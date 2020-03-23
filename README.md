@@ -24,27 +24,27 @@
 
 # MfPack 
 
-  Version X 2.6.4 Kraftwerk release.  
-  SDK version: 10.0.19569.0, May 2020 OS update (20H1)
+  Version X 2.6.4 Kraftwerk release.
   Delphi XE2 up to and including Delphi 10.3.3.
-
+  SDK version: 10.0.19569.0, May 2020 OS update (20H1)
 
 # Samples
 
-Audio Clip sample
-![AudioClip sample](https://a.fsdn.com/con/app/proj/mfpack/screenshots/AudioClipExSample.jpg/max/max/1)
+#
 
+**Audio Clip sample**
 
+![AudioClip sample](D:\MFPACK\Docs\AudioClipExSample.jpg)
 
-MfVideoThumbNails sample
+**MfVideoThumbNails sample**
 
 ![](https://a.fsdn.com/con/app/proj/mfpack/screenshots/VideoThumbNailsSample.jpg/max/max/1)
 
-MediaEngine Player 2 & IMFTimedText sample
+**MediaEngine Player 2 & IMFTimedText sample**
 
 ![](https://a.fsdn.com/con/app/proj/mfpack/screenshots/MediaEngine%20Player%202a.jpg/max/max/1)
 
-MfTransform I sample
+**MfTransform I sample**
 
 ![](https://a.fsdn.com/con/app/proj/mfpack/screenshots/mftransform.jpg/max/max/1)
 
