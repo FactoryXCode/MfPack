@@ -54,7 +54,7 @@
 
 **AudioClip sample**
 
-![AudioClip sample](D:\MFPACK\Docs\AudioClipExSample.jpg)
+![AudioClip sample](https://a.fsdn.com/con/app/proj/mfpack/screenshots/AudioClipExSample.jpg/max/max/1)
 
 
 
