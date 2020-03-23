@@ -52,6 +52,10 @@
 
 ![](https://a.fsdn.com/con/app/proj/mfpack/screenshots/MfPeakMeter.jpg/max/max/1)
 
+**AudioClip sample**
+
+![AudioClip sample](D:\MFPACK\Docs\AudioClipExSample.jpg)
+
 
 
 ***© FactoryX. All rights reserved.***
