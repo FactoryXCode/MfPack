@@ -18,9 +18,8 @@
 - Media Foundation samples
 
 
-### Latest release: 
+# <u>Latest release:</u> 
 
----------------------
 
 # MfPack 
 
