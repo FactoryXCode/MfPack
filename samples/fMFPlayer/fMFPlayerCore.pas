@@ -9,7 +9,7 @@
 // Release date: 07-07-2012
 // Language: ENU
 //
-// Revision Version: 2.6.3
+// Revision Version: 2.6.4
 // Description: MfPlayer core engine
 //
 // Both versions use the same internal objects to render video, and they share many
@@ -30,11 +30,11 @@
 //
 //
 // Related objects: -
-// Related projects: MfPackX263
+// Related projects: MfPackX264
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.18362.0 (19H1)
+// SDK version: 10.0.19569.0
 //
 // Todo: -
 //
@@ -47,9 +47,9 @@
 // LICENSE
 //
 // The contents of this file are subject to the Mozilla Public License
-// Version 1.1 (the "License"); you may not use this file except in
+// Version 2.0 (the "License"); you may not use this file except in
 // compliance with the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/MPL-1.1.html
+// https://www.mozilla.org/en-US/MPL/2.0/
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
