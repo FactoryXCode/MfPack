@@ -11,8 +11,9 @@
 //
 // Revision Version: 2.6.4
 //
-// Description: This header is used by Windows Imaging Component (WIC).
-//
+// Description: Used by Windows Imaging Component (WIC) API.
+//              This module contains interfaces used by codec and metadata handler authors.
+
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
@@ -21,13 +22,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2019 All                 WIN10 May 2019 update (version 1903)
-// 03/06/2019                     ISÁK release.
-// 12/06/2019                     Prodigy release.
-// 28/02/2020                     Kraftwerk release.
+// 28/05/2020                     Kraftwerk release. (WIN10 April 2020 update, version 20H1)
 //------------------------------------------------------------------------------
 //
-// Remarks: - Requires Windows Vista or later.
+// Remarks: Requires Windows Vista or later.
+//
+//          Using packed records is not a recommended practice,
+//          because it can prevent compatibility with other languages or
+//          platforms, it slows data access, and, in the case of a character array,
+//          it affects type compatibility.
+//          For more information, see Memory management and Implicit Packing of
+//          Fields with a Common Type Specification.
 //
 //
 // Related objects: -
@@ -35,7 +40,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.18362.0 (19H1)
+// SDK version: 10.0.19569.0
 //
 // Todo: -
 //
@@ -351,7 +356,7 @@ type
   IWICMetadataHandlerInfo = interface;
 
 
-
+{$WARN BOUNDS_ERROR OFF}
   PWICMetadataCreationOptions = ^WICMetadataCreationOptions;
   WICMetadataCreationOptions        = (
     WICMetadataCreationDefault      = 0,
@@ -365,6 +370,7 @@ type
     );
   {$EXTERNALSYM WICMetadataCreationOptions}
 
+{$WARN BOUNDS_ERROR ON}
 
   PWICPersistOptions = ^WICPersistOptions;
   WICPersistOptions               = (
@@ -555,7 +561,7 @@ type
   {$EXTERNALSYM IID_IWICMetadataHandlerInfo}
 
 
-  PWICMetadataPattern = ^TWICMetadataPattern;
+  PWICMetadataPattern = ^WICMetadataPattern;
   WICMetadataPattern = record
     Position: ULARGE_INTEGER;
     Length: ULONG;
@@ -590,7 +596,7 @@ type
 
 
 
-  PWICMetadataHeader = ^TWICMetadataHeader;
+  PWICMetadataHeader = ^WICMetadataHeader;
   WICMetadataHeader = record
     Position: ULARGE_INTEGER;
     Length: ULONG;

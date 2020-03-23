@@ -11,7 +11,9 @@
 //
 // Revision Version: 2.6.4
 //
-// Description: This header is used by Windows Imaging Component (WIC).
+// Description: Windows Imaging Component (WIC) API.
+//              This module contains the public data structures and API definitions
+//              needed for the Windows still image codecs.
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -21,14 +23,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2019 All                 WIN10 May 2019 update (version 1903)
-// 03/06/2019                     ISÁK release.
-// 12/06/2019                     Prodigy release.
-// 24/12/2019                     Underworld release.
-// 28/02/2020                     Kraftwerk release.
+// 28/05/2020                     Kraftwerk release. (WIN10 April 2020 update, version 20H1)
 //------------------------------------------------------------------------------
 //
-// Remarks: - Requires Windows Vista or later.
+// Remarks: Requires Windows Vista or later.
+//
+//          Using packed records is not a recommended practice,
+//          because it can prevent compatibility with other languages or
+//          platforms, it slows data access, and, in the case of a character array,
+//          it affects type compatibility.
+//          For more information, see Memory management and Implicit Packing of
+//          Fields with a Common Type Specification.
 //
 //
 // Related objects: -
@@ -36,7 +41,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.18362.0 (19H1)
+// SDK version: 10.0.19569.0
 //
 // Todo: -
 //
@@ -78,6 +83,7 @@ uses
   MfPack.DXGIType,
   MfPack.D2D1,
   MfPack.D2D1_1,
+  MfPack.D2DErr,
   MfPack.WinError;
 
   {$WEAKPACKAGEUNIT ON}
@@ -91,44 +97,46 @@ uses
 
   {$INCLUDE 'MfPack.inc'}
 
-
 const
 
   WINCODEC_SDK_VERSION1               = $0236;
-  WINCODEC_SDK_VERSION2               = $0237;
   {$EXTERNALSYM WINCODEC_SDK_VERSION1}
 
+  WINCODEC_SDK_VERSION2               = $0237;
   {$EXTERNALSYM WINCODEC_SDK_VERSION2}
 
-  CLSID_WICImagingFactory    : TGUID = '{cacaf262-9370-4615-a13b-9f5539da4c0a}';
-  CLSID_WICImagingFactory1   : TGUID = '{cacaf262-9370-4615-a13b-9f5539da4c0a}';
-  {$EXTERNALSYM CLSID_WICImagingFactory}
-  CLSID_WICImagingFactory2   : TGUID = '{317d06e8-5f24-433d-bdf7-79ce68d8abc2}';
+  CLSID_WICImagingFactory1     : TGUID = '{cacaf262-9370-4615-a13b-9f5539da4c0a}';
   {$EXTERNALSYM CLSID_WICImagingFactory1}
-
+  CLSID_WICImagingFactory2     : TGUID = '{317d06e8-5f24-433d-bdf7-79ce68d8abc2}';
   {$EXTERNALSYM CLSID_WICImagingFactory2}
+
 //#if(_WIN32_WINNT >= _WIN32_WINNT_WIN8) or defined(_WIN7_PLATFORM_UPDATE)
-  //WINCODEC_SDK_VERSION                = WINCODEC_SDK_VERSION2;
-  //CLSID_WICImagingFactory             = CLSID_WICImagingFactory2;
+  WINCODEC_SDK_VERSION         = WINCODEC_SDK_VERSION2;
+
+var  CLSID_WICImagingFactory      : TGUID absolute CLSID_WICImagingFactory2;
+  {$EXTERNALSYM CLSID_WICImagingFactory}
 //#else
-  //WINCODEC_SDK_VERSION                = WINCODEC_SDK_VERSION1;
+// const WINCODEC_SDK_VERSION                = WINCODEC_SDK_VERSION1;
 //#endif
+
+const
 
   GUID_VendorMicrosoft         : TGUID = '{f0e749ca-edef-4589-a73a-ee0e626a2a2b}';
   {$EXTERNALSYM GUID_VendorMicrosoft}
   GUID_VendorMicrosoftBuiltIn  : TGUID = '{257a30fd-06b6-462b-aea4-63f70b86e533}';
   {$EXTERNALSYM GUID_VendorMicrosoftBuiltIn}
 
-  CLSID_WICPngDecoder          : TGUID = '{389ea17b-5078-4cde-b6ef-25c15175c751}';
-  {$EXTERNALSYM CLSID_WICPngDecoder}
   CLSID_WICPngDecoder1         : TGUID = '{389ea17b-5078-4cde-b6ef-25c15175c751}';
   {$EXTERNALSYM CLSID_WICPngDecoder1}
   CLSID_WICPngDecoder2         : TGUID = '{e018945b-aa86-4008-9bd4-6777a1e40c11}';
   {$EXTERNALSYM CLSID_WICPngDecoder2}
 
 //#if(_WIN32_WINNT >= _WIN32_WINNT_WIN8) or defined(_WIN7_PLATFORM_UPDATE)
-  //CLSID_WICPngDecoder                 = CLSID_WICPngDecoder2;
+var CLSID_WICPngDecoder : TGUID absolute CLSID_WICPngDecoder2;
+  {$EXTERNALSYM CLSID_WICPngDecoder}
 //#endif
+
+const
 
   CLSID_WICBmpDecoder          : TGUID = '{6b462062-7cbf-400d-9fdb-813dd10f2778}';
   {$EXTERNALSYM CLSID_WICBmpDecoder}
@@ -252,8 +260,11 @@ const
 
   GUID_WICPixelFormatDontCare       : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc900}';
   {$EXTERNALSYM GUID_WICPixelFormatDontCare}
-  GUID_WICPixelFormatUndefined      : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc900}'; // GUID_WICPixelFormatDontCare;
+var GUID_WICPixelFormatUndefined      : TGUID absolute GUID_WICPixelFormatDontCare;
   {$EXTERNALSYM GUID_WICPixelFormatUndefined}
+
+const
+
   GUID_WICPixelFormat1bppIndexed    : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc901}';
   {$EXTERNALSYM GUID_WICPixelFormat1bppIndexed}
   GUID_WICPixelFormat2bppIndexed    : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc902}';
@@ -616,6 +627,7 @@ type
     );
   {$EXTERNALSYM WICColorContextType}
 
+{$WARN BOUNDS_ERROR OFF}
   PWICBitmapCreateCacheOption = ^WICBitmapCreateCacheOption;
   WICBitmapCreateCacheOption               = (
     WICBitmapNoCache                       = 0,
@@ -628,6 +640,7 @@ type
     {$EXTERNALSYM WICBITMAPCREATECACHEOPTION_FORCE_DWORD}
     );
   {$EXTERNALSYM WICBitmapCreateCacheOption}
+
 
   PWICDecodeOptions = ^WICDecodeOptions;
   WICDecodeOptions                     = (
@@ -1264,6 +1277,8 @@ type
     {$EXTERNALSYM WICJpegScanType_FORCE_DWORD}
     );
   {$EXTERNALSYM WICJpegScanType}
+
+{$WARN BOUNDS_ERROR ON}
 
 //#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8) or defined(_WIN7_PLATFORM_UPDATE)
 
@@ -2334,6 +2349,8 @@ const
 
 type
 
+{$WARN BOUNDS_ERROR OFF}
+
   PWICTiffCompressionOption = ^WICTiffCompressionOption;
   WICTiffCompressionOption               = (
     WICTiffCompressionDontCare           = 0,
@@ -2500,6 +2517,8 @@ type
     {$EXTERNALSYM WICRAWRENDERMODE_FORCE_DWORD}
     );
   {$EXTERNALSYM WICRawRenderMode}
+
+{$WARN BOUNDS_ERROR ON}
 
   PWICRawToneCurvePoint = ^WICRawToneCurvePoint;
   WICRawToneCurvePoint = record
@@ -2669,6 +2688,7 @@ type
   {$EXTERNALSYM IID_IWICDevelopRaw}
 
 
+{$WARN BOUNDS_ERROR OFF}
 
   PWICDdsDimension = ^WICDdsDimension;
   WICDdsDimension             = (
@@ -2701,6 +2721,8 @@ type
     {$EXTERNALSYM WICDDSALPHAMODE_FORCE_DWORD}
     );
   {$EXTERNALSYM WICDdsAlphaMode}
+
+{$WARN BOUNDS_ERROR ON}
 
   PWICDdsParameters = ^WICDdsParameters;
   WICDdsParameters = record
