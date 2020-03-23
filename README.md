@@ -1,6 +1,7 @@
 # MfPack
+
  Delphi translatations for Microsoft Media Foundation and related API's.
- 
+
  What about MfPack:
 
 # MfPack covers the Delphi translations of:
@@ -17,16 +18,45 @@
 - Media Foundation samples
 
 
-# Latest release: 
+### Latest release: 
+
 ---------------------
+
 # MfPack 
-  Version X 2.6.4 Kraftwerk release.
-  Delphi XE2 up to and including Delphi 10.3.3.
+
+  Version X 2.6.4 Kraftwerk release.  
   SDK version: 10.0.19569.0, May 2020 OS update (20H1)
-
-- For Samples look here:  https://sourceforge.net/projects/mfpack/files/MFPack/Official/Samples
-
+  Delphi XE2 up to and including Delphi 10.3.3.
 
 
-© FactoryX. All rights reserved.
+# Samples
+
+Audio Clip sample
+![AudioClip sample](https://a.fsdn.com/con/app/proj/mfpack/screenshots/AudioClipExSample.jpg/max/max/1)
+
+
+
+MfVideoThumbNails sample
+
+![](https://a.fsdn.com/con/app/proj/mfpack/screenshots/VideoThumbNailsSample.jpg/max/max/1)
+
+MediaEngine Player 2 & IMFTimedText sample
+
+![](https://a.fsdn.com/con/app/proj/mfpack/screenshots/MediaEngine%20Player%202a.jpg/max/max/1)
+
+MfTransform I sample
+
+![](https://a.fsdn.com/con/app/proj/mfpack/screenshots/mftransform.jpg/max/max/1)
+
+MfSimpleCapture sample
+
+![](https://a.fsdn.com/con/app/proj/mfpack/screenshots/MfSimpleCapture.jpg/max/max/1)
+
+MfPeakMeter component sample
+
+![](https://a.fsdn.com/con/app/proj/mfpack/screenshots/MfPeakMeter.jpg/max/max/1)
+
+
+
+***© FactoryX. All rights reserved.***
 
