@@ -32,10 +32,6 @@
 # Samples
 
 
-**Audio Clip sample**
-
-![AudioClip sample](D:\MFPACK\Docs\AudioClipExSample.jpg)
-
 **MfVideoThumbNails sample**
 
 ![](https://a.fsdn.com/con/app/proj/mfpack/screenshots/VideoThumbNailsSample.jpg/max/max/1)
@@ -48,11 +44,11 @@
 
 ![](https://a.fsdn.com/con/app/proj/mfpack/screenshots/mftransform.jpg/max/max/1)
 
-MfSimpleCapture sample
+**MfSimpleCapture sample**
 
 ![](https://a.fsdn.com/con/app/proj/mfpack/screenshots/MfSimpleCapture.jpg/max/max/1)
 
-MfPeakMeter component sample
+**MfPeakMeter component sample**
 
 ![](https://a.fsdn.com/con/app/proj/mfpack/screenshots/MfPeakMeter.jpg/max/max/1)
 
