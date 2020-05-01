@@ -6,14 +6,11 @@
 .\$(Platform)\$(Config)
 
 
-/* Project Searchpaths for MfPack263 */
+/* Project Searchpaths for MfPack264 */
 
 ..\CoreAudio;
 ..\MediaFoundation;
 ..\Shared;
 ..\DirectX;
-..\DirectX\DXGI;
-..\DirectX\XAudio2
-..\DirectX\WinCodec
 
 <EOF>
