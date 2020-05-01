@@ -12,7 +12,7 @@
   * EndpointVolume API
   * Multimedia Device (MMDevice) API
 - Microsoft Media Foundation API (successor of DirectShow).
-- XAudio2 API (Game development)
+- XAudio2 API (XBox game development)
 - Microsoft Media Foundation DirectX API's
 - Windows Imaging Component (WIC) API.
 - Media Foundation samples
@@ -94,7 +94,8 @@ SDK version: 10.0.19569.0, May 2020 OS update (20H1)
 
 - *MfPlayer II : The extended version I sample.*
 
-- *MfPlayer X : This is an example that shows how to use the IMFTimer, language tags, subtitles (only SubRip files - .srt - files are supported yet) and how to get media properties.*
+- *MfPlayer X : This is an example that shows how to use the IMFTimer, language tags,*  
+                *subtitles (SubRip and MicroDvd), RegEx (Regular Expressions) and how to get media properties.*
 
 
 
