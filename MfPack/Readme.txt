@@ -6,11 +6,12 @@
 .\$(Platform)\$(Config)
 
 
-/* Project Searchpaths for MfPack263 */
+/* Project Searchpaths for MfPack264 */
 
 ..\CoreAudio;
 ..\MediaFoundation;
 ..\Shared;
+..\Shared\WIC;
 ..\DirectX;
 ..\DirectX\DXGI;
 ..\DirectX\XAudio2
