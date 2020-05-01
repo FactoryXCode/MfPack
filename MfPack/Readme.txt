@@ -11,10 +11,6 @@
 ..\CoreAudio;
 ..\MediaFoundation;
 ..\Shared;
-..\Shared\WIC;
 ..\DirectX;
-..\DirectX\DXGI;
-..\DirectX\XAudio2
-..\DirectX\WinCodec
 
 <EOF>
