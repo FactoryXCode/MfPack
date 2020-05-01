@@ -84,7 +84,7 @@ SDK version: 10.0.19569.0, May 2020 OS update (20H1)
 
 
 
-**MfMediaEnginePlayer**
+**MfPlayer**
 
 *Player samples, based on the CPlayer sample.*
 
