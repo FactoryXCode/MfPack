@@ -21,6 +21,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 29/05/2020  Tony               Revision #1
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -57,9 +58,7 @@
 //==============================================================================
 unit MfPack.StructuredQueryCondition;
 
-  {$HPPEMIT ''}
   {$HPPEMIT '#include "structuredquerycondition.h"'}
-  {$HPPEMIT ''}
 
 interface
 
@@ -86,41 +85,61 @@ uses
 // to them that we cannot remove so they must exist outside of WINAPI_PARTITION_DESKTOP.
 
 type
-
-  PConditionType = ^tagCONDITION_TYPE;
-  tagCONDITION_TYPE = (
-    CT_AND_CONDITION,               // AND of subconditions
-    CT_OR_CONDITION,                // OR of subconditions
-    CT_NOT_CONDITION,               // NOT of a single subcondition
-    CT_LEAF_CONDITION               // No subcondition: property, operation, value.
-  );
+  tagCONDITION_TYPE = type DWord;
   {$EXTERNALSYM tagCONDITION_TYPE}
   CONDITION_TYPE = tagCONDITION_TYPE;
   {$EXTERNALSYM CONDITION_TYPE}
+  PConditionType = ^tagCONDITION_TYPE;
+const
+  CT_AND_CONDITION  = 0;               // AND of subconditions
+  {$EXTERNALSYM CT_AND_CONDITION}
+  CT_OR_CONDITION   = 1;               // OR of subconditions
+  {$EXTERNALSYM CT_OR_CONDITION}
+  CT_NOT_CONDITION  = 2;               // NOT of a single subcondition
+  {$EXTERNALSYM CT_NOT_CONDITION}
+  CT_LEAF_CONDITION = 3;               // No subcondition: property, operation, value.
+  {$EXTERNALSYM CT_LEAF_CONDITION}
 
+
+type
   // Prefix CT
-
-  PConditionOperation = ^tagCONDITION_OPERATION;
-  tagCONDITION_OPERATION = (
-    COP_IMPLICIT,
-    COP_EQUAL,
-    COP_NOTEQUAL,
-    COP_LESSTHAN,
-    COP_GREATERTHAN,
-    COP_LESSTHANOREQUAL,
-    COP_GREATERTHANOREQUAL,
-    COP_VALUE_STARTSWITH,       // LIKE FOO%
-    COP_VALUE_ENDSWITH,         // LIKE %FOO
-    COP_VALUE_CONTAINS,         // LIKE %FOO%
-    COP_VALUE_NOTCONTAINS,      // NOT LIKE %FOO%
-    COP_DOSWILDCARDS,           // "DOS wildcards" and the like
-    COP_WORD_EQUAL,             // Contains a word/phrase somewhere.
-    COP_WORD_STARTSWITH,        // Contains a word/phrase beginning with this
-    COP_APPLICATION_SPECIFIC    // Application specific, presumably uses the Value.
-  );
+  tagCONDITION_OPERATION =  type DWord;
   {$EXTERNALSYM tagCONDITION_OPERATION}
   CONDITION_OPERATION = tagCONDITION_OPERATION;
   {$EXTERNALSYM CONDITION_OPERATION}
+  PConditionOperation = ^tagCONDITION_OPERATION;
+const
+  COP_IMPLICIT             = 0;
+  {$EXTERNALSYM COP_IMPLICIT}
+  COP_EQUAL                = 1;
+  {$EXTERNALSYM COP_EQUAL}
+  COP_NOTEQUAL             = 2;
+  {$EXTERNALSYM COP_NOTEQUAL}
+  COP_LESSTHAN             = 3;
+  {$EXTERNALSYM COP_LESSTHAN}
+  COP_GREATERTHAN          = 4;
+  {$EXTERNALSYM COP_GREATERTHAN}
+  COP_LESSTHANOREQUAL      = 5;
+  {$EXTERNALSYM COP_LESSTHANOREQUAL}
+  COP_GREATERTHANOREQUAL   = 6;
+  {$EXTERNALSYM COP_GREATERTHANOREQUAL}
+  COP_VALUE_STARTSWITH     = 7;     // LIKE FOO%
+  {$EXTERNALSYM COP_VALUE_STARTSWITH}
+  COP_VALUE_ENDSWITH       = 8;     // LIKE %FOO
+  {$EXTERNALSYM COP_VALUE_ENDSWITH}
+  COP_VALUE_CONTAINS       = 9;     // LIKE %FOO%
+  {$EXTERNALSYM COP_VALUE_CONTAINS}
+  COP_VALUE_NOTCONTAINS    = 10;    // NOT LIKE %FOO%
+  {$EXTERNALSYM COP_VALUE_NOTCONTAINS}
+  COP_DOSWILDCARDS         = 11;    // "DOS wildcards" and the like
+  {$EXTERNALSYM COP_DOSWILDCARDS}
+  COP_WORD_EQUAL           = 12;    // Contains a word/phrase somewhere.
+  {$EXTERNALSYM COP_WORD_EQUAL}
+  COP_WORD_STARTSWITH      = 13;    // Contains a word/phrase beginning with this
+  {$EXTERNALSYM COP_WORD_STARTSWITH}
+  COP_APPLICATION_SPECIFIC = 14;    // Application specific, presumably uses the Value.
+  {$EXTERNALSYM COP_APPLICATION_SPECIFIC}
+
   // Prefix COP
 
 type
@@ -133,18 +152,15 @@ type
   IRichChunk = interface(IUnknown)
   ['{4FDEF69C-DBC9-454e-9910-B34F3C64B510}']
 
-    function GetData(out pFirstPos: ULONG;
-                     out pLength: ULONG;
-                     out ppsz: PWideChar;
-                     out pValue: MfPROPVARIANT): HResult; stdcall;
-
-    function RemoteGetData(out pFirstPos: ULONG;
-                           out pLength: ULONG;
-                           out ppsz: PWideChar;
-                           out pValue: MfPROPVARIANT): HResult; stdcall;
+    function GetData(var pFirstPos: ULONG;
+                     var pLength: ULONG;
+                     var ppsz: PWideChar;
+                     var pValue: MfPROPVARIANT): HResult; stdcall;
   end;
   IID_IRichChunk = IRichChunk;
   {$EXTERNALSYM IID_IRichChunk}
+  SID_IRichChunk = IRichChunk;
+  {$EXTERNALSYM SID_IRichChunk}
 
 
   // Interface ICondition
@@ -155,32 +171,28 @@ type
   ICondition = interface(IPersistStream)
   ['{0FC988D4-C935-4b97-A973-46282EA175C8}']
 
-    function GetConditionType(out pNodeType: CONDITION_TYPE): HResult; stdcall;
+    function GetConditionType(var pNodeType: CONDITION_TYPE): HResult; stdcall;
     // For any node, return what kind of node it is.
 
     function GetSubConditions(const riid: REFIID;
-                              out ppv): HResult; stdcall;
+                              var ppv: Pointer): HResult; stdcall;
     // riid must be IID_IEnumUnknown, IID_IEnumVARIANT or IID_IObjectArray, or in the case of a negation node IID_ICondition.
     // If this is a leaf node, E_FAIL will be returned.
     // If this is a negation node, then if riid is IID_ICondition, *ppv will be set to a single ICondition, otherwise an enumeration of one.
     // If this is a conjunction or a disjunction, *ppv will be set to an enumeration of the subconditions.
 
-    function GetComparisonInfo(out ppszPropertyName: PWideChar;
-                               out pcop: CONDITION_OPERATION;
-                               out ppropvar: MfPROPVARIANT): HResult; stdcall;
+    function GetComparisonInfo(var ppszPropertyName: PWideChar;
+                               var pcop: CONDITION_OPERATION;
+                               var ppropvar: MfPROPVARIANT): HResult; stdcall;
     // If this is not a leaf node, E_FAIL will be returned.
     // Retrieve the property name, operation and value from the leaf node.
     // Any one of ppszPropertyName, pcop and ppropvar may be NULL.
 
-    function RemoteGetComparisonInfo(out ppszPropertyName: PWideChar;
-                                     out pcop: CONDITION_OPERATION;
-                                     out ppropvar: MfPROPVARIANT): HResult; stdcall;
-
-    function GetValueType(out ppszValueTypeName: PWideChar): HResult; stdcall;
+    function GetValueType(var ppszValueTypeName: PWideChar): HResult; stdcall;
     // If this is not a leaf node, E_FAIL will be returned.
     // ppszValueTypeName will be set to the semantic type of the value, or to NULL if this is not meaningful.
 
-    function GetValueNormalization(out ppszNormalization: PWideChar): HResult; stdcall;
+    function GetValueNormalization(var ppszNormalization: PWideChar): HResult; stdcall;
     // If this is not a leaf node, E_FAIL will be returned.
     // If the value of the leaf node is VT_EMPTY, *ppszNormalization will be set to an empty string.
     // If the value is a string (VT_LPWSTR, VT_BSTR or VT_LPSTR), then *ppszNormalization will be set to a
@@ -196,15 +208,12 @@ type
     // contributed the property/operation/value, the string value is the corresponding part of the input string, and
     // the TMfpPropVariant is VT_EMPTY.
 
-    function RemoteGetInputTerms(out ppPropertyTerm: IRichChunk;
-                                 out ppOperationTerm: IRichChunk;
-                                 out ppValueTerm: IRichChunk): HResult; stdcall;
-
     function Clone(out ppc: ICondition): HResult; stdcall;
-
   end;
   IID_ICondition = ICondition;
   {$EXTERNALSYM IID_ICondition}
+  SID_ICondition = ICondition;
+  {$EXTERNALSYM SID_ICondition}
 
 
   // Interface ICondition2
@@ -220,23 +229,17 @@ type
     // ppszLocaleName will be set to the locale name of the value,
     // which may be NIL.
 
-    function GetLeafConditionInfo(out ppropkey: MfPROPVARIANT;
-                                  out pcop: CONDITION_OPERATION;
-                                  out ppropvar: MfPROPVARIANT): HResult; stdcall;
+    function GetLeafConditionInfo(var ppropkey: MfPROPVARIANT;
+                                  var pcop: CONDITION_OPERATION;
+                                  var ppropvar: MfPROPVARIANT): HResult; stdcall;
     // If this is not a leaf node, E_FAIL will be returned.
     // Retrieve the property key, operation and value from the leaf node.
     // Any one of ppropkey, pcop and ppropvar may be NIL.
-
-    function RemoteGetLeafConditionInfo(out ppropkey: PROPERTYKEY;
-                                        out pcop: CONDITION_OPERATION;
-                                        out ppropvar: MfPROPVARIANT): HResult; stdcall;
-    // If this is not a leaf node, E_FAIL will be returned.
-    // Retrieve the property key, operation and value from the leaf node.
-    // Any one of ppropkey, pcop and ppropvar may be NIL.
-
   end;
   IID_ICondition2 = ICondition2;
   {$EXTERNALSYM IID_ICondition2}
+  SID_ICondition2 = ICondition2;
+  {$EXTERNALSYM SID_ICondition2}
 
 
   // Additional Prototypes for ALL interfaces
