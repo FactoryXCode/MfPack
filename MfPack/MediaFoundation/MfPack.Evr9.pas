@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -31,7 +32,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.18362.0
+// SDK version: 10.0.19569.0
 //
 // Todo: -
 //
@@ -128,16 +129,18 @@ type
   end;
   {$EXTERNALSYM MFVideoAlphaBitmap}
 
+type
   PMFVideoAlphaBitmapFlags = ^MFVideoAlphaBitmapFlags;
-  MFVideoAlphaBitmapFlags = (
-    MFVideoAlphaBitmap_EntireDDS   = $1,
-    MFVideoAlphaBitmap_SrcColorKey = $2,
-    MFVideoAlphaBitmap_SrcRect     = $4,
-    MFVideoAlphaBitmap_DestRect    = $8,
-    MFVideoAlphaBitmap_FilterMode  = $10,
-    MFVideoAlphaBitmap_Alpha       = $20,
-    MFVideoAlphaBitmap_BitMask     = $3F);
+  MFVideoAlphaBitmapFlags = DWord;
   {$EXTERNALSYM MFVideoAlphaBitmapFlags}
+const
+    MFVideoAlphaBitmap_EntireDDS   = DWord($1);
+    MFVideoAlphaBitmap_SrcColorKey = DWord($2);
+    MFVideoAlphaBitmap_SrcRect     = DWord($4);
+    MFVideoAlphaBitmap_DestRect    = DWord($8);
+    MFVideoAlphaBitmap_FilterMode  = DWord($10);
+    MFVideoAlphaBitmap_Alpha       = DWord($20);
+    MFVideoAlphaBitmap_BitMask     = DWord($3F);
 
 
 type
@@ -172,7 +175,7 @@ type
     function GetAvailableVideoProcessorModes(lpdwNumProcessingModes: PUINT;
                                              out ppVideoProcessingModes: PPTGUID): HResult; stdcall;
 
-    function GetVideoProcessorCaps(lpVideoProcessorMode: LPGUID;
+    function GetVideoProcessorCaps(const lpVideoProcessorMode: LPGUID;
                                    out lpVideoProcessorCaps: DXVA2_VideoProcessorCaps): HResult; stdcall;
 
     function GetVideoProcessorMode(out lpMode: LPGUID): HResult; stdcall;

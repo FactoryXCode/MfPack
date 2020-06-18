@@ -21,6 +21,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -136,7 +137,6 @@ type
 {$ENDIF}
 
   PEPcxConnectionType = ^TEPcxConnectionType;
-  {$EXTERNALSYM __MIDL___MIDL_itf_devicetopology_0000_0000_0005}
   __MIDL___MIDL_itf_devicetopology_0000_0000_0005 = (
     eConnTypeUnknown               = 0,
     eConnType3Point5mm             = (eConnTypeUnknown + 1),
@@ -151,6 +151,7 @@ type
     eConnTypeRJ11Modem             = (eConnTypeXlrProfessional + 1),
     eConnTypeCombination           = (eConnTypeRJ11Modem + 1)
   );
+  {$EXTERNALSYM __MIDL___MIDL_itf_devicetopology_0000_0000_0005}
   EPcxConnectionType = __MIDL___MIDL_itf_devicetopology_0000_0000_0005;
   {$EXTERNALSYM EPcxConnectionType}
   TEPcxConnectionType = __MIDL___MIDL_itf_devicetopology_0000_0000_0005;
@@ -158,7 +159,6 @@ type
 
 
   PEPcxGeoLocation = ^TEPcxGeoLocation;
-  {$EXTERNALSYM __MIDL___MIDL_itf_devicetopology_0000_0000_0006}
   __MIDL___MIDL_itf_devicetopology_0000_0000_0006 = (
     eGeoLocRear             = $1,
     eGeoLocFront            = (eGeoLocRear + 1),
@@ -174,7 +174,9 @@ type
     eGeoLocOutsideMobileLid = (eGeoLocHDMI + 1),
     eGeoLocATAPI            = (eGeoLocOutsideMobileLid + 1),
     eGeoLocNotApplicable    = (eGeoLocATAPI + 1),
-    eGeoLocReserved6        = (eGeoLocNotApplicable + 1));
+    eGeoLocReserved6        = (eGeoLocNotApplicable + 1)
+  );
+  {$EXTERNALSYM __MIDL___MIDL_itf_devicetopology_0000_0000_0006}
   EPcxGeoLocation = __MIDL___MIDL_itf_devicetopology_0000_0000_0006;
   {$EXTERNALSYM EPcxGeoLocation}
   TEPcxGeoLocation = __MIDL___MIDL_itf_devicetopology_0000_0000_0006;
@@ -194,19 +196,19 @@ type
 
 
   PEPxcPortConnection = ^TEPxcPortConnection;
-  {$EXTERNALSYM __MIDL___MIDL_itf_devicetopology_0000_0000_0008}
   __MIDL___MIDL_itf_devicetopology_0000_0000_0008 = (
     ePortConnJack                  = 0,
     ePortConnIntegratedDevice      = (ePortConnJack + 1),
     ePortConnBothIntegratedAndJack = (ePortConnIntegratedDevice + 1),
-    ePortConnUnknown               = (ePortConnBothIntegratedAndJack + 1));
+    ePortConnUnknown               = (ePortConnBothIntegratedAndJack + 1)
+  );
+  {$EXTERNALSYM __MIDL___MIDL_itf_devicetopology_0000_0000_0008}
   EPxcPortConnection = __MIDL___MIDL_itf_devicetopology_0000_0000_0008;
   {$EXTERNALSYM EPxcPortConnection}
   TEPxcPortConnection = __MIDL___MIDL_itf_devicetopology_0000_0000_0008;
   _tagePxcPortConnection = __MIDL___MIDL_itf_devicetopology_0000_0000_0008; // For compatibility with earlier MfPack versions
 
   PKsjackDescription = ^TKsjackDescription;
-  {$EXTERNALSYM __MIDL___MIDL_itf_devicetopology_0000_0000_0009}
   __MIDL___MIDL_itf_devicetopology_0000_0000_0009 = record
     ChannelMapping: DWORD;
     Color: COLORREF;  // use RGB() macro to generate these
@@ -216,6 +218,7 @@ type
     PortConnection: EPxcPortConnection;
     IsConnected: BOOL;
   end;
+  {$EXTERNALSYM __MIDL___MIDL_itf_devicetopology_0000_0000_0009}
   KSJACK_DESCRIPTION = __MIDL___MIDL_itf_devicetopology_0000_0000_0009;
   {$EXTERNALSYM KSJACK_DESCRIPTION}
   TKsjackDescription = __MIDL___MIDL_itf_devicetopology_0000_0000_0009;
@@ -230,10 +233,11 @@ type
 
 
   PKsjackSinkConnectiontype = ^TKsjackSinkConnectiontype;
-  {$EXTERNALSYM __MIDL___MIDL_itf_devicetopology_0000_0000_0010}
   __MIDL___MIDL_itf_devicetopology_0000_0000_0010 = (
     KSJACK_SINK_CONNECTIONTYPE_HDMI        = 0, // HDMI
-    KSJACK_SINK_CONNECTIONTYPE_DISPLAYPORT = (KSJACK_SINK_CONNECTIONTYPE_HDMI + 1)); // DisplayPort
+    KSJACK_SINK_CONNECTIONTYPE_DISPLAYPORT = (KSJACK_SINK_CONNECTIONTYPE_HDMI + 1)
+  ); // DisplayPort
+  {$EXTERNALSYM __MIDL___MIDL_itf_devicetopology_0000_0000_0010}
   KSJACK_SINK_CONNECTIONTYPE = __MIDL___MIDL_itf_devicetopology_0000_0000_0010;
   {$EXTERNALSYM KSJACK_SINK_CONNECTIONTYPE}
   TKsjackSinkConnectiontype = __MIDL___MIDL_itf_devicetopology_0000_0000_0010;
@@ -307,7 +311,6 @@ type
 
 
   PConnectorType = ^TConnectorType;
-  {$EXTERNALSYM __MIDL___MIDL_itf_devicetopology_0000_0000_0013}
   __MIDL___MIDL_itf_devicetopology_0000_0000_0013 = (
     Unknown_Connector = 0,
     Physical_Internal = (Unknown_Connector + 1), // Tangible connector inside the device or PC. i.e. you have to open the case (of the PC or device) to see it
@@ -316,6 +319,7 @@ type
     Software_Fixed    = (Software_IO + 1),       // Connector that is for topology parsing only.  Is involved in a permanent connection to another Fixed connector.
     Network           = (Software_Fixed + 1)
   );
+  {$EXTERNALSYM __MIDL___MIDL_itf_devicetopology_0000_0000_0013}
   ConnectorType = __MIDL___MIDL_itf_devicetopology_0000_0000_0013;
   {$EXTERNALSYM ConnectorType}
   TConnectorType = __MIDL___MIDL_itf_devicetopology_0000_0000_0013;

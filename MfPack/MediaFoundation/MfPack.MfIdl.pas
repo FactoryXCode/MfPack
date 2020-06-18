@@ -21,6 +21,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -1343,7 +1344,211 @@ type
   // DECLARED IN MfpTypes
 
 
+//--------------------- Types and records ------------------------------------
+
+  // MFMEDIASOURCE_CHARACTERISTICS
+  // Defines the characteristics of a media source.
+  // These flags are retrieved by the IMFMediaSource.GetCharacteristics method.
+
+  PMFMEDIASOURCE_CHARACTERISTICS = ^MFMEDIASOURCE_CHARACTERISTICS;
+  _MFMEDIASOURCE_CHARACTERISTICS = type DWord;
+  {$EXTERNALSYM _MFMEDIASOURCE_CHARACTERISTICS}
+  MFMEDIASOURCE_CHARACTERISTICS = _MFMEDIASOURCE_CHARACTERISTICS;
+  {$EXTERNALSYM MFMEDIASOURCE_CHARACTERISTICS}
+const
+  MFMEDIASOURCE_IS_LIVE                    = DWord($1);
+  {$EXTERNALSYM MFMEDIASOURCE_IS_LIVE}
+  MFMEDIASOURCE_CAN_SEEK                   = DWord($2);
+  {$EXTERNALSYM MFMEDIASOURCE_CAN_SEEK}
+  MFMEDIASOURCE_CAN_PAUSE                  = DWord($4);
+  {$EXTERNALSYM MFMEDIASOURCE_CAN_PAUSE}
+  MFMEDIASOURCE_HAS_SLOW_SEEK              = DWord($8);
+  {$EXTERNALSYM MFMEDIASOURCE_HAS_SLOW_SEEK}
+  MFMEDIASOURCE_HAS_MULTIPLE_PRESENTATIONS = DWord($10);    // >= Win 7
+  {$EXTERNALSYM MFMEDIASOURCE_HAS_MULTIPLE_PRESENTATIONS}
+  MFMEDIASOURCE_CAN_SKIPFORWARD            = DWord($20);    // >= Win 7
+  {$EXTERNALSYM MFMEDIASOURCE_CAN_SKIPFORWARD}
+  MFMEDIASOURCE_CAN_SKIPBACKWARD           = DWord($40);    // >= Win 7
+  {$EXTERNALSYM MFMEDIASOURCE_CAN_SKIPBACKWARD}
+  MFMEDIASOURCE_DOES_NOT_USE_NETWORK       = DWord($80);    // >= Win 8
+  {$EXTERNALSYM MFMEDIASOURCE_DOES_NOT_USE_NETWORK}
+
+  // MFCLOCK_RELATIONAL_FLAGS
+  // Jitter values are always negative.
+  // In other words, the time returned by IMFClock.GetCorrelatedTime might jitter behind the actual clock time,
+  // but will never jitter ahead of the actual time.
+  // If this flag is not present, the clock might jitter in either direction.
 type
+  PMFCLOCK_RELATIONAL_FLAGS = ^_MFCLOCK_RELATIONAL_FLAGS;
+  _MFCLOCK_RELATIONAL_FLAGS = DWord;
+  {$EXTERNALSYM _MFCLOCK_RELATIONAL_FLAGS}
+  MFCLOCK_RELATIONAL_FLAGS = _MFCLOCK_RELATIONAL_FLAGS;
+  {$EXTERNALSYM MFCLOCK_RELATIONAL_FLAGS}
+const
+  MFCLOCK_RELATIONAL_FLAG_JITTER_NEVER_AHEAD = DWord($1);
+  {$EXTERNALSYM MFCLOCK_RELATIONAL_FLAG_JITTER_NEVER_AHEAD}
+
+type
+  PMFCLOCK_CHARACTERISTICS_FLAGS = ^MFCLOCK_CHARACTERISTICS_FLAGS;
+  PMfClockCharacteristicsFlags = ^MFCLOCK_CHARACTERISTICS_FLAGS;
+  _MFCLOCK_CHARACTERISTICS_FLAGS = DWord;
+  {$EXTERNALSYM _MFCLOCK_CHARACTERISTICS_FLAGS}
+  MFCLOCK_CHARACTERISTICS_FLAGS = _MFCLOCK_CHARACTERISTICS_FLAGS;
+  {$EXTERNALSYM MFCLOCK_CHARACTERISTICS_FLAGS}
+const
+  MFCLOCK_CHARACTERISTICS_FLAG_FREQUENCY_10MHZ = DWord($2);
+  {$EXTERNALSYM MFCLOCK_CHARACTERISTICS_FLAG_FREQUENCY_10MHZ}
+  MFCLOCK_CHARACTERISTICS_FLAG_ALWAYS_RUNNING  = DWord($4);
+  {$EXTERNALSYM MFCLOCK_CHARACTERISTICS_FLAG_ALWAYS_RUNNING}
+  MFCLOCK_CHARACTERISTICS_FLAG_IS_SYSTEM_CLOCK = DWord($8);
+  {$EXTERNALSYM MFCLOCK_CHARACTERISTICS_FLAG_IS_SYSTEM_CLOCK}
+
+type
+  PMFSESSION_SETTOPOLOGY_FLAGS = ^MFSESSION_SETTOPOLOGY_FLAGS;
+  MFSESSION_SETTOPOLOGY_FLAGS = DWord;
+  {$EXTERNALSYM MFSESSION_SETTOPOLOGY_FLAGS}
+const
+    MFSESSION_SETTOPOLOGY_IMMEDIATE     = DWord($1);
+    {$EXTERNALSYM MFSESSION_SETTOPOLOGY_IMMEDIATE}
+    MFSESSION_SETTOPOLOGY_NORESOLUTION  = DWord($2);
+    {$EXTERNALSYM MFSESSION_SETTOPOLOGY_NORESOLUTION}
+    MFSESSION_SETTOPOLOGY_CLEAR_CURRENT = DWord($4);
+    {$EXTERNALSYM MFSESSION_SETTOPOLOGY_CLEAR_CURRENT}
+
+type
+  PMFSESSION_GETFULLTOPOLOGY_FLAG = ^MFSESSION_GETFULLTOPOLOGY_FLAG;
+  MFSESSION_GETFULLTOPOLOGY_FLAG = DWord;
+  {$EXTERNALSYM MFSESSION_GETFULLTOPOLOGY_FLAG}
+const
+  MFSESSION_GETFULLTOPOLOGY_CURRENT = DWord($1);
+  {$EXTERNALSYM MFSESSION_GETFULLTOPOLOGY_CURRENT}
+
+
+type
+  PMFPMPSESSION_CREATION_FLAGS = ^MFPMPSESSION_CREATION_FLAGS;
+  MFPMPSESSION_CREATION_FLAGS = DWord;
+  {$EXTERNALSYM MFPMPSESSION_CREATION_FLAGS}
+const
+    MFPMPSESSION_UNPROTECTED_PROCESS = DWord($1);
+    {$EXTERNALSYM MFPMPSESSION_UNPROTECTED_PROCESS}
+    MFPMPSESSION_IN_PROCESS	         = DWord($2);
+    {$EXTERNALSYM MFPMPSESSION_IN_PROCESS}
+
+//#if (WINVER >= _WIN32_WINNT_WIN7)
+type
+  PMF_QUALITY_ADVISE_FLAGS = ^MF_QUALITY_ADVISE_FLAGS;
+  PMfQualityAdviseFlags = ^MF_QUALITY_ADVISE_FLAGS;
+  _MF_QUALITY_ADVISE_FLAGS    = DWord;
+  {$EXTERNALSYM _MF_QUALITY_ADVISE_FLAGS}
+  MF_QUALITY_ADVISE_FLAGS = _MF_QUALITY_ADVISE_FLAGS;
+  {$EXTERNALSYM MF_QUALITY_ADVISE_FLAGS}
+const
+  MF_QUALITY_CANNOT_KEEP_UP = DWord($1);
+  {$EXTERNALSYM MF_QUALITY_CANNOT_KEEP_UP}
+//#endif // (WINVER >= _WIN32_WINNT_WIN7)
+
+
+type
+  PMFSequencerTopologyFlags = ^MFSequencerTopologyFlags;
+  _MFSequencerTopologyFlags     = DWord;
+  {$EXTERNALSYM _MFSequencerTopologyFlags}
+  MFSequencerTopologyFlags = _MFSequencerTopologyFlags;
+  {$EXTERNALSYM MFSequencerTopologyFlags}
+const
+    SequencerTopologyFlags_Last = DWord($1);
+    {$EXTERNALSYM SequencerTopologyFlags_Last}
+
+
+  // IMFNetCredentialCache
+  ////////////////////////
+
+type
+  PMFNetCredentialRequirements = ^MFNetCredentialRequirements;
+  _MFNetCredentialRequirements = DWord;
+  {$EXTERNALSYM _MFNetCredentialRequirements}
+  MFNetCredentialRequirements = _MFNetCredentialRequirements;
+  {$EXTERNALSYM MFNetCredentialRequirements}
+const
+    REQUIRE_PROMPT        = DWord($1);
+    {$EXTERNALSYM REQUIRE_PROMPT}
+    REQUIRE_SAVE_SELECTED = DWord($2);
+    {$EXTERNALSYM REQUIRE_SAVE_SELECTED}
+
+
+type
+  PMFNetCredentialOptions = ^MFNetCredentialOptions;
+  _MFNetCredentialOptions = DWord;
+  {$EXTERNALSYM _MFNetCredentialOptions}
+  MFNetCredentialOptions = _MFNetCredentialOptions;
+  {$EXTERNALSYM MFNetCredentialOptions}
+const
+  MFNET_CREDENTIAL_SAVE             = DWord($1);
+  {$EXTERNALSYM MFNET_CREDENTIAL_SAVE}
+  MFNET_CREDENTIAL_DONT_CACHE       = DWord($2);
+  {$EXTERNALSYM MFNET_CREDENTIAL_DONT_CACHE}
+  MFNET_CREDENTIAL_ALLOW_CLEAR_TEXT = DWord($4);
+  {$EXTERNALSYM MFNET_CREDENTIAL_ALLOW_CLEAR_TEXT}
+
+
+type
+  PMFNetAuthenticationFlags = ^MFNetAuthenticationFlags;
+  _MFNetAuthenticationFlags = DWord;
+  {$EXTERNALSYM _MFNetAuthenticationFlags}
+  MFNetAuthenticationFlags = _MFNetAuthenticationFlags;
+  {$EXTERNALSYM MFNetAuthenticationFlags}
+const
+  MFNET_AUTHENTICATION_PROXY          = DWord($1);
+  {$EXTERNALSYM MFNET_AUTHENTICATION_PROXY}
+  MFNET_AUTHENTICATION_CLEAR_TEXT     = DWord($2);
+  {$EXTERNALSYM MFNET_AUTHENTICATION_CLEAR_TEXT}
+  MFNET_AUTHENTICATION_LOGGED_ON_USER = DWord($4);
+  {$EXTERNALSYM MFNET_AUTHENTICATION_LOGGED_ON_USER}
+
+
+  // MF_RESOLUTION
+  // =============
+
+type
+  PMF_CONNECT_METHOD = ^MF_CONNECT_METHOD;
+  _MF_CONNECT_METHOD = UINT32;
+  {$EXTERNALSYM _MF_CONNECT_METHOD}
+  MF_CONNECT_METHOD = _MF_CONNECT_METHOD;
+  {$EXTERNALSYM MF_CONNECT_METHOD}
+const
+    MF_CONNECT_DIRECT                          = UINT32(0);
+    {$EXTERNALSYM MF_CONNECT_DIRECT}
+    MF_CONNECT_ALLOW_CONVERTER                 = UINT32($1);
+    {$EXTERNALSYM MF_CONNECT_ALLOW_CONVERTER}
+    MF_CONNECT_ALLOW_DECODER                   = UINT32($3);
+    {$EXTERNALSYM MF_CONNECT_ALLOW_DECODER}
+    MF_CONNECT_RESOLVE_INDEPENDENT_OUTPUTTYPES = UINT32($4);
+    {$EXTERNALSYM MF_CONNECT_RESOLVE_INDEPENDENT_OUTPUTTYPES}
+    MF_CONNECT_AS_OPTIONAL                     = UINT32($10000);
+    {$EXTERNALSYM MF_CONNECT_AS_OPTIONAL}
+    MF_CONNECT_AS_OPTIONAL_BRANCH              = UINT32($20000);
+    {$EXTERNALSYM MF_CONNECT_AS_OPTIONAL_BRANCH}
+
+type
+  PMF_TOPOLOGY_RESOLUTION_STATUS_FLAGS = ^MF_TOPOLOGY_RESOLUTION_STATUS_FLAGS;
+  _MF_TOPOLOGY_RESOLUTION_STATUS_FLAGS = UINT32;
+  {$EXTERNALSYM _MF_TOPOLOGY_RESOLUTION_STATUS_FLAGS}
+  MF_TOPOLOGY_RESOLUTION_STATUS_FLAGS = _MF_TOPOLOGY_RESOLUTION_STATUS_FLAGS;
+  {$EXTERNALSYM MF_TOPOLOGY_RESOLUTION_STATUS_FLAGS}
+const
+    MF_TOPOLOGY_RESOLUTION_SUCCEEDED            = UINT32(0);
+    {$EXTERNALSYM MF_TOPOLOGY_RESOLUTION_SUCCEEDED}
+    MF_OPTIONAL_NODE_REJECTED_MEDIA_TYPE        = UINT32($1);
+    {$EXTERNALSYM MF_OPTIONAL_NODE_REJECTED_MEDIA_TYPE}
+    MF_OPTIONAL_NODE_REJECTED_PROTECTED_PROCESS = UINT32($2);
+    {$EXTERNALSYM MF_OPTIONAL_NODE_REJECTED_PROTECTED_PROCESS}
+
+//
+
+
+
+
+type
+  // typedef unsigned __int64 TOPOID; >> MfpTypes
 
   // Forward interface definitions
 
@@ -1364,41 +1569,6 @@ type
   IMFHttpDownloadRequest = interface;
   PIMFHttpDownloadSession = ^IMFHttpDownloadSession;
   IMFHttpDownloadSession = interface;
-
-
-
-//--------------------- Types and records ------------------------------------
-
-  PMFSESSION_SETTOPOLOGY_FLAGS = ^MFSESSION_SETTOPOLOGY_FLAGS;
-  MFSESSION_SETTOPOLOGY_FLAGS = (
-    MFSESSION_SETTOPOLOGY_IMMEDIATE     = $1,
-    {$EXTERNALSYM MFSESSION_SETTOPOLOGY_IMMEDIATE}
-    MFSESSION_SETTOPOLOGY_NORESOLUTION  = $2,
-    {$EXTERNALSYM MFSESSION_SETTOPOLOGY_NORESOLUTION}
-    MFSESSION_SETTOPOLOGY_CLEAR_CURRENT = $4
-    {$EXTERNALSYM MFSESSION_SETTOPOLOGY_CLEAR_CURRENT}
-  );
-  {$EXTERNALSYM MFSESSION_SETTOPOLOGY_FLAGS}
-
-  PMFSESSION_GETFULLTOPOLOGY_FLAG = ^MFSESSION_GETFULLTOPOLOGY_FLAG;
-  MFSESSION_GETFULLTOPOLOGY_FLAG = (
-    MFSESSION_GETFULLTOPOLOGY_CURRENT = $1
-    {$EXTERNALSYM MFSESSION_GETFULLTOPOLOGY_CURRENT}
-  );
-  {$EXTERNALSYM MFSESSION_GETFULLTOPOLOGY_FLAG}
-
-  PMFPMPSESSION_CREATION_FLAGS = ^MFPMPSESSION_CREATION_FLAGS;
-  MFPMPSESSION_CREATION_FLAGS = (
-    MFPMPSESSION_UNPROTECTED_PROCESS = $1,
-    {$EXTERNALSYM MFPMPSESSION_UNPROTECTED_PROCESS}
-    MFPMPSESSION_IN_PROCESS	         = $2
-    {$EXTERNALSYM MFPMPSESSION_IN_PROCESS}
-  );
-  {$EXTERNALSYM MFPMPSESSION_CREATION_FLAGS}
-
-  // typedef unsigned __int64 TOPOID; >> MfpTypes
-
-
 
   // Interface IMFMediaSession
   // =========================
@@ -1462,41 +1632,6 @@ type
   );
   {$EXTERNALSYM MF_OBJECT_TYPE}
 
-  // MF_RESOLUTION
-  // =============
-
-  PMF_CONNECT_METHOD = ^MF_CONNECT_METHOD;
-  _MF_CONNECT_METHOD                           = (
-    MF_CONNECT_DIRECT                          = 0,
-    {$EXTERNALSYM MF_CONNECT_DIRECT}
-    MF_CONNECT_ALLOW_CONVERTER                 = $1,
-    {$EXTERNALSYM MF_CONNECT_ALLOW_CONVERTER}
-    MF_CONNECT_ALLOW_DECODER                   = $3,
-    {$EXTERNALSYM MF_CONNECT_ALLOW_DECODER}
-    MF_CONNECT_RESOLVE_INDEPENDENT_OUTPUTTYPES = $4,
-    {$EXTERNALSYM MF_CONNECT_RESOLVE_INDEPENDENT_OUTPUTTYPES}
-    MF_CONNECT_AS_OPTIONAL                     = $10000,
-    {$EXTERNALSYM MF_CONNECT_AS_OPTIONAL}
-    MF_CONNECT_AS_OPTIONAL_BRANCH              = $20000
-    {$EXTERNALSYM MF_CONNECT_AS_OPTIONAL_BRANCH}
-  );
-  {$EXTERNALSYM _MF_CONNECT_METHOD}
-  MF_CONNECT_METHOD = _MF_CONNECT_METHOD;
-  {$EXTERNALSYM MF_CONNECT_METHOD}
-
-  PMF_TOPOLOGY_RESOLUTION_STATUS_FLAGS = ^MF_TOPOLOGY_RESOLUTION_STATUS_FLAGS;
-  _MF_TOPOLOGY_RESOLUTION_STATUS_FLAGS          = (
-    MF_TOPOLOGY_RESOLUTION_SUCCEEDED            = 0,
-    {$EXTERNALSYM MF_TOPOLOGY_RESOLUTION_SUCCEEDED}
-    MF_OPTIONAL_NODE_REJECTED_MEDIA_TYPE        = $1,
-    {$EXTERNALSYM MF_OPTIONAL_NODE_REJECTED_MEDIA_TYPE}
-    MF_OPTIONAL_NODE_REJECTED_PROTECTED_PROCESS = $2
-    {$EXTERNALSYM MF_OPTIONAL_NODE_REJECTED_PROTECTED_PROCESS}
-  );
-  {$EXTERNALSYM _MF_TOPOLOGY_RESOLUTION_STATUS_FLAGS}
-  MF_TOPOLOGY_RESOLUTION_STATUS_FLAGS = _MF_TOPOLOGY_RESOLUTION_STATUS_FLAGS;
-  {$EXTERNALSYM MF_TOPOLOGY_RESOLUTION_STATUS_FLAGS}
-
 
   // interface IMFSourceResolver
   // ===========================
@@ -1547,28 +1682,6 @@ type
   {$EXTERNALSYM IID_IMFSourceResolver}
 
 
-  PMFMEDIASOURCE_CHARACTERISTICS = ^MFMEDIASOURCE_CHARACTERISTICS;
-  _MFMEDIASOURCE_CHARACTERISTICS             = (
-    MFMEDIASOURCE_IS_LIVE                    = $1,
-    {$EXTERNALSYM MFMEDIASOURCE_IS_LIVE}
-    MFMEDIASOURCE_CAN_SEEK                   = $2,
-    {$EXTERNALSYM MFMEDIASOURCE_CAN_SEEK}
-    MFMEDIASOURCE_CAN_PAUSE                  = $4,
-    {$EXTERNALSYM MFMEDIASOURCE_CAN_PAUSE}
-    MFMEDIASOURCE_HAS_SLOW_SEEK              = $8,
-    {$EXTERNALSYM MFMEDIASOURCE_HAS_SLOW_SEEK}
-    MFMEDIASOURCE_HAS_MULTIPLE_PRESENTATIONS = $10,
-    {$EXTERNALSYM MFMEDIASOURCE_HAS_MULTIPLE_PRESENTATIONS}
-    MFMEDIASOURCE_CAN_SKIPFORWARD            = $20,
-    {$EXTERNALSYM MFMEDIASOURCE_CAN_SKIPFORWARD}
-    MFMEDIASOURCE_CAN_SKIPBACKWARD           = $40,
-    {$EXTERNALSYM MFMEDIASOURCE_CAN_SKIPBACKWARD}
-    MFMEDIASOURCE_DOES_NOT_USE_NETWORK       = $80
-    {$EXTERNALSYM MFMEDIASOURCE_DOES_NOT_USE_NETWORK}
-  );
-  {$EXTERNALSYM _MFMEDIASOURCE_CHARACTERISTICS}
-  MFMEDIASOURCE_CHARACTERISTICS = _MFMEDIASOURCE_CHARACTERISTICS;
-  {$EXTERNALSYM MFMEDIASOURCE_CHARACTERISTICS}
 
 
   // Interface IMFMediaSource
@@ -1578,7 +1691,8 @@ type
   IMFMediaSource = interface(IMFMediaEventGenerator)
     ['{3C9B2EB9-86D5-4514-A394-F56664F9F0D8}']
 
-      function GetCharacteristics(out pdwCharacteristics: DWord): HResult; stdcall;
+      function GetCharacteristics(out pdwCharacteristics: PDWord): HResult; stdcall;
+      // Receives a bitwise OR of zero or more flags from the MFMEDIASOURCE_CHARACTERISTICS enumeration.
 
       function CreatePresentationDescriptor(out ppPresentationDescriptor: IMFPresentationDescriptor): HResult; stdcall;
 
@@ -1671,7 +1785,7 @@ type
   IMFMediaSink = interface(IUnknown)
   ['{6ef2a660-47c0-4666-b13d-cbb717f2fa2c}']
 
-    function GetCharacteristics(out pdwCharacteristics: DWord): HResult; stdcall;
+    function GetCharacteristics(out pdwCharacteristics: PDWord): HResult; stdcall;
 
     function AddStreamSink(dwStreamSinkIdentifier: DWord;
                            pMediaType: IMFMediaType;
@@ -1917,14 +2031,14 @@ type
   PMFVideoSphericalFormat = ^MFVideoSphericalFormat;
   {$EXTERNALSYM _MFVideoSphericalFormat}
   _MFVideoSphericalFormat = (
-    {$EXTERNALSYM MFVideoSphericalFormat_Unsupported}
     MFVideoSphericalFormat_Unsupported	    = 0,
-    {$EXTERNALSYM MFVideoSphericalFormat_Equirectangular}
+    {$EXTERNALSYM MFVideoSphericalFormat_Unsupported}
     MFVideoSphericalFormat_Equirectangular	= 1,
-    {$EXTERNALSYM MFVideoSphericalFormat_CubeMap}
+    {$EXTERNALSYM MFVideoSphericalFormat_Equirectangular}
     MFVideoSphericalFormat_CubeMap	        = 2,
-    {$EXTERNALSYM MFVideoSphericalFormat_3DMesh}
+    {$EXTERNALSYM MFVideoSphericalFormat_CubeMap}
     MFVideoSphericalFormat_3DMesh	          = 3
+    {$EXTERNALSYM MFVideoSphericalFormat_3DMesh}
   );
   {$EXTERNALSYM MFVideoSphericalFormat}
   MFVideoSphericalFormat = _MFVideoSphericalFormat;
@@ -2186,21 +2300,6 @@ type
   {$EXTERNALSYM IID_IMFGetService}
 
 
-  PMFCLOCK_CHARACTERISTICS_FLAGS = ^MFCLOCK_CHARACTERISTICS_FLAGS;
-  PMfClockCharacteristicsFlags = ^MFCLOCK_CHARACTERISTICS_FLAGS;
-  _MFCLOCK_CHARACTERISTICS_FLAGS                 = (
-    MFCLOCK_CHARACTERISTICS_FLAG_FREQUENCY_10MHZ = $2,
-    {$EXTERNALSYM MFCLOCK_CHARACTERISTICS_FLAG_FREQUENCY_10MHZ}
-    MFCLOCK_CHARACTERISTICS_FLAG_ALWAYS_RUNNING  = $4,
-    {$EXTERNALSYM MFCLOCK_CHARACTERISTICS_FLAG_ALWAYS_RUNNING}
-    MFCLOCK_CHARACTERISTICS_FLAG_IS_SYSTEM_CLOCK = $8
-    {$EXTERNALSYM MFCLOCK_CHARACTERISTICS_FLAG_IS_SYSTEM_CLOCK}
-  );
-  {$EXTERNALSYM _MFCLOCK_CHARACTERISTICS_FLAGS}
-  MFCLOCK_CHARACTERISTICS_FLAGS = _MFCLOCK_CHARACTERISTICS_FLAGS;
-  {$EXTERNALSYM MFCLOCK_CHARACTERISTICS_FLAGS}
-
-
   PMF_CLOCK_STATE = ^MF_CLOCK_STATE;
   PMfclockState = ^MFCLOCK_STATE;
   _MFCLOCK_STATE          = (
@@ -2218,16 +2317,6 @@ type
   {$EXTERNALSYM MFCLOCK_STATE}
   MF_CLOCK_STATE = MFCLOCK_STATE;   // An issue as defined in SDK 7.0
   {$EXTERNALSYM MF_CLOCK_STATE}
-
-
-  PMFCLOCK_RELATIONAL_FLAGS = ^MFCLOCK_RELATIONAL_FLAGS;
-  _MFCLOCK_RELATIONAL_FLAGS                    = (
-    MFCLOCK_RELATIONAL_FLAG_JITTER_NEVER_AHEAD = $1
-    {$EXTERNALSYM MFCLOCK_RELATIONAL_FLAG_JITTER_NEVER_AHEAD}
-  );
-  {$EXTERNALSYM _MFCLOCK_RELATIONAL_FLAGS}
-  MFCLOCK_RELATIONAL_FLAGS = _MFCLOCK_RELATIONAL_FLAGS;
-  {$EXTERNALSYM MFCLOCK_RELATIONAL_FLAGS}
 
 
   PMFCLOCK_PROPERTIES = ^MFCLOCK_PROPERTIES;
@@ -2253,7 +2342,7 @@ type
   IMFClock = interface(IUnknown)
     ['{2eb1e945-18b8-4139-9b1a-d5d584818530}']
 
-    function GetClockCharacteristics(out pdwCharacteristics: DWord): HResult; stdcall;
+    function GetClockCharacteristics(out pdwCharacteristics: PDWord): HResult; stdcall;
 
     function GetCorrelatedTime(dwReserved: DWord;
                                out pllClockTime: LongLong;
@@ -2976,19 +3065,6 @@ type
   MF_QUALITY_LEVEL = _MF_QUALITY_LEVEL;
   {$EXTERNALSYM MF_QUALITY_LEVEL}
 
-//#if (WINVER >= _WIN32_WINNT_WIN7)
-
-  PMF_QUALITY_ADVISE_FLAGS = ^MF_QUALITY_ADVISE_FLAGS;
-  PMfQualityAdviseFlags = ^MF_QUALITY_ADVISE_FLAGS;
-  _MF_QUALITY_ADVISE_FLAGS    = (
-    MF_QUALITY_CANNOT_KEEP_UP = $1
-    {$EXTERNALSYM MF_QUALITY_CANNOT_KEEP_UP}
-  );
-  {$EXTERNALSYM _MF_QUALITY_ADVISE_FLAGS}
-  MF_QUALITY_ADVISE_FLAGS = _MF_QUALITY_ADVISE_FLAGS;
-  {$EXTERNALSYM MF_QUALITY_ADVISE_FLAGS}
-
-//#endif // (WINVER >= _WIN32_WINNT_WIN7)
 
 
   // Interface IMFQualityManager
@@ -3049,7 +3125,7 @@ type
     ['{F3706F0D-8EA2-4886-8000-7155E9EC2EAE}']
 
       function NotifyQualityEvent(pEvent: IMFMediaEvent;
-                                  out pdwFlags: DWORD): HResult; stdcall;
+                                  out pdwFlags: PDWORD): HResult; stdcall;
 
    end;
   IID_IMFQualityAdvise2 = IMFQualityAdvise2;
@@ -3121,15 +3197,6 @@ type
   {$EXTERNALSYM MFSequencerElementId}
 
 
-  PMFSequencerTopologyFlags = ^MFSequencerTopologyFlags;
-  _MFSequencerTopologyFlags     = (
-    SequencerTopologyFlags_Last = $1
-    {$EXTERNALSYM SequencerTopologyFlags_Last}
-  );
-  {$EXTERNALSYM _MFSequencerTopologyFlags}
-  MFSequencerTopologyFlags = _MFSequencerTopologyFlags;
-  {$EXTERNALSYM MFSequencerTopologyFlags}
-
 
   // Interface IMFSequencerSource
   // ============================
@@ -3139,7 +3206,7 @@ type
   ['{197CD219-19CB-4de1-A64C-ACF2EDCBE59E}']
 
     function AppendTopology(pTopology: IMFTopology;
-                            dwFlags: Dword;
+                            dwFlags: DWord;
                             out pdwId: MFSequencerElementId): HResult; stdcall;
 
     function DeleteTopology(const dwId: MFSequencerElementId): HResult; stdcall;
@@ -3152,7 +3219,7 @@ type
                             pTopology: IMFTopology): HResult; stdcall;
 
     function UpdateTopologyFlags(const dwId: MFSequencerElementId;
-                                 dwFlags: Dword): HResult; stdcall;
+                                 dwFlags: DWord): HResult; stdcall;
 
   end;
   IID_IMFSequencerSource = IMFSequencerSource;
@@ -3401,50 +3468,6 @@ type
    end;
   IID_IMFNetCredentialManager = IMFNetCredentialManager;
   {$EXTERNALSYM IID_IMFNetCredentialManager}
-
-
-  // IMFNetCredentialCache
-  ////////////////////////
-
-
-  PMFNetCredentialRequirements = ^MFNetCredentialRequirements;
-  _MFNetCredentialRequirements = (
-    REQUIRE_PROMPT        = $1,
-    {$EXTERNALSYM REQUIRE_PROMPT}
-    REQUIRE_SAVE_SELECTED = $2
-    {$EXTERNALSYM REQUIRE_SAVE_SELECTED}
-  );
-  {$EXTERNALSYM _MFNetCredentialRequirements}
-  MFNetCredentialRequirements = _MFNetCredentialRequirements;
-  {$EXTERNALSYM MFNetCredentialRequirements}
-
-
-  PMFNetCredentialOptions = ^MFNetCredentialOptions;
-  _MFNetCredentialOptions             = (
-    MFNET_CREDENTIAL_SAVE             = $1,
-    {$EXTERNALSYM MFNET_CREDENTIAL_SAVE}
-    MFNET_CREDENTIAL_DONT_CACHE       = $2,
-    {$EXTERNALSYM MFNET_CREDENTIAL_DONT_CACHE}
-    MFNET_CREDENTIAL_ALLOW_CLEAR_TEXT = $4
-    {$EXTERNALSYM MFNET_CREDENTIAL_ALLOW_CLEAR_TEXT}
-  );
-  {$EXTERNALSYM _MFNetCredentialOptions}
-  MFNetCredentialOptions = _MFNetCredentialOptions;
-  {$EXTERNALSYM MFNetCredentialOptions}
-
-
-  PMFNetAuthenticationFlags = ^MFNetAuthenticationFlags;
-  _MFNetAuthenticationFlags             = (
-    MFNET_AUTHENTICATION_PROXY          = $1,
-    {$EXTERNALSYM MFNET_AUTHENTICATION_PROXY}
-    MFNET_AUTHENTICATION_CLEAR_TEXT     = $2,
-    {$EXTERNALSYM MFNET_AUTHENTICATION_CLEAR_TEXT}
-    MFNET_AUTHENTICATION_LOGGED_ON_USER = $4
-    {$EXTERNALSYM MFNET_AUTHENTICATION_LOGGED_ON_USER}
-  );
-  {$EXTERNALSYM _MFNetAuthenticationFlags}
-  MFNetAuthenticationFlags = _MFNetAuthenticationFlags;
-  {$EXTERNALSYM MFNetAuthenticationFlags}
 
 
   // Interface IMFNetCredentialCache

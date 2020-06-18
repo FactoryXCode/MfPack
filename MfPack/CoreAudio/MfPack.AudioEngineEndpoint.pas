@@ -21,6 +21,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -174,7 +175,8 @@ type
     POSITION_CONTINUOUS    = 2,
     // The QPC value associated with this position is not accurate
     // within 300 Microseconds.
-    POSITION_QPC_ERROR     = 4);
+    POSITION_QPC_ERROR     = 4
+  );
   {$EXTERNALSYM AE_POSITION_FLAGS}
   AePositionFlags = AE_POSITION_FLAGS;
 

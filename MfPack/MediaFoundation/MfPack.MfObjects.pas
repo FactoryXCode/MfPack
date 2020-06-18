@@ -21,6 +21,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or higher.
@@ -134,139 +135,261 @@ const
 type
   // MediaEventType = DWORD;
   PMediaEventType = ^MediaEventType;
-  MediaEventType = (
+  {$EXTERNALSYM MediaEventType}
+  MediaEventType = DWord;
 
+const
   //-------------------------------------------------------------------------
   // generic events
   //-------------------------------------------------------------------------
 
-        MEUnknown	                              = 0,
-        MEError	                                = 1,
-        MEExtendedType	                        = 2,
-        MENonFatalError	                        = 3,
-        MEGenericV1Anchor	                      = MENonFatalError,
+  MEUnknown	                              = DWord(0);
+  {$EXTERNALSYM MEUnknown}
+  MEError	                                = DWord(1);
+  {$EXTERNALSYM MEError}
+  MEExtendedType	                        = DWord(2);
+  {$EXTERNALSYM MEExtendedType}
+  MENonFatalError	                        = DWord(3);
+  {$EXTERNALSYM MENonFatalError}
+  MEGenericV1Anchor	                      = MENonFatalError;
+  {$EXTERNALSYM MEGenericV1Anchor}
 
   //-------------------------------------------------------------------------
   // Media Session events:
   // Events of interest to applications using the Media Session
   //-------------------------------------------------------------------------
 
-        MESessionUnknown	                      = 100,
-        MESessionTopologySet	                  = 101,
-        MESessionTopologiesCleared	            = 102,
-        MESessionStarted	                      = 103,
-        MESessionPaused	                        = 104,
-        MESessionStopped	                      = 105,
-        MESessionClosed	                        = 106,
-        MESessionEnded	                        = 107,
-        MESessionRateChanged	                  = 108,
-        MESessionScrubSampleComplete	          = 109,
-        MESessionCapabilitiesChanged	          = 110,
-        MESessionTopologyStatus	                = 111,
-        MESessionNotifyPresentationTime	        = 112,
-        MENewPresentation	                      = 113,
-        MELicenseAcquisitionStart	              = 114,
-        MELicenseAcquisitionCompleted	          = 115,
-        MEIndividualizationStart	              = 116,
-        MEIndividualizationCompleted	          = 117,
-        MEEnablerProgress	                      = 118,
-        MEEnablerCompleted	                    = 119,
-        MEPolicyError	                          = 120,
-        MEPolicyReport	                        = 121,
-        MEBufferingStarted	                    = 122,
-        MEBufferingStopped	                    = 123,
-        MEConnectStart	                        = 124,
-        MEConnectEnd	                          = 125,
-        MEReconnectStart	                      = 126,
-        MEReconnectEnd	                        = 127,
-        MERendererEvent	                        = 128,
-        MESessionStreamSinkFormatChanged	      = 129,
-        MESessionV1Anchor	                      = MESessionStreamSinkFormatChanged,
-        MESourceUnknown	                        = 200,
-        MESourceStarted	                        = 201,
-        MEStreamStarted	                        = 202,
-        MESourceSeeked	                        = 203,
-        MEStreamSeeked	                        = 204,
-        MENewStream	                            = 205,
-        MEUpdatedStream	                        = 206,
-        MESourceStopped	                        = 207,
-        MEStreamStopped	                        = 208,
-        MESourcePaused	                        = 209,
-        MEStreamPaused	                        = 210,
-        MEEndOfPresentation	                    = 211,
-        MEEndOfStream	                          = 212,
-        MEMediaSample	                          = 213,  // Sent when a media stream delivers a new sample in response to a call to IMFMediaStream.RequestSample.
-        MEStreamTick	                          = 214,  // Signals that a media stream does not have data available at a specified time.
-        MEStreamThinMode	                      = 215,
-        MEStreamFormatChanged	                  = 216,
-        MESourceRateChanged	                    = 217,
-        MEEndOfPresentationSegment	            = 218,
-        MESourceCharacteristicsChanged	        = 219,
-        MESourceRateChangeRequested	            = 220,
-        MESourceMetadataChanged	                = 221,
-        MESequencerSourceTopologyUpdated	      = 222,
-        MESourceV1Anchor	                      = MESequencerSourceTopologyUpdated,
-        MESinkUnknown	                          = 300,
-        MEStreamSinkStarted	                    = 301,
-        MEStreamSinkStopped	                    = 302,
-        MEStreamSinkPaused	                    = 303,
-        MEStreamSinkRateChanged	                = 304,
-        MEStreamSinkRequestSample	              = 305,
-        MEStreamSinkMarker	                    = 306,
-        MEStreamSinkPrerolled	                  = 307,
-        MEStreamSinkScrubSampleComplete	        = 308,
-        MEStreamSinkFormatChanged	              = 309,
-        MEStreamSinkDeviceChanged	              = 310,
-        MEQualityNotify	                        = 311,
-        MESinkInvalidated	                      = 312,
-        MEAudioSessionNameChanged	              = 313,
-        MEAudioSessionVolumeChanged	            = 314,
-        MEAudioSessionDeviceRemoved	            = 315,
-        MEAudioSessionServerShutdown	          = 316,
-        MEAudioSessionGroupingParamChanged	    = 317,
-        MEAudioSessionIconChanged	              = 318,
-        MEAudioSessionFormatChanged	            = 319,
-        MEAudioSessionDisconnected	            = 320,
-        MEAudioSessionExclusiveModeOverride	    = 321,
-        MESinkV1Anchor	                        = MEAudioSessionExclusiveModeOverride,
-        MECaptureAudioSessionVolumeChanged	    = 322,
-        MECaptureAudioSessionDeviceRemoved	    = 323,
-        MECaptureAudioSessionFormatChanged	    = 324,
-        MECaptureAudioSessionDisconnected	      = 325,
-        MECaptureAudioSessionExclusiveModeOverride	= 326,
-        MECaptureAudioSessionServerShutdown	    = 327,
-        MESinkV2Anchor	                        = MECaptureAudioSessionServerShutdown,
-        METrustUnknown	                        = 400,
-        MEPolicyChanged	                        = 401,
-        MEContentProtectionMessage	            = 402,
-        MEPolicySet	                            = 403,
-        METrustV1Anchor	                        = MEPolicySet,
-        MEWMDRMLicenseBackupCompleted	          = 500,
-        MEWMDRMLicenseBackupProgress	          = 501,
-        MEWMDRMLicenseRestoreCompleted	        = 502,
-        MEWMDRMLicenseRestoreProgress	          = 503,
-        MEWMDRMLicenseAcquisitionCompleted	    = 506,
-        MEWMDRMIndividualizationCompleted	      = 508,
-        MEWMDRMIndividualizationProgress	      = 513,
-        MEWMDRMProximityCompleted	              = 514,
-        MEWMDRMLicenseStoreCleaned	            = 515,
-        MEWMDRMRevocationDownloadCompleted	    = 516,
-        MEWMDRMV1Anchor	                        = MEWMDRMRevocationDownloadCompleted,
-        METransformUnknown	                    = 600,
-        METransformNeedInput	                  = (METransformUnknown + 1) ,
-        METransformHaveOutput	                  = (METransformNeedInput + 1) ,
-        METransformDrainComplete	              = (METransformHaveOutput + 1) ,
-        METransformMarker	                      = (METransformDrainComplete + 1) ,
-        METransformInputStreamStateChanged      = (METransformMarker + 1) ,
-        MEByteStreamCharacteristicsChanged      = 700,
-        MEVideoCaptureDeviceRemoved	            = 800,
-        MEVideoCaptureDevicePreempted	          = 801,
-        MEStreamSinkFormatInvalidated	          = 802,
-        MEEncodingParameters                    = 803,
-        MEContentProtectionMetadata	            = 900,
-        MEDeviceThermalStateChanged	            = 950,
-        MEReservedMax	                          = 10000);
-  {$EXTERNALSYM MediaEventType}
+  MESessionUnknown	                      = DWord(100);
+  {$EXTERNALSYM MESessionUnknown}
+  MESessionTopologySet	                  = DWord(101);
+  {$EXTERNALSYM MESessionTopologySet}
+  MESessionTopologiesCleared	            = DWord(102);
+  {$EXTERNALSYM MESessionTopologiesCleared}
+  MESessionStarted	                      = DWord(103);
+  {$EXTERNALSYM MESessionStarted}
+  MESessionPaused	                        = DWord(104);
+  {$EXTERNALSYM MESessionPaused}
+  MESessionStopped	                      = DWord(105);
+  {$EXTERNALSYM MESessionStopped}
+  MESessionClosed	                        = DWord(106);
+  {$EXTERNALSYM MESessionClosed}
+  MESessionEnded	                        = DWord(107);
+  {$EXTERNALSYM MESessionEnded}
+  MESessionRateChanged	                  = DWord(108);
+  {$EXTERNALSYM MESessionRateChanged}
+  MESessionScrubSampleComplete	          = DWord(109);
+  {$EXTERNALSYM MESessionScrubSampleComplete}
+  MESessionCapabilitiesChanged	          = DWord(110);
+  {$EXTERNALSYM MESessionCapabilitiesChanged}
+  MESessionTopologyStatus	                = DWord(111);
+  {$EXTERNALSYM MESessionTopologyStatus}
+  MESessionNotifyPresentationTime	        = DWord(112);
+  {$EXTERNALSYM MESessionNotifyPresentationTime}
+  MENewPresentation	                      = DWord(113);
+  {$EXTERNALSYM MENewPresentation}
+  MELicenseAcquisitionStart	              = DWord(114);
+  {$EXTERNALSYM MELicenseAcquisitionStart}
+  MELicenseAcquisitionCompleted	          = DWord(115);
+  {$EXTERNALSYM MELicenseAcquisitionCompleted}
+  MEIndividualizationStart	              = DWord(116);
+  {$EXTERNALSYM MEIndividualizationStart}
+  MEIndividualizationCompleted	          = DWord(117);
+  {$EXTERNALSYM MEIndividualizationCompleted}
+  MEEnablerProgress	                      = DWord(118);
+  {$EXTERNALSYM MEEnablerProgress}
+  MEEnablerCompleted	                    = DWord(119);
+  {$EXTERNALSYM MEEnablerCompleted}
+  MEPolicyError	                          = DWord(120);
+  {$EXTERNALSYM MEPolicyError}
+  MEPolicyReport	                        = DWord(121);
+  {$EXTERNALSYM MEPolicyReport}
+  MEBufferingStarted	                    = DWord(122);
+  {$EXTERNALSYM MEBufferingStarted}
+  MEBufferingStopped	                    = DWord(123);
+  {$EXTERNALSYM MEBufferingStopped}
+  MEConnectStart	                        = DWord(124);
+  {$EXTERNALSYM MEConnectStart}
+  MEConnectEnd	                          = DWord(125);
+  {$EXTERNALSYM MEConnectEnd}
+  MEReconnectStart	                      = DWord(126);
+  {$EXTERNALSYM MEReconnectStart}
+  MEReconnectEnd	                        = DWord(127);
+  {$EXTERNALSYM MEReconnectEnd}
+  MERendererEvent	                        = DWord(128);
+  {$EXTERNALSYM MERendererEvent}
+  MESessionStreamSinkFormatChanged	      = DWord(129);
+  {$EXTERNALSYM MESessionStreamSinkFormatChanged}
+  MESessionV1Anchor	                      = DWord(MESessionStreamSinkFormatChanged);
+  {$EXTERNALSYM MESessionV1Anchor}
+  MESourceUnknown	                        = DWord(200);
+  {$EXTERNALSYM MESourceUnknown}
+  MESourceStarted	                        = DWord(201);
+  {$EXTERNALSYM MESourceStarted}
+  MEStreamStarted	                        = DWord(202);
+  {$EXTERNALSYM MEStreamStarted}
+  MESourceSeeked	                        = DWord(203);
+  {$EXTERNALSYM MESourceSeeked}
+  MEStreamSeeked	                        = DWord(204);
+  {$EXTERNALSYM MEStreamSeeked}
+  MENewStream	                            = DWord(205);
+  {$EXTERNALSYM MENewStream}
+  MEUpdatedStream	                        = DWord(206);
+  {$EXTERNALSYM MEUpdatedStream}
+  MESourceStopped	                        = DWord(207);
+  {$EXTERNALSYM MESourceStopped}
+  MEStreamStopped	                        = DWord(208);
+  {$EXTERNALSYM MEStreamStopped}
+  MESourcePaused	                        = DWord(209);
+  {$EXTERNALSYM MESourcePaused}
+  MEStreamPaused	                        = DWord(210);
+  {$EXTERNALSYM MEStreamPaused}
+  MEEndOfPresentation	                    = DWord(211);
+  {$EXTERNALSYM MEEndOfPresentation}
+  MEEndOfStream	                          = DWord(212);
+  {$EXTERNALSYM MEEndOfStream}
+  MEMediaSample	                          = DWord(213);  // Sent when a media stream delivers a new sample in response to a call to IMFMediaStream.RequestSample.
+  {$EXTERNALSYM MEMediaSample}
+  MEStreamTick	                          = DWord(214);  // Signals that a media stream does not have data available at a specified time.
+  {$EXTERNALSYM MEStreamTick}
+  MEStreamThinMode	                      = DWord(215);
+  {$EXTERNALSYM MEStreamThinMode}
+  MEStreamFormatChanged	                  = DWord(216);
+  {$EXTERNALSYM MEStreamFormatChanged}
+  MESourceRateChanged	                    = DWord(217);
+  {$EXTERNALSYM MESourceRateChanged}
+  MEEndOfPresentationSegment	            = DWord(218);
+  {$EXTERNALSYM MEEndOfPresentationSegment}
+  MESourceCharacteristicsChanged	        = DWord(219);
+  {$EXTERNALSYM MESourceCharacteristicsChanged}
+  MESourceRateChangeRequested	            = DWord(220);
+  {$EXTERNALSYM MESourceRateChangeRequested}
+  MESourceMetadataChanged	                = DWord(221);
+  {$EXTERNALSYM MESourceMetadataChanged}
+  MESequencerSourceTopologyUpdated	      = DWord(222);
+  {$EXTERNALSYM MESequencerSourceTopologyUpdated}
+  MESourceV1Anchor	                      = DWord(MESequencerSourceTopologyUpdated);
+  {$EXTERNALSYM MESourceV1Anchor}
+  MESinkUnknown	                          = DWord(300);
+  {$EXTERNALSYM MESinkUnknown}
+  MEStreamSinkStarted	                    = DWord(301);
+  {$EXTERNALSYM MEStreamSinkStarted}
+  MEStreamSinkStopped	                    = DWord(302);
+  {$EXTERNALSYM MEStreamSinkStopped}
+  MEStreamSinkPaused	                    = DWord(303);
+  {$EXTERNALSYM MEStreamSinkPaused}
+  MEStreamSinkRateChanged	                = DWord(304);
+  {$EXTERNALSYM MEStreamSinkRateChanged}
+  MEStreamSinkRequestSample	              = DWord(305);
+  {$EXTERNALSYM MEStreamSinkRequestSample}
+  MEStreamSinkMarker	                    = DWord(306);
+  {$EXTERNALSYM MEStreamSinkMarker}
+  MEStreamSinkPrerolled	                  = DWord(307);
+  {$EXTERNALSYM MEStreamSinkPrerolled}
+  MEStreamSinkScrubSampleComplete	        = DWord(308);
+  {$EXTERNALSYM MEStreamSinkScrubSampleComplete}
+  MEStreamSinkFormatChanged	              = DWord(309);
+  {$EXTERNALSYM MEStreamSinkFormatChanged}
+  MEStreamSinkDeviceChanged	              = DWord(310);
+  {$EXTERNALSYM MEStreamSinkDeviceChanged}
+  MEQualityNotify	                        = DWord(311);
+  {$EXTERNALSYM MEQualityNotify}
+  MESinkInvalidated	                      = DWord(312);
+  {$EXTERNALSYM MESinkInvalidated}
+  MEAudioSessionNameChanged	              = DWord(313);
+  {$EXTERNALSYM MEAudioSessionNameChanged}
+  MEAudioSessionVolumeChanged	            = DWord(314);
+  {$EXTERNALSYM MEAudioSessionVolumeChanged}
+  MEAudioSessionDeviceRemoved	            = DWord(315);
+  {$EXTERNALSYM MEAudioSessionDeviceRemoved}
+  MEAudioSessionServerShutdown	          = DWord(316);
+  {$EXTERNALSYM MEAudioSessionServerShutdown}
+  MEAudioSessionGroupingParamChanged	    = DWord(317);
+  {$EXTERNALSYM MEAudioSessionGroupingParamChanged}
+  MEAudioSessionIconChanged	              = DWord(318);
+  {$EXTERNALSYM MEAudioSessionIconChanged}
+  MEAudioSessionFormatChanged	            = DWord(319);
+  {$EXTERNALSYM MEAudioSessionFormatChanged}
+  MEAudioSessionDisconnected	            = DWord(320);
+  {$EXTERNALSYM MEAudioSessionDisconnected}
+  MEAudioSessionExclusiveModeOverride	    = DWord(321);
+  {$EXTERNALSYM MEAudioSessionExclusiveModeOverride}
+  MESinkV1Anchor	                        = MEAudioSessionExclusiveModeOverride;
+  {$EXTERNALSYM MESinkV1Anchor}
+  MECaptureAudioSessionVolumeChanged	    = DWord(322);
+  {$EXTERNALSYM MECaptureAudioSessionVolumeChanged}
+  MECaptureAudioSessionDeviceRemoved	    = DWord(323);
+  {$EXTERNALSYM MECaptureAudioSessionDeviceRemoved}
+  MECaptureAudioSessionFormatChanged	    = DWord(324);
+  {$EXTERNALSYM MECaptureAudioSessionFormatChanged}
+  MECaptureAudioSessionDisconnected	      = DWord(325);
+  {$EXTERNALSYM MECaptureAudioSessionDisconnected}
+  MECaptureAudioSessionExclusiveModeOverride	= DWord(326);
+  {$EXTERNALSYM MECaptureAudioSessionExclusiveModeOverride}
+  MECaptureAudioSessionServerShutdown	    = DWord(327);
+  {$EXTERNALSYM MECaptureAudioSessionServerShutdown}
+  MESinkV2Anchor	                        = MECaptureAudioSessionServerShutdown;
+  {$EXTERNALSYM MESinkV2Anchor}
+  METrustUnknown	                        = DWord(400);
+  {$EXTERNALSYM METrustUnknown}
+  MEPolicyChanged	                        = DWord(401);
+  {$EXTERNALSYM MEPolicyChanged}
+  MEContentProtectionMessage	            = DWord(402);
+  {$EXTERNALSYM MEContentProtectionMessage}
+  MEPolicySet	                            = DWord(403);
+  {$EXTERNALSYM MEPolicySet}
+  METrustV1Anchor	                        = MEPolicySet;
+  {$EXTERNALSYM METrustV1Anchor}
+  MEWMDRMLicenseBackupCompleted	          = DWord(500);
+  {$EXTERNALSYM MEWMDRMLicenseBackupCompleted}
+  MEWMDRMLicenseBackupProgress	          = DWord(501);
+  {$EXTERNALSYM MEWMDRMLicenseBackupProgress}
+  MEWMDRMLicenseRestoreCompleted	        = DWord(502);
+  {$EXTERNALSYM MEWMDRMLicenseRestoreCompleted}
+  MEWMDRMLicenseRestoreProgress	          = DWord(503);
+  {$EXTERNALSYM MEWMDRMLicenseRestoreProgress}
+  MEWMDRMLicenseAcquisitionCompleted	    = DWord(506);
+  {$EXTERNALSYM MEWMDRMLicenseAcquisitionCompleted}
+  MEWMDRMIndividualizationCompleted	      = DWord(508);
+  {$EXTERNALSYM MEWMDRMIndividualizationCompleted}
+  MEWMDRMIndividualizationProgress	      = DWord(513);
+  {$EXTERNALSYM MEWMDRMIndividualizationProgress}
+  MEWMDRMProximityCompleted	              = DWord(514);
+  {$EXTERNALSYM MEWMDRMProximityCompleted}
+  MEWMDRMLicenseStoreCleaned	            = DWord(515);
+  {$EXTERNALSYM MEWMDRMLicenseStoreCleaned}
+  MEWMDRMRevocationDownloadCompleted	    = DWord(516);
+  {$EXTERNALSYM MEWMDRMRevocationDownloadCompleted}
+  MEWMDRMV1Anchor	                        = MEWMDRMRevocationDownloadCompleted;
+  {$EXTERNALSYM MEWMDRMV1Anchor}
+  METransformUnknown	                    = DWord(600);
+  {$EXTERNALSYM METransformUnknown}
+  METransformNeedInput	                  = METransformUnknown + 1;
+  {$EXTERNALSYM METransformNeedInput}
+  METransformHaveOutput	                  = METransformNeedInput + 1;
+  {$EXTERNALSYM METransformHaveOutput}
+  METransformDrainComplete	              = METransformHaveOutput + 1;
+  {$EXTERNALSYM METransformDrainComplete}
+  METransformMarker	                      = METransformDrainComplete + 1;
+  {$EXTERNALSYM METransformMarker}
+  METransformInputStreamStateChanged      = METransformMarker + 1;
+  {$EXTERNALSYM METransformInputStreamStateChanged}
+  MEByteStreamCharacteristicsChanged      = DWord(700);
+  {$EXTERNALSYM MEByteStreamCharacteristicsChanged}
+  MEVideoCaptureDeviceRemoved	            = DWord(800);
+  {$EXTERNALSYM MEVideoCaptureDeviceRemoved}
+  MEVideoCaptureDevicePreempted	          = DWord(801);
+  {$EXTERNALSYM MEVideoCaptureDevicePreempted}
+  MEStreamSinkFormatInvalidated	          = DWord(802);
+  {$EXTERNALSYM MEStreamSinkFormatInvalidated}
+  MEEncodingParameters                    = DWord(803);
+  {$EXTERNALSYM MEEncodingParameters}
+  MEContentProtectionMetadata	            = DWord(900);
+  {$EXTERNALSYM MEContentProtectionMetadata}
+  MEDeviceThermalStateChanged	            = DWord(950);
+  {$EXTERNALSYM MEDeviceThermalStateChanged}
+  MEReservedMax	                          = DWord(10000);
+  {$EXTERNALSYM MEReservedMax}
+
 
 
 const
@@ -329,12 +452,20 @@ type
   PMF_ATTRIBUTE_TYPE = ^_MF_ATTRIBUTE_TYPE;
 	_MF_ATTRIBUTE_TYPE    = (
 	  MF_ATTRIBUTE_UINT32   = VT_UI4,
+	  {$EXTERNALSYM MF_ATTRIBUTE_UINT32}
 	  MF_ATTRIBUTE_UINT64   = VT_UI8,
+	  {$EXTERNALSYM MF_ATTRIBUTE_UINT64}
 	  MF_ATTRIBUTE_DOUBLE   = VT_R8,
+	  {$EXTERNALSYM MF_ATTRIBUTE_DOUBLE}
 	  MF_ATTRIBUTE_GUID     = VT_CLSID,
+	  {$EXTERNALSYM MF_ATTRIBUTE_GUID}
 	  MF_ATTRIBUTE_STRING   = VT_LPWSTR,
+	  {$EXTERNALSYM MF_ATTRIBUTE_STRING}
 	  MF_ATTRIBUTE_BLOB     = (VT_VECTOR or VT_UI1),
-	  MF_ATTRIBUTE_IUNKNOWN = VT_UNKNOWN);
+	  {$EXTERNALSYM MF_ATTRIBUTE_BLOB}
+	  MF_ATTRIBUTE_IUNKNOWN = VT_UNKNOWN
+	  {$EXTERNALSYM MF_ATTRIBUTE_IUNKNOWN}
+  );
 	{$EXTERNALSYM _MF_ATTRIBUTE_TYPE}
 	MF_ATTRIBUTE_TYPE = _MF_ATTRIBUTE_TYPE;
 	{$EXTERNALSYM MF_ATTRIBUTE_TYPE}
@@ -343,23 +474,30 @@ type
   PMF_ATTRIBUTES_MATCH_TYPE = ^_MF_ATTRIBUTES_MATCH_TYPE;
   _MF_ATTRIBUTES_MATCH_TYPE        = (
    	MF_ATTRIBUTES_MATCH_OUR_ITEMS    = 0,
+   	{$EXTERNALSYM MF_ATTRIBUTES_MATCH_OUR_ITEMS}
    	MF_ATTRIBUTES_MATCH_THEIR_ITEMS  = 1,
+   	{$EXTERNALSYM MF_ATTRIBUTES_MATCH_THEIR_ITEMS}
    	MF_ATTRIBUTES_MATCH_ALL_ITEMS    = 2,
+   	{$EXTERNALSYM MF_ATTRIBUTES_MATCH_ALL_ITEMS}
    	MF_ATTRIBUTES_MATCH_INTERSECTION = 3,
-   	MF_ATTRIBUTES_MATCH_SMALLER      = 4);
+   	{$EXTERNALSYM MF_ATTRIBUTES_MATCH_INTERSECTION}
+   	MF_ATTRIBUTES_MATCH_SMALLER      = 4
+   	{$EXTERNALSYM MF_ATTRIBUTES_MATCH_SMALLER}
+  );
   {$EXTERNALSYM _MF_ATTRIBUTES_MATCH_TYPE}
   MF_ATTRIBUTES_MATCH_TYPE = _MF_ATTRIBUTES_MATCH_TYPE;
   {$EXTERNALSYM MF_ATTRIBUTES_MATCH_TYPE}
 
-
+type
   PMF_ATTRIBUTE_SERIALIZE_OPTIONS = ^cwMF_ATTRIBUTE_SERIALIZE_OPTIONS;
-  cwMF_ATTRIBUTE_SERIALIZE_OPTIONS     = (
-	  MF_ATTRIBUTE_SERIALIZE_UNKNOWN_BYREF = $1);
+  cwMF_ATTRIBUTE_SERIALIZE_OPTIONS     = DWord;
   {$EXTERNALSYM cwMF_ATTRIBUTE_SERIALIZE_OPTIONS}
   MF_ATTRIBUTE_SERIALIZE_OPTIONS = cwMF_ATTRIBUTE_SERIALIZE_OPTIONS;
   {$EXTERNALSYM MF_ATTRIBUTE_SERIALIZE_OPTIONS}
+const
+	  MF_ATTRIBUTE_SERIALIZE_UNKNOWN_BYREF = DWord($1);
 
-
+type
   PBITMAPINFOHEADER = ^BITMAPINFOHEADER;
   cwBITMAPINFOHEADER = record
 	  biSize: DWORD;
@@ -400,21 +538,30 @@ type
   TMftRegisterTypeInfoArray = array of MFT_REGISTER_TYPE_INFO;
   {$EXTERNALSYM TMftRegisterTypeInfoArray}
 
-
+type
   PMFVideoInterlaceMode = ^MFVideoInterlaceMode;
-  _MFVideoInterlaceMode                        = (
-	  MFVideoInterlace_Unknown                     = 0,
-	  MFVideoInterlace_Progressive                 = 2,
-	  MFVideoInterlace_FieldInterleavedUpperFirst  = 3,
-   	MFVideoInterlace_FieldInterleavedLowerFirst  = 4,
-   	MFVideoInterlace_FieldSingleUpper            = 5,
-   	MFVideoInterlace_FieldSingleLower            = 6,
-	  MFVideoInterlace_MixedInterlaceOrProgressive = 7,
-	  MFVideoInterlace_Last                        = (MFVideoInterlace_MixedInterlaceOrProgressive + 1),
-	  MFVideoInterlace_ForceDWORD                  = FORCEDWORD);
+  _MFVideoInterlaceMode = DWord;
   {$EXTERNALSYM _MFVideoInterlaceMode}
   MFVideoInterlaceMode = _MFVideoInterlaceMode;
   {$EXTERNALSYM MFVideoInterlaceMode}
+const
+	MFVideoInterlace_Unknown                     = DWord(0);
+	{$EXTERNALSYM MFVideoInterlace_Unknown}
+  MFVideoInterlace_Progressive                 = DWord(2);
+  {$EXTERNALSYM MFVideoInterlace_Progressive}
+  MFVideoInterlace_FieldInterleavedUpperFirst  = DWord(3);
+  {$EXTERNALSYM MFVideoInterlace_FieldInterleavedUpperFirst}
+  MFVideoInterlace_FieldInterleavedLowerFirst  = DWord(4);
+  {$EXTERNALSYM MFVideoInterlace_FieldInterleavedLowerFirst}
+  MFVideoInterlace_FieldSingleUpper            = DWord(5);
+  {$EXTERNALSYM MFVideoInterlace_FieldSingleUpper}
+  MFVideoInterlace_FieldSingleLower            = DWord(6);
+  {$EXTERNALSYM MFVideoInterlace_FieldSingleLower}
+  MFVideoInterlace_MixedInterlaceOrProgressive = DWord(7);
+  {$EXTERNALSYM MFVideoInterlace_MixedInterlaceOrProgressive}
+  MFVideoInterlace_Last                        = MFVideoInterlace_MixedInterlaceOrProgressive + 1;
+  {$EXTERNALSYM MFVideoInterlace_Last}
+  //MFVideoInterlace_ForceDWORD                  = FORCEDWORD);
 
 const
   MFVideoInterlace_FieldSingleUpperFirst = MFVideoInterlace_FieldSingleUpper;
@@ -424,149 +571,253 @@ const
 
 
 type
-
   PMFVideoTransferFunction = ^MFVideoTransferFunction;
-  _MFVideoTransferFunction    = (
-	  MFVideoTransFunc_Unknown    = 0,
-	  MFVideoTransFunc_10         = 1,
-	  MFVideoTransFunc_18         = 2,
-	  MFVideoTransFunc_20         = 3,
-	  MFVideoTransFunc_22         = 4,
-	  MFVideoTransFunc_709        = 5,
-	  MFVideoTransFunc_240M       = 6,
-	  MFVideoTransFunc_sRGB       = 7,
-	  MFVideoTransFunc_28         = 8,
-	  MFVideoTransFunc_Log_100    = 9,
-	  MFVideoTransFunc_Log_316    = 10,
-	  MFVideoTransFunc_709_sym    = 11,
-    MFVideoTransFunc_2020_const	= 12,
-    MFVideoTransFunc_2020	      = 13,
-    MFVideoTransFunc_26	        = 14,
-    MFVideoTransFunc_2084	      = 15, // SMPTE ST.2084
-    MFVideoTransFunc_HLG	      = 16, // Hybrid Log-Gamma, ARIB STD-B67
-// >= NTDDI_WIN10_RS4)
-    MFVideoTransFunc_10_rel     = 17, // No gamma, display referred (relative)
-// end
-   	MFVideoTransFunc_Last       = (MFVideoTransFunc_HLG + 1),
-	  MFVideoTransFunc_ForceDWORD = FORCEDWORD);
+  _MFVideoTransferFunction    = DWord;
   {$EXTERNALSYM _MFVideoTransferFunction}
   MFVideoTransferFunction = _MFVideoTransferFunction;
   {$EXTERNALSYM MFVideoTransferFunction}
+const
+  MFVideoTransFunc_Unknown    = DWord(0);
+  {$EXTERNALSYM MFVideoTransFunc_Unknown}
+  MFVideoTransFunc_10         = DWord(1);
+  {$EXTERNALSYM MFVideoTransFunc_10}
+  MFVideoTransFunc_18         = DWord(2);
+  {$EXTERNALSYM MFVideoTransFunc_18}
+  MFVideoTransFunc_20         = DWord(3);
+  {$EXTERNALSYM MFVideoTransFunc_20}
+  MFVideoTransFunc_22         = DWord(4);
+  {$EXTERNALSYM MFVideoTransFunc_22}
+  MFVideoTransFunc_709        = DWord(5);
+  {$EXTERNALSYM MFVideoTransFunc_709}
+  MFVideoTransFunc_240M       = DWord(6);
+  {$EXTERNALSYM MFVideoTransFunc_240M}
+  MFVideoTransFunc_sRGB       = DWord(7);
+  {$EXTERNALSYM MFVideoTransFunc_sRGB}
+  MFVideoTransFunc_28         = DWord(8);
+  {$EXTERNALSYM MFVideoTransFunc_28}
+  MFVideoTransFunc_Log_100    = DWord(9);
+  {$EXTERNALSYM MFVideoTransFunc_Log_100}
+  MFVideoTransFunc_Log_316    = DWord(10);
+  {$EXTERNALSYM MFVideoTransFunc_Log_316}
+  MFVideoTransFunc_709_sym    = DWord(11);
+  {$EXTERNALSYM MFVideoTransFunc_709_sym}
+  MFVideoTransFunc_2020_const	= DWord(12);
+  {$EXTERNALSYM MFVideoTransFunc_2020_const}
+  MFVideoTransFunc_2020	      = DWord(13);
+  {$EXTERNALSYM MFVideoTransFunc_2020}
+  MFVideoTransFunc_26	        = DWord(14);
+  {$EXTERNALSYM MFVideoTransFunc_26}
+  MFVideoTransFunc_2084	      = DWord(15); // SMPTE ST.2084
+  {$EXTERNALSYM MFVideoTransFunc_2084}
+  MFVideoTransFunc_HLG	      = DWord(16); // Hybrid Log-Gamma, ARIB STD-B67
+  {$EXTERNALSYM MFVideoTransFunc_HLG}
+// >= NTDDI_WIN10_RS4)
+  MFVideoTransFunc_10_rel     = DWord(17); // No gamma, display referred (relative)
+  {$EXTERNALSYM MFVideoTransFunc_10_rel}
+// end
+  FVideoTransFunc_Last       = MFVideoTransFunc_HLG + 1;
+  {$EXTERNALSYM FVideoTransFunc_Last}
+  // MFVideoTransFunc_ForceDWORD = FORCEDWORD;
 
-
+type
   PMFVideoPrimaries = ^MFVideoPrimaries;
-  _MFVideoPrimaries              = (
-	  MFVideoPrimaries_Unknown       = 0,
-    MFVideoPrimaries_reserved      = 1,
-	  MFVideoPrimaries_BT709         = 2,
-   	MFVideoPrimaries_BT470_2_SysM  = 3,
-   	MFVideoPrimaries_BT470_2_SysBG = 4,
-   	MFVideoPrimaries_SMPTE170M     = 5,
-   	MFVideoPrimaries_SMPTE240M     = 6,
-   	MFVideoPrimaries_EBU3213       = 7,
-   	MFVideoPrimaries_SMPTE_C       = 8,
-    MFVideoPrimaries_BT2020	       = 9,
-    MFVideoPrimaries_XYZ	         = 10,
-    MFVideoPrimaries_DCI_P3	       = 11,
-    MFVideoPrimaries_ACES	         = 12,
-   	MFVideoPrimaries_Last          = (MFVideoPrimaries_ACES + 1),
-   	MFVideoPrimaries_ForceDWORD    = FORCEDWORD);
+  _MFVideoPrimaries              = DWord;
   {$EXTERNALSYM _MFVideoPrimaries}
   MFVideoPrimaries = _MFVideoPrimaries;
   {$EXTERNALSYM MFVideoPrimaries}
+const
+  MFVideoPrimaries_Unknown       = DWord(0);
+  {$EXTERNALSYM MFVideoPrimaries_Unknown}
+  MFVideoPrimaries_reserved      = DWord(1);
+  {$EXTERNALSYM MFVideoPrimaries_reserved}
+  MFVideoPrimaries_BT709         = DWord(2);
+  {$EXTERNALSYM MFVideoPrimaries_BT709}
+  MFVideoPrimaries_BT470_2_SysM  = DWord(3);
+  {$EXTERNALSYM MFVideoPrimaries_BT470_2_SysM}
+  MFVideoPrimaries_BT470_2_SysBG = DWord(4);
+  {$EXTERNALSYM MFVideoPrimaries_BT470_2_SysBG}
+  MFVideoPrimaries_SMPTE170M     = DWord(5);
+  {$EXTERNALSYM MFVideoPrimaries_SMPTE170M}
+  MFVideoPrimaries_SMPTE240M     = DWord(6);
+  {$EXTERNALSYM MFVideoPrimaries_SMPTE240M}
+  MFVideoPrimaries_EBU3213       = DWord(7);
+  {$EXTERNALSYM MFVideoPrimaries_EBU3213}
+  MFVideoPrimaries_SMPTE_C       = DWord(8);
+  {$EXTERNALSYM MFVideoPrimaries_SMPTE_C}
+  MFVideoPrimaries_BT2020	       = DWord(9);
+  {$EXTERNALSYM MFVideoPrimaries_BT2020}
+  MFVideoPrimaries_XYZ	         = DWord(10);
+  {$EXTERNALSYM MFVideoPrimaries_XYZ}
+  MFVideoPrimaries_DCI_P3	       = DWord(11);
+  {$EXTERNALSYM MFVideoPrimaries_DCI_P3}
+  MFVideoPrimaries_ACES	         = DWord(12);
+  {$EXTERNALSYM MFVideoPrimaries_ACES}
+  MFVideoPrimaries_Last          = MFVideoPrimaries_ACES + 1;
+  {$EXTERNALSYM MFVideoPrimaries_Last}
+  //MFVideoPrimaries_ForceDWORD    = FORCEDWORD);
 
+type
   PMFVideoLighting = ^MFVideoLighting;
-  _MFVideoLighting             = (
-	  MFVideoLighting_Unknown    = 0,
-	  MFVideoLighting_bright     = 1,
-	  MFVideoLighting_office     = 2,
-	  MFVideoLighting_dim        = 3,
-	  MFVideoLighting_dark       = 4,
-	  MFVideoLighting_Last       = (MFVideoLighting_dark + 1),
-	  MFVideoLighting_ForceDWORD = FORCEDWORD);
+  _MFVideoLighting = DWord;
   {$EXTERNALSYM _MFVideoLighting}
   MFVideoLighting = _MFVideoLighting;
   {$EXTERNALSYM MFVideoLighting}
+const
+	MFVideoLighting_Unknown    = DWord(0);
+	{$EXTERNALSYM MFVideoLighting_Unknown}
+  MFVideoLighting_bright     = DWord(1);
+  {$EXTERNALSYM MFVideoLighting_bright}
+  MFVideoLighting_office     = DWord(2);
+  {$EXTERNALSYM MFVideoLighting_office}
+  MFVideoLighting_dim        = DWord(3);
+  {$EXTERNALSYM MFVideoLighting_dim}
+  MFVideoLighting_dark       = DWord(4);
+  {$EXTERNALSYM MFVideoLighting_dark}
+  MFVideoLighting_Last       = MFVideoLighting_dark + 1;
+  {$EXTERNALSYM MFVideoLighting_Last}
+  //MFVideoLighting_ForceDWORD = FORCEDWORD);
 
+type
   PMFVideoTransferMatrix = ^MFVideoTransferMatrix;
-  _MFVideoTransferMatrix           = (
-	  MFVideoTransferMatrix_Unknown    = 0,
-	  MFVideoTransferMatrix_BT709      = 1,
-   	MFVideoTransferMatrix_BT601      = 2,
-   	MFVideoTransferMatrix_SMPTE240M  = 3,
-    MFVideoTransferMatrix_BT2020_10	 = 4,
-    MFVideoTransferMatrix_BT2020_12	 = 5,
-   	MFVideoTransferMatrix_Last       = (MFVideoTransferMatrix_BT2020_12 + 1),
-   	MFVideoTransferMatrix_ForceDWORD = FORCEDWORD);
+  _MFVideoTransferMatrix           = DWord;
   {$EXTERNALSYM _MFVideoTransferMatrix}
   MFVideoTransferMatrix = _MFVideoTransferMatrix;
   {$EXTERNALSYM MFVideoTransferMatrix}
+const
+	MFVideoTransferMatrix_Unknown    = DWord(0);
+	{$EXTERNALSYM MFVideoTransferMatrix_Unknown}
+  MFVideoTransferMatrix_BT709      = DWord(1);
+  {$EXTERNALSYM MFVideoTransferMatrix_BT709}
+  MFVideoTransferMatrix_BT601      = DWord(2);
+  {$EXTERNALSYM MFVideoTransferMatrix_BT601}
+  MFVideoTransferMatrix_SMPTE240M  = DWord(3);
+  {$EXTERNALSYM MFVideoTransferMatrix_SMPTE240M}
+  MFVideoTransferMatrix_BT2020_10	 = DWord(4);
+  {$EXTERNALSYM MFVideoTransferMatrix_BT2020_10}
+  MFVideoTransferMatrix_BT2020_12	 = DWord(5);
+  {$EXTERNALSYM MFVideoTransferMatrix_BT2020_12}
+  MFVideoTransferMatrix_Last       = MFVideoTransferMatrix_BT2020_12 + 1;
+  {$EXTERNALSYM MFVideoTransferMatrix_Last}
+  //MFVideoTransferMatrix_ForceDWORD = FORCEDWORD);
 
-
+type
   PMFVideoChromaSubsampling = ^MFVideoChromaSubsampling;
-  _MFVideoChromaSubsampling                               = (
-   	MFVideoChromaSubsampling_Unknown                        = 0,
-	  MFVideoChromaSubsampling_ProgressiveChroma              = $8,
-	  MFVideoChromaSubsampling_Horizontally_Cosited           = $4,
-	  MFVideoChromaSubsampling_Vertically_Cosited             = $2,
-	  MFVideoChromaSubsampling_Vertically_AlignedChromaPlanes = $1,
-	  MFVideoChromaSubsampling_MPEG2                          = (Ord(MFVideoChromaSubsampling_Horizontally_Cosited) or
-	                                                             Ord(MFVideoChromaSubsampling_Vertically_AlignedChromaPlanes)),
-	  MFVideoChromaSubsampling_MPEG1                          = MFVideoChromaSubsampling_Vertically_AlignedChromaPlanes,
-	  MFVideoChromaSubsampling_DV_PAL                         = (Ord(MFVideoChromaSubsampling_Horizontally_Cosited) or
-	                                                             Ord(MFVideoChromaSubsampling_Vertically_Cosited)),
-	  MFVideoChromaSubsampling_Cosited                        = ((Ord(MFVideoChromaSubsampling_Horizontally_Cosited) or
-	                                                              Ord(MFVideoChromaSubsampling_Vertically_Cosited)) or
-                                                                Ord(MFVideoChromaSubsampling_Vertically_AlignedChromaPlanes)),
-	  MFVideoChromaSubsampling_Last                           = (MFVideoChromaSubsampling_Cosited + 1),
-	  {$EXTERNALSYM MFVideoChromaSubsampling_Last}
-	  MFVideoChromaSubsampling_ForceDWORD                     = FORCEDWORD);
+  _MFVideoChromaSubsampling = Dword;
   {$EXTERNALSYM _MFVideoChromaSubsampling}
   MFVideoChromaSubsampling = _MFVideoChromaSubsampling;
   {$EXTERNALSYM MFVideoChromaSubsampling}
+const
+  MFVideoChromaSubsampling_Unknown                        = DWord(0);
+  {$EXTERNALSYM MFVideoChromaSubsampling_Unknown}
+  MFVideoChromaSubsampling_ProgressiveChroma              = DWord($8);
+  {$EXTERNALSYM MFVideoChromaSubsampling_ProgressiveChroma}
+  MFVideoChromaSubsampling_Horizontally_Cosited           = DWord($4);
+  {$EXTERNALSYM MFVideoChromaSubsampling_Horizontally_Cosited}
+  MFVideoChromaSubsampling_Vertically_Cosited             = DWord($2);
+  {$EXTERNALSYM MFVideoChromaSubsampling_Vertically_Cosited}
+  MFVideoChromaSubsampling_Vertically_AlignedChromaPlanes = DWord($1);
+  {$EXTERNALSYM MFVideoChromaSubsampling_Vertically_AlignedChromaPlanes}
+  {$EXTERNALSYM MFVideoChromaSubsampling_MPEG2}
+  MFVideoChromaSubsampling_MPEG2                          = MFVideoChromaSubsampling_Horizontally_Cosited or
+	                                                          MFVideoChromaSubsampling_Vertically_AlignedChromaPlanes;
+  {$EXTERNALSYM MFVideoChromaSubsampling_MPEG2}
+  MFVideoChromaSubsampling_MPEG1                          = MFVideoChromaSubsampling_Vertically_AlignedChromaPlanes;
+  {$EXTERNALSYM MFVideoChromaSubsampling_MPEG1}
+  MFVideoChromaSubsampling_DV_PAL                         = MFVideoChromaSubsampling_Horizontally_Cosited or
+	                                                          MFVideoChromaSubsampling_Vertically_Cosited;
+  {$EXTERNALSYM MFVideoChromaSubsampling_DV_PAL}
+  MFVideoChromaSubsampling_Cosited                        = MFVideoChromaSubsampling_Horizontally_Cosited or
+	                                                          MFVideoChromaSubsampling_Vertically_Cosited or
+                                                            MFVideoChromaSubsampling_Vertically_AlignedChromaPlanes;
+  {$EXTERNALSYM MFVideoChromaSubsampling_Cosited}
+  MFVideoChromaSubsampling_Last                           = MFVideoChromaSubsampling_Cosited + 1;
+  {$EXTERNALSYM MFVideoChromaSubsampling_Last}
+  //MFVideoChromaSubsampling_ForceDWORD                     = FORCEDWORD);
 
-
+type
   PMFNominalRange = ^MFNominalRange;
-  _MFNominalRange           = (
-	  MFNominalRange_Unknown    = 0,
-	  MFNominalRange_Normal     = 1,
-	  MFNominalRange_Wide       = 2,
-	  MFNominalRange_0_255      = 1,
-	  MFNominalRange_16_235     = 2,
-	  MFNominalRange_48_208     = 3,
-	  MFNominalRange_64_127     = 4,
-	  MFNominalRange_Last       = (MFNominalRange_64_127 + 1),
-	  MFNominalRange_ForceDWORD = FORCEDWORD);
+  _MFNominalRange           = DWord;
   {$EXTERNALSYM _MFNominalRange}
   MFNominalRange = _MFNominalRange;
   {$EXTERNALSYM MFNominalRange}
+const
+	MFNominalRange_Unknown    = DWord(0);
+	{$EXTERNALSYM MFNominalRange_Unknown}
+  MFNominalRange_Normal     = DWord(1);
+  {$EXTERNALSYM MFNominalRange_Normal}
+  MFNominalRange_Wide       = DWord(2);
+  {$EXTERNALSYM MFNominalRange_Wide}
+  MFNominalRange_0_255      = DWord(1);
+  {$EXTERNALSYM MFNominalRange_0_255}
+  MFNominalRange_16_235     = DWord(2);
+  {$EXTERNALSYM MFNominalRange_16_235}
+  MFNominalRange_48_208     = DWord(3);
+  {$EXTERNALSYM MFNominalRange_48_208}
+  MFNominalRange_64_127     = DWord(4);
+  {$EXTERNALSYM MFNominalRange_64_127}
+  MFNominalRange_Last       = MFNominalRange_64_127 + 1;
+  {$EXTERNALSYM MFNominalRange_Last}
+  // MFNominalRange_ForceDWORD = FORCEDWORD);
 
+type
   PMFVideoFlags = ^MFVideoFlags;
-  _MFVideoFlags                     = (
-	  MFVideoFlag_PAD_TO_Mask           = ($1 or $2),
-	  MFVideoFlag_PAD_TO_None           = (0 * $1),
-	  MFVideoFlag_PAD_TO_4x3            = (1 * $1),
-	  MFVideoFlag_PAD_TO_16x9           = (2 * $1),
-   	MFVideoFlag_SrcContentHintMask    = (($4 or $8) or $10),
-   	MFVideoFlag_SrcContentHintNone    = (0 * $4),
-   	MFVideoFlag_SrcContentHint16x9    = (1 * $4),
-   	MFVideoFlag_SrcContentHint235_1   = (2 * $4),
-   	MFVideoFlag_AnalogProtected       = $20,
-   	MFVideoFlag_DigitallyProtected    = $40,
-   	MFVideoFlag_ProgressiveContent    = $80,
-   	MFVideoFlag_FieldRepeatCountMask  = (($100 or $200) or $400),
-   	MFVideoFlag_FieldRepeatCountShift = 8,
-   	MFVideoFlag_ProgressiveSeqReset   = $800,
-   	MFVideoFlag_PanScanEnabled        = $20000,
-   	MFVideoFlag_LowerFieldFirst       = $40000,
-   	MFVideoFlag_BottomUpLinearRep     = $80000,
-  	MFVideoFlags_DXVASurface          = $100000,
-  	MFVideoFlags_RenderTargetSurface  = $400000,
-  	MFVideoFlags_ForceQWORD           = $7FFFFFFF);
+  _MFVideoFlags = QWORD;
   {$EXTERNALSYM _MFVideoFlags}
   MFVideoFlags = _MFVideoFlags;
   {$EXTERNALSYM MFVideoFlags}
+const
+  // static flags
+	MFVideoFlag_PAD_TO_Mask           = QWORD($1 or $2);
+	{$EXTERNALSYM MFVideoFlag_PAD_TO_Mask}
+  MFVideoFlag_PAD_TO_None           = QWORD(0 * $1);
+  {$EXTERNALSYM MFVideoFlag_PAD_TO_None}
+  MFVideoFlag_PAD_TO_4x3            = QWORD(1 * $1);
+  {$EXTERNALSYM MFVideoFlag_PAD_TO_4x3}
+  MFVideoFlag_PAD_TO_16x9           = QWORD(2 * $1);
+  {$EXTERNALSYM MFVideoFlag_PAD_TO_16x9}
 
+  MFVideoFlag_SrcContentHintMask    = QWORD(($4 or $8) or $10);
+  {$EXTERNALSYM MFVideoFlag_SrcContentHintMask}
+  MFVideoFlag_SrcContentHintNone    = QWORD(0 * $4);
+  {$EXTERNALSYM MFVideoFlag_SrcContentHintNone}
+  MFVideoFlag_SrcContentHint16x9    = QWORD(1 * $4);
+  {$EXTERNALSYM MFVideoFlag_SrcContentHint16x9}
+  MFVideoFlag_SrcContentHint235_1   = QWORD(2 * $4);
+  {$EXTERNALSYM MFVideoFlag_SrcContentHint235_1}
+
+  // static/dynamic flags
+  MFVideoFlag_AnalogProtected       = QWORD($20);
+  {$EXTERNALSYM MFVideoFlag_AnalogProtected}
+  MFVideoFlag_DigitallyProtected    = QWORD($40);
+  {$EXTERNALSYM MFVideoFlag_DigitallyProtected}
+
+  // dynamic flags
+  MFVideoFlag_ProgressiveContent    = QWORD($80);
+  {$EXTERNALSYM MFVideoFlag_ProgressiveContent}
+  MFVideoFlag_FieldRepeatCountMask  = QWORD(($100 or $200) or $400);
+  {$EXTERNALSYM MFVideoFlag_FieldRepeatCountMask}
+  MFVideoFlag_FieldRepeatCountShift = QWORD(8);
+  {$EXTERNALSYM MFVideoFlag_FieldRepeatCountShift}
+  MFVideoFlag_ProgressiveSeqReset   = QWORD($800);
+  {$EXTERNALSYM MFVideoFlag_ProgressiveSeqReset}
+  MFVideoFlag_PanScanEnabled        = QWORD($20000);
+  {$EXTERNALSYM MFVideoFlag_PanScanEnabled}
+  MFVideoFlag_LowerFieldFirst       = QWORD($40000);
+  {$EXTERNALSYM MFVideoFlag_LowerFieldFirst}
+  MFVideoFlag_BottomUpLinearRep     = QWORD($80000);
+  {$EXTERNALSYM MFVideoFlag_BottomUpLinearRep}
+
+  // ******************************************
+  // static surface creation flags - UNAPPROVED
+  // --------------- DO NOT USE ---------------
+  // ******************************************
+  MFVideoFlags_DXVASurface          = QWORD($100000);
+  {$EXTERNALSYM MFVideoFlags_DXVASurface}
+  MFVideoFlags_RenderTargetSurface  = QWORD($400000);
+  {$EXTERNALSYM MFVideoFlags_RenderTargetSurface}
+  //	MFVideoFlags_ForceQWORD           = $7FFFFFFF);
+
+type
   PMFRatio = ^MFRatio;
   _MFRatio = record
 	  Numerator: DWORD;
@@ -784,7 +1035,7 @@ type
 	['{2cd2d921-c447-44a7-a13c-4adabfc247e3}']
 
     function GetItem(const guidKey: REFGUID;
-                     var pValue: MfPROPVARIANT): HResult; stdcall;
+                     var pValue: PROPVARIANT): HResult; stdcall;
 
     function GetItemType(const guidKey: REFGUID;
                          out pType: MF_ATTRIBUTE_TYPE): HResult; stdcall;
@@ -846,7 +1097,7 @@ type
                         out ppv): HResult; stdcall;
 
     function SetItem(const guidKey: TGUID;
-                     const Value: REFPROPVARIANT): HResult; stdcall;
+                     const Value: PROPVARIANT): HResult; stdcall;
 
     function DeleteItem(const guidKey: TGUID): HResult; stdcall;
 

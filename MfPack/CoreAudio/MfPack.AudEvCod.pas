@@ -21,6 +21,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -74,7 +75,6 @@ interface
   {$I 'MfPack.inc'}
 
 const
-
   EC_SND_DEVICE_ERROR_BASE       = $0200;
   {$EXTERNALSYM EC_SND_DEVICE_ERROR_BASE}
 

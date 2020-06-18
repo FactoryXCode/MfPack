@@ -21,6 +21,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -92,7 +93,7 @@ uses
 const
 
   // IsEqual flags
-  //==============
+  // =============
   // subtype match = format types match = iscompressed for both matches
   // format_data match = format blocks match exactly
 
@@ -107,6 +108,7 @@ const
 //
 // UNCOMPRESSEDAUDIOFORMAT
 //
+
 type
 
   PUNCOMPRESSEDAUDIOFORMAT = ^UNCOMPRESSEDAUDIOFORMAT;

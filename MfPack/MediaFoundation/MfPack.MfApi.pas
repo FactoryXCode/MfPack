@@ -41,6 +41,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -427,19 +428,20 @@ type
   // MFASYNC_WORKQUEUE_TYPE: types of work queue used by MFAllocateWorkQueueEx
 
 type
-
   PMfasyncWorkqueueType = ^MFASYNC_WORKQUEUE_TYPE;
-  MFASYNC_WORKQUEUE_TYPE       = (
-    MF_STANDARD_WORKQUEUE      = 0,  // MF_STANDARD_WORKQUEUE: Work queue in a thread without Window
-    {$EXTERNALSYM MF_STANDARD_WORKQUEUE}
-                                     // message loop.
-    MF_WINDOW_WORKQUEUE        = 1,  // MF_WINDOW_WORKQUEUE: Work queue in a thread running Window
-    {$EXTERNALSYM MF_WINDOW_WORKQUEUE}
-                                     // Message loop that calls PeekMessage() / DispatchMessage()..
-    MF_MULTITHREADED_WORKQUEUE = 2   // common MT threadpool
-    {$EXTERNALSYM MF_MULTITHREADED_WORKQUEUE}
-  );
+  PMFASYNC_WORKQUEUE_TYPE = ^MFASYNC_WORKQUEUE_TYPE;
+  MFASYNC_WORKQUEUE_TYPE  = Dword;
   {$EXTERNALSYM MFASYNC_WORKQUEUE_TYPE}
+const
+  MF_STANDARD_WORKQUEUE      = 0;  // MF_STANDARD_WORKQUEUE: Work queue in a thread without Window
+  {$EXTERNALSYM MF_STANDARD_WORKQUEUE}
+  // message loop.
+  MF_WINDOW_WORKQUEUE        = 1;  // MF_WINDOW_WORKQUEUE: Work queue in a thread running Window
+  {$EXTERNALSYM MF_WINDOW_WORKQUEUE}
+  // Message loop that calls PeekMessage() / DispatchMessage()..
+  MF_MULTITHREADED_WORKQUEUE = 2;   // common MT threadpool
+  {$EXTERNALSYM MF_MULTITHREADED_WORKQUEUE}
+
 
   function MFAllocateWorkQueueEx(WorkQueueType: MFASYNC_WORKQUEUE_TYPE;
                                  out pdwWorkQueue: DWord): HResult; stdcall;
@@ -795,7 +797,7 @@ type
 
 
   // Creates an IMFMediaBuffer in memory
-  function MFCreateMemoryBuffer(cbMaxLength: DWord;
+  function MFCreateMemoryBuffer(cbMaxLength: DWord; // Size of the buffer, in bytes.
                                 out ppBuffer: IMFMediaBuffer): HResult; stdcall;
   {$EXTERNALSYM MFCreateMemoryBuffer}
 
@@ -1110,28 +1112,34 @@ const  //updt 090812 replace type
 
 
 type
-  MF_TOPOSTATUS = (
-    MF_TOPOSTATUS_INVALID         = 0,    // MF_TOPOSTATUS_INVALID: Invalid value; will not be sent
-    MF_TOPOSTATUS_READY           = 100,  // MF_TOPOSTATUS_READY: The topology has been put in place and is
-                                          // ready to start.  All GetService calls to the Media Session will use
+  MF_TOPOSTATUS = DWord;
+  {$EXTERNALSYM MF_TOPOSTATUS}
+
+const
+
+    MF_TOPOSTATUS_INVALID         = 0;    // MF_TOPOSTATUS_INVALID: Invalid value; will not be sent
+    {$EXTERNALSYM MF_TOPOSTATUS_INVALID}
+    MF_TOPOSTATUS_READY           = 100;  // MF_TOPOSTATUS_READY: The topology has been put in place and is
+    {$EXTERNALSYM MF_TOPOSTATUS_READY}    // ready to start.  All GetService calls to the Media Session will use
                                           // this topology.
-    MF_TOPOSTATUS_STARTED_SOURCE  = 200,  // MF_TOPOSTATUS_STARTED_SOURCE: The Media Session has started to read
-                                          // and process data from the Media Source(s) in this topology.
-    MF_TOPOSTATUS_DYNAMIC_CHANGED = 210,  // MF_TOPOSTATUS_DYNAMIC_CHANGED: The topology has been dynamic changed
-                                          // due to the format change.
-    MF_TOPOSTATUS_SINK_SWITCHED   = 300,  // MF_TOPOSTATUS_SINK_SWITCHED: The Media Sinks in the pipeline have
-                                          // switched from a previous topology to this topology.
-                                          // Note that this status does not get sent for the first topology;
-                                          // applications can assume that the sinks are playing the first
-                                          // topology when they receive MESessionStarted.
-    MF_TOPOSTATUS_ENDED           = 400   // MF_TOPOSTATUS_ENDED: Playback of this topology is complete.
-                                          // Before deleting this topology, however, the application should wait
+
+    MF_TOPOSTATUS_STARTED_SOURCE  = 200;        // MF_TOPOSTATUS_STARTED_SOURCE: The Media Session has started to read
+    {$EXTERNALSYM MF_TOPOSTATUS_STARTED_SOURCE} // and process data from the Media Source(s) in this topology.
+
+    MF_TOPOSTATUS_DYNAMIC_CHANGED = 210;         // MF_TOPOSTATUS_DYNAMIC_CHANGED: The topology has been dynamic changed
+    {$EXTERNALSYM MF_TOPOSTATUS_DYNAMIC_CHANGED} // due to the format change.
+
+    MF_TOPOSTATUS_SINK_SWITCHED   = 300;       // MF_TOPOSTATUS_SINK_SWITCHED: The Media Sinks in the pipeline have
+    {$EXTERNALSYM MF_TOPOSTATUS_SINK_SWITCHED} // switched from a previous topology to this topology.
+                                               // Note that this status does not get sent for the first topology;
+                                               // applications can assume that the sinks are playing the first
+                                               // topology when they receive MESessionStarted.
+
+    MF_TOPOSTATUS_ENDED           = 400;  // MF_TOPOSTATUS_ENDED: Playback of this topology is complete.
+    {$EXTERNALSYM MF_TOPOSTATUS_ENDED}    // Before deleting this topology, however, the application should wait
                                           // for either MESessionEnded or the MF_TOPOSTATUS_STARTED_SOURCE status
                                           // on the next topology to ensure that the Media Session is no longer
                                           // using this topology.
-  );
-  {$EXTERNALSYM MF_TOPOSTATUS}
-
 
 const
 
@@ -1312,15 +1320,20 @@ const
 
 
 type
-
   PMFSampleEncryptionProtectionScheme = ^MFSampleEncryptionProtectionScheme;
-  _MFSampleEncryptionProtectionScheme = (
-    MF_SAMPLE_ENCRYPTION_PROTECTION_SCHEME_NONE    = 0,
-    MF_SAMPLE_ENCRYPTION_PROTECTION_SCHEME_AES_CTR = 1,
-    MF_SAMPLE_ENCRYPTION_PROTECTION_SCHEME_AES_CBC = 2);
+  _MFSampleEncryptionProtectionScheme = UINT32;
   {$EXTERNALSYM _MFSampleEncryptionProtectionScheme}
   MFSampleEncryptionProtectionScheme = _MFSampleEncryptionProtectionScheme;
   {$EXTERNALSYM MFSampleEncryptionProtectionScheme}
+
+const
+  MF_SAMPLE_ENCRYPTION_PROTECTION_SCHEME_NONE    = 0;
+  {$EXTERNALSYM MF_SAMPLE_ENCRYPTION_PROTECTION_SCHEME_NONE}
+  MF_SAMPLE_ENCRYPTION_PROTECTION_SCHEME_AES_CTR = 1;
+  {$EXTERNALSYM MF_SAMPLE_ENCRYPTION_PROTECTION_SCHEME_AES_CTR}
+  MF_SAMPLE_ENCRYPTION_PROTECTION_SCHEME_AES_CBC = 2;
+  {$EXTERNALSYM MF_SAMPLE_ENCRYPTION_PROTECTION_SCHEME_AES_CBC}
+
 
 const
 
@@ -2199,24 +2212,36 @@ type
   // These flags are used in the following functions:
   //   MFTEnumEx: These flags control which Media Foundation transforms (MFTs) are enumerated, as well as the enumeration order.
   //   MFTRegister: A subset of these flags are used when registering an MFT.
-  //
+
   PMFT_ENUM_FLAG = ^MFT_ENUM_FLAG;
-  _MFT_ENUM_FLAG = (
-    MFT_ENUM_FLAG_SYNCMFT                         = $00000001,   // Enumerates V1 MFTs. This is default.
-    MFT_ENUM_FLAG_ASYNCMFT                        = $00000002,   // Enumerates only software async MFTs also known as V2 MFTs
-    MFT_ENUM_FLAG_HARDWARE                        = $00000004,   // Enumerates V2 hardware async MFTs
-    MFT_ENUM_FLAG_FIELDOFUSE                      = $00000008,   // Enumerates MFTs that require unlocking
-    MFT_ENUM_FLAG_LOCALMFT                        = $00000010,   // Enumerates Locally (in-process) registered MFTs
-    MFT_ENUM_FLAG_TRANSCODE_ONLY                  = $00000020,   // Enumerates decoder MFTs used by transcode only
-    MFT_ENUM_FLAG_SORTANDFILTER                   = $00000040,   // Apply system local, do not use and preferred sorting and filtering
-    MFT_ENUM_FLAG_SORTANDFILTER_APPROVED_ONLY     = $000000C0,   // Similar to MFT_ENUM_FLAG_SORTANDFILTER, but apply a local policy of: MF_PLUGIN_CONTROL_POLICY_USE_APPROVED_PLUGINS
-    MFT_ENUM_FLAG_SORTANDFILTER_WEB_ONLY          = $00000140,   // Similar to MFT_ENUM_FLAG_SORTANDFILTER, but apply a local policy of: MF_PLUGIN_CONTROL_POLICY_USE_WEB_PLUGINS
-    MFT_ENUM_FLAG_SORTANDFILTER_WEB_ONLY_EDGEMODE = $00000240,   // Similar to MFT_ENUM_FLAG_SORTANDFILTER, but apply a local policy of: MF_PLUGIN_CONTROL_POLICY_USE_WEB_PLUGINS_EDGEMODE
-    MFT_ENUM_FLAG_ALL                             = $0000003F    // Enumerates all MFTs including SW and HW MFTs and applies filtering
-  );
+  _MFT_ENUM_FLAG = UINT32;
   {$EXTERNALSYM _MFT_ENUM_FLAG}
   MFT_ENUM_FLAG = _MFT_ENUM_FLAG;
   {$EXTERNALSYM MFT_ENUM_FLAG}
+
+const
+  MFT_ENUM_FLAG_SYNCMFT                         = UINT32($00000001);   // Enumerates V1 MFTs. This is default.
+  {$EXTERNALSYM MFT_ENUM_FLAG_SYNCMFT}
+  MFT_ENUM_FLAG_ASYNCMFT                        = UINT32($00000002);   // Enumerates only software async MFTs also known as V2 MFTs
+  {$EXTERNALSYM MFT_ENUM_FLAG_ASYNCMFT}
+  MFT_ENUM_FLAG_HARDWARE                        = UINT32($00000004);   // Enumerates V2 hardware async MFTs
+  {$EXTERNALSYM MFT_ENUM_FLAG_HARDWARE}
+  MFT_ENUM_FLAG_FIELDOFUSE                      = UINT32($00000008);   // Enumerates MFTs that require unlocking
+  {$EXTERNALSYM MFT_ENUM_FLAG_FIELDOFUSE}
+  MFT_ENUM_FLAG_LOCALMFT                        = UINT32($00000010);   // Enumerates Locally (in-process) registered MFTs
+  {$EXTERNALSYM MFT_ENUM_FLAG_LOCALMFT}
+  MFT_ENUM_FLAG_TRANSCODE_ONLY                  = UINT32($00000020);   // Enumerates decoder MFTs used by transcode only
+  {$EXTERNALSYM MFT_ENUM_FLAG_TRANSCODE_ONLY}
+  MFT_ENUM_FLAG_SORTANDFILTER                   = UINT32($00000040);   // Apply system local, do not use and preferred sorting and filtering
+  {$EXTERNALSYM MFT_ENUM_FLAG_SORTANDFILTER}
+  MFT_ENUM_FLAG_SORTANDFILTER_APPROVED_ONLY     = UINT32($000000C0);   // Similar to MFT_ENUM_FLAG_SORTANDFILTER, but apply a local policy of: MF_PLUGIN_CONTROL_POLICY_USE_APPROVED_PLUGINS
+  {$EXTERNALSYM MFT_ENUM_FLAG_SORTANDFILTER_APPROVED_ONLY}
+  MFT_ENUM_FLAG_SORTANDFILTER_WEB_ONLY          = UINT32($00000140);   // Similar to MFT_ENUM_FLAG_SORTANDFILTER, but apply a local policy of: MF_PLUGIN_CONTROL_POLICY_USE_WEB_PLUGINS
+  {$EXTERNALSYM MFT_ENUM_FLAG_SORTANDFILTER_WEB_ONLY}
+  MFT_ENUM_FLAG_SORTANDFILTER_WEB_ONLY_EDGEMODE = UINT32($00000240);   // Similar to MFT_ENUM_FLAG_SORTANDFILTER, but apply a local policy of: MF_PLUGIN_CONTROL_POLICY_USE_WEB_PLUGINS_EDGEMODE
+  {$EXTERNALSYM MFT_ENUM_FLAG_SORTANDFILTER_WEB_ONLY_EDGEMODE}
+  MFT_ENUM_FLAG_ALL                             = UINT32($0000003F);   // Enumerates all MFTs including SW and HW MFTs and applies filtering
+  {$EXTERNALSYM MFT_ENUM_FLAG_ALL}
 
 
 
@@ -2976,17 +3001,22 @@ const
   //
 
 type
-
   PMFFrameSourceTypes = ^_MFFrameSourceTypes;
-  _MFFrameSourceTypes           = (
-    MFFrameSourceTypes_Color    = $0001,
-    MFFrameSourceTypes_Infrared = $0002,
-    MFFrameSourceTypes_Depth    = $0004,
-    MFFrameSourceTypes_Image    = $0008,
-    MFFrameSourceTypes_Custom   = $0080);
+  _MFFrameSourceTypes = UINT32;
   {$EXTERNALSYM _MFFrameSourceTypes}
   MFFrameSourceTypes = _MFFrameSourceTypes;
   {$EXTERNALSYM MFFrameSourceTypes}
+const
+  MFFrameSourceTypes_Color    = $0001;
+  {$EXTERNALSYM MFFrameSourceTypes_Color}
+  MFFrameSourceTypes_Infrared = $0002;
+  {$EXTERNALSYM MFFrameSourceTypes_Infrared}
+  MFFrameSourceTypes_Depth    = $0004;
+  {$EXTERNALSYM MFFrameSourceTypes_Depth}
+  MFFrameSourceTypes_Image    = $0008;
+  {$EXTERNALSYM MFFrameSourceTypes_Image}
+  MFFrameSourceTypes_Custom   = $0080;
+  {$EXTERNALSYM MFFrameSourceTypes_Custom}
 
 //#endif // (WINVER > _WIN32_WINNT_WIN10)
 
@@ -3813,15 +3843,18 @@ const
 
 
 type
-
-  PMFVideoDRMFlags = ^MFVideoDRMFlags;
-  _MFVideoDRMFlags                    = (
-    MFVideoDRMFlag_None               = 0,
-    MFVideoDRMFlag_AnalogProtected    = 1,
-    MFVideoDRMFlag_DigitallyProtected = 2);
+  PMFVideoDRMFlags = ^_MFVideoDRMFlags;
+  _MFVideoDRMFlags = UINT32;
   {$EXTERNALSYM _MFVideoDRMFlags}
   MFVideoDRMFlags = _MFVideoDRMFlags;
   {$EXTERNALSYM MFVideoDRMFlags}
+const
+  MFVideoDRMFlag_None               = UINT32(0);
+  {$EXTERNALSYM MFVideoDRMFlag_None}
+  MFVideoDRMFlag_AnalogProtected    = UINT32(1);
+  {$EXTERNALSYM MFVideoDRMFlag_AnalogProtected}
+  MFVideoDRMFlag_DigitallyProtected = UINT32(2);
+  {$EXTERNALSYM MFVideoDRMFlag_DigitallyProtected}
 
 
 const
@@ -3832,16 +3865,15 @@ const
 
 
 type
-
-  PMFVideoPadFlags = ^MFVideoPadFlags;
-  _MFVideoPadFlags             = (
-    MFVideoPadFlag_PAD_TO_None = UINT32(0),  // Do not pad the image. (default)
-    MFVideoPadFlag_PAD_TO_4x3  = UINT32(1),  // Pad the image so that it can be displayed in a 4×3 area.
-    MFVideoPadFlag_PAD_TO_16x9 = UINT32(2)   // Pad the image so that it can be displayed in a 16×9 area.
-  );
+  PMFVideoPadFlags = ^_MFVideoPadFlags;
+  _MFVideoPadFlags = UINT32;
   {$EXTERNALSYM _MFVideoPadFlags}
   MFVideoPadFlags = _MFVideoPadFlags;
   {$EXTERNALSYM MFVideoPadFlags}
+const
+  MFVideoPadFlag_PAD_TO_None = UINT32(0);  // Do not pad the image. (default)
+  MFVideoPadFlag_PAD_TO_4x3  = UINT32(1);  // Pad the image so that it can be displayed in a 4×3 area.
+  MFVideoPadFlag_PAD_TO_16x9 = UINT32(2);  // Pad the image so that it can be displayed in a 16×9 area.
 
 
 const
@@ -3852,15 +3884,15 @@ const
 
 
 type
-
-  PMFVideoSrcContentHintFlags = ^MFVideoSrcContentHintFlags;
-  _MFVideoSrcContentHintFlags       = (
-    MFVideoSrcContentHintFlag_None  = 0,
-    MFVideoSrcContentHintFlag_16x9  = 1,
-    MFVideoSrcContentHintFlag_235_1 = 2);
+  PMFVideoSrcContentHintFlags = ^_MFVideoSrcContentHintFlags;
+  _MFVideoSrcContentHintFlags = UINT32;
   {$EXTERNALSYM _MFVideoSrcContentHintFlags}
   MFVideoSrcContentHintFlags = _MFVideoSrcContentHintFlags;
   {$EXTERNALSYM MFVideoSrcContentHintFlags}
+const
+  MFVideoSrcContentHintFlag_None  = UINT32(0);
+  MFVideoSrcContentHintFlag_16x9  = UINT32(1);
+  MFVideoSrcContentHintFlag_235_1 = UINT32(2);
 
 
 const
@@ -4527,14 +4559,17 @@ const
 
 
 type
-
   PMFWaveFormatExConvertFlags = ^MFWaveFormatExConvertFlags;
-  _MFWaveFormatExConvertFlags                 = (
-    MFWaveFormatExConvertFlag_Normal          = 0,
-    MFWaveFormatExConvertFlag_ForceExtensible = 1);
+  _MFWaveFormatExConvertFlags = UINT32;
   {$EXTERNALSYM _MFWaveFormatExConvertFlags}
   MFWaveFormatExConvertFlags = _MFWaveFormatExConvertFlags;
   {$EXTERNALSYM MFWaveFormatExConvertFlags}
+const
+  MFWaveFormatExConvertFlag_Normal          = UINT32(0);
+  {$EXTERNALSYM MFWaveFormatExConvertFlag_Normal}
+  MFWaveFormatExConvertFlag_ForceExtensible = UINT32(1);
+  {$EXTERNALSYM MFWaveFormatExConvertFlag_ForceExtensible}
+
 
 
   // Converts a Media Foundation audio media type to a WAVEFORMATEX structure.

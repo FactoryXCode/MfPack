@@ -21,6 +21,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -209,32 +210,45 @@ type
   ApoConnectionDescriptor = APO_CONNECTION_DESCRIPTOR;
   {$EXTERNALSYM ApoConnectionDescriptor}
 
-
+type
   // These flags specify the basic properties of Audio Processing objects.
   // If the APO is being used directly by a client without using an audio processor,
   // the client needs to ensure these flags are respected.
 
-  APO_FLAG = (
-    // No flags set
-    APO_FLAG_NONE                       = $00000000,
-    // APO can perform in-place processing. This allows the processor to
-    // connect a common buffer on input and output.
-    APO_FLAG_INPLACE                    = $00000001,
-    // Samples Per Frame of input and output connections must match.
-    APO_FLAG_SAMPLESPERFRAME_MUST_MATCH = $00000002,
-    // Frames per second of input and output connections must match
-    APO_FLAG_FRAMESPERSECOND_MUST_MATCH = $00000004,
-    // Bits per sample AND bytes per sample containter of input and output
-    // connections must match.
-    APO_FLAG_BITSPERSAMPLE_MUST_MATCH   = $00000008,
-    // standard flags for default APOs
-    APO_FLAG_DEFAULT                    = (ord(APO_FLAG_SAMPLESPERFRAME_MUST_MATCH) or
-                                           ord(APO_FLAG_FRAMESPERSECOND_MUST_MATCH) or
-                                           ord(APO_FLAG_BITSPERSAMPLE_MUST_MATCH)));
+  APO_FLAG = DWord;
   {$EXTERNALSYM APO_FLAG}
   PApoFlag = ^APO_FLAG;
   ApoFlag = APO_FLAG;
+  {$EXTERNALSYM ApoFlag}
+const
+  // No flags set
+  APO_FLAG_NONE                       = DWord($00000000);
+  {$EXTERNALSYM APO_FLAG_NONE}
+  // APO can perform in-place processing. This allows the processor to
+  // connect a common buffer on input and output.
+  APO_FLAG_INPLACE                    = DWord($00000001);
+  {$EXTERNALSYM APO_FLAG_INPLACE}
+  // Samples Per Frame of input and output connections must match.
+  APO_FLAG_SAMPLESPERFRAME_MUST_MATCH = DWord($00000002);
+  {$EXTERNALSYM APO_FLAG_SAMPLESPERFRAME_MUST_MATCH}
+  // Frames per second of input and output connections must match
+  APO_FLAG_FRAMESPERSECOND_MUST_MATCH = DWord($00000004);
+  {$EXTERNALSYM APO_FLAG_FRAMESPERSECOND_MUST_MATCH}
+  // Bits per sample AND bytes per sample containter of input and output
+  // connections must match.
+  APO_FLAG_BITSPERSAMPLE_MUST_MATCH   = DWord($00000008);
+  {$EXTERNALSYM APO_FLAG_BITSPERSAMPLE_MUST_MATCH}
+  // APO is a mix APO. This flag should be set only for the mixer APO.
+  APO_FLAG_MIXER                      = DWord($00000010);
+  {$EXTERNALSYM APO_FLAG_MIXER}
+  // standard flags for default APOs
+  APO_FLAG_DEFAULT                    = APO_FLAG_SAMPLESPERFRAME_MUST_MATCH or
+                                        APO_FLAG_FRAMESPERSECOND_MUST_MATCH or
+                                        APO_FLAG_BITSPERSAMPLE_MUST_MATCH;  // In other words: APO_FLAG_DEFAULT = APO_FLAG_SAMPLESPERFRAME_MUST_MATCH
+  {$EXTERNALSYM APO_FLAG_DEFAULT}
 
+
+type
 
   // Registration properties for an APO.
   // This structure is used by the registration API functions and by IAudioProcessingObject.GetRegistrationProperties().
@@ -324,11 +338,11 @@ type
   PEAudioConstriction = ^EAudioConstriction;
   EAudioConstriction = (
     // order least to most
-    eAudioConstrictionOff   = 0,
-    eAudioConstriction48_16 = (eAudioConstrictionOff  + 1),
-    eAudioConstriction44_16 = (eAudioConstriction48_16  + 1),
-    eAudioConstriction14_14 = (eAudioConstriction44_16  + 1),
-    eAudioConstrictionMute  = (eAudioConstriction14_14  + 1));
+    eAudioConstrictionOff   = 0,    // Audio is not constricted.
+    eAudioConstriction48_16 = (eAudioConstrictionOff  + 1),    // Audio is down sampled to 48 kHz/16-bit.
+    eAudioConstriction44_16 = (eAudioConstriction48_16  + 1),  // Audio is down sampled to 44 kHz/16-bit.
+    eAudioConstriction14_14 = (eAudioConstriction44_16  + 1),  // Audio is down sampled to 14 kHz/16-bit.
+    eAudioConstrictionMute  = (eAudioConstriction14_14  + 1)); // Audio is muted.
   {$EXTERNALSYM EAudioConstriction}
 
 

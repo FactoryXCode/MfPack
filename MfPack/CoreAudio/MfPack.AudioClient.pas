@@ -21,6 +21,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -100,7 +101,7 @@ type
 	REFERENCE_TIME = LONGLONG;
 	{$EXTERNALSYM REFERENCE_TIME}
 
-
+type
 	//-------------------------------------------------------------------------
     // Description: AudioClient buffer flags
     //
@@ -112,14 +113,16 @@ type
     //                                          buffer does not correlate with the data position.
     //
   PAUDCLNT_BUFFERFLAGS = ^AUDCLNT_BUFFERFLAGS;
-	_AUDCLNT_BUFFERFLAGS = (
-    AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY	= $00000001,
-    AUDCLNT_BUFFERFLAGS_SILENT	            = $00000002,
-		AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR	    = $00000004);
+	_AUDCLNT_BUFFERFLAGS = DWord;
 	{$EXTERNALSYM _AUDCLNT_BUFFERFLAGS}
   AUDCLNT_BUFFERFLAGS = _AUDCLNT_BUFFERFLAGS;
   {$EXTERNALSYM AUDCLNT_BUFFERFLAGS}
+const
+  AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY	= DWord($00000001);
+  AUDCLNT_BUFFERFLAGS_SILENT	            = DWord($00000002);
+  AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR	    = DWord($00000004);
 
+type
   //-------------------------------------------------------------------------
   // Description: Flags describing the characteristics of an audio stream
   //
@@ -861,7 +864,7 @@ type
 	['{C8ADBD64-E71E-48a0-A4DE-185C395CD317}']
 		function GetBuffer(out ppData: PByte;
                        out pNumFramesToRead: UINT32;
-                       out pdwFlags: DWord;
+                       out pdwFlags: PAUDCLNT_BUFFERFLAGS;  // DWord
                        out pu64DevicePosition: Int64;
                        out pu64QPCPosition: Int64): HResult; stdcall;
     // Description:

@@ -21,6 +21,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -94,9 +95,11 @@ type
   PAUDCLNT_SHAREMODE = ^AUDCLNT_SHAREMODE;
   _AUDCLNT_SHAREMODE = (
     AUDCLNT_SHAREMODE_SHARED,
-    AUDCLNT_SHAREMODE_EXCLUSIVE);
+    AUDCLNT_SHAREMODE_EXCLUSIVE
+  );
   {$EXTERNALSYM _AUDCLNT_SHAREMODE}
   AUDCLNT_SHAREMODE = _AUDCLNT_SHAREMODE;
+  {$EXTERNALSYM AUDCLNT_SHAREMODE}
 
   // Description: Audio stream categories
   //=====================================
@@ -131,6 +134,7 @@ type
     AudioCategory_Media                   = 11);
   {$EXTERNALSYM _AUDIO_STREAM_CATEGORY}
   AUDIO_STREAM_CATEGORY = _AUDIO_STREAM_CATEGORY;
+  {$EXTERNALSYM AUDIO_STREAM_CATEGORY}
 
 
   // Description: AudioClient stream flags
@@ -224,9 +228,11 @@ type
   _AudioSessionState          = (
     AudioSessionStateInactive = 0,
     AudioSessionStateActive   = 1,
-    AudioSessionStateExpired  = 2 );
+    AudioSessionStateExpired  = 2
+  );
   {$EXTERNALSYM _AudioSessionState}
   AudioSessionState = _AudioSessionState;
+  {$EXTERNALSYM AudioSessionState}
 
 
   // Additional Prototypes for ALL interfaces

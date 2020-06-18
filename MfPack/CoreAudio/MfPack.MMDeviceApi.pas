@@ -21,6 +21,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -278,12 +279,13 @@ type
 
 
   PEDataFlow = ^TEDataFlow;
-  {$EXTERNALSYM __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0001}
   __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0001 = (
     eRender              = 0,
     eCapture             = (eRender + 1),
     eAll                 = (eCapture + 1),
-    EDataFlow_enum_count = (eAll + 1));
+    EDataFlow_enum_count = (eAll + 1)
+  );
+  {$EXTERNALSYM __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0001}
   EDataFlow = __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0001;
   {$EXTERNALSYM EDataFlow}
   TEDataFlow = __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0001;
@@ -293,12 +295,13 @@ type
 	// ERole
 
   PERole = ^TERole;
-  {$EXTERNALSYM __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0002}
   __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0002 = (
     eConsole         = 0,
     eMultimedia      = (eConsole  + 1),
     eCommunications  = (eMultimedia  + 1),
-    ERole_enum_count = (eCommunications  + 1));
+    ERole_enum_count = (eCommunications  + 1)
+  );
+  {$EXTERNALSYM __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0002}
   ERole = __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0002;
   {$EXTERNALSYM ERole}
   TERole = __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0002;
@@ -308,7 +311,6 @@ type
 	// EndpointFormFactor enum
 
   PEndpointFormFactor = ^TEndpointFormFactor;
-  {$EXTERNALSYM __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0003}
   __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0003 = (
     RemoteNetworkDevice           = 0,
     Speakers                      = (RemoteNetworkDevice + 1),
@@ -322,7 +324,9 @@ type
     DigitalAudioDisplayDevice     = (SPDIF + 1),
     UnknownFormFactor             = (DigitalAudioDisplayDevice + 1),
     EndpointFormFactor_enum_count = (UnknownFormFactor + 1),
-    HDMI                          = DigitalAudioDisplayDevice);
+    HDMI                          = DigitalAudioDisplayDevice
+  );
+  {$EXTERNALSYM __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0003}
   EndpointFormFactor = __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0003;
   {$EXTERNALSYM EndpointFormFactor}
   TEndpointFormFactor = __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0003;

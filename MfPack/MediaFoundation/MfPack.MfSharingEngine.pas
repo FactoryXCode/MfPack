@@ -21,6 +21,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or later.
@@ -215,8 +216,31 @@ const
   GUID_NativeDeviceService                  : TGUID = '{ef71e53c-52f4-43c5-b86a-ad6cb216a61e}';
   {$EXTERNALSYM GUID_NativeDeviceService}
 
-type
 
+
+  // PLAYTO_SOURCE_CREATEFLAGS
+  //
+  ///////////////////////////////////////////////////////////////////////////////
+type
+  PPLAYTO_SOURCE_CREATEFLAGS = ^PLAYTO_SOURCE_CREATEFLAGS;
+  PLAYTO_SOURCE_CREATEFLAGS = DWord;
+  {$EXTERNALSYM PLAYTO_SOURCE_CREATEFLAGS}
+const
+  PLAYTO_SOURCE_NONE      = DWord($0);
+  {$EXTERNALSYM PLAYTO_SOURCE_NONE}
+  PLAYTO_SOURCE_IMAGE     = DWord($1);
+  {$EXTERNALSYM PLAYTO_SOURCE_AUDIO}
+  PLAYTO_SOURCE_AUDIO     = DWord($2);
+  {$EXTERNALSYM PLAYTO_SOURCE_IMAGE}
+  PLAYTO_SOURCE_VIDEO     = DWord($4);
+  {$EXTERNALSYM PLAYTO_SOURCE_VIDEO}
+// (WINVER >= _WIN32_WINNT_WINBLUE)
+  PLAYTO_SOURCE_PROTECTED = DWord($8);
+  {$EXTERNALSYM PLAYTO_SOURCE_PROTECTED}
+// end (WINVER >= _WIN32_WINNT_WINBLUE)
+
+
+type
 
   // Interfaces
   // ==========
@@ -306,27 +330,6 @@ type
   {$EXTERNALSYM IID_IMFImageSharingEngineClassFactory}
 
 
-  // PLAYTO_SOURCE_CREATEFLAGS
-  //
-  ///////////////////////////////////////////////////////////////////////////////
-
-  PPLAYTO_SOURCE_CREATEFLAGS = ^PLAYTO_SOURCE_CREATEFLAGS;
-  PLAYTO_SOURCE_CREATEFLAGS = (
-    PLAYTO_SOURCE_NONE      = $0,
-    {$EXTERNALSYM PLAYTO_SOURCE_NONE}
-    PLAYTO_SOURCE_IMAGE     = $1,
-    {$EXTERNALSYM PLAYTO_SOURCE_AUDIO}
-    PLAYTO_SOURCE_AUDIO     = $2,
-    {$EXTERNALSYM PLAYTO_SOURCE_IMAGE}
-    PLAYTO_SOURCE_VIDEO     = $4,
-    {$EXTERNALSYM PLAYTO_SOURCE_VIDEO}
-// (WINVER >= _WIN32_WINNT_WINBLUE)
-    PLAYTO_SOURCE_PROTECTED = $8
-    {$EXTERNALSYM PLAYTO_SOURCE_PROTECTED}
-// end (WINVER >= _WIN32_WINNT_WINBLUE)
-  );
-  {$EXTERNALSYM PLAYTO_SOURCE_CREATEFLAGS}
-
 
   // IPlayToControl interface
   // ========================
@@ -351,7 +354,7 @@ type
   IPlayToControlWithCapabilities = interface(IPlayToControl)
   ['{AA9DD80F-C50A-4220-91C1-332287F82A34}']
 
-    function GetCapabilities(out pCapabilities: PLAYTO_SOURCE_CREATEFLAGS): HRESULT; stdcall;
+    function GetCapabilities(out pCapabilities: PPLAYTO_SOURCE_CREATEFLAGS): HRESULT; stdcall;
 
   end;
   IID_IPlayToControlWithCapabilities = IPlayToControlWithCapabilities;
