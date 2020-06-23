@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks:
@@ -195,37 +197,39 @@ const
 
 type
   // class registration flags; passed to CoRegisterClassObject
-  PREGCLS = ^REGCLS;
-  tagREGCLS = (
-    REGCLS_SINGLEUSE      = 0,  // class object only generates one instance
-
-    REGCLS_MULTIPLEUSE    = 1, // same class object genereates multiple inst.
-                               // and local automatically goes into inproc tbl.
-
-    REGCLS_MULTI_SEPARATE = 2,  // multiple use, but separate control over each
-                                // context.
-
-    REGCLS_SUSPENDED      = 4,  // register is as suspended, will be activated
-                                // when app calls CoResumeClassObjects
-
-    REGCLS_SURROGATE      = 8,  // must be used when a surrogate process
-                                // is registering a class object that will be
-                                // loaded in the surrogate
-
-    //#if (NTDDI_VERSION >= NTDDI_WINTHRESHOLD)
-
-    REGCLS_AGILE         = $10  // Class object aggregates the free-threaded marshaler
-                                // and will be made visible to all inproc apartments.
-                                // Can be used together with other flags - for example,
-                                // REGCLS_AGILE | REGCLS_MULTIPLEUSE to register a
-                                // class object that can be used multiple times from
-                                // different apartments. Without other flags, behavior
-                                // will retain REGCLS_SINGLEUSE semantics in that only
-                                // one instance can be generated.
-  );
+  PREGCLS = ^tagREGCLS;
+  tagREGCLS = DWord;
   {$EXTERNALSYM tagREGCLS}
   REGCLS = tagREGCLS;
   {$EXTERNALSYM REGCLS}
+const
+  REGCLS_SINGLEUSE      = REGCLS(0);  // class object only generates one instance
+  {$EXTERNALSYM REGCLS_SINGLEUSE}
+
+  REGCLS_MULTIPLEUSE    = REGCLS(1); // same class object genereates multiple inst.
+  {$EXTERNALSYM REGCLS_MULTIPLEUSE}  // and local automatically goes into inproc tbl.
+
+  REGCLS_MULTI_SEPARATE = REGCLS(2);    // multiple use, but separate control over each
+  {$EXTERNALSYM REGCLS_MULTI_SEPARATE}  // context.
+
+  REGCLS_SUSPENDED      = REGCLS(4);  // register is as suspended, will be activated
+  {$EXTERNALSYM REGCLS_SUSPENDED}     // when app calls CoResumeClassObjects
+
+  REGCLS_SURROGATE      = REGCLS(8);  // must be used when a surrogate process
+  {$EXTERNALSYM REGCLS_SURROGATE}     // is registering a class object that will be
+                                      // loaded in the surrogate
+
+    //#if (NTDDI_VERSION >= NTDDI_WINTHRESHOLD)
+
+  REGCLS_AGILE         = REGCLS($10);  // Class object aggregates the free-threaded marshaler
+  {$EXTERNALSYM REGCLS_AGILE}          // and will be made visible to all inproc apartments.
+                                       // Can be used together with other flags - for example,
+                                       // REGCLS_AGILE | REGCLS_MULTIPLEUSE to register a
+                                       // class object that can be used multiple times from
+                                       // different apartments. Without other flags, behavior
+                                       // will retain REGCLS_SINGLEUSE semantics in that only
+                                       // one instance can be generated.
+
 
 
   //* here is where we pull in the MIDL generated headers for the interfaces */
@@ -238,15 +242,16 @@ type
 
 
   // COM initialization flags; passed to CoInitialize.
-  PCOINITBASE = ^COINITBASE;
-  tagCOINITBASE  = (
-    // These constants are only valid on Windows NT 4.0
-    COINITBASE_MULTITHREADED      = $0 // OLE calls objects on any thread.
-  );
+type
+  PCOINITBASE = ^tagCOINITBASE;
+  tagCOINITBASE  = DWord;
   {$EXTERNALSYM tagCOINITBASE}
   COINITBASE = tagCOINITBASE;
   {$EXTERNALSYM COINITBASE}
-
+const
+  // These constants are only valid on Windows NT 4.0
+  COINITBASE_MULTITHREADED      = COINITBASE($0); // OLE calls objects on any thread.
+  {$EXTERNALSYM COINITBASE_MULTITHREADED}
 
 
   //****** STD Object API Prototypes *****************************************/
@@ -578,7 +583,7 @@ const
                               dwClsCtx: Longint;
                               pServerInfo: PCoServerInfo;
                               dwCount: Longint;
-                              pResults: MULTI_QIArray {An array of MULTI_QI structures}): HResult; stdcall;
+                              pResults: PMULTI_QI {An array of MULTI_QI structures}): HResult; stdcall;
   {$EXTERNALSYM CoCreateInstanceEx}
 
   // Registers a process-wide filter to process activation requests.
@@ -592,7 +597,7 @@ const
                                    dwClsCtx: DWORD;
                                    reserved: Pointer;
                                    dwCount: DWORD;
-                                   pResults: MULTI_QIArray {An array of MULTI_QI structures}): HResult; stdcall;
+                                   pResults: PMULTI_QI {An array of MULTI_QI structures}): HResult; stdcall;
   {$EXTERNALSYM CoCreateInstanceFromApp}
 
 
@@ -688,32 +693,43 @@ const
 
 
 
-type
-  //* Flags for Synchronization API and Classes *//
 
+  //* Flags for Synchronization API and Classes *//
+type
   PCOWAIT_FLAGS = ^tagCOWAIT_FLAGS;
-  tagCOWAIT_FLAGS                   = (
-    COWAIT_DEFAULT                  = 0,
-    COWAIT_WAITALL                  = 1,
-    COWAIT_ALERTABLE                = 2,
-    COWAIT_INPUTAVAILABLE           = 4,
-    COWAIT_DISPATCH_CALLS           = 8,
-    COWAIT_DISPATCH_WINDOW_MESSAGES = $10);
+  tagCOWAIT_FLAGS = DWord;
   {$EXTERNALSYM tagCOWAIT_FLAGS}
   COWAIT_FLAGS = tagCOWAIT_FLAGS;
   {$EXTERNALSYM COWAIT_FLAGS}
+const
+  COWAIT_DEFAULT                  = COWAIT_FLAGS(0);
+  {$EXTERNALSYM COWAIT_DEFAULT}
+  COWAIT_WAITALL                  = COWAIT_FLAGS(1);
+  {$EXTERNALSYM COWAIT_WAITALL}
+  COWAIT_ALERTABLE                = COWAIT_FLAGS(2);
+  {$EXTERNALSYM COWAIT_ALERTABLE}
+  COWAIT_INPUTAVAILABLE           = COWAIT_FLAGS(4);
+  {$EXTERNALSYM COWAIT_INPUTAVAILABLE}
+  COWAIT_DISPATCH_CALLS           = COWAIT_FLAGS(8);
+  {$EXTERNALSYM COWAIT_DISPATCH_CALLS}
+  COWAIT_DISPATCH_WINDOW_MESSAGES = COWAIT_FLAGS($10);
+  {$EXTERNALSYM COWAIT_DISPATCH_WINDOW_MESSAGES}
 
 //#if (NTDDI_VERSION >= NTDDI_WIN8)
-
+type
   PCWMO_FLAGS = ^CWMO_FLAGS;
   PCwmoFlags = ^TCwmoFlags;
-  CWMO_FLAGS                      = (
-    CWMO_DEFAULT                  = 0,
-    CWMO_DISPATCH_CALLS           = 1,
-    CWMO_DISPATCH_WINDOW_MESSAGES = 2);
+  CWMO_FLAGS = DWord;
   {$EXTERNALSYM CWMO_FLAGS}
   TCwmoFlags = CWMO_FLAGS;
   {$EXTERNALSYM TCwmoFlags}
+const
+  CWMO_DEFAULT                  = CWMO_FLAGS(0);
+  {$EXTERNALSYM CWMO_DEFAULT}
+  CWMO_DISPATCH_CALLS           = CWMO_FLAGS(1);
+  {$EXTERNALSYM CWMO_DISPATCH_CALLS}
+  CWMO_DISPATCH_WINDOW_MESSAGES = CWMO_FLAGS(2);
+  {$EXTERNALSYM CWMO_DISPATCH_WINDOW_MESSAGES}
 
 
   function CoWaitForMultipleObjects(dwFlags: DWORD;
@@ -752,10 +768,13 @@ const
 
 type
   PAgileReferenceOptions = ^AgileReferenceOptions;
-  AgileReferenceOptions = (
-    AGILEREFERENCE_DEFAULT        = 0,
-    AGILEREFERENCE_DELAYEDMARSHAL = 1);
+  AgileReferenceOptions = DWord;
   {$EXTERNALSYM AgileReferenceOptions}
+const
+  AGILEREFERENCE_DEFAULT        = AgileReferenceOptions(0);
+  {$EXTERNALSYM AGILEREFERENCE_DEFAULT}
+  AGILEREFERENCE_DELAYEDMARSHAL = AgileReferenceOptions(1);
+  {$EXTERNALSYM AGILEREFERENCE_DELAYEDMARSHAL}
 
 
   function RoGetAgileReference(options: AgileReferenceOptions;
@@ -774,9 +793,9 @@ type
   //*
 
   DLLGetClassObject = function(const rclsid: CLSID;
-  {$EXTERNALSYM DLLGetClassObject}
                                const riid: IID;
                                out ppv): HResult; stdcall;
+  {$EXTERNALSYM DLLGetClassObject}
 
   DLLCanUnloadNow = function(): HResult; stdcall;
   {$EXTERNALSYM DLLCanUnloadNow}
@@ -811,11 +830,14 @@ type
 
 type
   CO_DEVICE_CATALOG_COOKIE = THandle;
+  {$EXTERNALSYM CO_DEVICE_CATALOG_COOKIE}
 
   function CoRegisterDeviceCatalog(deviceInstanceId: PCWSTR;
                                    out cookie: CO_DEVICE_CATALOG_COOKIE): HResult; stdcall;
+  {$EXTERNALSYM CoRegisterDeviceCatalog}
 
   function CoRevokeDeviceCatalog(cookie: CO_DEVICE_CATALOG_COOKIE): HResult; stdcall;
+  {$EXTERNALSYM CoRevokeDeviceCatalog}
 
 // end NTDDI_VERSION >= NTDDI_WIN10_VB
 

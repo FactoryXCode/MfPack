@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -247,7 +249,8 @@ type
   PDEVPROPSTORE = ^_DEVPROPSTORE;
   _DEVPROPSTORE = (
     DEVPROP_STORE_SYSTEM = 0,
-    DEVPROP_STORE_USER = 1);
+    DEVPROP_STORE_USER   = 1
+  );
   {$EXTERNALSYM _DEVPROPSTORE}
   DEVPROPSTORE = _DEVPROPSTORE;
   {$EXTERNALSYM DEVPROPSTORE}

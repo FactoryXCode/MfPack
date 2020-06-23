@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -471,7 +473,7 @@ type
 
   // typedef struct tagPROPVARIANT PROPVARIANT;
   // See WTypes.pas for details of the case select vars
-  // this structure is also defined in ActiveX , but depending on the compilerversion
+  // this structure is also defined in ActiveX, but depending on the compilerversion
   // this could differ. So we undefine the -older - ActiveX version.
   //
   // Members
@@ -668,23 +670,25 @@ type
   {$EXTERNALSYM PROPVARIANT}
   //TPropVariant = tagPROPVARIANT;
   // Delphi Note: To prevent namemangling with ActiveX, we prefixed the name with Mf.
+  {$NODEFINE MfPROPVARIANT}
   MfPROPVARIANT = tagPROPVARIANT;
+  {$NODEFINE MfPROPVARIANTArray}
   MfPROPVARIANTArray = array [0..65535] of MfPROPVARIANT;
-  {$EXTERNALSYM MfPROPVARIANTArray}
 
   // PIDMSI_STATUS value definitions
   PPIDMSI_STATUS_VALUE = ^PIDMSI_STATUS_VALUE;
   PIDMSI_STATUS_VALUE                  = (
    PIDMSI_STATUS_NORMAL                = 0,
    PIDMSI_STATUS_NEW                   = PIDMSI_STATUS_NORMAL + 1,
-   PIDMSI_STATUS_PRELIM                = ( PIDMSI_STATUS_NEW + 1),
-   PIDMSI_STATUS_DRAFT                 = ( PIDMSI_STATUS_PRELIM + 1),
-   PIDMSI_STATUS_INPROGRESS            = ( PIDMSI_STATUS_DRAFT + 1),
-   PIDMSI_STATUS_EDIT                  = ( PIDMSI_STATUS_INPROGRESS + 1),
-   PIDMSI_STATUS_REVIEW                = ( PIDMSI_STATUS_EDIT + 1),
-   PIDMSI_STATUS_PROOF                 = ( PIDMSI_STATUS_REVIEW + 1),
-   PIDMSI_STATUS_FINAL                 = ( PIDMSI_STATUS_PROOF + 1),
-   PIDMSI_STATUS_OTHER                 = $7fff);
+   PIDMSI_STATUS_PRELIM                = PIDMSI_STATUS_NEW + 1,
+   PIDMSI_STATUS_DRAFT                 = PIDMSI_STATUS_PRELIM + 1,
+   PIDMSI_STATUS_INPROGRESS            = PIDMSI_STATUS_DRAFT + 1,
+   PIDMSI_STATUS_EDIT                  = PIDMSI_STATUS_INPROGRESS + 1,
+   PIDMSI_STATUS_REVIEW                = PIDMSI_STATUS_EDIT + 1,
+   PIDMSI_STATUS_PROOF                 = PIDMSI_STATUS_REVIEW + 1,
+   PIDMSI_STATUS_FINAL                 = PIDMSI_STATUS_PROOF + 1,
+   PIDMSI_STATUS_OTHER                 = $7fff
+  );
   {$EXTERNALSYM PIDMSI_STATUS_VALUE}
 
 
@@ -735,7 +739,7 @@ type
   PSERIALIZEDPROPERTYVALUE = ^tagSERIALIZEDPROPERTYVALUE;
   tagSERIALIZEDPROPERTYVALUE = record
     dwType: DWORD;
-    rgb: array of Byte;
+    rgb: array[0..0] of Byte;
   end;
   {$EXTERNALSYM tagSERIALIZEDPROPERTYVALUE}
   SERIALIZEDPROPERTYVALUE = tagSERIALIZEDPROPERTYVALUE;

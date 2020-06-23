@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 12/03/2020 Tony                Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.

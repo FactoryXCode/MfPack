@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: This unit is also included in Winapi/DsPack.DirectShow9.pas
@@ -31,7 +33,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.18362.0 (19H1)
+// SDK version: 10.0.19569.0
 //
 // Todo: -
 //
@@ -174,7 +176,7 @@ type
 
     function GetSurfaceType(out pSurfaceType: DWORD): HResult; stdcall;
 
-    function SetDefault: HResult; stdcall;
+    function SetDefault(): HResult; stdcall;
 
     function UseScanLine(UseScanLine: LongBool): HResult; stdcall;
 
@@ -229,33 +231,33 @@ type
     (*** IFullScreenVideo methods ***)
     function CountModes(out pModes: Longint): HResult; stdcall;
 
-    function GetModeInfo(const Mode: Longint;
+    function GetModeInfo(Mode: Longint;
                          out pWidth: Longint;
-                         const pHeight: Longint;
-                         const pDepth: Longint): HResult; stdcall;
+                         pHeight: Longint;
+                         pDepth: Longint): HResult; stdcall;
 
     function GetCurrentMode(out pMode: Longint): HResult; stdcall;
 
-    function IsModeAvailable(const Mode: Longint): HResult; stdcall;
+    function IsModeAvailable(Mode: Longint): HResult; stdcall;
 
-    function IsModeEnabled(const Mode: Longint): HResult; stdcall;
+    function IsModeEnabled(Mode: Longint): HResult; stdcall;
 
-    function SetEnabled(const Mode: Longint;
-                        const bEnabled: Longint): HResult; stdcall;
+    function SetEnabled(Mode: Longint;
+                        bEnabled: Longint): HResult; stdcall;
 
     function GetClipFactor(out pClipFactor: Longint): HResult; stdcall;
 
-    function SetClipFactor(const ClipFactor: Longint): HResult; stdcall;
+    function SetClipFactor(ClipFactor: Longint): HResult; stdcall;
 
     function SetMessageDrain(hwnd: HWND): HResult; stdcall;
 
     function GetMessageDrain(out hwnd: HWND): HResult; stdcall;
 
-    function SetMonitor(const Monitor: Longint): HResult; stdcall;
+    function SetMonitor(Monitor: Longint): HResult; stdcall;
 
     function GetMonitor(out Monitor: Longint): HResult; stdcall;
 
-    function HideOnDeactivate(const Hide: LongBool): HResult; stdcall;
+    function HideOnDeactivate(Hide: LongBool): HResult; stdcall;
 
     function IsHideOnDeactivate: HResult; stdcall;
 
@@ -293,13 +295,13 @@ type
   IFullScreenVideoEx = interface(IFullScreenVideo)
     ['{53479470-F1DD-11CF-BC42-00AA00AC74F6}']
 
-    function SetAcceleratorTable(const hwnd: HWND;
-                                 const hAccel: HACCEL): HResult; stdcall;
+    function SetAcceleratorTable(hwnd: HWND;
+                                 hAccel: HACCEL): HResult; stdcall;
 
     function GetAcceleratorTable(var hwnd: HWND;
                                  var hAccel: HACCEL): HResult; stdcall;
 
-    function KeepPixelAspectRatio(const KeepAspect: LongBool): HResult; stdcall;
+    function KeepPixelAspectRatio(KeepAspect: LongBool): HResult; stdcall;
 
     function IsKeepPixelAspectRatio(var pKeepAspect: LongBool): HResult; stdcall;
 
@@ -321,7 +323,7 @@ type
   IBaseVideoMixer = interface(IUnknown)
     ['{61DED640-E912-11CE-A099-00AA00479A58}']
     (*** IBaseVideoMixer methods ***)
-    function SetLeadPin(const iPin: Integer): HResult; stdcall;
+    function SetLeadPin(iPin: Integer): HResult; stdcall;
 
     function GetLeadPin(out iPin: Integer): HResult; stdcall;
 
@@ -329,11 +331,11 @@ type
 
     function IsUsingClock(out pbValue: Integer): HResult; stdcall;
 
-    function SetUsingClock(const bValue: Integer): HResult; stdcall;
+    function SetUsingClock(bValue: Integer): HResult; stdcall;
 
     function GetClockPeriod(out pbValue: Integer): HResult; stdcall;
 
-    function SetClockPeriod(const bValue: Integer): HResult; stdcall;
+    function SetClockPeriod(bValue: Integer): HResult; stdcall;
 
   end;
   IID_IBaseVideoMixer = IBaseVideoMixer;
@@ -597,14 +599,10 @@ type
   AM_PROPERTY_FRAMESTEP = (
     //  Step
     AM_PROPERTY_FRAMESTEP_STEP            = 1,
-    {$EXTERNALSYM AM_PROPERTY_FRAMESTEP_STEP}
     AM_PROPERTY_FRAMESTEP_CANCEL          = 2 ,
-    {$EXTERNALSYM AM_PROPERTY_FRAMESTEP_CANCEL}
     //  S_OK for these 2 means we can - S_FALSE if we can't
     AM_PROPERTY_FRAMESTEP_CANSTEP         = 3,
-    {$EXTERNALSYM AM_PROPERTY_FRAMESTEP_CANSTEP}
     AM_PROPERTY_FRAMESTEP_CANSTEPMULTIPLE = 4
-    {$EXTERNALSYM AM_PROPERTY_FRAMESTEP_CANSTEPMULTIPLE}
   );
   {$EXTERNALSYM AM_PROPERTY_FRAMESTEP}
 
@@ -628,13 +626,17 @@ type
   //
 
   function TRUECOLOR(pbmi: PVIDEOINFO): PTRUECOLORINFO;
+  {$EXTERNALSYM TRUECOLOR}
 
   function COLORS(pbmi: PVIDEOINFO): PRGBQUAD;
+  {$EXTERNALSYM COLORS}
 
   function BITMASKS(pbmi: PVIDEOINFO): PDWORD;
+  {$EXTERNALSYM BITMASKS}
 
   function BIT_MASKS_MATCH(pbmi1: PVIDEOINFO;
                            pbmi2: PVIDEOINFO): BOOL;
+  {$EXTERNALSYM BIT_MASKS_MATCH}
 
   // End of Additional Prototypes
 
@@ -689,7 +691,7 @@ implementation
 
   //#define BITMASKS(pbmi)  ((DWORD *)(((LPBYTE)&((pbmi)->bmiHeader))       \
   //                                      + (pbmi)->bmiHeader.biSize))
-  Function BITMASKS(pbmi: PVIDEOINFO): PDWORD;
+  function BITMASKS(pbmi: PVIDEOINFO): PDWORD;
     Begin
       Result:= PDWORD(SizeOf(LPBYTE) + SizeOf(pbmi.bmiHeader) + pbmi^.bmiHeader.biSize);
     End;

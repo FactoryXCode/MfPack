@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -115,6 +117,224 @@ type
   {$EXTERNALSYM PIStream}
 {$ENDIF}
 
+type
+  // The following are new for Vista, but are use in downlevel components
+  PGETPROPERTYSTOREFLAGS = ^GETPROPERTYSTOREFLAGS;
+  GETPROPERTYSTOREFLAGS = DWord;
+  {$EXTERNALSYM GETPROPERTYSTOREFLAGS}
+  // If no flags are specified (GPS_DEFAULT), a read-only property store is returned that includes properties for the file or item.
+  // In the case that the shell item is a file, the property store contains:
+  //     1. properties about the file from the file system
+  //     2. properties from the file itself provided by the file's property handler, unless that file is offline,
+  //         see GPS_OPENSLOWITEM
+  //     3. if requested by the file's property handler and supported by the file system, properties stored in the
+  //     alternate property store.
+  //
+  // Non-file shell items should return a similar read-only store
+  //
+  // Specifying other GPS_ flags modifies the store that is returned
+const
+  GPS_DEFAULT                 = GETPROPERTYSTOREFLAGS($0);
+  {$EXTERNALSYM GPS_DEFAULT}
+  GPS_HANDLERPROPERTIESONLY   = GETPROPERTYSTOREFLAGS($1);    // only include properties directly from the file's property handler
+  {$EXTERNALSYM GPS_HANDLERPROPERTIESONLY}
+  GPS_READWRITE               = GETPROPERTYSTOREFLAGS($2);    // Writable stores will only include handler properties
+  {$EXTERNALSYM GPS_READWRITE}
+  GPS_TEMPORARY               = GETPROPERTYSTOREFLAGS($4);    //  A read/write store that only holds properties for the lifetime of the IShellItem object
+  {$EXTERNALSYM GPS_TEMPORARY}
+  GPS_FASTPROPERTIESONLY      = GETPROPERTYSTOREFLAGS($8);    // do not include any properties from the file's property handler (because the file's property handler will hit the disk)
+  {$EXTERNALSYM GPS_FASTPROPERTIESONLY}
+  GPS_OPENSLOWITEM            = GETPROPERTYSTOREFLAGS($10);   // include properties from a file's property handler, even if it means retrieving the file from offline storage.
+  {$EXTERNALSYM GPS_OPENSLOWITEM}
+  GPS_DELAYCREATION           = GETPROPERTYSTOREFLAGS($20);   // delay the creation of the file's property handler until those properties are read, written, or enumerated
+  {$EXTERNALSYM GPS_DELAYCREATION}
+  GPS_BESTEFFORT              = GETPROPERTYSTOREFLAGS($40);   // For readonly stores, succeed and return all available properties, even if one or more sources of properties fails. Not valid with GPS_READWRITE.
+  {$EXTERNALSYM GPS_BESTEFFORT}
+  GPS_NO_OPLOCK               = GETPROPERTYSTOREFLAGS($80);   // some data sources protect the read property store with an oplock, this disables that
+  {$EXTERNALSYM GPS_NO_OPLOCK}
+  GPS_PREFERQUERYPROPERTIES   = GETPROPERTYSTOREFLAGS($100);  // For file system WDS results, only retrieve properties from the indexer
+  {$EXTERNALSYM GPS_PREFERQUERYPROPERTIES}
+  GPS_EXTRINSICPROPERTIES     = GETPROPERTYSTOREFLAGS($200);  // include properties from the file's secondary stream
+  {$EXTERNALSYM GPS_EXTRINSICPROPERTIES}
+  GPS_EXTRINSICPROPERTIESONLY = GETPROPERTYSTOREFLAGS($400);  // only include properties from the file's secondary stream
+  {$EXTERNALSYM GPS_EXTRINSICPROPERTIESONLY}
+  GPS_VOLATILEPROPERTIES	    = GETPROPERTYSTOREFLAGS($800);  // include properties from the file's volatile store in the indexer
+  {$EXTERNALSYM GPS_VOLATILEPROPERTIES}
+  GPS_VOLATILEPROPERTIESONLY	= GETPROPERTYSTOREFLAGS($1000); // only include properties from the file's volatile store in the indexer
+  {$EXTERNALSYM GPS_VOLATILEPROPERTIESONLY}
+  GPS_MASK_VALID	            = GETPROPERTYSTOREFLAGS($1fff);
+  {$EXTERNALSYM GPS_MASK_VALID}
+
+
+type
+  PPKA_FLAGS = ^PKA_FLAGS;
+  PKA_FLAGS = DWord;
+  {$EXTERNALSYM PKA_FLAGS}
+   // note, this enum type not named property, it should have been named PKA_OPERATION
+const
+  PKA_SET    = PKA_FLAGS(0);    // replace current value
+  {$EXTERNALSYM PKA_SET}
+  PKA_APPEND = PKA_FLAGS(1);    // append to current value - multi-value properties only
+  {$EXTERNALSYM PKA_APPEND}
+  PKA_DELETE = PKA_FLAGS(2);    // delete from current value - multi-value properties only
+  {$EXTERNALSYM PKA_DELETE}
+
+
+type
+  // IPropertyDescription types
+  // ==========================
+  //
+  PPROPDESC_TYPE_FLAGS = ^PROPDESC_TYPE_FLAGS;
+  PROPDESC_TYPE_FLAGS = DWord;
+  {$EXTERNALSYM PROPDESC_TYPE_FLAGS}
+const
+  PDTF_DEFAULT                    = PROPDESC_TYPE_FLAGS($0);
+  {$EXTERNALSYM PDTF_DEFAULT}
+  PDTF_MULTIPLEVALUES             = PROPDESC_TYPE_FLAGS($1);     // This property can have multiple values (as VT_VECTOR)
+  {$EXTERNALSYM PDTF_MULTIPLEVALUES}
+  PDTF_ISINNATE                   = PROPDESC_TYPE_FLAGS($2);     // This property cannot be written to
+  {$EXTERNALSYM PDTF_ISINNATE}
+  PDTF_ISGROUP                    = PROPDESC_TYPE_FLAGS($4);     // This property is a group heading
+  {$EXTERNALSYM PDTF_ISGROUP}
+  PDTF_CANGROUPBY                 = PROPDESC_TYPE_FLAGS($8);     // The user can group by this property
+  {$EXTERNALSYM PDTF_CANGROUPBY}
+  PDTF_CANSTACKBY                 = PROPDESC_TYPE_FLAGS($10);    // The user can stack by this property
+  {$EXTERNALSYM PDTF_CANSTACKBY}
+  PDTF_ISTREEPROPERTY             = PROPDESC_TYPE_FLAGS($20);    // This property contains a hierarchy
+  {$EXTERNALSYM PDTF_ISTREEPROPERTY}
+  PDTF_INCLUDEINFULLTEXTQUERY     = PROPDESC_TYPE_FLAGS($40);    // Deprecated
+  {$EXTERNALSYM PDTF_INCLUDEINFULLTEXTQUERY}
+  PDTF_ISVIEWABLE                 = PROPDESC_TYPE_FLAGS($80);    // This property is meant to be viewed by the user
+  {$EXTERNALSYM PDTF_ISVIEWABLE}
+  PDTF_ISQUERYABLE                = PROPDESC_TYPE_FLAGS($100);   // Deprecated
+  {$EXTERNALSYM PDTF_ISQUERYABLE}
+  PDTF_CANBEPURGED                = PROPDESC_TYPE_FLAGS($200);   // This property can be purged, even if it is innate (property handler should respect this)
+  {$EXTERNALSYM PDTF_CANBEPURGED}
+  PDTF_SEARCHRAWVALUE             = PROPDESC_TYPE_FLAGS($400);   // The raw (rather than formatted) value of this property should be used for searching
+  {$EXTERNALSYM PDTF_SEARCHRAWVALUE}
+  PDTF_DONTCOERCEEMPTYSTRINGS     = PROPDESC_TYPE_FLAGS($800);   // Don't coerce empty strings into null/empty
+  {$EXTERNALSYM PDTF_DONTCOERCEEMPTYSTRINGS}
+  PDTF_ALWAYSINSUPPLEMENTALSTORE  = PROPDESC_TYPE_FLAGS($1000);  // Property is persisted into supplemental store, not file format property handler's store
+  {$EXTERNALSYM PDTF_ALWAYSINSUPPLEMENTALSTORE}
+  PDTF_ISSYSTEMPROPERTY           = PROPDESC_TYPE_FLAGS($80000000);  // This property is owned by the system
+  {$EXTERNALSYM PDTF_ISSYSTEMPROPERTY}
+  PDTF_MASK_ALL                   = PROPDESC_TYPE_FLAGS($80001FFF);
+  {$EXTERNALSYM PDTF_MASK_ALL}
+
+type
+  PPROPDESC_VIEW_FLAGS = ^PROPDESC_VIEW_FLAGS;
+  PROPDESC_VIEW_FLAGS = DWord;
+  {$EXTERNALSYM PROPDESC_VIEW_FLAGS}
+const
+  PDVF_DEFAULT             = PROPDESC_VIEW_FLAGS(0);
+  {$EXTERNALSYM PDVF_DEFAULT}
+  PDVF_CENTERALIGN         = PROPDESC_VIEW_FLAGS($1);
+  {$EXTERNALSYM PDVF_CENTERALIGN}
+  PDVF_RIGHTALIGN          = PROPDESC_VIEW_FLAGS($2);
+  {$EXTERNALSYM PDVF_RIGHTALIGN}
+  PDVF_BEGINNEWGROUP       = PROPDESC_VIEW_FLAGS($4);
+  {$EXTERNALSYM PDVF_BEGINNEWGROUP}
+  PDVF_FILLAREA            = PROPDESC_VIEW_FLAGS($8);
+  {$EXTERNALSYM PDVF_FILLAREA}
+  PDVF_SORTDESCENDING      = PROPDESC_VIEW_FLAGS($10);
+  {$EXTERNALSYM PDVF_SORTDESCENDING}
+  PDVF_SHOWONLYIFPRESENT   = PROPDESC_VIEW_FLAGS($20);
+  {$EXTERNALSYM PDVF_SHOWONLYIFPRESENT}
+  PDVF_SHOWBYDEFAULT       = PROPDESC_VIEW_FLAGS($40);
+  {$EXTERNALSYM PDVF_SHOWBYDEFAULT}
+  PDVF_SHOWINPRIMARYLIST   = PROPDESC_VIEW_FLAGS($80);
+  {$EXTERNALSYM PDVF_SHOWINPRIMARYLIST}
+  PDVF_SHOWINSECONDARYLIST = PROPDESC_VIEW_FLAGS($100);
+  {$EXTERNALSYM PDVF_SHOWINSECONDARYLIST}
+  PDVF_HIDELABEL           = PROPDESC_VIEW_FLAGS($200);
+  {$EXTERNALSYM PDVF_HIDELABEL}
+  PDVF_HIDDEN              = PROPDESC_VIEW_FLAGS($800);
+  {$EXTERNALSYM PDVF_HIDDEN}
+  PDVF_CANWRAP             = PROPDESC_VIEW_FLAGS($1000);
+  {$EXTERNALSYM PDVF_CANWRAP}
+  PDVF_MASK_ALL            = PROPDESC_VIEW_FLAGS($1BFF);
+  {$EXTERNALSYM PDVF_MASK_ALL}
+
+
+
+type
+  PPROPDESC_FORMAT_FLAGS = ^PROPDESC_FORMAT_FLAGS;
+  PROPDESC_FORMAT_FLAGS = DWord;
+  {$EXTERNALSYM PROPDESC_FORMAT_FLAGS}
+const
+  PDFF_DEFAULT              = PROPDESC_FORMAT_FLAGS($00000000);
+  {$EXTERNALSYM PDFF_DEFAULT}
+  PDFF_PREFIXNAME           = PROPDESC_FORMAT_FLAGS($00000001);  // Prefix the value with the property name
+  {$EXTERNALSYM PDFF_PREFIXNAME}
+  PDFF_FILENAME             = PROPDESC_FORMAT_FLAGS($00000002);  // Treat as a file name
+  {$EXTERNALSYM PDFF_FILENAME}
+  PDFF_ALWAYSKB             = PROPDESC_FORMAT_FLAGS($00000004);  // Always format byte sizes as KB
+  {$EXTERNALSYM PDFF_ALWAYSKB}
+  PDFF_RESERVED_RIGHTTOLEFT = PROPDESC_FORMAT_FLAGS($00000008);  // Reserved for legacy use.
+  {$EXTERNALSYM PDFF_RESERVED_RIGHTTOLEFT}
+  PDFF_SHORTTIME            = PROPDESC_FORMAT_FLAGS($00000010);  // Show time as "5:17 pm"
+  {$EXTERNALSYM PDFF_SHORTTIME}
+  PDFF_LONGTIME             = PROPDESC_FORMAT_FLAGS($00000020);  // Show time as "5:17:14 pm"
+  {$EXTERNALSYM PDFF_LONGTIME}
+  PDFF_HIDETIME             = PROPDESC_FORMAT_FLAGS($00000040);  // Hide the time-portion of the datetime
+  {$EXTERNALSYM PDFF_HIDETIME}
+  PDFF_SHORTDATE            = PROPDESC_FORMAT_FLAGS($00000080);  // Show date as "3/21/04"
+  {$EXTERNALSYM PDFF_SHORTDATE}
+  PDFF_LONGDATE             = PROPDESC_FORMAT_FLAGS($00000100);  // Show date as "Monday, March 21, 2004"
+  {$EXTERNALSYM PDFF_LONGDATE}
+  PDFF_HIDEDATE             = PROPDESC_FORMAT_FLAGS($00000200);  // Hide the date-portion of the datetime
+  {$EXTERNALSYM PDFF_HIDEDATE}
+  PDFF_RELATIVEDATE         = PROPDESC_FORMAT_FLAGS($00000400);  // Use friendly date descriptions like "Yesterday"
+  {$EXTERNALSYM PDFF_RELATIVEDATE}
+  PDFF_USEEDITINVITATION    = PROPDESC_FORMAT_FLAGS($00000800);  // Use edit invitation text if failed or empty
+  {$EXTERNALSYM PDFF_USEEDITINVITATION}
+  PDFF_READONLY             = PROPDESC_FORMAT_FLAGS($00001000);  // Use readonly format, fill with default text if empty and !PDFF_FAILIFEMPTYPROP
+  {$EXTERNALSYM PDFF_READONLY}
+  PDFF_NOAUTOREADINGORDER   = PROPDESC_FORMAT_FLAGS($00002000);   // Don't detect reading order automatically. Useful if you will be converting to Ansi and don't want Unicode reading order characters
+  {$EXTERNALSYM PDFF_NOAUTOREADINGORDER}
+
+
+type
+  // IPropertyDescriptionSearchInfo types
+  // ====================================
+  //
+  // IPropertyDescriptionSearchInfo
+  PPROPDESC_SEARCHINFO_FLAGS = ^PROPDESC_SEARCHINFO_FLAGS;
+  PROPDESC_SEARCHINFO_FLAGS = DWord;
+  {$EXTERNALSYM PROPDESC_SEARCHINFO_FLAGS}
+const
+  PDSIF_DEFAULT         = PROPDESC_SEARCHINFO_FLAGS($00000000);
+  {$EXTERNALSYM PDSIF_DEFAULT}
+  PDSIF_ININVERTEDINDEX = PROPDESC_SEARCHINFO_FLAGS($00000001);
+  {$EXTERNALSYM PDSIF_ININVERTEDINDEX}
+  PDSIF_ISCOLUMN        = PROPDESC_SEARCHINFO_FLAGS($00000002);
+  {$EXTERNALSYM PDSIF_ISCOLUMN}
+  PDSIF_ISCOLUMNSPARSE  = PROPDESC_SEARCHINFO_FLAGS($00000004);
+  {$EXTERNALSYM PDSIF_ISCOLUMNSPARSE}
+  PDSIF_ALWAYSINCLUDE   = PROPDESC_SEARCHINFO_FLAGS($00000008);
+  {$EXTERNALSYM PDSIF_ALWAYSINCLUDE}
+  PDSIF_USEFORTYPEAHEAD = PROPDESC_SEARCHINFO_FLAGS($00000010);
+  {$EXTERNALSYM PDSIF_USEFORTYPEAHEAD}
+
+
+type
+  // PERSIST_SPROPSTORE_FLAGS should be converted to use DEFINE_ENUM_FLAG_OPERATORS() but some callers pass "0"
+  // as the value of this to existing APIs.
+  // Those callers need to change to use FPSPS_DEFAULT.
+  PPERSIST_SPROPSTORE_FLAGS = ^PERSIST_SPROPSTORE_FLAGS;
+  _PERSIST_SPROPSTORE_FLAGS = DWord;
+  {$EXTERNALSYM _PERSIST_SPROPSTORE_FLAGS}
+  PERSIST_SPROPSTORE_FLAGS = _PERSIST_SPROPSTORE_FLAGS;
+  {$EXTERNALSYM PERSIST_SPROPSTORE_FLAGS}
+const
+  FPSPS_DEFAULT                   = PERSIST_SPROPSTORE_FLAGS($00000000);  // Windows 7 and later
+  {$EXTERNALSYM FPSPS_DEFAULT}
+  FPSPS_READONLY                  = PERSIST_SPROPSTORE_FLAGS($00000001);
+  {$EXTERNALSYM FPSPS_READONLY}
+  FPSPS_TREAT_NEW_VALUES_AS_DIRTY = PERSIST_SPROPSTORE_FLAGS($00000002);   // >= Win 8
+  {$EXTERNALSYM FPSPS_TREAT_NEW_VALUES_AS_DIRTY}
+
+
 
 type
 
@@ -205,39 +425,6 @@ type
   {$EXTERNALSYM IID_INamedPropertyStore}
 
 
-  // The following are new for Vista, but are use in downlevel components
-  PGETPROPERTYSTOREFLAGS = ^GETPROPERTYSTOREFLAGS;
-  GETPROPERTYSTOREFLAGS = (
-  // If no flags are specified (GPS_DEFAULT), a read-only property store is returned that includes properties for the file or item.
-  // In the case that the shell item is a file, the property store contains:
-  //     1. properties about the file from the file system
-  //     2. properties from the file itself provided by the file's property handler, unless that file is offline,
-  //         see GPS_OPENSLOWITEM
-  //     3. if requested by the file's property handler and supported by the file system, properties stored in the
-  //     alternate property store.
-  //
-  // Non-file shell items should return a similar read-only store
-  //
-  // Specifying other GPS_ flags modifies the store that is returned
-    GPS_DEFAULT                 = $0,
-    GPS_HANDLERPROPERTIESONLY   = $1,    // only include properties directly from the file's property handler
-    GPS_READWRITE               = $2,    // Writable stores will only include handler properties
-    GPS_TEMPORARY               = $4,    //  A read/write store that only holds properties for the lifetime of the IShellItem object
-    GPS_FASTPROPERTIESONLY      = $8,    // do not include any properties from the file's property handler (because the file's property handler will hit the disk)
-    GPS_OPENSLOWITEM            = $10,   // include properties from a file's property handler, even if it means retrieving the file from offline storage.
-    GPS_DELAYCREATION           = $20,   // delay the creation of the file's property handler until those properties are read, written, or enumerated
-    GPS_BESTEFFORT              = $40,   // For readonly stores, succeed and return all available properties, even if one or more sources of properties fails. Not valid with GPS_READWRITE.
-    GPS_NO_OPLOCK               = $80,   // some data sources protect the read property store with an oplock, this disables that
-    GPS_PREFERQUERYPROPERTIES   = $100,  // For file system WDS results, only retrieve properties from the indexer
-    GPS_EXTRINSICPROPERTIES     = $200,  // include properties from the file's secondary stream
-    GPS_EXTRINSICPROPERTIESONLY = $400,  // only include properties from the file's secondary stream
-    GPS_VOLATILEPROPERTIES	    = $800,  // include properties from the file's volatile store in the indexer
-    GPS_VOLATILEPROPERTIESONLY	= $1000, // only include properties from the file's volatile store in the indexer
-    GPS_MASK_VALID	            = $1fff
-  );
-  {$EXTERNALSYM GETPROPERTYSTOREFLAGS}
-
-
 
   // Interface IObjectWithPropertyKey
   // ================================
@@ -254,17 +441,6 @@ type
   end;
   IID_IObjectWithPropertyKey = IObjectWithPropertyKey;
   {$EXTERNALSYM IID_IObjectWithPropertyKey}
-
-
-  PPKA_FLAGS = ^PKA_FLAGS;
-  PKA_FLAGS = (
-    PKA_SET,                        // replace current value
-    PKA_APPEND,                     // append to current value - multi-value properties only
-    PKA_DELETE                      // delete from current value - multi-value properties only
-   );
-  {$EXTERNALSYM PKA_FLAGS}
-   // note, this enum type not named property, it should have been named PKA_OPERATION
-
 
 
   // Interface IPropertyChange
@@ -351,7 +527,8 @@ type
     PSC_NORMAL      = 0,
     PSC_NOTINSOURCE = 1,
     PSC_DIRTY       = 2,
-    PSC_READONLY    = 3);
+    PSC_READONLY    = 3
+  );
   {$EXTERNALSYM PSC_STATE}
 
 
@@ -431,52 +608,6 @@ type
   {$EXTERNALSYM IID_IPropertyEnumTypeList}
 
 
-  // IPropertyDescription types
-  // ==========================
-  //
-  PPROPDESC_TYPE_FLAGS = ^PROPDESC_TYPE_FLAGS;
-  PROPDESC_TYPE_FLAGS           = (
-    PDTF_DEFAULT                = $0,
-    PDTF_MULTIPLEVALUES         = $1,     // This property can have multiple values (as VT_VECTOR)
-    PDTF_ISINNATE               = $2,     // This property cannot be written to
-    PDTF_ISGROUP                = $4,     // This property is a group heading
-    PDTF_CANGROUPBY             = $8,     // The user can group by this property
-    PDTF_CANSTACKBY             = $10,    // The user can stack by this property
-    PDTF_ISTREEPROPERTY         = $20,    // This property contains a hierarchy
-    PDTF_INCLUDEINFULLTEXTQUERY = $40,    // Deprecated
-    PDTF_ISVIEWABLE             = $80,    // This property is meant to be viewed by the user
-    PDTF_ISQUERYABLE            = $100,   // Deprecated
-    PDTF_CANBEPURGED            = $200,   // This property can be purged, even if it is innate (property handler should respect this)
-    PDTF_SEARCHRAWVALUE         = $400,   // The raw (rather than formatted) value of this property should be used for searching
-    PDTF_DONTCOERCEEMPTYSTRINGS     = $800,                 // Don't coerce empty strings into null/empty
-    PDTF_ALWAYSINSUPPLEMENTALSTORE  = $1000,                // Property is persisted into supplemental store, not file format property handler's store
-    PDTF_ISSYSTEMPROPERTY           = Integer($80000000),   // This property is owned by the system
-    PDTF_MASK_ALL                   = Integer($80001FFF)
-  );
-  {$EXTERNALSYM PROPDESC_TYPE_FLAGS}
-
-
-  PPROPDESC_VIEW_FLAGS = ^PROPDESC_VIEW_FLAGS;
-  PROPDESC_VIEW_FLAGS           = (
-    PDVF_DEFAULT                = $00000000,
-    PDVF_CENTERALIGN            = $00000001,    // This property should be centered
-    PDVF_RIGHTALIGN             = $00000002,    // This property should be right aligned
-    PDVF_BEGINNEWGROUP          = $00000004,    // Show this property as the beginning of the next collection of properties in the view
-    PDVF_FILLAREA               = $00000008,    // Fill the remainder of the view area with the content of this property
-    PDVF_SORTDESCENDING         = $00000010,    // If this flag is set, the default sort for this property is highest-to-lowest. If this flag is not set, the default sort is lowest-to-highest
-    PDVF_SHOWONLYIFPRESENT      = $00000020,    // Only show this property if it is present
-    PDVF_SHOWBYDEFAULT          = $00000040,    // the property should be shown by default in a view (where applicable)
-    PDVF_SHOWINPRIMARYLIST      = $00000080,    // the property should be shown by default in primary column selection UI
-    PDVF_SHOWINSECONDARYLIST    = $00000100,    // the property should be shown by default in secondary column selection UI
-    PDVF_HIDELABEL              = $00000200,    // Hide the label if the view is normally inclined to show the label
-    // obsolete                 = 0x00000400,
-    PDVF_HIDDEN                 = $00000800,    // Don't display this property as a column in the UI
-    PDVF_CANWRAP                = $00001000,    // the property can be wrapped to the next row
-    PDVF_MASK_ALL               = $00001BFF
-  );
-  {$EXTERNALSYM PROPDESC_VIEW_FLAGS}
-
-
   PPROPDESC_DISPLAYTYPE = ^PROPDESC_DISPLAYTYPE;
   PROPDESC_DISPLAYTYPE = (
     PDDT_STRING     = 0,
@@ -499,33 +630,14 @@ type
   );
   {$EXTERNALSYM PROPDESC_GROUPING_RANGE}
 
-  PPROPDESC_FORMAT_FLAGS = ^PROPDESC_FORMAT_FLAGS;
-  PROPDESC_FORMAT_FLAGS       = (
-    PDFF_DEFAULT              = $00000000,
-    PDFF_PREFIXNAME           = $00000001,  // Prefix the value with the property name
-    PDFF_FILENAME             = $00000002,  // Treat as a file name
-    PDFF_ALWAYSKB             = $00000004,  // Always format byte sizes as KB
-    PDFF_RESERVED_RIGHTTOLEFT = $00000008,  // Reserved for legacy use.
-    PDFF_SHORTTIME            = $00000010,  // Show time as "5:17 pm"
-    PDFF_LONGTIME             = $00000020,  // Show time as "5:17:14 pm"
-    PDFF_HIDETIME             = $00000040,  // Hide the time-portion of the datetime
-    PDFF_SHORTDATE            = $00000080,  // Show date as "3/21/04"
-    PDFF_LONGDATE             = $00000100,  // Show date as "Monday, March 21, 2004"
-    PDFF_HIDEDATE             = $00000200,  // Hide the date-portion of the datetime
-    PDFF_RELATIVEDATE         = $00000400,  // Use friendly date descriptions like "Yesterday"
-    PDFF_USEEDITINVITATION    = $00000800,  // Use edit invitation text if failed or empty
-    PDFF_READONLY             = $00001000,  // Use readonly format, fill with default text if empty and !PDFF_FAILIFEMPTYPROP
-    PDFF_NOAUTOREADINGORDER   = $00002000   // Don't detect reading order automatically. Useful if you will be converting to Ansi and don't want Unicode reading order characters
-  );
-  {$EXTERNALSYM PROPDESC_FORMAT_FLAGS}
-
   PPROPDESC_SORTDESCRIPTION = ^PROPDESC_SORTDESCRIPTION;
   PROPDESC_SORTDESCRIPTION = (
     PDSD_GENERAL          = 0,
     PDSD_A_Z              = 1,
     PDSD_LOWEST_HIGHEST   = 2,
     PDSD_SMALLEST_BIGGEST = 3,
-    PDSD_OLDEST_NEWEST    = 4);
+    PDSD_OLDEST_NEWEST    = 4
+  );
   {$EXTERNALSYM PROPDESC_SORTDESCRIPTION}
 
 
@@ -541,7 +653,8 @@ type
     PDRDT_SPEED    = 7,
     PDRDT_RATE     = 8,
     PDRDT_RATING   = 9,
-    PDRDT_PRIORITY = 10);
+    PDRDT_PRIORITY = 10
+  );
   {$EXTERNALSYM PROPDESC_RELATIVEDESCRIPTION_TYPE}
 
 
@@ -566,7 +679,8 @@ type
     PDCOT_SIZE     = 2,
     PDCOT_DATETIME = 3,
     PDCOT_BOOLEAN  = 4,
-    PDCOT_NUMBER   = 5);
+    PDCOT_NUMBER   = 5
+  );
   {$EXTERNALSYM PROPDESC_CONDITION_TYPE}
 
 
@@ -639,7 +753,6 @@ type
   {$EXTERNALSYM IID_IPropertyDescription}
 
 
-
   // Interface IPropertyDescription2
   // ===============================
   //
@@ -655,8 +768,6 @@ type
   // IPropertyDescription2
   IID_IPropertyDescription2 = IPropertyDescription2;
   {$EXTERNALSYM IID_IPropertyDescription2}
-
-
 
 
   // Interface IPropertyDescriptionAliasInfo
@@ -679,22 +790,6 @@ type
   {$EXTERNALSYM IID_IPropertyDescriptionAliasInfo}
 
 
-
-  // IPropertyDescriptionSearchInfo types
-  // ====================================
-  //
-  // IPropertyDescriptionSearchInfo
-  PPROPDESC_SEARCHINFO_FLAGS = ^PROPDESC_SEARCHINFO_FLAGS;
-  PROPDESC_SEARCHINFO_FLAGS = (
-    PDSIF_DEFAULT         = $00000000,
-    PDSIF_ININVERTEDINDEX = $00000001,
-    PDSIF_ISCOLUMN        = $00000002,
-    PDSIF_ISCOLUMNSPARSE  = $00000004,
-    PDSIF_ALWAYSINCLUDE   = $00000008,
-    PDSIF_USEFORTYPEAHEAD = $00000010);
-  {$EXTERNALSYM PROPDESC_SEARCHINFO_FLAGS}
-
-
   PPROPDESC_COLUMNINDEX_TYPE = ^PROPDESC_COLUMNINDEX_TYPE;
   PROPDESC_COLUMNINDEX_TYPE = (
     PDCIT_NONE         = 0,
@@ -702,7 +797,8 @@ type
     PDCIT_INMEMORY     = 2,
     PDCIT_ONDEMAND     = 3,
     PDCIT_ONDISKALL    = 4,
-    PDCIT_ONDISKVECTOR = 5);
+    PDCIT_ONDISKVECTOR = 5
+  );
   {$EXTERNALSYM PROPDESC_COLUMNINDEX_TYPE}
 
 
@@ -878,18 +974,6 @@ type
   IID_IDelayedPropertyStoreFactory = IDelayedPropertyStoreFactory;
   {$EXTERNALSYM IID_IDelayedPropertyStoreFactory}
 
-
-  // PERSIST_SPROPSTORE_FLAGS should be converted to use DEFINE_ENUM_FLAG_OPERATORS() but some callers pass "0"
-  // as the value of this to existing APIs.
-  // Those callers need to change to use FPSPS_DEFAULT.
-  PPERSIST_SPROPSTORE_FLAGS = ^PERSIST_SPROPSTORE_FLAGS;
-  _PERSIST_SPROPSTORE_FLAGS         = (
-    FPSPS_DEFAULT                   = $00000000,
-    FPSPS_READONLY                  = $00000001,
-    FPSPS_TREAT_NEW_VALUES_AS_DIRTY = $00000002);
-  {$EXTERNALSYM _PERSIST_SPROPSTORE_FLAGS}
-  PERSIST_SPROPSTORE_FLAGS = _PERSIST_SPROPSTORE_FLAGS;
-  {$EXTERNALSYM PERSIST_SPROPSTORE_FLAGS}
 
   // new
 

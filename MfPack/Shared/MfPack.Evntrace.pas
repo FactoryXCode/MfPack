@@ -17,11 +17,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: LIBRARY CHANGES:
@@ -1992,7 +1994,7 @@ type
     //
     //      Input Format: An array of ULONGs
     //
-    TraceLbrEventListInfo = 21,
+    TraceLbrEventListInfo   = 21,
 
     //
     // TraceMaxPmcCounterQuery:
@@ -2012,8 +2014,9 @@ type
     //
     //      Output Format: ULONG
     //
-    TraceStreamCount = 23,
-    MaxTraceSetInfoClass = 23);
+    TraceStreamCount       = 23,
+    MaxTraceSetInfoClass   = 23
+  );
   {$EXTERNALSYM _TRACE_QUERY_INFO_CLASS}
   TRACE_QUERY_INFO_CLASS = _TRACE_QUERY_INFO_CLASS;
   {$EXTERNALSYM TRACE_QUERY_INFO_CLASS}

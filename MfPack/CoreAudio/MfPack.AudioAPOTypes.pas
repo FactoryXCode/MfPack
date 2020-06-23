@@ -16,12 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-//                                #1
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -159,7 +160,8 @@ type
   PAUDIO_CURVE_TYPE = ^AUDIO_CURVE_TYPE;
   AUDIO_CURVE_TYPE                = (
     AUDIO_CURVE_TYPE_NONE         = 0,
-    AUDIO_CURVE_TYPE_WINDOWS_FADE = 1);
+    AUDIO_CURVE_TYPE_WINDOWS_FADE = 1
+  );
   {$EXTERNALSYM AUDIO_CURVE_TYPE}
   AudioCurveType = AUDIO_CURVE_TYPE;
 {$DEFINE _AUDIO_CURVE_TYPE_DEFINED}
@@ -168,6 +170,7 @@ type
   // Additional Prototypes for ALL interfaces
 
   // Used by IAudioProcessingObjectRT
+  {$NODEFINE TApoConnectionPropertyArray}
   TApoConnectionPropertyArray = array [0..65535] of APO_CONNECTION_PROPERTY;
 
   // End of Additional Prototypes

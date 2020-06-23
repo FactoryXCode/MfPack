@@ -17,11 +17,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: This unit is also included in DsPack.DirectShow9.pas / Winapi.DirectShow9.pas
@@ -97,7 +99,8 @@ type
     AM_PROPERTY_AC3_BIT_STREAM_MODE   = 4,
     AM_PROPERTY_AC3_DIALOGUE_LEVEL    = 5,
     AM_PROPERTY_AC3_LANGUAGE_CODE     = 6,
-    AM_PROPERTY_AC3_ROOM_TYPE         = 7);
+    AM_PROPERTY_AC3_ROOM_TYPE         = 7
+  );
   {$EXTERNALSYM AM_PROPERTY_AC3}
 
   PAM_AC3_ERROR_CONCEALMENT = ^AM_AC3_ERROR_CONCEALMENT;
@@ -285,7 +288,8 @@ type
     AM_PROPERTY_COPY_DVD_SRM                  = $0A,
     AM_PROPERTY_DVDCOPY_SUPPORTS_NEW_KEYCOUNT = $0B,  // read only, BOOL (Delphi LongBool)
                                                       // gap
-    AM_PROPERTY_DVDCOPY_DISC_KEY              = $80);
+    AM_PROPERTY_DVDCOPY_DISC_KEY              = $80
+  );
   {$EXTERNALSYM AM_PROPERTY_DVDCOPYPROT}
 
 
@@ -296,7 +300,8 @@ type
   _AM_DIGITAL_CP                = (
     AM_DIGITAL_CP_OFF           = 0,
     AM_DIGITAL_CP_ON            = 1,
-    AM_DIGITAL_CP_DVD_COMPLIANT = 2);
+    AM_DIGITAL_CP_DVD_COMPLIANT = 2
+  );
   {$EXTERNALSYM _AM_DIGITAL_CP}
   AM_DIGITAL_CP = _AM_DIGITAL_CP;
   {$EXTERNALSYM AM_DIGITAL_CP}
@@ -362,7 +367,8 @@ type
     AM_DVDCOPYSTATE_INITIALIZE_TITLE            = 1,  // indicates we are starting a title
     AM_DVDCOPYSTATE_AUTHENTICATION_NOT_REQUIRED = 2,  // key copy protection sequence
     AM_DVDCOPYSTATE_AUTHENTICATION_REQUIRED     = 3,
-    AM_DVDCOPYSTATE_DONE                        = 4);
+    AM_DVDCOPYSTATE_DONE                        = 4
+  );
   {$EXTERNALSYM AM_DVDCOPYSTATE}
 
 
@@ -371,7 +377,8 @@ type
     AM_MACROVISION_DISABLED = 0,
     AM_MACROVISION_LEVEL1   = 1,
     AM_MACROVISION_LEVEL2   = 2,
-    AM_MACROVISION_LEVEL3   = 3);
+    AM_MACROVISION_LEVEL3   = 3
+  );
   {$EXTERNALSYM AM_COPY_MACROVISION_LEVEL}
 
 
@@ -434,7 +441,8 @@ type
     AM_MPEG2Level_Low      = 1,
     AM_MPEG2Level_Main     = 2,
     AM_MPEG2Level_High1440 = 3,
-    AM_MPEG2Level_High     = 4);
+    AM_MPEG2Level_High     = 4
+  );
   {$EXTERNALSYM AM_MPEG2Level}
 
 
@@ -444,7 +452,8 @@ type
     AM_MPEG2Profile_Main              = 2,
     AM_MPEG2Profile_SNRScalable       = 3,
     AM_MPEG2Profile_SpatiallyScalable = 4,
-    AM_MPEG2Profile_High              = 5);
+    AM_MPEG2Profile_High              = 5
+  );
   {$EXTERNALSYM AM_MPEG2Profile}
 
 
@@ -657,7 +666,8 @@ type
     AM_RATE_CorrectTS              = 8,           // w,  use LONG
     AM_RATE_ReverseMaxFullDataRate = 9,           // r,  use AM_MaxFullDataRate
     AM_RATE_ResetOnTimeDisc        = 10,          // rw, use DWORD - indicates supports new 'timeline reset on time discontinuity' sample
-    AM_RATE_QueryMapping           = 11);
+    AM_RATE_QueryMapping           = 11
+  );
   {$EXTERNALSYM AM_PROPERTY_TS_RATE_CHANGE}
 
 
@@ -725,7 +735,8 @@ type
   PDVD_PLAY_DIRECTION = ^DVD_PLAY_DIRECTION;
   DVD_PLAY_DIRECTION = (
     DVD_DIR_FORWARD  = 0,
-    DVD_DIR_BACKWARD = 1);
+    DVD_DIR_BACKWARD = 1
+  );
   {$EXTERNALSYM DVD_PLAY_DIRECTION}
 
   // Additional Prototypes for ALL interfaces

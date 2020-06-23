@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -613,17 +615,17 @@ const
 // note: When you have to compile for versions < Win10RS1 you have to comment out the proper one, or
 //       set the NTDDI_VERSION for the correct OS. (see MfPack.inc)
 
-  WMIGUID_ALL_ACCESS         = WMIGUID_ALL_ACCESS_RS1;
+  WMIGUID_ALL_ACCESS = WMIGUID_ALL_ACCESS_RS1;
   {$EXTERNALSYM WMIGUID_ALL_ACCESS}
 
 // #elif (NTDDI_VERSION >= NTDDI_WINXP)
 
-  //WMIGUID_ALL_ACCESS         = WMIGUID_ALL_ACCESS_WINXP;
+  //WMIGUID_ALL_ACCESS = WMIGUID_ALL_ACCESS_WINXP;
   //{$EXTERNALSYM WMIGUID_ALL_ACCESS}
 
 // #else
 
-  //WMIGUID_ALL_ACCESS         = WMIGUID_ALL_ACCESS_WIN2K;
+  //WMIGUID_ALL_ACCESS = WMIGUID_ALL_ACCESS_WIN2K;
   //{$EXTERNALSYM WMIGUID_ALL_ACCESS}
 
 //#endif

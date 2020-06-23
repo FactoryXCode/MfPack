@@ -18,11 +18,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -246,25 +248,30 @@ const
   {$EXTERNALSYM DVD_AUDIO_CAPS_SDDS}
 
 
-  // IOverlayNotify
-type
-  __MIDL___MIDL_itf_strmif_0000_0026_0002 = (
-    ADVISE_NONE           = $0,
-    ADVISE_CLIPPING       = $1,
-    ADVISE_PALETTE        = $2,
-    ADVISE_COLORKEY       = $4,
-    ADVISE_POSITION       = $8,
-    ADVISE_DISPLAY_CHANGE = $10);
-  {$EXTERNALSYM __MIDL___MIDL_itf_strmif_0000_0026_0002}
-
+  // IOverlay
 const
-  ADVISE_ALL  = (DWord(ADVISE_CLIPPING) or
-                 DWord(ADVISE_PALETTE) or
-                 DWord(ADVISE_COLORKEY) or
-                 DWord(ADVISE_POSITION));
+  //Enum __MIDL___MIDL_itf_strmif_0000_0026_0002
+  ADVISE_NONE           = DWord($0);
+  {$EXTERNALSYM ADVISE_NONE}
+  ADVISE_CLIPPING       = DWord($1);
+  {$EXTERNALSYM ADVISE_CLIPPING}
+  ADVISE_PALETTE        = DWord($2);
+  {$EXTERNALSYM ADVISE_PALETTE}
+  ADVISE_COLORKEY       = DWord($4);
+  {$EXTERNALSYM ADVISE_COLORKEY}
+  ADVISE_POSITION       = DWord($8);
+  {$EXTERNALSYM ADVISE_POSITION}
+  ADVISE_DISPLAY_CHANGE = DWord($10);
+  {$EXTERNALSYM ADVISE_DISPLAY_CHANGE}
 
-  ADVISE_ALL2 = (DWord(ADVISE_ALL) or
-                 DWord(ADVISE_DISPLAY_CHANGE));
+  ADVISE_ALL  = (ADVISE_CLIPPING or
+                 ADVISE_PALETTE or
+                 ADVISE_COLORKEY or
+                 ADVISE_POSITION);
+  {$EXTERNALSYM ADVISE_ALL}
+
+  ADVISE_ALL2 = (ADVISE_ALL or
+                 ADVISE_DISPLAY_CHANGE);
   {$EXTERNALSYM ADVISE_ALL2}
 
 
@@ -330,7 +337,7 @@ const
   {$EXTERNALSYM AnalogVideoMask_MCE_PAL}
 
   AnalogVideoMask_MCE_SECAM = ((((((( AnalogVideo_SECAM_B or
-                                     AnalogVideo_SECAM_D) or
+                                      AnalogVideo_SECAM_D) or
                                       AnalogVideo_SECAM_G) or
                                       AnalogVideo_SECAM_H) or
                                       AnalogVideo_SECAM_K) or
@@ -339,34 +346,140 @@ const
                                       AnalogVideo_SECAM_L1);
   {$EXTERNALSYM AnalogVideoMask_MCE_SECAM}
 
-type
-  __MIDL_IFilterMapper_0001 = (
-    MERIT_PREFERRED      = $800000,
-    MERIT_NORMAL         = $600000,
-    MERIT_UNLIKELY       = $400000,
-    MERIT_DO_NOT_USE     = $200000,
-    MERIT_SW_COMPRESSOR  = $100000,
-    MERIT_HW_COMPRESSOR  = $100050);
-  {$EXTERNALSYM __MIDL_IFilterMapper_0001}
-
-  __MIDL___MIDL_itf_strmif_0000_0023_0001 = (
-    REG_PINFLAG_B_ZERO      = $1,
-    REG_PINFLAG_B_RENDERER  = $2,
-    REG_PINFLAG_B_MANY      = $4,
-    REG_PINFLAG_B_OUTPUT    = $8);
-  {$EXTERNALSYM __MIDL___MIDL_itf_strmif_0000_0023_0001}
-
-  __MIDL___MIDL_itf_strmif_0000_0122_0001 = (
-    MAX_NUMBER_OF_STREAMS   = 16);
-  {$EXTERNALSYM __MIDL___MIDL_itf_strmif_0000_0122_0001}
-
-
 const
+  // Merit
+  MERIT_PREFERRED      = $800000;
+  {$EXTERNALSYM MERIT_PREFERRED}
+  MERIT_NORMAL         = $600000;
+  {$EXTERNALSYM MERIT_NORMAL}
+  MERIT_UNLIKELY       = $400000;
+  {$EXTERNALSYM MERIT_UNLIKELY}
+  MERIT_DO_NOT_USE     = $200000;
+  {$EXTERNALSYM MERIT_DO_NOT_USE}
+  MERIT_SW_COMPRESSOR  = $100000;
+  {$EXTERNALSYM MERIT_SW_COMPRESSOR}
+  MERIT_HW_COMPRESSOR  = $100050;
+  {$EXTERNALSYM MERIT_HW_COMPRESSOR}
+
+
+  // __MIDL___MIDL_itf_strmif_0000_0023_0001
+  REG_PINFLAG_B_ZERO     = $1;
+  {$EXTERNALSYM REG_PINFLAG_B_ZERO}
+  REG_PINFLAG_B_RENDERER = $2;
+  {$EXTERNALSYM REG_PINFLAG_B_RENDERER}
+  REG_PINFLAG_B_MANY     = $4;
+  {$EXTERNALSYM REG_PINFLAG_B_MANY}
+  REG_PINFLAG_B_OUTPUT   = $8;
+  {$EXTERNALSYM REG_PINFLAG_B_OUTPUT}
+
+  // __MIDL___MIDL_itf_strmif_0000_0122_0001
+  MAX_NUMBER_OF_STREAMS   = 16;
+  {$EXTERNALSYM MAX_NUMBER_OF_STREAMS}
 
   // Interface Identifiers
 
   STATIC_IID_IKsPropertySet          : TGUID = '{31EFAC30-515C-11d0-A9AA-00AA0061BE93}';
   {$EXTERNALSYM STATIC_IID_IKsPropertySet}
+
+type
+  PAM_SAMPLE_PROPERTY_FLAGS = ^tagAM_SAMPLE_PROPERTY_FLAGS;
+  tagAM_SAMPLE_PROPERTY_FLAGS = DWord;
+  {$EXTERNALSYM tagAM_SAMPLE_PROPERTY_FLAGS}
+  AM_SAMPLE_PROPERTY_FLAGS = tagAM_SAMPLE_PROPERTY_FLAGS;
+  {$EXTERNALSYM AM_SAMPLE_PROPERTY_FLAGS}
+const
+  AM_SAMPLE_SPLICEPOINT         = AM_SAMPLE_PROPERTY_FLAGS($1);
+  {$EXTERNALSYM AM_SAMPLE_SPLICEPOINT}
+  AM_SAMPLE_PREROLL             = AM_SAMPLE_PROPERTY_FLAGS($2);
+  {$EXTERNALSYM AM_SAMPLE_PREROLL}
+  AM_SAMPLE_DATADISCONTINUITY   = AM_SAMPLE_PROPERTY_FLAGS($4);
+  {$EXTERNALSYM AM_SAMPLE_DATADISCONTINUITY}
+  AM_SAMPLE_TYPECHANGED         = AM_SAMPLE_PROPERTY_FLAGS($8);
+  {$EXTERNALSYM AM_SAMPLE_TYPECHANGED}
+  AM_SAMPLE_TIMEVALID           = AM_SAMPLE_PROPERTY_FLAGS($10);
+  {$EXTERNALSYM AM_SAMPLE_TIMEVALID}
+  AM_SAMPLE_TIMEDISCONTINUITY   = AM_SAMPLE_PROPERTY_FLAGS($40);
+  {$EXTERNALSYM AM_SAMPLE_TIMEDISCONTINUITY}
+  AM_SAMPLE_FLUSH_ON_PAUSE      = AM_SAMPLE_PROPERTY_FLAGS($80);
+  {$EXTERNALSYM AM_SAMPLE_FLUSH_ON_PAUSE}
+  AM_SAMPLE_STOPVALID           = AM_SAMPLE_PROPERTY_FLAGS($100);
+  {$EXTERNALSYM AM_SAMPLE_STOPVALID}
+  AM_SAMPLE_ENDOFSTREAM         = AM_SAMPLE_PROPERTY_FLAGS($200);
+  {$EXTERNALSYM AM_SAMPLE_ENDOFSTREAM}
+  AM_STREAM_MEDIA               = AM_SAMPLE_PROPERTY_FLAGS(0);
+  {$EXTERNALSYM AM_STREAM_MEDIA}
+  AM_STREAM_CONTROL             = AM_SAMPLE_PROPERTY_FLAGS(1);
+  {$EXTERNALSYM AM_STREAM_CONTROL}
+
+
+type
+  PAM_SEEKING_SEEKING_FLAGS = ^AM_SEEKING_SEEKING_FLAGS;
+  AM_SEEKING_SeekingFlags             = DWord;
+  {$EXTERNALSYM AM_SEEKING_SeekingFlags}
+  AM_SEEKING_SEEKING_FLAGS = AM_SEEKING_SeekingFlags;
+  {$EXTERNALSYM AM_SEEKING_SEEKING_FLAGS}
+const
+  AM_SEEKING_NoPositioning          = AM_SEEKING_SEEKING_FLAGS(0);
+  {$EXTERNALSYM AM_SEEKING_NoPositioning}
+  AM_SEEKING_AbsolutePositioning    = AM_SEEKING_SEEKING_FLAGS($1);
+  {$EXTERNALSYM AM_SEEKING_AbsolutePositioning}
+  AM_SEEKING_RelativePositioning    = AM_SEEKING_SEEKING_FLAGS($2);
+  {$EXTERNALSYM AM_SEEKING_RelativePositioning}
+  AM_SEEKING_IncrementalPositioning = AM_SEEKING_SEEKING_FLAGS($3);
+  {$EXTERNALSYM AM_SEEKING_IncrementalPositioning}
+  AM_SEEKING_PositioningBitsMask    = AM_SEEKING_SEEKING_FLAGS($3);
+  {$EXTERNALSYM AM_SEEKING_PositioningBitsMask}
+
+  AM_SEEKING_SeekToKeyFrame         = AM_SEEKING_SEEKING_FLAGS($4);
+  {$EXTERNALSYM AM_SEEKING_SeekToKeyFrame}
+  AM_SEEKING_ReturnTime             = AM_SEEKING_SEEKING_FLAGS($8);
+  {$EXTERNALSYM AM_SEEKING_ReturnTime}
+  AM_SEEKING_Segment                = AM_SEEKING_SEEKING_FLAGS($10);
+  {$EXTERNALSYM AM_SEEKING_Segment}
+  AM_SEEKING_NoFlush                = AM_SEEKING_SEEKING_FLAGS($20);
+  {$EXTERNALSYM AM_SEEKING_NoFlush}
+
+
+type
+  PAM_SEEKING_SEEKING_CAPABILITIES = ^AM_SEEKING_SEEKING_CAPABILITIES;
+  AM_SEEKING_SeekingCapabilities = DWord;
+  {$EXTERNALSYM AM_SEEKING_SeekingCapabilities}
+  AM_SEEKING_SEEKING_CAPABILITIES = AM_SEEKING_SeekingCapabilities;
+  {$EXTERNALSYM AM_SEEKING_SEEKING_CAPABILITIES}
+const
+  AM_SEEKING_CanSeekAbsolute  = AM_SEEKING_SEEKING_CAPABILITIES($1);
+  {$EXTERNALSYM AM_SEEKING_CanSeekAbsolute}
+  AM_SEEKING_CanSeekForwards  = AM_SEEKING_SEEKING_CAPABILITIES($2);
+  {$EXTERNALSYM AM_SEEKING_CanSeekForwards}
+  AM_SEEKING_CanSeekBackwards = AM_SEEKING_SEEKING_CAPABILITIES($4);
+  {$EXTERNALSYM AM_SEEKING_CanSeekBackwards}
+  AM_SEEKING_CanGetCurrentPos = AM_SEEKING_SEEKING_CAPABILITIES($8);
+  {$EXTERNALSYM AM_SEEKING_CanGetCurrentPos}
+  AM_SEEKING_CanGetStopPos    = AM_SEEKING_SEEKING_CAPABILITIES($10);
+  {$EXTERNALSYM AM_SEEKING_CanGetStopPos}
+  AM_SEEKING_CanGetDuration   = AM_SEEKING_SEEKING_CAPABILITIES($20);
+  {$EXTERNALSYM AM_SEEKING_CanGetDuration}
+  AM_SEEKING_CanPlayBackwards = AM_SEEKING_SEEKING_CAPABILITIES($40);
+  {$EXTERNALSYM AM_SEEKING_CanPlayBackwards}
+  AM_SEEKING_CanDoSegments    = AM_SEEKING_SEEKING_CAPABILITIES($80);
+  {$EXTERNALSYM AM_SEEKING_CanDoSegments}
+  AM_SEEKING_Source           = AM_SEEKING_SEEKING_CAPABILITIES($100);
+  {$EXTERNALSYM AM_SEEKING_Source}
+
+type
+  PAM_STREAM_INFO_FLAGS = ^AM_STREAM_INFO_FLAGS;
+  AM_STREAM_INFO_FLAGS = DWord;
+  {$EXTERNALSYM AM_STREAM_INFO_FLAGS}
+const
+  AM_STREAM_INFO_START_DEFINED   = AM_STREAM_INFO_FLAGS($1);
+  {$EXTERNALSYM AM_STREAM_INFO_START_DEFINED}
+  AM_STREAM_INFO_STOP_DEFINED    = AM_STREAM_INFO_FLAGS($2);
+  {$EXTERNALSYM AM_STREAM_INFO_STOP_DEFINED}
+  AM_STREAM_INFO_DISCARDING      = AM_STREAM_INFO_FLAGS($4);
+  {$EXTERNALSYM AM_STREAM_INFO_DISCARDING}
+  AM_STREAM_INFO_STOP_SEND_EXTRA = AM_STREAM_INFO_FLAGS($10);
+  {$EXTERNALSYM AM_STREAM_INFO_STOP_SEND_EXTRA}
+
 
 type
 
@@ -450,7 +563,8 @@ type
   PPIN_DIRECTION = ^PIN_DIRECTION;
   _PinDirection   = (
     PINDIR_INPUT  = 0,
-    PINDIR_OUTPUT = (PINDIR_INPUT + 1));
+    PINDIR_OUTPUT = (PINDIR_INPUT + 1)
+  );
   {$EXTERNALSYM _PinDirection}
   PIN_DIRECTION = _PinDirection;
   {$EXTERNALSYM PIN_DIRECTION}
@@ -667,7 +781,8 @@ type
   _FilterState    = (
     State_Stopped = 0,
     State_Paused  = (State_Stopped + 1),
-    State_Running = (State_Paused + 1));
+    State_Running = (State_Paused + 1)
+  );
   {$EXTERNALSYM _FilterState}
   FILTER_STATE = _FilterState;
   {$EXTERNALSYM FILTER_STATE}
@@ -758,7 +873,6 @@ type
   end;
   IID_IBaseFilter = IBaseFilter;
   {$EXTERNALSYM IID_IBaseFilter}
-
 
 
   // Interface IReferenceClock
@@ -866,24 +980,6 @@ type
   IID_IMediaSample = IMediaSample;
   {$EXTERNALSYM IID_IMediaSample}
 
-
-
-  PAM_SAMPLE_PROPERTY_FLAGS = ^tagAM_SAMPLE_PROPERTY_FLAGS;
-  tagAM_SAMPLE_PROPERTY_FLAGS = (
-    AM_SAMPLE_SPLICEPOINT         = $1,
-    AM_SAMPLE_PREROLL             = $2,
-    AM_SAMPLE_DATADISCONTINUITY   = $4,
-    AM_SAMPLE_TYPECHANGED         = $8,
-    AM_SAMPLE_TIMEVALID           = $10,
-    AM_SAMPLE_TIMEDISCONTINUITY   = $40,
-    AM_SAMPLE_FLUSH_ON_PAUSE      = $80,
-    AM_SAMPLE_STOPVALID           = $100,
-    AM_SAMPLE_ENDOFSTREAM         = $200,
-    AM_STREAM_MEDIA               = 0,
-    AM_STREAM_CONTROL             = 1);
-  {$EXTERNALSYM tagAM_SAMPLE_PROPERTY_FLAGS}
-  AM_SAMPLE_PROPERTY_FLAGS = tagAM_SAMPLE_PROPERTY_FLAGS;
-  {$EXTERNALSYM AM_SAMPLE_PROPERTY_FLAGS}
 
   PAmSample2Properties = ^AM_SAMPLE2_PROPERTIES;
   tagAM_SAMPLE2_PROPERTIES = record
@@ -1053,39 +1149,6 @@ type
   {$EXTERNALSYM IID_IAMovieSetup}
 
 
-  PAM_SEEKING_SEEKING_FLAGS = ^AM_SEEKING_SEEKING_FLAGS;
-  AM_SEEKING_SeekingFlags             = (
-    AM_SEEKING_NoPositioning          = 0,
-    AM_SEEKING_AbsolutePositioning    = $1,
-    AM_SEEKING_RelativePositioning    = $2,
-    AM_SEEKING_IncrementalPositioning = $3,
-    AM_SEEKING_PositioningBitsMask    = $3,
-    AM_SEEKING_SeekToKeyFrame         = $4,
-    AM_SEEKING_ReturnTime             = $8,
-    AM_SEEKING_Segment                = $10,
-    AM_SEEKING_NoFlush                = $20);
-  {$EXTERNALSYM AM_SEEKING_SeekingFlags}
-  AM_SEEKING_SEEKING_FLAGS = AM_SEEKING_SeekingFlags;
-  {$EXTERNALSYM AM_SEEKING_SEEKING_FLAGS}
-
-
-  PAM_SEEKING_SEEKING_CAPABILITIES = ^AM_SEEKING_SEEKING_CAPABILITIES;
-  AM_SEEKING_SeekingCapabilities = (
-    AM_SEEKING_CanSeekAbsolute  = $1,
-    AM_SEEKING_CanSeekForwards  = $2,
-    AM_SEEKING_CanSeekBackwards = $4,
-    AM_SEEKING_CanGetCurrentPos = $8,
-    AM_SEEKING_CanGetStopPos    = $10,
-    AM_SEEKING_CanGetDuration   = $20,
-    AM_SEEKING_CanPlayBackwards = $40,
-    AM_SEEKING_CanDoSegments    = $80,
-    AM_SEEKING_Source           = $100);
-  {$EXTERNALSYM AM_SEEKING_SeekingCapabilities}
-  AM_SEEKING_SEEKING_CAPABILITIES = AM_SEEKING_SeekingCapabilities;
-  {$EXTERNALSYM AM_SEEKING_SEEKING_CAPABILITIES}
-
-
-
   // Interface IMediaSeeking
   // =======================
   //
@@ -1094,9 +1157,9 @@ type
   IMediaSeeking = interface(IUnknown)
     ['{36b73880-c2c8-11cf-8b46-00805f6cef60}']
 
-      function GetCapabilities(out pCapabilities: DWORD): HResult; stdcall;
+      function GetCapabilities(out pCapabilities: AM_SEEKING_SEEKING_CAPABILITIES): HResult; stdcall;
 
-      function CheckCapabilities(var pCapabilities: DWORD): HResult; stdcall;
+      function CheckCapabilities(var pCapabilities: AM_SEEKING_SEEKING_CAPABILITIES): HResult; stdcall;
 
       function IsFormatSupported(const pFormat: TGuid): HResult; stdcall;
 
@@ -1120,9 +1183,9 @@ type
                                  const pSourceFormat: TGuid): HResult; stdcall;
 
       function SetPositions(var pCurrent: LONGLONG;
-                            dwCurrentFlags: DWORD;
+                            dwCurrentFlags: AM_SEEKING_SEEKING_FLAGS;
                             var pStop: LONGLONG;
-                            dwStopFlags: DWORD): HResult; stdcall;
+                            dwStopFlags: AM_SEEKING_SEEKING_FLAGS): HResult; stdcall;
 
       function GetPositions(out pCurrent: LONGLONG;
                             out pStop: LONGLONG): HResult; stdcall;
@@ -1522,7 +1585,7 @@ type
   PRGNDATA = ^RGNDATA;
   _RGNDATA = record
     rdh: RGNDATAHEADER;
-    Buffer: array of AnsiChar;
+    Buffer: array [0..0] of AnsiChar;
   end;
   {$EXTERNALSYM _RGNDATA}
   RGNDATA = _RGNDATA;
@@ -1584,7 +1647,7 @@ type
   IOverlay = interface(IUnknown)
     ['{56A868A1-0AD4-11CE-B03A-0020AF0BA770}']
 
-      function GetPalette(var pdwColors: DWORD;
+      function GetPalette(out pdwColors: DWORD;
                           out ppPalette: PALETTEENTRY): HResult; stdcall;
 
       function SetPalette(dwColors: DWORD;
@@ -1624,9 +1687,9 @@ type
   IMediaEventSink = interface(IUnknown)
     ['{56a868a2-0ad4-11ce-b03a-0020af0ba770}']
 
-      function Notify(const EventCode: LONG;
-                      const EventParam1: LONG_PTR;
-                      const EventParam2: LONG_PTR): HResult; stdcall;
+      function Notify(EventCode: LONG;
+                      EventParam1: LONG_PTR;
+                      EventParam2: LONG_PTR): HResult; stdcall;
 
   end;
   IID_IMediaEventSink = IMediaEventSink;
@@ -1691,7 +1754,8 @@ type
 
 
   AM_FILESINK_FLAGS = (
-    AM_FILE_OVERWRITE = 1);
+    AM_FILE_OVERWRITE = 1
+  );
   {$EXTERNALSYM AM_FILESINK_FLAGS}
 
 
@@ -1752,7 +1816,7 @@ type
                              const riid: TGUID;
                              out ppint {IUnknown} ): HResult; stdcall;
 
-      function RenderStream(const pCategory: PGUID;
+      function RenderStream(pCategory: PGUID;
                             pSource: IUnknown;
                             pfCompressor: IBaseFilter;
                             pfRenderer: IBaseFilter): HResult; stdcall;
@@ -1853,7 +1917,8 @@ type
 
 
   _AM_RENSDEREXFLAGS = (
-    AM_RENDEREX_RENDERTOEXISTINGRENDERERS = $01);
+    AM_RENDEREX_RENDERTOEXISTINGRENDERERS = $01
+  );
   {$EXTERNALSYM _AM_RENSDEREXFLAGS}
 
 
@@ -2058,15 +2123,6 @@ type
   {$EXTERNALSYM IID_IDistributorNotify}
 
 
-  PAM_STREAM_INFO_FLAGS = ^AM_STREAM_INFO_FLAGS;
-  AM_STREAM_INFO_FLAGS             = (
-    AM_STREAM_INFO_START_DEFINED   = $1,
-    AM_STREAM_INFO_STOP_DEFINED    = $2,
-    AM_STREAM_INFO_DISCARDING      = $4,
-    AM_STREAM_INFO_STOP_SEND_EXTRA = $10);
-  {$EXTERNALSYM AM_STREAM_INFO_FLAGS}
-
-
   PAM_STREAM_INFO = ^AM_STREAM_INFO;
   AM_STREAM_INFO = record
     tStart: REFERENCE_TIME;
@@ -2194,7 +2250,8 @@ type
     INTERLEAVE_NONE           = 0,
     INTERLEAVE_CAPTURE       = (INTERLEAVE_NONE + 1) ,
     INTERLEAVE_FULL           = (INTERLEAVE_CAPTURE + 1) ,
-    INTERLEAVE_NONE_BUFFERED = (INTERLEAVE_FULL + 1));
+    INTERLEAVE_NONE_BUFFERED = (INTERLEAVE_FULL + 1)
+  );
   {$EXTERNALSYM InterleavingMode}
 
 
@@ -2249,7 +2306,8 @@ type
     CompressionCaps_CanCrunch    = $2,
     CompressionCaps_CanKeyFrame  = $4,
     CompressionCaps_CanBFrame    = $8,
-    CompressionCaps_CanWindow    = $10);
+    CompressionCaps_CanWindow    = $10
+  );
   {$EXTERNALSYM CompressionCaps}
 
 
@@ -2300,7 +2358,8 @@ type
   VfwCaptureDialogs = (
     VfwCaptureDialog_Source  = $1,
     VfwCaptureDialog_Format  = $2,
-    VfwCaptureDialog_Display = $4);
+    VfwCaptureDialog_Display = $4
+  );
   {$EXTERNALSYM VfwCaptureDialogs}
 
   PVfwCompressDialogs = ^VfwCompressDialogs;
@@ -2308,7 +2367,8 @@ type
     VfwCompressDialog_Config      = $1,
     VfwCompressDialog_About       = $2,
     VfwCompressDialog_QueryConfig = $4,
-    VfwCompressDialog_QueryAbout  = $8);
+    VfwCompressDialog_QueryAbout  = $8
+  );
   {$EXTERNALSYM VfwCompressDialogs}
 
 
@@ -2456,7 +2516,8 @@ type
   PTunerInputType = ^TunerInputType;
   tagTunerInputType = (
     TunerInputCable = 0,
-    TunerInputAntenna = (TunerInputCable + 1));
+    TunerInputAntenna = (TunerInputCable + 1)
+  );
   {$EXTERNALSYM tagTunerInputType}
   TunerInputType = tagTunerInputType;
   {$EXTERNALSYM TunerInputType}
@@ -2465,7 +2526,8 @@ type
   PVideoCopyProtectionType = ^VideoCopyProtectionType;
   VideoCopyProtectionType               = (
     VideoCopyProtectionMacrovisionBasic = 0,
-    VideoCopyProtectionMacrovisionCBI   = (VideoCopyProtectionMacrovisionBasic + 1));
+    VideoCopyProtectionMacrovisionCBI   = (VideoCopyProtectionMacrovisionBasic + 1)
+  );
   {$EXTERNALSYM VideoCopyProtectionType}
 
 
@@ -2495,7 +2557,8 @@ type
     PhysConn_Audio_AUX             = (PhysConn_Audio_SCSI + 1),
     PhysConn_Audio_1394            = (PhysConn_Audio_AUX + 1),
     PhysConn_Audio_USB             = (PhysConn_Audio_1394 + 1),
-    PhysConn_Audio_AudioDecoder    = (PhysConn_Audio_USB + 1));
+    PhysConn_Audio_AudioDecoder    = (PhysConn_Audio_USB + 1)
+  );
   {$EXTERNALSYM tagPhysicalConnectorType}
   PhysicalConnectorType = tagPhysicalConnectorType;
   {$EXTERNALSYM PhysicalConnectorType}
@@ -2553,7 +2616,8 @@ type
   PVideoProcAmpFlags = ^VideoProcAmpFlags;
   tagVideoProcAmpFlags        = (
     VideoProcAmp_Flags_Auto   = $1,
-    VideoProcAmp_Flags_Manual = $2);
+    VideoProcAmp_Flags_Manual = $2
+  );
   {$EXTERNALSYM tagVideoProcAmpFlags}
   VideoProcAmpFlags = tagVideoProcAmpFlags;
   {$EXTERNALSYM VideoProcAmpFlags}
@@ -2595,7 +2659,8 @@ type
     CameraControl_Zoom,
     CameraControl_Exposure,
     CameraControl_Iris,
-    CameraControl_Focus);
+    CameraControl_Focus
+  );
   {$EXTERNALSYM tagCameraControlProperty}
   CameraControlProperty = tagCameraControlProperty;
   {$EXTERNALSYM CameraControlProperty}
@@ -2604,7 +2669,8 @@ type
   PCameraControlFlags = ^CameraControlFlags;
   tagCameraControlFlags = (
     CameraControl_Flags_Manual = 1,
-    CameraControl_Flags_Auto);
+    CameraControl_Flags_Auto   = 2
+  );
   {$EXTERNALSYM tagCameraControlFlags}
   CameraControlFlags = tagCameraControlFlags;
   {$EXTERNALSYM CameraControlFlags}
@@ -2643,7 +2709,8 @@ type
     VideoControlFlag_FlipHorizontal        = $1,
     VideoControlFlag_FlipVertical          = $2,
     VideoControlFlag_ExternalTriggerEnable = $4,
-    VideoControlFlag_Trigger               = $8);
+    VideoControlFlag_Trigger               = $8
+  );
   {$EXTERNALSYM tagVideoControlFlags}
   VideoControlFlags = tagVideoControlFlags;
   {$EXTERNALSYM VideoControlFlags}
@@ -2717,7 +2784,8 @@ type
   PAMTunerSubChannel = ^AMTunerSubChannel;
   tagAMTunerSubChannel = (
      AMTUNER_SUBCHAN_NO_TUNE  = -2,
-    AMTUNER_SUBCHAN_DEFAULT   = -1);
+    AMTUNER_SUBCHAN_DEFAULT   = -1
+  );
   {$EXTERNALSYM tagAMTunerSubChannel}
   AMTunerSubChannel = tagAMTunerSubChannel;
   {$EXTERNALSYM AMTunerSubChannel}
@@ -2727,7 +2795,8 @@ type
   tagAMTunerSignalStrength = (
     AMTUNER_HASNOSIGNALSTRENGTH  = -1,
     AMTUNER_NOSIGNAL             = 0,
-    AMTUNER_SIGNALPRESENT        = 1);
+    AMTUNER_SIGNALPRESENT        = 1
+  );
   {$EXTERNALSYM tagAMTunerSignalStrength}
   AMTunerSignalStrength = tagAMTunerSignalStrength;
   {$EXTERNALSYM AMTunerSignalStrength}
@@ -2739,7 +2808,8 @@ type
     AMTUNER_MODE_TV        = 1,
     AMTUNER_MODE_FM_RADIO  = 2,
     AMTUNER_MODE_AM_RADIO  = 4,
-    AMTUNER_MODE_DSS       = 8);
+    AMTUNER_MODE_DSS       = 8
+  );
   {$EXTERNALSYM tagAMTunerModeType}
   AMTunerModeType = tagAMTunerModeType;
   {$EXTERNALSYM AMTunerModeType}
@@ -2747,7 +2817,8 @@ type
 
   PAMTunerEventType = ^AMTunerEventType;
   tagAMTunerEventType = (
-    AMTUNER_EVENT_CHANGED = 1);
+    AMTUNER_EVENT_CHANGED = 1
+  );
   {$EXTERNALSYM tagAMTunerEventType}
   AMTunerEventType = tagAMTunerEventType;
   {$EXTERNALSYM AMTunerEventType}
@@ -2887,7 +2958,8 @@ type
     AMTVAUDIO_PRESET_STEREO = $200,
     AMTVAUDIO_PRESET_LANG_A = $1000,
     AMTVAUDIO_PRESET_LANG_B = $2000,
-    AMTVAUDIO_PRESET_LANG_C = $4000);
+    AMTVAUDIO_PRESET_LANG_C = $4000
+  );
   {$EXTERNALSYM tagTVAudioMode}
   TVAudioMode = tagTVAudioMode;
   {$EXTERNALSYM TVAudioMode}
@@ -2895,7 +2967,8 @@ type
 
   PAMTVAudioEventType = ^AMTVAudioEventType;
   tagAMTVAudioEventType     = (
-    AMTVAUDIO_EVENT_CHANGED = $1);
+    AMTVAUDIO_EVENT_CHANGED = $1
+  );
   {$EXTERNALSYM tagAMTVAudioEventType}
   AMTVAudioEventType = tagAMTVAudioEventType;
   {$EXTERNALSYM AMTVAudioEventType}
@@ -2976,7 +3049,8 @@ type
   PAMPropertyPin = ^AMPROPERTY_PIN;
   AMPROPERTY_PIN = (
     AMPROPERTY_PIN_CATEGORY,
-    AMPROPERTY_PIN_MEDIUM);
+    AMPROPERTY_PIN_MEDIUM
+  );
   {$EXTERNALSYM AMPROPERTY_PIN}
 
 
@@ -3372,11 +3446,11 @@ type
   {$EXTERNALSYM IID_IAMDevMemoryControl}
 
 
-
   PAMSTREAMSELECTINFOFLAGS = ^_AMSTREAMSELECTINFOFLAGS;
   _AMSTREAMSELECTINFOFLAGS = (
     AMSTREAMSELECTINFO_ENABLED    = $1,
-    AMSTREAMSELECTINFO_EXCLUSIVE  = $2);
+    AMSTREAMSELECTINFO_EXCLUSIVE  = $2
+  );
   {$EXTERNALSYM _AMSTREAMSELECTINFOFLAGS}
   AMSTREAMSELECTINFOFLAGS = _AMSTREAMSELECTINFOFLAGS;
   {$EXTERNALSYM AMSTREAMSELECTINFOFLAGS}
@@ -3385,7 +3459,8 @@ type
   PAMSTREAMSELECTENABLEFLAGS = ^_AMSTREAMSELECTENABLEFLAGS;
   _AMSTREAMSELECTENABLEFLAGS = (
     AMSTREAMSELECTENABLE_ENABLE      = $1,
-    AMSTREAMSELECTENABLE_ENABLEALL   = $2);
+    AMSTREAMSELECTENABLE_ENABLEALL   = $2
+  );
   {$EXTERNALSYM _AMSTREAMSELECTENABLEFLAGS}
   AMSTREAMSELECTENABLEFLAGS = _AMSTREAMSELECTENABLEFLAGS;
   {$EXTERNALSYM AMSTREAMSELECTENABLEFLAGS}
@@ -3454,7 +3529,8 @@ type
   PAM_FILTER_MISC_FLAGS = ^_AM_FILTER_MISC_FLAGS;
   _AM_FILTER_MISC_FLAGS = (
     AM_FILTER_MISC_FLAGS_IS_RENDERER  = $1,
-    AM_FILTER_MISC_FLAGS_IS_SOURCE    = $2);
+    AM_FILTER_MISC_FLAGS_IS_SOURCE    = $2
+  );
   {$EXTERNALSYM _AM_FILTER_MISC_FLAGS}
   AM_FILTER_MISC_FLAGS = _AM_FILTER_MISC_FLAGS;
   {$EXTERNALSYM AM_FILTER_MISC_FLAGS}
@@ -3518,7 +3594,8 @@ type
     DECIMATION_USE_DECODER_ONLY   = (DECIMATION_LEGACY + 1),
     DECIMATION_USE_VIDEOPORT_ONLY = (DECIMATION_USE_DECODER_ONLY + 1),
     DECIMATION_USE_OVERLAY_ONLY   = (DECIMATION_USE_VIDEOPORT_ONLY + 1),
-    DECIMATION_DEFAULT            = (DECIMATION_USE_OVERLAY_ONLY + 1));
+    DECIMATION_DEFAULT            = (DECIMATION_USE_OVERLAY_ONLY + 1)
+  );
   {$EXTERNALSYM _DECIMATION_USAGE}
   DECIMATION_USAGE = _DECIMATION_USAGE;
   {$EXTERNALSYM DECIMATION_USAGE}
@@ -3568,7 +3645,8 @@ type
     AM_PUSHSOURCECAPS_NOT_LIVE           = $2,
     AM_PUSHSOURCECAPS_PRIVATE_CLOCK      = $4,
     AM_PUSHSOURCEREQS_USE_STREAM_CLOCK   = $10000,
-    AM_PUSHSOURCEREQS_USE_CLOCK_CHAIN    = $20000);
+    AM_PUSHSOURCEREQS_USE_CLOCK_CHAIN    = $20000
+  );
   {$EXTERNALSYM _AM_PUSHSOURCE_FLAGS}
   AM_PUSHSOURCE_FLAGS = _AM_PUSHSOURCE_FLAGS;
   {$EXTERNALSYM AM_PUSHSOURCE_FLAGS}
@@ -3653,7 +3731,8 @@ type
     DVENCODERRESOLUTION_720x480  = 2012,
     DVENCODERRESOLUTION_360x240  = 2013,
     DVENCODERRESOLUTION_180x120  = 2014,
-    DVENCODERRESOLUTION_88x60    = 2015);
+    DVENCODERRESOLUTION_88x60    = 2015
+  );
   {$EXTERNALSYM _DVENCODERRESOLUTION}
   DVENCODERRESOLUTION = _DVENCODERRESOLUTION;
   {$EXTERNALSYM DVENCODERRESOLUTION}
@@ -3661,7 +3740,8 @@ type
   PDVENCODERVIDEOFORMAT = ^_DVENCODERVIDEOFORMAT;
   _DVENCODERVIDEOFORMAT = (
     DVENCODERVIDEOFORMAT_NTSC  = 2000,
-    DVENCODERVIDEOFORMAT_PAL   = 2001);
+    DVENCODERVIDEOFORMAT_PAL   = 2001
+  );
   {$EXTERNALSYM _DVENCODERVIDEOFORMAT}
   DVENCODERVIDEOFORMAT = _DVENCODERVIDEOFORMAT;
   {$EXTERNALSYM DVENCODERVIDEOFORMAT}
@@ -3670,7 +3750,8 @@ type
   _DVENCODERFORMAT = (
     DVENCODERFORMAT_DVSD  = 2007,
     DVENCODERFORMAT_DVHD  = 2008,
-    DVENCODERFORMAT_DVSL  = 2009);
+    DVENCODERFORMAT_DVSL  = 2009
+  );
   {$EXTERNALSYM _DVENCODERFORMAT}
   DVENCODERFORMAT = _DVENCODERFORMAT;
   {$EXTERNALSYM DVENCODERFORMAT}
@@ -3706,7 +3787,8 @@ type
     DVDECODERRESOLUTION_720x480  = 1000,
     DVDECODERRESOLUTION_360x240  = 1001,
     DVDECODERRESOLUTION_180x120  = 1002,
-    DVDECODERRESOLUTION_88x60    = 1003);
+    DVDECODERRESOLUTION_88x60    = 1003
+  );
   {$EXTERNALSYM _DVDECODERRESOLUTION}
   DVDECODERRESOLUTION = _DVDECODERRESOLUTION;
   {$EXTERNALSYM DVDECODERRESOLUTION}
@@ -3716,7 +3798,8 @@ type
     DVRESOLUTION_FULL      = 1000,
     DVRESOLUTION_HALF      = 1001,
     DVRESOLUTION_QUARTER   = 1002,
-    DVRESOLUTION_DC        = 1003);
+    DVRESOLUTION_DC        = 1003
+  );
   {$EXTERNALSYM _DVRESOLUTION}
   DVRESOLUTION = _DVRESOLUTION;
   {$EXTERNALSYM DVRESOLUTION}
@@ -3782,7 +3865,8 @@ type
     AM_AUDREND_STAT_PARAM_SLAVE_LASTHIGHLOWERROR  = ( AM_AUDREND_STAT_PARAM_SLAVE_HIGHLOWERROR + 1),
     AM_AUDREND_STAT_PARAM_SLAVE_ACCUMERROR  = ( AM_AUDREND_STAT_PARAM_SLAVE_LASTHIGHLOWERROR + 1),
     AM_AUDREND_STAT_PARAM_BUFFERFULLNESS  = ( AM_AUDREND_STAT_PARAM_SLAVE_ACCUMERROR + 1),
-    AM_AUDREND_STAT_PARAM_JITTER  = ( AM_AUDREND_STAT_PARAM_BUFFERFULLNESS + 1));
+    AM_AUDREND_STAT_PARAM_JITTER  = ( AM_AUDREND_STAT_PARAM_BUFFERFULLNESS + 1)
+  );
   {$EXTERNALSYM _AM_AUDIO_RENDERER_STAT_PARAM}
   AM_AUDIO_RENDERER_STAT_PARAM = _AM_AUDIO_RENDERER_STAT_PARAM;
   {$EXTERNALSYM AM_AUDIO_RENDERER_STAT_PARAM}
@@ -3809,7 +3893,8 @@ type
   _AM_INTF_SEARCH_FLAGS = (
     AM_INTF_SEARCH_INPUT_PIN   = $1,
     AM_INTF_SEARCH_OUTPUT_PIN  = $2,
-    AM_INTF_SEARCH_FILTER      = $4);
+    AM_INTF_SEARCH_FILTER      = $4
+  );
   {$EXTERNALSYM _AM_INTF_SEARCH_FLAGS}
   AM_INTF_SEARCH_FLAGS = _AM_INTF_SEARCH_FLAGS;
   {$EXTERNALSYM AM_INTF_SEARCH_FLAGS}
@@ -3842,7 +3927,8 @@ type
     AMOVERFX_NOFX              = 0,
     AMOVERFX_MIRRORLEFTRIGHT   = $2,
     AMOVERFX_MIRRORUPDOWN      = $4,
-    AMOVERFX_DEINTERLACE       = $8);
+    AMOVERFX_DEINTERLACE       = $8
+  );
   {$EXTERNALSYM AMOVERLAYFX}
 
 
@@ -4126,7 +4212,8 @@ type
   VIDEOENCODER_BITRATE_MODE = (
     ConstantBitRate        = 0,
     VariableBitRateAverage = (ConstantBitRate + 1),
-    VariableBitRatePeak    = (VariableBitRateAverage + 1));
+    VariableBitRatePeak    = (VariableBitRateAverage + 1)
+  );
   {$EXTERNALSYM VIDEOENCODER_BITRATE_MODE}
 
 
@@ -4316,7 +4403,8 @@ type
 
   PAM_PIN_FLOW_CONTROL_BLOCK_FLAGS = ^_AM_PIN_FLOW_CONTROL_BLOCK_FLAGS;
   _AM_PIN_FLOW_CONTROL_BLOCK_FLAGS = (
-    AM_PIN_FLOW_CONTROL_BLOCK  = $1);
+    AM_PIN_FLOW_CONTROL_BLOCK  = $1
+  );
   {$EXTERNALSYM _AM_PIN_FLOW_CONTROL_BLOCK_FLAGS}
   AM_PIN_FLOW_CONTROL_BLOCK_FLAGS = _AM_PIN_FLOW_CONTROL_BLOCK_FLAGS;
 
@@ -4325,7 +4413,8 @@ type
   _AM_GRAPH_CONFIG_RECONNECT_FLAGS                    = (
     AM_GRAPH_CONFIG_RECONNECT_DIRECTCONNECT           = $1,
     AM_GRAPH_CONFIG_RECONNECT_CACHE_REMOVED_FILTERS   = $2,
-    AM_GRAPH_CONFIG_RECONNECT_USE_ONLY_CACHED_FILTERS = $4);
+    AM_GRAPH_CONFIG_RECONNECT_USE_ONLY_CACHED_FILTERS = $4
+  );
   {$EXTERNALSYM _AM_GRAPH_CONFIG_RECONNECT_FLAGS}
   AM_GRAPH_CONFIG_RECONNECT_FLAGS = _AM_GRAPH_CONFIG_RECONNECT_FLAGS;
   {$EXTERNALSYM AM_GRAPH_CONFIG_RECONNECT_FLAGS}
@@ -4333,14 +4422,16 @@ type
 
   PREM_FILTER_FLAGS = ^_REM_FILTER_FLAGS;
   _REM_FILTER_FLAGS = (
-        REMFILTERF_LEAVECONNECTED  = $1);
+        REMFILTERF_LEAVECONNECTED  = $1
+  );
   {$EXTERNALSYM _REM_FILTER_FLAGS}
   REM_FILTER_FLAGS = _REM_FILTER_FLAGS;
 
 
   PAM_FILTER_FLAGS = ^AM_FILTER_FLAGS;
   _AM_FILTER_FLAGS            = (
-    AM_FILTER_FLAGS_REMOVABLE = $1);
+    AM_FILTER_FLAGS_REMOVABLE = $1
+  );
   {$EXTERNALSYM _AM_FILTER_FLAGS}
   AM_FILTER_FLAGS = _AM_FILTER_FLAGS;
   {$EXTERNALSYM AM_FILTER_FLAGS}
@@ -4392,7 +4483,7 @@ type
   {$EXTERNALSYM IID_IGraphConfig}
 
 
-  // Interface IGraphConfigCallback 2
+  // Interface IGraphConfigCallback
   // ==============================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IGraphConfigCallback);'}

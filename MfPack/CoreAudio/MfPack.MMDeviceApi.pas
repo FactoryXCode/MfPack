@@ -16,12 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Mike (fc234), (Ciaran).
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-//                                #1
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -289,6 +290,7 @@ type
   EDataFlow = __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0001;
   {$EXTERNALSYM EDataFlow}
   TEDataFlow = __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0001;
+  {$NODEFINE _tagEDataFlow}
   _tagEDataFlow = __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0001; // For compatibility with earlier MfPack versions
 
 
@@ -305,6 +307,7 @@ type
   ERole = __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0002;
   {$EXTERNALSYM ERole}
   TERole = __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0002;
+  {$NODEFINE _tagERole}
   _tagERole = __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0002; // For compatibility with earlier MfPack versions
 
 
@@ -330,6 +333,7 @@ type
   EndpointFormFactor = __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0003;
   {$EXTERNALSYM EndpointFormFactor}
   TEndpointFormFactor = __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0003;
+  {$NODEFINE _tagEndpointFormFactor}
   _tagEndpointFormFactor = __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0003; // For compatibility with earlier MfPack versions
 
 

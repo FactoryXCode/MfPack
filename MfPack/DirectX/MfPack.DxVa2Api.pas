@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks:  Using packed records is not a recommended practice,
@@ -325,7 +327,7 @@ type
   //    Use this member to access all of the bits in the union.
 
 
-
+type
   PDXVA2_SampleFormat = ^_DXVA2_SampleFormat;
   _DXVA2_SampleFormat                     = (
     DXVA2_SampleFormatMask                = $FF, // 8 bits used for DXVA Sample format
@@ -335,7 +337,8 @@ type
     DXVA2_SampleFieldInterleavedOddFirst  = 4,
     DXVA2_SampleFieldSingleEven           = 5,
     DXVA2_SampleFieldSingleOdd            = 6,
-    DXVA2_SampleSubStream                 = 7);
+    DXVA2_SampleSubStream                 = 7
+  );
   {$EXTERNALSYM _DXVA2_SampleFormat}
   DXVA2_SampleFormat = _DXVA2_SampleFormat;
   {$EXTERNALSYM DXVA2_SampleFormat}
@@ -379,7 +382,8 @@ type
     DXVA2_NominalRange_Wide    = 2,
     DXVA2_NominalRange_0_255   = 1,
     DXVA2_NominalRange_16_235  = 2,
-    DXVA2_NominalRange_48_208  = 3);
+    DXVA2_NominalRange_48_208  = 3
+  );
   {$EXTERNALSYM _DXVA2_NominalRange}
   DXVA2_NominalRange = _DXVA2_NominalRange;
   {$EXTERNALSYM DXVA2_NominalRange}
@@ -390,7 +394,8 @@ type
     DXVA2_VideoTransferMatrix_Unknown   = 0,
     DXVA2_VideoTransferMatrix_BT709     = 1,
     DXVA2_VideoTransferMatrix_BT601     = 2,
-    DXVA2_VideoTransferMatrix_SMPTE240M = 3);
+    DXVA2_VideoTransferMatrix_SMPTE240M = 3
+  );
   {$EXTERNALSYM _DXVA2_VideoTransferMatrix}
   DXVA2_VideoTransferMatrix = _DXVA2_VideoTransferMatrix;
   {$EXTERNALSYM DXVA2_VideoTransferMatrix}
@@ -403,7 +408,8 @@ type
     DXVA2_VideoLighting_bright  = 1,
     DXVA2_VideoLighting_office  = 2,
     DXVA2_VideoLighting_dim     = 3,
-    DXVA2_VideoLighting_dark    = 4);
+    DXVA2_VideoLighting_dark    = 4
+  );
   {$EXTERNALSYM _DXVA2_VideoLighting}
   DXVA2_VideoLighting = _DXVA2_VideoLighting;
   {$EXTERNALSYM DXVA2_VideoLighting}
@@ -419,7 +425,8 @@ type
     DXVA2_VideoPrimaries_SMPTE170M     = 5,
     DXVA2_VideoPrimaries_SMPTE240M     = 6,
     DXVA2_VideoPrimaries_EBU3213       = 7,
-    DXVA2_VideoPrimaries_SMPTE_C       = 8);
+    DXVA2_VideoPrimaries_SMPTE_C       = 8
+  );
   {$EXTERNALSYM _DXVA2_VideoPrimaries}
   DXVA2_VideoPrimaries = _DXVA2_VideoPrimaries;
   {$EXTERNALSYM DXVA2_VideoPrimaries}
@@ -436,7 +443,8 @@ type
     DXVA2_VideoTransFunc_709     = 5,
     DXVA2_VideoTransFunc_240M    = 6,
     DXVA2_VideoTransFunc_sRGB    = 7,
-    DXVA2_VideoTransFunc_28      = 8);
+    DXVA2_VideoTransFunc_28      = 8
+  );
   {$EXTERNALSYM _DXVA2_VideoTransferFunction}
   DXVA2_VideoTransferFunction = _DXVA2_VideoTransferFunction;
   {$EXTERNALSYM DXVA2_VideoTransferFunction}
@@ -487,134 +495,172 @@ type
   TDXVA2VideoDesc = DXVA2_VideoDesc;
   {$EXTERNALSYM TDXVA2VideoDesc}
 
- // Delphi has no unnamed unions or structs,
- // so we have to give them names (See the dxva2api.h).
- PDxva2api3 = ^__MIDL___MIDL_itf_dxva2api_0000_0000_0003;
-  __MIDL___MIDL_itf_dxva2api_0000_0000_0003      = (
-    DXVA2_DeinterlaceTech_Unknown                = 0,
-    DXVA2_DeinterlaceTech_BOBLineReplicate       = $1,
-    DXVA2_DeinterlaceTech_BOBVerticalStretch     = $2,
-    DXVA2_DeinterlaceTech_BOBVerticalStretch4Tap = $4,
-    DXVA2_DeinterlaceTech_MedianFiltering        = $8,
-    DXVA2_DeinterlaceTech_EdgeFiltering          = $10,
-    DXVA2_DeinterlaceTech_FieldAdaptive          = $20,
-    DXVA2_DeinterlaceTech_PixelAdaptive          = $40,
-    DXVA2_DeinterlaceTech_MotionVectorSteered    = $80,
-    DXVA2_DeinterlaceTech_InverseTelecine        = $100,
-    DXVA2_DeinterlaceTech_Mask                   = $1FF);
-  {$EXTERNALSYM __MIDL___MIDL_itf_dxva2api_0000_0000_0003}
-  Dxva2api3 = __MIDL___MIDL_itf_dxva2api_0000_0000_0003;
-  {$EXTERNALSYM Dxva2api3}
+const
+  // enum __MIDL___MIDL_itf_dxva2api_0000_0000_0003
+  DXVA2_DeinterlaceTech_Unknown                = UINT(0);
+  {$EXTERNALSYM DXVA2_DeinterlaceTech_Unknown}
+  DXVA2_DeinterlaceTech_BOBLineReplicate       = UINT($1);
+  {$EXTERNALSYM DXVA2_DeinterlaceTech_BOBLineReplicate}
+  DXVA2_DeinterlaceTech_BOBVerticalStretch     = UINT($2);
+  {$EXTERNALSYM DXVA2_DeinterlaceTech_BOBVerticalStretch}
+  DXVA2_DeinterlaceTech_BOBVerticalStretch4Tap = UINT($4);
+  {$EXTERNALSYM DXVA2_DeinterlaceTech_BOBVerticalStretch4Tap}
+  DXVA2_DeinterlaceTech_MedianFiltering        = UINT($8);
+  {$EXTERNALSYM DXVA2_DeinterlaceTech_MedianFiltering}
+  DXVA2_DeinterlaceTech_EdgeFiltering          = UINT($10);
+  {$EXTERNALSYM DXVA2_DeinterlaceTech_EdgeFiltering}
+  DXVA2_DeinterlaceTech_FieldAdaptive          = UINT($20);
+  {$EXTERNALSYM DXVA2_DeinterlaceTech_FieldAdaptive}
+  DXVA2_DeinterlaceTech_PixelAdaptive          = UINT($40);
+  {$EXTERNALSYM DXVA2_DeinterlaceTech_PixelAdaptive}
+  DXVA2_DeinterlaceTech_MotionVectorSteered    = UINT($80);
+  {$EXTERNALSYM DXVA2_DeinterlaceTech_MotionVectorSteered}
+  DXVA2_DeinterlaceTech_InverseTelecine        = UINT($100);
+  {$EXTERNALSYM DXVA2_DeinterlaceTech_InverseTelecine}
+  DXVA2_DeinterlaceTech_Mask                   = UINT($1FF);
+  {$EXTERNALSYM DXVA2_DeinterlaceTech_Mask}
 
-  PDxva2api4 = ^__MIDL___MIDL_itf_dxva2api_0000_0000_0004;
-  __MIDL___MIDL_itf_dxva2api_0000_0000_0004 = (
-    DXVA2_NoiseFilterLumaLevel              = 1,
-    DXVA2_NoiseFilterLumaThreshold          = 2,
-    DXVA2_NoiseFilterLumaRadius             = 3,
-    DXVA2_NoiseFilterChromaLevel            = 4,
-    DXVA2_NoiseFilterChromaThreshold        = 5,
-    DXVA2_NoiseFilterChromaRadius           = 6,
-    DXVA2_DetailFilterLumaLevel             = 7,
-    DXVA2_DetailFilterLumaThreshold         = 8,
-    DXVA2_DetailFilterLumaRadius            = 9,
-    DXVA2_DetailFilterChromaLevel           = 10,
-    DXVA2_DetailFilterChromaThreshold       = 11,
-    DXVA2_DetailFilterChromaRadius          = 12);
-  {$EXTERNALSYM __MIDL___MIDL_itf_dxva2api_0000_0000_0004}
-  Dxva2api4 = __MIDL___MIDL_itf_dxva2api_0000_0000_0004;
-  {$EXTERNALSYM Dxva2api4}
+const
+  // enum __MIDL___MIDL_itf_dxva2api_0000_0000_0004
+  DXVA2_NoiseFilterLumaLevel              = UINT(1);
+  {$EXTERNALSYM DXVA2_NoiseFilterLumaLevel}
+  DXVA2_NoiseFilterLumaThreshold          = UINT(2);
+  {$EXTERNALSYM DXVA2_NoiseFilterLumaThreshold}
+  DXVA2_NoiseFilterLumaRadius             = UINT(3);
+  {$EXTERNALSYM DXVA2_NoiseFilterLumaRadius}
+  DXVA2_NoiseFilterChromaLevel            = UINT(4);
+  {$EXTERNALSYM DXVA2_NoiseFilterChromaLevel}
+  DXVA2_NoiseFilterChromaThreshold        = UINT(5);
+  {$EXTERNALSYM DXVA2_NoiseFilterChromaThreshold}
+  DXVA2_NoiseFilterChromaRadius           = UINT(6);
+  {$EXTERNALSYM DXVA2_NoiseFilterChromaRadius}
+  DXVA2_DetailFilterLumaLevel             = UINT(7);
+  {$EXTERNALSYM DXVA2_DetailFilterLumaLevel}
+  DXVA2_DetailFilterLumaThreshold         = UINT(8);
+  {$EXTERNALSYM DXVA2_DetailFilterLumaThreshold}
+  DXVA2_DetailFilterLumaRadius            = UINT(9);
+  {$EXTERNALSYM DXVA2_DetailFilterLumaRadius}
+  DXVA2_DetailFilterChromaLevel           = UINT(10);
+  {$EXTERNALSYM DXVA2_DetailFilterChromaLevel}
+  DXVA2_DetailFilterChromaThreshold       = UINT(11);
+  {$EXTERNALSYM DXVA2_DetailFilterChromaThreshold}
+  DXVA2_DetailFilterChromaRadius          = UINT(12);
+  {$EXTERNALSYM DXVA2_DetailFilterChromaRadius}
 
 
-  PDxva2api5 = ^__MIDL___MIDL_itf_dxva2api_0000_0000_0005;
-  __MIDL___MIDL_itf_dxva2api_0000_0000_0005 = (
-    DXVA2_NoiseFilterTech_Unsupported       = 0,
-    DXVA2_NoiseFilterTech_Unknown           = $1,
-    DXVA2_NoiseFilterTech_Median            = $2,
-    DXVA2_NoiseFilterTech_Temporal          = $4,
-    DXVA2_NoiseFilterTech_BlockNoise        = $8,
-    DXVA2_NoiseFilterTech_MosquitoNoise     = $10,
-    DXVA2_NoiseFilterTech_Mask              = $1F);
-  {$EXTERNALSYM __MIDL___MIDL_itf_dxva2api_0000_0000_0005}
-  Dxva2api5 = __MIDL___MIDL_itf_dxva2api_0000_0000_0005;
-  {$EXTERNALSYM Dxva2api5}
+const
+  // enum __MIDL___MIDL_itf_dxva2api_0000_0000_0005
+  DXVA2_NoiseFilterTech_Unsupported       = UINT(0);
+  {$EXTERNALSYM DXVA2_NoiseFilterTech_Unsupported}
+  DXVA2_NoiseFilterTech_Unknown           = UINT($1);
+  {$EXTERNALSYM DXVA2_NoiseFilterTech_Unknown}
+  DXVA2_NoiseFilterTech_Median            = UINT($2);
+  {$EXTERNALSYM DXVA2_NoiseFilterTech_Median}
+  DXVA2_NoiseFilterTech_Temporal          = UINT($4);
+  {$EXTERNALSYM DXVA2_NoiseFilterTech_Temporal}
+  DXVA2_NoiseFilterTech_BlockNoise        = UINT($8);
+  {$EXTERNALSYM DXVA2_NoiseFilterTech_BlockNoise}
+  DXVA2_NoiseFilterTech_MosquitoNoise     = UINT($10);
+  {$EXTERNALSYM DXVA2_NoiseFilterTech_MosquitoNoise}
+  DXVA2_NoiseFilterTech_Mask              = UINT($1F);
+  {$EXTERNALSYM DXVA2_NoiseFilterTech_Mask}
 
-  PDxva2api6 = ^__MIDL___MIDL_itf_dxva2api_0000_0000_0006;
-  __MIDL___MIDL_itf_dxva2api_0000_0000_0006 = (
-    DXVA2_DetailFilterTech_Unsupported      = 0,
-    DXVA2_DetailFilterTech_Unknown          = $1,
-    DXVA2_DetailFilterTech_Edge             = $2,
-    DXVA2_DetailFilterTech_Sharpening       = $4,
-    DXVA2_DetailFilterTech_Mask             = $7);
-  {$EXTERNALSYM __MIDL___MIDL_itf_dxva2api_0000_0000_0006}
-  Dxva2api6 = __MIDL___MIDL_itf_dxva2api_0000_0000_0006;
-  {$EXTERNALSYM Dxva2api6}
+const
+  // enum __MIDL___MIDL_itf_dxva2api_0000_0000_0006
+  DXVA2_DetailFilterTech_Unsupported      = UINT(0);
+  DXVA2_DetailFilterTech_Unknown          = UINT($1);
+  DXVA2_DetailFilterTech_Edge             = UINT($2);
+  DXVA2_DetailFilterTech_Sharpening       = UINT($4);
+  DXVA2_DetailFilterTech_Mask             = UINT($7);
 
-  PDxva2api7 = ^__MIDL___MIDL_itf_dxva2api_0000_0000_0007;
-  __MIDL___MIDL_itf_dxva2api_0000_0000_0007 = (
-    DXVA2_ProcAmp_None                      = 0,
-    DXVA2_ProcAmp_Brightness                = $1,
-    DXVA2_ProcAmp_Contrast                  = $2,
-    DXVA2_ProcAmp_Hue                       = $4,
-    DXVA2_ProcAmp_Saturation                = $8,
-    DXVA2_ProcAmp_Mask                      = $F);
-  {$EXTERNALSYM __MIDL___MIDL_itf_dxva2api_0000_0000_0007}
-  Dxva2api7 = __MIDL___MIDL_itf_dxva2api_0000_0000_0007;
-  {$EXTERNALSYM Dxva2api7}
+const
+  // enum __MIDL___MIDL_itf_dxva2api_0000_0000_0007
+  DXVA2_ProcAmp_None                      = UINT(0);
+  {$EXTERNALSYM DXVA2_ProcAmp_None}
+  DXVA2_ProcAmp_Brightness                = UINT($1);
+  {$EXTERNALSYM DXVA2_ProcAmp_Brightness}
+  DXVA2_ProcAmp_Contrast                  = UINT($2);
+  {$EXTERNALSYM DXVA2_ProcAmp_Contrast}
+  DXVA2_ProcAmp_Hue                       = UINT($4);
+  {$EXTERNALSYM DXVA2_ProcAmp_Hue}
+  DXVA2_ProcAmp_Saturation                = UINT($8);
+  {$EXTERNALSYM DXVA2_ProcAmp_Saturation}
+  DXVA2_ProcAmp_Mask                      = UINT($F);
+  {$EXTERNALSYM DXVA2_ProcAmp_Mask}
 
-  PDxva2api8 = ^__MIDL___MIDL_itf_dxva2api_0000_0000_0008;
-  __MIDL___MIDL_itf_dxva2api_0000_0000_0008       = (
-    DXVA2_VideoProcess_None                       = 0,
-    DXVA2_VideoProcess_YUV2RGB                    = $1,
-    DXVA2_VideoProcess_StretchX                   = $2,
-    DXVA2_VideoProcess_StretchY                   = $4,
-    DXVA2_VideoProcess_AlphaBlend                 = $8,
-    DXVA2_VideoProcess_SubRects                   = $10,
-    DXVA2_VideoProcess_SubStreams                 = $20,
-    DXVA2_VideoProcess_SubStreamsExtended         = $40,
-    DXVA2_VideoProcess_YUV2RGBExtended            = $80,
-    DXVA2_VideoProcess_AlphaBlendExtended         = $100,
-    DXVA2_VideoProcess_Constriction               = $200,
-    DXVA2_VideoProcess_NoiseFilter                = $400,
-    DXVA2_VideoProcess_DetailFilter               = $800,
-    DXVA2_VideoProcess_PlanarAlpha                = $1000,
-    DXVA2_VideoProcess_LinearScaling              = $2000,
-    DXVA2_VideoProcess_GammaCompensated           = $4000,
-    DXVA2_VideoProcess_MaintainsOriginalFieldData = $8000,
-    DXVA2_VideoProcess_Mask                       = $FFFF);
-  {$EXTERNALSYM __MIDL___MIDL_itf_dxva2api_0000_0000_0008}
-  Dxva2api8 = __MIDL___MIDL_itf_dxva2api_0000_0000_0008;
-  {$EXTERNALSYM Dxva2api8}
+const
+  // enum __MIDL___MIDL_itf_dxva2api_0000_0000_0008
+  DXVA2_VideoProcess_None                       = UINT(0);
+  {$EXTERNALSYM DXVA2_VideoProcess_None}
+  DXVA2_VideoProcess_YUV2RGB                    = UINT($1);
+  {$EXTERNALSYM DXVA2_VideoProcess_YUV2RGB}
+  DXVA2_VideoProcess_StretchX                   = UINT($2);
+  {$EXTERNALSYM DXVA2_VideoProcess_StretchX}
+  DXVA2_VideoProcess_StretchY                   = UINT($4);
+  {$EXTERNALSYM DXVA2_VideoProcess_StretchY}
+  DXVA2_VideoProcess_AlphaBlend                 = UINT($8);
+  {$EXTERNALSYM DXVA2_VideoProcess_AlphaBlend}
+  DXVA2_VideoProcess_SubRects                   = UINT($10);
+  {$EXTERNALSYM DXVA2_VideoProcess_SubRects}
+  DXVA2_VideoProcess_SubStreams                 = UINT($20);
+  {$EXTERNALSYM DXVA2_VideoProcess_SubStreams}
+  DXVA2_VideoProcess_SubStreamsExtended         = UINT($40);
+  {$EXTERNALSYM DXVA2_VideoProcess_SubStreamsExtended}
+  DXVA2_VideoProcess_YUV2RGBExtended            = UINT($80);
+  {$EXTERNALSYM DXVA2_VideoProcess_YUV2RGBExtended}
+  DXVA2_VideoProcess_AlphaBlendExtended         = UINT($100);
+  {$EXTERNALSYM DXVA2_VideoProcess_AlphaBlendExtended}
+  DXVA2_VideoProcess_Constriction               = UINT($200);
+  {$EXTERNALSYM DXVA2_VideoProcess_Constriction}
+  DXVA2_VideoProcess_NoiseFilter                = UINT($400);
+  {$EXTERNALSYM DXVA2_VideoProcess_NoiseFilter}
+  DXVA2_VideoProcess_DetailFilter               = UINT($800);
+  {$EXTERNALSYM DXVA2_VideoProcess_DetailFilter}
+  DXVA2_VideoProcess_PlanarAlpha                = UINT($1000);
+  {$EXTERNALSYM DXVA2_VideoProcess_PlanarAlpha}
+  DXVA2_VideoProcess_LinearScaling              = UINT($2000);
+  {$EXTERNALSYM DXVA2_VideoProcess_LinearScaling}
+  DXVA2_VideoProcess_GammaCompensated           = UINT($4000);
+  {$EXTERNALSYM DXVA2_VideoProcess_GammaCompensated}
+  DXVA2_VideoProcess_MaintainsOriginalFieldData = UINT($8000);
+  {$EXTERNALSYM DXVA2_VideoProcess_MaintainsOriginalFieldData}
+  DXVA2_VideoProcess_Mask                       = UINT($FFFF);
+  {$EXTERNALSYM DXVA2_VideoProcess_Mask}
 
-  PDxva2api9 = ^__MIDL___MIDL_itf_dxva2api_0000_0000_0009;
-  __MIDL___MIDL_itf_dxva2api_0000_0000_0009 = (
-    DXVA2_VPDev_HardwareDevice              = $1,
-    DXVA2_VPDev_EmulatedDXVA1               = $2,
-    DXVA2_VPDev_SoftwareDevice              = $4,
-    DXVA2_VPDev_Mask                        = $7);
-  {$EXTERNALSYM __MIDL___MIDL_itf_dxva2api_0000_0000_0009}
-  Dxva2api9 = __MIDL___MIDL_itf_dxva2api_0000_0000_0009;
-  {$EXTERNALSYM Dxva2api9}
+const
+  // enum __MIDL___MIDL_itf_dxva2api_0000_0000_0009
+  DXVA2_VPDev_HardwareDevice              = UINT($1);
+  {$EXTERNALSYM DXVA2_VPDev_HardwareDevice}
+  DXVA2_VPDev_EmulatedDXVA1               = UINT($2);
+  {$EXTERNALSYM DXVA2_VPDev_EmulatedDXVA1}
+  DXVA2_VPDev_SoftwareDevice              = UINT($4);
+  {$EXTERNALSYM DXVA2_VPDev_SoftwareDevice}
+  DXVA2_VPDev_Mask                        = UINT($7);
+  {$EXTERNALSYM DXVA2_VPDev_Mask}
 
-  PDxva2api10 = ^__MIDL___MIDL_itf_dxva2api_0000_0000_0010;
-  __MIDL___MIDL_itf_dxva2api_0000_0000_0010 = (
-    DXVA2_SampleData_RFF                    = $1,
-    DXVA2_SampleData_TFF                    = $2,
-    DXVA2_SampleData_RFF_TFF_Present        = $4,
-    DXVA2_SampleData_Mask                   = $FFFF);
-  {$EXTERNALSYM __MIDL___MIDL_itf_dxva2api_0000_0000_0010}
-  Dxva2api10 = __MIDL___MIDL_itf_dxva2api_0000_0000_0010;
-  {$EXTERNALSYM Dxva2api10}
+const
+  // enum __MIDL___MIDL_itf_dxva2api_0000_0000_0010
+  DXVA2_SampleData_RFF                    = UINT($1);
+  {$EXTERNALSYM DXVA2_SampleData_RFF}
+  DXVA2_SampleData_TFF                    = UINT($2);
+  {$EXTERNALSYM DXVA2_SampleData_TFF}
+  DXVA2_SampleData_RFF_TFF_Present        = UINT($4);
+  {$EXTERNALSYM DXVA2_SampleData_RFF_TFF_Present}
+  DXVA2_SampleData_Mask                   = UINT($FFFF);
+  {$EXTERNALSYM DXVA2_SampleData_Mask}
 
-  PDxva2api11 = ^__MIDL___MIDL_itf_dxva2api_0000_0000_0011;
-  __MIDL___MIDL_itf_dxva2api_0000_0000_0011 = (
-    DXVA2_DestData_RFF                      = $1,
-    DXVA2_DestData_TFF                      = $2,
-    DXVA2_DestData_RFF_TFF_Present          = $4,
-    DXVA2_DestData_Mask                     = $FFFF);
-  {$EXTERNALSYM __MIDL___MIDL_itf_dxva2api_0000_0000_0011}
-  Dxva2api11 = __MIDL___MIDL_itf_dxva2api_0000_0000_0011;
-  {$EXTERNALSYM Dxva2api11}
+const
+  // enum __MIDL___MIDL_itf_dxva2api_0000_0000_0011
+  DXVA2_DestData_RFF                      = UINT($1);
+  {$EXTERNALSYM DXVA2_DestData_RFF}
+  DXVA2_DestData_TFF                      = UINT($2);
+  {$EXTERNALSYM DXVA2_DestData_TFF}
+  DXVA2_DestData_RFF_TFF_Present          = UINT($4);
+  {$EXTERNALSYM DXVA2_DestData_RFF_TFF_Present}
+  DXVA2_DestData_Mask                     = UINT($FFFF);
+  {$EXTERNALSYM DXVA2_DestData_Mask}
 
+type
 
   PDXVA2_VideoProcessorCaps = ^_DXVA2_VideoProcessorCaps;
   _DXVA2_VideoProcessorCaps = record
@@ -758,33 +804,40 @@ type
   //  Structures and enums used by the DXVA2 Video Decoding API.
   //
 
+const
   // Compressed buffer types.
-  PDxva2api12 = ^__MIDL___MIDL_itf_dxva2api_0000_0000_0012;
-  __MIDL___MIDL_itf_dxva2api_0000_0000_0012   = (
-    DXVA2_PictureParametersBufferType         = 0,
-    DXVA2_MacroBlockControlBufferType         = 1,
-    DXVA2_ResidualDifferenceBufferType        = 2,
-    DXVA2_DeblockingControlBufferType         = 3,
-    DXVA2_InverseQuantizationMatrixBufferType = 4,
-    DXVA2_SliceControlBufferType              = 5,
-    DXVA2_BitStreamDateBufferType             = 6,
-    DXVA2_MotionVectorBuffer                  = 7,
-    DXVA2_FilmGrainBuffer                     = 8);
-  {$EXTERNALSYM __MIDL___MIDL_itf_dxva2api_0000_0000_0012}
-  Dxva2api12 = __MIDL___MIDL_itf_dxva2api_0000_0000_0012;
-  {$EXTERNALSYM Dxva2api12}
+  // enum __MIDL___MIDL_itf_dxva2api_0000_0000_0012
+  DXVA2_PictureParametersBufferType         = UINT(0);
+  {$EXTERNALSYM DXVA2_PictureParametersBufferType}
+  DXVA2_MacroBlockControlBufferType         = UINT(1);
+  {$EXTERNALSYM DXVA2_MacroBlockControlBufferType}
+  DXVA2_ResidualDifferenceBufferType        = UINT(2);
+  {$EXTERNALSYM DXVA2_ResidualDifferenceBufferType}
+  DXVA2_DeblockingControlBufferType         = UINT(3);
+  {$EXTERNALSYM DXVA2_DeblockingControlBufferType}
+  DXVA2_InverseQuantizationMatrixBufferType = UINT(4);
+  {$EXTERNALSYM DXVA2_InverseQuantizationMatrixBufferType}
+  DXVA2_SliceControlBufferType              = UINT(5);
+  {$EXTERNALSYM DXVA2_SliceControlBufferType}
+  DXVA2_BitStreamDateBufferType             = UINT(6);
+  {$EXTERNALSYM DXVA2_BitStreamDateBufferType}
+  DXVA2_MotionVectorBuffer                  = UINT(7);
+  {$EXTERNALSYM DXVA2_MotionVectorBuffer}
+  DXVA2_FilmGrainBuffer                     = UINT(8);
+  {$EXTERNALSYM DXVA2_FilmGrainBuffer}
 
-
+const
   // Uncompressed buffer types
-  PDxva2api13 = ^__MIDL___MIDL_itf_dxva2api_0000_0000_0013;
-  __MIDL___MIDL_itf_dxva2api_0000_0000_0013 = (
-    DXVA2_VideoDecoderRenderTarget          = 0,
-    DXVA2_VideoProcessorRenderTarget        = 1,
-    DXVA2_VideoSoftwareRenderTarget         = 2);
-  {$EXTERNALSYM __MIDL___MIDL_itf_dxva2api_0000_0000_0013}
-  Dxva2api13 = __MIDL___MIDL_itf_dxva2api_0000_0000_0013;
-  {$EXTERNALSYM Dxva2api13}
+  // enum __MIDL___MIDL_itf_dxva2api_0000_0000_0013
+  DXVA2_VideoDecoderRenderTarget          = UINT(0);
+  {$EXTERNALSYM DXVA2_VideoDecoderRenderTarget}
+  DXVA2_VideoProcessorRenderTarget        = UINT(1);
+  {$EXTERNALSYM DXVA2_VideoProcessorRenderTarget}
+  DXVA2_VideoSoftwareRenderTarget         = UINT(2);
+  {$EXTERNALSYM DXVA2_VideoSoftwareRenderTarget}
 
+
+type
    PDXVA2_ConfigPictureDecode = ^_DXVA2_ConfigPictureDecode;
   _DXVA2_ConfigPictureDecode = record
     guidConfigBitstreamEncryption: TGUID;
@@ -1133,7 +1186,8 @@ type
   DXVA2_SurfaceType                          = (
     DXVA2_SurfaceType_DecoderRenderTarget    = 0,
     DXVA2_SurfaceType_ProcessorRenderTarget  = 1,
-    DXVA2_SurfaceType_D3DRenderTargetTexture = 2);
+    DXVA2_SurfaceType_D3DRenderTargetTexture = 2
+  );
   {$EXTERNALSYM DXVA2_SurfaceType}
   TDXVA2SurfaceType = DXVA2_SurfaceType;
   {$EXTERNALSYM TDXVA2SurfaceType}

@@ -16,12 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-//                                #1
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -96,6 +97,7 @@ uses
 type
 
   PEndPoint = ^TEndPoint;
+  {$NODEFINE TEndPoint}
   TEndPoint = record
    sName: LPWSTR;
    pwszID: LPWSTR;
@@ -105,7 +107,7 @@ type
   FEndPoint = TEndPoint;
   PfEndPoint = ^TEndPoint;
   //
-
+  {$NODEFINE EndPointArray}
   EndPointArray = array [0..65535] of TEndPoint;
 
 

@@ -17,11 +17,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows Vista or later.
@@ -298,7 +300,8 @@ type
     OLEGETMONIKER_ONLYIFTHERE = 1,
     OLEGETMONIKER_FORCEASSIGN = 2,
     OLEGETMONIKER_UNASSIGN    = 3,
-    OLEGETMONIKER_TEMPFORUSER = 4);
+    OLEGETMONIKER_TEMPFORUSER = 4
+  );
   {$EXTERNALSYM tagOLEGETMONIKER}
   OLEGETMONIKER = tagOLEGETMONIKER;
   {$EXTERNALSYM OLEGETMONIKER}
@@ -307,7 +310,8 @@ type
   tagOLEWHICHMK          = (
     OLEWHICHMK_CONTAINER = 1,
     OLEWHICHMK_OBJREL    = 2,
-    OLEWHICHMK_OBJFULL   = 3);
+    OLEWHICHMK_OBJFULL   = 3
+  );
   {$EXTERNALSYM tagOLEWHICHMK}
   OLEWHICHMK = tagOLEWHICHMK;
   {$EXTERNALSYM OLEWHICHMK}
@@ -316,7 +320,8 @@ type
   tagUSERCLASSTYPE        = (
     USERCLASSTYPE_FULL    = 1,
     USERCLASSTYPE_SHORT   = 2,
-    USERCLASSTYPE_APPNAME = 3);
+    USERCLASSTYPE_APPNAME = 3
+  );
   {$EXTERNALSYM tagUSERCLASSTYPE}
   USERCLASSTYPE = tagUSERCLASSTYPE;
   {$EXTERNALSYM USERCLASSTYPE}
@@ -345,7 +350,8 @@ type
     OLEMISC_IMEMODE                      = $00040000,
     OLEMISC_IGNOREACTIVATEWHENVISIBLE    = $00080000,
     OLEMISC_WANTSTOMENUMERGE             = $00100000,
-    OLEMISC_SUPPORTSMULTILEVELUNDO       = $00200000);
+    OLEMISC_SUPPORTSMULTILEVELUNDO       = $00200000
+  );
   {$EXTERNALSYM tagOLEMISC}
   OLEMISC = tagOLEMISC;
   {$EXTERNALSYM OLEMISC}
@@ -448,7 +454,8 @@ type
       OLERENDER_NONE   = 0,
       OLERENDER_DRAW   = 1,
       OLERENDER_FORMAT = 2,
-      OLERENDER_ASIS   = 3);
+      OLERENDER_ASIS   = 3
+  );
   {$EXTERNALSYM tagOLERENDER}
   OLERENDER = tagOLERENDER;
   {$EXTERNALSYM OLERENDER}
@@ -537,7 +544,8 @@ type
   POLEUPDATE = ^OLEUPDATE;
   tagOLEUPDATE       = (
     OLEUPDATE_ALWAYS = 1,
-    OLEUPDATE_ONCALL = 3);
+    OLEUPDATE_ONCALL = 3
+  );
   {$EXTERNALSYM tagOLEUPDATE}
   OLEUPDATE = tagOLEUPDATE;
   {$EXTERNALSYM OLEUPDATE}
@@ -545,7 +553,8 @@ type
   // for IOleLink.BindToSource
   POLELINKBIND = ^OLELINKBIND;
   tagOLELINKBIND                = (
-    OLELINKBIND_EVENIFCLASSDIFF = 1);
+    OLELINKBIND_EVENIFCLASSDIFF = 1
+  );
   {$EXTERNALSYM tagOLELINKBIND}
   OLELINKBIND = tagOLELINKBIND;
   {$EXTERNALSYM OLELINKBIND}

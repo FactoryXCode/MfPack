@@ -16,12 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-//                                #1
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -131,7 +132,8 @@ type
     AudioCategory_GameChat                = 8,
     AudioCategory_Speech                  = 9,
     AudioCategory_Movie                   = 10,
-    AudioCategory_Media                   = 11);
+    AudioCategory_Media                   = 11
+  );
   {$EXTERNALSYM _AUDIO_STREAM_CATEGORY}
   AUDIO_STREAM_CATEGORY = _AUDIO_STREAM_CATEGORY;
   {$EXTERNALSYM AUDIO_STREAM_CATEGORY}
@@ -204,7 +206,7 @@ const
   {$EXTERNALSYM AUDCLNT_STREAMFLAGS_NOPERSIST}
   AUDCLNT_STREAMFLAGS_RATEADJUST                = $00100000;
   {$EXTERNALSYM AUDCLNT_STREAMFLAGS_RATEADJUST}
-  AUDCLNT_STREAMFLAGS_PREVENT_LOOPBACK_CAPTURE  = $01000000;  // Deprecated, removed since v1903
+  AUDCLNT_STREAMFLAGS_PREVENT_LOOPBACK_CAPTURE  = $01000000; // deprecated: Removed since version 1903
   AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY       = $08000000;
   {$EXTERNALSYM AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY}
   AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM            = $80000000;

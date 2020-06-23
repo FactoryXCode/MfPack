@@ -16,12 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), (TopPlay)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-//                                #1
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -117,7 +118,6 @@ type
 
 // Is also defined in directShow9.pas
 {$IFDEF DEFINE_KSIDENTIFIER}
-  {$EXTERNALSYM __MIDL___MIDL_itf_devicetopology_0000_0000_0001}
   __MIDL___MIDL_itf_devicetopology_0000_0000_0001 = record
 		case Integer of
       0: (Set_  : TGUID;
@@ -125,14 +125,18 @@ type
           Flags : ULONG);
       1: (Alignment : int64);
 	end;
+  {$EXTERNALSYM __MIDL___MIDL_itf_devicetopology_0000_0000_0001}
   KSIDENTIFIER = __MIDL___MIDL_itf_devicetopology_0000_0000_0001
   {$EXTERNALSYM KSIDENTIFIER}
 	PKSIDENTIFIER = ^KSIDENTIFIER;
 	KSPROPERTY = KSIDENTIFIER;
+	{$EXTERNALSYM KSPROPERTY}
 	PKSPROPERTY = ^KSPROPERTY;
 	KSMETHOD = KSIDENTIFIER;
+	{$EXTERNALSYM KSMETHOD}
 	PKSMETHOD = ^KSMETHOD;
 	KSEVENT = KSIDENTIFIER;
+	{$EXTERNALSYM KSEVENT}
 	PKSEVENT = ^KSEVENT;
 {$ENDIF}
 
@@ -155,6 +159,7 @@ type
   EPcxConnectionType = __MIDL___MIDL_itf_devicetopology_0000_0000_0005;
   {$EXTERNALSYM EPcxConnectionType}
   TEPcxConnectionType = __MIDL___MIDL_itf_devicetopology_0000_0000_0005;
+  {$NODEFINE _tagEPcxConnectionType}
   _tagEPcxConnectionType = __MIDL___MIDL_itf_devicetopology_0000_0000_0005; // For compatibility with earlier MfPack versions
 
 
@@ -180,6 +185,7 @@ type
   EPcxGeoLocation = __MIDL___MIDL_itf_devicetopology_0000_0000_0006;
   {$EXTERNALSYM EPcxGeoLocation}
   TEPcxGeoLocation = __MIDL___MIDL_itf_devicetopology_0000_0000_0006;
+  {$NODEFINE _tagEPcxGeoLocation}
   _tagEPcxGeoLocation = __MIDL___MIDL_itf_devicetopology_0000_0000_0006; // For compatibility with earlier MfPack versions
 
   PEPcxGenLocation = ^TEPcxGenLocation;
@@ -192,6 +198,7 @@ type
   EPcxGenLocation = __MIDL___MIDL_itf_devicetopology_0000_0000_0007;
   {$EXTERNALSYM EPcxGenLocation}
   TEPcxGenLocation = __MIDL___MIDL_itf_devicetopology_0000_0000_0007;
+  {$NODEFINE _tagEPcxGenLocation}
   _tagEPcxGenLocation = __MIDL___MIDL_itf_devicetopology_0000_0000_0007; // For compatibility with earlier MfPack versions
 
 
@@ -206,6 +213,7 @@ type
   EPxcPortConnection = __MIDL___MIDL_itf_devicetopology_0000_0000_0008;
   {$EXTERNALSYM EPxcPortConnection}
   TEPxcPortConnection = __MIDL___MIDL_itf_devicetopology_0000_0000_0008;
+  {$NODEFINE _tagePxcPortConnection}
   _tagePxcPortConnection = __MIDL___MIDL_itf_devicetopology_0000_0000_0008; // For compatibility with earlier MfPack versions
 
   PKsjackDescription = ^TKsjackDescription;
@@ -241,6 +249,7 @@ type
   KSJACK_SINK_CONNECTIONTYPE = __MIDL___MIDL_itf_devicetopology_0000_0000_0010;
   {$EXTERNALSYM KSJACK_SINK_CONNECTIONTYPE}
   TKsjackSinkConnectiontype = __MIDL___MIDL_itf_devicetopology_0000_0000_0010;
+  {$NODEFINE _tagKSJACK_SINK_CONNECTIONTYPE}
   _tagKSJACK_SINK_CONNECTIONTYPE = __MIDL___MIDL_itf_devicetopology_0000_0000_0010; // For compatibility with earlier MfPack versions
 
 
@@ -296,6 +305,7 @@ type
   DataFlow = __MIDL___MIDL_itf_devicetopology_0000_0000_0011;
   {$EXTERNALSYM DataFlow}
   TDataFlow = __MIDL___MIDL_itf_devicetopology_0000_0000_0011;
+  {$NODEFINE _tagDataFlow}
   _tagDataFlow = __MIDL___MIDL_itf_devicetopology_0000_0000_0011; // For compatibility with earlier MfPack versions
 
 
@@ -307,6 +317,7 @@ type
   PartType = __MIDL___MIDL_itf_devicetopology_0000_0000_0012;
   {$EXTERNALSYM PartType}
   TPartType = __MIDL___MIDL_itf_devicetopology_0000_0000_0012;
+  {$NODEFINE _tagPartType}
   _tagPartType = __MIDL___MIDL_itf_devicetopology_0000_0000_0012; // For compatibility with earlier MfPack versions
 
 
@@ -323,6 +334,7 @@ type
   ConnectorType = __MIDL___MIDL_itf_devicetopology_0000_0000_0013;
   {$EXTERNALSYM ConnectorType}
   TConnectorType = __MIDL___MIDL_itf_devicetopology_0000_0000_0013;
+  {$NODEFINE _tagConnectorType}
   _tagConnectorType = __MIDL___MIDL_itf_devicetopology_0000_0000_0013; // For compatibility with earlier MfPack versions
 
 

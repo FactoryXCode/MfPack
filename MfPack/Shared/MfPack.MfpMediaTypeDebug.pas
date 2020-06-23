@@ -16,11 +16,13 @@
 // Intiator(s): Ramyses De Macedo Rodrigues, Tony (maXcomX), Peter (OzShips).
 // Contributor(s): Ramyses De Macedo Rodrigues, Tony Kalf (maXcomX), Peter Larson (ozships).
 //
-// -----------------------------------------------------------------------------
+// Rudy Velthuis 1960 ~ 2019.
+//------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks:
@@ -84,18 +86,23 @@ type
     gName: ShortString;
     gIID: TGUID;
   end;
+  {$EXTERNALSYM TGuidProp}
 
   function GetGUIDName(const gguid: TGUID;
                        out Gprop: TGuidProp): HRESULT;
+  {$EXTERNALSYM GetGUIDName}
 
   function LogAttributeValueByIndex(pAttr: IMFAttributes;
                                     index: DWORD): HRESULT;
+  {$EXTERNALSYM LogAttributeValueByIndex}
 
   function LogMediaType(pType: IMFMediaType): HRESULT;
+  {$EXTERNALSYM LogMediaType}
 
   // Handle certain known special cases.
   function SpecialCaseAttributeValue(guid: TGUID;
                                      pvar: mfPROPVARIANT): HRESULT;
+  {$EXTERNALSYM SpecialCaseAttributeValue}
 
 
 

@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Delphi : The IUnknown entries of functions should be casted like this:
@@ -5183,7 +5185,7 @@ type
   {$EXTERNALSYM LPHEAACWAVEFORMAT}
   heaacwaveformat_tag = record
     wfInfo: HEAACWAVEINFO;                        // This structure has a size of 30 bytes
-    pbAudioSpecificConfig: array of Byte;         // First byte of AudioSpecificConfig()
+    pbAudioSpecificConfig: array [0..0] of Byte;  // First byte of AudioSpecificConfig()
   end;
   {$EXTERNALSYM heaacwaveformat_tag}
   HEAACWAVEFORMAT = heaacwaveformat_tag;  // This structure has a size of 31 bytes
@@ -5815,7 +5817,7 @@ const
 
   // Additional Prototypes for ALL interfaces
 
-  function GETFOURCC(frcc: FOURCC): WideString; inline;
+  function GETFOURCC(frcc: FOURCC): WideString;
 
   // End of Additional Prototypes
 
@@ -5826,7 +5828,7 @@ implementation
 function MAKEFOURCC(const ch0: AnsiChar;
                     const ch1: AnsiChar;
                     const ch2: AnsiChar;
-                    const ch3: AnsiChar): FOURCC; inline;
+                    const ch3: AnsiChar): FOURCC;
 begin
   Result := DWORD(Ord(ch0)) or
            (DWORD(Ord(ch1)) shl 8) or
@@ -5836,7 +5838,7 @@ end;
 
 
 // Get FOURCC as string
-function GETFOURCC(frcc: FOURCC): WideString; inline;
+function GETFOURCC(frcc: FOURCC): WideString;
 var
   afc : array[0..3] of AnsiChar;
 

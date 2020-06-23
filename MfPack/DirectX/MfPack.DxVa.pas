@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -1003,11 +1005,12 @@ type
   DXVA_Highlight = _DXVA_Highlight;
   {$EXTERNALSYM DXVA_Highlight}
 
+
   LPDXVA_DPXD = ^DXVA_DPXD;
-  DXVA_DPXD = {$IFDEF TYPE_IDENTITY} type {$ENDIF} BYTE;
+  DXVA_DPXD = type BYTE;
   {$EXTERNALSYM DXVA_DPXD}
   LPDXVA_DCCMD = ^DXVA_DCCMD;
-  DXVA_DCCMD = {$IFDEF TYPE_IDENTITY} type {$ENDIF} WORD;
+  DXVA_DCCMD = type WORD;
   {$EXTERNALSYM DXVA_DCCMD}
 
 
@@ -1155,76 +1158,179 @@ type
 // from the above by adjusting the number of residual difference
 // blocks, the number of motion vectors per macroblock, etc.
 //
-{
-function readDXVA_MBskipsFollowing(ptr: Pointer): DWORD;
-(*
-begin
-  Result := (((ptr)^.dwMB_SNL and $FF000000)shr 24);
-end;
-*)
 
-#define readDXVA_MBdataLocation(ptr)         (((ptr)->dwMB_SNL & 0x00FFFFFF))
 
-#define writeDXVA_MB_SNL(ptr, skips, dloc)   ((ptr)->dwMB_SNL = (((skips) << 24) | (dloc)))
-#define setDXVA_MBskipsFollowing(ptr, skips) ((ptr)->dwMB_SNL |= ((skips) << 24))
-#define setDXVA_MBdataLocation(ptr, dloc)    ((ptr)->dwMB_SNL |= (dloc))
+function readDXVA_MBskipsFollowing(dwMB_SNL: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_MBskipsFollowing}
 
-#define readDXVA_MvertFieldSel_3(ptr)    (((ptr)->wMBtype & 0x8000) >> 15)
-#define readDXVA_MvertFieldSel_2(ptr)    (((ptr)->wMBtype & 0x4000) >> 14)
-#define readDXVA_MvertFieldSel_1(ptr)    (((ptr)->wMBtype & 0x2000) >> 13)
-#define readDXVA_MvertFieldSel_0(ptr)    (((ptr)->wMBtype & 0x1000) >> 12)
-#define readDXVA_ReservedBits(ptr)       (((ptr)->wMBtype & 0x0800) >> 11)
-#define readDXVA_HostResidDiff(ptr)      (((ptr)->wMBtype & 0x0400) >> 10)
-#define readDXVA_MotionType(ptr)         (((ptr)->wMBtype & 0x0300) >>  8)
-#define readDXVA_MBscanMethod(ptr)       (((ptr)->wMBtype & 0x00C0) >>  6)
-#define readDXVA_FieldResidual(ptr)      (((ptr)->wMBtype & 0x0020) >>  5)
-#define readDXVA_H261LoopFilter(ptr)     (((ptr)->wMBtype & 0x0010) >>  4)
-#define readDXVA_Motion4MV(ptr)          (((ptr)->wMBtype & 0x0008) >>  3)
-#define readDXVA_MotionBackward(ptr)     (((ptr)->wMBtype & 0x0004) >>  2)
-#define readDXVA_MotionForward(ptr)      (((ptr)->wMBtype & 0x0002) >>  1)
-#define readDXVA_IntraMacroblock(ptr)    (((ptr)->wMBtype & 0x0001))
+function readDXVA_MBdataLocation(dwMB_SNL: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_MBdataLocation}
 
-#define setDXVA_MvertFieldSel_3(ptr)     ((ptr)->wMBtype |= 0x8000)
-#define setDXVA_MvertFieldSel_2(ptr)     ((ptr)->wMBtype |= 0x4000)
-#define setDXVA_MvertFieldSel_1(ptr)     ((ptr)->wMBtype |= 0x2000)
-#define setDXVA_MvertFieldSel_0(ptr)     ((ptr)->wMBtype |= 0x1000)
-#define setDXVA_ReservedBits(ptr)        ((ptr)->wMBtype |= 0x0800)
-#define setDXVA_HostResidDiff(ptr)       ((ptr)->wMBtype |= 0x0400)
-#define setDXVA_MotionType(ptr, value)   ((ptr)->wMBtype |= ((value) << 8))
-#define setDXVA_MBscanMethod(ptr, value) ((ptr)->wMBtype |= ((value) << 6))
-#define setDXVA_FieldResidual(ptr)       ((ptr)->wMBtype |= 0x0020)
-#define setDXVA_H261LoopFilter(ptr)      ((ptr)->wMBtype |= 0x0010)
-#define setDXVA_Motion4MV(ptr)           ((ptr)->wMBtype |= 0x0008)
-#define setDXVA_MotionBackward(ptr)      ((ptr)->wMBtype |= 0x0004)
-#define setDXVA_MotionForward(ptr)       ((ptr)->wMBtype |= 0x0002)
-#define setDXVA_IntraMacroblock(ptr)     ((ptr)->wMBtype |= 0x0001)
+function writeDXVA_MB_SNL(dwMB_SNL: DWord ; skips: DWord; dloc: DWord): DWORD; inline;
+{$EXTERNALSYM writeDXVA_MB_SNL}
 
-#define readDXVA_Y___0coded(ptr)        (((ptr)->wPatternCode & 0x0800) >> 11)
-#define readDXVA_Y___1coded(ptr)        (((ptr)->wPatternCode & 0x0400) >> 10)
-#define readDXVA_Y___2coded(ptr)        (((ptr)->wPatternCode & 0x0200) >>  9)
-#define readDXVA_Y___3coded(ptr)        (((ptr)->wPatternCode & 0x0100) >>  8)
-#define readDXVA_Cb__4coded(ptr)        (((ptr)->wPatternCode & 0x0080) >>  7)
-#define readDXVA_Cr__5coded(ptr)        (((ptr)->wPatternCode & 0x0040) >>  6)
-#define readDXVA_Cb__6coded(ptr)        (((ptr)->wPatternCode & 0x0020) >>  5)
-#define readDXVA_Cr__7coded(ptr)        (((ptr)->wPatternCode & 0x0010) >>  4)
-#define readDXVA_Cb__8coded(ptr)        (((ptr)->wPatternCode & 0x0008) >>  3)
-#define readDXVA_Cb__9coded(ptr)        (((ptr)->wPatternCode & 0x0004) >>  2)
-#define readDXVA_Cr_10coded(ptr)        (((ptr)->wPatternCode & 0x0002) >>  1)
-#define readDXVA_Cr_11coded(ptr)        (((ptr)->wPatternCode & 0x0001))
+function setDXVA_MBskipsFollowing(dwMB_SNL: DWord; skips: DWord): DWORD; inline;
+{$EXTERNALSYM setDXVA_MBskipsFollowing}
 
-#define readDXVA_Y___0oflow(ptr)        (((ptr)->wPC_Overflow & 0x0800) >> 11)
-#define readDXVA_Y___1oflow(ptr)        (((ptr)->wPC_Overflow & 0x0400) >> 10)
-#define readDXVA_Y___2oflow(ptr)        (((ptr)->wPC_Overflow & 0x0200) >>  9)
-#define readDXVA_Y___3oflow(ptr)        (((ptr)->wPC_Overflow & 0x0100) >>  8)
-#define readDXVA_Cb__4oflow(ptr)        (((ptr)->wPC_Overflow & 0x0080) >>  7)
-#define readDXVA_Cr__5oflow(ptr)        (((ptr)->wPC_Overflow & 0x0040) >>  6)
-#define readDXVA_Cb__6oflow(ptr)        (((ptr)->wPC_Overflow & 0x0020) >>  5)
-#define readDXVA_Cr__7oflow(ptr)        (((ptr)->wPC_Overflow & 0x0010) >>  4)
-#define readDXVA_Cb__8oflow(ptr)        (((ptr)->wPC_Overflow & 0x0008) >>  3)
-#define readDXVA_Cb__9oflow(ptr)        (((ptr)->wPC_Overflow & 0x0004) >>  2)
-#define readDXVA_Cr_10oflow(ptr)        (((ptr)->wPC_Overflow & 0x0002) >>  1)
-#define readDXVA_Cr_11oflow(ptr)        (((ptr)->wPC_Overflow & 0x0001))
-}
+function setDXVA_MBdataLocation(dwMB_SNL: DWord; dloc: Dword): DWORD; inline;
+{$EXTERNALSYM setDXVA_MBdataLocation}
+
+function readDXVA_MvertFieldSel_3(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_MvertFieldSel_3}
+
+function readDXVA_MvertFieldSel_2(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_MvertFieldSel_2}
+
+function readDXVA_MvertFieldSel_1(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_MvertFieldSel_1}
+
+function readDXVA_MvertFieldSel_0(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_MvertFieldSel_0}
+
+function readDXVA_ReservedBits(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_ReservedBits}
+
+function readDXVA_HostResidDiff(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_HostResidDiff}
+
+function readDXVA_MotionType(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_MotionType}
+
+function readDXVA_MBscanMethod(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_MBscanMethod}
+
+function readDXVA_FieldResidual(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_FieldResidual}
+
+function readDXVA_H261LoopFilter(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_H261LoopFilter}
+
+function readDXVA_Motion4MV(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_Motion4MV}
+
+function readDXVA_MotionBackward(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_MotionBackward}
+
+function readDXVA_MotionForward(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_MotionForward}
+
+function readDXVA_IntraMacroblock(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_IntraMacroblock}
+
+function setDXVA_MvertFieldSel_3(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM setDXVA_MvertFieldSel_3}
+
+function setDXVA_MvertFieldSel_2(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM setDXVA_MvertFieldSel_2}
+
+function setDXVA_MvertFieldSel_1(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM setDXVA_MvertFieldSel_1}
+
+function setDXVA_MvertFieldSel_0(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM setDXVA_MvertFieldSel_0}
+
+function setDXVA_ReservedBits(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM setDXVA_ReservedBits}
+
+function setDXVA_HostResidDiff(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM setDXVA_HostResidDiff}
+
+function setDXVA_MotionType(wMBtype: DWord; value: DWord ): DWORD; inline;
+{$EXTERNALSYM setDXVA_MotionType}
+
+function setDXVA_MBscanMethod(wMBtype: DWord; value: DWord ): DWORD; inline;
+{$EXTERNALSYM setDXVA_MBscanMethod}
+
+function setDXVA_FieldResidual(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM setDXVA_FieldResidual}
+
+function setDXVA_H261LoopFilter(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM setDXVA_H261LoopFilter}
+
+function setDXVA_Motion4MV(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM setDXVA_Motion4MV}
+
+function setDXVA_MotionBackward(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM setDXVA_MotionBackward}
+
+function setDXVA_MotionForward(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM setDXVA_MotionForward}
+
+function setDXVA_IntraMacroblock(wMBtype: DWord): DWORD; inline;
+{$EXTERNALSYM setDXVA_IntraMacroblock}
+
+function readDXVA_Y___0coded(wPatternCode: Dword): DWORD; inline;
+{$EXTERNALSYM readDXVA_Y___0coded}
+
+function readDXVA_Y___1coded(wPatternCode: Dword): DWORD; inline;
+{$EXTERNALSYM readDXVA_Y___1coded}
+
+function readDXVA_Y___2coded(wPatternCode: Dword): DWORD; inline;
+{$EXTERNALSYM readDXVA_Y___2coded}
+
+function readDXVA_Y___3coded(wPatternCode: Dword): DWORD; inline;
+{$EXTERNALSYM readDXVA_Y___3coded}
+
+function readDXVA_Cb__4coded(wPatternCode: Dword): DWORD; inline;
+{$EXTERNALSYM readDXVA_Cb__4coded}
+
+function readDXVA_Cr__5coded(wPatternCode: Dword): DWORD; inline;
+{$EXTERNALSYM readDXVA_Cr__5coded}
+
+function readDXVA_Cb__6coded(wPatternCode: Dword): DWORD; inline;
+{$EXTERNALSYM readDXVA_Cb__6coded}
+
+function readDXVA_Cr__7coded(wPatternCode: Dword): DWORD; inline;
+{$EXTERNALSYM readDXVA_Cr__7coded}
+
+function readDXVA_Cb__8coded(wPatternCode: Dword): DWORD; inline;
+{$EXTERNALSYM readDXVA_Cb__8coded}
+
+function readDXVA_Cb__9coded(wPatternCode: Dword): DWORD; inline;
+{$EXTERNALSYM readDXVA_Cb__9coded}
+
+function readDXVA_Cr_10coded(wPatternCode: Dword): DWORD; inline;
+{$EXTERNALSYM readDXVA_Cr_10coded}
+
+function readDXVA_Cr_11coded(wPatternCode: Dword): DWORD; inline;
+{$EXTERNALSYM readDXVA_Cr_11coded}
+
+function readDXVA_Y___0oflow(wPC_Overflow: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_Y___0oflow}
+
+function readDXVA_Y___1oflow(wPC_Overflow: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_Y___1oflow}
+
+function readDXVA_Y___2oflow(wPC_Overflow: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_Y___2oflow}
+
+function readDXVA_Y___3oflow(wPC_Overflow: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_Y___3oflow}
+
+function readDXVA_Cb__4oflow(wPC_Overflow: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_Cb__4oflow}
+
+function readDXVA_Cr__5oflow(wPC_Overflow: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_Cr__5oflow}
+
+function readDXVA_Cb__6oflow(wPC_Overflow: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_Cb__6oflow}
+
+function readDXVA_Cr__7oflow(wPC_Overflow: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_Cr__7oflow}
+
+function readDXVA_Cb__8oflow(wPC_Overflow: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_Cb__8oflow}
+
+function readDXVA_Cb__9oflow(wPC_Overflow: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_Cb__9oflow}
+
+function readDXVA_Cr_10oflow(wPC_Overflow: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_Cr_10oflow}
+
+function readDXVA_Cr_11oflow(wPC_Overflow: DWord): DWORD; inline;
+{$EXTERNALSYM readDXVA_Cr_11oflow}
+
 
 // -------------------------------------------------------------------------
 //
@@ -1250,7 +1356,8 @@ type
     DXVA_SampleFieldInterleavedOddFirst,
     DXVA_SampleFieldSingleEven,
     DXVA_SampleFieldSingleOdd,
-    DXVA_SampleSubStream);
+    DXVA_SampleSubStream
+  );
   {$EXTERNALSYM DXVA_SampleFormat}
 
 
@@ -1300,7 +1407,8 @@ type
     DXVA_VideoPrimaries_SMPTE170M,
     DXVA_VideoPrimaries_SMPTE240M,
     DXVA_VideoPrimaries_EBU3213,
-    DXVA_VideoPrimaries_SMPTE_C);
+    DXVA_VideoPrimaries_SMPTE_C
+  );
   {$EXTERNALSYM DXVA_VideoPrimaries}
 
 const
@@ -1321,7 +1429,8 @@ type
     DXVA_VideoLighting_bright,
     DXVA_VideoLighting_office,
     DXVA_VideoLighting_dim,
-    DXVA_VideoLighting_dark);
+    DXVA_VideoLighting_dark
+  );
   {$EXTERNALSYM DXVA_VideoLighting}
 
 const
@@ -1339,7 +1448,8 @@ type
     DXVA_VideoTransferMatrix_Unknown,
     DXVA_VideoTransferMatrix_BT709,
     DXVA_VideoTransferMatrix_BT601,
-    DXVA_VideoTransferMatrix_SMPTE240M);
+    DXVA_VideoTransferMatrix_SMPTE240M
+  );
   {$EXTERNALSYM DXVA_VideoTransferMatrix}
 
 const
@@ -1356,7 +1466,8 @@ type
   DXVA_NominalRange = (
     DXVA_NominalRange_Unknown,
     DXVA_NominalRange_Normal,
-    DXVA_NominalRange_Wide);
+    DXVA_NominalRange_Wide
+  );
   {$EXTERNALSYM DXVA_NominalRange}
 
   DXVA_VideoChromaSubsampling = DWORD;
@@ -1501,63 +1612,85 @@ type
   DXVA_VideoDesc = _DXVA_VideoDesc;
   {$EXTERNALSYM DXVA_VideoDesc}
 
-
+type
   PDXVAVideoProcessCaps = ^_DXVA_VideoProcessCaps;
-  _DXVA_VideoProcessCaps                 = (
-    DXVA_VideoProcess_None               = $0000,
-    DXVA_VideoProcess_YUV2RGB            = $0001,
-    DXVA_VideoProcess_StretchX           = $0002,
-    DXVA_VideoProcess_StretchY           = $0004,
-    DXVA_VideoProcess_AlphaBlend         = $0008,
-    DXVA_VideoProcess_SubRects           = $0010,
-    DXVA_VideoProcess_SubStreams         = $0020,
-    DXVA_VideoProcess_SubStreamsExtended = $0040,
-    DXVA_VideoProcess_YUV2RGBExtended    = $0080,
-    DXVA_VideoProcess_AlphaBlendExtended = $0100);
+  _DXVA_VideoProcessCaps = DWord;
   {$EXTERNALSYM _DXVA_VideoProcessCaps}
   DXVA_VideoProcessCaps = _DXVA_VideoProcessCaps;
   {$EXTERNALSYM DXVA_VideoProcessCaps}
+const
+  DXVA_VideoProcess_None               = DXVA_VideoProcessCaps($0000);
+  {$EXTERNALSYM DXVA_VideoProcess_None}
+  DXVA_VideoProcess_YUV2RGB            = DXVA_VideoProcessCaps($0001);
+  {$EXTERNALSYM DXVA_VideoProcess_YUV2RGB}
+  DXVA_VideoProcess_StretchX           = DXVA_VideoProcessCaps($0002);
+  {$EXTERNALSYM DXVA_VideoProcess_StretchX}
+  DXVA_VideoProcess_StretchY           = DXVA_VideoProcessCaps($0004);
+  {$EXTERNALSYM DXVA_VideoProcess_StretchY}
+  DXVA_VideoProcess_AlphaBlend         = DXVA_VideoProcessCaps($0008);
+  {$EXTERNALSYM DXVA_VideoProcess_AlphaBlend}
+  DXVA_VideoProcess_SubRects           = DXVA_VideoProcessCaps($0010);
+  {$EXTERNALSYM DXVA_VideoProcess_SubRects}
+  DXVA_VideoProcess_SubStreams         = DXVA_VideoProcessCaps($0020);
+  {$EXTERNALSYM DXVA_VideoProcess_SubStreams}
+  DXVA_VideoProcess_SubStreamsExtended = DXVA_VideoProcessCaps($0040);
+  {$EXTERNALSYM DXVA_VideoProcess_SubStreamsExtended}
+  DXVA_VideoProcess_YUV2RGBExtended    = DXVA_VideoProcessCaps($0080);
+  {$EXTERNALSYM DXVA_VideoProcess_YUV2RGBExtended}
+  DXVA_VideoProcess_AlphaBlendExtended = DXVA_VideoProcessCaps($0100);
+  {$EXTERNALSYM DXVA_VideoProcess_AlphaBlendExtended}
 
 
+type
   PDXVADeinterlaceTech = ^_DXVA_DeinterlaceTech;
-  _DXVA_DeinterlaceTech                         = (
-    // the algorithm is unknown or proprietary
-    DXVA_DeinterlaceTech_Unknown                = $0000,
-    // the algorithm creates the missing lines by repeating
-    // the line either above or below it - this method will look very jaggy and
-    // isn't recommended
-    DXVA_DeinterlaceTech_BOBLineReplicate       = $0001,
-    // The algorithm creates the missing lines by vertically stretching each
-    // video field by a factor of two by averaging two lines
-    DXVA_DeinterlaceTech_BOBVerticalStretch     = $0002,
-    // or using a [-1, 9, 9, -1]/16 filter across four lines.
-    DXVA_DeinterlaceTech_BOBVerticalStretch4Tap = $0100,
-    // the pixels in the missing line are recreated by a median filtering operation
-    DXVA_DeinterlaceTech_MedianFiltering        = $0004,
-    // the pixels in the missing line are recreated by an edge filter.
-    // In this process, spatial directional filters are applied to determine
-    // the orientation of edges in the picture content, and missing
-    // pixels are created by filtering along (rather than across) the
-    // detected edges.
-    DXVA_DeinterlaceTech_EdgeFiltering          = $0010,
-    // the pixels in the missing line are recreated by switching on a field by
-    // field basis between using either spatial or temporal interpolation
-    // depending on the amount of motion.
-    DXVA_DeinterlaceTech_FieldAdaptive          = $0020,
-    // the pixels in the missing line are recreated by switching on a pixel by pixel
-    // basis between using either spatial or temporal interpolation depending on
-    // the amount of motion..
-    DXVA_DeinterlaceTech_PixelAdaptive          = $0040,
-    // Motion Vector Steering  identifies objects within a sequence of video
-    // fields.  The missing pixels are recreated after first aligning the
-    // movement axes of the individual objects in the scene to make them
-    // parallel with the time axis.
-    DXVA_DeinterlaceTech_MotionVectorSteered    = $0080);
+  _DXVA_DeinterlaceTech = DWord;
   {$EXTERNALSYM _DXVA_DeinterlaceTech}
   DXVA_DeinterlaceTech = _DXVA_DeinterlaceTech;
   {$EXTERNALSYM DXVA_DeinterlaceTech}
+const
+  // the algorithm is unknown or proprietary
+  DXVA_DeinterlaceTech_Unknown                = DXVA_DeinterlaceTech($0000);
+  {$EXTERNALSYM DXVA_DeinterlaceTech_Unknown}
+  // the algorithm creates the missing lines by repeating
+  // the line either above or below it - this method will look very jaggy and
+  // isn't recommended
+  DXVA_DeinterlaceTech_BOBLineReplicate       = DXVA_DeinterlaceTech($0001);
+  {$EXTERNALSYM DXVA_DeinterlaceTech_BOBLineReplicate}
+  // The algorithm creates the missing lines by vertically stretching each
+  // video field by a factor of two by averaging two lines
+  DXVA_DeinterlaceTech_BOBVerticalStretch     = DXVA_DeinterlaceTech($0002);
+  {$EXTERNALSYM DXVA_DeinterlaceTech_BOBVerticalStretch}
+  // or using a [-1); 9); 9); -1]/16 filter across four lines.
+  DXVA_DeinterlaceTech_BOBVerticalStretch4Tap = DXVA_DeinterlaceTech($0100);
+  {$EXTERNALSYM DXVA_DeinterlaceTech_BOBVerticalStretch4Tap}
+  // the pixels in the missing line are recreated by a median filtering operation
+  DXVA_DeinterlaceTech_MedianFiltering        = DXVA_DeinterlaceTech($0004);
+  {$EXTERNALSYM DXVA_DeinterlaceTech_MedianFiltering}
+  // the pixels in the missing line are recreated by an edge filter.
+  // In this process); spatial directional filters are applied to determine
+  // the orientation of edges in the picture content); and missing
+  // pixels are created by filtering along (rather than across) the
+  // detected edges.
+  DXVA_DeinterlaceTech_EdgeFiltering          = DXVA_DeinterlaceTech($0010);
+  {$EXTERNALSYM DXVA_DeinterlaceTech_EdgeFiltering}
+  // the pixels in the missing line are recreated by switching on a field by
+  // field basis between using either spatial or temporal interpolation
+  // depending on the amount of motion.
+  DXVA_DeinterlaceTech_FieldAdaptive          = DXVA_DeinterlaceTech($0020);
+  {$EXTERNALSYM DXVA_DeinterlaceTech_FieldAdaptive}
+  // the pixels in the missing line are recreated by switching on a pixel by pixel
+  // basis between using either spatial or temporal interpolation depending on
+  // the amount of motion..
+  DXVA_DeinterlaceTech_PixelAdaptive          = DXVA_DeinterlaceTech($0040);
+  {$EXTERNALSYM DXVA_DeinterlaceTech_PixelAdaptive}
+  // Motion Vector Steering  identifies objects within a sequence of video
+  // fields.  The missing pixels are recreated after first aligning the
+  // movement axes of the individual objects in the scene to make them
+  // parallel with the time axis.
+  DXVA_DeinterlaceTech_MotionVectorSteered    = DXVA_DeinterlaceTech($0080);
+  {$EXTERNALSYM DXVA_DeinterlaceTech_MotionVectorSteered}
 
-
+type
   LPDXVA_VideoSample = ^_DXVA_VideoSample;
   PDXVAVideoSample = ^_DXVA_VideoSample;
   _DXVA_VideoSample = record
@@ -1577,15 +1710,22 @@ type
 //
 type
   PDXVASampleFlags = ^_DXVA_SampleFlags;
-  _DXVA_SampleFlags                   = (
-    DXVA_SampleFlagsMask              = (1 shl 3) or (1 shl 2) or (1 shl 1) or (1 shl 0),
-    DXVA_SampleFlag_Palette_Changed   = $0001,
-    DXVA_SampleFlag_SrcRect_Changed   = $0002,
-    DXVA_SampleFlag_DstRect_Changed   = $0004,
-    DXVA_SampleFlag_ColorData_Changed = $0008);
+  _DXVA_SampleFlags = DWord;
   {$EXTERNALSYM _DXVA_SampleFlags}
   DXVA_SampleFlags = _DXVA_SampleFlags;
   {$EXTERNALSYM DXVA_SampleFlags}
+const
+  DXVA_SampleFlagsMask              = DXVA_SampleFlags((1 shl 3) or (1 shl 2) or (1 shl 1) or (1 shl 0));
+  {$EXTERNALSYM DXVA_SampleFlagsMask}
+  DXVA_SampleFlag_Palette_Changed   = DXVA_SampleFlags($0001);
+  {$EXTERNALSYM DXVA_SampleFlag_Palette_Changed}
+  DXVA_SampleFlag_SrcRect_Changed   = DXVA_SampleFlags($0002);
+  {$EXTERNALSYM DXVA_SampleFlag_SrcRect_Changed}
+  DXVA_SampleFlag_DstRect_Changed   = DXVA_SampleFlags($0004);
+  {$EXTERNALSYM DXVA_SampleFlag_DstRect_Changed}
+  DXVA_SampleFlag_ColorData_Changed = DXVA_SampleFlags($0008);
+  {$EXTERNALSYM DXVA_SampleFlag_ColorData_Changed}
+
   // The DXVA_SampleFlags enumeration type contains a collection of flags that identify
   // changes in the current sample frame from the previous sample frame.
   // Constants:
@@ -1600,17 +1740,24 @@ type
   // DXVA_SampleFlag_ColorData_Changed
   //   Indicates that the color data of the sample frame changed.
 
-
+type
   PDXVADestinationFlags = ^_DXVA_DestinationFlags;
-  _DXVA_DestinationFlags                    = (
-    DXVA_DestinationFlagMask                = (1 shl 3) or (1 shl 2) or (1 shl 1) or (1 shl 0),
-    DXVA_DestinationFlag_Background_Changed = $0001,
-    DXVA_DestinationFlag_TargetRect_Changed = $0002,
-    DXVA_DestinationFlag_ColorData_Changed  = $0004,
-    DXVA_DestinationFlag_Alpha_Changed      = $0008);
+  _DXVA_DestinationFlags = DWord;
   {$EXTERNALSYM _DXVA_DestinationFlags}
   DXVA_DestinationFlags = _DXVA_DestinationFlags;
   {$EXTERNALSYM DXVA_DestinationFlags}
+const
+  DXVA_DestinationFlagMask                = DXVA_DestinationFlags((1 shl 3) or (1 shl 2) or (1 shl 1) or (1 shl 0));
+  {$EXTERNALSYM DXVA_DestinationFlagMask}
+  DXVA_DestinationFlag_Background_Changed = DXVA_DestinationFlags($0001);
+  {$EXTERNALSYM DXVA_DestinationFlag_Background_Changed}
+  DXVA_DestinationFlag_TargetRect_Changed = DXVA_DestinationFlags($0002);
+  {$EXTERNALSYM DXVA_DestinationFlag_TargetRect_Changed}
+  DXVA_DestinationFlag_ColorData_Changed  = DXVA_DestinationFlags($0004);
+  {$EXTERNALSYM DXVA_DestinationFlag_ColorData_Changed}
+  DXVA_DestinationFlag_Alpha_Changed      = DXVA_DestinationFlags($0008);
+  {$EXTERNALSYM DXVA_DestinationFlag_Alpha_Changed}
+
   // The DXVA_DestinationFlags enumeration type contains a collection of flags that identify
   // changes in the current destination surface from the previous destination surface.
   // Constants:
@@ -2122,50 +2269,51 @@ type
   end;
   {$EXTERNALSYM DXVA_COPPSetSignalingCmdData}
 
+type
   // Add format enum and data enum
+  PCOPP_TVProtectionStandard = ^COPP_TVProtectionStandard;
   COPP_TVProtectionStandard = DWORD;
-
+  {$EXTERNALSYM COPP_TVProtectionStandard}
 const
-
-  COPP_ProtectionStandard_Unknown             = $80000000;
+  COPP_ProtectionStandard_Unknown             = COPP_TVProtectionStandard($80000000);
   {$EXTERNALSYM COPP_ProtectionStandard_Unknown}
-  COPP_ProtectionStandard_None                = $00000000;
+  COPP_ProtectionStandard_None                = COPP_TVProtectionStandard($00000000);
   {$EXTERNALSYM COPP_ProtectionStandard_None}
-  COPP_ProtectionStandard_IEC61880_525i       = $00000001;
+  COPP_ProtectionStandard_IEC61880_525i       = COPP_TVProtectionStandard($00000001);
   {$EXTERNALSYM COPP_ProtectionStandard_IEC61880_525i}
-  COPP_ProtectionStandard_IEC61880_2_525i     = $00000002;
+  COPP_ProtectionStandard_IEC61880_2_525i     = COPP_TVProtectionStandard($00000002);
   {$EXTERNALSYM COPP_ProtectionStandard_IEC61880_2_525i}
-  COPP_ProtectionStandard_IEC62375_625p       = $00000004;
+  COPP_ProtectionStandard_IEC62375_625p       = COPP_TVProtectionStandard($00000004);
   {$EXTERNALSYM COPP_ProtectionStandard_IEC62375_625p}
-  COPP_ProtectionStandard_EIA608B_525         = $00000008;
+  COPP_ProtectionStandard_EIA608B_525         = COPP_TVProtectionStandard($00000008);
   {$EXTERNALSYM COPP_ProtectionStandard_EIA608B_525}
-  COPP_ProtectionStandard_EN300294_625i       = $00000010;
+  COPP_ProtectionStandard_EN300294_625i       = COPP_TVProtectionStandard($00000010);
   {$EXTERNALSYM COPP_ProtectionStandard_EN300294_625i}
-  COPP_ProtectionStandard_CEA805A_TypeA_525p  = $00000020;
+  COPP_ProtectionStandard_CEA805A_TypeA_525p  = COPP_TVProtectionStandard($00000020);
   {$EXTERNALSYM COPP_ProtectionStandard_CEA805A_TypeA_525p}
-  COPP_ProtectionStandard_CEA805A_TypeA_750p  = $00000040;
+  COPP_ProtectionStandard_CEA805A_TypeA_750p  = COPP_TVProtectionStandard($00000040);
   {$EXTERNALSYM COPP_ProtectionStandard_CEA805A_TypeA_750p}
-  COPP_ProtectionStandard_CEA805A_TypeA_1125i = $00000080;
+  COPP_ProtectionStandard_CEA805A_TypeA_1125i = COPP_TVProtectionStandard($00000080);
   {$EXTERNALSYM COPP_ProtectionStandard_CEA805A_TypeA_1125i}
-  COPP_ProtectionStandard_CEA805A_TypeB_525p  = $00000100;
+  COPP_ProtectionStandard_CEA805A_TypeB_525p  = COPP_TVProtectionStandard($00000100);
   {$EXTERNALSYM COPP_ProtectionStandard_CEA805A_TypeB_525p}
-  COPP_ProtectionStandard_CEA805A_TypeB_750p  = $00000200;
+  COPP_ProtectionStandard_CEA805A_TypeB_750p  = COPP_TVProtectionStandard($00000200);
   {$EXTERNALSYM COPP_ProtectionStandard_CEA805A_TypeB_750p}
-  COPP_ProtectionStandard_CEA805A_TypeB_1125i = $00000400;
+  COPP_ProtectionStandard_CEA805A_TypeB_1125i = COPP_TVProtectionStandard($00000400);
   {$EXTERNALSYM COPP_ProtectionStandard_CEA805A_TypeB_1125i}
-  COPP_ProtectionStandard_ARIBTRB15_525i      = $00000800;
+  COPP_ProtectionStandard_ARIBTRB15_525i      = COPP_TVProtectionStandard($00000800);
   {$EXTERNALSYM COPP_ProtectionStandard_ARIBTRB15_525i}
-  COPP_ProtectionStandard_ARIBTRB15_525p      = $00001000;
+  COPP_ProtectionStandard_ARIBTRB15_525p      = COPP_TVProtectionStandard($00001000);
   {$EXTERNALSYM COPP_ProtectionStandard_ARIBTRB15_525p}
-  COPP_ProtectionStandard_ARIBTRB15_750p      = $00002000;
+  COPP_ProtectionStandard_ARIBTRB15_750p      = COPP_TVProtectionStandard($00002000);
   {$EXTERNALSYM COPP_ProtectionStandard_ARIBTRB15_750p}
-  COPP_ProtectionStandard_ARIBTRB15_1125i     = $00004000;
+  COPP_ProtectionStandard_ARIBTRB15_1125i     = COPP_TVProtectionStandard($00004000);
   {$EXTERNALSYM COPP_ProtectionStandard_ARIBTRB15_1125i}
-  COPP_ProtectionStandard_Mask                = $80007FFF;
+  COPP_ProtectionStandard_Mask                = COPP_TVProtectionStandard($80007FFF);
   {$EXTERNALSYM COPP_ProtectionStandard_Mask}
-  COPP_ProtectionStandard_Reserved            = $7FFF8000;
+  COPP_ProtectionStandard_Reserved            = COPP_TVProtectionStandard($7FFF8000);
   {$EXTERNALSYM COPP_ProtectionStandard_Reserved}
-  COPP_ImageAspectRatio_EN300294_Mask         = $00000007;
+  COPP_ImageAspectRatio_EN300294_Mask         = COPP_TVProtectionStandard($00000007);
   {$EXTERNALSYM COPP_ImageAspectRatio_EN300294_Mask}
 
 
@@ -2173,14 +2321,15 @@ type
 
   PCOPP_ImageAspectRatio_EN300294 = ^COPP_ImageAspectRatio_EN300294;
   COPP_ImageAspectRatio_EN300294 = (
-    COPP_AspectRatio_EN300294_FullFormat4by3,
-    COPP_AspectRatio_EN300294_Box14by9Center,
-    COPP_AspectRatio_EN300294_Box14by9Top,
-    COPP_AspectRatio_EN300294_Box16by9Center,
-    COPP_AspectRatio_EN300294_Box16by9Top,
-    COPP_AspectRatio_EN300294_BoxGT16by9Center,
-    COPP_AspectRatio_EN300294_FullFormat4by3ProtectedCenter,
-    COPP_AspectRatio_EN300294_FullFormat16by9Anamorphic);
+    COPP_AspectRatio_EN300294_FullFormat4by3                = 0,
+    COPP_AspectRatio_EN300294_Box14by9Center                = 1,
+    COPP_AspectRatio_EN300294_Box14by9Top                   = 2,
+    COPP_AspectRatio_EN300294_Box16by9Center                = 3,
+    COPP_AspectRatio_EN300294_Box16by9Top                   = 4,
+    COPP_AspectRatio_EN300294_BoxGT16by9Center              = 5,
+    COPP_AspectRatio_EN300294_FullFormat4by3ProtectedCenter = 6,
+    COPP_AspectRatio_EN300294_FullFormat16by9Anamorphic     = 7
+  );
   {$EXTERNALSYM COPP_ImageAspectRatio_EN300294}
 
   // -------------------------------------------------------------------------
@@ -2382,6 +2531,8 @@ implementation
 
   // Implement Additional functions here.
 
+
+
 {$OPTIMIZATION ON}
 {$OVERFLOWCHECKS OFF}
 
@@ -2463,5 +2614,292 @@ end;
 
 {$OPTIMIZATION OFF}
 
+// inline
+
+function readDXVA_MBskipsFollowing(dwMB_SNL: DWord): DWORD;
+begin
+  Result := ((dwMB_SNL and $FF000000) shr 24);
+end;
+
+function readDXVA_MBdataLocation(dwMB_SNL: DWord): DWORD;
+begin
+  Result := (dwMB_SNL and $00FFFFFF);
+end;
+
+function writeDXVA_MB_SNL(dwMB_SNL: DWord ; skips: DWord; dloc: DWord): DWORD;
+begin
+  Result := (dwMB_SNL or (skips shl 24) or dloc);
+end;
+
+function setDXVA_MBskipsFollowing(dwMB_SNL: DWord; skips: DWord): DWORD;
+begin
+  Result := dwMB_SNL or (skips shl 24);
+end;
+
+function setDXVA_MBdataLocation(dwMB_SNL: DWord; dloc: Dword): DWORD;
+begin
+  Result := (dwMB_SNL or dloc);
+end;
+
+function readDXVA_MvertFieldSel_3(wMBtype: DWord): DWORD;
+begin
+  Result := ((wMBtype and $8000) shr 15);
+end;
+
+function readDXVA_MvertFieldSel_2(wMBtype: DWord): DWORD;
+begin
+  Result := ((wMBtype and $4000) shr 14);
+end;
+
+function readDXVA_MvertFieldSel_1(wMBtype: DWord): DWORD;
+begin
+  Result := ((wMBtype and $2000) shr 13);
+end;
+
+function readDXVA_MvertFieldSel_0(wMBtype: DWord): DWORD;
+begin
+  Result := ((wMBtype and $1000) shr 12);
+end;
+
+function readDXVA_ReservedBits(wMBtype: DWord): DWORD;
+begin
+  Result := ((wMBtype and $0800) shr 11);
+end;
+
+function readDXVA_HostResidDiff(wMBtype: DWord): DWORD;
+begin
+  Result := ((wMBtype and $0400) shr 10);
+end;
+
+function readDXVA_MotionType(wMBtype: DWord): DWORD;
+begin
+  Result := ((wMBtype and $0300) shr 8);
+end;
+
+function readDXVA_MBscanMethod(wMBtype: DWord): DWORD;
+begin
+  Result := ((wMBtype and $00C0) shr 6);
+end;
+
+function readDXVA_FieldResidual(wMBtype: DWord): DWORD;
+begin
+  Result := ((wMBtype and $0020) shr 5);
+end;
+
+function readDXVA_H261LoopFilter(wMBtype: DWord): DWORD;
+begin
+  Result := ((wMBtype and $0010) shr 4);
+end;
+
+function readDXVA_Motion4MV(wMBtype: DWord): DWORD;
+begin
+  Result := ((wMBtype and $0008) shr 3);
+end;
+
+function readDXVA_MotionBackward(wMBtype: DWord): DWORD;
+begin
+  Result := ((wMBtype and $0004) shr 2);
+end;
+
+function readDXVA_MotionForward(wMBtype: DWord): DWORD;
+begin
+  Result := ((wMBtype and $0002) shr 1);
+end;
+
+function readDXVA_IntraMacroblock(wMBtype: DWord): DWORD;
+begin
+  Result := ((wMBtype and $0001));
+end;
+
+function setDXVA_MvertFieldSel_3(wMBtype: DWord): DWORD;
+begin
+  Result := (wMBtype or $8000);
+end;
+
+function setDXVA_MvertFieldSel_2(wMBtype: DWord): DWORD;
+begin
+  Result := (wMBtype or $4000);
+end;
+
+function setDXVA_MvertFieldSel_1(wMBtype: DWord): DWORD;
+begin
+  Result := (wMBtype or $2000);
+end;
+
+function setDXVA_MvertFieldSel_0(wMBtype: DWord): DWORD;
+begin
+  Result := (wMBtype or $1000);
+end;
+
+function setDXVA_ReservedBits(wMBtype: DWord): DWORD;
+begin
+  Result := (wMBtype or $0800);
+end;
+
+function setDXVA_HostResidDiff(wMBtype: DWord): DWORD;
+begin
+  Result := (wMBtype or $0400);
+end;
+
+function setDXVA_MotionType(wMBtype: DWord; value: DWord ): DWORD;
+begin
+  Result := wMBtype or (value shl 8);
+end;
+
+function setDXVA_MBscanMethod(wMBtype: DWord; value: DWord ): DWORD;
+begin
+  Result := wMBtype or (value shl 6);
+end;
+
+function setDXVA_FieldResidual(wMBtype: DWord): DWORD;
+begin
+  Result := wMBtype or $0020;
+end;
+
+function setDXVA_H261LoopFilter(wMBtype: DWord): DWORD;
+begin
+  Result := wMBtype or $0010;
+end;
+
+function setDXVA_Motion4MV(wMBtype: DWord): DWORD;
+begin
+  Result := wMBtype or $0008;
+end;
+
+function setDXVA_MotionBackward(wMBtype: DWord): DWORD;
+begin
+  Result := wMBtype or $0004;
+end;
+
+function setDXVA_MotionForward(wMBtype: DWord): DWORD;
+begin
+  Result := wMBtype or $0002;
+end;
+
+function setDXVA_IntraMacroblock(wMBtype: DWord): DWORD;
+begin
+  Result := wMBtype or $0001;
+end;
+
+function readDXVA_Y___0coded(wPatternCode: Dword): DWORD;
+begin
+  Result := ((wPatternCode and $0800) shr 11);
+end;
+
+function readDXVA_Y___1coded(wPatternCode: Dword): DWORD;
+begin
+  Result := ((wPatternCode and $0400) shr 10);
+end;
+
+function readDXVA_Y___2coded(wPatternCode: Dword): DWORD;
+begin
+  Result := ((wPatternCode and $0200) shr 9);
+end;
+
+function readDXVA_Y___3coded(wPatternCode: Dword): DWORD;
+begin
+  Result := ((wPatternCode and $0100) shr 8);
+end;
+
+function readDXVA_Cb__4coded(wPatternCode: Dword): DWORD;
+begin
+  Result := ((wPatternCode and $0080) shr 7);
+end;
+
+function readDXVA_Cr__5coded(wPatternCode: Dword): DWORD;
+begin
+  Result := ((wPatternCode and $0040) shr 6);
+end;
+
+function readDXVA_Cb__6coded(wPatternCode: Dword): DWORD;
+begin
+  Result := ((wPatternCode and $0020) shr 5);
+end;
+
+function readDXVA_Cr__7coded(wPatternCode: Dword): DWORD;
+begin
+  Result := ((wPatternCode and $0010) shr 4);
+end;
+
+function readDXVA_Cb__8coded(wPatternCode: Dword): DWORD;
+begin
+  Result := ((wPatternCode and $0008) shr 3);
+end;
+
+function readDXVA_Cb__9coded(wPatternCode: Dword): DWORD;
+begin
+  Result := ((wPatternCode and $0004) shr 2);
+end;
+
+function readDXVA_Cr_10coded(wPatternCode: Dword): DWORD;
+begin
+  Result := ((wPatternCode and $0002) shr 1);
+end;
+
+function readDXVA_Cr_11coded(wPatternCode: Dword): DWORD;
+begin
+  Result := (wPatternCode and $0001);
+end;
+
+
+function readDXVA_Y___0oflow(wPC_Overflow: DWord): DWORD;
+begin
+  Result := ((wPC_Overflow and $0800) shr 11);
+end;
+
+function readDXVA_Y___1oflow(wPC_Overflow: DWord): DWORD;
+begin
+  Result := ((wPC_Overflow and $0400) shr 10);
+end;
+
+function readDXVA_Y___2oflow(wPC_Overflow: DWord): DWORD;
+begin
+  Result := ((wPC_Overflow and $0200) shr 9);
+end;
+
+function readDXVA_Y___3oflow(wPC_Overflow: DWord): DWORD;
+begin
+  Result := ((wPC_Overflow and $0100) shr 8);
+end;
+
+function readDXVA_Cb__4oflow(wPC_Overflow: DWord): DWORD;
+begin
+  Result := ((wPC_Overflow and $0080) shr 7);
+end;
+
+function readDXVA_Cr__5oflow(wPC_Overflow: DWord): DWORD;
+begin
+  Result := ((wPC_Overflow and $0040) shr 6);
+end;
+
+function readDXVA_Cb__6oflow(wPC_Overflow: DWord): DWORD;
+begin
+  Result := ((wPC_Overflow and $0020) shr 5);
+end;
+
+function readDXVA_Cr__7oflow(wPC_Overflow: DWord): DWORD;
+begin
+  Result := ((wPC_Overflow and $0010) shr 4);
+end;
+
+function readDXVA_Cb__8oflow(wPC_Overflow: DWord): DWORD;
+begin
+  Result := ((wPC_Overflow and $0008) shr 3);
+end;
+
+function readDXVA_Cb__9oflow(wPC_Overflow: DWord): DWORD;
+begin
+  Result := ((wPC_Overflow and $0004) shr 2);
+end;
+
+function readDXVA_Cr_10oflow(wPC_Overflow: DWord): DWORD;
+begin
+  Result := ((wPC_Overflow and $0002) shr 1);
+end;
+
+function readDXVA_Cr_11oflow(wPC_Overflow: DWord): DWORD;
+begin
+  Result := wPC_Overflow and $0001;
+end;
 
 end.

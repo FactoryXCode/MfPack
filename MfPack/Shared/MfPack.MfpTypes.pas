@@ -17,11 +17,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -1140,12 +1142,13 @@ type
   // WideChar
   // Those are defined in winnt.h, but for our convenience we do it here to keep things simple.
 
-
+dd = PLPWSTR;
 {$IFDEF MFP_LPWSTR}
   PWSTR = PWideChar;
   {$EXTERNALSYM PWSTR}
   PLPWSTR = ^LPWSTR;
-  LPWSTR = PWSTR;
+  {$EXTERNALSYM PLPWSTR}
+  LPWSTR = PWideChar;
   {$EXTERNALSYM LPWSTR}
 {$ENDIF}
 

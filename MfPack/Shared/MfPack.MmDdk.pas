@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -485,7 +487,7 @@ type
     dwInstance: DWORD_PTR;                  // app's private instance information
     dnDevNode: DWORD_PTR;                   // DevNode
     cIds: DWORD;                            // If stream open, # stream ids
-    rgIds: array of MIDIOPENSTRMID;         // (dynamic)Array of device ID's (actually [cIds])
+    rgIds: array [0..0] of MIDIOPENSTRMID;  // Array of device ID's (actually [cIds])
   end;
   {$EXTERNALSYM midiopendesc_tag}
   MIDIOPENDESC = midiopendesc_tag;

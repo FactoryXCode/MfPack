@@ -16,12 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), (Ciaran), (topPlay)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-//                                #1
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later (See: Remarks).
@@ -224,7 +225,6 @@ type
   PMF_SOURCE_READER_CONTROL_FLAG = ^cwMF_SOURCE_READER_CONTROL_FLAG;
   cwMF_SOURCE_READER_CONTROL_FLAG   = (
     MF_SOURCE_READER_CONTROLF_DRAIN = $00000001
-    {$EXTERNALSYM MF_SOURCE_READER_CONTROLF_DRAIN}
   );
   {$EXTERNALSYM cwMF_SOURCE_READER_CONTROL_FLAG}
   MF_SOURCE_READER_CONTROL_FLAG = cwMF_SOURCE_READER_CONTROL_FLAG;

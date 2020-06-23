@@ -16,12 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-//                                #1
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -2099,11 +2100,11 @@ type
   eAVEncVideoOutputFrameRateConversion = UINT32;
   {$EXTERNALSYM eAVEncVideoOutputFrameRateConversion}
 const
-  eAVEncVideoOutputFrameRateConversion_Disable = UINT32(0);
+  eAVEncVideoOutputFrameRateConversion_Disable = eAVEncVideoOutputFrameRateConversion(0);
   {$EXTERNALSYM eAVEncVideoOutputFrameRateConversion_Disable}
-  eAVEncVideoOutputFrameRateConversion_Enable  = UINT32(1);
+  eAVEncVideoOutputFrameRateConversion_Enable  = eAVEncVideoOutputFrameRateConversion(1);
   {$EXTERNALSYM eAVEncVideoOutputFrameRateConversion_Enable}
-  eAVEncVideoOutputFrameRateConversion_Alias   = UINT32(2);
+  eAVEncVideoOutputFrameRateConversion_Alias   = eAVEncVideoOutputFrameRateConversion(2);
   {$EXTERNALSYM eAVEncVideoOutputFrameRateConversion_Alias}
 
 
@@ -2112,13 +2113,13 @@ type
   eAVDecVideoSoftwareDeinterlaceMode = UINT32;
   {$EXTERNALSYM eAVDecVideoSoftwareDeinterlaceMode}
 const
-  eAVDecVideoSoftwareDeinterlaceMode_NoDeinterlacing          = UINT32(0); // do not use software deinterlace
+  eAVDecVideoSoftwareDeinterlaceMode_NoDeinterlacing          = eAVDecVideoSoftwareDeinterlaceMode(0); // do not use software deinterlace
   {$EXTERNALSYM eAVDecVideoSoftwareDeinterlaceMode_NoDeinterlacing}
-  eAVDecVideoSoftwareDeinterlaceMode_ProgressiveDeinterlacing = UINT32(1); // Use progressive deinterlace
+  eAVDecVideoSoftwareDeinterlaceMode_ProgressiveDeinterlacing = eAVDecVideoSoftwareDeinterlaceMode(1); // Use progressive deinterlace
   {$EXTERNALSYM eAVDecVideoSoftwareDeinterlaceMode_ProgressiveDeinterlacing}
-  eAVDecVideoSoftwareDeinterlaceMode_BOBDeinterlacing         = UINT32(2); // BOB deinterlacing
+  eAVDecVideoSoftwareDeinterlaceMode_BOBDeinterlacing         = eAVDecVideoSoftwareDeinterlaceMode(2); // BOB deinterlacing
   {$EXTERNALSYM eAVDecVideoSoftwareDeinterlaceMode_BOBDeinterlacing}
-  eAVDecVideoSoftwareDeinterlaceMode_SmartBOBDeinterlacing    = UINT32(3); // Smart BOB deinterlacing
+  eAVDecVideoSoftwareDeinterlaceMode_SmartBOBDeinterlacing    = eAVDecVideoSoftwareDeinterlaceMode(3); // Smart BOB deinterlacing
   {$EXTERNALSYM eAVDecVideoSoftwareDeinterlaceMode_SmartBOBDeinterlacing}
 
 
@@ -2127,13 +2128,13 @@ type
   eAVFastDecodeMode = UINT32;
   {$EXTERNALSYM eAVFastDecodeMode}
 const
-  eVideoDecodeCompliant  = UINT32(0);
+  eVideoDecodeCompliant  = eAVFastDecodeMode(0);
   {$EXTERNALSYM eVideoDecodeCompliant}
-  eVideoDecodeOptimalLF  = UINT32(1); // Optimal Loop Filter
+  eVideoDecodeOptimalLF  = eAVFastDecodeMode(1); // Optimal Loop Filter
   {$EXTERNALSYM eVideoDecodeOptimalLF}
-  eVideoDecodeDisableLF  = UINT32(2); // Disable Loop Filter
+  eVideoDecodeDisableLF  = eAVFastDecodeMode(2); // Disable Loop Filter
   {$EXTERNALSYM eVideoDecodeDisableLF}
-  eVideoDecodeFastest    = UINT32(32);
+  eVideoDecodeFastest    = eAVFastDecodeMode(32);
   {$EXTERNALSYM eVideoDecodeFastest}
 
 
@@ -2142,13 +2143,13 @@ type
   eAVDecVideoH264ErrorConcealment = UINT32;
   {$EXTERNALSYM eAVDecVideoH264ErrorConcealment}
 const
-  eErrorConcealmentTypeDrop          = UINT32(0);  // ERR_CONCEALMENT_TYPE_DROP
+  eErrorConcealmentTypeDrop          = eAVDecVideoH264ErrorConcealment(0);  // ERR_CONCEALMENT_TYPE_DROP
   {$EXTERNALSYM eErrorConcealmentTypeDrop}
-  eErrorConcealmentTypeBasic         = UINT32(1);  // ERR_CONCEALMENT_TYPE_BASIC  (the default, and good mode used most of the time)
+  eErrorConcealmentTypeBasic         = eAVDecVideoH264ErrorConcealment(1);  // ERR_CONCEALMENT_TYPE_BASIC  (the default, and good mode used most of the time)
   {$EXTERNALSYM eErrorConcealmentTypeBasic}
-  eErrorConcealmentTypeAdvanced      = UINT32(2);  // ERR_CONCEALMENT_TYPE_ADVANCED
+  eErrorConcealmentTypeAdvanced      = eAVDecVideoH264ErrorConcealment(2);  // ERR_CONCEALMENT_TYPE_ADVANCED
   {$EXTERNALSYM eErrorConcealmentTypeAdvanced}
-  eErrorConcealmentTypeDXVASetBlack  = UINT32(3);  // ERR_CONCEALMENT_TYPE_DXVA_SET_BLACK
+  eErrorConcealmentTypeDXVASetBlack  = eAVDecVideoH264ErrorConcealment(3);  // ERR_CONCEALMENT_TYPE_DXVA_SET_BLACK
   {$EXTERNALSYM eErrorConcealmentTypeDXVASetBlack}
 
 
@@ -2157,9 +2158,9 @@ type
   eAVDecVideoMPEG2ErrorConcealment = UINT32;
   {$EXTERNALSYM eAVDecVideoMPEG2ErrorConcealment}
 const
-  eErrorConcealmentOff          = UINT32(0);   //
+  eErrorConcealmentOff          = eAVDecVideoMPEG2ErrorConcealment(0);   //
   {$EXTERNALSYM eErrorConcealmentOff}
-  eErrorConcealmentOn           = UINT32(1);   //  the default and good mode used most of the time
+  eErrorConcealmentOn           = eAVDecVideoMPEG2ErrorConcealment(1);   //  the default and good mode used most of the time
   {$EXTERNALSYM eErrorConcealmentOn}
 
 
@@ -2168,11 +2169,11 @@ type
   eAVDecVideoCodecType = UINT32;
   {$EXTERNALSYM eAVDecVideoCodecType}
 const
-  eAVDecVideoCodecType_NOTPLAYING   = UINT32(0);
+  eAVDecVideoCodecType_NOTPLAYING   = eAVDecVideoCodecType(0);
   {$EXTERNALSYM eAVDecVideoCodecType_NOTPLAYING}
-  eAVDecVideoCodecType_MPEG2        = UINT32(1);
+  eAVDecVideoCodecType_MPEG2        = eAVDecVideoCodecType(1);
   {$EXTERNALSYM eAVDecVideoCodecType_MPEG2}
-  eAVDecVideoCodecType_H264         = UINT32(2);
+  eAVDecVideoCodecType_H264         = eAVDecVideoCodecType(2);
   {$EXTERNALSYM eAVDecVideoCodecType_H264}
 
 
@@ -2181,15 +2182,15 @@ type
   eAVDecVideoDXVAMode = UINT32;
   {$EXTERNALSYM eAVDecVideoDXVAMode}
 const
-  eAVDecVideoDXVAMode_NOTPLAYING = UINT32(0);
+  eAVDecVideoDXVAMode_NOTPLAYING = eAVDecVideoDXVAMode(0);
   {$EXTERNALSYM eAVDecVideoDXVAMode_NOTPLAYING}
-  eAVDecVideoDXVAMode_SW     = UINT32(1);
+  eAVDecVideoDXVAMode_SW     = eAVDecVideoDXVAMode(1);
   {$EXTERNALSYM eAVDecVideoDXVAMode_SW}
-  eAVDecVideoDXVAMode_MC     = UINT32(2);
+  eAVDecVideoDXVAMode_MC     = eAVDecVideoDXVAMode(2);
   {$EXTERNALSYM eAVDecVideoDXVAMode_MC}
-  eAVDecVideoDXVAMode_IDCT   = UINT32(3);
+  eAVDecVideoDXVAMode_IDCT   = eAVDecVideoDXVAMode(3);
   {$EXTERNALSYM eAVDecVideoDXVAMode_IDCT}
-  eAVDecVideoDXVAMode_VLD    = UINT32(4);
+  eAVDecVideoDXVAMode_VLD    = eAVDecVideoDXVAMode(4);
   {$EXTERNALSYM eAVDecVideoDXVAMode_VLD}
 
 
@@ -2198,11 +2199,11 @@ type
   eAVDecVideoDXVABusEncryption = UINT32;
   {$EXTERNALSYM eAVDecVideoDXVABusEncryption}
 const
-  eAVDecVideoDXVABusEncryption_NONE     = UINT32(0);
+  eAVDecVideoDXVABusEncryption_NONE     = eAVDecVideoDXVABusEncryption(0);
   {$EXTERNALSYM eAVDecVideoDXVABusEncryption_NONE}
-  eAVDecVideoDXVABusEncryption_PRIVATE  = UINT32(1);
+  eAVDecVideoDXVABusEncryption_PRIVATE  = eAVDecVideoDXVABusEncryption(1);
   {$EXTERNALSYM eAVDecVideoDXVABusEncryption_PRIVATE}
-  eAVDecVideoDXVABusEncryption_AES      = UINT32(2);
+  eAVDecVideoDXVABusEncryption_AES      = eAVDecVideoDXVABusEncryption(2);
   {$EXTERNALSYM eAVDecVideoDXVABusEncryption_AES}
 
 
@@ -2211,11 +2212,11 @@ type
   eAVEncVideoSourceScanType = UINT32;
   {$EXTERNALSYM eAVEncVideoSourceScanType}
 const
-  eAVEncVideoSourceScan_Automatic         = UINT32(0);
+  eAVEncVideoSourceScan_Automatic         = eAVEncVideoSourceScanType(0);
   {$EXTERNALSYM eAVEncVideoSourceScan_Automatic}
-  eAVEncVideoSourceScan_Interlaced        = UINT32(1);
+  eAVEncVideoSourceScan_Interlaced        = eAVEncVideoSourceScanType(1);
   {$EXTERNALSYM eAVEncVideoSourceScan_Interlaced}
-  eAVEncVideoSourceScan_Progressive       = UINT32(2);
+  eAVEncVideoSourceScan_Progressive       = eAVEncVideoSourceScanType(2);
   {$EXTERNALSYM eAVEncVideoSourceScan_Progressive}
 
 
@@ -2224,13 +2225,13 @@ type
   eAVEncVideoOutputScanType = UINT32;
   {$EXTERNALSYM eAVEncVideoOutputScanType}
 const
-  eAVEncVideoOutputScan_Progressive       = UINT32(0);
+  eAVEncVideoOutputScan_Progressive       = eAVEncVideoOutputScanType(0);
   {$EXTERNALSYM eAVEncVideoOutputScan_Progressive}
-  eAVEncVideoOutputScan_Interlaced        = UINT32(1);
+  eAVEncVideoOutputScan_Interlaced        = eAVEncVideoOutputScanType(1);
   {$EXTERNALSYM eAVEncVideoOutputScan_Interlaced}
-  eAVEncVideoOutputScan_SameAsInput       = UINT32(2);
+  eAVEncVideoOutputScan_SameAsInput       = eAVEncVideoOutputScanType(2);
   {$EXTERNALSYM eAVEncVideoOutputScan_SameAsInput}
-  eAVEncVideoOutputScan_Automatic         = UINT32(3);
+  eAVEncVideoOutputScan_Automatic         = eAVEncVideoOutputScanType(3);
   {$EXTERNALSYM eAVEncVideoOutputScan_Automatic}
 
 
@@ -2239,11 +2240,11 @@ type
   eAVEncVideoFilmContent = UINT32;
   {$EXTERNALSYM eAVEncVideoFilmContent}
 const
-  eAVEncVideoFilmContent_VideoOnly = UINT32(0);
+  eAVEncVideoFilmContent_VideoOnly = eAVEncVideoFilmContent(0);
   {$EXTERNALSYM eAVEncVideoFilmContent_VideoOnly}
-  eAVEncVideoFilmContent_FilmOnly  = UINT32(1);
+  eAVEncVideoFilmContent_FilmOnly  = eAVEncVideoFilmContent(1);
   {$EXTERNALSYM eAVEncVideoFilmContent_FilmOnly}
-  eAVEncVideoFilmContent_Mixed     = UINT32(2);
+  eAVEncVideoFilmContent_Mixed     = eAVEncVideoFilmContent(2);
   {$EXTERNALSYM eAVEncVideoFilmContent_Mixed}
 
 
@@ -2252,15 +2253,15 @@ type
   eAVEncVideoChromaResolution = UINT32;
   {$EXTERNALSYM eAVEncVideoChromaResolution}
 const
-  eAVEncVideoChromaResolution_SameAsSource = UINT32(0);
+  eAVEncVideoChromaResolution_SameAsSource = eAVEncVideoChromaResolution(0);
   {$EXTERNALSYM eAVEncVideoChromaResolution_SameAsSource}
-  eAVEncVideoChromaResolution_444 = UINT32(1);
+  eAVEncVideoChromaResolution_444          = eAVEncVideoChromaResolution(1);
   {$EXTERNALSYM eAVEncVideoChromaResolution_444}
-  eAVEncVideoChromaResolution_422 = UINT32(2);
+  eAVEncVideoChromaResolution_422          = eAVEncVideoChromaResolution(2);
   {$EXTERNALSYM eAVEncVideoChromaResolution_422}
-  eAVEncVideoChromaResolution_420 = UINT32(3);
+  eAVEncVideoChromaResolution_420          = eAVEncVideoChromaResolution(3);
   {$EXTERNALSYM eAVEncVideoChromaResolution_420}
-  eAVEncVideoChromaResolution_411 = UINT32(4);
+  eAVEncVideoChromaResolution_411          = eAVEncVideoChromaResolution(4);
   {$EXTERNALSYM eAVEncVideoChromaResolution_411}
 
 
@@ -2269,15 +2270,15 @@ type
   eAVEncVideoChromaSubsampling = UINT32;
   {$EXTERNALSYM eAVEncVideoChromaSubsampling}
 const
-  eAVEncVideoChromaSubsamplingFormat_SameAsSource                   = UINT32($0);
+  eAVEncVideoChromaSubsamplingFormat_SameAsSource                   = eAVEncVideoChromaSubsampling($0);
   {$EXTERNALSYM eAVEncVideoChromaSubsamplingFormat_SameAsSource}
-  eAVEncVideoChromaSubsamplingFormat_ProgressiveChroma              = UINT32($8);
+  eAVEncVideoChromaSubsamplingFormat_ProgressiveChroma              = eAVEncVideoChromaSubsampling($8);
   {$EXTERNALSYM eAVEncVideoChromaSubsamplingFormat_ProgressiveChroma}
-  eAVEncVideoChromaSubsamplingFormat_Horizontally_Cosited           = UINT32($4);
+  eAVEncVideoChromaSubsamplingFormat_Horizontally_Cosited           = eAVEncVideoChromaSubsampling($4);
   {$EXTERNALSYM eAVEncVideoChromaSubsamplingFormat_Horizontally_Cosited}
-  eAVEncVideoChromaSubsamplingFormat_Vertically_Cosited             = UINT32($2);
+  eAVEncVideoChromaSubsamplingFormat_Vertically_Cosited             = eAVEncVideoChromaSubsampling($2);
   {$EXTERNALSYM eAVEncVideoChromaSubsamplingFormat_Vertically_Cosited}
-  eAVEncVideoChromaSubsamplingFormat_Vertically_AlignedChromaPlanes = UINT32($1);
+  eAVEncVideoChromaSubsamplingFormat_Vertically_AlignedChromaPlanes = eAVEncVideoChromaSubsampling($1);
   {$EXTERNALSYM eAVEncVideoChromaSubsamplingFormat_Vertically_AlignedChromaPlanes}
 
 
@@ -2286,23 +2287,23 @@ type
   eAVEncVideoColorPrimaries = UINT32;
   {$EXTERNALSYM eAVEncVideoColorPrimaries}
 const
-  eAVEncVideoColorPrimaries_SameAsSource  = UINT32(0);
+  eAVEncVideoColorPrimaries_SameAsSource  = eAVEncVideoColorPrimaries(0);
   {$EXTERNALSYM eAVEncVideoColorPrimaries_SameAsSource}
-  eAVEncVideoColorPrimaries_Reserved      = UINT32(1);
+  eAVEncVideoColorPrimaries_Reserved      = eAVEncVideoColorPrimaries(1);
   {$EXTERNALSYM eAVEncVideoColorPrimaries_Reserved}
-  eAVEncVideoColorPrimaries_BT709         = UINT32(2);
+  eAVEncVideoColorPrimaries_BT709         = eAVEncVideoColorPrimaries(2);
   {$EXTERNALSYM eAVEncVideoColorPrimaries_BT709}
-  eAVEncVideoColorPrimaries_BT470_2_SysM  = UINT32(3);
+  eAVEncVideoColorPrimaries_BT470_2_SysM  = eAVEncVideoColorPrimaries(3);
   {$EXTERNALSYM eAVEncVideoColorPrimaries_BT470_2_SysM}
-  eAVEncVideoColorPrimaries_BT470_2_SysBG = UINT32(4);
+  eAVEncVideoColorPrimaries_BT470_2_SysBG = eAVEncVideoColorPrimaries(4);
   {$EXTERNALSYM eAVEncVideoColorPrimaries_BT470_2_SysBG}
-  eAVEncVideoColorPrimaries_SMPTE170M     = UINT32(5);
+  eAVEncVideoColorPrimaries_SMPTE170M     = eAVEncVideoColorPrimaries(5);
   {$EXTERNALSYM eAVEncVideoColorPrimaries_SMPTE170M}
-  eAVEncVideoColorPrimaries_SMPTE240M     = UINT32(6);
+  eAVEncVideoColorPrimaries_SMPTE240M     = eAVEncVideoColorPrimaries(6);
   {$EXTERNALSYM eAVEncVideoColorPrimaries_SMPTE240M}
-  eAVEncVideoColorPrimaries_EBU3231       = UINT32(7);
+  eAVEncVideoColorPrimaries_EBU3231       = eAVEncVideoColorPrimaries(7);
   {$EXTERNALSYM eAVEncVideoColorPrimaries_EBU3231}
-  eAVEncVideoColorPrimaries_SMPTE_C       = UINT32(8);
+  eAVEncVideoColorPrimaries_SMPTE_C       = eAVEncVideoColorPrimaries(8);
   {$EXTERNALSYM eAVEncVideoColorPrimaries_SMPTE_C}
 
 
@@ -2311,23 +2312,23 @@ type
   eAVEncVideoColorTransferFunction = UINT32;
   {$EXTERNALSYM eAVEncVideoColorTransferFunction}
 const
-  eAVEncVideoColorTransferFunction_SameAsSource = UINT32(0);
+  eAVEncVideoColorTransferFunction_SameAsSource = eAVEncVideoColorTransferFunction(0);
   {$EXTERNALSYM eAVEncVideoColorTransferFunction_SameAsSource}
-  eAVEncVideoColorTransferFunction_10           = UINT32(1);  // (Linear); scRGB)
+  eAVEncVideoColorTransferFunction_10           = eAVEncVideoColorTransferFunction(1);  // (Linear); scRGB)
   {$EXTERNALSYM eAVEncVideoColorTransferFunction_10}
-  eAVEncVideoColorTransferFunction_18           = UINT32(2);
+  eAVEncVideoColorTransferFunction_18           = eAVEncVideoColorTransferFunction(2);
   {$EXTERNALSYM eAVEncVideoColorTransferFunction_18}
-  eAVEncVideoColorTransferFunction_20           = UINT32(3);
+  eAVEncVideoColorTransferFunction_20           = eAVEncVideoColorTransferFunction(3);
   {$EXTERNALSYM eAVEncVideoColorTransferFunction_20}
-  eAVEncVideoColorTransferFunction_22           = UINT32(4);  // (BT470-2 SysM)
+  eAVEncVideoColorTransferFunction_22           = eAVEncVideoColorTransferFunction(4);  // (BT470-2 SysM)
   {$EXTERNALSYM eAVEncVideoColorTransferFunction_22}
-  eAVEncVideoColorTransferFunction_22_709       = UINT32(5);  // (BT709);  SMPTE296M); SMPTE170M); BT470); SMPTE274M); BT.1361)
+  eAVEncVideoColorTransferFunction_22_709       = eAVEncVideoColorTransferFunction(5);  // (BT709);  SMPTE296M); SMPTE170M); BT470); SMPTE274M); BT.1361)
   {$EXTERNALSYM eAVEncVideoColorTransferFunction_22_709}
-  eAVEncVideoColorTransferFunction_22_240M      = UINT32(6);  // (SMPTE240M); interim 274M)
+  eAVEncVideoColorTransferFunction_22_240M      = eAVEncVideoColorTransferFunction(6);  // (SMPTE240M); interim 274M)
   {$EXTERNALSYM eAVEncVideoColorTransferFunction_22_240M}
-  eAVEncVideoColorTransferFunction_22_8bit_sRGB = UINT32(7);  // (sRGB)
+  eAVEncVideoColorTransferFunction_22_8bit_sRGB = eAVEncVideoColorTransferFunction(7);  // (sRGB)
   {$EXTERNALSYM eAVEncVideoColorTransferFunction_22_8bit_sRGB}
-  eAVEncVideoColorTransferFunction_28           = UINT32(8);
+  eAVEncVideoColorTransferFunction_28           = eAVEncVideoColorTransferFunction(8);
   {$EXTERNALSYM eAVEncVideoColorTransferFunction_28}
 
 
@@ -2336,13 +2337,13 @@ type
   eAVEncVideoColorTransferMatrix = UINT32;
   {$EXTERNALSYM eAVEncVideoColorTransferMatrix}
 const
-  eAVEncVideoColorTransferMatrix_SameAsSource = UINT32(0);
+  eAVEncVideoColorTransferMatrix_SameAsSource = eAVEncVideoColorTransferMatrix(0);
   {$EXTERNALSYM eAVEncVideoColorTransferMatrix_SameAsSource}
-  eAVEncVideoColorTransferMatrix_BT709        = UINT32(1);
+  eAVEncVideoColorTransferMatrix_BT709        = eAVEncVideoColorTransferMatrix(1);
   {$EXTERNALSYM eAVEncVideoColorTransferMatrix_BT709}
-  eAVEncVideoColorTransferMatrix_BT601        = UINT32(2);  // (601, BT470-2 B,B, 170M)
+  eAVEncVideoColorTransferMatrix_BT601        = eAVEncVideoColorTransferMatrix(2);  // (601, BT470-2 B,B, 170M)
   {$EXTERNALSYM eAVEncVideoColorTransferMatrix_BT601}
-  eAVEncVideoColorTransferMatrix_SMPTE240M    = UINT32(3);
+  eAVEncVideoColorTransferMatrix_SMPTE240M    = eAVEncVideoColorTransferMatrix(3);
   {$EXTERNALSYM eAVEncVideoColorTransferMatrix_SMPTE240M}
 
 
@@ -2351,17 +2352,17 @@ type
   eAVEncVideoColorLighting = UINT32;
   {$EXTERNALSYM eAVEncVideoColorLighting}
 const
-  eAVEncVideoColorLighting_SameAsSource = UINT32(0);
+  eAVEncVideoColorLighting_SameAsSource = eAVEncVideoColorLighting(0);
   {$EXTERNALSYM eAVEncVideoColorLighting_SameAsSource}
-  eAVEncVideoColorLighting_Unknown      = UINT32(1);
+  eAVEncVideoColorLighting_Unknown      = eAVEncVideoColorLighting(1);
   {$EXTERNALSYM eAVEncVideoColorLighting_Unknown}
-  eAVEncVideoColorLighting_Bright       = UINT32(2);
+  eAVEncVideoColorLighting_Bright       = eAVEncVideoColorLighting(2);
   {$EXTERNALSYM eAVEncVideoColorLighting_Bright}
-  eAVEncVideoColorLighting_Office       = UINT32(3);
+  eAVEncVideoColorLighting_Office       = eAVEncVideoColorLighting(3);
   {$EXTERNALSYM eAVEncVideoColorLighting_Office}
-  eAVEncVideoColorLighting_Dim          = UINT32(4);
+  eAVEncVideoColorLighting_Dim          = eAVEncVideoColorLighting(4);
   {$EXTERNALSYM eAVEncVideoColorLighting_Dim}
-  eAVEncVideoColorLighting_Dark         = UINT32(5);
+  eAVEncVideoColorLighting_Dark         = eAVEncVideoColorLighting(5);
   {$EXTERNALSYM eAVEncVideoColorLighting_Dark}
 
 
@@ -2370,13 +2371,13 @@ type
   eAVEncVideoColorNominalRange = UINT32;
   {$EXTERNALSYM eAVEncVideoColorNominalRange}
 const
-  eAVEncVideoColorNominalRange_SameAsSource = UINT32(0);
+  eAVEncVideoColorNominalRange_SameAsSource = eAVEncVideoColorNominalRange(0);
   {$EXTERNALSYM eAVEncVideoColorNominalRange_SameAsSource}
-  eAVEncVideoColorNominalRange_0_255        = UINT32(1); // (8 bit: 0..255, 10 bit: 0..1023)
+  eAVEncVideoColorNominalRange_0_255        = eAVEncVideoColorNominalRange(1); // (8 bit: 0..255, 10 bit: 0..1023)
   {$EXTERNALSYM eAVEncVideoColorNominalRange_0_255}
-  eAVEncVideoColorNominalRange_16_235       = UINT32(2); // (16..235, 64..940 (16*4...235*4)
+  eAVEncVideoColorNominalRange_16_235       = eAVEncVideoColorNominalRange(2); // (16..235, 64..940 (16*4...235*4)
   {$EXTERNALSYM eAVEncVideoColorNominalRange_16_235}
-  eAVEncVideoColorNominalRange_48_208       = UINT32(3); // (48..208)
+  eAVEncVideoColorNominalRange_48_208       = eAVEncVideoColorNominalRange(3); // (48..208)
   {$EXTERNALSYM eAVEncVideoColorNominalRange_48_208}
 
 
@@ -2385,19 +2386,19 @@ type
   eAVEncInputVideoSystem = UINT32;
   {$EXTERNALSYM eAVEncInputVideoSystem}
 const
-  eAVEncInputVideoSystem_Unspecified = UINT32(0);
+  eAVEncInputVideoSystem_Unspecified = eAVEncInputVideoSystem(0);
   {$EXTERNALSYM eAVEncInputVideoSystem_Unspecified}
-  eAVEncInputVideoSystem_PAL         = UINT32(1);
+  eAVEncInputVideoSystem_PAL         = eAVEncInputVideoSystem(1);
   {$EXTERNALSYM eAVEncInputVideoSystem_PAL}
-  eAVEncInputVideoSystem_NTSC        = UINT32(2);
+  eAVEncInputVideoSystem_NTSC        = eAVEncInputVideoSystem(2);
   {$EXTERNALSYM eAVEncInputVideoSystem_NTSC}
-  eAVEncInputVideoSystem_SECAM       = UINT32(3);
+  eAVEncInputVideoSystem_SECAM       = eAVEncInputVideoSystem(3);
   {$EXTERNALSYM eAVEncInputVideoSystem_SECAM}
-  eAVEncInputVideoSystem_MAC         = UINT32(4);
+  eAVEncInputVideoSystem_MAC         = eAVEncInputVideoSystem(4);
   {$EXTERNALSYM eAVEncInputVideoSystem_MAC}
-  eAVEncInputVideoSystem_HDV         = UINT32(5);
+  eAVEncInputVideoSystem_HDV         = eAVEncInputVideoSystem(5);
   {$EXTERNALSYM eAVEncInputVideoSystem_HDV}
-  eAVEncInputVideoSystem_Component   = UINT32(6);
+  eAVEncInputVideoSystem_Component   = eAVEncInputVideoSystem(6);
   {$EXTERNALSYM eAVEncInputVideoSystem_Component}
 
 
@@ -2406,9 +2407,9 @@ type
   eAVEncVideoContentType = UINT32;
   {$EXTERNALSYM eAVEncVideoContentType}
 const
-  eAVEncVideoContentType_Unknown          = UINT32(0);
+  eAVEncVideoContentType_Unknown          = eAVEncVideoContentType(0);
   {$EXTERNALSYM eAVEncVideoContentType_Unknown}
-  eAVEncVideoContentType_FixedCameraAngle = UINT32(1);
+  eAVEncVideoContentType_FixedCameraAngle = eAVEncVideoContentType(1);
   {$EXTERNALSYM eAVEncVideoContentType_FixedCameraAngle}
 
 
@@ -2417,11 +2418,11 @@ type
   eAVEncAdaptiveMode = UINT32;
   {$EXTERNALSYM eAVEncAdaptiveMode}
 const
-  eAVEncAdaptiveMode_None         = UINT32(0);
+  eAVEncAdaptiveMode_None         = eAVEncAdaptiveMode(0);
   {$EXTERNALSYM eAVEncAdaptiveMode_None}
-  eAVEncAdaptiveMode_Resolution   = UINT32(1);
+  eAVEncAdaptiveMode_Resolution   = eAVEncAdaptiveMode(1);
   {$EXTERNALSYM eAVEncAdaptiveMode_Resolution}
-  eAVEncAdaptiveMode_FrameRate    = UINT32(2);
+  eAVEncAdaptiveMode_FrameRate    = eAVEncAdaptiveMode(2);
   {$EXTERNALSYM eAVEncAdaptiveMode_FrameRate}
 
 
@@ -2430,19 +2431,19 @@ type
   eAVScenarioInfo = UINT32;
   {$EXTERNALSYM eAVScenarioInfo}
 const
-  eAVScenarioInfo_Unknown         = UINT32(0);
+  eAVScenarioInfo_Unknown                       = eAVScenarioInfo(0);
   {$EXTERNALSYM eAVScenarioInfo_Unknown}
-  eAVScenarioInfo_DisplayRemoting = UINT32(1);
+  eAVScenarioInfo_DisplayRemoting               = eAVScenarioInfo(1);
   {$EXTERNALSYM eAVScenarioInfo_DisplayRemoting}
-  eAVScenarioInfo_VideoConference = UINT32(2);
+  eAVScenarioInfo_VideoConference               = eAVScenarioInfo(2);
   {$EXTERNALSYM eAVScenarioInfo_VideoConference}
-  eAVScenarioInfo_Archive         = UINT32(3);
+  eAVScenarioInfo_Archive                       = eAVScenarioInfo(3);
   {$EXTERNALSYM eAVScenarioInfo_Archive}
-  eAVScenarioInfo_LiveStreaming   = UINT32(4);
+  eAVScenarioInfo_LiveStreaming                 = eAVScenarioInfo(4);
   {$EXTERNALSYM eAVScenarioInfo_LiveStreaming}
-  eAVScenarioInfo_CameraRecord    = UINT32(5);
+  eAVScenarioInfo_CameraRecord                  = eAVScenarioInfo(5);
   {$EXTERNALSYM eAVScenarioInfo_CameraRecord}
-  eAVScenarioInfo_DisplayRemotingWithFeatureMap = UINT32(6);
+  eAVScenarioInfo_DisplayRemotingWithFeatureMap = eAVScenarioInfo(6);
   {$EXTERNALSYM eAVScenarioInfo_DisplayRemotingWithFeatureMap}
 
 
@@ -2451,9 +2452,9 @@ type
   eVideoEncoderDisplayContentType = UINT32;
   {$EXTERNALSYM eVideoEncoderDisplayContentType}
 const
-  eVideoEncoderDisplayContent_Unknown         = UINT32(0);
+  eVideoEncoderDisplayContent_Unknown         = eVideoEncoderDisplayContentType(0);
   {$EXTERNALSYM eVideoEncoderDisplayContent_Unknown}
-  eVideoEncoderDisplayContent_FullScreenVideo = UINT32(1);
+  eVideoEncoderDisplayContent_FullScreenVideo = eVideoEncoderDisplayContentType(1);
   {$EXTERNALSYM eVideoEncoderDisplayContent_FullScreenVideo}
 
 
@@ -2467,11 +2468,11 @@ type
   eAVEncMuxOutput = UINT32;
   {$EXTERNALSYM eAVEncMuxOutput}
 const
-  eAVEncMuxOutputAuto = UINT32(0);    // Decision is made automatically be the mux (elementary stream, program stream or transport stream)
+  eAVEncMuxOutputAuto = eAVEncMuxOutput(0);    // Decision is made automatically be the mux (elementary stream, program stream or transport stream)
   {$EXTERNALSYM eAVEncMuxOutputAuto}
-  eAVEncMuxOutputPS   = UINT32(1);    // Program stream
+  eAVEncMuxOutputPS   = eAVEncMuxOutput(1);    // Program stream
   {$EXTERNALSYM eAVEncMuxOutputPS}
-  eAVEncMuxOutputTS   = UINT32(2);    // Transport stream
+  eAVEncMuxOutputTS   = eAVEncMuxOutput(2);    // Transport stream
   {$EXTERNALSYM eAVEncMuxOutputTS}
 
 
@@ -2480,11 +2481,11 @@ type
   eAVEncAudioDualMono = UINT32;
   {$EXTERNALSYM eAVEncAudioDualMono}
 const
-  eAVEncAudioDualMono_SameAsInput = UINT32(0);    // As indicated by input media type
+  eAVEncAudioDualMono_SameAsInput = eAVEncAudioDualMono(0);    // As indicated by input media type
   {$EXTERNALSYM eAVEncAudioDualMono_SameAsInput}
-  eAVEncAudioDualMono_Off         = UINT32(1);    // 2-ch output bitstream should not be dual mono
+  eAVEncAudioDualMono_Off         = eAVEncAudioDualMono(1);    // 2-ch output bitstream should not be dual mono
   {$EXTERNALSYM eAVEncAudioDualMono_Off}
-  eAVEncAudioDualMono_On          = UINT32(2);    // 2-ch output bitstream should be dual mono
+  eAVEncAudioDualMono_On          = eAVEncAudioDualMono(2);    // 2-ch output bitstream should be dual mono
   {$EXTERNALSYM eAVEncAudioDualMono_On}
 
 
@@ -2493,11 +2494,11 @@ type
   eAVEncAudioInputContent = UINT32;
   {$EXTERNALSYM eAVEncAudioInputContent}
 const
-  AVEncAudioInputContent_Unknown = UINT32(0);
+  AVEncAudioInputContent_Unknown = eAVEncAudioInputContent(0);
   {$EXTERNALSYM AVEncAudioInputContent_Unknown}
-  AVEncAudioInputContent_Voice   = UINT32(1);
+  AVEncAudioInputContent_Voice   = eAVEncAudioInputContent(1);
   {$EXTERNALSYM AVEncAudioInputContent_Voice}
-  AVEncAudioInputContent_Music   = UINT32(2);
+  AVEncAudioInputContent_Music   = eAVEncAudioInputContent(2);
   {$EXTERNALSYM AVEncAudioInputContent_Music}
 
 
@@ -2506,15 +2507,15 @@ type
   eAVEncMPVProfile = UINT32;
   {$EXTERNALSYM eAVEncMPVProfile}
 const
-  eAVEncMPVProfile_unknown = UINT32(0);
+  eAVEncMPVProfile_unknown = eAVEncMPVProfile(0);
   {$EXTERNALSYM eAVEncMPVProfile_unknown}
-  eAVEncMPVProfile_Simple  = UINT32(1);
+  eAVEncMPVProfile_Simple  = eAVEncMPVProfile(1);
   {$EXTERNALSYM eAVEncMPVProfile_Simple}
-  eAVEncMPVProfile_Main    = UINT32(2);
+  eAVEncMPVProfile_Main    = eAVEncMPVProfile(2);
   {$EXTERNALSYM eAVEncMPVProfile_Main}
-  eAVEncMPVProfile_High    = UINT32(3);
+  eAVEncMPVProfile_High    = eAVEncMPVProfile(3);
   {$EXTERNALSYM eAVEncMPVProfile_High}
-  eAVEncMPVProfile_422     = UINT32(4);
+  eAVEncMPVProfile_422     = eAVEncMPVProfile(4);
   {$EXTERNALSYM eAVEncMPVProfile_422}
 
 
@@ -2523,13 +2524,13 @@ type
   eAVEncMPVLevel = UINT32;
   {$EXTERNALSYM eAVEncMPVLevel}
 const
-  eAVEncMPVLevel_Low      = UINT32(1);
+  eAVEncMPVLevel_Low      = eAVEncMPVLevel(1);
   {$EXTERNALSYM eAVEncMPVLevel_Low}
-  eAVEncMPVLevel_Main     = UINT32(2);
+  eAVEncMPVLevel_Main     = eAVEncMPVLevel(2);
   {$EXTERNALSYM eAVEncMPVLevel_Main}
-  eAVEncMPVLevel_High1440 = UINT32(3);
+  eAVEncMPVLevel_High1440 = eAVEncMPVLevel(3);
   {$EXTERNALSYM eAVEncMPVLevel_High1440}
-  eAVEncMPVLevel_High     = UINT32(4);
+  eAVEncMPVLevel_High     = eAVEncMPVLevel(4);
   {$EXTERNALSYM eAVEncMPVLevel_High}
 
 
@@ -2538,23 +2539,23 @@ type
   eAVEncH263VProfile = UINT32;
   {$EXTERNALSYM eAVEncH263VProfile}
 const
-  eAVEncH263VProfile_Base            = UINT32(0);
+  eAVEncH263VProfile_Base            = eAVEncH263VProfile(0);
   {$EXTERNALSYM eAVEncH263VProfile_Base}
-  eAVEncH263VProfile_CompatibilityV2 = UINT32(1);
+  eAVEncH263VProfile_CompatibilityV2 = eAVEncH263VProfile(1);
   {$EXTERNALSYM eAVEncH263VProfile_CompatibilityV2}
-  eAVEncH263VProfile_CompatibilityV1 = UINT32(2);
+  eAVEncH263VProfile_CompatibilityV1 = eAVEncH263VProfile(2);
   {$EXTERNALSYM eAVEncH263VProfile_CompatibilityV1}
-  eAVEncH263VProfile_WirelessV2      = UINT32(3);
+  eAVEncH263VProfile_WirelessV2      = eAVEncH263VProfile(3);
   {$EXTERNALSYM eAVEncH263VProfile_WirelessV2}
-  eAVEncH263VProfile_WirelessV3      = UINT32(4);
+  eAVEncH263VProfile_WirelessV3      = eAVEncH263VProfile(4);
   {$EXTERNALSYM eAVEncH263VProfile_WirelessV3}
-  eAVEncH263VProfile_HighCompression = UINT32(5);
+  eAVEncH263VProfile_HighCompression = eAVEncH263VProfile(5);
   {$EXTERNALSYM eAVEncH263VProfile_HighCompression}
-  eAVEncH263VProfile_Internet        = UINT32(6);
+  eAVEncH263VProfile_Internet        = eAVEncH263VProfile(6);
   {$EXTERNALSYM eAVEncH263VProfile_Internet}
-  eAVEncH263VProfile_Interlace       = UINT32(7);
+  eAVEncH263VProfile_Interlace       = eAVEncH263VProfile(7);
   {$EXTERNALSYM eAVEncH263VProfile_Interlace}
-  eAVEncH263VProfile_HighLatency     = UINT32(8);
+  eAVEncH263VProfile_HighLatency     = eAVEncH263VProfile(8);
   {$EXTERNALSYM eAVEncH263VProfile_HighLatency}
 
 
@@ -2563,40 +2564,40 @@ type
   eAVEncH264VProfile = UINT32;
   {$EXTERNALSYM eAVEncH264VProfile}
 const
-  eAVEncH264VProfile_unknown                   = UINT32(0);
+  eAVEncH264VProfile_unknown                   = eAVEncH264VProfile(0);
   {$EXTERNALSYM eAVEncH264VProfile_unknown}
-  eAVEncH264VProfile_Simple                    = UINT32(66);
+  eAVEncH264VProfile_Simple                    = eAVEncH264VProfile(66);
   {$EXTERNALSYM eAVEncH264VProfile_Simple}
-  eAVEncH264VProfile_Base                      = UINT32(66);
+  eAVEncH264VProfile_Base                      = eAVEncH264VProfile(66);
   {$EXTERNALSYM eAVEncH264VProfile_Base}
-  eAVEncH264VProfile_Main                      = UINT32(77);
+  eAVEncH264VProfile_Main                      = eAVEncH264VProfile(77);
   {$EXTERNALSYM eAVEncH264VProfile_Main}
-  eAVEncH264VProfile_High                      = UINT32(100);
+  eAVEncH264VProfile_High                      = eAVEncH264VProfile(100);
   {$EXTERNALSYM eAVEncH264VProfile_High}
-  eAVEncH264VProfile_422                       = UINT32(122);
+  eAVEncH264VProfile_422                       = eAVEncH264VProfile(122);
   {$EXTERNALSYM eAVEncH264VProfile_422}
-  eAVEncH264VProfile_High10                    = UINT32(110);
+  eAVEncH264VProfile_High10                    = eAVEncH264VProfile(110);
   {$EXTERNALSYM eAVEncH264VProfile_High10}
-  eAVEncH264VProfile_444                       = UINT32(244);
+  eAVEncH264VProfile_444                       = eAVEncH264VProfile(244);
   {$EXTERNALSYM eAVEncH264VProfile_444}
-  eAVEncH264VProfile_Extended                  = UINT32(88);
+  eAVEncH264VProfile_Extended                  = eAVEncH264VProfile(88);
   {$EXTERNALSYM eAVEncH264VProfile_Extended}
   // UVC 1.2 H.264 extension
-  eAVEncH264VProfile_ScalableBase              = UINT32(83);
+  eAVEncH264VProfile_ScalableBase              = eAVEncH264VProfile(83);
   {$EXTERNALSYM eAVEncH264VProfile_ScalableBase}
-  eAVEncH264VProfile_ScalableHigh              = UINT32(86);
+  eAVEncH264VProfile_ScalableHigh              = eAVEncH264VProfile(86);
   {$EXTERNALSYM eAVEncH264VProfile_ScalableHigh}
-  eAVEncH264VProfile_MultiviewHigh             = UINT32(118);
+  eAVEncH264VProfile_MultiviewHigh             = eAVEncH264VProfile(118);
   {$EXTERNALSYM eAVEncH264VProfile_MultiviewHigh}
-  eAVEncH264VProfile_StereoHigh                = UINT32(128);
+  eAVEncH264VProfile_StereoHigh                = eAVEncH264VProfile(128);
   {$EXTERNALSYM eAVEncH264VProfile_StereoHigh}
-  eAVEncH264VProfile_ConstrainedBase           = UINT32(256);
+  eAVEncH264VProfile_ConstrainedBase           = eAVEncH264VProfile(256);
   {$EXTERNALSYM eAVEncH264VProfile_ConstrainedBase}
-  eAVEncH264VProfile_UCConstrainedHigh         = UINT32(257);
+  eAVEncH264VProfile_UCConstrainedHigh         = eAVEncH264VProfile(257);
   {$EXTERNALSYM eAVEncH264VProfile_UCConstrainedHigh}
-  eAVEncH264VProfile_UCScalableConstrainedBase = UINT32(258);
+  eAVEncH264VProfile_UCScalableConstrainedBase = eAVEncH264VProfile(258);
   {$EXTERNALSYM eAVEncH264VProfile_UCScalableConstrainedBase}
-  eAVEncH264VProfile_UCScalableConstrainedHigh = UINT32(259);
+  eAVEncH264VProfile_UCScalableConstrainedHigh = eAVEncH264VProfile(259);
   {$EXTERNALSYM eAVEncH264VProfile_UCScalableConstrainedHigh}
 
   eAVEncH264VProfile_ConstrainedHigh = eAVEncH264VProfile_UCConstrainedHigh;
@@ -2608,51 +2609,51 @@ type
   eAVEncH265VProfile = UINT32;
   {$EXTERNALSYM eAVEncH265VProfile}
 const
-  eAVEncH265VProfile_unknown           = UINT32(0);
+  eAVEncH265VProfile_unknown           = eAVEncH265VProfile(0);
   {$EXTERNALSYM eAVEncH265VProfile_unknown}
-  eAVEncH265VProfile_Main_420_8        = UINT32(1);
+  eAVEncH265VProfile_Main_420_8        = eAVEncH265VProfile(1);
   {$EXTERNALSYM eAVEncH265VProfile_Main_420_8}
-  eAVEncH265VProfile_Main_420_10       = UINT32(2);
+  eAVEncH265VProfile_Main_420_10       = eAVEncH265VProfile(2);
   {$EXTERNALSYM eAVEncH265VProfile_Main_420_10}
-  eAVEncH265VProfile_Main_420_12       = UINT32(3);
+  eAVEncH265VProfile_Main_420_12       = eAVEncH265VProfile(3);
   {$EXTERNALSYM eAVEncH265VProfile_Main_420_12}
-  eAVEncH265VProfile_Main_422_10       = UINT32(4);
+  eAVEncH265VProfile_Main_422_10       = eAVEncH265VProfile(4);
   {$EXTERNALSYM eAVEncH265VProfile_Main_422_10}
-  eAVEncH265VProfile_Main_422_12       = UINT32(5);
+  eAVEncH265VProfile_Main_422_12       = eAVEncH265VProfile(5);
   {$EXTERNALSYM eAVEncH265VProfile_Main_422_12}
-  eAVEncH265VProfile_Main_444_8        = UINT32(6);
+  eAVEncH265VProfile_Main_444_8        = eAVEncH265VProfile(6);
   {$EXTERNALSYM eAVEncH265VProfile_Main_444_8}
-  eAVEncH265VProfile_Main_444_10       = UINT32(7);
+  eAVEncH265VProfile_Main_444_10       = eAVEncH265VProfile(7);
   {$EXTERNALSYM eAVEncH265VProfile_Main_444_10}
-  eAVEncH265VProfile_Main_444_12       = UINT32(8);
+  eAVEncH265VProfile_Main_444_12       = eAVEncH265VProfile(8);
   {$EXTERNALSYM eAVEncH265VProfile_Main_444_12}
-  eAVEncH265VProfile_Monochrome_12     = UINT32(9);
+  eAVEncH265VProfile_Monochrome_12     = eAVEncH265VProfile(9);
   {$EXTERNALSYM eAVEncH265VProfile_Monochrome_12}
-  eAVEncH265VProfile_Monochrome_16     = UINT32(10);
+  eAVEncH265VProfile_Monochrome_16     = eAVEncH265VProfile(10);
   {$EXTERNALSYM eAVEncH265VProfile_Monochrome_16}
-  eAVEncH265VProfile_MainIntra_420_8   = UINT32(11);
+  eAVEncH265VProfile_MainIntra_420_8   = eAVEncH265VProfile(11);
   {$EXTERNALSYM eAVEncH265VProfile_MainIntra_420_8}
-  eAVEncH265VProfile_MainIntra_420_10  = UINT32(12);
+  eAVEncH265VProfile_MainIntra_420_10  = eAVEncH265VProfile(12);
   {$EXTERNALSYM eAVEncH265VProfile_MainIntra_420_10}
-  eAVEncH265VProfile_MainIntra_420_12  = UINT32(13);
+  eAVEncH265VProfile_MainIntra_420_12  = eAVEncH265VProfile(13);
   {$EXTERNALSYM eAVEncH265VProfile_MainIntra_420_12}
-  eAVEncH265VProfile_MainIntra_422_10  = UINT32(14);
+  eAVEncH265VProfile_MainIntra_422_10  = eAVEncH265VProfile(14);
   {$EXTERNALSYM eAVEncH265VProfile_MainIntra_422_10}
-  eAVEncH265VProfile_MainIntra_422_12  = UINT32(15);
+  eAVEncH265VProfile_MainIntra_422_12  = eAVEncH265VProfile(15);
   {$EXTERNALSYM eAVEncH265VProfile_MainIntra_422_12}
-  eAVEncH265VProfile_MainIntra_444_8   = UINT32(16);
+  eAVEncH265VProfile_MainIntra_444_8   = eAVEncH265VProfile(16);
   {$EXTERNALSYM eAVEncH265VProfile_MainIntra_444_8}
-  eAVEncH265VProfile_MainIntra_444_10  = UINT32(17);
+  eAVEncH265VProfile_MainIntra_444_10  = eAVEncH265VProfile(17);
   {$EXTERNALSYM eAVEncH265VProfile_MainIntra_444_10}
-  eAVEncH265VProfile_MainIntra_444_12  = UINT32(18);
+  eAVEncH265VProfile_MainIntra_444_12  = eAVEncH265VProfile(18);
   {$EXTERNALSYM eAVEncH265VProfile_MainIntra_444_12}
-  eAVEncH265VProfile_MainIntra_444_16  = UINT32(19);
+  eAVEncH265VProfile_MainIntra_444_16  = eAVEncH265VProfile(19);
   {$EXTERNALSYM eAVEncH265VProfile_MainIntra_444_16}
-  eAVEncH265VProfile_MainStill_420_8   = UINT32(20);
+  eAVEncH265VProfile_MainStill_420_8   = eAVEncH265VProfile(20);
   {$EXTERNALSYM eAVEncH265VProfile_MainStill_420_8}
-  eAVEncH265VProfile_MainStill_444_8   = UINT32(21);
+  eAVEncH265VProfile_MainStill_444_8   = eAVEncH265VProfile(21);
   {$EXTERNALSYM eAVEncH265VProfile_MainStill_444_8}
-  eAVEncH265VProfile_MainStill_444_16  = UINT32(22);
+  eAVEncH265VProfile_MainStill_444_16  = eAVEncH265VProfile(22);
   {$EXTERNALSYM eAVEncH265VProfile_MainStill_444_16}
 
 
@@ -2661,13 +2662,13 @@ type
   eAVEncVP9VProfile = UINT32;
   {$EXTERNALSYM eAVEncVP9VProfile}
 const
-  eAVEncVP9VProfile_unknown  = UINT32(0);
+  eAVEncVP9VProfile_unknown  = eAVEncVP9VProfile(0);
   {$EXTERNALSYM eAVEncVP9VProfile_unknown}
-  eAVEncVP9VProfile_420_8    = UINT32(1);
+  eAVEncVP9VProfile_420_8    = eAVEncVP9VProfile(1);
   {$EXTERNALSYM eAVEncVP9VProfile_420_8}
-  eAVEncVP9VProfile_420_10   = UINT32(2);
+  eAVEncVP9VProfile_420_10   = eAVEncVP9VProfile(2);
   {$EXTERNALSYM eAVEncVP9VProfile_420_10}
-  eAVEncVP9VProfile_420_12   = UINT32(3);
+  eAVEncVP9VProfile_420_12   = eAVEncVP9VProfile(3);
   {$EXTERNALSYM eAVEncVP9VProfile_420_12}
 
 
@@ -2676,11 +2677,11 @@ type
   eAVEncH263PictureType = UINT32;
   {$EXTERNALSYM eAVEncH263PictureType}
 const
-  eAVEncH263PictureType_I = UINT32(0);
+  eAVEncH263PictureType_I = eAVEncH263PictureType(0);
   {$EXTERNALSYM eAVEncH263PictureType_I}
-  eAVEncH263PictureType_P = UINT32(1);
+  eAVEncH263PictureType_P = eAVEncH263PictureType(1);
   {$EXTERNALSYM eAVEncH263PictureType_P}
-  eAVEncH263PictureType_B = UINT32(2);
+  eAVEncH263PictureType_B = eAVEncH263PictureType(2);
   {$EXTERNALSYM eAVEncH263PictureType_B}
 
 
@@ -2689,11 +2690,11 @@ type
   eAVEncH264PictureType = UINT32;
   {$EXTERNALSYM eAVEncH264PictureType}
 const
-  eAVEncH264PictureType_IDR = UINT32(0);
+  eAVEncH264PictureType_IDR = eAVEncH264PictureType(0);
   {$EXTERNALSYM eAVEncH264PictureType_IDR}
-  eAVEncH264PictureType_P   = UINT32(1);
+  eAVEncH264PictureType_P   = eAVEncH264PictureType(1);
   {$EXTERNALSYM eAVEncH264PictureType_P}
-  eAVEncH264PictureType_B   = UINT32(2);
+  eAVEncH264PictureType_B   = eAVEncH264PictureType(2);
   {$EXTERNALSYM eAVEncH264PictureType_B}
 
 
@@ -2702,39 +2703,39 @@ type
   eAVEncH264VLevel = UINT32;
   {$EXTERNALSYM eAVEncH264VLevel}
 const
-  eAVEncH264VLevel1         = UINT32(10);
+  eAVEncH264VLevel1         = eAVEncH264VLevel(10);
   {$EXTERNALSYM eAVEncH264VLevel1}
-  eAVEncH264VLevel1_b       = UINT32(11);
+  eAVEncH264VLevel1_b       = eAVEncH264VLevel(11);
   {$EXTERNALSYM eAVEncH264VLevel1_b}
-  eAVEncH264VLevel1_1       = UINT32(11);
+  eAVEncH264VLevel1_1       = eAVEncH264VLevel(11);
   {$EXTERNALSYM eAVEncH264VLevel1_1}
-  eAVEncH264VLevel1_2       = UINT32(12);
+  eAVEncH264VLevel1_2       = eAVEncH264VLevel(12);
   {$EXTERNALSYM eAVEncH264VLevel1_2}
-  eAVEncH264VLevel1_3       = UINT32(13);
+  eAVEncH264VLevel1_3       = eAVEncH264VLevel(13);
   {$EXTERNALSYM eAVEncH264VLevel1_3}
-  eAVEncH264VLevel2         = UINT32(20);
+  eAVEncH264VLevel2         = eAVEncH264VLevel(20);
   {$EXTERNALSYM eAVEncH264VLevel2}
-  eAVEncH264VLevel2_1       = UINT32(21);
+  eAVEncH264VLevel2_1       = eAVEncH264VLevel(21);
   {$EXTERNALSYM eAVEncH264VLevel2_1}
-  eAVEncH264VLevel2_2       = UINT32(22);
+  eAVEncH264VLevel2_2       = eAVEncH264VLevel(22);
   {$EXTERNALSYM eAVEncH264VLevel2_2}
-  eAVEncH264VLevel3         = UINT32(30);
+  eAVEncH264VLevel3         = eAVEncH264VLevel(30);
   {$EXTERNALSYM eAVEncH264VLevel3}
-  eAVEncH264VLevel3_1       = UINT32(31);
+  eAVEncH264VLevel3_1       = eAVEncH264VLevel(31);
   {$EXTERNALSYM eAVEncH264VLevel3_1}
-  eAVEncH264VLevel3_2       = UINT32(32);
+  eAVEncH264VLevel3_2       = eAVEncH264VLevel(32);
   {$EXTERNALSYM eAVEncH264VLevel3_2}
-  eAVEncH264VLevel4         = UINT32(40);
+  eAVEncH264VLevel4         = eAVEncH264VLevel(40);
   {$EXTERNALSYM eAVEncH264VLevel4}
-  eAVEncH264VLevel4_1       = UINT32(41);
+  eAVEncH264VLevel4_1       = eAVEncH264VLevel(41);
   {$EXTERNALSYM eAVEncH264VLevel4_1}
-  eAVEncH264VLevel4_2       = UINT32(42);
+  eAVEncH264VLevel4_2       = eAVEncH264VLevel(42);
   {$EXTERNALSYM eAVEncH264VLevel4_2}
-  eAVEncH264VLevel5         = UINT32(50);
+  eAVEncH264VLevel5         = eAVEncH264VLevel(50);
   {$EXTERNALSYM eAVEncH264VLevel5}
-  eAVEncH264VLevel5_1       = UINT32(51);
+  eAVEncH264VLevel5_1       = eAVEncH264VLevel(51);
   {$EXTERNALSYM eAVEncH264VLevel5_1}
-  eAVEncH264VLevel5_2       = UINT32(52);
+  eAVEncH264VLevel5_2       = eAVEncH264VLevel(52);
   {$EXTERNALSYM eAVEncH264VLevel5_2}
 
 
@@ -2743,31 +2744,31 @@ type
   eAVEncH265VLevel = UINT32;
   {$EXTERNALSYM eAVEncH265VLevel}
 const
-  eAVEncH265VLevel1        = UINT32(30);
+  eAVEncH265VLevel1        = eAVEncH265VLevel(30);
   {$EXTERNALSYM eAVEncH265VLevel1}
-  eAVEncH265VLevel2        = UINT32(60);
+  eAVEncH265VLevel2        = eAVEncH265VLevel(60);
   {$EXTERNALSYM eAVEncH265VLevel2}
-  eAVEncH265VLevel2_1      = UINT32(63);
+  eAVEncH265VLevel2_1      = eAVEncH265VLevel(63);
   {$EXTERNALSYM eAVEncH265VLevel2_1}
-  eAVEncH265VLevel3        = UINT32(90);
+  eAVEncH265VLevel3        = eAVEncH265VLevel(90);
   {$EXTERNALSYM eAVEncH265VLevel3}
-  eAVEncH265VLevel3_1      = UINT32(93);
+  eAVEncH265VLevel3_1      = eAVEncH265VLevel(93);
   {$EXTERNALSYM eAVEncH265VLevel3_1}
-  eAVEncH265VLevel4        = UINT32(120);
+  eAVEncH265VLevel4        = eAVEncH265VLevel(120);
   {$EXTERNALSYM eAVEncH265VLevel4}
-  eAVEncH265VLevel4_1      = UINT32(123);
+  eAVEncH265VLevel4_1      = eAVEncH265VLevel(123);
   {$EXTERNALSYM eAVEncH265VLevel4_1}
-  eAVEncH265VLevel5        = UINT32(150);
+  eAVEncH265VLevel5        = eAVEncH265VLevel(150);
   {$EXTERNALSYM eAVEncH265VLevel5}
-  eAVEncH265VLevel5_1      = UINT32(153);
+  eAVEncH265VLevel5_1      = eAVEncH265VLevel(153);
   {$EXTERNALSYM eAVEncH265VLevel5_1}
-  eAVEncH265VLevel5_2      = UINT32(156);
+  eAVEncH265VLevel5_2      = eAVEncH265VLevel(156);
   {$EXTERNALSYM eAVEncH265VLevel5_2}
-  eAVEncH265VLevel6        = UINT32(180);
+  eAVEncH265VLevel6        = eAVEncH265VLevel(180);
   {$EXTERNALSYM eAVEncH265VLevel6}
-  eAVEncH265VLevel6_1      = UINT32(183);
+  eAVEncH265VLevel6_1      = eAVEncH265VLevel(183);
   {$EXTERNALSYM eAVEncH265VLevel6_1}
-  eAVEncH265VLevel6_2      = UINT32(186);
+  eAVEncH265VLevel6_2      = eAVEncH265VLevel(186);
   {$EXTERNALSYM eAVEncH265VLevel6_2}
 
 
@@ -2777,9 +2778,9 @@ type
   eAVEncMPVFrameFieldMode = UINT32;
   {$EXTERNALSYM eAVEncMPVFrameFieldMode}
 const
-  eAVEncMPVFrameFieldMode_FieldMode = UINT32(0);
+  eAVEncMPVFrameFieldMode_FieldMode = eAVEncMPVFrameFieldMode(0);
   {$EXTERNALSYM eAVEncMPVFrameFieldMode_FieldMode}
-  eAVEncMPVFrameFieldMode_FrameMode = UINT32(1);
+  eAVEncMPVFrameFieldMode_FrameMode = eAVEncMPVFrameFieldMode(1);
   {$EXTERNALSYM eAVEncMPVFrameFieldMode_FrameMode}
 
 
@@ -2792,13 +2793,13 @@ type
   eAVEncMPVSceneDetection = UINT32;
   {$EXTERNALSYM eAVEncMPVSceneDetection}
 const
-  eAVEncMPVSceneDetection_None                 = UINT32(0);
+  eAVEncMPVSceneDetection_None                 = eAVEncMPVSceneDetection(0);
   {$EXTERNALSYM eAVEncMPVSceneDetection_None}
-  eAVEncMPVSceneDetection_InsertIPicture       = UINT32(1);
+  eAVEncMPVSceneDetection_InsertIPicture       = eAVEncMPVSceneDetection(1);
   {$EXTERNALSYM eAVEncMPVSceneDetection_InsertIPicture}
-  eAVEncMPVSceneDetection_StartNewGOP          = UINT32(2);
+  eAVEncMPVSceneDetection_StartNewGOP          = eAVEncMPVSceneDetection(2);
   {$EXTERNALSYM eAVEncMPVSceneDetection_StartNewGOP}
-  eAVEncMPVSceneDetection_StartNewLocatableGOP = UINT32(3);
+  eAVEncMPVSceneDetection_StartNewLocatableGOP = eAVEncMPVSceneDetection(3);
   {$EXTERNALSYM eAVEncMPVSceneDetection_StartNewLocatableGOP}
 
 
@@ -2807,11 +2808,11 @@ type
   eAVEncMPVScanPattern = UINT32;
   {$EXTERNALSYM eAVEncMPVScanPattern}
 const
-  eAVEncMPVScanPattern_Auto          = UINT32(0);
+  eAVEncMPVScanPattern_Auto          = eAVEncMPVScanPattern(0);
   {$EXTERNALSYM eAVEncMPVScanPattern_Auto}
-  eAVEncMPVScanPattern_ZigZagScan    = UINT32(1);
+  eAVEncMPVScanPattern_ZigZagScan    = eAVEncMPVScanPattern(1);
   {$EXTERNALSYM eAVEncMPVScanPattern_ZigZagScan}
-  eAVEncMPVScanPattern_AlternateScan = UINT32(2);
+  eAVEncMPVScanPattern_AlternateScan = eAVEncMPVScanPattern(2);
   {$EXTERNALSYM eAVEncMPVScanPattern_AlternateScan}
 
 
@@ -2820,11 +2821,11 @@ type
   eAVEncMPVQScaleType = UINT32;
   {$EXTERNALSYM eAVEncMPVQScaleType}
 const
-  eAVEncMPVQScaleType_Auto      = UINT32(0);
+  eAVEncMPVQScaleType_Auto      = eAVEncMPVQScaleType(0);
   {$EXTERNALSYM eAVEncMPVQScaleType_Auto}
-  eAVEncMPVQScaleType_Linear    = UINT32(1);
+  eAVEncMPVQScaleType_Linear    = eAVEncMPVQScaleType(1);
   {$EXTERNALSYM eAVEncMPVQScaleType_Linear}
-  eAVEncMPVQScaleType_NonLinear = UINT32(2);
+  eAVEncMPVQScaleType_NonLinear = eAVEncMPVQScaleType(2);
   {$EXTERNALSYM eAVEncMPVQScaleType_NonLinear}
 
 
@@ -2833,11 +2834,11 @@ type
   eAVEncMPVIntraVLCTable = UINT32;
   {$EXTERNALSYM eAVEncMPVIntraVLCTable}
 const
-  eAVEncMPVIntraVLCTable_Auto      = UINT32(0);
+  eAVEncMPVIntraVLCTable_Auto      = eAVEncMPVIntraVLCTable(0);
   {$EXTERNALSYM eAVEncMPVIntraVLCTable_Auto}
-  eAVEncMPVIntraVLCTable_MPEG1     = UINT32(1);
+  eAVEncMPVIntraVLCTable_MPEG1     = eAVEncMPVIntraVLCTable(1);
   {$EXTERNALSYM eAVEncMPVIntraVLCTable_MPEG1}
-  eAVEncMPVIntraVLCTable_Alternate = UINT32(2);
+  eAVEncMPVIntraVLCTable_Alternate = eAVEncMPVIntraVLCTable(2);
   {$EXTERNALSYM eAVEncMPVIntraVLCTable_Alternate}
 
 
@@ -2854,11 +2855,11 @@ type
   eAVEncMPALayer = UINT32;
   {$EXTERNALSYM eAVEncMPALayer}
 const
-  eAVEncMPALayer_1 = UINT32(1);
+  eAVEncMPALayer_1 = eAVEncMPALayer(1);
   {$EXTERNALSYM eAVEncMPALayer_1}
-  eAVEncMPALayer_2 = UINT32(2);
+  eAVEncMPALayer_2 = eAVEncMPALayer(2);
   {$EXTERNALSYM eAVEncMPALayer_2}
-  eAVEncMPALayer_3 = UINT32(3);
+  eAVEncMPALayer_3 = eAVEncMPALayer(3);
   {$EXTERNALSYM eAVEncMPALayer_3}
 
 
@@ -2867,15 +2868,15 @@ type
   eAVEncMPACodingMode = UINT32;
   {$EXTERNALSYM eAVEncMPACodingMode}
 const
-  eAVEncMPACodingMode_Mono        = UINT32(0);
+  eAVEncMPACodingMode_Mono        = eAVEncMPACodingMode(0);
   {$EXTERNALSYM eAVEncMPACodingMode_Mono}
-  eAVEncMPACodingMode_Stereo      = UINT32(1);
+  eAVEncMPACodingMode_Stereo      = eAVEncMPACodingMode(1);
   {$EXTERNALSYM eAVEncMPACodingMode_Stereo}
-  eAVEncMPACodingMode_DualChannel = UINT32(2);
+  eAVEncMPACodingMode_DualChannel = eAVEncMPACodingMode(2);
   {$EXTERNALSYM eAVEncMPACodingMode_DualChannel}
-  eAVEncMPACodingMode_JointStereo = UINT32(3);
+  eAVEncMPACodingMode_JointStereo = eAVEncMPACodingMode(3);
   {$EXTERNALSYM eAVEncMPACodingMode_JointStereo}
-  eAVEncMPACodingMode_Surround    = UINT32(4);
+  eAVEncMPACodingMode_Surround    = eAVEncMPACodingMode(4);
   {$EXTERNALSYM eAVEncMPACodingMode_Surround}
 
 
@@ -2884,13 +2885,13 @@ type
   eAVEncMPAEmphasisType = UINT32;
   {$EXTERNALSYM eAVEncMPAEmphasisType}
 const
-  eAVEncMPAEmphasisType_None        = UINT32(0);
+  eAVEncMPAEmphasisType_None        = eAVEncMPAEmphasisType(0);
   {$EXTERNALSYM eAVEncMPAEmphasisType_None}
-  eAVEncMPAEmphasisType_50_15       = UINT32(1);
+  eAVEncMPAEmphasisType_50_15       = eAVEncMPAEmphasisType(1);
   {$EXTERNALSYM eAVEncMPAEmphasisType_50_15}
-  eAVEncMPAEmphasisType_Reserved    = UINT32(2);
+  eAVEncMPAEmphasisType_Reserved    = eAVEncMPAEmphasisType(2);
   {$EXTERNALSYM eAVEncMPAEmphasisType_Reserved}
-  eAVEncMPAEmphasisType_CCITT_J17   = UINT32(3);
+  eAVEncMPAEmphasisType_CCITT_J17   = eAVEncMPAEmphasisType(3);
   {$EXTERNALSYM eAVEncMPAEmphasisType_CCITT_J17}
 
 
@@ -2906,21 +2907,21 @@ type
   eAVEncDDService = UINT32;
   {$EXTERNALSYM eAVEncDDService}
 const
-  eAVEncDDService_CM = UINT32(0);   // (Main Service: Complete Main)
+  eAVEncDDService_CM = eAVEncDDService(0);   // (Main Service: Complete Main)
   {$EXTERNALSYM eAVEncDDService_CM}
-  eAVEncDDService_ME = UINT32(1);   // (Main Service: Music and Effects (ME))
+  eAVEncDDService_ME = eAVEncDDService(1);   // (Main Service: Music and Effects (ME))
   {$EXTERNALSYM eAVEncDDService_ME}
-  eAVEncDDService_VI = UINT32(2);   // (Associated Service: Visually-Impaired (VI)
+  eAVEncDDService_VI = eAVEncDDService(2);   // (Associated Service: Visually-Impaired (VI)
   {$EXTERNALSYM eAVEncDDService_VI}
-  eAVEncDDService_HI = UINT32(3);   // (Associated Service: Hearing-Impaired (HI))
+  eAVEncDDService_HI = eAVEncDDService(3);   // (Associated Service: Hearing-Impaired (HI))
   {$EXTERNALSYM eAVEncDDService_HI}
-  eAVEncDDService_D  = UINT32(4);   // (Associated Service: Dialog (D))
+  eAVEncDDService_D  = eAVEncDDService(4);   // (Associated Service: Dialog (D))
   {$EXTERNALSYM eAVEncDDService_D}
-  eAVEncDDService_C  = UINT32(5);   // (Associated Service: Commentary (C))
+  eAVEncDDService_C  = eAVEncDDService(5);   // (Associated Service: Commentary (C))
   {$EXTERNALSYM eAVEncDDService_C}
-  eAVEncDDService_E  = UINT32(6);   // (Associated Service: Emergency (E))
+  eAVEncDDService_E  = eAVEncDDService(6);   // (Associated Service: Emergency (E))
   {$EXTERNALSYM eAVEncDDService_E}
-  eAVEncDDService_VO = UINT32(7);   // (Associated Service: Voice Over (VO) / Karaoke)
+  eAVEncDDService_VO = eAVEncDDService(7);   // (Associated Service: Voice Over (VO) / Karaoke)
   {$EXTERNALSYM eAVEncDDService_VO}
 
 type
@@ -2928,11 +2929,11 @@ type
   eAVEncDDProductionRoomType = UINT32;
   {$EXTERNALSYM eAVEncDDProductionRoomType}
 const
-  eAVEncDDProductionRoomType_NotIndicated = UINT32(0);
+  eAVEncDDProductionRoomType_NotIndicated = eAVEncDDProductionRoomType(0);
   {$EXTERNALSYM eAVEncDDProductionRoomType_NotIndicated}
-  eAVEncDDProductionRoomType_Large        = UINT32(1);
+  eAVEncDDProductionRoomType_Large        = eAVEncDDProductionRoomType(1);
   {$EXTERNALSYM eAVEncDDProductionRoomType_Large}
-  eAVEncDDProductionRoomType_Small        = UINT32(2);
+  eAVEncDDProductionRoomType_Small        = eAVEncDDProductionRoomType(2);
   {$EXTERNALSYM eAVEncDDProductionRoomType_Small}
 
 
@@ -2941,17 +2942,17 @@ type
   eAVEncDDDynamicRangeCompressionControl = UINT32;
   {$EXTERNALSYM eAVEncDDDynamicRangeCompressionControl}
 const
-  eAVEncDDDynamicRangeCompressionControl_None          = UINT32(0);
+  eAVEncDDDynamicRangeCompressionControl_None          = eAVEncDDDynamicRangeCompressionControl(0);
   {$EXTERNALSYM eAVEncDDDynamicRangeCompressionControl_None}
-  eAVEncDDDynamicRangeCompressionControl_FilmStandard  = UINT32(1);
+  eAVEncDDDynamicRangeCompressionControl_FilmStandard  = eAVEncDDDynamicRangeCompressionControl(1);
   {$EXTERNALSYM eAVEncDDDynamicRangeCompressionControl_FilmStandard}
-  eAVEncDDDynamicRangeCompressionControl_FilmLight     = UINT32(2);
+  eAVEncDDDynamicRangeCompressionControl_FilmLight     = eAVEncDDDynamicRangeCompressionControl(2);
   {$EXTERNALSYM eAVEncDDDynamicRangeCompressionControl_FilmLight}
-  eAVEncDDDynamicRangeCompressionControl_MusicStandard = UINT32(3);
+  eAVEncDDDynamicRangeCompressionControl_MusicStandard = eAVEncDDDynamicRangeCompressionControl(3);
   {$EXTERNALSYM eAVEncDDDynamicRangeCompressionControl_MusicStandard}
-  eAVEncDDDynamicRangeCompressionControl_MusicLight    = UINT32(4);
+  eAVEncDDDynamicRangeCompressionControl_MusicLight    = eAVEncDDDynamicRangeCompressionControl(4);
   {$EXTERNALSYM eAVEncDDDynamicRangeCompressionControl_MusicLight}
-  eAVEncDDDynamicRangeCompressionControl_Speech        = UINT32(5);
+  eAVEncDDDynamicRangeCompressionControl_Speech        = eAVEncDDDynamicRangeCompressionControl(5);
   {$EXTERNALSYM eAVEncDDDynamicRangeCompressionControl_Speech}
 
 
@@ -2960,11 +2961,11 @@ type
   eAVEncDDSurroundExMode = UINT32;
   {$EXTERNALSYM eAVEncDDSurroundExMode}
 const
-  eAVEncDDSurroundExMode_NotIndicated = UINT32(0);
+  eAVEncDDSurroundExMode_NotIndicated = eAVEncDDSurroundExMode(0);
   {$EXTERNALSYM eAVEncDDSurroundExMode_NotIndicated}
-  eAVEncDDSurroundExMode_No           = UINT32(1);
+  eAVEncDDSurroundExMode_No           = eAVEncDDSurroundExMode(1);
   {$EXTERNALSYM eAVEncDDSurroundExMode_No}
-  eAVEncDDSurroundExMode_Yes          = UINT32(2);
+  eAVEncDDSurroundExMode_Yes          = eAVEncDDSurroundExMode(2);
   {$EXTERNALSYM eAVEncDDSurroundExMode_Yes}
 
 
@@ -2973,9 +2974,9 @@ type
   eAVEncDDPreferredStereoDownMixMode = UINT32;
   {$EXTERNALSYM eAVEncDDPreferredStereoDownMixMode}
 const
-  eAVEncDDPreferredStereoDownMixMode_LtRt = UINT32(0);
+  eAVEncDDPreferredStereoDownMixMode_LtRt = eAVEncDDPreferredStereoDownMixMode(0);
   {$EXTERNALSYM eAVEncDDPreferredStereoDownMixMode_LtRt}
-  eAVEncDDPreferredStereoDownMixMode_LoRo = UINT32(1);
+  eAVEncDDPreferredStereoDownMixMode_LoRo = eAVEncDDPreferredStereoDownMixMode(1);
   {$EXTERNALSYM eAVEncDDPreferredStereoDownMixMode_LoRo}
 
 
@@ -2984,9 +2985,9 @@ type
   eAVEncDDAtoDConverterType = UINT32;
   {$EXTERNALSYM eAVEncDDAtoDConverterType}
 const
-  eAVEncDDAtoDConverterType_Standard = UINT32(0);
+  eAVEncDDAtoDConverterType_Standard = eAVEncDDAtoDConverterType(0);
   {$EXTERNALSYM eAVEncDDAtoDConverterType_Standard}
-  eAVEncDDAtoDConverterType_HDCD     = UINT32(1);
+  eAVEncDDAtoDConverterType_HDCD     = eAVEncDDAtoDConverterType(1);
   {$EXTERNALSYM eAVEncDDAtoDConverterType_HDCD}
 
 
@@ -2995,11 +2996,11 @@ type
   eAVEncDDHeadphoneMode = UINT32;
   {$EXTERNALSYM eAVEncDDHeadphoneMode}
 const
-  eAVEncDDHeadphoneMode_NotIndicated = UINT32(0);
+  eAVEncDDHeadphoneMode_NotIndicated = eAVEncDDHeadphoneMode(0);
   {$EXTERNALSYM eAVEncDDHeadphoneMode_NotIndicated}
-  eAVEncDDHeadphoneMode_NotEncoded   = UINT32(1);
+  eAVEncDDHeadphoneMode_NotEncoded   = eAVEncDDHeadphoneMode(1);
   {$EXTERNALSYM eAVEncDDHeadphoneMode_NotEncoded}
-  eAVEncDDHeadphoneMode_Encoded      = UINT32(2);
+  eAVEncDDHeadphoneMode_Encoded      = eAVEncDDHeadphoneMode(2);
   {$EXTERNALSYM eAVEncDDHeadphoneMode_Encoded}
 
   //
@@ -3015,13 +3016,13 @@ type
   eAVDecVideoInputScanType = UINT32;
   {$EXTERNALSYM eAVDecVideoInputScanType}
 const
-  eAVDecVideoInputScan_Unknown                    = UINT32(0);
+  eAVDecVideoInputScan_Unknown                    = eAVDecVideoInputScanType(0);
   {$EXTERNALSYM eAVDecVideoInputScan_Unknown}
-  eAVDecVideoInputScan_Progressive                = UINT32(1);
+  eAVDecVideoInputScan_Progressive                = eAVDecVideoInputScanType(1);
   {$EXTERNALSYM eAVDecVideoInputScan_Progressive}
-  eAVDecVideoInputScan_Interlaced_UpperFieldFirst = UINT32(2);
+  eAVDecVideoInputScan_Interlaced_UpperFieldFirst = eAVDecVideoInputScanType(2);
   {$EXTERNALSYM eAVDecVideoInputScan_Interlaced_UpperFieldFirst}
-  eAVDecVideoInputScan_Interlaced_LowerFieldFirst = UINT32(3);
+  eAVDecVideoInputScan_Interlaced_LowerFieldFirst = eAVDecVideoInputScanType(3);
   {$EXTERNALSYM eAVDecVideoInputScan_Interlaced_LowerFieldFirst}
 
 
@@ -3030,11 +3031,11 @@ type
   eAVDecVideoSWPowerLevel = UINT32;
   {$EXTERNALSYM eAVDecVideoSWPowerLevel}
 const
-  eAVDecVideoSWPowerLevel_BatteryLife  = UINT32(0);
+  eAVDecVideoSWPowerLevel_BatteryLife  = eAVDecVideoSWPowerLevel(0);
   {$EXTERNALSYM eAVDecVideoSWPowerLevel_BatteryLife}
-  eAVDecVideoSWPowerLevel_Balanced     = UINT32(50);
+  eAVDecVideoSWPowerLevel_Balanced     = eAVDecVideoSWPowerLevel(50);
   {$EXTERNALSYM eAVDecVideoSWPowerLevel_Balanced}
-  eAVDecVideoSWPowerLevel_VideoQuality = UINT32(100);
+  eAVDecVideoSWPowerLevel_VideoQuality = eAVDecVideoSWPowerLevel(100);
   {$EXTERNALSYM eAVDecVideoSWPowerLevel_VideoQuality}
 
 
@@ -3047,9 +3048,9 @@ type
   eAVDecAACDownmixMode = UINT32;
   {$EXTERNALSYM eAVDecAACDownmixMode}
 const
-  eAVDecAACUseISODownmix  = UINT32(0);
+  eAVDecAACUseISODownmix  = eAVDecAACDownmixMode(0);
   {$EXTERNALSYM eAVDecAACUseISODownmix}
-  eAVDecAACUseARIBDownmix = UINT32(1);
+  eAVDecAACUseARIBDownmix = eAVDecAACDownmixMode(1);
   {$EXTERNALSYM eAVDecAACUseARIBDownmix}
 
 
@@ -3058,9 +3059,9 @@ type
   eAVDecHEAACDynamicRangeControl = UINT32;
   {$EXTERNALSYM eAVDecHEAACDynamicRangeControl}
 const
-  eAVDecHEAACDynamicRangeControl_OFF  = UINT32(0);
+  eAVDecHEAACDynamicRangeControl_OFF  = eAVDecHEAACDynamicRangeControl(0);
   {$EXTERNALSYM eAVDecHEAACDynamicRangeControl_OFF}
-  eAVDecHEAACDynamicRangeControl_ON   = UINT32(1);
+  eAVDecHEAACDynamicRangeControl_ON   = eAVDecHEAACDynamicRangeControl(1);
   {$EXTERNALSYM eAVDecHEAACDynamicRangeControl_ON}
 
 
@@ -3069,11 +3070,11 @@ type
   eAVDecAudioDualMono = UINT32;
   {$EXTERNALSYM eAVDecAudioDualMono}
 const
-  eAVDecAudioDualMono_IsNotDualMono = UINT32(0);    // 2-ch bitstream input is not dual mono
+  eAVDecAudioDualMono_IsNotDualMono = eAVDecAudioDualMono(0);    // 2-ch bitstream input is not dual mono
   {$EXTERNALSYM eAVDecAudioDualMono_IsNotDualMono}
-  eAVDecAudioDualMono_IsDualMono    = UINT32(1);    // 2-ch bitstream input is dual mono
+  eAVDecAudioDualMono_IsDualMono    = eAVDecAudioDualMono(1);    // 2-ch bitstream input is dual mono
   {$EXTERNALSYM eAVDecAudioDualMono_IsDualMono}
-  eAVDecAudioDualMono_UnSpecified   = UINT32(2);    // There is no indication in the bitstream
+  eAVDecAudioDualMono_UnSpecified   = eAVDecAudioDualMono(2);    // There is no indication in the bitstream
   {$EXTERNALSYM eAVDecAudioDualMono_UnSpecified}
 
 
@@ -3082,13 +3083,13 @@ type
   eAVDecAudioDualMonoReproMode = UINT32;
   {$EXTERNALSYM eAVDecAudioDualMonoReproMode}
 const
-  eAVDecAudioDualMonoReproMode_STEREO      = UINT32(0);   // Ch1+Ch2 for mono output, (Ch1 left,     Ch2 right) for stereo output
+  eAVDecAudioDualMonoReproMode_STEREO      = eAVDecAudioDualMonoReproMode(0);   // Ch1+Ch2 for mono output, (Ch1 left,     Ch2 right) for stereo output
   {$EXTERNALSYM eAVDecAudioDualMonoReproMode_STEREO}
-  eAVDecAudioDualMonoReproMode_LEFT_MONO   = UINT32(1);   // Ch1 for mono output,     (Ch1 left,     Ch1 right) for stereo output
+  eAVDecAudioDualMonoReproMode_LEFT_MONO   = eAVDecAudioDualMonoReproMode(1);   // Ch1 for mono output,     (Ch1 left,     Ch1 right) for stereo output
   {$EXTERNALSYM eAVDecAudioDualMonoReproMode_LEFT_MONO}
-  eAVDecAudioDualMonoReproMode_RIGHT_MONO  = UINT32(2);   // Ch2 for mono output,     (Ch2 left,     Ch2 right) for stereo output
+  eAVDecAudioDualMonoReproMode_RIGHT_MONO  = eAVDecAudioDualMonoReproMode(2);   // Ch2 for mono output,     (Ch2 left,     Ch2 right) for stereo output
   {$EXTERNALSYM eAVDecAudioDualMonoReproMode_RIGHT_MONO}
-  eAVDecAudioDualMonoReproMode_MIX_MONO    = UINT32(3);   // Ch1+Ch2 for mono output, (Ch1+Ch2 left, Ch1+Ch2 right) for stereo output
+  eAVDecAudioDualMonoReproMode_MIX_MONO    = eAVDecAudioDualMonoReproMode(3);   // Ch1+Ch2 for mono output, (Ch1+Ch2 left, Ch1+Ch2 right) for stereo output
   {$EXTERNALSYM eAVDecAudioDualMonoReproMode_MIX_MONO}
 
 
@@ -3109,41 +3110,41 @@ type
   eAVAudioChannelConfig = UINT32;
   {$EXTERNALSYM eAVAudioChannelConfig}
 const
-  eAVAudioChannelConfig_FRONT_LEFT    = UINT32($1);
+  eAVAudioChannelConfig_FRONT_LEFT    = eAVAudioChannelConfig($1);
   {$EXTERNALSYM eAVAudioChannelConfig_FRONT_LEFT}
-  eAVAudioChannelConfig_FRONT_RIGHT   = UINT32($2);
+  eAVAudioChannelConfig_FRONT_RIGHT   = eAVAudioChannelConfig($2);
   {$EXTERNALSYM eAVAudioChannelConfig_FRONT_RIGHT}
-  eAVAudioChannelConfig_FRONT_CENTER  = UINT32($4);
+  eAVAudioChannelConfig_FRONT_CENTER  = eAVAudioChannelConfig($4);
   {$EXTERNALSYM eAVAudioChannelConfig_FRONT_CENTER}
-  eAVAudioChannelConfig_LOW_FREQUENCY = UINT32($8);  // aka LFE
+  eAVAudioChannelConfig_LOW_FREQUENCY = eAVAudioChannelConfig($8);  // aka LFE
   {$EXTERNALSYM eAVAudioChannelConfig_LOW_FREQUENCY}
-  eAVAudioChannelConfig_BACK_LEFT     = UINT32($10);
+  eAVAudioChannelConfig_BACK_LEFT     = eAVAudioChannelConfig($10);
   {$EXTERNALSYM eAVAudioChannelConfig_BACK_LEFT}
-  eAVAudioChannelConfig_BACK_RIGHT    = UINT32($20);
+  eAVAudioChannelConfig_BACK_RIGHT    = eAVAudioChannelConfig($20);
   {$EXTERNALSYM eAVAudioChannelConfig_BACK_RIGHT}
-  eAVAudioChannelConfig_FRONT_LEFT_OF_CENTER  = UINT32($40);
+  eAVAudioChannelConfig_FRONT_LEFT_OF_CENTER  = eAVAudioChannelConfig($40);
   {$EXTERNALSYM eAVAudioChannelConfig_FRONT_LEFT_OF_CENTER}
-  eAVAudioChannelConfig_FRONT_RIGHT_OF_CENTER = UINT32($80);
+  eAVAudioChannelConfig_FRONT_RIGHT_OF_CENTER = eAVAudioChannelConfig($80);
   {$EXTERNALSYM eAVAudioChannelConfig_FRONT_RIGHT_OF_CENTER}
-  eAVAudioChannelConfig_BACK_CENTER = UINT32($100);  // aka Mono Surround
+  eAVAudioChannelConfig_BACK_CENTER = eAVAudioChannelConfig($100);  // aka Mono Surround
   {$EXTERNALSYM eAVAudioChannelConfig_BACK_CENTER}
-  eAVAudioChannelConfig_SIDE_LEFT   = UINT32($200);  // aka Left Surround
+  eAVAudioChannelConfig_SIDE_LEFT   = eAVAudioChannelConfig($200);  // aka Left Surround
   {$EXTERNALSYM eAVAudioChannelConfig_SIDE_LEFT}
-  eAVAudioChannelConfig_SIDE_RIGHT  = UINT32($400);  // aka Right Surround
+  eAVAudioChannelConfig_SIDE_RIGHT  = eAVAudioChannelConfig($400);  // aka Right Surround
   {$EXTERNALSYM eAVAudioChannelConfig_SIDE_RIGHT}
-  eAVAudioChannelConfig_TOP_CENTER  = UINT32($800);
+  eAVAudioChannelConfig_TOP_CENTER  = eAVAudioChannelConfig($800);
   {$EXTERNALSYM eAVAudioChannelConfig_TOP_CENTER}
-  eAVAudioChannelConfig_TOP_FRONT_LEFT   = UINT32($1000);
+  eAVAudioChannelConfig_TOP_FRONT_LEFT   = eAVAudioChannelConfig($1000);
   {$EXTERNALSYM eAVAudioChannelConfig_TOP_FRONT_LEFT}
-  eAVAudioChannelConfig_TOP_FRONT_CENTER = UINT32($2000);
+  eAVAudioChannelConfig_TOP_FRONT_CENTER = eAVAudioChannelConfig($2000);
   {$EXTERNALSYM eAVAudioChannelConfig_TOP_FRONT_CENTER}
-  eAVAudioChannelConfig_TOP_FRONT_RIGHT  = UINT32($4000);
+  eAVAudioChannelConfig_TOP_FRONT_RIGHT  = eAVAudioChannelConfig($4000);
   {$EXTERNALSYM eAVAudioChannelConfig_TOP_FRONT_RIGHT}
-  eAVAudioChannelConfig_TOP_BACK_LEFT    = UINT32($8000);
+  eAVAudioChannelConfig_TOP_BACK_LEFT    = eAVAudioChannelConfig($8000);
   {$EXTERNALSYM eAVAudioChannelConfig_TOP_BACK_LEFT}
-  eAVAudioChannelConfig_TOP_BACK_CENTER  = UINT32($10000);
+  eAVAudioChannelConfig_TOP_BACK_CENTER  = eAVAudioChannelConfig($10000);
   {$EXTERNALSYM eAVAudioChannelConfig_TOP_BACK_CENTER}
-  eAVAudioChannelConfig_TOP_BACK_RIGHT   = UINT32($20000);
+  eAVAudioChannelConfig_TOP_BACK_RIGHT   = eAVAudioChannelConfig($20000);
   {$EXTERNALSYM eAVAudioChannelConfig_TOP_BACK_RIGHT}
 
 
@@ -3152,11 +3153,11 @@ type
   eAVDDSurroundMode = UINT32;
   {$EXTERNALSYM eAVDDSurroundMode}
 const
-  eAVDDSurroundMode_NotIndicated = UINT32(0);
+  eAVDDSurroundMode_NotIndicated = eAVDDSurroundMode(0);
   {$EXTERNALSYM eAVDDSurroundMode_NotIndicated}
-  eAVDDSurroundMode_No           = UINT32(1);
+  eAVDDSurroundMode_No           = eAVDDSurroundMode(1);
   {$EXTERNALSYM eAVDDSurroundMode_No}
-  eAVDDSurroundMode_Yes          = UINT32(2);
+  eAVDDSurroundMode_Yes          = eAVDDSurroundMode(2);
   {$EXTERNALSYM eAVDDSurroundMode_Yes}
 
 
@@ -3165,21 +3166,21 @@ type
   eAVDecDDOperationalMode  = UINT32;
   {$EXTERNALSYM eAVDecDDOperationalMode}
 const
-  eAVDecDDOperationalMode_NONE       = UINT32(0);
+  eAVDecDDOperationalMode_NONE       = eAVDecDDOperationalMode(0);
   {$EXTERNALSYM eAVDecDDOperationalMode_NONE}
-  eAVDecDDOperationalMode_LINE       = UINT32(1);    // Dialnorm enabled, dialogue at -31dBFS, dynrng used, high/low scaling allowed
+  eAVDecDDOperationalMode_LINE       = eAVDecDDOperationalMode(1);    // Dialnorm enabled, dialogue at -31dBFS, dynrng used, high/low scaling allowed
   {$EXTERNALSYM eAVDecDDOperationalMode_LINE}
-  eAVDecDDOperationalMode_RF         = UINT32(2);    // Dialnorm enabled, dialogue at -20dBFS, dynrng & compr used, high/low scaling NOT allowed (always fully compressed)
+  eAVDecDDOperationalMode_RF         = eAVDecDDOperationalMode(2);    // Dialnorm enabled, dialogue at -20dBFS, dynrng & compr used, high/low scaling NOT allowed (always fully compressed)
   {$EXTERNALSYM eAVDecDDOperationalMode_RF}
-  eAVDecDDOperationalMode_CUSTOM0    = UINT32(3);    // Analog dialnorm (dialogue normalization not part of the decoder)
+  eAVDecDDOperationalMode_CUSTOM0    = eAVDecDDOperationalMode(3);    // Analog dialnorm (dialogue normalization not part of the decoder)
   {$EXTERNALSYM eAVDecDDOperationalMode_CUSTOM0}
-  eAVDecDDOperationalMode_CUSTOM1    = UINT32(4);    // Digital dialnorm (dialogue normalization is part of the decoder)
+  eAVDecDDOperationalMode_CUSTOM1    = eAVDecDDOperationalMode(4);    // Digital dialnorm (dialogue normalization is part of the decoder)
   {$EXTERNALSYM eAVDecDDOperationalMode_CUSTOM1}
-  eAVDecDDOperationalMode_PORTABLE8  = UINT32(5);    // Dialnorm enabled, dialogue at -8dBFS, dynrng & compr used, high/low scaling NOT allowed (always fully compressed)
+  eAVDecDDOperationalMode_PORTABLE8  = eAVDecDDOperationalMode(5);    // Dialnorm enabled, dialogue at -8dBFS, dynrng & compr used, high/low scaling NOT allowed (always fully compressed)
   {$EXTERNALSYM eAVDecDDOperationalMode_PORTABLE8}
-  eAVDecDDOperationalMode_PORTABLE11 = UINT32(6);    // Dialnorm enabled, dialogue at -11dBFS, dynrng & compr used, high/low scaling NOT allowed (always fully compressed)
+  eAVDecDDOperationalMode_PORTABLE11 = eAVDecDDOperationalMode(6);    // Dialnorm enabled, dialogue at -11dBFS, dynrng & compr used, high/low scaling NOT allowed (always fully compressed)
   {$EXTERNALSYM eAVDecDDOperationalMode_PORTABLE11}
-  eAVDecDDOperationalMode_PORTABLE14 = UINT32(7);    // Dialnorm enabled, dialogue at -14dBFS, dynrng & compr used, high/low scaling NOT allowed (always fully compressed)
+  eAVDecDDOperationalMode_PORTABLE14 = eAVDecDDOperationalMode(7);    // Dialnorm enabled, dialogue at -14dBFS, dynrng & compr used, high/low scaling NOT allowed (always fully compressed)
   {$EXTERNALSYM eAVDecDDOperationalMode_PORTABLE14}
 
 
@@ -3188,11 +3189,11 @@ type
   eAVDecDDMatrixDecodingMode = UINT32;
   {$EXTERNALSYM eAVDecDDMatrixDecodingMode}
 const
-  eAVDecDDMatrixDecodingMode_OFF  = UINT32(0);
+  eAVDecDDMatrixDecodingMode_OFF  = eAVDecDDMatrixDecodingMode(0);
   {$EXTERNALSYM eAVDecDDMatrixDecodingMode_OFF}
-  eAVDecDDMatrixDecodingMode_ON   = UINT32(1);
+  eAVDecDDMatrixDecodingMode_ON   = eAVDecDDMatrixDecodingMode(1);
   {$EXTERNALSYM eAVDecDDMatrixDecodingMode_ON}
-  eAVDecDDMatrixDecodingMode_AUTO = UINT32(2);
+  eAVDecDDMatrixDecodingMode_AUTO = eAVDecDDMatrixDecodingMode(2);
   {$EXTERNALSYM eAVDecDDMatrixDecodingMode_AUTO}
 
 
@@ -3201,11 +3202,11 @@ type
   eAVDecDDStereoDownMixMode = UINT32;
   {$EXTERNALSYM eAVDecDDStereoDownMixMode}
 const
-  eAVDecDDStereoDownMixMode_Auto  = UINT32(0);   // Automatic detection
+  eAVDecDDStereoDownMixMode_Auto  = eAVDecDDStereoDownMixMode(0);   // Automatic detection
   {$EXTERNALSYM eAVDecDDStereoDownMixMode_Auto}
-  eAVDecDDStereoDownMixMode_LtRt  = UINT32(1);   // Surround compatible (Lt/Rt)
+  eAVDecDDStereoDownMixMode_LtRt  = eAVDecDDStereoDownMixMode(1);   // Surround compatible (Lt/Rt)
   {$EXTERNALSYM eAVDecDDStereoDownMixMode_LtRt}
-  eAVDecDDStereoDownMixMode_LoRo  = UINT32(2);   // Stereo (Lo/Ro)
+  eAVDecDDStereoDownMixMode_LoRo  = eAVDecDDStereoDownMixMode(2);   // Stereo (Lo/Ro)
   {$EXTERNALSYM eAVDecDDStereoDownMixMode_LoRo}
 
 
@@ -3214,11 +3215,11 @@ type
   eAVDSPLoudnessEqualization = UINT32;
   {$EXTERNALSYM eAVDSPLoudnessEqualization}
 const
-  eAVDSPLoudnessEqualization_OFF  = UINT32(0);
+  eAVDSPLoudnessEqualization_OFF  = eAVDSPLoudnessEqualization(0);
   {$EXTERNALSYM eAVDSPLoudnessEqualization_OFF}
-  eAVDSPLoudnessEqualization_ON   = UINT32(1);
+  eAVDSPLoudnessEqualization_ON   = eAVDSPLoudnessEqualization(1);
   {$EXTERNALSYM eAVDSPLoudnessEqualization_ON}
-  eAVDSPLoudnessEqualization_AUTO = UINT32(2);
+  eAVDSPLoudnessEqualization_AUTO = eAVDSPLoudnessEqualization(2);
   {$EXTERNALSYM eAVDSPLoudnessEqualization_AUTO}
 
 
@@ -3227,11 +3228,11 @@ type
   eAVDSPSpeakerFill = UINT32;
   {$EXTERNALSYM eAVDSPSpeakerFill}
 const
-  eAVDSPSpeakerFill_OFF  = UINT32(0);
+  eAVDSPSpeakerFill_OFF  = eAVDSPSpeakerFill(0);
   {$EXTERNALSYM eAVDSPSpeakerFill_OFF}
-  eAVDSPSpeakerFill_ON   = UINT32(1);
+  eAVDSPSpeakerFill_ON   = eAVDSPSpeakerFill(1);
   {$EXTERNALSYM eAVDSPSpeakerFill_ON}
-  eAVDSPSpeakerFill_AUTO = UINT32(2);
+  eAVDSPSpeakerFill_AUTO = eAVDSPSpeakerFill(2);
   {$EXTERNALSYM eAVDSPSpeakerFill_AUTO}
 
 

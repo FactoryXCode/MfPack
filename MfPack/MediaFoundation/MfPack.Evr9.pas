@@ -17,12 +17,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-//                                #1
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -134,13 +135,20 @@ type
   MFVideoAlphaBitmapFlags = DWord;
   {$EXTERNALSYM MFVideoAlphaBitmapFlags}
 const
-    MFVideoAlphaBitmap_EntireDDS   = DWord($1);
-    MFVideoAlphaBitmap_SrcColorKey = DWord($2);
-    MFVideoAlphaBitmap_SrcRect     = DWord($4);
-    MFVideoAlphaBitmap_DestRect    = DWord($8);
-    MFVideoAlphaBitmap_FilterMode  = DWord($10);
-    MFVideoAlphaBitmap_Alpha       = DWord($20);
-    MFVideoAlphaBitmap_BitMask     = DWord($3F);
+  MFVideoAlphaBitmap_EntireDDS   = MFVideoAlphaBitmapFlags($1);
+  {$EXTERNALSYM MFVideoAlphaBitmap_EntireDDS}
+  MFVideoAlphaBitmap_SrcColorKey = MFVideoAlphaBitmapFlags($2);
+  {$EXTERNALSYM MFVideoAlphaBitmap_SrcColorKey}
+  MFVideoAlphaBitmap_SrcRect     = MFVideoAlphaBitmapFlags($4);
+  {$EXTERNALSYM MFVideoAlphaBitmap_SrcRect}
+  MFVideoAlphaBitmap_DestRect    = MFVideoAlphaBitmapFlags($8);
+  {$EXTERNALSYM MFVideoAlphaBitmap_DestRect}
+  MFVideoAlphaBitmap_FilterMode  = MFVideoAlphaBitmapFlags($10);
+  {$EXTERNALSYM MFVideoAlphaBitmap_FilterMode}
+  MFVideoAlphaBitmap_Alpha       = MFVideoAlphaBitmapFlags($20);
+  {$EXTERNALSYM MFVideoAlphaBitmap_Alpha}
+  MFVideoAlphaBitmap_BitMask     = MFVideoAlphaBitmapFlags($3F);
+  {$EXTERNALSYM MFVideoAlphaBitmap_BitMask}
 
 
 type

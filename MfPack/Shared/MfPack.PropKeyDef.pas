@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 2000 Pro or later.
@@ -167,7 +169,7 @@ type
 implementation
 
 function IsEqualPropertyKey(pkeyOne: PROPERTYKEY;
-                            pkeyOther: PROPERTYKEY ): BOOL;
+                            pkeyOther: PROPERTYKEY): BOOL;
 begin
   Result:= (pkeyOne.pid = pkeyOther.pid) and
             IsEqualGUID(pkeyOne.fmtid,

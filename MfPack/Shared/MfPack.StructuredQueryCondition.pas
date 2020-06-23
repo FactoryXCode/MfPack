@@ -10,18 +10,20 @@
 // Language: ENU
 //
 // Revision Version: 2.6.4
-// Description: -
+// Description: This header is used by Windows Search.
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
 //------------------------------------------------------------------------------
+// Rudy Velthuis 1960 ~ 2019.
+//------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-// 29/05/2020  Tony               Revision #1
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -85,59 +87,59 @@ uses
 // to them that we cannot remove so they must exist outside of WINAPI_PARTITION_DESKTOP.
 
 type
-  tagCONDITION_TYPE = type DWord;
+  tagCONDITION_TYPE = DWord;
   {$EXTERNALSYM tagCONDITION_TYPE}
   CONDITION_TYPE = tagCONDITION_TYPE;
   {$EXTERNALSYM CONDITION_TYPE}
   PConditionType = ^tagCONDITION_TYPE;
 const
-  CT_AND_CONDITION  = 0;               // AND of subconditions
+  CT_AND_CONDITION  = CONDITION_TYPE(0);               // AND of subconditions
   {$EXTERNALSYM CT_AND_CONDITION}
-  CT_OR_CONDITION   = 1;               // OR of subconditions
+  CT_OR_CONDITION   = CONDITION_TYPE(1);               // OR of subconditions
   {$EXTERNALSYM CT_OR_CONDITION}
-  CT_NOT_CONDITION  = 2;               // NOT of a single subcondition
+  CT_NOT_CONDITION  = CONDITION_TYPE(2);               // NOT of a single subcondition
   {$EXTERNALSYM CT_NOT_CONDITION}
-  CT_LEAF_CONDITION = 3;               // No subcondition: property, operation, value.
+  CT_LEAF_CONDITION = CONDITION_TYPE(3);               // No subcondition: property, operation, value.
   {$EXTERNALSYM CT_LEAF_CONDITION}
 
 
 type
   // Prefix CT
-  tagCONDITION_OPERATION =  type DWord;
+  tagCONDITION_OPERATION = DWord;
   {$EXTERNALSYM tagCONDITION_OPERATION}
   CONDITION_OPERATION = tagCONDITION_OPERATION;
   {$EXTERNALSYM CONDITION_OPERATION}
   PConditionOperation = ^tagCONDITION_OPERATION;
 const
-  COP_IMPLICIT             = 0;
+  COP_IMPLICIT             = CONDITION_OPERATION(0);
   {$EXTERNALSYM COP_IMPLICIT}
-  COP_EQUAL                = 1;
+  COP_EQUAL                = CONDITION_OPERATION(1);
   {$EXTERNALSYM COP_EQUAL}
-  COP_NOTEQUAL             = 2;
+  COP_NOTEQUAL             = CONDITION_OPERATION(2);
   {$EXTERNALSYM COP_NOTEQUAL}
-  COP_LESSTHAN             = 3;
+  COP_LESSTHAN             = CONDITION_OPERATION(3);
   {$EXTERNALSYM COP_LESSTHAN}
-  COP_GREATERTHAN          = 4;
+  COP_GREATERTHAN          = CONDITION_OPERATION(4);
   {$EXTERNALSYM COP_GREATERTHAN}
-  COP_LESSTHANOREQUAL      = 5;
+  COP_LESSTHANOREQUAL      = CONDITION_OPERATION(5);
   {$EXTERNALSYM COP_LESSTHANOREQUAL}
-  COP_GREATERTHANOREQUAL   = 6;
+  COP_GREATERTHANOREQUAL   = CONDITION_OPERATION(6);
   {$EXTERNALSYM COP_GREATERTHANOREQUAL}
-  COP_VALUE_STARTSWITH     = 7;     // LIKE FOO%
+  COP_VALUE_STARTSWITH     = CONDITION_OPERATION(7);     // LIKE FOO%
   {$EXTERNALSYM COP_VALUE_STARTSWITH}
-  COP_VALUE_ENDSWITH       = 8;     // LIKE %FOO
+  COP_VALUE_ENDSWITH       = CONDITION_OPERATION(8);     // LIKE %FOO
   {$EXTERNALSYM COP_VALUE_ENDSWITH}
-  COP_VALUE_CONTAINS       = 9;     // LIKE %FOO%
+  COP_VALUE_CONTAINS       = CONDITION_OPERATION(9);     // LIKE %FOO%
   {$EXTERNALSYM COP_VALUE_CONTAINS}
-  COP_VALUE_NOTCONTAINS    = 10;    // NOT LIKE %FOO%
+  COP_VALUE_NOTCONTAINS    = CONDITION_OPERATION(10);    // NOT LIKE %FOO%
   {$EXTERNALSYM COP_VALUE_NOTCONTAINS}
-  COP_DOSWILDCARDS         = 11;    // "DOS wildcards" and the like
+  COP_DOSWILDCARDS         = CONDITION_OPERATION(11);    // "DOS wildcards" and the like
   {$EXTERNALSYM COP_DOSWILDCARDS}
-  COP_WORD_EQUAL           = 12;    // Contains a word/phrase somewhere.
+  COP_WORD_EQUAL           = CONDITION_OPERATION(12);    // Contains a word/phrase somewhere.
   {$EXTERNALSYM COP_WORD_EQUAL}
-  COP_WORD_STARTSWITH      = 13;    // Contains a word/phrase beginning with this
+  COP_WORD_STARTSWITH      = CONDITION_OPERATION(13);    // Contains a word/phrase beginning with this
   {$EXTERNALSYM COP_WORD_STARTSWITH}
-  COP_APPLICATION_SPECIFIC = 14;    // Application specific, presumably uses the Value.
+  COP_APPLICATION_SPECIFIC = CONDITION_OPERATION(14);    // Application specific, presumably uses the Value.
   {$EXTERNALSYM COP_APPLICATION_SPECIFIC}
 
   // Prefix COP

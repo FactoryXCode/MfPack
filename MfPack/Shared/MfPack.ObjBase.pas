@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks:
@@ -196,7 +198,7 @@ type
                                  grfMode: DWORD;
                                  pwszName: POlESTR;
                                  dwCount: DWORD;
-                                 pResults: PMULTI_QIArray): HResult; stdcall;
+                                 pResults: PMULTI_QI): HResult; stdcall;
   {$EXTERNALSYM CoGetInstanceFromFile}
 
   function CoGetInstanceFromIStorage(pServerInfo: PCoServerInfo;
@@ -205,7 +207,7 @@ type
                                      dwClsCtx: DWORD;
                                      pstg: IUnknown; {IStorage}
                                      dwCount: DWORD;
-                                     rgmqResults: PMULTI_QIArray): HResult; stdcall;
+                                     rgmqResults: PMULTI_QI): HResult; stdcall;
   {$EXTERNALSYM CoGetInstanceFromIStorage}
 
 

@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 12/03/2020 Tony                Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -582,7 +584,7 @@ type
     dbch_hdevnotify : ULONG32;
     dbch_eventguid  : TGUID;
     dbch_nameoffset : LONG;
-    dbch_data       : Byte; // We could translate it as array [0..0] of Byte, but we know the result is more than just one byte.
+    dbch_data       : array [0..0] of Byte; // We know the result is more than just one byte.
   end;
   {$EXTERNALSYM _DEV_BROADCAST_HANDLE32}
   DEV_BROADCAST_HANDLE32 = _DEV_BROADCAST_HANDLE32;
@@ -597,7 +599,7 @@ type
     dbch_hdevnotify : ULONG64;
     dbch_eventguid  : TGUID;
     dbch_nameoffset : LONG;
-    dbch_data       : Byte;  // We could translate it as array [0..0] of Byte, but we know the result is more than just one byte.
+    dbch_data       : array [0..0] of Byte; // We know the result is more than just one byte.
   end;
   {$EXTERNALSYM _DEV_BROADCAST_HANDLE64}
   DEV_BROADCAST_HANDLE64 = _DEV_BROADCAST_HANDLE64;
@@ -647,7 +649,7 @@ type
   PDEV_BROADCAST_USERDEFINED = ^DEV_BROADCAST_USERDEFINED;
   _DEV_BROADCAST_USERDEFINED = record
     dbud_dbh    : _DEV_BROADCAST_HDR ;
-    dbud_szName : Char;      {* ASCIIZ name *}
+    dbud_szName : array [0..0] of AnsiChar; {* ASCIIZ name *}
     {/*  BYTE        dbud_rgbUserDefined[];*/ /* User-defined contents */}
   end;
   {$EXTERNALSYM _DEV_BROADCAST_USERDEFINED}

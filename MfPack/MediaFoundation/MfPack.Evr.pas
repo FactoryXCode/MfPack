@@ -24,12 +24,13 @@
 //                 Eric.C.Fortier,
 //                 Ramyses De Macedo Rodrigues
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-//                                #1
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -108,77 +109,77 @@ type
   D3DFORMAT = _D3DFORMAT;
   {$EXTERNALSYM D3DFORMAT}
 const
-  D3DFMT_UNKNOWN      = Dword(0);
+  D3DFMT_UNKNOWN      = D3DFORMAT(0);
   {$EXTERNALSYM D3DFMT_UNKNOWN}
-  D3DFMT_R8G8B8       = Dword(20);
+  D3DFMT_R8G8B8       = D3DFORMAT(20);
   {$EXTERNALSYM D3DFMT_R8G8B8}
-  D3DFMT_A8R8G8B8     = Dword(21);
+  D3DFMT_A8R8G8B8     = D3DFORMAT(21);
   {$EXTERNALSYM D3DFMT_A8R8G8B8}
-  D3DFMT_X8R8G8B8     = Dword(22);
+  D3DFMT_X8R8G8B8     = D3DFORMAT(22);
   {$EXTERNALSYM D3DFMT_X8R8G8B8}
-  D3DFMT_R5G6B5       = Dword(23);
+  D3DFMT_R5G6B5       = D3DFORMAT(23);
   {$EXTERNALSYM D3DFMT_R5G6B5}
-  D3DFMT_X1R5G5B5     = Dword(24);
+  D3DFMT_X1R5G5B5     = D3DFORMAT(24);
   {$EXTERNALSYM D3DFMT_X1R5G5B5}
-  D3DFMT_A1R5G5B5     = Dword(25);
+  D3DFMT_A1R5G5B5     = D3DFORMAT(25);
   {$EXTERNALSYM D3DFMT_A1R5G5B5}
-  D3DFMT_A4R4G4B4     = Dword(26);
+  D3DFMT_A4R4G4B4     = D3DFORMAT(26);
   {$EXTERNALSYM D3DFMT_A4R4G4B4}
-  D3DFMT_R3G3B2       = Dword(27);
+  D3DFMT_R3G3B2       = D3DFORMAT(27);
   {$EXTERNALSYM D3DFMT_R3G3B2}
-  D3DFMT_A8           = Dword(28);
+  D3DFMT_A8           = D3DFORMAT(28);
   {$EXTERNALSYM D3DFMT_A8}
-  D3DFMT_A8R3G3B2     = Dword(29);
+  D3DFMT_A8R3G3B2     = D3DFORMAT(29);
   {$EXTERNALSYM D3DFMT_A8R3G3B2}
-  D3DFMT_X4R4G4B4     = Dword(30);
+  D3DFMT_X4R4G4B4     = D3DFORMAT(30);
   {$EXTERNALSYM D3DFMT_X4R4G4B4}
-  D3DFMT_A2B10G10R10  = Dword(31);
+  D3DFMT_A2B10G10R10  = D3DFORMAT(31);
   {$EXTERNALSYM D3DFMT_A2B10G10R10}
-  D3DFMT_G16R16       = Dword(34);
+  D3DFMT_G16R16       = D3DFORMAT(34);
   {$EXTERNALSYM D3DFMT_G16R16}
-  D3DFMT_A8P8         = Dword(40);
+  D3DFMT_A8P8         = D3DFORMAT(40);
   {$EXTERNALSYM D3DFMT_A8P8}
-  D3DFMT_P8           = Dword(41);
+  D3DFMT_P8           = D3DFORMAT(41);
   {$EXTERNALSYM D3DFMT_P8}
-  D3DFMT_L8           = Dword(50);
+  D3DFMT_L8           = D3DFORMAT(50);
   {$EXTERNALSYM D3DFMT_L8}
-  D3DFMT_A8L8         = Dword(51);
+  D3DFMT_A8L8         = D3DFORMAT(51);
   {$EXTERNALSYM D3DFMT_A8L8}
-  D3DFMT_A4L4         = Dword(52);
+  D3DFMT_A4L4         = D3DFORMAT(52);
   {$EXTERNALSYM D3DFMT_A4L4}
-  D3DFMT_V8U8         = Dword(60);
+  D3DFMT_V8U8         = D3DFORMAT(60);
   {$EXTERNALSYM D3DFMT_V8U8}
-  D3DFMT_L6V5U5       = Dword(61);
+  D3DFMT_L6V5U5       = D3DFORMAT(61);
   {$EXTERNALSYM D3DFMT_L6V5U5}
-  D3DFMT_X8L8V8U8     = Dword(62);
+  D3DFMT_X8L8V8U8     = D3DFORMAT(62);
   {$EXTERNALSYM D3DFMT_X8L8V8U8}
-  D3DFMT_Q8W8V8U8     = Dword(63);
+  D3DFMT_Q8W8V8U8     = D3DFORMAT(63);
   {$EXTERNALSYM D3DFMT_Q8W8V8U8}
-  D3DFMT_V16U16       = Dword(64);
+  D3DFMT_V16U16       = D3DFORMAT(64);
   {$EXTERNALSYM D3DFMT_V16U16}
-  D3DFMT_W11V11U10    = Dword(65);
+  D3DFMT_W11V11U10    = D3DFORMAT(65);
   {$EXTERNALSYM D3DFMT_W11V11U10}
-  D3DFMT_A2W10V10U10  = Dword(67);
+  D3DFMT_A2W10V10U10  = D3DFORMAT(67);
   {$EXTERNALSYM D3DFMT_A2W10V10U10}
-  D3DFMT_D16_LOCKABLE = Dword(70);
+  D3DFMT_D16_LOCKABLE = D3DFORMAT(70);
   {$EXTERNALSYM D3DFMT_D16_LOCKABLE}
-  D3DFMT_D32          = Dword(71);
+  D3DFMT_D32          = D3DFORMAT(71);
   {$EXTERNALSYM D3DFMT_D32}
-  D3DFMT_D15S1        = Dword(73);
+  D3DFMT_D15S1        = D3DFORMAT(73);
   {$EXTERNALSYM D3DFMT_D15S1}
-  D3DFMT_D24S8        = Dword(75);
+  D3DFMT_D24S8        = D3DFORMAT(75);
   {$EXTERNALSYM D3DFMT_D24S8}
-  D3DFMT_D24X8        = Dword(77);
+  D3DFMT_D24X8        = D3DFORMAT(77);
   {$EXTERNALSYM D3DFMT_D24X8}
-  D3DFMT_D24X4S4      = Dword(79);
+  D3DFMT_D24X4S4      = D3DFORMAT(79);
   {$EXTERNALSYM D3DFMT_D24X4S4}
-  D3DFMT_D16          = Dword(80);
+  D3DFMT_D16          = D3DFORMAT(80);
   {$EXTERNALSYM D3DFMT_D16}
-  D3DFMT_VERTEXDATA   = Dword(100);
+  D3DFMT_VERTEXDATA   = D3DFORMAT(100);
   {$EXTERNALSYM D3DFMT_VERTEXDATA}
-  D3DFMT_INDEX16      = Dword(101);
+  D3DFMT_INDEX16      = D3DFORMAT(101);
   {$EXTERNALSYM D3DFMT_INDEX16}
-  D3DFMT_INDEX32      = Dword(102);
+  D3DFMT_INDEX32      = D3DFORMAT(102);
   {$EXTERNALSYM D3DFMT_INDEX32}
   //D3DFMT_FORCE_DWORD  = FORCEDWORD;
 
@@ -200,15 +201,15 @@ type
   MFVideoAspectRatioMode = Dword;
   {$EXTERNALSYM MFVideoAspectRatioMode}
 const
-  MFVideoARMode_None             = Dword($0);
+  MFVideoARMode_None             = MFVideoAspectRatioMode($0);
   {$EXTERNALSYM MFVideoARMode_None}
-  MFVideoARMode_PreservePicture  = Dword($1);
+  MFVideoARMode_PreservePicture  = MFVideoAspectRatioMode($1);
   {$EXTERNALSYM MFVideoARMode_PreservePicture}
-  MFVideoARMode_PreservePixel    = Dword($2);
+  MFVideoARMode_PreservePixel    = MFVideoAspectRatioMode($2);
   {$EXTERNALSYM MFVideoARMode_PreservePixel}
-  MFVideoARMode_NonLinearStretch = Dword($4);
+  MFVideoARMode_NonLinearStretch = MFVideoAspectRatioMode($4);
   {$EXTERNALSYM MFVideoARMode_NonLinearStretch}
-  MFVideoARMode_Mask             = Dword($7);
+  MFVideoARMode_Mask             = MFVideoAspectRatioMode($7);
   {$EXTERNALSYM MFVideoARMode_Mask}
 
 type
@@ -216,16 +217,26 @@ type
   MFVideoRenderPrefs = DWord;
   {$EXTERNALSYM MFVideoRenderPrefs}
 const
-  MFVideoRenderPrefs_DoNotRenderBorder     = Dword($1);
-  MFVideoRenderPrefs_DoNotClipToDevice     = Dword($2);
-  MFVideoRenderPrefs_AllowOutputThrottling = Dword($4);
-  MFVideoRenderPrefs_ForceOutputThrottling = Dword($8);
-  MFVideoRenderPrefs_ForceBatching         = Dword($10);
-  MFVideoRenderPrefs_AllowBatching         = Dword($20);
-  MFVideoRenderPrefs_ForceScaling          = Dword($40);
-  MFVideoRenderPrefs_AllowScaling          = Dword($80);
-  MFVideoRenderPrefs_DoNotRepaintOnStop    = Dword($100);
-  MFVideoRenderPrefs_Mask                  = Dword($1FF);
+  MFVideoRenderPrefs_DoNotRenderBorder     = MFVideoRenderPrefs($1);
+  {$EXTERNALSYM MFVideoRenderPrefs_DoNotRenderBorder}
+  MFVideoRenderPrefs_DoNotClipToDevice     = MFVideoRenderPrefs($2);
+  {$EXTERNALSYM MFVideoRenderPrefs_DoNotClipToDevice}
+  MFVideoRenderPrefs_AllowOutputThrottling = MFVideoRenderPrefs($4);
+  {$EXTERNALSYM MFVideoRenderPrefs_AllowOutputThrottling}
+  MFVideoRenderPrefs_ForceOutputThrottling = MFVideoRenderPrefs($8);
+  {$EXTERNALSYM MFVideoRenderPrefs_ForceOutputThrottling}
+  MFVideoRenderPrefs_ForceBatching         = MFVideoRenderPrefs($10);
+  {$EXTERNALSYM MFVideoRenderPrefs_ForceBatching}
+  MFVideoRenderPrefs_AllowBatching         = MFVideoRenderPrefs($20);
+  {$EXTERNALSYM MFVideoRenderPrefs_AllowBatching}
+  MFVideoRenderPrefs_ForceScaling          = MFVideoRenderPrefs($40);
+  {$EXTERNALSYM MFVideoRenderPrefs_ForceScaling}
+  MFVideoRenderPrefs_AllowScaling          = MFVideoRenderPrefs($80);
+  {$EXTERNALSYM MFVideoRenderPrefs_AllowScaling}
+  MFVideoRenderPrefs_DoNotRepaintOnStop    = MFVideoRenderPrefs($100);
+  {$EXTERNALSYM MFVideoRenderPrefs_DoNotRepaintOnStop}
+  MFVideoRenderPrefs_Mask                  = MFVideoRenderPrefs($1FF);
+  {$EXTERNALSYM MFVideoRenderPrefs_Mask}
 
 
 type
@@ -272,7 +283,8 @@ type
     MFVP_MESSAGE_ENDSTREAMING        = $4,
     MFVP_MESSAGE_ENDOFSTREAM         = $5,
     MFVP_MESSAGE_STEP                = $6,
-    MFVP_MESSAGE_CANCELSTEP          = $7);
+    MFVP_MESSAGE_CANCELSTEP          = $7
+  );
   {$EXTERNALSYM MFVP_MESSAGE_TYPE}
 
 type
@@ -282,15 +294,15 @@ type
   MFVideoMixPrefs = _MFVideoMixPrefs;
   {$EXTERNALSYM MFVideoMixPrefs}
 const
-  MFVideoMixPrefs_ForceHalfInterlace       = DWord($1);
+  MFVideoMixPrefs_ForceHalfInterlace       = MFVideoMixPrefs($1);
   {$EXTERNALSYM MFVideoMixPrefs_ForceHalfInterlace}
-  MFVideoMixPrefs_AllowDropToHalfInterlace = DWord($2);
+  MFVideoMixPrefs_AllowDropToHalfInterlace = MFVideoMixPrefs($2);
   {$EXTERNALSYM MFVideoMixPrefs_AllowDropToHalfInterlace}
-  MFVideoMixPrefs_AllowDropToBob           = DWord($4);
+  MFVideoMixPrefs_AllowDropToBob           = MFVideoMixPrefs($4);
   {$EXTERNALSYM MFVideoMixPrefs_AllowDropToBob}
-  MFVideoMixPrefs_ForceBob                 = DWord($8);
+  MFVideoMixPrefs_ForceBob                 = MFVideoMixPrefs($8);
   {$EXTERNALSYM MFVideoMixPrefs_ForceBob}
-  MFVideoMixPrefs_Mask                     = DWord($F);
+  MFVideoMixPrefs_Mask                     = MFVideoMixPrefs($F);
   {$EXTERNALSYM MFVideoMixPrefs_Mask}
 
 type
@@ -300,9 +312,9 @@ type
   EVRFilterConfigPrefs = _EVRFilterConfig_Prefs;
   {$EXTERNALSYM EVRFilterConfigPrefs}
 const
-  EVRFilterConfigPrefs_EnableQoS = DWord($1);
+  EVRFilterConfigPrefs_EnableQoS = EVRFilterConfigPrefs($1);
   {$EXTERNALSYM EVRFilterConfigPrefs_EnableQoS}
-  EVRFilterConfigPrefs_Mask      = DWord($1);
+  EVRFilterConfigPrefs_Mask      = EVRFilterConfigPrefs($1);
   {$EXTERNALSYM EVRFilterConfigPrefs_Mask}
 
 
@@ -315,7 +327,8 @@ type
     MF_SERVICE_LOOKUP_DOWNSTREAM        = (MF_SERVICE_LOOKUP_UPSTREAM_DIRECT + 1),
     MF_SERVICE_LOOKUP_DOWNSTREAM_DIRECT = (MF_SERVICE_LOOKUP_DOWNSTREAM + 1),
     MF_SERVICE_LOOKUP_ALL               = (MF_SERVICE_LOOKUP_DOWNSTREAM_DIRECT + 1),
-    MF_SERVICE_LOOKUP_GLOBAL            = (MF_SERVICE_LOOKUP_ALL + 1));
+    MF_SERVICE_LOOKUP_GLOBAL            = (MF_SERVICE_LOOKUP_ALL + 1)
+  );
   {$EXTERNALSYM _MF_SERVICE_LOOKUP_TYPE}
   MF_SERVICE_LOOKUP_TYPE = _MF_SERVICE_LOOKUP_TYPE;
   {$EXTERNALSYM MF_SERVICE_LOOKUP_TYPE}

@@ -18,12 +18,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-//                                #1
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -113,7 +114,7 @@ type
     bMuted: INT {BOOL};
     fMasterVolume: Single;
     nChannels: UINT;
-    afChannelVolumes: array of Single; //array[0..1] of Single
+    afChannelVolumes: array [0..0] of Single;
   end;
   {$EXTERNALSYM cwAUDIO_VOLUME_NOTIFICATION_DATA}
   AUDIO_VOLUME_NOTIFICATION_DATA = cwAUDIO_VOLUME_NOTIFICATION_DATA;

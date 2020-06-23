@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Ramyses De Macedo Rodrigues
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
@@ -188,7 +190,8 @@ type
   PKSALLOCATORMODE = ^KSALLOCATORMODE;
   KSALLOCATORMODE = (
     KsAllocatorMode_User,
-    KsAllocatorMode_Kernel);
+    KsAllocatorMode_Kernel
+  );
   {$EXTERNALSYM KSALLOCATORMODE}
 
 
@@ -197,7 +200,8 @@ type
     FramingProp_Uninitialized,
     FramingProp_None,
     FramingProp_Old,
-    FramingProp_Ex);
+    FramingProp_Ex
+  );
   {$EXTERNALSYM FRAMING_PROP}
 
 
@@ -206,7 +210,8 @@ type
     Framing_Cache_Update,     // request to bypass cache when read/write
     Framing_Cache_ReadLast,
     Framing_Cache_ReadOrig,
-    Framing_Cache_Write);
+    Framing_Cache_Write
+  );
   {$EXTERNALSYM FRAMING_CACHE_OPS}
 
   POPTIMAL_WEIGHT_TOTALS = ^OPTIMAL_WEIGHT_TOTALS;
@@ -284,7 +289,8 @@ type
     PipeState_RangeNotFixed,
     PipeState_RangeFixed,
     PipeState_CompressionUnknown,
-    PipeState_Finalized);
+    PipeState_Finalized
+  );
   {$EXTERNALSYM PIPE_STATE}
 
   //
@@ -304,7 +310,8 @@ type
     Pipe_Allocator_None,
     Pipe_Allocator_FirstPin,
     Pipe_Allocator_LastPin,
-    Pipe_Allocator_MiddlePin);
+    Pipe_Allocator_MiddlePin
+  );
   {$EXTERNALSYM PIPE_ALLOCATOR_PLACE}
 
 
@@ -316,7 +323,8 @@ type
     KS_MemoryTypeDeviceHostMapped,
     KS_MemoryTypeDeviceSpecific,
     KS_MemoryTypeUser,
-    KS_MemoryTypeAnyHost);
+    KS_MemoryTypeAnyHost
+  );
   {$EXTERNALSYM KS_LogicalMemoryType}
 
   PPIPE_TERMINATION = ^PIPE_TERMINATION;
@@ -441,7 +449,8 @@ type
   PKSPEEKOPERATION = ^KSPEEKOPERATION;
   KSPEEKOPERATION = (
     KsPeekOperation_PeekOnly,
-    KsPeekOperation_AddRef);
+    KsPeekOperation_AddRef
+  );
   {$EXTERNALSYM KSPEEKOPERATION}
 
   PKSSTREAM_SEGMENT = ^KSSTREAM_SEGMENT;
@@ -564,7 +573,8 @@ type
   PKSIOOPERATION = ^KSIOOPERATION;
   KSIOOPERATION = (
     KsIoOperation_Write,
-    KsIoOperation_Read);
+    KsIoOperation_Read
+  );
   {$EXTERNALSYM KSIOOPERATION}
 
 

@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -230,34 +232,34 @@ type
 
 const
 
-  EVENT_HEADER_PROPERTY_XML           = $0001;
+  EVENT_HEADER_PROPERTY_XML             = $0001;
   {$EXTERNALSYM EVENT_HEADER_PROPERTY_XML}
-  EVENT_HEADER_PROPERTY_FORWARDED_XML = $0002;
+  EVENT_HEADER_PROPERTY_FORWARDED_XML   = $0002;
   {$EXTERNALSYM EVENT_HEADER_PROPERTY_FORWARDED_XML}
-  EVENT_HEADER_PROPERTY_LEGACY_EVENTLOG= $0004;
+  EVENT_HEADER_PROPERTY_LEGACY_EVENTLOG = $0004;
   {$EXTERNALSYM EVENT_HEADER_PROPERTY_LEGACY_EVENTLOG}
-  EVENT_HEADER_PROPERTY_RELOGGABLE    = $0008;
+  EVENT_HEADER_PROPERTY_RELOGGABLE      = $0008;
   {$EXTERNALSYM EVENT_HEADER_PROPERTY_RELOGGABLE}
 
-  EVENT_HEADER_FLAG_EXTENDED_INFO     = $0001;
+  EVENT_HEADER_FLAG_EXTENDED_INFO       = $0001;
     {$EXTERNALSYM EVENT_HEADER_FLAG_EXTENDED_INFO}
-  EVENT_HEADER_FLAG_PRIVATE_SESSION   = $0002;
+  EVENT_HEADER_FLAG_PRIVATE_SESSION     = $0002;
   {$EXTERNALSYM EVENT_HEADER_FLAG_PRIVATE_SESSION}
-  EVENT_HEADER_FLAG_STRING_ONLY       = $0004;
+  EVENT_HEADER_FLAG_STRING_ONLY         = $0004;
   {$EXTERNALSYM EVENT_HEADER_FLAG_STRING_ONLY}
-  EVENT_HEADER_FLAG_TRACE_MESSAGE     = $0008;
+  EVENT_HEADER_FLAG_TRACE_MESSAGE       = $0008;
   {$EXTERNALSYM EVENT_HEADER_FLAG_TRACE_MESSAGE}
-  EVENT_HEADER_FLAG_NO_CPUTIME        = $0010;
+  EVENT_HEADER_FLAG_NO_CPUTIME          = $0010;
   {$EXTERNALSYM EVENT_HEADER_FLAG_NO_CPUTIME}
-  EVENT_HEADER_FLAG_32_BIT_HEADER     = $0020;
+  EVENT_HEADER_FLAG_32_BIT_HEADER       = $0020;
   {$EXTERNALSYM EVENT_HEADER_FLAG_32_BIT_HEADER}
-  EVENT_HEADER_FLAG_64_BIT_HEADER     = $0040;
+  EVENT_HEADER_FLAG_64_BIT_HEADER       = $0040;
   {$EXTERNALSYM EVENT_HEADER_FLAG_64_BIT_HEADER}
-  EVENT_HEADER_FLAG_DECODE_GUID       = $0080;  // ProviderId is decode GUID.
+  EVENT_HEADER_FLAG_DECODE_GUID         = $0080;  // ProviderId is decode GUID.
   {$EXTERNALSYM EVENT_HEADER_FLAG_DECODE_GUID}
-  EVENT_HEADER_FLAG_CLASSIC_HEADER    = $0100;
+  EVENT_HEADER_FLAG_CLASSIC_HEADER      = $0100;
   {$EXTERNALSYM EVENT_HEADER_FLAG_CLASSIC_HEADER}
-  EVENT_HEADER_FLAG_PROCESSOR_INDEX   = $0200;
+  EVENT_HEADER_FLAG_PROCESSOR_INDEX     = $0200;
   {$EXTERNALSYM EVENT_HEADER_FLAG_PROCESSOR_INDEX}
 
 //#ifndef EVENT_HEADER_DEF
@@ -377,7 +379,8 @@ type
   ETW_PROVIDER_TRAIT_TYPE      = (
     EtwProviderTraitTypeGroup  = 1,  // Provider group GUID.
     EtwProviderTraitDecodeGuid = 2,  // Decode GUID (when different from control GUID)
-    EtwProviderTraitTypeMax    = 3);
+    EtwProviderTraitTypeMax    = 3
+  );
   {$EXTERNALSYM ETW_PROVIDER_TRAIT_TYPE}
   TEtwProviderTraitType = ETW_PROVIDER_TRAIT_TYPE;
   {$EXTERNALSYM TEtwProviderTraitType}
@@ -392,7 +395,8 @@ type
     EventSecuritySetSACL = 1,
     EventSecurityAddDACL = 2,
     EventSecurityAddSACL = 3,
-    EventSecurityMax     = 4);
+    EventSecurityMax     = 4
+  );
   {$EXTERNALSYM EVENTSECURITYOPERATION}
   TEventsecurityoperation = EVENTSECURITYOPERATION;
   {$EXTERNALSYM TEventsecurityoperation}

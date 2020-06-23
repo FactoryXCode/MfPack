@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX),
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -768,7 +770,7 @@ type
 
 
   function EventWriteTransfer(RegHandle: REGHANDLE;
-                              const EventDescriptor: EVENT_DESCRIPTOR;
+                              EventDescriptor: EVENT_DESCRIPTOR;
                               const ActivityId: TGUID;
                               const RelatedActivityId: TGUID;
                               UserDataCount: ULONG;
@@ -800,7 +802,7 @@ type
 
 
   function EventWriteEx(RegHandle: REGHANDLE;
-                        const EventDescriptor: PCEVENT_DESCRIPTOR;
+                        EventDescriptor: PCEVENT_DESCRIPTOR;
                         Filter: ULONG64;
                         Flags: ULONG;
                         const ActivityId: LPCGUID;

@@ -16,12 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-//                                #1
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -102,19 +103,12 @@ type
   PWmtPropDatatype = ^TWmtPropDatatype;
   WMT_PROP_DATATYPE      = (
     WMT_PROP_TYPE_DWORD  = 0,
-    {$EXTERNALSYM WMT_PROP_TYPE_DWORD}
     WMT_PROP_TYPE_STRING = 1,
-    {$EXTERNALSYM WMT_PROP_TYPE_STRING}
     WMT_PROP_TYPE_BINARY = 2,
-    {$EXTERNALSYM WMT_PROP_TYPE_BINARY}
     WMT_PROP_TYPE_BOOL   = 3,
-    {$EXTERNALSYM WMT_PROP_TYPE_BOOL}
     WMT_PROP_TYPE_QWORD  = 4,
-    {$EXTERNALSYM WMT_PROP_TYPE_QWORD}
     WMT_PROP_TYPE_WORD   = 5,
-    {$EXTERNALSYM WMT_PROP_TYPE_WORD}
     WMT_PROP_TYPE_GUID   = 6
-    {$EXTERNALSYM WMT_PROP_TYPE_GUID}
   );
   {$EXTERNALSYM WMT_PROP_DATATYPE}
   TWmtPropDatatype = WMT_PROP_DATATYPE;
@@ -1503,11 +1497,11 @@ type
   WMV_DYNAMIC_FLAGS        = DWord;
   {$EXTERNALSYM WMV_DYNAMIC_FLAGS}
 const
-  WMV_DYNAMIC_BITRATE    = DWord($1);
+  WMV_DYNAMIC_BITRATE    = WMV_DYNAMIC_FLAGS($1);
   {$EXTERNALSYM WMV_DYNAMIC_BITRATE}
-  WMV_DYNAMIC_RESOLUTION = DWord($2);
+  WMV_DYNAMIC_RESOLUTION = WMV_DYNAMIC_FLAGS($2);
   {$EXTERNALSYM WMV_DYNAMIC_RESOLUTION}
-  WMV_DYNAMIC_COMPLEXITY = DWord($4);
+  WMV_DYNAMIC_COMPLEXITY = WMV_DYNAMIC_FLAGS($4);
   {$EXTERNALSYM WMV_DYNAMIC_COMPLEXITY}
 
 type
@@ -1516,7 +1510,7 @@ type
   MF_AUVRHP_ROOMMODEL   = DWord;
   {$EXTERNALSYM MF_AUVRHP_ROOMMODEL}
 const
-  VRHP_SMALLROOM      = DWord(0);
+  VRHP_SMALLROOM      = MF_AUVRHP_ROOMMODEL(0);
   {$EXTERNALSYM VRHP_SMALLROOM}
   VRHP_MEDIUMROOM     = VRHP_SMALLROOM + 1;
   {$EXTERNALSYM VRHP_MEDIUMROOM}
@@ -1537,7 +1531,7 @@ type
   AEC_SYSTEM_MODE          = DWord; // VT_I4
   {$EXTERNALSYM AEC_SYSTEM_MODE}
 const
-  SINGLE_CHANNEL_AEC     = DWord(0);
+  SINGLE_CHANNEL_AEC     = AEC_SYSTEM_MODE(0);
   {$EXTERNALSYM SINGLE_CHANNEL_AEC}
   ADAPTIVE_ARRAY_ONLY    = SINGLE_CHANNEL_AEC + 1;
   {$EXTERNALSYM ADAPTIVE_ARRAY_ONLY}
@@ -1586,7 +1580,7 @@ type
   AEC_VAD_MODE = DWord;
   {$EXTERNALSYM AEC_VAD_MODE}
 const
-    AEC_VAD_DISABLED                = DWord(0);
+    AEC_VAD_DISABLED                = AEC_VAD_MODE(0);
     {$EXTERNALSYM AEC_VAD_DISABLED}
     AEC_VAD_NORMAL                  = AEC_VAD_DISABLED + 1;
     {$EXTERNALSYM AEC_VAD_NORMAL}
@@ -1602,8 +1596,8 @@ type
   AEC_INPUT_STREAM = DWord;
   {$EXTERNALSYM AEC_INPUT_STREAM}
 const
-  AEC_CAPTURE_STREAM   = DWord(0);
-  AEC_REFERENCE_STREAM = DWord(1);
+  AEC_CAPTURE_STREAM   = AEC_INPUT_STREAM(0);
+  AEC_REFERENCE_STREAM = AEC_INPUT_STREAM(1);
 
 
 type
@@ -1612,15 +1606,15 @@ type
   MIC_ARRAY_MODE = DWord;
   {$EXTERNALSYM MIC_ARRAY_MODE}
 const
-  MICARRAY_SINGLE_CHAN = DWord(0);
+  MICARRAY_SINGLE_CHAN = MIC_ARRAY_MODE(0);
   {$EXTERNALSYM MICARRAY_SINGLE_CHAN}
-  MICARRAY_SIMPLE_SUM  = DWord($100);
+  MICARRAY_SIMPLE_SUM  = MIC_ARRAY_MODE($100);
   {$EXTERNALSYM MICARRAY_SIMPLE_SUM}
-  MICARRAY_SINGLE_BEAM = DWord($200);
+  MICARRAY_SINGLE_BEAM = MIC_ARRAY_MODE($200);
   {$EXTERNALSYM MICARRAY_SINGLE_BEAM}
-  MICARRAY_FIXED_BEAM  = DWord($400);
+  MICARRAY_FIXED_BEAM  = MIC_ARRAY_MODE($400);
   {$EXTERNALSYM MICARRAY_FIXED_BEAM}
-  MICARRAY_EXTERN_BEAM = DWord($800);
+  MICARRAY_EXTERN_BEAM = MIC_ARRAY_MODE($800);
   {$EXTERNALSYM MICARRAY_EXTERN_BEAM}
 
 
@@ -1779,9 +1773,9 @@ type
   MFVideoDSPMode = _MFVideoDSPMode;
   {$EXTERNALSYM MFVideoDSPMode}
 const
-  MFVideoDSPMode_Passthrough   = UINT32(1);
+  MFVideoDSPMode_Passthrough   = MFVideoDSPMode(1);
   {$EXTERNALSYM MFVideoDSPMode_Passthrough}
-  MFVideoDSPMode_Stabilization = UINT32(4);
+  MFVideoDSPMode_Stabilization = MFVideoDSPMode(4);
   {$EXTERNALSYM MFVideoDSPMode_Stabilization}
 
 
@@ -2257,7 +2251,8 @@ type
     OPENMODE_FAIL_IF_EXIST      = 1,
     OPENMODE_RESET_IF_EXIST     = 2,
     OPENMODE_APPEND_IF_EXIST    = 3,
-    OPENMODE_DELETE_IF_EXIST    = 4);
+    OPENMODE_DELETE_IF_EXIST    = 4
+  );
   {$EXTERNALSYM __MIDL___MIDL_itf_mfobjects_0000_0017_0002}
   FILE_OPENMODE = __MIDL___MIDL_itf_mfobjects_0000_0017_0002;
   {$EXTERNALSYM FILE_OPENMODE}
@@ -2274,7 +2269,8 @@ type
     ACCESSMODE_READ             = 1,
     ACCESSMODE_WRITE            = 2,
     ACCESSMODE_READWRITE        = 3,
-    ACCESSMODE_WRITE_EXCLUSIVE  = 4);
+    ACCESSMODE_WRITE_EXCLUSIVE  = 4
+  );
   {$EXTERNALSYM FILE_ACCESSMODE}
 
 

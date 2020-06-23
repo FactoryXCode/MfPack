@@ -16,12 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-//                                #1
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -129,7 +130,8 @@ type
     eOffloadConnector	        = (eHostProcessConnector + 1),
     eLoopbackConnector	      = (eOffloadConnector + 1),
     eKeywordDetectorConnector	= (eLoopbackConnector + 1),
-    eConnectorCount	          = (eKeywordDetectorConnector + 1));
+    eConnectorCount	          = (eKeywordDetectorConnector + 1)
+  );
   {$EXTERNALSYM EndpointConnectorType}
 
 
@@ -179,12 +181,14 @@ type
   );
   {$EXTERNALSYM AE_POSITION_FLAGS}
   AePositionFlags = AE_POSITION_FLAGS;
+  {$EXTERNALSYM AePositionFlags}
 
 
   // AE_CURRENT_POSITION
   //====================
   // Description:
   // Structure used to report the current frame position from the device to the clients.
+  PAeCurrentPosition = ^AeCurrentPosition;
   AE_CURRENT_POSITION = record
     // Device position in frames.
     u64DevicePosition: UINT64;
@@ -200,8 +204,8 @@ type
     Flag: AE_POSITION_FLAGS;
   end;
   {$EXTERNALSYM AE_CURRENT_POSITION}
-  PAeCurrentPosition = ^AeCurrentPosition;
   AeCurrentPosition = AE_CURRENT_POSITION;
+  {$EXTERNALSYM AeCurrentPosition}
 
 
   //  An Audio Endpoint object abstracts the audio device, audio API and any other

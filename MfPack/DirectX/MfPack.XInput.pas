@@ -18,22 +18,24 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 // 
 //          Using packed records is not a recommended practice,
 //          because it can prevent compatibility with other languages or
-//          platforms, it slows data access, and, in the case of a character array,
+//          platforms, it slows data access, and in the case of a character array,
 //          it affects type compatibility.
 //          For more information, see Memory management and Implicit Packing of
 //          Fields with a Common Type Specification.
-// 
+//
 //
 // Related objects: -
 // Related projects: MfPackX264

@@ -16,12 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-//                                #1
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -163,6 +164,7 @@ const
 type
   // Flags for APO connection creation.
   // These flags are internally used by APO connection objects.
+  PApoConnectionBufferType = ^APO_CONNECTION_BUFFER_TYPE;
   APO_CONNECTION_BUFFER_TYPE = (
     // Connection buffer is internally allocated (Initialize)
     APO_CONNECTION_BUFFER_TYPE_ALLOCATED = 0,
@@ -170,9 +172,9 @@ type
     APO_CONNECTION_BUFFER_TYPE_EXTERNAL  = 1,
     // Connection buffer is extracted from another Connection Object
     // (InitializeWithConnection)
-    APO_CONNECTION_BUFFER_TYPE_DEPENDANT = 2);
+    APO_CONNECTION_BUFFER_TYPE_DEPENDANT = 2
+  );
   {$EXTERNALSYM APO_CONNECTION_BUFFER_TYPE}
-  PApoConnectionBufferType = ^APO_CONNECTION_BUFFER_TYPE;
   ApoConnectionBufferType = APO_CONNECTION_BUFFER_TYPE;
   {$EXTERNALSYM ApoConnectionBufferType}
 
@@ -214,32 +216,31 @@ type
   // These flags specify the basic properties of Audio Processing objects.
   // If the APO is being used directly by a client without using an audio processor,
   // the client needs to ensure these flags are respected.
-
+  PApoFlag = ^APO_FLAG;
   APO_FLAG = DWord;
   {$EXTERNALSYM APO_FLAG}
-  PApoFlag = ^APO_FLAG;
   ApoFlag = APO_FLAG;
   {$EXTERNALSYM ApoFlag}
 const
   // No flags set
-  APO_FLAG_NONE                       = DWord($00000000);
+  APO_FLAG_NONE                       = APO_FLAG($00000000);
   {$EXTERNALSYM APO_FLAG_NONE}
   // APO can perform in-place processing. This allows the processor to
   // connect a common buffer on input and output.
-  APO_FLAG_INPLACE                    = DWord($00000001);
+  APO_FLAG_INPLACE                    = APO_FLAG($00000001);
   {$EXTERNALSYM APO_FLAG_INPLACE}
   // Samples Per Frame of input and output connections must match.
-  APO_FLAG_SAMPLESPERFRAME_MUST_MATCH = DWord($00000002);
+  APO_FLAG_SAMPLESPERFRAME_MUST_MATCH = APO_FLAG($00000002);
   {$EXTERNALSYM APO_FLAG_SAMPLESPERFRAME_MUST_MATCH}
   // Frames per second of input and output connections must match
-  APO_FLAG_FRAMESPERSECOND_MUST_MATCH = DWord($00000004);
+  APO_FLAG_FRAMESPERSECOND_MUST_MATCH = APO_FLAG($00000004);
   {$EXTERNALSYM APO_FLAG_FRAMESPERSECOND_MUST_MATCH}
   // Bits per sample AND bytes per sample containter of input and output
   // connections must match.
-  APO_FLAG_BITSPERSAMPLE_MUST_MATCH   = DWord($00000008);
+  APO_FLAG_BITSPERSAMPLE_MUST_MATCH   = APO_FLAG($00000008);
   {$EXTERNALSYM APO_FLAG_BITSPERSAMPLE_MUST_MATCH}
   // APO is a mix APO. This flag should be set only for the mixer APO.
-  APO_FLAG_MIXER                      = DWord($00000010);
+  APO_FLAG_MIXER                      = APO_FLAG($00000010);
   {$EXTERNALSYM APO_FLAG_MIXER}
   // standard flags for default APOs
   APO_FLAG_DEFAULT                    = APO_FLAG_SAMPLESPERFRAME_MUST_MATCH or
@@ -308,6 +309,7 @@ type
   // and specified in the initialization structure for each particular APO.
   // These flow types specify how the rate converter will consume and
   // generate samples based on the amount of available input, or amount of requested output.
+  PAudioFlowType = ^AUDIO_FLOW_TYPE;
   AUDIO_FLOW_TYPE   = (
     AUDIO_FLOW_PULL = 0,                      // If AUDIO_FLOW_PULL is specified then the converter will
                                               // generate a fixed and equal number of output frames on
@@ -320,7 +322,7 @@ type
                                               // the returned u32InputFrameCount must equal the input APO Connection’s
                                               // u32ValidFrameCount value, or the APO will fail.
 
-    AUDIO_FLOW_PUSH = (AUDIO_FLOW_PULL + 1)); // With AUDIO_FLOW_PUSH the converter will generate as much output
+    AUDIO_FLOW_PUSH = (AUDIO_FLOW_PULL + 1)   // With AUDIO_FLOW_PUSH the converter will generate as much output
                                               // possible with the available input on each processing pass, and
                                               // consume the entire input APO Connection buffer.
                                               // CalcMaxOutputFrames should be called to determine the maximum
@@ -329,9 +331,10 @@ type
                                               // size of APO output Connection buffer to allocate.
                                               // CalcOutputFrames may be called to query the next output
                                               // frameCount, however, this call is not required when using AUDIO_FLOW_PUSH.
+  );
   {$EXTERNALSYM AUDIO_FLOW_TYPE}
-  PAudioFlowType = ^AUDIO_FLOW_TYPE;
   AudioFlowType = AUDIO_FLOW_TYPE;
+  {$EXTERNALSYM AudioFlowType}
 
 
   // Constriction levels
@@ -342,7 +345,8 @@ type
     eAudioConstriction48_16 = (eAudioConstrictionOff  + 1),    // Audio is down sampled to 48 kHz/16-bit.
     eAudioConstriction44_16 = (eAudioConstriction48_16  + 1),  // Audio is down sampled to 44 kHz/16-bit.
     eAudioConstriction14_14 = (eAudioConstriction44_16  + 1),  // Audio is down sampled to 14 kHz/16-bit.
-    eAudioConstrictionMute  = (eAudioConstriction14_14  + 1)); // Audio is muted.
+    eAudioConstrictionMute  = (eAudioConstriction14_14  + 1)   // Audio is muted.
+  );
   {$EXTERNALSYM EAudioConstriction}
 
 

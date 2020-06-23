@@ -36,35 +36,36 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), (TopPlay)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-//                                #1
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 // 
-//         MfApi.pas is the unit containing the APIs for using the MF platform.
+//          MfApi.pas is the unit containing the APIs for using the MF platform.
 //
-//         When reading the original headers (.h) you may see "STDAPI", a macro.
-//         "STDAPI" means it uses the "stdcall" calling convention and it returns always a
-//         HRESULT,
-//         unless it's marked with, for example _BOOL, a boolean is returned.
-//         In Delphi it's declared as:
-//         [uses Windows;]
-//         [function FunctionName(vars: -const, out or var-): HResult; stdcall;]
+//          When reading the original headers (.h) you may see "STDAPI", a macro.
+//          "STDAPI" means it uses the "stdcall" calling convention and it returns always a
+//          HRESULT,
+//          unless it's marked with, for example BOOL, a LongBool is returned.
+//          In Delphi it's declared as:
+//          [uses Windows;]
+//          [function FunctionName(vars: -const, out or var-): HResult; stdcall;]
 // 
-//         Delphi : The IUnknown entries of functions should be casted like this:
-//         IUnknown(Pointer), IUnknown(Object), IUnknown(Nil) etc.
+//          Delphi : The IUnknown entries of functions should be casted like this:
+//          IUnknown(Pointer), IUnknown(Object), IUnknown(Nil) etc.
 // 
-//         Using packed records is not recommended,
-//         because it can prevent compatibility with other languages or
-//         platforms, it slows data access, and, in the case of a character array,
-//         it affects type compatibility.
-//         For more information, see Memory management and Implicit Packing of
-//         Fields with a Common Type Specification.
+//          Using packed records is not recommended,
+//          because it can prevent compatibility with other languages or
+//          platforms, it slows data access, and, in the case of a character array,
+//          it affects type compatibility.
+//          For more information, see Memory management and Implicit Packing of
+//          Fields with a Common Type Specification.
 //
 // Related objects: -
 // Related projects: MfPackX264
@@ -1112,34 +1113,36 @@ const  //updt 090812 replace type
 
 
 type
-  MF_TOPOSTATUS = DWord;
-  {$EXTERNALSYM MF_TOPOSTATUS}
+  PMF_TOPOSTATUS = ^MF_TOPOSTATUS;
+  MF_TOPOSTATUS = (
 
-const
+    MF_TOPOSTATUS_INVALID       = 0,      // MF_TOPOSTATUS_INVALID: Invalid value; will not be sent
 
-    MF_TOPOSTATUS_INVALID         = 0;    // MF_TOPOSTATUS_INVALID: Invalid value; will not be sent
-    {$EXTERNALSYM MF_TOPOSTATUS_INVALID}
-    MF_TOPOSTATUS_READY           = 100;  // MF_TOPOSTATUS_READY: The topology has been put in place and is
-    {$EXTERNALSYM MF_TOPOSTATUS_READY}    // ready to start.  All GetService calls to the Media Session will use
+
+    MF_TOPOSTATUS_READY           = 100,  // MF_TOPOSTATUS_READY: The topology has been put in place and is
+                                          // ready to start.  All GetService calls to the Media Session will use
                                           // this topology.
 
-    MF_TOPOSTATUS_STARTED_SOURCE  = 200;        // MF_TOPOSTATUS_STARTED_SOURCE: The Media Session has started to read
-    {$EXTERNALSYM MF_TOPOSTATUS_STARTED_SOURCE} // and process data from the Media Source(s) in this topology.
+    MF_TOPOSTATUS_STARTED_SOURCE  = 200,  // MF_TOPOSTATUS_STARTED_SOURCE: The Media Session has started to read
+                                          // and process data from the Media Source(s) in this topology.
 
-    MF_TOPOSTATUS_DYNAMIC_CHANGED = 210;         // MF_TOPOSTATUS_DYNAMIC_CHANGED: The topology has been dynamic changed
-    {$EXTERNALSYM MF_TOPOSTATUS_DYNAMIC_CHANGED} // due to the format change.
+    MF_TOPOSTATUS_DYNAMIC_CHANGED = 210,  // MF_TOPOSTATUS_DYNAMIC_CHANGED: The topology has been dynamic changed
+                                          // due to the format change.
 
-    MF_TOPOSTATUS_SINK_SWITCHED   = 300;       // MF_TOPOSTATUS_SINK_SWITCHED: The Media Sinks in the pipeline have
-    {$EXTERNALSYM MF_TOPOSTATUS_SINK_SWITCHED} // switched from a previous topology to this topology.
-                                               // Note that this status does not get sent for the first topology;
-                                               // applications can assume that the sinks are playing the first
-                                               // topology when they receive MESessionStarted.
+    MF_TOPOSTATUS_SINK_SWITCHED   = 300,  // MF_TOPOSTATUS_SINK_SWITCHED: The Media Sinks in the pipeline have
+                                          // switched from a previous topology to this topology.
+                                          // Note that this status does not get sent for the first topology;
+                                          // applications can assume that the sinks are playing the first
+                                          // topology when they receive MESessionStarted.
 
-    MF_TOPOSTATUS_ENDED           = 400;  // MF_TOPOSTATUS_ENDED: Playback of this topology is complete.
-    {$EXTERNALSYM MF_TOPOSTATUS_ENDED}    // Before deleting this topology, however, the application should wait
+    MF_TOPOSTATUS_ENDED           = 400   // MF_TOPOSTATUS_ENDED: Playback of this topology is complete.
+                                          // Before deleting this topology, however, the application should wait
                                           // for either MESessionEnded or the MF_TOPOSTATUS_STARTED_SOURCE status
                                           // on the next topology to ensure that the Media Session is no longer
                                           // using this topology.
+  );
+  {$EXTERNALSYM MF_TOPOSTATUS}
+
 
 const
 
@@ -1325,13 +1328,12 @@ type
   {$EXTERNALSYM _MFSampleEncryptionProtectionScheme}
   MFSampleEncryptionProtectionScheme = _MFSampleEncryptionProtectionScheme;
   {$EXTERNALSYM MFSampleEncryptionProtectionScheme}
-
 const
-  MF_SAMPLE_ENCRYPTION_PROTECTION_SCHEME_NONE    = 0;
+  MF_SAMPLE_ENCRYPTION_PROTECTION_SCHEME_NONE    = MFSampleEncryptionProtectionScheme(0);
   {$EXTERNALSYM MF_SAMPLE_ENCRYPTION_PROTECTION_SCHEME_NONE}
-  MF_SAMPLE_ENCRYPTION_PROTECTION_SCHEME_AES_CTR = 1;
+  MF_SAMPLE_ENCRYPTION_PROTECTION_SCHEME_AES_CTR = MFSampleEncryptionProtectionScheme(1);
   {$EXTERNALSYM MF_SAMPLE_ENCRYPTION_PROTECTION_SCHEME_AES_CTR}
-  MF_SAMPLE_ENCRYPTION_PROTECTION_SCHEME_AES_CBC = 2;
+  MF_SAMPLE_ENCRYPTION_PROTECTION_SCHEME_AES_CBC = MFSampleEncryptionProtectionScheme(2);
   {$EXTERNALSYM MF_SAMPLE_ENCRYPTION_PROTECTION_SCHEME_AES_CBC}
 
 
@@ -1593,7 +1595,7 @@ type
   _DIRTYRECT_INFO = record
     FrameNumber: UINT;
     NumDirtyRects: UINT;
-    DirtyRects: array [0..65535] of TRect;
+    DirtyRects: array [0..0] of TRect;
   end;
   {$EXTERNALSYM DIRTYRECT_INFO}
   DIRTYRECT_INFO = _DIRTYRECT_INFO;
@@ -1605,11 +1607,12 @@ type
   _MOVEREGION_INFO = record
     FrameNumber: UINT;
     NumMoveRegions: UINT;
-    MoveRegions: array of MOVE_RECT;
+    MoveRegions: array [0..0] of MOVE_RECT;
   end;
   {$EXTERNALSYM MOVEREGION_INFO}
   MOVEREGION_INFO = _MOVEREGION_INFO;
   {$EXTERNALSYM MOVEREGION_INFO}
+
 
 const
 
@@ -2218,29 +2221,28 @@ type
   {$EXTERNALSYM _MFT_ENUM_FLAG}
   MFT_ENUM_FLAG = _MFT_ENUM_FLAG;
   {$EXTERNALSYM MFT_ENUM_FLAG}
-
 const
-  MFT_ENUM_FLAG_SYNCMFT                         = UINT32($00000001);   // Enumerates V1 MFTs. This is default.
+  MFT_ENUM_FLAG_SYNCMFT                         = MFT_ENUM_FLAG($00000001);   // Enumerates V1 MFTs. This is default.
   {$EXTERNALSYM MFT_ENUM_FLAG_SYNCMFT}
-  MFT_ENUM_FLAG_ASYNCMFT                        = UINT32($00000002);   // Enumerates only software async MFTs also known as V2 MFTs
+  MFT_ENUM_FLAG_ASYNCMFT                        = MFT_ENUM_FLAG($00000002);   // Enumerates only software async MFTs also known as V2 MFTs
   {$EXTERNALSYM MFT_ENUM_FLAG_ASYNCMFT}
-  MFT_ENUM_FLAG_HARDWARE                        = UINT32($00000004);   // Enumerates V2 hardware async MFTs
+  MFT_ENUM_FLAG_HARDWARE                        = MFT_ENUM_FLAG($00000004);   // Enumerates V2 hardware async MFTs
   {$EXTERNALSYM MFT_ENUM_FLAG_HARDWARE}
-  MFT_ENUM_FLAG_FIELDOFUSE                      = UINT32($00000008);   // Enumerates MFTs that require unlocking
+  MFT_ENUM_FLAG_FIELDOFUSE                      = MFT_ENUM_FLAG($00000008);   // Enumerates MFTs that require unlocking
   {$EXTERNALSYM MFT_ENUM_FLAG_FIELDOFUSE}
-  MFT_ENUM_FLAG_LOCALMFT                        = UINT32($00000010);   // Enumerates Locally (in-process) registered MFTs
+  MFT_ENUM_FLAG_LOCALMFT                        = MFT_ENUM_FLAG($00000010);   // Enumerates Locally (in-process) registered MFTs
   {$EXTERNALSYM MFT_ENUM_FLAG_LOCALMFT}
-  MFT_ENUM_FLAG_TRANSCODE_ONLY                  = UINT32($00000020);   // Enumerates decoder MFTs used by transcode only
+  MFT_ENUM_FLAG_TRANSCODE_ONLY                  = MFT_ENUM_FLAG($00000020);   // Enumerates decoder MFTs used by transcode only
   {$EXTERNALSYM MFT_ENUM_FLAG_TRANSCODE_ONLY}
-  MFT_ENUM_FLAG_SORTANDFILTER                   = UINT32($00000040);   // Apply system local, do not use and preferred sorting and filtering
+  MFT_ENUM_FLAG_SORTANDFILTER                   = MFT_ENUM_FLAG($00000040);   // Apply system local, do not use and preferred sorting and filtering
   {$EXTERNALSYM MFT_ENUM_FLAG_SORTANDFILTER}
-  MFT_ENUM_FLAG_SORTANDFILTER_APPROVED_ONLY     = UINT32($000000C0);   // Similar to MFT_ENUM_FLAG_SORTANDFILTER, but apply a local policy of: MF_PLUGIN_CONTROL_POLICY_USE_APPROVED_PLUGINS
+  MFT_ENUM_FLAG_SORTANDFILTER_APPROVED_ONLY     = MFT_ENUM_FLAG($000000C0);   // Similar to MFT_ENUM_FLAG_SORTANDFILTER, but apply a local policy of: MF_PLUGIN_CONTROL_POLICY_USE_APPROVED_PLUGINS
   {$EXTERNALSYM MFT_ENUM_FLAG_SORTANDFILTER_APPROVED_ONLY}
-  MFT_ENUM_FLAG_SORTANDFILTER_WEB_ONLY          = UINT32($00000140);   // Similar to MFT_ENUM_FLAG_SORTANDFILTER, but apply a local policy of: MF_PLUGIN_CONTROL_POLICY_USE_WEB_PLUGINS
+  MFT_ENUM_FLAG_SORTANDFILTER_WEB_ONLY          = MFT_ENUM_FLAG($00000140);   // Similar to MFT_ENUM_FLAG_SORTANDFILTER, but apply a local policy of: MF_PLUGIN_CONTROL_POLICY_USE_WEB_PLUGINS
   {$EXTERNALSYM MFT_ENUM_FLAG_SORTANDFILTER_WEB_ONLY}
-  MFT_ENUM_FLAG_SORTANDFILTER_WEB_ONLY_EDGEMODE = UINT32($00000240);   // Similar to MFT_ENUM_FLAG_SORTANDFILTER, but apply a local policy of: MF_PLUGIN_CONTROL_POLICY_USE_WEB_PLUGINS_EDGEMODE
+  MFT_ENUM_FLAG_SORTANDFILTER_WEB_ONLY_EDGEMODE = MFT_ENUM_FLAG($00000240);   // Similar to MFT_ENUM_FLAG_SORTANDFILTER, but apply a local policy of: MF_PLUGIN_CONTROL_POLICY_USE_WEB_PLUGINS_EDGEMODE
   {$EXTERNALSYM MFT_ENUM_FLAG_SORTANDFILTER_WEB_ONLY_EDGEMODE}
-  MFT_ENUM_FLAG_ALL                             = UINT32($0000003F);   // Enumerates all MFTs including SW and HW MFTs and applies filtering
+  MFT_ENUM_FLAG_ALL                             = MFT_ENUM_FLAG($0000003F);   // Enumerates all MFTs including SW and HW MFTs and applies filtering
   {$EXTERNALSYM MFT_ENUM_FLAG_ALL}
 
 
@@ -2274,7 +2276,7 @@ const
   function MFTRegister(const clsidMFT: CLSID;  // The CLSID of the MFT. The MFT must also be registered as a COM object using the same CLSID.
                        const guidCategory: TGuid; // GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY .
                        const pszName: LPCWSTR;  // Wide-character string that contains the friendly name of the MFT.
-                       Flags: UINT32;  // Bitwise OR of zero or more of the following flags from the _MFT_ENUM_FLAG enumeration.
+                       Flags: UINT32;  // Bitwise OR of zero or more of the following flags from the MFT_ENUM_FLAG enumeration.
                        const cInputTypes: UINT32;  // Number of elements in the pInputTypes array.
                        const pInputTypes: PMFT_REGISTER_TYPE_INFO; // Pointer to an array of MFT_REGISTER_TYPE_INFO structures. Each member of the array specifies an input format that the MFT supports. This parameter can be Nil.
                        const cOutputTypes: UINT32; // Number of elements in the pOutputTypes array.
@@ -2292,7 +2294,7 @@ const
   function MFTRegisterLocal(pClassFactory: IClassFactory; // A pointer to the IClassFactory interface of a class factory object. The class factory creates the MFT.
                             const guidCategory: REFGUID; // A GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY.
                             const pszName: LPCWSTR; // A wide-character null-terminated string that contains the friendly name of the MFT.
-                            Flags: UINT32; // A bitwise OR of zero or more flags from the _MFT_ENUM_FLAG enumeration.
+                            Flags: UINT32; // A bitwise OR of zero or more flags from the MFT_ENUM_FLAG enumeration.
                             const cInputTypes: UINT32; // The number of elements in the pInputTypes array.
                             const pInputTypes: PMFT_REGISTER_TYPE_INFO; // A pointer to an array of MFT_REGISTER_TYPE_INFO structures. Each member of the array specifies an input format that the MFT supports. This parameter can be Nil if cInputTypes is zero.
                             const cOutputTypes: UINT32; // The number of elements in the pOutputTypes array.
@@ -2310,7 +2312,7 @@ const
   function MFTRegisterLocalByCLSID(const clisdMFT: REFCLSID; // The class identifier (CLSID) of the MFT.
                                    const guidCategory: REFGUID; // A GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY.
                                    const pszName: LPCWSTR;  // A wide-character null-terminated string that contains the friendly name of the MFT.
-                                   Flags: UINT32; // A bitwise OR of zero or more flags from the _MFT_ENUM_FLAG enumeration.
+                                   Flags: UINT32; // A bitwise OR of zero or more flags from the MFT_ENUM_FLAG enumeration.
                                    const cInputTypes: UINT32; // The number of elements in the pInputTypes array.
                                    const pInputTypes: PMFT_REGISTER_TYPE_INFO; // A pointer to an array of MFT_REGISTER_TYPE_INFO structures.
                                    const cOutputTypes: UINT32; // The number of elements in the pOutputTypes array.
@@ -2424,9 +2426,9 @@ const
 
   function MFTGetInfo(const clsidMFT: CLSID;
                       out pszName: PWideChar;
-                      out ppInputTypes: TMftRegisterTypeInfoArray;
+                      out ppInputTypes: PMFT_REGISTER_TYPE_INFO;
                       out pcInputTypes: UINT32;
-                      out ppOutputTypes: TMftRegisterTypeInfoArray;
+                      out ppOutputTypes: PMFT_REGISTER_TYPE_INFO;
                       out pcOutputTypes: UINT32; //updt 090812 typo fix
                       out ppAttributes: IMFAttributes): HResult; stdcall;
   {$EXTERNALSYM MFTGetInfo}
@@ -2535,7 +2537,7 @@ const    // updt 090812 add
 // The following steps should be taken:
 // 1 Declare  MFYourAudioOrVideo_Guid as TGuid. (var MFYourAudioOrVideo_Guid : TGuid)
 // 2 Assign a valid DWord or FourCC value to get a proper Guid:
-//   MFYourAudioOrVideo_Guid:= DefineMediaTypeGuid(FourCC or Dword - NOT BOTH! -)
+//   MFYourAudioOrVideo_Guid := DefineMediaTypeGuid(FourCC or Dword - NOT BOTH! -)
 //   NOTE: Default values for both are '' (sFcc) or 0 (dwConst)
 
 
@@ -3007,15 +3009,15 @@ type
   MFFrameSourceTypes = _MFFrameSourceTypes;
   {$EXTERNALSYM MFFrameSourceTypes}
 const
-  MFFrameSourceTypes_Color    = $0001;
+  MFFrameSourceTypes_Color    = MFFrameSourceTypes($0001);
   {$EXTERNALSYM MFFrameSourceTypes_Color}
-  MFFrameSourceTypes_Infrared = $0002;
+  MFFrameSourceTypes_Infrared = MFFrameSourceTypes($0002);
   {$EXTERNALSYM MFFrameSourceTypes_Infrared}
-  MFFrameSourceTypes_Depth    = $0004;
+  MFFrameSourceTypes_Depth    = MFFrameSourceTypes($0004);
   {$EXTERNALSYM MFFrameSourceTypes_Depth}
-  MFFrameSourceTypes_Image    = $0008;
+  MFFrameSourceTypes_Image    = MFFrameSourceTypes($0008);
   {$EXTERNALSYM MFFrameSourceTypes_Image}
-  MFFrameSourceTypes_Custom   = $0080;
+  MFFrameSourceTypes_Custom   = MFFrameSourceTypes($0080);
   {$EXTERNALSYM MFFrameSourceTypes_Custom}
 
 //#endif // (WINVER > _WIN32_WINNT_WIN10)
@@ -3388,7 +3390,8 @@ type
     MFVideo3DSampleFormat_BaseView         = 0,
     MFVideo3DSampleFormat_MultiView        = 1,
     MFVideo3DSampleFormat_Packed_LeftRight = 2,
-    MFVideo3DSampleFormat_Packed_TopBottom = 3);
+    MFVideo3DSampleFormat_Packed_TopBottom = 3
+  );
   {$EXTERNALSYM _MFVideo3DFormat}
   MFVideo3DFormat = _MFVideo3DFormat;
   {$EXTERNALSYM MFVideo3DFormat}
@@ -3418,7 +3421,8 @@ type
   PMFVideo3DSampleFormat = ^MFVideo3DSampleFormat;
   _MFVideo3DSampleFormat                = (
     MFSampleExtension_3DVideo_MultiView = 1,
-    MFSampleExtension_3DVideo_Packed    = 0);
+    MFSampleExtension_3DVideo_Packed    = 0
+  );
   {$EXTERNALSYM _MFVideo3DSampleFormat}
   MFVideo3DSampleFormat = _MFVideo3DSampleFormat;
   {$EXTERNALSYM MFVideo3DSampleFormat}
@@ -3435,13 +3439,14 @@ const
   //      - in a multiview representation, each view is stored in its own buffer
 
 type
-
+  // Describes the rotation of the video image in the counter-clockwise direction.
   PMFVideoRotationFormat = ^_MFVideoRotationFormat;
-  _MFVideoRotationFormat      = (      // Describes the rotation of the video image in the counter-clockwise direction.
+  _MFVideoRotationFormat      = (
     MFVideoRotationFormat_0   = 0,
     MFVideoRotationFormat_90  = 90,
     MFVideoRotationFormat_180 = 180,
-    MFVideoRotationFormat_270 = 270);
+    MFVideoRotationFormat_270 = 270
+  );
   {$EXTERNALSYM _MFVideoRotationFormat}
   MFVideoRotationFormat = _MFVideoRotationFormat;
   {$EXTERNALSYM MFVideoRotationFormat}
@@ -3524,7 +3529,8 @@ type
   PMFDepthMeasurement = ^MFDepthMeasurement;
   _MFDepthMeasurement       = (
     DistanceToFocalPlane    = 0,
-    DistanceToOpticalCenter = 1);
+    DistanceToOpticalCenter = 1
+  );
   {$EXTERNALSYM _MFDepthMeasurement}
   MFDepthMeasurement = _MFDepthMeasurement;
   {$EXTERNALSYM MFDepthMeasurement}
@@ -3849,11 +3855,11 @@ type
   MFVideoDRMFlags = _MFVideoDRMFlags;
   {$EXTERNALSYM MFVideoDRMFlags}
 const
-  MFVideoDRMFlag_None               = UINT32(0);
+  MFVideoDRMFlag_None               = MFVideoDRMFlags(0);
   {$EXTERNALSYM MFVideoDRMFlag_None}
-  MFVideoDRMFlag_AnalogProtected    = UINT32(1);
+  MFVideoDRMFlag_AnalogProtected    = MFVideoDRMFlags(1);
   {$EXTERNALSYM MFVideoDRMFlag_AnalogProtected}
-  MFVideoDRMFlag_DigitallyProtected = UINT32(2);
+  MFVideoDRMFlag_DigitallyProtected = MFVideoDRMFlags(2);
   {$EXTERNALSYM MFVideoDRMFlag_DigitallyProtected}
 
 
@@ -3871,9 +3877,9 @@ type
   MFVideoPadFlags = _MFVideoPadFlags;
   {$EXTERNALSYM MFVideoPadFlags}
 const
-  MFVideoPadFlag_PAD_TO_None = UINT32(0);  // Do not pad the image. (default)
-  MFVideoPadFlag_PAD_TO_4x3  = UINT32(1);  // Pad the image so that it can be displayed in a 4×3 area.
-  MFVideoPadFlag_PAD_TO_16x9 = UINT32(2);  // Pad the image so that it can be displayed in a 16×9 area.
+  MFVideoPadFlag_PAD_TO_None = MFVideoPadFlags(0);  // Do not pad the image. (default)
+  MFVideoPadFlag_PAD_TO_4x3  = MFVideoPadFlags(1);  // Pad the image so that it can be displayed in a 4×3 area.
+  MFVideoPadFlag_PAD_TO_16x9 = MFVideoPadFlags(2);  // Pad the image so that it can be displayed in a 16×9 area.
 
 
 const
@@ -3890,9 +3896,9 @@ type
   MFVideoSrcContentHintFlags = _MFVideoSrcContentHintFlags;
   {$EXTERNALSYM MFVideoSrcContentHintFlags}
 const
-  MFVideoSrcContentHintFlag_None  = UINT32(0);
-  MFVideoSrcContentHintFlag_16x9  = UINT32(1);
-  MFVideoSrcContentHintFlag_235_1 = UINT32(2);
+  MFVideoSrcContentHintFlag_None  = MFVideoSrcContentHintFlags(0);
+  MFVideoSrcContentHintFlag_16x9  = MFVideoSrcContentHintFlags(1);
+  MFVideoSrcContentHintFlag_235_1 = MFVideoSrcContentHintFlags(2);
 
 
 const
@@ -5798,25 +5804,25 @@ uses
   // Implement Additional Prototypes here.
 
 
-function HI32(unPacked: UINT64): UINT32; inline;
+function HI32(unPacked: UINT64): UINT32;
 begin
   Result := unPacked shr 32;
 end;
 
-function LO32(unPacked: UINT64): UINT32; inline;
+function LO32(unPacked: UINT64): UINT32;
 begin
   Result := unPacked and $0ffffffff;
 end;
 
 function Pack2UINT32AsUINT64(unHigh: UINT32;
-                             unLow: UINT32): UINT64; inline;
+                             unLow: UINT32): UINT64;
 begin
   Result := UINT64(unHigh) shl 32 or unLow;
 end;
 
 procedure Unpack2UINT32AsUINT64(unPacked: UINT64;
                                 out punHigh: UINT32;
-                                out punLow: UINT32); inline;
+                                out punLow: UINT32);
 begin
   punHigh := HI32(unPacked);
   punLow := LO32(unPacked);
@@ -5824,20 +5830,20 @@ end;
 
 
 // Helper function to access the macro translations, mentioned under REMARK#1
-function DefineMediaTypeGuidByFourCC(sFcc: TCh4): TGuid; inline;
+function DefineMediaTypeGuidByFourCC(sFcc: TCh4): TGuid;
 begin
   Result := DEFINE_MEDIATYPE_GUID(FCC(sFcc));
 end;
 
 // Helper function to access the macro translations, mentioned under REMARK#1
-function DefineMediaTypeGuidByDWord(dwConst: DWord): TGuid; inline;
+function DefineMediaTypeGuidByDWord(dwConst: DWord): TGuid;
 begin
   Result := DEFINE_MEDIATYPE_GUID(dwConst);
 end;
 
 
 // MOVE_RECT helper
-function MoveRect(const mR: MOVE_RECT): MFVideoNormalizedRect; inline;
+function MoveRect(const mR: MOVE_RECT): MFVideoNormalizedRect;
 begin
   Result.Top := (mR.DestRect.Top * 1.0);
   Result.Bottom := (mR.DestRect.Bottom * 1.0);
@@ -5862,7 +5868,7 @@ begin
 end;
 
 
-function DEFINE_MEDIATYPE_GUID(const format: DWord): TGuid; inline;
+function DEFINE_MEDIATYPE_GUID(const format: DWord): TGuid;
 begin
   Result.D1 := format;
   Result.D2 := $0000;
@@ -6199,7 +6205,7 @@ var
   pcb: PSIZE_T;
 
 begin
-  psz:= NIL;
+  psz:= Nil;
   hr:= NOERROR;  //init
 
 try

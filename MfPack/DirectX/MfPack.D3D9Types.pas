@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -352,178 +354,245 @@ type
   D3DFILLMODE = _D3DFILLMODE;
   {$EXTERNALSYM D3DFILLMODE}
 
-
+type
   PD3DBLEND = ^D3DBLEND;
-  _D3DBLEND                  = (
-    D3DBLEND_ZERO            = 1,
-    D3DBLEND_ONE             = 2,
-    D3DBLEND_SRCCOLOR        = 3,
-    D3DBLEND_INVSRCCOLOR     = 4,
-    D3DBLEND_SRCALPHA        = 5,
-    D3DBLEND_INVSRCALPHA     = 6,
-    D3DBLEND_DESTALPHA       = 7,
-    D3DBLEND_INVDESTALPHA    = 8,
-    D3DBLEND_DESTCOLOR       = 9,
-    D3DBLEND_INVDESTCOLOR    = 10,
-    D3DBLEND_SRCALPHASAT     = 11,
-    D3DBLEND_BOTHSRCALPHA    = 12,
-    D3DBLEND_BOTHINVSRCALPHA = 13,
-    D3DBLEND_BLENDFACTOR     = 14,         { Only supported if D3DPBLENDCAPS_BLENDFACTOR is on }
-    D3DBLEND_INVBLENDFACTOR  = 15,         { Only supported if D3DPBLENDCAPS_BLENDFACTOR is on }
-    //* D3D9Ex only -- */
-    //{$IFDEF D3D_DISABLE_9EX}
-    D3DBLEND_SRCCOLOR2       = 16,
-    D3DBLEND_INVSRCCOLOR2    = 17,
-    //{$ENDIF} // !D3D_DISABLE_9EX
-    //* -- D3D9Ex only
-    D3DBLEND_FORCE_DWORD     = FORCEDWORD  { force 32-bit size enum }
-  );
+  _D3DBLEND = DWord;
   {$EXTERNALSYM _D3DBLEND}
   D3DBLEND = _D3DBLEND;
   {$EXTERNALSYM D3DBLEND}
-
-
-  PD3DBLENDOP = ^D3DBLENDOP;
-  _D3DBLENDOP              = (
-    D3DBLENDOP_ADD         = 1,
-    D3DBLENDOP_SUBTRACT    = 2,
-    D3DBLENDOP_REVSUBTRACT = 3,
-    D3DBLENDOP_MIN         = 4,
-    D3DBLENDOP_MAX         = 5,
-    D3DBLENDOP_FORCE_DWORD = FORCEDWORD  { force 32-bit size enum }
-  );
-  {$EXTERNALSYM _D3DBLENDOP}
-  D3DBLENDOP = _D3DBLENDOP;
-  {$EXTERNALSYM D3DBLENDOP}
-
-
-  PD3DTEXTUREADDRESS = ^D3DTEXTUREADDRESS;
-  _D3DTEXTUREADDRESS        = (
-    D3DTADDRESS_WRAP        = 1,
-    D3DTADDRESS_MIRROR      = 2,
-    D3DTADDRESS_CLAMP       = 3,
-    D3DTADDRESS_BORDER      = 4,
-    D3DTADDRESS_MIRRORONCE  = 5,
-    D3DTADDRESS_FORCE_DWORD = FORCEDWORD  { force 32-bit size enum }
-  );
-  {$EXTERNALSYM _D3DTEXTUREADDRESS}
-  D3DTEXTUREADDRESS = _D3DTEXTUREADDRESS;
-  {$EXTERNALSYM D3DTEXTUREADDRESS}
-
-
-  PD3DCULL = ^D3DCULL;
-  _D3DCULL              = (
-    D3DCULL_NONE        = 1,
-    D3DCULL_CW          = 2,
-    D3DCULL_CCW         = 3,
-    D3DCULL_FORCE_DWORD = FORCEDWORD  { force 32-bit size enum }
-  );
-  {$EXTERNALSYM _D3DCULL}
-  D3DCULL = _D3DCULL;
-  {$EXTERNALSYM D3DCULL}
-
-
-  PD3DCMPFUNC = ^D3DCMPFUNC;
-  {$EXTERNALSYM _D3DCMPFUNC}
-  {$EXTERNALSYM _D3DCMPFUNC}
-  _D3DCMPFUNC           = (
-    D3DCMP_NEVER        = 1,
-    D3DCMP_LESS         = 2,
-    D3DCMP_EQUAL        = 3,
-    D3DCMP_LESSEQUAL    = 4,
-    D3DCMP_GREATER      = 5,
-    D3DCMP_NOTEQUAL     = 6,
-    D3DCMP_GREATEREQUAL = 7,
-    D3DCMP_ALWAYS       = 8,
-    D3DCMP_FORCE_DWORD  = FORCEDWORD  { force 32-bit size enum }
-  );
-  D3DCMPFUNC = _D3DCMPFUNC;
-  {$EXTERNALSYM D3DCMPFUNC}
-
-
-  PD3DSTENCILOP = ^D3DSTENCILOP;
-  _D3DSTENCILOP              = (
-    D3DSTENCILOP_KEEP        = 1,
-    D3DSTENCILOP_ZERO        = 2,
-    D3DSTENCILOP_REPLACE     = 3,
-    D3DSTENCILOP_INCRSAT     = 4,
-    D3DSTENCILOP_DECRSAT     = 5,
-    D3DSTENCILOP_INVERT      = 6,
-    D3DSTENCILOP_INCR        = 7,
-    D3DSTENCILOP_DECR        = 8,
-    D3DSTENCILOP_FORCE_DWORD = FORCEDWORD  { force 32-bit size enum }
-  );
-  {$EXTERNALSYM _D3DSTENCILOP}
-  D3DSTENCILOP = _D3DSTENCILOP;
-  {$EXTERNALSYM D3DSTENCILOP}
-
-
-  PD3DFOGMODE = ^D3DFOGMODE;
-  _D3DFOGMODE          = (
-    D3DFOG_NONE        = 0,
-    D3DFOG_EXP         = 1,
-    D3DFOG_EXP2        = 2,
-    D3DFOG_LINEAR      = 3,
-    D3DFOG_FORCE_DWORD = FORCEDWORD  { force 32-bit size enum }
-  );
-  {$EXTERNALSYM _D3DFOGMODE}
-  D3DFOGMODE = _D3DFOGMODE;
-  {$EXTERNALSYM D3DFOGMODE}
-
-
-  PD3DZBUFFERTYPE = ^D3DZBUFFERTYPE;
-  _D3DZBUFFERTYPE     = (
-    D3DZB_FALSE       = 0,
-    D3DZB_TRUE        = 1,             // Z buffering
-    D3DZB_USEW        = 2,             // W buffering
-    D3DZB_FORCE_DWORD = FORCEDWORD    { force 32-bit size enum }
-  );
-  {$EXTERNALSYM _D3DZBUFFERTYPE}
-  D3DZBUFFERTYPE = _D3DZBUFFERTYPE;
-  {$EXTERNALSYM D3DZBUFFERTYPE}
-
-  // Primitives supported by draw-primitive API
-
-  PD3DPRIMITIVETYPE = ^D3DPRIMITIVETYPE;
-  _D3DPRIMITIVETYPE     = (
-    D3DPT_POINTLIST     = 1,
-    D3DPT_LINELIST      = 2,
-    D3DPT_LINESTRIP     = 3,
-    D3DPT_TRIANGLELIST  = 4,
-    D3DPT_TRIANGLESTRIP = 5,
-    D3DPT_TRIANGLEFAN   = 6,
-    D3DPT_FORCE_DWORD   = FORCEDWORD  { force 32-bit size enum }
-  );
-  {$EXTERNALSYM _D3DPRIMITIVETYPE}
-  D3DPRIMITIVETYPE = _D3DPRIMITIVETYPE;
-  {$EXTERNALSYM D3DPRIMITIVETYPE}
+const
+  D3DBLEND_ZERO            = D3DBLEND(1);
+  {$EXTERNALSYM D3DBLEND_ZERO}
+  D3DBLEND_ONE             = D3DBLEND(2);
+  {$EXTERNALSYM D3DBLEND_ONE}
+  D3DBLEND_SRCCOLOR        = D3DBLEND(3);
+  {$EXTERNALSYM D3DBLEND_SRCCOLOR}
+  D3DBLEND_INVSRCCOLOR     = D3DBLEND(4);
+  {$EXTERNALSYM D3DBLEND_INVSRCCOLOR}
+  D3DBLEND_SRCALPHA        = D3DBLEND(5);
+  {$EXTERNALSYM D3DBLEND_SRCALPHA}
+  D3DBLEND_INVSRCALPHA     = D3DBLEND(6);
+  {$EXTERNALSYM D3DBLEND_INVSRCALPHA}
+  D3DBLEND_DESTALPHA       = D3DBLEND(7);
+  {$EXTERNALSYM D3DBLEND_DESTALPHA}
+  D3DBLEND_INVDESTALPHA    = D3DBLEND(8);
+  {$EXTERNALSYM D3DBLEND_INVDESTALPHA}
+  D3DBLEND_DESTCOLOR       = D3DBLEND(9);
+  {$EXTERNALSYM D3DBLEND_DESTCOLOR}
+  D3DBLEND_INVDESTCOLOR    = D3DBLEND(10);
+  {$EXTERNALSYM D3DBLEND_INVDESTCOLOR}
+  D3DBLEND_SRCALPHASAT     = D3DBLEND(11);
+  {$EXTERNALSYM D3DBLEND_SRCALPHASAT}
+  D3DBLEND_BOTHSRCALPHA    = D3DBLEND(12);
+  {$EXTERNALSYM D3DBLEND_BOTHSRCALPHA}
+  D3DBLEND_BOTHINVSRCALPHA = D3DBLEND(13);
+  {$EXTERNALSYM D3DBLEND_BOTHINVSRCALPHA}
+  D3DBLEND_BLENDFACTOR     = D3DBLEND(14);         { Only supported if D3DPBLENDCAPS_BLENDFACTOR is on }
+  {$EXTERNALSYM D3DBLEND_BLENDFACTOR}
+  D3DBLEND_INVBLENDFACTOR  = D3DBLEND(15);         { Only supported if D3DPBLENDCAPS_BLENDFACTOR is on }
+  {$EXTERNALSYM D3DBLEND_INVBLENDFACTOR}
+  //* D3D9Ex only -- */
+  //{$IFDEF D3D_DISABLE_9EX}
+  D3DBLEND_SRCCOLOR2       = D3DBLEND(16);
+  {$EXTERNALSYM D3DBLEND_SRCCOLOR2}
+  D3DBLEND_INVSRCCOLOR2    = D3DBLEND(17);
+  {$EXTERNALSYM D3DBLEND_INVSRCCOLOR2}
+  //{$ENDIF} // !D3D_DISABLE_9EX
+  //* -- D3D9Ex only
+  //D3DBLEND_FORCE_DWORD     = FORCEDWORD  { force 32-bit size enum }
 
 
 type
+  PD3DBLENDOP = ^D3DBLENDOP;
+  _D3DBLENDOP = DWord;
+  {$EXTERNALSYM _D3DBLENDOP}
+  D3DBLENDOP = _D3DBLENDOP;
+  {$EXTERNALSYM D3DBLENDOP}
+const
+  D3DBLENDOP_ADD         = D3DBLENDOP(1);
+  {$EXTERNALSYM D3DBLENDOP_ADD}
+  D3DBLENDOP_SUBTRACT    = D3DBLENDOP(2);
+  {$EXTERNALSYM D3DBLENDOP_SUBTRACT}
+  D3DBLENDOP_REVSUBTRACT = D3DBLENDOP(3);
+  {$EXTERNALSYM D3DBLENDOP_REVSUBTRACT}
+  D3DBLENDOP_MIN         = D3DBLENDOP(4);
+  {$EXTERNALSYM D3DBLENDOP_MIN}
+  D3DBLENDOP_MAX         = D3DBLENDOP(5);
+  {$EXTERNALSYM D3DBLENDOP_MAX}
+  //D3DBLENDOP_FORCE_DWORD = FORCEDWORD  { force 32-bit size enum }
 
+
+type
+  PD3DTEXTUREADDRESS = ^D3DTEXTUREADDRESS;
+  _D3DTEXTUREADDRESS = DWord;
+  {$EXTERNALSYM _D3DTEXTUREADDRESS}
+  D3DTEXTUREADDRESS = _D3DTEXTUREADDRESS;
+  {$EXTERNALSYM D3DTEXTUREADDRESS}
+const
+  D3DTADDRESS_WRAP        = D3DTEXTUREADDRESS(1);
+  {$EXTERNALSYM D3DTADDRESS_WRAP}
+  D3DTADDRESS_MIRROR      = D3DTEXTUREADDRESS(2);
+  {$EXTERNALSYM D3DTADDRESS_MIRROR}
+  D3DTADDRESS_CLAMP       = D3DTEXTUREADDRESS(3);
+  {$EXTERNALSYM D3DTADDRESS_CLAMP}
+  D3DTADDRESS_BORDER      = D3DTEXTUREADDRESS(4);
+  {$EXTERNALSYM D3DTADDRESS_BORDER}
+  D3DTADDRESS_MIRRORONCE  = D3DTEXTUREADDRESS(5);
+  {$EXTERNALSYM D3DTADDRESS_MIRRORONCE}
+  //D3DTADDRESS_FORCE_DWORD = FORCEDWORD  { force 32-bit size enum }
+
+type
+  PD3DCULL = ^D3DCULL;
+  _D3DCULL = DWord;
+  {$EXTERNALSYM _D3DCULL}
+  D3DCULL = _D3DCULL;
+  {$EXTERNALSYM D3DCULL}
+const
+  D3DCULL_NONE        = D3DCULL(1);
+  {$EXTERNALSYM D3DCULL_NONE}
+  D3DCULL_CW          = D3DCULL(2);
+  {$EXTERNALSYM D3DCULL_CW}
+  D3DCULL_CCW         = D3DCULL(3);
+  {$EXTERNALSYM D3DCULL_CCW}
+  //D3DCULL_FORCE_DWORD = FORCEDWORD  { force 32-bit size enum }
+
+type
+  PD3DCMPFUNC = ^D3DCMPFUNC;
+  _D3DCMPFUNC = DWord;
+  {$EXTERNALSYM _D3DCMPFUNC}
+  D3DCMPFUNC = _D3DCMPFUNC;
+  {$EXTERNALSYM D3DCMPFUNC}
+const
+  D3DCMP_NEVER        = D3DCMPFUNC(1);
+  {$EXTERNALSYM D3DCMP_NEVER}
+  D3DCMP_LESS         = D3DCMPFUNC(2);
+  {$EXTERNALSYM D3DCMP_LESS}
+  D3DCMP_EQUAL        = D3DCMPFUNC(3);
+  {$EXTERNALSYM D3DCMP_EQUAL}
+  D3DCMP_LESSEQUAL    = D3DCMPFUNC(4);
+  {$EXTERNALSYM D3DCMP_LESSEQUAL}
+  D3DCMP_GREATER      = D3DCMPFUNC(5);
+  {$EXTERNALSYM D3DCMP_GREATER}
+  D3DCMP_NOTEQUAL     = D3DCMPFUNC(6);
+  {$EXTERNALSYM D3DCMP_NOTEQUAL}
+  D3DCMP_GREATEREQUAL = D3DCMPFUNC(7);
+  {$EXTERNALSYM D3DCMP_GREATEREQUAL}
+  D3DCMP_ALWAYS       = D3DCMPFUNC(8);
+  {$EXTERNALSYM D3DCMP_ALWAYS}
+  //D3DCMP_FORCE_DWORD  = FORCEDWORD  { force 32-bit size enum }
+
+
+type
+  PD3DSTENCILOP = ^D3DSTENCILOP;
+  _D3DSTENCILOP = DWord;
+  {$EXTERNALSYM _D3DSTENCILOP}
+  D3DSTENCILOP = _D3DSTENCILOP;
+  {$EXTERNALSYM D3DSTENCILOP}
+const
+  D3DSTENCILOP_KEEP        = D3DSTENCILOP(1);
+  {$EXTERNALSYM D3DSTENCILOP_KEEP}
+  D3DSTENCILOP_ZERO        = D3DSTENCILOP(2);
+  {$EXTERNALSYM D3DSTENCILOP_ZERO}
+  D3DSTENCILOP_REPLACE     = D3DSTENCILOP(3);
+  {$EXTERNALSYM D3DSTENCILOP_REPLACE}
+  D3DSTENCILOP_INCRSAT     = D3DSTENCILOP(4);
+  {$EXTERNALSYM D3DSTENCILOP_INCRSAT}
+  D3DSTENCILOP_DECRSAT     = D3DSTENCILOP(5);
+  {$EXTERNALSYM D3DSTENCILOP_DECRSAT}
+  D3DSTENCILOP_INVERT      = D3DSTENCILOP(6);
+  {$EXTERNALSYM D3DSTENCILOP_INVERT}
+  D3DSTENCILOP_INCR        = D3DSTENCILOP(7);
+  {$EXTERNALSYM D3DSTENCILOP_INCR}
+  D3DSTENCILOP_DECR        = D3DSTENCILOP(8);
+  {$EXTERNALSYM D3DSTENCILOP_DECR}
+  //D3DSTENCILOP_FORCE_DWORD = FORCEDWORD  { force 32-bit size enum }
+
+
+type
+  PD3DFOGMODE = ^D3DFOGMODE;
+  _D3DFOGMODE = DWord;
+  {$EXTERNALSYM _D3DFOGMODE}
+  D3DFOGMODE = _D3DFOGMODE;
+  {$EXTERNALSYM D3DFOGMODE}
+const
+  D3DFOG_NONE        = D3DFOGMODE(0);
+  {$EXTERNALSYM D3DFOG_NONE}
+  D3DFOG_EXP         = D3DFOGMODE(1);
+  {$EXTERNALSYM D3DFOG_EXP}
+  D3DFOG_EXP2        = D3DFOGMODE(2);
+  {$EXTERNALSYM D3DFOG_EXP2}
+  D3DFOG_LINEAR      = D3DFOGMODE(3);
+  {$EXTERNALSYM D3DFOG_LINEAR}
+  //D3DFOG_FORCE_DWORD = FORCEDWORD  { force 32-bit size enum }
+
+type
+  PD3DZBUFFERTYPE = ^D3DZBUFFERTYPE;
+  _D3DZBUFFERTYPE = DWord;
+  {$EXTERNALSYM _D3DZBUFFERTYPE}
+  D3DZBUFFERTYPE = _D3DZBUFFERTYPE;
+  {$EXTERNALSYM D3DZBUFFERTYPE}
+const
+  D3DZB_FALSE       = D3DZBUFFERTYPE(0);
+  {$EXTERNALSYM D3DZB_FALSE}
+  D3DZB_TRUE        = D3DZBUFFERTYPE(1);             // Z buffering
+  {$EXTERNALSYM D3DZB_TRUE}
+  D3DZB_USEW        = D3DZBUFFERTYPE(2);             // W buffering
+  {$EXTERNALSYM D3DZB_USEW}
+  //D3DZB_FORCE_DWORD = FORCEDWORD    { force 32-bit size enum }
+
+
+  // Primitives supported by draw-primitive API
+type
+  PD3DPRIMITIVETYPE = ^D3DPRIMITIVETYPE;
+  _D3DPRIMITIVETYPE = DWord;
+  {$EXTERNALSYM _D3DPRIMITIVETYPE}
+  D3DPRIMITIVETYPE = _D3DPRIMITIVETYPE;
+  {$EXTERNALSYM D3DPRIMITIVETYPE}
+const
+  D3DPT_POINTLIST     = D3DPRIMITIVETYPE(1);
+  {$EXTERNALSYM D3DPT_POINTLIST}
+  D3DPT_LINELIST      = D3DPRIMITIVETYPE(2);
+  {$EXTERNALSYM D3DPT_LINELIST}
+  D3DPT_LINESTRIP     = D3DPRIMITIVETYPE(3);
+  {$EXTERNALSYM D3DPT_LINESTRIP}
+  D3DPT_TRIANGLELIST  = D3DPRIMITIVETYPE(4);
+  {$EXTERNALSYM D3DPT_TRIANGLELIST}
+  D3DPT_TRIANGLESTRIP = D3DPRIMITIVETYPE(5);
+  {$EXTERNALSYM D3DPT_TRIANGLESTRIP}
+  D3DPT_TRIANGLEFAN   = D3DPRIMITIVETYPE(6);
+  {$EXTERNALSYM D3DPT_TRIANGLEFAN}
+  //D3DPT_FORCE_D3DPRIMITIVETYPE   = FORCED3DPRIMITIVETYPE  { force 32-bit size enum }
+
+
+
+type
   PD3DTRANSFORMSTATETYPE = ^D3DTRANSFORMSTATETYPE;
-
-  {$IFDEF TYPE_IDENTITY}
-  _D3DTRANSFORMSTATETYPE = DWORD;
+  _D3DTRANSFORMSTATETYPE = DWord;
   {$EXTERNALSYM _D3DTRANSFORMSTATETYPE}
-  {$ELSE}
-  _D3DTRANSFORMSTATETYPE = (
-    D3DTS_VIEW        = 2,
-    D3DTS_PROJECTION  = 3,
-    D3DTS_TEXTURE0    = 16,
-    D3DTS_TEXTURE1    = 17,
-    D3DTS_TEXTURE2    = 18,
-    D3DTS_TEXTURE3    = 19,
-    D3DTS_TEXTURE4    = 20,
-    D3DTS_TEXTURE5    = 21,
-    D3DTS_TEXTURE6    = 22,
-    D3DTS_TEXTURE7    = 23,
-    D3DTS_FORCE_DWORD = FORCEDWORD  { force 32-bit size enum }
-  );
-  {$EXTERNALSYM _D3DTRANSFORMSTATETYPE}
-  {$ENDIF}
   D3DTRANSFORMSTATETYPE = _D3DTRANSFORMSTATETYPE;
   {$EXTERNALSYM D3DTRANSFORMSTATETYPE}
+const
+  D3DTS_VIEW        = D3DTRANSFORMSTATETYPE(2);
+  {$EXTERNALSYM D3DTS_VIEW}
+  D3DTS_PROJECTION  = D3DTRANSFORMSTATETYPE(3);
+  {$EXTERNALSYM D3DTS_PROJECTION}
+  D3DTS_TEXTURE0    = D3DTRANSFORMSTATETYPE(16);
+  {$EXTERNALSYM D3DTS_TEXTURE0}
+  D3DTS_TEXTURE1    = D3DTRANSFORMSTATETYPE(17);
+  {$EXTERNALSYM D3DTS_TEXTURE1}
+  D3DTS_TEXTURE2    = D3DTRANSFORMSTATETYPE(18);
+  {$EXTERNALSYM D3DTS_TEXTURE2}
+  D3DTS_TEXTURE3    = D3DTRANSFORMSTATETYPE(19);
+  {$EXTERNALSYM D3DTS_TEXTURE3}
+  D3DTS_TEXTURE4    = D3DTRANSFORMSTATETYPE(20);
+  {$EXTERNALSYM D3DTS_TEXTURE4}
+  D3DTS_TEXTURE5    = D3DTRANSFORMSTATETYPE(21);
+  {$EXTERNALSYM D3DTS_TEXTURE5}
+  D3DTS_TEXTURE6    = D3DTRANSFORMSTATETYPE(22);
+  {$EXTERNALSYM D3DTS_TEXTURE6}
+  D3DTS_TEXTURE7    = D3DTRANSFORMSTATETYPE(23);
+  {$EXTERNALSYM D3DTS_TEXTURE7}
+  //D3DTS_FORCE_D3DTRANSFORMSTATETYPE = FORCED3DTRANSFORMSTATETYPE  { force 32-bit size enum }
 
 
   function D3DTS_WORLDMATRIX(index: Int32): D3DTRANSFORMSTATETYPE;   // index value in the range 0 through 255.
@@ -542,143 +611,242 @@ const
 
 
 type
-
   PD3DRENDERSTATETYPE = ^D3DRENDERSTATETYPE;
-  _D3DRENDERSTATETYPE                = (
-    D3DRS_ZENABLE                    = 7,              { D3DZBUFFERTYPE (or TRUE/FALSE for legacy) }
-    D3DRS_FILLMODE                   = 8,              { D3DFILLMODE }
-    D3DRS_SHADEMODE                  = 9,              { D3DSHADEMODE }
-    D3DRS_ZWRITEENABLE               = 14,             { TRUE to enable z writes }
-    D3DRS_ALPHATESTENABLE            = 15,             { TRUE to enable alpha tests }
-    D3DRS_LASTPIXEL                  = 16,             { TRUE for last-pixel on lines }
-    D3DRS_SRCBLEND                   = 19,             { D3DBLEND }
-    D3DRS_DESTBLEND                  = 20,             { D3DBLEND }
-    D3DRS_CULLMODE                   = 22,             { D3DCULL }
-    D3DRS_ZFUNC                      = 23,             { D3DCMPFUNC }
-    D3DRS_ALPHAREF                   = 24,             { D3DFIXED }
-    D3DRS_ALPHAFUNC                  = 25,             { D3DCMPFUNC }
-    D3DRS_DITHERENABLE               = 26,             { TRUE to enable dithering }
-    D3DRS_ALPHABLENDENABLE           = 27,             { TRUE to enable alpha blending }
-    D3DRS_FOGENABLE                  = 28,             { TRUE to enable fog blending }
-    D3DRS_SPECULARENABLE             = 29,             { TRUE to enable specular }
-    D3DRS_FOGCOLOR                   = 34,             { D3DCOLOR }
-    D3DRS_FOGTABLEMODE               = 35,             { D3DFOGMODE }
-    D3DRS_FOGSTART                   = 36,             { Fog start (for both vertex and pixel fog) }
-    D3DRS_FOGEND                     = 37,             { Fog end      }
-    D3DRS_FOGDENSITY                 = 38,             { Fog density  }
-    D3DRS_RANGEFOGENABLE             = 48,             { Enables range-based fog }
-    D3DRS_STENCILENABLE              = 52,             { BOOL enable/disable stenciling }
-    D3DRS_STENCILFAIL                = 53,             { D3DSTENCILOP to do if stencil test fails }
-    D3DRS_STENCILZFAIL               = 54,             { D3DSTENCILOP to do if stencil test passes and Z test fails }
-    D3DRS_STENCILPASS                = 55,             { D3DSTENCILOP to do if both stencil and Z tests pass }
-    D3DRS_STENCILFUNC                = 56,             { D3DCMPFUNC fn.  Stencil Test passes if ((ref  mask) stencilfn (stencil  mask)) is true }
-    D3DRS_STENCILREF                 = 57,             { Reference value used in stencil test }
-    D3DRS_STENCILMASK                = 58,             { Mask value used in stencil test }
-    D3DRS_STENCILWRITEMASK           = 59,             { Write mask applied to values written to stencil buffer }
-    D3DRS_TEXTUREFACTOR              = 60,             { D3DCOLOR used for multi-texture blend }
-    D3DRS_WRAP0                      = 128,            { wrap for 1st texture coord. set }
-    D3DRS_WRAP1                      = 129,            { wrap for 2nd texture coord. set }
-    D3DRS_WRAP2                      = 130,            { wrap for 3rd texture coord. set }
-    D3DRS_WRAP3                      = 131,            { wrap for 4th texture coord. set }
-    D3DRS_WRAP4                      = 132,            { wrap for 5th texture coord. set }
-    D3DRS_WRAP5                      = 133,            { wrap for 6th texture coord. set }
-    D3DRS_WRAP6                      = 134,            { wrap for 7th texture coord. set }
-    D3DRS_WRAP7                      = 135,            { wrap for 8th texture coord. set }
-    D3DRS_CLIPPING                   = 136,
-    D3DRS_LIGHTING                   = 137,
-    D3DRS_AMBIENT                    = 139,
-    D3DRS_FOGVERTEXMODE              = 140,
-    D3DRS_COLORVERTEX                = 141,
-    D3DRS_LOCALVIEWER                = 142,
-    D3DRS_NORMALIZENORMALS           = 143,
-    D3DRS_DIFFUSEMATERIALSOURCE      = 145,
-    D3DRS_SPECULARMATERIALSOURCE     = 146,
-    D3DRS_AMBIENTMATERIALSOURCE      = 147,
-    D3DRS_EMISSIVEMATERIALSOURCE     = 148,
-    D3DRS_VERTEXBLEND                = 151,
-    D3DRS_CLIPPLANEENABLE            = 152,
-    D3DRS_POINTSIZE                  = 154,            { float point size }
-    D3DRS_POINTSIZE_MIN              = 155,            { float point size min threshold }
-    D3DRS_POINTSPRITEENABLE          = 156,            { BOOL point texture coord control }
-    D3DRS_POINTSCALEENABLE           = 157,            { BOOL point size scale enable }
-    D3DRS_POINTSCALE_A               = 158,            { float point attenuation A value }
-    D3DRS_POINTSCALE_B               = 159,            { float point attenuation B value }
-    D3DRS_POINTSCALE_C               = 160,            { float point attenuation C value }
-    D3DRS_MULTISAMPLEANTIALIAS       = 161,            // BOOL - set to do FSAA with multisample buffer
-    D3DRS_MULTISAMPLEMASK            = 162,            // DWORD - per-sample enable/disable
-    D3DRS_PATCHEDGESTYLE             = 163,            // Sets whether patch edges will use float style tessellation
-    D3DRS_DEBUGMONITORTOKEN          = 165,            // DEBUG ONLY - token to debug monitor
-    D3DRS_POINTSIZE_MAX              = 166,            { float point size max threshold }
-    D3DRS_INDEXEDVERTEXBLENDENABLE   = 167,
-    D3DRS_COLORWRITEENABLE           = 168,            // per-channel write enable
-    D3DRS_TWEENFACTOR                = 170,            // float tween factor
-    D3DRS_BLENDOP                    = 171,            // D3DBLENDOP setting
-    D3DRS_POSITIONDEGREE             = 172,            // NPatch position interpolation degree. D3DDEGREE_LINEAR or D3DDEGREE_CUBIC (default)
-    D3DRS_NORMALDEGREE               = 173,            // NPatch normal interpolation degree. D3DDEGREE_LINEAR (default) or D3DDEGREE_QUADRATIC
-    D3DRS_SCISSORTESTENABLE          = 174,
-    D3DRS_SLOPESCALEDEPTHBIAS        = 175,
-    D3DRS_ANTIALIASEDLINEENABLE      = 176,
-    D3DRS_MINTESSELLATIONLEVEL       = 178,
-    D3DRS_MAXTESSELLATIONLEVEL       = 179,
-    D3DRS_ADAPTIVETESS_X             = 180,
-    D3DRS_ADAPTIVETESS_Y             = 181,
-    D3DRS_ADAPTIVETESS_Z             = 182,
-    D3DRS_ADAPTIVETESS_W             = 183,
-    D3DRS_ENABLEADAPTIVETESSELLATION = 184,
-    D3DRS_TWOSIDEDSTENCILMODE        = 185,            { BOOL enable/disable 2 sided stenciling }
-    D3DRS_CCW_STENCILFAIL            = 186,            { D3DSTENCILOP to do if ccw stencil test fails }
-    D3DRS_CCW_STENCILZFAIL           = 187,            { D3DSTENCILOP to do if ccw stencil test passes and Z test fails }
-    D3DRS_CCW_STENCILPASS            = 188,            { D3DSTENCILOP to do if both ccw stencil and Z tests pass }
-    D3DRS_CCW_STENCILFUNC            = 189,            { D3DCMPFUNC fn.  ccw Stencil Test passes if ((ref  mask) stencilfn (stencil  mask)) is true }
-    D3DRS_COLORWRITEENABLE1          = 190,            { Additional ColorWriteEnables for the devices that support D3DPMISCCAPS_INDEPENDENTWRITEMASKS }
-    D3DRS_COLORWRITEENABLE2          = 191,            { Additional ColorWriteEnables for the devices that support D3DPMISCCAPS_INDEPENDENTWRITEMASKS }
-    D3DRS_COLORWRITEENABLE3          = 192,            { Additional ColorWriteEnables for the devices that support D3DPMISCCAPS_INDEPENDENTWRITEMASKS }
-    D3DRS_BLENDFACTOR                = 193,            { D3DCOLOR used for a constant blend factor during alpha blending for devices that support D3DPBLENDCAPS_BLENDFACTOR }
-    D3DRS_SRGBWRITEENABLE            = 194,            { Enable rendertarget writes to be DE-linearized to SRGB (for formats that expose D3DUSAGE_QUERY_SRGBWRITE) }
-    D3DRS_DEPTHBIAS                  = 195,
-    D3DRS_WRAP8                      = 198,            { Additional wrap states for vs_3_0+ attributes with D3DDECLUSAGE_TEXCOORD }
-    D3DRS_WRAP9                      = 199,
-    D3DRS_WRAP10                     = 200,
-    D3DRS_WRAP11                     = 201,
-    D3DRS_WRAP12                     = 202,
-    D3DRS_WRAP13                     = 203,
-    D3DRS_WRAP14                     = 204,
-    D3DRS_WRAP15                     = 205,
-    D3DRS_SEPARATEALPHABLENDENABLE   = 206,            { TRUE to enable a separate blending function for the alpha channel }
-    D3DRS_SRCBLENDALPHA              = 207,            { SRC blend factor for the alpha channel when D3DRS_SEPARATEDESTALPHAENABLE is TRUE }
-    D3DRS_DESTBLENDALPHA             = 208,            { DST blend factor for the alpha channel when D3DRS_SEPARATEDESTALPHAENABLE is TRUE }
-    D3DRS_BLENDOPALPHA               = 209,            { Blending operation for the alpha channel when D3DRS_SEPARATEDESTALPHAENABLE is TRUE }
-    D3DRS_FORCE_DWORD                = FORCEDWORD      { force 32-bit size enum }
-  );
+  _D3DRENDERSTATETYPE = DWord;
   {$EXTERNALSYM _D3DRENDERSTATETYPE}
   D3DRENDERSTATETYPE = _D3DRENDERSTATETYPE;
   {$EXTERNALSYM D3DRENDERSTATETYPE}
+const
+  D3DRS_ZENABLE                    = D3DRENDERSTATETYPE(7);              // D3DZBUFFERTYPE (or TRUE/FALSE for legacy)
+  {$EXTERNALSYM D3DRS_ZENABLE}
+  D3DRS_FILLMODE                   = D3DRENDERSTATETYPE(8);              // D3DFILLMODE
+  {$EXTERNALSYM D3DRS_FILLMODE}
+  D3DRS_SHADEMODE                  = D3DRENDERSTATETYPE(9);              // D3DSHADEMODE
+  {$EXTERNALSYM D3DRS_SHADEMODE}
+  D3DRS_ZWRITEENABLE               = D3DRENDERSTATETYPE(14);             // TRUE to enable z writes
+  {$EXTERNALSYM D3DRS_ZWRITEENABLE}
+  D3DRS_ALPHATESTENABLE            = D3DRENDERSTATETYPE(15);             // TRUE to enable alpha tests
+  {$EXTERNALSYM D3DRS_ALPHATESTENABLE}
+  D3DRS_LASTPIXEL                  = D3DRENDERSTATETYPE(16);             // TRUE for last-pixel on lines
+  {$EXTERNALSYM D3DRS_LASTPIXEL}
+  D3DRS_SRCBLEND                   = D3DRENDERSTATETYPE(19);             // D3DBLEND
+  {$EXTERNALSYM D3DRS_SRCBLEND}
+  D3DRS_DESTBLEND                  = D3DRENDERSTATETYPE(20);             // D3DBLEND
+  {$EXTERNALSYM D3DRS_DESTBLEND}
+  D3DRS_CULLMODE                   = D3DRENDERSTATETYPE(22);             // D3DCULL
+  {$EXTERNALSYM D3DRS_CULLMODE}
+  D3DRS_ZFUNC                      = D3DRENDERSTATETYPE(23);             // D3DCMPFUNC
+  {$EXTERNALSYM D3DRS_ZFUNC}
+  D3DRS_ALPHAREF                   = D3DRENDERSTATETYPE(24);             // D3DFIXED
+  {$EXTERNALSYM D3DRS_ALPHAREF}
+  D3DRS_ALPHAFUNC                  = D3DRENDERSTATETYPE(25);             // D3DCMPFUNC
+  {$EXTERNALSYM D3DRS_ALPHAFUNC}
+  D3DRS_DITHERENABLE               = D3DRENDERSTATETYPE(26);             // TRUE to enable dithering
+  {$EXTERNALSYM D3DRS_DITHERENABLE}
+  D3DRS_ALPHABLENDENABLE           = D3DRENDERSTATETYPE(27);             // TRUE to enable alpha blending
+  {$EXTERNALSYM D3DRS_ALPHABLENDENABLE}
+  D3DRS_FOGENABLE                  = D3DRENDERSTATETYPE(28);             // TRUE to enable fog blending
+  {$EXTERNALSYM D3DRS_FOGENABLE}
+  D3DRS_SPECULARENABLE             = D3DRENDERSTATETYPE(29);             // TRUE to enable specular
+  {$EXTERNALSYM D3DRS_SPECULARENABLE}
+  D3DRS_FOGCOLOR                   = D3DRENDERSTATETYPE(34);             // D3DCOLOR
+  {$EXTERNALSYM D3DRS_FOGCOLOR}
+  D3DRS_FOGTABLEMODE               = D3DRENDERSTATETYPE(35);             // D3DFOGMODE
+  {$EXTERNALSYM D3DRS_FOGTABLEMODE}
+  D3DRS_FOGSTART                   = D3DRENDERSTATETYPE(36);             // Fog start (for both vertex and pixel fog)
+  {$EXTERNALSYM D3DRS_FOGEND}
+  D3DRS_FOGEND                     = D3DRENDERSTATETYPE(37);             // Fog end
+  {$EXTERNALSYM D3DRS_FOGSTART}
+  D3DRS_FOGDENSITY                 = D3DRENDERSTATETYPE(38);             // Fog density
+  {$EXTERNALSYM D3DRS_FOGDENSITY}
+  D3DRS_RANGEFOGENABLE             = D3DRENDERSTATETYPE(48);             // Enables range-based fog
+  {$EXTERNALSYM D3DRS_RANGEFOGENABLE}
+  D3DRS_STENCILENABLE              = D3DRENDERSTATETYPE(52);             // BOOL enable/disable stenciling
+  {$EXTERNALSYM D3DRS_STENCILENABLE}
+  D3DRS_STENCILFAIL                = D3DRENDERSTATETYPE(53);             // D3DSTENCILOP to do if stencil test fails
+  {$EXTERNALSYM D3DRS_STENCILFAIL}
+  D3DRS_STENCILZFAIL               = D3DRENDERSTATETYPE(54);             // D3DSTENCILOP to do if stencil test passes and Z test fails
+  {$EXTERNALSYM D3DRS_STENCILZFAIL}
+  D3DRS_STENCILPASS                = D3DRENDERSTATETYPE(55);             // D3DSTENCILOP to do if both stencil and Z tests pass
+  {$EXTERNALSYM D3DRS_STENCILPASS}
+  D3DRS_STENCILFUNC                = D3DRENDERSTATETYPE(56);             // D3DCMPFUNC fn.  Stencil Test passes if ((ref  mask) stencilfn (stencil  mask)) is true
+  {$EXTERNALSYM D3DRS_STENCILFUNC}
+  D3DRS_STENCILREF                 = D3DRENDERSTATETYPE(57);             // Reference value used in stencil test
+  {$EXTERNALSYM D3DRS_STENCILREF}
+  D3DRS_STENCILMASK                = D3DRENDERSTATETYPE(58);             // Mask value used in stencil test
+  {$EXTERNALSYM D3DRS_STENCILMASK}
+  D3DRS_STENCILWRITEMASK           = D3DRENDERSTATETYPE(59);             // Write mask applied to values written to stencil buffer
+  {$EXTERNALSYM D3DRS_STENCILWRITEMASK}
+  D3DRS_TEXTUREFACTOR              = D3DRENDERSTATETYPE(60);             // D3DCOLOR used for multi-texture blend
+  {$EXTERNALSYM D3DRS_TEXTUREFACTOR}
+  D3DRS_WRAP0                      = D3DRENDERSTATETYPE(128);            // wrap for 1st texture coord. set
+  {$EXTERNALSYM D3DRS_WRAP0}
+  D3DRS_WRAP1                      = D3DRENDERSTATETYPE(129);            // wrap for 2nd texture coord. set
+  {$EXTERNALSYM D3DRS_WRAP1}
+  D3DRS_WRAP2                      = D3DRENDERSTATETYPE(130);            // wrap for 3rd texture coord. set
+  {$EXTERNALSYM D3DRS_WRAP2}
+  D3DRS_WRAP3                      = D3DRENDERSTATETYPE(131);            // wrap for 4th texture coord. set
+  {$EXTERNALSYM D3DRS_WRAP3}
+  D3DRS_WRAP4                      = D3DRENDERSTATETYPE(132);            // wrap for 5th texture coord. set
+  {$EXTERNALSYM D3DRS_WRAP4}
+  D3DRS_WRAP5                      = D3DRENDERSTATETYPE(133);            // wrap for 6th texture coord. set
+  {$EXTERNALSYM D3DRS_WRAP5}
+  D3DRS_WRAP6                      = D3DRENDERSTATETYPE(134);            // wrap for 7th texture coord. set
+  {$EXTERNALSYM D3DRS_WRAP6}
+  D3DRS_WRAP7                      = D3DRENDERSTATETYPE(135);            // wrap for 8th texture coord. set
+  {$EXTERNALSYM D3DRS_WRAP7}
+  D3DRS_CLIPPING                   = D3DRENDERSTATETYPE(136);
+  {$EXTERNALSYM D3DRS_CLIPPING}
+  D3DRS_LIGHTING                   = D3DRENDERSTATETYPE(137);
+  {$EXTERNALSYM D3DRS_LIGHTING}
+  D3DRS_AMBIENT                    = D3DRENDERSTATETYPE(139);
+  {$EXTERNALSYM D3DRS_AMBIENT}
+  D3DRS_FOGVERTEXMODE              = D3DRENDERSTATETYPE(140);
+  {$EXTERNALSYM D3DRS_FOGVERTEXMODE}
+  D3DRS_COLORVERTEX                = D3DRENDERSTATETYPE(141);
+  {$EXTERNALSYM D3DRS_COLORVERTEX}
+  D3DRS_LOCALVIEWER                = D3DRENDERSTATETYPE(142);
+  {$EXTERNALSYM D3DRS_LOCALVIEWER}
+  D3DRS_NORMALIZENORMALS           = D3DRENDERSTATETYPE(143);
+  {$EXTERNALSYM D3DRS_NORMALIZENORMALS}
+  D3DRS_DIFFUSEMATERIALSOURCE      = D3DRENDERSTATETYPE(145);
+  {$EXTERNALSYM D3DRS_DIFFUSEMATERIALSOURCE}
+  D3DRS_SPECULARMATERIALSOURCE     = D3DRENDERSTATETYPE(146);
+  {$EXTERNALSYM D3DRS_SPECULARMATERIALSOURCE}
+  D3DRS_AMBIENTMATERIALSOURCE      = D3DRENDERSTATETYPE(147);
+  {$EXTERNALSYM D3DRS_AMBIENTMATERIALSOURCE}
+  D3DRS_EMISSIVEMATERIALSOURCE     = D3DRENDERSTATETYPE(148);
+  {$EXTERNALSYM D3DRS_EMISSIVEMATERIALSOURCE}
+  D3DRS_VERTEXBLEND                = D3DRENDERSTATETYPE(151);
+  {$EXTERNALSYM D3DRS_VERTEXBLEND}
+  D3DRS_CLIPPLANEENABLE            = D3DRENDERSTATETYPE(152);
+  {$EXTERNALSYM D3DRS_CLIPPLANEENABLE}
+  D3DRS_POINTSIZE                  = D3DRENDERSTATETYPE(154);            // float point size
+  {$EXTERNALSYM D3DRS_POINTSIZE}
+  D3DRS_POINTSIZE_MIN              = D3DRENDERSTATETYPE(155);            // float point size min threshold
+  {$EXTERNALSYM D3DRS_POINTSIZE_MIN}
+  D3DRS_POINTSPRITEENABLE          = D3DRENDERSTATETYPE(156);            // BOOL point texture coord control
+  {$EXTERNALSYM D3DRS_POINTSPRITEENABLE}
+  D3DRS_POINTSCALEENABLE           = D3DRENDERSTATETYPE(157);            // BOOL point size scale enable
+  {$EXTERNALSYM D3DRS_POINTSCALEENABLE}
+  D3DRS_POINTSCALE_A               = D3DRENDERSTATETYPE(158);            // float point attenuation A value
+  {$EXTERNALSYM D3DRS_POINTSCALE_A}
+  D3DRS_POINTSCALE_B               = D3DRENDERSTATETYPE(159);            // float point attenuation B value
+  {$EXTERNALSYM D3DRS_POINTSCALE_B}
+  D3DRS_POINTSCALE_C               = D3DRENDERSTATETYPE(160);            // float point attenuation C value
+  {$EXTERNALSYM D3DRS_POINTSCALE_C}
+  D3DRS_MULTISAMPLEANTIALIAS       = D3DRENDERSTATETYPE(161);            // BOOL - set to do FSAA with multisample buffer
+  {$EXTERNALSYM D3DRS_MULTISAMPLEANTIALIAS}
+  D3DRS_MULTISAMPLEMASK            = D3DRENDERSTATETYPE(162);            // D3DRENDERSTATETYPE - per-sample enable/disable
+  {$EXTERNALSYM D3DRS_MULTISAMPLEMASK}
+  D3DRS_PATCHEDGESTYLE             = D3DRENDERSTATETYPE(163);            // Sets whether patch edges will use float style tessellation
+  {$EXTERNALSYM D3DRS_PATCHEDGESTYLE}
+  D3DRS_DEBUGMONITORTOKEN          = D3DRENDERSTATETYPE(165);            // DEBUG ONLY - token to debug monitor
+  {$EXTERNALSYM D3DRS_DEBUGMONITORTOKEN}
+  D3DRS_POINTSIZE_MAX              = D3DRENDERSTATETYPE(166);            // float point size max threshold
+  {$EXTERNALSYM D3DRS_POINTSIZE_MAX}
+  D3DRS_INDEXEDVERTEXBLENDENABLE   = D3DRENDERSTATETYPE(167);
+  {$EXTERNALSYM D3DRS_INDEXEDVERTEXBLENDENABLE}
+  D3DRS_COLORWRITEENABLE           = D3DRENDERSTATETYPE(168);            // per-channel write enable
+  {$EXTERNALSYM D3DRS_COLORWRITEENABLE}
+  D3DRS_TWEENFACTOR                = D3DRENDERSTATETYPE(170);            // float tween factor
+  {$EXTERNALSYM D3DRS_TWEENFACTOR}
+  D3DRS_BLENDOP                    = D3DRENDERSTATETYPE(171);            // D3DBLENDOP setting
+  {$EXTERNALSYM D3DRS_BLENDOP}
+  D3DRS_POSITIONDEGREE             = D3DRENDERSTATETYPE(172);            // NPatch position interpolation degree. D3DDEGREE_LINEAR or D3DDEGREE_CUBIC (default)
+  {$EXTERNALSYM D3DRS_POSITIONDEGREE}
+  D3DRS_NORMALDEGREE               = D3DRENDERSTATETYPE(173);            // NPatch normal interpolation degree. D3DDEGREE_LINEAR (default) or D3DDEGREE_QUADRATIC
+  {$EXTERNALSYM D3DRS_NORMALDEGREE}
+  D3DRS_SCISSORTESTENABLE          = D3DRENDERSTATETYPE(174);
+  {$EXTERNALSYM D3DRS_SCISSORTESTENABLE}
+  D3DRS_SLOPESCALEDEPTHBIAS        = D3DRENDERSTATETYPE(175);
+  {$EXTERNALSYM D3DRS_SLOPESCALEDEPTHBIAS}
+  D3DRS_ANTIALIASEDLINEENABLE      = D3DRENDERSTATETYPE(176);
+  {$EXTERNALSYM D3DRS_ANTIALIASEDLINEENABLE}
+  D3DRS_MINTESSELLATIONLEVEL       = D3DRENDERSTATETYPE(178);
+  {$EXTERNALSYM D3DRS_MINTESSELLATIONLEVEL}
+  D3DRS_MAXTESSELLATIONLEVEL       = D3DRENDERSTATETYPE(179);
+  {$EXTERNALSYM D3DRS_MAXTESSELLATIONLEVEL}
+  D3DRS_ADAPTIVETESS_X             = D3DRENDERSTATETYPE(180);
+  {$EXTERNALSYM D3DRS_ADAPTIVETESS_X}
+  D3DRS_ADAPTIVETESS_Y             = D3DRENDERSTATETYPE(181);
+  {$EXTERNALSYM D3DRS_ADAPTIVETESS_Y}
+  D3DRS_ADAPTIVETESS_Z             = D3DRENDERSTATETYPE(182);
+  {$EXTERNALSYM D3DRS_ADAPTIVETESS_Z}
+  D3DRS_ADAPTIVETESS_W             = D3DRENDERSTATETYPE(183);
+  {$EXTERNALSYM D3DRS_ADAPTIVETESS_W}
+  D3DRS_ENABLEADAPTIVETESSELLATION = D3DRENDERSTATETYPE(184);
+  {$EXTERNALSYM D3DRS_ENABLEADAPTIVETESSELLATION}
+  D3DRS_TWOSIDEDSTENCILMODE        = D3DRENDERSTATETYPE(185);            // BOOL enable/disable 2 sided stenciling
+  {$EXTERNALSYM D3DRS_TWOSIDEDSTENCILMODE}
+  D3DRS_CCW_STENCILFAIL            = D3DRENDERSTATETYPE(186);            // D3DSTENCILOP to do if ccw stencil test fails
+  {$EXTERNALSYM D3DRS_CCW_STENCILFAIL}
+  D3DRS_CCW_STENCILZFAIL           = D3DRENDERSTATETYPE(187);            // D3DSTENCILOP to do if ccw stencil test passes and Z test fails
+  {$EXTERNALSYM D3DRS_CCW_STENCILZFAIL}
+  D3DRS_CCW_STENCILPASS            = D3DRENDERSTATETYPE(188);            // D3DSTENCILOP to do if both ccw stencil and Z tests pass
+  {$EXTERNALSYM D3DRS_CCW_STENCILPASS}
+  D3DRS_CCW_STENCILFUNC            = D3DRENDERSTATETYPE(189);            // D3DCMPFUNC fn.  ccw Stencil Test passes if ((ref  mask) stencilfn (stencil  mask)) is true
+  {$EXTERNALSYM D3DRS_CCW_STENCILFUNC}
+  D3DRS_COLORWRITEENABLE1          = D3DRENDERSTATETYPE(190);            // Additional ColorWriteEnables for the devices that support D3DPMISCCAPS_INDEPENDENTWRITEMASKS
+  {$EXTERNALSYM D3DRS_COLORWRITEENABLE1}
+  D3DRS_COLORWRITEENABLE2          = D3DRENDERSTATETYPE(191);            // Additional ColorWriteEnables for the devices that support D3DPMISCCAPS_INDEPENDENTWRITEMASKS
+  {$EXTERNALSYM D3DRS_COLORWRITEENABLE2}
+  D3DRS_COLORWRITEENABLE3          = D3DRENDERSTATETYPE(192);            // Additional ColorWriteEnables for the devices that support D3DPMISCCAPS_INDEPENDENTWRITEMASKS
+  {$EXTERNALSYM D3DRS_COLORWRITEENABLE3}
+  D3DRS_BLENDFACTOR                = D3DRENDERSTATETYPE(193);            // D3DCOLOR used for a constant blend factor during alpha blending for devices that support D3DPBLENDCAPS_BLENDFACTOR
+  {$EXTERNALSYM D3DRS_BLENDFACTOR}
+  D3DRS_SRGBWRITEENABLE            = D3DRENDERSTATETYPE(194);            // Enable rendertarget writes to be DE-linearized to SRGB (for formats that expose D3DUSAGE_QUERY_SRGBWRITE)
+  {$EXTERNALSYM D3DRS_SRGBWRITEENABLE}
+  D3DRS_DEPTHBIAS                  = D3DRENDERSTATETYPE(195);
+  {$EXTERNALSYM D3DRS_DEPTHBIAS}
+  D3DRS_WRAP8                      = D3DRENDERSTATETYPE(198);            // Additional wrap states for vs_3_0+ attributes with D3DDECLUSAGE_TEXCOORD
+  {$EXTERNALSYM D3DRS_WRAP8}
+  D3DRS_WRAP9                      = D3DRENDERSTATETYPE(199);
+  {$EXTERNALSYM D3DRS_WRAP9}
+  D3DRS_WRAP10                     = D3DRENDERSTATETYPE(200);
+  {$EXTERNALSYM D3DRS_WRAP10}
+  D3DRS_WRAP11                     = D3DRENDERSTATETYPE(201);
+  {$EXTERNALSYM D3DRS_WRAP11}
+  D3DRS_WRAP12                     = D3DRENDERSTATETYPE(202);
+  {$EXTERNALSYM D3DRS_WRAP12}
+  D3DRS_WRAP13                     = D3DRENDERSTATETYPE(203);
+  {$EXTERNALSYM D3DRS_WRAP13}
+  D3DRS_WRAP14                     = D3DRENDERSTATETYPE(204);
+  {$EXTERNALSYM D3DRS_WRAP14}
+  D3DRS_WRAP15                     = D3DRENDERSTATETYPE(205);
+  {$EXTERNALSYM D3DRS_WRAP15}
+  D3DRS_SEPARATEALPHABLENDENABLE   = D3DRENDERSTATETYPE(206);            // TRUE to enable a separate blending function for the alpha channel
+  {$EXTERNALSYM D3DRS_SEPARATEALPHABLENDENABLE}
+  D3DRS_SRCBLENDALPHA              = D3DRENDERSTATETYPE(207);            // SRC blend factor for the alpha channel when D3DRS_SEPARATEDESTALPHAENABLE is TRUE
+  {$EXTERNALSYM D3DRS_SRCBLENDALPHA}
+  D3DRS_DESTBLENDALPHA             = D3DRENDERSTATETYPE(208);            // DST blend factor for the alpha channel when D3DRS_SEPARATEDESTALPHAENABLE is TRUE
+  {$EXTERNALSYM D3DRS_DESTBLENDALPHA}
+  D3DRS_BLENDOPALPHA               = D3DRENDERSTATETYPE(209);            // Blending operation for the alpha channel when D3DRS_SEPARATEDESTALPHAENABLE is TRUE
+  {$EXTERNALSYM D3DRS_BLENDOPALPHA}
+  //D3DRS_FORCE_D3DRENDERSTATETYPE                = FORCED3DRENDERSTATETYPE      // force 32-bit size enum
 
 
 const
-
   // Maximum number of simultaneous render targets D3D supports
   D3D_MAX_SIMULTANEOUS_RENDERTARGETS  = 4;
   {$EXTERNALSYM D3D_MAX_SIMULTANEOUS_RENDERTARGETS}
 
 
 type
-
   // Values for material source
   PD3DMATERIALCOLORSOURCE = ^D3DMATERIALCOLORSOURCE;
-  _D3DMATERIALCOLORSOURCE = (
-    D3DMCS_MATERIAL    = 0,            // Color from material is used
-    D3DMCS_COLOR1      = 1,            // Diffuse vertex color is used
-    D3DMCS_COLOR2      = 2,            // Specular vertex color is used
-    D3DMCS_FORCE_DWORD = FORCEDWORD    // force 32-bit size enum
-  );
+  _D3DMATERIALCOLORSOURCE = DWord;
   {$EXTERNALSYM _D3DMATERIALCOLORSOURCE}
   D3DMATERIALCOLORSOURCE = _D3DMATERIALCOLORSOURCE;
   {$EXTERNALSYM D3DMATERIALCOLORSOURCE}
+const
+  D3DMCS_MATERIAL    = D3DMATERIALCOLORSOURCE(0);            // Color from material is used
+  D3DMCS_COLOR1      = D3DMATERIALCOLORSOURCE(1);            // Diffuse vertex color is used
+  D3DMCS_COLOR2      = D3DMATERIALCOLORSOURCE(2);            // Specular vertex color is used
+  //D3DMCS_FORCE_DWORD = FORCEDWORD    // force 32-bit size enum
 
 
 const
-
   // Bias to apply to the texture coordinate set to apply a wrap to.
   D3DRENDERSTATE_WRAPBIAS             = LONG(128);
   {$EXTERNALSYM D3DRENDERSTATE_WRAPBIAS}
@@ -713,63 +881,81 @@ const
 
 
 type
-
   // State enumerants for per-stage processing of fixed function pixel processing
   // Two of these affect fixed function vertex processing as well: TEXTURETRANSFORMFLAGS and TEXCOORDINDEX.
 
   PD3DTEXTURESTAGESTATETYPE = ^_D3DTEXTURESTAGESTATETYPE;
-  _D3DTEXTURESTAGESTATETYPE      = (
-    D3DTSS_COLOROP               = 1,             { D3DTEXTUREOP - per-stage blending controls for color channels }
-    D3DTSS_COLORARG1             = 2,             { D3DTA_* (texture arg) }
-    D3DTSS_COLORARG2             = 3,             { D3DTA_* (texture arg) }
-    D3DTSS_ALPHAOP               = 4,             { D3DTEXTUREOP - per-stage blending controls for alpha channel }
-    D3DTSS_ALPHAARG1             = 5,             { D3DTA_* (texture arg) }
-    D3DTSS_ALPHAARG2             = 6,             { D3DTA_* (texture arg) }
-    D3DTSS_BUMPENVMAT00          = 7,             { float (bump mapping matrix) }
-    D3DTSS_BUMPENVMAT01          = 8,             { float (bump mapping matrix) }
-    D3DTSS_BUMPENVMAT10          = 9,             { float (bump mapping matrix) }
-    D3DTSS_BUMPENVMAT11          = 10,            { float (bump mapping matrix) }
-    D3DTSS_TEXCOORDINDEX         = 11,            { identifies which set of texture coordinates index this texture }
-    D3DTSS_BUMPENVLSCALE         = 22,            { float scale for bump map luminance }
-    D3DTSS_BUMPENVLOFFSET        = 23,            { float offset for bump map luminance }
-    D3DTSS_TEXTURETRANSFORMFLAGS = 24,            { D3DTEXTURETRANSFORMFLAGS controls texture transform }
-    D3DTSS_COLORARG0             = 26,            { D3DTA_* third arg for triadic ops }
-    D3DTSS_ALPHAARG0             = 27,            { D3DTA_* third arg for triadic ops }
-    D3DTSS_RESULTARG             = 28,            { D3DTA_* arg for result (CURRENT or TEMP) }
-    D3DTSS_CONSTANT              = 32,            { Per-stage constant D3DTA_CONSTANT }
-    D3DTSS_FORCE_DWORD           = FORCEDWORD     { force 32-bit size enum }
-  );
+  _D3DTEXTURESTAGESTATETYPE = DWord;
   {$EXTERNALSYM _D3DTEXTURESTAGESTATETYPE}
   D3DTEXTURESTAGESTATETYPE = _D3DTEXTURESTAGESTATETYPE;
   {$EXTERNALSYM D3DTEXTURESTAGESTATETYPE}
+const
+  D3DTSS_COLOROP               = D3DTEXTURESTAGESTATETYPE(1);             { D3DTEXTUREOP - per-stage blending controls for color channels }
+  {$EXTERNALSYM D3DTSS_COLOROP}
+  D3DTSS_COLORARG1             = D3DTEXTURESTAGESTATETYPE(2);             { D3DTA_* (texture arg) }
+  {$EXTERNALSYM D3DTSS_COLORARG1}
+  D3DTSS_COLORARG2             = D3DTEXTURESTAGESTATETYPE(3);             { D3DTA_* (texture arg) }
+  {$EXTERNALSYM D3DTSS_COLORARG2}
+  D3DTSS_ALPHAOP               = D3DTEXTURESTAGESTATETYPE(4);             { D3DTEXTUREOP - per-stage blending controls for alpha channel }
+  {$EXTERNALSYM D3DTSS_ALPHAOP}
+  D3DTSS_ALPHAARG1             = D3DTEXTURESTAGESTATETYPE(5);             { D3DTA_* (texture arg) }
+  {$EXTERNALSYM D3DTSS_ALPHAARG1}
+  D3DTSS_ALPHAARG2             = D3DTEXTURESTAGESTATETYPE(6);             { D3DTA_* (texture arg) }
+  {$EXTERNALSYM D3DTSS_ALPHAARG2}
+  D3DTSS_BUMPENVMAT00          = D3DTEXTURESTAGESTATETYPE(7);             { float (bump mapping matrix) }
+  {$EXTERNALSYM D3DTSS_BUMPENVMAT00}
+  D3DTSS_BUMPENVMAT01          = D3DTEXTURESTAGESTATETYPE(8);             { float (bump mapping matrix) }
+  {$EXTERNALSYM D3DTSS_BUMPENVMAT01}
+  D3DTSS_BUMPENVMAT10          = D3DTEXTURESTAGESTATETYPE(9);             { float (bump mapping matrix) }
+  {$EXTERNALSYM D3DTSS_BUMPENVMAT10}
+  D3DTSS_BUMPENVMAT11          = D3DTEXTURESTAGESTATETYPE(10);            { float (bump mapping matrix) }
+  {$EXTERNALSYM D3DTSS_BUMPENVMAT11}
+  D3DTSS_TEXCOORDINDEX         = D3DTEXTURESTAGESTATETYPE(11);            { identifies which set of texture coordinates index this texture }
+  {$EXTERNALSYM D3DTSS_TEXCOORDINDEX}
+  D3DTSS_BUMPENVLSCALE         = D3DTEXTURESTAGESTATETYPE(22);            { float scale for bump map luminance }
+  {$EXTERNALSYM D3DTSS_BUMPENVLSCALE}
+  D3DTSS_BUMPENVLOFFSET        = D3DTEXTURESTAGESTATETYPE(23);            { float offset for bump map luminance }
+  {$EXTERNALSYM D3DTSS_BUMPENVLOFFSET}
+  D3DTSS_TEXTURETRANSFORMFLAGS = D3DTEXTURESTAGESTATETYPE(24);            { D3DTEXTURETRANSFORMFLAGS controls texture transform }
+  {$EXTERNALSYM D3DTSS_TEXTURETRANSFORMFLAGS}
+  D3DTSS_COLORARG0             = D3DTEXTURESTAGESTATETYPE(26);            { D3DTA_* third arg for triadic ops }
+  {$EXTERNALSYM D3DTSS_COLORARG0}
+  D3DTSS_ALPHAARG0             = D3DTEXTURESTAGESTATETYPE(27);            { D3DTA_* third arg for triadic ops }
+  {$EXTERNALSYM D3DTSS_ALPHAARG0}
+  D3DTSS_RESULTARG             = D3DTEXTURESTAGESTATETYPE(28);            { D3DTA_* arg for result (CURRENT or TEMP) }
+  {$EXTERNALSYM D3DTSS_RESULTARG}
+  D3DTSS_CONSTANT              = D3DTEXTURESTAGESTATETYPE(32);            { Per-stage constant D3DTA_CONSTANT }
+  {$EXTERNALSYM D3DTSS_CONSTANT}
+ //D3DTSS_FORCE_DWORD           = FORCEDWORD     { force 32-bit size enum }
 
 
+type
   // State enumerants for per-sampler texture processing.
 
   PD3DSAMPLERSTATETYPE = ^_D3DSAMPLERSTATETYPE;
-  _D3DSAMPLERSTATETYPE                             = (
-    D3DSAMP_ADDRESSU                               = 1,           { D3DTEXTUREADDRESS for U coordinate }
-    D3DSAMP_ADDRESSV                               = 2,           { D3DTEXTUREADDRESS for V coordinate }
-    D3DSAMP_ADDRESSW                               = 3,           { D3DTEXTUREADDRESS for W coordinate }
-    D3DSAMP_BORDERCOLOR                            = 4,           { D3DCOLOR }
-    D3DSAMP_MAGFILTER                              = 5,           { D3DTEXTUREFILTER filter to use for magnification }
-    D3DSAMP_MINFILTER                              = 6,           { D3DTEXTUREFILTER filter to use for minification }
-    D3DSAMP_MIPFILTER                              = 7,           { D3DTEXTUREFILTER filter to use between mipmaps during minification }
-    D3DSAMP_MIPMAPLODBIAS                          = 8,           { float Mipmap LOD bias }
-    D3DSAMP_MAXMIPLEVEL                            = 9,           { DWORD 0..(n-1) LOD index of largest map to use (0 == largest) }
-    D3DSAMP_MAXANISOTROPY                          = 10,          { DWORD maximum anisotropy }
-    D3DSAMP_SRGBTEXTURE                            = 11,          { Default = 0 (which means Gamma 1.0, no correction required.) else correct for
-                                                                    Gamma = 2.2 }
-
-    D3DSAMP_ELEMENTINDEX                           = 12,          { When multi-element texture is assigned to sampler, this
-                                                                    indicates which element index to use.  Default = 0.0 }
-    D3DSAMP_DMAPOFFSET                             = 13,          { Offset in vertices in the pre-sampled displacement map.
-                                                                    Only valid for D3DDMAPSAMPLER sampler  }
-    D3DSAMP_FORCE_DWORD                            = FORCEDWORD   { force 32-bit size enum }
-  );
+  _D3DSAMPLERSTATETYPE = DWord;
   {$EXTERNALSYM _D3DSAMPLERSTATETYPE}
   D3DSAMPLERSTATETYPE = _D3DSAMPLERSTATETYPE;
   {$EXTERNALSYM D3DSAMPLERSTATETYPE}
+const
+  D3DSAMP_ADDRESSU       = D3DSAMPLERSTATETYPE(1);        { D3DTEXTUREADDRESS for U coordinate }
+  D3DSAMP_ADDRESSV       = D3DSAMPLERSTATETYPE(2);        { D3DTEXTUREADDRESS for V coordinate }
+  D3DSAMP_ADDRESSW       = D3DSAMPLERSTATETYPE(3);        { D3DTEXTUREADDRESS for W coordinate }
+  D3DSAMP_BORDERCOLOR    = D3DSAMPLERSTATETYPE(4);        { D3DCOLOR }
+  D3DSAMP_MAGFILTER      = D3DSAMPLERSTATETYPE(5);        { D3DTEXTUREFILTER filter to use for magnification }
+  D3DSAMP_MINFILTER      = D3DSAMPLERSTATETYPE(6);        { D3DTEXTUREFILTER filter to use for minification }
+  D3DSAMP_MIPFILTER      = D3DSAMPLERSTATETYPE(7);        { D3DTEXTUREFILTER filter to use between mipmaps during minification }
+  D3DSAMP_MIPMAPLODBIAS  = D3DSAMPLERSTATETYPE(8);        { float Mipmap LOD bias }
+  D3DSAMP_MAXMIPLEVEL    = D3DSAMPLERSTATETYPE(9);        { DWORD 0..(n-1) LOD index of largest map to use (0 == DWord(largest) }
+  D3DSAMP_MAXANISOTROPY  = D3DSAMPLERSTATETYPE(10);       { DWORD maximum anisotropy }
+  D3DSAMP_SRGBTEXTURE    = D3DSAMPLERSTATETYPE(11);       { Default = DWord(0 (which means Gamma 1.0); no correction required.) else correct for
+                                                            Gamma = DWord(2.2 }
+
+  D3DSAMP_ELEMENTINDEX   = D3DSAMPLERSTATETYPE(12);       { When multi-element texture is assigned to sampler); this
+                                                            indicates which element index to use.  Default = DWord(0.0 }
+  D3DSAMP_DMAPOFFSET     = D3DSAMPLERSTATETYPE(13);       { Offset in vertices in the pre-sampled displacement map.
+                                                            Only valid for D3DDMAPSAMPLER sampler  }
+  //D3DSAMP_FORCE_DWORD                            = FORCEDWORD;   { force 32-bit size enum }
 
 
 const
@@ -810,56 +996,57 @@ type
   // texture processing stage controls in D3DTSS.
 
   PD3DTEXTUREOP = ^_D3DTEXTUREOP;
-  _D3DTEXTUREOP                      = (
+  _D3DTEXTUREOP = DWord;
+  {$EXTERNALSYM _D3DTEXTUREOP}
+  D3DTEXTUREOP = _D3DTEXTUREOP;
+  {$EXTERNALSYM D3DTEXTUREOP}
+const
     // Control
-    D3DTOP_DISABLE                   = 1,              // disables stage
-    D3DTOP_SELECTARG1                = 2,              // the default
-    D3DTOP_SELECTARG2                = 3,
+    D3DTOP_DISABLE                   = D3DTEXTUREOP(1);              // disables stage
+    D3DTOP_SELECTARG1                = D3DTEXTUREOP(2);              // the default
+    D3DTOP_SELECTARG2                = D3DTEXTUREOP(3);
     // Modulate
-    D3DTOP_MODULATE                  = 4,              // multiply args together
-    D3DTOP_MODULATE2X                = 5,              // multiply and  1 bit
-    D3DTOP_MODULATE4X                = 6,              // multiply and  2 bits
+    D3DTOP_MODULATE                  = D3DTEXTUREOP(4);              // multiply args together
+    D3DTOP_MODULATE2X                = D3DTEXTUREOP(5);              // multiply and  1 bit
+    D3DTOP_MODULATE4X                = D3DTEXTUREOP(6);              // multiply and  2 bits
     // Add
-    D3DTOP_ADD                       = 7,              // add arguments together
-    D3DTOP_ADDSIGNED                 = 8,              // add with -0.5 bias
-    D3DTOP_ADDSIGNED2X               = 9,              // as above but left  1 bit
-    D3DTOP_SUBTRACT                  = 10,             // Arg1 - Arg2, with no saturation
-    D3DTOP_ADDSMOOTH                 = 11,             // add 2 args, subtract product
-                                                       // Arg1 + Arg2 - Arg1*Arg2
-                                                       //  = Arg1 + (1-Arg1)*Arg2
+    D3DTOP_ADD                       = D3DTEXTUREOP(7);              // add arguments together
+    D3DTOP_ADDSIGNED                 = D3DTEXTUREOP(8);              // add with -0.5 bias
+    D3DTOP_ADDSIGNED2X               = D3DTEXTUREOP(9);              // as above but left  1 bit
+    D3DTOP_SUBTRACT                  = D3DTEXTUREOP(10);             // Arg1 - Arg2); with no saturation
+    D3DTOP_ADDSMOOTH                 = D3DTEXTUREOP(11);             // add 2 args); subtract product
+                                                                     // Arg1 + Arg2 - Arg1*Arg2
+                                                                     //  = D3DTEXTUREOP(Arg1 + (1-Arg1)*Arg2
     // Linear alpha blend: Arg1*(Alpha) + Arg2*(1-Alpha)
-    D3DTOP_BLENDDIFFUSEALPHA         = 12,             // iterated alpha
-    D3DTOP_BLENDTEXTUREALPHA         = 13,             // texture alpha
-    D3DTOP_BLENDFACTORALPHA          = 14,             // alpha from D3DRS_TEXTUREFACTOR
+    D3DTOP_BLENDDIFFUSEALPHA         = D3DTEXTUREOP(12);             // iterated alpha
+    D3DTOP_BLENDTEXTUREALPHA         = D3DTEXTUREOP(13);             // texture alpha
+    D3DTOP_BLENDFACTORALPHA          = D3DTEXTUREOP(14);             // alpha from D3DRS_TEXTUREFACTOR
     // Linear alpha blend with pre-multiplied arg1 input: Arg1 + Arg2*(1-Alpha)
-    D3DTOP_BLENDTEXTUREALPHAPM       = 15,             // texture alpha
-    D3DTOP_BLENDCURRENTALPHA         = 16,             // by alpha of current color
+    D3DTOP_BLENDTEXTUREALPHAPM       = D3DTEXTUREOP(15);             // texture alpha
+    D3DTOP_BLENDCURRENTALPHA         = D3DTEXTUREOP(16);             // by alpha of current color
     // Specular mapping
-    D3DTOP_PREMODULATE               = 17,             // modulate with next texture before use
-    D3DTOP_MODULATEALPHA_ADDCOLOR    = 18,             // Arg1.RGB + Arg1.A*Arg2.RGB
-                                                       // COLOROP only
-    D3DTOP_MODULATECOLOR_ADDALPHA    = 19,             // Arg1.RGB*Arg2.RGB + Arg1.A
-                                                       // COLOROP only
-    D3DTOP_MODULATEINVALPHA_ADDCOLOR = 20,             // (1-Arg1.A)*Arg2.RGB + Arg1.RGB
-                                                       // COLOROP only
-    D3DTOP_MODULATEINVCOLOR_ADDALPHA = 21,             // (1-Arg1.RGB)*Arg2.RGB + Arg1.A
-                                                       // COLOROP only
+    D3DTOP_PREMODULATE               = D3DTEXTUREOP(17);             // modulate with next texture before use
+    D3DTOP_MODULATEALPHA_ADDCOLOR    = D3DTEXTUREOP(18);             // Arg1.RGB + Arg1.A*Arg2.RGB
+    // COLOROP only
+    D3DTOP_MODULATECOLOR_ADDALPHA    = D3DTEXTUREOP(19);             // Arg1.RGB*Arg2.RGB + Arg1.A
+    // COLOROP only
+    D3DTOP_MODULATEINVALPHA_ADDCOLOR = D3DTEXTUREOP(20);             // (1-Arg1.A)*Arg2.RGB + Arg1.RGB
+    // COLOROP only
+    D3DTOP_MODULATEINVCOLOR_ADDALPHA = D3DTEXTUREOP(21);             // (1-Arg1.RGB)*Arg2.RGB + Arg1.A
+    // COLOROP only
 
     // Bump mapping
-    D3DTOP_BUMPENVMAP                = 22,             // per pixel env map perturbation
-    D3DTOP_BUMPENVMAPLUMINANCE       = 23,             // with luminance channel
+    D3DTOP_BUMPENVMAP                = D3DTEXTUREOP(22);             // per pixel env map perturbation
+    D3DTOP_BUMPENVMAPLUMINANCE       = D3DTEXTUREOP(23);             // with luminance channel
     // This can do either diffuse or specular bump mapping with correct input.
     // Performs the function (Arg1.R*Arg2.R + Arg1.G*Arg2.G + Arg1.B*Arg2.B)
     // where each component has been scaled and offset to make it signed.
     // The result is replicated into all four (including alpha) channels.
     // This is a valid COLOROP only.
-    D3DTOP_DOTPRODUCT3               = 24,             // Triadic ops
-    D3DTOP_MULTIPLYADD               = 25,             // Arg0 + Arg1*Arg2
-    D3DTOP_LERP                      = 26,             // (Arg0)*Arg1 + (1-Arg0)*Arg2
-    D3DTOP_FORCE_DWORD               = FORCEDWORD);
-  {$EXTERNALSYM _D3DTEXTUREOP}
-  D3DTEXTUREOP = _D3DTEXTUREOP;
-  {$EXTERNALSYM D3DTEXTUREOP}
+    D3DTOP_DOTPRODUCT3               = D3DTEXTUREOP(24);             // Triadic ops
+    D3DTOP_MULTIPLYADD               = D3DTEXTUREOP(25);             // Arg0 + Arg1*Arg2
+    D3DTOP_LERP                      = D3DTEXTUREOP(26);             // (Arg0)*Arg1 + (1-Arg0)*Arg2
+    //D3DTOP_FORCE_DWORD               = FORCEDWORD;
 
 
 const
@@ -893,23 +1080,30 @@ type
   // Values for D3DSAMP_***FILTER texture stage states
   //
   PD3DTEXTUREFILTERTYPE = ^_D3DTEXTUREFILTERTYPE;
-  _D3DTEXTUREFILTERTYPE     = (
-    D3DTEXF_NONE            = 0,               // filtering disabled (valid for mip filter only)
-    D3DTEXF_POINT           = 1,               // nearest
-    D3DTEXF_LINEAR          = 2,               // linear interpolation
-    D3DTEXF_ANISOTROPIC     = 3,               // anisotropic
-    D3DTEXF_PYRAMIDALQUAD   = 6,               // 4-sample tent
-    D3DTEXF_GAUSSIANQUAD    = 7,               // 4-sample gaussian
-    // D3D9Ex only -- */
-    //{$IFDEF D3D_DISABLE_9EX}
-    D3DTEXF_CONVOLUTIONMONO = 8,               // Convolution filter for monochrome textures
-    //{$ENDIF} // !D3D_DISABLE_9EX
-    //* -- D3D9Ex only */
-    D3DTEXF_FORCE_DWORD     = FORCEDWORD       // force 32-bit size enum
-  );
+  _D3DTEXTUREFILTERTYPE = DWord;
   {$EXTERNALSYM _D3DTEXTUREFILTERTYPE}
   D3DTEXTUREFILTERTYPE = _D3DTEXTUREFILTERTYPE;
   {$EXTERNALSYM D3DTEXTUREFILTERTYPE}
+const
+  D3DTEXF_NONE            = D3DTEXTUREFILTERTYPE(0);      // filtering disabled (valid for mip filter only)
+  {$EXTERNALSYM D3DTEXF_NONE}
+  D3DTEXF_POINT           = D3DTEXTUREFILTERTYPE(1);      // nearest
+  {$EXTERNALSYM D3DTEXF_POINT}
+  D3DTEXF_LINEAR          = D3DTEXTUREFILTERTYPE(2);      // linear interpolation
+  {$EXTERNALSYM D3DTEXF_LINEAR}
+  D3DTEXF_ANISOTROPIC     = D3DTEXTUREFILTERTYPE(3);      // anisotropic
+  {$EXTERNALSYM D3DTEXF_ANISOTROPIC}
+  D3DTEXF_PYRAMIDALQUAD   = D3DTEXTUREFILTERTYPE(6);      // 4-sample tent
+  {$EXTERNALSYM D3DTEXF_PYRAMIDALQUAD}
+  D3DTEXF_GAUSSIANQUAD    = D3DTEXTUREFILTERTYPE(7);      // 4-sample gaussian
+  {$EXTERNALSYM D3DTEXF_GAUSSIANQUAD}
+  // D3D9Ex only -- */
+  //{$IFDEF D3D_DISABLE_9EX}
+  D3DTEXF_CONVOLUTIONMONO = D3DTEXTUREFILTERTYPE(8);      // Convolution filter for monochrome textures
+  {$EXTERNALSYM D3DTEXF_CONVOLUTIONMONO}
+  //{$ENDIF} // !D3D_DISABLE_9EX
+  //* -- D3D9Ex only */
+  //D3DTEXF_FORCE_DWORD     = FORCEDWORD       // force 32-bit size enum
 
 
 const
@@ -997,25 +1191,39 @@ type
   //
 
   PD3DDECLUSAGE = ^D3DDECLUSAGE;
-  _D3DDECLUSAGE           = (
-    D3DDECLUSAGE_POSITION = 0,
-    D3DDECLUSAGE_BLENDWEIGHT,   // 1
-    D3DDECLUSAGE_BLENDINDICES,  // 2
-    D3DDECLUSAGE_NORMAL,        // 3
-    D3DDECLUSAGE_PSIZE,         // 4
-    D3DDECLUSAGE_TEXCOORD,      // 5
-    D3DDECLUSAGE_TANGENT,       // 6
-    D3DDECLUSAGE_BINORMAL,      // 7
-    D3DDECLUSAGE_TESSFACTOR,    // 8
-    D3DDECLUSAGE_POSITIONT,     // 9
-    D3DDECLUSAGE_COLOR,         // 10
-    D3DDECLUSAGE_FOG,           // 11
-    D3DDECLUSAGE_DEPTH,         // 12
-    D3DDECLUSAGE_SAMPLE         // 13
-  );
+  _D3DDECLUSAGE           = DWord;
   {$EXTERNALSYM _D3DDECLUSAGE}
   D3DDECLUSAGE = _D3DDECLUSAGE;
   {$EXTERNALSYM D3DDECLUSAGE}
+const
+  D3DDECLUSAGE_POSITION      = D3DDECLUSAGE(0);
+  {$EXTERNALSYM D3DDECLUSAGE_POSITION}
+  D3DDECLUSAGE_BLENDWEIGHT   = D3DDECLUSAGE(1);
+  {$EXTERNALSYM D3DDECLUSAGE_BLENDWEIGHT}
+  D3DDECLUSAGE_BLENDINDICES  = D3DDECLUSAGE(2);
+  {$EXTERNALSYM D3DDECLUSAGE_BLENDINDICES}
+  D3DDECLUSAGE_NORMAL        = D3DDECLUSAGE(3);
+  {$EXTERNALSYM D3DDECLUSAGE_NORMAL}
+  D3DDECLUSAGE_PSIZE         = D3DDECLUSAGE(4);
+  {$EXTERNALSYM D3DDECLUSAGE_PSIZE}
+  D3DDECLUSAGE_TEXCOORD      = D3DDECLUSAGE(5);
+  {$EXTERNALSYM D3DDECLUSAGE_TEXCOORD}
+  D3DDECLUSAGE_TANGENT       = D3DDECLUSAGE(6);
+  {$EXTERNALSYM D3DDECLUSAGE_TANGENT}
+  D3DDECLUSAGE_BINORMAL      = D3DDECLUSAGE(7);
+  {$EXTERNALSYM D3DDECLUSAGE_BINORMAL}
+  D3DDECLUSAGE_TESSFACTOR    = D3DDECLUSAGE(8);
+  {$EXTERNALSYM D3DDECLUSAGE_TESSFACTOR}
+  D3DDECLUSAGE_POSITIONT     = D3DDECLUSAGE(9);
+  {$EXTERNALSYM D3DDECLUSAGE_POSITIONT}
+  D3DDECLUSAGE_COLOR         = D3DDECLUSAGE(10);
+  {$EXTERNALSYM D3DDECLUSAGE_COLOR}
+  D3DDECLUSAGE_FOG           = D3DDECLUSAGE(11);
+  {$EXTERNALSYM D3DDECLUSAGE_FOG}
+  D3DDECLUSAGE_DEPTH         = D3DDECLUSAGE(12);
+  {$EXTERNALSYM D3DDECLUSAGE_DEPTH}
+  D3DDECLUSAGE_SAMPLE        = D3DDECLUSAGE(13);
+  {$EXTERNALSYM D3DDECLUSAGE_SAMPLE}
 
 
 const
@@ -1028,22 +1236,27 @@ const
   MAXD3DDECLLENGTH                    = 64;  // does not include "end" marker vertex element
 
 
-
 type
-
   PD3DDECLMETHOD = ^D3DDECLMETHOD;
+  _D3DDECLMETHOD          = DWord;
   {$EXTERNALSYM _D3DDECLMETHOD}
-  _D3DDECLMETHOD          = (
-    D3DDECLMETHOD_DEFAULT = 0,
-    D3DDECLMETHOD_PARTIALU,
-    D3DDECLMETHOD_PARTIALV,
-    D3DDECLMETHOD_CROSSUV,           // Normal
-    D3DDECLMETHOD_UV,
-    D3DDECLMETHOD_LOOKUP,            // Lookup a displacement map
-    D3DDECLMETHOD_LOOKUPPRESAMPLED   // Lookup a pre-sampled displacement map
-  );
-  {$EXTERNALSYM D3DDECLMETHOD}
   D3DDECLMETHOD = _D3DDECLMETHOD;
+  {$EXTERNALSYM D3DDECLMETHOD}
+const
+  D3DDECLMETHOD_DEFAULT          = D3DDECLMETHOD(0);
+  {$EXTERNALSYM D3DDECLMETHOD_DEFAULT}
+  D3DDECLMETHOD_PARTIALU         = D3DDECLMETHOD(1);
+  {$EXTERNALSYM D3DDECLMETHOD_PARTIALU}
+  D3DDECLMETHOD_PARTIALV         = D3DDECLMETHOD(2);
+  {$EXTERNALSYM D3DDECLMETHOD_PARTIALV}
+  D3DDECLMETHOD_CROSSUV          = D3DDECLMETHOD(3);  // Normal
+  {$EXTERNALSYM D3DDECLMETHOD_CROSSUV}
+  D3DDECLMETHOD_UV               = D3DDECLMETHOD(4);
+  {$EXTERNALSYM D3DDECLMETHOD_UV}
+  D3DDECLMETHOD_LOOKUP           = D3DDECLMETHOD(5);  // Lookup a displacement map
+  {$EXTERNALSYM D3DDECLMETHOD_LOOKUP}
+  D3DDECLMETHOD_LOOKUPPRESAMPLED = D3DDECLMETHOD(6);  // Lookup a pre-sampled displacement map
+  {$EXTERNALSYM D3DDECLMETHOD_LOOKUPPRESAMPLED}
 
 
 const
@@ -1055,33 +1268,50 @@ const
   //
 
 type
-
   PD3DDECLTYPE = ^D3DDECLTYPE;
-  _D3DDECLTYPE                                                 = (
-    D3DDECLTYPE_FLOAT1                                         = 0,         // 1D float expanded to (value, 0., 0., 1.)
-    D3DDECLTYPE_FLOAT2                                         = 1,         // 2D float expanded to (value, value, 0., 1.)
-    D3DDECLTYPE_FLOAT3                                         = 2,         // 3D float expanded to (value, value, value, 1.)
-    D3DDECLTYPE_FLOAT4                                         = 3,         // 4D float
-    D3DDECLTYPE_D3DCOLOR                                       = 4,         // 4D packed unsigned bytes mapped to 0. to 1. range
-    // Input is in D3DCOLOR format (ARGB) expanded to (R, G, B, A)
-    D3DDECLTYPE_UBYTE4                                         = 5,         // 4D unsigned byte
-    D3DDECLTYPE_SHORT2                                         = 6,         // 2D signed short expanded to (value, value, 0., 1.)
-    D3DDECLTYPE_SHORT4                                         = 7,         // 4D signed short
-    // The following types are valid only with vertex shaders >= 2.0
-    D3DDECLTYPE_UBYTE4N                                        = 8,         // Each of 4 bytes is normalized by dividing to 255.0
-    D3DDECLTYPE_SHORT2N                                        = 9,         // 2D signed short normalized (v[0]/32767.0,v[1]/32767.0,0,1)
-    D3DDECLTYPE_SHORT4N                                        = 10,        // 4D signed short normalized (v[0]/32767.0,v[1]/32767.0,v[2]/32767.0,v[3]/32767.0)
-    D3DDECLTYPE_USHORT2N                                       = 11,        // 2D unsigned short normalized (v[0]/65535.0,v[1]/65535.0,0,1)
-    D3DDECLTYPE_USHORT4N                                       = 12,        // 4D unsigned short normalized (v[0]/65535.0,v[1]/65535.0,v[2]/65535.0,v[3]/65535.0)
-    D3DDECLTYPE_UDEC3                                          = 13,        // 3D unsigned 10 10 10 format expanded to (value, value, value, 1)
-    D3DDECLTYPE_DEC3N                                          = 14,        // 3D signed 10 10 10 format normalized and expanded to (v[0]/511.0, v[1]/511.0, v[2]/511.0, 1)
-    D3DDECLTYPE_FLOAT16_2                                      = 15,        // Two 16-bit floating point values, expanded to (value, value, 0, 1)
-    D3DDECLTYPE_FLOAT16_4                                      = 16,        // Four 16-bit floating point values
-    D3DDECLTYPE_UNUSED                                         = 17         // When the type field in a decl is unused.
-  );
+  _D3DDECLTYPE = DWord;
   {$EXTERNALSYM _D3DDECLTYPE}
   D3DDECLTYPE = _D3DDECLTYPE;
   {$EXTERNALSYM D3DDECLTYPE}
+const
+  D3DDECLTYPE_FLOAT1          = D3DDECLTYPE(0);         // 1D float expanded to (value); 0.); 0.); 1.)
+  {$EXTERNALSYM D3DDECLTYPE_FLOAT1}
+  D3DDECLTYPE_FLOAT2          = D3DDECLTYPE(1);         // 2D float expanded to (value); value); 0.); 1.)
+  {$EXTERNALSYM D3DDECLTYPE_FLOAT2}
+  D3DDECLTYPE_FLOAT3          = D3DDECLTYPE(2);         // 3D float expanded to (value); value); value); 1.)
+  {$EXTERNALSYM D3DDECLTYPE_FLOAT3}
+  D3DDECLTYPE_FLOAT4          = D3DDECLTYPE(3);         // 4D float
+  {$EXTERNALSYM D3DDECLTYPE_FLOAT4}
+  D3DDECLTYPE_D3DCOLOR        = D3DDECLTYPE(4);         // 4D packed unsigned bytes mapped to 0. to 1. range
+  {$EXTERNALSYM D3DDECLTYPE_D3DCOLOR}
+  // Input is in D3DCOLOR format (ARGB) expanded to (R); G); B); A)
+  D3DDECLTYPE_UBYTE4          = D3DDECLTYPE(5);         // 4D unsigned byte
+  {$EXTERNALSYM D3DDECLTYPE_UBYTE4}
+  D3DDECLTYPE_SHORT2          = D3DDECLTYPE(6);         // 2D signed short expanded to (value); value); 0.); 1.)
+  {$EXTERNALSYM D3DDECLTYPE_SHORT2}
+  D3DDECLTYPE_SHORT4          = D3DDECLTYPE(7);         // 4D signed short
+  {$EXTERNALSYM D3DDECLTYPE_SHORT4}
+  // The following types are valid only with vertex shaders >= D3DDECLTYPE(2.0
+  D3DDECLTYPE_UBYTE4N         = D3DDECLTYPE(8);         // Each of 4 bytes is normalized by dividing to 255.0
+  {$EXTERNALSYM D3DDECLTYPE_UBYTE4N}
+  D3DDECLTYPE_SHORT2N         = D3DDECLTYPE(9);         // 2D signed short normalized (v[0]/32767.0);v[1]/32767.0);0);1)
+  {$EXTERNALSYM D3DDECLTYPE_SHORT2N}
+  D3DDECLTYPE_SHORT4N         = D3DDECLTYPE(10);        // 4D signed short normalized (v[0]/32767.0);v[1]/32767.0);v[2]/32767.0);v[3]/32767.0)
+  {$EXTERNALSYM D3DDECLTYPE_SHORT4N}
+  D3DDECLTYPE_USHORT2N        = D3DDECLTYPE(11);        // 2D unsigned short normalized (v[0]/65535.0);v[1]/65535.0);0);1)
+  {$EXTERNALSYM D3DDECLTYPE_USHORT2N}
+  D3DDECLTYPE_USHORT4N        = D3DDECLTYPE(12);        // 4D unsigned short normalized (v[0]/65535.0);v[1]/65535.0);v[2]/65535.0);v[3]/65535.0)
+  {$EXTERNALSYM D3DDECLTYPE_USHORT4N}
+  D3DDECLTYPE_UDEC3           = D3DDECLTYPE(13);        // 3D unsigned 10 10 10 format expanded to (value); value); value); 1)
+  {$EXTERNALSYM D3DDECLTYPE_UDEC3}
+  D3DDECLTYPE_DEC3N           = D3DDECLTYPE(14);        // 3D signed 10 10 10 format normalized and expanded to (v[0]/511.0); v[1]/511.0); v[2]/511.0); 1)
+  {$EXTERNALSYM D3DDECLTYPE_DEC3N}
+  D3DDECLTYPE_FLOAT16_2       = D3DDECLTYPE(15);        // Two 16-bit floating point values); expanded to (value); value); 0); 1)
+  {$EXTERNALSYM D3DDECLTYPE_FLOAT16_2}
+  D3DDECLTYPE_FLOAT16_4       = D3DDECLTYPE(16);        // Four 16-bit floating point values
+  {$EXTERNALSYM D3DDECLTYPE_FLOAT16_4}
+  D3DDECLTYPE_UNUSED          = D3DDECLTYPE(17);         // When the type field in a decl is unused.
+  {$EXTERNALSYM D3DDECLTYPE_UNUSED}
 
 
 const
@@ -1147,97 +1377,183 @@ const
 type
 
   PD3DSHADER_INSTRUCTION_OPCODE_TYPE = ^D3DSHADER_INSTRUCTION_OPCODE_TYPE;
-  _D3DSHADER_INSTRUCTION_OPCODE_TYPE = (
-    D3DSIO_NOP          =  0,
-    D3DSIO_MOV          =  1,
-    D3DSIO_ADD          =  2,
-    D3DSIO_SUB          =  3,
-    D3DSIO_MAD          =  4,
-    D3DSIO_MUL          =  5,
-    D3DSIO_RCP          =  6,
-    D3DSIO_RSQ          =  7,
-    D3DSIO_DP3          =  8,
-    D3DSIO_DP4          =  9,
-    D3DSIO_MIN          =  10,
-    D3DSIO_MAX          =  11,
-    D3DSIO_SLT          =  12,
-    D3DSIO_SGE          =  13,
-    D3DSIO_EXP          =  14,
-    D3DSIO_LOG          =  15,
-    D3DSIO_LIT          =  16,
-    D3DSIO_DST          =  17,
-    D3DSIO_LRP          =  18,
-    D3DSIO_FRC          =  19,
-    D3DSIO_M4x4         =  20,
-    D3DSIO_M4x3         =  21,
-    D3DSIO_M3x4         =  22,
-    D3DSIO_M3x3         =  23,
-    D3DSIO_M3x2         =  24,
-    D3DSIO_CALL         =  25,
-    D3DSIO_CALLNZ       =  26,
-    D3DSIO_LOOP         =  27,
-    D3DSIO_RET          =  28,
-    D3DSIO_ENDLOOP      =  29,
-    D3DSIO_LABEL        =  30,
-    D3DSIO_DCL          =  31,
-    D3DSIO_POW          =  32,
-    D3DSIO_CRS          =  33,
-    D3DSIO_SGN          =  34,
-    D3DSIO_ABS          =  35,
-    D3DSIO_NRM          =  36,
-    D3DSIO_SINCOS       =  37,
-    D3DSIO_REP          =  38,
-    D3DSIO_ENDREP       =  39,
-    D3DSIO_IF           =  40,
-    D3DSIO_IFC          =  41,
-    D3DSIO_ELSE         =  42,
-    D3DSIO_ENDIF        =  43,
-    D3DSIO_BREAK        =  44,
-    D3DSIO_BREAKC       =  45,
-    D3DSIO_MOVA         =  46,
-    D3DSIO_DEFB         =  47,
-    D3DSIO_DEFI         =  48,
-    D3DSIO_TEXCOORD     =  64,
-    D3DSIO_TEXKILL      =  65,
-    D3DSIO_TEX          =  66,
-    D3DSIO_TEXBEM       =  67,
-    D3DSIO_TEXBEML      =  68,
-    D3DSIO_TEXREG2AR    =  69,
-    D3DSIO_TEXREG2GB    =  70,
-    D3DSIO_TEXM3x2PAD   =  71,
-    D3DSIO_TEXM3x2TEX   =  72,
-    D3DSIO_TEXM3x3PAD   =  73,
-    D3DSIO_TEXM3x3TEX   =  74,
-    D3DSIO_RESERVED0    =  75,
-    D3DSIO_TEXM3x3SPEC  =  76,
-    D3DSIO_TEXM3x3VSPEC =  77,
-    D3DSIO_EXPP         =  78,
-    D3DSIO_LOGP         =  79,
-    D3DSIO_CND          =  80,
-    D3DSIO_DEF          =  81,
-    D3DSIO_TEXREG2RGB   =  82,
-    D3DSIO_TEXDP3TEX    =  83,
-    D3DSIO_TEXM3x2DEPTH =  84,
-    D3DSIO_TEXDP3       =  85,
-    D3DSIO_TEXM3x3      =  86,
-    D3DSIO_TEXDEPTH     =  87,
-    D3DSIO_CMP          =  88,
-    D3DSIO_BEM          =  89,
-    D3DSIO_DP2ADD       =  90,
-    D3DSIO_DSX          =  91,
-    D3DSIO_DSY          =  92,
-    D3DSIO_TEXLDD       =  93,
-    D3DSIO_SETP         =  94,
-    D3DSIO_TEXLDL       =  95,
-    D3DSIO_BREAKP       =  96,
-    D3DSIO_PHASE        = $FFFD,
-    D3DSIO_COMMENT      = $FFFE,
-    D3DSIO_END          = $FFFF,
-    D3DSIO_FORCE_DWORD  = FORCEDWORD    // force 32-bit size enum
-  );
+  _D3DSHADER_INSTRUCTION_OPCODE_TYPE = DWord;
   {$EXTERNALSYM _D3DSHADER_INSTRUCTION_OPCODE_TYPE}
   D3DSHADER_INSTRUCTION_OPCODE_TYPE =  _D3DSHADER_INSTRUCTION_OPCODE_TYPE;
   {$EXTERNALSYM D3DSHADER_INSTRUCTION_OPCODE_TYPE}
+const
+  D3DSIO_NOP          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(0);
+  {$EXTERNALSYM D3DSIO_NOP}
+  D3DSIO_MOV          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(1);
+  {$EXTERNALSYM D3DSIO_MOV}
+  D3DSIO_ADD          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(2);
+  {$EXTERNALSYM D3DSIO_ADD}
+  D3DSIO_SUB          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(3);
+  {$EXTERNALSYM D3DSIO_SUB}
+  D3DSIO_MAD          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(4);
+  {$EXTERNALSYM D3DSIO_MAD}
+  D3DSIO_MUL          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(5);
+  {$EXTERNALSYM D3DSIO_MUL}
+  D3DSIO_RCP          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(6);
+  {$EXTERNALSYM D3DSIO_RCP}
+  D3DSIO_RSQ          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(7);
+  {$EXTERNALSYM D3DSIO_RSQ}
+  D3DSIO_DP3          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(8);
+  {$EXTERNALSYM D3DSIO_DP3}
+  D3DSIO_DP4          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(9);
+  {$EXTERNALSYM D3DSIO_DP4}
+  D3DSIO_MIN          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(10);
+  {$EXTERNALSYM D3DSIO_MIN}
+  D3DSIO_MAX          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(11);
+  {$EXTERNALSYM D3DSIO_MAX}
+  D3DSIO_SLT          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(12);
+  {$EXTERNALSYM D3DSIO_SLT}
+  D3DSIO_SGE          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(13);
+  {$EXTERNALSYM D3DSIO_SGE}
+  D3DSIO_EXP          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(14);
+  {$EXTERNALSYM D3DSIO_EXP}
+  D3DSIO_LOG          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(15);
+  {$EXTERNALSYM D3DSIO_LOG}
+  D3DSIO_LIT          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(16);
+  {$EXTERNALSYM D3DSIO_LIT}
+  D3DSIO_DST          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(17);
+  {$EXTERNALSYM D3DSIO_DST}
+  D3DSIO_LRP          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(18);
+  {$EXTERNALSYM D3DSIO_LRP}
+  D3DSIO_FRC          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(19);
+  {$EXTERNALSYM D3DSIO_FRC}
+  D3DSIO_M4x4         = D3DSHADER_INSTRUCTION_OPCODE_TYPE(20);
+  {$EXTERNALSYM D3DSIO_M4x4}
+  D3DSIO_M4x3         = D3DSHADER_INSTRUCTION_OPCODE_TYPE(21);
+  {$EXTERNALSYM D3DSIO_M4x3}
+  D3DSIO_M3x4         = D3DSHADER_INSTRUCTION_OPCODE_TYPE(22);
+  {$EXTERNALSYM D3DSIO_M3x4}
+  D3DSIO_M3x3         = D3DSHADER_INSTRUCTION_OPCODE_TYPE(23);
+  {$EXTERNALSYM D3DSIO_M3x3}
+  D3DSIO_M3x2         = D3DSHADER_INSTRUCTION_OPCODE_TYPE(24);
+  {$EXTERNALSYM D3DSIO_M3x2}
+  D3DSIO_CALL         = D3DSHADER_INSTRUCTION_OPCODE_TYPE(25);
+  {$EXTERNALSYM D3DSIO_CALL}
+  D3DSIO_CALLNZ       = D3DSHADER_INSTRUCTION_OPCODE_TYPE(26);
+  {$EXTERNALSYM D3DSIO_CALLNZ}
+  D3DSIO_LOOP         = D3DSHADER_INSTRUCTION_OPCODE_TYPE(27);
+  {$EXTERNALSYM D3DSIO_LOOP}
+  D3DSIO_RET          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(28);
+  {$EXTERNALSYM D3DSIO_RET}
+  D3DSIO_ENDLOOP      = D3DSHADER_INSTRUCTION_OPCODE_TYPE(29);
+  {$EXTERNALSYM D3DSIO_ENDLOOP}
+  D3DSIO_LABEL        = D3DSHADER_INSTRUCTION_OPCODE_TYPE(30);
+  {$EXTERNALSYM D3DSIO_LABEL}
+  D3DSIO_DCL          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(31);
+  {$EXTERNALSYM D3DSIO_DCL}
+  D3DSIO_POW          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(32);
+  {$EXTERNALSYM D3DSIO_POW}
+  D3DSIO_CRS          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(33);
+  {$EXTERNALSYM D3DSIO_CRS}
+  D3DSIO_SGN          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(34);
+  {$EXTERNALSYM D3DSIO_SGN}
+  D3DSIO_ABS          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(35);
+  {$EXTERNALSYM D3DSIO_ABS}
+  D3DSIO_NRM          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(36);
+  {$EXTERNALSYM D3DSIO_NRM}
+  D3DSIO_SINCOS       = D3DSHADER_INSTRUCTION_OPCODE_TYPE(37);
+  {$EXTERNALSYM D3DSIO_SINCOS}
+  D3DSIO_REP          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(38);
+  {$EXTERNALSYM D3DSIO_REP}
+  D3DSIO_ENDREP       = D3DSHADER_INSTRUCTION_OPCODE_TYPE(39);
+  {$EXTERNALSYM D3DSIO_ENDREP}
+  D3DSIO_IF           = D3DSHADER_INSTRUCTION_OPCODE_TYPE(40);
+  {$EXTERNALSYM D3DSIO_IF}
+  D3DSIO_IFC          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(41);
+  {$EXTERNALSYM D3DSIO_IFC}
+  D3DSIO_ELSE         = D3DSHADER_INSTRUCTION_OPCODE_TYPE(42);
+  {$EXTERNALSYM D3DSIO_ELSE}
+  D3DSIO_ENDIF        = D3DSHADER_INSTRUCTION_OPCODE_TYPE(43);
+  {$EXTERNALSYM D3DSIO_ENDIF}
+  D3DSIO_BREAK        = D3DSHADER_INSTRUCTION_OPCODE_TYPE(44);
+  {$EXTERNALSYM D3DSIO_BREAK}
+  D3DSIO_BREAKC       = D3DSHADER_INSTRUCTION_OPCODE_TYPE(45);
+  {$EXTERNALSYM D3DSIO_BREAKC}
+  D3DSIO_MOVA         = D3DSHADER_INSTRUCTION_OPCODE_TYPE(46);
+  {$EXTERNALSYM D3DSIO_MOVA}
+  D3DSIO_DEFB         = D3DSHADER_INSTRUCTION_OPCODE_TYPE(47);
+  {$EXTERNALSYM D3DSIO_DEFB}
+  D3DSIO_DEFI         = D3DSHADER_INSTRUCTION_OPCODE_TYPE(48);
+  {$EXTERNALSYM D3DSIO_DEFI}
+  D3DSIO_TEXCOORD     = D3DSHADER_INSTRUCTION_OPCODE_TYPE(64);
+  {$EXTERNALSYM D3DSIO_TEXCOORD}
+  D3DSIO_TEXKILL      = D3DSHADER_INSTRUCTION_OPCODE_TYPE(65);
+  {$EXTERNALSYM D3DSIO_TEXKILL}
+  D3DSIO_TEX          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(66);
+  {$EXTERNALSYM D3DSIO_TEX}
+  D3DSIO_TEXBEM       = D3DSHADER_INSTRUCTION_OPCODE_TYPE(67);
+  {$EXTERNALSYM D3DSIO_TEXBEM}
+  D3DSIO_TEXBEML      = D3DSHADER_INSTRUCTION_OPCODE_TYPE(68);
+  {$EXTERNALSYM D3DSIO_TEXBEML}
+  D3DSIO_TEXREG2AR    = D3DSHADER_INSTRUCTION_OPCODE_TYPE(69);
+  {$EXTERNALSYM D3DSIO_TEXREG2AR}
+  D3DSIO_TEXREG2GB    = D3DSHADER_INSTRUCTION_OPCODE_TYPE(70);
+  {$EXTERNALSYM D3DSIO_TEXREG2GB}
+  D3DSIO_TEXM3x2PAD   = D3DSHADER_INSTRUCTION_OPCODE_TYPE(71);
+  {$EXTERNALSYM D3DSIO_TEXM3x2PAD}
+  D3DSIO_TEXM3x2TEX   = D3DSHADER_INSTRUCTION_OPCODE_TYPE(72);
+  {$EXTERNALSYM D3DSIO_TEXM3x2TEX}
+  D3DSIO_TEXM3x3PAD   = D3DSHADER_INSTRUCTION_OPCODE_TYPE(73);
+  {$EXTERNALSYM D3DSIO_TEXM3x3PAD}
+  D3DSIO_TEXM3x3TEX   = D3DSHADER_INSTRUCTION_OPCODE_TYPE(74);
+  {$EXTERNALSYM D3DSIO_TEXM3x3TEX}
+  D3DSIO_RESERVED0    = D3DSHADER_INSTRUCTION_OPCODE_TYPE(75);
+  {$EXTERNALSYM D3DSIO_RESERVED0}
+  D3DSIO_TEXM3x3SPEC  = D3DSHADER_INSTRUCTION_OPCODE_TYPE(76);
+  {$EXTERNALSYM D3DSIO_TEXM3x3SPEC}
+  D3DSIO_TEXM3x3VSPEC = D3DSHADER_INSTRUCTION_OPCODE_TYPE(77);
+  {$EXTERNALSYM D3DSIO_TEXM3x3VSPEC}
+  D3DSIO_EXPP         = D3DSHADER_INSTRUCTION_OPCODE_TYPE(78);
+  {$EXTERNALSYM D3DSIO_EXPP}
+  D3DSIO_LOGP         = D3DSHADER_INSTRUCTION_OPCODE_TYPE(79);
+  {$EXTERNALSYM D3DSIO_LOGP}
+  D3DSIO_CND          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(80);
+  {$EXTERNALSYM D3DSIO_CND}
+  D3DSIO_DEF          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(81);
+  {$EXTERNALSYM D3DSIO_DEF}
+  D3DSIO_TEXREG2RGB   = D3DSHADER_INSTRUCTION_OPCODE_TYPE(82);
+  {$EXTERNALSYM D3DSIO_TEXREG2RGB}
+  D3DSIO_TEXDP3TEX    = D3DSHADER_INSTRUCTION_OPCODE_TYPE(83);
+  {$EXTERNALSYM D3DSIO_TEXDP3TEX}
+  D3DSIO_TEXM3x2DEPTH = D3DSHADER_INSTRUCTION_OPCODE_TYPE(84);
+  {$EXTERNALSYM D3DSIO_TEXM3x2DEPTH}
+  D3DSIO_TEXDP3       = D3DSHADER_INSTRUCTION_OPCODE_TYPE(85);
+  {$EXTERNALSYM D3DSIO_TEXDP3}
+  D3DSIO_TEXM3x3      = D3DSHADER_INSTRUCTION_OPCODE_TYPE(86);
+  {$EXTERNALSYM D3DSIO_TEXM3x3}
+  D3DSIO_TEXDEPTH     = D3DSHADER_INSTRUCTION_OPCODE_TYPE(87);
+  {$EXTERNALSYM D3DSIO_TEXDEPTH}
+  D3DSIO_CMP          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(88);
+  {$EXTERNALSYM D3DSIO_CMP}
+  D3DSIO_BEM          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(89);
+  {$EXTERNALSYM D3DSIO_BEM}
+  D3DSIO_DP2ADD       = D3DSHADER_INSTRUCTION_OPCODE_TYPE(90);
+  {$EXTERNALSYM D3DSIO_DP2ADD}
+  D3DSIO_DSX          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(91);
+  {$EXTERNALSYM D3DSIO_DSX}
+  D3DSIO_DSY          = D3DSHADER_INSTRUCTION_OPCODE_TYPE(92);
+  {$EXTERNALSYM D3DSIO_DSY}
+  D3DSIO_TEXLDD       = D3DSHADER_INSTRUCTION_OPCODE_TYPE(93);
+  {$EXTERNALSYM D3DSIO_TEXLDD}
+  D3DSIO_SETP         = D3DSHADER_INSTRUCTION_OPCODE_TYPE(94);
+  {$EXTERNALSYM D3DSIO_SETP}
+  D3DSIO_TEXLDL       = D3DSHADER_INSTRUCTION_OPCODE_TYPE(95);
+  {$EXTERNALSYM D3DSIO_TEXLDL}
+  D3DSIO_BREAKP       = D3DSHADER_INSTRUCTION_OPCODE_TYPE(96);
+  {$EXTERNALSYM D3DSIO_BREAKP}
+  D3DSIO_PHASE        = D3DSHADER_INSTRUCTION_OPCODE_TYPE($FFFD);
+  {$EXTERNALSYM D3DSIO_PHASE}
+  D3DSIO_COMMENT      = D3DSHADER_INSTRUCTION_OPCODE_TYPE($FFFE);
+  {$EXTERNALSYM D3DSIO_COMMENT}
+  D3DSIO_END          = D3DSHADER_INSTRUCTION_OPCODE_TYPE($FFFF);
+  {$EXTERNALSYM D3DSIO_END}
+  //D3DSIO_FORCE_DWORD  = FORCEDWORD    // force 32-bit size enum
+
 
 const
 
@@ -1269,22 +1585,30 @@ const
   {$EXTERNALSYM D3DSI_TEXLD_BIAS}
 
 type
-
   // Comparison for dynamic conditional instruction opcodes (i.e. if, breakc)
   PD3DSHADER_COMPARISON = ^D3DSHADER_COMPARISON;
-  _D3DSHADER_COMPARISON = (            // <             = >
-    D3DSPC_RESERVED0 = 0,              // 0 0 0
-    D3DSPC_GT        = 1,              // 0 0 1
-    D3DSPC_EQ        = 2,              // 0 1 0
-    D3DSPC_GE        = 3,              // 0 1 1
-    D3DSPC_LT        = 4,              // 1 0 0
-    D3DSPC_NE        = 5,              // 1 0 1
-    D3DSPC_LE        = 6,              // 1 1 0
-    D3DSPC_RESERVED1 = 7               // 1 1 1
-  );
+  _D3DSHADER_COMPARISON = DWord;            // <             = >
   {$EXTERNALSYM _D3DSHADER_COMPARISON}
   D3DSHADER_COMPARISON = _D3DSHADER_COMPARISON;
   {$EXTERNALSYM D3DSHADER_COMPARISON}
+const
+  D3DSPC_RESERVED0 = D3DSHADER_COMPARISON(0);              // 0 0 0
+  {$EXTERNALSYM D3DSPC_RESERVED0}
+  D3DSPC_GT        = D3DSHADER_COMPARISON(1);              // 0 0 1
+  {$EXTERNALSYM D3DSPC_GT}
+  D3DSPC_EQ        = D3DSHADER_COMPARISON(2);              // 0 1 0
+  {$EXTERNALSYM D3DSPC_EQ}
+  D3DSPC_GE        = D3DSHADER_COMPARISON(3);              // 0 1 1
+  {$EXTERNALSYM D3DSPC_GE}
+  D3DSPC_LT        = D3DSHADER_COMPARISON(4);              // 1 0 0
+  {$EXTERNALSYM D3DSPC_LT}
+  D3DSPC_NE        = D3DSHADER_COMPARISON(5);              // 1 0 1
+  {$EXTERNALSYM D3DSPC_NE}
+  D3DSPC_LE        = D3DSHADER_COMPARISON(6);              // 1 1 0
+  {$EXTERNALSYM D3DSPC_LE}
+  D3DSPC_RESERVED1 = D3DSHADER_COMPARISON(7);               // 1 1 1
+  {$EXTERNALSYM D3DSPC_RESERVED1}
+
 
 const
 
@@ -1321,18 +1645,22 @@ const
 
 
 type
-
   PD3DSAMPLER_TEXTURE_TYPE = ^D3DSAMPLER_TEXTURE_TYPE;
-  _D3DSAMPLER_TEXTURE_TYPE = (
-    D3DSTT_UNKNOWN     = 0  shl D3DSP_TEXTURETYPE_SHIFT,  // uninitialized value
-    D3DSTT_2D          = 2  shl D3DSP_TEXTURETYPE_SHIFT,  // dcl_2d s# (for declaring a 2-D texture)
-    D3DSTT_CUBE        = 3  shl D3DSP_TEXTURETYPE_SHIFT,  // dcl_cube s# (for declaring a cube texture)
-    D3DSTT_VOLUME      = 4  shl D3DSP_TEXTURETYPE_SHIFT,  // dcl_volume s# (for declaring a volume texture)
-    D3DSTT_FORCE_DWORD = FORCEDWORD                       // force 32-bit size enum
-  );
+  _D3DSAMPLER_TEXTURE_TYPE = DWord;
   {$EXTERNALSYM _D3DSAMPLER_TEXTURE_TYPE}
   D3DSAMPLER_TEXTURE_TYPE = _D3DSAMPLER_TEXTURE_TYPE;
   {$EXTERNALSYM D3DSAMPLER_TEXTURE_TYPE}
+const
+  D3DSTT_UNKNOWN     = 0 shl D3DSP_TEXTURETYPE_SHIFT;  // uninitialized value
+  {$EXTERNALSYM D3DSTT_UNKNOWN}
+  D3DSTT_2D          = 2 shl D3DSP_TEXTURETYPE_SHIFT;  // dcl_2d s# (for declaring a 2-D texture)
+  {$EXTERNALSYM D3DSTT_2D}
+  D3DSTT_CUBE        = 3 shl D3DSP_TEXTURETYPE_SHIFT;  // dcl_cube s# (for declaring a cube texture)
+  {$EXTERNALSYM D3DSTT_CUBE}
+  D3DSTT_VOLUME      = 4 shl D3DSP_TEXTURETYPE_SHIFT;  // dcl_volume s# (for declaring a volume texture)
+  {$EXTERNALSYM D3DSTT_VOLUME}
+  //D3DSTT_FORCE_DWORD = FORCEDWORD                      // force 32-bit size enum
+
 
 
 const
@@ -1393,37 +1721,59 @@ const
 
 
 type
-
   PD3DSHADER_PARAM_REGISTER_TYPE = ^D3DSHADER_PARAM_REGISTER_TYPE;
-  _D3DSHADER_PARAM_REGISTER_TYPE = (
-    D3DSPR_TEMP        = 0,                // Temporary Register File
-    D3DSPR_INPUT       = 1,                // Input Register File
-    D3DSPR_CONST       = 2,                // Constant Register File
-    D3DSPR_ADDR        = 3,                // Address Register (VS)
-    D3DSPR_TEXTURE     = 3,                // Texture Register File (PS)
-    D3DSPR_RASTOUT     = 4,                // Rasterizer Register File
-    D3DSPR_ATTROUT     = 5,                // Attribute Output Register File
-    D3DSPR_TEXCRDOUT   = 6,                // Texture Coordinate Output Register File
-    D3DSPR_OUTPUT      = 6,                // Output register file for VS3.0+
-    D3DSPR_CONSTINT    = 7,                // Constant Integer Vector Register File
-    D3DSPR_COLOROUT    = 8,                // Color Output Register File
-    D3DSPR_DEPTHOUT    = 9,                // Depth Output Register File
-    D3DSPR_SAMPLER     = 10,               // Sampler State Register File
-    D3DSPR_CONST2      = 11,               // Constant Register File  2048 - 4095
-    D3DSPR_CONST3      = 12,               // Constant Register File  4096 - 6143
-    D3DSPR_CONST4      = 13,               // Constant Register File  6144 - 8191
-    D3DSPR_CONSTBOOL   = 14,               // Constant Boolean register file
-    D3DSPR_LOOP        = 15,               // Loop counter register file
-    D3DSPR_TEMPFLOAT16 = 16,               // 16-bit float temp register file
-    D3DSPR_MISCTYPE    = 17,               // Miscellaneous (single) registers.
-    D3DSPR_LABEL       = 18,               // Label
-    D3DSPR_PREDICATE   = 19,               // Predicate register
-    D3DSPR_FORCE_DWORD = FORCEDWORD        // force 32-bit size enum
-  );
+  _D3DSHADER_PARAM_REGISTER_TYPE = Dword;
   {$EXTERNALSYM _D3DSHADER_PARAM_REGISTER_TYPE}
   D3DSHADER_PARAM_REGISTER_TYPE = _D3DSHADER_PARAM_REGISTER_TYPE;
   {$EXTERNALSYM D3DSHADER_PARAM_REGISTER_TYPE}
+const
+  D3DSPR_TEMP        = D3DSHADER_PARAM_REGISTER_TYPE(0);                // Temporary Register File
+  {$EXTERNALSYM D3DSPR_TEMP}
+  D3DSPR_INPUT       = D3DSHADER_PARAM_REGISTER_TYPE(1);                // Input Register File
+  {$EXTERNALSYM D3DSPR_INPUT}
+  D3DSPR_CONST       = D3DSHADER_PARAM_REGISTER_TYPE(2);                // Constant Register File
+  {$EXTERNALSYM D3DSPR_CONST}
+  D3DSPR_ADDR        = D3DSHADER_PARAM_REGISTER_TYPE(3);                // Address Register (VS)
+  {$EXTERNALSYM D3DSPR_ADDR}
+  D3DSPR_TEXTURE     = D3DSHADER_PARAM_REGISTER_TYPE(3);                // Texture Register File (PS)
+  {$EXTERNALSYM D3DSPR_TEXTURE}
+  D3DSPR_RASTOUT     = D3DSHADER_PARAM_REGISTER_TYPE(4);                // Rasterizer Register File
+  {$EXTERNALSYM D3DSPR_RASTOUT}
+  D3DSPR_ATTROUT     = D3DSHADER_PARAM_REGISTER_TYPE(5);                // Attribute Output Register File
+  {$EXTERNALSYM D3DSPR_ATTROUT}
+  D3DSPR_TEXCRDOUT   = D3DSHADER_PARAM_REGISTER_TYPE(6);                // Texture Coordinate Output Register File
+  {$EXTERNALSYM D3DSPR_TEXCRDOUT}
+  D3DSPR_OUTPUT      = D3DSHADER_PARAM_REGISTER_TYPE(6);                // Output register file for VS3.0+
+  {$EXTERNALSYM D3DSPR_OUTPUT}
+  D3DSPR_CONSTINT    = D3DSHADER_PARAM_REGISTER_TYPE(7);                // Constant Integer Vector Register File
+  {$EXTERNALSYM D3DSPR_CONSTINT}
+  D3DSPR_COLOROUT    = D3DSHADER_PARAM_REGISTER_TYPE(8);                // Color Output Register File
+  {$EXTERNALSYM D3DSPR_COLOROUT}
+  D3DSPR_DEPTHOUT    = D3DSHADER_PARAM_REGISTER_TYPE(9);                // Depth Output Register File
+  {$EXTERNALSYM D3DSPR_DEPTHOUT}
+  D3DSPR_SAMPLER     = D3DSHADER_PARAM_REGISTER_TYPE(10);               // Sampler State Register File
+  {$EXTERNALSYM D3DSPR_SAMPLER}
+  D3DSPR_CONST2      = D3DSHADER_PARAM_REGISTER_TYPE(11);               // Constant Register File  2048 - 4095
+  {$EXTERNALSYM D3DSPR_CONST2}
+  D3DSPR_CONST3      = D3DSHADER_PARAM_REGISTER_TYPE(12);               // Constant Register File  4096 - 6143
+  {$EXTERNALSYM D3DSPR_CONST3}
+  D3DSPR_CONST4      = D3DSHADER_PARAM_REGISTER_TYPE(13);               // Constant Register File  6144 - 8191
+  {$EXTERNALSYM D3DSPR_CONST4}
+  D3DSPR_CONSTBOOL   = D3DSHADER_PARAM_REGISTER_TYPE(14);               // Constant Boolean register file
+  {$EXTERNALSYM D3DSPR_CONSTBOOL}
+  D3DSPR_LOOP        = D3DSHADER_PARAM_REGISTER_TYPE(15);               // Loop counter register file
+  {$EXTERNALSYM D3DSPR_LOOP}
+  D3DSPR_TEMPFLOAT16 = D3DSHADER_PARAM_REGISTER_TYPE(16);               // 16-bit float temp register file
+  {$EXTERNALSYM D3DSPR_TEMPFLOAT16}
+  D3DSPR_MISCTYPE    = D3DSHADER_PARAM_REGISTER_TYPE(17);               // Miscellaneous (single) registers.
+  {$EXTERNALSYM D3DSPR_MISCTYPE}
+  D3DSPR_LABEL       = D3DSHADER_PARAM_REGISTER_TYPE(18);               // Label
+  {$EXTERNALSYM D3DSPR_LABEL}
+  D3DSPR_PREDICATE   = D3DSHADER_PARAM_REGISTER_TYPE(19);               // Predicate register
+  {$EXTERNALSYM D3DSPR_PREDICATE}
+  //D3DSPR_FORCE_DWORD = FORCEDWORD;        // force 32-bit size enum
 
+type
   // The miscellaneous register file (D3DSPR_MISCTYPES)
   // contains register types for which there is only ever one
   // register (i.e. the register # is not needed).
@@ -1431,14 +1781,17 @@ type
   // registers, they are defined
   // as particular offsets into the misc. register file:
   PD3DSHADER_MISCTYPE_OFFSETS = ^D3DSHADER_MISCTYPE_OFFSETS;
-  _D3DSHADER_MISCTYPE_OFFSETS = (
-    D3DSMO_POSITION = 0,            // Input position x,y,z,rhw (PS)
-    D3DSMO_FACE     = 1             // Floating point primitive area (PS)
-  );
+  _D3DSHADER_MISCTYPE_OFFSETS = DWord;
   {$EXTERNALSYM _D3DSHADER_MISCTYPE_OFFSETS}
   D3DSHADER_MISCTYPE_OFFSETS = _D3DSHADER_MISCTYPE_OFFSETS;
   {$EXTERNALSYM D3DSHADER_MISCTYPE_OFFSETS}
+const
+  D3DSMO_POSITION = D3DSHADER_MISCTYPE_OFFSETS(0);            // Input position x,y,z,rhw (PS)
+  {$EXTERNALSYM D3DSMO_POSITION}
+  D3DSMO_FACE     = D3DSHADER_MISCTYPE_OFFSETS(1);            // Floating point primitive area (PS)
+  {$EXTERNALSYM D3DSMO_FACE}
 
+type
   // Register offsets in the Rasterizer Register File
   //
   PD3DVS_RASTOUT_OFFSETS = ^D3DVS_RASTOUT_OFFSETS;
@@ -1464,16 +1817,17 @@ const
 
 
 type
-
   PD3DVS_ADDRESSMODE_TYPE = ^D3DVS_ADDRESSMODE_TYPE;
-  _D3DVS_ADDRESSMODE_TYPE      = (
-    D3DVS_ADDRMODE_ABSOLUTE    = (0 shl D3DVS_ADDRESSMODE_SHIFT),
-    D3DVS_ADDRMODE_RELATIVE    = (1 shl D3DVS_ADDRESSMODE_SHIFT),
-    D3DVS_ADDRMODE_FORCE_DWORD = FORCEDWORD    // force 32-bit size enum
-  );
+  _D3DVS_ADDRESSMODE_TYPE      = DWord;
   {$EXTERNALSYM _D3DVS_ADDRESSMODE_TYPE}
   D3DVS_ADDRESSMODE_TYPE = _D3DVS_ADDRESSMODE_TYPE;
   {$EXTERNALSYM D3DVS_ADDRESSMODE_TYPE}
+const
+  D3DVS_ADDRMODE_ABSOLUTE    = (0 shl D3DVS_ADDRESSMODE_SHIFT);
+  {$EXTERNALSYM D3DVS_ADDRMODE_ABSOLUTE}
+  D3DVS_ADDRMODE_RELATIVE    = (1 shl D3DVS_ADDRESSMODE_SHIFT);
+  {$EXTERNALSYM D3DVS_ADDRMODE_RELATIVE}
+  //D3DVS_ADDRMODE_FORCE_DWORD = FORCEDWORD    // force 32-bit size enum
 
 
 const
@@ -1485,16 +1839,15 @@ const
 
 
 type
-
   PD3DSHADER_ADDRESSMODE_TYPE = ^D3DSHADER_ADDRESSMODE_TYPE;
-  _D3DSHADER_ADDRESSMODE_TYPE      = (
-    D3DSHADER_ADDRMODE_ABSOLUTE    = (0 shl D3DSHADER_ADDRESSMODE_SHIFT),
-    D3DSHADER_ADDRMODE_RELATIVE    = (1 shl D3DSHADER_ADDRESSMODE_SHIFT),
-    D3DSHADER_ADDRMODE_FORCE_DWORD = FORCEDWORD   // force 32-bit size enum
-  );
+  _D3DSHADER_ADDRESSMODE_TYPE = DWord;
   {$EXTERNALSYM _D3DSHADER_ADDRESSMODE_TYPE}
   D3DSHADER_ADDRESSMODE_TYPE = _D3DSHADER_ADDRESSMODE_TYPE;
   {$EXTERNALSYM D3DSHADER_ADDRESSMODE_TYPE}
+const
+  D3DSHADER_ADDRMODE_ABSOLUTE    = (0 shl D3DSHADER_ADDRESSMODE_SHIFT);
+  D3DSHADER_ADDRMODE_RELATIVE    = (1 shl D3DSHADER_ADDRESSMODE_SHIFT);
+  //D3DSHADER_ADDRMODE_FORCE_DWORD = FORCEDWORD   // force 32-bit size enum
 
 
 const
@@ -1606,28 +1959,41 @@ const
 
 
 type
-
   PD3DSHADER_PARAM_SRCMOD_TYPE = ^_D3DSHADER_PARAM_SRCMOD_TYPE;
-  _D3DSHADER_PARAM_SRCMOD_TYPE = (
-    D3DSPSM_NONE        = 0  shl D3DSP_SRCMOD_SHIFT,   // nop
-    D3DSPSM_NEG         = 1  shl D3DSP_SRCMOD_SHIFT,   // negate
-    D3DSPSM_BIAS        = 2  shl D3DSP_SRCMOD_SHIFT,   // bias
-    D3DSPSM_BIASNEG     = 3  shl D3DSP_SRCMOD_SHIFT,   // bias and negate
-    D3DSPSM_SIGN        = 4  shl D3DSP_SRCMOD_SHIFT,   // sign
-    D3DSPSM_SIGNNEG     = 5  shl D3DSP_SRCMOD_SHIFT,   // sign and negate
-    D3DSPSM_COMP        = 6  shl D3DSP_SRCMOD_SHIFT,   // complement
-    D3DSPSM_X2          = 7  shl D3DSP_SRCMOD_SHIFT,   // *2
-    D3DSPSM_X2NEG       = 8  shl D3DSP_SRCMOD_SHIFT,   // *2 and negate
-    D3DSPSM_DZ          = 9  shl D3DSP_SRCMOD_SHIFT,   // divide through by z component
-    D3DSPSM_DW          = 10  shl D3DSP_SRCMOD_SHIFT,  // divide through by w component
-    D3DSPSM_ABS         = 11  shl D3DSP_SRCMOD_SHIFT,  // abs()
-    D3DSPSM_ABSNEG      = 12  shl D3DSP_SRCMOD_SHIFT,  // -abs()
-    D3DSPSM_NOT         = 13  shl D3DSP_SRCMOD_SHIFT,  // for predicate register: "!p0"
-    D3DSPSM_FORCE_DWORD = FORCEDWORD                   // force 32-bit size enum
-  );
+  _D3DSHADER_PARAM_SRCMOD_TYPE = DWord;
   {$EXTERNALSYM _D3DSHADER_PARAM_SRCMOD_TYPE}
   D3DSHADER_PARAM_SRCMOD_TYPE = _D3DSHADER_PARAM_SRCMOD_TYPE;
   {$EXTERNALSYM D3DSHADER_PARAM_SRCMOD_TYPE}
+const
+  D3DSPSM_NONE        = 0  shl D3DSP_SRCMOD_SHIFT;   // nop
+  {$EXTERNALSYM D3DSPSM_NONE}
+  D3DSPSM_NEG         = 1  shl D3DSP_SRCMOD_SHIFT;   // negate
+  {$EXTERNALSYM D3DSPSM_NEG}
+  D3DSPSM_BIAS        = 2  shl D3DSP_SRCMOD_SHIFT;   // bias
+  {$EXTERNALSYM D3DSPSM_BIAS}
+  D3DSPSM_BIASNEG     = 3  shl D3DSP_SRCMOD_SHIFT;   // bias and negate
+  {$EXTERNALSYM D3DSPSM_BIASNEG}
+  D3DSPSM_SIGN        = 4  shl D3DSP_SRCMOD_SHIFT;   // sign
+  {$EXTERNALSYM D3DSPSM_SIGN}
+  D3DSPSM_SIGNNEG     = 5  shl D3DSP_SRCMOD_SHIFT;   // sign and negate
+  {$EXTERNALSYM D3DSPSM_SIGNNEG}
+  D3DSPSM_COMP        = 6  shl D3DSP_SRCMOD_SHIFT;   // complement
+  {$EXTERNALSYM D3DSPSM_COMP}
+  D3DSPSM_X2          = 7  shl D3DSP_SRCMOD_SHIFT;   // *2
+  {$EXTERNALSYM D3DSPSM_X2}
+  D3DSPSM_X2NEG       = 8  shl D3DSP_SRCMOD_SHIFT;   // *2 and negate
+  {$EXTERNALSYM D3DSPSM_X2NEG}
+  D3DSPSM_DZ          = 9  shl D3DSP_SRCMOD_SHIFT;   // divide through by z component
+  {$EXTERNALSYM D3DSPSM_DZ}
+  D3DSPSM_DW          = 10  shl D3DSP_SRCMOD_SHIFT;  // divide through by w component
+  {$EXTERNALSYM D3DSPSM_DW}
+  D3DSPSM_ABS         = 11  shl D3DSP_SRCMOD_SHIFT;  // abs()
+  {$EXTERNALSYM D3DSPSM_ABS}
+  D3DSPSM_ABSNEG      = 12  shl D3DSP_SRCMOD_SHIFT;  // -abs()
+  {$EXTERNALSYM D3DSPSM_ABSNEG}
+  D3DSPSM_NOT         = 13  shl D3DSP_SRCMOD_SHIFT;  // for predicate register: "!p0"
+  {$EXTERNALSYM D3DSPSM_NOT}
+  //D3DSPSM_FORCE_DWORD = FORCEDWORD                   // force 32-bit size enum
 
 
 const
@@ -1641,16 +2007,16 @@ const
 
 
 type
-
   PD3DSHADER_MIN_PRECISION = ^_D3DSHADER_MIN_PRECISION;
-  _D3DSHADER_MIN_PRECISION = (
-    D3DMP_DEFAULT = 0,               // Default precision for the shader model
-    D3DMP_16      = 1,               // 16 bit per component
-    D3DMP_2_8     = 2                // 10 bits (2.8) per component
-  );
+  _D3DSHADER_MIN_PRECISION = DWord;
   {$EXTERNALSYM _D3DSHADER_MIN_PRECISION}
   D3DSHADER_MIN_PRECISION = _D3DSHADER_MIN_PRECISION;
   {$EXTERNALSYM D3DSHADER_MIN_PRECISION}
+const
+  D3DMP_DEFAULT = D3DSHADER_MIN_PRECISION(0);               // Default precision for the shader model
+  D3DMP_16      = D3DSHADER_MIN_PRECISION(1);               // 16 bit per component
+  D3DMP_2_8     = D3DSHADER_MIN_PRECISION(2);               // 10 bits (2.8) per component
+
 
   // If the older D3DSPDM_PARTIALPRECISION is set,
   // that is equivalent to the whole operation specifying
@@ -1697,11 +2063,12 @@ type
   // High order surfaces
   //
   PD3DBASISTYPE = ^_D3DBASISTYPE;
-   _D3DBASISTYPE          = (
+   _D3DBASISTYPE         = (
     D3DBASIS_BEZIER      = 0,
     D3DBASIS_BSPLINE     = 1,
     D3DBASIS_CATMULL_ROM = 2,   { In D3D8 this used to be D3DBASIS_INTERPOLATE }
-    D3DBASIS_FORCE_DWORD = FORCEDWORD);
+    D3DBASIS_FORCE_DWORD = FORCEDWORD
+  );
    {$EXTERNALSYM _D3DBASISTYPE}
   D3DBASISTYPE = _D3DBASISTYPE;
   {$EXTERNALSYM D3DBASISTYPE}
@@ -1713,7 +2080,8 @@ type
     D3DDEGREE_QUADRATIC   = 2,
     D3DDEGREE_CUBIC       = 3,
     D3DDEGREE_QUINTIC     = 5,
-    D3DDEGREE_FORCE_DWORD = FORCEDWORD);
+    D3DDEGREE_FORCE_DWORD = FORCEDWORD
+  );
   {$EXTERNALSYM _D3DDEGREETYPE}
   D3DDEGREETYPE = _D3DDEGREETYPE;
   {$EXTERNALSYM D3DDEGREETYPE}
@@ -1723,7 +2091,8 @@ type
   _D3DPATCHEDGESTYLE         = (
     D3DPATCHEDGE_DISCRETE    = 0,
     D3DPATCHEDGE_CONTINUOUS  = 1,
-    D3DPATCHEDGE_FORCE_DWORD = FORCEDWORD);
+    D3DPATCHEDGE_FORCE_DWORD = FORCEDWORD
+  );
   {$EXTERNALSYM _D3DPATCHEDGESTYLE}
   D3DPATCHEDGESTYLE = _D3DPATCHEDGESTYLE;
   {$EXTERNALSYM D3DPATCHEDGESTYLE}
@@ -1734,7 +2103,8 @@ type
     D3DSBT_ALL         = 1,                 // capture all state
     D3DSBT_PIXELSTATE  = 2,                 // capture pixel state
     D3DSBT_VERTEXSTATE = 3,                 // capture vertex state
-    D3DSBT_FORCE_DWORD = FORCEDWORD);
+    D3DSBT_FORCE_DWORD = FORCEDWORD
+  );
   {$EXTERNALSYM _D3DSTATEBLOCKTYPE}
   D3DSTATEBLOCKTYPE = _D3DSTATEBLOCKTYPE;
   {$EXTERNALSYM D3DSTATEBLOCKTYPE}
@@ -1756,19 +2126,26 @@ type
   D3DVERTEXBLENDFLAGS = _D3DVERTEXBLENDFLAGS;
   {$EXTERNALSYM D3DVERTEXBLENDFLAGS}
 
-
+type
   PD3DTEXTURETRANSFORMFLAGS = ^_D3DTEXTURETRANSFORMFLAGS;
-  _D3DTEXTURETRANSFORMFLAGS = (
-    D3DTTFF_DISABLE     = 0,            // texture coordinates are passed directly
-    D3DTTFF_COUNT1      = 1,            // rasterizer should expect 1-D texture coords
-    D3DTTFF_COUNT2      = 2,            // rasterizer should expect 2-D texture coords
-    D3DTTFF_COUNT3      = 3,            // rasterizer should expect 3-D texture coords
-    D3DTTFF_COUNT4      = 4,            // rasterizer should expect 4-D texture coords
-    D3DTTFF_PROJECTED   = 256,          // texcoords to be divided by COUNTth element
-    D3DTTFF_FORCE_DWORD = FORCEDWORD);
+  _D3DTEXTURETRANSFORMFLAGS = DWord;
   {$EXTERNALSYM _D3DTEXTURETRANSFORMFLAGS}
   D3DTEXTURETRANSFORMFLAGS = _D3DTEXTURETRANSFORMFLAGS;
   {$EXTERNALSYM D3DTEXTURETRANSFORMFLAGS}
+const
+  D3DTTFF_DISABLE     = D3DTEXTURETRANSFORMFLAGS(0);            // texture coordinates are passed directly
+  {$EXTERNALSYM D3DTTFF_DISABLE}
+  D3DTTFF_COUNT1      = D3DTEXTURETRANSFORMFLAGS(1);            // rasterizer should expect 1-D texture coords
+  {$EXTERNALSYM D3DTTFF_COUNT1}
+  D3DTTFF_COUNT2      = D3DTEXTURETRANSFORMFLAGS(2);            // rasterizer should expect 2-D texture coords
+  {$EXTERNALSYM D3DTTFF_COUNT2}
+  D3DTTFF_COUNT3      = D3DTEXTURETRANSFORMFLAGS(3);            // rasterizer should expect 3-D texture coords
+  {$EXTERNALSYM D3DTTFF_COUNT3}
+  D3DTTFF_COUNT4      = D3DTEXTURETRANSFORMFLAGS(4);            // rasterizer should expect 4-D texture coords
+  {$EXTERNALSYM D3DTTFF_COUNT4}
+  D3DTTFF_PROJECTED   = D3DTEXTURETRANSFORMFLAGS(256);          // texcoords to be divided by COUNTth element
+  {$EXTERNALSYM D3DTTFF_PROJECTED}
+  //D3DTTFF_FORCE_DWORD = FORCEDWORD;
 
 
 const
@@ -1820,7 +2197,8 @@ type
     D3DDEVTYPE_REF         = 2,
     D3DDEVTYPE_SW          = 3,
     D3DDEVTYPE_NULLREF     = 4,
-    D3DDEVTYPE_FORCE_DWORD = FORCEDWORD);
+    D3DDEVTYPE_FORCE_DWORD = FORCEDWORD
+  );
   {$EXTERNALSYM _D3DDEVTYPE}
   D3DDEVTYPE = _D3DDEVTYPE;
   {$EXTERNALSYM D3DDEVTYPE}
@@ -1846,7 +2224,8 @@ type
     D3DMULTISAMPLE_14_SAMPLES  = 14,
     D3DMULTISAMPLE_15_SAMPLES  = 15,
     D3DMULTISAMPLE_16_SAMPLES  = 16,
-    D3DMULTISAMPLE_FORCE_DWORD = FORCEDWORD);
+    D3DMULTISAMPLE_FORCE_DWORD = FORCEDWORD
+  );
   {$EXTERNALSYM _D3DMULTISAMPLE_TYPE}
   D3DMULTISAMPLE_TYPE = _D3DMULTISAMPLE_TYPE;
   {$EXTERNALSYM D3DMULTISAMPLE_TYPE}
@@ -1887,118 +2266,177 @@ type
 // */
 
 
-{$IFDEF TYPE_IDENTITY}
-
-  _D3DFORMAT = type DWord;
-  {$EXTERNALSYM _D3DFORMAT}
-
-{$ELSE}
-
 type
-  _D3DFORMAT                    = (
-    D3DFMT_UNKNOWN              = 0,
-    D3DFMT_R8G8B8               = 20,
-    D3DFMT_A8R8G8B8             = 21,
-    D3DFMT_X8R8G8B8             = 22,
-    D3DFMT_R5G6B5               = 23,
-    D3DFMT_X1R5G5B5             = 24,
-    D3DFMT_A1R5G5B5             = 25,
-    D3DFMT_A4R4G4B4             = 26,
-    D3DFMT_R3G3B2               = 27,
-    D3DFMT_A8                   = 28,
-    D3DFMT_A8R3G3B2             = 29,
-    D3DFMT_X4R4G4B4             = 30,
-    D3DFMT_A2B10G10R10          = 31,
-    D3DFMT_A8B8G8R8             = 32,
-    D3DFMT_X8B8G8R8             = 33,
-    D3DFMT_G16R16               = 34,
-    D3DFMT_A2R10G10B10          = 35,
-    D3DFMT_A16B16G16R16         = 36,
-
-    D3DFMT_A8P8                 = 40,
-    D3DFMT_P8                   = 41,
-
-    D3DFMT_L8                   = 50,
-    D3DFMT_A8L8                 = 51,
-    D3DFMT_A4L4                 = 52,
-
-    D3DFMT_V8U8                 = 60,
-    D3DFMT_L6V5U5               = 61,
-    D3DFMT_X8L8V8U8             = 62,
-    D3DFMT_Q8W8V8U8             = 63,
-    D3DFMT_V16U16               = 64,
-    D3DFMT_A2W10V10U10          = 67,
-
-    D3DFMT_UYVY                 = Byte('U') OR (Byte('Y') shl 8) OR (Byte('V') shl 16) OR (Byte('Y') shl 24),
-    D3DFMT_RGBG                 = Byte('R') OR (Byte('G') shl 8) OR (Byte('B') shl 16) OR (Byte('G') shl 24),
-    D3DFMT_YUY2                 = Byte('Y') OR (Byte('U') shl 8) OR (Byte('Y') shl 16) OR (Byte('2') shl 24),
-    D3DFMT_GRGB                 = Byte('G') OR (Byte('R') shl 8) OR (Byte('G') shl 16) OR (Byte('B') shl 24),
-    D3DFMT_DXT1                 = Byte('D') OR (Byte('X') shl 8) OR (Byte('T') shl 16) OR (Byte('1') shl 24),
-    D3DFMT_DXT2                 = Byte('D') OR (Byte('X') shl 8) OR (Byte('T') shl 16) OR (Byte('2') shl 24),
-    D3DFMT_DXT3                 = Byte('D') OR (Byte('X') shl 8) OR (Byte('T') shl 16) OR (Byte('3') shl 24),
-    D3DFMT_DXT4                 = Byte('D') OR (Byte('X') shl 8) OR (Byte('T') shl 16) OR (Byte('4') shl 24),
-    D3DFMT_DXT5                 = Byte('D') OR (Byte('X') shl 8) OR (Byte('T') shl 16) OR (Byte('5') shl 24),
-
-    D3DFMT_D16_LOCKABLE         = 70,
-    D3DFMT_D32                  = 71,
-    D3DFMT_D15S1                = 73,
-    D3DFMT_D24S8                = 75,
-    D3DFMT_D24X8                = 77,
-    D3DFMT_D24X4S4              = 79,
-    D3DFMT_D16                  = 80,
-    D3DFMT_D32F_LOCKABLE        = 82,
-    D3DFMT_D24FS8               = 83,
-
-   //* D3D9Ex only -- */
-   //{$IFDEF D3D_DISABLE_9EX}
-   //* Z-Stencil formats valid for CPU access */
-    D3DFMT_D32_LOCKABLE         = 84,
-    D3DFMT_S8_LOCKABLE          = 85,
-   //{$ENDIF} //!D3D_DISABLE_9EX
-   //* -- D3D9Ex only */
-    D3DFMT_L16                  = 81,
-
-    D3DFMT_VERTEXDATA           = 100,
-    D3DFMT_INDEX16              = 101,
-    D3DFMT_INDEX32              = 102,
-
-    D3DFMT_Q16W16V16U16         = 110,
-
-    D3DFMT_MULTI2_ARGB8         = Byte('M') OR (Byte('E') shl 8) OR (Byte('T') shl 16) OR (Byte('1') shl 24),
-
-    // Floating point surface formats
-
-    // s10e5 formats (16-bits per channel)
-    D3DFMT_R16F                 = 111,
-    D3DFMT_G16R16F              = 112,
-    D3DFMT_A16B16G16R16F        = 113,
-
-    // IEEE s23e8 formats (32-bits per channel)
-    D3DFMT_R32F                 = 114,
-    D3DFMT_G32R32F              = 115,
-    D3DFMT_A32B32G32R32F        = 116,
-
-    D3DFMT_CxV8U8               = 117,
-
-    //* D3D9Ex only -- */
-    //{$IFDEF D3D_DISABLE_9EX}
-    // Monochrome 1 bit per pixel format
-    D3DFMT_A1                   = 118,
-    /// 2.8 biased fixed point
-    D3DFMT_A2B10G10R10_XR_BIAS  = 119,
-    // Binary format indicating that the data has no inherent type
-    D3DFMT_BINARYBUFFER         = 199,
-    //{$ENDIF} // !D3D_DISABLE_9EX
-    //* -- D3D9Ex only */
-    D3DFMT_FORCE_DWORD          = FORCEDWORD);
-  {$EXTERNALSYM _D3DFORMAT}
-{$ENDIF}
-
   PD3DFORMAT = ^_D3DFORMAT;
+  _D3DFORMAT = DWord;
+  {$EXTERNALSYM _D3DFORMAT}
   D3DFORMAT = _D3DFORMAT;
   {$EXTERNALSYM D3DFORMAT}
+const
+  D3DFMT_UNKNOWN              = D3DFORMAT(0);
+  {$EXTERNALSYM D3DFMT_UNKNOWN}
+  D3DFMT_R8G8B8               = D3DFORMAT(20);
+  {$EXTERNALSYM D3DFMT_R8G8B8}
+  D3DFMT_A8R8G8B8             = D3DFORMAT(21);
+  {$EXTERNALSYM D3DFMT_A8R8G8B8}
+  D3DFMT_X8R8G8B8             = D3DFORMAT(22);
+  {$EXTERNALSYM D3DFMT_X8R8G8B8}
+  D3DFMT_R5G6B5               = D3DFORMAT(23);
+  {$EXTERNALSYM D3DFMT_R5G6B5}
+  D3DFMT_X1R5G5B5             = D3DFORMAT(24);
+  {$EXTERNALSYM D3DFMT_X1R5G5B5}
+  D3DFMT_A1R5G5B5             = D3DFORMAT(25);
+  {$EXTERNALSYM D3DFMT_A1R5G5B5}
+  D3DFMT_A4R4G4B4             = D3DFORMAT(26);
+  {$EXTERNALSYM D3DFMT_A4R4G4B4}
+  D3DFMT_R3G3B2               = D3DFORMAT(27);
+  {$EXTERNALSYM D3DFMT_R3G3B2}
+  D3DFMT_A8                   = D3DFORMAT(28);
+  {$EXTERNALSYM D3DFMT_A8}
+  D3DFMT_A8R3G3B2             = D3DFORMAT(29);
+  {$EXTERNALSYM D3DFMT_A8R3G3B2}
+  D3DFMT_X4R4G4B4             = D3DFORMAT(30);
+  {$EXTERNALSYM D3DFMT_X4R4G4B4}
+  D3DFMT_A2B10G10R10          = D3DFORMAT(31);
+  {$EXTERNALSYM D3DFMT_A2B10G10R10}
+  D3DFMT_A8B8G8R8             = D3DFORMAT(32);
+  {$EXTERNALSYM D3DFMT_A8B8G8R8}
+  D3DFMT_X8B8G8R8             = D3DFORMAT(33);
+  {$EXTERNALSYM D3DFMT_X8B8G8R8}
+  D3DFMT_G16R16               = D3DFORMAT(34);
+  {$EXTERNALSYM D3DFMT_G16R16}
+  D3DFMT_A2R10G10B10          = D3DFORMAT(35);
+  {$EXTERNALSYM D3DFMT_A2R10G10B10}
+  D3DFMT_A16B16G16R16         = D3DFORMAT(36);
+  {$EXTERNALSYM D3DFMT_A16B16G16R16}
+
+  D3DFMT_A8P8                 = D3DFORMAT(40);
+  {$EXTERNALSYM D3DFMT_A8P8}
+  D3DFMT_P8                   = D3DFORMAT(41);
+  {$EXTERNALSYM D3DFMT_P8}
+
+  D3DFMT_L8                   = D3DFORMAT(50);
+  {$EXTERNALSYM D3DFMT_L8}
+  D3DFMT_A8L8                 = D3DFORMAT(51);
+  {$EXTERNALSYM D3DFMT_A8L8}
+  D3DFMT_A4L4                 = D3DFORMAT(52);
+  {$EXTERNALSYM D3DFMT_A4L4}
+
+  D3DFMT_V8U8                 = D3DFORMAT(60);
+  {$EXTERNALSYM D3DFMT_V8U8}
+  D3DFMT_L6V5U5               = D3DFORMAT(61);
+  {$EXTERNALSYM D3DFMT_L6V5U5}
+  D3DFMT_X8L8V8U8             = D3DFORMAT(62);
+  {$EXTERNALSYM D3DFMT_X8L8V8U8}
+  D3DFMT_Q8W8V8U8             = D3DFORMAT(63);
+  {$EXTERNALSYM D3DFMT_Q8W8V8U8}
+  D3DFMT_V16U16               = D3DFORMAT(64);
+  {$EXTERNALSYM D3DFMT_V16U16}
+  D3DFMT_A2W10V10U10          = D3DFORMAT(67);
+  {$EXTERNALSYM D3DFMT_A2W10V10U10}
+
+  D3DFMT_UYVY                 = D3DFORMAT(Byte('U') OR (Byte('Y') shl 8) OR (Byte('V') shl 16) OR (Byte('Y') shl 24));
+  {$EXTERNALSYM D3DFMT_UYVY}
+  D3DFMT_RGBG                 = D3DFORMAT(Byte('R') OR (Byte('G') shl 8) OR (Byte('B') shl 16) OR (Byte('G') shl 24));
+  {$EXTERNALSYM D3DFMT_RGBG}
+  D3DFMT_YUY2                 = D3DFORMAT(Byte('Y') OR (Byte('U') shl 8) OR (Byte('Y') shl 16) OR (Byte('2') shl 24));
+  {$EXTERNALSYM D3DFMT_YUY2}
+  D3DFMT_GRGB                 = D3DFORMAT(Byte('G') OR (Byte('R') shl 8) OR (Byte('G') shl 16) OR (Byte('B') shl 24));
+  {$EXTERNALSYM D3DFMT_GRGB}
+  D3DFMT_DXT1                 = D3DFORMAT(Byte('D') OR (Byte('X') shl 8) OR (Byte('T') shl 16) OR (Byte('1') shl 24));
+  {$EXTERNALSYM D3DFMT_DXT1}
+  D3DFMT_DXT2                 = D3DFORMAT(Byte('D') OR (Byte('X') shl 8) OR (Byte('T') shl 16) OR (Byte('2') shl 24));
+  {$EXTERNALSYM D3DFMT_DXT2}
+  D3DFMT_DXT3                 = D3DFORMAT(Byte('D') OR (Byte('X') shl 8) OR (Byte('T') shl 16) OR (Byte('3') shl 24));
+  {$EXTERNALSYM D3DFMT_DXT3}
+  D3DFMT_DXT4                 = D3DFORMAT(Byte('D') OR (Byte('X') shl 8) OR (Byte('T') shl 16) OR (Byte('4') shl 24));
+  {$EXTERNALSYM D3DFMT_DXT4}
+  D3DFMT_DXT5                 = D3DFORMAT(Byte('D') OR (Byte('X') shl 8) OR (Byte('T') shl 16) OR (Byte('5') shl 24));
+  {$EXTERNALSYM D3DFMT_DXT5}
+
+  D3DFMT_D16_LOCKABLE         = D3DFORMAT(70);
+  {$EXTERNALSYM D3DFMT_D16_LOCKABLE}
+  D3DFMT_D32                  = D3DFORMAT(71);
+  {$EXTERNALSYM D3DFMT_D32}
+  D3DFMT_D15S1                = D3DFORMAT(73);
+  {$EXTERNALSYM D3DFMT_D15S1}
+  D3DFMT_D24S8                = D3DFORMAT(75);
+  {$EXTERNALSYM D3DFMT_D24S8}
+  D3DFMT_D24X8                = D3DFORMAT(77);
+  {$EXTERNALSYM D3DFMT_D24X8}
+  D3DFMT_D24X4S4              = D3DFORMAT(79);
+  {$EXTERNALSYM D3DFMT_D24X4S4}
+  D3DFMT_D16                  = D3DFORMAT(80);
+  {$EXTERNALSYM D3DFMT_D16}
+  D3DFMT_D32F_LOCKABLE        = D3DFORMAT(82);
+  {$EXTERNALSYM D3DFMT_D32F_LOCKABLE}
+  D3DFMT_D24FS8               = D3DFORMAT(83);
+  {$EXTERNALSYM D3DFMT_D24FS8}
+
+  //* D3D9Ex only -- */
+//{$IFDEF D3D_DISABLE_9EX}
+  //* Z-Stencil formats valid for CPU access */
+  D3DFMT_D32_LOCKABLE         = D3DFORMAT(84);
+  {$EXTERNALSYM D3DFMT_D32_LOCKABLE}
+  D3DFMT_S8_LOCKABLE          = D3DFORMAT(85);
+  {$EXTERNALSYM D3DFMT_S8_LOCKABLE}
+//{$ENDIF} //!D3D_DISABLE_9EX
+  //* -- D3D9Ex only */
+  D3DFMT_L16                  = D3DFORMAT(81);
+  {$EXTERNALSYM D3DFMT_L16}
+
+  D3DFMT_VERTEXDATA           = D3DFORMAT(100);
+  {$EXTERNALSYM D3DFMT_VERTEXDATA}
+  D3DFMT_INDEX16              = D3DFORMAT(101);
+  {$EXTERNALSYM D3DFMT_INDEX16}
+  D3DFMT_INDEX32              = D3DFORMAT(102);
+  {$EXTERNALSYM D3DFMT_INDEX32}
+
+  D3DFMT_Q16W16V16U16         = D3DFORMAT(110);
+  {$EXTERNALSYM D3DFMT_Q16W16V16U16}
+
+  D3DFMT_MULTI2_ARGB8         = D3DFORMAT(Byte('M') OR (Byte('E') shl 8) OR (Byte('T') shl 16) OR (Byte('1') shl 24));
+  {$EXTERNALSYM D3DFMT_MULTI2_ARGB8}
+
+  // Floating point surface formats
+
+  // s10e5 formats (16-bits per channel)
+  D3DFMT_R16F                 = D3DFORMAT(111);
+  {$EXTERNALSYM D3DFMT_R16F}
+  D3DFMT_G16R16F              = D3DFORMAT(112);
+  {$EXTERNALSYM D3DFMT_G16R16F}
+  D3DFMT_A16B16G16R16F        = D3DFORMAT(113);
+  {$EXTERNALSYM D3DFMT_A16B16G16R16F}
+
+  // IEEE s23e8 formats (32-bits per channel)
+  D3DFMT_R32F                 = D3DFORMAT(114);
+  {$EXTERNALSYM D3DFMT_R32F}
+  D3DFMT_G32R32F              = D3DFORMAT(115);
+  {$EXTERNALSYM D3DFMT_G32R32F}
+  D3DFMT_A32B32G32R32F        = D3DFORMAT(116);
+  {$EXTERNALSYM D3DFMT_A32B32G32R32F}
+
+  D3DFMT_CxV8U8               = D3DFORMAT(117);
+  {$EXTERNALSYM D3DFMT_CxV8U8}
+
+  //* D3D9Ex only -- */
+  //{$IFDEF D3D_DISABLE_9EX}
+  // Monochrome 1 bit per pixel format
+  D3DFMT_A1                   = D3DFORMAT(118);
+  {$EXTERNALSYM D3DFMT_A1}
+  /// 2.8 biased fixed point
+  D3DFMT_A2B10G10R10_XR_BIAS  = D3DFORMAT(119);
+  {$EXTERNALSYM D3DFMT_A2B10G10R10_XR_BIAS}
+  // Binary format indicating that the data has no inherent type
+  D3DFMT_BINARYBUFFER         = D3DFORMAT(199);
+  {$EXTERNALSYM D3DFMT_BINARYBUFFER}
+//{$ENDIF} // !D3D_DISABLE_9EX
+  //* -- D3D9Ex only */
+  //D3DFMT_FORCE_DWORD          = FORCEDWORD;
 
 
+
+type
   //* Display Modes */
   PD3DDISPLAYMODE = ^_D3DDISPLAYMODE;
   _D3DDISPLAYMODE = record
@@ -2037,7 +2475,8 @@ type
     D3DSWAPEFFECT_FLIPEX      = 5,
     //{$ENDIF} // !D3D_DISABLE_9EX
     //* -- D3D9Ex only */
-    D3DSWAPEFFECT_FORCE_DWORD = FORCEDWORD);
+    D3DSWAPEFFECT_FORCE_DWORD = FORCEDWORD
+  );
   {$EXTERNALSYM _D3DSWAPEFFECT}
   D3DSWAPEFFECT = _D3DSWAPEFFECT;
   {$EXTERNALSYM D3DSWAPEFFECT}
@@ -2050,7 +2489,8 @@ type
     D3DPOOL_MANAGED     = 1,
     D3DPOOL_SYSTEMMEM   = 2,
     D3DPOOL_SCRATCH     = 3,
-    D3DPOOL_FORCE_DWORD = FORCEDWORD);
+    D3DPOOL_FORCE_DWORD = FORCEDWORD
+  );
   {$EXTERNALSYM _D3DPOOL}
   D3DPOOL = _D3DPOOL;
   {$EXTERNALSYM D3DPOOL}
@@ -2142,7 +2582,8 @@ type
     D3DBACKBUFFER_TYPE_MONO        = 0,
     D3DBACKBUFFER_TYPE_LEFT        = 1,
     D3DBACKBUFFER_TYPE_RIGHT       = 2,
-    D3DBACKBUFFER_TYPE_FORCE_DWORD = FORCEDWORD);
+    D3DBACKBUFFER_TYPE_FORCE_DWORD = FORCEDWORD
+  );
   D3DBACKBUFFER_TYPE = _D3DBACKBUFFER_TYPE;
   {$EXTERNALSYM D3DBACKBUFFER_TYPE}
 
@@ -2158,7 +2599,8 @@ type
     D3DRTYPE_CUBETEXTURE   = 5,
     D3DRTYPE_VERTEXBUFFER  = 6,
     D3DRTYPE_INDEXBUFFER   = 7,   // if this changes, change _D3DDEVINFO_RESOURCEMANAGER definition
-    D3DRTYPE_FORCE_DWORD   = FORCEDWORD);
+    D3DRTYPE_FORCE_DWORD   = FORCEDWORD
+  );
   {$EXTERNALSYM _D3DRESOURCETYPE}
   D3DRESOURCETYPE = _D3DRESOURCETYPE;
   {$EXTERNALSYM D3DRESOURCETYPE}
@@ -2245,7 +2687,8 @@ type
     D3DCUBEMAP_FACE_NEGATIVE_Y  = 3,
     D3DCUBEMAP_FACE_POSITIVE_Z  = 4,
     D3DCUBEMAP_FACE_NEGATIVE_Z  = 5,
-    D3DCUBEMAP_FACE_FORCE_DWORD = FORCEDWORD);
+    D3DCUBEMAP_FACE_FORCE_DWORD = FORCEDWORD
+  );
   {$EXTERNALSYM _D3DCUBEMAP_FACES}
   D3DCUBEMAP_FACES = _D3DCUBEMAP_FACES;
   {$EXTERNALSYM D3DCUBEMAP_FACES}
@@ -2479,31 +2922,32 @@ type
 
 
   // Async feedback
-
+type
   PD3DQUERYTYPE = ^_D3DQUERYTYPE;
-  _D3DQUERYTYPE                    = (
-    D3DQUERYTYPE_VCACHE            = 4,        { D3DISSUE_END }
-    D3DQUERYTYPE_RESOURCEMANAGER   = 5,        { D3DISSUE_END }
-    D3DQUERYTYPE_VERTEXSTATS       = 6,        { D3DISSUE_END }
-    D3DQUERYTYPE_EVENT             = 8,        { D3DISSUE_END }
-    D3DQUERYTYPE_OCCLUSION         = 9,        { D3DISSUE_BEGIN, D3DISSUE_END }
-    D3DQUERYTYPE_TIMESTAMP         = 10,       { D3DISSUE_END }
-    D3DQUERYTYPE_TIMESTAMPDISJOINT = 11,       { D3DISSUE_BEGIN, D3DISSUE_END }
-    D3DQUERYTYPE_TIMESTAMPFREQ     = 12,       { D3DISSUE_END }
-    D3DQUERYTYPE_PIPELINETIMINGS   = 13,       { D3DISSUE_BEGIN, D3DISSUE_END }
-    D3DQUERYTYPE_INTERFACETIMINGS  = 14,       { D3DISSUE_BEGIN, D3DISSUE_END }
-    D3DQUERYTYPE_VERTEXTIMINGS     = 15,       { D3DISSUE_BEGIN, D3DISSUE_END }
-    D3DQUERYTYPE_PIXELTIMINGS      = 16,       { D3DISSUE_BEGIN, D3DISSUE_END }
-    D3DQUERYTYPE_BANDWIDTHTIMINGS  = 17,       { D3DISSUE_BEGIN, D3DISSUE_END }
-    D3DQUERYTYPE_CACHEUTILIZATION  = 18        { D3DISSUE_BEGIN, D3DISSUE_END }
-    //* D3D9Ex only -- */
-    //{$IFDEF D3D_DISABLE_9EX}
-    , D3DQUERYTYPE_MEMORYPRESSURE  = 19        { D3DISSUE_BEGIN, D3DISSUE_END }
-    //{$ENDIF} // !D3D_DISABLE_9EX
-  );
+  _D3DQUERYTYPE = DWord;
   {$EXTERNALSYM _D3DQUERYTYPE}
   D3DQUERYTYPE = _D3DQUERYTYPE;
   {$EXTERNALSYM D3DQUERYTYPE}
+const
+  D3DQUERYTYPE_VCACHE            = D3DQUERYTYPE(4);        { D3DISSUE_END }
+  D3DQUERYTYPE_RESOURCEMANAGER   = D3DQUERYTYPE(5);        { D3DISSUE_END }
+  D3DQUERYTYPE_VERTEXSTATS       = D3DQUERYTYPE(6);        { D3DISSUE_END }
+  D3DQUERYTYPE_EVENT             = D3DQUERYTYPE(8);        { D3DISSUE_END }
+  D3DQUERYTYPE_OCCLUSION         = D3DQUERYTYPE(9);        { D3DISSUE_BEGIN); D3DISSUE_END }
+  D3DQUERYTYPE_TIMESTAMP         = D3DQUERYTYPE(10);       { D3DISSUE_END }
+  D3DQUERYTYPE_TIMESTAMPDISJOINT = D3DQUERYTYPE(11);       { D3DISSUE_BEGIN); D3DISSUE_END }
+  D3DQUERYTYPE_TIMESTAMPFREQ     = D3DQUERYTYPE(12);       { D3DISSUE_END }
+  D3DQUERYTYPE_PIPELINETIMINGS   = D3DQUERYTYPE(13);       { D3DISSUE_BEGIN); D3DISSUE_END }
+  D3DQUERYTYPE_INTERFACETIMINGS  = D3DQUERYTYPE(14);       { D3DISSUE_BEGIN); D3DISSUE_END }
+  D3DQUERYTYPE_VERTEXTIMINGS     = D3DQUERYTYPE(15);       { D3DISSUE_BEGIN); D3DISSUE_END }
+  D3DQUERYTYPE_PIXELTIMINGS      = D3DQUERYTYPE(16);       { D3DISSUE_BEGIN); D3DISSUE_END }
+  D3DQUERYTYPE_BANDWIDTHTIMINGS  = D3DQUERYTYPE(17);       { D3DISSUE_BEGIN); D3DISSUE_END }
+  D3DQUERYTYPE_CACHEUTILIZATION  = D3DQUERYTYPE(18);       { D3DISSUE_BEGIN); D3DISSUE_END }
+//* D3D9Ex only -- */
+//{$IFDEF D3D_DISABLE_9EX}
+  D3DQUERYTYPE_MEMORYPRESSURE    = D3DQUERYTYPE(19);       { D3DISSUE_BEGIN); D3DISSUE_END }
+//{$ENDIF} // !D3D_DISABLE_9EX
+
 
 
 const
@@ -2523,7 +2967,7 @@ type
 
   PD3DRESOURCESTATS = ^_D3DRESOURCESTATS;
   _D3DRESOURCESTATS = record
-                                     // Data collected since last Present()
+    // Data collected since last Present()
     bThrashing: BOOL;                { indicates if thrashing }
     ApproxBytesDownloaded: DWORD;    { Approximate number of bytes downloaded by resource manager }
     NumEvicts: DWORD;                { number of objects evicted }
@@ -2666,7 +3110,8 @@ type
     D3DCOMPOSERECTS_OR          = 2,
     D3DCOMPOSERECTS_AND         = 3,
     D3DCOMPOSERECTS_NEG         = 4,
-    D3DCOMPOSERECTS_FORCE_DWORD = FORCEDWORD);  { force 32-bit size enum }
+    D3DCOMPOSERECTS_FORCE_DWORD = FORCEDWORD
+  );  { force 32-bit size enum }
   {$EXTERNALSYM _D3DCOMPOSERECTSOP}
   D3DCOMPOSERECTSOP = _D3DCOMPOSERECTSOP;
   {$EXTERNALSYM D3DCOMPOSERECTSOP}
@@ -2729,7 +3174,8 @@ type
   D3DSCANLINEORDERING               = (
     D3DSCANLINEORDERING_UNKNOWN     = 0,
     D3DSCANLINEORDERING_PROGRESSIVE = 1,
-    D3DSCANLINEORDERING_INTERLACED  = 2);
+    D3DSCANLINEORDERING_INTERLACED  = 2
+  );
   {$EXTERNALSYM D3DSCANLINEORDERING}
 
 
@@ -2756,15 +3202,15 @@ type
 
   PD3DDISPLAYROTATION = ^D3DDISPLAYROTATION;
   D3DDISPLAYROTATION            = (
-    D3DDISPLAYROTATION_IDENTITY = 1,  // No rotation.
+    D3DDISPLAYROTATION_IDENTITY = 1,       // No rotation.
     {$EXTERNALSYM D3DDISPLAYROTATION_IDENTITY}
-    D3DDISPLAYROTATION_90       = 2,  // Rotated 90 degrees.
+    D3DDISPLAYROTATION_90       = 2,       // Rotated 90 degrees.
     {$EXTERNALSYM D3DDISPLAYROTATION_90}
-    D3DDISPLAYROTATION_180      = 3,  // Rotated 180 degrees.
+    D3DDISPLAYROTATION_180      = 3,       // Rotated 180 degrees.
     {$EXTERNALSYM D3DDISPLAYROTATION_180}
     D3DDISPLAYROTATION_270      = 4
-    {$EXTERNALSYM D3DDISPLAYROTATION_270}
-  ); // Rotated 270 degrees.
+    {$EXTERNALSYM D3DDISPLAYROTATION_270}  // Rotated 270 degrees.
+  );
   {$EXTERNALSYM D3DDISPLAYROTATION}
 
 
@@ -2801,7 +3247,8 @@ type
   _D3DAUTHENTICATEDCHANNELTYPE              = (
     D3DAUTHENTICATEDCHANNEL_D3D9            = 1,
     D3DAUTHENTICATEDCHANNEL_DRIVER_SOFTWARE = 2,
-    D3DAUTHENTICATEDCHANNEL_DRIVER_HARDWARE = 3);
+    D3DAUTHENTICATEDCHANNEL_DRIVER_HARDWARE = 3
+  );
   {$EXTERNALSYM _D3DAUTHENTICATEDCHANNELTYPE}
   D3DAUTHENTICATEDCHANNELTYPE = _D3DAUTHENTICATEDCHANNELTYPE;
   {$EXTERNALSYM D3DAUTHENTICATEDCHANNELTYPE}
@@ -3098,25 +3545,43 @@ const
 
 
 type
-
   PD3DBUSTYPE = ^D3DBUSTYPE;
-  _D3DBUSTYPE                                                   = (
-    D3DBUSTYPE_OTHER                                            = $00000000,
-    D3DBUSTYPE_PCI                                              = $00000001,
-    D3DBUSTYPE_PCIX                                             = $00000002,
-    D3DBUSTYPE_PCIEXPRESS                                       = $00000003,
-    D3DBUSTYPE_AGP                                              = $00000004,
-    D3DBUSIMPL_MODIFIER_INSIDE_OF_CHIPSET                       = $00010000,
-    D3DBUSIMPL_MODIFIER_TRACKS_ON_MOTHER_BOARD_TO_CHIP          = $00020000,
-    D3DBUSIMPL_MODIFIER_TRACKS_ON_MOTHER_BOARD_TO_SOCKET        = $00030000,
-    D3DBUSIMPL_MODIFIER_DAUGHTER_BOARD_CONNECTOR                = $00040000,
-    D3DBUSIMPL_MODIFIER_DAUGHTER_BOARD_CONNECTOR_INSIDE_OF_NUAE = $00050000,
-    D3DBUSIMPL_MODIFIER_NON_STANDARD                            = Integer($80000000));
+  _D3DBUSTYPE = DWord;
   {$EXTERNALSYM _D3DBUSTYPE}
   D3DBUSTYPE = _D3DBUSTYPE;
   {$EXTERNALSYM D3DBUSTYPE}
+const
+  D3DBUSTYPE_OTHER                                            = D3DBUSTYPE($00000000);
+  {$EXTERNALSYM D3DBUSTYPE_OTHER}
+  D3DBUSTYPE_PCI                                              = D3DBUSTYPE($00000001);
+  {$EXTERNALSYM D3DBUSTYPE_PCI}
+  D3DBUSTYPE_PCIX                                             = D3DBUSTYPE($00000002);
+  {$EXTERNALSYM D3DBUSTYPE_PCIX}
+  D3DBUSTYPE_PCIEXPRESS                                       = D3DBUSTYPE($00000003);
+  {$EXTERNALSYM D3DBUSTYPE_PCIEXPRESS}
+  D3DBUSTYPE_AGP                                              = D3DBUSTYPE($00000004);
+  {$EXTERNALSYM D3DBUSTYPE_AGP}
+  D3DBUSIMPL_MODIFIER_INSIDE_OF_CHIPSET                       = D3DBUSTYPE($00010000);
+  {$EXTERNALSYM D3DBUSIMPL_MODIFIER_INSIDE_OF_CHIPSET}
+  D3DBUSIMPL_MODIFIER_TRACKS_ON_MOTHER_BOARD_TO_CHIP          = D3DBUSTYPE($00020000);
+  {$EXTERNALSYM D3DBUSIMPL_MODIFIER_TRACKS_ON_MOTHER_BOARD_TO_CHIP}
+  D3DBUSIMPL_MODIFIER_TRACKS_ON_MOTHER_BOARD_TO_SOCKET        = D3DBUSTYPE($00030000);
+  {$EXTERNALSYM D3DBUSIMPL_MODIFIER_TRACKS_ON_MOTHER_BOARD_TO_SOCKET}
+  D3DBUSIMPL_MODIFIER_DAUGHTER_BOARD_CONNECTOR                = D3DBUSTYPE($00040000);
+  {$EXTERNALSYM D3DBUSIMPL_MODIFIER_DAUGHTER_BOARD_CONNECTOR}
+  D3DBUSIMPL_MODIFIER_DAUGHTER_BOARD_CONNECTOR_INSIDE_OF_NUAE = D3DBUSTYPE($00050000);
+  {$EXTERNALSYM D3DBUSIMPL_MODIFIER_DAUGHTER_BOARD_CONNECTOR_INSIDE_OF_NUAE}
+  D3DBUSIMPL_MODIFIER_NON_STANDARD                            = D3DBUSTYPE($80000000);
+  {$EXTERNALSYM D3DBUSIMPL_MODIFIER_NON_STANDARD}
+  // NOTE:
+  // As many as three flags can be set.
+  // Flags in the range 0x00 through 0x04 (D3DBUSTYPE_Xxx) provide the basic bus type.
+  // Flags in the range 0x10000 through 0x50000 (D3DBUSIMPL_MODIFIER_Xxx) modify the basic description.
+  // The driver sets one bus-type flag, and can set zero or one modifier flag.
+  // If the driver sets a modifier flag, it also sets the D3DBUSIMPL_MODIFIER_NON_STANDARD flag.
+  // Flags are combined with a bitwise OR.
 
-
+type
   PD3DAUTHENTICATEDCHANNEL_QUERYINFOBUSTYPE_OUTPUT = ^_D3DAUTHENTICATEDCHANNEL_QUERYINFOBUSTYPE_OUTPUT;
   _D3DAUTHENTICATEDCHANNEL_QUERYINFOBUSTYPE_OUTPUT = record
     Output: D3DAUTHENTICATEDCHANNEL_QUERY_OUTPUT;

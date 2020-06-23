@@ -9,24 +9,26 @@
 // Release date: 11-07-2012
 // Language: ENU
 //
-// Revision Version: 2.6.3
+// Revision Version: 2.6.4
 // Description: -
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX263
+// Related projects: MfPackX264
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -145,7 +147,8 @@ type
   cwSTREAM_TYPE = (
     STREAMTYPE_READ      = 0,
     STREAMTYPE_WRITE     = 1,
-    STREAMTYPE_TRANSFORM = 2);
+    STREAMTYPE_TRANSFORM = 2
+  );
   {$EXTERNALSYM cwSTREAM_TYPE}
   STREAM_TYPE = cwSTREAM_TYPE;
   {$EXTERNALSYM STREAM_TYPE}
@@ -154,25 +157,30 @@ type
   PStreamState = ^cwSTREAMSTATE_STOP;
   cwSTREAMSTATE_STOP = (
     STREAMSTATE_STOP = 0,
-    STREAMSTATE_RUN  = 1);
+    STREAMSTATE_RUN  = 1
+  );
   {$EXTERNALSYM cwSTREAMSTATE_STOP}
   STREAM_STATE = cwSTREAMSTATE_STOP;
   {$EXTERNALSYM STREAM_STATE}
 
+type
   PCompletionStatusFlags = ^cwCOMPLETION_STATUS_FLAGS;
-  cwCOMPLETION_STATUS_FLAGS = (
-    COMPSTAT_NOUPDATEOK = $1,
-    COMPSTAT_WAIT       = $2,
-    COMPSTAT_ABORT      = $4);
+  cwCOMPLETION_STATUS_FLAGS = Dword;
   {$EXTERNALSYM cwCOMPLETION_STATUS_FLAGS}
   COMPLETION_STATUS_FLAGS = cwCOMPLETION_STATUS_FLAGS;
   {$EXTERNALSYM COMPLETION_STATUS_FLAGS}
+const
+    COMPSTAT_NOUPDATEOK = COMPLETION_STATUS_FLAGS($1);
+    COMPSTAT_WAIT       = COMPLETION_STATUS_FLAGS($2);
+    COMPSTAT_ABORT      = COMPLETION_STATUS_FLAGS($4);
 
+type
   PMMSSF = ^cwMMSSF;
   cwMMSSF = (
     MMSSF_HASCLOCK	    = $1,
 	  MMSSF_SUPPORTSEEK	  = $2,
-	  MMSSF_ASYNCHRONOUS	= $4);
+	  MMSSF_ASYNCHRONOUS	= $4
+  );
   {$EXTERNALSYM cwMMSSF}
   MMSSF = cwMMSSF;
   {$EXTERNALSYM MMSSF}
@@ -180,7 +188,8 @@ type
   PSSUPDATE = ^cwSSUPDATE;
   cwSSUPDATE = (
     SSUPDATE_ASYNC	    = $1,
-	  SSUPDATE_CONTINUOUS	= $2);
+	  SSUPDATE_CONTINUOUS	= $2
+  );
   {$EXTERNALSYM cwSSUPDATE}
   SSUPDATE = cwSSUPDATE;
   {$EXTERNALSYM SSUPDATE}

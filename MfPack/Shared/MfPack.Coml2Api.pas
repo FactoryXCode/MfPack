@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -142,17 +144,16 @@ type
   PSTGFMT = ^STGFMT;
   STGFMT = DWORD;
   {$EXTERNALSYM STGFMT}
-
 const
-  STGFMT_STORAGE                      = DWord(0);
+  STGFMT_STORAGE                      = STGFMT(0);
   {$EXTERNALSYM STGFMT_STORAGE}
-  STGFMT_NATIVE                       = DWord(1);
+  STGFMT_NATIVE                       = STGFMT(1);
   {$EXTERNALSYM STGFMT_NATIVE}
-  STGFMT_FILE                         = DWord(3);
+  STGFMT_FILE                         = STGFMT(3);
   {$EXTERNALSYM STGFMT_FILE}
-  STGFMT_ANY                          = DWord(4);
+  STGFMT_ANY                          = STGFMT(4);
   {$EXTERNALSYM STGFMT_ANY}
-  STGFMT_DOCFILE                      = DWord(5);
+  STGFMT_DOCFILE                      = STGFMT(5);
   {$EXTERNALSYM STGFMT_DOCFILE}
 
 

@@ -17,11 +17,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX),
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -86,9 +88,10 @@ type
   // in order to select the video format
   PAMVP_SELECT_FORMAT_BY = ^AMVP_SELECT_FORMAT_BY;
   _AMVP_SELECT_FORMAT_BY = (
-    AMVP_DO_NOT_CARE,
-    AMVP_BEST_BANDWIDTH,
-    AMVP_INPUT_SAME_AS_OUTPUT);
+    AMVP_DO_NOT_CARE          = 0,
+    AMVP_BEST_BANDWIDTH       = 1,
+    AMVP_INPUT_SAME_AS_OUTPUT = 2
+  );
   {$EXTERNALSYM _AMVP_SELECT_FORMAT_BY}
   AMVP_SELECT_FORMAT_BY = _AMVP_SELECT_FORMAT_BY;
   {$EXTERNALSYM AMVP_SELECT_FORMAT_BY}
@@ -96,11 +99,12 @@ type
   // enum to specify the various mode
   PAMVP_MODE = ^AMVP_MODE;
   _AMVP_MODE = (
-    AMVP_MODE_WEAVE,
-    AMVP_MODE_BOBINTERLEAVED,
-    AMVP_MODE_BOBNONINTERLEAVED,
-    AMVP_MODE_SKIPEVEN,
-    AMVP_MODE_SKIPODD);
+    AMVP_MODE_WEAVE             = 0,
+    AMVP_MODE_BOBINTERLEAVED    = 1,
+    AMVP_MODE_BOBNONINTERLEAVED = 2,
+    AMVP_MODE_SKIPEVEN          = 3,
+    AMVP_MODE_SKIPODD           = 4
+  );
   {$EXTERNALSYM _AMVP_MODE}
   AMVP_MODE = _AMVP_MODE;
   {$EXTERNALSYM AMVP_MODE}

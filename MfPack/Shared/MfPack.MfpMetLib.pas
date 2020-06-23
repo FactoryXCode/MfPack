@@ -10,7 +10,7 @@
 // Language: ENU
 //
 // Revision Version: 2.6.4
-// Description: This unit holds the basic Media Foundation methods needed to play,
+// Description: This unit holds basic Media Foundation methods needed to play,
 //              record, encode, decode, etc.
 //
 // Company: FactoryX
@@ -20,11 +20,13 @@
 //                 Ramyses De Macedo Rodrigues,
 //                 (TopPlay)
 //
+// Rudy Velthuis 1960 ~ 2019.
 // -----------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -134,7 +136,7 @@ type
   // Arrays that holds retrieved devices by name and/or index
   TDevicePropertiesArray = array of TDeviceProperties;
 
-  // See https://msdn.microsoft.com/en-us/library/windows/desktop/aa367377 and MfApi.pas
+  // See https://docs.microsoft.com/en-us/windows/win32/medfound/media-type-guids and MfApi.pas
   TMediaTypes = (mtDefault,                   // Default stream.
                  mtAudio,                     // Audio stream.
                  mtVideo,                     // Video stream.
@@ -193,6 +195,7 @@ type
   TStreamContentsArray = array of TStreamContents;
 
 
+
 // EVENTS
 // ======
 
@@ -202,6 +205,15 @@ type
   // Alternative for ProcessMessages
   // Usage: HandleMessages(GetThreadHandle());
   procedure HandleMessages(hThread: THandle);
+
+
+// Media Samples
+// =============
+
+  // Create a sample and add a buffer to it.
+  function CreateMediaSample(cbData: DWORD;
+                             ppSample: IMFSample): HRESULT;
+
 
 // MEDIA SOURCE
 // ============
@@ -487,6 +499,9 @@ type
   function EnumerateTypesForStream(pReader: IMFSourceReader;
                                    dwStreamIndex: DWORD): HRESULT;
 
+  // Returns the name of a guid
+  function GetGUIDNameConst(const guid: TGUID): string;
+
 
 
 // Device Loss
@@ -555,6 +570,21 @@ type
   procedure ListDeviceNames(ppDevices: PIMFActivate; // Pointer to array of IMFActivate
                             out iList: TStringList); // output
 
+  //
+  function SetMaxFrameRate(pSource: IMFMediaSource; dwTypeIndex: DWORD): HRESULT;
+
+
+
+
+// SAR (Streaming Audio Renderer)
+// ==============================
+
+ // Enumerates the audio rendering devices and assigns the first device or nDevice in the list to the SAR.
+ function EnumAudioRenderingDevices(nDevice: UInt;
+                                    out wstrID: PWideChar; // Id
+                                    pSink: IMFMediaSink = Nil;  // Streaming audio renderer (SAR)
+                                    pActivate: IMFActivate = Nil // Activation object, which can be used to create the SAR.
+                                    ): HResult;
 
 
   // Helper methods
@@ -651,8 +681,7 @@ type
   // Use this interface to get a pointer to the IMFMetadata interface.
   function GetMetadata(pSource: IMFMediaSource;
                        out ppMetadata: IMFMetadata;
-                       dwStream: DWORD): HRESULT;
-
+                       dwStream: DWORD): HResult;
 
   // Returns the stream identifier from an active stream, of a given streamtype.
   function GetActiveStreamIndex(stmediaType: TMediaTypes;
@@ -823,6 +852,31 @@ begin
       TranslateMessage(Msg);
       DispatchMessage(Msg);
     end;
+end;
+
+
+// Create a sample and add a buffer to it.
+function CreateMediaSample(cbData: DWORD;
+                           ppSample: IMFSample): HRESULT;
+var
+  hr: HRESULT;
+  pSample: IMFSample;
+  pBuffer: IMFMediaBuffer;
+
+begin
+  hr := MFCreateSample(pSample);
+
+  if SUCCEEDED(hr) then
+    hr := MFCreateMemoryBuffer(cbData,
+                               pBuffer);
+
+  if SUCCEEDED(hr) then
+    hr := pSample.AddBuffer(pBuffer);
+
+  if SUCCEEDED(hr) then
+    ppSample := pSample;
+
+  Result := hr;
 end;
 
 
@@ -1908,9 +1962,6 @@ begin
       Exit;
     end;
 
-  pAttr := Nil;
-  pCol := Nil;
-  pNode := Nil;
 
   hr := MFGetService(pSession,
                      MF_TOPONODE_ATTRIBUTE_EDITOR_SERVICE,
@@ -2533,13 +2584,13 @@ begin
   for i := 0 to cTypes - 1 do
     begin
       hr := pHandler.GetMediaTypeByIndex(i,
-                                        pType);
+                                         pType);
       if FAILED(hr) then
         goto done;
 
-     // LogMediaType(pType);
+     // todo: LogMediaType(pType);
      // OutputDebugString(L"\n");
-
+     // GetTypeName(TypeInfo(IMFMediaType))
     end;
 
 done:
@@ -2574,13 +2625,329 @@ begin
       else if (SUCCEEDED(hr)) then
         begin
 
-          // Examine the media type here. (Not implemented)
+          //todo:  Examine the media type here. (Not implemented)
 
           SafeRelease(pType);
         end;
       inc(dwMediaTypeIndex);
     end;
   Result := hr;
+end;
+
+
+// Note: RTTI is not used, because it will not work on all Delphi versions.
+//       So, we do it the alternative way.
+function GetGUIDNameConst(const guid: TGuid): string;
+var
+  sGuidName: string;
+
+  function IfEqualReturnGuidName(const gtype: TGuid;
+                                 const sgName: string): Boolean;
+    begin
+      sGuidName := '';
+      if IsEqualGuid(guid, gtype) then
+        begin
+          sGuidName := sgName;
+          Result := True;
+        end
+      else
+        Result := False;
+    end;
+
+label
+  done;
+
+begin
+
+   if IfEqualReturnGuidName(MF_MT_MAJOR_TYPE, 'MF_MT_MAJOR_TYPE') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_SUBTYPE, 'MF_MT_SUBTYPE') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_ALL_SAMPLES_INDEPENDENT, 'MF_MT_ALL_SAMPLES_INDEPENDENT') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_FIXED_SIZE_SAMPLES, 'MF_MT_FIXED_SIZE_SAMPLES') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_COMPRESSED, 'MF_MT_COMPRESSED') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_SAMPLE_SIZE, 'MF_MT_SAMPLE_SIZE') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_WRAPPED_TYPE, 'MF_MT_WRAPPED_TYPE') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_AUDIO_NUM_CHANNELS, 'MF_MT_AUDIO_NUM_CHANNELS') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_AUDIO_SAMPLES_PER_SECOND, 'MF_MT_AUDIO_SAMPLES_PER_SECOND') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_AUDIO_FLOAT_SAMPLES_PER_SECOND, 'MF_MT_AUDIO_FLOAT_SAMPLES_PER_SECOND') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_AUDIO_AVG_BYTES_PER_SECOND, 'MF_MT_AUDIO_AVG_BYTES_PER_SECOND') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_AUDIO_BLOCK_ALIGNMENT, 'MF_MT_AUDIO_BLOCK_ALIGNMENT') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_AUDIO_BITS_PER_SAMPLE, 'MF_MT_AUDIO_BITS_PER_SAMPLE') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_AUDIO_VALID_BITS_PER_SAMPLE, 'MF_MT_AUDIO_VALID_BITS_PER_SAMPLE') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_AUDIO_SAMPLES_PER_BLOCK, 'MF_MT_AUDIO_SAMPLES_PER_BLOCK') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_AUDIO_CHANNEL_MASK, 'MF_MT_AUDIO_CHANNEL_MASK') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_AUDIO_FOLDDOWN_MATRIX, 'MF_MT_AUDIO_FOLDDOWN_MATRIX') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_AUDIO_WMADRC_PEAKREF, 'MF_MT_AUDIO_WMADRC_PEAKREF') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_AUDIO_WMADRC_PEAKTARGET, 'MF_MT_AUDIO_WMADRC_PEAKTARGET') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_AUDIO_WMADRC_AVGREF, 'MF_MT_AUDIO_WMADRC_AVGREF') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_AUDIO_WMADRC_AVGTARGET, 'MF_MT_AUDIO_WMADRC_AVGTARGET') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_AUDIO_PREFER_WAVEFORMATEX, 'MF_MT_AUDIO_PREFER_WAVEFORMATEX') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_AAC_PAYLOAD_TYPE, 'MF_MT_AAC_PAYLOAD_TYPE') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_AAC_AUDIO_PROFILE_LEVEL_INDICATION, 'MF_MT_AAC_AUDIO_PROFILE_LEVEL_INDICATION') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_FRAME_SIZE, 'MF_MT_FRAME_SIZE') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_FRAME_RATE, 'MF_MT_FRAME_RATE') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_FRAME_RATE_RANGE_MAX, 'MF_MT_FRAME_RATE_RANGE_MAX') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_FRAME_RATE_RANGE_MIN, 'MF_MT_FRAME_RATE_RANGE_MIN') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_PIXEL_ASPECT_RATIO, 'MF_MT_PIXEL_ASPECT_RATIO') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_DRM_FLAGS, 'MF_MT_DRM_FLAGS') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_PAD_CONTROL_FLAGS, 'MF_MT_PAD_CONTROL_FLAGS') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_SOURCE_CONTENT_HINT, 'MF_MT_SOURCE_CONTENT_HINT') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_VIDEO_CHROMA_SITING, 'MF_MT_VIDEO_CHROMA_SITING') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_INTERLACE_MODE, 'MF_MT_INTERLACE_MODE') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_TRANSFER_FUNCTION, 'MF_MT_TRANSFER_FUNCTION') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_VIDEO_PRIMARIES, 'MF_MT_VIDEO_PRIMARIES') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_CUSTOM_VIDEO_PRIMARIES, 'MF_MT_CUSTOM_VIDEO_PRIMARIES') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_YUV_MATRIX, 'MF_MT_YUV_MATRIX') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_VIDEO_LIGHTING, 'MF_MT_VIDEO_LIGHTING') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_VIDEO_NOMINAL_RANGE, 'MF_MT_VIDEO_NOMINAL_RANGE') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_GEOMETRIC_APERTURE, 'MF_MT_GEOMETRIC_APERTURE') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_MINIMUM_DISPLAY_APERTURE, 'MF_MT_MINIMUM_DISPLAY_APERTURE') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_PAN_SCAN_APERTURE, 'MF_MT_PAN_SCAN_APERTURE') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_PAN_SCAN_ENABLED, 'MF_MT_PAN_SCAN_ENABLED') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_AVG_BITRATE, 'MF_MT_AVG_BITRATE') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_AVG_BIT_ERROR_RATE, 'MF_MT_AVG_BIT_ERROR_RATE') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_MAX_KEYFRAME_SPACING, 'MF_MT_MAX_KEYFRAME_SPACING') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_DEFAULT_STRIDE, 'MF_MT_DEFAULT_STRIDE') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_PALETTE, 'MF_MT_PALETTE') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_USER_DATA, 'MF_MT_USER_DATA') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_AM_FORMAT_TYPE, 'MF_MT_AM_FORMAT_TYPE') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_MPEG_START_TIME_CODE, 'MF_MT_MPEG_START_TIME_CODE') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_MPEG2_PROFILE, 'MF_MT_MPEG2_PROFILE') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_MPEG2_LEVEL, 'MF_MT_MPEG2_LEVEL') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_MPEG2_FLAGS, 'MF_MT_MPEG2_FLAGS') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_MPEG_SEQUENCE_HEADER, 'MF_MT_MPEG_SEQUENCE_HEADER') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_DV_AAUX_SRC_PACK_0, 'MF_MT_DV_AAUX_SRC_PACK_0') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_DV_AAUX_CTRL_PACK_0, 'MF_MT_DV_AAUX_CTRL_PACK_0') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_DV_AAUX_SRC_PACK_1, 'MF_MT_DV_AAUX_SRC_PACK_1') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_DV_AAUX_CTRL_PACK_1, 'MF_MT_DV_AAUX_CTRL_PACK_1') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_DV_VAUX_SRC_PACK, 'MF_MT_DV_VAUX_SRC_PACK') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_DV_VAUX_CTRL_PACK, 'MF_MT_DV_VAUX_CTRL_PACK') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_ARBITRARY_HEADER, 'MF_MT_ARBITRARY_HEADER') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_ARBITRARY_FORMAT, 'MF_MT_ARBITRARY_FORMAT') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_IMAGE_LOSS_TOLERANT, 'MF_MT_IMAGE_LOSS_TOLERANT') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_MPEG4_SAMPLE_DESCRIPTION, 'MF_MT_MPEG4_SAMPLE_DESCRIPTION') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_MPEG4_CURRENT_SAMPLE_ENTRY, 'MF_MT_MPEG4_CURRENT_SAMPLE_ENTRY') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_ORIGINAL_4CC, 'MF_MT_ORIGINAL_4CC') then
+     goto done;
+   if IfEqualReturnGuidName(MF_MT_ORIGINAL_WAVE_FORMAT_TAG, 'MF_MT_ORIGINAL_WAVE_FORMAT_TAG') then
+     goto done;
+
+   // Media types
+
+   if IfEqualReturnGuidName(MFMediaType_Audio, 'MFMediaType_Audio') then
+     goto done;
+   if IfEqualReturnGuidName(MFMediaType_Video, 'MFMediaType_Video') then
+     goto done;
+   if IfEqualReturnGuidName(MFMediaType_Protected, 'MFMediaType_Protected') then
+     goto done;
+   if IfEqualReturnGuidName(MFMediaType_SAMI, 'MFMediaType_SAMI') then
+     goto done;
+   if IfEqualReturnGuidName(MFMediaType_Script, 'MFMediaType_Script') then
+     goto done;
+   if IfEqualReturnGuidName(MFMediaType_Image, 'MFMediaType_Image') then
+     goto done;
+   if IfEqualReturnGuidName(MFMediaType_HTML, 'MFMediaType_HTML') then
+     goto done;
+   if IfEqualReturnGuidName(MFMediaType_Binary, 'MFMediaType_Binary') then
+     goto done;
+   if IfEqualReturnGuidName(MFMediaType_FileTransfer, 'MFMediaType_FileTransfer') then
+     goto done;
+
+   // Video formats
+
+   if IfEqualReturnGuidName(MFVideoFormat_AI44, 'MFVideoFormat_AI44') then //     FCC('AI44')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_ARGB32, 'MFVideoFormat_ARGB32') then //   D3DFMT_A8R8G8B8
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_AYUV, 'MFVideoFormat_AYUV') then //     FCC('AYUV')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_DV25, 'MFVideoFormat_DV25') then //     FCC('dv25')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_DV50, 'MFVideoFormat_DV50') then //     FCC('dv50')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_DVH1, 'MFVideoFormat_DVH1') then //     FCC('dvh1')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_DVSD, 'MFVideoFormat_DVSD') then //     FCC('dvsd')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_DVSL, 'MFVideoFormat_DVSL') then //     FCC('dvsl')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_H264, 'MFVideoFormat_H264') then //     FCC('H264')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_I420, 'MFVideoFormat_I420') then //     FCC('I420')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_IYUV, 'MFVideoFormat_IYUV') then //     FCC('IYUV')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_M4S2, 'MFVideoFormat_M4S2') then //     FCC('M4S2')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_MJPG, 'MFVideoFormat_MJPG') then //     FCC('MJPG')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_MP43, 'MFVideoFormat_MP43') then //     FCC('MP43')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_MP4S, 'MFVideoFormat_MP4S') then //     FCC('MP4S')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_MP4V, 'MFVideoFormat_MP4V') then //     FCC('MP4V')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_MPG1, 'MFVideoFormat_MPG1') then //     FCC('MPG1')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_MSS1, 'MFVideoFormat_MSS1') then //     FCC('MSS1')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_MSS2, 'MFVideoFormat_MSS2') then //     FCC('MSS2')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_NV11, 'MFVideoFormat_NV11') then //     FCC('NV11')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_NV12, 'MFVideoFormat_NV12') then //     FCC('NV12')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_P010, 'MFVideoFormat_P010') then //     FCC('P010')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_P016, 'MFVideoFormat_P016') then //     FCC('P016')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_P210, 'MFVideoFormat_P210') then //     FCC('P210')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_P216, 'MFVideoFormat_P216') then //     FCC('P216')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_RGB24, 'MFVideoFormat_RGB24') then //    D3DFMT_R8G8B8
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_RGB32, 'MFVideoFormat_RGB32') then //    D3DFMT_X8R8G8B8
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_RGB555, 'MFVideoFormat_RGB555') then //   D3DFMT_X1R5G5B5
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_RGB565, 'MFVideoFormat_RGB565') then //   D3DFMT_R5G6B5
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_RGB8, 'MFVideoFormat_RGB8') then
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_UYVY, 'MFVideoFormat_UYVY') then //     FCC('UYVY')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_v210, 'MFVideoFormat_v210') then //     FCC('v210')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_v410, 'MFVideoFormat_v410') then //     FCC('v410')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_WMV1, 'MFVideoFormat_WMV1') then //     FCC('WMV1')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_WMV2, 'MFVideoFormat_WMV2') then //     FCC('WMV2')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_WMV3, 'MFVideoFormat_WMV3') then //     FCC('WMV3')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_WVC1, 'MFVideoFormat_WVC1') then //     FCC('WVC1')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_Y210, 'MFVideoFormat_Y210') then //     FCC('Y210')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_Y216, 'MFVideoFormat_Y216') then //     FCC('Y216')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_Y410, 'MFVideoFormat_Y410') then //     FCC('Y410')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_Y416, 'MFVideoFormat_Y416') then //     FCC('Y416')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_Y41P, 'MFVideoFormat_Y41P') then
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_Y41T, 'MFVideoFormat_Y41T') then
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_YUY2, 'MFVideoFormat_YUY2') then //     FCC('YUY2')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_YV12, 'MFVideoFormat_YV12') then //     FCC('YV12')
+     goto done;
+   if IfEqualReturnGuidName(MFVideoFormat_YVYU, 'MFVideoFormat_YVYU') then
+     goto done;
+
+   // Audio formats
+
+   if IfEqualReturnGuidName(MFAudioFormat_PCM, 'MFAudioFormat_PCM') then //              WAVE_FORMAT_PCM
+     goto done;
+   if IfEqualReturnGuidName(MFAudioFormat_Float, 'MFAudioFormat_Float') then //            WAVE_FORMAT_IEEE_FLOAT
+     goto done;
+   if IfEqualReturnGuidName(MFAudioFormat_DTS, 'MFAudioFormat_DTS') then //              WAVE_FORMAT_DTS
+     goto done;
+   if IfEqualReturnGuidName(MFAudioFormat_Dolby_AC3_SPDIF, 'MFAudioFormat_Dolby_AC3_SPDIF') then //  WAVE_FORMAT_DOLBY_AC3_SPDIF
+     goto done;
+   if IfEqualReturnGuidName(MFAudioFormat_DRM, 'MFAudioFormat_DRM') then //              WAVE_FORMAT_DRM
+     goto done;
+   if IfEqualReturnGuidName(MFAudioFormat_WMAudioV8, 'MFAudioFormat_WMAudioV8') then //        WAVE_FORMAT_WMAUDIO2
+     goto done;
+   if IfEqualReturnGuidName(MFAudioFormat_WMAudioV9, 'MFAudioFormat_WMAudioV9') then //        WAVE_FORMAT_WMAUDIO3
+     goto done;
+   if IfEqualReturnGuidName(MFAudioFormat_WMAudio_Lossless, 'MFAudioFormat_WMAudio_Lossless') then // WAVE_FORMAT_WMAUDIO_LOSSLESS
+     goto done;
+   if IfEqualReturnGuidName(MFAudioFormat_WMASPDIF, 'MFAudioFormat_WMASPDIF') then //         WAVE_FORMAT_WMASPDIF
+     goto done;
+   if IfEqualReturnGuidName(MFAudioFormat_MSP1, 'MFAudioFormat_MSP1') then //             WAVE_FORMAT_WMAVOICE9
+     goto done;
+   if IfEqualReturnGuidName(MFAudioFormat_MP3, 'MFAudioFormat_MP3') then //              WAVE_FORMAT_MPEGLAYER3
+     goto done;
+   if IfEqualReturnGuidName(MFAudioFormat_MPEG, 'MFAudioFormat_MPEG') then //             WAVE_FORMAT_MPEG
+     goto done;
+   if IfEqualReturnGuidName(MFAudioFormat_AAC, 'MFAudioFormat_AAC') then //              WAVE_FORMAT_MPEG_HEAAC
+     goto done;
+   if IfEqualReturnGuidName(MFAudioFormat_ADTS, 'MFAudioFormat_ADTS') then  //             WAVE_FORMAT_MPEG_ADTS_AA
+     goto done;
+
+done:
+  Result := sGuidName;
+
 end;
 
 
@@ -2914,6 +3281,134 @@ begin
 end;
 
 
+function EnumAudioRenderingDevices(nDevice: UInt;
+                                   out wstrID: PWideChar; // Device ID.
+                                   pSink: IMFMediaSink = Nil;  // Streaming audio renderer (SAR)
+                                   pActivate: IMFActivate = Nil // Activation object, which can be used to create the SAR.
+                                   ): HResult;
+var
+  hr: HResult;
+  pEnum: IMMDeviceEnumerator;       // Audio device enumerator.
+  pDevices: IMMDeviceCollection;    // Audio device collection.
+  pDevice: IMMDevice;               // An audio device.
+  pAttributes: IMFAttributes;       // Attribute store.
+
+begin
+
+  // Create the device enumerator.
+  hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
+                         Nil,
+                         CLSCTX_ALL,
+                         IID_IMMDeviceEnumerator,
+                         pEnum);
+
+  // Enumerate the rendering devices.
+  if SUCCEEDED(hr) then
+    hr := pEnum.EnumAudioEndpoints(eRender,
+                                   DEVICE_STATE_ACTIVE,
+                                   pDevices);
+
+  // Get ID of the first device in the list by default or the nDevice value.
+  if SUCCEEDED(hr) then
+    hr := pDevices.Item(nDevice,
+                        pDevice);
+
+  if SUCCEEDED(hr) then
+    hr := pDevice.GetId(wstrID);
+
+  // Create the activation object for the SAR if needed ie when streaming protected content.
+  if Assigned(pActivate) then
+    begin
+      hr := MFCreateAudioRendererActivate(pActivate);
+      if SUCCEEDED(hr) then
+        hr := pActivate.SetString(MF_AUDIO_RENDERER_ATTRIBUTE_ENDPOINT_ID,
+                                  wstrID);
+    end
+  else  // For unprotected content
+    begin
+      // Create an attribute store and set the device ID attribute.
+      if SUCCEEDED(hr) then
+        hr := MFCreateAttributes(pAttributes,
+                                 2);
+
+      if SUCCEEDED(hr) then
+        hr := pAttributes.SetString(MF_AUDIO_RENDERER_ATTRIBUTE_ENDPOINT_ID,
+                                    wstrID);
+
+      // Create the audio renderer.
+      if SUCCEEDED(hr) then
+        hr := MFCreateAudioRenderer(pAttributes,
+                                    pSink);
+    end;
+
+  Result := hr;
+  CoTaskMemFree(wstrID);
+end;
+
+
+function SetMaxFrameRate(pSource: IMFMediaSource; dwTypeIndex: DWORD): HRESULT;
+var
+  pPD: IMFPresentationDescriptor;
+  pSD: IMFStreamDescriptor;
+  pHandler: IMFMediaTypeHandler;
+  pType: IMFMediaType;
+  hr: HResult;
+  fSelected: BOOL;
+  propvar: PROPVARIANT;
+
+label
+  done;
+
+begin
+  hr := pSource.CreatePresentationDescriptor(pPD);
+  if FAILED(hr) then
+    goto done;
+
+  hr := pPD.GetStreamDescriptorByIndex(dwTypeIndex,
+                                       fSelected,
+                                       pSD);
+  if FAILED(hr) then
+    goto done;
+
+  hr := pSD.GetMediaTypeHandler(pHandler);
+  if FAILED(hr) then
+    goto done;
+
+  hr := pHandler.GetCurrentMediaType(pType);
+  if FAILED(hr) then
+    goto done;
+
+  // Get the maximum frame rate for the selected capture format.
+
+  // Note: To get the minimum frame rate, use the
+  // MF_MT_FRAME_RATE_RANGE_MIN attribute instead.
+
+  if SUCCEEDED(pType.GetItem(MF_MT_FRAME_RATE_RANGE_MAX,
+                             propvar)) then
+    begin
+      hr := pType.SetItem(MF_MT_FRAME_RATE,
+                          propvar);
+
+      PropVariantClear(propvar);
+
+      if FAILED(hr) then
+        goto done;
+
+      hr := pHandler.SetCurrentMediaType(pType);
+    end;
+
+done:
+  Result := hr;
+end;
+
+
+
+
+
+
+
+
+
 function GetBitmapInfoHeaderFromMFMediaType(pType: IMFMediaType;     // Pointer to the media type.
                                             out ppBmih: PBITMAPINFOHEADER; // Receives a pointer to the structure.
                                             out pcbSize: DWORD // Receives the size of the structure.
@@ -3018,12 +3513,12 @@ begin
   PropVariantInit(pvar);
 
   hr := pSrc.GetItem(key,
-                    pvar);
+                     pvar);
 
   if (SUCCEEDED(hr)) then
     begin
       hr := pDest.SetItem(key,
-                          @pvar);
+                          pvar);
       PropVariantClear(pvar);
     end;
 
@@ -3237,7 +3732,7 @@ end;
 // It can be faster to access this information through metadata than through media-type attributes.
 function GetMetadata(pSource: IMFMediaSource;
                      out ppMetadata: IMFMetadata;
-                     dwStream: DWORD): HRESULT;
+                     dwStream: DWORD): HResult;
 var
   hr: HRESULT;
   pPD: IMFPresentationDescriptor;
@@ -3247,8 +3742,6 @@ label
   done;
 
 begin
-  pPD := Nil;
-  pProvider := Nil;
 
   hr := pSource.CreatePresentationDescriptor(pPD);
   if FAILED(hr) then
@@ -3273,10 +3766,11 @@ done:
 end;
 
 
+
 // Returns the stream identifier from an active stream.
 function GetActiveStreamIndex(stmediaType: TMediaTypes;          // [in] mediatype
                               pspd: IMFPresentationDescriptor;   // [in] presentation descriptor interface
-                              out dwStreamId: DWORD): HRESULT;   // [out] stream identifier
+                              out dwStreamId: DWORD): HResult;   // [out] stream identifier
 var
   hr: HRESULT;
   sdCount: DWORD;

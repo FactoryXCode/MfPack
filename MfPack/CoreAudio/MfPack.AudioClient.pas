@@ -16,12 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Jacob C.
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-//                                #1
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -118,9 +119,9 @@ type
   AUDCLNT_BUFFERFLAGS = _AUDCLNT_BUFFERFLAGS;
   {$EXTERNALSYM AUDCLNT_BUFFERFLAGS}
 const
-  AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY	= DWord($00000001);
-  AUDCLNT_BUFFERFLAGS_SILENT	            = DWord($00000002);
-  AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR	    = DWord($00000004);
+  AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY	= AUDCLNT_BUFFERFLAGS($00000001);
+  AUDCLNT_BUFFERFLAGS_SILENT	            = AUDCLNT_BUFFERFLAGS($00000002);
+  AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR	    = AUDCLNT_BUFFERFLAGS($00000004);
 
 type
   //-------------------------------------------------------------------------
@@ -138,20 +139,20 @@ type
   //     AUDCLNT_STREAMOPTIONS_AMBISONICS - The client is requesting the audio client to insert  
   //                                  Ambisonics renderer and configure the pipeline to match Ambisonics format types 
   //
+
   PAudclntStreamoptions = ^AUDCLNT_STREAMOPTIONS;
+  PAUDCLNT_STREAMOPTIONS = ^AUDCLNT_STREAMOPTIONS;
   AUDCLNT_STREAMOPTIONS        = (
     AUDCLNT_STREAMOPTIONS_NONE         = $00,
     AUDCLNT_STREAMOPTIONS_RAW          = $01,
     AUDCLNT_STREAMOPTIONS_MATCH_FORMAT = $02,
-    AUDCLNT_STREAMOPTIONS_AMBISONICS   = $04);
+    AUDCLNT_STREAMOPTIONS_AMBISONICS   = $04
+  );
   {$EXTERNALSYM AUDCLNT_STREAMOPTIONS}
-  PAUDCLNT_STREAMOPTIONS = ^AUDCLNT_STREAMOPTIONS;
-  {$EXTERNALSYM PAUDCLNT_STREAMOPTIONS}
-
 
     //-------------------------------------------------------------------------
     // Description: AudioClient properties structure that must precede
-    //             other properties in IAudioClient::SetClientProperties
+    //             other properties in IAudioClient.SetClientProperties
     //
     //  cbSize     - UINT32 size in bytes of this structure.
     //  bIsOffload - BOOL indicating whether or not to use offlod mode.
@@ -203,7 +204,8 @@ type
   PAMBISONICS_NORMALIZATION = ^AMBISONICS_NORMALIZATION;
   AMBISONICS_NORMALIZATION = (
     AMBISONICS_NORMALIZATION_SN3D = 0,
-    AMBISONICS_NORMALIZATION_N3D);
+    AMBISONICS_NORMALIZATION_N3D
+  );
   {$EXTERNALSYM AMBISONICS_NORMALIZATION}
 
   // AMBISONICS_PARAM_VERSION_1 1

@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -686,7 +688,6 @@ type
   // Debug class
   // To prevent moving this code outside the interfaces section, the parameters are moved into this class
   // D3D_DEBUG_INFO
-  {$EXTERNALSYM IDIRECT3DDEVICE9_DEBUG_INFO}
   IDIRECT3DDEVICE9_DEBUG_INFO = class
     CreationParameters: D3DDEVICE_CREATION_PARAMETERS;
     PresentParameters: D3DPRESENT_PARAMETERS;
@@ -721,6 +722,7 @@ type
     ScissorRect: TRect;
     DialogBoxMode: BOOL;
   end;
+  {$EXTERNALSYM IDIRECT3DDEVICE9_DEBUG_INFO}
 
 
 
@@ -733,8 +735,8 @@ type
   ['{B07C4FE5-310D-4ba8-A23C-4F0F206F218B}']
      //*** IDirect3DStateBlock9 methods ***//
     function GetDevice(out ppDevice: IDirect3DDevice9): HResult; stdcall;
-    function Capture: HResult; stdcall;
-    function Apply: HResult; stdcall;
+    function Capture(): HResult; stdcall;
+    function Apply(): HResult; stdcall;
   end;
   IID_IDirect3DStateBlock9 = IDirect3DStateBlock9;
   {$EXTERNALSYM IID_IDirect3DStateBlock9}
@@ -817,11 +819,11 @@ type
 
     function SetPriority(PriorityNew: DWORD): DWORD; stdcall;
 
-    function GetPriority: DWORD; stdcall;
+    function GetPriority(): DWORD; stdcall;
 
-    procedure PreLoad; stdcall;
+    procedure PreLoad(); stdcall;
 
-    function GetType: D3DRESOURCETYPE; stdcall;
+    function GetType(): D3DRESOURCETYPE; stdcall;
   end;
   IID_IDirect3DResource9 = IDirect3DResource9;
   {$EXTERNALSYM IID_IDirect3DResource9}
@@ -921,15 +923,15 @@ type
     //*** IDirect3DBaseTexture9 methods ***//
     function SetLOD(LODNew: DWORD): DWORD; stdcall;
 
-    function GetLOD: DWORD; stdcall;
+    function GetLOD(): DWORD; stdcall;
 
-    function GetLevelCount: DWORD; stdcall;
+    function GetLevelCount(): DWORD; stdcall;
 
     function SetAutoGenFilterType(FilterType: D3DTEXTUREFILTERTYPE): HResult; stdcall;
 
-    function GetAutoGenFilterType: D3DTEXTUREFILTERTYPE; stdcall;
+    function GetAutoGenFilterType(): D3DTEXTUREFILTERTYPE; stdcall;
 
-    procedure GenerateMipSubLevels;
+    procedure GenerateMipSubLevels();
   end;
   IID_IDirect3DBaseTexture9 = IDirect3DBaseTexture9;
   {$EXTERNALSYM IID_IDirect3DBaseTexture9}
@@ -1099,7 +1101,7 @@ type
                   out ppbData: Pointer;
                   Flags: DWORD): HResult; stdcall;
 
-    function Unlock: HResult; stdcall;
+    function Unlock(): HResult; stdcall;
 
     function GetDesc(out pDesc: D3DVERTEXBUFFER_DESC): HResult; stdcall;
   end;
@@ -1137,7 +1139,7 @@ type
                   out ppbData: Pointer;
                   Flags: DWord): HResult; stdcall;
 
-    function Unlock: HResult; stdcall;
+    function Unlock(): HResult; stdcall;
 
     function GetDesc(out pDesc: D3DINDEXBUFFER_DESC): HResult; stdcall;
   end;
@@ -1239,7 +1241,7 @@ type
                      pBox: PD3DBOX;
                      Flags: DWORD): HResult; stdcall;
 
-    function UnlockBox: HResult; stdcall;
+    function UnlockBox(): HResult; stdcall;
   end;
   IID_IDirect3DVolume9 = IDirect3DVolume9;
   {$EXTERNALSYM IID_IDirect3DVolume9}
@@ -1273,9 +1275,9 @@ type
     //*** IDirect3DQuery9 methods ***//
     function GetDevice(out ppDevice: IDirect3DDevice9): HResult; stdcall;
 
-    function GetType: D3DQUERYTYPE; stdcall;
+    function GetType(): D3DQUERYTYPE; stdcall;
 
-    function GetDataSize: DWORD; stdcall;
+    function GetDataSize(): DWORD; stdcall;
 
     function Issue(dwIssueFlags: DWORD): HResult; stdcall;
 
@@ -1325,7 +1327,7 @@ type
                               wszName: LPCWSTR): Integer; stdcall;
   {$EXTERNALSYM D3DPERF_BeginEvent}
 
-  function D3DPERF_EndEvent: Integer; stdcall;
+  function D3DPERF_EndEvent(): Integer; stdcall;
   {$EXTERNALSYM D3DPERF_EndEvent}
 
   procedure D3DPERF_SetMarker(col: D3DCOLOR;
@@ -1336,13 +1338,13 @@ type
                               wszName: LPCWSTR); stdcall;
   {$EXTERNALSYM D3DPERF_SetRegion}
 
-  function D3DPERF_QueryRepeatFrame: BOOL; stdcall;
+  function D3DPERF_QueryRepeatFrame(): BOOL; stdcall;
   {$EXTERNALSYM D3DPERF_QueryRepeatFrame}
 
   procedure D3DPERF_SetOptions(dwOptions: DWORD); stdcall;
   {$EXTERNALSYM D3DPERF_SetOptions}
 
-  function D3DPERF_GetStatus: DWORD; stdcall;
+  function D3DPERF_GetStatus(): DWORD; stdcall;
   {$EXTERNALSYM D3DPERF_GetStatus}
 
 

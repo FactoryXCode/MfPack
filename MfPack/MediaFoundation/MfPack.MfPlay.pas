@@ -17,12 +17,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-//                                #1
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or higher.
@@ -147,7 +148,8 @@ type
     MFP_MEDIAPLAYER_STATE_STOPPED  = $1,
     MFP_MEDIAPLAYER_STATE_PLAYING  = $2,
     MFP_MEDIAPLAYER_STATE_PAUSED   = $3,
-    MFP_MEDIAPLAYER_STATE_SHUTDOWN = $4);
+    MFP_MEDIAPLAYER_STATE_SHUTDOWN = $4
+  );
   {$EXTERNALSYM cwMFP_MEDIAPLAYER_STATE}
   MFP_MEDIAPLAYER_STATE = cwMFP_MEDIAPLAYER_STATE;
   {$EXTERNALSYM MFP_MEDIAPLAYER_STATE}
@@ -198,31 +200,18 @@ type
   PMFP_EVENT_TYPE = ^MFP_EVENT_TYPE;
   cwMFP_EVENT_TYPE                         = (
     MFP_EVENT_TYPE_PLAY                    = 0,
-    {$EXTERNALSYM MFP_EVENT_TYPE_PLAY}
     MFP_EVENT_TYPE_PAUSE                   = 1,
-    {$EXTERNALSYM MFP_EVENT_TYPE_PAUSE}
     MFP_EVENT_TYPE_STOP                    = 2,
-    {$EXTERNALSYM MFP_EVENT_TYPE_STOP}
     MFP_EVENT_TYPE_POSITION_SET            = 3,
-    {$EXTERNALSYM MFP_EVENT_TYPE_POSITION_SET}
     MFP_EVENT_TYPE_RATE_SET                = 4,
-    {$EXTERNALSYM MFP_EVENT_TYPE_RATE_SET}
     MFP_EVENT_TYPE_MEDIAITEM_CREATED       = 5,
-    {$EXTERNALSYM MFP_EVENT_TYPE_MEDIAITEM_CREATED}
     MFP_EVENT_TYPE_MEDIAITEM_SET           = 6,
-    {$EXTERNALSYM MFP_EVENT_TYPE_MEDIAITEM_SET}
     MFP_EVENT_TYPE_FRAME_STEP              = 7,
-    {$EXTERNALSYM MFP_EVENT_TYPE_FRAME_STEP}
     MFP_EVENT_TYPE_MEDIAITEM_CLEARED       = 8,
-    {$EXTERNALSYM MFP_EVENT_TYPE_MEDIAITEM_CLEARED}
     MFP_EVENT_TYPE_MF                      = 9,
-    {$EXTERNALSYM MFP_EVENT_TYPE_MF}
     MFP_EVENT_TYPE_ERROR                   = 10,
-    {$EXTERNALSYM MFP_EVENT_TYPE_ERROR}
     MFP_EVENT_TYPE_PLAYBACK_ENDED          = 11,
-    {$EXTERNALSYM MFP_EVENT_TYPE_PLAYBACK_ENDED}
     MFP_EVENT_TYPE_ACQUIRE_USER_CREDENTIAL = 12
-    {$EXTERNALSYM MFP_EVENT_TYPE_ACQUIRE_USER_CREDENTIAL}
   );
   {$EXTERNALSYM cwMFP_EVENT_TYPE}
   MFP_EVENT_TYPE = cwMFP_EVENT_TYPE;

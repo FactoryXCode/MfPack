@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8.1 or later.
@@ -368,9 +370,6 @@ type
   {$EXTERNALSYM IID_IBindCtx}
 
 
-  //
-  IMonikerArray = array [0..65535] of IMoniker;
-
 
   // Interface IEnumMoniker
   // ======================
@@ -380,7 +379,7 @@ type
   IEnumMoniker = interface(IUnknown)
   ['{00000102-0000-0000-C000-000000000046}']
     function Next(celt: ULONG;
-                  out rgelt: IMonikerArray; // array of IMoniker
+                  out rgelt: PIMoniker; // array of IMoniker
                   out pceltFetched: PDWORD): HResult; stdcall;
 
     function Skip(celt: DWORD): HResult; stdcall;
@@ -496,7 +495,8 @@ type
     MKSYS_CLASSMONIKER	    = 7,
     MKSYS_OBJREFMONIKER	    = 8,
     MKSYS_SESSIONMONIKER	  = 9,
-    MKSYS_LUAMONIKER	      = 10);
+    MKSYS_LUAMONIKER	      = 10
+  );
   {$EXTERNALSYM tagMKSYS}
   MKSYS = tagMKSYS;
 
@@ -506,7 +506,8 @@ type
     MKRREDUCE_ONE         = 3 shl 16,
     MKRREDUCE_TOUSER      = 2 shl 16,
     MKRREDUCE_THROUGHUSER = 1 shl 16,
-    MKRREDUCE_ALL         = 0);
+    MKRREDUCE_ALL         = 0
+  );
   {$EXTERNALSYM tagMKREDUCE}
   MKRREDUCE = tagMKREDUCE;
   {$EXTERNALSYM MKRREDUCE}
@@ -593,9 +594,6 @@ type
   {$EXTERNALSYM IID_IROTData}
 
 
-  //
-  STATSTGArray = array [0..65535] of STATSTG;
-
 
   // Interface IEnumSTATSTG
   // ======================
@@ -605,7 +603,7 @@ type
   IEnumSTATSTG = interface(IUnknown)
   ['{0000000d-0000-0000-C000-000000000046}']
     function Next(celt: ULONG;
-                  out rgelt: STATSTGArray; // array of STATSTG;
+                  out rgelt: PSTATSTG; // array of STATSTG;
                   pceltFetched: PDWORD): HResult; stdcall;
 
     function Skip(celt: DWORD): HResult; stdcall;
@@ -821,7 +819,6 @@ type
   {$EXTERNALSYM FORMATETC}
   LPFORMATETC = ^tagFORMATETC;
 
-  FORMATETCArray = array [0..65535] of FORMATETC;
 
   // Interface IEnumFORMATETC
   // ========================
@@ -831,7 +828,7 @@ type
   IEnumFORMATETC = interface(IUnknown)
   ['{00000103-0000-0000-C000-000000000046}']
     function Next(celt: DWORD;
-                  out elt: FORMATETCArray;  // An array of enumerated items. (FORMATETCArray)
+                  out elt: PFORMATETC;  // An array of enumerated items.
                   pceltFetched: PDWORD): HResult; stdcall;
 
     function Skip(celt: DWORD): HResult; stdcall;
@@ -854,7 +851,8 @@ type
     ADVF_DATAONSTOP        = 64,
     ADVFCACHE_NOHANDLER    = 8,
     ADVFCACHE_FORCEBUILTIN = 16,
-    ADVFCACHE_ONSAVE       = 32);
+    ADVFCACHE_ONSAVE       = 32
+  );
   {$EXTERNALSYM tagADVF}
   ADVF = tagADVF;
   {$EXTERNALSYM ADVF}
@@ -877,8 +875,6 @@ type
   {$EXTERNALSYM STATDATA}
   LPSTATDATA = ^STATDATA;
 
-  STATDATAArray = array [0..65535] of STATDATA;
-
 
   // Interface IEnumSTATDATA
   // =======================
@@ -888,7 +884,7 @@ type
   IEnumSTATDATA = interface(IUnknown)
   ['{00000105-0000-0000-C000-000000000046}']
     function Next(celt: ULONG;   // The number of items to be retrieved.
-                  out elt: STATDATA;  // array of STATDATA
+                  out elt: PSTATDATA;  // array of STATDATA
                   pceltFetched: PDWORD): HResult; stdcall; // The number of items that were retrieved.
                                                            // This parameter is always less than or equal to
                                                            // the number of items requested.
@@ -932,7 +928,8 @@ type
     TYMED_GDI      = 16,
     TYMED_MFPICT   = 32,
     TYMED_ENHMF    = 64,
-    TYMED_NULL     = 0);
+    TYMED_NULL     = 0
+  );
   {$EXTERNALSYM tagTYMED}
   TYMED = tagTYMED;
   {$EXTERNALSYM TYMED}
@@ -1077,7 +1074,8 @@ type
   PDATADIR = ^tagDATADIR;
   tagDATADIR    = (
     DATADIR_GET = 1,
-    DATADIR_SET = 2);
+    DATADIR_SET = 2
+  );
   {$EXTERNALSYM tagDATADIR}
   DATADIR = tagDATADIR;
   {$EXTERNALSYM DATADIR}
@@ -1147,7 +1145,7 @@ type
   {$EXTERNALSYM IID_IDataAdviseHolder}
 
 
-  // call type used by IMessageFilter::HandleIncomingMessage
+  // call type used by IMessageFilter.HandleIncomingMessage
   PCALLTYPE = ^tagCALLTYPE;
   tagCALLTYPE                     = (
     CALLTYPE_TOPLEVEL             = 1,          // toplevel call - no outgoing call
@@ -1166,7 +1164,8 @@ type
   tagSERVERCALL           = (
     SERVERCALL_ISHANDLED  = 0,
     SERVERCALL_REJECTED   = 1,
-    SERVERCALL_RETRYLATER = 2);
+    SERVERCALL_RETRYLATER = 2
+  );
   {$EXTERNALSYM tagSERVERCALL}
   SERVERCALL = tagSERVERCALL;
   {$EXTERNALSYM SERVERCALL}
@@ -1284,9 +1283,6 @@ type
   CONNECTDATA = tagCONNECTDATA;
   {$EXTERNALSYM CONNECTDATA}
 
-  //
-  CONNECTDATAArray = array [0..65535] of CONNECTDATA;
-
 
   // Interface IEnumConnections
   // ==========================
@@ -1296,7 +1292,7 @@ type
   IEnumConnections = interface(IUnknown)
   ['{B196B287-BAB4-101A-B69C-00AA00341D07}']
     function Next(celt: ULONG;
-                  out elt: CONNECTDATAArray;  // array of CONNECTDATA
+                  out elt: PCONNECTDATA;  // array of CONNECTDATA
                   pceltFetched: PDWORD): HResult; stdcall;
 
     function Skip(celt: DWORD): HResult; stdcall;
@@ -1308,8 +1304,6 @@ type
   IID_IEnumConnections = IEnumConnections;
   {$EXTERNALSYM IID_IEnumConnections}
 
-  //
-  IConnectionPointArray = array [0..65535] of IConnectionPoint;
 
 
   // Interface IEnumConnectionPoints
@@ -1320,7 +1314,7 @@ type
   IEnumConnectionPoints = interface(IUnknown)
   ['{B196B285-BAB4-101A-B69C-00AA00341D07}']
     function Next(celt: DWORD;
-                  out elt: IConnectionPointArray;  // array of IConnectionPoint
+                  out elt: PIConnectionPoint;  // array of IConnectionPoint
                   pceltFetched: PLongint): HResult; stdcall;
 
     function Skip(celt: DWORD): HResult; stdcall;
@@ -1610,7 +1604,8 @@ type
   PShutdownType = ^tagShutdownType;
   tagShutdownType = (
     IdleShutdown,
-    ForcedShutdown);
+    ForcedShutdown
+  );
   {$EXTERNALSYM tagShutdownType}
   ShutdownType = tagShutdownType;
   {$EXTERNALSYM ShutdownType}
