@@ -76,7 +76,7 @@ SDK version: 10.0.19569.0, May 2020 OS update (20H1)
 
 *Demonstrates using the IMFSourceReader API to extract uncompressed media data from a media file. This sample application reads audio data from a media file and writes the uncompressed audio to a WAVE file.*
 
-*The AudioClipEx sample Demonstrates using the IMFSourceReader and IMFSourceReaderCallback API to extract uncompressed mediadata from a media file.*
+*The AudioClipEx sample demonstrates using the IMFSourceReader and IMFSourceReaderCallback API to extract uncompressed mediadata from a media file.*
 
 
 
