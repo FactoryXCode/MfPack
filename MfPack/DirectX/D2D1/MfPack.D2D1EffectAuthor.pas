@@ -18,11 +18,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -74,18 +76,10 @@ uses
   MfPack.D2D1_1,
   MfPack.DXGIFormat;
 
-
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$I 'MfPack.inc'}
-  {$WARN BOUNDS_ERROR OFF}
 
 const
 
@@ -97,7 +91,6 @@ const
   {$EXTERNALSYM D2D1_APPEND_ALIGNED_ELEMENT}
 
 
-type
   // Function pointer that sets a property on an effect.
   // NOTE: Moved to D2D1_1.pas to prevent circular references
   // PD2D1_PROPERTY_SET_FUNCTION = function(effect: IUnknown;
@@ -113,138 +106,171 @@ type
   //                                        actualSize: UINT32): HRESULT; stdcall;
 
 
-  //
-  // Forward interface declarations
-  //
+// Enums =======================================================================
 
-  PID2D1EffectContext = ^ID2D1EffectContext;
-  ID2D1EffectContext = interface;
-
+type
   // Indicates what has changed since the last time the effect was asked to prepare
   // to render.
   PD2D1_CHANGE_TYPE = ^D2D1_CHANGE_TYPE;
-  D2D1_CHANGE_TYPE               = (
-    // Nothing has changed.
-    D2D1_CHANGE_TYPE_NONE        = 0,
-    // The effect's properties have changed.
-    D2D1_CHANGE_TYPE_PROPERTIES  = 1,
-    // The internal context has changed and should be inspected.
-    D2D1_CHANGE_TYPE_CONTEXT     = 2,
-    // A new graph has been set due to a change in the input count.
-    D2D1_CHANGE_TYPE_GRAPH       = 3,
-    D2D1_CHANGE_TYPE_FORCE_DWORD = FORCEDWORD);
+  D2D1_CHANGE_TYPE = DWord;
   {$EXTERNALSYM D2D1_CHANGE_TYPE}
+const
+  // Nothing has changed.
+  D2D1_CHANGE_TYPE_NONE        = D2D1_CHANGE_TYPE(0);
+  {$EXTERNALSYM D2D1_CHANGE_TYPE_NONE}
+  // The effect's properties have changed.
+  D2D1_CHANGE_TYPE_PROPERTIES  = D2D1_CHANGE_TYPE(1);
+  {$EXTERNALSYM D2D1_CHANGE_TYPE_PROPERTIES}
+  // The internal context has changed and should be inspected.
+  D2D1_CHANGE_TYPE_CONTEXT     = D2D1_CHANGE_TYPE(2);
+  {$EXTERNALSYM D2D1_CHANGE_TYPE_CONTEXT}
+  // A new graph has been set due to a change in the input count.
+  D2D1_CHANGE_TYPE_GRAPH       = D2D1_CHANGE_TYPE(3);
+  {$EXTERNALSYM D2D1_CHANGE_TYPE_GRAPH}
+  //D2D1_CHANGE_TYPE_FORCE_DWORD = FORCEDWORD;
 
-
+type
   // Indicates options for drawing using a pixel shader.
   PD2D1_PIXEL_OPTIONS = ^D2D1_PIXEL_OPTIONS;
-  D2D1_PIXEL_OPTIONS                    = (
-    // Default pixel processing.
-    D2D1_PIXEL_OPTIONS_NONE             = 0,
-    // Indicates that the shader samples its inputs only at exactly the same scene
-    // coordinate as the output pixel, and that it returns transparent black whenever
-    // the input pixels are also transparent black.
-    D2D1_PIXEL_OPTIONS_TRIVIAL_SAMPLING = 1,
-    D2D1_PIXEL_OPTIONS_FORCE_DWORD      = FORCEDWORD);
+  D2D1_PIXEL_OPTIONS = DWord;
   {$EXTERNALSYM D2D1_PIXEL_OPTIONS}
+const
+  // Default pixel processing.
+  D2D1_PIXEL_OPTIONS_NONE             = D2D1_PIXEL_OPTIONS(0);
+  {$EXTERNALSYM D2D1_PIXEL_OPTIONS_NONE}
+  // Indicates that the shader samples its inputs only at exactly the same scene
+  // coordinate as the output pixel, and that it returns transparent black whenever
+  // the input pixels are also transparent black.
+  D2D1_PIXEL_OPTIONS_TRIVIAL_SAMPLING = D2D1_PIXEL_OPTIONS(1);
+  {$EXTERNALSYM D2D1_PIXEL_OPTIONS_TRIVIAL_SAMPLING}
+  //D2D1_PIXEL_OPTIONS_FORCE_DWORD      = FORCEDWORD;
 
-
+type
   // Indicates options for drawing custom vertices set by transforms.
   PD2D1_VERTEX_OPTIONS = ^D2D1_VERTEX_OPTIONS;
-  D2D1_VERTEX_OPTIONS                     = (
-    // Default vertex processing.
-    D2D1_VERTEX_OPTIONS_NONE              = 0,
-    // Indicates that the output rectangle does not need to be cleared before drawing
-    // custom vertices. This must only be used by transforms whose custom vertices
-    // completely cover their output rectangle.
-    D2D1_VERTEX_OPTIONS_DO_NOT_CLEAR      = 1,
-    // Causes a depth buffer to be used while drawing custom vertices. This impacts
-    // drawing behavior when primitives overlap one another.
-    D2D1_VERTEX_OPTIONS_USE_DEPTH_BUFFER  = 2,
-    // Indicates that custom vertices do not form primitives which overlap one another.
-    D2D1_VERTEX_OPTIONS_ASSUME_NO_OVERLAP = 4,
-    D2D1_VERTEX_OPTIONS_FORCE_DWORD       = FORCEDWORD);
+  D2D1_VERTEX_OPTIONS = DWord;
   {$EXTERNALSYM D2D1_VERTEX_OPTIONS}
+const
+  // Default vertex processing.
+  D2D1_VERTEX_OPTIONS_NONE              = D2D1_VERTEX_OPTIONS(0);
+  {$EXTERNALSYM D2D1_VERTEX_OPTIONS_NONE}
+  // Indicates that the output rectangle does not need to be cleared before drawing
+  // custom vertices. This must only be used by transforms whose custom vertices
+  // completely cover their output rectangle.
+  D2D1_VERTEX_OPTIONS_DO_NOT_CLEAR      = D2D1_VERTEX_OPTIONS(1);
+  {$EXTERNALSYM D2D1_VERTEX_OPTIONS_DO_NOT_CLEAR}
+  // Causes a depth buffer to be used while drawing custom vertices. This impacts
+  // drawing behavior when primitives overlap one another.
+  D2D1_VERTEX_OPTIONS_USE_DEPTH_BUFFER  = D2D1_VERTEX_OPTIONS(2);
+  {$EXTERNALSYM D2D1_VERTEX_OPTIONS_USE_DEPTH_BUFFER}
+  // Indicates that custom vertices do not form primitives which overlap one another.
+  D2D1_VERTEX_OPTIONS_ASSUME_NO_OVERLAP = D2D1_VERTEX_OPTIONS(4);
+  {$EXTERNALSYM D2D1_VERTEX_OPTIONS_ASSUME_NO_OVERLAP}
+  //D2D1_VERTEX_OPTIONS_FORCE_DWORD       = FORCEDWORD;
 
-
+type
   // Describes how a vertex buffer is to be managed.
   PD2D1_VERTEX_USAGE = ^D2D1_VERTEX_USAGE;
-  D2D1_VERTEX_USAGE               = (
-    // The vertex buffer content do not change frequently from frame to frame.
-    D2D1_VERTEX_USAGE_STATIC      = 0,
-    // The vertex buffer is intended to be updated frequently.
-    D2D1_VERTEX_USAGE_DYNAMIC     = 1,
-    D2D1_VERTEX_USAGE_FORCE_DWORD = FORCEDWORD);
+  D2D1_VERTEX_USAGE = DWord;
   {$EXTERNALSYM D2D1_VERTEX_USAGE}
+const
+  // The vertex buffer content do not change frequently from frame to frame.
+  D2D1_VERTEX_USAGE_STATIC      = D2D1_VERTEX_USAGE(0);
+  // The vertex buffer is intended to be updated frequently.
+  D2D1_VERTEX_USAGE_DYNAMIC     = D2D1_VERTEX_USAGE(1);
+  //D2D1_VERTEX_USAGE_FORCE_DWORD = FORCEDWORD;
 
-
+type
   // Describes a particular blend in the D2D1_BLEND_DESCRIPTION structure.
   PD2D1_BLEND_OPERATION = ^D2D1_BLEND_OPERATION;
-  D2D1_BLEND_OPERATION                = (
-    D2D1_BLEND_OPERATION_ADD          = 1,
-    D2D1_BLEND_OPERATION_SUBTRACT     = 2,
-    D2D1_BLEND_OPERATION_REV_SUBTRACT = 3,
-    D2D1_BLEND_OPERATION_MIN          = 4,
-    D2D1_BLEND_OPERATION_MAX          = 5,
-    D2D1_BLEND_OPERATION_FORCE_DWORD  = FORCEDWORD);
+  D2D1_BLEND_OPERATION = DWord;
   {$EXTERNALSYM D2D1_BLEND_OPERATION}
+const
+  D2D1_BLEND_OPERATION_ADD          = D2D1_BLEND_OPERATION(1);
+  {$EXTERNALSYM D2D1_BLEND_OPERATION_ADD}
+  D2D1_BLEND_OPERATION_SUBTRACT     = D2D1_BLEND_OPERATION(2);
+  {$EXTERNALSYM D2D1_BLEND_OPERATION_SUBTRACT}
+  D2D1_BLEND_OPERATION_REV_SUBTRACT = D2D1_BLEND_OPERATION(3);
+  {$EXTERNALSYM D2D1_BLEND_OPERATION_REV_SUBTRACT}
+  D2D1_BLEND_OPERATION_MIN          = D2D1_BLEND_OPERATION(4);
+  {$EXTERNALSYM D2D1_BLEND_OPERATION_MIN}
+  D2D1_BLEND_OPERATION_MAX          = D2D1_BLEND_OPERATION(5);
+  {$EXTERNALSYM D2D1_BLEND_OPERATION_MAX}
+  //D2D1_BLEND_OPERATION_FORCE_DWORD  = FORCEDWORD;
 
-
+type
   // Describes a particular blend in the D2D1_BLEND_DESCRIPTION structure.
   PD2D1_BLEND = ^D2D1_BLEND;
-  D2D1_BLEND                    = (
-    D2D1_BLEND_ZERO             = 1,
-    D2D1_BLEND_ONE              = 2,
-    D2D1_BLEND_SRC_COLOR        = 3,
-    D2D1_BLEND_INV_SRC_COLOR    = 4,
-    D2D1_BLEND_SRC_ALPHA        = 5,
-    D2D1_BLEND_INV_SRC_ALPHA    = 6,
-    D2D1_BLEND_DEST_ALPHA       = 7,
-    D2D1_BLEND_INV_DEST_ALPHA   = 8,
-    D2D1_BLEND_DEST_COLOR       = 9,
-    D2D1_BLEND_INV_DEST_COLOR   = 10,
-    D2D1_BLEND_SRC_ALPHA_SAT    = 11,
-    D2D1_BLEND_BLEND_FACTOR     = 14,
-    D2D1_BLEND_INV_BLEND_FACTOR = 15,
-    D2D1_BLEND_FORCE_DWORD      = FORCEDWORD);
+  D2D1_BLEND = DWord;
   {$EXTERNALSYM D2D1_BLEND}
+const
+  D2D1_BLEND_ZERO             = D2D1_BLEND(1);
+  {$EXTERNALSYM D2D1_BLEND_ZERO}
+  D2D1_BLEND_ONE              = D2D1_BLEND(2);
+  {$EXTERNALSYM D2D1_BLEND_ONE}
+  D2D1_BLEND_SRC_COLOR        = D2D1_BLEND(3);
+  {$EXTERNALSYM D2D1_BLEND_SRC_COLOR}
+  D2D1_BLEND_INV_SRC_COLOR    = D2D1_BLEND(4);
+  {$EXTERNALSYM D2D1_BLEND_INV_SRC_COLOR}
+  D2D1_BLEND_SRC_ALPHA        = D2D1_BLEND(5);
+  {$EXTERNALSYM D2D1_BLEND_SRC_ALPHA}
+  D2D1_BLEND_INV_SRC_ALPHA    = D2D1_BLEND(6);
+  {$EXTERNALSYM D2D1_BLEND_INV_SRC_ALPHA}
+  D2D1_BLEND_DEST_ALPHA       = D2D1_BLEND(7);
+  {$EXTERNALSYM D2D1_BLEND_DEST_ALPHA}
+  D2D1_BLEND_INV_DEST_ALPHA   = D2D1_BLEND(8);
+  {$EXTERNALSYM D2D1_BLEND_INV_DEST_ALPHA}
+  D2D1_BLEND_DEST_COLOR       = D2D1_BLEND(9);
+  {$EXTERNALSYM D2D1_BLEND_DEST_COLOR}
+  D2D1_BLEND_INV_DEST_COLOR   = D2D1_BLEND(10);
+  {$EXTERNALSYM D2D1_BLEND_INV_DEST_COLOR}
+  D2D1_BLEND_SRC_ALPHA_SAT    = D2D1_BLEND(11);
+  {$EXTERNALSYM D2D1_BLEND_SRC_ALPHA_SAT}
+  D2D1_BLEND_BLEND_FACTOR     = D2D1_BLEND(14);
+  {$EXTERNALSYM D2D1_BLEND_BLEND_FACTOR}
+  D2D1_BLEND_INV_BLEND_FACTOR = D2D1_BLEND(15);
+  {$EXTERNALSYM D2D1_BLEND_INV_BLEND_FACTOR}
+  //D2D1_BLEND_FORCE_DWORD      = FORCEDWORD;
 
-
+type
   // Allows a caller to control the channel depth of a stage in the rendering
   // pipeline.
   PD2D1_CHANNEL_DEPTH = ^D2D1_CHANNEL_DEPTH;
-  D2D1_CHANNEL_DEPTH               = (
-    D2D1_CHANNEL_DEPTH_DEFAULT     = 0,
-    D2D1_CHANNEL_DEPTH_1           = 1,
-    D2D1_CHANNEL_DEPTH_4           = 4,
-    D2D1_CHANNEL_DEPTH_FORCE_DWORD = FORCEDWORD);
+  D2D1_CHANNEL_DEPTH = DWord;
   {$EXTERNALSYM D2D1_CHANNEL_DEPTH}
+const
+  D2D1_CHANNEL_DEPTH_DEFAULT     = D2D1_CHANNEL_DEPTH(0);
+  D2D1_CHANNEL_DEPTH_1           = D2D1_CHANNEL_DEPTH(1);
+  D2D1_CHANNEL_DEPTH_4           = D2D1_CHANNEL_DEPTH(4);
+  //D2D1_CHANNEL_DEPTH_FORCE_DWORD = FORCEDWORD;
 
-
+type
   // Represents filtering modes transforms may select to use on their input textures.
   PD2D1_FILTER = ^D2D1_FILTER;
-  D2D1_FILTER                                   = (
-    D2D1_FILTER_MIN_MAG_MIP_POINT               = $00,
-    D2D1_FILTER_MIN_MAG_POINT_MIP_LINEAR        = $01,
-    D2D1_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT  = $04,
-    D2D1_FILTER_MIN_POINT_MAG_MIP_LINEAR        = $05,
-    D2D1_FILTER_MIN_LINEAR_MAG_MIP_POINT        = $10,
-    D2D1_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR = $11,
-    D2D1_FILTER_MIN_MAG_LINEAR_MIP_POINT        = $14,
-    D2D1_FILTER_MIN_MAG_MIP_LINEAR              = $15,
-    D2D1_FILTER_ANISOTROPIC                     = $55,
-    D2D1_FILTER_FORCE_DWORD                     = FORCEDWORD);
+  D2D1_FILTER = DWord;
   {$EXTERNALSYM D2D1_FILTER}
+const
+  D2D1_FILTER_MIN_MAG_MIP_POINT               = D2D1_FILTER($00);
+  D2D1_FILTER_MIN_MAG_POINT_MIP_LINEAR        = D2D1_FILTER($01);
+  D2D1_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT  = D2D1_FILTER($04);
+  D2D1_FILTER_MIN_POINT_MAG_MIP_LINEAR        = D2D1_FILTER($05);
+  D2D1_FILTER_MIN_LINEAR_MAG_MIP_POINT        = D2D1_FILTER($10);
+  D2D1_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR = D2D1_FILTER($11);
+  D2D1_FILTER_MIN_MAG_LINEAR_MIP_POINT        = D2D1_FILTER($14);
+  D2D1_FILTER_MIN_MAG_MIP_LINEAR              = D2D1_FILTER($15);
+  D2D1_FILTER_ANISOTROPIC                     = D2D1_FILTER($55);
+  //D2D1_FILTER_FORCE_DWORD                     = FORCEDWORD;
 
-
+type
   // Defines capabilities of the underlying D3D device which may be queried using
   // CheckFeatureSupport.
   PD2D1_FEATURE = ^D2D1_FEATURE;
-  D2D1_FEATURE                            = (
-    D2D1_FEATURE_DOUBLES                  = 0,
-    D2D1_FEATURE_D3D10_X_HARDWARE_OPTIONS = 1,
-    D2D1_FEATURE_FORCE_DWORD              = FORCEDWORD);
+  D2D1_FEATURE = DWord;
   {$EXTERNALSYM D2D1_FEATURE}
+const
+  D2D1_FEATURE_DOUBLES                  = D2D1_FEATURE(0);
+  D2D1_FEATURE_D3D10_X_HARDWARE_OPTIONS = D2D1_FEATURE(1);
+  //D2D1_FEATURE_FORCE_DWORD              = FORCEDWORD;
 
 
   // Defines a property binding to a function. The name must match the property
@@ -259,6 +285,17 @@ type
   //  getFunction: PD2D1_PROPERTY_GET_FUNCTION;
   //end;
   //PD2D1_PROPERTY_BINDING = ^D2D1_PROPERTY_BINDING;
+
+// =============================================================================
+
+type
+
+  //
+  // Forward interface declarations
+  //
+
+  PID2D1EffectContext = ^ID2D1EffectContext;
+  ID2D1EffectContext = interface;
 
 
   // This is used to define a resource texture when that resource texture is created.

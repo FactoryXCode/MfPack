@@ -19,11 +19,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -85,15 +87,8 @@ uses
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$I 'MfPack.inc'}
-  {$WARN BOUNDS_ERROR OFF}
+
 
 var
   TD2D1_RECT_F: D2D1_RECT_F;
@@ -109,23 +104,520 @@ const
   // This defines the superset of interpolation mode supported by D2D APIs
   // and built-in effects
 
-  D2D1_INTERPOLATION_MODE_DEFINITION_NEAREST_NEIGHBOR    = 0;
+  D2D1_INTERPOLATION_MODE_DEFINITION_NEAREST_NEIGHBOR    = DWord(0);
   {$EXTERNALSYM D2D1_INTERPOLATION_MODE_DEFINITION_NEAREST_NEIGHBOR}
-  D2D1_INTERPOLATION_MODE_DEFINITION_LINEAR              = 1;
+  D2D1_INTERPOLATION_MODE_DEFINITION_LINEAR              = DWord(1);
   {$EXTERNALSYM D2D1_INTERPOLATION_MODE_DEFINITION_LINEAR}
-  D2D1_INTERPOLATION_MODE_DEFINITION_CUBIC               = 2;
+  D2D1_INTERPOLATION_MODE_DEFINITION_CUBIC               = DWord(2);
   {$EXTERNALSYM D2D1_INTERPOLATION_MODE_DEFINITION_CUBIC}
-  D2D1_INTERPOLATION_MODE_DEFINITION_MULTI_SAMPLE_LINEAR = 3;
+  D2D1_INTERPOLATION_MODE_DEFINITION_MULTI_SAMPLE_LINEAR = DWord(3);
   {$EXTERNALSYM D2D1_INTERPOLATION_MODE_DEFINITION_MULTI_SAMPLE_LINEAR}
-  D2D1_INTERPOLATION_MODE_DEFINITION_ANISOTROPIC         = 4;
+  D2D1_INTERPOLATION_MODE_DEFINITION_ANISOTROPIC         = DWord(4);
   {$EXTERNALSYM D2D1_INTERPOLATION_MODE_DEFINITION_ANISOTROPIC}
-  D2D1_INTERPOLATION_MODE_DEFINITION_HIGH_QUALITY_CUBIC  = 5;
+  D2D1_INTERPOLATION_MODE_DEFINITION_HIGH_QUALITY_CUBIC  = DWord(5);
   {$EXTERNALSYM D2D1_INTERPOLATION_MODE_DEFINITION_HIGH_QUALITY_CUBIC}
-  D2D1_INTERPOLATION_MODE_DEFINITION_FANT                = 6;
+  D2D1_INTERPOLATION_MODE_DEFINITION_FANT                = DWord(6);
   {$EXTERNALSYM D2D1_INTERPOLATION_MODE_DEFINITION_FANT}
-  D2D1_INTERPOLATION_MODE_DEFINITION_MIPMAP_LINEAR       = 7;
+  D2D1_INTERPOLATION_MODE_DEFINITION_MIPMAP_LINEAR       = DWord(7);
   {$EXTERNALSYM D2D1_INTERPOLATION_MODE_DEFINITION_MIPMAP_LINEAR}
 
+
+// Enums =======================================================================
+
+
+type
+  // This determines what gamma is used for interpolation/blending.
+  PD2D1_GAMMA = ^D2D1_GAMMA;
+  D2D1_GAMMA = DWord;
+  {$EXTERNALSYM D2D1_GAMMA}
+const
+  // Colors are manipulated in 2.2 gamma color space.
+  D2D1_GAMMA_2_2         = D2D1_GAMMA(0);
+  {$EXTERNALSYM D2D1_GAMMA_2_2}
+  // Colors are manipulated in 1.0 gamma color space.
+  D2D1_GAMMA_1_0         = D2D1_GAMMA(1);
+  {$EXTERNALSYM D2D1_GAMMA_1_0}
+  //D2D1_GAMMA_FORCE_DWORD = FORCEDWORD;
+
+type
+  // Specifies what the contents are of an opacity mask.
+  PD2D1_OPACITY_MASK_CONTENT = ^D2D1_OPACITY_MASK_CONTENT;
+  D2D1_OPACITY_MASK_CONTENT = DWord;
+  {$EXTERNALSYM D2D1_OPACITY_MASK_CONTENT}
+const
+  // The mask contains geometries or bitmaps.
+  D2D1_OPACITY_MASK_CONTENT_GRAPHICS            = D2D1_OPACITY_MASK_CONTENT(0);
+  {$EXTERNALSYM D2D1_OPACITY_MASK_CONTENT_GRAPHICS}
+  // The mask contains text rendered using one of the natural text modes.
+  D2D1_OPACITY_MASK_CONTENT_TEXT_NATURAL        = D2D1_OPACITY_MASK_CONTENT(1);
+  {$EXTERNALSYM D2D1_OPACITY_MASK_CONTENT_TEXT_NATURAL}
+  // The mask contains text rendered using one of the GDI compatible text modes.
+  D2D1_OPACITY_MASK_CONTENT_TEXT_GDI_COMPATIBLE = D2D1_OPACITY_MASK_CONTENT(2);
+  {$EXTERNALSYM D2D1_OPACITY_MASK_CONTENT_TEXT_GDI_COMPATIBLE}
+  //D2D1_OPACITY_MASK_CONTENT_FORCE_DWORD         = FORCEDWORD;
+
+type
+  // Enum which describes how to sample from a source outside its base tile.
+  PD2D1_EXTEND_MODE = ^D2D1_EXTEND_MODE;
+  D2D1_EXTEND_MODE = DWord;
+  {$EXTERNALSYM D2D1_EXTEND_MODE}
+const
+  // Extend the edges of the source out by clamping sample points outside the source
+  // to the edges.
+  D2D1_EXTEND_MODE_CLAMP       = D2D1_EXTEND_MODE(0);
+  {$EXTERNALSYM D2D1_EXTEND_MODE_CLAMP}
+  // The base tile is drawn untransformed and the remainder are filled by repeating
+  // the base tile.
+  D2D1_EXTEND_MODE_WRAP        = D2D1_EXTEND_MODE(1);
+  {$EXTERNALSYM D2D1_EXTEND_MODE_WRAP}
+  // The same as wrap, but alternate tiles are flipped  The base tile is drawn
+  // untransformed.
+  D2D1_EXTEND_MODE_MIRROR      = D2D1_EXTEND_MODE(2);
+  {$EXTERNALSYM D2D1_EXTEND_MODE_MIRROR}
+  //D2D1_EXTEND_MODE_FORCE_DWORD = FORCEDWORD;
+
+type
+  // Enum which describes the manner in which we render edges of non-text primitives.
+  PD2D1_ANTIALIAS_MODE = ^D2D1_ANTIALIAS_MODE;
+  D2D1_ANTIALIAS_MODE = DWord;
+  {$EXTERNALSYM D2D1_ANTIALIAS_MODE}
+const
+  // The edges of each primitive are antialiased sequentially.
+  D2D1_ANTIALIAS_MODE_PER_PRIMITIVE = D2D1_ANTIALIAS_MODE(0);
+  {$EXTERNALSYM D2D1_ANTIALIAS_MODE_PER_PRIMITIVE}
+  // Each pixel is rendered if its pixel center is contained by the geometry.
+  D2D1_ANTIALIAS_MODE_ALIASED       = D2D1_ANTIALIAS_MODE(1);
+  {$EXTERNALSYM D2D1_ANTIALIAS_MODE_ALIASED}
+  //D2D1_ANTIALIAS_MODE_FORCE_DWORD   = FORCEDWORD;
+
+type
+  // Describes the antialiasing mode used for drawing text.
+  PD2D1_TEXT_ANTIALIAS_MODE = ^D2D1_TEXT_ANTIALIAS_MODE;
+  D2D1_TEXT_ANTIALIAS_MODE = DWord;
+  {$EXTERNALSYM D2D1_TEXT_ANTIALIAS_MODE}
+const
+  // Render text using the current system setting.
+  D2D1_TEXT_ANTIALIAS_MODE_DEFAULT     = D2D1_TEXT_ANTIALIAS_MODE(0);
+  {$EXTERNALSYM D2D1_TEXT_ANTIALIAS_MODE_DEFAULT}
+  // Render text using ClearType.
+  D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE   = D2D1_TEXT_ANTIALIAS_MODE(1);
+  {$EXTERNALSYM D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE}
+  // Render text using gray-scale.
+  D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE   = D2D1_TEXT_ANTIALIAS_MODE(2);
+  {$EXTERNALSYM D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE}
+  // Render text aliased.
+  D2D1_TEXT_ANTIALIAS_MODE_ALIASED     = D2D1_TEXT_ANTIALIAS_MODE(3);
+  {$EXTERNALSYM D2D1_TEXT_ANTIALIAS_MODE_ALIASED}
+  //D2D1_TEXT_ANTIALIAS_MODE_FORCE_DWORD = FORCEDWORD;
+
+type
+  // Specifies the algorithm that is used when images are scaled or rotated. Note
+  // Starting in Windows 8, more interpolations modes are available. See
+  // D2D1_INTERPOLATION_MODE for more info.
+  PD2D1_BITMAP_INTERPOLATION_MODE = ^D2D1_BITMAP_INTERPOLATION_MODE;
+  D2D1_BITMAP_INTERPOLATION_MODE = DWord;
+  {$EXTERNALSYM D2D1_BITMAP_INTERPOLATION_MODE}
+const
+  // Nearest Neighbor filtering. Also known as nearest pixel or nearest point
+  // sampling.
+  D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR = D2D1_INTERPOLATION_MODE_DEFINITION_NEAREST_NEIGHBOR;
+  {$EXTERNALSYM D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR}
+  // Linear filtering.
+  D2D1_BITMAP_INTERPOLATION_MODE_LINEAR           = D2D1_INTERPOLATION_MODE_DEFINITION_LINEAR;
+  {$EXTERNALSYM D2D1_BITMAP_INTERPOLATION_MODE_LINEAR}
+  //D2D1_BITMAP_INTERPOLATION_MODE_FORCE_DWORD      = FORCEDWORD;
+
+type
+  // Modifications made to the draw text call that influence how the text is
+  // rendered.
+  PD2D1_DRAW_TEXT_OPTIONS = ^D2D1_DRAW_TEXT_OPTIONS;
+  D2D1_DRAW_TEXT_OPTIONS = DWord;
+  {$EXTERNALSYM D2D1_DRAW_TEXT_OPTIONS}
+const
+  // Do not snap the baseline of the text vertically.
+  D2D1_DRAW_TEXT_OPTIONS_NO_SNAP                       = D2D1_DRAW_TEXT_OPTIONS($00000001);
+  {$EXTERNALSYM D2D1_DRAW_TEXT_OPTIONS_NO_SNAP}
+  // Clip the text to the content bounds.
+  D2D1_DRAW_TEXT_OPTIONS_CLIP                          = D2D1_DRAW_TEXT_OPTIONS($00000002);
+  {$EXTERNALSYM D2D1_DRAW_TEXT_OPTIONS_CLIP}
+  // Render color versions of glyphs if defined by the font.
+  D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT             = D2D1_DRAW_TEXT_OPTIONS($00000004);
+  {$EXTERNALSYM D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT}
+  // Bitmap origins of color glyph bitmaps are not snapped.
+  D2D1_DRAW_TEXT_OPTIONS_DISABLE_COLOR_BITMAP_SNAPPING = D2D1_DRAW_TEXT_OPTIONS($00000008);
+  {$EXTERNALSYM D2D1_DRAW_TEXT_OPTIONS_DISABLE_COLOR_BITMAP_SNAPPING}
+  D2D1_DRAW_TEXT_OPTIONS_NONE                          = D2D1_DRAW_TEXT_OPTIONS($00000000);
+  {$EXTERNALSYM D2D1_DRAW_TEXT_OPTIONS_NONE}
+  //D2D1_DRAW_TEXT_OPTIONS_FORCE_DWORD                   = FORCEDWORD;
+
+
+type
+  // Differentiates which of the two possible arcs could match the given arc
+  // parameters.
+  PD2D1_ARC_SIZE = ^D2D1_ARC_SIZE;
+  D2D1_ARC_SIZE = DWord;
+  {$EXTERNALSYM D2D1_ARC_SIZE}
+const
+  D2D1_ARC_SIZE_SMALL       = D2D1_ARC_SIZE(0);
+  {$EXTERNALSYM D2D1_ARC_SIZE_SMALL}
+  D2D1_ARC_SIZE_LARGE       = D2D1_ARC_SIZE(1);
+  {$EXTERNALSYM D2D1_ARC_SIZE_LARGE}
+  //D2D1_ARC_SIZE_FORCE_DWORD = FORCEDWORD;
+
+type
+  // Enum which describes the drawing of the ends of a line.
+  PD2D1_CAP_STYLE = ^D2D1_CAP_STYLE;
+  D2D1_CAP_STYLE = DWord;
+  {$EXTERNALSYM D2D1_CAP_STYLE}
+const
+  // Flat line cap.
+  D2D1_CAP_STYLE_FLAT        = D2D1_CAP_STYLE(0);
+  {$EXTERNALSYM D2D1_CAP_STYLE_FLAT}
+  // Square line cap.
+  D2D1_CAP_STYLE_SQUARE      = D2D1_CAP_STYLE(1);
+  {$EXTERNALSYM D2D1_CAP_STYLE_SQUARE}
+  // Round line cap.
+  D2D1_CAP_STYLE_ROUND       = D2D1_CAP_STYLE(2);
+  {$EXTERNALSYM D2D1_CAP_STYLE_ROUND}
+  // Triangle line cap.
+  D2D1_CAP_STYLE_TRIANGLE    = D2D1_CAP_STYLE(3);
+  {$EXTERNALSYM D2D1_CAP_STYLE_TRIANGLE}
+  //D2D1_CAP_STYLE_FORCE_DWORD = FORCEDWORD;
+
+type
+  // Describes the sequence of dashes and gaps in a stroke.
+  PD2D1_DASH_STYLE = ^D2D1_DASH_STYLE;
+  D2D1_DASH_STYLE = DWord;
+  {$EXTERNALSYM D2D1_DASH_STYLE}
+const
+  D2D1_DASH_STYLE_SOLID         = D2D1_DASH_STYLE(0);
+  {$EXTERNALSYM D2D1_DASH_STYLE_SOLID}
+  D2D1_DASH_STYLE_DASH         = D2D1_DASH_STYLE(1);
+  {$EXTERNALSYM D2D1_DASH_STYLE_DASH}
+  D2D1_DASH_STYLE_DOT          = D2D1_DASH_STYLE(2);
+  {$EXTERNALSYM D2D1_DASH_STYLE_DOT}
+  D2D1_DASH_STYLE_DASH_DOT     = D2D1_DASH_STYLE(3);
+  {$EXTERNALSYM D2D1_DASH_STYLE_DASH_DOT}
+  D2D1_DASH_STYLE_DASH_DOT_DOT = D2D1_DASH_STYLE(4);
+  {$EXTERNALSYM D2D1_DASH_STYLE_DASH_DOT_DOT}
+  D2D1_DASH_STYLE_CUSTOM       = D2D1_DASH_STYLE(5);
+  {$EXTERNALSYM D2D1_DASH_STYLE_CUSTOM}
+  //D2D1_DASH_STYLE_FORCE_DWORD  = FORCEDWORD;
+
+type
+  // Enum which describes the drawing of the corners on the line.
+  PD2D1_LINE_JOIN = ^D2D1_LINE_JOIN;
+  D2D1_LINE_JOIN = DWord;
+  {$EXTERNALSYM D2D1_LINE_JOIN}
+const
+  // Miter join.
+  D2D1_LINE_JOIN_MITER          = D2D1_LINE_JOIN(0);
+  {$EXTERNALSYM D2D1_LINE_JOIN_MITER}
+  // Bevel join.
+  D2D1_LINE_JOIN_BEVEL          = D2D1_LINE_JOIN(1);
+  {$EXTERNALSYM D2D1_LINE_JOIN_BEVEL}
+  // Round join.
+  D2D1_LINE_JOIN_ROUND          = D2D1_LINE_JOIN(2);
+  {$EXTERNALSYM D2D1_LINE_JOIN_ROUND}
+  // Miter/Bevel join.
+  D2D1_LINE_JOIN_MITER_OR_BEVEL = D2D1_LINE_JOIN(3);
+  {$EXTERNALSYM D2D1_LINE_JOIN_MITER_OR_BEVEL}
+  //D2D1_LINE_JOIN_FORCE_DWORD    = FORCEDWORD;
+
+type
+  // This enumeration describes the type of combine operation to be performed.
+  PD2D1_COMBINE_MODE = ^D2D1_COMBINE_MODE;
+  D2D1_COMBINE_MODE = DWord;
+  {$EXTERNALSYM D2D1_COMBINE_MODE}
+const
+  // Produce a geometry representing the set of points contained in either the first
+  // or the second geometry.
+  D2D1_COMBINE_MODE_UNION       = D2D1_COMBINE_MODE(0);
+  {$EXTERNALSYM D2D1_COMBINE_MODE_UNION}
+  // Produce a geometry representing the set of points common to the first and the
+  // second geometries.
+  D2D1_COMBINE_MODE_INTERSECT   = D2D1_COMBINE_MODE(1);
+  {$EXTERNALSYM D2D1_COMBINE_MODE_INTERSECT}
+  // Produce a geometry representing the set of points contained in the first
+  // geometry or the second geometry); but not both.
+  D2D1_COMBINE_MODE_XOR         = D2D1_COMBINE_MODE(2);
+  {$EXTERNALSYM D2D1_COMBINE_MODE_XOR}
+  // Produce a geometry representing the set of points contained in the first
+  // geometry but not the second geometry.
+  D2D1_COMBINE_MODE_EXCLUDE     = D2D1_COMBINE_MODE(3);
+  {$EXTERNALSYM D2D1_COMBINE_MODE_EXCLUDE}
+  //D2D1_COMBINE_MODE_FORCE_DWORD = FORCEDWORD;
+
+type
+  // Describes how one geometry object is spatially related to another geometry
+  // object.
+  PD2D1_GEOMETRY_RELATION = ^D2D1_GEOMETRY_RELATION;
+  D2D1_GEOMETRY_RELATION = DWord;
+  {$EXTERNALSYM D2D1_GEOMETRY_RELATION}
+const
+  // The relation between the geometries couldn't be determined. This value is never
+  // returned by any D2D method.
+  D2D1_GEOMETRY_RELATION_UNKNOWN      = D2D1_GEOMETRY_RELATION(0);
+  {$EXTERNALSYM D2D1_GEOMETRY_RELATION_UNKNOWN}
+  // The two geometries do not intersect at all.
+  D2D1_GEOMETRY_RELATION_DISJOINT     = D2D1_GEOMETRY_RELATION(1);
+  {$EXTERNALSYM D2D1_GEOMETRY_RELATION_DISJOINT}
+  // The passed in geometry is entirely contained by the object.
+  D2D1_GEOMETRY_RELATION_IS_CONTAINED = D2D1_GEOMETRY_RELATION(2);
+  {$EXTERNALSYM D2D1_GEOMETRY_RELATION_IS_CONTAINED}
+  // The object entirely contains the passed in geometry.
+  D2D1_GEOMETRY_RELATION_CONTAINS     = D2D1_GEOMETRY_RELATION(3);
+  {$EXTERNALSYM D2D1_GEOMETRY_RELATION_CONTAINS}
+  // The two geometries overlap but neither completely contains the other.
+  D2D1_GEOMETRY_RELATION_OVERLAP      = D2D1_GEOMETRY_RELATION(4);
+  {$EXTERNALSYM D2D1_GEOMETRY_RELATION_OVERLAP}
+  //D2D1_GEOMETRY_RELATION_FORCE_DWORD  = FORCEDWORD;
+
+type
+  // Specifies how simple the output of a simplified geometry sink should be.
+  PD2D1_GEOMETRY_SIMPLIFICATION_OPTION = ^D2D1_GEOMETRY_SIMPLIFICATION_OPTION;
+  D2D1_GEOMETRY_SIMPLIFICATION_OPTION = DWord;
+  {$EXTERNALSYM D2D1_GEOMETRY_SIMPLIFICATION_OPTION}
+const
+  D2D1_GEOMETRY_SIMPLIFICATION_OPTION_CUBICS_AND_LINES = D2D1_GEOMETRY_SIMPLIFICATION_OPTION(0);
+  {$EXTERNALSYM D2D1_GEOMETRY_SIMPLIFICATION_OPTION_CUBICS_AND_LINES}
+  D2D1_GEOMETRY_SIMPLIFICATION_OPTION_LINES            = D2D1_GEOMETRY_SIMPLIFICATION_OPTION(1);
+  {$EXTERNALSYM D2D1_GEOMETRY_SIMPLIFICATION_OPTION_LINES}
+  //D2D1_GEOMETRY_SIMPLIFICATION_OPTION_FORCE_DWORD      = FORCEDWORD;
+
+type
+  // Indicates whether the given figure is filled or hollow.
+  PD2D1_FIGURE_BEGIN = ^D2D1_FIGURE_BEGIN;
+  D2D1_FIGURE_BEGIN = DWord;
+  {$EXTERNALSYM D2D1_FIGURE_BEGIN}
+const
+  D2D1_FIGURE_BEGIN_FILLED      = D2D1_FIGURE_BEGIN(0);
+  {$EXTERNALSYM D2D1_FIGURE_BEGIN_FILLED}
+  D2D1_FIGURE_BEGIN_HOLLOW      = D2D1_FIGURE_BEGIN(1);
+  {$EXTERNALSYM D2D1_FIGURE_BEGIN_HOLLOW}
+  //D2D1_FIGURE_BEGIN_FORCE_DWORD = FORCEDWORD);
+
+type
+  // Indicates whether the figure is open or closed on its end point.
+  PD2D1_FIGURE_END = ^D2D1_FIGURE_END;
+  D2D1_FIGURE_END = DWord;
+  {$EXTERNALSYM D2D1_FIGURE_END}
+const
+  D2D1_FIGURE_END_OPEN        = D2D1_FIGURE_END(0);
+  {$EXTERNALSYM D2D1_FIGURE_END_OPEN}
+  D2D1_FIGURE_END_CLOSED      = D2D1_FIGURE_END(1);
+  {$EXTERNALSYM D2D1_FIGURE_END_CLOSED}
+  //D2D1_FIGURE_END_FORCE_DWORD = FORCEDWORD;
+
+type
+  // Indicates whether the given segment should be stroked, or, if the join between
+  // this segment and the previous one should be smooth.
+  PD2D1_PATH_SEGMENT = ^D2D1_PATH_SEGMENT;
+  D2D1_PATH_SEGMENT = DWord;
+  {$EXTERNALSYM D2D1_PATH_SEGMENT}
+const
+  {$EXTERNALSYM D2D1_PATH_SEGMENT_NONE}
+  D2D1_PATH_SEGMENT_NONE                  = D2D1_PATH_SEGMENT($00000000);
+  {$EXTERNALSYM D2D1_PATH_SEGMENT_FORCE_UNSTROKED}
+  D2D1_PATH_SEGMENT_FORCE_UNSTROKED       = D2D1_PATH_SEGMENT($00000001);
+  {$EXTERNALSYM D2D1_PATH_SEGMENT_FORCE_ROUND_LINE_JOIN}
+  D2D1_PATH_SEGMENT_FORCE_ROUND_LINE_JOIN = D2D1_PATH_SEGMENT($00000002);
+  //D2D1_PATH_SEGMENT_FORCE_DWORD           = FORCEDWORD;
+
+type
+  // Defines the direction that an elliptical arc is drawn.
+  PD2D1_SWEEP_DIRECTION = ^D2D1_SWEEP_DIRECTION;
+  D2D1_SWEEP_DIRECTION = DWord;
+  {$EXTERNALSYM D2D1_SWEEP_DIRECTION}
+const
+  {$EXTERNALSYM D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE}
+  D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE = D2D1_SWEEP_DIRECTION(0);
+  {$EXTERNALSYM D2D1_SWEEP_DIRECTION_CLOCKWISE}
+  D2D1_SWEEP_DIRECTION_CLOCKWISE         = D2D1_SWEEP_DIRECTION(1);
+  //D2D1_SWEEP_DIRECTION_FORCE_DWORD       = FORCEDWORD;
+
+type
+  // Specifies how the intersecting areas of geometries or figures are combined to
+  // form the area of the composite geometry.
+  PD2D1_FILL_MODE = ^D2D1_FILL_MODE;
+  D2D1_FILL_MODE = DWord;
+  {$EXTERNALSYM D2D1_FILL_MODE}
+const
+  {$EXTERNALSYM D2D1_FILL_MODE_ALTERNATE}
+  D2D1_FILL_MODE_ALTERNATE   = D2D1_FILL_MODE(0);
+  {$EXTERNALSYM D2D1_FILL_MODE_WINDING}
+  D2D1_FILL_MODE_WINDING     = D2D1_FILL_MODE(1);
+  //D2D1_FILL_MODE_FORCE_DWORD = FORCEDWORD;
+
+type
+  // Specified options that can be applied when a layer resource is applied to create
+  // a layer.
+  PD2D1_LAYER_OPTIONS = ^D2D1_LAYER_OPTIONS;
+  D2D1_LAYER_OPTIONS = DWord;
+  {$EXTERNALSYM D2D1_LAYER_OPTIONS}
+const
+  D2D1_LAYER_OPTIONS_NONE                     = D2D1_LAYER_OPTIONS($00000000);
+  {$EXTERNALSYM D2D1_LAYER_OPTIONS_NONE}
+  // The layer will render correctly for ClearType text. If the render target was set
+  // to ClearType previously, the layer will continue to render ClearType. If the
+  // render target was set to ClearType and this option is not specified, the render
+  // target will be set to render gray-scale until the layer is popped. The caller
+  // can override this default by calling SetTextAntialiasMode while within the
+  // layer. This flag is slightly slower than the default.
+  {$EXTERNALSYM D2D1_LAYER_OPTIONS_INITIALIZE_FOR_CLEARTYPE}
+  D2D1_LAYER_OPTIONS_INITIALIZE_FOR_CLEARTYPE = D2D1_LAYER_OPTIONS($00000001);
+  //D2D1_LAYER_OPTIONS_FORCE_DWORD              = FORCEDWORD;
+
+type
+  // Describes whether a window is occluded.
+  PD2D1_WINDOW_STATE = ^D2D1_WINDOW_STATE;
+  D2D1_WINDOW_STATE = DWord;
+  {$EXTERNALSYM D2D1_WINDOW_STATE}
+const
+  D2D1_WINDOW_STATE_NONE        = D2D1_WINDOW_STATE($0000000);
+  {$EXTERNALSYM D2D1_WINDOW_STATE_NONE}
+  D2D1_WINDOW_STATE_OCCLUDED    = D2D1_WINDOW_STATE($0000001);
+  {$EXTERNALSYM D2D1_WINDOW_STATE_OCCLUDED}
+  //D2D1_WINDOW_STATE_FORCE_DWORD = FORCEDWORD;
+
+type
+  // Describes whether a render target uses hardware or software rendering, or if
+  // Direct2D should select the rendering mode.
+  PD2D1_RENDER_TARGET_TYPE = ^D2D1_RENDER_TARGET_TYPE;
+  D2D1_RENDER_TARGET_TYPE = DWord;
+  {$EXTERNALSYM D2D1_RENDER_TARGET_TYPE}
+const
+  // D2D is free to choose the render target type for the caller.
+  D2D1_RENDER_TARGET_TYPE_DEFAULT     = D2D1_RENDER_TARGET_TYPE(0);
+  {$EXTERNALSYM D2D1_RENDER_TARGET_TYPE_DEFAULT}
+  // The render target will render using the CPU.
+  D2D1_RENDER_TARGET_TYPE_SOFTWARE    = D2D1_RENDER_TARGET_TYPE(1);
+  {$EXTERNALSYM D2D1_RENDER_TARGET_TYPE_SOFTWARE}
+  // The render target will render using the GPU.
+  D2D1_RENDER_TARGET_TYPE_HARDWARE    = D2D1_RENDER_TARGET_TYPE(2);
+  {$EXTERNALSYM D2D1_RENDER_TARGET_TYPE_HARDWARE}
+  //D2D1_RENDER_TARGET_TYPE_FORCE_DWORD = FORCEDWORD;
+
+type
+  // Describes the minimum DirectX support required for hardware rendering by a
+  // render target.
+  PD2D1_FEATURE_LEVEL = ^D2D1_FEATURE_LEVEL;
+  D2D1_FEATURE_LEVEL = D3D_FEATURE_LEVEL;
+  {$EXTERNALSYM D2D1_FEATURE_LEVEL}
+const
+  // The caller does not require a particular underlying D3D device level.
+  D2D1_FEATURE_LEVEL_DEFAULT     = D2D1_FEATURE_LEVEL(0);
+  {$EXTERNALSYM D2D1_FEATURE_LEVEL_DEFAULT}
+  // The D3D device level is DX9 compatible.
+  D2D1_FEATURE_LEVEL_9           = D3D_FEATURE_LEVEL_9_1;
+  {$EXTERNALSYM D2D1_FEATURE_LEVEL_9}
+  // The D3D device level is DX10 compatible.
+  D2D1_FEATURE_LEVEL_10          = D3D_FEATURE_LEVEL_10_0;
+  {$EXTERNALSYM D2D1_FEATURE_LEVEL_10}
+  //D2D1_FEATURE_LEVEL_FORCE_DWORD = FORCEDWORD;
+
+type
+  // Describes how a render target is remoted and whether it should be
+  // GDI-compatible. This enumeration allows a bitwise combination of its member
+  // values.
+  PD2D1_RENDER_TARGET_USAGE = ^D2D1_RENDER_TARGET_USAGE;
+  D2D1_RENDER_TARGET_USAGE = DWord;
+  {$EXTERNALSYM D2D1_RENDER_TARGET_USAGE}
+const
+  D2D1_RENDER_TARGET_USAGE_NONE                  = D2D1_RENDER_TARGET_USAGE($00000000);
+  {$EXTERNALSYM D2D1_RENDER_TARGET_USAGE_NONE}
+  // Rendering will occur locally, if a terminal-services session is established, the
+  // bitmap updates will be sent to the terminal services client.
+  D2D1_RENDER_TARGET_USAGE_FORCE_BITMAP_REMOTING = D2D1_RENDER_TARGET_USAGE($00000001);
+  {$EXTERNALSYM D2D1_RENDER_TARGET_USAGE_FORCE_BITMAP_REMOTING}
+  // The render target will allow a call to GetDC on the ID2D1GdiInteropRenderTarget
+  // interface. Rendering will also occur locally.
+  D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE        = D2D1_RENDER_TARGET_USAGE($00000002);
+  {$EXTERNALSYM D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE}
+  //D2D1_RENDER_TARGET_USAGE_FORCE_DWORD           = FORCEDWORD;
+
+type
+  // Describes how present should behave.
+  PD2D1_PRESENT_OPTIONS = ^D2D1_PRESENT_OPTIONS;
+  D2D1_PRESENT_OPTIONS = DWord;
+  {$EXTERNALSYM D2D1_PRESENT_OPTIONS}
+const
+  D2D1_PRESENT_OPTIONS_NONE            = D2D1_PRESENT_OPTIONS($00000000);
+  {$EXTERNALSYM D2D1_PRESENT_OPTIONS_NONE}
+  // Keep the target contents intact through present.
+  D2D1_PRESENT_OPTIONS_RETAIN_CONTENTS = D2D1_PRESENT_OPTIONS($00000001);
+  {$EXTERNALSYM D2D1_PRESENT_OPTIONS_RETAIN_CONTENTS}
+  // Do not wait for display refresh to commit changes to display.
+  D2D1_PRESENT_OPTIONS_IMMEDIATELY     = D2D1_PRESENT_OPTIONS($00000002);
+  {$EXTERNALSYM D2D1_PRESENT_OPTIONS_IMMEDIATELY}
+  //D2D1_PRESENT_OPTIONS_FORCE_DWORD     = FORCEDWORD;
+
+type
+  // Specifies additional features supportable by a compatible render target when it
+  // is created. This enumeration allows a bitwise combination of its member values.
+  PD2D1_COMPATIBLE_RENDER_TARGET_OPTIONS = ^D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS;
+  D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS = DWord;
+  {$EXTERNALSYM D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS}
+const
+  D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_NONE           = D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS($00000000);
+  {$EXTERNALSYM D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_NONE}
+  // The compatible render target will allow a call to GetDC on the
+  // ID2D1GdiInteropRenderTarget interface. This can be specified even if the parent
+  // render target is not GDI compatible.
+  D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_GDI_COMPATIBLE = D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS($00000001);
+  {$EXTERNALSYM D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_GDI_COMPATIBLE}
+  //D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_FORCE_DWORD    = FORCEDWORD);
+
+type
+  // Specifies how a device context is initialized for GDI rendering when it is
+  // retrieved from the render target.
+  PD2D1_DC_INITIALIZE_MODE = ^D2D1_DC_INITIALIZE_MODE;
+  D2D1_DC_INITIALIZE_MODE = DWord;
+  {$EXTERNALSYM D2D1_DC_INITIALIZE_MODE}
+const
+  // The contents of the D2D render target will be copied to the DC.
+  D2D1_DC_INITIALIZE_MODE_COPY        = D2D1_DC_INITIALIZE_MODE(0);
+  {$EXTERNALSYM D2D1_DC_INITIALIZE_MODE_COPY}
+  // The contents of the DC will be cleared.
+  D2D1_DC_INITIALIZE_MODE_CLEAR       = D2D1_DC_INITIALIZE_MODE(1);
+  {$EXTERNALSYM D2D1_DC_INITIALIZE_MODE_CLEAR}
+  //D2D1_DC_INITIALIZE_MODE_FORCE_DWORD = FORCEDWORD;
+
+type
+  // Indicates the debug level to be output by the debug layer.
+  PD2D1_DEBUG_LEVEL = ^D2D1_DEBUG_LEVEL;
+  D2D1_DEBUG_LEVEL = DWord;
+  {$EXTERNALSYM D2D1_DEBUG_LEVEL}
+const
+  D2D1_DEBUG_LEVEL_NONE        = D2D1_DEBUG_LEVEL(0); // Direct2D does not produce any debugging output.
+  {$EXTERNALSYM D2D1_DEBUG_LEVEL_NONE}
+  D2D1_DEBUG_LEVEL_ERROR       = D2D1_DEBUG_LEVEL(1); // Direct2D sends error messages to the debug layer.
+  {$EXTERNALSYM D2D1_DEBUG_LEVEL_ERROR}
+  D2D1_DEBUG_LEVEL_WARNING     = D2D1_DEBUG_LEVEL(2); // Direct2D sends error messages and warnings to the debug layer.
+  {$EXTERNALSYM D2D1_DEBUG_LEVEL_WARNING}
+  D2D1_DEBUG_LEVEL_INFORMATION = D2D1_DEBUG_LEVEL(3); // Direct2D sends error messages, warnings, and additional diagnostic information that can help improve performance to the debug layer.
+  {$EXTERNALSYM D2D1_DEBUG_LEVEL_INFORMATION}
+  //D2D1_DEBUG_LEVEL_FORCE_DWORD = FORCEDWORD;
+
+type
+  // Specifies the threading model of the created factory and all of its derived
+  // resources.
+  PD2D1_FACTORY_TYPE = ^D2D1_FACTORY_TYPE;
+  D2D1_FACTORY_TYPE = DWord;
+  {$EXTERNALSYM D2D1_FACTORY_TYPE}
+const
+  // The resulting factory and derived resources may only be invoked serially.
+  // Reference counts on resources are interlocked, however, resource and render
+  // target state is not protected from multi-threaded access.
+  D2D1_FACTORY_TYPE_SINGLE_THREADED = D2D1_FACTORY_TYPE(0);
+  {$EXTERNALSYM D2D1_FACTORY_TYPE_SINGLE_THREADED}
+  // The resulting factory may be invoked from multiple threads. Returned resources
+  // use interlocked reference counting and their state is protected.
+  D2D1_FACTORY_TYPE_MULTI_THREADED  = D2D1_FACTORY_TYPE(1);
+  {$EXTERNALSYM D2D1_FACTORY_TYPE_MULTI_THREADED}
+  //D2D1_FACTORY_TYPE_FORCE_DWORD     = FORCEDWORD;
+
+// =============================================================================
 
 type
 
@@ -157,103 +649,6 @@ type
 
   PID2D1Factory = ^ID2D1Factory;
   ID2D1Factory = interface;
-
-
-  // This determines what gamma is used for interpolation/blending.
-  PD2D1_GAMMA = ^D2D1_GAMMA;
-  D2D1_GAMMA = (
-    // Colors are manipulated in 2.2 gamma color space.
-    D2D1_GAMMA_2_2         = 0,
-    // Colors are manipulated in 1.0 gamma color space.
-    D2D1_GAMMA_1_0         = 1,
-    D2D1_GAMMA_FORCE_DWORD = -1);
-  {$EXTERNALSYM D2D1_GAMMA}
-
-
-  // Specifies what the contents are of an opacity mask.
-  PD2D1_OPACITY_MASK_CONTENT = ^D2D1_OPACITY_MASK_CONTENT;
-  D2D1_OPACITY_MASK_CONTENT                       = (
-    // The mask contains geometries or bitmaps.
-    D2D1_OPACITY_MASK_CONTENT_GRAPHICS            = 0,
-    // The mask contains text rendered using one of the natural text modes.
-    D2D1_OPACITY_MASK_CONTENT_TEXT_NATURAL        = 1,
-    // The mask contains text rendered using one of the GDI compatible text modes.
-    D2D1_OPACITY_MASK_CONTENT_TEXT_GDI_COMPATIBLE = 2,
-    D2D1_OPACITY_MASK_CONTENT_FORCE_DWORD         = -1);
-  {$EXTERNALSYM D2D1_OPACITY_MASK_CONTENT}
-
-
-  // Enum which describes how to sample from a source outside its base tile.
-  PD2D1_EXTEND_MODE = ^D2D1_EXTEND_MODE;
-  D2D1_EXTEND_MODE = (
-    // Extend the edges of the source out by clamping sample points outside the source
-    // to the edges.
-    D2D1_EXTEND_MODE_CLAMP       = 0,
-    // The base tile is drawn untransformed and the remainder are filled by repeating
-    // the base tile.
-    D2D1_EXTEND_MODE_WRAP        = 1,
-    // The same as wrap, but alternate tiles are flipped  The base tile is drawn
-    // untransformed.
-    D2D1_EXTEND_MODE_MIRROR      = 2,
-    D2D1_EXTEND_MODE_FORCE_DWORD = -1);
-  {$EXTERNALSYM D2D1_EXTEND_MODE}
-
-
-  // Enum which describes the manner in which we render edges of non-text primitives.
-  PD2D1_ANTIALIAS_MODE = ^D2D1_ANTIALIAS_MODE;
-  D2D1_ANTIALIAS_MODE                 = (
-    // The edges of each primitive are antialiased sequentially.
-    D2D1_ANTIALIAS_MODE_PER_PRIMITIVE = 0,
-    // Each pixel is rendered if its pixel center is contained by the geometry.
-    D2D1_ANTIALIAS_MODE_ALIASED       = 1,
-    D2D1_ANTIALIAS_MODE_FORCE_DWORD   = -1);
-  {$EXTERNALSYM D2D1_ANTIALIAS_MODE}
-
-
-  // Describes the antialiasing mode used for drawing text.
-  PD2D1_TEXT_ANTIALIAS_MODE = ^D2D1_TEXT_ANTIALIAS_MODE;
-  D2D1_TEXT_ANTIALIAS_MODE = (
-    // Render text using the current system setting.
-    D2D1_TEXT_ANTIALIAS_MODE_DEFAULT     = 0,
-    // Render text using ClearType.
-    D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE   = 1,
-    // Render text using gray-scale.
-    D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE   = 2,
-    // Render text aliased.
-    D2D1_TEXT_ANTIALIAS_MODE_ALIASED     = 3,
-    D2D1_TEXT_ANTIALIAS_MODE_FORCE_DWORD = -1);
-  {$EXTERNALSYM D2D1_TEXT_ANTIALIAS_MODE}
-
-
-  // Specifies the algorithm that is used when images are scaled or rotated. Note
-  // Starting in Windows 8, more interpolations modes are available. See
-  // D2D1_INTERPOLATION_MODE for more info.
-  PD2D1_BITMAP_INTERPOLATION_MODE = ^D2D1_BITMAP_INTERPOLATION_MODE;
-  D2D1_BITMAP_INTERPOLATION_MODE = (
-    // Nearest Neighbor filtering. Also known as nearest pixel or nearest point
-    // sampling.
-    D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR = D2D1_INTERPOLATION_MODE_DEFINITION_NEAREST_NEIGHBOR,
-    // Linear filtering.
-    D2D1_BITMAP_INTERPOLATION_MODE_LINEAR           = D2D1_INTERPOLATION_MODE_DEFINITION_LINEAR,
-    D2D1_BITMAP_INTERPOLATION_MODE_FORCE_DWORD      = -1);
-  {$EXTERNALSYM D2D1_BITMAP_INTERPOLATION_MODE}
-
-
-  // Modifications made to the draw text call that influence how the text is
-  // rendered.
-  PD2D1_DRAW_TEXT_OPTIONS = ^D2D1_DRAW_TEXT_OPTIONS;
-  D2D1_DRAW_TEXT_OPTIONS = (
-    // Do not snap the baseline of the text vertically.
-    D2D1_DRAW_TEXT_OPTIONS_NO_SNAP                       = $00000001,
-    // Clip the text to the content bounds.
-    D2D1_DRAW_TEXT_OPTIONS_CLIP                          = $00000002,
-    // Render color versions of glyphs if defined by the font.
-    D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT             = $00000004,
-    // Bitmap origins of color glyph bitmaps are not snapped.
-    D2D1_DRAW_TEXT_OPTIONS_DISABLE_COLOR_BITMAP_SNAPPING = $00000008,
-    D2D1_DRAW_TEXT_OPTIONS_NONE                          = $00000000,
-    D2D1_DRAW_TEXT_OPTIONS_FORCE_DWORD                   = -1);
-  {$EXTERNALSYM D2D1_DRAW_TEXT_OPTIONS}
 
 
   PD2D1_POINT_2U = ^D2D1_POINT_2U;
@@ -353,123 +748,6 @@ type
   {$EXTERNALSYM D2D1_RADIAL_GRADIENT_BRUSH_PROPERTIES}
 
 
-  // Differentiates which of the two possible arcs could match the given arc
-  // parameters.
-  PD2D1_ARC_SIZE = ^D2D1_ARC_SIZE;
-  D2D1_ARC_SIZE               = (
-    D2D1_ARC_SIZE_SMALL       = 0,
-    D2D1_ARC_SIZE_LARGE       = 1,
-    D2D1_ARC_SIZE_FORCE_DWORD = -1);
-  {$EXTERNALSYM D2D1_ARC_SIZE}
-
-  // Enum which describes the drawing of the ends of a line.
-  PD2D1_CAP_STYLE = ^D2D1_CAP_STYLE;
-  D2D1_CAP_STYLE               = (
-    // Flat line cap.
-    D2D1_CAP_STYLE_FLAT        = 0,
-    // Square line cap.
-    D2D1_CAP_STYLE_SQUARE      = 1,
-    // Round line cap.
-    D2D1_CAP_STYLE_ROUND       = 2,
-    // Triangle line cap.
-    D2D1_CAP_STYLE_TRIANGLE    = 3,
-    D2D1_CAP_STYLE_FORCE_DWORD = -1);
-  {$EXTERNALSYM D2D1_CAP_STYLE}
-
-
-  // Describes the sequence of dashes and gaps in a stroke.
-  PD2D1_DASH_STYLE = ^D2D1_DASH_STYLE;
-  D2D1_DASH_STYLE                = (
-    D2D1_DASH_STYLE_SOLID        = 0,
-    D2D1_DASH_STYLE_DASH         = 1,
-    D2D1_DASH_STYLE_DOT          = 2,
-    D2D1_DASH_STYLE_DASH_DOT     = 3,
-    D2D1_DASH_STYLE_DASH_DOT_DOT = 4,
-    D2D1_DASH_STYLE_CUSTOM       = 5,
-    D2D1_DASH_STYLE_FORCE_DWORD  = -1);
-  {$EXTERNALSYM D2D1_DASH_STYLE}
-
-
-  // Enum which describes the drawing of the corners on the line.
-  PD2D1_LINE_JOIN = ^D2D1_LINE_JOIN;
-  D2D1_LINE_JOIN                  = (
-    // Miter join.
-    D2D1_LINE_JOIN_MITER          = 0,
-    // Bevel join.
-    D2D1_LINE_JOIN_BEVEL          = 1,
-    // Round join.
-    D2D1_LINE_JOIN_ROUND          = 2,
-    // Miter/Bevel join.
-    D2D1_LINE_JOIN_MITER_OR_BEVEL = 3,
-    D2D1_LINE_JOIN_FORCE_DWORD    = -1);
-  {$EXTERNALSYM D2D1_LINE_JOIN}
-
-
-  // This enumeration describes the type of combine operation to be performed.
-  PD2D1_COMBINE_MODE = ^D2D1_COMBINE_MODE;
-  D2D1_COMBINE_MODE               = (
-    // Produce a geometry representing the set of points contained in either the first
-    // or the second geometry.
-    D2D1_COMBINE_MODE_UNION       = 0,
-    // Produce a geometry representing the set of points common to the first and the
-    // second geometries.
-    D2D1_COMBINE_MODE_INTERSECT   = 1,
-    // Produce a geometry representing the set of points contained in the first
-    // geometry or the second geometry, but not both.
-    D2D1_COMBINE_MODE_XOR         = 2,
-    // Produce a geometry representing the set of points contained in the first
-    // geometry but not the second geometry.
-    D2D1_COMBINE_MODE_EXCLUDE     = 3,
-    D2D1_COMBINE_MODE_FORCE_DWORD = -1);
-  {$EXTERNALSYM D2D1_COMBINE_MODE}
-
-
-  // Describes how one geometry object is spatially related to another geometry
-  // object.
-  PD2D1_GEOMETRY_RELATION = ^D2D1_GEOMETRY_RELATION;
-  D2D1_GEOMETRY_RELATION                = (
-    // The relation between the geometries couldn't be determined. This value is never
-    // returned by any D2D method.
-    D2D1_GEOMETRY_RELATION_UNKNOWN      = 0,
-    // The two geometries do not intersect at all.
-    D2D1_GEOMETRY_RELATION_DISJOINT     = 1,
-    // The passed in geometry is entirely contained by the object.
-    D2D1_GEOMETRY_RELATION_IS_CONTAINED = 2,
-    // The object entirely contains the passed in geometry.
-    D2D1_GEOMETRY_RELATION_CONTAINS     = 3,
-    // The two geometries overlap but neither completely contains the other.
-    D2D1_GEOMETRY_RELATION_OVERLAP      = 4,
-    D2D1_GEOMETRY_RELATION_FORCE_DWORD  = -1);
-  {$EXTERNALSYM D2D1_GEOMETRY_RELATION}
-
-
-  // Specifies how simple the output of a simplified geometry sink should be.
-  PD2D1_GEOMETRY_SIMPLIFICATION_OPTION = ^D2D1_GEOMETRY_SIMPLIFICATION_OPTION;
-  D2D1_GEOMETRY_SIMPLIFICATION_OPTION                    = (
-    D2D1_GEOMETRY_SIMPLIFICATION_OPTION_CUBICS_AND_LINES = 0,
-    D2D1_GEOMETRY_SIMPLIFICATION_OPTION_LINES            = 1,
-    D2D1_GEOMETRY_SIMPLIFICATION_OPTION_FORCE_DWORD      = -1);
-  {$EXTERNALSYM D2D1_GEOMETRY_SIMPLIFICATION_OPTION}
-
-
-  // Indicates whether the given figure is filled or hollow.
-  PD2D1_FIGURE_BEGIN = ^D2D1_FIGURE_BEGIN;
-  D2D1_FIGURE_BEGIN               = (
-    D2D1_FIGURE_BEGIN_FILLED      = 0,
-    D2D1_FIGURE_BEGIN_HOLLOW      = 1,
-    D2D1_FIGURE_BEGIN_FORCE_DWORD = -1);
-  {$EXTERNALSYM D2D1_FIGURE_BEGIN}
-
-
-  // Indicates whether the figure is open or closed on its end point.
-  PD2D1_FIGURE_END = ^D2D1_FIGURE_END;
-  D2D1_FIGURE_END               = (
-    D2D1_FIGURE_END_OPEN        = 0,
-    D2D1_FIGURE_END_CLOSED      = 1,
-    D2D1_FIGURE_END_FORCE_DWORD = -1);
-  {$EXTERNALSYM D2D1_FIGURE_END}
-
-
   // Describes a cubic bezier in a path.
   PD2D1_BEZIER_SEGMENT = ^D2D1_BEZIER_SEGMENT;
   D2D1_BEZIER_SEGMENT = record
@@ -488,34 +766,6 @@ type
     point3: D2D1_POINT_2F;
   end;
   {$EXTERNALSYM D2D1_TRIANGLE}
-
-
-  // Indicates whether the given segment should be stroked, or, if the join between
-  // this segment and the previous one should be smooth.
-  PD2D1_PATH_SEGMENT = ^D2D1_PATH_SEGMENT;
-  D2D1_PATH_SEGMENT                         = (
-    D2D1_PATH_SEGMENT_NONE                  = $00000000,
-    D2D1_PATH_SEGMENT_FORCE_UNSTROKED       = $00000001,
-    D2D1_PATH_SEGMENT_FORCE_ROUND_LINE_JOIN = $00000002,
-    D2D1_PATH_SEGMENT_FORCE_DWORD           = -1);
-  {$EXTERNALSYM D2D1_PATH_SEGMENT}
-
-  // Defines the direction that an elliptical arc is drawn.
-  PD2D1_SWEEP_DIRECTION = ^D2D1_SWEEP_DIRECTION;
-  D2D1_SWEEP_DIRECTION                     = (
-    D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE = 0,
-    D2D1_SWEEP_DIRECTION_CLOCKWISE         = 1,
-    D2D1_SWEEP_DIRECTION_FORCE_DWORD       = -1);
-  {$EXTERNALSYM D2D1_SWEEP_DIRECTION}
-
-  // Specifies how the intersecting areas of geometries or figures are combined to
-  // form the area of the composite geometry.
-  PD2D1_FILL_MODE = ^D2D1_FILL_MODE;
-  D2D1_FILL_MODE               = (
-    D2D1_FILL_MODE_ALTERNATE   = 0,
-    D2D1_FILL_MODE_WINDING     = 1,
-    D2D1_FILL_MODE_FORCE_DWORD = -1);
-  {$EXTERNALSYM D2D1_FILL_MODE}
 
 
   // Describes an arc that is defined as part of a path.
@@ -568,22 +818,6 @@ type
   end;
   {$EXTERNALSYM D2D1_STROKE_STYLE_PROPERTIES}
 
-  // Specified options that can be applied when a layer resource is applied to create
-  // a layer.
-  PD2D1_LAYER_OPTIONS = ^D2D1_LAYER_OPTIONS;
-  D2D1_LAYER_OPTIONS                            = (
-    D2D1_LAYER_OPTIONS_NONE                     = $00000000,
-    {$EXTERNALSYM D2D1_LAYER_OPTIONS_NONE}
-    // The layer will render correctly for ClearType text. If the render target was set
-    // to ClearType previously, the layer will continue to render ClearType. If the
-    // render target was set to ClearType and this option is not specified, the render
-    // target will be set to render gray-scale until the layer is popped. The caller
-    // can override this default by calling SetTextAntialiasMode while within the
-    // layer. This flag is slightly slower than the default.
-    D2D1_LAYER_OPTIONS_INITIALIZE_FOR_CLEARTYPE = $00000001,
-    D2D1_LAYER_OPTIONS_FORCE_DWORD              = -1);
-  {$EXTERNALSYM D2D1_LAYER_OPTIONS}
-
 
   // Contains the content bounds, mask information, opacity settings, and other
   // options for a layer resource.
@@ -621,67 +855,6 @@ type
   {$EXTERNALSYM D2D1_LAYER_PARAMETERS}
 
 
-  // Describes whether a window is occluded.
-  PD2D1_WINDOW_STATE = ^D2D1_WINDOW_STATE;
-  D2D1_WINDOW_STATE               = (
-    D2D1_WINDOW_STATE_NONE        = $0000000,
-    D2D1_WINDOW_STATE_OCCLUDED    = $0000001,
-    D2D1_WINDOW_STATE_FORCE_DWORD = FORCEDWORD);
-  {$EXTERNALSYM D2D1_WINDOW_STATE}
-
-
-  // Describes whether a render target uses hardware or software rendering, or if
-  // Direct2D should select the rendering mode.
-  PD2D1_RENDER_TARGET_TYPE = ^D2D1_RENDER_TARGET_TYPE;
-  D2D1_RENDER_TARGET_TYPE               = (
-    // D2D is free to choose the render target type for the caller.
-    D2D1_RENDER_TARGET_TYPE_DEFAULT     = 0,
-    // The render target will render using the CPU.
-    D2D1_RENDER_TARGET_TYPE_SOFTWARE    = 1,
-    // The render target will render using the GPU.
-    D2D1_RENDER_TARGET_TYPE_HARDWARE    = 2,
-    D2D1_RENDER_TARGET_TYPE_FORCE_DWORD = FORCEDWORD);
-  {$EXTERNALSYM D2D1_RENDER_TARGET_TYPE}
-
-  // Describes the minimum DirectX support required for hardware rendering by a
-  // render target.
-  PD2D1_FEATURE_LEVEL = ^D2D1_FEATURE_LEVEL;
-  D2D1_FEATURE_LEVEL               = (
-    // The caller does not require a particular underlying D3D device level.
-    D2D1_FEATURE_LEVEL_DEFAULT     = 0,
-    // The D3D device level is DX9 compatible.
-    D2D1_FEATURE_LEVEL_9           = Ord(D3D_FEATURE_LEVEL_9_1),
-    // The D3D device level is DX10 compatible.
-    D2D1_FEATURE_LEVEL_10          = Ord(D3D_FEATURE_LEVEL_10_0),
-    D2D1_FEATURE_LEVEL_FORCE_DWORD = FORCEDWORD);
-  {$EXTERNALSYM D2D1_FEATURE_LEVEL}
-
-  // Describes how a render target is remoted and whether it should be
-  // GDI-compatible. This enumeration allows a bitwise combination of its member
-  // values.
-  PD2D1_RENDER_TARGET_USAGE = ^D2D1_RENDER_TARGET_USAGE;
-  D2D1_RENDER_TARGET_USAGE                         = (
-    D2D1_RENDER_TARGET_USAGE_NONE                  = $00000000,
-    // Rendering will occur locally, if a terminal-services session is established, the
-    // bitmap updates will be sent to the terminal services client.
-    D2D1_RENDER_TARGET_USAGE_FORCE_BITMAP_REMOTING = $00000001,
-    // The render target will allow a call to GetDC on the ID2D1GdiInteropRenderTarget
-    // interface. Rendering will also occur locally.
-    D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE        = $00000002,
-    D2D1_RENDER_TARGET_USAGE_FORCE_DWORD           = FORCEDWORD);
-  {$EXTERNALSYM D2D1_RENDER_TARGET_USAGE}
-
-  // Describes how present should behave.
-  PD2D1_PRESENT_OPTIONS = ^D2D1_PRESENT_OPTIONS;
-  D2D1_PRESENT_OPTIONS                   = (
-    D2D1_PRESENT_OPTIONS_NONE            = $00000000,
-    // Keep the target contents intact through present.
-    D2D1_PRESENT_OPTIONS_RETAIN_CONTENTS = $00000001,
-    // Do not wait for display refresh to commit changes to display.
-    D2D1_PRESENT_OPTIONS_IMMEDIATELY     = $00000002,
-    D2D1_PRESENT_OPTIONS_FORCE_DWORD     = FORCEDWORD);
-  {$EXTERNALSYM D2D1_PRESENT_OPTIONS}
-
   // Contains rendering options (hardware or software), pixel format, DPI
   // information, remoting options, and Direct3D support requirements for a render
   // target.
@@ -706,17 +879,6 @@ type
   end;
   {$EXTERNALSYM D2D1_HWND_RENDER_TARGET_PROPERTIES}
 
-  // Specifies additional features supportable by a compatible render target when it
-  // is created. This enumeration allows a bitwise combination of its member values.
-  PD2D1_COMPATIBLE_RENDER_TARGET_OPTIONS = ^D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS;
-  D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS                  = (
-    D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_NONE           = $00000000,
-    // The compatible render target will allow a call to GetDC on the
-    // ID2D1GdiInteropRenderTarget interface. This can be specified even if the parent
-    // render target is not GDI compatible.
-    D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_GDI_COMPATIBLE = $00000001,
-    D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_FORCE_DWORD    = FORCEDWORD);
-  {$EXTERNALSYM D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS}
 
   // Allows the drawing state to be atomically created. This also specifies the
   // drawing state that is saved into an IDrawingStateBlock object.
@@ -730,40 +892,6 @@ type
   end;
   {$EXTERNALSYM D2D1_DRAWING_STATE_DESCRIPTION}
 
-  // Specifies how a device context is initialized for GDI rendering when it is
-  // retrieved from the render target.
-  PD2D1_DC_INITIALIZE_MODE = ^D2D1_DC_INITIALIZE_MODE;
-  D2D1_DC_INITIALIZE_MODE               = (
-    // The contents of the D2D render target will be copied to the DC.
-    D2D1_DC_INITIALIZE_MODE_COPY        = 0,
-    // The contents of the DC will be cleared.
-    D2D1_DC_INITIALIZE_MODE_CLEAR       = 1,
-    D2D1_DC_INITIALIZE_MODE_FORCE_DWORD = FORCEDWORD);
-  {$EXTERNALSYM D2D1_DC_INITIALIZE_MODE}
-
-  // Indicates the debug level to be output by the debug layer.
-  PD2D1_DEBUG_LEVEL = ^D2D1_DEBUG_LEVEL;
-  D2D1_DEBUG_LEVEL               = (
-    D2D1_DEBUG_LEVEL_NONE        = 0, // Direct2D does not produce any debugging output.
-    D2D1_DEBUG_LEVEL_ERROR       = 1, // Direct2D sends error messages to the debug layer.
-    D2D1_DEBUG_LEVEL_WARNING     = 2, // Direct2D sends error messages and warnings to the debug layer.
-    D2D1_DEBUG_LEVEL_INFORMATION = 3, // Direct2D sends error messages, warnings, and additional diagnostic information that can help improve performance to the debug layer.
-    D2D1_DEBUG_LEVEL_FORCE_DWORD = FORCEDWORD);
-  {$EXTERNALSYM D2D1_DEBUG_LEVEL}
-
-  // Specifies the threading model of the created factory and all of its derived
-  // resources.
-  PD2D1_FACTORY_TYPE = ^D2D1_FACTORY_TYPE;
-  D2D1_FACTORY_TYPE                   = (
-    // The resulting factory and derived resources may only be invoked serially.
-    // Reference counts on resources are interlocked, however, resource and render
-    // target state is not protected from multi-threaded access.
-    D2D1_FACTORY_TYPE_SINGLE_THREADED = 0,
-    // The resulting factory may be invoked from multiple threads. Returned resources
-    // use interlocked reference counting and their state is protected.
-    D2D1_FACTORY_TYPE_MULTI_THREADED  = 1,
-    D2D1_FACTORY_TYPE_FORCE_DWORD     = FORCEDWORD);
-  {$EXTERNALSYM D2D1_FACTORY_TYPE}
 
   // Allows additional parameters for factory creation.
   PD2D1_FACTORY_OPTIONS = ^D2D1_FACTORY_OPTIONS;

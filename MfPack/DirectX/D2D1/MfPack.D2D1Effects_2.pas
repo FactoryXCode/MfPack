@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -71,14 +73,7 @@ uses
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$I 'MfPack.inc'}
-  {$WARN BOUNDS_ERROR OFF}
 
 const
 
@@ -151,372 +146,455 @@ const
 
 
 type
-
   // The enumeration of the Contrast effect's top level properties.
   // Effect description: Adjusts the contrast of an image.
   PD2D1_CONTRAST_PROP = ^D2D1_CONTRAST_PROP;
-  D2D1_CONTRAST_PROP               = (
-    // Property Name: "Contrast"
-    // Property Type: FLOAT
-    D2D1_CONTRAST_PROP_CONTRAST    = 0,
-    // Property Name: "ClampInput"
-    // Property Type: BOOL
-    D2D1_CONTRAST_PROP_CLAMP_INPUT = 1,
-    D2D1_CONTRAST_PROP_FORCE_DWORD = FORCEDWORD);
+  D2D1_CONTRAST_PROP = DWord;
   {$EXTERNALSYM D2D1_CONTRAST_PROP}
+const
+  // Property Name: "Contrast"
+  // Property Type: FLOAT
+  D2D1_CONTRAST_PROP_CONTRAST    = D2D1_CONTRAST_PROP(0);
+  {$EXTERNALSYM D2D1_CONTRAST_PROP_CONTRAST}
+  // Property Name: "ClampInput"
+  // Property Type: BOOL
+  D2D1_CONTRAST_PROP_CLAMP_INPUT = D2D1_CONTRAST_PROP(1);
+  {$EXTERNALSYM D2D1_CONTRAST_PROP_CLAMP_INPUT}
+  //D2D1_CONTRAST_PROP_FORCE_DWORD = FORCEDWORD;
 
-
+type
   // The enumeration of the RgbToHue effect's top level properties.
   // Effect description: Converts an RGB bitmap to HSV or HSL.
   PD2D1_RGBTOHUE_PROP = ^D2D1_RGBTOHUE_PROP;
-  D2D1_RGBTOHUE_PROP                      = (
-    // Property Name: "OutputColorSpace"
-    // Property Type: D2D1_RGBTOHUE_OUTPUT_COLOR_SPACE
-    D2D1_RGBTOHUE_PROP_OUTPUT_COLOR_SPACE = 0,
-    D2D1_RGBTOHUE_PROP_FORCE_DWORD        = FORCEDWORD);
+  D2D1_RGBTOHUE_PROP = DWord;
   {$EXTERNALSYM D2D1_RGBTOHUE_PROP}
+const
+  // Property Name: "OutputColorSpace"
+  // Property Type: D2D1_RGBTOHUE_OUTPUT_COLOR_SPACE
+  D2D1_RGBTOHUE_PROP_OUTPUT_COLOR_SPACE = D2D1_RGBTOHUE_PROP(0);
+  {$EXTERNALSYM D2D1_RGBTOHUE_PROP_OUTPUT_COLOR_SPACE}
+  //D2D1_RGBTOHUE_PROP_FORCE_DWORD    = FORCEDWORD;
 
-
+type
   PD2D1_RGBTOHUE_OUTPUT_COLOR_SPACE = ^D2D1_RGBTOHUE_OUTPUT_COLOR_SPACE;
-  D2D1_RGBTOHUE_OUTPUT_COLOR_SPACE                            = (
-    D2D1_RGBTOHUE_OUTPUT_COLOR_SPACE_HUE_SATURATION_VALUE     = 0,
-    D2D1_RGBTOHUE_OUTPUT_COLOR_SPACE_HUE_SATURATION_LIGHTNESS = 1,
-    D2D1_RGBTOHUE_OUTPUT_COLOR_SPACE_FORCE_DWORD              = FORCEDWORD);
+  D2D1_RGBTOHUE_OUTPUT_COLOR_SPACE = DWord;
   {$EXTERNALSYM D2D1_RGBTOHUE_OUTPUT_COLOR_SPACE}
+const
+  D2D1_RGBTOHUE_OUTPUT_COLOR_SPACE_HUE_SATURATION_VALUE     = D2D1_RGBTOHUE_OUTPUT_COLOR_SPACE(0);
+  {$EXTERNALSYM D2D1_RGBTOHUE_OUTPUT_COLOR_SPACE_HUE_SATURATION_LIGHTNESS}
+  D2D1_RGBTOHUE_OUTPUT_COLOR_SPACE_HUE_SATURATION_LIGHTNESS = D2D1_RGBTOHUE_OUTPUT_COLOR_SPACE(1);
+  {$EXTERNALSYM D2D1_RGBTOHUE_OUTPUT_COLOR_SPACE_HUE_SATURATION_VALUE}
+  //D2D1_RGBTOHUE_OUTPUT_COLOR_SPACE_FORCE_DWORD        = FORCEDWORD;
 
-
+type
   // The enumeration of the HueToRgb effect's top level properties.
   // Effect description: Converts an HSV or HSL bitmap into an RGB bitmap.
   PD2D1_HUETORGB_PROP = ^D2D1_HUETORGB_PROP;
-  D2D1_HUETORGB_PROP                     = (
-    // Property Name: "InputColorSpace"
-    // Property Type: D2D1_HUETORGB_INPUT_COLOR_SPACE
-    D2D1_HUETORGB_PROP_INPUT_COLOR_SPACE = 0,
-    D2D1_HUETORGB_PROP_FORCE_DWORD       = FORCEDWORD);
+  D2D1_HUETORGB_PROP = DWord;
   {$EXTERNALSYM D2D1_HUETORGB_PROP}
+const
+  // Property Name: "InputColorSpace"
+  // Property Type: D2D1_HUETORGB_INPUT_COLOR_SPACE
+  D2D1_HUETORGB_PROP_INPUT_COLOR_SPACE = D2D1_HUETORGB_PROP(0);
+  {$EXTERNALSYM D2D1_HUETORGB_PROP_INPUT_COLOR_SPACE}
+  //D2D1_HUETORGB_PROP_FORCE_DWORD     = FORCEDWORD;
 
-
+type
   PD2D1_HUETORGB_INPUT_COLOR_SPACE = ^D2D1_HUETORGB_INPUT_COLOR_SPACE;
-  D2D1_HUETORGB_INPUT_COLOR_SPACE                            = (
-    D2D1_HUETORGB_INPUT_COLOR_SPACE_HUE_SATURATION_VALUE     = 0,
-    D2D1_HUETORGB_INPUT_COLOR_SPACE_HUE_SATURATION_LIGHTNESS = 1,
-    D2D1_HUETORGB_INPUT_COLOR_SPACE_FORCE_DWORD              = FORCEDWORD);
+  D2D1_HUETORGB_INPUT_COLOR_SPACE = DWord;
   {$EXTERNALSYM D2D1_HUETORGB_INPUT_COLOR_SPACE}
+const
+  D2D1_HUETORGB_INPUT_COLOR_SPACE_HUE_SATURATION_VALUE   = D2D1_HUETORGB_INPUT_COLOR_SPACE(0);
+  {$EXTERNALSYM D2D1_HUETORGB_INPUT_COLOR_SPACE_HUE_SATURATION_VALUE}
+  D2D1_HUETORGB_INPUT_COLOR_SPACE_HUE_SATURATION_LIGHTNESS = D2D1_HUETORGB_INPUT_COLOR_SPACE(1);
+  {$EXTERNALSYM D2D1_HUETORGB_INPUT_COLOR_SPACE_HUE_SATURATION_LIGHTNESS}
+  //D2D1_HUETORGB_INPUT_COLOR_SPACE_FORCE_DWORD        = FORCEDWORD;
 
-
+type
   // The enumeration of the Chroma Key effect's top level properties.
   // Effect description: Converts a specified color to transparent.
   PD2D1_CHROMAKEY_PROP = ^D2D1_CHROMAKEY_PROP;
-  D2D1_CHROMAKEY_PROP                = (
-    // Property Name: "Color"
-    // Property Type: D2D1_VECTOR_3F
-    D2D1_CHROMAKEY_PROP_COLOR        = 0,
-    // Property Name: "Tolerance"
-    // Property Type: FLOAT
-    D2D1_CHROMAKEY_PROP_TOLERANCE    = 1,
-    // Property Name: "InvertAlpha"
-    // Property Type: BOOL
-    D2D1_CHROMAKEY_PROP_INVERT_ALPHA = 2,
-    // Property Name: "Feather"
-    // Property Type: BOOL
-    D2D1_CHROMAKEY_PROP_FEATHER      = 3,
-    D2D1_CHROMAKEY_PROP_FORCE_DWORD  = FORCEDWORD);
+  D2D1_CHROMAKEY_PROP = DWord;
   {$EXTERNALSYM D2D1_CHROMAKEY_PROP}
+const
+  // Property Name: "Color"
+  // Property Type: D2D1_VECTOR_3F
+  D2D1_CHROMAKEY_PROP_COLOR    = D2D1_CHROMAKEY_PROP(0);
+  {$EXTERNALSYM D2D1_CHROMAKEY_PROP_COLOR}
+  // Property Name: "Tolerance"
+  // Property Type: FLOAT
+  D2D1_CHROMAKEY_PROP_TOLERANCE  = D2D1_CHROMAKEY_PROP(1);
+  {$EXTERNALSYM D2D1_CHROMAKEY_PROP_TOLERANCE}
+  // Property Name: "InvertAlpha"
+  // Property Type: BOOL
+  D2D1_CHROMAKEY_PROP_INVERT_ALPHA = D2D1_CHROMAKEY_PROP(2);
+  {$EXTERNALSYM D2D1_CHROMAKEY_PROP_INVERT_ALPHA}
+  // Property Name: "Feather"
+  // Property Type: BOOL
+  D2D1_CHROMAKEY_PROP_FEATHER    = D2D1_CHROMAKEY_PROP(3);
+  {$EXTERNALSYM D2D1_CHROMAKEY_PROP_FEATHER}
+  //D2D1_CHROMAKEY_PROP_FORCE_DWORD  = FORCEDWORD;
 
-
+type
   // The enumeration of the Emboss effect's top level properties.
   // Effect description: Applies an embossing effect to an image.
   PD2D1_EMBOSS_PROP = ^D2D1_EMBOSS_PROP;
-  D2D1_EMBOSS_PROP               = (
-    // Property Name: "Height"
-    // Property Type: FLOAT
-    D2D1_EMBOSS_PROP_HEIGHT      = 0,
-    // Property Name: "Direction"
-    // Property Type: FLOAT
-    D2D1_EMBOSS_PROP_DIRECTION   = 1,
-    D2D1_EMBOSS_PROP_FORCE_DWORD = FORCEDWORD);
+  D2D1_EMBOSS_PROP         = DWord;
   {$EXTERNALSYM D2D1_EMBOSS_PROP}
+const
+  // Property Name: "Height"
+  // Property Type: FLOAT
+  D2D1_EMBOSS_PROP_HEIGHT    = D2D1_EMBOSS_PROP(0);
+  // Property Name: "Direction"
+  // Property Type: FLOAT
+  D2D1_EMBOSS_PROP_DIRECTION   = D2D1_EMBOSS_PROP(1);
+  //D2D1_EMBOSS_PROP_FORCE_DWORD = FORCEDWORD;
 
-
+type
   // The enumeration of the Exposure effect's top level properties.
   // Effect description: Simulates camera exposure adjustment.
   PD2D1_EXPOSURE_PROP = ^D2D1_EXPOSURE_PROP;
-  D2D1_EXPOSURE_PROP                  = (
-    // Property Name: "ExposureValue"
-    // Property Type: FLOAT
-    D2D1_EXPOSURE_PROP_EXPOSURE_VALUE = 0,
-    D2D1_EXPOSURE_PROP_FORCE_DWORD    = FORCEDWORD);
+  D2D1_EXPOSURE_PROP = DWord;
   {$EXTERNALSYM D2D1_EXPOSURE_PROP}
+const
+  // Property Name: "ExposureValue"
+  // Property Type: FLOAT
+  D2D1_EXPOSURE_PROP_EXPOSURE_VALUE = D2D1_EXPOSURE_PROP(0);
+  {$EXTERNALSYM D2D1_EXPOSURE_PROP_EXPOSURE_VALUE}
+  //D2D1_EXPOSURE_PROP_FORCE_DWORD  = FORCEDWORD;
 
-
+type
   // The enumeration of the Posterize effect's top level properties.
   // Effect description: Reduces the number of colors in an image.
   PD2D1_POSTERIZE_PROP = ^D2D1_POSTERIZE_PROP;
-  D2D1_POSTERIZE_PROP                     = (
-    // Property Name: "RedValueCount"
-    // Property Type: UINT32
-    D2D1_POSTERIZE_PROP_RED_VALUE_COUNT   = 0,
-    // Property Name: "GreenValueCount"
-    // Property Type: UINT32
-    D2D1_POSTERIZE_PROP_GREEN_VALUE_COUNT = 1,
-    // Property Name: "BlueValueCount"
-    // Property Type: UINT32
-    D2D1_POSTERIZE_PROP_BLUE_VALUE_COUNT  = 2,
-    D2D1_POSTERIZE_PROP_FORCE_DWORD       = FORCEDWORD);
+  D2D1_POSTERIZE_PROP = DWord;
   {$EXTERNALSYM D2D1_POSTERIZE_PROP}
+const
+  // Property Name: "RedValueCount"
+  // Property Type: UINT32
+  D2D1_POSTERIZE_PROP_RED_VALUE_COUNT   = D2D1_POSTERIZE_PROP(0);
+  {$EXTERNALSYM D2D1_POSTERIZE_PROP_RED_VALUE_COUNT}
+  // Property Name: "GreenValueCount"
+  // Property Type: UINT32
+  D2D1_POSTERIZE_PROP_GREEN_VALUE_COUNT = D2D1_POSTERIZE_PROP(1);
+  {$EXTERNALSYM D2D1_POSTERIZE_PROP_GREEN_VALUE_COUNT}
+  // Property Name: "BlueValueCount"
+  // Property Type: UINT32
+  D2D1_POSTERIZE_PROP_BLUE_VALUE_COUNT  = D2D1_POSTERIZE_PROP(2);
+  {$EXTERNALSYM D2D1_POSTERIZE_PROP_BLUE_VALUE_COUNT}
+  //D2D1_POSTERIZE_PROP_FORCE_DWORD     = FORCEDWORD;
 
-
+type
   // The enumeration of the Sepia effect's top level properties.
   // Effect description: Applies a Sepia tone to an image.
   PD2D1_SEPIA_PROP = ^D2D1_SEPIA_PROP;
-  D2D1_SEPIA_PROP               = (
-    // Property Name: "Intensity"
-    // Property Type: FLOAT
-    D2D1_SEPIA_PROP_INTENSITY   = 0,
-    // Property Name: "AlphaMode"
-    // Property Type: D2D1_ALPHA_MODE
-    D2D1_SEPIA_PROP_ALPHA_MODE  = 1,
-    D2D1_SEPIA_PROP_FORCE_DWORD = FORCEDWORD);
+  D2D1_SEPIA_PROP = DWord;
   {$EXTERNALSYM D2D1_SEPIA_PROP}
+const
+  // Property Name: "Intensity"
+  // Property Type: FLOAT
+  D2D1_SEPIA_PROP_INTENSITY   = D2D1_SEPIA_PROP(0);
+  {$EXTERNALSYM D2D1_SEPIA_PROP_INTENSITY}
+  // Property Name: "AlphaMode"
+  // Property Type: D2D1_ALPHA_MODE
+  D2D1_SEPIA_PROP_ALPHA_MODE  = D2D1_SEPIA_PROP(1);
+  {$EXTERNALSYM D2D1_SEPIA_PROP_ALPHA_MODE}
+  //D2D1_SEPIA_PROP_FORCE_DWORD = FORCEDWORD;
 
-
+type
   // The enumeration of the Sharpen effect's top level properties.
   // Effect description: Performs sharpening adjustment
   PD2D1_SHARPEN_PROP = ^D2D1_SHARPEN_PROP;
-  D2D1_SHARPEN_PROP               = (
-    // Property Name: "Sharpness"
-    // Property Type: FLOAT
-    D2D1_SHARPEN_PROP_SHARPNESS   = 0,
-    // Property Name: "Threshold"
-    // Property Type: FLOAT
-    D2D1_SHARPEN_PROP_THRESHOLD   = 1,
-    D2D1_SHARPEN_PROP_FORCE_DWORD = FORCEDWORD);
+  D2D1_SHARPEN_PROP = DWord;
   {$EXTERNALSYM D2D1_SHARPEN_PROP}
+const
+  // Property Name: "Sharpness"
+  // Property Type: FLOAT
+  D2D1_SHARPEN_PROP_SHARPNESS   = D2D1_SHARPEN_PROP(0);
+  {$EXTERNALSYM D2D1_SHARPEN_PROP_SHARPNESS}
+  // Property Name: "Threshold"
+  // Property Type: FLOAT
+  D2D1_SHARPEN_PROP_THRESHOLD   = D2D1_SHARPEN_PROP(1);
+  {$EXTERNALSYM D2D1_SHARPEN_PROP_THRESHOLD}
+  //D2D1_SHARPEN_PROP_FORCE_DWORD = FORCEDWORD;
 
-
+type
   // The enumeration of the Straighten effect's top level properties.
   // Effect description: Straightens an image.
   PD2D1_STRAIGHTEN_PROP = ^D2D1_STRAIGHTEN_PROP;
-  D2D1_STRAIGHTEN_PROP                 = (
-    // Property Name: "Angle"
-    // Property Type: FLOAT
-    D2D1_STRAIGHTEN_PROP_ANGLE         = 0,
-    // Property Name: "MaintainSize"
-    // Property Type: BOOL
-    D2D1_STRAIGHTEN_PROP_MAINTAIN_SIZE = 1,
-    // Property Name: "ScaleMode"
-    // Property Type: D2D1_STRAIGHTEN_SCALE_MODE
-    D2D1_STRAIGHTEN_PROP_SCALE_MODE    = 2,
-    D2D1_STRAIGHTEN_PROP_FORCE_DWORD   = FORCEDWORD);
+  D2D1_STRAIGHTEN_PROP = DWord;
   {$EXTERNALSYM D2D1_STRAIGHTEN_PROP}
+const
+  // Property Name: "Angle"
+  // Property Type: FLOAT
+  D2D1_STRAIGHTEN_PROP_ANGLE     = D2D1_STRAIGHTEN_PROP(0);
+  {$EXTERNALSYM D2D1_STRAIGHTEN_PROP_ANGLE}
+  // Property Name: "MaintainSize"
+  // Property Type: BOOL
+  D2D1_STRAIGHTEN_PROP_MAINTAIN_SIZE = D2D1_STRAIGHTEN_PROP(1);
+  {$EXTERNALSYM D2D1_STRAIGHTEN_PROP_MAINTAIN_SIZE}
+  // Property Name: "ScaleMode"
+  // Property Type: D2D1_STRAIGHTEN_SCALE_MODE
+  D2D1_STRAIGHTEN_PROP_SCALE_MODE  = D2D1_STRAIGHTEN_PROP(2);
+  {$EXTERNALSYM D2D1_STRAIGHTEN_PROP_SCALE_MODE}
+  //D2D1_STRAIGHTEN_PROP_FORCE_DWORD   = FORCEDWORD;
 
-
+type
   PD2D1_STRAIGHTEN_SCALE_MODE = ^D2D1_STRAIGHTEN_SCALE_MODE;
-  D2D1_STRAIGHTEN_SCALE_MODE                       = (
-    D2D1_STRAIGHTEN_SCALE_MODE_NEAREST_NEIGHBOR    = 0,
-    D2D1_STRAIGHTEN_SCALE_MODE_LINEAR              = 1,
-    D2D1_STRAIGHTEN_SCALE_MODE_CUBIC               = 2,
-    D2D1_STRAIGHTEN_SCALE_MODE_MULTI_SAMPLE_LINEAR = 3,
-    D2D1_STRAIGHTEN_SCALE_MODE_ANISOTROPIC         = 4,
-    D2D1_STRAIGHTEN_SCALE_MODE_FORCE_DWORD         = FORCEDWORD);
+  D2D1_STRAIGHTEN_SCALE_MODE = DWord;
   {$EXTERNALSYM D2D1_STRAIGHTEN_SCALE_MODE}
+const
+  D2D1_STRAIGHTEN_SCALE_MODE_NEAREST_NEIGHBOR  = D2D1_STRAIGHTEN_SCALE_MODE(0);
+  {$EXTERNALSYM D2D1_STRAIGHTEN_SCALE_MODE_NEAREST_NEIGHBOR}
+  D2D1_STRAIGHTEN_SCALE_MODE_LINEAR        = D2D1_STRAIGHTEN_SCALE_MODE(1);
+  {$EXTERNALSYM D2D1_STRAIGHTEN_SCALE_MODE_LINEAR}
+  D2D1_STRAIGHTEN_SCALE_MODE_CUBIC         = D2D1_STRAIGHTEN_SCALE_MODE(2);
+  {$EXTERNALSYM D2D1_STRAIGHTEN_SCALE_MODE_CUBIC}
+  D2D1_STRAIGHTEN_SCALE_MODE_MULTI_SAMPLE_LINEAR = D2D1_STRAIGHTEN_SCALE_MODE(3);
+  {$EXTERNALSYM D2D1_STRAIGHTEN_SCALE_MODE_MULTI_SAMPLE_LINEAR}
+  D2D1_STRAIGHTEN_SCALE_MODE_ANISOTROPIC     = D2D1_STRAIGHTEN_SCALE_MODE(4);
+  {$EXTERNALSYM D2D1_STRAIGHTEN_SCALE_MODE_ANISOTROPIC}
+  //D2D1_STRAIGHTEN_SCALE_MODE_FORCE_DWORD     = FORCEDWORD;
 
-
+type
   // The enumeration of the Temperature And Tint effect's top level properties.
   // Effect description: Adjusts the temperature and tint of an image.
   PD2D1_TEMPERATUREANDTINT_PROP = ^D2D1_TEMPERATUREANDTINT_PROP;
-  D2D1_TEMPERATUREANDTINT_PROP               = (
-    // Property Name: "Temperature"
-    // Property Type: FLOAT
-    D2D1_TEMPERATUREANDTINT_PROP_TEMPERATURE = 0,
-    // Property Name: "Tint"
-    // Property Type: FLOAT
-    D2D1_TEMPERATUREANDTINT_PROP_TINT        = 1,
-    D2D1_TEMPERATUREANDTINT_PROP_FORCE_DWORD = FORCEDWORD);
+  D2D1_TEMPERATUREANDTINT_PROP = DWord;
   {$EXTERNALSYM D2D1_TEMPERATUREANDTINT_PROP}
+const
+  // Property Name: "Temperature"
+  // Property Type: FLOAT
+  D2D1_TEMPERATUREANDTINT_PROP_TEMPERATURE = D2D1_TEMPERATUREANDTINT_PROP(0);
+  {$EXTERNALSYM D2D1_TEMPERATUREANDTINT_PROP_TEMPERATURE}
+  // Property Name: "Tint"
+  // Property Type: FLOAT
+  D2D1_TEMPERATUREANDTINT_PROP_TINT    = D2D1_TEMPERATUREANDTINT_PROP(1);
+  {$EXTERNALSYM D2D1_TEMPERATUREANDTINT_PROP_TINT}
+  //D2D1_TEMPERATUREANDTINT_PROP_FORCE_DWORD = FORCEDWORD;
 
-
+type
   // The enumeration of the Vignette effect's top level properties.
   // Effect description: Fades the edges of an image to the specified color.
   PD2D1_VIGNETTE_PROP = ^D2D1_VIGNETTE_PROP;
-  D2D1_VIGNETTE_PROP                   = (
-    // Property Name: "Color"
-    // Property Type: D2D1_VECTOR_4F
-    D2D1_VIGNETTE_PROP_COLOR           = 0,
-    // Property Name: "TransitionSize"
-    // Property Type: FLOAT
-    D2D1_VIGNETTE_PROP_TRANSITION_SIZE = 1,
-    // Property Name: "Strength"
-    // Property Type: FLOAT
-    D2D1_VIGNETTE_PROP_STRENGTH        = 2,
-    D2D1_VIGNETTE_PROP_FORCE_DWORD     = FORCEDWORD);
+  D2D1_VIGNETTE_PROP = DWord;
   {$EXTERNALSYM D2D1_VIGNETTE_PROP}
+const
+  // Property Name: "Color"
+  // Property Type: D2D1_VECTOR_4F
+  D2D1_VIGNETTE_PROP_COLOR       = D2D1_VIGNETTE_PROP(0);
+  {$EXTERNALSYM D2D1_VIGNETTE_PROP_COLOR}
+  // Property Name: "TransitionSize"
+  // Property Type: FLOAT
+  D2D1_VIGNETTE_PROP_TRANSITION_SIZE = D2D1_VIGNETTE_PROP(1);
+  {$EXTERNALSYM D2D1_VIGNETTE_PROP_TRANSITION_SIZE}
+  // Property Name: "Strength"
+  // Property Type: FLOAT
+  D2D1_VIGNETTE_PROP_STRENGTH    = D2D1_VIGNETTE_PROP(2);
+  {$EXTERNALSYM D2D1_VIGNETTE_PROP_STRENGTH}
+  //D2D1_VIGNETTE_PROP_FORCE_DWORD   = FORCEDWORD;
 
-
+type
   // The enumeration of the Edge Detection effect's top level properties.
   // Effect description: Detects edges of an image.
   PD2D1_EDGEDETECTION_PROP = ^D2D1_EDGEDETECTION_PROP;
-  D2D1_EDGEDETECTION_PROP                 = (
-    // Property Name: "Strength"
-    // Property Type: FLOAT
-    D2D1_EDGEDETECTION_PROP_STRENGTH      = 0,
-    // Property Name: "BlurRadius"
-    // Property Type: FLOAT
-    D2D1_EDGEDETECTION_PROP_BLUR_RADIUS   = 1,
-    // Property Name: "Mode"
-    // Property Type: D2D1_EDGEDETECTION_MODE
-    D2D1_EDGEDETECTION_PROP_MODE          = 2,
-    // Property Name: "OverlayEdges"
-    // Property Type: BOOL
-    D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES = 3,
-    // Property Name: "AlphaMode"
-    // Property Type: D2D1_ALPHA_MODE
-    D2D1_EDGEDETECTION_PROP_ALPHA_MODE    = 4,
-    D2D1_EDGEDETECTION_PROP_FORCE_DWORD   = FORCEDWORD);
+  D2D1_EDGEDETECTION_PROP = DWord;
   {$EXTERNALSYM D2D1_EDGEDETECTION_PROP}
+const
+  // Property Name: "Strength"
+  // Property Type: FLOAT
+  D2D1_EDGEDETECTION_PROP_STRENGTH    = D2D1_EDGEDETECTION_PROP(0);
+  {$EXTERNALSYM D2D1_EDGEDETECTION_PROP_STRENGTH}
+  // Property Name: "BlurRadius"
+  // Property Type: FLOAT
+  D2D1_EDGEDETECTION_PROP_BLUR_RADIUS   = D2D1_EDGEDETECTION_PROP(1);
+  {$EXTERNALSYM D2D1_EDGEDETECTION_PROP_BLUR_RADIUS}
+  // Property Name: "Mode"
+  // Property Type: D2D1_EDGEDETECTION_MODE
+  D2D1_EDGEDETECTION_PROP_MODE      = D2D1_EDGEDETECTION_PROP(2);
+  {$EXTERNALSYM D2D1_EDGEDETECTION_PROP_MODE}
+  // Property Name: "OverlayEdges"
+  // Property Type: BOOL
+  D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES = D2D1_EDGEDETECTION_PROP(3);
+  {$EXTERNALSYM D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES}
+  // Property Name: "AlphaMode"
+  // Property Type: D2D1_ALPHA_MODE
+  D2D1_EDGEDETECTION_PROP_ALPHA_MODE  = D2D1_EDGEDETECTION_PROP(4);
+  {$EXTERNALSYM D2D1_EDGEDETECTION_PROP_ALPHA_MODE}
+  //D2D1_EDGEDETECTION_PROP_FORCE_DWORD   = FORCEDWORD;
 
-
+type
   PD2D1_EDGEDETECTION_MODE = ^D2D1_EDGEDETECTION_MODE;
-  D2D1_EDGEDETECTION_MODE               = (
-    D2D1_EDGEDETECTION_MODE_SOBEL       = 0,
-    D2D1_EDGEDETECTION_MODE_PREWITT     = 1,
-    D2D1_EDGEDETECTION_MODE_FORCE_DWORD = FORCEDWORD);
+  D2D1_EDGEDETECTION_MODE = DWord;
   {$EXTERNALSYM D2D1_EDGEDETECTION_MODE}
+const
+  D2D1_EDGEDETECTION_MODE_SOBEL     = D2D1_EDGEDETECTION_MODE(0);
+  {$EXTERNALSYM D2D1_EDGEDETECTION_MODE_SOBEL}
+  D2D1_EDGEDETECTION_MODE_PREWITT   = D2D1_EDGEDETECTION_MODE(1);
+  {$EXTERNALSYM D2D1_EDGEDETECTION_MODE_PREWITT}
+  //D2D1_EDGEDETECTION_MODE_FORCE_DWORD = FORCEDWORD;
 
-
+type
   // The enumeration of the Highlights and Shadows effect's top level properties.
   // Effect description: Adjusts the highlight and shadow strength of an image.
   PD2D1_HIGHLIGHTSANDSHADOWS_PROP = ^D2D1_HIGHLIGHTSANDSHADOWS_PROP;
-  D2D1_HIGHLIGHTSANDSHADOWS_PROP                    = (
-    // Property Name: "Highlights"
-    // Property Type: FLOAT
-    D2D1_HIGHLIGHTSANDSHADOWS_PROP_HIGHLIGHTS       = 0,
-    // Property Name: "Shadows"
-    // Property Type: FLOAT
-    D2D1_HIGHLIGHTSANDSHADOWS_PROP_SHADOWS          = 1,
-    // Property Name: "Clarity"
-    // Property Type: FLOAT
-    D2D1_HIGHLIGHTSANDSHADOWS_PROP_CLARITY          = 2,
-    // Property Name: "InputGamma"
-    // Property Type: D2D1_HIGHLIGHTSANDSHADOWS_INPUT_GAMMA
-    D2D1_HIGHLIGHTSANDSHADOWS_PROP_INPUT_GAMMA      = 3,
-    // Property Name: "MaskBlurRadius"
-    // Property Type: FLOAT
-    D2D1_HIGHLIGHTSANDSHADOWS_PROP_MASK_BLUR_RADIUS = 4,
-    D2D1_HIGHLIGHTSANDSHADOWS_PROP_FORCE_DWORD      = FORCEDWORD);
+  D2D1_HIGHLIGHTSANDSHADOWS_PROP = DWord;
   {$EXTERNALSYM D2D1_HIGHLIGHTSANDSHADOWS_PROP}
+const
+  // Property Name: "Highlights"
+  // Property Type: FLOAT
+  D2D1_HIGHLIGHTSANDSHADOWS_PROP_HIGHLIGHTS     = D2D1_HIGHLIGHTSANDSHADOWS_PROP(0);
+  {$EXTERNALSYM D2D1_HIGHLIGHTSANDSHADOWS_PROP_HIGHLIGHTS}
+  // Property Name: "Shadows"
+  // Property Type: FLOAT
+  D2D1_HIGHLIGHTSANDSHADOWS_PROP_SHADOWS      = D2D1_HIGHLIGHTSANDSHADOWS_PROP(1);
+  {$EXTERNALSYM D2D1_HIGHLIGHTSANDSHADOWS_PROP_SHADOWS}
+  // Property Name: "Clarity"
+  // Property Type: FLOAT
+  D2D1_HIGHLIGHTSANDSHADOWS_PROP_CLARITY      = D2D1_HIGHLIGHTSANDSHADOWS_PROP(2);
+  {$EXTERNALSYM D2D1_HIGHLIGHTSANDSHADOWS_PROP_CLARITY}
+  // Property Name: "InputGamma"
+  // Property Type: D2D1_HIGHLIGHTSANDSHADOWS_INPUT_GAMMA
+  D2D1_HIGHLIGHTSANDSHADOWS_PROP_INPUT_GAMMA    = D2D1_HIGHLIGHTSANDSHADOWS_PROP(3);
+  {$EXTERNALSYM D2D1_HIGHLIGHTSANDSHADOWS_PROP_INPUT_GAMMA}
+  // Property Name: "MaskBlurRadius"
+  // Property Type: FLOAT
+  D2D1_HIGHLIGHTSANDSHADOWS_PROP_MASK_BLUR_RADIUS = D2D1_HIGHLIGHTSANDSHADOWS_PROP(4);
+  {$EXTERNALSYM D2D1_HIGHLIGHTSANDSHADOWS_PROP_MASK_BLUR_RADIUS}
+  //D2D1_HIGHLIGHTSANDSHADOWS_PROP_FORCE_DWORD    = FORCEDWORD;
 
-
+type
   PD2D1_HIGHLIGHTSANDSHADOWS_INPUT_GAMMA = ^D2D1_HIGHLIGHTSANDSHADOWS_INPUT_GAMMA;
-  D2D1_HIGHLIGHTSANDSHADOWS_INPUT_GAMMA               = (
-    D2D1_HIGHLIGHTSANDSHADOWS_INPUT_GAMMA_LINEAR      = 0,
-    D2D1_HIGHLIGHTSANDSHADOWS_INPUT_GAMMA_SRGB        = 1,
-    D2D1_HIGHLIGHTSANDSHADOWS_INPUT_GAMMA_FORCE_DWORD = FORCEDWORD);
+  D2D1_HIGHLIGHTSANDSHADOWS_INPUT_GAMMA = DWord;
   {$EXTERNALSYM D2D1_HIGHLIGHTSANDSHADOWS_INPUT_GAMMA}
+const
+  D2D1_HIGHLIGHTSANDSHADOWS_INPUT_GAMMA_LINEAR    = D2D1_HIGHLIGHTSANDSHADOWS_INPUT_GAMMA(0);
+  {$EXTERNALSYM D2D1_HIGHLIGHTSANDSHADOWS_INPUT_GAMMA_LINEAR}
+  D2D1_HIGHLIGHTSANDSHADOWS_INPUT_GAMMA_SRGB    = D2D1_HIGHLIGHTSANDSHADOWS_INPUT_GAMMA(1);
+  {$EXTERNALSYM D2D1_HIGHLIGHTSANDSHADOWS_INPUT_GAMMA_SRGB}
+  //D2D1_HIGHLIGHTSANDSHADOWS_INPUT_GAMMA_FORCE_DWORD = FORCEDWORD;
 
-
+type
   // The enumeration of the Lookup Table 3D effect's top level properties.
   // Effect description: Remaps colors in an image via a 3D lookup table.
   PD2D1_LOOKUPTABLE3D_PROP = ^D2D1_LOOKUPTABLE3D_PROP;
-  D2D1_LOOKUPTABLE3D_PROP               = (
-    // Property Name: "Lut"
-    // Property Type: IUnknown *
-    D2D1_LOOKUPTABLE3D_PROP_LUT         = 0,
-    // Property Name: "AlphaMode"
-    // Property Type: D2D1_ALPHA_MODE
-    D2D1_LOOKUPTABLE3D_PROP_ALPHA_MODE  = 1,
-    D2D1_LOOKUPTABLE3D_PROP_FORCE_DWORD = FORCEDWORD);
+  D2D1_LOOKUPTABLE3D_PROP = DWord;
   {$EXTERNALSYM D2D1_LOOKUPTABLE3D_PROP}
+const
+  // Property Name: "Lut"
+  // Property Type: IUnknown *
+  D2D1_LOOKUPTABLE3D_PROP_LUT     = D2D1_LOOKUPTABLE3D_PROP(0);
+  {$EXTERNALSYM D2D1_LOOKUPTABLE3D_PROP_LUT}
+  // Property Name: "AlphaMode"
+  // Property Type: D2D1_ALPHA_MODE
+  D2D1_LOOKUPTABLE3D_PROP_ALPHA_MODE  = D2D1_LOOKUPTABLE3D_PROP(1);
+  {$EXTERNALSYM D2D1_LOOKUPTABLE3D_PROP_ALPHA_MODE}
+  //D2D1_LOOKUPTABLE3D_PROP_FORCE_DWORD = FORCEDWORD;
 
 //#if NTDDI_VERSION >= NTDDI_WIN10_RS1
 
-
+type
   // The enumeration of the Opacity effect's top level properties.
   // Effect description: Adjusts the opacity of an image by multiplying the alpha
   // channel by the specified opacity.
   PD2D1_OPACITY_PROP = ^D2D1_OPACITY_PROP;
-  D2D1_OPACITY_PROP               = (
-    // Property Name: "Opacity"
-    // Property Type: FLOAT
-    D2D1_OPACITY_PROP_OPACITY     = 0,
-    D2D1_OPACITY_PROP_FORCE_DWORD = FORCEDWORD);
+  D2D1_OPACITY_PROP = DWord;
   {$EXTERNALSYM D2D1_OPACITY_PROP}
+const
+  // Property Name: "Opacity"
+  // Property Type: FLOAT
+  D2D1_OPACITY_PROP_OPACITY   = D2D1_OPACITY_PROP(0);
+  //D2D1_OPACITY_PROP_FORCE_DWORD = FORCEDWORD;
 
-
+type
   // The enumeration of the Cross Fade effect's top level properties.
   // Effect description: This effect combines two images by adding weighted pixels
   // from input images. The formula can be expressed as output = weight * Destination
   // + (1 - weight) * Source
   PD2D1_CROSSFADE_PROP = ^D2D1_CROSSFADE_PROP;
-  D2D1_CROSSFADE_PROP               = (
-    // Property Name: "Weight"
-    // Property Type: FLOAT
-    D2D1_CROSSFADE_PROP_WEIGHT      = 0,
-    D2D1_CROSSFADE_PROP_FORCE_DWORD = FORCEDWORD);
+  D2D1_CROSSFADE_PROP = DWord;
   {$EXTERNALSYM D2D1_CROSSFADE_PROP}
+const
+  // Property Name: "Weight"
+  // Property Type: FLOAT
+  D2D1_CROSSFADE_PROP_WEIGHT    = D2D1_CROSSFADE_PROP(0);
+  //D2D1_CROSSFADE_PROP_FORCE_DWORD = FORCEDWORD;
 
-
+type
   // The enumeration of the Tint effect's top level properties.
   // Effect description: This effect tints the source image by multiplying the
   // specified color by the source image.
   PD2D1_TINT_PROP = ^D2D1_TINT_PROP;
-  D2D1_TINT_PROP                = (
-    // Property Name: "Color"
-    // Property Type: D2D1_VECTOR_4F
-    D2D1_TINT_PROP_COLOR        = 0,
-    // Property Name: "ClampOutput"
-    // Property Type: BOOL
-    D2D1_TINT_PROP_CLAMP_OUTPUT = 1,
-    D2D1_TINT_PROP_FORCE_DWORD  = FORCEDWORD);
+  D2D1_TINT_PROP = DWord;
   {$EXTERNALSYM D2D1_TINT_PROP}
+const
+  // Property Name: "Color"
+  // Property Type: D2D1_VECTOR_4F
+  D2D1_TINT_PROP_COLOR    = D2D1_TINT_PROP(0);
+  {$EXTERNALSYM D2D1_TINT_PROP_COLOR}
+  // Property Name: "ClampOutput"
+  // Property Type: BOOL
+  D2D1_TINT_PROP_CLAMP_OUTPUT = D2D1_TINT_PROP(1);
+  {$EXTERNALSYM D2D1_TINT_PROP_CLAMP_OUTPUT}
+  //D2D1_TINT_PROP_FORCE_DWORD  = FORCEDWORD;
 
 //#endif // #if NTDDI_VERSION >= NTDDI_WIN10_RS1
 
 //#if NTDDI_VERSION >= NTDDI_WIN10_RS5
 
-
+type
   // The enumeration of the White Level Adjustment effect's top level properties.
   // Effect description: This effect adjusts the white level of the source image by
   // multiplying the source image color by the ratio of the input and output white
   // levels. Input and output white levels are specified in nits.
   PD2D1_WHITELEVELADJUSTMENT_PROP = ^D2D1_WHITELEVELADJUSTMENT_PROP;
-  D2D1_WHITELEVELADJUSTMENT_PROP                      = (
-    // Property Name: "InputWhiteLevel"
-    // Property Type: FLOAT
-    D2D1_WHITELEVELADJUSTMENT_PROP_INPUT_WHITE_LEVEL  = 0,
-    // Property Name: "OutputWhiteLevel"
-    // Property Type: FLOAT
-    D2D1_WHITELEVELADJUSTMENT_PROP_OUTPUT_WHITE_LEVEL = 1,
-    D2D1_WHITELEVELADJUSTMENT_PROP_FORCE_DWORD        = FORCEDWORD);
+  D2D1_WHITELEVELADJUSTMENT_PROP = DWord;
   {$EXTERNALSYM D2D1_WHITELEVELADJUSTMENT_PROP}
+const
+  // Property Name: "InputWhiteLevel"
+  // Property Type: FLOAT
+  D2D1_WHITELEVELADJUSTMENT_PROP_INPUT_WHITE_LEVEL  = D2D1_WHITELEVELADJUSTMENT_PROP(0);
+  {$EXTERNALSYM D2D1_WHITELEVELADJUSTMENT_PROP_INPUT_WHITE_LEVEL}
+  // Property Name: "OutputWhiteLevel"
+  // Property Type: FLOAT
+  D2D1_WHITELEVELADJUSTMENT_PROP_OUTPUT_WHITE_LEVEL = D2D1_WHITELEVELADJUSTMENT_PROP(1);
+  {$EXTERNALSYM D2D1_WHITELEVELADJUSTMENT_PROP_OUTPUT_WHITE_LEVEL}
+  //D2D1_WHITELEVELADJUSTMENT_PROP_FORCE_DWORD    = FORCEDWORD;
 
-
+type
   // The enumeration of the HDR Tone Map effect's top level properties.
   // Effect description: Adjusts the maximum luminance of the source image to fit
   // within the maximum output luminance supported. Input and output luminance values
   // are specified in nits. Note that the color space of the image is assumed to be
   // scRGB.
   PD2D1_HDRTONEMAP_PROP = ^D2D1_HDRTONEMAP_PROP;
-  D2D1_HDRTONEMAP_PROP                        = (
-    // Property Name: "InputMaxLuminance"
-    // Property Type: FLOAT
-    D2D1_HDRTONEMAP_PROP_INPUT_MAX_LUMINANCE  = 0,
-    // Property Name: "OutputMaxLuminance"
-    // Property Type: FLOAT
-    D2D1_HDRTONEMAP_PROP_OUTPUT_MAX_LUMINANCE = 1,
-    // Property Name: "DisplayMode"
-    // Property Type: D2D1_HDRTONEMAP_DISPLAY_MODE
-    D2D1_HDRTONEMAP_PROP_DISPLAY_MODE         = 2,
-    D2D1_HDRTONEMAP_PROP_FORCE_DWORD          = FORCEDWORD);
+  D2D1_HDRTONEMAP_PROP = DWord;
   {$EXTERNALSYM D2D1_HDRTONEMAP_PROP}
+const
+  // Property Name: "InputMaxLuminance"
+  // Property Type: FLOAT
+  D2D1_HDRTONEMAP_PROP_INPUT_MAX_LUMINANCE  = D2D1_HDRTONEMAP_PROP(0);
+  {$EXTERNALSYM D2D1_HDRTONEMAP_PROP_INPUT_MAX_LUMINANCE}
+  // Property Name: "OutputMaxLuminance"
+  // Property Type: FLOAT
+  D2D1_HDRTONEMAP_PROP_OUTPUT_MAX_LUMINANCE = D2D1_HDRTONEMAP_PROP(1);
+  {$EXTERNALSYM D2D1_HDRTONEMAP_PROP_OUTPUT_MAX_LUMINANCE}
+  // Property Name: "DisplayMode"
+  // Property Type: D2D1_HDRTONEMAP_DISPLAY_MODE
+  D2D1_HDRTONEMAP_PROP_DISPLAY_MODE     = D2D1_HDRTONEMAP_PROP(2);
+  {$EXTERNALSYM D2D1_HDRTONEMAP_PROP_DISPLAY_MODE}
+  //D2D1_HDRTONEMAP_PROP_FORCE_DWORD      = FORCEDWORD;
 
-
+type
   PD2D1_HDRTONEMAP_DISPLAY_MODE = ^D2D1_HDRTONEMAP_DISPLAY_MODE;
-  D2D1_HDRTONEMAP_DISPLAY_MODE               = (
-    D2D1_HDRTONEMAP_DISPLAY_MODE_SDR         = 0,
-    D2D1_HDRTONEMAP_DISPLAY_MODE_HDR         = 1,
-    D2D1_HDRTONEMAP_DISPLAY_MODE_FORCE_DWORD = FORCEDWORD);
+  D2D1_HDRTONEMAP_DISPLAY_MODE = DWord;
   {$EXTERNALSYM D2D1_HDRTONEMAP_DISPLAY_MODE}
+const
+  D2D1_HDRTONEMAP_DISPLAY_MODE_SDR     = D2D1_HDRTONEMAP_DISPLAY_MODE(0);
+  {$EXTERNALSYM D2D1_HDRTONEMAP_DISPLAY_MODE_SDR}
+  D2D1_HDRTONEMAP_DISPLAY_MODE_HDR     = D2D1_HDRTONEMAP_DISPLAY_MODE(1);
+  {$EXTERNALSYM D2D1_HDRTONEMAP_DISPLAY_MODE_HDR}
+  //D2D1_HDRTONEMAP_DISPLAY_MODE_FORCE_DWORD = FORCEDWORD;
 
 //#endif // #if NTDDI_VERSION >= NTDDI_WIN10_RS1
 

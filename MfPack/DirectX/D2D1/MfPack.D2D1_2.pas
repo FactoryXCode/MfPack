@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -75,26 +77,22 @@ uses
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$I 'MfPack.inc'}
-  {$WARN BOUNDS_ERROR OFF}
 
 type
-
   // Specifies the extent to which D2D will throttle work sent to the GPU.
   PD2D1_RENDERING_PRIORITY = ^D2D1_RENDERING_PRIORITY;
-  D2D1_RENDERING_PRIORITY               = (
-    D2D1_RENDERING_PRIORITY_NORMAL      = 0,
-    D2D1_RENDERING_PRIORITY_LOW         = 1,
-    D2D1_RENDERING_PRIORITY_FORCE_DWORD = FORCEDWORD);
+  D2D1_RENDERING_PRIORITY = DWord;
   {$EXTERNALSYM D2D1_RENDERING_PRIORITY}
+const
+  D2D1_RENDERING_PRIORITY_NORMAL      = D2D1_RENDERING_PRIORITY(0);
+  {$EXTERNALSYM D2D1_RENDERING_PRIORITY_NORMAL}
+  D2D1_RENDERING_PRIORITY_LOW         = D2D1_RENDERING_PRIORITY(1);
+  {$EXTERNALSYM D2D1_RENDERING_PRIORITY_LOW}
+  //D2D1_RENDERING_PRIORITY_FORCE_DWORD = FORCEDWORD;
 
 
+type
 
   // INTERFACES ////////////////////////////////////////////////////////////////
 

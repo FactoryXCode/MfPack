@@ -17,11 +17,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Tilo Güldner.
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -73,18 +75,356 @@ uses
   MfPack.D2d1_1,
   MfPack.ObjIdlbase;  // ActiveX
 
-
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$I 'MfPack.inc'}
-  {$WARN BOUNDS_ERROR OFF}
+
+
+// Enums =======================================================================
+
+type
+  // Specifies the paint type for an SVG fill or stroke.
+  PD2D1_SVG_PAINT_TYPE = ^D2D1_SVG_PAINT_TYPE;
+  D2D1_SVG_PAINT_TYPE = DWord;
+  {$EXTERNALSYM D2D1_SVG_PAINT_TYPE}
+const
+  // The fill or stroke is not rendered.
+  D2D1_SVG_PAINT_TYPE_NONE        = D2D1_SVG_PAINT_TYPE(0);
+  {$EXTERNALSYM D2D1_SVG_PAINT_TYPE_NONE}
+  // A solid color is rendered.
+  D2D1_SVG_PAINT_TYPE_COLOR       = D2D1_SVG_PAINT_TYPE(1);
+  {$EXTERNALSYM D2D1_SVG_PAINT_TYPE_COLOR}
+  // The current color is rendered.
+  D2D1_SVG_PAINT_TYPE_CURRENT_COLOR   = D2D1_SVG_PAINT_TYPE(2);
+  {$EXTERNALSYM D2D1_SVG_PAINT_TYPE_CURRENT_COLOR}
+  // A paint server); defined by another element in the SVG document); is used.
+  D2D1_SVG_PAINT_TYPE_URI         = D2D1_SVG_PAINT_TYPE(3);
+  {$EXTERNALSYM D2D1_SVG_PAINT_TYPE_URI}
+  // A paint server); defined by another element in the SVG document); is used. If the
+  // paint server reference is invalid); fall back to D2D1_SVG_PAINT_TYPE_NONE.
+  D2D1_SVG_PAINT_TYPE_URI_NONE      = D2D1_SVG_PAINT_TYPE(4);
+  {$EXTERNALSYM D2D1_SVG_PAINT_TYPE_URI_NONE}
+  // A paint server); defined by another element in the SVG document); is used. If the
+  // paint server reference is invalid); fall back to D2D1_SVG_PAINT_TYPE_COLOR.
+  D2D1_SVG_PAINT_TYPE_URI_COLOR     = D2D1_SVG_PAINT_TYPE(5);
+  {$EXTERNALSYM D2D1_SVG_PAINT_TYPE_URI_COLOR}
+  // A paint server); defined by another element in the SVG document); is used. If the
+  // paint server reference is invalid); fall back to
+  // D2D1_SVG_PAINT_TYPE_CURRENT_COLOR.
+  D2D1_SVG_PAINT_TYPE_URI_CURRENT_COLOR = D2D1_SVG_PAINT_TYPE(6);
+  {$EXTERNALSYM D2D1_SVG_PAINT_TYPE_URI_CURRENT_COLOR}
+  //D2D1_SVG_PAINT_TYPE_FORCE_DWORD     = FORCEDWORD;
+
+type
+  // Specifies the units for an SVG length.
+  PD2D1_SVG_LENGTH_UNITS = ^D2D1_SVG_LENGTH_UNITS;
+  D2D1_SVG_LENGTH_UNITS = DWord;
+  {$EXTERNALSYM D2D1_SVG_LENGTH_UNITS}
+const
+  // The length is unitless.
+  D2D1_SVG_LENGTH_UNITS_NUMBER    = D2D1_SVG_LENGTH_UNITS(0);
+  {$EXTERNALSYM D2D1_SVG_LENGTH_UNITS_NUMBER}
+  // The length is a percentage value.
+  D2D1_SVG_LENGTH_UNITS_PERCENTAGE  = D2D1_SVG_LENGTH_UNITS(1);
+  {$EXTERNALSYM D2D1_SVG_LENGTH_UNITS_PERCENTAGE}
+  //D2D1_SVG_LENGTH_UNITS_FORCE_DWORD = FORCEDWORD;
+
+type
+  // Specifies a value for the SVG display property.
+  PD2D1_SVG_DISPLAY = ^D2D1_SVG_DISPLAY;
+  D2D1_SVG_DISPLAY = DWord;
+  {$EXTERNALSYM D2D1_SVG_DISPLAY}
+const
+  // The element uses the default display behavior.
+  D2D1_SVG_DISPLAY_INLINE    = D2D1_SVG_DISPLAY(0);
+  // The element and all children are not rendered directly.
+  D2D1_SVG_DISPLAY_NONE    = D2D1_SVG_DISPLAY(1);
+  //D2D1_SVG_DISPLAY_FORCE_DWORD = FORCEDWORD;
+
+type
+  // Specifies a value for the SVG visibility property.
+  PD2D1_SVG_VISIBILITY = ^D2D1_SVG_VISIBILITY;
+  D2D1_SVG_VISIBILITY = DWord;
+  {$EXTERNALSYM D2D1_SVG_VISIBILITY}
+const
+  // The element is visible.
+  D2D1_SVG_VISIBILITY_VISIBLE   = D2D1_SVG_VISIBILITY(0);
+  {$EXTERNALSYM D2D1_SVG_VISIBILITY_VISIBLE}
+  // The element is invisible.
+  D2D1_SVG_VISIBILITY_HIDDEN    = D2D1_SVG_VISIBILITY(1);
+  {$EXTERNALSYM D2D1_SVG_VISIBILITY_HIDDEN}
+  //D2D1_SVG_VISIBILITY_FORCE_DWORD = FORCEDWORD;
+
+type
+  // Specifies a value for the SVG overflow property.
+  PD2D1_SVG_OVERFLOW = ^D2D1_SVG_OVERFLOW;
+  D2D1_SVG_OVERFLOW = DWord;
+  {$EXTERNALSYM D2D1_SVG_OVERFLOW}
+const
+  // The element is not clipped to its viewport.
+  D2D1_SVG_OVERFLOW_VISIBLE   = D2D1_SVG_OVERFLOW(0);
+  {$EXTERNALSYM D2D1_SVG_OVERFLOW_VISIBLE}
+  // The element is clipped to its viewport.
+  D2D1_SVG_OVERFLOW_HIDDEN    = D2D1_SVG_OVERFLOW(1);
+  {$EXTERNALSYM D2D1_SVG_OVERFLOW_HIDDEN}
+  //D2D1_SVG_OVERFLOW_FORCE_DWORD = FORCEDWORD;
+
+type
+  // Specifies a value for the SVG stroke-linecap property.
+  PD2D1_SVG_LINE_CAP = ^D2D1_SVG_LINE_CAP;
+  D2D1_SVG_LINE_CAP = DWord;
+  {$EXTERNALSYM D2D1_SVG_LINE_CAP}
+const
+  // The property is set to SVG's 'butt' value.
+  D2D1_SVG_LINE_CAP_BUTT    = D2D1_CAP_STYLE_FLAT;
+  {$EXTERNALSYM D2D1_SVG_LINE_CAP_BUTT}
+  // The property is set to SVG's 'square' value.
+  D2D1_SVG_LINE_CAP_SQUARE   = D2D1_CAP_STYLE_SQUARE;
+  {$EXTERNALSYM D2D1_SVG_LINE_CAP_SQUARE}
+  // The property is set to SVG's 'round' value.
+  D2D1_SVG_LINE_CAP_ROUND    = D2D1_CAP_STYLE_ROUND;
+  {$EXTERNALSYM D2D1_SVG_LINE_CAP_ROUND}
+  //D2D1_SVG_LINE_CAP_FORCE_DWORD = FORCEDWORD;
+
+type
+  // Specifies a value for the SVG stroke-linejoin property.
+  PD2D1_SVG_LINE_JOIN = ^D2D1_SVG_LINE_JOIN;
+  D2D1_SVG_LINE_JOIN = DWord;
+  {$EXTERNALSYM D2D1_SVG_LINE_JOIN}
+const
+  // The property is set to SVG's 'bevel' value.
+  D2D1_SVG_LINE_JOIN_BEVEL     = D2D1_LINE_JOIN_BEVEL;
+  {$EXTERNALSYM D2D1_SVG_LINE_JOIN_BEVEL}
+  // The property is set to SVG's 'miter' value. Note that this is equivalent to
+  // D2D1_LINE_JOIN_MITER_OR_BEVEL); not D2D1_LINE_JOIN_MITER.
+  D2D1_SVG_LINE_JOIN_MITER     = D2D1_LINE_JOIN_MITER_OR_BEVEL;
+  {$EXTERNALSYM D2D1_SVG_LINE_JOIN_MITER}
+  // The property is set to SVG's 'round' value.
+  D2D1_SVG_LINE_JOIN_ROUND     = D2D1_LINE_JOIN_ROUND;
+  {$EXTERNALSYM D2D1_SVG_LINE_JOIN_ROUND}
+  //D2D1_SVG_LINE_JOIN_FORCE_DWORD = FORCEDWORD;
+
+type
+  // The alignment portion of the SVG preserveAspectRatio attribute.
+  PD2D1_SVG_ASPECT_ALIGN = ^D2D1_SVG_ASPECT_ALIGN;
+  D2D1_SVG_ASPECT_ALIGN = DWord;
+  {$EXTERNALSYM D2D1_SVG_ASPECT_ALIGN}
+const
+  // The alignment is set to SVG's 'none' value.
+  D2D1_SVG_ASPECT_ALIGN_NONE    = D2D1_SVG_ASPECT_ALIGN(0);
+  {$EXTERNALSYM D2D1_SVG_ASPECT_ALIGN_NONE}
+  // The alignment is set to SVG's 'xMinYMin' value.
+  D2D1_SVG_ASPECT_ALIGN_X_MIN_Y_MIN = D2D1_SVG_ASPECT_ALIGN(1);
+  {$EXTERNALSYM D2D1_SVG_ASPECT_ALIGN_X_MIN_Y_MIN}
+  // The alignment is set to SVG's 'xMidYMin' value.
+  D2D1_SVG_ASPECT_ALIGN_X_MID_Y_MIN = D2D1_SVG_ASPECT_ALIGN(2);
+  {$EXTERNALSYM D2D1_SVG_ASPECT_ALIGN_X_MID_Y_MIN}
+  // The alignment is set to SVG's 'xMaxYMin' value.
+  D2D1_SVG_ASPECT_ALIGN_X_MAX_Y_MIN = D2D1_SVG_ASPECT_ALIGN(3);
+  {$EXTERNALSYM D2D1_SVG_ASPECT_ALIGN_X_MAX_Y_MIN}
+  // The alignment is set to SVG's 'xMinYMid' value.
+  D2D1_SVG_ASPECT_ALIGN_X_MIN_Y_MID = D2D1_SVG_ASPECT_ALIGN(4);
+  {$EXTERNALSYM D2D1_SVG_ASPECT_ALIGN_X_MIN_Y_MID}
+  // The alignment is set to SVG's 'xMidYMid' value.
+  D2D1_SVG_ASPECT_ALIGN_X_MID_Y_MID = D2D1_SVG_ASPECT_ALIGN(5);
+  {$EXTERNALSYM D2D1_SVG_ASPECT_ALIGN_X_MID_Y_MID}
+  // The alignment is set to SVG's 'xMaxYMid' value.
+  D2D1_SVG_ASPECT_ALIGN_X_MAX_Y_MID = D2D1_SVG_ASPECT_ALIGN(6);
+  {$EXTERNALSYM D2D1_SVG_ASPECT_ALIGN_X_MAX_Y_MID}
+  // The alignment is set to SVG's 'xMinYMax' value.
+  D2D1_SVG_ASPECT_ALIGN_X_MIN_Y_MAX = D2D1_SVG_ASPECT_ALIGN(7);
+  {$EXTERNALSYM D2D1_SVG_ASPECT_ALIGN_X_MIN_Y_MAX}
+  // The alignment is set to SVG's 'xMidYMax' value.
+  D2D1_SVG_ASPECT_ALIGN_X_MID_Y_MAX = D2D1_SVG_ASPECT_ALIGN(8);
+  {$EXTERNALSYM D2D1_SVG_ASPECT_ALIGN_X_MID_Y_MAX}
+  // The alignment is set to SVG's 'xMaxYMax' value.
+  D2D1_SVG_ASPECT_ALIGN_X_MAX_Y_MAX = D2D1_SVG_ASPECT_ALIGN(9);
+  {$EXTERNALSYM D2D1_SVG_ASPECT_ALIGN_X_MAX_Y_MAX}
+  //D2D1_SVG_ASPECT_ALIGN_FORCE_DWORD = FORCEDWORD;
+
+type
+  // The meetOrSlice portion of the SVG preserveAspectRatio attribute.
+  PD2D1_SVG_ASPECT_SCALING = ^D2D1_SVG_ASPECT_SCALING;
+  D2D1_SVG_ASPECT_SCALING = DWord;
+  {$EXTERNALSYM D2D1_SVG_ASPECT_SCALING}
+const
+  // Scale the viewBox up as much as possible such that the entire viewBox is visible
+  // within the viewport.
+  D2D1_SVG_ASPECT_SCALING_MEET    = D2D1_SVG_ASPECT_SCALING(0);
+  {$EXTERNALSYM D2D1_SVG_ASPECT_SCALING_MEET}
+  // Scale the viewBox down as much as possible such that the entire viewport is
+  // covered by the viewBox.
+  D2D1_SVG_ASPECT_SCALING_SLICE     = D2D1_SVG_ASPECT_SCALING(1);
+  {$EXTERNALSYM D2D1_SVG_ASPECT_SCALING_SLICE}
+  //D2D1_SVG_ASPECT_SCALING_FORCE_DWORD = FORCEDWORD;
+
+type
+  // Represents a path commmand. Each command may reference floats from the segment
+  // data. Commands ending in _ABSOLUTE interpret data as absolute coordinate.
+  // Commands ending in _RELATIVE interpret data as being relative to the previous
+  // point.
+  PD2D1_SVG_PATH_COMMAND = ^D2D1_SVG_PATH_COMMAND;
+  D2D1_SVG_PATH_COMMAND = DWord;
+  {$EXTERNALSYM D2D1_SVG_PATH_COMMAND}
+const
+  // Closes the current subpath. Uses no segment data.
+  D2D1_SVG_PATH_COMMAND_CLOSE_PATH        = D2D1_SVG_PATH_COMMAND(0);
+  {$EXTERNALSYM D2D1_SVG_PATH_COMMAND_CLOSE_PATH}
+  // Starts a new subpath at the coordinate (x y). Uses 2 floats of segment data.
+  D2D1_SVG_PATH_COMMAND_MOVE_ABSOLUTE       = D2D1_SVG_PATH_COMMAND(1);
+  {$EXTERNALSYM D2D1_SVG_PATH_COMMAND_MOVE_ABSOLUTE}
+  // Starts a new subpath at the coordinate (x y). Uses 2 floats of segment data.
+  D2D1_SVG_PATH_COMMAND_MOVE_RELATIVE       = D2D1_SVG_PATH_COMMAND(2);
+  {$EXTERNALSYM D2D1_SVG_PATH_COMMAND_MOVE_RELATIVE}
+  // Draws a line to the coordinate (x y). Uses 2 floats of segment data.
+  D2D1_SVG_PATH_COMMAND_LINE_ABSOLUTE       = D2D1_SVG_PATH_COMMAND(3);
+  {$EXTERNALSYM D2D1_SVG_PATH_COMMAND_LINE_ABSOLUTE}
+  // Draws a line to the coordinate (x y). Uses 2 floats of segment data.
+  D2D1_SVG_PATH_COMMAND_LINE_RELATIVE       = D2D1_SVG_PATH_COMMAND(4);
+  {$EXTERNALSYM D2D1_SVG_PATH_COMMAND_LINE_RELATIVE}
+  // Draws a cubic Bezier curve (x1 y1 x2 y2 x y). The curve ends at (x); y) and is
+  // defined by the two control points (x1); y1) and (x2); y2). Uses 6 floats of
+  // segment data.
+  D2D1_SVG_PATH_COMMAND_CUBIC_ABSOLUTE      = D2D1_SVG_PATH_COMMAND(5);
+  {$EXTERNALSYM D2D1_SVG_PATH_COMMAND_CUBIC_ABSOLUTE}
+  // Draws a cubic Bezier curve (x1 y1 x2 y2 x y). The curve ends at (x); y) and is
+  // defined by the two control points (x1); y1) and (x2); y2). Uses 6 floats of
+  // segment data.
+  D2D1_SVG_PATH_COMMAND_CUBIC_RELATIVE      = D2D1_SVG_PATH_COMMAND(6);
+  {$EXTERNALSYM D2D1_SVG_PATH_COMMAND_CUBIC_RELATIVE}
+  // Draws a quadratic Bezier curve (x1 y1 x y). The curve ends at (x); y) and is
+  // defined by the control point (x1 y1). Uses 4 floats of segment data.
+  D2D1_SVG_PATH_COMMAND_QUADRADIC_ABSOLUTE    = D2D1_SVG_PATH_COMMAND(7);
+  {$EXTERNALSYM D2D1_SVG_PATH_COMMAND_QUADRADIC_ABSOLUTE}
+  // Draws a quadratic Bezier curve (x1 y1 x y). The curve ends at (x); y) and is
+  // defined by the control point (x1 y1). Uses 4 floats of segment data.
+  D2D1_SVG_PATH_COMMAND_QUADRADIC_RELATIVE    = D2D1_SVG_PATH_COMMAND(8);
+  {$EXTERNALSYM D2D1_SVG_PATH_COMMAND_QUADRADIC_RELATIVE}
+  // Draws an elliptical arc (rx ry x-axis-rotation large-arc-flag sweep-flag x y).
+  // The curve ends at (x); y) and is defined by the arc parameters. The two flags are
+  // considered set if their values are non-zero. Uses 7 floats of segment data.
+  D2D1_SVG_PATH_COMMAND_ARC_ABSOLUTE        = D2D1_SVG_PATH_COMMAND(9);
+  {$EXTERNALSYM D2D1_SVG_PATH_COMMAND_ARC_ABSOLUTE}
+  // Draws an elliptical arc (rx ry x-axis-rotation large-arc-flag sweep-flag x y).
+  // The curve ends at (x); y) and is defined by the arc parameters. The two flags are
+  // considered set if their values are non-zero. Uses 7 floats of segment data.
+  D2D1_SVG_PATH_COMMAND_ARC_RELATIVE        = D2D1_SVG_PATH_COMMAND(10);
+  {$EXTERNALSYM D2D1_SVG_PATH_COMMAND_ARC_RELATIVE}
+  // Draws a horizontal line to the coordinate (x). Uses 1 float of segment data.
+  D2D1_SVG_PATH_COMMAND_HORIZONTAL_ABSOLUTE     = D2D1_SVG_PATH_COMMAND(11);
+  {$EXTERNALSYM D2D1_SVG_PATH_COMMAND_HORIZONTAL_ABSOLUTE}
+  // Draws a horizontal line to the coordinate (x). Uses 1 float of segment data.
+  D2D1_SVG_PATH_COMMAND_HORIZONTAL_RELATIVE     = D2D1_SVG_PATH_COMMAND(12);
+  {$EXTERNALSYM D2D1_SVG_PATH_COMMAND_HORIZONTAL_RELATIVE}
+  // Draws a vertical line to the coordinate (y). Uses 1 float of segment data.
+  D2D1_SVG_PATH_COMMAND_VERTICAL_ABSOLUTE     = D2D1_SVG_PATH_COMMAND(13);
+  {$EXTERNALSYM D2D1_SVG_PATH_COMMAND_VERTICAL_ABSOLUTE}
+  // Draws a vertical line to the coordinate (y). Uses 1 float of segment data.
+  D2D1_SVG_PATH_COMMAND_VERTICAL_RELATIVE     = D2D1_SVG_PATH_COMMAND(14);
+  {$EXTERNALSYM D2D1_SVG_PATH_COMMAND_VERTICAL_RELATIVE}
+  // Draws a smooth cubic Bezier curve (x2 y2 x y). The curve ends at (x); y) and is
+  // defined by the control point (x2); y2). Uses 4 floats of segment data.
+  D2D1_SVG_PATH_COMMAND_CUBIC_SMOOTH_ABSOLUTE   = D2D1_SVG_PATH_COMMAND(15);
+  {$EXTERNALSYM D2D1_SVG_PATH_COMMAND_CUBIC_SMOOTH_ABSOLUTE}
+  // Draws a smooth cubic Bezier curve (x2 y2 x y). The curve ends at (x); y) and is
+  // defined by the control point (x2); y2). Uses 4 floats of segment data.
+  D2D1_SVG_PATH_COMMAND_CUBIC_SMOOTH_RELATIVE   = D2D1_SVG_PATH_COMMAND(16);
+  {$EXTERNALSYM D2D1_SVG_PATH_COMMAND_CUBIC_SMOOTH_RELATIVE}
+  // Draws a smooth quadratic Bezier curve ending at (x); y). Uses 2 floats of segment
+  // data.
+  D2D1_SVG_PATH_COMMAND_QUADRADIC_SMOOTH_ABSOLUTE = D2D1_SVG_PATH_COMMAND(17);
+  {$EXTERNALSYM D2D1_SVG_PATH_COMMAND_QUADRADIC_SMOOTH_ABSOLUTE}
+  // Draws a smooth quadratic Bezier curve ending at (x); y). Uses 2 floats of segment
+  // data.
+  D2D1_SVG_PATH_COMMAND_QUADRADIC_SMOOTH_RELATIVE = D2D1_SVG_PATH_COMMAND(18);
+  {$EXTERNALSYM D2D1_SVG_PATH_COMMAND_QUADRADIC_SMOOTH_RELATIVE}
+  //D2D1_SVG_PATH_COMMAND_FORCE_DWORD         = FORCEDWORD;
+
+type
+  // Defines the coordinate system used for SVG gradient or clipPath elements.
+  PD2D1_SVG_UNIT_TYPE = ^D2D1_SVG_UNIT_TYPE;
+  D2D1_SVG_UNIT_TYPE = DWord;
+  {$EXTERNALSYM D2D1_SVG_UNIT_TYPE}
+const
+  // The property is set to SVG's 'userSpaceOnUse' value.
+  D2D1_SVG_UNIT_TYPE_USER_SPACE_ON_USE   = D2D1_SVG_UNIT_TYPE(0);
+  {$EXTERNALSYM D2D1_SVG_UNIT_TYPE_USER_SPACE_ON_USE}
+  // The property is set to SVG's 'objectBoundingBox' value.
+  D2D1_SVG_UNIT_TYPE_OBJECT_BOUNDING_BOX = D2D1_SVG_UNIT_TYPE(1);
+  {$EXTERNALSYM D2D1_SVG_UNIT_TYPE_OBJECT_BOUNDING_BOX}
+  //D2D1_SVG_UNIT_TYPE_FORCE_DWORD     = FORCEDWORD;
+
+type
+  // Defines the type of SVG string attribute to set or get.
+  PD2D1_SVG_ATTRIBUTE_STRING_TYPE = ^D2D1_SVG_ATTRIBUTE_STRING_TYPE;
+  D2D1_SVG_ATTRIBUTE_STRING_TYPE = DWord;
+  {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_STRING_TYPE}
+const
+  // The attribute is a string in the same form as it would appear in the SVG XML.
+  //
+  // Note that when getting values of this type); the value returned may not exactly
+  // match the value that was set. Instead); the output value is a normalized version
+  // of the value. For example); an input color of 'red' may be output as '#FF0000'.
+  D2D1_SVG_ATTRIBUTE_STRING_TYPE_SVG     = D2D1_SVG_ATTRIBUTE_STRING_TYPE(0);
+  {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_STRING_TYPE_SVG}
+  // The attribute is an element ID.
+  D2D1_SVG_ATTRIBUTE_STRING_TYPE_ID      = D2D1_SVG_ATTRIBUTE_STRING_TYPE(1);
+  {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_STRING_TYPE_ID}
+  //D2D1_SVG_ATTRIBUTE_STRING_TYPE_FORCE_DWORD = FORCEDWORD;
+
+type
+  // Defines the type of SVG POD attribute to set or get.
+  PD2D1_SVG_ATTRIBUTE_POD_TYPE = ^D2D1_SVG_ATTRIBUTE_POD_TYPE;
+  D2D1_SVG_ATTRIBUTE_POD_TYPE = DWord;
+  {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_POD_TYPE}
+const
+  // The attribute is a FLOAT.
+  D2D1_SVG_ATTRIBUTE_POD_TYPE_FLOAT                = D2D1_SVG_ATTRIBUTE_POD_TYPE(0);
+  {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_POD_TYPE_FLOAT}
+  // The attribute is a D2D1_COLOR_F.
+  D2D1_SVG_ATTRIBUTE_POD_TYPE_COLOR                = D2D1_SVG_ATTRIBUTE_POD_TYPE(1);
+  {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_POD_TYPE_COLOR}
+  // The attribute is a D2D1_FILL_MODE.
+  D2D1_SVG_ATTRIBUTE_POD_TYPE_FILL_MODE            = D2D1_SVG_ATTRIBUTE_POD_TYPE(2);
+  {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_POD_TYPE_FILL_MODE}
+  // The attribute is a D2D1_SVG_DISPLAY.
+  D2D1_SVG_ATTRIBUTE_POD_TYPE_DISPLAY              = D2D1_SVG_ATTRIBUTE_POD_TYPE(3);
+  {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_POD_TYPE_DISPLAY}
+  // The attribute is a D2D1_SVG_OVERFLOW.
+  D2D1_SVG_ATTRIBUTE_POD_TYPE_OVERFLOW             = D2D1_SVG_ATTRIBUTE_POD_TYPE(4);
+  {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_POD_TYPE_OVERFLOW}
+  // The attribute is a D2D1_SVG_LINE_CAP.
+  D2D1_SVG_ATTRIBUTE_POD_TYPE_LINE_CAP             = D2D1_SVG_ATTRIBUTE_POD_TYPE(5);
+  {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_POD_TYPE_LINE_CAP}
+  // The attribute is a D2D1_SVG_LINE_JOIN.
+  D2D1_SVG_ATTRIBUTE_POD_TYPE_LINE_JOIN            = D2D1_SVG_ATTRIBUTE_POD_TYPE(6);
+  {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_POD_TYPE_LINE_JOIN}
+  // The attribute is a D2D1_SVG_VISIBILITY.
+  D2D1_SVG_ATTRIBUTE_POD_TYPE_VISIBILITY           = D2D1_SVG_ATTRIBUTE_POD_TYPE(7);
+  {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_POD_TYPE_VISIBILITY}
+  // The attribute is a D2D1_MATRIX_3X2_F.
+  D2D1_SVG_ATTRIBUTE_POD_TYPE_MATRIX               = D2D1_SVG_ATTRIBUTE_POD_TYPE(8);
+  {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_POD_TYPE_MATRIX}
+  // The attribute is a D2D1_SVG_UNIT_TYPE.
+  D2D1_SVG_ATTRIBUTE_POD_TYPE_UNIT_TYPE             = D2D1_SVG_ATTRIBUTE_POD_TYPE(9);
+  {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_POD_TYPE_UNIT_TYPE}
+  // The attribute is a D2D1_EXTEND_MODE.
+  D2D1_SVG_ATTRIBUTE_POD_TYPE_EXTEND_MODE           = D2D1_SVG_ATTRIBUTE_POD_TYPE(10);
+  {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_POD_TYPE_EXTEND_MODE}
+  // The attribute is a D2D1_SVG_PRESERVE_ASPECT_RATIO.
+  D2D1_SVG_ATTRIBUTE_POD_TYPE_PRESERVE_ASPECT_RATIO = D2D1_SVG_ATTRIBUTE_POD_TYPE(11);
+  {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_POD_TYPE_PRESERVE_ASPECT_RATIO}
+  // The attribute is a D2D1_SVG_VIEWBOX.
+  D2D1_SVG_ATTRIBUTE_POD_TYPE_VIEWBOX               = D2D1_SVG_ATTRIBUTE_POD_TYPE(12);
+  {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_POD_TYPE_VIEWBOX}
+  // The attribute is a D2D1_SVG_LENGTH.
+  D2D1_SVG_ATTRIBUTE_POD_TYPE_LENGTH                = D2D1_SVG_ATTRIBUTE_POD_TYPE(13);
+  {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_POD_TYPE_LENGTH}
+  //D2D1_SVG_ATTRIBUTE_POD_TYPE_FORCE_DWORD         = FORCEDWORD;
+
+
+// =============================================================================
 
 type
 
@@ -110,264 +450,6 @@ type
   ID2D1SvgDocument = interface;
   PID2D1SvgDocument = ^ID2D1SvgDocument;
 
-
-  // Specifies the paint type for an SVG fill or stroke.
-  PD2D1_SVG_PAINT_TYPE = ^D2D1_SVG_PAINT_TYPE;
-  D2D1_SVG_PAINT_TYPE                     = (
-    // The fill or stroke is not rendered.
-    D2D1_SVG_PAINT_TYPE_NONE              = 0,
-    // A solid color is rendered.
-    D2D1_SVG_PAINT_TYPE_COLOR             = 1,
-    // The current color is rendered.
-    D2D1_SVG_PAINT_TYPE_CURRENT_COLOR     = 2,
-    // A paint server, defined by another element in the SVG document, is used.
-    D2D1_SVG_PAINT_TYPE_URI               = 3,
-    // A paint server, defined by another element in the SVG document, is used. If the
-    // paint server reference is invalid, fall back to D2D1_SVG_PAINT_TYPE_NONE.
-    D2D1_SVG_PAINT_TYPE_URI_NONE          = 4,
-    // A paint server, defined by another element in the SVG document, is used. If the
-    // paint server reference is invalid, fall back to D2D1_SVG_PAINT_TYPE_COLOR.
-    D2D1_SVG_PAINT_TYPE_URI_COLOR         = 5,
-    // A paint server, defined by another element in the SVG document, is used. If the
-    // paint server reference is invalid, fall back to
-    // D2D1_SVG_PAINT_TYPE_CURRENT_COLOR.
-    D2D1_SVG_PAINT_TYPE_URI_CURRENT_COLOR = 6,
-    D2D1_SVG_PAINT_TYPE_FORCE_DWORD       = FORCEDWORD);
-  {$EXTERNALSYM D2D1_SVG_PAINT_TYPE}
-
-
-  // Specifies the units for an SVG length.
-  PD2D1_SVG_LENGTH_UNITS = ^D2D1_SVG_LENGTH_UNITS;
-  D2D1_SVG_LENGTH_UNITS               = (
-    // The length is unitless.
-    D2D1_SVG_LENGTH_UNITS_NUMBER      = 0,
-    // The length is a percentage value.
-    D2D1_SVG_LENGTH_UNITS_PERCENTAGE  = 1,
-    D2D1_SVG_LENGTH_UNITS_FORCE_DWORD = FORCEDWORD);
-  {$EXTERNALSYM D2D1_SVG_LENGTH_UNITS}
-
-
-  // Specifies a value for the SVG display property.
-  PD2D1_SVG_DISPLAY = ^D2D1_SVG_DISPLAY;
-  D2D1_SVG_DISPLAY               = (
-    // The element uses the default display behavior.
-    D2D1_SVG_DISPLAY_INLINE      = 0,
-    // The element and all children are not rendered directly.
-    D2D1_SVG_DISPLAY_NONE        = 1,
-    D2D1_SVG_DISPLAY_FORCE_DWORD = FORCEDWORD);
-  {$EXTERNALSYM D2D1_SVG_DISPLAY}
-
-
-  // Specifies a value for the SVG visibility property.
-  PD2D1_SVG_VISIBILITY = ^D2D1_SVG_VISIBILITY;
-  D2D1_SVG_VISIBILITY               = (
-    // The element is visible.
-    D2D1_SVG_VISIBILITY_VISIBLE     = 0,
-    // The element is invisible.
-    D2D1_SVG_VISIBILITY_HIDDEN      = 1,
-    D2D1_SVG_VISIBILITY_FORCE_DWORD = FORCEDWORD);
-  {$EXTERNALSYM D2D1_SVG_VISIBILITY}
-
-
-  // Specifies a value for the SVG overflow property.
-  PD2D1_SVG_OVERFLOW = ^D2D1_SVG_OVERFLOW;
-  D2D1_SVG_OVERFLOW               = (
-    // The element is not clipped to its viewport.
-    D2D1_SVG_OVERFLOW_VISIBLE     = 0,
-    // The element is clipped to its viewport.
-    D2D1_SVG_OVERFLOW_HIDDEN      = 1,
-    D2D1_SVG_OVERFLOW_FORCE_DWORD = FORCEDWORD);
-  {$EXTERNALSYM D2D1_SVG_OVERFLOW}
-
-
-  // Specifies a value for the SVG stroke-linecap property.
-  PD2D1_SVG_LINE_CAP = ^D2D1_SVG_LINE_CAP;
-  D2D1_SVG_LINE_CAP               = (
-    // The property is set to SVG's 'butt' value.
-    D2D1_SVG_LINE_CAP_BUTT        = Ord(D2D1_CAP_STYLE_FLAT),
-    // The property is set to SVG's 'square' value.
-    D2D1_SVG_LINE_CAP_SQUARE      = Ord(D2D1_CAP_STYLE_SQUARE),
-    // The property is set to SVG's 'round' value.
-    D2D1_SVG_LINE_CAP_ROUND       = Ord(D2D1_CAP_STYLE_ROUND),
-    D2D1_SVG_LINE_CAP_FORCE_DWORD = FORCEDWORD);
-  {$EXTERNALSYM D2D1_SVG_LINE_CAP}
-
-
-  // Specifies a value for the SVG stroke-linejoin property.
-  PD2D1_SVG_LINE_JOIN = ^D2D1_SVG_LINE_JOIN;
-  D2D1_SVG_LINE_JOIN               = (
-    // The property is set to SVG's 'bevel' value.
-    D2D1_SVG_LINE_JOIN_BEVEL       = Ord(D2D1_LINE_JOIN_BEVEL),
-    // The property is set to SVG's 'miter' value. Note that this is equivalent to
-    // D2D1_LINE_JOIN_MITER_OR_BEVEL, not D2D1_LINE_JOIN_MITER.
-    D2D1_SVG_LINE_JOIN_MITER       = Ord(D2D1_LINE_JOIN_MITER_OR_BEVEL),
-    // \ The property is set to SVG's 'round' value.
-    D2D1_SVG_LINE_JOIN_ROUND       = Ord(D2D1_LINE_JOIN_ROUND),
-    D2D1_SVG_LINE_JOIN_FORCE_DWORD = FORCEDWORD);
-  {$EXTERNALSYM D2D1_SVG_LINE_JOIN}
-
-
-  // The alignment portion of the SVG preserveAspectRatio attribute.
-  PD2D1_SVG_ASPECT_ALIGN = ^D2D1_SVG_ASPECT_ALIGN;
-  D2D1_SVG_ASPECT_ALIGN               = (
-    // The alignment is set to SVG's 'none' value.
-    D2D1_SVG_ASPECT_ALIGN_NONE        = 0,
-    // The alignment is set to SVG's 'xMinYMin' value.
-    D2D1_SVG_ASPECT_ALIGN_X_MIN_Y_MIN = 1,
-    // The alignment is set to SVG's 'xMidYMin' value.
-    D2D1_SVG_ASPECT_ALIGN_X_MID_Y_MIN = 2,
-    // The alignment is set to SVG's 'xMaxYMin' value.
-    D2D1_SVG_ASPECT_ALIGN_X_MAX_Y_MIN = 3,
-    // The alignment is set to SVG's 'xMinYMid' value.
-    D2D1_SVG_ASPECT_ALIGN_X_MIN_Y_MID = 4,
-    // The alignment is set to SVG's 'xMidYMid' value.
-    D2D1_SVG_ASPECT_ALIGN_X_MID_Y_MID = 5,
-    // The alignment is set to SVG's 'xMaxYMid' value.
-    D2D1_SVG_ASPECT_ALIGN_X_MAX_Y_MID = 6,
-    // The alignment is set to SVG's 'xMinYMax' value.
-    D2D1_SVG_ASPECT_ALIGN_X_MIN_Y_MAX = 7,
-    // The alignment is set to SVG's 'xMidYMax' value.
-    D2D1_SVG_ASPECT_ALIGN_X_MID_Y_MAX = 8,
-    // The alignment is set to SVG's 'xMaxYMax' value.
-    D2D1_SVG_ASPECT_ALIGN_X_MAX_Y_MAX = 9,
-    D2D1_SVG_ASPECT_ALIGN_FORCE_DWORD = FORCEDWORD);
-  {$EXTERNALSYM D2D1_SVG_ASPECT_ALIGN}
-
-
-  // The meetOrSlice portion of the SVG preserveAspectRatio attribute.
-  PD2D1_SVG_ASPECT_SCALING = ^D2D1_SVG_ASPECT_SCALING;
-  D2D1_SVG_ASPECT_SCALING               = (
-    // Scale the viewBox up as much as possible such that the entire viewBox is visible
-    // within the viewport.
-    D2D1_SVG_ASPECT_SCALING_MEET        = 0,
-    // Scale the viewBox down as much as possible such that the entire viewport is
-    // covered by the viewBox.
-    D2D1_SVG_ASPECT_SCALING_SLICE       = 1,
-    D2D1_SVG_ASPECT_SCALING_FORCE_DWORD = FORCEDWORD);
-  {$EXTERNALSYM D2D1_SVG_ASPECT_SCALING}
-
-
-  // Represents a path commmand. Each command may reference floats from the segment
-  // data. Commands ending in _ABSOLUTE interpret data as absolute coordinate.
-  // Commands ending in _RELATIVE interpret data as being relative to the previous
-  // point.
-  PD2D1_SVG_PATH_COMMAND = ^D2D1_SVG_PATH_COMMAND;
-  D2D1_SVG_PATH_COMMAND                             = (
-    // Closes the current subpath. Uses no segment data.
-    D2D1_SVG_PATH_COMMAND_CLOSE_PATH                = 0,
-    // Starts a new subpath at the coordinate (x y). Uses 2 floats of segment data.
-    D2D1_SVG_PATH_COMMAND_MOVE_ABSOLUTE             = 1,
-    // Starts a new subpath at the coordinate (x y). Uses 2 floats of segment data.
-    D2D1_SVG_PATH_COMMAND_MOVE_RELATIVE             = 2,
-    // Draws a line to the coordinate (x y). Uses 2 floats of segment data.
-    D2D1_SVG_PATH_COMMAND_LINE_ABSOLUTE             = 3,
-    // Draws a line to the coordinate (x y). Uses 2 floats of segment data.
-    D2D1_SVG_PATH_COMMAND_LINE_RELATIVE             = 4,
-    // Draws a cubic Bezier curve (x1 y1 x2 y2 x y). The curve ends at (x, y) and is
-    // defined by the two control points (x1, y1) and (x2, y2). Uses 6 floats of
-    // segment data.
-    D2D1_SVG_PATH_COMMAND_CUBIC_ABSOLUTE            = 5,
-    // Draws a cubic Bezier curve (x1 y1 x2 y2 x y). The curve ends at (x, y) and is
-    // defined by the two control points (x1, y1) and (x2, y2). Uses 6 floats of
-    // segment data.
-    D2D1_SVG_PATH_COMMAND_CUBIC_RELATIVE            = 6,
-    // Draws a quadratic Bezier curve (x1 y1 x y). The curve ends at (x, y) and is
-    // defined by the control point (x1 y1). Uses 4 floats of segment data.
-    D2D1_SVG_PATH_COMMAND_QUADRADIC_ABSOLUTE        = 7,
-    // Draws a quadratic Bezier curve (x1 y1 x y). The curve ends at (x, y) and is
-    // defined by the control point (x1 y1). Uses 4 floats of segment data.
-    D2D1_SVG_PATH_COMMAND_QUADRADIC_RELATIVE        = 8,
-    // Draws an elliptical arc (rx ry x-axis-rotation large-arc-flag sweep-flag x y).
-    // The curve ends at (x, y) and is defined by the arc parameters. The two flags are
-    // considered set if their values are non-zero. Uses 7 floats of segment data.
-    D2D1_SVG_PATH_COMMAND_ARC_ABSOLUTE              = 9,
-    // Draws an elliptical arc (rx ry x-axis-rotation large-arc-flag sweep-flag x y).
-    // The curve ends at (x, y) and is defined by the arc parameters. The two flags are
-    // considered set if their values are non-zero. Uses 7 floats of segment data.
-    D2D1_SVG_PATH_COMMAND_ARC_RELATIVE              = 10,
-    // Draws a horizontal line to the coordinate (x). Uses 1 float of segment data.
-    D2D1_SVG_PATH_COMMAND_HORIZONTAL_ABSOLUTE       = 11,
-    // Draws a horizontal line to the coordinate (x). Uses 1 float of segment data.
-    D2D1_SVG_PATH_COMMAND_HORIZONTAL_RELATIVE       = 12,
-    // Draws a vertical line to the coordinate (y). Uses 1 float of segment data.
-    D2D1_SVG_PATH_COMMAND_VERTICAL_ABSOLUTE         = 13,
-    // Draws a vertical line to the coordinate (y). Uses 1 float of segment data.
-    D2D1_SVG_PATH_COMMAND_VERTICAL_RELATIVE         = 14,
-    // Draws a smooth cubic Bezier curve (x2 y2 x y). The curve ends at (x, y) and is
-    // defined by the control point (x2, y2). Uses 4 floats of segment data.
-    D2D1_SVG_PATH_COMMAND_CUBIC_SMOOTH_ABSOLUTE     = 15,
-    // Draws a smooth cubic Bezier curve (x2 y2 x y). The curve ends at (x, y) and is
-    // defined by the control point (x2, y2). Uses 4 floats of segment data.
-    D2D1_SVG_PATH_COMMAND_CUBIC_SMOOTH_RELATIVE     = 16,
-    // Draws a smooth quadratic Bezier curve ending at (x, y). Uses 2 floats of segment
-    // data.
-    D2D1_SVG_PATH_COMMAND_QUADRADIC_SMOOTH_ABSOLUTE = 17,
-    // Draws a smooth quadratic Bezier curve ending at (x, y). Uses 2 floats of segment
-    // data.
-    D2D1_SVG_PATH_COMMAND_QUADRADIC_SMOOTH_RELATIVE = 18,
-    D2D1_SVG_PATH_COMMAND_FORCE_DWORD               = FORCEDWORD);
-  {$EXTERNALSYM D2D1_SVG_PATH_COMMAND}
-
-
-  // Defines the coordinate system used for SVG gradient or clipPath elements.
-  PD2D1_SVG_UNIT_TYPE = ^D2D1_SVG_UNIT_TYPE;
-  D2D1_SVG_UNIT_TYPE                       = (
-    // The property is set to SVG's 'userSpaceOnUse' value.
-    D2D1_SVG_UNIT_TYPE_USER_SPACE_ON_USE   = 0,
-    // The property is set to SVG's 'objectBoundingBox' value.
-    D2D1_SVG_UNIT_TYPE_OBJECT_BOUNDING_BOX = 1,
-    D2D1_SVG_UNIT_TYPE_FORCE_DWORD         = FORCEDWORD);
-  {$EXTERNALSYM D2D1_SVG_UNIT_TYPE}
-
-
-  // Defines the type of SVG string attribute to set or get.
-  PD2D1_SVG_ATTRIBUTE_STRING_TYPE = ^D2D1_SVG_ATTRIBUTE_STRING_TYPE;
-  D2D1_SVG_ATTRIBUTE_STRING_TYPE               = (
-    // The attribute is a string in the same form as it would appear in the SVG XML.
-    //
-    // Note that when getting values of this type, the value returned may not exactly
-    // match the value that was set. Instead, the output value is a normalized version
-    // of the value. For example, an input color of 'red' may be output as '#FF0000'.
-    D2D1_SVG_ATTRIBUTE_STRING_TYPE_SVG         = 0,
-    // The attribute is an element ID.
-    D2D1_SVG_ATTRIBUTE_STRING_TYPE_ID          = 1,
-    D2D1_SVG_ATTRIBUTE_STRING_TYPE_FORCE_DWORD = FORCEDWORD);
-  {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_STRING_TYPE}
-
-
-  // Defines the type of SVG POD attribute to set or get.
-  PD2D1_SVG_ATTRIBUTE_POD_TYPE = ^D2D1_SVG_ATTRIBUTE_POD_TYPE;
-  D2D1_SVG_ATTRIBUTE_POD_TYPE                         = (
-    // The attribute is a FLOAT.
-    D2D1_SVG_ATTRIBUTE_POD_TYPE_FLOAT                 = 0,
-    // The attribute is a D2D1_COLOR_F.
-    D2D1_SVG_ATTRIBUTE_POD_TYPE_COLOR                 = 1,
-    // The attribute is a D2D1_FILL_MODE.
-    D2D1_SVG_ATTRIBUTE_POD_TYPE_FILL_MODE             = 2,
-    // The attribute is a D2D1_SVG_DISPLAY.
-    D2D1_SVG_ATTRIBUTE_POD_TYPE_DISPLAY               = 3,
-    // The attribute is a D2D1_SVG_OVERFLOW.
-    D2D1_SVG_ATTRIBUTE_POD_TYPE_OVERFLOW              = 4,
-    // The attribute is a D2D1_SVG_LINE_CAP.
-    D2D1_SVG_ATTRIBUTE_POD_TYPE_LINE_CAP              = 5,
-    // The attribute is a D2D1_SVG_LINE_JOIN.
-    D2D1_SVG_ATTRIBUTE_POD_TYPE_LINE_JOIN             = 6,
-    // The attribute is a D2D1_SVG_VISIBILITY.
-    D2D1_SVG_ATTRIBUTE_POD_TYPE_VISIBILITY            = 7,
-    // The attribute is a D2D1_MATRIX_3X2_F.
-    D2D1_SVG_ATTRIBUTE_POD_TYPE_MATRIX                = 8,
-    // The attribute is a D2D1_SVG_UNIT_TYPE.
-    D2D1_SVG_ATTRIBUTE_POD_TYPE_UNIT_TYPE             = 9,
-    // The attribute is a D2D1_EXTEND_MODE.
-    D2D1_SVG_ATTRIBUTE_POD_TYPE_EXTEND_MODE           = 10,
-    // The attribute is a D2D1_SVG_PRESERVE_ASPECT_RATIO.
-    D2D1_SVG_ATTRIBUTE_POD_TYPE_PRESERVE_ASPECT_RATIO = 11,
-    // The attribute is a D2D1_SVG_VIEWBOX.
-    D2D1_SVG_ATTRIBUTE_POD_TYPE_VIEWBOX               = 12,
-    // The attribute is a D2D1_SVG_LENGTH.
-    D2D1_SVG_ATTRIBUTE_POD_TYPE_LENGTH                = 13,
-    D2D1_SVG_ATTRIBUTE_POD_TYPE_FORCE_DWORD           = FORCEDWORD);
-  {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_POD_TYPE}
 
 
   // Represents an SVG length.

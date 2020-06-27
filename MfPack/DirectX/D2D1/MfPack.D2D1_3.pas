@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -79,78 +81,169 @@ uses
   MfPack.DWrite,
   MfPack.ObjIdlbase;   // ActiveX
 
-
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$I 'MfPack.inc'}
-  {$WARN BOUNDS_ERROR OFF}
+
+
+// Enums =======================================================================
 
 type
-
   // Specifies the appearance of the ink nib (pen tip) as part of an
   // D2D1_INK_STYLE_PROPERTIES structure.
   PD2D1_INK_NIB_SHAPE = ^D2D1_INK_NIB_SHAPE;
-  D2D1_INK_NIB_SHAPE               = (
-    D2D1_INK_NIB_SHAPE_ROUND       = 0,
-    D2D1_INK_NIB_SHAPE_SQUARE      = 1,
-    D2D1_INK_NIB_SHAPE_FORCE_DWORD = FORCEDWORD);
+  D2D1_INK_NIB_SHAPE = DWord;
   {$EXTERNALSYM D2D1_INK_NIB_SHAPE}
+const
+  D2D1_INK_NIB_SHAPE_ROUND     = D2D1_INK_NIB_SHAPE(0);
+  {$EXTERNALSYM D2D1_INK_NIB_SHAPE_ROUND}
+  D2D1_INK_NIB_SHAPE_SQUARE    = D2D1_INK_NIB_SHAPE(1);
+  {$EXTERNALSYM D2D1_INK_NIB_SHAPE_SQUARE}
+  //D2D1_INK_NIB_SHAPE_FORCE_DWORD = FORCEDWORD;
 
-
+type
   // Specifies the orientation of an image.
   PD2D1_ORIENTATION = ^D2D1_ORIENTATION;
-  D2D1_ORIENTATION                                       = (
-    D2D1_ORIENTATION_DEFAULT                             = 1,
-    D2D1_ORIENTATION_FLIP_HORIZONTAL                     = 2,
-    D2D1_ORIENTATION_ROTATE_CLOCKWISE180                 = 3,
-    D2D1_ORIENTATION_ROTATE_CLOCKWISE180_FLIP_HORIZONTAL = 4,
-    D2D1_ORIENTATION_ROTATE_CLOCKWISE90_FLIP_HORIZONTAL  = 5,
-    D2D1_ORIENTATION_ROTATE_CLOCKWISE270                 = 6,
-    D2D1_ORIENTATION_ROTATE_CLOCKWISE270_FLIP_HORIZONTAL = 7,
-    D2D1_ORIENTATION_ROTATE_CLOCKWISE90                  = 8,
-    D2D1_ORIENTATION_FORCE_DWORD                         = FORCEDWORD);
+  D2D1_ORIENTATION = DWord;
   {$EXTERNALSYM D2D1_ORIENTATION}
+const
+  D2D1_ORIENTATION_DEFAULT                             = D2D1_ORIENTATION(1);
+  {$EXTERNALSYM D2D1_ORIENTATION_DEFAULT}
+  D2D1_ORIENTATION_FLIP_HORIZONTAL                     = D2D1_ORIENTATION(2);
+  {$EXTERNALSYM D2D1_ORIENTATION_FLIP_HORIZONTAL}
+  D2D1_ORIENTATION_ROTATE_CLOCKWISE180                 = D2D1_ORIENTATION(3);
+  {$EXTERNALSYM D2D1_ORIENTATION_ROTATE_CLOCKWISE180}
+  D2D1_ORIENTATION_ROTATE_CLOCKWISE180_FLIP_HORIZONTAL = D2D1_ORIENTATION(4);
+  {$EXTERNALSYM D2D1_ORIENTATION_ROTATE_CLOCKWISE180_FLIP_HORIZONTAL}
+  D2D1_ORIENTATION_ROTATE_CLOCKWISE90_FLIP_HORIZONTAL  = D2D1_ORIENTATION(5);
+  {$EXTERNALSYM D2D1_ORIENTATION_ROTATE_CLOCKWISE90_FLIP_HORIZONTAL}
+  D2D1_ORIENTATION_ROTATE_CLOCKWISE270                 = D2D1_ORIENTATION(6);
+  {$EXTERNALSYM D2D1_ORIENTATION_ROTATE_CLOCKWISE270}
+  D2D1_ORIENTATION_ROTATE_CLOCKWISE270_FLIP_HORIZONTAL = D2D1_ORIENTATION(7);
+  {$EXTERNALSYM D2D1_ORIENTATION_ROTATE_CLOCKWISE270_FLIP_HORIZONTAL}
+  D2D1_ORIENTATION_ROTATE_CLOCKWISE90                  = D2D1_ORIENTATION(8);
+  {$EXTERNALSYM D2D1_ORIENTATION_ROTATE_CLOCKWISE90}
+  //D2D1_ORIENTATION_FORCE_DWORD             = FORCEDWORD;
 
-
+type
   // Option flags controlling how images sources are loaded during
   // CreateImageSourceFromWic.
   PD2D1_IMAGE_SOURCE_LOADING_OPTIONS = ^D2D1_IMAGE_SOURCE_LOADING_OPTIONS;
-  D2D1_IMAGE_SOURCE_LOADING_OPTIONS                   = (
-    D2D1_IMAGE_SOURCE_LOADING_OPTIONS_NONE            = 0,
-    D2D1_IMAGE_SOURCE_LOADING_OPTIONS_RELEASE_SOURCE  = 1,
-    D2D1_IMAGE_SOURCE_LOADING_OPTIONS_CACHE_ON_DEMAND = 2,
-    D2D1_IMAGE_SOURCE_LOADING_OPTIONS_FORCE_DWORD     = FORCEDWORD);
+  D2D1_IMAGE_SOURCE_LOADING_OPTIONS = DWord;
   {$EXTERNALSYM D2D1_IMAGE_SOURCE_LOADING_OPTIONS}
+const
+  {$EXTERNALSYM D2D1_IMAGE_SOURCE_LOADING_OPTIONS_NONE}
+  D2D1_IMAGE_SOURCE_LOADING_OPTIONS_NONE            = D2D1_IMAGE_SOURCE_LOADING_OPTIONS(0);
+  {$EXTERNALSYM D2D1_IMAGE_SOURCE_LOADING_OPTIONS_RELEASE_SOURCE}
+  D2D1_IMAGE_SOURCE_LOADING_OPTIONS_RELEASE_SOURCE  = D2D1_IMAGE_SOURCE_LOADING_OPTIONS(1);
+  {$EXTERNALSYM D2D1_IMAGE_SOURCE_LOADING_OPTIONS_CACHE_ON_DEMAND}
+  D2D1_IMAGE_SOURCE_LOADING_OPTIONS_CACHE_ON_DEMAND = D2D1_IMAGE_SOURCE_LOADING_OPTIONS(2);
+  //D2D1_IMAGE_SOURCE_LOADING_OPTIONS_FORCE_DWORD   = FORCEDWORD;
 
-
+type
   // Option flags controlling primary conversion performed by
-  // CreateImageSourceFromDxgi, if any.
+  // CreateImageSourceFromDxgi); if any.
   PD2D1_IMAGE_SOURCE_FROM_DXGI_OPTIONS = ^D2D1_IMAGE_SOURCE_FROM_DXGI_OPTIONS;
-  D2D1_IMAGE_SOURCE_FROM_DXGI_OPTIONS                                  = (
-    D2D1_IMAGE_SOURCE_FROM_DXGI_OPTIONS_NONE                           = 0,
-    D2D1_IMAGE_SOURCE_FROM_DXGI_OPTIONS_LOW_QUALITY_PRIMARY_CONVERSION = 1,
-    D2D1_IMAGE_SOURCE_FROM_DXGI_OPTIONS_FORCE_DWORD                    = FORCEDWORD);
+  D2D1_IMAGE_SOURCE_FROM_DXGI_OPTIONS = DWord;
   {$EXTERNALSYM D2D1_IMAGE_SOURCE_FROM_DXGI_OPTIONS}
+const
+  D2D1_IMAGE_SOURCE_FROM_DXGI_OPTIONS_NONE                           = D2D1_IMAGE_SOURCE_FROM_DXGI_OPTIONS(0);
+  {$EXTERNALSYM D2D1_IMAGE_SOURCE_FROM_DXGI_OPTIONS_NONE}
+  D2D1_IMAGE_SOURCE_FROM_DXGI_OPTIONS_LOW_QUALITY_PRIMARY_CONVERSION = D2D1_IMAGE_SOURCE_FROM_DXGI_OPTIONS(1);
+  {$EXTERNALSYM D2D1_IMAGE_SOURCE_FROM_DXGI_OPTIONS_LOW_QUALITY_PRIMARY_CONVERSION}
+  //D2D1_IMAGE_SOURCE_FROM_DXGI_OPTIONS_FORCE_DWORD          = FORCEDWORD;
 
-
+type
   // Option flags for transformed image sources.
   PD2D1_TRANSFORMED_IMAGE_SOURCE_OPTIONS = ^D2D1_TRANSFORMED_IMAGE_SOURCE_OPTIONS;
-  D2D1_TRANSFORMED_IMAGE_SOURCE_OPTIONS                     = (
-    D2D1_TRANSFORMED_IMAGE_SOURCE_OPTIONS_NONE              = 0,
-    // Prevents the image source from being automatically scaled (by a ratio of the
-    // context DPI divided by 96) while drawn.
-    D2D1_TRANSFORMED_IMAGE_SOURCE_OPTIONS_DISABLE_DPI_SCALE = 1,
-    D2D1_TRANSFORMED_IMAGE_SOURCE_OPTIONS_FORCE_DWORD       = FORCEDWORD);
+  D2D1_TRANSFORMED_IMAGE_SOURCE_OPTIONS = DWord;
   {$EXTERNALSYM D2D1_TRANSFORMED_IMAGE_SOURCE_OPTIONS}
+const
+  D2D1_TRANSFORMED_IMAGE_SOURCE_OPTIONS_NONE              = D2D1_TRANSFORMED_IMAGE_SOURCE_OPTIONS(0);
+  {$EXTERNALSYM D2D1_TRANSFORMED_IMAGE_SOURCE_OPTIONS_NONE}
+  // Prevents the image source from being automatically scaled (by a ratio of the
+  // context DPI divided by 96) while drawn.
+  D2D1_TRANSFORMED_IMAGE_SOURCE_OPTIONS_DISABLE_DPI_SCALE = D2D1_TRANSFORMED_IMAGE_SOURCE_OPTIONS(1);
+  {$EXTERNALSYM D2D1_TRANSFORMED_IMAGE_SOURCE_OPTIONS_DISABLE_DPI_SCALE}
+  //D2D1_TRANSFORMED_IMAGE_SOURCE_OPTIONS_FORCE_DWORD     = FORCEDWORD;
 
+type
+  // Specifies how to render gradient mesh edges.
+  PD2D1_PATCH_EDGE_MODE = ^D2D1_PATCH_EDGE_MODE;
+  D2D1_PATCH_EDGE_MODE = DWord;
+  {$EXTERNALSYM D2D1_PATCH_EDGE_MODE}
+const
+  // Render this edge aliased.
+  D2D1_PATCH_EDGE_MODE_ALIASED          = D2D1_PATCH_EDGE_MODE(0);
+  {$EXTERNALSYM D2D1_PATCH_EDGE_MODE_ALIASED}
+  // Render this edge antialiased.
+  D2D1_PATCH_EDGE_MODE_ANTIALIASED      = D2D1_PATCH_EDGE_MODE(1);
+  {$EXTERNALSYM D2D1_PATCH_EDGE_MODE_ANTIALIASED}
+  // Render this edge aliased and inflated out slightly.
+  D2D1_PATCH_EDGE_MODE_ALIASED_INFLATED = D2D1_PATCH_EDGE_MODE(2);
+  {$EXTERNALSYM D2D1_PATCH_EDGE_MODE_ALIASED_INFLATED}
+  //D2D1_PATCH_EDGE_MODE_FORCE_DWORD    = FORCEDWORD;
 
+type
+  PD2D1_SPRITE_OPTIONS = ^D2D1_SPRITE_OPTIONS;
+  D2D1_SPRITE_OPTIONS = DWord;
+  {$EXTERNALSYM D2D1_SPRITE_OPTIONS}
+const
+  // Use default sprite rendering behavior.
+  D2D1_SPRITE_OPTIONS_NONE                      = D2D1_SPRITE_OPTIONS(0);
+  {$EXTERNALSYM D2D1_SPRITE_OPTIONS_NONE}
+  // Bitmap interpolation will be clamped to the sprite's source rectangle.
+  D2D1_SPRITE_OPTIONS_CLAMP_TO_SOURCE_RECTANGLE = D2D1_SPRITE_OPTIONS(1);
+  {$EXTERNALSYM D2D1_SPRITE_OPTIONS_CLAMP_TO_SOURCE_RECTANGLE}
+  //D2D1_SPRITE_OPTIONS_FORCE_DWORD         = FORCEDWORD;
+
+type
+  // Specifies the pixel snapping policy when rendering color bitmap glyphs.
+  PD2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION = ^D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION;
+  D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION = DWord;
+  {$EXTERNALSYM D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION}
+const
+  // Color bitmap glyph positions are snapped to the nearest pixel if the bitmap
+  // resolution matches that of the device context.
+  D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION_DEFAULT   = D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION(0);
+  {$EXTERNALSYM D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION_DEFAULT}
+  // Color bitmap glyph positions are not snapped.
+  D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION_DISABLE   = D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION(1);
+  {$EXTERNALSYM D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION_DISABLE}
+  //D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION_FORCE_DWORD = FORCEDWORD;
+
+type
+  // This determines what gamma is used for interpolation/blending.
+  PD2D1_GAMMA1 = ^D2D1_GAMMA1;
+  D2D1_GAMMA1 = DWord;
+  {$EXTERNALSYM D2D1_GAMMA1}
+const
+  // Colors are manipulated in 2.2 gamma color space.
+  D2D1_GAMMA1_G22     = D2D1_GAMMA_2_2;
+  // Colors are manipulated in 1.0 gamma color space.
+  D2D1_GAMMA1_G10     = D2D1_GAMMA_1_0;
+  // Colors are manipulated in ST.2084 PQ gamma color space.
+  D2D1_GAMMA1_G2084     = D2D1_GAMMA1(2);
+  //D2D1_GAMMA1_FORCE_DWORD = FORCEDWORD;
+
+type
+  // Specifies which way a color profile is defined.
+  PD2D1_COLOR_CONTEXT_TYPE = ^D2D1_COLOR_CONTEXT_TYPE;
+  D2D1_COLOR_CONTEXT_TYPE = DWord;
+  {$EXTERNALSYM D2D1_COLOR_CONTEXT_TYPE}
+const
+  D2D1_COLOR_CONTEXT_TYPE_ICC     = D2D1_COLOR_CONTEXT_TYPE(0);
+  {$EXTERNALSYM D2D1_COLOR_CONTEXT_TYPE_ICC}
+  D2D1_COLOR_CONTEXT_TYPE_SIMPLE  = D2D1_COLOR_CONTEXT_TYPE(1);
+  {$EXTERNALSYM D2D1_COLOR_CONTEXT_TYPE_SIMPLE}
+  D2D1_COLOR_CONTEXT_TYPE_DXGI    = D2D1_COLOR_CONTEXT_TYPE(2);
+  {$EXTERNALSYM D2D1_COLOR_CONTEXT_TYPE_DXGI}
+  //D2D1_COLOR_CONTEXT_TYPE_FORCE_DWORD = FORCEDWORD;
+
+// =============================================================================
+
+type
   // Properties of a transformed image source.
   PD2D1_TRANSFORMED_IMAGE_SOURCE_PROPERTIES = ^D2D1_TRANSFORMED_IMAGE_SOURCE_PROPERTIES;
   D2D1_TRANSFORMED_IMAGE_SOURCE_PROPERTIES = record
@@ -201,19 +294,6 @@ type
     nibTransform: D2D1_MATRIX_3X2_F;
   end;
   {$EXTERNALSYM D2D1_INK_STYLE_PROPERTIES}
-
-
-  // Specifies how to render gradient mesh edges.
-  PD2D1_PATCH_EDGE_MODE = ^D2D1_PATCH_EDGE_MODE;
-  D2D1_PATCH_EDGE_MODE                    = (
-    // Render this edge aliased.
-    D2D1_PATCH_EDGE_MODE_ALIASED          = 0,
-    // Render this edge antialiased.
-    D2D1_PATCH_EDGE_MODE_ANTIALIASED      = 1,
-    // Render this edge aliased and inflated out slightly.
-    D2D1_PATCH_EDGE_MODE_ALIASED_INFLATED = 2,
-    D2D1_PATCH_EDGE_MODE_FORCE_DWORD      = FORCEDWORD);
-  {$EXTERNALSYM D2D1_PATCH_EDGE_MODE}
 
 
   // Represents a tensor patch with 16 control points, 4 corner colors, and boundary
@@ -274,41 +354,6 @@ type
   {$EXTERNALSYM D2D1_GRADIENT_MESH_PATCH}
 
 
-  PD2D1_SPRITE_OPTIONS = ^D2D1_SPRITE_OPTIONS;
-  D2D1_SPRITE_OPTIONS                             = (
-    // Use default sprite rendering behavior.
-    D2D1_SPRITE_OPTIONS_NONE                      = 0,
-    // Bitmap interpolation will be clamped to the sprite's source rectangle.
-    D2D1_SPRITE_OPTIONS_CLAMP_TO_SOURCE_RECTANGLE = 1,
-    D2D1_SPRITE_OPTIONS_FORCE_DWORD               = FORCEDWORD);
-  {$EXTERNALSYM D2D1_SPRITE_OPTIONS}
-
-
-  // Specifies the pixel snapping policy when rendering color bitmap glyphs.
-  PD2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION = ^D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION;
-  D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION               = (
-    // Color bitmap glyph positions are snapped to the nearest pixel if the bitmap
-    // resolution matches that of the device context.
-    D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION_DEFAULT     = 0,
-    // Color bitmap glyph positions are not snapped.
-    D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION_DISABLE     = 1,
-    D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION_FORCE_DWORD = FORCEDWORD);
-  {$EXTERNALSYM D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION}
-
-
-  // This determines what gamma is used for interpolation/blending.
-  PD2D1_GAMMA1 = ^D2D1_GAMMA1;
-  D2D1_GAMMA1               = (
-    // Colors are manipulated in 2.2 gamma color space.
-    D2D1_GAMMA1_G22         = Ord(D2D1_GAMMA_2_2),
-    // Colors are manipulated in 1.0 gamma color space.
-    D2D1_GAMMA1_G10         = Ord(D2D1_GAMMA_1_0),
-    // Colors are manipulated in ST.2084 PQ gamma color space.
-    D2D1_GAMMA1_G2084       = 2,
-    D2D1_GAMMA1_FORCE_DWORD = FORCEDWORD);
-  {$EXTERNALSYM D2D1_GAMMA1}
-
-
   // Simple description of a color space.
   PD2D1_SIMPLE_COLOR_PROFILE = ^D2D1_SIMPLE_COLOR_PROFILE;
   D2D1_SIMPLE_COLOR_PROFILE = record
@@ -325,18 +370,6 @@ type
     gamma: D2D1_GAMMA1;
   end;
   {$EXTERNALSYM D2D1_SIMPLE_COLOR_PROFILE}
-
-
-  // Specifies which way a color profile is defined.
-  PD2D1_COLOR_CONTEXT_TYPE = ^D2D1_COLOR_CONTEXT_TYPE;
-  D2D1_COLOR_CONTEXT_TYPE               = (
-    D2D1_COLOR_CONTEXT_TYPE_ICC         = 0,
-    D2D1_COLOR_CONTEXT_TYPE_SIMPLE      = 1,
-    D2D1_COLOR_CONTEXT_TYPE_DXGI        = 2,
-    D2D1_COLOR_CONTEXT_TYPE_FORCE_DWORD = FORCEDWORD);
-  {$EXTERNALSYM D2D1_COLOR_CONTEXT_TYPE}
-
-
   //
   // INTERFACES ////////////////////////////////////////////////////////////////
   //

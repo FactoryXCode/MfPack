@@ -17,11 +17,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows Vista or later.
@@ -76,83 +78,93 @@ uses
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$I 'MfPack.inc'}
-  {$WARN BOUNDS_ERROR OFF}
+
+// Enums =======================================================================
 
 type
-
-
   // The measuring method used for text layout.
   PDWRITE_MEASURING_MODE = ^DWRITE_MEASURING_MODE;
-  DWRITE_MEASURING_MODE = (
-    // Text is measured using glyph ideal metrics whose values are independent to the current display resolution.
-    DWRITE_MEASURING_MODE_NATURAL,
-    // Text is measured using glyph display compatible metrics whose values tuned for the current display resolution.
-    DWRITE_MEASURING_MODE_GDI_CLASSIC,
-    // Text is measured using the same glyph display metrics as text measured by GDI using a font
-    // created with CLEARTYPE_NATURAL_QUALITY.
-    DWRITE_MEASURING_MODE_GDI_NATURAL);
+  DWRITE_MEASURING_MODE = DWord;
   {$EXTERNALSYM DWRITE_MEASURING_MODE}
+const
+  // Text is measured using glyph ideal metrics whose values are independent to the current display resolution.
+  DWRITE_MEASURING_MODE_NATURAL     = DWRITE_MEASURING_MODE(0);
+  {$EXTERNALSYM DWRITE_MEASURING_MODE_NATURAL}
+  // Text is measured using glyph display compatible metrics whose values tuned for the current display resolution.
+  DWRITE_MEASURING_MODE_GDI_CLASSIC = DWRITE_MEASURING_MODE(1);
+  {$EXTERNALSYM DWRITE_MEASURING_MODE_GDI_CLASSIC}
+  // Text is measured using the same glyph display metrics as text measured by GDI using a font
+  // created with CLEARTYPE_NATURAL_QUALITY.
+  DWRITE_MEASURING_MODE_GDI_NATURAL = DWRITE_MEASURING_MODE(3);
+  {$EXTERNALSYM DWRITE_MEASURING_MODE_GDI_NATURAL}
 
 
 // #if NTDDI_VERSION >= NTDDI_WIN10_RS1
 
-
+type
   // Fonts may contain multiple drawable data formats for glyphs. These flags specify which formats
   // are supported in the font, either at a font-wide level or per glyph, and the app may use them
   // to tell DWrite which formats to return when splitting a color glyph run.
   PDWRITE_GLYPH_IMAGE_FORMATS = ^DWRITE_GLYPH_IMAGE_FORMATS;
-  DWRITE_GLYPH_IMAGE_FORMATS = (
-    // Indicates no data is available for this glyph.
-    DWRITE_GLYPH_IMAGE_FORMATS_NONE = $00000000,
-    // The glyph has TrueType outlines.
-    DWRITE_GLYPH_IMAGE_FORMATS_TRUETYPE = $00000001,
-    // The glyph has CFF outlines.
-    DWRITE_GLYPH_IMAGE_FORMATS_CFF = $00000002,
-    // The glyph has multilayered COLR data.
-    DWRITE_GLYPH_IMAGE_FORMATS_COLR = $00000004,
-    // The glyph has SVG outlines as standard XML.
-    // <remarks>
-    // Fonts may store the content gzip'd rather than plain text,
-    // indicated by the first two bytes as gzip header {0x1F 0x8B}.
-    // </remarks>
-    DWRITE_GLYPH_IMAGE_FORMATS_SVG = $00000008,
-    // The glyph has PNG image data, with standard PNG IHDR.
-    DWRITE_GLYPH_IMAGE_FORMATS_PNG = $00000010,
-    // The glyph has JPEG image data, with standard JIFF SOI header.
-    DWRITE_GLYPH_IMAGE_FORMATS_JPEG = $00000020,
-    // The glyph has TIFF image data.
-    DWRITE_GLYPH_IMAGE_FORMATS_TIFF = $00000040,
-    // The glyph has raw 32-bit premultiplied BGRA data.
-    DWRITE_GLYPH_IMAGE_FORMATS_PREMULTIPLIED_B8G8R8A8 = $00000080);
+  DWRITE_GLYPH_IMAGE_FORMATS = DWord;
   {$EXTERNALSYM DWRITE_GLYPH_IMAGE_FORMATS}
+const
+  // Indicates no data is available for this glyph.
+  DWRITE_GLYPH_IMAGE_FORMATS_NONE                   = DWRITE_GLYPH_IMAGE_FORMATS($00000000);
+  {$EXTERNALSYM DWRITE_GLYPH_IMAGE_FORMATS_NONE}
+  // The glyph has TrueType outlines.
+  DWRITE_GLYPH_IMAGE_FORMATS_TRUETYPE               = DWRITE_GLYPH_IMAGE_FORMATS($00000001);
+  {$EXTERNALSYM DWRITE_GLYPH_IMAGE_FORMATS_TRUETYPE}
+  // The glyph has CFF outlines.
+  DWRITE_GLYPH_IMAGE_FORMATS_CFF                    = DWRITE_GLYPH_IMAGE_FORMATS($00000002);
+  {$EXTERNALSYM DWRITE_GLYPH_IMAGE_FORMATS_CFF}
+  // The glyph has multilayered COLR data.
+  DWRITE_GLYPH_IMAGE_FORMATS_COLR                   = DWRITE_GLYPH_IMAGE_FORMATS($00000004);
+  {$EXTERNALSYM DWRITE_GLYPH_IMAGE_FORMATS_COLR}
+  // The glyph has SVG outlines as standard XML.
+  // <remarks>
+  // Fonts may store the content gzip'd rather than plain text);
+  // indicated by the first two bytes as gzip header {0x1F 0x8B}.
+  // </remarks>
+  DWRITE_GLYPH_IMAGE_FORMATS_SVG                    = DWRITE_GLYPH_IMAGE_FORMATS($00000008);
+  {$EXTERNALSYM DWRITE_GLYPH_IMAGE_FORMATS_SVG}
+  // The glyph has PNG image data); with standard PNG IHDR.
+  DWRITE_GLYPH_IMAGE_FORMATS_PNG                    = DWRITE_GLYPH_IMAGE_FORMATS($00000010);
+  {$EXTERNALSYM DWRITE_GLYPH_IMAGE_FORMATS_PNG}
+  // The glyph has JPEG image data); with standard JIFF SOI header.
+  DWRITE_GLYPH_IMAGE_FORMATS_JPEG                   = DWRITE_GLYPH_IMAGE_FORMATS($00000020);
+  {$EXTERNALSYM DWRITE_GLYPH_IMAGE_FORMATS_JPEG}
+  // The glyph has TIFF image data.
+  DWRITE_GLYPH_IMAGE_FORMATS_TIFF                   = DWRITE_GLYPH_IMAGE_FORMATS($00000040);
+  {$EXTERNALSYM DWRITE_GLYPH_IMAGE_FORMATS_TIFF}
+  // The glyph has raw 32-bit premultiplied BGRA data.
+  DWRITE_GLYPH_IMAGE_FORMATS_PREMULTIPLIED_B8G8R8A8 = DWRITE_GLYPH_IMAGE_FORMATS($00000080);
+  {$EXTERNALSYM DWRITE_GLYPH_IMAGE_FORMATS_PREMULTIPLIED_B8G8R8A8}
 
 // #endif  NTDDI_WIN10_RS1
 
-
+type
   // Qualifies how alpha is to be treated in a bitmap or render target containing
   // alpha.
   PD2D1_ALPHA_MODE = ^D2D1_ALPHA_MODE;
-  D2D1_ALPHA_MODE                 = (
-    // Alpha mode should be determined implicitly. Some target surfaces do not supply
-    // or imply this information in which case alpha must be specified.
-    D2D1_ALPHA_MODE_UNKNOWN       = 0,
-    // Treat the alpha as premultipled.
-    D2D1_ALPHA_MODE_PREMULTIPLIED = 1,
-    // Opacity is in the 'A' component only.
-    D2D1_ALPHA_MODE_STRAIGHT      = 2,
-    // Ignore any alpha channel information.
-    D2D1_ALPHA_MODE_IGNORE        = 3,
-    D2D1_ALPHA_MODE_FORCE_DWORD   = FORCEDWORD);
+  D2D1_ALPHA_MODE = DWord;
   {$EXTERNALSYM D2D1_ALPHA_MODE}
+const
+  // Alpha mode should be determined implicitly. Some target surfaces do not supply
+  // or imply this information in which case alpha must be specified.
+  D2D1_ALPHA_MODE_UNKNOWN       = D2D1_ALPHA_MODE(0);
+  // Treat the alpha as premultipled.
+  D2D1_ALPHA_MODE_PREMULTIPLIED = D2D1_ALPHA_MODE(1);
+  // Opacity is in the 'A' component only.
+  D2D1_ALPHA_MODE_STRAIGHT      = D2D1_ALPHA_MODE(2);
+  // Ignore any alpha channel information.
+  D2D1_ALPHA_MODE_IGNORE        = D2D1_ALPHA_MODE(3);
+  //D2D1_ALPHA_MODE_FORCE_DWORD   = FORCEDWORD;
 
+// =============================================================================
 
+type
   // Description of a pixel format.
   PD2D1_PIXEL_FORMAT = ^D2D1_PIXEL_FORMAT;
   D2D1_PIXEL_FORMAT = record

@@ -16,13 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2019 All                 WIN10 May 2019 update (version 1903)
-// 24/12/2019                     Underworld release.
-// 27/02/2020                     Kraftwerk release.
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: Because Delphi does not accept complex types (like functions) as default values,
@@ -85,12 +85,6 @@ uses
 
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
 
   {$I 'MfPack.inc'}
 

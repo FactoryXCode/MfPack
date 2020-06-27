@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -61,15 +63,6 @@ unit MfPack.D2D1_1Helper;
 
 interface
 
-  {$WEAKPACKAGEUNIT ON}
-  {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
 uses
   {WinApi}
   WinApi.Windows,
@@ -82,6 +75,8 @@ uses
   MfPack.DCommon,
   MfPack.DXGIFormat;
 
+  {$WEAKPACKAGEUNIT ON}
+  {$MINENUMSIZE 4}
 
 
 function ConvertColorSpace(sourceColorSpace: D2D1_COLOR_SPACE;
