@@ -19,14 +19,16 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or later.
+// Remarks: Requires Windows Vista or later.
 //
 //          Using packed records is not a recommended practice,
 //          because it can prevent compatibility with other languages or
@@ -88,13 +90,6 @@ uses
 
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$INCLUDE 'MfPack.inc'}
 
 const
@@ -258,7 +253,7 @@ const
   {$EXTERNALSYM WIC_JPEG_HUFFMAN_BASELINE_THREE}
 
 
-  GUID_WICPixelFormatDontCare       : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc900}';
+  GUID_WICPixelFormatDontCare         : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc900}';
   {$EXTERNALSYM GUID_WICPixelFormatDontCare}
 var GUID_WICPixelFormatUndefined      : TGUID absolute GUID_WICPixelFormatDontCare;
   {$EXTERNALSYM GUID_WICPixelFormatUndefined}
@@ -471,8 +466,879 @@ const
   WINCODEC_ERR_VALUEOVERFLOW          = HResult($80070216); //INTSAFE_E_ARITHMETIC_OVERFLOW;
   {$EXTERNALSYM WINCODEC_ERR_VALUEOVERFLOW}
 
+const
+
+  FACILITY_WINCODEC_ERR               = $898;
+  {$EXTERNALSYM FACILITY_WINCODEC_ERR}
+  WINCODEC_ERR_BASE                   = $2000;
+  {$EXTERNALSYM WINCODEC_ERR_BASE}
+
+  WICRawChangeNotification_ExposureCompensation    = $00000001;
+  {$EXTERNALSYM WICRawChangeNotification_ExposureCompensation}
+  WICRawChangeNotification_NamedWhitePoint         = $00000002;
+  {$EXTERNALSYM WICRawChangeNotification_NamedWhitePoint}
+  WICRawChangeNotification_KelvinWhitePoint        = $00000004;
+  {$EXTERNALSYM WICRawChangeNotification_KelvinWhitePoint}
+  WICRawChangeNotification_RGBWhitePoint           = $00000008;
+  {$EXTERNALSYM WICRawChangeNotification_RGBWhitePoint}
+  WICRawChangeNotification_Contrast                = $00000010;
+  {$EXTERNALSYM WICRawChangeNotification_Contrast}
+  WICRawChangeNotification_Gamma                   = $00000020;
+  {$EXTERNALSYM WICRawChangeNotification_Gamma}
+  WICRawChangeNotification_Sharpness               = $00000040;
+  {$EXTERNALSYM WICRawChangeNotification_Sharpness}
+  WICRawChangeNotification_Saturation              = $00000080;
+  {$EXTERNALSYM WICRawChangeNotification_Saturation}
+  WICRawChangeNotification_Tint                    = $00000100;
+  {$EXTERNALSYM WICRawChangeNotification_Tint}
+  WICRawChangeNotification_NoiseReduction          = $00000200;
+  {$EXTERNALSYM WICRawChangeNotification_NoiseReduction}
+  WICRawChangeNotification_DestinationColorContext = $00000400;
+  {$EXTERNALSYM WICRawChangeNotification_DestinationColorContext}
+  WICRawChangeNotification_ToneCurve               = $00000800;
+  {$EXTERNALSYM WICRawChangeNotification_ToneCurve}
+  WICRawChangeNotification_Rotation                = $00001000;
+  {$EXTERNALSYM WICRawChangeNotification_Rotation}
+  WICRawChangeNotification_RenderMode              = $00002000;
+  {$EXTERNALSYM WICRawChangeNotification_RenderMode}
+
+
+// Enums =======================================================================
 
 type
+  PWICColorContextType = ^WICColorContextType;
+  WICColorContextType = DWord;
+  {$EXTERNALSYM WICColorContextType}
+const
+  WICColorContextUninitialized  = WICColorContextType(0);
+  {$EXTERNALSYM WICColorContextUninitialized}
+  WICColorContextProfile        = WICColorContextType($1);
+  {$EXTERNALSYM WICColorContextProfile}
+  WICColorContextExifColorSpace = WICColorContextType($2);
+  {$EXTERNALSYM WICColorContextExifColorSpace}
+
+
+type
+  PWICBitmapCreateCacheOption = ^WICBitmapCreateCacheOption;
+  WICBitmapCreateCacheOption = DWord;
+  {$EXTERNALSYM WICBitmapCreateCacheOption}
+const
+  WICBitmapNoCache                       = WICBitmapCreateCacheOption(0);
+  {$EXTERNALSYM WICBitmapNoCache}
+  WICBitmapCacheOnDemand                 = WICBitmapCreateCacheOption($1);
+  {$EXTERNALSYM WICBitmapCacheOnDemand}
+  WICBitmapCacheOnLoad                   = WICBitmapCreateCacheOption($2);
+  {$EXTERNALSYM WICBitmapCacheOnLoad}
+  //WICBITMAPCREATECACHEOPTION_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICDecodeOptions = ^WICDecodeOptions;
+  WICDecodeOptions = DWord;
+  {$EXTERNALSYM WICDecodeOptions}
+const
+  WICDecodeMetadataCacheOnDemand     = WICDecodeOptions(0);
+  {$EXTERNALSYM WICDecodeMetadataCacheOnDemand}
+  WICDecodeMetadataCacheOnLoad       = WICDecodeOptions($1);
+  {$EXTERNALSYM WICDecodeMetadataCacheOnLoad}
+  //WICMETADATACACHEOPTION_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICBitmapEncoderCacheOption = ^WICBitmapEncoderCacheOption;
+  WICBitmapEncoderCacheOption = DWord;
+  {$EXTERNALSYM WICBitmapEncoderCacheOption}
+const
+  WICBitmapEncoderCacheInMemory           = WICBitmapEncoderCacheOption(0);
+  {$EXTERNALSYM WICBitmapEncoderCacheInMemory}
+  WICBitmapEncoderCacheTempFile           = WICBitmapEncoderCacheOption($1);
+  {$EXTERNALSYM WICBitmapEncoderCacheTempFile}
+  WICBitmapEncoderNoCache                 = WICBitmapEncoderCacheOption($2);
+  {$EXTERNALSYM WICBitmapEncoderNoCache}
+  //WICBITMAPENCODERCACHEOPTION_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICComponentType = ^WICComponentType;
+  WICComponentType = DWord;
+  {$EXTERNALSYM WICComponentType}
+const
+  WICDecoder                   = WICComponentType($1);
+  {$EXTERNALSYM WICDecoder}
+  WICEncoder                   = WICComponentType($2);
+  {$EXTERNALSYM WICEncoder}
+  WICPixelFormatConverter      = WICComponentType($4);
+  {$EXTERNALSYM WICPixelFormatConverter}
+  WICMetadataReader            = WICComponentType($8);
+  {$EXTERNALSYM WICMetadataReader}
+  WICMetadataWriter            = WICComponentType($10);
+  {$EXTERNALSYM WICMetadataWriter}
+  WICPixelFormat               = WICComponentType($20);
+  {$EXTERNALSYM WICPixelFormat}
+  WICAllComponents             = WICComponentType($3F);
+  {$EXTERNALSYM WICAllComponents}
+  //WICCOMPONENTTYPE_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICComponentEnumerateOptions = ^WICComponentEnumerateOptions;
+  WICComponentEnumerateOptions = DWord;
+  {$EXTERNALSYM WICComponentEnumerateOptions}
+const
+  WICComponentEnumerateDefault         = WICComponentEnumerateOptions(0);
+  {$EXTERNALSYM WICComponentEnumerateDefault}
+  WICComponentEnumerateRefresh         = WICComponentEnumerateOptions($1);
+  {$EXTERNALSYM WICComponentEnumerateRefresh}
+  WICComponentEnumerateDisabled        = WICComponentEnumerateOptions($80000000);
+  {$EXTERNALSYM WICComponentEnumerateDisabled}
+  WICComponentEnumerateUnsigned        = WICComponentEnumerateOptions($40000000);
+  {$EXTERNALSYM WICComponentEnumerateUnsigned}
+  WICComponentEnumerateBuiltInOnly     = WICComponentEnumerateOptions($20000000);
+  {$EXTERNALSYM WICComponentEnumerateBuiltInOnly}
+  WICCOMPONENTENUMERATEOPTIONS_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICBitmapInterpolationMode = ^WICBitmapInterpolationMode;
+  WICBitmapInterpolationMode = DWord;
+  {$EXTERNALSYM WICBitmapInterpolationMode}
+const
+  WICBitmapInterpolationModeNearestNeighbor  = WICBitmapInterpolationMode(0);
+  {$EXTERNALSYM WICBitmapInterpolationModeNearestNeighbor}
+  WICBitmapInterpolationModeLinear           = WICBitmapInterpolationMode($1);
+  {$EXTERNALSYM WICBitmapInterpolationModeLinear}
+  WICBitmapInterpolationModeCubic            = WICBitmapInterpolationMode($2);
+  {$EXTERNALSYM WICBitmapInterpolationModeCubic}
+  WICBitmapInterpolationModeFant             = WICBitmapInterpolationMode($3);
+  {$EXTERNALSYM WICBitmapInterpolationModeFant}
+  WICBitmapInterpolationModeHighQualityCubic = WICBitmapInterpolationMode($4);
+  {$EXTERNALSYM WICBitmapInterpolationModeHighQualityCubic}
+  //WICBITMAPINTERPOLATIONMODE_FORCE_DWORD   = FORCEDWORD
+
+type
+  PWICBitmapPaletteType = ^WICBitmapPaletteType;
+  WICBitmapPaletteType = DWord;
+  {$EXTERNALSYM WICBitmapPaletteType}
+const
+  WICBitmapPaletteTypeCustom           = WICBitmapPaletteType(0);
+  {$EXTERNALSYM WICBitmapPaletteTypeCustom}
+  WICBitmapPaletteTypeMedianCut        = WICBitmapPaletteType($1);
+  {$EXTERNALSYM WICBitmapPaletteTypeMedianCut}
+  WICBitmapPaletteTypeFixedBW          = WICBitmapPaletteType($2);
+  {$EXTERNALSYM WICBitmapPaletteTypeFixedBW}
+  WICBitmapPaletteTypeFixedHalftone8   = WICBitmapPaletteType($3);
+  {$EXTERNALSYM WICBitmapPaletteTypeFixedHalftone8}
+  WICBitmapPaletteTypeFixedHalftone27  = WICBitmapPaletteType($4);
+  {$EXTERNALSYM WICBitmapPaletteTypeFixedHalftone27}
+  WICBitmapPaletteTypeFixedHalftone64  = WICBitmapPaletteType($5);
+  {$EXTERNALSYM WICBitmapPaletteTypeFixedHalftone64}
+  WICBitmapPaletteTypeFixedHalftone125 = WICBitmapPaletteType($6);
+  {$EXTERNALSYM WICBitmapPaletteTypeFixedHalftone125}
+  WICBitmapPaletteTypeFixedHalftone216 = WICBitmapPaletteType($7);
+  {$EXTERNALSYM WICBitmapPaletteTypeFixedHalftone216}
+  WICBitmapPaletteTypeFixedWebPalette  = WICBitmapPaletteTypeFixedHalftone216;
+  {$EXTERNALSYM WICBitmapPaletteTypeFixedWebPalette}
+  WICBitmapPaletteTypeFixedHalftone252 = WICBitmapPaletteType($8);
+  {$EXTERNALSYM WICBitmapPaletteTypeFixedHalftone252}
+  WICBitmapPaletteTypeFixedHalftone256 = WICBitmapPaletteType($9);
+  {$EXTERNALSYM WICBitmapPaletteTypeFixedHalftone256}
+  WICBitmapPaletteTypeFixedGray4       = WICBitmapPaletteType($A);
+  {$EXTERNALSYM WICBitmapPaletteTypeFixedGray4}
+  WICBitmapPaletteTypeFixedGray16      = WICBitmapPaletteType($B);
+  {$EXTERNALSYM WICBitmapPaletteTypeFixedGray16}
+  WICBitmapPaletteTypeFixedGray256     = WICBitmapPaletteType($C);
+  {$EXTERNALSYM WICBitmapPaletteTypeFixedGray256}
+  //WICBITMAPPALETTETYPE_FORCE_DWORD   = FORCEDWORD
+
+type
+  PWICBitmapDitherType = ^WICBitmapDitherType;
+  WICBitmapDitherType = DWord;
+  {$EXTERNALSYM WICBitmapDitherType}
+const
+  WICBitmapDitherTypeNone           = WICBitmapDitherType(0);
+  {$EXTERNALSYM WICBitmapDitherTypeNone}
+  WICBitmapDitherTypeSolid          = WICBitmapDitherType(0);
+  {$EXTERNALSYM WICBitmapDitherTypeSolid}
+  WICBitmapDitherTypeOrdered4x4     = WICBitmapDitherType($1);
+  {$EXTERNALSYM WICBitmapDitherTypeOrdered4x4}
+  WICBitmapDitherTypeOrdered8x8     = WICBitmapDitherType($2);
+  {$EXTERNALSYM WICBitmapDitherTypeOrdered8x8}
+  WICBitmapDitherTypeOrdered16x16   = WICBitmapDitherType($3);
+  {$EXTERNALSYM WICBitmapDitherTypeOrdered16x16}
+  WICBitmapDitherTypeSpiral4x4      = WICBitmapDitherType($4);
+  {$EXTERNALSYM WICBitmapDitherTypeSpiral4x4}
+  WICBitmapDitherTypeSpiral8x8      = WICBitmapDitherType($5);
+  {$EXTERNALSYM WICBitmapDitherTypeSpiral8x8}
+  WICBitmapDitherTypeDualSpiral4x4  = WICBitmapDitherType($6);
+  {$EXTERNALSYM WICBitmapDitherTypeDualSpiral4x4}
+  WICBitmapDitherTypeDualSpiral8x8  = WICBitmapDitherType($7);
+  {$EXTERNALSYM WICBitmapDitherTypeDualSpiral8x8}
+  WICBitmapDitherTypeErrorDiffusion = WICBitmapDitherType($8);
+  {$EXTERNALSYM WICBitmapDitherTypeErrorDiffusion}
+  //WICBITMAPDITHERTYPE_FORCE_DWORD   = FORCEDWORD;
+
+type
+  PWICBitmapAlphaChannelOption = ^WICBitmapAlphaChannelOption;
+  WICBitmapAlphaChannelOption = DWord;
+  {$EXTERNALSYM WICBitmapAlphaChannelOption}
+const
+  WICBitmapUseAlpha              = WICBitmapAlphaChannelOption(0);
+  {$EXTERNALSYM WICBitmapUseAlpha}
+  WICBitmapUsePremultipliedAlpha = WICBitmapAlphaChannelOption($1);
+  {$EXTERNALSYM WICBitmapUsePremultipliedAlpha}
+  WICBitmapIgnoreAlpha           = WICBitmapAlphaChannelOption($2);
+  {$EXTERNALSYM WICBitmapIgnoreAlpha}
+  //WICBITMAPALPHACHANNELOPTIONS_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICBitmapTransformOptions = ^WICBitmapTransformOptions;
+  WICBitmapTransformOptions = DWord;
+  {$EXTERNALSYM WICBitmapTransformOptions}
+const
+  WICBitmapTransformRotate0         = WICBitmapTransformOptions(0);
+  {$EXTERNALSYM WICBitmapTransformRotate0}
+  WICBitmapTransformRotate90        = WICBitmapTransformOptions($1);
+  {$EXTERNALSYM WICBitmapTransformRotate90}
+  WICBitmapTransformRotate180       = WICBitmapTransformOptions($2);
+  {$EXTERNALSYM WICBitmapTransformRotate180}
+  WICBitmapTransformRotate270       = WICBitmapTransformOptions($3);
+  {$EXTERNALSYM WICBitmapTransformRotate270}
+  WICBitmapTransformFlipHorizontal  = WICBitmapTransformOptions($8);
+  {$EXTERNALSYM WICBitmapTransformFlipHorizontal}
+  WICBitmapTransformFlipVertical    = WICBitmapTransformOptions($10);
+  {$EXTERNALSYM WICBitmapTransformFlipVertical}
+  //WICBITMAPTRANSFORMOPTIONS_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICBitmapLockFlags = ^WICBitmapLockFlags;
+  WICBitmapLockFlags = DWord;
+  {$EXTERNALSYM WICBitmapLockFlags}
+const
+  WICBitmapLockRead        = WICBitmapLockFlags($1);
+  {$EXTERNALSYM WICBitmapLockRead}
+  WICBitmapLockWrite       = WICBitmapLockFlags($2);
+  {$EXTERNALSYM WICBitmapLockWrite}
+  //WICBITMAPLOCKFLAGS_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICBitmapDecoderCapabilities = ^WICBitmapDecoderCapabilities;
+  WICBitmapDecoderCapabilities = DWord;
+  {$EXTERNALSYM WICBitmapDecoderCapabilities}
+const
+  WICBitmapDecoderCapabilitySameEncoder          = WICBitmapDecoderCapabilities($1);
+  {$EXTERNALSYM WICBitmapDecoderCapabilitySameEncoder}
+  WICBitmapDecoderCapabilityCanDecodeAllImages   = WICBitmapDecoderCapabilities($2);
+  {$EXTERNALSYM WICBitmapDecoderCapabilityCanDecodeAllImages}
+  WICBitmapDecoderCapabilityCanDecodeSomeImages  = WICBitmapDecoderCapabilities($4);
+  {$EXTERNALSYM WICBitmapDecoderCapabilityCanDecodeSomeImages}
+  WICBitmapDecoderCapabilityCanEnumerateMetadata = WICBitmapDecoderCapabilities($8);
+  {$EXTERNALSYM WICBitmapDecoderCapabilityCanEnumerateMetadata}
+  WICBitmapDecoderCapabilityCanDecodeThumbnail   = WICBitmapDecoderCapabilities($10);
+  {$EXTERNALSYM WICBitmapDecoderCapabilityCanDecodeThumbnail}
+  //WICBITMAPDECODERCAPABILITIES_FORCE_DWORD     = FORCEDWORD;
+
+type
+  PWICProgressOperation = ^WICProgressOperation;
+  WICProgressOperation = DWord;
+  {$EXTERNALSYM WICProgressOperation}
+const
+  WICProgressOperationCopyPixels   = WICProgressOperation($1);
+  {$EXTERNALSYM WICProgressOperationCopyPixels}
+  WICProgressOperationWritePixels  = WICProgressOperation($2);
+  {$EXTERNALSYM WICProgressOperationWritePixels}
+  WICProgressOperationAll          = WICProgressOperation($FFFF);
+  {$EXTERNALSYM WICProgressOperationAll}
+  //WICPROGRESSOPERATION_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICProgressNotification = ^WICProgressNotification;
+  WICProgressNotification = DWord;
+  {$EXTERNALSYM WICProgressNotification}
+const
+  WICProgressNotificationBegin    = WICProgressNotification($10000);
+  {$EXTERNALSYM WICProgressNotificationBegin}
+  WICProgressNotificationEnd      = WICProgressNotification($20000);
+  {$EXTERNALSYM WICProgressNotificationEnd}
+  WICProgressNotificationFrequent = WICProgressNotification($40000);
+  {$EXTERNALSYM WICProgressNotificationFrequent}
+  WICProgressNotificationAll      = WICProgressNotification($FFFF0000);
+  {$EXTERNALSYM WICProgressNotificationAll}
+  //WICPROGRESSNOTIFICATION_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICComponentSigning = ^WICComponentSigning;
+  WICComponentSigning = DWord;
+  {$EXTERNALSYM WICComponentSigning}
+const
+  WICComponentSigned        = WICComponentSigning($1);
+  {$EXTERNALSYM WICComponentSigned}
+  WICComponentUnsigned      = WICComponentSigning($2);
+  {$EXTERNALSYM WICComponentUnsigned}
+  WICComponentSafe          = WICComponentSigning($4);
+  {$EXTERNALSYM WICComponentSafe}
+  WICComponentDisabled      = WICComponentSigning($80000000);
+  {$EXTERNALSYM WICComponentDisabled}
+  //WICCOMPONENTSIGNING_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICGifLogicalScreenDescriptorProperties = ^WICGifLogicalScreenDescriptorProperties;
+  WICGifLogicalScreenDescriptorProperties = DWord;
+  {$EXTERNALSYM WICGifLogicalScreenDescriptorProperties}
+const
+  WICGifLogicalScreenSignature                      = WICGifLogicalScreenDescriptorProperties($1);
+  {$EXTERNALSYM WICGifLogicalScreenSignature}
+  WICGifLogicalScreenDescriptorWidth                = WICGifLogicalScreenDescriptorProperties($2);
+  {$EXTERNALSYM WICGifLogicalScreenDescriptorWidth}
+  WICGifLogicalScreenDescriptorHeight               = WICGifLogicalScreenDescriptorProperties($3);
+  {$EXTERNALSYM WICGifLogicalScreenDescriptorHeight}
+  WICGifLogicalScreenDescriptorGlobalColorTableFlag = WICGifLogicalScreenDescriptorProperties($4);
+  {$EXTERNALSYM WICGifLogicalScreenDescriptorGlobalColorTableFlag}
+  WICGifLogicalScreenDescriptorColorResolution      = WICGifLogicalScreenDescriptorProperties($5);
+  {$EXTERNALSYM WICGifLogicalScreenDescriptorColorResolution}
+  WICGifLogicalScreenDescriptorSortFlag             = WICGifLogicalScreenDescriptorProperties($6);
+  {$EXTERNALSYM WICGifLogicalScreenDescriptorSortFlag}
+  WICGifLogicalScreenDescriptorGlobalColorTableSize = WICGifLogicalScreenDescriptorProperties($7);
+  {$EXTERNALSYM WICGifLogicalScreenDescriptorGlobalColorTableSize}
+  WICGifLogicalScreenDescriptorBackgroundColorIndex = WICGifLogicalScreenDescriptorProperties($8);
+  {$EXTERNALSYM WICGifLogicalScreenDescriptorBackgroundColorIndex}
+  WICGifLogicalScreenDescriptorPixelAspectRatio     = WICGifLogicalScreenDescriptorProperties($9);
+  {$EXTERNALSYM WICGifLogicalScreenDescriptorPixelAspectRatio}
+  //WICGifLogicalScreenDescriptorProperties_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICGifImageDescriptorProperties = ^WICGifImageDescriptorProperties;
+  WICGifImageDescriptorProperties = DWord;
+  {$EXTERNALSYM WICGifImageDescriptorProperties}
+const
+  WICGifImageDescriptorLeft                 = WICGifImageDescriptorProperties($1);
+  {$EXTERNALSYM WICGifImageDescriptorLeft}
+  WICGifImageDescriptorTop                  = WICGifImageDescriptorProperties($2);
+  {$EXTERNALSYM WICGifImageDescriptorTop}
+  WICGifImageDescriptorWidth                = WICGifImageDescriptorProperties($3);
+  {$EXTERNALSYM WICGifImageDescriptorWidth}
+  WICGifImageDescriptorHeight               = WICGifImageDescriptorProperties($4);
+  {$EXTERNALSYM WICGifImageDescriptorHeight}
+  WICGifImageDescriptorLocalColorTableFlag  = WICGifImageDescriptorProperties($5);
+  {$EXTERNALSYM WICGifImageDescriptorLocalColorTableFlag}
+  WICGifImageDescriptorInterlaceFlag        = WICGifImageDescriptorProperties($6);
+  {$EXTERNALSYM WICGifImageDescriptorInterlaceFlag}
+  WICGifImageDescriptorSortFlag             = WICGifImageDescriptorProperties($7);
+  {$EXTERNALSYM WICGifImageDescriptorSortFlag}
+  WICGifImageDescriptorLocalColorTableSize  = WICGifImageDescriptorProperties($8);
+  {$EXTERNALSYM WICGifImageDescriptorLocalColorTableSize}
+  //WICGifImageDescriptorProperties_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICGifGraphicControlExtensionProperties = ^WICGifGraphicControlExtensionProperties;
+  WICGifGraphicControlExtensionProperties = DWord;
+  {$EXTERNALSYM WICGifGraphicControlExtensionProperties}
+const
+  WICGifGraphicControlExtensionDisposal               = WICGifGraphicControlExtensionProperties($1);
+  {$EXTERNALSYM WICGifGraphicControlExtensionDisposal}
+  WICGifGraphicControlExtensionUserInputFlag          = WICGifGraphicControlExtensionProperties($2);
+  {$EXTERNALSYM WICGifGraphicControlExtensionUserInputFlag}
+  WICGifGraphicControlExtensionTransparencyFlag       = WICGifGraphicControlExtensionProperties($3);
+  {$EXTERNALSYM WICGifGraphicControlExtensionTransparencyFlag}
+  WICGifGraphicControlExtensionDelay                  = WICGifGraphicControlExtensionProperties($4);
+  {$EXTERNALSYM WICGifGraphicControlExtensionDelay}
+  WICGifGraphicControlExtensionTransparentColorIndex  = WICGifGraphicControlExtensionProperties($5);
+  {$EXTERNALSYM WICGifGraphicControlExtensionTransparentColorIndex}
+  //WICGifGraphicControlExtensionProperties_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICGifApplicationExtensionProperties = ^WICGifApplicationExtensionProperties;
+  WICGifApplicationExtensionProperties = DWord;
+  {$EXTERNALSYM WICGifApplicationExtensionProperties}
+const
+  WICGifApplicationExtensionApplication      = WICGifApplicationExtensionProperties($1);
+  {$EXTERNALSYM WICGifApplicationExtensionApplication}
+  WICGifApplicationExtensionData             = WICGifApplicationExtensionProperties($2);
+  {$EXTERNALSYM WICGifApplicationExtensionData}
+  //WICGifApplicationExtensionProperties_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICGifCommentExtensionProperties = ^WICGifCommentExtensionProperties;
+  WICGifCommentExtensionProperties = DWord;
+  {$EXTERNALSYM WICGifCommentExtensionProperties}
+const
+  WICGifCommentExtensionText           = WICGifCommentExtensionProperties($1);
+  {$EXTERNALSYM WICGifCommentExtensionText}
+  //WICGifCommentExtensionProperties_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICJpegCommentProperties = ^WICJpegCommentProperties;
+  WICJpegCommentProperties = DWord;
+  {$EXTERNALSYM WICJpegCommentProperties}
+const
+  WICJpegCommentText           = WICJpegCommentProperties($1);
+  {$EXTERNALSYM WICJpegCommentText}
+  //WICJpegCommentProperties_FORCE_DWORD = FORCEDWORD;;
+
+type
+  PWICJpegLuminanceProperties = ^WICJpegLuminanceProperties;
+  WICJpegLuminanceProperties = DWord;
+  {$EXTERNALSYM WICJpegLuminanceProperties}
+const
+  WICJpegLuminanceTable = WICJpegLuminanceProperties($1);
+  {$EXTERNALSYM WICJpegLuminanceTable}
+  //WICJpegLuminanceProperties_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICJpegChrominanceProperties = ^WICJpegChrominanceProperties;
+  WICJpegChrominanceProperties = DWord;
+  {$EXTERNALSYM WICJpegChrominanceProperties}
+const
+  WICJpegChrominanceTable = WICJpegChrominanceProperties($1);
+  {$EXTERNALSYM WICJpegChrominanceTable}
+  //WICJpegChrominanceProperties_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWIC8BIMIptcProperties = ^WIC8BIMIptcProperties;
+  WIC8BIMIptcProperties = DWord;
+  {$EXTERNALSYM WIC8BIMIptcProperties}
+const
+  WIC8BIMIptcPString            = WIC8BIMIptcProperties(0);
+  {$EXTERNALSYM WIC8BIMIptcPString}
+  WIC8BIMIptcEmbeddedIPTC       = WIC8BIMIptcProperties($1);
+  {$EXTERNALSYM WIC8BIMIptcEmbeddedIPTC}
+  //WIC8BIMIptcProperties_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWIC8BIMResolutionInfoProperties = ^WIC8BIMResolutionInfoProperties;
+  WIC8BIMResolutionInfoProperties = DWord;
+  {$EXTERNALSYM WIC8BIMResolutionInfoProperties}
+const
+  WIC8BIMResolutionInfoPString          = WIC8BIMResolutionInfoProperties($1);
+  {$EXTERNALSYM WIC8BIMResolutionInfoPString}
+  WIC8BIMResolutionInfoHResolution      = WIC8BIMResolutionInfoProperties($2);
+  {$EXTERNALSYM WIC8BIMResolutionInfoHResolution}
+  WIC8BIMResolutionInfoHResolutionUnit  = WIC8BIMResolutionInfoProperties($3);
+  {$EXTERNALSYM WIC8BIMResolutionInfoHResolutionUnit}
+  WIC8BIMResolutionInfoWidthUnit        = WIC8BIMResolutionInfoProperties($4);
+  {$EXTERNALSYM WIC8BIMResolutionInfoWidthUnit}
+  WIC8BIMResolutionInfoVResolution      = WIC8BIMResolutionInfoProperties($5);
+  {$EXTERNALSYM WIC8BIMResolutionInfoVResolution}
+  WIC8BIMResolutionInfoVResolutionUnit  = WIC8BIMResolutionInfoProperties($6);
+  {$EXTERNALSYM WIC8BIMResolutionInfoVResolutionUnit}
+  WIC8BIMResolutionInfoHeightUnit       = WIC8BIMResolutionInfoProperties($7);
+  {$EXTERNALSYM WIC8BIMResolutionInfoHeightUnit}
+  //WIC8BIMResolutionInfoProperties_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWIC8BIMIptcDigestProperties = ^WIC8BIMIptcDigestProperties;
+  WIC8BIMIptcDigestProperties = DWord;
+  {$EXTERNALSYM WIC8BIMIptcDigestProperties}
+const
+  WIC8BIMIptcDigestPString          = WIC8BIMIptcDigestProperties($1);
+  {$EXTERNALSYM WIC8BIMIptcDigestPString}
+  WIC8BIMIptcDigestIptcDigest       = WIC8BIMIptcDigestProperties($2);
+  {$EXTERNALSYM WIC8BIMIptcDigestIptcDigest}
+  //WIC8BIMIptcDigestProperties_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICPngGamaProperties = ^WICPngGamaProperties;
+  WICPngGamaProperties = DWord;
+  {$EXTERNALSYM WICPngGamaProperties}
+const
+  WICPngGamaGamma          = WICPngGamaProperties($1);
+  {$EXTERNALSYM WICPngGamaGamma}
+  //WICPngGamaProperties_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICPngBkgdProperties = ^WICPngBkgdProperties;
+  WICPngBkgdProperties = DWord;
+  {$EXTERNALSYM WICPngBkgdProperties}
+const
+  WICPngBkgdBackgroundColor    = WICPngBkgdProperties($1);
+  {$EXTERNALSYM WICPngBkgdBackgroundColor}
+  //WICPngBkgdProperties_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICPngItxtProperties = ^WICPngItxtProperties;
+  WICPngItxtProperties = DWord;
+  {$EXTERNALSYM WICPngItxtProperties}
+const
+  WICPngItxtKeyword           = WICPngItxtProperties($1);
+  {$EXTERNALSYM WICPngItxtKeyword}
+  WICPngItxtCompressionFlag   = WICPngItxtProperties($2);
+  {$EXTERNALSYM WICPngItxtCompressionFlag}
+  WICPngItxtLanguageTag       = WICPngItxtProperties($3);
+  {$EXTERNALSYM WICPngItxtLanguageTag}
+  WICPngItxtTranslatedKeyword = WICPngItxtProperties($4);
+  {$EXTERNALSYM WICPngItxtTranslatedKeyword}
+  WICPngItxtText              = WICPngItxtProperties($5);
+  {$EXTERNALSYM WICPngItxtText}
+  //WICPngItxtProperties_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICPngChrmProperties = ^WICPngChrmProperties;
+  WICPngChrmProperties         = DWord;
+  {$EXTERNALSYM WICPngChrmProperties}
+const
+  WICPngChrmWhitePointX    = WICPngChrmProperties($1);
+  {$EXTERNALSYM WICPngChrmWhitePointX}
+  WICPngChrmWhitePointY    = WICPngChrmProperties($2);
+  {$EXTERNALSYM WICPngChrmWhitePointY}
+  WICPngChrmRedX           = WICPngChrmProperties($3);
+  {$EXTERNALSYM WICPngChrmRedX}
+  WICPngChrmRedY           = WICPngChrmProperties($4);
+  {$EXTERNALSYM WICPngChrmRedY}
+  WICPngChrmGreenX         = WICPngChrmProperties($5);
+  {$EXTERNALSYM WICPngChrmGreenX}
+  WICPngChrmGreenY         = WICPngChrmProperties($6);
+  {$EXTERNALSYM WICPngChrmGreenY}
+  WICPngChrmBlueX          = WICPngChrmProperties($7);
+  {$EXTERNALSYM WICPngChrmBlueX}
+  WICPngChrmBlueY          = WICPngChrmProperties($8);
+  {$EXTERNALSYM WICPngChrmBlueY}
+  //WICPngChrmProperties_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICPngHistProperties = ^WICPngHistProperties;
+  WICPngHistProperties = DWord;
+  {$EXTERNALSYM WICPngHistProperties}
+const
+  WICPngHistFrequencies      = WICPngHistProperties($1);
+  {$EXTERNALSYM WICPngHistFrequencies}
+  //WICPngHistProperties_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICPngIccpProperties = ^WICPngIccpProperties;
+  WICPngIccpProperties = DWord;
+  {$EXTERNALSYM WICPngIccpProperties}
+const
+  WICPngIccpProfileName      = WICPngIccpProperties($1);
+  {$EXTERNALSYM WICPngIccpProfileName}
+  WICPngIccpProfileData      = WICPngIccpProperties($2);
+  {$EXTERNALSYM WICPngIccpProfileData}
+  //WICPngIccpProperties_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICPngSrgbProperties = ^WICPngSrgbProperties;
+  WICPngSrgbProperties = DWord;
+  {$EXTERNALSYM WICPngSrgbProperties}
+const
+  WICPngSrgbRenderingIntent    = WICPngSrgbProperties($1);
+  {$EXTERNALSYM WICPngSrgbRenderingIntent}
+  //WICPngSrgbProperties_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICPngTimeProperties = ^WICPngTimeProperties;
+  WICPngTimeProperties = DWord;
+  {$EXTERNALSYM WICPngTimeProperties}
+const
+  WICPngTimeYear           = WICPngTimeProperties($1);
+  {$EXTERNALSYM WICPngTimeYear}
+  WICPngTimeMonth          = WICPngTimeProperties($2);
+  {$EXTERNALSYM WICPngTimeMonth}
+  WICPngTimeDay          = WICPngTimeProperties($3);
+  {$EXTERNALSYM WICPngTimeDay}
+  WICPngTimeHour           = WICPngTimeProperties($4);
+  {$EXTERNALSYM WICPngTimeHour}
+  WICPngTimeMinute         = WICPngTimeProperties($5);
+  {$EXTERNALSYM WICPngTimeMinute}
+  WICPngTimeSecond         = WICPngTimeProperties($6);
+  {$EXTERNALSYM WICPngTimeSecond}
+  //WICPngTimeProperties_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICHeifProperties = ^WICHeifProperties;
+  WICHeifProperties = DWord;
+  {$EXTERNALSYM WICHeifProperties}
+const
+  WICHeifOrientation      = WICHeifProperties($1);
+  {$EXTERNALSYM WICHeifOrientation}
+  //WICHeifProperties_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICHeifHdrProperties = ^WICHeifHdrProperties;
+  WICHeifHdrProperties = DWord;
+  {$EXTERNALSYM WICHeifHdrProperties}
+const
+  WICHeifHdrMaximumLuminanceLevel                 = WICHeifHdrProperties($1);
+  {$EXTERNALSYM WICHeifHdrMaximumLuminanceLevel}
+  WICHeifHdrMaximumFrameAverageLuminanceLevel     = WICHeifHdrProperties($2);
+  {$EXTERNALSYM WICHeifHdrMaximumFrameAverageLuminanceLevel}
+  WICHeifHdrMinimumMasteringDisplayLuminanceLevel = WICHeifHdrProperties($3);
+  {$EXTERNALSYM WICHeifHdrMinimumMasteringDisplayLuminanceLevel}
+  WICHeifHdrMaximumMasteringDisplayLuminanceLevel = WICHeifHdrProperties($4);
+  {$EXTERNALSYM WICHeifHdrMaximumMasteringDisplayLuminanceLevel}
+  WICHeifHdrCustomVideoPrimaries                  = WICHeifHdrProperties($5);
+  {$EXTERNALSYM WICHeifHdrCustomVideoPrimaries}
+  //WICHeifHdrProperties_FORCE_DWORD        = FORCEDWORD;
+
+type
+  PWICWebpAnimProperties = ^WICWebpAnimProperties;
+  WICWebpAnimProperties = DWord;
+  {$EXTERNALSYM WICWebpAnimProperties}
+const
+  WICWebpAnimLoopCount        = WICWebpAnimProperties($1);
+  {$EXTERNALSYM WICWebpAnimLoopCount}
+  //WICWebpAnimProperties_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICWebpAnmfProperties = ^WICWebpAnmfProperties;
+  WICWebpAnmfProperties = DWord;
+  {$EXTERNALSYM WICWebpAnmfProperties}
+const
+  WICWebpAnmfFrameDuration      = WICWebpAnmfProperties($1);
+  {$EXTERNALSYM WICWebpAnmfFrameDuration}
+  //WICWebpAnmfProperties_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICSectionAccessLevel = ^WICSectionAccessLevel;
+  WICSectionAccessLevel         = DWord;
+  {$EXTERNALSYM WICSectionAccessLevel}
+const
+  WICSectionAccessLevelRead       = WICSectionAccessLevel($1);
+  {$EXTERNALSYM WICSectionAccessLevelRead}
+  WICSectionAccessLevelReadWrite  = WICSectionAccessLevel($3);
+  {$EXTERNALSYM WICSectionAccessLevelReadWrite}
+  //WICSectionAccessLevel_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICPixelFormatNumericRepresentation = ^WICPixelFormatNumericRepresentation;
+  WICPixelFormatNumericRepresentation = DWord;
+  {$EXTERNALSYM WICPixelFormatNumericRepresentation}
+const
+  WICPixelFormatNumericRepresentationUnspecified     = WICPixelFormatNumericRepresentation(0);
+  {$EXTERNALSYM WICPixelFormatNumericRepresentationUnspecified}
+  WICPixelFormatNumericRepresentationIndexed         = WICPixelFormatNumericRepresentation($1);
+  {$EXTERNALSYM WICPixelFormatNumericRepresentationIndexed}
+  WICPixelFormatNumericRepresentationUnsignedInteger = WICPixelFormatNumericRepresentation($2);
+  {$EXTERNALSYM WICPixelFormatNumericRepresentationUnsignedInteger}
+  WICPixelFormatNumericRepresentationSignedInteger   = WICPixelFormatNumericRepresentation($3);
+  {$EXTERNALSYM WICPixelFormatNumericRepresentationSignedInteger}
+  WICPixelFormatNumericRepresentationFixed           = WICPixelFormatNumericRepresentation($4);
+  {$EXTERNALSYM WICPixelFormatNumericRepresentationFixed}
+  WICPixelFormatNumericRepresentationFloat           = WICPixelFormatNumericRepresentation($5);
+  {$EXTERNALSYM WICPixelFormatNumericRepresentationFloat}
+  //WICPixelFormatNumericRepresentation_FORCE_DWORD  = FORCEDWORD;
+
+type
+  PWICPlanarOptions = ^WICPlanarOptions;
+  WICPlanarOptions = DWord;
+  {$EXTERNALSYM WICPlanarOptions}
+const
+  WICPlanarOptionsDefault             = WICPlanarOptions(0);
+  {$EXTERNALSYM WICPlanarOptionsDefault}
+  WICPlanarOptionsPreserveSubsampling = WICPlanarOptions($1);
+  {$EXTERNALSYM WICPlanarOptionsPreserveSubsampling}
+  //WICPLANAROPTIONS_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICJpegIndexingOptions = ^WICJpegIndexingOptions;
+  WICJpegIndexingOptions = DWord;
+  {$EXTERNALSYM WICJpegIndexingOptions}
+const
+  WICJpegIndexingOptionsGenerateOnDemand = WICJpegIndexingOptions(0);
+  {$EXTERNALSYM WICJpegIndexingOptionsGenerateOnDemand}
+  WICJpegIndexingOptionsGenerateOnLoad   = WICJpegIndexingOptions($1);
+  {$EXTERNALSYM WICJpegIndexingOptionsGenerateOnLoad}
+  //WICJpegIndexingOptions_FORCE_DWORD     = FORCEDWORD;
+
+type
+  PWICJpegTransferMatrix = ^WICJpegTransferMatrix;
+  WICJpegTransferMatrix = DWord;
+  {$EXTERNALSYM WICJpegTransferMatrix}
+const
+  WICJpegTransferMatrixIdentity = WICJpegTransferMatrix(0);
+  {$EXTERNALSYM WICJpegTransferMatrixIdentity}
+  WICJpegTransferMatrixBT601    = WICJpegTransferMatrix($1);
+  {$EXTERNALSYM WICJpegTransferMatrixBT601}
+  //WICJpegTransferMatrix_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICJpegScanType = ^WICJpegScanType;
+  WICJpegScanType = DWord;
+  {$EXTERNALSYM WICJpegScanType}
+const
+  WICJpegScanTypeInterleaved      = WICJpegScanType(0);
+  {$EXTERNALSYM WICJpegScanTypeInterleaved}
+  WICJpegScanTypePlanarComponents = WICJpegScanType($1);
+  {$EXTERNALSYM WICJpegScanTypePlanarComponents}
+  WICJpegScanTypeProgressive      = WICJpegScanType($2);
+  {$EXTERNALSYM WICJpegScanTypeProgressive}
+  //WICJpegScanType_FORCE_DWORD   = FORCEDWORD;
+
+type
+  PWICTiffCompressionOption = ^WICTiffCompressionOption;
+  WICTiffCompressionOption = DWord;
+  {$EXTERNALSYM WICTiffCompressionOption}
+const
+  WICTiffCompressionDontCare         = WICTiffCompressionOption(0);
+  {$EXTERNALSYM WICTiffCompressionDontCare}
+  WICTiffCompressionNone             = WICTiffCompressionOption($1);
+  {$EXTERNALSYM WICTiffCompressionNone}
+  WICTiffCompressionCCITT3           = WICTiffCompressionOption($2);
+  {$EXTERNALSYM WICTiffCompressionCCITT3}
+  WICTiffCompressionCCITT4           = WICTiffCompressionOption($3);
+  {$EXTERNALSYM WICTiffCompressionCCITT4}
+  WICTiffCompressionLZW              = WICTiffCompressionOption($4);
+  {$EXTERNALSYM WICTiffCompressionLZW}
+  WICTiffCompressionRLE              = WICTiffCompressionOption($5);
+  {$EXTERNALSYM WICTiffCompressionRLE}
+  WICTiffCompressionZIP              = WICTiffCompressionOption($6);
+  {$EXTERNALSYM WICTiffCompressionZIP}
+  WICTiffCompressionLZWHDifferencing = WICTiffCompressionOption($7);
+  {$EXTERNALSYM WICTiffCompressionLZWHDifferencing}
+  //WICTIFFCOMPRESSIONOPTION_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICJpegYCrCbSubsamplingOption = ^WICJpegYCrCbSubsamplingOption;
+  WICJpegYCrCbSubsamplingOption = DWord;
+  {$EXTERNALSYM WICJpegYCrCbSubsamplingOption}
+const
+  WICJpegYCrCbSubsamplingDefault  = WICJpegYCrCbSubsamplingOption(0);
+  {$EXTERNALSYM WICJpegYCrCbSubsamplingDefault}
+  WICJpegYCrCbSubsampling420      = WICJpegYCrCbSubsamplingOption($1);
+  {$EXTERNALSYM WICJpegYCrCbSubsampling420}
+  WICJpegYCrCbSubsampling422      = WICJpegYCrCbSubsamplingOption($2);
+  {$EXTERNALSYM WICJpegYCrCbSubsampling422}
+  WICJpegYCrCbSubsampling444      = WICJpegYCrCbSubsamplingOption($3);
+  {$EXTERNALSYM WICJpegYCrCbSubsampling444}
+  WICJpegYCrCbSubsampling440      = WICJpegYCrCbSubsamplingOption($4);
+  {$EXTERNALSYM WICJpegYCrCbSubsampling440}
+  //WICJPEGYCRCBSUBSAMPLING_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICPngFilterOption = ^WICPngFilterOption;
+  WICPngFilterOption = DWord;
+  {$EXTERNALSYM WICPngFilterOption}
+const
+  WICPngFilterUnspecified    = WICPngFilterOption(0);
+  {$EXTERNALSYM WICPngFilterUnspecified}
+  WICPngFilterNone           = WICPngFilterOption($1);
+  {$EXTERNALSYM WICPngFilterNone}
+  WICPngFilterSub            = WICPngFilterOption($2);
+  {$EXTERNALSYM WICPngFilterSub}
+  WICPngFilterUp             = WICPngFilterOption($3);
+  {$EXTERNALSYM WICPngFilterUp}
+  WICPngFilterAverage        = WICPngFilterOption($4);
+  {$EXTERNALSYM WICPngFilterAverage}
+  WICPngFilterPaeth          = WICPngFilterOption($5);
+  {$EXTERNALSYM WICPngFilterPaeth}
+  WICPngFilterAdaptive       = WICPngFilterOption($6);
+  {$EXTERNALSYM WICPngFilterAdaptive}
+  //WICPNGFILTEROPTION_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICNamedWhitePoint = ^WICNamedWhitePoint;
+  WICNamedWhitePoint = DWord;
+  {$EXTERNALSYM WICNamedWhitePoint}
+const
+  WICWhitePointDefault           = WICNamedWhitePoint($1);
+  {$EXTERNALSYM WICWhitePointDefault}
+  WICWhitePointDaylight          = WICNamedWhitePoint($2);
+  {$EXTERNALSYM WICWhitePointDaylight}
+  WICWhitePointCloudy            = WICNamedWhitePoint($4);
+  {$EXTERNALSYM WICWhitePointCloudy}
+  WICWhitePointShade             = WICNamedWhitePoint($8);
+  {$EXTERNALSYM WICWhitePointShade}
+  WICWhitePointTungsten          = WICNamedWhitePoint($10);
+  {$EXTERNALSYM WICWhitePointTungsten}
+  WICWhitePointFluorescent       = WICNamedWhitePoint($20);
+  {$EXTERNALSYM WICWhitePointFluorescent}
+  WICWhitePointFlash             = WICNamedWhitePoint($40);
+  {$EXTERNALSYM WICWhitePointFlash}
+  WICWhitePointUnderwater        = WICNamedWhitePoint($80);
+  {$EXTERNALSYM WICWhitePointUnderwater}
+  WICWhitePointCustom            = WICNamedWhitePoint($100);
+  {$EXTERNALSYM WICWhitePointCustom}
+  WICWhitePointAutoWhiteBalance  = WICNamedWhitePoint($200);
+  {$EXTERNALSYM WICWhitePointAutoWhiteBalance}
+  WICWhitePointAsShot            = WICWhitePointDefault;
+  {$EXTERNALSYM WICWhitePointAsShot}
+  //WICNAMEDWHITEPOINT_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICRawCapabilities = ^WICRawCapabilities;
+  WICRawCapabilities = DWord;
+  {$EXTERNALSYM WICRawCapabilities}
+const
+  WICRawCapabilityNotSupported   = WICRawCapabilities(0);
+  {$EXTERNALSYM WICRawCapabilityNotSupported}
+  WICRawCapabilityGetSupported   = WICRawCapabilities($1);
+  {$EXTERNALSYM WICRawCapabilityGetSupported}
+  WICRawCapabilityFullySupported = WICRawCapabilities($2);
+  {$EXTERNALSYM WICRawCapabilityFullySupported}
+  //WICRAWCAPABILITIES_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICRawRotationCapabilities = ^WICRawRotationCapabilities;
+  WICRawRotationCapabilities = DWord;
+  {$EXTERNALSYM WICRawRotationCapabilities}
+const
+  WICRawRotationCapabilityNotSupported           = WICRawRotationCapabilities(0);
+  {$EXTERNALSYM WICRawRotationCapabilityNotSupported}
+  WICRawRotationCapabilityGetSupported           = WICRawRotationCapabilities($1);
+  {$EXTERNALSYM WICRawRotationCapabilityGetSupported}
+  WICRawRotationCapabilityNinetyDegreesSupported = WICRawRotationCapabilities($2);
+  {$EXTERNALSYM WICRawRotationCapabilityNinetyDegreesSupported}
+  WICRawRotationCapabilityFullySupported         = WICRawRotationCapabilities($3);
+  {$EXTERNALSYM WICRawRotationCapabilityFullySupported}
+  //WICRAWROTATIONCAPABILITIES_FORCE_DWORD     = FORCEDWORD;
+
+type
+  PWICRawParameterSet = ^WICRawParameterSet;
+  WICRawParameterSet = DWord;
+  {$EXTERNALSYM WICRawParameterSet}
+const
+  WICAsShotParameterSet          = WICRawParameterSet($1);
+  {$EXTERNALSYM WICAsShotParameterSet}
+  WICUserAdjustedParameterSet    = WICRawParameterSet($2);
+  {$EXTERNALSYM WICUserAdjustedParameterSet}
+  WICAutoAdjustedParameterSet    = WICRawParameterSet($3);
+  {$EXTERNALSYM WICAutoAdjustedParameterSet}
+  //WICRAWPARAMETERSET_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICRawRenderMode = ^WICRawRenderMode;
+  WICRawRenderMode = DWord;
+  {$EXTERNALSYM WICRawRenderMode}
+const
+  WICRawRenderModeDraft        = WICRawRenderMode($1);
+  {$EXTERNALSYM WICRawRenderModeDraft}
+  WICRawRenderModeNormal       = WICRawRenderMode($2);
+  {$EXTERNALSYM WICRawRenderModeNormal}
+  WICRawRenderModeBestQuality  = WICRawRenderMode($3);
+  {$EXTERNALSYM WICRawRenderModeBestQuality}
+  //WICRAWRENDERMODE_FORCE_DWORD = FORCEDWORD;
+
+
+type
+  PWICDdsDimension = ^WICDdsDimension;
+  WICDdsDimension = DWord;
+  {$EXTERNALSYM WICDdsDimension}
+const
+  WICDdsTexture1D           = WICDdsDimension(0);
+  {$EXTERNALSYM WICDdsTexture1D}
+  WICDdsTexture2D           = WICDdsDimension($1);
+  {$EXTERNALSYM WICDdsTexture2D}
+  WICDdsTexture3D           = WICDdsDimension($2);
+  {$EXTERNALSYM WICDdsTexture3D}
+  WICDdsTextureCube         = WICDdsDimension($3);
+  {$EXTERNALSYM WICDdsTextureCube}
+  //WICDDSTEXTURE_FORCE_DWORD = FORCEDWORD;
+
+type
+  PWICDdsAlphaMode = ^WICDdsAlphaMode;
+  WICDdsAlphaMode = DWord;
+  {$EXTERNALSYM WICDdsAlphaMode}
+const
+  WICDdsAlphaModeUnknown       = WICDdsAlphaMode(0);
+  {$EXTERNALSYM WICDdsAlphaModeUnknown}
+  WICDdsAlphaModeStraight      = WICDdsAlphaMode($1);
+  {$EXTERNALSYM WICDdsAlphaModeStraight}
+  WICDdsAlphaModePremultiplied = WICDdsAlphaMode($2);
+  {$EXTERNALSYM WICDdsAlphaModePremultiplied}
+  WICDdsAlphaModeOpaque        = WICDdsAlphaMode($3);
+  {$EXTERNALSYM WICDdsAlphaModeOpaque}
+  WICDdsAlphaModeCustom        = WICDdsAlphaMode($4);
+  {$EXTERNALSYM WICDdsAlphaModeCustom}
+  //WICDDSALPHAMODE_FORCE_DWORD  = FORCEDWORD;
+
+
+// =============================================================================
+
+
+type
+
   PREFWICPixelFormatGUID = ^REFWICPixelFormatGUID;
   REFWICPixelFormatGUID = REFGUID;
   {$EXTERNALSYM REFWICPixelFormatGUID}
@@ -616,94 +1482,6 @@ type
   {$EXTERNALSYM PWICInProcPointer}
 
 
-  PWICColorContextType = ^WICColorContextType;
-  WICColorContextType             = (
-    WICColorContextUninitialized  = 0,
-    {$EXTERNALSYM WICColorContextUninitialized}
-    WICColorContextProfile        = $1,
-    {$EXTERNALSYM WICColorContextProfile}
-    WICColorContextExifColorSpace = $2
-    {$EXTERNALSYM WICColorContextExifColorSpace}
-    );
-  {$EXTERNALSYM WICColorContextType}
-
-{$WARN BOUNDS_ERROR OFF}
-  PWICBitmapCreateCacheOption = ^WICBitmapCreateCacheOption;
-  WICBitmapCreateCacheOption               = (
-    WICBitmapNoCache                       = 0,
-    {$EXTERNALSYM WICBitmapNoCache}
-    WICBitmapCacheOnDemand                 = $1,
-    {$EXTERNALSYM WICBitmapCacheOnDemand}
-    WICBitmapCacheOnLoad                   = $2,
-    {$EXTERNALSYM WICBitmapCacheOnLoad}
-    WICBITMAPCREATECACHEOPTION_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICBITMAPCREATECACHEOPTION_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICBitmapCreateCacheOption}
-
-
-  PWICDecodeOptions = ^WICDecodeOptions;
-  WICDecodeOptions                     = (
-    WICDecodeMetadataCacheOnDemand     = 0,
-    {$EXTERNALSYM WICDecodeMetadataCacheOnDemand}
-    WICDecodeMetadataCacheOnLoad       = $1,
-    {$EXTERNALSYM WICDecodeMetadataCacheOnLoad}
-    WICMETADATACACHEOPTION_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICMETADATACACHEOPTION_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICDecodeOptions}
-
-  PWICBitmapEncoderCacheOption = ^WICBitmapEncoderCacheOption;
-  WICBitmapEncoderCacheOption               = (
-    WICBitmapEncoderCacheInMemory           = 0,
-    {$EXTERNALSYM WICBitmapEncoderCacheInMemory}
-    WICBitmapEncoderCacheTempFile           = $1,
-    {$EXTERNALSYM WICBitmapEncoderCacheTempFile}
-    WICBitmapEncoderNoCache                 = $2,
-    {$EXTERNALSYM WICBitmapEncoderNoCache}
-    WICBITMAPENCODERCACHEOPTION_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICBITMAPENCODERCACHEOPTION_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICBitmapEncoderCacheOption}
-
-  PWICComponentType = ^WICComponentType;
-  WICComponentType               = (
-    WICDecoder                   = $1,
-    {$EXTERNALSYM WICDecoder}
-    WICEncoder                   = $2,
-    {$EXTERNALSYM WICEncoder}
-    WICPixelFormatConverter      = $4,
-    {$EXTERNALSYM WICPixelFormatConverter}
-    WICMetadataReader            = $8,
-    {$EXTERNALSYM WICMetadataReader}
-    WICMetadataWriter            = $10,
-    {$EXTERNALSYM WICMetadataWriter}
-    WICPixelFormat               = $20,
-    {$EXTERNALSYM WICPixelFormat}
-    WICAllComponents             = $3F,
-    {$EXTERNALSYM WICAllComponents}
-    WICCOMPONENTTYPE_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICCOMPONENTTYPE_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICComponentType}
-
-  PWICComponentEnumerateOptions = ^WICComponentEnumerateOptions;
-  WICComponentEnumerateOptions               = (
-    WICComponentEnumerateDefault             = 0,
-    {$EXTERNALSYM WICComponentEnumerateDefault}
-    WICComponentEnumerateRefresh             = $1,
-    {$EXTERNALSYM WICComponentEnumerateRefresh}
-    WICComponentEnumerateDisabled            = $80000000,
-    {$EXTERNALSYM WICComponentEnumerateDisabled}
-    WICComponentEnumerateUnsigned            = $40000000,
-    {$EXTERNALSYM WICComponentEnumerateUnsigned}
-    WICComponentEnumerateBuiltInOnly         = $20000000,
-    {$EXTERNALSYM WICComponentEnumerateBuiltInOnly}
-    WICCOMPONENTENUMERATEOPTIONS_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICCOMPONENTENUMERATEOPTIONS_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICComponentEnumerateOptions}
-
   PWICBitmapPattern = ^WICBitmapPattern;
   WICBitmapPattern = record
     Position: ULARGE_INTEGER;
@@ -716,569 +1494,6 @@ type
   end;
   {$EXTERNALSYM WICBitmapPattern}
 
-  PWICBitmapInterpolationMode = ^WICBitmapInterpolationMode;
-  WICBitmapInterpolationMode                   = (
-    WICBitmapInterpolationModeNearestNeighbor  = 0,
-    {$EXTERNALSYM WICBitmapInterpolationModeNearestNeighbor}
-    WICBitmapInterpolationModeLinear           = $1,
-    {$EXTERNALSYM WICBitmapInterpolationModeLinear}
-    WICBitmapInterpolationModeCubic            = $2,
-    {$EXTERNALSYM WICBitmapInterpolationModeCubic}
-    WICBitmapInterpolationModeFant             = $3,
-    {$EXTERNALSYM WICBitmapInterpolationModeFant}
-    WICBitmapInterpolationModeHighQualityCubic = $4,
-    {$EXTERNALSYM WICBitmapInterpolationModeHighQualityCubic}
-    WICBITMAPINTERPOLATIONMODE_FORCE_DWORD     = FORCEDWORD
-    {$EXTERNALSYM WICBITMAPINTERPOLATIONMODE_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICBitmapInterpolationMode}
-
-  PWICBitmapPaletteType = ^WICBitmapPaletteType;
-  WICBitmapPaletteType                   = (
-    WICBitmapPaletteTypeCustom           = 0,
-    {$EXTERNALSYM WICBitmapPaletteTypeCustom}
-    WICBitmapPaletteTypeMedianCut        = $1,
-    {$EXTERNALSYM WICBitmapPaletteTypeMedianCut}
-    WICBitmapPaletteTypeFixedBW          = $2,
-    {$EXTERNALSYM WICBitmapPaletteTypeFixedBW}
-    WICBitmapPaletteTypeFixedHalftone8   = $3,
-    {$EXTERNALSYM WICBitmapPaletteTypeFixedHalftone8}
-    WICBitmapPaletteTypeFixedHalftone27  = $4,
-    {$EXTERNALSYM WICBitmapPaletteTypeFixedHalftone27}
-    WICBitmapPaletteTypeFixedHalftone64  = $5,
-    {$EXTERNALSYM WICBitmapPaletteTypeFixedHalftone64}
-    WICBitmapPaletteTypeFixedHalftone125 = $6,
-    {$EXTERNALSYM WICBitmapPaletteTypeFixedHalftone125}
-    WICBitmapPaletteTypeFixedHalftone216 = $7,
-    {$EXTERNALSYM WICBitmapPaletteTypeFixedHalftone216}
-    WICBitmapPaletteTypeFixedWebPalette  = WICBitmapPaletteTypeFixedHalftone216,
-    {$EXTERNALSYM WICBitmapPaletteTypeFixedWebPalette}
-    WICBitmapPaletteTypeFixedHalftone252 = $8,
-    {$EXTERNALSYM WICBitmapPaletteTypeFixedHalftone252}
-    WICBitmapPaletteTypeFixedHalftone256 = $9,
-    {$EXTERNALSYM WICBitmapPaletteTypeFixedHalftone256}
-    WICBitmapPaletteTypeFixedGray4       = $A,
-    {$EXTERNALSYM WICBitmapPaletteTypeFixedGray4}
-    WICBitmapPaletteTypeFixedGray16      = $B,
-    {$EXTERNALSYM WICBitmapPaletteTypeFixedGray16}
-    WICBitmapPaletteTypeFixedGray256     = $C,
-    {$EXTERNALSYM WICBitmapPaletteTypeFixedGray256}
-    WICBITMAPPALETTETYPE_FORCE_DWORD     = FORCEDWORD
-    {$EXTERNALSYM WICBITMAPPALETTETYPE_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICBitmapPaletteType}
-
-  PWICBitmapDitherType = ^WICBitmapDitherType;
-  WICBitmapDitherType                 = (
-    WICBitmapDitherTypeNone           = 0,
-    {$EXTERNALSYM WICBitmapDitherTypeNone}
-    WICBitmapDitherTypeSolid          = 0,
-    {$EXTERNALSYM WICBitmapDitherTypeSolid}
-    WICBitmapDitherTypeOrdered4x4     = $1,
-    {$EXTERNALSYM WICBitmapDitherTypeOrdered4x4}
-    WICBitmapDitherTypeOrdered8x8     = $2,
-    {$EXTERNALSYM WICBitmapDitherTypeOrdered8x8}
-    WICBitmapDitherTypeOrdered16x16   = $3,
-    {$EXTERNALSYM WICBitmapDitherTypeOrdered16x16}
-    WICBitmapDitherTypeSpiral4x4      = $4,
-    {$EXTERNALSYM WICBitmapDitherTypeSpiral4x4}
-    WICBitmapDitherTypeSpiral8x8      = $5,
-    {$EXTERNALSYM WICBitmapDitherTypeSpiral8x8}
-    WICBitmapDitherTypeDualSpiral4x4  = $6,
-    {$EXTERNALSYM WICBitmapDitherTypeDualSpiral4x4}
-    WICBitmapDitherTypeDualSpiral8x8  = $7,
-    {$EXTERNALSYM WICBitmapDitherTypeDualSpiral8x8}
-    WICBitmapDitherTypeErrorDiffusion = $8,
-    {$EXTERNALSYM WICBitmapDitherTypeErrorDiffusion}
-    WICBITMAPDITHERTYPE_FORCE_DWORD   = FORCEDWORD
-    {$EXTERNALSYM WICBITMAPDITHERTYPE_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICBitmapDitherType}
-
-  PWICBitmapAlphaChannelOption = ^WICBitmapAlphaChannelOption;
-  WICBitmapAlphaChannelOption                = (
-    WICBitmapUseAlpha                        = 0,
-    {$EXTERNALSYM WICBitmapUseAlpha}
-    WICBitmapUsePremultipliedAlpha           = $1,
-    {$EXTERNALSYM WICBitmapUsePremultipliedAlpha}
-    WICBitmapIgnoreAlpha                     = $2,
-    {$EXTERNALSYM WICBitmapIgnoreAlpha}
-    WICBITMAPALPHACHANNELOPTIONS_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICBITMAPALPHACHANNELOPTIONS_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICBitmapAlphaChannelOption}
-
-  PWICBitmapTransformOptions = ^WICBitmapTransformOptions;
-  WICBitmapTransformOptions               = (
-    WICBitmapTransformRotate0             = 0,
-    {$EXTERNALSYM WICBitmapTransformRotate0}
-    WICBitmapTransformRotate90            = $1,
-    {$EXTERNALSYM WICBitmapTransformRotate90}
-    WICBitmapTransformRotate180           = $2,
-    {$EXTERNALSYM WICBitmapTransformRotate180}
-    WICBitmapTransformRotate270           = $3,
-    {$EXTERNALSYM WICBitmapTransformRotate270}
-    WICBitmapTransformFlipHorizontal      = $8,
-    {$EXTERNALSYM WICBitmapTransformFlipHorizontal}
-    WICBitmapTransformFlipVertical        = $10,
-    {$EXTERNALSYM WICBitmapTransformFlipVertical}
-    WICBITMAPTRANSFORMOPTIONS_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICBITMAPTRANSFORMOPTIONS_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICBitmapTransformOptions}
-
-  PWICBitmapLockFlags = ^WICBitmapLockFlags;
-  WICBitmapLockFlags               = (
-    WICBitmapLockRead              = $1,
-    {$EXTERNALSYM WICBitmapLockRead}
-    WICBitmapLockWrite             = $2,
-    {$EXTERNALSYM WICBitmapLockWrite}
-    WICBITMAPLOCKFLAGS_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICBITMAPLOCKFLAGS_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICBitmapLockFlags}
-
-  PWICBitmapDecoderCapabilities = ^WICBitmapDecoderCapabilities;
-  WICBitmapDecoderCapabilities                     = (
-    WICBitmapDecoderCapabilitySameEncoder          = $1,
-    {$EXTERNALSYM WICBitmapDecoderCapabilitySameEncoder}
-    WICBitmapDecoderCapabilityCanDecodeAllImages   = $2,
-    {$EXTERNALSYM WICBitmapDecoderCapabilityCanDecodeAllImages}
-    WICBitmapDecoderCapabilityCanDecodeSomeImages  = $4,
-    {$EXTERNALSYM WICBitmapDecoderCapabilityCanDecodeSomeImages}
-    WICBitmapDecoderCapabilityCanEnumerateMetadata = $8,
-    {$EXTERNALSYM WICBitmapDecoderCapabilityCanEnumerateMetadata}
-    WICBitmapDecoderCapabilityCanDecodeThumbnail   = $10,
-    {$EXTERNALSYM WICBitmapDecoderCapabilityCanDecodeThumbnail}
-    WICBITMAPDECODERCAPABILITIES_FORCE_DWORD       = FORCEDWORD
-    {$EXTERNALSYM WICBITMAPDECODERCAPABILITIES_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICBitmapDecoderCapabilities}
-
-  PWICProgressOperation = ^WICProgressOperation;
-  WICProgressOperation               = (
-    WICProgressOperationCopyPixels   = $1,
-    {$EXTERNALSYM WICProgressOperationCopyPixels}
-    WICProgressOperationWritePixels  = $2,
-    {$EXTERNALSYM WICProgressOperationWritePixels}
-    WICProgressOperationAll          = $FFFF,
-    {$EXTERNALSYM WICProgressOperationAll}
-    WICPROGRESSOPERATION_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICPROGRESSOPERATION_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICProgressOperation}
-
-  PWICProgressNotification = ^WICProgressNotification;
-  WICProgressNotification               = (
-    WICProgressNotificationBegin        = $10000,
-    {$EXTERNALSYM WICProgressNotificationBegin}
-    WICProgressNotificationEnd          = $20000,
-    {$EXTERNALSYM WICProgressNotificationEnd}
-    WICProgressNotificationFrequent     = $40000,
-    {$EXTERNALSYM WICProgressNotificationFrequent}
-    WICProgressNotificationAll          = $FFFF0000,
-    {$EXTERNALSYM WICProgressNotificationAll}
-    WICPROGRESSNOTIFICATION_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICPROGRESSNOTIFICATION_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICProgressNotification}
-
-  PWICComponentSigning = ^WICComponentSigning;
-  WICComponentSigning               = (
-    WICComponentSigned              = $1,
-    {$EXTERNALSYM WICComponentSigned}
-    WICComponentUnsigned            = $2,
-    {$EXTERNALSYM WICComponentUnsigned}
-    WICComponentSafe                = $4,
-    {$EXTERNALSYM WICComponentSafe}
-    WICComponentDisabled            = $80000000,
-    {$EXTERNALSYM WICComponentDisabled}
-    WICCOMPONENTSIGNING_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICCOMPONENTSIGNING_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICComponentSigning}
-
-  PWICGifLogicalScreenDescriptorProperties = ^WICGifLogicalScreenDescriptorProperties;
-  WICGifLogicalScreenDescriptorProperties               = (
-    WICGifLogicalScreenSignature                        = $1,
-    {$EXTERNALSYM WICGifLogicalScreenSignature}
-    WICGifLogicalScreenDescriptorWidth                  = $2,
-    {$EXTERNALSYM WICGifLogicalScreenDescriptorWidth}
-    WICGifLogicalScreenDescriptorHeight                 = $3,
-    {$EXTERNALSYM WICGifLogicalScreenDescriptorHeight}
-    WICGifLogicalScreenDescriptorGlobalColorTableFlag   = $4,
-    {$EXTERNALSYM WICGifLogicalScreenDescriptorGlobalColorTableFlag}
-    WICGifLogicalScreenDescriptorColorResolution        = $5,
-    {$EXTERNALSYM WICGifLogicalScreenDescriptorColorResolution}
-    WICGifLogicalScreenDescriptorSortFlag               = $6,
-    {$EXTERNALSYM WICGifLogicalScreenDescriptorSortFlag}
-    WICGifLogicalScreenDescriptorGlobalColorTableSize   = $7,
-    {$EXTERNALSYM WICGifLogicalScreenDescriptorGlobalColorTableSize}
-    WICGifLogicalScreenDescriptorBackgroundColorIndex   = $8,
-    {$EXTERNALSYM WICGifLogicalScreenDescriptorBackgroundColorIndex}
-    WICGifLogicalScreenDescriptorPixelAspectRatio       = $9,
-    {$EXTERNALSYM WICGifLogicalScreenDescriptorPixelAspectRatio}
-    WICGifLogicalScreenDescriptorProperties_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICGifLogicalScreenDescriptorProperties_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICGifLogicalScreenDescriptorProperties}
-
-  PWICGifImageDescriptorProperties = ^WICGifImageDescriptorProperties;
-  WICGifImageDescriptorProperties               = (
-    WICGifImageDescriptorLeft                   = $1,
-    {$EXTERNALSYM WICGifImageDescriptorLeft}
-    WICGifImageDescriptorTop                    = $2,
-    {$EXTERNALSYM WICGifImageDescriptorTop}
-    WICGifImageDescriptorWidth                  = $3,
-    {$EXTERNALSYM WICGifImageDescriptorWidth}
-    WICGifImageDescriptorHeight                 = $4,
-    {$EXTERNALSYM WICGifImageDescriptorHeight}
-    WICGifImageDescriptorLocalColorTableFlag    = $5,
-    {$EXTERNALSYM WICGifImageDescriptorLocalColorTableFlag}
-    WICGifImageDescriptorInterlaceFlag          = $6,
-    {$EXTERNALSYM WICGifImageDescriptorInterlaceFlag}
-    WICGifImageDescriptorSortFlag               = $7,
-    {$EXTERNALSYM WICGifImageDescriptorSortFlag}
-    WICGifImageDescriptorLocalColorTableSize    = $8,
-    {$EXTERNALSYM WICGifImageDescriptorLocalColorTableSize}
-    WICGifImageDescriptorProperties_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICGifImageDescriptorProperties_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICGifImageDescriptorProperties}
-
-  PWICGifGraphicControlExtensionProperties = ^WICGifGraphicControlExtensionProperties;
-  WICGifGraphicControlExtensionProperties               = (
-    WICGifGraphicControlExtensionDisposal               = $1,
-    {$EXTERNALSYM WICGifGraphicControlExtensionDisposal}
-    WICGifGraphicControlExtensionUserInputFlag          = $2,
-    {$EXTERNALSYM WICGifGraphicControlExtensionUserInputFlag}
-    WICGifGraphicControlExtensionTransparencyFlag       = $3,
-    {$EXTERNALSYM WICGifGraphicControlExtensionTransparencyFlag}
-    WICGifGraphicControlExtensionDelay                  = $4,
-    {$EXTERNALSYM WICGifGraphicControlExtensionDelay}
-    WICGifGraphicControlExtensionTransparentColorIndex  = $5,
-    {$EXTERNALSYM WICGifGraphicControlExtensionTransparentColorIndex}
-    WICGifGraphicControlExtensionProperties_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICGifGraphicControlExtensionProperties_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICGifGraphicControlExtensionProperties}
-
-  PWICGifApplicationExtensionProperties = ^WICGifApplicationExtensionProperties;
-  WICGifApplicationExtensionProperties               = (
-    WICGifApplicationExtensionApplication            = $1,
-    {$EXTERNALSYM WICGifApplicationExtensionApplication}
-    WICGifApplicationExtensionData                   = $2,
-    {$EXTERNALSYM WICGifApplicationExtensionData}
-    WICGifApplicationExtensionProperties_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICGifApplicationExtensionProperties_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICGifApplicationExtensionProperties}
-
-  PWICGifCommentExtensionProperties = ^WICGifCommentExtensionProperties;
-  WICGifCommentExtensionProperties               = (
-    WICGifCommentExtensionText                   = $1,
-    {$EXTERNALSYM WICGifCommentExtensionText}
-    WICGifCommentExtensionProperties_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICGifCommentExtensionProperties_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICGifCommentExtensionProperties}
-
-  PWICJpegCommentProperties = ^WICJpegCommentProperties;
-  WICJpegCommentProperties               = (
-    WICJpegCommentText                   = $1,
-    {$EXTERNALSYM WICJpegCommentText}
-    WICJpegCommentProperties_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICJpegCommentProperties_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICJpegCommentProperties}
-
-  PWICJpegLuminanceProperties = ^WICJpegLuminanceProperties;
-  WICJpegLuminanceProperties               = (
-    WICJpegLuminanceTable                  = $1,
-    {$EXTERNALSYM WICJpegLuminanceTable}
-    WICJpegLuminanceProperties_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICJpegLuminanceProperties_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICJpegLuminanceProperties}
-
-  PWICJpegChrominanceProperties = ^WICJpegChrominanceProperties;
-  WICJpegChrominanceProperties               = (
-    WICJpegChrominanceTable                  = $1,
-    {$EXTERNALSYM WICJpegChrominanceTable}
-  {$EXTERNALSYM WICJpegChrominanceProperties}
-    {$EXTERNALSYM WICJpegChrominanceProperties_FORCE_DWORD}
-    WICJpegChrominanceProperties_FORCE_DWORD = FORCEDWORD);
-
-  PWIC8BIMIptcProperties = ^WIC8BIMIptcProperties;
-  WIC8BIMIptcProperties               = (
-    WIC8BIMIptcPString                = 0,
-    {$EXTERNALSYM WIC8BIMIptcPString}
-    WIC8BIMIptcEmbeddedIPTC           = $1,
-    {$EXTERNALSYM WIC8BIMIptcEmbeddedIPTC}
-    WIC8BIMIptcProperties_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WIC8BIMIptcProperties_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WIC8BIMIptcProperties}
-
-  PWIC8BIMResolutionInfoProperties = ^WIC8BIMResolutionInfoProperties;
-  WIC8BIMResolutionInfoProperties               = (
-    WIC8BIMResolutionInfoPString                = $1,
-    {$EXTERNALSYM WIC8BIMResolutionInfoPString}
-    WIC8BIMResolutionInfoHResolution            = $2,
-    {$EXTERNALSYM WIC8BIMResolutionInfoHResolution}
-    WIC8BIMResolutionInfoHResolutionUnit        = $3,
-    {$EXTERNALSYM WIC8BIMResolutionInfoHResolutionUnit}
-    WIC8BIMResolutionInfoWidthUnit              = $4,
-    {$EXTERNALSYM WIC8BIMResolutionInfoWidthUnit}
-    WIC8BIMResolutionInfoVResolution            = $5,
-    {$EXTERNALSYM WIC8BIMResolutionInfoVResolution}
-    WIC8BIMResolutionInfoVResolutionUnit        = $6,
-    {$EXTERNALSYM WIC8BIMResolutionInfoVResolutionUnit}
-    WIC8BIMResolutionInfoHeightUnit             = $7,
-    {$EXTERNALSYM WIC8BIMResolutionInfoHeightUnit}
-    WIC8BIMResolutionInfoProperties_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WIC8BIMResolutionInfoProperties_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WIC8BIMResolutionInfoProperties}
-
-  PWIC8BIMIptcDigestProperties = ^WIC8BIMIptcDigestProperties;
-  WIC8BIMIptcDigestProperties               = (
-    WIC8BIMIptcDigestPString                = $1,
-    {$EXTERNALSYM WIC8BIMIptcDigestPString}
-    WIC8BIMIptcDigestIptcDigest             = $2,
-    {$EXTERNALSYM WIC8BIMIptcDigestIptcDigest}
-    WIC8BIMIptcDigestProperties_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WIC8BIMIptcDigestProperties_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WIC8BIMIptcDigestProperties}
-
-  PWICPngGamaProperties = ^WICPngGamaProperties;
-  WICPngGamaProperties               = (
-    WICPngGamaGamma                  = $1,
-    {$EXTERNALSYM WICPngGamaGamma}
-    WICPngGamaProperties_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICPngGamaProperties_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICPngGamaProperties}
-
-  PWICPngBkgdProperties = ^WICPngBkgdProperties;
-  WICPngBkgdProperties               = (
-    WICPngBkgdBackgroundColor        = $1,
-    {$EXTERNALSYM WICPngBkgdBackgroundColor}
-    WICPngBkgdProperties_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICPngBkgdProperties_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICPngBkgdProperties}
-
-  PWICPngItxtProperties = ^WICPngItxtProperties;
-  WICPngItxtProperties               = (
-    WICPngItxtKeyword                = $1,
-    {$EXTERNALSYM WICPngItxtKeyword}
-    WICPngItxtCompressionFlag        = $2,
-    {$EXTERNALSYM WICPngItxtCompressionFlag}
-    WICPngItxtLanguageTag            = $3,
-    {$EXTERNALSYM WICPngItxtLanguageTag}
-    WICPngItxtTranslatedKeyword      = $4,
-    {$EXTERNALSYM WICPngItxtTranslatedKeyword}
-    WICPngItxtText                   = $5,
-    {$EXTERNALSYM WICPngItxtText}
-    WICPngItxtProperties_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICPngItxtProperties_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICPngItxtProperties}
-
-  PWICPngChrmProperties = ^WICPngChrmProperties;
-  WICPngChrmProperties               = (
-    WICPngChrmWhitePointX            = $1,
-    {$EXTERNALSYM WICPngChrmWhitePointX}
-    WICPngChrmWhitePointY            = $2,
-    {$EXTERNALSYM WICPngChrmWhitePointY}
-    WICPngChrmRedX                   = $3,
-    {$EXTERNALSYM WICPngChrmRedX}
-    WICPngChrmRedY                   = $4,
-    {$EXTERNALSYM WICPngChrmRedY}
-    WICPngChrmGreenX                 = $5,
-    {$EXTERNALSYM WICPngChrmGreenX}
-    WICPngChrmGreenY                 = $6,
-    {$EXTERNALSYM WICPngChrmGreenY}
-    WICPngChrmBlueX                  = $7,
-    {$EXTERNALSYM WICPngChrmBlueX}
-    WICPngChrmBlueY                  = $8,
-    {$EXTERNALSYM WICPngChrmBlueY}
-    WICPngChrmProperties_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICPngChrmProperties_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICPngChrmProperties}
-
-  PWICPngHistProperties = ^WICPngHistProperties;
-  WICPngHistProperties               = (
-    WICPngHistFrequencies            = $1,
-    {$EXTERNALSYM WICPngHistFrequencies}
-    WICPngHistProperties_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICPngHistProperties_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICPngHistProperties}
-
-  PWICPngIccpProperties = ^WICPngIccpProperties;
-  WICPngIccpProperties               = (
-    WICPngIccpProfileName            = $1,
-    {$EXTERNALSYM WICPngIccpProfileName}
-    WICPngIccpProfileData            = $2,
-    {$EXTERNALSYM WICPngIccpProfileData}
-    WICPngIccpProperties_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICPngIccpProperties_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICPngIccpProperties}
-
-  PWICPngSrgbProperties = ^WICPngSrgbProperties;
-  WICPngSrgbProperties               = (
-    WICPngSrgbRenderingIntent        = $1,
-    {$EXTERNALSYM WICPngSrgbRenderingIntent}
-    WICPngSrgbProperties_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICPngSrgbProperties_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICPngSrgbProperties}
-
-  PWICPngTimeProperties = ^WICPngTimeProperties;
-  WICPngTimeProperties               = (
-    WICPngTimeYear                   = $1,
-    {$EXTERNALSYM WICPngTimeYear}
-    WICPngTimeMonth                  = $2,
-    {$EXTERNALSYM WICPngTimeMonth}
-    WICPngTimeDay                    = $3,
-    {$EXTERNALSYM WICPngTimeDay}
-    WICPngTimeHour                   = $4,
-    {$EXTERNALSYM WICPngTimeHour}
-    WICPngTimeMinute                 = $5,
-    {$EXTERNALSYM WICPngTimeMinute}
-    WICPngTimeSecond                 = $6,
-    {$EXTERNALSYM WICPngTimeSecond}
-    WICPngTimeProperties_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICPngTimeProperties_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICPngTimeProperties}
-
-  PWICHeifProperties = ^WICHeifProperties;
-  WICHeifProperties               = (
-    WICHeifOrientation            = $1,
-    {$EXTERNALSYM WICHeifOrientation}
-    WICHeifProperties_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICHeifProperties_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICHeifProperties}
-
-  PWICHeifHdrProperties = ^WICHeifHdrProperties;
-  WICHeifHdrProperties                              = (
-    WICHeifHdrMaximumLuminanceLevel                 = $1,
-    {$EXTERNALSYM WICHeifHdrMaximumLuminanceLevel}
-    WICHeifHdrMaximumFrameAverageLuminanceLevel     = $2,
-    {$EXTERNALSYM WICHeifHdrMaximumFrameAverageLuminanceLevel}
-    WICHeifHdrMinimumMasteringDisplayLuminanceLevel = $3,
-    {$EXTERNALSYM WICHeifHdrMinimumMasteringDisplayLuminanceLevel}
-    WICHeifHdrMaximumMasteringDisplayLuminanceLevel = $4,
-    {$EXTERNALSYM WICHeifHdrMaximumMasteringDisplayLuminanceLevel}
-    WICHeifHdrCustomVideoPrimaries                  = $5,
-    {$EXTERNALSYM WICHeifHdrCustomVideoPrimaries}
-    WICHeifHdrProperties_FORCE_DWORD                = FORCEDWORD
-    {$EXTERNALSYM WICHeifHdrProperties_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICHeifHdrProperties}
-
-  PWICWebpAnimProperties = ^WICWebpAnimProperties;
-  WICWebpAnimProperties               = (
-    WICWebpAnimLoopCount              = $1,
-    {$EXTERNALSYM WICWebpAnimLoopCount}
-    WICWebpAnimProperties_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICWebpAnimProperties_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICWebpAnimProperties}
-
-  PWICWebpAnmfProperties = ^WICWebpAnmfProperties;
-  WICWebpAnmfProperties               = (
-    WICWebpAnmfFrameDuration          = $1,
-    {$EXTERNALSYM WICWebpAnmfFrameDuration}
-    WICWebpAnmfProperties_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICWebpAnmfProperties_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICWebpAnmfProperties}
-
-  PWICSectionAccessLevel = ^WICSectionAccessLevel;
-  WICSectionAccessLevel               = (
-    WICSectionAccessLevelRead         = $1,
-    {$EXTERNALSYM WICSectionAccessLevelRead}
-    WICSectionAccessLevelReadWrite    = $3,
-    {$EXTERNALSYM WICSectionAccessLevelReadWrite}
-    WICSectionAccessLevel_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICSectionAccessLevel_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICSectionAccessLevel}
-
-  PWICPixelFormatNumericRepresentation = ^WICPixelFormatNumericRepresentation;
-  WICPixelFormatNumericRepresentation                  = (
-    WICPixelFormatNumericRepresentationUnspecified     = 0,
-    {$EXTERNALSYM WICPixelFormatNumericRepresentationUnspecified}
-    WICPixelFormatNumericRepresentationIndexed         = $1,
-    {$EXTERNALSYM WICPixelFormatNumericRepresentationIndexed}
-    WICPixelFormatNumericRepresentationUnsignedInteger = $2,
-    {$EXTERNALSYM WICPixelFormatNumericRepresentationUnsignedInteger}
-    WICPixelFormatNumericRepresentationSignedInteger   = $3,
-    {$EXTERNALSYM WICPixelFormatNumericRepresentationSignedInteger}
-    WICPixelFormatNumericRepresentationFixed           = $4,
-    {$EXTERNALSYM WICPixelFormatNumericRepresentationFixed}
-    WICPixelFormatNumericRepresentationFloat           = $5,
-    {$EXTERNALSYM WICPixelFormatNumericRepresentationFloat}
-    WICPixelFormatNumericRepresentation_FORCE_DWORD    = FORCEDWORD
-    {$EXTERNALSYM WICPixelFormatNumericRepresentation_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICPixelFormatNumericRepresentation}
-
-  PWICPlanarOptions = ^WICPlanarOptions;
-  WICPlanarOptions                      = (
-    WICPlanarOptionsDefault             = 0,
-    {$EXTERNALSYM WICPlanarOptionsDefault}
-    WICPlanarOptionsPreserveSubsampling = $1,
-    {$EXTERNALSYM WICPlanarOptionsPreserveSubsampling}
-    WICPLANAROPTIONS_FORCE_DWORD        = FORCEDWORD
-    {$EXTERNALSYM WICPLANAROPTIONS_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICPlanarOptions}
-
-  PWICJpegIndexingOptions = ^WICJpegIndexingOptions;
-  WICJpegIndexingOptions                   = (
-    WICJpegIndexingOptionsGenerateOnDemand = 0,
-    {$EXTERNALSYM WICJpegIndexingOptionsGenerateOnDemand}
-    WICJpegIndexingOptionsGenerateOnLoad   = $1,
-    {$EXTERNALSYM WICJpegIndexingOptionsGenerateOnLoad}
-    WICJpegIndexingOptions_FORCE_DWORD     = FORCEDWORD
-    {$EXTERNALSYM WICJpegIndexingOptions_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICJpegIndexingOptions}
-
-  PWICJpegTransferMatrix = ^WICJpegTransferMatrix;
-  WICJpegTransferMatrix               = (
-    WICJpegTransferMatrixIdentity     = 0,
-    {$EXTERNALSYM WICJpegTransferMatrixIdentity}
-    WICJpegTransferMatrixBT601        = $1,
-    {$EXTERNALSYM WICJpegTransferMatrixBT601}
-    WICJpegTransferMatrix_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICJpegTransferMatrix_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICJpegTransferMatrix}
-
-  PWICJpegScanType = ^WICJpegScanType;
-  WICJpegScanType                   = (
-    WICJpegScanTypeInterleaved      = 0,
-    {$EXTERNALSYM WICJpegScanTypeInterleaved}
-    WICJpegScanTypePlanarComponents = $1,
-    {$EXTERNALSYM WICJpegScanTypePlanarComponents}
-    WICJpegScanTypeProgressive      = $2,
-    {$EXTERNALSYM WICJpegScanTypeProgressive}
-    WICJpegScanType_FORCE_DWORD     = FORCEDWORD
-    {$EXTERNALSYM WICJpegScanType_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICJpegScanType}
-
-{$WARN BOUNDS_ERROR ON}
 
 //#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8) or defined(_WIN7_PLATFORM_UPDATE)
 
@@ -2337,138 +2552,7 @@ type
                               var pcchActual: UINT): HResult; stdcall;
   {$EXTERNALSYM WICMapSchemaToName}
 
-
-const
-
-  FACILITY_WINCODEC_ERR               = $898;
-  {$EXTERNALSYM FACILITY_WINCODEC_ERR}
-  WINCODEC_ERR_BASE                   = $2000;
-  {$EXTERNALSYM WINCODEC_ERR_BASE}
-
-
-
 type
-
-{$WARN BOUNDS_ERROR OFF}
-
-  PWICTiffCompressionOption = ^WICTiffCompressionOption;
-  WICTiffCompressionOption               = (
-    WICTiffCompressionDontCare           = 0,
-    {$EXTERNALSYM WICTiffCompressionDontCare}
-    WICTiffCompressionNone               = $1,
-    {$EXTERNALSYM WICTiffCompressionNone}
-    WICTiffCompressionCCITT3             = $2,
-    {$EXTERNALSYM WICTiffCompressionCCITT3}
-    WICTiffCompressionCCITT4             = $3,
-    {$EXTERNALSYM WICTiffCompressionCCITT4}
-    WICTiffCompressionLZW                = $4,
-    {$EXTERNALSYM WICTiffCompressionLZW}
-    WICTiffCompressionRLE                = $5,
-    {$EXTERNALSYM WICTiffCompressionRLE}
-    WICTiffCompressionZIP                = $6,
-    {$EXTERNALSYM WICTiffCompressionZIP}
-    WICTiffCompressionLZWHDifferencing   = $7,
-    {$EXTERNALSYM WICTiffCompressionLZWHDifferencing}
-    WICTIFFCOMPRESSIONOPTION_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICTIFFCOMPRESSIONOPTION_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICTiffCompressionOption}
-
-  PWICJpegYCrCbSubsamplingOption = ^WICJpegYCrCbSubsamplingOption;
-  WICJpegYCrCbSubsamplingOption         = (
-    WICJpegYCrCbSubsamplingDefault      = 0,
-    {$EXTERNALSYM WICJpegYCrCbSubsamplingDefault}
-    WICJpegYCrCbSubsampling420          = $1,
-    {$EXTERNALSYM WICJpegYCrCbSubsampling420}
-    WICJpegYCrCbSubsampling422          = $2,
-    {$EXTERNALSYM WICJpegYCrCbSubsampling422}
-    WICJpegYCrCbSubsampling444          = $3,
-    {$EXTERNALSYM WICJpegYCrCbSubsampling444}
-    WICJpegYCrCbSubsampling440          = $4,
-    {$EXTERNALSYM WICJpegYCrCbSubsampling440}
-    WICJPEGYCRCBSUBSAMPLING_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICJPEGYCRCBSUBSAMPLING_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICJpegYCrCbSubsamplingOption}
-
-  PWICPngFilterOption = ^WICPngFilterOption;
-  WICPngFilterOption               = (
-    WICPngFilterUnspecified        = 0,
-    {$EXTERNALSYM WICPngFilterUnspecified}
-    WICPngFilterNone               = $1,
-    {$EXTERNALSYM WICPngFilterNone}
-    WICPngFilterSub                = $2,
-    {$EXTERNALSYM WICPngFilterSub}
-    WICPngFilterUp                 = $3,
-    {$EXTERNALSYM WICPngFilterUp}
-    WICPngFilterAverage            = $4,
-    {$EXTERNALSYM WICPngFilterAverage}
-    WICPngFilterPaeth              = $5,
-    {$EXTERNALSYM WICPngFilterPaeth}
-    WICPngFilterAdaptive           = $6,
-    {$EXTERNALSYM WICPngFilterAdaptive}
-    WICPNGFILTEROPTION_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICPNGFILTEROPTION_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICPngFilterOption}
-
-  PWICNamedWhitePoint = ^WICNamedWhitePoint;
-  WICNamedWhitePoint               = (
-    WICWhitePointDefault           = $1,
-    {$EXTERNALSYM WICWhitePointDefault}
-    WICWhitePointDaylight          = $2,
-    {$EXTERNALSYM WICWhitePointDaylight}
-    WICWhitePointCloudy            = $4,
-    {$EXTERNALSYM WICWhitePointCloudy}
-    WICWhitePointShade             = $8,
-    {$EXTERNALSYM WICWhitePointShade}
-    WICWhitePointTungsten          = $10,
-    {$EXTERNALSYM WICWhitePointTungsten}
-    WICWhitePointFluorescent       = $20,
-    {$EXTERNALSYM WICWhitePointFluorescent}
-    WICWhitePointFlash             = $40,
-    {$EXTERNALSYM WICWhitePointFlash}
-    WICWhitePointUnderwater        = $80,
-    {$EXTERNALSYM WICWhitePointUnderwater}
-    WICWhitePointCustom            = $100,
-    {$EXTERNALSYM WICWhitePointCustom}
-    WICWhitePointAutoWhiteBalance  = $200,
-    {$EXTERNALSYM WICWhitePointAutoWhiteBalance}
-    WICWhitePointAsShot            = WICWhitePointDefault,
-    {$EXTERNALSYM WICWhitePointAsShot}
-    WICNAMEDWHITEPOINT_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICNAMEDWHITEPOINT_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICNamedWhitePoint}
-
-  PWICRawCapabilities = ^WICRawCapabilities;
-  WICRawCapabilities               = (
-    WICRawCapabilityNotSupported   = 0,
-    {$EXTERNALSYM WICRawCapabilityNotSupported}
-    WICRawCapabilityGetSupported   = $1,
-    {$EXTERNALSYM WICRawCapabilityGetSupported}
-    WICRawCapabilityFullySupported = $2,
-    {$EXTERNALSYM WICRawCapabilityFullySupported}
-    WICRAWCAPABILITIES_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICRAWCAPABILITIES_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICRawCapabilities}
-
-  PWICRawRotationCapabilities = ^WICRawRotationCapabilities;
-  WICRawRotationCapabilities                       = (
-    WICRawRotationCapabilityNotSupported           = 0,
-    {$EXTERNALSYM WICRawRotationCapabilityNotSupported}
-    WICRawRotationCapabilityGetSupported           = $1,
-    {$EXTERNALSYM WICRawRotationCapabilityGetSupported}
-    WICRawRotationCapabilityNinetyDegreesSupported = $2,
-    {$EXTERNALSYM WICRawRotationCapabilityNinetyDegreesSupported}
-    WICRawRotationCapabilityFullySupported         = $3,
-    {$EXTERNALSYM WICRawRotationCapabilityFullySupported}
-    WICRAWROTATIONCAPABILITIES_FORCE_DWORD         = FORCEDWORD
-    {$EXTERNALSYM WICRAWROTATIONCAPABILITIES_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICRawRotationCapabilities}
-
   PWICRawCapabilitiesInfo = ^WICRawCapabilitiesInfo;
   WICRawCapabilitiesInfo = record
     cbSize: UINT;
@@ -2492,33 +2576,6 @@ type
   end;
   {$EXTERNALSYM WICRawCapabilitiesInfo}
 
-  PWICRawParameterSet = ^WICRawParameterSet;
-  WICRawParameterSet               = (
-    WICAsShotParameterSet          = $1,
-    {$EXTERNALSYM WICAsShotParameterSet}
-    WICUserAdjustedParameterSet    = $2,
-    {$EXTERNALSYM WICUserAdjustedParameterSet}
-    WICAutoAdjustedParameterSet    = $3,
-    {$EXTERNALSYM WICAutoAdjustedParameterSet}
-    WICRAWPARAMETERSET_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICRAWPARAMETERSET_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICRawParameterSet}
-
-  PWICRawRenderMode = ^WICRawRenderMode;
-  WICRawRenderMode               = (
-    WICRawRenderModeDraft        = $1,
-    {$EXTERNALSYM WICRawRenderModeDraft}
-    WICRawRenderModeNormal       = $2,
-    {$EXTERNALSYM WICRawRenderModeNormal}
-    WICRawRenderModeBestQuality  = $3,
-    {$EXTERNALSYM WICRawRenderModeBestQuality}
-    WICRAWRENDERMODE_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICRAWRENDERMODE_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICRawRenderMode}
-
-{$WARN BOUNDS_ERROR ON}
 
   PWICRawToneCurvePoint = ^WICRawToneCurvePoint;
   WICRawToneCurvePoint = record
@@ -2534,39 +2591,6 @@ type
   end;
   {$EXTERNALSYM WICRawToneCurve}
 
-const
-
-  WICRawChangeNotification_ExposureCompensation    = $00000001;
-  {$EXTERNALSYM WICRawChangeNotification_ExposureCompensation}
-  WICRawChangeNotification_NamedWhitePoint         = $00000002;
-  {$EXTERNALSYM WICRawChangeNotification_NamedWhitePoint}
-  WICRawChangeNotification_KelvinWhitePoint        = $00000004;
-  {$EXTERNALSYM WICRawChangeNotification_KelvinWhitePoint}
-  WICRawChangeNotification_RGBWhitePoint           = $00000008;
-  {$EXTERNALSYM WICRawChangeNotification_RGBWhitePoint}
-  WICRawChangeNotification_Contrast                = $00000010;
-  {$EXTERNALSYM WICRawChangeNotification_Contrast}
-  WICRawChangeNotification_Gamma                   = $00000020;
-  {$EXTERNALSYM WICRawChangeNotification_Gamma}
-  WICRawChangeNotification_Sharpness               = $00000040;
-  {$EXTERNALSYM WICRawChangeNotification_Sharpness}
-  WICRawChangeNotification_Saturation              = $00000080;
-  {$EXTERNALSYM WICRawChangeNotification_Saturation}
-  WICRawChangeNotification_Tint                    = $00000100;
-  {$EXTERNALSYM WICRawChangeNotification_Tint}
-  WICRawChangeNotification_NoiseReduction          = $00000200;
-  {$EXTERNALSYM WICRawChangeNotification_NoiseReduction}
-  WICRawChangeNotification_DestinationColorContext = $00000400;
-  {$EXTERNALSYM WICRawChangeNotification_DestinationColorContext}
-  WICRawChangeNotification_ToneCurve               = $00000800;
-  {$EXTERNALSYM WICRawChangeNotification_ToneCurve}
-  WICRawChangeNotification_Rotation                = $00001000;
-  {$EXTERNALSYM WICRawChangeNotification_Rotation}
-  WICRawChangeNotification_RenderMode              = $00002000;
-  {$EXTERNALSYM WICRawChangeNotification_RenderMode}
-
-
-type
 
   PIWICDevelopRawNotificationCallback = ^IWICDevelopRawNotificationCallback;
   IWICDevelopRawNotificationCallback = interface;
@@ -2687,42 +2711,6 @@ type
   IID_IWICDevelopRaw = IWICDevelopRaw;
   {$EXTERNALSYM IID_IWICDevelopRaw}
 
-
-{$WARN BOUNDS_ERROR OFF}
-
-  PWICDdsDimension = ^WICDdsDimension;
-  WICDdsDimension             = (
-    WICDdsTexture1D           = 0,
-    {$EXTERNALSYM WICDdsTexture1D}
-    WICDdsTexture2D           = $1,
-    {$EXTERNALSYM WICDdsTexture2D}
-    WICDdsTexture3D           = $2,
-    {$EXTERNALSYM WICDdsTexture3D}
-    WICDdsTextureCube         = $3,
-    {$EXTERNALSYM WICDdsTextureCube}
-    WICDDSTEXTURE_FORCE_DWORD = FORCEDWORD
-    {$EXTERNALSYM WICDDSTEXTURE_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICDdsDimension}
-
-  PWICDdsAlphaMode = ^WICDdsAlphaMode;
-  WICDdsAlphaMode                = (
-    WICDdsAlphaModeUnknown       = 0,
-    {$EXTERNALSYM WICDdsAlphaModeUnknown}
-    WICDdsAlphaModeStraight      = $1,
-    {$EXTERNALSYM WICDdsAlphaModeStraight}
-    WICDdsAlphaModePremultiplied = $2,
-    {$EXTERNALSYM WICDdsAlphaModePremultiplied}
-    WICDdsAlphaModeOpaque        = $3,
-    {$EXTERNALSYM WICDdsAlphaModeOpaque}
-    WICDdsAlphaModeCustom        = $4,
-    {$EXTERNALSYM WICDdsAlphaModeCustom}
-    WICDDSALPHAMODE_FORCE_DWORD  = FORCEDWORD
-    {$EXTERNALSYM WICDDSALPHAMODE_FORCE_DWORD}
-    );
-  {$EXTERNALSYM WICDdsAlphaMode}
-
-{$WARN BOUNDS_ERROR ON}
 
   PWICDdsParameters = ^WICDdsParameters;
   WICDdsParameters = record

@@ -18,14 +18,16 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or later.
+// Remarks: Requires Windows Vista or later.
 //
 //          Using packed records is not a recommended practice,
 //          because it can prevent compatibility with other languages or
@@ -83,13 +85,6 @@ uses
 
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$INCLUDE 'MfPack.inc'}
 
 const
@@ -341,7 +336,43 @@ const
   CLSID_WICWebpAnmfMetadataReader       : TGUID = '{85a10b03-c9f6-439f-be5e-c0fbef67807c}';
   {$EXTERNALSYM CLSID_WICWebpAnmfMetadataReader}
 
+// Enums =======================================================================
 
+type
+  PWICMetadataCreationOptions = ^WICMetadataCreationOptions;
+  WICMetadataCreationOptions = DWord;
+  {$EXTERNALSYM WICMetadataCreationOptions}
+const
+  WICMetadataCreationDefault      = WICMetadataCreationOptions(0);
+  {$EXTERNALSYM WICMetadataCreationDefault}
+  WICMetadataCreationAllowUnknown = WICMetadataCreationDefault;
+  {$EXTERNALSYM WICMetadataCreationAllowUnknown}
+  WICMetadataCreationFailUnknown  = WICMetadataCreationOptions($10000);
+  {$EXTERNALSYM WICMetadataCreationFailUnknown}
+  WICMetadataCreationMask         = WICMetadataCreationOptions($FFFF0000);
+  {$EXTERNALSYM WICMetadataCreationMask}
+
+type
+  PWICPersistOptions = ^WICPersistOptions;
+  WICPersistOptions = DWord;
+  {$EXTERNALSYM WICPersistOptions}
+const
+  WICPersistOptionDefault       = WICPersistOptions(0);
+  {$EXTERNALSYM WICPersistOptionDefault}
+  WICPersistOptionLittleEndian  = WICPersistOptions(0);
+  {$EXTERNALSYM WICPersistOptionLittleEndian}
+  WICPersistOptionBigEndian     = WICPersistOptions($1);
+  {$EXTERNALSYM WICPersistOptionBigEndian}
+  WICPersistOptionStrictFormat  = WICPersistOptions($2);
+  {$EXTERNALSYM WICPersistOptionStrictFormat}
+  WICPersistOptionNoCacheStream = WICPersistOptions($4);
+  {$EXTERNALSYM WICPersistOptionNoCacheStream}
+  WICPersistOptionPreferUTF8    = WICPersistOptions($8);
+  {$EXTERNALSYM WICPersistOptionPreferUTF8}
+  WICPersistOptionMask          = WICPersistOptions($FFFF);
+  {$EXTERNALSYM WICPersistOptionMask}
+
+// =============================================================================
 type
 
   //* Forward Declarations *//
@@ -354,43 +385,6 @@ type
 
   PIWICMetadataHandlerInfo = ^IWICMetadataHandlerInfo;
   IWICMetadataHandlerInfo = interface;
-
-
-{$WARN BOUNDS_ERROR OFF}
-  PWICMetadataCreationOptions = ^WICMetadataCreationOptions;
-  WICMetadataCreationOptions        = (
-    WICMetadataCreationDefault      = 0,
-    {$EXTERNALSYM WICMetadataCreationDefault}
-    WICMetadataCreationAllowUnknown = WICMetadataCreationDefault,
-    {$EXTERNALSYM WICMetadataCreationAllowUnknown}
-    WICMetadataCreationFailUnknown  = $10000,
-    {$EXTERNALSYM WICMetadataCreationFailUnknown}
-    WICMetadataCreationMask         = $FFFF0000
-    {$EXTERNALSYM WICMetadataCreationMask}
-    );
-  {$EXTERNALSYM WICMetadataCreationOptions}
-
-{$WARN BOUNDS_ERROR ON}
-
-  PWICPersistOptions = ^WICPersistOptions;
-  WICPersistOptions               = (
-    WICPersistOptionDefault       = 0,
-    {$EXTERNALSYM WICPersistOptionDefault}
-    WICPersistOptionLittleEndian  = 0,
-    {$EXTERNALSYM WICPersistOptionLittleEndian}
-    WICPersistOptionBigEndian     = $1,
-    {$EXTERNALSYM WICPersistOptionBigEndian}
-    WICPersistOptionStrictFormat  = $2,
-    {$EXTERNALSYM WICPersistOptionStrictFormat}
-    WICPersistOptionNoCacheStream = $4,
-    {$EXTERNALSYM WICPersistOptionNoCacheStream}
-    WICPersistOptionPreferUTF8    = $8,
-    {$EXTERNALSYM WICPersistOptionPreferUTF8}
-    WICPersistOptionMask          = $FFFF
-    {$EXTERNALSYM WICPersistOptionMask}
-    );
-  {$EXTERNALSYM WICPersistOptions}
-
 
 
   // Interface IWICMetadataBlockReader
