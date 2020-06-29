@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -30,7 +32,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.19569.0
+// SDK version: 10.0.19041.0
 //
 // Todo: -
 //
@@ -58,9 +60,7 @@
 //==============================================================================
 unit MfPack.DXGI1_3;
 
-  {$HPPEMIT ''}
   {$HPPEMIT '#include "dxgi1_3.h"'}
-  {$HPPEMIT ''}
 
 interface
 
@@ -74,14 +74,6 @@ uses
   MfPack.DXGIFormat;
 
   {$WEAKPACKAGEUNIT ON}
-  {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$INCLUDE 'MfPack.inc'}
 
 const
@@ -98,6 +90,50 @@ const
                                   riid: REFIID;
                                   out pDebug {IUnknown}): HResult; stdcall;
   {$EXTERNALSYM DXGIGetDebugInterface1}
+
+// Enums =======================================================================
+
+type
+  //+-----------------------------------------------------------------------------
+  //
+  //  Flags: DXGI_MULTIPLANE_OVERLAY_YCbCr_FLAGS
+  //
+  //------------------------------------------------------------------------------
+  PDXGI_MULTIPLANE_OVERLAY_YCbCr_FLAGS = ^DXGI_MULTIPLANE_OVERLAY_YCbCr_FLAGS;
+  DXGI_MULTIPLANE_OVERLAY_YCbCr_FLAGS = DWord;
+  {$EXTERNALSYM DXGI_MULTIPLANE_OVERLAY_YCbCr_FLAGS}
+const
+  DXGI_MULTIPLANE_OVERLAY_YCbCr_FLAG_NOMINAL_RANGE = DXGI_MULTIPLANE_OVERLAY_YCbCr_FLAGS($1);  // 16 - 235 vs. 0 - 255
+  {$EXTERNALSYM DXGI_MULTIPLANE_OVERLAY_YCbCr_FLAG_NOMINAL_RANGE}
+  DXGI_MULTIPLANE_OVERLAY_YCbCr_FLAG_BT709         = DXGI_MULTIPLANE_OVERLAY_YCbCr_FLAGS($2);  // BT.709 vs. BT.601
+  {$EXTERNALSYM DXGI_MULTIPLANE_OVERLAY_YCbCr_FLAG_BT709}
+  DXGI_MULTIPLANE_OVERLAY_YCbCr_FLAG_xvYCC         = DXGI_MULTIPLANE_OVERLAY_YCbCr_FLAGS($4);   // xvYCC vs. conventional YCbCr
+  {$EXTERNALSYM DXGI_MULTIPLANE_OVERLAY_YCbCr_FLAG_xvYCC}
+
+type
+  PDxgiFramePresentationMode = ^DXGI_FRAME_PRESENTATION_MODE;
+  DXGI_FRAME_PRESENTATION_MODE = DWord;
+  {$EXTERNALSYM DXGI_FRAME_PRESENTATION_MODE}
+  DxgiFramePresentationMode                        = DXGI_FRAME_PRESENTATION_MODE;
+  {$EXTERNALSYM DxgiFramePresentationMode}
+const
+  DXGI_FRAME_PRESENTATION_MODE_COMPOSED            = DXGI_FRAME_PRESENTATION_MODE(0);
+  DXGI_FRAME_PRESENTATION_MODE_OVERLAY             = DXGI_FRAME_PRESENTATION_MODE(1);
+  DXGI_FRAME_PRESENTATION_MODE_NONE                = DXGI_FRAME_PRESENTATION_MODE(2);
+  DXGI_FRAME_PRESENTATION_MODE_COMPOSITION_FAILURE = DXGI_FRAME_PRESENTATION_MODE(3);
+
+type
+  PDXGI_OVERLAY_SUPPORT_FLAG = ^DXGI_OVERLAY_SUPPORT_FLAG;
+  DXGI_OVERLAY_SUPPORT_FLAG = DWord;
+  {$EXTERNALSYM DXGI_OVERLAY_SUPPORT_FLAG}
+const
+  DXGI_OVERLAY_SUPPORT_FLAG_DIRECT  = DXGI_OVERLAY_SUPPORT_FLAG($1);
+  {$EXTERNALSYM DXGI_OVERLAY_SUPPORT_FLAG_DIRECT}
+  DXGI_OVERLAY_SUPPORT_FLAG_SCALING = DXGI_OVERLAY_SUPPORT_FLAG($2);
+  {$EXTERNALSYM DXGI_OVERLAY_SUPPORT_FLAG_SCALING}
+
+
+// =============================================================================
 
 type
 
@@ -204,20 +240,6 @@ type
   {$EXTERNALSYM DXGI_DECODE_SWAP_CHAIN_DESC}
 
 
-  //+-----------------------------------------------------------------------------
-  //
-  //  Flags: DXGI_MULTIPLANE_OVERLAY_YCbCr_FLAGS
-  //
-  //------------------------------------------------------------------------------
-  PDXGI_MULTIPLANE_OVERLAY_YCbCr_FLAGS = ^DXGI_MULTIPLANE_OVERLAY_YCbCr_FLAGS;
-  DXGI_MULTIPLANE_OVERLAY_YCbCr_FLAGS                = (
-    DXGI_MULTIPLANE_OVERLAY_YCbCr_FLAG_NOMINAL_RANGE = $1,  // 16 - 235 vs. 0 - 255
-    DXGI_MULTIPLANE_OVERLAY_YCbCr_FLAG_BT709         = $2,  // BT.709 vs. BT.601
-    DXGI_MULTIPLANE_OVERLAY_YCbCr_FLAG_xvYCC         = $4   // xvYCC vs. conventional YCbCr
-    );
-  {$EXTERNALSYM DXGI_MULTIPLANE_OVERLAY_YCbCr_FLAGS}
-
-
   // Interface IDXGIDecodeSwapChain
   // ==============================
   //
@@ -284,14 +306,6 @@ type
   //  Struct: DXGI_FRAME_PRESENTATION_MODE & DXGI_FRAME_STATISTICS_MEDIA
   //
   //------------------------------------------------------------------------------
-  PDxgiFramePresentationMode = ^DXGI_FRAME_PRESENTATION_MODE;
-  DXGI_FRAME_PRESENTATION_MODE                       = (
-    DXGI_FRAME_PRESENTATION_MODE_COMPOSED            = 0,
-    DXGI_FRAME_PRESENTATION_MODE_OVERLAY             = 1,
-    DXGI_FRAME_PRESENTATION_MODE_NONE                = 2,
-    DXGI_FRAME_PRESENTATION_MODE_COMPOSITION_FAILURE = 3);
-  {$EXTERNALSYM DXGI_FRAME_PRESENTATION_MODE}
-  DxgiFramePresentationMode = DXGI_FRAME_PRESENTATION_MODE;
 
   PDxgiFrameStatisticsMedia = ^DXGI_FRAME_STATISTICS_MEDIA;
   DXGI_FRAME_STATISTICS_MEDIA = record
@@ -326,13 +340,6 @@ type
   end;
   IID_IDXGISwapChainMedia = IDXGISwapChainMedia;
   {$EXTERNALSYM IID_IDXGISwapChainMedia}
-
-
-  PDXGI_OVERLAY_SUPPORT_FLAG = ^DXGI_OVERLAY_SUPPORT_FLAG;
-  DXGI_OVERLAY_SUPPORT_FLAG           = (
-    DXGI_OVERLAY_SUPPORT_FLAG_DIRECT  = $1,
-    DXGI_OVERLAY_SUPPORT_FLAG_SCALING = $2);
-  {$EXTERNALSYM DXGI_OVERLAY_SUPPORT_FLAG}
 
 
   // Interface IDXGIOutput3

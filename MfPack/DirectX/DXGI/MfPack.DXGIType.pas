@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -30,7 +32,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.19569.0
+// SDK version: 10.0.19041.0
 //
 // Todo: -
 //
@@ -74,14 +76,6 @@ uses
   MfPack.WinError;
 
   {$WEAKPACKAGEUNIT ON}
-  {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$INCLUDE 'MfPack.inc'}
 
 const
@@ -90,15 +84,38 @@ const
 
   // DXGI error messages have moved to winerror.h
 
-  DXGI_CPU_ACCESS_NONE                = 0;
+  DXGI_CPU_ACCESS_NONE                = UINT(0);
   {$EXTERNALSYM DXGI_CPU_ACCESS_NONE}
-  DXGI_CPU_ACCESS_DYNAMIC             = 1;
+  DXGI_CPU_ACCESS_DYNAMIC             = UINT(1);
   {$EXTERNALSYM DXGI_CPU_ACCESS_DYNAMIC}
-  DXGI_CPU_ACCESS_READ_WRITE          = 2;
+  DXGI_CPU_ACCESS_READ_WRITE          = UINT(2);
   {$EXTERNALSYM DXGI_CPU_ACCESS_READ_WRITE}
-  DXGI_CPU_ACCESS_SCRATCH             = 3;
+  DXGI_CPU_ACCESS_SCRATCH             = UINT(3);
   {$EXTERNALSYM DXGI_CPU_ACCESS_SCRATCH}
-  DXGI_CPU_ACCESS_FIELD               = 15;
+  DXGI_CPU_ACCESS_FIELD               = UINT(15);
+
+type
+  DXGI_USAGE = UINT;
+  {$EXTERNALSYM DXGI_USAGE}
+const
+  DXGI_USAGE_SHADER_INPUT             = DXGI_USAGE(1 shl (0 + 4)); // Use the surface or resource as an input to a shader.
+  {$EXTERNALSYM DXGI_USAGE_SHADER_INPUT}
+  DXGI_USAGE_RENDER_TARGET_OUTPUT     = DXGI_USAGE(1 shl (1 + 4)); // Use the surface or resource as an output render target.
+  {$EXTERNALSYM DXGI_USAGE_RENDER_TARGET_OUTPUT}
+  DXGI_USAGE_BACK_BUFFER              = DXGI_USAGE(1 shl (2 + 4)); // The surface or resource is used as a back buffer.
+  {$EXTERNALSYM DXGI_USAGE_BACK_BUFFER}                            // You don’t need to pass DXGI_USAGE_BACK_BUFFER when you create a swap chain.
+                                                                   // But you can determine whether a resource belongs to a swap chain when
+                                                                   // you call IDXGIResource.GetUsage and get DXGI_USAGE_BACK_BUFFER.
+
+  DXGI_USAGE_SHARED                   = DXGI_USAGE(1 shl (3 + 4)); // Share the surface or resource.
+  {$EXTERNALSYM DXGI_USAGE_SHARED}
+  DXGI_USAGE_READ_ONLY                = DXGI_USAGE(1 shl (4 + 4)); // Use the surface or resource for reading only.
+  {$EXTERNALSYM DXGI_USAGE_READ_ONLY}
+  DXGI_USAGE_DISCARD_ON_PRESENT       = DXGI_USAGE(1 shl (5 + 4)); // This flag is for internal use only.
+  {$EXTERNALSYM DXGI_USAGE_DISCARD_ON_PRESENT}
+  DXGI_USAGE_UNORDERED_ACCESS         = DXGI_USAGE(1 shl (6 + 4)); // Use the surface or resource for unordered access.
+  {$EXTERNALSYM DXGI_USAGE_UNORDERED_ACCESS}
+
 
   // Internal functions
   function MAKE_DXGI_HRESULT(code: DWORD): HResult;
@@ -175,29 +192,50 @@ type
   end;
   {$EXTERNALSYM DXGI_GAMMA_CONTROL_CAPABILITIES}
 
+type
   PDXGI_MODE_SCANLINE_ORDER = ^DXGI_MODE_SCANLINE_ORDER;
-  DXGI_MODE_SCANLINE_ORDER                     = (
-    DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED       = 0,
-    DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE       = 1,
-    DXGI_MODE_SCANLINE_ORDER_UPPER_FIELD_FIRST = 2,
-    DXGI_MODE_SCANLINE_ORDER_LOWER_FIELD_FIRST = 3);
+  DXGI_MODE_SCANLINE_ORDER = DWord;
   {$EXTERNALSYM DXGI_MODE_SCANLINE_ORDER}
+const
+  DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED       = DXGI_MODE_SCANLINE_ORDER(0);
+  {$EXTERNALSYM DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED}
+  DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE       = DXGI_MODE_SCANLINE_ORDER(1);
+  {$EXTERNALSYM DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE}
+  DXGI_MODE_SCANLINE_ORDER_UPPER_FIELD_FIRST = DXGI_MODE_SCANLINE_ORDER(2);
+  {$EXTERNALSYM DXGI_MODE_SCANLINE_ORDER_UPPER_FIELD_FIRST}
+  DXGI_MODE_SCANLINE_ORDER_LOWER_FIELD_FIRST = DXGI_MODE_SCANLINE_ORDER(3);
+  {$EXTERNALSYM DXGI_MODE_SCANLINE_ORDER_LOWER_FIELD_FIRST}
 
+type
   PDXGI_MODE_SCALING = ^DXGI_MODE_SCALING;
-  DXGI_MODE_SCALING               = (
-    DXGI_MODE_SCALING_UNSPECIFIED = 0,
-    DXGI_MODE_SCALING_CENTERED    = 1,
-    DXGI_MODE_SCALING_STRETCHED   = 2);
+  DXGI_MODE_SCALING = DWord;
   {$EXTERNALSYM DXGI_MODE_SCALING}
+const
+  DXGI_MODE_SCALING_UNSPECIFIED = DXGI_MODE_SCALING(0);
+  {$EXTERNALSYM DXGI_MODE_SCALING_UNSPECIFIED}
+  DXGI_MODE_SCALING_CENTERED    = DXGI_MODE_SCALING(1);
+  {$EXTERNALSYM DXGI_MODE_SCALING_CENTERED}
+  DXGI_MODE_SCALING_STRETCHED   = DXGI_MODE_SCALING(2);
+  {$EXTERNALSYM DXGI_MODE_SCALING_STRETCHED}
 
+type
   PDXGI_MODE_ROTATION = ^DXGI_MODE_ROTATION;
-  DXGI_MODE_ROTATION               = (
-    DXGI_MODE_ROTATION_UNSPECIFIED = 0,
-    DXGI_MODE_ROTATION_IDENTITY    = 1,
-    DXGI_MODE_ROTATION_ROTATE90    = 2,
-    DXGI_MODE_ROTATION_ROTATE180   = 3,
-    DXGI_MODE_ROTATION_ROTATE270   = 4);
+  DXGI_MODE_ROTATION = DWord;
   {$EXTERNALSYM DXGI_MODE_ROTATION}
+const
+  DXGI_MODE_ROTATION_UNSPECIFIED = DXGI_MODE_ROTATION(0);
+  {$EXTERNALSYM DXGI_MODE_ROTATION_UNSPECIFIED}
+  DXGI_MODE_ROTATION_IDENTITY    = DXGI_MODE_ROTATION(1);
+  {$EXTERNALSYM DXGI_MODE_ROTATION_IDENTITY}
+  DXGI_MODE_ROTATION_ROTATE90    = DXGI_MODE_ROTATION(2);
+  {$EXTERNALSYM DXGI_MODE_ROTATION_ROTATE90}
+  DXGI_MODE_ROTATION_ROTATE180   = DXGI_MODE_ROTATION(3);
+  {$EXTERNALSYM DXGI_MODE_ROTATION_ROTATE180}
+  DXGI_MODE_ROTATION_ROTATE270   = DXGI_MODE_ROTATION(4);
+  {$EXTERNALSYM DXGI_MODE_ROTATION_ROTATE270}
+
+
+type
 
   PDXGI_MODE_DESC = ^DXGI_MODE_DESC;
   DXGI_MODE_DESC = record
@@ -241,17 +279,17 @@ implementation
 
 function MAKE_DXGI_HRESULT(code: DWORD): HResult;
 begin
-  Result := MAKE_HRESULT (1,
-                          _FACDXGI,
-                          code);
+  Result := MAKE_HRESULT(1,
+                         _FACDXGI,
+                         code);
 end;
 
 
 function MAKE_DXGI_STATUS(code: DWORD): HResult;
 begin
-  Result := MAKE_HRESULT (0,
-                          _FACDXGI,
-                          code);
+  Result := MAKE_HRESULT(0,
+                         _FACDXGI,
+                         code);
 end;
 
 

@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -30,7 +32,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.19569.0
+// SDK version: 10.0.19041.0
 //
 // Todo: -
 //
@@ -58,9 +60,7 @@
 //==============================================================================
 unit MfPack.DXGI1_6;
 
-  {$HPPEMIT ''}
   {$HPPEMIT '#include "dxgi1_6.h"'}
-  {$HPPEMIT ''}
 
 interface
 
@@ -76,32 +76,62 @@ uses
   Mfpack.DXGI1_5;
 
   {$WEAKPACKAGEUNIT ON}
-  {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$INCLUDE 'MfPack.inc'}
-  {$WARN BOUNDS_ERROR OFF}
+
+// Enums =======================================================================
 
 type
-
   PDXGI_ADAPTER_FLAG3 = ^DXGI_ADAPTER_FLAG3;
-  DXGI_ADAPTER_FLAG3                                = (
-    DXGI_ADAPTER_FLAG3_NONE                         = 0,
-    DXGI_ADAPTER_FLAG3_REMOTE                       = 1,
-    DXGI_ADAPTER_FLAG3_SOFTWARE                     = 2,
-    DXGI_ADAPTER_FLAG3_ACG_COMPATIBLE               = 4,
-    DXGI_ADAPTER_FLAG3_SUPPORT_MONITORED_FENCES     = 8,
-    DXGI_ADAPTER_FLAG3_SUPPORT_NON_MONITORED_FENCES = $10,
-    DXGI_ADAPTER_FLAG3_KEYED_MUTEX_CONFORMANCE      = $20,
-    DXGI_ADAPTER_FLAG3_FORCE_DWORD                  = FORCEDWORD);
+  DXGI_ADAPTER_FLAG3 = DWord;
   {$EXTERNALSYM DXGI_ADAPTER_FLAG3}
+const
+  DXGI_ADAPTER_FLAG3_NONE                         = DXGI_ADAPTER_FLAG3(0);
+  {$EXTERNALSYM DXGI_ADAPTER_FLAG3_NONE}
+  DXGI_ADAPTER_FLAG3_REMOTE                       = DXGI_ADAPTER_FLAG3(1);
+  {$EXTERNALSYM DXGI_ADAPTER_FLAG3_REMOTE}
+  DXGI_ADAPTER_FLAG3_SOFTWARE                     = DXGI_ADAPTER_FLAG3(2);
+  {$EXTERNALSYM DXGI_ADAPTER_FLAG3_SOFTWARE}
+  DXGI_ADAPTER_FLAG3_ACG_COMPATIBLE               = DXGI_ADAPTER_FLAG3(4);
+  {$EXTERNALSYM DXGI_ADAPTER_FLAG3_ACG_COMPATIBLE}
+  DXGI_ADAPTER_FLAG3_SUPPORT_MONITORED_FENCES     = DXGI_ADAPTER_FLAG3(8);
+  {$EXTERNALSYM DXGI_ADAPTER_FLAG3_SUPPORT_MONITORED_FENCES}
+  DXGI_ADAPTER_FLAG3_SUPPORT_NON_MONITORED_FENCES = DXGI_ADAPTER_FLAG3($10);
+  {$EXTERNALSYM DXGI_ADAPTER_FLAG3_SUPPORT_NON_MONITORED_FENCES}
+  DXGI_ADAPTER_FLAG3_KEYED_MUTEX_CONFORMANCE      = DXGI_ADAPTER_FLAG3($20);
+  {$EXTERNALSYM DXGI_ADAPTER_FLAG3_KEYED_MUTEX_CONFORMANCE}
+  //DXGI_ADAPTER_FLAG3_FORCE_DWORD                  = FORCEDWORD;
+
+type
+  PDXGI_HARDWARE_COMPOSITION_SUPPORT_FLAGS = ^DXGI_HARDWARE_COMPOSITION_SUPPORT_FLAGS;
+  DXGI_HARDWARE_COMPOSITION_SUPPORT_FLAGS = DWord;
+  {$EXTERNALSYM DXGI_HARDWARE_COMPOSITION_SUPPORT_FLAGS}
+const
+  DXGI_HARDWARE_COMPOSITION_SUPPORT_FLAG_FULLSCREEN       = DXGI_HARDWARE_COMPOSITION_SUPPORT_FLAGS(1);
+  {$EXTERNALSYM DXGI_HARDWARE_COMPOSITION_SUPPORT_FLAG_FULLSCREEN}
+  DXGI_HARDWARE_COMPOSITION_SUPPORT_FLAG_WINDOWED         = DXGI_HARDWARE_COMPOSITION_SUPPORT_FLAGS(2);
+  {$EXTERNALSYM DXGI_HARDWARE_COMPOSITION_SUPPORT_FLAG_WINDOWED}
+  DXGI_HARDWARE_COMPOSITION_SUPPORT_FLAG_CURSOR_STRETCHED = DXGI_HARDWARE_COMPOSITION_SUPPORT_FLAGS(4);
+  {$EXTERNALSYM DXGI_HARDWARE_COMPOSITION_SUPPORT_FLAG_CURSOR_STRETCHED}
+
+type
+  //+-----------------------------------------------------------------------------
+  //  Enum for GPU Preference categories
+  //------------------------------------------------------------------------------
+  PDXGI_GPU_PREFERENCE = ^DXGI_GPU_PREFERENCE;
+  DXGI_GPU_PREFERENCE = DWord;
+  {$EXTERNALSYM DXGI_GPU_PREFERENCE}
+const
+  DXGI_GPU_PREFERENCE_UNSPECIFIED      = DXGI_GPU_PREFERENCE(0);
+  {$EXTERNALSYM DXGI_GPU_PREFERENCE_UNSPECIFIED}
+  DXGI_GPU_PREFERENCE_MINIMUM_POWER    = DXGI_GPU_PREFERENCE(1);
+  {$EXTERNALSYM DXGI_GPU_PREFERENCE_MINIMUM_POWER}
+  DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE = DXGI_GPU_PREFERENCE(2);
+  {$EXTERNALSYM DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE}
+
+// =============================================================================
 
 
+type
   PDXGI_ADAPTER_DESC3 = ^DXGI_ADAPTER_DESC3;
   DXGI_ADAPTER_DESC3 = record
     Description: array[0..127] of WideChar;
@@ -171,12 +201,6 @@ type
 
 
 //--------------------------------------------------------------------------------------------------------
-  PDXGI_HARDWARE_COMPOSITION_SUPPORT_FLAGS = ^DXGI_HARDWARE_COMPOSITION_SUPPORT_FLAGS;
-  DXGI_HARDWARE_COMPOSITION_SUPPORT_FLAGS                   = (
-    DXGI_HARDWARE_COMPOSITION_SUPPORT_FLAG_FULLSCREEN       = 1,
-    DXGI_HARDWARE_COMPOSITION_SUPPORT_FLAG_WINDOWED         = 2,
-    DXGI_HARDWARE_COMPOSITION_SUPPORT_FLAG_CURSOR_STRETCHED = 4);
-  {$EXTERNALSYM DXGI_HARDWARE_COMPOSITION_SUPPORT_FLAGS}
 
 
   // Interface IDXGIOutput6
@@ -194,18 +218,6 @@ type
   end;
   IID_IDXGIOutput6 = IDXGIOutput6;
   {$EXTERNALSYM IID_IDXGIOutput6}
-
-  //+-----------------------------------------------------------------------------
-  //
-  //  Enum for GPU Preference categories
-  //
-  //------------------------------------------------------------------------------
-  PDXGI_GPU_PREFERENCE = ^DXGI_GPU_PREFERENCE;
-  DXGI_GPU_PREFERENCE               = (
-    DXGI_GPU_PREFERENCE_UNSPECIFIED = 0,
-    DXGI_GPU_PREFERENCE_MINIMUM_POWER,
-    DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE);
-  {$EXTERNALSYM DXGI_GPU_PREFERENCE}
 
 
   // Interface IDXGIFactory6

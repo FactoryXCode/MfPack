@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -30,7 +32,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.19569.0
+// SDK version: 10.0.19041.0
 //
 // Todo: -
 //
@@ -58,9 +60,7 @@
 //==============================================================================
 unit MfPack.DXGI1_5;
 
-  {$HPPEMIT ''}
   {$HPPEMIT '#include "dxgi1_5.h"'}
-  {$HPPEMIT ''}
 
 interface
 
@@ -74,23 +74,72 @@ uses
   MfPack.DXGI1_4;
 
   {$WEAKPACKAGEUNIT ON}
-  {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$INCLUDE 'MfPack.inc'}
 
+
+// Enums =======================================================================
+
 type
-
   PDXGI_OUTDUPL_FLAG = ^DXGI_OUTDUPL_FLAG;
-  DXGI_OUTDUPL_FLAG                         = (
-    DXGI_OUTDUPL_COMPOSITED_UI_CAPTURE_ONLY = 1);
+  DXGI_OUTDUPL_FLAG = DWord;
   {$EXTERNALSYM DXGI_OUTDUPL_FLAG}
+const
+  DXGI_OUTDUPL_COMPOSITED_UI_CAPTURE_ONLY = DXGI_OUTDUPL_FLAG(1);
+  {$EXTERNALSYM DXGI_OUTDUPL_COMPOSITED_UI_CAPTURE_ONLY}
 
+type
+  PDXGI_HDR_METADATA_TYPE = ^DXGI_HDR_METADATA_TYPE;
+  DXGI_HDR_METADATA_TYPE = DWord;
+  {$EXTERNALSYM DXGI_HDR_METADATA_TYPE}
+const
+  DXGI_HDR_METADATA_TYPE_NONE      = DXGI_HDR_METADATA_TYPE(0);
+  {$EXTERNALSYM DXGI_HDR_METADATA_TYPE_NONE}
+  DXGI_HDR_METADATA_TYPE_HDR10     = DXGI_HDR_METADATA_TYPE(1);
+  {$EXTERNALSYM DXGI_HDR_METADATA_TYPE_HDR10}
+  DXGI_HDR_METADATA_TYPE_HDR10PLUS = DXGI_HDR_METADATA_TYPE(2);
+  {$EXTERNALSYM DXGI_HDR_METADATA_TYPE_HDR10PLUS}
+
+type
+  //--------------------------------------------------------------------------------------------------------
+  // Enums for IDXGIDevice4 interface
+  //--------------------------------------------------------------------------------------------------------
+  PDXGI_OFFER_RESOURCE_FLAGS = ^_DXGI_OFFER_RESOURCE_FLAGS;
+  _DXGI_OFFER_RESOURCE_FLAGS = DWord;
+  {$EXTERNALSYM _DXGI_OFFER_RESOURCE_FLAGS}
+  DXGI_OFFER_RESOURCE_FLAGS = _DXGI_OFFER_RESOURCE_FLAGS;
+  {$EXTERNALSYM DXGI_OFFER_RESOURCE_FLAGS}
+const
+  DXGI_OFFER_RESOURCE_FLAG_ALLOW_DECOMMIT = DXGI_OFFER_RESOURCE_FLAGS($1);
+  {$EXTERNALSYM DXGI_OFFER_RESOURCE_FLAG_ALLOW_DECOMMIT}
+
+type
+  PDXGI_RECLAIM_RESOURCE_RESULTS = ^_DXGI_RECLAIM_RESOURCE_RESULTS;
+  _DXGI_RECLAIM_RESOURCE_RESULTS = DWord;
+  {$EXTERNALSYM _DXGI_RECLAIM_RESOURCE_RESULTS}
+  DXGI_RECLAIM_RESOURCE_RESULTS = _DXGI_RECLAIM_RESOURCE_RESULTS;
+  {$EXTERNALSYM DXGI_RECLAIM_RESOURCE_RESULTS}
+const
+  DXGI_RECLAIM_RESOURCE_RESULT_OK            = DXGI_RECLAIM_RESOURCE_RESULTS(0);
+  {$EXTERNALSYM DXGI_RECLAIM_RESOURCE_RESULT_OK}
+  DXGI_RECLAIM_RESOURCE_RESULT_DISCARDED     = DXGI_RECLAIM_RESOURCE_RESULTS(1);
+  {$EXTERNALSYM DXGI_RECLAIM_RESOURCE_RESULT_DISCARDED}
+  DXGI_RECLAIM_RESOURCE_RESULT_NOT_COMMITTED = DXGI_RECLAIM_RESOURCE_RESULTS(2);
+  {$EXTERNALSYM DXGI_RECLAIM_RESOURCE_RESULT_NOT_COMMITTED}
+
+type
+  //+-----------------------------------------------------------------------------
+  //  Enum for IDXGIFactory5.CheckFeatureSupport
+  //------------------------------------------------------------------------------
+  PDXGI_FEATURE = ^DXGI_FEATURE;
+  DXGI_FEATURE = DWord;
+  {$EXTERNALSYM DXGI_FEATURE}
+const
+  DXGI_FEATURE_PRESENT_ALLOW_TEARING = DXGI_FEATURE(0);
+  {$EXTERNALSYM DXGI_FEATURE_PRESENT_ALLOW_TEARING}
+
+// =============================================================================
+
+type
 
   // Interface IDXGIOutput5
   // ======================
@@ -116,13 +165,6 @@ type
   //  HDR MetaData types
   //
   //------------------------------------------------------------------------------
-
-  PDXGI_HDR_METADATA_TYPE = ^DXGI_HDR_METADATA_TYPE;
-  DXGI_HDR_METADATA_TYPE             = (
-    DXGI_HDR_METADATA_TYPE_NONE      = 0,
-    DXGI_HDR_METADATA_TYPE_HDR10     = 1,
-    DXGI_HDR_METADATA_TYPE_HDR10PLUS = 2);
-  {$EXTERNALSYM DXGI_HDR_METADATA_TYPE}
 
   PDXGI_HDR_METADATA_HDR10 = ^DXGI_HDR_METADATA_HDR10;
   DXGI_HDR_METADATA_HDR10 = record
@@ -163,27 +205,6 @@ type
   {$EXTERNALSYM IID_IDXGISwapChain4}
 
 
-  //--------------------------------------------------------------------------------------------------------
-  // IDXGIDevice4 interface
-  //--------------------------------------------------------------------------------------------------------
-  PDXGI_OFFER_RESOURCE_FLAGS = ^_DXGI_OFFER_RESOURCE_FLAGS;
-  _DXGI_OFFER_RESOURCE_FLAGS                = (
-    DXGI_OFFER_RESOURCE_FLAG_ALLOW_DECOMMIT = $1);
-  {$EXTERNALSYM _DXGI_OFFER_RESOURCE_FLAGS}
-  DXGI_OFFER_RESOURCE_FLAGS = _DXGI_OFFER_RESOURCE_FLAGS;
-  {$EXTERNALSYM DXGI_OFFER_RESOURCE_FLAGS}
-
-
-  PDXGI_RECLAIM_RESOURCE_RESULTS = ^_DXGI_RECLAIM_RESOURCE_RESULTS;
-  _DXGI_RECLAIM_RESOURCE_RESULTS               = (
-    DXGI_RECLAIM_RESOURCE_RESULT_OK            = 0,
-    DXGI_RECLAIM_RESOURCE_RESULT_DISCARDED     = 1,
-    DXGI_RECLAIM_RESOURCE_RESULT_NOT_COMMITTED = 2);
-  {$EXTERNALSYM _DXGI_RECLAIM_RESOURCE_RESULTS}
-  DXGI_RECLAIM_RESOURCE_RESULTS = _DXGI_RECLAIM_RESOURCE_RESULTS;
-  {$EXTERNALSYM DXGI_RECLAIM_RESOURCE_RESULTS}
-
-
   // Interface IDXGIDevice4
   // ======================
   //
@@ -204,17 +225,6 @@ type
   end;
   IID_IDXGIDevice4 = IDXGIDevice4;
   {$EXTERNALSYM IID_IDXGIDevice4}
-
-
-  //+-----------------------------------------------------------------------------
-  //
-  //  Enum for IDXGIFactory5.CheckFeatureSupport
-  //
-  //------------------------------------------------------------------------------
-  PDXGI_FEATURE = ^DXGI_FEATURE;
-  DXGI_FEATURE                         = (
-    DXGI_FEATURE_PRESENT_ALLOW_TEARING = 0);
-  {$EXTERNALSYM DXGI_FEATURE}
 
 
   // Interface IDXGIFactory5

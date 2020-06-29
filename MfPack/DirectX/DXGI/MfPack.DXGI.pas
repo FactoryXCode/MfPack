@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -30,7 +32,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.19569.0
+// SDK version: 10.0.19041.0
 //
 // Todo: -
 //
@@ -58,9 +60,7 @@
 //==============================================================================
 unit MfPack.DXGI;
 
-  {$HPPEMIT ''}
   {$HPPEMIT '#include "dxgi.h"'}
-  {$HPPEMIT ''}
 
 interface
 
@@ -75,16 +75,8 @@ uses
   MfPack.DXGIFormat;
 
   {$WEAKPACKAGEUNIT ON}
-  {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$INCLUDE 'MfPack.inc'}
-  {$WARN BOUNDS_ERROR OFF}
+
 
 //--------------------------------------------------------------------------------------------------------
 // DXGI API-only types
@@ -284,15 +276,20 @@ type
   {$EXTERNALSYM DXGI_SHARED_RESOURCE}
 
 //--------------------------------------------------------------------------------------------------------
-
+type
   PDXGI_RESIDENCY = ^DXGI_RESIDENCY;
-  DXGI_RESIDENCY                             = (
-    DXGI_RESIDENCY_FULLY_RESIDENT            = 1,
-    DXGI_RESIDENCY_RESIDENT_IN_SHARED_MEMORY = 2,
-    DXGI_RESIDENCY_EVICTED_TO_DISK           = 3);
+  DXGI_RESIDENCY = DWord;
   {$EXTERNALSYM DXGI_RESIDENCY}
+const
+  DXGI_RESIDENCY_FULLY_RESIDENT            = DXGI_RESIDENCY(1);
+  {$EXTERNALSYM DXGI_RESIDENCY_FULLY_RESIDENT}
+  DXGI_RESIDENCY_RESIDENT_IN_SHARED_MEMORY = DXGI_RESIDENCY(2);
+  {$EXTERNALSYM DXGI_RESIDENCY_RESIDENT_IN_SHARED_MEMORY}
+  DXGI_RESIDENCY_EVICTED_TO_DISK           = DXGI_RESIDENCY(3);
+  {$EXTERNALSYM DXGI_RESIDENCY_EVICTED_TO_DISK}
 
 //--------------------------------------------------------------------------------------------------------
+type
   PDXGI_SURFACE_DESC = ^DXGI_SURFACE_DESC;
   DXGI_SURFACE_DESC = record
     Width: UINT;
@@ -303,33 +300,53 @@ type
   {$EXTERNALSYM DXGI_SURFACE_DESC}
 
 //--------------------------------------------------------------------------------------------------------
+type
   PDXGI_SWAP_EFFECT = ^DXGI_SWAP_EFFECT;
-  DXGI_SWAP_EFFECT                   = (
-    DXGI_SWAP_EFFECT_DISCARD         = 0,
-    DXGI_SWAP_EFFECT_SEQUENTIAL      = 1,
-    DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL = 3,
-    DXGI_SWAP_EFFECT_FLIP_DISCARD    = 4);
+  DXGI_SWAP_EFFECT = DWord;
   {$EXTERNALSYM DXGI_SWAP_EFFECT}
+const
+  DXGI_SWAP_EFFECT_DISCARD         = DXGI_SWAP_EFFECT(0);
+  {$EXTERNALSYM DXGI_SWAP_EFFECT_DISCARD}
+  DXGI_SWAP_EFFECT_SEQUENTIAL      = DXGI_SWAP_EFFECT(1);
+  {$EXTERNALSYM DXGI_SWAP_EFFECT_SEQUENTIAL}
+  DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL = DXGI_SWAP_EFFECT(3);
+  {$EXTERNALSYM DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL}
+  DXGI_SWAP_EFFECT_FLIP_DISCARD    = DXGI_SWAP_EFFECT(4);
+  {$EXTERNALSYM DXGI_SWAP_EFFECT_FLIP_DISCARD}
 
 //--------------------------------------------------------------------------------------------------------
+type
   PDXGI_SWAP_CHAIN_FLAG = ^DXGI_SWAP_CHAIN_FLAG;
-  DXGI_SWAP_CHAIN_FLAG                                          = (
-    DXGI_SWAP_CHAIN_FLAG_NONPREROTATED                          = 1,
-    DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH                      = 2,
-    DXGI_SWAP_CHAIN_FLAG_GDI_COMPATIBLE                         = 4,
-    DXGI_SWAP_CHAIN_FLAG_RESTRICTED_CONTENT                     = 8,
-    DXGI_SWAP_CHAIN_FLAG_RESTRICT_SHARED_RESOURCE_DRIVER        = 16,
-    DXGI_SWAP_CHAIN_FLAG_DISPLAY_ONLY                           = 32,
-    DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT          = 64,
-    DXGI_SWAP_CHAIN_FLAG_FOREGROUND_LAYER                       = 128,
-    DXGI_SWAP_CHAIN_FLAG_FULLSCREEN_VIDEO                       = 256,
-    DXGI_SWAP_CHAIN_FLAG_YUV_VIDEO                              = 512,
-    DXGI_SWAP_CHAIN_FLAG_HW_PROTECTED                           = 1024,
-    DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING                          = 2048,
-    DXGI_SWAP_CHAIN_FLAG_RESTRICTED_TO_ALL_HOLOGRAPHIC_DISPLAYS = 4096);
+  DXGI_SWAP_CHAIN_FLAG = DWord;
   {$EXTERNALSYM DXGI_SWAP_CHAIN_FLAG}
+const
+  DXGI_SWAP_CHAIN_FLAG_NONPREROTATED                          = DXGI_SWAP_CHAIN_FLAG(1);
+  DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH                      = DXGI_SWAP_CHAIN_FLAG(2);
+  DXGI_SWAP_CHAIN_FLAG_GDI_COMPATIBLE                         = DXGI_SWAP_CHAIN_FLAG(4);
+  DXGI_SWAP_CHAIN_FLAG_RESTRICTED_CONTENT                     = DXGI_SWAP_CHAIN_FLAG(8);
+  DXGI_SWAP_CHAIN_FLAG_RESTRICT_SHARED_RESOURCE_DRIVER        = DXGI_SWAP_CHAIN_FLAG(16);
+  DXGI_SWAP_CHAIN_FLAG_DISPLAY_ONLY                           = DXGI_SWAP_CHAIN_FLAG(32);
+  DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT          = DXGI_SWAP_CHAIN_FLAG(64);
+  DXGI_SWAP_CHAIN_FLAG_FOREGROUND_LAYER                       = DXGI_SWAP_CHAIN_FLAG(128);
+  DXGI_SWAP_CHAIN_FLAG_FULLSCREEN_VIDEO                       = DXGI_SWAP_CHAIN_FLAG(256);
+  DXGI_SWAP_CHAIN_FLAG_YUV_VIDEO                              = DXGI_SWAP_CHAIN_FLAG(512);
+  DXGI_SWAP_CHAIN_FLAG_HW_PROTECTED                           = DXGI_SWAP_CHAIN_FLAG(1024);
+  DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING                          = DXGI_SWAP_CHAIN_FLAG(2048);
+  DXGI_SWAP_CHAIN_FLAG_RESTRICTED_TO_ALL_HOLOGRAPHIC_DISPLAYS = DXGI_SWAP_CHAIN_FLAG(4096);
+
+type
+  PDXGI_ADAPTER_FLAG = ^DXGI_ADAPTER_FLAG;
+  DXGI_ADAPTER_FLAG = DWord;
+  {$EXTERNALSYM DXGI_ADAPTER_FLAG}
+const
+  DXGI_ADAPTER_FLAG_NONE        = DXGI_ADAPTER_FLAG(0);
+  DXGI_ADAPTER_FLAG_REMOTE      = DXGI_ADAPTER_FLAG(1);
+  DXGI_ADAPTER_FLAG_SOFTWARE    = DXGI_ADAPTER_FLAG(2);
+  //DXGI_ADAPTER_FLAG_FORCE_DWORD = FORCEDWORD;
 
 //--------------------------------------------------------------------------------------------------------
+type
+  PDXGISwapChainDesc = ^DXGI_SWAP_CHAIN_DESC;
   PDXGI_SWAP_CHAIN_DESC = ^DXGI_SWAP_CHAIN_DESC;
   DXGI_SWAP_CHAIN_DESC = record
     BufferDesc: DXGI_MODE_DESC;
@@ -674,16 +691,6 @@ type
   //--------------------------------------------------------------------------------------------------------
   // DXGI 1.1
   //--------------------------------------------------------------------------------------------------------
-
-
-//--------------------------------------------------------------------------------------------------------
-  PDXGI_ADAPTER_FLAG = ^DXGI_ADAPTER_FLAG;
-  DXGI_ADAPTER_FLAG               = (
-    DXGI_ADAPTER_FLAG_NONE        = 0,
-    DXGI_ADAPTER_FLAG_REMOTE      = 1,
-    DXGI_ADAPTER_FLAG_SOFTWARE    = 2,
-    DXGI_ADAPTER_FLAG_FORCE_DWORD = FORCEDWORD);
-  {$EXTERNALSYM DXGI_ADAPTER_FLAG}
 
 //--------------------------------------------------------------------------------------------------------
   PDXGI_ADAPTER_DESC1 = ^DXGI_ADAPTER_DESC1;

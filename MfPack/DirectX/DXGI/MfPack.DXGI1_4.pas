@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -30,7 +32,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.19569.0
+// SDK version: 10.0.19041.0
 //
 // Todo: -
 //
@@ -58,9 +60,7 @@
 //==============================================================================
 unit MfPack.DXGI1_4;
 
-  {$HPPEMIT ''}
   {$HPPEMIT '#include "dxgi1_4.h"'}
-  {$HPPEMIT ''}
 
 interface
 
@@ -73,29 +73,51 @@ uses
   MfPack.DXGI1_3;
 
   {$WEAKPACKAGEUNIT ON}
-  {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$INCLUDE 'MfPack.inc'}
 
+// Enums =======================================================================
+
+type
+  //+---------------------------------------------------------------------------
+  //
+  //  Return flags from CheckColorSpaceSupport
+  //
+  //----------------------------------------------------------------------------
+  PDXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG = ^DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG;
+  DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG = DWord;
+  {$EXTERNALSYM DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG}
+const
+  DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG_PRESENT         = DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG($00000001);
+  {$EXTERNALSYM DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG_PRESENT}
+  DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG_OVERLAY_PRESENT = DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG($00000002);
+  {$EXTERNALSYM DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG_OVERLAY_PRESENT}
 
 type
   //+-----------------------------------------------------------------------------
   //
-  //  Return flags from CheckColorSpaceSupport
+  //  Return flags from CheckOverlayColorSpaceSupport
   //
   //------------------------------------------------------------------------------
-  PDXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG = ^DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG;
-  DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG                   = (
-    DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG_PRESENT         = $00000001,
-    DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG_OVERLAY_PRESENT = $00000002);
-  {$EXTERNALSYM DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG}
+  PDXGI_OVERLAY_COLOR_SPACE_SUPPORT_FLAG = ^DXGI_OVERLAY_COLOR_SPACE_SUPPORT_FLAG;
+  DXGI_OVERLAY_COLOR_SPACE_SUPPORT_FLAG = DWord;
+  {$EXTERNALSYM DXGI_OVERLAY_COLOR_SPACE_SUPPORT_FLAG}
+const
+  DXGI_OVERLAY_COLOR_SPACE_SUPPORT_FLAG_PRESENT = DXGI_OVERLAY_COLOR_SPACE_SUPPORT_FLAG($00000001);
+  {$EXTERNALSYM DXGI_OVERLAY_COLOR_SPACE_SUPPORT_FLAG_PRESENT}
 
+type
+  PDXGI_MEMORY_SEGMENT_GROUP = ^DXGI_MEMORY_SEGMENT_GROUP;
+  DXGI_MEMORY_SEGMENT_GROUP = DWord;
+  {$EXTERNALSYM DXGI_MEMORY_SEGMENT_GROUP}
+const
+  DXGI_MEMORY_SEGMENT_GROUP_LOCAL     = DXGI_MEMORY_SEGMENT_GROUP(0);
+  {$EXTERNALSYM DXGI_MEMORY_SEGMENT_GROUP_LOCAL}
+  DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL = DXGI_MEMORY_SEGMENT_GROUP(1);
+  {$EXTERNALSYM DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL}
+
+// =============================================================================
+
+type
 
   // Interface IDXGISwapChain3
   // =========================
@@ -123,17 +145,6 @@ type
   end;
   IID_IDXGISwapChain3 = IDXGISwapChain3;
   {$EXTERNALSYM IID_IDXGISwapChain3}
-
-
-  //+-----------------------------------------------------------------------------
-  //
-  //  Return flags from CheckOverlayColorSpaceSupport
-  //
-  //------------------------------------------------------------------------------
-  PDXGI_OVERLAY_COLOR_SPACE_SUPPORT_FLAG = ^DXGI_OVERLAY_COLOR_SPACE_SUPPORT_FLAG;
-  DXGI_OVERLAY_COLOR_SPACE_SUPPORT_FLAG           = (
-    DXGI_OVERLAY_COLOR_SPACE_SUPPORT_FLAG_PRESENT = $00000001);
-  {$EXTERNALSYM DXGI_OVERLAY_COLOR_SPACE_SUPPORT_FLAG}
 
 
   // Interface IDXGIOutput4
@@ -173,12 +184,6 @@ type
   IID_IDXGIFactory4 = IDXGIFactory4;
   {$EXTERNALSYM IID_IDXGIFactory4}
 
-
-  PDXGI_MEMORY_SEGMENT_GROUP = ^DXGI_MEMORY_SEGMENT_GROUP;
-  DXGI_MEMORY_SEGMENT_GROUP             = (
-    DXGI_MEMORY_SEGMENT_GROUP_LOCAL     = 0,
-    DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL = 1);
-  {$EXTERNALSYM DXGI_MEMORY_SEGMENT_GROUP}
 
   PDXGI_QUERY_VIDEO_MEMORY_INFO = ^DXGI_QUERY_VIDEO_MEMORY_INFO;
   DXGI_QUERY_VIDEO_MEMORY_INFO = record
