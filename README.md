@@ -25,9 +25,9 @@
 
 In Memoriam: Rudy Velthuis 1960 ~ 2019. Thanks Rudy!
 
-Version X 2.6.4 Kraftwerk release.  
+Version X 2.6.4 Kraftwerk #1 Autobahn release.  
 Delphi XE2 up to and including Delphi 10.3.3.  
-SDK version: 10.0.19569.0, May 2020 OS update (20H1)
+SDK version: 10.0.19041.0, May 2020 OS update (2004)
 
 
 # Samples
