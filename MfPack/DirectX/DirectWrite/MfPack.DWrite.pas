@@ -17,21 +17,23 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
-// Remarks: - Requires Windows 7 or later.
+// Remarks: - Requires Windows Vista or later.
 //
 // Related objects: -
 // Related projects: MfPackX264
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.19569.0
+// SDK version: 10.0.19041.0
 //
 // Todo: -
 //
@@ -72,14 +74,6 @@ uses
   MfPack.DCommon;
 
   {$WEAKPACKAGEUNIT ON}
-  {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$INCLUDE 'MfPack.inc'}
 
 const
@@ -89,218 +83,276 @@ const
   {$EXTERNALSYM DWRITE_ALPHA_MAX}
 
 type
-
   // The type of a font represented by a single font file.
   // Font formats that consist of multiple files, e.g. Type 1 .PFM and .PFB, have
   // separate enum values for each of the file type.
   PDWRITE_FONT_FILE_TYPE = ^DWRITE_FONT_FILE_TYPE;
-  DWRITE_FONT_FILE_TYPE = (
-    // Font type is not recognized by the DirectWrite font system.
-    DWRITE_FONT_FILE_TYPE_UNKNOWN,
-    // OpenType font with CFF outlines.
-    DWRITE_FONT_FILE_TYPE_CFF,
-    // OpenType font with TrueType outlines.
-    DWRITE_FONT_FILE_TYPE_TRUETYPE,
-    // OpenType font that contains a TrueType collection.
-    DWRITE_FONT_FILE_TYPE_OPENTYPE_COLLECTION,
-    // Type 1 PFM font.
-    DWRITE_FONT_FILE_TYPE_TYPE1_PFM,
-    // Type 1 PFB font.
-    DWRITE_FONT_FILE_TYPE_TYPE1_PFB,
-    // Vector .FON font.
-    DWRITE_FONT_FILE_TYPE_VECTOR,
-    // Bitmap .FON font.
-    DWRITE_FONT_FILE_TYPE_BITMAP,
-    // The following name is obsolete, but kept as an alias to avoid breaking existing code.
-    DWRITE_FONT_FILE_TYPE_TRUETYPE_COLLECTION = DWRITE_FONT_FILE_TYPE_OPENTYPE_COLLECTION);
+  DWRITE_FONT_FILE_TYPE = DWord;
   {$EXTERNALSYM DWRITE_FONT_FILE_TYPE}
+const
+  // Font type is not recognized by the DirectWrite font system.
+  DWRITE_FONT_FILE_TYPE_UNKNOWN             = DWRITE_FONT_FILE_TYPE(0);
+  {$EXTERNALSYM DWRITE_FONT_FILE_TYPE_UNKNOWN}
+  // OpenType font with CFF outlines.
+  DWRITE_FONT_FILE_TYPE_CFF                 = DWRITE_FONT_FILE_TYPE(1);
+  {$EXTERNALSYM DWRITE_FONT_FILE_TYPE_CFF}
+  // OpenType font with TrueType outlines.
+  DWRITE_FONT_FILE_TYPE_TRUETYPE            = DWRITE_FONT_FILE_TYPE(2);
+  {$EXTERNALSYM DWRITE_FONT_FILE_TYPE_TRUETYPE}
+  // OpenType font that contains a TrueType collection.
+  DWRITE_FONT_FILE_TYPE_OPENTYPE_COLLECTION = DWRITE_FONT_FILE_TYPE(3);
+  {$EXTERNALSYM DWRITE_FONT_FILE_TYPE_OPENTYPE_COLLECTION}
+  // Type 1 PFM font.
+  DWRITE_FONT_FILE_TYPE_TYPE1_PFM           = DWRITE_FONT_FILE_TYPE(4);
+  {$EXTERNALSYM DWRITE_FONT_FILE_TYPE_TYPE1_PFM}
+  // Type 1 PFB font.
+  DWRITE_FONT_FILE_TYPE_TYPE1_PFB           = DWRITE_FONT_FILE_TYPE(5);
+  {$EXTERNALSYM DWRITE_FONT_FILE_TYPE_TYPE1_PFB}
+  // Vector .FON font.
+  DWRITE_FONT_FILE_TYPE_VECTOR              = DWRITE_FONT_FILE_TYPE(6);
+  {$EXTERNALSYM DWRITE_FONT_FILE_TYPE_VECTOR}
+  // Bitmap .FON font.
+  DWRITE_FONT_FILE_TYPE_BITMAP              = DWRITE_FONT_FILE_TYPE(7);
+  {$EXTERNALSYM DWRITE_FONT_FILE_TYPE_BITMAP}
+  // The following name is obsolete, but kept as an alias to avoid breaking existing code.
+  DWRITE_FONT_FILE_TYPE_TRUETYPE_COLLECTION = DWRITE_FONT_FILE_TYPE_OPENTYPE_COLLECTION;
+  {$EXTERNALSYM DWRITE_FONT_FILE_TYPE_TRUETYPE_COLLECTION}
 
-
+type
   // The file format of a complete font face.
   // Font formats that consist of multiple files, e.g. Type 1 .PFM and .PFB, have
   // a single enum entry.
   PDWRITE_FONT_FACE_TYPE = ^DWRITE_FONT_FACE_TYPE;
-  DWRITE_FONT_FACE_TYPE = (
-    // OpenType font face with CFF outlines.
-    DWRITE_FONT_FACE_TYPE_CFF,
-    // OpenType font face with TrueType outlines.
-    DWRITE_FONT_FACE_TYPE_TRUETYPE,
-    // OpenType font face that is a part of a TrueType or CFF collection.
-    DWRITE_FONT_FACE_TYPE_OPENTYPE_COLLECTION,
-    // A Type 1 font face.
-    DWRITE_FONT_FACE_TYPE_TYPE1,
-    // A vector .FON format font face.
-    DWRITE_FONT_FACE_TYPE_VECTOR,
-    // A bitmap .FON format font face.
-    DWRITE_FONT_FACE_TYPE_BITMAP,
-    // Font face type is not recognized by the DirectWrite font system.
-    DWRITE_FONT_FACE_TYPE_UNKNOWN,
-    // The font data includes only the CFF table from an OpenType CFF font.
-    // This font face type can be used only for embedded fonts (i.e., custom
-    // font file loaders) and the resulting font face object supports only the
-    // minimum functionality necessary to render glyphs.
-    DWRITE_FONT_FACE_TYPE_RAW_CFF,
-    // The following name is obsolete, but kept as an alias to avoid breaking existing code.
-    DWRITE_FONT_FACE_TYPE_TRUETYPE_COLLECTION = DWRITE_FONT_FACE_TYPE_OPENTYPE_COLLECTION);
+  DWRITE_FONT_FACE_TYPE = DWord;
   {$EXTERNALSYM DWRITE_FONT_FACE_TYPE}
+const
+  // OpenType font face with CFF outlines.
+  DWRITE_FONT_FACE_TYPE_CFF                 = DWRITE_FONT_FACE_TYPE(0);
+  {$EXTERNALSYM DWRITE_FONT_FACE_TYPE_CFF}
+  // OpenType font face with TrueType outlines.
+  DWRITE_FONT_FACE_TYPE_TRUETYPE            = DWRITE_FONT_FACE_TYPE(1);
+  {$EXTERNALSYM DWRITE_FONT_FACE_TYPE_TRUETYPE}
+  // OpenType font face that is a part of a TrueType or CFF collection.
+  DWRITE_FONT_FACE_TYPE_OPENTYPE_COLLECTION = DWRITE_FONT_FACE_TYPE(2);
+  {$EXTERNALSYM DWRITE_FONT_FACE_TYPE_OPENTYPE_COLLECTION}
+  // A Type 1 font face.
+  DWRITE_FONT_FACE_TYPE_TYPE1               = DWRITE_FONT_FACE_TYPE(3);
+  {$EXTERNALSYM DWRITE_FONT_FACE_TYPE_TYPE1}
+  // A vector .FON format font face.
+  DWRITE_FONT_FACE_TYPE_VECTOR              = DWRITE_FONT_FACE_TYPE(4);
+  {$EXTERNALSYM DWRITE_FONT_FACE_TYPE_VECTOR}
+  // A bitmap .FON format font face.
+  DWRITE_FONT_FACE_TYPE_BITMAP              = DWRITE_FONT_FACE_TYPE(5);
+  {$EXTERNALSYM DWRITE_FONT_FACE_TYPE_BITMAP}
+  // Font face type is not recognized by the DirectWrite font system.
+  DWRITE_FONT_FACE_TYPE_UNKNOWN             = DWRITE_FONT_FACE_TYPE(6);
+  {$EXTERNALSYM DWRITE_FONT_FACE_TYPE_UNKNOWN}
+  // The font data includes only the CFF table from an OpenType CFF font.
+  // This font face type can be used only for embedded fonts (i.e., custom
+  // font file loaders) and the resulting font face object supports only the
+  // minimum functionality necessary to render glyphs.
+  DWRITE_FONT_FACE_TYPE_RAW_CFF             = DWRITE_FONT_FACE_TYPE(7);
+  {$EXTERNALSYM DWRITE_FONT_FACE_TYPE_RAW_CFF}
+  // The following name is obsolete, but kept as an alias to avoid breaking existing code.
+  DWRITE_FONT_FACE_TYPE_TRUETYPE_COLLECTION = DWRITE_FONT_FACE_TYPE_OPENTYPE_COLLECTION;
+  {$EXTERNALSYM DWRITE_FONT_FACE_TYPE_TRUETYPE_COLLECTION}
 
-
+type
   // Specifies algorithmic style simulations to be applied to the font face.
   // Bold and oblique simulations can be combined via bitwise OR operation.
   PDWRITE_FONT_SIMULATIONS = ^DWRITE_FONT_SIMULATIONS;
-  DWRITE_FONT_SIMULATIONS = (
-    // No simulations are performed.
-    DWRITE_FONT_SIMULATIONS_NONE    = $0000,
-    // Algorithmic emboldening is performed.
-    DWRITE_FONT_SIMULATIONS_BOLD    = $0001,
-    // Algorithmic italicization is performed.
-    DWRITE_FONT_SIMULATIONS_OBLIQUE = $0002);
+  DWRITE_FONT_SIMULATIONS = DWord;
   {$EXTERNALSYM DWRITE_FONT_SIMULATIONS}
+const
+  // No simulations are performed.
+  DWRITE_FONT_SIMULATIONS_NONE    = DWRITE_FONT_SIMULATIONS($0000);
+  {$EXTERNALSYM DWRITE_FONT_SIMULATIONS_NONE}
+  // Algorithmic emboldening is performed.
+  DWRITE_FONT_SIMULATIONS_BOLD    = DWRITE_FONT_SIMULATIONS($0001);
+  {$EXTERNALSYM DWRITE_FONT_SIMULATIONS_BOLD}
+  // Algorithmic italicization is performed.
+  DWRITE_FONT_SIMULATIONS_OBLIQUE = DWRITE_FONT_SIMULATIONS($0002);
+  {$EXTERNALSYM DWRITE_FONT_SIMULATIONS_OBLIQUE}
 
-
+type
   // The font weight enumeration describes common values for degree of blackness or thickness of strokes of characters in a font.
   // Font weight values less than 1 or greater than 999 are considered to be invalid, and they are rejected by font API functions.
   PDWRITE_FONT_WEIGHT = ^DWRITE_FONT_WEIGHT;
-  DWRITE_FONT_WEIGHT = (
-    // Predefined font weight : Thin (100).
-    DWRITE_FONT_WEIGHT_THIN = 100,
-    // Predefined font weight : Extra-light (200).
-    DWRITE_FONT_WEIGHT_EXTRA_LIGHT = 200,
-    // Predefined font weight : Ultra-light (200).
-    DWRITE_FONT_WEIGHT_ULTRA_LIGHT = 200,
-    // Predefined font weight : Light (300).
-    DWRITE_FONT_WEIGHT_LIGHT = 300,
-    // Predefined font weight : Semi-light (350).
-    DWRITE_FONT_WEIGHT_SEMI_LIGHT = 350,
-    // Predefined font weight : Normal (400).
-    DWRITE_FONT_WEIGHT_NORMAL = 400,
-    // Predefined font weight : Regular (400).
-    DWRITE_FONT_WEIGHT_REGULAR = 400,
-    // Predefined font weight : Medium (500).
-    DWRITE_FONT_WEIGHT_MEDIUM = 500,
-    // Predefined font weight : Demi-bold (600).
-    DWRITE_FONT_WEIGHT_DEMI_BOLD = 600,
-    // Predefined font weight : Semi-bold (600).
-    DWRITE_FONT_WEIGHT_SEMI_BOLD = 600,
-    // Predefined font weight : Bold (700).
-    DWRITE_FONT_WEIGHT_BOLD = 700,
-    // Predefined font weight : Extra-bold (800).
-    DWRITE_FONT_WEIGHT_EXTRA_BOLD = 800,
-    // Predefined font weight : Ultra-bold (800).
-    DWRITE_FONT_WEIGHT_ULTRA_BOLD = 800,
-    // Predefined font weight : Black (900).
-    DWRITE_FONT_WEIGHT_BLACK = 900,
-    {$EXTERNALSYM DWRITE_FONT_WEIGHT_BLACK}
-    // Predefined font weight : Heavy (900).
-    DWRITE_FONT_WEIGHT_HEAVY = 900,
-    // Predefined font weight : Extra-black (950).
-    DWRITE_FONT_WEIGHT_EXTRA_BLACK = 950,
-    // Predefined font weight : Ultra-black (950).
-    DWRITE_FONT_WEIGHT_ULTRA_BLACK = 950);
+  DWRITE_FONT_WEIGHT = DWord;
   {$EXTERNALSYM DWRITE_FONT_WEIGHT}
+const
+  // Predefined font weight : Thin (100).
+  DWRITE_FONT_WEIGHT_THIN        = DWRITE_FONT_WEIGHT(100);
+  {$EXTERNALSYM DWRITE_FONT_WEIGHT_THIN}
+  // Predefined font weight : Extra-light (200).
+  DWRITE_FONT_WEIGHT_EXTRA_LIGHT = DWRITE_FONT_WEIGHT(200);
+  {$EXTERNALSYM DWRITE_FONT_WEIGHT_EXTRA_LIGHT}
+  // Predefined font weight : Ultra-light (200).
+  DWRITE_FONT_WEIGHT_ULTRA_LIGHT = DWRITE_FONT_WEIGHT(200);
+  {$EXTERNALSYM DWRITE_FONT_WEIGHT_ULTRA_LIGHT}
+  // Predefined font weight : Light (300).
+  DWRITE_FONT_WEIGHT_LIGHT       = DWRITE_FONT_WEIGHT(300);
+  {$EXTERNALSYM DWRITE_FONT_WEIGHT_LIGHT}
+  // Predefined font weight : Semi-light (350).
+  DWRITE_FONT_WEIGHT_SEMI_LIGHT  = DWRITE_FONT_WEIGHT(350);
+  {$EXTERNALSYM DWRITE_FONT_WEIGHT_SEMI_LIGHT}
+  // Predefined font weight : Normal (400).
+  DWRITE_FONT_WEIGHT_NORMAL      = DWRITE_FONT_WEIGHT(400);
+  {$EXTERNALSYM DWRITE_FONT_WEIGHT_NORMAL}
+  // Predefined font weight : Regular (400).
+  DWRITE_FONT_WEIGHT_REGULAR     = DWRITE_FONT_WEIGHT(400);
+  {$EXTERNALSYM DWRITE_FONT_WEIGHT_REGULAR}
+  // Predefined font weight : Medium (500).
+  DWRITE_FONT_WEIGHT_MEDIUM      = DWRITE_FONT_WEIGHT(500);
+  {$EXTERNALSYM DWRITE_FONT_WEIGHT_MEDIUM}
+  // Predefined font weight : Demi-bold (600).
+  DWRITE_FONT_WEIGHT_DEMI_BOLD   = DWRITE_FONT_WEIGHT(600);
+  {$EXTERNALSYM DWRITE_FONT_WEIGHT_DEMI_BOLD}
+  // Predefined font weight : Semi-bold (600).
+  DWRITE_FONT_WEIGHT_SEMI_BOLD   = DWRITE_FONT_WEIGHT(600);
+  {$EXTERNALSYM DWRITE_FONT_WEIGHT_SEMI_BOLD}
+  // Predefined font weight : Bold (700).
+  DWRITE_FONT_WEIGHT_BOLD        = DWRITE_FONT_WEIGHT(700);
+  {$EXTERNALSYM DWRITE_FONT_WEIGHT_BOLD}
+  // Predefined font weight : Extra-bold (800).
+  DWRITE_FONT_WEIGHT_EXTRA_BOLD  = DWRITE_FONT_WEIGHT(800);
+  {$EXTERNALSYM DWRITE_FONT_WEIGHT_EXTRA_BOLD}
+  // Predefined font weight : Ultra-bold (800).
+  DWRITE_FONT_WEIGHT_ULTRA_BOLD  = DWRITE_FONT_WEIGHT(800);
+  {$EXTERNALSYM DWRITE_FONT_WEIGHT_ULTRA_BOLD}
+  // Predefined font weight : Black (900).
+  DWRITE_FONT_WEIGHT_BLACK       = DWRITE_FONT_WEIGHT(900);
+  {$EXTERNALSYM DWRITE_FONT_WEIGHT_BLACK}
+  // Predefined font weight : Heavy (900).
+  DWRITE_FONT_WEIGHT_HEAVY       = DWRITE_FONT_WEIGHT(900);
+  {$EXTERNALSYM DWRITE_FONT_WEIGHT_HEAVY}
+  // Predefined font weight : Extra-black (950).
+  DWRITE_FONT_WEIGHT_EXTRA_BLACK = DWRITE_FONT_WEIGHT(950);
+  {$EXTERNALSYM DWRITE_FONT_WEIGHT_EXTRA_BLACK}
+  // Predefined font weight : Ultra-black (950).
+  DWRITE_FONT_WEIGHT_ULTRA_BLACK = DWRITE_FONT_WEIGHT(950);
+  {$EXTERNALSYM DWRITE_FONT_WEIGHT_ULTRA_BLACK}
 
-
+type
   // The font stretch enumeration describes relative change from the normal aspect ratio
   // as specified by a font designer for the glyphs in a font.
   // Values less than 1 or greater than 9 are considered to be invalid, and they are rejected by font API functions.
   PDWRITE_FONT_STRETCH = ^DWRITE_FONT_STRETCH;
-  DWRITE_FONT_STRETCH = (
-    // Predefined font stretch : Not known (0).
-    DWRITE_FONT_STRETCH_UNDEFINED = 0,
-    // Predefined font stretch : Ultra-condensed (1).
-    DWRITE_FONT_STRETCH_ULTRA_CONDENSED = 1,
-    // Predefined font stretch : Extra-condensed (2).
-    DWRITE_FONT_STRETCH_EXTRA_CONDENSED = 2,
-    // Predefined font stretch : Condensed (3).
-    DWRITE_FONT_STRETCH_CONDENSED = 3,
-    // Predefined font stretch : Semi-condensed (4).
-    DWRITE_FONT_STRETCH_SEMI_CONDENSED = 4,
-    // Predefined font stretch : Normal (5).
-    DWRITE_FONT_STRETCH_NORMAL = 5,
-    // Predefined font stretch : Medium (5).
-    DWRITE_FONT_STRETCH_MEDIUM = 5,
-    // Predefined font stretch : Semi-expanded (6).
-    DWRITE_FONT_STRETCH_SEMI_EXPANDED = 6,
-    // Predefined font stretch : Expanded (7).
-    DWRITE_FONT_STRETCH_EXPANDED = 7,
-    // Predefined font stretch : Extra-expanded (8).
-    DWRITE_FONT_STRETCH_EXTRA_EXPANDED = 8,
-    // Predefined font stretch : Ultra-expanded (9).
-    DWRITE_FONT_STRETCH_ULTRA_EXPANDED = 9);
+  DWRITE_FONT_STRETCH = DWord;
   {$EXTERNALSYM DWRITE_FONT_STRETCH}
+const
+  // Predefined font stretch : Not known (0).
+  DWRITE_FONT_STRETCH_UNDEFINED       = DWRITE_FONT_STRETCH(0);
+  {$EXTERNALSYM DWRITE_FONT_STRETCH_UNDEFINED}
+  // Predefined font stretch : Ultra-condensed (1).
+  DWRITE_FONT_STRETCH_ULTRA_CONDENSED = DWRITE_FONT_STRETCH(1);
+  {$EXTERNALSYM DWRITE_FONT_STRETCH_ULTRA_CONDENSED}
+  // Predefined font stretch : Extra-condensed (2).
+  DWRITE_FONT_STRETCH_EXTRA_CONDENSED = DWRITE_FONT_STRETCH(2);
+  {$EXTERNALSYM DWRITE_FONT_STRETCH_EXTRA_CONDENSED}
+  // Predefined font stretch : Condensed (3).
+  DWRITE_FONT_STRETCH_CONDENSED       = DWRITE_FONT_STRETCH(3);
+  {$EXTERNALSYM DWRITE_FONT_STRETCH_CONDENSED}
+  // Predefined font stretch : Semi-condensed (4).
+  DWRITE_FONT_STRETCH_SEMI_CONDENSED  = DWRITE_FONT_STRETCH(4);
+  {$EXTERNALSYM DWRITE_FONT_STRETCH_SEMI_CONDENSED}
+  // Predefined font stretch : Normal (5).
+  DWRITE_FONT_STRETCH_NORMAL          = DWRITE_FONT_STRETCH(5);
+  {$EXTERNALSYM DWRITE_FONT_STRETCH_NORMAL}
+  // Predefined font stretch : Medium (5).
+  DWRITE_FONT_STRETCH_MEDIUM          = DWRITE_FONT_STRETCH(5);
+  {$EXTERNALSYM DWRITE_FONT_STRETCH_MEDIUM}
+  // Predefined font stretch : Semi-expanded (6).
+  DWRITE_FONT_STRETCH_SEMI_EXPANDED   = DWRITE_FONT_STRETCH(6);
+  {$EXTERNALSYM DWRITE_FONT_STRETCH_SEMI_EXPANDED}
+  // Predefined font stretch : Expanded (7).
+  DWRITE_FONT_STRETCH_EXPANDED        = DWRITE_FONT_STRETCH(7);
+  {$EXTERNALSYM DWRITE_FONT_STRETCH_EXPANDED}
+  // Predefined font stretch : Extra-expanded (8).
+  DWRITE_FONT_STRETCH_EXTRA_EXPANDED  = DWRITE_FONT_STRETCH(8);
+  {$EXTERNALSYM DWRITE_FONT_STRETCH_EXTRA_EXPANDED}
+  // Predefined font stretch : Ultra-expanded (9).
+  DWRITE_FONT_STRETCH_ULTRA_EXPANDED  = DWRITE_FONT_STRETCH(9);
+  {$EXTERNALSYM DWRITE_FONT_STRETCH_ULTRA_EXPANDED}
 
-
+type
   // The font style enumeration describes the slope style of a font face, such as Normal, Italic or Oblique.
   // Values other than the ones defined in the enumeration are considered to be invalid, and they are rejected by font API functions.
   PDWRITE_FONT_STYLE = ^DWRITE_FONT_STYLE;
-  DWRITE_FONT_STYLE = (
-    // Font slope style : Normal.
-    DWRITE_FONT_STYLE_NORMAL,
-    // Font slope style : Oblique.
-    DWRITE_FONT_STYLE_OBLIQUE,
-    // Font slope style : Italic.
-    DWRITE_FONT_STYLE_ITALIC);
+  DWRITE_FONT_STYLE = DWord;
   {$EXTERNALSYM DWRITE_FONT_STYLE}
+const
+  // Font slope style : Normal.
+  DWRITE_FONT_STYLE_NORMAL  = DWRITE_FONT_STYLE(0);
+  {$EXTERNALSYM DWRITE_FONT_STYLE_NORMAL}
+  // Font slope style : Oblique.
+  DWRITE_FONT_STYLE_OBLIQUE = DWRITE_FONT_STYLE(1);
+  {$EXTERNALSYM DWRITE_FONT_STYLE_OBLIQUE}
+  // Font slope style : Italic.
+  DWRITE_FONT_STYLE_ITALIC  = DWRITE_FONT_STYLE(2);
+  {$EXTERNALSYM DWRITE_FONT_STYLE_ITALIC}
 
-
+type
   // The informational string enumeration identifies a string in a font.
   PDWRITE_INFORMATIONAL_STRING_ID = ^DWRITE_INFORMATIONAL_STRING_ID;
-  DWRITE_INFORMATIONAL_STRING_ID = (
-    // Unspecified name ID.
-    DWRITE_INFORMATIONAL_STRING_NONE,
-    // Copyright notice provided by the font.
-    DWRITE_INFORMATIONAL_STRING_COPYRIGHT_NOTICE,
-    // String containing a version number.
-    DWRITE_INFORMATIONAL_STRING_VERSION_STRINGS,
-    // Trademark information provided by the font.
-    DWRITE_INFORMATIONAL_STRING_TRADEMARK,
-    // Name of the font manufacturer.
-    DWRITE_INFORMATIONAL_STRING_MANUFACTURER,
-    // Name of the font designer.
-    DWRITE_INFORMATIONAL_STRING_DESIGNER,
-    // URL of font designer (with protocol, e.g., http://, ftp://).
-    DWRITE_INFORMATIONAL_STRING_DESIGNER_URL,
-    // Description of the font. Can contain revision information, usage recommendations, history, features, etc.
-    DWRITE_INFORMATIONAL_STRING_DESCRIPTION,
-    // URL of font vendor (with protocol, e.g., http://, ftp://). If a unique serial number is embedded in the URL, it can be used to register the font.
-    DWRITE_INFORMATIONAL_STRING_FONT_VENDOR_URL,
-    // Description of how the font may be legally used, or different example scenarios for licensed use. This field should be written in plain language, not legalese.
-    DWRITE_INFORMATIONAL_STRING_LICENSE_DESCRIPTION,
-    // URL where additional licensing information can be found.
-    DWRITE_INFORMATIONAL_STRING_LICENSE_INFO_URL,
-    // GDI-compatible family name. Because GDI allows a maximum of four fonts per family, fonts in the same family may have different GDI-compatible family names
-    // (e.g., "Arial", "Arial Narrow", "Arial Black").
-    DWRITE_INFORMATIONAL_STRING_WIN32_FAMILY_NAMES,
-    // GDI-compatible subfamily name.
-    DWRITE_INFORMATIONAL_STRING_WIN32_SUBFAMILY_NAMES,
-    // Typographic family name preferred by the designer. This enables font designers to group more than four fonts in a single family without losing compatibility with
-    // GDI. This name is typically only present if it differs from the GDI-compatible family name.
-    DWRITE_INFORMATIONAL_STRING_TYPOGRAPHIC_FAMILY_NAMES,
-    // Typographic subfamily name preferred by the designer. This name is typically only present if it differs from the GDI-compatible subfamily name.
-    DWRITE_INFORMATIONAL_STRING_TYPOGRAPHIC_SUBFAMILY_NAMES,
-    // Sample text. This can be the font name or any other text that the designer thinks is the best example to display the font in.
-    DWRITE_INFORMATIONAL_STRING_SAMPLE_TEXT,
-    // The full name of the font, e.g. "Arial Bold", from name id 4 in the name table.
-    DWRITE_INFORMATIONAL_STRING_FULL_NAME,
-    // The postscript name of the font, e.g. "GillSans-Bold" from name id 6 in the name table.
-    DWRITE_INFORMATIONAL_STRING_POSTSCRIPT_NAME,
-    // The postscript CID findfont name, from name id 20 in the name table.
-    DWRITE_INFORMATIONAL_STRING_POSTSCRIPT_CID_NAME,
-    // Family name for the weight-stretch-style model.
-    DWRITE_INFORMATIONAL_STRING_WEIGHT_STRETCH_STYLE_FAMILY_NAME,
-    // Script/language tag to identify the scripts or languages that the font was
-    // primarily designed to support. See DWRITE_FONT_PROPERTY_ID_DESIGN_SCRIPT_LANGUAGE_TAG
-    // for a longer description.
-    DWRITE_INFORMATIONAL_STRING_DESIGN_SCRIPT_LANGUAGE_TAG,
-    // Script/language tag to identify the scripts or languages that the font declares
-    // it is able to support.
-    DWRITE_INFORMATIONAL_STRING_SUPPORTED_SCRIPT_LANGUAGE_TAG,
-    // Obsolete aliases kept to avoid breaking existing code.
-    DWRITE_INFORMATIONAL_STRING_PREFERRED_FAMILY_NAMES = DWRITE_INFORMATIONAL_STRING_TYPOGRAPHIC_FAMILY_NAMES,
-    DWRITE_INFORMATIONAL_STRING_PREFERRED_SUBFAMILY_NAMES = DWRITE_INFORMATIONAL_STRING_TYPOGRAPHIC_SUBFAMILY_NAMES,
-    DWRITE_INFORMATIONAL_STRING_WWS_FAMILY_NAME = DWRITE_INFORMATIONAL_STRING_WEIGHT_STRETCH_STYLE_FAMILY_NAME);
+  DWRITE_INFORMATIONAL_STRING_ID = DWord;
+const
+  // Unspecified name ID.
+  DWRITE_INFORMATIONAL_STRING_NONE                             = DWRITE_INFORMATIONAL_STRING_ID(0);
+  // Copyright notice provided by the font.
+  DWRITE_INFORMATIONAL_STRING_COPYRIGHT_NOTICE                 = DWRITE_INFORMATIONAL_STRING_ID(1);
+  // String containing a version number.
+  DWRITE_INFORMATIONAL_STRING_VERSION_STRINGS                  = DWRITE_INFORMATIONAL_STRING_ID(2);
+  // Trademark information provided by the font.
+  DWRITE_INFORMATIONAL_STRING_TRADEMARK                        = DWRITE_INFORMATIONAL_STRING_ID(3);
+  // Name of the font manufacturer.
+  DWRITE_INFORMATIONAL_STRING_MANUFACTURER                     = DWRITE_INFORMATIONAL_STRING_ID(4);
+  // Name of the font designer.
+  DWRITE_INFORMATIONAL_STRING_DESIGNER                         = DWRITE_INFORMATIONAL_STRING_ID(5);
+  // URL of font designer (with protocol, e.g., http://, ftp://).
+  DWRITE_INFORMATIONAL_STRING_DESIGNER_URL                     = DWRITE_INFORMATIONAL_STRING_ID(6);
+  // Description of the font. Can contain revision information, usage recommendations, history, features, etc.
+  DWRITE_INFORMATIONAL_STRING_DESCRIPTION                      = DWRITE_INFORMATIONAL_STRING_ID(7);
+  // URL of font vendor (with protocol, e.g., http://, ftp://). If a unique serial number is embedded in the URL, it can be used to register the font.
+  DWRITE_INFORMATIONAL_STRING_FONT_VENDOR_URL                  = DWRITE_INFORMATIONAL_STRING_ID(8);
+  // Description of how the font may be legally used, or different example scenarios for licensed use. This field should be written in plain language, not legalese.
+  DWRITE_INFORMATIONAL_STRING_LICENSE_DESCRIPTION              = DWRITE_INFORMATIONAL_STRING_ID(9);
+  // URL where additional licensing information can be found.
+  DWRITE_INFORMATIONAL_STRING_LICENSE_INFO_URL                 = DWRITE_INFORMATIONAL_STRING_ID(10);
+  // GDI-compatible family name. Because GDI allows a maximum of four fonts per family, fonts in the same family may have different GDI-compatible family names
+  // (e.g., "Arial", "Arial Narrow", "Arial Black").
+  DWRITE_INFORMATIONAL_STRING_WIN32_FAMILY_NAMES               = DWRITE_INFORMATIONAL_STRING_ID(11);
+  // GDI-compatible subfamily name.
+  DWRITE_INFORMATIONAL_STRING_WIN32_SUBFAMILY_NAMES            = DWRITE_INFORMATIONAL_STRING_ID(12);
+  // Typographic family name preferred by the designer. This enables font designers to group more than four fonts in a single family without losing compatibility with
+  // GDI. This name is typically only present if it differs from the GDI-compatible family name.
+  DWRITE_INFORMATIONAL_STRING_TYPOGRAPHIC_FAMILY_NAMES         = DWRITE_INFORMATIONAL_STRING_ID(13);
+  // Typographic subfamily name preferred by the designer. This name is typically only present if it differs from the GDI-compatible subfamily name.
+  DWRITE_INFORMATIONAL_STRING_TYPOGRAPHIC_SUBFAMILY_NAMES      = DWRITE_INFORMATIONAL_STRING_ID(14);
+  // Sample text. This can be the font name or any other text that the designer thinks is the best example to display the font in.
+  DWRITE_INFORMATIONAL_STRING_SAMPLE_TEXT                      = DWRITE_INFORMATIONAL_STRING_ID(15);
+  // The full name of the font, e.g. "Arial Bold", from name id 4 in the name table.
+  DWRITE_INFORMATIONAL_STRING_FULL_NAME                        = DWRITE_INFORMATIONAL_STRING_ID(16);
+  // The postscript name of the font, e.g. "GillSans-Bold" from name id 6 in the name table.
+  DWRITE_INFORMATIONAL_STRING_POSTSCRIPT_NAME                  = DWRITE_INFORMATIONAL_STRING_ID(17);
+  // The postscript CID findfont name, from name id 20 in the name table.
+  DWRITE_INFORMATIONAL_STRING_POSTSCRIPT_CID_NAME              = DWRITE_INFORMATIONAL_STRING_ID(18);
+  // Family name for the weight-stretch-style model.
+  DWRITE_INFORMATIONAL_STRING_WEIGHT_STRETCH_STYLE_FAMILY_NAME = DWRITE_INFORMATIONAL_STRING_ID(19);
+  // Script/language tag to identify the scripts or languages that the font was
+  // primarily designed to support. See DWRITE_FONT_PROPERTY_ID_DESIGN_SCRIPT_LANGUAGE_TAG
+  // for a longer description.
+  DWRITE_INFORMATIONAL_STRING_DESIGN_SCRIPT_LANGUAGE_TAG       = DWRITE_INFORMATIONAL_STRING_ID(20);
+  // Script/language tag to identify the scripts or languages that the font declares
+  // it is able to support.
+  DWRITE_INFORMATIONAL_STRING_SUPPORTED_SCRIPT_LANGUAGE_TAG    = DWRITE_INFORMATIONAL_STRING_ID(21);
+  // Obsolete aliases kept to avoid breaking existing code.
+  DWRITE_INFORMATIONAL_STRING_PREFERRED_FAMILY_NAMES           = DWRITE_INFORMATIONAL_STRING_TYPOGRAPHIC_FAMILY_NAMES;
+  DWRITE_INFORMATIONAL_STRING_PREFERRED_SUBFAMILY_NAMES        = DWRITE_INFORMATIONAL_STRING_TYPOGRAPHIC_SUBFAMILY_NAMES;
+  DWRITE_INFORMATIONAL_STRING_WWS_FAMILY_NAME                  = DWRITE_INFORMATIONAL_STRING_WEIGHT_STRETCH_STYLE_FAMILY_NAME;
   {$EXTERNALSYM DWRITE_INFORMATIONAL_STRING_ID}
 
+type
 
   // The DWRITE_FONT_METRICS structure specifies the metrics of a font face that
   // are applicable to all glyphs within the font face.
@@ -401,6 +453,7 @@ type
   end;
   {$EXTERNALSYM DWRITE_GLYPH_OFFSET}
 
+type
   // Specifies the type of DirectWrite factory object.
   // DirectWrite factory contains internal state such as font loader registration and cached font data.
   // In most cases it is recommended to use the shared factory object, because it allows multiple components
@@ -410,14 +463,488 @@ type
   // from the rest of the process components. In such cases, it is recommended to use an isolated factory for the sandboxed
   // component.
   PDWRITE_FACTORY_TYPE = ^DWRITE_FACTORY_TYPE;
-  DWRITE_FACTORY_TYPE = (
-    // Shared factory allow for re-use of cached font data across multiple in process components.
-    // Such factories also take advantage of cross process font caching components for better performance.
-    DWRITE_FACTORY_TYPE_SHARED,
-    // Objects created from the isolated factory do not interact with internal DirectWrite state from other components.
-    DWRITE_FACTORY_TYPE_ISOLATED);
+  DWRITE_FACTORY_TYPE = DWord;
   {$EXTERNALSYM DWRITE_FACTORY_TYPE}
+const
+  // Shared factory allow for re-use of cached font data across multiple in process components.
+  // Such factories also take advantage of cross process font caching components for better performance.
+  DWRITE_FACTORY_TYPE_SHARED   = DWRITE_FACTORY_TYPE(0);
+  // Objects created from the isolated factory do not interact with internal DirectWrite state from other components.
+  DWRITE_FACTORY_TYPE_ISOLATED = DWRITE_FACTORY_TYPE(1);
 
+// Forwarded enums =============================================================
+
+type
+  // Represents the internal structure of a device pixel (i.e., the physical arrangement of red,
+  // green, and blue color components) that is assumed for purposes of rendering text.
+  PDWRITE_PIXEL_GEOMETRY = ^DWRITE_PIXEL_GEOMETRY;
+  DWRITE_PIXEL_GEOMETRY = DWord;
+  {$EXTERNALSYM DWRITE_PIXEL_GEOMETRY}
+const
+  // The red, green, and blue color components of each pixel are assumed to occupy the same point.
+  DWRITE_PIXEL_GEOMETRY_FLAT = DWRITE_PIXEL_GEOMETRY(0);
+  // Each pixel comprises three vertical stripes, with red on the left, green in the center, and
+  // blue on the right. This is the most common pixel geometry for LCD monitors.
+  DWRITE_PIXEL_GEOMETRY_RGB  = DWRITE_PIXEL_GEOMETRY(1);
+  // Each pixel comprises three vertical stripes, with blue on the left, green in the center, and
+  // red on the right.
+  DWRITE_PIXEL_GEOMETRY_BGR  = DWRITE_PIXEL_GEOMETRY(2);
+
+type
+  // Represents a method of rendering glyphs.
+  PDWRITE_RENDERING_MODE = ^DWRITE_RENDERING_MODE;
+  DWRITE_RENDERING_MODE = DWord;
+  {$EXTERNALSYM DWRITE_RENDERING_MODE}
+const
+  // Specifies that the rendering mode is determined automatically based on the font and size.
+  DWRITE_RENDERING_MODE_DEFAULT                     = DWRITE_RENDERING_MODE(0);
+  {$EXTERNALSYM DWRITE_RENDERING_MODE_DEFAULT}
+  // Specifies that no antialiasing is performed. Each pixel is either set to the foreground
+  // color of the text or retains the color of the background.
+  DWRITE_RENDERING_MODE_ALIASED                     = DWRITE_RENDERING_MODE(1);
+  {$EXTERNALSYM DWRITE_RENDERING_MODE_ALIASED}
+  // Specifies that antialiasing is performed in the horizontal direction and the appearance
+  // of glyphs is layout-compatible with GDI using CLEARTYPE_QUALITY. Use DWRITE_MEASURING_MODE_GDI_CLASSIC
+  // to get glyph advances. The antialiasing may be either ClearType or grayscale depending on
+  // the text antialiasing mode.
+  DWRITE_RENDERING_MODE_GDI_CLASSIC                 = DWRITE_RENDERING_MODE(2);
+  {$EXTERNALSYM DWRITE_RENDERING_MODE_GDI_CLASSIC}
+  // Specifies that antialiasing is performed in the horizontal direction and the appearance
+  // of glyphs is layout-compatible with GDI using CLEARTYPE_NATURAL_QUALITY. Glyph advances
+  // are close to the font design advances = DWRITE_RENDERING_MODE(0); but are still rounded to whole pixels. Use
+  // DWRITE_MEASURING_MODE_GDI_NATURAL to get glyph advances. The antialiasing may be either
+  // ClearType or grayscale depending on the text antialiasing mode.
+  DWRITE_RENDERING_MODE_GDI_NATURAL                 = DWRITE_RENDERING_MODE(3);
+  {$EXTERNALSYM DWRITE_RENDERING_MODE_GDI_NATURAL}
+  // Specifies that antialiasing is performed in the horizontal direction. This rendering
+  // mode allows glyphs to be positioned with subpixel precision and is therefore suitable
+  // for natural (i.e. resolution-independent) layout. The antialiasing may be either
+  // ClearType or grayscale depending on the text antialiasing mode.
+  DWRITE_RENDERING_MODE_NATURAL                     = DWRITE_RENDERING_MODE(4);
+  {$EXTERNALSYM DWRITE_RENDERING_MODE_NATURAL}
+  // Similar to natural mode except that antialiasing is performed in both the horizontal
+  // and vertical directions. This is typically used at larger sizes to make curves and
+  // diagonal lines look smoother. The antialiasing may be either ClearType or grayscale
+  // depending on the text antialiasing mode.
+  DWRITE_RENDERING_MODE_NATURAL_SYMMETRIC           = DWRITE_RENDERING_MODE(5);
+  {$EXTERNALSYM DWRITE_RENDERING_MODE_NATURAL_SYMMETRIC}
+  // Specifies that rendering should bypass the rasterizer and use the outlines directly.
+  // This is typically used at very large sizes.
+  DWRITE_RENDERING_MODE_OUTLINE                     = DWRITE_RENDERING_MODE(6);
+  {$EXTERNALSYM DWRITE_RENDERING_MODE_OUTLINE}
+  // The following names are obsolete but are kept as aliases to avoid breaking existing code.
+  // Each of these rendering modes may result in either ClearType or grayscale antialiasing
+  // depending on the DWRITE_TEXT_ANTIALIASING_MODE.
+  DWRITE_RENDERING_MODE_CLEARTYPE_GDI_CLASSIC       = DWRITE_RENDERING_MODE_GDI_CLASSIC;
+  {$EXTERNALSYM DWRITE_RENDERING_MODE_CLEARTYPE_GDI_CLASSIC}
+  DWRITE_RENDERING_MODE_CLEARTYPE_GDI_NATURAL       = DWRITE_RENDERING_MODE_GDI_NATURAL;
+  {$EXTERNALSYM DWRITE_RENDERING_MODE_CLEARTYPE_GDI_NATURAL}
+  DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL           = DWRITE_RENDERING_MODE_NATURAL;
+  {$EXTERNALSYM DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL}
+  DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL_SYMMETRIC = DWRITE_RENDERING_MODE_NATURAL_SYMMETRIC;
+  {$EXTERNALSYM DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL_SYMMETRIC}
+
+type
+  // Direction for how reading progresses.
+  PDWRITE_READING_DIRECTION = ^DWRITE_READING_DIRECTION;
+  DWRITE_READING_DIRECTION = DWord;
+  {$EXTERNALSYM DWRITE_READING_DIRECTION}
+const
+  // Reading progresses from left to right.
+  DWRITE_READING_DIRECTION_LEFT_TO_RIGHT = DWRITE_READING_DIRECTION(0);
+  {$EXTERNALSYM DWRITE_READING_DIRECTION_LEFT_TO_RIGHT}
+  // Reading progresses from right to left.
+  DWRITE_READING_DIRECTION_RIGHT_TO_LEFT = DWRITE_READING_DIRECTION(1);
+  {$EXTERNALSYM DWRITE_READING_DIRECTION_RIGHT_TO_LEFT}
+  // Reading progresses from top to bottom.
+  DWRITE_READING_DIRECTION_TOP_TO_BOTTOM = DWRITE_READING_DIRECTION(2);
+  {$EXTERNALSYM DWRITE_READING_DIRECTION_TOP_TO_BOTTOM}
+  // Reading progresses from bottom to top.
+  DWRITE_READING_DIRECTION_BOTTOM_TO_TOP = DWRITE_READING_DIRECTION(3);
+  {$EXTERNALSYM DWRITE_READING_DIRECTION_BOTTOM_TO_TOP}
+
+type
+  // Direction for how lines of text are placed relative to one another.
+  PDWRITE_FLOW_DIRECTION = ^DWRITE_FLOW_DIRECTION;
+  DWRITE_FLOW_DIRECTION = DWord;
+  {$EXTERNALSYM DWRITE_FLOW_DIRECTION}
+const
+  // Text lines are placed from top to bottom.
+  DWRITE_FLOW_DIRECTION_TOP_TO_BOTTOM = DWRITE_FLOW_DIRECTION(0);
+  {$EXTERNALSYM DWRITE_FLOW_DIRECTION_TOP_TO_BOTTOM}
+  // Text lines are placed from bottom to top.
+  DWRITE_FLOW_DIRECTION_BOTTOM_TO_TOP = DWRITE_FLOW_DIRECTION(1);
+  {$EXTERNALSYM DWRITE_FLOW_DIRECTION_BOTTOM_TO_TOP}
+  // Text lines are placed from left to right.
+  DWRITE_FLOW_DIRECTION_LEFT_TO_RIGHT = DWRITE_FLOW_DIRECTION(2);
+  {$EXTERNALSYM DWRITE_FLOW_DIRECTION_LEFT_TO_RIGHT}
+  // Text lines are placed from right to left.
+  DWRITE_FLOW_DIRECTION_RIGHT_TO_LEFT = DWRITE_FLOW_DIRECTION(3);
+  {$EXTERNALSYM DWRITE_FLOW_DIRECTION_RIGHT_TO_LEFT}
+
+type
+  // Alignment of paragraph text along the reading direction axis relative to
+  // the leading and trailing edge of the layout box.
+  PDWRITE_TEXT_ALIGNMENT = ^DWRITE_TEXT_ALIGNMENT;
+  DWRITE_TEXT_ALIGNMENT = DWord;
+  {$EXTERNALSYM DWRITE_TEXT_ALIGNMENT}
+const
+  // The leading edge of the paragraph text is aligned to the layout box's leading edge.
+  DWRITE_TEXT_ALIGNMENT_LEADING   = DWRITE_TEXT_ALIGNMENT(0);
+  {$EXTERNALSYM DWRITE_TEXT_ALIGNMENT_LEADING}
+  // The trailing edge of the paragraph text is aligned to the layout box's trailing edge.
+  DWRITE_TEXT_ALIGNMENT_TRAILING  = DWRITE_TEXT_ALIGNMENT(1);
+  {$EXTERNALSYM DWRITE_TEXT_ALIGNMENT_TRAILING}
+  // The center of the paragraph text is aligned to the center of the layout box.
+  DWRITE_TEXT_ALIGNMENT_CENTER    = DWRITE_TEXT_ALIGNMENT(2);
+  {$EXTERNALSYM DWRITE_TEXT_ALIGNMENT_CENTER}
+  // Align text to the leading side, and also justify text to fill the lines.
+  DWRITE_TEXT_ALIGNMENT_JUSTIFIED = DWRITE_TEXT_ALIGNMENT(3);
+  {$EXTERNALSYM DWRITE_TEXT_ALIGNMENT_JUSTIFIED}
+
+type
+  // Alignment of paragraph text along the flow direction axis relative to the
+  // flow's beginning and ending edge of the layout box.
+  PDWRITE_PARAGRAPH_ALIGNMENT = ^DWRITE_PARAGRAPH_ALIGNMENT;
+  DWRITE_PARAGRAPH_ALIGNMENT = DWord;
+  {$EXTERNALSYM DWRITE_PARAGRAPH_ALIGNMENT}
+const
+  // The first line of paragraph is aligned to the flow's beginning edge of the layout box.
+  DWRITE_PARAGRAPH_ALIGNMENT_NEAR   = DWRITE_PARAGRAPH_ALIGNMENT(0);
+  {$EXTERNALSYM DWRITE_PARAGRAPH_ALIGNMENT_NEAR}
+  // The last line of paragraph is aligned to the flow's ending edge of the layout box.
+  DWRITE_PARAGRAPH_ALIGNMENT_FAR    = DWRITE_PARAGRAPH_ALIGNMENT(1);
+  {$EXTERNALSYM DWRITE_PARAGRAPH_ALIGNMENT_FAR}
+  // The center of the paragraph is aligned to the center of the flow of the layout box.
+  DWRITE_PARAGRAPH_ALIGNMENT_CENTER = DWRITE_PARAGRAPH_ALIGNMENT(2);
+  {$EXTERNALSYM DWRITE_PARAGRAPH_ALIGNMENT_CENTER}
+
+type
+  // Word wrapping in multiline paragraph.
+  PDWRITE_WORD_WRAPPING = ^DWRITE_WORD_WRAPPING;
+  DWRITE_WORD_WRAPPING = DWord;
+  {$EXTERNALSYM DWRITE_WORD_WRAPPING}
+const
+  // Words are broken across lines to avoid text overflowing the layout box.
+  DWRITE_WORD_WRAPPING_WRAP            = DWRITE_WORD_WRAPPING(0);
+  {$EXTERNALSYM DWRITE_WORD_WRAPPING_WRAP}
+  // Words are kept within the same line even when it overflows the layout box.
+  // This option is often used with scrolling to reveal overflow text.
+  DWRITE_WORD_WRAPPING_NO_WRAP         = DWRITE_WORD_WRAPPING(1);
+  {$EXTERNALSYM DWRITE_WORD_WRAPPING_NO_WRAP}
+  // Words are broken across lines to avoid text overflowing the layout box.
+  // Emergency wrapping occurs if the word is larger than the maximum width.
+  DWRITE_WORD_WRAPPING_EMERGENCY_BREAK = DWRITE_WORD_WRAPPING(2);
+  {$EXTERNALSYM DWRITE_WORD_WRAPPING_EMERGENCY_BREAK}
+  // Only wrap whole words, never breaking words (emergency wrapping) when the
+  // layout width is too small for even a single word.
+  DWRITE_WORD_WRAPPING_WHOLE_WORD      = DWRITE_WORD_WRAPPING(3);
+  {$EXTERNALSYM DWRITE_WORD_WRAPPING_WHOLE_WORD}
+  // Wrap between any valid characters clusters.
+  DWRITE_WORD_WRAPPING_CHARACTER       = DWRITE_WORD_WRAPPING(4);
+  {$EXTERNALSYM DWRITE_WORD_WRAPPING_CHARACTER}
+
+type
+  // The method used for line spacing in layout.
+  PDWRITE_LINE_SPACING_METHOD = ^DWRITE_LINE_SPACING_METHOD;
+  DWRITE_LINE_SPACING_METHOD = DWord;
+  {$EXTERNALSYM DWRITE_LINE_SPACING_METHOD}
+const
+  // Line spacing depends solely on the content, growing to accommodate the size of fonts and inline objects.
+  DWRITE_LINE_SPACING_METHOD_DEFAULT      = DWRITE_LINE_SPACING_METHOD(0);
+  {$EXTERNALSYM DWRITE_LINE_SPACING_METHOD_DEFAULT}
+  // Lines are explicitly set to uniform spacing, regardless of contained font sizes.
+  // This can be useful to avoid the uneven appearance that can occur from font fallback.
+  DWRITE_LINE_SPACING_METHOD_UNIFORM      = DWRITE_LINE_SPACING_METHOD(1);
+  {$EXTERNALSYM DWRITE_LINE_SPACING_METHOD_UNIFORM}
+  // Line spacing and baseline distances are proportional to the computed values based on the content, the size of the fonts and inline objects.
+  DWRITE_LINE_SPACING_METHOD_PROPORTIONAL = DWRITE_LINE_SPACING_METHOD(2);
+  {$EXTERNALSYM DWRITE_LINE_SPACING_METHOD_PROPORTIONAL}
+
+type
+  // Text granularity used to trim text overflowing the layout box.
+  PDWRITE_TRIMMING_GRANULARITY = ^DWRITE_TRIMMING_GRANULARITY;
+  DWRITE_TRIMMING_GRANULARITY = DWord;
+  {$EXTERNALSYM DWRITE_TRIMMING_GRANULARITY}
+const
+  // No trimming occurs. Text flows beyond the layout width.
+  DWRITE_TRIMMING_GRANULARITY_NONE      = DWRITE_TRIMMING_GRANULARITY(0);
+  {$EXTERNALSYM DWRITE_TRIMMING_GRANULARITY_NONE}
+  // Trimming occurs at character cluster boundary.
+  DWRITE_TRIMMING_GRANULARITY_CHARACTER = DWRITE_TRIMMING_GRANULARITY(1);
+  {$EXTERNALSYM DWRITE_TRIMMING_GRANULARITY_CHARACTER}
+  // Trimming occurs at word boundary.
+  DWRITE_TRIMMING_GRANULARITY_WORD      = DWRITE_TRIMMING_GRANULARITY(2);
+  {$EXTERNALSYM DWRITE_TRIMMING_GRANULARITY_WORD}
+
+type
+  // Typographic feature of text supplied by the font.
+  // Remarks:
+  //   Use DWRITE_MAKE_FONT_FEATURE_TAG() to create a custom one.
+  // Delphi Note:
+  //  We did hardcode the macro's here, but you might also use this type of declaration, for example:
+  //  DWRITE_FONT_FEATURE_TAG_ALTERNATIVE_FRACTIONS = ord('a') or
+  //                                                  (ord('f') shl 8) or
+  //                                                  (ord('r') shl 16) or
+  //                                                  (ord('c') shl 24); resulting in Int $63726661
+
+  PDWRITE_FONT_FEATURE_TAG = ^DWRITE_FONT_FEATURE_TAG;
+  DWRITE_FONT_FEATURE_TAG = Integer;
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG}
+const
+  DWRITE_FONT_FEATURE_TAG_ALTERNATIVE_FRACTIONS               = $63726661; //DWRITE_MAKE_OPENTYPE_TAG('a','f','r','c'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_ALTERNATIVE_FRACTIONS}
+  DWRITE_FONT_FEATURE_TAG_PETITE_CAPITALS_FROM_CAPITALS       = $63703263; //DWRITE_MAKE_OPENTYPE_TAG('c','2','p','c'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_PETITE_CAPITALS_FROM_CAPITALS}
+  DWRITE_FONT_FEATURE_TAG_SMALL_CAPITALS_FROM_CAPITALS        = $63733263; //DWRITE_MAKE_OPENTYPE_TAG('c','2','s','c'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_SMALL_CAPITALS_FROM_CAPITALS}
+  DWRITE_FONT_FEATURE_TAG_CONTEXTUAL_ALTERNATES               = $746C6163; //DWRITE_MAKE_OPENTYPE_TAG('c','a','l','t'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_CONTEXTUAL_ALTERNATES}
+  DWRITE_FONT_FEATURE_TAG_CASE_SENSITIVE_FORMS                = $65736163; //DWRITE_MAKE_OPENTYPE_TAG('c','a','s','e'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_CASE_SENSITIVE_FORMS}
+  DWRITE_FONT_FEATURE_TAG_GLYPH_COMPOSITION_DECOMPOSITION     = $706D6363; //DWRITE_MAKE_OPENTYPE_TAG('c','c','m','p'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_GLYPH_COMPOSITION_DECOMPOSITION}
+  DWRITE_FONT_FEATURE_TAG_CONTEXTUAL_LIGATURES                = $67696C63; //DWRITE_MAKE_OPENTYPE_TAG('c','l','i','g'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_CONTEXTUAL_LIGATURES}
+  DWRITE_FONT_FEATURE_TAG_CAPITAL_SPACING                     = $70737063; //DWRITE_MAKE_OPENTYPE_TAG('c','p','s','p'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_CAPITAL_SPACING}
+  DWRITE_FONT_FEATURE_TAG_CONTEXTUAL_SWASH                    = $68777363; //DWRITE_MAKE_OPENTYPE_TAG('c','s','w','h'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_CONTEXTUAL_SWASH}
+  DWRITE_FONT_FEATURE_TAG_CURSIVE_POSITIONING                 = $73727563; //DWRITE_MAKE_OPENTYPE_TAG('c','u','r','s'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_CURSIVE_POSITIONING}
+  DWRITE_FONT_FEATURE_TAG_DEFAULT                             = $746C6664; //DWRITE_MAKE_OPENTYPE_TAG('d','f','l','t'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_DEFAULT}
+  DWRITE_FONT_FEATURE_TAG_DISCRETIONARY_LIGATURES             = $67696C64; //DWRITE_MAKE_OPENTYPE_TAG('d','l','i','g'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_DISCRETIONARY_LIGATURES}
+  DWRITE_FONT_FEATURE_TAG_EXPERT_FORMS                        = $74707865; //DWRITE_MAKE_OPENTYPE_TAG('e','x','p','t'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_EXPERT_FORMS}
+  DWRITE_FONT_FEATURE_TAG_FRACTIONS                           = $63617266; //DWRITE_MAKE_OPENTYPE_TAG('f','r','a','c'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_FRACTIONS}
+  DWRITE_FONT_FEATURE_TAG_FULL_WIDTH                          = $64697766; //DWRITE_MAKE_OPENTYPE_TAG('f','w','i','d'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_FULL_WIDTH}
+  DWRITE_FONT_FEATURE_TAG_HALF_FORMS                          = $666C6168; //DWRITE_MAKE_OPENTYPE_TAG('h','a','l','f'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_HALF_FORMS}
+  DWRITE_FONT_FEATURE_TAG_HALANT_FORMS                        = $6E6C6168; //DWRITE_MAKE_OPENTYPE_TAG('h','a','l','n'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_HALANT_FORMS}
+  DWRITE_FONT_FEATURE_TAG_ALTERNATE_HALF_WIDTH                = $746C6168; //DWRITE_MAKE_OPENTYPE_TAG('h','a','l','t'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_ALTERNATE_HALF_WIDTH}
+  DWRITE_FONT_FEATURE_TAG_HISTORICAL_FORMS                    = $74736968; //DWRITE_MAKE_OPENTYPE_TAG('h','i','s','t'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_HISTORICAL_FORMS}
+  DWRITE_FONT_FEATURE_TAG_HORIZONTAL_KANA_ALTERNATES          = $616E6B68; //DWRITE_MAKE_OPENTYPE_TAG('h','k','n','a'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_HORIZONTAL_KANA_ALTERNATES}
+  DWRITE_FONT_FEATURE_TAG_HISTORICAL_LIGATURES                = $67696C68; //DWRITE_MAKE_OPENTYPE_TAG('h','l','i','g'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_HISTORICAL_LIGATURES}
+  DWRITE_FONT_FEATURE_TAG_HALF_WIDTH                          = $64697768; //DWRITE_MAKE_OPENTYPE_TAG('h','w','i','d'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_HALF_WIDTH}
+  DWRITE_FONT_FEATURE_TAG_HOJO_KANJI_FORMS                    = $6F6A6F68; //DWRITE_MAKE_OPENTYPE_TAG('h','o','j','o'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_HOJO_KANJI_FORMS}
+  DWRITE_FONT_FEATURE_TAG_JIS04_FORMS                         = $3430706A; //DWRITE_MAKE_OPENTYPE_TAG('j','p','0','4'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_JIS04_FORMS}
+  DWRITE_FONT_FEATURE_TAG_JIS78_FORMS                         = $3837706A; //DWRITE_MAKE_OPENTYPE_TAG('j','p','7','8'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_JIS78_FORMS}
+  DWRITE_FONT_FEATURE_TAG_JIS83_FORMS                         = $3338706A; //DWRITE_MAKE_OPENTYPE_TAG('j','p','8','3'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_JIS83_FORMS}
+  DWRITE_FONT_FEATURE_TAG_JIS90_FORMS                         = $3039706A; //DWRITE_MAKE_OPENTYPE_TAG('j','p','9','0'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_JIS90_FORMS}
+  DWRITE_FONT_FEATURE_TAG_KERNING                             = $6E72656B; //DWRITE_MAKE_OPENTYPE_TAG('k','e','r','n'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_KERNING}
+  DWRITE_FONT_FEATURE_TAG_STANDARD_LIGATURES                  = $6167696C; //DWRITE_MAKE_OPENTYPE_TAG('l','i','g','a'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_STANDARD_LIGATURES}
+  DWRITE_FONT_FEATURE_TAG_LINING_FIGURES                      = $6D756E6C; //DWRITE_MAKE_OPENTYPE_TAG('l','n','u','m'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_LINING_FIGURES}
+  DWRITE_FONT_FEATURE_TAG_LOCALIZED_FORMS                     = $6C636F6C; //DWRITE_MAKE_OPENTYPE_TAG('l','o','c','l'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_LOCALIZED_FORMS}
+  DWRITE_FONT_FEATURE_TAG_MARK_POSITIONING                    = $6B72616D; //DWRITE_MAKE_OPENTYPE_TAG('m','a','r','k'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_MARK_POSITIONING}
+  DWRITE_FONT_FEATURE_TAG_MATHEMATICAL_GREEK                  = $6B72676D; //DWRITE_MAKE_OPENTYPE_TAG('m','g','r','k'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_MATHEMATICAL_GREEK}
+  DWRITE_FONT_FEATURE_TAG_MARK_TO_MARK_POSITIONING            = $6B6D6B6D; //DWRITE_MAKE_OPENTYPE_TAG('m','k','m','k'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_MARK_TO_MARK_POSITIONING}
+  DWRITE_FONT_FEATURE_TAG_ALTERNATE_ANNOTATION_FORMS          = $746C616E; //DWRITE_MAKE_OPENTYPE_TAG('n','a','l','t'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_ALTERNATE_ANNOTATION_FORMS}
+  DWRITE_FONT_FEATURE_TAG_NLC_KANJI_FORMS                     = $6B636C6E; //DWRITE_MAKE_OPENTYPE_TAG('n','l','c','k'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_NLC_KANJI_FORMS}
+  DWRITE_FONT_FEATURE_TAG_OLD_STYLE_FIGURES                   = $6D756E6F; //DWRITE_MAKE_OPENTYPE_TAG('o','n','u','m'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_OLD_STYLE_FIGURES}
+  DWRITE_FONT_FEATURE_TAG_ORDINALS                            = $6E64726F; //DWRITE_MAKE_OPENTYPE_TAG('o','r','d','n'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_ORDINALS}
+  DWRITE_FONT_FEATURE_TAG_PROPORTIONAL_ALTERNATE_WIDTH        = $746C6170; //DWRITE_MAKE_OPENTYPE_TAG('p','a','l','t'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_PROPORTIONAL_ALTERNATE_WIDTH}
+  DWRITE_FONT_FEATURE_TAG_PETITE_CAPITALS                     = $70616370; //DWRITE_MAKE_OPENTYPE_TAG('p','c','a','p'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_PETITE_CAPITALS}
+  DWRITE_FONT_FEATURE_TAG_PROPORTIONAL_FIGURES                = $6D756E70; //DWRITE_MAKE_OPENTYPE_TAG('p','n','u','m'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_PROPORTIONAL_FIGURES}
+  DWRITE_FONT_FEATURE_TAG_PROPORTIONAL_WIDTHS                 = $64697770; //DWRITE_MAKE_OPENTYPE_TAG('p','w','i','d'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_PROPORTIONAL_WIDTHS}
+  DWRITE_FONT_FEATURE_TAG_QUARTER_WIDTHS                      = $64697771; //DWRITE_MAKE_OPENTYPE_TAG('q','w','i','d'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_QUARTER_WIDTHS}
+  DWRITE_FONT_FEATURE_TAG_REQUIRED_LIGATURES                  = $67696C72; //DWRITE_MAKE_OPENTYPE_TAG('r','l','i','g'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_REQUIRED_LIGATURES}
+  DWRITE_FONT_FEATURE_TAG_RUBY_NOTATION_FORMS                 = $79627572; //DWRITE_MAKE_OPENTYPE_TAG('r','u','b','y'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_RUBY_NOTATION_FORMS}
+  DWRITE_FONT_FEATURE_TAG_STYLISTIC_ALTERNATES                = $746C6173; //DWRITE_MAKE_OPENTYPE_TAG('s','a','l','t'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_STYLISTIC_ALTERNATES}
+  DWRITE_FONT_FEATURE_TAG_SCIENTIFIC_INFERIORS                = $666E6973; //DWRITE_MAKE_OPENTYPE_TAG('s','i','n','f'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_SCIENTIFIC_INFERIORS}
+  DWRITE_FONT_FEATURE_TAG_SMALL_CAPITALS                      = $70636D73; //DWRITE_MAKE_OPENTYPE_TAG('s','m','c','p'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_SMALL_CAPITALS}
+  DWRITE_FONT_FEATURE_TAG_SIMPLIFIED_FORMS                    = $6C706D73; //DWRITE_MAKE_OPENTYPE_TAG('s','m','p','l'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_SIMPLIFIED_FORMS}
+  DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_1                     = $31307373; //DWRITE_MAKE_OPENTYPE_TAG('s','s','0','1'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_1}
+  DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_2                     = $32307373; //DWRITE_MAKE_OPENTYPE_TAG('s','s','0','2'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_2}
+  DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_3                     = $33307373; //DWRITE_MAKE_OPENTYPE_TAG('s','s','0','3'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_3}
+  DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_4                     = $34307373; //DWRITE_MAKE_OPENTYPE_TAG('s','s','0','4'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_4}
+  DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_5                     = $35307373; //DWRITE_MAKE_OPENTYPE_TAG('s','s','0','5'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_5}
+  DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_6                     = $36307373; //DWRITE_MAKE_OPENTYPE_TAG('s','s','0','6'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_6}
+  DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_7                     = $37307373; //DWRITE_MAKE_OPENTYPE_TAG('s','s','0','7'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_7}
+  DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_8                     = $38307373; //DWRITE_MAKE_OPENTYPE_TAG('s','s','0','8'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_8}
+  DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_9                     = $39307373; //DWRITE_MAKE_OPENTYPE_TAG('s','s','0','9'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_9}
+  DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_10                    = $30317373; //DWRITE_MAKE_OPENTYPE_TAG('s','s','1','0'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_10}
+  DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_11                    = $31317373; //DWRITE_MAKE_OPENTYPE_TAG('s','s','1','1'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_11}
+  DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_12                    = $32317373; //DWRITE_MAKE_OPENTYPE_TAG('s','s','1','2'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_12}
+  DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_13                    = $33317373; //DWRITE_MAKE_OPENTYPE_TAG('s','s','1','3'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_13}
+  DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_14                    = $34317373; //DWRITE_MAKE_OPENTYPE_TAG('s','s','1','4'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_14}
+  DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_15                    = $35317373; //DWRITE_MAKE_OPENTYPE_TAG('s','s','1','5'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_15}
+  DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_16                    = $36317373; //DWRITE_MAKE_OPENTYPE_TAG('s','s','1','6'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_16}
+  DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_17                    = $37317373; //DWRITE_MAKE_OPENTYPE_TAG('s','s','1','7'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_17}
+  DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_18                    = $38317373; //DWRITE_MAKE_OPENTYPE_TAG('s','s','1','8'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_18}
+  DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_19                    = $39317373; //DWRITE_MAKE_OPENTYPE_TAG('s','s','1','9'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_19}
+  DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_20                    = $30327373; //DWRITE_MAKE_OPENTYPE_TAG('s','s','2','0'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_20}
+  DWRITE_FONT_FEATURE_TAG_SUBSCRIPT                           = $73627573; //DWRITE_MAKE_OPENTYPE_TAG('s','u','b','s'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_SUBSCRIPT}
+  DWRITE_FONT_FEATURE_TAG_SUPERSCRIPT                         = $73707573; //DWRITE_MAKE_OPENTYPE_TAG('s','u','p','s'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_SUPERSCRIPT}
+  DWRITE_FONT_FEATURE_TAG_SWASH                               = $68737773; //DWRITE_MAKE_OPENTYPE_TAG('s','w','s','h'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_SWASH}
+  DWRITE_FONT_FEATURE_TAG_TITLING                             = $6C746974; //DWRITE_MAKE_OPENTYPE_TAG('t','i','t','l'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_TITLING}
+  DWRITE_FONT_FEATURE_TAG_TRADITIONAL_NAME_FORMS              = $6D616E74; //DWRITE_MAKE_OPENTYPE_TAG('t','n','a','m'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_TRADITIONAL_NAME_FORMS}
+  DWRITE_FONT_FEATURE_TAG_TABULAR_FIGURES                     = $6D756E74; //DWRITE_MAKE_OPENTYPE_TAG('t','n','u','m'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_TABULAR_FIGURES}
+  DWRITE_FONT_FEATURE_TAG_TRADITIONAL_FORMS                   = $64617274; //DWRITE_MAKE_OPENTYPE_TAG('t','r','a','d'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_TRADITIONAL_FORMS}
+  DWRITE_FONT_FEATURE_TAG_THIRD_WIDTHS                        = $64697774; //DWRITE_MAKE_OPENTYPE_TAG('t','w','i','d'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_THIRD_WIDTHS}
+  DWRITE_FONT_FEATURE_TAG_UNICASE                             = $63696E75; //DWRITE_MAKE_OPENTYPE_TAG('u','n','i','c'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_UNICASE}
+  DWRITE_FONT_FEATURE_TAG_VERTICAL_WRITING                    = $74726576; //DWRITE_MAKE_OPENTYPE_TAG('v','e','r','t'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_VERTICAL_WRITING}
+  DWRITE_FONT_FEATURE_TAG_VERTICAL_ALTERNATES_AND_ROTATION    = $32747276; //DWRITE_MAKE_OPENTYPE_TAG('v','r','t','2'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_VERTICAL_ALTERNATES_AND_ROTATION}
+  DWRITE_FONT_FEATURE_TAG_SLASHED_ZERO                        = $6F72657A; //DWRITE_MAKE_OPENTYPE_TAG('z','e','r','o'),
+  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG_SLASHED_ZERO}
+
+type
+  // How to apply number substitution on digits and related punctuation.
+  PDWRITE_NUMBER_SUBSTITUTION_METHOD = ^DWRITE_NUMBER_SUBSTITUTION_METHOD;
+  DWRITE_NUMBER_SUBSTITUTION_METHOD = DWord;
+  {$EXTERNALSYM DWRITE_NUMBER_SUBSTITUTION_METHOD}
+const
+  // Specifies that the substitution method should be determined based
+  // on LOCALE_IDIGITSUBSTITUTION value of the specified text culture.
+  DWRITE_NUMBER_SUBSTITUTION_METHOD_FROM_CULTURE = DWRITE_NUMBER_SUBSTITUTION_METHOD(0);
+  {$EXTERNALSYM DWRITE_NUMBER_SUBSTITUTION_METHOD_FROM_CULTURE}
+  // If the culture is Arabic or Farsi, specifies that the number shape
+  // depend on the context. Either traditional or nominal number shape
+  // are used depending on the nearest preceding strong character or (if
+  // there is none) the reading direction of the paragraph.
+  DWRITE_NUMBER_SUBSTITUTION_METHOD_CONTEXTUAL   = DWRITE_NUMBER_SUBSTITUTION_METHOD(1);
+  {$EXTERNALSYM DWRITE_NUMBER_SUBSTITUTION_METHOD_CONTEXTUAL}
+  // Specifies that code points 0x30-0x39 are always rendered as nominal numeral
+  // shapes (ones of the European number), i.e., no substitution is performed.
+  DWRITE_NUMBER_SUBSTITUTION_METHOD_NONE         = DWRITE_NUMBER_SUBSTITUTION_METHOD(2);
+  {$EXTERNALSYM DWRITE_NUMBER_SUBSTITUTION_METHOD_NONE}
+  // Specifies that number are rendered using the national number shape
+  // as specified by the LOCALE_SNATIVEDIGITS value of the specified text culture.
+  DWRITE_NUMBER_SUBSTITUTION_METHOD_NATIONAL     = DWRITE_NUMBER_SUBSTITUTION_METHOD(3);
+  {$EXTERNALSYM DWRITE_NUMBER_SUBSTITUTION_METHOD_NATIONAL}
+  // Specifies that number are rendered using the traditional shape
+  // for the specified culture. For most cultures, this is the same as
+  // NativeNational. However, NativeNational results in Latin number
+  // for some Arabic cultures, whereas this value results in Arabic
+  // number for all Arabic cultures.
+  DWRITE_NUMBER_SUBSTITUTION_METHOD_TRADITIONAL  = DWRITE_NUMBER_SUBSTITUTION_METHOD(4);
+  {$EXTERNALSYM DWRITE_NUMBER_SUBSTITUTION_METHOD_TRADITIONAL}
+
+type
+  PDWRITE_SCRIPT_SHAPES = ^DWRITE_SCRIPT_SHAPES;
+  DWRITE_SCRIPT_SHAPES = DWord;
+  {$EXTERNALSYM DWRITE_SCRIPT_SHAPES}
+const
+  // No additional shaping requirement. Text is shaped with the writing system default behavior.
+  DWRITE_SCRIPT_SHAPES_DEFAULT   = DWRITE_SCRIPT_SHAPES(0);
+  {$EXTERNALSYM DWRITE_SCRIPT_SHAPES_DEFAULT}
+  // Text should leave no visual on display i.e. control or format control characters.
+  DWRITE_SCRIPT_SHAPES_NO_VISUAL = DWRITE_SCRIPT_SHAPES(1);
+  {$EXTERNALSYM DWRITE_SCRIPT_SHAPES_NO_VISUAL}
+
+type
+  // Condition at the edges of inline object or text used to determine
+  // line-breaking behavior.
+  PDWRITE_BREAK_CONDITION = ^DWRITE_BREAK_CONDITION;
+  DWRITE_BREAK_CONDITION = DWord;
+  {$EXTERNALSYM DWRITE_BREAK_CONDITION}
+const
+  // Whether a break is allowed is determined by the condition of the
+  // neighboring text span or inline object.
+  DWRITE_BREAK_CONDITION_NEUTRAL       = DWRITE_BREAK_CONDITION(0);
+  {$EXTERNALSYM DWRITE_BREAK_CONDITION_NEUTRAL}
+  // A break is allowed, unless overruled by the condition of the
+  // neighboring text span or inline object, either prohibited by a
+  // May Not or forced by a Must.
+  DWRITE_BREAK_CONDITION_CAN_BREAK     = DWRITE_BREAK_CONDITION(1);
+  {$EXTERNALSYM DWRITE_BREAK_CONDITION_CAN_BREAK}
+  // There should be no break, unless overruled by a Must condition from
+  // the neighboring text span or inline object.
+  DWRITE_BREAK_CONDITION_MAY_NOT_BREAK = DWRITE_BREAK_CONDITION(2);
+  {$EXTERNALSYM DWRITE_BREAK_CONDITION_MAY_NOT_BREAK}
+  // The break must happen, regardless of the condition of the adjacent
+  // text span or inline object.
+  DWRITE_BREAK_CONDITION_MUST_BREAK    = DWRITE_BREAK_CONDITION(3);
+  {$EXTERNALSYM DWRITE_BREAK_CONDITION_MUST_BREAK}
+
+type
+  // The DWRITE_TEXTURE_TYPE enumeration identifies a type of alpha texture. An alpha texture is a bitmap of alpha values, each
+  // representing the darkness (i.e., opacity) of a pixel or subpixel.
+  PDWRITE_TEXTURE_TYPE = ^DWRITE_TEXTURE_TYPE;
+  DWRITE_TEXTURE_TYPE = DWord;
+  {$EXTERNALSYM DWRITE_TEXTURE_TYPE}
+const
+  // Specifies an alpha texture for aliased text rendering (i.e., bi-level, where each pixel is either fully opaque or fully transparent),
+  // with one byte per pixel.
+  DWRITE_TEXTURE_ALIASED_1x1   = DWRITE_TEXTURE_TYPE(0);
+  {$EXTERNALSYM DWRITE_TEXTURE_ALIASED_1x1}
+  // Specifies an alpha texture for ClearType text rendering, with three bytes per pixel in the horizontal dimension and
+  // one byte per pixel in the vertical dimension.
+  DWRITE_TEXTURE_CLEARTYPE_3x1 = DWRITE_TEXTURE_TYPE(1);
+  {$EXTERNALSYM DWRITE_TEXTURE_CLEARTYPE_3x1}
+
+
+
+// =============================================================================
+
+type
 
   // Forward interface declarations
 
@@ -652,63 +1179,6 @@ type
   end;
   IID_IDWriteFontFile = IDWriteFontFile;
   {$EXTERNALSYM IID_IDWriteFontFile}
-
-
-  // Represents the internal structure of a device pixel (i.e., the physical arrangement of red,
-  // green, and blue color components) that is assumed for purposes of rendering text.
-  PDWRITE_PIXEL_GEOMETRY = ^DWRITE_PIXEL_GEOMETRY;
-  DWRITE_PIXEL_GEOMETRY = (
-    // The red, green, and blue color components of each pixel are assumed to occupy the same point.
-    DWRITE_PIXEL_GEOMETRY_FLAT,
-    // Each pixel comprises three vertical stripes, with red on the left, green in the center, and
-    // blue on the right. This is the most common pixel geometry for LCD monitors.
-    DWRITE_PIXEL_GEOMETRY_RGB,
-    // Each pixel comprises three vertical stripes, with blue on the left, green in the center, and
-    // red on the right.
-    DWRITE_PIXEL_GEOMETRY_BGR);
-  {$EXTERNALSYM DWRITE_PIXEL_GEOMETRY}
-
-
-  // Represents a method of rendering glyphs.
-  PDWRITE_RENDERING_MODE = ^DWRITE_RENDERING_MODE;
-  DWRITE_RENDERING_MODE = (
-    // Specifies that the rendering mode is determined automatically based on the font and size.
-    DWRITE_RENDERING_MODE_DEFAULT,
-    // Specifies that no antialiasing is performed. Each pixel is either set to the foreground
-    // color of the text or retains the color of the background.
-    DWRITE_RENDERING_MODE_ALIASED,
-    // Specifies that antialiasing is performed in the horizontal direction and the appearance
-    // of glyphs is layout-compatible with GDI using CLEARTYPE_QUALITY. Use DWRITE_MEASURING_MODE_GDI_CLASSIC
-    // to get glyph advances. The antialiasing may be either ClearType or grayscale depending on
-    // the text antialiasing mode.
-    DWRITE_RENDERING_MODE_GDI_CLASSIC,
-    // Specifies that antialiasing is performed in the horizontal direction and the appearance
-    // of glyphs is layout-compatible with GDI using CLEARTYPE_NATURAL_QUALITY. Glyph advances
-    // are close to the font design advances, but are still rounded to whole pixels. Use
-    // DWRITE_MEASURING_MODE_GDI_NATURAL to get glyph advances. The antialiasing may be either
-    // ClearType or grayscale depending on the text antialiasing mode.
-    DWRITE_RENDERING_MODE_GDI_NATURAL,
-    // Specifies that antialiasing is performed in the horizontal direction. This rendering
-    // mode allows glyphs to be positioned with subpixel precision and is therefore suitable
-    // for natural (i.e., resolution-independent) layout. The antialiasing may be either
-    // ClearType or grayscale depending on the text antialiasing mode.
-    DWRITE_RENDERING_MODE_NATURAL,
-    // Similar to natural mode except that antialiasing is performed in both the horizontal
-    // and vertical directions. This is typically used at larger sizes to make curves and
-    // diagonal lines look smoother. The antialiasing may be either ClearType or grayscale
-    // depending on the text antialiasing mode.
-    DWRITE_RENDERING_MODE_NATURAL_SYMMETRIC,
-    // Specifies that rendering should bypass the rasterizer and use the outlines directly.
-    // This is typically used at very large sizes.
-    DWRITE_RENDERING_MODE_OUTLINE,
-    // The following names are obsolete, but are kept as aliases to avoid breaking existing code.
-    // Each of these rendering modes may result in either ClearType or grayscale antialiasing
-    // depending on the DWRITE_TEXT_ANTIALIASING_MODE.
-    DWRITE_RENDERING_MODE_CLEARTYPE_GDI_CLASSIC         = DWRITE_RENDERING_MODE_GDI_CLASSIC,
-    DWRITE_RENDERING_MODE_CLEARTYPE_GDI_NATURAL         = DWRITE_RENDERING_MODE_GDI_NATURAL,
-    DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL             = DWRITE_RENDERING_MODE_NATURAL,
-    DWRITE_RENDERING_MODE_CLEARTYPE_NATURAL_SYMMETRIC   = DWRITE_RENDERING_MODE_NATURAL_SYMMETRIC);
-  {$EXTERNALSYM DWRITE_RENDERING_MODE}
 
 
   // The DWRITE_MATRIX structure specifies the graphics transform to be applied
@@ -1323,196 +1793,6 @@ type
   {$EXTERNALSYM IID_IDWriteFont}
 
 
-  // Direction for how reading progresses.
-  PDWRITE_READING_DIRECTION = ^DWRITE_READING_DIRECTION;
-  DWRITE_READING_DIRECTION = (
-    // Reading progresses from left to right.
-    DWRITE_READING_DIRECTION_LEFT_TO_RIGHT = 0,
-    // Reading progresses from right to left.
-    DWRITE_READING_DIRECTION_RIGHT_TO_LEFT = 1,
-    // Reading progresses from top to bottom.
-    DWRITE_READING_DIRECTION_TOP_TO_BOTTOM = 2,
-    // Reading progresses from bottom to top.
-    DWRITE_READING_DIRECTION_BOTTOM_TO_TOP = 3);
-  {$EXTERNALSYM DWRITE_READING_DIRECTION}
-
-
-  // Direction for how lines of text are placed relative to one another.
-  PDWRITE_FLOW_DIRECTION = ^DWRITE_FLOW_DIRECTION;
-  DWRITE_FLOW_DIRECTION = (
-    // Text lines are placed from top to bottom.
-    DWRITE_FLOW_DIRECTION_TOP_TO_BOTTOM = 0,
-    // Text lines are placed from bottom to top.
-    DWRITE_FLOW_DIRECTION_BOTTOM_TO_TOP = 1,
-    // Text lines are placed from left to right.
-    DWRITE_FLOW_DIRECTION_LEFT_TO_RIGHT = 2,
-    // Text lines are placed from right to left.
-    DWRITE_FLOW_DIRECTION_RIGHT_TO_LEFT = 3);
-  {$EXTERNALSYM DWRITE_FLOW_DIRECTION}
-
-
-  // Alignment of paragraph text along the reading direction axis relative to
-  // the leading and trailing edge of the layout box.
-  PDWRITE_TEXT_ALIGNMENT = ^DWRITE_TEXT_ALIGNMENT;
-  DWRITE_TEXT_ALIGNMENT = (
-    // The leading edge of the paragraph text is aligned to the layout box's leading edge.
-    DWRITE_TEXT_ALIGNMENT_LEADING,
-    // The trailing edge of the paragraph text is aligned to the layout box's trailing edge.
-    DWRITE_TEXT_ALIGNMENT_TRAILING,
-    // The center of the paragraph text is aligned to the center of the layout box.
-    DWRITE_TEXT_ALIGNMENT_CENTER,
-    // Align text to the leading side, and also justify text to fill the lines.
-    DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
-  {$EXTERNALSYM DWRITE_TEXT_ALIGNMENT}
-
-
-  // Alignment of paragraph text along the flow direction axis relative to the
-  // flow's beginning and ending edge of the layout box.
-  PDWRITE_PARAGRAPH_ALIGNMENT = ^DWRITE_PARAGRAPH_ALIGNMENT;
-  DWRITE_PARAGRAPH_ALIGNMENT = (
-    // The first line of paragraph is aligned to the flow's beginning edge of the layout box.
-    DWRITE_PARAGRAPH_ALIGNMENT_NEAR,
-    // The last line of paragraph is aligned to the flow's ending edge of the layout box.
-    DWRITE_PARAGRAPH_ALIGNMENT_FAR,
-    // The center of the paragraph is aligned to the center of the flow of the layout box.
-    DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-  {$EXTERNALSYM DWRITE_PARAGRAPH_ALIGNMENT}
-
-
-  // Word wrapping in multiline paragraph.
-  PDWRITE_WORD_WRAPPING = ^DWRITE_WORD_WRAPPING;
-  DWRITE_WORD_WRAPPING = (
-    // Words are broken across lines to avoid text overflowing the layout box.
-    DWRITE_WORD_WRAPPING_WRAP = 0,
-    // Words are kept within the same line even when it overflows the layout box.
-    // This option is often used with scrolling to reveal overflow text.
-    DWRITE_WORD_WRAPPING_NO_WRAP = 1,
-    // Words are broken across lines to avoid text overflowing the layout box.
-    // Emergency wrapping occurs if the word is larger than the maximum width.
-    DWRITE_WORD_WRAPPING_EMERGENCY_BREAK = 2,
-    // Only wrap whole words, never breaking words (emergency wrapping) when the
-    // layout width is too small for even a single word.
-    DWRITE_WORD_WRAPPING_WHOLE_WORD = 3,
-    // Wrap between any valid characters clusters.
-    DWRITE_WORD_WRAPPING_CHARACTER = 4);
-  {$EXTERNALSYM DWRITE_WORD_WRAPPING}
-
-
-  // The method used for line spacing in layout.
-  PDWRITE_LINE_SPACING_METHOD = ^DWRITE_LINE_SPACING_METHOD;
-  DWRITE_LINE_SPACING_METHOD = (
-    // Line spacing depends solely on the content, growing to accommodate the size of fonts and inline objects.
-    DWRITE_LINE_SPACING_METHOD_DEFAULT,
-    // Lines are explicitly set to uniform spacing, regardless of contained font sizes.
-    // This can be useful to avoid the uneven appearance that can occur from font fallback.
-    DWRITE_LINE_SPACING_METHOD_UNIFORM,
-    // Line spacing and baseline distances are proportional to the computed values based on the content, the size of the fonts and inline objects.
-    DWRITE_LINE_SPACING_METHOD_PROPORTIONAL);
-  {$EXTERNALSYM DWRITE_LINE_SPACING_METHOD}
-
-
-  // Text granularity used to trim text overflowing the layout box.
-  PDWRITE_TRIMMING_GRANULARITY = ^DWRITE_TRIMMING_GRANULARITY;
-  DWRITE_TRIMMING_GRANULARITY = (
-    // No trimming occurs. Text flows beyond the layout width.
-    DWRITE_TRIMMING_GRANULARITY_NONE,
-    // Trimming occurs at character cluster boundary.
-    DWRITE_TRIMMING_GRANULARITY_CHARACTER,
-    // Trimming occurs at word boundary.
-    DWRITE_TRIMMING_GRANULARITY_WORD);
-  {$EXTERNALSYM DWRITE_TRIMMING_GRANULARITY}
-
-
-  // Typographic feature of text supplied by the font.
-  // Remarks:
-  //   Use DWRITE_MAKE_FONT_FEATURE_TAG() to create a custom one.
-  // Delphi Note: We did hardcode the macro's.
-  PDWRITE_FONT_FEATURE_TAG = ^DWRITE_FONT_FEATURE_TAG;
-  DWRITE_FONT_FEATURE_TAG = (
-    DWRITE_FONT_FEATURE_TAG_ALTERNATIVE_FRACTIONS               = $63726661, //DWRITE_MAKE_OPENTYPE_TAG('a','f','r','c'),
-    DWRITE_FONT_FEATURE_TAG_PETITE_CAPITALS_FROM_CAPITALS       = $63703263, //DWRITE_MAKE_OPENTYPE_TAG('c','2','p','c'),
-    DWRITE_FONT_FEATURE_TAG_SMALL_CAPITALS_FROM_CAPITALS        = $63733263, //DWRITE_MAKE_OPENTYPE_TAG('c','2','s','c'),
-    DWRITE_FONT_FEATURE_TAG_CONTEXTUAL_ALTERNATES               = $746C6163, //DWRITE_MAKE_OPENTYPE_TAG('c','a','l','t'),
-    DWRITE_FONT_FEATURE_TAG_CASE_SENSITIVE_FORMS                = $65736163, //DWRITE_MAKE_OPENTYPE_TAG('c','a','s','e'),
-    DWRITE_FONT_FEATURE_TAG_GLYPH_COMPOSITION_DECOMPOSITION     = $706D6363, //DWRITE_MAKE_OPENTYPE_TAG('c','c','m','p'),
-    DWRITE_FONT_FEATURE_TAG_CONTEXTUAL_LIGATURES                = $67696C63, //DWRITE_MAKE_OPENTYPE_TAG('c','l','i','g'),
-    DWRITE_FONT_FEATURE_TAG_CAPITAL_SPACING                     = $70737063, //DWRITE_MAKE_OPENTYPE_TAG('c','p','s','p'),
-    DWRITE_FONT_FEATURE_TAG_CONTEXTUAL_SWASH                    = $68777363, //DWRITE_MAKE_OPENTYPE_TAG('c','s','w','h'),
-    DWRITE_FONT_FEATURE_TAG_CURSIVE_POSITIONING                 = $73727563, //DWRITE_MAKE_OPENTYPE_TAG('c','u','r','s'),
-    DWRITE_FONT_FEATURE_TAG_DEFAULT                             = $746C6664, //DWRITE_MAKE_OPENTYPE_TAG('d','f','l','t'),
-    DWRITE_FONT_FEATURE_TAG_DISCRETIONARY_LIGATURES             = $67696C64, //DWRITE_MAKE_OPENTYPE_TAG('d','l','i','g'),
-    DWRITE_FONT_FEATURE_TAG_EXPERT_FORMS                        = $74707865, //DWRITE_MAKE_OPENTYPE_TAG('e','x','p','t'),
-    DWRITE_FONT_FEATURE_TAG_FRACTIONS                           = $63617266, //DWRITE_MAKE_OPENTYPE_TAG('f','r','a','c'),
-    DWRITE_FONT_FEATURE_TAG_FULL_WIDTH                          = $64697766, //DWRITE_MAKE_OPENTYPE_TAG('f','w','i','d'),
-    DWRITE_FONT_FEATURE_TAG_HALF_FORMS                          = $666C6168, //DWRITE_MAKE_OPENTYPE_TAG('h','a','l','f'),
-    DWRITE_FONT_FEATURE_TAG_HALANT_FORMS                        = $6E6C6168, //DWRITE_MAKE_OPENTYPE_TAG('h','a','l','n'),
-    DWRITE_FONT_FEATURE_TAG_ALTERNATE_HALF_WIDTH                = $746C6168, //DWRITE_MAKE_OPENTYPE_TAG('h','a','l','t'),
-    DWRITE_FONT_FEATURE_TAG_HISTORICAL_FORMS                    = $74736968, //DWRITE_MAKE_OPENTYPE_TAG('h','i','s','t'),
-    DWRITE_FONT_FEATURE_TAG_HORIZONTAL_KANA_ALTERNATES          = $616E6B68, //DWRITE_MAKE_OPENTYPE_TAG('h','k','n','a'),
-    DWRITE_FONT_FEATURE_TAG_HISTORICAL_LIGATURES                = $67696C68, //DWRITE_MAKE_OPENTYPE_TAG('h','l','i','g'),
-    DWRITE_FONT_FEATURE_TAG_HALF_WIDTH                          = $64697768, //DWRITE_MAKE_OPENTYPE_TAG('h','w','i','d'),
-    DWRITE_FONT_FEATURE_TAG_HOJO_KANJI_FORMS                    = $6F6A6F68, //DWRITE_MAKE_OPENTYPE_TAG('h','o','j','o'),
-    DWRITE_FONT_FEATURE_TAG_JIS04_FORMS                         = $3430706A, //DWRITE_MAKE_OPENTYPE_TAG('j','p','0','4'),
-    DWRITE_FONT_FEATURE_TAG_JIS78_FORMS                         = $3837706A, //DWRITE_MAKE_OPENTYPE_TAG('j','p','7','8'),
-    DWRITE_FONT_FEATURE_TAG_JIS83_FORMS                         = $3338706A, //DWRITE_MAKE_OPENTYPE_TAG('j','p','8','3'),
-    DWRITE_FONT_FEATURE_TAG_JIS90_FORMS                         = $3039706A, //DWRITE_MAKE_OPENTYPE_TAG('j','p','9','0'),
-    DWRITE_FONT_FEATURE_TAG_KERNING                             = $6E72656B, //DWRITE_MAKE_OPENTYPE_TAG('k','e','r','n'),
-    DWRITE_FONT_FEATURE_TAG_STANDARD_LIGATURES                  = $6167696C, //DWRITE_MAKE_OPENTYPE_TAG('l','i','g','a'),
-    DWRITE_FONT_FEATURE_TAG_LINING_FIGURES                      = $6D756E6C, //DWRITE_MAKE_OPENTYPE_TAG('l','n','u','m'),
-    DWRITE_FONT_FEATURE_TAG_LOCALIZED_FORMS                     = $6C636F6C, //DWRITE_MAKE_OPENTYPE_TAG('l','o','c','l'),
-    DWRITE_FONT_FEATURE_TAG_MARK_POSITIONING                    = $6B72616D, //DWRITE_MAKE_OPENTYPE_TAG('m','a','r','k'),
-    DWRITE_FONT_FEATURE_TAG_MATHEMATICAL_GREEK                  = $6B72676D, //DWRITE_MAKE_OPENTYPE_TAG('m','g','r','k'),
-    DWRITE_FONT_FEATURE_TAG_MARK_TO_MARK_POSITIONING            = $6B6D6B6D, //DWRITE_MAKE_OPENTYPE_TAG('m','k','m','k'),
-    DWRITE_FONT_FEATURE_TAG_ALTERNATE_ANNOTATION_FORMS          = $746C616E, //DWRITE_MAKE_OPENTYPE_TAG('n','a','l','t'),
-    DWRITE_FONT_FEATURE_TAG_NLC_KANJI_FORMS                     = $6B636C6E, //DWRITE_MAKE_OPENTYPE_TAG('n','l','c','k'),
-    DWRITE_FONT_FEATURE_TAG_OLD_STYLE_FIGURES                   = $6D756E6F, //DWRITE_MAKE_OPENTYPE_TAG('o','n','u','m'),
-    DWRITE_FONT_FEATURE_TAG_ORDINALS                            = $6E64726F, //DWRITE_MAKE_OPENTYPE_TAG('o','r','d','n'),
-    DWRITE_FONT_FEATURE_TAG_PROPORTIONAL_ALTERNATE_WIDTH        = $746C6170, //DWRITE_MAKE_OPENTYPE_TAG('p','a','l','t'),
-    DWRITE_FONT_FEATURE_TAG_PETITE_CAPITALS                     = $70616370, //DWRITE_MAKE_OPENTYPE_TAG('p','c','a','p'),
-    DWRITE_FONT_FEATURE_TAG_PROPORTIONAL_FIGURES                = $6D756E70, //DWRITE_MAKE_OPENTYPE_TAG('p','n','u','m'),
-    DWRITE_FONT_FEATURE_TAG_PROPORTIONAL_WIDTHS                 = $64697770, //DWRITE_MAKE_OPENTYPE_TAG('p','w','i','d'),
-    DWRITE_FONT_FEATURE_TAG_QUARTER_WIDTHS                      = $64697771, //DWRITE_MAKE_OPENTYPE_TAG('q','w','i','d'),
-    DWRITE_FONT_FEATURE_TAG_REQUIRED_LIGATURES                  = $67696C72, //DWRITE_MAKE_OPENTYPE_TAG('r','l','i','g'),
-    DWRITE_FONT_FEATURE_TAG_RUBY_NOTATION_FORMS                 = $79627572, //DWRITE_MAKE_OPENTYPE_TAG('r','u','b','y'),
-    DWRITE_FONT_FEATURE_TAG_STYLISTIC_ALTERNATES                = $746C6173, //DWRITE_MAKE_OPENTYPE_TAG('s','a','l','t'),
-    DWRITE_FONT_FEATURE_TAG_SCIENTIFIC_INFERIORS                = $666E6973, //DWRITE_MAKE_OPENTYPE_TAG('s','i','n','f'),
-    DWRITE_FONT_FEATURE_TAG_SMALL_CAPITALS                      = $70636D73, //DWRITE_MAKE_OPENTYPE_TAG('s','m','c','p'),
-    DWRITE_FONT_FEATURE_TAG_SIMPLIFIED_FORMS                    = $6C706D73, //DWRITE_MAKE_OPENTYPE_TAG('s','m','p','l'),
-    DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_1                     = $31307373, //DWRITE_MAKE_OPENTYPE_TAG('s','s','0','1'),
-    DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_2                     = $32307373, //DWRITE_MAKE_OPENTYPE_TAG('s','s','0','2'),
-    DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_3                     = $33307373, //DWRITE_MAKE_OPENTYPE_TAG('s','s','0','3'),
-    DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_4                     = $34307373, //DWRITE_MAKE_OPENTYPE_TAG('s','s','0','4'),
-    DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_5                     = $35307373, //DWRITE_MAKE_OPENTYPE_TAG('s','s','0','5'),
-    DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_6                     = $36307373, //DWRITE_MAKE_OPENTYPE_TAG('s','s','0','6'),
-    DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_7                     = $37307373, //DWRITE_MAKE_OPENTYPE_TAG('s','s','0','7'),
-    DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_8                     = $38307373, //DWRITE_MAKE_OPENTYPE_TAG('s','s','0','8'),
-    DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_9                     = $39307373, //DWRITE_MAKE_OPENTYPE_TAG('s','s','0','9'),
-    DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_10                    = $30317373, //DWRITE_MAKE_OPENTYPE_TAG('s','s','1','0'),
-    DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_11                    = $31317373, //DWRITE_MAKE_OPENTYPE_TAG('s','s','1','1'),
-    DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_12                    = $32317373, //DWRITE_MAKE_OPENTYPE_TAG('s','s','1','2'),
-    DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_13                    = $33317373, //DWRITE_MAKE_OPENTYPE_TAG('s','s','1','3'),
-    DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_14                    = $34317373, //DWRITE_MAKE_OPENTYPE_TAG('s','s','1','4'),
-    DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_15                    = $35317373, //DWRITE_MAKE_OPENTYPE_TAG('s','s','1','5'),
-    DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_16                    = $36317373, //DWRITE_MAKE_OPENTYPE_TAG('s','s','1','6'),
-    DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_17                    = $37317373, //DWRITE_MAKE_OPENTYPE_TAG('s','s','1','7'),
-    DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_18                    = $38317373, //DWRITE_MAKE_OPENTYPE_TAG('s','s','1','8'),
-    DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_19                    = $39317373, //DWRITE_MAKE_OPENTYPE_TAG('s','s','1','9'),
-    DWRITE_FONT_FEATURE_TAG_STYLISTIC_SET_20                    = $30327373, //DWRITE_MAKE_OPENTYPE_TAG('s','s','2','0'),
-    DWRITE_FONT_FEATURE_TAG_SUBSCRIPT                           = $73627573, //DWRITE_MAKE_OPENTYPE_TAG('s','u','b','s'),
-    DWRITE_FONT_FEATURE_TAG_SUPERSCRIPT                         = $73707573, //DWRITE_MAKE_OPENTYPE_TAG('s','u','p','s'),
-    DWRITE_FONT_FEATURE_TAG_SWASH                               = $68737773, //DWRITE_MAKE_OPENTYPE_TAG('s','w','s','h'),
-    DWRITE_FONT_FEATURE_TAG_TITLING                             = $6C746974, //DWRITE_MAKE_OPENTYPE_TAG('t','i','t','l'),
-    DWRITE_FONT_FEATURE_TAG_TRADITIONAL_NAME_FORMS              = $6D616E74, //DWRITE_MAKE_OPENTYPE_TAG('t','n','a','m'),
-    DWRITE_FONT_FEATURE_TAG_TABULAR_FIGURES                     = $6D756E74, //DWRITE_MAKE_OPENTYPE_TAG('t','n','u','m'),
-    DWRITE_FONT_FEATURE_TAG_TRADITIONAL_FORMS                   = $64617274, //DWRITE_MAKE_OPENTYPE_TAG('t','r','a','d'),
-    DWRITE_FONT_FEATURE_TAG_THIRD_WIDTHS                        = $64697774, //DWRITE_MAKE_OPENTYPE_TAG('t','w','i','d'),
-    DWRITE_FONT_FEATURE_TAG_UNICASE                             = $63696E75, //DWRITE_MAKE_OPENTYPE_TAG('u','n','i','c'),
-    DWRITE_FONT_FEATURE_TAG_VERTICAL_WRITING                    = $74726576, //DWRITE_MAKE_OPENTYPE_TAG('v','e','r','t'),
-    DWRITE_FONT_FEATURE_TAG_VERTICAL_ALTERNATES_AND_ROTATION    = $32747276, //DWRITE_MAKE_OPENTYPE_TAG('v','r','t','2'),
-    DWRITE_FONT_FEATURE_TAG_SLASHED_ZERO                        = $6F72657A  //DWRITE_MAKE_OPENTYPE_TAG('z','e','r','o'),
-  );
-  {$EXTERNALSYM DWRITE_FONT_FEATURE_TAG}
-
   // The DWRITE_TEXT_RANGE structure specifies a range of text positions where format is applied.
   PDWRITE_TEXT_RANGE = ^DWRITE_TEXT_RANGE;
   DWRITE_TEXT_RANGE = record
@@ -1782,15 +2062,6 @@ type
   {$EXTERNALSYM IID_IDWriteTypography}
 
 
-  PDWRITE_SCRIPT_SHAPES = ^DWRITE_SCRIPT_SHAPES;
-  DWRITE_SCRIPT_SHAPES = (
-    // No additional shaping requirement. Text is shaped with the writing system default behavior.
-    DWRITE_SCRIPT_SHAPES_DEFAULT = 0,
-    // Text should leave no visual on display i.e. control or format control characters.
-    DWRITE_SCRIPT_SHAPES_NO_VISUAL = 1);
-  {$EXTERNALSYM DWRITE_SCRIPT_SHAPES}
-
-
   // Association of text and its writing system script as well as some display attributes.
   PDWRITE_SCRIPT_ANALYSIS = ^DWRITE_SCRIPT_ANALYSIS;
   DWRITE_SCRIPT_ANALYSIS = record
@@ -1801,24 +2072,6 @@ type
   end;
   {$EXTERNALSYM DWRITE_SCRIPT_ANALYSIS}
 
-  // Condition at the edges of inline object or text used to determine
-  // line-breaking behavior.
-  PDWRITE_BREAK_CONDITION = ^DWRITE_BREAK_CONDITION;
-  DWRITE_BREAK_CONDITION = (
-    // Whether a break is allowed is determined by the condition of the
-    // neighboring text span or inline object.
-    DWRITE_BREAK_CONDITION_NEUTRAL,
-    // A break is allowed, unless overruled by the condition of the
-    // neighboring text span or inline object, either prohibited by a
-    // May Not or forced by a Must.
-    DWRITE_BREAK_CONDITION_CAN_BREAK,
-    // There should be no break, unless overruled by a Must condition from
-    // the neighboring text span or inline object.
-    DWRITE_BREAK_CONDITION_MAY_NOT_BREAK,
-    // The break must happen, regardless of the condition of the adjacent
-    // text span or inline object.
-    DWRITE_BREAK_CONDITION_MUST_BREAK);
-  {$EXTERNALSYM DWRITE_BREAK_CONDITION}
 
 
   // Line breakpoint characteristics of a character.
@@ -1848,32 +2101,6 @@ type
     property padding: UINT8 index $0602 read GetUINT8 write SetUINT8;              // mask $0002, offset 6
   end;
   {$EXTERNALSYM DWRITE_LINE_BREAKPOINT}
-
-
-  // How to apply number substitution on digits and related punctuation.
-  PDWRITE_NUMBER_SUBSTITUTION_METHOD = ^DWRITE_NUMBER_SUBSTITUTION_METHOD;
-  DWRITE_NUMBER_SUBSTITUTION_METHOD = (
-    // Specifies that the substitution method should be determined based
-    // on LOCALE_IDIGITSUBSTITUTION value of the specified text culture.
-    DWRITE_NUMBER_SUBSTITUTION_METHOD_FROM_CULTURE,
-    // If the culture is Arabic or Farsi, specifies that the number shape
-    // depend on the context. Either traditional or nominal number shape
-    // are used depending on the nearest preceding strong character or (if
-    // there is none) the reading direction of the paragraph.
-    DWRITE_NUMBER_SUBSTITUTION_METHOD_CONTEXTUAL,
-    // Specifies that code points 0x30-0x39 are always rendered as nominal numeral
-    // shapes (ones of the European number), i.e., no substitution is performed.
-    DWRITE_NUMBER_SUBSTITUTION_METHOD_NONE,
-    // Specifies that number are rendered using the national number shape
-    // as specified by the LOCALE_SNATIVEDIGITS value of the specified text culture.
-    DWRITE_NUMBER_SUBSTITUTION_METHOD_NATIONAL,
-    // Specifies that number are rendered using the traditional shape
-    // for the specified culture. For most cultures, this is the same as
-    // NativeNational. However, NativeNational results in Latin number
-    // for some Arabic cultures, whereas this value results in Arabic
-    // number for all Arabic cultures.
-    DWRITE_NUMBER_SUBSTITUTION_METHOD_TRADITIONAL);
-  {$EXTERNALSYM DWRITE_NUMBER_SUBSTITUTION_METHOD}
 
 
   // Interface IDWriteNumberSubstitution
@@ -3593,19 +3820,6 @@ type
   {$EXTERNALSYM IID_IDWriteGdiInterop}
 
 
-  // The DWRITE_TEXTURE_TYPE enumeration identifies a type of alpha texture. An alpha texture is a bitmap of alpha values, each
-  // representing the darkness (i.e., opacity) of a pixel or subpixel.
-  PDWRITE_TEXTURE_TYPE = ^DWRITE_TEXTURE_TYPE;
-  DWRITE_TEXTURE_TYPE = (
-    // Specifies an alpha texture for aliased text rendering (i.e., bi-level, where each pixel is either fully opaque or fully transparent),
-    // with one byte per pixel.
-    DWRITE_TEXTURE_ALIASED_1x1,
-    // Specifies an alpha texture for ClearType text rendering, with three bytes per pixel in the horizontal dimension and
-    // one byte per pixel in the vertical dimension.
-    DWRITE_TEXTURE_CLEARTYPE_3x1);
-  {$EXTERNALSYM DWRITE_TEXTURE_TYPE}
-
-
   // Interface IDWriteGlyphRunAnalysis
   // =================================
   // Interface that encapsulates information used to render a glyph run.
@@ -4026,17 +4240,17 @@ const
   //
   // Example: DWRITE_MAKE_OPENTYPE_TAG('c','c','m','p')
   // Dword:   $706D6363
-  function DWRITE_MAKE_OPENTYPE_TAG(a: Char;
-                                    b: Char;
-                                    c: Char;
-                                    d: Char): DWORD;
+  function DWRITE_MAKE_OPENTYPE_TAG(a: AnsiChar;
+                                    b: AnsiChar;
+                                    c: AnsiChar;
+                                    d: AnsiChar): DWORD;
   {$EXTERNALSYM DWRITE_MAKE_OPENTYPE_TAG}
 
   // Creates an OpenType tag for glyph positioning and substitution font features.
-  function DWRITE_MAKE_FONT_FEATURE_TAG(a: Char;
-                                        b: Char;
-                                        c: Char;
-                                        d: Char): DWORD;
+  function DWRITE_MAKE_FONT_FEATURE_TAG(a: AnsiChar;
+                                        b: AnsiChar;
+                                        c: AnsiChar;
+                                        d: AnsiChar): DWORD;
   {$EXTERNALSYM DWRITE_MAKE_FONT_FEATURE_TAG}
 
 
@@ -4100,16 +4314,19 @@ const
   {$EXTERNALSYM DWriteLib}
 
 
-function DWRITE_MAKE_OPENTYPE_TAG(a: char;
-                                  b: char;
-                                  c: char;
-                                  d: char): DWORD;
+function DWRITE_MAKE_OPENTYPE_TAG(a: AnsiChar;
+                                  b: AnsiChar;
+                                  c: AnsiChar;
+                                  d: AnsiChar): DWORD;
 begin
   Result := DWORD((Ord(d) shl 24) or (Ord(c) shl 16) or (Ord(b) shl 8) or Ord(a));
 end;
 
 
-function DWRITE_MAKE_FONT_FEATURE_TAG(a: Char; b: Char; c: Char; d: Char): DWORD;
+function DWRITE_MAKE_FONT_FEATURE_TAG(a: AnsiChar;
+                                      b: AnsiChar;
+                                      c: AnsiChar;
+                                      d: AnsiChar): DWORD;
 begin
   Result := DWRITE_MAKE_OPENTYPE_TAG(a, b, c, d);
 end;

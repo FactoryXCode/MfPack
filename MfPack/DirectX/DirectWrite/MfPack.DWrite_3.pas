@@ -17,11 +17,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows 7 or later.
@@ -31,7 +33,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.19569.0
+// SDK version: 10.0.19041.0
 //
 // Todo: -
 //
@@ -72,14 +74,6 @@ uses
   MfPack.DWrite_2;
 
   {$WEAKPACKAGEUNIT ON}
-  {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$INCLUDE 'MfPack.inc'}
 
 const
@@ -119,6 +113,313 @@ const
   DWRITE_FONT_AXIS_TAG_ITALIC        = Ord('i') or (Ord('t') shl 8) or (Ord('a') shl 16) or (Ord('l') shl 24);
   {$EXTERNALSYM DWRITE_FONT_AXIS_TAG_ITALIC}
 
+// Enums =======================================================================
+
+type
+  // The font property enumeration identifies a string in a font.
+  PDWRITE_FONT_PROPERTY_ID = ^DWRITE_FONT_PROPERTY_ID;
+  DWRITE_FONT_PROPERTY_ID = DWord;
+  {$EXTERNALSYM DWRITE_FONT_PROPERTY_ID}
+const
+  // Unspecified font property identifier.
+  DWRITE_FONT_PROPERTY_ID_NONE = DWRITE_FONT_PROPERTY_ID(0);
+  {$EXTERNALSYM DWRITE_FONT_PROPERTY_ID_NONE}
+  // Family name for the weight-stretch-style model.
+  DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME = DWRITE_FONT_PROPERTY_ID(1);
+  {$EXTERNALSYM DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME}
+  // Family name preferred by the designer. This enables font designers to group more than four fonts in a single family without losing compatibility with
+  // GDI. This name is typically only present if it differs from the GDI-compatible family name.
+  DWRITE_FONT_PROPERTY_ID_TYPOGRAPHIC_FAMILY_NAME = DWRITE_FONT_PROPERTY_ID(2);
+  {$EXTERNALSYM DWRITE_FONT_PROPERTY_ID_TYPOGRAPHIC_FAMILY_NAME}
+  // Face name of the for the weight-stretch-style (e.g., Regular or Bold).
+  DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FACE_NAME = DWRITE_FONT_PROPERTY_ID(3);
+  {$EXTERNALSYM DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FACE_NAME}
+  // The full name of the font, e.g. "Arial Bold", from name id 4 in the name table.
+  DWRITE_FONT_PROPERTY_ID_FULL_NAME = DWRITE_FONT_PROPERTY_ID(4);
+  {$EXTERNALSYM DWRITE_FONT_PROPERTY_ID_FULL_NAME}
+  // GDI-compatible family name. Because GDI allows a maximum of four fonts per family, fonts in the same family may have different GDI-compatible family names
+  // (e.g., "Arial", "Arial Narrow", "Arial Black").
+  DWRITE_FONT_PROPERTY_ID_WIN32_FAMILY_NAME = DWRITE_FONT_PROPERTY_ID(5);
+  {$EXTERNALSYM DWRITE_FONT_PROPERTY_ID_WIN32_FAMILY_NAME}
+  // The postscript name of the font, e.g. "GillSans-Bold" from name id 6 in the name table.
+  DWRITE_FONT_PROPERTY_ID_POSTSCRIPT_NAME = DWRITE_FONT_PROPERTY_ID(6);
+  {$EXTERNALSYM DWRITE_FONT_PROPERTY_ID_POSTSCRIPT_NAME}
+  // Script/language tag to identify the scripts or languages that the font was
+  // primarily designed to support.
+  // <remarks>
+  // The design script/language tag is meant to be understood from the perspective of
+  // users. For example, a font is considered designed for English if it is considered
+  // useful for English users. Note that this is different from what a font might be
+  // capable of supporting. For example, the Meiryo font was primarily designed for
+  // Japanese users. While it is capable of displaying English well, it was not
+  // meant to be offered for the benefit of non-Japanese-speaking English users.
+  //
+  // As another example, a font designed for Chinese may be capable of displaying
+  // Japanese text, but would likely look incorrect to Japanese users.
+  //
+  // The valid values for this property are "ScriptLangTag" values. These are adapted
+  // from the IETF BCP 47 specification, "Tags for Identifying Languages" (see
+  // http://tools.ietf.org/html/bcp47). In a BCP 47 language tag, a language subtag
+  // element is mandatory and other subtags are optional. In a ScriptLangTag, a
+  // script subtag is mandatory and other subtags are option. The following
+  // augmented BNF syntax, adapted from BCP 47, is used:
+  //
+  //     ScriptLangTag = [language "-"]
+  //                     script
+  //                     ["-" region]
+  //                     *("-" variant)
+  //                     *("-" extension)
+  //                     ["-" privateuse]
+  //
+  // The expansion of the elements and the intended semantics associated with each
+  // are as defined in BCP 47. Script subtags are taken from ISO 15924. At present,
+  // no extensions are defined, and any extension should be ignored. Private use
+  // subtags are defined by private agreement between the source and recipient and
+  // may be ignored.
+  //
+  // Subtags must be valid for use in BCP 47 and contained in the Language Subtag
+  // Registry maintained by IANA. (See
+  // http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
+  // and section 3 of BCP 47 for details.
+  //
+  // Any ScriptLangTag value not conforming to these specifications is ignored.
+  //
+  // Examples:
+  //   "Latn" denotes Latin script (and any language or writing system using Latin)
+  //   "Cyrl" denotes Cyrillic script
+  //   "sr-Cyrl" denotes Cyrillic script as used for writing the Serbian language;
+  //       a font that has this property value may not be suitable for displaying
+  //       text in Russian or other languages written using Cyrillic script
+  //   "Jpan" denotes Japanese writing (Han + Hiragana + Katakana)
+  //
+  // When passing this property to GetPropertyValues, use the overload which does
+  // not take a language parameter, since this property has no specific language.
+  // </remarks>
+  DWRITE_FONT_PROPERTY_ID_DESIGN_SCRIPT_LANGUAGE_TAG = DWRITE_FONT_PROPERTY_ID(7);
+  {$EXTERNALSYM DWRITE_FONT_PROPERTY_ID_DESIGN_SCRIPT_LANGUAGE_TAG}
+  // Script/language tag to identify the scripts or languages that the font declares
+  // it is able to support.
+  DWRITE_FONT_PROPERTY_ID_SUPPORTED_SCRIPT_LANGUAGE_TAG = DWRITE_FONT_PROPERTY_ID(8);
+  {$EXTERNALSYM DWRITE_FONT_PROPERTY_ID_SUPPORTED_SCRIPT_LANGUAGE_TAG}
+  // Semantic tag to describe the font (e.g. Fancy, Decorative, Handmade, Sans-serif, Swiss, Pixel, Futuristic).
+  DWRITE_FONT_PROPERTY_ID_SEMANTIC_TAG = DWRITE_FONT_PROPERTY_ID(9);
+  {$EXTERNALSYM DWRITE_FONT_PROPERTY_ID_SEMANTIC_TAG}
+  // Weight of the font represented as a decimal string in the range 1-999.
+  // <remark>
+  // This enum is discouraged for use with IDWriteFontSetBuilder2 in favor of the more generic font axis
+  // DWRITE_FONT_AXIS_TAG_WEIGHT which supports higher precision and range.
+  // </remark>
+  DWRITE_FONT_PROPERTY_ID_WEIGHT = DWRITE_FONT_PROPERTY_ID(10);
+  {$EXTERNALSYM DWRITE_FONT_PROPERTY_ID_WEIGHT}
+  // Stretch of the font represented as a decimal string in the range 1-9.
+  // <remark>
+  // This enum is discouraged for use with IDWriteFontSetBuilder2 in favor of the more generic font axis
+  // DWRITE_FONT_AXIS_TAG_WIDTH which supports higher precision and range.
+  // </remark>
+  DWRITE_FONT_PROPERTY_ID_STRETCH = DWRITE_FONT_PROPERTY_ID(11);
+  {$EXTERNALSYM DWRITE_FONT_PROPERTY_ID_STRETCH}
+  // Style of the font represented as a decimal string in the range 0-2.
+  // <remark>
+  // This enum is discouraged for use with IDWriteFontSetBuilder2 in favor of the more generic font axes
+  // DWRITE_FONT_AXIS_TAG_SLANT and DWRITE_FONT_AXIS_TAG_ITAL.
+  // </remark>
+  DWRITE_FONT_PROPERTY_ID_STYLE = DWRITE_FONT_PROPERTY_ID(12);
+  {$EXTERNALSYM DWRITE_FONT_PROPERTY_ID_STYLE}
+  // Face name preferred by the designer. This enables font designers to group more than four fonts in a single
+  // family without losing compatibility with GDI.
+  DWRITE_FONT_PROPERTY_ID_TYPOGRAPHIC_FACE_NAME = DWRITE_FONT_PROPERTY_ID(13);
+  {$EXTERNALSYM DWRITE_FONT_PROPERTY_ID_TYPOGRAPHIC_FACE_NAME}
+  // Total number of properties for NTDDI_WIN10 (IDWriteFontSet).
+  // <remarks>
+  // DWRITE_FONT_PROPERTY_ID_TOTAL cannot be used as a property ID.
+  // </remarks>
+  DWRITE_FONT_PROPERTY_ID_TOTAL = DWRITE_FONT_PROPERTY_ID_STYLE + 1;
+  {$EXTERNALSYM DWRITE_FONT_PROPERTY_ID_TOTAL}
+
+  // Total number of properties for NTDDI_WIN10_RS3 (IDWriteFontSet1).
+  DWRITE_FONT_PROPERTY_ID_TOTAL_RS3 = DWRITE_FONT_PROPERTY_ID_TYPOGRAPHIC_FACE_NAME + 1;
+  {$EXTERNALSYM DWRITE_FONT_PROPERTY_ID_TOTAL_RS3}
+  // Obsolete aliases kept to avoid breaking existing code.
+  DWRITE_FONT_PROPERTY_ID_PREFERRED_FAMILY_NAME = DWRITE_FONT_PROPERTY_ID_TYPOGRAPHIC_FAMILY_NAME;
+  {$EXTERNALSYM DWRITE_FONT_PROPERTY_ID_PREFERRED_FAMILY_NAME}
+  DWRITE_FONT_PROPERTY_ID_FAMILY_NAME = DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME;
+  {$EXTERNALSYM DWRITE_FONT_PROPERTY_ID_FAMILY_NAME}
+  DWRITE_FONT_PROPERTY_ID_FACE_NAME = DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FACE_NAME;
+  {$EXTERNALSYM DWRITE_FONT_PROPERTY_ID_FACE_NAME}
+
+type
+  // Specifies the locality of a resource.
+  PDWRITE_LOCALITY = ^DWRITE_LOCALITY;
+  DWRITE_LOCALITY = DWord;
+  {$EXTERNALSYM DWRITE_LOCALITY}
+const
+  // The resource is remote, and information is unknown yet, including the file size and date.
+  // Attempting to create a font or file stream will fail until locality becomes at least partial.
+  DWRITE_LOCALITY_REMOTE = DWRITE_LOCALITY(0);
+  // The resource is partially local, meaning you can query the size and date of the file
+  // stream, and you may be able to create a font face and retrieve the particular glyphs
+  // for metrics and drawing, but not all the glyphs will be present.
+  DWRITE_LOCALITY_PARTIAL = DWRITE_LOCALITY(1);
+  // The resource is completely local, and all font functions can be called
+  // without concern of missing data or errors related to network connectivity.
+  DWRITE_LOCALITY_LOCAL = DWRITE_LOCALITY(2);
+
+type
+  // Represents a method of rendering glyphs.
+  PDWRITE_RENDERING_MODE1 = ^DWRITE_RENDERING_MODE1;
+  DWRITE_RENDERING_MODE1 = DWord;
+  {$EXTERNALSYM DWRITE_RENDERING_MODE1}
+const
+  // Specifies that the rendering mode is determined automatically based on the font and size.
+  DWRITE_RENDERING_MODE1_DEFAULT = DWRITE_RENDERING_MODE_DEFAULT;
+  {$EXTERNALSYM DWRITE_RENDERING_MODE1_DEFAULT}
+  // Specifies that no antialiasing is performed. Each pixel is either set to the foreground
+  // color of the text or retains the color of the background.
+  DWRITE_RENDERING_MODE1_ALIASED = DWRITE_RENDERING_MODE_ALIASED;
+  {$EXTERNALSYM DWRITE_RENDERING_MODE1_ALIASED}
+  // Specifies that antialiasing is performed in the horizontal direction and the appearance
+  // of glyphs is layout-compatible with GDI using CLEARTYPE_QUALITY. Use DWRITE_MEASURING_MODE_GDI_CLASSIC
+  // to get glyph advances. The antialiasing may be either ClearType or grayscale depending on
+  // the text antialiasing mode.
+  DWRITE_RENDERING_MODE1_GDI_CLASSIC = DWRITE_RENDERING_MODE_GDI_CLASSIC;
+  {$EXTERNALSYM DWRITE_RENDERING_MODE1_GDI_CLASSIC}
+  // Specifies that antialiasing is performed in the horizontal direction and the appearance
+  // of glyphs is layout-compatible with GDI using CLEARTYPE_NATURAL_QUALITY. Glyph advances
+  // are close to the font design advances, but are still rounded to whole pixels. Use
+  // DWRITE_MEASURING_MODE_GDI_NATURAL to get glyph advances. The antialiasing may be either
+  // ClearType or grayscale depending on the text antialiasing mode.
+  DWRITE_RENDERING_MODE1_GDI_NATURAL = DWRITE_RENDERING_MODE_GDI_NATURAL;
+  {$EXTERNALSYM DWRITE_RENDERING_MODE1_GDI_NATURAL}
+  // Specifies that antialiasing is performed in the horizontal direction. This rendering
+  // mode allows glyphs to be positioned with subpixel precision and is therefore suitable
+  // for natural (i.e., resolution-independent) layout. The antialiasing may be either
+  // ClearType or grayscale depending on the text antialiasing mode.
+  DWRITE_RENDERING_MODE1_NATURAL = DWRITE_RENDERING_MODE_NATURAL;
+  {$EXTERNALSYM DWRITE_RENDERING_MODE1_NATURAL}
+  // Similar to natural mode except that antialiasing is performed in both the horizontal
+  // and vertical directions. This is typically used at larger sizes to make curves and
+  // diagonal lines look smoother. The antialiasing may be either ClearType or grayscale
+  // depending on the text antialiasing mode.
+  DWRITE_RENDERING_MODE1_NATURAL_SYMMETRIC = DWRITE_RENDERING_MODE_NATURAL_SYMMETRIC;
+  {$EXTERNALSYM DWRITE_RENDERING_MODE1_NATURAL_SYMMETRIC}
+  // Specifies that rendering should bypass the rasterizer and use the outlines directly.
+  // This is typically used at very large sizes.
+  DWRITE_RENDERING_MODE1_OUTLINE = DWRITE_RENDERING_MODE_OUTLINE;
+  {$EXTERNALSYM DWRITE_RENDERING_MODE1_OUTLINE}
+  // Similar to natural symmetric mode except that when possible, text should be rasterized
+  // in a downsampled form.
+  DWRITE_RENDERING_MODE1_NATURAL_SYMMETRIC_DOWNSAMPLED = DWRITE_RENDERING_MODE1(7);
+  {$EXTERNALSYM DWRITE_RENDERING_MODE1_NATURAL_SYMMETRIC_DOWNSAMPLED}
+
+type
+  // Specify whether DWRITE_FONT_METRICS.lineGap value should be part of the line metrics.
+  PDWRITE_FONT_LINE_GAP_USAGE = ^DWRITE_FONT_LINE_GAP_USAGE;
+  DWRITE_FONT_LINE_GAP_USAGE = DWord;
+  {$EXTERNALSYM DWRITE_FONT_LINE_GAP_USAGE}
+const
+  // The usage of the font line gap depends on the method used for text layout.
+  DWRITE_FONT_LINE_GAP_USAGE_DEFAULT = DWRITE_FONT_LINE_GAP_USAGE(0);
+  // The font line gap is excluded from line spacing
+  DWRITE_FONT_LINE_GAP_USAGE_DISABLED = DWRITE_FONT_LINE_GAP_USAGE(1);
+  // The font line gap is included in line spacing
+  DWRITE_FONT_LINE_GAP_USAGE_ENABLED = DWRITE_FONT_LINE_GAP_USAGE(2);
+
+type
+  // Specifies the container format of a font resource. A container format is distinct from
+  // a font file format (DWRITE_FONT_FILE_TYPE) because the container describes the container
+  // in which the underlying font file is packaged.
+  PDWRITE_CONTAINER_TYPE = ^DWRITE_CONTAINER_TYPE;
+  DWRITE_CONTAINER_TYPE = DWord;
+  {$EXTERNALSYM DWRITE_CONTAINER_TYPE}
+const
+  DWRITE_CONTAINER_TYPE_UNKNOWN = DWRITE_CONTAINER_TYPE(0);
+  {$EXTERNALSYM DWRITE_CONTAINER_TYPE_UNKNOWN}
+  DWRITE_CONTAINER_TYPE_WOFF = DWRITE_CONTAINER_TYPE(1);
+  {$EXTERNALSYM DWRITE_CONTAINER_TYPE_WOFF}
+  DWRITE_CONTAINER_TYPE_WOFF2 = DWRITE_CONTAINER_TYPE(2);
+  {$EXTERNALSYM DWRITE_CONTAINER_TYPE_WOFF2}
+
+type
+  // How font families are grouped together, used by IDWriteFontCollection.
+  PDWRITE_FONT_FAMILY_MODEL = ^DWRITE_FONT_FAMILY_MODEL;
+  DWRITE_FONT_FAMILY_MODEL = DWord;
+  {$EXTERNALSYM DWRITE_FONT_FAMILY_MODEL}
+const
+  // Families are grouped by the typographic family name preferred by the font author. The family can contain as
+  // many face as the font author wants.
+  // This corresponds to the DWRITE_FONT_PROPERTY_ID_TYPOGRAPHIC_FAMILY_NAME.
+  DWRITE_FONT_FAMILY_MODEL_TYPOGRAPHIC = DWRITE_FONT_FAMILY_MODEL(0);
+  {$EXTERNALSYM DWRITE_FONT_FAMILY_MODEL_TYPOGRAPHIC}
+  // Families are grouped by the weight-stretch-style family name, where all faces that differ only by those three
+  // axes are grouped into the same family, but any other axes go into a distinct family. For example, the Sitka
+  // family with six different optical sizes yields six separate families (Sitka Caption, Display, Text, Subheading,
+  // Heading, Banner...). This corresponds to the DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME.
+  DWRITE_FONT_FAMILY_MODEL_WEIGHT_STRETCH_STYLE = DWRITE_FONT_FAMILY_MODEL(1);
+  {$EXTERNALSYM DWRITE_FONT_FAMILY_MODEL_WEIGHT_STRETCH_STYLE}
+
+type
+  // Apply certain axes automatically in layout during font selection.
+  PDWRITE_AUTOMATIC_FONT_AXES = ^DWRITE_AUTOMATIC_FONT_AXES;
+  DWRITE_AUTOMATIC_FONT_AXES = DWord;
+  {$EXTERNALSYM DWRITE_AUTOMATIC_FONT_AXES}
+const
+  // No axes are automatically applied.
+  DWRITE_AUTOMATIC_FONT_AXES_NONE         = DWRITE_AUTOMATIC_FONT_AXES($0000);
+  {$EXTERNALSYM DWRITE_AUTOMATIC_FONT_AXES_NONE}
+  // Automatically pick an appropriate optical value based on the font size (via SetFontSize) when no value is
+  // specified via DWRITE_FONT_AXIS_TAG_OPTICAL_SIZE. Callers can still explicitly apply the 'opsz' value over
+  // text ranges via SetFontAxisValues, which take priority.
+  DWRITE_AUTOMATIC_FONT_AXES_OPTICAL_SIZE = DWRITE_AUTOMATIC_FONT_AXES($0001);
+  {$EXTERNALSYM DWRITE_AUTOMATIC_FONT_AXES_OPTICAL_SIZE}
+
+type
+  // Attributes for a font axis.
+  PDWRITE_FONT_AXIS_ATTRIBUTES = ^DWRITE_FONT_AXIS_ATTRIBUTES;
+  DWRITE_FONT_AXIS_ATTRIBUTES = DWord;
+  {$EXTERNALSYM DWRITE_FONT_AXIS_ATTRIBUTES}
+const
+  // No attributes.
+  DWRITE_FONT_AXIS_ATTRIBUTES_NONE = DWRITE_FONT_AXIS_ATTRIBUTES($0000);
+  {$EXTERNALSYM DWRITE_FONT_AXIS_ATTRIBUTES_NONE}
+  // This axis is implemented as a variation axis in a variable font, with a continuous range of
+  // values, such as a range of weights from 100..900. Otherwise it is either a static axis that
+  // holds a single point, or it has a range but doesn't vary, such as optical size in the Skia
+  // Heading font which covers a range of points but doesn't interpolate any new glyph outlines.
+  DWRITE_FONT_AXIS_ATTRIBUTES_VARIABLE = DWRITE_FONT_AXIS_ATTRIBUTES($0001);
+  {$EXTERNALSYM DWRITE_FONT_AXIS_ATTRIBUTES_VARIABLE}
+  // This axis is recommended to be remain hidden in user interfaces. The font developer may
+  // recommend this if an axis is intended to be accessed only programmatically, or is meant for
+  // font-internal or font-developer use only. The axis may be exposed in lower-level font
+  // inspection utilities, but should not be exposed in common or even advanced-mode user
+  // interfaces in content-authoring apps.
+  DWRITE_FONT_AXIS_ATTRIBUTES_HIDDEN = DWRITE_FONT_AXIS_ATTRIBUTES($0002);
+  {$EXTERNALSYM DWRITE_FONT_AXIS_ATTRIBUTES_HIDDEN}
+
+type
+  // The font source type identifies the mechanism by which a font came to be included in a font set.
+  PDWRITE_FONT_SOURCE_TYPE = ^DWRITE_FONT_SOURCE_TYPE;
+  DWRITE_FONT_SOURCE_TYPE = DWord;
+  {$EXTERNALSYM DWRITE_FONT_SOURCE_TYPE}
+const
+  // The font source is unknown or is not any of the other defined font source types.
+  DWRITE_FONT_SOURCE_TYPE_UNKNOWN = DWRITE_FONT_SOURCE_TYPE(0);
+  {$EXTERNALSYM DWRITE_FONT_SOURCE_TYPE_UNKNOWN}
+  // The font source is a font file, which is installed for all users on the device.
+  DWRITE_FONT_SOURCE_TYPE_PER_MACHINE = DWRITE_FONT_SOURCE_TYPE(1);
+  {$EXTERNALSYM DWRITE_FONT_SOURCE_TYPE_PER_MACHINE}
+  // The font source is a font file, which is installed for the current user.
+  DWRITE_FONT_SOURCE_TYPE_PER_USER = DWRITE_FONT_SOURCE_TYPE(2);
+  {$EXTERNALSYM DWRITE_FONT_SOURCE_TYPE_PER_USER}
+  // The font source is an APPX package, which includes one or more font files.
+  // The font source name is the full name of the package.
+  DWRITE_FONT_SOURCE_TYPE_APPX_PACKAGE = DWRITE_FONT_SOURCE_TYPE(3);
+  {$EXTERNALSYM DWRITE_FONT_SOURCE_TYPE_APPX_PACKAGE}
+  // font: The is a font provider for downloadable fonts.
+  DWRITE_FONT_SOURCE_TYPE_REMOTE_FONT_PROVIDER = DWRITE_FONT_SOURCE_TYPE(4);
+  {$EXTERNALSYM DWRITE_FONT_SOURCE_TYPE_REMOTE_FONT_PROVIDER}
+
+
+// =============================================================================
 
 type
 
@@ -145,133 +446,6 @@ type
   IDWriteFontDownloadQueue = interface;
 
 
-  // The font property enumeration identifies a string in a font.
-  PDWRITE_FONT_PROPERTY_ID = ^DWRITE_FONT_PROPERTY_ID;
-  DWRITE_FONT_PROPERTY_ID = (
-
-    // Unspecified font property identifier.
-    DWRITE_FONT_PROPERTY_ID_NONE,
-
-    // Family name for the weight-stretch-style model.
-    DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME,
-
-    // Family name preferred by the designer. This enables font designers to group more than four fonts in a single family without losing compatibility with
-    // GDI. This name is typically only present if it differs from the GDI-compatible family name.
-    DWRITE_FONT_PROPERTY_ID_TYPOGRAPHIC_FAMILY_NAME,
-
-    // Face name of the for the weight-stretch-style (e.g., Regular or Bold).
-    DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FACE_NAME,
-
-    // The full name of the font, e.g. "Arial Bold", from name id 4 in the name table.
-    DWRITE_FONT_PROPERTY_ID_FULL_NAME,
-
-    // GDI-compatible family name. Because GDI allows a maximum of four fonts per family, fonts in the same family may have different GDI-compatible family names
-    // (e.g., "Arial", "Arial Narrow", "Arial Black").
-    DWRITE_FONT_PROPERTY_ID_WIN32_FAMILY_NAME,
-    // The postscript name of the font, e.g. "GillSans-Bold" from name id 6 in the name table.
-    DWRITE_FONT_PROPERTY_ID_POSTSCRIPT_NAME,
-
-    // Script/language tag to identify the scripts or languages that the font was
-    // primarily designed to support.
-    // <remarks>
-    // The design script/language tag is meant to be understood from the perspective of
-    // users. For example, a font is considered designed for English if it is considered
-    // useful for English users. Note that this is different from what a font might be
-    // capable of supporting. For example, the Meiryo font was primarily designed for
-    // Japanese users. While it is capable of displaying English well, it was not
-    // meant to be offered for the benefit of non-Japanese-speaking English users.
-    //
-    // As another example, a font designed for Chinese may be capable of displaying
-    // Japanese text, but would likely look incorrect to Japanese users.
-    //
-    // The valid values for this property are "ScriptLangTag" values. These are adapted
-    // from the IETF BCP 47 specification, "Tags for Identifying Languages" (see
-    // http://tools.ietf.org/html/bcp47). In a BCP 47 language tag, a language subtag
-    // element is mandatory and other subtags are optional. In a ScriptLangTag, a
-    // script subtag is mandatory and other subtags are option. The following
-    // augmented BNF syntax, adapted from BCP 47, is used:
-    //
-    //     ScriptLangTag = [language "-"]
-    //                     script
-    //                     ["-" region]
-    //                     *("-" variant)
-    //                     *("-" extension)
-    //                     ["-" privateuse]
-    //
-    // The expansion of the elements and the intended semantics associated with each
-    // are as defined in BCP 47. Script subtags are taken from ISO 15924. At present,
-    // no extensions are defined, and any extension should be ignored. Private use
-    // subtags are defined by private agreement between the source and recipient and
-    // may be ignored.
-    //
-    // Subtags must be valid for use in BCP 47 and contained in the Language Subtag
-    // Registry maintained by IANA. (See
-    // http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
-    // and section 3 of BCP 47 for details.
-    //
-    // Any ScriptLangTag value not conforming to these specifications is ignored.
-    //
-    // Examples:
-    //   "Latn" denotes Latin script (and any language or writing system using Latin)
-    //   "Cyrl" denotes Cyrillic script
-    //   "sr-Cyrl" denotes Cyrillic script as used for writing the Serbian language;
-    //       a font that has this property value may not be suitable for displaying
-    //       text in Russian or other languages written using Cyrillic script
-    //   "Jpan" denotes Japanese writing (Han + Hiragana + Katakana)
-    //
-    // When passing this property to GetPropertyValues, use the overload which does
-    // not take a language parameter, since this property has no specific language.
-    // </remarks>
-    DWRITE_FONT_PROPERTY_ID_DESIGN_SCRIPT_LANGUAGE_TAG,
-
-    // Script/language tag to identify the scripts or languages that the font declares
-    // it is able to support.
-    DWRITE_FONT_PROPERTY_ID_SUPPORTED_SCRIPT_LANGUAGE_TAG,
-
-    // Semantic tag to describe the font (e.g. Fancy, Decorative, Handmade, Sans-serif, Swiss, Pixel, Futuristic).
-    DWRITE_FONT_PROPERTY_ID_SEMANTIC_TAG,
-
-    // Weight of the font represented as a decimal string in the range 1-999.
-    // <remark>
-    // This enum is discouraged for use with IDWriteFontSetBuilder2 in favor of the more generic font axis
-    // DWRITE_FONT_AXIS_TAG_WEIGHT which supports higher precision and range.
-    // </remark>
-    DWRITE_FONT_PROPERTY_ID_WEIGHT,
-
-    // Stretch of the font represented as a decimal string in the range 1-9.
-    // <remark>
-    // This enum is discouraged for use with IDWriteFontSetBuilder2 in favor of the more generic font axis
-    // DWRITE_FONT_AXIS_TAG_WIDTH which supports higher precision and range.
-    // </remark>
-    DWRITE_FONT_PROPERTY_ID_STRETCH,
-
-    // Style of the font represented as a decimal string in the range 0-2.
-    // <remark>
-    // This enum is discouraged for use with IDWriteFontSetBuilder2 in favor of the more generic font axes
-    // DWRITE_FONT_AXIS_TAG_SLANT and DWRITE_FONT_AXIS_TAG_ITAL.
-    // </remark>
-    DWRITE_FONT_PROPERTY_ID_STYLE,
-
-    // Face name preferred by the designer. This enables font designers to group more than four fonts in a single
-    // family without losing compatibility with GDI.
-    DWRITE_FONT_PROPERTY_ID_TYPOGRAPHIC_FACE_NAME,
-
-    // Total number of properties for NTDDI_WIN10 (IDWriteFontSet).
-    // <remarks>
-    // DWRITE_FONT_PROPERTY_ID_TOTAL cannot be used as a property ID.
-    // </remarks>
-    DWRITE_FONT_PROPERTY_ID_TOTAL = DWRITE_FONT_PROPERTY_ID_STYLE + 1,
-
-    // Total number of properties for NTDDI_WIN10_RS3 (IDWriteFontSet1).
-    DWRITE_FONT_PROPERTY_ID_TOTAL_RS3 = DWRITE_FONT_PROPERTY_ID_TYPOGRAPHIC_FACE_NAME + 1,
-
-    // Obsolete aliases kept to avoid breaking existing code.
-    DWRITE_FONT_PROPERTY_ID_PREFERRED_FAMILY_NAME = DWRITE_FONT_PROPERTY_ID_TYPOGRAPHIC_FAMILY_NAME,
-    DWRITE_FONT_PROPERTY_ID_FAMILY_NAME = DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME,
-    DWRITE_FONT_PROPERTY_ID_FACE_NAME = DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FACE_NAME);
-  {$EXTERNALSYM DWRITE_FONT_PROPERTY_ID}
-
-
   // Font property used for filtering font sets and
   // building a font set with explicit properties.
   PDWRITE_FONT_PROPERTY = ^DWRITE_FONT_PROPERTY;
@@ -293,72 +467,6 @@ type
     localeName: PWideChar;
   end;
   {$EXTERNALSYM DWRITE_FONT_PROPERTY}
-
-
-  // Specifies the locality of a resource.
-  PDWRITE_LOCALITY = ^DWRITE_LOCALITY;
-  DWRITE_LOCALITY = (
-
-    // The resource is remote, and information is unknown yet, including the file size and date.
-    // Attempting to create a font or file stream will fail until locality becomes at least partial.
-    DWRITE_LOCALITY_REMOTE,
-
-    // The resource is partially local, meaning you can query the size and date of the file
-    // stream, and you may be able to create a font face and retrieve the particular glyphs
-    // for metrics and drawing, but not all the glyphs will be present.
-    DWRITE_LOCALITY_PARTIAL,
-
-    // The resource is completely local, and all font functions can be called
-    // without concern of missing data or errors related to network connectivity.
-    DWRITE_LOCALITY_LOCAL
-  );
-  {$EXTERNALSYM DWRITE_LOCALITY}
-
-
-  // Represents a method of rendering glyphs.
-  PDWRITE_RENDERING_MODE1 = ^DWRITE_RENDERING_MODE1;
-  DWRITE_RENDERING_MODE1 = (
-
-    // Specifies that the rendering mode is determined automatically based on the font and size.
-    DWRITE_RENDERING_MODE1_DEFAULT = Ord(DWRITE_RENDERING_MODE_DEFAULT),
-
-    // Specifies that no antialiasing is performed. Each pixel is either set to the foreground
-    // color of the text or retains the color of the background.
-    DWRITE_RENDERING_MODE1_ALIASED = Ord(DWRITE_RENDERING_MODE_ALIASED),
-
-    // Specifies that antialiasing is performed in the horizontal direction and the appearance
-    // of glyphs is layout-compatible with GDI using CLEARTYPE_QUALITY. Use DWRITE_MEASURING_MODE_GDI_CLASSIC
-    // to get glyph advances. The antialiasing may be either ClearType or grayscale depending on
-    // the text antialiasing mode.
-    DWRITE_RENDERING_MODE1_GDI_CLASSIC = Ord(DWRITE_RENDERING_MODE_GDI_CLASSIC),
-
-    // Specifies that antialiasing is performed in the horizontal direction and the appearance
-    // of glyphs is layout-compatible with GDI using CLEARTYPE_NATURAL_QUALITY. Glyph advances
-    // are close to the font design advances, but are still rounded to whole pixels. Use
-    // DWRITE_MEASURING_MODE_GDI_NATURAL to get glyph advances. The antialiasing may be either
-    // ClearType or grayscale depending on the text antialiasing mode.
-    DWRITE_RENDERING_MODE1_GDI_NATURAL = Ord(DWRITE_RENDERING_MODE_GDI_NATURAL),
-
-    // Specifies that antialiasing is performed in the horizontal direction. This rendering
-    // mode allows glyphs to be positioned with subpixel precision and is therefore suitable
-    // for natural (i.e., resolution-independent) layout. The antialiasing may be either
-    // ClearType or grayscale depending on the text antialiasing mode.
-    DWRITE_RENDERING_MODE1_NATURAL = Ord(DWRITE_RENDERING_MODE_NATURAL),
-
-    // Similar to natural mode except that antialiasing is performed in both the horizontal
-    // and vertical directions. This is typically used at larger sizes to make curves and
-    // diagonal lines look smoother. The antialiasing may be either ClearType or grayscale
-    // depending on the text antialiasing mode.
-    DWRITE_RENDERING_MODE1_NATURAL_SYMMETRIC = Ord(DWRITE_RENDERING_MODE_NATURAL_SYMMETRIC),
-
-    // Specifies that rendering should bypass the rasterizer and use the outlines directly.
-    // This is typically used at very large sizes.
-    DWRITE_RENDERING_MODE1_OUTLINE = Ord(DWRITE_RENDERING_MODE_OUTLINE),
-
-    // Similar to natural symmetric mode except that when possible, text should be rasterized
-    // in a downsampled form.
-    DWRITE_RENDERING_MODE1_NATURAL_SYMMETRIC_DOWNSAMPLED);
-  {$EXTERNALSYM DWRITE_RENDERING_MODE1}
 
 
   // The interface that represents text rendering settings for glyph rasterization and filtering.
@@ -1380,21 +1488,6 @@ type
   {$EXTERNALSYM DWRITE_LINE_METRICS1}
 
 
-  // Specify whether DWRITE_FONT_METRICS.lineGap value should be part of the line metrics.
-  PDWRITE_FONT_LINE_GAP_USAGE = ^DWRITE_FONT_LINE_GAP_USAGE;
-  DWRITE_FONT_LINE_GAP_USAGE = (
-
-    // The usage of the font line gap depends on the method used for text layout.
-    DWRITE_FONT_LINE_GAP_USAGE_DEFAULT,
-
-    // The font line gap is excluded from line spacing
-    DWRITE_FONT_LINE_GAP_USAGE_DISABLED,
-
-    // The font line gap is included in line spacing
-    DWRITE_FONT_LINE_GAP_USAGE_ENABLED);
-  {$EXTERNALSYM DWRITE_FONT_LINE_GAP_USAGE}
-
-
   // The DWRITE_LINE_SPACING structure specifies the parameters used to specify how to manage space between lines.
   PDWRITE_LINE_SPACING = ^DWRITE_LINE_SPACING;
   DWRITE_LINE_SPACING = record
@@ -1849,17 +1942,6 @@ type
   {$EXTERNALSYM IID_IDWriteRemoteFontFileStream}
 
 
-  // Specifies the container format of a font resource. A container format is distinct from
-  // a font file format (DWRITE_FONT_FILE_TYPE) because the container describes the container
-  // in which the underlying font file is packaged.
-  PDWRITE_CONTAINER_TYPE = ^DWRITE_CONTAINER_TYPE;
-  DWRITE_CONTAINER_TYPE = (
-    DWRITE_CONTAINER_TYPE_UNKNOWN,
-    DWRITE_CONTAINER_TYPE_WOFF,
-    DWRITE_CONTAINER_TYPE_WOFF2);
-  {$EXTERNALSYM DWRITE_CONTAINER_TYPE}
-
-
   // Interface IDWriteRemoteFontFileLoader
   // =====================================
   // The IDWriteRemoteFontFileLoader interface represents a font file loader that can access
@@ -2063,7 +2145,7 @@ type
 
   // Four character identifier for a font axis.
   // remarks
-  //   Use DWRITE_MAKE_FONT_AXIS_TAG() to create a custom one.
+  //   Use funtion DwriteMakeFontAxisTag() to create a custom one.
   DWRITE_FONT_AXIS_TAG = UINT32;
   {$EXTERNALSYM DWRITE_FONT_AXIS_TAG}
 
@@ -2096,59 +2178,6 @@ type
     maxValue: FLOAT;
   end;
   {$EXTERNALSYM DWRITE_FONT_AXIS_RANGE}
-
-
-  // How font families are grouped together, used by IDWriteFontCollection.
-  PDWRITE_FONT_FAMILY_MODEL = ^DWRITE_FONT_FAMILY_MODEL;
-  DWRITE_FONT_FAMILY_MODEL = (
-
-    // Families are grouped by the typographic family name preferred by the font author. The family can contain as
-    // many face as the font author wants.
-    // This corresponds to the DWRITE_FONT_PROPERTY_ID_TYPOGRAPHIC_FAMILY_NAME.
-    DWRITE_FONT_FAMILY_MODEL_TYPOGRAPHIC,
-
-    // Families are grouped by the weight-stretch-style family name, where all faces that differ only by those three
-    // axes are grouped into the same family, but any other axes go into a distinct family. For example, the Sitka
-    // family with six different optical sizes yields six separate families (Sitka Caption, Display, Text, Subheading,
-    // Heading, Banner...). This corresponds to the DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME.
-    DWRITE_FONT_FAMILY_MODEL_WEIGHT_STRETCH_STYLE);
-  {$EXTERNALSYM DWRITE_FONT_FAMILY_MODEL}
-
-
-  // Apply certain axes automatically in layout during font selection.
-  PDWRITE_AUTOMATIC_FONT_AXES = ^DWRITE_AUTOMATIC_FONT_AXES;
-  DWRITE_AUTOMATIC_FONT_AXES = (
-
-    // No axes are automatically applied.
-    DWRITE_AUTOMATIC_FONT_AXES_NONE         = $0000,
-
-    // Automatically pick an appropriate optical value based on the font size (via SetFontSize) when no value is
-    // specified via DWRITE_FONT_AXIS_TAG_OPTICAL_SIZE. Callers can still explicitly apply the 'opsz' value over
-    // text ranges via SetFontAxisValues, which take priority.
-    DWRITE_AUTOMATIC_FONT_AXES_OPTICAL_SIZE = $0001);
-  {$EXTERNALSYM DWRITE_AUTOMATIC_FONT_AXES}
-
-
-
-  // Attributes for a font axis.
-  PDWRITE_FONT_AXIS_ATTRIBUTES = ^DWRITE_FONT_AXIS_ATTRIBUTES;
-  DWRITE_FONT_AXIS_ATTRIBUTES = (
-    // No attributes.
-    DWRITE_FONT_AXIS_ATTRIBUTES_NONE = $0000,
-
-    // This axis is implemented as a variation axis in a variable font, with a continuous range of
-    // values, such as a range of weights from 100..900. Otherwise it is either a static axis that
-    // holds a single point, or it has a range but doesn't vary, such as optical size in the Skia
-    // Heading font which covers a range of points but doesn't interpolate any new glyph outlines.
-    DWRITE_FONT_AXIS_ATTRIBUTES_VARIABLE = $0001,
-
-    // This axis is recommended to be remain hidden in user interfaces. The font developer may
-    // recommend this if an axis is intended to be accessed only programmatically, or is meant for
-    // font-internal or font-developer use only. The axis may be exposed in lower-level font
-    // inspection utilities, but should not be exposed in common or even advanced-mode user
-    // interfaces in content-authoring apps.
-    DWRITE_FONT_AXIS_ATTRIBUTES_HIDDEN = $0002);
-  {$EXTERNALSYM DWRITE_FONT_AXIS_ATTRIBUTES}
 
 
   // Interface IDWriteFactory6
@@ -2975,28 +3004,6 @@ type
 
 // #if NTDDI_VERSION >= NTDDI_WIN10_RS5
 
-  // The font source type identifies the mechanism by which a font came to be included in a font set.
-  PDWRITE_FONT_SOURCE_TYPE = ^DWRITE_FONT_SOURCE_TYPE;
-  DWRITE_FONT_SOURCE_TYPE = (
-
-    // The font source is unknown or is not any of the other defined font source types.
-    DWRITE_FONT_SOURCE_TYPE_UNKNOWN,
-
-    // The font source is a font file, which is installed for all users on the device.
-    DWRITE_FONT_SOURCE_TYPE_PER_MACHINE,
-
-    // The font source is a font file, which is installed for the current user.
-    DWRITE_FONT_SOURCE_TYPE_PER_USER,
-
-    // The font source is an APPX package, which includes one or more font files.
-    // The font source name is the full name of the package.
-    DWRITE_FONT_SOURCE_TYPE_APPX_PACKAGE,
-
-    // The font source is a font provider for downloadable fonts.
-    DWRITE_FONT_SOURCE_TYPE_REMOTE_FONT_PROVIDER);
-  {$EXTERNALSYM DWRITE_FONT_SOURCE_TYPE}
-
-
   // Interface IDWriteFontSet3
   // =========================
   //
@@ -3032,11 +3039,11 @@ type
 //#endif // NTDDI_VERSION >= NTDDI_WIN10_RS5
 
   // Creates an OpenType tag for a font axis.
-  function DWRITE_MAKE_FONT_AXIS_TAG(a: AnsiChar;
-                                     b: AnsiChar;
-                                     c: AnsiChar;
-                                     d: AnsiChar): DWRITE_FONT_AXIS_TAG;
-  {$EXTERNALSYM DWRITE_MAKE_FONT_AXIS_TAG}
+  function DwriteMakeFontAxisTag(a: AnsiChar;
+                                 b: AnsiChar;
+                                 c: AnsiChar;
+                                 d: AnsiChar): DWRITE_FONT_AXIS_TAG;
+  {$EXTERNALSYM DwriteMakeFontAxisTag}
 
 
   // Additional Prototypes for ALL interfaces
@@ -3046,10 +3053,10 @@ type
 implementation
 
 
-function DWRITE_MAKE_FONT_AXIS_TAG(a: AnsiChar;
-                                   b: AnsiChar;
-                                   c: AnsiChar;
-                                   d: AnsiChar): DWRITE_FONT_AXIS_TAG;
+function DwriteMakeFontAxisTag(a: AnsiChar;
+                               b: AnsiChar;
+                               c: AnsiChar;
+                               d: AnsiChar): DWRITE_FONT_AXIS_TAG;
 begin
   Result:= UINT32(Ord(a)) or
            (UINT32(Ord(b)) shl 8) or

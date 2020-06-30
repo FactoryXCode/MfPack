@@ -17,21 +17,23 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
-// Remarks: - Requires Windows 7 or later.
+// Remarks: - Requires Windows Vista or later.
 //
 // Related objects: -
 // Related projects: MfPackX264
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.19569.0
+// SDK version: 10.0.19041.0
 //
 // Todo: -
 //
@@ -72,46 +74,52 @@ uses
   MfPack.DWrite_1;
 
   {$WEAKPACKAGEUNIT ON}
-  {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
   {$I 'MfPack.inc'}
 
+// Enums =======================================================================
+
+type
+  // How to align glyphs to the margin.
+  PDWRITE_OPTICAL_ALIGNMENT = ^DWRITE_OPTICAL_ALIGNMENT;
+  DWRITE_OPTICAL_ALIGNMENT = DWord;
+  {$EXTERNALSYM DWRITE_OPTICAL_ALIGNMENT}
+const
+  // Align to the default metrics of the glyph.
+  DWRITE_OPTICAL_ALIGNMENT_NONE = DWRITE_OPTICAL_ALIGNMENT(0);
+  {$EXTERNALSYM DWRITE_OPTICAL_ALIGNMENT_NONE}
+  // Align glyphs to the margins. Without this, some small whitespace
+  // may be present between the text and the margin from the glyph's side
+  // bearing values. Note that glyphs may still overhang outside the
+  // margin, such as flourishes or italic slants.
+  DWRITE_OPTICAL_ALIGNMENT_NO_SIDE_BEARINGS = DWRITE_OPTICAL_ALIGNMENT(1);
+  {$EXTERNALSYM DWRITE_OPTICAL_ALIGNMENT_NO_SIDE_BEARINGS}
+
+type
+  // Whether to enable grid-fitting of glyph outlines (a.k.a. hinting).
+  PDWRITE_GRID_FIT_MODE = ^DWRITE_GRID_FIT_MODE;
+  DWRITE_GRID_FIT_MODE = DWord;
+  {$EXTERNALSYM DWRITE_GRID_FIT_MODE}
+const
+  // Choose grid fitting base on the font's gasp table information.
+  DWRITE_GRID_FIT_MODE_DEFAULT = DWRITE_GRID_FIT_MODE(0);
+  {$EXTERNALSYM DWRITE_GRID_FIT_MODE_DEFAULT}
+  // Always disable grid fitting, using the ideal glyph outlines.
+  DWRITE_GRID_FIT_MODE_DISABLED = DWRITE_GRID_FIT_MODE(1);
+  {$EXTERNALSYM DWRITE_GRID_FIT_MODE_DISABLED}
+  // Enable grid fitting, adjusting glyph outlines for device pixel display.
+  DWRITE_GRID_FIT_MODE_ENABLED = DWRITE_GRID_FIT_MODE(2);
+  {$EXTERNALSYM DWRITE_GRID_FIT_MODE_ENABLED}
+
+
+// =============================================================================
 
 type
 
   // Forward interfaces
+
   PIDWriteFontFallback = ^IDWriteFontFallback;
   IDWriteFontFallback = interface;
 
-
-  // How to align glyphs to the margin.
-  PDWRITE_OPTICAL_ALIGNMENT = ^DWRITE_OPTICAL_ALIGNMENT;
-  DWRITE_OPTICAL_ALIGNMENT = (
-    // Align to the default metrics of the glyph.
-    DWRITE_OPTICAL_ALIGNMENT_NONE,
-    // Align glyphs to the margins. Without this, some small whitespace
-    // may be present between the text and the margin from the glyph's side
-    // bearing values. Note that glyphs may still overhang outside the
-    // margin, such as flourishes or italic slants.
-    DWRITE_OPTICAL_ALIGNMENT_NO_SIDE_BEARINGS);
-  {$EXTERNALSYM DWRITE_OPTICAL_ALIGNMENT}
-
-
-  // Whether to enable grid-fitting of glyph outlines (a.k.a. hinting).
-  PDWRITE_GRID_FIT_MODE = ^DWRITE_GRID_FIT_MODE;
-  DWRITE_GRID_FIT_MODE = (
-    // Choose grid fitting base on the font's gasp table information.
-    DWRITE_GRID_FIT_MODE_DEFAULT,
-    // Always disable grid fitting, using the ideal glyph outlines.
-    DWRITE_GRID_FIT_MODE_DISABLED,
-    // Enable grid fitting, adjusting glyph outlines for device pixel display.
-    DWRITE_GRID_FIT_MODE_ENABLED);
-  {$EXTERNALSYM DWRITE_GRID_FIT_MODE}
 
 
   // Overall metrics associated with text after layout.
