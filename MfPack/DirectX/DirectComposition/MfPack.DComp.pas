@@ -18,11 +18,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -32,7 +34,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.19569.0
+// SDK version: 10.0.19041.0
 //
 // Todo: -
 //
@@ -81,14 +83,6 @@ uses
   MfPack.DCompAnimation;
 
   {$WEAKPACKAGEUNIT ON}
-  {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$I 'MfPack.inc'}
 
 
@@ -99,107 +93,141 @@ type
 
   PIDCompositionAffineTransform2DEffect = ^IDCompositionAffineTransform2DEffect;
   IDCompositionAffineTransform2DEffect = interface;
+  {$EXTERNALSYM IDCompositionAffineTransform2DEffect}
 
   // IDCompositionAnimation = interface;  >> MfPack.DCompAnimation.pas
 
   PIDCompositionArithmeticCompositeEffect = ^IDCompositionArithmeticCompositeEffect;
   IDCompositionArithmeticCompositeEffect = interface;
+  {$EXTERNALSYM IDCompositionArithmeticCompositeEffect}
 
   PIDCompositionBlendEffect = ^IDCompositionBlendEffect;
   IDCompositionBlendEffect = interface;
+  {$EXTERNALSYM IDCompositionBlendEffect}
 
   PIDCompositionBrightnessEffect = ^IDCompositionBrightnessEffect;
   IDCompositionBrightnessEffect = interface;
+  {$EXTERNALSYM IDCompositionBrightnessEffect}
 
   PIDCompositionClip = ^IDCompositionClip;
   IDCompositionClip = interface;
+  {$EXTERNALSYM IDCompositionClip}
 
   PIDCompositionColorMatrixEffect = ^IDCompositionColorMatrixEffect;
   IDCompositionColorMatrixEffect = interface;
+  {$EXTERNALSYM IDCompositionColorMatrixEffect}
 
   PIDCompositionCompositeEffect = ^IDCompositionCompositeEffect;
   IDCompositionCompositeEffect = interface;
+  {$EXTERNALSYM IDCompositionCompositeEffect}
 
   PIDCompositionDevice = ^IDCompositionDevice;
   IDCompositionDevice = interface;
+  {$EXTERNALSYM IDCompositionDevice}
 
   PIDCompositionTarget = ^IDCompositionTarget;
   IDCompositionTarget = interface;
+  {$EXTERNALSYM IDCompositionTarget}
 
   PIDCompositionVisual = ^IDCompositionVisual;
   IDCompositionVisual = interface;
+  {$EXTERNALSYM IDCompositionVisual}
 
   PIDCompositionTransform = ^IDCompositionTransform;
   IDCompositionTransform = interface;
+  {$EXTERNALSYM IDCompositionTransform}
 
   PIDCompositionTransform3D = ^IDCompositionTransform3D;
   IDCompositionTransform3D = interface;
+  {$EXTERNALSYM IDCompositionTransform3D}
 
   PIDCompositionTranslateTransform = ^IDCompositionTranslateTransform;
   IDCompositionTranslateTransform = interface;
+  {$EXTERNALSYM IDCompositionTranslateTransform}
 
   PIDCompositionTranslateTransform3D = ^IDCompositionTranslateTransform3D;
   IDCompositionTranslateTransform3D = interface;
+  {$EXTERNALSYM IDCompositionTranslateTransform3D}
 
   PIDCompositionScaleTransform = ^IDCompositionScaleTransform;
   IDCompositionScaleTransform = interface;
+  {$EXTERNALSYM IDCompositionScaleTransform}
 
   PIDCompositionScaleTransform3D = ^IDCompositionScaleTransform3D;
   IDCompositionScaleTransform3D = interface;
+  {$EXTERNALSYM IDCompositionScaleTransform3D}
 
   PIDCompositionRotateTransform = ^IDCompositionRotateTransform;
   IDCompositionRotateTransform = interface;
+  {$EXTERNALSYM IDCompositionRotateTransform}
 
   PIDCompositionRotateTransform3D = ^IDCompositionRotateTransform3D;
   IDCompositionRotateTransform3D = interface;
+  {$EXTERNALSYM IDCompositionRotateTransform3D}
 
   PIDCompositionSkewTransform = ^IDCompositionSkewTransform;
   IDCompositionSkewTransform = interface;
+  {$EXTERNALSYM IDCompositionSkewTransform}
 
   PIDCompositionMatrixTransform = ^IDCompositionMatrixTransform;
   IDCompositionMatrixTransform = interface;
+  {$EXTERNALSYM IDCompositionMatrixTransform}
 
   PIDCompositionMatrixTransform3D = ^IDCompositionMatrixTransform3D;
   IDCompositionMatrixTransform3D = interface;
+  {$EXTERNALSYM IDCompositionMatrixTransform3D}
 
   PIDCompositionEffect = ^IDCompositionEffect;
   IDCompositionEffect = interface;
+  {$EXTERNALSYM IDCompositionEffect}
 
   PIDCompositionEffectGroup = ^IDCompositionEffectGroup;
   IDCompositionEffectGroup = interface;
+  {$EXTERNALSYM IDCompositionEffectGroup}
 
   PIDCompositionRectangleClip = ^IDCompositionRectangleClip;
   IDCompositionRectangleClip = interface;
+  {$EXTERNALSYM IDCompositionRectangleClip}
 
   PIDCompositionSurface = ^IDCompositionSurface;
   IDCompositionSurface = interface;
+  {$EXTERNALSYM IDCompositionSurface}
 
   PIDCompositionVirtualSurface = ^IDCompositionVirtualSurface;
   IDCompositionVirtualSurface = interface;
+  {$EXTERNALSYM IDCompositionVirtualSurface}
 
   PIDCompositionFilterEffect = ^IDCompositionFilterEffect;
   IDCompositionFilterEffect = interface;
+  {$EXTERNALSYM IDCompositionFilterEffect}
 
   PIDCompositionGaussianBlurEffect = ^IDCompositionGaussianBlurEffect;
   IDCompositionGaussianBlurEffect = interface;
+  {$EXTERNALSYM IDCompositionGaussianBlurEffect}
 
-  IDCompositionShadowEffect = interface;
   PIDCompositionShadowEffect = ^IDCompositionShadowEffect;
+  IDCompositionShadowEffect = interface;
+  {$EXTERNALSYM IDCompositionShadowEffect}
 
   PIDCompositionHueRotationEffect = ^IDCompositionHueRotationEffect;
   IDCompositionHueRotationEffect = interface;
+  {$EXTERNALSYM IDCompositionHueRotationEffect}
 
   PIDCompositionSaturationEffect = ^IDCompositionSaturationEffect;
   IDCompositionSaturationEffect = interface;
+  {$EXTERNALSYM IDCompositionSaturationEffect}
 
   PIDCompositionTurbulenceEffect = ^IDCompositionTurbulenceEffect;
   IDCompositionTurbulenceEffect = interface;
+  {$EXTERNALSYM IDCompositionTurbulenceEffect}
 
   PIDCompositionLinearTransferEffect = ^IDCompositionLinearTransferEffect;
   IDCompositionLinearTransferEffect = interface;
+  {$EXTERNALSYM IDCompositionLinearTransferEffect}
 
   PIDCompositionTableTransferEffect = ^IDCompositionTableTransferEffect;
   IDCompositionTableTransferEffect = interface;
+  {$EXTERNALSYM IDCompositionTableTransferEffect}
 
 
 

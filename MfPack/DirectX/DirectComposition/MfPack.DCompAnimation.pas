@@ -18,21 +18,23 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or later.
+// Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
 // Related projects: MfPackX264
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.19569.0
+// SDK version: 10.0.19041.0
 //
 // Todo: -
 //
@@ -67,14 +69,6 @@ uses
   MfPack.MfpTypes;
 
   {$WEAKPACKAGEUNIT ON}
-  {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$I 'MfPack.inc'}
 
 //+-----------------------------------------------------------------------------
