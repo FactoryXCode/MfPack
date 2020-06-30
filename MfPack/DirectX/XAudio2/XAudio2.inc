@@ -17,12 +17,14 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 //
 //
-// ----------------------------------------------------------------------------
+// Rudy Velthuis 1960 ~ 2019.
+//------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
-// ---------- ------------------- ---------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-//-----------------------------------------------------------------------------
+// ---------- ------------------- ----------------------------------------------
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
+//                                #1 Autobahn
+//------------------------------------------------------------------------------
 // Remarks: Delphi specific include file, to determine which DLL's are needed to load.
 //          XAudio2 version 2.9 ships as part of Windows 10, XAUDIO2_9.DLL,
 //          alongside XAudio2.8 to support older applications, and does not require redistribution.
@@ -31,7 +33,7 @@
 // Related projects: MfPackX264
 // Known Issues: -
 // Compiler version: 23 up to 33
-// SDK version: 10.0.19569.0
+// SDK version: 10.0.19041.0
 // Todo: -
 // =============================================================================
 // Source: xaudio2fx.h / xaudio2.h

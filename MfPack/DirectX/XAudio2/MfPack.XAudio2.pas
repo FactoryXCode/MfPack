@@ -17,11 +17,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -33,7 +35,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.19569.0
+// SDK version: 10.0.19041.0
 //
 // Todo: -
 //
@@ -99,32 +101,31 @@ uses
 
 
 type
-
   // Used in XAUDIO2_FILTER_PARAMETERS below
   PXAUDIO2_FILTER_TYPE = ^XAUDIO2_FILTER_TYPE;
-  XAUDIO2_FILTER_TYPE = (
-    LowPassFilter,                  // Attenuates frequencies above the cutoff frequency (state-variable filter).
-    {$EXTERNALSYM LowPassFilter}
-    BandPassFilter,                 // Attenuates frequencies outside a given range      (state-variable filter).
-    {$EXTERNALSYM BandPassFilter}
-    HighPassFilter,                 // Attenuates frequencies below the cutoff frequency (state-variable filter).
-    {$EXTERNALSYM HighPassFilter}
-    NotchFilter,                    // Attenuates frequencies inside a given range       (state-variable filter).
-    {$EXTERNALSYM NotchFilter}
-    LowPassOnePoleFilter,           // Attenuates frequencies above the cutoff frequency (one-pole filter, XAUDIO2_FILTER_PARAMETERS.OneOverQ has no effect)
-    {$EXTERNALSYM LowPassOnePoleFilter}
-    HighPassOnePoleFilter           // Attenuates frequencies below the cutoff frequency (one-pole filter, XAUDIO2_FILTER_PARAMETERS.OneOverQ has no effect)
-    {$EXTERNALSYM HighPassOnePoleFilter}
-  );
+  XAUDIO2_FILTER_TYPE = DWord;
   {$EXTERNALSYM XAUDIO2_FILTER_TYPE}
+const
+  LowPassFilter         = XAUDIO2_FILTER_TYPE(0);  // Attenuates frequencies above the cutoff frequency (state-variable filter).
+  {$EXTERNALSYM LowPassFilter}
+  BandPassFilter        = XAUDIO2_FILTER_TYPE(1);  // Attenuates frequencies outside a given range      (state-variable filter).
+  {$EXTERNALSYM BandPassFilter}
+  HighPassFilter        = XAUDIO2_FILTER_TYPE(2);  // Attenuates frequencies below the cutoff frequency (state-variable filter).
+  {$EXTERNALSYM HighPassFilter}
+  NotchFilter           = XAUDIO2_FILTER_TYPE(3);  // Attenuates frequencies inside a given range       (state-variable filter).
+  {$EXTERNALSYM NotchFilter}
+  LowPassOnePoleFilter  = XAUDIO2_FILTER_TYPE(4);  // Attenuates frequencies above the cutoff frequency (one-pole filter, XAUDIO2_FILTER_PARAMETERS.OneOverQ has no effect)
+  {$EXTERNALSYM LowPassOnePoleFilter}
+  HighPassOnePoleFilter = XAUDIO2_FILTER_TYPE(5);  // Attenuates frequencies below the cutoff frequency (one-pole filter, XAUDIO2_FILTER_PARAMETERS.OneOverQ has no effect)
+  {$EXTERNALSYM HighPassOnePoleFilter}
 
+const
 
   (**************************************************************************
   *
   * XAudio2 constants, flags and error codes.
   *
   **************************************************************************)
-const
 
   // Numeric boundary values
   XAUDIO2_MAX_BUFFER_BYTES            = $80000000;      // Maximum bytes allowed in a source buffer

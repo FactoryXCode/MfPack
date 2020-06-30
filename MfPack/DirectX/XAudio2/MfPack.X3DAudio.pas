@@ -18,11 +18,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks:
@@ -66,7 +68,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.19569.0
+// SDK version: 10.0.19041.0
 //
 // Todo: -
 //
@@ -108,14 +110,6 @@ uses
   MfPack.MfpTypes;
 
   {$WEAKPACKAGEUNIT ON}
-  {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$I 'MfPack.inc'}
   {$I 'XAudio2.inc'}
 
@@ -264,7 +258,7 @@ type
   {$EXTERNALSYM X3DAUDIO_DISTANCE_CURVE_POINT}
 
   // If you don't want to use a pointer to array
-  TX3DAudioDistancePointArray = array of X3DAUDIO_DISTANCE_CURVE_POINT;
+  TX3DAudioDistancePointArray = array [0..65535] of X3DAUDIO_DISTANCE_CURVE_POINT;
   {$EXTERNALSYM TX3DAudioDistancePointArray}
 
   // Distance curve:
@@ -294,10 +288,10 @@ const
 
   //static const X3DAUDIO_DISTANCE_CURVE_POINT X3DAudioDefault_LinearCurvePoints[2] = { 0.0f, 1.0f, 1.0f, 0.0f };
   X3DAudioDefault_LinearCurvePoints: array[0..1] of X3DAUDIO_DISTANCE_CURVE_POINT = ((Distance: 0.0;
-  {$EXTERNALSYM X3DAudioDefault_LinearCurvePoints}
                                                                                       DSPSetting: 1.0),
                                                                                      (Distance: 1.0;
                                                                                       DSPSetting: 0.0));
+  {$EXTERNALSYM X3DAudioDefault_LinearCurvePoints}
 
   //static const X3DAUDIO_DISTANCE_CURVE   X3DAudioDefault_LinearCurve  = { (X3DAUDIO_DISTANCE_CURVE_POINT*)&X3DAudioDefault_LinearCurvePoints[0], 2 };
   X3DAudioDefault_LinearCurve: X3DAUDIO_DISTANCE_CURVE = (pPoints: @X3DAudioDefault_LinearCurvePoints[0]; PointCount: 2);

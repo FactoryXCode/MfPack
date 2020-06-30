@@ -16,11 +16,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -32,7 +34,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.19569.0
+// SDK version: 10.0.19041.0
 //
 // Todo: -
 //
@@ -71,14 +73,6 @@ uses
   MfPack.XApo;
 
   {$WEAKPACKAGEUNIT ON}
-  {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$I 'MfPack.inc'}
 
 const
@@ -114,29 +108,35 @@ type
   end;
   {$EXTERNALSYM HrtfOrientation}
 
+type
   //! Indicates one of several stock directivity patterns.
   PHrtfDirectivityType = ^HrtfDirectivityType;
-  HrtfDirectivityType = (
-                         //! The sound emission is in all directions.
-                         OmniDirectional = 0,
-                         //! The sound emission is a cardiod shape.
-                         Cardioid,
-                         //! The sound emission is a cone.
-                         Cone);
+  HrtfDirectivityType = DWord;
   {$EXTERNALSYM HrtfDirectivityType}
+const
+  OmniDirectional = HrtfDirectivityType(0); //! The sound emission is in all directions.
+  {$EXTERNALSYM OmniDirectional}
+  Cardioid        = HrtfDirectivityType(1); //! The sound emission is a cardiod shape.
+  {$EXTERNALSYM Cardioid}
+  Cone            = HrtfDirectivityType(2); //! The sound emission is a cone.
+  {$EXTERNALSYM Cone}
 
+type
   //! Indicates one of several stock environment types.
   PHrtfEnvironment = ^HrtfEnvironment;
-  HrtfEnvironment = (
-                     //! A small room.
-                     Small = 0,
-                     //! A medium-sized room.
-                     Medium,
-                     //! A large enclosed space.
-                     Large,
-                     //! An outdoor space.
-                     Outdoors);
+  HrtfEnvironment = DWord;
   {$EXTERNALSYM HrtfEnvironment}
+const
+  Small    = HrtfEnvironment(0); //! A small room.
+  {$EXTERNALSYM Small}
+  Medium   = HrtfEnvironment(1); //! A medium-sized room.
+  {$EXTERNALSYM Medium}
+  Large    = HrtfEnvironment(2); //! A large enclosed space.
+  {$EXTERNALSYM Large}
+  Outdoors = HrtfEnvironment(3); //! An outdoor space.
+  {$EXTERNALSYM Outdoors}
+
+type
 
   //
   //! Base directivity pattern descriptor. Describes the type of directivity applied to a sound.
@@ -183,17 +183,19 @@ type
   end;
   {$EXTERNALSYM HrtfDirectivityCone}
 
+type
   //
   //! Indicates a distance-based decay type applied to a sound.
   //
   PHrtfDistanceDecayType = ^HrtfDistanceDecayType;
-  HrtfDistanceDecayType = (
-                           //! Simulates natural decay with distance, as constrained by minimum and
-                           //  maximum gain distance limits. Drops to silence at rolloff distance.
-                           NaturalDecay = 0,
-                           //! Used to set up a custom gain curve, within the maximum and minimum gain limit.
-                           CustomDecay);
+  HrtfDistanceDecayType = DWord;
   {$EXTERNALSYM HrtfDistanceDecayType}
+const
+  NaturalDecay = HrtfDistanceDecayType(0); //! Simulates natural decay with distance, as constrained by minimum and
+                                           //  maximum gain distance limits. Drops to silence at rolloff distance.
+  CustomDecay  = HrtfDistanceDecayType(1); //! Used to set up a custom gain curve, within the maximum and minimum gain limit.
+
+type
 
   //
   //! Describes a distance-based decay behavior.

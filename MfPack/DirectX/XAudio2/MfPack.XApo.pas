@@ -19,11 +19,13 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
+//                                #1 Autobahn
 //------------------------------------------------------------------------------
 //
 // Remarks:     
@@ -104,7 +106,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.19569.0
+// SDK version: 10.0.19041.0
 //
 // Todo: -
 //
@@ -290,7 +292,7 @@ type
   TXAPOLockForProcessBufferParametersArray = array [0.. 65535] of XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
   {$EXTERNALSYM TXAPOLockForProcessBufferParametersArray}
 
-
+type
   // Buffer flags:
   // Describes assumed content of the respective buffer.
   // Used with XAPO_PROCESS_BUFFER_PARAMETERS.BufferFlags.
@@ -310,12 +312,15 @@ type
   // The flags may not reflect what is actually stored in memory.
 
   PXAPO_BUFFER_FLAGS = ^XAPO_BUFFER_FLAGS;
-  XAPO_BUFFER_FLAGS = (
-    XAPO_BUFFER_SILENT,     // silent data should be assumed, respective memory may be uninitialized
-    XAPO_BUFFER_VALID       // arbitrary data should be assumed (may or may not be silent frames), respective memory initialized
-  );
+  XAPO_BUFFER_FLAGS = DWord;
   {$EXTERNALSYM XAPO_BUFFER_FLAGS}
+const
+  XAPO_BUFFER_SILENT = XAPO_BUFFER_FLAGS(0);     // silent data should be assumed, respective memory may be uninitialized
+  {$EXTERNALSYM XAPO_BUFFER_SILENT}
+  XAPO_BUFFER_VALID  = XAPO_BUFFER_FLAGS(1);     // arbitrary data should be assumed (may or may not be silent frames), respective memory initialized
+  {$EXTERNALSYM XAPO_BUFFER_VALID}
 
+type
 
   // Process buffer parameters:
   // Defines buffer parameters that may change from one
