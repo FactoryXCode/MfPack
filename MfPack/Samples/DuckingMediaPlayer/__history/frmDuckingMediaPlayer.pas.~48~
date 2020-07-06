@@ -1,0 +1,373 @@
+unit frmDuckingMediaPlayer;
+
+interface
+
+uses
+  Winapi.Windows,
+  Winapi.Messages,
+  Winapi.CommCtrl,
+  System.SysUtils,
+  System.Variants,
+  System.Classes,
+  Vcl.Graphics,
+  Vcl.Controls,
+  Vcl.Forms,
+  Vcl.Dialogs,
+  Vcl.StdCtrls,
+  Vcl.ComCtrls,
+  Vcl.ExtCtrls,
+  MfPack.MfpTypes,
+  MediaPlayer;
+
+type
+  TForm1 = class(TForm)
+    Label1: TLabel;
+    edFileName: TEdit;
+    butBrowse: TButton;
+    Bevel1: TBevel;
+    Label2: TLabel;
+    trbPlayBackPosition: TTrackBar;
+    Bevel2: TBevel;
+    butPlay: TButton;
+    butPause: TButton;
+    butStop: TButton;
+    Label3: TLabel;
+    Bevel3: TBevel;
+    cbCheckPauseOnDuck: TCheckBox;
+    cbOptOutOnDucking: TCheckBox;
+    tbVolumeSlider: TTrackBar;
+    Label4: TLabel;
+    Label5: TLabel;
+    Button5: TButton;
+    Button6: TButton;
+    cbCheckMute: TCheckBox;
+    dlgOpen: TOpenDialog;
+    tmrProgress: TTimer;
+    procedure FormCreate(Sender: TObject);
+    procedure Button5Click(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure cbCheckPauseOnDuckClick(Sender: TObject);
+    procedure cbOptOutOnDuckingClick(Sender: TObject);
+    procedure butBrowseClick(Sender: TObject);
+    procedure butPlayClick(Sender: TObject);
+    procedure butPauseClick(Sender: TObject);
+    procedure butStopClick(Sender: TObject);
+    procedure tbVolumeSliderChange(Sender: TObject);
+    procedure tmrProgressTimer(Sender: TObject);
+  private
+    { Private declarations }
+    AppHandle: HWND;
+    volume: Single;
+    mute: BOOL; // = LongBool
+    fileName: WideString;
+    //progressTimer: UIntPtr;
+
+    procedure MediaPlayerDialogProc(var Msg: TMsg; var Handled: Boolean);
+
+  public
+    { Public declarations }
+  end;
+
+var
+  Form1: TForm1;
+  g_MediaPlayer: TCMediaPlayer;
+
+implementation
+
+{$R *.dfm}
+
+//
+//  If the user hit the "Browse" button, bring up the file common dialog box.
+//
+//  If the user hit "OK" to the dialog then update the edit control to include the filename and load
+//  the file into the player.
+//
+procedure TForm1.butBrowseClick(Sender: TObject);
+begin
+  if dlgOpen.Execute then
+    begin
+      trbPlayBackPosition.Max := 1000;
+      edFileName.Text := dlgOpen.Filename;
+      fileName := dlgOpen.FileName;
+
+      //
+      //  If we're playing (the stop button is enabled), stop playing.
+      //
+      if butStop.Enabled then
+        begin
+          g_MediaPlayer.Stop();
+
+          tmrProgress.Enabled := False;
+          //KillTimer(AppHandle, progressTimer);
+
+          ButPlay.Enabled := True;
+          //EnableWindow(GetDlgItem(AppHandle, IDC_BUTTON_PLAY), TRUE);
+          butPause.Enabled := False;
+          //EnableWindow(GetDlgItem(AppHandle, butPause), FALSE);
+          butStop.Enabled := False;
+          //EnableWindow(GetDlgItem(AppHandle, butStop), FALSE);
+        end;
+
+      g_MediaPlayer.SetFileName(PWideChar(fileName));
+
+      butPlay.Enabled := True;
+      //EnableWindow(GetDlgItem(AppHandle, IDC_BUTTON_PLAY), TRUE);
+      butPause.Enabled := False;
+      //EnableWindow(GetDlgItem(AppHandle, butPause), FALSE);
+      butStop.Enabled := False;
+      //EnableWindow(GetDlgItem(AppHandle, butStop), FALSE);
+    end;
+end;
+
+//
+//  The user hit the "Pause/Continue" button.
+//
+//  Toggle the "Pause" state in the player and update the button text as appropriate.
+//
+procedure TForm1.butPauseClick(Sender: TObject);
+begin
+  if g_MediaPlayer.TogglePauseState() then
+    begin
+      butPause.Caption := 'Continue';
+      //SetWindowText(GetDlgItem(AppHandle, butPause), lpcwstr('Continue'));
+      tmrProgress.Enabled := False;
+      //KillTimer(AppHandle, progressTimer);
+
+    end
+  else
+    begin
+      butPause.Caption := 'Pause';
+      //SetWindowText(GetDlgItem(AppHandle, butPause), lpcwstr('Pause'));
+      tmrProgress.Enabled := True;
+      //SetTimer(AppHandle, progressTimer, 40, Nil);
+    end;
+end;
+
+//
+//  The user hit the "Play" button.
+//
+//  Sync the "Pause On Duck" and "Ducking Opt Out" buttons with the player and then start playback.
+//
+//
+//  Then disable the "Play" button and enable the "Pause" and "Stop" buttons.
+//
+procedure TForm1.butPlayClick(Sender: TObject);
+begin
+  g_MediaPlayer.SyncPauseOnDuck(cbCheckPauseOnDuck.Checked);
+  g_MediaPlayer.SyncDuckingOptOut(cbOptOutOnDucking.Checked);
+
+  g_MediaPlayer.Play();
+
+  tmrProgress.Enabled := True;
+  //SetTimer(AppHandle, progressTimer, 40, Nil);
+
+  ButPlay.Enabled := False;
+  //EnableWindow(GetDlgItem(AppHandle, butPlay), FALSE);
+  butPause.Enabled := True;
+  //EnableWindow(GetDlgItem(AppHandle, butPause), TRUE);
+  butStop.Enabled := True;
+  //EnableWindow(GetDlgItem(AppHandle, butStop), TRUE);
+end;
+
+
+procedure TForm1.butStopClick(Sender: TObject);
+begin
+  g_MediaPlayer.Stop();
+
+  tmrProgress.Enabled := False;
+  //KillTimer(AppHandle, progressTimer);
+
+  ButPlay.Enabled := True;
+  //EnableWindow(GetDlgItem(AppHandle, butPlay), TRUE);
+  butPause.Enabled := False;
+  //EnableWindow(GetDlgItem(AppHandle, butPause), FALSE);
+  butStop.Enabled := False;
+  //EnableWindow(GetDlgItem(AppHandle, butStop), FALSE);
+end;
+
+
+procedure TForm1.Button5Click(Sender: TObject);
+begin
+  Close; // Close the dialog or use this method
+  // EndDialog(AppHandle, True);
+end;
+
+
+procedure TForm1.cbCheckPauseOnDuckClick(Sender: TObject);
+begin
+  g_MediaPlayer.SyncPauseOnDuck(cbCheckPauseOnDuck.Checked);
+end;
+
+
+procedure TForm1.cbOptOutOnDuckingClick(Sender: TObject);
+begin
+  g_MediaPlayer.SyncDuckingOptOut(cbOptOutOnDucking.Checked);
+end;
+
+
+procedure TForm1.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  CanClose := False;
+  g_MediaPlayer.Shutdown();
+  FreeAndNil(g_MediaPlayer);
+  CanClose := True;
+end;
+
+
+procedure TForm1.FormCreate(Sender: TObject);
+var
+  hr: HResult;
+
+begin
+  AppHandle := Application.Handle;
+  Application.OnMessage := MediaPlayerDialogProc;
+
+  g_MediaPlayer := TCMediaPlayer.Create(AppHandle);
+
+  if not Assigned(g_MediaPlayer) then
+    begin
+      MessageBox(AppHandle,
+                 lpcwstr('Unable to allocate media player'),
+                 lpcwstr('Initialization Failure'),
+                 MB_OK);
+      Exit;
+      // or use EndDialog(AppHandle, -1);
+    end
+  else
+    begin
+      hr := g_MediaPlayer.Initialize();
+      if Failed(hr) then
+        begin
+          MessageBox(AppHandle,
+                     lpcwstr('Unable to initialize media player'),
+                     lpcwstr('Initialization Failure'),
+                     MB_OK);
+          Exit;
+          // or use EndDialog(AppHandle, -1);
+        end;
+    end;
+
+  // Set progress max
+  trbPlayBackPosition.Max := g_MediaPlayer.Duration;
+
+  // Get&set volume and mute
+  volume := g_MediaPlayer.GetVolume();
+  tbVolumeSlider.Position := Trunc(volume * 100.0);
+  mute := g_MediaPlayer.GetMute();
+  cbCheckMute.Checked := mute;
+end;
+
+//
+// Update the volume for the media player.
+//
+procedure TForm1.tbVolumeSliderChange(Sender: TObject);
+var
+  volumePosition: Integer;
+
+begin
+  volumePosition := tbVolumeSlider.Position;
+  g_MediaPlayer.SetVolume(Single(volumePosition) / 100.0);
+end;
+
+//
+// Update the progress slider to match the current playback position.
+// NOTE:
+//  We used the TTimerclass which use the Windows API timer functions SetTimer and KillTimer as been used in the official MS sample.
+//  Since Delphi doen't have slider component, we use the TTrackBar for this. In other samples we used the TProgressBar.
+procedure TForm1.tmrProgressTimer(Sender: TObject);
+var
+  position: LongInt;
+
+begin
+  position := g_MediaPlayer.GetPosition();
+  trbPlayBackPosition.Position := position;
+end;
+
+//
+//  FUNCTION: MediaPlayerDialogProc(HWND, UINT, WPARAM, LPARAM)
+//
+//  PURPOSE:  Processes messages for the main window.
+//
+procedure TForm1.MediaPlayerDialogProc(var Msg: TMsg; var Handled: Boolean);
+var
+  slposition: LongInt;
+
+begin
+
+ if Msg.hwnd = Application.Handle then
+  begin
+
+    if Msg.message = WM_TIMER then
+      begin
+        //
+        //  Update the progress slider to match the current playback position.
+        //
+        slposition := g_MediaPlayer.GetPosition();
+        trbPlayBackPosition.Position := slposition;
+        // or
+        //SendMessage(GetDlgItem(AppHandle, trbPlayBackPosition), TBM_SETPOS, True, position);
+
+        Handled := True;
+        Exit;
+      end;
+
+    //
+    //  Let the media player know about the DShow graph event.
+    //  If we come to the end of the track, reset the slider to the beginning of the track.
+    //
+    if Msg.message = WM_APP_GRAPHNOTIFY then
+      begin
+        if g_MediaPlayer.HandleGraphEvent() then
+          begin
+            //  Reset the slider and timer, we're at the end of the track.
+            trbPlayBackPosition.Position := 0;
+            //SendMessage(GetDlgItem(AppHandle, trbPlayBackPosition), TBM_SETPOS, True, 0);
+            tmrProgress.Enabled := False;
+            //KillTimer(AppHandle, progressTimer);
+
+            ButPlay.Enabled := True;
+            //EnableWindow(GetDlgItem(AppHandle, butPlay), TRUE);
+            butPause.Enabled := False;
+            //EnableWindow(GetDlgItem(AppHandle, butPause), FALSE);
+            butStop.Enabled := False;
+            //EnableWindow(GetDlgItem(AppHandle, butStop), FALSE);
+          end;
+
+        Handled := True;
+        Exit;
+      end;
+
+    //
+    //  Called when the media player receives a ducking notification.  Lets the media player know that the session has been ducked and pauses the player.
+    //
+    if Msg.message = WM_APP_SESSION_DUCKED then
+      begin
+        if g_MediaPlayer.Pause() then
+          begin
+            //butPause.Click;
+            // or
+            SetWindowText(GetDlgItem(hWnd, butPause), 'Continue');
+            tmrProgress.Enabled := False;
+            //KillTimer(hWnd, progressTimer);
+          end;
+      end;
+
+    if Msg.message = WM_APP_SESSION_UNDUCKED then
+      begin
+        if g_MediaPlayer.Continue() then
+          begin
+            // butPause.Click
+            // or
+            SetWindowText(GetDlgItem(AppHandle, butPause), 'Pause');
+            tmrProgress.Enabled := True;
+            //SetTimer(AppHandle, progressTimer, 40, Nil);
+            Handled := True;
+            Exit;
+          end;
+      end;
+
+  end;
+  Handled := false;
+end;
+
+end.
