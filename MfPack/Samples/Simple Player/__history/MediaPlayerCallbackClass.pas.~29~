@@ -1,0 +1,160 @@
+unit MediaPlayerCallbackClass;
+
+
+interface
+
+uses
+  Winapi.Windows,
+  Winapi.Messages,
+  System.Classes,
+  System.SysUtils,
+  {MfPack}
+  MfPack.MfApi,
+  MfPack.MfPlay,
+  MfPack.MfpUtils,
+  MfPack.MfpTypes;
+
+
+type
+
+  TMediaPlayerCallback = class(TInterfacedPersistent, IMFPMediaPlayerCallback)
+  private
+    // IMFPMediaPlayerCallback methods
+    procedure OnMediaPlayerEvent(pEventHeader: MFP_EVENT_HEADER); stdcall;
+
+  public
+
+    constructor Create();
+    destructor Destroy(); override;
+
+  end;
+
+var
+  // Global variables
+  g_pPlayer: IMFPMediaPlayer;        // The MFPlay player object.
+  g_pPlayerCB: TMediaPlayerCallback; // Application callback object.
+  g_bHasVideo: BOOL;
+
+  //
+  procedure OnMediaItemCreated(pEvent: PMFP_MEDIAITEM_CREATED_EVENT);
+  procedure OnMediaItemSet(pEvent: PMFP_MEDIAITEM_CREATED_EVENT);
+  procedure ShowErrorMessage(fmt: string; hrErr: HResult);
+
+
+implementation
+
+
+constructor TMediaPlayerCallback.Create();
+begin
+  inherited Create();
+
+end;
+
+destructor TMediaPlayerCallback.Destroy();
+begin
+
+  inherited Destroy();
+end;
+
+//-------------------------------------------------------------------
+// OnMediaPlayerEvent
+//
+// Implements IMFPMediaPlayerCallback.OnMediaPlayerEvent.
+// This callback method handles events from the MFPlay object.
+//-------------------------------------------------------------------
+procedure TMediaPlayerCallback.OnMediaPlayerEvent(pEventHeader: MFP_EVENT_HEADER);
+begin
+  if Failed(pEventHeader.hrEvent) then
+    begin
+      ShowErrorMessage(LPCWSTR('Playback error'), pEventHeader.hrEvent);
+      Exit;
+    end;
+
+  case (pEventHeader.eEventType) of
+    MFP_EVENT_TYPE_MEDIAITEM_CREATED:
+      begin
+        OnMediaItemCreated(MFP_GET_MEDIAITEM_CREATED_EVENT(@pEventHeader));
+      end;
+
+    MFP_EVENT_TYPE_MEDIAITEM_SET:
+      begin
+        OnMediaItemSet(MFP_GET_MEDIAITEM_CREATED_EVENT(@pEventHeader));
+      end;
+  end;
+end;
+
+
+//-------------------------------------------------------------------
+// OnMediaItemCreated
+//
+// Called when the IMFPMediaPlayer.CreateMediaItemFromURL method
+// completes.
+//-------------------------------------------------------------------
+procedure OnMediaItemCreated(pEvent: PMFP_MEDIAITEM_CREATED_EVENT);
+var
+  hr: HResult;
+  bHasVideo,
+  bIsSelected: BOOL;
+
+label
+  done;
+
+begin
+  hr := S_OK;
+  // The media item was created successfully.
+
+  if Assigned(g_pPlayer) then
+    begin
+      bHasVideo := False;
+      bIsSelected := False;
+
+      // Check if the media item contains video.
+      hr := pEvent.pMediaItem.HasVideo(bHasVideo, bIsSelected);
+
+      if Failed(hr) then
+        goto done;
+
+      g_bHasVideo := bHasVideo and bIsSelected;
+
+      // Set the media item on the player. This method completes asynchronously.
+      hr := g_pPlayer.SetMediaItem(pEvent.pMediaItem);
+    end;
+
+done:
+  if Failed(hr) then
+    ShowErrorMessage(LPCWSTR('Error playing this file.'), hr);
+
+end;
+
+
+//-------------------------------------------------------------------
+// OnMediaItemSet
+//
+// Called when the IMFPMediaPlayer.SetMediaItem method completes.
+//-------------------------------------------------------------------
+procedure OnMediaItemSet(pEvent: PMFP_MEDIAITEM_CREATED_EVENT);
+var
+  hr: HResult;
+
+begin
+  hr := g_pPlayer.Play();
+
+  if Failed(hr) then
+    ShowErrorMessage(LPCWSTR('IMFPMediaPlayer.Play failed.'), hr);
+end;
+
+
+procedure ShowErrorMessage(fmt: string; hrErr: HResult);
+var
+  msg: string;
+
+begin
+  msg := Format('%s Resultcode: (%d)', [fmt, hrErr]);
+
+  MessageBox(0,
+             LPCWSTR(msg),
+             LPCWSTR('Error'),
+             MB_ICONERROR);
+end;
+
+end.

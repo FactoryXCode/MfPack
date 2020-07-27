@@ -29,7 +29,7 @@
 // Remarks: Requires Windows Vista or later.
 // 
 // Related objects: -
-// Related projects: MfPackX263
+// Related projects: MfPackX264
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -96,12 +96,21 @@ type
 
   // Use for releasing interfaces.
   procedure SafeRelease(var IUnk);
-  // Use for releasing interface pointers.
+  // Use for releasing objects.
   procedure SAFE_RELEASE(var Obj);
 
   // Identical methods, both can be called.
-  procedure SafeDelete(var Obj);
-  procedure FreeAndNil(var Obj);
+  {$IF COMPILERVERSION < 24.0}
+  procedure SafeDelete(var Obj);  overload;
+  {$ELSE}
+  procedure SafeDelete(const [ref] Obj: TObject);
+  {$ENDIF}
+
+  {$IF COMPILERVERSION < 24.0}
+  procedure FreeAndNil(var Obj);  overload;
+  {$ELSE}
+  procedure FreeAndNil(const [ref] Obj: TObject);
+  {$ENDIF}
 
 
   // Compare GUIDS
@@ -472,13 +481,25 @@ begin
     end;
 end;
 
-
+{$IF COMPILERVERSION < 24.0}
 // From DS, same as SafeDelete
 procedure FreeAndNil(var Obj);
 begin
   SafeDelete(Obj);
 end;
 
+{$ELSE}
+
+// A much safe method to free and nil objects
+procedure FreeAndNil(const [ref] Obj: TObject);
+begin
+  SafeDelete(Obj);
+end;
+
+{$ENDIF}
+
+
+{$IF COMPILERVERSION < 24.0}
 // Frees an Object reference and sets this reference to zero.
 // This is actually the same method as FeeAndNil as used in DirectShow.
 // NOTE: Use SafeRelease for freeing an interfaced object!
@@ -492,6 +513,19 @@ begin
   Tmp.Free;
 end;
 
+{$ELSE}
+
+// A much saver method to free and nil objects
+procedure SafeDelete(const [ref] Obj: TObject);
+var
+  Temp: TObject;
+begin
+  Temp := Obj;
+  TObject(Pointer(@Obj)^) := Nil;
+  Temp.Free;
+end;
+
+{$ENDIF}
 
 
 {$WARN SYMBOL_PLATFORM OFF}

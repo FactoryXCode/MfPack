@@ -10,8 +10,10 @@
 // Language: ENU
 //
 // Revision Version: 2.6.4
+//
 // Description: MFPlay is a Microsoft Media Foundation API for creating media
-// playback applications.
+//              playback applications.
+//              This API will be deprecated: See: https://docs.microsoft.com/en-us/windows/win32/api/mfplay/
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -24,9 +26,12 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
 //                                #1 Autobahn
+//                                #2 The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or higher.
+//          Deprecated. This API may be removed from future releases of Windows.
+//          Applications should use the Media Session for playback.
 //
 // Related objects: -
 // Related projects: MfPackX264
@@ -90,7 +95,12 @@ uses
 
 const
 
-  MFP_POSITIONTYPE_100NS                  : TGUID = '{00000000-0000-0000-0000-000000000000}';
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  // Position types that MFPlay uses.
+  // See IMFPMediaItem.GetStartStopPosition and IMFPMediaItem.SetStartStopPosition.
+  //
+  MFP_POSITIONTYPE_100NS          : TGUID = '{00000000-0000-0000-0000-000000000000}';  // = GUID_NULL
   {$EXTERNALSYM MFP_POSITIONTYPE_100NS}
 
   // implementations of DEFINE_PROPERTYKEY macro, see comment: PropKeyDef.pas
@@ -109,28 +119,40 @@ const
                                                    pid: $01);
   {$EXTERNALSYM MFP_PKEY_StreamRenderingResults}
 
+
+
+{$IFNDEF MFP_X_PTRS}
+  // NOTES: A DWORD_PTR is NOT a pointer to DWord, but a NativeUInt (4 bytes) on a 32bit system or UInt64 (8 bytes) on a 64bit system.
+  //        By default this type is defined in MfPack.MfpTypes
 type
+  DWORD_PTR = NativeUInt;
+  {$EXTERNALSYM DWORD_PTR}
+{$ENDIF}
 
-  DWORD_PTR = ^DWord;
-
+{$IFNDEF MFP_SIZE}
+type
   PSIZE = ^tagSIZE;
   tagSIZE = record
-    cx: LONG;
-    cy: LONG;
+    cx: Longint;
+    cy: Longint;
   end;
   {$EXTERNALSYM tagSIZE}
   SIZE = tagSIZE;
   {$EXTERNALSYM SIZE}
+{$ENDIF}
 
+{$IFNDEF MFP_COLORREF}
+type
   COLORREF = DWORD;
   {$EXTERNALSYM COLORREF}
   LPCOLORREF = ^DWORD;
+{$ENDIF}
 
+
+type
   MFP_CREATION_OPTIONS = UINT32;
   {$EXTERNALSYM MFP_CREATION_OPTIONS}
-
 const
-
   MFP_OPTION_NONE                             : MFP_CREATION_OPTIONS = 0;
   {$EXTERNALSYM MFP_OPTION_NONE}
   MFP_OPTION_FREE_THREADED_CALLBACK           : MFP_CREATION_OPTIONS = $1;
@@ -141,25 +163,21 @@ const
   {$EXTERNALSYM MFP_OPTION_NO_REMOTE_DESKTOP_OPTIMIZATION}
 
 type
-
-  PMFP_MEDIAPLAYER_STATE = ^cwMFP_MEDIAPLAYER_STATE;
-  cwMFP_MEDIAPLAYER_STATE            = (
+  PMFP_MEDIAPLAYER_STATE = ^MFP_MEDIAPLAYER_STATE;
+  MFP_MEDIAPLAYER_STATE            = (
     MFP_MEDIAPLAYER_STATE_EMPTY    = 0,
     MFP_MEDIAPLAYER_STATE_STOPPED  = $1,
     MFP_MEDIAPLAYER_STATE_PLAYING  = $2,
     MFP_MEDIAPLAYER_STATE_PAUSED   = $3,
     MFP_MEDIAPLAYER_STATE_SHUTDOWN = $4
   );
-  {$EXTERNALSYM cwMFP_MEDIAPLAYER_STATE}
-  MFP_MEDIAPLAYER_STATE = cwMFP_MEDIAPLAYER_STATE;
   {$EXTERNALSYM MFP_MEDIAPLAYER_STATE}
 
 
+type
   MFP_MEDIAITEM_CHARACTERISTICS = UINT32;
   {$EXTERNALSYM MFP_MEDIAITEM_CHARACTERISTICS}
-
 const
-
   MFP_MEDIAITEM_IS_LIVE       : MFP_MEDIAITEM_CHARACTERISTICS = $1;
   {$EXTERNALSYM MFP_MEDIAITEM_IS_LIVE}
   MFP_MEDIAITEM_CAN_SEEK      : MFP_MEDIAITEM_CHARACTERISTICS = $2;
@@ -170,12 +188,9 @@ const
   {$EXTERNALSYM MFP_MEDIAITEM_HAS_SLOW_SEEK}
 
 type
-
   MFP_CREDENTIAL_FLAGS = UINT32;
   {$EXTERNALSYM MFP_CREDENTIAL_FLAGS}
-
 const
-
   MFP_CREDENTIAL_PROMPT         : MFP_CREDENTIAL_FLAGS = $1;
   {$EXTERNALSYM MFP_CREDENTIAL_PROMPT}
   MFP_CREDENTIAL_SAVE           : MFP_CREDENTIAL_FLAGS = $2;
@@ -193,12 +208,18 @@ type
 
   // Forward Interface Declarations
 
+  PIMFPMediaPlayer = ^IMFPMediaPlayer;
   IMFPMediaPlayer = interface;
+
+  PIMFPMediaPlayerCallback = ^IMFPMediaPlayerCallback;
+  IMFPMediaPlayerCallback = interface;
+
+  PIMFPMediaItem = ^IMFPMediaItem;
   IMFPMediaItem = interface;
 
 
   PMFP_EVENT_TYPE = ^MFP_EVENT_TYPE;
-  cwMFP_EVENT_TYPE          = (
+  MFP_EVENT_TYPE = (
     MFP_EVENT_TYPE_PLAY                    = 0,
     MFP_EVENT_TYPE_PAUSE                   = 1,
     MFP_EVENT_TYPE_STOP                    = 2,
@@ -213,31 +234,25 @@ type
     MFP_EVENT_TYPE_PLAYBACK_ENDED          = 11,
     MFP_EVENT_TYPE_ACQUIRE_USER_CREDENTIAL = 12
   );
-  {$EXTERNALSYM cwMFP_EVENT_TYPE}
-  MFP_EVENT_TYPE = cwMFP_EVENT_TYPE;
   {$EXTERNALSYM MFP_EVENT_TYPE}
 
 
   PMFP_EVENT_HEADER = ^MFP_EVENT_HEADER;
-  cwMFP_EVENT_HEADER = record
+  MFP_EVENT_HEADER = record
     eEventType: MFP_EVENT_TYPE;
     hrEvent: HResult;
     pMediaPlayer: IMFPMediaPlayer;
     eState: MFP_MEDIAPLAYER_STATE;
-    pPropertyStore: ^IPropertyStore;
+    pPropertyStore: IPropertyStore;
   end;
-  {$EXTERNALSYM cwMFP_EVENT_HEADER}
-  MFP_EVENT_HEADER = cwMFP_EVENT_HEADER;
   {$EXTERNALSYM MFP_EVENT_HEADER}
 
 
   PMFP_PLAY_EVENT = ^MFP_PLAY_EVENT;
-  cwMFP_PLAY_EVENT = record
+  MFP_PLAY_EVENT = record
     header: MFP_EVENT_HEADER;
-    pMediaItem: ^IMFPMediaItem;
+    pMediaItem: IMFPMediaItem;
   end;
-  {$EXTERNALSYM cwMFP_PLAY_EVENT}
-  MFP_PLAY_EVENT = cwMFP_PLAY_EVENT;
   {$EXTERNALSYM MFP_PLAY_EVENT}
 
 
@@ -252,86 +267,70 @@ type
 
 
   PMFP_STOP_EVENT = ^MFP_STOP_EVENT;
-  cwMFP_STOP_EVENT = record
+  MFP_STOP_EVENT = record
     header: MFP_EVENT_HEADER;
     pMediaItem: IMFPMediaItem;
   end;
-  {$EXTERNALSYM cwMFP_STOP_EVENT}
-  MFP_STOP_EVENT = cwMFP_STOP_EVENT;
   {$EXTERNALSYM MFP_STOP_EVENT}
 
 
   PMFP_POSITION_SET_EVENT = ^MFP_POSITION_SET_EVENT;
-  cwMFP_POSITION_SET_EVENT = record
+  MFP_POSITION_SET_EVENT = record
     header: MFP_EVENT_HEADER;
     pMediaItem: IMFPMediaItem;
   end;
-  {$EXTERNALSYM cwMFP_POSITION_SET_EVENT}
-  MFP_POSITION_SET_EVENT = cwMFP_POSITION_SET_EVENT;
   {$EXTERNALSYM MFP_POSITION_SET_EVENT}
 
 
   PMFP_RATE_SET_EVENT = ^MFP_RATE_SET_EVENT;
-  cwMFP_RATE_SET_EVENT = record
+  MFP_RATE_SET_EVENT = record
     header: MFP_EVENT_HEADER;
     pMediaItem: IMFPMediaItem;
     flRate: Single;
   end;
-  {$EXTERNALSYM cwMFP_RATE_SET_EVENT}
-  MFP_RATE_SET_EVENT = cwMFP_RATE_SET_EVENT;
   {$EXTERNALSYM MFP_RATE_SET_EVENT}
 
 
   PMFP_MEDIAITEM_CREATED_EVENT = ^MFP_MEDIAITEM_CREATED_EVENT;
-  cwMFP_MEDIAITEM_CREATED_EVENT = record
+  MFP_MEDIAITEM_CREATED_EVENT = record
     header: MFP_EVENT_HEADER;
     pMediaItem: IMFPMediaItem;
     dwUserData: DWORD_PTR;
   end;
-  {$EXTERNALSYM cwMFP_MEDIAITEM_CREATED_EVENT}
-  MFP_MEDIAITEM_CREATED_EVENT = cwMFP_MEDIAITEM_CREATED_EVENT;
   {$EXTERNALSYM MFP_MEDIAITEM_CREATED_EVENT}
 
 
   PMFP_MEDIAITEM_SET_EVENT = ^MFP_MEDIAITEM_SET_EVENT;
-  cwMFP_MEDIAITEM_SET_EVENT = record
+  MFP_MEDIAITEM_SET_EVENT = record
     header: MFP_EVENT_HEADER;
     pMediaItem: IMFPMediaItem;
   end;
-  {$EXTERNALSYM cwMFP_MEDIAITEM_SET_EVENT}
-  MFP_MEDIAITEM_SET_EVENT = cwMFP_MEDIAITEM_SET_EVENT;
   {$EXTERNALSYM MFP_MEDIAITEM_SET_EVENT}
 
 
   PMFP_FRAME_STEP_EVENT = ^MFP_FRAME_STEP_EVENT;
-  cwMFP_FRAME_STEP_EVENT = record
+  MFP_FRAME_STEP_EVENT = record
     header: MFP_EVENT_HEADER;
     pMediaItem: IMFPMediaItem;
   end;
-  {$EXTERNALSYM cwMFP_FRAME_STEP_EVENT}
-  MFP_FRAME_STEP_EVENT = cwMFP_FRAME_STEP_EVENT;
   {$EXTERNALSYM MFP_FRAME_STEP_EVENT}
 
 
   PMFP_MEDIAITEM_CLEARED_EVENT = ^MFP_MEDIAITEM_CLEARED_EVENT;
-  cwMFP_MEDIAITEM_CLEARED_EVENT = record
+  MFP_MEDIAITEM_CLEARED_EVENT = record
     header: MFP_EVENT_HEADER;
     pMediaItem: IMFPMediaItem;
   end;
-  {$EXTERNALSYM cwMFP_MEDIAITEM_CLEARED_EVENT}
-  MFP_MEDIAITEM_CLEARED_EVENT = cwMFP_MEDIAITEM_CLEARED_EVENT;
   {$EXTERNALSYM MFP_MEDIAITEM_CLEARED_EVENT}
 
 
   PMFP_MF_EVENT = ^MFP_MF_EVENT;
-  cwMFP_MF_EVENT = record
+  MFP_MF_EVENT = record
     header: MFP_EVENT_HEADER;
     MFEventType: MediaEventType;
     pMFMediaEvent: IMFMediaEvent;
     pMediaItem: IMFPMediaItem;
   end;
-  {$EXTERNALSYM cwMFP_MF_EVENT}
-  MFP_MF_EVENT = cwMFP_MF_EVENT;
   {$EXTERNALSYM MFP_MF_EVENT}
 
 
@@ -343,17 +342,15 @@ type
 
 
   PMFP_PLAYBACK_ENDED_EVENT = ^MFP_PLAYBACK_ENDED_EVENT;
-  cwMFP_PLAYBACK_ENDED_EVENT = record
+  MFP_PLAYBACK_ENDED_EVENT = record
     header: MFP_EVENT_HEADER;
     pMediaItem: IMFPMediaItem;
   end;
-  {$EXTERNALSYM cwMFP_PLAYBACK_ENDED_EVENT}
-  MFP_PLAYBACK_ENDED_EVENT = cwMFP_PLAYBACK_ENDED_EVENT;
   {$EXTERNALSYM MFP_PLAYBACK_ENDED_EVENT}
 
 
   PMFP_ACQUIRE_USER_CREDENTIAL_EVENT = ^MFP_ACQUIRE_USER_CREDENTIAL_EVENT;
-  cwMFP_ACQUIRE_USER_CREDENTIAL_EVENT = record
+  MFP_ACQUIRE_USER_CREDENTIAL_EVENT = record
     header: MFP_EVENT_HEADER;
     dwUserData: DWORD_PTR;
     fProceedWithAuthentication: BOOL;
@@ -366,8 +363,6 @@ type
     flags: MFP_CREDENTIAL_FLAGS;
     pCredential: IMFNetCredential;
   end;
-  {$EXTERNALSYM cwMFP_ACQUIRE_USER_CREDENTIAL_EVENT}
-  MFP_ACQUIRE_USER_CREDENTIAL_EVENT = cwMFP_ACQUIRE_USER_CREDENTIAL_EVENT;
   {$EXTERNALSYM MFP_ACQUIRE_USER_CREDENTIAL_EVENT}
 
 
@@ -394,6 +389,10 @@ type
 
     function FrameStep(): HResult; stdcall;
 
+    //
+    // Position controls
+    //
+
     function SetPosition(guidPositionType: REFGUID;
                          pvPositionValue: MfPROPVARIANT): HResult; stdcall;
 
@@ -403,31 +402,47 @@ type
     function GetDuration(guidPositionType: REFGUID;
                          out pvDurationValue: MfPROPVARIANT): HResult; stdcall;
 
+    //
+    // Rate Control
+    //
+
     function SetRate(flRate: Single): HResult; stdcall;
 
     function GetRate(out pflRate: Single): HResult; stdcall;
 
-    function GetSupportedRates(fForwardDirection: BOOL;
+    function GetSupportedRates(fForwardDirection: Boolean;
                                out pflSlowestRate: Single;
                                out pflFastestRate: Single): HResult; stdcall;
 
+    //
+    // State
+    //
+
     function GetState(out peState: MFP_MEDIAPLAYER_STATE): HResult; stdcall;
+
+    //
+    // Media Item Management
+    //
 
     function CreateMediaItemFromURL(pwszURL: LPCWSTR;
                                     fSync: BOOL;
                                     dwUserData: DWORD_PTR;
-                                    out ppMediaItem: IMFPMediaItem): HResult; stdcall;
+                                    ppMediaItem: PIMFPMediaItem): HResult; stdcall;
 
     function CreateMediaItemFromObject(pIUnknownObj: IUnknown;
                                        fSync: BOOL;
                                        dwUserData: DWORD_PTR;
-                                       out ppMediaItem: IMFPMediaItem): HResult; stdcall;
+                                       ppMediaItem: PIMFPMediaItem): HResult; stdcall;
 
     function SetMediaItem(pIMFPMediaItem: IMFPMediaItem): HResult; stdcall;
 
     function ClearMediaItem(): HResult; stdcall;
 
     function GetMediaItem(out ppIMFPMediaItem: IMFPMediaItem): HResult; stdcall;
+
+    //
+    // Audio controls
+    //
 
     function GetVolume(out pflVolume: Double): HResult; stdcall;
 
@@ -440,6 +455,10 @@ type
     function GetMute(out pfMute: BOOL): HResult; stdcall; //  4 bytes, BOOL;
 
     function SetMute(fMute: BOOL): HResult; stdcall; // 4 bytes, BOOL;
+
+    //
+    // Video controls
+    //
 
     function GetNativeVideoSize(out pszVideo: SIZE;
                                 out pszARVideo: SIZE): HResult; stdcall;
@@ -463,12 +482,20 @@ type
 
     function GetBorderColor(out pClr: COLORREF): HResult; stdcall;
 
+    //
+    // Effect Management
+    //
+
     function InsertEffect(pEffect: IUnknown;
-                          fOptional: BOOL): HResult; stdcall;
+                          fOptional: Boolean): HResult; stdcall;
 
     function RemoveEffect(pEffect: IUnknown): HResult; stdcall;
 
     function RemoveAllEffects(): HResult; stdcall;
+
+    //
+    // Shutdown
+    //
 
     function Shutdown(): HResult; stdcall;
 
@@ -529,10 +556,10 @@ type
 
     function GetNumberOfStreams(out pdwStreamCount: DWord): HResult; stdcall;
 
-    function GetStreamSelection(const dwStreamIndex: DWord;
+    function GetStreamSelection(dwStreamIndex: DWord;
                                 out pfEnabled: BOOL): HResult; stdcall;
 
-    function SetStreamSelection(const dwStreamIndex: DWord;
+    function SetStreamSelection(dwStreamIndex: DWord;
                                 fEnabled: BOOL): HResult; stdcall;
 
     function GetStreamAttribute(const dwStreamIndex: DWord;
@@ -569,7 +596,7 @@ type
   IMFPMediaPlayerCallback = interface(IUnknown)
     ['{766C8FFB-5FDB-4fea-A28D-B912996F51BD}']
 
-      procedure OnMediaPlayerEvent(pEventHeader: MFP_EVENT_HEADER); stdcall;
+      procedure OnMediaPlayerEvent(var pEventHeader: MFP_EVENT_HEADER); stdcall;
 
   end;
   IID_IMFPMediaPlayerCallback = IMFPMediaPlayerCallback;
@@ -578,11 +605,11 @@ type
 
   {
    NOTE: Deprecated.
-   This API may be removed from future releases of Windows (Windows 7).
+   This API may be removed from future releases of Windows.
    Applications should use the Media Session for playback.
    Creates a new instance of the MFPlay player object.
   }
-  function MFPCreateMediaPlayer(pwszURL: LPCWSTR;
+  function MFPCreateMediaPlayer(const pwszURL: LPCWSTR;
                                 fStartPlayback: BOOL;
                                 creationOptions: MFP_CREATION_OPTIONS;
                                 pCallback: IMFPMediaPlayerCallback;
