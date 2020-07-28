@@ -1,11 +1,74 @@
-
-
-{Project searchpath:
- ..\MfPack\MediaFoundation;
- ..\MfPack\Shared;
- ..\MfPack\DirectX
-}
-
+// FactoryX
+//
+// Copyright: © FactoryX. All rights reserved.
+//
+// Project: Media Foundation - MFPack - Samples
+// Project location: http://sourceforge.net/projects/MFPack
+// Module: frmSimplePlayer.pas
+// Kind: Pascal Unit
+// Release date: 05-07-2020
+// Language: ENU
+//
+// Version: 2.6.4
+// Description: Demonstrates audio/video playback using the IMFPMediaPlayer API.
+//
+//
+// Company: FactoryX
+// Intiator(s): Tony (maXcomX), Peter (OzShips), Ramyses De Macedo Rodrigues.
+// Contributor(s): Tony Kalf (maXcomX), Ramyses De Macedo Rodrigues.
+//
+//
+// Rudy Velthuis 1960 ~ 2019.
+//------------------------------------------------------------------------------
+// CHANGE LOG
+// Date       Person              Reason
+// ---------- ------------------- ----------------------------------------------
+// 05/07/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
+//                                #1 Autobahn
+//                                #2 The Model
+//------------------------------------------------------------------------------
+//
+// Remarks: Requires Windows 7 or later.
+//
+//          The MFPlayer API is deprecated: See: https://docs.microsoft.com/en-us/windows/win32/api/mfplay/
+//
+//          To play a file, select **Open File** from the **File** menu.
+//          To pause, press the **Spacebar**. To resume playback, press the **Spacebar** again.
+//          To Stop, press Esc.
+//          To change volume, press left arrow (decrease) or right arrow (increase).
+//
+// Related objects: -
+// Related projects: MfPackX264
+// Known Issues: -
+//
+// Compiler version: 23 up to 33
+// SDK version: 10.0.19041.0
+//
+// Todo: -
+//
+// =============================================================================
+// Source: SimplePlay sample project
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
+//==============================================================================
+//
+// LICENSE
+//
+// The contents of this file are subject to the Mozilla Public License
+// Version 2.0 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at
+// https://www.mozilla.org/en-US/MPL/2.0/
+//
+// Software distributed under the License is distributed on an "AS IS"
+// basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+// License for the specific language governing rights and limitations
+// under the License.
+//
+//
+// Users may distribute this source code provided that this header is included
+// in full at the top of the file.
+//
+//==============================================================================
 unit frmSimplePlayer;
 
 interface
@@ -40,7 +103,7 @@ type
     procedure OnMediaPlayerEvent(var pEventHeader: MFP_EVENT_HEADER); stdcall;
 
   public
-    constructor Create();  virtual;
+    constructor Create(); virtual;
     destructor Destroy(); override;
 
   end;
@@ -56,9 +119,9 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure OpenFile1Click(Sender: TObject);
     procedure Exit1Click(Sender: TObject);
+    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 
   private
     { Private declarations }
@@ -70,13 +133,12 @@ type
   public
     { Public declarations }
 
-
   end;
 
-    procedure OnMediaItemCreated(pEvent: PMFP_MEDIAITEM_CREATED_EVENT);
-    procedure OnMediaItemSet(pEvent: PMFP_MEDIAITEM_SET_EVENT);
-    procedure ShowErrorMessage(fmt: string; hrErr: HResult);
 
+  procedure OnMediaItemCreated(pEvent: PMFP_MEDIAITEM_CREATED_EVENT);
+  procedure OnMediaItemSet(pEvent: PMFP_MEDIAITEM_SET_EVENT);
+  procedure ShowErrorMessage(fmt: string; hrErr: HResult);
 
 var
   Form1: TForm1;
@@ -85,6 +147,7 @@ var
   g_pPlayer: IMFPMediaPlayer;        // The MFPlay player object.
   g_pPlayerCB: IMFPMediaPlayerCallback; // Application callback object.
   g_bHasVideo: BOOL;
+
 
 implementation
 
@@ -133,13 +196,19 @@ end;
 // Form class //////////////////////////////////////////////////////////////////
 
 procedure TForm1.WMSize(var Msg: TMessage);
+var
+  whdc: HDC;
+  ps: PAINTSTRUCT;
+
 begin
   Inherited;  // OnResize method will be handled first
   if (Msg.wParam = SIZE_RESTORED) then
     if Assigned(g_pPlayer) then
       begin
+        whdc := BeginPaint(AppHandle, ps);
         // Resize the video.
         g_pPlayer.UpdateVideo();
+        {void} EndPaint(whdc, ps);
       end;
 end;
 
@@ -176,49 +245,101 @@ begin
 end;
 
 
-procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TForm1.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 var
   hr: HResult;
   state: MFP_MEDIAPLAYER_STATE;
+  CurVolume: FLOAT;
 
 begin
   hr := S_OK;
+  state := MFP_MEDIAPLAYER_STATE_EMPTY;
 
   case Key of
-    VK_SPACE:   // Toggle between playback and paused/stopped.
+
+    VK_SPACE: // Toggle between playback and paused/stopped.
+      begin
+        if Assigned(g_pPlayer) then
+          begin
+            hr := g_pPlayer.GetState(state);
+            if Succeeded(hr) then
+              begin
+                if (state = MFP_MEDIAPLAYER_STATE_PAUSED) or (state = MFP_MEDIAPLAYER_STATE_STOPPED) then
+                  hr := g_pPlayer.Play()
+                else if (state = MFP_MEDIAPLAYER_STATE_PLAYING) then
+                  hr := g_pPlayer.Pause();
+              end;
+          end;
+      end;
+
+    VK_ESCAPE: // Stop and shutdown
+      begin
+        if Assigned(g_pPlayer) then
+          begin
+            hr := g_pPlayer.GetState(state);
+            if Succeeded(hr) then
+              if (state <> MFP_MEDIAPLAYER_STATE_EMPTY) or (state <> MFP_MEDIAPLAYER_STATE_SHUTDOWN) then
                 begin
-                  if Assigned(g_pPlayer) then
-                    begin
-                      state := MFP_MEDIAPLAYER_STATE_EMPTY;
-                      hr := g_pPlayer.GetState(state);
-                      if Succeeded(hr) then
-                        begin
-                          if (state = MFP_MEDIAPLAYER_STATE_PAUSED) or (state = MFP_MEDIAPLAYER_STATE_STOPPED) then
-                            hr := g_pPlayer.Play();
-                        end
-                      else if (state = MFP_MEDIAPLAYER_STATE_PLAYING) then
-                        begin
-                          hr := g_pPlayer.Pause();
-                        end;
-                    end;
+                  hr := g_pPlayer.Stop();
+                  // Repaint the screen
+                  SendMessage(AppHandle, WM_SIZE, 0, 0);
                 end;
+          end;
+      end;
+
+    VK_RIGHT:
+      begin
+        if Assigned(g_pPlayer) then
+          begin
+            hr := g_pPlayer.GetState(state);
+            if Succeeded(hr) then
+              begin
+                if (state <> MFP_MEDIAPLAYER_STATE_EMPTY) or (state <> MFP_MEDIAPLAYER_STATE_SHUTDOWN) then
+                  if Succeeded(g_pPlayer.GetVolume(CurVolume)) then
+                    begin
+                      CurVolume := CurVolume + 0.1;
+                      if CurVolume > 1 then
+                        CurVolume := 1;
+                      hr := g_pPlayer.SetVolume(CurVolume);
+                    end;
+              end;
+          end;
+      end;
+
+    VK_LEFT:
+      begin
+        if Assigned(g_pPlayer) then
+          begin
+            hr := g_pPlayer.GetState(state);
+            if Succeeded(hr) then
+              begin
+                if (state <> MFP_MEDIAPLAYER_STATE_EMPTY) or (state <> MFP_MEDIAPLAYER_STATE_SHUTDOWN) then
+                  if Succeeded(g_pPlayer.GetVolume(CurVolume)) then
+                    begin
+                      CurVolume := CurVolume - 0.1;
+                      if CurVolume < 0 then
+                        CurVolume := 0;
+                      hr := g_pPlayer.SetVolume(CurVolume);
+                    end;
+              end;
+          end;
+      end;
   end;
 
   if Failed(hr) then
     ShowErrorMessage('Playback Error', hr);
+
 end;
 
 
 procedure TForm1.FormPaint(Sender: TObject);
 var
   ps: PAINTSTRUCT;
-  hadc: HDC;
+  whdc: HDC;
 
 begin
 
-  {todo}exit;
-
-  hadc := BeginPaint(AppHandle, ps);
+  whdc := BeginPaint(AppHandle, ps);
   if (Assigned(g_pPlayer) and g_bHasVideo) then
     begin
       // Playback has started and there is video.
@@ -230,12 +351,12 @@ begin
     begin
       // There is no video stream, or playback has not started.
       // Paint the entire client area.
-      FillRect(hadc,
+      FillRect(whdc,
                ps.rcPaint,
-               HBRUSH(COLOR_WINDOW +1));
+               HBRUSH(COLOR_WINDOW + 1));
     end;
 
-    EndPaint(hadc, ps);
+    EndPaint(whdc, ps);
 end;
 
 
@@ -391,18 +512,18 @@ end;
 initialization
 begin
   // Initialize Media Foundation platform
-  //if Succeeded(MFStartup(MF_VERSION)) then
+  if Succeeded(MFStartup(MF_VERSION)) then
     CoInitializeEx(Nil,
                    COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE)
-  //else
-  //  Abort();
+  else
+    Abort();
 end;
 
 
 finalization
 begin
   // Shutdown MF
-  //MFShutdown();
+  MFShutdown();
   CoUninitialize();
 end;
 

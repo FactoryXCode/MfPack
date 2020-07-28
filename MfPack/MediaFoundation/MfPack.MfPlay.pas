@@ -436,7 +436,7 @@ type
 
     function SetMediaItem(pIMFPMediaItem: IMFPMediaItem): HResult; stdcall;
 
-    function ClearMediaItem(): HResult; stdcall;
+    function ClearMediaItem(): HResult; stdcall; // This method is currently not implemented.
 
     function GetMediaItem(out ppIMFPMediaItem: IMFPMediaItem): HResult; stdcall;
 
@@ -444,13 +444,13 @@ type
     // Audio controls
     //
 
-    function GetVolume(out pflVolume: Double): HResult; stdcall;
+    function GetVolume(out pflVolume: FLOAT): HResult; stdcall;
 
-    function SetVolume(const flVolume: Double): HResult; stdcall;
+    function SetVolume(const flVolume: FLOAT): HResult; stdcall;
 
-    function GetBalance(out pflBalance: Double): HResult; stdcall;
+    function GetBalance(out pflBalance: FLOAT): HResult; stdcall;
 
-    function SetBalance(const flBalance: Double): HResult; stdcall;
+    function SetBalance(const flBalance: FLOAT): HResult; stdcall;
 
     function GetMute(out pfMute: BOOL): HResult; stdcall; //  4 bytes, BOOL;
 
