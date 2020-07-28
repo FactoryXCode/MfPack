@@ -32,6 +32,7 @@ SDK version: 10.0.19041.0, May 2020 OS update (2004)
 
 # Samples
 
+
 **MfVideoThumbNails sample**
 
 *This sample app needs the D2D1 Api. If your Delphi version doesn't have the latest D2D1 Api (May 2019 update), use the D2D1 MfPack version.*
@@ -83,6 +84,15 @@ SDK version: 10.0.19041.0, May 2020 OS update (2004)
 
 
 ![AudioClip sample](https://a.fsdn.com/con/app/proj/mfpack/screenshots/AudioClipExSample.jpg/max/max/1)
+
+
+
+
+**Simple Player**
+
+This sample app demonstrates audio/video playback using the IMFPMediaPlayer API.
+Note: This API is deprecated, however, still functional up to Windows version May 2020 update.
+
 
 
 
