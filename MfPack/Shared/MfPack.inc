@@ -26,6 +26,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
 //                                #1 Autobahn
+//                                #2 The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: All future updates (releases) will be named to an artist except for 
@@ -272,7 +273,7 @@ const
   {$DEFINE DELPHI_DSHOW9_INCLUDED}
 {$ENDIF}
 
-// Since Delphi 2009 POINTERMATH is introduced.
+// Since Delphi 2009 POINTERMATH has been introduced.
 // Pointer math is simply treating any given typed pointer in some narrow instances as a
 // scaled ordinal where you can perform simple arithmetic operations directly on the pointer variable.
 // It also allows you to treat such a pointer variable as an unbounded array using the array [] operator.
@@ -360,8 +361,9 @@ const
 // {$DEFINE MFPACK_VERSION_262_UP} // Leftfield release.
 // {$DEFINE MFPACK_VERSION_263_UP} // Underworld release, Milestone update 12, WIN10 November 2019 Update (19H2))
 // {$DEFINE MFPACK_VERSION_264_UP} // Kraftwerk release, Milestone update 13, WIN10 May 2020 pre-update
-   {$DEFINE MFPACK_VERSION_264#1_UP} // Kraftwerk #1 Autobahn release, update 13#1, WIN10 May 2020 final update (2004))
-
+// {$DEFINE MFPACK_VERSION_264#1_UP} // Kraftwerk #1 Autobahn release, update 13#1, WIN10 May 2020 final update (2004))
+   {$DEFINE MFPACK_VERSION_264#2_UP} // Kraftwerk #1 The Model release, update 13#2, WIN10 May 2020 final update (2004))
+       
        
 // WARNINGS
 // enable/disable compiler warnings. 

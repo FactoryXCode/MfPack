@@ -4,7 +4,7 @@
 //
 // Project: MFPack - DirectX
 // Project location: https://sourceforge.net/projects/MFPack
-// Module: MfPack.D3d9.pas
+// Module: MfPack.D3D9.pas
 // Kind: Pascal / Delphi unit
 // Release date: 14-01-2018
 // Language: ENU
@@ -58,7 +58,7 @@
 // in full at the top of the file.
 // 
 //==============================================================================
-unit MfPack.D3d9;
+unit MfPack.D3D9;
 
   {$HPPEMIT '#include "d3d9.h"'}
 

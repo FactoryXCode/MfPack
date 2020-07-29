@@ -23,11 +23,10 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
 //                                #1 Autobahn
+//                                #2 The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
-//
-//
 //
 // Related objects: -
 // Related projects: MfPackX264
@@ -1517,11 +1516,11 @@ type
     public
       property SampleFormat: Integer index $0008 read ReadBits write WriteBits;           // 8 bits at offset 0
       property VideoChromaSubsampling: Integer index $0804 read ReadBits write WriteBits; // 4 bits at offset 8
-      property NominalRange: Integer index $0c03 read ReadBits write WriteBits;           // 3 bit at offset 12
+      property NominalRange: Integer index $0c03 read ReadBits write WriteBits;           // 3 bits at offset 12
       property VideoTransferMatrix: Integer index $0f03 read ReadBits write WriteBits;    // 3 bits at offset 15
       property VideoLighting: Integer index $1204 read ReadBits write WriteBits;          // 4 bits at offset 18
       property VideoPrimaries: Integer index $1605 read ReadBits write WriteBits;         // 5 bits at offset 22
-      property VideoTransferFunction: Integer index $1b01 read ReadBits write WriteBits;  // 5 bit at offset 27
+      property VideoTransferFunction: Integer index $1b01 read ReadBits write WriteBits;  // 5 bits at offset 27
   end;
   {$EXTERNALSYM _DXVA_ExtendedFormat}
   DXVA_ExtendedFormat = _DXVA_ExtendedFormat;
@@ -1561,17 +1560,15 @@ type
 // -------------------------------------------------------------------------
 //
 
-type
+
 
   // reintroduced REFERENCE_TIME  See: mfpTypes.pas
-  {ifndef REFERENCE_TIME}
+{$IFNDEF MFP_REFERENCE_TIME}
+type
   PReferenceTime = ^TReferenceTime;
-
   REFERENCE_TIME = LONGLONG;
   {$EXTERNALSYM REFERENCE_TIME}
-  TReferenceTime = LONGLONG;
-  {$EXTERNALSYM TReferenceTime}
-  {endif}
+{$ENDIF}
 
 const
 
@@ -1873,7 +1870,7 @@ type
   _DXVA_DeinterlaceBlt = record
     Size              : DWORD;
     Reserved          : DWORD;
-    rtTarget          : TReferenceTime;
+    rtTarget          : REFERENCE_TIME;
     DstRect           : TRECT;
     SrcRect           : TRECT;
     NumSourceSurfaces : DWORD;
