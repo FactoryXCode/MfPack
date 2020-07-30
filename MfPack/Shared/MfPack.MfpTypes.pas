@@ -1272,10 +1272,10 @@ type
 {$ENDIF}
 
 
-  // WideChar
+  // Unicode WideChar / PWideChar
   // Those are defined in winnt.h, but for our convenience we do it here to keep things simple.
+  // See: https://docs.microsoft.com/en-us/windows/win32/learnwin32/working-with-strings
 
-dd = PLPWSTR;
 {$IFDEF MFP_LPWSTR}
   PWSTR = PWideChar;
   {$EXTERNALSYM PWSTR}
@@ -1287,9 +1287,9 @@ dd = PLPWSTR;
 
 
 {$IFDEF MFP_LPCWSTR}
-  PCWSTR = WideChar;
+  PCWSTR = PWideChar;  // ^wchar_t = PWideChar
   {$EXTERNALSYM PCWSTR}
-  LPCWSTR = PWideChar;
+  LPCWSTR = PWideChar; // ^wchar_t
   {$EXTERNALSYM LPCWSTR}
 {$ENDIF}
 
