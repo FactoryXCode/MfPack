@@ -15,7 +15,7 @@
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Tilo Güldner.
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Tilo Güldner, (pyscripter)
 //
 // Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
@@ -912,7 +912,7 @@ type
     // string type.
     function GetAttributeValue(name: PCWSTR;
                                _type: D2D1_SVG_ATTRIBUTE_STRING_TYPE;
-                               out value: PWideChar;
+                               {out} value: PWideChar;
                                valueCount: UINT32): HResult; overload; stdcall;
 
     // Gets the string length of an attribute of this element. The returned string
@@ -938,7 +938,7 @@ type
     // specified POD type.
     function GetAttributeValue(name: PCWSTR;
                                _type: D2D1_SVG_ATTRIBUTE_POD_TYPE;
-                               out value {IUnknown} ;
+                               value: Pointer;  // pyscripter
                                valueSizeInBytes: UINT32): HResult; overload; stdcall;
 
     // Sets an attribute of this element using an interface. Returns an error if the
@@ -956,7 +956,7 @@ type
     // <param name="riid">The interface ID of the attribute value.</param>
     function GetAttributeValue(name: PCWSTR;
                                const riid: REFIID;
-                               out value {IUnknown} ): HResult; overload; stdcall;
+                               value: Pointer): HResult; overload; stdcall;
 
   end;
   IID_ID2D1SvgElement = ID2D1SvgElement;
