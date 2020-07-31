@@ -21,8 +21,9 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
+//                                #2 The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or higher.
@@ -136,8 +137,8 @@ const
 type
   // MediaEventType = DWORD;
   PMediaEventType = ^MediaEventType;
-  {$EXTERNALSYM MediaEventType}
   MediaEventType = DWord;
+  {$EXTERNALSYM MediaEventType}
 const
   //-------------------------------------------------------------------------
   // generic events
@@ -529,7 +530,7 @@ type
 
 type
   PMFVideoInterlaceMode = ^MFVideoInterlaceMode;
-  _MFVideoInterlaceMode = DWord;
+  _MFVideoInterlaceMode = UINT32;
   {$EXTERNALSYM _MFVideoInterlaceMode}
   MFVideoInterlaceMode = _MFVideoInterlaceMode;
   {$EXTERNALSYM MFVideoInterlaceMode}
@@ -561,7 +562,7 @@ const
 
 type
   PMFVideoTransferFunction = ^MFVideoTransferFunction;
-  _MFVideoTransferFunction    = DWord;
+  _MFVideoTransferFunction = UINT32;
   {$EXTERNALSYM _MFVideoTransferFunction}
   MFVideoTransferFunction = _MFVideoTransferFunction;
   {$EXTERNALSYM MFVideoTransferFunction}
@@ -610,7 +611,7 @@ const
 
 type
   PMFVideoPrimaries = ^MFVideoPrimaries;
-  _MFVideoPrimaries              = DWord;
+  _MFVideoPrimaries = UINT32;
   {$EXTERNALSYM _MFVideoPrimaries}
   MFVideoPrimaries = _MFVideoPrimaries;
   {$EXTERNALSYM MFVideoPrimaries}
@@ -647,7 +648,7 @@ const
 
 type
   PMFVideoLighting = ^MFVideoLighting;
-  _MFVideoLighting = DWord;
+  _MFVideoLighting = UINT32;
   {$EXTERNALSYM _MFVideoLighting}
   MFVideoLighting = _MFVideoLighting;
   {$EXTERNALSYM MFVideoLighting}
@@ -668,7 +669,7 @@ const
 
 type
   PMFVideoTransferMatrix = ^MFVideoTransferMatrix;
-  _MFVideoTransferMatrix           = DWord;
+  _MFVideoTransferMatrix = UINT32;
   {$EXTERNALSYM _MFVideoTransferMatrix}
   MFVideoTransferMatrix = _MFVideoTransferMatrix;
   {$EXTERNALSYM MFVideoTransferMatrix}
@@ -691,7 +692,7 @@ const
 
 type
   PMFVideoChromaSubsampling = ^MFVideoChromaSubsampling;
-  _MFVideoChromaSubsampling = Dword;
+  _MFVideoChromaSubsampling = UINT32;
   {$EXTERNALSYM _MFVideoChromaSubsampling}
   MFVideoChromaSubsampling = _MFVideoChromaSubsampling;
   {$EXTERNALSYM MFVideoChromaSubsampling}
@@ -725,7 +726,7 @@ const
 
 type
   PMFNominalRange = ^MFNominalRange;
-  _MFNominalRange           = DWord;
+  _MFNominalRange = UINT32;
   {$EXTERNALSYM _MFNominalRange}
   MFNominalRange = _MFNominalRange;
   {$EXTERNALSYM MFNominalRange}
@@ -958,38 +959,44 @@ type
 
 
   PMF_FILE_ACCESSMODE = ^MF_FILE_ACCESSMODE;
-  cwMF_FILE_ACCESSMODE    = (
+  __MIDL___MIDL_itf_mfobjects_0000_0017_0001 = (
 	  MF_ACCESSMODE_READ      = 1,
    	MF_ACCESSMODE_WRITE     = 2,
    	MF_ACCESSMODE_READWRITE = 3);
-  {$EXTERNALSYM cwMF_FILE_ACCESSMODE}
-  MF_FILE_ACCESSMODE = cwMF_FILE_ACCESSMODE;
+  {$EXTERNALSYM __MIDL___MIDL_itf_mfobjects_0000_0017_0001}
+  MF_FILE_ACCESSMODE = __MIDL___MIDL_itf_mfobjects_0000_0017_0001;
   {$EXTERNALSYM MF_FILE_ACCESSMODE}
 
 
   PMF_FILE_OPENMODE = ^MF_FILE_OPENMODE;
-  cwMF_OPENMODE_FAIL_IF_NOT_EXIST = (
+  __MIDL___MIDL_itf_mfobjects_0000_0017_0002 = (
     MF_OPENMODE_FAIL_IF_NOT_EXIST   = 0,
 	  MF_OPENMODE_FAIL_IF_EXIST       = 1,
 	  MF_OPENMODE_RESET_IF_EXIST      = 2,
 	  MF_OPENMODE_APPEND_IF_EXIST     = 3,
 	  MF_OPENMODE_DELETE_IF_EXIST     = 4);
-  {$EXTERNALSYM cwMF_OPENMODE_FAIL_IF_NOT_EXIST}
-  MF_FILE_OPENMODE = cwMF_OPENMODE_FAIL_IF_NOT_EXIST;
+  {$EXTERNALSYM __MIDL___MIDL_itf_mfobjects_0000_0017_0002}
+  MF_FILE_OPENMODE = __MIDL___MIDL_itf_mfobjects_0000_0017_0002;
   {$EXTERNALSYM MF_FILE_OPENMODE}
 
-
+type
   PMF_FILE_FLAGS = ^MF_FILE_FLAGS;
-  cwMF_FILE_FLAGS                     = (
-    MF_FILEFLAGS_NONE                 = 0,
-	  MF_FILEFLAGS_NOBUFFERING          = $1,
-    MF_FILEFLAGS_ALLOW_WRITE_SHARING  = $2);
-  {$EXTERNALSYM cwMF_FILE_FLAGS}
-  MF_FILE_FLAGS = cwMF_FILE_FLAGS;
+  __MIDL___MIDL_itf_mfobjects_0000_0017_0003 = DWord;
+  {$EXTERNALSYM __MIDL___MIDL_itf_mfobjects_0000_0017_0003}
+  MF_FILE_FLAGS = __MIDL___MIDL_itf_mfobjects_0000_0017_0003 ;
   {$EXTERNALSYM MF_FILE_FLAGS}
+const
+  MF_FILEFLAGS_NONE                 = MF_FILE_FLAGS(0);
+  {$EXTERNALSYM MF_FILEFLAGS_NONE}
+	MF_FILEFLAGS_NOBUFFERING          = MF_FILE_FLAGS($1);
+	{$EXTERNALSYM MF_FILEFLAGS_NOBUFFERING}
+  MF_FILEFLAGS_ALLOW_WRITE_SHARING  = MF_FILE_FLAGS($2);
+  {$EXTERNALSYM MF_FILEFLAGS_ALLOW_WRITE_SHARING}
 
 
 // >= Windows 7
+
+type
 
   PMF_Plugin_Type = ^MF_Plugin_Type;
   _MF_Plugin_Type            = (

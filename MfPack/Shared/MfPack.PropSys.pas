@@ -10,7 +10,7 @@
 // Language: ENU
 //
 // Revision Version: 2.6.4
-// Description: Requires Windows Vista or later.
+// Description:
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -21,12 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
+//                                #2 The Model
 //------------------------------------------------------------------------------
 //
-// Remarks: -
-// 
+// Remarks: Requires Windows Vista or later.
+//
 //
 // Related objects: -
 // Related projects: MfPackX264

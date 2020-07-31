@@ -21,8 +21,9 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
+//                                #2 The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8.1 or later.
@@ -424,17 +425,17 @@ type
   MfMediaEngineCreateflags = MF_MEDIA_ENGINE_CREATEFLAGS;
   {$EXTERNALSYM MfMediaEngineCreateflags}
 const
-  MF_MEDIA_ENGINE_AUDIOONLY             = MF_MEDIA_ENGINE_CREATEFLAGS($0001);
+  MF_MEDIA_ENGINE_AUDIOONLY             = MF_MEDIA_ENGINE_CREATEFLAGS($1);
   {$EXTERNALSYM MF_MEDIA_ENGINE_AUDIOONLY}
-  MF_MEDIA_ENGINE_WAITFORSTABLE_STATE   = MF_MEDIA_ENGINE_CREATEFLAGS($0002);
+  MF_MEDIA_ENGINE_WAITFORSTABLE_STATE   = MF_MEDIA_ENGINE_CREATEFLAGS($2);
   {$EXTERNALSYM MF_MEDIA_ENGINE_WAITFORSTABLE_STATE}
-  MF_MEDIA_ENGINE_FORCEMUTE             = MF_MEDIA_ENGINE_CREATEFLAGS($0004);
+  MF_MEDIA_ENGINE_FORCEMUTE             = MF_MEDIA_ENGINE_CREATEFLAGS($4);
   {$EXTERNALSYM MF_MEDIA_ENGINE_FORCEMUTE}
-  MF_MEDIA_ENGINE_REAL_TIME_MODE        = MF_MEDIA_ENGINE_CREATEFLAGS($0008);  // sets the default real time mode, can be changed later by calling IMFMediaEngineEx::SetRealTimeMode
+  MF_MEDIA_ENGINE_REAL_TIME_MODE        = MF_MEDIA_ENGINE_CREATEFLAGS($8);  // sets the default real time mode, can be changed later by calling IMFMediaEngineEx::SetRealTimeMode
   {$EXTERNALSYM MF_MEDIA_ENGINE_REAL_TIME_MODE}
-  MF_MEDIA_ENGINE_DISABLE_LOCAL_PLUGINS = MF_MEDIA_ENGINE_CREATEFLAGS($0010);
+  MF_MEDIA_ENGINE_DISABLE_LOCAL_PLUGINS = MF_MEDIA_ENGINE_CREATEFLAGS($10);
   {$EXTERNALSYM MF_MEDIA_ENGINE_DISABLE_LOCAL_PLUGINS}
-  MF_MEDIA_ENGINE_CREATEFLAGS_MASK      = MF_MEDIA_ENGINE_CREATEFLAGS($001F);
+  MF_MEDIA_ENGINE_CREATEFLAGS_MASK      = MF_MEDIA_ENGINE_CREATEFLAGS($1F); // Reserved, do not use.
   {$EXTERNALSYM MF_MEDIA_ENGINE_CREATEFLAGS_MASK}
 
 type
@@ -514,10 +515,10 @@ type
     function GetEnd(const index: DWORD;
                     out pEnd: Double): HResult; stdcall;
     // Extensions
-    function ContainsTime(const time: Double): BOOL; stdcall;
+    function ContainsTime(time: Double): BOOL; stdcall;
 
-    function AddRange(const startTime: Double;
-                      const endTime: Double): HResult; stdcall;
+    function AddRange(startTime: Double;
+                      endTime: Double): HResult; stdcall;
 
     function Clear(): HResult; stdcall;
 
@@ -1773,7 +1774,7 @@ type
     //              IUnknown(IMFMEdiaEngineEx).
     function CreateInstance(dwFlags: DWORD;
                             const pAttr: IMFAttributes;
-                            out ppPlayer: IUnknown): HResult; stdcall;
+                            out ppPlayer: IMFMediaEngine): HResult; stdcall;
 
     function CreateTimeRange(out ppTimeRange: IMFMediaTimeRange): HResult; stdcall;
 

@@ -21,8 +21,9 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
+//                                #2 The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: This unit is also included in Winapi/DsPack.DirectShow9.pas

@@ -21,8 +21,9 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 12/03/2020 Tony                Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 12/03/2020 Tony                Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
+//                                #2 The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.

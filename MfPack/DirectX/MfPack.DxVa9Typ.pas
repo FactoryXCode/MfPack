@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
 //                                #2 The Model
 //------------------------------------------------------------------------------
@@ -121,8 +121,11 @@ type
 
 const
   DXVAp_ModeMPEG2_A  : TGUID = '{1b81be0A-a0c7-11d3-b984-00c04f2e73c5}';
+  {$EXTERNALSYM DXVAp_ModeMPEG2_A}
   DXVAp_ModeMPEG2_C  : TGUID = '{1b81be0C-a0c7-11d3-b984-00c04f2e73c5}';
+  {$EXTERNALSYM DXVAp_ModeMPEG2_C}
   DXVAp_NoEncrypt    : TGUID = '{1b81beD0-a0c7-11d3-b984-00c04f2e73c5}';
+  {$EXTERNALSYM DXVAp_NoEncrypt}
 
 // #pragma pack(push, BeforeDXVApacking, 1)
 {$Z1}
@@ -371,9 +374,8 @@ type
   function DXVA_ExtractSampleFormat(_sf: DWORD): DWORD; inline;
   {$EXTERNALSYM DXVA_ExtractSampleFormat}
 
-
-  {$EXTERNALSYM DXVA_ExtractExtColorData}
   function DXVA_ExtractExtColorData(_sf: DWORD; _Mask: DWORD; _Shift: DWORD): DWORD; inline;
+  {$EXTERNALSYM DXVA_ExtractExtColorData}
 
   function DXVABitMask(__n: DWORD): DWORD; inline;
   {$EXTERNALSYM DXVABitMask}
@@ -477,25 +479,38 @@ type
   {$EXTERNALSYM DXVA_VideoChromaSubsampling}
 const
   DXVA_VideoChromaSubsamplingShift = (DXVA_ExtColorData_ShiftBase + 0);
+  {$EXTERNALSYM DXVA_VideoChromaSubsamplingShift}
   DXVA_VideoChromaSubsamplingMask = ((($FFFFFFFF shl 4) xor $FFFFFFFF) shl ord(DXVA_VideoChromaSubsamplingShift)); // DXVAColorMask(4, DXVA_VideoChromaSubsamplingShift),
+  {$EXTERNALSYM DXVA_VideoChromaSubsamplingMask}
 
   DXVA_VideoChromaSubsampling_Unknown                        = 0;
+  {$EXTERNALSYM DXVA_VideoChromaSubsampling_Unknown}
   DXVA_VideoChromaSubsampling_ProgressiveChroma              = $8;
+  {$EXTERNALSYM DXVA_VideoChromaSubsampling_ProgressiveChroma}
   DXVA_VideoChromaSubsampling_Horizontally_Cosited           = $4;
+  {$EXTERNALSYM DXVA_VideoChromaSubsampling_Horizontally_Cosited}
   DXVA_VideoChromaSubsampling_Vertically_Cosited             = $2;
+  {$EXTERNALSYM DXVA_VideoChromaSubsampling_Vertically_Cosited}
   DXVA_VideoChromaSubsampling_Vertically_AlignedChromaPlanes = $1;
+  {$EXTERNALSYM DXVA_VideoChromaSubsampling_Vertically_AlignedChromaPlanes}
+
   // 4:2:0 variations
   DXVA_VideoChromaSubsampling_MPEG2   = (DXVA_VideoChromaSubsampling_Horizontally_Cosited or
                                          DXVA_VideoChromaSubsampling_Vertically_AlignedChromaPlanes);
+  {$EXTERNALSYM DXVA_VideoChromaSubsampling_MPEG2}
 
   DXVA_VideoChromaSubsampling_MPEG1   = (DXVA_VideoChromaSubsampling_Vertically_AlignedChromaPlanes);
+  {$EXTERNALSYM DXVA_VideoChromaSubsampling_MPEG1}
 
   DXVA_VideoChromaSubsampling_DV_PAL  = (DXVA_VideoChromaSubsampling_Horizontally_Cosited or
                                          DXVA_VideoChromaSubsampling_Vertically_Cosited);
+  {$EXTERNALSYM DXVA_VideoChromaSubsampling_DV_PAL}
+
   // 4:4:4, 4:2:2, 4:1:1
   DXVA_VideoChromaSubsampling_Cosited = (DXVA_VideoChromaSubsampling_Horizontally_Cosited or
                                          DXVA_VideoChromaSubsampling_Vertically_Cosited or
                                          DXVA_VideoChromaSubsampling_Vertically_AlignedChromaPlanes);
+  {$EXTERNALSYM DXVA_VideoChromaSubsampling_Cosited}
 
 
 type
@@ -559,12 +574,19 @@ const
 type D3DFORMAT = DWORD;
 const
   D3DPOOL_DEFAULT                 = 0;
+  {$EXTERNALSYM D3DPOOL_DEFAULT}
   D3DPOOL_MANAGED                 = 1;
+  {$EXTERNALSYM D3DPOOL_MANAGED}
   D3DPOOL_SYSTEMMEM               = 2;
+  {$EXTERNALSYM D3DPOOL_SYSTEMMEM}
   D3DPOOL_SCRATCH                 = 3;
+  {$EXTERNALSYM D3DPOOL_SCRATCH}
   D3DPOOL_LOCALVIDMEM             = 4;
+  {$EXTERNALSYM D3DPOOL_LOCALVIDMEM}
   D3DPOOL_NONLOCALVIDMEM          = 5;
-  D3DPOOL_FORCE_DWORD             = $7fffffff;
+  {$EXTERNALSYM D3DPOOL_NONLOCALVIDMEM}
+  //D3DPOOL_FORCE_DWORD             = $7fffffff;
+
 
   // -------------------------------------------------------------------------
   // data structures shared by User mode and Kernel mode.
@@ -608,15 +630,25 @@ type
   {$EXTERNALSYM DXVA_VideoProcessCaps}
 const
   DXVA_VideoProcess_None               : _DXVA_VideoProcessCaps = $0000;
+  {$EXTERNALSYM DXVA_VideoProcess_None}
   DXVA_VideoProcess_YUV2RGB            : _DXVA_VideoProcessCaps = $0001;
+  {$EXTERNALSYM DXVA_VideoProcess_YUV2RGB}
   DXVA_VideoProcess_StretchX           : _DXVA_VideoProcessCaps = $0002;
+  {$EXTERNALSYM DXVA_VideoProcess_StretchX}
   DXVA_VideoProcess_StretchY           : _DXVA_VideoProcessCaps = $0004;
+  {$EXTERNALSYM DXVA_VideoProcess_StretchY}
   DXVA_VideoProcess_AlphaBlend         : _DXVA_VideoProcessCaps = $0008;
+  {$EXTERNALSYM DXVA_VideoProcess_AlphaBlend}
   DXVA_VideoProcess_SubRects           : _DXVA_VideoProcessCaps = $0010;
+  {$EXTERNALSYM DXVA_VideoProcess_SubRects}
   DXVA_VideoProcess_SubStreams         : _DXVA_VideoProcessCaps = $0020;
+  {$EXTERNALSYM DXVA_VideoProcess_SubStreams}
   DXVA_VideoProcess_SubStreamsExtended : _DXVA_VideoProcessCaps = $0040;
+  {$EXTERNALSYM DXVA_VideoProcess_SubStreamsExtended}
   DXVA_VideoProcess_YUV2RGBExtended    : _DXVA_VideoProcessCaps = $0080;
+  {$EXTERNALSYM DXVA_VideoProcess_YUV2RGBExtended}
   DXVA_VideoProcess_AlphaBlendExtended : _DXVA_VideoProcessCaps = $0100;
+  {$EXTERNALSYM DXVA_VideoProcess_AlphaBlendExtended}
 
 
 type
@@ -687,10 +719,15 @@ type
   {$EXTERNALSYM DXVA_SampleFlags}
 const
   DXVA_SampleFlagsMask              = (1 shl 3) or (1 shl 2) or (1 shl 1) or (1 shl 1); // DXVABit(3)|DXVABit(2)|DXVABit(1)|DXVABit(0)
+  {$EXTERNALSYM DXVA_SampleFlagsMask}
   DXVA_SampleFlag_Palette_Changed   = $0001;
+  {$EXTERNALSYM DXVA_SampleFlag_Palette_Changed}
   DXVA_SampleFlag_SrcRect_Changed   = $0002;
+  {$EXTERNALSYM DXVA_SampleFlag_SrcRect_Changed}
   DXVA_SampleFlag_DstRect_Changed   = $0004;
+  {$EXTERNALSYM DXVA_SampleFlag_DstRect_Changed}
   DXVA_SampleFlag_ColorData_Changed = $0008;
+  {$EXTERNALSYM DXVA_SampleFlag_ColorData_Changed}
 
 
 type
@@ -701,10 +738,15 @@ type
   {$EXTERNALSYM DXVA_DestinationFlags}
 const
   DXVA_DestinationFlagMask                = (1 shl 3) or (1 shl 2) or (1 shl 1) or (1 shl 1); // DXVABit(3)|DXVABit(2)|DXVABit(1)|DXVABit(0)
+  {$EXTERNALSYM DXVA_DestinationFlagMask}
   DXVA_DestinationFlag_Background_Changed = $0001;
+  {$EXTERNALSYM DXVA_DestinationFlag_Background_Changed}
   DXVA_DestinationFlag_TargetRect_Changed = $0002;
+  {$EXTERNALSYM DXVA_DestinationFlag_TargetRect_Changed}
   DXVA_DestinationFlag_ColorData_Changed  = $0004;
+  {$EXTERNALSYM DXVA_DestinationFlag_ColorData_Changed}
   DXVA_DestinationFlag_Alpha_Changed      = $0008;
+  {$EXTERNALSYM DXVA_DestinationFlag_Alpha_Changed}
 
 type
 
@@ -1105,9 +1147,13 @@ type
   {$EXTERNALSYM COPP_HDCP_Protection_Level}
 const
   COPP_HDCP_Level0     = COPP_HDCP_Protection_Level(0);
+  {$EXTERNALSYM COPP_HDCP_Level0}
   COPP_HDCP_LevelMin   = COPP_HDCP_Protection_Level(COPP_HDCP_Level0);
+  {$EXTERNALSYM COPP_HDCP_LevelMin}
   COPP_HDCP_Level1     = COPP_HDCP_Protection_Level(1);
+  {$EXTERNALSYM COPP_HDCP_Level1}
   COPP_HDCP_LevelMax   = COPP_HDCP_Protection_Level(COPP_HDCP_Level1);
+  {$EXTERNALSYM COPP_HDCP_LevelMax}
   //COPP_HDCP_ForceDWORD = $7FFFFFFF
 
 type
@@ -1118,13 +1164,21 @@ type
   {$EXTERNALSYM COPP_CGMSA_Protection_Level}
 const
   COPP_CGMSA_Disabled                      = COPP_CGMSA_Protection_Level(0);
+  {$EXTERNALSYM COPP_CGMSA_Disabled}
   COPP_CGMSA_LevelMin                      = COPP_CGMSA_Protection_Level(COPP_CGMSA_Disabled);
+  {$EXTERNALSYM COPP_CGMSA_LevelMin}
   COPP_CGMSA_CopyFreely                    = COPP_CGMSA_Protection_Level(1);
+  {$EXTERNALSYM COPP_CGMSA_CopyFreely}
   COPP_CGMSA_CopyNoMore                    = COPP_CGMSA_Protection_Level(2);
+  {$EXTERNALSYM COPP_CGMSA_CopyNoMore}
   COPP_CGMSA_CopyOneGeneration             = COPP_CGMSA_Protection_Level(3);
+  {$EXTERNALSYM COPP_CGMSA_CopyOneGeneration}
   COPP_CGMSA_CopyNever                     = COPP_CGMSA_Protection_Level(4);
+  {$EXTERNALSYM COPP_CGMSA_CopyNever}
   COPP_CGMSA_RedistributionControlRequired = COPP_CGMSA_Protection_Level($08);
+  {$EXTERNALSYM COPP_CGMSA_RedistributionControlRequired}
   COPP_CGMSA_LevelMax                      = COPP_CGMSA_Protection_Level(COPP_CGMSA_RedistributionControlRequired + COPP_CGMSA_CopyNever);
+  {$EXTERNALSYM COPP_CGMSA_LevelMax}
   //COPP_CGMSA_ForceDWORD                  = $7FFFFFFF;
 
 type
@@ -1135,11 +1189,17 @@ type
   {$EXTERNALSYM COPP_ACP_Protection_Level}
 const
   COPP_ACP_Level0     = COPP_ACP_Protection_Level(0);
+  {$EXTERNALSYM COPP_ACP_Level0}
   COPP_ACP_LevelMin   = COPP_ACP_Protection_Level(COPP_ACP_Level0);
+  {$EXTERNALSYM COPP_ACP_LevelMin}
   COPP_ACP_Level1     = COPP_ACP_Protection_Level(1);
+  {$EXTERNALSYM COPP_ACP_Level1}
   COPP_ACP_Level2     = COPP_ACP_Protection_Level(2);
+  {$EXTERNALSYM COPP_ACP_Level2}
   COPP_ACP_Level3     = COPP_ACP_Protection_Level(3);
+  {$EXTERNALSYM COPP_ACP_Level3}
   COPP_ACP_LevelMax   = COPP_ACP_Protection_Level(COPP_ACP_Level3);
+  {$EXTERNALSYM COPP_ACP_LevelMax}
   //COPP_ACP_ForceDWORD = $7FFFFFFF;
 
 
@@ -1154,15 +1214,23 @@ const
   //
 
   COPP_ProtectionType_Unknown      = $80000000;
+  {$EXTERNALSYM COPP_ProtectionType_Unknown}
   COPP_ProtectionType_None         = $00000000;
+  {$EXTERNALSYM COPP_ProtectionType_None}
   COPP_ProtectionType_HDCP         = $00000001;
+  {$EXTERNALSYM COPP_ProtectionType_HDCP}
   COPP_ProtectionType_ACP          = $00000002;
+  {$EXTERNALSYM COPP_ProtectionType_ACP}
   COPP_ProtectionType_CGMSA        = $00000004;
+  {$EXTERNALSYM COPP_ProtectionType_CGMSA}
   COPP_ProtectionType_Mask         = $80000007;
+  {$EXTERNALSYM COPP_ProtectionType_Mask}
   COPP_ProtectionType_Reserved     = $7FFFFFF8;
+  {$EXTERNALSYM COPP_ProtectionType_Reserved}
 
 
   DXVA_COPPSetSignaling : TGUID = '{09a631a5-d684-4c60-8e4d-d3bb0f0be3ee}';
+  {$EXTERNALSYM DXVA_COPPSetSignaling}
 
 type
 
@@ -1192,24 +1260,43 @@ type
   {$EXTERNALSYM COPP_TVProtectionStandard}
 const
   COPP_ProtectionStandard_Unknown             = COPP_TVProtectionStandard($80000000);
+  {$EXTERNALSYM COPP_ProtectionStandard_Unknown}
   COPP_ProtectionStandard_None                = COPP_TVProtectionStandard($00000000);
+  {$EXTERNALSYM COPP_ProtectionStandard_None}
   COPP_ProtectionStandard_IEC61880_525i       = COPP_TVProtectionStandard($00000001);
+  {$EXTERNALSYM COPP_ProtectionStandard_IEC61880_525i}
   COPP_ProtectionStandard_IEC61880_2_525i     = COPP_TVProtectionStandard($00000002);
+  {$EXTERNALSYM COPP_ProtectionStandard_IEC61880_2_525i}
   COPP_ProtectionStandard_IEC62375_625p       = COPP_TVProtectionStandard($00000004);
+  {$EXTERNALSYM COPP_ProtectionStandard_IEC62375_625p}
   COPP_ProtectionStandard_EIA608B_525         = COPP_TVProtectionStandard($00000008);
+  {$EXTERNALSYM COPP_ProtectionStandard_EIA608B_525}
   COPP_ProtectionStandard_EN300294_625i       = COPP_TVProtectionStandard($00000010);
+  {$EXTERNALSYM COPP_ProtectionStandard_EN300294_625i}
   COPP_ProtectionStandard_CEA805A_TypeA_525p  = COPP_TVProtectionStandard($00000020);
+  {$EXTERNALSYM COPP_ProtectionStandard_CEA805A_TypeA_525p}
   COPP_ProtectionStandard_CEA805A_TypeA_750p  = COPP_TVProtectionStandard($00000040);
+  {$EXTERNALSYM COPP_ProtectionStandard_CEA805A_TypeA_750p}
   COPP_ProtectionStandard_CEA805A_TypeA_1125i = COPP_TVProtectionStandard($00000080);
+  {$EXTERNALSYM COPP_ProtectionStandard_CEA805A_TypeA_1125i}
   COPP_ProtectionStandard_CEA805A_TypeB_525p  = COPP_TVProtectionStandard($00000100);
+  {$EXTERNALSYM COPP_ProtectionStandard_CEA805A_TypeB_525p}
   COPP_ProtectionStandard_CEA805A_TypeB_750p  = COPP_TVProtectionStandard($00000200);
+  {$EXTERNALSYM COPP_ProtectionStandard_CEA805A_TypeB_750p}
   COPP_ProtectionStandard_CEA805A_TypeB_1125i = COPP_TVProtectionStandard($00000400);
+  {$EXTERNALSYM COPP_ProtectionStandard_CEA805A_TypeB_1125i}
   COPP_ProtectionStandard_ARIBTRB15_525i      = COPP_TVProtectionStandard($00000800);
+  {$EXTERNALSYM COPP_ProtectionStandard_ARIBTRB15_525i}
   COPP_ProtectionStandard_ARIBTRB15_525p      = COPP_TVProtectionStandard($00001000);
+  {$EXTERNALSYM COPP_ProtectionStandard_ARIBTRB15_525p}
   COPP_ProtectionStandard_ARIBTRB15_750p      = COPP_TVProtectionStandard($00002000);
+  {$EXTERNALSYM COPP_ProtectionStandard_ARIBTRB15_750p}
   COPP_ProtectionStandard_ARIBTRB15_1125i     = COPP_TVProtectionStandard($00004000);
+  {$EXTERNALSYM COPP_ProtectionStandard_ARIBTRB15_1125i}
   COPP_ProtectionStandard_Mask                = COPP_TVProtectionStandard($80007FFF);
+  {$EXTERNALSYM COPP_ProtectionStandard_Mask}
   COPP_ProtectionStandard_Reserved            = COPP_TVProtectionStandard($7FFF8000);
+  {$EXTERNALSYM COPP_ProtectionStandard_Reserved}
 
 
 const
@@ -1225,13 +1312,21 @@ type
   {$EXTERNALSYM COPP_ImageAspectRatio_EN300294}
 const
   COPP_AspectRatio_EN300294_FullFormat4by3                = COPP_ImageAspectRatio_EN300294(0);
+  {$EXTERNALSYM COPP_AspectRatio_EN300294_FullFormat4by3}
   COPP_AspectRatio_EN300294_Box14by9Center                = COPP_ImageAspectRatio_EN300294(1);
+  {$EXTERNALSYM COPP_AspectRatio_EN300294_Box14by9Center}
   COPP_AspectRatio_EN300294_Box14by9Top                   = COPP_ImageAspectRatio_EN300294(2);
+  {$EXTERNALSYM COPP_AspectRatio_EN300294_Box14by9Top}
   COPP_AspectRatio_EN300294_Box16by9Center                = COPP_ImageAspectRatio_EN300294(3);
+  {$EXTERNALSYM COPP_AspectRatio_EN300294_Box16by9Center}
   COPP_AspectRatio_EN300294_Box16by9Top                   = COPP_ImageAspectRatio_EN300294(4);
+  {$EXTERNALSYM COPP_AspectRatio_EN300294_Box16by9Top}
   COPP_AspectRatio_EN300294_BoxGT16by9Center              = COPP_ImageAspectRatio_EN300294(5);
+  {$EXTERNALSYM COPP_AspectRatio_EN300294_BoxGT16by9Center}
   COPP_AspectRatio_EN300294_FullFormat4by3ProtectedCenter = COPP_ImageAspectRatio_EN300294(6);
+  {$EXTERNALSYM COPP_AspectRatio_EN300294_FullFormat4by3ProtectedCenter}
   COPP_AspectRatio_EN300294_FullFormat16by9Anamorphic     = COPP_ImageAspectRatio_EN300294(7);
+  {$EXTERNALSYM COPP_AspectRatio_EN300294_FullFormat16by9Anamorphic}
   //COPP_AspectRatio_ForceDWORD                             = $7FFFFFFF
 
 

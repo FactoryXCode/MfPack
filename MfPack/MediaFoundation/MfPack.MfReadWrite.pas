@@ -21,8 +21,9 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
+//                                #2 The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later (See: Remarks).
@@ -121,13 +122,13 @@ const
 
   MF_SOURCE_READER_INVALID_STREAM_INDEX  = MAXDW; // $ffffffff;
   {$EXTERNALSYM MF_SOURCE_READER_INVALID_STREAM_INDEX}
-  MF_SOURCE_READER_ALL_STREAMS           = $fffffffe;
+  MF_SOURCE_READER_ALL_STREAMS           = DWord($fffffffe);
   {$EXTERNALSYM MF_SOURCE_READER_ALL_STREAMS}
-  MF_SOURCE_READER_ANY_STREAM            = $fffffffe;
+  MF_SOURCE_READER_ANY_STREAM            = DWord($fffffffe);
   {$EXTERNALSYM MF_SOURCE_READER_ANY_STREAM}
-  MF_SOURCE_READER_FIRST_AUDIO_STREAM    = $fffffffd;
+  MF_SOURCE_READER_FIRST_AUDIO_STREAM    = DWord($fffffffd);
   {$EXTERNALSYM MF_SOURCE_READER_FIRST_AUDIO_STREAM}
-  MF_SOURCE_READER_FIRST_VIDEO_STREAM    = $fffffffc;
+  MF_SOURCE_READER_FIRST_VIDEO_STREAM    = DWord($fffffffc);
   {$EXTERNALSYM MF_SOURCE_READER_FIRST_VIDEO_STREAM}
   MF_SOURCE_READER_MEDIASOURCE           = MAXDW; // $ffffffff;
   {$EXTERNALSYM MF_SOURCE_READER_MEDIASOURCE}
@@ -148,7 +149,7 @@ const
 
   MF_SINK_WRITER_INVALID_STREAM_INDEX  = MAXDW; // 0xffffffff
   {$EXTERNALSYM MF_SINK_WRITER_INVALID_STREAM_INDEX}
-  MF_SINK_WRITER_ALL_STREAMS           = $fffffffe;
+  MF_SINK_WRITER_ALL_STREAMS           = DWord($fffffffe);
   {$EXTERNALSYM MF_SINK_WRITER_ALL_STREAMS}
   MF_SINK_WRITER_MEDIASINK             = MAXDW; // 0xffffffff
   {$EXTERNALSYM MF_SINK_WRITER_MEDIASINK}
@@ -180,57 +181,58 @@ const
 
 
 type
-
   PMF_SOURCE_READER_FLAG = ^MF_SOURCE_READER_FLAG;
-  MF_SOURCE_READER_FLAG                     = (
-
-    // Specifies that an error has occurred while processing sample
-    // requests.  If this is set, then no other calls should be made
-    // on the source reader besides shutting it down.
-    MF_SOURCE_READERF_ERROR                   = $00000001,
-    {$EXTERNALSYM MF_SOURCE_READERF_ERROR}
-
-    // Specifies that the stream has ended.
-    MF_SOURCE_READERF_ENDOFSTREAM             = $00000002,
-    {$EXTERNALSYM MF_SOURCE_READERF_ENDOFSTREAM}
-
-    // Specifies that one or more new streams have been created.
-    // The application can modify stream selection and configure
-    // output media types for the new streams.
-    MF_SOURCE_READERF_NEWSTREAM               = $00000004,
-    {$EXTERNALSYM MF_SOURCE_READERF_NEWSTREAM}
-
-    // Specifies that the native media type for the stream has changed.
-    MF_SOURCE_READERF_NATIVEMEDIATYPECHANGED  = $00000010,
-    {$EXTERNALSYM MF_SOURCE_READERF_NATIVEMEDIATYPECHANGED}
-
-    // Specifies that the current media type for the stream has changed.
-    MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED = $00000020,
-    {$EXTERNALSYM MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED}
-
-    // Specifies that there is a gap in the stream.
-    MF_SOURCE_READERF_STREAMTICK              = $00000100,
-    {$EXTERNALSYM MF_SOURCE_READERF_STREAMTICK}
-
-    // Indicates that all transforms inserted by the application have been
-    // removed for a particular stream. This could be due to a dynamic format
-    // change from a source or decoder that prevents custom transforms from
-    // being used because they cannot handle the new media type.
-    MF_SOURCE_READERF_ALLEFFECTSREMOVED       = $00000200
-    {$EXTERNALSYM MF_SOURCE_READERF_ALLEFFECTSREMOVED}
-  );
+  MF_SOURCE_READER_FLAG = DWord;
   {$EXTERNALSYM MF_SOURCE_READER_FLAG}
+const
+  // Specifies that an error has occurred while processing sample
+  // requests.  If this is set, then no other calls should be made
+  // on the source reader besides shutting it down.
+  MF_SOURCE_READERF_ERROR           = MF_SOURCE_READER_FLAG($00000001);
+  {$EXTERNALSYM MF_SOURCE_READERF_ERROR}
 
+  // Specifies that the stream has ended.
+  MF_SOURCE_READERF_ENDOFSTREAM       = MF_SOURCE_READER_FLAG($00000002);
+  {$EXTERNALSYM MF_SOURCE_READERF_ENDOFSTREAM}
 
+  // Specifies that one or more new streams have been created.
+  // The application can modify stream selection and configure
+  // output media types for the new streams.
+  MF_SOURCE_READERF_NEWSTREAM         = MF_SOURCE_READER_FLAG($00000004);
+  {$EXTERNALSYM MF_SOURCE_READERF_NEWSTREAM}
+
+  // Specifies that the native media type for the stream has changed.
+  MF_SOURCE_READERF_NATIVEMEDIATYPECHANGED  = MF_SOURCE_READER_FLAG($00000010);
+  {$EXTERNALSYM MF_SOURCE_READERF_NATIVEMEDIATYPECHANGED}
+
+  // Specifies that the current media type for the stream has changed.
+  MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED = MF_SOURCE_READER_FLAG($00000020);
+  {$EXTERNALSYM MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED}
+
+  // Specifies that there is a gap in the stream.
+  MF_SOURCE_READERF_STREAMTICK        = MF_SOURCE_READER_FLAG($00000100);
+  {$EXTERNALSYM MF_SOURCE_READERF_STREAMTICK}
+
+  // Indicates that all transforms inserted by the application have been
+  // removed for a particular stream. This could be due to a dynamic format
+  // change from a source or decoder that prevents custom transforms from
+  // being used because they cannot handle the new media type.
+  MF_SOURCE_READERF_ALLEFFECTSREMOVED     = MF_SOURCE_READER_FLAG($00000200);
+  {$EXTERNALSYM MF_SOURCE_READERF_ALLEFFECTSREMOVED}
+
+type
   PMF_SOURCE_READER_CONTROL_FLAG = ^cwMF_SOURCE_READER_CONTROL_FLAG;
-  cwMF_SOURCE_READER_CONTROL_FLAG   = (
-    MF_SOURCE_READER_CONTROLF_DRAIN = $00000001
-  );
+  cwMF_SOURCE_READER_CONTROL_FLAG   = DWord;
   {$EXTERNALSYM cwMF_SOURCE_READER_CONTROL_FLAG}
   MF_SOURCE_READER_CONTROL_FLAG = cwMF_SOURCE_READER_CONTROL_FLAG;
   {$EXTERNALSYM MF_SOURCE_READER_CONTROL_FLAG}
+const
+  MF_SOURCE_READER_CONTROLF_DRAIN = MF_SOURCE_READER_CONTROL_FLAG($00000001);
+  {$EXTERNALSYM MF_SOURCE_READER_CONTROLF_DRAIN}
+
   //DEFINE_ENUM_FLAG_OPERATORS(MF_SOURCE_READER_CONTROL_FLAG)
 
+type
 
   PMF_SINK_WRITER_STATISTICS = ^MF_SINK_WRITER_STATISTICS;
   _MF_SINK_WRITER_STATISTICS = record

@@ -21,15 +21,16 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
+//                                #2 The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: Delphi : The IUnknown entries of functions should be casted like this:
 //          IUnknown(Pointer), IUnknown(Object), IUnknown(Nil) etc.
 // 
 // Related objects: -
-// Related projects: MfPackX263
+// Related projects: MfPackX264
 // Known Issues: -
 //
 // Compiler version: 23 up to 33

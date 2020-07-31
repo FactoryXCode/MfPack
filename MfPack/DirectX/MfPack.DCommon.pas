@@ -22,6 +22,8 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 April 2020 update, version 20H1)
+//                                #1 Autobahn
+//                                #2 The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows 7 or later.
