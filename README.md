@@ -87,15 +87,6 @@ SDK version: 10.0.19041.0, May 2020 OS update (2004)
 
 
 
-
-**Simple Player**
-
-*This sample app demonstrates audio/video playback using the IMFPMediaPlayer API.*
-*Note: This API is deprecated, however, still functional up to Windows version May 2020 update.*
-
-
-
-
 **MfPlayer**
 
 *Player samples, based on the CPlayer sample.*
