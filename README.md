@@ -90,8 +90,8 @@ SDK version: 10.0.19041.0, May 2020 OS update (2004)
 
 **Simple Player**
 
-This sample app demonstrates audio/video playback using the IMFPMediaPlayer API.
-Note: This API is deprecated, however, still functional up to Windows version May 2020 update.
+*This sample app demonstrates audio/video playback using the IMFPMediaPlayer API.*
+*Note: This API is deprecated, however, still functional up to Windows version May 2020 update.*
 
 
 
@@ -107,7 +107,7 @@ Note: This API is deprecated, however, still functional up to Windows version Ma
 - *MfPlayer II : The extended version I sample.*
 
 - *MfPlayer X : This is an example that shows how to use the IMFTimer, language tags,*  
-                *subtitles (SubRip and MicroDvd), RegEx (Regular Expressions) and how to get media properties.*
+               *subtitles (SubRip and MicroDvd), RegEx (Regular Expressions) and how to get media properties.*
 
 
 
@@ -125,6 +125,11 @@ Note: This API is deprecated, however, still functional up to Windows version Ma
   
 ![](https://dc622.4shared.com/img/0MridAEjiq/s24/17320862100/DuckingMediaPlayer?async&rand=0.11134263709146652)
 
+
+**Simple Player**
+
+*Demonstrates audio/video playback using the IMFPMediaPlayer and IMFPMediaPlayerCallback API.*
+*Note: This API is deprecated, but still functional in the latest Windows version.*
 
 
 **© FactoryX. All rights reserved.***
