@@ -4,6 +4,7 @@
 //
 // Project: MfPack - MediaFoundation
 // Project location: https://sourceforge.net/projects/MfPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfPack.MfApi.pas
 // Kind: Pascal / Delphi unit
 // Release date: 27-06-2012
@@ -2273,9 +2274,9 @@ const
   // The MFT is optimized for transcoding and should not be used for playback.
   // Requires >= Windows 7.
   //
-  function MFTRegister(const clsidMFT: CLSID;  // The CLSID of the MFT. The MFT must also be registered as a COM object using the same CLSID.
-                       const guidCategory: TGuid; // GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY .
-                       const pszName: LPCWSTR;  // Wide-character string that contains the friendly name of the MFT.
+  function MFTRegister(clsidMFT: CLSID;  // The CLSID of the MFT. The MFT must also be registered as a COM object using the same CLSID.
+                       guidCategory: TGuid; // GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY .
+                       pszName: LPCWSTR;  // Wide-character string that contains the friendly name of the MFT.
                        Flags: UINT32;  // Bitwise OR of zero or more of the following flags from the MFT_ENUM_FLAG enumeration.
                        const cInputTypes: UINT32;  // Number of elements in the pInputTypes array.
                        const pInputTypes: PMFT_REGISTER_TYPE_INFO; // Pointer to an array of MFT_REGISTER_TYPE_INFO structures. Each member of the array specifies an input format that the MFT supports. This parameter can be Nil.
@@ -2292,8 +2293,8 @@ const
   // Registers a Media Foundation transform (MFT) in the caller's process.
 
   function MFTRegisterLocal(pClassFactory: IClassFactory; // A pointer to the IClassFactory interface of a class factory object. The class factory creates the MFT.
-                            const guidCategory: REFGUID; // A GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY.
-                            const pszName: LPCWSTR; // A wide-character null-terminated string that contains the friendly name of the MFT.
+                            guidCategory: REFGUID; // A GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY.
+                            pszName: LPCWSTR; // A wide-character null-terminated string that contains the friendly name of the MFT.
                             Flags: UINT32; // A bitwise OR of zero or more flags from the MFT_ENUM_FLAG enumeration.
                             const cInputTypes: UINT32; // The number of elements in the pInputTypes array.
                             const pInputTypes: PMFT_REGISTER_TYPE_INFO; // A pointer to an array of MFT_REGISTER_TYPE_INFO structures. Each member of the array specifies an input format that the MFT supports. This parameter can be Nil if cInputTypes is zero.
@@ -2309,9 +2310,9 @@ const
 
 
   // Register an MFT class in-process, by CLSID
-  function MFTRegisterLocalByCLSID(const clisdMFT: REFCLSID; // The class identifier (CLSID) of the MFT.
-                                   const guidCategory: REFGUID; // A GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY.
-                                   const pszName: LPCWSTR;  // A wide-character null-terminated string that contains the friendly name of the MFT.
+  function MFTRegisterLocalByCLSID(clisdMFT: REFCLSID; // The class identifier (CLSID) of the MFT.
+                                   guidCategory: REFGUID; // A GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY.
+                                   pszName: LPCWSTR;  // A wide-character null-terminated string that contains the friendly name of the MFT.
                                    Flags: UINT32; // A bitwise OR of zero or more flags from the MFT_ENUM_FLAG enumeration.
                                    const cInputTypes: UINT32; // The number of elements in the pInputTypes array.
                                    const pInputTypes: PMFT_REGISTER_TYPE_INFO; // A pointer to an array of MFT_REGISTER_TYPE_INFO structures.
