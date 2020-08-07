@@ -4,6 +4,7 @@
 //
 // Project: MfPack - D2D1
 // Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfPack.D2D1.pas
 // Kind: Pascal / Delphi unit
 // Release date: 30-04-2019
@@ -24,8 +25,9 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
+//                                #2 The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -86,6 +88,12 @@ uses
 
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
+
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
 
   {$I 'MfPack.inc'}
 
@@ -159,22 +167,19 @@ const
 type
   // Enum which describes how to sample from a source outside its base tile.
   PD2D1_EXTEND_MODE = ^D2D1_EXTEND_MODE;
-  D2D1_EXTEND_MODE = DWord;
+  D2D1_EXTEND_MODE = (
+    // Extend the edges of the source out by clamping sample points outside the source
+    // to the edges.
+    D2D1_EXTEND_MODE_CLAMP       = DWord(0),
+    // The base tile is drawn untransformed and the remainder are filled by repeating
+    // the base tile.
+    D2D1_EXTEND_MODE_WRAP        = DWord(1),
+    // The same as wrap, but alternate tiles are flipped  The base tile is drawn
+    // untransformed.
+    D2D1_EXTEND_MODE_MIRROR      = DWord(2)
+    //D2D1_EXTEND_MODE_FORCE_DWORD = FORCEDWORD
+  );
   {$EXTERNALSYM D2D1_EXTEND_MODE}
-const
-  // Extend the edges of the source out by clamping sample points outside the source
-  // to the edges.
-  D2D1_EXTEND_MODE_CLAMP       = D2D1_EXTEND_MODE(0);
-  {$EXTERNALSYM D2D1_EXTEND_MODE_CLAMP}
-  // The base tile is drawn untransformed and the remainder are filled by repeating
-  // the base tile.
-  D2D1_EXTEND_MODE_WRAP        = D2D1_EXTEND_MODE(1);
-  {$EXTERNALSYM D2D1_EXTEND_MODE_WRAP}
-  // The same as wrap, but alternate tiles are flipped  The base tile is drawn
-  // untransformed.
-  D2D1_EXTEND_MODE_MIRROR      = D2D1_EXTEND_MODE(2);
-  {$EXTERNALSYM D2D1_EXTEND_MODE_MIRROR}
-  //D2D1_EXTEND_MODE_FORCE_DWORD = FORCEDWORD;
 
 type
   // Enum which describes the manner in which we render edges of non-text primitives.
@@ -440,14 +445,13 @@ type
   // Specifies how the intersecting areas of geometries or figures are combined to
   // form the area of the composite geometry.
   PD2D1_FILL_MODE = ^D2D1_FILL_MODE;
-  D2D1_FILL_MODE = DWord;
+  D2D1_FILL_MODE = (
+    D2D1_FILL_MODE_ALTERNATE   = DWord(0),
+    D2D1_FILL_MODE_WINDING     = DWord(1)
+    //D2D1_FILL_MODE_FORCE_DWORD = FORCEDWORD
+  );
   {$EXTERNALSYM D2D1_FILL_MODE}
-const
-  {$EXTERNALSYM D2D1_FILL_MODE_ALTERNATE}
-  D2D1_FILL_MODE_ALTERNATE   = D2D1_FILL_MODE(0);
-  {$EXTERNALSYM D2D1_FILL_MODE_WINDING}
-  D2D1_FILL_MODE_WINDING     = D2D1_FILL_MODE(1);
-  //D2D1_FILL_MODE_FORCE_DWORD = FORCEDWORD;
+
 
 type
   // Specified options that can be applied when a layer resource is applied to create
@@ -456,7 +460,7 @@ type
   D2D1_LAYER_OPTIONS = DWord;
   {$EXTERNALSYM D2D1_LAYER_OPTIONS}
 const
-  D2D1_LAYER_OPTIONS_NONE                     = D2D1_LAYER_OPTIONS($00000000);
+  D2D1_LAYER_OPTIONS_NONE = D2D1_LAYER_OPTIONS($00000000);
   {$EXTERNALSYM D2D1_LAYER_OPTIONS_NONE}
   // The layer will render correctly for ClearType text. If the render target was set
   // to ClearType previously, the layer will continue to render ClearType. If the
@@ -954,7 +958,8 @@ type
     procedure GetPixelFormat(out pixelFormat: D2D1_PIXEL_FORMAT); stdcall;
 
     // Return the DPI of the bitmap.
-    procedure GetDpi(out dpiX, dpiY: FLOAT); stdcall;
+    procedure GetDpi(out dpiX;
+                     out dpiY: FLOAT); stdcall;
 
     function CopyFromBitmap(var destPoint: D2D1_POINT_2U;
                             const bitmap: ID2D1Bitmap;
@@ -1053,6 +1058,7 @@ type
     function GetInterpolationMode(): D2D1_BITMAP_INTERPOLATION_MODE; stdcall;
 
     procedure GetBitmap(out bitmap: ID2D1Bitmap); stdcall;
+
   end;
   IID_ID2D1BitmapBrush = ID2D1BitmapBrush;
   {$EXTERNALSYM IID_ID2D1BitmapBrush}

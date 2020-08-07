@@ -4,6 +4,7 @@
 //
 // Project: MFPack - D2D1
 // Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfPack.D2D1Helper.pas
 // Kind: Pascal / Delphi unit
 // Release date: 29-03-2019
@@ -21,8 +22,9 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
+//                                #2 The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: Because Delphi does not accept complex types (like functions) as default values,

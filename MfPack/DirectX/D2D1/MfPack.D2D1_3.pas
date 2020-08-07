@@ -4,6 +4,7 @@
 //
 // Project: MfPack - D2D1
 // Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfPack.D2D1_3.pas
 // Kind: Pascal / Delphi unit
 // Release date: 30-04-2019
@@ -21,8 +22,9 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
+//                                #2 The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -740,7 +742,7 @@ type
 
     // Adds sprites to the end of the sprite batch.
     function AddSprites(spriteCount: UINT32;
-                        destinationRectangles: D2D1_RECT_F;  // pointer to array of rectangles
+                        destinationRectangles: D2D1_RECT_F;   // pointer to array of rectangles
                         sourceRectangles: PD2D1_RECT_U = Nil; // pointer to array of rectangles
                         colors: PD2D1_COLOR_F = Nil;          // pointer to array of colors
                         transforms: PD2D1_MATRIX_3X2_F = Nil; // pointer to array of transforms
@@ -878,10 +880,10 @@ type
     // used as the 'context-fill'. The opacity of the brush is used as the
     // 'context-fill-opacity' value.
 
-    // <param name="brush">A null brush will cause the context-fill value to come from
-    // the defaultFillBrush. If the defaultFillBrush is also null, the context-fill
+    // <param name="brush">A nil brush will cause the context-fill value to come from
+    // the defaultFillBrush. If the defaultFillBrush is also nil, the context-fill
     // value will be 'none'.</param>
-    function SetFill({in_opt} brush: PID2D1Brush): HResult; stdcall;
+    function SetFill({in_opt} brush: ID2D1Brush): HResult; stdcall;
 
     // Returns the requested fill parameters.
     procedure GetFill(out brush: ID2D1Brush); stdcall;

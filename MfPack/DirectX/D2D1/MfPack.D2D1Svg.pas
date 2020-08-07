@@ -4,6 +4,7 @@
 //
 // Project: MFPack - D2D1
 // Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfPack.D2D1Svg.pas
 // Kind: Pascal / Delphi unit
 // Release date: 30-04-2019
@@ -22,8 +23,9 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
+//                                #2 The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -78,6 +80,12 @@ uses
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
+
   {$I 'MfPack.inc'}
 
 
@@ -119,91 +127,84 @@ const
 type
   // Specifies the units for an SVG length.
   PD2D1_SVG_LENGTH_UNITS = ^D2D1_SVG_LENGTH_UNITS;
-  D2D1_SVG_LENGTH_UNITS = DWord;
-  {$EXTERNALSYM D2D1_SVG_LENGTH_UNITS}
-const
-  // The length is unitless.
-  D2D1_SVG_LENGTH_UNITS_NUMBER    = D2D1_SVG_LENGTH_UNITS(0);
-  {$EXTERNALSYM D2D1_SVG_LENGTH_UNITS_NUMBER}
-  // The length is a percentage value.
-  D2D1_SVG_LENGTH_UNITS_PERCENTAGE  = D2D1_SVG_LENGTH_UNITS(1);
-  {$EXTERNALSYM D2D1_SVG_LENGTH_UNITS_PERCENTAGE}
-  //D2D1_SVG_LENGTH_UNITS_FORCE_DWORD = FORCEDWORD;
+  D2D1_SVG_LENGTH_UNITS = (
+    // The length is unitless.
+    D2D1_SVG_LENGTH_UNITS_NUMBER      = DWord(0),
+    // The length is a percentage value.
+    D2D1_SVG_LENGTH_UNITS_PERCENTAGE  = DWord(1)
+   // D2D1_SVG_LENGTH_UNITS_FORCE_DWORD = FORCEDWORD
+  );
 
 type
   // Specifies a value for the SVG display property.
   PD2D1_SVG_DISPLAY = ^D2D1_SVG_DISPLAY;
-  D2D1_SVG_DISPLAY = DWord;
+  D2D1_SVG_DISPLAY = (
+    // The element uses the default display behavior.
+    D2D1_SVG_DISPLAY_INLINE      = DWord(0),
+    // The element and all children are not rendered directly.
+    D2D1_SVG_DISPLAY_NONE        = DWord(1)
+    //D2D1_SVG_DISPLAY_FORCE_DWORD = FORCEDWORD
+ );
   {$EXTERNALSYM D2D1_SVG_DISPLAY}
-const
-  // The element uses the default display behavior.
-  D2D1_SVG_DISPLAY_INLINE    = D2D1_SVG_DISPLAY(0);
-  // The element and all children are not rendered directly.
-  D2D1_SVG_DISPLAY_NONE    = D2D1_SVG_DISPLAY(1);
-  //D2D1_SVG_DISPLAY_FORCE_DWORD = FORCEDWORD;
 
 type
   // Specifies a value for the SVG visibility property.
   PD2D1_SVG_VISIBILITY = ^D2D1_SVG_VISIBILITY;
-  D2D1_SVG_VISIBILITY = DWord;
+  D2D1_SVG_VISIBILITY = (
+    // The element is visible.
+    D2D1_SVG_VISIBILITY_VISIBLE     = DWord(0),
+    // The element is invisible.
+    D2D1_SVG_VISIBILITY_HIDDEN      = DWord(1)
+    //D2D1_SVG_VISIBILITY_FORCE_DWORD = FORCEDWORD
+  );
   {$EXTERNALSYM D2D1_SVG_VISIBILITY}
-const
-  // The element is visible.
-  D2D1_SVG_VISIBILITY_VISIBLE   = D2D1_SVG_VISIBILITY(0);
-  {$EXTERNALSYM D2D1_SVG_VISIBILITY_VISIBLE}
-  // The element is invisible.
-  D2D1_SVG_VISIBILITY_HIDDEN    = D2D1_SVG_VISIBILITY(1);
-  {$EXTERNALSYM D2D1_SVG_VISIBILITY_HIDDEN}
-  //D2D1_SVG_VISIBILITY_FORCE_DWORD = FORCEDWORD;
+
 
 type
   // Specifies a value for the SVG overflow property.
   PD2D1_SVG_OVERFLOW = ^D2D1_SVG_OVERFLOW;
-  D2D1_SVG_OVERFLOW = DWord;
+  D2D1_SVG_OVERFLOW = (
+    // The element is not clipped to its viewport.
+    D2D1_SVG_OVERFLOW_VISIBLE   = DWord(0),
+    // The element is clipped to its viewport.
+    D2D1_SVG_OVERFLOW_HIDDEN    = DWord(1)
+    //D2D1_SVG_OVERFLOW_FORCE_DWORD = FORCEDWORD
+  );
   {$EXTERNALSYM D2D1_SVG_OVERFLOW}
-const
-  // The element is not clipped to its viewport.
-  D2D1_SVG_OVERFLOW_VISIBLE   = D2D1_SVG_OVERFLOW(0);
-  {$EXTERNALSYM D2D1_SVG_OVERFLOW_VISIBLE}
-  // The element is clipped to its viewport.
-  D2D1_SVG_OVERFLOW_HIDDEN    = D2D1_SVG_OVERFLOW(1);
-  {$EXTERNALSYM D2D1_SVG_OVERFLOW_HIDDEN}
-  //D2D1_SVG_OVERFLOW_FORCE_DWORD = FORCEDWORD;
+
 
 type
   // Specifies a value for the SVG stroke-linecap property.
   PD2D1_SVG_LINE_CAP = ^D2D1_SVG_LINE_CAP;
-  D2D1_SVG_LINE_CAP = DWord;
+  D2D1_SVG_LINE_CAP = (
+    // The property is set to SVG's 'butt' value.
+    D2D1_SVG_LINE_CAP_BUTT    = D2D1_CAP_STYLE_FLAT,
+    // The property is set to SVG's 'square' value.
+    D2D1_SVG_LINE_CAP_SQUARE   = D2D1_CAP_STYLE_SQUARE,
+    // The property is set to SVG's 'round' value.
+    D2D1_SVG_LINE_CAP_ROUND    = D2D1_CAP_STYLE_ROUND
+    //D2D1_SVG_LINE_CAP_FORCE_DWORD = FORCEDWORD
+  );
   {$EXTERNALSYM D2D1_SVG_LINE_CAP}
-const
-  // The property is set to SVG's 'butt' value.
-  D2D1_SVG_LINE_CAP_BUTT    = D2D1_CAP_STYLE_FLAT;
-  {$EXTERNALSYM D2D1_SVG_LINE_CAP_BUTT}
-  // The property is set to SVG's 'square' value.
-  D2D1_SVG_LINE_CAP_SQUARE   = D2D1_CAP_STYLE_SQUARE;
-  {$EXTERNALSYM D2D1_SVG_LINE_CAP_SQUARE}
-  // The property is set to SVG's 'round' value.
-  D2D1_SVG_LINE_CAP_ROUND    = D2D1_CAP_STYLE_ROUND;
-  {$EXTERNALSYM D2D1_SVG_LINE_CAP_ROUND}
-  //D2D1_SVG_LINE_CAP_FORCE_DWORD = FORCEDWORD;
+
 
 type
   // Specifies a value for the SVG stroke-linejoin property.
   PD2D1_SVG_LINE_JOIN = ^D2D1_SVG_LINE_JOIN;
-  D2D1_SVG_LINE_JOIN = DWord;
+  D2D1_SVG_LINE_JOIN = (
+    // The property is set to SVG's 'bevel' value.
+    D2D1_SVG_LINE_JOIN_BEVEL     = D2D1_LINE_JOIN_BEVEL,
+
+    // The property is set to SVG's 'miter' value. Note that this is equivalent to
+    // D2D1_LINE_JOIN_MITER_OR_BEVEL); not D2D1_LINE_JOIN_MITER.
+    D2D1_SVG_LINE_JOIN_MITER     = D2D1_LINE_JOIN_MITER_OR_BEVEL,
+
+    // The property is set to SVG's 'round' value.
+    D2D1_SVG_LINE_JOIN_ROUND     = D2D1_LINE_JOIN_ROUND
+    //D2D1_SVG_LINE_JOIN_FORCE_DWORD = FORCEDWORD
+  );
   {$EXTERNALSYM D2D1_SVG_LINE_JOIN}
-const
-  // The property is set to SVG's 'bevel' value.
-  D2D1_SVG_LINE_JOIN_BEVEL     = D2D1_LINE_JOIN_BEVEL;
-  {$EXTERNALSYM D2D1_SVG_LINE_JOIN_BEVEL}
-  // The property is set to SVG's 'miter' value. Note that this is equivalent to
-  // D2D1_LINE_JOIN_MITER_OR_BEVEL); not D2D1_LINE_JOIN_MITER.
-  D2D1_SVG_LINE_JOIN_MITER     = D2D1_LINE_JOIN_MITER_OR_BEVEL;
-  {$EXTERNALSYM D2D1_SVG_LINE_JOIN_MITER}
-  // The property is set to SVG's 'round' value.
-  D2D1_SVG_LINE_JOIN_ROUND     = D2D1_LINE_JOIN_ROUND;
-  {$EXTERNALSYM D2D1_SVG_LINE_JOIN_ROUND}
-  //D2D1_SVG_LINE_JOIN_FORCE_DWORD = FORCEDWORD;
+
 
 type
   // The alignment portion of the SVG preserveAspectRatio attribute.
@@ -212,7 +213,7 @@ type
   {$EXTERNALSYM D2D1_SVG_ASPECT_ALIGN}
 const
   // The alignment is set to SVG's 'none' value.
-  D2D1_SVG_ASPECT_ALIGN_NONE    = D2D1_SVG_ASPECT_ALIGN(0);
+  D2D1_SVG_ASPECT_ALIGN_NONE        = D2D1_SVG_ASPECT_ALIGN(0);
   {$EXTERNALSYM D2D1_SVG_ASPECT_ALIGN_NONE}
   // The alignment is set to SVG's 'xMinYMin' value.
   D2D1_SVG_ASPECT_ALIGN_X_MIN_Y_MIN = D2D1_SVG_ASPECT_ALIGN(1);
@@ -341,37 +342,34 @@ const
   {$EXTERNALSYM D2D1_SVG_PATH_COMMAND_QUADRADIC_SMOOTH_RELATIVE}
   //D2D1_SVG_PATH_COMMAND_FORCE_DWORD         = FORCEDWORD;
 
+
 type
   // Defines the coordinate system used for SVG gradient or clipPath elements.
   PD2D1_SVG_UNIT_TYPE = ^D2D1_SVG_UNIT_TYPE;
-  D2D1_SVG_UNIT_TYPE = DWord;
+  D2D1_SVG_UNIT_TYPE = (
+    // The property is set to SVG's 'userSpaceOnUse' value.
+    D2D1_SVG_UNIT_TYPE_USER_SPACE_ON_USE   = 0,
+    // The property is set to SVG's 'objectBoundingBox' value.
+    D2D1_SVG_UNIT_TYPE_OBJECT_BOUNDING_BOX = 1
+    //D2D1_SVG_UNIT_TYPE_FORCE_DWORD         = FORCEDWORD
+  );
   {$EXTERNALSYM D2D1_SVG_UNIT_TYPE}
-const
-  // The property is set to SVG's 'userSpaceOnUse' value.
-  D2D1_SVG_UNIT_TYPE_USER_SPACE_ON_USE   = D2D1_SVG_UNIT_TYPE(0);
-  {$EXTERNALSYM D2D1_SVG_UNIT_TYPE_USER_SPACE_ON_USE}
-  // The property is set to SVG's 'objectBoundingBox' value.
-  D2D1_SVG_UNIT_TYPE_OBJECT_BOUNDING_BOX = D2D1_SVG_UNIT_TYPE(1);
-  {$EXTERNALSYM D2D1_SVG_UNIT_TYPE_OBJECT_BOUNDING_BOX}
-  //D2D1_SVG_UNIT_TYPE_FORCE_DWORD     = FORCEDWORD;
 
 type
   // Defines the type of SVG string attribute to set or get.
   PD2D1_SVG_ATTRIBUTE_STRING_TYPE = ^D2D1_SVG_ATTRIBUTE_STRING_TYPE;
-  D2D1_SVG_ATTRIBUTE_STRING_TYPE = DWord;
+  D2D1_SVG_ATTRIBUTE_STRING_TYPE = (
+    // The attribute is a string in the same form as it would appear in the SVG XML.
+    //
+    // Note that when getting values of this type); the value returned may not exactly
+    // match the value that was set. Instead); the output value is a normalized version
+    // of the value. For example); an input color of 'red' may be output as '#FF0000'.
+    D2D1_SVG_ATTRIBUTE_STRING_TYPE_SVG     = DWord(0),
+    // The attribute is an element ID.
+    D2D1_SVG_ATTRIBUTE_STRING_TYPE_ID      = DWord(1)
+    //D2D1_SVG_ATTRIBUTE_STRING_TYPE_FORCE_DWORD = FORCEDWORD;
+  );
   {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_STRING_TYPE}
-const
-  // The attribute is a string in the same form as it would appear in the SVG XML.
-  //
-  // Note that when getting values of this type); the value returned may not exactly
-  // match the value that was set. Instead); the output value is a normalized version
-  // of the value. For example); an input color of 'red' may be output as '#FF0000'.
-  D2D1_SVG_ATTRIBUTE_STRING_TYPE_SVG     = D2D1_SVG_ATTRIBUTE_STRING_TYPE(0);
-  {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_STRING_TYPE_SVG}
-  // The attribute is an element ID.
-  D2D1_SVG_ATTRIBUTE_STRING_TYPE_ID      = D2D1_SVG_ATTRIBUTE_STRING_TYPE(1);
-  {$EXTERNALSYM D2D1_SVG_ATTRIBUTE_STRING_TYPE_ID}
-  //D2D1_SVG_ATTRIBUTE_STRING_TYPE_FORCE_DWORD = FORCEDWORD;
 
 type
   // Defines the type of SVG POD attribute to set or get.
@@ -531,7 +529,7 @@ type
 
     // Sets the paint color that is used if the paint type is
     // D2D1_SVG_PAINT_TYPE_COLOR.
-    function SetColor(color: D2D1_COLOR_F): HResult; stdcall;
+    function SetColor(const color: D2D1_COLOR_F): HResult; stdcall;
 
     // Gets the paint color that is used if the paint type is
     // D2D1_SVG_PAINT_TYPE_COLOR.
@@ -539,7 +537,7 @@ type
 
     // Sets the element id which acts as the paint server. This id is used if the paint
     // type is D2D1_SVG_PAINT_TYPE_URI.
-    function SetId(id: PCWSTR): HResult; stdcall;
+    function SetId(id: LPCWSTR): HResult; stdcall;
 
     // Gets the element id which acts as the paint server. This id is used if the paint
     // type is D2D1_SVG_PAINT_TYPE_URI.
@@ -743,7 +741,6 @@ type
   {$EXTERNALSYM IID_ID2D1SvgPathData}
 
 
-
   // Interface ID2D1SvgElement
   // =========================
   // Interface for all SVG elements.
@@ -758,7 +755,7 @@ type
     procedure GetDocument(document: ID2D1SvgDocument); stdcall;
 
     // Gets the tag name.
-    function GetTagName(out name: PWideChar;
+    function GetTagName(name: PWSTR;
                         nameCount: UINT32): HResult; stdcall;
 
     // Gets the string length of the tag name. The returned string length does not
@@ -810,7 +807,7 @@ type
     // referenceChild is non-nil, it must be an immediate child of this element.
     // </param>
     function InsertChildBefore(newChild: ID2D1SvgElement;
-                               {In_opt} referenceChild: PID2D1SvgElement = Nil): HResult; stdcall;
+                               {In_opt} referenceChild: ID2D1SvgElement = Nil): HResult; stdcall;
 
     // Appends newChild to the list of children. If the newChild element already has a
     // parent, it is removed from this parent as part of the append operation. Returns
@@ -867,7 +864,7 @@ type
     // <param name="inherited">Outputs whether the attribute is set to the 'inherit'
     // value.</param>
     function GetSpecifiedAttributeName(index: UINT32;
-                                       out name: PWideChar;
+                                       out name: PWSTR;
                                        nameCount: UINT32;
                                        _inherited: PBOOL = Nil): HResult; stdcall;
 
@@ -888,23 +885,57 @@ type
     function RemoveAttribute(name: PCWSTR): HResult; stdcall;
 
     // Sets the value of a text content element.
-    function SetTextValue(name: PWideChar;
+    function SetTextValue(name: WCHAR;
                           nameCount: UINT32): HResult; stdcall;
 
     // Gets the value of a text content element.
-    function GetTextValue(out name: PWideChar;
+    function GetTextValue(out name: PWSTR;
                           nameCount: UINT32): HResult; stdcall;
 
     // Gets the length of the text content value. The returned string length does not
     // include room for the null terminator.
     function GetTextValueLength(): UINT32; stdcall;
 
+    // Sets an attribute of this element using an interface. Returns an error if the
+    // attribute name is not valid on this element. Returns an error if the attribute
+    // cannot be expressed as the specified interface type. Returns an error if the
+    // attribute object is already set on an element. A given attribute object may only
+    // be set on one element in one attribute location at a time.
+    function SetAttributeValue(name: PCWSTR;
+                               value: ID2D1SvgAttribute): HResult; overload; stdcall;
+
+    // Sets an attribute of this element using a POD type. Returns an error if the
+    // attribute name is not valid on this element. Returns an error if the attribute
+    // cannot be expressed as the specified type.
+    function SetAttributeValue(name: PCWSTR;
+                               _type: D2D1_SVG_ATTRIBUTE_POD_TYPE;
+                               value: Pointer;
+                               valueSizeInBytes: UINT32): HResult; overload; stdcall;
+
     // Sets an attribute of this element using a string. Returns an error if the
     // attribute name is not valid on this element. Returns an error if the attribute
     // cannot be expressed as the specified type.
     function SetAttributeValue(name: PCWSTR;
                                _type: D2D1_SVG_ATTRIBUTE_STRING_TYPE;
-                               value: PCWSTR): HResult; overload; stdcall;
+                               value: LPCWSTR): HResult; overload; stdcall;
+
+    // Gets an attribute of this element as an interface type. Returns an error if the
+    // attribute is not specified. Returns an error if the attribute name is not valid
+    // on this element. Returns an error if the attribute cannot be expressed as the
+    // specified interface type.
+    // <param name="riid">The interface ID of the attribute value.</param>
+    function GetAttributeValue(name: PCWSTR;
+                               const riid: TGUID;
+                               var value: Pointer): HResult; overload; stdcall;
+
+    // Gets an attribute of this element as a POD type. Returns an error if the
+    // attribute is not specified. Returns an error if the attribute name is not valid
+    // on this element. Returns an error if the attribute cannot be expressed as the
+    // specified POD type.
+    function GetAttributeValue(name: PCWSTR;
+                               _type: D2D1_SVG_ATTRIBUTE_POD_TYPE;
+                               value: Pointer;
+                               valueSizeInBytes: UINT32): HResult; overload; stdcall;
 
     // Gets an attribute of this element as a string. Returns an error if the attribute
     // is not specified. Returns an error if the attribute name is not valid on this
@@ -912,7 +943,7 @@ type
     // string type.
     function GetAttributeValue(name: PCWSTR;
                                _type: D2D1_SVG_ATTRIBUTE_STRING_TYPE;
-                               {out} value: PWideChar;
+                               out value: PWideChar;
                                valueCount: UINT32): HResult; overload; stdcall;
 
     // Gets the string length of an attribute of this element. The returned string
@@ -924,43 +955,10 @@ type
                                      _type: D2D1_SVG_ATTRIBUTE_STRING_TYPE;
                                      out valueLength: UINT32): HResult; stdcall;
 
-    // Sets an attribute of this element using a POD type. Returns an error if the
-    // attribute name is not valid on this element. Returns an error if the attribute
-    // cannot be expressed as the specified type.
-    function SetAttributeValue(name: PCWSTR;
-                               _type: D2D1_SVG_ATTRIBUTE_POD_TYPE;
-                               value: Pointer;
-                               valueSizeInBytes: UINT32): HResult; overload; stdcall;
-
-    // Gets an attribute of this element as a POD type. Returns an error if the
-    // attribute is not specified. Returns an error if the attribute name is not valid
-    // on this element. Returns an error if the attribute cannot be expressed as the
-    // specified POD type.
-    function GetAttributeValue(name: PCWSTR;
-                               _type: D2D1_SVG_ATTRIBUTE_POD_TYPE;
-                               value: Pointer;  // pyscripter
-                               valueSizeInBytes: UINT32): HResult; overload; stdcall;
-
-    // Sets an attribute of this element using an interface. Returns an error if the
-    // attribute name is not valid on this element. Returns an error if the attribute
-    // cannot be expressed as the specified interface type. Returns an error if the
-    // attribute object is already set on an element. A given attribute object may only
-    // be set on one element in one attribute location at a time.
-    function SetAttributeValue(name: PCWSTR;
-                               value: ID2D1SvgAttribute): HResult; overload; stdcall;
-
-    // Gets an attribute of this element as an interface type. Returns an error if the
-    // attribute is not specified. Returns an error if the attribute name is not valid
-    // on this element. Returns an error if the attribute cannot be expressed as the
-    // specified interface type.
-    // <param name="riid">The interface ID of the attribute value.</param>
-    function GetAttributeValue(name: PCWSTR;
-                               const riid: REFIID;
-                               value: Pointer): HResult; overload; stdcall;
-
-  end;
+  end; // interface ID2D1SvgElement
   IID_ID2D1SvgElement = ID2D1SvgElement;
   {$EXTERNALSYM IID_ID2D1SvgElement}
+
 
 
   // Interface ID2D1SvgDocument
@@ -996,8 +994,7 @@ type
     // <param name="subtree">The root of the subtree. If null, the entire document is
     // serialized.</param>
     function Serialize(outputXmlStream: IStream;
-                       {in_opt} subtree: PID2D1SvgElement = Nil): HResult; stdcall;
-
+                       {in_opt} subtree: ID2D1SvgElement = nil): HResult; stdcall;
 
     // Deserializes a subtree from the stream. The stream must have only one root
     // element, but that root element need not be an 'svg' element. The output element
@@ -1042,7 +1039,6 @@ type
   end;
   IID_ID2D1SvgDocument = ID2D1SvgDocument;
   {$EXTERNALSYM IID_ID2D1SvgDocument}
-
 
   // Additional Prototypes for ALL interfaces
 
