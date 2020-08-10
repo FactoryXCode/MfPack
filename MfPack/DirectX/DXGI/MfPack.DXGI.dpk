@@ -30,7 +30,8 @@ package MfPack.DXGI;
 
 requires
   rtl,
-  vcl;
+  vcl,
+  MfPackX264;
 
 contains
   MfPack.DXGI in 'MfPack.DXGI.pas',
@@ -41,8 +42,7 @@ contains
   MfPack.DXGI1_6 in 'MfPack.DXGI1_6.pas',
   MfPack.DXGICommon in 'MfPack.DXGICommon.pas',
   MfPack.DXGIType in 'MfPack.DXGIType.pas',
-  MfPack.DXGIMessages in 'MfPack.DXGIMessages.pas',
-  MfPack.DXGIFormat in 'MfPack.DXGIFormat.pas';
+  MfPack.DXGIMessages in 'MfPack.DXGIMessages.pas';
 
 end.
 

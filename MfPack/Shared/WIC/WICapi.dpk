@@ -29,15 +29,12 @@ package WICapi;
 {$IMPLICITBUILD ON}
 
 requires
-  rtl,
   vcl,
-  MfPackX263;
+  rtl,
+  MfPackX264;
 
 contains
   MfPack.WinCodec in 'MfPack.WinCodec.pas',
   MfPack.WinCodecSdk in 'MfPack.WinCodecSdk.pas';
 
 end.
-
-
-

@@ -4,6 +4,7 @@
 //
 // Project: MfPack - CoreAudio - WASAPI
 // Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfPack.AudioPolicy.pas
 // Kind: Pascal / Delphi unit
 // Release date: 04-05-2012
@@ -21,8 +22,9 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
+// 10/08/2010 All                 #2 => #2b The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -156,7 +158,7 @@ type
 
 		function OnSimpleVolumeChanged(NewVolume: FLOAT;
                                    NewMute: BOOL;
-                                   EventContext: TGUID): HResult; stdcall;
+                                   const EventContext: TGUID): HResult; stdcall;
     // Description:
     //
     //  Called when the simple volume of an AudioSession changes.
@@ -181,7 +183,7 @@ type
 		function OnChannelVolumeChanged(ChannelCount: UINT;
                                     NewChannelArray: PFloat;
                                     ChangedChannel: UINT;
-																    EventContext: TGUID): HResult; stdcall;
+																    const EventContext: TGUID): HResult; stdcall;
     // Description:
     //
     //  Called when the channel volume of an AudioSession changes.
@@ -207,7 +209,7 @@ type
     //
 
 		function OnGroupingParamChanged(NewGroupingParam: TGUID;
-                                    EventContext: TGUID): HResult; stdcall;
+                                    const EventContext: TGUID): HResult; stdcall;
     // Description:
     //      Called when the grouping param of an Audio Session changes.
     //
@@ -581,7 +583,7 @@ type
   {$EXTERNALSYM IAudioSessionManager}
   IAudioSessionManager = interface(IUnknown)
   ['{BFA971F1-4D5E-40BB-935E-967039BFBEE4}']
-    function GetAudioSessionControl(AudioSessionGuid: TGUID;
+    function GetAudioSessionControl(AudioSessionGuid: LPCGUID;
                                     StreamFlag: UINT;
                                     out SessionControl: IAudioSessionControl): HResult; stdcall;
     // Description:
@@ -601,7 +603,7 @@ type
     //      FAILURECODE Failure
     //
 
-    function GetSimpleAudioVolume(AudioSessionGuid: TGUID;
+    function GetSimpleAudioVolume(AudioSessionGuid: LPCGUID;
                                   StreamFlag: UINT;
                                   out AudioVolume: ISimpleAudioVolume): HResult; stdcall;
     // Description:

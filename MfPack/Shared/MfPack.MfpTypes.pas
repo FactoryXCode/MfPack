@@ -4,6 +4,7 @@
 //
 // Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfPack.MfpTypes.pas
 // Kind: Pascal / Delphi unit
 // Release date: 29-07-2012
@@ -24,7 +25,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
-//                                #2 The Model
+// 10/08/2010 All                 #2 => #2b The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -171,8 +172,8 @@ type
 
 
 {$IFDEF MFP_LPGUID}
-  LPGUID = ^PGUID;
-  LPCGUID = ^PGUID;
+  LPGUID = PGUID;
+  LPCGUID = PGUID;
 {$ENDIF}
 
 
@@ -2437,9 +2438,9 @@ type
 
 {$IFDEF MFP_FLOAT32}
   PFLOAT32 = PSingle;
-  TFloat32Array = array of FLOAT32;
   FLOAT32 = Single;
   {$EXTERNALSYM FLOAT32}
+  TFloat32Array = array of FLOAT32;
 {$ENDIF}
 
 
@@ -2841,12 +2842,12 @@ const
   {$EXTERNALSYM SHRT_MIN}
   {$ENDIF}
   {$IFDEF MFP_UINT_MAX}
-  UINT_MAX       = MAXDWORD; // max value for an unsigned int
+  UINT_MAX       = $7FFFFFFF; // max value for an unsigned int
   {$EXTERNALSYM UINT_MAX}
   {$ENDIF}
 
   {$IFDEF MFP_FORCEDWORD}   // Force value to DWord
-  FORCEDWORD = MAXDWORD;
+  FORCEDWORD     = $7FFFFFFF;
   {$ENDIF}
 
   MAXDW = MAXDWORD;
@@ -3107,16 +3108,10 @@ type
   // Additional Prototypes for ALL interfaces
 
 const ONE_HNS_SECOND  = 10000000; // One sec = 100,000 hns
-{$EXTERNALSYM ONE_HNS_SECOND}
 const ONE_HNS_MSEC    = 10000;    // One ms  = 10,000 hns
-{$EXTERNALSYM ONE_HNS_MSEC}
 const ONE_MSEC_SECOND = 1000;     // One second = 1,000 ms
-{$EXTERNALSYM ONE_MSEC_SECOND}
-
 const ONE_MHZ = 1000000;          // One MegaHertz = 1,000,000 Hertz
-{$EXTERNALSYM ONE_MHZ}
 const ONE_GHZ = ONE_MHZ * 1000;   // One GigaHertz = 1,000 MegaHertz
-{$EXTERNALSYM ONE_GHZ}
 
 
 type
@@ -3274,7 +3269,6 @@ const
     (ClrName: 'YELLOW'; DelphiClr: TColor($FFFF00)),
     (ClrName: 'YELLOWGREEN'; DelphiClr: TColor($9ACD32))
   );
-  {$EXTERNALSYM HTMLColorNames}
 
   // End of Additional Prototypes
 

@@ -4,6 +4,7 @@
 //
 // Project: MFPack - DirectWrite
 // Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfPack.DWrite_3.pas
 // Kind: Pascal / Delphi unit
 // Release date: 30-04-2019
@@ -24,6 +25,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
+// 10/08/2010 All                 #2 => #2b The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows 7 or later.
@@ -256,13 +258,16 @@ const
   // The resource is remote, and information is unknown yet, including the file size and date.
   // Attempting to create a font or file stream will fail until locality becomes at least partial.
   DWRITE_LOCALITY_REMOTE = DWRITE_LOCALITY(0);
+  {$EXTERNALSYM DWRITE_LOCALITY_REMOTE}
   // The resource is partially local, meaning you can query the size and date of the file
   // stream, and you may be able to create a font face and retrieve the particular glyphs
   // for metrics and drawing, but not all the glyphs will be present.
   DWRITE_LOCALITY_PARTIAL = DWRITE_LOCALITY(1);
+  {$EXTERNALSYM DWRITE_LOCALITY_PARTIAL}
   // The resource is completely local, and all font functions can be called
   // without concern of missing data or errors related to network connectivity.
   DWRITE_LOCALITY_LOCAL = DWRITE_LOCALITY(2);
+  {$EXTERNALSYM DWRITE_LOCALITY_LOCAL}
 
 type
   // Represents a method of rendering glyphs.
@@ -319,10 +324,14 @@ type
 const
   // The usage of the font line gap depends on the method used for text layout.
   DWRITE_FONT_LINE_GAP_USAGE_DEFAULT = DWRITE_FONT_LINE_GAP_USAGE(0);
+  {$EXTERNALSYM DWRITE_FONT_LINE_GAP_USAGE_DEFAULT}
   // The font line gap is excluded from line spacing
+  {$EXTERNALSYM The}
   DWRITE_FONT_LINE_GAP_USAGE_DISABLED = DWRITE_FONT_LINE_GAP_USAGE(1);
+  {$EXTERNALSYM DWRITE_FONT_LINE_GAP_USAGE_DISABLED}
   // The font line gap is included in line spacing
   DWRITE_FONT_LINE_GAP_USAGE_ENABLED = DWRITE_FONT_LINE_GAP_USAGE(2);
+  {$EXTERNALSYM DWRITE_FONT_LINE_GAP_USAGE_ENABLED}
 
 type
   // Specifies the container format of a font resource. A container format is distinct from
@@ -545,7 +554,7 @@ type
     // param name: fontFaceReference: Receives a pointer to the newly created font face reference object, or nullptr in case of failure.
     // returns
     // Standard HRESULT error code.
-    function CreateFontFaceReference(filePath: WideChar;
+    function CreateFontFaceReference(filePath: PWideChar;
                                      lastWriteTime: FILETIME;
                                      faceIndex: UINT32;
                                      fontSimulations: DWRITE_FONT_SIMULATIONS;
@@ -685,7 +694,7 @@ type
     // a preferred locale) or the English name (in all other cases).
     // </remarks>
     function GetPropertyValues(propertyID: DWRITE_FONT_PROPERTY_ID;
-                               preferredLocaleNames: WideChar;
+                               preferredLocaleNames: PWideChar;
                                out values: IDWriteStringList): HResult; overload; stdcall;
 
     // Returns all unique property values in the set, which can be used
@@ -744,7 +753,7 @@ type
     // The returned list can include simulated bold and oblique variants,
     // which would be useful for font fallback selection.
     // </remarks>
-    function GetMatchingFonts(familyName: WideChar;
+    function GetMatchingFonts(familyName: PWideChar;
                               fontWeight: DWRITE_FONT_WEIGHT;
                               fontStretch: DWRITE_FONT_STRETCH;
                               fontStyle: DWRITE_FONT_STYLE;
@@ -1284,7 +1293,7 @@ type
     // returns
     // Standard HRESULT error code.
     function GetStringLength(listIndex: UINT32;
-                             out length: PUINT32): HResult; stdcall;
+                             out length: UINT32): HResult; stdcall;
 
     // Copies the string with the specified index to the specified array.
     // param name: listIndex: Zero-based index of the string.
@@ -1355,7 +1364,7 @@ type
     // context parameter, rather than globally registered to the queue.
     // </remarks>
     function AddListener(listener: IDWriteFontDownloadListener;
-                         out token: PUINT32): HResult; stdcall;
+                         out token: UINT32): HResult; stdcall;
 
     // Unregisters a notification handler that was previously registered using
     // AddListener.
@@ -1803,7 +1812,7 @@ type
     // includes SVG, TrueType natural modes, and bitmap placement.
     function ComputeGlyphOrigins(glyphRun: DWRITE_GLYPH_RUN;
                                  baselineOrigin: D2D1_POINT_2F;
-                                 out glyphOrigins: PD2D1_POINT_2F): HResult; overload; stdcall;
+                                 out glyphOrigins: D2D1_POINT_2F): HResult; overload; stdcall;
 
   end;
   IID_IDWriteFactory4 = IDWriteFactory4;

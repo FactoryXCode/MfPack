@@ -4,6 +4,7 @@
 //
 // Project: MFPack - DirectComposition
 // Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfPack.OleIdl.pas
 // Kind: Pascal / Delphi unit
 // Release date: 30-04-2019
@@ -24,7 +25,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
-//                                #2 The Model
+// 10/08/2010 All                 #2 => #2b The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows Vista or later.

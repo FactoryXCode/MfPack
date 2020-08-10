@@ -4,6 +4,7 @@
 //
 // Project: MfPack - CoreAudio - Utilities
 // Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfPack.DevTopoUtils.pas
 // Kind: Pascal / Delphi unit
 // Release date: 18-12-2015
@@ -21,8 +22,9 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
+// 10/08/2010 All                 #2 => #2b The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).

@@ -25,7 +25,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
-//                                #2 The Model
+// 10/08/2010 All                 #2 => #2b The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -895,6 +895,15 @@ type
     // Gets the length of the text content value. The returned string length does not
     // include room for the null terminator.
     function GetTextValueLength(): UINT32; stdcall;
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    //
+    // Here the sequence differs from the d2d1svg.h.
+    // This API has a wrong function sequence.
+    // See: https://github.com/FactoryXCode/MfPack/issues/4
+    //
+    ////////////////////////////////////////////////////////////////////////////
 
     // Sets an attribute of this element using an interface. Returns an error if the
     // attribute name is not valid on this element. Returns an error if the attribute

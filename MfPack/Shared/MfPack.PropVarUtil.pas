@@ -4,6 +4,7 @@
 //
 // Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfPack.PropVarUtil.pas
 // Kind: Pascal / Delphi unit
 // Release date: 13-02-2016
@@ -23,7 +24,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
-//                                #2 The Model
+// 10/08/2010 All                 #2 => #2b The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8.1 or later.
@@ -796,7 +797,7 @@ function InitVariantFromGUIDAsBuffer(const _guid: TGUID;
                                      var pvar: OleVariant): HResult; inline;
 {$EXTERNALSYM InitVariantFromGUIDAsBuffer}
 
-function InitVariantFromUnknown(const unknown: IUnknown;
+function InitVariantFromUnknown(unknown: IUnknown;
                                 var _variant: OleVariant): HResult; inline;
 {$EXTERNALSYM InitVariantFromUnknown}
 
@@ -1111,14 +1112,15 @@ type
 
 // Helpers:  (not a part of propvarutil.h, but Shlwapi.h)
 
-// (See: https://msdn.microsoft.com/en-us/library/windows/desktop/bb773816
-procedure IUnknown_Set(var ppunk: Pointer;
-                       punk: IUnknown); stdcall;
+// (See: https://docs.microsoft.com/nl-nl/windows/win32/api/shlwapi/nf-shlwapi-iunknown_set
+procedure IUnknown_Set({_Inout_} var ppunk: Pointer {IUnknown};
+                       {_In_opt_} punk: IUnknown); stdcall;
 {$EXTERNALSYM IUnknown_Set}
 
-function _SHStrDupW(const psz: LPCWSTR;
-                    out ppwsz: LPCWSTR): HRESULT; stdcall;
-{$EXTERNALSYM _SHStrDupW}
+// Makes a copy of a string in newly allocated memory.
+function SHStrDupW(const psz: LPCWSTR;
+                   ppwsz: LPCWSTR): HRESULT; stdcall;
+{$EXTERNALSYM SHStrDupW}
 
 // Additional helpers from OleAut32
 
@@ -1170,7 +1172,7 @@ const
 
 //See earlier comment
 procedure IUnknown_Set; external PropVarUtilLibH1 name 'IUnknown_Set' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-function _SHStrDupW; external PropVarUtilLibH1 name 'SHStrDupW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function SHStrDupW; external PropVarUtilLibH1 name 'SHStrDupW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
 function SysAllocString; external PropVarUtilLibH2 name 'SysAllocString' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 procedure VariantInit; external PropVarUtilLibH2 name 'VariantInit' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
@@ -1575,7 +1577,7 @@ end;
 
 // Changes the value of a Component Object Model (COM) interface pointer and
 // releases the previous interface.
-function InitVariantFromUnknown(const unknown: IUnknown;
+function InitVariantFromUnknown(unknown: IUnknown;
                                 var _variant: OLEVARIANT): HResult; inline;
 begin
   VariantInit(_variant);
@@ -1593,7 +1595,7 @@ function InitPropVariantFromString(psz: LPCWSTR;
                                    out ppropvar: MfPROPVARIANT): HResult; inline;
 begin
   ppropvar.vt:= VT_LPWSTR;
-  Result:= _SHStrDupW(psz, ppropvar.pwszVal);
+  Result:= SHStrDupW(psz, ppropvar.pwszVal);
   if FAILED(Result) then
       PropVariantInit(ppropvar);
 end;

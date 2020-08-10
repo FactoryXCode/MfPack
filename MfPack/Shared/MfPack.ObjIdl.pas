@@ -4,6 +4,7 @@
 //
 // Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfPack.ObjIdl.pas
 // Kind: Pascal / Delphi unit
 // Release date: 13-02-2016
@@ -23,7 +24,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
-//                                #2 The Model
+// 10/08/2010 All                 #2 => #2b The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8.1 or later.

@@ -3,7 +3,8 @@
 // Copyright: © FactoryX. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
-// Project location: http://sourceforge.net/projects/MFPack
+// Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: Media Foundation - MfpMediaTypeDebug.pas
 // Kind: Pascal Unit
 // Release date: 04-06-2016
@@ -23,7 +24,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
-//                                #2 The Model
+// 10/08/2010 All                 #2 => #2b The Model
 //------------------------------------------------------------------------------
 //
 // Remarks:

@@ -4,6 +4,7 @@
 //
 // Project: MfPack - MediaFoundation
 // Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfPack.CodecApi.pas
 // Kind: Pascal / Delphi unit
 // Release date: 17-10-2015

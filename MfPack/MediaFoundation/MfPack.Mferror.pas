@@ -4,6 +4,7 @@
 //
 // Project: MfPack - MediaFoundation
 // Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfPack.MfError.pas
 // Kind: Pascal / Delphi unit
 // Release date: 29-06-2012

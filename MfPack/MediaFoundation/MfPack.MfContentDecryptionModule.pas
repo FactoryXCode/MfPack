@@ -4,6 +4,7 @@
 //
 // Project: MfPack - CoreAudio - WASAPI
 // Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfPack.MfContentDecryptionModule.pas
 // Kind: Pascal / Delphi unit
 // Release date: 28-07-2020
@@ -23,7 +24,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
-//                                #2 The Model
+// 10/08/2010 All                 #2 => #2b The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: NTDDI_VERSION >= NTDDI_WIN10_VB

@@ -159,9 +159,9 @@ type
                         const blue: FLOAT;
                         const alpha: FLOAT = 1.0): _D3DCOLORVALUE; overload; static;
 
-    class operator Implicit(const val: DWORD): _D3DCOLORVALUE; inline;
+    class operator Implicit(const val: DWORD): _D3DCOLORVALUE; overload; inline;
 
-    class operator Implicit(const val: _D3DCOLORVALUE): DWORD; inline;
+    class operator Implicit(const val: D3DCOLORVALUE): DWORD; overload; inline;
 
     class operator Equal(const left: _D3DCOLORVALUE;
                          const right: _D3DCOLORVALUE): Boolean; inline;
@@ -298,8 +298,8 @@ end;
 //
 // D3DCOLORVALUE Helpers
 //
-class function _D3DCOLORVALUE.Init(const rgb: UINT32;
-                                   const alpha: FLOAT = 1.0): _D3DCOLORVALUE;
+class function D3DCOLORVALUE.Init(const rgb: UINT32;
+                                  const alpha: FLOAT = 1.0): _D3DCOLORVALUE;
 const
   sc_redShift   = 16;
   sc_greenShift = 8;
@@ -322,18 +322,18 @@ begin
 end;
 
 
-class function _D3DCOLORVALUE.Init(const knownColor: TColor;
-                                   const alpha: FLOAT = 1.0): _D3DCOLORVALUE;
+class function D3DCOLORVALUE.Init(const knownColor: TColor;
+                                  const alpha: FLOAT = 1.0): _D3DCOLORVALUE;
 begin
   Result := Init(knownColor,
                  alpha);
 end;
 
 
-class function _D3DCOLORVALUE.Init(const red: FLOAT;
-                                   const green: FLOAT;
-                                   const blue: FLOAT;
-                                   const alpha: FLOAT = 1.0): _D3DCOLORVALUE;
+class function D3DCOLORVALUE.Init(const red: FLOAT;
+                                  const green: FLOAT;
+                                  const blue: FLOAT;
+                                  const alpha: FLOAT = 1.0): _D3DCOLORVALUE;
 begin
   Result.r := red;
   Result.g := green;
@@ -342,8 +342,8 @@ begin
 end;
 
 
-class operator _D3DCOLORVALUE.Equal(const left: _D3DCOLORVALUE;
-                                    const right: _D3DCOLORVALUE): Boolean;
+class operator D3DCOLORVALUE.Equal(const left: _D3DCOLORVALUE;
+                                   const right: _D3DCOLORVALUE): Boolean;
 begin
   Result:= (left.r = right.r) and
            (left.g = right.g) and
@@ -352,7 +352,7 @@ begin
 end;
 
 
-class operator _D3DCOLORVALUE.Implicit(const val: DWORD): _D3DCOLORVALUE;
+class operator D3DCOLORVALUE.Implicit(const val: DWORD): _D3DCOLORVALUE;
 const
   fval = 1/255; // 0,0039215686274509803921568627451‬
 
@@ -366,7 +366,7 @@ begin
     end;
 end;
 
-class operator _D3DCOLORVALUE.Implicit(const val: _D3DCOLORVALUE): DWORD;
+class operator D3DCOLORVALUE.Implicit(const val: _D3DCOLORVALUE): DWORD;
 var
   rd: DWord;
   gr: DWord;

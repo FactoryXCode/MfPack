@@ -4,6 +4,7 @@
 //
 // Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfPack.DvdMedia.pas
 // Kind: Pascal / Delphi unit
 // Release date: 06-10-2015
@@ -24,7 +25,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
-//                                #2 The Model
+// 10/08/2010 All                 #2 => #2b The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: This unit is also included in DsPack.DirectShow9.pas / Winapi.DirectShow9.pas

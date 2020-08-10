@@ -4,6 +4,7 @@
 //
 // Project: MfPack - MediaFoundation
 // Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfPack.MfIdl.pas
 // Kind: Pascal Unit
 // Release date: 27-06-2012
@@ -23,7 +24,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
-//                                #2 The Model
+// 10/08/2010 All                 #2 => #2b The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -6305,7 +6306,7 @@ const
       Result:= ((Data and $FFF80000) shr 19);
     end;
 
-  //Else
+  // Else
 
   function _EXTRACT_MFPROTECTIONDATA_TRUSTEDAUDIODRIVERS_RESERVED(Data: DWORD): DWORD; inline;
     begin
