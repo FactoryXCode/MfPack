@@ -4,6 +4,7 @@
 //
 // Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfPack.Evntprov.pas
 // Kind: Pascal / Delphi unit
 // Release date: 18-12-2016
@@ -594,11 +595,11 @@ type
 
   PENABLECALLBACK = function(const SourceId: TGUID;
                              IsEnabled: ULONG;
-                             Level: INT; //UCHAR
+                             Level: UCHAR;
                              MatchAnyKeyword: ULONGLONG;
                              MatchAllKeyword: ULONGLONG;
-                             FilterData: PEVENT_FILTER_DESCRIPTOR;
-                             CallbackContext: PVOID): ULONG; stdcall;
+                             {_In_opt_} FilterData: PEVENT_FILTER_DESCRIPTOR;
+                             {_Inout_opt_} CallbackContext: PVOID): ULONG; stdcall;
   {$EXTERNALSYM PENABLECALLBACK}
 
 
@@ -749,7 +750,7 @@ type
   function EventWrite(RegHandle: REGHANDLE;
                       const EventDescriptor: EVENT_DESCRIPTOR;
                       UserDataCount: ULONG;
-                      UserData: EVENT_DATA_DESCRIPTOR): ULONG; stdcall;
+                      UserData: PEVENT_DATA_DESCRIPTOR): ULONG; stdcall;
   {$EXTERNALSYM EventWrite}
 
 
