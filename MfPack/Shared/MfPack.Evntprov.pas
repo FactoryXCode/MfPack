@@ -593,13 +593,13 @@ type
   // }
 
 
-  PENABLECALLBACK = function(const SourceId: TGUID;
-                             IsEnabled: ULONG;
-                             Level: UCHAR;
-                             MatchAnyKeyword: ULONGLONG;
-                             MatchAllKeyword: ULONGLONG;
-                             {_In_opt_} FilterData: PEVENT_FILTER_DESCRIPTOR;
-                             {_Inout_opt_} CallbackContext: PVOID): ULONG; stdcall;
+  PENABLECALLBACK = procedure(const SourceId: TGUID;
+                              IsEnabled: ULONG;
+                              Level: UCHAR;
+                              MatchAnyKeyword: ULONGLONG;
+                              MatchAllKeyword: ULONGLONG;
+                              {_In_opt_} FilterData: PEVENT_FILTER_DESCRIPTOR;
+                              {_Inout_opt_} CallbackContext: PVOID); stdcall;
   {$EXTERNALSYM PENABLECALLBACK}
 
 
