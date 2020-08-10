@@ -583,7 +583,7 @@ type
   {$EXTERNALSYM IAudioSessionManager}
   IAudioSessionManager = interface(IUnknown)
   ['{BFA971F1-4D5E-40BB-935E-967039BFBEE4}']
-    function GetAudioSessionControl(AudioSessionGuid: LPCGUID;
+    function GetAudioSessionControl(AudioSessionGuid: LPCGUID;  // may be @GUID_NULL or Nil when nothing is specified.
                                     StreamFlag: UINT;
                                     out SessionControl: IAudioSessionControl): HResult; stdcall;
     // Description:
@@ -603,7 +603,7 @@ type
     //      FAILURECODE Failure
     //
 
-    function GetSimpleAudioVolume(AudioSessionGuid: LPCGUID;
+    function GetSimpleAudioVolume(AudioSessionGuid: LPCGUID;  // may be @GUID_NULL or Nil when nothing is specified.
                                   StreamFlag: UINT;
                                   out AudioVolume: ISimpleAudioVolume): HResult; stdcall;
     // Description:
