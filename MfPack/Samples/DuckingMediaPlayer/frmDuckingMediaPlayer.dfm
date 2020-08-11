@@ -89,7 +89,7 @@ object Form1: TForm1
     Left = 475
     Top = 33
     Width = 78
-    Height = 24
+    Height = 22
     Caption = 'Browse...'
     TabOrder = 1
     OnClick = butBrowseClick

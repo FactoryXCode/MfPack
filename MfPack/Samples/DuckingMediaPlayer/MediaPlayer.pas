@@ -28,6 +28,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 05/07/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
 //                                #1 Autobahn
+// 10/08/2010 All                 #2 => #2b The Model
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
@@ -1004,7 +1005,7 @@ end;
 //
 //  Utility function to retrieve the session control interface for the current audio session.
 //
-//  We assume that DirectShow uses the NULL session GUID and doesn't specify any session specific flags.
+//  We assume that DirectShow uses the Nil session GUID and doesn't specify any session specific flags.
 //
 function TCMediaPlayer.GetSessionControl2(): HResult;
 var
@@ -1018,7 +1019,7 @@ begin
       hr := GetSessionManager2();
       if Succeeded(hr) then
         begin
-          hr := _SessionManager2.GetAudioSessionControl(Nil,
+          hr := _SessionManager2.GetAudioSessionControl(@GUID_NULL, // or Nil
                                                         0,
                                                         sessionControl);
           if Succeeded(hr) then
