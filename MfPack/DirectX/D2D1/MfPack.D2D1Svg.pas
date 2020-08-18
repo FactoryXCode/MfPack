@@ -784,7 +784,7 @@ type
     // <param name="previousChild">The output previousChild element will be non-nil if
     // the referenceChild has a previous sibling. If the referenceChild is the first
     // child, the output is nil.</param>
-    function GetPreviousChild(const referenceChild: ID2D1SvgElement;
+    function GetPreviousChild(referenceChild: ID2D1SvgElement;
                               out previousChild: ID2D1SvgElement): HResult; stdcall;
 
     // Gets the next sibling of the referenceChild element.
@@ -793,7 +793,7 @@ type
     // <param name="nextChild">The output nextChild element will be non-nil if the
     // referenceChild has a next sibling. If the referenceChild is the last child, the
     // output is nil.</param>
-    function GetNextChild(const referenceChild: ID2D1SvgElement;
+    function GetNextChild(referenceChild: ID2D1SvgElement;
                           out nextChild: ID2D1SvgElement): HResult; stdcall;
 
     // Inserts newChild as a child of this element, before the referenceChild element.
@@ -897,29 +897,6 @@ type
     function GetTextValueLength(): UINT32; stdcall;
 
 
-    ////////////////////////////////////////////////////////////////////////////
-    //
-    // Here the sequence differs from the d2d1svg.h.
-    // This API has a wrong function sequence.
-    // See: https://github.com/FactoryXCode/MfPack/issues/4
-    //
-    ////////////////////////////////////////////////////////////////////////////
-
-    // Sets an attribute of this element using an interface. Returns an error if the
-    // attribute name is not valid on this element. Returns an error if the attribute
-    // cannot be expressed as the specified interface type. Returns an error if the
-    // attribute object is already set on an element. A given attribute object may only
-    // be set on one element in one attribute location at a time.
-    function SetAttributeValue(name: PCWSTR;
-                               value: ID2D1SvgAttribute): HResult; overload; stdcall;
-
-    // Sets an attribute of this element using a POD type. Returns an error if the
-    // attribute name is not valid on this element. Returns an error if the attribute
-    // cannot be expressed as the specified type.
-    function SetAttributeValue(name: PCWSTR;
-                               _type: D2D1_SVG_ATTRIBUTE_POD_TYPE;
-                               value: Pointer;
-                               valueSizeInBytes: UINT32): HResult; overload; stdcall;
 
     // Sets an attribute of this element using a string. Returns an error if the
     // attribute name is not valid on this element. Returns an error if the attribute
@@ -927,24 +904,6 @@ type
     function SetAttributeValue(name: PCWSTR;
                                _type: D2D1_SVG_ATTRIBUTE_STRING_TYPE;
                                value: LPCWSTR): HResult; overload; stdcall;
-
-    // Gets an attribute of this element as an interface type. Returns an error if the
-    // attribute is not specified. Returns an error if the attribute name is not valid
-    // on this element. Returns an error if the attribute cannot be expressed as the
-    // specified interface type.
-    // <param name="riid">The interface ID of the attribute value.</param>
-    function GetAttributeValue(name: PCWSTR;
-                               const riid: TGUID;
-                               var value: Pointer): HResult; overload; stdcall;
-
-    // Gets an attribute of this element as a POD type. Returns an error if the
-    // attribute is not specified. Returns an error if the attribute name is not valid
-    // on this element. Returns an error if the attribute cannot be expressed as the
-    // specified POD type.
-    function GetAttributeValue(name: PCWSTR;
-                               _type: D2D1_SVG_ATTRIBUTE_POD_TYPE;
-                               value: Pointer;
-                               valueSizeInBytes: UINT32): HResult; overload; stdcall;
 
     // Gets an attribute of this element as a string. Returns an error if the attribute
     // is not specified. Returns an error if the attribute name is not valid on this
@@ -963,6 +922,40 @@ type
     function GetAttributeValueLength(name: PCWSTR;
                                      _type: D2D1_SVG_ATTRIBUTE_STRING_TYPE;
                                      out valueLength: UINT32): HResult; stdcall;
+
+     // Sets an attribute of this element using a POD type. Returns an error if the
+    // attribute name is not valid on this element. Returns an error if the attribute
+    // cannot be expressed as the specified type.
+    function SetAttributeValue(name: PCWSTR;
+                               _type: D2D1_SVG_ATTRIBUTE_POD_TYPE;
+                               value: Pointer;
+                               valueSizeInBytes: UINT32): HResult; overload; stdcall;
+
+    // Gets an attribute of this element as a POD type. Returns an error if the
+    // attribute is not specified. Returns an error if the attribute name is not valid
+    // on this element. Returns an error if the attribute cannot be expressed as the
+    // specified POD type.
+    function GetAttributeValue(name: PCWSTR;
+                               _type: D2D1_SVG_ATTRIBUTE_POD_TYPE;
+                               value: Pointer;
+                               valueSizeInBytes: UINT32): HResult; overload; stdcall;
+
+    // Sets an attribute of this element using an interface. Returns an error if the
+    // attribute name is not valid on this element. Returns an error if the attribute
+    // cannot be expressed as the specified interface type. Returns an error if the
+    // attribute object is already set on an element. A given attribute object may only
+    // be set on one element in one attribute location at a time.
+    function SetAttributeValue(name: PCWSTR;
+                               value: ID2D1SvgAttribute): HResult; overload; stdcall;
+
+    // Gets an attribute of this element as an interface type. Returns an error if the
+    // attribute is not specified. Returns an error if the attribute name is not valid
+    // on this element. Returns an error if the attribute cannot be expressed as the
+    // specified interface type.
+    // <param name="riid">The interface ID of the attribute value.</param>
+    function GetAttributeValue(name: PCWSTR;
+                               const riid: REFIID;
+                               var value: Pointer): HResult; overload; stdcall;
 
   end; // interface ID2D1SvgElement
   IID_ID2D1SvgElement = ID2D1SvgElement;
