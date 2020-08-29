@@ -114,7 +114,7 @@ SDK version: 10.0.19041.0, May 2020 OS update (2004)
   *feature in Windows 7 and later. It also implements a volume control which tracks*
   *to the volume control in the volume mixer.* 
   
-![](https://dc622.4shared.com/img/0MridAEjiq/s24/17320862100/DuckingMediaPlayer?async&rand=0.11134263709146652)
+![](https://dc724.4shared.com/img/AVk91_8Hea/s24/1743b68d480/DuckingMediaPlayerSample?async&rand=0.04014350792035826)
 
 
 **Simple Player**
