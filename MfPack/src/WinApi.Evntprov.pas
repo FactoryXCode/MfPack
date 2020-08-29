@@ -15,7 +15,7 @@
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX),
+// Contributor(s): Tony Kalf (maXcomX), Markus(MBulli)
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
@@ -676,7 +676,7 @@ type
 
 
   function EventEnabled(RegHandle: REGHANDLE;
-                        const EventDescriptor: EVENT_DESCRIPTOR): BOOLEAN; stdcall;
+                        const EventDescriptor: PCEVENT_DESCRIPTOR): BOOLEAN; stdcall;
   {$EXTERNALSYM EventEnabled}
 
 
@@ -740,7 +740,7 @@ type
 
 
   function EventWrite(RegHandle: REGHANDLE;
-                      const EventDescriptor: EVENT_DESCRIPTOR;
+                      const EventDescriptor: PCEVENT_DESCRIPTOR;
                       UserDataCount: ULONG;
                       UserData: PEVENT_DATA_DESCRIPTOR): ULONG; stdcall;
   {$EXTERNALSYM EventWrite}
@@ -764,11 +764,11 @@ type
 
 
   function EventWriteTransfer(RegHandle: REGHANDLE;
-                              EventDescriptor: EVENT_DESCRIPTOR;
-                              const ActivityId: TGUID;
-                              const RelatedActivityId: TGUID;
+                              const EventDescriptor: PCEVENT_DESCRIPTOR;
+                              {_In_opt_} const ActivityId: LPCGUID;
+                              {_In_opt_} const RelatedActivityId: LPCGUID;
                               UserDataCount: ULONG;
-                              UserData: EVENT_DATA_DESCRIPTOR): ULONG; stdcall;
+                              UserData: PEVENT_DATA_DESCRIPTOR): ULONG; stdcall;
   {$EXTERNALSYM EventWriteTransfer}
 
 
@@ -796,13 +796,13 @@ type
 
 
   function EventWriteEx(RegHandle: REGHANDLE;
-                        EventDescriptor: PCEVENT_DESCRIPTOR;
+                        const EventDescriptor: PCEVENT_DESCRIPTOR;
                         Filter: ULONG64;
                         Flags: ULONG;
-                        const ActivityId: PGUID;
-                        const RelatedActivityId: PGUID;
+                        {_In_opt_} const ActivityId: LPCGUID;
+                        {_In_opt_} const RelatedActivityId: LPCGUID;
                         UserDataCount: ULONG;
-                        UserData: EVENT_DATA_DESCRIPTOR): ULONG; stdcall;
+                        UserData: PEVENT_DATA_DESCRIPTOR): ULONG; stdcall;
   {$EXTERNALSYM EventWriteEx}
 
 
