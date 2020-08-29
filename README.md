@@ -1,6 +1,6 @@
 # MfPack
 
- Delphi translatations for Microsoft Media Foundation and related API's.
+ Delphi translations for Microsoft Media Foundation and related API's.
 
  **<u>What about MfPack:</u>**
 
@@ -13,7 +13,7 @@
   * Multimedia Device (MMDevice) API
 - Microsoft Media Foundation API (successor of DirectShow).
 - XAudio2 API (XBox game development)
-- Microsoft Media Foundation DirectX API's
+- Microsoft DirectX API's (D2D1, DirectComposition, DXGI, DirectWrite and DXVA)
 - Windows Imaging Component (WIC) API.
 - Media Foundation samples
 
@@ -23,11 +23,9 @@
 
 # MfPack 
 
-In Memoriam: Rudy Velthuis 1960 ~ 2019. Thanks Rudy!
-
-Version X 2.6.4 Kraftwerk #1 Autobahn release.  
+Version X 3.0.0 Enigma release.  
 Delphi XE2 up to and including Delphi 10.3.3.  
-SDK version: 10.0.19041.0, May 2020 OS update (2004)
+SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
 
 
 # Samples
