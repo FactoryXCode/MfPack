@@ -9,7 +9,7 @@
 // Release date: 24-04-2019
 // Language: ENU
 //
-// Version: 2.6.4
+// Version: 3.0.0
 // Description: Floating form for subtitles.
 //
 // Company: FactoryX
@@ -17,19 +17,17 @@
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships),
 //                 Ramyses De Macedo Rodrigues, (Ciaran).
 //
-// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
-//                                #1 Autobahn
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -70,6 +68,7 @@ uses
   WinApi.Messages,
   {System}
   System.SysUtils,
+  System.UITypes,
   System.Variants,
   System.Classes,
   System.Math,
@@ -80,7 +79,7 @@ uses
   Vcl.Dialogs,
   Vcl.StdCtrls,
   {MfPack}
-  MfPack.MfpUtils;
+  WinApi.MediaFoundationApi.MfUtils;
 
 const
 
@@ -182,6 +181,9 @@ begin
   fLayerFont.Size := 12;
   fLayerFont.Style := [fsBold];
   fLayerFont.Color := clWhite;
+  lblSubTitle.Font.Size := fLayerFont.Size;
+  lblSubTitle.Font.Style := fLayerFont.Style;
+  lblSubTitle.Font.Color := fLayerFont.Color;
   FormStyle := fsStayOnTop; // Keep the form always on top
   BorderStyle := bsNone;
   Ctl3D := False;
@@ -222,6 +224,12 @@ begin
       lblSubTitle.Font.Size  := 12;
       lblSubTitle.Font.Style := [fsBold];
       lblSubTitle.Font.Color := clWhite;
+    end
+  else
+    begin
+      lblSubTitle.Font.Size := fLayerFont.Size;
+      lblSubTitle.Font.Style := fLayerFont.Style;
+      lblSubTitle.Font.Color := fLayerFont.Color;
     end;
   lblSubTitle.Caption := sSubTitleTxt;
   Invalidate();
@@ -326,28 +334,30 @@ begin
   xf := (formsize.Height / screenRes.ScrResV) * 100;
   perc := (xf + xd) / 2;
 
-  if (perc >= 100) then
-    lblSubTitle.Font.Size := 40
-  else if InRange(perc, 90, 100) then
-    lblSubTitle.Font.Size := 38
-  else if InRange(perc, 80, 90) then
-    lblSubTitle.Font.Size := 32
-  else if InRange(perc, 70, 80) then
-    lblSubTitle.Font.Size := 28
-  else if InRange(perc, 60, 70) then
-    lblSubTitle.Font.Size := 22
-  else if InRange(perc, 50, 60) then
-    lblSubTitle.Font.Size := 22
-  else if InRange(perc, 40, 50) then
-    lblSubTitle.Font.Size := 18
-  else if InRange(perc, 30, 40) then
-    lblSubTitle.Font.Size := 16
-  else if InRange(perc, 20, 30) then
-    lblSubTitle.Font.Size := 14
-  else if InRange(perc, 0, 20) then
-    lblSubTitle.Font.Size := 12;
-  // test
-  //lblSubTitle.Caption := IntToStr(lblSubTitle.Font.Size) + ' - ' + FloatToStr(perc) + ' %';
+  if Assigned(fLayerFont) then
+    begin
+      if (perc >= 100) then
+        fLayerFont.Size := 40
+      else if InRange(perc, 90, 100) then
+        fLayerFont.Size := 38
+      else if InRange(perc, 80, 90) then
+        fLayerFont.Size := 32
+      else if InRange(perc, 70, 80) then
+        fLayerFont.Size := 28
+      else if InRange(perc, 60, 70) then
+        fLayerFont.Size := 22
+      else if InRange(perc, 50, 60) then
+        fLayerFont.Size := 22
+      else if InRange(perc, 40, 50) then
+        fLayerFont.Size := 18
+      else if InRange(perc, 30, 40) then
+        fLayerFont.Size := 16
+      else if InRange(perc, 20, 30) then
+        fLayerFont.Size := 14
+      else if InRange(perc, 0, 20) then
+        fLayerFont.Size := 12;
+    end;
+
 end;
 
 

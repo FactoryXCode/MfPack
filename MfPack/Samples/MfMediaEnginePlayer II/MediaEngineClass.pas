@@ -9,7 +9,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 2.6.4
+// Version: 3.0.0
 // Description: This class uses the IMFMediaEngine based on HTML 5 and
 //              the TimedText interfaces for subtitles.
 //
@@ -18,19 +18,17 @@
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships),
 //                 Ramyses De Macedo Rodrigues, (Ciaran).
 //
-// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
-//                                #1 Autobahn
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -70,23 +68,23 @@ uses
   {WinApi}
   WinApi.Windows,
   Winapi.Messages,
-  //WinApi.ActiveX {opt},
+  WinApi.WinApiTypes,
+  WinApi.WinError,
+  WinApi.ComBaseApi,
   {System}
   System.Classes,
   System.SysUtils,
   System.Win.ComObj,
   System.SyncObjs,
   {MfPack}
-  MfPack.MfpUtils,
-  MfPack.MfpTypes,
-  MfPack.MfApi,
-  MfPack.MfIdl,
-  MfPack.MfObjects,
-  MfPack.MfMediaEngine,
-  MfPack.ObjBase,
-  MfPack.ComBaseApi,
-  MfPack.WinError,
-  MfPack.MfpMetLib,  // replacement for MfMethods.pas
+  WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfMetLib,
+  WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.MfIdl,
+  WinApi.MediaFoundationApi.MfObjects,
+  WinApi.MediaFoundationApi.MfMediaEngine,
+  {ActiveX}
+  WinApi.ActiveX.ObjBase,
   {Application}
   TimedTextNotifyClass;
 

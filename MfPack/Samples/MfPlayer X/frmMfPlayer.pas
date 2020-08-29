@@ -4,31 +4,30 @@
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: http://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: frmMfPlayer.pas
 // Kind: Pascal Unit
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 2.6.4
+// Version: 3.0.0
 // Description: MfPlayer X: Requires Windows 7 or later.
 //
 // Company: FactoryX
 // Intiator(s): Tony (maXcomX), Peter (OzShips), Ramyses De Macedo Rodrigues.
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Ramyses De Macedo Rodrigues.
 //
-// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
-//                                #1 Autobahn
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -66,7 +65,9 @@ interface
 
 uses
   {Winapi}
-  Winapi.Windows, Winapi.Messages,
+  Winapi.Windows,
+  Winapi.Messages,
+  WinApi.WinApiTypes,
   {System}
   System.SysUtils,
   System.Types,
@@ -83,12 +84,11 @@ uses
   Vcl.ComCtrls,
   Vcl.ExtCtrls,
   Vcl.Menus,
-  {MfPack}
-  MfPack.MfpUtils,
-  MfPack.MfpTypes,
-  MfPack.MfApi,
-  MfPack.WmCodecDsp,
-  MfPack.MfpMetLib,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.WmCodecDsp,
+  WinApi.MediaFoundationApi.MfMetLib,
   {Project}
   MfPlayerClassX,
   FloatingFrm,

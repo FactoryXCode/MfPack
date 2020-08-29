@@ -1,0 +1,20 @@
+MFSimpleCapture
+Version: X 3.0.0
+Enigma release.
+
+
+NOTES: 
+ - This release is updated for compiler version 17 up to 33.
+ - SDK version 10.0.19041.0 (May 2020 OS update (2004))
+ - Requires Windows 7 or later.
+ - Minimum supported MfPack version: 3.0.0
+
+This example shows, how you have to implement capturing
+within a session.
+
+Project: Media Foundation - MFPack - Samples
+Project location: http://sourceforge.net/projects/MFPack
+First release date: 2018/02/05
+Final release date: 2020/08/13
+
+Copyright © FactoryX. All rights reserved.

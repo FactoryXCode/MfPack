@@ -4,12 +4,13 @@
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: http://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfpPlayerClassX.pas
 // Kind: Pascal Unit
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 2.6.4
+// Version: 3.0.0
 // Description: This is the extended basic player class (version X),
 //              containing the necessary methodes to play a mediafile
 //              For indepth information see the included examples (CPlayer)
@@ -20,19 +21,17 @@
 // Intiator(s): Ramyses De Macedo Rodrigues, Tony (maXcomX), Peter (OzShips).
 // Contributor(s): Ramyses De Macedo Rodrigues, Tony Kalf (maXcomX), Peter Larson (ozships).
 //
-// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
-//                                #1 Autobahn
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -73,6 +72,9 @@ uses
   {Winapi}
   Winapi.Windows,
   WinApi.Messages,
+  WinApi.WinApiTypes,
+  WinApi.Unknwn,
+  WinApi.ComBaseApi,
   {Vcl}
   VCL.Graphics,
   VCL.ExtCtrls,
@@ -82,20 +84,18 @@ uses
   System.Classes,
   System.Types,
   System.Win.ComObj,
-  {MfPack}
-  MfPack.MfpUtils,
-  MfPack.MfpTypes,
-  MfPack.Unknwn,
-  MfPack.MfApi,
-  MfPack.MfIdl,
-  MfPack.PropIdl,
-  MfPack.MfError,
-  MfPack.MfObjects,
-  MfPack.Evr,
-  MfPack.Evr9,
-  MfPack.ComBaseApi,
-  MfPack.ObjBase,
-  MfPack.MfpMetLib,
+  {ActiveX}
+  WinApi.ActiveX.PropIdl,
+  WinApi.ActiveX.ObjBase,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.MfIdl,
+  WinApi.MediaFoundationApi.MfError,
+  WinApi.MediaFoundationApi.MfObjects,
+  WinApi.MediaFoundationApi.Evr,
+  WinApi.MediaFoundationApi.Evr9,
+  WinApi.MediaFoundationApi.MfMetLib,
   {Project}
   TimedTextClass,
   FloatingFrm,
@@ -1418,7 +1418,7 @@ end;
 // the offset between the presentation time and the source time.
 function TMfPlayerX.OnSessionNotifyPresentationTime(pEvent: IMFMediaEvent): HRESULT;
 var
-  eventVal: MfPROPVARIANT;
+  eventVal: PROPVARIANT;
   hr: HResult;
 
 begin
@@ -1718,7 +1718,7 @@ end;
 function TMfPlayerX.Start(): HRESULT;
 var
   hr: HRESULT;
-  varStart: mfPROPVARIANT;
+  varStart: PROPVARIANT;
   tPos: MFTIME;
   csClockState: MF_CLOCK_STATE;
   FVideoProcessor: IMFVideoProcessor;
@@ -1941,7 +1941,7 @@ end;
 // This function is called by SetPosition.
 function TMfPlayerX.SetPositionInternal(tPos: MFTIME): HRESULT;
 var
-  varStart: mfPROPVARIANT;
+  varStart: PROPVARIANT;
   hr: HRESULT;
 
 begin

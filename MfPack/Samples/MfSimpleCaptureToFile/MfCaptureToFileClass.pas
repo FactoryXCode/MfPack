@@ -1,15 +1,16 @@
 // FactoryX
 //
-// Copyright ©2003 - 2018 by FactoryX, Netherlands/Australia
+// Copyright © by FactoryX, Netherlands/Australia
 //
 // Project: Media Foundation - MFPack - Samples
-// Project location: http://sourceforge.net/projects/MFPack
+// Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfCaptureToFileClass.pas
 // Kind: Pascal Unit
 // Release date: 09-02-2018
 // Language: ENU
 //
-// Version: 2.6.4
+// Version: 3.0.0
 //
 // Description: Device capture class based on MFCaptureToFile example
 //
@@ -17,19 +18,17 @@
 // Intiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), (Ciaran), (TopPlay)
 //
-// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
-//                                #1 Autobahn
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -69,26 +68,26 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.Messages,
-  //Winapi.ActiveX {opt},
+  WinApi.WinApiTypes,
+  WinApi.ComBaseApi,
+  WinApi.Dbt,
+  WinApi.Ks,
+  WinApi.WinError,
   {System}
   System.SysUtils,
   System.Classes,
+  {ActiveX}
+  WinApi.ActiveX.ObjBase,
+  WinApi.ActiveX.PropIdl,
   {MfPack}
-  MfPack.MfpTypes,
-  MfPack.MfpUtils,
-  MfPack.MfApi,
-  MfPack.MfIdl,
-  MfPack.MfObjects,
-  MfPack.Dbt,
-  MfPack.MfReadWrite,
-  MfPack.WmCodecDsp,
-  MfPack.Ks,
-  MfPack.PropIdl,
-  MfPack.Evr,
-  MfPack.Evr9,
-  MfPack.WinError,
-  MfPack.ObjBase,    // ActiveX
-  MfPack.ComBaseApi; // ActiveX
+  WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.MfIdl,
+  WinApi.MediaFoundationApi.MfObjects,
+  WinApi.MediaFoundationApi.MfReadWrite,
+  WinApi.MediaFoundationApi.WmCodecDsp,
+  WinApi.MediaFoundationApi.Evr,
+  WinApi.MediaFoundationApi.Evr9;
 
   {$TYPEINFO ON}
 
@@ -1029,7 +1028,7 @@ function CopyAttribute(pSrc: IMFAttributes;
                        const key: REFGUID): HRESULT;
 var
   hr: HRESULT;
-  pvar: MfPROPVARIANT;  // Don't use the ActiveX one, the ActiveX PROPVARIANT is Delphi version depended!
+  pvar: PROPVARIANT;  // Don't use the ActiveX one, the ActiveX PROPVARIANT is Delphi version depended!
 
 begin
 

@@ -9,7 +9,7 @@
 // Release date: 25-02-2016
 // Language: ENU
 //
-// Version: 2.6.4
+// Version: 3.0.0
 // Description:
 //              This is the basic class of a queue timer,
 //              Use this timer when less overhead
@@ -19,19 +19,19 @@
 // Intiator(s): Tony (maXcomX), Peter (OzShips), Ramyses De Macedo Rodrigues.
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Ramyses De Macedo Rodrigues.
 //
-// -----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or later.
+// Remarks: Requires Windows Vista or later.
 //          For use in critical sections,
 //          use the ThreadedQueueTimer instead.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -48,9 +48,9 @@
 // LICENSE
 //
 // The contents of this file are subject to the Mozilla Public License
-// Version 1.1 (the "License"); you may not use this file except in
+// Version 2.0 (the "License"); you may not use this file except in
 // compliance with the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/MPL-1.1.html
+// https://www.mozilla.org/en-US/MPL/2.0/
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the

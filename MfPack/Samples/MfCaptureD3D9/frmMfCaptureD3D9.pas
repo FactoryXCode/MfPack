@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright © FactoryX, Netherlands/Australia
+// Copyright © by FactoryX, Netherlands/Australia
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: http://sourceforge.net/projects/MFPack
@@ -9,24 +9,24 @@
 // Release date: 08-03-2018
 // Language: ENU
 //
-// Version: 2.6.4
+// Version: 3.0.0
 //
 // Description: Preview window.
 //
 // Intiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
-// ---------- ------------------- ---------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-// ----------------------------------------------------------------------------
+// ---------- ------------------- ----------------------------------------------
+// 13/08/2020 All                 Enigma release. New layout and namespaces
+//------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -44,9 +44,9 @@
 // LICENSE
 //
 // The contents of this file are subject to the Mozilla Public License
-// Version 1.1 (the "License"); you may not use this file except in
+// Version 2.0 (the "License"); you may not use this file except in
 // compliance with the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/MPL-1.1.html
+// https://www.mozilla.org/en-US/MPL/2.0/
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
@@ -65,6 +65,10 @@ uses
   {WinAPI}
   Winapi.Windows,
   Winapi.Messages,
+  WinApi.WinApiTypes,
+  WinApi.Dbt,
+  WinApi.Ks,
+  WinApi.ComBaseApi,
   {System}
   System.SysUtils,
   System.Classes,
@@ -76,17 +80,14 @@ uses
   Vcl.Dialogs,
   Vcl.Menus,
   Vcl.StdCtrls,
-  {MfPack}
-  MfPack.MfpTypes,
-  MfPack.MfpUtils,
-  MfPack.MfObjects,
-  MfPack.MfApi,
-  MfPack.Dbt,
-  MfPack.Ks,
-  MfPack.MfIdl,
-  MfPack.ObjBase,    // ActiveX
-  MfPack.ComBaseApi, // ActiveX
-  {App}
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfObjects,
+  WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.MfIdl,
+  {ActiveX}
+  WinApi.ActiveX.ObjBase,
+  {Project}
   dlgSelDevice,
   Preview;
 

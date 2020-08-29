@@ -3,13 +3,14 @@
 // Copyright: © FactoryX. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
-// Project location: http://sourceforge.net/projects/MFPack
+// Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: frmDuckingMediaPlayer.pas
 // Kind: Pascal Unit
 // Release date: 05-07-2020
 // Language: ENU
 //
-// Version: 2.6.4
+// Version: 3.0.0
 // Description: This sample implements a simple media player that responds to the "ducking"
 //              feature in Windows 7 and higher.
 //              It also implements a volume control which tracks
@@ -18,17 +19,13 @@
 //
 // Company: FactoryX
 // Intiator(s): Tony (maXcomX), Peter (OzShips), Ramyses De Macedo Rodrigues.
-// Contributor(s): Tony Kalf (maXcomX), Ramyses De Macedo Rodrigues.
+// Contributor(s): Tony Kalf (maXcomX).
 //
-//
-// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/07/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
-//                                #1 Autobahn
-// 10/08/2010 All                 #2 => #2b The Model
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
@@ -36,7 +33,7 @@
 //          feature in Windows 7 and higher.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -72,12 +69,16 @@ unit frmDuckingMediaPlayer;
 interface
 
 uses
+  {Winapi}
   Winapi.Windows,
   Winapi.Messages,
   Winapi.CommCtrl,
+  WinApi.WinApiTypes,
+  {System}
   System.SysUtils,
   System.Variants,
   System.Classes,
+  {Vcl}
   Vcl.Graphics,
   Vcl.Controls,
   Vcl.Forms,
@@ -85,7 +86,7 @@ uses
   Vcl.StdCtrls,
   Vcl.ComCtrls,
   Vcl.ExtCtrls,
-  MfPack.MfpTypes,
+  {Project}
   MediaPlayer;
 
 type

@@ -3,32 +3,31 @@
 // Copyright © FactoryX. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
-// Project location: http://sourceforge.net/projects/MFPack
+// Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MediaEngineClass.pas
 // Kind: Pascal Unit
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 2.6.4
+// Version: 3.0.0
 // Description: This class uses the IMFMediaEngine based on extended HTML5.
 //
 // Company: FactoryX
 // Intiator(s): Tony (maXcomX), Peter (OzShips), Ramyses De Macedo Rodrigues.
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Ramyses De Macedo Rodrigues.
 //
-// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
-//                                #1 Autobahn
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -36,16 +35,6 @@
 //
 // Todo: -
 //
-// ----------------------------------------------------------------------------
-//
-// Remarks: Requires MfAdditional (XE) 2.6.3 (or higher) and included components to be installed!
-//
-// Related objects: -
-// Related projects: MfPackX263
-// Known Issues: -
-// Compiler version: 23 up to 33
-// TODO: -
-// SDK version: 10.0.18362.0 (19H1)
 // =============================================================================
 // Source: -
 //
@@ -64,7 +53,6 @@
 // License for the specific language governing rights and limitations
 // under the License.
 //
-//
 // Users may distribute this source code provided that this header is included
 // in full at the top of the file.
 //
@@ -77,21 +65,22 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.Messages,
-  //WinApi.ActiveX {opt},
+  WinApi.WinApiTypes,
+  WinApi.ComBaseApi,
   {System}
   System.SysUtils,
   System.Classes,
   System.Win.ComObj,
   System.SyncObjs,
+  {ActiveX}
+  WinApi.ActiveX.ObjBase,
   {MfPack}
-  MfPack.MfpUtils,
-  MfPack.MfpTypes,
-  MfPack.MfApi,
-  MfPack.MfObjects,
-  MfPack.MfMediaEngine,
-  MfPack.ObjBase,
-  MfPack.ComBaseApi,
-  MfPack.MfpMetLib;
+  MediaFoundationApi.MfUtils,
+  MediaFoundationApi.MfApi,
+  MediaFoundationApi.MfObjects,
+  MediaFoundationApi.MfMediaEngine,
+  MediaFoundationApi.MfMetLib;
+
 
   {$TYPEINFO ON}
 

@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright ©2003 - 2018 by FactoryX, Netherlands/Australia
+// Copyright © by FactoryX, Netherlands/Australia
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: http://sourceforge.net/projects/MFPack
@@ -9,23 +9,23 @@
 // Release date: 08-03-2018
 // Language: ENU
 //
-// Version: 2.6.4
+// Version: 3.0.0
 //
 // Description: Select device dialog.
 //
 // Intiator(s): Tony (maXcomX), Peter (OzShips)
 //
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
-// ---------- ------------------- ---------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-// ----------------------------------------------------------------------------
+// ---------- ------------------- ----------------------------------------------
+// 13/08/2020 All                 Enigma release. New layout and namespaces
+//------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -43,9 +43,9 @@
 // LICENSE
 //
 // The contents of this file are subject to the Mozilla Public License
-// Version 1.1 (the "License"); you may not use this file except in
+// Version 2.0 (the "License"); you may not use this file except in
 // compliance with the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/MPL-1.1.html
+// https://www.mozilla.org/en-US/MPL/2.0/
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
@@ -59,7 +59,6 @@
 // Contributor(s): Tony Kalf (maXcomX),
 //                 Peter Larson (ozships),
 //
-//
 // Users may distribute this source code provided that this header is included
 // in full at the top of the file.
 //
@@ -72,6 +71,7 @@ interface
 uses
   {WinApi}
   Winapi.Windows,
+  WinApi.WinApiTypes,
   {System}
   System.SysUtils,
   System.Classes,
@@ -82,10 +82,9 @@ uses
   Vcl.StdCtrls,
   Vcl.Buttons,
   Vcl.ExtCtrls,
-  {MfPack}
-  Mfpack.MfpTypes,
-  MfPack.MfObjects,
-  {App}
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfObjects,
+  {Project}
   Preview;
 
 type

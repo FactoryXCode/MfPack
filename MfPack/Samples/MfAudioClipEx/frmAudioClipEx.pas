@@ -4,12 +4,13 @@
 //
 // Project: MfPack - MediaFoundation
 // Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module:  frmAudioClipEx.pas
 // Kind: Pascal Unit
 // Release date: 21-12-2019
 // Language: ENU
 //
-// Revision Version: 2.6.4
+// Revision Version: 3.0.0
 // Description:
 //   This application demonstrates using the Media Foundation
 //   source reader to extract decoded audio from an audio/video file.
@@ -20,7 +21,7 @@
 //   The input file must be a media format supported by Media Foundation,
 //   and must have  an audio stream. The audio stream can be an encoded
 //   format, such as Windows Media Audio.
-//   Note: The original application was a console app.
+//   Note: The original application is a console app.
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -30,13 +31,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: >= MfPackX264
+// Related projects: >= MfPackX300
 // Known Issues: The IMFSourceReader.ReadSample method eats a lot of CPU cycles and
 //               power on low latency file reading.
 //
@@ -54,9 +55,9 @@
 // LICENSE
 //
 // The contents of this file are subject to the Mozilla Public License
-// Version 1.1 (the "License"); you may not use this file except in
+// Version 2.0 (the "License"); you may not use this file except in
 // compliance with the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/MPL-1.1.html
+// https://www.mozilla.org/en-US/MPL/2.0/
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
@@ -74,6 +75,7 @@ uses
   {WinApi}
   Winapi.Windows,
   Winapi.Messages,
+  WinApi.WinApiTypes,
   {System}
   System.SysUtils,
   System.Variants,
@@ -89,10 +91,9 @@ uses
   Vcl.Menus,
   Vcl.ComCtrls,
   {MfPack}
-  MfPack.MfpTypes,
-  MfPack.MfpUtils,
-  MfPack.MfError,
-  MfPack.MfReadWrite,
+  WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfError,
+  WinApi.MediaFoundationApi.MfReadWrite,
   {Application}
   AudioClipEngine,
   Helpers;
@@ -274,7 +275,8 @@ begin
 
       lblTargetFile.Caption := Savedialog1.FileName;
       wTargetFile := PWideChar(Savedialog1.FileName);
-      ButExtract.Enabled := True;
+      butExtract.Enabled := True;
+      butCancel.Enabled := True;
     end;
 end;
 
@@ -376,7 +378,10 @@ begin
       begin
         // Check HResult
         if Succeeded(HResult(Msg.lParam)) then
-          lblProgress.Caption := 'Clip succesfully extracted.'
+          begin
+            lblProgress.Caption := 'Clip succesfully extracted.';
+
+          end
         else
           if HResult(Msg.lParam) = MF_E_NOTACCEPTING then
             lblProgress.Caption := 'Clip extraction aborted.'
@@ -384,6 +389,7 @@ begin
           lblProgress.Caption := 'Clip extraction failed!';
 
         butExtract.Enabled := True;
+        butCancel.Enabled := False;
       end;
 end;
 

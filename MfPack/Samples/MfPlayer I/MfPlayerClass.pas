@@ -4,12 +4,13 @@
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: http://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfpPlayerClass.pas
 // Kind: Pascal Unit
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 2.6.4
+// Version: 3.0.0
 // Description: This is the basic class of MfPlayer,
 //              containing the necessary methodes to play a mediafile
 //              For indepth information see the included examples (CPlayer)
@@ -20,21 +21,18 @@
 // Intiator(s): Tony (maXcomX), Peter (OzShips), Ramyses De Macedo Rodrigues.
 // Contributor(s): Tony Kalf (maXcomX), Ramyses De Macedo Rodrigues.
 //
-//
-// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
-//                                #1 Autobahn
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
 //          This sample shows how to implement the TInterfacedObject.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -73,8 +71,10 @@ interface
 uses
   {Winapi}
   Winapi.Windows,
-  Winapi.ActiveX,
   WinApi.Messages,
+  WinApi.WinApiTypes,
+  WinApi.Unknwn,
+  WinApi.ComBaseApi,
   {System}
   System.Win.ComObj,
   System.SysUtils,
@@ -82,17 +82,17 @@ uses
   {VCL}
   VCL.Graphics,
   VCL.ExtCtrls,
-  {MfPack}
-  MfPack.MfpTypes,
-  MfPack.MfpUtils,
-  MfPack.Unknwn,
-  MfPack.MfApi,
-  MfPack.MfIdl,
-  MfPack.PropIdl,
-  MfPack.MfError,
-  MfPack.MfObjects,
-  MfPack.Evr,
-  MfPack.Evr9;
+  {ActiveX}
+  WinApi.ActiveX.PropIdl,
+  WinApi.ActiveX.ObjBase,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.MfIdl,
+  WinApi.MediaFoundationApi.MfError,
+  WinApi.MediaFoundationApi.MfObjects,
+  WinApi.MediaFoundationApi.Evr,
+  WinApi.MediaFoundationApi.Evr9;
 
   {$DEFINE AUTOREFCOUNT}
 
@@ -796,6 +796,8 @@ begin
   FFileName := '';
   m_pSession := nil;
   m_pSource := nil;
+  if Assigned(FTimer) then
+    FTimer.Enabled := False;
 end;
 
 
@@ -842,12 +844,13 @@ begin
   // Shut down the media session. (Synchronous operation, no events.)
   if Assigned(m_pSession) then
     begin
-      hr := m_pSession.Shutdown();
       hr := m_pSession.ClearTopologies();
+      hr := m_pSession.Shutdown();
     end;
 
   m_pSource := Nil;
   m_pSession := Nil;
+  Clear();
   m_state.Command := CmdClosed;
   m_state.State := Closed;
 
@@ -1725,7 +1728,7 @@ end;
 
 function TMfPlayer.SetPositionInternal(tPos: MFTIME): HRESULT;
 var
-  varStart: mfPROPVARIANT;
+  varStart: PROPVARIANT;
   hr: HRESULT;
 
 begin

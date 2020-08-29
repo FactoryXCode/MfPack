@@ -16,12 +16,14 @@
 // Intiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
-// ----------------------------------------------------------------------------
+// Rudy Velthuis 1960 ~ 2019.
+//------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
-// ---------- ------------------- ---------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-// ----------------------------------------------------------------------------
+// ---------- ------------------- ----------------------------------------------
+// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
+//                                #1 Autobahn
+//------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
@@ -44,9 +46,9 @@
 // LICENSE
 //
 // The contents of this file are subject to the Mozilla Public License
-// Version 1.1 (the "License"); you may not use this file except in
+// Version 2.0 (the "License"); you may not use this file except in
 // compliance with the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/MPL-1.1.html
+// https://www.mozilla.org/en-US/MPL/2.0/
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
@@ -64,19 +66,19 @@ interface
 uses
   {WinApi}
   WinApi.Windows,
+  WinApi.WinApiTypes,
   {System}
   System.Types,
   System.SysUtils,
   {DirectX - Clootie, WinApi or MfPack}
-  MfPack.D3D9,
-  MfPack.D3D9Types,
-  MfPack.D3d9Caps,
-  {MFPACK}
-  MfPack.MfpTypes,
-  MfPack.MfpUtils,
-  MfPack.MfObjects,
-  MfPack.Mfapi,
-  MfPack.Mferror,
+  WinApi.DirectX.D3D9,
+  WinApi.DirectX.D3D9Types,
+  WinApi.DirectX.D3d9Caps,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfObjects,
+  WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.Mferror,
   {Project}
   VideoBufferLock;
 
@@ -468,7 +470,7 @@ begin
 
   m_interlace := MFVideoInterlaceMode(MFGetAttributeUINT32(pType,
                                       MF_MT_INTERLACE_MODE,
-                                      UINT32(MFVideoInterlace_Progressive)));
+                                      MFVideoInterlace_Progressive));
 
   // Get the image stride.
   hr := GetDefaultStride(pType,

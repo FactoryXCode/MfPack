@@ -9,7 +9,7 @@
 // Release date: 24-04-2019
 // Language: ENU
 //
-// Version: 2.6.4
+// Version: 3.0.0
 // Description: This player version is based on the IMFMediaEngine and
 //              the TimedText interfaces for subtitles.
 //
@@ -18,19 +18,17 @@
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships),
 //                 Ramyses De Macedo Rodrigues, (Ciaran).
 //
-// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
-//                                #1 Autobahn
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -69,6 +67,7 @@ uses
   {Winapi}
   Winapi.Windows,
   Winapi.Messages,
+  WinApi.WinApiTypes,
   {System}
   System.Types,
   System.SysUtils,
@@ -84,10 +83,9 @@ uses
   Vcl.ExtCtrls,
   Vcl.Menus,
   {MfPack}
-  MfPack.MfpUtils,
-  MfPack.MfpTypes,
-  MfPack.MfApi,
-  MfPack.MfpMetLib,
+  WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.MfMetLib,
   {Project}
   MediaEngineClass,
   TimedTextNotifyClass,

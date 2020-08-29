@@ -9,7 +9,7 @@
 // Release date: 21-11-2019
 // Language: ENU
 //
-// Revision Version: 2.6.4
+// Revision Version: 3.0.0
 // Description:
 //   This application demonstrates using the Media Foundation
 //   source reader to extract decoded audio from an audio/video file.
@@ -26,17 +26,18 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: >= MfPackX264
+// Related projects: >= MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -53,9 +54,9 @@
 // LICENSE
 //
 // The contents of this file are subject to the Mozilla Public License
-// Version 1.1 (the "License"); you may not use this file except in
+// Version 2.0 (the "License"); you may not use this file except in
 // compliance with the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/MPL-1.1.html
+// https://www.mozilla.org/en-US/MPL/2.0/
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
@@ -72,23 +73,24 @@ interface
 uses
   {WinApi}
   WinApi.Windows,
+  WinApi.WinError,
+  WinApi.WinApiTypes,
+  WinApi.ComBaseApi,
+  WinApi.MmReg,
   {System}
   System.SysUtils,
   System.Math,
   {Vcl}
   Vcl.Forms,
-  {MfPack}
-  MfPack.MfpUtils,
-  MfPack.MfpTypes,
-  MfPack.MfApi,
-  MfPack.MfIdl,
-  MfPack.MmReg,
-  MfPack.MfObjects,
-  MfPack.MfReadWrite,
-  MfPack.MfError,
-  MfPack.WinError,
-  MfPack.ComBaseApi,
-  MfPack.ObjBase;
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.MfIdl,
+  WinApi.MediaFoundationApi.MfObjects,
+  WinApi.MediaFoundationApi.MfReadWrite,
+  WinApi.MediaFoundationApi.MfError,
+  {ActiveX}
+  WinApi.ActiveX.ObjBase;
 
 
 const
@@ -107,7 +109,7 @@ var
                          msecAudioData: LONG): HResult;
 
   function ConfigureAudioStream(pReader: IMFSourceReader;    // Pointer to the source reader.
-                              out ppPCMAudio: IMFMediaType): HResult;
+                                out ppPCMAudio: IMFMediaType): HResult;
 
   function WriteWaveHeader(const hFile: THandle;        // Output file.
                            pMediaType: IMFMediaType;    // PCM audio format.

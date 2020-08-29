@@ -4,32 +4,30 @@
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: http://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MFTimerCallBackClass.pas
 // Kind: Pascal Unit
 // Release date: 13-08-2019
 // Language: ENU
 //
-// Version: 2.6.4
+// Version: 3.0.0
 // Description: A Timercallback class for the IMFTimer interface.
 //
 // Company: FactoryX
 // Intiator(s): Ramyses De Macedo Rodrigues, Tony (maXcomX), Peter (OzShips).
 // Contributor(s): Ramyses De Macedo Rodrigues, Tony Kalf (maXcomX), Peter Larson (ozships).
 //
-//
-// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
-//                                #1 Autobahn
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -67,18 +65,18 @@ uses
   {Winapi}
   Winapi.Windows,
   WinApi.Messages,
+  WinApi.WinApiTypes,
+  WinApi.Unknwn,
   {System}
   System.Classes,
   System.SysUtils,
   {Vcl}
   Vcl.Forms,
-  {MfPack}
-  MfPack.MfpUtils,
-  MfPack.MfpTypes,
-  MfPack.Unknwn,
-  MfPack.MfIdl,
-  MfPack.MfObjects,
-  MfPack.MfError,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfIdl,
+  WinApi.MediaFoundationApi.MfObjects,
+  WinApi.MediaFoundationApi.MfError,
   {Project}
   MfPCXConstants;
 

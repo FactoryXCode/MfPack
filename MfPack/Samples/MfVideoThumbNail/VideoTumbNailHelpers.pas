@@ -4,31 +4,30 @@
 //
 // Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: VideoTumbNailHelpers.pas
 // Kind: Pascal / Delphi unit
 // Release date: 08-07-2012
 // Language: ENU
 //
-// Revision Version: 2.6.4
+// Revision Version: 3.0.0
 // Description: Helper methods.
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
-// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
-//                                #1 Autobahn
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -64,13 +63,13 @@ interface
 uses
   {WinApi}
   WinApi.Windows,
+  WinApi.WinApiTypes,
   {Vcl}
   Vcl.Graphics,
-  {MfPack}
-  MfPack.DCommon,
-  MfPack.D2D1,
-  MfPack.D2D1Helper,
-  MfPack.MfpTypes;
+  {DirectX}
+  WinApi.DirectX.DCommon,
+  WinApi.DirectX.D2D1,
+  WinApi.DirectX.D2D1Helper;
 
 
 type

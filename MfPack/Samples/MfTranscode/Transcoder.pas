@@ -3,32 +3,31 @@
 // Copyright: © FactoryX. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
-// Project location: http://sourceforge.net/projects/MFPack
+// Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: Transcoder.pas
 // Kind: Pascal Unit
 // Release date: 24-01-2020
 // Language: ENU
 //
-// Version: 2.6.4
+// Version: 3.0.0
 // Description: This is a modified class of the Transcoder sample,
 //
 // Company: FactoryX
 // Intiator(s): Tony (maXcomX), Peter (OzShips), Ramyses De Macedo Rodrigues.
 // Contributor(s): Tony Kalf (maXcomX)
 //
-// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
-//                                #1 Autobahn
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -67,18 +66,19 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.Messages,
+  WinApi.WinApiTypes,
+  WinApi.ComBaseApi,
   {System}
   System.SysUtils,
-  {MfPack}
-  MfPack.MfpTypes,
-  MfPack.MfApi,
-  MfPack.MfIdl,
-  MfPack.PropIdl,
-  MfPack.MfObjects,
-  MfPack.ObjBase,
-  MfPack.ComBaseApi,
-  MfPack.MfError,
-  {Application}
+  {ActiveX}
+  WinApi.ActiveX.PropIdl,
+  WinApi.ActiveX.ObjBase,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.MfIdl,
+  WinApi.MediaFoundationApi.MfObjects,
+  WinApi.MediaFoundationApi.MfError,
+  {Project}
   Helpers;
 
 const
@@ -100,7 +100,7 @@ type
     function Shutdown(): HResult;
     function Transcode(): HResult;
     function Start(): HResult;
-    // usage;  arrayindex := GetMediaFromContArray( mtAudio or mtVideo);
+    // usage;  arrayindex := GetMediaFromContArray(mtAudio or mtVideo);
     function GetMediaFromContArray(const mitype: TMediaTypes): Integer;
 
   public
@@ -580,7 +580,7 @@ end;
 function TTranscoder.Start(): HResult;
 var
   hr: HResult;
-  varStart: mfPROPVARIANT;
+  varStart: PROPVARIANT;
   pPD: IMFPresentationDescriptor;
   pClock: IMFClock;
 

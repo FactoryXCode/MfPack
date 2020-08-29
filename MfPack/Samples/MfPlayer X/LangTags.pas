@@ -4,29 +4,28 @@
 //
 // Project: Media Foundation - MFPack
 // Project location: http://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: LangTags.pas
 // Kind: Delphi file
 // Release date: 13-08-2019
 // Language: ENU
 //
-// Revision Version: 2.6.4
+// Revision Version: 3.0.0
 // Description: Language tag definitions file.
 //
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 //
-// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
-//                                #1 Autobahn
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -75,6 +74,7 @@ uses
   System.SysUtils,
   System.StrUtils,
   System.RegularExpressions,
+  {Project}
   MfPCXConstants;
 
 

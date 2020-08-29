@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright © FactoryX, Netherlands/Australia
+// Copyright © by FactoryX, Netherlands/Australia
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: http://sourceforge.net/projects/MFPack
@@ -9,26 +9,25 @@
 // Release date: 08-03-2018
 // Language: ENU
 //
-// Version: 2.6.4
+// Version: 3.0.0
 //
 // Description: Requires Windows 7 or later.
 //              Manages video preview.
 //
-//
 // Intiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
-// ---------- ------------------- ---------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-// ----------------------------------------------------------------------------
+// ---------- ------------------- ----------------------------------------------
+// 13/08/2020 All                 Enigma release. New layout and namespaces
+//------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -46,9 +45,9 @@
 // LICENSE
 //
 // The contents of this file are subject to the Mozilla Public License
-// Version 1.1 (the "License"); you may not use this file except in
+// Version 2.0 (the "License"); you may not use this file except in
 // compliance with the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/MPL-1.1.html
+// https://www.mozilla.org/en-US/MPL/2.0/
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
@@ -66,12 +65,12 @@ interface
 uses
   {Vcl}
   Vcl.Dialogs,
-  {MFPACK}
-  MfPack.MfpTypes,
-  MfPack.MfpUtils,
-  MfPack.MfObjects,
-  MfPack.Mferror,
-  MfPack.WinError;
+  WinApi.WinApiTypes,
+  WinApi.WinError,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfObjects,
+  WinApi.MediaFoundationApi.MfError;
 
   {$MINENUMSIZE 4}
   {$IFDEF WIN32}

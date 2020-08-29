@@ -4,12 +4,13 @@
 //
 // Project: MfPack - MediaFoundation
 // Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module:  frmAudioClip.pas
 // Kind: Pascal Unit
 // Release date: 21-11-2019
 // Language: ENU
 //
-// Revision Version: 2.6.4
+// Revision Version: 3.0.0
 // Description:
 //   This application demonstrates using the Media Foundation
 //   source reader to extract decoded audio from an audio/video file.
@@ -26,17 +27,18 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX)
 //
+// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: >= MfPackX264
+// Related projects: >= MfPackX300
 // Known Issues: The SourceReader has a bug that prevents releasing internal readbuffers
 //               at low latency when reading a media file in Windows 10 November 2019 update (H1903).
 //               To fix this latency issue, we did implement MsgWaitForMultipleObjects to give the
@@ -56,9 +58,9 @@
 // LICENSE
 //
 // The contents of this file are subject to the Mozilla Public License
-// Version 1.1 (the "License"); you may not use this file except in
+// Version 2.0 (the "License"); you may not use this file except in
 // compliance with the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/MPL-1.1.html
+// https://www.mozilla.org/en-US/MPL/2.0/
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
@@ -76,6 +78,7 @@ uses
   {WinApi}
   Winapi.Windows,
   Winapi.Messages,
+  //WinApi.WinApiTypes,
   {System}
   System.SysUtils,
   System.Variants,
@@ -89,8 +92,6 @@ uses
   Vcl.ExtCtrls,
   Vcl.Menus,
   Vcl.ComCtrls,
-  {MfPack}
-  MfPack.MfpTypes,
   {Application}
   AudioClipCore;
 

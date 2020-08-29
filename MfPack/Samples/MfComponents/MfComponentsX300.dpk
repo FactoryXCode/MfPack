@@ -1,0 +1,44 @@
+package MfComponentsX300;
+
+{$R *.res}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
+{$ALIGN 4}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO OFF}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 4}
+{$IMAGEBASE $400000}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
+{$DESCRIPTION 'MfComponents for Delphi'}
+{$IMPLICITBUILD ON}
+
+requires
+  rtl,
+  vcl,
+  MfPackX300;
+
+contains
+  MfPeakMeter in 'MfPeakMeter.pas',
+  MfPeakMeterEx in 'MfPeakMeterEx.pas',
+  MfpMixer in 'MfpMixer.pas',
+  QueueTimer in 'QueueTimer.pas',
+  ThreadedQueueTimer in 'ThreadedQueueTimer.pas';
+
+end.
+

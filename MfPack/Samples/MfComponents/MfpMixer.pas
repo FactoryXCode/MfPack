@@ -9,7 +9,7 @@
 // Release date: 05-08-2016
 // Language: ENU
 //
-// Version: 2.6.4
+// Version: 3.0.0
 //
 // Description: Sample component to get/set the proper mixer (and properties)
 //              used in Vista, 7, 8 and 10
@@ -18,18 +18,18 @@
 // Intiator(s): Tony (maXcomX), Peter (OzShips), Ramyses De Macedo Rodrigues.
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Ramyses De Macedo Rodrigues.
 //
-// -----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
 // Remarks: This unit contains samples of how to create the soundmixerdevice
 //          objects and managing them.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -42,9 +42,9 @@
 // LICENSE
 //
 // The contents of this file are subject to the Mozilla Public License
-// Version 1.1 (the "License"); you may not use this file except in
+// Version 2.0 (the "License"); you may not use this file except in
 // compliance with the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/MPL-1.1.html
+// https://www.mozilla.org/en-US/MPL/2.0/
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
@@ -64,23 +64,24 @@ interface
 uses
   {WinApi}
   WinApi.Windows,
-  WinApi.CommCtrl, //WinApi.ActiveX {opt},
+  WinApi.CommCtrl,
   WinApi.Messages,
+  WinApi.WinApiTypes,
+  WinApi.Coml2Api,
+  WinApi.ComBaseApi,
   {System}
   System.Classes,
   System.Win.ComObj,
-  {MfPack}
-  MfPack.MfpTypes,
-  MfPack.MfpUtils,
-  MfPack.PropSys,
-  MfPack.PropIdl,
-  MfPack.MMDeviceApi,
-  MfPack.Endpointvolume,
-  MfPack.Functiondiscoverykeys_devpkey,
-  MfPack.ComBaseApi,
-  MfPack.ObjBase,
-  MfPack.Coml2Api;
-
+  {ActiveX}
+  WinApi.ActiveX.PropSys,
+  WinApi.ActiveX.PropIdl,
+  WinApi.ActiveX.ObjBase,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfUtils,
+  {WinApi.CoreAudioApi}
+  WinApi.CoreAudioApi.Functiondiscoverykeys_devpkey,
+  WinApi.CoreAudioApi.MMDeviceApi,
+  WinApi.CoreAudioApi.Endpointvolume;
 
 const
   // Defines the maximum and minimum in- and output values
@@ -90,7 +91,6 @@ const
   MIN_OUTPUT_VALUE : Single = 0.0;
 
 type
-  
 
   TChannelVolume = record
     ChannelId: UINT;
@@ -316,7 +316,7 @@ function TMfpMixer.GetDeviceName(const DeviceId: integer;
 var
   hr: HResult;
   psPropertyStore: IPropertyStore;
-  pvvar: mfPROPVARIANT;
+  pvvar: PROPVARIANT;
 
 label
   done;

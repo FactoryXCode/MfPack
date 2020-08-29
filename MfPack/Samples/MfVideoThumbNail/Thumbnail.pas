@@ -4,31 +4,30 @@
 //
 // Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: Thumbnail.pas
 // Kind: Pascal / Delphi unit
 // Release date: 08-07-2012
 // Language: ENU
 //
-// Revision Version: 2.6.4
+// Revision Version: 3.0.0
 // Description: Videothumbnail generator.
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
-// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
-//                                #1 Autobahn
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -65,27 +64,27 @@ uses
   {WinApi}
   WinApi.Windows,
   Winapi.Messages,
-  //Winapi.ActiveX,
+  WinApi.WinApiTypes,
   {System}
   System.Classes,
   System.Math,
   System.SysUtils,
   {MfPack dx}
-  MfPack.DCommon,
-  MfPack.DXGIFormat,
-  MfPack.D2D1,
-  MfPack.D2D1Helper,
-  {MfPack}
-  MfPack.MfpTypes,
-  MfPack.MfReadWrite,
-  MfPack.MfError,
-  MfPack.MfpUtils,
-  MfPack.MfIdl,
-  MfPack.MfObjects,
-  MfPack.MfApi,
-  MfPack.PropIdl,
-  MfPack.PropVarUtil,
-  {Application}
+  WinApi.DirectX.DCommon,
+  WinApi.DirectX.DXGIFormat,
+  WinApi.DirectX.D2D1,
+  WinApi.DirectX.D2D1Helper,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfReadWrite,
+  WinApi.MediaFoundationApi.MfError,
+  WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfIdl,
+  WinApi.MediaFoundationApi.MfObjects,
+  WinApi.MediaFoundationApi.MfApi,
+  {ActiveX}
+  WinApi.ActiveX.PropIdl,
+  WinApi.ActiveX.PropVarUtil,
+  {Project}
   Sprite,
   VideoTumbNailHelpers;
 
@@ -182,7 +181,7 @@ var
   pSample: IMFSample;
   pSampleTmp: IMFSample;
   pBitmap: ID2D1Bitmap;
-  _var: MfPROPVARIANT;
+  _var: PROPVARIANT;
   pitch: UINT32;
 
   // debug
@@ -584,7 +583,7 @@ end;
 
 function TThumbnailGenerator.GetDuration(out phnsDuration: LONGLONG): HRESULT;
 var
-  _var: MfPROPVARIANT;
+  _var: PROPVARIANT;
   hr: HResult;
 
 begin
@@ -606,7 +605,7 @@ begin
       phnsDuration := _var.hVal.QuadPart;
     end;
 
-  {WinApi.ActiveX.}PropVariantClear(_var);
+  PropVariantClear(_var);
   Result := hr;
 end;
 
@@ -617,12 +616,12 @@ function TThumbnailGenerator.CanSeek(out pbCanSeek: BOOL): HRESULT;
 var
   hr: HResult;
   flags: ULONG;
-  _var: MfPROPVARIANT;
+  _var: PROPVARIANT;
 
 begin
 
   flags := 0;
-  {WinApi.ActiveX.}PropVariantInit(_var);
+  PropVariantInit(_var);
 
   if (m_pReader = Nil) then
     begin

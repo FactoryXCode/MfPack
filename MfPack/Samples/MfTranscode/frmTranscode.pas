@@ -3,13 +3,14 @@
 // Copyright: © FactoryX. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
-// Project location: http://sourceforge.net/projects/MFPack
+// Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfTranscode.pas
 // Kind: Pascal Unit
 // Release date: 24-01-2020
 // Language: ENU
 //
-// Version: 2.6.4
+// Version: 3.0.0
 // Description: This is a modified translation of the Transcoder sample,
 //              The original is a commandline app.
 //
@@ -17,19 +18,17 @@
 // Intiator(s): Tony (maXcomX), Peter (OzShips), Ramyses De Macedo Rodrigues.
 // Contributor(s): Tony Kalf (maXcomX)
 //
-// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
-//                                #1 Autobahn
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -68,6 +67,7 @@ uses
   {WinApi}
   Winapi.Windows,
   Winapi.Messages,
+  WinApi.WinApiTypes,
   {System}
   System.SysUtils,
   System.DateUtils,
@@ -83,9 +83,9 @@ uses
   Vcl.ExtCtrls,
   Vcl.Menus,
   Vcl.ComCtrls,
-  {MfPack}
-  MfPack.MfpUtils,
-  {Application}
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfUtils,
+  {Project}
   Transcoder;
 
 type

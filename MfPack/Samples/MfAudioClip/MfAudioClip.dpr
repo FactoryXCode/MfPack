@@ -1,11 +1,6 @@
 program MfAudioClip;
 
 uses
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
   Vcl.Forms,
   AudioClipCore in 'AudioClipCore.pas',
   frmAudioClip in 'frmAudioClip.pas' {frmAudioClip};

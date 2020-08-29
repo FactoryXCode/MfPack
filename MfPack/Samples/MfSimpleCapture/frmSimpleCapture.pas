@@ -9,7 +9,7 @@
 // Release date: 08-02-2018
 // Language: ENU
 //
-// Version: 2.6.4
+// Version: 3.0.0
 //
 // Description: This is the basic class of MfSimpleCapture,
 //              containing the necessary methodes to capture media streams.
@@ -20,20 +20,17 @@
 // Contributor(s): Tony Kalf (maXcomX),
 //                 Peter Larson (ozships)
 //
-//
-// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
-//                                #1 Autobahn
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -73,7 +70,11 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.Messages,
-  //WinApi.ActiveX {opt},
+  WinApi.Dbt,
+  WinApi.Ks,
+  WinApi.KsMedia,
+  WinApi.ComBaseApi,
+  WinApi.WinApiTypes,
   {System}
   System.SysUtils,
   System.Variants,
@@ -86,17 +87,13 @@ uses
   Vcl.Dialogs,
   Vcl.StdCtrls,
   Vcl.ExtCtrls,
-  {MfPack}
-  MfPack.MfpTypes,
-  MfPack.MfApi,
-  MfPack.MfPlay,
-  MfPack.Dbt,
-  MfPack.Ks,
-  MfPack.KsMedia,
-  MfPack.MfObjects,
-  MfPack.MfpUtils,
-  MfPack.ObjBase,
-  MfPack.ComBaseApi,
+  {ActiveX}
+  WinApi.ActiveX.ObjBase,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.MfPlay,
+  WinApi.MediaFoundationApi.MfObjects,
+  WinApi.MediaFoundationApi.MfUtils,
   {Application}
   frmdlgChooseDevice,
   MfDeviceCaptureClass;

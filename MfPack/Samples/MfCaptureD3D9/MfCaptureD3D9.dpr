@@ -1,11 +1,6 @@
 program MfCaptureD3D9;
 
 uses
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
   Vcl.Forms,
   frmMfCaptureD3D9 in 'frmMfCaptureD3D9.pas' {frmMain},
   dlgSelDevice in 'dlgSelDevice.pas' {dlgSelectDevice},

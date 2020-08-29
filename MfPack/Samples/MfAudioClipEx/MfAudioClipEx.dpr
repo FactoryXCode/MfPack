@@ -19,7 +19,7 @@ begin
 
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
-  Application.Title := 'MfAudioClipEx version 2.6.4';
+  Application.Title := 'MfAudioClipEx version 3.0.0';
   Application.CreateForm(TAudioClipExFrm, AudioClipExFrm);
   Application.Run;
 end.

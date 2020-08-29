@@ -86,10 +86,10 @@ object Form1: TForm1
     TabOrder = 0
   end
   object butBrowse: TButton
-    Left = 475
-    Top = 33
+    Left = 485
+    Top = 32
     Width = 78
-    Height = 22
+    Height = 23
     Caption = 'Browse...'
     TabOrder = 1
     OnClick = butBrowseClick
@@ -99,17 +99,16 @@ object Form1: TForm1
     Top = 90
     Width = 531
     Height = 23
-    PositionToolTip = ptTop
     TabOrder = 2
     ThumbLength = 18
-    TickMarks = tmTopLeft
+    TickMarks = tmBoth
     TickStyle = tsNone
   end
   object butPlay: TButton
     Left = 18
     Top = 132
     Width = 78
-    Height = 24
+    Height = 23
     Caption = 'Play'
     Enabled = False
     TabOrder = 3
@@ -119,7 +118,7 @@ object Form1: TForm1
     Left = 97
     Top = 132
     Width = 78
-    Height = 24
+    Height = 23
     Caption = 'Pause'
     Enabled = False
     TabOrder = 4
@@ -129,7 +128,7 @@ object Form1: TForm1
     Left = 176
     Top = 132
     Width = 78
-    Height = 24
+    Height = 23
     Caption = 'Stop'
     Enabled = False
     TabOrder = 5
@@ -159,10 +158,9 @@ object Form1: TForm1
     Width = 185
     Height = 23
     Max = 100
-    PositionToolTip = ptTop
     TabOrder = 8
     ThumbLength = 18
-    TickMarks = tmTopLeft
+    TickMarks = tmBoth
     TickStyle = tsNone
     OnChange = tbVolumeSliderChange
   end
@@ -170,7 +168,7 @@ object Form1: TForm1
     Left = 406
     Top = 226
     Width = 78
-    Height = 24
+    Height = 23
     Caption = 'Ok'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -185,7 +183,7 @@ object Form1: TForm1
     Left = 485
     Top = 226
     Width = 78
-    Height = 24
+    Height = 23
     Caption = 'Cancel'
     TabOrder = 10
     OnClick = butOKClick
@@ -208,6 +206,6 @@ object Form1: TForm1
     Interval = 40
     OnTimer = tmrProgressTimer
     Left = 82
-    Top = 218
+    Top = 216
   end
 end

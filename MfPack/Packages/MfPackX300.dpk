@@ -1,0 +1,172 @@
+package MfPackX300;
+
+{$R *.res}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO OFF}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
+{$IMPLICITBUILD ON}
+
+requires
+  rtl,
+  vcl;
+
+contains
+  WinApi.DirectX.XAudio2.XAPO in '..\src\WinApi.DirectX.XAudio2.XAPO.pas',
+  WinApi.DirectX.XAudio2.XAudio2Fx in '..\src\WinApi.DirectX.XAudio2.XAudio2Fx.pas',
+  WinApi.DirectX.XAudio2.XAudio2 in '..\src\WinApi.DirectX.XAudio2.XAudio2.pas',
+  WinApi.DirectX.XAudio2.XAPOFx in '..\src\WinApi.DirectX.XAudio2.XAPOFx.pas',
+  WinApi.DirectX.XAudio2.XAPOBase in '..\src\WinApi.DirectX.XAudio2.XAPOBase.pas',
+  WinApi.DirectX.XAudio2.X3DAudio in '..\src\WinApi.DirectX.XAudio2.X3DAudio.pas',
+  WinApi.DirectX.XAudio2.HrtfApoApi in '..\src\WinApi.DirectX.XAudio2.HrtfApoApi.pas',
+  WinApi.DirectX.DXGIType in '..\src\WinApi.DirectX.DXGIType.pas',
+  WinApi.DirectX.DXGIMessages in '..\src\WinApi.DirectX.DXGIMessages.pas',
+  WinApi.DirectX.DXGIFormat in '..\src\WinApi.DirectX.DXGIFormat.pas',
+  WinApi.DirectX.DXGICommon in '..\src\WinApi.DirectX.DXGICommon.pas',
+  WinApi.DirectX.DXGI1_6 in '..\src\WinApi.DirectX.DXGI1_6.pas',
+  WinApi.DirectX.DXGI1_5 in '..\src\WinApi.DirectX.DXGI1_5.pas',
+  WinApi.DirectX.DXGI1_4 in '..\src\WinApi.DirectX.DXGI1_4.pas',
+  WinApi.DirectX.DXGI1_3 in '..\src\WinApi.DirectX.DXGI1_3.pas',
+  WinApi.DirectX.DXGI1_2 in '..\src\WinApi.DirectX.DXGI1_2.pas',
+  WinApi.DirectX.DXGI in '..\src\WinApi.DirectX.DXGI.pas',
+  WinApi.DirectX.DWrite_3 in '..\src\WinApi.DirectX.DWrite_3.pas',
+  WinApi.DirectX.DWrite_2 in '..\src\WinApi.DirectX.DWrite_2.pas',
+  WinApi.DirectX.DWrite_1 in '..\src\WinApi.DirectX.DWrite_1.pas',
+  WinApi.DirectX.DWrite in '..\src\WinApi.DirectX.DWrite.pas',
+  WinApi.DirectX.DCompTypes in '..\src\WinApi.DirectX.DCompTypes.pas',
+  WinApi.DirectX.DCompAnimation in '..\src\WinApi.DirectX.DCompAnimation.pas',
+  WinApi.DirectX.DComp in '..\src\WinApi.DirectX.DComp.pas',
+  WinApi.MediaFoundationApi.MfMetLib in '..\src\WinApi.MediaFoundationApi.MfMetLib.pas',
+  WinApi.MediaFoundationApi.MfApi in '..\src\WinApi.MediaFoundationApi.MfApi.pas',
+  WinApi.CoreAudioApi.MMDevApiUtils in '..\src\WinApi.CoreAudioApi.MMDevApiUtils.pas',
+  WinApi.CoreAudioApi.DevTopoUtils in '..\src\WinApi.CoreAudioApi.DevTopoUtils.pas',
+  WinApi.DirectX.XInput in '..\src\WinApi.DirectX.XInput.pas',
+  WinApi.DirectX.DxVaHd in '..\src\WinApi.DirectX.DxVaHd.pas',
+  WinApi.DirectX.DxVa9Typ in '..\src\WinApi.DirectX.DxVa9Typ.pas',
+  WinApi.DirectX.Dxva2Trace in '..\src\WinApi.DirectX.Dxva2Trace.pas',
+  WinApi.DirectX.DxVa2SWDev in '..\src\WinApi.DirectX.DxVa2SWDev.pas',
+  WinApi.DirectX.DxVa2Api in '..\src\WinApi.DirectX.DxVa2Api.pas',
+  WinApi.DirectX.DxVa in '..\src\WinApi.DirectX.DxVa.pas',
+  WinApi.DirectX.DocumentTarget in '..\src\WinApi.DirectX.DocumentTarget.pas',
+  WinApi.DirectX.D3DCommon in '..\src\WinApi.DirectX.D3DCommon.pas',
+  WinApi.DirectX.D3D9Types in '..\src\WinApi.DirectX.D3D9Types.pas',
+  WinApi.DirectX.D3D9Caps in '..\src\WinApi.DirectX.D3D9Caps.pas',
+  WinApi.DirectX.D3D9 in '..\src\WinApi.DirectX.D3D9.pas',
+  WinApi.MediaFoundationApi.WmContainer in '..\src\WinApi.MediaFoundationApi.WmContainer.pas',
+  WinApi.MediaFoundationApi.WmCodecDsp in '..\src\WinApi.MediaFoundationApi.WmCodecDsp.pas',
+  WinApi.MediaFoundationApi.OpmApi in '..\src\WinApi.MediaFoundationApi.OpmApi.pas',
+  WinApi.MediaFoundationApi.MfTransform in '..\src\WinApi.MediaFoundationApi.MfTransform.pas',
+  WinApi.MediaFoundationApi.MfSpatialAudio in '..\src\WinApi.MediaFoundationApi.MfSpatialAudio.pas',
+  WinApi.MediaFoundationApi.MfSharingEngine in '..\src\WinApi.MediaFoundationApi.MfSharingEngine.pas',
+  WinApi.MediaFoundationApi.MfReadWrite in '..\src\WinApi.MediaFoundationApi.MfReadWrite.pas',
+  WinApi.MediaFoundationApi.MfPlay in '..\src\WinApi.MediaFoundationApi.MfPlay.pas',
+  WinApi.MediaFoundationApi.MfObjects in '..\src\WinApi.MediaFoundationApi.MfObjects.pas',
+  WinApi.MediaFoundationApi.MfMp2Dlna in '..\src\WinApi.MediaFoundationApi.MfMp2Dlna.pas',
+  WinApi.MediaFoundationApi.MfMediaEngine in '..\src\WinApi.MediaFoundationApi.MfMediaEngine.pas',
+  WinApi.MediaFoundationApi.MfMediaCapture in '..\src\WinApi.MediaFoundationApi.MfMediaCapture.pas',
+  WinApi.MediaFoundationApi.MfIdl in '..\src\WinApi.MediaFoundationApi.MfIdl.pas',
+  WinApi.MediaFoundationApi.Mferror in '..\src\WinApi.MediaFoundationApi.Mferror.pas',
+  WinApi.MediaFoundationApi.MfContentDecryptionModule in '..\src\WinApi.MediaFoundationApi.MfContentDecryptionModule.pas',
+  WinApi.MediaFoundationApi.MfCaptureEngine in '..\src\WinApi.MediaFoundationApi.MfCaptureEngine.pas',
+  WinApi.MediaFoundationApi.KsOpmApi in '..\src\WinApi.MediaFoundationApi.KsOpmApi.pas',
+  WinApi.MediaFoundationApi.Evr9 in '..\src\WinApi.MediaFoundationApi.Evr9.pas',
+  WinApi.MediaFoundationApi.Evr in '..\src\WinApi.MediaFoundationApi.Evr.pas',
+  WinApi.MediaFoundationApi.CodecApi in '..\src\WinApi.MediaFoundationApi.CodecApi.pas',
+  WinApi.MediaFoundationApi.CameraUIControl in '..\src\WinApi.MediaFoundationApi.CameraUIControl.pas',
+  WinApi.CoreAudioApi.SpatialAudioMetadata in '..\src\WinApi.CoreAudioApi.SpatialAudioMetadata.pas',
+  WinApi.CoreAudioApi.SpatialAudioHrtf in '..\src\WinApi.CoreAudioApi.SpatialAudioHrtf.pas',
+  WinApi.CoreAudioApi.SpatialAudioClient in '..\src\WinApi.CoreAudioApi.SpatialAudioClient.pas',
+  WinApi.CoreAudioApi.MMDeviceApi in '..\src\WinApi.CoreAudioApi.MMDeviceApi.pas',
+  WinApi.CoreAudioApi.FunctionDiscoveryKeys_devpkey in '..\src\WinApi.CoreAudioApi.FunctionDiscoveryKeys_devpkey.pas',
+  WinApi.CoreAudioApi.Endpointvolume in '..\src\WinApi.CoreAudioApi.Endpointvolume.pas',
+  WinApi.CoreAudioApi.DeviceTopology in '..\src\WinApi.CoreAudioApi.DeviceTopology.pas',
+  WinApi.CoreAudioApi.AudioPolicy in '..\src\WinApi.CoreAudioApi.AudioPolicy.pas',
+  WinApi.CoreAudioApi.AudioSessionTypes in '..\src\WinApi.CoreAudioApi.AudioSessionTypes.pas',
+  WinApi.CoreAudioApi.AudioEngineEndpoint in '..\src\WinApi.CoreAudioApi.AudioEngineEndpoint.pas',
+  WinApi.CoreAudioApi.AudioengineBaseApo in '..\src\WinApi.CoreAudioApi.AudioengineBaseApo.pas',
+  WinApi.CoreAudioApi.AudioClient in '..\src\WinApi.CoreAudioApi.AudioClient.pas',
+  WinApi.MediaFoundationApi.MfUtils in '..\src\WinApi.MediaFoundationApi.MfUtils.pas',
+  WinApi.DevpKey in '..\src\WinApi.DevpKey.pas',
+  WinApi.Coml2Api in '..\src\WinApi.Coml2Api.pas',
+  WinApi.ComBaseApi in '..\src\WinApi.ComBaseApi.pas',
+  WinApi.StructuredQueryCondition_2020 in '..\src\WinApi.StructuredQueryCondition_2020.pas',
+  WinApi.ActiveX.PropVarUtil in '..\src\WinApi.ActiveX.PropVarUtil.pas',
+  WinApi.ActiveX.PropSys in '..\src\WinApi.ActiveX.PropSys.pas',
+  WinApi.ActiveX.PropIdl in '..\src\WinApi.ActiveX.PropIdl.pas',
+  WinApi.AudioMediaType in '..\src\WinApi.AudioMediaType.pas',
+  WinApi.KsMedia in '..\src\WinApi.KsMedia.pas',
+  WinApi.ActiveX.PropKeyDef in '..\src\WinApi.ActiveX.PropKeyDef.pas',
+  WinApi.ActiveX.OaIdl in '..\src\WinApi.ActiveX.OaIdl.pas',
+  WinApi.ActiveX.ObjBase in '..\src\WinApi.ActiveX.ObjBase.pas',
+  WinApi.ActiveX.ObjIdl in '..\src\WinApi.ActiveX.ObjIdl.pas',
+  WinApi.ActiveX.ObjIdlbase in '..\src\WinApi.ActiveX.ObjIdlbase.pas',
+  WinApi.ActiveX.OCIdl in '..\src\WinApi.ActiveX.OCIdl.pas',
+  WinApi.ActiveX.OleIdl in '..\src\WinApi.ActiveX.OleIdl.pas',
+  WinApi.WinError in '..\src\WinApi.WinError.pas',
+  WinApi.Wmistr in '..\src\WinApi.Wmistr.pas',
+  WinApi.WinApiTypes in '..\src\WinApi.WinApiTypes.pas',
+  WinApi.VpType in '..\src\WinApi.VpType.pas',
+  WinApi.UuIds in '..\src\WinApi.UuIds.pas',
+  WinApi.StrmIf in '..\src\WinApi.StrmIf.pas',
+  WinApi.Unknwn in '..\src\WinApi.Unknwn.pas',
+  WinApi.ShTypes in '..\src\WinApi.ShTypes.pas',
+  WinApi.ServProv in '..\src\WinApi.ServProv.pas',
+  WinApi.Relogger in '..\src\WinApi.Relogger.pas',
+  WinApi.MmStream in '..\src\WinApi.MmStream.pas',
+  WinApi.MmDdk in '..\src\WinApi.MmDdk.pas',
+  WinApi.MmReg in '..\src\WinApi.MmReg.pas',
+  WinApi.KsProxy in '..\src\WinApi.KsProxy.pas',
+  WinApi.MediaObj in '..\src\WinApi.MediaObj.pas',
+  WinApi.Ks in '..\src\WinApi.Ks.pas',
+  WinApi.Dbt in '..\src\WinApi.Dbt.pas',
+  WinApi.DevPropDef in '..\src\WinApi.DevPropDef.pas',
+  WinApi.DvdMedia in '..\src\WinApi.DvdMedia.pas',
+  WinApi.Evntcons in '..\src\WinApi.Evntcons.pas',
+  WinApi.Evntprov in '..\src\WinApi.Evntprov.pas',
+  WinApi.Evntrace in '..\src\WinApi.Evntrace.pas',
+  WinApi.InitGuid in '..\src\WinApi.InitGuid.pas',
+  WinApi.Inspectable in '..\src\WinApi.Inspectable.pas',
+  WinApi.AmVideo in '..\src\WinApi.AmVideo.pas',
+  WinApi.AudioAPOTypes in '..\src\WinApi.AudioAPOTypes.pas',
+  WinApi.AudEvCod in '..\src\WinApi.AudEvCod.pas',
+  WinApi.Dxva2Trace in '..\src\WinApi.Dxva2Trace.pas',
+  WinApi.MediaFoundationApi.MfpMediaTypeDebug in '..\src\WinApi.MediaFoundationApi.MfpMediaTypeDebug.pas',
+  WinApi.DirectX.D2D1_2 in '..\src\WinApi.DirectX.D2D1_2.pas',
+  WinApi.DirectX.D2D1_2Helper in '..\src\WinApi.DirectX.D2D1_2Helper.pas',
+  WinApi.DirectX.D2D1_3 in '..\src\WinApi.DirectX.D2D1_3.pas',
+  WinApi.DirectX.D2D1_3Helper in '..\src\WinApi.DirectX.D2D1_3Helper.pas',
+  WinApi.DirectX.D2DBaseTypes in '..\src\WinApi.DirectX.D2DBaseTypes.pas',
+  WinApi.DirectX.D2DErr in '..\src\WinApi.DirectX.D2DErr.pas',
+  WinApi.DirectX.DCommon in '..\src\WinApi.DirectX.DCommon.pas',
+  WinApi.DirectX.D2D1 in '..\src\WinApi.DirectX.D2D1.pas',
+  WinApi.DirectX.D2d1_1 in '..\src\WinApi.DirectX.D2d1_1.pas',
+  WinApi.DirectX.D2D1_1Helper in '..\src\WinApi.DirectX.D2D1_1Helper.pas',
+  WinApi.DirectX.D2D1EffectAuthor in '..\src\WinApi.DirectX.D2D1EffectAuthor.pas',
+  WinApi.DirectX.D2D1EffectAuthor_1 in '..\src\WinApi.DirectX.D2D1EffectAuthor_1.pas',
+  WinApi.DirectX.D2d1Effects in '..\src\WinApi.DirectX.D2d1Effects.pas',
+  WinApi.DirectX.D2d1Effects_1 in '..\src\WinApi.DirectX.D2d1Effects_1.pas',
+  WinApi.DirectX.D2D1Effects_2 in '..\src\WinApi.DirectX.D2D1Effects_2.pas',
+  WinApi.DirectX.D2D1Helper in '..\src\WinApi.DirectX.D2D1Helper.pas',
+  WinApi.DirectX.D2D1Svg in '..\src\WinApi.DirectX.D2D1Svg.pas';
+
+end.

@@ -9,25 +9,25 @@
 // Release date: 04-08-2016
 // Language: ENU
 //
-// Version: 2.6.3
+// Version: 3.0.0
 // Description: An extended Peakmeter component based on the Mf Peakmeter Sample.
 //
 // Company: FactoryX
 // Intiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
-// -----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-// -----------------------------------------------------------------------------
+// 13/08/2020 All                 Enigma release. New layout and namespaces
+//------------------------------------------------------------------------------
 //
 // Remarks: To install the visual components, choose Install in the Project Manager.
 //          Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -44,9 +44,9 @@
 // LICENSE
 //
 // The contents of this file are subject to the Mozilla Public License
-// Version 1.1 (the "License"); you may not use this file except in
+// Version 2.0 (the "License"); you may not use this file except in
 // compliance with the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/MPL-1.1.html
+// https://www.mozilla.org/en-US/MPL/2.0/
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
@@ -73,7 +73,9 @@ interface
 uses
   {WinApi}
   WinApi.Windows,
-  WinApi.Messages, //WinApi.ActiveX {opt},
+  WinApi.Messages,
+  WinApi.WinApiTypes,
+  WinApi.ComBaseApi,
   {System}
   System.SysUtils,
   System.Classes,
@@ -83,13 +85,13 @@ uses
   VCL.Controls,
   VCL.Forms,
   VCL.ExtCtrls,
-  {MfPack}
-  MfPack.MfpTypes,
-  MfPack.MMDeviceApi,
-  MfPack.EndPointVolume,
-  MfPack.MfpUtils,
-  MfPack.ComBaseApi,
-  MfPack.ObjBase,
+  {ActiveX}
+  WinApi.ActiveX.ObjBase,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfUtils,
+  {CoreAudioApi}
+  WinApi.CoreAudioApi.MMDeviceApi,
+  WinApi.CoreAudioApi.EndPointVolume,
   {Additional}
   QueueTimer;
 

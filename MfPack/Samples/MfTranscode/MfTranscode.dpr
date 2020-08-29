@@ -1,6 +1,11 @@
 program MfTranscode;
 
 uses
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
   Vcl.Forms,
   frmTranscode in 'frmTranscode.pas' {frmTranscoder},
   Transcoder in 'Transcoder.pas',

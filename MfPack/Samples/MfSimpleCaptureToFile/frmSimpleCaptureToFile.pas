@@ -1,15 +1,16 @@
 // FactoryX
 //
-// Copyright ©2003 - 2018 by FactoryX, Netherlands/Australia
+// Copyright © by FactoryX, Netherlands/Australia
 //
 // Project: Media Foundation - MFPack - Samples
-// Project location: http://sourceforge.net/projects/MFPack
+// Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: frmSimpleCaptureToFile.pas
 // Kind: Pascal Unit
 // Release date: 26-01-2018
 // Language: ENU
 //
-// Version: 2.6.4
+// Version: 3.0.0
 //
 // Description: Main window
 //
@@ -17,19 +18,17 @@
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), (Ciaran), (topPlay)
 //
-// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
-//                                #1 Autobahn
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -79,7 +78,7 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.Messages,
-  //WinApi.ActiveX {opt},
+  WinApi.WinApiTypes,
   {System}
   System.SysUtils,
   System.Classes,
@@ -91,13 +90,13 @@ uses
   Vcl.StdCtrls,
   Vcl.ExtCtrls,
   Vcl.Menus,
-  {MfPack}
-  MfPack.MfpTypes,
-  MfPack.MfApi,
-  MfPack.MfObjects,
-  MfPack.MfpUtils,
-  MfPack.ComBaseApi, // ActiveX
-  {Application}
+  {ActiveX}
+  WinApi.ComBaseApi,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.MfObjects,
+  WinApi.MediaFoundationApi.MfUtils,
+  {Project}
   MfCaptureToFileClass;
 
 type

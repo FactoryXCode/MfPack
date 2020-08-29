@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright © FactoryX, Netherlands/Australia
+// Copyright © by FactoryX, Netherlands/Australia
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: http://sourceforge.net/projects/MFPack
@@ -9,24 +9,24 @@
 // Release date: 08-03-2019
 // Language: ENU
 //
-// Version: 2.6.4
+// Version: 3.0.0
 //
 // Description: Manages video preview.
 //
 // Intiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
-// ---------- ------------------- ---------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-// ----------------------------------------------------------------------------
+// ---------- ------------------- ----------------------------------------------
+// 13/08/2020 All                 Enigma release. New layout and namespaces
+//------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -44,9 +44,9 @@
 // LICENSE
 //
 // The contents of this file are subject to the Mozilla Public License
-// Version 1.1 (the "License"); you may not use this file except in
+// Version 2.0 (the "License"); you may not use this file except in
 // compliance with the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/MPL-1.1.html
+// https://www.mozilla.org/en-US/MPL/2.0/
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
@@ -65,21 +65,20 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.Messages,
-  //Winapi.ActiveX {opt},
+  WinApi.WinApiTypes,
+  WinApi.Dbt,
+  WinApi.ComBaseApi,
   {System}
   System.Classes,
   System.SysUtils,
-  {MfPack}
-  MfPack.MfpTypes,
-  MfPack.MfpUtils,
-  MfPack.MfObjects,
-  MfPack.Mfapi,
-  MfPack.MfIdl,
-  MfPack.MfReadWrite,
-  MfPack.Mferror,
-  MfPack.Dbt,
-  MfPack.ComBaseApi, // ActiveX
-  {Application}
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfObjects,
+  WinApi.MediaFoundationApi.Mfapi,
+  WinApi.MediaFoundationApi.MfIdl,
+  WinApi.MediaFoundationApi.MfReadWrite,
+  WinApi.MediaFoundationApi.Mferror,
+  {Project}
   Device,
   VideoBufferLock;
 
@@ -376,7 +375,7 @@ begin
         // Try to set this type on the source reader.
         // If no suitable transform found then hr = -1072868846 ($C00D5212)
         // Try find the next transform (SUCCEEDED(hr) = True)
-        hr := m_pReader.SetCurrentMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
+        hr := m_pReader.SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
                                             0,
                                             pType);
 
@@ -478,7 +477,7 @@ begin
   if SUCCEEDED(hr) then
     begin
      if g_pPreview.m_pReader <> nil then
-       hr := g_pPreview.m_pReader.ReadSample(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
+       hr := g_pPreview.m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
                                              0)
                                              // Nil,   // actual
                                              // Nil,   // flags
@@ -497,29 +496,28 @@ begin
     if SUCCEEDED(hr) then
       begin
         case dwStreamFlags of
-        DWORD(MF_SOURCE_READERF_ERROR):                    begin {An error occurred.
+        MF_SOURCE_READERF_ERROR:                    begin {An error occurred.
                                                            If you receive this flag, do not make any further calls to IMFSourceReader methods.
                                                            } end;
-        DWORD(MF_SOURCE_READERF_ENDOFSTREAM):              begin {The source reader reached the end of the stream.} end;
-        DWORD(MF_SOURCE_READERF_NEWSTREAM):                begin {One or more new streams were created.
+        MF_SOURCE_READERF_ENDOFSTREAM:              begin {The source reader reached the end of the stream.} end;
+        MF_SOURCE_READERF_NEWSTREAM:                begin {One or more new streams were created.
                                                            Respond to this flag by doing at least one of the following:
                                                             - Set the output types on the new streams.
-                                                            - Update the stream selection by selecting or deselecting streams.
-                                                          } end;
-        DWORD(MF_SOURCE_READERF_NATIVEMEDIATYPECHANGED):   begin {The native format has changed for one or more streams.
-                                                          The native format is the format delivered by the media source before any decoders are inserted.
-                                                          } end;
-        DWORD(MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED):  begin {The current media has type changed for one or more streams.
-                                                           To get the current media type, call the IMFSourceReader.GetCurrentMediaType method.
-                                                           } end;
-        DWORD(MF_SOURCE_READERF_STREAMTICK):               begin {There is a gap in the stream.
-                                                           This flag corresponds to an MEStreamTick event from the media source.
-                                                           }
-                                                           end;
-        DWORD(MF_SOURCE_READERF_ALLEFFECTSREMOVED):        begin {All transforms inserted by the application have been removed for a particular stream.
+                                                            - Update the stream selection by selecting or deselecting streams.}
+                                                    end;
+        MF_SOURCE_READERF_NATIVEMEDIATYPECHANGED:   begin {The native format has changed for one or more streams.
+                                                          The native format is the format delivered by the media source before any decoders are inserted.}
+                                                    end;
+        MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED:  begin {The current media has type changed for one or more streams.
+                                                           To get the current media type, call the IMFSourceReader.GetCurrentMediaType method.}
+                                                    end;
+        MF_SOURCE_READERF_STREAMTICK:               begin {There is a gap in the stream.
+                                                           This flag corresponds to an MEStreamTick event from the media source.}
+                                                    end;
+        MF_SOURCE_READERF_ALLEFFECTSREMOVED:        begin {All transforms inserted by the application have been removed for a particular stream.
                                                            This could be due to a dynamic format change from a source or decoder that prevents custom transforms from
-                                                           being used because they cannot handle the new media type.
-                                                           } end;
+                                                           being used because they cannot handle the new media type.}
+                                                    end;
         else
           // Show timeframes in Mainwindow caption
           SetWindowText(g_pPreview.m_hwndEvent,
@@ -623,7 +621,7 @@ begin
     begin
       for i := 0 to g_cFormats -1 do
         begin
-          hr := m_pReader.GetNativeMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
+          hr := m_pReader.GetNativeMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
                                              i,
                                              pType);
 
@@ -642,7 +640,7 @@ begin
   if SUCCEEDED(hr) then
     begin
       // Ask for the first sample. From here the IMFSourceReaderCallback.OnReadSample will be activated
-      hr := m_pReader.ReadSample(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
+      hr := m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
                                  0);
 
       m_bFirstSample := TRUE;
@@ -724,7 +722,7 @@ begin
 
    pDi := Default(DEV_BROADCAST_DEVICEINTERFACE);
    pDi.dbcc_size := pHdr.dbch_size;
-   pDi.dbcc_devicetype := DWORD(pHdr.dbch_devicetype);
+   pDi.dbcc_devicetype := pHdr.dbch_devicetype;
    pDi.dbcc_reserved := pHdr.dbch_reserved;
 
   //FCritSec.Enter;
