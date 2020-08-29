@@ -1,11 +1,6 @@
 program SimplePlayer;
 
 uses
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
   Vcl.Forms,
   frmSimplePlayer in 'frmSimplePlayer.pas' {Form1};
 
