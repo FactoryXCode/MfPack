@@ -5,7 +5,7 @@
 // Project: WinApi.DirectX - DirectX
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: WinApi.DirectX.DxVa9Typ.pas
+// Module: WinApi.DirectX.DXVA9Typ.pas
 // Kind: Pascal / Delphi unit
 // Release date: 28-07-2020
 // Language: ENU

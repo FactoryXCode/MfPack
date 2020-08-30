@@ -5,7 +5,7 @@
 // Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: WinApi.DirectX.Dxva2Trace.pas
+// Module: WinApi.DirectX.DXVA2Trace.pas
 // Kind: Pascal / Delphi unit
 // Release date: 11-24-2015
 // Language: ENU
@@ -69,7 +69,7 @@ uses
   {System}
   System.Types,
   {DirectX}
-  WinApi.DirectX.DxVa9Typ;
+  WinApi.DirectX.DXVA9Typ;
 
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}

@@ -5,7 +5,7 @@
 // Project: WinApi.DirectX - DirectX
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: WinApi.DirectX.DxVa2Api.pas
+// Module: WinApi.DirectX.DXVA2Api.pas
 // Kind: Pascal / Delphi unit
 // Release date: 20-07-2012
 // Language: ENU
@@ -72,8 +72,8 @@ uses
   System.SysUtils,
   {Use rtl, Clootie Dx or MfPack}
   WinApi.DirectX.D3D9,
-  WinApi.DirectX.DxVa,
-  WinApi.DirectX.DxVaHd,
+  WinApi.DirectX.DXVA,
+  WinApi.DirectX.DXVAHd,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfObjects;
@@ -198,9 +198,11 @@ const
   DXVA2_ModeHEVC_VLD_Main10 : TGUID = '{107af0e0-ef1a-4d19-aba8-67a163073d13}';
   {$EXTERNALSYM DXVA2_ModeHEVC_VLD_Main10}
 
-  DXVA2_ModeVP9_VLD_Profile0  :	TGUID = '{463707f8-a1d0-4585-876d-83aa6d60b89e}';
+  DXVA2_ModeVP9_VLD_Profile0       : TGUID = '{463707f8-a1d0-4585-876d-83aa6d60b89e}';
   {$EXTERNALSYM DXVA2_ModeVP9_VLD_Profile0}
-  DXVA2_ModeVP8_VLD           :	TGUID = '{90b899ea-3a62-4705-88b3-8df04b2744e7}';
+  DXVA2_ModeVP9_VLD_10bit_Profile2 : TGUID = '{a4c749ef-6ecf-48aa-8448-50a7a1165ff7}';
+  {$EXTERNALSYM DXVA2_ModeVP9_VLD_10bit_Profile2}
+  DXVA2_ModeVP8_VLD                : TGUID = '{90b899ea-3a62-4705-88b3-8df04b2744e7}';
   {$EXTERNALSYM DXVA2_ModeVP8_VLD}
 
 
@@ -215,12 +217,14 @@ const
   {$EXTERNALSYM DXVA2_ModeWMV8_PostProc}
   DXVA2_ModeWMV8_MoComp                : TGUID = '{1b81be81-a0c7-11d3-b984-00c04f2e73c5}'; // = DXVA2_ModeWMV8_B
   {$EXTERNALSYM DXVA2_ModeWMV8_MoComp}
+
   DXVA2_ModeWMV9_PostProc              : TGUID = '{1b81be90-a0c7-11d3-b984-00c04f2e73c5}'; // = DXVA2_ModeWMV9_A
   {$EXTERNALSYM DXVA2_ModeWMV9_PostProc}
   DXVA2_ModeWMV9_MoComp                : TGUID = '{1b81be91-a0c7-11d3-b984-00c04f2e73c5}'; // = DXVA2_ModeWMV9_B
   {$EXTERNALSYM DXVA2_ModeWMV9_MoComp}
   DXVA2_ModeWMV9_IDCT                  : TGUID = '{1b81be94-a0c7-11d3-b984-00c04f2e73c5}'; // = DXVA2_ModeWMV9_C
   {$EXTERNALSYM DXVA2_ModeWMV9_IDCT}
+
   DXVA2_ModeVC1_PostProc               : TGUID = '{1b81beA0-a0c7-11d3-b984-00c04f2e73c5}'; // = DXVA2_ModeVC1_A
   {$EXTERNALSYM DXVA2_ModeVC1_PostProc}
   DXVA2_ModeVC1_MoComp                 : TGUID = '{1b81beA1-a0c7-11d3-b984-00c04f2e73c5}'; // = DXVA2_ModeVC1_B
@@ -229,6 +233,7 @@ const
   {$EXTERNALSYM DXVA2_ModeVC1_IDCT}
   DXVA2_ModeVC1_VLD                    : TGUID = '{1b81beA3-a0c7-11d3-b984-00c04f2e73c5}'; // = DXVA2_ModeVC1_D
   {$EXTERNALSYM DXVA2_ModeVC1_VLD}
+
   DXVA2_ModeH264_MoComp_NoFGT          : TGUID = '{1b81be64-a0c7-11d3-b984-00c04f2e73c5}'; // = DXVA2_ModeH264_A
   {$EXTERNALSYM DXVA2_ModeH264_MoComp_NoFGT}
   DXVA2_ModeH264_MoComp_FGT            : TGUID = '{1b81be65-a0c7-11d3-b984-00c04f2e73c5}'; // = DXVA2_ModeH264_B
@@ -241,6 +246,24 @@ const
   {$EXTERNALSYM DXVA2_ModeH264_VLD_NoFGT}
   DXVA2_ModeH264_VLD_FGT               : TGUID = '{1b81be69-a0c7-11d3-b984-00c04f2e73c5}'; // = DXVA2_ModeH264_F
   {$EXTERNALSYM DXVA2_ModeH264_VLD_FGT}
+
+
+  // Description:
+  //
+  //  COM objects.
+  //
+  //  IID_IDirect3DDeviceManager9
+  //
+  //  IID_IDirectXVideoAccelerationService
+  //  IID_IDirectXVideoDecoderService
+  //  IID_IDirectXVideoProcessorService
+  //
+  //  IID_IDirectXVideoDecoder
+  //  IID_IDirectXVideoProcessor
+  //  IID_IDirectXVideoMemoryConfiguration
+  //
+  //  See interface declarations for the specific IID's.
+
 
   // Description:
   //

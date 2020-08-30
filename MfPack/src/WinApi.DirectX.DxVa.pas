@@ -5,7 +5,7 @@
 // Project: WinApi.DirectX - DirectX
 // Project location: https://sourceforge.net/projects/MfPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: WinApi.DirectX.DxVa.pas
+// Module: WinApi.DirectX.DXVA.pas
 // Kind: Pascal / Delphi unit
 // Release date: 02-10-2015
 // Language: ENU

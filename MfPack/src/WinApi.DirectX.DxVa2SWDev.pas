@@ -5,7 +5,7 @@
 // Project: WinApi.DirectX - DirectX
 // Project location: https://sourceforge.net/projects/MfPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: WinApi.DirectX.DxVa2SWDev.pas
+// Module: WinApi.DirectX.DXVA2SWDev.pas
 // Kind: Pascal / Delphi unit
 // Release date: 02-10-2015
 // Language: ENU
@@ -68,8 +68,8 @@ uses
   {WinApi}
   WinApi.Windows,
   {DirectX}
-  WinApi.DirectX.DxVa9Typ,
-  WinApi.DirectX.DxVa2Api,
+  WinApi.DirectX.DXVA9Typ,
+  WinApi.DirectX.DXVA2Api,
   WinApi.DirectX.D3D9;
 
   {$WEAKPACKAGEUNIT ON}
