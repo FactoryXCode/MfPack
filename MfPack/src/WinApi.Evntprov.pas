@@ -65,7 +65,8 @@ interface
 uses
 
   {Winapi}
-  Winapi.Windows;
+  Winapi.Windows,
+  WinApi.WinApiTypes;
 
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
