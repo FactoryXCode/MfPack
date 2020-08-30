@@ -57,7 +57,7 @@
 // in full at the top of the file.
 //
 //==============================================================================
-unit WinApi.DirectX.D2d1Effects_1;
+unit WinApi.DirectX.D2D1Effects_1;
 
   {$HPPEMIT '#include "d2d1effects.h"'}
 

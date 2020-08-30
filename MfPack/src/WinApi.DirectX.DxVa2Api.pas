@@ -11,7 +11,8 @@
 // Language: ENU
 //
 // Revision Version: 3.0.0
-// Description: n:
+// Description: Public Interfaces for DXVA2.
+//              https://docs.microsoft.com/en-us/windows/win32/medfound/directx-video-acceleration-2-0
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -24,12 +25,7 @@
 // 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
-// Remarks:  Using packed records is not a recommended practice,
-//           because it can prevent compatibility with other languages or
-//           platforms, it slows data access, and, in the case of a character array,
-//           it affects type compatibility.
-//           For more information, see Memory management and Implicit Packing of
-//           Fields with a Common Type Specification.
+// Remarks: -
 //
 // Related objects: -
 // Related projects: MfPackX300
@@ -62,7 +58,7 @@
 // in full at the top of the file.
 // 
 //==============================================================================
-unit WinApi.DirectX.DxVa2Api;
+unit WinApi.DirectX.DXVA2Api;
 
   {$HPPEMIT '#include "dxva2api.h"'}
 

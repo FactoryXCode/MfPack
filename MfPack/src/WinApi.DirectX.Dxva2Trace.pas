@@ -12,6 +12,7 @@
 //
 // Revision Version: 3.0.0
 // Description: DirectX Video Acceleration 2 header file for ETW data.
+//              https://docs.microsoft.com/en-us/windows/win32/medfound/directx-video-acceleration-2-0
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -55,7 +56,7 @@
 // Users may distribute this source code provided that this header is included
 // in full at the top of the file.
 //==============================================================================
-unit WinApi.DirectX.Dxva2Trace;
+unit WinApi.DirectX.DXVA2Trace;
 
   {$HPPEMIT '#include "dxva2Trace.h"'}
 

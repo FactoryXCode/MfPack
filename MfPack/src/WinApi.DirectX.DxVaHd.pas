@@ -12,6 +12,7 @@
 //
 // Revision Version: 3.0.0
 // Description: Contains interface definitions for DirectX Video Acceleration for HD API.
+//              https://docs.microsoft.com/en-us/windows/win32/medfound/directx-video-acceleration-2-0
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -25,14 +26,7 @@
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
-// 
-//          Using packed records is not a recommended practice,
-//          because it can prevent compatibility with other languages or
-//          platforms, it slows data access, and, in the case of a character array,
-//          it affects type compatibility.
-//          For more information, see Memory management and Implicit Packing of
-//          Fields with a Common Type Specification.
-// 
+//
 // Related objects: -
 // Related projects: MfPackX300
 // Known Issues: -
@@ -64,7 +58,7 @@
 // in full at the top of the file.
 // 
 //==============================================================================
-unit WinApi.DirectX.DxVaHd;
+unit WinApi.DirectX.DXVAHd;
 
   {$HPPEMIT '#include "dxvahd.h"'}
 

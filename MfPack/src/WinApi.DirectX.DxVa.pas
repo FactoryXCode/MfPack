@@ -11,7 +11,8 @@
 // Language: ENU
 //
 // Revision Version: 3.0.0
-// Description: DirectX Video Acceleration header file.
+// Description: DirectX Video Acceleration (DXVA 2.0) header file.
+//              https://docs.microsoft.com/en-us/windows/win32/medfound/directx-video-acceleration-2-0
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -57,7 +58,7 @@
 // in full at the top of the file.
 // 
 //==============================================================================
-unit WinApi.DirectX.DxVa;
+unit WinApi.DirectX.DXVA;
 
   {$HPPEMIT '#include "dxva.h"'}
 

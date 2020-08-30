@@ -56,7 +56,7 @@
 // Users may distribute this source code provided that this header is included
 // in full at the top of the file.
 //==============================================================================
-unit WinApi.DirectX.D2d1Effects;
+unit WinApi.DirectX.D2D1Effects;
 
   {$HPPEMIT '#include "d2d1effects.h"'}
 

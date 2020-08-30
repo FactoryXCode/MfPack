@@ -15,7 +15,7 @@
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Tilo Güldner ().
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Tilo Güldner (TiloGueldner).
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
@@ -56,7 +56,7 @@
 // Users may distribute this source code provided that this header is included
 // in full at the top of the file.
 //==============================================================================
-unit WinApi.DirectX.D2d1_1;
+unit WinApi.DirectX.D2D1_1;
 
   {$HPPEMIT '#include "d2d1_1.h"'}
 

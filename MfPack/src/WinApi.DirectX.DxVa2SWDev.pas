@@ -13,6 +13,7 @@
 // Revision Version: 3.0.0
 // Description: DirectX Video Acceleration 2 header file for software video
 //              processing devices.
+//              https://docs.microsoft.com/en-us/windows/win32/medfound/directx-video-acceleration-2-0
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -59,7 +60,7 @@
 //
 //==============================================================================
 
-unit WinApi.DirectX.DxVa2SWDev;
+unit WinApi.DirectX.DXVA2SWDev;
 
 interface
 

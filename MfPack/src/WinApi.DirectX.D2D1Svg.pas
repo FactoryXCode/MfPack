@@ -16,7 +16,8 @@
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Tilo Güldner, (pyscripter)
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships),
+//                 Tilo Güldner (TiloGueldner), (pyscripter)
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
@@ -889,6 +890,11 @@ type
     // Gets the length of the text content value. The returned string length does not
     // include room for the null terminator.
     function GetTextValueLength(): UINT32; stdcall;
+
+    //==========================================================================
+    // From here the sequence of the implemented interface methods differs from
+    // the C-header file. This has been issued to Microsoft and Idera.
+    //==========================================================================
 
     // Sets an attribute of this element using an interface. Returns an error if the
     // attribute name is not valid on this element. Returns an error if the attribute

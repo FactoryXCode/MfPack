@@ -12,6 +12,7 @@
 //
 // Revision Version: 3.0.0
 // Description: Direct3D include file.
+//              https://docs.microsoft.com/en-us/windows/win32/medfound/directx-video-acceleration-2-0
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -57,7 +58,7 @@
 // in full at the top of the file.
 //
 //==============================================================================
-unit WinApi.DirectX.DxVa9Typ;
+unit WinApi.DirectX.DXVA9Typ;
 
   {$HPPEMIT '#include "dxva9typ.h"'}
 
