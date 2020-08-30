@@ -1,40 +1,37 @@
 // FactoryX
 //
-// Copyright ©2003 - 2020 by FactoryX, Netherlands/Australia
+// Copyright © by FactoryX. All rights reserved.
 //
-// Project: Media Foundation - MFPack
+// Project: Media Foundation - MfPack
 // Project location: http://sourceforge.net/projects/MFPack
-// Module: MfPack.inc
+//                   https://github.com/FactoryXCode/MfPack
+// Module: WinApiTypes.inc
 // Kind: Delphi include file
 // Release date: 04-01-2016
 // Language: ENU
 //
-// Revision Version: 2.6.5
+// Revision Version: 3.0.0
 // Description: Holds compiler definitions used by Media Foundation,
 //              WASAPI and Core Audio.
 //
 //
-//              Example: {$INCLUDE 'MfPack.inc'}
+//              Example: {$INCLUDE 'WinApiTypes.inc'}
 //
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 //
 //
-// Rudy Velthuis 1960 ~ 2019.
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 20H1)
-//                                #1 Autobahn
-//                                #2 The Model
-// 13/08/2020                     Enigma release.
+// 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
 // Remarks: All future updates (releases) will be named to an artist except for
 //          the major Windows updates. So, we started with ISÁK.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 // Compiler version: 23 up to 33
 // SDK version: 10.0.19041.0
@@ -364,7 +361,7 @@ const
 // {$DEFINE MFPACK_VERSION_264_UP} // Kraftwerk release, Milestone update 13, WIN10 May 2020 pre-update
 // {$DEFINE MFPACK_VERSION_264#1_UP} // Kraftwerk #1 Autobahn release, update 13#1, WIN10 May 2020 final update (2004))
 // {$DEFINE MFPACK_VERSION_264#2_UP} // Kraftwerk #1 The Model release, update 13#2, WIN10 May 2020 final update (2004))
-   {$DEFINE MFPACK_VERSION_265_UP} // Enigma release, Milestone update 14.
+   {$DEFINE MFPACK_VERSION_300_UP} // Enigma release, Milestone update 14.
 
 
 // WARNINGS
@@ -409,21 +406,21 @@ const
 
 const
 // a global version ID (for internal use only).
-  MfpVersion   = '2.6.4'; // Release version.
+  MfpVersion   = '3.0.0'; // Release version.
 
 
 
-//Definitions MfpTypes
-//====================
+//Definitions WinApiTypes
+//=======================
 // When encountering declaration issues with rtl definitions,
 // you should enable or disable the definitions for
-// MfPack.MfpTypes.pas, etc. here.
+// WinApi.WinApiTypes.pas, etc. here.
 // To do so, just (un)comment the definition you (don't) need.
 
 
 
-// MfpTypes.pas
-//=============
+// WinApiTypes.pas
+//================
 
 
 {$DEFINE MFP_DWORD}
@@ -1084,37 +1081,37 @@ const
 //Other files
 //===========
 
-// MfPack.MfApi
-//=============
+// WinApi.MediaFoundationApi.MfApi
+//================================
 
  {$DEFINE MFP_WORDARRAY}
 // {$UNDEF MFP_WORDARRAY}
 
 
 
-// MfPack.DeviceTopology
-//======================
+// WinApi.CoreAudioApi.DeviceTopology
+//===================================
 // {$DEFINE MFP_KSIDENTIFIER}
 // {$UNDEF MFP_KSIDENTIFIER}
 
 
 
-// MfPack.AudioAPOTypes
+// WinApi.AudioAPOTypes
 //=====================
 // {$DEFINE MFP_AUDIO_CURVE_TYPE}
 // {$UNDEF MFP_AUDIO_CURVE_TYPE}
 
 
 
-//MfPack.OpmApi
-//=============
+//WinApi.MediaFoundationApi.OpmApi
+//================================
 // {$DEFINE DO_NOT_USE_DIRECTX_OR_DXVA2}
 // {$UNDEF DO_NOT_USE_DIRECTX_OR_DXVA2}
 
 
 
-// MfPack.WmCodecDsp
-//==================
+// WinApi.MediaFoundationApi.WmCodecDsp
+//=====================================
 // {$DEFINE MEDIASUBTYPE_NV11}
 // {$UNDEF MEDIASUBTYPE_NV11}
 
@@ -1135,7 +1132,7 @@ const
 
 
 
-// MfPack.DevPropDef
+// WinApi.DevPropDef
 //==================
 // {$DEFINE MFP_DEVPROPTYPE}
 // {$UNDEF MFP_DEVPROPTYPE}
@@ -1144,8 +1141,8 @@ const
 // {$UNDEF MFP_DEVPROPKEY}
 
 
-// MfPack.Dxva2Trace
-//==================
+// WinApi.DirectX.DXVA2Trace
+//==========================
 // {$DEFINE DXVA2Trace_PostProcessing}
 // {$UNDEF DXVA2Trace_PostProcessing}
 
@@ -1157,8 +1154,8 @@ const
 // {$UNDEF MFP_TRACEHANDLE}
 
 
-// EVR9.pas
-//=========
+// WinApi.MediaFoundationApi.EVR9.pas
+//===================================
 // {$DEFINE MFP_RECT}
 // {$UNDEF MFP_RECT}
 
@@ -1172,8 +1169,8 @@ const
 // {$UNDEF MFP_LPGUID}
 
 
-// MfIdl.pas
-//==========
+// WinApi.MediaFoundationApi.MfIdl.pas
+//====================================
 // {$DEFINE MFP_MFTIME} // Defined in MfpTypes.pas
 // {$UNDEF MFP_MFTIME}
 
@@ -1182,31 +1179,31 @@ const
 
 
 
-// MfPack.OaIdl
-//=============
+// WinApi.ActiveX.OaIdl
+//=====================
 // {$DEFINE MFP_CURRENCY}
 // {$UNDEF MFP_CURRENCY}
 
 
-// MfPAck.PropKeyDef
-//==================
+// WinApi.ActiveX.PropKeyDef
+//==========================
 // {$DEFINE PID_FIRST_USABLE}
 // {$UNDEF PID_FIRST_USABLE}
 
 
-//MfPack.PropSys
-//==============
+//WinApi.ActiveX.PropSys
+//======================
 // {$DEFINE MFP_PIStream}
 // {$UNDEF MFP_PIStream}
 
 
-// MfPack.PropIdl
-//===============
+// WinApi.ActiveX.PropIdl
+//=======================
 // {$DEFINE MFP_PROPSPEC}
 // {$UNDEF MFP_PROPSPEC}
 
 
-// MfPack.MmReg
+// WinApi.MmReg
 //=============
 // {$DEFINE MFP_MM_MIDI_MAPPER}
 // {$UNDEF MFP_MM_MIDI_MAPPER}
@@ -1227,7 +1224,7 @@ const
 // {$UNDEF MFP__SPEAKER_POSITIONS_}
 
 
-// MfPack.Dbt
+// WinApi.Dbt
 //===========
 // {$DEFINE MFP_WCHAR_T}
 // {$UNDEF MFP_WCHAR_T}
@@ -1237,7 +1234,7 @@ const
 
 
 
-//MfPack.AudioAPOTypes
+//WinApi.AudioAPOTypes
 //====================
 // {$DEFINE MFP_AUDIO_CURVE_TYPE}
 // {$UNDEF MFP_AUDIO_CURVE_TYPE}
