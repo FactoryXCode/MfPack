@@ -2,8 +2,6 @@
 
  Delphi translations for Microsoft Media Foundation and related API's.
 
- **<u>What about MfPack:</u>**
-
 # MfPack covers the Delphi translations of:
 
 - Core Audio API's:
