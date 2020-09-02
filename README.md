@@ -98,7 +98,7 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
 
 
 
-![](https://dc623.4shared.com/img/8WIop2fviq/s24/1710787b350/MfPlayer_X_Sample?async&rand=0.8424708240917771)
+![](https://sourceforge.net/p/mfpack/screenshot/MfMediaPlayer%20X.jpg)
 
 
 
