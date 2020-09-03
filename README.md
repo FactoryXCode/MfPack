@@ -2,8 +2,6 @@
 
  Delphi translations for Microsoft Media Foundation and related API's.
 
- **<u>What about MfPack:</u>**
-
 # MfPack covers the Delphi translations of:
 
 - Core Audio API's:
@@ -100,7 +98,7 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
 
 
 
-![](https://dc623.4shared.com/img/8WIop2fviq/s24/1710787b350/MfPlayer_X_Sample?async&rand=0.8424708240917771)
+![](https://sourceforge.net/p/mfpack/screenshot/MfMediaPlayer%20X.jpg)
 
 
 
@@ -112,7 +110,7 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
   *feature in Windows 7 and later. It also implements a volume control which tracks*
   *to the volume control in the volume mixer.* 
   
-![](https://dc724.4shared.com/img/AVk91_8Hea/s24/1743b68d480/DuckingMediaPlayerSample?async&rand=0.04014350792035826)
+![](https://dc576.4shared.com/img/5_Nqbv90ea/s24/17441862340/DuckingMediaPlayerSample?async&rand=0.7740816140241176)
 
 
 **Simple Player**
