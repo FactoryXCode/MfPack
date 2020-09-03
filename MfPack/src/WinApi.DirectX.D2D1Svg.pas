@@ -13,7 +13,6 @@
 // Revision Version: 3.0.0
 // Description: -
 //
-//
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships),
@@ -70,7 +69,7 @@ uses
   {WinApi}
   WinApi.ActiveX,
   WinApi.Windows,
-  {MfPack}
+  {DirectX}
   WinApi.DirectX.D2D1,
   WinApi.DirectX.D2d1_1;
 
@@ -925,8 +924,9 @@ type
     // specified interface type.
     // <param name="riid">The interface ID of the attribute value.</param>
     function GetAttributeValue(name: LPWSTR;
-                               const riid: TGUID;
-                               var value: Pointer): HResult; overload; stdcall;
+                               const riid: TGUID;    // The interface ID of the attribute value.
+                               out value {IUnknown}  // The value of the attribute = interface
+                               ): HResult; overload; stdcall;
 
     // Gets an attribute of this element as a POD type. Returns an error if the
     // attribute is not specified. Returns an error if the attribute name is not valid
@@ -958,7 +958,6 @@ type
   end;
   IID_ID2D1SvgElement = ID2D1SvgElement;
   {$EXTERNALSYM IID_ID2D1SvgElement}
-
 
 
   // Interface ID2D1SvgDocument
@@ -1039,6 +1038,7 @@ type
   end;
   IID_ID2D1SvgDocument = ID2D1SvgDocument;
   {$EXTERNALSYM IID_ID2D1SvgDocument}
+
 
   // Additional Prototypes for ALL interfaces
 
