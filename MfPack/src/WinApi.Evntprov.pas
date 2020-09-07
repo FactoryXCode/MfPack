@@ -847,7 +847,7 @@ type
 
   procedure EventDataDescCreate(out EventDataDescriptor: EVENT_DATA_DESCRIPTOR;
                                 const DataPtr: PVOID;
-                                DataSize: ULONG);
+                                DataSize: ULONG); inline;
   {$EXTERNALSYM EventDataDescCreate}
 
   // Initializes an EVENT_DESCRIPTOR with the given values.
@@ -858,32 +858,32 @@ type
                             Level: UCHAR;
                             Task: USHORT;
                             Opcode: UCHAR;
-                            Keyword: ULONGLONG);
+                            Keyword: ULONGLONG); inline;
   {$EXTERNALSYM EventDescCreate}
 
 
   // Initializes an EVENT_DESCRIPTOR. Sets all values to 0.
 
-  procedure EventDescZero(out EventDescriptor: EVENT_DESCRIPTOR);
+  procedure EventDescZero(out EventDescriptor: EVENT_DESCRIPTOR); inline;
   {$EXTERNALSYM EventDescZero}
 
 
   // Macros to extract info from an Event Descriptor
   // ===============================================
 
-  function EventDescGetId(const EventDescriptor: EVENT_DESCRIPTOR): USHORT;
+  function EventDescGetId(const EventDescriptor: EVENT_DESCRIPTOR): USHORT; inline;
 
-  function EventDescGetVersion(const EventDescriptor: EVENT_DESCRIPTOR): UCHAR;
+  function EventDescGetVersion(const EventDescriptor: EVENT_DESCRIPTOR): UCHAR; inline;
 
-  function EventDescGetTask(const EventDescriptor: EVENT_DESCRIPTOR): USHORT;
+  function EventDescGetTask(const EventDescriptor: EVENT_DESCRIPTOR): USHORT; inline;
 
-  function EventDescGetOpcode(const EventDescriptor: EVENT_DESCRIPTOR): UCHAR;
+  function EventDescGetOpcode(const EventDescriptor: EVENT_DESCRIPTOR): UCHAR; inline;
 
-  function EventDescGetChannel(const EventDescriptor: EVENT_DESCRIPTOR): UCHAR;
+  function EventDescGetChannel(const EventDescriptor: EVENT_DESCRIPTOR): UCHAR; inline;
 
-  function EventDescGetLevel(const EventDescriptor: EVENT_DESCRIPTOR): UCHAR;
+  function EventDescGetLevel(const EventDescriptor: EVENT_DESCRIPTOR): UCHAR; inline;
 
-  function EventDescGetKeyword(const EventDescriptor: EVENT_DESCRIPTOR): ULONGLONG;
+  function EventDescGetKeyword(const EventDescriptor: EVENT_DESCRIPTOR): ULONGLONG; inline;
 
 
 
@@ -891,28 +891,28 @@ type
   // ===========================================
 
   function EventDescSetId(EventDescriptor: EVENT_DESCRIPTOR;
-                          Id: USHORT): EVENT_DESCRIPTOR;
+                          Id: USHORT): EVENT_DESCRIPTOR; inline;
 
   function EventDescSetVersion(EventDescriptor: EVENT_DESCRIPTOR;
-                               Version: UCHAR): EVENT_DESCRIPTOR;
+                               Version: UCHAR): EVENT_DESCRIPTOR; inline;
 
   function EventDescSetTask(EventDescriptor: EVENT_DESCRIPTOR;
-                            Task: USHORT): EVENT_DESCRIPTOR;
+                            Task: USHORT): EVENT_DESCRIPTOR; inline;
 
   function EventDescSetOpcode(EventDescriptor: EVENT_DESCRIPTOR;
-                              Opcode: UCHAR): EVENT_DESCRIPTOR;
+                              Opcode: UCHAR): EVENT_DESCRIPTOR; inline;
 
   function EventDescSetLevel(EventDescriptor: EVENT_DESCRIPTOR;
-                             Level: UCHAR): EVENT_DESCRIPTOR;
+                             Level: UCHAR): EVENT_DESCRIPTOR; inline;
 
   function EventDescSetChannel(EventDescriptor: EVENT_DESCRIPTOR;
-                               Channel: UCHAR): EVENT_DESCRIPTOR;
+                               Channel: UCHAR): EVENT_DESCRIPTOR; inline;
 
   function EventDescSetKeyword(EventDescriptor: EVENT_DESCRIPTOR;
-                               Keyword: ULONGLONG): EVENT_DESCRIPTOR;
+                               Keyword: ULONGLONG): EVENT_DESCRIPTOR; inline;
 
   function EventDescOrKeyword(EventDescriptor: EVENT_DESCRIPTOR;
-                              Keyword: ULONGLONG): EVENT_DESCRIPTOR;
+                              Keyword: ULONGLONG): EVENT_DESCRIPTOR; inline;
 
 
   //Additional Prototypes for ALL interfaces
