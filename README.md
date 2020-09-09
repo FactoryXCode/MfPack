@@ -116,7 +116,7 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
 **Simple Player**
 
 *Demonstrates audio/video playback using the IMFPMediaPlayer and IMFPMediaPlayerCallback API.*
-*Note: This API is deprecated, but still functional in the latest Windows version.*
+*Note: This API is deprecated, but still functional in Windows 10 version 2004 (May 2020 update).*
 
 
 **© FactoryX. All rights reserved.***
