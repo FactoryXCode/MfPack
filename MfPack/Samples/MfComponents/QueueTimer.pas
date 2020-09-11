@@ -3,13 +3,14 @@
 // Copyright: © FactoryX. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
-// Project location: http://sourceforge.net/projects/MFPack
+// Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: QueueTimer.pas
 // Kind: Pascal Unit
 // Release date: 25-02-2016
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 // Description:
 //              This is the basic class of a queue timer,
 //              Use this timer when less overhead
@@ -71,8 +72,6 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.Messages,
-  {Vcl}
-  Vcl.Forms,
   {System}
   System.Classes,
   System.SysUtils;
@@ -96,7 +95,8 @@ type
                                  Flags: LongWord): Boolean; stdcall;
   // Important:
   // Wrong implementations can lock up your system!
-  // Please read https://msdn.microsoft.com/en-us/library/windows/desktop/ms682569
+  // Please read:
+  //   https://docs.microsoft.com/us-en/windows/win32/api/threadpoollegacyapiset/nf-threadpoollegacyapiset-deletetimerqueuetimer
   function DeleteTimerQueueTimer(TimerQueue: THandle;
                                  Timer: THandle;
                                  CompletionEvent: THandle): Boolean; stdcall;
@@ -111,7 +111,7 @@ type
 
 type
 
-  TQTimer = class(TObject)
+  TQTimer = class(TComponent)
   private
     { Private declarations }
     bTimerEnabled: Boolean;
@@ -131,6 +131,7 @@ type
   protected
     { Protected declarations }
     MsgId: Cardinal;
+    gTimerID: TGuid;
 
     { Protected methods }
     procedure QueueTimerHandler; virtual; // called every elTime milliseconds
@@ -139,21 +140,30 @@ type
     { Public declarations }
 
     { Public methods }
-    constructor Create(pwTimerName: PWideChar);
+    constructor Create(aOwner: Tcomponent); reintroduce;
     // Disable and destroy the timer. (example: FreeAndNil(YourQueueTimer);
     destructor Destroy(); override;
     // Change the timer settings, while it is running.
     function ChangeTimerQueue(lwDueTime: LongWord;
                               lwPeriod: LongWord): Bool;
 
+  published
     property Enabled: Boolean read bTimerEnabled write EnableQTimer default False;
     property DueTime: UINT read uiDueTime write SetDueTime default 0;  // 0 = start immediate
     property Period: Cardinal read uiPeriod write SetPeriod default 100; // timer interval in ms
     property OnTimerEvent: TNotifyEvent read neOnTimer write neOnTimer;
   end;
 
+  procedure Register;
 
 implementation
+
+
+procedure Register;
+begin
+  RegisterComponents('MfPack Timer Samples', [TQTimer]);
+end;
+
 
 const
   Kernel32Lib = 'kernel32.dll';    // Also declared in WinApi.Windows
@@ -184,13 +194,24 @@ end;
 //========
 
 
-constructor TQTimer.Create(pwTimerName: PWideChar);
+constructor TQTimer.Create(aOwner: Tcomponent);
+var
+  stmp: string;
+  wcmp: array[0..37] of WideChar;
 begin
-  inherited Create();
+  inherited Create(AOwner);
+
   uiDueTime := 0;
   uiPeriod := 100;
+
+  // Create the contextID, in this case a unique guid during runtime
+  if Succeeded( CreateGuid(gTimerID) ) then
+    stmp := GuidToString(gTimerID)
+  else // this should not happen!
+    stmp := '{4C68E633-53BF-4609-B7DC-0E4FDBCC585E}';
+
   // Create a unique msgId by the given name of the qtimer object
-  MsgId := RegisterWindowMessage(pwTimerName);
+  MsgId := RegisterWindowMessage( StringToWideChar(stmp, wcmp, Length(wcmp)) );
 end;
 
 

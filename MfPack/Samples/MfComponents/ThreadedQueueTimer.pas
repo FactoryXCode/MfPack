@@ -3,13 +3,14 @@
 // Copyright: © FactoryX. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
-// Project location: http://sourceforge.net/projects/MFPack
+// Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: ThreadedQueueTimer.pas
 // Kind: Pascal Unit
 // Release date: 25-02-2016
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 // Description: This is the basic class of a threaded queue timer,
 //              Use this timer when less overhead
 //              and high presicion is needed with critical sections.
@@ -124,7 +125,7 @@ type
   end;
 
 
-  TThreadedQTimer = class(TObject)
+  TThreadedQTimer = class(TComponent)
   private
     { Private declarations }
     bTimerEnabled: Boolean;
@@ -145,6 +146,7 @@ type
     { Protected declarations }
     FQTimerThread: TQTimerThread;
     MsgId: Cardinal;
+    gTimerID: TGuid;
 
     { Protected methods }
     procedure UpdateTimer();
@@ -154,21 +156,31 @@ type
     { Public declarations }
 
     { Public methods }
-    constructor Create(pwTimerName: PWideChar);
+    constructor Create(aOwner: Tcomponent); override;
     // Disable and destroy the timer. (example: FreeAndNil(YourQueueTimer);
     destructor Destroy(); override;
     // Change the timer settings, while it is running.
     function ChangeTimerQueue(lwDueTime: LongWord;
                               lwPeriod: LongWord): Bool;
 
+  published
     property Enabled: Boolean read bTimerEnabled write EnableQTimer default False;
     property DueTime: UINT read uiDueTime write SetDueTime default 0;  // Immediate
     property Period: Cardinal read uiPeriod write SetPeriod default 100;  // 100 ms
     property OnTimerEvent: TNotifyEvent read neOnTimer write neOnTimer;
+
   end;
 
+  procedure Register;
 
 implementation
+
+
+procedure Register;
+begin
+  RegisterComponents('MfPack Timer Samples', [TThreadedQTimer]);
+end;
+
 
 const
   Kernel32Lib = 'kernel32.dll';    // Also declared in WinApi.Windows
@@ -193,13 +205,24 @@ end;
 //========
 
 
-constructor TThreadedQTimer.Create(pwTimerName: PWideChar);
+constructor TThreadedQTimer.Create(aOwner: Tcomponent);
+var
+  stmp: string;
+  wcmp: array[0..37] of WideChar;
 begin
-  inherited Create();
+  inherited Create(aOwner);
+
   uiDueTime := 0;
   uiPeriod := 100;
-  // Create a unique msgId for the given name of the qtimer object
-  MsgId:= RegisterWindowMessage(pwTimerName);
+
+  // Create the contextID, in this case a unique guid during runtime
+  if Succeeded( CreateGuid(gTimerID) ) then
+    stmp := GuidToString(gTimerID)
+  else // this should not happen!
+    stmp := '{6A6E25F2-A09C-4E30-8E10-DDF3020F6620}';
+
+  // Create a unique msgId by the given name of the qtimer object
+  MsgId := RegisterWindowMessage( StringToWideChar(stmp, wcmp, Length(wcmp)) );
 end;
 
 

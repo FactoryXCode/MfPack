@@ -3,13 +3,14 @@
 // Copyright: © FactoryX. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
-// Project location: http://sourceforge.net/projects/MFPack
+// Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
 // Module: MfPeakMeterEx.pas
 // Kind: Pascal Unit Component
 // Release date: 04-08-2016
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 // Description: An extended Peakmeter component based on the Mf Peakmeter Sample.
 //
 // Company: FactoryX
@@ -265,7 +266,7 @@ implementation
 
 procedure Register;
 begin
-  RegisterComponents('MfPack Samples', [TMfPeakMeterEx]);
+  RegisterComponents('MfPack Core Audio Samples', [TMfPeakMeterEx]);
 end;
 
 
@@ -412,7 +413,7 @@ begin
             fChannelCount);
 
   // Create and activate a qtimer
-  FTimer := TQTimer.Create('PeakMeterTimer');
+  FTimer := TQTimer.Create(Self);
   FTimer.DueTime := 0;  // Immediate
   FTimer.Period := TIMER_PERIOD;
   FTimer.OnTimerEvent := TimerTimer;
