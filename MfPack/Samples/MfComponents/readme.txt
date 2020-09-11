@@ -16,7 +16,7 @@ This package contains the following -installable- components:
 - TQTimer - Queue Timer component. For precise timing.
 - MfPeakMeter - Simple PeakMeter control.
 - MfPeakMeterEx - Enhanged PeakMeter control.
-- MfAudioEndPoint - Audio EndPoint component that responds to volume changes. 
+- MfAudioEndPoint - Audio EndPoint component that sets and gets volume changes of endpoints discovered on your system. 
                     Uses: IAudioEndpointVolumeEx, IAudioEndpointVolumeCallback and IMMDeviceEnumerator.
 - TThreadedQTimer - A threaded queue timer (experimental) 
 
