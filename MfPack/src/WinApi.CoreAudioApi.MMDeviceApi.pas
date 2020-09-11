@@ -109,33 +109,31 @@ const
 	// The DEVICE_STATE_XXX constants indicate the current state of an audio endpoint device.
 
 	DEVICE_STATE_ACTIVE                 = $00000001;  // The audio endpoint device is active.
-																										// That is, the audio adapter that connects to the endpoint device is present and enabled.
+	{$EXTERNALSYM DEVICE_STATE_ACTIVE}  							// That is, the audio adapter that connects to the endpoint device is present and enabled.
 																										// In addition, if the endpoint device plugs into a jack on the adapter,
 																										// then the endpoint device is plugged in.
-	{$EXTERNALSYM DEVICE_STATE_ACTIVE}
 
 	DEVICE_STATE_DISABLED               = $00000002;  // The audio endpoint device is disabled.
-																										// The user has disabled the device in the Windows multimedia control panel,
+	{$EXTERNALSYM DEVICE_STATE_DISABLED}							// The user has disabled the device in the Windows multimedia control panel,
 																										// Mmsys.cpl.
-	{$EXTERNALSYM DEVICE_STATE_DISABLED}
 
 	DEVICE_STATE_NOTPRESENT             = $00000004;  // The audio endpoint device is not present because the audio adapter that connects to
-																										// the endpoint device has been removed from the system,
+	{$EXTERNALSYM DEVICE_STATE_NOTPRESENT}						// the endpoint device has been removed from the system,
 																										// or the user has disabled the adapter device in Device Manager.
-	{$EXTERNALSYM DEVICE_STATE_NOTPRESENT}
 
 	DEVICE_STATE_UNPLUGGED              = $00000008;  // The audio endpoint device is unplugged.
-																										// The audio adapter that contains the jack for the endpoint device is present and enabled,
+	{$EXTERNALSYM DEVICE_STATE_UNPLUGGED}							// The audio adapter that contains the jack for the endpoint device is present and enabled,
 																										// but the endpoint device is not plugged into the jack.
 																										// Only a device with jack-presence detection can be in this state.
 																										// For more information about jack-presence detection, see Audio Endpoint Devices.
-	{$EXTERNALSYM DEVICE_STATE_UNPLUGGED}
 
 	DEVICE_STATEMASK_ALL                = $0000000F;  // Includes audio endpoint devices in all states—active, disabled, not present, and unplugged.
 	{$EXTERNALSYM DEVICE_STATEMASK_ALL}
 
+
   ENDPOINT_SYSFX_ENABLED 						  = $00000000;  // System Effects are enabled.
   {$EXTERNALSYM ENDPOINT_SYSFX_ENABLED}
+
 	ENDPOINT_SYSFX_DISABLED 				  	= $00000001;  // System Effects are disabled.
 	{$EXTERNALSYM ENDPOINT_SYSFX_DISABLED}
 
@@ -212,13 +210,13 @@ const
   {$EXTERNALSYM PKEY_AudioEndpoint_Default_VolumeInDb}
 
 
-	// The following properties are defined in Functiondiscoverykeys_devpkey.h in Windows Vista and later.
+// Defined in WinApi.CoreAudioApi.FunctionDiscoveryKeys_devpkey if OS >= Vista
+//	PKEY_Device_FriendlyName: PROPERTYKEY = (
+//								fmtid: (D1:$a45c254e; D2:$df1c; D3:$4efd;
+//								D4: ($80, $20, $67, $d1, $46, $a8, $50, $e0));
+//								pid: 14);
+//	{$EXTERNALSYM PKEY_Device_FriendlyName}
 
-	PKEY_Device_FriendlyName: PROPERTYKEY = (
-								fmtid: (D1:$a45c254e; D2:$df1c; D3:$4efd;
-								D4: ($80, $20, $67, $d1, $46, $a8, $50, $e0));
-								pid: 14);
-	{$EXTERNALSYM PKEY_Device_FriendlyName}
 
 	//PKEY_AudioEndpoint_XXX
 	PKEY_AudioEngine_DeviceFormat: PROPERTYKEY = (
@@ -259,13 +257,11 @@ const
 
 
 type
-	// LPCGUID = PGUID;   // declared in MfPack.MfpTypes, See: ComObj for TGuid specs
+	// LPCGUID = PGUID;   // declared in WinApi.MediaFoundationApi.MfTypes, See: ComObj for TGuid specs
 	HANDLE = System.THandle;
 
-  //Note: Skip the auto wrapper classnames generated for COM enumerations (__MIDL___MIDL_itf_name_xxx_xxx)
-	//Also the generated pointers and Tobjects, because they are of little use here, and when needed,
-  //you need them localy most of the time.
-	//Example: A pointer to EDataFlow will be: PEDataFlow = ^EDataFlow and a TEDataFlow = EDataFlow  etc.
+  // Note:
+  // Skip the auto wrapper MIDL recordnames generated for COM enumerations (__MIDL___MIDL_itf_name_xxx_xxx)
 
 
   PDIRECTX_AUDIO_ACTIVATION_PARAMS = ^tagDIRECTX_AUDIO_ACTIVATION_PARAMS;
@@ -296,12 +292,12 @@ type
 
 	// ERole
 
-  PERole = ^TERole;
+  PeRole = ^TeRole;
   __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0002 = (
-    eConsole         = 0,
-    eMultimedia      = (eConsole  + 1),
-    eCommunications  = (eMultimedia  + 1),
-    ERole_enum_count = (eCommunications  + 1)
+    eConsole         = 0,                    // Games, system notification sounds, and voice commands.
+    eMultimedia      = (eConsole + 1),       // Music, movies, narration, and live music recording.
+    eCommunications  = (eMultimedia + 1),    // Voice communications (talking to another person).
+    eRole_enum_count = (eCommunications + 1) // The number of members in the ERole enumeration (not counting the ERole_enum_count member).
   );
   {$EXTERNALSYM __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0002}
   ERole = __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0002;
@@ -498,7 +494,7 @@ type
 		function OpenPropertyStore(stgmAccess: DWORD;
                                out ppProperties: IPropertyStore): HRESULT; stdcall;
 
-		function GetId(out ppstrId: LPWSTR): HRESULT; stdcall;    //250815a, modified; issue reported by mbergstrand
+		function GetId(out ppstrId: PWideChar): HRESULT; stdcall;    //250815a, modified; issue reported by mbergstrand
 
 		function GetState(out pdwState: UINT): HRESULT; stdcall;
     // Parameters
@@ -534,7 +530,7 @@ type
 
 		function GetCount(out pcDevices: UINT): HRESULT; stdcall;
 
-		function Item(nDevice: uint;
+		function Item(nDevice: UINT;
                   out ppDevice: IMMDevice): HRESULT; stdcall;
 
 	end;

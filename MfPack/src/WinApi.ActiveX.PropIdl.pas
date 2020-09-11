@@ -640,7 +640,7 @@ type
       VT_VECTOR OR VT_BSTR:       (cabstr: CABSTR);
       VT_VECTOR OR VT_BSTR_BLOB:  (cabstrblob: CABSTRBLOB);
       VT_VECTOR OR VT_LPSTR:      (calpstr: CALPSTR);
-      VT_VECTOR OR VT_LPWSTR:     (calpwstr: CALPWSTR);
+      VT_VECTOR OR VT_LPWSTR:     (calpwstr: PCALPWSTR);
       VT_VECTOR OR VT_VARIANT:    (capropvar: CAPROPVARIANT);
       VT_BYREF OR VT_I1:          (pcVal: PAnsiChar);
       VT_BYREF OR VT_UI1:         (pbVal: PUCHAR);
@@ -921,8 +921,8 @@ type
   //   Passing NULL as the pvar parameter produces a return code of S_OK.
   //
   // Note
-  // Do not use this function to initialize PROPVARIANT structures.
-  // Instead, initialize these structures using the PropVariantInit procedure (defined in this unit).
+  //   Do not use this function to initialize PROPVARIANT structures.
+  //   Instead, initialize these structures using the PropVariantInit procedure (defined in this unit).
   function PropVariantClear(var pvar: PROPVARIANT): HResult; stdcall;
   {$EXTERNALSYM PropVariantClear}
 
@@ -985,7 +985,8 @@ type
   // Additional Prototypes for ALL interfaces
 
   // Forward functions
-  procedure PropVariantInit(var pv: PROPVARIANT);
+  procedure PropVariantInit(var pv: PROPVARIANT); inline;
+  procedure PropVariantClearSafe(var pv: PROPVARIANT); inline;
   //procedure PropVariantClear(var pv: TMfPROPVARIANT);
 
   // end of Additional Prototypes
@@ -1020,10 +1021,10 @@ const
       FillChar(pv, sizeof(PROPVARIANT), 0);
     end;
 
-  //procedure PropVariantClear(var pv: TMfPPROPVARIANT);
-  //  begin
-  //    ZeroMemory(@pv, SizeOf(pv));
-  //  end;
+  procedure PropVariantClearSafe(var pv: PROPVARIANT);
+    begin
+      ZeroMemory(@pv, SizeOf(pv));
+    end;
     
 {$WARN SYMBOL_PLATFORM OFF}
   function PropVariantCopy;             external PropIdlLib name 'PropVariantCopy' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};

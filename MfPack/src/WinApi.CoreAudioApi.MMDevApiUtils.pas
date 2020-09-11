@@ -82,7 +82,9 @@ uses
   WinApi.ActiveX.ObjBase,
   {System}
   System.Classes,
+  System.Win.ComObj,
   System.SysUtils,
+  System.VarUtils,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfUtils,
   {CoreAudioApi}
@@ -90,20 +92,40 @@ uses
   WinApi.CoreAudioApi.AudioPolicy,
   WinApi.CoreAudioApi.AudioClient,
   WinApi.CoreAudioApi.Audiosessiontypes,
-  WinApi.CoreAudioApi.DeviceTopology;
-
-  {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
+  WinApi.CoreAudioApi.Endpointvolume,
+  WinApi.CoreAudioApi.DeviceTopology,
+  WinApi.CoreAudioApi.FunctionDiscoveryKeys_devpkey;
 
   {$I 'WinApiTypes.inc'}
 
 const
   STRSAFE_MAX_CCH = 2147483647;  // Maximum supported buffer size, in characters (same as INT_MAX)
+
+  // State indicators
+  DEV_STATE_ACTIVE     : string = 'Active';
+  DEV_STATE_DISABLED   : string = 'Disabled';
+  DEV_STATE_NOTPRESENT : string = 'Not Present';
+  DEV_STATE_UNPLUGGED  : string = 'Unplugged';
+  DEV_STATEMASK_ALL    : string = 'All States'; // only use for queries
+
+type
+  PEndPointDevice = ^EndPointDevice;
+  {$NODEFINE PEndPointDevice}
+  _EndPointDevice = record
+   {Device Properties}
+   DevInterfaceName: LPWSTR;  // The friendly name of the audio adapter to which the endpoint device is attached (for example, "XYZ Audio Adapter").
+   DeviceDesc: LPWSTR;        // The device description of the endpoint device (for example, "Speakers").
+   DeviceName: LPWSTR;        // The friendly name of the endpoint device (for example, "Speakers (XYZ Audio Adapter)").
+   pwszID: LPWSTR;            //
+   dwState: DWord;            // State of the device (disconnected, active, unplugged or not present)
+   sState: string;            // State of the device in readable string
+   iID: integer;              // Device index ID, starting with 0
+  end;
+  EndPointDevice = _EndPointDevice;
+  TEndPointDevice = _EndPointDevice;
+
+  TEndPointDeviceArray = array of TEndPointDevice;
+
 
 type
  //-----------------------------------------------------------
@@ -135,16 +157,32 @@ type
 
   end;
 
-  // Get endpointnames
-  function GetEndpointNames(out slEndPoints: TStrings;
-                            DataFlow: eDataFlow;
-                            DeviceState: OLE_ENUM): HRESULT;
+  //-----------------------------------------------------------
+  // Get endpoint devices
+  //
+  // This function enumerates all audio rendering endpoint devices.
+  // It returns an array of TEndPointDevice.
+  // Params:
+  //   {in}     flow: eRender, eCapture or eAll
+  //   {in}     state: Set this parameter to the bitwise OR of one or more DEVICE_STATE_XXX constants
+  //   {out}    endpointdevices: Returns an array of TEndPointDevices.
+  //   {out}    Number of endpoints returned.
+  //-----------------------------------------------------------
+  function GetEndpointDevices(const flow: EDataFlow;
+                              state: DWord;
+                              out endpointdevices: TEndPointDeviceArray;
+                              out devicesCount: DWord): HRESULT;
 
-  function GetDefaultComDeviceEndPoint: HRESULT;
+  function GetDefaultEndPointAudioDevice(out audioEndPoint: IMMDevice;
+                                         Role: eRole = eMultimedia;
+                                         dataFlow: EDataFlow = eRender): HRESULT;
 
-  // Get the devicename of a device
-  function GetImmDeviceName(Device: IMMDevice;
-                            out deviceName: string): HRESULT;
+  // Get the device descriptions of a device
+  function GetDeviceDescriptions(DefaultDevice: IMMDevice; // the zero based index, where 0 is the default (active) endpoint.
+                                 const DevicePkey: PROPERTYKEY; // Possible values are: PKEY_Device_FriendlyName, PKEY_Device_DeviceDesc or PKEY_DeviceInterface_FriendlyName.
+                                 out deviceDesc: WideString): HRESULT;
+
+  function GetDeviceStateAsString(state: DWord): string;
 
   // The DirectShow API does not provide a means for an application to select the
   // audio endpoint device that is assigned to a particular device role.
@@ -309,102 +347,126 @@ end;
 // eof AudioVolumeEvents
 
 
-// Get endpointnames
-// Source: Microsoft, http://msdn.microsoft.com/en-us/library/windows/desktop/dd370812(v=vs.85).aspx
+// Get GetEndpointDevices
 // Remarks: the index of slEndPoints indicates also the device index.
-function GetEndpointNames(out slEndPoints: TStrings;
-                          DataFlow: eDataFlow;
-                          DeviceState: OLE_ENUM): HRESULT;
+function GetEndpointDevices(const flow: EDataFlow;
+                            state: DWord;
+                            out endpointdevices: TEndPointDeviceArray;
+                            out devicesCount: DWord): HRESULT;
 var
-  hr: HRESULT;
-  Enumerator: IMMDeviceEnumerator;
-  Collection: IMMDeviceCollection;
-  Endpoint: IMMDevice;
-  Props: IPropertyStore;
-  wszID: LPWSTR;
-  dwCount: UINT;
-  i: integer;
-  varName: PROPVARIANT;
+  hr: HResult;
+  pEnumerator: IMMDeviceEnumerator;
+  pCollection: IMMDeviceCollection;
+  pEndpoint: IMMDevice;
+  pProps: IPropertyStore;
+  DevIfaceName: PROPVARIANT;
+  DevDesc: PROPVARIANT;
+  DevName: PROPVARIANT;
+  pwszID: PWideChar;
+  count: UINT;
+  i: Integer;
+  dwState: DWord;
+
+  procedure CheckHr(hres: HResult);
+    begin
+      if FAILED(hres) then
+        Abort;
+    end;
 
 begin
-  slEndPoints.Clear;
-  hr:= S_OK;
+  hr := S_OK;
 
 try
 try
+  SetLength(endpointdevices, 0);
 
-  hr:= CoCreateInstance(CLSID_MMDeviceEnumerator,
-                        nil,
-                        CLSCTX_ALL,
-                        IID_IMMDeviceEnumerator,
-                        Enumerator);
-  if Failed(hr) then
-    Abort;
+  if (state = 0) then
+    state := $0000000F; {15 = ALL}
 
-  hr:= Enumerator.EnumAudioEndpoints(DataFlow,
-                                     DeviceState,
-                                     Collection);
-  if Failed(hr) then
-    Abort;
+  // Create the enumerator
+  CheckHr( CoCreateInstance(CLSID_MMDeviceEnumerator,
+                            Nil,
+                            CLSCTX_ALL,
+                            IID_IMMDeviceEnumerator,
+                            pEnumerator) );
+  CheckHr( pEnumerator.EnumAudioEndpoints(flow,
+                                          state,
+                                          pCollection) );
+  CheckHr( pCollection.GetCount(count) );
 
-  hr := Collection.GetCount(dwCount);
-  if Failed(hr) then
-    Abort;
-
-  if (dwCount = 0) then
-    Abort;
-
-  // Each loop prints the name of an endpoint device.
-  for i := 0 to dwCount -1 do
+  // No endpoints found.
+  if (count = 0) then
     begin
-      // Get pointer to endpoint number _i
-      hr := Collection.Item(i,
-                            Endpoint);
-      if Failed(hr) then
-        Abort;
+      devicesCount := 0;
+      Exit;
+    end;
 
+  // Store devices found
+  devicesCount := count;
+  // expand the array (in case we have an open array)
+  SetLength(endpointdevices, count);
+  // Initialize containers for property values.
+  PropVariantInit(DevIfaceName);
+  PropVariantInit(DevDesc);
+  PropVariantInit(DevName);
+
+  // Each loop gets the properties of an endpoint device.
+  for i := 0 to count -1 do
+    begin
+      // Get pointer to endpoint i.
+      CheckHr( pCollection.Item(i,
+                                pEndpoint) );
       // Get the endpoint ID string.
-      hr := Endpoint.GetId(wszID);
-      if Failed(hr) then
-        Abort;
-
-      hr := Endpoint.OpenPropertyStore(Ord(STGM_READ),
-                                       Props);
-      if Failed(hr) then
-        Abort;
-
-      // Initialize container for property value.
-      PropVariantInit(varName);
+      CheckHr( pEndpoint.GetId(pwszID) );
+      // Get the endpoint state
+      CheckHr( pEndpoint.GetState(dwState) );
+      // Open propertystore, to get device descriptions
+      CheckHr( pEndpoint.OpenPropertyStore(STGM_READ,
+                                           pProps) );
 
       // Get the endpoint's friendly-name property.
-      hr:= Props.GetValue(PKEY_Device_FriendlyName,
-                          varName);
-      if Failed(hr) then
-        Abort;
+      CheckHr( pProps.GetValue(PKEY_DeviceInterface_FriendlyName,
+                               DevIfaceName) );
+      // Get the endpoint's device description property.
+      CheckHr( pProps.GetValue(PKEY_Device_DeviceDesc,
+                               DevDesc) );
+      // Get the endpoint's device name property.
+      CheckHr( pProps.GetValue(PKEY_Device_FriendlyName,
+                               DevName) );
 
-      // endpoint friendly name and endpoint ID.
-      slEndPoints.Append(string(varName.pwszVal));
+      // Store endpoint's properties in array.
+      endpointdevices[i].DevInterfaceName := DevIfaceName.pwszVal;
+      endpointdevices[i].DeviceDesc := DevDesc.pwszVal;
+      endpointdevices[i].DeviceName := DevName.pwszVal;
+      endpointdevices[i].pwszID := pwszID;
+      endpointdevices[i].dwState := dwState;
+      endpointdevices[i].sState := GetDeviceStateAsString(dwState);
+      endpointdevices[i].iID := i;
 
-      PropVariantClear(varName);
+      SafeRelease(pProps);
+      SafeRelease(pEndpoint);
     end;
 
 except
-  //Do Nothing
+  // Silent exception
 end;
 finally
-  CoTaskMemFree(wszID);
+  PropVariantClearSafe(DevIfaceName);
+  PropVariantClearSafe(DevDesc);
+  PropVariantClearSafe(DevName);
+  pwszID := Nil;
   Result := hr;
 end;
 end;
 
 
-
 // Get a reference to the endpoint of the default communication device for
 // rendering an audio stream.
-function GetDefaultComDeviceEndPoint(): HRESULT;
+function GetDefaultEndPointAudioDevice(out audioEndPoint: IMMDevice;
+                                       Role: eRole = eMultimedia;
+                                       dataFlow: EDataFlow = eRender): HRESULT;
 var
   pdeviceEnumerator: IMMDeviceEnumerator;
-  DefaultAudioEndpoint: IMMDevice;
   hr: HRESULT;
 
 begin
@@ -419,11 +481,16 @@ try
   if Failed(hr) then
     Abort;
 
-  hr := pdeviceEnumerator.GetDefaultAudioEndpoint(eRender,
-                                                  eCommunications,
-                                                  DefaultAudioEndpoint);
-  if Failed(hr) then
-    Abort;
+  if (dataFlow = eRender) or (dataFlow = eCapture) then  // Can only be eRender or eCapture
+    begin
+      hr := pdeviceEnumerator.GetDefaultAudioEndpoint(dataFlow,
+                                                      Role,
+                                                      audioEndPoint);
+     if Failed(hr) then
+       Abort;
+    end
+  else
+    hr := E_INVALIDARG;
 
 except
   //Do Nothing
@@ -434,38 +501,49 @@ end;
 end;
 
 
-// Get the devicename of a device
-function GetImmDeviceName(Device: IMMDevice;
-                          out deviceName: string): HRESULT;
+// Get the device descriptions of a device
+function GetDeviceDescriptions(DefaultDevice: IMMDevice;
+                               const DevicePkey: PROPERTYKEY; // Possible values are: PKEY_Device_FriendlyName, PKEY_Device_DeviceDesc or PKEY_DeviceInterface_FriendlyName.
+                               out deviceDesc: WideString): HRESULT;
 var
-  PropStore: IPropertyStore;
-  pvar: PROPVARIANT;
-  hr: HRESULT;
+  hr: HResult;
+  psPropertyStore: IPropertyStore;
+  pvvar: PROPVARIANT;
+
+label
+  done;
 
 begin
-  deviceName := '';
-  hr := E_FAIL;  //to prevent might not have been initialised warning
-try
-try
-  hr := Device.OpenPropertyStore(STGM_READ,
-                                 PropStore);
+  PropVariantInit(pvvar);
+  hr := DefaultDevice.OpenPropertyStore(STGM_READ,
+                                        psPropertyStore);
   if SUCCEEDED(hr) then
     begin
-      // Get the DirectSound or DirectSoundCapture device GUID
-      // (in WCHAR string format) for the endpoint device.
-      hr := PropStore.GetValue(PKEY_Device_FriendlyName,
-                               pvar);
-      if Failed(hr) then
-        Abort
-      else
-        deviceName:= string(pvar.pwszVal);
+      hr := psPropertyStore.GetValue(DevicePkey,
+                                     pvvar);
+      if FAILED(hr) then
+        begin
+          OleCheck(hr);
+          goto done;
+        end;
+
+      deviceDesc := pvvar.pwszVal;
     end;
-except
-  //do nothing
-end;
-finally
+
+done:
+  PropVariantClear(pvvar);
   Result := hr;
 end;
+
+function GetDeviceStateAsString(state: DWord): string;
+begin
+  case state of
+    DEVICE_STATE_ACTIVE:     Result := DEV_STATE_ACTIVE;
+    DEVICE_STATE_DISABLED:   Result := DEV_STATE_DISABLED;
+    DEVICE_STATE_NOTPRESENT: Result := DEV_STATE_NOTPRESENT;
+    DEVICE_STATE_UNPLUGGED:  Result := DEV_STATE_UNPLUGGED;
+    DEVICE_STATEMASK_ALL:    Result := DEV_STATEMASK_ALL;
+  end;
 end;
 
 //-----------------------------------------------------------

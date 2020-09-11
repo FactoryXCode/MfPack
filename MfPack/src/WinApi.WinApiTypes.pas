@@ -270,7 +270,7 @@ type
 
 {$IFDEF MFP_POLESTR}
  PPOLESTR = ^POLESTR;
- POLESTR = PWideChar;
+ POLESTR = PWideString;
 {$ENDIF}
 
 
@@ -1276,7 +1276,7 @@ type
   {$EXTERNALSYM PWSTR}
   PLPWSTR = ^LPWSTR;
   {$EXTERNALSYM PLPWSTR}
-  LPWSTR = PWideChar;
+  LPWSTR = PWSTR;
   {$EXTERNALSYM LPWSTR}
 {$ENDIF}
 
@@ -2351,14 +2351,14 @@ type
 
 {$IFDEF MFP_OLEDATE}
   POLE_DATE = ^OLE_DATE;
-  OLE_DATE = Double;
+  OLE_DATE = type Double;
   {$EXTERNALSYM OLE_DATE}
 {$ENDIF}
 
 
 {$IFDEF MFP_OLEBOOL}
   POLE_BOOL = ^OLE_BOOL;
-  OLE_BOOL = WordBool;
+  OLE_BOOL = type WordBool;
   {$EXTERNALSYM OLE_BOOL}
 {$ENDIF}
 
@@ -2393,7 +2393,7 @@ type
 
 {$IFDEF MFP_UINT8}
   PUINT8 = ^UINT8;
-  UINT8 = Byte;
+  UINT8 = type Byte;
   {$EXTERNALSYM UINT8}
 {$ENDIF}
 

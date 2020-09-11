@@ -109,10 +109,10 @@ type
   PAUDIO_VOLUME_NOTIFICATION_DATA = ^AUDIO_VOLUME_NOTIFICATION_DATA;
   cwAUDIO_VOLUME_NOTIFICATION_DATA = record
     guidEventContext: TGUID;  // Context associated with the originator of the event.
-    bMuted: INT {BOOL};
+    bMuted: BOOL;
     fMasterVolume: Single;
     nChannels: UINT;
-    afChannelVolumes: array [0..0] of Single;
+    afChannelVolumes: array [0..128] of Single;
   end;
   {$EXTERNALSYM cwAUDIO_VOLUME_NOTIFICATION_DATA}
   AUDIO_VOLUME_NOTIFICATION_DATA = cwAUDIO_VOLUME_NOTIFICATION_DATA;
@@ -149,7 +149,7 @@ type
   IAudioEndpointVolumeCallback = interface(IUnknown)
   ['{657804FA-D6AD-4496-8A60-352752AF4F89}']
 
-    function OnNotify(pNotify: AUDIO_VOLUME_NOTIFICATION_DATA): HRESULT; stdcall;
+    function OnNotify(pNotify: PAUDIO_VOLUME_NOTIFICATION_DATA): HRESULT; stdcall;
 
   end;
   IID_IAudioEndpointVolumeCallback = IAudioEndpointVolumeCallback;
@@ -186,10 +186,10 @@ type
     function GetChannelCount(out pnChannelCount: UINT): HRESULT; stdcall;
 
     function SetMasterVolumeLevel(fLevelDB: Single;
-                                  const pguidEventContext: TGUID): HRESULT; stdcall;
+                                  const pguidEventContext: LPCGUID): HRESULT; stdcall;
 
     function SetMasterVolumeLevelScalar(fLevel: Single;
-                                        const pguidEventContext: TGUID): HRESULT; stdcall;
+                                        const pguidEventContext: LPCGUID): HRESULT; stdcall;
 
     function GetMasterVolumeLevel(out pfLevelDB: Single): HRESULT; stdcall;
 
@@ -197,11 +197,11 @@ type
 
     function SetChannelVolumeLevel(nChannel: UINT;
                                    fLevelDB: Single;
-                                   const pguidEventContext: TGUID): HRESULT; stdcall;
+                                   const pguidEventContext: LPCGUID): HRESULT; stdcall;
 
     function SetChannelVolumeLevelScalar(nChannel: UINT;
                                          fLevel: Single;
-                                         const pguidEventContext: TGUID): HRESULT; stdcall;
+                                         const pguidEventContext: LPCGUID): HRESULT; stdcall;
 
     function GetChannelVolumeLevel(nChannel: UINT;
                                    out fLevelDB: Single): HRESULT; stdcall;
@@ -217,11 +217,11 @@ type
     function GetVolumeStepInfo(out pnStep: UINT;
                                out pnStepCount: UINT): HRESULT; stdcall;
 
-    function VolumeStepUp(const pguidEventContext: TGUID): HRESULT; stdcall;
+    function VolumeStepUp(const pguidEventContext: LPCGUID): HRESULT; stdcall;
 
-    function VolumeStepDown(const pguidEventContext: TGUID): HRESULT; stdcall;
+    function VolumeStepDown(const pguidEventContext: LPCGUID): HRESULT; stdcall;
 
-    function QueryHardwareSupport(out pdwHardwareSupportMask: UINT): HRESULT; stdcall;
+    function QueryHardwareSupport(pdwHardwareSupportMask: DWord): HRESULT; stdcall;
 
     function GetVolumeRange(out pflVolumeMindB: Single;
                             out pflVolumeMaxdB: Single;

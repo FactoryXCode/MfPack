@@ -382,11 +382,11 @@ type
      function GetAt(iProp: DWORD;
                     out pkey: PPROPERTYKEY): HResult; stdcall;
 
-     function GetValue(key: PROPERTYKEY;
+     function GetValue(const key: PROPERTYKEY;
                        out pv: PROPVARIANT): HResult; stdcall;
 
-     function SetValue(key: PROPERTYKEY;
-                       propvar: PROPVARIANT): HResult; stdcall;
+     function SetValue(const key: PROPERTYKEY;
+                       const propvar: PROPVARIANT): HResult; stdcall;
 
      function Commit: HResult; stdcall;
 
