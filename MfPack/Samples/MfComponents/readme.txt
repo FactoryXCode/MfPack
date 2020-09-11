@@ -21,8 +21,9 @@ This package contains the following -installable- components:
 - TThreadedQTimer - A threaded queue timer (experimental) 
 
 Project: Media Foundation - MFPack - Samples
-Project location: http://sourceforge.net/projects/MFPack
+Project location: https://sourceforge.net/projects/MFPack
+                  https://github.com/FactoryXCode/MfPack
 First release date: 05-02-2016
-Final release date: 11-09-2020
+Final release date: 12-09-2020
 
 Copyright © FactoryX. All rights reserved.
