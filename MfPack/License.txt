@@ -12,5 +12,7 @@ LICENSE
 
  Users may distribute this source code provided that this header is included
  in full at the top of the file.
+ Users may copy parts of this source code provided that the origin source is included
+ at the top of the file, including founders and contibuters.
 
 <eof>
