@@ -133,8 +133,8 @@ type
   //
   // Parameters:
   //
-  //  pNotify - [in] Structure containing information about the new
-  //                 endpoint volume.
+  //  pNotify - [in] A pointer (PAUDIO_VOLUME_NOTIFICATION_DATA) to the structure
+  //                 containing information about the new endpoint volume.
   //
   // Return values:
   //      S_OK if successful
