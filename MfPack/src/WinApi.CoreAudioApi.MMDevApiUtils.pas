@@ -127,6 +127,17 @@ type
   TEndPointDeviceArray = array of TEndPointDevice;
 
 
+  // The following enum is stripped, to prevent users select not allowed members of
+  // EDataFlow when querying or setting endpoint-devices.
+  // When EDataFlow parameters are clashing with the stripped enum,
+  // you have to cast those like: EDataFlow(eRender) etc.
+
+  // Stripped EDataFlow
+  EDataFlowEx = (
+    eRender              = 0,
+    eCapture             = (eRender + 1)
+                );
+
 type
  //-----------------------------------------------------------
  // Register the application to receive notifications when the
@@ -168,14 +179,14 @@ type
   //   {out}    endpointdevices: Returns an array of TEndPointDevices.
   //   {out}    Number of endpoints returned.
   //-----------------------------------------------------------
-  function GetEndpointDevices(const flow: EDataFlow;
+  function GetEndpointDevices(const flow: EDataFlowEx;
                               state: DWord;
                               out endpointdevices: TEndPointDeviceArray;
                               out devicesCount: DWord): HRESULT;
 
   function GetDefaultEndPointAudioDevice(out audioEndPoint: IMMDevice;
                                          Role: eRole = eMultimedia;
-                                         dataFlow: EDataFlow = eRender): HRESULT;
+                                         dataFlow: EDataFlowEx = eRender): HRESULT;
 
   // Get the device descriptions of a device
   function GetDeviceDescriptions(DefaultDevice: IMMDevice; // the zero based index, where 0 is the default (active) endpoint.
@@ -349,7 +360,7 @@ end;
 
 // Get GetEndpointDevices
 // Remarks: the index of slEndPoints indicates also the device index.
-function GetEndpointDevices(const flow: EDataFlow;
+function GetEndpointDevices(const flow: EDataFlowEx;
                             state: DWord;
                             out endpointdevices: TEndPointDeviceArray;
                             out devicesCount: DWord): HRESULT;
@@ -389,9 +400,11 @@ try
                             CLSCTX_ALL,
                             IID_IMMDeviceEnumerator,
                             pEnumerator) );
-  CheckHr( pEnumerator.EnumAudioEndpoints(flow,
+
+  CheckHr( pEnumerator.EnumAudioEndpoints(EDataFlow(flow),
                                           state,
                                           pCollection) );
+
   CheckHr( pCollection.GetCount(count) );
 
   // No endpoints found.
@@ -464,7 +477,7 @@ end;
 // rendering an audio stream.
 function GetDefaultEndPointAudioDevice(out audioEndPoint: IMMDevice;
                                        Role: eRole = eMultimedia;
-                                       dataFlow: EDataFlow = eRender): HRESULT;
+                                       dataFlow: EDataFlowEx = eRender): HRESULT;
 var
   pdeviceEnumerator: IMMDeviceEnumerator;
   hr: HRESULT;
@@ -483,8 +496,8 @@ try
 
   if (dataFlow = eRender) or (dataFlow = eCapture) then  // Can only be eRender or eCapture
     begin
-      hr := pdeviceEnumerator.GetDefaultAudioEndpoint(dataFlow,
-                                                      Role,
+      hr := pdeviceEnumerator.GetDefaultAudioEndpoint(EDataFlow(dataFlow),
+                                                      ERole(Role),
                                                       audioEndPoint);
      if Failed(hr) then
        Abort;
@@ -587,8 +600,8 @@ try
   if Failed(hr) then
     Abort;
 
-  hr:= pEnumerator.GetDefaultAudioEndpoint(eRender,
-                                           role,
+  hr:= pEnumerator.GetDefaultAudioEndpoint(EDataFlow(eRender),
+                                           ERole(role),
                                            pDevice);
 
   if Failed(hr) then
@@ -740,8 +753,8 @@ begin
 
   // Get the audio endpoint device that the user has
   // assigned to the specified device role.
-  hr:= pEnumerator.GetDefaultAudioEndpoint(eRender,
-                                           role,
+  hr:= pEnumerator.GetDefaultAudioEndpoint(EDataFlow(eRender),
+                                           ERole(role),
                                            pDevice);
   if Failed(hr) then
     goto leave;
