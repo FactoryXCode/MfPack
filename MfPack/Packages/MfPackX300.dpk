@@ -168,6 +168,8 @@ contains
   WinApi.DirectX.D2D1Helper in '..\src\WinApi.DirectX.D2D1Helper.pas',
   WinApi.DirectX.D2D1Svg in '..\src\WinApi.DirectX.D2D1Svg.pas',
   WinApi.WIC.WinCodecSdk in '..\src\WinApi.WIC.WinCodecSdk.pas',
-  WinApi.WIC.WinCodec in '..\src\WinApi.WIC.WinCodec.pas';
+  WinApi.WIC.WinCodec in '..\src\WinApi.WIC.WinCodec.pas',
+  WinApi.MMiscApi in '..\src\WinApi.MMiscApi.pas',
+  WinApi.MMSysCom in '..\src\WinApi.MMSysCom.pas';
 
 end.

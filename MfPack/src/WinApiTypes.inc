@@ -19,12 +19,12 @@
 //
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 //
-//
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 15/09/2020 Tony                Added support for HPSTR type
 //------------------------------------------------------------------------------
 //
 // Remarks: All future updates (releases) will be named to an artist except for
@@ -726,6 +726,9 @@ const
 
  {$DEFINE MFP_LPSTR}
 // {$UNDEF MFP_LPSTR}
+
+ {$DEFINE MFP_HPSTR}
+// {$UNDEF MFP_HPSTR}
 
  {$DEFINE MFP_LPCSTR}
 // {$UNDEF MFP_LPCSTR}

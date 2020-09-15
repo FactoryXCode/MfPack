@@ -2544,7 +2544,7 @@ const    // updt 090812 add
 
   // Peter
 type
-  // This function is an alias for function MAKEFOURCC defined in MfPack.MmReg and MfPack.MfpUtils
+  // This function is an alias for function MAKEFOURCC defined in WinApi.MmReg.pas and WinApi.MediaFoundationApi.MfMetLib.pas
   tCh4 = array [0..3] of AnsiChar;
   function FCC(ch4: TCh4): DWord; inline;
 

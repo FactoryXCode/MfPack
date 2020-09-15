@@ -623,15 +623,15 @@ const
 
 
   // {d5a47fa7-6d98-11d1-a21a-00a0c9223196}
-  function INIT_MMREG_MID(guid: TGuid; const id: USHORT): TGUID;
-  function EXTRACT_MMREG_MID(guid: TGUID): USHORT;
-  function DEFINE_MMREG_MID_GUID(const id: USHORT): TGUID;
-  function IS_COMPATIBLE_MMREG_MID(guid: TGUID): BOOL;
+  function INIT_MMREG_MID(const guid: TGuid; const id: USHORT): TGUID; inline;
+  function EXTRACT_MMREG_MID(const guid: TGUID): USHORT; inline;
+  function DEFINE_MMREG_MID_GUID(const id: USHORT): TGUID; inline;
+  function IS_COMPATIBLE_MMREG_MID(const guid: TGUID): BOOL; inline;
   // {e36dc2ac-6d9a-11d1-a21a-00a0c9223196}
-  function INIT_MMREG_PID(guid: TGUID; id: USHORT): TGUID;
-  function EXTRACT_MMREG_PID(guid: TGUID): USHORT;
-  function DEFINE_MMREG_PID_GUID(const id: USHORT): TGUID;
-  function IS_COMPATIBLE_MMREG_PID(guid: TGUID): BOOL;
+  function INIT_MMREG_PID(const guid: TGUID; const id: USHORT): TGUID; inline;
+  function EXTRACT_MMREG_PID(const guid: TGUID): USHORT; inline;
+  function DEFINE_MMREG_PID_GUID(const id: USHORT): TGUID; inline;
+  function IS_COMPATIBLE_MMREG_PID(const guid: TGUID): BOOL; inline;
 
 
 const
@@ -5847,8 +5847,8 @@ begin
 end;
 
 
-function INIT_MMREG_MID(guid: TGuid;
-                          const id: USHORT): TGUID;
+function INIT_MMREG_MID(const guid: TGuid;
+                        const id: USHORT): TGUID;
 begin
   Result.D1:= $d5a47fa7 + id;
   Result.D2:= $6d98;
@@ -5864,7 +5864,7 @@ begin
 end;
 
 
-function EXTRACT_MMREG_MID(guid: TGUID): USHORT;
+function EXTRACT_MMREG_MID(const guid: TGUID): USHORT;
 begin
   Result:= guid.D1 - $d5a47fa7;
 end;
@@ -5886,7 +5886,7 @@ begin
 end;
 
 
-function IS_COMPATIBLE_MMREG_MID(guid: TGUID): BOOL;
+function IS_COMPATIBLE_MMREG_MID(const guid: TGUID): BOOL;
 begin
   Result:= (guid.D1 >= $d5a47fa7) AND
            (guid.D1 < $d5a47fa7 + $ffff) AND
@@ -5903,8 +5903,8 @@ begin
 end;
 
 
-function INIT_MMREG_PID(guid: TGUID;
-                          id: USHORT): TGUID;
+function INIT_MMREG_PID(const guid: TGUID;
+                        const id: USHORT): TGUID;
 begin
   Result.D1:= $e36dc2ac + id;
   Result.D2:= $6d9a;
@@ -5920,7 +5920,7 @@ begin
 end;
 
 
-function EXTRACT_MMREG_PID(guid: TGUID): USHORT;
+function EXTRACT_MMREG_PID(const guid: TGUID): USHORT;
 begin
   Result:= guid.D1 - $e36dc2ac;
 end;
@@ -5943,7 +5943,7 @@ end;
 
 
 
-function IS_COMPATIBLE_MMREG_PID(guid: TGUID): BOOL;
+function IS_COMPATIBLE_MMREG_PID(const guid: TGUID): BOOL;
 begin
   Result:= (guid.D1 >= $e36dc2ac) AND
            (guid.D1 < $e36dc2ac + $ffff) AND

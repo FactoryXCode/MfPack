@@ -2168,7 +2168,7 @@ const
   {$EXTERNALSYM D3DFVF_TEXCOORDSIZE1}
 
 
-// MAKEFOURCC is also defined in media foundation MFApi.pas and MmReg.pas
+// MAKEFOURCC is also defined in WinApi.MmReg.pas and WinApi.MediaFoundationApi.MfMetLib.pas
 {$IFNDEF MAKEFOURCC}
   function MAKEFOURCC(ch0: AnsiChar;
                       ch1: AnsiChar;

@@ -1213,6 +1213,12 @@ type
 {$ENDIF}
 
 
+{$IFDEF MFP_HPSTR}
+  HPSTR = PAnsiChar;
+  {$EXTERNALSYM HPSTR}
+{$ENDIF}
+
+
 {$IFDEF MFP_WCHAR}
   {$IFDEF UNICODE}
     WCHAR = WideChar;
