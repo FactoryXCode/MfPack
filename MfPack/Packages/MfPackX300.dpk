@@ -170,6 +170,11 @@ contains
   WinApi.WIC.WinCodecSdk in '..\src\WinApi.WIC.WinCodecSdk.pas',
   WinApi.WIC.WinCodec in '..\src\WinApi.WIC.WinCodec.pas',
   WinApi.MMiscApi in '..\src\WinApi.MMiscApi.pas',
-  WinApi.MMSysCom in '..\src\WinApi.MMSysCom.pas';
+  WinApi.MMSysCom in '..\src\WinApi.MMSysCom.pas',
+  WinApi.Mpeg2Data in '..\src\WinApi.Mpeg2Data.pas',
+  WinApi.Mpeg2Structs in '..\src\WinApi.Mpeg2Structs.pas',
+  WinApi.Mpeg2Bits in '..\src\WinApi.Mpeg2Bits.pas',
+  WinApi.Mpeg2PsiParser in '..\src\WinApi.Mpeg2PsiParser.pas',
+  WinApi.MPEGError in '..\src\WinApi.MPEGError.pas';
 
 end.
