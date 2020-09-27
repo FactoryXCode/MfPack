@@ -135,7 +135,8 @@ type
   //  call these to start stop using VfW from your app.
   //
   //****************************************************************************
-  //  Old obsolete implementations. For some reason these are still defined.
+  //  Old obsolete implementations (VFW 16-bit).
+  //  For some odd reason these are still defined in the header file.
   //
   //  function InitVFW(): LONG; stdcall;
   //
