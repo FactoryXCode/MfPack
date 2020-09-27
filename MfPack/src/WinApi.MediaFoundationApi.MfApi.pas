@@ -12,26 +12,7 @@
 //
 // Revision Version: 3.0.0
 // Description: Requires Windows Vista or later.
-//  
-//          MfApi.pas is the unit containing the APIs for using the MF platform.
-//  
-//          When reading the original headers (.h) you may see "STDAPI", a macro.
-//          "STDAPI" means it uses the "stdcall" calling convention and it returns
-//          always a HRESULT, unless it's marked with, for example _BOOL,
-//          a boolean is returned.
-//          In Delphi it's declared as:
-//          [uses Windows;]
-//          [function FunctionName(vars: -const, out or var-): HResult; stdcall;]
-//  
-//          Delphi : The IUnknown entries of functions should be casted like this:
-//          IUnknown(Pointer), IUnknown(Object), IUnknown(Nil) etc.
-//  
-//          Using packed records is not recommended,
-//          because it can prevent compatibility with other languages or
-//          platforms, it slows data access, and, in the case of a character array,
-//          it affects type compatibility.
-//          For more information, see "Memory management and Implicit Packing of
-//          Fields with a Common Type Specification".
+//              MfApi.pas is the unit containing the APIs for using the MF platform.
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -46,8 +27,6 @@
 //
 // Remarks: Requires Windows Vista or later.
 // 
-//          MfApi.pas is the unit containing the APIs for using the MF platform.
-//
 //          When reading the original headers (.h) you may see "STDAPI", a macro.
 //          "STDAPI" means it uses the "stdcall" calling convention and it returns always a
 //          HRESULT,
@@ -106,7 +85,7 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.WinApiTypes,
-  WinApi.MMReg,
+  WinApi.WinMM.MMReg,
   WinApi.MediaObj,
   WinApi.AmVideo,
   WinApi.DvdMedia,
@@ -166,7 +145,7 @@ const
   // Application should not call MFStartup / MFShutdown from workqueue threads
   //
   // Default = MFSTARTUP_FULL
-  function MFStartup(const Version: ULONG;
+  function MFStartup(const Version: ULONG = MF_API_VERSION;
                      const dwFlags: DWORD = MFSTARTUP_FULL): HRESULT; stdcall;
   {$EXTERNALSYM MFStartup}
 
@@ -2508,9 +2487,6 @@ const    // updt 090812 add
   // Compressed video or audio can also use any well-known GUID that exists, or can create a new GUID.
   //
   // GUIDs for common media types are defined below.
-
-
-
 
 {
 #ifndef FCC

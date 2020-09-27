@@ -66,7 +66,7 @@ interface
 uses
   {WinApi}
   WinApi.WinApiTypes,
-  WinApi.MmReg,
+  WinApi.WinMM.MMReg,
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioSessionTypes,
   WinApi.CoreAudioApi.SpatialAudioClient;

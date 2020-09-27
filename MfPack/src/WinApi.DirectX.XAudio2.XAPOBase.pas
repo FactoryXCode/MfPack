@@ -67,7 +67,7 @@ interface
 uses
   {WinApi}
   WinApi.Windows,
-  WinApi.MmReg,
+  WinApi.WinMM.MMReg,
   {DirectX}
   WinApi.DirectX.XAudio2.XApo;
 

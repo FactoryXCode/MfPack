@@ -83,7 +83,7 @@ uses
   WinApi.UuIds,
   WinApi.AmVideo,
   WinApi.Dvdmedia,
-  WinApi.MMReg,
+  WinApi.WinMM.MMReg,
   WinApi.ComBaseApi,
   {ActiveX}
   WinApi.ActiveX.PropVarUtil,

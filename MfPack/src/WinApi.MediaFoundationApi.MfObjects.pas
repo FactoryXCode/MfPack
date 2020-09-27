@@ -74,7 +74,7 @@ uses
   Winapi.Windows,
   WinApi.WinApiTypes,
   WinApi.Unknwn,
-  WinApi.MMReg,
+  WinApi.WinMM.MMReg,
   WinApi.MediaObj,
   {ActiveX}
   WinApi.ActiveX.PropSys,

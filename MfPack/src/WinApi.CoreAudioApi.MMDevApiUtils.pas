@@ -74,8 +74,8 @@ uses
   WinApi.StrMif,
   WinApi.Coml2Api,
   WinApi.ComBaseApi,
-  WinApi.Mmreg,
-  WinApi.MmDdk,
+  WinApi.WinMM.MMreg,
+  WinApi.WinMM.MMDdk,
   {ActiveX}
   WinApi.ActiveX.PropIdl,
   WinApi.ActiveX.PropSys,

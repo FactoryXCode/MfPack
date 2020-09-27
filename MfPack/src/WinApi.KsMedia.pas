@@ -70,7 +70,7 @@ uses
   WinApi.VpType,
   WinApi.KsProxy,
   WinApi.Ks,
-  WinApi.MmReg;
+  WinApi.WinMM.MMReg;
 
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}

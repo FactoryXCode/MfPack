@@ -140,7 +140,7 @@ uses
 
   {WinApi}
   WinApi.WinApiTypes,
-  WinApi.MmReg,
+  WinApi.WinMM.MMReg,
   WinApi.ComBaseApi;
 
   {$WEAKPACKAGEUNIT ON}

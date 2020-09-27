@@ -921,8 +921,6 @@ type
 
 implementation
 
-  // Implement Additional Prototypes here.
-
 const
   advapi32Lib = 'Advapi32.dll';
 
@@ -954,7 +952,7 @@ const
   begin
     EventDataDescriptor.Ptr := ULONGLONG(DataPtr);
     EventDataDescriptor.Size := DataSize;
-    EventDataDescriptor.DUMMYSTRUCTNAME.Reserved:= 0;
+    EventDataDescriptor.DUMMYSTRUCTNAME.Reserved := 0;
   end;
 
 
@@ -1024,7 +1022,7 @@ const
 
   function EventDescGetKeyword(const EventDescriptor: EVENT_DESCRIPTOR): ULONGLONG;
   begin
-    Result:= EventDescriptor.Keyword;
+    Result := EventDescriptor.Keyword;
   end;
 
 
@@ -1037,7 +1035,7 @@ const
                           Id: USHORT): EVENT_DESCRIPTOR;
   begin
     EventDescriptor.Id := Id;
-    result:= EventDescriptor;
+    result := EventDescriptor;
   end;
 
 
@@ -1045,7 +1043,7 @@ const
                                Version: UCHAR): EVENT_DESCRIPTOR;
   begin
     EventDescriptor.Version := Version;
-    result:= EventDescriptor;
+    result := EventDescriptor;
   end;
 
 
@@ -1053,7 +1051,7 @@ const
                             Task: USHORT): EVENT_DESCRIPTOR;
   begin
     EventDescriptor.Task := Task;
-    result:= EventDescriptor;
+    result := EventDescriptor;
   end;
 
 
@@ -1061,7 +1059,7 @@ const
                               Opcode: UCHAR): EVENT_DESCRIPTOR;
   begin
     EventDescriptor.Opcode := Opcode;
-    result:= EventDescriptor;
+    result := EventDescriptor;
   end;
 
 
@@ -1069,7 +1067,7 @@ const
                              Level: UCHAR): EVENT_DESCRIPTOR;
   begin
     EventDescriptor.Level := Level;
-    result:= EventDescriptor;
+    result := EventDescriptor;
   end;
 
 
@@ -1077,7 +1075,7 @@ const
                                Channel: UCHAR) : EVENT_DESCRIPTOR;
   begin
     EventDescriptor.Channel := Channel;
-    result:= EventDescriptor;
+    result := EventDescriptor;
   end;
 
 
@@ -1085,7 +1083,7 @@ const
                                Keyword: ULONGLONG): EVENT_DESCRIPTOR;
   begin
     EventDescriptor.Keyword := Keyword;
-    result:= EventDescriptor;
+    result := EventDescriptor;
   end;
 
 
@@ -1093,7 +1091,9 @@ const
                               Keyword: ULONGLONG): EVENT_DESCRIPTOR;
   begin
     EventDescriptor.Keyword := EventDescriptor.Keyword or Keyword;
-    result:= EventDescriptor;
+    result := EventDescriptor;
   end;
+
+  // Implement Additional Prototypes here.
 
 end.

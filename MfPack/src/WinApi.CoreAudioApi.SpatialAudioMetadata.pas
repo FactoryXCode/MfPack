@@ -69,7 +69,7 @@ interface
 uses
   {MfPack}
   WinApi.WinApiTypes,
-  WinApi.MmReg,
+  WinApi.WinMM.MMReg,
   {ActiveX}
   WinApi.ActiveX.PropIdl,
   {CoreAudioApi}

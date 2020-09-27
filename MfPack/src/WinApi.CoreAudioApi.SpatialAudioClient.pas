@@ -67,7 +67,7 @@ uses
   {WinApi}
   WinApi.PropSys,
   WinApi.WinApiTypes,
-  WinApi.MmReg,
+  WinApi.WinMM.MMReg,
   {ActiveX}
   WinApi.ActiveX.PropIdl,
   {CoreAudioApi}
