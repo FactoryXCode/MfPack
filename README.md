@@ -13,7 +13,9 @@
 - XAudio2 API (XBox game development)
 - Microsoft DirectX API's (D2D1, DirectComposition, DXGI, DirectWrite and DXVA)
 - Windows Imaging Component (WIC) API.
-- Media Foundation samples
+- MPEG2 API.
+- The COMPLETE Windows Multi Media (WinMM) API.
+- Media Foundation samples.
 
 
 # <u>Latest release:</u> 
