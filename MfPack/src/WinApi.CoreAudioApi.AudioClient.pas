@@ -107,7 +107,7 @@ type
     // Description: AudioClient buffer flags
     //
     // AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY - The data for this buffer is not correlated
-    //                                         with the data from the previous buffer.
+    //                                          with the data from the previous buffer.
     // AUDCLNT_BUFFERFLAGS_SILENT             - This data in this buffer should be treated as silence.
     //
     // AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR    - The QPC based timestamp reading for this data
@@ -249,7 +249,7 @@ type
                         StreamFlags: DWord;
                         hnsBufferDuration: REFERENCE_TIME;
                         hnsPeriodicity: REFERENCE_TIME;
-                        pFormat: WaveFormatEx;
+                        pFormat: PWaveFormatEx;
                         {optional} AudioSessionGuid: LPCGUID): HResult; stdcall;
     // Description:
     //
@@ -507,7 +507,7 @@ type
     //  This method does not require that the Initialize method be called first.
     //
 
-    function GetMixFormat(out ppDeviceFormat: WaveFormatEx): HResult; stdcall;
+    function GetMixFormat({out} ppDeviceFormat: PWaveFormatEx): HResult; stdcall;
     // Description:
     //
     //  Returns the current format of the WAS for this device. This is a device method
@@ -667,7 +667,7 @@ type
     //
 
     function GetService(riid: TGUID;
-                        out ppv): HResult; stdcall;
+                        {out} ppv: Pointer): HResult; stdcall;
     // Description:
     //
     //  Method used to exposed additional services off the AudioClient API, including
@@ -799,17 +799,17 @@ type
   // the "tracing context" identifier can ease correlation of which audio client instance belongs to which application context
   //
   // Sample app code:
-  // PPROPVARIANT var;
-  // PropVariantInit(&var);
-  // auto p = reinterpret_cast<AudioClient3ActivationParams *>CoTaskMemAlloc(sizeof(AudioClient3ActivationParams));
-  // if (nullptr == p) { ... }
-  // p->tracingContextId = /* app-specific context identifier */;
-  // var.vt = VT_BLOB;
-  // var.blob.cbSize = sizeof(*p);
-  // var.blob.pBlobData = reinterpret_cast<BYTE *>(p);
-  // hr = ActivateAudioInterfaceAsync(device, __uuidof(IAudioClient3), &var, ...);
-  // ...
-  // PropVariantClear(&var);
+  //  var: PROPVARIANT;
+  //  PropVariantInit(var);
+  //  p := AudioClient3ActivationParams := CoTaskMemAlloc(sizeof(AudioClient3ActivationParams));
+  //  if Not Assigned(p) { ... }
+  //  p->tracingContextId = /* app-specific context identifier */;
+  //  var.vt = VT_BLOB;
+  //  var.blob.cbSize = sizeof(*p);
+  //  var.blob.pBlobData = reinterpret_cast<BYTE *>(p);
+  //  hr := ActivateAudioInterfaceAsync(device, CLSID_IAudioClient3), var, ...);
+  //  ...
+  //  PropVariantClear(var);
 
   // Interface IAudioClient3
   // =======================
@@ -864,9 +864,9 @@ type
   {$EXTERNALSYM IAudioCaptureClient}
 	IAudioCaptureClient = interface(IUnknown)
 	['{C8ADBD64-E71E-48a0-A4DE-185C395CD317}']
-		function GetBuffer(out ppData: PByte;
+		function GetBuffer({out} ppData: PByte;
                        out pNumFramesToRead: UINT32;
-                       out pdwFlags: PAUDCLNT_BUFFERFLAGS;  // DWord
+                       out pdwFlags: AUDCLNT_BUFFERFLAGS;  // DWord
                        out pu64DevicePosition: Int64;
                        out pu64QPCPosition: Int64): HResult; stdcall;
     // Description:

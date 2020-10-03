@@ -458,6 +458,7 @@ type
   //
 
   PWAVEFORMATEXTENSIBLE = ^WAVEFORMATEXTENSIBLE;
+  {$EXTERNALSYM PWAVEFORMATEXTENSIBLE}  
   WAVEFORMATEXTENSIBLE = record
     Format: WAVEFORMATEX;
     samples: record                        // union part
@@ -466,10 +467,10 @@ type
         1: (wSamplesPerBlock    : WORD);   // valid if wBitsPerSample = 0
         2: (wReserved           : WORD);   // If neither applies, set to zero.
       end;
-  {$EXTERNALSYM WAVEFORMATEXTENSIBLE}
     dwChannelMask       : DWORD;  // which channels are present in stream
     SubFormat           : TGUID;
   end;
+  {$EXTERNALSYM WAVEFORMATEXTENSIBLE}
 
 {$DEFINE _WAVEFORMATEXTENSIBLE_DEFINED}
 {$ENDIF} // !_WAVEFORMATEXTENSIBLE_

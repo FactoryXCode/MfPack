@@ -123,11 +123,11 @@ const
 
   //* general data types */
 type
-  VERSION = UINT;               { major (high byte), minor (low byte) }
+  VERSION = type UINT;               { major (high byte), minor (low byte) }
   {$EXTERNALSYM VERSION}
-  MMVERSION = UINT;             { major (high byte), minor (low byte) }
+  MMVERSION = type UINT;             { major (high byte), minor (low byte) }
   {$EXTERNALSYM MMVERSION}
-  MMRESULT = UINT;              { error return code, 0 means no error }
+  MMRESULT = type UINT;              { error return code, 0 means no error }
   {$EXTERNALSYM MMRESULT}
 
   //* MMTIME data structure */

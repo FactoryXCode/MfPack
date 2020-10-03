@@ -62,6 +62,7 @@ interface
 
 uses
   WinApi.Windows,
+  WinApi.StrmIf,
   WinApi.WinMM.MMReg;
 
 //
@@ -81,8 +82,8 @@ type
   tagAM_MPEGSTREAMTYPE = record
     dwStreamId: DWORD;               // Stream id of stream to process
     dwReserved: DWORD;               // 8-byte alignment
-    mt: AM_MEDIA_TYPE;               // Type for substream - pbFormat is NULL
-    bFormat: array[0..0] of Byte;   // Format data
+    mt: AM_MEDIA_TYPE;               // Type for substream - pbFormat is Nil
+    bFormat: array[0..0] of Byte;    // Format data
   end;
   {$EXTERNALSYM tagAM_MPEGSTREAMTYPE}
   AM_MPEGSTREAMTYPE = tagAM_MPEGSTREAMTYPE;

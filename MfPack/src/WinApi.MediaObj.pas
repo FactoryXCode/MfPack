@@ -84,7 +84,7 @@ uses
 
 
 type
-  //  PDmoMediaType = ^DMO_MEDIA_TYPE;
+
   //  DMO_MEDIA_TYPE = AM_MEDIA_TYPE;
 
   PDmoMediaType = ^_DMOMediaType;
