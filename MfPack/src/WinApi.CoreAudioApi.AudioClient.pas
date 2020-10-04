@@ -42,20 +42,20 @@
 //==============================================================================
 //
 // LICENSE
-// 
+//
 // The contents of this file are subject to the Mozilla Public License
 // Version 2.0 (the "License"); you may not use this file except in
 // compliance with the License. You may obtain a copy of the License at
 // https://www.mozilla.org/en-US/MPL/2.0/
-// 
+//
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
 // License for the specific language governing rights and limitations
 // under the License.
-// 
+//
 // Users may distribute this source code provided that this header is included
 // in full at the top of the file.
-// 
+//
 //==============================================================================
 unit WinApi.CoreAudioApi.AudioClient;
 
@@ -94,16 +94,15 @@ const
   //    The clock exposed by this object runs at a fixed frequency.
   //
 
-
 type
 
-	//Private
-	PReferenceTime = ^REFERENCE_TIME;
-	REFERENCE_TIME = LONGLONG;
-	{$EXTERNALSYM REFERENCE_TIME}
+  //Private
+  PReferenceTime = ^REFERENCE_TIME;
+  REFERENCE_TIME = LONGLONG;
+  {$EXTERNALSYM REFERENCE_TIME}
 
 type
-	//-------------------------------------------------------------------------
+  //-------------------------------------------------------------------------
     // Description: AudioClient buffer flags
     //
     // AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY - The data for this buffer is not correlated
@@ -114,14 +113,14 @@ type
     //                                          buffer does not correlate with the data position.
     //
   PAUDCLNT_BUFFERFLAGS = ^AUDCLNT_BUFFERFLAGS;
-	_AUDCLNT_BUFFERFLAGS = DWord;
-	{$EXTERNALSYM _AUDCLNT_BUFFERFLAGS}
+  _AUDCLNT_BUFFERFLAGS = DWord;
+  {$EXTERNALSYM _AUDCLNT_BUFFERFLAGS}
   AUDCLNT_BUFFERFLAGS = _AUDCLNT_BUFFERFLAGS;
   {$EXTERNALSYM AUDCLNT_BUFFERFLAGS}
 const
-  AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY	= AUDCLNT_BUFFERFLAGS($00000001);
-  AUDCLNT_BUFFERFLAGS_SILENT	            = AUDCLNT_BUFFERFLAGS($00000002);
-  AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR	    = AUDCLNT_BUFFERFLAGS($00000004);
+  AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY  = AUDCLNT_BUFFERFLAGS($00000001);
+  AUDCLNT_BUFFERFLAGS_SILENT              = AUDCLNT_BUFFERFLAGS($00000002);
+  AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR      = AUDCLNT_BUFFERFLAGS($00000004);
 
 type
   //-------------------------------------------------------------------------
@@ -245,6 +244,7 @@ type
   {$EXTERNALSYM IAudioClient}
   IAudioClient = interface(IUnknown)
   ['{1CB9AD4C-DBFA-4c32-B178-C2F568A703B2}']
+
     function Initialize(ShareMode: AUDCLNT_SHAREMODE;
                         StreamFlags: DWord;
                         hnsBufferDuration: REFERENCE_TIME;
@@ -507,7 +507,7 @@ type
     //  This method does not require that the Initialize method be called first.
     //
 
-    function GetMixFormat({out} ppDeviceFormat: PWaveFormatEx): HResult; stdcall;
+    function GetMixFormat(out ppDeviceFormat: PWaveFormatEx): HResult; stdcall;
     // Description:
     //
     //  Returns the current format of the WAS for this device. This is a device method
@@ -666,8 +666,8 @@ type
     //    this event handle
     //
 
-    function GetService(riid: TGUID;
-                        {out} ppv: Pointer): HResult; stdcall;
+    function GetService(const riid: TGUID;
+                        out ppv): HResult; stdcall;
     // Description:
     //
     //  Method used to exposed additional services off the AudioClient API, including
@@ -862,13 +862,13 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioCaptureClient);'}
   {$EXTERNALSYM IAudioCaptureClient}
-	IAudioCaptureClient = interface(IUnknown)
-	['{C8ADBD64-E71E-48a0-A4DE-185C395CD317}']
-		function GetBuffer({out} ppData: PByte;
-                       out pNumFramesToRead: UINT32;
-                       out pdwFlags: AUDCLNT_BUFFERFLAGS;  // DWord
-                       out pu64DevicePosition: Int64;
-                       out pu64QPCPosition: Int64): HResult; stdcall;
+  IAudioCaptureClient = interface(IUnknown)
+  ['{C8ADBD64-E71E-48a0-A4DE-185C395CD317}']
+    function GetBuffer(out ppData: PByte;
+                       {out} pNumFramesToRead: UINT32;
+                       {out} pdwFlags: AUDCLNT_BUFFERFLAGS;  // DWord
+                       {out} pu64DevicePosition: Int64;
+                       {out} pu64QPCPosition: Int64): HResult; stdcall;
     // Description:
     //
     //  Returns a pointer to the shared render buffer of the requested size for the
@@ -913,31 +913,7 @@ type
     // initialize IAudioClient.
     //
 
-		function GetNextPacketSize(out pNumFramesInNextPacket: UINT32): HResult; stdcall;
-    // Description:
-    //
-    //  Returns the number of frames in the next capture buffer packet. Capture applications must read in frames on a packet-by-packet basis.
-    //
-    // Parameters:
-    //
-    //  pNumFramesInNextPacket - [out]
-    //    Pointer for returning the number of frames in the next capture packet.
-    //    When all capture packets have been read this value will be 0.
-    //
-    // Return values:
-    //
-    //    S_OK if successful, failure otherwise.
-    //    AUDCLNT_E_DEVICEINVALIDATED, if WAS device format was changed or device was removed.
-    //    E_POINTER, if pNumFramesInNextPacket is NULL.
-    //
-    // Remarks:
-    //
-    //  This method returns the size of the next capture packet. To determine the size of all
-    //  the captured data currently in the shared buffer (accounting for all current packets)
-    //  use the IAudioClient::GetCurrentPadding() method.
-    //
-
-		function ReleaseBuffer(NumFramesRead: UINT32): HResult; stdcall;
+    function ReleaseBuffer(NumFramesRead: UINT32): HResult; stdcall;
     // Description:
     //
     //  Releases the render data buffer acquired in the GetBuffer call.
@@ -975,7 +951,31 @@ type
     //      this function has no valid failure modes.
     //
 
-	end;
+    function GetNextPacketSize(out pNumFramesInNextPacket: UINT32): HResult; stdcall;
+    // Description:
+    //
+    //  Returns the number of frames in the next capture buffer packet. Capture applications must read in frames on a packet-by-packet basis.
+    //
+    // Parameters:
+    //
+    //  pNumFramesInNextPacket - [out]
+    //    Pointer for returning the number of frames in the next capture packet.
+    //    When all capture packets have been read this value will be 0.
+    //
+    // Return values:
+    //
+    //    S_OK if successful, failure otherwise.
+    //    AUDCLNT_E_DEVICEINVALIDATED, if WAS device format was changed or device was removed.
+    //    E_POINTER, if pNumFramesInNextPacket is NULL.
+    //
+    // Remarks:
+    //
+    //  This method returns the size of the next capture packet. To determine the size of all
+    //  the captured data currently in the shared buffer (accounting for all current packets)
+    //  use the IAudioClient.GetCurrentPadding() method.
+    //
+
+  end;
   IID_IAudioCaptureClient = IAudioCaptureClient;
   {$EXTERNALSYM IID_IAudioCaptureClient}
 
@@ -987,8 +987,8 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioClock);'}
   {$EXTERNALSYM IAudioClock}
-	IAudioClock = interface(IUnknown)
-	['{CD63314F-3FBA-4a1b-812C-EF96358728E7}']
+  IAudioClock = interface(IUnknown)
+  ['{CD63314F-3FBA-4a1b-812C-EF96358728E7}']
     function GetFrequency(out pu64Frequency: Int64): HResult; stdcall;
     // Description:
     //
@@ -1058,7 +1058,7 @@ type
     //  bytes, then the clock position will be byte count.
     //
 
-		function GetCharacteristics(out pdwCharacteristics: DWord): HResult; stdcall;
+    function GetCharacteristics(out pdwCharacteristics: DWord): HResult; stdcall;
     // Description:
     //
     //  Returns the current clock position
@@ -1081,7 +1081,7 @@ type
     //  clock position computations.
     //
 
-	end;
+  end;
   IID_IAudioClock = IAudioClock;
   {$EXTERNALSYM IID_IAudioClock}
 
@@ -1094,8 +1094,8 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioClock2);'}
   {$EXTERNALSYM IAudioClock2}
   IAudioClock2 = interface(IUnknown)
-	['{6f49ff73-6727-49ac-a008-d98cf5e70048}']
-		function GetDevicePosition(out DevicePosition: UINT64;
+  ['{6f49ff73-6727-49ac-a008-d98cf5e70048}']
+    function GetDevicePosition(out DevicePosition: UINT64;
                                out QPCPosition: UINT64): HResult; stdcall;
     // Description:
     //
@@ -1123,7 +1123,7 @@ type
     //    position because the sampling rate of the device endpoint may be different from
     //    the mix format used by the client.
     //
-	end;
+  end;
   IID_IAudioClock2 = IAudioClock2;
   {$EXTERNALSYM IID_IAudioClock2}
 
@@ -1135,10 +1135,10 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioClockAdjustment);'}
   {$EXTERNALSYM IAudioClockAdjustment}
-	IAudioClockAdjustment = interface(IUnknown)
-	['{f6e4c0a0-46d9-4fb8-be21-57a3ef2b626c}']
-		//Sets the sample rate of a stream, in frames per second.
-		function SetSampleRate(flSampleRate: Float): HResult; stdcall;
+  IAudioClockAdjustment = interface(IUnknown)
+  ['{f6e4c0a0-46d9-4fb8-be21-57a3ef2b626c}']
+    //Sets the sample rate of a stream, in frames per second.
+    function SetSampleRate(flSampleRate: Float): HResult; stdcall;
     // Description:
     //
     //  Sets the current sample rate
@@ -1158,7 +1158,7 @@ type
     //      The new sample rate adjustment will take place on the
     //      processing pass that follows the call to SetSampleRate().
     //
-	end;
+  end;
   IID_IAudioClockAdjustment = IAudioClockAdjustment;
   {$EXTERNALSYM IID_IAudioClockAdjustment}
 
@@ -1169,8 +1169,8 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ISimpleAudioVolume);'}
   {$EXTERNALSYM ISimpleAudioVolume}
   ISimpleAudioVolume = interface(IUnknown)
-	['{87CE5498-68D6-44E5-9215-6DA47EF883D8}']
-		function SetMasterVolume(fLevel: Single;
+  ['{87CE5498-68D6-44E5-9215-6DA47EF883D8}']
+    function SetMasterVolume(fLevel: Single;
                              EventContext: LPCGUID): HResult; stdcall;
     // Description:
     //
@@ -1267,9 +1267,9 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioStreamVolume);'}
   {$EXTERNALSYM IAudioStreamVolume}
-	IAudioStreamVolume = interface(IUnknown)
-	['{93014887-242D-4068-8A15-CF5E93B90FE3}']
-		function GetChannelCount(out pdwCount: UINT32): HResult; stdcall;
+  IAudioStreamVolume = interface(IUnknown)
+  ['{93014887-242D-4068-8A15-CF5E93B90FE3}']
+    function GetChannelCount(out pdwCount: UINT32): HResult; stdcall;
     // Description:
     //
     //  Get the channel count for the audio stream.
@@ -1285,7 +1285,7 @@ type
     //     OTHER       Other error.
     //
 
-		function SetChannelVolume(dwIndex: UINT32;
+    function SetChannelVolume(dwIndex: UINT32;
                               fLevel: Single): HResult; stdcall;
     // Description:
     //
@@ -1305,7 +1305,7 @@ type
     //
     //
 
-		function GetChannelVolume(dwIndex: UINT32;
+    function GetChannelVolume(dwIndex: UINT32;
                               out pfLevel: Single): HResult; stdcall;
     // Description:
     //
@@ -1372,7 +1372,7 @@ type
     //     S_OK        Successful completion.
     //     OTHER       Other error.
     //
-	end;
+  end;
   IID_IAudioStreamVolume = IAudioStreamVolume;
   {$EXTERNALSYM IID_IAudioStreamVolume}
 
@@ -1382,8 +1382,8 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IChannelAudioVolume);'}
   {$EXTERNALSYM IChannelAudioVolume}
-	IChannelAudioVolume = interface(IUnknown)
-	['{1C158861-B533-4B30-B1CF-E853E51C59B8}']
+  IChannelAudioVolume = interface(IUnknown)
+  ['{1C158861-B533-4B30-B1CF-E853E51C59B8}']
     function GetChannelCount(out pdwCount: UINT32): HResult; stdcall;
     // Description:
     //
@@ -1507,7 +1507,7 @@ type
     //     OTHER       Other error.
     //
 
-	end;
+  end;
   IID_IChannelAudioVolume = IChannelAudioVolume;
   {$EXTERNALSYM IID_IChannelAudioVolume}
 
@@ -1518,7 +1518,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioAmbisonicsControl);'}
   {$EXTERNALSYM IAudioAmbisonicsControl}
   IAudioAmbisonicsControl = interface(IUnknown)
-	['{28724C91-DF35-4856-9F76-D6A26413F3DF}']
+  ['{28724C91-DF35-4856-9F76-D6A26413F3DF}']
     //-------------------------------------------------------------------------
     // Description:
     //
@@ -1612,21 +1612,21 @@ type
 
 const
   // error codes
-	FACILITY_AUDCLNT                        = $889;
-	{$EXTERNALSYM FACILITY_AUDCLNT}
+  FACILITY_AUDCLNT                        = $889;
+  {$EXTERNALSYM FACILITY_AUDCLNT}
 
   // Since XE2 you have to hardcode this.
 
   AUDCLNT_E_NOT_INITIALIZED               = $88890001;  //AUDCLNT_ERR($001);
   {$EXTERNALSYM AUDCLNT_E_NOT_INITIALIZED}
-	AUDCLNT_E_ALREADY_INITIALIZED           = $88890002;  //AUDCLNT_ERR($002);
-	{$EXTERNALSYM AUDCLNT_E_ALREADY_INITIALIZED}
+  AUDCLNT_E_ALREADY_INITIALIZED           = $88890002;  //AUDCLNT_ERR($002);
+  {$EXTERNALSYM AUDCLNT_E_ALREADY_INITIALIZED}
   AUDCLNT_E_WRONG_ENDPOINT_TYPE           = $88890003;  //AUDCLNT_ERR($003);
   {$EXTERNALSYM AUDCLNT_E_WRONG_ENDPOINT_TYPE}
   AUDCLNT_E_DEVICE_INVALIDATED            = $88890004;  //AUDCLNT_ERR($004);
   {$EXTERNALSYM AUDCLNT_E_DEVICE_INVALIDATED}
-	AUDCLNT_E_NOT_STOPPED                   = $88890005;  //AUDCLNT_ERR($005);
-	{$EXTERNALSYM AUDCLNT_E_NOT_STOPPED}
+  AUDCLNT_E_NOT_STOPPED                   = $88890005;  //AUDCLNT_ERR($005);
+  {$EXTERNALSYM AUDCLNT_E_NOT_STOPPED}
   AUDCLNT_E_BUFFER_TOO_LARGE              = $88890006;  //AUDCLNT_ERR($006);
   {$EXTERNALSYM AUDCLNT_E_BUFFER_TOO_LARGE}
   AUDCLNT_E_OUT_OF_ORDER                  = $88890007;  //AUDCLNT_ERR($007);

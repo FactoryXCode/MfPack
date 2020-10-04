@@ -630,7 +630,7 @@ const
                            out lpsz: POlESTR): HResult; stdcall;
   {$EXTERNALSYM StringFromCLSID}
 
-  function CLSIDFromString(lpsz: POlESTR;
+  function CLSIDFromString(lpsz: LPWSTR; //POlESTR;
                            out pclsid: TGUID): HResult; stdcall;
   {$EXTERNALSYM CLSIDFromString}
 

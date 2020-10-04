@@ -169,7 +169,6 @@ const
 type
 
   PWAVEHDR = ^wavehdr_tag;
-  {$EXTERNALSYM PWAVEHDR}
   wavehdr_tag = record
     lpData: PAnsiChar;              { pointer to locked data buffer }
     dwBufferLength: DWORD;          { length of data buffer }
@@ -527,8 +526,10 @@ type
  {
  *  extended waveform format structure used for all non-PCM formats. this
  *  structure is common to all non-PCM formats.
+ // NOTE: This structure is also defined in MMReg
  }
 
+{$IFNDEF _WAVEFORMATEX_DEFINED}
 type
 
   PWAVEFORMATEX = ^tWAVEFORMATEX;
@@ -546,11 +547,14 @@ type
   {$EXTERNALSYM tWAVEFORMATEX}
   WAVEFORMATEX = tWAVEFORMATEX;
   {$EXTERNALSYM WAVEFORMATEX}
+  NPWAVEFORMATEX = ^tWAVEFORMATEX;
+  {$EXTERNALSYM NPWAVEFORMATEX}
   LPWAVEFORMATEX = ^tWAVEFORMATEX;
   {$EXTERNALSYM LPWAVEFORMATEX}
   LPCWAVEFORMATEX = ^WAVEFORMATEX;
   {$EXTERNALSYM LPCWAVEFORMATEX}
-
+{$DEFINE _WAVEFORMATEX_DEFINED}
+{$ENDIF} // _WAVEFORMATEX_
 
   { waveform audio function prototypes }
 
