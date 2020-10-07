@@ -865,84 +865,93 @@ type
   IAudioCaptureClient = interface(IUnknown)
   ['{C8ADBD64-E71E-48a0-A4DE-185C395CD317}']
     function GetBuffer(out ppData: PByte;
-                       {out} pNumFramesToRead: UINT32;
-                       {out} pdwFlags: AUDCLNT_BUFFERFLAGS;  // DWord
-                       {out} pu64DevicePosition: Int64;
-                       {out} pu64QPCPosition: Int64): HResult; stdcall;
+                       out pNumFramesToRead: UINT32;
+                       out pdwFlags: AUDCLNT_BUFFERFLAGS;
+                       {out} pu64DevicePosition: UINT64;
+                       {out} pu64QPCPosition: UINT64): HResult; stdcall;
+    //-------------------------------------------------------------------------
     // Description:
     //
-    //  Returns a pointer to the shared render buffer of the requested size for the
-    //  application to write its output data into for rendering to the WAS.
+    //  This method is called to retrieve a pointer to the next packet of data in the
+    //  shared capture buffer ready for the application to read. The method returns the
+    //  size of the packet, which the application must read it in its entirety (or not at all).
     //
     // Parameters:
     //
-    //  NumFramesRequested - [in]
-    //    Number of frames requested in the returned data pointer.
-    //
-    //  ppData - [out]
-    //    If call was successful, this address contains a pointer to a data buffer of
-    //    requested size, which application can write into.
-    //
-    // Return Values:
-    //
-    //     S_OK if successful, error otherwise.
-    //     AUDCLNT_E_BUFFERTOOLARGE, if NumFramesRequested > (GetBufferSize() - GetCurrentPadding())
-    //     AUDCLNT_E_OUTOFORDER, if called while a previous IAudioRenderClient.GetBuffer() is still
-    //     in effect.
-    //     AUDCLNT_E_DEVICEINVALIDATED, if WAS device format was changed or device was removed,
-    //     E_POINTER, if ppData is NULL.
-    //
-    // Remarks:
-    //
-    //  Maximum buffer size to request - The application shouldn't ask for a larger buffer than
-    //  the size currently available in the requested shared buffer region and if this value is
-    //  exceeded GetBuffer() will fail. The total available space at any given time can be
-    //  determined by calling the GetCurrentPadding() method and subtracting that frame count
-    //  size from the shared buffer size (returned in the GetBufferSize() method).
-    //
-    //  Minimum buffer size to request - As far as determining the minimum amount of data to write
-    //  per-processing pass, it is left up to the application to ensure that it writes enough data
-    //  to prevent glitching. However, the minimum recommended size for a buffer request to prevent
-    //  glitching is: latency + device period.
-    //
-    //  The client is required to serialize the GetBuffer()/ReleaseBuffer() sequence of calls.
-    //  For instance, consecutive calls to either GetBuffer() or ReleaseBuffer() aren't permitted and
-    //  will fail.
-    //
-    // 'pFormat' in the annotation below refers to the WAVEFORMATEX structure used to
-    // initialize IAudioClient.
-    //
-
-    function ReleaseBuffer(NumFramesRead: UINT32): HResult; stdcall;
-    // Description:
-    //
-    //  Releases the render data buffer acquired in the GetBuffer call.
-    //
-    // Parameters:
-    //
-    //  NumFramesWritten - [in]
-    //     Count of application frames written into the render buffer. Must be
-    //     less than or equal to the requested amount.
-    //
-    //  dwFlags - [in]
-    //     This value is used to allow the application to flag the return buffer specially,
-    //     if necessary.
-    //     The following flags are supported on render buffers:
-    //
-    //          AUDCLNT_BUFFERFLAGS_SILENT - buffer data should be treated as silence. This flag
-    //          frees a render client from needing to explicitly write silence data to the output
-    //          buffer. Note that a loopback client reading capture data from this render buffer
-    //          shouldn't be required to do any silence filling.
-    //
-    //     Otherwise, the dwFlags value must be set to 0.
-    //
+    //  ppBuffer - [out] address to return a pointer to a data buffer containing *pNumFramesToRead
+    //     frames of captured data for application to read.
+    //  pNumFramesToRead - [out] pointer to the count of frames in the returned data buffer.
+    //     The caller must read them all (or none, if it doesn't have room to read the complete
+    //     buffer).
+    //  pdwFlags - [out] pointer to bit flags providing additional information about the buffer.
+    //     Must be 0 or a combination of the following flags:
+    //          AUDCLNT_BUFFERFLAGS_TIMEVALID - buffer timestamp is valid.
+    //          AUDCLNT_BUFFERFLAGS_TIMEDISCONTINUITY - buffer timestamp is not correlated with
+    //          previous buffer's timestamp, possibly due to a glitch or state transition.
+    //          AUDCLNT_BUFFERFLAGS_DATADISCONTINUITY - buffer data is not correlated with previous
+    //          buffer's timestamp, possibly due to a glitch or state transition.
+    //  pu64DevicePosition - [out, unique] optional pointer to the device position at the moment of
+    //     capture for the data packet captured in ppData. Note this is a device position and not a
+    //     0-based stream position.
+    //  pu64QPCPosition - [out, unique] optional pointer to a system QueryPerformaceCounter time
+    //     correlated to the device time for the data packet.
     //
     // Return values:
     //
     //      S_OK if successful, error otherwise.
-    //      E_FAIL, if FramesWritten > count requested in previous GetBuffer() call.
-    //      E_INVALIDARG, if invalid flag was used.
-    //      AUDCLNT_E_OUTOFORDER, if previous IAudioRenderClient streaming call wasn't GetBuffer().
+    //      AUDCLNT_E_OUTOFORDER, if called while a previous IAudioCaptureClient::GetBuffer()
+    //      is still in effect.
+    //      AUDCLNT_S_BUFFEREMPTY, if called when there's no available capture data. Note that
+    //      this is a success code that the content of pFrameCount will be 0 in this case.
+    //      AUDCLNT_E_DEVICEINVALIDATED, if WAS device format was changed or device was removed.
+    //
+    // Remarks:
+    //
+    //  To process capture data, the application should call this method to get the next buffer
+    //  and its size, from which it can proceed to read the data into the application buffer.
+    //  When the application is finished reading the buffer, it fills in the FramesRead value
+    //  and calls the ReleaseBuffer() method to signal that it's done.
+    //
+    //  The application is required to read the entire buffer or none of it, if it can't read
+    //  the complete buffer.
+    //
+    //  To process captured data, during each processing pass the application has the option of:
+    //  a) calling the GetBuffer()/ReleaseBuffer() sequence until GetBuffer() returns
+    //  AUDCNT_S_BUFFEREMPTY or
+    //  b) calling GetNextPacketSize() before each GetBuffer()/ReleaseBuffer() sequence until it
+    //  returns 0.
+    //
+    //  The data in the returned data pointer will be valid until the client calls the
+    //  ReleaseBuffer() method.
+    //
+    //  The client is required to serialize the GetBuffer()/ReleaseBuffer() sequence of calls.
+    //  For instance, consecutive calls to either GetBuffer() or ReleaseBuffer() aren't permitted
+    //  and will fail.
+    //
+    //  If an application needs to determine a stream time for a given sample time, it should
+    //  cache the timestamp of the first capture sample and subtract that value from the current
+    //  sample timestamp (taking care to account for the possible arithmetic wraparound).
+    //
+    // 'pFormat' in the annotation below refers to the WAVEFORMATEX structure used to initialize IAudioClient.
+    //
+
+
+    function ReleaseBuffer(NumFramesRead: UINT32): HResult; stdcall;
+    // Description:
+    //
+    //  Call this method when done reading from the capture buffer returned in the GetBuffer() call.
+    //
+    // Parameters:
+    //
+    //
+    //  NumFramesRead - [in] frames read out of capture buffer. Must be equal to the total number of
+    //     frames in the previously returned buffer or 0.
+    //
+    // Return values:
+    //
+    //      S_OK if successful, error otherwise.
+    //      E_INVALIDARG, if NumFramesRead <> [ value in buffer or 0 ].
+    //      AUDCLNT_E_OUTOFORDER, if previous IAudioCaptureClient streaming call wasn't GetBuffer().
     //      AUDCLNT_E_DEVICEINVALIDATED, if WAS device format was changed or device was removed.
     //
     // Remarks:
@@ -950,6 +959,7 @@ type
     //      except for invalid argument errors as called out above,
     //      this function has no valid failure modes.
     //
+
 
     function GetNextPacketSize(out pNumFramesInNextPacket: UINT32): HResult; stdcall;
     // Description:

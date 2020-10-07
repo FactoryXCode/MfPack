@@ -181,9 +181,9 @@ type
 
   // This function is also defined in WinApi.MmReg.pas and WinApi.MediaFoundationApi.MfMetLib.pas
   function MAKEFOURCC(const ch0: AnsiChar;
-                    const ch1: AnsiChar;
-                    const ch2: AnsiChar;
-                    const ch3: AnsiChar): FOURCC; inline;
+                      const ch1: AnsiChar;
+                      const ch2: AnsiChar;
+                      const ch3: AnsiChar): FOURCC; inline;
   {$EXTERNALSYM MAKEFOURCC}
 
 

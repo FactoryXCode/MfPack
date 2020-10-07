@@ -751,7 +751,7 @@ type
                        puDeviceID: PUINT): MMRESULT; stdcall;
   {$EXTERNALSYM waveInGetID}
 
-  function waveInMessage({_In_opt_} hwi: HWAVEIN;
+  function waveInMessage({_In_opt_} const hwi: HWAVEIN;
                          uMsg: UINT;
                          {_In_opt_} dw1: DWORD_PTR;
                          {_In_opt_} dw2: DWORD_PTR): MMRESULT; stdcall;
