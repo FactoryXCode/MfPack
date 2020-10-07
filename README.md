@@ -121,4 +121,11 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
 *Note: This API is deprecated, but still functional in Windows 10 version 2004 (May 2020 update).*
 
 
+**Ducking Capture Sample**
+
+*This sample implements a simple "Chat" that demonstrates to the "ducking" 
+feature in Windows 7 and later. It simply captures samples from the sound card and 
+discards them.*
+![](https://www.4shared.com/photo/oHkTHhBAea/ChatDemo.html)
+
 **© FactoryX. All rights reserved.***
