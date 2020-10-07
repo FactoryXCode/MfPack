@@ -126,6 +126,6 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
 *This sample implements a simple "Chat" that demonstrates to the "ducking" 
 feature in Windows 7 and later. It simply captures samples from the sound card and 
 discards them.*
-![](https://www.4shared.com/photo/oHkTHhBAea/ChatDemo.html)
+![](https://dc733.4shared.com/img/oHkTHhBAea/s24/17504f48c68/ChatDemo?async&rand=0.318866860047367)
 
 **© FactoryX. All rights reserved.***
