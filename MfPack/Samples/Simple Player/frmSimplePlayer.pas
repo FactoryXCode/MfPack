@@ -86,7 +86,7 @@ uses
   Vcl.Dialogs,
   Vcl.Menus,
   {DirectX}
-  WinApi.DirectX.ComBaseApi,
+  WinApi.ComBaseApi,
   {ActiveX}
   WinApi.ActiveX.ObjBase,
   {MediaFoundationApi}
