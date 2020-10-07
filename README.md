@@ -120,5 +120,14 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
 *Demonstrates audio/video playback using the IMFPMediaPlayer and IMFPMediaPlayerCallback API.*
 *Note: This API is deprecated, but still functional in Windows 10 version 2004 (May 2020 update).*
 
+![](https://dc704.4shared.com/img/7ROVGSlQiq/s24/175050570a0/SimplePlayer?async&rand=0.30102809049677814)
+
+**Ducking Capture Sample**
+
+  *This sample implements a simple "Chat" that demonstrates to the "ducking"* 
+  *feature in Windows 7 and later. It simply captures samples from the sound card and* 
+  *discards them.*
+
+![](https://dc552.4shared.com/img/V8zsdA0ciq/s24/17504fdc7b0/ChatDemo?async&rand=0.34976150132933204)
 
 **© FactoryX. All rights reserved.***
