@@ -5,14 +5,10 @@ interface
 uses
   Winapi.Windows,
   Winapi.Messages,
-  Winapi.ActiveX,
   System.SysUtils,
-  System.Variants,
   System.Classes,
-
   WinApi.WinMM.MMeApi,
   WinApi.WinMM.MMSysCom,
-
   Vcl.Graphics,
   Vcl.Controls,
   Vcl.Forms,
@@ -27,10 +23,6 @@ const
   //
   //  The current "Chat" transport.
   //
-
-  // Forward declarations of functions included in this code module:
-  //INT_PTR CALLBACK    ChatDialogProc(HWND, UINT, WPARAM, LPARAM);
-
 type
   ChatState = (ChatStatePlaying,    // We're currently playing/capturing
                ChatStateNotPlaying);
@@ -76,7 +68,6 @@ implementation
 
 {$R *.dfm}
 
-
 uses
   WasapiChat,
   WaveChat;
@@ -104,7 +95,6 @@ begin
   Result := bWin7OrLater;
 end;
 
-
 procedure TForm1.btnChatStartClick(Sender: TObject);
 begin
 
@@ -114,7 +104,6 @@ begin
   if g_CurrentChat.StartChat(chkHideFromVolumeMixer.Checked) then
     SyncUIState(ChatStatePlaying);
 end;
-
 
 procedure TForm1.btnChatStopClick(Sender: TObject);
 begin
@@ -143,7 +132,6 @@ begin
     end;
   Close; // EndDialog(hWnd, TRUE);
 end;
-
 
 procedure TForm1.cbxChatTransportChange(Sender: TObject);
 var
@@ -214,7 +202,6 @@ begin
                MB_OK);
 end;
 
-
 procedure TForm1.FormCreate(Sender: TObject);
 begin
 
@@ -230,13 +217,8 @@ begin
         Close;
     end;
 
-  // from messages
   //
   //  Start by using the wave transport for "chat".
-  //
-  // Delphi specific
-  //Application.HookMainWindow(ChatDialogProc);
-  //
   //  Allocate the WAVE chat transport.  If we failed to startup, we're done.
   //
   g_CurrentChat := CWaveChat.Create(Self.Handle);
@@ -265,7 +247,6 @@ begin
   //  Simulate a "stop" event to get the UI in sync.
   SyncUIState(ChatStateNotPlaying);
 end;
-
 
 //
 //  Makes all of the dialog controls consistent with the current transport and specified chat state
@@ -318,8 +299,6 @@ begin
     end;
 end;
 
-
-
 // NOTE: This method is also used by rbtRender (see: rbtRender.OnClick)
 procedure TForm1.rbtCaptureClick(Sender: TObject);
 var
@@ -364,26 +343,5 @@ begin
       SyncUIState(ChatStateNotPlaying)
     end;
 end;
-
-
-{function TForm1.ChatDialogProc(var Msg: TMessage): Boolean;
-var
-  handled: BOOL;
-
-  begin
-    handled := False;
-      Result := False;
-
-      // default handler //Do we need this?
-        //  //  If the current chat transport is going to handle this message, pass the message to the transport.  //  //  Otherwise just let our caller know that they need to handle it.  //  if Assigned(g_CurrentChat) then    if g_CurrentChat.HandlesMessage(Self.Handle, Msg.Msg) then      begin        handled := Boolean(g_CurrentChat.MessageHandler(Self.Handle,                                                        Msg.Msg,                                                        Msg.wParam,
-                                                                Msg.lParam));      end;
-
-                                                                  Msg.Result := DefWindowProc(Self.Handle,
-                                                                                                Msg.Msg,
-                                                                                                                              Msg.wParam,
-                                                                                                                                                            Msg.lParam);
-
-                                                                                                                                                              Result := handled;
-                                                                                                                                                              end;}
 
 end.
