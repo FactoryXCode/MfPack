@@ -1,3 +1,68 @@
+// FactoryX
+//
+// Copyright: © FactoryX. All rights reserved.
+//
+// Project: MfPack - Shared
+// Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
+// Module: IddDialogChat.pas
+// Kind: Pascal / Delphi unit
+// Release date: 04-10-2020
+// Language: ENU
+//
+// Revision Version: 3.0.0
+// Description: Ducking Capture dialog that defines the entry point for the application.
+//
+//              WIN32 APPLICATION : Ducking Capture Sample Project Overview
+//              ================================================================
+//
+//              This sample implements a simple "Chat" that demonstrates to the "ducking"
+//              feature in Windows 7. It simply captures samples from the sound card and
+//              discards them.
+//
+// Organisation: FactoryX
+// Initiator(s): Tony (maXcomX), Peter (OzShips)
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
+//
+//------------------------------------------------------------------------------
+// CHANGE LOG
+// Date       Person              Reason
+// ---------- ------------------- ----------------------------------------------
+// 13/08/2020 All                 Enigma release. New layout and namespaces
+//------------------------------------------------------------------------------
+//
+// Remarks: Note that this sample requires Windows 7 or later.
+//
+// Related objects: -
+// Related projects: MfPackX300
+// Known Issues: -
+//
+// Compiler version: 23 up to 33
+// SDK version: 10.0.19041.0
+//
+// Todo: -
+//
+//==============================================================================
+// Source: DuckingCaptureSample: DuckingCaptureSample.cpp
+//
+// Copyright (c) Microsoft Corporation. All rights reserved.
+//==============================================================================
+//
+// LICENSE
+//
+// The contents of this file are subject to the Mozilla Public License
+// Version 2.0 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at
+// https://www.mozilla.org/en-US/MPL/2.0/
+//
+// Software distributed under the License is distributed on an "AS IS"
+// basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+// License for the specific language governing rights and limitations
+// under the License.
+//
+// Users may distribute this source code provided that this header is included
+// in full at the top of the file.
+//==============================================================================
 unit IddDialogChat;
 
 interface
@@ -74,7 +139,7 @@ uses
 
 //
 //  This sample funtion only works on Windows 7
-//  Note: seeL https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-verifyversioninfow
+//  Note: See: https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-verifyversioninfow
 //
 function TForm1.IsWin7OrLater(): Boolean;
 var

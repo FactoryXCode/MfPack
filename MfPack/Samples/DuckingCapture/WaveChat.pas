@@ -1,4 +1,61 @@
-
+// FactoryX
+//
+// Copyright: © FactoryX. All rights reserved.
+//
+// Project: MfPack - Shared
+// Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
+// Module: WaveChat.pas
+// Kind: Pascal / Delphi unit
+// Release date: 04-10-2020
+// Language: ENU
+//
+// Revision Version: 3.0.0
+// Description: Wave in renderer class.
+//
+// Organisation: FactoryX
+// Initiator(s): Tony (maXcomX), Peter (OzShips)
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
+//
+//------------------------------------------------------------------------------
+// CHANGE LOG
+// Date       Person              Reason
+// ---------- ------------------- ----------------------------------------------
+// 13/08/2020 All                 Enigma release. New layout and namespaces
+//------------------------------------------------------------------------------
+//
+// Remarks: Note that this sample requires Windows 7 or later.
+//
+// Related objects: -
+// Related projects: MfPackX300
+// Known Issues: -
+//
+// Compiler version: 23 up to 33
+// SDK version: 10.0.19041.0
+//
+// Todo: -
+//
+//==============================================================================
+// Source: DuckingCaptureSample: wavechat.h, wavechat.ccp
+//
+// Copyright (c) Microsoft Corporation. All rights reserved.
+//==============================================================================
+//
+// LICENSE
+//
+// The contents of this file are subject to the Mozilla Public License
+// Version 2.0 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at
+// https://www.mozilla.org/en-US/MPL/2.0/
+//
+// Software distributed under the License is distributed on an "AS IS"
+// basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+// License for the specific language governing rights and limitations
+// under the License.
+//
+// Users may distribute this source code provided that this header is included
+// in full at the top of the file.
+//==============================================================================
 unit WaveChat;
 
 interface
@@ -44,7 +101,7 @@ implementation
 
 // NOTES: - The use of a systemproc can't access local (class) variables!
 //          In this sample there is no reason to implement for instance a window handle intercept.
-//        - Here we altered the MessageHandler for a WaveInproc.
+//        - Here we altered WaveInproc in MessageHandler.
 //
 procedure MessageHandler(hWaveIn: IntPtr;
                          uMsg: UINT;
@@ -66,7 +123,6 @@ begin
 
      MM_WIM_CLOSE: begin
                      // ignore
-                     hwaveHandle := hWaveIn;
                    end;
 
      MM_WIM_DATA:  begin
@@ -222,7 +278,7 @@ begin
                     @waveFormat,
                     DWORD_PTR(@MessageHandler),
                     0,
-                    CALLBACK_FUNCTION or WAVE_MAPPED_DEFAULT_COMMUNICATION_DEVICE); // we don't send messages to a windows or dialog, but to this unit.
+                    CALLBACK_FUNCTION or WAVE_MAPPED_DEFAULT_COMMUNICATION_DEVICE); // we don't send messages to a window or dialog, but to this unit.
 
   if (mmr <> MMSYSERR_NOERROR) then
     begin
