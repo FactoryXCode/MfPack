@@ -14,7 +14,7 @@
 - Microsoft DirectX API's (D2D1, DirectComposition, DXGI, DirectWrite and DXVA)
 - Windows Imaging Component (WIC) API.
 - MPEG2 API.
-- The COMPLETE Windows Multi Media (WinMM) API.
+- The COMPLETE Windows Media (WinMM) API.
 - Media Foundation samples.
 
 
