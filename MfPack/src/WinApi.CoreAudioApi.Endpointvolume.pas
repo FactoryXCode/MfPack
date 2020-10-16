@@ -5,7 +5,7 @@
 // Project: MfPack - CoreAudio - EndpointVolume
 // Project location: https://sourceforge.net/projects/MfPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: WinApi.CoreAudioApi.EndpointVolume.pas
+// Module: WinApi.CoreAudioApi.EndPointVolume.pas
 // Kind: Pascal / Delphi unit
 // Release date: 04-05-2012
 // Language: ENU
@@ -67,7 +67,7 @@
 // in full at the top of the file.
 // 
 //==============================================================================
-unit WinApi.CoreAudioApi.Endpointvolume;
+unit WinApi.CoreAudioApi.EndPointVolume;
 
   {$HPPEMIT '#include "endpointvolume.h"'}
 

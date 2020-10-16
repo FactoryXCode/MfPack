@@ -25,13 +25,13 @@
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
-// 
+//
 //          Delphi : The IUnknown entries of functions should be casted like this:
 //          IUnknown(Pointer), IUnknown(Object), IUnknown(Nil) etc.
-// 
+//
 //          The interface and type definitions for base APO functionality.
 //          Requires Windows Vista or later.
-// 
+//
 // Related objects: -
 // Related projects: MfPackX300
 // Known Issues: -
@@ -48,20 +48,20 @@
 //==============================================================================
 //
 // LICENSE
-// 
+//
 // The contents of this file are subject to the Mozilla Public License
 // Version 2.0 (the "License"); you may not use this file except in
 // compliance with the License. You may obtain a copy of the License at
 // https://www.mozilla.org/en-US/MPL/2.0/
-// 
+//
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
 // License for the specific language governing rights and limitations
 // under the License.
-// 
+//
 // Users may distribute this source code provided that this header is included
 // in full at the top of the file.
-// 
+//
 //==============================================================================
 unit WinApi.CoreAudioApi.AudioPolicy;
 
@@ -90,27 +90,27 @@ uses
 
 
 type
-	// local
-	_tagAudioSessionDisconnectReason        = (
+  // local
+  _tagAudioSessionDisconnectReason        = (
     DisconnectReasonDeviceRemoval         = 0,
-		DisconnectReasonServerShutdown        = (DisconnectReasonDeviceRemoval + 1),
-		DisconnectReasonFormatChanged         = (DisconnectReasonServerShutdown + 1),
+    DisconnectReasonServerShutdown        = (DisconnectReasonDeviceRemoval + 1),
+    DisconnectReasonFormatChanged         = (DisconnectReasonServerShutdown + 1),
     DisconnectReasonSessionLogoff         = (DisconnectReasonFormatChanged + 1),
-		DisconnectReasonSessionDisconnected   = (DisconnectReasonSessionLogoff + 1),
-		DisconnectReasonExclusiveModeOverride = (DisconnectReasonSessionDisconnected + 1)
+    DisconnectReasonSessionDisconnected   = (DisconnectReasonSessionLogoff + 1),
+    DisconnectReasonExclusiveModeOverride = (DisconnectReasonSessionDisconnected + 1)
   );
-	{$EXTERNALSYM _tagAudioSessionDisconnectReason}
-	AudioSessionDisconnectReason = _tagAudioSessionDisconnectReason;
+  {$EXTERNALSYM _tagAudioSessionDisconnectReason}
+  AudioSessionDisconnectReason = _tagAudioSessionDisconnectReason;
 
 
-	// Interface IAudioSessionEvents
+  // Interface IAudioSessionEvents
   // =============================
   //  Application initiated events.
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioSessionEvents);'}
-	{$EXTERNALSYM IAudioSessionEvents}
-	IAudioSessionEvents = interface(IUnknown)
+  {$EXTERNALSYM IAudioSessionEvents}
+  IAudioSessionEvents = interface(IUnknown)
   ['{24918ACC-64B3-37C1-8CA9-74A66E9957A8}']
-		function OnDisplayNameChanged(NewDisplayName: LPCWSTR;
+    function OnDisplayNameChanged(NewDisplayName: LPCWSTR;
                                   const EventContext: TGUID): HResult; stdcall;
     // Description:
     //
@@ -131,7 +131,7 @@ type
     //  codes from this method.
     //
 
-		function OnIconPathChanged(NewIconPath: LPCWSTR;
+    function OnIconPathChanged(NewIconPath: LPCWSTR;
                                const EventContext: TGUID): HResult; stdcall;
     // Description:
     //
@@ -152,7 +152,7 @@ type
     //  codes from this method.
     //
 
-		function OnSimpleVolumeChanged(NewVolume: FLOAT;
+    function OnSimpleVolumeChanged(NewVolume: FLOAT;
                                    NewMute: BOOL;
                                    const EventContext: TGUID): HResult; stdcall;
     // Description:
@@ -176,10 +176,10 @@ type
     //  codes from this method.
     //
 
-		function OnChannelVolumeChanged(ChannelCount: UINT;
+    function OnChannelVolumeChanged(ChannelCount: UINT;
                                     NewChannelArray: PFloat;
                                     ChangedChannel: UINT;
-																    const EventContext: TGUID): HResult; stdcall;
+                                    const EventContext: TGUID): HResult; stdcall;
     // Description:
     //
     //  Called when the channel volume of an AudioSession changes.
@@ -204,7 +204,7 @@ type
     //  codes from this method.
     //
 
-		function OnGroupingParamChanged(NewGroupingParam: TGUID;
+    function OnGroupingParamChanged(NewGroupingParam: TGUID;
                                     const EventContext: TGUID): HResult; stdcall;
     // Description:
     //      Called when the grouping param of an Audio Session changes.
@@ -226,7 +226,7 @@ type
     //  System initiated events.
     //==========================
 
-		function OnStateChanged(NewState: AudioSessionState): HResult; stdcall;
+    function OnStateChanged(NewState: AudioSessionState): HResult; stdcall;
     // Description:
     //
     //  Called when the state of an AudioSession changes.
@@ -244,7 +244,7 @@ type
     //  codes from this method.
     //
 
-		function OnSessionDisconnected(DisconnectReason: AudioSessionDisconnectReason): HResult; stdcall;
+    function OnSessionDisconnected(DisconnectReason: AudioSessionDisconnectReason): HResult; stdcall;
     // Description:
     //      Called when the audio session has been disconnected.
     //
@@ -259,21 +259,21 @@ type
     //  Please note: The caller of this function ignores all return
     //  codes from this method.
     //
-	end;
+  end;
   // IAudioSessionEvents
   IID_IAudioSessionEvents = IAudioSessionEvents;
   {$EXTERNALSYM IID_IAudioSessionEvents}
 
 
-	// Interface IAudioSessionControl >= Vista
+  // Interface IAudioSessionControl >= Vista
   // ==============================
   // Client interface that allows control over a AudioSession.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioSessionControl);'}
-	{$EXTERNALSYM IAudioSessionControl}
-	IAudioSessionControl = interface(IUnknown)
-	['{F4B1A599-7266-4319-A8CA-E70ACB11E8CD}']
-		function GetState(out pRetVal: UINT): HResult; stdcall;
+  {$EXTERNALSYM IAudioSessionControl}
+  IAudioSessionControl = interface(IUnknown)
+  ['{F4B1A599-7266-4319-A8CA-E70ACB11E8CD}']
+    function GetState(out pRetVal: UINT): HResult; stdcall;
     // Description:
     //
     //  Retrieves the current AudioSession state.
@@ -295,9 +295,9 @@ type
     //  the AudioSession is considered active, otherwise it is inactive.
     //
 
-		function GetDisplayName(out pRetVal: LPWSTR): HResult; stdcall; // pRetVal must be freed by CoTaskMemFree
-		
-		function SetDisplayName(Val: LPCWSTR;
+    function GetDisplayName(out pRetVal: LPWSTR): HResult; stdcall; // pRetVal must be freed by CoTaskMemFree
+
+    function SetDisplayName(Val: LPCWSTR;
                             EventContext: TGUID): HResult; stdcall;
     // Description:
     //
@@ -331,9 +331,9 @@ type
     //      then this will return an empty string ("").
     //
 
-		function GetIconPath(out pRetVal: LPWSTR): HResult; stdcall;    // pRetVal must be freed by CoTaskMemFree
-		
-		function SetIconPath(Val: LPCWSTR;
+    function GetIconPath(out pRetVal: LPWSTR): HResult; stdcall;    // pRetVal must be freed by CoTaskMemFree
+
+    function SetIconPath(Val: LPCWSTR;
                          EventContext: TGUID): HResult; stdcall;
     // Description:
     //
@@ -366,9 +366,9 @@ type
     //      then this will return an empty string ("").
     //
 
-		function GetGroupingParam(out pRetVal: TGUID): HResult; stdcall;
-		
-		function SetGroupingParam(const OverrideValue: TGUID;
+    function GetGroupingParam(out pRetVal: TGUID): HResult; stdcall;
+
+    function SetGroupingParam(const OverrideValue: TGUID;
                               const EventContext: TGUID): HResult; stdcall;
     // Description:
     //
@@ -405,7 +405,7 @@ type
     //  of the application to ensure that the volume control on each session has the same value.
     //
 
-		function RegisterAudioSessionNotification(NewNotifications: IAudioSessionEvents): HResult; stdcall;
+    function RegisterAudioSessionNotification(NewNotifications: IAudioSessionEvents): HResult; stdcall;
     // Description:
     //
     //  Add a notification callback to the list of AudioSession notification
@@ -423,7 +423,7 @@ type
     //      FAILURECODE Failure
     //
 
-		function UnregisterAudioSessionNotification(NewNotifications: IAudioSessionEvents): HResult; stdcall;
+    function UnregisterAudioSessionNotification(NewNotifications: IAudioSessionEvents): HResult; stdcall;
     // Description:
     //
     // Remove a notification callback to the list of AudioSession notification
@@ -446,7 +446,7 @@ type
     //      previously registered for notification, this function has
     //      no valid failure modes.
     //
-	end;
+  end;
   IID_IAudioSessionControl = IAudioSessionControl;
   {$EXTERNALSYM IID_IAudioSessionControl}
 
@@ -457,8 +457,8 @@ type
   // AudioSession Control Extended Interface
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioSessionControl2);'}
-	{$EXTERNALSYM IAudioSessionControl2}
-	IAudioSessionControl2 = interface(IAudioSessionControl)
+  {$EXTERNALSYM IAudioSessionControl2}
+  IAudioSessionControl2 = interface(IAudioSessionControl)
   ['{bfb7ff88-7239-4fc9-8fa2-07c950be9c6d}']
     function GetSessionIdentifier(out pRetVal: LPWSTR): Hresult; stdcall;
     // Description:
@@ -520,9 +520,14 @@ type
     //
     // Return values:
     //
-    //      S_OK        Success
-    //      AUDCLNT_E_NO_SINGLE_PROCESS Indicates that the session spans more than one process.
-    //      FAILURECODE Failure
+    //      S_OK: Success
+    //      AUDCLNT_E_NO_SINGLE_PROCESS: The session spans more than one process.
+    //                                   In this case, pRetVal receives the initial identifier of the process that created the
+    //                                   session. To use this value, include the following definition:
+    //                                   const AUDCLNT_S_NO_SINGLE_PROCESS = $8890000D;
+    //                                   NOTE: This constant is defined in WinApi.CoreAudioApi.AudioClient.pas and is NOT present in any headerfile.
+    //                                   SEE: https://docs.microsoft.com/en-us/windows/win32/api/audiopolicy/nf-audiopolicy-iaudiosessioncontrol2-getprocessid
+    //      FAILURECODE: Failure
     //
     // Remarks:
     //
@@ -558,7 +563,7 @@ type
     //
     //     An application should call this method in advance of receiving
     //     a ducking notification (generally at stream create time).  This
-    //	   method can be called dynamically (i.e. over and over) as its
+    //     method can be called dynamically (i.e. over and over) as its
     //     desire to opt in or opt out of ducking changes.
     //
     // Return values:
@@ -619,21 +624,21 @@ type
     //      FAILURECODE Failure
     //
 
-	end;
+  end;
   IID_IAudioSessionManager = IAudioSessionManager;
   {$EXTERNALSYM IID_IAudioSessionManager}
 
 
 
-	// Interface IAudioVolumeDuckNotification >= Windows 7
+  // Interface IAudioVolumeDuckNotification >= Windows 7
   // ======================================
   // Notification on session changes.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioVolumeDuckNotification);'}
-	{$EXTERNALSYM IAudioVolumeDuckNotification}
-	IAudioVolumeDuckNotification = interface(IUnknown)
-	['{C3B284D4-6D39-4359-B3CF-B56DDB3BB39C}']
-		function OnVolumeDuckNotification(sessionID: LPCWSTR;
+  {$EXTERNALSYM IAudioVolumeDuckNotification}
+  IAudioVolumeDuckNotification = interface(IUnknown)
+  ['{C3B284D4-6D39-4359-B3CF-B56DDB3BB39C}']
+    function OnVolumeDuckNotification(sessionID: LPCWSTR;
                                       countCommunicationSessions: UINT32): HResult; stdcall;
     // Description:
     //
@@ -656,7 +661,7 @@ type
     //      FAILURECODE Failure
     //
 
-		function OnVolumeUnduckNotification(sessionID: LPCWSTR): HResult; stdcall;
+    function OnVolumeUnduckNotification(sessionID: LPCWSTR): HResult; stdcall;
     // Description:
     //
     // Notification of a pending system auto-unduck
@@ -677,7 +682,7 @@ type
     //      S_OK        Success
     //      FAILURECODE Failure
     //
-	end;
+  end;
   IID_IAudioVolumeDuckNotification = IAudioVolumeDuckNotification;
   {$EXTERNALSYM IID_IAudioVolumeDuckNotification}
 
@@ -687,8 +692,8 @@ type
   // Audio Session Notification Interface
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioSessionNotification);'}
-	{$EXTERNALSYM IAudioSessionNotification}
-	IAudioSessionNotification = interface(IUnknown)
+  {$EXTERNALSYM IAudioSessionNotification}
+  IAudioSessionNotification = interface(IUnknown)
   ['{641DD20B-4D41-49CC-ABA3-174B9477BB08}']
 
     function OnSessionCreated(NewSession: IAudioSessionControl): HResult; stdcall;

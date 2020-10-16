@@ -184,6 +184,12 @@ type
                               out endpointdevices: TEndPointDeviceArray;
                               out devicesCount: DWord): HRESULT;
 
+  // Get audioendpoint by a string containing the endpoint ID.
+  // The caller typically obtains this string from the IMMDevice.GetId method (see: GetEndpointDevices) or
+  // from one of the methods in the IMMNotificationClient interface.
+  function GetEndPointDeviceByID(const deviceId: PWideChar;
+                                 out audioEndPoint: IMMDevice): HResult;
+
   function GetDefaultEndPointAudioDevice(out audioEndPoint: IMMDevice;
                                          Role: eRole = eMultimedia;
                                          dataFlow: EDataFlowEx = eRender): HRESULT;
@@ -358,8 +364,40 @@ end;
 // eof AudioVolumeEvents
 
 
+function GetEndPointDeviceByID(const deviceId: PWideChar;
+                               out audioEndPoint: IMMDevice): HResult;
+var
+  pdeviceEnumerator: IMMDeviceEnumerator;
+  hr: HRESULT;
+
+begin
+  hr := E_FAIL;
+try
+try
+  hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
+                         nil,
+                         CLSCTX_ALL,
+                         IID_IMMDeviceEnumerator,
+                         pdeviceEnumerator);
+  if Failed(hr) then
+    Abort;
+
+  hr := pdeviceEnumerator.GetDevice(deviceId,
+                                    audioEndPoint);
+  if Failed(hr) then
+    Abort;
+
+except
+  // Do Nothing. Caller is responsible for error handling.
+end;
+finally
+  Result := hr;
+end;
+end;
+
+
 // Get GetEndpointDevices
-// Remarks: the index of slEndPoints indicates also the device index.
+// Remarks: the index of endpointdevices indicates also the device index.
 function GetEndpointDevices(const flow: EDataFlowEx;
                             state: DWord;
                             out endpointdevices: TEndPointDeviceArray;
@@ -403,7 +441,7 @@ try
 
   CheckHr( pEnumerator.EnumAudioEndpoints(EDataFlow(flow),
                                           state,
-                                          pCollection) );
+                                          pCollection));
 
   CheckHr( pCollection.GetCount(count) );
 
@@ -461,7 +499,7 @@ try
     end;
 
 except
-  // Silent exception
+  // Do Nothing. Caller is responsible for error handling.
 end;
 finally
   PropVariantClearSafe(DevIfaceName);
@@ -483,14 +521,14 @@ var
   hr: HRESULT;
 
 begin
-  hr := E_FAIL;  //to prevent might not have been initialised warning
+  hr := E_FAIL;
 try
 try
   hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
-                          nil,
-                          CLSCTX_ALL,
-                          IID_IMMDeviceEnumerator,
-                          pdeviceEnumerator);
+                         nil,
+                         CLSCTX_ALL,
+                         IID_IMMDeviceEnumerator,
+                         pdeviceEnumerator);
   if Failed(hr) then
     Abort;
 
@@ -499,14 +537,14 @@ try
       hr := pdeviceEnumerator.GetDefaultAudioEndpoint(EDataFlow(dataFlow),
                                                       ERole(Role),
                                                       audioEndPoint);
-     if Failed(hr) then
-       Abort;
+      if Failed(hr) then
+        Abort;
     end
   else
     hr := E_INVALIDARG;
 
 except
-  //Do Nothing
+  // Do Nothing. Caller is responsible for error handling.
 end;
 finally
   Result := hr;
@@ -567,16 +605,13 @@ end;
 //-----------------------------------------------------------
 function CreateDShowAudioRenderer(const role: eRole;
                                   var ppAudioRenderer: IBaseFilter): HRESULT;
-const
-  // This application's audio session GUID
-  guidAudioSessionId: TGUID = '{b13ff52e-a5cf-4fca-9fc3-42265b0b14fb}';
-
 var
   hr: HRESULT;
   daap: PDIRECTX_AUDIO_ACTIVATION_PARAMS;
   pVar: PROPVARIANT;
   pEnumerator: IMMDeviceEnumerator;
   pDevice: IMMDevice;
+  guidAudioSessionId: TGUID;
 
 begin
   hr := E_FAIL;  // to prevent might not have been initialised warning
@@ -592,18 +627,23 @@ try
 
   // Activate the IBaseFilter interface on the
   // audio renderer with the specified role.
-  hr:= CoCreateInstance(CLSID_MMDeviceEnumerator,
-                        nil, 
-                        CLSCTX_INPROC_SERVER,
-                        IID_IMMDeviceEnumerator,
-                        IUnknown(pEnumerator));
+  hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
+                         nil,
+                         CLSCTX_INPROC_SERVER,
+                         IID_IMMDeviceEnumerator,
+                         IUnknown(pEnumerator));
   if Failed(hr) then
     Abort;
 
-  hr:= pEnumerator.GetDefaultAudioEndpoint(EDataFlow(eRender),
-                                           ERole(role),
-                                           pDevice);
+  hr := pEnumerator.GetDefaultAudioEndpoint(EDataFlow(eRender),
+                                            ERole(role),
+                                            pDevice);
+  if Failed(hr) then
+    Abort;
 
+  // Create this application's audio session GUID
+  // We could just write this, however not every Delphi compiler supports this: guidAudioSessionId := TGUID.NewGuid;
+  hr := CreateGUID(guidAudioSessionId);
   if Failed(hr) then
     Abort;
 
@@ -626,10 +666,10 @@ try
   if Failed(hr) then
     Abort;
 except
-  //do nothing
+  // Do Nothing. Caller is responsible for error handling.
 end;
 finally
-    Result := hr;
+  Result := hr;
 end;
 end;
 
@@ -702,7 +742,7 @@ try
     Abort;
 
 except
-  //do nothing
+  // Do Nothing. Caller is responsible for error handling.
 end;
 finally
     PropVariantClear(pVar);

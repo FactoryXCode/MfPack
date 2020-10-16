@@ -597,14 +597,16 @@ type
   ['{A95664D2-9614-4F35-A746-DE8DB63617E6}']
 
     function EnumAudioEndpoints(dataFlow: EDataFlow;
-                                const dwStateMask: DWORD;
+                                const dwStateMask: DWORD;   // DEVICE_STATE_XXX constants
                                 out ppDevices: IMMDeviceCollection): HRESULT; stdcall;
 
     function GetDefaultAudioEndpoint(dataFlow: EDataFlow;
                                      role: eRole;
                                      out ppEndpoint: IMMDevice): HRESULT; stdcall;
 
-    function GetDevice(pwstrId: PWChar;
+    function GetDevice(pwstrId: PWChar;  // Pointer to a string containing the endpoint ID.
+                                         // The caller typically obtains this string from the IMMDevice.GetId method or
+                                         // from one of the methods in the IMMNotificationClient interface.
                        out ppDevice: IMMDevice): HRESULT; stdcall;
 
     function RegisterEndpointNotificationCallback(pClient: IMMNotificationClient): HRESULT; stdcall;

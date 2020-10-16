@@ -56,7 +56,7 @@
 // Users may distribute this source code provided that this header is included
 // in full at the top of the file.
 //==============================================================================
-unit WinApi.MediaFoundationApi.Mferror;
+unit WinApi.MediaFoundationApi.MfError;
 
   {$HPPEMIT '#include "MfError.h"'}
 
@@ -3710,8 +3710,9 @@ const
   {$EXTERNALSYM MF_QUOTA_EXCEEDED_ERR}
   MF_PARSE_ERR                        = $80700051;
   {$EXTERNALSYM MF_PARSE_ERR}
-
-
+  MF_TYPE_ERR                         = $80704005;
+  {$EXTERNALSYM MF_TYPE_ERR}
+  
 
   // Additional Prototypes for ALL interfaces
 

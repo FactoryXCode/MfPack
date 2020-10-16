@@ -337,7 +337,7 @@ type
     //    S_OK   If successful, failure otherwise.
     //    AUDCLNT_E_INITIALIZED, if already initialized.
     //    AUDCLNT_E_WRONG_ENDPOINT_TYPE, if loopback flag was set but endpoint isn't a render endpoint.
-    //    AUDCLNT_E_DEVICEINVALIDATED, if WAS device was removed.
+    //    AUDCLNT_E_DEVICE_INVALIDATED, if WAS device was removed.
     //    AUDCLNT_E_BUFDURATION_PERIOD_NOT_EQUAL, if AUDCLNT_STREAMFLAGS_EVENTCALLBACK StreamFlag is
     //                                            supplied and share mode is AUDCLNT_SHAREMODE_EXCLUSIVE,
     //                                            hnsBufferDuration and hnsPeriodicity must be equal
@@ -394,13 +394,13 @@ type
     //
     //     S_OK if successful, failure otherwise.
     //     AUDCLNT_E_NOT_INITIALIZED, if audio stream hasn't been successfully initialized.
-    //     E_POINTER, if pNumBufferFrames is NULL.
-    //     AUDCLNT_E_DEVICEINVALIDATED, if WAS device format was changed or device was removed.
+    //     E_POINTER, if pNumBufferFrames is Nil.
+    //     AUDCLNT_E_DEVICE_INVALIDATED, if WAS device format was changed or device was removed.
     //
     // Remarks:
     //
     //  Render clients can use this value to compute the largest render buffer size that can be
-    //  requested from IAudioRenderClient::GetBuffer() during each processing pass. (For more
+    //  requested from IAudioRenderClient.GetBuffer() during each processing pass. (For more
     //  information, see the IAudioRenderClient section.)
     //
 
@@ -419,7 +419,7 @@ type
     //
     //     S_OK if successful, failure otherwise.
     //     AUDCLNT_E_NOT_INITIALIZED if audio stream hasn't been successfully initialized.
-    //     AUDCLNT_E_DEVICEINVALIDATED, if WAS device format was changed or device was removed.
+    //     AUDCLNT_E_DEVICE_INVALIDATED, if WAS device format was changed or device was removed.
     //
     // Remarks:
     //
@@ -450,7 +450,7 @@ type
     //
     //     S_OK if successful, failure otherwise.
     //     AUDCLNT_E_NOT_INITIALIZED if audio stream hasn't been successfully initialized.
-    //     AUDCLNT_E_DEVICEINVALIDATED, if WAS device format was changed or device was removed,
+    //     AUDCLNT_E_DEVICE_INVALIDATED, if WAS device format was changed or device was removed,
     //
     // Remarks:
     //
@@ -467,7 +467,7 @@ type
 
     function IsFormatSupported(ShareMode: AUDCLNT_SHAREMODE;
                                pFormat: WaveFormatEx;
-                               out ppClosestMatch: PWaveFormatEx): HResult; stdcall;
+                               ppClosestMatch: PWaveFormatEx): HResult; stdcall;
     // Description:
     //
     //  Provides a way for the user to determine, prior to initialization, whether a given format
@@ -488,19 +488,23 @@ type
     //  pFormat - [in]
     //    Pointer to buffer containing the application's audio format.
     //
-    //  ppClosestMatch - [out] Pointer to WAVEFORMATEX pointer containing the audio format
-    //      of the closest match in case the format requested cannot be supported natively.
-    //      The closest match is only returned if the SharedMode parameter is
-    //      AUDCLNT_SHAREMODE_SHARED and the return code is S_FALSE. No closest match can be
-    //      provided for AUDCLNT_SHAREMODE_EXCLUSIVE.
+    //  ppClosestMatch - []
+    //    Pointer to a pointer variable into which the method writes the address of a WAVEFORMATEX or WAVEFORMATEXTENSIBLE structure.
+    //    This structure specifies the supported format that is closest to the format that the client specified through the
+    //    pFormat parameter. For shared mode (that is, if the ShareMode parameter is AUDCLNT_SHAREMODE_SHARED),
+    //    set ppClosestMatch to point to a valid, non-Nil pointer variable.
+    //    For exclusive mode, set ppClosestMatch to Nil. The method allocates the storage for the structure.
+    //    The caller is responsible for freeing the storage, when it is no longer needed, by calling the CoTaskMemFree function.
+    //    If the IsFormatSupported call fails and ppClosestMatch is non-Nil, the method sets ppClosestMatch to Nil.
+    //    For information about CoTaskMemFree, see the Windows SDK documentation.
     //
     // Return Values:
     //
     //     S_OK                         if format is supported.
     //     S_FALSE                      if input format is not supported but ppClosestMatch is.
-    //     E_POINTER                    if ppClosestMatch is NULL & AUDCLNT_SHAREMODE_SHARED.
-    //     AUDCLNT_E_INVALIDTYPE        if type isn't supported.
-    //     AUDCLNT_E_DEVICEINVALIDATED  if WAS device was removed.
+    //     E_POINTER                    if ppClosestMatch is Nil & AUDCLNT_SHAREMODE_SHARED.
+    //     E_INVALIDTYPE                if type isn't supported. NOTE: This error is wrongly documented as AUDCLNT_E_INVALIDTYPE.
+    //     AUDCLNT_E_DEVICE_INVALIDATED if WAS device was removed. NOTE: This error is wrongly documented as AUDCLNT_E_DEVICEINVALIDATED.
     //
     // Remarks:
     //
@@ -524,7 +528,7 @@ type
     // Return Values:
     //
     //    S_OK if successful, failure otherwise.
-    //    AUDCLNT_E_DEVICEINVALIDATED, if WAS device was removed.
+    //    AUDCLNT_E_DEVICE_INVALIDATED, if WAS device was removed.
     //
     // Remarks:
     //
@@ -558,7 +562,7 @@ type
     // Return Values:
     //
     //     S_OK if successful, failure otherwise.
-    //     AUDCLNT_E_DEVICEINVALIDATED, if WAS device was removed.
+    //     AUDCLNT_E_DEVICE_INVALIDATED, if WAS device was removed.
     //
     // Remarks:
     //
@@ -584,7 +588,7 @@ type
     //    S_OK if successful, failure otherwise.
     //    AUDCLNT_E_NOT_INITIALIZED if client hasn't been successfully initialized.
     //    AUDCLNT_E_NOT_STOPPED if client hasn't been first stopped.
-    //    AUDCLNT_E_DEVICEINVALIDATED, if WAS device format was changed or device was removed.
+    //    AUDCLNT_E_DEVICE_INVALIDATED, if WAS device format was changed or device was removed.
     //    AUDCLNT_E_EVENTHANDLE_NOT_SET, if event callback stream flag is specified and the event
     //                                    handle was not set with SetEventHandle
     //
@@ -612,7 +616,7 @@ type
     //    S_OK if successful, failure otherwise.
     //    AUDCLNT_E_NOT_INITIALIZED if client hasn't been successfully initialized.
     //    AUDCLNT_E_STOPPED if client is already stopped.
-    //    AUDCLNT_E_DEVICEINVALIDATED, if WAS device format was changed or device was removed.
+    //    AUDCLNT_E_DEVICE_INVALIDATED, if WAS device format was changed or device was removed.
     //
     // Remarks:
     //
@@ -633,7 +637,7 @@ type
     //    S_OK if successful, failure otherwise.
     //    AUDCLNT_E_NOT_INITIALIZED if audio stream hasn't been successfully initialized.
     //    AUDCLNT_E_NOT_STOPPED if audio stream hasn't been stopped.
-    //    AUDCLNT_E_DEVICEINVALIDATED, if WAS device format was changed or device was removed.
+    //    AUDCLNT_E_DEVICE_INVALIDATED, if WAS device format was changed or device was removed.
     //
     // Remarks:
     //
@@ -656,7 +660,7 @@ type
     //    S_OK if successful, failure otherwise.
     //    AUDCLNT_E_NOT_INITIALIZED if audio stream hasn't been successfully initialized.
     //    AUDCLNT_E_NOT_STOPPED if audio stream hasn't been stopped.
-    //    AUDCLNT_E_DEVICEINVALIDATED, if WAS device format was changed or device was removed.
+    //    AUDCLNT_E_DEVICE_INVALIDATED, if WAS device format was changed or device was removed.
     //    AUDCLNT_E_EVENTHANDLE_NOT_EXPECTED, if Initialize was not called with the
     //                                          AUDCLNT_STREAMFLAGS_EVENTCALLBACK flag
     //
@@ -686,7 +690,7 @@ type
     //    S_OK if successful, failure otherwise.
     //    AUDCLNT_E_NOT_INITIALIZED if audio stream hasn't been successfully initialized.
     //    AUDCLNT_E_NOT_STOPPED if audio stream hasn't been stopped.
-    //    AUDCLNT_E_DEVICEINVALIDATED, if WAS device format was changed or device was removed.
+    //    AUDCLNT_E_DEVICE_INVALIDATED, if WAS device format was changed or device was removed.
     //
     // Remarks:
     //
@@ -781,7 +785,7 @@ type
     //    parameter 100-nanosecond units.
     //
     //    S_OK if successful, failure otherwise.
-    //    AUDCLNT_E_DEVICEINVALIDATED, if a device was removed.
+    //    AUDCLNT_E_DEVICE_INVALIDATED, if a device was removed.
     //
     // Remarks:
     //
@@ -903,7 +907,7 @@ type
     //      is still in effect.
     //      AUDCLNT_S_BUFFEREMPTY, if called when there's no available capture data. Note that
     //      this is a success code that the content of pFrameCount will be 0 in this case.
-    //      AUDCLNT_E_DEVICEINVALIDATED, if WAS device format was changed or device was removed.
+    //      AUDCLNT_E_DEVICE_INVALIDATED, if WAS device format was changed or device was removed.
     //
     // Remarks:
     //
@@ -952,7 +956,7 @@ type
     //      S_OK if successful, error otherwise.
     //      E_INVALIDARG, if NumFramesRead <> [ value in buffer or 0 ].
     //      AUDCLNT_E_OUTOFORDER, if previous IAudioCaptureClient streaming call wasn't GetBuffer().
-    //      AUDCLNT_E_DEVICEINVALIDATED, if WAS device format was changed or device was removed.
+    //      AUDCLNT_E_DEVICE_INVALIDATED, if WAS device format was changed or device was removed.
     //
     // Remarks:
     //      Please note: This function is a "finalizer". As such,
@@ -975,7 +979,7 @@ type
     // Return values:
     //
     //    S_OK if successful, failure otherwise.
-    //    AUDCLNT_E_DEVICEINVALIDATED, if WAS device format was changed or device was removed.
+    //    AUDCLNT_E_DEVICE_INVALIDATED, if WAS device format was changed or device was removed.
     //    E_POINTER, if pNumFramesInNextPacket is NULL.
     //
     // Remarks:
@@ -1621,9 +1625,10 @@ type
 
 
 const
+
   // error codes
-  FACILITY_AUDCLNT                        = $889;
-  {$EXTERNALSYM FACILITY_AUDCLNT}
+
+  // FACILITY_AUDCLNT = $889 (2185), defined in WinApi.WinError.pas
 
   // Since XE2 you have to hardcode this.
 
@@ -1695,20 +1700,26 @@ const
   {$EXTERNALSYM AUDCLNT_E_ENGINE_PERIODICITY_LOCKED}
   AUDCLNT_E_ENGINE_FORMAT_LOCKED          = $88890029;  //AUDCLNT_ERR($029)
   {$EXTERNALSYM AUDCLNT_E_ENGINE_FORMAT_LOCKED}
+  AUDCLNT_E_HEADTRACKING_ENABLED          = $88890030;  //AUDCLNT_ERR($030)
+  {$EXTERNALSYM AUDCLNT_E_HEADTRACKING_ENABLED}
+  AUDCLNT_E_HEADTRACKING_UNSUPPORTED      = $88890040;  //AUDCLNT_ERR($040)
+  {$EXTERNALSYM AUDCLNT_E_HEADTRACKING_UNSUPPORTED}
 
-  AUDCLNT_S_BUFFER_EMPTY                  = $8890001;  //AUDCLNT_SUCCESS($001);
+  AUDCLNT_S_BUFFER_EMPTY                  = $88900001;  //AUDCLNT_SUCCESS($001);
   {$EXTERNALSYM AUDCLNT_S_BUFFER_EMPTY}
-  AUDCLNT_S_THREAD_ALREADY_REGISTERED     = $8890002;  //AUDCLNT_SUCCESS($002);
+  AUDCLNT_S_THREAD_ALREADY_REGISTERED     = $88900002;  //AUDCLNT_SUCCESS($002);
   {$EXTERNALSYM AUDCLNT_S_THREAD_ALREADY_REGISTERED}
-  AUDCLNT_S_POSITION_STALLED              = $8890003;  //AUDCLNT_SUCCESS($003);
+  AUDCLNT_S_POSITION_STALLED              = $88900003;  //AUDCLNT_SUCCESS($003);
   {$EXTERNALSYM AUDCLNT_S_POSITION_STALLED}
-
+  {See: IAudioSessionControl2 interface}
+  AUDCLNT_S_NO_SINGLE_PROCESS             = $8890000D;  //AUDCLNT_SUCCESS($00D);
+  {$EXTERNALSYM AUDCLNT_S_NO_SINGLE_PROCESS}
 
 
   // Additional Prototypes for ALL interfaces
 
   // Remarks: HRESULTs are signed 4-byte integers.
-  //          AUDCLNT_ERR is a macro that returns an integer of the format $88890000 + x.
+  //          AUDCLNT_ERR is a macro that returns an integer of the format $8889000 + x.
   //          Example: AUDCLNT_ERR($001) will result in $88890001.
   function AUDCLNT_ERR(n: Longint): HRESULT;
   function AUDCLNT_SUCCESS(n: Longint): HRESULT;

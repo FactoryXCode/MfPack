@@ -3104,11 +3104,15 @@ type
 
   // Additional Prototypes for ALL interfaces
 
-const ONE_HNS_SECOND  = 10000000; // One sec = 100,000 hns
-const ONE_HNS_MSEC    = 10000;    // One ms  = 10,000 hns
-const ONE_MSEC_SECOND = 1000;     // One second = 1,000 ms
-const ONE_MHZ = 1000000;          // One MegaHertz = 1,000,000 Hertz
-const ONE_GHZ = ONE_MHZ * 1000;   // One GigaHertz = 1,000 MegaHertz
+// REFERENCE_TIME time units per second and per millisecond
+const REFTIMES_PER_SEC = 10000000;   // One sec = 100,000 hns
+const REFTIMES_PER_MILLISEC = 10000; // One ms  = 10,000 hns
+const ONE_HNS_SECOND   = REFTIMES_PER_SEC;
+const ONE_HNS_MSEC     = REFTIMES_PER_MILLISEC;
+const ONE_MSEC_SECOND  = 1000;                  // One second = 1,000 ms
+
+const ONE_MHZ          = 1000000;               // One MegaHertz = 1,000,000 Hertz
+const ONE_GHZ          = ONE_MHZ * 1000;        // One GigaHertz = 1,000 MegaHertz
 
 
 type
