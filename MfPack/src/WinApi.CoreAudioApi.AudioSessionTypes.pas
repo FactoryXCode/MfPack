@@ -114,6 +114,14 @@ type
   // Movie                   - Video with audio
   // Other                   - All other streams (default)
   //
+  // IMPORTANT NOTES:
+  // The values AudioCategory_ForegroundOnlyMedia and AudioCategory_BackgroundCapableMedia are deprecated.
+  // For Windows Store apps, these values will continue to function the same when running on
+  // Windows 10 as they did on Windows 8.1.
+  // Attempting to use these values in a Universal Windows Platform (UWP) app,
+  // will result in compilation errors and an exception at runtime.
+  // Using these values in a Windows desktop application built with the Windows 10 SDK the will result in a compilation error.
+
   PAUDIO_STREAM_CATEGORY = ^AUDIO_STREAM_CATEGORY;
   _AUDIO_STREAM_CATEGORY = (
     AudioCategory_Other                   = 0,
@@ -241,6 +249,6 @@ type
 
 implementation
 
-  //Implement Additional functions here.
+  // Implement Additional functions here.
 
 end.

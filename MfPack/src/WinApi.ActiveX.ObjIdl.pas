@@ -1344,6 +1344,7 @@ type
   // Interface IFillLockBytes
   // ========================
   //
+  PIFillLockBytes = ^IFillLockBytes;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IFillLockBytes);'}
   {$EXTERNALSYM IFillLockBytes}
   IFillLockBytes = interface(IUnknown)

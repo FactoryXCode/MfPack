@@ -10,7 +10,7 @@
 // Release date: 08-07-2012
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: Component object model definitions.
 //
 // Organisation: FactoryX
@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 25/10/2020 Tony                Fixed some pointer issues.
 //------------------------------------------------------------------------------
 //
 // Remarks:
@@ -176,7 +177,7 @@ type
   {$EXTERNALSYM COMSD}
 
   function CoGetSystemSecurityPermissions(comSDType: COMSD;
-                                          ppSD: SECURITY_DESCRIPTOR): HResult; stdcall;
+                                          ppSD: PSECURITY_DESCRIPTOR): HResult; stdcall;
   {$EXTERNALSYM CoGetSystemSecurityPermissions}
 
 
@@ -193,7 +194,7 @@ type
 
 
   function CoGetInstanceFromFile(pServerInfo: PCoServerInfo;
-                                 const pclsid: TGUID;
+                                 const pclsid: PCLSID; // = ^GUID
                                  punkOuter: IUnknown;
                                  dwClsCtx: DWORD;
                                  grfMode: DWORD;
@@ -203,7 +204,7 @@ type
   {$EXTERNALSYM CoGetInstanceFromFile}
 
   function CoGetInstanceFromIStorage(pServerInfo: PCoServerInfo;
-                                     const pclsid: TGUID;
+                                     const pclsid: PCLSID;
                                      punkOuter: IUnknown;
                                      dwClsCtx: DWORD;
                                      pstg: IUnknown; {IStorage}
@@ -220,7 +221,7 @@ type
 
 
   function DcomChannelSetHResult(pvReserved: Pointer;
-                                 pulReserved: PULONG;
+                                 pulReserved: ULONG;
                                  appsHR: HResult): HResult; stdcall;
   {$EXTERNALSYM DcomChannelSetHResult}
 
@@ -336,7 +337,7 @@ type
 
   function MonikerRelativePathTo(pmkSrc: IMoniker;
                                  pmkDest: IMoniker;
-                                 out ppmkRelPath: IMoniker;
+                                 out ppmkRelPath: PIMoniker;
                                  dwReserved: BOOL): HResult; stdcall;
   {$EXTERNALSYM MonikerRelativePathTo}
 
@@ -346,7 +347,7 @@ type
   {$EXTERNALSYM MonikerCommonPrefixWith}
 
   function CreateBindCtx(reserved: DWORD;
-                         out ppbc: IBindCtx): HResult; stdcall;
+                         out ppbc: PIBindCtx): HResult; stdcall;
   {$EXTERNALSYM CreateBindCtx}
 
   function CreateGenericComposite(pmkFirst: IMoniker;
@@ -363,7 +364,7 @@ type
   {$EXTERNALSYM CreateFileMoniker}
 
   function CreateClassMoniker(const rclsid: TGUID;
-                             out ppmk: IMoniker): HResult; stdcall;
+                             out ppmk: PIMoniker): HResult; stdcall;
   {$EXTERNALSYM CreateClassMoniker}
 
   function CreateItemMoniker(lpszDelim: PWideChar;

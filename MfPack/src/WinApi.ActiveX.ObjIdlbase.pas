@@ -187,6 +187,7 @@ type
   // Interface IMarshal
   // ==================
   //
+  PIMarshal = ^IMarshal;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMarshal);'}
   {$EXTERNALSYM IMarshal}
   IMarshal = interface(IUnknown)
@@ -230,6 +231,7 @@ type
   // INoMarshal - marks an object that does not support being marshaled
   // or stored in the global interface table
   //
+  PINoMarshal = ^INoMarshal;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(INoMarshal);'}
   {$EXTERNALSYM INoMarshal}
   INoMarshal = interface(IUnknown)
@@ -273,6 +275,7 @@ type
   // Interface IActivationFilter
   // ===========================
   //
+  PIActivationFilter = ^IActivationFilter;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IActivationFilter);'}
   {$EXTERNALSYM IActivationFilter}
   IActivationFilter = interface(IUnknown)
@@ -389,6 +392,7 @@ type
   // Interface IMultiQI
   // ==================
   //
+  PIMultiQI = ^IMultiQI;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMultiQI);'}
   {$EXTERNALSYM IMultiQI}
   IMultiQI = interface(IUnknown)
@@ -465,6 +469,7 @@ type
   // Interface ISequentialStream
   // ===========================
   //
+  PISequentialStream = ^ISequentialStream;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ISequentialStream);'}
   {$EXTERNALSYM ISequentialStream}
   ISequentialStream = interface(IUnknown)
@@ -604,6 +609,7 @@ type
   // Interface IRpcChannelBuffer
   // ===========================
   //
+  PIRpcChannelBuffer = ^IRpcChannelBuffer;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IRpcChannelBuffer);'}
   {$EXTERNALSYM IRpcChannelBuffer}
   IRpcChannelBuffer = interface(IUnknown)
@@ -629,6 +635,7 @@ type
   // Interface IRpcChannelBuffer2
   // ============================
   //
+  PIRpcChannelBuffer2 = ^IRpcChannelBuffer2;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IRpcChannelBuffer2);'}
   {$EXTERNALSYM IRpcChannelBuffer2}
   IRpcChannelBuffer2 = interface(IRpcChannelBuffer)
@@ -653,6 +660,7 @@ type
   // Interface IAsyncRpcChannelBuffer
   // ================================
   //
+  PIAsyncRpcChannelBuffer = ^IAsyncRpcChannelBuffer;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAsyncRpcChannelBuffer);'}
   {$EXTERNALSYM IAsyncRpcChannelBuffer}
   IAsyncRpcChannelBuffer = interface(IRpcChannelBuffer2)
@@ -667,6 +675,7 @@ type
   // Interface IRpcChannelBuffer3
   // ============================
   //
+  PIRpcChannelBuffer3 = ^IRpcChannelBuffer3;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IRpcChannelBuffer3);'}
   {$EXTERNALSYM IRpcChannelBuffer3}
   IRpcChannelBuffer3 = interface(IRpcChannelBuffer2)
@@ -703,6 +712,7 @@ type
   // Interface IRpcSyntaxNegotiate
   // =============================
   //
+  PIRpcSyntaxNegotiate = ^IRpcSyntaxNegotiate;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IRpcSyntaxNegotiate);'}
   {$EXTERNALSYM IRpcSyntaxNegotiate}
   IRpcSyntaxNegotiate = interface(IUnknown)
@@ -717,6 +727,7 @@ type
   // Interface IRpcProxyBuffer
   // =========================
   //
+  PIRpcProxyBuffer = ^IRpcProxyBuffer;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IRpcProxyBuffer);'}
   {$EXTERNALSYM IRpcProxyBuffer}
   IRpcProxyBuffer = interface(IUnknown)
@@ -733,6 +744,7 @@ type
   // Interface IRpcStubBuffer
   // ========================
   //
+  PIRpcStubBuffer = ^IRpcStubBuffer;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IRpcStubBuffer);'}
   {$EXTERNALSYM IRpcStubBuffer}
   IRpcStubBuffer = interface(IUnknown)
@@ -760,6 +772,7 @@ type
   // Interface IPSFactoryBuffer
   // ==========================
   //
+  PIPSFactoryBuffer = ^IPSFactoryBuffer;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IPSFactoryBuffer);'}
   {$EXTERNALSYM IPSFactoryBuffer}
   IPSFactoryBuffer = interface(IUnknown)
@@ -798,6 +811,7 @@ type
   // Interface IChannelHook
   // ======================
   //
+  PIChannelHook = ^IChannelHook;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IChannelHook);'}
   {$EXTERNALSYM IChannelHook}
   IChannelHook = interface(IUnknown)
@@ -875,6 +889,7 @@ type
   // Interface IClientSecurity
   // =========================
   //
+  PIClientSecurity = ^IClientSecurity;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IClientSecurity);'}
   {$EXTERNALSYM IClientSecurity}
   IClientSecurity = interface(IUnknown)
@@ -908,6 +923,7 @@ type
   // Interface IServerSecurity
   // =========================
   //
+  PIServerSecurity = ^IServerSecurity;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IServerSecurity);'}
   {$EXTERNALSYM IServerSecurity}
   IServerSecurity = interface(IUnknown)
@@ -960,6 +976,7 @@ type
   // Interface IRpcOptions
   // =====================
   //
+  PIRpcOptions = ^IRpcOptions;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IRpcOptions);'}
   {$EXTERNALSYM IRpcOptions}
   IRpcOptions = interface(IUnknown)
@@ -1054,6 +1071,7 @@ type
   // Interface IGlobalOptions
   // ========================
   //
+  PIGlobalOptions = ^IGlobalOptions;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IGlobalOptions);'}
   {$EXTERNALSYM IGlobalOptions}
   IGlobalOptions = interface(IUnknown)
@@ -1089,6 +1107,7 @@ type
   // Interface IGlobalInterfaceTable
   // ===============================
   //
+  PIGlobalInterfaceTable = ^IGlobalInterfaceTable;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IGlobalInterfaceTable);'}
   {$EXTERNALSYM IGlobalInterfaceTable}
   IGlobalInterfaceTable = interface(IUnknown)
@@ -1130,6 +1149,7 @@ type
   // Interface ISynchronizeHandle
   // ============================
   //
+  PISynchronizeHandle = ^ISynchronizeHandle;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ISynchronizeHandle);'}
   {$EXTERNALSYM ISynchronizeHandle}
   ISynchronizeHandle = interface(IUnknown)
@@ -1144,6 +1164,7 @@ type
   // Interface ISynchronizeEvent
   // ===========================
   //
+  PISynchronizeEvent = ^ISynchronizeEvent;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ISynchronizeEvent);'}
   {$EXTERNALSYM ISynchronizeEvent}
   ISynchronizeEvent = interface(ISynchronizeHandle)
@@ -1158,6 +1179,7 @@ type
   // Interface ISynchronizeContainer
   // ===============================
   //
+  PISynchronizeContainer = ^ISynchronizeContainer;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ISynchronizeContainer);'}
   {$EXTERNALSYM ISynchronizeContainer}
   ISynchronizeContainer = interface(IUnknown)
@@ -1176,6 +1198,7 @@ type
   // Interface ISynchronizeMutex
   // ===========================
   //
+  PISynchronizeMutex = ^ISynchronizeMutex;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ISynchronizeMutex);'}
   {$EXTERNALSYM ISynchronizeMutex}
   ISynchronizeMutex = interface(ISynchronize)
@@ -1190,6 +1213,7 @@ type
   // Interface ICancelMethodCalls
   // ============================
   //
+  PICancelMethodCalls = ^ICancelMethodCalls;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ICancelMethodCalls);'}
   {$EXTERNALSYM ICancelMethodCalls}
   ICancelMethodCalls = interface(IUnknown)
@@ -1235,6 +1259,7 @@ type
   // Interface ICallFactory
   // ======================
   //
+  PICallFactory = ^ICallFactory;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ICallFactory);'}
   {$EXTERNALSYM ICallFactory}
   ICallFactory = interface(IUnknown)
@@ -1252,6 +1277,7 @@ type
   // Interface IRpcHelper
   // ====================
   //
+  PIRpcHelper = ^IRpcHelper;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IRpcHelper);'}
   {$EXTERNALSYM IRpcHelper}
   IRpcHelper = interface(IUnknown)
@@ -1268,6 +1294,7 @@ type
   // Interface IReleaseMarshalBuffers
   // ================================
   //
+  PIReleaseMarshalBuffers = ^IReleaseMarshalBuffers;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IReleaseMarshalBuffers);'}
   {$EXTERNALSYM IReleaseMarshalBuffers}
   IReleaseMarshalBuffers = interface(IUnknown)
@@ -1283,6 +1310,7 @@ type
   // Interface IWaitMultiple
   // =======================
   //
+  PIWaitMultiple = ^IWaitMultiple;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IWaitMultiple);'}
   {$EXTERNALSYM IWaitMultiple}
   IWaitMultiple = interface(IUnknown)
@@ -1300,6 +1328,7 @@ type
   // Interface IAddrTrackingControl
   // ==============================
   //
+  PIAddrTrackingControl = ^IAddrTrackingControl;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAddrTrackingControl);'}
   {$EXTERNALSYM IAddrTrackingControl}
   IAddrTrackingControl = interface(IUnknown)
@@ -1316,6 +1345,7 @@ type
   // Interface IAddrExclusionControl
   // ===============================
   //
+  PIAddrExclusionControl = ^IAddrExclusionControl;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAddrExclusionControl);'}
   {$EXTERNALSYM IAddrExclusionControl}
   IAddrExclusionControl = interface(IUnknown)
@@ -1450,23 +1480,24 @@ type
   // Interface IObjContext
   // =====================
   //
+  PIObjContext = ^IObjContext;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IObjContext);'}
   {$EXTERNALSYM IObjContext}
   IObjContext = interface(IContext)
   ['{000001c6-0000-0000-C000-000000000046}']
-	  procedure Reserved1(); stdcall;
+    procedure Reserved1(); stdcall;
 
-	  procedure Reserved2(); stdcall;
+    procedure Reserved2(); stdcall;
 
-	  procedure Reserved3(); stdcall;
+    procedure Reserved3(); stdcall;
 
-	  procedure Reserved4(); stdcall;
+    procedure Reserved4(); stdcall;
 
-	  procedure Reserved5(); stdcall;
+    procedure Reserved5(); stdcall;
 
-	  procedure Reserved6(); stdcall;
+    procedure Reserved6(); stdcall;
 
-	  procedure Reserved7(); stdcall;
+    procedure Reserved7(); stdcall;
 
   end;
   IID_IObjContext = IObjContext;
@@ -1526,6 +1557,7 @@ type
   // Interface IComThreadingInfo
   // ===========================
   //
+  PIComThreadingInfo = ^IComThreadingInfo;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IComThreadingInfo);'}
   {$EXTERNALSYM IComThreadingInfo}
   IComThreadingInfo = interface(IUnknown)
@@ -1546,6 +1578,7 @@ type
   // Interface IProcessInitControl
   // =============================
   //
+  PIProcessInitControl = ^IProcessInitControl;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IProcessInitControl);'}
   {$EXTERNALSYM IProcessInitControl}
   IProcessInitControl = interface(IUnknown)
@@ -1560,6 +1593,7 @@ type
   // ======================
   // marker interface for objects that want to opt into the fast rundown feature.
   //
+  PIFastRundown = ^IFastRundown;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IFastRundown);'}
   {$EXTERNALSYM IFastRundown}
   IFastRundown = interface(IUnknown)
@@ -1597,6 +1631,7 @@ type
   // Interface IMarshalingStream
   // ===========================
   //
+  PIMarshalingStream = ^IMarshalingStream;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMarshalingStream);'}
   {$EXTERNALSYM IMarshalingStream}
   IMarshalingStream = interface(IStream)
@@ -1612,6 +1647,7 @@ type
   // Interface IAgileReference
   // =========================
   //
+  PIAgileReference = ^IAgileReference;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAgileReference);'}
   {$EXTERNALSYM IAgileReference}
   IAgileReference = interface(IUnknown)
@@ -1635,6 +1671,7 @@ type
   // Interface IMachineGlobalObjectTable
   // ===================================
   //
+  PIMachineGlobalObjectTable = ^IMachineGlobalObjectTable;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMachineGlobalObjectTable);'}
   {$EXTERNALSYM IMachineGlobalObjectTable}
   IMachineGlobalObjectTable = interface(IUnknown)

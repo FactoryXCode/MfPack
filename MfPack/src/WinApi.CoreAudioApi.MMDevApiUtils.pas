@@ -745,8 +745,8 @@ except
   // Do Nothing. Caller is responsible for error handling.
 end;
 finally
-    PropVariantClear(pVar);
-    Result := hr;
+  PropVariantClear(pVar);
+  Result := hr;
 end;
 end;
 
@@ -770,11 +770,9 @@ label
 
 begin
 
-  pEnumerator:= Nil;
-  pDevice:= Nil;
-  pstrEndpointIdKey:= Nil;
-  pstrEndpointId:= Nil;
-  cbEndpointId:= 0;
+  pstrEndpointIdKey := Nil;
+  pstrEndpointId := Nil;
+  cbEndpointId := 0;
 
   if (pWaveOutId = Nil) then
     begin
@@ -783,33 +781,28 @@ begin
     end;
 
   // Create an audio endpoint device enumerator.
-  hr:= CoCreateInstance(IID_IMMDeviceEnumerator,
-                        Nil,
-                        CLSCTX_INPROC_SERVER,
-                        IID_IMMDeviceEnumerator,
-                        pEnumerator);
+  hr := CoCreateInstance(IID_IMMDeviceEnumerator,
+                         Nil,
+                         CLSCTX_INPROC_SERVER,
+                         IID_IMMDeviceEnumerator,
+                         pEnumerator);
   if Failed(hr) then
     goto leave;
 
   // Get the audio endpoint device that the user has
   // assigned to the specified device role.
-  hr:= pEnumerator.GetDefaultAudioEndpoint(EDataFlow(eRender),
-                                           ERole(role),
-                                           pDevice);
+  hr := pEnumerator.GetDefaultAudioEndpoint(EDataFlow(eRender),
+                                            ERole(role),
+                                            pDevice);
   if Failed(hr) then
     goto leave;
 
   // Get the endpoint ID string of the audio endpoint device.
-  hr:= pDevice.GetId(pstrEndpointIdKey);
+  hr := pDevice.GetId(pstrEndpointIdKey);
   if Failed(hr) then
     goto leave;
 
   // Get the size of the endpoint ID string.
-  //hr:= StringCbLength(pstrEndpointIdKey,
-  //                    (STRSAFE_MAX_CCH * sizeof(WCHAR)),
-  //                    cbEndpointIdKey);
-
-  //  EXIT_ON_ERROR(hr)
   cbEndpointIdKey := (Length(pstrEndpointIdKey) * SizeOf(WCHAR));
 
   // Include terminating null in string size.

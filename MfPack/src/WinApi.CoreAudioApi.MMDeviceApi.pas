@@ -129,7 +129,7 @@ const
   {$EXTERNALSYM DEVICE_STATEMASK_ALL}
 
 
-  ENDPOINT_SYSFX_ENABLED               = $00000000;  // System Effects are enabled.
+  ENDPOINT_SYSFX_ENABLED              = $00000000;  // System Effects are enabled.
   {$EXTERNALSYM ENDPOINT_SYSFX_ENABLED}
 
   ENDPOINT_SYSFX_DISABLED             = $00000001;  // System Effects are disabled.
