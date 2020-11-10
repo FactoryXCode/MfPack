@@ -79,7 +79,7 @@ uses
   WinApi.WinApiTypes,
   WinApi.WinError,
   WinApi.ComBaseApi,
-  WinApi.MmReg,
+  WinApi.WinMM.MMReg,
   {Vcl}
   Vcl.Dialogs,
   {System}
@@ -738,7 +738,7 @@ begin
       header[2] := FCC('WAVE'); // 4 bytes
       // Start of 'fmt ' chunk
       header[3] := FCC('fmt '); // 4 bytes
-      header[4] := cbFormat;    // 4 bytes
+      header[4] := cbFormat;    // 4 bytes = size of the waveformatex structure.
 
       // The WaveFormatEx structure will be placed inbetween RIFF and Data header
 
@@ -774,7 +774,6 @@ end;
 // Initiate the callback interface to decode PCM audio data from
 // the source file and writes it to the WAVE file.
 //-------------------------------------------------------------------
-
 function TAudioClipClass.WriteWaveData(): HResult;
 var
   hr: HResult;
