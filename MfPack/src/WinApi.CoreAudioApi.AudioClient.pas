@@ -145,7 +145,7 @@ type
   AUDCLNT_STREAMOPTIONS        = (
     AUDCLNT_STREAMOPTIONS_NONE         = $00,
     AUDCLNT_STREAMOPTIONS_RAW          = $01,
-    AUDCLNT_STREAMOPTIONS_MATCH_FORMAT = $02,
+    AUDCLNT_STREAMOPTIONS_MATCH_FORMAT = $02, // Supported in Windows 10 and later.
     AUDCLNT_STREAMOPTIONS_AMBISONICS   = $04
   );
   {$EXTERNALSYM AUDCLNT_STREAMOPTIONS}
@@ -238,7 +238,7 @@ type
 
 
   {Tony}
-  // Interface IAudioClient3
+  // -> IAudioClient3
   PAudioClient3ActivationParams = ^TAudioClient3ActivationParams;
   AudioClient3ActivationParams = record
     tracingContextId: TGUID;
@@ -264,7 +264,7 @@ type
                         hnsBufferDuration: REFERENCE_TIME;
                         hnsPeriodicity: REFERENCE_TIME;
                         const pFormat: PWaveFormatEx;
-                        {optional, can be Nil or GUID_NULL} AudioSessionGuid: LPCGUID): HResult; stdcall;
+                        {optional, can be Nil or a pointer to GUID_NULL} AudioSessionGuid: LPCGUID): HResult; stdcall;
     // Description:
     //
     //  Initializes the audio stream by creating a connection to the Windows Audio System (WAS)
@@ -481,7 +481,8 @@ type
 
     function IsFormatSupported(const ShareMode: AUDCLNT_SHAREMODE;
                                const pFormat: PWaveFormatEx;
-                               out ppClosestMatch: PWaveFormatEx): HResult; stdcall;
+                               {out} ppClosestMatch: PWaveFormatEx // Exclusive mode can't suggest a "closest match", you have to set this param to Nil.
+                               ): HResult; stdcall;
     // Description:
     //
     //  Provides a way for the user to determine, prior to initialization, whether a given format
@@ -718,6 +719,8 @@ type
     //  IChannelAudioVolume
     //
   end;
+  IID_IAudioClient = IAudioClient;
+  {$EXTERNALSYM IID_IAudioClient}
 
 
   // Interface IAudioClient2
@@ -752,7 +755,7 @@ type
     // Remarks:
     //
 
-    function SetClientProperties(pProperties: PAudioClientProperties): HResult; stdcall;
+    function SetClientProperties(pProperties: AudioClientProperties): HResult; stdcall;
     // Description:
     //
     //  This method is called to set an audio stream's properties, before a call to IAudioClient.Initialize takes place.

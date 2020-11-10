@@ -43,17 +43,17 @@
 //==============================================================================
 //
 // LICENSE
-// 
+//
 // The contents of this file are subject to the Mozilla Public License
 // Version 2.0 (the "License"); you may not use this file except in
 // compliance with the License. You may obtain a copy of the License at
 // https://www.mozilla.org/en-US/MPL/2.0/
-// 
+//
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
 // License for the specific language governing rights and limitations
 // under the License.
-// 
+//
 // Users may distribute this source code provided that this header is included
 // in full at the top of the file.
 //==============================================================================
@@ -137,10 +137,10 @@ type
 
   // From wtypes.h
   procedure DECIMAL_SETZERO(var dec: DECIMAL); inline;
-  
+
   // Macro translation to calculate the size of the pbClipData declared in tagCLIPDATA in WTypes.pas
   function CBPCLIPDATA(_clipdata: CLIPDATA): PByte; inline;
-  
+
   // Functions to keep byte values in range of 0 - 255
   function ClipByteValue(byteval: UINT32): Byte; inline;
   function Clip(clr: Integer): Byte; inline;
@@ -259,8 +259,8 @@ type
 
 
   function ConvertYCrCbToRGB(aY: Integer;
-	                           aCr: Integer;
-	                           aCb: Integer): RGBQUAD; inline;
+                             aCr: Integer;
+                             aCb: Integer): RGBQUAD; inline;
 
 
   // External
@@ -465,9 +465,7 @@ end;
 procedure SAFE_RELEASE(var Obj);
 begin
   if Assigned(IUnknown(Obj)) then
-    begin
-      Pointer(IUnknown(Obj)):= Nil;
-    end;
+    Pointer(IUnknown(Obj)) := Nil;
 end;
 
 // From DS, same as SafeDelete
@@ -1013,9 +1011,9 @@ procedure CopyMFARGBToTColor(const argb: MFARGB;
                              out cColor: TColor); inline;
 begin
   cColor := ((argb.rgbRed shl 16) or
-				     (argb.rgbGreen shl 8) or
-				     (argb.rgbBlue shl 0) or
-				     (argb.rgbAlpha shl 24));
+             (argb.rgbGreen shl 8) or
+             (argb.rgbBlue shl 0) or
+             (argb.rgbAlpha shl 24));
 end;
 
 
@@ -1066,9 +1064,9 @@ procedure CopyRGBQuadToClrRef(src: RGBQUAD;
                               out srd: COLORREF); inline;
 begin
   srd:= ((src.rgbRed shl 16) or
-				 (src.rgbGreen shl 8) or
-				 (src.rgbBlue shl 0) or
-				 (src.rgbReserved shl 24)); // this should always be 0!
+         (src.rgbGreen shl 8) or
+         (src.rgbBlue shl 0) or
+         (src.rgbReserved shl 24)); // this should always be 0!
 end;
 
 
@@ -1084,8 +1082,8 @@ end;
 
 
 function ConvertYCrCbToRGB(aY: Integer;
-	                         aCr: Integer;
-	                         aCb: Integer): RGBQUAD; inline;
+                           aCr: Integer;
+                           aCb: Integer): RGBQUAD; inline;
 var
   rgbq: RGBQUAD;
   c, d, e: Integer;
@@ -1094,13 +1092,13 @@ begin
   rgbq:= Default(RGBQUAD);
   c:= aY - 16;
   d:= aCb - 128;
-	e:= aCr - 128;
+  e:= aCr - 128;
 
   rgbq.rgbRed:=   Clip(( 298 * c + 409 * e + 128) shr 8);
   rgbq.rgbGreen:= Clip(( 298 * c - 100 * d - 208 * e + 128) shr 8);
   rgbq.rgbBlue:=  Clip(( 298 * c + 516 * d + 128) shr 8);
 
-	Result:=  rgbq;
+  Result:=  rgbq;
 end;
 
 

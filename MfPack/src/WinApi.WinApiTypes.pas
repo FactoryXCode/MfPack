@@ -3102,7 +3102,12 @@ type
 {$ENDIF}
 
 
+
   // Additional Prototypes for ALL interfaces
+
+type
+  ByteData = TArray<Byte>;
+  PByteData = ^ByteData;
 
 // REFERENCE_TIME time units per second and per millisecond
 const REFTIMES_PER_SEC = 10000000;   // One sec = 100,000 hns

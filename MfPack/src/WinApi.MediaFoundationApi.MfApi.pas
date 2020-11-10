@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: Requires Windows Vista or later.
 //              MfApi.pas is the unit containing the APIs for using the MF platform.
 //
@@ -23,6 +23,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 10/10/2020 Tony                Fixed some issues, see updt 101020
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -719,18 +720,18 @@ type
   // Any implementation of IMFAsyncResult must inherit from this struct;
   // the Media Foundation workqueue implementation depends on this.
   //
-  PIMFAsyncResult = ^IMFAsyncResult;
+  PMFASYNCRESULT = ^MFASYNCRESULT;  // updt 101020 corrected wrong naming
   tagMFASYNCRESULT = record
     AsyncResult: IMFAsyncResult;
     overlapped: OVERLAPPED;
-    pCallback: IMFAsyncCallback;   // updt 090812 changed pointer to IMFAsyncCallback
+    pCallback: IMFAsyncCallback;    // updt 090812 changed pointer to IMFAsyncCallback
     hrStatusResult: HResult;
     dwBytesTransferred: DWORD;
     hEvent: THandle;
   end;
   {$EXTERNALSYM tagMFASYNCRESULT}
-  IMFAsyncResult = tagMFASYNCRESULT;
-  {$EXTERNALSYM IMFAsyncResult}
+  MFASYNCRESULT = tagMFASYNCRESULT; // updt 101020 corrected wrong naming
+  {$EXTERNALSYM MFASYNCRESULT}
 
 
 
@@ -4559,7 +4560,7 @@ const
   function MFCreateWaveFormatExFromMFMediaType(pMFType: IMFMediaType; // Pointer to the IMFMediaType interface of the media type.
                                                var ppWF: PWAVEFORMATEX; // Receives a pointer to the WAVEFORMATEX structure. The caller must release the memory allocated for the structure by calling CoTaskMemFree.
                                                out pcbSize: UINT32; // Receives the size of the WAVEFORMATEX structure.
-                                               Flags: UINT32): HResult; stdcall; // Contains a flag from the MFWaveFormatExConvertFlags enumeration.
+                                               Flags: UINT32 = 0): HResult; stdcall; // Contains a flag from the MFWaveFormatExConvertFlags enumeration.
   {$EXTERNALSYM MFCreateWaveFormatExFromMFMediaType}
 
   function MFInitMediaTypeFromVideoInfoHeader(pMFType: IMFMediaType;

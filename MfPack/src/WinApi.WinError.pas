@@ -32442,6 +32442,7 @@ function PropagateResult(hrPrevious: DWORD;
                          scBase: DWORD): DWORD; inline;
 
 // ****** End of OBSOLETE functions.
+
 const
 
   E_NOT_SET                           = HRESULT(ERROR_NOT_FOUND);
