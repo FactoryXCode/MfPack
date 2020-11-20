@@ -189,6 +189,7 @@ contains
   WinApi.WinMM.MCIAvi in '..\src\WinApi.WinMM.MCIAvi.pas',
   WinApi.WinMM.VfW in '..\src\WinApi.WinMM.VfW.pas',
   WinApi.WinMM.VfwMsgs in '..\src\WinApi.WinMM.VfwMsgs.pas',
-  WinApi.MPEGType in '..\src\WinApi.MPEGType.pas';
+  WinApi.MPEGType in '..\src\WinApi.MPEGType.pas',
+  WinApi.Avrt in '..\src\WinApi.Avrt.pas';
 
 end.

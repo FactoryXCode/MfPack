@@ -135,20 +135,21 @@ type
   PMediaEventType = ^MediaEventType;
   MediaEventType = DWord;
   {$EXTERNALSYM MediaEventType}
+
 const
   //-------------------------------------------------------------------------
   // generic events
   //-------------------------------------------------------------------------
 
-  MEUnknown                                = MediaEventType(0);
+  MEUnknown                               = MediaEventType(0);
   {$EXTERNALSYM MEUnknown}
-  MEError                                  = MediaEventType(1);
+  MEError                                 = MediaEventType(1);
   {$EXTERNALSYM MEError}
   MEExtendedType                          = MediaEventType(2);
   {$EXTERNALSYM MEExtendedType}
-  MENonFatalError                          = MediaEventType(3);
+  MENonFatalError                         = MediaEventType(3);
   {$EXTERNALSYM MENonFatalError}
-  MEGenericV1Anchor                        = MENonFatalError;
+  MEGenericV1Anchor                       = MENonFatalError;
   {$EXTERNALSYM MEGenericV1Anchor}
 
   //-------------------------------------------------------------------------
@@ -164,11 +165,10 @@ const
   {$EXTERNALSYM MESessionTopologiesCleared}
   MESessionStarted                        = MediaEventType(103);
   {$EXTERNALSYM MESessionStarted}
-  MESessionPaused                          = MediaEventType(104);
   {$EXTERNALSYM MESessionPaused}
   MESessionStopped                        = MediaEventType(105);
   {$EXTERNALSYM MESessionStopped}
-  MESessionClosed                          = MediaEventType(106);
+  MESessionClosed                         = MediaEventType(106);
   {$EXTERNALSYM MESessionClosed}
   MESessionEnded                          = MediaEventType(107);
   {$EXTERNALSYM MESessionEnded}
@@ -178,25 +178,25 @@ const
   {$EXTERNALSYM MESessionScrubSampleComplete}
   MESessionCapabilitiesChanged            = MediaEventType(110);
   {$EXTERNALSYM MESessionCapabilitiesChanged}
-  MESessionTopologyStatus                  = MediaEventType(111);
+  MESessionTopologyStatus                 = MediaEventType(111);
   {$EXTERNALSYM MESessionTopologyStatus}
-  MESessionNotifyPresentationTime          = MediaEventType(112);
+  MESessionNotifyPresentationTime         = MediaEventType(112);
   {$EXTERNALSYM MESessionNotifyPresentationTime}
-  MENewPresentation                        = MediaEventType(113);
+  MENewPresentation                       = MediaEventType(113);
   {$EXTERNALSYM MENewPresentation}
-  MELicenseAcquisitionStart                = MediaEventType(114);
+  MELicenseAcquisitionStart               = MediaEventType(114);
   {$EXTERNALSYM MELicenseAcquisitionStart}
-  MELicenseAcquisitionCompleted            = MediaEventType(115);
+  MELicenseAcquisitionCompleted           = MediaEventType(115);
   {$EXTERNALSYM MELicenseAcquisitionCompleted}
   MEIndividualizationStart                = MediaEventType(116);
   {$EXTERNALSYM MEIndividualizationStart}
   MEIndividualizationCompleted            = MediaEventType(117);
   {$EXTERNALSYM MEIndividualizationCompleted}
-  MEEnablerProgress                        = MediaEventType(118);
+  MEEnablerProgress                       = MediaEventType(118);
   {$EXTERNALSYM MEEnablerProgress}
   MEEnablerCompleted                      = MediaEventType(119);
   {$EXTERNALSYM MEEnablerCompleted}
-  MEPolicyError                            = MediaEventType(120);
+  MEPolicyError                           = MediaEventType(120);
   {$EXTERNALSYM MEPolicyError}
   MEPolicyReport                          = MediaEventType(121);
   {$EXTERNALSYM MEPolicyReport}
@@ -212,103 +212,103 @@ const
   {$EXTERNALSYM MEReconnectStart}
   MEReconnectEnd                          = MediaEventType(127);
   {$EXTERNALSYM MEReconnectEnd}
-  MERendererEvent                          = MediaEventType(128);
+  MERendererEvent                         = MediaEventType(128);
   {$EXTERNALSYM MERendererEvent}
   MESessionStreamSinkFormatChanged        = MediaEventType(129);
   {$EXTERNALSYM MESessionStreamSinkFormatChanged}
-  MESessionV1Anchor                        = MESessionStreamSinkFormatChanged;
+  MESessionV1Anchor                       = MESessionStreamSinkFormatChanged;
   {$EXTERNALSYM MESessionV1Anchor}
-  MESourceUnknown                          = MediaEventType(200);
+  MESourceUnknown                         = MediaEventType(200);
   {$EXTERNALSYM MESourceUnknown}
-  MESourceStarted                          = MediaEventType(201);
+  MESourceStarted                         = MediaEventType(201);
   {$EXTERNALSYM MESourceStarted}
-  MEStreamStarted                          = MediaEventType(202);
+  MEStreamStarted                         = MediaEventType(202);
   {$EXTERNALSYM MEStreamStarted}
   MESourceSeeked                          = MediaEventType(203);
   {$EXTERNALSYM MESourceSeeked}
   MEStreamSeeked                          = MediaEventType(204);
   {$EXTERNALSYM MEStreamSeeked}
-  MENewStream                              = MediaEventType(205);
+  MENewStream                             = MediaEventType(205);
   {$EXTERNALSYM MENewStream}
-  MEUpdatedStream                          = MediaEventType(206);
+  MEUpdatedStream                         = MediaEventType(206);
   {$EXTERNALSYM MEUpdatedStream}
-  MESourceStopped                          = MediaEventType(207);
+  MESourceStopped                         = MediaEventType(207);
   {$EXTERNALSYM MESourceStopped}
-  MEStreamStopped                          = MediaEventType(208);
+  MEStreamStopped                         = MediaEventType(208);
   {$EXTERNALSYM MEStreamStopped}
   MESourcePaused                          = MediaEventType(209);
   {$EXTERNALSYM MESourcePaused}
   MEStreamPaused                          = MediaEventType(210);
   {$EXTERNALSYM MEStreamPaused}
-  MEEndOfPresentation                      = MediaEventType(211);
+  MEEndOfPresentation                     = MediaEventType(211);
   {$EXTERNALSYM MEEndOfPresentation}
-  MEEndOfStream                            = MediaEventType(212);
+  MEEndOfStream                           = MediaEventType(212);
   {$EXTERNALSYM MEEndOfStream}
-  MEMediaSample                            = MediaEventType(213);  // Sent when a media stream delivers a new sample in response to a call to IMFMediaStream.RequestSample.
+  MEMediaSample                           = MediaEventType(213);  // Sent when a media stream delivers a new sample in response to a call to IMFMediaStream.RequestSample.
   {$EXTERNALSYM MEMediaSample}
   MEStreamTick                            = MediaEventType(214);  // Signals that a media stream does not have data available at a specified time.
   {$EXTERNALSYM MEStreamTick}
   MEStreamThinMode                        = MediaEventType(215);
   {$EXTERNALSYM MEStreamThinMode}
-  MEStreamFormatChanged                    = MediaEventType(216);
+  MEStreamFormatChanged                   = MediaEventType(216);
   {$EXTERNALSYM MEStreamFormatChanged}
-  MESourceRateChanged                      = MediaEventType(217);
+  MESourceRateChanged                     = MediaEventType(217);
   {$EXTERNALSYM MESourceRateChanged}
   MEEndOfPresentationSegment              = MediaEventType(218);
   {$EXTERNALSYM MEEndOfPresentationSegment}
   MESourceCharacteristicsChanged          = MediaEventType(219);
   {$EXTERNALSYM MESourceCharacteristicsChanged}
-  MESourceRateChangeRequested              = MediaEventType(220);
+  MESourceRateChangeRequested             = MediaEventType(220);
   {$EXTERNALSYM MESourceRateChangeRequested}
-  MESourceMetadataChanged                  = MediaEventType(221);
+  MESourceMetadataChanged                 = MediaEventType(221);
   {$EXTERNALSYM MESourceMetadataChanged}
   MESequencerSourceTopologyUpdated        = MediaEventType(222);
   {$EXTERNALSYM MESequencerSourceTopologyUpdated}
   MESourceV1Anchor                        = MESequencerSourceTopologyUpdated;
   {$EXTERNALSYM MESourceV1Anchor}
-  MESinkUnknown                            = MediaEventType(300);
+  MESinkUnknown                           = MediaEventType(300);
   {$EXTERNALSYM MESinkUnknown}
-  MEStreamSinkStarted                      = MediaEventType(301);
+  MEStreamSinkStarted                     = MediaEventType(301);
   {$EXTERNALSYM MEStreamSinkStarted}
-  MEStreamSinkStopped                      = MediaEventType(302);
+  MEStreamSinkStopped                     = MediaEventType(302);
   {$EXTERNALSYM MEStreamSinkStopped}
   MEStreamSinkPaused                      = MediaEventType(303);
   {$EXTERNALSYM MEStreamSinkPaused}
-  MEStreamSinkRateChanged                  = MediaEventType(304);
+  MEStreamSinkRateChanged                 = MediaEventType(304);
   {$EXTERNALSYM MEStreamSinkRateChanged}
-  MEStreamSinkRequestSample                = MediaEventType(305);
+  MEStreamSinkRequestSample               = MediaEventType(305);
   {$EXTERNALSYM MEStreamSinkRequestSample}
   MEStreamSinkMarker                      = MediaEventType(306);
   {$EXTERNALSYM MEStreamSinkMarker}
-  MEStreamSinkPrerolled                    = MediaEventType(307);
+  MEStreamSinkPrerolled                   = MediaEventType(307);
   {$EXTERNALSYM MEStreamSinkPrerolled}
-  MEStreamSinkScrubSampleComplete          = MediaEventType(308);
+  MEStreamSinkScrubSampleComplete         = MediaEventType(308);
   {$EXTERNALSYM MEStreamSinkScrubSampleComplete}
-  MEStreamSinkFormatChanged                = MediaEventType(309);
+  MEStreamSinkFormatChanged               = MediaEventType(309);
   {$EXTERNALSYM MEStreamSinkFormatChanged}
-  MEStreamSinkDeviceChanged                = MediaEventType(310);
+  MEStreamSinkDeviceChanged               = MediaEventType(310);
   {$EXTERNALSYM MEStreamSinkDeviceChanged}
-  MEQualityNotify                          = MediaEventType(311);
+  MEQualityNotify                         = MediaEventType(311);
   {$EXTERNALSYM MEQualityNotify}
-  MESinkInvalidated                        = MediaEventType(312);
+  MESinkInvalidated                       = MediaEventType(312);
   {$EXTERNALSYM MESinkInvalidated}
-  MEAudioSessionNameChanged                = MediaEventType(313);
+  MEAudioSessionNameChanged               = MediaEventType(313);
   {$EXTERNALSYM MEAudioSessionNameChanged}
-  MEAudioSessionVolumeChanged              = MediaEventType(314);
+  MEAudioSessionVolumeChanged             = MediaEventType(314);
   {$EXTERNALSYM MEAudioSessionVolumeChanged}
-  MEAudioSessionDeviceRemoved              = MediaEventType(315);
+  MEAudioSessionDeviceRemoved             = MediaEventType(315);
   {$EXTERNALSYM MEAudioSessionDeviceRemoved}
   MEAudioSessionServerShutdown            = MediaEventType(316);
   {$EXTERNALSYM MEAudioSessionServerShutdown}
   MEAudioSessionGroupingParamChanged      = MediaEventType(317);
   {$EXTERNALSYM MEAudioSessionGroupingParamChanged}
-  MEAudioSessionIconChanged                = MediaEventType(318);
+  MEAudioSessionIconChanged               = MediaEventType(318);
   {$EXTERNALSYM MEAudioSessionIconChanged}
-  MEAudioSessionFormatChanged              = MediaEventType(319);
+  MEAudioSessionFormatChanged             = MediaEventType(319);
   {$EXTERNALSYM MEAudioSessionFormatChanged}
   MEAudioSessionDisconnected              = MediaEventType(320);
   {$EXTERNALSYM MEAudioSessionDisconnected}
-  MEAudioSessionExclusiveModeOverride      = MediaEventType(321);
+  MEAudioSessionExclusiveModeOverride     = MediaEventType(321);
   {$EXTERNALSYM MEAudioSessionExclusiveModeOverride}
   MESinkV1Anchor                          = MEAudioSessionExclusiveModeOverride;
   {$EXTERNALSYM MESinkV1Anchor}
@@ -318,73 +318,73 @@ const
   {$EXTERNALSYM MECaptureAudioSessionDeviceRemoved}
   MECaptureAudioSessionFormatChanged      = MediaEventType(324);
   {$EXTERNALSYM MECaptureAudioSessionFormatChanged}
-  MECaptureAudioSessionDisconnected        = MediaEventType(325);
+  MECaptureAudioSessionDisconnected       = MediaEventType(325);
   {$EXTERNALSYM MECaptureAudioSessionDisconnected}
   MECaptureAudioSessionExclusiveModeOverride  = MediaEventType(326);
   {$EXTERNALSYM MECaptureAudioSessionExclusiveModeOverride}
-  MECaptureAudioSessionServerShutdown      = MediaEventType(327);
+  MECaptureAudioSessionServerShutdown     = MediaEventType(327);
   {$EXTERNALSYM MECaptureAudioSessionServerShutdown}
   MESinkV2Anchor                          = MECaptureAudioSessionServerShutdown;
   {$EXTERNALSYM MESinkV2Anchor}
   METrustUnknown                          = MediaEventType(400);
   {$EXTERNALSYM METrustUnknown}
-  MEPolicyChanged                          = MediaEventType(401);
+  MEPolicyChanged                         = MediaEventType(401);
   {$EXTERNALSYM MEPolicyChanged}
   MEContentProtectionMessage              = MediaEventType(402);
   {$EXTERNALSYM MEContentProtectionMessage}
-  MEPolicySet                              = MediaEventType(403);
+  MEPolicySet                             = MediaEventType(403);
   {$EXTERNALSYM MEPolicySet}
-  METrustV1Anchor                          = MEPolicySet;
+  METrustV1Anchor                         = MEPolicySet;
   {$EXTERNALSYM METrustV1Anchor}
-  MEWMDRMLicenseBackupCompleted            = MediaEventType(500);
+  MEWMDRMLicenseBackupCompleted           = MediaEventType(500);
   {$EXTERNALSYM MEWMDRMLicenseBackupCompleted}
   MEWMDRMLicenseBackupProgress            = MediaEventType(501);
   {$EXTERNALSYM MEWMDRMLicenseBackupProgress}
   MEWMDRMLicenseRestoreCompleted          = MediaEventType(502);
   {$EXTERNALSYM MEWMDRMLicenseRestoreCompleted}
-  MEWMDRMLicenseRestoreProgress            = MediaEventType(503);
+  MEWMDRMLicenseRestoreProgress           = MediaEventType(503);
   {$EXTERNALSYM MEWMDRMLicenseRestoreProgress}
   MEWMDRMLicenseAcquisitionCompleted      = MediaEventType(506);
   {$EXTERNALSYM MEWMDRMLicenseAcquisitionCompleted}
-  MEWMDRMIndividualizationCompleted        = MediaEventType(508);
+  MEWMDRMIndividualizationCompleted       = MediaEventType(508);
   {$EXTERNALSYM MEWMDRMIndividualizationCompleted}
   MEWMDRMIndividualizationProgress        = MediaEventType(513);
   {$EXTERNALSYM MEWMDRMIndividualizationProgress}
-  MEWMDRMProximityCompleted                = MediaEventType(514);
+  MEWMDRMProximityCompleted               = MediaEventType(514);
   {$EXTERNALSYM MEWMDRMProximityCompleted}
   MEWMDRMLicenseStoreCleaned              = MediaEventType(515);
   {$EXTERNALSYM MEWMDRMLicenseStoreCleaned}
   MEWMDRMRevocationDownloadCompleted      = MediaEventType(516);
   {$EXTERNALSYM MEWMDRMRevocationDownloadCompleted}
-  MEWMDRMV1Anchor                          = MEWMDRMRevocationDownloadCompleted;
+  MEWMDRMV1Anchor                         = MEWMDRMRevocationDownloadCompleted;
   {$EXTERNALSYM MEWMDRMV1Anchor}
   METransformUnknown                      = MediaEventType(600);
   {$EXTERNALSYM METransformUnknown}
   METransformNeedInput                    = METransformUnknown + 1;
   {$EXTERNALSYM METransformNeedInput}
-  METransformHaveOutput                    = METransformNeedInput + 1;
+  METransformHaveOutput                   = METransformNeedInput + 1;
   {$EXTERNALSYM METransformHaveOutput}
   METransformDrainComplete                = METransformHaveOutput + 1;
   {$EXTERNALSYM METransformDrainComplete}
-  METransformMarker                        = METransformDrainComplete + 1;
+  METransformMarker                       = METransformDrainComplete + 1;
   {$EXTERNALSYM METransformMarker}
   METransformInputStreamStateChanged      = METransformMarker + 1;
   {$EXTERNALSYM METransformInputStreamStateChanged}
   MEByteStreamCharacteristicsChanged      = MediaEventType(700);
   {$EXTERNALSYM MEByteStreamCharacteristicsChanged}
-  MEVideoCaptureDeviceRemoved              = MediaEventType(800);
+  MEVideoCaptureDeviceRemoved             = MediaEventType(800);
   {$EXTERNALSYM MEVideoCaptureDeviceRemoved}
-  MEVideoCaptureDevicePreempted            = MediaEventType(801);
+  MEVideoCaptureDevicePreempted           = MediaEventType(801);
   {$EXTERNALSYM MEVideoCaptureDevicePreempted}
-  MEStreamSinkFormatInvalidated            = MediaEventType(802);
+  MEStreamSinkFormatInvalidated           = MediaEventType(802);
   {$EXTERNALSYM MEStreamSinkFormatInvalidated}
   MEEncodingParameters                    = MediaEventType(803);
   {$EXTERNALSYM MEEncodingParameters}
-  MEContentProtectionMetadata              = MediaEventType(900);
+  MEContentProtectionMetadata             = MediaEventType(900);
   {$EXTERNALSYM MEContentProtectionMetadata}
-  MEDeviceThermalStateChanged              = MediaEventType(950);
+  MEDeviceThermalStateChanged             = MediaEventType(950);
   {$EXTERNALSYM MEDeviceThermalStateChanged}
-  MEReservedMax                            = MediaEventType(10000);
+  MEReservedMax                           = MediaEventType(10000);
   {$EXTERNALSYM MEReservedMax}
 
 
@@ -563,29 +563,29 @@ type
   MFVideoTransferFunction = _MFVideoTransferFunction;
   {$EXTERNALSYM MFVideoTransferFunction}
 const
-  MFVideoTransFunc_Unknown    = MFVideoTransferFunction(0);
+  MFVideoTransFunc_Unknown     = MFVideoTransferFunction(0);
   {$EXTERNALSYM MFVideoTransFunc_Unknown}
-  MFVideoTransFunc_10         = MFVideoTransferFunction(1);
+  MFVideoTransFunc_10          = MFVideoTransferFunction(1);
   {$EXTERNALSYM MFVideoTransFunc_10}
-  MFVideoTransFunc_18         = MFVideoTransferFunction(2);
+  MFVideoTransFunc_18          = MFVideoTransferFunction(2);
   {$EXTERNALSYM MFVideoTransFunc_18}
-  MFVideoTransFunc_20         = MFVideoTransferFunction(3);
+  MFVideoTransFunc_20          = MFVideoTransferFunction(3);
   {$EXTERNALSYM MFVideoTransFunc_20}
-  MFVideoTransFunc_22         = MFVideoTransferFunction(4);
+  MFVideoTransFunc_22          = MFVideoTransferFunction(4);
   {$EXTERNALSYM MFVideoTransFunc_22}
-  MFVideoTransFunc_709        = MFVideoTransferFunction(5);
+  MFVideoTransFunc_709         = MFVideoTransferFunction(5);
   {$EXTERNALSYM MFVideoTransFunc_709}
-  MFVideoTransFunc_240M       = MFVideoTransferFunction(6);
+  MFVideoTransFunc_240M        = MFVideoTransferFunction(6);
   {$EXTERNALSYM MFVideoTransFunc_240M}
-  MFVideoTransFunc_sRGB       = MFVideoTransferFunction(7);
+  MFVideoTransFunc_sRGB        = MFVideoTransferFunction(7);
   {$EXTERNALSYM MFVideoTransFunc_sRGB}
-  MFVideoTransFunc_28         = MFVideoTransferFunction(8);
+  MFVideoTransFunc_28          = MFVideoTransferFunction(8);
   {$EXTERNALSYM MFVideoTransFunc_28}
-  MFVideoTransFunc_Log_100    = MFVideoTransferFunction(9);
+  MFVideoTransFunc_Log_100     = MFVideoTransferFunction(9);
   {$EXTERNALSYM MFVideoTransFunc_Log_100}
-  MFVideoTransFunc_Log_316    = MFVideoTransferFunction(10);
+  MFVideoTransFunc_Log_316     = MFVideoTransferFunction(10);
   {$EXTERNALSYM MFVideoTransFunc_Log_316}
-  MFVideoTransFunc_709_sym    = MFVideoTransferFunction(11);
+  MFVideoTransFunc_709_sym     = MFVideoTransferFunction(11);
   {$EXTERNALSYM MFVideoTransFunc_709_sym}
   MFVideoTransFunc_2020_const  = MFVideoTransferFunction(12);
   {$EXTERNALSYM MFVideoTransFunc_2020_const}
@@ -595,13 +595,13 @@ const
   {$EXTERNALSYM MFVideoTransFunc_26}
   MFVideoTransFunc_2084        = MFVideoTransferFunction(15); // SMPTE ST.2084
   {$EXTERNALSYM MFVideoTransFunc_2084}
-  MFVideoTransFunc_HLG        = MFVideoTransferFunction(16); // Hybrid Log-Gamma, ARIB STD-B67
+  MFVideoTransFunc_HLG         = MFVideoTransferFunction(16); // Hybrid Log-Gamma, ARIB STD-B67
   {$EXTERNALSYM MFVideoTransFunc_HLG}
 // >= NTDDI_WIN10_RS4)
-  MFVideoTransFunc_10_rel     = MFVideoTransferFunction(17); // No gamma, display referred (relative)
+  MFVideoTransFunc_10_rel      = MFVideoTransferFunction(17); // No gamma, display referred (relative)
   {$EXTERNALSYM MFVideoTransFunc_10_rel}
 // end
-  FVideoTransFunc_Last       = MFVideoTransFunc_HLG + 1;
+  FVideoTransFunc_Last         = MFVideoTransFunc_HLG + 1;
   {$EXTERNALSYM FVideoTransFunc_Last}
   // MFVideoTransFunc_ForceMFVideoTransferFunction = FORCEMFVideoTransferFunction;
 
@@ -630,13 +630,13 @@ const
   {$EXTERNALSYM MFVideoPrimaries_EBU3213}
   MFVideoPrimaries_SMPTE_C       = MFVideoPrimaries(8);
   {$EXTERNALSYM MFVideoPrimaries_SMPTE_C}
-  MFVideoPrimaries_BT2020         = MFVideoPrimaries(9);
+  MFVideoPrimaries_BT2020        = MFVideoPrimaries(9);
   {$EXTERNALSYM MFVideoPrimaries_BT2020}
   MFVideoPrimaries_XYZ           = MFVideoPrimaries(10);
   {$EXTERNALSYM MFVideoPrimaries_XYZ}
-  MFVideoPrimaries_DCI_P3         = MFVideoPrimaries(11);
+  MFVideoPrimaries_DCI_P3        = MFVideoPrimaries(11);
   {$EXTERNALSYM MFVideoPrimaries_DCI_P3}
-  MFVideoPrimaries_ACES           = MFVideoPrimaries(12);
+  MFVideoPrimaries_ACES          = MFVideoPrimaries(12);
   {$EXTERNALSYM MFVideoPrimaries_ACES}
   MFVideoPrimaries_Last          = MFVideoPrimaries_ACES + 1;
   {$EXTERNALSYM MFVideoPrimaries_Last}
@@ -678,9 +678,9 @@ const
   {$EXTERNALSYM MFVideoTransferMatrix_BT601}
   MFVideoTransferMatrix_SMPTE240M  = MFVideoTransferMatrix(3);
   {$EXTERNALSYM MFVideoTransferMatrix_SMPTE240M}
-  MFVideoTransferMatrix_BT2020_10   = MFVideoTransferMatrix(4);
+  MFVideoTransferMatrix_BT2020_10  = MFVideoTransferMatrix(4);
   {$EXTERNALSYM MFVideoTransferMatrix_BT2020_10}
-  MFVideoTransferMatrix_BT2020_12   = MFVideoTransferMatrix(5);
+  MFVideoTransferMatrix_BT2020_12  = MFVideoTransferMatrix(5);
   {$EXTERNALSYM MFVideoTransferMatrix_BT2020_12}
   MFVideoTransferMatrix_Last       = MFVideoTransferMatrix_BT2020_12 + 1;
   {$EXTERNALSYM MFVideoTransferMatrix_Last}
@@ -828,7 +828,7 @@ type
                         // This coordinate might have a fractional value.
     OffsetY: MFOffset;  // Contains the y-coordinate of the upper-left corner of the rectangle.
                         // This coordinate might have a fractional value.
-     Area: SIZE;         // A SIZE structure that contains the width and height of the rectangle.
+     Area: SIZE;        // A SIZE structure that contains the width and height of the rectangle.
   end;
   {$EXTERNALSYM _MFVideoArea}
   MFVideoArea = _MFVideoArea;
