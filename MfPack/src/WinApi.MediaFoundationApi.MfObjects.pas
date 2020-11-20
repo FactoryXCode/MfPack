@@ -165,6 +165,7 @@ const
   {$EXTERNALSYM MESessionTopologiesCleared}
   MESessionStarted                        = MediaEventType(103);
   {$EXTERNALSYM MESessionStarted}
+  MESessionPaused                         = MediaEventType(104);
   {$EXTERNALSYM MESessionPaused}
   MESessionStopped                        = MediaEventType(105);
   {$EXTERNALSYM MESessionStopped}
