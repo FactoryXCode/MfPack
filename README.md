@@ -37,7 +37,7 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
 
 
 
-![](https://a.fsdn.com/con/app/proj/mfpack/screenshots/VideoThumbNailsSample.jpg/max/max/1)
+![](https://dc586.4shared.com/img/UXj_-_XWea/s24/1710787b738/VideoThumbNailsSample?async&rand=0.5293139052028757)
 
 **MediaEngine Player 2 & IMFTimedText sample**
 
@@ -45,7 +45,7 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
 
 
 
-![](https://a.fsdn.com/con/app/proj/mfpack/screenshots/MediaEngine%20Player%202a.jpg/max/max/1)
+![](https://dc621.4shared.com/img/_PwgZKPSea/s24/175e5dbca20/MediaEnginePlayer2?async&rand=0.7885918906958431)
 
 **MfTranscode sample**
 
@@ -53,7 +53,7 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
 
 
 
-![](https://a.fsdn.com/con/app/proj/mfpack/screenshots/mftransform.jpg/max/max/1)
+![](https://dc724.4shared.com/img/xNTtmc9ciq/s24/175e5b80db0/mftransform?async&rand=0.16034549456217317)
 
 **MfSimpleCapture sample**
 
@@ -63,15 +63,15 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
 
 
 
-![](https://a.fsdn.com/con/app/proj/mfpack/screenshots/MfSimpleCapture.jpg/max/max/1)
+![](https://dc586.4shared.com/img/DiY4eAqsiq/s24/1710787b350/MfSimpleCapture?async&rand=0.12859230191467885)
 
-**MfPeakMeter component sample**
+**MfPeakMeter and MfPeakMeterEx component sample**
 
 *An example about how to create a MfPeakMeter control. This sample is part of the Samples/MfComponents package.*
 
 
 
-![](https://a.fsdn.com/con/app/proj/mfpack/screenshots/MfPeakMeter.jpg/max/max/1)
+![](https://dc621.4shared.com/img/F3_uzenMiq/s24/175e5fa3730/MfPeakmeter?async&rand=0.7552506778489054)
 
 **AudioClip and AudioClipEx sample**
 
@@ -81,7 +81,7 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
 
 
 
-![AudioClip sample](https://a.fsdn.com/con/app/proj/mfpack/screenshots/AudioClipExSample.jpg/max/max/1)
+![AudioClip sample](https://dc623.4shared.com/img/UfTU00D-ea/s24/1710787af68/AudioClipExSample?async&rand=0.31564552106971044)
 
 
 
@@ -100,7 +100,7 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
 
 
 
-![](https://sourceforge.net/p/mfpack/screenshot/MfMediaPlayer%20X.jpg)
+![](https://dc621.4shared.com/img/bD4Vx1J1iq/s24/175e5ff6368/MfMediaPlayer_X?async&rand=0.6549303904092856)
 
 
 
