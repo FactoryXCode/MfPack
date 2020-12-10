@@ -12,8 +12,8 @@
 //
 // Version: 3.0.1
 //
-// Description: Sample component to get/set a discovered endpoint (and it's properties)
-//              used in Vista, 7, 8 and 10
+// Description: Component to manage capture or render endpoints (and properties).
+//              It also provides an audio endpoint callback.
 //
 // Company: FactoryX
 // Intiator(s): Tony (maXcomX), Peter (OzShips), Ramyses De Macedo Rodrigues.
@@ -26,7 +26,7 @@
 // 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
-// Remarks: Audio EndPoint control with callback.
+// Remarks: -
 //
 // Related objects: -
 // Related projects: MfPackX300
@@ -56,7 +56,6 @@
 // in full at the top of the file.
 //
 //==============================================================================
-
 unit MfAudioEndPoint;
 
 interface
@@ -80,7 +79,7 @@ uses
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfUtils,
   {WinApi.CoreAudioApi}
-  WinApi.CoreAudioApi.Functiondiscoverykeys_devpkey,
+  WinApi.CoreAudioApi.FunctionDiscoveryKeys_devpkey,
   WinApi.CoreAudioApi.MMDeviceApi,
   WinApi.CoreAudioApi.MMDevApiUtils,
   WinApi.CoreAudioApi.Endpointvolume;
@@ -122,7 +121,8 @@ type
     wsDeviceDesc: string;
 
     fEndPointDevices: TEndPointDeviceArray;  // Array containing properties for each endpointdevice found on this system.
-    fSelectedDevice: IMMDevice;
+
+    fSelectedIMMDevice: IMMDevice;
     fDeviceEnumerator: IMMDeviceEnumerator;
     fAudioEndpoint: IAudioEndpointVolumeEx;
     fOnEndPointNotify: TOnEndPointNotify;
@@ -211,6 +211,7 @@ type
 
     // Non visual properties
     property Handle: THandle read fHwnd;
+    property IMMDevice: IMMDevice read fSelectedIMMDevice;
     property ChannelVolume[_Index: UINT]: Single read GetChannelScalarVolume write SetChannelScalarVolume;
     property Devices: TEndPointDeviceArray read FEndPointDevices;
     property EndPointsCount: DWord read dwEndPointsCount;
@@ -280,7 +281,7 @@ begin
 
   // If you need the default capture device,
   // change the value of the first parameter (fDataFlow) in the call to the from eRender to eCapture.
-  fRole := eConsole; //eMultimedia;
+  fRole := eMultimedia;
   fDataFlow := eRender;
   fState := DEVICE_STATE_ACTIVE;
   dwDeviceID := 0;
@@ -295,6 +296,7 @@ begin
 
   if Assigned(FEndPointDevices) then
     SetEndPointDevice(dwDeviceID);
+
 done:
   if ((csDesigning in ComponentState) = False) then
     if FAILED(hr) then
@@ -313,11 +315,12 @@ begin
 
   // SafeRelease is declared in unit WinApi.MediaFoundationApi.MfUtils.pas
   SafeRelease(FDeviceEnumerator);
-  SafeRelease(fSelectedDevice);
+  SafeRelease(fSelectedIMMDevice);
   SafeRelease(FAudioEndpoint);
   // Free the Handle
   DeallocateHWnd(fHwnd);
   SetLength(fEndPointDevices, 0);
+  CoUninitialize;
   inherited Destroy;
 end;
 
@@ -542,6 +545,7 @@ begin
       OleCheck( GetAudioEndPoints(aValue,
                                   fState,
                                   FEndPointDevices) );
+      dwDeviceID := 0;
     end;
 end;
 
@@ -571,7 +575,7 @@ begin
   if not Assigned(FEndPointDevices) then
     Exit;
 
-  if (DeviceID <> aValue) then
+  if (dwDeviceID <> aValue) then
     dwDeviceID := aValue;
 
   // Check boundaries
@@ -581,7 +585,7 @@ begin
   if dwEndPointsCount > 0 then
     begin
       hr := FDeviceEnumerator.GetDevice(FEndPointDevices[dwDeviceID].pwszID,
-                                        fSelectedDevice);
+                                        fSelectedIMMDevice);
       if Succeeded(hr) then
         begin
           wsDeviceName := WideCharToString(FEndPointDevices[dwDeviceID].DeviceName);
@@ -599,10 +603,10 @@ begin
 
           if Succeeded(hr) then
             begin
-              hr := fSelectedDevice.Activate(IID_IAudioEndpointVolume,
-                                           INT(CLSCTX_INPROC_SERVER),
-                                           Nil,
-                                           IUnknown(FAudioEndpoint));
+              hr := fSelectedIMMDevice.Activate(IID_IAudioEndpointVolume,
+                                                INT(CLSCTX_INPROC_SERVER),
+                                                Nil,
+                                                IUnknown(FAudioEndpoint));
 
               if Succeeded(hr) then
                 begin

@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: This unit holds basic Media Foundation methods needed to play,
 //              record, encode, decode, etc.
 //
@@ -26,6 +26,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 10/12/2020                     Compatibility update.
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -1644,7 +1645,7 @@ function GetPresentationDescriptorFromTopology(pTopology: IMFTopology;
 var
   hr: HRESULT;
   pCollection: IMFCollection;
-  pUnk: IUnknown;
+  pUnk: PIUnknown;
   pNode: IMFTopologyNode;
   dwElementcount: DWord;
   dwIndex: DWORD;
@@ -1654,9 +1655,6 @@ label
 
 begin
 
-  pCollection := Nil;
-  pUnk := Nil;
-  pNode := Nil;
   dwIndex := 0;
 
   // Get the collection of source nodes from the topology.
@@ -1678,7 +1676,7 @@ begin
       hr := pCollection.GetElement(dwIndex,
                                    pUnk);
       if FAILED(hr) then
-    	  begin
+        begin
           OleCheck(hr);
           goto done;
         end;
@@ -1689,7 +1687,8 @@ begin
       goto done;
     end;
 
-  hr := pUnk.QueryInterface(IID_IMFTopologyNode, pNode);
+  hr := pUnk.QueryInterface(IID_IMFTopologyNode,
+                            pNode);
     if FAILED(hr) then
       goto done;
 
@@ -1716,9 +1715,6 @@ label
 
 begin
   phnsDuration := 0;
-  pSourceNodes := Nil;
-  pNode := Nil;
-  pPD := Nil;
 
   hr := pTopology.GetSourceNodeCollection(pSourceNodes);
   if FAILED(hr) then
@@ -1749,12 +1745,11 @@ function GetCollectionObject(pCollection: IMFCollection;
                              const dwIndex: DWORD;
                              out ppObject): HRESULT;
 var
-  pUnk: IUnknown;
+  pUnk: PIUnknown;
   hr: HRESULT;
 
 begin
-  //ppObject := Nil;   // zero output
-  pUnk := Nil;
+
   hr := pCollection.GetElement(dwIndex,
                                pUnk);
   if SUCCEEDED(hr) then
@@ -1864,7 +1859,7 @@ function SetMediaStop(pTopology: IMFTopology;
                                dwIndex: DWORD;
                                ppObject: Pointer): HRESULT;
   var
-    pUnk: IUnknown;
+    pUnk: PIUnknown;
     hr: HRESULT;
 
   begin
@@ -1890,7 +1885,6 @@ var
   pNode: IMFTopologyNode;
 
 begin
-  pCol := Nil;
 
   hr := pTopology.GetSourceNodeCollection(pCol);
   if SUCCEEDED(hr) then
@@ -2020,9 +2014,9 @@ function FindDecoderEx(const subtype: TGUID;         // Subtype
                        bAudio: Boolean;              // TRUE for audio, FALSE for video
                        out ppDecoder: IMFTransform): HRESULT;
 const
-  enumflag = Ord(MFT_ENUM_FLAG_SYNCMFT) or
-             Ord(MFT_ENUM_FLAG_LOCALMFT) or
-             Ord(MFT_ENUM_FLAG_SORTANDFILTER);
+  enumflag = MFT_ENUM_FLAG_SYNCMFT or
+             MFT_ENUM_FLAG_LOCALMFT or
+             MFT_ENUM_FLAG_SORTANDFILTER;
 
 var
   hr: HRESULT;
@@ -2051,11 +2045,11 @@ try
     end;
 
   hr := MFTEnumEx(mft,
-                 enumflag,
-                 @info,    // Input type
-                 Nil,      // Output type
-                 ppMFTActivate,  // array of IMFActivate
-                 count);       // number of returned elements
+                  enumflag,
+                  @info,    // Input type
+                  Nil,      // Output type
+                  ppMFTActivate, // array of IMFActivate
+                  count);        // number of returned elements
 
   if (SUCCEEDED(hr) And (count = 0)) then
     begin
@@ -2106,9 +2100,9 @@ try
     end;
 
   hr := MFTEnumEx(mft,
-                  Ord(MFT_ENUM_FLAG_SYNCMFT) Or
-                  Ord(MFT_ENUM_FLAG_LOCALMFT) Or
-                  Ord(MFT_ENUM_FLAG_SORTANDFILTER),
+                  MFT_ENUM_FLAG_SYNCMFT or
+                  MFT_ENUM_FLAG_LOCALMFT or
+                  MFT_ENUM_FLAG_SORTANDFILTER,
                   Nil,       // Input type
                   @info,     // Output type
                   ppActivate,
@@ -2124,7 +2118,7 @@ try
   if SUCCEEDED(hr) then
     begin
       hr := ppActivate[0].ActivateObject(IID_IMFTransform,
-                                        ppEncoder);
+                                         ppEncoder);
     end;
 {$POINTERMATH OFF}
 
@@ -2149,9 +2143,9 @@ var
 begin
   hr := S_OK;
 
-  unFlags := Ord(MFT_ENUM_FLAG_SYNCMFT) Or
-            Ord(MFT_ENUM_FLAG_LOCALMFT) Or
-            Ord(MFT_ENUM_FLAG_SORTANDFILTER);
+  unFlags := MFT_ENUM_FLAG_SYNCMFT or
+             MFT_ENUM_FLAG_LOCALMFT or
+             MFT_ENUM_FLAG_SORTANDFILTER;
 
 try
 
@@ -2160,26 +2154,26 @@ try
 
   if (bAllowAsync = True) then
     begin
-      unFlags := unFlags Or Ord(MFT_ENUM_FLAG_ASYNCMFT);
+      unFlags := unFlags or MFT_ENUM_FLAG_ASYNCMFT;
     end;
 
   if (bAllowHardware = True) then
     begin
-      unFlags := unFlags Or Ord(MFT_ENUM_FLAG_HARDWARE);
+      unFlags := unFlags or MFT_ENUM_FLAG_HARDWARE;
     end;
 
   if (bAllowTranscode = True) then
     begin
-      unFlags := unFlags Or Ord(MFT_ENUM_FLAG_TRANSCODE_ONLY);
+      unFlags := unFlags or MFT_ENUM_FLAG_TRANSCODE_ONLY;
     end;
 
 
   hr := MFTEnumEx(MFT_CATEGORY_VIDEO_DECODER,
-                 unFlags,
-                 @info,     // Input type
-                 Nil,       // Output type
-                 ppActivate,
-                 count);
+                  unFlags,
+                  @info,     // Input type
+                  Nil,       // Output type
+                  ppActivate,
+                  count);
 
   if (SUCCEEDED(hr) and (count = 0)) then
     begin
@@ -3257,6 +3251,7 @@ var
 
 begin
   cchName := 0;
+  iList.Clear;
 
 {$POINTERMATH ON}
 
@@ -3849,7 +3844,6 @@ var
 
 begin
 
-  pSourceSD := Nil;
   SetLength(alsCont, 0);
   sdCount := 0;
   pcchLength := 0;
@@ -4557,7 +4551,7 @@ begin
   // Get file duration
   // Gets the duration in 100-nanosecond units.
   // Divide by 10,000,000 to get the duration in seconds.
-  hr := pReader.GetPresentationAttribute(DWord(MF_SOURCE_READER_MEDIASOURCE),
+  hr := pReader.GetPresentationAttribute(MF_SOURCE_READER_MEDIASOURCE,
                                          MF_PD_DURATION,
                                          pvVar);
   if (SUCCEEDED(hr)) then
@@ -4580,7 +4574,7 @@ var
 
 begin
   PropVariantInit(pvVar);
-  hr := pReader.GetPresentationAttribute(DWord(MF_SOURCE_READER_MEDIASOURCE),
+  hr := pReader.GetPresentationAttribute(MF_SOURCE_READER_MEDIASOURCE,
                                          MF_PD_TOTAL_FILE_SIZE,
                                          pvVar);
   if (SUCCEEDED(hr)) then
