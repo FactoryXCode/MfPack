@@ -10,7 +10,7 @@
 // Release date: 02-06-2016
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: Windows Driver Model/Connection and Streaming Architecture (WDM-CSA)
 // ions.
 //
@@ -23,6 +23,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 10/12/2020                     Compatibility update.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8.1 or later.
@@ -104,6 +105,7 @@ const
 type
 
   PKSRESET = ^KSRESET;
+  {$EXTERNALSYM PKSRESET}
   KSRESET = (
     KSRESET_BEGIN = 0,
     KSRESET_END   = 1
@@ -111,6 +113,7 @@ type
   {$EXTERNALSYM KSRESET}
 
   PKSSTATE = ^KSSTATE;
+  {$EXTERNALSYM PKSSTATE}
   KSSTATE = (
     KSSTATE_STOP    = 0,
     KSSTATE_ACQUIRE = 1,
@@ -133,6 +136,7 @@ const
 type
 
   PKSPRIORITY = ^KSPRIORITY;
+  {$EXTERNALSYM PKSPRIORITY}
   KSPRIORITY = record
     PriorityClass: ULONG;
     PrioritySubClass: ULONG;
@@ -141,6 +145,7 @@ type
 
 
   PKSIDENTIFIER = ^KSIDENTIFIER;
+  {$EXTERNALSYM PKSIDENTIFIER}
   KSIDENTIFIER = record
     case integer of
       0: (Set_  : TGUID;
@@ -151,12 +156,15 @@ type
   {$EXTERNALSYM KSIDENTIFIER}
 
   PKSPROPERTY = ^KSPROPERTY;
+  {$EXTERNALSYM PKSPROPERTY}
   KSPROPERTY  = {$IFDEF TYPE_IDENTITY} type {$ENDIF} KSIDENTIFIER;
   {$EXTERNALSYM KSPROPERTY}
   PKSMETHOD   = ^KSMETHOD;
+  {$EXTERNALSYM PKSMETHOD}
   KSMETHOD    = KSPROPERTY;
   {$EXTERNALSYM KSMETHOD}
   PKSEVENT    = ^KSEVENT;
+  {$EXTERNALSYM PKSEVENT}
   KSEVENT     = KSIDENTIFIER;
   {$EXTERNALSYM KSEVENT}
 
@@ -222,6 +230,7 @@ const
 type
 
   PKSP_NODE = ^KSP_NODE;
+  {$EXTERNALSYM PKSP_NODE}
   KSP_NODE = record
     Property_ : KSPROPERTY;
     NodeId    : ULONG;
@@ -230,6 +239,7 @@ type
   {$EXTERNALSYM KSP_NODE}
 
   PKSM_NODE = ^KSM_NODE;
+  {$EXTERNALSYM PKSM_NODE}
   KSM_NODE = record
     Method   : KSMETHOD;
     NodeId   : ULONG;
@@ -238,6 +248,7 @@ type
   {$EXTERNALSYM KSM_NODE}
 
   PKSE_NODE = ^KSE_NODE;
+  {$EXTERNALSYM PKSE_NODE}
   KSE_NODE = record
     Event    : KSEVENT;
     NodeId   : ULONG;
@@ -250,65 +261,72 @@ const
   KSPROPTYPESETID_General    : TGUID = '{97E99BA0-BDEA-11CF-A5D6-28DB04C10000}';
   {$EXTERNALSYM KSPROPTYPESETID_General}
 
+{$IFNDEF NTDDK_VARENUM}
 type
+  VARTYPE = Word;
+  VARENUM = VARTYPE;
+  {$EXTERNALSYM VARENUM}
+const
+    VT_EMPTY = 0;                // The type of the contained field is undefined. When this flag is specified; the PROPVARIANT MUST NOT contain a data field.
+    VT_NULL = 1;                 // Nil.
+    VT_I2 = 2;                   // A 2-byte integer.
+    VT_I4 = 3;                   // A 4-byte integer.
+    VT_R4 = 4;                   // A 4-byte real.
+    VT_R8 = 5;                   // An 8-byte real.
+    VT_CY = 6;                   // Currency.
+    VT_DATE = 7;                 // A date.
+    VT_BSTR = 8;                 // A string.
+    VT_DISPATCH = 9;             // An IDispatch pointer.
+    VT_ERROR = 10;               // An SCODE value.
+    VT_BOOL = 11;                // A Boolean value. True is -1 and false is 0.
+    VT_VARIANT = 12;             // A variant pointer.
+    VT_UNKNOWN = 13;             // An IUnknown pointer.
+    VT_DECIMAL = 14;             // A 16-byte fixed-pointer value.
+    VT_I1 = 16;                  // A character.
+    VT_UI1 = 17;                 // An unsigned character.
+    VT_UI2 = 18;                 // An unsigned short.
+    VT_UI4 = 19;                 // An unsigned long.
+    VT_I8 = 20;                  // A 64-bit integer.
+    VT_UI8 = 21;                 // A 64-bit unsigned integer.
+    VT_INT = 22;                 // An integer.
+    VT_UINT = 23;                // An unsigned integer.
+    VT_VOID = 24;                // A C-style void.
+    VT_HRESULT  = 25;            // An HRESULT value.
+    VT_PTR = 26;                 // A pointer type.
+    VT_SAFEARRAY = 27;           // A safe array. Use VT_ARRAY in VARIANT.
+    VT_CARRAY = 28;              // A C-style array.
+    VT_USERDEFINED = 29;         // A user-defined type.
+    VT_LPSTR = 30;               // A null-terminated string.
+    VT_LPWSTR = 31;              // A wide null-terminated string.
+    VT_RECORD = 36;              // A user-defined type.
+    VT_INT_PTR = 37;             // A signed machine register size width.
+    VT_UINT_PTR = 38;            // An unsigned machine register size width.
+    VT_FILETIME = 64;            // A FILETIME value.
+    VT_BLOB = 65;                // Length-prefixed bytes.
+    VT_STREAM = 66;              // The name of the stream follows.
+    VT_STORAGE = 67;             // The name of the storage follows.
+    VT_STREAMED_OBJECT = 68;     // The stream contains an object.
+    VT_STORED_OBJECT = 69;       // The storage contains an object.
+    VT_BLOB_OBJECT = 70;         // The blob contains an object.
+    VT_CF = 71;                  // A clipboard format.
+    VT_CLSID = 72;               // A class ID.
+    VT_VERSIONED_STREAM  = 73;   // A stream with a GUID version.
+    VT_VECTOR = $1000;           // A simple counted array. The type of the contained field MUST be combined with other values by using the bitwise OR operation to indicate a counted field. The type of the contained field MUST be a COUNTEDARRAY.
+    VT_ARRAY = $2000;            // A SAFEARRAY pointer.
+    VT_BYREF = $4000;            // A void pointer for local use.
+    VT_RESERVED = $8000;         // Reserved.
+    VT_BSTR_BLOB = $fff;         // Reserved (is reserved for system use.)
+    VT_ILLEGAL = $ffff;          //
+    VT_ILLEGALMASKED = $fff;     //
+    VT_TYPEMASK = $fff;          //
 
- VARENUM = (
-    VT_EMPTY = 0,                // The type of the contained field is undefined. When this flag is specified, the PROPVARIANT MUST NOT contain a data field.
-    VT_NULL = 1,                 // Nil.
-    VT_I2 = 2,                   // A 2-byte integer.
-    VT_I4 = 3,                   // A 4-byte integer.
-    VT_R4 = 4,                   // A 4-byte real.
-    VT_R8 = 5,                   // An 8-byte real.
-    VT_CY = 6,                   // Currency.
-    VT_DATE = 7,                 // A date.
-    VT_BSTR = 8,                 // A string.
-    VT_DISPATCH = 9,             // An IDispatch pointer.
-    VT_ERROR = 10,               // An SCODE value.
-    VT_BOOL = 11,                // A Boolean value. True is -1 and false is 0.
-    VT_VARIANT = 12,             // A variant pointer.
-    VT_UNKNOWN = 13,             // An IUnknown pointer.
-    VT_DECIMAL = 14,             // A 16-byte fixed-pointer value.
-    VT_I1 = 16,                  // A character.
-    VT_UI1 = 17,                 // An unsigned character.
-    VT_UI2 = 18,                 // An unsigned short.
-    VT_UI4 = 19,                 // An unsigned long.
-    VT_I8 = 20,                  // A 64-bit integer.
-    VT_UI8 = 21,                 // A 64-bit unsigned integer.
-    VT_INT = 22,                 // An integer.
-    VT_UINT = 23,                // An unsigned integer.
-    VT_VOID = 24,                // A C-style void.
-    VT_HRESULT  = 25,            // An HRESULT value.
-    VT_PTR = 26,                 // A pointer type.
-    VT_SAFEARRAY = 27,           // A safe array. Use VT_ARRAY in VARIANT.
-    VT_CARRAY = 28,              // A C-style array.
-    VT_USERDEFINED = 29,         // A user-defined type.
-    VT_LPSTR = 30,               // A null-terminated string.
-    VT_LPWSTR = 31,              // A wide null-terminated string.
-    VT_RECORD = 36,              // A user-defined type.
-    VT_INT_PTR = 37,             // A signed machine register size width.
-    VT_UINT_PTR = 38,            // An unsigned machine register size width.
-    VT_FILETIME = 64,            // A FILETIME value.
-    VT_BLOB = 65,                // Length-prefixed bytes.
-    VT_STREAM = 66,              // The name of the stream follows.
-    VT_STORAGE = 67,             // The name of the storage follows.
-    VT_STREAMED_OBJECT = 68,     // The stream contains an object.
-    VT_STORED_OBJECT = 69,       // The storage contains an object.
-    VT_BLOB_OBJECT = 70,         // The blob contains an object.
-    VT_CF = 71,                  // A clipboard format.
-    VT_CLSID = 72,               // A class ID.
-    VT_VERSIONED_STREAM  = 73,   // A stream with a GUID version.
-    VT_VECTOR = $1000,           // A simple counted array. The type of the contained field MUST be combined with other values by using the bitwise OR operation to indicate a counted field. The type of the contained field MUST be a COUNTEDARRAY.
-    VT_ARRAY = $2000,            // A SAFEARRAY pointer.
-    VT_BYREF = $4000,            // A void pointer for local use.
-    VT_RESERVED = $8000,         // Reserved.
-    VT_BSTR_BLOB = $fff,         // Reserved (is reserved for system use.)
-    VT_ILLEGAL = $ffff,          //
-    VT_ILLEGALMASKED = $fff,     //
-    VT_TYPEMASK = $fff           //
-    );
- {$EXTERNALSYM VARENUM}
- // For detailed information see: https://msdn.microsoft.com/en-us/library/cc235506.aspx
+ // For detailed information see:
+ //   https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-mqmq/876f9674-752a-4d9b-bf8b-7212c6c9a6b4
+ // Note: This enum is also declared in wtypes.h (WinApi.WinApiTypes.pas)
+{$DEFINE NTDDK_VARENUM}
+{$ENDIF}
 
+type
   PKSMULTIPLE_ITEM = ^KSMULTIPLE_ITEM;
   KSMULTIPLE_ITEM = record
     Size  : ULONG;

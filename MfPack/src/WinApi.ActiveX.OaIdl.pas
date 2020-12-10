@@ -389,6 +389,7 @@ type
 
 
   PSF_TYPE = ^tagSF_TYPE;
+  {$EXTERNALSYM PSF_TYPE}
   tagSF_TYPE    = (
     SF_ERROR    = VT_ERROR,
     SF_I1       = VT_I1,
@@ -413,11 +414,11 @@ type
   PVARIANT = ^VARIANT;
   PVARIANTARG = ^VARIANTARG;
   tagVARIANT = record
-    vt: TVarType;
+    vt: VARTYPE;
     wReserved1: Word;
     wReserved2: Word;
     wReserved3: Word;
-      case Integer of
+      case VARTYPE of
         VT_UI1:                  (bVal: Byte);
         VT_I2:                   (iVal: Smallint);
         VT_I4:                   (lVal: Longint);

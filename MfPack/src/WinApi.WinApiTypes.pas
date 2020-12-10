@@ -23,6 +23,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 10/12/2020                     Compatibility update.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -1974,194 +1975,132 @@ type
   {$EXTERNALSYM CLIPDATA}
 {$ENDIF}
 
-
-{$IFDEF MFP_VARTYPE}
 type
   PVARTYPE = ^VARTYPE;
-  VARTYPE = WORD;
+  VARTYPE = Word;
   {$EXTERNALSYM VARTYPE}
-{$ENDIF}
-//
-// VARENUM usage key,
-//
-// [V] - may appear in a VARIANT
-// [T] - may appear in a TYPEDESC
-// [P] - may appear in an OLE property set
-// [S] - may appear in a Safe Array
-//
-//
-//   VT_EMPTY            [V]   [P]     nothing
-//   VT_NULL             [V]   [P]     SQL style Null
-//   VT_I2               [V][T][P][S]  2 byte signed int
-//   VT_I4               [V][T][P][S]  4 byte signed int
-//   VT_R4               [V][T][P][S]  4 byte real
-//   VT_R8               [V][T][P][S]  8 byte real
-//   VT_CY               [V][T][P][S]  currency
-//   VT_DATE             [V][T][P][S]  date
-//   VT_BSTR             [V][T][P][S]  OLE Automation string
-//   VT_DISPATCH         [V][T]   [S]  IDispatch *
-//   VT_ERROR            [V][T][P][S]  SCODE
-//   VT_BOOL             [V][T][P][S]  True=-1, False=0
-//   VT_VARIANT          [V][T][P][S]  VARIANT *
-//   VT_UNKNOWN          [V][T]   [S]  IUnknown *
-//   VT_DECIMAL          [V][T]   [S]  16 byte fixed point
-//   VT_RECORD           [V]   [P][S]  user defined type
-//   VT_I1               [V][T][P][s]  signed char
-//   VT_UI1              [V][T][P][S]  unsigned char
-//   VT_UI2              [V][T][P][S]  unsigned short
-//   VT_UI4              [V][T][P][S]  unsigned long
-//   VT_I8                  [T][P]     signed 64-bit int
-//   VT_UI8                 [T][P]     unsigned 64-bit int
-//   VT_INT              [V][T][P][S]  signed machine int
-//   VT_UINT             [V][T]   [S]  unsigned machine int
-//   VT_INT_PTR             [T]        signed machine register size width
-//   VT_UINT_PTR            [T]        unsigned machine register size width
-//   VT_VOID                [T]        C style void
-//   VT_HRESULT             [T]        Standard return type
-//   VT_PTR                 [T]        pointer type
-//   VT_SAFEARRAY           [T]        (use VT_ARRAY in VARIANT)
-//   VT_CARRAY              [T]        C style array
-//   VT_USERDEFINED         [T]        user defined type
-//   VT_LPSTR               [T][P]     null terminated string
-//   VT_LPWSTR              [T][P]     wide null terminated string
-//   VT_FILETIME               [P]     FILETIME
-//   VT_BLOB                   [P]     Length prefixed bytes
-//   VT_STREAM                 [P]     Name of the stream follows
-//   VT_STORAGE                [P]     Name of the storage follows
-//   VT_STREAMED_OBJECT        [P]     Stream contains an object
-//   VT_STORED_OBJECT          [P]     Storage contains an object
-//   VT_VERSIONED_STREAM       [P]     Stream with a GUID version
-//   VT_BLOB_OBJECT            [P]     Blob contains an object
-//   VT_CF                     [P]     Clipboard format
-//   VT_CLSID                  [P]     A Class ID
-//   VT_VECTOR                 [P]     simple counted array
-//   VT_ARRAY            [V]           SAFEARRAY*
-//   VT_BYREF            [V]           void* for local use
-//   VT_BSTR_BLOB                      Reserved for system use
-///////////////////////////////////////////////////////////////////////////////
 
-{$IFDEF MFP_VARENUM}
+// VARENUM  See also: WinApi.Ks.pas)
+///
+ // VARENUM usage key,
+ //
+ // // [V] - may appear in a VARIANT
+ // // [T] - may appear in a TYPEDESC
+ // // [P] - may appear in an OLE property set
+ // // [S] - may appear in a Safe Array
+ //
+ //
+ //  VT_EMPTY            [V]   [P]     nothing
+ //  VT_NULL             [V]   [P]     SQL style Null
+ //  VT_I2               [V][T][P][S]  2 byte signed int
+ //  VT_I4               [V][T][P][S]  4 byte signed int
+ //  VT_R4               [V][T][P][S]  4 byte real
+ //  VT_R8               [V][T][P][S]  8 byte real
+ //  VT_CY               [V][T][P][S]  currency
+ //  VT_DATE             [V][T][P][S]  date
+ //  VT_BSTR             [V][T][P][S]  OLE Automation string
+ //  VT_DISPATCH         [V][T]   [S]  IDispatch //
+ //  VT_ERROR            [V][T][P][S]  SCODE
+ //  VT_BOOL             [V][T][P][S]  True=-1, False=0
+ //  VT_VARIANT          [V][T][P][S]  VARIANT //
+ //  VT_UNKNOWN          [V][T]   [S]  IUnknown //
+ //  VT_DECIMAL          [V][T]   [S]  16 byte fixed point
+ //  VT_RECORD           [V]   [P][S]  user defined type
+ //  VT_I1               [V][T][P][s]  signed char
+ //  VT_UI1              [V][T][P][S]  unsigned char
+ //  VT_UI2              [V][T][P][S]  unsigned short
+ //  VT_UI4              [V][T][P][S]  ULONG
+ //  VT_I8                  [T][P]     signed 64-bit int
+ //  VT_UI8                 [T][P]     unsigned 64-bit int
+ //  VT_INT              [V][T][P][S]  signed machine int
+ //  VT_UINT             [V][T]   [S]  unsigned machine int
+ //  VT_INT_PTR             [T]        signed machine register size width
+ //  VT_UINT_PTR            [T]        unsigned machine register size width
+ //  VT_VOID                [T]        C style void
+ //  VT_HRESULT             [T]        Standard return type
+ //  VT_PTR                 [T]        pointer type
+ //  VT_SAFEARRAY           [T]        (use VT_ARRAY in VARIANT)
+ //  VT_CARRAY              [T]        C style array
+ //  VT_USERDEFINED         [T]        user defined type
+ //  VT_LPSTR               [T][P]     null terminated string
+ //  VT_LPWSTR              [T][P]     wide null terminated string
+ //  VT_FILETIME               [P]     FILETIME
+ //  VT_BLOB                   [P]     Length prefixed bytes
+ //  VT_STREAM                 [P]     Name of the stream follows
+ //  VT_STORAGE                [P]     Name of the storage follows
+ //  VT_STREAMED_OBJECT        [P]     Stream contains an object
+ //  VT_STORED_OBJECT          [P]     Storage contains an object
+ //  VT_VERSIONED_STREAM       [P]     Stream with a GUID version
+ //  VT_BLOB_OBJECT            [P]     Blob contains an object
+ //  VT_CF                     [P]     Clipboard format
+ //  VT_CLSID                  [P]     A Class ID
+ //  VT_VECTOR                 [P]     simple counted array
+ //  VT_ARRAY            [V]           SAFEARRAY
+ //  VT_BYREF            [V]           void for local use
+ //  VT_BSTR_BLOB                      Reserved for system use
+ ///
+
+{$IFNDEF NTDDK_VARENUM}
+type
+  VARENUM = VARTYPE;
+  {$EXTERNALSYM VARENUM}
 const
-// VARENUM      See: MfPack.Ks.pas for the enumeration
-//////////////////////////////////////////////////////
+    VT_EMPTY = 0;                // The type of the contained field is undefined. When this flag is specified; the PROPVARIANT MUST NOT contain a data field.
+    VT_NULL = 1;                 // Nil.
+    VT_I2 = 2;                   // A 2-byte integer.
+    VT_I4 = 3;                   // A 4-byte integer.
+    VT_R4 = 4;                   // A 4-byte real.
+    VT_R8 = 5;                   // An 8-byte real.
+    VT_CY = 6;                   // Currency.
+    VT_DATE = 7;                 // A date.
+    VT_BSTR = 8;                 // A string.
+    VT_DISPATCH = 9;             // An IDispatch pointer.
+    VT_ERROR = 10;               // An SCODE value.
+    VT_BOOL = 11;                // A Boolean value. True is -1 and false is 0.
+    VT_VARIANT = 12;             // A variant pointer.
+    VT_UNKNOWN = 13;             // An IUnknown pointer.
+    VT_DECIMAL = 14;             // A 16-byte fixed-pointer value.
+    VT_I1 = 16;                  // A character.
+    VT_UI1 = 17;                 // An unsigned character.
+    VT_UI2 = 18;                 // An unsigned short.
+    VT_UI4 = 19;                 // An unsigned long.
+    VT_I8 = 20;                  // A 64-bit integer.
+    VT_UI8 = 21;                 // A 64-bit unsigned integer.
+    VT_INT = 22;                 // An integer.
+    VT_UINT = 23;                // An unsigned integer.
+    VT_VOID = 24;                // A C-style void.
+    VT_HRESULT = 25;             // An HRESULT value.
+    VT_PTR = 26;                 // A pointer type.
+    VT_SAFEARRAY = 27;           // A safe array. Use VT_ARRAY in VARIANT.
+    VT_CARRAY = 28;              // A C-style array.
+    VT_USERDEFINED = 29;         // A user-defined type.
+    VT_LPSTR = 30;               // A null-terminated string.
+    VT_LPWSTR = 31;              // A wide null-terminated string.
+    VT_RECORD = 36;              // A user-defined type.
+    VT_INT_PTR = 37;             // A signed machine register size width.
+    VT_UINT_PTR = 38;            // An unsigned machine register size width.
+    VT_FILETIME = 64;            // A FILETIME value.
+    VT_BLOB = 65;                // Length-prefixed bytes.
+    VT_STREAM = 66;              // The name of the stream follows.
+    VT_STORAGE = 67;             // The name of the storage follows.
+    VT_STREAMED_OBJECT = 68;     // The stream contains an object.
+    VT_STORED_OBJECT = 69;       // The storage contains an object.
+    VT_BLOB_OBJECT = 70;         // The blob contains an object.
+    VT_CF = 71;                  // A clipboard format.
+    VT_CLSID = 72;               // A class ID.
+    VT_VERSIONED_STREAM = 73;    // A stream with a GUID version.
+    VT_VECTOR = $1000;           // A simple counted array. The type of the contained field MUST be combined with other values by using the bitwise OR operation to indicate a counted field. The type of the contained field MUST be a COUNTEDARRAY.
+    VT_ARRAY = $2000;            // A SAFEARRAY pointer.
+    VT_BYREF = $4000;            // A void pointer for local use.
+    VT_RESERVED = $8000;         // Reserved.
+    VT_BSTR_BLOB = $fff;         // Reserved (is reserved for system use.)
+    VT_ILLEGAL = $ffff;          //
+    VT_ILLEGALMASKED = $fff;     //
+    VT_TYPEMASK = $fff;          //
 
-    VT_EMPTY            = $0000;  // Not specified. 0
-    {$EXTERNALSYM VT_EMPTY}
-    VT_NULL             = $0001;  // Nil. 1
-    {$EXTERNALSYM VT_NULL}
-    VT_I2               = $0002;  // A 2-byte integer. 2
-    {$EXTERNALSYM VT_I2}
-    VT_I4               = $0003;  // A 4-byte integer. 3
-    {$EXTERNALSYM VT_I4}
-    VT_R4               = $0004;  // A 4-byte real. 4
-    {$EXTERNALSYM VT_R4}
-    VT_R8               = $0005;  // An 8-byte real. 5
-    {$EXTERNALSYM VT_R8}
-    VT_CY               = $0006;  // Currency. 6
-    {$EXTERNALSYM VT_CY}
-    VT_DATE             = $0007;  // A date. 7
-    {$EXTERNALSYM VT_DATE}
-    VT_BSTR             = $0008;  // A string. 8
-    {$EXTERNALSYM VT_BSTR}
-    VT_DISPATCH         = $0009;  // An IDispatch pointer. 9
-    {$EXTERNALSYM VT_DISPATCH}
-    VT_ERROR            = $000A;  // An SCODE value. 10
-    {$EXTERNALSYM VT_ERROR}
-    VT_BOOL             = $000B;  // A Boolean value. True is -1 and false is 0. 11
-    {$EXTERNALSYM VT_BOOL}
-    VT_VARIANT          = $000C;  // A variant pointer. 12
-    {$EXTERNALSYM VT_VARIANT}
-    VT_UNKNOWN          = $000D;  // An IUnknown pointer. 13
-    {$EXTERNALSYM VT_UNKNOWN}
-    VT_DECIMAL          = $000E;  // A 16-byte fixed-pointer value. 14
-    {$EXTERNALSYM VT_DECIMAL}
-    //
-    VT_I1               = $0010;  // A character. 16
-    {$EXTERNALSYM VT_I1}
-    VT_UI1              = $0011;  // An unsigned character. 17
-    {$EXTERNALSYM VT_UI1}
-    VT_UI2              = $0012;  // An unsigned short. 18
-    {$EXTERNALSYM VT_UI2}
-    VT_UI4              = $0013;  // An unsigned long. 19
-    {$EXTERNALSYM VT_UI4}
-    VT_I8               = $0014;  // A 64-bit integer. 20
-    {$EXTERNALSYM VT_I8}
-    VT_UI8              = $0015;  // A 64-bit unsigned integer. 21
-    {$EXTERNALSYM VT_UI8}
-    VT_INT              = $0016;  // An integer. 22
-    {$EXTERNALSYM VT_INT}
-    VT_UINT             = $0017;  // An unsigned integer.23
-    {$EXTERNALSYM VT_UINT}
-    VT_VOID             = $0018;  // A C-style void. 24
-    {$EXTERNALSYM VT_VOID}
-    VT_HRESULT          = $0019;  // An HRESULT value. 25
-    {$EXTERNALSYM VT_HRESULT}
-    VT_PTR              = $001A;  // A pointer type. 26
-    {$EXTERNALSYM VT_PTR}
-    VT_SAFEARRAY        = $001B;  // A safe array. Use VT_ARRAY in VARIANT. 27
-    {$EXTERNALSYM VT_SAFEARRAY}
-    VT_CARRAY           = $001C;  // A C-style array. 28
-    {$EXTERNALSYM VT_CARRAY}
-    VT_USERDEFINED      = $001D;  // A user-defined type. 29
-    {$EXTERNALSYM VT_USERDEFINED}
-    VT_LPSTR            = $001E;  // A null-terminated string. 30
-    {$EXTERNALSYM VT_LPSTR}
-    VT_LPWSTR           = $001F;  // A wide null-terminated string. 31
-    {$EXTERNALSYM VT_LPWSTR}
-    VT_RECORD           = $0024;  // A user-defined type. 36
-    {$EXTERNALSYM VT_RECORD}
-    VT_INT_PTR          = $0025;  // A signed machine register size width. 37
-    {$EXTERNALSYM VT_INT_PTR}
-    VT_UINT_PTR         = $0026;  // An unsigned machine register size width. 38
-    {$EXTERNALSYM VT_UINT_PTR}
-    //
-    VT_FILETIME         = $0040;  // A FILETIME value. 64
-    {$EXTERNALSYM VT_FILETIME}
-    VT_BLOB             = $0041;  // Length-prefixed bytes. 65
-    {$EXTERNALSYM VT_BLOB}
-    VT_STREAM           = $0042;  // The name of the stream follows. 66
-    {$EXTERNALSYM VT_STREAM}
-    VT_STORAGE          = $0043;  // The name of the storage follows. 67
-    {$EXTERNALSYM VT_STORAGE}
-    VT_STREAMED_OBJECT  = $0044;  // The stream contains an object. 68
-    {$EXTERNALSYM VT_STREAMED_OBJECT}
-    VT_STORED_OBJECT    = $0045;  // The storage contains an object. 69
-    {$EXTERNALSYM VT_STORED_OBJECT}
-    VT_BLOBOBJECT       = $0046;  // The blob contains an object. 70
-    {$EXTERNALSYM VT_BLOBOBJECT}
-    VT_CF               = $0047;  // A clipboard format. 71
-    {$EXTERNALSYM VT_CF}
-    VT_CLSID            = $0048;  // A class ID. 72
-    {$EXTERNALSYM VT_CLSID}
-    VT_VERSIONED_STREAM = $0049;  // A stream with a GUID version. 73
-    {$EXTERNALSYM VT_VERSIONED_STREAM}
-    //
-    VT_VECTOR           = $1000;  // A simple counted array. $1000
-    {$EXTERNALSYM VT_VECTOR}
-    VT_ARRAY            = $2000;  // A SAFEARRAY pointer. $2000
-    {$EXTERNALSYM VT_ARRAY}
-    VT_BYREF            = $4000;  // A void pointer for local use. $4000
-    {$EXTERNALSYM VT_BYREF}
-    VT_RESERVED         = $8000;  // Reserved. $8000
-    {$EXTERNALSYM VT_RESERVED}
-    VT_BSTR_BLOB        = $0fff;  // Reserved (is reserved for system use.)
-    {$EXTERNALSYM VT_BSTR_BLOB}
-    VT_ILLEGAL          = $ffff;  //
-    {$EXTERNALSYM VT_ILLEGAL}
-    VT_ILLEGALMASKED    = $0fff;  //
-    {$EXTERNALSYM VT_ILLEGALMASKED}
-    VT_TYPEMASK         = $0fff;  //
-    {$EXTERNALSYM VT_TYPEMASK}
-
-    // Delphi specific ( Not OLE compatible )
-    varString           = $0100; // Pascal string 256
-    {$EXTERNALSYM varString}
-    varAny              = $0101; // Corba any 257
-    {$EXTERNALSYM varAny}
-    varUString          = $0102; // Unicode string 258
-    {$EXTERNALSYM varUString}
-
+{$DEFINE NTDDK_VARENUM}
 {$ENDIF}
+
 
 type
 

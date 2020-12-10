@@ -818,7 +818,7 @@ begin
   hr := pEvent.GetValue(vvar);
   if (SUCCEEDED(hr)) then
     begin
-      if (vvar.vt = WORD(VT_UNKNOWN)) then
+      if (vvar.vt = VARTYPE(VT_UNKNOWN)) then
         hr := IUnknown(vvar.ppunkVal).QueryInterface(IID_IUnknown,
                                                      ppObject)
       else
@@ -1787,10 +1787,10 @@ begin
 
   // Create the Media Session start position.
   if (SeekTime = PRESENTATION_CURRENT_POSITION)then
-    pvar.vt := WORD(VT_EMPTY)
+    pvar.vt := VARTYPE(VT_EMPTY)
   else
     begin
-      pvar.vt := WORD(VT_I8);
+      pvar.vt := VARTYPE(VT_I8);
       pvar.hVal.QuadPart := SeekTime;
     end;
 
