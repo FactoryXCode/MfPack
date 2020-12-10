@@ -10,7 +10,7 @@
 // Release date: 29-06-2012
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: -
 //
 // Organisation: FactoryX
@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 08/12/2020 Tony                Added updates from sdk 10.0.19041.0
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or higher.
@@ -99,6 +100,7 @@ uses
 const
 
   // Interface IMFMediaType
+
   MF_MEDIATYPE_EQUAL_MAJOR_TYPES      = $00000001;
   {$EXTERNALSYM MF_MEDIATYPE_EQUAL_MAJOR_TYPES}
   MF_MEDIATYPE_EQUAL_FORMAT_TYPES     = $00000002;
@@ -109,29 +111,47 @@ const
   {$EXTERNALSYM MF_MEDIATYPE_EQUAL_FORMAT_USER_DATA}
 
   // Interface IMFAsyncCallback
+
+  //
+  // Async callback flags
+  //
+
   MFASYNC_FAST_IO_PROCESSING_CALLBACK = $00000001;
   {$EXTERNALSYM MFASYNC_FAST_IO_PROCESSING_CALLBACK}
   MFASYNC_SIGNAL_CALLBACK             = $00000002;
   {$EXTERNALSYM MFASYNC_SIGNAL_CALLBACK}
-  MFASYNC_CALLBACK_QUEUE_UNDEFINED    = $00000000;
+  MFASYNC_BLOCKING_CALLBACK           = $00000004;
+  {$EXTERNALSYM MFASYNC_BLOCKING_CALLBACK}
+  MFASYNC_REPLY_CALLBACK              = $00000008; // Callback will reply via IMFAsyncCallback in GetObject()
+  {$EXTERNALSYM MFASYNC_REPLY_CALLBACK}
+  MFASYNC_LOCALIZE_REMOTE_CALLBACK    = $00000010; // The callback object is not apartment-agile and the callback pointer must be localized after an RPC
+  {$EXTERNALSYM MFASYNC_LOCALIZE_REMOTE_CALLBACK}
+
+  //
+  // Async callback invocation queue IDs
+  //
+
+  MFASYNC_CALLBACK_QUEUE_UNDEFINED     = $00000000;
   {$EXTERNALSYM MFASYNC_CALLBACK_QUEUE_UNDEFINED}
-  MFASYNC_CALLBACK_QUEUE_STANDARD     = $00000001;
+  MFASYNC_CALLBACK_QUEUE_STANDARD      = $00000001;
   {$EXTERNALSYM MFASYNC_CALLBACK_QUEUE_STANDARD}
-  MFASYNC_CALLBACK_QUEUE_RT           = $00000002;
+  MFASYNC_CALLBACK_QUEUE_RT            = $00000002;
   {$EXTERNALSYM MFASYNC_CALLBACK_QUEUE_RT}
-  MFASYNC_CALLBACK_QUEUE_IO           = $00000003;
+  MFASYNC_CALLBACK_QUEUE_IO            = $00000003;
   {$EXTERNALSYM MFASYNC_CALLBACK_QUEUE_IO}
-  MFASYNC_CALLBACK_QUEUE_TIMER        = $00000004;
+  MFASYNC_CALLBACK_QUEUE_TIMER         = $00000004;
   {$EXTERNALSYM MFASYNC_CALLBACK_QUEUE_TIMER}
-  MFASYNC_CALLBACK_QUEUE_LONG_FUNCTION= $00000007;
+  MFASYNC_CALLBACK_QUEUE_MULTITHREADED = $00000005;
+  {$EXTERNALSYM MFASYNC_CALLBACK_QUEUE_MULTITHREADED}
+  MFASYNC_CALLBACK_QUEUE_LONG_FUNCTION = $00000007;
   {$EXTERNALSYM MFASYNC_CALLBACK_QUEUE_LONG_FUNCTION}
-  MFASYNC_CALLBACK_QUEUE_PRIVATE_MASK = $FFFF0000;
+  MFASYNC_CALLBACK_QUEUE_PRIVATE_MASK  = $FFFF0000;
   {$EXTERNALSYM MFASYNC_CALLBACK_QUEUE_PRIVATE_MASK}
-  MFASYNC_CALLBACK_QUEUE_ALL          = MAXDW; // 0xFFFFFFFF
+  MFASYNC_CALLBACK_QUEUE_ALL           = MAXDW; // 0xFFFFFFFF
   {$EXTERNALSYM MFASYNC_CALLBACK_QUEUE_ALL}
 
 type
-  // MediaEventType = DWORD;
+  // MediaEventType
   PMediaEventType = ^MediaEventType;
   MediaEventType = DWord;
   {$EXTERNALSYM MediaEventType}
@@ -385,6 +405,15 @@ const
   {$EXTERNALSYM MEContentProtectionMetadata}
   MEDeviceThermalStateChanged             = MediaEventType(950);
   {$EXTERNALSYM MEDeviceThermalStateChanged}
+
+  //-------------------------------------------------------------------------
+  // MF reserves a range of events for internal and future use
+  //-------------------------------------------------------------------------
+
+  // <member name="MEReservedMax">
+  //     All event type codes up to and including this value are
+  //     reserved.
+  // </member>
   MEReservedMax                           = MediaEventType(10000);
   {$EXTERNALSYM MEReservedMax}
 
@@ -410,16 +439,22 @@ const
   {$EXTERNALSYM MFBYTESTREAM_HAS_SLOW_SEEK}
   MFBYTESTREAM_IS_PARTIALLY_DOWNLOADED     = $00000200;
   {$EXTERNALSYM MFBYTESTREAM_IS_PARTIALLY_DOWNLOADED}
-  //>= Windows 7
-  //#if (WINVER >= _WIN32_WINNT_WIN7)
-  MFBYTESTREAM_SHARE_WRITE                 = $00000400;
+
+  MFBYTESTREAM_SHARE_WRITE                 = $00000400;    // (WINVER >= _WIN32_WINNT_WIN7)
   {$EXTERNALSYM MFBYTESTREAM_SHARE_WRITE}
-  //#endif // (WINVER >= _WIN32_WINNT_WIN7)
-  //end >= Windows 7
+
+  MFBYTESTREAM_DOES_NOT_USE_NETWORK        = $00000800;    // (WINVER >= _WIN32_WINNT_WIN8)
+  {$EXTERNALSYM MFBYTESTREAM_DOES_NOT_USE_NETWORK}
+
   MFBYTESTREAM_SEEK_FLAG_CANCEL_PENDING_IO = $00000001;
   {$EXTERNALSYM MFBYTESTREAM_SEEK_FLAG_CANCEL_PENDING_IO}
 
-  //Interface IMFByteStream
+  // Interface IMFByteStream
+
+  //
+  // Byte Stream attributes (query the Byte Stream for IMFAttributes)
+  //
+
   MF_BYTESTREAM_ORIGIN_NAME                        : TGUID = '{fc358288-3cb6-460c-a424-b6681260375a}';
   {$EXTERNALSYM MF_BYTESTREAM_ORIGIN_NAME}
   MF_BYTESTREAM_CONTENT_TYPE                       : TGUID = '{fc358289-3cb6-460c-a424-b6681260375a}';
@@ -428,14 +463,24 @@ const
   {$EXTERNALSYM MF_BYTESTREAM_DURATION}
   MF_BYTESTREAM_LAST_MODIFIED_TIME                 : TGUID = '{fc35828b-3cb6-460c-a424-b6681260375a}';
   {$EXTERNALSYM MF_BYTESTREAM_LAST_MODIFIED_TIME}
+
   // >= Windows 7
   //#if (WINVER >= _WIN32_WINNT_WIN7)
   MF_BYTESTREAM_IFO_FILE_URI                       : TGUID = '{fc35828c-3cb6-460c-a424-b6681260375a}';
   {$EXTERNALSYM MF_BYTESTREAM_IFO_FILE_URI}
   MF_BYTESTREAM_DLNA_PROFILE_ID                    : TGUID = '{fc35828d-3cb6-460c-a424-b6681260375a}';
   {$EXTERNALSYM MF_BYTESTREAM_DLNA_PROFILE_ID}
+  MF_BYTESTREAM_EFFECTIVE_URL                      : TGUID = '{9AFA0209-89D1-42AF-8456-1DE6B562D691}';
+  {$EXTERNALSYM MF_BYTESTREAM_EFFECTIVE_URL}
+  MF_BYTESTREAM_TRANSCODED                         : TGUID = '{b6c5c282-4dc9-4db9-ab48-cf3b6d8bc5e0}';
+  {$EXTERNALSYM MF_BYTESTREAM_TRANSCODED}
   //#endif // (WINVER >= _WIN32_WINNT_WIN7)
   //end >= Windows 7
+
+
+  CLSID_MFByteStreamProxyClassFactory   : TGUID = '{770e8e77-4916-441c-a9a7-b342d0eebc71}';
+
+
 
   // Interface IMFByteStream
 type
@@ -444,11 +489,11 @@ type
 
   // PRGBQUAD = ^RGBQUAD;
   // RGBQUAD = DWORD;
-  // RGBQUAD is defined ins Winapi.Windows (Wingdi.h) and MfPack.MfTypes.
-  // To store a RGBQUAD in a DWORD, use procedure CopyRGBQuadToClrRef in MfPack.MfpUtils
+  // RGBQUAD is defined ins Winapi.Windows (Wingdi.h) and WinApi.WinApiTypes.pas
+  // To store a RGBQUAD in a DWORD, use procedure CopyRGBQuadToClrRef in WinApi.MediaFoundationApi.MfUtils.pas
 
   PMF_ATTRIBUTE_TYPE = ^_MF_ATTRIBUTE_TYPE;
-  _MF_ATTRIBUTE_TYPE    = (
+  _MF_ATTRIBUTE_TYPE = (
     MF_ATTRIBUTE_UINT32   = VT_UI4,
     MF_ATTRIBUTE_UINT64   = VT_UI8,
     MF_ATTRIBUTE_DOUBLE   = VT_R8,
@@ -463,20 +508,20 @@ type
 
 
   PMF_ATTRIBUTES_MATCH_TYPE = ^_MF_ATTRIBUTES_MATCH_TYPE;
-  _MF_ATTRIBUTES_MATCH_TYPE        = (
-     MF_ATTRIBUTES_MATCH_OUR_ITEMS    = 0,
-     MF_ATTRIBUTES_MATCH_THEIR_ITEMS  = 1,
-     MF_ATTRIBUTES_MATCH_ALL_ITEMS    = 2,
-     MF_ATTRIBUTES_MATCH_INTERSECTION = 3,
-     MF_ATTRIBUTES_MATCH_SMALLER      = 4
-  );
+  _MF_ATTRIBUTES_MATCH_TYPE = (
+    MF_ATTRIBUTES_MATCH_OUR_ITEMS    = 0,    // do all of our items exist in their store and have identical data?
+    MF_ATTRIBUTES_MATCH_THEIR_ITEMS  = 1,    // do all of their items exist in our store and have identical data?
+    MF_ATTRIBUTES_MATCH_ALL_ITEMS    = 2,    // do both stores have the same set of identical items?
+    MF_ATTRIBUTES_MATCH_INTERSECTION = 3,    // do the attributes that intersect match?
+    MF_ATTRIBUTES_MATCH_SMALLER      = 4     // do all the attributes in the type that has fewer attributes match?
+    );
   {$EXTERNALSYM _MF_ATTRIBUTES_MATCH_TYPE}
   MF_ATTRIBUTES_MATCH_TYPE = _MF_ATTRIBUTES_MATCH_TYPE;
   {$EXTERNALSYM MF_ATTRIBUTES_MATCH_TYPE}
 
 type
   PMF_ATTRIBUTE_SERIALIZE_OPTIONS = ^cwMF_ATTRIBUTE_SERIALIZE_OPTIONS;
-  cwMF_ATTRIBUTE_SERIALIZE_OPTIONS     = DWord;
+  cwMF_ATTRIBUTE_SERIALIZE_OPTIONS = DWord;
   {$EXTERNALSYM cwMF_ATTRIBUTE_SERIALIZE_OPTIONS}
   MF_ATTRIBUTE_SERIALIZE_OPTIONS = cwMF_ATTRIBUTE_SERIALIZE_OPTIONS;
   {$EXTERNALSYM MF_ATTRIBUTE_SERIALIZE_OPTIONS}
@@ -488,14 +533,14 @@ type
   cwBITMAPINFOHEADER = record
     biSize: DWORD;
     biWidth: LONG;
-     biHeight: LONG;
+    biHeight: LONG;
     biPlanes: WORD;
-     biBitCount: WORD;
-     biCompression: DWORD;
-     biSizeImage: DWORD;
-     biXPelsPerMeter: LONG;
+    biBitCount: WORD;
+    biCompression: DWORD;
+    biSizeImage: DWORD;
+    biXPelsPerMeter: LONG;
     biYPelsPerMeter: LONG;
-     biClrUsed: DWORD;
+    biClrUsed: DWORD;
     biClrImportant: DWORD;
   end;
   {$EXTERNALSYM cwBITMAPINFOHEADER}
@@ -948,12 +993,18 @@ type
 
   PMFBYTESTREAM_SEEK_ORIGIN = ^MFBYTESTREAM_SEEK_ORIGIN;
   _MFBYTESTREAM_SEEK_ORIGIN = (
-   	msoBegin                  = 0,
-   	msoCurrent                = (msoBegin  + 1));
+    msoBegin                  = 0,
+    msoCurrent                = (msoBegin  + 1));
   {$EXTERNALSYM _MFBYTESTREAM_SEEK_ORIGIN}
   MFBYTESTREAM_SEEK_ORIGIN = _MFBYTESTREAM_SEEK_ORIGIN;
   {$EXTERNALSYM MFBYTESTREAM_SEEK_ORIGIN}
 
+  //
+  // File access modes for the file creation functions (MFCreateFile and related
+  // functions in mfapi.h).
+  // Regardless of the access mode with which the file is opened, the sharing
+  // permissions will allow shared reading and deleting.
+  //
 
   PMF_FILE_ACCESSMODE = ^MF_FILE_ACCESSMODE;
   __MIDL___MIDL_itf_mfobjects_0000_0017_0001 = (
@@ -994,11 +1045,16 @@ const
 // >= Windows 7
 
 type
-
+  //
+  //  List IDs for IMFPluginControl
+  //
   PMF_Plugin_Type = ^MF_Plugin_Type;
   _MF_Plugin_Type            = (
-    MF_Plugin_Type_MFT         = 0,
-    MF_Plugin_Type_MediaSource = 1);
+    MF_Plugin_Type_MFT                 = 0,
+    MF_Plugin_Type_MediaSource         = 1,
+    MF_Plugin_Type_MFT_MatchOutputType = 2,
+    MF_Plugin_Type_Other               = DWORD(-1)
+  );
   {$EXTERNALSYM _MF_Plugin_Type}
   MF_Plugin_Type = _MF_Plugin_Type;
   {$EXTERNALSYM MF_Plugin_Type}
@@ -1346,8 +1402,15 @@ type
 
   // Interface IMFAsyncResult
   // ========================
-  // Provides information about the result of an asynchronous operation.
-  //
+  // <summary>
+  //     This interface is used to represent the result from an asynchronous
+  //     operation.
+  //     For most Media Foundation components and applications that need to
+  //     create an IMFAsyncResult implementation, MFCreateAsyncResult, which
+  //     instantiates the MF implementation of this interface, will suffice.
+  //     Any implementation of IMFAsyncResult must inherit from the
+  //     MFASYNCRESULT structure defined in mfapi.h
+  // </summary>
   PIMFAsyncResult = ^IMFAsyncResult;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFAsyncResult);'}
   {$EXTERNALSYM IMFAsyncResult}
@@ -1449,10 +1512,11 @@ type
 
   // Interface IMFRemoteAsyncCallback
   // ================================
-  // Used by the Microsoft Media Foundation proxy/stub DLL to marshal certain asynchronous method calls across process boundaries.
-  // Applications do not use or implement this interface.
-  // So, it's just here to complete the header translation, for your convenience...
-  //
+  // <summary>
+  //     Remote async callback function for use with
+  //     IMFMediaEventGenerator.RemoteBeginGetEvent.
+  //     Media Foundation applications need not implement this interface.
+  // </summary>
   PIMFRemoteAsyncCallback = ^IMFRemoteAsyncCallback;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFRemoteAsyncCallback);'}
   {$EXTERNALSYM IMFRemoteAsyncCallback}
@@ -1542,15 +1606,15 @@ type
     function GetElementCount(out pcElements: DWord): HResult; stdcall;
 
     function GetElement(const dwElementIndex: DWord;
-                        var ppUnkElement: IUnknown): HResult; stdcall;
+                        out ppUnkElement: PIUnknown): HResult; stdcall;
 
     function AddElement(pUnkElement: IUnknown): HResult; stdcall;
 
     function RemoveElement(const dwElementIndex: DWord;
-                           out ppUnkElement: IUnknown): HResult; stdcall;
+                           out ppUnkElement: PIUnknown): HResult; stdcall;
 
     function InsertElementAt(const dwIndex: DWord;
-                             out pUnknown_: IUnknown): HResult; stdcall;
+                             pUnknown_: IUnknown): HResult; stdcall;
 
     function RemoveAllElements(): HResult; stdcall;
 
@@ -1574,29 +1638,96 @@ type
   {$EXTERNALSYM IMFMediaEventQueue}
   IMFMediaEventQueue = interface(IUnknown)
   ['{36f846fc-2256-48b6-b58e-e2b638316581}']
-
+    // <summary>
+    //     Media Event Generator components that use the Media Event Queue
+    //     object should just forward IMFMediaEventGenerator::GetEvent
+    //     calls to this method on the Media Event Queue.
+    //     See IMFMediaEventGenerator::GetEvent parameter descriptions.
+    // </summary>
     function GetEvent(dwFlags: DWord;
                       out ppEvent: IMFMediaEvent): HResult; stdcall;
 
+    // <summary>
+    //     Media Event Generator components that use the Media Event Queue
+    //     object should just forward IMFMediaEventGenerator::BeginGetEvent
+    //     calls to this method on the Media Event Queue.
+    //     See IMFMediaEventGenerator::BeginGetEvent parameter descriptions.
+    // </summary>
     function BeginGetEvent(pCallback: IMFAsyncCallback;
                            punkState: IUnknown): HResult; stdcall;
 
+    // <summary>
+    //     Media Event Generator components that use the Media Event Queue
+    //     object should just forward IMFMediaEventGenerator::EndGetEvent
+    //     calls to this method on the Media Event Queue.
+    //     See IMFMediaEventGenerator::EndGetEvent parameter descriptions.
+    // </summary>
     function EndGetEvent(pResult: IMFAsyncResult;
                          out ppEvent: IMFMediaEvent): HResult; stdcall;
 
+    // <summary>
+    //     Queues the specified event on the Media Event Queue object.
+    //     This event will be retrievable using Begin/EndGetEvent or
+    //     GetEvent
+    // </summary>
+    // <param name="pEvent">
+    //     Pointer to the Media Event object to queue
+    // </param>
     function QueueEvent(pEvent: IMFMediaEvent): HResult; stdcall;
 
+    // <summary>
+    //     Queues an event with the specified event data on the Media Event
+    //     Queue object.
+    //     This event will be retrievable using Begin/EndGetEvent or
+    //     GetEvent
+    // </summary>
+    // <param name="met">
+    //     Event type
+    // </param>
+    // <param name="guidExtendedType">
+    //     Extended event type
+    // </param>
+    // <param name="hrStatus">
+    //     Event status
+    // </param>
+    // <param name="pvValue">
+    //     Event value
+    // </param>
     function QueueEventParamVar(met: MediaEventType;
-                                guidExtendedType: REFGUID;
+                                const guidExtendedType: REFGUID;
                                 hrStatus: HRESULT;
                                 pvValue: PROPVARIANT): HResult; stdcall;
 
+    // <summary>
+    //     Queues an event with the specified event data on the Media Event
+    //     Queue object.
+    //     This event will be retrievable using Begin/EndGetEvent or
+    //     GetEvent
+    // </summary>
+    // <param name="met">
+    //     Event type
+    // </param>
+    // <param name="guidExtendedType">
+    //     Extended event type
+    // </param>
+    // <param name="hrStatus">
+    //     Event status
+    // </param>
+    // <param name="pUnk">
+    //     Event value, specified as an IUnknown *
+    // </param>
     function QueueEventParamUnk(met: MediaEventType;
-                                guidExtendedType: REFGUID;
+                                const guidExtendedType: REFGUID;
                                 hrStatus: HRESULT;
                                 pUnk: IUnknown): HResult; stdcall;
 
+    // <summary>
+    //     Shutdown must be called when the component is done using the
+    //     Media Event Queue object to break circular references and
+    //     prevent memory leaks.
+    // </summary>
     function Shutdown(): HResult; stdcall;
+
   end;
   IID_IMFMediaEventQueue = IMFMediaEventQueue;
   {$EXTERNALSYM IID_IMFMediaEventQueue}
@@ -1618,15 +1749,33 @@ type
   IMFActivate = interface(IMFAttributes)
   ['{7FEE9E9A-4A89-47a6-899C-B6A53A70FB67}']
 
+    // <summary>
+    //     Creates the object that this activate represents.
+    //     The ActivateObject(...) method should always return the same instance of the object
+    //     until either ShutdownObject() or DetachObject() is called.
+    // </summary>
+    // <param name="riid">
+    //     The interface ID that the requested object will be QI'ed for
+    // </param>
+    // <param name="ppv">
+    //     Will contain the requested interface
+    // </param>
     function ActivateObject(const riid: REFIID;
                             out ppv): HResult; stdcall;
-    // Creates the object associated with this activation object.
 
+    // <summary>
+    //     Shuts down the internal represented object
+    //     (that is returned on ActivateObject(...))
+    //     and then releases all references to it.
+    // </summary>
     function ShutdownObject(): HResult; stdcall;
-    // Shuts down the created object.
 
+    // <summary>
+    //     Releases all references to the internal represented
+    //     object (without shutting it down.)
+    //     If this action is not supported, E_NOTIMPL should be returned.
+    // </summary>
     function DetachObject(): HResult; stdcall;
-    // Detaches the created object from the activation object.
 
    end;
   IID_IMFActivate = IMFActivate;
@@ -1659,14 +1808,14 @@ type
                                const clsid: CLSID): HResult; stdcall;
 
     function IsDisabled(pluginType: DWord;
-                        clsid: REFCLSID): HResult; stdcall;
+                        const clsid: REFCLSID): HResult; stdcall;
 
     function GetDisabledByIndex(pluginType: DWord;
                                 const index: DWord;
                                 out clsid: CLSID): HResult; stdcall;
 
     function SetDisabled(pluginType: DWord;
-                         clsid: REFCLSID;
+                         const clsid: REFCLSID;
                          disabled: BOOL): HResult; stdcall;
   end;
   IID_IMFPluginControl = IMFPluginControl;
@@ -1745,8 +1894,8 @@ type
   PMfStreamState = ^MF_STREAM_STATE;
   _MF_STREAM_STATE          = (
     MF_STREAM_STATE_STOPPED = 0,
-    MF_STREAM_STATE_PAUSED  = (MF_STREAM_STATE_STOPPED + 1),
-    MF_STREAM_STATE_RUNNING = (MF_STREAM_STATE_PAUSED + 1)
+    MF_STREAM_STATE_PAUSED  = 1,
+    MF_STREAM_STATE_RUNNING = 2
   );
   {$EXTERNALSYM _MF_STREAM_STATE}
   MF_STREAM_STATE = _MF_STREAM_STATE;
@@ -1812,7 +1961,7 @@ type
     function GetStreamCount(out pdwMuxStreamCount: DWORD): HResult; stdcall;
 
     function GetSample(dwMuxStreamIndex: DWORD;
-                       out ppSample: IMFSample): HResult; stdcall;
+                       out ppSample: PIMFSample): HResult; stdcall;
 
     function GetStreamConfiguration(): ULONGLONG; stdcall;
 
@@ -1839,6 +1988,43 @@ type
   end;
   IID_IMFSecureBuffer = IMFSecureBuffer;
   {$EXTERNALSYM IID_IMFSecureBuffer}
+
+
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFByteStreamProxyClassFactory);'}
+  {$EXTERNALSYM IMFByteStreamProxyClassFactory}
+  IMFByteStreamProxyClassFactory = interface(IUnknown)
+  ['{a6b43f84-5c0a-42e8-a44d-b1857a76992f}']
+    function CreateByteStreamProxy(pByteStream: IMFByteStream;
+                                   pAttributes: IMFAttributes;
+                                   const riid: REFIID;
+                                   {out} ppvObject: Pointer): HResult; stdcall;
+
+  end;
+  IID_IMFByteStreamProxyClassFactory = IMFByteStreamProxyClassFactory;
+  {$EXTERNALSYM IID_IMFByteStreamProxyClassFactory}
+
+
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSampleOutputStream);'}
+  {$EXTERNALSYM IMFSampleOutputStream}
+  IMFSampleOutputStream = interface(IUnknown)
+  ['{8feed468-6f7e-440d-869a-49bdd283ad0d}']
+    /// <summary>
+    ///     Begin async write operation.
+    /// </summary>
+    function BeginWriteSample(pSample: IMFSample;
+                              pCallback: IMFAsyncCallback;
+                              punkState: IUnknown): HResult; stdcall;
+
+    /// <summary>
+    ///     Complete async write operation.
+    /// </summary>
+    function EndWriteSample(pResult: IMFAsyncResult): HResult; stdcall;
+
+    function Close(): HResult; stdcall;
+
+  end;
+  {$EXTERNALSYM IID_IMFSampleOutputStream}
+
 
 
 

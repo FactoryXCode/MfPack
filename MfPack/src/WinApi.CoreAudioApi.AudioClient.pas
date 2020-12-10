@@ -22,7 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
-// 25/10/2020 Tony                IAudioClient, 2 & 3 update.
+// 08/12/2020 Tony                Added updates from SDK 10.0.19041.0 (IAudioClient 2 & 3)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -68,7 +68,7 @@ uses
   {WinApi}
   WinApi.WinApiTypes,
   WinApi.WinError,
-  WinApi.WinMM.MMReg,
+  WinApi.WinMM.MMReg,  // for WAVEFORMATEX
   WinApi.AudioMediaType,
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioSessionTypes;
@@ -178,7 +178,7 @@ type
   //                               Only option supported by AMBIX_BASIC format.
   //
   PAMBISONICS_TYPE = ^AMBISONICS_TYPE;
-  AMBISONICS_TYPE          = (
+  AMBISONICS_TYPE = (
     AMBISONICS_TYPE_FULL3D = 0
   );
   {$EXTERNALSYM AMBISONICS_TYPE}
@@ -1884,6 +1884,7 @@ const
   {$EXTERNALSYM AUDCLNT_S_THREAD_ALREADY_REGISTERED}
   AUDCLNT_S_POSITION_STALLED              = $88900003;  //AUDCLNT_SUCCESS($003);
   {$EXTERNALSYM AUDCLNT_S_POSITION_STALLED}
+
   {See: IAudioSessionControl2 interface}
   AUDCLNT_S_NO_SINGLE_PROCESS             = $8890000D;  //AUDCLNT_SUCCESS($00D);
   {$EXTERNALSYM AUDCLNT_S_NO_SINGLE_PROCESS}
