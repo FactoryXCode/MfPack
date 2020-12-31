@@ -10,7 +10,7 @@
 // Release date: 24-04-2019
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 // Description: This player version is based on the IMFMediaEngine interface,
 //
 // Company: FactoryX
@@ -464,6 +464,7 @@ begin
                     case gi_MediaEngine.pu_RenderingState of
                       rsPlaying: butPauseClick(Self);
                       rsStopped, rsPaused: butPlayClick(Self);
+                      rsInitialised: butPlayClick(Self);
                     end;
                   end;
     // Stop

@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 // Description: This class uses the IMFMediaEngine based on extended HTML5.
 //
 // Company: FactoryX
@@ -90,7 +90,7 @@ const
 type
 
   TRedrawStatus = (rdStarted, rdStopped);
-  TRenderingState = (rsPlaying, rsPaused, rsStopped, rsFlushed);
+  TRenderingState = (rsPlaying, rsPaused, rsStopped, rsFlushed, rsInitialised);
   TRequestMsg = (rMsgSetVolume,
                  rMsgSetBalance,
                  rMsgUpdateVideoStream,
@@ -967,6 +967,7 @@ begin
   if SUCCEEDED(hr) then
     begin
       pu_SourceURL := pwURL;
+      pu_RenderingState := rsInitialised;
     end;
 
 done:
