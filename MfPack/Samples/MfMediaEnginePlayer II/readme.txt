@@ -1,5 +1,5 @@
 MfMediaEnginePlayer
-Version: X 3.0.0
+Version: X 3.0.1
 Enigma release.
 
 Description: 
@@ -20,6 +20,6 @@ documentation, containing the complete information about MediaEnginePlayer.
 Project: Media Foundation - MFPack - Samples
 Project location: http://sourceforge.net/projects/MFPack
 First release date: 05-02-2016
-Final release date: 13-08-2020
+Final release date: 30-12-2020
 
 Copyright © FactoryX. All rights reserved.

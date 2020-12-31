@@ -9,7 +9,7 @@
 // Release date: 24-04-2019
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 // Description: This player version is based on the IMFMediaEngine and
 //              the TimedText interfaces for subtitles.
 //
@@ -223,13 +223,14 @@ begin
   lp.X := 0;
   lp.Y := 0;
   lo := pnlVideo.ClientToScreen(lp);
-  with FloatingForm do
-    begin
-      ParentPosition := lo;
-      ParentRect.Empty;
-      ParentRect.Width := pnlVideo.Width;
-      ParentRect.Height := pnlVideo.Height;
-    end;
+
+  // with FloatingForm do {Deprecated since version 10.3}
+
+  FloatingForm.ParentPosition := lo;
+  FloatingForm.ParentRect.Empty;
+  FloatingForm.ParentRect.Width := pnlVideo.Width;
+  FloatingForm.ParentRect.Height := pnlVideo.Height;
+
   SendMessage(ph_FloatingForm,
               WM_PARENTCHANGED,
               0,
@@ -268,12 +269,11 @@ end;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-
 procedure TFeMediaEnginePlayer.ResetInterface();
 begin
-  prbProgress.Position:= 0;
-  pnlControls.Enabled:= False;
-  mnuTakeScreenshot.Enabled:= False;
+  prbProgress.Position := 0;
+  pnlControls.Enabled := False;
+  mnuTakeScreenshot.Enabled := False;
 end;
 
 
@@ -285,8 +285,7 @@ begin
   // Because trackbar has no MouseUp event, jou can use this trick.
   //if GetAsyncKeyState(VK_LBUTTON) = 0 then
 
-    gi_MediaEngine.SetVolume(trbVolume.Position * 0.01);
-
+  gi_MediaEngine.SetVolume(trbVolume.Position * 0.01);
 end;
 
 
@@ -312,7 +311,6 @@ var
   crD: TRect;
 
 begin
-
   if (prbProgress <> Nil) then
     prbProgress.Max:= prbProgress.Width;
 
@@ -323,7 +321,6 @@ begin
       crD.top:= 0;
       crD.right:= pnlVideo.ClientWidth;
       crD.bottom:= pnlVideo.ClientHeight;
-
       gi_MediaEngine.ResizeVideo(crD);
     end;
 end;
@@ -609,6 +606,7 @@ begin
                     case gi_MediaEngine.pu_RenderingState of
                       rsPlaying: butPauseClick(Self);
                       rsStopped, rsPaused: butPlayClick(Self);
+                      rsInitialised: butPlayClick(Self);
                     end;
                   end;
     // Stop

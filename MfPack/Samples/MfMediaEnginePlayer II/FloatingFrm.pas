@@ -9,7 +9,7 @@
 // Release date: 24-04-2019
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 // Description: Floating form for subtitles.
 //
 // Company: FactoryX

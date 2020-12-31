@@ -9,7 +9,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 // Description: TimedText callback implementation.
 //
 // Company: FactoryX
@@ -24,7 +24,7 @@
 // 13/08/2020 All                 Enigma release. New layout and namespaces
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires MfAdditional (XE) 2.6.4 (or higher) and MfComponents to be installed!
+// Remarks: Requires WinApi.MediaFoundationApi.MfMetLib.pas version 2.6.4 (or higher) and MfComponents to be installed!
 //          All TimedText interfaces require Windows 10 or later.
 //
 // Related objects: -

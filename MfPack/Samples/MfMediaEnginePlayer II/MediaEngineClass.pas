@@ -9,7 +9,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 // Description: This class uses the IMFMediaEngine based on HTML 5 and
 //              the TimedText interfaces for subtitles.
 //
@@ -96,7 +96,7 @@ const
 
 type
   TRedrawStatus = (rdStarted, rdStopped);
-  TRenderingState = (rsPlaying, rsPaused, rsStopped, rsFlushed);
+  TRenderingState = (rsPlaying, rsPaused, rsStopped, rsFlushed, rsInitialised);
   TRequestMsg = (rMsgSetVolume,
                  rMsgSetBalance,
                  rMsgUpdateVideoStream,
@@ -864,7 +864,7 @@ begin
     MF_MEDIA_ENGINE_EVENT_FRAMESTEPCOMPLETED:     OnFrameStepCompleted(event);
 
     // The Media Engine's Load algorithm is waiting to start.
-    // Event Parameter	   Description
+    // Event Parameter     Description
     // ~~~~~~~~~~~~~~~     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // param1              A handle to a waitable event, of type HANDLE.
     // param2              Zero.
@@ -1047,6 +1047,7 @@ begin
   if SUCCEEDED(hr) then
     begin
       pu_SourceURL := pwURL;
+      pu_RenderingState := rsInitialised;
     end;
 
   // Get the subtitles, if no file exists, continue.
@@ -1167,7 +1168,7 @@ begin
 end;
 
 // Use framestep after pause, to get an accurate playback position
-// See: https://docs.microsoft.com/nl-nl/windows/win32/api/mfmediaengine/nf-mfmediaengine-imfmediaengine-getcurrenttime
+// See: https://docs.microsoft.com/en-us/windows/win32/api/mfmediaengine/nf-mfmediaengine-imfmediaengine-getcurrenttime
 function TcMediaEngine.FrameStep(goForward: BOOL): HResult;
 begin
   Result := pr_MediaEngine.FrameStep(goForward);
