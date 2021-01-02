@@ -609,7 +609,7 @@ type
       VT_BSTR:                    (bstrVal: BSTR);
       VT_BSTR_BLOB:               (bstrblobVal: BSTRBLOB);
       VT_BLOB,
-      VT_BLOBOBJECT:              (blob: BLOB);
+      VT_BLOB_OBJECT:             (blob: BLOB);
       VT_LPSTR:                   (pszVal: LPSTR);
       VT_LPWSTR:                  (pwszVal: LPWSTR);
       VT_UNKNOWN:                 (punkVal: PIUnknown);
