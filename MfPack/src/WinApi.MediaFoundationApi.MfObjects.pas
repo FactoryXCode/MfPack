@@ -2023,8 +2023,8 @@ type
     function Close(): HResult; stdcall;
 
   end;
+  IID_IMFSampleOutputStream = IMFSampleOutputStream;
   {$EXTERNALSYM IID_IMFSampleOutputStream}
-
 
 
 
