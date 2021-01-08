@@ -10,7 +10,7 @@
 // Release date: 18-12-2015
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: DeviceTopology API Utils, provides helpers for the DeviceTopology API.
 //
 // Organisation: FactoryX
@@ -82,7 +82,8 @@ uses
   {CoreAudioApi}
 	WinApi.CoreAudioApi.MMDeviceApi,
   WinApi.CoreAudioApi.DeviceTopology,
-  WinApi.CoreAudioApi.AudioClient {WASAPI};
+  WinApi.CoreAudioApi.AudioClient {WASAPI},
+  WinApi.CoreAudioApi.Functiondiscoverykeys_devpkey;
 
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
