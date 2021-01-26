@@ -24,6 +24,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
 // 10/10/2020 Tony                Fixed some issues, see updt 101020
+// 26/01/2021 Tony                Fixed MFT Register functions.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -2254,14 +2255,14 @@ const
   // The MFT is optimized for transcoding and should not be used for playback.
   // Requires >= Windows 7.
   //
-  function MFTRegister(clsidMFT: CLSID;  // The CLSID of the MFT. The MFT must also be registered as a COM object using the same CLSID.
-                       guidCategory: TGuid; // GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY .
+  function MFTRegister(const clsidMFT: CLSID;  // The CLSID of the MFT. The MFT must also be registered as a COM object using the same CLSID.
+                       const guidCategory: TGuid; // GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY .
                        pszName: LPCWSTR;  // Wide-character string that contains the friendly name of the MFT.
                        Flags: UINT32;  // Bitwise OR of zero or more of the following flags from the MFT_ENUM_FLAG enumeration.
-                       const cInputTypes: UINT32;  // Number of elements in the pInputTypes array.
-                       const pInputTypes: PMFT_REGISTER_TYPE_INFO; // Pointer to an array of MFT_REGISTER_TYPE_INFO structures. Each member of the array specifies an input format that the MFT supports. This parameter can be Nil.
-                       const cOutputTypes: UINT32; // Number of elements in the pOutputTypes array.
-                       const pOutputTypes: PMFT_REGISTER_TYPE_INFO; // Pointer to an array of MFT_REGISTER_TYPE_INFO structures. Each member of the array specifies an input format that the MFT supports. This parameter can be Nil.
+                       cInputTypes: UINT32;  // Number of elements in the pInputTypes array.
+                       pInputTypes: PMFT_REGISTER_TYPE_INFO; // Pointer to an array of MFT_REGISTER_TYPE_INFO structures. Each member of the array specifies an input format that the MFT supports. This parameter can be Nil.
+                       cOutputTypes: UINT32; // Number of elements in the pOutputTypes array.
+                       pOutputTypes: PMFT_REGISTER_TYPE_INFO; // Pointer to an array of MFT_REGISTER_TYPE_INFO structures. Each member of the array specifies an input format that the MFT supports. This parameter can be Nil.
                        pAttributes: IMFAttributes): HRESULT; stdcall; // Pointer to the IMFAttributes interface of an attribute store that contains additional registry information. This parameter can be Nil.
   {$EXTERNALSYM MFTRegister}
 
@@ -2273,13 +2274,13 @@ const
   // Registers a Media Foundation transform (MFT) in the caller's process.
 
   function MFTRegisterLocal(pClassFactory: IClassFactory; // A pointer to the IClassFactory interface of a class factory object. The class factory creates the MFT.
-                            guidCategory: REFGUID; // A GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY.
+                            const guidCategory: REFGUID; // A GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY.
                             pszName: LPCWSTR; // A wide-character null-terminated string that contains the friendly name of the MFT.
                             Flags: UINT32; // A bitwise OR of zero or more flags from the MFT_ENUM_FLAG enumeration.
-                            const cInputTypes: UINT32; // The number of elements in the pInputTypes array.
-                            const pInputTypes: PMFT_REGISTER_TYPE_INFO; // A pointer to an array of MFT_REGISTER_TYPE_INFO structures. Each member of the array specifies an input format that the MFT supports. This parameter can be Nil if cInputTypes is zero.
-                            const cOutputTypes: UINT32; // The number of elements in the pOutputTypes array.
-                            const pOutputTypes: PMFT_REGISTER_TYPE_INFO): HResult; stdcall; // A pointer to an array of MFT_REGISTER_TYPE_INFO structures. Each member of the array defines an output format that the MFT supports. This parameter can be Nil if cOutputTypes is zero.
+                            cInputTypes: UINT32; // The number of elements in the pInputTypes array.
+                            pInputTypes: PMFT_REGISTER_TYPE_INFO; // A pointer to an array of MFT_REGISTER_TYPE_INFO structures. Each member of the array specifies an input format that the MFT supports. This parameter can be Nil if cInputTypes is zero.
+                            cOutputTypes: UINT32; // The number of elements in the pOutputTypes array.
+                            pOutputTypes: PMFT_REGISTER_TYPE_INFO): HResult; stdcall; // A pointer to an array of MFT_REGISTER_TYPE_INFO structures. Each member of the array defines an output format that the MFT supports. This parameter can be Nil if cOutputTypes is zero.
   {$EXTERNALSYM MFTRegisterLocal}
 
   // Unregister locally registered MFT
@@ -2290,14 +2291,14 @@ const
 
 
   // Register an MFT class in-process, by CLSID
-  function MFTRegisterLocalByCLSID(clisdMFT: REFCLSID; // The class identifier (CLSID) of the MFT.
-                                   guidCategory: REFGUID; // A GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY.
+  function MFTRegisterLocalByCLSID(const clisdMFT: REFCLSID; // The class identifier (CLSID) of the MFT.
+                                   const guidCategory: REFGUID; // A GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY.
                                    pszName: LPCWSTR;  // A wide-character null-terminated string that contains the friendly name of the MFT.
                                    Flags: UINT32; // A bitwise OR of zero or more flags from the MFT_ENUM_FLAG enumeration.
-                                   const cInputTypes: UINT32; // The number of elements in the pInputTypes array.
-                                   const pInputTypes: PMFT_REGISTER_TYPE_INFO; // A pointer to an array of MFT_REGISTER_TYPE_INFO structures.
-                                   const cOutputTypes: UINT32; // The number of elements in the pOutputTypes array.
-                                   const pOutputTypes: PMFT_REGISTER_TYPE_INFO // A pointer to an array of MFT_REGISTER_TYPE_INFO structures.
+                                   cInputTypes: UINT32; // The number of elements in the pInputTypes array.
+                                   pInputTypes: PMFT_REGISTER_TYPE_INFO; // A pointer to an array of MFT_REGISTER_TYPE_INFO structures.
+                                   cOutputTypes: UINT32; // The number of elements in the pOutputTypes array.
+                                   pOutputTypes: PMFT_REGISTER_TYPE_INFO // A pointer to an array of MFT_REGISTER_TYPE_INFO structures.
                                    ): HResult; stdcall;
   {$EXTERNALSYM MFTRegisterLocalByCLSID}
 
@@ -2309,7 +2310,7 @@ const
 
 
   // Starting in Windows 7, applications should use the MFTEnumEx function instead!
-  function MFTEnum(guidCategory: TGUID;   // GUID that specifies the category of MFTs to enumerate.
+  function MFTEnum(const guidCategory: TGUID;   // GUID that specifies the category of MFTs to enumerate.
                    Flags: UINT32;         // Reserved. Must be zero.
                    pInputType: PMFT_REGISTER_TYPE_INFO;  // Pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an input media type to match.
                                                          // This parameter can be Nil. If Nil, all input types are matched.
@@ -2320,7 +2321,7 @@ const
                                                    // To get information about a particular MFT from its CLSID, call MFTGetInfo.
                                                    // The caller must free the memory for the array by calling CoTaskMemFree.
                                                    // NOTE:  When using pointer array calculations, POINTERMATH should be turned ON.
-                                                   //        See MfPack.inc
+                                                   //        See WinApiTypes.inc
                    out pcMFTs: UINT32): HResult; stdcall;  // Receives the number of elements in the ppclsidMFT array. The value can be zero.
   {$EXTERNALSYM MFTEnum}
 
