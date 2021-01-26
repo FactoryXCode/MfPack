@@ -1606,15 +1606,15 @@ type
 
     function GetElementCount(out pcElements: DWord): HResult; stdcall;
 
-    function GetElement(const dwElementIndex: DWord;
-                        ppUnkElement: PIUnknown): HResult; stdcall;
+    function GetElement(dwElementIndex: DWord;
+                        out ppUnkElement: PIUnknown): HResult; stdcall;
 
     function AddElement(pUnkElement: IUnknown): HResult; stdcall;
 
-    function RemoveElement(const dwElementIndex: DWord;
-                           ppUnkElement: PIUnknown): HResult; stdcall;
+    function RemoveElement(dwElementIndex: DWord;
+                           out ppUnkElement: PIUnknown): HResult; stdcall;
 
-    function InsertElementAt(const dwIndex: DWord;
+    function InsertElementAt(dwIndex: DWord;
                              pUnknown_: IUnknown): HResult; stdcall;
 
     function RemoveAllElements(): HResult; stdcall;
