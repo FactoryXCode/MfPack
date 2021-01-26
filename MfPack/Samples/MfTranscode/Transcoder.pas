@@ -69,6 +69,7 @@ uses
   WinApi.Messages,
   WinApi.WinApiTypes,
   WinApi.ComBaseApi,
+  WinApi.Unknwn,
   {System}
   System.SysUtils,
   {ActiveX}
@@ -229,7 +230,7 @@ var
   hr: HResult;
   dwMTCount: DWORD;
   pAvailableTypes: IMFCollection;
-  pUnkAudioType: IUnknown;
+  pUnkAudioType: PIUnknown;
   pAudioType: IMFMediaType;
   pAudioAttrs: IMFAttributes;
 
@@ -264,7 +265,7 @@ begin
 
   if SUCCEEDED(hr) then
     hr := pAvailableTypes.GetElement(0,
-                                     @pUnkAudioType);
+                                     pUnkAudioType);
 
   if SUCCEEDED(hr) then
     hr := pUnkAudioType.QueryInterface(IID_IMFMediaType,

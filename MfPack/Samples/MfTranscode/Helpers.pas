@@ -70,6 +70,7 @@ uses
   WinApi.WinApiTypes,
   WinApi.ComBaseApi,
   WinApi.MMReg,
+  WinApi.Unknwn,
   {System}
   System.SysUtils,
   {MediaFoundationApi}
@@ -239,7 +240,7 @@ function GetPresentationDescriptorFromTopology(pTopology: IMFTopology;
 var
   hr: HResult;
   pCollection: IMFCollection;
-  pUnk: IUnknown;
+  pUnk: PIUnknown;
   pNode: IMFTopologyNode;
   pPD: IMFPresentationDescriptor;
 
@@ -257,7 +258,7 @@ begin
   // object in the collection.
 
   hr := pCollection.GetElement(0,
-                               @pUnk);
+                               pUnk);
   if FAILED(hr) then
     goto done;
 
