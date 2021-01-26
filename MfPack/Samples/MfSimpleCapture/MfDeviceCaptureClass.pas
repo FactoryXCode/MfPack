@@ -9,7 +9,7 @@
 // Release date: 08-02-2018
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 //
 // Description: This is the basic class of MfSimpleCapture,
 //              containing the necessary methodes to capture media streams.
@@ -24,6 +24,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 26/01/2021 Tony                Update to 3.01
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
@@ -331,7 +332,7 @@ begin
   hr := s_ok;
 
   // release the video display object
-  m_pVideoDisplay := Nil;
+  SafeRelease(m_pVideoDisplay);
 
   // First close the media session.
   if not Assigned(m_pSession) then
@@ -366,9 +367,9 @@ begin
     end;
 
   // Release the global interfaces
-  m_pSession := Nil;
-  m_pSource := Nil;
-  m_pActivate := Nil;
+  SafeRelease(m_pSession);
+  SafeRelease(m_pSource);
+  SafeRelease(m_pActivate);
   State := Closed;
   // Unregister device notification
   hr := UnRegisterForDeviceNotification(m_hdevnotify);
@@ -752,7 +753,7 @@ begin
     MF_TOPOSTATUS_STARTED_SOURCE: {} ;
     else
       hr := E_UNEXPECTED; // possible error  -1072875802 ($C00D36E6) The requested attribute was not found.
-  end;                   // this error can be ignored, because probably the topology is not completely set at this point.
+  end;                    // this error can be ignored, because probably the topology is not completely set at this point.
   Result := hr;
 end;
 
@@ -1034,10 +1035,8 @@ begin
 
   // Release the current instance of the player (if any).
   Clear();
-  // Release the interfaces
-  m_pSession := Nil;
-  m_pSource := Nil;
-  m_pActivate := Nil;
+  // Close session and release interfaces
+  CloseSession();
 
   // Prepare the device
   // ==================

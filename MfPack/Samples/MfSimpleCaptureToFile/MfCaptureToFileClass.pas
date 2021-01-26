@@ -10,7 +10,7 @@
 // Release date: 09-02-2018
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 //
 // Description: Device capture class based on MFCaptureToFile example
 //
@@ -23,6 +23,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 26/01/2021 Tony                Fixed some issues & code cleaning
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
@@ -474,8 +475,6 @@ var
 
 begin
 
-  pAttributes := Nil;
-
   hr := MFCreateAttributes(pAttributes,
                            2);
 
@@ -488,7 +487,6 @@ begin
                                              pAttributes,
                                              m_pReader);
 
-  SafeRelease(pAttributes);
   Result := hr;
 end;
 
@@ -508,7 +506,6 @@ var
 begin
 
   sink_stream := 0;
-  pType := Nil;
 
   hr:= ConfigureSourceReader(m_pReader);
 
@@ -532,7 +529,7 @@ begin
       hr := MFTRegisterLocalByCLSID(CLSID_CColorConvertDMO,
                                     MFT_CATEGORY_VIDEO_PROCESSOR,
                                     '',
-                                    UINT32(MFT_ENUM_FLAG_SYNCMFT),
+                                    MFT_ENUM_FLAG_SYNCMFT,
                                     0,
                                     Nil,
                                     0,
@@ -564,8 +561,8 @@ begin
   if Assigned(m_pWriter) then
     hr := m_pWriter.Finalize();
 
-  m_pWriter := Nil;
-  m_pReader := Nil;
+  SafeRelease(m_pWriter);
+  SafeRelease(m_pReader);
 
   CoTaskMemFree(m_pwszSymbolicLink);
   m_pwszSymbolicLink := Nil;
@@ -590,62 +587,61 @@ var
 
 begin
 
-  pSource:= Nil;
 
   //FCritSec.Enter;
 
   // Create the media source for the device.
-  hr:= pActivate.ActivateObject(IID_IMFMediaSource,
-                                pSource);
+  hr := pActivate.ActivateObject(IID_IMFMediaSource,
+                                 pSource);
 
   // Get the symbolic link. This is needed to handle device-
   // loss notifications. (See CheckDeviceLost.)
 
   if SUCCEEDED(hr) then
-    hr:= pActivate.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
-                                      m_pwszSymbolicLink,
-                                      pcchLength);
+    hr := pActivate.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
+                                       m_pwszSymbolicLink,
+                                       pcchLength);
   if SUCCEEDED(hr) then
     hr:= OpenMediaSource(pSource);
 
   // Create the sink writer
   if SUCCEEDED(hr) then
-    hr:= MFCreateSinkWriterFromURL(pwszFileName,
-                                   Nil,
-                                   Nil,
-                                   m_pWriter);
+    hr := MFCreateSinkWriterFromURL(pwszFileName,
+                                    Nil,
+                                    Nil,
+                                    m_pWriter);
 
   // Set up the encoding parameters.
    if SUCCEEDED(hr) then
-     hr:= ConfigureCapture(param);
+     hr := ConfigureCapture(param);
 
 
    if SUCCEEDED(hr) then
      begin
-        m_bFirstSample:= True;
-        m_llBaseTime:= 0;
+        m_bFirstSample := True;
+        m_llBaseTime := 0;
 
         // Request the first video frame.
         // This function will fire the OnReadSample events.
-        hr:= m_pReader.ReadSample(DWord(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
-                                  0,
-                                  Nil,
-                                  Nil,
-                                  Nil,
-                                  Nil);  // No sample needed for first time.
+        hr := m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                   0,
+                                   Nil,
+                                   Nil,
+                                   Nil,
+                                   Nil);  // No sample needed for first time.
      end;
 
 
     // Begin writing (must be initialized before any atempt by the sink is made to write data to the file.)
     if SUCCEEDED(hr) then
       begin
-        State:= State_Capturing;
-        hr:= m_pWriter.BeginWriting();
+        State := State_Capturing;
+        hr := m_pWriter.BeginWriting();
       end;
 
     //FCritSec.Leave;
 
-    Result:= hr;
+    Result := hr;
 end;
 
 //------------------------------------------------------------------------------
@@ -672,8 +668,8 @@ begin
 
   //FCritSec.Leave;
 
-  m_pWriter := Nil;
-  m_pReader := Nil;
+  SafeRelease(m_pWriter);
+  SafeRelease(m_pReader);
 
   Result := hr;
 end;
@@ -686,11 +682,11 @@ var
 begin
   //FCritSec.Enter;
 
-  bIsCapturing:= (m_pWriter <> Nil) ;
+  bIsCapturing := (m_pWriter <> Nil) ;
 
   //FCritSec.Leave;
 
-  Result:= bIsCapturing;
+  Result := bIsCapturing;
 end;
 
 //------------------------------------------------------------------------------
@@ -736,7 +732,7 @@ begin
   // Compare the device name with the symbolic link.
 
   if Assigned(m_pwszSymbolicLink) then
-    if (StrComp(m_pwszSymbolicLink, pDi.dbcc_name) = 0) then
+    if (StrComp(m_pwszSymbolicLink, @pDi.dbcc_name) = 0) then
       pbDeviceLost := True;
 
 done:
@@ -791,30 +787,28 @@ var
 
 begin
 
-  pAttributes:= Nil;
-
   Clear();
 
   // Initialize an attribute store. We will use this to
   // specify the enumeration parameters.
 
-  hr:= MFCreateAttributes(pAttributes,
-                          1);
+  hr := MFCreateAttributes(pAttributes,
+                           1);
 
   // Ask for source type = video capture devices
   if SUCCEEDED(hr) then
-    hr:= pAttributes.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
-                             MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
+    hr := pAttributes.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
+                              MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
 
   // Enumerate devices.
 
   if SUCCEEDED(hr) then
     begin
-      hr:= MFEnumDeviceSources(pAttributes, {in}
-                               m_ppDevices, {out}
-                               m_cDevices); {out}
+      hr := MFEnumDeviceSources(pAttributes, {in}
+                                m_ppDevices, {out}
+                                m_cDevices); {out}
     end;
-  Result:= hr;
+  Result := hr;
 end;
 
 //
@@ -824,16 +818,16 @@ begin
 
   if (index >= Count()) then
     begin
-      Result:= E_INVALIDARG;
+      Result := E_INVALIDARG;
       Exit;
     end;
 
 {$POINTERMATH ON}
 
-  ppActivate:= m_ppDevices[index];
+  ppActivate := m_ppDevices[index];
 
 {$POINTERMATH OFF}
-  Result:=  S_OK;
+  Result :=  S_OK;
 end;
 
 //
@@ -850,7 +844,7 @@ begin
 
   if (index >= Count()) then
     begin
-      hr:= E_INVALIDARG;
+      hr := E_INVALIDARG;
       goto Done;
     end;
 
@@ -861,7 +855,7 @@ begin
 {$POINTERMATH OFF}
 
 done:
-  Result:= hr;
+  Result := hr;
 end;
 
 
@@ -890,9 +884,8 @@ label
   Done;
 
 begin
-  bUseNativeType:= False;
-  subtype:= GUID_NULL;
-  pType:= Nil;
+  bUseNativeType := False;
+  subtype := GUID_NULL;
 
   // If the source's native format matches any of the formats in
   // the list, prefer the native format.
@@ -903,14 +896,14 @@ begin
   // camera's output format. That is outside the scope of this
   // sample, however.
 
-  hr:= pReader.GetNativeMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
-                                  0,  // Type index
-                                  pType);
+  hr := pReader.GetNativeMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
+                                   0,  // Type index
+                                   pType);
 
   if FAILED(hr) then
     goto Done;
 
-  hr:= pType.GetGUID(MF_MT_SUBTYPE,
+  hr := pType.GetGUID(MF_MT_SUBTYPE,
                       subtype);
 
   if FAILED(hr) then
@@ -922,15 +915,15 @@ begin
 
 
 
-  for _i:= 0 to SizeOf(subtypes) -1 do
+  for _i := 0 to SizeOf(subtypes) - 1 do
     begin
       if IsEqualGuid(subtype, subtypes[_i]^) then
         begin
-          hr:= pReader.SetCurrentMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
-                                           0,
-                                           pType);
+          hr := pReader.SetCurrentMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
+                                            0,
+                                            pType);
 
-          bUseNativeType:= True;
+          bUseNativeType := True;
           Break;
         end;
     end;
@@ -941,17 +934,17 @@ begin
       // output a compressed type such as MJPEG or DV.
 
       // Try adding a decoder.
-      for _i:= 0 to Length(subtypes) -1 do
+      for _i := 0 to Length(subtypes) - 1 do
         begin
-            hr:= pType.SetGUID(MF_MT_SUBTYPE,
-                               subtypes[_i]^);
+            hr := pType.SetGUID(MF_MT_SUBTYPE,
+                                subtypes[_i]^);
 
             if FAILED(hr) then
               Break;
 
-            hr:= pReader.SetCurrentMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
-                                             0,
-                                             pType);
+            hr := pReader.SetCurrentMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
+                                              0,
+                                              pType);
 
             if SUCCEEDED(hr) then
               Break;
@@ -974,47 +967,45 @@ var
 
 begin
 
-  pType2:= Nil;
-
-  hr:= MFCreateMediaType(pType2);
+  hr := MFCreateMediaType(pType2);
 
   if SUCCEEDED(hr) then
-    hr:= pType2.SetGUID(MF_MT_MAJOR_TYPE,
-                        MFMediaType_Video);
+    hr := pType2.SetGUID(MF_MT_MAJOR_TYPE,
+                         MFMediaType_Video);
 
   if SUCCEEDED(hr) then
-    hr:= pType2.SetGUID(MF_MT_SUBTYPE,
-                        params.subtype);
+    hr := pType2.SetGUID(MF_MT_SUBTYPE,
+                         params.subtype);
 
   if SUCCEEDED(hr) then
-    hr:= pType2.SetUINT32(MF_MT_AVG_BITRATE,
-                          params.bitrate);
+    hr := pType2.SetUINT32(MF_MT_AVG_BITRATE,
+                           params.bitrate);
 
   if SUCCEEDED(hr) then
-    hr:= CopyAttribute(pType,
-                       pType2,
-                       MF_MT_FRAME_SIZE);
+    hr := CopyAttribute(pType,
+                        pType2,
+                        MF_MT_FRAME_SIZE);
 
   if SUCCEEDED(hr) then
-    hr:= CopyAttribute(pType,
-                       pType2,
-                       MF_MT_FRAME_RATE);
+    hr := CopyAttribute(pType,
+                        pType2,
+                        MF_MT_FRAME_RATE);
 
   if SUCCEEDED(hr) then
-    hr:= CopyAttribute(pType,
-                       pType2,
-                       MF_MT_PIXEL_ASPECT_RATIO);
+    hr := CopyAttribute(pType,
+                        pType2,
+                        MF_MT_PIXEL_ASPECT_RATIO);
 
   if SUCCEEDED(hr) then
-    hr:= CopyAttribute(pType,
-                       pType2,
-                       MF_MT_INTERLACE_MODE);
+    hr := CopyAttribute(pType,
+                        pType2,
+                        MF_MT_INTERLACE_MODE);
 
   if SUCCEEDED(hr) then
-    hr:= pWriter.AddStream(pType2,
-                           pdwStreamIndex);
+    hr := pWriter.AddStream(pType2,
+                            pdwStreamIndex);
 
-  Result:= hr;
+  Result := hr;
 end;
 
 
@@ -1034,15 +1025,15 @@ begin
 
   PropVariantInit(pvar);
 
-  hr:= pSrc.GetItem(key,
-                    pvar);
+  hr := pSrc.GetItem(key,
+                     pvar);
 
   if SUCCEEDED(hr) then
-    hr:= pDest.SetItem(key,
-                       pvar);
+    hr := pDest.SetItem(key,
+                        pvar);
 
   PropVariantClear(pvar);
-  Result:= hr;
+  Result := hr;
 end;
 
 

@@ -9,7 +9,7 @@
 // Release date: 08-02-2018
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 //
 // Description: This is the basic class of MfSimpleCapture,
 //              containing the necessary methodes to capture media streams.

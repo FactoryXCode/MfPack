@@ -1,6 +1,6 @@
-MFSimpleCapture
+MfSimpleCaptureToFile
 Version: X 3.0.1
-Enigma release.
+Enigma release #3.
 
 
 NOTES: 
@@ -9,8 +9,7 @@ NOTES:
  - Requires Windows 7 or later.
  - Minimum supported MfPack version: 3.0.0
 
-This example shows, how you have to implement capturing
-within a session.
+Demonstrates how to capture video from camera to a file within a session.
 
 Project: Media Foundation - MFPack - Samples
 Project location: http://sourceforge.net/projects/MFPack

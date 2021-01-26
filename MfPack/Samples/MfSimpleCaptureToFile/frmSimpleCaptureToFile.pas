@@ -10,7 +10,7 @@
 // Release date: 26-01-2018
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 //
 // Description: Main window
 //
@@ -23,6 +23,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 26/01/2021 Tony                Fixed some issues & code cleaning
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
@@ -233,12 +234,12 @@ procedure TFrm_SimpleCapture.FormCreate(Sender: TObject);
 var
   hr: HRESULT;  // For debugging issues only
 begin
-  bAppIsClosing:= False;
+  bAppIsClosing := False;
   // Get the capture engine
-  hr:= GetFmCapture();
+  hr := GetFmCapture();
   // Get the capture device list
   if SUCCEEDED(hr) then
-    hr:= UpdateDeviceList();
+    hr := UpdateDeviceList();
 
   if FAILED(hr) then
     ShowMessage('Function UpdateDeviceList() Failed!');
@@ -265,7 +266,7 @@ begin
   if Assigned(MfDeviceList) then
     begin
       cbxSelectDevice.Clear;
-      szFriendlyName:= Nil;
+      szFriendlyName := Nil;
       MfDeviceList.Clear();
 
       hr:= MfDeviceList.EnumerateDevices();
@@ -273,11 +274,11 @@ begin
       if FAILED(hr) then
         goto Done;
 
-      for iDevice:= 0 to MfDeviceList.Count() -1 do
+      for iDevice := 0 to MfDeviceList.Count() - 1 do
         begin
           // Get the friendly name of the device.
-          hr:= MfDeviceList.GetDeviceName(iDevice,
-                                          szFriendlyName);
+          hr := MfDeviceList.GetDeviceName(iDevice,
+                                           szFriendlyName);
 
           if FAILED(hr) then
             goto Done;
@@ -287,12 +288,12 @@ begin
 
           // The list might be sorted, so the list index is not always the same as the
           // array index. Therefore, set the array index as item data.
-          cbxSelectDevice.ItemIndex:= iDevice;
+          cbxSelectDevice.ItemIndex := iDevice;
 
           CoTaskMemFree(szFriendlyName);
-          szFriendlyName:= Nil;
+          szFriendlyName := Nil;
         end;
-      cbxSelectDevice.ItemIndex:= 0;
+      cbxSelectDevice.ItemIndex := 0;
     end
   else
     hr:= E_FAIL;
@@ -327,7 +328,7 @@ begin
   hr:= MfDeviceList.GetDevice(iListIndex,
                               ppActivate);
 
-  Result:= hr;
+  Result := hr;
 end;
 
 
@@ -388,14 +389,14 @@ var
   hr: HRESULT; // For debugging issues only, discard compiler messages.
 
 begin
-  hr:= S_OK;
+  hr := S_OK;
 
   if (MfCaptureToFileEngine.State = State_Capturing) then
-    hr:= MfCaptureToFileEngine.EndCaptureSession();
+    hr := MfCaptureToFileEngine.EndCaptureSession();
 
 
   if SUCCEEDED(hr) then
-    hr:= UpdateDeviceList();
+    hr := UpdateDeviceList();
 
   // NOTE: Updating the device list releases the existing IMFActivate
   // pointers. This ensures that the current instance of the video capture
@@ -409,21 +410,21 @@ end;
 
 function TFrm_SimpleCapture.GetFmCapture(): HRESULT;
 begin
-  Result:= E_FAIL;
+  Result := E_FAIL;
 
   // Create the devicelist object
   if not Assigned(MfDeviceList) then
     begin
-      MfDeviceList:= Nil;
-      MfDeviceList:= TDeviceList.Create();
+      MfDeviceList := Nil;
+      MfDeviceList := TDeviceList.Create();
     end;
 
   // Create the cature engine
   if not Assigned(MfCaptureToFileEngine) then
     begin
-      MfCaptureToFileEngine:= Nil;
-      MfCaptureToFileEngine:= TCaptureToFile.Create(Frm_SimpleCapture.Handle);  // Must be main form or a parent window !!!
-      Result:= S_OK;
+      MfCaptureToFileEngine := Nil;
+      MfCaptureToFileEngine := TCaptureToFile.Create(Frm_SimpleCapture.Handle);  // Must be main form or a parent window !!!
+      Result := S_OK;
     end;
 end;
 
