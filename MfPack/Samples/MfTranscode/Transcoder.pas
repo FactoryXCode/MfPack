@@ -10,7 +10,7 @@
 // Release date: 24-01-2020
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 // Description: This is a modified class of the Transcoder sample,
 //
 // Company: FactoryX
@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 26/01/2021 Tony                Code cleanup
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
@@ -78,6 +79,7 @@ uses
   WinApi.MediaFoundationApi.MfIdl,
   WinApi.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MfError,
+  WinApi.MediaFoundationApi.MfUtils,
   {Project}
   Helpers;
 
@@ -154,12 +156,12 @@ begin
   MFShutdown();
   CoUninitialize();
 
-  m_pClock := Nil;
-  m_pProfile := Nil;
-  m_pTopology := Nil;
-  m_pSource := Nil;
-  m_pSession := Nil;
-  m_pAttributes := Nil;
+  SafeRelease(m_pClock);
+  SafeRelease(m_pProfile);
+  SafeRelease(m_pTopology);
+  SafeRelease(m_pSource);
+  SafeRelease(m_pSession);
+  SafeRelease(m_pAttributes);
 
   SetLength(pCont, 0);
   pCont := Nil;
@@ -193,11 +195,13 @@ begin
     end;
 
   // Create the media source.
-  hr := CreateMediaSource(sURL, m_pSource);
+  hr := CreateMediaSource(sURL,
+                          m_pSource);
 
   // Create the media session.
   if SUCCEEDED(hr) then
-    hr := MFCreateMediaSession(m_pAttributes, m_pSession);
+    hr := MFCreateMediaSession(m_pAttributes,
+                               m_pSession);
 
   // Create an empty transcode profile.
   if SUCCEEDED(hr) then
@@ -259,7 +263,8 @@ begin
   // In this simple case, use the first media type in the collection.
 
   if SUCCEEDED(hr) then
-    hr := pAvailableTypes.GetElement(0, pUnkAudioType);
+    hr := pAvailableTypes.GetElement(0,
+                                     @pUnkAudioType);
 
   if SUCCEEDED(hr) then
     hr := pUnkAudioType.QueryInterface(IID_IMFMediaType,
@@ -276,7 +281,8 @@ begin
   // appropriate MFTs are added to the topology.
 
   if SUCCEEDED(hr) then
-    hr := pAudioAttrs.SetGUID(MF_MT_SUBTYPE, MFAudioFormat_WMAudioV9);
+    hr := pAudioAttrs.SetGUID(MF_MT_SUBTYPE,
+                              MFAudioFormat_WMAudioV9);
 
   // Set the attribute store on the transcode profile.
   if SUCCEEDED(hr) then
@@ -316,28 +322,37 @@ begin
 
   // Set the encoder to be Windows Media video encoder, so that the appropriate MFTs are added to the topology.
   if SUCCEEDED(hr) then
-    hr := pVideoAttrs.SetGUID(MF_MT_SUBTYPE, MFVideoFormat_WMV3);
+    hr := pVideoAttrs.SetGUID(MF_MT_SUBTYPE,
+                              MFVideoFormat_WMV3);
 
   // Set the frame rate.
   // Framerate is calculated by FrameRateNumerator / FrameRateDenominator
   // For example:  5000000 / 208541 = 23.97 frames per second.
   uiRate := Round(pCont[arIndex].video_FrameRateNumerator / pCont[arIndex].video_FrameRateDenominator);
   if SUCCEEDED(hr) then
-    hr := MFSetAttributeRatio(pVideoAttrs, MF_MT_FRAME_RATE, uiRate, 1);
+    hr := MFSetAttributeRatio(pVideoAttrs,
+                              MF_MT_FRAME_RATE, uiRate,
+                              1);
 
   // Set the frame size. This size is just a guess, to get the original size you have to call
   // MFGetAttributeSize from the source
   if SUCCEEDED(hr) then
-    hr := MFSetAttributeSize(pVideoAttrs, MF_MT_FRAME_SIZE, pCont[arIndex].video_FrameSizeWidth, pCont[arIndex].video_FrameSizeHeigth);
+    hr := MFSetAttributeSize(pVideoAttrs,
+                             MF_MT_FRAME_SIZE,
+                             pCont[arIndex].video_FrameSizeWidth,
+                             pCont[arIndex].video_FrameSizeHeigth);
 
   //Set the pixel aspect ratio
   if SUCCEEDED(hr) then
-    hr := MFSetAttributeRatio(pVideoAttrs, MF_MT_PIXEL_ASPECT_RATIO,
-         pCont[arIndex].video_PixelAspectRatioNumerator, pCont[arIndex].video_PixelAspectRatioDenominator);
+    hr := MFSetAttributeRatio(pVideoAttrs,
+                              MF_MT_PIXEL_ASPECT_RATIO,
+                              pCont[arIndex].video_PixelAspectRatioNumerator,
+                              pCont[arIndex].video_PixelAspectRatioDenominator);
 
   // Set the bit rate. = framerate numerator
   if SUCCEEDED(hr) then
-    hr := pVideoAttrs.SetUINT32(MF_MT_AVG_BITRATE, pCont[arIndex].video_FrameRateNumerator);
+    hr := pVideoAttrs.SetUINT32(MF_MT_AVG_BITRATE,
+                                pCont[arIndex].video_FrameRateNumerator);
 
   // Set the attribute store on the transcode profile.
   if SUCCEEDED(hr) then

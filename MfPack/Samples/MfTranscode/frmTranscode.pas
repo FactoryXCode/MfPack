@@ -10,7 +10,7 @@
 // Release date: 24-01-2020
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 // Description: This is a modified translation of the Transcoder sample,
 //              The original is a commandline app.
 //

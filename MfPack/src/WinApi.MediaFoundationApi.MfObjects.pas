@@ -23,6 +23,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
 // 08/12/2020 Tony                Added updates from sdk 10.0.19041.0
+// 26/01/2021 Tony                Fixed IMFCollection
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or higher.
@@ -1606,12 +1607,12 @@ type
     function GetElementCount(out pcElements: DWord): HResult; stdcall;
 
     function GetElement(const dwElementIndex: DWord;
-                        out ppUnkElement: PIUnknown): HResult; stdcall;
+                        ppUnkElement: PIUnknown): HResult; stdcall;
 
     function AddElement(pUnkElement: IUnknown): HResult; stdcall;
 
     function RemoveElement(const dwElementIndex: DWord;
-                           out ppUnkElement: PIUnknown): HResult; stdcall;
+                           ppUnkElement: PIUnknown): HResult; stdcall;
 
     function InsertElementAt(const dwIndex: DWord;
                              pUnknown_: IUnknown): HResult; stdcall;

@@ -1,6 +1,6 @@
 MfTranscode
-Version: X 3.0.0
-Enigma release.
+Version: X 3.0.1
+Enigma release #3.
 
 NOTES: 
  - This release is updated for compiler version 17 up to 33.
@@ -15,6 +15,6 @@ source file to a Windows Media format (audio or video).
 Project: Media Foundation - MFPack - Samples
 Project location: httpS://sourceforge.net/projects/MFPack
 First release date: 24-01-2020
-Final release date: 13-08-2020
+Final release date: 26-01-2021
 
 Copyright © FactoryX. All rights reserved.

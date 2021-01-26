@@ -129,7 +129,7 @@ object frmTranscoder: TfrmTranscoder
   end
   object OpenDialog1: TOpenDialog
     Filter = 'All files|*.*'
-    Left = 460
+    Left = 468
     Top = 62
   end
   object SaveDialog1: TSaveDialog
