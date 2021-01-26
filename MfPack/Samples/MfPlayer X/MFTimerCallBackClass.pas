@@ -3,14 +3,14 @@
 // Copyright © FactoryX. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
-// Project location: http://sourceforge.net/projects/MFPack
+// Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: MFTimerCallBackClass.pas
 // Kind: Pascal Unit
 // Release date: 13-08-2019
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 // Description: A Timercallback class for the IMFTimer interface.
 //
 // Company: FactoryX

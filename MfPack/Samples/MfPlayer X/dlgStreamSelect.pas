@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 // Description: Dialog example to select streams from a file source.
 //
 // Company: FactoryX

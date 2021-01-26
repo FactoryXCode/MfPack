@@ -3,14 +3,14 @@
 // Copyright © FactoryX, Netherlands/Australia. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
-// Project location: http://sourceforge.net/projects/MFPack
+// Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: frmMfPlayer.pas
 // Kind: Pascal Unit
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 // Description: MfPlayer X: Requires Windows 7 or later.
 //
 // Company: FactoryX

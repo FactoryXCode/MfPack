@@ -3,14 +3,14 @@
 // Copyright © FactoryX. All rights reserved.
 //
 // Project: Media Foundation - MFPack
-// Project location: http://sourceforge.net/projects/MFPack
+// Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: LangTags.pas
 // Kind: Delphi file
 // Release date: 13-08-2019
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: Language tag definitions file.
 //
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -128,10 +128,13 @@ type
 
     // REGEX implementation
     procedure AddMatchToList(match: TMatch);
+
+{$HINTS OFF}
     // Gets all matches and puts it in a matchlist (Not used, keep here for later implementations)
     function GetMatches(const pattern: string; // RegEx pattern
                         const txt: string;     // Text to search in
                         const options: TRegExOptions = [roNotEmpty]): Integer;
+{$HINTS ON}
     // Returns the single match
     function GetMatch(const pattern: string; // RegEx pattern
                       const txt: string;     // Text to search in

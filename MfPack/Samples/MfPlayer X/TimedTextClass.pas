@@ -3,14 +3,14 @@
 // Copyright © FactoryX, Netherlands/Australia/Brazil. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
-// Project location: http://sourceforge.net/projects/MFPack
+// Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: TimedTextClass.pas
 // Kind: Pascal Unit
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 // Description: This unit contains methods to get and
 //              present TimedText from currently SubRib and MicroDvd files.
 //
@@ -175,11 +175,12 @@ type
     function GetMatchCount(const pattern: string; // RegEx pattern
                            const txt: string;     // Text to search in
                            const options: TRegExOptions = [roNotEmpty]): integer;
+{$HINTS OFF}
     // Not used, keep for later implementations
     function GetMatch(const pattern: string; // RegEx pattern
                       const txt: string;     // Text to search in
                       const options: TRegExOptions = [roNotEmpty]): string;
-
+{$HINTS ON}
     // compares given pattern with given string
     function IsMatch(const pattern: string;
                      const txt: string): Boolean;
@@ -533,11 +534,8 @@ end;
 // compares given pattern with given string
 function TMfTimedText.IsMatch(const pattern: string;
                               const txt: string): Boolean;
-var
-  rxRegEx : TRegEx;
-
 begin
-  Result := rxRegEx.IsMatch(txt, pattern); // For example: '[a-z][a-z]_[A-Z][A-Z]' or '_[A-Z][A-Z]' or '[a-z][a-z]_' etc.
+  Result := TRegEx.IsMatch(txt, pattern); // For example: '[a-z][a-z]_[A-Z][A-Z]' or '_[A-Z][A-Z]' or '[a-z][a-z]_' etc.
 end;
 
 
@@ -721,10 +719,10 @@ try
         begin
           // Calculate begin
           ap_SubTitleTracks[aSize].Start := TimeToHnsTime(lp_MatchList.Strings[0], False);
-                // Calculate end
-                ap_SubTitleTracks[aSize].Stop := TimeToHnsTime(lp_MatchList.Strings[1], False);
-                // Calculate duration
-                ap_SubTitleTracks[aSize].Duration := ap_SubTitleTracks[aSize].Stop - ap_SubTitleTracks[aSize].Start;
+          // Calculate end
+          ap_SubTitleTracks[aSize].Stop := TimeToHnsTime(lp_MatchList.Strings[1], False);
+          // Calculate duration
+          ap_SubTitleTracks[aSize].Duration := ap_SubTitleTracks[aSize].Stop - ap_SubTitleTracks[aSize].Start;
         end
       else // The file or format is corrupted
         begin
