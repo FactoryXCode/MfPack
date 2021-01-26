@@ -10,7 +10,7 @@
 // Release date: 18-06-2016
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: Equates for WM_DEVICECHANGE and BroadcastSystemMessage
 //
 // Organisation: FactoryX
@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 25/01/2021 Tony/Jasper S.      Modified DEV_BROADCAST_DEVICEINTERFACE records
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -66,7 +67,8 @@ interface
 uses
 
   {Winapi}
-  Winapi.Windows;
+  Winapi.Windows,
+  WinApi.WinApiTypes;
 
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
@@ -78,39 +80,13 @@ uses
   {$ENDIF}
 
 
-{$IFNDEF wchar_t}
-type
-  Pwchar_t = ^wchar_t;
-  PTCHAR = ^TTCHAR;
-  {$IF COMPILERVERSION >= 20.0}
-    wchar_t = WideChar;
-    {$EXTERNALSYM wchar_t}
-    TTCHAR = WideChar;
-    {$EXTERNALSYM TTCHAR}
-  {$ELSE}
-    wchar_t = AnsiChar;
-    {$EXTERNALSYM wchar_t}
-    TTCHAR = AnsiChar;
-    {$EXTERNALSYM TTCHAR}
-  {$ENDIF}
-  {$DEFINE wchar_t}
-{$ENDIF}
-
-
 const
+
   //
   // BroadcastSpecialMessage constants.
   //
   WM_DEVICECHANGE                     = $0219;
   {$EXTERNALSYM WM_DEVICECHANGE}
-
-  //{* XLATOFF *}
-  //#ifdef  IS_32
-  //#define DBTFAR
-  //#else
-  //#define DBTFAR  far
-  //#endif
-  //{* XLATON *}
 
 
   // Broadcast message and receipient flags.
@@ -124,7 +100,6 @@ const
   // bit 14 off:  lparam is a pointer to a binary struture starting with
   //              a dword describing the length of the structure.
 
-const
 
   BSF_QUERY                           = $00000001;
   {$EXTERNALSYM BSF_QUERY}
@@ -311,12 +286,12 @@ type
 
   PVolLockBroadcast = ^VolLockBroadcast;
   VolLockBroadcast = record
-        vlb_dbh: _DEV_BROADCAST_HDR;
-        vlb_owner: DWORD;              // thread on which lock request is being issued
-        vlb_perms: Byte;               // lock permission flags defined below
-        vlb_lockType: Byte;            // type of lock
-        vlb_drive: Byte;               // drive on which lock is issued
-        vlb_flags: Byte;               // miscellaneous flags
+    vlb_dbh: _DEV_BROADCAST_HDR;
+    vlb_owner: DWORD;              // thread on which lock request is being issued
+    vlb_perms: Byte;               // lock permission flags defined below
+    vlb_lockType: Byte;            // type of lock
+    vlb_drive: Byte;               // drive on which lock is issued
+    vlb_flags: Byte;               // miscellaneous flags
   end;
   {$EXTERNALSYM VolLockBroadcast}
 
@@ -483,7 +458,7 @@ type
     dbcp_size       : DWORD;  // length of dbcp_name including #0 terminator
     dbcp_devicetype : DWORD;
     dbcp_reserved   : DWORD;
-    dbcp_name       : AnsiChar; // We could translate it as array [0..0] of AnsiChar, but we know the result is more than just one AnsiChar.
+    dbcp_name       : AnsiChar;
   end;
   {$EXTERNALSYM _DEV_BROADCAST_PORT_A}
   DEV_BROADCAST_PORT_A = _DEV_BROADCAST_PORT_A;
@@ -495,7 +470,7 @@ type
     dbcp_size       : DWORD;
     dbcp_devicetype : DWORD;
     dbcp_reserved   : DWORD;
-    dbcp_name       : WideChar; // We could translate it as array [0..0] of WideChar, but we know the result is more than just one WideChar.
+    dbcp_name       : WideChar;
   end;
   {$EXTERNALSYM _DEV_BROADCAST_PORT_W}
   DEV_BROADCAST_PORT_W = _DEV_BROADCAST_PORT_W;
@@ -530,11 +505,11 @@ type
 
   PDEV_BROADCAST_DEVICEINTERFACE_A = ^_DEV_BROADCAST_DEVICEINTERFACE_A;
   _DEV_BROADCAST_DEVICEINTERFACE_A = record
-    dbcc_size       : DWORD;
-    dbcc_devicetype : DWORD;
+    dbcc_size       : DWORD;  // size of dbcc_name including terminating #0
+    dbcc_devicetype : DWORD;  // = DBT_DEVTYP_DEVICEINTERFACE
     dbcc_reserved   : DWORD;
     dbcc_classguid  : TGUID;
-    dbcc_name       : array [0..0] of AnsiChar;  // char
+    dbcc_name       : AnsiChar;  // char
   end;
   {$EXTERNALSYM _DEV_BROADCAST_DEVICEINTERFACE_A}
   DEV_BROADCAST_DEVICEINTERFACE_A = _DEV_BROADCAST_DEVICEINTERFACE_A;
@@ -546,7 +521,7 @@ type
     dbcc_devicetype : DWORD;  // = DBT_DEVTYP_DEVICEINTERFACE
     dbcc_reserved   : DWORD;
     dbcc_classguid  : TGUID;
-    dbcc_name       : array [0..0] of wchar_t;
+    dbcc_name       : wchar_t;
   end;
   {$EXTERNALSYM _DEV_BROADCAST_DEVICEINTERFACE_W}
   DEV_BROADCAST_DEVICEINTERFACE_W = _DEV_BROADCAST_DEVICEINTERFACE_W;
@@ -575,7 +550,7 @@ type
     //
     dbch_eventguid  : TGUID;
     dbch_nameoffset : LONG;           // offset (bytes) of variable-length string buffer (-1 if none)
-    dbch_data: array [0..0] of Byte;  // variable-sized buffer, potentially containing binary and/or text data
+    dbch_data: Byte;                  // variable-sized buffer, potentially containing binary and/or text data
   end;
   {$EXTERNALSYM _DEV_BROADCAST_HANDLE}
   DEV_BROADCAST_HANDLE = _DEV_BROADCAST_HANDLE;
@@ -598,7 +573,7 @@ type
     dbch_hdevnotify : ULONG32;
     dbch_eventguid  : TGUID;
     dbch_nameoffset : LONG;
-    dbch_data       : array [0..0] of Byte; // We know the result is more than just one byte.
+    dbch_data       : Byte;
   end;
   {$EXTERNALSYM _DEV_BROADCAST_HANDLE32}
   DEV_BROADCAST_HANDLE32 = _DEV_BROADCAST_HANDLE32;
@@ -613,7 +588,7 @@ type
     dbch_hdevnotify : ULONG64;
     dbch_eventguid  : TGUID;
     dbch_nameoffset : LONG;
-    dbch_data       : array [0..0] of Byte; // We know the result is more than just one byte.
+    dbch_data       : Byte;
   end;
   {$EXTERNALSYM _DEV_BROADCAST_HANDLE64}
   DEV_BROADCAST_HANDLE64 = _DEV_BROADCAST_HANDLE64;
@@ -631,14 +606,12 @@ const
   DBTF_XPORT                          = $00000002;  // new transport coming or going
   {$EXTERNALSYM DBTF_XPORT}
   DBTF_SLOWNET                        = $00000004;  // new incoming transport is slow
-  {$EXTERNALSYM DBTF_SLOWNET}
-                                        // (dbcn_resource undefined for now)
-
-  DBT_VPOWERDAPI                      = $8100;  // VPOWERD API for Win95
+  {$EXTERNALSYM DBTF_SLOWNET}                       // (dbcn_resource undefined for now)
+  DBT_VPOWERDAPI                      = $8100;      // VPOWERD API for Win95
   {$EXTERNALSYM DBT_VPOWERDAPI}
 
 
-  //  User-defined message types all use wParam = 0xFFFF with the
+  //  User-defined message types all use wParam = $FFFF with the
   //  lParam a pointer to the structure below.
   //
   //  dbud_dbh - DEV_BROADCAST_HEADER must be filled in as usual.
@@ -663,7 +636,7 @@ type
   PDEV_BROADCAST_USERDEFINED = ^DEV_BROADCAST_USERDEFINED;
   _DEV_BROADCAST_USERDEFINED = record
     dbud_dbh    : _DEV_BROADCAST_HDR ;
-    dbud_szName : array [0..0] of AnsiChar; {* ASCIIZ name *}
+    dbud_szName : AnsiChar; {* ASCIIZ name *}
     {/*  BYTE        dbud_rgbUserDefined[];*/ /* User-defined contents */}
   end;
   {$EXTERNALSYM _DEV_BROADCAST_USERDEFINED}

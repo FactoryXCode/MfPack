@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: Media Foundation basic control-layer interfaces.
 //
 // Organisation: FactoryX

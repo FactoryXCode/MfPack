@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: -
 //
 // Organisation: FactoryX
@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 18/01/2021 Tony                Corrected some pointer issues.
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -318,7 +319,7 @@ type
 
 
   // EndpointFormFactor enum
-
+  // The EndpointFormFactor enumeration defines constants that indicate the general physical attributes of an audio endpoint device.
   PEndpointFormFactor = ^TEndpointFormFactor;
   __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0003 = (
     RemoteNetworkDevice           = 0,
@@ -503,8 +504,8 @@ type
     function Activate(const iid: REFIID;
                       dwClsCtx: DWORD;
                       {In_opt} pActivationParams: PPROPVARIANT;
-                      out ppInterface): HRESULT; stdcall;  // Replaced IUNKOWN pointer to a pointer, as described on ms-docs:
-                                                           // https://docs.microsoft.com/us-en/windows/win32/api/mmdeviceapi/nf-mmdeviceapi-immdevice-activate
+                      out ppInterface: Pointer): HRESULT; stdcall;  // Replaced IUNKOWN pointer to a pointer, as described on ms-docs:
+                                                                    // https://docs.microsoft.com/us-en/windows/win32/api/mmdeviceapi/nf-mmdeviceapi-immdevice-activate
     function OpenPropertyStore(stgmAccess: DWORD;
                                out ppProperties: IPropertyStore): HRESULT; stdcall;
 
@@ -620,6 +621,9 @@ type
 
   // Interface IMMDeviceActivator
   // ============================
+  // Interface provided by an object that can be activated on a device.  i.e Components that
+  // provide interfaces produced by IMMDevice.Activate must support this interface.
+  // NOTE: IMMDeviceActivator is reserved for system use.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMMDeviceActivator);'}
   {$EXTERNALSYM IMMDeviceActivator}
@@ -627,8 +631,8 @@ type
   ['{3B0D0EA4-D0A9-4B0E-935B-09516746FAC0}']
     function Activate(const iid: REFIID;
                       pDevice: IMMDevice;
-                      {opt} pActivationParams: PROPVARIANT;
-                      out ppInterface): HRESULT; stdcall;
+                      pActivationParams: PROPVARIANT;
+                      out ppInterface: Pointer): HRESULT; stdcall;
     // Parameters:
     //      iid               - [in] The specified interface
     //      pDevice           - [in] The specified device

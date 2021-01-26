@@ -10,8 +10,8 @@
 // Release date: 11-07-2012
 // Language: ENU
 //
-// Revision Version: 3.0.0
-// Description: -
+// Revision Version: 3.0.1
+// Description: See: Remarks
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -25,6 +25,7 @@
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
+//          The interfaces in this header are deprecated. New applications should not use them.
 //
 // Related objects: -
 // Related projects: MfPackX300
@@ -56,7 +57,7 @@
 // Users may distribute this source code provided that this header is included
 // in full at the top of the file.
 //==============================================================================
-unit WinApi.MMStream;
+unit WinApi.MmStream;
 
   {$HPPEMIT '#include "mmstream.h"'}
 
@@ -75,7 +76,6 @@ uses
   {$ELSE}
     {$ALIGN 8} // Win64
   {$ENDIF}
-
 
 
 	function MS_ERROR_CODE(x: Cardinal): Cardinal;
@@ -208,6 +208,7 @@ type
 
   // Interface IMultiMediaStream
   // ===========================
+  // This interface is deprecated. New applications should not use it.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMultiMediaStream);'}
   {$EXTERNALSYM IMultiMediaStream}
@@ -228,7 +229,7 @@ type
 
     function GetTime(out pCurrentTime: STREAM_TIME): HResult; stdcall;
 
-    function GetDuration(pDuration: STREAM_TIME): HResult; stdcall;
+    function GetDuration(out pDuration: STREAM_TIME): HResult; stdcall;
 
     function Seek(SeekTime: STREAM_TIME): HResult; stdcall;
 
@@ -241,6 +242,7 @@ type
 
   // Interface IMediaStream
   // ======================
+  // This interface is deprecated. New applications should not use it.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMediaStream);'}
   {$EXTERNALSYM IMediaStream}
@@ -252,16 +254,16 @@ type
                             out pType: STREAM_TYPE): HResult; stdcall;
 
 		function SetSameFormat(pStreamThatHasDesiredFormat: IMediaStream;
-                           dwFlags: DWORD): HResult; stdcall;
+                           dwFlags: DWORD {Must be zero}): HResult; stdcall;
 
-		function AllocateSample(dwFlags: DWORD;
+		function AllocateSample(dwFlags: DWORD; // Must be zero.
                             out ppSample: IStreamSample): HResult; stdcall;
 
     function CreateSharedSample(pExistingSample: IStreamSample;
-                                dwFlags: DWORD;
+                                dwFlags: DWORD; // Reserved for flag data. Must be zero.
                                 out ppNewSample: IStreamSample): HResult; stdcall;
 
-    function SendEndOfStream(dwFlags: DWORD): HResult; stdcall;
+    function SendEndOfStream(dwFlags: DWORD {Must be zero}): HResult; stdcall;
 
   end;
   IID_IMediaStream = IMediaStream;
@@ -270,6 +272,7 @@ type
 
   // Interface IStreamSample
   // =======================
+  // Note This interface is deprecated. New applications should not use it.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IStreamSample);'}
   {$EXTERNALSYM IStreamSample}
@@ -284,7 +287,7 @@ type
 		function SetSampleTimes(pStartTime: STREAM_TIME;
                             pEndTime: STREAM_TIME): HResult; stdcall;
 
-		function Update(dwFlags: DWORD;
+		function Update(dwFlags: DWORD;  // Flag that specifies whether the update is synchronous or asynchronous. The SSUPDATE_ASYNC flag specifies an asynchronous update, which you can set if both hEvent and pfnAPC are nil. Use SSUPDATE_CONTINUOUS to continuously update the sample until you call the IStreamSample.CompletionStatus method.
                     hEvent: THANDLE;
                     pfnAPC: PAPCFUNC;
                     dwAPCData: DWORD_PTR): HResult; stdcall;

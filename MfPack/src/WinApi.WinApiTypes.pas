@@ -10,7 +10,7 @@
 // Release date: 29-07-2012
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: Generic converted Windows (c/cpp) types for Win32 / Win64 compatibility
 //              used by DirectX, Media Foundation and Core Audio.
 //
@@ -24,6 +24,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
 // 10/12/2020                     Compatibility update.
+// 25/01/2021 Tony/Jasper S.      Changed TCHAR and wchar_t implementation
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -138,7 +139,7 @@ const
 // To keep things simple: don't use the commented out _GUID in this unit,
 //                        but the one declared in System
 //
-// See comments inPropKeyDef.pas
+// See comments in WinApi.ActiveX.PropKeyDef.pas
 //***********************************************************************************************
 //#ifdef INITGUID
 //#define MFP_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
@@ -160,7 +161,7 @@ type
    {$IF COMPILERVERSION < 30.0}
      PDWORD = ^LongWord; // Override wrong implementation in pre-delphi 10 versions
    {$ELSE}
-     PDWORD = WinApi.Windows.PDWORD;
+     PDWORD = ^DWORD;
    {$ENDIF}
 {$ENDIF}
 
@@ -1256,18 +1257,14 @@ type
 
 {$IFDEF MFP_wchar_t}
   Pwchar_t = ^wchar_t;
-  PTCHAR = ^TTCHAR;
-  {$IF COMPILERVERSION >= 20.0}
-    wchar_t = WideChar;
-    {$EXTERNALSYM wchar_t}
-    TTCHAR = WideChar;
-    {$EXTERNALSYM TTCHAR}
-  {$ELSE}
-    wchar_t = AnsiChar;
-    {$EXTERNALSYM wchar_t}
-    TTCHAR = AnsiChar;
-    {$EXTERNALSYM TTCHAR}
-  {$ENDIF}
+  wchar_t = WideChar;
+  {$EXTERNALSYM wchar_t}
+{$ENDIF}
+
+{$IFDEF MFP_TCHAR}
+  PTCHAR = ^TCHAR;
+  TCHAR = WCHAR;
+  {$EXTERNALSYM TCHAR}
 {$ENDIF}
 
 

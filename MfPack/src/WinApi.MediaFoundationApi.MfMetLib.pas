@@ -27,6 +27,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
 // 10/12/2020                     Compatibility update.
+// 18/01/2021 Tony                Corrected some pointer issues.
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -4435,7 +4436,7 @@ begin
     hr := pDevice.Activate(IID_IAudioSessionManager,
                            CLSCTX_ALL,
                            Nil,
-                           IUnknown(pSessionManager));
+                           Pointer(pSessionManager));
 
   // Get a reference to the session manager.
   if Succeeded(hr) then

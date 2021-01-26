@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: -
 //
 // Organisation: FactoryX
@@ -161,21 +161,21 @@ const
   {$EXTERNALSYM MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS}
 
 // #if (WINVER >= _WIN32_WINNT_WIN8)
-  MF_READWRITE_MMCSS_CLASS                              :  TGUID = '{39384300-d0eb-40b1-87a0-3318871b5a53}';
+  MF_READWRITE_MMCSS_CLASS                              : TGUID = '{39384300-d0eb-40b1-87a0-3318871b5a53}';
   {$EXTERNALSYM MF_READWRITE_MMCSS_CLASS}
-  MF_READWRITE_MMCSS_PRIORITY                           :  TGUID = '{43ad19ce-f33f-4ba9-a580-e4cd12f2d144}';
+  MF_READWRITE_MMCSS_PRIORITY                           : TGUID = '{43ad19ce-f33f-4ba9-a580-e4cd12f2d144}';
   {$EXTERNALSYM MF_READWRITE_MMCSS_PRIORITY}
-  MF_READWRITE_MMCSS_CLASS_AUDIO                        :  TGUID = '{430847da-0890-4b0e-938c-054332c547e1}';
+  MF_READWRITE_MMCSS_CLASS_AUDIO                        : TGUID = '{430847da-0890-4b0e-938c-054332c547e1}';
   {$EXTERNALSYM MF_READWRITE_MMCSS_CLASS_AUDIO}
-  MF_READWRITE_MMCSS_PRIORITY_AUDIO                     :  TGUID = '{273db885-2de2-4db2-a6a7-fdb66fb40b61}';
+  MF_READWRITE_MMCSS_PRIORITY_AUDIO                     : TGUID = '{273db885-2de2-4db2-a6a7-fdb66fb40b61}';
   {$EXTERNALSYM MF_READWRITE_MMCSS_PRIORITY_AUDIO}
-  MF_READWRITE_D3D_OPTIONAL                             :  TGUID = '{216479d9-3071-42ca-bb6c-4c22102e1d18}';
+  MF_READWRITE_D3D_OPTIONAL                             : TGUID = '{216479d9-3071-42ca-bb6c-4c22102e1d18}';
   {$EXTERNALSYM MF_READWRITE_D3D_OPTIONAL}
-  MF_MEDIASINK_AUTOFINALIZE_SUPPORTED                   :  TGUID = '{48c131be-135a-41cb-8290-03652509c999}';
+  MF_MEDIASINK_AUTOFINALIZE_SUPPORTED                   : TGUID = '{48c131be-135a-41cb-8290-03652509c999}';
   {$EXTERNALSYM MF_MEDIASINK_AUTOFINALIZE_SUPPORTED}
-  MF_MEDIASINK_ENABLE_AUTOFINALIZE                      :  TGUID = '{34014265-cb7e-4cde-ac7c-effd3b3c2530}';
+  MF_MEDIASINK_ENABLE_AUTOFINALIZE                      : TGUID = '{34014265-cb7e-4cde-ac7c-effd3b3c2530}';
   {$EXTERNALSYM MF_MEDIASINK_ENABLE_AUTOFINALIZE}
-  MF_READWRITE_ENABLE_AUTOFINALIZE                      :  TGUID = '{dd7ca129-8cd1-4dc5-9dde-ce168675de61}';
+  MF_READWRITE_ENABLE_AUTOFINALIZE                      : TGUID = '{dd7ca129-8cd1-4dc5-9dde-ce168675de61}';
   {$EXTERNALSYM MF_READWRITE_ENABLE_AUTOFINALIZE}
 //#endif // (WINVER >= _WIN32_WINNT_WIN8)
 
@@ -188,17 +188,17 @@ const
   // Specifies that an error has occurred while processing sample
   // requests.  If this is set, then no other calls should be made
   // on the source reader besides shutting it down.
-  MF_SOURCE_READERF_ERROR           = MF_SOURCE_READER_FLAG($00000001);
+  MF_SOURCE_READERF_ERROR                   = MF_SOURCE_READER_FLAG($00000001);
   {$EXTERNALSYM MF_SOURCE_READERF_ERROR}
 
   // Specifies that the stream has ended.
-  MF_SOURCE_READERF_ENDOFSTREAM       = MF_SOURCE_READER_FLAG($00000002);
+  MF_SOURCE_READERF_ENDOFSTREAM             = MF_SOURCE_READER_FLAG($00000002);
   {$EXTERNALSYM MF_SOURCE_READERF_ENDOFSTREAM}
 
   // Specifies that one or more new streams have been created.
   // The application can modify stream selection and configure
   // output media types for the new streams.
-  MF_SOURCE_READERF_NEWSTREAM         = MF_SOURCE_READER_FLAG($00000004);
+  MF_SOURCE_READERF_NEWSTREAM               = MF_SOURCE_READER_FLAG($00000004);
   {$EXTERNALSYM MF_SOURCE_READERF_NEWSTREAM}
 
   // Specifies that the native media type for the stream has changed.
@@ -210,21 +210,21 @@ const
   {$EXTERNALSYM MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED}
 
   // Specifies that there is a gap in the stream.
-  MF_SOURCE_READERF_STREAMTICK        = MF_SOURCE_READER_FLAG($00000100);
+  MF_SOURCE_READERF_STREAMTICK              = MF_SOURCE_READER_FLAG($00000100);
   {$EXTERNALSYM MF_SOURCE_READERF_STREAMTICK}
 
   // Indicates that all transforms inserted by the application have been
   // removed for a particular stream. This could be due to a dynamic format
   // change from a source or decoder that prevents custom transforms from
   // being used because they cannot handle the new media type.
-  MF_SOURCE_READERF_ALLEFFECTSREMOVED     = MF_SOURCE_READER_FLAG($00000200);
+  MF_SOURCE_READERF_ALLEFFECTSREMOVED       = MF_SOURCE_READER_FLAG($00000200);
   {$EXTERNALSYM MF_SOURCE_READERF_ALLEFFECTSREMOVED}
 
 type
-  PMF_SOURCE_READER_CONTROL_FLAG = ^cwMF_SOURCE_READER_CONTROL_FLAG;
-  cwMF_SOURCE_READER_CONTROL_FLAG   = DWord;
+  PMF_SOURCE_READER_CONTROL_FLAG  = ^cwMF_SOURCE_READER_CONTROL_FLAG;
+  cwMF_SOURCE_READER_CONTROL_FLAG = DWord;
   {$EXTERNALSYM cwMF_SOURCE_READER_CONTROL_FLAG}
-  MF_SOURCE_READER_CONTROL_FLAG = cwMF_SOURCE_READER_CONTROL_FLAG;
+  MF_SOURCE_READER_CONTROL_FLAG   = cwMF_SOURCE_READER_CONTROL_FLAG;
   {$EXTERNALSYM MF_SOURCE_READER_CONTROL_FLAG}
 const
   MF_SOURCE_READER_CONTROLF_DRAIN = MF_SOURCE_READER_CONTROL_FLAG($00000001);
@@ -259,9 +259,9 @@ type
 
 const
 
-  CLSID_MFReadWriteClassFactory                         : TGUID = '{48e2ed0f-98c2-4a37-bed5-166312ddd83f}';
+  CLSID_MFReadWriteClassFactory : TGUID = '{48e2ed0f-98c2-4a37-bed5-166312ddd83f}';
   {$EXTERNALSYM CLSID_MFReadWriteClassFactory}
-  CLSID_MFSourceReader                                  : TGUID = '{1777133c-0881-411b-a577-ad545f0714c4}';
+  CLSID_MFSourceReader          : TGUID = '{1777133c-0881-411b-a577-ad545f0714c4}';
   {$EXTERNALSYM CLSID_MFSourceReader}
 
 type
@@ -311,22 +311,23 @@ type
 
   // Interface IMFSourceReader
   // =========================
-  {
-   Implemented by the Microsoft Media Foundation source reader object.
-   To create the source reader, call one of the following functions:
-    MFCreateSourceReaderFromByteStream
-    MFCreateSourceReaderFromMediaSource
-    MFCreateSourceReaderFromURL
-
-   Alternatively, use the IMFReadWriteClassFactory interface.
-
-   This interface is available on Windows Vista if Platform Update Supplement
-   for Windows Vista is installed.
-
-   The MF Source Reader provides a simple programming model that allows
-   applications to easily access multimedia content from files or devices.
-  }
+  //
+  // Implemented by the Microsoft Media Foundation source reader object.
+  // To create the source reader, call one of the following functions:
+  //  MFCreateSourceReaderFromByteStream
+  //  MFCreateSourceReaderFromMediaSource
+  //  MFCreateSourceReaderFromURL
+  //
+  // Alternatively, use the IMFReadWriteClassFactory interface.
+  //
+  // This interface is available on Windows Vista if Platform Update Supplement
+  // for Windows Vista is installed.
+  //
+  // The MF Source Reader provides a simple programming model that allows
+  // applications to easily access multimedia content from files or devices.
+  //
   // NOTE:  THIS, AS IS IN HEADERSEQUENCE DIFFERS FROM MSDN!
+  //
   PIMFSourceReader = ^IMFSourceReader;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSourceReader);'}
   {$EXTERNALSYM IMFSourceReader}
@@ -347,7 +348,7 @@ type
                                  out ppMediaType: IMFMediaType): HResult; stdcall;
 
     function SetCurrentMediaType(dwStreamIndex: DWORD;
-                      {Reserved} pdwReserved: DWord;
+                      {Reserved} pdwReserved: DWORD;
                                  pMediaType: IMFMediaType): HResult; stdcall;
 
     function SetCurrentPosition(const guidTimeFormat: TGUID;
@@ -510,17 +511,17 @@ type
 
   // Interface IMFSinkWriter
   // =======================
-  {
-   Implemented by the Microsoft Media Foundation sink writer object.
-   NOTE:  To create the sink writer, call one of the following functions:
-          MFCreateSinkWriterFromMediaSink
-          MFCreateSinkWriterFromURL
-
-          Alternatively, use the IMFReadWriteClassFactory interface.
-
-          This interface is available on Windows Vista if Platform Update
-          Supplement for Windows Vista is installed.
-  }
+  //
+  // Implemented by the Microsoft Media Foundation sink writer object.
+  // NOTE:  To create the sink writer, call one of the following functions:
+  //        MFCreateSinkWriterFromMediaSink
+  //        MFCreateSinkWriterFromURL
+  //
+  //        Alternatively, use the IMFReadWriteClassFactory interface.
+  //
+  //        This interface is available on Windows Vista if Platform Update
+  //        Supplement for Windows Vista is installed.
+  //
   PIMFSinkWriter = ^IMFSinkWriter;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSinkWriter);'}
   {$EXTERNALSYM IMFSinkWriter}
@@ -605,10 +606,10 @@ type
 
   // Interface IMFSinkWriterCallback
   // ===============================
-  {
-   Callback interface for the Microsoft Media Foundation sink writer.
-   Implement this interface if you use the IMFSinkWriter interface and want to receive asynchronous notifications.
-  }
+  //
+  // Callback interface for the Microsoft Media Foundation sink writer.
+  // Implement this interface if you use the IMFSinkWriter interface and want to receive asynchronous notifications.
+  //
   PIMFSinkWriterCallback = ^IMFSinkWriterCallback;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSinkWriterCallback);'}
   {$EXTERNALSYM IMFSinkWriterCallback}
@@ -627,6 +628,7 @@ type
 
   // Interface IMFSinkWriterCallback2
   // ================================
+  //
   PIMFSinkWriterCallback2 = ^IMFSinkWriterCallback2;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSinkWriterCallback2);'}
   {$EXTERNALSYM IMFSinkWriterCallback2}
@@ -645,6 +647,8 @@ type
 
   // CREATE interface functions
   // ==========================
+  //
+
   function MFCreateSourceReaderFromURL(const pwszURL: LPCWSTR;
                                        pAttributes: IMFAttributes;
                                        out ppSourceReader: IMFSourceReader): HResult; stdcall;
@@ -684,10 +688,10 @@ const
   MfReadWriteLib = 'mfreadwrite.dll';
 
 {$WARN SYMBOL_PLATFORM OFF}
-  function MFCreateSourceReaderFromURL;         external MfReadWriteLib name 'MFCreateSourceReaderFromURL';
-  function MFCreateSourceReaderFromByteStream;  external MfReadWriteLib name 'MFCreateSourceReaderFromByteStream';
-  function MFCreateSourceReaderFromMediaSource; external MfReadWriteLib name 'MFCreateSourceReaderFromMediaSource';
-  function MFCreateSinkWriterFromURL;           external MfReadWriteLib name 'MFCreateSinkWriterFromURL';
-  function MFCreateSinkWriterFromMediaSink;     external MfReadWriteLib name 'MFCreateSinkWriterFromMediaSink';
+  function MFCreateSourceReaderFromURL;         external MfReadWriteLib name 'MFCreateSourceReaderFromURL' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateSourceReaderFromByteStream;  external MfReadWriteLib name 'MFCreateSourceReaderFromByteStream' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateSourceReaderFromMediaSource; external MfReadWriteLib name 'MFCreateSourceReaderFromMediaSource' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateSinkWriterFromURL;           external MfReadWriteLib name 'MFCreateSinkWriterFromURL' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateSinkWriterFromMediaSink;     external MfReadWriteLib name 'MFCreateSinkWriterFromMediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 {$WARN SYMBOL_PLATFORM ON}
 end.

@@ -186,7 +186,7 @@ try
   hr:= pEndptDev.Activate(IID_IDeviceTopology,
                           UINT(CLSCTX_ALL),
                           Nil,
-                          pDevTopoEndpt);
+                          Pointer(pDevTopoEndpt));
   if Failed(hr) then
     Abort;
 
@@ -262,7 +262,7 @@ try
   hr := pEndptDev.Activate(IID_IDeviceTopology,
                            CLSCTX_ALL,
                            Nil,
-                           pDeviceTopology);
+                           Pointer(pDeviceTopology));
   if Failed(hr) then
     Abort;
 

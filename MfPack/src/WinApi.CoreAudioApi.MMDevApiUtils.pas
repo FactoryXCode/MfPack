@@ -10,7 +10,7 @@
 // Release date: 04-05-2012
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: MMDevApiUtils, Device api helper routines >= Win 8
 //
 // Organisation: FactoryX
@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 18/01/2021 Tony                Corrected some pointer issues.
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -218,7 +219,7 @@ type
   // assigned to the specified device role.
   //-----------------------------------------------------------
   function CreateDShowAudioRenderer(const role: eRole;
-                                    var ppAudioRenderer: IBaseFilter): HRESULT;
+                                    ppAudioRenderer: PIBaseFilter): HRESULT;
 
 
   // The DirectSound API does not provide a means for an application to select the
@@ -317,7 +318,7 @@ try
   hrStatus := pDevice.Activate(IID_IAudioSessionManager,
                                CLSCTX_INPROC_SERVER,
                                Nil,
-                               pManager);
+                               Pointer(pManager));
   if Failed(hrStatus) then
     Abort;
 
@@ -604,7 +605,7 @@ end;
 // Source: http://msdn.microsoft.com/en-us/library/windows/desktop/dd370815
 //-----------------------------------------------------------
 function CreateDShowAudioRenderer(const role: eRole;
-                                  var ppAudioRenderer: IBaseFilter): HRESULT;
+                                  ppAudioRenderer: PIBaseFilter): HRESULT;
 var
   hr: HRESULT;
   daap: PDIRECTX_AUDIO_ACTIVATION_PARAMS;
@@ -662,7 +663,7 @@ try
   hr := pDevice.Activate(IID_IBaseFilter,
                          CLSCTX_ALL,
                          @pVar,
-                         ppAudioRenderer);
+                         Pointer(ppAudioRenderer));
   if Failed(hr) then
     Abort;
 except
