@@ -1,13 +1,12 @@
 MfVideoThumbNail
-Version: X 3.0.0
-Enigma release.
+Version: 3.0.1
+Enigma release #3.
 
 Description:
 
 Video ThumbNails Sample
 =======================
-Demonstrates how to use the source reader to get video thumbnail
-images.
+Demonstrates how to use the source reader to get video thumbnail images.
 For indepth information see the VideoThumbNails example and
 documentation. (https://docs.microsoft.com/en-us/windows/desktop/medfound/videothumbnail-sample)
 
@@ -20,6 +19,6 @@ NOTES:
 Project: Media Foundation - MFPack - Samples
 Project location: https://sourceforge.net/projects/MFPack
 First release date: 08-04-2019
-Final release date: 13-08-2020
+Final release date: 27-01-2021
 
 Copyright © FactoryX. All rights reserved.
