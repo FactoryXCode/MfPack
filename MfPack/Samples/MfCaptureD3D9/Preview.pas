@@ -9,7 +9,7 @@
 // Release date: 08-03-2019
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 //
 // Description: Manages video preview.
 //
@@ -71,6 +71,7 @@ uses
   {System}
   System.Classes,
   System.SysUtils,
+  System.SyncObjs,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfUtils,
   WinApi.MediaFoundationApi.MfObjects,
@@ -153,7 +154,7 @@ type
                        hEvent: HWND); virtual;
 
   protected
-    //FCritSec: TCriticalSection; //CritSec;          // !!!!
+    FCritSec: TCriticalSection;
 
     m_hwndVideo: HWND;             // Video window.
     m_hwndEvent: HWND;             // Application window to receive events.
@@ -247,7 +248,7 @@ begin
 
   // Create the callback
   m_pSourceReaderCallback := TMFSourceReaderCallback.Create();
-  //FCritSec := TCriticalSection.Create();
+  FCritSec := TCriticalSection.Create();
 
   m_bFirstSample := FALSE;
   m_llBaseTime := 0;
@@ -268,8 +269,9 @@ begin
   m_draw.DestroyDevice();
   m_draw.Free;
   m_draw := Nil;
-  //FCritSec.Free;
-  //FCritSec := Nil;
+  //CloseDevice();
+  FCritSec.Free;
+  FCritSec := Nil;
 
   inherited Destroy();
 end;
@@ -303,18 +305,28 @@ end;
 //-------------------------------------------------------------------
 function TCPreview.CloseDevice(): HResult;
 begin
- //FCritSec.Enter;
+  FCritSec.Enter;
 
- m_pReader.Flush(MF_SOURCE_READER_ALL_STREAMS);
- m_pReader := Nil;
+  if Assigned(m_pReader) then
+    begin
+      m_pReader.Flush(MF_SOURCE_READER_ALL_STREAMS);
+      m_pReader := Nil;
+    end;
 
- m_pSourceReaderCallback.Free;
- m_pSourceReaderCallback := Nil;
+  if Assigned(m_pSourceReaderCallback) then
+    begin
+      m_pSourceReaderCallback.Free;
+      m_pSourceReaderCallback := Nil;
+    end;
 
- CoTaskMemFree(m_pwszSymbolicLink);
- m_pwszSymbolicLink := Nil;
- m_cchSymbolicLink := 0;
- //FCritSec.Leave;
+  if Assigned(m_pwszSymbolicLink) then
+    begin
+      CoTaskMemFree(m_pwszSymbolicLink);
+      m_pwszSymbolicLink := Nil;
+      m_cchSymbolicLink := 0;
+   end;
+
+ FCritSec.Leave;
  Result := S_OK;
 end;
 
@@ -438,7 +450,6 @@ begin
       goto done;
     end;
 
-//FCritSec.Enter;
 
   if FAILED(hrStatus) then
     hr := hrStatus;
@@ -460,12 +471,13 @@ begin
           // Get the video frame buffer from the sample.
           // Like this
           if SUCCEEDED(hr) then
-          // hr := pSample.GetBufferByIndex(0,
-          //                                pBuffer);
+           hr := pSample.GetBufferByIndex(0,
+                                          pBuffer);
           // or like this (both are permitted)
-             hr := pSample.ConvertToContiguousBuffer(pBuffer);
+          //   hr := pSample.ConvertToContiguousBuffer(pBuffer);
 
           // Draw the frame and create the lockbuffer (buffer)
+
           if SUCCEEDED(hr) then
             hr := g_pPreview.m_draw.DrawFrame(pBuffer);
 
@@ -539,7 +551,6 @@ done:
     g_pPreview.NotifyError(hr);
 
   pBuffer := Nil;
-  //FCritSec.Leave;
   Result := hr;
 end;
 
@@ -579,7 +590,7 @@ begin
   if Assigned(m_pReader) then
     hr := CloseDevice();
 
-  //FCritSec.Enter;
+  FCritSec.Enter;
 
   // Create the media source for the device.
   if SUCCEEDED(hr) then
@@ -658,7 +669,7 @@ begin
       CloseDevice();
     end;
 
-  //FCritSec.Leave;
+  FCritSec.Leave;
   Result := hr;
 end;
 
@@ -676,7 +687,7 @@ var
 
 begin
   hr := S_OK;
-  //FCritSec.Enter;
+  FCritSec.Enter;
   if Assigned(m_draw) then
     begin
       hr := m_draw.ResetDevice();
@@ -686,7 +697,7 @@ begin
                    Nil,
                    MB_OK);
     end;
-  //FCritSec.Leave;
+  FCritSec.Leave;
   Result := hr;
 end;
 
@@ -725,15 +736,15 @@ begin
    pDi.dbcc_devicetype := pHdr.dbch_devicetype;
    pDi.dbcc_reserved := pHdr.dbch_reserved;
 
-  //FCritSec.Enter;
+  FCritSec.Enter;
 
   if Assigned(m_pwszSymbolicLink) then
     begin
-      if (StrComp(m_pwszSymbolicLink, pDi.dbcc_name) = 0) then
+      if (StrComp(m_pwszSymbolicLink, @pDi.dbcc_name) = 0) then
         pbDeviceLost := True;
     end;
 
-  //FCritSec.Leave;
+  FCritSec.Leave;
 
   Result := S_OK;
 end;

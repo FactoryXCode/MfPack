@@ -9,7 +9,7 @@
 // Release date: 08-03-2018
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 //
 // Description: Requires Windows 7 or later.
 //              Manages video preview.
@@ -97,7 +97,7 @@ type
 
   public
     // Constructor & destructor
-    constructor Create(const pBuffer: IMFMediaBuffer);
+    constructor Create(pBuffer: IMFMediaBuffer);
     destructor Destroy(); override;
 
     procedure UnlockBuffer();
@@ -112,7 +112,7 @@ type
 implementation
 
 
-constructor TVideoBufferLock.Create(const pBuffer: IMFMediaBuffer);
+constructor TVideoBufferLock.Create(pBuffer: IMFMediaBuffer);
 var
   hr : HRESULT;
 
@@ -134,7 +134,7 @@ end;
 destructor TVideoBufferLock.Destroy();
 begin
   UnlockBuffer(); // Unlock the buffer
-  m_pBuffer := Nil;
+  safeRelease(m_pBuffer);
   m_p2DBuffer := Nil;
   inherited Destroy();
 end;

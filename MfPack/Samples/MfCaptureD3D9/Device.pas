@@ -9,7 +9,7 @@
 // Release date: 08-03-2019
 // Language: ENU
 //
-// Version: 2.6.4
+// Version: 3.0.1
 //
 // Description: Manages the Direct3D device.
 //
@@ -21,14 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/05/2020                     Kraftwerk release. (WIN10 May 2020 update, version 2004)
-//                                #1 Autobahn
+// 13/08/2020 All                 Enigma release. New layout and namespaces
+// 27/01/2021 Tony                Fixed procedure TransformImage_NV12.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX264
+// Related projects: MfPackX300
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -94,7 +94,7 @@ const
 type
    IMAGE_TRANSFORM_FN = procedure(pDest: PByte;
                                   lDestStride: LONG;
-                                  const pSrc: PByte;
+                                  pSrc: PByte;
                                   lSrcStride: LONG;
                                   dwWidthInPixels: DWORD;
                                   dwHeightInPixels: DWORD);
@@ -414,9 +414,9 @@ end;
 //-------------------------------------------------------------------
 procedure TDrawDevice.DestroyDevice();
 begin
-  m_pSwapChain := Nil;
-  m_pDevice := Nil;
-  m_pD3D := Nil;
+  SafeRelease(m_pSwapChain);
+  SafeRelease(m_pDevice);
+  SafeRelease(m_pD3D);
 end;
 
 //-------------------------------------------------------------------
@@ -623,7 +623,7 @@ begin
 
 done:
 
-  FReeAndNil(buffer); // MUST DO!!! Otherwise the buffer stays in locked state and
+  FreeAndNil(buffer); // MUST DO!!! Otherwise the buffer stays in locked state and
                       // OnReadSample will halt after approx 10 samples (because of an exhausted sample pool)
 
   pbScanline0 := Nil;
@@ -746,7 +746,7 @@ begin
   //pp := 0; << Use Default() to accomplish the same
   pp := Default(D3DPRESENT_PARAMETERS);
 
-  m_pSwapChain := Nil;
+  SafeRelease(m_pSwapChain);
 
   pp.BackBufferWidth := m_srcWidth;
   pp.BackBufferHeight := m_srcHeight;
@@ -762,7 +762,7 @@ begin
   hr := m_pDevice.CreateAdditionalSwapChain(pp,
                                             m_pSwapChain);
 
-  Result:= hr;
+  Result := hr;
 end;
 
 //-------------------------------------------------------------------
@@ -780,8 +780,8 @@ var
 begin
   rcSrc.Top := 0;
   rcSrc.Left := 0;
-  rcSrc.Right := m_srcWidth;  //320
-  rcSrc.Bottom := m_srcHeight; //240
+  rcSrc.Right := m_srcWidth;
+  rcSrc.Bottom := m_srcHeight;
 
   GetClientRect(m_hwnd,
                 rcClient);
@@ -833,9 +833,9 @@ begin
           // or like this:
           //
           //pDestPel[x] := DWord((psrcPel[x].rgbtRed shl 16) or
-				  //                     (psrcPel[x].rgbtGreen shl 8) or
-				  //                     (psrcPel[x].rgbtBlue shl 0) or
-				  //                     ($00000000 shl 24)); // padding byte, must be 0
+          //                     (psrcPel[x].rgbtGreen shl 8) or
+          //                     (psrcPel[x].rgbtBlue shl 0) or
+          //                     ($00000000 shl 24)); // padding byte, must be 0
 
           // or like this:
           //
@@ -947,50 +947,51 @@ procedure TransformImage_NV12(pDest: PByte;
                               dwWidthInPixels: DWORD;
                               dwHeightInPixels: DWORD);
 var
-  x, y: DWORD;
   lpBitsY, lpBitsCb, lpBitsCr: PByte;
+  Y, X: DWORD;
   lpLineY1, lpLineY2, lpLineCr, lpLineCb: PByte;
-  lpDibLine1, lpDibLine2: PByte;
-  y0, y1, y2, y3: DWord;
-  cb, cr: DWord;
+  lpDibLine1, lpDibLine2: LPByte;
+  y0, y1, y2, y3, cb, cr: Int;
   r: RGBQUAD;
 
 begin
 
 {$POINTERMATH ON}
 
-  lpBitsY:= pSrc;
-  lpBitsCb:= lpBitsY + (dwHeightInPixels * DWORD(lSrcStride));
-  lpBitsCr:= lpBitsCb + 1;
+  lpBitsY := pSrc;
+  lpBitsCb := lpBitsY + (dwHeightInPixels * Dword(lsrcStride));
+  lpBitsCr := lpBitsCb + 1;
+  Y := 0;
 
-  y:= 0;
   repeat
+  //for (UINT y = 0; y < dwHeightInPixels; y += 2)
+
     lpLineY1 := lpBitsY;
-    lpLineY2 := lpBitsY + lSrcStride;
+    lpLineY2 := lpBitsY + lsrcStride;
     lpLineCr := lpBitsCr;
     lpLineCb := lpBitsCb;
 
     lpDibLine1 := pDest;
-    lpDibLine2 := pDest + lSrcStride;
+    lpDibLine2 := pDest + ldestStride;
 
-    x := 0;
+    // for (UINT x = 0; x < dwWidthInPixels; x += 2)
+    X := 0;
     repeat
-      y0 := int(lpLineY1[0]);
-      y1 := int(lpLineY1[1]);
-      y2 := int(lpLineY2[0]);
-      y3 := int(lpLineY2[1]);
-      cb := int(lpLineCb[0]);
-      cr := int(lpLineCr[0]);
+
+      y0 := Int(lpLineY1[0]);
+      y1 := Int(lpLineY1[1]);
+      y2 := Int(lpLineY2[0]);
+      y3 := Int(lpLineY2[1]);
+      cb := Int(lpLineCb[0]);
+      cr := Int(lpLineCr[0]);
 
       r := ConvertYCrCbToRGB(y0, cr, cb);
-
       lpDibLine1[0] := r.rgbBlue;
       lpDibLine1[1] := r.rgbGreen;
       lpDibLine1[2] := r.rgbRed;
       lpDibLine1[3] := 0; // Alpha
 
-      r:= ConvertYCrCbToRGB(y1, cr, cb);
-
+      r := ConvertYCrCbToRGB(y1, cr, cb);
       lpDibLine1[4] := r.rgbBlue;
       lpDibLine1[5] := r.rgbGreen;
       lpDibLine1[6] := r.rgbRed;
@@ -1008,30 +1009,25 @@ begin
       lpDibLine2[6] := r.rgbRed;
       lpDibLine2[7] := 0; // Alpha
 
-      inc(lpLineY1^, (lpLineY1 + 2)^);
-      inc(lpLineY2^, (lpLineY2 + 2)^);
-      inc(lpLineCr^, (lpLineY2 + 2)^);
-      inc(lpLineCb^, (lpLineY2 + 2)^);
+      inc(lpLineY1, 2);
+      inc(lpLineY2, 2);
+      inc(lpLineCr, 2);
+      inc(lpLineCb, 2);
 
-      inc(lpDibLine1^, (lpDibLine1 + 8)^);
-      inc(lpDibLine2^, (lpDibLine2 + 8)^);
+      inc(lpDibLine1, 8);
+      inc(lpDibLine2, 8);
 
       inc(x, 2);
 
-    until (x > dwWidthInPixels);
+    until (X = dwWidthInPixels);
 
-    inc(pDest^, (2 * lSrcStride));
-    inc(lpBitsY^, (2 * lsrcStride));
-
-    inc(lpBitsCr^, lsrcStride);
-    inc(lpBitsCb^, lsrcStride);
-
-    inc(y, 2);
-
-  until (y > dwHeightInPixels);
-
+    inc(pDest, (2 * ldestStride));
+    inc(lpBitsY, (2 * lsrcStride));
+    inc(lpBitsCr, lsrcStride);
+    inc(lpBitsCb, lsrcStride);
+    inc(Y, 2);
+  until (Y = dwHeightInPixels);
 {$POINTERMATH OFF}
-
 end;
 
 

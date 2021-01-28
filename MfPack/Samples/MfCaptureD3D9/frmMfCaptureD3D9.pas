@@ -9,7 +9,7 @@
 // Release date: 08-03-2018
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 //
 // Description: Preview window.
 //
@@ -418,7 +418,7 @@ procedure TfrmMain.OnSize(var Message: TWMSize);
 begin
   inherited;
 
-  if Assigned(g_pPreview) then
+  if Assigned(g_pPreview) and (Self.WindowState <> wsMinimized) then
     begin
       // Send a request to adjust the source rect to destination rect.
       // This must be handled after a sample has token. See Preview.pas OnReadSample event.
@@ -469,7 +469,7 @@ begin
   di.dbcc_devicetype := DBT_DEVTYP_DEVICEINTERFACE;
   di.dbcc_reserved := 0;
   di.dbcc_classguid := KSCATEGORY_CAPTURE;
-  di.dbcc_name := '';
+  di.dbcc_name := #0;
 
   g_hdevnotify := RegisterDeviceNotification(hwWindowHandle,
                                              @di,

@@ -1,6 +1,6 @@
 MfCaptureD3D9
-Version: X 3.0.0
-Enigma release.
+Version: X 3.0.1
+Enigma release #3.
 
 NOTES: 
  - This release is updated for compiler version 17 up to 33.
@@ -15,6 +15,6 @@ Description:
 Project: Media Foundation - MFPack - Samples
 Project location: http://sourceforge.net/projects/MFPack
 First release date: 06-02-2019
-Final release date: 13-08-2020
+Final release date: 27-01-2021
 
 Copyright © FactoryX. All rights reserved.
