@@ -15,13 +15,14 @@
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), (laoqiuqiu)
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 10/05/2021 (laoqiuqiu)         function Stat fixed.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -572,7 +573,7 @@ type
                           cb: ULARGE_INTEGER;
                           dwLockType: DWORD): HResult; stdcall;
 
-    function Stat(out statstg: STGTY;
+    function Stat(out pstatstg: STATSTG;
                   grfStatFlag: DWORD): HResult; stdcall;
 
     function Clone(out stm: IStream): HResult; stdcall;
