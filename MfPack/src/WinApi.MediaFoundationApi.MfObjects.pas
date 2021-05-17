@@ -10,7 +10,7 @@
 // Release date: 29-06-2012
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 // Description: -
 //
 // Organisation: FactoryX
@@ -24,6 +24,7 @@
 // 13/08/2020 All                 Enigma release. New layout and namespaces
 // 08/12/2020 Tony                Added updates from sdk 10.0.19041.0
 // 26/01/2021 Tony                Fixed IMFCollection
+// 17/05/2021 Tony                Fixed IMFCollection
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or higher.
@@ -1607,12 +1608,12 @@ type
     function GetElementCount(out pcElements: DWord): HResult; stdcall;
 
     function GetElement(dwElementIndex: DWord;
-                        out ppUnkElement: PIUnknown): HResult; stdcall;
+                        {out} ppUnkElement: PIUnknown): HResult; stdcall;
 
     function AddElement(pUnkElement: IUnknown): HResult; stdcall;
 
     function RemoveElement(dwElementIndex: DWord;
-                           out ppUnkElement: PIUnknown): HResult; stdcall;
+                           {out} ppUnkElement: PIUnknown): HResult; stdcall;
 
     function InsertElementAt(dwIndex: DWord;
                              pUnknown_: IUnknown): HResult; stdcall;

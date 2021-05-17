@@ -10,7 +10,7 @@
 // Release date: 24-01-2020
 // Language: ENU
 //
-// Version: 3.0.1
+// Version: 3.0.2
 // Description: This is a modified class of the Transcoder sample,
 //
 // Company: FactoryX
@@ -23,6 +23,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
 // 26/01/2021 Tony                Code cleanup
+// 17/05/2021 Tony                Fixed function ConfigureAudioOutput()
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
@@ -230,7 +231,7 @@ var
   hr: HResult;
   dwMTCount: DWORD;
   pAvailableTypes: IMFCollection;
-  pUnkAudioType: PIUnknown;
+  pUnkAudioType: IUnknown;
   pAudioType: IMFMediaType;
   pAudioAttrs: IMFAttributes;
 
@@ -265,7 +266,7 @@ begin
 
   if SUCCEEDED(hr) then
     hr := pAvailableTypes.GetElement(0,
-                                     pUnkAudioType);
+                                     @pUnkAudioType);
 
   if SUCCEEDED(hr) then
     hr := pUnkAudioType.QueryInterface(IID_IMFMediaType,
@@ -273,7 +274,8 @@ begin
 
   // Create a copy of the attribute store so that we can modify it safely.
   if SUCCEEDED(hr) then
-    hr := MFCreateAttributes(pAudioAttrs, 0);
+    hr := MFCreateAttributes(pAudioAttrs,
+                             0);
 
   if SUCCEEDED(hr) then
     hr := pAudioType.CopyAllItems(pAudioAttrs);

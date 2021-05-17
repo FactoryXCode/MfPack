@@ -69,7 +69,7 @@ interface
 
 uses
   {WinApi}
-	WinApi.WinApiTypes;
+  WinApi.WinApiTypes;
 
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
