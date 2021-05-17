@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 // Description: This unit holds basic Media Foundation methods needed to play,
 //              record, encode, decode, etc.
 //
@@ -28,6 +28,7 @@
 // 13/08/2020 All                 Enigma release. New layout and namespaces
 // 10/12/2020                     Compatibility update.
 // 18/01/2021 Tony                Corrected some pointer issues.
+// 17/05/2021 Tony                Corrected some pointer issues.
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -1646,7 +1647,7 @@ function GetPresentationDescriptorFromTopology(pTopology: IMFTopology;
 var
   hr: HRESULT;
   pCollection: IMFCollection;
-  pUnk: PIUnknown;
+  pUnk: IUnknown;
   pNode: IMFTopologyNode;
   dwElementcount: DWord;
   dwIndex: DWORD;
@@ -1675,7 +1676,7 @@ begin
   if (dwElementcount > 0) then
     begin
       hr := pCollection.GetElement(dwIndex,
-                                   pUnk);
+                                   @pUnk);
       if FAILED(hr) then
         begin
           OleCheck(hr);
@@ -1746,13 +1747,13 @@ function GetCollectionObject(pCollection: IMFCollection;
                              const dwIndex: DWORD;
                              out ppObject): HRESULT;
 var
-  pUnk: PIUnknown;
+  pUnk: IUnknown;
   hr: HRESULT;
 
 begin
 
   hr := pCollection.GetElement(dwIndex,
-                               pUnk);
+                               @pUnk);
   if SUCCEEDED(hr) then
     begin
       hr := pUnk.QueryInterface(IID_IUnknown,
