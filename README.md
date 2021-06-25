@@ -37,7 +37,7 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
 
 
 
-![](https://dc586.4shared.com/img/UXj_-_XWea/s24/1710787b738/VideoThumbNailsSample?async&rand=0.5293139052028757)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/VideoThumbNailsSample.jpg)
 
 **MediaEngine Player 2 & IMFTimedText sample**
 
@@ -45,7 +45,7 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
 
 
 
-![](https://dc621.4shared.com/img/_PwgZKPSea/s24/175e5dbca20/MediaEnginePlayer2?async&rand=0.7885918906958431)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MediaEnginePlayer2.jfif)
 
 **MfTranscode sample**
 
@@ -53,7 +53,7 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
 
 
 
-![](https://dc724.4shared.com/img/xNTtmc9ciq/s24/175e5b80db0/mftransform?async&rand=0.16034549456217317)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/mftransform.jfif)
 
 **MfSimpleCapture sample**
 
