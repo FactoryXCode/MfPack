@@ -23,7 +23,7 @@
 
 # MfPack 
 
-Version X 3.0.0 Enigma release.  
+Version X 3.0.1 Enigma release #4.  
 Delphi XE2 up to and including Delphi 10.3.3.  
 SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
 
@@ -63,7 +63,7 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
 
 
 
-![](https://dc586.4shared.com/img/DiY4eAqsiq/s24/1710787b350/MfSimpleCapture?async&rand=0.12859230191467885)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleCapture.jpg)
 
 **MfPeakMeter and MfPeakMeterEx component sample**
 
@@ -71,7 +71,7 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
 
 
 
-![](https://dc621.4shared.com/img/F3_uzenMiq/s24/175e5fa3730/MfPeakmeter?async&rand=0.7552506778489054)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfPeakmeter.jfif)
 
 **AudioClip and AudioClipEx sample**
 
@@ -81,7 +81,7 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
 
 
 
-![AudioClip sample](https://dc623.4shared.com/img/UfTU00D-ea/s24/1710787af68/AudioClipExSample?async&rand=0.31564552106971044)
+![AudioClip sample](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/AudioClipExSample.jpg)
 
 
 
@@ -100,7 +100,7 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
 
 
 
-![](https://dc621.4shared.com/img/bD4Vx1J1iq/s24/175e5ff6368/MfMediaPlayer_X?async&rand=0.6549303904092856)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfMediaPlayer_X.jfif)
 
 
 
@@ -112,7 +112,7 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
   *feature in Windows 7 and later. It also implements a volume control which tracks*
   *to the volume control in the volume mixer.* 
   
-![](https://dc576.4shared.com/img/5_Nqbv90ea/s24/17441862340/DuckingMediaPlayerSample?async&rand=0.7740816140241176)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/DuckingMediaPlayerSample.jpg)
 
 
 **Simple Player**
@@ -120,7 +120,7 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
 *Demonstrates audio/video playback using the IMFPMediaPlayer and IMFPMediaPlayerCallback API.*
 *Note: This API is deprecated, but still functional in Windows 10 version 2004 (May 2020 update).*
 
-![](https://dc704.4shared.com/img/7ROVGSlQiq/s24/175050570a0/SimplePlayer?async&rand=0.30102809049677814)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/SimplePlayer.jfif)
 
 **Ducking Capture Sample**
 
@@ -128,6 +128,6 @@ SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
   *feature in Windows 7 and later. It simply captures samples from the sound card and* 
   *discards them.*
 
-![](https://dc552.4shared.com/img/V8zsdA0ciq/s24/17504fdc7b0/ChatDemo?async&rand=0.34976150132933204)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ChatDemo.jfif)
 
 **© FactoryX. All rights reserved.***
