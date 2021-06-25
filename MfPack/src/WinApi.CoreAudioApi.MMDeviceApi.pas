@@ -34,7 +34,7 @@
 //          Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33

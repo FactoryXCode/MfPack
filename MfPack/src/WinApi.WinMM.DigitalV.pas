@@ -10,7 +10,7 @@
 // Release date: 17-05-2020
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: Include file for the MCI Digital Video Command Set.
 //              Part of Windows Multimedia
 //              See: https://docs.microsoft.com/en-us/windows/win32/api/_multimedia/
@@ -31,7 +31,7 @@
 //          Aug 19, 1992    Version 1.0 Release
 //
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -62,7 +62,19 @@
 //==============================================================================
 unit WinApi.WinMM.DigitalV;
 
+  {$MINENUMSIZE 4}
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
+  {$WEAKPACKAGEUNIT}
+
 interface
+
+  (*$HPPEMIT '' *)
+  (*$HPPEMIT '#include <digitalv.h>' *)
+  (*$HPPEMIT '' *)
 
 uses
   WinApi.Windows,
@@ -72,6 +84,9 @@ uses
   WinApi.WinMM.MMDdk;
 
 const
+
+  {$EXTERNALSYM _INC_DIGITALV}
+  _INC_DIGITALV                       = 100 ;
 
   {$EXTERNALSYM MCI_TEST}
   MCI_TEST                            = $00000020;

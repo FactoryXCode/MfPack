@@ -10,12 +10,11 @@
 // Release date: 05-07-2020
 // Language: ENU
 //
-// Version: 3.0.0
+// Version: 3.0.1
 // Description: This sample implements a simple media player that responds to the "ducking"
 //              feature in Windows 7 and higher.
 //              It also implements a volume control which tracks
 //              to the volume control in the volume mixer.
-//
 //
 // Company: FactoryX
 // Intiator(s): Tony (maXcomX), Peter (OzShips), Ramyses De Macedo Rodrigues.
@@ -31,7 +30,7 @@
 // Remarks: Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -67,7 +66,7 @@ unit MediaPlayer;
 interface
 
 uses
-  {}
+  {WinApi}
   WinApi.Windows,
   WinApi.DirectShow9, {or DSPack DirectShow}
   WinApi.Messages,
@@ -122,14 +121,14 @@ type
     _SessionControl2: IAudioSessionControl2;
 
 
-	  // IAudioVolumeDuckNotification implementation
+   // IAudioVolumeDuckNotification implementation
     function OnVolumeDuckNotification(sessionID: LPCWSTR;
                                       countCommunicationSessions: UINT32): HResult; stdcall;
 
     function OnVolumeUnduckNotification(sessionID: LPCWSTR): HResult; stdcall;
 
 
-	  // IAudioSessionEvents implementation
+   // IAudioSessionEvents implementation
     function OnDisplayNameChanged(NewDisplayName: LPCWSTR;
                                   const EventContext: TGUID): HResult; stdcall;
 
@@ -143,7 +142,7 @@ type
     function OnChannelVolumeChanged(ChannelCount: UINT;
                                     NewChannelArray: PFloat;
                                     ChangedChannel: UINT;
-																    const EventContext: TGUID): HResult; stdcall; { return S_OK; }
+                                    const EventContext: TGUID): HResult; stdcall; { return S_OK; }
 
     function OnGroupingParamChanged(NewGroupingParam: TGUID;
                                     const EventContext: TGUID): HResult; stdcall; { return S_OK; }
@@ -153,7 +152,7 @@ type
     function OnSessionDisconnected(DisconnectReason: AudioSessionDisconnectReason): HResult; stdcall; { return S_OK; }
 
 
-	  // Other
+   // Other
 
     function GetSessionManager2(): HResult; stdcall;
     function GetSessionControl2(): HResult; stdcall;
@@ -315,7 +314,7 @@ begin
         begin
           hr := _SessionControl2.UnregisterAudioSessionNotification(Self);
           if Failed(hr) then
-				    // Failures here are highly unlikely and could indicate an application defect
+            // Failures here are highly unlikely and could indicate an application defect
             MessageBox(_AppWindow,
                        lpcwstr('Unable to unregister for session notifications'),
                        lpcwstr('Stop PlayerError'),
@@ -909,7 +908,7 @@ end;
 function TCMediaPlayer.OnChannelVolumeChanged(ChannelCount: UINT;
                                               NewChannelArray: PFloat;
                                               ChangedChannel: UINT;
-																              const EventContext: TGUID): HResult; stdcall; { return S_OK; }
+                                              const EventContext: TGUID): HResult; stdcall; { return S_OK; }
 begin
   // to prevent "Return value might be undefined" compilerwarning
   Result := S_OK;
@@ -977,7 +976,7 @@ begin
           hr := endpoint.Activate(IID_IAudioSessionManager2,
                                   CLSCTX_INPROC_SERVER,
                                   Nil,
-                                  _SessionManager2);
+                                  Pointer(_SessionManager2));
           if Failed(hr) then
             MessageBox(_AppWindow,
                        lpcwstr('Unable to Activate session manager'),

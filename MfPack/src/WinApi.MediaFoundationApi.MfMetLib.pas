@@ -36,7 +36,7 @@
 //          On version 263 this unit was named MfpMetLib.pas and part of MfAdditional
 //
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33

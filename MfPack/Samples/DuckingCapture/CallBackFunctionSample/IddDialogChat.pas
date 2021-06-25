@@ -10,14 +10,14 @@
 // Release date: 04-10-2020
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: Ducking Capture dialog that defines the entry point for the application.
 //
 //              WIN32 APPLICATION : Ducking Capture Sample Project Overview
 //              ================================================================
 //
 //              This sample implements a simple "Chat" that demonstrates to the "ducking"
-//              feature in Windows 7. It simply captures samples from the sound card and
+//              feature in Windows 7 and higher. It simply captures samples from the sound card and
 //              discards them.
 //
 // Organisation: FactoryX
@@ -34,7 +34,7 @@
 // Remarks: Note that this sample requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -68,17 +68,22 @@ unit IddDialogChat;
 interface
 
 uses
+  {Winapi}
   Winapi.Windows,
   Winapi.Messages,
+  {System}
   System.SysUtils,
   System.Classes,
+  {WinMM}
   WinApi.WinMM.MMeApi,
   WinApi.WinMM.MMSysCom,
+  {Vcl}
   Vcl.Graphics,
   Vcl.Controls,
   Vcl.Forms,
   Vcl.Dialogs,
   Vcl.StdCtrls,
+  {Application}
   ChatTransport;
 
 // Global Variables:

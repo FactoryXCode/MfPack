@@ -10,7 +10,7 @@
 // Release date: 17-05-2020
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: ApiSet Contract for api-ms-win-mm-joystick-l1-1-0
 //              Part of Windows Multimedia
 //              See: https://docs.microsoft.com/en-us/windows/win32/api/_multimedia/
@@ -29,7 +29,7 @@
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -60,7 +60,19 @@
 //==============================================================================
 unit WinApi.WinMM.JoyStickApi;
 
+  {$MINENUMSIZE 4}
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
+  {$WEAKPACKAGEUNIT}
+
 interface
+
+  (*$HPPEMIT '' *)
+  (*$HPPEMIT '#include <joystickapi.h>' *)
+  (*$HPPEMIT '' *)
 
 uses
   WinApi.Windows,

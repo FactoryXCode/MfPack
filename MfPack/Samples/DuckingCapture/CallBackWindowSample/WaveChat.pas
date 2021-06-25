@@ -10,7 +10,7 @@
 // Release date: 04-10-2020
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: Wave in renderer class.
 //
 // Organisation: FactoryX
@@ -27,7 +27,7 @@
 // Remarks: Note that this sample requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -61,13 +61,17 @@ unit WaveChat;
 interface
 
 uses
+  {Winapi}
   WinApi.Windows,
   WinApi.Messages,
+  {System}
   System.Classes,
   System.SysUtils,
-  ChatTransport,
+  {WinMM}
   WinApi.WinMM.MMSysCom,
-  WinApi.WinMM.MMeApi;
+  WinApi.WinMM.MMeApi,
+  {Application}
+  ChatTransport;
 
 // const WAVE_MAPPED_DEFAULT_COMMUNICATION_DEVICE = $0010  declared in MMeApi
 
@@ -485,44 +489,45 @@ var
   waveHeader: LPWAVEHDR;
 
 begin
+  Result := INT_PTR(False);
 
-   case message.Msg of
+  case message.Msg of
 
-     MM_WIM_OPEN:  begin
-                     Result := INT_PTR(True);
-                   end;
+    MM_WIM_OPEN:  begin
+                    Result := INT_PTR(True);
+                  end;
 
-     MM_WIM_CLOSE: begin
-                     Result := INT_PTR(True);
-                   end;
+    MM_WIM_CLOSE: begin
+                    Result := INT_PTR(True);
+                  end;
 
-     MM_WIM_DATA:  begin
-                     //
-                     // Process the capture data since we've received a buffers worth of data.
-                     //
-                     //  In real life, we'd copy the capture data out of the waveHeader that just completed and process it, but since
-                     //  this is a sample, we discard the data and simply re-submit the buffer.
-                     //
-                     hwaveHandle := HWAVEIN(message.WParam);
-                     waveHeader := LPWAVEHDR(message.LParam);
+    MM_WIM_DATA:  begin
+                    //
+                    // Process the capture data since we've received a buffers worth of data.
+                    //
+                    //  In real life, we'd copy the capture data out of the waveHeader that just completed and process it, but since
+                    //  this is a sample, we discard the data and simply re-submit the buffer.
+                    //
+                    hwaveHandle := HWAVEIN(message.WParam);
+                    waveHeader := LPWAVEHDR(message.LParam);
 
-                     if _waveHandle <> 0 then
-                       begin
-                         mmr := waveInAddBuffer(hwaveHandle,
-                                                waveHeader,
-                                                SizeOf(WAVEHDR));
-                         if mmr <> MMSYSERR_NOERROR then
-                           MessageBox(_hWnd,
-                                      'Failed to add buffer',
-                                      'Error',
-                                      MB_OK);
-                         Result := INT_PTR(True);
-                       end;
-                    end;
-     else
-       begin
-         Result := INT_PTR(False);
-       end;
+                    if _waveHandle <> 0 then
+                      begin
+                        mmr := waveInAddBuffer(hwaveHandle,
+                                               waveHeader,
+                                               SizeOf(WAVEHDR));
+                        if mmr <> MMSYSERR_NOERROR then
+                          MessageBox(_hWnd,
+                                     'Failed to add buffer',
+                                     'Error',
+                                     MB_OK);
+                        Result := INT_PTR(True);
+                      end;
+                  end;
+    else
+      begin
+        Result := INT_PTR(False);
+      end;
    end;
 end;
 

@@ -27,7 +27,7 @@
 //          alongside XAudio2.8 to support older applications, and does not require redistribution.
 //
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 // Compiler version: 23 up to 33
 // SDK version: 10.0.19041.0

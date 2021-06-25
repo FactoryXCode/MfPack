@@ -10,7 +10,7 @@
 // Release date: 17-05-2020
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: Multimedia Systems Media Control Interface
 //              AVI driver external header file
 //
@@ -23,6 +23,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 25/06/2021 Tony                Added/fixed some directives.
 //------------------------------------------------------------------------------
 //
 // Remarks: Depends on MMSYSTEM.H and WINDOWS.h
@@ -30,7 +31,7 @@
 //        	Date:		16-JUL-1992
 //
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -66,7 +67,17 @@
 //==============================================================================
 unit WinApi.WinMM.MCIAvi;
 
+  {$MINENUMSIZE 4}
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
+  {$WEAKPACKAGEUNIT}
+
 interface
+
+  (*$HPPEMIT '#include <mciavi.h>' *)
 
 uses
   WinApi.WinMM.MCIApi;

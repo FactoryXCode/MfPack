@@ -10,7 +10,7 @@
 // Release date: 12/12/2015
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: ActiveMovie interface definitions.
 // also included with DirectShow.pas,
 // s code is not up to date.
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows Vista or later.
 // 
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33

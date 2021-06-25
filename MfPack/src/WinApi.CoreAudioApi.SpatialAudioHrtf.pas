@@ -10,7 +10,7 @@
 // Release date: 29-05-2018
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 //
 // Description: Shared part of the Core Audio Interfaces
 //
@@ -28,7 +28,7 @@
 // Remarks: Requires Windows 10 RedStone 1 or later.
 //
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33

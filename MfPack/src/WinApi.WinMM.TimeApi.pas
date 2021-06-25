@@ -10,7 +10,7 @@
 // Release date: 17-09-2020
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: ApiSet Contract for api-ms-win-mm-time-l1-1-0
 //              Part of Windows Multimedia
 //              See: https://docs.microsoft.com/en-us/windows/win32/api/_multimedia/
@@ -24,12 +24,13 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 25/06/2021 Tony                Added/fixed some directives.
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -60,6 +61,14 @@
 //==============================================================================
 
 unit WinApi.WinMM.TimeApi;
+
+  {$MINENUMSIZE 4}
+  {$WEAKPACKAGEUNIT}
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
 
 interface
 

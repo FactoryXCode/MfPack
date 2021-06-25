@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 //
 // Description: Windows Imaging Component (WIC) API.
 //              This module contains the public data structures and API definitions
@@ -32,7 +32,7 @@
 //          It is not recommended to use the rtl versions <= Delphi 10.4
 //
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33

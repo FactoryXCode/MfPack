@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: Multimedia Registration
 //
 // Organisation: FactoryX
@@ -28,7 +28,7 @@
 //          IUnknown(Pointer), IUnknown(Object), IUnknown(Nil) etc.
 // 
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -59,16 +59,6 @@
 // =============================================================================
 unit WinApi.WinMM.MMReg;
 
-  {$HPPEMIT '#include "mmreg.h"'}
-
-interface
-
-uses
-  {WinApi}
-  WinApi.Windows,
-  WinApi.WinMM.MMiscApi,
-  WinApi.WinMM.MMeApi;
-
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
@@ -77,6 +67,17 @@ uses
   {$ELSE}
     {$ALIGN 8} // Win64
   {$ENDIF}
+
+interface
+
+  {$HPPEMIT '#include "mmreg.h"'}
+
+uses
+  {WinApi}
+  WinApi.Windows,
+  WinApi.WinMM.MMiscApi,
+  WinApi.WinMM.MMeApi;
+
 
 
 // Define the following to skip definitions

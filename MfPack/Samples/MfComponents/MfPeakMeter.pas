@@ -28,7 +28,7 @@
 //          Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -219,7 +219,7 @@ begin
   hr := pDevice.Activate(IID_IAudioMeterInformation,
                          CLSCTX_ALL,
                          Nil,
-                         pMeterInfo);
+                         Pointer(pMeterInfo));
   if FAILED(hr) then
     goto done;
 

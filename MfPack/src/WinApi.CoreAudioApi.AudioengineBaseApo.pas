@@ -10,7 +10,7 @@
 // Release date: 04-09-2015
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: -
 //
 // Organisation: FactoryX
@@ -46,7 +46,7 @@
 //          Fields with a Common Type Specification.
 // 
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33

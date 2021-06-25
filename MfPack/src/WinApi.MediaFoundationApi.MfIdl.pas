@@ -27,7 +27,7 @@
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -2025,10 +2025,10 @@ type
   PMFVideoSphericalFormat = ^MFVideoSphericalFormat;
   {$EXTERNALSYM _MFVideoSphericalFormat}
   _MFVideoSphericalFormat = (
-    MFVideoSphericalFormat_Unsupported	    = 0,
-    MFVideoSphericalFormat_Equirectangular	= 1,
-    MFVideoSphericalFormat_CubeMap	        = 2,
-    MFVideoSphericalFormat_3DMesh	          = 3
+    MFVideoSphericalFormat_Unsupported     = 0,
+    MFVideoSphericalFormat_Equirectangular = 1,
+    MFVideoSphericalFormat_CubeMap         = 2,
+    MFVideoSphericalFormat_3DMesh          = 3
   );
   {$EXTERNALSYM MFVideoSphericalFormat}
   MFVideoSphericalFormat = _MFVideoSphericalFormat;

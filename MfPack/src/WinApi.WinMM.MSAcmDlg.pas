@@ -2,17 +2,16 @@
 //
 // Copyright: © FactoryX. All rights reserved.
 //
-// Project: MFPack - DirectComposition
+// Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: WinApi.ServProv.pas
+// Module: WinApi.WinMM.MsAcm.pas
 // Kind: Pascal / Delphi unit
-// Release date: 30-04-2019
+// Release date: 25-06-2021
 // Language: ENU
 //
 // Revision Version: 3.0.1
-//
-// Description: IServiceProvider description.
+// Description: Audio Compression Manager Common Dialogs Identifiers.
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -22,11 +21,10 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
+// 13/08/2020 All                 Enigma release. #1
 //------------------------------------------------------------------------------
 //
-// Remarks: - Requires Windows Vista or later.
-//
+// Remarks: -
 //
 // Related objects: -
 // Related projects: MfPackX301
@@ -38,7 +36,7 @@
 // Todo: -
 //
 //==============================================================================
-// Source: servprov.h
+// Source: MSAcmDlg.h
 //
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //==============================================================================
@@ -57,42 +55,58 @@
 //
 // Users may distribute this source code provided that this header is included
 // in full at the top of the file.
-//
 //==============================================================================
-unit WinApi.ServProv;
+unit WinApi.WinMM.MSAcmDlg;
 
-  {$HPPEMIT '#include "servprov.h"'}
+  {$MINENUMSIZE 4}
+  {$WEAKPACKAGEUNIT}
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
 
 interface
 
+  (*$HPPEMIT '#include <MSAcmDlg.h>' *)
+
 uses
-  {WinApi}
   WinApi.Windows;
 
-type
+const
 
-  // Interface IServiceProvider
-  // ==========================
-  //
-  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IServiceProvider);'}
-  {$EXTERNALSYM IServiceProvider}
-  IServiceProvider = interface(IUnknown)
+  DLG_ACMFORMATCHOOSE_ID              = 70;
+  {$EXTERNALSYM DLG_ACMFORMATCHOOSE_ID}
+  IDD_ACMFORMATCHOOSE_BTN_HELP        = 9;
+  {$EXTERNALSYM IDD_ACMFORMATCHOOSE_BTN_HELP}
+  IDD_ACMFORMATCHOOSE_CMB_CUSTOM      = 100;
+  {$EXTERNALSYM IDD_ACMFORMATCHOOSE_CMB_CUSTOM}
+  IDD_ACMFORMATCHOOSE_CMB_FORMATTAG   = 101;
+  {$EXTERNALSYM IDD_ACMFORMATCHOOSE_CMB_FORMATTAG}
+  IDD_ACMFORMATCHOOSE_CMB_FORMAT      = 102;
+  {$EXTERNALSYM IDD_ACMFORMATCHOOSE_CMB_FORMAT}
+  IDD_ACMFORMATCHOOSE_BTN_SETNAME     = 103;
+  {$EXTERNALSYM IDD_ACMFORMATCHOOSE_BTN_SETNAME}
+  IDD_ACMFORMATCHOOSE_BTN_DELNAME     = 104;
+  {$EXTERNALSYM IDD_ACMFORMATCHOOSE_BTN_DELNAME}
 
-  ['{6d5140c1-7436-11ce-8034-00aa006009fa}']
-    function  QueryService(const guidService: TGUID;
-                           const riid: TGUID;
-                           var ppvObject: Pointer): HResult; stdcall;
-  end;
-  IID_IServiceProvider = IServiceProvider;
-  {$EXTERNALSYM IID_IServiceProvider}
 
+  DLG_ACMFILTERCHOOSE_ID              = 71;
+  {$EXTERNALSYM DLG_ACMFILTERCHOOSE_ID}
+  IDD_ACMFILTERCHOOSE_BTN_HELP        = 9;
+  {$EXTERNALSYM IDD_ACMFILTERCHOOSE_BTN_HELP}
+  IDD_ACMFILTERCHOOSE_CMB_CUSTOM      = 100;
+  {$EXTERNALSYM IDD_ACMFILTERCHOOSE_CMB_CUSTOM}
+  IDD_ACMFILTERCHOOSE_CMB_FILTERTAG   = 101;
+  {$EXTERNALSYM IDD_ACMFILTERCHOOSE_CMB_FILTERTAG}
+  IDD_ACMFILTERCHOOSE_CMB_FILTER      = 102;
+  {$EXTERNALSYM IDD_ACMFILTERCHOOSE_CMB_FILTER}
+  IDD_ACMFILTERCHOOSE_BTN_SETNAME     = 103;
+  {$EXTERNALSYM IDD_ACMFILTERCHOOSE_BTN_SETNAME}
+  IDD_ACMFILTERCHOOSE_BTN_DELNAME     = 104;
+  {$EXTERNALSYM IDD_ACMFILTERCHOOSE_BTN_DELNAME}
 
-  // Additional Prototypes for ALL interfaces
-
-  // End of Additional Prototypes
 
 implementation
-
-  // Implement Additional functions here.
 
 end.

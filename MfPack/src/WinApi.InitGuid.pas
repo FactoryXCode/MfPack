@@ -10,7 +10,7 @@
 // Release date: 20-12-2015
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: Definitions for controlling GUID initialization.
 //              OLE Version 2.0
 //
@@ -28,7 +28,7 @@
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33

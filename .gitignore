@@ -1,3 +1,5 @@
 
 tsvnsync.tsex
 *.bak
+*.jpeg
+*.png

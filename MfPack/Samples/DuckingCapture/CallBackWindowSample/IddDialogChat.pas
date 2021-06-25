@@ -10,14 +10,14 @@
 // Release date: 04-10-2020
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: Ducking Capture dialog that defines the entry point for the application.
 //
 //              WIN32 APPLICATION : Ducking Capture Sample Project Overview
 //              ================================================================
 //
 //              This sample implements a simple "Chat" that demonstrates to the "ducking"
-//              feature in Windows 7. It simply captures samples from the sound card and
+//              feature in Windows 7 and higher. It simply captures samples from the sound card and
 //              discards them.
 //
 // Organisation: FactoryX
@@ -35,7 +35,7 @@
 //          This sample uses the CALLBACK_WINDOW callbacktype as used in the original C++ sample.
 //
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -69,17 +69,21 @@ unit IddDialogChat;
 interface
 
 uses
+  {Winapi}
   Winapi.Windows,
   Winapi.Messages,
-  System.SysUtils,
-  System.Classes,
   WinApi.WinMM.MMeApi,
   WinApi.WinMM.MMSysCom,
+  {System}
+  System.SysUtils,
+  System.Classes,
+  {Vcl}
   Vcl.Graphics,
   Vcl.Controls,
   Vcl.Forms,
   Vcl.Dialogs,
   Vcl.StdCtrls,
+  {Application}
   ChatTransport;
 
 // Global Variables:
@@ -114,6 +118,8 @@ type
 
   private
     { Private declarations }
+
+    DataProcHandled: Boolean;
 
     //  UI State information.
     g_WaveComboBoxIndex: Integer;
@@ -436,9 +442,8 @@ begin
 end;
 
 procedure TForm1.WimDataProc(var message: TMessage);
-var
-  handled: Boolean;
 begin
+  DataProcHandled := False;
   //
   //  If the current chat transport is going to handle this message, pass the message to the transport.
   //
@@ -446,7 +451,7 @@ begin
   //
   if assigned(g_CurrentChat) then
     if g_CurrentChat.HandlesMessage(Handle, message.Msg) then
-      handled := Boolean(g_CurrentChat.MessageHandler(Handle, message));
+      DataProcHandled := Boolean(g_CurrentChat.MessageHandler(Handle, message));
 end;
 
 end.

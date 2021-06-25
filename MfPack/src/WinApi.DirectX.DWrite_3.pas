@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 //
 // Description: DirectX Typography Services public API definitions.
 //
@@ -28,7 +28,7 @@
 // Remarks: - Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33

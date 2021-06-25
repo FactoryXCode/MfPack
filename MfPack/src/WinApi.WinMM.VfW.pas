@@ -10,7 +10,7 @@
 // Release date: 17-05-2020
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: Video for windows include file for WIN32.
 //
 // Organisation: FactoryX
@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 25/06/2021 Tony                Added/fixed some directives.
 //------------------------------------------------------------------------------
 //
 // Remarks:
@@ -65,7 +66,7 @@
 //    can lead to mismatches that result in compilation or runtime errors.
 //
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -96,7 +97,18 @@
 //==============================================================================
 unit WinApi.WinMM.VfW;
 
+  {$MINENUMSIZE 4}
+  {$WEAKPACKAGEUNIT}
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
+
 interface
+
+ {$HPPEMIT '#include "vfw.h"'}
+
 uses
   WinApi.Windows,
   WinApi.Messages,
@@ -115,6 +127,7 @@ uses
   //****************************************************************************
 
 type
+
   TWOCC = type WORD;
   {$EXTERNALSYM TWOCC}
 
@@ -164,6 +177,7 @@ type
                       const ch1: AnsiChar;
                       const ch2: AnsiChar;
                       const ch3: AnsiChar): FOURCC; inline;
+  {$EXTERNALSYM MAKEFOURCC}
 {$DEFINE MAKEFOURCC}
 {$ENDIF}
 
@@ -184,20 +198,21 @@ const
   // this code in biCompression means the DIB must be accesed via
   // 48 bit pointers! using *ONLY* the selector given.
   //
-const
+
   BI_1632                             = $32333631;  // '1632'
   {$EXTERNALSYM BI_1632}
 
 
 {$IFNDEF mmioFOURCC}
+
   function mmioFOURCC(ch1: AnsiChar;
                       ch2: AnsiChar;
                       ch3: AnsiChar;
                       ch4: AnsiChar): FOURCC;
+  {$EXTERNALSYM mmioFOURCC}
 
 {$DEFINE mmioFOURCC}
 {$ENDIF}
-
 
   function aviTWOCC(ch0: AnsiChar;
                     ch1: AnsiChar): TWOCC;

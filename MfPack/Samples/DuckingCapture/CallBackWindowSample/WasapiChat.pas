@@ -10,7 +10,7 @@
 // Release date: 04-10-2020
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: WasApi threaded capture class.
 //
 // Organisation: FactoryX
@@ -27,7 +27,7 @@
 // Remarks: Note that this sample requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -61,6 +61,7 @@ unit WasapiChat;
 interface
 
 uses
+  {Winapi}
   WinApi.Windows,
   WinApi.Messages,
   WinApi.WinApiTypes,
@@ -71,8 +72,10 @@ uses
   WinApi.CoreAudioApi.AudioClient,
   WinApi.MediaFoundationApi.MfUtils,
   WinApi.CoreAudioApi.AudioSessionTypes,
+  {System}
   System.Classes,
   System.SysUtils,
+  {Application}
   ChatTransport;
 
 type
@@ -342,7 +345,7 @@ begin
   hr := _ChatEndpoint.Activate(IID_IAudioClient,
                                CLSCTX_INPROC_SERVER,
                                Nil,
-                               _AudioClient);
+                               Pointer(_AudioClient));
   if FAILED(hr) then
     begin
       MessageBox(_AppWindow,

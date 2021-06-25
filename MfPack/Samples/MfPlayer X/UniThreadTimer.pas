@@ -9,7 +9,7 @@
 // Release date: 24-02-2012
 // Language: ENU
 //
-// Version: 2.6.3
+// Version: 3.0.1
 // Description: Universal threaded timer
 //              This timer can be used for a variety of tasks where you need a
 //              lightweight, precise and threadsave timer.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ---------------------------------------------
-// 24/12/2019                     Underworld release.
+// 13/08/2020 All                 Enigma release.
 // ----------------------------------------------------------------------------
 //
 // Remarks: -
 //
-// Related objects: MfAdditional version 2.6.2
-// Related projects: MfPack262
+// Related objects: MfSamples
+// Related projects: MfPack301
 // Known Issues: -
 // Compiler version: 17 up to 21
 // ToDo: -

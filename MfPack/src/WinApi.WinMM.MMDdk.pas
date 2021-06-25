@@ -10,7 +10,7 @@
 // Release date: 22-05-2016
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 // Description: Include file for Multimedia Device Development Kit.
 //
 // Organisation: FactoryX
@@ -22,12 +22,13 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 25/06/2021 Tony                Added/fixed some directives.
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 // 
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -58,16 +59,6 @@
 //==============================================================================
 unit WinApi.WinMM.MMDdk;
 
-  {$HPPEMIT '#include "mmddk.h"'}
-
-interface
-
-uses
-
-  {WinApi}
-  WinApi.Windows,
-  WinApi.MMSystem;
-
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
@@ -76,6 +67,17 @@ uses
   {$ELSE}
     {$ALIGN 8} // Win64
   {$ENDIF}
+
+interface
+
+  {$HPPEMIT '#include "mmddk.h"'}
+
+uses
+
+  {WinApi}
+  WinApi.Windows,
+  WinApi.MMSystem;
+
 
 
 {$ifndef _INC_MMDDK}

@@ -1,5 +1,5 @@
-MfPack X 3.0.0 
-Enigma release #3.
+MfPack X 3.0.1 
+Enigma release #4.
 
 NOTES: 
  - This release is updated for compiler version 17 up to 33.
@@ -7,7 +7,7 @@ NOTES:
  - Requires Windows 8 or later.
 
 First release date: 04-06-2012
-Final release date: 02-01-2021
+Final release date: 25-06-2021
 
 Copyright © FactoryX. All rights reserved.
 

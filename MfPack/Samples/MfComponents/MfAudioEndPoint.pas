@@ -29,7 +29,7 @@
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX300
+// Related projects: MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -606,7 +606,7 @@ begin
               hr := fSelectedIMMDevice.Activate(IID_IAudioEndpointVolume,
                                                 INT(CLSCTX_INPROC_SERVER),
                                                 Nil,
-                                                IUnknown(FAudioEndpoint));
+                                                Pointer(FAudioEndpoint));
 
               if Succeeded(hr) then
                 begin
