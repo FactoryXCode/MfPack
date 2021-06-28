@@ -1,5 +1,5 @@
 MfComponents
-Version: X 3.0.0
+Version: X 3.0.1
 Enigma release.
 
 NOTES: 
@@ -23,6 +23,6 @@ This package contains the following -installable- components:
 Project: Media Foundation - MFPack - Samples
 Project location: http://sourceforge.net/projects/MFPack
 First release date: 05-02-2016
-Final release date: 11-09-2020
+Final release date: 28-06-2021
 
 Copyright © FactoryX. All rights reserved.
