@@ -25,6 +25,7 @@
 // 13/08/2020 All                 Enigma release. New layout and namespaces
 // 10/10/2020 Tony                Fixed some issues, see updt 101020
 // 26/01/2021 Tony                Fixed MFT Register functions.
+// 08/07/2021 Tony                Added MFBinaryFormat guids.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -322,8 +323,8 @@ const
   //    Due to asynchronous nature of timers, application might still get a
   //    timer callback after MFCancelWorkItem has returned.
 
-  {$EXTERNALSYM MFCancelWorkItem}
   function MFCancelWorkItem(Key: MFWORKITEM_KEY): HResult; stdcall;
+  {$EXTERNALSYM MFCancelWorkItem}
   // Attempts to cancel an asynchronous operation that was scheduled with
   // MFScheduleWorkItem or MFScheduleWorkItemEx.
   // Parameters
@@ -336,7 +337,7 @@ const
   // Remarks
   //    Because work items are asynchronous, the work-item callback might still be
   //    invoked after MFCancelWorkItem is called.
-
+  //
   ///////////////////////////////////////////////////////////////////////////////
 
 
@@ -413,7 +414,7 @@ type
 type
   PMfasyncWorkqueueType = ^MFASYNC_WORKQUEUE_TYPE;
   PMFASYNC_WORKQUEUE_TYPE = ^MFASYNC_WORKQUEUE_TYPE;
-  MFASYNC_WORKQUEUE_TYPE  = Dword;
+  MFASYNC_WORKQUEUE_TYPE  = DWord;
   {$EXTERNALSYM MFASYNC_WORKQUEUE_TYPE}
 const
   MF_STANDARD_WORKQUEUE      = 0;  // MF_STANDARD_WORKQUEUE: Work queue in a thread without Window
@@ -1098,7 +1099,7 @@ type
   PMF_TOPOSTATUS = ^MF_TOPOSTATUS;
   MF_TOPOSTATUS = (
 
-    MF_TOPOSTATUS_INVALID       = 0,      // MF_TOPOSTATUS_INVALID: Invalid value; will not be sent
+    MF_TOPOSTATUS_INVALID         = 0,    // MF_TOPOSTATUS_INVALID: Invalid value; will not be sent
 
 
     MF_TOPOSTATUS_READY           = 100,  // MF_TOPOSTATUS_READY: The topology has been put in place and is
@@ -2422,6 +2423,7 @@ const
 
 
   function MFGetPluginControl(out ppPluginControl: IMFPluginControl): HResult; stdcall;
+  {$EXTERNALSYM MFGetPluginControl}
   // Get the plugin control API
 
 
@@ -2525,9 +2527,11 @@ type
   // This function is an alias for function MAKEFOURCC defined in WinApi.MmReg.pas and WinApi.MediaFoundationApi.MfMetLib.pas
   tCh4 = array [0..3] of AnsiChar;
   function FCC(ch4: TCh4): DWord; inline;
+  {$EXTERNALSYM FCC}
 
   // Tony
   function DEFINE_MEDIATYPE_GUID(const format: DWord): TGuid; inline;
+  {$EXTERNALSYM DEFINE_MEDIATYPE_GUID}
   // Parameters
   // name
   //    The name of the GUID constant to be defined.
@@ -3300,14 +3304,11 @@ const
   // Binary Data MediaTypes
   //
 
-  //#ifndef DEFINE_BINARY_MEDIATYPMF_DEVICESTREAM_ATTRIBUTE_SECURE_CAPABILITYE_GUID
-  //#define DEFINE_BINARY_MEDIATYPE_GUID(name, format) \
-  //    DEFINE_GUID(name,                       \
-  //    format, 0xbf10, 0x48b4, 0xbc, 0x18, 0x59, 0x3d, 0xc1, 0xdb, 0x95, 0xf);
-  //#endif
+  MFBinaryFormat_Base             : TGUID = '{00000000-bf10-48b4-bc18-593dc1db950f}';
+  {$EXTERNALSYM MFBinaryFormat_Base}
 
-  //DEFINE_BINARY_MEDIATYPE_GUID(MFBinaryFormat_Base, 0x00000000);
-  //DEFINE_BINARY_MEDIATYPE_GUID(MFBinaryFormat_GPMD, 'gpmd');
+  MFBinaryFormat_GPMD             : TGUID = '{67706d64-bf10-48b4-bc18-593dc1db950f}';
+  {$EXTERNALSYM MFBinaryFormat_GPMD}
 
 
 //////////////////////  Media Type Attributes GUIDs ////////////////////////////
