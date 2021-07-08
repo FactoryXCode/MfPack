@@ -1,7 +1,6 @@
 
 tsvnsync.tsex
 *.bak
-*.jpeg
+*.jpg
 *.png
 *.jfif
-Pic/
