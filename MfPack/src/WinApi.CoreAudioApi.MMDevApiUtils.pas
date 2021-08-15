@@ -161,7 +161,7 @@ type
 
     constructor Create(flow: eDataFlow;
                        role: eRole;
-                       pAudioEvents: IAudioSessionEvents);
+                       AudioEvents: IAudioSessionEvents);
 
     destructor Destroy; override;
 
@@ -273,7 +273,7 @@ implementation
 // Constructor
 constructor TAudioVolumeEvents.Create(flow: EDataFlow;
                                       role: ERole; 
-                                      pAudioEvents: IAudioSessionEvents);
+                                      AudioEvents: IAudioSessionEvents);
 var
   pEnumerator: IMMDeviceEnumerator;
   pDevice: IMMDevice;
@@ -284,7 +284,7 @@ begin
   hrStatus := S_OK;
   pManager := Nil;
   pControl := Nil;
-  pAudioEvents := pAudioEvents;
+  pAudioEvents := AudioEvents;
 
 try
 
