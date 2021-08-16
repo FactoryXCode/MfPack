@@ -19,10 +19,11 @@ This package contains the following -installable- components:
 - MfAudioEndPoint - Audio EndPoint component that responds to volume changes. 
                     Uses: IAudioEndpointVolumeEx, IAudioEndpointVolumeCallback and IMMDeviceEnumerator.
 - TThreadedQTimer - A threaded queue timer (experimental) 
+- WasApiRenderFile - WAV rendering component that uses WASAPI
 
 Project: Media Foundation - MFPack - Samples
 Project location: http://sourceforge.net/projects/MFPack
 First release date: 05-02-2016
-Final release date: 28-06-2021
+Final release date: 178-08-2021
 
 Copyright © FactoryX. All rights reserved.
