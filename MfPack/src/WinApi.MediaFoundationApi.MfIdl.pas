@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 // Description: Media Foundation basic control-layer interfaces.
 //
 // Organisation: FactoryX
@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 17/08/2021 Ciaran              Fixed incorrect GUID for IMFMediaSource
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -1692,7 +1693,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFMediaSource);'}
   {$EXTERNALSYM IMFMediaSource}
   IMFMediaSource = interface(IMFMediaEventGenerator)
-    ['{3C9B2EB9-86D5-4514-A394-F56664F9F0D8}']
+    ['{279A808D-AEC7-40C8-9C6B-A6B492C78A66}']
 
       function GetCharacteristics(out pdwCharacteristics: PDWord): HResult; stdcall;
       // Receives a bitwise OR of zero or more flags from the MFMEDIASOURCE_CHARACTERISTICS enumeration.
