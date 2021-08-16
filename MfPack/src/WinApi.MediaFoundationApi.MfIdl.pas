@@ -1692,7 +1692,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFMediaSource);'}
   {$EXTERNALSYM IMFMediaSource}
   IMFMediaSource = interface(IMFMediaEventGenerator)
-    ['{3C9B2EB9-86D5-4514-A394-F56664F9F0D8}']
+    ['{279A808D-AEC7-40C8-9C6B-A6B492C78A66}']
 
       function GetCharacteristics(out pdwCharacteristics: PDWord): HResult; stdcall;
       // Receives a bitwise OR of zero or more flags from the MFMEDIASOURCE_CHARACTERISTICS enumeration.
