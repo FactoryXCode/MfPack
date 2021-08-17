@@ -10,7 +10,7 @@
 // Release date: 29-07-2012
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 // Description: Common methods used by Media Foundation,
 //              Core Audio etc..
 //
@@ -23,6 +23,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 17/08/2021 Tony                Fixed lprect copy issues
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -340,20 +341,20 @@ type
   function GetTRectHeight(const rc: TRect): LONG; inline;
 
   // Copy a TRect to a LPRECT
-  procedure CopyTRectToLPRect(const rs: TRect;
-                              out rd: LPRECT); inline;
+  procedure CopyTRectToLPRect(rs: TRect;
+                              var rd: LPRECT); inline;
 
   // Copy a LPRECT to a TRect
   procedure CopyLPRectToTRect(rs: LPRECT;
-                              out rd: TRect); inline;
+                              var rd: TRect); inline;
 
   // Copy a TRect to a PRect
   procedure CopyTRectToPRect(rs: TRect;
-                             out rd: PRect ); inline;
+                             var rd: PRect ); inline;
 
   // Copy a PRect to a TRect
   procedure CopyPRectToTRect(rs: PRect;
-                             out rd: TRect); inline;
+                             var rd: TRect); inline;
 
   // MakeOffset
   function MakeOffset(v: Single): MFOffset; inline;
@@ -1280,8 +1281,8 @@ end;
 // Note: LPRect is an alias for PRect.
 
 // Copy a TRect to a LPRECT
-procedure CopyTRectToLPRect(const rs: TRect;
-                            out rd: LPRECT); inline;
+procedure CopyTRectToLPRect(rs: TRect;
+                            var rd: LPRECT); inline;
 var
   rdRect: LPRect;
 begin
@@ -1300,14 +1301,14 @@ end;
 
 // Copy a LPRECT to a TRect
 procedure CopyLPRectToTRect(rs: LPRECT;
-                            out rd: TRect ); inline;
+                            var rd: TRect ); inline;
 begin
   rd := rs^;
 end;
 
 // Copy a TRect to a PRect
 procedure CopyTRectToPRect(rs: TRect;
-                           out rd: PRect ); inline;
+                           var rd: PRect ); inline;
 var
   rdRect: PRect;
 
@@ -1327,7 +1328,7 @@ end;
 
 // Copy a PRect to a TRect
 procedure CopyPRectToTRect(rs: PRect;
-                           out rd: TRect); inline;
+                           var rd: TRect); inline;
 var
   rsRect: PRect;
 begin
