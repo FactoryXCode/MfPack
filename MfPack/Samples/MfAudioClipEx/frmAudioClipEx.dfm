@@ -22,8 +22,8 @@ object AudioClipExFrm: TAudioClipExFrm
   PixelsPerInch = 96
   TextHeight = 13
   object lblGetSourceFile: TLabel
-    Left = 14
-    Top = 5
+    Left = 17
+    Top = 8
     Width = 63
     Height = 21
     Cursor = crHandPoint
@@ -177,8 +177,8 @@ object AudioClipExFrm: TAudioClipExFrm
     OnChange = tbPriorityChange
   end
   object prbProgress: TProgressBar
-    Left = 77
-    Top = 151
+    Left = 76
+    Top = 157
     Width = 448
     Height = 15
     ParentCustomHint = False

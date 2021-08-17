@@ -10,7 +10,7 @@
 // Release date: 21-12-2019
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.2
 //
 // Description:
 //   Common helper methods.
@@ -24,12 +24,13 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 17/08/2021 Tony                Fixed some memory issues.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: >= MfPackX300
+// Related projects: >= MfPackX301
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
