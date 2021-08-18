@@ -23,7 +23,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
-// 17/08/2021 Tony                Fixed lprect copy issues
+// 18/08/2021 Tony                Modified (l)prect copy methods for safer memory management.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -1286,7 +1286,7 @@ procedure CopyTRectToLPRect(rs: TRect;
 var
   rdRect: LPRect;
 begin
-  rdRect := AllocMem(SizeOf(TRect));  // Store TRect structure in memory
+  New(rdRect); // Create new structure in memory
 try
   rdRect.Top := rs.Top;
   rdRect.Left := rs.Left;
@@ -1294,7 +1294,7 @@ try
   rdRect.Width := rs.Width;
 finally
   rd := rdRect;
-  FreeMem(rdRect);
+  Dispose(rdRect);
 end;
 end;
 
@@ -1313,7 +1313,7 @@ var
   rdRect: PRect;
 
 begin
-  rdRect := AllocMem(SizeOf(TRect));  // Store TRect structure in memory
+  New(rdRect); // Create new structure in memory
 try
   rdRect.Top := rs.Top;
   rdRect.Left := rs.Left;
@@ -1321,7 +1321,7 @@ try
   rdRect.Width := rs.Width;
 finally
   rd := rdRect;
-  FreeMem(rdRect);
+  Dispose(rdRect);
 end;
 end;
 
@@ -1332,7 +1332,7 @@ procedure CopyPRectToTRect(rs: PRect;
 var
   rsRect: PRect;
 begin
-  rsRect := AllocMem(SizeOf(TRect));  // Store TRect structure in memory
+  New(rsRect); // Create new structure in memory
 try
   rsRect := rs;
   rd.Top := rsRect.Top;
@@ -1340,7 +1340,7 @@ try
   rd.Height := rsRect.Height;
   rd.Width := rsRect.Width;
 finally
-  FreeMem(rsRect);
+  Dispose(rsRect);
 end;
 end;
 
