@@ -420,8 +420,10 @@ begin
       label1.Caption := 'Position : ' + IntToStr(MfPlayerX.Position) +
                         '   Start : ' + IntToStr(fTimedText.Track.Start) +
                         '   Stop : ' + IntToStr(fTimedText.Track.Stop);
-      label2.Caption := 'TrackID: ' + IntToStr(fTimedText.TrackIndex) +
-                        '   First textline: ' + fTimedText.Track.TrackText[0].TextLine;
+
+      if (length(fTimedText.Track.TrackText) > 0) then
+        label2.Caption := 'TrackID: ' + IntToStr(fTimedText.TrackIndex) +
+                          '   First textline: ' + fTimedText.Track.TrackText[0].TextLine;
 
 
       // Keep the starting of a subtitle within a range, because the clock jitter makes the timer a bit inacurate.
