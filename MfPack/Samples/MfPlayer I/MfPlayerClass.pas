@@ -26,6 +26,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 18/08/2021 Tony                Fixed memory issue.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
@@ -845,7 +846,8 @@ begin
   if Assigned(m_pSession) then
     begin
       hr := m_pSession.ClearTopologies();
-      hr := m_pSession.Shutdown();
+      if Succeeded(hr) then
+        hr := m_pSession.Shutdown();
     end;
 
   m_pSource := Nil;
@@ -1290,7 +1292,6 @@ var
   rcd: LPRECT; //NRECT is a Normalised RECT (In C++ defined as RECT)
 
 begin
-
   hr := S_OK;
   // release any previous instance of the m_pVideoDisplay interface
   SafeRelease(m_pVideoDisplay);
@@ -1316,7 +1317,7 @@ try
           if Winapi.Windows.GetClientRect(m_hwndVideo, rc) then
             begin
               CopyTRectToLPRect(rc, rcD);
-              hr := m_pVideoDisplay.SetAspectRatioMode(DWord(MFVideoARMode_PreservePicture));
+              hr := m_pVideoDisplay.SetAspectRatioMode(MFVideoARMode_PreservePicture);
               if FAILED(hr) then
                 raise Exception.Create('SetAspectRatioMode failed!');
               hr := m_pVideoDisplay.SetVideoPosition(nil, rcd);
@@ -1335,6 +1336,7 @@ except
   Raise;
 end;
 finally
+  rcd := Nil;
   Result := hr;
 end;
 end;
