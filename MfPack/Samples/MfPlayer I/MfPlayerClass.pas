@@ -846,8 +846,9 @@ begin
   if Assigned(m_pSession) then
     begin
       hr := m_pSession.ClearTopologies();
-      if Succeeded(hr) then
-        hr := m_pSession.Shutdown();
+      if Failed(hr) then
+        raise Exception.Create('Error ' + SysErrorMessage(hr));
+      hr := m_pSession.Shutdown();
     end;
 
   m_pSource := Nil;
@@ -1674,6 +1675,7 @@ begin
 
       // Start repaint again
       SetRedraw();
+      rcpdest := Nil;
       Result := hr;
     end;
 end;
