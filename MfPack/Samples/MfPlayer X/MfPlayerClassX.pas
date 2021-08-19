@@ -1844,13 +1844,15 @@ begin
 
       if SUCCEEDED(hr) then
         // Set aspect ratio in conjunction with SetVideoPosition
-        hr := m_pVideoDisplay.SetAspectRatioMode(DWORD(MFVideoARMode_PreservePicture));
+        hr := m_pVideoDisplay.SetAspectRatioMode(MFVideoARMode_PreservePicture);
 
       UpdateCaption();
 
       // Start repaint again
       SetRedraw();
     end;
+  rcpdest := Nil;
+  rpcSrc := Nil;
   Result := hr;
 end;
 
@@ -2036,7 +2038,7 @@ end;
 //       to initiate those interfaces is within the OnTopologyStatus or OnTopologyReady event.
 //
 function TMfPlayerX.CommitRateChange(fRate: FLOAT;
-                                    bThin: Boolean): HResult;
+                                     bThin: Boolean): HResult;
 var
   hr: HResult;
   hnsSystemTime: MFTIME;

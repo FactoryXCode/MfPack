@@ -1,6 +1,11 @@
 program TMFPlayer;
 
 uses
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
   Vcl.Forms,
   frmMfPlayer in 'frmMfPlayer.pas' {frm_MfPlayer},
   dlgStreamSelect in 'dlgStreamSelect.pas' {dlgSelectStreams},

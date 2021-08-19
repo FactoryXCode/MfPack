@@ -1381,6 +1381,8 @@ begin
       // Start repaint again
       SetRedraw();
     end;
+  rcpdest := Nil;
+  rpcSrc := Nil;
   Result := hr;
 end;
 
