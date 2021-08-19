@@ -37,8 +37,7 @@ contains
   QueueTimer in 'QueueTimer.pas',
   ThreadedQueueTimer in 'ThreadedQueueTimer.pas',
   MfPeakMeterEx in 'MfPeakMeterEx.pas',
-  MfPeakMeter in 'MfPeakMeter.pas',
-  WasApiRenderFile in 'WasApiRenderFile.pas';
+  MfPeakMeter in 'MfPeakMeter.pas';
 
 end.
 
