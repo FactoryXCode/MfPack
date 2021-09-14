@@ -10,7 +10,7 @@
 // Release date: 21-12-2019
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.2
 // Description:
 //   This application demonstrates using the Media Foundation
 //   source reader to extract decoded audio from an audio/video file.
@@ -32,6 +32,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 17/08/2021 Tony                Fixed some memory issues.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
@@ -161,7 +162,6 @@ implementation
 
 procedure TAudioClipExFrm.Reset();
 begin
-  MfAudioClip.Free;
   tbPriority.Position := 10;
   butExtract.Enabled := False;
   butCancel.Enabled := False;
@@ -173,6 +173,8 @@ begin
   lblProgress.Caption := '';
   wSourceFile := Nil;
   wTargetFile := Nil;
+  if Assigned(MfAudioClip) then
+    FreeAndNil(MfAudioClip);
 end;
 
 
@@ -186,11 +188,25 @@ end;
 procedure TAudioClipExFrm.butExtractClick(Sender: TObject);
 var
   iClipLen: Integer;
+  hr: HResult;
 
 begin
+  hr := S_OK;
+
+  if (wSourceFile = Nil) or (wTargetFile = Nil) then
+    exit;
+
+  // Delete existing target
+  if FileExists(wTargetFile) then
+    DeleteFile(wTargetFile);
 
   if not Assigned(MfAudioClip) then
-    Exit;
+    MfAudioClip := TAudioClipClass.Create(Self.Handle,
+                                          wSourceFile,
+                                          hr);
+
+  if Failed(hr) then
+     Exit;
 
   if TryStrToInt(edClipDuration.Text, iClipLen) then
     begin
@@ -269,7 +285,7 @@ begin
       // If choosen the source as target, change it to wav
       if wSourceFile = Savedialog1.FileName then
         Savedialog1.FileName := ChangeFileExt(wSourceFile, '.wav');
-      // delete excisting target
+      // Delete existing target
       if FileExists(Savedialog1.FileName) then
         DeleteFile(Savedialog1.FileName);
 
@@ -383,12 +399,12 @@ begin
 
           end
         else
-          if HResult(Msg.lParam) = MF_E_NOTACCEPTING then
+          if HResult(Msg.lParam) = E_ABORT then  //$80004004
             lblProgress.Caption := 'Clip extraction aborted.'
         else
           lblProgress.Caption := 'Clip extraction failed!';
 
-        butExtract.Enabled := True;
+        butExtract.Enabled := False;
         butCancel.Enabled := False;
       end;
 end;

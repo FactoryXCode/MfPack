@@ -1,12 +1,12 @@
 AudioClipEx
-Version: X 3.0.0
+Version: X 3.0.2
 Enigma release.
 
 NOTES: 
  - This release is updated for compiler version 17 up to 33.
  - SDK version 10.0.19041.0 May 2020 OS update (2004))
  - Requires Windows 7 or later.
- - Minimum supported MfPack version: 3.0.0
+ - Minimum supported MfPack version: 3.0.1
 
 
 Description:
@@ -27,7 +27,7 @@ Description:
 Project: Media Foundation - MFPack - Samples
 Project location: http://sourceforge.net/projects/MFPack
 First release date: 21-11-2019
-Final release date: 13-08-2020
+Final release date: 17-08-2021
 
 
 Copyright © FactoryX. All rights reserved.

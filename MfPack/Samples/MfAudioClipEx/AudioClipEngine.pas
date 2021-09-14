@@ -10,7 +10,7 @@
 // Release date: 21-12-2019
 // Language: ENU
 //
-// Revision Version: 3.0.0
+// Revision Version: 3.0.1
 //
 // Description:
 //   This application demonstrates using the Media Foundation
@@ -113,11 +113,11 @@ const
 type
 
   // Messages for caller response
-  CallBackState = (STATE_END_OF_STREAM,
-                   STATE_END_OF_CLIP,
-                   STATE_ABORT,
-                   STATE_ERROR
-                   );
+  TCallBackState = (STATE_END_OF_STREAM,
+                    STATE_END_OF_CLIP,
+                    STATE_ABORT,
+                    STATE_ERROR
+                    );
 
   // Note: We don't use the TInterfacedObject, because TInterfacedPersistence does not
   // have a reference counting mechanism. It delegates it to it's owner and that is what we want.
@@ -134,6 +134,7 @@ type
     cbHeader: DWORD;                // Size of the WAVE file header, in bytes.
     pReader: IMFSourceReader;       // The source reader.
     bSourceReaderFlushed : Boolean; // Flag to indicate we flushed the streams. To prevent looping.
+    cbState: TCallBackState;        // Callbackstate
 
   {private methods}
 
@@ -152,6 +153,17 @@ type
     // Called when the source reader receives certain events from the media source.
     function OnEvent(dwStreamIndex: DWORD;
                      pEvent: IMFMediaEvent): HResult; stdcall;
+
+    //  These functions will never been called in this example.
+    function OnBufferingStarted(pEvent: IMFMediaEvent): HResult;
+    function OnBufferingStopped(pEvent: IMFMediaEvent): HResult;
+    function OnConnectStart(pEvent: IMFMediaEvent): HResult;
+    function OnConnectEnd(pEvent: IMFMediaEvent): HResult;
+    function OnExtendedType(pEvent: IMFMediaEvent): HResult;
+    function OnSourceCharacteristicsChanged(pEvent: IMFMediaEvent): HResult;
+    function OnSourceMetadataChanged(pEvent: IMFMediaEvent): HResult;
+    function OnUnExpected(pEvent: IMFMediaEvent): HResult;
+
 
     // -------------------------------------------------------------------------
 
@@ -174,7 +186,7 @@ type
                          cb: DWORD): HResult;
 
     // Write header values and closes the targetfile, when audiodata has been processed by callback interface.
-    procedure FinalizeClip(dwState: CallBackState;
+    procedure FinalizeClip(dwState: TCallBackState;
                            rs: HResult);
 
     // Catches all messages to this object.
@@ -209,7 +221,7 @@ type
     function ExtractSoundClip(): HResult;    // The duration in milliseconds to extract.
 
     property Flushed: Boolean read bSourceReaderFlushed write bSourceReaderFlushed;
-
+    property CallBackState: TCallBackState read cbState write cbState;
   end;
 
 
@@ -279,14 +291,17 @@ end;
 procedure TAudioClipClass.BeforeDestruction();
 begin
   DeallocateHWnd(FHWnd);
-  if Assigned(FCritSec) then
-    FreeAndNil(FCritSec);
-
   if assigned(pReader) then
     begin
-      pReader.Flush(DWORD(MF_SOURCE_READER_ANY_STREAM));
-      pReader := Nil;
+      pReader.Flush(MF_SOURCE_READER_ANY_STREAM);
+      SafeRelease(pReader);
+      //pReader := Nil;
     end;
+
+  if Assigned(FCritSec) then
+    SafeDelete(FCritSec);
+
+  wcSourceFile := Nil;
   inherited BeforeDestruction();
 end;
 
@@ -322,7 +337,7 @@ begin
   pAudioData := Nil;
   pBuffer := Nil;
 
-  FCritSec.Lock;
+  FCritSec.Lock();
 
   if Failed(hrStatus) then
     begin
@@ -377,14 +392,14 @@ begin
   // Checks flags
   
   // Check whether the data is still valid
-  if (DWord(MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED) And dwStreamFlags <> 0) then
+  if (MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED And dwStreamFlags <> 0) then
     begin
       FinalizeClip(STATE_ERROR, hr);
       goto done;
     end;
 
   // Check for EOF
-  if (DWord(MF_SOURCE_READERF_ENDOFSTREAM) And dwStreamFlags <> 0) then
+  if (MF_SOURCE_READERF_ENDOFSTREAM And dwStreamFlags <> 0) then
     begin
       FinalizeClip(STATE_END_OF_STREAM, hr);
       goto done;
@@ -408,7 +423,7 @@ begin
 nextsample:
   if Assigned(pReader) then
     // Read the next sample.
-    hr := pReader.ReadSample(DWORD(MF_SOURCE_READER_FIRST_AUDIO_STREAM),
+    hr := pReader.ReadSample(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
                              0)
   else
     goto done;
@@ -432,7 +447,9 @@ done:
   // Just Nil will do too
   SafeRelease(pBuffer);
   SafeRelease(pSample);
-  FCritSec.Unlock;
+
+  FCritSec.Unlock();
+
   Result := hr;
 end;
 
@@ -443,36 +460,125 @@ begin
   bSourceReaderFlushed := True;
   // This method will be triggered when SourceReader.flush is called.
   // However we handle this event in procedure FinalizeClip to prevent double handling.
-  // MfAudioClip.FinalizeClip(STATE_ABORT,
-  //                          E_ABORT);
-  // Result := E_ABORT;
+  if CallBackState = STATE_ABORT then
+    begin
+      FinalizeClip(STATE_ABORT,
+                   E_ABORT);
+      Result := E_ABORT;
+    end;
+
 end;
 
 // Note: The OnEvent method will probarly never been triggered in this case.
 //       We implemented this for completeness.
 function TAudioClipClass.OnEvent(dwStreamIndex: DWORD;
-                                       pEvent: IMFMediaEvent): HResult;
+                                 pEvent: IMFMediaEvent): HResult;
 var
   hr: HResult;
   EventType: MediaEventType;
 
 begin
   hr := pEvent.GetType(EventType);
-  // Until the current implementation of this MF release,
-  // the source reader uses these methods to forward the following events to the application:
-  case EventType of
-    MEBufferingStarted: begin {hr := OnBufferingStarted(pEvent);} end;
-    MEBufferingStopped: begin {hr := OnBufferingStopped(pEvent);} end;
-    MEConnectStart:     begin {hr := OnConnectStart(pEvent);} end;
-    MEConnectEnd:       begin {hr := OnConnectEnd(pEvent);} end;
-    MEExtendedType:     begin {hr := OnExtendedType(pEvent);} end;
-    MESourceCharacteristicsChanged: begin {hr := OnSourceCharacteristicsChanged(pEvent);} end;
-    MESourceMetadataChanged:        begin {hr := OnSourceMetadataChanged(pEvent);} end;
-  else  // This should not happen.
-    begin {hr := OnUnExpected(pEvent)} end;
-  end;
+  if Succeeded(hr) then
+    begin
+      // Until the current implementation of this MF release,
+      // the source reader uses these methods to forward the following events to the application:
+      case EventType of
+        MEBufferingStarted:             begin hr := OnBufferingStarted(pEvent); end;
+        MEBufferingStopped:             begin hr := OnBufferingStopped(pEvent); end;
+        MEConnectStart:                 begin hr := OnConnectStart(pEvent); end;
+        MEConnectEnd:                   begin hr := OnConnectEnd(pEvent); end;
+        MEExtendedType:                 begin hr := OnExtendedType(pEvent); end;
+        MESourceCharacteristicsChanged: begin hr := OnSourceCharacteristicsChanged(pEvent); end;
+        MESourceMetadataChanged:        begin hr := OnSourceMetadataChanged(pEvent); end;
+      else  // This should not happen.
+        begin hr := OnUnExpected(pEvent) end;
+      end;
+    end;
   Result := hr;
 end;
+
+
+
+function TAudioClipClass.OnBufferingStarted(pEvent: IMFMediaEvent): HResult;
+var
+  hr: HResult;
+begin
+  hr := S_OK;
+
+  Result := hr;
+end;
+
+
+function TAudioClipClass.OnBufferingStopped(pEvent: IMFMediaEvent): HResult;
+var
+  hr: HResult;
+begin
+  hr := S_OK;
+
+  Result := hr;
+end;
+
+
+function TAudioClipClass.OnConnectStart(pEvent: IMFMediaEvent): HResult;
+var
+  hr: HResult;
+begin
+  hr := S_OK;
+
+  Result := hr;
+end;
+
+
+function TAudioClipClass.OnConnectEnd(pEvent: IMFMediaEvent): HResult;
+var
+  hr: HResult;
+begin
+  hr := S_OK;
+
+  Result := hr;
+end;
+
+
+function TAudioClipClass.OnExtendedType(pEvent: IMFMediaEvent): HResult;
+var
+  hr: HResult;
+begin
+  hr := S_OK;
+
+  Result := hr;
+end;
+
+
+function TAudioClipClass.OnSourceCharacteristicsChanged(pEvent: IMFMediaEvent): HResult;
+var
+  hr: HResult;
+begin
+  hr := S_OK;
+
+  Result := hr;
+end;
+
+
+function TAudioClipClass.OnSourceMetadataChanged(pEvent: IMFMediaEvent): HResult;
+var
+  hr: HResult;
+begin
+  hr := S_OK;
+
+  Result := hr;
+end;
+
+
+function TAudioClipClass.OnUnExpected(pEvent: IMFMediaEvent): HResult;
+var
+  hr: HResult;
+begin
+  hr := S_OK;
+
+  Result := hr;
+end;
+
 
 // -----------------------------------------------------------------------------
 
@@ -487,6 +593,7 @@ label
 
 begin
   hr := S_OK;
+
   hTargetFile := INVALID_HANDLE_VALUE;
   bSourceReaderFlushed := False;
 
@@ -527,7 +634,6 @@ begin
     hr := WriteWaveFile();
 
 done:
-
   Result := hr;
 end;
 
@@ -592,7 +698,6 @@ var
   cbMaxSize: DWORD;
 
 begin
-
   // Get the audio block size and number of bytes/second from the audio format.
 
   cbBlockSize := MFGetAttributeUINT32(pAudioType,
@@ -621,7 +726,6 @@ begin
 
   // Round to the audio block size, so that we do not write a partial audio frame.
   cbAudioClipSize := ((cbAudioClipSize div cbBlockSize) * cbBlockSize);
-
   Result := cbAudioClipSize;
 end;
 
@@ -641,8 +745,6 @@ var
 
 begin
 
-  //hr := pReader.Flush(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM));
-
   // Create a partial media type that specifies uncompressed PCM audio.
   hr := MFCreateMediaType(pPartialType);
 
@@ -657,13 +759,13 @@ begin
   // Set this type on the source reader. The source reader will
   // load the necessary decoder.
   if SUCCEEDED(hr) then
-    hr := pReader.SetCurrentMediaType(DWORD(MF_SOURCE_READER_FIRST_AUDIO_STREAM),
+    hr := pReader.SetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
                                       0,
                                       pPartialType);
 
   // Get the complete uncompressed format.
   if SUCCEEDED(hr) then
-    hr := pReader.GetCurrentMediaType(DWORD(MF_SOURCE_READER_FIRST_AUDIO_STREAM),
+    hr := pReader.GetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
                                       pUncompressedAudioType);
 
   // IMPORTANT NOTE:
@@ -687,8 +789,7 @@ begin
 
   // In C/C++ we have to release the interfaces when going out of scope.
   // Delphi is automaticly taking care of that.
-  // SafeRelease(pUncompressedAudioType);
-  // SafeRelease(pPartialType);
+
   Result := hr;
 end;
 
@@ -780,7 +881,7 @@ var
 
 begin
   // Read the first sample. this will start the callback OnReadSample
-  hr := pReader.ReadSample(DWORD(MF_SOURCE_READER_FIRST_AUDIO_STREAM),
+  hr := pReader.ReadSample(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
                            0);
 
   if Failed(hr) then
@@ -807,7 +908,6 @@ var
 
 begin
   hr := S_OK;
-
   ll := (cbHeader - SizeOf(DWORD));
 
   if (SetFilePointerEx(hTargetFile,
@@ -844,8 +944,7 @@ begin
       hr := WriteToFile(cbRiffFileSize,
                         SizeOf(cbRiffFileSize));
     end;
-
-    Result := hr;
+  Result := hr;
 end;
 
 
@@ -868,8 +967,6 @@ var
   bResult: BOOL;
 
 begin
-
-  FCritSec.Lock;
 
   cbWritten := 0;
   hr := S_OK;
@@ -894,8 +991,6 @@ begin
               WM_CLIPENGINE_MSG,
               WPARAM(1),
               0);
-
-  FCritSec.UnLock;
   Result := hr;
 end;
 
@@ -932,7 +1027,7 @@ end;
 // Writes the header data and closes the targetfile after the callback interface
 // processed the audiodata.
 //-------------------------------------------------------------------
-procedure TAudioClipClass.FinalizeClip(dwState: CallBackState;
+procedure TAudioClipClass.FinalizeClip(dwState: TCallBackState;
                                        rs: HResult);
 var
   hr: HResult;
@@ -952,11 +1047,12 @@ var
 
 begin
   hr := S_OK;
+
   // Flush the SourceReader's streams.
   // The Flush method discards all queued samples and cancels all pending sample requests.
   // This method can complete either synchronously or asynchronously.
   if not bSourceReaderFlushed then
-    hr := pReader.Flush(DWORD(MF_SOURCE_READER_ALL_STREAMS));
+    hr := pReader.Flush(MF_SOURCE_READER_ALL_STREAMS);
 
   // Note:
   //  Remember Flush will invoke the IMFSoureReaderCallBack.OnFlush method directly.
@@ -971,6 +1067,7 @@ begin
                            if Succeeded(hr) then
                            // Close the targetfile
                            hr := CloseTfHandle();
+                           dwAudioDataWritten := 0;
                          end;
 
     STATE_ERROR:         begin
@@ -984,6 +1081,7 @@ begin
                            // Delete the targetfile
                            if DeleteFile(string(wcTargetFile)) then
                              hr := S_OK;
+                           dwAudioDataWritten := 0;
                          end;
   end;
 
@@ -998,6 +1096,7 @@ begin
                 WM_CLIPENGINE_MSG,
                 WPARAM(2),
                 LPARAM(hr));
+
 end;
 
 
@@ -1010,7 +1109,8 @@ try
     begin
       // Handle the abort operation
       // This will ends the callback and calls FinalizeClip method
-      pReader.Flush(DWORD(MF_SOURCE_READER_ALL_STREAMS));
+      CallBackState :=  STATE_ABORT;
+      pReader.Flush(MF_SOURCE_READER_ALL_STREAMS);
     end
   else // Any other messages are passed to DefWindowProc, which tells Windows to handle the message.
        // NOTE: The first parameter, FHWnd, is the handle of the class's invisible window receiving this message.

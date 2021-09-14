@@ -78,7 +78,7 @@ uses
   WinApi.ActiveX.ObjBase,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfUtils,
-  {WinApi.CoreAudioApi}
+  {CoreAudioApi}
   WinApi.CoreAudioApi.FunctionDiscoveryKeys_devpkey,
   WinApi.CoreAudioApi.MMDeviceApi,
   WinApi.CoreAudioApi.MMDevApiUtils,
@@ -137,10 +137,10 @@ type
                         // eMultimedia      = Music, movies, narration, and live music recording.
                         // eCommunications  = Voice communications (talking to another person).
 
-    fState: eState;       // The state or states of the endpoints that are to be included in the collection
-                          // Possible values or combinations are:
-                          //   DEVICE_STATE_ACTIVE, DEVICE_STATE_DISABLED, DEVICE_STATE_NOTPRESENT or DEVICE_STATE_UNPLUGGED
-                          //   To include all endpoints, regardless of state, set dwStateMask = DEVICE_STATEMASK_ALL
+    fState: eState;     // The state or states of the endpoints that are to be included in the collection
+                        // Possible values or combinations are:
+                        //   DEVICE_STATE_ACTIVE, DEVICE_STATE_DISABLED, DEVICE_STATE_NOTPRESENT or DEVICE_STATE_UNPLUGGED
+                        //   To include all endpoints, regardless of state, set dwStateMask = DEVICE_STATEMASK_ALL
 
     g_guidEventContext: TGuid; // Client's proprietary event-context GUID
     FOnNotify: TOnNotify;      // Component's Eventhandler
@@ -374,8 +374,8 @@ end;
 
 
 procedure TMfAudioEndPoint.GetVolumeRange(out pflVolumeMindB: Single;
-                                     out pflVolumeMaxdB: Single;
-                                     out pflVolumeIncrementdB: Single);
+                                          out pflVolumeMaxdB: Single;
+                                          out pflVolumeIncrementdB: Single);
 var
   hr: HResult;
 begin

@@ -227,8 +227,6 @@ object frm_MfPlayer: Tfrm_MfPlayer
       TabOrder = 0
       Visible = False
       StyleElements = []
-      ExplicitLeft = 7
-      ExplicitTop = 295
     end
   end
   object dlgOpenUrl: TOpenDialog
