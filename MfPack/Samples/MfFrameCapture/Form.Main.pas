@@ -184,6 +184,7 @@ begin
   TInternalTrackBar(tbVideoPosition).OnMouseUp := HandleTrackbarMouseUp;
 
   UpdateLogLevelMenu;
+
 end;
 
 procedure TFrmMain.HandleFormDestroy(Sender : TObject);
