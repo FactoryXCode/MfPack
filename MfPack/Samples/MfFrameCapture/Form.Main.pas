@@ -1,11 +1,36 @@
+// Version 2.0
 unit Form.Main;
 
 interface
 
 uses
-  Winapi.ComBaseApi, Winapi.Windows, Winapi.Messages, Winapi.MediaFoundationApi.MfObjects, Winapi.MediaFoundationApi.MfReadWrite,
-  Winapi.ActiveX.ObjBase, Winapi.MediaFoundationApi.MfApi, System.TimeSpan, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.ComCtrls, Support, Vcl.Samples.Spin, Winapi.D2D1, Vcl.Menus;
+  {Winapi}
+  Winapi.ComBaseApi,
+  Winapi.Windows,
+  Winapi.Messages,
+  Winapi.MediaFoundationApi.MfObjects,
+  Winapi.MediaFoundationApi.MfReadWrite,
+  Winapi.ActiveX.ObjBase,
+  Winapi.MediaFoundationApi.MfApi,
+  Winapi.MediaFoundationApi.MfUtils,
+  Winapi.D2D1,
+  {System}
+  System.TimeSpan,
+  System.SysUtils,
+  System.Variants,
+  System.Classes,
+  {VCL}
+  Vcl.Graphics,
+  Vcl.Controls,
+  Vcl.Forms,
+  Vcl.Dialogs,
+  Vcl.ExtCtrls,
+  Vcl.StdCtrls,
+  Vcl.ComCtrls,
+  Vcl.Samples.Spin,
+  Vcl.Menus,
+  {Application}
+  Support;
 
 type
   TInternalTrackBar = class(TTrackbar)
@@ -66,6 +91,7 @@ type
     procedure HandleOpenClick(Sender : TObject);
     procedure HandleExitClick(Sender : TObject);
     procedure HandleLogLevelChange(Sender : TObject);
+
   private
     FSourceURL : string;
     FSourceReader : IMFSourceReader;
@@ -114,8 +140,10 @@ type
     function CreateRenderTarget : Boolean;
     procedure UpdateImage(const ASample : IMFSample);
     function SampleWithTolerance(ARequestedTime, AActualTime : TTimeSpan) : Boolean;
+
   public
     property SourceOpen : Boolean read GetSourceOpen;
+
   end;
 
 var
@@ -156,6 +184,8 @@ begin
   TInternalTrackBar(tbVideoPosition).OnMouseUp := HandleTrackbarMouseUp;
 
   UpdateLogLevelMenu;
+
+  OpenVideo('C:\Temp\the-matrix-resurrections-trailer-1_h1080p.mov');
 end;
 
 procedure TFrmMain.HandleFormDestroy(Sender : TObject);
@@ -163,7 +193,7 @@ begin
   CloseSource;
 
   FRenderTarget.Flush();
-  FRenderTarget := nil;
+  SafeRelease(FRenderTarget);
 
   MFShutdown();
   CoUnInitialize();
@@ -234,8 +264,10 @@ begin
 end;
 
 procedure TFrmMain.UpdateLogLevelMenu;
+var
+  i : Integer;
 begin
-  for var i := 0 to mnLogLevel.Count - 1 do
+  for i := 0 to mnLogLevel.Count - 1 do
     mnLogLevel.Items[i].Checked := Ord(FLogLevel) = mnLogLevel.Items[i].Tag;
 end;
 
@@ -395,6 +427,7 @@ var
   bEndOfStream : Boolean;
   iCaptureEnd : int64;
   bReachedMaxFrames : Boolean;
+
 begin
   iSkippedFrames := 0;
   dSampleTimeStamp := 0;
@@ -403,17 +436,19 @@ begin
   bReachedMaxFrames := False;
 
   dwFlags := 0;
-  pSample := nil;
 
   QueryPerformanceFrequency(FFrequency);
   QueryPerformanceCounter(FCaptureStart);
 
-  while not Result and not bEndOfStream and (iSkippedFrames < spMaxSkipFrames.Value) and
-    SUCCEEDED(FSourceReader.ReadSample(DWord(MF_SOURCE_READER_FIRST_VIDEO_STREAM), 0, nil, @dwFlags, nil, @pSample)) do
-  begin
-    bEndOfStream := (dwFlags = DWord(MF_SOURCE_READERF_ENDOFSTREAM));
+  FSourceReader.SetStreamSelection(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                   True);
 
-    if (dwFlags = DWord(MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED)) then
+  while not Result and not bEndOfStream and (iSkippedFrames < spMaxSkipFrames.Value) and
+    SUCCEEDED(FSourceReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, nil, @dwFlags, nil, @pSample)) do
+  begin
+    bEndOfStream := (dwFlags = MF_SOURCE_READERF_ENDOFSTREAM);
+
+    if (dwFlags = MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED) then
     begin
       // Type change. Get the new format.
       Log('Media Format has changed, getting new format', ltInfo);
@@ -443,7 +478,8 @@ begin
     bReachedMaxFrames := (iSkippedFrames = spMaxSkipFrames.Value);
 
     if not bReachedMaxFrames then
-      pSample := nil;
+      SafeRelease(pSample);
+
   end;
 
   if not Result then
@@ -458,7 +494,7 @@ begin
       Log(Format('Frame not found. Frames Skipped: %d', [iSkippedFrames]), ltWarning);
   end;
 
-  pSample := nil;
+  SafeRelease(pSample);
 end;
 
 function TFrmMain.SampleWithTolerance(ARequestedTime : TTimeSpan; AActualTime : TTimeSpan) : Boolean;
@@ -470,7 +506,10 @@ procedure TFrmMain.UpdateImage(const ASample : IMFSample);
 var
   oBitmap : TBitmap;
 begin
-  oBitmap := TBitmap.Create(FVideoInfo.iVideoWidth, FVideoInfo.iVideoHeight);
+  oBitmap := TBitmap.Create({FVideoInfo.iVideoWidth, FVideoInfo.iVideoHeight});
+  // Compatible with Delphi versions <= 10.3.3
+  oBitmap.Width := FVideoInfo.iVideoWidth;
+  oBitmap.Height := FVideoInfo.iVideoHeight;
   try
     if BitmapFromSample(ASample, oBitmap) then
     begin
@@ -480,7 +519,7 @@ begin
     else
       Log('Failed to create BMP from frame sample', ltError);
   finally
-    oBitmap.Free;
+    FreeAndNil(oBitmap);
   end;
 end;
 
@@ -494,8 +533,11 @@ var
   iPitch : Integer;
   iActualBMPDataSize : Integer;
   iExpectedBMPDataSize : Integer;
+
 begin
+
   Result := SUCCEEDED(ASample.ConvertToContiguousBuffer(pBuffer));
+
   try
     if Result then
     begin
@@ -536,43 +578,42 @@ begin
                 FRenderTarget.EndDraw();
               end;
             finally
-              o2DBitmap := nil;
+              SafeRelease(o2DBitmap);
             end;
           end;
         end;
       finally
         pBuffer.Unlock;
+        SafeRelease(pBuffer);
       end;
     end;
   finally
-    pBuffer := nil;
+    pBitmapData := Nil;
+    SafeRelease(pBuffer);
   end;
 end;
 
 function TFrmMain.SelectVideoStream : Boolean;
 var
   pMediaType : IMFMediaType;
+
 begin
-  pMediaType := nil;
 
   // Configure the source reader to give us progressive RGB32 frames.
   Result := SUCCEEDED(MFCreateMediaType(pMediaType));
-  try
-    if Result then
-      Result := SUCCEEDED(pMediaType.SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video));
 
-    if Result then
-      Result := SUCCEEDED(pMediaType.SetGUID(MF_MT_SUBTYPE, MFVideoFormat_RGB32));
+  if Result then
+    Result := SUCCEEDED(pMediaType.SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video));
 
-    if Result then
-      Result := SUCCEEDED(FSourceReader.SetCurrentMediaType(DWord(MF_SOURCE_READER_FIRST_VIDEO_STREAM), 0, pMediaType));
-  finally
-    pMediaType := nil;
-  end;
+  if Result then
+    Result := SUCCEEDED(pMediaType.SetGUID(MF_MT_SUBTYPE, MFVideoFormat_RGB32));
+
+  if Result then
+    Result := SUCCEEDED(FSourceReader.SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, pMediaType));
 
   // Select the first video stream
   if Result then
-    Result := SUCCEEDED(FSourceReader.SetStreamSelection(DWord(MF_SOURCE_READER_FIRST_VIDEO_STREAM), True));
+    Result := SUCCEEDED(FSourceReader.SetStreamSelection(MF_SOURCE_READER_FIRST_VIDEO_STREAM, True));
 
   if not Result then
     Log('SelectVideoStream failed', ltError);
@@ -590,7 +631,7 @@ begin
   begin
     PropVariantInit(oPropVar);
     try
-      Result := SUCCEEDED(FSourceReader.GetPresentationAttribute(DWord(MF_SOURCE_READER_MEDIASOURCE),
+      Result := SUCCEEDED(FSourceReader.GetPresentationAttribute(MF_SOURCE_READER_MEDIASOURCE,
         MF_SOURCE_READER_MEDIASOURCE_CHARACTERISTICS, oPropVar));
 
       if Result then
@@ -598,7 +639,7 @@ begin
         Result := SUCCEEDED(PropVariantToUInt32(oPropVar, oFlags));
 
         if Result then
-          FSupportsSeek := (oFlags and DWord(MFMEDIASOURCE_CAN_SEEK)) = DWord(MFMEDIASOURCE_CAN_SEEK);
+          FSupportsSeek := (oFlags and MFMEDIASOURCE_CAN_SEEK) = MFMEDIASOURCE_CAN_SEEK;
       end
       else
         Log('GetPresentationAttribute failed', ltError);
@@ -618,7 +659,7 @@ begin
   begin
     PropVariantInit(oPropVar);
     try
-      if SUCCEEDED(FSourceReader.GetPresentationAttribute(DWord(MF_SOURCE_READER_MEDIASOURCE), MF_PD_DURATION, oPropVar)) and
+      if SUCCEEDED(FSourceReader.GetPresentationAttribute(MF_SOURCE_READER_MEDIASOURCE, MF_PD_DURATION, oPropVar)) and
         (oPropVar.vt = VT_UI8) then
         Result := TTimeSpan.Create(oPropVar.hVal.QuadPart)
       else
@@ -631,15 +672,16 @@ end;
 
 procedure TFrmMain.FlushSource;
 var
-  bFlushed : Boolean;
+  hr: HResult;
+
 begin
   if SourceOpen then
   begin
     Log('Flush - Begin', ltInfo);
 
-    bFlushed := SUCCEEDED(FSourceReader.Flush(DWord(MF_SOURCE_READER_ALL_STREAMS)));
+    hr := FSourceReader.Flush(MF_SOURCE_READER_ALL_STREAMS);
 
-    if bFlushed then
+    if SUCCEEDED(hr) then
       Log('Flush - End', ltInfo)
     else
       Log('Failed to flush source', ltError)
@@ -698,7 +740,7 @@ end;
 
 procedure TFrmMain.ResetVariables;
 begin
-  FSourceReader := nil;
+  SafeRelease(FSourceReader);
   FSupportsSeek := False;
   FFrequency := 0;
   FCaptureStart := 0;
@@ -739,7 +781,7 @@ begin
   if Assigned(FSourceReader) then
   begin
     Log('Destroy source reader - Begin', ltInfo);
-    FSourceReader := nil;
+    SafeRelease(FSourceReader);
     Log('Destroy source reader - End', ltInfo);
   end;
 

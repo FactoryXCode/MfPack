@@ -1,14 +1,20 @@
+// Version 2.0
 unit Support;
 
 interface
 
 uses
-  WinAPI.Windows, System.TimeSpan, psAPI;
+  {WinApi}
+  WinAPI.Windows,
+  WinAPI.psAPI,
+  {System}
+  System.TimeSpan;
 
-function ToSize(AKilobytes : int64) : string;
-function ProcessMemoryUsage : int64;
-function TimeSpanToDisplay(ATime : TTimeSpan; AIncludeMilliseconds : Boolean = False) : string;
-function DevicePixelPerInch : Integer;
+
+  function ToSize(AKilobytes : int64) : string;
+  function ProcessMemoryUsage : int64;
+  function TimeSpanToDisplay(ATime : TTimeSpan; AIncludeMilliseconds : Boolean = False) : string;
+  function DevicePixelPerInch : Integer;
 
 type
   TLogType = (ltDebug, ltInfo, ltWarning, ltError);

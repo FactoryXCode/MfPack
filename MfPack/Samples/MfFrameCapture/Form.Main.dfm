@@ -26,6 +26,7 @@ object FrmMain: TFrmMain
     Height = 265
     Align = alTop
     TabOrder = 0
+    ExplicitTop = -5
     DesignSize = (
       994
       265)
@@ -210,12 +211,11 @@ object FrmMain: TFrmMain
       Width = 992
       Height = 473
       Align = alClient
+      AutoSize = True
       Center = True
       Proportional = True
-      ExplicitLeft = 0
-      ExplicitTop = 240
-      ExplicitWidth = 717
-      ExplicitHeight = 357
+      ExplicitLeft = 2
+      ExplicitTop = 0
     end
   end
   object fdOpenVideo: TOpenDialog
