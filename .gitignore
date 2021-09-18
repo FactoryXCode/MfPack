@@ -1,4 +1,12 @@
-
-tsvnsync.tsex
 *.bak
-
+*.dproj
+*.identcache
+*.dcu
+*.dsk
+*.res
+*.~*
+*.local
+__history/
+FastMM/
+Win32/
+*.exe
