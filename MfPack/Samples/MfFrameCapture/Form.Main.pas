@@ -211,7 +211,9 @@ begin
     AHandled := True;
     GetVideoFormat(True);
     RequestSampleAsync;
-  end;
+  end
+  else
+    AHandled := False;
 end;
 
 procedure TFrmMain.HandleMethodChanged(Sender: TObject);
