@@ -13,6 +13,7 @@ uses
   Winapi.ActiveX.ObjBase,
   Winapi.MediaFoundationApi.MfApi,
   Winapi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfError,
   Winapi.D2D1,
   {System}
   System.TimeSpan,
@@ -30,23 +31,16 @@ uses
   Vcl.Samples.Spin,
   Vcl.Menus,
   {Application}
-  Support;
+  Support,
+  SourceReaderCallback,
+  MessageHandler,
+  SampleConverter;
 
 type
   TInternalTrackBar = class(TTrackbar)
   published
     property OnMouseDown;
     property OnMouseUp;
-  end;
-
-  TVideoFormatInfo = record
-  public
-    iVideoWidth : Integer;
-    iVideoHeight : Integer;
-    iBufferWidth : Integer;
-    iBufferHeight : Integer;
-    iStride : Integer;
-    procedure Reset;
   end;
 
   TFrmMain = class(TForm)
@@ -81,7 +75,6 @@ type
     mnInfoLevel : TMenuItem;
     mnWarningLevel : TMenuItem;
     mnErrorLevel : TMenuItem;
-
     procedure HandleBrowseClick(Sender : TObject);
     procedure HandleClearLogClick(Sender : TObject);
     procedure HandleFormCreate(Sender : TObject);
@@ -91,7 +84,7 @@ type
     procedure HandleOpenClick(Sender : TObject);
     procedure HandleExitClick(Sender : TObject);
     procedure HandleLogLevelChange(Sender : TObject);
-
+    procedure HandleMethodChanged(Sender: TObject);
   private
     FSourceURL : string;
     FSourceReader : IMFSourceReader;
@@ -99,31 +92,29 @@ type
     FDuration : TTimeSpan;
     FFormatSettings : TFormatSettings;
     FVideoInfo : TVideoFormatInfo;
-    FRenderTarget : ID2D1DCRenderTarget;
-    F2DBitmapProperties : TD2D1BitmapProperties;
-    FDPI : Integer;
     FLogLevel : TLogType;
-
+    FDefaultVideoPath : string;
+    FAwaitingFlush : Boolean;
+    FMethod : TCaptureMethod;
+    FCallback : TSourceReaderCallback;
+    FMessageHandler : TMessageHandler;
     FFrequency : int64;
     FCaptureStart : int64;
     FRequestedFramePosition : Double;
-
+    FSampleConverter : TSampleConverter;
     procedure OpenVideo(const AFilePath : string);
     procedure Log(const AText : string; ALogType : TLogType);
     procedure GetVideoFrame;
     procedure UpdateCapturePositionDisplay;
-
     procedure CloseSource;
     procedure FlushSource;
     procedure ResetVariables;
     procedure ClearImage;
     procedure UpdateEnabledStates;
-    procedure CreateDirect2DBitmapProperties;
     procedure HandleTrackbarMouseUp(Sender : TObject; Button : TMouseButton; Shift : TShiftState; X, Y : Integer);
     procedure BeginBusy;
     procedure EndBusy;
     procedure UpdateLogLevelMenu;
-
     function CreateSourceReader(const AURL : string) : Boolean;
     function SelectVideoStream : Boolean;
     function UpdateCapabilities : Boolean;
@@ -133,39 +124,41 @@ type
     function GetDuration : TTimeSpan;
     function SetPosition(APosition : TTimeSpan) : Boolean;
     function GetMemoryUsed : string;
-
-    function BitmapFromSample(const ASample : IMFSample; var AImage : TBitmap) : Boolean;
     function GetVideoFormat(AMediaTypeChanged : Boolean) : Boolean;
-
-    function CreateRenderTarget : Boolean;
     procedure UpdateImage(const ASample : IMFSample);
     function SampleWithTolerance(ARequestedTime, AActualTime : TTimeSpan) : Boolean;
-
+    procedure SetDefaults;
+    procedure HandleMessages(var AMessage: TMessage; var AHandled: Boolean);
+    procedure HandleAsyncFlushComplete;
+    procedure RequestSampleAsync;
+    procedure GetFrameAsync(APosition: TTimeSpan);
+    procedure GetFrameSync(APosition: TTimeSpan);
+    procedure FlushAsync;
+    procedure FlushSync;
   public
     property SourceOpen : Boolean read GetSourceOpen;
-
   end;
-
 var
   FrmMain : TFrmMain;
 
 implementation
-
 uses
   Winapi.ActiveX.PropIdl, Winapi.MediaFoundationApi.MfIdl, Winapi.ActiveX.PropVarUtil, Winapi.WinApiTypes, Winapi.DxgiFormat,
   System.IOUtils, System.Types, System.Math;
-
 {$r *.dfm}
 
 procedure TFrmMain.HandleFormCreate(Sender : TObject);
 begin
-  ResetVariables;
+  CoInitializeEx(nil, COINIT_APARTMENTTHREADED);
 
-  FLogLevel := ltInfo;
+  ResetVariables;
+  SetDefaults;
 
   FFormatSettings := TFormatSettings.Create;
-
-  CoInitializeEx(nil, COINIT_APARTMENTTHREADED);
+  FMessageHandler := TMessageHandler.Create;
+  FMessageHandler.OnMessage := HandleMessages;
+  FSampleConverter := TSampleConverter.Create;
+  FCallback := TSourceReaderCallback.Create(FMessageHandler.Handle);
 
   if FAILED(MFStartup(MF_VERSION, 0)) then
   begin
@@ -174,27 +167,61 @@ begin
     Application.Terminate;
   end;
 
-  FDPI := DevicePixelPerInch;
-
-  CreateDirect2DBitmapProperties;
-
-  if not CreateRenderTarget then
-    Log('Failed to create render target', ltError);
-
   TInternalTrackBar(tbVideoPosition).OnMouseUp := HandleTrackbarMouseUp;
-
   UpdateLogLevelMenu;
+
+  cboMethod.ItemIndex := Ord(FMethod);
+
+  if (FDefaultVideoPath <> '') and TFile.Exists(FDefaultVideoPath) then
+    OpenVideo(FDefaultVideoPath);
 end;
 
 procedure TFrmMain.HandleFormDestroy(Sender : TObject);
 begin
   CloseSource;
+  FCallback.Free;
 
-  FRenderTarget.Flush();
-  SafeRelease(FRenderTarget);
-
+  FMessageHandler.RemoveHandle;
+  FMessageHandler.Free;
+  FMessageHandler := nil;
+  FSampleConverter.Free;
   MFShutdown();
   CoUnInitialize();
+end;
+
+procedure TFrmMain.SetDefaults;
+begin
+  FLogLevel := ltInfo;
+  FMethod := cmSync;
+
+  // Set a default video to open
+  FDefaultVideoPath := '';
+end;
+
+procedure TFrmMain.HandleMessages(var AMessage : TMessage; var AHandled : Boolean);
+begin
+  if AMessage.Msg = WM_FLUSH_COMPLETE then
+  begin
+    AHandled := True;
+    HandleAsyncFlushComplete;
+  end
+  else if AMessage.Msg = WM_MEDIA_FORMAT_CHANGED then
+  begin
+    Log('Media Format has changed, getting new format', ltInfo);
+    AHandled := True;
+    GetVideoFormat(True);
+    RequestSampleAsync;
+  end;
+end;
+
+procedure TFrmMain.HandleMethodChanged(Sender: TObject);
+begin
+  if Sender is TComboBox then
+  begin
+    FMethod := TCaptureMethod(TComboBox(Sender).ItemIndex);
+    if SourceOpen then
+      OpenSource(FSourceURL);
+  end;
 end;
 
 procedure TFrmMain.OpenVideo(const AFilePath : string);
@@ -261,6 +288,12 @@ begin
   end;
 end;
 
+procedure TFrmMain.HandleAsyncFlushComplete;
+begin
+  Log('Flush - End', ltInfo);
+  FAwaitingFlush := False;
+end;
+
 procedure TFrmMain.UpdateLogLevelMenu;
 var
   i : Integer;
@@ -272,40 +305,6 @@ end;
 procedure TFrmMain.HandleTrackbarMouseUp(Sender : TObject; Button : TMouseButton; Shift : TShiftState; X, Y : Integer);
 begin
   GetVideoFrame;
-end;
-
-function TFrmMain.CreateRenderTarget : Boolean;
-var
-  pFactory : ID2D1Factory;
-  oProperties : TD2D1RenderTargetProperties;
-begin
-  Result := SUCCEEDED(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, IID_ID2D1Factory, nil, pFactory));
-  try
-    if Result then
-    begin
-      oProperties.&type := D2D1_RENDER_TARGET_TYPE_DEFAULT;
-      oProperties.PixelFormat.Format := DXGI_FORMAT_B8G8R8A8_UNORM;
-      oProperties.PixelFormat.alphaMode := D2D1_ALPHA_MODE_IGNORE;
-      oProperties.dpiX := 0;
-      oProperties.dpiY := 0;
-      oProperties.usage := D2D1_RENDER_TARGET_USAGE_NONE;
-      oProperties.minLevel := D2D1_FEATURE_LEVEL_DEFAULT;
-      Result := SUCCEEDED(pFactory.CreateDCRenderTarget(oProperties, FRenderTarget));
-    end;
-  finally
-    pFactory := nil;
-  end;
-end;
-
-procedure TFrmMain.CreateDirect2DBitmapProperties;
-var
-  oPixelFormat : D2D1_PIXEL_FORMAT;
-begin
-  oPixelFormat.Format := DXGI_FORMAT_B8G8R8A8_UNORM;
-  oPixelFormat.alphaMode := D2D1_ALPHA_MODE_IGNORE;
-  F2DBitmapProperties.PixelFormat := oPixelFormat;
-  F2DBitmapProperties.dpiX := FDPI;
-  F2DBitmapProperties.dpiY := FDPI;
 end;
 
 procedure TFrmMain.HandleOpenClick(Sender : TObject);
@@ -324,34 +323,48 @@ end;
 procedure TFrmMain.GetVideoFrame;
 var
   oRequestedFramePosition : TTimeSpan;
-  iPreviousPosition : Integer;
 begin
   if SourceOpen then
   begin
     ClearImage;
-
     oRequestedFramePosition := TTimeSpan.Create(0, 0, tbVideoPosition.Position);
     FRequestedFramePosition := oRequestedFramePosition.TotalMilliseconds;
-
     SetPosition(oRequestedFramePosition);
-
     Log('Requesting image...', ltInfo);
 
-    BeginBusy;
-    try
-      if CaptureFrame(oRequestedFramePosition) then
-      begin
-        if chkReopen.Checked then
-        begin
-          iPreviousPosition := tbVideoPosition.Position;
-          if OpenSource(FSourceURL) then
-            tbVideoPosition.Position := iPreviousPosition;
-        end;
-      end;
-    finally
-      EndBusy;
-    end;
+    if FMethod = cmSync then
+      GetFrameSync(oRequestedFramePosition)
+    else
+      GetFrameAsync(oRequestedFramePosition);
   end;
+end;
+
+procedure TFrmMain.GetFrameSync(APosition : TTimeSpan);
+var
+  iPreviousPosition : Integer;
+begin
+  BeginBusy;
+  try
+    if CaptureFrame(APosition) then
+    begin
+      if chkReopen.Checked then
+      begin
+        iPreviousPosition := tbVideoPosition.Position;
+        if OpenSource(FSourceURL) then
+          tbVideoPosition.Position := iPreviousPosition;
+      end;
+    end;
+  finally
+    EndBusy;
+  end;
+end;
+
+procedure TFrmMain.GetFrameAsync(APosition : TTimeSpan);
+begin
+  FCallback.MaxFramesToSkip := spMaxSkipFrames.Value;
+  FCallback.AllowableOffset := spAccuracy.Value;
+  FCallback.RequestedTime := APosition;
+  RequestSampleAsync;
 end;
 
 function TFrmMain.GetVideoFormat(AMediaTypeChanged : Boolean) : Boolean;
@@ -393,6 +406,33 @@ begin
   end;
 end;
 
+procedure TFrmMain.RequestSampleAsync;
+var
+  oResult : HRESULT;
+  sMessage : string;
+begin
+  FCallback.ResetFramesSkipped;
+
+  oResult := FSourceReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0);
+  if not SUCCEEDED(oResult) then
+  begin
+    case oResult of
+      MF_E_INVALIDREQUEST :
+        sMessage := 'Invalid request';
+      MF_E_INVALIDSTREAMNUMBER :
+        sMessage := 'The dwStreamIndex parameter is invalid.';
+      MF_E_NOTACCEPTING :
+        sMessage := 'A flush operation is pending';
+      E_INVALIDARG :
+        sMessage := 'Invalid argument.';
+    else
+      sMessage := 'Unknown error';
+    end;
+
+    Log('ReadSample call failed: ' + sMessage, ltError);
+  end;
+end;
+
 function TFrmMain.CreateSourceReader(const AURL : string) : Boolean;
 var
   oAttributes : IMFAttributes;
@@ -404,13 +444,18 @@ begin
     begin
       Result := SUCCEEDED(oAttributes.SetUINT32(MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, 1));
 
+      if Result and (FMethod = cmASync) then
+        Result := SUCCEEDED(oAttributes.SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK, FCallback));
+
       if Result then
         Result := SUCCEEDED(MFCreateSourceReaderFromURL(PWideChar(AURL), oAttributes, FSourceReader));
+
+      if Result then
+        FCallback.SourceReader := FSourceReader;
     end;
   finally
     oAttributes := nil;
   end;
-
   if not Result then
     Log('Failed to create source reader for frame capture', ltError);
 end;
@@ -425,16 +470,13 @@ var
   bEndOfStream : Boolean;
   iCaptureEnd : int64;
   bReachedMaxFrames : Boolean;
-
 begin
   iSkippedFrames := 0;
   dSampleTimeStamp := 0;
   Result := False;
   bEndOfStream := False;
   bReachedMaxFrames := False;
-
   dwFlags := 0;
-
   QueryPerformanceFrequency(FFrequency);
   QueryPerformanceCounter(FCaptureStart);
 
@@ -456,7 +498,6 @@ begin
     begin
       tsSampleTime := TTimeSpan.FromTicks(dSampleTimeStamp);
       Result := bEndOfStream or SampleWithTolerance(APosition, tsSampleTime);
-
       if Result then
       begin
         QueryPerformanceCounter(iCaptureEnd);
@@ -477,7 +518,6 @@ begin
 
     if not bReachedMaxFrames then
       SafeRelease(pSample);
-
   end;
 
   if not Result then
@@ -503,100 +543,29 @@ end;
 procedure TFrmMain.UpdateImage(const ASample : IMFSample);
 var
   oBitmap : TBitmap;
+  sError : string;
 begin
   oBitmap := TBitmap.Create({FVideoInfo.iVideoWidth, FVideoInfo.iVideoHeight});
   // Compatible with Delphi versions <= 10.3.3
   oBitmap.Width := FVideoInfo.iVideoWidth;
   oBitmap.Height := FVideoInfo.iVideoHeight;
   try
-    if BitmapFromSample(ASample, oBitmap) then
+    if FSampleConverter.BitmapFromSample(ASample, FVideoInfo, sError, oBitmap) then
     begin
       pnlFrameCapture.Caption := '';
       picFrame.Picture.Bitmap.Assign(oBitmap);
     end
     else
-      Log('Failed to create BMP from frame sample', ltError);
+      Log('Failed to create BMP from frame sample: ' + sError, ltError);
   finally
     FreeAndNil(oBitmap);
-  end;
-end;
-
-function TFrmMain.BitmapFromSample(const ASample : IMFSample; var AImage : TBitmap) : Boolean;
-var
-  pBuffer : IMFMediaBuffer;
-  pBitmapData : PByte;
-  cbBitmapData : DWord;
-  o2DBitmap : ID2D1Bitmap;
-  oSize : D2D1_SIZE_U;
-  iPitch : Integer;
-  iActualBMPDataSize : Integer;
-  iExpectedBMPDataSize : Integer;
-
-begin
-
-  Result := SUCCEEDED(ASample.ConvertToContiguousBuffer(pBuffer));
-
-  try
-    if Result then
-    begin
-      Result := SUCCEEDED(pBuffer.Lock(pBitmapData, nil, @cbBitmapData));
-      try
-        iPitch := 4 * FVideoInfo.iVideoWidth;
-
-        // For full frame capture, use the buffer dimensions for the data size check
-        iExpectedBMPDataSize := (FVideoInfo.iBufferWidth * 4) * FVideoInfo.iBufferHeight;
-
-        iActualBMPDataSize := Integer(cbBitmapData);
-
-        if iActualBMPDataSize <> iExpectedBMPDataSize then
-          Log(Format('Sample size does not match expected size. Current: %d. Expected: %d', [iActualBMPDataSize, iExpectedBMPDataSize]
-            ), ltError);
-
-        if Result then
-        begin
-          // Bind the render target to the bitmap
-          Result := SUCCEEDED(FRenderTarget.BindDC(AImage.Canvas.Handle, AImage.Canvas.ClipRect));
-
-          if Result then
-          begin
-            // Create the 2D bitmap interface
-            oSize.Width := FVideoInfo.iVideoWidth;
-            oSize.Height := FVideoInfo.iVideoHeight;
-            Result := SUCCEEDED(FRenderTarget.CreateBitmap(oSize, pBitmapData, iPitch, F2DBitmapProperties, o2DBitmap));
-          end;
-
-          // Draw the 2D bitmap to the render target
-          if Result then
-          begin
-            try
-              FRenderTarget.BeginDraw;
-              try
-                FRenderTarget.DrawBitmap(o2DBitmap);
-              finally
-                FRenderTarget.EndDraw();
-              end;
-            finally
-              SafeRelease(o2DBitmap);
-            end;
-          end;
-        end;
-      finally
-        pBuffer.Unlock;
-        SafeRelease(pBuffer);
-      end;
-    end;
-  finally
-    pBitmapData := Nil;
-    SafeRelease(pBuffer);
   end;
 end;
 
 function TFrmMain.SelectVideoStream : Boolean;
 var
   pMediaType : IMFMediaType;
-
 begin
-
   // Configure the source reader to give us progressive RGB32 frames.
   Result := SUCCEEDED(MFCreateMediaType(pMediaType));
 
@@ -624,7 +593,6 @@ var
 begin
   FSupportsSeek := False;
   Result := SourceOpen;
-
   if Result then
   begin
     PropVariantInit(oPropVar);
@@ -635,7 +603,6 @@ begin
       if Result then
       begin
         Result := SUCCEEDED(PropVariantToUInt32(oPropVar, oFlags));
-
         if Result then
           FSupportsSeek := (oFlags and MFMEDIASOURCE_CAN_SEEK) = MFMEDIASOURCE_CAN_SEEK;
       end
@@ -669,21 +636,39 @@ begin
 end;
 
 procedure TFrmMain.FlushSource;
-var
-  hr: HResult;
-
 begin
   if SourceOpen then
   begin
-    Log('Flush - Begin', ltInfo);
+    if FMethod = cmSync then
+      FlushSync
+    else
+      FlushAsync;
+  end;
+end;
 
+procedure TFrmMain.FlushSync;
+var
+  hr: HResult;
+begin
+  Log('Flush - Begin', ltInfo);
+
+  FAwaitingFlush := True;
+  try
     hr := FSourceReader.Flush(MF_SOURCE_READER_ALL_STREAMS);
-
     if SUCCEEDED(hr) then
       Log('Flush - End', ltInfo)
     else
       Log('Failed to flush source', ltError)
+  finally
+    FAwaitingFlush := False;
   end;
+end;
+
+procedure TFrmMain.FlushAsync;
+begin
+  Log('Flush - Begin', ltInfo);
+  FAwaitingFlush := True;
+  FSourceReader.Flush(MF_SOURCE_READER_ALL_STREAMS);
 end;
 
 function TFrmMain.SetPosition(APosition : TTimeSpan) : Boolean;
@@ -782,7 +767,6 @@ begin
     SafeRelease(FSourceReader);
     Log('Destroy source reader - End', ltInfo);
   end;
-
   UpdateEnabledStates;
 end;
 
@@ -807,17 +791,6 @@ procedure TFrmMain.ClearImage;
 begin
   pnlFrameCapture.Caption := 'No Image. Waiting frame capture...';
   picFrame.Picture := nil;
-end;
-
-{ TVideoFormatInfo }
-
-procedure TVideoFormatInfo.Reset;
-begin
-  iVideoWidth := 0;
-  iVideoHeight := 0;
-  iBufferWidth := 0;
-  iBufferHeight := 0;
-  iStride := 0;
 end;
 
 end.

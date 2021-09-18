@@ -5,11 +5,11 @@ interface
 
 uses
   {WinApi}
+  WinAPI.Messages,
   WinAPI.Windows,
   WinAPI.psAPI,
   {System}
   System.TimeSpan;
-
 
   function ToSize(AKilobytes : int64) : string;
   function ProcessMemoryUsage : int64;
@@ -19,9 +19,34 @@ uses
 type
   TLogType = (ltDebug, ltInfo, ltWarning, ltError);
 
+  TCaptureMethod = (cmSync, cmAsync);
+
   TLogTypeHelper = record helper for TLogType
     function AsDisplay : string;
   end;
+
+  TVideoFormatInfo = record
+  public
+    iVideoWidth : Integer;
+    iVideoHeight : Integer;
+    iBufferWidth : Integer;
+    iBufferHeight : Integer;
+    iStride : Integer;
+    procedure Reset;
+  end;
+
+  // CriticalSection
+  TMFCritSec = class
+  private
+    FCriticalSection : TRTLCriticalSection;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    procedure Lock;
+    procedure Unlock;
+  end;
+
+  procedure HandleMessages(AThread : THandle; AWait : Cardinal = INFINITE);
 
 const
   cTab = #9;
@@ -90,6 +115,47 @@ begin
     Result := Format('%.2d:%.2d:%.2d', [ATime.Hours, ATime.Minutes, ATime.Seconds]);
 end;
 
+{ TMFCritSec }
+
+constructor TMFCritSec.Create;
+begin
+  InitializeCriticalSection(FCriticalSection);
+end;
+
+destructor TMFCritSec.Destroy;
+begin
+  DeleteCriticalSection(FCriticalSection);
+  inherited;
+end;
+
+procedure TMFCritSec.Lock;
+begin
+  EnterCriticalSection(FCriticalSection);
+end;
+
+procedure TMFCritSec.Unlock;
+begin
+  LeaveCriticalSection(FCriticalSection);
+end;
+
+procedure HandleMessages(AThread : THandle; AWait : Cardinal = INFINITE);
+var
+  oMsg : TMsg;
+begin
+
+  while (MsgWaitForMultipleObjects(1, AThread, False, AWait, QS_ALLINPUT) = WAIT_OBJECT_0 + 1) do
+  begin
+    PeekMessage(oMsg, 0, 0, 0, PM_REMOVE);
+
+    if oMsg.Message = WM_QUIT then
+      Exit;
+
+    TranslateMessage(oMsg);
+    DispatchMessage(oMsg);
+  end;
+end;
+
+
 { TLogTypeHelper }
 
 function TLogTypeHelper.AsDisplay : string;
@@ -105,5 +171,17 @@ begin
       Result := 'Debug';
   end;
 end;
+
+{ TVideoFormatInfo }
+
+procedure TVideoFormatInfo.Reset;
+begin
+  iVideoWidth := 0;
+  iVideoHeight := 0;
+  iBufferWidth := 0;
+  iBufferHeight := 0;
+  iStride := 0;
+end;
+
 
 end.
