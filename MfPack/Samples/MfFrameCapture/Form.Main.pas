@@ -184,8 +184,6 @@ begin
   TInternalTrackBar(tbVideoPosition).OnMouseUp := HandleTrackbarMouseUp;
 
   UpdateLogLevelMenu;
-
-  OpenVideo('C:\Temp\the-matrix-resurrections-trailer-1_h1080p.mov');
 end;
 
 procedure TFrmMain.HandleFormDestroy(Sender : TObject);
