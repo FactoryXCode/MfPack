@@ -3,10 +3,13 @@ program MfFrameCapture;
 uses
   {$IFDEF FASTMM}
   FastMM4,
-  {$ENDIF}
+  {$ENDIF }
   Vcl.Forms,
   Form.Main in 'Form.Main.pas' {FrmMain},
-  Support in 'Support.pas';
+  Support in 'Support.pas',
+  SampleConverter in 'SampleConverter.pas',
+  SourceReaderCallback in 'SourceReaderCallback.pas',
+  MessageHandler in 'MessageHandler.pas';
 
 {$R *.res}
 

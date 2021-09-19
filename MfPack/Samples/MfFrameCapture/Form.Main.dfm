@@ -26,7 +26,6 @@ object FrmMain: TFrmMain
     Height = 265
     Align = alTop
     TabOrder = 0
-    ExplicitTop = -5
     DesignSize = (
       994
       265)
@@ -188,10 +187,10 @@ object FrmMain: TFrmMain
       Width = 105
       Height = 21
       Style = csDropDownList
-      Enabled = False
       ItemIndex = 0
       TabOrder = 10
       Text = 'Synchronous'
+      OnChange = HandleMethodChanged
       Items.Strings = (
         'Synchronous'
         'Asynchronous')
