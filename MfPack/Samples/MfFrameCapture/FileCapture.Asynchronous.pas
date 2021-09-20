@@ -26,13 +26,13 @@ type
     FCritSec : TMFCritSec;
 
     procedure HandleMessages(var AMessage : TMessage; var AHandled : Boolean);
+    procedure NotifyMediaFormatChanged;
 
     {$region 'IMFSourceReaderCallback methods'}
     function OnReadSample(hrStatus : HRESULT; dwStreamIndex : DWord; dwStreamFlags : DWord; llTimestamp : LONGLONG; pSample : IMFSample)
       : HRESULT; stdcall;
     function OnFlush(dwStreamIndex : DWord) : HRESULT; stdcall;
     function OnEvent(dwStreamIndex : DWord; pEvent : IMFMediaEvent) : HRESULT; stdcall;
-    procedure NotifyMediaFormatChanged;
     {$endregion}
   protected
     procedure ProcessSample(const ASample : IMFSample; ATimeStamp : TTimeSpan); override;
