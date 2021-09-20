@@ -13,7 +13,6 @@ object FrmMain: TFrmMain
   Font.Style = []
   KeyPreview = True
   Menu = MainMenu1
-  OldCreateOrder = True
   Position = poDesktopCenter
   OnCreate = HandleFormCreate
   OnDestroy = HandleFormDestroy
@@ -165,21 +164,13 @@ object FrmMain: TFrmMain
     end
     object spMaxSkipFrames: TSpinEdit
       Left = 532
-      Top = 163
+      Top = 162
       Width = 56
       Height = 22
       MaxValue = 200
       MinValue = 1
       TabOrder = 8
       Value = 120
-    end
-    object chkReopen: TCheckBox
-      Left = 619
-      Top = 165
-      Width = 185
-      Height = 17
-      Caption = 'Reopen video after each capture'
-      TabOrder = 9
     end
     object cboMethod: TComboBox
       Left = 73
@@ -188,7 +179,7 @@ object FrmMain: TFrmMain
       Height = 21
       Style = csDropDownList
       ItemIndex = 0
-      TabOrder = 10
+      TabOrder = 9
       Text = 'Synchronous'
       OnChange = HandleMethodChanged
       Items.Strings = (
