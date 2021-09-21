@@ -4,11 +4,11 @@ interface
 
 uses
   {Winapi}
-  WinApi.Windows,
-  WinApi.MediaFoundationApi.MfReadWrite,
-  WinApi.MediaFoundationApi.MfObjects,
+  WinApi.Windows, //
+  WinApi.MediaFoundationApi.MfReadWrite, //
+  WinApi.MediaFoundationApi.MfObjects, //
   {System}
-  System.TimeSpan,
+  System.TimeSpan, //
   {Application}
   FileCapture;
 
@@ -16,6 +16,7 @@ type
   TFileCaptureSync = class(TFileCapture)
   protected
     procedure ProcessSample(const ASample : IMFSample; ATimeStamp : TTimeSpan); override;
+    function ReadNextSample(out AFlags : DWord; out ASample : IMFSample) : Boolean;
   public
     procedure RequestFrame(APosition : TTimeSpan); override;
     procedure Flush; override;
@@ -25,38 +26,36 @@ implementation
 
 uses
   {Winapi}
-  WinApi.WinApiTypes,
-  WinApi.MediaFoundationApi.MfUtils,
+  WinApi.WinApiTypes, //
+  WinApi.MediaFoundationApi.MfUtils, //
   {System}
-  System.SysUtils,
-  System.Types,
+  System.SysUtils, //
+  System.Types, //
   {Application}
-  Support,
+  Support, //
   VCL.Graphics;
 
 { TFileCaptureSync }
 
 procedure TFileCaptureSync.RequestFrame(APosition : TTimeSpan);
 var
-  dwFlags : DWord;
   pSample : IMFSample;
   dSampleTimeStamp : LONGLONG;
   tsSampleTime : TTimeSpan;
   bEndOfStream : Boolean;
   bReachedMaxFrames : Boolean;
   bFound : Boolean;
+  dwFlags : DWord;
 begin
   inherited;
   dSampleTimeStamp := 0;
 
   bFound := False;
-
+  dwFlags := 0;
   bEndOfStream := False;
   bReachedMaxFrames := False;
-  dwFlags := 0;
 
-  while not bFound and not bEndOfStream and (FramesSkipped < MaxFramesToSkip) and
-    SUCCEEDED(SourceReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, nil, @dwFlags, nil, @pSample)) do
+  while not bFound and not bEndOfStream and (FramesSkipped < MaxFramesToSkip) and ReadNextSample(dwFlags, pSample) do
   begin
     bEndOfStream := (dwFlags = MF_SOURCE_READERF_ENDOFSTREAM);
 
@@ -101,27 +100,25 @@ begin
   SafeRelease(pSample);
 end;
 
-procedure TFileCaptureSync.ProcessSample(const ASample : IMFSample; ATimeStamp : TTimeSpan);
+function TFileCaptureSync.ReadNextSample(out AFlags : DWord; out ASample : IMFSample) : Boolean;
 var
-  oBitmap : TBitmap;
-  sError : string;
+  oResult : HRESULT;
+begin
+  Result := Assigned(SourceReader);
 
+  if Result then
+  begin
+    oResult := SourceReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, nil, @AFlags, nil, @ASample);
+    Result := SUCCEEDED(oResult);
+    if not Result then
+      HandleSampleReadError(oResult);
+  end;
+end;
+
+procedure TFileCaptureSync.ProcessSample(const ASample : IMFSample; ATimeStamp : TTimeSpan);
 begin
   inherited;
-  oBitmap := TBitmap.Create( { FVideoInfo.iVideoWidth, FVideoInfo.iVideoHeight } );
-  // Compatible with Delphi versions <= 10.3.3
-  oBitmap.Width := VideoInfo.iVideoWidth;
-  oBitmap.Height := VideoInfo.iVideoHeight;
-
-  if SampleConverter.BitmapFromSample(ASample, VideoInfo, sError, oBitmap) then
-  begin
-    if Assigned(OnFrameFound) then
-      OnFrameFound(oBitmap, ATimeStamp);
-  end
-  else
-    Log('Failed to create BMP from frame sample: ' + sError, ltError);
-
-  FreeAndNil(oBitmap);
+  ReturnSample(ASample, ATimeStamp);
 end;
 
 procedure TFileCaptureSync.Flush;

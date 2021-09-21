@@ -4,16 +4,17 @@ interface
 
 uses
   {Winapi}
-  WinAPI.Messages,
-  WinAPI.MediaFoundationApi.MfReadWrite,
-  WinAPI.Windows,
-  WinAPI.MediaFoundationApi.MfApi,
-  WinAPI.MediaFoundationApi.MfObjects,
-  WinAPI.MediaFoundationApi.MfUtils,
+  WinAPI.Messages, //
+  WinAPI.MediaFoundationApi.MfReadWrite, //
+  WinAPI.Windows, //
+  WinAPI.MediaFoundationApi.MfApi, //
+  WinAPI.MediaFoundationApi.MfObjects, //
+  WinAPI.MediaFoundationApi.MfUtils, //
   {System}
-  System.Classes,
-  System.TimeSpan,Support,
+  System.Classes, //
+  System.TimeSpan, //
   {Application}
+  Support, //
   SampleConverter;
 
 type
@@ -22,7 +23,6 @@ type
     FAccuracy : Double;
     FMaxFramesToSkip : Integer;
     FSourceReader : IMFSourceReader;
-    FOnFlushComplete : TNotifyEvent;
     FOnLog : TLogEvent;
     FAwaitingFlush : Boolean;
     FRequestedTime : TTimeSpan;
@@ -36,7 +36,6 @@ type
 
     procedure SetAccuracy(const AValue : Double);
     procedure SetMaxFramesToSkip(const AValue : Integer);
-    procedure ResetVariables;
 
     function GetAccuracy : Double;
     function GetMaxFramesToSkip : Integer;
@@ -46,25 +45,33 @@ type
     function GetVideoFormat(AMediaTypeChanged : Boolean) : Boolean;
     function UpdateCapabilities : Boolean;
     function GetDuration : TTimeSpan;
+
+    function SetPosition(APosition : TTimeSpan) : Boolean;
   protected
-    procedure HandleFlushComplete;
+    procedure HandleFlushComplete; virtual;
     procedure HandleFrameSkipped;
     procedure ResetFramesSkipped;
+
+    procedure ResetVariables; virtual;
+
+    procedure HandleSampleReadError(AResult : HResult);
 
     procedure Flush; virtual;
     procedure HandleMediaFormatChanged; virtual;
 
     procedure ProcessSample(const ASample : IMFSample; ATimeStamp : TTimeSpan); virtual; abstract;
+    procedure ReturnSample(const ASample : IMFSample; ATimeStamp : TTimeSpan);
 
     procedure Log(const AMessage : string; const AType : TLogType);
     procedure ConfigureSourceReader(const AAttributes : IMFAttributes); virtual;
 
     property SourceReader : IMFSourceReader read FSourceReader;
     property SampleConverter : TSampleConverter read FSampleConverter;
+    property AwaitingFlush : Boolean read FAwaitingFlush;
 
     function SampleWithinTolerance(ARequestedTime, AActualTime : TTimeSpan) : Boolean;
   public
-    constructor Create;
+    constructor Create; virtual;
     destructor Destroy; override;
 
     property Accuracy : Double read GetAccuracy write SetAccuracy;
@@ -73,13 +80,12 @@ type
     procedure RequestFrame(APosition : TTimeSpan); virtual;
 
     function OpenSource(const AURL : string) : Boolean;
-    function SetPosition(APosition : TTimeSpan) : Boolean;
 
     procedure CloseSource;
+    procedure CancelCapture;
 
     // Event hooks
     property OnLog : TLogEvent read FOnLog write FOnLog;
-    property OnFlushComplete : TNotifyEvent read FOnFlushComplete write FOnFlushComplete;
     property OnFrameFound : TFrameEvent read FOnFrameFound write FOnFrameFound;
 
     property RequestedTime : TTimeSpan read FRequestedTime;
@@ -95,8 +101,19 @@ type
 implementation
 
 uses
-  WinAPI.ActiveX.PropIdl, WinAPI.WinApiTypes, WinAPI.MediaFoundationApi.MfIdl, WinAPI.ActiveX.PropVarUtil, System.Math, System.SysUtils,
-  System.IOUtils, System.Types;
+  {Winapi}
+  WinAPI.ActiveX.PropIdl, //
+  WinAPI.WinApiTypes, //
+  WinAPI.MediaFoundationApi.MfIdl, //
+  WinAPI.MediaFoundationApi.MfError, //
+  WinAPI.ActiveX.PropVarUtil, //
+  {System}
+  System.Math, //
+  System.SysUtils, //
+  System.IOUtils, //
+  System.Types, //
+  {VCL}
+  VCL.Graphics;
 
 { TFileCapture }
 
@@ -114,6 +131,11 @@ begin
   FSampleConverter.Free;
   FSampleConverter := nil;
   inherited;
+end;
+
+procedure TFileCapture.CancelCapture;
+begin
+  Flush;
 end;
 
 procedure TFileCapture.CloseSource;
@@ -140,6 +162,25 @@ begin
   FSupportsSeek := False;
 end;
 
+procedure TFileCapture.ReturnSample(const ASample : IMFSample; ATimeStamp : TTimeSpan);
+var
+  oBitmap : TBitmap;
+  sError : string;
+begin
+  oBitmap := TBitmap.Create( { FVideoInfo.iVideoWidth, FVideoInfo.iVideoHeight } );
+  // Compatible with Delphi versions <= 10.3.3
+  oBitmap.Width := VideoInfo.iVideoWidth;
+  oBitmap.Height := VideoInfo.iVideoHeight;
+
+  if SampleConverter.BitmapFromSample(ASample, VideoInfo, sError, oBitmap) then
+  begin
+    if Assigned(OnFrameFound) then
+      OnFrameFound(oBitmap, ATimeStamp);
+  end
+  else
+    Log('Failed to create BMP from frame sample: ' + sError, ltError);
+end;
+
 procedure TFileCapture.Flush;
 begin
   FAwaitingFlush := True;
@@ -154,6 +195,7 @@ procedure TFileCapture.RequestFrame(APosition : TTimeSpan);
 begin
   FFramesSkipped := 0;
   FRequestedTime := APosition;
+  SetPosition(APosition);
 end;
 
 procedure TFileCapture.SetAccuracy(const AValue : Double);
@@ -174,9 +216,6 @@ end;
 procedure TFileCapture.HandleFlushComplete;
 begin
   FAwaitingFlush := False;
-
-  if Assigned(FOnFlushComplete) then
-    FOnFlushComplete(Self);
 end;
 
 procedure TFileCapture.HandleFrameSkipped;
@@ -190,6 +229,26 @@ begin
   FSourceReader.SetStreamSelection(MF_SOURCE_READER_FIRST_VIDEO_STREAM, True);
 end;
 
+procedure TFileCapture.HandleSampleReadError(AResult : HResult);
+var
+  sError : string;
+begin
+  case AResult of
+    MF_E_INVALIDREQUEST :
+      sError := 'Invalid request';
+    MF_E_INVALIDSTREAMNUMBER :
+      sError := 'The dwStreamIndex parameter is invalid.';
+    MF_E_NOTACCEPTING :
+      sError := 'A flush operation is pending';
+    E_INVALIDARG :
+      sError := 'Invalid argument.';
+  else
+    sError := 'Unknown error';
+  end;
+
+  Log('ReadSample call failed: ' + sError, ltError);
+end;
+
 procedure TFileCapture.Log(const AMessage : string; const AType : TLogType);
 begin
   if Assigned(FOnLog) then
@@ -198,7 +257,7 @@ end;
 
 procedure TFileCapture.ConfigureSourceReader(const AAttributes : IMFAttributes);
 begin
-  //
+  // Override if the capture method needs to configure IMFAttributes.
 end;
 
 function TFileCapture.OpenSource(const AURL : string) : Boolean;
@@ -384,7 +443,9 @@ begin
 
     if not Result then
       Log('Failed to set position', ltError);
-  end;
+  end
+  else
+    Log('Failed to set position - Source is not open.', ltError);
 end;
 
 function TFileCapture.SampleWithinTolerance(ARequestedTime : TTimeSpan; AActualTime : TTimeSpan) : Boolean;
