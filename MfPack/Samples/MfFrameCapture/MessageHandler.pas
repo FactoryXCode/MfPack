@@ -3,12 +3,11 @@ unit MessageHandler;
 interface
 
 uses
-   {Winapi}
-   WinApi.Windows,
-   WinApi.Messages,
-   WinApi.MediaFoundationApi.MfUtils,
-   {System}
-   System.Classes;
+  {Winapi}
+  WinApi.Windows, //
+  WinApi.Messages, //
+  {System}
+  System.Classes;
 
 type
   TOnHandleMessage = reference to procedure(var AMessage : TMessage; var AHandled : boolean);

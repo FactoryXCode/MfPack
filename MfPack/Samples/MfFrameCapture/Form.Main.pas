@@ -5,30 +5,30 @@ interface
 
 uses
   {Winapi}
-  Winapi.ComBaseApi,
-  Winapi.Windows,
-  Winapi.ActiveX.ObjBase,
-  WinApi.MediaFoundationApi.MfApi,
-  Winapi.MediaFoundationApi.MfUtils,
+  Winapi.ComBaseApi, //
+  Winapi.Windows, //
+  Winapi.ActiveX.ObjBase, //
+  Winapi.MediaFoundationApi.MfApi, //
+  Winapi.MediaFoundationApi.MfUtils, //
   {System}
-  System.TimeSpan,
-  System.SysUtils,
-  System.Variants,
-  System.Classes,
+  System.TimeSpan, //
+  System.SysUtils, //
+  System.Variants, //
+  System.Classes, //
   {VCL}
-  Vcl.Graphics,
-  Vcl.Controls,
-  Vcl.Forms,
-  Vcl.Dialogs,
-  Vcl.ExtCtrls,
-  Vcl.StdCtrls,
-  Vcl.ComCtrls,
-  Vcl.Samples.Spin,
-  Vcl.Menus,
+  Vcl.Graphics, //
+  Vcl.Controls, //
+  Vcl.Forms, //
+  Vcl.Dialogs, //
+  Vcl.ExtCtrls, //
+  Vcl.StdCtrls, //
+  Vcl.ComCtrls, //
+  Vcl.Samples.Spin, //
+  Vcl.Menus, //
   {Application}
-  FileCapture,
-  FileCapture.Asynchronous,
-  FileCapture.Synchronous,
+  FileCapture, //
+  FileCapture.Asynchronous, //
+  FileCapture.Synchronous, //
   Support;
 
 type
@@ -83,8 +83,6 @@ type
     FFormatSettings : TFormatSettings;
     FLogLevel : TLogType;
     FDefaultVideoPath : string;
-    FMethod : TCaptureMethod;
-
     FFrequency : int64;
     FCaptureStart : int64;
 
@@ -143,7 +141,7 @@ begin
   TInternalTrackBar(tbVideoPosition).OnMouseUp := HandleTrackbarMouseUp;
   UpdateLogLevelMenu;
 
-  cboMethod.ItemIndex := Ord(FMethod);
+  cboMethod.ItemIndex := Ord(FCaptureMethod);
 
   if (FDefaultVideoPath <> '') and TFile.Exists(FDefaultVideoPath) then
     OpenSource(FDefaultVideoPath);
@@ -286,9 +284,7 @@ begin
     ClearImage;
     oRequestedFramePosition := TTimeSpan.Create(0, 0, tbVideoPosition.Position);
 
-    FCapture.SetPosition(oRequestedFramePosition);
     Log('Requesting image...', ltInfo);
-
     BeginBusy;
     try
       QueryPerformanceFrequency(FFrequency);
@@ -322,13 +318,13 @@ end;
 
 procedure TFrmMain.BeginBusy;
 begin
-  if FMethod = cmSync then
+  if FCaptureMethod = cmSync then
     Screen.Cursor := crHourGlass;
 end;
 
 procedure TFrmMain.EndBusy;
 begin
-  if FMethod = cmSync then
+  if FCaptureMethod = cmSync then
     Screen.Cursor := crDefault;
 end;
 
