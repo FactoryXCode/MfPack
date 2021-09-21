@@ -105,6 +105,7 @@ procedure TFileCaptureSync.ProcessSample(const ASample : IMFSample; ATimeStamp :
 var
   oBitmap : TBitmap;
   sError : string;
+
 begin
   inherited;
   oBitmap := TBitmap.Create( { FVideoInfo.iVideoWidth, FVideoInfo.iVideoHeight } );
@@ -119,6 +120,8 @@ begin
   end
   else
     Log('Failed to create BMP from frame sample: ' + sError, ltError);
+
+  FreeAndNil(oBitmap);
 end;
 
 procedure TFileCaptureSync.Flush;

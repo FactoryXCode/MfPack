@@ -10,6 +10,8 @@ uses
   WinAPI.MediaFoundationApi.MfObjects,
   {System}
   System.TimeSpan,
+  {Vcl}
+  Vcl.Graphics,
   {Application}
   FileCapture,
   MessageHandler,
@@ -166,9 +168,32 @@ begin
   HandleThreadMessages(GetCurrentThread());
 end;
 
+
+// A sugggestion ;_)
 procedure TFileCaptureAsync.ProcessSample(const ASample : IMFSample; ATimeStamp : TTimeSpan);
+var
+  oBitmap : TBitmap;
+  sError : string;
+
 begin
-  {$message 'TODO: Handle sample conversion to BMP, or provide sample to main thread for conversion'}
+
+  //{$message 'TODO: Handle sample conversion to BMP, or provide sample to main thread for conversion'}
+
+  //inherited;
+  oBitmap := TBitmap.Create( { FVideoInfo.iVideoWidth, FVideoInfo.iVideoHeight } );
+  // Compatible with Delphi versions <= 10.3.3
+  oBitmap.Width := VideoInfo.iVideoWidth;
+  oBitmap.Height := VideoInfo.iVideoHeight;
+  // Here it goes wrong, because FRenderTarget is nilled when changing from sync to async mode.
+  if SampleConverter.BitmapFromSample(ASample, VideoInfo, sError, oBitmap) then
+  begin
+    if Assigned(OnFrameFound) then
+      OnFrameFound(oBitmap, ATimeStamp);
+  end
+  else
+    Log('Failed to create BMP from frame sample: ' + sError, ltError);
+
+  FreeAndNil(oBitmap);
 end;
 
 function TFileCaptureAsync.OnReadSample(hrStatus : HRESULT; dwStreamIndex, dwStreamFlags : DWord; llTimestamp : LONGLONG;

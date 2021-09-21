@@ -13,6 +13,7 @@ object FrmMain: TFrmMain
   Font.Style = []
   KeyPreview = True
   Menu = MainMenu1
+  OldCreateOrder = True
   Position = poDesktopCenter
   OnCreate = HandleFormCreate
   OnDestroy = HandleFormDestroy
@@ -172,8 +173,8 @@ object FrmMain: TFrmMain
       Value = 120
     end
     object cboMethod: TComboBox
-      Left = 73
-      Top = 163
+      Left = 81
+      Top = 159
       Width = 105
       Height = 21
       Style = csDropDownList
@@ -203,7 +204,7 @@ object FrmMain: TFrmMain
       AutoSize = True
       Center = True
       Proportional = True
-      ExplicitLeft = 2
+      ExplicitLeft = 0
       ExplicitTop = 0
     end
   end

@@ -102,6 +102,7 @@ uses
 
 constructor TFileCapture.Create;
 begin
+  Inherited;
   ResetVariables;
 
   FSampleConverter := TSampleConverter.Create;
@@ -109,6 +110,7 @@ end;
 
 destructor TFileCapture.Destroy;
 begin
+  // Would FeeAndNil be an option?
   FSampleConverter.Free;
   FSampleConverter := nil;
   inherited;
@@ -261,7 +263,7 @@ begin
         Log('GetVideoFormat. Video is not RGB 32 format', ltError);
     end;
   finally
-    pInputType := nil;
+    //pInputType := nil;   no need to
   end;
 end;
 
@@ -306,7 +308,7 @@ begin
         Result := SUCCEEDED(MFCreateSourceReaderFromURL(PWideChar(AURL), oAttributes, FSourceReader));
     end;
   finally
-    oAttributes := nil;
+    //oAttributes := nil;  no need to
   end;
   if not Result then
     Log('Failed to create source reader for frame capture', ltError);
