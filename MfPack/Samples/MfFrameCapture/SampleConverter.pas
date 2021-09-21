@@ -4,15 +4,15 @@ interface
 
 uses
   {Winapi}
-  WinApi.Windows,
-  WinApi.MediaFoundationApi.MfObjects,
-  WinApi.MediaFoundationApi.MfUtils,
-  WinApi.DirectX.D2D1,
-  WinApi.D2D1,
+  WinApi.Windows, //
+  WinApi.MediaFoundationApi.MfObjects, //
+  WinApi.MediaFoundationApi.MfUtils, //
+  WinApi.DirectX.D2D1, //
+  WinApi.D2D1, //
   {VCL}
-  VCL.Graphics,
+  VCL.Graphics, //
   {System}
-  System.Classes,
+  System.Classes, //
   {Application}
   Support;
 
@@ -28,13 +28,17 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function BitmapFromSample(const ASample : IMFSample; const AVideoInfo : TVideoFormatInfo; var AError : string; var AImage : TBitmap) : Boolean;
+    function BitmapFromSample(const ASample : IMFSample; const AVideoInfo : TVideoFormatInfo; var AError : string; var AImage : TBitmap)
+      : Boolean;
   end;
 
 implementation
 
 uses
-  System.SysUtils, WinApi.DxgiFormat;
+  {Winapi}
+  WinApi.DxgiFormat, //
+  {System}
+  System.SysUtils;
 
 constructor TSampleConverter.Create;
 begin
@@ -85,7 +89,8 @@ begin
   F2DBitmapProperties.dpiY := FDPI;
 end;
 
-function TSampleConverter.BitmapFromSample(const ASample : IMFSample; const AVideoInfo : TVideoFormatInfo; var AError : string; var AImage : TBitmap) : Boolean;
+function TSampleConverter.BitmapFromSample(const ASample : IMFSample; const AVideoInfo : TVideoFormatInfo; var AError : string;
+  var AImage : TBitmap) : Boolean;
 var
   pBuffer : IMFMediaBuffer;
   pBitmapData : PByte;
@@ -108,7 +113,8 @@ begin
         iExpectedBMPDataSize := (AVideoInfo.iBufferWidth * 4) * AVideoInfo.iBufferHeight;
         iActualBMPDataSize := Integer(cbBitmapData);
         if iActualBMPDataSize <> iExpectedBMPDataSize then
-          AError := Format('Sample size does not match expected size. Current: %d. Expected: %d', [iActualBMPDataSize, iExpectedBMPDataSize]);
+          AError := Format('Sample size does not match expected size. Current: %d. Expected: %d',
+            [iActualBMPDataSize, iExpectedBMPDataSize]);
         if Result then
         begin
           // Bind the render target to the bitmap
@@ -141,10 +147,9 @@ begin
       end;
     end;
   finally
-    pBitmapData := Nil;
+    pBitmapData := nil;
     SafeRelease(pBuffer);
   end;
 end;
-
 
 end.
