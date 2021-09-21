@@ -8,18 +8,23 @@ uses
   WinAPI.Messages,
   WinAPI.Windows,
   WinAPI.psAPI,
+  {VLC}
+  VCL.Graphics,
   {System}
   System.TimeSpan;
 
-  function ToSize(AKilobytes : int64) : string;
-  function ProcessMemoryUsage : int64;
-  function TimeSpanToDisplay(ATime : TTimeSpan; AIncludeMilliseconds : Boolean = False) : string;
-  function DevicePixelPerInch : Integer;
+function ToSize(AKilobytes : int64) : string;
+function ProcessMemoryUsage : int64;
+function TimeSpanToDisplay(ATime : TTimeSpan; AIncludeMilliseconds : Boolean = False) : string;
+function DevicePixelPerInch : Integer;
 
 type
-  TLogType = (ltDebug, ltInfo, ltWarning, ltError);
 
+  TLogType = (ltDebug, ltInfo, ltWarning, ltError);
   TCaptureMethod = (cmSync, cmAsync);
+
+  TFrameEvent = procedure(ABitmap : VCL.Graphics.TBitmap; ATimeStamp : TTimeSpan) of object;
+  TLogEvent = reference to procedure(const AMessage : string; ALogType : TLogType);
 
   TLogTypeHelper = record helper for TLogType
     function AsDisplay : string;
@@ -34,8 +39,8 @@ type
     iStride : Integer;
     procedure Reset;
   end;
-
   // CriticalSection
+
   TMFCritSec = class
   private
     FCriticalSection : TRTLCriticalSection;
@@ -46,7 +51,8 @@ type
     procedure Unlock;
   end;
 
-  procedure HandleMessages(AThread : THandle; AWait : Cardinal = INFINITE);
+procedure HandleThreadMessages(AThread : THandle; AWait : Cardinal = INFINITE);
+function IsURL(const APath : string) : Boolean;
 
 const
   cTab = #9;
@@ -115,6 +121,11 @@ begin
     Result := Format('%.2d:%.2d:%.2d', [ATime.Hours, ATime.Minutes, ATime.Seconds]);
 end;
 
+function IsURL(const APath : string) : Boolean;
+begin
+  Result := APath.StartsWith('https://') or APath.StartsWith('http://') or APath.StartsWith('www.')
+end;
+
 { TMFCritSec }
 
 constructor TMFCritSec.Create;
@@ -138,11 +149,10 @@ begin
   LeaveCriticalSection(FCriticalSection);
 end;
 
-procedure HandleMessages(AThread : THandle; AWait : Cardinal = INFINITE);
+procedure HandleThreadMessages(AThread : THandle; AWait : Cardinal = INFINITE);
 var
   oMsg : TMsg;
 begin
-
   while (MsgWaitForMultipleObjects(1, AThread, False, AWait, QS_ALLINPUT) = WAIT_OBJECT_0 + 1) do
   begin
     PeekMessage(oMsg, 0, 0, 0, PM_REMOVE);
@@ -155,9 +165,7 @@ begin
   end;
 end;
 
-
 { TLogTypeHelper }
-
 function TLogTypeHelper.AsDisplay : string;
 begin
   case Self of
@@ -173,7 +181,6 @@ begin
 end;
 
 { TVideoFormatInfo }
-
 procedure TVideoFormatInfo.Reset;
 begin
   iVideoWidth := 0;
@@ -182,6 +189,5 @@ begin
   iBufferHeight := 0;
   iStride := 0;
 end;
-
 
 end.
