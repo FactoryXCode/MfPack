@@ -5,11 +5,11 @@ interface
 
 uses
   {WinApi}
-  WinAPI.Messages, //
-  WinAPI.Windows, //
-  WinAPI.psAPI, //
+  WinAPI.Messages,
+  WinAPI.Windows,
+  WinAPI.psAPI,
   {VLC}
-  VCL.Graphics, //
+  VCL.Graphics,
   {System}
   System.TimeSpan;
 
