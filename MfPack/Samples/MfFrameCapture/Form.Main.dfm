@@ -31,9 +31,9 @@ object FrmMain: TFrmMain
     object lblVideo: TLabel
       Left = 16
       Top = 27
-      Width = 30
+      Width = 49
       Height = 13
-      Caption = 'Video:'
+      Caption = 'File / URL:'
     end
     object lblLog: TLabel
       Left = 16
@@ -90,7 +90,6 @@ object FrmMain: TFrmMain
       Width = 650
       Height = 21
       Anchors = [akLeft, akTop, akRight]
-      ReadOnly = True
       TabOrder = 0
     end
     object btnBrowse: TButton

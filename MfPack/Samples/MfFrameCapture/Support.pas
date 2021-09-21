@@ -52,6 +52,7 @@ type
   end;
 
 procedure HandleThreadMessages(AThread : THandle; AWait : Cardinal = INFINITE);
+function IsURL(const APath : string) : Boolean;
 
 const
   cTab = #9;
@@ -118,6 +119,11 @@ begin
     Result := Format('%.2d:%.2d:%.2d:%.2d', [ATime.Hours, ATime.Minutes, ATime.Seconds, ATime.Milliseconds])
   else
     Result := Format('%.2d:%.2d:%.2d', [ATime.Hours, ATime.Minutes, ATime.Seconds]);
+end;
+
+function IsURL(const APath : string) : Boolean;
+begin
+  Result := APath.StartsWith('https://') or APath.StartsWith('http://') or APath.StartsWith('www.')
 end;
 
 { TMFCritSec }

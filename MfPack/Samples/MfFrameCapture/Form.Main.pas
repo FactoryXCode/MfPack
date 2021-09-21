@@ -94,7 +94,6 @@ type
     function OpenSource(const AURL : string) : Boolean;
     function GetMemoryUsed : string;
 
-    procedure OpenVideo(const AFilePath : string);
     procedure Log(const AText : string; ALogType : TLogType);
     procedure GetVideoFrame;
     procedure UpdateCapturePositionDisplay;
@@ -147,7 +146,7 @@ begin
   cboMethod.ItemIndex := Ord(FMethod);
 
   if (FDefaultVideoPath <> '') and TFile.Exists(FDefaultVideoPath) then
-    OpenVideo(FDefaultVideoPath);
+    OpenSource(FDefaultVideoPath);
 end;
 
 procedure TFrmMain.HandleFormDestroy(Sender : TObject);
@@ -210,16 +209,12 @@ begin
   end;
 end;
 
-procedure TFrmMain.OpenVideo(const AFilePath : string);
-begin
-  ClearImage;
-  OpenSource(AFilePath);
-end;
-
 function TFrmMain.OpenSource(const AURL : string) : Boolean;
 var
   oPreviousRounding : TRoundingMode;
 begin
+  ClearImage;
+
   Log(Format('Opening video: "%s"', [AURL]), ltInfo);
   try
     Result := FCapture.OpenSource(AURL);
@@ -273,13 +268,13 @@ procedure TFrmMain.HandleOpenClick(Sender : TObject);
 begin
   ClearImage;
   CloseSource;
-  OpenVideo(edtVideoFile.Text);
+  OpenSource(edtVideoFile.Text);
 end;
 
 procedure TFrmMain.HandleBrowseClick(Sender : TObject);
 begin
   if fdOpenVideo.Execute then
-    OpenVideo(fdOpenVideo.Filename);
+    OpenSource(fdOpenVideo.Filename);
 end;
 
 procedure TFrmMain.GetVideoFrame;

@@ -3,7 +3,14 @@ unit FileCapture.Synchronous;
 interface
 
 uses
-  System.TimeSpan, WinApi.Windows, WinApi.MediaFoundationApi.MfReadWrite, WinApi.MediaFoundationApi.MfObjects, FileCapture;
+  {Winapi}
+  WinApi.Windows,
+  WinApi.MediaFoundationApi.MfReadWrite,
+  WinApi.MediaFoundationApi.MfObjects,
+  {System}
+  System.TimeSpan,
+  {Application}
+  FileCapture;
 
 type
   TFileCaptureSync = class(TFileCapture)

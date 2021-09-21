@@ -201,12 +201,13 @@ end;
 
 function TFileCapture.OpenSource(const AURL : string) : Boolean;
 begin
-  Result := TFile.Exists(AURL);
+  CloseSource;
+  FURL := '';
+
+  Result := IsURL(AURL) or TFile.Exists(AURL);
 
   if Result then
   begin
-    CloseSource;
-
     Result := CreateSourceReader(AURL);
 
     if Result then
