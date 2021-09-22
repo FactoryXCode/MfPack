@@ -18,9 +18,10 @@ uses
 
 type
   TSampleConverter = class(TPersistent)
+  protected
+    FRenderTarget : ID2D1DCRenderTarget;
   private
     FDPI : Integer;
-    FRenderTarget : ID2D1DCRenderTarget;
     F2DBitmapProperties : TD2D1BitmapProperties;
     procedure CreateDirect2DBitmapProperties;
     function CreateRenderTarget : Boolean;
@@ -74,7 +75,7 @@ begin
       Result := SUCCEEDED(pFactory.CreateDCRenderTarget(oProperties, FRenderTarget));
     end;
   finally
-    pFactory := nil;
+    //pFactory := nil;   no need to
   end;
 end;
 
@@ -118,6 +119,7 @@ begin
         if Result then
         begin
           // Bind the render target to the bitmap
+          // Note: When going in to async mode, and going to into this function, frendertarget is lost, so we need to reinitialize a new rendertarget.
           Result := SUCCEEDED(FRenderTarget.BindDC(AImage.Canvas.Handle, AImage.Canvas.ClipRect));
           if Result then
           begin
