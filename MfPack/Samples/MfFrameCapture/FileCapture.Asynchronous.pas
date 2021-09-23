@@ -197,7 +197,8 @@ begin
 end;
 
 
-procedure TFileCaptureAsync.HandleMessages(var AMessage: TMessage; var AHandled: Boolean);
+procedure TFileCaptureAsync.HandleMessages(var AMessage: TMessage;
+                                           var AHandled: Boolean);
 begin
   if AMessage.Msg = WM_FLUSH_COMPLETE then
     begin
@@ -228,7 +229,6 @@ var
 
 begin
 
-  New(oSampleReply);
   oSampleReply := PSampleReply(AMessage.LPARAM);
 
   try
@@ -237,7 +237,7 @@ begin
 
   finally
     SafeRelease(oSampleReply.oSample);
-    Dispose(oSampleReply);
+    oSampleReply := Nil;
   end;
 end;
 {$HINTS ON}
@@ -259,7 +259,7 @@ begin
     begin
       // We need to flush before changing position if a sample request is in progress.
       FPositionRequest := TPositionRequest.New(APosition,
-                                              True);
+                                               True);
 
     if not AwaitingFlush then
       Flush;
@@ -318,7 +318,8 @@ function TFileCaptureAsync.OnFlush(dwStreamIndex: DWord): HRESULT;
 begin
   // Note: This will be called in a worker thread.
   Result := S_OK;
-  PostMessage(FMessageHandler.Handle,
+
+  SendMessage(FMessageHandler.Handle,
               WM_FLUSH_COMPLETE,
               0,
               0);
@@ -329,7 +330,7 @@ end;
 procedure TFileCaptureAsync.NotifyMediaFormatChanged;
 begin
   // Note: This will be called in a worker thread.
-  PostMessage(FMessageHandler.Handle,
+  SendMessage(FMessageHandler.Handle,
               WM_MEDIA_FORMAT_CHANGED,
               0,
               0);
@@ -337,25 +338,34 @@ begin
 end;
 
 
-procedure TFileCaptureAsync.ProcessSample(const ASample: IMFSample; ATimeStamp: TTimeSpan);
+procedure TFileCaptureAsync.ProcessSample(const ASample: IMFSample;
+                                          ATimeStamp: TTimeSpan);
 var
   oSampleReply: PSampleReply;
+  itest: Integer;
 
 begin
   // Note: This will be called in a worker thread.
 
   // _AddRef will be called, so the sample will not be released until the message is handled.
   New(oSampleReply);
+
   oSampleReply.oSample := ASample;
   oSampleReply.oSampleTimeStamp := ATimeStamp;
 
-  if not PostMessage(FMessageHandler.Handle, WM_SAMPLE_FOUND, 0, LPARAM(oSampleReply)) then
+  if SendMessage(FMessageHandler.Handle,
+                 WM_SAMPLE_FOUND,
+                 0,
+                 LPARAM(oSampleReply)) <> 0 then
     begin
       SafeRelease(oSampleReply.oSample);
       Dispose(oSampleReply);
     end;
 
   HandleThreadMessages(GetCurrentThread());
+  //must do to prevent memory leak
+  if Assigned(oSampleReply) then
+    Dispose(oSampleReply);
 end;
 
 
@@ -414,8 +424,10 @@ finally
   FCritSec.Unlock;
 end;
 finally
-  SafeRelease(pSample);
+  //SafeRelease(pSample);
+  PSample := Nil;
 end;
+
 end;
 
 

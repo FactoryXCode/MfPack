@@ -2,12 +2,7 @@ program MfFrameCapture;
 uses
   {$IFDEF FASTMM}
   FastMM4,
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
-  {$ENDIF }
+  {$ENDIF}
   Vcl.Forms,
   Form.Main in 'Form.Main.pas' {FrmMain},
   Support in 'Support.pas',
