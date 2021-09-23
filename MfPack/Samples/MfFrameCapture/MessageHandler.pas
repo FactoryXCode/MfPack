@@ -1,23 +1,83 @@
+// FactoryX
+//
+// Copyright: © FactoryX. All rights reserved.
+//
+// Project: MfPack - MediaFoundation
+// Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
+// Module:  MessageHandler.pas
+// Kind: Pascal Unit
+// Release date: 22-09-2021
+// Language: ENU
+//
+// Revision Version: 3.0.2
+//
+// Description:
+//   This unit handles the messages between the mainform and sync modules.
+//
+// Organisation: FactoryX
+// Initiator(s): Ciaran
+// Contributor(s): Ciaran, Tony (maXcomX)
+//
+//------------------------------------------------------------------------------
+// CHANGE LOG
+// Date       Person              Reason
+// ---------- ------------------- ----------------------------------------------
+//
+//------------------------------------------------------------------------------
+//
+// Remarks: Requires Windows 10 or later.
+//
+// Related objects: -
+// Related projects: MfPackX301/Samples/MFFrameSample
+//
+// Compiler version: 23 up to 33
+// SDK version: 10.0.19041.0
+//
+// Todo: -
+//
+//==============================================================================
+// Source: -
+//==============================================================================
+//
+// LICENSE
+//
+// The contents of this file are subject to the Mozilla Public License
+// Version 2.0 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at
+// https://www.mozilla.org/en-US/MPL/2.0/
+//
+// Software distributed under the License is distributed on an "AS IS"
+// basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+// License for the specific language governing rights and limitations
+// under the License.
+//
+// Users may distribute this source code provided that this header is included
+// in full at the top of the file.
+//==============================================================================
 unit MessageHandler;
 
 interface
 
 uses
   {Winapi}
-  WinApi.Windows, //
-  WinApi.Messages, //
+  WinApi.Windows,
+  WinApi.Messages,
   {System}
   System.Classes;
 
 type
-  TOnHandleMessage = reference to procedure(var AMessage : TMessage; var AHandled : boolean);
+  TOnHandleMessage = reference to procedure(var AMessage: TMessage;
+                                            var AHandled: boolean);
 
   TMessageHandler = class(TObject)
   private
-    FWinHandle : HWND;
-    FOnHandleMessage : TOnHandleMessage;
+    FWinHandle: HWND;
+    FOnHandleMessage: TOnHandleMessage;
+
   protected
-    procedure HandleWindowsMessage(var AMessage : TMessage); virtual;
+    procedure HandleWindowsMessage(var AMessage: TMessage); virtual;
+
   public
     constructor Create;
     destructor Destroy; override;
@@ -25,8 +85,8 @@ type
     procedure AllocateHandle;
     procedure RemoveHandle;
 
-    property Handle : HWND read FWinHandle;
-    property OnMessage : TOnHandleMessage read FOnHandleMessage write FOnHandleMessage;
+    property Handle: HWND read FWinHandle;
+    property OnMessage: TOnHandleMessage read FOnHandleMessage write FOnHandleMessage;
   end;
 
 implementation
@@ -58,9 +118,9 @@ begin
   FWinHandle := INVALID_HANDLE_VALUE;
 end;
 
-procedure TMessageHandler.HandleWindowsMessage(var AMessage : TMessage);
+procedure TMessageHandler.HandleWindowsMessage(var AMessage: TMessage);
 var
-  bHandled : boolean;
+  bHandled: boolean;
 begin
   bHandled := False;
 
@@ -70,7 +130,10 @@ begin
   if bHandled then
     AMessage.Result := 0
   else
-    AMessage.Result := DefWindowProc(FWinHandle, AMessage.Msg, AMessage.WParam, AMessage.LParam);
+    AMessage.Result := DefWindowProc(FWinHandle,
+                                     AMessage.Msg,
+                                     AMessage.WParam,
+                                     AMessage.LParam);
 end;
 
 end.
