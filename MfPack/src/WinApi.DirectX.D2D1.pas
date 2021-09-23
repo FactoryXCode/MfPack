@@ -25,6 +25,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 22/09/2021 Tony                Fixed ID2D1DCRenderTarget and ID2D1GdiInteropRenderTarget
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -1878,7 +1879,7 @@ type
     function GetDC(mode: D2D1_DC_INITIALIZE_MODE;
                    out hdc: HDC): HResult; stdcall;
 
-    function ReleaseDC(update: TRECT): HResult; stdcall;
+    function ReleaseDC(const update: TRECT): HResult; stdcall;
 
   end;
   IID_ID2D1GdiInteropRenderTarget = ID2D1GdiInteropRenderTarget;
@@ -1895,7 +1896,7 @@ type
   ['{1c51bc64-de61-46fd-9899-63a5d8f03950}']
 
     function BindDC(hDC: HDC;
-                    pSubRect: TRECT): HResult; stdcall;
+                    const pSubRect: TRECT): HResult; stdcall;
 
   end;
   IID_ID2D1DCRenderTarget = ID2D1DCRenderTarget;
