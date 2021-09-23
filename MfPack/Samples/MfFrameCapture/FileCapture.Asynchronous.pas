@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: Â© FactoryX. All rights reserved.
 //
 // Project: MfPack - MediaFoundation
 // Project location: https://sourceforge.net/projects/MFPack
@@ -424,8 +424,7 @@ finally
   FCritSec.Unlock;
 end;
 finally
-  //SafeRelease(pSample);
-  PSample := Nil;
+  SafeRelease(pSample);
 end;
 
 end;
