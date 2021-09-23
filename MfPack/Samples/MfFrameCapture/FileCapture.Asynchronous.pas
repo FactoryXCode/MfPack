@@ -228,7 +228,6 @@ var
   oSampleReply: PSampleReply;
 
 begin
-
   oSampleReply := PSampleReply(AMessage.LPARAM);
 
   try
@@ -319,7 +318,7 @@ begin
   // Note: This will be called in a worker thread.
   Result := S_OK;
 
-  SendMessage(FMessageHandler.Handle,
+  PostMessage(FMessageHandler.Handle,
               WM_FLUSH_COMPLETE,
               0,
               0);
@@ -330,7 +329,7 @@ end;
 procedure TFileCaptureAsync.NotifyMediaFormatChanged;
 begin
   // Note: This will be called in a worker thread.
-  SendMessage(FMessageHandler.Handle,
+  PostMessage(FMessageHandler.Handle,
               WM_MEDIA_FORMAT_CHANGED,
               0,
               0);
@@ -424,8 +423,7 @@ finally
   FCritSec.Unlock;
 end;
 finally
-  //SafeRelease(pSample);
-  PSample := Nil;
+  SafeRelease(pSample);
 end;
 
 end;
@@ -434,7 +432,7 @@ end;
 { TPositionRequest }
 
 class function TPositionRequest.New(APosition: TTimeSpan;
-                                      ARequestSample: Boolean): TPositionRequest;
+                                    ARequestSample: Boolean): TPositionRequest;
 begin
   Result.oPosition := APosition;
   Result.bRequestNextSample := ARequestSample;
