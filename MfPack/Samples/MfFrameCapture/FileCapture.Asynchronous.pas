@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: Â© FactoryX. All rights reserved.
 //
 // Project: MfPack - MediaFoundation
 // Project location: https://sourceforge.net/projects/MFPack
