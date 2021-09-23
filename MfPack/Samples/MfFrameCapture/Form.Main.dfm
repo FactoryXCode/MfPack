@@ -209,7 +209,7 @@ object FrmMain: TFrmMain
     end
   end
   object fdOpenVideo: TOpenDialog
-    Filter = 
+    Filter =
       'Supported Videos |*.asf;*.wma;*.wmv;*.avi;*.m4a;*.m4v;*.mov;*.mp' +
       '4'
     Title = 'Select a video to open'
