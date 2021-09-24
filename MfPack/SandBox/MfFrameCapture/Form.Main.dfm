@@ -204,12 +204,12 @@ object FrmMain: TFrmMain
       AutoSize = True
       Center = True
       Proportional = True
-      ExplicitLeft = 0
+      ExplicitLeft = 2
       ExplicitTop = 0
     end
   end
   object fdOpenVideo: TOpenDialog
-    Filter =
+    Filter = 
       'Supported Videos |*.asf;*.wma;*.wmv;*.avi;*.m4a;*.m4v;*.mov;*.mp' +
       '4'
     Title = 'Select a video to open'
