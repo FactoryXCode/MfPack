@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: Â© FactoryX. All rights reserved.
+// Copyright: © FactoryX. All rights reserved.
 //
 // Project: MfPack - MediaFoundation
 // Project location: https://sourceforge.net/projects/MFPack
@@ -90,7 +90,6 @@ type
   end;
 
   PSampleReply = ^TSampleReply;
-
   TSampleReply = record
     oSampleTimeStamp: TTimeSpan;
     oSample: IMFSample;
@@ -102,6 +101,7 @@ type
     FPositionRequest: TPositionRequest;
     FCritSec: TMFCritSec;
     FFindingSample: Boolean;
+    oSampleReply: TSampleReply;
 
     procedure HandleMessages(var AMessage: TMessage; var AHandled: Boolean);
     procedure NotifyMediaFormatChanged;
@@ -166,9 +166,9 @@ end;
 
 destructor TFileCaptureAsync.Destroy;
 begin
+  SafeDelete(FCritSec);
   FMessageHandler.RemoveHandle;
   FreeAndNil(FMessageHandler);
-  FreeAndNil(FCritSec);
   inherited;
 end;
 
@@ -176,7 +176,7 @@ end;
 procedure TFileCaptureAsync.HandleFlushComplete;
 begin
   inherited;
-  FFindingSample:= False;
+  FFindingSample := False;
 
   if SourceOpen and FPositionRequest.bPending then
     ProcessPendingRequest;
@@ -230,14 +230,8 @@ var
 begin
   oSampleReply := PSampleReply(AMessage.LPARAM);
 
-  try
-    ReturnSample(oSampleReply.oSample,
-                 oSampleReply.oSampleTimeStamp);
-
-  finally
-    SafeRelease(oSampleReply.oSample);
-    oSampleReply := Nil;
-  end;
+  ReturnSample(oSampleReply.oSample,
+               oSampleReply.oSampleTimeStamp);
 end;
 {$HINTS ON}
 
@@ -299,14 +293,16 @@ var
   oResult: HRESULT;
 
 begin
-  oResult := AAttributes.SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK, Self);
+  oResult := AAttributes.SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK,
+                                    Self);
   if not SUCCEEDED(oResult) then
     Log('Failed to configure source reader callback',
         ltError);
 end;
 
 
-function TFileCaptureAsync.OnEvent(dwStreamIndex: DWord; pEvent: IMFMediaEvent): HRESULT;
+function TFileCaptureAsync.OnEvent(dwStreamIndex: DWord;
+                                   pEvent: IMFMediaEvent): HRESULT;
 begin
   // Note: This will be called in a worker thread.
   Result := S_OK;
@@ -339,32 +335,23 @@ end;
 
 procedure TFileCaptureAsync.ProcessSample(const ASample: IMFSample;
                                           ATimeStamp: TTimeSpan);
-var
-  oSampleReply: PSampleReply;
-  itest: Integer;
-
 begin
   // Note: This will be called in a worker thread.
 
   // _AddRef will be called, so the sample will not be released until the message is handled.
-  New(oSampleReply);
 
   oSampleReply.oSample := ASample;
   oSampleReply.oSampleTimeStamp := ATimeStamp;
 
-  if SendMessage(FMessageHandler.Handle,
-                 WM_SAMPLE_FOUND,
-                 0,
-                 LPARAM(oSampleReply)) <> 0 then
+  if not PostMessage(FMessageHandler.Handle,
+                     WM_SAMPLE_FOUND,
+                     0,
+                     LPARAM(@oSampleReply)) then
     begin
       SafeRelease(oSampleReply.oSample);
-      Dispose(oSampleReply);
     end;
 
   HandleThreadMessages(GetCurrentThread());
-  //must do to prevent memory leak
-  if Assigned(oSampleReply) then
-    Dispose(oSampleReply);
 end;
 
 
@@ -388,6 +375,7 @@ try
 try
   if SUCCEEDED(hrStatus) then
     begin
+
       bEndOfStream := (dwStreamFlags = MF_SOURCE_READERF_ENDOFSTREAM);
 
       if (dwStreamFlags = MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED) then

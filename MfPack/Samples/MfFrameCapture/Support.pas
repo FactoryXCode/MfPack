@@ -231,15 +231,24 @@ begin
 end;
 
 
-procedure HandleThreadMessages(AThread: THandle; AWait: Cardinal = INFINITE);
+procedure HandleThreadMessages(AThread: THandle;
+                               AWait: Cardinal = INFINITE);
 var
   oMsg: TMsg;
 
 begin
 
-  while (MsgWaitForMultipleObjects(1, AThread, False, AWait, QS_ALLINPUT) = WAIT_OBJECT_0 + 1) do
+  while (MsgWaitForMultipleObjects(1,
+                                   AThread,
+                                   False,
+                                   AWait,
+                                   QS_ALLINPUT) = WAIT_OBJECT_0 + 1) do
     begin
-      PeekMessage(oMsg, 0, 0, 0, PM_REMOVE);
+      PeekMessage(oMsg,
+                  0,
+                  0,
+                  0,
+                  PM_REMOVE);
 
       if oMsg.Message = WM_QUIT then
         Exit;

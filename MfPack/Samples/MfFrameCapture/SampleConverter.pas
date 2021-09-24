@@ -97,8 +97,7 @@ type
     function BitmapFromSample(const ASample: IMFSample;
                               const AVideoInfo: TVideoFormatInfo;
                               var AError: string;
-                              var AImage: TBitmap)
-     : Boolean;
+                              var AImage: TBitmap): Boolean;
   end;
 
 implementation

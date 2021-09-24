@@ -79,6 +79,7 @@ type
     procedure HandleWindowsMessage(var AMessage: TMessage); virtual;
 
   public
+
     constructor Create;
     destructor Destroy; override;
 

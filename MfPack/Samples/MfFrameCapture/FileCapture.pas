@@ -262,8 +262,12 @@ begin
                      ATimeStamp);
     end
   else
-    Log('Failed to create BMP from frame sample: ' + sError,
-        ltError);
+    begin
+      Log('Failed to create BMP from frame sample: ' + sError,
+          ltError);
+      FreeAndNil(oBitmap);
+    end;
+
 end;
 
 
@@ -565,14 +569,14 @@ begin
                 ltInfo);
 
       PropVariantInit(oStartPropVar);
-try
-      oStartPropVar.vt := VT_I8;
-      oStartPropVar.hVal.QuadPart := APosition.Ticks;
-      Result := SUCCEEDED(FSourceReader.SetCurrentPosition(GUID_NULL,
-                                                           oStartPropVar));
-finally
-      PropVariantClear(oStartPropVar);
-end;
+      try
+        oStartPropVar.vt := VT_I8;
+        oStartPropVar.hVal.QuadPart := APosition.Ticks;
+        Result := SUCCEEDED(FSourceReader.SetCurrentPosition(GUID_NULL,
+                                                             oStartPropVar));
+      finally
+        PropVariantClear(oStartPropVar);
+      end;
 
     if not Result then
       Log('Failed to set position',
