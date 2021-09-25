@@ -1,6 +1,6 @@
-DuckingCapture Sample
-Version: X 3.0.0
-Enigma release.
+# DuckingCapture Sample
+Version: X 3.0.1
+Enigma release #5.
 
 Description:
   ========================================================================

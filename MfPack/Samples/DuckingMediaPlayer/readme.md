@@ -1,6 +1,6 @@
-Ducking Media Player
-Version: X 3.0.0
-Enigma release.
+# Ducking Media Player
+Version: X 3.0.1
+Enigma release #5.
 
 Description:
   This sample implements a simple media player that responds to 
@@ -15,7 +15,8 @@ NOTES:
  - Minimum supported MfPack version: 3.0.0
 
 Project: Media Foundation - MFPack - Samples
-Project location: http://sourceforge.net/projects/MFPack
+Project location: https://github.com/FactoryXCode/MfPack
+                  https://sourceforge.net/projects/MFPack
 
 First release date: 05-07-2020
 Final release date: 13-08-2020

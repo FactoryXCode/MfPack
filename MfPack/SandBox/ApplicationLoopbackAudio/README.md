@@ -1,16 +1,5 @@
----
-page_type: sample
-languages:
-- cpp
-products:
-- windows-api-win32
-name: Application loopback audio capture
-urlFragment: applicationloopbackaudio-sample
-description: Demonstrates how to capture system audio either from a specific process tree or for all process except a process tree.
-extendedZipContent:
-- path: LICENSE
-  target: LICENSE
----
+Version: X 3.0.2
+Enigma release #5.
 
 # Application loopback API Capture Sample
 
@@ -33,51 +22,14 @@ To use this sample, obtain the process ID for the process tree you wish to captu
 You can use Task Manager or the tlist program to get this ID. Run the sample with the process ID, the
 desired capture mode (including the process tree or excluding it), and the output WAV file.
 
-Examples:
 
-* Capture audio from process 1234 and its children: `ApplicationLoopback 1234 includetree Captured.wav`
-* Capture audio from all process except process 1234 and its children: `ApplicationLoopback 1234 excludetree Captured.wav`
-
-Note that this sample requires Windows 10 build 20348 or later.
+# Note that this sample requires Windows 10 build 20348 or later.
     
-Sample Language Implementations
-===============================
-    C++
+Project: Media Foundation - MFPack - Samples
+Project location: https://github.com/FactoryXCode/MfPack
+                  https://sourceforge.net/projects/MFPack
 
-Files
-===============================
+First release date: 20-08-2021
+Final release date: 2021
 
-ApplicationLoopback.vcproj
-    This is the main project file for VC++ projects generated using an Application Wizard.
-    It contains information about the version of Visual C++ that generated the file, and
-    information about the platforms, configurations, and project features selected with the
-    Application Wizard.
-
-ApplicationLoopback.cpp
-    This is the main application source file. It parses the command line and instantiates a
-    CLoopbackCapture object which actually performs the capturing.
-    
-LoopbackCapture.cpp/LoopbackCapture.h
-    Implementation of a class which uses the WASAPI APIs to capture audio from a process using ActivateAudioInterfaceAsync.
-    
-Common.h
-    Helper for implementing IMFAsyncCallback.
-
-
-To build the sample using the command prompt:
-=============================================
-
-    1. Open the Command Prompt window and navigate to the directory.
-    2. Type msbuild [Solution Filename]
-    
-To build the sample using Visual Studio 2019 (preferred method):
-================================================================
-
-    1. Open Windows Explorer and navigate to the directory.
-    2. Double-click the icon for the .sln (solution) file to open the file in Visual Studio.
-    3. In the Build menu, select Build Solution.  The application will be built in the default 
-       \Debug or \Release directory
-
-To run the sample:
-=================
-    Type ApplicationLoopback.exe at the command line with appropriate command line options described above.
+Copyright © FactoryX. All rights reserved.
