@@ -1,6 +1,6 @@
-MfVideoThumbNail
+# MfVideoThumbNail
 Version: 3.0.1
-Enigma release #3.
+Enigma release #5.
 
 Description:
 
@@ -17,7 +17,10 @@ NOTES:
  - Minimum supported MfPack version: 3.0.0 
 
 Project: Media Foundation - MFPack - Samples
-Project location: https://sourceforge.net/projects/MFPack
+Project location: https://github.com/FactoryXCode/MfPack
+                  https://sourceforge.net/projects/MFPack
+
+
 First release date: 08-04-2019
 Final release date: 27-01-2021
 

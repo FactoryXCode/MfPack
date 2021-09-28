@@ -1,6 +1,6 @@
-MfMediaEnginePlayer
+# MfMediaEnginePlayer
 Version: X 3.0.1
-Enigma release.
+Enigma release #5.
 
 Description: 
   A mediaengine player sample with support for 
@@ -18,7 +18,9 @@ For indepth information see the MediaEnginePlayer examples and
 documentation, containing the complete information about MediaEnginePlayer.
 
 Project: Media Foundation - MFPack - Samples
-Project location: http://sourceforge.net/projects/MFPack
+Project location: https://github.com/FactoryXCode/MfPack
+                  https://sourceforge.net/projects/MFPack
+
 First release date: 05-02-2016
 Final release date: 30-12-2020
 

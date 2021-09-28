@@ -1,6 +1,6 @@
-MfComponents
+# MfComponents
 Version: X 3.0.1
-Enigma release.
+Enigma release #5.
 
 NOTES: 
  - This release is updated for compiler version 17 up to 33.
@@ -19,11 +19,12 @@ This package contains the following -installable- components:
 - MfAudioEndPoint - Audio EndPoint component that responds to volume changes. 
                     Uses: IAudioEndpointVolumeEx, IAudioEndpointVolumeCallback and IMMDeviceEnumerator.
 - TThreadedQTimer - A threaded queue timer (experimental) 
-- WasApiRenderFile - WAV rendering component that uses WASAPI
 
 Project: Media Foundation - MFPack - Samples
-Project location: http://sourceforge.net/projects/MFPack
+Project location: https://github.com/FactoryXCode/MfPack
+                  https://sourceforge.net/projects/MFPack
+
 First release date: 05-02-2016
-Final release date: 178-08-2021
+Final release date: 18-08-2021
 
 Copyright © FactoryX. All rights reserved.

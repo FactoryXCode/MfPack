@@ -1,6 +1,6 @@
-mfMediaPlayer I
+# mfMediaPlayer I
 Version: X 3.0.1
-Enigma release.
+Enigma release #5.
 
 NOTES: 
  - This release is updated for compiler version 17 up to 33.
@@ -15,7 +15,9 @@ For indepth information see the Microsoft MediaEnginePlayer example and
 documentation, containing the complete information about MfMediaEnginePlayer.
 
 Project: Media Foundation - MFPack - Samples
-Project location: https://sourceforge.net/projects/MFPack
+Project location: https://github.com/FactoryXCode/MfPack
+                  https://sourceforge.net/projects/MFPack
+
 First release date: 05-02-2016
 Final release date: 30-12-2020
 
