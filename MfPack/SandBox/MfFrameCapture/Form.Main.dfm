@@ -13,7 +13,6 @@ object FrmMain: TFrmMain
   Font.Style = []
   KeyPreview = True
   Menu = MainMenu1
-  OldCreateOrder = True
   Position = poDesktopCenter
   OnCreate = HandleFormCreate
   OnDestroy = HandleFormDestroy
@@ -173,8 +172,8 @@ object FrmMain: TFrmMain
       Value = 120
     end
     object cboMethod: TComboBox
-      Left = 81
-      Top = 159
+      Left = 73
+      Top = 161
       Width = 105
       Height = 21
       Style = csDropDownList
@@ -185,6 +184,15 @@ object FrmMain: TFrmMain
       Items.Strings = (
         'Synchronous'
         'Asynchronous')
+    end
+    object btnSaveImage: TButton
+      Left = 800
+      Top = 159
+      Width = 75
+      Height = 25
+      Caption = 'Save Image'
+      TabOrder = 10
+      OnClick = HandleSaveImageClick
     end
   end
   object pnlFrameCapture: TPanel
@@ -211,7 +219,7 @@ object FrmMain: TFrmMain
   object fdOpenVideo: TOpenDialog
     Filter = 
       'Supported Videos |*.asf;*.wma;*.wmv;*.avi;*.m4a;*.m4v;*.mov;*.mp' +
-      '4'
+      '4;*.mts'
     Title = 'Select a video to open'
     Left = 32
     Top = 272
@@ -248,5 +256,11 @@ object FrmMain: TFrmMain
         OnClick = HandleLogLevelChange
       end
     end
+  end
+  object sdSaveFrame: TSaveDialog
+    DefaultExt = '.bmp'
+    Filter = 'BMP|*.bmp'
+    Left = 32
+    Top = 328
   end
 end

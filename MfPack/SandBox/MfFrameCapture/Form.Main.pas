@@ -126,6 +126,8 @@ type
     mnInfoLevel: TMenuItem;
     mnWarningLevel: TMenuItem;
     mnErrorLevel: TMenuItem;
+    btnSaveImage: TButton;
+    sdSaveFrame: TSaveDialog;
     procedure HandleBrowseClick(Sender: TObject);
     procedure HandleClearLogClick(Sender: TObject);
     procedure HandleFormCreate(Sender: TObject);
@@ -136,6 +138,7 @@ type
     procedure HandleExitClick(Sender: TObject);
     procedure HandleLogLevelChange(Sender: TObject);
     procedure HandleMethodChanged(Sender: TObject);
+    procedure HandleSaveImageClick(Sender: TObject);
 
   private
     FFormatSettings: TFormatSettings;
@@ -143,6 +146,7 @@ type
     FDefaultVideoPath: string;
     FFrequency: int64;
     FCaptureStart: int64;
+    FLastFrameTime : TTimeSpan;
 
     FCapture: TFileCapture;
     FCaptureMethod: TCaptureMethod;
@@ -167,6 +171,7 @@ type
     procedure DestroyCapture;
     procedure HandleFrameFound(ABitmap: TBitmap;
                                ATimeStamp: TTimeSpan);
+    function GetDefaultSaveName: string;
   public
     property CaptureMethod: TCaptureMethod read FCaptureMethod write SetCaptureMethod;
   end;
@@ -190,6 +195,7 @@ begin
 
   FFrequency := 0;
   FCaptureStart := 0;
+  FLastFrameTime := TTimeSpan.Zero;
 
   SetDefaults;
 
@@ -249,7 +255,7 @@ end;
 procedure TFrmMain.SetDefaults;
 begin
   FLogLevel := ltInfo;
-  CaptureMethod := cmSync;
+  CaptureMethod := cmASync;
 
   // Set a default video to open
   FDefaultVideoPath := '';
@@ -346,6 +352,19 @@ begin
 end;
 
 
+procedure TFrmMain.HandleSaveImageClick(Sender: TObject);
+begin
+  sdSaveFrame.FileName := GetDefaultSaveName;
+
+  if sdSaveFrame.Execute then
+    picFrame.Picture.SaveToFile(sdSaveFrame.FileName);
+end;
+
+function TFrmMain.GetDefaultSaveName : string;
+begin
+  Result := 'Capture_' + TimeSpanToDisplay(FLastFrameTime, True).Replace(':', '.');
+end;
+
 procedure TFrmMain.HandleBrowseClick(Sender: TObject);
 begin
   if fdOpenVideo.Execute then
@@ -402,6 +421,10 @@ begin
   finally
     FreeAndNil(ABitmap);
   end;
+
+  FLastFrameTime := ATimeStamp;
+
+  UpdateEnabledStates;
 end;
 
 
@@ -488,6 +511,7 @@ begin
 
   btnClose.Enabled := FCapture.SourceOpen;
   btnOpen.Enabled := not FCapture.SourceOpen;
+  btnSaveImage.Enabled := Assigned(picFrame.Picture.Bitmap) and not picFrame.Picture.Bitmap.Empty;
 end;
 
 
