@@ -121,10 +121,10 @@ type
     procedure Flush; virtual;
     procedure HandleMediaFormatChanged; virtual;
 
-    procedure ProcessSample(const ASample: IMFSample;
+    procedure ProcessSample(ASample: IMFSample;
                             ATimeStamp: TTimeSpan); virtual; abstract;
 
-    procedure ReturnSample(const ASample: IMFSample;
+    procedure ReturnSample(ASample: IMFSample;
                            ATimeStamp: TTimeSpan);
 
     procedure Log(const AMessage: string;
@@ -235,7 +235,7 @@ begin
 end;
 
 
-procedure TFileCapture.ReturnSample(const ASample: IMFSample;
+procedure TFileCapture.ReturnSample(ASample: IMFSample;
                                     ATimeStamp: TTimeSpan);
 var
   oBitmap: TBitmap;
@@ -268,6 +268,7 @@ begin
       FreeAndNil(oBitmap);
     end;
 
+  SafeRelease(ASample);
 end;
 
 
@@ -334,6 +335,8 @@ var
 
 begin
   case AResult of
+    E_POINTER:
+      sError := 'Object not initialized.';
     MF_E_INVALIDREQUEST:
       sError := 'Invalid request';
     MF_E_INVALIDSTREAMNUMBER:

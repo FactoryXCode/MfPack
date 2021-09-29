@@ -184,7 +184,9 @@ implementation
 uses
   {System}
   System.IOUtils,
-  System.Math;
+  System.Math,
+  PngImage,
+  Vcl.Imaging.jpeg;
 
 {$r *.dfm}
 
@@ -353,11 +355,55 @@ end;
 
 
 procedure TFrmMain.HandleSaveImageClick(Sender: TObject);
-begin
-  sdSaveFrame.FileName := GetDefaultSaveName;
+var
+  pPng: TPngImage;
+  pJpg: TJPEGImage;
+  //sFilter: string;
 
-  if sdSaveFrame.Execute then
-    picFrame.Picture.SaveToFile(sdSaveFrame.FileName);
+begin
+  if not picFrame.Picture.Bitmap.Empty then
+    begin
+      sdSaveFrame.FileName := GetDefaultSaveName;
+
+     // Stores a filter with all available image extensions and is compatible with the savedialog filter property
+     // sFilter := GraphicFilter(TGraphic);
+
+      if sdSaveFrame.Execute then
+        begin
+          case sdSaveFrame.FilterIndex of
+            {BMP}
+            1: begin
+                 picFrame.Picture.SaveToFile(sdSaveFrame.FileName);
+               end;
+            {PNG}
+            2: begin
+                 try
+                 pPng := TPngImage.Create;
+                 pPng.Assign(picFrame.Picture.Bitmap);
+                 pPng.SaveToFile(sdSaveFrame.FileName);
+                 finally
+                   pPng.Free;
+                 end;
+               end;
+            {JPG}
+            3: begin
+                 try
+                 pJpg := TJPEGImage.Create;
+                 // Adjust performance, compression etc.
+                 pJpg.Performance := jpBestQuality;
+                 pJpg.ProgressiveEncoding := True;
+                 pJpg.ProgressiveDisplay := True;
+                 //pJpg.CompressionQuality := 30;
+                 pJpg.Compress;
+                 pJpg.Assign(picFrame.Picture.Bitmap);
+                 pjpg.SaveToFile(sdSaveFrame.FileName);
+                 finally
+                   pJpg.Free;
+                 end;
+               end;
+          end;
+        end;
+    end;
 end;
 
 function TFrmMain.GetDefaultSaveName : string;

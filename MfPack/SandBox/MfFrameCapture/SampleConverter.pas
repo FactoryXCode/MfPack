@@ -234,7 +234,6 @@ begin
 
   finally
     pBitmapData := Nil;
-    SafeRelease(pBuffer);
   end;
 
 end;

@@ -72,7 +72,7 @@ uses
 type
   TFileCaptureSync = class(TFileCapture)
   protected
-    procedure ProcessSample(const ASample: IMFSample;
+    procedure ProcessSample(ASample: IMFSample;
                             ATimeStamp: TTimeSpan); override;
     function ReadNextSample(out AFlags: DWord;
                             out ASample: IMFSample): Boolean;
@@ -146,6 +146,7 @@ begin
 
     if not bReachedMaxFrames then
       SafeRelease(pSample);
+
   end;
 
   if not bFound then
@@ -163,29 +164,37 @@ begin
 end;
 
 
-function TFileCaptureSync.ReadNextSample(out AFlags: DWord; out ASample: IMFSample): Boolean;
+function TFileCaptureSync.ReadNextSample(out AFlags: DWord;
+                                         out ASample: IMFSample): Boolean;
 var
-  oResult: HRESULT;
+  hr: HResult;
 
 begin
-  Result := Assigned(SourceReader);
+try
+  Result := True;
 
-  if Result then
-    begin
-      oResult := SourceReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                         0,
-                                         Nil,
-                                         @AFlags,
-                                         Nil, @
-                                         ASample);
-      Result := SUCCEEDED(oResult);
-      if not Result then
-        HandleSampleReadError(oResult);
-    end;
+  if Assigned(SourceReader) then
+    hr := SourceReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                  0,
+                                  Nil,
+                                  @AFlags,
+                                  Nil,
+                                  @ASample)
+  else
+    hr := E_POINTER;
+
+  // Handle normal exceptions.
+  if FAILED(hr) then
+    HandleSampleReadError(hr);
+except
+  // Do nothing, proceed with E_ABORT.
+  Result := False;
+end;
 end;
 
 
-procedure TFileCaptureSync.ProcessSample(const ASample: IMFSample; ATimeStamp: TTimeSpan);
+procedure TFileCaptureSync.ProcessSample(ASample: IMFSample;
+                                         ATimeStamp: TTimeSpan);
 begin
   inherited;
   ReturnSample(ASample,
@@ -199,6 +208,7 @@ var
 
 begin
   inherited;
+
   Log('Flush - Begin',
       ltInfo);
 
