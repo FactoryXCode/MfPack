@@ -235,7 +235,6 @@ begin
   finally
     pBitmapData := Nil;
     SafeRelease(pBuffer);
-    ASample.RemoveAllBuffers(); // Clear all buffers
   end;
 
 end;
