@@ -10,7 +10,7 @@
 // Release date: 29-05-2018
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 // Description: SpatialAudioClient API interface definition.
 //
 // Organisation: FactoryX
@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/09/2021 Tony                Fixed GetSpatialAudioObjectByIndex
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 RedStone (rs) 1 or later.
@@ -97,6 +98,7 @@ type
   //	   To get the audio data contained in the spatial audio object, use the IMFMediaBuffer
   //	   Lock() and Unlock() methods.
   // </summary>
+  PIMFSpatialAudioObjectBuffer = ^IMFSpatialAudioObjectBuffer;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSpatialAudioObjectBuffer);'}
   {$EXTERNALSYM IMFSpatialAudioObjectBuffer}
   IMFSpatialAudioObjectBuffer = interface(IMFMediaBuffer)
@@ -200,7 +202,7 @@ type
     // </param>
 
     function GetSpatialAudioObjectByIndex(const dwIndex: DWORD;
-                                          out ppAudioObjBuffer: IMFSpatialAudioObjectBuffer): HRESULT; stdcall;
+                                          {out} ppAudioObjBuffer: PIMFSpatialAudioObjectBuffer): HRESULT; stdcall;
     // <summary>
     //     The GetSpatialAudioObjectByIndex() method returns an audio object specified
     //     with the passed-in index.
