@@ -10,7 +10,7 @@
 // Release date: 09-10-2015
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 // Description: -
 //
 // Organisation: FactoryX
@@ -22,16 +22,17 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //
@@ -138,6 +139,10 @@ const
     {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO}
     MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_AUDIO          = UINT($fffffff7); // The first available audio stream
     {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_AUDIO}
+    {NTDDI_VERSION > NTDDI_WIN10_FE}
+    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_METADATA       = UINT($fffffff6); // The first available metadata stream
+    {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_METADATA}
+    {END NTDDI_VERSION}
     MF_CAPTURE_ENGINE_MEDIASOURCE                                = UINT($ffffffff);
     {$EXTERNALSYM MF_CAPTURE_ENGINE_MEDIASOURCE}
 
@@ -157,7 +162,9 @@ type
     MF_CAPTURE_ENGINE_STREAM_CATEGORY_PHOTO_INDEPENDENT = $00000002, // Independent photo stream
     MF_CAPTURE_ENGINE_STREAM_CATEGORY_PHOTO_DEPENDENT   = $00000003, // Dependent photo stream
     MF_CAPTURE_ENGINE_STREAM_CATEGORY_AUDIO             = $00000004, // Audio stream
-    MF_CAPTURE_ENGINE_STREAM_CATEGORY_UNSUPPORTED       = $00000005  // Unsupported stream
+    MF_CAPTURE_ENGINE_STREAM_CATEGORY_UNSUPPORTED       = $00000005, // Unsupported stream
+    {NTDDI_VERSION > NTDDI_WIN10_FE}
+    MF_CAPTURE_ENGINE_STREAM_CATEGORY_METADATA          = $00000006  // Video Metadata stream
   );
   {$EXTERNALSYM MF_CAPTURE_ENGINE_STREAM_CATEGORY}
 
@@ -176,7 +183,11 @@ type
     MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_COMMUNICATIONS = 1,  // Communications capture category
     MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_MEDIA          = 2,  // General media capture category
     MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_GAMECHAT       = 3,  // Game Chat capture category
-    MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_SPEECH         = 4   // Speech capture category
+    MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_SPEECH         = 4,  // Speech capture category
+    {NTDDI_VERSION > NTDDI_WIN10_FE}
+    MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_FARFIELDSPEECH = 5,  // Capture Audio located in the 'far field' for the purpose of speech recognition
+    MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_UNIFORMSPEECH  = 6,  // Consistent speech processing for the captured Audio. Used for Machine Learning
+    MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE_VOICETYPING    = 7   // Capture Audio with the intent of enabling dictation or typing by voice
   );
   {$EXTERNALSYM MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE}
 

@@ -63,7 +63,7 @@
 // in full at the top of the file.
 //
 //==============================================================================
-unit WinApi.AudioMediaType;
+unit WinApi.CoreAudio.AudioMediaType;
 
   {$HPPEMIT '#include "audiomediatype.h"'}
 

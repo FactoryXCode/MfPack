@@ -5,7 +5,7 @@
 // Project: MfPack - CoreAudio - WASAPI
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: MfPack.AudioClient.pas
+// Module: WinApi.CoreAudioApi.AudioClient.pas
 // Kind: Pascal / Delphi unit
 // Release date: 04-05-2012
 // Language: ENU
@@ -24,16 +24,17 @@
 // 13/08/2020 All                 Enigma release. New layout and namespaces
 // 08/12/2020 Tony                Added updates from SDK 10.0.19041.0 (IAudioClient 2 & 3)
 // 13/08/2021 Tony                Fixed wrong facility codes (error codes)
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //
@@ -247,6 +248,13 @@ type
   {$EXTERNALSYM AudioClient3ActivationParams}
   TAudioClient3ActivationParams = AudioClient3ActivationParams;
 
+  //
+  PAUDIO_DUCKING_OPTIONS = ^AUDIO_DUCKING_OPTIONS;
+  {$EXTERNALSYM AUDIO_DUCKING_OPTIONS}
+  AUDIO_DUCKING_OPTIONS                             = (
+    AUDIO_DUCKING_OPTIONS_DEFAULT                   = $00,
+    AUDIO_DUCKING_OPTIONS_DO_NOT_DUCK_OTHER_STREAMS = $01
+  );
 
 
   // Interfaces ////////////////////////////////////////////////////////////////
@@ -482,7 +490,7 @@ type
 
     function IsFormatSupported(const ShareMode: AUDCLNT_SHAREMODE;
                                const pFormat: PWaveFormatEx;
-                               {out} ppClosestMatch: PWaveFormatEx // Exclusive mode can't suggest a "closest match", you have to set this param to Nil.
+                               const ppClosestMatch: PWaveFormatEx // Exclusive mode can't suggest a "closest match", you have to set this param to Nil.
                                ): HResult; stdcall;
     // Description:
     //
@@ -519,8 +527,8 @@ type
     //     S_OK                         if format is supported.
     //     S_FALSE                      if input format is not supported but ppClosestMatch is.
     //     E_POINTER                    if ppClosestMatch is Nil & AUDCLNT_SHAREMODE_SHARED.
-    //     E_INVALIDTYPE                if type isn't supported. NOTE: This error is wrongly documented as AUDCLNT_E_INVALIDTYPE.
-    //     AUDCLNT_E_DEVICE_INVALIDATED if WAS device was removed. NOTE: This error is wrongly documented as AUDCLNT_E_DEVICEINVALIDATED.
+    //     AUDCLNT_E_UNSUPPORTED_FORMAT if the offload connector is used and input format is not a compressed format.
+    //     AUDCLNT_E_DEVICE_INVALIDATED if WAS device was removed.
     //
     // Remarks:
     //
@@ -631,7 +639,7 @@ type
     //
     //    S_OK if successful, failure otherwise.
     //    AUDCLNT_E_NOT_INITIALIZED if client hasn't been successfully initialized.
-    //    AUDCLNT_E_STOPPED if client is already stopped.
+    //    S_FALSE if client is already stopped.
     //    AUDCLNT_E_DEVICE_INVALIDATED, if WAS device format was changed or device was removed.
     //
     // Remarks:
@@ -712,12 +720,13 @@ type
     //
     //  The services supported via the method are:
     //
-    //  IAudioRenderClient
-    //  IAudioCaptureClient
-    //  IAudioClock
-    //  IAudioSessionControl
-    //  ISimpleAudioVolume
-    //  IChannelAudioVolume
+    //    IAudioRenderClient
+    //    IAudioCaptureClient
+    //    IAudioClock
+    //    IAudioSessionControl
+    //    ISimpleAudioVolume
+    //    IChannelAudioVolume
+    //    IAudioClientDuckingControl
     //
   end;
   IID_IAudioClient = IAudioClient;
@@ -756,7 +765,7 @@ type
     // Remarks:
     //
 
-    function SetClientProperties(pProperties: AudioClientProperties): HResult; stdcall;
+    function SetClientProperties(const pProperties: AudioClientProperties): HResult; stdcall;
     // Description:
     //
     //  This method is called to set an audio stream's properties, before a call to IAudioClient.Initialize takes place.
@@ -963,11 +972,11 @@ type
     // Return Values:
     //
     //     S_OK if successful, error otherwise.
-    //     AUDCLNT_E_BUFFERTOOLARGE, if NumFramesRequested > (GetBufferSize() - GetCurrentPadding())
-    //     AUDCLNT_E_OUTOFORDER, if called while a previous IAudioRenderClient::GetBuffer() is still
+    //     AUDCLNT_E_BUFFER_TOO_LARGE, if NumFramesRequested > (GetBufferSize() - GetCurrentPadding())
+    //     AUDCLNT_E_OUT_OF_ORDER, if called while a previous IAudioRenderClient.GetBuffer() is still
     //     in effect.
-    //     AUDCLNT_E_DEVICEINVALIDATED, if WAS device format was changed or device was removed,
-    //     E_POINTER, if ppData is NULL.
+    //     AUDCLNT_E_DEVICE_INVALIDATED, if WAS device format was changed or device was removed,
+    //     E_POINTER, if ppData is Nil.
     //
     // Remarks:
     //
@@ -989,7 +998,7 @@ type
     // 'pFormat' in the annotation below refers to the WAVEFORMATEX structure used to initialize IAudioClient.
     //
     function GetBuffer(const NumFramesRequested: UINT;
-                       out ppData: PByte): HResult; stdcall;    // modified by Jacob C
+                       {out} ppData: PByte): HResult; stdcall;    // modified by Jacob C
 
     //-------------------------------------------------------------------------
     // Description:
@@ -1017,8 +1026,8 @@ type
     //      S_OK if successful, error otherwise.
     //      E_FAIL, if FramesWritten > count requested in previous GetBuffer() call.
     //      E_INVALIDARG, if invalid flag was used.
-    //      AUDCLNT_E_OUTOFORDER, if previous IAudioRenderClient streaming call wasn't GetBuffer().
-    //      AUDCLNT_E_DEVICEINVALIDATED, if WAS device format was changed or device was removed.
+    //      AUDCLNT_E_OUT_OF_ORDER, if previous IAudioRenderClient streaming call wasn't GetBuffer().
+    //      AUDCLNT_E_DEVICE_INVALIDATED, if WAS device format was changed or device was removed.
     //
     // Remarks:
     //      Please note: This function is a "finalizer".  As such,
@@ -1077,7 +1086,7 @@ type
     // Return values:
     //
     //      S_OK if successful, error otherwise.
-    //      AUDCLNT_E_OUTOFORDER, if called while a previous IAudioCaptureClient::GetBuffer()
+    //      AUDCLNT_E_OUT_OF_ORDER, if called while a previous IAudioCaptureClient::GetBuffer()
     //      is still in effect.
     //      AUDCLNT_S_BUFFEREMPTY, if called when there's no available capture data. Note that
     //      this is a success code that the content of pFrameCount will be 0 in this case.
@@ -1129,7 +1138,7 @@ type
     //
     //      S_OK if successful, error otherwise.
     //      E_INVALIDARG, if NumFramesRead <> [ value in buffer or 0 ].
-    //      AUDCLNT_E_OUTOFORDER, if previous IAudioCaptureClient streaming call wasn't GetBuffer().
+    //      AUDCLNT_E_OUT_OF_ORDER, if previous IAudioCaptureClient streaming call wasn't GetBuffer().
     //      AUDCLNT_E_DEVICE_INVALIDATED, if WAS device format was changed or device was removed.
     //
     // Remarks:
@@ -1154,7 +1163,7 @@ type
     //
     //    S_OK if successful, failure otherwise.
     //    AUDCLNT_E_DEVICE_INVALIDATED, if WAS device format was changed or device was removed.
-    //    E_POINTER, if pNumFramesInNextPacket is NULL.
+    //    E_POINTER, if pNumFramesInNextPacket is Nil.
     //
     // Remarks:
     //
@@ -1448,6 +1457,35 @@ type
   end;
   IID_ISimpleAudioVolume = ISimpleAudioVolume;
   {$EXTERNALSYM IID_ISimpleAudioVolume}
+
+
+
+  // Interface IAudioClientDuckingControl
+  // ====================================
+  // Description: IAudioClientDuckingControl interface
+  // Use IAudioClient.GetService to obtain this interface.
+  //
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioClientDuckingControl);'}
+  {$EXTERNALSYM IAudioClientDuckingControl}
+  IAudioClientDuckingControl = interface(IUnknown)
+  ['{C789D381-A28C-4168-B28F-D3A837924DC3}']
+    function SetDuckingOptionsForCurrentStream({in} options: AUDIO_DUCKING_OPTIONS): HResult; stdcall;
+    // Description:
+    //
+    // Set the AUDIO_DUCKING_OPTIONS_DO_NOT_DUCK_OTHER_STREAMS flag to disable any
+    // ducking that may be caused by the current stream.
+    // Specifying AUDIO_DUCKING_OPTIONS_DEFAULT lets Windows control if
+    // this stream should cause any other streams to be ducked.
+    //
+    // Return values:
+    //
+    // S_OK Successful completion.
+    //
+
+  end;
+  IID_IAudioClientDuckingControl = IAudioClientDuckingControl;
+  {$EXTERNALSYM IID_IAudioClientDuckingControl}
 
 
   // Interface IAudioStreamVolume
@@ -1802,92 +1840,92 @@ const
 
   // error codes
 
-  // FACILITY_AUDCLNT = $889 (2185), defined in WinApi.WinError.pas
+  // FACILITY_AUDCLNT = 2185, defined in WinApi.WinError.pas
 
   // Since XE2 you have to hardcode this.
 
-  AUDCLNT_E_NOT_INITIALIZED               = $88900001;  //AUDCLNT_ERR($001);
+  AUDCLNT_E_NOT_INITIALIZED               = $88890001;  //AUDCLNT_ERR($001);
   {$EXTERNALSYM AUDCLNT_E_NOT_INITIALIZED}
-  AUDCLNT_E_ALREADY_INITIALIZED           = $88900002;  //AUDCLNT_ERR($002);
+  AUDCLNT_E_ALREADY_INITIALIZED           = $88890002;  //AUDCLNT_ERR($002);
   {$EXTERNALSYM AUDCLNT_E_ALREADY_INITIALIZED}
-  AUDCLNT_E_WRONG_ENDPOINT_TYPE           = $88900003;  //AUDCLNT_ERR($003);
+  AUDCLNT_E_WRONG_ENDPOINT_TYPE           = $88890003;  //AUDCLNT_ERR($003);
   {$EXTERNALSYM AUDCLNT_E_WRONG_ENDPOINT_TYPE}
-  AUDCLNT_E_DEVICE_INVALIDATED            = $88900004;  //AUDCLNT_ERR($004);
+  AUDCLNT_E_DEVICE_INVALIDATED            = $88890004;  //AUDCLNT_ERR($004);
   {$EXTERNALSYM AUDCLNT_E_DEVICE_INVALIDATED}
-  AUDCLNT_E_NOT_STOPPED                   = $88900005;  //AUDCLNT_ERR($005);
+  AUDCLNT_E_NOT_STOPPED                   = $88890005;  //AUDCLNT_ERR($005);
   {$EXTERNALSYM AUDCLNT_E_NOT_STOPPED}
-  AUDCLNT_E_BUFFER_TOO_LARGE              = $88900006;  //AUDCLNT_ERR($006);
+  AUDCLNT_E_BUFFER_TOO_LARGE              = $88890006;  //AUDCLNT_ERR($006);
   {$EXTERNALSYM AUDCLNT_E_BUFFER_TOO_LARGE}
-  AUDCLNT_E_OUT_OF_ORDER                  = $88900007;  //AUDCLNT_ERR($007);
+  AUDCLNT_E_OUT_OF_ORDER                  = $88890007;  //AUDCLNT_ERR($007);
   {$EXTERNALSYM AUDCLNT_E_OUT_OF_ORDER}
-  AUDCLNT_E_UNSUPPORTED_FORMAT            = $88900008;  //AUDCLNT_ERR($008);
+  AUDCLNT_E_UNSUPPORTED_FORMAT            = $88890008;  //AUDCLNT_ERR($008);
   {$EXTERNALSYM AUDCLNT_E_UNSUPPORTED_FORMAT}
-  AUDCLNT_E_INVALID_SIZE                  = $88900009;  //AUDCLNT_ERR($009);
+  AUDCLNT_E_INVALID_SIZE                  = $88890009;  //AUDCLNT_ERR($009);
   {$EXTERNALSYM AUDCLNT_E_INVALID_SIZE}
-  AUDCLNT_E_DEVICE_IN_USE                 = $8890000a;  //AUDCLNT_ERR($00A);
+  AUDCLNT_E_DEVICE_IN_USE                 = $8889000a;  //AUDCLNT_ERR($00A);
   {$EXTERNALSYM AUDCLNT_E_DEVICE_IN_USE}
-  AUDCLNT_E_BUFFER_OPERATION_PENDING      = $8890000b;  //AUDCLNT_ERR($00B);
+  AUDCLNT_E_BUFFER_OPERATION_PENDING      = $8889000b;  //AUDCLNT_ERR($00B);
   {$EXTERNALSYM AUDCLNT_E_BUFFER_OPERATION_PENDING}
-  AUDCLNT_E_THREAD_NOT_REGISTERED         = $8890000c;  //AUDCLNT_ERR($00C);
+  AUDCLNT_E_THREAD_NOT_REGISTERED         = $8889000c;  //AUDCLNT_ERR($00C);
   {$EXTERNALSYM AUDCLNT_E_THREAD_NOT_REGISTERED}
-  AUDCLNT_E_EXCLUSIVE_MODE_NOT_ALLOWED    = $8890000e;  //AUDCLNT_ERR($00E);
+  AUDCLNT_E_EXCLUSIVE_MODE_NOT_ALLOWED    = $8889000e;  //AUDCLNT_ERR($00E);
   {$EXTERNALSYM AUDCLNT_E_EXCLUSIVE_MODE_NOT_ALLOWED}
-  AUDCLNT_E_ENDPOINT_CREATE_FAILED        = $8890000f;  //AUDCLNT_ERR($00F);
+  AUDCLNT_E_ENDPOINT_CREATE_FAILED        = $8889000f;  //AUDCLNT_ERR($00F);
   {$EXTERNALSYM AUDCLNT_E_ENDPOINT_CREATE_FAILED}
-  AUDCLNT_E_SERVICE_NOT_RUNNING           = $88900010;  //AUDCLNT_ERR($010);
+  AUDCLNT_E_SERVICE_NOT_RUNNING           = $88890010;  //AUDCLNT_ERR($010);
   {$EXTERNALSYM AUDCLNT_E_SERVICE_NOT_RUNNING}
-  AUDCLNT_E_EVENTHANDLE_NOT_EXPECTED      = $88900011;  //AUDCLNT_ERR($011);
+  AUDCLNT_E_EVENTHANDLE_NOT_EXPECTED      = $88890011;  //AUDCLNT_ERR($011);
   {$EXTERNALSYM AUDCLNT_E_EVENTHANDLE_NOT_EXPECTED}
-  AUDCLNT_E_EXCLUSIVE_MODE_ONLY           = $88900012;  //AUDCLNT_ERR($012);
+  AUDCLNT_E_EXCLUSIVE_MODE_ONLY           = $88890012;  //AUDCLNT_ERR($012);
   {$EXTERNALSYM AUDCLNT_E_EXCLUSIVE_MODE_ONLY}
-  AUDCLNT_E_BUFDURATION_PERIOD_NOT_EQUAL  = $88900013;  //AUDCLNT_ERR($013);
+  AUDCLNT_E_BUFDURATION_PERIOD_NOT_EQUAL  = $88890013;  //AUDCLNT_ERR($013);
   {$EXTERNALSYM AUDCLNT_E_BUFDURATION_PERIOD_NOT_EQUAL}
-  AUDCLNT_E_EVENTHANDLE_NOT_SET           = $88900014;  //AUDCLNT_ERR($014);
+  AUDCLNT_E_EVENTHANDLE_NOT_SET           = $88890014;  //AUDCLNT_ERR($014);
   {$EXTERNALSYM AUDCLNT_E_EVENTHANDLE_NOT_SET}
-  AUDCLNT_E_INCORRECT_BUFFER_SIZE         = $88900015;  //AUDCLNT_ERR($015);
+  AUDCLNT_E_INCORRECT_BUFFER_SIZE         = $88890015;  //AUDCLNT_ERR($015);
   {$EXTERNALSYM AUDCLNT_E_INCORRECT_BUFFER_SIZE}
-  AUDCLNT_E_BUFFER_SIZE_ERROR             = $88900016;  //AUDCLNT_ERR($016);
+  AUDCLNT_E_BUFFER_SIZE_ERROR             = $88890016;  //AUDCLNT_ERR($016);
   {$EXTERNALSYM AUDCLNT_E_BUFFER_SIZE_ERROR}
-  AUDCLNT_E_CPUUSAGE_EXCEEDED             = $88900017;  //AUDCLNT_ERR($017);
+  AUDCLNT_E_CPUUSAGE_EXCEEDED             = $88890017;  //AUDCLNT_ERR($017);
   {$EXTERNALSYM AUDCLNT_E_CPUUSAGE_EXCEEDED}
-  AUDCLNT_E_BUFFER_ERROR                  = $88900018;  //AUDCLNT_ERR($018);
+  AUDCLNT_E_BUFFER_ERROR                  = $88890018;  //AUDCLNT_ERR($018);
   {$EXTERNALSYM AUDCLNT_E_BUFFER_ERROR}
-  AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED       = $88900019;  //AUDCLNT_ERR($019);
+  AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED       = $88890019;  //AUDCLNT_ERR($019);
   {$EXTERNALSYM AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED}
-  AUDCLNT_E_INVALID_DEVICE_PERIOD         = $88900020;  //AUDCLNT_ERR($020);
+  AUDCLNT_E_INVALID_DEVICE_PERIOD         = $88890020;  //AUDCLNT_ERR($020);
   {$EXTERNALSYM AUDCLNT_E_INVALID_DEVICE_PERIOD}
-  AUDCLNT_E_INVALID_STREAM_FLAG           = $88900021;  //AUDCLNT_ERR($021);
+  AUDCLNT_E_INVALID_STREAM_FLAG           = $88890021;  //AUDCLNT_ERR($021);
   {$EXTERNALSYM AUDCLNT_E_INVALID_STREAM_FLAG}
-  AUDCLNT_E_ENDPOINT_OFFLOAD_NOT_CAPABLE  = $88900022;  //AUDCLNT_ERR($022)
+  AUDCLNT_E_ENDPOINT_OFFLOAD_NOT_CAPABLE  = $88890022;  //AUDCLNT_ERR($022)
   {$EXTERNALSYM AUDCLNT_E_ENDPOINT_OFFLOAD_NOT_CAPABLE}
-  AUDCLNT_E_OUT_OF_OFFLOAD_RESOURCES      = $88900023;  //AUDCLNT_ERR($023)
+  AUDCLNT_E_OUT_OF_OFFLOAD_RESOURCES      = $88890023;  //AUDCLNT_ERR($023)
   {$EXTERNALSYM AUDCLNT_E_OUT_OF_OFFLOAD_RESOURCES}
-  AUDCLNT_E_OFFLOAD_MODE_ONLY             = $88900024;  //AUDCLNT_ERR($024)
+  AUDCLNT_E_OFFLOAD_MODE_ONLY             = $88890024;  //AUDCLNT_ERR($024)
   {$EXTERNALSYM AUDCLNT_E_OFFLOAD_MODE_ONLY}
-  AUDCLNT_E_NONOFFLOAD_MODE_ONLY          = $88900025;  //AUDCLNT_ERR($025)
+  AUDCLNT_E_NONOFFLOAD_MODE_ONLY          = $88890025;  //AUDCLNT_ERR($025)
   {$EXTERNALSYM AUDCLNT_E_NONOFFLOAD_MODE_ONLY}
-  AUDCLNT_E_RESOURCES_INVALIDATED         = $88900026;  //AUDCLNT_ERR($026)
+  AUDCLNT_E_RESOURCES_INVALIDATED         = $88890026;  //AUDCLNT_ERR($026)
   {$EXTERNALSYM AUDCLNT_E_RESOURCES_INVALIDATED}
-  AUDCLNT_E_RAW_MODE_UNSUPPORTED          = $88900027;  //AUDCLNT_ERR($027)
+  AUDCLNT_E_RAW_MODE_UNSUPPORTED          = $88890027;  //AUDCLNT_ERR($027)
   {$EXTERNALSYM AUDCLNT_E_RAW_MODE_UNSUPPORTED}
-  AUDCLNT_E_ENGINE_PERIODICITY_LOCKED     = $88900028;  //AUDCLNT_ERR($028)
+  AUDCLNT_E_ENGINE_PERIODICITY_LOCKED     = $88890028;  //AUDCLNT_ERR($028)
   {$EXTERNALSYM AUDCLNT_E_ENGINE_PERIODICITY_LOCKED}
-  AUDCLNT_E_ENGINE_FORMAT_LOCKED          = $88900029;  //AUDCLNT_ERR($029)
+  AUDCLNT_E_ENGINE_FORMAT_LOCKED          = $88890029;  //AUDCLNT_ERR($029)
   {$EXTERNALSYM AUDCLNT_E_ENGINE_FORMAT_LOCKED}
-  AUDCLNT_E_HEADTRACKING_ENABLED          = $88900030;  //AUDCLNT_ERR($030)
+  AUDCLNT_E_HEADTRACKING_ENABLED          = $88890030;  //AUDCLNT_ERR($030)
   {$EXTERNALSYM AUDCLNT_E_HEADTRACKING_ENABLED}
-  AUDCLNT_E_HEADTRACKING_UNSUPPORTED      = $88900040;  //AUDCLNT_ERR($040)
+  AUDCLNT_E_HEADTRACKING_UNSUPPORTED      = $88890040;  //AUDCLNT_ERR($040)
   {$EXTERNALSYM AUDCLNT_E_HEADTRACKING_UNSUPPORTED}
 
-  AUDCLNT_S_BUFFER_EMPTY                  = $88900001;  //AUDCLNT_SUCCESS($001);
+  AUDCLNT_S_BUFFER_EMPTY                  = $88890001;  //AUDCLNT_SUCCESS($001);
   {$EXTERNALSYM AUDCLNT_S_BUFFER_EMPTY}
-  AUDCLNT_S_THREAD_ALREADY_REGISTERED     = $88900002;  //AUDCLNT_SUCCESS($002);
+  AUDCLNT_S_THREAD_ALREADY_REGISTERED     = $88890002;  //AUDCLNT_SUCCESS($002);
   {$EXTERNALSYM AUDCLNT_S_THREAD_ALREADY_REGISTERED}
-  AUDCLNT_S_POSITION_STALLED              = $88900003;  //AUDCLNT_SUCCESS($003);
+  AUDCLNT_S_POSITION_STALLED              = $88890003;  //AUDCLNT_SUCCESS($003);
   {$EXTERNALSYM AUDCLNT_S_POSITION_STALLED}
 
   {See: IAudioSessionControl2 interface}
-  AUDCLNT_S_NO_SINGLE_PROCESS             = $8890000D;  //AUDCLNT_SUCCESS($00D);
+  AUDCLNT_S_NO_SINGLE_PROCESS             = $8889000D;  //AUDCLNT_SUCCESS($00D);
   {$EXTERNALSYM AUDCLNT_S_NO_SINGLE_PROCESS}
 
 
