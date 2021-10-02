@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 // Description: Requires Windows Vista or later.
 //              MfApi.pas is the unit containing the APIs for using the MF platform.
 //
@@ -26,6 +26,7 @@
 // 10/10/2020 Tony                Fixed some issues, see updt 101020
 // 26/01/2021 Tony                Fixed MFT Register functions.
 // 08/07/2021 Tony                Added MFBinaryFormat guids.
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -49,11 +50,11 @@
 //          Fields with a Common Type Specification.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //
@@ -1935,6 +1936,9 @@ const
   // $04 - Vertical Scanline
   MF_CAPTURE_METADATA_SCAN_DIRECTION                :  TGUID = '{6496a3ba-1907-49e6-b0c3-123795f380a9}'; // Type: UINT32
   {$EXTERNALSYM MF_CAPTURE_METADATA_SCAN_DIRECTION}
+  // Reports the current Digital Window as a DigitalWindowSetting structure.
+  MF_CAPTURE_METADATA_DIGITALWINDOW                 :  TGUID = '{276F72A2-59C8-4F69-97B4-068B8C0EC044}'; // Type: BLOB
+  {$EXTERNALSYM MF_CAPTURE_METADATA_DIGITALWINDOW}
 
 
   MFCAPTURE_METADATA_SCAN_RIGHT_LEFT   =      $00000001;
@@ -1946,6 +1950,17 @@ const
 
 
 type
+
+  // Digital Window Region
+  PDigitalWindowSetting = ^tagDigitalWindowSetting;
+  {$EXTERNALSYM tagDigitalWindowSetting}
+  tagDigitalWindowSetting = record
+    OriginX: Double;
+    OriginY: Double;
+    WindowSize: Double;
+  end;
+  DigitalWindowSetting = tagDigitalWindowSetting;
+  {$EXTERNALSYM DigitalWindowSetting}
 
   PFaceRectInfoBlobHeader = ^FaceRectInfoBlobHeader;
   tagFaceRectInfoBlobHeader = record
@@ -2980,6 +2995,28 @@ const
                                         D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
   {$EXTERNALSYM MFVideoFormat_A16B16G16R16F}
 
+{if (WDK_NTDDI_VERSION >= NTDDI_WIN10_RS3}
+   MFVideoFormat_VP10         : TGUID = (D1: Ord('V') or (Ord('P') shl 8) or (Ord('1') shl 16) or (Ord('0') shl 24);  // = D3DFMT_A16B16G16R16F = 113
+                                         D2: $0000;
+                                         D3: $0010;
+                                         D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
+
+   MFVideoFormat_AV1          : TGUID = (D1: Ord('A') or (Ord('V') shl 8) or (Ord('0') shl 16) or (Ord('1') shl 24);  // = D3DFMT_A16B16G16R16F = 113
+                                         D2: $0000;
+                                         D3: $0010;
+                                         D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
+
+{endif}
+
+{if NTDDI_VERSION >= NTDDI_WIN10_FE}
+   FVideoFormat_Theora        : TGUID = (D1: Ord('t') or (Ord('h') shl 8) or (Ord('e') shl 16) or (Ord('o') shl 24);
+                                         D2: $0000;
+                                         D3: $0010;
+                                         D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));  // {6F656874-0000-0010-8000-00AA00389B71}
+
+{endif NTDDI_VERSION >= NTDDI_WIN10_FE }
+
+
 
   //
   // MFSample Perception Date Type-specific attribute GUIDs should be in sync with KSCameraProfileSensorType
@@ -3201,6 +3238,26 @@ const
   MFAudioFormat_Dolby_DDPlus    :  TGUID = '{a7fb87af-2d02-42fb-a4d4-05cd93843bdd}';
   {$EXTERNALSYM MFAudioFormat_Dolby_DDPlus}
   // == MEDIASUBTYPE_DOLBY_DDPLUS defined in wmcodecdsp.h
+
+  // AC-4 bitstream versions 0 and 1.
+  // This audio media type is normally used as an alternate media type (the primary being MFAudioFormat_Dolby_AC4)
+  // to allow a MFT to register support for only version 0 and 1 of the AC-4 bistream.
+  MFAudioFormat_Dolby_AC4_V1   :  TGUID = '{36b7927c-3d87-4a2a-9196-a21ad9e935e6}';
+
+  // AC-4 bitstream version 2. (Supports Immersive Stereo.)
+  // This audio media type is normally used as an alternate media type (the primary being MFAudioFormat_Dolby_AC4)
+  // to allow a MFT to register support for only version 2 of the AC-4 bistream.
+  MFAudioFormat_Dolby_AC4_V2   :  TGUID = '{7998b2a0-17dd-49b6-8dfa-9b278552a2ac}';
+
+  // This format is used for AC-4 streams that use ac4_syncframe and the optional crc
+  // at the end of each frame. The frames might not be aligned with IMFSample boundaries.
+  MFAudioFormat_Dolby_AC4_V1_ES:  TGUID = '{36b7927c-3d87-4a2a-9196-a21ad9e935e6}';
+
+  // {7e58c9f9-b070-45f4-8ccd-a99a0417c1ac}
+  // This format is used for AC-4 version 2 bit streams (may include Immersive Stereo) that use ac4_syncframe
+  // and the optional crc at the end of each frame. The frames might not be aligned with IMFSample boundaries.
+  MFAudioFormat_Dolby_AC4_V2_ES:  TGUID = '{7e58c9f9-b070-45f4-8ccd-a99a0417c1ac}';
+
 
   MFAudioFormat_Vorbis          :  TGUID = '{8D2FD10B-5841-4a6b-8905-588FEC1ADED9}';
   {$EXTERNALSYM MFAudioFormat_Vorbis}
@@ -4516,11 +4573,16 @@ const
   FORMAT_MFVideoFormat                          : TGUID = '{aed4ab2d-7326-43cb-9464-c879cab9c43d}';
   {$EXTERNALSYM FORMAT_MFVideoFormat}
 
+{if WINVER >= _WIN32_WINNT_FE}
+  // {2C8FA20C-82BB-4782-90A0-98A2A5BD8EF8}
+  MFMediaType_Metadata                          : TGUID = '{2C8FA20C-82BB-4782-90A0-98A2A5BD8EF8}';
+{endif WINVER >= _WIN32_WINNT_FE}
+
 
 //////////////////////////////////  Media Type functions ///////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-
+                                             `
   // Forward declaration
   //====================
 
@@ -4591,11 +4653,10 @@ const
                                              const pSubtype: TGUID): HResult; stdcall;
   {$EXTERNALSYM MFInitMediaTypeFromMPEG2VideoInfo}
 
-
-  function MFCalculateBitmapImageSize(pBMIH: BITMAPINFOHEADER;
-                                      const cbBufSize: UINT32;
-                                      out pcbImageSize: UINT32;
-                                      out pbKnown: Boolean): HResult; stdcall;
+  function MFCalculateBitmapImageSize({in} pBMIH: PBITMAPINFOHEADER;
+                                      {In} const cbBufSize: UINT32;
+                                      {Out} pcbImageSize: UINT32;
+                                      {Out_opt} pbKnown: PBOOL = Nil);
   {$EXTERNALSYM MFCalculateBitmapImageSize}
 
   //////////////////////////////////////////////////////////////////////////////
@@ -4840,7 +4901,7 @@ const
   // These depend on BITMAPINFOHEADER being defined
   //===============================================
 
-  function MFCreateVideoMediaTypeFromBitMapInfoHeader(pbmihBitMapInfoHeader: BITMAPINFOHEADER;
+  function MFCreateVideoMediaTypeFromBitMapInfoHeader({in} pbmihBitMapInfoHeader: BITMAPINFOHEADER;
                                                       dwPixelAspectRatioX: DWORD;
                                                       dwPixelAspectRatioY: DWORD;
                                                       InterlaceMode: MFVideoInterlaceMode;
@@ -4848,10 +4909,9 @@ const
                                                       qwFramesPerSecondNumerator: QWORD;
                                                       qwFramesPerSecondDenominator: QWORD;
                                                       dwMaxBitRate: DWORD;
-                                                      out ppIVideoMediaType: IMFVideoMediaType): HRESULT; stdcall;
+                                                      out ppIVideoMediaType: PIMFVideoMediaType): HRESULT; stdcall;
   {$EXTERNALSYM MFCreateVideoMediaTypeFromBitMapInfoHeader}
-  // This function is not implemented.
-  //
+
   // Parameters
   // pbmihBitMapInfoHeader
   //    Reserved.
@@ -4942,7 +5002,7 @@ const
   //=============================================
 
 
-  function MFCreateVideoMediaTypeFromBitMapInfoHeaderEx(pbmihBitMapInfoHeader: BITMAPINFOHEADER;
+  function MFCreateVideoMediaTypeFromBitMapInfoHeaderEx({in} zpbmihBitMapInfoHeader: BITMAPINFOHEADER;
                                                         cbBitMapInfoHeader: UINT32;
                                                         dwPixelAspectRatioX: DWORD;
                                                         dwPixelAspectRatioY: DWORD;
