@@ -71,8 +71,8 @@ uses
   WinApi.WinApiTypes,
   WinApi.WinError,
   WinApi.WinMM.MMReg,  // for WAVEFORMATEX
-  WinApi.AudioMediaType,
   {CoreAudioApi}
+  WinApi.CoreAudioApi.AudioMediaType,
   WinApi.CoreAudioApi.AudioSessionTypes;
 
 

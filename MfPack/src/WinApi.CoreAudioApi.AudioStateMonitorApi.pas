@@ -75,9 +75,10 @@ uses
 
 // Desktop and Games Family
 
+
 type
 
-  IAudioStateMonitor = Interface;
+  IAudioStateMonitor = interface;
 
   PAudioStateMonitorCallback = ^AudioStateMonitorCallback;
   AudioStateMonitorCallback = procedure({In} audioStateMonitor: IAudioStateMonitor;
@@ -94,8 +95,8 @@ type
                                  Low,       // Audio is ducked
                                  Full       // Audio is unchanged
                                 );
+  {$EXTERNALSYM AudioStateMonitorSoundLevel}
 
-type
 
   // Interface IAudioStateMonitor
   // ============================
@@ -107,7 +108,7 @@ type
   ['{63BD8738-E30D-4C77-BF5C-834E87C657E2}']
     function RegisterCallback({In} callback: PAudioStateMonitorCallback;
                               {In_opt} context: Pointer;
-                              out registration: AudioStateMonitorRegistrationHandle); stdcall;
+                              out registration: AudioStateMonitorRegistrationHandle): HResult; stdcall;
      // Registers a new callback with the AudioStateMonitor.
 
     procedure UnregisterCallback({In} registration: AudioStateMonitorRegistrationHandle); stdcall;
@@ -145,11 +146,11 @@ type
 
   function CreateRenderAudioStateMonitorForCategoryAndDeviceRole({In} category: AUDIO_STREAM_CATEGORY;
                                                                  {In} role: ERole;
-                                                                 {Outptr} audioStateMonitor: PIAudioStateMonitor);
+                                                                 {Outptr} audioStateMonitor: PIAudioStateMonitor): HResult; stdcall;
 
   function CreateRenderAudioStateMonitorForCategoryAndDeviceId({In} category: AUDIO_STREAM_CATEGORY;
                                                                {In} deviceId: PCWSTR;
-                                                               {Outptr} audioStateMonitor: PIAudioStateMonitor);
+                                                               {Outptr} audioStateMonitor: PIAudioStateMonitor): HResult; stdcall;
 
   function CreateCaptureAudioStateMonitor(audioStateMonitor: PIAudioStateMonitor): HResult; stdcall;
 
@@ -170,6 +171,23 @@ type
   // End of Additional Prototypes
 
 implementation
+
+  function CreateRenderAudioStateMonitor; external AudioEngineBaseApoLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+
+  function CreateRenderAudioStateMonitorForCategory; external AudioEngineBaseApoLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+
+  function CreateRenderAudioStateMonitorForCategoryAndDeviceRole; external AudioEngineBaseApoLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+
+  function CreateRenderAudioStateMonitorForCategoryAndDeviceId; external AudioEngineBaseApoLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+
+  function CreateCaptureAudioStateMonitor; external AudioEngineBaseApoLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+
+  function CreateCaptureAudioStateMonitorForCategory; external AudioEngineBaseApoLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+
+  function CreateCaptureAudioStateMonitorForCategoryAndDeviceRole; external AudioEngineBaseApoLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+
+  function CreateCaptureAudioStateMonitorForCategoryAndDeviceId; external AudioEngineBaseApoLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+
 
   // Implement Additional functions here.
 

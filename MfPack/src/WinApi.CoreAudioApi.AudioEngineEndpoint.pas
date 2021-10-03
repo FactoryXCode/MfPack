@@ -75,11 +75,11 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.WinApiTypes,
-  WinApi.AudioAPOTypes,
   WinApi.WinMM.MMReg,
   {ActiveX}
   WinApi.ActiveX.PropIdl,
   {CoreAudioApi}
+  WinApi.CoreAudioApi.AudioAPOTypes,
   WinApi.CoreAudioApi.MmDeviceApi,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfObjects;

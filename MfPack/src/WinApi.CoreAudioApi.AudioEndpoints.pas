@@ -98,7 +98,7 @@ type
   {$EXTERNALSYM IAudioEndpointFormatControl}
   IAudioEndpointFormatControl = interface(IUnknown)
   ['{784CFD40-9F89-456E-A1A6-873B006A664E}']
-    function ResetToDefault({in} ResetFlags: DWORD);
+    function ResetToDefault({in} ResetFlags: DWORD): HResult; stdcall;
     // Parameters:
     //
     //  ResetFlags - [in] Allows the application to specify which formats are reset.  If

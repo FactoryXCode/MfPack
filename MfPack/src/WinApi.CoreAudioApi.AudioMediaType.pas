@@ -129,6 +129,7 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioMediaType);'}
   {$EXTERNALSYM IAudioMediaType}
+  PIAudioMediaType = ^IAudioMediaType;
   IAudioMediaType = interface(IUnknown)
   ['{4E997F73-B71F-4798-873B-ED7DFCF15B4D}']
     function IsCompressedFormat(out pfCompressed: BOOL): HResult; stdcall;

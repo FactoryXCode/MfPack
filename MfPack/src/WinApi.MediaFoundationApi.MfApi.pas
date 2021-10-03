@@ -4582,7 +4582,7 @@ const
 //////////////////////////////////  Media Type functions ///////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-                                             `
+
   // Forward declaration
   //====================
 
@@ -4656,7 +4656,7 @@ const
   function MFCalculateBitmapImageSize({in} pBMIH: PBITMAPINFOHEADER;
                                       {In} const cbBufSize: UINT32;
                                       {Out} pcbImageSize: UINT32;
-                                      {Out_opt} pbKnown: PBOOL = Nil);
+                                      {Out_opt} pbKnown: PBOOL = Nil): HResult; stdcall;
   {$EXTERNALSYM MFCalculateBitmapImageSize}
 
   //////////////////////////////////////////////////////////////////////////////

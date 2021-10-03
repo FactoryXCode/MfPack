@@ -92,11 +92,11 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.WinApiTypes,
-  WinApi.AudioAPOTypes,
-  WinApi.AudioMediaType,
   {WinApi.ActiveX}
   WinApi.ActiveX.PropSys,
   {WinApi.CoreAudioApi}
+  WinApi.CoreAudioApi.AudioAPOTypes,
+  WinApi.CoreAudioApi.AudioMediaType,
   WinApi.CoreAudioApi.MmDeviceApi;
 
 
