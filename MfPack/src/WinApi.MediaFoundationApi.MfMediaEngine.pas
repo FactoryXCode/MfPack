@@ -10,28 +10,29 @@
 // Release date: 09-10-2015
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 // Description: -
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), (Ciaran), (TopPlay)
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Ciaran, (TopPlay)
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8.1 or later.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //
@@ -2003,6 +2004,61 @@ type
   {$EXTERNALSYM MF_TIMED_TEXT_TRACK_READY_STATE}
 
 
+  PMF_TIMED_TEXT_RUBY_POSITION = ^MF_TIMED_TEXT_RUBY_POSITION;
+  MF_TIMED_TEXT_RUBY_POSITION           = (
+    MF_TIMED_TEXT_RUBY_POSITION_BEFORE  = 0,
+    MF_TIMED_TEXT_RUBY_POSITION_AFTER   = 1,
+    MF_TIMED_TEXT_RUBY_POSITION_OUTSIDE = 2
+  );
+  {$EXTERNALSYM MF_TIMED_TEXT_RUBY_POSITION}
+
+  PMF_TIMED_TEXT_RUBY_ALIGN = ^MF_TIMED_TEXT_RUBY_ALIGN;
+  MF_TIMED_TEXT_RUBY_ALIGN                = (
+    MF_TIMED_TEXT_RUBY_ALIGN_CENTER       = 0,
+    MF_TIMED_TEXT_RUBY_ALIGN_START        = 1,
+    MF_TIMED_TEXT_RUBY_ALIGN_END          = 2,
+    MF_TIMED_TEXT_RUBY_ALIGN_SPACEAROUND  = 3,
+    MF_TIMED_TEXT_RUBY_ALIGN_SPACEBETWEEN = 4,
+    MF_TIMED_TEXT_RUBY_ALIGN_WITHBASE     = 5
+  );
+  {$EXTERNALSYM MF_TIMED_TEXT_RUBY_ALIGN}
+
+
+  PMF_TIMED_TEXT_RUBY_RESERVE = ^MF_TIMED_TEXT_RUBY_RESERVE;
+  MF_TIMED_TEXT_RUBY_RESERVE           = (
+    MF_TIMED_TEXT_RUBY_RESERVE_NONE    = 0,
+    MF_TIMED_TEXT_RUBY_RESERVE_BEFORE  = 1,
+    MF_TIMED_TEXT_RUBY_RESERVE_AFTER   = 2,
+    MF_TIMED_TEXT_RUBY_RESERVE_BOTH    = 3,
+    MF_TIMED_TEXT_RUBY_RESERVE_OUTSIDE = 4
+  );
+  {$EXTERNALSYM MF_TIMED_TEXT_RUBY_RESERVE}
+
+
+  PMF_TIMED_TEXT_BOUTEN_TYPE = ^MF_TIMED_TEXT_BOUTEN_TYPE;
+  MF_TIMED_TEXT_BOUTEN_TYPE                = (
+    MF_TIMED_TEXT_BOUTEN_TYPE_NONE         = 0,
+    MF_TIMED_TEXT_BOUTEN_TYPE_AUTO         = 1,
+    MF_TIMED_TEXT_BOUTEN_TYPE_FILLEDCIRCLE = 2,
+    MF_TIMED_TEXT_BOUTEN_TYPE_OPENCIRCLE   = 3,
+    MF_TIMED_TEXT_BOUTEN_TYPE_FILLEDDOT    = 4,
+    MF_TIMED_TEXT_BOUTEN_TYPE_OPENDOT      = 5,
+    MF_TIMED_TEXT_BOUTEN_TYPE_FILLEDSESAME = 6,
+    MF_TIMED_TEXT_BOUTEN_TYPE_OPENSESAME   = 7
+  );
+  {$EXTERNALSYM MF_TIMED_TEXT_BOUTEN_TYPE}
+
+  PMF_TIMED_TEXT_BOUTEN_POSITION = ^MF_TIMED_TEXT_BOUTEN_POSITION;
+  MF_TIMED_TEXT_BOUTEN_POSITION           = (
+    MF_TIMED_TEXT_BOUTEN_POSITION_BEFORE  = 0,
+    MF_TIMED_TEXT_BOUTEN_POSITION_AFTER   = 1,
+    MF_TIMED_TEXT_BOUTEN_POSITION_OUTSIDE = 2
+  );
+  {$EXTERNALSYM MF_TIMED_TEXT_BOUTEN_POSITION}
+
+
+
+
   // Interface IMFTimedText
   // ======================
   //
@@ -2351,6 +2407,70 @@ type
   // End  TIMED TEXT
 
 
+  // Interface IMFTimedTextRuby
+  // ==========================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFTimedTextRuby);'}
+  PIMFTimedTextRuby = ^IMFTimedTextRuby;
+  {$EXTERNALSYM IMFTimedTextRuby}
+  IMFTimedTextRuby = interface(IUnknown)
+  ['{76c6a6f5-4955-4de5-b27b-14b734cc14b4}']
+    function GetRubyText(out rubyText: PWideChar): HResult; stdcall;
+
+    function GetRubyPosition(out value: MF_TIMED_TEXT_RUBY_POSITION): HResult; stdcall;
+
+    function GetRubyAlign(out value: MF_TIMED_TEXT_RUBY_ALIGN): HResult; stdcall;
+
+    function GetRubyReserve(out value: MF_TIMED_TEXT_RUBY_RESERVE): HResult; stdcall;
+
+  end;
+  IID_IMFTimedTextRuby = IMFTimedTextRuby;
+  {$EXTERNALSYM IID_IMFTimedTextRuby}
+
+
+  // Interface IMFTimedTextBouten
+  // ==========================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFTimedTextBouten);'}
+  PIMFTimedTextBouten = ^IMFTimedTextBouten;
+  {$EXTERNALSYM IMFTimedTextBouten}
+  IMFTimedTextBouten = interface(IUnknown)
+  ['{3c5f3e8a-90c0-464e-8136-898d2975f847}']
+    function GetBoutenType(out value: MF_TIMED_TEXT_BOUTEN_TYPE): HResult; stdcall;
+
+    function GetBoutenColor(out value: MFARGB): HResult; stdcall;
+
+    function GetBoutenPosition(out value: MF_TIMED_TEXT_BOUTEN_POSITION): HResult; stdcall;
+
+  end;
+  IID_IMFTimedTextBouten = IMFTimedTextBouten;
+  {$EXTERNALSYM IID_IMFTimedTextBouten}
+
+
+  // Interface IMFTimedTextBouten
+  // ==========================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFTimedTextStyle2);'}
+  PIMFTimedTextStyle2 = ^IMFTimedTextStyle2;
+  {$EXTERNALSYM IMFTimedTextStyle2}
+  IMFTimedTextStyle2 = interface(IUnknown)
+  ['{db639199-c809-4c89-bfca-d0bbb9729d6e}']
+    function GetRuby({out} ruby: IMFTimedTextRuby = Nil): HResult; stdcall;
+
+    function GetBouten({out} bouten: IMFTimedTextBouten = Nil): HResult; stdcall;
+
+    // Tate-chu-yoko
+    function IsTextCombined(out value: BOOL): HResult; stdcall;
+
+    // Slanted Text, when is 0, that means the texts are not slanted texts
+    function GetFontAngleInDegrees(out value: Double): HResult; stdcall;
+
+  end;
+  IID_IMFTimedTextStyle2 = IMFTimedTextStyle2;
+  {$EXTERNALSYM IID_IMFTimedTextStyle2}
+
+
+
 
 //#if (WINVER >= _WIN32_WINNT_WINTHRESHOLD) (Win 8)
 
@@ -2360,7 +2480,7 @@ type
   //
   //  Synopsis:   Defines stream type that failed to render
   //
-  //------------------------------------------------------------------------------
+  //-Allows direct usage of CDM objects-----------------------------------------------------------------------------
 
   PMF_MEDIA_ENGINE_STREAMTYPE_FAILED = ^MF_MEDIA_ENGINE_STREAMTYPE_FAILED;
   MF_MEDIA_ENGINE_STREAMTYPE_FAILED           = (

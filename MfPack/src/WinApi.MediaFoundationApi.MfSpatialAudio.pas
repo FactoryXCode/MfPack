@@ -10,28 +10,30 @@
 // Release date: 29-05-2018
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 // Description: SpatialAudioClient API interface definition.
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), (Ciaran), (topPlay)
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Ciaran, (topPlay)
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/09/2021 Tony                Fixed GetSpatialAudioObjectByIndex
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 RedStone (rs) 1 or later.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //
@@ -97,6 +99,7 @@ type
   //	   To get the audio data contained in the spatial audio object, use the IMFMediaBuffer
   //	   Lock() and Unlock() methods.
   // </summary>
+  PIMFSpatialAudioObjectBuffer = ^IMFSpatialAudioObjectBuffer;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSpatialAudioObjectBuffer);'}
   {$EXTERNALSYM IMFSpatialAudioObjectBuffer}
   IMFSpatialAudioObjectBuffer = interface(IMFMediaBuffer)
@@ -200,7 +203,7 @@ type
     // </param>
 
     function GetSpatialAudioObjectByIndex(const dwIndex: DWORD;
-                                          out ppAudioObjBuffer: IMFSpatialAudioObjectBuffer): HRESULT; stdcall;
+                                          {out} ppAudioObjBuffer: PIMFSpatialAudioObjectBuffer): HRESULT; stdcall;
     // <summary>
     //     The GetSpatialAudioObjectByIndex() method returns an audio object specified
     //     with the passed-in index.

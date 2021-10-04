@@ -13,6 +13,7 @@ object FrmMain: TFrmMain
   Font.Style = []
   KeyPreview = True
   Menu = MainMenu1
+  OldCreateOrder = True
   Position = poDesktopCenter
   OnCreate = HandleFormCreate
   OnDestroy = HandleFormDestroy
@@ -190,6 +191,7 @@ object FrmMain: TFrmMain
       Top = 159
       Width = 75
       Height = 25
+      Anchors = [akTop, akRight]
       Caption = 'Save Image'
       TabOrder = 10
       OnClick = HandleSaveImageClick
@@ -259,7 +261,9 @@ object FrmMain: TFrmMain
   end
   object sdSaveFrame: TSaveDialog
     DefaultExt = '.bmp'
-    Filter = 'BMP|*.bmp'
+    Filter = 
+      'BMP image (*.bmp)|*.bmp|PNG image (*.png)|*.png|JPEG image (*.jp' +
+      'g, *.jpeg)|*.jpg'
     Left = 32
     Top = 328
   end

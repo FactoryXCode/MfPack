@@ -103,7 +103,8 @@ type
     FFindingSample: Boolean;
     oSampleReply: TSampleReply;
 
-    procedure HandleMessages(var AMessage: TMessage; var AHandled: Boolean);
+    procedure HandleMessages(var AMessage: TMessage;
+                             var AHandled: Boolean);
     procedure NotifyMediaFormatChanged;
     procedure HandleSampleFoundMessage(var AMessage: TMessage);
 
@@ -124,7 +125,7 @@ type
 
   protected
 
-    procedure ProcessSample(const ASample: IMFSample;
+    procedure ProcessSample(ASample: IMFSample;
                             ATimeStamp: TTimeSpan); override;
     procedure ConfigureSourceReader(const AAttributes: IMFAttributes); override;
     procedure HandleMediaFormatChanged; override;
@@ -235,6 +236,7 @@ begin
 end;
 {$HINTS ON}
 
+
 procedure TFileCaptureAsync.Flush;
 begin
   inherited;
@@ -275,12 +277,17 @@ var
   oResult: HRESULT;
 
 begin
-  Result:= Assigned(SourceReader);
+  Result := Assigned(SourceReader);
 
   if Result then
   begin
     FFindingSample := True;
-    oResult := SourceReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0);
+    oResult := SourceReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                       0,
+                                       nil,
+                                       nil,
+                                       nil,
+                                       nil);
     Result := SUCCEEDED(oResult);
     if not Result then
       HandleSampleReadError(oResult);
@@ -333,7 +340,7 @@ begin
 end;
 
 
-procedure TFileCaptureAsync.ProcessSample(const ASample: IMFSample;
+procedure TFileCaptureAsync.ProcessSample(ASample: IMFSample;
                                           ATimeStamp: TTimeSpan);
 begin
   // Note: This will be called in a worker thread.

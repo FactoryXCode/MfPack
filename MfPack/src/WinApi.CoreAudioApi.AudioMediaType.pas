@@ -5,12 +5,12 @@
 // Project: MfPack - CoreAudio - Shared
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: WinApi.AudioMediaType.pas
+// Module: WinApi.CoreAudioApi.AudioMediaType.pas
 // Kind: Pascal / Delphi unit
 // Release date: 24-09-2015
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 // Description: IAudioMediaType definition.
 //
 // Organisation: FactoryX
@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -33,11 +34,11 @@
 //          Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //
@@ -63,7 +64,7 @@
 // in full at the top of the file.
 //
 //==============================================================================
-unit WinApi.AudioMediaType;
+unit WinApi.CoreAudioApi.AudioMediaType;
 
   {$HPPEMIT '#include "audiomediatype.h"'}
 
@@ -128,6 +129,7 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioMediaType);'}
   {$EXTERNALSYM IAudioMediaType}
+  PIAudioMediaType = ^IAudioMediaType;
   IAudioMediaType = interface(IUnknown)
   ['{4E997F73-B71F-4798-873B-ED7DFCF15B4D}']
     function IsCompressedFormat(out pfCompressed: BOOL): HResult; stdcall;
