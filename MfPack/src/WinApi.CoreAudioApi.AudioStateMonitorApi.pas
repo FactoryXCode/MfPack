@@ -172,21 +172,24 @@ type
 
 implementation
 
-  function CreateRenderAudioStateMonitor; external AudioEngineBaseApoLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+const
+  AudioStateMonitorApiLib = '';
 
-  function CreateRenderAudioStateMonitorForCategory; external AudioEngineBaseApoLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function CreateRenderAudioStateMonitor; external AudioStateMonitorApiLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
-  function CreateRenderAudioStateMonitorForCategoryAndDeviceRole; external AudioEngineBaseApoLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function CreateRenderAudioStateMonitorForCategory; external AudioStateMonitorApiLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
-  function CreateRenderAudioStateMonitorForCategoryAndDeviceId; external AudioEngineBaseApoLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function CreateRenderAudioStateMonitorForCategoryAndDeviceRole; external AudioStateMonitorApiLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
-  function CreateCaptureAudioStateMonitor; external AudioEngineBaseApoLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function CreateRenderAudioStateMonitorForCategoryAndDeviceId; external AudioStateMonitorApiLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
-  function CreateCaptureAudioStateMonitorForCategory; external AudioEngineBaseApoLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function CreateCaptureAudioStateMonitor; external AudioStateMonitorApiLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
-  function CreateCaptureAudioStateMonitorForCategoryAndDeviceRole; external AudioEngineBaseApoLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function CreateCaptureAudioStateMonitorForCategory; external AudioStateMonitorApiLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
-  function CreateCaptureAudioStateMonitorForCategoryAndDeviceId; external AudioEngineBaseApoLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function CreateCaptureAudioStateMonitorForCategoryAndDeviceRole; external AudioStateMonitorApiLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+
+  function CreateCaptureAudioStateMonitorForCategoryAndDeviceId; external AudioStateMonitorApiLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
 
   // Implement Additional functions here.
