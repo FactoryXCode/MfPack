@@ -712,7 +712,6 @@ type
     pPnpInterface: IMMDevice;
     pPnpDevnode: IMMDevice;
   end;
-  {$EXTERNALSYM __MIDL___MIDL_itf_mmdeviceapi_0000_0008_0001}
   {$EXTERNALSYM AudioExtensionParams}
 
 

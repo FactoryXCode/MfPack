@@ -116,6 +116,12 @@ type
   {$EXTERNALSYM IID_IAudioEndpointFormatControl}
 
 
+  // Additional Prototypes for ALL interfaces
+
+  // End of Additional Prototypes
+
 implementation
+
+  // Implement Additional functions here.
 
 end.
