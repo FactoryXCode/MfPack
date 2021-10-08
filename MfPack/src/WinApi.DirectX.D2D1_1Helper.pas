@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 // Description: Helper files over the D2D interfaces and APIs.
 //
 // Organisation: FactoryX
@@ -22,18 +22,20 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
-// Remarks: -
+// Remarks: Here we use Objects as records in place for records to make inheritance possible.
+//          Note: Objects are placed on the heap instead of stack.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
-// Todo: -
+// Todo: Test if the concept of objects works.
 //
 //==============================================================================
 // Source: d2d1_1helper.h
@@ -75,6 +77,133 @@ uses
 
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
+
+type
+
+  //Matrix4x3F as D2D1_MATRIX_4X3_F;
+  // In Delphi you can't inherid from a record
+  Matrix4x3F = Object(D2D1_MATRIX_4X3_F)
+
+        constructor Create(m11: Single = 1;
+                           m12: Single = 0;
+                           m13: Single = 0;
+
+                           m21: Single = 0;
+                           m22: Single = 1;
+                           m23: Single = 0;
+
+                           m31: Single = 0;
+                           m32: Single = 0;
+                           m33: Single = 1;
+
+                           m41: Single = 0;
+                           m42: Single = 0;
+                           m43: Single = 0);
+  end;
+
+
+  Matrix4x4F = Object(D2D1_MATRIX_4X4_F)
+    public
+
+        constructor Create(m11: Single = 1;
+                           m12: Single = 0;
+                           m13: Single = 0;
+                           m14: Single = 0;
+
+                           m21: Single = 0;
+                           m22: Single = 1;
+                           m23: Single = 0;
+                           m24: Single = 0;
+
+                           m31: Single = 0;
+                           m32: Single = 0;
+                           m33: Single = 1;
+                           m34: Single = 0;
+
+                           m41: Single = 0;
+                           m42: Single = 0;
+                           m43: Single = 0;
+                           m44: Single = 1);
+
+        function Translation(x: Single;
+                             y: Single;
+                             z: Single): Matrix4x4F; inline;
+
+        function Scale(x: Single;
+                       y: Single;
+                       z: Single): Matrix4x4F; inline;
+
+        function RotationX(degreeX: Single): Matrix4x4F; inline;
+
+        function RotationY(degreeY: Single): Matrix4x4F; inline;
+
+        function RotationZ(degreeZ: Single): Matrix4x4F; inline;
+
+        //
+        // 3D Rotation matrix for an arbitrary axis specified by x, y and z
+        //
+
+        function RotationArbitraryAxis(x: Single;
+                                       y: Single;
+                                       z: Single;
+                                       degree: Single): Matrix4x4F; inline;
+
+        function SkewX(degreeX: Single): Matrix4x4F; inline;
+
+        function SkewY(degreeY: Single): Matrix4x4F; inline;
+
+        function PerspectiveProjection(depth: Single): Matrix4x4F; inline;
+
+
+        //
+        // Functions for convertion from the base D2D1_MATRIX_4X4_f to
+        // this type without making a copy
+        //
+
+        function ReinterpretBaseType(const pMatrix: D2D1_MATRIX_4X4_F): Matrix4x4F;
+
+        function Determinant(): Single; inline;
+
+        function IsIdentity(): Boolean; inline;
+
+        procedure SetProduct(var a: Matrix4x4F;
+                             var b: Matrix4x4F); inline;
+
+        function product(matrix: Matrix4x4F): Matrix4x4F; inline;
+
+    end;
+
+  Matrix5x4F = Object(D2D1_MATRIX_5X4_F)
+  public
+
+    constructor Create(m11: Single = 1;
+                       m12: Single = 0;
+                       m13: Single = 0;
+                       m14: Single = 0;
+
+                       m21: Single = 0;
+                       m22: Single = 1;
+                       m23: Single = 0;
+                       m24: Single = 0;
+
+                       m31: Single = 0;
+                       m32: Single = 0;
+                       m33: Single = 1;
+                       m34: Single = 0;
+
+                       m41: Single = 0;
+                       m42: Single = 0;
+                       m43: Single = 0;
+                       m44: Single = 1;
+
+                       m51: Single = 0;
+                       m52: Single = 0;
+                       m53: Single = 0;
+                       m54: Single = 0);
+
+  end;
+
+
 
 
 function ConvertColorSpace(sourceColorSpace: D2D1_COLOR_SPACE;
@@ -216,6 +345,559 @@ function SetDpiCompensatedEffectInput(deviceContext: ID2D1DeviceContext;
   // End of Additional Prototypes
 
 implementation
+
+
+constructor Matrix4x3F.Create(m11: Single = 1;
+                              m12: Single = 0;
+                              m13: Single = 0;
+
+                              m21: Single = 0;
+                              m22: Single = 1;
+                              m23: Single = 0;
+
+                              m31: Single = 0;
+                              m32: Single = 0;
+                              m33: Single = 1;
+
+                              m41: Single = 0;
+                              m42: Single = 0;
+                              m43: Single = 0);
+begin
+  _11 := m11;
+  _12 := m12;
+  _13 := m13;
+
+  _21 := m21;
+  _22 := m22;
+  _23 := m23;
+
+  _31 := m31;
+  _32 := m32;
+  _33 := m33;
+
+  _41 := m41;
+  _42 := m42;
+  _43 := m43;
+end;
+
+
+constructor Matrix4x4F.Create(m11: Single = 1;
+                              m12: Single = 0;
+                              m13: Single = 0;
+                              m14: Single = 0;
+
+                              m21: Single = 0;
+                              m22: Single = 1;
+                              m23: Single = 0;
+                              m24: Single = 0;
+
+                              m31: Single = 0;
+                              m32: Single = 0;
+                              m33: Single = 1;
+                              m34: Single = 0;
+
+                              m41: Single = 0;
+                              m42: Single = 0;
+                              m43: Single = 0;
+                              m44: Single = 1);
+begin
+  inherited;
+  _11 := m11;
+  _12 := m12;
+  _13 := m13;
+  _14 := m14;
+
+  _21 := m21;
+  _22 := m22;
+  _23 := m23;
+  _24 := m24;
+
+  _31 := m31;
+  _32 := m32;
+  _33 := m33;
+  _34 := m34;
+
+  _41 := m41;
+  _42 := m42;
+  _43 := m43;
+  _44 := m44;
+end;
+
+
+function Matrix4x4f.Translation(x: Single;
+                                y: Single;
+                                z: Single): Matrix4x4F;
+var
+  transl: Matrix4x4F;
+
+begin
+
+  transl._11 := 1.0;
+  transl._12 := 0.0;
+  transl._13 := 0.0;
+  transl._14 := 0.0;
+
+  transl._21 := 0.0;
+  transl._22 := 1.0;
+  transl._23 := 0.0;
+  transl._24 := 0.0;
+
+  transl._31 := 0.0;
+  transl._32 := 0.0;
+  transl._33 := 1.0;
+  transl._34 := 0.0;
+
+  transl._41 := x;
+  transl._42 := y;
+  transl._43 := z;
+  transl._44 := 1.0;
+
+  Result := transl;
+end;
+
+
+function Matrix4x4f.Scale(x: Single;
+                         y: Single;
+                         z: Single): Matrix4x4F;
+var
+   scl: Matrix4x4F;
+
+begin
+   scl._11 := x;
+   scl._12 := 0.0;
+   scl._13 := 0.0;
+   scl._14 := 0.0;
+
+   scl._21 := 0.0;
+   scl._22 := y;
+   scl._23 := 0.0;
+   scl._24 := 0.0;
+
+   scl._31 := 0.0;
+   scl._32 := 0.0;
+   scl._33 := z;
+   scl._34 := 0.0;
+
+   scl._41 := 0.0;
+   scl._42 := 0.0;
+   scl._43 := 0.0;
+   scl._44 := 1.0;
+
+   Result := scl;
+end;
+
+
+function Matrix4x4f.RotationX(degreeX: Single): Matrix4x4F;
+var
+  angleInRadian: Single;
+  sinAngle: Single;
+  cosAngle: Single;
+  MRotationX: Matrix4x4F;
+
+begin
+  angleInRadian := degreeX * (Single(3.141592654) / Single(180.0));
+
+  sinAngle := 0.0;
+  cosAngle := 0.0;
+  D2D1SinCos(angleInRadian,
+             sinAngle,
+             cosAngle);
+
+  MRotationX._11 := 1;
+  MRotationX._12 := 0;
+  MRotationX._13 := 0;
+  MRotationX._14 := 0;
+
+  MRotationX._21 := 0;
+  MRotationX._22 := cosAngle;
+  MRotationX._23 := sinAngle;
+  MRotationX._24 := 0;
+
+  MRotationX._31 := 0;
+  MRotationX._32 := -sinAngle;
+  MRotationX._33 := cosAngle;
+  MRotationX._34 := 0;
+
+  MRotationX._41 := 0;
+  MRotationX._42 := 0;
+  MRotationX._43 := 0;
+  MRotationX._44 := 1;
+
+  Result := MRotationX;
+end;
+
+
+function Matrix4x4F.RotationZ(degreeZ: Single): Matrix4x4F;
+var
+  angleInRadian: Single;
+  sinAngle: Single;
+  cosAngle: Single;
+  MRotationZ: Matrix4x4F;
+
+begin
+  angleInRadian := degreeZ * (Single(3.141592654) / Single(180.0));
+
+  sinAngle := 0.0;
+  cosAngle := 0.0;
+  D2D1SinCos(angleInRadian,
+             sinAngle,
+             cosAngle);
+
+  MRotationZ._11 := cosAngle;
+  MRotationZ._12 := sinAngle;
+  MRotationZ._13 := 0;
+  MRotationZ._14 := 0;
+
+  MRotationZ._21 := -sinAngle;
+  MRotationZ._22 := cosAngle;
+  MRotationZ._23 := 0;
+  MRotationZ._24 := 0;
+
+  MRotationZ._31 := 0;
+  MRotationZ._32 := 0;
+  MRotationZ._33 := 1;
+  MRotationZ._34 := 0;
+
+  MRotationZ._41 := 0;
+  MRotationZ._42 := 0;
+  MRotationZ._43 := 0;
+  MRotationZ._44 := 1;
+
+  Result := MRotationZ;
+end;
+
+
+function Matrix4x4F.RotationArbitraryAxis(x: Single;
+                                          y: Single;
+                                          z: Single;
+                                          degree: Single): Matrix4x4F;
+var
+  magnitude: Single;
+  angleInRadian: Single;
+  sinAngle: Single;
+  cosAngle: Single;
+  oneMinusCosAngle: Single;
+  MRotationArb: Matrix4x4F;
+
+begin
+  // Normalize the vector represented by x, y, and z
+  magnitude := D2D1Vec3Length(x,
+                              y,
+                              z);
+  x := x / magnitude;
+  y := y / magnitude;
+  z := z / magnitude;
+
+  angleInRadian := degree * (Single(3.141592654) / Single(180.0));
+
+  sinAngle := 0.0;
+  cosAngle := 0.0;
+  D2D1SinCos(angleInRadian,
+             sinAngle,
+             cosAngle);
+
+  oneMinusCosAngle := 1 - cosAngle;
+
+  MRotationArb._11 := (1 + oneMinusCosAngle * (x * x - 1));
+  MRotationArb._12 := z * sinAngle + oneMinusCosAngle * x * y;
+  MRotationArb._13 := -y * sinAngle + oneMinusCosAngle * x * z;
+  MRotationArb._14 := 0;
+
+  MRotationArb._21 := -z * sinAngle + oneMinusCosAngle * y * x;
+  MRotationArb._22 := 1 + oneMinusCosAngle * y * y - 1;
+  MRotationArb._23 := x * sinAngle + oneMinusCosAngle * y * z;
+  MRotationArb._24 := 0;
+
+  MRotationArb._31 := y * sinAngle + oneMinusCosAngle * z * x;
+  MRotationArb._32 := -x * sinAngle + oneMinusCosAngle * z * y;
+  MRotationArb._33 := 1             + oneMinusCosAngle * (z * z - 1) ;
+  MRotationArb._34 := 0;
+
+  MRotationArb._41 := 0;
+  MRotationArb._42 := 0;
+  MRotationArb._43 := 0;
+  MRotationArb._44 := 1;
+
+  Result := MRotationArb;
+end;
+
+
+function Matrix4x4F.SkewX(degreeX: Single): Matrix4x4F;
+var
+  angleInRadian: Single;
+  tanAngle: Single;
+  MSkewX: Matrix4x4F;
+
+begin
+  angleInRadian := degreeX * (Single(3.141592654) / Single(180.0));
+
+  tanAngle := D2D1Tan(angleInRadian);
+
+  MSkewX._11 := 1;
+  MSkewX._12 := 0;
+  MSkewX._13 := 0;
+  MSkewX._14 := 0;
+
+  MSkewX._21 := tanAngle;
+  MSkewX._22 := 1;
+  MSkewX._23 := 0;
+  MSkewX._24 := 0;
+
+  MSkewX._31 := 0;
+  MSkewX._32 := 0;
+  MSkewX._33 := 1;
+  MSkewX._34 := 0;
+
+  MSkewX._41 := 0;
+  MSkewX._42 := 0;
+  MSkewX._43 := 0;
+  MSkewX._44 := 1;
+
+  Result := MSkewX;
+end;
+
+
+function Matrix4x4F.SkewY(degreeY: Single): Matrix4x4F;
+var
+  angleInRadian: Single;
+  tanAngle: Single;
+  MSkewY: Matrix4x4F;
+
+begin
+  angleInRadian := degreeY * (Single(3.141592654) / Single(180.0));
+
+  tanAngle := D2D1Tan(angleInRadian);
+
+  MSkewY._11 := 1;
+  MSkewY._12 := tanAngle;
+  MSkewY._13 := 0;
+  MSkewY._14 := 0;
+
+  MSkewY._21 := 0;
+  MSkewY._22 := 1;
+  MSkewY._23 := 0;
+  MSkewY._24 := 0;
+
+  MSkewY._31 := 0;
+  MSkewY._32 := 0;
+  MSkewY._33 := 1;
+  MSkewY._34 := 0;
+
+  MSkewY._41 := 0;
+  MSkewY._42 := 0;
+  MSkewY._43 := 0;
+  MSkewY._44 := 1;
+
+  Result := MSkewY;
+end;
+
+function Matrix4x4F.PerspectiveProjection(depth: Single): Matrix4x4F;
+var
+  proj: Single;
+  MProjection: Matrix4x4F;
+
+begin
+  proj := 0;
+
+  if (depth > 0) then
+    proj := -1 / depth;
+
+
+  MProjection._11 := 1;
+  MProjection._12 := 0;
+  MProjection._13 := 0;
+  MProjection._14 := 0;
+
+  MProjection._21 := 0;
+  MProjection._22 := 1;
+  MProjection._23 := 0;
+  MProjection._24 := 0;
+
+  MProjection._31 := 0;
+  MProjection._32 := 0;
+  MProjection._33 := 1;
+  MProjection._34 := proj;
+
+  MProjection._41 := 0;
+  MProjection._42 := 0;
+  MProjection._43 := 0;
+  MProjection._44 := 1;
+
+  Result := MProjection;
+end;
+
+
+function Matrix4x4F.ReinterpretBaseType(const pMatrix: D2D1_MATRIX_4X4_F): Matrix4x4F;
+begin
+  Result := Matrix4x4F(pMatrix);
+end;
+
+
+function Matrix4x4F.IsIdentity(): Boolean;
+begin
+  Result := ( _11 = 1.0 ) And
+            ( _12 = 0.0 ) And
+            ( _13 = 0.0 ) And
+            ( _14 = 0.0 ) And
+
+            ( _21 = 0.0 ) And
+            ( _22 = 1.0 ) And
+            ( _23 = 0.0 ) And
+            ( _24 = 0.0 ) And
+
+            ( _31 = 0.0 ) And
+            ( _32 = 0.0 ) And
+            ( _33 = 1.0 ) And
+            ( _34 = 0.0 ) And
+
+            ( _41 = 0.0 ) And
+            ( _42 = 0.0 ) And
+            ( _43 = 0.0 ) And
+            ( _44 = 1.0);
+end;
+
+
+function Matrix4x4F.RotationY(degreeY: Single): Matrix4x4F;
+var
+  angleInRadian: Single;
+  sinAngle: Single;
+  cosAngle: Single;
+  MRotationY: Matrix4x4F;
+
+begin
+  angleInRadian := degreeY * (Single(3.141592654) / Single(180.0));
+
+  sinAngle := 0.0;
+  cosAngle := 0.0;
+  D2D1SinCos(angleInRadian,
+             sinAngle,
+             cosAngle);
+
+  MRotationY._11 := cosAngle;
+  MRotationY._12 := 0;
+  MRotationY._13 := -sinAngle;
+  MRotationY._14 := 0;
+
+  MRotationY._21 := 0;
+  MRotationY._22 := 1;
+  MRotationY._23 := 0;
+  MRotationY._24 := 0;
+
+  MRotationY._31 := sinAngle;
+  MRotationY._32 := 0;
+  MRotationY._33 := cosAngle;
+  MRotationY._34 := 0;
+
+  MRotationY._41 := 0;
+  MRotationY._42 := 0;
+  MRotationY._43 := 0;
+  MRotationY._44 := 1;
+
+  Result := MRotationY;
+end;
+
+
+function Matrix4x4f.Determinant(): Single;
+var
+  minor1: Single;
+  minor2: Single;
+  minor3: Single;
+  minor4: Single;
+
+begin
+  minor1 := _41 * (_12 * (_23 * _34 - _33 * _24) - _13 * (_22 * _34 - _24 * _32) + _14 * (_22 * _33 - _23 * _32));
+  minor2 := _42 * (_11 * (_21 * _34 - _31 * _24) - _13 * (_21 * _34 - _24 * _31) + _14 * (_21 * _33 - _23 * _31));
+  minor3 := _43 * (_11 * (_22 * _34 - _32 * _24) - _12 * (_21 * _34 - _24 * _31) + _14 * (_21 * _32 - _22 * _31));
+  minor4 := _44 * (_11 * (_22 * _33 - _32 * _23) - _12 * (_21 * _33 - _23 * _31) + _13 * (_21 * _32 - _22 * _31));
+
+  Result := (minor1 - minor2) + (minor3 - minor4);
+end;
+
+
+procedure Matrix4x4f.SetProduct(var a: Matrix4x4F;
+                                var b: Matrix4x4F);
+begin
+  _11 := a._11 * b._11 + a._12 * b._21 + a._13 * b._31 + a._14 * b._41;
+  _12 := a._11 * b._12 + a._12 * b._22 + a._13 * b._32 + a._14 * b._42;
+  _13 := a._11 * b._13 + a._12 * b._23 + a._13 * b._33 + a._14 * b._43;
+  _14 := a._11 * b._14 + a._12 * b._24 + a._13 * b._34 + a._14 * b._44;
+
+  _21 := a._21 * b._11 + a._22 * b._21 + a._23 * b._31 + a._24 * b._41;
+  _22 := a._21 * b._12 + a._22 * b._22 + a._23 * b._32 + a._24 * b._42;
+  _23 := a._21 * b._13 + a._22 * b._23 + a._23 * b._33 + a._24 * b._43;
+  _24 := a._21 * b._14 + a._22 * b._24 + a._23 * b._34 + a._24 * b._44;
+
+  _31 := a._31 * b._11 + a._32 * b._21 + a._33 * b._31 + a._34 * b._41;
+  _32 := a._31 * b._12 + a._32 * b._22 + a._33 * b._32 + a._34 * b._42;
+  _33 := a._31 * b._13 + a._32 * b._23 + a._33 * b._33 + a._34 * b._43;
+  _34 := a._31 * b._14 + a._32 * b._24 + a._33 * b._34 + a._34 * b._44;
+
+  _41 := a._41 * b._11 + a._42 * b._21 + a._43 * b._31 + a._44 * b._41;
+  _42 := a._41 * b._12 + a._42 * b._22 + a._43 * b._32 + a._44 * b._42;
+  _43 := a._41 * b._13 + a._42 * b._23 + a._43 * b._33 + a._44 * b._43;
+  _44 := a._41 * b._14 + a._42 * b._24 + a._43 * b._34 + a._44 * b._44;
+end;
+
+
+function Matrix4x4f.product(matrix: Matrix4x4F): Matrix4x4F;
+begin
+  result.SetProduct(Self,
+                    matrix);
+end;
+
+
+constructor Matrix5x4f.Create(m11: Single = 1;
+                              m12: Single = 0;
+                              m13: Single = 0;
+                              m14: Single = 0;
+
+                              m21: Single = 0;
+                              m22: Single = 1;
+                              m23: Single = 0;
+                              m24: Single = 0;
+
+                              m31: Single = 0;
+                              m32: Single = 0;
+                              m33: Single = 1;
+                              m34: Single = 0;
+
+                              m41: Single = 0;
+                              m42: Single = 0;
+                              m43: Single = 0;
+                              m44: Single = 1;
+
+                              m51: Single = 0;
+                              m52: Single = 0;
+                              m53: Single = 0;
+                              m54: Single = 0);
+begin
+  inherited;
+  _11 := m11;
+  _12 := m12;
+  _13 := m13;
+  _14 := m14;
+
+  _21 := m21;
+  _22 := m22;
+  _23 := m23;
+  _24 := m24;
+
+  _31 := m31;
+  _32 := m32;
+  _33 := m33;
+  _34 := m34;
+
+  _41 := m41;
+  _42 := m42;
+  _43 := m43;
+  _44 := m44;
+
+  _51 := m51;
+  _52 := m52;
+  _53 := m53;
+  _54 := m54;
+end;
+
 
 
 function ConvertColorSpace(sourceColorSpace: D2D1_COLOR_SPACE;

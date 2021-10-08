@@ -10,30 +10,31 @@
 // Release date: 18-06-2016
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 // Description: Equates for WM_DEVICECHANGE and BroadcastSystemMessage
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Jasper S
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
-// 25/01/2021 Tony/Jasper S.      Modified DEV_BROADCAST_DEVICEINTERFACE records
+// 25/01/2021 Jasper S.           Modified DEV_BROADCAST_DEVICEINTERFACE records
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 // 
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //

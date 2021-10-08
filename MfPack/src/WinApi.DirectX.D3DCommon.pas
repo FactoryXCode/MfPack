@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 //
 // Description: D3D-version-neutral runtime information.
 //
@@ -23,17 +23,18 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows Vista or later.
 //            New apps should use the latest Direct3D API
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //
@@ -130,6 +131,8 @@ const
   {$EXTERNALSYM D3D_FEATURE_LEVEL_12_0}
   D3D_FEATURE_LEVEL_12_1      = D3D_FEATURE_LEVEL($C100);
   {$EXTERNALSYM D3D_FEATURE_LEVEL_12_1}
+  D3D_FEATURE_LEVEL_12_2      = D3D_FEATURE_LEVEL($C200);
+  {$EXTERNALSYM D3D_FEATURE_LEVEL_12_2}
 
 
 const
@@ -635,6 +638,53 @@ const
   D3D11_SRV_DIMENSION_BUFFEREX           = D3D_SRV_DIMENSION_BUFFEREX;
   {$EXTERNALSYM D3D11_SRV_DIMENSION_BUFFEREX}
 
+const
+  D3D_SHADER_FEATURE_DOUBLES                                                        = $00001;
+  {$EXTERNALSYM D3D_SHADER_FEATURE_DOUBLES}
+  D3D_SHADER_FEATURE_COMPUTE_SHADERS_PLUS_RAW_AND_STRUCTURED_BUFFERS_VIA_SHADER_4_X = $00002;
+  {$EXTERNALSYM D3D_SHADER_FEATURE_COMPUTE_SHADERS_PLUS_RAW_AND_STRUCTURED_BUFFERS_VIA_SHADER_4_X}
+  D3D_SHADER_FEATURE_UAVS_AT_EVERY_STAGE                                            = $00004;
+  {$EXTERNALSYM D3D_SHADER_FEATURE_UAVS_AT_EVERY_STAGE}
+  D3D_SHADER_FEATURE_64_UAVS                                                        = $00008;
+  {$EXTERNALSYM D3D_SHADER_FEATURE_64_UAVS}
+  D3D_SHADER_FEATURE_MINIMUM_PRECISION                                              = $00010;
+  {$EXTERNALSYM D3D_SHADER_FEATURE_MINIMUM_PRECISION}
+  D3D_SHADER_FEATURE_11_1_DOUBLE_EXTENSIONS                                         = $00020;
+  {$EXTERNALSYM D3D_SHADER_FEATURE_11_1_DOUBLE_EXTENSIONS}
+  D3D_SHADER_FEATURE_11_1_SHADER_EXTENSIONS                                         = $00040;
+  {$EXTERNALSYM D3D_SHADER_FEATURE_11_1_SHADER_EXTENSIONS}
+  D3D_SHADER_FEATURE_LEVEL_9_COMPARISON_FILTERING                                   = $00080;
+  {$EXTERNALSYM D3D_SHADER_FEATURE_LEVEL_9_COMPARISON_FILTERING}
+  D3D_SHADER_FEATURE_TILED_RESOURCES                                                = $00100;
+  {$EXTERNALSYM D3D_SHADER_FEATURE_TILED_RESOURCES}
+  D3D_SHADER_FEATURE_STENCIL_REF                                                    = $00200;
+  {$EXTERNALSYM D3D_SHADER_FEATURE_STENCIL_REF}
+  D3D_SHADER_FEATURE_INNER_COVERAGE                                                 = $00400;
+  {$EXTERNALSYM D3D_SHADER_FEATURE_INNER_COVERAGE}
+  D3D_SHADER_FEATURE_TYPED_UAV_LOAD_ADDITIONAL_FORMATS                              = $00800;
+  {$EXTERNALSYM D3D_SHADER_FEATURE_TYPED_UAV_LOAD_ADDITIONAL_FORMATS}
+  D3D_SHADER_FEATURE_ROVS                                                           = $01000;
+  {$EXTERNALSYM D3D_SHADER_FEATURE_ROVS}
+  D3D_SHADER_FEATURE_VIEWPORT_AND_RT_ARRAY_INDEX_FROM_ANY_SHADER_FEEDING_RASTERIZER = $02000;
+  {$EXTERNALSYM D3D_SHADER_FEATURE_VIEWPORT_AND_RT_ARRAY_INDEX_FROM_ANY_SHADER_FEEDING_RASTERIZER}
+  D3D_SHADER_FEATURE_WAVE_OPS                                                       = $04000;
+  {$EXTERNALSYM D3D_SHADER_FEATURE_WAVE_OPS}
+  D3D_SHADER_FEATURE_INT64_OPS                                                      = $08000;
+  {$EXTERNALSYM D3D_SHADER_FEATURE_INT64_OPS}
+  D3D_SHADER_FEATURE_VIEW_ID                                                        = $10000;
+  {$EXTERNALSYM D3D_SHADER_FEATURE_VIEW_ID}
+  D3D_SHADER_FEATURE_BARYCENTRICS                                                   = $20000;
+  {$EXTERNALSYM D3D_SHADER_FEATURE_BARYCENTRICS}
+  D3D_SHADER_FEATURE_NATIVE_16BIT_OPS                                               = $40000;
+  {$EXTERNALSYM D3D_SHADER_FEATURE_NATIVE_16BIT_OPS}
+  D3D_SHADER_FEATURE_SHADING_RATE                                                   = $80000;
+  {$EXTERNALSYM D3D_SHADER_FEATURE_SHADING_RATE}
+  D3D_SHADER_FEATURE_RAYTRACING_TIER_1_1                                            = $100000;
+  {$EXTERNALSYM D3D_SHADER_FEATURE_RAYTRACING_TIER_1_1}
+  D3D_SHADER_FEATURE_SAMPLER_FEEDBACK                                               = $200000;
+  {$EXTERNALSYM D3D_SHADER_FEATURE_SAMPLER_FEEDBACK}
+
+
 type
   PD3D_INCLUDE_TYPE = ^_D3D_INCLUDE_TYPE;
   _D3D_INCLUDE_TYPE = DWord;
@@ -655,6 +705,7 @@ const
   // Shader compilation information.
   //
   //----------------------------------------------------------------------------
+
 
   //----------------------------------------------------------------------------
   // D3D_SHADER_MACRO:
@@ -1546,6 +1597,8 @@ const
   {$EXTERNALSYM WKPDID_D3DDebugObjectNameW}
   WKPDID_CommentStringW        : TGUID = '{d0149dc0-90e8-4ec8-8144-e900ad266bb2}';
   {$EXTERNALSYM WKPDID_CommentStringW}
+  WKPDID_D3D12UniqueObjectId   : TGUID = '{1b39de15-ec04-4bae-ba4d-8cef79fc04c1}';
+
 
  // We left the macro's out for now, because they lack documentation at this time.
 

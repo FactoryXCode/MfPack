@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 //
 // Description: Enables high-performance bitmap composition with transforms,
 //              effects, and animations.
@@ -24,16 +24,17 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or later.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //
@@ -2093,6 +2094,76 @@ type
                                              _hwnd: HWND;
                                              enable: LongBool): HResult; stdcall;
   {$EXTERNALSYM DCompositionAttachMouseDragToHwnd}
+
+type
+  PDCompositionInkTrailPoint = ^DCompositionInkTrailPoint;
+  DCompositionInkTrailPoint = record
+    x: Single;
+    y: Single;
+    radius: Single;
+  end;
+  {$EXTERNALSYM DCompositionInkTrailPoint}
+
+  //+-----------------------------------------------------------------------------
+  //
+  //  Interface:
+  //      IDCompositionDelegatedInkTrail
+  //
+  //  Synopsis:
+  //      An IDCompositionDelegatedInkTrail interface represents low latency ink
+  //      that the system renders on behalf of the app.
+  //
+  //------------------------------------------------------------------------------
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IDCompositionDelegatedInkTrail);'}
+  {$EXTERNALSYM IDCompositionDelegatedInkTrail}
+  IDCompositionDelegatedInkTrail = interface(IUnknown)
+  ['{C2448E9B-547D-4057-8CF5-8144EDE1C2DA}']
+
+    // Returns a generation id to be used when removing points later
+    function AddTrailPoints(inkPoints: PDCompositionInkTrailPoint;
+                            inkPointsCount: UINT;
+                            out generationId: UINT): HResult; stdcall;
+
+    // Returns a generation id to be used when removing points later
+    function AddTrailPointsWithPrediction(inkPoints: PDCompositionInkTrailPoint;
+        inkPointsCount: UINT;
+        predictedInkPoints: PDCompositionInkTrailPoint;
+        predictedInkPointsCount: UINT;
+        Out generationId: UINT): HResult; stdcall;
+
+    function RemoveTrailPoints(generationId: UINT): HResult; stdcall;
+
+    function StartNewTrail(color: D2D1_COLOR_F): HResult; stdcall;
+
+  end;
+  IID_IDCompositionDelegatedInkTrail = IDCompositionDelegatedInkTrail;
+  {$EXTERNALSYM IID_IDCompositionDelegatedInkTrail}
+
+  //+-----------------------------------------------------------------------------
+  //
+  //  Interface:
+  //      IDCompositionInkTrailDevice
+  //
+  //  Synopsis:
+  //      An IDCompositionInkTrailDevice interface is the factory for
+  //      creating DelegatedInkTrail objects
+  //
+  //------------------------------------------------------------------------------
+  PIDCompositionDelegatedInkTrail = ^IDCompositionDelegatedInkTrail;
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IDCompositionInkTrailDevice);'}
+  {$EXTERNALSYM IDCompositionInkTrailDevice}
+  IDCompositionInkTrailDevice = interface(IUnknown)
+  ['{DF0C7CEC-CDEB-4D4A-B91C-721BF22F4E6C}']
+
+    function CreateDelegatedInkTrail(out inkTrail: PIDCompositionDelegatedInkTrail): HResult; stdcall;
+
+    function CreateDelegatedInkTrailForSwapChain(swapChain: IUnknown;
+                                                 out inkTrail: PIDCompositionDelegatedInkTrail): HResult; stdcall;
+
+  end;
+  IID_IDCompositionInkTrailDevice = IDCompositionInkTrailDevice;
+  {$EXTERNALSYM IID_IDCompositionInkTrailDevice}
+
 
   // Additional Prototypes for ALL interfaces
 

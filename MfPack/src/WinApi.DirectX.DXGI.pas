@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 // Description: Microsoft DirectX Graphics Infrastructure API
 //
 // Organisation: FactoryX
@@ -22,16 +22,17 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //
@@ -103,11 +104,11 @@ const
   {$EXTERNALSYM DXGI_CPU_ACCESS_FIELD}
 
 //
-// DXGI is a 15-bit field containing DXGI-defined usages. In DXGI’s first revision, these usages refer only to 2D
-//    non-mipped resources: the only resource type that DXGI intends to share cross-process, cross-API. Further
-//    2D non-mipped uses can be added here (for example, DXVA extensions)
+// DXGI is a 15-bit field containing DXGI-defined usages. In DXGI's first revision, these usages refer only to 2D
+// non-mipped resources: the only resource type that DXGI intends to share cross-process, cross-API. Further
+// 2D non-mipped uses can be added here (for example, DXVA extensions)
 //
-//    Bitfield meanings: (Shift these into bits 18:4)
+// Bitfield meanings: (Shift these into bits 18:4)
   DXGI_USAGE_SHADER_INPUT             = $00000010;
   {$EXTERNALSYM DXGI_USAGE_SHADER_INPUT}
   DXGI_USAGE_RENDER_TARGET_OUTPUT     = $00000020;

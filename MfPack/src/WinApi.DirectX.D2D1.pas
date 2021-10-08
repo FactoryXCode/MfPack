@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 //
 // Description: Direct2D: Hardware-accelerated, immediate-mode, 2-D graphics API that
 //              provides high performance and high-quality rendering for 2-D geometry,
@@ -26,16 +26,17 @@
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
 // 22/09/2021 Tony                Fixed ID2D1DCRenderTarget and ID2D1GdiInteropRenderTarget
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //
@@ -1879,7 +1880,7 @@ type
     function GetDC(mode: D2D1_DC_INITIALIZE_MODE;
                    out hdc: HDC): HResult; stdcall;
 
-    function ReleaseDC(const update: TRECT): HResult; stdcall;
+    function ReleaseDC(const update: PRECT): HResult; stdcall;
 
   end;
   IID_ID2D1GdiInteropRenderTarget = ID2D1GdiInteropRenderTarget;
@@ -1896,7 +1897,7 @@ type
   ['{1c51bc64-de61-46fd-9899-63a5d8f03950}']
 
     function BindDC(hDC: HDC;
-                    const pSubRect: TRECT): HResult; stdcall;
+                    const pSubRect: PRECT): HResult; stdcall;
 
   end;
   IID_ID2D1DCRenderTarget = ID2D1DCRenderTarget;
