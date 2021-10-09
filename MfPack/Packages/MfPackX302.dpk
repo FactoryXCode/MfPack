@@ -1,4 +1,4 @@
-package MfPackX301;
+package MfPackX302;
 
 {$R *.res}
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
@@ -117,13 +117,12 @@ contains
   WinApi.CoreAudioApi.SpatialAudioClient in '..\src\WinApi.CoreAudioApi.SpatialAudioClient.pas',
   WinApi.CoreAudioApi.MMDeviceApi in '..\src\WinApi.CoreAudioApi.MMDeviceApi.pas',
   WinApi.CoreAudioApi.FunctionDiscoveryKeys_devpkey in '..\src\WinApi.CoreAudioApi.FunctionDiscoveryKeys_devpkey.pas',
-  WinApi.CoreAudioApi.EndPointVolume in '..\src\WinApi.CoreAudioApi.EndPointVolume.pas',
+  WinApi.CoreAudioApi.Endpointvolume in '..\src\WinApi.CoreAudioApi.Endpointvolume.pas',
   WinApi.CoreAudioApi.DeviceTopology in '..\src\WinApi.CoreAudioApi.DeviceTopology.pas',
   WinApi.CoreAudioApi.AudioPolicy in '..\src\WinApi.CoreAudioApi.AudioPolicy.pas',
   WinApi.CoreAudioApi.AudioSessionTypes in '..\src\WinApi.CoreAudioApi.AudioSessionTypes.pas',
   WinApi.CoreAudioApi.AudioEngineEndpoint in '..\src\WinApi.CoreAudioApi.AudioEngineEndpoint.pas',
   WinApi.CoreAudioApi.AudioengineBaseApo in '..\src\WinApi.CoreAudioApi.AudioengineBaseApo.pas',
-  WinApi.CoreAudioApi.AudioClient in '..\src\WinApi.CoreAudioApi.AudioClient.pas',
   WinApi.DevpKey in '..\src\WinApi.DevpKey.pas',
   WinApi.Coml2Api in '..\src\WinApi.Coml2Api.pas',
   WinApi.ComBaseApi in '..\src\WinApi.ComBaseApi.pas',
@@ -131,7 +130,7 @@ contains
   WinApi.ActiveX.PropVarUtil in '..\src\WinApi.ActiveX.PropVarUtil.pas',
   WinApi.ActiveX.PropSys in '..\src\WinApi.ActiveX.PropSys.pas',
   WinApi.ActiveX.PropIdl in '..\src\WinApi.ActiveX.PropIdl.pas',
-  WinApi.AudioMediaType in '..\src\WinApi.AudioMediaType.pas',
+  WinApi.CoreAudioApi.AudioMediaType in '..\src\WinApi.CoreAudioApi.AudioMediaType.pas',
   WinApi.KsMedia in '..\src\WinApi.KsMedia.pas',
   WinApi.ActiveX.PropKeyDef in '..\src\WinApi.ActiveX.PropKeyDef.pas',
   WinApi.ActiveX.OaIdl in '..\src\WinApi.ActiveX.OaIdl.pas',
@@ -165,8 +164,8 @@ contains
   WinApi.InitGuid in '..\src\WinApi.InitGuid.pas',
   WinApi.Inspectable in '..\src\WinApi.Inspectable.pas',
   WinApi.AmVideo in '..\src\WinApi.AmVideo.pas',
-  WinApi.AudioAPOTypes in '..\src\WinApi.AudioAPOTypes.pas',
-  WinApi.AudEvCod in '..\src\WinApi.AudEvCod.pas',
+  WinApi.CoreAudioApi.AudioAPOTypes in '..\src\WinApi.CoreAudioApi.AudioAPOTypes.pas',
+  WinApi.CoreAudioApi.AudEvCod in '..\src\WinApi.CoreAudioApi.AudEvCod.pas',
   WinApi.WIC.WinCodecSdk in '..\src\WinApi.WIC.WinCodecSdk.pas',
   WinApi.WIC.WinCodec in '..\src\WinApi.WIC.WinCodec.pas',
   WinApi.Mpeg2Data in '..\src\WinApi.Mpeg2Data.pas',
@@ -192,6 +191,10 @@ contains
   WinApi.WinMM.MSAcmDrv in '..\src\WinApi.WinMM.MSAcmDrv.pas',
   WinApi.WinMM.MSAcmDlg in '..\src\WinApi.WinMM.MSAcmDlg.pas',
   WinApi.MPEGType in '..\src\WinApi.MPEGType.pas',
-  WinApi.Avrt in '..\src\WinApi.Avrt.pas';
+  WinApi.Avrt in '..\src\WinApi.Avrt.pas',
+  WinApi.CoreAudioApi.AudioClientActivationParams in '..\src\WinApi.CoreAudioApi.AudioClientActivationParams.pas',
+  WinApi.CoreAudioApi.AudioEndpoints in '..\src\WinApi.CoreAudioApi.AudioEndpoints.pas',
+  WinApi.CoreAudioApi.AudioStateMonitorApi in '..\src\WinApi.CoreAudioApi.AudioStateMonitorApi.pas',
+  WinApi.CoreAudioApi.AudioClient in '..\src\WinApi.CoreAudioApi.AudioClient.pas';
 
 end.
