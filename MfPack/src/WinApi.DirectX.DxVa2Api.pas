@@ -10,7 +10,7 @@
 // Release date: 20-07-2012
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 // Description: Public Interfaces for DXVA2.
 //              https://docs.microsoft.com/en-us/windows/win32/medfound/directx-video-acceleration-2-0
 //
@@ -23,21 +23,22 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //
 //==============================================================================
-// Source: dxva2api.h
+// Source: f.h
 //
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //==============================================================================
@@ -1064,16 +1065,16 @@ type
                                      out pFormats: PD3DFORMAT): HResult; stdcall;
 
     function GetDecoderConfigurations(const Guid: TGuid;
-                                      const pVideoDesc: DXVA2_VideoDesc;
-                                      const pReserved: Pointer;
+                                      pVideoDesc: DXVA2_VideoDesc;
+                                      pReserved: Pointer;
                                       out pCount: UINT;
                                       out ppConfigs: PDXVA2_ConfigPictureDecode): HResult; stdcall;
 
     function CreateVideoDecoder(const Guid: TGuid;
-                                const pVideoDesc: DXVA2_VideoDesc;
-                                const pConfig: DXVA2_ConfigPictureDecode;
-                                const ppDecoderRenderTargets: PIDirect3DSurface9;
-                                const NumRenderTargets: UINT;
+                                pVideoDesc: DXVA2_VideoDesc;
+                                pConfig: DXVA2_ConfigPictureDecode;
+                                ppDecoderRenderTargets: PIDirect3DSurface9;
+                                NumRenderTargets: UINT;
                                 out ppDecode: PIDirectXVideoDecoder): HResult; stdcall;
   end;
   IID_IDirectXVideoDecoderService = IDirectXVideoDecoderService;
@@ -1156,9 +1157,9 @@ type
     function ReleaseBuffer(BufferType: UINT): HResult; stdcall;
 
     function BeginFrame(pRenderTarget: IDirect3DSurface9;
-                        pvPVPData: pointer): HResult; stdcall;
+                        pvPVPData: Pointer): HResult; stdcall;
 
-    function EndFrame(out pHandleComplete: THANDLE): HResult; stdcall;
+    function EndFrame(out pHandleComplete: THandle): HResult; stdcall;
 
     function Execute(pExecuteParams: DXVA2_DecodeExecuteParams): HResult; stdcall;
 

@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 //
 // Description: DirectX Typography Services public API definitions.
 //
@@ -23,16 +23,17 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //
@@ -3041,7 +3042,57 @@ type
   {$EXTERNALSYM IID_IDWriteFontSet3}
 
 
+
+
+
+
 //#endif // NTDDI_VERSION >= NTDDI_WIN10_RS5
+
+
+
+
+{if NTDDI_VERSION >= NTDDI_WIN10_MN}
+
+
+  // Interface IDWriteFontFace6
+  // ==========================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IDWriteFontFace6);'}
+  {$EXTERNALSYM IDWriteFontFace6}
+  IDWriteFontFace6 = interface(IDWriteFontFace5)
+  ['{C4B1FE1B-6E84-47D5-B54C-A597981B06AD}']
+
+    function GetFamilyNames(fontFamilyModel: DWRITE_FONT_FAMILY_MODEL;
+                            out names: IDWriteLocalizedStrings): HResult; stdcall;
+    /// <summary>
+    /// Creates a localized strings object that contains the family names for the font, indexed by locale name.
+    /// </summary>
+    /// <param name="fontFamilyModel">Specifies how fonts are grouped into families, which affects the family name property.</param>
+    /// <param name="names">Receives a pointer to an object to contains the font family names, indexed by locale.</param>
+    /// <returns>
+    /// Standard HRESULT error code.
+    /// </returns>
+
+    // using IDWriteFontFace3::GetFamilyNames;
+
+    /// <summary>
+    /// Creates a localized strings object that contains the face names for the font, indexed by locale name.
+    /// </summary>
+    /// <param name="fontFamilyModel">Specifies how fonts are grouped into families, which affects the face name property.</param>
+    /// <param name="names">Receives a pointer to an object to contains the font face names, indexed by locale.</param>
+    /// <returns>
+    /// Standard HRESULT error code.
+    /// </returns>
+    function GetFaceNames(fontFamilyModel: DWRITE_FONT_FAMILY_MODEL;
+                          out names: PIDWriteLocalizedStrings): HResult; stdcall;
+
+    // using IDWriteFontFace3::GetFaceNames;
+  end;
+  IID_IDWriteFontFace6 = IDWriteFontFace6;
+  {$EXTERNALSYM IID_IDWriteFontFace6}
+
+{endif // NTDDI_VERSION >= NTDDI_WIN10_MN}
+
 
   // Creates an OpenType tag for a font axis.
   function DwriteMakeFontAxisTag(a: AnsiChar;
