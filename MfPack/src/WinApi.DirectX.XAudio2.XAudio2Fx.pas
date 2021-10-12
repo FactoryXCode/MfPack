@@ -9,7 +9,7 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 // Description: Declarations for the audio effects included with XAudio2.
 //              Windows 8 XAudio 2.8 or later
 //
@@ -22,16 +22,17 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: This version of XAudio2 is available only in Windows 8 or later.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //
@@ -936,24 +937,24 @@ begin
 {$IFDEF _WIN32_WINNT_WIN10}
   if (sevenDotOneReverb = True) then
     begin
-        pNative.RearDelay:= XAUDIO2FX_REVERB_DEFAULT_7POINT1_REAR_DELAY; // 20
+        pNative.RearDelay := XAUDIO2FX_REVERB_DEFAULT_7POINT1_REAR_DELAY; // 20
     end
   else
     begin
-        pNative.RearDelay:= XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY; // 5
+        pNative.RearDelay := XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY; // 5
     end;
 
-    pNative.SideDelay:= XAUDIO2FX_REVERB_DEFAULT_7POINT1_SIDE_DELAY; // 5
+    pNative.SideDelay := XAUDIO2FX_REVERB_DEFAULT_7POINT1_SIDE_DELAY; // 5
 {$ELSE}
-    pNative.RearDelay:= XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY; // 5
+    pNative.RearDelay := XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY; // 5
 {$ENDIF}
-    pNative.PositionLeft:= XAUDIO2FX_REVERB_DEFAULT_POSITION; // 6
-    pNative.PositionRight:= XAUDIO2FX_REVERB_DEFAULT_POSITION; // 6
-    pNative.PositionMatrixLeft:= XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX; // 27
-    pNative.PositionMatrixRight:= XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX; // 27
-    pNative.RoomSize:= XAUDIO2FX_REVERB_DEFAULT_ROOM_SIZE; // 100
-    pNative.LowEQCutoff:= 4;
-    pNative.HighEQCutoff:= 6;
+    pNative.PositionLeft := XAUDIO2FX_REVERB_DEFAULT_POSITION; // 6
+    pNative.PositionRight := XAUDIO2FX_REVERB_DEFAULT_POSITION; // 6
+    pNative.PositionMatrixLeft := XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX; // 27
+    pNative.PositionMatrixRight := XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX; // 27
+    pNative.RoomSize := XAUDIO2FX_REVERB_DEFAULT_ROOM_SIZE; // 100
+    pNative.LowEQCutoff := 4;
+    pNative.HighEQCutoff := 6;
 
     // The rest of the I3DL2 parameters map to the native property set
     pNative.RoomFilterMain:= (pI3DL2.Room / 100.0);
@@ -961,45 +962,45 @@ begin
 
     if (pI3DL2.DecayHFRatio >= 1.0) then
       begin
-        index:= Round(-4.0 * log10(pI3DL2.DecayHFRatio));
+        index := Round(-4.0 * log10(pI3DL2.DecayHFRatio));
 
         if (index < -8) then
-          index:= -8;
+          index := -8;
 
         if (index < 0) then
-            pNative.LowEQGain:= index + 8
+            pNative.LowEQGain := index + 8
         else
-            pNative.LowEQGain:= 8;
+            pNative.LowEQGain := 8;
 
         pNative.HighEQGain:= 8;
-        pNative.DecayTime:= pI3DL2.DecayTime * pI3DL2.DecayHFRatio;
+        pNative.DecayTime := pI3DL2.DecayTime * pI3DL2.DecayHFRatio;
       end
     else
       begin
-        index:= Round(4.0 * log10(pI3DL2.DecayHFRatio));
+        index := Round(4.0 * log10(pI3DL2.DecayHFRatio));
 
         if (index < -8) then
-          index:= -8;
+          index := -8;
 
-        pNative.LowEQGain:= 8;
+        pNative.LowEQGain := 8;
 
         if (index < 0) then
-            pNative.HighEQGain:= index + 8
+            pNative.HighEQGain := index + 8
         else
-            pNative.HighEQGain:= 8;
+            pNative.HighEQGain := 8;
 
-        pNative.DecayTime:= pI3DL2.DecayTime;
+        pNative.DecayTime := pI3DL2.DecayTime;
      end;
 
-    reflectionsDelay:= pI3DL2.ReflectionsDelay * 1000.0;
+    reflectionsDelay := pI3DL2.ReflectionsDelay * 1000.0;
 
     if (reflectionsDelay >= XAUDIO2FX_REVERB_MAX_REFLECTIONS_DELAY) then // 300
       begin
-        reflectionsDelay:= (XAUDIO2FX_REVERB_MAX_REFLECTIONS_DELAY - 1);
+        reflectionsDelay := (XAUDIO2FX_REVERB_MAX_REFLECTIONS_DELAY - 1);
       end
     else if (reflectionsDelay <= 1) then
       begin
-        reflectionsDelay:= 1;
+        reflectionsDelay := 1;
       end;
 
     pNative.ReflectionsDelay:= Round(reflectionsDelay);
@@ -1007,21 +1008,21 @@ begin
     reverbDelay:= (pI3DL2.ReverbDelay * 1000.0);
     if (reverbDelay >= XAUDIO2FX_REVERB_MAX_REVERB_DELAY) then // 85
       begin
-        reverbDelay:= (XAUDIO2FX_REVERB_MAX_REVERB_DELAY - 1);
+        reverbDelay := (XAUDIO2FX_REVERB_MAX_REVERB_DELAY - 1);
       end;
 
     // Implemented a rangechecker here
-    pNative.ReverbDelay:= ClipByteValue(Round(reverbDelay));
+    pNative.ReverbDelay := ClipByteValue(Round(reverbDelay));
 
-    pNative.ReflectionsGain:= (pI3DL2.Reflections / 100.0);
-    pNative.ReverbGain:= (pI3DL2.Reverb / 100.0);
+    pNative.ReflectionsGain := Single(pI3DL2.Reflections / 100.0);
+    pNative.ReverbGain := Single(pI3DL2.Reverb / 100.0);
     pNative.EarlyDiffusion:= Round(15.0 * pI3DL2.Diffusion / 100.0);
-    pNative.LateDiffusion:= pNative.EarlyDiffusion;
-    pNative.Density:= pI3DL2.Density;
-    pNative.RoomFilterFreq:= pI3DL2.HFReference;
+    pNative.LateDiffusion := pNative.EarlyDiffusion;
+    pNative.Density := pI3DL2.Density;
+    pNative.RoomFilterFreq := pI3DL2.HFReference;
 
-    pNative.WetDryMix:= pI3DL2.WetDryMix;
-    pNative.DisableLateField:= FALSE;
+    pNative.WetDryMix := pI3DL2.WetDryMix;
+    pNative.DisableLateField := FALSE;
 end;
 
 // Implement Additional Prototypes here.

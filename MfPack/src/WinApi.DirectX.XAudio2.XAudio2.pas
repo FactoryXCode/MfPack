@@ -9,7 +9,7 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 // Description: Declarations for the XAudio2 game audio API.
 //              Windows 10 XAudio2.9 or later
 //
@@ -22,16 +22,19 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
-// Remarks: -
+// Remarks: This version of XAudio2 is available only in Windows 8 or later.
+//          Use the XAudio2 headers and libraries from XAudio2Redist with applications
+//          that target Windows 7. See https://aka.ms/xaudio2redist.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //
@@ -710,7 +713,7 @@ type
   IXAudio2Extension = interface(IUnknown)
     ['{84ac29bb-d619-44d2-b197-e4acf7df3ed6}']
 
-    // NAME: IXAudio2::GetProcessingQuantum
+    // NAME: IXAudio2.GetProcessingQuantum
     // DESCRIPTION: Returns the processing quantum
     //              quantumMilliseconds = (1000.0f * quantumNumerator / quantumDenominator)
     //
@@ -1161,7 +1164,8 @@ type
     // The voice may have to be destroyed and re-created to recover from
     // the error.  The callback arguments report which buffer was being
     // processed when the error occurred, and its HRESULT code.
-    procedure OnVoiceError(pBufferContext: Pointer; Error: HRESULT); virtual; stdcall; abstract;
+    procedure OnVoiceError(pBufferContext: Pointer;
+                           Error: HRESULT); virtual; stdcall; abstract;
 
   end;
 
@@ -1270,7 +1274,7 @@ uses
 // Calculate the argument to SetVolume from a decibel value
 function XAudio2DecibelsToAmplitudeRatio(Decibels: Single): Single; inline;
 begin
-  Result:= power(10.0, Decibels / 20.0);
+  Result := power(10.0, Decibels / 20.0);
 end;
 
 
@@ -1279,10 +1283,10 @@ function XAudio2AmplitudeRatioToDecibels(Volume: Single): Single; inline;
 begin
   if (Volume = 0) then
     begin
-      Result:= -3.402823466e+38; // Smallest Single value (-FLT_MAX)
+      Result := -3.402823466e+38; // Smallest Single value (-FLT_MAX)
     end
   else
-    Result:= 20.0 * Single(log10(Volume));
+    Result := 20.0 * Single(log10(Volume));
 end;
 
 
@@ -1291,7 +1295,7 @@ function XAudio2SemitonesToFrequencyRatio(Semitones: Single): Single; inline;
 begin
   // FrequencyRatio = 2 ^ Octaves
   //                = 2 ^ (Semitones / 12)
-  Result:= Power(2.0, Semitones / 12.0);
+  Result := Power(2.0, Semitones / 12.0);
 end;
 
 
@@ -1314,10 +1318,10 @@ function XAudio2CutoffFrequencyToRadians(CutoffFrequency: Single;
 begin
   if Round(CutoffFrequency * 6.0) >= SampleRate then
     begin
-      Result:= XAUDIO2_MAX_FILTER_FREQUENCY;
+      Result := XAUDIO2_MAX_FILTER_FREQUENCY;
     end
   else
-    Result:=  2.0 * Sin(Single(M_PI) * CutoffFrequency / SampleRate);
+    Result :=  2.0 * Sin(Single(M_PI) * CutoffFrequency / SampleRate);
 end;
 
 
@@ -1325,7 +1329,7 @@ end;
 function XAudio2RadiansToCutoffFrequency(Radians: Single;
                                          SampleRate: Single): Single;
 begin
-    Result:= SampleRate * ArcSin(Radians / 2.0) / Single(M_PI);
+    Result := SampleRate * ArcSin(Radians / 2.0) / Single(M_PI);
 end;
 
 
@@ -1338,10 +1342,10 @@ function XAudio2CutoffFrequencyToOnePoleCoefficient(CutoffFrequency: Single;
 begin
   if (Round(CutoffFrequency) >= SampleRate) then
     begin
-      Result:= XAUDIO2_MAX_FILTER_FREQUENCY;
+      Result := XAUDIO2_MAX_FILTER_FREQUENCY;
     end
   else
-    Result:= (1.0 - Power(1.0 - 2.0 * CutoffFrequency / SampleRate, 2.0));
+    Result := (1.0 - Power(1.0 - 2.0 * CutoffFrequency / SampleRate, 2.0));
 end;
 
 // end XAUDIO2_HELPER_FUNCTIONS
