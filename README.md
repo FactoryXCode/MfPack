@@ -23,9 +23,9 @@
 
 # MfPack 
 
-Version X 3.0.1 Enigma release #4.  
-Delphi XE2 up to and including Delphi 10.3.3.  
-SDK version: 10.0.19041.0, May 2020, OS Win10 update (2004)
+Version X 3.0.2  
+Delphi XE2 up to and including Delphi 10.3.4.  
+SDK version: 10.0.20348.0
 
 
 # Samples
