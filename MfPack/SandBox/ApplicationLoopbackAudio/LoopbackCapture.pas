@@ -7,7 +7,7 @@
 //                   https://github.com/FactoryXCode/MfPack
 // Module: LoopbackCapture.pas
 // Kind: Pascal / Delphi unit
-// Release date: 20-08-2021
+// Release date: 00-00-2021
 // Language: ENU
 //
 // Revision Version: 3.0.2
@@ -27,11 +27,11 @@
 // Remarks: Note that this sample requires Windows 10 build 20348 or later.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //
@@ -65,6 +65,8 @@ uses
   WinApi.Windows,
   WinApi.Messages,
   WinApi.ComBaseApi,
+  {ActiveX}
+  WinApi.ActiveX.PropIdl,
   {system}
   System.SysUtils,
   System.Classes,
@@ -77,6 +79,7 @@ uses
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfObjects,
   {Application}
+  Common,
   Helpers;
 
 const
@@ -97,8 +100,7 @@ type
         Starting,
         Capturing,
         Stopping,
-        Stopped
-                );
+        Stopped );
 
   CallbackAsyncCallback = class(IMFAsyncCallback)
   public
@@ -107,6 +109,11 @@ type
 
     function Invoke(pAsyncResult: IMFAsyncResult): HResult; stdcall;
   end;
+
+   // TMethodSyncCallBack = procedure(CLoopbackCapture, StartCapture, OnStartCapture);
+   // TMethodSyncCallBack = procedure(CLoopbackCapture, StopCapture, OnStopCapture);
+   // TMethodSyncCallBack(CLoopbackCapture, SampleReady, OnSampleReady);
+   // TMethodSyncCallBack(CLoopbackCapture, FinishCapture, OnFinishCapture);
 
 
   CLoopbackCapture = class(TInterfacedPersistent, IActivateAudioInterfaceCompletionHandler)
@@ -164,13 +171,8 @@ type
     function StartCaptureAsync(processId: DWORD; includeProcessTree: Boolean; outputFileName: PCWSTR): HResult;
     function StopCaptureAsync(): HResult;
 
-    //METHODASYNCCALLBACK(CLoopbackCapture, StartCapture, OnStartCapture);
-    //METHODASYNCCALLBACK(CLoopbackCapture, StopCapture, OnStopCapture);
-    //METHODASYNCCALLBACK(CLoopbackCapture, SampleReady, OnSampleReady);
-    //METHODASYNCCALLBACK(CLoopbackCapture, FinishCapture, OnFinishCapture);
-
-
   end;
+
 
 
 implementation
@@ -209,22 +211,26 @@ end;
 function CLoopbackCapture.InitializeLoopbackCapture(): HResult;
 var
   dwTaskID: DWord;
+  hr: HResult;
 
 begin
   dwTaskID := 0;
 
+try
   // Create events for sample ready or user stop
-  //RETURN_IF_FAILED(m_SampleReadyEvent.create(wil::EventOptions::None));
+  //RETURN_IF_FAILED(m_SampleReadyEvent.create(wil.EventOptions.None));
 
   // Initialize MF
   //RETURN_IF_FAILED(MFStartup(MF_VERSION, MFSTARTUP_LITE));
   InitMF();
 
   // Register MMCSS work queue
-  if Failed(MFLockSharedWorkQueue('Capture',
-                                  0,
-                                  dwTaskID,
-                                  m_dwQueueID)) then Exit;
+  hr := (MFLockSharedWorkQueue('Capture',
+                               0,
+                               dwTaskID,
+                               m_dwQueueID));
+  if FAILED(hr) then
+    Exit;
 
   // Set the capture event work queue to use the MMCSS queue
   m_xSampleReady.SetQueueID(m_dwQueueID);
@@ -234,8 +240,9 @@ begin
 
   // Create the capture-stopped event as auto-reset
   if Failed(m_hCaptureStopped = EventOptions.None) then Exit;
-
-  Result := S_OK;
+finally
+  Result := hr;
+end;
 end;
 
 

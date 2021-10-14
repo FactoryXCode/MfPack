@@ -7,7 +7,7 @@
 //                   https://github.com/FactoryXCode/MfPack
 // Module: SampleConverter.pas
 // Kind: Pascal Unit
-// Release date: 22-09-2021
+// Release date: 00-00-2021
 // Language: ENU
 //
 // Revision Version: 3.0.2
@@ -24,15 +24,16 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 //
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX301/Samples/MFFrameSample
+// Related projects: MfPackX302/Samples/MFFrameSample
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //
@@ -64,8 +65,6 @@ uses
   WinApi.Windows,
   WinApi.DirectX.D2D1,
   WinApi.DirectX.DCommon,
-  //WinApi.D2D1,  // You could use the 2D1D api included with Delphi,
-                  // however this API is maintained until 2019 and missing some important updates.
   WinApi.DirectX.DXGI,
   WinApi.DirectX.DXGIFormat,
   // WinApi.DXGI included with Delphi <= 10.3.3 is not up to date!

@@ -7,7 +7,7 @@
 //                   https://github.com/FactoryXCode/MfPack
 // Module:  Helpers.pas
 // Kind: Pascal Unit
-// Release date: 21-12-2019
+// Release date: 00-00-2021
 // Language: ENU
 //
 // Revision Version: 3.0.2
@@ -23,18 +23,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 17/08/2021 Tony                Fixed some memory issues.
+//
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or later.
+// Remarks: Note that this sample requires Windows 10 build 20348 or later.
 //
 // Related objects: -
-// Related projects: >= MfPackX301
+// Related projects: >= MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //

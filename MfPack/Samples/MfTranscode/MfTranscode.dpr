@@ -11,7 +11,7 @@ uses
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
-  Application.Title := 'MfTranscode version 2.6.4';
+  Application.Title := 'MfTranscode version 3.0.2';
   Application.CreateForm(TfrmTranscoder, frmTranscoder);
   Application.Run;
 end.

@@ -9,7 +9,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.0.1
+// Version: 3.0.2
 // Description: This is the basic class of MfPlayer,
 //              containing the necessary methodes to play a mediafile
 //              For indepth information see the included examples (CPlayer)
@@ -25,16 +25,17 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //
@@ -191,8 +192,8 @@ type
     procedure SetVideoScreen(val: HWND);
     function GetVideoScreen(): HWND;
 
-    procedure SetFullScreen(val: LongBool); deprecated 'This API is not supported and is unavailable since Redstone 5. ';
-    function IsFullScreen(): LongBool;
+   // procedure SetFullScreen(val: LongBool); deprecated 'This API is not supported and is unavailable since Redstone 5. ';
+   // function IsFullScreen(): LongBool;
 
     function UpdatePendingCommands(req: TRequest): HRESULT;
 
@@ -317,7 +318,7 @@ type
     property SetNewPosition: MFTIME write GotoNewPosition;
     property Position: MFTIME read mfpControl.CurrentPosition;
     property SetVideoSurface: HWND read GetVideoScreen write SetVideoScreen;
-    property FullScreen: LongBool read IsFullScreen write SetFullScreen;
+    // property FullScreen: LongBool read IsFullScreen write SetFullScreen;  See comment @ IMFVideoDisplayControl
     property State: TPlayerState read GetState;
   end;
 
@@ -1536,20 +1537,20 @@ begin
     m_pVideoDisplay.GetVideoWindow(Result);
 end;
 
-
+{
 procedure TMfPlayer.SetFullScreen(val: LongBool);
 begin
   if Assigned(m_pVideoDisplay) then
     m_pVideoDisplay.SetFullscreen(val);
 end;
-
-
+}
+{
 function TMfPlayer.IsFullScreen(): LongBool;
 begin
   if Assigned(m_pVideoDisplay) then
-    {void} m_pVideoDisplay.GetFullscreen(Result);
+    m_pVideoDisplay.GetFullscreen(Result);
 end;
-
+}
 
 function TMfPlayer.GetPosition(out hnsPosition: MFTIME): HRESULT;
 var

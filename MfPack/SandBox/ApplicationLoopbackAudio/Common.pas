@@ -7,7 +7,7 @@
 //                   https://github.com/FactoryXCode/MfPack
 // Module: Common.pas
 // Kind: Pascal / Delphi unit
-// Release date: 20-08-2021
+// Release date: 00-00-2021
 // Language: ENU
 //
 // Revision Version: 3.0.2
@@ -27,11 +27,11 @@
 // Remarks: Note that this sample requires Windows 10 build 20348 or later.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //
@@ -74,14 +74,16 @@ uses
   WinApi.MediaFoundationApi.MfObjects;
 
 
-//#ifndef METHODASYNCCALLBACK
-//#define METHODASYNCCALLBACK(Parent, AsyncCallback, pfnCallback) \
+
+type
+  METHODASYNCCALLBACK = procedure(Parent; AsyncCallback; pfnCallback);
+
 
 type
 
   Callback_AsyncCallback = class(TInterfacedPersistent, IMFAsyncCallback)
   protected
-    _parent: HWND;
+    _parent: Parent;
     _dwQueueID: DWORD;
 
   private
@@ -92,6 +94,7 @@ type
                            out pdwQueue: DWord): HResult; stdcall;
 
     function Invoke(pAsyncResult: IMFAsyncResult): HResult; stdcall;
+    //
 
   public
 
@@ -135,7 +138,7 @@ end;
 
 function Callback_AsyncCallback.Invoke(pAsyncResult: IMFAsyncResult): HResult;
 begin
-  //_parent.pfnCallback(pResult);
+  _parent.pfnCallback(pResult);
   Result := S_OK;
 end;
 

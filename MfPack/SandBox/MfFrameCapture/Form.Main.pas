@@ -7,7 +7,7 @@
 //                   https://github.com/FactoryXCode/MfPack
 // Module:  Form.Main.pas
 // Kind: Pascal Unit
-// Release date: 22-09-2021
+// Release date: 00-00-2021
 // Language: ENU
 //
 // Revision Version: 3.0.2
@@ -24,15 +24,16 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 //
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX301/Samples/MFFrameSample
+// Related projects: MfPackX302/Samples/MFFrameSample
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //
@@ -306,6 +307,7 @@ begin
       oPreviousRounding := GetRoundMode;
     try
       SetRoundMode(rmDown);
+      // Set trackbar max range, maybe in frames?
       tbVideoPosition.Max := Round(FCapture.Duration.TotalSeconds);
     finally
       SetRoundMode(oPreviousRounding);
@@ -378,9 +380,9 @@ begin
             {PNG}
             2: begin
                  try
-                 pPng := TPngImage.Create;
-                 pPng.Assign(picFrame.Picture.Bitmap);
-                 pPng.SaveToFile(sdSaveFrame.FileName);
+                   pPng := TPngImage.Create;
+                   pPng.Assign(picFrame.Picture.Bitmap);
+                   pPng.SaveToFile(sdSaveFrame.FileName);
                  finally
                    pPng.Free;
                  end;
@@ -388,15 +390,15 @@ begin
             {JPG}
             3: begin
                  try
-                 pJpg := TJPEGImage.Create;
-                 // Adjust performance, compression etc.
-                 pJpg.Performance := jpBestQuality;
-                 pJpg.ProgressiveEncoding := True;
-                 pJpg.ProgressiveDisplay := True;
-                 //pJpg.CompressionQuality := 30;
-                 pJpg.Compress;
-                 pJpg.Assign(picFrame.Picture.Bitmap);
-                 pjpg.SaveToFile(sdSaveFrame.FileName);
+                   pJpg := TJPEGImage.Create;
+                   // Adjust performance, compression etc.
+                   pJpg.Performance := jpBestQuality;
+                   pJpg.ProgressiveEncoding := True;
+                   pJpg.ProgressiveDisplay := True;
+                   //pJpg.CompressionQuality := 30;
+                   pJpg.Compress;
+                   pJpg.Assign(picFrame.Picture.Bitmap);
+                   pjpg.SaveToFile(sdSaveFrame.FileName);
                  finally
                    pJpg.Free;
                  end;
@@ -406,10 +408,12 @@ begin
     end;
 end;
 
+
 function TFrmMain.GetDefaultSaveName : string;
 begin
   Result := 'Capture_' + TimeSpanToDisplay(FLastFrameTime, True).Replace(':', '.');
 end;
+
 
 procedure TFrmMain.HandleBrowseClick(Sender: TObject);
 begin
@@ -517,7 +521,7 @@ begin
   lblCurrentPosition.Caption := TimeSpanToDisplay(TTimeSpan.Create(0,
                                                                    0,
                                                                    tbVideoPosition.Position)) + ' / ' +
-                                                                   TimeSpanToDisplay(FCapture.Duration);
+                                                                   TimeSpanToDisplay(FCapture.Duration, True);
 end;
 
 

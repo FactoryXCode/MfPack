@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.0.1
+// Version: 3.0.2
 // Description: This is the extended basic player class (version X),
 //              containing the necessary methodes to play a mediafile
 //              For indepth information see the included examples (CPlayer)
@@ -26,16 +26,17 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //
@@ -103,10 +104,8 @@ uses
   MfPCXConstants,
   LangTags,
   {MfComponents}
-  QueueTimer;
-
-  {if getting an error about a missing dcu, install Additional first or
-   add the searchpath to Additional in your project options}
+  QueueTimer;  {if getting an error about a missing dcu, install MfComponents first or
+                add the searchpath to MfComponents in your project options}
 
 type
   TRedrawStatus = (rdStarted,

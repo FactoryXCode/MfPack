@@ -172,7 +172,6 @@ contains
   WinApi.Mpeg2Structs in '..\src\WinApi.Mpeg2Structs.pas',
   WinApi.Mpeg2Bits in '..\src\WinApi.Mpeg2Bits.pas',
   WinApi.Mpeg2PsiParser in '..\src\WinApi.Mpeg2PsiParser.pas',
-  WinApi.MPEGError in '..\src\WinApi.MPEGError.pas',
   WinApi.WinMM.MMiscApi in '..\src\WinApi.WinMM.MMiscApi.pas',
   WinApi.WinMM.MMSysCom in '..\src\WinApi.WinMM.MMSysCom.pas',
   WinApi.WinMM.MMSystem in '..\src\WinApi.WinMM.MMSystem.pas',
@@ -190,11 +189,12 @@ contains
   WinApi.WinMM.VfwMsgs in '..\src\WinApi.WinMM.VfwMsgs.pas',
   WinApi.WinMM.MSAcmDrv in '..\src\WinApi.WinMM.MSAcmDrv.pas',
   WinApi.WinMM.MSAcmDlg in '..\src\WinApi.WinMM.MSAcmDlg.pas',
-  WinApi.MPEGType in '..\src\WinApi.MPEGType.pas',
   WinApi.Avrt in '..\src\WinApi.Avrt.pas',
   WinApi.CoreAudioApi.AudioClientActivationParams in '..\src\WinApi.CoreAudioApi.AudioClientActivationParams.pas',
   WinApi.CoreAudioApi.AudioEndpoints in '..\src\WinApi.CoreAudioApi.AudioEndpoints.pas',
   WinApi.CoreAudioApi.AudioStateMonitorApi in '..\src\WinApi.CoreAudioApi.AudioStateMonitorApi.pas',
-  WinApi.CoreAudioApi.AudioClient in '..\src\WinApi.CoreAudioApi.AudioClient.pas';
+  WinApi.CoreAudioApi.AudioClient in '..\src\WinApi.CoreAudioApi.AudioClient.pas',
+  WinApi.Mpeg2Error in '..\src\WinApi.Mpeg2Error.pas',
+  WinApi.MpegType in '..\src\WinApi.MpegType.pas';
 
 end.

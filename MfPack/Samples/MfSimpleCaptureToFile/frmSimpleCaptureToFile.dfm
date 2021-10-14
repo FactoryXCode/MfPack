@@ -81,6 +81,7 @@ object Frm_SimpleCapture: TFrm_SimpleCapture
     Font.Style = []
     ParentFont = False
     TabOrder = 1
+    ExplicitTop = 1
     object Label1: TLabel
       Left = 6
       Top = 8
