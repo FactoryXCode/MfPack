@@ -172,6 +172,7 @@ type
 
 implementation
 
+{$WARN SYMBOL_PLATFORM OFF}
 const
   AudioStateMonitorApiLib = '';
 
@@ -191,7 +192,7 @@ const
 
   function CreateCaptureAudioStateMonitorForCategoryAndDeviceId; external AudioStateMonitorApiLib name 'RegisterAPO' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
-
+{$WARN SYMBOL_PLATFORM ON}
   // Implement Additional functions here.
 
 end.

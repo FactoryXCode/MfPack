@@ -175,6 +175,7 @@ var
   iPitch: Integer;
   iActualBMPDataSize: Integer;
   iExpectedBMPDataSize: Integer;
+  pClipRect: PRect;
 
 begin
   AError := '';
@@ -201,8 +202,9 @@ begin
           begin
             // Bind the render target to the bitmap
             // Note: When going in to async mode, and going to into this function, frendertarget is lost, so we need to reinitialize a new rendertarget.
+            CopyTRectToPRect(AImage.Canvas.ClipRect, pClipRect);
             Result := SUCCEEDED(FRenderTarget.BindDC(AImage.Canvas.Handle,
-                                                     AImage.Canvas.ClipRect));
+                                                     pClipRect));
             if Result then
               begin
                 // Create the 2D bitmap interface
@@ -222,7 +224,6 @@ begin
                 FRenderTarget.DrawBitmap(o2DBitmap);
                 FRenderTarget.EndDraw();
               end;
-              SafeRelease(o2DBitmap);
           end;
 
       finally
@@ -233,6 +234,7 @@ begin
 
   finally
     pBitmapData := Nil;
+    pClipRect := Nil;
   end;
 
 end;

@@ -1,7 +1,14 @@
 program MfFrameCapture;
 uses
+
   {$IFDEF FASTMM}
   FastMM4,
+  {$ELSE IFDEF madExcept}
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
   {$ENDIF}
 
   Vcl.Forms,
