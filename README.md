@@ -24,7 +24,7 @@
 # MfPack 
 
 Version X 3.0.2  
-Delphi XE2 up to and including Delphi 10.3.4.  
+Delphi XE2 up to and including Delphi 10.4  
 SDK version: 10.0.20348.0
 
 
