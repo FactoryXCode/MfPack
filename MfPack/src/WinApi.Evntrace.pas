@@ -10,7 +10,7 @@
 // Release date: 24-11-2015
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 // Description: Public headers for event tracing control applications,
 // consumers and providers.
 //
@@ -23,6 +23,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: LIBRARY CHANGES:
@@ -32,10 +33,10 @@
 //          See: const EvntraceLib declaration.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
+// Compiler version: 23 up to 34
 // SDK version: 10.0.19041.0
 //
 // Todo: -
@@ -90,25 +91,37 @@ const
   // EventTraceGuid is used to identify a event tracing session
   // ==========================================================
   // 68fdd900-4a3e-11d1-84f4-0000f80464e3
-  EventTraceGuid  :  TGUID = (D1: $68fdd900; D2: $4a3e; D3: $11d1; D4: ($84, $f4, $00, $00, $f8, $04, $64, $e3));
+  EventTraceGuid  :  TGUID = (D1: $68fdd900;
+                              D2: $4a3e;
+                              D3: $11d1;
+                              D4: ($84, $f4, $00, $00, $f8, $04, $64, $e3));
   {$EXTERNALSYM EventTraceGuid}
 
   // SystemTraceControlGuid. Used to specify event tracing for kernel
   // ================================================================
   // 9e814aad-3204-11d2-9a82-006008a86939
-  SystemTraceControlGuid  :  TGUID = (D1: $9e814aad; D2: $3204; D3: $11d2; D4: ($9a, $82, $00, $60, $08, $a8, $69, $39));
+  SystemTraceControlGuid  :  TGUID = (D1: $9e814aad;
+                                      D2: $3204;
+                                      D3: $11d2;
+                                      D4: ($9a, $82, $00, $60, $08, $a8, $69, $39));
   {$EXTERNALSYM SystemTraceControlGuid}
 
   // EventTraceConfigGuid. Used to report system configuration records
   // =================================================================
   // 01853a65-418f-4f36-aefc-dc0f1d2fd235
-  EventTraceConfigGuid  :  TGUID = (D1: $01853a65; D2: $418f; D3: $4f36; D4: ($ae, $fc, $dc, $0f, $1d, $2f, $d2, $35));
+  EventTraceConfigGuid  :  TGUID = (D1: $01853a65;
+                                    D2: $418f;
+                                    D3: $4f36;
+                                    D4: ($ae, $fc, $dc, $0f, $1d, $2f, $d2, $35));
   {$EXTERNALSYM EventTraceConfigGuid}
 
   // DefaultTraceSecurityGuid. Specifies the default event tracing security
   // ======================================================================
   // 0811c1af-7a07-4a06-82ed-869455cdf713
-  DefaultTraceSecurityGuid  :  TGUID = (D1: $0811c1af; D2: $7a07; D3: $4a06; D4: ($82, $ed, $86, $94, $55, $cd, $f7, $13));
+  DefaultTraceSecurityGuid  :  TGUID = (D1: $0811c1af;
+                                        D2: $7a07;
+                                        D3: $4a06;
+                                        D4: ($82, $ed, $86, $94, $55, $cd, $f7, $13));
   {$EXTERNALSYM DefaultTraceSecurityGuid}
 
   // PrivateLoggerNotificationGuid. Used for private cross-process logger notifications.
@@ -118,6 +131,97 @@ const
                                            D2: $042a;
                                            D3: $4c8e;
                                            D4: ($b9, $42, $2d, $05, $9b, $fe, $b1, $b1));
+
+  //
+  // System Provider GUIDs
+  //
+
+  SystemIoFilterProviderGuid : TGUID = (D1: $fbd09363;
+                                        D2: $9e22;
+                                        D3: $4661;
+                                        D4: ($b8, $bf, $e7, $a3, $4b, $53, $5b, $8c));
+
+
+  SystemObjectProviderGuid : TGUID = (D1: $febd7460;
+                                      D2: $3d1d;
+                                      D3: $47eb;
+                                      D4: ($af, $49, $c9, $ee, $b1, $e1, $46, $f2));
+
+
+  SystemPowerProviderGuid : TGUID = (D1: $c134884a;
+                                     D2: $32d5;
+                                     D3: $4488;
+                                     D4: ($80, $e5, $14, $ed, $7a, $bb, $82, $69));
+
+  SystemHypervisorProviderGuid : TGUID = (D1: $bafa072a;
+                                          D2: $918a;
+                                          D3: $4bed;
+                                          D4: ($b6, $22, $bc, $15, $20, $97, $9, $8f));
+
+  SystemLockProviderGuid : TGUID = (D1: $721ddfd3;
+                                    D2: $dacc;
+                                    D3: $4e1e;
+                                    D4: ($b2, $6a, $a2, $cb, $31, $d4, $70, $5a));
+
+  SystemConfigProviderGuid : TGUID = (D1: $fef3a8b6;
+                                      D2: $318d;
+                                      D3: $4b67;
+                                      D4: ($a9, $6a, $3b, $f, $6b, $8f, $18, $fe));
+
+  SystemCpuProviderGuid : TGUID = (D1: $c6c5265f;
+                                   D2: $eae8;
+                                   D3: $4650;
+                                   D4: ($aa, $e4, $9d, $48, $60, $3d, $85, $10));
+
+  SystemSchedulerProviderGuid : TGUID = (D1: $599a2a76;
+                                         D2: $4d91;
+                                         D3: $4910;
+                                         D4: ($9a, $c7, $7d, $33, $f2, $e9, $7a, $6c));
+
+  SystemProfileProviderGuid : TGUID = (D1: $bfeb0324;
+                                       D2: $1cee;
+                                       D3: $496f;
+                                       D4: ($a4, $9, $2a, $c2, $b4, $8a, $63, $22));
+
+  SystemIoProviderGuid : TGUID = (D1: $3d5c43e3;
+                                  D2: $f1c;
+                                  D3: $4202;
+                                  D4: ($b8, $17, $17, $4c, $0, $70, $dc, $79));
+
+  SystemMemoryProviderGuid : TGUID = (D1: $82958ca9;
+                                      D2: $b6cd;
+                                      D3: $47f8;
+                                      D4: ($a3, $a8, $3, $ae, $85, $a4, $bc, $24));
+
+  SystemRegistryProviderGuid : TGUID = (D1: $16156bd9;
+                                        D2: $fab4;
+                                        D3: $4cfa;
+                                        D4: ($a2, $32, $89, $d1, $9, $90, $58, $e3));
+
+  SystemProcessProviderGuid : TGUID = (D1: $151f55dc;
+                                       D2: $467d;
+                                       D3: $471f;
+                                       D4: ($83, $b5, $5f, $88, $9d, $46, $ff, $66));
+
+  SystemAlpcProviderGuid : TGUID = (D1: $fcb9baaf;
+                                    D2: $e529;
+                                    D3: $4980;
+                                    D4: ($92, $e9, $ce, $d1, $a6, $aa, $df, $df));
+
+  SystemSyscallProviderGuid : TGUID = (D1: $434286f7;
+                                       D2: $6f1b;
+                                       D3: $45bb;
+                                       D4: ($b3, $7e, $95, $f6, $23, $04, $6c, $7c));
+
+  SystemInterruptProviderGuid : TGUID = (D1: $d4bbee17;
+                                         D2: $b545;
+                                         D3: $4888;
+                                         D4: ($85, $8b, $74, $41, $69, $01, $5b, $25));
+
+  SystemTimerProviderGuid : TGUID = (D1: $4f061568;
+                                     D2: $e215;
+                                     D3: $499f;
+                                     D4: ($ab, $2e, $ed, $a0, $ae, $89, $0a, $5b));
 
 
   KERNEL_LOGGER_NAMEW                 = 'NT Kernel Logger';
@@ -752,6 +856,285 @@ const
   {$EXTERNALSYM TRACE_HEADER_FLAG_USE_MOF_PTR}
 
 
+  //
+  // Keywords to be used for the System ALPC Provider.
+  //
+
+  SYSTEM_ALPC_KW_GENERAL              = $0000000000000001;
+  {$EXTERNALSYM SYSTEM_ALPC_KW_GENERAL}
+
+  //
+  // Keywords to be used for the System Config Provider.
+  //
+
+  SYSTEM_CONFIG_KW_SYSTEM             = $0000000000000001;
+  {$EXTERNALSYM SYSTEM_CONFIG_KW_SYSTEM}
+  SYSTEM_CONFIG_KW_GRAPHICS           = $0000000000000002;
+  {$EXTERNALSYM SYSTEM_CONFIG_KW_GRAPHICS}
+  SYSTEM_CONFIG_KW_STORAGE            = $0000000000000004;
+  {$EXTERNALSYM SYSTEM_CONFIG_KW_STORAGE}
+  SYSTEM_CONFIG_KW_NETWORK            = $0000000000000008;
+  {$EXTERNALSYM SYSTEM_CONFIG_KW_NETWORK}
+  SYSTEM_CONFIG_KW_SERVICES           = $0000000000000010;
+  {$EXTERNALSYM SYSTEM_CONFIG_KW_SERVICES}
+  SYSTEM_CONFIG_KW_PNP                = $0000000000000020;
+  {$EXTERNALSYM SYSTEM_CONFIG_KW_PNP}
+  SYSTEM_CONFIG_KW_OPTICAL            = $0000000000000040;
+  {$EXTERNALSYM SYSTEM_CONFIG_KW_OPTICAL}
+
+  //
+  // Keywords to be used for the System CPU Provider.
+  //
+
+  SYSTEM_CPU_KW_CONFIG                = $0000000000000001;
+  {$EXTERNALSYM SYSTEM_CPU_KW_CONFIG}
+  SYSTEM_CPU_KW_CACHE_FLUSH           = $0000000000000002;
+  {$EXTERNALSYM SYSTEM_CPU_KW_CACHE_FLUSH}
+  SYSTEM_CPU_KW_SPEC_CONTROL          = $0000000000000004;
+  {$EXTERNALSYM SYSTEM_CPU_KW_SPEC_CONTROL}
+
+  //
+  // Keywords to be used for the System Hypervisor Provider.
+  //
+
+  SYSTEM_HYPERVISOR_KW_PROFILE        = $0000000000000001;
+  {$EXTERNALSYM SYSTEM_HYPERVISOR_KW_PROFILE}
+  SYSTEM_HYPERVISOR_KW_CALLOUTS       = $0000000000000002;
+  {$EXTERNALSYM SYSTEM_HYPERVISOR_KW_CALLOUTS}
+  SYSTEM_HYPERVISOR_KW_VTL_CHANGE     = $0000000000000004;
+  {$EXTERNALSYM SYSTEM_HYPERVISOR_KW_VTL_CHANGE}
+
+  //
+  // Keywords to be used for the System Interrupt Provider.
+  //
+
+  SYSTEM_INTERRUPT_KW_GENERAL         = $0000000000000001;
+  {$EXTERNALSYM SYSTEM_INTERRUPT_KW_GENERAL}
+  SYSTEM_INTERRUPT_KW_CLOCK_INTERRUPT = $0000000000000002;
+  {$EXTERNALSYM SYSTEM_INTERRUPT_KW_CLOCK_INTERRUPT}
+  SYSTEM_INTERRUPT_KW_DPC             = $0000000000000004;
+  {$EXTERNALSYM SYSTEM_INTERRUPT_KW_DPC}
+  SYSTEM_INTERRUPT_KW_DPC_QUEUE       = $0000000000000008;
+  {$EXTERNALSYM SYSTEM_INTERRUPT_KW_DPC_QUEUE}
+  SYSTEM_INTERRUPT_KW_WDF_DPC         = $0000000000000010;
+  {$EXTERNALSYM SYSTEM_INTERRUPT_KW_WDF_DPC}
+  SYSTEM_INTERRUPT_KW_WDF_INTERRUPT   = $0000000000000020;
+  {$EXTERNALSYM SYSTEM_INTERRUPT_KW_WDF_INTERRUPT}
+  SYSTEM_INTERRUPT_KW_IPI             = $0000000000000040;
+  {$EXTERNALSYM SYSTEM_INTERRUPT_KW_IPI}
+
+  //
+  // Keywords to be used for the System IO Provider.
+  //
+
+  SYSTEM_IO_KW_DISK                   = $0000000000000001;
+  {$EXTERNALSYM SYSTEM_IO_KW_DISK}
+  SYSTEM_IO_KW_DISK_INIT              = $0000000000000002;
+  {$EXTERNALSYM SYSTEM_IO_KW_DISK_INIT}
+  SYSTEM_IO_KW_FILENAME               = $0000000000000004;
+  {$EXTERNALSYM SYSTEM_IO_KW_FILENAME}
+  SYSTEM_IO_KW_SPLIT                  = $0000000000000008;
+  {$EXTERNALSYM SYSTEM_IO_KW_SPLIT}
+  SYSTEM_IO_KW_FILE                   = $0000000000000010;
+  {$EXTERNALSYM SYSTEM_IO_KW_FILE}
+  SYSTEM_IO_KW_OPTICAL                = $0000000000000020;
+  {$EXTERNALSYM SYSTEM_IO_KW_OPTICAL}
+  SYSTEM_IO_KW_OPTICAL_INIT           = $0000000000000040;
+  {$EXTERNALSYM SYSTEM_IO_KW_OPTICAL_INIT}
+  SYSTEM_IO_KW_DRIVERS                = $0000000000000080;
+  {$EXTERNALSYM SYSTEM_IO_KW_DRIVERS}
+  SYSTEM_IO_KW_CC                     = $0000000000000100;
+  {$EXTERNALSYM SYSTEM_IO_KW_CC}
+  SYSTEM_IO_KW_NETWORK                = $0000000000000200;
+  {$EXTERNALSYM SYSTEM_IO_KW_NETWORK}
+
+  //
+  // Keywords to be used for the System IoFilter Provider.
+  //
+
+  SYSTEM_IOFILTER_KW_GENERAL          = $0000000000000001;
+  {$EXTERNALSYM SYSTEM_IOFILTER_KW_GENERAL}
+  SYSTEM_IOFILTER_KW_INIT             = $0000000000000002;
+  {$EXTERNALSYM SYSTEM_IOFILTER_KW_INIT}
+  SYSTEM_IOFILTER_KW_FASTIO           = $0000000000000004;
+  {$EXTERNALSYM SYSTEM_IOFILTER_KW_FASTIO}
+  SYSTEM_IOFILTER_KW_FAILURE          = $0000000000000008;
+  {$EXTERNALSYM SYSTEM_IOFILTER_KW_FAILURE}
+
+  //
+  // Keywords to be used for the System SpinLock Provider.
+  //
+
+  SYSTEM_LOCK_KW_SPINLOCK             = $0000000000000001;
+  {$EXTERNALSYM SYSTEM_LOCK_KW_SPINLOCK}
+  SYSTEM_LOCK_KW_SPINLOCK_COUNTERS    = $0000000000000002;
+  {$EXTERNALSYM SYSTEM_LOCK_KW_SPINLOCK_COUNTERS}
+  SYSTEM_LOCK_KW_SYNC_OBJECTS         = $0000000000000004;
+  {$EXTERNALSYM SYSTEM_LOCK_KW_SYNC_OBJECTS}
+
+  //
+  // Keywords to be used for the System Memory Provider.
+  //
+
+  SYSTEM_MEMORY_KW_GENERAL            = $0000000000000001;
+  {$EXTERNALSYM SYSTEM_MEMORY_KW_GENERAL}
+  SYSTEM_MEMORY_KW_HARD_FAULTS        = $0000000000000002;
+  {$EXTERNALSYM SYSTEM_MEMORY_KW_HARD_FAULTS}
+  SYSTEM_MEMORY_KW_ALL_FAULTS         = $0000000000000004;
+  {$EXTERNALSYM SYSTEM_MEMORY_KW_ALL_FAULTS}
+  SYSTEM_MEMORY_KW_POOL               = $0000000000000008;
+  {$EXTERNALSYM SYSTEM_MEMORY_KW_POOL}
+  SYSTEM_MEMORY_KW_MEMINFO            = $0000000000000010;
+  {$EXTERNALSYM SYSTEM_MEMORY_KW_MEMINFO}
+  SYSTEM_MEMORY_KW_PFSECTION          = $0000000000000020;
+  {$EXTERNALSYM SYSTEM_MEMORY_KW_PFSECTION}
+  SYSTEM_MEMORY_KW_MEMINFO_WS         = $0000000000000040;
+  {$EXTERNALSYM SYSTEM_MEMORY_KW_MEMINFO_WS}
+  SYSTEM_MEMORY_KW_HEAP               = $0000000000000080;
+  {$EXTERNALSYM SYSTEM_MEMORY_KW_HEAP}
+  SYSTEM_MEMORY_KW_WS                 = $0000000000000100;
+  {$EXTERNALSYM SYSTEM_MEMORY_KW_WS}
+  SYSTEM_MEMORY_KW_CONTMEM_GEN        = $0000000000000200;
+  {$EXTERNALSYM SYSTEM_MEMORY_KW_CONTMEM_GEN}
+  SYSTEM_MEMORY_KW_VIRTUAL_ALLOC      = $0000000000000400;
+  {$EXTERNALSYM SYSTEM_MEMORY_KW_VIRTUAL_ALLOC}
+  SYSTEM_MEMORY_KW_FOOTPRINT          = $0000000000000800;
+  {$EXTERNALSYM SYSTEM_MEMORY_KW_FOOTPRINT}
+  SYSTEM_MEMORY_KW_SESSION            = $0000000000001000;
+  {$EXTERNALSYM SYSTEM_MEMORY_KW_SESSION}
+  SYSTEM_MEMORY_KW_REFSET             = $0000000000002000;
+  {$EXTERNALSYM SYSTEM_MEMORY_KW_REFSET}
+  SYSTEM_MEMORY_KW_VAMAP              = $0000000000004000;
+  {$EXTERNALSYM SYSTEM_MEMORY_KW_VAMAP}
+  SYSTEM_MEMORY_KW_NONTRADEABLE       = $0000000000008000;
+  {$EXTERNALSYM SYSTEM_MEMORY_KW_NONTRADEABLE}
+
+  //
+  // Keywords to be used for the System Object Provider.
+  //
+
+  SYSTEM_OBJECT_KW_GENERAL            = $0000000000000001;
+  {$EXTERNALSYM SYSTEM_OBJECT_KW_GENERAL}
+  SYSTEM_OBJECT_KW_HANDLE             = $0000000000000002;
+  {$EXTERNALSYM SYSTEM_OBJECT_KW_HANDLE}
+
+  //
+  // Keywords to be used for the System Power Provider.
+  //
+
+  SYSTEM_POWER_KW_GENERAL             = $0000000000000001;
+  {$EXTERNALSYM SYSTEM_POWER_KW_GENERAL}
+  SYSTEM_POWER_KW_HIBER_RUNDOWN       = $0000000000000002;
+  {$EXTERNALSYM SYSTEM_POWER_KW_HIBER_RUNDOWN}
+  SYSTEM_POWER_KW_PROCESSOR_IDLE      = $0000000000000004;
+  {$EXTERNALSYM SYSTEM_POWER_KW_PROCESSOR_IDLE}
+  SYSTEM_POWER_KW_IDLE_SELECTION      = $0000000000000008;
+  {$EXTERNALSYM SYSTEM_POWER_KW_IDLE_SELECTION}
+  SYSTEM_POWER_KW_PPM_EXIT_LATENCY    = $0000000000000010;
+  {$EXTERNALSYM SYSTEM_POWER_KW_PPM_EXIT_LATENCY}
+
+  //
+  // Keywords to be used for the System Process Provider.
+  //
+
+  SYSTEM_PROCESS_KW_GENERAL           = $0000000000000001;
+  {$EXTERNALSYM SYSTEM_PROCESS_KW_GENERAL}
+  SYSTEM_PROCESS_KW_INSWAP            = $0000000000000002;
+  {$EXTERNALSYM SYSTEM_PROCESS_KW_INSWAP}
+  SYSTEM_PROCESS_KW_FREEZE            = $0000000000000004;
+  {$EXTERNALSYM SYSTEM_PROCESS_KW_FREEZE}
+  SYSTEM_PROCESS_KW_PERF_COUNTER      = $0000000000000008;
+  {$EXTERNALSYM SYSTEM_PROCESS_KW_PERF_COUNTER}
+  SYSTEM_PROCESS_KW_WAKE_COUNTER      = $0000000000000010;
+  {$EXTERNALSYM SYSTEM_PROCESS_KW_WAKE_COUNTER}
+  SYSTEM_PROCESS_KW_WAKE_DROP         = $0000000000000020;
+  {$EXTERNALSYM SYSTEM_PROCESS_KW_WAKE_DROP}
+  SYSTEM_PROCESS_KW_WAKE_EVENT        = $0000000000000040;
+  {$EXTERNALSYM SYSTEM_PROCESS_KW_WAKE_EVENT}
+  SYSTEM_PROCESS_KW_DEBUG_EVENTS      = $0000000000000080;
+  {$EXTERNALSYM SYSTEM_PROCESS_KW_DEBUG_EVENTS}
+  SYSTEM_PROCESS_KW_DBGPRINT          = $0000000000000100;
+  {$EXTERNALSYM SYSTEM_PROCESS_KW_DBGPRINT}
+  SYSTEM_PROCESS_KW_JOB               = $0000000000000200;
+  {$EXTERNALSYM SYSTEM_PROCESS_KW_JOB}
+  SYSTEM_PROCESS_KW_WORKER_THREAD     = $0000000000000400;
+  {$EXTERNALSYM SYSTEM_PROCESS_KW_WORKER_THREAD}
+  SYSTEM_PROCESS_KW_THREAD            = $0000000000000800;
+  {$EXTERNALSYM SYSTEM_PROCESS_KW_THREAD}
+  SYSTEM_PROCESS_KW_LOADER            = $0000000000001000;
+  {$EXTERNALSYM SYSTEM_PROCESS_KW_LOADER}
+
+  //
+  // Keywords to be used for the System Profile Provider.
+  //
+
+  SYSTEM_PROFILE_KW_GENERAL           = $0000000000000001;
+  {$EXTERNALSYM SYSTEM_PROFILE_KW_GENERAL}
+  SYSTEM_PROFILE_KW_PMC_PROFILE       = $0000000000000002;
+  {$EXTERNALSYM SYSTEM_PROFILE_KW_PMC_PROFILE}
+
+  //
+  // Keywords to be used for the System Registry Provider.
+  //
+
+  SYSTEM_REGISTRY_KW_GENERAL          = $0000000000000001;
+  {$EXTERNALSYM SYSTEM_REGISTRY_KW_GENERAL}
+  SYSTEM_REGISTRY_KW_HIVE             = $0000000000000002;
+  {$EXTERNALSYM SYSTEM_REGISTRY_KW_HIVE}
+  SYSTEM_REGISTRY_KW_NOTIFICATION     = $0000000000000004;
+  {$EXTERNALSYM SYSTEM_REGISTRY_KW_NOTIFICATION}
+
+  //
+  // Keywords to be used for the System Scheduler Provider.
+  //
+
+  SYSTEM_SCHEDULER_KW_XSCHEDULER      = $0000000000000001;
+  {$EXTERNALSYM SYSTEM_SCHEDULER_KW_XSCHEDULER}
+  SYSTEM_SCHEDULER_KW_DISPATCHER      = $0000000000000002;
+  {$EXTERNALSYM SYSTEM_SCHEDULER_KW_DISPATCHER}
+  SYSTEM_SCHEDULER_KW_KERNEL_QUEUE    = $0000000000000004;
+  {$EXTERNALSYM SYSTEM_SCHEDULER_KW_KERNEL_QUEUE}
+  SYSTEM_SCHEDULER_KW_SHOULD_YIELD    = $0000000000000008;
+  {$EXTERNALSYM SYSTEM_SCHEDULER_KW_SHOULD_YIELD}
+  SYSTEM_SCHEDULER_KW_ANTI_STARVATION = $0000000000000010;
+  {$EXTERNALSYM SYSTEM_SCHEDULER_KW_ANTI_STARVATION}
+  SYSTEM_SCHEDULER_KW_LOAD_BALANCER   = $0000000000000020;
+  {$EXTERNALSYM SYSTEM_SCHEDULER_KW_LOAD_BALANCER}
+  SYSTEM_SCHEDULER_KW_AFFINITY        = $0000000000000040;
+  {$EXTERNALSYM SYSTEM_SCHEDULER_KW_AFFINITY}
+  SYSTEM_SCHEDULER_KW_PRIORITY        = $0000000000000080;
+  {$EXTERNALSYM SYSTEM_SCHEDULER_KW_PRIORITY}
+  SYSTEM_SCHEDULER_KW_IDEAL_PROCESSOR = $0000000000000100;
+  {$EXTERNALSYM SYSTEM_SCHEDULER_KW_IDEAL_PROCESSOR}
+  SYSTEM_SCHEDULER_KW_CONTEXT_SWITCH  = $0000000000000200;
+  {$EXTERNALSYM SYSTEM_SCHEDULER_KW_CONTEXT_SWITCH}
+  SYSTEM_SCHEDULER_KW_COMPACT_CSWITCH = $0000000000000400;
+  {$EXTERNALSYM SYSTEM_SCHEDULER_KW_COMPACT_CSWITCH}
+
+  //
+  // Keywords to be used for the System Syscall Provider.
+  //
+
+  SYSTEM_SYSCALL_KW_GENERAL           = $0000000000000001;
+  {$EXTERNALSYM SYSTEM_SYSCALL_KW_GENERAL}
+
+  //
+  // Keywords to be used for the System Timer Provider.
+  //
+
+  SYSTEM_TIMER_KW_GENERAL             = $0000000000000001;
+  {$EXTERNALSYM SYSTEM_TIMER_KW_GENERAL}
+  SYSTEM_TIMER_KW_CLOCK_TIMER         = $0000000000000002;
+  {$EXTERNALSYM SYSTEM_TIMER_KW_CLOCK_TIMER}
+
+  //
+  // Schematized Filter ID for the Pool Tag Filter on the System Memory Provider.
+  //
+
+  SYSTEM_MEMORY_POOL_FILTER_ID        = 1;
+  {$EXTERNALSYM SYSTEM_MEMORY_POOL_FILTER_ID}
+
+
 type
 
   ETW_COMPRESSION_RESUMPTION_MODE = (
@@ -1306,6 +1689,40 @@ type
   {$EXTERNALSYM _PROFILE_SOURCE_INFO}
   PROFILE_SOURCE_INFO = _PROFILE_SOURCE_INFO;
   {$EXTERNALSYM PROFILE_SOURCE_INFO}
+
+
+  {$EXTERNALSYM _ETW_PMC_COUNTER_OWNER_TYPE}
+  _ETW_PMC_COUNTER_OWNER_TYPE = (
+    EtwPmcOwnerFree,
+    EtwPmcOwnerUntagged,
+    EtwPmcOwnerTagged,
+    EtwPmcOwnerTaggedWithSource
+  );
+  PETW_PMC_COUNTER_OWNER_TYPE = ^_ETW_PMC_COUNTER_OWNER_TYPE;
+  ETW_PMC_COUNTER_OWNER_TYPE = _ETW_PMC_COUNTER_OWNER_TYPE;
+  {$EXTERNALSYM ETW_PMC_COUNTER_OWNER_TYPE}
+
+
+  PETW_PMC_COUNTER_OWNER = ^_ETW_PMC_COUNTER_OWNER;
+  _ETW_PMC_COUNTER_OWNER = record
+    OwnerType: ETW_PMC_COUNTER_OWNER_TYPE;
+    ProfileSource: ULONG;
+    OwnerTag: ULONG;
+  end;
+  {$EXTERNALSYM _ETW_PMC_COUNTER_OWNER}
+  ETW_PMC_COUNTER_OWNER = _ETW_PMC_COUNTER_OWNER;
+  {$EXTERNALSYM ETW_PMC_COUNTER_OWNER}
+
+
+  PETW_PMC_COUNTER_OWNERSHIP_STATUS = ^_ETW_PMC_COUNTER_OWNERSHIP_STATUS;
+  _ETW_PMC_COUNTER_OWNERSHIP_STATUS = record
+    ProcessorNumber: ULONG;
+    NumberOfCounters: ULONG;
+    CounterOwners: array [0..ANYSIZE_ARRAY - 1] of ETW_PMC_COUNTER_OWNER;
+  end;
+  {$EXTERNALSYM _ETW_PMC_COUNTER_OWNERSHIP_STATUS}
+  ETW_PMC_COUNTER_OWNERSHIP_STATUS = _ETW_PMC_COUNTER_OWNERSHIP_STATUS;
+
 
 
   // An EVENT_TRACE consists of a fixed header (EVENT_TRACE_HEADER) and
@@ -2008,8 +2425,44 @@ type
     //
     //      Output Format: ULONG
     //
-    TraceStreamCount       = 23,
-    MaxTraceSetInfoClass   = 23
+    TraceStreamCount = 23,
+
+    //
+    // TraceStackCachingInfo:
+    // - TraceSetInformation
+    //      Turns on stack caching for classic event stacks.
+    //
+    //      Input Format: TRACE_STACK_CACHING_INFO
+    //
+    TraceStackCachingInfo = 24,
+
+    //
+    // TracePmcCounterOwners:
+    // - TraceQueryInformation
+    //      Queries ownership information for active PMC counters.
+    //      Expects NULL SessionHandle.
+    //
+    //      Input Format: ETW_PMC_COUNTER_OWNERSHIP_STATUS with ProcessorNumber set to an
+    //                    appropriate processor index. The input buffer must be of size at least
+    //                    RTL_SIZEOF_THROUGH_FIELD(ETW_PMC_COUNTER_OWNERSHIP_STATUS, NumberOfCounters) +
+    //                    (sizeof(ETW_PMC_COUNTER_OWNER) * EtwMaxPmcCounters), where EtwMaxPmcCounters
+    //                    is the result of a TraceQueryInformation(TraceMaxPmcCounterQuery, ...) operation.
+    //
+    //      Output Format: ETW_PMC_COUNTER_OWNERSHIP_STATUS with CounterOwners filled out. NumberOfCounters is
+    //                     set to the number of items in the CounterOwners array.
+    //                     If a counter owner's OwnershipType is EtwPmcOwnerTagged, then OwnerTag contains
+    //                     a tag provided by the counter owner.
+    //
+    TracePmcCounterOwners = 25,
+
+    //
+    // TraceStackCachingInfo:
+    // - TraceSetInformation
+    //      Turns on unified stack caching for all event stacks.
+    //
+    //      Input Format: TRACE_STACK_CACHING_INFO
+    //
+    TraceUnifiedStackCachingInfo = 26
   );
   {$EXTERNALSYM _TRACE_QUERY_INFO_CLASS}
   TRACE_QUERY_INFO_CLASS = _TRACE_QUERY_INFO_CLASS;
@@ -2031,6 +2484,7 @@ type
 type
 
   PCLASSIC_EVENT_ID = ^CLASSIC_EVENT_ID;
+  {$EXTERNALSYM PCLASSIC_EVENT_ID}
   _CLASSIC_EVENT_ID = record
     EventGuid: TGUID;
     _Type: UCHAR;
@@ -2039,6 +2493,17 @@ type
   {$EXTERNALSYM _CLASSIC_EVENT_ID}
   CLASSIC_EVENT_ID = _CLASSIC_EVENT_ID;
   {$EXTERNALSYM CLASSIC_EVENT_ID}
+
+  PTRACE_STACK_CACHING_INFO = ^_TRACE_STACK_CACHING_INFO;
+  {$EXTERNALSYM PTRACE_STACK_CACHING_INFO}
+  _TRACE_STACK_CACHING_INFO = record
+    Enabled: BOOLEAN;
+    CacheSize: ULONG;
+    BucketCount: ULONG;
+  end;
+  {$EXTERNALSYM _TRACE_STACK_CACHING_INFO}
+  TRACE_STACK_CACHING_INFO = _TRACE_STACK_CACHING_INFO;
+  {$EXTERNALSYM TRACE_STACK_CACHING_INFO}
 
   PTRACE_PROFILE_INTERVAL = ^TRACE_PROFILE_INTERVAL;
   _TRACE_PROFILE_INTERVAL = record

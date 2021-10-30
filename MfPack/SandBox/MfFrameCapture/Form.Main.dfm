@@ -129,6 +129,8 @@ object FrmMain: TFrmMain
       Width = 909
       Height = 45
       Anchors = [akLeft, akTop, akRight]
+      Max = 1000000
+      PageSize = 1
       TabOrder = 4
       OnChange = HandleTrackbarChange
     end
@@ -154,7 +156,7 @@ object FrmMain: TFrmMain
     end
     object spAccuracy: TSpinEdit
       Left = 249
-      Top = 163
+      Top = 159
       Width = 68
       Height = 22
       MaxValue = 5000

@@ -10,7 +10,7 @@
 // Release date: 02-06-2016
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 // Description: Interface definitions for WDM-CSA proxy filters.
 //
 // Organisation: FactoryX
@@ -22,16 +22,17 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
 // 
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //

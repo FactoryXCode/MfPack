@@ -9,7 +9,7 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 // Description: Cross-platform Audio Processing Objects
 // Declarations for the audio effects included with XAudio2.
 //
@@ -22,18 +22,18 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
-// Remarks: This version of XAudio2 is available only in Windows 8 or later.
-//
+// Remarks: This version of XAudio2 is available only in Windows 8, XBox one and later.
 //
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //
@@ -269,7 +269,7 @@ type
   //  The created XAPO will have a reference count of 1. Client code must call IUnknown.Release after passing the XAPO
   //  to XAudio2 to allow XAudio2 to dispose of the XAPO when it is no longer needed.
   //  Use IXAudio2.CreateSourceVoice or IXAudio2Voice.SetEffectChain to pass an XAPO to XAudio2.
-  function CreateFX(clsid: TGuid;
+  function CreateFX(const clsid: TGuid;
                     out pEffect: IUnknown;
                     pInitData: Pointer = nil;
                     InitDataByteSize: UINT32 = 0): HRESULT; stdcall;

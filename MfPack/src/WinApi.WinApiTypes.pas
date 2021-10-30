@@ -10,13 +10,13 @@
 // Release date: 29-07-2012
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 // Description: Generic converted Windows (c/cpp) types for Win32 / Win64 compatibility
 //              used by DirectX, Media Foundation and Core Audio.
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Jasper S
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
@@ -25,16 +25,17 @@
 // 13/08/2020 All                 Enigma release. New layout and namespaces
 // 10/12/2020                     Compatibility update.
 // 25/01/2021 Tony/Jasper S.      Changed TCHAR and wchar_t implementation
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //
@@ -766,16 +767,18 @@ type
   MSHCTX = tagMSHCTX;
   {$EXTERNALSYM MSHCTX}
 const
-  MSHCTX_LOCAL            = MSHCTX(0);
+  MSHCTX_LOCAL            = MSHCTX(0);  // unmarshal context is local (e.g. shared memory)
   {$EXTERNALSYM MSHCTX_LOCAL}
-  MSHCTX_NOSHAREDMEM      = MSHCTX(1);
+  MSHCTX_NOSHAREDMEM      = MSHCTX(1);  // unmarshal context has no shared memory access
   {$EXTERNALSYM MSHCTX_NOSHAREDMEM}
-  MSHCTX_DIFFERENTMACHINE = MSHCTX(2);
+  MSHCTX_DIFFERENTMACHINE = MSHCTX(2);  // unmarshal context is on a different machine
   {$EXTERNALSYM MSHCTX_DIFFERENTMACHINE}
-  MSHCTX_INPROC           = MSHCTX(3);
+  MSHCTX_INPROC           = MSHCTX(3);  // unmarshal context is on different thread
   {$EXTERNALSYM MSHCTX_INPROC}
-  MSHCTX_CROSSCTX         = MSHCTX(4);
+  MSHCTX_CROSSCTX         = MSHCTX(4);  // unmarshal context is on different context
   {$EXTERNALSYM MSHCTX_CROSSCTX}
+  MSHCTX_CONTAINER        = MSHCTX(5);  // unmarshal context is in a different container
+  {$EXTERNALSYM MSHCTX_CONTAINER}
 {$ENDIF}
 
 type

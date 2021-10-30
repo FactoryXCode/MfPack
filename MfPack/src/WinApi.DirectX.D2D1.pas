@@ -1880,7 +1880,7 @@ type
     function GetDC(mode: D2D1_DC_INITIALIZE_MODE;
                    out hdc: HDC): HResult; stdcall;
 
-    function ReleaseDC(const update: PRECT): HResult; stdcall;
+    function ReleaseDC(update: PRECT): HResult; stdcall;
 
   end;
   IID_ID2D1GdiInteropRenderTarget = ID2D1GdiInteropRenderTarget;
@@ -1897,7 +1897,7 @@ type
   ['{1c51bc64-de61-46fd-9899-63a5d8f03950}']
 
     function BindDC(hDC: HDC;
-                    const pSubRect: PRECT): HResult; stdcall;
+                    pSubRect: PRECT): HResult; stdcall;
 
   end;
   IID_ID2D1DCRenderTarget = ID2D1DCRenderTarget;

@@ -9,7 +9,7 @@
 // Release date: 08-03-2019
 // Language: ENU
 //
-// Version: 3.0.1
+// Version: 3.0.2
 //
 // Description: Manages video preview.
 //
@@ -21,16 +21,17 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //

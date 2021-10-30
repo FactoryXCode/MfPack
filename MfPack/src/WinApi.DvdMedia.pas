@@ -10,7 +10,7 @@
 // Release date: 06-10-2015
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.0.2
 // Description: Contains typedefs and defines necessary for user mode (ring 3) DVD
 //              filters and applications.
 //
@@ -23,17 +23,18 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/09/2021 All                 Updated to 10.0.20348.0
 //------------------------------------------------------------------------------
 //
 // Remarks: This unit is also included in DsPack.DirectShow9.pas / Winapi.DirectShow9.pas
 //          If you need DirectShow, please, don't add this file to your project to prevent name-mangling.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX302
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.20348.0
 //
 // Todo: -
 //

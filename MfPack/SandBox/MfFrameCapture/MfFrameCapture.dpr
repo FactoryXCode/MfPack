@@ -1,10 +1,9 @@
 program MfFrameCapture;
 uses
+
   {$IFDEF FASTMM}
   FastMM4,
-  {$ENDIF}
-
-  {$IFDEF madExcept}
+  {$ELSE IFDEF madExcept}
   madExcept,
   madLinkDisAsm,
   madListHardware,

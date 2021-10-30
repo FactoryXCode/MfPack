@@ -1,6 +1,5 @@
 # MfVideoThumbNail
-Version: 3.0.1
-Enigma release #5.
+Version: 3.0.2
 
 Description:
 
@@ -11,8 +10,8 @@ For indepth information see the VideoThumbNails example and
 documentation. (https://docs.microsoft.com/en-us/windows/desktop/medfound/videothumbnail-sample)
 
 NOTES: 
- - This release is updated for compiler version 17 up to 33.
- - SDK version 10.0.19041.0 May 2020 OS update (2004))
+ - This release is updated for compiler version 17 up to 34.
+ - SDK version 10.0.20348.0
  - Requires Windows 7 or later.
  - Minimum supported MfPack version: 3.0.0 
 
@@ -22,6 +21,6 @@ Project location: https://github.com/FactoryXCode/MfPack
 
 
 First release date: 08-04-2019
-Final release date: 27-01-2021
+Final release date: 14-10-2021
 
 Copyright © FactoryX. All rights reserved.
