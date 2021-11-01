@@ -10,7 +10,7 @@
 // Release date: 04-01-2016
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.1.0
 // Description: Holds compiler definitions used by Media Foundation,
 //              WASAPI and Core Audio.
 //
@@ -23,18 +23,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 15/09/2020 Tony                Added support for HPSTR type
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: All future updates (releases) will be named to an artist except for
 //          the major Windows updates. So, we started with ISÁK.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX310
 // Known Issues: -
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.22000.0
 // Todo: -
 // =============================================================================
 // Source: -
@@ -73,8 +72,11 @@ const
 // The macros and compiler directives for all windows versions are described in
 // sdkddkver.h (Master include file for versioning windows SDK/DDK.)
 //
-// Value for NTDDI_VERSION 	          | Minimum system required
+// Value for NTDDI_VERSION            |  Minimum system required
 //------------------------------------+-----------------------------------------
+  MFPACK_NTDDI_WIN10_CO     = $0A00000B; // Windows 11 22000
+  MFPACK_NTDDI_WIN10_MN     = $0A000009; // Windows 10 20348
+  MFPACK_NTDDI_WIN10_FE     = $0A00000A; // Windows 10 19041
 
   MFPACK_NTDDI_WIN10_VB     = $0A000008; // Windows 10 2004
   MFPACK_NTDDI_WIN10_19H1   = $0A000007; // Windows 10 19H1
@@ -123,7 +125,9 @@ const
   MFPACK_WIN32_WINNT_WIN10_RS5      = $0A000006; // Windows 10 1809 "Redstone 5"
   MFPACK_WIN32_WINNT_WIN10_19H1     = $0A000007; // Windows 10 1903 "19H1"
   MFPACK_WIN32_WINNT_WIN10_VB       = $0A000008; // Windows 10 2004
-
+  MFPACK_WIN32_WINNT_WIN10_MN       = $0A000009; // Windows 10
+  MFPACK_WIN32_WINNT_WIN10_FE       = $0A00000A; // Windows 10
+  MFPACK_WIN32_WINNT_WIN10_CO       = $0A00000B; // Windows 11 22000
 
 //
 // _WIN32_WINNT version constants from sdkddkver.h
@@ -150,9 +154,9 @@ const
   {$EXTERNALSYM _WIN32_WINNT_WIN8}
   _WIN32_WINNT_WINBLUE                = $0603;  // Win 8.1
   {$EXTERNALSYM _WIN32_WINNT_WINBLUE}
-  _WIN32_WINNT_WINTHRESHOLD           = $0A00;  // ABRACADABRA_THRESHOLD
+  _WIN32_WINNT_WINTHRESHOLD           = $0A00;
   {$EXTERNALSYM _WIN32_WINNT_WINTHRESHOLD}
-  _WIN32_WINNT_WIN10                  = $0A00;  // ABRACADABRA_THRESHOLD
+  _WIN32_WINNT_WIN10                  = $0A00;
   {$EXTERNALSYM _WIN32_WINNT_WIN10}
 
 //
@@ -231,28 +235,36 @@ const
   {$EXTERNALSYM NTDDI_WIN8}
   NTDDI_WINBLUE                       = $06030000;
   {$EXTERNALSYM NTDDI_WINBLUE}
-  NTDDI_WINTHRESHOLD                  = $0A000000;  { ABRACADABRA_THRESHOLD }
+  NTDDI_WINTHRESHOLD                  = $0A000000;
   {$EXTERNALSYM NTDDI_WINTHRESHOLD}
-  NTDDI_WIN10                         = $0A000000;  { ABRACADABRA_THRESHOLD }
+  NTDDI_WIN10                         = $0A000000;
   {$EXTERNALSYM NTDDI_WIN10}
-  NTDDI_WIN10_TH2                     = $0A000001;  { ABRACADABRA_WIN10_TH2 }
+  NTDDI_WIN10_TH2                     = $0A000001;
   {$EXTERNALSYM NTDDI_WIN10_TH2}
-  NTDDI_WIN10_RS1                     = $0A000002;  { ABRACADABRA_WIN10_RS1 }
+  NTDDI_WIN10_RS1                     = $0A000002;
   {$EXTERNALSYM NTDDI_WIN10_RS1}
-  NTDDI_WIN10_RS2                     = $0A000003;  { ABRACADABRA_WIN10_RS2 }
+  NTDDI_WIN10_RS2                     = $0A000003;
   {$EXTERNALSYM NTDDI_WIN10_RS2}
-  NTDDI_WIN10_RS3                     = $0A000004;  { ABRACADABRA_WIN10_RS3 }
+  NTDDI_WIN10_RS3                     = $0A000004;
   {$EXTERNALSYM NTDDI_WIN10_RS3}
-  NTDDI_WIN10_RS4                     = $0A000005;  { ABRACADABRA_WIN10_RS4 }
+  NTDDI_WIN10_RS4                     = $0A000005;
   {$EXTERNALSYM NTDDI_WIN10_RS4}
-  NTDDI_WIN10_RS5                     = $0A000006;  { ABRACADABRA_WIN10_RS5 }
+  NTDDI_WIN10_RS5                     = $0A000006;
   {$EXTERNALSYM NTDDI_WIN10_RS5}
-  NTDDI_WIN10_19H1                    = $0A000007;  { ABRACADABRA_WIN10_19H1 }
+  NTDDI_WIN10_19H1                    = $0A000007;
   {$EXTERNALSYM NTDDI_WIN10_19H1}
-  NTDDI_WIN10_VB                      = $0A000008;  { ABRACADABRA_WIN10_VB }
+  NTDDI_WIN10_VB                      = $0A000008;
+  {$EXTERNALSYM NTDDI_WIN10_VB}
+  NTDDI_WIN10_MN                      = $0A000009;
+  {$EXTERNALSYM NTDDI_WIN10_MN}
+  NTDDI_WIN10_FE                      = $0A00000A;
+  {$EXTERNALSYM NTDDI_WIN10_FE}
+  NTDDI_WIN10_CO                      = $0A00000B;
+  {$EXTERNALSYM NTDDI_WIN10_CO}
+
   {$EXTERNALSYM NTDDI_WIN10_VB}
   // Latest WDK version
-  WDK_NTDDI_VERSION                   = NTDDI_WIN10_VB;  { ABRACADABRA_WIN10_VB }
+  WDK_NTDDI_VERSION                   = NTDDI_WIN10_CO;
   {$EXTERNALSYM WDK_NTDDI_VERSION}
 
 
@@ -260,7 +272,7 @@ const
 //
   MFPACK_WINVER        = _WIN32_WINNT_WIN10;
   MFPACK_WIN32_WINNT   = _WIN32_WINNT_WIN10;
-  MFPACK_NTDDI_VERSION = NTDDI_WIN10_VB;
+  MFPACK_NTDDI_VERSION = NTDDI_WIN10_CO;
 
 
 
@@ -361,8 +373,8 @@ const
 // {$DEFINE MFPACK_VERSION_264_UP} // Kraftwerk release, Milestone update 13, WIN10 May 2020 pre-update
 // {$DEFINE MFPACK_VERSION_264#1_UP} // Kraftwerk #1 Autobahn release, update 13#1, WIN10 May 2020 final update (2004))
 // {$DEFINE MFPACK_VERSION_264#2_UP} // Kraftwerk #1 The Model release, update 13#2, WIN10 May 2020 final update (2004))
-   {$DEFINE MFPACK_VERSION_300_UP} // Enigma release, Milestone update 14.
-
+// {$DEFINE MFPACK_VERSION_300_UP} // Enigma release, Milestone update 14.
+{$DEFINE MFPACK_VERSION_310_UP} // Bowie release, Milestone update 15.
 
 // WARNINGS
 // enable/disable compiler warnings.
@@ -406,7 +418,7 @@ const
 
 const
 // a global version ID (for internal use only).
-  MfpVersion   = '3.0.0'; // Release version.
+MfpVersion   = '3.1.0'; // Release version.
 
 
 
