@@ -10,7 +10,7 @@
 // Release date: 29-06-2012
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,10 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 08/12/2020 Tony                Added updates from sdk 10.0.19041.0
-// 26/01/2021 Tony                Fixed IMFCollection
-// 17/05/2021 Tony                Fixed IMFCollection
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or higher.

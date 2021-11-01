@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,9 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 18/01/2021 Tony                Corrected some pointer issues.
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -35,11 +33,11 @@
 //          Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -345,6 +343,17 @@ type
   _tagEndpointFormFactor = __MIDL___MIDL_itf_mmdeviceapi_0000_0000_0003; // For compatibility with earlier MfPack versions
 
 
+  {Win 11}
+  PAUDIO_SYSTEMEFFECTS_PROPERTYSTORE_TYPE = ^AUDIO_SYSTEMEFFECTS_PROPERTYSTORE_TYPE;
+  AUDIO_SYSTEMEFFECTS_PROPERTYSTORE_TYPE            = (
+    AUDIO_SYSTEMEFFECTS_PROPERTYSTORE_TYPE_DEFAULT  = 0,
+    AUDIO_SYSTEMEFFECTS_PROPERTYSTORE_TYPE_USER     = 1,
+    AUDIO_SYSTEMEFFECTS_PROPERTYSTORE_TYPE_VOLATILE = 2,
+    AUDIO_SYSTEMEFFECTS_PROPERTYSTORE_TYPE_ENUM_COUNT
+  );
+  {$EXTERNALSYM AUDIO_SYSTEMEFFECTS_PROPERTYSTORE_TYPE}
+
+
 const
   // ----------------------------------------------------------------------
   // Device Interface Classes
@@ -575,6 +584,53 @@ type
   {$EXTERNALSYM IID_IMMEndpoint}
 
 
+  // IAudioSystemEffectsPropertyChangeNotificationClient
+  // ===================================================
+  // Description:
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioSystemEffectsPropertyChangeNotificationClient);'}
+  {$EXTERNALSYM IAudioSystemEffectsPropertyChangeNotificationClient}
+  IAudioSystemEffectsPropertyChangeNotificationClient = interface(IUnknown)
+  ['{20049D40-56D5-400E-A2EF-385599FEED49}']
+
+    function OnPropertyChanged(_type: AUDIO_SYSTEMEFFECTS_PROPERTYSTORE_TYPE;
+                               const key: PROPERTYKEY): HRESULT; stdcall;
+
+  end;
+  IID_IAudioSystemEffectsPropertyChangeNotificationClient = IAudioSystemEffectsPropertyChangeNotificationClient;
+  {$EXTERNALSYM IID_IAudioSystemEffectsPropertyChangeNotificationClient}
+
+
+  // IAudioSystemEffectsPropertyStore
+  // ================================
+  // Description:
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioSystemEffectsPropertyStore);'}
+  {$EXTERNALSYM IAudioSystemEffectsPropertyStore}
+  IAudioSystemEffectsPropertyStore = interface(IUnknown)
+  ['{302AE7F9-D7E0-43E4-971B-1F8293613D2A}']
+    function OpenDefaultPropertyStore(stgmAccess: DWORD;
+                                      {out} propStore: PIPropertyStore): HRESULT; stdcall;
+
+    function OpenUserPropertyStore(stgmAccess: DWORD;
+                                   {out} propStore: PIPropertyStore): HRESULT; stdcall;
+
+    function OpenVolatilePropertyStore(stgmAccess: DWORD;
+                                       {out} propStore: PIPropertyStore): HRESULT; stdcall;
+
+    function ResetUserPropertyStore(): HRESULT; stdcall;
+
+    function ResetVolatilePropertyStore(): HRESULT; stdcall;
+
+    function RegisterPropertyChangeNotification(callback: IAudioSystemEffectsPropertyChangeNotificationClient): HRESULT; stdcall;
+
+    function UnregisterPropertyChangeNotification(callback: IAudioSystemEffectsPropertyChangeNotificationClient): HRESULT; stdcall;
+
+  end;
+  IID_IAudioSystemEffectsPropertyStore = IAudioSystemEffectsPropertyStore;
+  {$EXTERNALSYM IID_IAudioSystemEffectsPropertyStore}
+
+
   // Interface IMMDeviceEnumerator
   // =============================
   {
@@ -713,6 +769,9 @@ type
     pPnpDevnode: IMMDevice;
   end;
   {$EXTERNALSYM AudioExtensionParams}
+
+
+
 
 
   // Additional Prototypes for ALL interfaces

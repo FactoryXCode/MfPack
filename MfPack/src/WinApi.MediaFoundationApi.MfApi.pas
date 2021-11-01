@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.0
 // Description: Requires Windows Vista or later.
 //              MfApi.pas is the unit containing the APIs for using the MF platform.
 //
@@ -22,11 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 10/10/2020 Tony                Fixed some issues, see updt 101020
-// 26/01/2021 Tony                Fixed MFT Register functions.
-// 08/07/2021 Tony                Added MFBinaryFormat guids.
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -50,11 +46,11 @@
 //          Fields with a Common Type Specification.
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -1940,6 +1936,11 @@ const
   MF_CAPTURE_METADATA_DIGITALWINDOW                 :  TGUID = '{276F72A2-59C8-4F69-97B4-068B8C0EC044}'; // Type: BLOB
   {$EXTERNALSYM MF_CAPTURE_METADATA_DIGITALWINDOW}
 
+  // Reports the background segmentation mask BackgroundSegmentationMask structure.
+  // Refer to the KSCAMERA_METADATA_BACKGROUNDSEGMENTATIONMASK struct in ksmedia.h
+  MF_CAPTURE_METADATA_FRAME_BACKGROUND_MASK         :  TGUID = '{03F14DD3-75DD-433A-A8E2-1E3F5F2A50A0}'; // Type: BLOB
+  {$EXTERNALSYM MF_CAPTURE_METADATA_FRAME_BACKGROUND_MASK}
+
 
   MFCAPTURE_METADATA_SCAN_RIGHT_LEFT   =      $00000001;
   {$EXTERNALSYM MFCAPTURE_METADATA_SCAN_RIGHT_LEFT}
@@ -1953,12 +1954,12 @@ type
 
   // Digital Window Region
   PDigitalWindowSetting = ^tagDigitalWindowSetting;
-  {$EXTERNALSYM tagDigitalWindowSetting}
   tagDigitalWindowSetting = record
     OriginX: Double;
     OriginY: Double;
     WindowSize: Double;
   end;
+  {$EXTERNALSYM tagDigitalWindowSetting}
   DigitalWindowSetting = tagDigitalWindowSetting;
   {$EXTERNALSYM DigitalWindowSetting}
 
@@ -2702,6 +2703,12 @@ const
                                D3: $0010;
                                D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
   {$EXTERNALSYM MFVideoFormat_NV12}
+
+  MFVideoFormat_NV21: TGUID = (D1: Ord('N') or (Ord('V') shl 8) or (Ord('2') shl 16) or (Ord('1') shl 24);
+                               D2: $0000;
+                               D3: $0010;
+                               D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
+  {$EXTERNALSYM MFVideoFormat_NV21}
 
   MFVideoFormat_YV12: TGUID = (D1: Ord('Y') or (Ord('V') shl 8) or (Ord('1') shl 16) or (Ord('2') shl 24);
                                D2: $0000;

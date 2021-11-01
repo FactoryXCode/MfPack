@@ -10,7 +10,7 @@
 // Release date: 11-07-2012
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.0
 // Description: Define the interfaces for Media Foundation Transforms.
 //
 // Organisation: FactoryX
@@ -21,8 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -31,11 +30,11 @@
 //         IUnknown(Pointer), IUnknown(Object), IUnknown(Nil) etc.
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -787,6 +786,16 @@ const
   // Specifies the # of buffers (of the same size, etc) that should be allocated for every sample.
   MF_SA_BUFFERS_PER_SAMPLE              : TGuid = '{873c5171-1e3d-4e25-988d-b433ce041983}';
   {$EXTERNALSYM MF_SA_BUFFERS_PER_SAMPLE}
+
+  // MF_SA_D3D11_ALLOCATE_DISPLAYABLE_RESOURCES
+  // Data type: UINT32
+  // If present and set to a nonzero value, indicates to the decoder MFT that it should allocate its D3D
+  // resources using the D3D11_RESOURCE_MISC_SHARED_DISPLAYABLE misc flag.
+  // The Media Foundation pipeline will set this attribute if appropriate;
+  // applications using this transform in a topology using the MF pipeline should
+  // not set it directly.
+  MF_SA_D3D11_ALLOCATE_DISPLAYABLE_RESOURCES : TGuid = '{EEFACE6D-2EA9-4ADF-BBDF-7BBC482A1B6D}';
+
 
   // MFT_DECODER_EXPOSE_OUTPUT_TYPES_IN_NATIVE_ORDER
   // Data Type: UINT32 (treat as BOOL)

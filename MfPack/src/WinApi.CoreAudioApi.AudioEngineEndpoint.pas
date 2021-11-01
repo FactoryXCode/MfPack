@@ -10,7 +10,7 @@
 // Release date: 04-09-2015
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.0
 // Description: -
 //
 // Organisation: FactoryX
@@ -22,8 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -35,11 +34,11 @@
 //          Requires Windows Vista or later.
 // 
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -103,35 +102,50 @@ const
 
   // DEVPKEY_AudioEndpointPlugin_FactoryCLSID: Specifies the CLSID of the audio endpoint plugin factory
   // vartype = VT_CLSID
-  DEVPKEY_AudioEndpointPlugin_FactoryCLSID   :	PROPERTYKEY = (fmtid: (D1: $12d83bd7; D2: $cf12; D3: $46be;
-                                                                       D4: ($85, $40, $81, $27, $10, $d3, $2, $1c));
-                                                                       pid: 1);
+  DEVPKEY_AudioEndpointPlugin_FactoryCLSID   : PROPERTYKEY = (fmtid: (D1: $12d83bd7;
+                                                                      D2: $cf12;
+                                                                      D3: $46be;
+                                                                      D4: ($85, $40, $81, $27, $10, $d3, $2, $1c));
+                                                                      pid: 1);
   {$EXTERNALSYM DEVPKEY_AudioEndpointPlugin_FactoryCLSID}
 
   // DEVPKEY_AudioEndpointPlugin_DataFlow: Specifies type of data flow. 0 = render, 1 = capture.
   // vartype = VT_UI4
-  DEVPKEY_AudioEndpointPlugin_DataFlow       :	PROPERTYKEY = (fmtid: (D1: $12d83bd7; D2: $cf12; D3: $46be;
-                                                                       D4: ($85, $40, $81, $27, $10, $d3, $2, $1c));
-                                                                       pid: 2);
+  DEVPKEY_AudioEndpointPlugin_DataFlow       : PROPERTYKEY = (fmtid: (D1: $12d83bd7;
+                                                                      D2: $cf12;
+                                                                      D3: $46be;
+                                                                      D4: ($85, $40, $81, $27, $10, $d3, $2, $1c));
+                                                                      pid: 2);
   {$EXTERNALSYM DEVPKEY_AudioEndpointPlugin_DataFlow}
 
   // DEVPKEY_AudioEndpointPlugin_PnPInterface: Specifies name of PnP Interface for audio endpoint plugin.
   // vartype = VT_LPWSTR
-  DEVPKEY_AudioEndpointPlugin_PnPInterface   :	PROPERTYKEY = (fmtid: (D1: $12d83bd7; D2: $cf12; D3: $46be;
-                                                                       D4: ($85, $40, $81, $27, $10, $d3, $2, $1c));
-                                                                       pid: 3);
+  DEVPKEY_AudioEndpointPlugin_PnPInterface   : PROPERTYKEY = (fmtid: (D1: $12d83bd7;
+                                                                      D2: $cf12;
+                                                                      D3: $46be;
+                                                                      D4: ($85, $40, $81, $27, $10, $d3, $2, $1c));
+                                                                      pid: 3);
   {$EXTERNALSYM DEVPKEY_AudioEndpointPlugin_PnPInterface}
+
+  // DEVPKEY_AudioEndpointPlugin2_FactoryCLSID: Specifies the CLSID of the audio endpoint plugin factory
+  // vartype = VT_CLSID
+  DEVPKEY_AudioEndpointPlugin2_FactoryCLSID  : PROPERTYKEY = (fmtid: (D1: $12d83bd7;
+                                                                      D2: $cf12;
+                                                                      D3: $46be;
+                                                                      D4: ($85, $40, $81, $27, $10, $d3, $2, $1c));
+                                                                      Pid: 4);
+  {$EXTERNALSYM DEVPKEY_AudioEndpointPlugin2_FactoryCLSID}
 
 
 type
   // Endpoint pin type
   PEndpointConnectorType = ^EndpointConnectorType;
   EndpointConnectorType = (
-    eHostProcessConnector	    = 0,
-    eOffloadConnector	        = (eHostProcessConnector + 1),
-    eLoopbackConnector	      = (eOffloadConnector + 1),
-    eKeywordDetectorConnector	= (eLoopbackConnector + 1),
-    eConnectorCount	          = (eKeywordDetectorConnector + 1)
+    eHostProcessConnector     = 0,
+    eOffloadConnector         = (eHostProcessConnector + 1),
+    eLoopbackConnector        = (eOffloadConnector + 1),
+    eKeywordDetectorConnector = (eLoopbackConnector + 1),
+    eConnectorCount           = (eKeywordDetectorConnector + 1)
   );
   {$EXTERNALSYM EndpointConnectorType}
 

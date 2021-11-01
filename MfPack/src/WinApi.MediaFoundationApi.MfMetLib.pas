@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.0
 // Description: This unit holds basic Media Foundation methods needed to play,
 //              record, encode, decode, etc.
 //
@@ -25,10 +25,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 10/12/2020                     Compatibility update.
-// 18/01/2021 Tony                Corrected some pointer issues.
-// 17/05/2021 Tony                Corrected some pointer issues.
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.

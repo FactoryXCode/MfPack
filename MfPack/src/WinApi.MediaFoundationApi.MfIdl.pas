@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.0
 // Description: Media Foundation basic control-layer interfaces.
 //
 // Organisation: FactoryX
@@ -21,19 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 17/08/2021 Ciaran              Fixed incorrect GUID for IMFMediaSource
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -6076,6 +6074,109 @@ const
 // end NTDDI_VERSION >= NTDDI_WIN10_VB
 
 
+type
+
+{NTDDI_VERSION >= NTDDI_WIN10_CO}
+
+
+  // <summary>
+  // This enum defines the possible occlusion states for a camera
+  // </summary>
+
+  PMFCameraOcclusionState = ^MFCameraOcclusionState;
+  MFCameraOcclusionState                            = (
+    MFCameraOcclusionState_Open                     = $0,
+    MFCameraOcclusionState_OccludedByLid            = $1,
+    MFCameraOcclusionState_OccludedByCameraHardware = $2
+  );
+  {$EXTERNALSYM MFCameraOcclusionState}
+
+
+
+  // IMFCameraOcclusionStateReport Interface
+  // =======================================
+  // This interface is an input parameter for OnOcclusionStateReport callback function
+  // adn is used to get the most recent camera occlusion state for the camera under monitoring.
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFCameraOcclusionStateReport);'}
+  {$EXTERNALSYM IMFCameraOcclusionStateReport}
+  IMFCameraOcclusionStateReport = interface(IUnknown)
+  ['{1640B2CF-74DA-4462-A43B-B76D3BDC1434}']
+
+    // This function will get the most recent occlusion state for the camera that's being monitored.
+    // <param name = "occlusionState">
+    // Numeric value that represents one or more MFCameraOcclusionState values.
+    // </param>
+    function GetOcclusionState(out occlusionState: DWORD): HRESULT; stdcall;
+  end;
+  IID_IMFCameraOcclusionStateReport = IMFCameraOcclusionStateReport;
+  {$EXTERNALSYM IID_IMFCameraOcclusionStateReport}
+
+
+  // IMFCameraOcclusionStateReportCallback Interface
+  // ===============================================
+  // This callback interface is required to be implemented by the client that creates
+  // an IMFCameraOcclusionStateMonitor object.
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFCameraOcclusionStateReportCallback);'}
+  {$EXTERNALSYM IMFCameraOcclusionStateReportCallback}
+  IMFCameraOcclusionStateReportCallback = interface(IUnknown)
+  ['{6E5841C7-3889-4019-9035-783FB19B5948}']
+    // This function will be called when the monitor detects that the occlusion state has changed.
+    // <param name = "occlusionStateReport">
+    // Pointer to the IMFCameraOcclusionStateReport interface that is used to get the most recent state.
+    // </param>
+    function OnOcclusionStateReport(occlusionStateReport: IMFCameraOcclusionStateReport): HRESULT; stdcall;
+  end;
+  IID_IMFCameraOcclusionStateReportCallback = IMFCameraOcclusionStateReportCallback;
+  {$EXTERNALSYM IID_IMFCameraOcclusionStateReportCallback}
+
+
+  // IMFCameraOcclusionStateMonitor Interface
+  // ========================================
+  // This interface represents the main camera occlusion state monitor object.
+  //
+  PIMFCameraOcclusionStateMonitor = ^IMFCameraOcclusionStateMonitor;
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFCameraOcclusionStateMonitor);'}
+  {$EXTERNALSYM IMFCameraOcclusionStateMonitor}
+  IMFCameraOcclusionStateMonitor = interface(IUnknown)
+  ['{CC692F46-C697-47E2-A72D-7B064617749B}']
+    // This function will start the monitor and will immediately cause
+    // OnOcclusionStateReport callback funtion to be called with the current state information.
+    function Start(): HRESULT; stdcall;
+
+    // This function will stop the monitor.
+    function Stop(): HRESULT; stdcall;
+
+    // This function will return supported camera occlusion states, the return value
+    // is combination MFCameraOcclusionState flags. MFCameraOcclusionState_Open is always supported.
+    function GetSupportedStates(): HRESULT; stdcall;
+  end;
+  IID_IMFCameraOcclusionStateMonitor = IMFCameraOcclusionStateMonitor;
+  {$EXTERNALSYM IID_IMFCameraOcclusionStateReport}
+
+
+
+  // Allows app to create Camera Occlusion State Monitor for the given camera device.
+  // The symbolicLink should be from the camera that is already activated, otherwise
+  // the state information is not guaranteed to be correct.
+  // <param name = "symbolicLink">
+  // String symbolic link name of the video capture device that is active.
+  // </param>
+  // <param name = "callback">
+  // Pointer to an object that implements the callback interface.
+  // </param>
+  // <param name = "occlusionStateMonitor">
+  // Specifies a pointer to a variable where theIMFCameraOcclusionStateMonitor object
+  // will be stored.
+  // </param>
+  function MFCreateCameraOcclusionStateMonitor(symbolicLink: PWideChar;
+                                               callback: IMFCameraOcclusionStateReportCallback;
+                                               out occlusionStateMonitor: PIMFCameraOcclusionStateMonitor): HRESULT; stdcall;
+
+{END NTDDI_VERSION >= NTDDI_WIN10_CO}
+
+
   // Additional Prototypes for ALL interfaces
 
 
@@ -6191,8 +6292,10 @@ const
   // end NTDDI_VERSION >= NTDDI_WIN10_RS5
 
   // NTDDI_VERSION >= NTDDI_WIN10_VB  TODO: which lib?
-  function MFCreateRelativePanelWatcher;    external MfIdlLib4 {?} name 'MFCreateRelativePanelWatcher' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateRelativePanelWatcher;         external MfIdlLib3 name 'MFCreateRelativePanelWatcher' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   // end NTDDI_VERSION >= NTDDI_WIN10_VB
+
+  function MFCreateCameraOcclusionStateMonitor;  external MfIdlLib3 name 'MFCreateCameraOcclusionStateMonitor' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
 {$WARN SYMBOL_PLATFORM ON}
 

@@ -10,7 +10,7 @@
 // Release date: 23-11-2015
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.0
 // Description: Defines property keys for the Plug and Play Device Property API.
 //
 // Organisation: FactoryX
@@ -21,18 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -713,8 +712,16 @@ const
                                                                  D2: $8b40;
                                                                  D3: $45bc;
                                                                  D4: ($a8, $a2, $6a, $0b, $89, $4c, $bd, $a2));
-                                                                 Pid: 24);   // DEVPROP_TYPE_BOOLEAN
+                                                                 Pid: 24);    // DEVPROP_TYPE_BOOLEAN
   {$EXTERNALSYM DEVPKEY_Device_AssignedToGuest}
+
+  DEVPKEY_Device_CreatorProcessId       : PROPERTYKEY = (fmtid: (D1: $540b947e;
+                                                                 D2: $8b40;
+                                                                 D3: $45bc;
+                                                                 D4: ($a8, $a2, $6a, $0b, $89, $4c, $bd, $a2));
+                                                                 Pid: 25);    // DEVPROP_TYPE_UINT32
+  {$EXTERNALSYM DEVPKEY_Device_CreatorProcessId}
+
 
 
   DEVPKEY_Device_SessionId              : PROPERTYKEY = (fmtid: (D1: $83da6326;
@@ -723,6 +730,8 @@ const
                                                                  D4: ($94, $53, $a1, $92, $3f, $57, $3b, $29));
                                                                  Pid: 6);     // DEVPROP_TYPE_UINT32
   {$EXTERNALSYM DEVPKEY_Device_SessionId}
+
+
 
 
   // Device activity timestamp properties

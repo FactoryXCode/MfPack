@@ -10,7 +10,7 @@
 // Release date: 29-05-2018
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.1.0
 //
 // Description: Shared part of the Core Audio Interfaces
 //
@@ -22,17 +22,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 RedStone 1 or later.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX310
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -174,6 +174,25 @@ type
     Orientation: SpatialAudioHrtfOrientation;               // Optional Orientation - All dynamic objects from this stream will default to this value  (nullptr if unused)
   end;
   {$EXTERNALSYM SpatialAudioHrtfActivationParams}
+
+
+  PSpatialAudioHrtfActivationParams2 = ^SpatialAudioHrtfActivationParams2;
+  SpatialAudioHrtfActivationParams2 = record
+    ObjectFormat: WAVEFORMATEX;                            // Format descriptor for a single spatial audio objects. All objects must have the same format and must be of type WAVEFORMATEX or WAVEFORMATEXTENSIBLE.
+    StaticObjectTypeMask: AudioObjectType;                 // (static channel bed mask) mask of static audio object type that are allowed
+    MinDynamicObjectCount: UINT32;                         // Minimum number of dynamic audio objects. If at least this count cannot be granted, no dynamic objects will be granted.
+    MaxDynamicObjectCount: UINT32;                         // Maximum number of dynamic audio objects that can be activated via ISpatialAudioObjectRenderStreamForMetadata.
+    Category: AUDIO_STREAM_CATEGORY;                       // Specifies the category of an audio stream and its spatial audio objects.
+    EventHandle: THandle;                                  // event that will signal the need for more audio data. This handle will be duplicated internally before getting used
+    NotifyObject: ISpatialAudioObjectRenderStreamNotify;   // Notification sink (can be nullptr)
+    DistanceDecay: PSpatialAudioHrtfDistanceDecay;         // Optional Distance Decay Settings - All dynamic objects from this stream will default to this setting  (nullptr if unused)
+    Directivity: SpatialAudioHrtfDirectivityUnion;         // Optional Directivity - All dynamic objects from this stream will default to this value   (nullptr if unused)
+    Environment: SpatialAudioHrtfEnvironmentType;          // Optional Environment - All dynamic objects from this stream will default to this value  (nullptr if unused)
+    Orientation: SpatialAudioHrtfOrientation;              // Optional Orientation - All dynamic objects from this stream will default to this value  (nullptr if unused)
+    Options: SPATIAL_AUDIO_STREAM_OPTIONS;
+  end;
+  {$EXTERNALSYM SpatialAudioHrtfActivationParams2}
+
 
 //#pragma pack(pop) set back to initial alignment
   {$IFNDEF WIN32}

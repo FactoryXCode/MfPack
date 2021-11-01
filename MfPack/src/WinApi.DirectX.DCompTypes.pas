@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.0
 //
 // Description: Enables high-performance bitmap composition with transforms,
 //              effects, and animations.
@@ -23,18 +23,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or later.
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -171,9 +170,9 @@ type
   {$EXTERNALSYM DCOMPOSITION_FRAME_STATISTICS}
 
 
-//
-// Composition object specific access flags
-//
+  //
+  // Composition object specific access flags
+  //
 const
 
   COMPOSITIONOBJECT_READ              = $0001;
@@ -183,6 +182,86 @@ const
   COMPOSITIONOBJECT_ALL_ACCESS        = (COMPOSITIONOBJECT_READ or COMPOSITIONOBJECT_WRITE);
   {$EXTERNALSYM COMPOSITIONOBJECT_ALL_ACCESS}
 
+
+
+  //
+  // Composition Stats
+  //
+
+type
+
+  PCOMPOSITION_FRAME_ID_TYPE = ^COMPOSITION_FRAME_ID_TYPE;
+  COMPOSITION_FRAME_ID_TYPE        = (
+    COMPOSITION_FRAME_ID_CREATED   = 0,
+    COMPOSITION_FRAME_ID_CONFIRMED = 1,
+    COMPOSITION_FRAME_ID_COMPLETED = 2
+  );
+  {$EXTERNALSYM COMPOSITION_FRAME_ID_TYPE}
+
+  PCOMPOSITION_FRAME_ID = ^COMPOSITION_FRAME_ID;
+  COMPOSITION_FRAME_ID = ULONG64;
+  {$EXTERNALSYM COMPOSITION_FRAME_ID}
+
+  PCOMPOSITION_FRAME_STATS = ^tagCOMPOSITION_FRAME_STATS;
+  tagCOMPOSITION_FRAME_STATS = record
+    startTime: UINT64;
+    targetTime: UINT64;
+    framePeriod: UINT64;
+  end;
+  {$EXTERNALSYM tagCOMPOSITION_FRAME_STATS}
+  COMPOSITION_FRAME_STATS = tagCOMPOSITION_FRAME_STATS;
+  {$EXTERNALSYM COMPOSITION_FRAME_STATS}
+
+
+  PCOMPOSITION_TARGET_ID = ^COMPOSITION_TARGET_ID;
+  tagCOMPOSITION_TARGET_ID = record
+    displayAdapterLuid: LUID;
+    renderAdapterLuid: LUID;
+    vidPnSourceId: UINT;
+    vidPnTargetId: UINT;
+    uniqueId: UINT;
+
+    function IsEqual(rhs: tagCOMPOSITION_TARGET_ID): Boolean;
+
+   end;
+  {$EXTERNALSYM tagCOMPOSITION_TARGET_ID}
+  COMPOSITION_TARGET_ID = tagCOMPOSITION_TARGET_ID;
+  {$EXTERNALSYM COMPOSITION_TARGET_ID}
+
+
+  PCOMPOSITION_STATS = ^COMPOSITION_STATS;
+  {$EXTERNALSYM tagCOMPOSITION_STATS}
+  tagCOMPOSITION_STATS = record
+    presentCount: UINT;
+    refreshCount: UINT;
+    virtualRefreshCount: UINT;
+    time: UINT64;
+  end;
+  {$EXTERNALSYM COMPOSITION_STATS}
+  COMPOSITION_STATS = tagCOMPOSITION_STATS;
+
+
+  PCOMPOSITION_TARGET_STATS = ^COMPOSITION_TARGET_STATS;
+  {$EXTERNALSYM tagCOMPOSITION_TARGET_STATS}
+  tagCOMPOSITION_TARGET_STATS = record
+    outstandingPresents: UINT;
+    presentTime: UINT64;
+    vblankDuration: UINT64;
+    presentedStats: COMPOSITION_STATS;
+    completedStats: COMPOSITION_STATS;
+  end;
+  {$EXTERNALSYM COMPOSITION_TARGET_STATS}
+  COMPOSITION_TARGET_STATS = tagCOMPOSITION_TARGET_STATS;
+
+const
+
+  // The maximum nubmer of objects we allow users to wait on the compositor clock
+  DCOMPOSITION_MAX_WAITFORCOMPOSITORCLOCK_OBJECTS = 32;
+  {$EXTERNALSYM DCOMPOSITION_MAX_WAITFORCOMPOSITORCLOCK_OBJECTS}
+
+  // Maximum number of targets kept per frame
+  COMPOSITION_STATS_MAX_TARGETS       = 256;
+  {$EXTERNALSYM COMPOSITION_STATS_MAX_TARGETS}
 // #endif // NTDDI_WIN8
 
 
@@ -193,5 +272,15 @@ const
 implementation
 
   // Implement Additional functions here.
+
+function tagCOMPOSITION_TARGET_ID.IsEqual(rhs: tagCOMPOSITION_TARGET_ID): Boolean;
+  begin
+    Result := (displayAdapterLuid.LowPart = rhs.displayAdapterLuid.LowPart)   AND
+                (renderAdapterLuid.LowPart = rhs.renderAdapterLuid.LowPart)   AND
+                (renderAdapterLuid.HighPart = rhs.renderAdapterLuid.HighPart) AND
+                (vidPnSourceId = rhs.vidPnSourceId)                           AND
+                (vidPnTargetId = rhs.vidPnTargetId)                           AND
+                ((uniqueId = rhs.uniqueId) OR (uniqueId = 0) OR (rhs.uniqueId = 0));
+  end;
 
 end.

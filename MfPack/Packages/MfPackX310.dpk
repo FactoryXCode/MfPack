@@ -1,4 +1,4 @@
-package MfPackX302;
+package MfPackX310;
 
 {$R *.res}
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
@@ -195,6 +195,8 @@ contains
   WinApi.CoreAudioApi.AudioStateMonitorApi in '..\src\WinApi.CoreAudioApi.AudioStateMonitorApi.pas',
   WinApi.CoreAudioApi.AudioClient in '..\src\WinApi.CoreAudioApi.AudioClient.pas',
   WinApi.Mpeg2Error in '..\src\WinApi.Mpeg2Error.pas',
-  WinApi.MpegType in '..\src\WinApi.MpegType.pas';
+  WinApi.MpegType in '..\src\WinApi.MpegType.pas',
+  WinApi.MediaFoundationApi.MfVirtualCamera in '..\src\WinApi.MediaFoundationApi.MfVirtualCamera.pas',
+  WinApi.ICodecApi in '..\src\WinApi.ICodecApi.pas';
 
 end.

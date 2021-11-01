@@ -10,7 +10,7 @@
 // Release date: 29-05-2018
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.1.0
 // Description: SpatialAudioClient API interface definition.
 //              of the Core Audio Interfaces
 //
@@ -22,17 +22,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 RedStone 1 or later.
-// 
+//
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX310
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -120,6 +120,13 @@ type
   {$EXTERNALSYM AudioObjectType}
 
 
+  PSPATIAL_AUDIO_STREAM_OPTIONS = ^SPATIAL_AUDIO_STREAM_OPTIONS;
+  SPATIAL_AUDIO_STREAM_OPTIONS = (
+    SPATIAL_AUDIO_STREAM_OPTIONS_NONE = $00,
+    SPATIAL_AUDIO_STREAM_OPTIONS_OFFLOAD = $01
+  );
+  {$EXTERNALSYM SPATIAL_AUDIO_STREAM_OPTIONS}
+
 type
 
   // Forwarded inteface declarations
@@ -139,6 +146,20 @@ type
     NotifyObject: ISpatialAudioObjectRenderStreamNotify;
   end;
   {$EXTERNALSYM SpatialAudioObjectRenderStreamActivationParams}
+
+
+  PSpatialAudioObjectRenderStreamActivationParams2 = ^SpatialAudioObjectRenderStreamActivationParams2;
+  SpatialAudioObjectRenderStreamActivationParams2 = record
+    ObjectFormat: WAVEFORMATEX;              // Format descriptor for a single spatial audio objects. All objects must have the same format and must be of type WAVEFORMATEX or WAVEFORMATEXTENSIBLE.
+    StaticObjectTypeMask: AudioObjectType;   // (static channel bed mask) mask of static audio object type that are allowed
+    MinDynamicObjectCount: UINT32;           // Minimum number of dynamic audio objects. If at least this count cannot be granted, stream activation will fail with SPTLAUDCLNT_E_NO_MORE_OBJECTS.
+    MaxDynamicObjectCount: UINT32;           // Maximum number of dynamic audio objects that can be activated via ISpatialAudioObjectRenderStream
+    Category: AUDIO_STREAM_CATEGORY;         // Specifies the category of the audio stream and its spatial audio objects
+    EventHandle: THandle;                    // Event that will signal the need for more audio data. This handle will be duplicated internally before getting used. This handle must be unique across stream instances.
+    NotifyObject: ISpatialAudioObjectRenderStreamNotify;
+    Options: SPATIAL_AUDIO_STREAM_OPTIONS;
+  end;
+  {$EXTERNALSYM SpatialAudioObjectRenderStreamActivationParams2}
 
 
 
@@ -400,7 +421,7 @@ type
   {$EXTERNALSYM ISpatialAudioClient}
   ISpatialAudioClient = interface(IUnknown)
   ['{BBF8E066-AAAA-49BE-9A4D-FD2A858EA27F}']
-    
+
     function GetStaticObjectPosition(_type: AudioObjectType;
                                      out x: FLOAT;
                                      out y: FLOAT;
@@ -462,7 +483,38 @@ type
   {$EXTERNALSYM IID_ISpatialAudioClient}
 
 
-// SpatialAudioClientActivationParams
+  // Interface ISpatialAudioClient2
+  // =============================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ISpatialAudioClient2);'}
+  {$EXTERNALSYM ISpatialAudioClient2}
+  ISpatialAudioClient2 = interface(ISpatialAudioClient)
+  ['{caabe452-a66a-4bee-a93e-e320463f6a53}']
+    function IsOffloadCapable(category: AUDIO_STREAM_CATEGORY;
+                             {out} isOffloadCapable: BOOL): HRESULT; stdcall;
+    // This method is called to find out if the audio rendering endpoint that the
+    // ISpatialAudioClient2 was created on supports hardware offloaded audio processing.
+    // The method also considers the capabilities of the AUDIO_STREAM_CATEGORY value that will
+    // be used, as use of offload is restricted to only certain AUDIO_STREAM_CATEGORY values.
+
+    function GetMaxFrameCountForCategory(category: AUDIO_STREAM_CATEGORY;
+                                         offloadEnabled: BOOL;
+                                         objectFormat: WAVEFORMATEX;
+                                         {out} frameCountPerBuffer: UINT32): HRESULT; stdcall;
+    // Get max possible frame count per processing pass. This value will change if the endpoint cadence changes.
+    // The value returned by this method can be used to allocate source buffer.
+    // The caller must specify same AUDIO_STREAM_CATEGORY value and WAVEFORMATEX that will be used when creating the stream.
+    // The offloadEnabled parameter must be set to TRUE if the stream will be created with the
+    // SPATIAL_AUDIO_STREAM_OPTIONS_OFFLOAD flag.
+
+  end;
+  IID_ISpatialAudioClient2 = ISpatialAudioClient2;
+  {$EXTERNALSYM IID_ISpatialAudioClient2}
+
+
+
+  // SpatialAudioClientActivationParams
+  // ==================================
   // SpatialAudioClientActivationParams is an optional activation parameter for ISpatialAudioClient
   //
   // ISpatialAudioClient implementations log various things via ETW tracing
