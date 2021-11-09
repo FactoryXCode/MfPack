@@ -206,36 +206,20 @@ type
     // validation against the XAPO's registration properties.
     // Derived XAPOs should call the base implementation first.
     function LockForProcess(InputLockedParameterCount: UINT32;
-                            pInputLockedParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
+                            pInputLockedParameters: PXAPO_LOCKFORPROCESS_PARAMETERS;
                             OutputLockedParameterCount: UINT32;
-                            pOutputLockedParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS): HRESULT; overload; stdcall;
-
-
-    function LockForProcess(InputLockedParameterCount: UINT32;
-                            pInputLockedParameters: TXAPOLockForProcessBufferParametersArray;
-                            OutputLockedParameterCount: UINT32;
-                            pOutputLockedParameters: TXAPOLockForProcessBufferParametersArray): HRESULT; overload; stdcall;
+                            pOutputLockedParameters: PXAPO_LOCKFORPROCESS_PARAMETERS): HRESULT; stdcall;
 
     // Opposite of LockForProcess.
     // Derived XAPOs should call the base implementation first.
     procedure UnlockForProcess(); stdcall;
 
-    // overloaded methods
-    //
-    // Need POINTERMATH
+    // Needs POINTERMATH turned On!
     procedure Process(InputProcessParameterCount: UINT32;
                       pInputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
                       OutputProcessParameterCount: UINT32;
                       var pOutputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
-                      IsEnabled: BOOL); overload; stdcall;
-    // No need for POINTERMATH
-    procedure Process(InputProcessParameterCount: UINT32;
-                      pInputProcessParameters: TXAPOProcessBufferParametersArray;
-                      OutputProcessParameterCount: UINT32;
-                      var pOutputProcessParameters: TXAPOProcessBufferParametersArray;
-                      IsEnabled: BOOL); overload; stdcall;
-
-
+                      IsEnabled: BOOL); stdcall;
 
     // Returns the number of input frames required to generate the requested number of output frames.
     // By default, this method returns the same number of frames it was passed.
@@ -450,19 +434,9 @@ begin
 end;
 
 function CXAPOBase.LockForProcess(InputLockedParameterCount: UINT32;
-                                  pInputLockedParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
+                                  pInputLockedParameters: PXAPO_LOCKFORPROCESS_PARAMETERS;
                                   OutputLockedParameterCount: UINT32;
-                                  pOutputLockedParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS): HRESULT;
-begin
-
-  Result := E_NOTIMPL; // Do your implementations here, by replacing this line for your code.
-
-end;
-
-function CXAPOBase.LockForProcess(InputLockedParameterCount: UINT32;
-                                  pInputLockedParameters: TXAPOLockForProcessBufferParametersArray;
-                                  OutputLockedParameterCount: UINT32;
-                                  pOutputLockedParameters: TXAPOLockForProcessBufferParametersArray): HRESULT;
+                                  pOutputLockedParameters: PXAPO_LOCKFORPROCESS_PARAMETERS): HRESULT; stdcall;
 begin
 
   Result := E_NOTIMPL; // Do your implementations here, by replacing this line for your code.
@@ -482,18 +456,6 @@ procedure CXAPOBase.Process(InputProcessParameterCount: UINT32;
                             pInputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
                             OutputProcessParameterCount: UINT32;
                             var pOutputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
-                            IsEnabled: BOOL);
-begin
-
-   // Do your implementations here
-
-end;
-
-
-procedure CXAPOBase.Process(InputProcessParameterCount: UINT32;
-                            pInputProcessParameters: TXAPOProcessBufferParametersArray;
-                            OutputProcessParameterCount: UINT32;
-                            var pOutputProcessParameters: TXAPOProcessBufferParametersArray;
                             IsEnabled: BOOL);
 begin
 

@@ -255,9 +255,6 @@ type
   end;
   {$EXTERNALSYM X3DAUDIO_DISTANCE_CURVE_POINT}
 
-  // If you don't want to use a pointer to array
-  TX3DAudioDistancePointArray = array [0..65535] of X3DAUDIO_DISTANCE_CURVE_POINT;
-  {$EXTERNALSYM TX3DAudioDistancePointArray}
 
   // Distance curve:
   // A piecewise curve made up of linear segments used to

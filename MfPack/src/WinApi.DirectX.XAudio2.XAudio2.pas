@@ -404,18 +404,16 @@ type
   PXAUDIO2_SEND_DESCRIPTOR = ^XAUDIO2_SEND_DESCRIPTOR;
   XAUDIO2_SEND_DESCRIPTOR = record
     Flags: UINT32;                   // Either 0 or XAUDIO2_SEND_USEFILTER.
-    pOutputVoice: IXAudio2Voice;     // This send's destination voice.
+    pOutputVoice: PIXAudio2Voice;    // This send's destination voice.
   end;
   {$EXTERNALSYM XAUDIO2_SEND_DESCRIPTOR}
-  // If you don't want to use pointer array's
-  TXAudio2SendDescriptor = array [0..65535] of XAUDIO2_SEND_DESCRIPTOR;
-  {$EXTERNALSYM TXAudio2SendDescriptor}
+
 
   // Used in the voice creation functions and in IXAudio2Voice.SetOutputVoices
   PXAUDIO2_VOICE_SENDS = ^XAUDIO2_VOICE_SENDS;
   XAUDIO2_VOICE_SENDS = record
     SendCount: UINT32;                  // Number of sends from this voice.
-    pSends: TXAudio2SendDescriptor;     // PXAUDIO2_SEND_DESCRIPTOR;   // Array of SendCount send descriptors.
+    pSends: PXAUDIO2_SEND_DESCRIPTOR;   // Array of SendCount send descriptors.
   end;
   {$EXTERNALSYM XAUDIO2_VOICE_SENDS}
 
@@ -423,19 +421,17 @@ type
   PXAUDIO2_EFFECT_DESCRIPTOR = ^XAUDIO2_EFFECT_DESCRIPTOR;
   XAUDIO2_EFFECT_DESCRIPTOR = record
     pEffect: IUnknown;              // Pointer to the effect object's IUnknown interface.
-    InitialState: BOOL;              // TRUE if the effect should begin in the enabled state.
-    OutputChannels: UINT32;          // How many output channels the effect should produce.
+    InitialState: BOOL;             // TRUE if the effect should begin in the enabled state.
+    OutputChannels: UINT32;         // How many output channels the effect should produce.
   end;
   {$EXTERNALSYM XAUDIO2_EFFECT_DESCRIPTOR}
-  // If you don't want to use pointer array's
-  TXAudio2EffectDescriptor = array [0..65535] of XAUDIO2_EFFECT_DESCRIPTOR;
-  {$EXTERNALSYM TXAudio2EffectDescriptor}
+
 
   // Used in the voice creation functions and in IXAudio2Voice.SetEffectChain
   PXAUDIO2_EFFECT_CHAIN = ^XAUDIO2_EFFECT_CHAIN;
   XAUDIO2_EFFECT_CHAIN = record
-    EffectCount: UINT32;                              // Number of effects in this voice's effect chain.
-    pEffectDescriptors: TXAudio2EffectDescriptor;     // PXAUDIO2_EFFECT_DESCRIPTOR;  // Array of effect descriptors.
+    EffectCount: UINT32;                             // Number of effects in this voice's effect chain.
+    pEffectDescriptors: PXAUDIO2_EFFECT_DESCRIPTOR;  // Array of effect descriptors.
   end;
   {$EXTERNALSYM XAUDIO2_EFFECT_CHAIN}
 
@@ -748,7 +744,6 @@ type
   //               However, this is not the case: This 'interface' is a pure virtual base class rather than an
   //               interface and NOT derived from IUnknown!
 
-  {$EXTERNALSYM IXAudio2Voice}
   IXAudio2Voice = class(TObject)
 
     // NAME: IXAudio2Voice.GetVoiceDetails
@@ -943,6 +938,7 @@ type
     procedure DestroyVoice(); virtual; stdcall; abstract;
 
   end;
+  {$EXTERNALSYM IXAudio2Voice}
 
 
 
@@ -952,7 +948,6 @@ type
   *
   **************************************************************************)
 
-  {$EXTERNALSYM IXAudio2SourceVoice}
   IXAudio2SourceVoice = class(IXAudio2Voice)
 
     // Methods from IXAudio2Voice base interface
@@ -1050,6 +1045,7 @@ type
     function SetSourceSampleRate(NewSourceSampleRate: UINT32): HRESULT; virtual; stdcall; abstract;
 
   end;
+  {$EXTERNALSYM IXAudio2SourceVoice}
 
 
 
@@ -1059,7 +1055,6 @@ type
   *
   **************************************************************************)
 
-  {$EXTERNALSYM IXAudio2SubmixVoice}
   IXAudio2SubmixVoice = class(IXAudio2Voice)
     // Methods from IXAudio2Voice base interface
 
@@ -1068,6 +1063,7 @@ type
     // There are currently no methods specific to submix voices.
 
   end;
+  {$EXTERNALSYM IXAudio2SubmixVoice}
 
 
 
@@ -1077,7 +1073,6 @@ type
   *
   **************************************************************************)
 
-  {$EXTERNALSYM IXAudio2MasteringVoice}
   IXAudio2MasteringVoice = class(IXAudio2Voice)
     // Methods from IXAudio2Voice base interface
     // Declare_IXAudio2Voice_Methods();
@@ -1092,6 +1087,7 @@ type
     function GetChannelMask(Out pChannelmask: DWORD): HRESULT; virtual; stdcall; abstract;
 
   end;
+  {$EXTERNALSYM IXAudio2MasteringVoice}
 
 
 
@@ -1107,7 +1103,6 @@ type
   *
   **************************************************************************)
 
-  {$EXTERNALSYM IXAudio2EngineCallback}
   IXAudio2EngineCallback = class
 
     // Called by XAudio2 just before an audio processing pass begins.
@@ -1121,6 +1116,7 @@ type
     procedure OnCriticalError(Error: HRESULT); virtual; stdcall; abstract;
 
   end;
+  {$EXTERNALSYM IXAudio2EngineCallback}
 
 
 
@@ -1135,7 +1131,6 @@ type
   *
   **************************************************************************)
 
-  {$EXTERNALSYM IXAudio2VoiceCallback}
   IXAudio2VoiceCallback = class
 
     // Called just before this voice's processing pass begins.
@@ -1167,6 +1162,7 @@ type
                            Error: HRESULT); virtual; stdcall; abstract;
 
   end;
+  {$EXTERNALSYM IXAudio2VoiceCallback}
 
 
 

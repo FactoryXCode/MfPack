@@ -284,9 +284,7 @@ type
   {$EXTERNALSYM XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS}
   XAPO_LOCKFORPROCESS_PARAMETERS = XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
   {$EXTERNALSYM XAPO_LOCKFORPROCESS_PARAMETERS}
-  //
-  TXAPOLockForProcessBufferParametersArray = array [0.. 65535] of XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
-  {$EXTERNALSYM TXAPOLockForProcessBufferParametersArray}
+  PXAPO_LOCKFORPROCESS_PARAMETERS = ^XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
 
 type
   // Buffer flags:
@@ -340,9 +338,6 @@ type
     ValidFrameCount: UINT32;    // number of frames of valid data, must be within respective [0, XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS.MaxFrameCount], always XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS.MaxFrameCount for CBR/user-defined XAPOs, does not affect BufferFlags
   end;
   {$EXTERNALSYM XAPO_PROCESS_BUFFER_PARAMETERS}
-  // If you don't want to use pointers to array's
-  TXAPOProcessBufferParametersArray = array [0..65535] of XAPO_PROCESS_BUFFER_PARAMETERS;
-  {$EXTERNALSYM TXAPOProcessBufferParametersArray}
 
 //--------------<M-A-C-R-O-S>-----------------------------------------------//
     // Memory allocation macros that allow one module to allocate memory and
@@ -529,14 +524,9 @@ type
     //  COM error code
     ////
     function LockForProcess(InputLockedParameterCount: UINT32;
-                            pInputLockedParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
+                            pInputLockedParameters: PXAPO_LOCKFORPROCESS_PARAMETERS;
                             OutputLockedParameterCount: UINT32;
-                            pOutputLockedParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS): HRESULT; stdcall; overload;
-
-    function LockForProcess(InputLockedParameterCount: UINT32;
-                            pInputLockedParameters: TXAPOLockForProcessBufferParametersArray;
-                            OutputLockedParameterCount: UINT32;
-                            pOutputLockedParameters: TXAPOLockForProcessBufferParametersArray): HRESULT; stdcall; overload;
+                            pOutputLockedParameters: PXAPO_LOCKFORPROCESS_PARAMETERS): HRESULT; stdcall;
 
     ////
     // DESCRIPTION:
@@ -600,13 +590,7 @@ type
                       pInputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
                       OutputProcessParameterCount: UINT32;
                       var pOutputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
-                      IsEnabled: BOOL); stdcall; overload;
-
-    procedure Process(InputProcessParameterCount: UINT32;
-                      pInputProcessParameters: TXAPOProcessBufferParametersArray;
-                      OutputProcessParameterCount: UINT32;
-                      var pOutputProcessParameters: TXAPOProcessBufferParametersArray;
-                      IsEnabled: BOOL); stdcall; overload;
+                      IsEnabled: BOOL); stdcall;
 
     ////
     // DESCRIPTION:
