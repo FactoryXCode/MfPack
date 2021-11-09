@@ -181,11 +181,11 @@ const
   // Flags
   XAUDIO2_DEBUG_ENGINE                = $0001;   // Used in XAudio2Create
   {$EXTERNALSYM XAUDIO2_DEBUG_ENGINE}
-  XAUDIO2_VOICE_NOPITCH               = $0002;   // Used in IXAudio2::CreateSourceVoice
+  XAUDIO2_VOICE_NOPITCH               = $0002;   // Used in IXAudio2.CreateSourceVoice
   {$EXTERNALSYM XAUDIO2_VOICE_NOPITCH}
-  XAUDIO2_VOICE_NOSRC                 = $0004;   // Used in IXAudio2::CreateSourceVoice
+  XAUDIO2_VOICE_NOSRC                 = $0004;   // Used in IXAudio2.CreateSourceVoice
   {$EXTERNALSYM XAUDIO2_VOICE_NOSRC}
-  XAUDIO2_VOICE_USEFILTER             = $0008;   // Used in IXAudio2::CreateSource/SubmixVoice
+  XAUDIO2_VOICE_USEFILTER             = $0008;   // Used in IXAudio2.CreateSource/SubmixVoice
   {$EXTERNALSYM XAUDIO2_VOICE_USEFILTER}
   XAUDIO2_PLAY_TAILS                  = $0020;   // Used in IXAudio2SourceVoice::Stop
   {$EXTERNALSYM XAUDIO2_PLAY_TAILS}
@@ -404,7 +404,7 @@ type
   PXAUDIO2_SEND_DESCRIPTOR = ^XAUDIO2_SEND_DESCRIPTOR;
   XAUDIO2_SEND_DESCRIPTOR = record
     Flags: UINT32;                   // Either 0 or XAUDIO2_SEND_USEFILTER.
-    pOutputVoice: PIXAudio2Voice;    // This send's destination voice.
+    pOutputVoice: IXAudio2Voice;     // This send's destination voice.
   end;
   {$EXTERNALSYM XAUDIO2_SEND_DESCRIPTOR}
 
@@ -605,7 +605,7 @@ type
     //  pEffectChain - Optional list of effects to apply to the audio data.
     //
     function CreateSourceVoice(out ppSourceVoice: IXAudio2SourceVoice;
-                               pSourceFormat: TWAVEFORMATEX;
+                               pSourceFormat: PWAVEFORMATEX;
                                Flags: UINT32 = 0;
                                MaxFrequencyRatio: Single = XAUDIO2_DEFAULT_FREQ_RATIO;
                                pCallback: IXAudio2VoiceCallback = nil;
@@ -687,7 +687,7 @@ type
     //  pDebugConfiguration - Structure describing the debug output behavior.
     //  pReserved - Optional parameter; must be NULL.
     //
-    procedure SetDebugConfiguration(pDebugConfiguration: XAUDIO2_DEBUG_CONFIGURATION;
+    procedure SetDebugConfiguration(pDebugConfiguration: PXAUDIO2_DEBUG_CONFIGURATION;
                                     pReserved: Pointer = nil); stdcall;
 
   end;
@@ -751,22 +751,22 @@ type
     //
     // ARGUMENTS:
     //  pVoiceDetails - Returns the voice's details.
-    procedure GetVoiceDetails(pVoiceDetails: XAUDIO2_VOICE_DETAILS); virtual; stdcall; abstract;
+    procedure GetVoiceDetails(out pVoiceDetails: PXAUDIO2_VOICE_DETAILS); virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.SetOutputVoices
     // DESCRIPTION: Replaces the set of submix/mastering voices that receive
-    //              this voice's output.
+    //              this voice's output.                 fv
     //
     // ARGUMENTS:
     //  pSendList - Optional list of voices this voice should send audio to.
-    function SetOutputVoices(pSendList: XAUDIO2_VOICE_SENDS): HRESULT; virtual; stdcall; abstract;
+    function SetOutputVoices(pSendList: PXAUDIO2_VOICE_SENDS): HRESULT; virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.SetEffectChain
     // DESCRIPTION: Replaces this voice's current effect chain with a new one.
     //
     // ARGUMENTS:
     //  pEffectChain - Structure describing the new effect chain to be used.
-    function SetEffectChain(pEffectChain: XAUDIO2_EFFECT_CHAIN): HRESULT; virtual; stdcall; abstract;
+    function SetEffectChain(pEffectChain: PXAUDIO2_EFFECT_CHAIN): HRESULT; virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.EnableEffect
     // DESCRIPTION: Enables an effect in this voice's effect chain.
@@ -830,7 +830,7 @@ type
     // ARGUMENTS:
     //  pParameters - Pointer to the filter's parameter structure.
     //  OperationSet - Used to identify this call as part of a deferred batch.
-    function SetFilterParameters(pParameters: XAUDIO2_FILTER_PARAMETERS;
+    function SetFilterParameters(pParameters: PXAUDIO2_FILTER_PARAMETERS;
                                  OperationSet: UINT32): HRESULT; virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.GetFilterParameters
@@ -838,7 +838,7 @@ type
     //
     // ARGUMENTS:
     //  pParameters - Returns the filter parameters.
-    procedure GetFilterParameters(out pParameters: XAUDIO2_FILTER_PARAMETERS); virtual; stdcall; abstract;
+    procedure GetFilterParameters(out pParameters: PXAUDIO2_FILTER_PARAMETERS); virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.SetOutputFilterParameters
     // DESCRIPTION: Sets the filter parameters on one of this voice's sends.
@@ -848,7 +848,7 @@ type
     //  pParameters - Pointer to the filter's parameter structure.
     //  OperationSet - Used to identify this call as part of a deferred batch.
     function SetOutputFilterParameters(pDestinationVoice: IXAudio2Voice;
-                                       pParameters: XAUDIO2_FILTER_PARAMETERS;
+                                       pParameters: PXAUDIO2_FILTER_PARAMETERS;
                                        OperationSet: UINT32): HRESULT; virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.GetOutputFilterParameters
@@ -858,7 +858,7 @@ type
     //  pDestinationVoice - Destination voice of the send whose filter parameters will be read.
     //  pParameters - Returns the filter parameters.
     procedure GetOutputFilterParameters(pDestinationVoice: IXAudio2Voice;
-                                        out pParameters: XAUDIO2_FILTER_PARAMETERS); virtual; stdcall; abstract;
+                                        out pParameters: PXAUDIO2_FILTER_PARAMETERS); virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.SetVolume
     // DESCRIPTION: Sets this voice's overall volume level.
@@ -981,7 +981,7 @@ type
     //  pBuffer - Pointer to the buffer structure to be queued.
     //  pBufferWMA - Additional structure used only when submitting XWMA data.
     //
-    function SubmitSourceBuffer(pBuffer: XAUDIO2_BUFFER;
+    function SubmitSourceBuffer(pBuffer: PXAUDIO2_BUFFER;
                                 pBufferWMA: PXAUDIO2_BUFFER_WMA = nil): HRESULT; virtual; stdcall; abstract;
 
     // NAME: IXAudio2SourceVoice.FlushSourceBuffers
