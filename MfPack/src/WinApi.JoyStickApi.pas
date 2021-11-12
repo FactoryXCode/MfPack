@@ -63,7 +63,8 @@ interface
 uses
   {WinApi}
   WinApi.Windows,
-  WinApi.MMSysCom;
+  {WinMM}
+  WinApi.WinMM.MMSysCom;
 
   //****************************************************************************
   //
