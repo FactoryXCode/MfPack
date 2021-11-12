@@ -751,7 +751,7 @@ type
     //
     // ARGUMENTS:
     //  pVoiceDetails - Returns the voice's details.
-    procedure GetVoiceDetails(out pVoiceDetails: PXAUDIO2_VOICE_DETAILS); virtual; stdcall; abstract;
+    procedure GetVoiceDetails(out pVoiceDetails: XAUDIO2_VOICE_DETAILS); virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.SetOutputVoices
     // DESCRIPTION: Replaces the set of submix/mastering voices that receive
@@ -838,7 +838,7 @@ type
     //
     // ARGUMENTS:
     //  pParameters - Returns the filter parameters.
-    procedure GetFilterParameters(out pParameters: PXAUDIO2_FILTER_PARAMETERS); virtual; stdcall; abstract;
+    procedure GetFilterParameters(out pParameters: XAUDIO2_FILTER_PARAMETERS); virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.SetOutputFilterParameters
     // DESCRIPTION: Sets the filter parameters on one of this voice's sends.
@@ -848,7 +848,7 @@ type
     //  pParameters - Pointer to the filter's parameter structure.
     //  OperationSet - Used to identify this call as part of a deferred batch.
     function SetOutputFilterParameters(pDestinationVoice: IXAudio2Voice;
-                                       pParameters: PXAUDIO2_FILTER_PARAMETERS;
+                                       pParameters: XAUDIO2_FILTER_PARAMETERS;
                                        OperationSet: UINT32): HRESULT; virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.GetOutputFilterParameters
@@ -858,7 +858,7 @@ type
     //  pDestinationVoice - Destination voice of the send whose filter parameters will be read.
     //  pParameters - Returns the filter parameters.
     procedure GetOutputFilterParameters(pDestinationVoice: IXAudio2Voice;
-                                        out pParameters: PXAUDIO2_FILTER_PARAMETERS); virtual; stdcall; abstract;
+                                        out pParameters: XAUDIO2_FILTER_PARAMETERS); virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.SetVolume
     // DESCRIPTION: Sets this voice's overall volume level.
@@ -906,9 +906,23 @@ type
     //  SourceChannels - Used to confirm this voice's output channel count
     //   (the number of channels produced by the last effect in the chain).
     //  DestinationChannels - Confirms the destination voice's input channels.
-    //  pLevelMatrix - Array of [SourceChannels * DestinationChannels] send
-    //   levels.  The level used to send from source channel S to destination
-    //   channel D should be in pLevelMatrix[S + SourceChannels * D].
+    //  pLevelMatrix - Array of [SourceChannels × DestinationChannels] volume levels sent to
+    //  the destination voice.
+    //  The level sent from source channel S to destination channel D is specified in the form pLevelMatrix[SourceChannels × D + S].
+    //  For example, when rendering two-channel stereo input into 5.1 output that is weighted
+    //  toward the front channels—but is absent from the center and low-frequency channels—the matrix might have
+    //  the values shown in the following table.
+    //  TABLE 1
+    //    Output        Left Input [Array Index]   Right Input [Array Index]
+    //    Left          1.0 [0]                    0.0 [1]
+    //    Right         0.0 [2]                    1.0 [3]
+    //    Front Center  0.0 [4]                    0.0 [5]
+    //    LFE           0.0 [6]                    0.0 [7]
+    //    Rear Left     0.8 [8]                    0.0 [9]
+    //    Rear Right    0.0 [10]                   0.8 [11]
+    //
+    //  Note  The left and right input are fully mapped to the output left and right channels; 80 percent of the
+    //  left and right input is mapped to the rear left and right channels.
     //  OperationSet - Used to identify this call as part of a deferred batch.
     function SetOutputMatrix(pDestinationVoice: IXAudio2Voice;
                              SourceChannels: UINT32;
