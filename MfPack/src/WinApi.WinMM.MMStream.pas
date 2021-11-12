@@ -5,7 +5,7 @@
 // Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: WinApi.MMStream.pas
+// Module: WinApi.WinMM.MMStream.pas
 // Kind: Pascal / Delphi unit
 // Release date: 11-07-2012
 // Language: ENU
@@ -57,7 +57,7 @@
 // Users may distribute this source code provided that this header is included
 // in full at the top of the file.
 //==============================================================================
-unit WinApi.MmStream;
+unit WinApi.WinMM.MmStream;
 
   {$HPPEMIT '#include "mmstream.h"'}
 
