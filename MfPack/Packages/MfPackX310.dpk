@@ -149,7 +149,7 @@ contains
   WinApi.ShTypes in '..\src\WinApi.ShTypes.pas',
   WinApi.ServProv in '..\src\WinApi.ServProv.pas',
   WinApi.Relogger in '..\src\WinApi.Relogger.pas',
-  WinApi.MmStream in '..\src\WinApi.MmStream.pas',
+  WinApi.WinMM.MmStream in '..\src\WinApi.WinMM.MmStream.pas',
   WinApi.WinMM.MMDdk in '..\src\WinApi.WinMM.MMDdk.pas',
   WinApi.WinMM.MMReg in '..\src\WinApi.WinMM.MMReg.pas',
   WinApi.KsProxy in '..\src\WinApi.KsProxy.pas',
@@ -197,6 +197,7 @@ contains
   WinApi.Mpeg2Error in '..\src\WinApi.Mpeg2Error.pas',
   WinApi.MpegType in '..\src\WinApi.MpegType.pas',
   WinApi.MediaFoundationApi.MfVirtualCamera in '..\src\WinApi.MediaFoundationApi.MfVirtualCamera.pas',
-  WinApi.ICodecApi in '..\src\WinApi.ICodecApi.pas';
+  WinApi.ICodecApi in '..\src\WinApi.ICodecApi.pas',
+  WinApi.JoyStickApi in '..\src\WinApi.JoyStickApi.pas';
 
 end.
