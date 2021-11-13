@@ -197,7 +197,6 @@ contains
   WinApi.Mpeg2Error in '..\src\WinApi.Mpeg2Error.pas',
   WinApi.MpegType in '..\src\WinApi.MpegType.pas',
   WinApi.MediaFoundationApi.MfVirtualCamera in '..\src\WinApi.MediaFoundationApi.MfVirtualCamera.pas',
-  WinApi.ICodecApi in '..\src\WinApi.ICodecApi.pas',
-  WinApi.JoyStickApi in '..\src\WinApi.JoyStickApi.pas';
+  WinApi.MediaFoundationApi.ICodecApi in '..\src\WinApi.MediaFoundationApi.ICodecApi.pas';
 
 end.

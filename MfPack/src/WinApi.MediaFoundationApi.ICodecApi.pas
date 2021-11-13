@@ -5,7 +5,7 @@
 // Project: MfPack - Media Foundation MediaFoundationApi
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: WinApi.ICodecApi.pas
+// Module: WinApi.MediaFoundationApi.ICodecApi.pas
 // Kind: Pascal / Delphi unit
 // Release date: 31-07-2020
 // Language: ENU
@@ -56,7 +56,7 @@
 // Users may distribute this source code provided that this header is included
 // in full at the top of the file.
 //==============================================================================
-unit WinApi.ICodecApi;
+unit WinApi.MediaFoundationApi.ICodecApi;
 
 interface
 

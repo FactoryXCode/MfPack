@@ -524,9 +524,9 @@ type
     //  COM error code
     ////
     function LockForProcess(InputLockedParameterCount: UINT32;
-                            pInputLockedParameters: PXAPO_LOCKFORPROCESS_PARAMETERS;
+                            pInputLockedParameters: XAPO_LOCKFORPROCESS_PARAMETERS;
                             OutputLockedParameterCount: UINT32;
-                            pOutputLockedParameters: PXAPO_LOCKFORPROCESS_PARAMETERS): HRESULT; stdcall;
+                            pOutputLockedParameters: XAPO_LOCKFORPROCESS_PARAMETERS): HRESULT; stdcall;
 
     ////
     // DESCRIPTION:
@@ -587,9 +587,9 @@ type
     //  void
     ////
     procedure Process(InputProcessParameterCount: UINT32;
-                      pInputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
+                      pInputProcessParameters: XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
                       OutputProcessParameterCount: UINT32;
-                      var pOutputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
+                      var pOutputProcessParameters: XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
                       IsEnabled: BOOL); stdcall;
 
     ////

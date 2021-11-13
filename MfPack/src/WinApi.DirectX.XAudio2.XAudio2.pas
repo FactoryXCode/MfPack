@@ -744,7 +744,7 @@ type
   //               However, this is not the case: This 'interface' is a pure virtual base class rather than an
   //               interface and NOT derived from IUnknown!
 
-  IXAudio2Voice = class(TObject)
+  IXAudio2Voice = class(TInterfacedObject)
 
     // NAME: IXAudio2Voice.GetVoiceDetails
     // DESCRIPTION: Returns the basic characteristics of this voice.
@@ -1117,7 +1117,7 @@ type
   *
   **************************************************************************)
 
-  IXAudio2EngineCallback = class
+  IXAudio2EngineCallback = class(TInterfacedObject)
 
     // Called by XAudio2 just before an audio processing pass begins.
     procedure OnProcessingPassStart(); virtual; stdcall; abstract;
@@ -1145,7 +1145,7 @@ type
   *
   **************************************************************************)
 
-  IXAudio2VoiceCallback = class
+  IXAudio2VoiceCallback = class(TInterfacedObject)
 
     // Called just before this voice's processing pass begins.
     procedure OnVoiceProcessingPassStart(BytesRequired: UINT32); virtual; stdcall; abstract;
