@@ -7,10 +7,10 @@
 //                   https://github.com/FactoryXCode/MfPack
 // Module:  Form.Main.pas
 // Kind: Pascal Unit
-// Release date: 00-00-2021
+// Release date: 22-09-2021
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.0
 //
 // Description:
 //   This unit is the application mainform.
@@ -23,17 +23,16 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-//
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 10 or later.
+// Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX302/Samples/MFFrameSample
+// Related projects: MfPackX310/Samples/MFFrameSample
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -367,6 +366,7 @@ begin
     begin
       sdSaveFrame.FileName := GetDefaultSaveName;
 
+     // Tip:
      // Stores a filter with all available image extensions and is compatible with the savedialog filter property
      // sFilter := GraphicFilter(TGraphic);
 
@@ -379,29 +379,27 @@ begin
                end;
             {PNG}
             2: begin
-                 try
-                   pPng := TPngImage.Create;
-                   pPng.Assign(picFrame.Picture.Bitmap);
-                   pPng.SaveToFile(sdSaveFrame.FileName);
-                 finally
+                 pPng := TPngImage.Create;
+                 pPng.Assign(picFrame.Picture.Bitmap);
+                 pPng.SaveToFile(sdSaveFrame.FileName);
+
+                 if Assigned(pPng) then
                    pPng.Free;
-                 end;
                end;
             {JPG}
             3: begin
-                 try
-                   pJpg := TJPEGImage.Create;
-                   // Adjust performance, compression etc.
-                   pJpg.Performance := jpBestQuality;
-                   pJpg.ProgressiveEncoding := True;
-                   pJpg.ProgressiveDisplay := True;
-                   //pJpg.CompressionQuality := 30;
-                   pJpg.Compress;
-                   pJpg.Assign(picFrame.Picture.Bitmap);
-                   pjpg.SaveToFile(sdSaveFrame.FileName);
-                 finally
+                 pJpg := TJPEGImage.Create;
+                 // Adjust performance, compression etc.
+                 pJpg.Performance := jpBestQuality;
+                 pJpg.ProgressiveEncoding := True;
+                 pJpg.ProgressiveDisplay := True;
+                 //pJpg.CompressionQuality := 30;
+                 pJpg.Compress;
+                 pJpg.Assign(picFrame.Picture.Bitmap);
+                 pjpg.SaveToFile(sdSaveFrame.FileName);
+
+                 if Assigned(pJpg) then
                    pJpg.Free;
-                 end;
                end;
           end;
         end;

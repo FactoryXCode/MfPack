@@ -7,10 +7,10 @@
 //                   https://github.com/FactoryXCode/MfPack
 // Module: Support.pas
 // Kind: Pascal Unit
-// Release date: 00-00-2021
+// Release date: 22-09-2021
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.0
 //
 // Description:
 //   This unit contains helpermethods for the MFFrameCapture project.
@@ -23,17 +23,16 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-//
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 10 or later.
+// Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX302/Samples/MFFrameSample
+// Related projects: MfPackX310/Samples/MFFrameSample
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
