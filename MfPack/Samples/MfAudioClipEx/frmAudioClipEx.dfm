@@ -148,8 +148,7 @@ object AudioClipExFrm: TAudioClipExFrm
     Height = 43
     Align = alBottom
     Shape = bsTopLine
-    ExplicitTop = 177
-    ExplicitWidth = 531
+    ExplicitTop = 178
   end
   object edClipDuration: TEdit
     Left = 86
@@ -192,7 +191,7 @@ object AudioClipExFrm: TAudioClipExFrm
     Top = 188
     Width = 82
     Height = 26
-    Caption = 'Extract'
+    Caption = 'E&xtract'
     Enabled = False
     TabOrder = 3
     OnClick = butExtractClick
@@ -202,10 +201,20 @@ object AudioClipExFrm: TAudioClipExFrm
     Top = 188
     Width = 82
     Height = 26
-    Caption = 'Cancel'
+    Caption = '&Cancel'
     Enabled = False
     TabOrder = 4
     OnClick = butCancelClick
+  end
+  object butClose: TButton
+    Left = 183
+    Top = 188
+    Width = 82
+    Height = 26
+    Caption = 'C&lose'
+    Enabled = False
+    TabOrder = 5
+    OnClick = butCloseClick
   end
   object MainMenu1: TMainMenu
     Left = 207

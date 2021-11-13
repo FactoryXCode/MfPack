@@ -1,6 +1,15 @@
 program MfAudioClip;
 
 uses
+
+{$IFDEF MadExcept}
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
+{$ENDIF}
+
   Vcl.Forms,
   AudioClipCore in 'AudioClipCore.pas',
   frmAudioClip in 'frmAudioClip.pas' {frmAudioClip};

@@ -1,6 +1,13 @@
 program DuckingCaptureSample;
 
 uses
+{$IFDEF MadExcept}  
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
+{$ENDIF}
   Vcl.Forms,
   IddDialogChat in 'IddDialogChat.pas' {Form1},
   ChatTransport in 'ChatTransport.pas',

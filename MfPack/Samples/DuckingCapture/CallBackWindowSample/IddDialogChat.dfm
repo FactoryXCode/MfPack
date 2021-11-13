@@ -14,6 +14,7 @@ object Form1: TForm1
   KeyPreview = True
   OldCreateOrder = False
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 13
   object btnChatStart: TButton
@@ -36,7 +37,7 @@ object Form1: TForm1
   end
   object butExit: TButton
     Left = 318
-    Top = 140
+    Top = 142
     Width = 72
     Height = 22
     Caption = 'Exit'
