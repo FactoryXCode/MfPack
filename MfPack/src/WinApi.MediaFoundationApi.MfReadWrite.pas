@@ -664,7 +664,7 @@ type
                                                out ppSourceReader: IMFSourceReader): HResult; stdcall;
   {$EXTERNALSYM MFCreateSourceReaderFromMediaSource}
 
-  function MFCreateSinkWriterFromURL(pwszOutputURL: LPCWSTR;
+  function MFCreateSinkWriterFromURL(const pwszOutputURL: WideString;
                                      pByteStream: IMFByteStream;
                                      pAttributes: IMFAttributes;
                                      out ppSinkWriter: IMFSinkWriter): HResult; stdcall;

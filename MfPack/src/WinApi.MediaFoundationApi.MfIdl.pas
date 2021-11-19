@@ -2474,7 +2474,7 @@ type
                       llClockTime: LONGLONG;
                       pCallback: IMFAsyncCallback;
                       punkState: IUnknown;
-                      ppunkKey: IUnknown): HResult; stdcall;
+                      {out} ppunkKey: PIUnknown): HResult; stdcall;
 
     function CancelTimer(punkKey: IUnknown): HResult; stdcall;
 
