@@ -1,6 +1,6 @@
 # Simple Player
 
-Version: X 3.0.2
+Version: X 3.1.0
 
 Description:
 
@@ -9,7 +9,7 @@ Description:
 NOTES: 
  - This API is deprecated, but still partly functional in Windows 10 version 2004 (May 2020 update).
  - This release is updated for compiler version 17 up to 34.
- - SDK version 10.0.20348.0
+ - SDK version 10.0.22000.0
  - Requires Windows 7 or later.
  - Minimum supported MfPack version: 3.0.0
 

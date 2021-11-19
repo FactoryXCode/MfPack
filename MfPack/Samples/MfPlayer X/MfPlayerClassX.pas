@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.0.2
+// Version: 3.1.0
 // Description: This is the extended basic player class (version X),
 //              containing the necessary methodes to play a mediafile
 //              For indepth information see the included examples (CPlayer)
@@ -25,18 +25,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -381,7 +380,7 @@ type
     // Resizes the video rectangle.
     // The application calls this method if the size of the video window changes;
     // e.g., when the application receives a WM_SIZE message.
-    function ResizeVideo(dRect: LPRECT): HRESULT;
+    function ResizeVideo(pdRect: LPRECT = Nil): HRESULT;
 
     // Start or stops redrawing surfaces (anti flicker)
     procedure SetRedraw();
@@ -518,14 +517,14 @@ try
     end;
 
   // Release the interfaces
-  m_pTopology := Nil;
-  m_pSession := Nil;
-  m_pSource := Nil;
-  m_pVideoDisplay := Nil;
-  m_pTimeSource := Nil;
-  m_pRateControl := Nil;
-  m_pRateSupport := Nil;
-  m_pSourcePD := Nil;
+  SafeRelease(m_pTopology);
+  SafeRelease(m_pSession);
+  SafeRelease(m_pSource);
+  SafeRelease(m_pVideoDisplay);
+  SafeRelease(m_pTimeSource);
+  SafeRelease(m_pRateControl);
+  SafeRelease(m_pRateSupport);
+  SafeRelease(m_pSourcePD);
 
   // The following objects need to be deleted from memory.
   // They are created again when a new URL is opened.
@@ -547,6 +546,9 @@ try
   // Close the floating form, if it's loaded.
   if Assigned(FloatingForm) then
     FloatingForm.Close();
+
+  SetLength(m_aStreamCont, 0);
+  Finalize(m_aStreamCont);
 
 except
   //
@@ -731,8 +733,7 @@ end;
 // The destructor
 destructor TMfPlayerX.Destroy();
 begin
-  DeallocateHWnd(m_hwndThis);
-  m_hwndThis := 0;
+  DeAllocateHWnd(m_hwndThis);
   // Shutdown the Media Foundation platform
   MFShutdown();
   CoUninitialize();
@@ -797,7 +798,6 @@ try
     end;
 
 finally
-
   Result := hr;
 end;
 end;
@@ -1812,16 +1812,15 @@ begin
 end;
 
 
-function TMfPlayerX.ResizeVideo(dRect: LPRECT): HRESULT;
+function TMfPlayerX.ResizeVideo(pdRect: LPRECT = Nil): HRESULT;
 var
-  rcpdest, rpcSrc: LPRECT;
+  rcpdest: LPRECT;
   rc: TRect;
   hr: HResult;  //debug purpose
 
 begin
   hr := E_NOINTERFACE;
   rcpdest := Nil;
-  rpcSrc := dRect;
 
   if Assigned(m_pVideoDisplay) then
     begin
@@ -1829,14 +1828,17 @@ begin
       SetRedraw();
       // Set the destination rectangle.
       // If dRect is empty; use the GetClientRect function
-      if (rpcSrc = Nil) then
+      if (pdRect = Nil) then
         begin
-          WinApi.Windows.GetClientRect(m_hwndVideo, rc);
+          WinApi.Windows.GetClientRect(m_hwndVideo,
+                                       rc);
           CopyTRectToLPRect(rc,
                             rcpdest);
         end
       else
-        rcpDest := rpcSrc;
+        begin
+          rcpDest := pdRect;
+        end;
 
       hr := m_pVideoDisplay.SetVideoPosition(Nil,
                                              rcpdest);
@@ -1851,7 +1853,6 @@ begin
       SetRedraw();
     end;
   rcpdest := Nil;
-  rpcSrc := Nil;
   Result := hr;
 end;
 
@@ -2544,6 +2545,8 @@ begin
   else
     hr := E_POINTER;
 
+  if Assigned(fTimedText) then
+    FreeAndNil(fTimedText);
   Result:= hr;
 end;
 

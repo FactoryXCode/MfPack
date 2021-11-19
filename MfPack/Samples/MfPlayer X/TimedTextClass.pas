@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.0.2
+// Version: 3.1.0
 // Description: This unit contains methods to get and
 //              present TimedText from currently SubRib and MicroDvd files.
 //
@@ -22,18 +22,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 // ----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.19041.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -111,6 +110,10 @@ type
   TFormattedTextArray = array of TFormattedText;
 
   TSubTitleTrack = record
+  public
+    procedure Init();
+    procedure Clear();
+  public
     stIndex       : Integer;          // track index
     Start         : MFTIME;           // Start time
     Stop          : MFTIME;           // End time
@@ -138,7 +141,7 @@ type
     sp_FriendlyLangName         : string;                    // Friendly localised languagename
     bp_AutoFormatText           : Boolean;                   // Option for automated formatting
     cp_clDefaultTextColor       : TColor;                    // DEfault text color
-    lp_MatchList                : TStrings;                  // Global matchlist, stores tracktimes
+    lp_MatchList                : TStringlist;                  // Global matchlist, stores tracktimes
     tp_SubTitleTrack            : TSubTitleTrack;            // Presentation record
     fTrackFont                  : TFont;
 
@@ -758,13 +761,17 @@ end;
 // Clears the whole SubTitle array
 procedure TMfTimedText.Clear();
 begin
-  if lp_MatchList <> Nil then
+  if Assigned(lp_MatchList) then
     begin
       lp_MatchList.Clear;
       lp_MatchList.Free;
-      lp_MatchList := Nil;
     end;
+  if Assigned(fTimedText) then
+     fTimedText.Clear();
+
+  SetLength(ap_SubTitleTracks, 0);
   Finalize(ap_SubTitleTracks);
+  ap_SubTitleTracks := nil;
 end;
 
 
@@ -1003,6 +1010,18 @@ begin
     end
   else
     TextFont := aFont;
+end;
+
+procedure TSubTitleTrack.Init();
+begin
+  SetLength(TrackText, 0);
+end;
+
+procedure TSubTitleTrack.Clear();
+begin
+  SetLength(TrackText, 0);
+  Finalize(TrackText);
+  TrackText := nil;
 end;
 
 end.

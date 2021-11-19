@@ -9,7 +9,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.0.2
+// Version: 3.1.0
 // Description: TimedText callback implementation.
 //
 // Company: FactoryX
@@ -21,19 +21,18 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires WinApi.MediaFoundationApi.MfMetLib.pas version 2.6.4 (or higher) and MfComponents to be installed!
 //          All TimedText interfaces require Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //

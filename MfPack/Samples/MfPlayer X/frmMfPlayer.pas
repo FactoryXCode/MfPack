@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.0.2
+// Version: 3.1.0
 // Description: MfPlayer X: Requires Windows 7 or later.
 //
 // Company: FactoryX
@@ -21,18 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -397,14 +396,15 @@ begin
   ResetInterface();
   if Assigned(MfPlayerX) then
     begin
-      MfPlayerX.Stop();
       // because we work in A-sync mode, we have to wait until the player
       // reached the Stopped state.
+      if (MfPlayerX.State <> Stopped) and not (MfPlayerX.State = closed) then
+        MfPlayerX.Stop();
       if (MfPlayerX.State in [Stopped, closed]) then
         begin
           MfPlayerX.ShutDown();
           MfPlayerX.Free;
-          MfPlayerX := Nil;
+          MfPlayerX := nil;
         end;
     end;
 end;
@@ -552,16 +552,16 @@ var
 begin
   // Clear any subtitle
   if Assigned(FloatingForm) then
-    FloatingForm.SubtitleText:= '';
+    FloatingForm.SubtitleText := '';
 
   if (X <= 0) then
-    fPos:= 0.0
+    fPos := 0.0
   else
-    fPos:= ((X / prbProgress.Width) * MfPlayerX.Duration);
+    fPos := ((X / prbProgress.Width) * MfPlayerX.Duration);
 
-  MfPlayerX.SetNewPosition:= trunc(fPos); // set new StartPosition
+  MfPlayerX.SetNewPosition := trunc(fPos); // set new StartPosition
   MfPlayerX.SendPlayerRequest(reqSeek);
-  prbProgress.Position:= X;
+  prbProgress.Position := X;
 end;
 
 
@@ -576,14 +576,14 @@ var
 
 begin
   // The calculated value is not accurate!
-  sDur:= IntToStr(int64(Trunc(MfPlayerX.Duration / (iSec * 60))));
-  sPos:= InputBox('Enter a position in seconds',
-                  'Enter a value between 0 and ' + sDur + '.',
-                  '1');
+  sDur := IntToStr(int64(Trunc(MfPlayerX.Duration / (iSec * 60))));
+  sPos := InputBox('Enter a position in seconds',
+                   'Enter a value between 0 and ' + sDur + '.',
+                   '1');
 
-  iDef:= StrToInt64Def(sPos, 0) * iSec;
+  iDef := StrToInt64Def(sPos, 0) * iSec;
   if (iDef >= MfPlayerX.Duration) then
-    iDef:= 0; // Set back to start position
+    iDef := 0; // Set back to start position
 
   MfPlayerX.SetNewPosition:= iDef; // set new StartPosition
   MfPlayerX.SendPlayerRequest(reqSeek);
@@ -625,14 +625,14 @@ begin
   // This is a very rare case, because mono is played on the leftchannel only or
   // on both channels without stereo effect.
   if (MfPlayerX.SoundChannels = 1) then
-    MfPlayerX.m_VolumeChannels[0]:= iSliderL;
+    MfPlayerX.m_VolumeChannels[0] := iSliderL;
 
   // Stereo
   // The first stereo channel (0) is always the LEFT one!
   if (MfPlayerX.SoundChannels = 2) then
     begin
-      MfPlayerX.m_VolumeChannels[0]:= iSliderL;
-      MfPlayerX.m_VolumeChannels[1]:= iSliderR;
+      MfPlayerX.m_VolumeChannels[0] := iSliderL;
+      MfPlayerX.m_VolumeChannels[1] := iSliderR;
     end;
 
   // DD 5.1 (AC3)
@@ -654,17 +654,17 @@ begin
   if (MfPlayerX.SoundChannels = 6) then
     begin
       // Channel 1  R
-      MfPlayerX.m_VolumeChannels[0]:= iSliderR;
+      MfPlayerX.m_VolumeChannels[0] := iSliderR;
       // Channel 2  L
-      MfPlayerX.m_VolumeChannels[1]:= iSliderL;
+      MfPlayerX.m_VolumeChannels[1] := iSliderL;
       // Channel 3  C >> most of the time, this is the character's voice channel.
-      MfPlayerX.m_VolumeChannels[2]:= iSliderL;
+      MfPlayerX.m_VolumeChannels[2] := iSliderL;
       // Channel 4  LFE
-      MfPlayerX.m_VolumeChannels[3]:= (iSliderR + iSliderL) / 2;
+      MfPlayerX.m_VolumeChannels[3] := (iSliderR + iSliderL) / 2;
       // Channel 5  Rs
-      MfPlayerX.m_VolumeChannels[4]:= iSliderR;
+      MfPlayerX.m_VolumeChannels[4] := iSliderR;
       // Channel 6  LS
-      MfPlayerX.m_VolumeChannels[5]:= iSliderL;
+      MfPlayerX.m_VolumeChannels[5] := iSliderL;
     end;
   MfPlayerX.SetVolume(MfPlayerX.m_VolumeChannels);
 end;
@@ -678,7 +678,7 @@ begin
   if (MfPlayerX.SoundChannels > 0) then
     begin
       if (cbLockVolumeSliders.Checked = True) then
-        trbVolumeL.Position:= trbVolumeR.Position;
+        trbVolumeL.Position := trbVolumeR.Position;
       SetVolumeChannels(MfPlayerX.m_VolumeChannels);
     end;
 end;
@@ -700,7 +700,9 @@ end;
 
 procedure Tfrm_MfPlayer.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
+  CanClose := False;
   QuitMfPlayerSession();
+  CanClose := True;
   bAppIsClosing := CanClose;
 end;
 

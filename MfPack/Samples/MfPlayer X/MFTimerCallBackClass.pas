@@ -10,7 +10,7 @@
 // Release date: 13-08-2019
 // Language: ENU
 //
-// Version: 3.0.2
+// Version: 3.1.0
 // Description: A Timercallback class for the IMFTimer interface.
 //
 // Company: FactoryX
@@ -21,18 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -88,6 +87,7 @@ type
       m_hnsClockTime: MFTIME;
       m_hwndOwner: HWnd;
       m_TimerFlags: DWord;
+      m_CancellationObject: IUnknown;
 
       // The Timer object that must be initiated by owner's PresentationClock
       MfTimer: IMFTimer;
@@ -116,10 +116,10 @@ type
       //         MFCLOCK_STATE_INVALID, MFCLOCK_STATE_STOPPED or MFCLOCK_STATE_PAUSED.
       function SetTimer(ClockTime: LONGLONG;
                         dwFlags: DWord; // Absolute = 0, Relative = DWord(MFTIMER_RELATIVE)
-                        CancellationObject: IUnknown): HResult;
+                        CancellationObject: PIUnknown): HResult;
 
       // Cancels a timer that was set using the IMFTimer.SetTimer method.
-      function CancelTimer(CancellationObject: IUnknown): HResult;
+      function CancelTimer(const CancellationObject: IUnknown): HResult;
 
       // Constructor, destructor
       // These are public methods in Delphi.
@@ -130,6 +130,7 @@ type
       property ClockProperties: MFCLOCK_PROPERTIES read GetClockProperties;
       property TimerResolution: LongWord read m_TimerResolution write SetTimerResolution default 1;
       property ClockTime: MFTIME read m_hnsClockTime;
+
   end;
 
 var
@@ -203,7 +204,7 @@ try
                          TimerResolution,
                          IMFAsyncCallback(Self),
                          Nil,
-                         Nil);
+                         @m_CancellationObject);
 
   // The timer's return code is one of those:
   //   S_OK = The method succeeded.
@@ -230,7 +231,7 @@ try
 
  if (hr = MF_E_SHUTDOWN) then
     begin
-      hr := CancelTimer(Nil);
+      hr := CancelTimer(m_CancellationObject);
     end;
 
 finally
@@ -248,7 +249,7 @@ end;
 
 function TMFCallBack.SetTimer(ClockTime: LONGLONG;
                               dwFlags: DWord;
-                              CancellationObject: IUnknown): HResult;
+                              CancellationObject: PIUnknown): HResult;
 var
   hr: HResult;
 
@@ -261,7 +262,7 @@ begin
                              ClockTime, // 0 = Immediate
                              Self,
                              Nil,
-                             Nil);
+                             CancellationObject);
     except
       Application.HandleException(Self);
     end
@@ -272,7 +273,7 @@ begin
 end;
 
 
-function TMFCallBack.CancelTimer(CancellationObject: IUnknown): HResult;
+function TMFCallBack.CancelTimer(const CancellationObject: IUnknown): HResult;
 var
   hr: HResult;
 begin

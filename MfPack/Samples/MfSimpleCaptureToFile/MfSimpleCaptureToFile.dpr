@@ -1,6 +1,11 @@
 program MfSimpleCaptureToFile;
 
 uses
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
   Vcl.Forms,
   frmSimpleCaptureToFile in 'frmSimpleCaptureToFile.pas' {Frm_SimpleCapture},
   MfCaptureToFileClass in 'MfCaptureToFileClass.pas';
