@@ -1260,7 +1260,7 @@ type
 
 const
 
-  M_PI : Single = 3.14159265358979323846;   // From math.h
+  M_PI : Single = Pi;   // From math.h
   {$EXTERNALSYM M_PI}
 
   // End of Additional Prototypes
@@ -1295,7 +1295,7 @@ begin
       Result := -3.402823466e+38; // Smallest Single value (-FLT_MAX)
     end
   else
-    Result := 20.0 * Single(log10(Volume));
+    Result := 20.0 * log10(Volume);
 end;
 
 
@@ -1330,7 +1330,7 @@ begin
       Result := XAUDIO2_MAX_FILTER_FREQUENCY;
     end
   else
-    Result :=  2.0 * Sin(Single(M_PI) * CutoffFrequency / SampleRate);
+    Result :=  2.0 * Sin(M_PI * CutoffFrequency / SampleRate);
 end;
 
 
@@ -1338,7 +1338,7 @@ end;
 function XAudio2RadiansToCutoffFrequency(Radians: Single;
                                          SampleRate: Single): Single;
 begin
-    Result := SampleRate * ArcSin(Radians / 2.0) / Single(M_PI);
+    Result := SampleRate * ArcSin(Radians / 2.0) / M_PI;
 end;
 
 

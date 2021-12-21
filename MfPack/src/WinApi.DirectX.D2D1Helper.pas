@@ -27,7 +27,7 @@
 // Remarks: Because Delphi does not accept complex types (like functions) as default values,
 //          the methods parameter will be set in the methods body.
 //          Also, parameters with none default values after a parameter with a default value are not
-//          accepted eather, so we chanched the parameter order the concerning methods.
+//          accepted eather, so we chanched the parameter order for the concerning methods.
 //          For internal methods that should not be a problem.
 //
 //

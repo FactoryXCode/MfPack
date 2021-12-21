@@ -26,17 +26,16 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 21/12/2021 Tony                Some small modifications
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
-//          Up to version 262 this unit was named MfMethods.pas and part of MfAdditional
-//          On version 263 this unit was named MfpMetLib.pas and part of MfAdditional
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX310
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
+// Compiler version: 23 up to 34
 // SDK version: 10.0.19041.0
 //
 // Todo: -
@@ -3948,7 +3947,7 @@ try
               hr := pMediaTypeHandler.GetCurrentMediaType(pMediaType);
 
               // Get the video frame rate
-              // To calculate the framerate in FPS : Single(uiNumerator / uiDenominator)
+              // To calculate the framerate in FPS : uiNumerator / uiDenominator
               hr := GetFrameRate(pMediaType,
                                  uiNumerator,
                                  uiDenominator);
@@ -3956,7 +3955,7 @@ try
               alsCont[i].video_FrameRateDenominator := uiDenominator;
 
               // Get the pixel aspect ratio
-              // To calculate the pixel aspect ratio: Single(uiNumerator / uiDenominator)
+              // To calculate the pixel aspect ratio: uiNumerator / uiDenominator
               hr := GetPixelAspectRatio(pMediaType,
                                         uiNumerator,
                                         uiDenominator);
@@ -3970,7 +3969,6 @@ try
               alsCont[i].video_FrameSizeWidth := uiWidth;
               alsCont[i].video_FrameSizeHeigth := uiHeigth;
             end;
-          SafeRelease(pSourceSD);
         end;
     end;
 
@@ -4011,7 +4009,7 @@ begin
       for iType := 0 to cTypes -1 do
         begin
           hr := pHandler.GetMediaTypeByIndex(iType,
-                                            pMediaType);
+                                             pMediaType);
 
           if FAILED(hr) then
             break;
@@ -4129,8 +4127,8 @@ begin
     goto done;
 
   hr := pPD.GetStreamDescriptorByIndex(i,
-                                      bSelected,
-                                      pSD);
+                                       bSelected,
+                                       pSD);
   if FAILED(hr) then
     goto done;
 
@@ -4147,7 +4145,7 @@ begin
     begin
 
       hr := pHandler.GetMediaTypeByIndex(j,
-                                        pType);
+                                         pType);
       if FAILED(hr) then
         goto done;
 
@@ -4457,12 +4455,8 @@ begin
     hr := pSessionControl2.SetDuckingPreference(True);
 
 done:
-  // Clean up. In Delphi all interfaces are referenced counted, so
+  // Clean up. In Delphi all interfaces are reference counted, so
   // Delphi compiler will take care of releasing the interfaces.
-  // pSessionControl2 := Nil;
-  // pSessionControl := Nil;
-  // pEnumerator := Nil;
-  // pDevice := Nil;
 
   if bCoUnInit then
     CoUnInitialize();
@@ -4590,10 +4584,10 @@ end;
 // System
 function MfpBoolToStr(const B: Boolean): string; inline;
 begin
-  case Integer(Bool(B)) of
-    -1 : Result := 'True';
-     0 : Result := 'False';
-  end;
+  if (B = True) then
+    Result := 'True'
+  else
+    Result := 'False';
 end;
 
 

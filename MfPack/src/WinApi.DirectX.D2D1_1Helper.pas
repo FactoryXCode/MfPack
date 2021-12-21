@@ -15,13 +15,14 @@
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Jim Hawkins.
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 20/12/2021 Jim Hawkins         Added system.math in uses clause, removed Single casting.
 //------------------------------------------------------------------------------
 //
 // Remarks: Here we use Objects as records in place for records to make inheritance possible.
@@ -66,6 +67,8 @@ interface
 uses
   {WinApi}
   WinApi.Windows,
+  {System}
+  System.Math,
   {WinApi.DirectX}
   WinApi.DirectX.D2D1,
   WinApi.DirectX.D2D1_1,
@@ -494,7 +497,8 @@ var
   MRotationX: Matrix4x4F;
 
 begin
-  angleInRadian := degreeX * (Single(3.141592654) / Single(180.0));
+  // angleInRadian := degreeX * (Pi / 180.0);  // same as DegToRad(degreeX)
+  angleInRadian := DegToRad(degreeX);
 
   sinAngle := 0.0;
   cosAngle := 0.0;
@@ -534,7 +538,8 @@ var
   MRotationZ: Matrix4x4F;
 
 begin
-  angleInRadian := degreeZ * (Single(3.141592654) / Single(180.0));
+  // angleInRadian := degreeZ * (Pi / 180.0); same as DegToRad(degreeZ)
+  angleInRadian := DegToRad(degreeZ);
 
   sinAngle := 0.0;
   cosAngle := 0.0;
@@ -587,7 +592,8 @@ begin
   y := y / magnitude;
   z := z / magnitude;
 
-  angleInRadian := degree * (Single(3.141592654) / Single(180.0));
+  // angleInRadian := degree * (Pi / 180.0); // same as DegToRad(degree)
+  angleInRadian := DegToRad(degree);
 
   sinAngle := 0.0;
   cosAngle := 0.0;
@@ -628,8 +634,9 @@ var
   MSkewX: Matrix4x4F;
 
 begin
-  angleInRadian := degreeX * (Single(3.141592654) / Single(180.0));
 
+  // angleInRadian := degreeX * (Pi / 180.0); // same as DegToRad(degreeX)
+  angleInRadian := DegToRad(degreeX);
   tanAngle := D2D1Tan(angleInRadian);
 
   MSkewX._11 := 1;
@@ -663,8 +670,9 @@ var
   MSkewY: Matrix4x4F;
 
 begin
-  angleInRadian := degreeY * (Single(3.141592654) / Single(180.0));
 
+  // angleInRadian := degreeY * (Pi / 180.0); // same as DegToRad(degreeY)
+  angleInRadian := DegToRad(degreeY);
   tanAngle := D2D1Tan(angleInRadian);
 
   MSkewY._11 := 1;
@@ -764,7 +772,8 @@ var
   MRotationY: Matrix4x4F;
 
 begin
-  angleInRadian := degreeY * (Single(3.141592654) / Single(180.0));
+  // angleInRadian := degreeY * (Pi / 180.0); // same as DegToRad(degreeY)
+  angleInRadian := DegToRad(degreeY);
 
   sinAngle := 0.0;
   cosAngle := 0.0;

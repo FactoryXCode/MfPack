@@ -518,6 +518,15 @@ type
                                                                     // https://docs.microsoft.com/us-en/windows/win32/api/mmdeviceapi/nf-mmdeviceapi-immdevice-activate
     function OpenPropertyStore(stgmAccess: DWORD;
                                out ppProperties: IPropertyStore): HRESULT; stdcall;
+    // Parameter stgmAccess declares the storage-access mode.
+    // This parameter specifies whether to open the property store in read mode, write mode, or read/write mode.
+    // Set this parameter to one of the following STGM constants:
+    //  STGM_READ
+    //  STGM_WRITE
+    //  STGM_READWRITE
+    // The method permits a client running as an administrator to open a store for read-only, write-only, or read/write access.
+    // A client that is not running as an administrator is restricted to read-only access.
+    // For more information about STGM constants, see the Windows SDK documentation.
 
     function GetId(out ppstrId: PWideChar): HRESULT; stdcall;    //250815a, modified; issue reported by mbergstrand
 

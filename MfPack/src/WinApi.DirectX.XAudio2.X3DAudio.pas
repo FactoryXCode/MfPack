@@ -191,9 +191,9 @@ const
   {$EXTERNALSYM X3DAUDIO_HANDLE_BYTESIZE}
 
   // float math constants
-  X3DAUDIO_PI                         = 3.141592654;
+  X3DAUDIO_PI                         = Pi;
   {$EXTERNALSYM X3DAUDIO_PI}
-  X3DAUDIO_2PI                        = 6.283185307;
+  X3DAUDIO_2PI                        = Pi * 2;
   {$EXTERNALSYM X3DAUDIO_2PI}
 
   // speed of sound in meters per second for dry air at approximately 20C, used with X3DAudioInitialize
