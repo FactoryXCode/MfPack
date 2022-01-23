@@ -10,7 +10,7 @@
 // Release date: 29-06-2012
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: -
 //
 // Organisation: FactoryX
@@ -34,7 +34,7 @@
 //         Fields with a Common Type Specification.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -1118,7 +1118,7 @@ type
 
     function GetAllocatedString(const guidKey: REFGUID;
                                 out ppwszValue: LPWSTR;
-                                out pcchLength: UINT32): HResult; stdcall;
+                                out pcchLength: UINT32 {This parameter must not be 0}): HResult; stdcall;
 
     function GetBlobSize(const guidKey: TGUID;
                          out pcbBlobSize: UINT32): HResult; stdcall;
@@ -1126,7 +1126,7 @@ type
     function GetBlob(const guidKey: TGUID;
                      out pBuf: PUINT8;
                      out cbBufSize: UINT32;
-                     out pcbBlobSize: PUINT32): HResult; stdcall;
+                     {out} pcbBlobSize: PUINT32): HResult; stdcall;
     // Usage example:
     // var
     //    pArea: MFVideoArea;

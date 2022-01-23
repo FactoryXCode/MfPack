@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Requires Windows Vista or later.
 //              MfApi.pas is the unit containing the APIs for using the MF platform.
 //
@@ -46,7 +46,7 @@
 //          Fields with a Common Type Specification.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -2187,7 +2187,7 @@ const           // updt 090812 add
   {$EXTERNALSYM MFT_CATEGORY_AUDIO_EFFECT}
 
   //#if (WINVER >= _WIN32_WINNT_WIN7)
-  // {302EA3FC-AA5F-47f9-9F7A-C2188BB163021}...MFT_CATEGORY_VIDEO_PROCESSOR
+  // {302ea3fc-aa5f-47f9-9f7a-c2188bb16302}...MFT_CATEGORY_VIDEO_PROCESSOR
   MFT_CATEGORY_VIDEO_PROCESSOR        : TGuid = '{302ea3fc-aa5f-47f9-9f7a-c2188bb16302}'; //updt 090812 correct GUID
   {$EXTERNALSYM MFT_CATEGORY_VIDEO_PROCESSOR}
   //#endif // (WINVER >= _WIN32_WINNT_WIN7)
@@ -2197,13 +2197,13 @@ const           // updt 090812 add
   {$EXTERNALSYM MFT_CATEGORY_OTHER}
 
   // #if (WINVER >= _WIN32_WINNT_WIN10_RS1)
-  MFT_CATEGORY_ENCRYPTOR              :	TGuid = '{b0c687be-01cd-44b5-b8b2-7c1d7e058b1f}';
+  MFT_CATEGORY_ENCRYPTOR              : TGuid = '{b0c687be-01cd-44b5-b8b2-7c1d7e058b1f}';
   {$EXTERNALSYM MFT_CATEGORY_ENCRYPTOR}
   // #endif
   // TODO: switch to NTDDI_WIN10_RS3 when _NT_TARGET_VERSION is updated to support RS3
   //if NTDDI_VERSION >= NTDDI_WIN10_RS2
   // {145CD8B4-92F4-4b23-8AE7-E0DF06C2DA95}   MFT_CATEGORY_VIDEO_RENDERER_EFFECT
-  MFT_CATEGORY_VIDEO_RENDERER_EFFECT  :	TGuid = '{145CD8B4-92F4-4b23-8AE7-E0DF06C2DA95}';
+  MFT_CATEGORY_VIDEO_RENDERER_EFFECT  : TGuid = '{145CD8B4-92F4-4b23-8AE7-E0DF06C2DA95}';
   {$EXTERNALSYM MFT_CATEGORY_VIDEO_RENDERER_EFFECT}
   //endif
 
@@ -2272,7 +2272,7 @@ const
   // The MFT is optimized for transcoding and should not be used for playback.
   // Requires >= Windows 7.
   //
-  function MFTRegister(const clsidMFT: CLSID;  // The CLSID of the MFT. The MFT must also be registered as a COM object using the same CLSID.
+  function MFTRegister(clsidMFT: CLSID;  // The CLSID of the MFT. The MFT must also be registered as a COM object using the same CLSID.
                        const guidCategory: TGuid; // GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY .
                        pszName: LPCWSTR;  // Wide-character string that contains the friendly name of the MFT.
                        Flags: UINT32;  // Bitwise OR of zero or more of the following flags from the MFT_ENUM_FLAG enumeration.
@@ -2308,13 +2308,13 @@ const
 
 
   // Register an MFT class in-process, by CLSID
-  function MFTRegisterLocalByCLSID(const clisdMFT: REFCLSID; // The class identifier (CLSID) of the MFT.
+  function MFTRegisterLocalByCLSID(const clisdMFT: REFCLSID;    // The class identifier (CLSID) of the MFT.
                                    const guidCategory: REFGUID; // A GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY.
-                                   pszName: LPCWSTR;  // A wide-character null-terminated string that contains the friendly name of the MFT.
-                                   Flags: UINT32; // A bitwise OR of zero or more flags from the MFT_ENUM_FLAG enumeration.
-                                   cInputTypes: UINT32; // The number of elements in the pInputTypes array.
+                                   pszName: LPCWSTR;      // A wide-character null-terminated string that contains the friendly name of the MFT.
+                                   Flags: UINT32;         // A bitwise OR of zero or more flags from the MFT_ENUM_FLAG enumeration.
+                                   cInputTypes: UINT32;         // The number of elements in the pInputTypes array.
                                    pInputTypes: PMFT_REGISTER_TYPE_INFO; // A pointer to an array of MFT_REGISTER_TYPE_INFO structures.
-                                   cOutputTypes: UINT32; // The number of elements in the pOutputTypes array.
+                                   cOutputTypes: UINT32;        // The number of elements in the pOutputTypes array.
                                    pOutputTypes: PMFT_REGISTER_TYPE_INFO // A pointer to an array of MFT_REGISTER_TYPE_INFO structures.
                                    ): HResult; stdcall;
   {$EXTERNALSYM MFTRegisterLocalByCLSID}

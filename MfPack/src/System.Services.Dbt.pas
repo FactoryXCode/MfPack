@@ -5,13 +5,15 @@
 // Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: WinApi.Dbt.pas
+// Module: System.Services.Dbt.pas
 // Kind: Pascal / Delphi unit
 // Release date: 18-06-2016
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Equates for WM_DEVICECHANGE and BroadcastSystemMessage
+//              This header is part of the System Services API.
+//              For more information, see: https://docs.microsoft.com/en-us/windows/win32/api/_base/
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -24,11 +26,11 @@
 // 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows Vista or later.
+// Remarks: Requires Windows 10 or later.
 // 
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -57,7 +59,7 @@
 // Users may distribute this source code provided that this header is included
 // in full at the top of the file.
 //==============================================================================
-unit WinApi.Dbt;
+unit System.Services.Dbt;
 
   {$HPPEMIT '#include "Dbt.h"'}
 
@@ -457,7 +459,7 @@ type
     dbcp_size       : DWORD;  // length of dbcp_name including #0 terminator
     dbcp_devicetype : DWORD;
     dbcp_reserved   : DWORD;
-    dbcp_name       : AnsiChar;
+    dbcp_name       : array [0..0] of AnsiChar;
   end;
   {$EXTERNALSYM _DEV_BROADCAST_PORT_A}
   DEV_BROADCAST_PORT_A = _DEV_BROADCAST_PORT_A;
@@ -469,7 +471,7 @@ type
     dbcp_size       : DWORD;
     dbcp_devicetype : DWORD;
     dbcp_reserved   : DWORD;
-    dbcp_name       : WideChar;
+    dbcp_name       : array [0..0] of WideChar;
   end;
   {$EXTERNALSYM _DEV_BROADCAST_PORT_W}
   DEV_BROADCAST_PORT_W = _DEV_BROADCAST_PORT_W;
@@ -508,7 +510,7 @@ type
     dbcc_devicetype : DWORD;  // = DBT_DEVTYP_DEVICEINTERFACE
     dbcc_reserved   : DWORD;
     dbcc_classguid  : TGUID;
-    dbcc_name       : AnsiChar;  // char
+    dbcc_name       : array [0..0] of AnsiChar;  // char
   end;
   {$EXTERNALSYM _DEV_BROADCAST_DEVICEINTERFACE_A}
   DEV_BROADCAST_DEVICEINTERFACE_A = _DEV_BROADCAST_DEVICEINTERFACE_A;
@@ -520,7 +522,7 @@ type
     dbcc_devicetype : DWORD;  // = DBT_DEVTYP_DEVICEINTERFACE
     dbcc_reserved   : DWORD;
     dbcc_classguid  : TGUID;
-    dbcc_name       : wchar_t;
+    dbcc_name       : array [0..0] of WideChar;
   end;
   {$EXTERNALSYM _DEV_BROADCAST_DEVICEINTERFACE_W}
   DEV_BROADCAST_DEVICEINTERFACE_W = _DEV_BROADCAST_DEVICEINTERFACE_W;
@@ -548,13 +550,12 @@ type
     // The following 3 fields are only valid if wParam is DBT_CUSTOMEVENT.
     //
     dbch_eventguid  : TGUID;
-    dbch_nameoffset : LONG;           // offset (bytes) of variable-length string buffer (-1 if none)
-    dbch_data: Byte;                  // variable-sized buffer, potentially containing binary and/or text data
+    dbch_nameoffset : LONG;                  // offset (bytes) of variable-length string buffer (-1 if none)
+    dbch_data       : array [0..0] of Byte;  // variable-sized buffer, potentially containing binary and/or text data
   end;
   {$EXTERNALSYM _DEV_BROADCAST_HANDLE}
   DEV_BROADCAST_HANDLE = _DEV_BROADCAST_HANDLE;
   {$EXTERNALSYM DEV_BROADCAST_HANDLE}
-
 
 //#if(WINVER >= 0x0501)
 
@@ -572,7 +573,7 @@ type
     dbch_hdevnotify : ULONG32;
     dbch_eventguid  : TGUID;
     dbch_nameoffset : LONG;
-    dbch_data       : Byte;
+    dbch_data       : array [0..0] of Byte;
   end;
   {$EXTERNALSYM _DEV_BROADCAST_HANDLE32}
   DEV_BROADCAST_HANDLE32 = _DEV_BROADCAST_HANDLE32;
@@ -587,7 +588,7 @@ type
     dbch_hdevnotify : ULONG64;
     dbch_eventguid  : TGUID;
     dbch_nameoffset : LONG;
-    dbch_data       : Byte;
+    dbch_data       : array [0..0] of Byte;
   end;
   {$EXTERNALSYM _DEV_BROADCAST_HANDLE64}
   DEV_BROADCAST_HANDLE64 = _DEV_BROADCAST_HANDLE64;
@@ -635,7 +636,7 @@ type
   PDEV_BROADCAST_USERDEFINED = ^DEV_BROADCAST_USERDEFINED;
   _DEV_BROADCAST_USERDEFINED = record
     dbud_dbh    : _DEV_BROADCAST_HDR ;
-    dbud_szName : AnsiChar; {* ASCIIZ name *}
+    dbud_szName : array [0..0] of AnsiChar;  {* ASCIIZ name *}
     {/*  BYTE        dbud_rgbUserDefined[];*/ /* User-defined contents */}
   end;
   {$EXTERNALSYM _DEV_BROADCAST_USERDEFINED}
@@ -643,7 +644,30 @@ type
   {$EXTERNALSYM DEV_BROADCAST_USERDEFINED}
 
 
+
+
   // Additional Prototypes for ALL interfaces
+
+
+  // Remarks
+  //   Because this structure contains variable length fields, use it as a template for creating a pointer to a user-defined structure.
+  //   Note that the structure must not contain pointers.
+  //   The following example shows such a user-defined structure.
+  //
+  // const
+  //
+  //  NAME_LENGTH                         = 32;
+  //  USER_LENGTH                         = 50;
+  //
+  //type
+  //
+  //  PWIDGET_WARE_DEV_BROADCAST_USERDEFINED = ^tagWIDGET_WARE_DEV_BROADCAST_USERDEFINED;
+  //  tagWIDGET_WARE_DEV_BROADCAST_USERDEFINED = record
+  //    DBHeader: _DEV_BROADCAST_HDR;
+  //    szName: array[0..NAME_LENGTH - 1] of AnsiChar;
+  //    UserDefined: array[0..USER_LENGTH - 1] of Byte;
+  //  end;
+  //  WIDGET_WARE_DEV_BROADCAST_USERDEFINED = tagWIDGET_WARE_DEV_BROADCAST_USERDEFINED;
 
 
   // End of Additional Prototypes

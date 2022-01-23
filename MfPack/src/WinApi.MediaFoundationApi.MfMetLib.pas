@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: This unit holds basic Media Foundation methods needed to play,
 //              record, encode, decode, etc.
 //
@@ -26,17 +26,17 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
-// 21/12/2021 Tony                Some small modifications
+// 15/01/2022                     Introduction of System.Services API implementation
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.19041.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -77,7 +77,6 @@ uses
   WinApi.Unknwn,
   WinApi.KsMedia,
   WinApi.Ks,
-  WinApi.Dbt,
   WinApi.StrmIf,
   WinApi.UuIds,
   WinApi.AmVideo,
@@ -93,6 +92,7 @@ uses
   System.Win.ComObj,
   System.Classes,
   System.SysUtils,
+  System.Services.Dbt,
   {DirectX}
   WinApi.DirectX.DxVa2Api,
   {MediaFoundationApi}
@@ -2608,7 +2608,7 @@ begin
       pType := Nil;
       hr := pReader.GetNativeMediaType(dwStreamIndex,
                                        dwMediaTypeIndex, // MF_SOURCE_READER_CURRENT_TYPE_INDEX
-                                       pType);
+                                       @pType);
 
       if (hr = MF_E_NO_MORE_TYPES) then
         begin
