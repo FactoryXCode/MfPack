@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.1
 // Description: Requires Windows Vista or later.
 //              MfApi.pas is the unit containing the APIs for using the MF platform.
 //
@@ -22,11 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 10/10/2020 Tony                Fixed some issues, see updt 101020
-// 26/01/2021 Tony                Fixed MFT Register functions.
-// 08/07/2021 Tony                Added MFBinaryFormat guids.
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -50,11 +46,11 @@
 //          Fields with a Common Type Specification.
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -1940,6 +1936,11 @@ const
   MF_CAPTURE_METADATA_DIGITALWINDOW                 :  TGUID = '{276F72A2-59C8-4F69-97B4-068B8C0EC044}'; // Type: BLOB
   {$EXTERNALSYM MF_CAPTURE_METADATA_DIGITALWINDOW}
 
+  // Reports the background segmentation mask BackgroundSegmentationMask structure.
+  // Refer to the KSCAMERA_METADATA_BACKGROUNDSEGMENTATIONMASK struct in ksmedia.h
+  MF_CAPTURE_METADATA_FRAME_BACKGROUND_MASK         :  TGUID = '{03F14DD3-75DD-433A-A8E2-1E3F5F2A50A0}'; // Type: BLOB
+  {$EXTERNALSYM MF_CAPTURE_METADATA_FRAME_BACKGROUND_MASK}
+
 
   MFCAPTURE_METADATA_SCAN_RIGHT_LEFT   =      $00000001;
   {$EXTERNALSYM MFCAPTURE_METADATA_SCAN_RIGHT_LEFT}
@@ -1953,12 +1954,12 @@ type
 
   // Digital Window Region
   PDigitalWindowSetting = ^tagDigitalWindowSetting;
-  {$EXTERNALSYM tagDigitalWindowSetting}
   tagDigitalWindowSetting = record
     OriginX: Double;
     OriginY: Double;
     WindowSize: Double;
   end;
+  {$EXTERNALSYM tagDigitalWindowSetting}
   DigitalWindowSetting = tagDigitalWindowSetting;
   {$EXTERNALSYM DigitalWindowSetting}
 
@@ -2186,7 +2187,7 @@ const           // updt 090812 add
   {$EXTERNALSYM MFT_CATEGORY_AUDIO_EFFECT}
 
   //#if (WINVER >= _WIN32_WINNT_WIN7)
-  // {302EA3FC-AA5F-47f9-9F7A-C2188BB163021}...MFT_CATEGORY_VIDEO_PROCESSOR
+  // {302ea3fc-aa5f-47f9-9f7a-c2188bb16302}...MFT_CATEGORY_VIDEO_PROCESSOR
   MFT_CATEGORY_VIDEO_PROCESSOR        : TGuid = '{302ea3fc-aa5f-47f9-9f7a-c2188bb16302}'; //updt 090812 correct GUID
   {$EXTERNALSYM MFT_CATEGORY_VIDEO_PROCESSOR}
   //#endif // (WINVER >= _WIN32_WINNT_WIN7)
@@ -2196,13 +2197,13 @@ const           // updt 090812 add
   {$EXTERNALSYM MFT_CATEGORY_OTHER}
 
   // #if (WINVER >= _WIN32_WINNT_WIN10_RS1)
-  MFT_CATEGORY_ENCRYPTOR              :	TGuid = '{b0c687be-01cd-44b5-b8b2-7c1d7e058b1f}';
+  MFT_CATEGORY_ENCRYPTOR              : TGuid = '{b0c687be-01cd-44b5-b8b2-7c1d7e058b1f}';
   {$EXTERNALSYM MFT_CATEGORY_ENCRYPTOR}
   // #endif
   // TODO: switch to NTDDI_WIN10_RS3 when _NT_TARGET_VERSION is updated to support RS3
   //if NTDDI_VERSION >= NTDDI_WIN10_RS2
   // {145CD8B4-92F4-4b23-8AE7-E0DF06C2DA95}   MFT_CATEGORY_VIDEO_RENDERER_EFFECT
-  MFT_CATEGORY_VIDEO_RENDERER_EFFECT  :	TGuid = '{145CD8B4-92F4-4b23-8AE7-E0DF06C2DA95}';
+  MFT_CATEGORY_VIDEO_RENDERER_EFFECT  : TGuid = '{145CD8B4-92F4-4b23-8AE7-E0DF06C2DA95}';
   {$EXTERNALSYM MFT_CATEGORY_VIDEO_RENDERER_EFFECT}
   //endif
 
@@ -2271,7 +2272,7 @@ const
   // The MFT is optimized for transcoding and should not be used for playback.
   // Requires >= Windows 7.
   //
-  function MFTRegister(const clsidMFT: CLSID;  // The CLSID of the MFT. The MFT must also be registered as a COM object using the same CLSID.
+  function MFTRegister(clsidMFT: CLSID;  // The CLSID of the MFT. The MFT must also be registered as a COM object using the same CLSID.
                        const guidCategory: TGuid; // GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY .
                        pszName: LPCWSTR;  // Wide-character string that contains the friendly name of the MFT.
                        Flags: UINT32;  // Bitwise OR of zero or more of the following flags from the MFT_ENUM_FLAG enumeration.
@@ -2307,13 +2308,13 @@ const
 
 
   // Register an MFT class in-process, by CLSID
-  function MFTRegisterLocalByCLSID(const clisdMFT: REFCLSID; // The class identifier (CLSID) of the MFT.
+  function MFTRegisterLocalByCLSID(const clisdMFT: REFCLSID;    // The class identifier (CLSID) of the MFT.
                                    const guidCategory: REFGUID; // A GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY.
-                                   pszName: LPCWSTR;  // A wide-character null-terminated string that contains the friendly name of the MFT.
-                                   Flags: UINT32; // A bitwise OR of zero or more flags from the MFT_ENUM_FLAG enumeration.
-                                   cInputTypes: UINT32; // The number of elements in the pInputTypes array.
+                                   pszName: LPCWSTR;      // A wide-character null-terminated string that contains the friendly name of the MFT.
+                                   Flags: UINT32;         // A bitwise OR of zero or more flags from the MFT_ENUM_FLAG enumeration.
+                                   cInputTypes: UINT32;         // The number of elements in the pInputTypes array.
                                    pInputTypes: PMFT_REGISTER_TYPE_INFO; // A pointer to an array of MFT_REGISTER_TYPE_INFO structures.
-                                   cOutputTypes: UINT32; // The number of elements in the pOutputTypes array.
+                                   cOutputTypes: UINT32;        // The number of elements in the pOutputTypes array.
                                    pOutputTypes: PMFT_REGISTER_TYPE_INFO // A pointer to an array of MFT_REGISTER_TYPE_INFO structures.
                                    ): HResult; stdcall;
   {$EXTERNALSYM MFTRegisterLocalByCLSID}
@@ -2702,6 +2703,12 @@ const
                                D3: $0010;
                                D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
   {$EXTERNALSYM MFVideoFormat_NV12}
+
+  MFVideoFormat_NV21: TGUID = (D1: Ord('N') or (Ord('V') shl 8) or (Ord('2') shl 16) or (Ord('1') shl 24);
+                               D2: $0000;
+                               D3: $0010;
+                               D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
+  {$EXTERNALSYM MFVideoFormat_NV21}
 
   MFVideoFormat_YV12: TGUID = (D1: Ord('Y') or (Ord('V') shl 8) or (Ord('1') shl 16) or (Ord('2') shl 24);
                                D2: $0000;

@@ -10,7 +10,7 @@
 // Release date: 01-05-2019
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.0
 // Description: Error code definitions for the Win32 API functions.
 //
 // Organisation: FactoryX
@@ -21,19 +21,18 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: When using MfPack, use this unit and not the outdated
 //          Error code definitions from Delphi <= ver 10.4
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -327,6 +326,10 @@ const
   {$EXTERNALSYM FACILITY_DEPLOYMENT_SERVICES_MULTICAST_CLIENT}
   FACILITY_DEPLOYMENT_SERVICES_CONTENT_PROVIDER = 293;
   {$EXTERNALSYM FACILITY_DEPLOYMENT_SERVICES_CONTENT_PROVIDER}
+  FACILITY_HSP_SERVICES               = 296;
+  {$EXTERNALSYM FACILITY_HSP_SERVICES}
+  FACILITY_HSP_SOFTWARE               = 297;
+  {$EXTERNALSYM FACILITY_HSP_SOFTWARE}
   FACILITY_LINGUISTIC_SERVICES        = 305;
   {$EXTERNALSYM FACILITY_LINGUISTIC_SERVICES}
   FACILITY_AUDIOSTREAMING             = 1094;
@@ -355,6 +358,8 @@ const
   {$EXTERNALSYM FACILITY_DIRECT3D12_DEBUG}
   FACILITY_DXCORE                     = 2176;
   {$EXTERNALSYM FACILITY_DXCORE}
+  FACILITY_PRESENTATION               = 2177;
+  {$EXTERNALSYM FACILITY_PRESENTATION}
   FACILITY_LEAP                       = 2184;
   {$EXTERNALSYM FACILITY_LEAP}
   FACILITY_AUDCLNT                    = 2185;
@@ -383,6 +388,8 @@ const
   {$EXTERNALSYM FACILITY_MOBILE}
   FACILITY_SQLITE                     = 1967;
   {$EXTERNALSYM FACILITY_SQLITE}
+  FACILITY_SERVICE_FABRIC             = 1968;
+  {$EXTERNALSYM FACILITY_SERVICE_FABRIC}
   FACILITY_UTC                        = 1989;
   {$EXTERNALSYM FACILITY_UTC}
   FACILITY_WEP                        = 2049;
@@ -2742,7 +2749,7 @@ const
 //
 // MessageText:
 //
-// An operation is not supported on a resident file.
+// The specified operation is not supported on a resident file.
 //
   ERROR_RESIDENT_FILE_NOT_SUPPORTED   = 334;
   {$EXTERNALSYM ERROR_RESIDENT_FILE_NOT_SUPPORTED}
@@ -2752,7 +2759,7 @@ const
 //
 // MessageText:
 //
-// An operation is not supported on a compressed file.
+// The specified operation is not supported on a compressed file.
 //
   ERROR_COMPRESSED_FILE_NOT_SUPPORTED = 335;
   {$EXTERNALSYM ERROR_COMPRESSED_FILE_NOT_SUPPORTED}
@@ -2762,7 +2769,7 @@ const
 //
 // MessageText:
 //
-// An operation is not supported on a directory.
+// The specified operation is not supported on a directory.
 //
   ERROR_DIRECTORY_NOT_SUPPORTED       = 336;
   {$EXTERNALSYM ERROR_DIRECTORY_NOT_SUPPORTED}
@@ -3003,7 +3010,7 @@ const
 //
 // MessageText:
 //
-// This operation is not supported on a DAX volume.
+// The specified operation is not supported on a DAX volume.
 //
   ERROR_NOT_SUPPORTED_ON_DAX          = 360;
   {$EXTERNALSYM ERROR_NOT_SUPPORTED_ON_DAX}
@@ -4136,6 +4143,116 @@ const
   ERROR_HAS_SYSTEM_CRITICAL_FILES     = 488;
   {$EXTERNALSYM ERROR_HAS_SYSTEM_CRITICAL_FILES}
 
+
+// MessageId: ERROR_ENCRYPTED_FILE_NOT_SUPPORTED
+//
+// MessageText:
+//
+// The specified operation is not supported on an encrypted file.
+//
+  ERROR_ENCRYPTED_FILE_NOT_SUPPORTED  = 489;
+  {$EXTERNALSYM ERROR_ENCRYPTED_FILE_NOT_SUPPORTED}
+
+//
+// MessageId: ERROR_SPARSE_FILE_NOT_SUPPORTED
+//
+// MessageText:
+//
+// The specified operation is not supported on a sparse file.
+//
+  ERROR_SPARSE_FILE_NOT_SUPPORTED     = 490;
+  {$EXTERNALSYM ERROR_SPARSE_FILE_NOT_SUPPORTED}
+
+//
+// MessageId: ERROR_PAGEFILE_NOT_SUPPORTED
+//
+// MessageText:
+//
+// The specified operation is not supported on a pagefile.
+//
+  ERROR_PAGEFILE_NOT_SUPPORTED        = 491;
+  {$EXTERNALSYM ERROR_PAGEFILE_NOT_SUPPORTED}
+
+//
+// MessageId: ERROR_VOLUME_NOT_SUPPORTED
+//
+// MessageText:
+//
+// The specified operation is not supported on a volume.
+//
+  ERROR_VOLUME_NOT_SUPPORTED          = 492;
+  {$EXTERNALSYM ERROR_VOLUME_NOT_SUPPORTED}
+
+//
+// MessageId: ERROR_NOT_SUPPORTED_WITH_BYPASSIO
+//
+// MessageText:
+//
+// The specified operation is not supported on a BypassIO enabled file.
+//
+  ERROR_NOT_SUPPORTED_WITH_BYPASSIO   = 493;
+  {$EXTERNALSYM ERROR_NOT_SUPPORTED_WITH_BYPASSIO}
+
+//
+// MessageId: ERROR_NO_BYPASSIO_DRIVER_SUPPORT
+//
+// MessageText:
+//
+// The specified driver does not support BypassIO operations.
+//
+  ERROR_NO_BYPASSIO_DRIVER_SUPPORT    = 494;
+  {$EXTERNALSYM ERROR_NO_BYPASSIO_DRIVER_SUPPORT}
+
+//
+// MessageId: ERROR_NOT_SUPPORTED_WITH_ENCRYPTION
+//
+// MessageText:
+//
+// The specified operation is not supported while encryption is enabled on the target object.
+//
+  ERROR_NOT_SUPPORTED_WITH_ENCRYPTION = 495;
+  {$EXTERNALSYM ERROR_NOT_SUPPORTED_WITH_ENCRYPTION}
+
+//
+// MessageId: ERROR_NOT_SUPPORTED_WITH_COMPRESSION
+//
+// MessageText:
+//
+// The specified operation is not supported while compression is enabled on the target object.
+//
+  ERROR_NOT_SUPPORTED_WITH_COMPRESSION = 496;
+  {$EXTERNALSYM ERROR_NOT_SUPPORTED_WITH_COMPRESSION}
+
+//
+// MessageId: ERROR_NOT_SUPPORTED_WITH_REPLICATION
+//
+// MessageText:
+//
+// The specified operation is not supported while replication is enabled on the target object.
+//
+  ERROR_NOT_SUPPORTED_WITH_REPLICATION = 497;
+  {$EXTERNALSYM ERROR_NOT_SUPPORTED_WITH_REPLICATION}
+
+//
+// MessageId: ERROR_NOT_SUPPORTED_WITH_DEDUPLICATION
+//
+// MessageText:
+//
+// The specified operation is not supported while deduplication is enabled on the target object.
+//
+  ERROR_NOT_SUPPORTED_WITH_DEDUPLICATION = 498;
+  {$EXTERNALSYM ERROR_NOT_SUPPORTED_WITH_DEDUPLICATION}
+
+//
+// MessageId: ERROR_NOT_SUPPORTED_WITH_AUDITING
+//
+// MessageText:
+//
+// The specified operation is not supported while auditing is enabled on the target object.
+//
+  ERROR_NOT_SUPPORTED_WITH_AUDITING   = 499;
+  {$EXTERNALSYM ERROR_NOT_SUPPORTED_WITH_AUDITING}
+
 //
 // MessageId: ERROR_PARTITION_TERMINATING
 //
@@ -4168,6 +4285,76 @@ const
 //
   ERROR_SESSION_KEY_TOO_SHORT         = 501;
   {$EXTERNALSYM ERROR_SESSION_KEY_TOO_SHORT}
+
+// MessageId: ERROR_ACCESS_DENIED_APPDATA
+//
+// MessageText:
+//
+// Access denied when accessing the user profile.
+//
+  {$EXTERNALSYM ERROR_ACCESS_DENIED_APPDATA}
+  ERROR_ACCESS_DENIED_APPDATA         = 502;
+  {$EXTERNALSYM ERROR_ACCESS_DENIED_APPDATA}
+
+//
+// MessageId: ERROR_NOT_SUPPORTED_WITH_MONITORING
+//
+// MessageText:
+//
+// The specified operation is not supported while monitoring is enabled on the target object.
+//
+  ERROR_NOT_SUPPORTED_WITH_MONITORING = 503;
+  {$EXTERNALSYM ERROR_NOT_SUPPORTED_WITH_MONITORING}
+
+//
+// MessageId: ERROR_NOT_SUPPORTED_WITH_SNAPSHOT
+//
+// MessageText:
+//
+// The specified operation is not supported while snapshot is enabled on the target object.
+//
+  ERROR_NOT_SUPPORTED_WITH_SNAPSHOT   = 504;
+  {$EXTERNALSYM ERROR_NOT_SUPPORTED_WITH_SNAPSHOT}
+
+//
+// MessageId: ERROR_NOT_SUPPORTED_WITH_VIRTUALIZATION
+//
+// MessageText:
+//
+// The specified operation is not supported while virtualization is enabled on the target object.
+//
+  ERROR_NOT_SUPPORTED_WITH_VIRTUALIZATION = 505;
+  {$EXTERNALSYM ERROR_NOT_SUPPORTED_WITH_VIRTUALIZATION}
+
+//
+// MessageId: ERROR_BYPASSIO_FLT_NOT_SUPPORTED
+//
+// MessageText:
+//
+// At least one minifilter does not support bypass IO.
+//
+  ERROR_BYPASSIO_FLT_NOT_SUPPORTED    = 506;
+  {$EXTERNALSYM ERROR_BYPASSIO_FLT_NOT_SUPPORTED}
+
+//
+// MessageId: ERROR_DEVICE_RESET_REQUIRED
+//
+// MessageText:
+//
+// The device needs to be reset.
+//
+  ERROR_DEVICE_RESET_REQUIRED         = 507;
+  {$EXTERNALSYM ERROR_DEVICE_RESET_REQUIRED}
+
+//
+// MessageId: ERROR_VOLUME_WRITE_ACCESS_DENIED
+//
+// MessageText:
+//
+// The volume is opened for exclusive write access, preventing files from being opened for write access.
+//
+  ERROR_VOLUME_WRITE_ACCESS_DENIED    = 508;
+  {$EXTERNALSYM ERROR_VOLUME_WRITE_ACCESS_DENIED}
 
 //
 // **** Available SYSTEM error codes ****
@@ -4506,7 +4693,7 @@ const
 //
 // MessageText:
 //
-// Page file quota was exceeded.
+// Pagefile quota was exceeded.
 //
   ERROR_PAGEFILE_QUOTA_EXCEEDED       = 567;
   {$EXTERNALSYM ERROR_PAGEFILE_QUOTA_EXCEEDED}
@@ -8381,7 +8568,7 @@ const
 //
 // MessageText:
 //
-// The system shutdown cannot safely proceed without enabling storage maintenance mode for physical disks connected to this cluster node.
+// The system shutdown cannot safely proceed without enabling node maintenance mode for cluster node and waiting for the drain to complete.
 //
   ERROR_SHUTDOWN_DISKS_NOT_IN_MAINTENANCE_MODE = 1192;
   {$EXTERNALSYM ERROR_SHUTDOWN_DISKS_NOT_IN_MAINTENANCE_MODE}
@@ -14344,6 +14531,17 @@ const
 //
   ERROR_VRF_VOLATILE_SETTINGS_CONFLICT = 3087;
   {$EXTERNALSYM ERROR_VRF_VOLATILE_SETTINGS_CONFLICT}
+
+// MessageId: ERROR_DIF_IOCALLBACK_NOT_REPLACED
+//
+// MessageText:
+//
+// The specified driver is not associated with driver object or driver extension.
+//
+  ERROR_DIF_IOCALLBACK_NOT_REPLACED   = 3190;
+  {$EXTERNALSYM ERROR_DIF_IOCALLBACK_NOT_REPLACED}
+
+
 
 //
 // MessageId: ERROR_DIF_LIVEDUMP_LIMIT_EXCEEDED
@@ -37637,6 +37835,15 @@ const
   APPX_E_INVALID_PACKAGE_FOLDER_ACLS  = HRESULT($80080217);
   {$EXTERNALSYM APPX_E_INVALID_PACKAGE_FOLDER_ACLS}
 
+// MessageId: APPX_E_INVALID_PUBLISHER_BRIDGING
+//
+// MessageText:
+//
+// The publisher bridging artifact is invalid.
+//
+  APPX_E_INVALID_PUBLISHER_BRIDGING   = HRESULT($80080218);
+  {$EXTERNALSYM APPX_E_INVALID_PUBLISHER_BRIDGING}
+
 //
 //
 // Codes $0300-$030f are reserved for background task error codes.
@@ -55590,6 +55797,46 @@ const
   FVE_E_EDRIVE_BAND_ENUMERATION_FAILED = HRESULT($803100E3);
   {$EXTERNALSYM FVE_E_EDRIVE_BAND_ENUMERATION_FAILED}
 
+//
+// MessageId: FVE_E_POLICY_ON_RDV_EXCLUSION_LIST
+//
+// MessageText:
+//
+// This removable data drive has been excluded from device encryption by BitLocker Drive Encryption policy.
+//
+  FVE_E_POLICY_ON_RDV_EXCLUSION_LIST = HRESULT($803100E4);
+  {$EXTERNALSYM FVE_E_POLICY_ON_RDV_EXCLUSION_LIST}
+
+//
+// MessageId: FVE_E_PREDICTED_TPM_PROTECTOR_NOT_SUPPORTED
+//
+// MessageText:
+//
+// Adding BitLocker predicted TPM based protector is not supported.
+//
+  FVE_E_PREDICTED_TPM_PROTECTOR_NOT_SUPPORTED = HRESULT($803100E5);
+  {$EXTERNALSYM FVE_E_PREDICTED_TPM_PROTECTOR_NOT_SUPPORTED}
+
+//
+// MessageId: FVE_E_SETUP_TPM_CALLBACK_NOT_SUPPORTED
+//
+// MessageText:
+//
+// Registeration for TPM callback is not supported.
+//
+  FVE_E_SETUP_TPM_CALLBACK_NOT_SUPPORTED = HRESULT($803100E6);
+  {$EXTERNALSYM FVE_E_SETUP_TPM_CALLBACK_NOT_SUPPORTED}
+
+//
+// MessageId: FVE_E_TPM_CONTEXT_SETUP_NOT_SUPPORTED
+//
+// MessageText:
+//
+// Creating new TPM context is not supported.
+//
+  FVE_E_TPM_CONTEXT_SETUP_NOT_SUPPORTED = HRESULT($803100E7);
+  {$EXTERNALSYM FVE_E_TPM_CONTEXT_SETUP_NOT_SUPPORTED}
+
 
 //
 // =======================================================
@@ -58870,14 +59117,25 @@ const
   {$EXTERNALSYM VM_SAVED_STATE_DUMP_E_WINDOWS_KERNEL_IMAGE_NOT_FOUND}
 
 //
-// MessageId: VM_SAVED_STATE_DUMP_E_PXE_NOT_PRESENT
+// MessageId: VM_SAVED_STATE_DUMP_E_VA_NOT_MAPPED
 //
 // MessageText:
 //
-// Failed to read Page Map Level 4 entry (pxe) for a virtual address.
+// The given virtual address is not mapped to a physical address.
 //
-  VM_SAVED_STATE_DUMP_E_PXE_NOT_PRESENT = HRESULT($C0370505);
-  {$EXTERNALSYM VM_SAVED_STATE_DUMP_E_PXE_NOT_PRESENT}
+  VM_SAVED_STATE_DUMP_E_VA_NOT_MAPPED = HRESULT($C0370505);
+  {$EXTERNALSYM VM_SAVED_STATE_DUMP_E_VA_NOT_MAPPED}
+
+//
+// MessageId: VM_SAVED_STATE_DUMP_E_INVALID_VP_STATE
+//
+// MessageText:
+//
+// The virtual processor is not in the correct state for the operation.
+//
+  VM_SAVED_STATE_DUMP_E_INVALID_VP_STATE = HRESULT($C0370506);
+  {$EXTERNALSYM VM_SAVED_STATE_DUMP_E_INVALID_VP_STATE}
+
 
 //
 // MessageId: VM_SAVED_STATE_DUMP_E_PDPTE_NOT_PRESENT
@@ -63671,6 +63929,16 @@ const
   {$EXTERNALSYM ERROR_VOLSNAP_ACTIVATION_TIMEOUT}
 
 //
+// MessageId: ERROR_VOLSNAP_NO_BYPASSIO_WITH_SNAPSHOT
+//
+// MessageText:
+//
+// BypassIO cannot be enabled while a volume snapshot exists.
+//
+  ERROR_VOLSNAP_NO_BYPASSIO_WITH_SNAPSHOT = HRESULT($80820003);
+  {$EXTERNALSYM ERROR_VOLSNAP_NO_BYPASSIO_WITH_SNAPSHOT}
+
+//
 // Tiering errors
 //
 // Errors
@@ -64270,6 +64538,21 @@ const
 //
   DXCORE_ERROR_EVENT_NOT_UNREGISTERED = HRESULT($88800001);
   {$EXTERNALSYM DXCORE_ERROR_EVENT_NOT_UNREGISTERED}
+
+
+//
+// Presentation error codes
+//
+
+//
+// MessageId: PRESENTATION_ERROR_LOST
+//
+// MessageText:
+//
+// The presentation manager has been lost and can no longer be used. The application should destroy this presentation manager and create a new presentation manager to use.
+//
+  PRESENTATION_ERROR_LOST             = HRESULT($88810001);
+  {$EXTERNALSYM PRESENTATION_ERROR_LOST}
 
 
 //
@@ -68202,6 +68485,319 @@ const
   ERROR_DBG_START_SERVER_FAILURE_LOCKDOWN = HRESULT($80B00004);
   {$EXTERNALSYM ERROR_DBG_START_SERVER_FAILURE_LOCKDOWN}
 
+
+//
+// HSP Services Error Messages
+//
+// The following are subranges within the HSP Services facility.
+//
+// $0000 - $0fff     HSP Hardware errors
+// $1000 - $10ff     HSP Base Services errors
+//
+// HSP Hardware errors {$0000..$0fff}
+//
+//
+// MessageId: HSP_E_ERROR_MASK
+//
+// MessageText:
+//
+// This is an error mask to convert HSP hardware errors to Win errors.
+//
+  HSP_E_ERROR_MASK                    = HRESULT($81280000);
+  {$EXTERNALSYM HSP_E_ERROR_MASK}
+
+//
+// MessageId: HSP_E_INTERNAL_ERROR
+//
+// MessageText:
+//
+// Catastrophic internal failure in the HSP hardware.
+//
+  HSP_E_INTERNAL_ERROR                = HRESULT($81280FFF);
+  {$EXTERNALSYM HSP_E_INTERNAL_ERROR}
+
+//
+// HSP Base Services errors {0x1000..0x10ff}
+//
+//
+// MessageId: HSP_BS_ERROR_MASK
+//
+// MessageText:
+//
+// This is an error mask to convert HSP base services errors to Win errors.
+//
+  HSP_BS_ERROR_MASK                   = HRESULT($81281000);
+  {$EXTERNALSYM HSP_BS_ERROR_MASK}
+
+//
+// MessageId: HSP_BS_INTERNAL_ERROR
+//
+// MessageText:
+//
+// Catastrophic internal failure in the HSP base services.
+//
+  HSP_BS_INTERNAL_ERROR               = HRESULT($812810FF);
+  {$EXTERNALSYM HSP_BS_INTERNAL_ERROR}
+
+//
+// HSP Software Error Messages
+//
+// The following are subranges within the HSP Software facility.
+//
+// $0000 - $00ff     HSP driver errors (hsp.sys)
+// $0100 - $01ff     HSP base class errors (hspbase.dll)
+// $0200 - $02ff     HSP Key Storage Provider errors (hspksp.dll)
+//
+// HSP driver errors {$0000..$000ff}
+//
+//
+// MessageId: HSP_DRV_ERROR_MASK
+//
+// MessageText:
+//
+// This is an error mask to convert HSP driver errors to Win errors.
+//
+  HSP_DRV_ERROR_MASK                  = HRESULT($81290000);
+  {$EXTERNALSYM HSP_DRV_ERROR_MASK}
+
+//
+// MessageId: HSP_DRV_INTERNAL_ERROR
+//
+// MessageText:
+//
+// Catastrophic internal failure in the HSP driver.
+//
+  HSP_DRV_INTERNAL_ERROR              = HRESULT($812900FF);
+  {$EXTERNALSYM HSP_DRV_INTERNAL_ERROR}
+
+//
+// HSP base class errors {0x0100..0x001ff}
+//
+//
+// MessageId: HSP_BASE_ERROR_MASK
+//
+// MessageText:
+//
+// This is an error mask to convert HSP base class errors to Win errors.
+//
+  HSP_BASE_ERROR_MASK                 = HRESULT($81290100);
+  {$EXTERNALSYM HSP_BASE_ERROR_MASK}
+
+//
+// MessageId: HSP_BASE_INTERNAL_ERROR
+//
+// MessageText:
+//
+// Catastrophic internal failure in the HSP base class.
+//
+  HSP_BASE_INTERNAL_ERROR             = HRESULT($812901FF);
+  {$EXTERNALSYM HSP_BASE_INTERNAL_ERROR}
+
+//
+// HSP Key Storage Provider errors {0x0200..0x002ff}
+//
+//
+// MessageId: HSP_KSP_ERROR_MASK
+//
+// MessageText:
+//
+// This is an error mask to convert HSP KSP errors to Win errors.
+//
+  HSP_KSP_ERROR_MASK                  = HRESULT($81290200);
+  {$EXTERNALSYM HSP_KSP_ERROR_MASK}
+
+//
+// MessageId: HSP_KSP_DEVICE_NOT_READY
+//
+// MessageText:
+//
+// The Pluton processor is currently not ready for use.
+//
+  HSP_KSP_DEVICE_NOT_READY            = HRESULT($81290201);
+  {$EXTERNALSYM HSP_KSP_DEVICE_NOT_READY}
+
+//
+// MessageId: HSP_KSP_INVALID_PROVIDER_HANDLE
+//
+// MessageText:
+//
+// The handle to the HSP KSP is invalid.
+//
+  HSP_KSP_INVALID_PROVIDER_HANDLE     = HRESULT($81290202);
+  {$EXTERNALSYM HSP_KSP_INVALID_PROVIDER_HANDLE}
+
+//
+// MessageId: HSP_KSP_INVALID_KEY_HANDLE
+//
+// MessageText:
+//
+// The handle to a key stored by the HSP KSP is invalid.
+//
+  HSP_KSP_INVALID_KEY_HANDLE          = HRESULT($81290203);
+  {$EXTERNALSYM HSP_KSP_INVALID_KEY_HANDLE}
+
+//
+// MessageId: HSP_KSP_INVALID_PARAMETER
+//
+// MessageText:
+//
+// A parameter to the HSP KSP was invalid.
+//
+  HSP_KSP_INVALID_PARAMETER           = HRESULT($81290204);
+  {$EXTERNALSYM HSP_KSP_INVALID_PARAMETER}
+
+//
+// MessageId: HSP_KSP_BUFFER_TOO_SMALL
+//
+// MessageText:
+//
+// The supplied buffer is too small.
+//
+  HSP_KSP_BUFFER_TOO_SMALL            = HRESULT($81290205);
+  {$EXTERNALSYM HSP_KSP_BUFFER_TOO_SMALL}
+
+//
+// MessageId: HSP_KSP_NOT_SUPPORTED
+//
+// MessageText:
+//
+// The requested operation is not supported.
+//
+  HSP_KSP_NOT_SUPPORTED               = HRESULT($81290206);
+  {$EXTERNALSYM HSP_KSP_NOT_SUPPORTED}
+
+//
+// MessageId: HSP_KSP_INVALID_DATA
+//
+// MessageText:
+//
+// The provided data is invalid.
+//
+  HSP_KSP_INVALID_DATA                = HRESULT($81290207);
+  {$EXTERNALSYM HSP_KSP_INVALID_DATA}
+
+//
+// MessageId: HSP_KSP_INVALID_FLAGS
+//
+// MessageText:
+//
+// The provided flags are invalid.
+//
+  HSP_KSP_INVALID_FLAGS               = HRESULT($81290208);
+  {$EXTERNALSYM HSP_KSP_INVALID_FLAGS}
+
+//
+// MessageId: HSP_KSP_ALGORITHM_NOT_SUPPORTED
+//
+// MessageText:
+//
+// The algorithm identifier is not supported.
+//
+  HSP_KSP_ALGORITHM_NOT_SUPPORTED     = HRESULT($81290209);
+  {$EXTERNALSYM HSP_KSP_ALGORITHM_NOT_SUPPORTED}
+
+//
+// MessageId: HSP_KSP_KEY_ALREADY_FINALIZED
+//
+// MessageText:
+//
+// The key has already been finalized.
+//
+  HSP_KSP_KEY_ALREADY_FINALIZED       = HRESULT($8129020A);
+  {$EXTERNALSYM HSP_KSP_KEY_ALREADY_FINALIZED}
+
+//
+// MessageId: HSP_KSP_KEY_NOT_FINALIZED
+//
+// MessageText:
+//
+// The key has not been finalized.
+//
+  HSP_KSP_KEY_NOT_FINALIZED           = HRESULT($8129020B);
+  {$EXTERNALSYM HSP_KSP_KEY_NOT_FINALIZED}
+
+//
+// MessageId: HSP_KSP_INVALID_KEY_TYPE
+//
+// MessageText:
+//
+// The key does not support the requested operation.
+//
+  HSP_KSP_INVALID_KEY_TYPE            = HRESULT($8129020C);
+  {$EXTERNALSYM HSP_KSP_INVALID_KEY_TYPE}
+
+//
+// MessageId: HSP_KSP_NO_MEMORY
+//
+// MessageText:
+//
+// There is not enough memory for the operation.
+//
+  HSP_KSP_NO_MEMORY                   = HRESULT($81290210);
+  {$EXTERNALSYM HSP_KSP_NO_MEMORY}
+
+//
+// MessageId: HSP_KSP_PARAMETER_NOT_SET
+//
+// MessageText:
+//
+// The parameter has not been set and has no default value.
+//
+  HSP_KSP_PARAMETER_NOT_SET           = HRESULT($81290211);
+  {$EXTERNALSYM HSP_KSP_PARAMETER_NOT_SET}
+
+//
+// MessageId: HSP_KSP_KEY_EXISTS
+//
+// MessageText:
+//
+// Key object already exists.
+//
+  HSP_KSP_KEY_EXISTS                  = HRESULT($81290215);
+  {$EXTERNALSYM HSP_KSP_KEY_EXISTS}
+
+//
+// MessageId: HSP_KSP_KEY_MISSING
+//
+// MessageText:
+//
+// The requsted key object does not exist.
+//
+  HSP_KSP_KEY_MISSING                 = HRESULT($81290216);
+  {$EXTERNALSYM HSP_KSP_KEY_MISSING}
+
+//
+// MessageId: HSP_KSP_KEY_LOAD_FAIL
+//
+// MessageText:
+//
+// Failed to load the requested key.
+//
+  HSP_KSP_KEY_LOAD_FAIL               = HRESULT($81290217);
+  {$EXTERNALSYM HSP_KSP_KEY_LOAD_FAIL}
+
+//
+// MessageId: HSP_KSP_NO_MORE_ITEMS
+//
+// MessageText:
+//
+// No more data is available.
+//
+  HSP_KSP_NO_MORE_ITEMS               = HRESULT($81290218);
+  {$EXTERNALSYM HSP_KSP_NO_MORE_ITEMS}
+
+//
+// MessageId: HSP_KSP_INTERNAL_ERROR
+//
+// MessageText:
+//
+// Catastrophic internal failure in the HSP KSP.
+//
+  HSP_KSP_INTERNAL_ERROR              = HRESULT($812902FF);
+  {$EXTERNALSYM HSP_KSP_INTERNAL_ERROR}
+
+
+
 //
 //Sdbus
 //
@@ -71065,8 +71661,8 @@ const
 //
 // The QUIC connection was canceled by the user.
 //
-  {$EXTERNALSYM ERROR_QUIC_USER_CANCELED}
   ERROR_QUIC_USER_CANCELED            = HRESULT($80410002);
+  {$EXTERNALSYM ERROR_QUIC_USER_CANCELED}
 
 //
 // MessageId: ERROR_QUIC_INTERNAL_ERROR
@@ -71075,8 +71671,8 @@ const
 //
 // The QUIC connection encountered an internal error.
 //
-  {$EXTERNALSYM ERROR_QUIC_INTERNAL_ERROR}
   ERROR_QUIC_INTERNAL_ERROR           = HRESULT($80410003);
+  {$EXTERNALSYM ERROR_QUIC_INTERNAL_ERROR}
 
 //
 // MessageId: ERROR_QUIC_PROTOCOL_VIOLATION
@@ -71085,8 +71681,8 @@ const
 //
 // The QUIC connection encountered a protocol violation.
 //
-  {$EXTERNALSYM ERROR_QUIC_PROTOCOL_VIOLATION}
   ERROR_QUIC_PROTOCOL_VIOLATION       = HRESULT($80410004);
+  {$EXTERNALSYM ERROR_QUIC_PROTOCOL_VIOLATION}
 
 //
 // MessageId: ERROR_QUIC_CONNECTION_IDLE
@@ -71095,8 +71691,8 @@ const
 //
 // The QUIC connection was idle.
 //
-  {$EXTERNALSYM ERROR_QUIC_CONNECTION_IDLE}
   ERROR_QUIC_CONNECTION_IDLE          = HRESULT($80410005);
+  {$EXTERNALSYM ERROR_QUIC_CONNECTION_IDLE}
 
 //
 // MessageId: ERROR_QUIC_CONNECTION_TIMEOUT
@@ -71105,8 +71701,8 @@ const
 //
 // The QUIC connection timed out while trying to contact the peer.
 //
-  {$EXTERNALSYM ERROR_QUIC_CONNECTION_TIMEOUT}
   ERROR_QUIC_CONNECTION_TIMEOUT       = HRESULT($80410006);
+  {$EXTERNALSYM ERROR_QUIC_CONNECTION_TIMEOUT}
 
 //
 // MessageId: ERROR_QUIC_ALPN_NEG_FAILURE
@@ -71115,9 +71711,89 @@ const
 //
 // The QUIC connection failed to negotiate a compatible ALPN.
 //
-  {$EXTERNALSYM ERROR_QUIC_ALPN_NEG_FAILURE}
   ERROR_QUIC_ALPN_NEG_FAILURE         = HRESULT($80410007);
+  {$EXTERNALSYM ERROR_QUIC_ALPN_NEG_FAILURE}
 
+
+//
+// IORING Error codes
+//
+
+//
+// MessageId: IORING_E_REQUIRED_FLAG_NOT_SUPPORTED
+//
+// MessageText:
+//
+// One or more of the required flags provided is unknown by the implementation.
+//
+  IORING_E_REQUIRED_FLAG_NOT_SUPPORTED = HRESULT($80460001);
+  {$EXTERNALSYM IORING_E_REQUIRED_FLAG_NOT_SUPPORTED}
+
+//
+// MessageId: IORING_E_SUBMISSION_QUEUE_FULL
+//
+// MessageText:
+//
+// The submission queue is full.
+//
+  IORING_E_SUBMISSION_QUEUE_FULL      = HRESULT($80460002);
+  {$EXTERNALSYM IORING_E_SUBMISSION_QUEUE_FULL}
+
+//
+// MessageId: IORING_E_VERSION_NOT_SUPPORTED
+//
+// MessageText:
+//
+// The version specified is not known or supported.
+//
+  IORING_E_VERSION_NOT_SUPPORTED      = HRESULT($80460003);
+  {$EXTERNALSYM IORING_E_VERSION_NOT_SUPPORTED}
+
+//
+// MessageId: IORING_E_SUBMISSION_QUEUE_TOO_BIG
+//
+// MessageText:
+//
+// The submission queue size specified for the IoRing is too big.
+//
+  IORING_E_SUBMISSION_QUEUE_TOO_BIG   = HRESULT($80460004);
+  {$EXTERNALSYM IORING_E_SUBMISSION_QUEUE_TOO_BIG}
+
+//
+// MessageId: IORING_E_COMPLETION_QUEUE_TOO_BIG
+//
+// MessageText:
+//
+// The completion queue size specified for the IoRing is too big.
+//
+  IORING_E_COMPLETION_QUEUE_TOO_BIG   = HRESULT($80460005);
+  {$EXTERNALSYM IORING_E_COMPLETION_QUEUE_TOO_BIG}
+
+//
+// MessageId: IORING_E_SUBMIT_IN_PROGRESS
+//
+// MessageText:
+//
+// A submit operation is already in progress for this IoRing on another thread.
+//
+  IORING_E_SUBMIT_IN_PROGRESS         = HRESULT($80460006);
+  {$EXTERNALSYM IORING_E_SUBMIT_IN_PROGRESS}
+
+//
+// MessageId: IORING_E_CORRUPT
+//
+// MessageText:
+//
+// The shared ring buffers of the IoRing are corrupt.
+//
+  IORING_E_CORRUPT                    = HRESULT($80460007);
+  {$EXTERNALSYM IORING_E_CORRUPT}
+
+
+
+  // Additional Prototypes for ALL interfaces
+
+  // End of Additional Prototypes
 
 
 implementation
@@ -71247,6 +71923,7 @@ begin
     Result := x;
 end;
 
+  // Implement Additional functions here.
 
 end.
 

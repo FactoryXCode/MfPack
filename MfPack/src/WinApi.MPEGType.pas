@@ -1,62 +1,61 @@
- // FactoryX
-  //
-  // Copyright: © FactoryX. All rights reserved.
-  //
-  // Project: MfPack - Shared
-  // Project location: https:  //sourceforge.net/projects/MFPack
-  //                   https:  //github.com/FactoryXCode/MfPack
-  // Module: WinApi.MpegType.pas
-  // Kind: Pascal / Delphi unit
-  // Release date: 17-05-2020
-  // Language: ENU
-  //
-  // Revision Version: 3.0.2
-  // Description: MPEG system stream compound type definition.
-  //
-  // Organisation: FactoryX
-  // Initiator(s): Tony (maXcomX), Peter (OzShips)
-  // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
-  //
-  //------------------------------------------------------------------------------
-  // CHANGE LOG
-  // Date       Person              Reason
-  // ---------- ------------------- ----------------------------------------------
-  // 13/08/2020 All                 Enigma release. New layout and namespaces
-  // 28/09/2021 All                 Updated to 10.0.20348.0
-  //------------------------------------------------------------------------------
-  //
-  // Remarks: -
-  //
-  // Related objects: -
-  // Related projects: MfPackX302
-  // Known Issues: -
-  //
-  // Compiler version: 23 up to 34
-  // SDK version: 10.0.20348.0
-  //
-  // Todo: -
-  //
-  //==============================================================================
-  // Source: MpegType.h
-  //
-  // Copyright (c) Microsoft Corporation. All rights reserved.
-  //==============================================================================
-  //
-  // LICENSE
-  //
-  // The contents of this file are subject to the Mozilla Public License
-  // Version 2.0 (the "License"); you may not use this file except in
-  // compliance with the License. You may obtain a copy of the License at
-  // https:  //www.mozilla.org/en-US/MPL/2.0/
-  //
-  // Software distributed under the License is distributed on an "AS IS"
-  // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-  // License for the specific language governing rights and limitations
-  // under the License.
-  //
-  // Users may distribute this source code provided that this header is included
-  // in full at the top of the file.
-  //==============================================================================
+// FactoryX
+//
+// Copyright: © FactoryX. All rights reserved.
+//
+// Project: MfPack - Shared
+// Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
+// Module: WinApi.MpegType.pas
+// Kind: Pascal / Delphi unit
+// Release date: 17-05-2020
+// Language: ENU
+//
+// Revision Version: 3.1.0
+// Description: MPEG system stream compound type definition.
+//
+// Organisation: FactoryX
+// Initiator(s): Tony (maXcomX), Peter (OzShips)
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
+//
+//------------------------------------------------------------------------------
+// CHANGE LOG
+// Date       Person              Reason
+// ---------- ------------------- ----------------------------------------------
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+//------------------------------------------------------------------------------
+//
+// Remarks: -
+//
+// Related objects: -
+// Related projects: MfPackX310
+// Known Issues: -
+//
+// Compiler version: 23 up to 34
+// SDK version: 10.0.22000.0
+//
+// Todo: -
+//
+//==============================================================================
+// Source: MpegType.h
+//
+// Copyright (c) Microsoft Corporation. All rights reserved.
+//==============================================================================
+//
+// LICENSE
+//
+// The contents of this file are subject to the Mozilla Public License
+// Version 2.0 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at
+// https://www.mozilla.org/en-US/MPL/2.0/
+//
+// Software distributed under the License is distributed on an "AS IS"
+// basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+// License for the specific language governing rights and limitations
+// under the License.
+//
+// Users may distribute this source code provided that this header is included
+// in full at the top of the file.
+//==============================================================================
 unit WinApi.MpegType;
 
 interface

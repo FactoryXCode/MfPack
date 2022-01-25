@@ -5,14 +5,15 @@
 // Project: MfPack - WinApi
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: WinApi.Avrt.pas
+// Module: System.Services.Avrt.pas
 // Kind: Pascal / Delphi unit
 // Release date: 24-10-2020
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.1
 // Description: This module contains the multimedia class scheduler APIs and any public data
 //              structures needed to call these APIs.
+//              This header is part of the System Services API.
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -22,8 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 Tony                Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Please take notice of ANSI or Unicode versions of the included function.
@@ -32,11 +32,11 @@
 //          For more information, see https://docs.microsoft.com/en-us/windows/win32/intl/conventions-for-function-prototypes.
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -62,7 +62,7 @@
 // in full at the top of the file.
 //
 //==============================================================================
-unit WinApi.Avrt;
+unit System.Services.Avrt;
 
   {$HPPEMIT '#include "avrt.h"'}
 
@@ -214,23 +214,25 @@ implementation
 const
   AvrtLib = 'avrt.dll';
 
-  function AvSetMmThreadCharacteristicsA; external AvrtLib name 'AvSetMmThreadCharacteristicsA';
-  function AvSetMmThreadCharacteristicsW; external AvrtLib name 'AvSetMmThreadCharacteristicsW';
-  function AvSetMmThreadCharacteristics; external AvrtLib name 'AvSetMmThreadCharacteristicsW';
-  function AvSetMmMaxThreadCharacteristicsA; external AvrtLib name 'AvSetMmMaxThreadCharacteristicsA';
-  function AvSetMmMaxThreadCharacteristicsW; external AvrtLib name 'AvSetMmMaxThreadCharacteristicsW';
-  function AvSetMmMaxThreadCharacteristics; external AvrtLib name 'AvSetMmMaxThreadCharacteristicsW';
-  function AvRevertMmThreadCharacteristics; external AvrtLib name 'AvRevertMmThreadCharacteristics';
-  function AvSetMmThreadPriority; external AvrtLib name 'AvSetMmThreadPriority';
-  function AvRtCreateThreadOrderingGroup; external AvrtLib name 'AvRtCreateThreadOrderingGroup';
-  function AvRtCreateThreadOrderingGroupExA; external AvrtLib name 'AvRtCreateThreadOrderingGroupExA';
-  function AvRtCreateThreadOrderingGroupExW; external AvrtLib name 'AvRtCreateThreadOrderingGroupExW';
-  function AvRtCreateThreadOrderingGroupEx; external AvrtLib name 'AvRtCreateThreadOrderingGroupExW';
-  function AvRtJoinThreadOrderingGroup; external AvrtLib name 'AvRtJoinThreadOrderingGroup';
-  function AvRtLeaveThreadOrderingGroup; external AvrtLib name 'AvRtLeaveThreadOrderingGroup';
-  function AvRtWaitOnThreadOrderingGroup; external AvrtLib name 'AvRtWaitOnThreadOrderingGroup';
-  function AvRtDeleteThreadOrderingGroup; external AvrtLib name 'AvRtDeleteThreadOrderingGroup';
-  function AvQuerySystemResponsiveness; external AvrtLib name 'AvQuerySystemResponsiveness';
+{$WARN SYMBOL_PLATFORM OFF}
+  function AvSetMmThreadCharacteristicsA; external AvrtLib name 'AvSetMmThreadCharacteristicsA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function AvSetMmThreadCharacteristicsW; external AvrtLib name 'AvSetMmThreadCharacteristicsW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function AvSetMmThreadCharacteristics; external AvrtLib name 'AvSetMmThreadCharacteristicsW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function AvSetMmMaxThreadCharacteristicsA; external AvrtLib name 'AvSetMmMaxThreadCharacteristicsA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function AvSetMmMaxThreadCharacteristicsW; external AvrtLib name 'AvSetMmMaxThreadCharacteristicsW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function AvSetMmMaxThreadCharacteristics; external AvrtLib name 'AvSetMmMaxThreadCharacteristicsW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function AvRevertMmThreadCharacteristics; external AvrtLib name 'AvRevertMmThreadCharacteristics' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function AvSetMmThreadPriority; external AvrtLib name 'AvSetMmThreadPriority' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function AvRtCreateThreadOrderingGroup; external AvrtLib name 'AvRtCreateThreadOrderingGroup' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function AvRtCreateThreadOrderingGroupExA; external AvrtLib name 'AvRtCreateThreadOrderingGroupExA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function AvRtCreateThreadOrderingGroupExW; external AvrtLib name 'AvRtCreateThreadOrderingGroupExW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function AvRtCreateThreadOrderingGroupEx; external AvrtLib name 'AvRtCreateThreadOrderingGroupExW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function AvRtJoinThreadOrderingGroup; external AvrtLib name 'AvRtJoinThreadOrderingGroup' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function AvRtLeaveThreadOrderingGroup; external AvrtLib name 'AvRtLeaveThreadOrderingGroup' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function AvRtWaitOnThreadOrderingGroup; external AvrtLib name 'AvRtWaitOnThreadOrderingGroup' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function AvRtDeleteThreadOrderingGroup; external AvrtLib name 'AvRtDeleteThreadOrderingGroup' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function AvQuerySystemResponsiveness; external AvrtLib name 'AvQuerySystemResponsiveness' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+{$WARN SYMBOL_PLATFORM ON}
 
   // Implement Additional functions here.
 

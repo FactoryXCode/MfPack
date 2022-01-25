@@ -9,30 +9,30 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.0
 // Description: Declarations for the audio effects included with XAudio2.
 //              Windows 8 XAudio 2.8 or later
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Jim Hawkins.
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 20/12/2021 Jim Hawkins         Removed Single casting.
 //------------------------------------------------------------------------------
 //
 // Remarks: This version of XAudio2 is available only in Windows 8 or later.
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -973,7 +973,7 @@ begin
             pNative.LowEQGain := 8;
 
         pNative.HighEQGain:= 8;
-        pNative.DecayTime := pI3DL2.DecayTime * pI3DL2.DecayHFRatio;
+        pNative.DecayTime := (pI3DL2.DecayTime * pI3DL2.DecayHFRatio);
       end
     else
       begin
@@ -1014,8 +1014,8 @@ begin
     // Implemented a rangechecker here
     pNative.ReverbDelay := ClipByteValue(Round(reverbDelay));
 
-    pNative.ReflectionsGain := Single(pI3DL2.Reflections / 100.0);
-    pNative.ReverbGain := Single(pI3DL2.Reverb / 100.0);
+    pNative.ReflectionsGain := (pI3DL2.Reflections / 100.0);
+    pNative.ReverbGain := (pI3DL2.Reverb / 100.0);
     pNative.EarlyDiffusion:= Round(15.0 * pI3DL2.Diffusion / 100.0);
     pNative.LateDiffusion := pNative.EarlyDiffusion;
     pNative.Density := pI3DL2.Density;

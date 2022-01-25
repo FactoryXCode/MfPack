@@ -9,20 +9,19 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.0
 // Description: Declarations for the XAudio2 game audio API.
 //              Windows 10 XAudio2.9 or later
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), AndrewBJ.
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: This version of XAudio2 is available only in Windows 8 or later.
@@ -30,11 +29,11 @@
 //          that target Windows 7. See https://aka.ms/xaudio2redist.
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -182,11 +181,11 @@ const
   // Flags
   XAUDIO2_DEBUG_ENGINE                = $0001;   // Used in XAudio2Create
   {$EXTERNALSYM XAUDIO2_DEBUG_ENGINE}
-  XAUDIO2_VOICE_NOPITCH               = $0002;   // Used in IXAudio2::CreateSourceVoice
+  XAUDIO2_VOICE_NOPITCH               = $0002;   // Used in IXAudio2.CreateSourceVoice
   {$EXTERNALSYM XAUDIO2_VOICE_NOPITCH}
-  XAUDIO2_VOICE_NOSRC                 = $0004;   // Used in IXAudio2::CreateSourceVoice
+  XAUDIO2_VOICE_NOSRC                 = $0004;   // Used in IXAudio2.CreateSourceVoice
   {$EXTERNALSYM XAUDIO2_VOICE_NOSRC}
-  XAUDIO2_VOICE_USEFILTER             = $0008;   // Used in IXAudio2::CreateSource/SubmixVoice
+  XAUDIO2_VOICE_USEFILTER             = $0008;   // Used in IXAudio2.CreateSource/SubmixVoice
   {$EXTERNALSYM XAUDIO2_VOICE_USEFILTER}
   XAUDIO2_PLAY_TAILS                  = $0020;   // Used in IXAudio2SourceVoice::Stop
   {$EXTERNALSYM XAUDIO2_PLAY_TAILS}
@@ -408,15 +407,13 @@ type
     pOutputVoice: IXAudio2Voice;     // This send's destination voice.
   end;
   {$EXTERNALSYM XAUDIO2_SEND_DESCRIPTOR}
-  // If you don't want to use pointer array's
-  TXAudio2SendDescriptor = array [0..65535] of XAUDIO2_SEND_DESCRIPTOR;
-  {$EXTERNALSYM TXAudio2SendDescriptor}
+
 
   // Used in the voice creation functions and in IXAudio2Voice.SetOutputVoices
   PXAUDIO2_VOICE_SENDS = ^XAUDIO2_VOICE_SENDS;
   XAUDIO2_VOICE_SENDS = record
     SendCount: UINT32;                  // Number of sends from this voice.
-    pSends: TXAudio2SendDescriptor;     // PXAUDIO2_SEND_DESCRIPTOR;   // Array of SendCount send descriptors.
+    pSends: PXAUDIO2_SEND_DESCRIPTOR;   // Array of SendCount send descriptors.
   end;
   {$EXTERNALSYM XAUDIO2_VOICE_SENDS}
 
@@ -424,19 +421,17 @@ type
   PXAUDIO2_EFFECT_DESCRIPTOR = ^XAUDIO2_EFFECT_DESCRIPTOR;
   XAUDIO2_EFFECT_DESCRIPTOR = record
     pEffect: IUnknown;              // Pointer to the effect object's IUnknown interface.
-    InitialState: BOOL;              // TRUE if the effect should begin in the enabled state.
-    OutputChannels: UINT32;          // How many output channels the effect should produce.
+    InitialState: BOOL;             // TRUE if the effect should begin in the enabled state.
+    OutputChannels: UINT32;         // How many output channels the effect should produce.
   end;
   {$EXTERNALSYM XAUDIO2_EFFECT_DESCRIPTOR}
-  // If you don't want to use pointer array's
-  TXAudio2EffectDescriptor = array [0..65535] of XAUDIO2_EFFECT_DESCRIPTOR;
-  {$EXTERNALSYM TXAudio2EffectDescriptor}
+
 
   // Used in the voice creation functions and in IXAudio2Voice.SetEffectChain
   PXAUDIO2_EFFECT_CHAIN = ^XAUDIO2_EFFECT_CHAIN;
   XAUDIO2_EFFECT_CHAIN = record
-    EffectCount: UINT32;                              // Number of effects in this voice's effect chain.
-    pEffectDescriptors: TXAudio2EffectDescriptor;     // PXAUDIO2_EFFECT_DESCRIPTOR;  // Array of effect descriptors.
+    EffectCount: UINT32;                             // Number of effects in this voice's effect chain.
+    pEffectDescriptors: PXAUDIO2_EFFECT_DESCRIPTOR;  // Array of effect descriptors.
   end;
   {$EXTERNALSYM XAUDIO2_EFFECT_CHAIN}
 
@@ -610,7 +605,7 @@ type
     //  pEffectChain - Optional list of effects to apply to the audio data.
     //
     function CreateSourceVoice(out ppSourceVoice: IXAudio2SourceVoice;
-                               pSourceFormat: TWAVEFORMATEX;
+                               pSourceFormat: PWAVEFORMATEX;
                                Flags: UINT32 = 0;
                                MaxFrequencyRatio: Single = XAUDIO2_DEFAULT_FREQ_RATIO;
                                pCallback: IXAudio2VoiceCallback = nil;
@@ -692,7 +687,7 @@ type
     //  pDebugConfiguration - Structure describing the debug output behavior.
     //  pReserved - Optional parameter; must be NULL.
     //
-    procedure SetDebugConfiguration(pDebugConfiguration: XAUDIO2_DEBUG_CONFIGURATION;
+    procedure SetDebugConfiguration(pDebugConfiguration: PXAUDIO2_DEBUG_CONFIGURATION;
                                     pReserved: Pointer = nil); stdcall;
 
   end;
@@ -749,30 +744,29 @@ type
   //               However, this is not the case: This 'interface' is a pure virtual base class rather than an
   //               interface and NOT derived from IUnknown!
 
-  {$EXTERNALSYM IXAudio2Voice}
-  IXAudio2Voice = class(TObject)
+  IXAudio2Voice = class(TInterfacedObject)
 
     // NAME: IXAudio2Voice.GetVoiceDetails
     // DESCRIPTION: Returns the basic characteristics of this voice.
     //
     // ARGUMENTS:
     //  pVoiceDetails - Returns the voice's details.
-    procedure GetVoiceDetails(pVoiceDetails: XAUDIO2_VOICE_DETAILS); virtual; stdcall; abstract;
+    procedure GetVoiceDetails(out pVoiceDetails: XAUDIO2_VOICE_DETAILS); virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.SetOutputVoices
     // DESCRIPTION: Replaces the set of submix/mastering voices that receive
-    //              this voice's output.
+    //              this voice's output.                 fv
     //
     // ARGUMENTS:
     //  pSendList - Optional list of voices this voice should send audio to.
-    function SetOutputVoices(pSendList: XAUDIO2_VOICE_SENDS): HRESULT; virtual; stdcall; abstract;
+    function SetOutputVoices(pSendList: PXAUDIO2_VOICE_SENDS): HRESULT; virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.SetEffectChain
     // DESCRIPTION: Replaces this voice's current effect chain with a new one.
     //
     // ARGUMENTS:
     //  pEffectChain - Structure describing the new effect chain to be used.
-    function SetEffectChain(pEffectChain: XAUDIO2_EFFECT_CHAIN): HRESULT; virtual; stdcall; abstract;
+    function SetEffectChain(pEffectChain: PXAUDIO2_EFFECT_CHAIN): HRESULT; virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.EnableEffect
     // DESCRIPTION: Enables an effect in this voice's effect chain.
@@ -836,7 +830,7 @@ type
     // ARGUMENTS:
     //  pParameters - Pointer to the filter's parameter structure.
     //  OperationSet - Used to identify this call as part of a deferred batch.
-    function SetFilterParameters(pParameters: XAUDIO2_FILTER_PARAMETERS;
+    function SetFilterParameters(pParameters: PXAUDIO2_FILTER_PARAMETERS;
                                  OperationSet: UINT32): HRESULT; virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.GetFilterParameters
@@ -912,9 +906,23 @@ type
     //  SourceChannels - Used to confirm this voice's output channel count
     //   (the number of channels produced by the last effect in the chain).
     //  DestinationChannels - Confirms the destination voice's input channels.
-    //  pLevelMatrix - Array of [SourceChannels * DestinationChannels] send
-    //   levels.  The level used to send from source channel S to destination
-    //   channel D should be in pLevelMatrix[S + SourceChannels * D].
+    //  pLevelMatrix - Array of [SourceChannels × DestinationChannels] volume levels sent to
+    //  the destination voice.
+    //  The level sent from source channel S to destination channel D is specified in the form pLevelMatrix[SourceChannels × D + S].
+    //  For example, when rendering two-channel stereo input into 5.1 output that is weighted
+    //  toward the front channels—but is absent from the center and low-frequency channels—the matrix might have
+    //  the values shown in the following table.
+    //  TABLE 1
+    //    Output        Left Input [Array Index]   Right Input [Array Index]
+    //    Left          1.0 [0]                    0.0 [1]
+    //    Right         0.0 [2]                    1.0 [3]
+    //    Front Center  0.0 [4]                    0.0 [5]
+    //    LFE           0.0 [6]                    0.0 [7]
+    //    Rear Left     0.8 [8]                    0.0 [9]
+    //    Rear Right    0.0 [10]                   0.8 [11]
+    //
+    //  Note  The left and right input are fully mapped to the output left and right channels; 80 percent of the
+    //  left and right input is mapped to the rear left and right channels.
     //  OperationSet - Used to identify this call as part of a deferred batch.
     function SetOutputMatrix(pDestinationVoice: IXAudio2Voice;
                              SourceChannels: UINT32;
@@ -944,6 +952,7 @@ type
     procedure DestroyVoice(); virtual; stdcall; abstract;
 
   end;
+  {$EXTERNALSYM IXAudio2Voice}
 
 
 
@@ -953,7 +962,6 @@ type
   *
   **************************************************************************)
 
-  {$EXTERNALSYM IXAudio2SourceVoice}
   IXAudio2SourceVoice = class(IXAudio2Voice)
 
     // Methods from IXAudio2Voice base interface
@@ -987,7 +995,7 @@ type
     //  pBuffer - Pointer to the buffer structure to be queued.
     //  pBufferWMA - Additional structure used only when submitting XWMA data.
     //
-    function SubmitSourceBuffer(pBuffer: XAUDIO2_BUFFER;
+    function SubmitSourceBuffer(pBuffer: PXAUDIO2_BUFFER;
                                 pBufferWMA: PXAUDIO2_BUFFER_WMA = nil): HRESULT; virtual; stdcall; abstract;
 
     // NAME: IXAudio2SourceVoice.FlushSourceBuffers
@@ -1051,6 +1059,7 @@ type
     function SetSourceSampleRate(NewSourceSampleRate: UINT32): HRESULT; virtual; stdcall; abstract;
 
   end;
+  {$EXTERNALSYM IXAudio2SourceVoice}
 
 
 
@@ -1060,7 +1069,6 @@ type
   *
   **************************************************************************)
 
-  {$EXTERNALSYM IXAudio2SubmixVoice}
   IXAudio2SubmixVoice = class(IXAudio2Voice)
     // Methods from IXAudio2Voice base interface
 
@@ -1069,6 +1077,7 @@ type
     // There are currently no methods specific to submix voices.
 
   end;
+  {$EXTERNALSYM IXAudio2SubmixVoice}
 
 
 
@@ -1078,7 +1087,6 @@ type
   *
   **************************************************************************)
 
-  {$EXTERNALSYM IXAudio2MasteringVoice}
   IXAudio2MasteringVoice = class(IXAudio2Voice)
     // Methods from IXAudio2Voice base interface
     // Declare_IXAudio2Voice_Methods();
@@ -1093,6 +1101,7 @@ type
     function GetChannelMask(Out pChannelmask: DWORD): HRESULT; virtual; stdcall; abstract;
 
   end;
+  {$EXTERNALSYM IXAudio2MasteringVoice}
 
 
 
@@ -1108,8 +1117,7 @@ type
   *
   **************************************************************************)
 
-  {$EXTERNALSYM IXAudio2EngineCallback}
-  IXAudio2EngineCallback = class
+  IXAudio2EngineCallback = class(TInterfacedObject)
 
     // Called by XAudio2 just before an audio processing pass begins.
     procedure OnProcessingPassStart(); virtual; stdcall; abstract;
@@ -1122,6 +1130,7 @@ type
     procedure OnCriticalError(Error: HRESULT); virtual; stdcall; abstract;
 
   end;
+  {$EXTERNALSYM IXAudio2EngineCallback}
 
 
 
@@ -1136,8 +1145,7 @@ type
   *
   **************************************************************************)
 
-  {$EXTERNALSYM IXAudio2VoiceCallback}
-  IXAudio2VoiceCallback = class
+  IXAudio2VoiceCallback = class(TInterfacedObject)
 
     // Called just before this voice's processing pass begins.
     procedure OnVoiceProcessingPassStart(BytesRequired: UINT32); virtual; stdcall; abstract;
@@ -1168,6 +1176,7 @@ type
                            Error: HRESULT); virtual; stdcall; abstract;
 
   end;
+  {$EXTERNALSYM IXAudio2VoiceCallback}
 
 
 
@@ -1251,7 +1260,7 @@ type
 
 const
 
-  M_PI : Single = 3.14159265358979323846;   // From math.h
+  M_PI : Single = Pi;   // From math.h
   {$EXTERNALSYM M_PI}
 
   // End of Additional Prototypes
@@ -1286,7 +1295,7 @@ begin
       Result := -3.402823466e+38; // Smallest Single value (-FLT_MAX)
     end
   else
-    Result := 20.0 * Single(log10(Volume));
+    Result := 20.0 * log10(Volume);
 end;
 
 
@@ -1321,7 +1330,7 @@ begin
       Result := XAUDIO2_MAX_FILTER_FREQUENCY;
     end
   else
-    Result :=  2.0 * Sin(Single(M_PI) * CutoffFrequency / SampleRate);
+    Result :=  2.0 * Sin(M_PI * CutoffFrequency / SampleRate);
 end;
 
 
@@ -1329,7 +1338,7 @@ end;
 function XAudio2RadiansToCutoffFrequency(Radians: Single;
                                          SampleRate: Single): Single;
 begin
-    Result := SampleRate * ArcSin(Radians / 2.0) / Single(M_PI);
+    Result := SampleRate * ArcSin(Radians / 2.0) / M_PI;
 end;
 
 

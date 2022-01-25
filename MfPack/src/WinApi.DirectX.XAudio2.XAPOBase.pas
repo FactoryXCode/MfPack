@@ -9,31 +9,28 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.0
 // Description: -
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), AndrewBJ.
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: See WinApi.DirectX.XAudio2.XAPO.pas for the rules governing XAPO interface behaviour.
-// 
-// 
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -139,16 +136,14 @@ type
   {$EXTERNALSYM CXAPOBase}
   CXAPOBase = class(TInterfacedObject, IXAPO)
   private
-
+{$HINTS OFF}
     m_pRegistrationProperties: XAPO_REGISTRATION_PROPERTIES;  // pointer to registration properties of the XAPO, set via constructor
-
-    //m_pfnMatrixMixFunction: Pointer;      // optimal matrix function pointer, used for thru processing
-    //m_pfl32MatrixCoefficients: FLOAT32;   // matrix coefficient table, used for thru processing
-    //m_nSrcFormatType: UINT32;             // input format type, used for thru processing
-    //m_fIsScalarMatrix: BOOL;              // TRUE if m_pfl32MatrixCoefficients is diagonal matrix with all main diagonal entries equal, i.e. m_pfnMatrixMixFunction only used for type conversion (no channel conversion), used for thru processing
-
-    m_fIsLocked: BOOL;                      // TRUE if XAPO locked via CXAPOBase.LockForProcess
-
+    m_pfnMatrixMixFunction: Pointer;      // optimal matrix function pointer, used for thru processing
+    m_pfl32MatrixCoefficients: FLOAT32;   // matrix coefficient table, used for thru processing
+    m_nSrcFormatType: UINT32;             // input format type, used for thru processing
+    m_fIsScalarMatrix: BOOL;              // TRUE if m_pfl32MatrixCoefficients is diagonal matrix with all main diagonal entries equal, i.e. m_pfnMatrixMixFunction only used for type conversion (no channel conversion), used for thru processing
+    m_fIsLocked: BOOL;                    // TRUE if XAPO locked via CXAPOBase.LockForProcess
+{$HINTS ON}
   protected
 
     // accessors
@@ -209,36 +204,20 @@ type
     // validation against the XAPO's registration properties.
     // Derived XAPOs should call the base implementation first.
     function LockForProcess(InputLockedParameterCount: UINT32;
-                            pInputLockedParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
+                            pInputLockedParameters: XAPO_LOCKFORPROCESS_PARAMETERS;
                             OutputLockedParameterCount: UINT32;
-                            pOutputLockedParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS): HRESULT; overload; stdcall;
-
-
-    function LockForProcess(InputLockedParameterCount: UINT32;
-                            pInputLockedParameters: TXAPOLockForProcessBufferParametersArray;
-                            OutputLockedParameterCount: UINT32;
-                            pOutputLockedParameters: TXAPOLockForProcessBufferParametersArray): HRESULT; overload; stdcall;
+                            pOutputLockedParameters: XAPO_LOCKFORPROCESS_PARAMETERS): HRESULT; stdcall;
 
     // Opposite of LockForProcess.
     // Derived XAPOs should call the base implementation first.
     procedure UnlockForProcess(); stdcall;
 
-    // overloaded methods
-    //
-    // Need POINTERMATH
+    // Needs POINTERMATH turned On!
     procedure Process(InputProcessParameterCount: UINT32;
-                      pInputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
+                      pInputProcessParameters: XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
                       OutputProcessParameterCount: UINT32;
-                      var pOutputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
-                      IsEnabled: BOOL); overload; stdcall;
-    // No need for POINTERMATH
-    procedure Process(InputProcessParameterCount: UINT32;
-                      pInputProcessParameters: TXAPOProcessBufferParametersArray;
-                      OutputProcessParameterCount: UINT32;
-                      var pOutputProcessParameters: TXAPOProcessBufferParametersArray;
-                      IsEnabled: BOOL); overload; stdcall;
-
-
+                      var pOutputProcessParameters: XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
+                      IsEnabled: BOOL); stdcall;
 
     // Returns the number of input frames required to generate the requested number of output frames.
     // By default, this method returns the same number of frames it was passed.
@@ -267,18 +246,15 @@ type
   {$EXTERNALSYM CXAPOParametersBase}
   CXAPOParametersBase = class(CXAPOBase, IXAPOParameters)
   private
-    m_pParameterBlocks: PByte;              // three contiguous process parameter blocks used for synchronization, user responsible for initialization of parameter blocks before IXAPO::Process/SetParameters/GetParameters called
-
-    // m_pCurrentParameters: PByte;            // pointer to current process parameters, must be aligned for atomic operations
-    // m_pCurrentParametersInternal: PByte;    // pointer to current process parameters (temp pointer read by SetParameters/BeginProcess/EndProcess)
-    // m_uCurrentParametersIndex: UINT32;      // index of current process parameters
-
-    m_uParameterBlockByteSize: UINT32;      // size of a single parameter block in bytes, must be > 0
-
-    // m_fNewerResultsReady: BOOL;             // TRUE if there exists new processing results not yet picked up by GetParameters(), must be aligned for atomic operations
-
-    m_fProducer: BOOL;                      // TRUE if IXAPO.Process produces data to be returned by GetParameters(), SetParameters() and ParametersChanged() disallowed
-
+{$HINTS OFF}
+    m_pParameterBlocks: PByte;             // three contiguous process parameter blocks used for synchronization, user responsible for initialization of parameter blocks before IXAPO::Process/SetParameters/GetParameters called
+    m_pCurrentParameters: PByte;           // pointer to current process parameters, must be aligned for atomic operations
+    m_pCurrentParametersInternal: PByte;   // pointer to current process parameters (temp pointer read by SetParameters/BeginProcess/EndProcess)
+    m_uCurrentParametersIndex: UINT32;     // index of current process parameters
+    m_uParameterBlockByteSize: UINT32;     // size of a single parameter block in bytes, must be > 0
+    m_fNewerResultsReady: BOOL;            // TRUE if there exists new processing results not yet picked up by GetParameters(), must be aligned for atomic operations
+    m_fProducer: BOOL;                     // TRUE if IXAPO::Process produces data to be returned by GetParameters(), SetParameters() and ParametersChanged() disallowed
+{$HINTS ON}
 
   public
 
@@ -453,19 +429,9 @@ begin
 end;
 
 function CXAPOBase.LockForProcess(InputLockedParameterCount: UINT32;
-                                  pInputLockedParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
+                                  pInputLockedParameters: XAPO_LOCKFORPROCESS_PARAMETERS;
                                   OutputLockedParameterCount: UINT32;
-                                  pOutputLockedParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS): HRESULT;
-begin
-
-  Result := E_NOTIMPL; // Do your implementations here, by replacing this line for your code.
-
-end;
-
-function CXAPOBase.LockForProcess(InputLockedParameterCount: UINT32;
-                                  pInputLockedParameters: TXAPOLockForProcessBufferParametersArray;
-                                  OutputLockedParameterCount: UINT32;
-                                  pOutputLockedParameters: TXAPOLockForProcessBufferParametersArray): HRESULT;
+                                  pOutputLockedParameters: XAPO_LOCKFORPROCESS_PARAMETERS): HRESULT; stdcall;
 begin
 
   Result := E_NOTIMPL; // Do your implementations here, by replacing this line for your code.
@@ -482,21 +448,9 @@ end;
 
 
 procedure CXAPOBase.Process(InputProcessParameterCount: UINT32;
-                            pInputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
+                            pInputProcessParameters: XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
                             OutputProcessParameterCount: UINT32;
-                            var pOutputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
-                            IsEnabled: BOOL);
-begin
-
-   // Do your implementations here
-
-end;
-
-
-procedure CXAPOBase.Process(InputProcessParameterCount: UINT32;
-                            pInputProcessParameters: TXAPOProcessBufferParametersArray;
-                            OutputProcessParameterCount: UINT32;
-                            var pOutputProcessParameters: TXAPOProcessBufferParametersArray;
+                            var pOutputProcessParameters: XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
                             IsEnabled: BOOL);
 begin
 

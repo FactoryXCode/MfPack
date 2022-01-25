@@ -10,21 +10,20 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.0
 // Description: X3DAudio is an API used with XAudio2 to position sound in 3D space
 //              to create the illusion of sound coming from a point in space
 //              relative to the position of the camera.
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), AndrewBJ.
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks:
@@ -64,11 +63,11 @@
 //          See https://docs.microsoft.com/en-gb/windows/desktop/xaudio2/x3daudio how to
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -192,9 +191,9 @@ const
   {$EXTERNALSYM X3DAUDIO_HANDLE_BYTESIZE}
 
   // float math constants
-  X3DAUDIO_PI                         = 3.141592654;
+  X3DAUDIO_PI                         = Pi;
   {$EXTERNALSYM X3DAUDIO_PI}
-  X3DAUDIO_2PI                        = 6.283185307;
+  X3DAUDIO_2PI                        = Pi * 2;
   {$EXTERNALSYM X3DAUDIO_2PI}
 
   // speed of sound in meters per second for dry air at approximately 20C, used with X3DAudioInitialize
@@ -256,9 +255,6 @@ type
   end;
   {$EXTERNALSYM X3DAUDIO_DISTANCE_CURVE_POINT}
 
-  // If you don't want to use a pointer to array
-  TX3DAudioDistancePointArray = array [0..65535] of X3DAUDIO_DISTANCE_CURVE_POINT;
-  {$EXTERNALSYM TX3DAudioDistancePointArray}
 
   // Distance curve:
   // A piecewise curve made up of linear segments used to

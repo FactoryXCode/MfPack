@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.0
 // Description:
 //
 // Organisation: FactoryX
@@ -29,11 +29,11 @@
 //
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -374,6 +374,7 @@ type
   // Interface IPropertyStore
   // ========================
   //
+  PIPropertyStore = ^IPropertyStore;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IPropertyStore);'}
   {$EXTERNALSYM IPropertyStore}
    IPropertyStore = interface(IUnknown)

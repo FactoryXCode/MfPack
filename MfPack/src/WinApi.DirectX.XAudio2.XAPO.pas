@@ -9,7 +9,7 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.0
 // Description:   
 //  This version of XAudio2 is available only in Windows 8 or later.
 //  Use the XAudio2 headers and libraries from the DirectX SDK with
@@ -17,14 +17,13 @@
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), AndrewBJ.
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks:     
@@ -101,11 +100,11 @@
 //           
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -285,9 +284,7 @@ type
   {$EXTERNALSYM XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS}
   XAPO_LOCKFORPROCESS_PARAMETERS = XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
   {$EXTERNALSYM XAPO_LOCKFORPROCESS_PARAMETERS}
-  //
-  TXAPOLockForProcessBufferParametersArray = array [0.. 65535] of XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
-  {$EXTERNALSYM TXAPOLockForProcessBufferParametersArray}
+  PXAPO_LOCKFORPROCESS_PARAMETERS = ^XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
 
 type
   // Buffer flags:
@@ -341,9 +338,6 @@ type
     ValidFrameCount: UINT32;    // number of frames of valid data, must be within respective [0, XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS.MaxFrameCount], always XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS.MaxFrameCount for CBR/user-defined XAPOs, does not affect BufferFlags
   end;
   {$EXTERNALSYM XAPO_PROCESS_BUFFER_PARAMETERS}
-  // If you don't want to use pointers to array's
-  TXAPOProcessBufferParametersArray = array [0..65535] of XAPO_PROCESS_BUFFER_PARAMETERS;
-  {$EXTERNALSYM TXAPOProcessBufferParametersArray}
 
 //--------------<M-A-C-R-O-S>-----------------------------------------------//
     // Memory allocation macros that allow one module to allocate memory and
@@ -530,14 +524,9 @@ type
     //  COM error code
     ////
     function LockForProcess(InputLockedParameterCount: UINT32;
-                            pInputLockedParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
+                            pInputLockedParameters: XAPO_LOCKFORPROCESS_PARAMETERS;
                             OutputLockedParameterCount: UINT32;
-                            pOutputLockedParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS): HRESULT; stdcall; overload;
-
-    function LockForProcess(InputLockedParameterCount: UINT32;
-                            pInputLockedParameters: TXAPOLockForProcessBufferParametersArray;
-                            OutputLockedParameterCount: UINT32;
-                            pOutputLockedParameters: TXAPOLockForProcessBufferParametersArray): HRESULT; stdcall; overload;
+                            pOutputLockedParameters: XAPO_LOCKFORPROCESS_PARAMETERS): HRESULT; stdcall;
 
     ////
     // DESCRIPTION:
@@ -598,16 +587,10 @@ type
     //  void
     ////
     procedure Process(InputProcessParameterCount: UINT32;
-                      pInputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
+                      pInputProcessParameters: XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
                       OutputProcessParameterCount: UINT32;
-                      var pOutputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
-                      IsEnabled: BOOL); stdcall; overload;
-
-    procedure Process(InputProcessParameterCount: UINT32;
-                      pInputProcessParameters: TXAPOProcessBufferParametersArray;
-                      OutputProcessParameterCount: UINT32;
-                      var pOutputProcessParameters: TXAPOProcessBufferParametersArray;
-                      IsEnabled: BOOL); stdcall; overload;
+                      var pOutputProcessParameters: XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
+                      IsEnabled: BOOL); stdcall;
 
     ////
     // DESCRIPTION:

@@ -10,7 +10,7 @@
 // Release date: 04-10-2020
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.0
 // Description: Ducking Capture dialog that defines the entry point for the application.
 //
 //              WIN32 APPLICATION : Ducking Capture Sample Project Overview
@@ -28,19 +28,18 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Note that this sample requires Windows 7 or later.
 //          This sample uses the CALLBACK_WINDOW callbacktype as used in the original C++ sample.
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -116,6 +115,7 @@ type
     procedure btnChatStopClick(Sender: TObject);
     procedure cbxChatTransportChange(Sender: TObject);
     procedure rbtCaptureClick(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
 
   private
     { Private declarations }
@@ -327,6 +327,18 @@ begin
 
   //  Simulate a "stop" event to get the UI in sync.
   SyncUIState(ChatStateNotPlaying);
+end;
+
+procedure TForm1.FormDestroy(Sender: TObject);
+begin
+  if Assigned(g_CurrentChat) then
+    begin
+      g_CurrentChat.StopChat();
+      g_CurrentChat.Shutdown();
+      g_CurrentChat.Free;
+      g_CurrentChat := nil;
+    end;
+  Close;
 end;
 
 //

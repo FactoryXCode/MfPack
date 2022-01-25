@@ -10,10 +10,9 @@
 // Release date: 12/12/2015
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.1
 // Description: ActiveMovie interface definitions.
-// also included with DirectShow.pas,
-// s code is not up to date.
+//              also included with DirectShow.pas.
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -23,18 +22,18 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 11/01/2022 Tony                Fixed IMediaSample2 interface
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 // 
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -554,6 +553,8 @@ type
   {$EXTERNALSYM _AMMediaType}
   AM_MEDIA_TYPE = _AMMediaType;
   {$EXTERNALSYM AM_MEDIA_TYPE}
+  AMMediaType = _AMMediaType;
+  {$EXTERNALSYM AMMediaType}
 
 
   PPIN_DIRECTION = ^PIN_DIRECTION;
@@ -1004,11 +1005,11 @@ type
   IMediaSample2 = interface(IMediaSample)
     ['{36b73884-c2c8-11cf-8b46-00805f6cef60}']
 
-      function GetProperties(const cbProperties: DWORD;
-                             out pbProperties: BYTE): HResult; stdcall;
+      function GetProperties(const cbProperties: DWORD;  // Length of property data to retrieve, in bytes.
+                             {out} pbProperties: PBYTE): HResult; stdcall;
 
       function SetProperties(const cbProperties: DWORD;
-                             const pbProperties: BYTE): HResult; stdcall;
+                             pbProperties: PBYTE): HResult; stdcall;
 
   end;
   IID_IMediaSample2 = IMediaSample2;

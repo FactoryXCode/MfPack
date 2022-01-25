@@ -1,4 +1,4 @@
-package MfPackX302;
+package MfPackX310;
 
 {$R *.res}
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
@@ -149,7 +149,7 @@ contains
   WinApi.ShTypes in '..\src\WinApi.ShTypes.pas',
   WinApi.ServProv in '..\src\WinApi.ServProv.pas',
   WinApi.Relogger in '..\src\WinApi.Relogger.pas',
-  WinApi.MmStream in '..\src\WinApi.MmStream.pas',
+  WinApi.WinMM.MmStream in '..\src\WinApi.WinMM.MmStream.pas',
   WinApi.WinMM.MMDdk in '..\src\WinApi.WinMM.MMDdk.pas',
   WinApi.WinMM.MMReg in '..\src\WinApi.WinMM.MMReg.pas',
   WinApi.KsProxy in '..\src\WinApi.KsProxy.pas',
@@ -195,6 +195,8 @@ contains
   WinApi.CoreAudioApi.AudioStateMonitorApi in '..\src\WinApi.CoreAudioApi.AudioStateMonitorApi.pas',
   WinApi.CoreAudioApi.AudioClient in '..\src\WinApi.CoreAudioApi.AudioClient.pas',
   WinApi.Mpeg2Error in '..\src\WinApi.Mpeg2Error.pas',
-  WinApi.MpegType in '..\src\WinApi.MpegType.pas';
+  WinApi.MpegType in '..\src\WinApi.MpegType.pas',
+  WinApi.MediaFoundationApi.MfVirtualCamera in '..\src\WinApi.MediaFoundationApi.MfVirtualCamera.pas',
+  WinApi.MediaFoundationApi.ICodecApi in '..\src\WinApi.MediaFoundationApi.ICodecApi.pas';
 
 end.

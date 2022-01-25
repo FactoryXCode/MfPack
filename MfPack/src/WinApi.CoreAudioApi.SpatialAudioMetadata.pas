@@ -10,7 +10,7 @@
 // Release date: 29-05-2018
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.1.0
 // Description: Spatial Audio position is a standard Microsoft define metadata command which
 // represents volumetric coordinates about the listener in the standard model used by
 // SpatialAudioClient, where center of listeners head is 0,0,0 and distance fo 1.0 = 
@@ -25,17 +25,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 RedStone 1 or later.
 // 
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX310
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 34
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -123,6 +123,7 @@ type
   end;
   {$EXTERNALSYM SpatialAudioMetadataItemsInfo}
 
+{$ALIGN 1}
 
   PSpatialAudioObjectRenderStreamForMetadataActivationParams = ^SpatialAudioObjectRenderStreamForMetadataActivationParams;
   SpatialAudioObjectRenderStreamForMetadataActivationParams = record
@@ -131,7 +132,7 @@ type
     MinDynamicObjectCount: UINT32;           // Minimum number of dynamic audio objects. If at least this count cannot be granted, no dynamic objects will be granted.
     MaxDynamicObjectCount: UINT32;           // Maximum number of dynamic audio objects that can be activated via ISpatialAudioObjectRenderStreamForMetadata.
     Category: AUDIO_STREAM_CATEGORY;         // Specifies the category of the audio stream and its spatial audio objects.
-    EventHandle: THandle;                     // event that will signal the need for more audio data. This handle will be duplicated internally before getting used
+    EventHandle: THandle;                    // event that will signal the need for more audio data. This handle will be duplicated internally before getting used
     MetadataFormatId: TGUID;                 // Specifies the metadataFormat that for the currently active spatial rendering engine
     MaxMetadataItemCount: UINT16;            // Maximum number of metadata Items Per FrameCount
     MetadataActivationParams: PROPVARIANT;
@@ -139,6 +140,26 @@ type
   end;
   {$EXTERNALSYM SpatialAudioObjectRenderStreamForMetadataActivationParams}
 
+  PSpatialAudioObjectRenderStreamForMetadataActivationParams2 = ^SpatialAudioObjectRenderStreamForMetadataActivationParams2;
+  SpatialAudioObjectRenderStreamForMetadataActivationParams2 = record
+    ObjectFormat: WAVEFORMATEX;              // Format descriptor for a single spatial audio objects. All objects must have the same format and must be of type WAVEFORMATEX or WAVEFORMATEXTENSIBLE.
+    StaticObjectTypeMask: AudioObjectType;   // (static channel bed mask) mask of static audio object type that are allowed
+    MinDynamicObjectCount: UINT32;           // Minimum number of dynamic audio objects. If at least this count cannot be granted, no dynamic objects will be granted.
+    MaxDynamicObjectCount: UINT32;           // Maximum number of dynamic audio objects that can be activated via ISpatialAudioObjectRenderStreamForMetadata.
+    Category: AUDIO_STREAM_CATEGORY;         // Specifies the category of the audio stream and its spatial audio objects.
+    EventHandle: THandle;                    // event that will signal the need for more audio data. This handle will be duplicated internally before getting used
+    MetadataFormatId: TGUID;                 // Specifies the metadataFormat that for the currently active spatial rendering engine
+    MaxMetadataItemCount: UINT32;            // Maximum number of metadata Items Per FrameCount
+    MetadataActivationParams: PROPVARIANT;
+    NotifyObject: ISpatialAudioObjectRenderStreamNotify;
+    Options: SPATIAL_AUDIO_STREAM_OPTIONS;
+  end;
+  {$EXTERNALSYM SpatialAudioObjectRenderStreamForMetadataActivationParams2}
+
+//#pragma pack(pop) set back to initial alignment
+  {$IFNDEF WIN32}
+    {$ALIGN 8} // for Win64
+  {$ENDIF}
 
 type
 

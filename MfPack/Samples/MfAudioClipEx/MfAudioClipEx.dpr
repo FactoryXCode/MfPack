@@ -1,6 +1,11 @@
 program MfAudioClipEx;
 
 uses
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
   Vcl.Forms,
   AudioClipEngine in 'AudioClipEngine.pas',
   frmAudioClipEx in 'frmAudioClipEx.pas' {AudioClipExFrm},

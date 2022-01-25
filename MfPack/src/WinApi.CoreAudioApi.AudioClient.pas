@@ -10,7 +10,7 @@
 // Release date: 04-05-2012
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.0
 // Description: AudioClient API interface definition.
 //
 // Organisation: FactoryX
@@ -21,20 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 08/12/2020 Tony                Added updates from SDK 10.0.19041.0 (IAudioClient 2 & 3)
-// 13/08/2021 Tony                Fixed wrong facility codes (error codes)
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -727,7 +724,9 @@ type
     //    ISimpleAudioVolume
     //    IChannelAudioVolume
     //    IAudioClientDuckingControl
+    //    IAudioEffectsManager
     //
+
   end;
   IID_IAudioClient = IAudioClient;
   {$EXTERNALSYM IID_IAudioClient}
@@ -1488,6 +1487,60 @@ type
   {$EXTERNALSYM IID_IAudioClientDuckingControl}
 
 
+  AUDIO_EFFECT_STATE = (
+                        AUDIO_EFFECT_STATE_OFF = 0,
+                        AUDIO_EFFECT_STATE_ON
+                       );
+ {$EXTERNALSYM AUDIO_EFFECT_STATE}
+
+
+  PAUDIO_EFFECT = ^AUDIO_EFFECT;
+  {$EXTERNALSYM AUDIO_EFFECT}
+  AUDIO_EFFECT = record
+    id: TGUID;
+    canSetState: BOOL;
+    state: AUDIO_EFFECT_STATE;
+  end;
+
+
+
+  // Interface IAudioEffectsChangedNotificationClient
+  // ================================================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioEffectsChangedNotificationClient);'}
+  {$EXTERNALSYM IAudioEffectsChangedNotificationClient}
+  IAudioEffectsChangedNotificationClient = interface(IUnknown)
+  ['{A5DED44F-3C5D-4B2B-BD1E-5DC1EE20BBF6}']
+    function OnAudioEffectsChanged(): HRESULT; stdcall;
+  end;
+  IID_IAudioEffectsChangedNotificationClient = IAudioEffectsChangedNotificationClient;
+  {$EXTERNALSYM IID_IAudioEffectsChangedNotificationClient}
+
+
+  // Interface IAudioEffectsManager
+  // ==============================
+  // Use IAudioClient.GetService to obtain this interface.
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioEffectsChangedNotificationClient);'}
+  {$EXTERNALSYM IAudioEffectsChangedNotificationClient}
+  IAudioEffectsManager = interface(IUnknown)
+  ['{4460B3AE-4B44-4527-8676-7548A8ACD260}']
+
+    function RegisterAudioEffectsChangedNotificationCallback(client: IAudioEffectsChangedNotificationClient): HRESULT; stdcall;
+
+    function UnregisterAudioEffectsChangedNotificationCallback(client: IAudioEffectsChangedNotificationClient): HRESULT; stdcall;
+
+    function GetAudioEffects({out} effects: PAUDIO_EFFECT;
+                             {out} numEffects: UINT32): HRESULT; stdcall;
+
+    function SetAudioEffectState(effectId: TGUID;
+                                 state: AUDIO_EFFECT_STATE): HRESULT; stdcall;
+
+  end;
+  IID_IAudioEffectsManager = IAudioEffectsManager;
+  {$EXTERNALSYM IID_IAudioEffectsManager}
+
+
   // Interface IAudioStreamVolume
   // ============================
   //
@@ -1916,16 +1969,20 @@ const
   {$EXTERNALSYM AUDCLNT_E_HEADTRACKING_ENABLED}
   AUDCLNT_E_HEADTRACKING_UNSUPPORTED      = $88890040;  //AUDCLNT_ERR($040)
   {$EXTERNALSYM AUDCLNT_E_HEADTRACKING_UNSUPPORTED}
+  AUDCLNT_E_EFFECT_NOT_AVAILABLE          = $88890041;  //AUDCLNT_ERR($041)
+  {$EXTERNALSYM AUDCLNT_E_EFFECT_NOT_AVAILABLE}
+  AUDCLNT_E_EFFECT_STATE_READ_ONLY        = $88890042;  //AUDCLNT_ERR($042)
+  {$EXTERNALSYM AUDCLNT_E_EFFECT_STATE_READ_ONLY}
 
-  AUDCLNT_S_BUFFER_EMPTY                  = $88890001;  //AUDCLNT_SUCCESS($001);
+  AUDCLNT_S_BUFFER_EMPTY                  = $88890001;  //AUDCLNT_SUCCESS($001)
   {$EXTERNALSYM AUDCLNT_S_BUFFER_EMPTY}
-  AUDCLNT_S_THREAD_ALREADY_REGISTERED     = $88890002;  //AUDCLNT_SUCCESS($002);
+  AUDCLNT_S_THREAD_ALREADY_REGISTERED     = $88890002;  //AUDCLNT_SUCCESS($002)
   {$EXTERNALSYM AUDCLNT_S_THREAD_ALREADY_REGISTERED}
-  AUDCLNT_S_POSITION_STALLED              = $88890003;  //AUDCLNT_SUCCESS($003);
+  AUDCLNT_S_POSITION_STALLED              = $88890003;  //AUDCLNT_SUCCESS($003)
   {$EXTERNALSYM AUDCLNT_S_POSITION_STALLED}
 
   {See: IAudioSessionControl2 interface}
-  AUDCLNT_S_NO_SINGLE_PROCESS             = $8889000D;  //AUDCLNT_SUCCESS($00D);
+  AUDCLNT_S_NO_SINGLE_PROCESS             = $8889000D;  //AUDCLNT_SUCCESS($00D)
   {$EXTERNALSYM AUDCLNT_S_NO_SINGLE_PROCESS}
 
 

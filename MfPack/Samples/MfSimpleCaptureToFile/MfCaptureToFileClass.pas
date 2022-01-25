@@ -10,7 +10,7 @@
 // Release date: 09-02-2018
 // Language: ENU
 //
-// Version: 3.0.2
+// Version: 3.1.0
 //
 // Description: Device capture class based on MFCaptureToFile example
 //
@@ -22,19 +22,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 26/01/2021 Tony                Fixed some issues & code cleaning
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -101,15 +99,15 @@ const
 type
 
   // BECAREFULL USING THIS!!!
-  //TMfCritSec = class
-  //private
-  //  FcriticalSection: TRTLCriticalSection;
-  //public
-  //  constructor Create;
-  //  destructor Destroy; override;
-  //  procedure Enter;
-  //  procedure Leave;
-  //end;
+  TMfCritSec = class
+  private
+    FcriticalSection: TRTLCriticalSection;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    procedure Enter;
+    procedure Leave;
+  end;
 
 
   TDeviceList = class
@@ -129,8 +127,10 @@ type
     procedure Clear();
     function Count(): UINT32; // { return m_cDevices; }
     function EnumerateDevices(): HRESULT;
-    function GetDevice(const index: UINT32; out ppActivate: IMFActivate): HRESULT;
-    function GetDeviceName(const index: UINT32; out ppszName: PWideChar): HRESULT;
+    function GetDevice(const index: UINT32;
+                       out ppActivate: IMFActivate): HRESULT;
+    function GetDeviceName(const index: UINT32;
+                           out ppszName: PWideChar): HRESULT;
   end;
 
 
@@ -155,7 +155,7 @@ type
   TCaptureToFile = class(TInterfacedPersistent, IMFSourceReaderCallback)
   protected
 
-    //FCritSec:            TMfCritSec;
+    FCritSec:            TMfCritSec;
 
     devBcDi: DEV_BROADCAST_DEVICEINTERFACE;
 
@@ -206,7 +206,7 @@ type
     // Clear and reset all objects by calling EndCaptureInternal()
     procedure Clear();
     function StartCapture(pActivate: IMFActivate;
-                          const pwszFileName: PWideChar;
+                          const wszFileName: WideString;
                           param: EncodingParameters): HResult;
     function EndCaptureSession(): HResult;
     function IsCapturing(): BOOL;
@@ -266,11 +266,11 @@ var
 begin
   inherited Create();
 
-  //FCritSec:= TMFCritSec.Create;
+  FCritSec := TMFCritSec.Create;
 
   if (MfStatus = MfStarted) then
     begin
-      m_hwndEvent:= hMainForm;
+      m_hwndEvent := hMainForm;
       hr := RegisterForDeviceNotification(m_hwndEvent);
       if FAILED(hr) then
         MessageBox(0,
@@ -283,12 +283,14 @@ end;
 //
 procedure TCaptureToFile.BeforeDestruction();
 begin
-  //if Assigned(FCritSec) then
-  //  FreeAndNil(FCritSec);
+  if Assigned(FCritSec) then
+    FreeAndNil(FCritSec);
   Clear();
 
   MfDeviceList.Free;
   MfDeviceList := Nil;
+
+  DeleteCriticalSection(FCritSec);
 
   MFShutdown();
   CoUninitialize;
@@ -300,8 +302,6 @@ end;
 destructor TCaptureToFile.Destroy();
 begin
   inherited Destroy();
-
-  //DeleteCriticalSection(FCritSec); Should be done in BeforeDestruction()
 end;
 
 // End Constructor & destructor section ////////////////////////////////////////
@@ -330,7 +330,7 @@ begin
       Exit;
     end;
 
-  //FCritSec.Enter;
+  FCritSec.Enter;
 
   if (IsCapturing() = False) then
     begin
@@ -422,7 +422,7 @@ Done:
     SetWindowText(m_hwndEvent,
                   'Capture Failure! (' + IntToStr(hr) + ')');
 
-  //FCritSec.Leave;
+  FCritSec.Leave;
 
   Result := hr;
 end;
@@ -579,17 +579,18 @@ end;
 // Start capturing.
 //------------------------------------------------------------------------------
 function TCaptureToFile.StartCapture(pActivate: IMFActivate;
-                                     const pwszFileName: PWideChar;
+                                     const wszFileName: WideString;
                                      param: EncodingParameters): HRESULT;
 var
   hr: HRESULT;
   pSource: IMFMediaSource;
   pcchLength: UINT32;
+  pFileName: WideString;
 
 begin
 
-
-  //FCritSec.Enter;
+  pFileName := wszFileName;
+  FCritSec.Enter;
 
   // Create the media source for the device.
   hr := pActivate.ActivateObject(IID_IMFMediaSource,
@@ -607,7 +608,7 @@ begin
 
   // Create the sink writer
   if SUCCEEDED(hr) then
-    hr := MFCreateSinkWriterFromURL(pwszFileName,
+    hr := MFCreateSinkWriterFromURL(pFileName,
                                     Nil,
                                     Nil,
                                     m_pWriter);
@@ -640,7 +641,7 @@ begin
         hr := m_pWriter.BeginWriting();
       end;
 
-    //FCritSec.Leave;
+    FCritSec.Leave;
 
     Result := hr;
 end;
@@ -1063,28 +1064,28 @@ end;
 
 /////////////////// TMfCritSec //////////////////////////////
 
-//constructor TMFCritSec.Create;
-//begin
-//  InitializeCriticalSection(FcriticalSection);
-//end;
+constructor TMFCritSec.Create;
+begin
+  InitializeCriticalSection(FcriticalSection);
+end;
 
 
-//destructor TMFCritSec.Destroy;
-//begin
-//  DeleteCriticalSection(FcriticalSection);
-//end;
+destructor TMFCritSec.Destroy;
+begin
+  DeleteCriticalSection(FcriticalSection);
+end;
 
 
-//procedure TMFCritSec.Enter;
-//begin
-//  EnterCriticalSection(FcriticalSection);
-//end;
+procedure TMFCritSec.Enter;
+begin
+  EnterCriticalSection(FcriticalSection);
+end;
 
 
-//procedure TMFCritSec.Leave;
-//begin
-//  LeaveCriticalSection(FcriticalSection);
-//end;
+procedure TMFCritSec.Leave;
+begin
+  LeaveCriticalSection(FcriticalSection);
+end;
 
 // end ///////////// TMfCritSec //////////////////////////////
 

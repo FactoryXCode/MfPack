@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.1
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,8 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later (See: Remarks).
@@ -31,11 +30,11 @@
 //                   IUnknown(Pointer), IUnknown(Object), IUnknown(Nil) etc.
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -343,10 +342,10 @@ type
 
     function GetNativeMediaType(dwStreamIndex: DWORD;
                                 dwMediaTypeIndex: DWORD;
-                                out ppMediaType: IMFMediaType): HResult; stdcall;
+                                {out} ppMediaType: PIMFMediaType): HResult; stdcall;
 
     function GetCurrentMediaType(dwStreamIndex: DWORD;
-                                 out ppMediaType: IMFMediaType): HResult; stdcall;
+                                 {out} ppMediaType: PIMFMediaType): HResult; stdcall;
 
     function SetCurrentMediaType(dwStreamIndex: DWORD;
                       {Reserved} pdwReserved: DWORD;
@@ -665,7 +664,7 @@ type
                                                out ppSourceReader: IMFSourceReader): HResult; stdcall;
   {$EXTERNALSYM MFCreateSourceReaderFromMediaSource}
 
-  function MFCreateSinkWriterFromURL(pwszOutputURL: LPCWSTR;
+  function MFCreateSinkWriterFromURL(const pwszOutputURL: WideString;
                                      pByteStream: IMFByteStream;
                                      pAttributes: IMFAttributes;
                                      out ppSinkWriter: IMFSinkWriter): HResult; stdcall;

@@ -1,6 +1,13 @@
 program TMfMediaEnginePlayer2;
 
 uses
+{$IFDEF MadExcept}
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
+{$ENDIF}
   Vcl.Forms,
   Vcl.Themes,
   Vcl.Styles,

@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.0
 //
 // Description: Enables high-performance bitmap composition with transforms,
 //              effects, and animations.
@@ -23,18 +23,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or later.
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX310
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -2095,6 +2094,85 @@ type
                                              enable: LongBool): HResult; stdcall;
   {$EXTERNALSYM DCompositionAttachMouseDragToHwnd}
 
+
+{NTDDI_VERSION >= NTDDI_WIN10_CO}
+
+
+  //+-----------------------------------------------------------------------------
+  //
+  //  Function:
+  //      DCompositionGetCurrentFrameId
+  //
+  //  Synopsis:
+  //      Returns the frameId of the most recently started composition frame.
+  //
+  //------------------------------------------------------------------------------
+  function DCompositionGetFrameId(frameIdType: COMPOSITION_FRAME_ID_TYPE;
+                                  out frameId: COMPOSITION_FRAME_ID): HResult; stdcall;
+  {$EXTERNALSYM DCompositionGetFrameId}
+
+  //+-----------------------------------------------------------------------------
+  //
+  //  Function:
+  //      DCompositionGetStatistics
+  //
+  //  Synopsis:
+  //      Returns statistics for the requested frame, as well as an optional list
+  //      of all target ids that existed at that time.
+  //
+  //------------------------------------------------------------------------------
+  function DCompositionGetStatistics(frameId: COMPOSITION_FRAME_ID;
+                                     Out frameStats: COMPOSITION_FRAME_STATS;
+                                     targetIdCount: UINT;
+                                     {out} targetIds: PCOMPOSITION_TARGET_ID;
+                                     {out} actualTargetIdCount: PUINT): HResult; stdcall;
+  {$EXTERNALSYM DCompositionGetStatistics}
+
+  //+-----------------------------------------------------------------------------
+  //
+  //  Function:
+  //      DCompositionGetCompositorStatistics
+  //
+  //  Synopsis:
+  //      Returns compositor target statistics for the requested frame.
+  //
+  //------------------------------------------------------------------------------
+  function DCompositionGetTargetStatistics(frameId: COMPOSITION_FRAME_ID;
+                                           const targetId: COMPOSITION_TARGET_ID;
+                                           out targetStats: COMPOSITION_TARGET_STATS): HResult; stdcall;
+  {$EXTERNALSYM DCompositionGetTargetStatistics}
+
+  //+-----------------------------------------------------------------------------
+  //
+  //  Function:
+  //      DCompositionBoostCompositorClock
+  //
+  //  Synopsis:
+  //      Requests compositor to temporarily increase framerate.
+  //
+  //------------------------------------------------------------------------------
+  function DCompositionBoostCompositorClock(enable: BOOL): HResult; stdcall;
+  {$EXTERNALSYM DCompositionBoostCompositorClock}
+
+  //+-----------------------------------------------------------------------------
+  //
+  //  Function:
+  //      DCompositionWaitForCompositorClock
+  //
+  //  Synopsis:
+  //      Waits for a compositor clock tick, other events, or a timeout.
+  //
+  //------------------------------------------------------------------------------
+  function DCompositionWaitForCompositorClock(count: UINT;
+                                              handles: PHandle;
+                                              timeoutInMs: DWORD): DWORD; stdcall;
+  {$EXTERNALSYM DCompositionWaitForCompositorClock}
+
+{END NTDDI_VERSION >= NTDDI_WIN10_CO}
+
+
+
+
 type
   PDCompositionInkTrailPoint = ^DCompositionInkTrailPoint;
   DCompositionInkTrailPoint = record
@@ -2181,6 +2259,13 @@ const
   function DCompositionCreateSurfaceHandle;    external DCompLib name 'DCompositionCreateSurfaceHandle' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function DCompositionAttachMouseWheelToHwnd; external DCompLib name 'DCompositionAttachMouseWheelToHwnd' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function DCompositionAttachMouseDragToHwnd;  external DCompLib name 'DCompositionAttachMouseDragToHwnd' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+
+  function DCompositionGetFrameId;             external DCompLib name 'DCompositionGetFrameId' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function DCompositionGetStatistics;          external DCompLib name 'DCompositionGetStatistics' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function DCompositionGetTargetStatistics;    external DCompLib name 'DCompositionGetTargetStatistics' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function DCompositionBoostCompositorClock;   external DCompLib name 'DCompositionBoostCompositorClock' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function DCompositionWaitForCompositorClock; external DCompLib name 'DCompositionWaitForCompositorClock' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+
 {$WARN SYMBOL_PLATFORM ON}
 
   // Implement Additional functions here.

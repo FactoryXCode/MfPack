@@ -1,6 +1,13 @@
 program DuckingMediaPlayer;
 
 uses
+{$IFDEF MadExcept}
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
+{$ENDIF}
   Vcl.Forms,
   frmDuckingMediaPlayer in 'frmDuckingMediaPlayer.pas' {Form1},
   MediaPlayer in 'MediaPlayer.pas';

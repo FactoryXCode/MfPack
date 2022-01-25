@@ -10,7 +10,7 @@
 // Release date: 21-12-2019
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.0
 // Description:
 //   This application demonstrates using the Media Foundation
 //   source reader to extract decoded audio from an audio/video file.
@@ -31,9 +31,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 17/08/2021 Tony                Fixed some memory issues.
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
@@ -44,7 +42,7 @@
 //               power on low latency file reading.
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -126,6 +124,7 @@ type
     Bevel1: TBevel;
     butExtract: TButton;
     butCancel: TButton;
+    butClose: TButton;
     procedure Exit1Click(Sender: TObject);
     procedure Open1Click(Sender: TObject);
     procedure Extractto1Click(Sender: TObject);
@@ -140,6 +139,7 @@ type
     procedure butCancelClick(Sender: TObject);
     procedure tbPriorityChange(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure butCloseClick(Sender: TObject);
   private
     { Private declarations }
 
@@ -212,6 +212,7 @@ begin
   if TryStrToInt(edClipDuration.Text, iClipLen) then
     begin
       butExtract.Enabled := False;
+      butClose.Enabled := False;
       MfAudioClip.Flushed := False;
       MfAudioClip.wcSourceFile := wSourceFile;
       MfAudioClip.wcTargetFile := wTargetFile;
@@ -232,6 +233,11 @@ begin
     end;
 end;
 
+
+procedure TAudioClipExFrm.butCloseClick(Sender: TObject);
+begin
+  Close();
+end;
 
 procedure TAudioClipExFrm.butCancelClick(Sender: TObject);
 begin
@@ -294,6 +300,7 @@ begin
       wTargetFile := PWideChar(Savedialog1.FileName);
       butExtract.Enabled := True;
       butCancel.Enabled := True;
+      butClose.Enabled := False;
     end;
 end;
 
@@ -397,7 +404,6 @@ begin
         if Succeeded(HResult(Msg.lParam)) then
           begin
             lblProgress.Caption := 'Clip succesfully extracted.';
-
           end
         else
           if HResult(Msg.lParam) = E_ABORT then  //$80004004
@@ -407,6 +413,7 @@ begin
 
         butExtract.Enabled := False;
         butCancel.Enabled := False;
+        butClose.Enabled := True;
       end;
 end;
 

@@ -2,16 +2,17 @@
 //
 // Copyright: © FactoryX. All rights reserved.
 //
-// Project: MfPack - CoreAudio - Shared
+// Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: WinApi.CoreAudioApi.AudEvCod.pas
+// Module: System.Services.AtlThunk.pas
 // Kind: Pascal / Delphi unit
-// Release date: 07-07-2012
+// Release date: 15/01/2022
 // Language: ENU
 //
-// Revision Version: 3.1.0
-// Description: List of Audio device error event codes and the expected params.
+// Revision Version: 3.1.1
+// Description:  This header is part of the System Services API.
+//
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -24,10 +25,10 @@
 // 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows Vista or later.
+// Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: - MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -36,32 +37,39 @@
 // Todo: -
 //
 //==============================================================================
-// Source: audevcod.h
+// Source: atlthunk.h
+// ATL thunks without writable executable memory.
 //
+// Author: Jay Krell (jaykrell) 26-Apr-2013
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //==============================================================================
 //
 // LICENSE
-// 
+//
 // The contents of this file are subject to the Mozilla Public License
 // Version 2.0 (the "License"); you may not use this file except in
 // compliance with the License. You may obtain a copy of the License at
 // https://www.mozilla.org/en-US/MPL/2.0/
-// 
+//
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
 // License for the specific language governing rights and limitations
 // under the License.
-// 
+//
 // Users may distribute this source code provided that this header is included
 // in full at the top of the file.
-// 
 //==============================================================================
-unit WinApi.CoreAudioApi.AudEvCod;
+unit System.Services.AtlThunk;
 
-  {$HPPEMIT '#include "audevcod.h"'}
+  {$HPPEMIT '#include "atlthunk.h"'}
 
 interface
+
+uses
+
+  {Winapi}
+  Winapi.Windows,
+  WinApi.WinApiTypes;
 
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
@@ -72,60 +80,52 @@ interface
     {$ALIGN 8} // Win64
   {$ENDIF}
 
-
-const
-  EC_SND_DEVICE_ERROR_BASE       = $0200;
-  {$EXTERNALSYM EC_SND_DEVICE_ERROR_BASE}
-
 type
-  PSNDDEV_ERR = ^SNDDEV_ERR;
-  _tagSND_DEVICE_ERROR           = (
-    SNDDEV_ERROR_Open            = 1,
-    SNDDEV_ERROR_Close           = 2,
-    SNDDEV_ERROR_GetCaps         = 3,
-    SNDDEV_ERROR_PrepareHeader   = 4,
-    SNDDEV_ERROR_UnprepareHeader = 5,
-    SNDDEV_ERROR_Reset           = 6,
-    SNDDEV_ERROR_Restart         = 7,
-    SNDDEV_ERROR_GetPosition     = 8,
-    SNDDEV_ERROR_Write           = 9,
-    SNDDEV_ERROR_Pause           = 10,
-    SNDDEV_ERROR_Stop            = 11,
-    SNDDEV_ERROR_Start           = 12,
-    SNDDEV_ERROR_AddBuffer       = 13,
-    SNDDEV_ERROR_Query           = 14);
-  {$EXTERNALSYM _tagSND_DEVICE_ERROR}
-  SNDDEV_ERR = _tagSND_DEVICE_ERROR;
-  {$EXTERNALSYM SNDDEV_ERR}
+
+  PAtlThunkData_t = ^AtlThunkData_t;
+  AtlThunkData_t = record
+  end;
+  {$NODEFINE AtlThunkData_t}
 
 
-// Sound device error event codes
-// ==============================
-//
-// All audio device error events are always passed on to the application, and are
-// never processed by the filter graph
+  // Allocates space in memory for an ATL thunk.
+  procedure AtlThunk_AllocateData(); stdcall;
+  {$EXTERNALSYM AtlThunk_AllocateData}
 
-const
+  // Initializes an ATL thunk.
+  procedure AtlThunk_InitData(Thunk: PAtlThunkData_t;
+                              Proc: Pointer;
+                              FirstParameter: SIZE_T); stdcall;
+  {$EXTERNALSYM AtlThunk_InitData}
 
-  EC_SNDDEV_IN_ERROR                  = (EC_SND_DEVICE_ERROR_BASE + $0);
-  {$EXTERNALSYM EC_SNDDEV_IN_ERROR}
-  EC_SNDDEV_OUT_ERROR                 = (EC_SND_DEVICE_ERROR_BASE + $1);
-  {$EXTERNALSYM EC_SNDDEV_OUT_ERROR}
+  // Returns an executable function corresponding to the AtlThunkData_t parameter.
+  procedure AtlThunk_DataToCode(unnamedParam1: PAtlThunkData_t); stdcall;
+  {$EXTERNALSYM AtlThunk_DataToCode}
 
-// Parameters: (DWORD, DWORD)
-// lParam1 is an enum SND_DEVICE_ERROR which notifies the app how the device was
-// being accessed when the failure occurred.
-//
-// lParam2 is the error returned from the sound device call.
-//
+  // Frees memory associated with an ATL thunk.
+  procedure AtlThunk_FreeData(Thunk: PAtlThunkData_t); stdcall;
+  {$EXTERNALSYM AtlThunk_FreeData}
 
 
   // Additional Prototypes for ALL interfaces
 
+
   // End of Additional Prototypes
+
 
 implementation
 
-  // Implement Additional functions here.
+const
+  AtlthunkLib = 'Atlthunk.dll';
+
+
+{$WARN SYMBOL_PLATFORM OFF}
+  procedure AtlThunk_AllocateData; external AtlthunkLib name 'AtlThunk_AllocateData' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  procedure AtlThunk_InitData; external AtlthunkLib name 'AtlThunk_InitData' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  procedure AtlThunk_DataToCode; external AtlthunkLib name 'AtlThunk_DataToCode' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  procedure AtlThunk_FreeData; external AtlthunkLib name 'AtlThunk_FreeData' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+{$WARN SYMBOL_PLATFORM ON}
+
+   // Implement Additional functions here.
 
 end.

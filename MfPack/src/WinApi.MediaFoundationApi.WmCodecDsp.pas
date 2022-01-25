@@ -10,7 +10,7 @@
 // Release date: 25-10-2015
 // Language: ENU
 //
-// Revision Version: 3.0.2
+// Revision Version: 3.1.1
 // Description: Contains the definitions for the speech interfaces.
 //
 // Organisation: FactoryX
@@ -21,18 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX302
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.22000.0
 //
 // Todo: -
 //
@@ -498,100 +497,232 @@ type
 
 const
 
-  MFPKEY_STARTTIME                      :  PROPERTYKEY = (fmtid: (D1: $5cefee10; D2: $e210; D3: $45c6; D4: ($9e, $28, $f5, $a8, $73, $1c, $96, $c7)); pid: $01);
+  MFPKEY_STARTTIME                      :  PROPERTYKEY = (fmtid: (D1: $5cefee10;
+                                                                  D2: $e210;
+                                                                  D3: $45c6;
+                                                                  D4: ($9e, $28, $f5, $a8, $73, $1c, $96, $c7));
+                                                                  pid: $01);
   {$EXTERNALSYM MFPKEY_STARTTIME}
-  MFPKEY_STOPTIME                       :  PROPERTYKEY = (fmtid: (D1: $5cefee10; D2: $e210; D3: $45c6; D4: ($9e, $28, $f5, $a8, $73, $1c, $96, $c7)); pid: $02);
+  MFPKEY_STOPTIME                       :  PROPERTYKEY = (fmtid: (D1: $5cefee10;
+                                                                  D2: $e210;
+                                                                  D3: $45c6;
+                                                                  D4: ($9e, $28, $f5, $a8, $73, $1c, $96, $c7));
+                                                                  pid: $02);
   {$EXTERNALSYM MFPKEY_STOPTIME}
-  MFPKEY_PROGRESS                       :  PROPERTYKEY = (fmtid: (D1: $5cefee10; D2: $e210; D3: $45c6; D4: ($9e, $28, $f5, $a8, $73, $1c, $96, $c7)); pid: $03);
+  MFPKEY_PROGRESS                       :  PROPERTYKEY = (fmtid: (D1: $5cefee10;
+                                                                  D2: $e210;
+                                                                  D3: $45c6;
+                                                                  D4: ($9e, $28, $f5, $a8, $73, $1c, $96, $c7));
+                                                                  pid: $03);
   {$EXTERNALSYM MFPKEY_PROGRESS}
-  MFPKEY_PHANTOMING_ON                  :  PROPERTYKEY = (fmtid: (D1: $12b53cb2; D2: $e12e; D3: $4579; D4: ($8a, $c3, $d0, $2f, $94, $f1, $e8, $9e)); pid: PID_FIRST_USABLE);
+  MFPKEY_PHANTOMING_ON                  :  PROPERTYKEY = (fmtid: (D1: $12b53cb2;
+                                                                  D2: $e12e;
+                                                                  D3: $4579;
+                                                                  D4: ($8a, $c3, $d0, $2f, $94, $f1, $e8, $9e));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM MFPKEY_PHANTOMING_ON}
 
-  PHANTOMING_ENABLED_KEY_GUID           :  PROPERTYKEY = (fmtid: (D1: $12b53cb2; D2: $e12e; D3: $4579; D4: ($8a, $c3, $d0, $2f, $94, $f1, $e8, $9e)); pid: PID_FIRST_USABLE);
+  PHANTOMING_ENABLED_KEY_GUID           :  PROPERTYKEY = (fmtid: (D1: $12b53cb2;
+                                                                  D2: $e12e;
+                                                                  D3: $4579;
+                                                                  D4: ($8a, $c3, $d0, $2f, $94, $f1, $e8, $9e));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM PHANTOMING_ENABLED_KEY_GUID}
 
-  MFPKEY_ROOMCORR_PROFILE               :  PROPERTYKEY = (fmtid: (D1: $f311cdc7; D2: $f45f; D3: $4eb7; D4: ($a8, $64, $9d, $c1, $ae, $eb, $7e, $6d)); pid: PID_FIRST_USABLE);
+  MFPKEY_ROOMCORR_PROFILE               :  PROPERTYKEY = (fmtid: (D1: $f311cdc7;
+                                                                  D2: $f45f;
+                                                                  D3: $4eb7;
+                                                                  D4: ($a8, $64, $9d, $c1, $ae, $eb, $7e, $6d));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM MFPKEY_ROOMCORR_PROFILE}
 
-  ROOM_PROFILE_KEY_GUID                 :  PROPERTYKEY = (fmtid: (D1: $f311cdc7; D2: $f45f; D3: $4eb7; D4: ($a8, $64, $9d, $c1, $ae, $eb, $7e, $6d)); pid: PID_FIRST_USABLE);
+  ROOM_PROFILE_KEY_GUID                 :  PROPERTYKEY = (fmtid: (D1: $f311cdc7;
+                                                                  D2: $f45f;
+                                                                  D3: $4eb7;
+                                                                  D4: ($a8, $64, $9d, $c1, $ae, $eb, $7e, $6d));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM ROOM_PROFILE_KEY_GUID}
 
-  MFPKEY_BASSMGMT_CROSSOVER_FREQ        :  PROPERTYKEY = (fmtid: (D1: $61e8acb9; D2: $f04f; D3: $4f40; D4: ($a6, $5f, $8f, $49, $fa, $b3, $ba, $10)); pid: PID_FIRST_USABLE);
+  MFPKEY_BASSMGMT_CROSSOVER_FREQ        :  PROPERTYKEY = (fmtid: (D1: $61e8acb9;
+                                                                  D2: $f04f;
+                                                                  D3: $4f40;
+                                                                  D4: ($a6, $5f, $8f, $49, $fa, $b3, $ba, $10));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM MFPKEY_BASSMGMT_CROSSOVER_FREQ}
 
-  CROSSOVER_FREQ_KEY_GUID               :  PROPERTYKEY = (fmtid: (D1: $61e8acb9; D2: $f04f; D3: $4f40; D4: ($a6, $5f, $8f, $49, $fa, $b3, $ba, $10)); pid: PID_FIRST_USABLE);
+  CROSSOVER_FREQ_KEY_GUID               :  PROPERTYKEY = (fmtid: (D1: $61e8acb9;
+                                                                  D2: $f04f;
+                                                                  D3: $4f40;
+                                                                  D4: ($a6, $5f, $8f, $49, $fa, $b3, $ba, $10));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM CROSSOVER_FREQ_KEY_GUID}
 
-  MFPKEY_BASSMGMT_SPKRBASSCONFIG        :  PROPERTYKEY = (fmtid: (D1: $7bfd170d; D2: $4770; D3: $4dc5; D4: ($92, $4d, $0b, $7b, $25, $2e, $e9, $18)); pid: PID_FIRST_USABLE);
+  MFPKEY_BASSMGMT_SPKRBASSCONFIG        :  PROPERTYKEY = (fmtid: (D1: $7bfd170d;
+                                                                  D2: $4770;
+                                                                  D3: $4dc5;
+                                                                  D4: ($92, $4d, $0b, $7b, $25, $2e, $e9, $18));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM MFPKEY_BASSMGMT_SPKRBASSCONFIG}
 
-  FULL_RANGE_SPEAKERS_KEY_GUID          :  PROPERTYKEY = (fmtid: (D1: $7bfd170d; D2: $4770; D3: $4dc5; D4: ($92, $4d, $0b, $7b, $25, $2e, $e9, $18)); pid: PID_FIRST_USABLE);
+  FULL_RANGE_SPEAKERS_KEY_GUID          :  PROPERTYKEY = (fmtid: (D1: $7bfd170d;
+                                                                  D2: $4770;
+                                                                  D3: $4dc5;
+                                                                  D4: ($92, $4d, $0b, $7b, $25, $2e, $e9, $18));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM FULL_RANGE_SPEAKERS_KEY_GUID}
 
-  MFPKEY_BASSMGMT_BIGROOM               :  PROPERTYKEY = (fmtid: (D1: $c816a1a7; D2: $a119; D3: $48a5; D4: ($9a, $d2, $85, $45, $1f, $4b, $5a, $2e)); pid: PID_FIRST_USABLE);
+  MFPKEY_BASSMGMT_BIGROOM               :  PROPERTYKEY = (fmtid: (D1: $c816a1a7;
+                                                                  D2: $a119;
+                                                                  D3: $48a5;
+                                                                  D4: ($9a, $d2, $85, $45, $1f, $4b, $5a, $2e));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM MFPKEY_BASSMGMT_BIGROOM}
 
-  BIG_ROOM_KEY_GUID                     :  PROPERTYKEY = (fmtid: (D1: $c816a1a7; D2: $a119; D3: $48a5; D4: ($9a, $d2, $85, $45, $1f, $4b, $5a, $2e)); pid: PID_FIRST_USABLE);
+  BIG_ROOM_KEY_GUID                     :  PROPERTYKEY = (fmtid: (D1: $c816a1a7;
+                                                                  D2: $a119;
+                                                                  D3: $48a5;
+                                                                  D4: ($9a, $d2, $85, $45, $1f, $4b, $5a, $2e));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM BIG_ROOM_KEY_GUID}
 
-  MFPKEY_BASSMGMT_NO_SUB                :  PROPERTYKEY = (fmtid: (D1: $5c3fd32e; D2: $0d40; D3: $4e2d; D4: ($99, $fb, $c9, $1e, $96, $42, $0b, $e7)); pid: PID_FIRST_USABLE);
+  MFPKEY_BASSMGMT_NO_SUB                :  PROPERTYKEY = (fmtid: (D1: $5c3fd32e;
+                                                                  D2: $0d40;
+                                                                  D3: $4e2d;
+                                                                  D4: ($99, $fb, $c9, $1e, $96, $42, $0b, $e7));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM MFPKEY_BASSMGMT_NO_SUB}
 
-  NO_SUB_KEY_GUID                       :  PROPERTYKEY = (fmtid: (D1: $5c3fd32e; D2: $0d40; D3: $4e2d; D4: ($99, $fb, $c9, $1e, $96, $42, $0b, $e7)); pid: PID_FIRST_USABLE);
+  NO_SUB_KEY_GUID                       :  PROPERTYKEY = (fmtid: (D1: $5c3fd32e;
+                                                                  D2: $0d40;
+                                                                  D3: $4e2d;
+                                                                  D4: ($99, $fb, $c9, $1e, $96, $42, $0b, $e7));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM NO_SUB_KEY_GUID}
 
-  MFPKEY_BASSMGMT_INVERT_SUB            :  PROPERTYKEY = (fmtid: (D1: $b1103003; D2: $c191; D3: $4275; D4: ($9f, $a0, $8c, $28, $2c, $72, $4b, $ce)); pid: PID_FIRST_USABLE);
+  MFPKEY_BASSMGMT_INVERT_SUB            :  PROPERTYKEY = (fmtid: (D1: $b1103003;
+                                                                  D2: $c191;
+                                                                  D3: $4275;
+                                                                  D4: ($9f, $a0, $8c, $28, $2c, $72, $4b, $ce));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM MFPKEY_BASSMGMT_INVERT_SUB}
 
-  INVERTED_SUB_KEY_GUID                 :  PROPERTYKEY = (fmtid: (D1: $b1103003; D2: $c191; D3: $4275; D4: ($9f, $a0, $8c, $28, $2c, $72, $4b, $ce)); pid: PID_FIRST_USABLE);
+  INVERTED_SUB_KEY_GUID                 :  PROPERTYKEY = (fmtid: (D1: $b1103003;
+                                                                  D2: $c191;
+                                                                  D3: $4275;
+                                                                  D4: ($9f, $a0, $8c, $28, $2c, $72, $4b, $ce));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM INVERTED_SUB_KEY_GUID}
 
-  MFPKEY_CORR_HEADPHONE                 :  PROPERTYKEY = (fmtid: (D1: $445f3559; D2: $b43f; D3: $4b67; D4: ($b0, $f8, $32, $b6, $7c, $f9, $4b, $48)); pid: PID_FIRST_USABLE + 0);
+  MFPKEY_CORR_HEADPHONE                 :  PROPERTYKEY = (fmtid: (D1: $445f3559;
+                                                                  D2: $b43f;
+                                                                  D3: $4b67;
+                                                                  D4: ($b0, $f8, $32, $b6, $7c, $f9, $4b, $48));
+                                                                  pid: PID_FIRST_USABLE + 0);
   {$EXTERNALSYM MFPKEY_CORR_HEADPHONE}
 
-  MFPKEY_CORR_BASS_MANAGEMENT_MODE      :  PROPERTYKEY = (fmtid: (D1: $1864a4e0; D2: $efc1; D3: $45e6; D4: ($a6, $75, $57, $86, $cb, $f3, $b9, $f0)); pid: PID_FIRST_USABLE);
+  MFPKEY_CORR_BASS_MANAGEMENT_MODE      :  PROPERTYKEY = (fmtid: (D1: $1864a4e0;
+                                                                  D2: $efc1;
+                                                                  D3: $45e6;
+                                                                  D4: ($a6, $75, $57, $86, $cb, $f3, $b9, $f0));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM MFPKEY_CORR_BASS_MANAGEMENT_MODE}
 
-  BASSMGMT_MODE_KEY_GUID                :  PROPERTYKEY = (fmtid: (D1: $1864a4e0; D2: $efc1; D3: $45e6; D4: ($a6, $75, $57, $86, $cb, $f3, $b9, $f0)); pid: PID_FIRST_USABLE);
+  BASSMGMT_MODE_KEY_GUID                :  PROPERTYKEY = (fmtid: (D1: $1864a4e0;
+                                                                  D2: $efc1;
+                                                                  D3: $45e6;
+                                                                  D4: ($a6, $75, $57, $86, $cb, $f3, $b9, $f0));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM BASSMGMT_MODE_KEY_GUID}
 
-  MFPKEY_CORR_MULTICHANNEL_MODE         :  PROPERTYKEY = (fmtid: (D1: $1b5c2483; D2: $0839; D3: $4523; D4: ($ba, $87, $95, $f8, $9d, $27, $bd, $8c)); pid: PID_FIRST_USABLE);
+  MFPKEY_CORR_MULTICHANNEL_MODE         :  PROPERTYKEY = (fmtid: (D1: $1b5c2483;
+                                                                  D2: $0839;
+                                                                  D3: $4523;
+                                                                  D4: ($ba, $87, $95, $f8, $9d, $27, $bd, $8c));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM MFPKEY_CORR_MULTICHANNEL_MODE}
 
-  MULTICHANNEL_MODE_KEY_GUID            :  PROPERTYKEY = (fmtid: (D1: $1b5c2483; D2: $0839; D3: $4523; D4: ($ba, $87, $95, $f8, $9d, $27, $bd, $8c)); pid: PID_FIRST_USABLE);
+  MULTICHANNEL_MODE_KEY_GUID            :  PROPERTYKEY = (fmtid: (D1: $1b5c2483;
+                                                                  D2: $0839;
+                                                                  D3: $4523;
+                                                                  D4: ($ba, $87, $95, $f8, $9d, $27, $bd, $8c));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM MULTICHANNEL_MODE_KEY_GUID}
 
-  MFPKEY_CORR_LOUDNESS_EQUALIZATION_ON  :  PROPERTYKEY = (fmtid: (D1: $fc52a749; D2: $4be9; D3: $4510; D4: ($89, $6e, $96, $6b, $a6, $52, $59, $80)); pid: PID_FIRST_USABLE);
+  MFPKEY_CORR_LOUDNESS_EQUALIZATION_ON  :  PROPERTYKEY = (fmtid: (D1: $fc52a749;
+                                                                  D2: $4be9;
+                                                                  D3: $4510;
+                                                                  D4: ($89, $6e, $96, $6b, $a6, $52, $59, $80));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM MFPKEY_CORR_LOUDNESS_EQUALIZATION_ON}
 
-  LEQ_ENABLED_KEY_GUID                  :  PROPERTYKEY = (fmtid: (D1: $fc52a749; D2: $4be9; D3: $4510; D4: ($89, $6e, $96, $6b, $a6, $52, $59, $80)); pid: PID_FIRST_USABLE);
+  LEQ_ENABLED_KEY_GUID                  :  PROPERTYKEY = (fmtid: (D1: $fc52a749;
+                                                                  D2: $4be9;
+                                                                  D3: $4510;
+                                                                  D4: ($89, $6e, $96, $6b, $a6, $52, $59, $80));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM LEQ_ENABLED_KEY_GUID}
 
-  MFPKEY_CORR_ROOM_CORRECTION_ON        :  PROPERTYKEY = (fmtid: (D1: $01fb17e3; D2: $796c; D3: $4451; D4: ($81, $63, $68, $cd, $c1, $32, $1a, $60)); pid: PID_FIRST_USABLE);
+  MFPKEY_CORR_ROOM_CORRECTION_ON        :  PROPERTYKEY = (fmtid: (D1: $01fb17e3;
+                                                                  D2: $796c;
+                                                                  D3: $4451;
+                                                                  D4: ($81, $63, $68, $cd, $c1, $32, $1a, $60));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM MFPKEY_CORR_ROOM_CORRECTION_ON}
 
-  ROOM_CORRECTION_ENABLED_KEY_GUID      :  PROPERTYKEY = (fmtid: (D1: $01fb17e3; D2: $796c; D3: $4451; D4: ($81, $63, $68, $cd, $c1, $32, $1a, $60)); pid: PID_FIRST_USABLE);
+  ROOM_CORRECTION_ENABLED_KEY_GUID      :  PROPERTYKEY = (fmtid: (D1: $01fb17e3;
+                                                                  D2: $796c;
+                                                                  D3: $4451;
+                                                                  D4: ($81, $63, $68, $cd, $c1, $32, $1a, $60));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM ROOM_CORRECTION_ENABLED_KEY_GUID}
 
-  MFPKEY_CORR_SPKRMASK                  :  PROPERTYKEY = (fmtid: (D1: $d328d8fb; D2: $d49f; D3: $4aa9; D4: ($b7, $21, $e1, $71, $e9, $3a, $d5, $63)); pid: PID_FIRST_USABLE + 5);
+  MFPKEY_CORR_SPKRMASK                  :  PROPERTYKEY = (fmtid: (D1: $d328d8fb;
+                                                                  D2: $d49f;
+                                                                  D3: $4aa9;
+                                                                  D4: ($b7, $21, $e1, $71, $e9, $3a, $d5, $63));
+                                                                  pid: PID_FIRST_USABLE + 5);
   {$EXTERNALSYM MFPKEY_CORR_SPKRMASK}
 
-  MFPKEY_CORR_NORMALIZATION_GAIN        :  PROPERTYKEY = (fmtid: (D1: $d61b266c; D2: $5aee; D3: $456b; D4: ($84, $24, $72, $25, $47, $7d, $ae, $77)); pid: PID_FIRST_USABLE + 0);
+  MFPKEY_CORR_NORMALIZATION_GAIN        :  PROPERTYKEY = (fmtid: (D1: $d61b266c;
+                                                                  D2: $5aee;
+                                                                  D3: $456b;
+                                                                  D4: ($84, $24, $72, $25, $47, $7d, $ae, $77));
+                                                                  pid: PID_FIRST_USABLE + 0);
   {$EXTERNALSYM MFPKEY_CORR_NORMALIZATION_GAIN}
 
-  MFPKEY_BASS_BOOST_AMOUNT              :  PROPERTYKEY = (fmtid: (D1: $ae7f0b2a; D2: $96fc; D3: $493a; D4: ($92, $47, $a0, $19, $f1, $f7, $01, $e1)); pid: PID_FIRST_USABLE);
+  MFPKEY_BASS_BOOST_AMOUNT              :  PROPERTYKEY = (fmtid: (D1: $ae7f0b2a;
+                                                                  D2: $96fc;
+                                                                  D3: $493a;
+                                                                  D4: ($92, $47, $a0, $19, $f1, $f7, $01, $e1));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM MFPKEY_BASS_BOOST_AMOUNT}
 
-  BOOST_LEVEL_KEY_GUID                  :  PROPERTYKEY = (fmtid: (D1: $ae7f0b2a; D2: $96fc; D3: $493a; D4: ($92, $47, $a0, $19, $f1, $f7, $01, $e1)); pid: PID_FIRST_USABLE);
+  BOOST_LEVEL_KEY_GUID                  :  PROPERTYKEY = (fmtid: (D1: $ae7f0b2a;
+                                                                  D2: $96fc;
+                                                                  D3: $493a;
+                                                                  D4: ($92, $47, $a0, $19, $f1, $f7, $01, $e1));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM BOOST_LEVEL_KEY_GUID}
 
-  MFPKEY_LOUDNESS_EQUALIZATION_RELEASE  :  PROPERTYKEY = (fmtid: (D1: $9c00eeed; D2: $edce; D3: $4cd8; D4: ($ae, $08, $cb, $05, $e8, $ef, $57, $a0)); pid: PID_FIRST_USABLE);
+  MFPKEY_LOUDNESS_EQUALIZATION_RELEASE  :  PROPERTYKEY = (fmtid: (D1: $9c00eeed;
+                                                                  D2: $edce;
+                                                                  D3: $4cd8;
+                                                                  D4: ($ae, $08, $cb, $05, $e8, $ef, $57, $a0));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM MFPKEY_LOUDNESS_EQUALIZATION_RELEASE}
 
-  LEQ_RELEASE_KEY_GUID                  :  PROPERTYKEY = (fmtid: (D1: $9c00eeed; D2: $edce; D3: $4cd8; D4: ($ae, $08, $cb, $05, $e8, $ef, $57, $a0)); pid: PID_FIRST_USABLE);
+  LEQ_RELEASE_KEY_GUID                  :  PROPERTYKEY = (fmtid: (D1: $9c00eeed;
+                                                                  D2: $edce;
+                                                                  D3: $4cd8;
+                                                                  D4: ($ae, $08, $cb, $05, $e8, $ef, $57, $a0));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM LEQ_RELEASE_KEY_GUID}
 
-  PKEY_SYSFXUI_HIDE_MASK                :  PROPERTYKEY = (fmtid: (D1: $cb9c6bce; D2: $7a25; D3: $47aa; D4: ($b2, $be, $6a, $d8, $44, $31, $ed, $de)); pid: PID_FIRST_USABLE);
+  PKEY_SYSFXUI_HIDE_MASK                :  PROPERTYKEY = (fmtid: (D1: $cb9c6bce;
+                                                                  D2: $7a25;
+                                                                  D3: $47aa;
+                                                                  D4: ($b2, $be, $6a, $d8, $44, $31, $ed, $de));
+                                                                  pid: PID_FIRST_USABLE);
   {$EXTERNALSYM PKEY_SYSFXUI_HIDE_MASK}
 
 
@@ -613,618 +744,1766 @@ const
   {$EXTERNALSYM SYSFXUI_DONOTSHOW_CHANNELPHANTOMING}
 
 
-  MFPKEY_AUVRHP_SKIPHRTFREVERB           :  PROPERTYKEY = (fmtid: (D1: $30bbfebf; D2: $24b4; D3: $4198; D4: ($89, $ba, $ad, $11, $a2, $ac, $d6, $01)); pid: $01);
+  MFPKEY_AUVRHP_SKIPHRTFREVERB           :  PROPERTYKEY = (fmtid: (D1: $30bbfebf;
+                                                                   D2: $24b4;
+                                                                   D3: $4198;
+                                                                   D4: ($89, $ba, $ad, $11, $a2, $ac, $d6, $01));
+                                                                   pid: $01);
   {$EXTERNALSYM MFPKEY_AUVRHP_SKIPHRTFREVERB}
-  MFPKEY_AUVRHP_SKIPPOSTREVERB           :  PROPERTYKEY = (fmtid: (D1: $30bbfebf; D2: $24b4; D3: $4198; D4: ($89, $ba, $ad, $11, $a2, $ac, $d6, $01)); pid: $02);
+  MFPKEY_AUVRHP_SKIPPOSTREVERB           :  PROPERTYKEY = (fmtid: (D1: $30bbfebf;
+                                                                   D2: $24b4;
+                                                                   D3: $4198;
+                                                                   D4: ($89, $ba, $ad, $11, $a2, $ac, $d6, $01));
+                                                                   pid: $02);
   {$EXTERNALSYM MFPKEY_AUVRHP_SKIPPOSTREVERB}
-  MFPKEY_AUVRHP_ROOMMODEL                :  PROPERTYKEY = (fmtid: (D1: $73ae880e; D2: $8258; D3: $4e57; D4: ($b8, $5f, $7d, $aa, $6b, $7d, $5e, $f0)); pid: PID_FIRST_USABLE);
+  MFPKEY_AUVRHP_ROOMMODEL                :  PROPERTYKEY = (fmtid: (D1: $73ae880e;
+                                                                   D2: $8258;
+                                                                   D3: $4e57;
+                                                                   D4: ($b8, $5f, $7d, $aa, $6b, $7d, $5e, $f0));
+                                                                   pid: PID_FIRST_USABLE);
   {$EXTERNALSYM MFPKEY_AUVRHP_ROOMMODEL}
 
-  VIRTUALIZATION_MODE_KEY_GUID           :  PROPERTYKEY = (fmtid: (D1: $73ae880e; D2: $8258; D3: $4e57; D4: ($b8, $5f, $7d, $aa, $6b, $7d, $5e, $f0)); pid: PID_FIRST_USABLE);
+  VIRTUALIZATION_MODE_KEY_GUID           :  PROPERTYKEY = (fmtid: (D1: $73ae880e;
+                                                                   D2: $8258;
+                                                                   D3: $4e57;
+                                                                   D4: ($b8, $5f, $7d, $aa, $6b, $7d, $5e, $f0));
+                                                                   pid: PID_FIRST_USABLE);
   {$EXTERNALSYM VIRTUALIZATION_MODE_KEY_GUID}
 
-  MFPKEY_AUVRHP_LFWEIGHT                 :  PROPERTYKEY = (fmtid: (D1: $30bbfebf; D2: $24b4; D3: $4198; D4: ($89, $ba, $ad, $11, $a2, $ac, $d6, $01)); pid: $04);
+  MFPKEY_AUVRHP_LFWEIGHT                 :  PROPERTYKEY = (fmtid: (D1: $30bbfebf;
+                                                                   D2: $24b4;
+                                                                   D3: $4198;
+                                                                   D4: ($89, $ba, $ad, $11, $a2, $ac, $d6, $01));
+                                                                   pid: $04);
   {$EXTERNALSYM MFPKEY_AUVRHP_LFWEIGHT}
-  MFPKEY_AUVRHP_DOHRTFREVERB             :  PROPERTYKEY = (fmtid: (D1: $30bbfebf; D2: $24b4; D3: $4198; D4: ($89, $ba, $ad, $11, $a2, $ac, $d6, $01)); pid: $05);
+  MFPKEY_AUVRHP_DOHRTFREVERB             :  PROPERTYKEY = (fmtid: (D1: $30bbfebf;
+                                                                   D2: $24b4;
+                                                                   D3: $4198;
+                                                                   D4: ($89, $ba, $ad, $11, $a2, $ac, $d6, $01));
+                                                                   pid: $05);
   {$EXTERNALSYM MFPKEY_AUVRHP_DOHRTFREVERB}
-  MFPKEY_AUVRHP_DOPOSTREVERB             :  PROPERTYKEY = (fmtid: (D1: $30bbfebf; D2: $24b4; D3: $4198; D4: ($89, $ba, $ad, $11, $a2, $ac, $d6, $01)); pid: $06);
+  MFPKEY_AUVRHP_DOPOSTREVERB             :  PROPERTYKEY = (fmtid: (D1: $30bbfebf;
+                                                                   D2: $24b4;
+                                                                   D3: $4198;
+                                                                   D4: ($89, $ba, $ad, $11, $a2, $ac, $d6, $01));
+                                                                   pid: $06);
   {$EXTERNALSYM MFPKEY_AUVRHP_DOPOSTREVERB}
-  MFPKEY_AUVRHP_POSTREVERB_START         :  PROPERTYKEY = (fmtid: (D1: $30bbfebf; D2: $24b4; D3: $4198; D4: ($89, $ba, $ad, $11, $a2, $ac, $d6, $01)); pid: $07);
+  MFPKEY_AUVRHP_POSTREVERB_START         :  PROPERTYKEY = (fmtid: (D1: $30bbfebf;
+                                                                   D2: $24b4;
+                                                                   D3: $4198;
+                                                                   D4: ($89, $ba, $ad, $11, $a2, $ac, $d6, $01));
+                                                                   pid: $07);
   {$EXTERNALSYM MFPKEY_AUVRHP_POSTREVERB_START}
-  MFPKEY_AUVRHP_POSTREVERB_LEN           :  PROPERTYKEY = (fmtid: (D1: $30bbfebf; D2: $24b4; D3: $4198; D4: ($89, $ba, $ad, $11, $a2, $ac, $d6, $01)); pid: $08);
+  MFPKEY_AUVRHP_POSTREVERB_LEN           :  PROPERTYKEY = (fmtid: (D1: $30bbfebf;
+                                                                   D2: $24b4;
+                                                                   D3: $4198;
+                                                                   D4: ($89, $ba, $ad, $11, $a2, $ac, $d6, $01));
+                                                                   pid: $08);
   {$EXTERNALSYM MFPKEY_AUVRHP_POSTREVERB_LEN}
 
-  MFPKEY_WMRESAMP_FILTERQUALITY          :  PROPERTYKEY = (fmtid: (D1: $af1adc73; D2: $a210; D3: $4b05; D4: ($96, $6e, $54, $91, $cf, $f4, $8b, $1d)); pid: $01);
+  MFPKEY_WMRESAMP_FILTERQUALITY          :  PROPERTYKEY = (fmtid: (D1: $af1adc73;
+                                                                   D2: $a210;
+                                                                   D3: $4b05;
+                                                                   D4: ($96, $6e, $54, $91, $cf, $f4, $8b, $1d));
+                                                                   pid: $01);
   {$EXTERNALSYM MFPKEY_WMRESAMP_FILTERQUALITY}
-  MFPKEY_WMRESAMP_CHANNELMTX             :  PROPERTYKEY = (fmtid: (D1: $af1adc73; D2: $a210; D3: $4b05; D4: ($96, $6e, $54, $91, $cf, $f4, $8b, $1d)); pid: $02);
+  MFPKEY_WMRESAMP_CHANNELMTX             :  PROPERTYKEY = (fmtid: (D1: $af1adc73;
+                                                                   D2: $a210;
+                                                                   D3: $4b05;
+                                                                   D4: ($96, $6e, $54, $91, $cf, $f4, $8b, $1d));
+                                                                   pid: $02);
   {$EXTERNALSYM MFPKEY_WMRESAMP_CHANNELMTX}
-  MFPKEY_WMRESAMP_LOWPASS_BANDWIDTH      :  PROPERTYKEY = (fmtid: (D1: $af1adc73; D2: $a210; D3: $4b05; D4: ($96, $6e, $54, $91, $cf, $f4, $8b, $1d)); pid: $03);
+  MFPKEY_WMRESAMP_LOWPASS_BANDWIDTH      :  PROPERTYKEY = (fmtid: (D1: $af1adc73;
+                                                                   D2: $a210;
+                                                                   D3: $4b05;
+                                                                   D4: ($96, $6e, $54, $91, $cf, $f4, $8b, $1d));
+                                                                   pid: $03);
   {$EXTERNALSYM MFPKEY_WMRESAMP_LOWPASS_BANDWIDTH}
 
-  MFPKEY_WMAENC_AVGBYTESPERSEC           :  PROPERTYKEY = (fmtid: (D1: $11caf780; D2: $921b; D3: $42ef; D4: ($b7, $55, $f3, $a0, $53, $ea, $1a, $41)); pid: $00);
+  MFPKEY_WMAENC_AVGBYTESPERSEC           :  PROPERTYKEY = (fmtid: (D1: $11caf780;
+                                                                   D2: $921b;
+                                                                   D3: $42ef;
+                                                                   D4: ($b7, $55, $f3, $a0, $53, $ea, $1a, $41));
+                                                                   pid: $00);
   {$EXTERNALSYM MFPKEY_WMAENC_AVGBYTESPERSEC}
 
-  MFPKEY_WMAENC_ORIGWAVEFORMAT           :  PROPERTYKEY = (fmtid: (D1: $f5c760a2; D2: $3635; D3: $48e1; D4: ($8f, $bd, $0e, $49, $81, $24, $e0, $a2)); pid: $00);
+  MFPKEY_WMAENC_ORIGWAVEFORMAT           :  PROPERTYKEY = (fmtid: (D1: $f5c760a2;
+                                                                   D2: $3635;
+                                                                   D3: $48e1;
+                                                                   D4: ($8f, $bd, $0e, $49, $81, $24, $e0, $a2));
+                                                                   pid: $00);
   {$EXTERNALSYM MFPKEY_WMAENC_ORIGWAVEFORMAT}
 
-  MFPKEY_PEAKCONSTRAINED                 :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00);
+  MFPKEY_PEAKCONSTRAINED                 :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00);
   {$EXTERNALSYM MFPKEY_PEAKCONSTRAINED}
 
-  MFPKEY_STAT_RAVG                       :  PROPERTYKEY = (fmtid: (D1: $23a0e3b5; D2: $fc62; D3: $4ab8; D4: ($b7, $7c, $6e, $0c, $28, $ab, $30, $16)); pid: $00);
+  MFPKEY_STAT_RAVG                       :  PROPERTYKEY = (fmtid: (D1: $23a0e3b5;
+                                                                   D2: $fc62;
+                                                                   D3: $4ab8;
+                                                                   D4: ($b7, $7c, $6e, $0c, $28, $ab, $30, $16));
+                                                                   pid: $00);
   {$EXTERNALSYM MFPKEY_STAT_RAVG}
-  MFPKEY_STAT_BAVG                       :  PROPERTYKEY = (fmtid: (D1: $036f6b60; D2: $ad43; D3: $485c; D4: ($86, $c6, $21, $a6, $db, $2c, $1b, $a3)); pid: $00);
+  MFPKEY_STAT_BAVG                       :  PROPERTYKEY = (fmtid: (D1: $036f6b60;
+                                                                   D2: $ad43;
+                                                                   D3: $485c;
+                                                                   D4: ($86, $c6, $21, $a6, $db, $2c, $1b, $a3));
+                                                                   pid: $00);
   {$EXTERNALSYM MFPKEY_STAT_BAVG}
-  MFPKEY_STAT_RMAX                       :  PROPERTYKEY = (fmtid: (D1: $82ff7c67; D2: $6554; D3: $4749; D4: ($a3, $2b, $36, $90, $dd, $1a, $e8, $de)); pid: $00);
+  MFPKEY_STAT_RMAX                       :  PROPERTYKEY = (fmtid: (D1: $82ff7c67;
+                                                                   D2: $6554;
+                                                                   D3: $4749;
+                                                                   D4: ($a3, $2b, $36, $90, $dd, $1a, $e8, $de));
+                                                                   pid: $00);
   {$EXTERNALSYM MFPKEY_STAT_RMAX}
-  MFPKEY_STAT_BMAX                       :  PROPERTYKEY = (fmtid: (D1: $cd95e5b7; D2: $9143; D3: $47fb; D4: ($a9, $d2, $9d, $b7, $5f, $2e, $74, $be)); pid: $00);
+  MFPKEY_STAT_BMAX                       :  PROPERTYKEY = (fmtid: (D1: $cd95e5b7;
+                                                                   D2: $9143;
+                                                                   D3: $47fb;
+                                                                   D4: ($a9, $d2, $9d, $b7, $5f, $2e, $74, $be));
+                                                                   pid: $00);
   {$EXTERNALSYM MFPKEY_STAT_BMAX}
-  MFPKEY_CONSTRAINENCLATENCY             :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 1);
+  MFPKEY_CONSTRAINENCLATENCY             :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 1);
   {$EXTERNALSYM MFPKEY_CONSTRAINENCLATENCY}
-  MFPKEY_CONSTRAINDECLATENCY             :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 2);
+  MFPKEY_CONSTRAINDECLATENCY             :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 2);
   {$EXTERNALSYM MFPKEY_CONSTRAINDECLATENCY}
-  MFPKEY_CONSTRAINENCCOMPLEXITY          :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 3);
+  MFPKEY_CONSTRAINENCCOMPLEXITY          :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 3);
   {$EXTERNALSYM MFPKEY_CONSTRAINENCCOMPLEXITY}
-  MFPKEY_MAXENCLATENCYMS                 :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 4);
+  MFPKEY_MAXENCLATENCYMS                 :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 4);
   {$EXTERNALSYM MFPKEY_MAXENCLATENCYMS}
-  MFPKEY_MAXDECLATENCYMS                 :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 5);
+  MFPKEY_MAXDECLATENCYMS                 :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 5);
   {$EXTERNALSYM MFPKEY_MAXDECLATENCYMS}
-  MFPKEY_ENCCOMPLEXITY                   :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 6);
+  MFPKEY_ENCCOMPLEXITY                   :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 6);
   {$EXTERNALSYM MFPKEY_ENCCOMPLEXITY}
-  MFPKEY_CHECKDATACONSISTENCY2P          :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 7);
+  MFPKEY_CHECKDATACONSISTENCY2P          :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 7);
   {$EXTERNALSYM MFPKEY_CHECKDATACONSISTENCY2P}
-  MFPKEY_AVGCONSTRAINED                  :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 8);
+  MFPKEY_AVGCONSTRAINED                  :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 8);
   {$EXTERNALSYM MFPKEY_AVGCONSTRAINED}
 
-  MFPKEY_ENHANCED_WMA                    :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 20);
+  MFPKEY_ENHANCED_WMA                    :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 20);
   {$EXTERNALSYM MFPKEY_ENHANCED_WMA}
-  MFPKEY_REQUESTING_A_FRAMESIZE          :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 21);
+  MFPKEY_REQUESTING_A_FRAMESIZE          :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 21);
   {$EXTERNALSYM MFPKEY_REQUESTING_A_FRAMESIZE}
-  MFPKEY_PREFERRED_FRAMESIZE             :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 22);
+  MFPKEY_PREFERRED_FRAMESIZE             :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 22);
   {$EXTERNALSYM MFPKEY_PREFERRED_FRAMESIZE}
-  MFPKEY_WMA_ELEMENTARY_STREAM           :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 23);
+  MFPKEY_WMA_ELEMENTARY_STREAM           :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 23);
   {$EXTERNALSYM MFPKEY_WMA_ELEMENTARY_STREAM}
-  MFPKEY_MOST_RECENTLY_ENUMERATED_VBRQUALITY :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 24);
+  MFPKEY_MOST_RECENTLY_ENUMERATED_VBRQUALITY :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                       D2: $b05c;
+                                                                       D3: $4a03;
+                                                                       D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                       pid: $00 + 24);
   {$EXTERNALSYM MFPKEY_MOST_RECENTLY_ENUMERATED_VBRQUALITY}
-  MFPKEY_DESIRED_VBRQUALITY              :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 25);
+  MFPKEY_DESIRED_VBRQUALITY              :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 25);
   {$EXTERNALSYM MFPKEY_DESIRED_VBRQUALITY}
-  MFPKEY_CONSTRAIN_ENUMERATED_VBRQUALITY :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 26);
+  MFPKEY_CONSTRAIN_ENUMERATED_VBRQUALITY :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 26);
   {$EXTERNALSYM MFPKEY_CONSTRAIN_ENUMERATED_VBRQUALITY}
 
-  MFPKEY_WMAENC_GENERATE_DRC_PARAMS      :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 28);
+  MFPKEY_WMAENC_GENERATE_DRC_PARAMS      :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 28);
   {$EXTERNALSYM MFPKEY_WMAENC_GENERATE_DRC_PARAMS}
-  MFPKEY_WMAENC_BUFFERLESSCBR            :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 29);
+  MFPKEY_WMAENC_BUFFERLESSCBR            :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 29);
   {$EXTERNALSYM MFPKEY_WMAENC_BUFFERLESSCBR}
-  MFPKEY_WMAENC_RTSPDIF                  :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 30);
+  MFPKEY_WMAENC_RTSPDIF                  :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 30);
   {$EXTERNALSYM MFPKEY_WMAENC_RTSPDIF}
 
-  MFPKEY_DYN_VBR_RAVG                    :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 9);
+  MFPKEY_DYN_VBR_RAVG                    :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 9);
   {$EXTERNALSYM MFPKEY_DYN_VBR_RAVG}
-  MFPKEY_DYN_BANDTRUNCATION              :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 10);
+  MFPKEY_DYN_BANDTRUNCATION              :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 10);
   {$EXTERNALSYM MFPKEY_DYN_BANDTRUNCATION}
-  MFPKEY_DYN_BANDTRUNC_QFLOOR            :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 11);
+  MFPKEY_DYN_BANDTRUNC_QFLOOR            :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 11);
   {$EXTERNALSYM MFPKEY_DYN_BANDTRUNC_QFLOOR}
-  MFPKEY_DYN_BANDTRUNC_QCEIL             :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 12);
+  MFPKEY_DYN_BANDTRUNC_QCEIL             :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 12);
   {$EXTERNALSYM MFPKEY_DYN_BANDTRUNC_QCEIL}
-  MFPKEY_DYN_BANDTRUNC_BWFLOOR           :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 13);
+  MFPKEY_DYN_BANDTRUNC_BWFLOOR           :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 13);
   {$EXTERNALSYM MFPKEY_DYN_BANDTRUNC_BWFLOOR}
-  MFPKEY_DYN_BANDTRUNC_BWCEIL            :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 14);
+  MFPKEY_DYN_BANDTRUNC_BWCEIL            :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 14);
   {$EXTERNALSYM MFPKEY_DYN_BANDTRUNC_BWCEIL}
-  MFPKEY_DYN_SIMPLEMASK                  :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 15);
+  MFPKEY_DYN_SIMPLEMASK                  :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 15);
   {$EXTERNALSYM MFPKEY_DYN_SIMPLEMASK}
-  MFPKEY_DYN_STEREO_PREPROC              :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 16);
+  MFPKEY_DYN_STEREO_PREPROC              :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 16);
   {$EXTERNALSYM MFPKEY_DYN_STEREO_PREPROC}
 
-  MFPKEY_DYN_VBR_BAVG                    :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 18);
+  MFPKEY_DYN_VBR_BAVG                    :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 18);
   {$EXTERNALSYM MFPKEY_DYN_VBR_BAVG}
-  MFPKEY_DYN_ALLOW_NOISESUB              :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 19);
+  MFPKEY_DYN_ALLOW_NOISESUB              :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 19);
   {$EXTERNALSYM MFPKEY_DYN_ALLOW_NOISESUB}
 
-  MFPKEY_DYN_ALLOW_PCMRANGELIMITING      :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b; D2: $b05c; D3: $4a03; D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4)); pid: $00 + 27);
+  MFPKEY_DYN_ALLOW_PCMRANGELIMITING      :  PROPERTYKEY = (fmtid: (D1: $6dbdf03b;
+                                                                   D2: $b05c;
+                                                                   D3: $4a03;
+                                                                   D4: ($8e, $c1, $bb, $e6, $3d, $b1, $0c, $b4));
+                                                                   pid: $00 + 27);
   {$EXTERNALSYM MFPKEY_DYN_ALLOW_PCMRANGELIMITING}
 
-  MFPKEY_WMADEC_HIRESOUTPUT              :  PROPERTYKEY = (fmtid: (D1: $8d3fe592; D2: $eecc; D3: $4f4e; D4: ($9a, $ff, $5a, $f1, $67, $9d, $38, $d2)); pid: $00);
+  MFPKEY_WMADEC_HIRESOUTPUT              :  PROPERTYKEY = (fmtid: (D1: $8d3fe592;
+                                                                   D2: $eecc;
+                                                                   D3: $4f4e;
+                                                                   D4: ($9a, $ff, $5a, $f1, $67, $9d, $38, $d2));
+                                                                   pid: $00);
   {$EXTERNALSYM MFPKEY_WMADEC_HIRESOUTPUT}
-  MFPKEY_WMADEC_SPKRCFG                  :  PROPERTYKEY = (fmtid: (D1: $8fff67be; D2: $977f; D3: $41dc; D4: ($8f, $af, $23, $ba, $c9, $a6, $df, $73)); pid: $00);
+  MFPKEY_WMADEC_SPKRCFG                  :  PROPERTYKEY = (fmtid: (D1: $8fff67be;
+                                                                   D2: $977f;
+                                                                   D3: $41dc;
+                                                                   D4: ($8f, $af, $23, $ba, $c9, $a6, $df, $73));
+                                                                   pid: $00);
   {$EXTERNALSYM MFPKEY_WMADEC_SPKRCFG}
-  MFPKEY_WMADEC_FOLDDOWN_MATRIX          :  PROPERTYKEY = (fmtid: (D1: $51647e9b; D2: $6a7f; D3: $4739; D4: ($9e, $0b, $29, $4b, $27, $89, $69, $eb)); pid: $00);
+  MFPKEY_WMADEC_FOLDDOWN_MATRIX          :  PROPERTYKEY = (fmtid: (D1: $51647e9b;
+                                                                   D2: $6a7f;
+                                                                   D3: $4739;
+                                                                   D4: ($9e, $0b, $29, $4b, $27, $89, $69, $eb));
+                                                                   pid: $00);
   {$EXTERNALSYM MFPKEY_WMADEC_FOLDDOWN_MATRIX}
 
-  MFPKEY_WMADEC_DRCMODE                  :  PROPERTYKEY = (fmtid: (D1: $7b613713; D2: $3d38; D3: $4cda; D4: ($aa, $61, $04, $78, $b1, $bc, $fc, $42)); pid: $00);
+  MFPKEY_WMADEC_DRCMODE                  :  PROPERTYKEY = (fmtid: (D1: $7b613713;
+                                                                   D2: $3d38;
+                                                                   D3: $4cda;
+                                                                   D4: ($aa, $61, $04, $78, $b1, $bc, $fc, $42));
+                                                                   pid: $00);
   {$EXTERNALSYM MFPKEY_WMADEC_DRCMODE}
-  MFPKEY_WMADRC_AVGTARGET                :  PROPERTYKEY = (fmtid: (D1: $7b613713; D2: $3d38; D3: $4cda; D4: ($aa, $61, $04, $78, $b1, $bc, $fc, $42)); pid: $01);
+  MFPKEY_WMADRC_AVGTARGET                :  PROPERTYKEY = (fmtid: (D1: $7b613713;
+                                                                   D2: $3d38;
+                                                                   D3: $4cda;
+                                                                   D4: ($aa, $61, $04, $78, $b1, $bc, $fc, $42));
+                                                                   pid: $01);
   {$EXTERNALSYM MFPKEY_WMADRC_AVGTARGET}
-  MFPKEY_WMADRC_PEAKTARGET               :  PROPERTYKEY = (fmtid: (D1: $7b613713; D2: $3d38; D3: $4cda; D4: ($aa, $61, $04, $78, $b1, $bc, $fc, $42)); pid: $02);
+  MFPKEY_WMADRC_PEAKTARGET               :  PROPERTYKEY = (fmtid: (D1: $7b613713;
+                                                                   D2: $3d38;
+                                                                   D3: $4cda;
+                                                                   D4: ($aa, $61, $04, $78, $b1, $bc, $fc, $42));
+                                                                   pid: $02);
   {$EXTERNALSYM MFPKEY_WMADRC_PEAKTARGET}
-  MFPKEY_WMADRC_AVGREF                   :  PROPERTYKEY = (fmtid: (D1: $7b613713; D2: $3d38; D3: $4cda; D4: ($aa, $61, $04, $78, $b1, $bc, $fc, $42)); pid: $03);
+  MFPKEY_WMADRC_AVGREF                   :  PROPERTYKEY = (fmtid: (D1: $7b613713;
+                                                                   D2: $3d38;
+                                                                   D3: $4cda;
+                                                                   D4: ($aa, $61, $04, $78, $b1, $bc, $fc, $42));
+                                                                   pid: $03);
   {$EXTERNALSYM MFPKEY_WMADRC_AVGREF}
-  MFPKEY_WMADRC_PEAKREF                  :  PROPERTYKEY = (fmtid: (D1: $7b613713; D2: $3d38; D3: $4cda; D4: ($aa, $61, $04, $78, $b1, $bc, $fc, $42)); pid: $04);
+  MFPKEY_WMADRC_PEAKREF                  :  PROPERTYKEY = (fmtid: (D1: $7b613713;
+                                                                   D2: $3d38;
+                                                                   D3: $4cda;
+                                                                   D4: ($aa, $61, $04, $78, $b1, $bc, $fc, $42));
+                                                                   pid: $04);
   {$EXTERNALSYM MFPKEY_WMADRC_PEAKREF}
-  MFPKEY_WMADEC_LTRTOUTPUT               :  PROPERTYKEY = (fmtid: (D1: $7b613713; D2: $3d38; D3: $4cda; D4: ($aa, $61, $04, $78, $b1, $bc, $fc, $42)); pid: $05);
+  MFPKEY_WMADEC_LTRTOUTPUT               :  PROPERTYKEY = (fmtid: (D1: $7b613713;
+                                                                   D2: $3d38;
+                                                                   D3: $4cda;
+                                                                   D4: ($aa, $61, $04, $78, $b1, $bc, $fc, $42));
+                                                                   pid: $05);
   {$EXTERNALSYM MFPKEY_WMADEC_LTRTOUTPUT}
 
 
-  MFPKEY_WMAVOICE_ENC_MusicSpeechClassMode :  PROPERTYKEY = (fmtid: (D1: $d9c8f5fe; D2: $8682; D3: $4347; D4: ($85, $7, $60, $a3, $f5, $1f, $33, $f1)); pid: PID_FIRST_USABLE);
+  MFPKEY_WMAVOICE_ENC_MusicSpeechClassMode :  PROPERTYKEY = (fmtid: (D1: $d9c8f5fe;
+                                                                     D2: $8682;
+                                                                     D3: $4347;
+                                                                     D4: ($85, $7, $60, $a3, $f5, $1f, $33, $f1));
+                                                                     pid: PID_FIRST_USABLE);
   {$EXTERNALSYM MFPKEY_WMAVOICE_ENC_MusicSpeechClassMode}
-  MFPKEY_WMAVOICE_ENC_BufferWindow         :  PROPERTYKEY = (fmtid: (D1: $d9c8f5fe; D2: $8682; D3: $4347; D4: ($85, $7, $60, $a3, $f5, $1f, $33, $f1)); pid: PID_FIRST_USABLE + 1);
+  MFPKEY_WMAVOICE_ENC_BufferWindow         :  PROPERTYKEY = (fmtid: (D1: $d9c8f5fe;
+                                                                     D2: $8682;
+                                                                     D3: $4347;
+                                                                     D4: ($85, $7, $60, $a3, $f5, $1f, $33, $f1));
+                                                                     pid: PID_FIRST_USABLE + 1);
   {$EXTERNALSYM MFPKEY_WMAVOICE_ENC_BufferWindow}
-  MFPKEY_WMAVOICE_ENC_DecoderDelay         :  PROPERTYKEY = (fmtid: (D1: $d9c8f5fe; D2: $8682; D3: $4347; D4: ($85, $7, $60, $a3, $f5, $1f, $33, $f1)); pid: PID_FIRST_USABLE + 2);
+  MFPKEY_WMAVOICE_ENC_DecoderDelay         :  PROPERTYKEY = (fmtid: (D1: $d9c8f5fe;
+                                                                     D2: $8682;
+                                                                     D3: $4347;
+                                                                     D4: ($85, $7, $60, $a3, $f5, $1f, $33, $f1));
+                                                                     pid: PID_FIRST_USABLE + 2);
   {$EXTERNALSYM MFPKEY_WMAVOICE_ENC_DecoderDelay}
-  MFPKEY_WMAVOICE_ENC_EDL                  :  PROPERTYKEY = (fmtid: (D1: $d9c8f5fe; D2: $8682; D3: $4347; D4: ($85, $7, $60, $a3, $f5, $1f, $33, $f1)); pid: PID_FIRST_USABLE + 3);
+  MFPKEY_WMAVOICE_ENC_EDL                  :  PROPERTYKEY = (fmtid: (D1: $d9c8f5fe;
+                                                                     D2: $8682;
+                                                                     D3: $4347;
+                                                                     D4: ($85, $7, $60, $a3, $f5, $1f, $33, $f1));
+                                                                     pid: PID_FIRST_USABLE + 3);
   {$EXTERNALSYM MFPKEY_WMAVOICE_ENC_EDL}
 
-  MFPKEY_WMAVOICE_ENC_RT_VariableRate      :  PROPERTYKEY = (fmtid: (D1: $d9c8f5fe; D2: $8682; D3: $4347; D4: ($85, $7, $60, $a3, $f5, $1f, $33, $f1)); pid: PID_FIRST_USABLE + 4);
+  MFPKEY_WMAVOICE_ENC_RT_VariableRate      :  PROPERTYKEY = (fmtid: (D1: $d9c8f5fe;
+                                                                     D2: $8682;
+                                                                     D3: $4347;
+                                                                     D4: ($85, $7, $60, $a3, $f5, $1f, $33, $f1));
+                                                                     pid: PID_FIRST_USABLE + 4);
   {$EXTERNALSYM MFPKEY_WMAVOICE_ENC_RT_VariableRate}
-  MFPKEY_WMAVOICE_ENC_RT_BandWidth         :  PROPERTYKEY = (fmtid: (D1: $d9c8f5fe; D2: $8682; D3: $4347; D4: ($85, $7, $60, $a3, $f5, $1f, $33, $f1)); pid: PID_FIRST_USABLE + 5);
+  MFPKEY_WMAVOICE_ENC_RT_BandWidth         :  PROPERTYKEY = (fmtid: (D1: $d9c8f5fe;
+                                                                     D2: $8682;
+                                                                     D3: $4347;
+                                                                     D4: ($85, $7, $60, $a3, $f5, $1f, $33, $f1));
+                                                                     pid: PID_FIRST_USABLE + 5);
   {$EXTERNALSYM MFPKEY_WMAVOICE_ENC_RT_BandWidth}
-  MFPKEY_WMAVOICE_ENC_RT_PacketLossMode    :  PROPERTYKEY = (fmtid: (D1: $d9c8f5fe; D2: $8682; D3: $4347; D4: ($85, $7, $60, $a3, $f5, $1f, $33, $f1)); pid: PID_FIRST_USABLE + 6);
+  MFPKEY_WMAVOICE_ENC_RT_PacketLossMode    :  PROPERTYKEY = (fmtid: (D1: $d9c8f5fe;
+                                                                     D2: $8682;
+                                                                     D3: $4347;
+                                                                     D4: ($85, $7, $60, $a3, $f5, $1f, $33, $f1));
+                                                                     pid: PID_FIRST_USABLE + 6);
   {$EXTERNALSYM MFPKEY_WMAVOICE_ENC_RT_PacketLossMode}
-  MFPKEY_WMAVOICE_ENC_RT_MinBufferSize     :  PROPERTYKEY = (fmtid: (D1: $d9c8f5fe; D2: $8682; D3: $4347; D4: ($85, $7, $60, $a3, $f5, $1f, $33, $f1)); pid: PID_FIRST_USABLE + 7);
+  MFPKEY_WMAVOICE_ENC_RT_MinBufferSize     :  PROPERTYKEY = (fmtid: (D1: $d9c8f5fe;
+                                                                     D2: $8682;
+                                                                     D3: $4347;
+                                                                     D4: ($85, $7, $60, $a3, $f5, $1f, $33, $f1));
+                                                                     pid: PID_FIRST_USABLE + 7);
   {$EXTERNALSYM MFPKEY_WMAVOICE_ENC_RT_MinBufferSize}
 
-  MFPKEY_WMAVOICE_DEC_RT_JitterControl     :  PROPERTYKEY = (fmtid: (D1: $165f69b; D2: $80a1; D3: $4ef8; D4: ($a4, $a9, $ad, $a3, $b8, $a6, $89, $dd)); pid: PID_FIRST_USABLE);
+  MFPKEY_WMAVOICE_DEC_RT_JitterControl     :  PROPERTYKEY = (fmtid: (D1: $165f69b;
+                                                                     D2: $80a1;
+                                                                     D3: $4ef8;
+                                                                     D4: ($a4, $a9, $ad, $a3, $b8, $a6, $89, $dd));
+                                                                     pid: PID_FIRST_USABLE);
   {$EXTERNALSYM MFPKEY_WMAVOICE_DEC_RT_JitterControl}
-  MFPKEY_WMAVOICE_DEC_RT_JitterMode        :  PROPERTYKEY = (fmtid: (D1: $165f69b; D2: $80a1; D3: $4ef8; D4: ($a4, $a9, $ad, $a3, $b8, $a6, $89, $dd)); pid: PID_FIRST_USABLE + 1);
+  MFPKEY_WMAVOICE_DEC_RT_JitterMode        :  PROPERTYKEY = (fmtid: (D1: $165f69b;
+                                                                     D2: $80a1;
+                                                                     D3: $4ef8;
+                                                                     D4: ($a4, $a9, $ad, $a3, $b8, $a6, $89, $dd));
+                                                                     pid: PID_FIRST_USABLE + 1);
   {$EXTERNALSYM MFPKEY_WMAVOICE_DEC_RT_JitterMode}
-  MFPKEY_WMAVOICE_DEC_RT_PacketLossMode    :  PROPERTYKEY = (fmtid: (D1: $165f69b; D2: $80a1; D3: $4ef8; D4: ($a4, $a9, $ad, $a3, $b8, $a6, $89, $dd)); pid: PID_FIRST_USABLE + 2);
+  MFPKEY_WMAVOICE_DEC_RT_PacketLossMode    :  PROPERTYKEY = (fmtid: (D1: $165f69b;
+                                                                     D2: $80a1;
+                                                                     D3: $4ef8;
+                                                                     D4: ($a4, $a9, $ad, $a3, $b8, $a6, $89, $dd));
+                                                                     pid: PID_FIRST_USABLE + 2);
   {$EXTERNALSYM MFPKEY_WMAVOICE_DEC_RT_PacketLossMode}
 
 
-  MFPKEY_Decoder_MaxNumPCMSamplesWithPaddedSilence  :  PROPERTYKEY = (fmtid: (D1: $c678ba85; D2: $1212; D3: $43da; D4: (90, $c3, $e7, $48, $b9, $24, $49, $ec)); pid: $00);
+  MFPKEY_Decoder_MaxNumPCMSamplesWithPaddedSilence  :  PROPERTYKEY = (fmtid: (D1: $c678ba85;
+                                                                              D2: $1212;
+                                                                              D3: $43da;
+                                                                              D4: (90, $c3, $e7, $48, $b9, $24, $49, $ec));
+                                                                              pid: $00);
   {$EXTERNALSYM MFPKEY_Decoder_MaxNumPCMSamplesWithPaddedSilence}
 
-  MFPKEY_WMAAECMA_SYSTEM_MODE          :  PROPERTYKEY = (fmtid: (D1: $6f52c567; D2: $360; D3: $4bd2; D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39)); pid: PID_FIRST_USABLE + 0);
+  MFPKEY_WMAAECMA_SYSTEM_MODE          :  PROPERTYKEY = (fmtid: (D1: $6f52c567;
+                                                                 D2: $360;
+                                                                 D3: $4bd2;
+                                                                 D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39));
+                                                                 pid: PID_FIRST_USABLE + 0);
   {$EXTERNALSYM MFPKEY_WMAAECMA_SYSTEM_MODE}
-  MFPKEY_WMAAECMA_DMO_SOURCE_MODE      :  PROPERTYKEY = (fmtid: (D1: $6f52c567; D2: $360; D3: $4bd2; D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39)); pid: PID_FIRST_USABLE + 1);
+  MFPKEY_WMAAECMA_DMO_SOURCE_MODE      :  PROPERTYKEY = (fmtid: (D1: $6f52c567;
+                                                                 D2: $360;
+                                                                 D3: $4bd2;
+                                                                 D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39));
+                                                                 pid: PID_FIRST_USABLE + 1);
   {$EXTERNALSYM MFPKEY_WMAAECMA_DMO_SOURCE_MODE}
-  MFPKEY_WMAAECMA_DEVICE_INDEXES       :  PROPERTYKEY = (fmtid: (D1: $6f52c567; D2: $360; D3: $4bd2; D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39)); pid: PID_FIRST_USABLE + 2);
+  MFPKEY_WMAAECMA_DEVICE_INDEXES       :  PROPERTYKEY = (fmtid: (D1: $6f52c567;
+                                                                 D2: $360;
+                                                                 D3: $4bd2;
+                                                                 D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39));
+                                                                 pid: PID_FIRST_USABLE + 2);
   {$EXTERNALSYM MFPKEY_WMAAECMA_DEVICE_INDEXES}
-  MFPKEY_WMAAECMA_FEATURE_MODE         :  PROPERTYKEY = (fmtid: (D1: $6f52c567; D2: $360; D3: $4bd2; D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39)); pid: PID_FIRST_USABLE + 3);
+  MFPKEY_WMAAECMA_FEATURE_MODE         :  PROPERTYKEY = (fmtid: (D1: $6f52c567;
+                                                                 D2: $360;
+                                                                 D3: $4bd2;
+                                                                 D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39));
+                                                                 pid: PID_FIRST_USABLE + 3);
   {$EXTERNALSYM MFPKEY_WMAAECMA_FEATURE_MODE}
-  MFPKEY_WMAAECMA_FEATR_FRAME_SIZE     :  PROPERTYKEY = (fmtid: (D1: $6f52c567; D2: $360; D3: $4bd2; D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39)); pid: PID_FIRST_USABLE + 4);
+  MFPKEY_WMAAECMA_FEATR_FRAME_SIZE     :  PROPERTYKEY = (fmtid: (D1: $6f52c567;
+                                                                 D2: $360;
+                                                                 D3: $4bd2;
+                                                                 D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39));
+                                                                 pid: PID_FIRST_USABLE + 4);
   {$EXTERNALSYM MFPKEY_WMAAECMA_FEATR_FRAME_SIZE}
-  MFPKEY_WMAAECMA_FEATR_ECHO_LENGTH    :  PROPERTYKEY = (fmtid: (D1: $6f52c567; D2: $360; D3: $4bd2; D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39)); pid: PID_FIRST_USABLE + 5);
+  MFPKEY_WMAAECMA_FEATR_ECHO_LENGTH    :  PROPERTYKEY = (fmtid: (D1: $6f52c567;
+                                                                 D2: $360;
+                                                                 D3: $4bd2;
+                                                                 D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39));
+                                                                 pid: PID_FIRST_USABLE + 5);
   {$EXTERNALSYM MFPKEY_WMAAECMA_FEATR_ECHO_LENGTH}
-  MFPKEY_WMAAECMA_FEATR_NS             :  PROPERTYKEY = (fmtid: (D1: $6f52c567; D2: $360; D3: $4bd2; D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39)); pid: PID_FIRST_USABLE + 6);
+  MFPKEY_WMAAECMA_FEATR_NS             :  PROPERTYKEY = (fmtid: (D1: $6f52c567;
+                                                                 D2: $360;
+                                                                 D3: $4bd2;
+                                                                 D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39));
+                                                                 pid: PID_FIRST_USABLE + 6);
   {$EXTERNALSYM MFPKEY_WMAAECMA_FEATR_NS}
-  MFPKEY_WMAAECMA_FEATR_AGC            :  PROPERTYKEY = (fmtid: (D1: $6f52c567; D2: $360; D3: $4bd2; D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39)); pid: PID_FIRST_USABLE + 7);
+  MFPKEY_WMAAECMA_FEATR_AGC            :  PROPERTYKEY = (fmtid: (D1: $6f52c567;
+                                                                 D2: $360;
+                                                                 D3: $4bd2;
+                                                                 D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39));
+                                                                 pid: PID_FIRST_USABLE + 7);
   {$EXTERNALSYM MFPKEY_WMAAECMA_FEATR_AGC}
-  MFPKEY_WMAAECMA_FEATR_AES            :  PROPERTYKEY = (fmtid: (D1: $6f52c567; D2: $360; D3: $4bd2; D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39)); pid: PID_FIRST_USABLE + 8);
+  MFPKEY_WMAAECMA_FEATR_AES            :  PROPERTYKEY = (fmtid: (D1: $6f52c567;
+                                                                 D2: $360;
+                                                                 D3: $4bd2;
+                                                                 D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39));
+                                                                 pid: PID_FIRST_USABLE + 8);
   {$EXTERNALSYM MFPKEY_WMAAECMA_FEATR_AES}
-  MFPKEY_WMAAECMA_FEATR_VAD            :  PROPERTYKEY = (fmtid: (D1: $6f52c567; D2: $360; D3: $4bd2; D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39)); pid: PID_FIRST_USABLE + 9);
+  MFPKEY_WMAAECMA_FEATR_VAD            :  PROPERTYKEY = (fmtid: (D1: $6f52c567;
+                                                                 D2: $360;
+                                                                 D3: $4bd2;
+                                                                 D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39));
+                                                                 pid: PID_FIRST_USABLE + 9);
   {$EXTERNALSYM MFPKEY_WMAAECMA_FEATR_VAD}
-  MFPKEY_WMAAECMA_FEATR_CENTER_CLIP    :  PROPERTYKEY = (fmtid: (D1: $6f52c567; D2: $360; D3: $4bd2; D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39)); pid: PID_FIRST_USABLE + 10);
+  MFPKEY_WMAAECMA_FEATR_CENTER_CLIP    :  PROPERTYKEY = (fmtid: (D1: $6f52c567;
+                                                                 D2: $360;
+                                                                 D3: $4bd2;
+                                                                 D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39));
+                                                                 pid: PID_FIRST_USABLE + 10);
   {$EXTERNALSYM MFPKEY_WMAAECMA_FEATR_CENTER_CLIP}
-  MFPKEY_WMAAECMA_FEATR_NOISE_FILL     :  PROPERTYKEY = (fmtid: (D1: $6f52c567; D2: $360; D3: $4bd2; D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39)); pid: PID_FIRST_USABLE + 11);
+  MFPKEY_WMAAECMA_FEATR_NOISE_FILL     :  PROPERTYKEY = (fmtid: (D1: $6f52c567;
+                                                                 D2: $360;
+                                                                 D3: $4bd2;
+                                                                 D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39));
+                                                                 pid: PID_FIRST_USABLE + 11);
   {$EXTERNALSYM MFPKEY_WMAAECMA_FEATR_NOISE_FILL}
-  MFPKEY_WMAAECMA_RETRIEVE_TS_STATS    :  PROPERTYKEY = (fmtid: (D1: $6f52c567; D2: $360; D3: $4bd2; D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39)); pid: PID_FIRST_USABLE + 12);
+  MFPKEY_WMAAECMA_RETRIEVE_TS_STATS    :  PROPERTYKEY = (fmtid: (D1: $6f52c567;
+                                                                 D2: $360;
+                                                                 D3: $4bd2;
+                                                                 D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39));
+                                                                 pid: PID_FIRST_USABLE + 12);
   {$EXTERNALSYM MFPKEY_WMAAECMA_RETRIEVE_TS_STATS}
-  MFPKEY_WMAAECMA_QUALITY_METRICS      :  PROPERTYKEY = (fmtid: (D1: $6f52c567; D2: $360; D3: $4bd2; D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39)); pid: PID_FIRST_USABLE + 13);
+  MFPKEY_WMAAECMA_QUALITY_METRICS      :  PROPERTYKEY = (fmtid: (D1: $6f52c567;
+                                                                 D2: $360;
+                                                                 D3: $4bd2;
+                                                                 D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39));
+                                                                 pid: PID_FIRST_USABLE + 13);
   {$EXTERNALSYM MFPKEY_WMAAECMA_QUALITY_METRICS}
-  MFPKEY_WMAAECMA_MICARRAY_DESCPTR     :  PROPERTYKEY = (fmtid: (D1: $6f52c567; D2: $360; D3: $4bd2; D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39)); pid: PID_FIRST_USABLE + 14);
+  MFPKEY_WMAAECMA_MICARRAY_DESCPTR     :  PROPERTYKEY = (fmtid: (D1: $6f52c567;
+                                                                 D2: $360;
+                                                                 D3: $4bd2;
+                                                                 D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39));
+                                                                 pid: PID_FIRST_USABLE + 14);
   {$EXTERNALSYM MFPKEY_WMAAECMA_MICARRAY_DESCPTR}
-  MFPKEY_WMAAECMA_DEVICEPAIR_GUID      :  PROPERTYKEY = (fmtid: (D1: $6f52c567; D2: $360; D3: $4bd2; D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39)); pid: PID_FIRST_USABLE + 15);
+  MFPKEY_WMAAECMA_DEVICEPAIR_GUID      :  PROPERTYKEY = (fmtid: (D1: $6f52c567;
+                                                                 D2: $360;
+                                                                 D3: $4bd2;
+                                                                 D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39));
+                                                                 pid: PID_FIRST_USABLE + 15);
   {$EXTERNALSYM MFPKEY_WMAAECMA_DEVICEPAIR_GUID}
-  MFPKEY_WMAAECMA_FEATR_MICARR_MODE    :  PROPERTYKEY = (fmtid: (D1: $6f52c567; D2: $360; D3: $4bd2; D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39)); pid: PID_FIRST_USABLE + 16);
+  MFPKEY_WMAAECMA_FEATR_MICARR_MODE    :  PROPERTYKEY = (fmtid: (D1: $6f52c567;
+                                                                 D2: $360;
+                                                                 D3: $4bd2;
+                                                                 D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39));
+                                                                 pid: PID_FIRST_USABLE + 16);
   {$EXTERNALSYM MFPKEY_WMAAECMA_FEATR_MICARR_MODE}
-  MFPKEY_WMAAECMA_FEATR_MICARR_BEAM    :  PROPERTYKEY = (fmtid: (D1: $6f52c567; D2: $360; D3: $4bd2; D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39)); pid: PID_FIRST_USABLE + 17);
+  MFPKEY_WMAAECMA_FEATR_MICARR_BEAM    :  PROPERTYKEY = (fmtid: (D1: $6f52c567;
+                                                                 D2: $360;
+                                                                 D3: $4bd2;
+                                                                 D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39));
+                                                                 pid: PID_FIRST_USABLE + 17);
   {$EXTERNALSYM MFPKEY_WMAAECMA_FEATR_MICARR_BEAM}
-  MFPKEY_WMAAECMA_FEATR_MICARR_PREPROC :  PROPERTYKEY = (fmtid: (D1: $6f52c567; D2: $360; D3: $4bd2; D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39)); pid: PID_FIRST_USABLE + 18);
+  MFPKEY_WMAAECMA_FEATR_MICARR_PREPROC :  PROPERTYKEY = (fmtid: (D1: $6f52c567;
+                                                                 D2: $360;
+                                                                 D3: $4bd2;
+                                                                 D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39));
+                                                                 pid: PID_FIRST_USABLE + 18);
   {$EXTERNALSYM MFPKEY_WMAAECMA_FEATR_MICARR_PREPROC}
-  MFPKEY_WMAAECMA_MIC_GAIN_BOUNDER     :  PROPERTYKEY = (fmtid: (D1: $6f52c567; D2: $360; D3: $4bd2; D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39)); pid: PID_FIRST_USABLE + 19);
+  MFPKEY_WMAAECMA_MIC_GAIN_BOUNDER     :  PROPERTYKEY = (fmtid: (D1: $6f52c567;
+                                                                 D2: $360;
+                                                                 D3: $4bd2;
+                                                                 D4: ($96, $17, $cc, $bf, $14, $21, $c9, $39));
+                                                                 pid: PID_FIRST_USABLE + 19);
   {$EXTERNALSYM MFPKEY_WMAAECMA_MIC_GAIN_BOUNDER}
 
-  MFPKEY_COLOR_BRIGHTNESS              :  PROPERTYKEY = (fmtid: (D1: $174fb0ec; D2: $2695; D3: $476c; D4: ($88, $aa, $d2, $b4, $1c, $e7, $5e, $67)); pid: $01);
+  MFPKEY_COLOR_BRIGHTNESS              :  PROPERTYKEY = (fmtid: (D1: $174fb0ec;
+                                                                 D2: $2695;
+                                                                 D3: $476c;
+                                                                 D4: ($88, $aa, $d2, $b4, $1c, $e7, $5e, $67));
+                                                                 pid: $01);
   {$EXTERNALSYM MFPKEY_COLOR_BRIGHTNESS}
-  MFPKEY_COLOR_CONTRAST                :  PROPERTYKEY = (fmtid: (D1: $174fb0ec; D2: $2695; D3: $476c; D4: ($88, $aa, $d2, $b4, $1c, $e7, $5e, $67)); pid: $02);
+  MFPKEY_COLOR_CONTRAST                :  PROPERTYKEY = (fmtid: (D1: $174fb0ec;
+                                                                 D2: $2695;
+                                                                 D3: $476c;
+                                                                 D4: ($88, $aa, $d2, $b4, $1c, $e7, $5e, $67));
+                                                                 pid: $02);
   {$EXTERNALSYM MFPKEY_COLOR_CONTRAST}
-  MFPKEY_COLOR_HUE                     :  PROPERTYKEY = (fmtid: (D1: $174fb0ec; D2: $2695; D3: $476c; D4: ($88, $aa, $d2, $b4, $1c, $e7, $5e, $67)); pid: $03);
+  MFPKEY_COLOR_HUE                     :  PROPERTYKEY = (fmtid: (D1: $174fb0ec;
+                                                                 D2: $2695;
+                                                                 D3: $476c;
+                                                                 D4: ($88, $aa, $d2, $b4, $1c, $e7, $5e, $67));
+                                                                 pid: $03);
   {$EXTERNALSYM MFPKEY_COLOR_HUE}
-  MFPKEY_COLOR_SATURATION              :  PROPERTYKEY = (fmtid: (D1: $174fb0ec; D2: $2695; D3: $476c; D4: ($88, $aa, $d2, $b4, $1c, $e7, $5e, $67)); pid: $04);
+  MFPKEY_COLOR_SATURATION              :  PROPERTYKEY = (fmtid: (D1: $174fb0ec;
+                                                                 D2: $2695;
+                                                                 D3: $476c;
+                                                                 D4: ($88, $aa, $d2, $b4, $1c, $e7, $5e, $67));
+                                                                 pid: $04);
   {$EXTERNALSYM MFPKEY_COLOR_SATURATION}
 
-  MFPKEY_COLORLEGALIZER_COMPLEXITY        :  PROPERTYKEY = (fmtid: (D1: $add0e6c1; D2: $cc30; D3: $475d; D4: ($9e, $5a, $f1, $b1, $9f, $58, $7b, $e0)); pid: $01);
+  MFPKEY_COLORLEGALIZER_COMPLEXITY        :  PROPERTYKEY = (fmtid: (D1: $add0e6c1;
+                                                                    D2: $cc30;
+                                                                    D3: $475d;
+                                                                    D4: ($9e, $5a, $f1, $b1, $9f, $58, $7b, $e0));
+                                                                    pid: $01);
   {$EXTERNALSYM MFPKEY_COLORLEGALIZER_COMPLEXITY}
-  MFPKEY_COLORLEGALIZER_COMPLEXITYEX      :  PROPERTYKEY = (fmtid: (D1: $add0e6c1; D2: $cc30; D3: $475d; D4: ($9e, $5a, $f1, $b1, $9f, $58, $7b, $e0)); pid: $02);
+  MFPKEY_COLORLEGALIZER_COMPLEXITYEX      :  PROPERTYKEY = (fmtid: (D1: $add0e6c1;
+                                                                    D2: $cc30;
+                                                                    D3: $475d;
+                                                                    D4: ($9e, $5a, $f1, $b1, $9f, $58, $7b, $e0));
+                                                                    pid: $02);
   {$EXTERNALSYM MFPKEY_COLORLEGALIZER_COMPLEXITYEX}
-  MFPKEY_COLORLEGALIZER_COMPLEXITYMAX     :  PROPERTYKEY = (fmtid: (D1: $add0e6c1; D2: $cc30; D3: $475d; D4: ($9e, $5a, $f1, $b1, $9f, $58, $7b, $e0)); pid: $03);
+  MFPKEY_COLORLEGALIZER_COMPLEXITYMAX     :  PROPERTYKEY = (fmtid: (D1: $add0e6c1;
+                                                                    D2: $cc30;
+                                                                    D3: $475d;
+                                                                    D4: ($9e, $5a, $f1, $b1, $9f, $58, $7b, $e0));
+                                                                    pid: $03);
   {$EXTERNALSYM MFPKEY_COLORLEGALIZER_COMPLEXITYMAX}
-  MFPKEY_COLORLEGALIZER_COMPLEXITYLIVE    :  PROPERTYKEY = (fmtid: (D1: $add0e6c1; D2: $cc30; D3: $475d; D4: ($9e, $5a, $f1, $b1, $9f, $58, $7b, $e0)); pid: $04);
+  MFPKEY_COLORLEGALIZER_COMPLEXITYLIVE    :  PROPERTYKEY = (fmtid: (D1: $add0e6c1;
+                                                                    D2: $cc30;
+                                                                    D3: $475d;
+                                                                    D4: ($9e, $5a, $f1, $b1, $9f, $58, $7b, $e0));
+                                                                    pid: $04);
   {$EXTERNALSYM MFPKEY_COLORLEGALIZER_COMPLEXITYLIVE}
-  MFPKEY_COLORLEGALIZER_COMPLEXITYOFFLINE :  PROPERTYKEY = (fmtid: (D1: $add0e6c1; D2: $cc30; D3: $475d; D4: ($9e, $5a, $f1, $b1, $9f, $58, $7b, $e0)); pid: $05);
+  MFPKEY_COLORLEGALIZER_COMPLEXITYOFFLINE :  PROPERTYKEY = (fmtid: (D1: $add0e6c1;
+                                                                    D2: $cc30;
+                                                                    D3: $475d;
+                                                                    D4: ($9e, $5a, $f1, $b1, $9f, $58, $7b, $e0));
+                                                                    pid: $05);
   {$EXTERNALSYM MFPKEY_COLORLEGALIZER_COMPLEXITYOFFLINE}
-  MFPKEY_COLORLEGALIZER_bSVideo           :  PROPERTYKEY = (fmtid: (D1: $add0e6c1; D2: $cc30; D3: $475d; D4: ($9e, $5a, $f1, $b1, $9f, $58, $7b, $e0)); pid: $06);
+  MFPKEY_COLORLEGALIZER_bSVideo           :  PROPERTYKEY = (fmtid: (D1: $add0e6c1;
+                                                                    D2: $cc30;
+                                                                    D3: $475d;
+                                                                    D4: ($9e, $5a, $f1, $b1, $9f, $58, $7b, $e0));
+                                                                    pid: $06);
   {$EXTERNALSYM MFPKEY_COLORLEGALIZER_bSVideo}
 
-  MFPKEY_CONV_INPUTFRAMERATE  :  PROPERTYKEY = (fmtid: (D1: $52f8d29b; D2: $2e76; D3: $43f7; D4: ($a4, $f6, $17, $17, $90, $4e, $35, $df)); pid: $01);
+  MFPKEY_CONV_INPUTFRAMERATE  :  PROPERTYKEY = (fmtid: (D1: $52f8d29b;
+                                                        D2: $2e76;
+                                                        D3: $43f7;
+                                                        D4: ($a4, $f6, $17, $17, $90, $4e, $35, $df));
+                                                        pid: $01);
   {$EXTERNALSYM MFPKEY_CONV_INPUTFRAMERATE}
-  MFPKEY_CONV_OUTPUTFRAMERATE :  PROPERTYKEY = (fmtid: (D1: $52f8d29b; D2: $2e76; D3: $43f7; D4: ($a4, $f6, $17, $17, $90, $4e, $35, $df)); pid: $02);
+  MFPKEY_CONV_OUTPUTFRAMERATE :  PROPERTYKEY = (fmtid: (D1: $52f8d29b;
+                                                        D2: $2e76;
+                                                        D3: $43f7;
+                                                        D4: ($a4, $f6, $17, $17, $90, $4e, $35, $df));
+                                                        pid: $02);
   {$EXTERNALSYM MFPKEY_CONV_OUTPUTFRAMERATE}
-  MFPKEY_CONV_REVERSEPLAYBACK :  PROPERTYKEY = (fmtid: (D1: $52f8d29b; D2: $2e76; D3: $43f7; D4: ($a4, $f6, $17, $17, $90, $4e, $35, $df)); pid: $03);
+  MFPKEY_CONV_REVERSEPLAYBACK :  PROPERTYKEY = (fmtid: (D1: $52f8d29b;
+                                                        D2: $2e76;
+                                                        D3: $43f7;
+                                                        D4: ($a4, $f6, $17, $17, $90, $4e, $35, $df));
+                                                        pid: $03);
   {$EXTERNALSYM MFPKEY_CONV_REVERSEPLAYBACK}
-  MFPKEY_SMPTE_MASKNUM        :  PROPERTYKEY = (fmtid: (D1: $427ce859; D2: $d55c; D3: $4f8e; D4: ($b0, $0e, $9c, $df, $76, $15, $48, $a6)); pid: $01);
+  MFPKEY_SMPTE_MASKNUM        :  PROPERTYKEY = (fmtid: (D1: $427ce859;
+                                                        D2: $d55c;
+                                                        D3: $4f8e;
+                                                        D4: ($b0, $0e, $9c, $df, $76, $15, $48, $a6));
+                                                        pid: $01);
   {$EXTERNALSYM MFPKEY_SMPTE_MASKNUM}
-  MFPKEY_SMPTE_OFFSETX        :  PROPERTYKEY = (fmtid: (D1: $427ce859; D2: $d55c; D3: $4f8e; D4: ($b0, $0e, $9c, $df, $76, $15, $48, $a6)); pid: $02);
+  MFPKEY_SMPTE_OFFSETX        :  PROPERTYKEY = (fmtid: (D1: $427ce859;
+                                                        D2: $d55c;
+                                                        D3: $4f8e;
+                                                        D4: ($b0, $0e, $9c, $df, $76, $15, $48, $a6));
+                                                        pid: $02);
   {$EXTERNALSYM MFPKEY_SMPTE_OFFSETX}
-  MFPKEY_SMPTE_OFFSETY        :  PROPERTYKEY = (fmtid: (D1: $427ce859; D2: $d55c; D3: $4f8e; D4: ($b0, $0e, $9c, $df, $76, $15, $48, $a6)); pid: $03);
+  MFPKEY_SMPTE_OFFSETY        :  PROPERTYKEY = (fmtid: (D1: $427ce859;
+                                                        D2: $d55c;
+                                                        D3: $4f8e;
+                                                        D4: ($b0, $0e, $9c, $df, $76, $15, $48, $a6));
+                                                        pid: $03);
   {$EXTERNALSYM MFPKEY_SMPTE_OFFSETY}
-  MFPKEY_SMPTE_REPLICATEX     :  PROPERTYKEY = (fmtid: (D1: $427ce859; D2: $d55c; D3: $4f8e; D4: ($b0, $0e, $9c, $df, $76, $15, $48, $a6)); pid: $04);
+  MFPKEY_SMPTE_REPLICATEX     :  PROPERTYKEY = (fmtid: (D1: $427ce859;
+                                                        D2: $d55c;
+                                                        D3: $4f8e;
+                                                        D4: ($b0, $0e, $9c, $df, $76, $15, $48, $a6));
+                                                        pid: $04);
   {$EXTERNALSYM MFPKEY_SMPTE_REPLICATEX}
-  MFPKEY_SMPTE_REPLICATEY     :  PROPERTYKEY = (fmtid: (D1: $427ce859; D2: $d55c; D3: $4f8e; D4: ($b0, $0e, $9c, $df, $76, $15, $48, $a6)); pid: $05);
+  MFPKEY_SMPTE_REPLICATEY     :  PROPERTYKEY = (fmtid: (D1: $427ce859;
+                                                        D2: $d55c;
+                                                        D3: $4f8e;
+                                                        D4: ($b0, $0e, $9c, $df, $76, $15, $48, $a6));
+                                                        pid: $05);
   {$EXTERNALSYM MFPKEY_SMPTE_REPLICATEY}
-  MFPKEY_SMPTE_REVERSE        :  PROPERTYKEY = (fmtid: (D1: $427ce859; D2: $d55c; D3: $4f8e; D4: ($b0, $0e, $9c, $df, $76, $15, $48, $a6)); pid: $06);
+  MFPKEY_SMPTE_REVERSE        :  PROPERTYKEY = (fmtid: (D1: $427ce859;
+                                                        D2: $d55c;
+                                                        D3: $4f8e;
+                                                        D4: ($b0, $0e, $9c, $df, $76, $15, $48, $a6));
+                                                        pid: $06);
   {$EXTERNALSYM MFPKEY_SMPTE_REVERSE}
-  MFPKEY_SMPTE_BORDERSOFTNESS :  PROPERTYKEY = (fmtid: (D1: $427ce859; D2: $d55c; D3: $4f8e; D4: ($b0, $0e, $9c, $df, $76, $15, $48, $a6)); pid: $07);
+  MFPKEY_SMPTE_BORDERSOFTNESS :  PROPERTYKEY = (fmtid: (D1: $427ce859;
+                                                        D2: $d55c;
+                                                        D3: $4f8e;
+                                                        D4: ($b0, $0e, $9c, $df, $76, $15, $48, $a6));
+                                                        pid: $07);
   {$EXTERNALSYM MFPKEY_SMPTE_BORDERSOFTNESS}
-  MFPKEY_SMPTE_BORDERWIDTH    :  PROPERTYKEY = (fmtid: (D1: $427ce859; D2: $d55c; D3: $4f8e; D4: ($b0, $0e, $9c, $df, $76, $15, $48, $a6)); pid: $08);
+  MFPKEY_SMPTE_BORDERWIDTH    :  PROPERTYKEY = (fmtid: (D1: $427ce859;
+                                                        D2: $d55c;
+                                                        D3: $4f8e;
+                                                        D4: ($b0, $0e, $9c, $df, $76, $15, $48, $a6));
+                                                        pid: $08);
   {$EXTERNALSYM MFPKEY_SMPTE_BORDERWIDTH}
-  MFPKEY_SMPTE_BORDERCOLOR    :  PROPERTYKEY = (fmtid: (D1: $427ce859; D2: $d55c; D3: $4f8e; D4: ($b0, $0e, $9c, $df, $76, $15, $48, $a6)); pid: $09);
+  MFPKEY_SMPTE_BORDERCOLOR    :  PROPERTYKEY = (fmtid: (D1: $427ce859;
+                                                        D2: $d55c;
+                                                        D3: $4f8e;
+                                                        D4: ($b0, $0e, $9c, $df, $76, $15, $48, $a6));
+                                                        pid: $09);
   {$EXTERNALSYM MFPKEY_SMPTE_BORDERCOLOR}
 
-  MFPKEY_DENOISE_FILTER      :  PROPERTYKEY = (fmtid: (D1: $7213c6ef; D2: $cdd4; D3: $4d09; D4: ($a8, $9e, $f3, $eb, $eb, $e5, $f5, $65)); pid: $01);
+  MFPKEY_DENOISE_FILTER      :  PROPERTYKEY = (fmtid: (D1: $7213c6ef;
+                                                       D2: $cdd4;
+                                                       D3: $4d09;
+                                                       D4: ($a8, $9e, $f3, $eb, $eb, $e5, $f5, $65));
+                                                       pid: $01);
   {$EXTERNALSYM MFPKEY_DENOISE_FILTER}
-  MFPKEY_DENOISE_CACHEFRAMES :  PROPERTYKEY = (fmtid: (D1: $7213c6ef; D2: $cdd4; D3: $4d09; D4: ($a8, $9e, $f3, $eb, $eb, $e5, $f5, $65)); pid: $02);
+  MFPKEY_DENOISE_CACHEFRAMES :  PROPERTYKEY = (fmtid: (D1: $7213c6ef;
+                                                       D2: $cdd4;
+                                                       D3: $4d09;
+                                                       D4: ($a8, $9e, $f3, $eb, $eb, $e5, $f5, $65));
+                                                       pid: $02);
   {$EXTERNALSYM MFPKEY_DENOISE_CACHEFRAMES}
-  MFPKEY_DENOISE_PROCFRAMES  :  PROPERTYKEY = (fmtid: (D1: $7213c6ef; D2: $cdd4; D3: $4d09; D4: ($a8, $9e, $f3, $eb, $eb, $e5, $f5, $65)); pid: $03);
+  MFPKEY_DENOISE_PROCFRAMES  :  PROPERTYKEY = (fmtid: (D1: $7213c6ef;
+                                                       D2: $cdd4;
+                                                       D3: $4d09;
+                                                       D4: ($a8, $9e, $f3, $eb, $eb, $e5, $f5, $65));
+                                                       pid: $03);
   {$EXTERNALSYM MFPKEY_DENOISE_PROCFRAMES}
-  MFPKEY_DENOISE_CAUSAL      :  PROPERTYKEY = (fmtid: (D1: $7213c6ef; D2: $cdd4; D3: $4d09; D4: ($a8, $9e, $f3, $eb, $eb, $e5, $f5, $65)); pid: $04);
+  MFPKEY_DENOISE_CAUSAL      :  PROPERTYKEY = (fmtid: (D1: $7213c6ef;
+                                                       D2: $cdd4;
+                                                       D3: $4d09;
+                                                       D4: ($a8, $9e, $f3, $eb, $eb, $e5, $f5, $65));
+                                                       pid: $04);
   {$EXTERNALSYM MFPKEY_DENOISE_CAUSAL}
-  MFPKEY_DENOISE_ITERATIVE   :  PROPERTYKEY = (fmtid: (D1: $7213c6ef; D2: $cdd4; D3: $4d09; D4: ($a8, $9e, $f3, $eb, $eb, $e5, $f5, $65)); pid: $05);
+  MFPKEY_DENOISE_ITERATIVE   :  PROPERTYKEY = (fmtid: (D1: $7213c6ef;
+                                                       D2: $cdd4;
+                                                       D3: $4d09;
+                                                       D4: ($a8, $9e, $f3, $eb, $eb, $e5, $f5, $65));
+                                                       pid: $05);
   {$EXTERNALSYM MFPKEY_DENOISE_ITERATIVE}
-  MFPKEY_DENOISE_PARA1       :  PROPERTYKEY = (fmtid: (D1: $7213c6ef; D2: $cdd4; D3: $4d09; D4: ($a8, $9e, $f3, $eb, $eb, $e5, $f5, $65)); pid: $06);
+  MFPKEY_DENOISE_PARA1       :  PROPERTYKEY = (fmtid: (D1: $7213c6ef;
+                                                       D2: $cdd4;
+                                                       D3: $4d09;
+                                                       D4: ($a8, $9e, $f3, $eb, $eb, $e5, $f5, $65));
+                                                       pid: $06);
   {$EXTERNALSYM MFPKEY_DENOISE_PARA1}
-  MFPKEY_DENOISE_PARA2       :  PROPERTYKEY = (fmtid: (D1: $7213c6ef; D2: $cdd4; D3: $4d09; D4: ($a8, $9e, $f3, $eb, $eb, $e5, $f5, $65)); pid: $07);
+  MFPKEY_DENOISE_PARA2       :  PROPERTYKEY = (fmtid: (D1: $7213c6ef;
+                                                       D2: $cdd4;
+                                                       D3: $4d09;
+                                                       D4: ($a8, $9e, $f3, $eb, $eb, $e5, $f5, $65));
+                                                       pid: $07);
   {$EXTERNALSYM MFPKEY_DENOISE_PARA2}
-  MFPKEY_DENOISE_PARA3       :  PROPERTYKEY = (fmtid: (D1: $7213c6ef; D2: $cdd4; D3: $4d09; D4: ($a8, $9e, $f3, $eb, $eb, $e5, $f5, $65)); pid: $08);
+  MFPKEY_DENOISE_PARA3       :  PROPERTYKEY = (fmtid: (D1: $7213c6ef;
+                                                       D2: $cdd4;
+                                                       D3: $4d09;
+                                                       D4: ($a8, $9e, $f3, $eb, $eb, $e5, $f5, $65));
+                                                       pid: $08);
   {$EXTERNALSYM MFPKEY_DENOISE_PARA3}
-  MFPKEY_DENOISE_PARA4       :  PROPERTYKEY = (fmtid: (D1: $7213c6ef; D2: $cdd4; D3: $4d09; D4: ($a8, $9e, $f3, $eb, $eb, $e5, $f5, $65)); pid: $09);
+  MFPKEY_DENOISE_PARA4       :  PROPERTYKEY = (fmtid: (D1: $7213c6ef;
+                                                       D2: $cdd4;
+                                                       D3: $4d09;
+                                                       D4: ($a8, $9e, $f3, $eb, $eb, $e5, $f5, $65));
+                                                       pid: $09);
   {$EXTERNALSYM MFPKEY_DENOISE_PARA4}
-  MFPKEY_DENOISE_PARA5       :  PROPERTYKEY = (fmtid: (D1: $7213c6ef; D2: $cdd4; D3: $4d09; D4: ($a8, $9e, $f3, $eb, $eb, $e5, $f5, $65)); pid: $10);
+  MFPKEY_DENOISE_PARA5       :  PROPERTYKEY = (fmtid: (D1: $7213c6ef;
+                                                       D2: $cdd4;
+                                                       D3: $4d09;
+                                                       D4: ($a8, $9e, $f3, $eb, $eb, $e5, $f5, $65));
+                                                       pid: $10);
   {$EXTERNALSYM MFPKEY_DENOISE_PARA5}
 
-  MFPKEY_CLUSTERDETECTOR_MAXCLUSTERS        :  PROPERTYKEY = (fmtid: (D1: $b79a666d; D2: $8a9d; D3: $463c; D4: ($9d, $97, $e1, $b1, $0, $45, $c1, $3a)); pid: $01);
+  MFPKEY_CLUSTERDETECTOR_MAXCLUSTERS        :  PROPERTYKEY = (fmtid: (D1: $b79a666d;
+                                                                      D2: $8a9d;
+                                                                      D3: $463c;
+                                                                      D4: ($9d, $97, $e1, $b1, $0, $45, $c1, $3a));
+                                                                      pid: $01);
   {$EXTERNALSYM MFPKEY_CLUSTERDETECTOR_MAXCLUSTERS}
-  MFPKEY_CLUSTERDETECTOR_MINCLUSTERDURATION :  PROPERTYKEY = (fmtid: (D1: $b79a666d; D2: $8a9d; D3: $463c; D4: ($9d, $97, $e1, $b1, $0, $45, $c1, $3a)); pid: $02);
+  MFPKEY_CLUSTERDETECTOR_MINCLUSTERDURATION :  PROPERTYKEY = (fmtid: (D1: $b79a666d;
+                                                                      D2: $8a9d;
+                                                                      D3: $463c;
+                                                                      D4: ($9d, $97, $e1, $b1, $0, $45, $c1, $3a));
+                                                                      pid: $02);
   {$EXTERNALSYM MFPKEY_CLUSTERDETECTOR_MINCLUSTERDURATION}
-  MFPKEY_CLUSTERDETECTOR_MAXCLUSTERDURATION :  PROPERTYKEY = (fmtid: (D1: $b79a666d; D2: $8a9d; D3: $463c; D4: ($9d, $97, $e1, $b1, $0, $45, $c1, $3a)); pid: $03);
+  MFPKEY_CLUSTERDETECTOR_MAXCLUSTERDURATION :  PROPERTYKEY = (fmtid: (D1: $b79a666d;
+                                                                      D2: $8a9d;
+                                                                      D3: $463c;
+                                                                      D4: ($9d, $97, $e1, $b1, $0, $45, $c1, $3a));
+                                                                      pid: $03);
   {$EXTERNALSYM MFPKEY_CLUSTERDETECTOR_MAXCLUSTERDURATION}
 
-  MFPKEY_FACEDETECTOR_SKIPFRAMES            :  PROPERTYKEY = (fmtid: (D1: $e1a124a6; D2: $4fa8; D3: $4ba5; D4: ($a2, $d8, $dc, $34, $53, $6f, $74, $26)); pid: $01);
+  MFPKEY_FACEDETECTOR_SKIPFRAMES            :  PROPERTYKEY = (fmtid: (D1: $e1a124a6;
+                                                                      D2: $4fa8;
+                                                                      D3: $4ba5;
+                                                                      D4: ($a2, $d8, $dc, $34, $53, $6f, $74, $26));
+                                                                      pid: $01);
   {$EXTERNALSYM MFPKEY_FACEDETECTOR_SKIPFRAMES}
 
-  MFPKEY_SHOTDETECTOR_TYPE                 :  PROPERTYKEY = (fmtid: (D1: $7bcc7b0f; D2: $dedf; D3: $4a68; D4: ($96, $a2, $fc, $e0, $19, $ed, $95, $6f)); pid: $01);
+  MFPKEY_SHOTDETECTOR_TYPE                 :  PROPERTYKEY = (fmtid: (D1: $7bcc7b0f;
+                                                                     D2: $dedf;
+                                                                     D3: $4a68;
+                                                                     D4: ($96, $a2, $fc, $e0, $19, $ed, $95, $6f));
+                                                                     pid: $01);
   {$EXTERNALSYM MFPKEY_SHOTDETECTOR_TYPE}
-  MFPKEY_SHOTDETECTOR_CLASSIFICATIONMETHOD :  PROPERTYKEY = (fmtid: (D1: $7bcc7b0f; D2: $dedf; D3: $4a68; D4: ($96, $a2, $fc, $e0, $19, $ed, $95, $6f)); pid: $02);
+  MFPKEY_SHOTDETECTOR_CLASSIFICATIONMETHOD :  PROPERTYKEY = (fmtid: (D1: $7bcc7b0f;
+                                                                     D2: $dedf;
+                                                                     D3: $4a68;
+                                                                     D4: ($96, $a2, $fc, $e0, $19, $ed, $95, $6f));
+                                                                     pid: $02);
   {$EXTERNALSYM MFPKEY_SHOTDETECTOR_CLASSIFICATIONMETHOD}
-  MFPKEY_SHOTDETECTOR_GLOBALTHRESHOLD      :  PROPERTYKEY = (fmtid: (D1: $7bcc7b0f; D2: $dedf; D3: $4a68; D4: ($96, $a2, $fc, $e0, $19, $ed, $95, $6f)); pid: $03);
+  MFPKEY_SHOTDETECTOR_GLOBALTHRESHOLD      :  PROPERTYKEY = (fmtid: (D1: $7bcc7b0f;
+                                                                     D2: $dedf;
+                                                                     D3: $4a68;
+                                                                     D4: ($96, $a2, $fc, $e0, $19, $ed, $95, $6f));
+                                                                     pid: $03);
   {$EXTERNALSYM MFPKEY_SHOTDETECTOR_GLOBALTHRESHOLD}
-  MFPKEY_SHOTDETECTOR_ADAPTIVETHRESHOLD    :  PROPERTYKEY = (fmtid: (D1: $7bcc7b0f; D2: $dedf; D3: $4a68; D4: ($96, $a2, $fc, $e0, $19, $ed, $95, $6f)); pid: $04);
+  MFPKEY_SHOTDETECTOR_ADAPTIVETHRESHOLD    :  PROPERTYKEY = (fmtid: (D1: $7bcc7b0f;
+                                                                     D2: $dedf;
+                                                                     D3: $4a68;
+                                                                     D4: ($96, $a2, $fc, $e0, $19, $ed, $95, $6f));
+                                                                     pid: $04);
   {$EXTERNALSYM MFPKEY_SHOTDETECTOR_ADAPTIVETHRESHOLD}
-  MFPKEY_SHOTDETECTOR_ADAPTIVEWINDOWSIZE   :  PROPERTYKEY = (fmtid: (D1: $7bcc7b0f; D2: $dedf; D3: $4a68; D4: ($96, $a2, $fc, $e0, $19, $ed, $95, $6f)); pid: $05);
+  MFPKEY_SHOTDETECTOR_ADAPTIVEWINDOWSIZE   :  PROPERTYKEY = (fmtid: (D1: $7bcc7b0f;
+                                                                     D2: $dedf;
+                                                                     D3: $4a68;
+                                                                     D4: ($96, $a2, $fc, $e0, $19, $ed, $95, $6f));
+                                                                     pid: $05);
   {$EXTERNALSYM MFPKEY_SHOTDETECTOR_ADAPTIVEWINDOWSIZE}
-  MFPKEY_SHOTDETECTOR_MINCLIPWEIGHT        :  PROPERTYKEY = (fmtid: (D1: $7bcc7b0f; D2: $dedf; D3: $4a68; D4: ($96, $a2, $fc, $e0, $19, $ed, $95, $6f)); pid: $06);
+  MFPKEY_SHOTDETECTOR_MINCLIPWEIGHT        :  PROPERTYKEY = (fmtid: (D1: $7bcc7b0f;
+                                                                     D2: $dedf;
+                                                                     D3: $4a68;
+                                                                     D4: ($96, $a2, $fc, $e0, $19, $ed, $95, $6f));
+                                                                     pid: $06);
   {$EXTERNALSYM MFPKEY_SHOTDETECTOR_MINCLIPWEIGHT}
-  MFPKEY_SHOTDETECTOR_MINCLIPDURATION      :  PROPERTYKEY = (fmtid: (D1: $7bcc7b0f; D2: $dedf; D3: $4a68; D4: ($96, $a2, $fc, $e0, $19, $ed, $95, $6f)); pid: $07);
+  MFPKEY_SHOTDETECTOR_MINCLIPDURATION      :  PROPERTYKEY = (fmtid: (D1: $7bcc7b0f;
+                                                                     D2: $dedf;
+                                                                     D3: $4a68;
+                                                                     D4: ($96, $a2, $fc, $e0, $19, $ed, $95, $6f));
+                                                                     pid: $07);
   {$EXTERNALSYM MFPKEY_SHOTDETECTOR_MINCLIPDURATION}
-  MFPKEY_SHOTDETECTOR_MAXCLIPDURATION      :  PROPERTYKEY = (fmtid: (D1: $7bcc7b0f; D2: $dedf; D3: $4a68; D4: ($96, $a2, $fc, $e0, $19, $ed, $95, $6f)); pid: $08);
+  MFPKEY_SHOTDETECTOR_MAXCLIPDURATION      :  PROPERTYKEY = (fmtid: (D1: $7bcc7b0f;
+                                                                     D2: $dedf;
+                                                                     D3: $4a68;
+                                                                     D4: ($96, $a2, $fc, $e0, $19, $ed, $95, $6f));
+                                                                     pid: $08);
   {$EXTERNALSYM MFPKEY_SHOTDETECTOR_MAXCLIPDURATION}
-  MFPKEY_SHOTDETECTOR_MAXCLIPSPERHOUR      :  PROPERTYKEY = (fmtid: (D1: $7bcc7b0f; D2: $dedf; D3: $4a68; D4: ($96, $a2, $fc, $e0, $19, $ed, $95, $6f)); pid: $09);
+  MFPKEY_SHOTDETECTOR_MAXCLIPSPERHOUR      :  PROPERTYKEY = (fmtid: (D1: $7bcc7b0f;
+                                                                     D2: $dedf;
+                                                                     D3: $4a68;
+                                                                     D4: ($96, $a2, $fc, $e0, $19, $ed, $95, $6f));
+                                                                     pid: $09);
   {$EXTERNALSYM MFPKEY_SHOTDETECTOR_MAXCLIPSPERHOUR}
-  MFPKEY_SHOTDETECTOR_PRESERVEMONOCLIPS    :  PROPERTYKEY = (fmtid: (D1: $7bcc7b0f; D2: $dedf; D3: $4a68; D4: ($96, $a2, $fc, $e0, $19, $ed, $95, $6f)); pid: $0a);
+  MFPKEY_SHOTDETECTOR_PRESERVEMONOCLIPS    :  PROPERTYKEY = (fmtid: (D1: $7bcc7b0f;
+                                                                     D2: $dedf;
+                                                                     D3: $4a68;
+                                                                     D4: ($96, $a2, $fc, $e0, $19, $ed, $95, $6f));
+                                                                     pid: $0a);
   {$EXTERNALSYM MFPKEY_SHOTDETECTOR_PRESERVEMONOCLIPS}
 
-  MFPKEY_THUMBNAILGENERATOR_SEARCHWINDOWSIZE  :  PROPERTYKEY = (fmtid: (D1: $d9d7473f; D2: $7d68; D3: $4226; D4: ($98, $5c, $31, $85, $2c, $4c, $9e, $74)); pid: $01);
+  MFPKEY_THUMBNAILGENERATOR_SEARCHWINDOWSIZE  :  PROPERTYKEY = (fmtid: (D1: $d9d7473f;
+                                                                        D2: $7d68;
+                                                                        D3: $4226;
+                                                                        D4: ($98, $5c, $31, $85, $2c, $4c, $9e, $74));
+                                                                        pid: $01);
   {$EXTERNALSYM MFPKEY_THUMBNAILGENERATOR_SEARCHWINDOWSIZE}
-  MFPKEY_THUMBNAILGENERATOR_MINCOLORENTROPY   :  PROPERTYKEY = (fmtid: (D1: $d9d7473f; D2: $7d68; D3: $4226; D4: ($98, $5c, $31, $85, $2c, $4c, $9e, $74)); pid: $02);
+  MFPKEY_THUMBNAILGENERATOR_MINCOLORENTROPY   :  PROPERTYKEY = (fmtid: (D1: $d9d7473f;
+                                                                        D2: $7d68;
+                                                                        D3: $4226;
+                                                                        D4: ($98, $5c, $31, $85, $2c, $4c, $9e, $74));
+                                                                        pid: $02);
   {$EXTERNALSYM MFPKEY_THUMBNAILGENERATOR_MINCOLORENTROPY}
-  MFPKEY_THUMBNAILGENERATOR_MAXMOTIONACTIVITY :  PROPERTYKEY = (fmtid: (D1: $d9d7473f; D2: $7d68; D3: $4226; D4: ($98, $5c, $31, $85, $2c, $4c, $9e, $74)); pid: $03);
+  MFPKEY_THUMBNAILGENERATOR_MAXMOTIONACTIVITY :  PROPERTYKEY = (fmtid: (D1: $d9d7473f;
+                                                                        D2: $7d68;
+                                                                        D3: $4226;
+                                                                        D4: ($98, $5c, $31, $85, $2c, $4c, $9e, $74));
+                                                                        pid: $03);
   {$EXTERNALSYM MFPKEY_THUMBNAILGENERATOR_MAXMOTIONACTIVITY}
-  MFPKEY_THUMBNAILGENERATOR_THUMBNAILWIDTH    :  PROPERTYKEY = (fmtid: (D1: $d9d7473f; D2: $7d68; D3: $4226; D4: ($98, $5c, $31, $85, $2c, $4c, $9e, $74)); pid: $04);
+  MFPKEY_THUMBNAILGENERATOR_THUMBNAILWIDTH    :  PROPERTYKEY = (fmtid: (D1: $d9d7473f;
+                                                                        D2: $7d68;
+                                                                        D3: $4226;
+                                                                        D4: ($98, $5c, $31, $85, $2c, $4c, $9e, $74));
+                                                                        pid: $04);
   {$EXTERNALSYM MFPKEY_THUMBNAILGENERATOR_THUMBNAILWIDTH}
-  MFPKEY_THUMBNAILGENERATOR_THUMBNAILHEIGHT   :  PROPERTYKEY = (fmtid: (D1: $d9d7473f; D2: $7d68; D3: $4226; D4: ($98, $5c, $31, $85, $2c, $4c, $9e, $74)); pid: $05);
+  MFPKEY_THUMBNAILGENERATOR_THUMBNAILHEIGHT   :  PROPERTYKEY = (fmtid: (D1: $d9d7473f;
+                                                                        D2: $7d68;
+                                                                        D3: $4226;
+                                                                        D4: ($98, $5c, $31, $85, $2c, $4c, $9e, $74));
+                                                                        pid: $05);
   {$EXTERNALSYM MFPKEY_THUMBNAILGENERATOR_THUMBNAILHEIGHT}
-  MFPKEY_THUMBNAILGENERATOR_THUMBNAILREADY    :  PROPERTYKEY = (fmtid: (D1: $d9d7473f; D2: $7d68; D3: $4226; D4: ($98, $5c, $31, $85, $2c, $4c, $9e, $74)); pid: $06);
+  MFPKEY_THUMBNAILGENERATOR_THUMBNAILREADY    :  PROPERTYKEY = (fmtid: (D1: $d9d7473f;
+                                                                        D2: $7d68;
+                                                                        D3: $4226;
+                                                                        D4: ($98, $5c, $31, $85, $2c, $4c, $9e, $74));
+                                                                        pid: $06);
   {$EXTERNALSYM MFPKEY_THUMBNAILGENERATOR_THUMBNAILREADY}
-  MFPKEY_THUMBNAILGENERATOR_THUMBNAILFILENAME :  PROPERTYKEY = (fmtid: (D1: $d9d7473f; D2: $7d68; D3: $4226; D4: ($98, $5c, $31, $85, $2c, $4c, $9e, $74)); pid: $ff);
+  MFPKEY_THUMBNAILGENERATOR_THUMBNAILFILENAME :  PROPERTYKEY = (fmtid: (D1: $d9d7473f;
+                                                                        D2: $7d68;
+                                                                        D3: $4226;
+                                                                        D4: ($98, $5c, $31, $85, $2c, $4c, $9e, $74));
+                                                                        pid: $ff);
   {$EXTERNALSYM MFPKEY_THUMBNAILGENERATOR_THUMBNAILFILENAME}
 
-  MFPKEY_TOCGENERATOR_TOCREADY              :  PROPERTYKEY = (fmtid: (D1: $7c109759; D2: $3c27; D3: $42ef; D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9)); pid: $01);
+  MFPKEY_TOCGENERATOR_TOCREADY              :  PROPERTYKEY = (fmtid: (D1: $7c109759;
+                                                                      D2: $3c27;
+                                                                      D3: $42ef;
+                                                                      D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9));
+                                                                      pid: $01);
   {$EXTERNALSYM MFPKEY_TOCGENERATOR_TOCREADY}
-  MFPKEY_TOCGENERATOR_TOCOBJECT             :  PROPERTYKEY = (fmtid: (D1: $7c109759; D2: $3c27; D3: $42ef; D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9)); pid: $02);
+  MFPKEY_TOCGENERATOR_TOCOBJECT             :  PROPERTYKEY = (fmtid: (D1: $7c109759;
+                                                                      D2: $3c27;
+                                                                      D3: $42ef;
+                                                                      D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9));
+                                                                      pid: $02);
   {$EXTERNALSYM MFPKEY_TOCGENERATOR_TOCOBJECT}
-  MFPKEY_TOCGENERATOR_SHOTDETECTOR_ON       :  PROPERTYKEY = (fmtid: (D1: $7c109759; D2: $3c27; D3: $42ef; D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9)); pid: $03);
+  MFPKEY_TOCGENERATOR_SHOTDETECTOR_ON       :  PROPERTYKEY = (fmtid: (D1: $7c109759;
+                                                                      D2: $3c27;
+                                                                      D3: $42ef;
+                                                                      D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9));
+                                                                      pid: $03);
   {$EXTERNALSYM MFPKEY_TOCGENERATOR_SHOTDETECTOR_ON}
-  MFPKEY_TOCGENERATOR_CLUSTERDETECTOR_ON    :  PROPERTYKEY = (fmtid: (D1: $7c109759; D2: $3c27; D3: $42ef; D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9)); pid: $04);
+  MFPKEY_TOCGENERATOR_CLUSTERDETECTOR_ON    :  PROPERTYKEY = (fmtid: (D1: $7c109759;
+                                                                      D2: $3c27;
+                                                                      D3: $42ef;
+                                                                      D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9));
+                                                                      pid: $04);
   {$EXTERNALSYM MFPKEY_TOCGENERATOR_CLUSTERDETECTOR_ON}
-  MFPKEY_TOCGENERATOR_THUMBNAILGENERATOR_ON :  PROPERTYKEY = (fmtid: (D1: $7c109759; D2: $3c27; D3: $42ef; D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9)); pid: $05);
+  MFPKEY_TOCGENERATOR_THUMBNAILGENERATOR_ON :  PROPERTYKEY = (fmtid: (D1: $7c109759;
+                                                                      D2: $3c27;
+                                                                      D3: $42ef;
+                                                                      D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9));
+                                                                      pid: $05);
   {$EXTERNALSYM MFPKEY_TOCGENERATOR_THUMBNAILGENERATOR_ON}
-  MFPKEY_TOCGENERATOR_FEATUREEXTRACTOR_ON   :  PROPERTYKEY = (fmtid: (D1: $7c109759; D2: $3c27; D3: $42ef; D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9)); pid: $06);
+  MFPKEY_TOCGENERATOR_FEATUREEXTRACTOR_ON   :  PROPERTYKEY = (fmtid: (D1: $7c109759;
+                                                                      D2: $3c27;
+                                                                      D3: $42ef;
+                                                                      D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9));
+                                                                      pid: $06);
   {$EXTERNALSYM MFPKEY_TOCGENERATOR_FEATUREEXTRACTOR_ON}
-  MFPKEY_TOCGENERATOR_FACEDETECTOR_ON       :  PROPERTYKEY = (fmtid: (D1: $7c109759; D2: $3c27; D3: $42ef; D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9)); pid: $07);
+  MFPKEY_TOCGENERATOR_FACEDETECTOR_ON       :  PROPERTYKEY = (fmtid: (D1: $7c109759;
+                                                                      D2: $3c27;
+                                                                      D3: $42ef;
+                                                                      D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9));
+                                                                      pid: $07);
   {$EXTERNALSYM MFPKEY_TOCGENERATOR_FACEDETECTOR_ON}
-  MFPKEY_TOCGENERATOR_USEENDSIGNAL          :  PROPERTYKEY = (fmtid: (D1: $7c109759; D2: $3c27; D3: $42ef; D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9)); pid: $fa);
+  MFPKEY_TOCGENERATOR_USEENDSIGNAL          :  PROPERTYKEY = (fmtid: (D1: $7c109759;
+                                                                      D2: $3c27;
+                                                                      D3: $42ef;
+                                                                      D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9));
+                                                                      pid: $fa);
   {$EXTERNALSYM MFPKEY_TOCGENERATOR_USEENDSIGNAL}
-  MFPKEY_TOCGENERATOR_ENDSIGNAL             :  PROPERTYKEY = (fmtid: (D1: $7c109759; D2: $3c27; D3: $42ef; D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9)); pid: $fb);
+  MFPKEY_TOCGENERATOR_ENDSIGNAL             :  PROPERTYKEY = (fmtid: (D1: $7c109759;
+                                                                      D2: $3c27;
+                                                                      D3: $42ef;
+                                                                      D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9));
+                                                                      pid: $fb);
   {$EXTERNALSYM MFPKEY_TOCGENERATOR_ENDSIGNAL}
-  MFPKEY_TOCGENERATOR_ENDTIME               :  PROPERTYKEY = (fmtid: (D1: $7c109759; D2: $3c27; D3: $42ef; D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9)); pid: $fc);
+  MFPKEY_TOCGENERATOR_ENDTIME               :  PROPERTYKEY = (fmtid: (D1: $7c109759;
+                                                                      D2: $3c27;
+                                                                      D3: $42ef;
+                                                                      D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9));
+                                                                      pid: $fc);
   {$EXTERNALSYM MFPKEY_TOCGENERATOR_ENDTIME}
-  MFPKEY_TOCGENERATOR_CURRENTTIME           :  PROPERTYKEY = (fmtid: (D1: $7c109759; D2: $3c27; D3: $42ef; D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9)); pid: $fd);
+  MFPKEY_TOCGENERATOR_CURRENTTIME           :  PROPERTYKEY = (fmtid: (D1: $7c109759;
+                                                                      D2: $3c27;
+                                                                      D3: $42ef;
+                                                                      D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9));
+                                                                      pid: $fd);
   {$EXTERNALSYM MFPKEY_TOCGENERATOR_CURRENTTIME}
-  MFPKEY_TOCGENERATOR_PROCESSEDFRAMES       :  PROPERTYKEY = (fmtid: (D1: $7c109759; D2: $3c27; D3: $42ef; D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9)); pid: $fe);
+  MFPKEY_TOCGENERATOR_PROCESSEDFRAMES       :  PROPERTYKEY = (fmtid: (D1: $7c109759;
+                                                                      D2: $3c27;
+                                                                      D3: $42ef;
+                                                                      D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9));
+                                                                      pid: $fe);
   {$EXTERNALSYM MFPKEY_TOCGENERATOR_PROCESSEDFRAMES}
-  MFPKEY_TOCGENERATOR_INDEXFILENAME         :  PROPERTYKEY = (fmtid: (D1: $7c109759; D2: $3c27; D3: $42ef; D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9)); pid: $ff);
+  MFPKEY_TOCGENERATOR_INDEXFILENAME         :  PROPERTYKEY = (fmtid: (D1: $7c109759;
+                                                                      D2: $3c27;
+                                                                      D3: $42ef;
+                                                                      D4: ($a6, $a3, $ce, $de, $f7, $5a, $35, $e9));
+                                                                      pid: $ff);
   {$EXTERNALSYM MFPKEY_TOCGENERATOR_INDEXFILENAME}
 
-  MFPKEY_DXVA_ENABLED               :  PROPERTYKEY = (fmtid: (D1: $58e28605; D2: $1d51; D3: $48ed; D4: ($a3, $eb, $0f, $9b, $af, $78, $5f, $bd)); pid: $01);
+  MFPKEY_DXVA_ENABLED               :  PROPERTYKEY = (fmtid: (D1: $58e28605;
+                                                              D2: $1d51;
+                                                              D3: $48ed;
+                                                              D4: ($a3, $eb, $0f, $9b, $af, $78, $5f, $bd));
+                                                              pid: $01);
   {$EXTERNALSYM MFPKEY_DXVA_ENABLED}
-  MFPKEY_FI_SUPPORTED               :  PROPERTYKEY = (fmtid: (D1: $5ce18788; D2: $b992; D3: $49a7; D4: ($a4, $f1, $60, $ea, $21, $ca, $a5, $5f)); pid: $02);
+  MFPKEY_FI_SUPPORTED               :  PROPERTYKEY = (fmtid: (D1: $5ce18788;
+                                                              D2: $b992;
+                                                              D3: $49a7;
+                                                              D4: ($a4, $f1, $60, $ea, $21, $ca, $a5, $5f));
+                                                              pid: $02);
   {$EXTERNALSYM MFPKEY_FI_SUPPORTED}
-  MFPKEY_FI_ENABLED                 :  PROPERTYKEY = (fmtid: (D1: $e020c4ca; D2: $3bdd; D3: $40ec; D4: ($bc, $f4, $40, $39, $b1, $45, $0e, $b8)); pid: $03);
+  MFPKEY_FI_ENABLED                 :  PROPERTYKEY = (fmtid: (D1: $e020c4ca;
+                                                              D2: $3bdd;
+                                                              D3: $40ec;
+                                                              D4: ($bc, $f4, $40, $39, $b1, $45, $0e, $b8));
+                                                              pid: $03);
   {$EXTERNALSYM MFPKEY_FI_ENABLED}
 
-  MFPKEY_DECODER_DEINTERLACING      :  PROPERTYKEY = (fmtid: (D1: $00c6281f; D2: $4be6; D3: $4e44; D4: ($9e, $d8, $9e, $c5, $42, $23, $16, $e4)); pid: $04);
+  MFPKEY_DECODER_DEINTERLACING      :  PROPERTYKEY = (fmtid: (D1: $00c6281f;
+                                                              D2: $4be6;
+                                                              D3: $4e44;
+                                                              D4: ($9e, $d8, $9e, $c5, $42, $23, $16, $e4));
+                                                              pid: $04);
   {$EXTERNALSYM MFPKEY_DECODER_DEINTERLACING}
-  MFPKEY_POSTPROCESSMODE            :  PROPERTYKEY = (fmtid: (D1: $00c6281f; D2: $4be6; D3: $4e44; D4: ($9e, $d8, $9e, $c5, $42, $23, $16, $e4)); pid: $05);
+  MFPKEY_POSTPROCESSMODE            :  PROPERTYKEY = (fmtid: (D1: $00c6281f;
+                                                              D2: $4be6;
+                                                              D3: $4e44;
+                                                              D4: ($9e, $d8, $9e, $c5, $42, $23, $16, $e4));
+                                                              pid: $05);
   {$EXTERNALSYM MFPKEY_POSTPROCESSMODE}
-  MFPKEY_NUMTHREADSDEC              :  PROPERTYKEY = (fmtid: (D1: $00c6281f; D2: $4be6; D3: $4e44; D4: ($9e, $d8, $9e, $c5, $42, $23, $16, $e4)); pid: $06);
+  MFPKEY_NUMTHREADSDEC              :  PROPERTYKEY = (fmtid: (D1: $00c6281f;
+                                                              D2: $4be6;
+                                                              D3: $4e44;
+                                                              D4: ($9e, $d8, $9e, $c5, $42, $23, $16, $e4));
+                                                              pid: $06);
   {$EXTERNALSYM MFPKEY_NUMTHREADSDEC}
-  MFPKEY_AVDecVideoSWPowerLevel     :  PROPERTYKEY = (fmtid: (D1: $fb5d2347; D2: $4dd8; D3: $4509; D4: ($ae, $d0, $db, $5f, $a9, $aa, $93, $f4)); pid: $08);
+  MFPKEY_AVDecVideoSWPowerLevel     :  PROPERTYKEY = (fmtid: (D1: $fb5d2347;
+                                                              D2: $4dd8;
+                                                              D3: $4509;
+                                                              D4: ($ae, $d0, $db, $5f, $a9, $aa, $93, $f4));
+                                                              pid: $08);
   {$EXTERNALSYM MFPKEY_AVDecVideoSWPowerLevel}
 
-  MFPKEY_AVGFRAMERATE               :  PROPERTYKEY = (fmtid: (D1: $41d700d6; D2: $95b1; D3: $4e3f; D4: ($b7, $59, $2d, $66, $d8, $c7, $ad, $a2)); pid: $01);
+  MFPKEY_AVGFRAMERATE               :  PROPERTYKEY = (fmtid: (D1: $41d700d6;
+                                                              D2: $95b1;
+                                                              D3: $4e3f;
+                                                              D4: ($b7, $59, $2d, $66, $d8, $c7, $ad, $a2));
+                                                              pid: $01);
   {$EXTERNALSYM MFPKEY_AVGFRAMERATE}
-  MFPKEY_BUFFERFULLNESSINFIRSTBYTE  :  PROPERTYKEY = (fmtid: (D1: $b69dc3c5; D2: $64c4; D3: $4757; D4: ($99, $cb, $5d, $58, $0f, $d5, $65, $9e)); pid: $02);
+  MFPKEY_BUFFERFULLNESSINFIRSTBYTE  :  PROPERTYKEY = (fmtid: (D1: $b69dc3c5;
+                                                              D2: $64c4;
+                                                              D3: $4757;
+                                                              D4: ($99, $cb, $5d, $58, $0f, $d5, $65, $9e));
+                                                              pid: $02);
   {$EXTERNALSYM MFPKEY_BUFFERFULLNESSINFIRSTBYTE}
-  MFPKEY_PASSESRECOMMENDED          :  PROPERTYKEY = (fmtid: (D1: $38bdceea; D2: $393e; D3: $4f9a; D4: ($8d, $c3, $80, $2c, $c4, $05, $83, $8f)); pid: $03);
+  MFPKEY_PASSESRECOMMENDED          :  PROPERTYKEY = (fmtid: (D1: $38bdceea;
+                                                              D2: $393e;
+                                                              D3: $4f9a;
+                                                              D4: ($8d, $c3, $80, $2c, $c4, $05, $83, $8f));
+                                                              pid: $03);
   {$EXTERNALSYM MFPKEY_PASSESRECOMMENDED}
-  MFPKEY_DECODERCOMPLEXITYPROFILE   :  PROPERTYKEY = (fmtid: (D1: $c0d912d6; D2: $14da; D3: $4d31; D4: ($8d, $83, $d1, $08, $91, $5e, $8d, $77)); pid: $04);
+  MFPKEY_DECODERCOMPLEXITYPROFILE   :  PROPERTYKEY = (fmtid: (D1: $c0d912d6;
+                                                              D2: $14da;
+                                                              D3: $4d31;
+                                                              D4: ($8d, $83, $d1, $08, $91, $5e, $8d, $77));
+                                                              pid: $04);
   {$EXTERNALSYM MFPKEY_DECODERCOMPLEXITYPROFILE}
-  MFPKEY_TOTALFRAMES                :  PROPERTYKEY = (fmtid: (D1: $ce5f1e3c; D2: $d3d4; D3: $4c3f; D4: ($88, $c8, $01, $e9, $89, $d9, $98, $d2)); pid: $05);
+  MFPKEY_TOTALFRAMES                :  PROPERTYKEY = (fmtid: (D1: $ce5f1e3c;
+                                                              D2: $d3d4;
+                                                              D3: $4c3f;
+                                                              D4: ($88, $c8, $01, $e9, $89, $d9, $98, $d2));
+                                                              pid: $05);
   {$EXTERNALSYM MFPKEY_TOTALFRAMES}
-  MFPKEY_CODEDFRAMES                :  PROPERTYKEY = (fmtid: (D1: $62872b55; D2: $fe0e; D3: $4930; D4: ($a6, $d2, $cc, $aa, $37, $e8, $f5, $35)); pid: $06);
+  MFPKEY_CODEDFRAMES                :  PROPERTYKEY = (fmtid: (D1: $62872b55;
+                                                              D2: $fe0e;
+                                                              D3: $4930;
+                                                              D4: ($a6, $d2, $cc, $aa, $37, $e8, $f5, $35));
+                                                              pid: $06);
   {$EXTERNALSYM MFPKEY_CODEDFRAMES}
-  MFPKEY_ZEROBYTEFRAMES             :  PROPERTYKEY = (fmtid: (D1: $8f04aba4; D2: $313d; D3: $40fb; D4: ($80, $31, $31, $51, $78, $13, $d9, $ef)); pid: $07);
+  MFPKEY_ZEROBYTEFRAMES             :  PROPERTYKEY = (fmtid: (D1: $8f04aba4;
+                                                              D2: $313d;
+                                                              D3: $40fb;
+                                                              D4: ($80, $31, $31, $51, $78, $13, $d9, $ef));
+                                                              pid: $07);
   {$EXTERNALSYM MFPKEY_ZEROBYTEFRAMES}
-  MFPKEY_ENDOFPASS                  :  PROPERTYKEY = (fmtid: (D1: $b2030f2a; D2: $8bbc; D3: $46f8; D4: ($a6, $4b, $a9, $8f, $f7, $fc, $f0, $2a)); pid: $08);
+  MFPKEY_ENDOFPASS                  :  PROPERTYKEY = (fmtid: (D1: $b2030f2a;
+                                                              D2: $8bbc;
+                                                              D3: $46f8;
+                                                              D4: ($a6, $4b, $a9, $8f, $f7, $fc, $f0, $2a));
+                                                              pid: $08);
   {$EXTERNALSYM MFPKEY_ENDOFPASS}
-  MFPKEY_DATARATE                   :  PROPERTYKEY = (fmtid: (D1: $e0db0807; D2: $8003; D3: $4880; D4: ($ac, $11, $61, $b7, $3f, $33, $dc, $60)); pid: $09);
+  MFPKEY_DATARATE                   :  PROPERTYKEY = (fmtid: (D1: $e0db0807;
+                                                              D2: $8003;
+                                                              D3: $4880;
+                                                              D4: ($ac, $11, $61, $b7, $3f, $33, $dc, $60));
+                                                              pid: $09);
   {$EXTERNALSYM MFPKEY_DATARATE}
-  MFPKEY_KEYDIST                    :  PROPERTYKEY = (fmtid: (D1: $18d6f8c5; D2: $2416; D3: $4d7b; D4: ($90, $d7, $9f, $3f, $21, $e7, $52, $b4)); pid: $0a);
+  MFPKEY_KEYDIST                    :  PROPERTYKEY = (fmtid: (D1: $18d6f8c5;
+                                                              D2: $2416;
+                                                              D3: $4d7b;
+                                                              D4: ($90, $d7, $9f, $3f, $21, $e7, $52, $b4));
+                                                              pid: $0a);
   {$EXTERNALSYM MFPKEY_KEYDIST}
-  MFPKEY_CRISP                      :  PROPERTYKEY = (fmtid: (D1: $2985f772; D2: $3af2; D3: $4d15; D4: ($8c, $fa, $8a, $96, $2f, $f3, $20, $40)); pid: $0b);
+  MFPKEY_CRISP                      :  PROPERTYKEY = (fmtid: (D1: $2985f772;
+                                                              D2: $3af2;
+                                                              D3: $4d15;
+                                                              D4: ($8c, $fa, $8a, $96, $2f, $f3, $20, $40));
+                                                              pid: $0b);
   {$EXTERNALSYM MFPKEY_CRISP}
-  MFPKEY_FOURCC                     :  PROPERTYKEY = (fmtid: (D1: $593e3f2e; D2: $f84d; D3: $4e85; D4: ($b6, $8d, $f6, $69, $40, $0e, $da, $bc)); pid: $0c);
+  MFPKEY_FOURCC                     :  PROPERTYKEY = (fmtid: (D1: $593e3f2e;
+                                                              D2: $f84d;
+                                                              D3: $4e85;
+                                                              D4: ($b6, $8d, $f6, $69, $40, $0e, $da, $bc));
+                                                              pid: $0c);
   {$EXTERNALSYM MFPKEY_FOURCC}
-  MFPKEY_VIDEOWINDOW                :  PROPERTYKEY = (fmtid: (D1: $c1c96060; D2: $76f0; D3: $47d4; D4: ($a8, $75, $5b, $dd, $a9, $0d, $f5, $e9)); pid: $0d);
+  MFPKEY_VIDEOWINDOW                :  PROPERTYKEY = (fmtid: (D1: $c1c96060;
+                                                              D2: $76f0;
+                                                              D3: $47d4;
+                                                              D4: ($a8, $75, $5b, $dd, $a9, $0d, $f5, $e9));
+                                                              pid: $0d);
   {$EXTERNALSYM MFPKEY_VIDEOWINDOW}
-  MFPKEY_FRAMECOUNT                 :  PROPERTYKEY = (fmtid: (D1: $75028eb4; D2: $4853; D3: $44d3; D4: ($88, $a3, $e4, $99, $f8, $9d, $22, $7f)); pid: $0e);
+  MFPKEY_FRAMECOUNT                 :  PROPERTYKEY = (fmtid: (D1: $75028eb4;
+                                                              D2: $4853;
+                                                              D3: $44d3;
+                                                              D4: ($88, $a3, $e4, $99, $f8, $9d, $22, $7f));
+                                                              pid: $0e);
   {$EXTERNALSYM MFPKEY_FRAMECOUNT}
-  MFPKEY_LIVEENCODE                 :  PROPERTYKEY = (fmtid: (D1: $3ffa1e60; D2: $5514; D3: $4634; D4: ($86, $e6, $1f, $3b, $7c, $54, $51, $43)); pid: $0f);
+  MFPKEY_LIVEENCODE                 :  PROPERTYKEY = (fmtid: (D1: $3ffa1e60;
+                                                              D2: $5514;
+                                                              D3: $4634;
+                                                              D4: ($86, $e6, $1f, $3b, $7c, $54, $51, $43));
+                                                              pid: $0f);
   {$EXTERNALSYM MFPKEY_LIVEENCODE}
-  MFPKEY_COMPLEXITY                 :  PROPERTYKEY = (fmtid: (D1: $44fa08c7; D2: $92f5; D3: $45dc; D4: ($83, $76, $8d, $1d, $32, $4c, $65, $2a)); pid: $10);
+  MFPKEY_COMPLEXITY                 :  PROPERTYKEY = (fmtid: (D1: $44fa08c7;
+                                                              D2: $92f5;
+                                                              D3: $45dc;
+                                                              D4: ($83, $76, $8d, $1d, $32, $4c, $65, $2a));
+                                                              pid: $10);
   {$EXTERNALSYM MFPKEY_COMPLEXITY}
-  MFPKEY_COMPLEXITYEX               :  PROPERTYKEY = (fmtid: (D1: $d6e48f93; D2: $fd47; D3: $47a3; D4: ($92, $62, $8a, $ef, $b5, $53, $03, $32)); pid: $11);
+  MFPKEY_COMPLEXITYEX               :  PROPERTYKEY = (fmtid: (D1: $d6e48f93;
+                                                              D2: $fd47;
+                                                              D3: $47a3;
+                                                              D4: ($92, $62, $8a, $ef, $b5, $53, $03, $32));
+                                                              pid: $11);
   {$EXTERNALSYM MFPKEY_COMPLEXITYEX}
-  MFPKEY_ASFOVERHEADPERFRAME        :  PROPERTYKEY = (fmtid: (D1: $0eac7502; D2: $1957; D3: $4beb; D4: ($91, $4d, $88, $5f, $85, $e7, $54, $36)); pid: $12);
+  MFPKEY_ASFOVERHEADPERFRAME        :  PROPERTYKEY = (fmtid: (D1: $0eac7502;
+                                                              D2: $1957;
+                                                              D3: $4beb;
+                                                              D4: ($91, $4d, $88, $5f, $85, $e7, $54, $36));
+                                                              pid: $12);
   {$EXTERNALSYM MFPKEY_ASFOVERHEADPERFRAME}
-  MFPKEY_PASSESUSED                 :  PROPERTYKEY = (fmtid: (D1: $b1653ac1; D2: $cb7d; D3: $43ee; D4: ($84, $54, $3f, $9d, $81, $1b, $03, $31)); pid: $13);
+  MFPKEY_PASSESUSED                 :  PROPERTYKEY = (fmtid: (D1: $b1653ac1;
+                                                              D2: $cb7d;
+                                                              D3: $43ee;
+                                                              D4: ($84, $54, $3f, $9d, $81, $1b, $03, $31));
+                                                              pid: $13);
   {$EXTERNALSYM MFPKEY_PASSESUSED}
-  MFPKEY_VBRENABLED                 :  PROPERTYKEY = (fmtid: (D1: $e48d9459; D2: $6abe; D3: $4eb5; D4: ($92, $11, $60, $08, $0c, $1a, $b9, $84)); pid: $14);
+  MFPKEY_VBRENABLED                 :  PROPERTYKEY = (fmtid: (D1: $e48d9459;
+                                                              D2: $6abe;
+                                                              D3: $4eb5;
+                                                              D4: ($92, $11, $60, $08, $0c, $1a, $b9, $84));
+                                                              pid: $14);
   {$EXTERNALSYM MFPKEY_VBRENABLED}
-  MFPKEY_VBRQUALITY                 :  PROPERTYKEY = (fmtid: (D1: $f97b3f3a; D2: $9eff; D3: $4ac9; D4: ($82, $47, $35, $b3, $0e, $b9, $25, $f4)); pid: $15);
+  MFPKEY_VBRQUALITY                 :  PROPERTYKEY = (fmtid: (D1: $f97b3f3a;
+                                                              D2: $9eff;
+                                                              D3: $4ac9;
+                                                              D4: ($82, $47, $35, $b3, $0e, $b9, $25, $f4));
+                                                              pid: $15);
   {$EXTERNALSYM MFPKEY_VBRQUALITY}
-  MFPKEY_RAVG                       :  PROPERTYKEY = (fmtid: (D1: $14b2aae6; D2: $2987; D3: $460a; D4: ($8b, $22, $9c, $07, $7c, $55, $d0, $5e)); pid: $16);
+  MFPKEY_RAVG                       :  PROPERTYKEY = (fmtid: (D1: $14b2aae6;
+                                                              D2: $2987;
+                                                              D3: $460a;
+                                                              D4: ($8b, $22, $9c, $07, $7c, $55, $d0, $5e));
+                                                              pid: $16);
   {$EXTERNALSYM MFPKEY_RAVG}
-  MFPKEY_BAVG                       :  PROPERTYKEY = (fmtid: (D1: $10174e76; D2: $e0ca; D3: $4a39; D4: ($94, $8c, $85, $10, $c2, $32, $32, $76)); pid: $17);
+  MFPKEY_BAVG                       :  PROPERTYKEY = (fmtid: (D1: $10174e76;
+                                                              D2: $e0ca;
+                                                              D3: $4a39;
+                                                              D4: ($94, $8c, $85, $10, $c2, $32, $32, $76));
+                                                              pid: $17);
   {$EXTERNALSYM MFPKEY_BAVG}
-  MFPKEY_RMAX                       :  PROPERTYKEY = (fmtid: (D1: $7d8dd246; D2: $aaf4; D3: $4a24; D4: ($81, $66, $19, $39, $6b, $06, $ef, $69)); pid: $18);
+  MFPKEY_RMAX                       :  PROPERTYKEY = (fmtid: (D1: $7d8dd246;
+                                                              D2: $aaf4;
+                                                              D3: $4a24;
+                                                              D4: ($81, $66, $19, $39, $6b, $06, $ef, $69));
+                                                              pid: $18);
   {$EXTERNALSYM MFPKEY_RMAX}
-  MFPKEY_BMAX                       :  PROPERTYKEY = (fmtid: (D1: $ff365211; D2: $21b6; D3: $4134; D4: ($ab, $7c, $52, $39, $3a, $8f, $80, $f6)); pid: $19);
+  MFPKEY_BMAX                       :  PROPERTYKEY = (fmtid: (D1: $ff365211;
+                                                              D2: $21b6;
+                                                              D3: $4134;
+                                                              D4: ($ab, $7c, $52, $39, $3a, $8f, $80, $f6));
+                                                              pid: $19);
   {$EXTERNALSYM MFPKEY_BMAX}
-  MFPKEY_INTERLACEDCODINGENABLED    :  PROPERTYKEY = (fmtid: (D1: $56976073; D2: $06c3; D3: $4b3b; D4: ($ad, $41, $b7, $41, $7f, $ce, $84, $74)); pid: $1a);
+  MFPKEY_INTERLACEDCODINGENABLED    :  PROPERTYKEY = (fmtid: (D1: $56976073;
+                                                              D2: $06c3;
+                                                              D3: $4b3b;
+                                                              D4: ($ad, $41, $b7, $41, $7f, $ce, $84, $74));
+                                                              pid: $1a);
   {$EXTERNALSYM MFPKEY_INTERLACEDCODINGENABLED}
-  MFPKEY_PRODUCEDUMMYFRAMES         :  PROPERTYKEY = (fmtid: (D1: $61714bc6; D2: $08a1; D3: $49d1; D4: ($b8, $27, $a3, $3a, $ad, $a9, $55, $26)); pid: $1b);
+  MFPKEY_PRODUCEDUMMYFRAMES         :  PROPERTYKEY = (fmtid: (D1: $61714bc6;
+                                                              D2: $08a1;
+                                                              D3: $49d1;
+                                                              D4: ($b8, $27, $a3, $3a, $ad, $a9, $55, $26));
+                                                              pid: $1b);
   {$EXTERNALSYM MFPKEY_PRODUCEDUMMYFRAMES}
-  MFPKEY_DECODERCOMPLEXITYREQUESTED :  PROPERTYKEY = (fmtid: (D1: $b0d7d4a7; D2: $422b; D3: $44c3; D4: ($97, $b4, $b9, $76, $0c, $ce, $ee, $a9)); pid: $1c);
+  MFPKEY_DECODERCOMPLEXITYREQUESTED :  PROPERTYKEY = (fmtid: (D1: $b0d7d4a7;
+                                                              D2: $422b;
+                                                              D3: $44c3;
+                                                              D4: ($97, $b4, $b9, $76, $0c, $ce, $ee, $a9));
+                                                              pid: $1c);
   {$EXTERNALSYM MFPKEY_DECODERCOMPLEXITYREQUESTED}
-  MFPKEY_DROPPEDFRAMES              :  PROPERTYKEY = (fmtid: (D1: $bdb5afd3; D2: $4027; D3: $4882; D4: ($80, $6c, $41, $62, $e4, $a7, $a3, $f0)); pid: $1d);
+  MFPKEY_DROPPEDFRAMES              :  PROPERTYKEY = (fmtid: (D1: $bdb5afd3;
+                                                              D2: $4027;
+                                                              D3: $4882;
+                                                              D4: ($80, $6c, $41, $62, $e4, $a7, $a3, $f0));
+                                                              pid: $1d);
   {$EXTERNALSYM MFPKEY_DROPPEDFRAMES}
-  MFPKEY_CODEDNONZEROFRAMES         :  PROPERTYKEY = (fmtid: (D1: $7adf5b69; D2: $1e3f; D3: $42d3; D4: ($99, $1d, $f8, $1e, $0c, $eb, $e9, $3e)); pid: $1e);
+  MFPKEY_CODEDNONZEROFRAMES         :  PROPERTYKEY = (fmtid: (D1: $7adf5b69;
+                                                              D2: $1e3f;
+                                                              D3: $42d3;
+                                                              D4: ($99, $1d, $f8, $1e, $0c, $eb, $e9, $3e));
+                                                              pid: $1e);
   {$EXTERNALSYM MFPKEY_CODEDNONZEROFRAMES}
-  MFPKEY_QPPERFRAME                 :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $1f);
+  MFPKEY_QPPERFRAME                 :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $1f);
   {$EXTERNALSYM MFPKEY_QPPERFRAME}
-  MFPKEY_VOLHEADERFORREENCODE       :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $21);
+  MFPKEY_VOLHEADERFORREENCODE       :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $21);
   {$EXTERNALSYM MFPKEY_VOLHEADERFORREENCODE}
-  MFPKEY_REENCDURATION              :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $22);
+  MFPKEY_REENCDURATION              :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $22);
   {$EXTERNALSYM MFPKEY_REENCDURATION}
-  MFPKEY_REENCSTARTBUFFERSIZE       :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $23);
+  MFPKEY_REENCSTARTBUFFERSIZE       :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $23);
   {$EXTERNALSYM MFPKEY_REENCSTARTBUFFERSIZE}
-  MFPKEY_REENCENDBUFFERSIZE         :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $24);
+  MFPKEY_REENCENDBUFFERSIZE         :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $24);
   {$EXTERNALSYM MFPKEY_REENCENDBUFFERSIZE}
-  MFPKEY_REENCQPREF                 :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $25);
+  MFPKEY_REENCQPREF                 :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $25);
   {$EXTERNALSYM MFPKEY_REENCQPREF}
-  MFPKEY_DENOISEOPTION              :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $26);
+  MFPKEY_DENOISEOPTION              :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $26);
   {$EXTERNALSYM MFPKEY_DENOISEOPTION}
-  MFPKEY_FULLFRAMERATE              :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $2d);
+  MFPKEY_FULLFRAMERATE              :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $2d);
   {$EXTERNALSYM MFPKEY_FULLFRAMERATE}
-  MFPKEY_MOTIONSEARCHRANGE          :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $2e);
+  MFPKEY_MOTIONSEARCHRANGE          :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $2e);
   {$EXTERNALSYM MFPKEY_MOTIONSEARCHRANGE}
-  MFPKEY_DELTAMVRANGEINDEX          :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $2f);
+  MFPKEY_DELTAMVRANGEINDEX          :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $2f);
   {$EXTERNALSYM MFPKEY_DELTAMVRANGEINDEX}
-  MFPKEY_NUMBFRAMES                 :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $30);
+  MFPKEY_NUMBFRAMES                 :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $30);
   {$EXTERNALSYM MFPKEY_NUMBFRAMES}
-  MFPKEY_RDSUBPIXELSEARCH           :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $31);
+  MFPKEY_RDSUBPIXELSEARCH           :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $31);
   {$EXTERNALSYM MFPKEY_RDSUBPIXELSEARCH}
-  MFPKEY_BDELTAQP                   :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $32);
+  MFPKEY_BDELTAQP                   :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $32);
   {$EXTERNALSYM MFPKEY_BDELTAQP}
-  MFPKEY_FORCEFRAMEWIDTH            :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $33);
+  MFPKEY_FORCEFRAMEWIDTH            :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $33);
   {$EXTERNALSYM MFPKEY_FORCEFRAMEWIDTH}
-  MFPKEY_FORCEFRAMEHEIGHT           :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $34);
+  MFPKEY_FORCEFRAMEHEIGHT           :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $34);
   {$EXTERNALSYM MFPKEY_FORCEFRAMEHEIGHT}
-  MFPKEY_RANGEREDUX                 :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $35);
+  MFPKEY_RANGEREDUX                 :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $35);
   {$EXTERNALSYM MFPKEY_RANGEREDUX}
-  MFPKEY_LOOKAHEAD                  :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $36);
+  MFPKEY_LOOKAHEAD                  :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $36);
   {$EXTERNALSYM MFPKEY_LOOKAHEAD}
-  MFPKEY_VIDEOSCALING               :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $37);
+  MFPKEY_VIDEOSCALING               :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $37);
   {$EXTERNALSYM MFPKEY_VIDEOSCALING}
-  MFPKEY_PERCEPTUALOPTLEVEL         :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $38);
+  MFPKEY_PERCEPTUALOPTLEVEL         :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $38);
   {$EXTERNALSYM MFPKEY_PERCEPTUALOPTLEVEL}
-  MFPKEY_FORCEMEDIANSETTING         :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $39);
+  MFPKEY_FORCEMEDIANSETTING         :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $39);
   {$EXTERNALSYM MFPKEY_FORCEMEDIANSETTING}
-  MFPKEY_NUMTHREADS                 :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $3a);
+  MFPKEY_NUMTHREADS                 :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $3a);
   {$EXTERNALSYM MFPKEY_NUMTHREADS}
-  MFPKEY_LOOPFILTER                 :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $3b);
+  MFPKEY_LOOPFILTER                 :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $3b);
   {$EXTERNALSYM MFPKEY_LOOPFILTER}
-  MFPKEY_NOISEEDGEREMOVAL           :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $3c);
+  MFPKEY_NOISEEDGEREMOVAL           :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $3c);
   {$EXTERNALSYM MFPKEY_NOISEEDGEREMOVAL}
-  MFPKEY_VTYPE                      :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $3d);
+  MFPKEY_VTYPE                      :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                              D2: $665a;
+                                                              D3: $49da;
+                                                              D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                              pid: $3d);
   {$EXTERNALSYM MFPKEY_VTYPE}
-  MFPKEY_CLOSEDENTRYPOINT            :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $3f);
+  MFPKEY_CLOSEDENTRYPOINT            :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $3f);
   {$EXTERNALSYM MFPKEY_CLOSEDENTRYPOINT}
-  MFPKEY_MOTIONSEARCHLEVEL           :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $40);
+  MFPKEY_MOTIONSEARCHLEVEL           :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $40);
   {$EXTERNALSYM MFPKEY_MOTIONSEARCHLEVEL}
-  MFPKEY_MOTIONMATCHMETHOD           :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $41);
+  MFPKEY_MOTIONMATCHMETHOD           :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $41);
   {$EXTERNALSYM MFPKEY_MOTIONMATCHMETHOD}
-  MFPKEY_MACROBLOCKMODECOSTMETHOD    :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $42);
+  MFPKEY_MACROBLOCKMODECOSTMETHOD    :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $42);
   {$EXTERNALSYM MFPKEY_MACROBLOCKMODECOSTMETHOD}
-  MFPKEY_COMPRESSIONOPTIMIZATIONTYPE :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $43);
+  MFPKEY_COMPRESSIONOPTIMIZATIONTYPE :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $43);
   {$EXTERNALSYM MFPKEY_COMPRESSIONOPTIMIZATIONTYPE}
-  MFPKEY_PERIODICALSPDISTANCE        :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $46);
+  MFPKEY_PERIODICALSPDISTANCE        :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $46);
   {$EXTERNALSYM MFPKEY_PERIODICALSPDISTANCE}
-  MFPKEY_ENCODERCOMPLEXITY           :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $47);
+  MFPKEY_ENCODERCOMPLEXITY           :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $47);
   {$EXTERNALSYM MFPKEY_ENCODERCOMPLEXITY}
-  MFPKEY_USERDATASIZE                :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $48);
+  MFPKEY_USERDATASIZE                :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $48);
   {$EXTERNALSYM MFPKEY_USERDATASIZE}
-  MFPKEY_LETTERBOXPRESENT            :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $49);
+  MFPKEY_LETTERBOXPRESENT            :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $49);
   {$EXTERNALSYM MFPKEY_LETTERBOXPRESENT}
-  MFPKEY_SCENECHANGE                 :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $4a);
+  MFPKEY_SCENECHANGE                 :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $4a);
   {$EXTERNALSYM MFPKEY_SCENECHANGE}
-  MFPKEY_VARIABLEGOP                 :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $4b);
+  MFPKEY_VARIABLEGOP                 :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $4b);
   {$EXTERNALSYM MFPKEY_VARIABLEGOP}
-  MFPKEY_SCENECHANGEI                :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $4c);
+  MFPKEY_SCENECHANGEI                :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $4c);
   {$EXTERNALSYM MFPKEY_SCENECHANGEI}
-  MFPKEY_LOOKAHEADRC                 :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $4d);
+  MFPKEY_LOOKAHEADRC                 :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $4d);
   {$EXTERNALSYM MFPKEY_LOOKAHEADRC}
-  MFPKEY_DQUANTOPTION                :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $4e);
+  MFPKEY_DQUANTOPTION                :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $4e);
   {$EXTERNALSYM MFPKEY_DQUANTOPTION}
-  MFPKEY_DQUANTSTRENGTH              :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $4f);
+  MFPKEY_DQUANTSTRENGTH              :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $4f);
   {$EXTERNALSYM MFPKEY_DQUANTSTRENGTH}
-  MFPKEY_FORCEOVERLAP                :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $50);
+  MFPKEY_FORCEOVERLAP                :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $50);
   {$EXTERNALSYM MFPKEY_FORCEOVERLAP}
-  MFPKEY_MOTIONVECTORCOSTMETHOD      :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $51);
+  MFPKEY_MOTIONVECTORCOSTMETHOD      :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $51);
   {$EXTERNALSYM MFPKEY_MOTIONVECTORCOSTMETHOD}
-  MFPKEY_DYNCOMPLEXLEVEL             :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $52);
+  MFPKEY_DYNCOMPLEXLEVEL             :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $52);
   {$EXTERNALSYM MFPKEY_DYNCOMPLEXLEVEL}
-  MFPKEY_TARGETENCRATE               :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $53);
+  MFPKEY_TARGETENCRATE               :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $53);
   {$EXTERNALSYM MFPKEY_TARGETENCRATE}
-  MFPKEY_DYNENCMODE                  :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $54);
+  MFPKEY_DYNENCMODE                  :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $54);
   {$EXTERNALSYM MFPKEY_DYNENCMODE}
-  MFPKEY_TARGETENCDELTA              :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $55);
+  MFPKEY_TARGETENCDELTA              :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $55);
   {$EXTERNALSYM MFPKEY_TARGETENCDELTA}
-  MFPKEY_ADAPTIVERESOLUTION          :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $56);
+  MFPKEY_ADAPTIVERESOLUTION          :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $56);
   {$EXTERNALSYM MFPKEY_ADAPTIVERESOLUTION}
-  MFPKEY_SETDYNVIDRES                :  PROPERTYKEY = (fmtid: (D1: $4e91bf89; D2: $665a; D3: $49da; D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28)); pid: $57);
+  MFPKEY_SETDYNVIDRES                :  PROPERTYKEY = (fmtid: (D1: $4e91bf89;
+                                                               D2: $665a;
+                                                               D3: $49da;
+                                                               D4: ($bb, $94, $88, $c5, $50, $cf, $cd, $28));
+                                                               pid: $57);
   {$EXTERNALSYM MFPKEY_SETDYNVIDRES}
 
-  MFPKEY_CLIP_XORIG                 :  PROPERTYKEY = (fmtid: (D1: $716fe5c8; D2: $755c; D3: $482f; D4: ($8d, $f3, $b3, $1d, $53, $59, $f0, $d6)); pid: $01);
+  MFPKEY_CLIP_XORIG                 :  PROPERTYKEY = (fmtid: (D1: $716fe5c8;
+                                                              D2: $755c;
+                                                              D3: $482f;
+                                                              D4: ($8d, $f3, $b3, $1d, $53, $59, $f0, $d6));
+                                                              pid: $01);
   {$EXTERNALSYM MFPKEY_CLIP_XORIG}
-  MFPKEY_CLIP_YORIG                 :  PROPERTYKEY = (fmtid: (D1: $716fe5c8; D2: $755c; D3: $482f; D4: ($8d, $f3, $b3, $1d, $53, $59, $f0, $d6)); pid: $02);
+  MFPKEY_CLIP_YORIG                 :  PROPERTYKEY = (fmtid: (D1: $716fe5c8;
+                                                              D2: $755c;
+                                                              D3: $482f;
+                                                              D4: ($8d, $f3, $b3, $1d, $53, $59, $f0, $d6));
+                                                              pid: $02);
   {$EXTERNALSYM MFPKEY_CLIP_YORIG}
-  MFPKEY_CLIP_WIDTH                 :  PROPERTYKEY = (fmtid: (D1: $716fe5c8; D2: $755c; D3: $482f; D4: ($8d, $f3, $b3, $1d, $53, $59, $f0, $d6)); pid: $03);
+  MFPKEY_CLIP_WIDTH                 :  PROPERTYKEY = (fmtid: (D1: $716fe5c8;
+                                                              D2: $755c;
+                                                              D3: $482f;
+                                                              D4: ($8d, $f3, $b3, $1d, $53, $59, $f0, $d6));
+                                                              pid: $03);
   {$EXTERNALSYM MFPKEY_CLIP_WIDTH}
-  MFPKEY_CLIP_HEIGHT                :  PROPERTYKEY = (fmtid: (D1: $716fe5c8; D2: $755c; D3: $482f; D4: ($8d, $f3, $b3, $1d, $53, $59, $f0, $d6)); pid: $04);
+  MFPKEY_CLIP_HEIGHT                :  PROPERTYKEY = (fmtid: (D1: $716fe5c8;
+                                                              D2: $755c;
+                                                              D3: $482f;
+                                                              D4: ($8d, $f3, $b3, $1d, $53, $59, $f0, $d6));
+                                                              pid: $04);
   {$EXTERNALSYM MFPKEY_CLIP_HEIGHT}
 
-  MFPKEY_FI_FRAMERATE_VALU_SRC      :  PROPERTYKEY = (fmtid: (D1: $305bca55; D2: $1e5b; D3: $428e; D4: ($a9, $4c, $65, $b9, $4d, $2, $64, $ed)); pid: $01);
+  MFPKEY_FI_FRAMERATE_VALU_SRC      :  PROPERTYKEY = (fmtid: (D1: $305bca55;
+                                                              D2: $1e5b;
+                                                              D3: $428e;
+                                                              D4: ($a9, $4c, $65, $b9, $4d, $2, $64, $ed));
+                                                              pid: $01);
   {$EXTERNALSYM MFPKEY_FI_FRAMERATE_VALU_SRC}
-  MFPKEY_FI_FRAMERATE_SCAL_SRC      :  PROPERTYKEY = (fmtid: (D1: $305bca55; D2: $1e5b; D3: $428e; D4: ($a9, $4c, $65, $b9, $4d, $2, $64, $ed)); pid: $02);
+  MFPKEY_FI_FRAMERATE_SCAL_SRC      :  PROPERTYKEY = (fmtid: (D1: $305bca55;
+                                                              D2: $1e5b;
+                                                              D3: $428e;
+                                                              D4: ($a9, $4c, $65, $b9, $4d, $2, $64, $ed));
+                                                              pid: $02);
   {$EXTERNALSYM MFPKEY_FI_FRAMERATE_SCAL_SRC}
-  MFPKEY_FI_FRAMERATE_VALU_DST      :  PROPERTYKEY = (fmtid: (D1: $305bca55; D2: $1e5b; D3: $428e; D4: ($a9, $4c, $65, $b9, $4d, $2, $64, $ed)); pid: $03);
+  MFPKEY_FI_FRAMERATE_VALU_DST      :  PROPERTYKEY = (fmtid: (D1: $305bca55;
+                                                              D2: $1e5b;
+                                                              D3: $428e;
+                                                              D4: ($a9, $4c, $65, $b9, $4d, $2, $64, $ed));
+                                                              pid: $03);
   {$EXTERNALSYM MFPKEY_FI_FRAMERATE_VALU_DST}
-  MFPKEY_FI_FRAMERATE_SCAL_DST      :  PROPERTYKEY = (fmtid: (D1: $305bca55; D2: $1e5b; D3: $428e; D4: ($a9, $4c, $65, $b9, $4d, $2, $64, $ed)); pid: $04);
+  MFPKEY_FI_FRAMERATE_SCAL_DST      :  PROPERTYKEY = (fmtid: (D1: $305bca55;
+                                                              D2: $1e5b;
+                                                              D3: $428e;
+                                                              D4: ($a9, $4c, $65, $b9, $4d, $2, $64, $ed));
+                                                              pid: $04);
   {$EXTERNALSYM MFPKEY_FI_FRAMERATE_SCAL_DST}
-  MFPKEY_FI_ALLOWED                 :  PROPERTYKEY = (fmtid: (D1: $305bca55; D2: $1e5b; D3: $428e; D4: ($a9, $4c, $65, $b9, $4d, $2, $64, $ed)); pid: $05);
+  MFPKEY_FI_ALLOWED                 :  PROPERTYKEY = (fmtid: (D1: $305bca55;
+                                                              D2: $1e5b;
+                                                              D3: $428e;
+                                                              D4: ($a9, $4c, $65, $b9, $4d, $2, $64, $ed));
+                                                              pid: $05);
   {$EXTERNALSYM MFPKEY_FI_ALLOWED}
-  MFPKEY_FI_COMPLEXITY              :  PROPERTYKEY = (fmtid: (D1: $305bca55; D2: $1e5b; D3: $428e; D4: ($a9, $4c, $65, $b9, $4d, $2, $64, $ed)); pid: $06);
+  MFPKEY_FI_COMPLEXITY              :  PROPERTYKEY = (fmtid: (D1: $305bca55;
+                                                              D2: $1e5b;
+                                                              D3: $428e;
+                                                              D4: ($a9, $4c, $65, $b9, $4d, $2, $64, $ed));
+                                                              pid: $06);
   {$EXTERNALSYM MFPKEY_FI_COMPLEXITY}
 
-  MFPKEY_RESIZE_SRC_LEFT        :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $01);
+  MFPKEY_RESIZE_SRC_LEFT        :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $01);
   {$EXTERNALSYM MFPKEY_RESIZE_SRC_LEFT}
-  MFPKEY_RESIZE_SRC_TOP         :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $02);
+  MFPKEY_RESIZE_SRC_TOP         :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $02);
   {$EXTERNALSYM MFPKEY_RESIZE_SRC_TOP}
-  MFPKEY_RESIZE_SRC_WIDTH       :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $03);
+  MFPKEY_RESIZE_SRC_WIDTH       :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $03);
   {$EXTERNALSYM MFPKEY_RESIZE_SRC_WIDTH}
-  MFPKEY_RESIZE_SRC_HEIGHT      :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $04);
+  MFPKEY_RESIZE_SRC_HEIGHT      :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $04);
   {$EXTERNALSYM MFPKEY_RESIZE_SRC_HEIGHT}
-  MFPKEY_RESIZE_DST_LEFT        :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $05);
+  MFPKEY_RESIZE_DST_LEFT        :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $05);
   {$EXTERNALSYM MFPKEY_RESIZE_DST_LEFT}
-  MFPKEY_RESIZE_DST_TOP         :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $06);
+  MFPKEY_RESIZE_DST_TOP         :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $06);
   {$EXTERNALSYM MFPKEY_RESIZE_DST_TOP}
-  MFPKEY_RESIZE_DST_WIDTH       :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $07);
+  MFPKEY_RESIZE_DST_WIDTH       :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $07);
   {$EXTERNALSYM MFPKEY_RESIZE_DST_WIDTH}
-  MFPKEY_RESIZE_DST_HEIGHT      :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $08);
+  MFPKEY_RESIZE_DST_HEIGHT      :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $08);
   {$EXTERNALSYM MFPKEY_RESIZE_DST_HEIGHT}
-  MFPKEY_RESIZE_QUALITY         :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $09);
+  MFPKEY_RESIZE_QUALITY         :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $09);
   {$EXTERNALSYM MFPKEY_RESIZE_QUALITY}
-  MFPKEY_RESIZE_INTERLACE       :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $0a);
+  MFPKEY_RESIZE_INTERLACE       :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $0a);
   {$EXTERNALSYM MFPKEY_RESIZE_INTERLACE}
-  MFPKEY_RESIZE_PANSCANAPX      :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $0b);
+  MFPKEY_RESIZE_PANSCANAPX      :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $0b);
   {$EXTERNALSYM MFPKEY_RESIZE_PANSCANAPX}
-  MFPKEY_RESIZE_PANSCANAPY      :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $0c);
+  MFPKEY_RESIZE_PANSCANAPY      :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $0c);
   {$EXTERNALSYM MFPKEY_RESIZE_PANSCANAPY}
-  MFPKEY_RESIZE_PANSCANAPWIDTH  :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $0d);
+  MFPKEY_RESIZE_PANSCANAPWIDTH  :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $0d);
   {$EXTERNALSYM MFPKEY_RESIZE_PANSCANAPWIDTH}
-  MFPKEY_RESIZE_PANSCANAPHEIGHT :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $0e);
+  MFPKEY_RESIZE_PANSCANAPHEIGHT :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $0e);
   {$EXTERNALSYM MFPKEY_RESIZE_PANSCANAPHEIGHT}
-  MFPKEY_RESIZE_GEOMAPX         :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $0f);
+  MFPKEY_RESIZE_GEOMAPX         :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $0f);
   {$EXTERNALSYM MFPKEY_RESIZE_GEOMAPX}
-  MFPKEY_RESIZE_GEOMAPY         :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $10);
+  MFPKEY_RESIZE_GEOMAPY         :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $10);
   {$EXTERNALSYM MFPKEY_RESIZE_GEOMAPY}
-  MFPKEY_RESIZE_GEOMAPWIDTH     :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $11);
+  MFPKEY_RESIZE_GEOMAPWIDTH     :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $11);
   {$EXTERNALSYM MFPKEY_RESIZE_GEOMAPWIDTH}
-  MFPKEY_RESIZE_GEOMAPHEIGHT    :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $12);
+  MFPKEY_RESIZE_GEOMAPHEIGHT    :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $12);
   {$EXTERNALSYM MFPKEY_RESIZE_GEOMAPHEIGHT}
-  MFPKEY_RESIZE_MINAPX          :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $13);
+  MFPKEY_RESIZE_MINAPX          :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $13);
   {$EXTERNALSYM MFPKEY_RESIZE_MINAPX}
-  MFPKEY_RESIZE_MINAPY          :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $14);
+  MFPKEY_RESIZE_MINAPY          :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $14);
   {$EXTERNALSYM MFPKEY_RESIZE_MINAPY}
-  MFPKEY_RESIZE_MINAPWIDTH      :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $15);
+  MFPKEY_RESIZE_MINAPWIDTH      :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $15);
   {$EXTERNALSYM MFPKEY_RESIZE_MINAPWIDTH}
-  MFPKEY_RESIZE_MINAPHEIGHT     :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $16);
+  MFPKEY_RESIZE_MINAPHEIGHT     :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $16);
   {$EXTERNALSYM MFPKEY_RESIZE_MINAPHEIGHT}
-  MFPKEY_PIXELASPECTRATIO       :  PROPERTYKEY = (fmtid: (D1: $6612a6bc; D2: $e57d; D3: $407d; D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00)); pid: $17);
+  MFPKEY_PIXELASPECTRATIO       :  PROPERTYKEY = (fmtid: (D1: $6612a6bc;
+                                                          D2: $e57d;
+                                                          D3: $407d;
+                                                          D4: ($a9, $58, $28, $5d, $f0, $d9, $b4, $00));
+                                                          pid: $17);
   {$EXTERNALSYM MFPKEY_PIXELASPECTRATIO}
 
-  MFPKEY_COLORCONV_SRCLEFT      :  PROPERTYKEY = (fmtid: (D1: $dc9100be; D2: $1228; D3: $416c; D4: ($99, $48, $6f, $38, $f4, $79, $65, $4f)); pid: $01);
+  MFPKEY_COLORCONV_SRCLEFT      :  PROPERTYKEY = (fmtid: (D1: $dc9100be;
+                                                          D2: $1228;
+                                                          D3: $416c;
+                                                          D4: ($99, $48, $6f, $38, $f4, $79, $65, $4f));
+                                                          pid: $01);
   {$EXTERNALSYM MFPKEY_COLORCONV_SRCLEFT}
-  MFPKEY_COLORCONV_SRCTOP       :  PROPERTYKEY = (fmtid: (D1: $dc9100be; D2: $1228; D3: $416c; D4: ($99, $48, $6f, $38, $f4, $79, $65, $4f)); pid: $02);
+  MFPKEY_COLORCONV_SRCTOP       :  PROPERTYKEY = (fmtid: (D1: $dc9100be;
+                                                          D2: $1228;
+                                                          D3: $416c;
+                                                          D4: ($99, $48, $6f, $38, $f4, $79, $65, $4f));
+                                                          pid: $02);
   {$EXTERNALSYM MFPKEY_COLORCONV_SRCTOP}
-  MFPKEY_COLORCONV_DSTLEFT      :  PROPERTYKEY = (fmtid: (D1: $dc9100be; D2: $1228; D3: $416c; D4: ($99, $48, $6f, $38, $f4, $79, $65, $4f)); pid: $03);
+  MFPKEY_COLORCONV_DSTLEFT      :  PROPERTYKEY = (fmtid: (D1: $dc9100be;
+                                                          D2: $1228;
+                                                          D3: $416c;
+                                                          D4: ($99, $48, $6f, $38, $f4, $79, $65, $4f));
+                                                          pid: $03);
   {$EXTERNALSYM MFPKEY_COLORCONV_DSTLEFT}
-  MFPKEY_COLORCONV_DSTTOP       :  PROPERTYKEY = (fmtid: (D1: $dc9100be; D2: $1228; D3: $416c; D4: ($99, $48, $6f, $38, $f4, $79, $65, $4f)); pid: $04);
+  MFPKEY_COLORCONV_DSTTOP       :  PROPERTYKEY = (fmtid: (D1: $dc9100be;
+                                                          D2: $1228;
+                                                          D3: $416c;
+                                                          D4: ($99, $48, $6f, $38, $f4, $79, $65, $4f));
+                                                          pid: $04);
   {$EXTERNALSYM MFPKEY_COLORCONV_DSTTOP}
-  MFPKEY_COLORCONV_WIDTH        :  PROPERTYKEY = (fmtid: (D1: $dc9100be; D2: $1228; D3: $416c; D4: ($99, $48, $6f, $38, $f4, $79, $65, $4f)); pid: $05);
+  MFPKEY_COLORCONV_WIDTH        :  PROPERTYKEY = (fmtid: (D1: $dc9100be;
+                                                          D2: $1228;
+                                                          D3: $416c;
+                                                          D4: ($99, $48, $6f, $38, $f4, $79, $65, $4f));
+                                                          pid: $05);
   {$EXTERNALSYM MFPKEY_COLORCONV_WIDTH}
-  MFPKEY_COLORCONV_HEIGHT       :  PROPERTYKEY = (fmtid: (D1: $dc9100be; D2: $1228; D3: $416c; D4: ($99, $48, $6f, $38, $f4, $79, $65, $4f)); pid: $06);
+  MFPKEY_COLORCONV_HEIGHT       :  PROPERTYKEY = (fmtid: (D1: $dc9100be;
+                                                          D2: $1228;
+                                                          D3: $416c;
+                                                          D4: ($99, $48, $6f, $38, $f4, $79, $65, $4f));
+                                                          pid: $06);
   {$EXTERNALSYM MFPKEY_COLORCONV_HEIGHT}
-  MFPKEY_COLORCONV_MODE         :  PROPERTYKEY = (fmtid: (D1: $dc9100be; D2: $1228; D3: $416c; D4: ($99, $48, $6f, $38, $f4, $79, $65, $4f)); pid: $07);
+  MFPKEY_COLORCONV_MODE         :  PROPERTYKEY = (fmtid: (D1: $dc9100be;
+                                                          D2: $1228;
+                                                          D3: $416c;
+                                                          D4: ($99, $48, $6f, $38, $f4, $79, $65, $4f));
+                                                          pid: $07);
   {$EXTERNALSYM MFPKEY_COLORCONV_MODE}
 
-  MFPKEY_DEINTERLACE_PROCESSTYPE     :  PROPERTYKEY = (fmtid: (D1: $6141f4c3; D2: $d3a2; D3: $48a9; D4: ($96, $ac, $2f, $0, $14, $17, $6c, $26)); pid: 01);
+  MFPKEY_DEINTERLACE_PROCESSTYPE     :  PROPERTYKEY = (fmtid: (D1: $6141f4c3;
+                                                               D2: $d3a2;
+                                                               D3: $48a9;
+                                                               D4: ($96, $ac, $2f, $0, $14, $17, $6c, $26));
+                                                               pid: 01);
   {$EXTERNALSYM MFPKEY_DEINTERLACE_PROCESSTYPE}
-  MFPKEY_DEINTERLACE_TELECINEPATTERN :  PROPERTYKEY = (fmtid: (D1: $6141f4c3; D2: $d3a2; D3: $48a9; D4: ($96, $ac, $2f, $0, $14, $17, $6c, $26)); pid: 02);
+  MFPKEY_DEINTERLACE_TELECINEPATTERN :  PROPERTYKEY = (fmtid: (D1: $6141f4c3;
+                                                               D2: $d3a2;
+                                                               D3: $48a9;
+                                                               D4: ($96, $ac, $2f, $0, $14, $17, $6c, $26));
+                                                               pid: 02);
   {$EXTERNALSYM MFPKEY_DEINTERLACE_TELECINEPATTERN}
-  MFPKEY_DEINTERLACE_LASTFRAME       :  PROPERTYKEY = (fmtid: (D1: $6141f4c3; D2: $d3a2; D3: $48a9; D4: ($96, $ac, $2f, $0, $14, $17, $6c, $26)); pid: 03);
+  MFPKEY_DEINTERLACE_LASTFRAME       :  PROPERTYKEY = (fmtid: (D1: $6141f4c3;
+                                                               D2: $d3a2;
+                                                               D3: $48a9;
+                                                               D4: ($96, $ac, $2f, $0, $14, $17, $6c, $26));
+                                                               pid: 03);
   {$EXTERNALSYM MFPKEY_DEINTERLACE_LASTFRAME}
-  MFPKEY_DEINTERLACE_DETELECINE_FLAG :  PROPERTYKEY = (fmtid: (D1: $6141f4c3; D2: $d3a2; D3: $48a9; D4: ($96, $ac, $2f, $0, $14, $17, $6c, $26)); pid: 04);
+  MFPKEY_DEINTERLACE_DETELECINE_FLAG :  PROPERTYKEY = (fmtid: (D1: $6141f4c3;
+                                                               D2: $d3a2;
+                                                               D3: $48a9;
+                                                               D4: ($96, $ac, $2f, $0, $14, $17, $6c, $26));
+                                                               pid: 04);
   {$EXTERNALSYM MFPKEY_DEINTERLACE_DETELECINE_FLAG}
-  MFPKEY_DEINTERLACE_SMOOTHLEVEL     :  PROPERTYKEY = (fmtid: (D1: $6141f4c3; D2: $d3a2; D3: $48a9; D4: ($96, $ac, $2f, $0, $14, $17, $6c, $26)); pid: 05);
+  MFPKEY_DEINTERLACE_SMOOTHLEVEL     :  PROPERTYKEY = (fmtid: (D1: $6141f4c3;
+                                                               D2: $d3a2;
+                                                               D3: $48a9;
+                                                               D4: ($96, $ac, $2f, $0, $14, $17, $6c, $26));
+                                                               pid: 05);
   {$EXTERNALSYM MFPKEY_DEINTERLACE_SMOOTHLEVEL}
-  MFPKEY_DEINTERLACE_EDGETHRESHOLD   :  PROPERTYKEY = (fmtid: (D1: $6141f4c3; D2: $d3a2; D3: $48a9; D4: ($96, $ac, $2f, $0, $14, $17, $6c, $26)); pid: 06);
+  MFPKEY_DEINTERLACE_EDGETHRESHOLD   :  PROPERTYKEY = (fmtid: (D1: $6141f4c3;
+                                                               D2: $d3a2;
+                                                               D3: $48a9;
+                                                               D4: ($96, $ac, $2f, $0, $14, $17, $6c, $26));
+                                                               pid: 06);
   {$EXTERNALSYM MFPKEY_DEINTERLACE_EDGETHRESHOLD}
 
-  MFPKEY_DVDEC_SIZE   :  PROPERTYKEY = (fmtid: (D1: $75f2421a; D2: $e73a; D3: $45b3; D4: ($ae, $f0, $91, $3c, $66, $84, $64, $61)); pid: $00);
+  MFPKEY_DVDEC_SIZE   :  PROPERTYKEY = (fmtid: (D1: $75f2421a;
+                                                D2: $e73a;
+                                                D3: $45b3;
+                                                D4: ($ae, $f0, $91, $3c, $66, $84, $64, $61));
+                                                pid: $00);
   {$EXTERNALSYM MFPKEY_DVDEC_SIZE}
-  MFPKEY_DVENC_FORMAT :  PROPERTYKEY = (fmtid: (D1: $f449a927; D2: $7b22; D3: $46ef; D4: ($b2, $e7, $4d, $2b, $72, $8b, $69, $9c)); pid: $00);
+  MFPKEY_DVENC_FORMAT :  PROPERTYKEY = (fmtid: (D1: $f449a927;
+                                                D2: $7b22;
+                                                D3: $46ef;
+                                                D4: ($b2, $e7, $4d, $2b, $72, $8b, $69, $9c));
+                                                pid: $00);
   {$EXTERNALSYM MFPKEY_DVENC_FORMAT}
 
 
@@ -1915,6 +3194,10 @@ const
   {$EXTERNALSYM CLSID_CWMAudioLFXAPO}
   CLSID_CWMAudioGFXAPO          :  TGUID = '{637c490d-eee3-4c0a-973f-371958802da2}';
   {$EXTERNALSYM CLSID_CWMAudioGFXAPO}
+  CLSID_CWMAudioCAPXLFXAPO      :  TGUID = '{C9453E73-8C5C-4463-9984-AF8BAB2F5447}';
+  {$EXTERNALSYM CLSID_CWMAudioCAPXLFXAPO}
+  CLSID_CWMAudioCAPXGFXAPO      :  TGUID = '{13AB3EBD-137E-4903-9D89-60BE8277FD17}';
+  {$EXTERNALSYM CLSID_CWMAudioCAPXGFXAPO}
   CLSID_CWMAudioSpdTxDMO        :  TGUID = '{5210f8e4-b0bb-47c3-a8d9-7b2282cc79ed}';
   {$EXTERNALSYM CLSID_CWMAudioSpdTxDMO}
   CLSID_CWMAudioAEC             :  TGUID = '{745057c7-f353-4f2d-a7ee-58434477730e}';
