@@ -468,6 +468,7 @@ begin
     Pointer(IUnknown(Obj)) := Nil;
 end;
 
+
 // From DS, same as SafeDelete
 procedure FreeAndNil(var Obj);
 begin
@@ -476,7 +477,6 @@ end;
 
 // Frees an Object reference and sets this reference to zero.
 // This is actually the same method as FeeAndNil as used in DirectShow.
-// NOTE: Use SafeRelease for freeing an interfaced object!
 procedure SafeDelete(var Obj);
 var
   Tmp: TObject;
