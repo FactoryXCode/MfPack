@@ -576,8 +576,8 @@ type
     MF_MEDIA_ENGINE_EVENT_OPMINFO            = 1011,
     MF_MEDIA_ENGINE_EVENT_RESOURCELOST       = 1012,
     MF_MEDIA_ENGINE_EVENT_DELAYLOADEVENT_CHANGED  = 1013,
-    MF_MEDIA_ENGINE_EVENT_STREAMRENDERINGERROR	  = 1014,
-    MF_MEDIA_ENGINE_EVENT_SUPPORTEDRATES_CHANGED	= 1015,
+    MF_MEDIA_ENGINE_EVENT_STREAMRENDERINGERROR    = 1014,
+    MF_MEDIA_ENGINE_EVENT_SUPPORTEDRATES_CHANGED  = 1015,
     MF_MEDIA_ENGINE_EVENT_AUDIOENDPOINTCHANGE     = 1016
   );
   {$EXTERNALSYM MF_MEDIA_ENGINE_EVENT}
@@ -842,9 +842,9 @@ type
     // For protected content, call the IMFMediaEngineProtectedContent.TransferVideoFrame method
     // instead of this method.
     function TransferVideoFrame(pDstSurf: IUnknown; // Delphi note: Pass the parameter as IUnknown(DXGI or WICbitmap interface)
-                         {opt}  pSrc: PMFVideoNormalizedRect;
-                         {opt}  pDst: PRECT;
-                                pBorderClr: MFARGB): HResult; stdcall;
+                         {opt}  pSrc: PMFVideoNormalizedRect;  // A pointer to an MFVideoNormalizedRect structure that specifies the source rectangle.
+                         {opt}  pDst: PRECT;                   // A pointer to a TRect structure that specifies the destination rectangle.
+                                pBorderClr: MFARGB): HResult; stdcall;   // A pointer to an MFARGB structure that specifies the border color.
 
     // If a new frame is ready, receives the presentation time of the frame.
     //
