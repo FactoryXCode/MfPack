@@ -382,17 +382,20 @@ type
   {$EXTERNALSYM IDCompositionVisual}
   IDCompositionVisual = interface(IUnknown)
   ['{4d93059d-097b-4651-9a60-f0f25116e2f3}']
-    // Changes the value of OffsetX property
-    function SetOffsetX(offsetX: Single): HResult; stdcall;
+    // IDCompositionVisual2::SetOffsetX and SetOffsetY methods are flipped in SDK + metadata
+    // https://github.com/microsoft/win32metadata/issues/600
 
     // Animates the value of the OffsetX property.
     function _SetOffsetX(animation: IDCompositionAnimation): HResult; stdcall;
 
-    // Changes the value of OffsetY property
-    function SetOffsetY(offsetY: Single): HResult; stdcall;
+    // Changes the value of OffsetX property
+    function SetOffsetX(offsetX: Single): HResult; stdcall;
 
     // Animates the value of the OffsetY property.
     function _SetOffsetY(animation: IDCompositionAnimation): HResult; stdcall;
+
+    // Changes the value of OffsetY property
+    function SetOffsetY(offsetY: Single): HResult; stdcall;
 
     // Sets the matrix that modifies the coordinate system of this visual.
     function SetTransform(matrix: D2D_MATRIX_3X2_F): HResult; stdcall;
