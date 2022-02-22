@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: � FactoryX. All rights reserved.
+// Copyright: © FactoryX. All rights reserved.
 //
 // Project: WinApi.DirectX - DirectComposition
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 //
 // Description: Enables high-performance bitmap composition with transforms,
 //              effects, and animations.
@@ -18,7 +18,7 @@
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
-//
+//                 Salvador Díaz Fau (salvadordf)
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 8 or later.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
