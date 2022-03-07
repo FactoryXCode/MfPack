@@ -470,9 +470,6 @@ begin
   // Close the media foundation platform and end COM
   { void } CloseMF();
 
-
-  //FContentProtectionManager._Release;
- // SafeRelease(FContentProtectionManager);
   FContentProtectionManager.Destroy();
   if FWnd <> 0 then
     CloseWindow(FWnd);
@@ -559,7 +556,8 @@ begin
     { void } FMediaEngine.Play();
 
   FMediaEngine.GetNativeVideoSize(FVideoWidth, FVideoHeight);
-  TThread.Synchronize(nil, DoResized);
+  TThread.Synchronize(Nil,
+                      DoResized);
 end;
 
 procedure TMediaEngine.OnCanPlayThrough(event: DWORD);
@@ -589,9 +587,13 @@ begin
 
     case FAction of
       caNone:
-        ;
+        begin
+          {Do something here}
+        end;
       caSetCurrentTime:
-        FMediaEngine.SetCurrentTime(FSetCurrentTime);
+        begin
+          FMediaEngine.SetCurrentTime(FSetCurrentTime);
+        end;
       caResize:
         begin
           FMediaEngine.UpdateVideoStream(nil, @FRect, nil);
@@ -621,7 +623,8 @@ begin
   try
     FSetCurrentTime := AValue;
     FAction := caSetCurrentTime;
-    WaitForSingleObject(FWnd, INFINITE);
+    WaitForSingleObject(FWnd,
+                        INFINITE);
   finally
     FLock.Leave;
   end;
@@ -1026,19 +1029,18 @@ begin
 
         // If the status code is NS_E_DRM_LICENSE_NOTACQUIRED,
         // we need to try non-silent enable.
-        if FContentProtectionManager.GetStatus = NS_E_DRM_LICENSE_NOTACQUIRED
-        then
-        begin
-          // Silent enabler failed, attempting non-silent.
-          FContentProtectionManager.DoEnable(ForceNonSilent);
-          // Try non-silent this time;
-        end
+        if FContentProtectionManager.GetStatus = NS_E_DRM_LICENSE_NOTACQUIRED then
+          begin
+            // Silent enabler failed, attempting non-silent.
+            FContentProtectionManager.DoEnable(ForceNonSilent);
+            // Try non-silent this time;
+          end
         else
-        begin
-          // Complete the operation. If it succeeded, the content will play.
-          // If it failed, the pipeline will queue an event with an error code.
-          FContentProtectionManager.CompleteEnable();
-        end;
+          begin
+            // Complete the operation. If it succeeded, the content will play.
+            // If it failed, the pipeline will queue an event with an error code.
+            FContentProtectionManager.CompleteEnable();
+          end;
       end;
 
     NonSilentInProgress:
@@ -1074,11 +1076,13 @@ begin
   FVideoHeight := 0;
 end;
 
+
 procedure TMediaEngine.Clear;
 begin
   FlushPlayer;
   FFilename := '';
 end;
+
 
 function TMediaEngine.Play(): HResult;
 begin
@@ -1097,105 +1101,117 @@ begin
 end;
 
 
-  procedure TMediaEngine.Pause();
-  begin
-    // Send request required, as this is an async method
-    // The request will be handled during the ontime eventhandler
-    if assigned(FMediaEngine) then
-      FMediaEngine.Pause;
-    FrameStep(true);
-  end;
+procedure TMediaEngine.Pause();
+begin
+  // Send request required, as this is an async method
+  // The request will be handled during the ontime eventhandler
+  if assigned(FMediaEngine) then
+    FMediaEngine.Pause;
+  FrameStep(true);
+end;
 
 
-  // This needs some explanation:
-  // There is a slight difference between stop or pause,
-  // At stop the mediafile will be reset to it's begin and starts all over again when playbutton is pressed.
-  procedure TMediaEngine.Stop();
-  begin
-    if assigned(FMediaEngine) and SUCCEEDED(FMediaEngine.Pause()) then
-      FMediaEngine.SetCurrentTime(0.0);
-  end;
+// This needs some explanation:
+// There is a slight difference between stop or pause,
+// At stop the mediafile will be reset to it's begin and starts all over again when playbutton is pressed.
+procedure TMediaEngine.Stop();
+begin
+  if assigned(FMediaEngine) and SUCCEEDED(FMediaEngine.Pause()) then
+    FMediaEngine.SetCurrentTime(0.0);
+end;
 
-  function TMediaEngine.IsProtected: Boolean;
-  var
-    bProt: LongBool;
-  begin
-    Result := assigned(FMediaEngine) and
-      SUCCEEDED(FMediaEngine.IsProtected(bProt)) and bProt;
-  end;
 
-  // This will free al resources kept by the MediaEngine.
-  // The caller has to release the player object and re-initialize,
-  // before playing a new mediasource.
-  procedure TMediaEngine.FlushPlayer();
-  begin
-    if assigned(FMediaEngine) then
-      FMediaEngine.Shutdown()
-  end;
+function TMediaEngine.IsProtected: Boolean;
+var
+  bProt: LongBool;
 
-  function TMediaEngine.GetVolume: double;
-  begin
-    if assigned(FMediaEngine) then
-      Result := FMediaEngine.GetVolume
-    else
-      Result := 0;
-  end;
+begin
+  Result := assigned(FMediaEngine) and
+    SUCCEEDED(FMediaEngine.IsProtected(bProt)) and bProt;
+end;
 
-  procedure TMediaEngine.SetVolume(dVol: double);
+
+// This will free al resources kept by the MediaEngine.
+// The caller has to release the player object and re-initialize,
+// before playing a new mediasource.
+procedure TMediaEngine.FlushPlayer();
+begin
+  if assigned(FMediaEngine) then
+    FMediaEngine.Shutdown()
+end;
+
+
+function TMediaEngine.GetVolume: double;
+begin
+  if assigned(FMediaEngine) then
+    Result := FMediaEngine.GetVolume
+  else
+    Result := 0;
+end;
+
+
+procedure TMediaEngine.SetVolume(dVol: double);
   begin
     if assigned(FMediaEngine) then
       FMediaEngine.SetVolume(dVol);
   end;
 
-  procedure TMediaEngine.SetBalance(dBal: double);
-  begin
-    if assigned(FMediaEngine) then
-      FMediaEngine.SetBalance(dBal);
-  end;
 
-  function TMediaEngine.Mute(var bMute: BOOL): HResult;
-  begin
-    Result := FMediaEngine.SetMuted(bMute);
-    // Return the mute state
-    bMute := FMediaEngine.GetMuted();
-  end;
+procedure TMediaEngine.SetBalance(dBal: double);
+begin
+  if assigned(FMediaEngine) then
+    FMediaEngine.SetBalance(dBal);
+end;
 
-  // Use framestep after pause, to get an accurate playback position
-  // See: https://docs.microsoft.com/en-us/windows/win32/api/mfmediaengine/nf-mfmediaengine-imfmediaengine-getcurrenttime
-  function TMediaEngine.FrameStep(goForward: BOOL): HResult;
-  begin
-    Result := FMediaEngine.FrameStep(goForward);
-  end;
+function TMediaEngine.Mute(var bMute: BOOL): HResult;
+begin
+  Result := FMediaEngine.SetMuted(bMute);
+  // Return the mute state
+  bMute := FMediaEngine.GetMuted();
+end;
 
-  function InitMF(): HResult;
-  var
-    hr: HResult;
 
-  begin
-    // Initialize the COM library.
-    hr := CoInitializeEx(Nil, COINIT_APARTMENTTHREADED or
-      COINIT_DISABLE_OLE1DDE);
-    if FAILED(hr) then
-    begin
-      MessageBox(0, LPCWSTR('COM library initialisation failure.'),
-        LPCWSTR('COM Failure!'), MB_ICONSTOP);
-      Abort();
-    end;
+// Use framestep after pause, to get an accurate playback position
+// See: https://docs.microsoft.com/en-us/windows/win32/api/mfmediaengine/nf-mfmediaengine-imfmediaengine-getcurrenttime
+function TMediaEngine.FrameStep(goForward: BOOL): HResult;
+begin
+  Result := FMediaEngine.FrameStep(goForward);
+end;
 
-    // Intialize the Media Foundation platform and
-    // check if the current MF version match user's version
-    hr := MFStartup(MF_VERSION);
+function InitMF(): HResult;
+var
+  hr: HResult;
 
-    if FAILED(hr) then
+begin
+  // Initialize the COM library.
+  hr := CoInitializeEx(Nil,
+                       COINIT_APARTMENTTHREADED or
+                       COINIT_DISABLE_OLE1DDE);
+  if FAILED(hr) then
     begin
       MessageBox(0,
-        LPCWSTR('Your computer does not support this Media Foundation API version'
-        + IntToStr(MF_VERSION) + '.'), LPCWSTR('MFStartup Failure!'),
-        MB_ICONSTOP);
+                 LPCWSTR('COM library initialisation failure.'),
+                 LPCWSTR('COM Failure!'),
+                 MB_ICONSTOP);
       Abort();
     end;
-    Result := hr;
-  end;
+
+  // Intialize the Media Foundation platform and
+  // check if the current MF version match user's version
+  hr := MFStartup(MF_VERSION);
+
+  if FAILED(hr) then
+    begin
+      MessageBox(0,
+        LPCWSTR('Your computer does not support this Media Foundation API version' +
+                IntToStr(MF_VERSION) + '.'),
+                LPCWSTR('MFStartup Failure!'),
+                MB_ICONSTOP);
+      Abort();
+    end;
+  Result := hr;
+end;
+
 
 function CloseMF(): HResult;
 begin
@@ -1225,17 +1241,17 @@ begin
     Safe_Release(FUnkState);
 end;
 
+
 destructor TContentProtectionManager.Destroy();
 begin
-
   inherited Destroy();
 end;
 
-  /// ////////////////////////////////////////////////////////////////////
-  // Name: BeginEnableContent
-  // Description:  Called by the PMP session to start the enable action.
-  /// //////////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////////
+// Name: BeginEnableContent
+// Description:  Called by the PMP session to start the enable action.
+/////////////////////////////////////////////////////////////////////////
 function TContentProtectionManager.BeginEnableContent(pEnablerActivate: IMFActivate;
                                                       pTopo: IMFTopology;
                                                       pCallback: IMFAsyncCallback;
@@ -1331,7 +1347,7 @@ begin
 
     // Get the event from the event queue.
     Result := FpMEG.EndGetEvent(pAsyncResult,
-              pEvent);
+                                pEvent);
     if FAILED(Result) then
       Exit;
 
