@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: Â© FactoryX. All rights reserved.
+// Copyright: © FactoryX. All rights reserved.
 //
 // Project: WinApi.DirectX - DirectComposition
 // Project location: https://sourceforge.net/projects/MFPack
@@ -17,8 +17,9 @@
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
-//                 Salvador DÃ­az Fau (salvadordf)
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships),
+//                 Salvador Díaz Fau (salvadordf)
+//
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason

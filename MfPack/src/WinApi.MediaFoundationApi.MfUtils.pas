@@ -10,7 +10,7 @@
 // Release date: 29-07-2012
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Common methods used by Media Foundation,
 //              Core Audio etc..
 //
@@ -28,7 +28,7 @@
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -93,10 +93,10 @@ type
 
   TPComObj = array of Pointer;
 
-  // Use for releasing interfaces.
+  // Use for releasing interfaces. The object does initiate a reference call.
   procedure SafeRelease(var IUnk);
-  // Use for releasing objects.
-  procedure SAFE_RELEASE(var Obj);
+  // Use for releasing interfaces. The object does NOT initiate a reference call.
+  procedure Safe_Release(var IUnk);
 
   // Identical methods, both can be called.
   procedure SafeDelete(var Obj);
@@ -462,10 +462,10 @@ begin
 end;
 
 // Note: Here the object does NOT initiate a reference call
-procedure SAFE_RELEASE(var Obj);
+procedure Safe_Release(var IUnk);
 begin
-  if Assigned(IUnknown(Obj)) then
-    Pointer(IUnknown(Obj)) := Nil;
+  if Assigned(IUnknown(IUnk)) then
+    Pointer(IUnknown(IUnk)) := Nil;
 end;
 
 

@@ -3017,9 +3017,6 @@ begin
 
   cNodes := 0;
   bFound := False;
-  pNode := Nil;
-  pNodeObject := Nil;
-  pD3DManager := Nil;
 
   // Search all of the nodes in the topology.
 
@@ -3323,7 +3320,7 @@ begin
       // Create an attribute store and set the device ID attribute.
       if SUCCEEDED(hr) then
         hr := MFCreateAttributes(pAttributes,
-                                 2);
+                                 1);
 
       if SUCCEEDED(hr) then
         hr := pAttributes.SetString(MF_AUDIO_RENDERER_ATTRIBUTE_ENDPOINT_ID,
@@ -3396,13 +3393,7 @@ done:
 end;
 
 
-
-
-
-
-
-
-
+//
 function GetBitmapInfoHeaderFromMFMediaType(pType: IMFMediaType;     // Pointer to the media type.
                                             out ppBmih: PBITMAPINFOHEADER; // Receives a pointer to the structure.
                                             out pcbSize: DWORD // Receives the size of the structure.
@@ -3619,8 +3610,7 @@ done:
   Result := hr;
 end;
 
-
-
+//
 function GetFrameRate(pAttributes: IMFAttributes;
                       out uiNumerator: UINT32;
                       out uiDenominator: UINT32): HResult;

@@ -10,7 +10,7 @@
 // Release date: 09-10-2015
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: -
 //
 // Organisation: FactoryX
@@ -22,12 +22,13 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 06/03/2022 Tony                Fixed IMFMediaEngineClassFactory.CreateInstance
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8.1 or later.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -841,9 +842,9 @@ type
     //
     // For protected content, call the IMFMediaEngineProtectedContent.TransferVideoFrame method
     // instead of this method.
-    function TransferVideoFrame(pDstSurf: IUnknown; // Delphi note: Pass the parameter as IUnknown(DXGI or WICbitmap interface)
+    function TransferVideoFrame(var pDstSurf: IUnknown; // Delphi note: Pass the parameter as IUnknown(DXGI or WICbitmap interface)
                          {opt}  pSrc: PMFVideoNormalizedRect;  // A pointer to an MFVideoNormalizedRect structure that specifies the source rectangle.
-                         {opt}  pDst: PRECT;                   // A pointer to a TRect structure that specifies the destination rectangle.
+                         {opt}  pDst: PRECT;                  // A pointer to a TRect structure that specifies the destination rectangle.
                                 pBorderClr: MFARGB): HResult; stdcall;   // A pointer to an MFARGB structure that specifies the border color.
 
     // If a new frame is ready, receives the presentation time of the frame.
@@ -1773,7 +1774,7 @@ type
     //              IUnknown(IMFMEdiaEngineEx).
     function CreateInstance(dwFlags: DWORD;
                             const pAttr: IMFAttributes;
-                            out ppPlayer: IMFMediaEngine): HResult; stdcall;
+                            out ppPlayer: IUnknown): HResult; stdcall;
 
     function CreateTimeRange(out ppTimeRange: IMFMediaTimeRange): HResult; stdcall;
 

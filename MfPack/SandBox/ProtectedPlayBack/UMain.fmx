@@ -1,0 +1,164 @@
+object frmMain: TfrmMain
+  Left = 0
+  Top = 0
+  Caption = 'Player'
+  ClientHeight = 720
+  ClientWidth = 1280
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  DesignerMasterStyle = 0
+  object layVideo: TScaledLayout
+    Align = Contents
+    HitTest = True
+    OriginalWidth = 1280.000000000000000000
+    OriginalHeight = 720.000000000000000000
+    Size.Width = 1280.000000000000000000
+    Size.Height = 720.000000000000000000
+    Size.PlatformDefault = False
+    object layEPG: TLayout
+      Align = Bottom
+      Margins.Left = 30.000000000000000000
+      Margins.Right = 30.000000000000000000
+      Margins.Bottom = 80.000000000000000000
+      Position.X = 30.000000000000000000
+      Position.Y = 480.000000000000000000
+      Size.Width = 1220.000000000000000000
+      Size.Height = 160.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      object rectEPGBackground: TRectangle
+        Align = Contents
+        Fill.Color = xC0000000
+        Size.Width = 1220.000000000000000000
+        Size.Height = 160.000000000000000000
+        Size.PlatformDefault = False
+        XRadius = 5.000000000000000000
+        YRadius = 5.000000000000000000
+      end
+      object layEPGCenter: TLayout
+        Align = Client
+        Size.Width = 785.000000000000000000
+        Size.Height = 160.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 2
+        object lblEPGChannel: TLabel
+          Align = Top
+          AutoSize = True
+          StyledSettings = [Family, Size, Style]
+          Margins.Left = 10.000000000000000000
+          Margins.Top = 10.000000000000000000
+          Margins.Right = 10.000000000000000000
+          Position.X = 10.000000000000000000
+          Position.Y = 10.000000000000000000
+          Size.Width = 765.000000000000000000
+          Size.Height = 16.000000000000000000
+          Size.PlatformDefault = False
+          TextSettings.FontColor = claWhite
+          TextSettings.WordWrap = False
+          Text = 'ZDF - 16:00 - 17:00'
+          TabOrder = 2
+        end
+        object lblEPGNow: TLabel
+          Align = Client
+          AutoSize = True
+          StyledSettings = [Family, Style]
+          Margins.Left = 10.000000000000000000
+          Margins.Right = 10.000000000000000000
+          Size.Width = 765.000000000000000000
+          Size.Height = 108.000000000000000000
+          Size.PlatformDefault = False
+          StyleLookup = 'listboxheaderlabel'
+          TextSettings.Font.Size = 30.000000000000000000
+          TextSettings.FontColor = claWhite
+          Text = 'heute - in Europa'
+          TabOrder = 0
+        end
+        object lblEPGNext: TLabel
+          Align = Bottom
+          AutoSize = True
+          StyledSettings = [Family, Size, Style]
+          Margins.Left = 10.000000000000000000
+          Margins.Right = 10.000000000000000000
+          Margins.Bottom = 10.000000000000000000
+          Position.X = 10.000000000000000000
+          Position.Y = 134.000000000000000000
+          Size.Width = 765.000000000000000000
+          Size.Height = 16.000000000000000000
+          Size.PlatformDefault = False
+          TextSettings.FontColor = claWhite
+          TextSettings.WordWrap = False
+          Text = 'Es folgt: 16:10 - 17:00 - Die Rosenheim Cops'
+          TabOrder = 1
+        end
+      end
+      object layEPGRight: TLayout
+        Align = Right
+        Position.X = 982.000000000000000000
+        Size.Width = 238.000000000000000000
+        Size.Height = 160.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 1
+        object lblToday: TLabel
+          Align = Top
+          AutoSize = True
+          StyledSettings = [Family, Size, Style]
+          Margins.Left = 10.000000000000000000
+          Margins.Top = 10.000000000000000000
+          Margins.Right = 10.000000000000000000
+          Position.X = 10.000000000000000000
+          Position.Y = 10.000000000000000000
+          Size.Width = 218.000000000000000000
+          Size.Height = 16.000000000000000000
+          Size.PlatformDefault = False
+          TextSettings.FontColor = claWhite
+          Text = '05.11.21 16:07'
+          TabOrder = 2
+        end
+      end
+      object lblChannel: TLabel
+        Align = Left
+        StyledSettings = [Family]
+        Size.Width = 193.000000000000000000
+        Size.Height = 160.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.Font.Size = 50.000000000000000000
+        TextSettings.Font.StyleExt = {00070000000000000004000000}
+        TextSettings.FontColor = claWhite
+        TextSettings.HorzAlign = Center
+        Text = '1'
+        TabOrder = 3
+      end
+      object Line1: TLine
+        Align = Left
+        LineType = Left
+        Margins.Top = 5.000000000000000000
+        Margins.Bottom = 5.000000000000000000
+        Position.X = 193.000000000000000000
+        Position.Y = 5.000000000000000000
+        Size.Width = 2.000000000000000000
+        Size.Height = 150.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Color = x90FFFFFF
+      end
+      object Line2: TLine
+        Align = Right
+        LineType = Left
+        Margins.Top = 5.000000000000000000
+        Margins.Bottom = 5.000000000000000000
+        Position.X = 980.000000000000000000
+        Position.Y = 5.000000000000000000
+        Size.Width = 2.000000000000000000
+        Size.Height = 150.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Color = x90FFFFFF
+      end
+    end
+  end
+  object tmrUpdate: TTimer
+    OnTimer = tmrUpdateTimer
+    Left = 424
+    Top = 224
+  end
+end

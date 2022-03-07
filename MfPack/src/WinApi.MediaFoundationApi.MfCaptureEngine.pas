@@ -10,7 +10,7 @@
 // Release date: 09-10-2015
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: -
 //
 // Organisation: FactoryX
@@ -22,12 +22,13 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 07/03/2022 Tony                Fixed IMFCaptureEngineClassFactory.CreateInstance
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -993,7 +994,17 @@ type
 
     function CreateInstance(const clsid: REFCLSID;
                             const riid: REFIID;
-                            out ppvObject): HResult; stdcall;
+                            {out} ppvObject: Pointer): HResult; stdcall;
+    // Parameters
+    //  [in] clsid
+    //  The CLSID of the object to create.
+    //  Currently, this parameter must equal CLSID_MFCaptureEngine.
+
+    //  [in] riid
+    //  The IID of the requested interface. The capture engine supports the IMFCaptureEngine interface.
+
+    //  [out] ppvObject
+    //  Receives a pointer (LPVOID) to the requested interface. The caller must release the interface.
 
   end;
   IID_IMFCaptureEngineClassFactory = IMFCaptureEngineClassFactory;
