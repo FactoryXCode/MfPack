@@ -2690,7 +2690,7 @@ type
   ['{fbe256c1-43cf-4a9b-8cb8-ce8632a34186}']
     function CreateContentDecryptionModuleFactory(keySystem: LPCWSTR;
                                                   const riid: REFIID;
-                                                  out ppvObject: Pointer): HResult; stdcall;
+                                                  out ppvObject: LPVOID): HResult; stdcall;
 
   end;
   IID_IMFMediaEngineClassFactory4 = IMFMediaEngineClassFactory4;

@@ -578,7 +578,7 @@ var
 begin
   hr := CaptureEngine.EndCaptureSession();
 
-  SafeDelete(CaptureEngine);
+  Safe_Release(CaptureEngine);
 
   UpdateDeviceList();
 

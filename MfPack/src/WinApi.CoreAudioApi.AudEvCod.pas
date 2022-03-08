@@ -10,7 +10,7 @@
 // Release date: 07-07-2012
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: List of Audio device error event codes and the expected params.
 //
 // Organisation: FactoryX

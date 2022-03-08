@@ -10,7 +10,7 @@
 // Release date: 31-07-2020
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Defines icodecapi interface.
 //
 // Organisation: FactoryX
@@ -27,7 +27,7 @@
 // Remarks: Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX310 / Media Foundation
+// Related projects: MfPackX311 / Media Foundation
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

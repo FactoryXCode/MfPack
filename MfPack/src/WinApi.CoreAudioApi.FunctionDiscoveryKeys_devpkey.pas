@@ -10,7 +10,7 @@
 // Release date: 04-06-2012
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Defines property keys for the Plug and Play Device Property API.
 //
 // Organisation: FactoryX
@@ -36,7 +36,7 @@
 //          Copied Jim's version replaced "DEFINE_DEVPROPKEY(DEVPKEY_" with "PKEY_")
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

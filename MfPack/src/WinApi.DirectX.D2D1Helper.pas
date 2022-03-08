@@ -10,7 +10,7 @@
 // Release date: 29-03-2019
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Helper files over the D2D interfaces and APIs.
 //
 // Organisation: FactoryX
@@ -32,7 +32,7 @@
 //
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

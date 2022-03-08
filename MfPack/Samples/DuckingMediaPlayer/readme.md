@@ -1,5 +1,5 @@
 # Ducking Media Player
-Version: X 3.1.0
+Version: X 3.1.1
 
 Description:
   This sample implements a simple media player that responds to 
@@ -18,6 +18,6 @@ Project location: https://github.com/FactoryXCode/MfPack
                   https://sourceforge.net/projects/MFPack
 
 First release date: 05-07-2020
-Final release date: 12-11-2021
+Final release date: 08-03-2022
 
 Copyright © FactoryX. All rights reserved.

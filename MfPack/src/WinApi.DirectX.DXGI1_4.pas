@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Microsoft DirectX Graphics Infrastructure API
 //
 // Organisation: FactoryX
@@ -27,7 +27,7 @@
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -176,10 +176,11 @@ type
     function EnumAdapterByLuid(AdapterLuid: LUID;
                                riid: Tguid;
                                out ppvAdapter {IUnknown} ): HResult; stdcall;
+    // note: ppvAdapter The address of an IDXGIAdapter interface pointer to the adapter. This parameter must not be Nil.
 
     function EnumWarpAdapter(riid: TGuid;
                              out ppvAdapter {IUnknown} ): HResult; stdcall;
-
+    // note: ppvAdapter The address of an IDXGIAdapter interface pointer to the adapter. This parameter must not be Nil.
   end;
   IID_IDXGIFactory4 = IDXGIFactory4;
   {$EXTERNALSYM IID_IDXGIFactory4}

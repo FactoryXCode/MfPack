@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 //
 // Description: Enables high-performance bitmap composition with transforms,
 //              effects, and animations.
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 8 or later.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

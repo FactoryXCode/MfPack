@@ -10,7 +10,7 @@
 // Release date: 13-02-2016
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: -
 //
 // Organisation: FactoryX
@@ -27,7 +27,7 @@
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -415,7 +415,7 @@ type
   ['{00000021-0000-0000-C000-000000000046}']
 
     function QueryInternalInterface(const riid: REFIID;
-                                    out ppv: Pointer): HResult; stdcall;
+                                    out ppv): HResult; stdcall;
 
   end;
   IID_IInternalUnknown = IInternalUnknown;
@@ -650,7 +650,7 @@ type
 
     function GetDestCtxEx(var message: RPCOLEMESSAGE;
                           out pdwDestContext: DWORD;
-                          out ppvDestContext: Pointer): HResult; stdcall;
+                          out ppvDestContext): HResult; stdcall;
 
   end;
   IID_IRpcChannelBuffer2 = IRpcChannelBuffer2;
@@ -692,11 +692,11 @@ type
 
     function GetCallContext(var message: RPCOLEMESSAGE;
                             const riid: REFIID;
-                            out pInterface: Pointer): HResult; stdcall;
+                            out pInterface: IntPtr): HResult; stdcall;
 
     function GetDestCtxEx(var message: RPCOLEMESSAGE;
                           out pdwDestContext: DWORD;
-                          out ppvDestContext: Pointer): HResult; stdcall;
+                          out ppvDestContext: IntPtr): HResult; stdcall;
 
     function GetState(var message: RPCOLEMESSAGE;
                       out pState: DWORD): HResult; stdcall;
@@ -1120,7 +1120,7 @@ type
 
     function GetInterfaceFromGlobal(const dwCookie: DWORD;
                                     const riid: REFIID;
-                                    out ppv: Pointer): HResult; stdcall;
+                                    out ppv): HResult; stdcall;
 
   end;
   IID_IGlobalInterfaceTable = IGlobalInterfaceTable;
@@ -1267,7 +1267,7 @@ type
     function CreateCall(const riid: REFIID;
                         pCtrlUnk: IUnknown;
                         const riid2: REFIID;
-                        out ppv: IUnknown): HResult; stdcall;
+                        out ppv: PUnknown): HResult; stdcall;
 
   end;
   IID_ICallFactory = ICallFactory;
@@ -1653,7 +1653,7 @@ type
   IAgileReference = interface(IUnknown)
   ['{C03F6A43-65A4-9818-987E-E0B810D2A6F2}']
    function Resolve(const riid: REFIID;
-                    out ppvObjectReference: Pointer): HResult; stdcall;
+                    out ppvObjectReference): HResult; stdcall;
 
   end;
   IID_IAgileReference = IAgileReference;
@@ -1686,7 +1686,7 @@ type
     function GetObject(const clsid: REFCLSID;
                        identifier: PWideChar;
                        const riid: REFIID;
-                       out ppv {IUnknown} ): HResult; stdcall;
+                       out ppv): HResult; stdcall;
 
     function RevokeObject(token: MachineGlobalObjectTableRegistrationToken): HResult; stdcall;
   end;

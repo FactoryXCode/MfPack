@@ -10,7 +10,7 @@
 // Release date: 13-02-2016
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Variant and PropVariant helpers.
 //
 // Organisation: FactoryX
@@ -27,7 +27,7 @@
 // Remarks: Requires Windows 8.1 or later.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -1334,7 +1334,7 @@ type
                             dwClassContext: DWORD;
                             const locale: LCID;
                             const riid: REFIID;
-                            out ppv: Pointer): HResult; stdcall;
+                            out ppv): HResult; stdcall;
 
   end;
   IID_IClassActivator = IClassActivator;

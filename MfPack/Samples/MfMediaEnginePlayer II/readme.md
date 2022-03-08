@@ -1,5 +1,5 @@
 # MfMediaEnginePlayer
-Version: X 3.1.0
+Version: X 3.1.1
 
 Description: 
   A mediaengine player sample with support for 
@@ -21,6 +21,6 @@ Project location: https://github.com/FactoryXCode/MfPack
                   https://sourceforge.net/projects/MFPack
 
 First release date: 05-02-2016
-Final release date: 14-11-2021
+Final release date: 08-03-2022
 
 Copyright © FactoryX. All rights reserved.

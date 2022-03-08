@@ -10,7 +10,7 @@
 // Release date: 05-07-2020
 // Language: ENU
 //
-// Version: 3.1.0
+// Version: 3.1.1
 // Description: This sample implements a simple media player that responds to the "ducking"
 //              feature in Windows 7 and higher.
 //              It also implements a volume control which tracks
@@ -30,7 +30,7 @@
 // Remarks: Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -251,7 +251,7 @@ begin
                          Nil,
                          CLSCTX_INPROC_SERVER,
                          IID_IGraphBuilder,
-                         _GraphBuilder);
+                         Pointer(_GraphBuilder));
   if Succeeded(hr) then
     begin
       hr := _GraphBuilder.QueryInterface(IID_IMediaEvent,

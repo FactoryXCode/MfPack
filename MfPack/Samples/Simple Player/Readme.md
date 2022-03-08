@@ -1,6 +1,6 @@
 # Simple Player
 
-Version: X 3.1.0
+Version: X 3.1.1
 
 Description:
 
@@ -18,6 +18,6 @@ Project location: https://github.com/FactoryXCode/MfPack
                   https://sourceforge.net/projects/MFPack
 
 First release date: 05-07-2020
-Final release date: 14-10-2021
+Final release date: 08-03-2022
 
 Copyright © FactoryX. All rights reserved.

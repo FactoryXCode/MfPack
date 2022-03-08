@@ -1,6 +1,11 @@
 program MfVideoThumbnail;
 
 uses
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
   Vcl.Forms,
   frmVideoThumbnail in 'frmVideoThumbnail.pas' {Form1},
   Thumbnail in 'Thumbnail.pas',

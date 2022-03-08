@@ -9,9 +9,9 @@
 // Release date: 05-07-2020
 // Language: ENU
 //
-// Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Demonstrates audio/video playback using the IMFPMediaPlayer API.
-//
+//              Note: This API is deprecated!
 //
 // Company: FactoryX
 // Intiator(s): Tony (maXcomX), Peter (OzShips), Ramyses De Macedo Rodrigues.
@@ -34,7 +34,7 @@
 //          To change volume, press left arrow (decrease) or right arrow (increase).
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: It's not recommended to use this api.
 //               As MS said this api is deprecated and support for most media types is not (fully) supported.
 //

@@ -10,7 +10,7 @@
 // Release date: 13-08-2020
 // Language: ENU
 //
-// Version: 3.1.0
+// Version: 3.1.1
 //
 // Description: Component to manage capture or render endpoints and properties.
 //              It also provides an audio endpoint callback.
@@ -29,7 +29,7 @@
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

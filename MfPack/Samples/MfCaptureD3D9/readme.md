@@ -1,5 +1,5 @@
 # MfCaptureD3D9
-Version: X 3.1.0
+Version: X 3.1.1
 
 NOTES: 
  - This release is updated for compiler version 17 up to 34.
@@ -16,6 +16,6 @@ Project location: https://github.com/FactoryXCode/MfPack
                   https://sourceforge.net/projects/MFPack
 
 First release date: 06-02-2019
-Final release date: 12-11-2021
+Final release date: 08-03-2022
 
 Copyright © FactoryX. All rights reserved.

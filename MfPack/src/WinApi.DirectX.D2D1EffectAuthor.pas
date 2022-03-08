@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Direct2D: Hardware-accelerated, immediate-mode, 2-D graphics API that
 //              provides high performance and high-quality rendering for 2-D geometry,
 //              bitmaps, and text.
@@ -29,7 +29,7 @@
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

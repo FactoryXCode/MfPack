@@ -27,7 +27,7 @@
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -875,7 +875,7 @@ begin //Position
   if (Msg.WParam = 1) then
     begin
       if (MfPlayerX.State = Started) then
-        prbProgress.Position:= Trunc((prbProgress.Width / (MfPlayerX.Duration / ONE_HNS_MSEC)) * (MfPlayerX.Position));
+        prbProgress.Position := Trunc((prbProgress.Width / (MfPlayerX.Duration / ONE_HNS_MSEC)) * (MfPlayerX.Position));
 
       if (MfPlayerX.State In [Closed, Stopped]) then
         ResetInterface();
@@ -886,7 +886,7 @@ begin //Position
       if (MfPlayerX.State = TopologyReady) then
         begin
           // Check if forward rate is supported
-          mnuSetRate.Enabled:= MfPlayerX.CanSetRateForward;
+          mnuSetRate.Enabled := MfPlayerX.CanSetRateForward;
           mnuSelectStreams.Enabled:= True;
         end;
     end;

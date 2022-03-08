@@ -9,7 +9,7 @@
 // Release date: 08-02-2018
 // Language: ENU
 //
-// Version: 3.1.0
+// Revision Version: 3.1.1
 //
 // Description: This is the basic class of MfSimpleCapture,
 //              containing the necessary methodes to capture media streams.
@@ -30,7 +30,7 @@
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -70,12 +70,12 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.Messages,
-  WinApi.Dbt,
   WinApi.Ks,
   WinApi.KsMedia,
   WinApi.ComBaseApi,
   WinApi.WinApiTypes,
   {System}
+  System.Services.Dbt,
   System.SysUtils,
   System.Variants,
   System.Classes,

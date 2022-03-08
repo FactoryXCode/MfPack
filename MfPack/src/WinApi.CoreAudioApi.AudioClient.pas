@@ -10,7 +10,7 @@
 // Release date: 04-05-2012
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: AudioClient API interface definition.
 //
 // Organisation: FactoryX
@@ -27,7 +27,7 @@
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -1531,7 +1531,7 @@ type
     function UnregisterAudioEffectsChangedNotificationCallback(client: IAudioEffectsChangedNotificationClient): HRESULT; stdcall;
 
     function GetAudioEffects({out} effects: PAUDIO_EFFECT;
-                             {out} numEffects: UINT32): HRESULT; stdcall;
+                             out numEffects: UINT32): HRESULT; stdcall;
 
     function SetAudioEffectState(effectId: TGUID;
                                  state: AUDIO_EFFECT_STATE): HRESULT; stdcall;

@@ -28,7 +28,7 @@
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -70,12 +70,13 @@ uses
   WinApi.Messages,
   WinApi.WinApiTypes,
   WinApi.ComBaseApi,
-  WinApi.Dbt,
   WinApi.Ks,
   WinApi.WinError,
   {System}
+  System.Services.Dbt,
   System.SysUtils,
   System.Classes,
+  System.SyncObjs,
   {ActiveX}
   WinApi.ActiveX.ObjBase,
   WinApi.ActiveX.PropIdl,
@@ -97,17 +98,6 @@ const
 
 
 type
-
-  // BECAREFULL USING THIS!!!
-  TMfCritSec = class
-  private
-    FcriticalSection: TRTLCriticalSection;
-  public
-    constructor Create;
-    destructor Destroy; override;
-    procedure Enter;
-    procedure Leave;
-  end;
 
 
   TDeviceList = class
@@ -155,8 +145,6 @@ type
   TCaptureToFile = class(TInterfacedPersistent, IMFSourceReaderCallback)
   protected
 
-    FCritSec:            TMfCritSec;
-
     devBcDi: DEV_BROADCAST_DEVICEINTERFACE;
 
     m_State: TState;
@@ -190,8 +178,6 @@ type
                      pEvent: IMFMediaEvent): HResult; stdcall;
 
     ////////////////////////////////////////////////////////////////////////////
-
-
 
   public
 
@@ -266,8 +252,6 @@ var
 begin
   inherited Create();
 
-  FCritSec := TMFCritSec.Create;
-
   if (MfStatus = MfStarted) then
     begin
       m_hwndEvent := hMainForm;
@@ -283,17 +267,15 @@ end;
 //
 procedure TCaptureToFile.BeforeDestruction();
 begin
-  if Assigned(FCritSec) then
-    FreeAndNil(FCritSec);
+
   Clear();
 
   MfDeviceList.Free;
   MfDeviceList := Nil;
 
-  DeleteCriticalSection(FCritSec);
-
   MFShutdown();
   CoUninitialize;
+
   inherited;
 end;
 
@@ -301,6 +283,7 @@ end;
 // Caller should call Release!!
 destructor TCaptureToFile.Destroy();
 begin
+
   inherited Destroy();
 end;
 
@@ -330,11 +313,9 @@ begin
       Exit;
     end;
 
-  FCritSec.Enter;
 
   if (IsCapturing() = False) then
     begin
-      //FCritSec.Leave;
       Result := S_OK;
       Exit;
     end;
@@ -422,7 +403,6 @@ Done:
     SetWindowText(m_hwndEvent,
                   'Capture Failure! (' + IntToStr(hr) + ')');
 
-  FCritSec.Leave;
 
   Result := hr;
 end;
@@ -529,7 +509,7 @@ begin
 
       hr := MFTRegisterLocalByCLSID(CLSID_CColorConvertDMO,
                                     MFT_CATEGORY_VIDEO_PROCESSOR,
-                                    '',
+                                    LPCWSTR(''),
                                     MFT_ENUM_FLAG_SYNCMFT,
                                     0,
                                     Nil,
@@ -590,7 +570,6 @@ var
 begin
 
   pFileName := wszFileName;
-  FCritSec.Enter;
 
   // Create the media source for the device.
   hr := pActivate.ActivateObject(IID_IMFMediaSource,
@@ -641,7 +620,6 @@ begin
         hr := m_pWriter.BeginWriting();
       end;
 
-    FCritSec.Leave;
 
     Result := hr;
 end;
@@ -659,7 +637,6 @@ var
   hr: HRESULT;
 
 begin
-  //FCritSec.Enter;
 
   hr := S_OK;
   State := State_NotReady;
@@ -667,8 +644,6 @@ begin
 
   if Assigned(m_pWriter) then
     hr := m_pWriter.Finalize();
-
-  //FCritSec.Leave;
 
   SafeRelease(m_pWriter);
   SafeRelease(m_pReader);
@@ -682,12 +657,7 @@ var
   bIsCapturing: BOOL;
 
 begin
-  //FCritSec.Enter;
-
   bIsCapturing := (m_pWriter <> Nil) ;
-
-  //FCritSec.Leave;
-
   Result := bIsCapturing;
 end;
 
@@ -715,8 +685,6 @@ begin
       Exit;
     end;
 
-  //FCritSec.Enter;
-
   pbDeviceLost := False;
 
   if IsCapturing() then
@@ -738,9 +706,7 @@ begin
       pbDeviceLost := True;
 
 done:
-  //FCritSec.Leave;
   Result:= S_OK;
-
 end;
 
 
@@ -1062,32 +1028,6 @@ end;
 
 // End Helpers /////////////////////////////////////////////////////////////////
 
-/////////////////// TMfCritSec //////////////////////////////
-
-constructor TMFCritSec.Create;
-begin
-  InitializeCriticalSection(FcriticalSection);
-end;
-
-
-destructor TMFCritSec.Destroy;
-begin
-  DeleteCriticalSection(FcriticalSection);
-end;
-
-
-procedure TMFCritSec.Enter;
-begin
-  EnterCriticalSection(FcriticalSection);
-end;
-
-
-procedure TMFCritSec.Leave;
-begin
-  LeaveCriticalSection(FcriticalSection);
-end;
-
-// end ///////////// TMfCritSec //////////////////////////////
 
 
 // initialization and  finalizationsection /////////////////////////////////////

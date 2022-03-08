@@ -1,5 +1,5 @@
 # MfTranscode
-Version: X 3.0.2
+Version: X 3.1.1
 
 NOTES: 
  - This release is updated for compiler version 17 up to 33.
@@ -16,6 +16,6 @@ Project location: https://github.com/FactoryXCode/MfPack
                   https://sourceforge.net/projects/MFPack
 
 First release date: 24-01-2020
-Final release date: 14-10-2021
+Final release date: 08-03-2022
 
 Copyright © FactoryX. All rights reserved.

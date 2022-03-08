@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: This class uses the IMFMediaEngine based on extended HTML5.
 //
 // Company: FactoryX
@@ -27,7 +27,7 @@
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -346,7 +346,7 @@ try
   // Create the mediaEngine
   hr := li_MediaEngineClassFactory.CreateInstance(0,
                                                   li_Attributes,
-                                                  IMFMediaEngine(pr_MediaEngine));
+                                                  IUnknown(pr_MediaEngine));
 
   if FAILED(hr) then
     begin

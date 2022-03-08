@@ -10,7 +10,7 @@
 // Release date: 24-01-2020
 // Language: ENU
 //
-// Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: This is a modified translation of the Transcoder sample,
 //              The original is a commandline app.
 //
@@ -27,7 +27,7 @@
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

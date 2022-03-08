@@ -10,7 +10,7 @@
 // Release date: 04-05-2012
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: MMDevApiUtils, Device api helper routines >= Win 8
 //
 // Organisation: FactoryX

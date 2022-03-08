@@ -1,5 +1,5 @@
 # MfVideoThumbNail
-Version: 3.0.2
+Version: 3.1.1
 
 Description:
 
@@ -21,6 +21,6 @@ Project location: https://github.com/FactoryXCode/MfPack
 
 
 First release date: 08-04-2019
-Final release date: 14-10-2021
+Final release date: 08-03-2022
 
 Copyright © FactoryX. All rights reserved.

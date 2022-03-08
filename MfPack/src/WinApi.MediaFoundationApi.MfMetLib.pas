@@ -1672,7 +1672,7 @@ begin
   if (dwElementcount > 0) then
     begin
       hr := pCollection.GetElement(dwIndex,
-                                   @pUnk);
+                                   pUnk);
       if FAILED(hr) then
         begin
           OleCheck(hr);
@@ -1749,7 +1749,7 @@ var
 begin
 
   hr := pCollection.GetElement(dwIndex,
-                               @pUnk);
+                               pUnk);
   if SUCCEEDED(hr) then
     begin
       hr := pUnk.QueryInterface(IID_IUnknown,
@@ -1857,7 +1857,7 @@ function SetMediaStop(pTopology: IMFTopology;
                                dwIndex: DWORD;
                                ppObject: Pointer): HRESULT;
   var
-    pUnk: PIUnknown;
+    pUnk: IUnknown;
     hr: HRESULT;
 
   begin
@@ -2608,7 +2608,7 @@ begin
       pType := Nil;
       hr := pReader.GetNativeMediaType(dwStreamIndex,
                                        dwMediaTypeIndex, // MF_SOURCE_READER_CURRENT_TYPE_INDEX
-                                       @pType);
+                                       pType);
 
       if (hr = MF_E_NO_MORE_TYPES) then
         begin
@@ -3431,7 +3431,7 @@ begin
     end;
 
   hr := pType.GetRepresentation(AM_MEDIA_TYPE_REPRESENTATION,
-                                pmt);
+                                Pointer(pmt));
   if FAILED(hr) then
     goto done;
 

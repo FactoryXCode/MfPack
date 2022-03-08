@@ -10,7 +10,7 @@
 // Release date: 22-09-2021
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 //
 // Description:
 //   This unit is the application mainform.
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX310/Samples/MFFrameSample
+// Related projects: MfPackX311/Samples/MFFrameSample
 //
 // Compiler version: 23 up to 34
 // SDK version: 10.0.22000.0

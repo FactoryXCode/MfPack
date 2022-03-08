@@ -10,7 +10,7 @@
 // Release date: 24-01-2020
 // Language: ENU
 //
-// Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Helpers for the Transcoding sample,
 //
 // Company: FactoryX
@@ -27,7 +27,7 @@
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -241,7 +241,7 @@ function GetPresentationDescriptorFromTopology(pTopology: IMFTopology;
 var
   hr: HResult;
   pCollection: IMFCollection;
-  pUnk: PIUnknown;
+  pUnk: IUnknown;
   pNode: IMFTopologyNode;
   pPD: IMFPresentationDescriptor;
 

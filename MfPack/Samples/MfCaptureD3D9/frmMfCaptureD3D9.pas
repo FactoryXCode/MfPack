@@ -9,7 +9,7 @@
 // Release date: 08-03-2018
 // Language: ENU
 //
-// Version: 3.1.0
+// Version: 3.1.1
 //
 // Description: Preview window.
 //
@@ -22,12 +22,13 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 29/01/2222 Tony                Changed OnDeviceChange for compatibility with Win 10/11
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -67,12 +68,12 @@ uses
   Winapi.Windows,
   Winapi.Messages,
   WinApi.WinApiTypes,
-  WinApi.Dbt,
   WinApi.Ks,
   WinApi.ComBaseApi,
   {System}
   System.SysUtils,
   System.Classes,
+  System.Services.Dbt,
   {Vcl}
   Vcl.Graphics,
   Vcl.Controls,
@@ -114,15 +115,14 @@ type
     { Private declarations }
 
     hwWindowHandle: HWND; // handle to recieve messages
-    pHdr: PDEV_BROADCAST_HDR;
+    g_hdevnotify: HDEVNOTIFY;
 
     function DelayedOnCreate(): BOOL;
     procedure OnChooseDevice(const hw: HWND;
                              const bPrompt: BOOL);
-    procedure OnDeviceChange(const hw: HWND;
-                             pHdr: PDEV_BROADCAST_HDR);
+    procedure OnDeviceChange(var AMessage: TMessage); message WM_DEVICECHANGE;
     // Callback
-    function MessageHook(var message: TMessage): Boolean;
+    function MessageHook(var AMessage: TMessage): Boolean;
     // Messages
     procedure OnMove(var message: TWMMove); message WM_MOVE;
     procedure OnSize(var message: TWMSize); message WM_SIZE;
@@ -138,26 +138,20 @@ type
 
 var
   frmMain: TfrmMain;
-  g_hdevnotify: HDEVNOTIFY;
 
 
 implementation
 
 {$R *.dfm}
 
-function TfrmMain.MessageHook(var message: TMessage): Boolean;
+function TfrmMain.MessageHook(var AMessage: TMessage): Boolean;
 begin
   Result := False;
-  case Message.msg of
+  case AMessage.Msg of
 
     WM_APP_PREVIEW_ERROR:    begin
-                               ShowMessage('Preview error ' + IntToStr(message.wParam));
+                               ShowMessage('Preview error ' + IntToStr(AMessage.wParam));
                                Result:= True;
-                             end;
-
-    WM_DEVICECHANGE:         begin
-                               // Signals whether the capturingdevice is changed
-                               OnDeviceChange(Self.WindowHandle, pHdr);
                              end;
 
     WM_ERASEBKGND:           begin
@@ -172,10 +166,10 @@ begin
                              end;
   end;
 
-  Message.Result := DefWindowProc(hwWindowHandle,
-                                  message.Msg,
-                                  message.wParam,
-                                  message.lParam);
+  AMessage.Result := DefWindowProc(hwWindowHandle,
+                                   AMessage.Msg,
+                                   AMessage.wParam,
+                                   AMessage.lParam);
 end;
 
 
@@ -226,8 +220,6 @@ begin
       g_pPreview.Free;
       g_pPreview := Nil;
     end;
-
-  pHdr := Nil;
 
   // Release the selectdialog device
   if Assigned(dlgSelectDevice) then
@@ -379,28 +371,50 @@ end;
 //
 //  Handles WM_DEVICECHANGE messages. (see messagehook method)
 //------------------------------------------------------------------------------
-procedure TfrmMain.OnDeviceChange(const hw: HWND;
-                                  pHdr: PDEV_BROADCAST_HDR);
+procedure TfrmMain.OnDeviceChange(var AMessage: TMessage);
 var
   hr: HRESULT;  // For debugging only
   bDeviceLost: BOOL;
+  PDevBroadcastHeader: PDEV_BROADCAST_HDR;
+  pDevBroadCastIntf: PDEV_BROADCAST_DEVICEINTERFACE;
+  pwDevSymbolicLink: PWideChar;
 
 begin
 
-  if (g_pPreview = Nil) or (pHdr = Nil) then
+  if (g_pPreview = Nil) then
     Exit;
 
   bDeviceLost := False;
 
   // Check if the current device was lost.
-  hr:= g_pPreview.CheckDeviceLost(pHdr,
-                                  bDeviceLost);
+  if AMessage.WParam = DBT_DEVICEREMOVECOMPLETE then
+    begin
+      // Check if the current video capture device was lost.
+
+      if PDEV_BROADCAST_HDR(AMessage.LParam).dbch_devicetype <> DBT_DEVTYP_DEVICEINTERFACE then
+        Exit;
+
+      // Get the symboliclink of the lost device and check.
+      PDevBroadcastHeader := PDEV_BROADCAST_HDR(AMessage.LParam);
+      pDevBroadCastIntf := PDEV_BROADCAST_DEVICEINTERFACE(PDevBroadcastHeader);
+      // Note: Since Windows 8 the value of dbcc_name is no longer the devicename, but the symboliclink of the device.
+      pwDevSymbolicLink := PChar(@pDevBroadCastIntf^.dbcc_name);
+
+      hr := S_OK;
+      bDeviceLost := False;
+
+      if StrIComp(PWideChar(g_pPreview.DeviceSymbolicLink),
+                  PWideChar(pwDevSymbolicLink)) = 0 then
+        bDeviceLost := True;
+
+     end;
+
 
   if (FAILED(hr) or (bDeviceLost = True)) then
     begin
       g_pPreview.CloseDevice();
 
-      MessageBox(hw,
+      MessageBox(hwWindowHandle,
                  lpcwstr('Lost the capture device.'),
                  lpcwstr(frmMain.caption),
                  MB_OK);
@@ -461,7 +475,7 @@ var
 
 begin
   Result := False;
-  hwWindowHandle := frmMain.Handle; // or Self.WindowHandle;
+  hwWindowHandle := Self.Handle;
 
   // Register this window to get device notification messages.
   sz := SizeOf(DEV_BROADCAST_DEVICEINTERFACE);
@@ -469,7 +483,8 @@ begin
   di.dbcc_size := sz;
   di.dbcc_devicetype := DBT_DEVTYP_DEVICEINTERFACE;
   di.dbcc_reserved := 0;
-  di.dbcc_classguid := KSCATEGORY_CAPTURE;
+  di.dbcc_classguid := KSCATEGORY_VIDEO_CAMERA; // KSCATEGORY_CAPTURE : Since windows 10 you should not use this guid to register for device loss!
+                                                // Otherwise it will return a wrong symoliclink when detecting a device lost.
   di.dbcc_name := #0;
 
   g_hdevnotify := RegisterDeviceNotification(hwWindowHandle,
@@ -496,8 +511,8 @@ begin
       Exit;
     end;
 
-    // Select the first available device (if any).
-    frmMain.OnChooseDevice(hwWindowHandle, FALSE);
+  // Select the first available device (if any).
+  frmMain.OnChooseDevice(hwWindowHandle, FALSE);
 
   ZeroMemory(@di, sz);
   Result := True;

@@ -9,7 +9,7 @@
 // Release date: 24-02-2012
 // Language: ENU
 //
-// Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Universal threaded timer
 //              This timer can be used for a variety of tasks where you need a
 //              lightweight, precise and threadsave timer.
@@ -28,7 +28,7 @@
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

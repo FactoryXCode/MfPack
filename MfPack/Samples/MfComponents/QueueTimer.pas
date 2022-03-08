@@ -10,7 +10,7 @@
 // Release date: 25-02-2016
 // Language: ENU
 //
-// Version: 3.1.0
+// Version: 3.1.1
 // Description:
 //              This is the basic class of a queue timer,
 //              Use this timer when less overhead
@@ -32,7 +32,7 @@
 //          use the ThreadedQueueTimer instead.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

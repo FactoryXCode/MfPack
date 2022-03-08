@@ -10,7 +10,7 @@
 // Release date: 06-10-2015
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Contains typedefs and defines necessary for user mode (ring 3) DVD
 //              filters and applications.
 //
@@ -29,7 +29,7 @@
 //          If you need DirectShow, please, don't add this file to your project to prevent name-mangling.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

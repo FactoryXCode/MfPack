@@ -10,7 +10,7 @@
 // Release date: 13-08-2019
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Language tag definitions file.
 //
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -25,7 +25,7 @@
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -315,8 +315,6 @@ end;
 
 
 destructor TLanguageTags.Destroy();
-var
-   i: integer;
 begin
   Clear();
   inherited Destroy();

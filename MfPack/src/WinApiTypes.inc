@@ -10,7 +10,7 @@
 // Release date: 04-01-2016
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Holds compiler definitions used by Media Foundation,
 //              WASAPI and Core Audio.
 //
@@ -30,7 +30,7 @@
 //          the major Windows updates. So, we started with ISÁK.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 // Compiler version: 23 up to 34
 // SDK version: 10.0.22000.0

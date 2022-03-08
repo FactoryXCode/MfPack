@@ -10,7 +10,7 @@
 // Release date: 17-02-2016
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: This header is used by Automation.
 //              For more information, see: https://docs.microsoft.com/en-us/windows/desktop/api/_automat
 //
@@ -28,7 +28,7 @@
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -1304,11 +1304,11 @@ type
 
     function AddressOfMember(memid: MEMBERID;
                              invKind: INVOKEKIND;
-                             out ppv {IUnknown}): HRESULT; stdcall;
+                             out ppv: Pointer): HRESULT; stdcall;
 
     function CreateInstance(pUnkOuter: IUnknown;
                             const riid: REFIID;
-                            outppvObj: Pointer): HResult; stdcall;
+                            out ppvObj: Pointer): HResult; stdcall;
 
     function GetMops(memid: MEMBERID;
                      out pBstrMops: BSTR): HResult; stdcall;
@@ -1558,7 +1558,7 @@ type
 
     function CreateFromTypeInfo(pTypeInfo: ITypeInfo;
                                 const riid: REFIID;
-                                out ppv {IUnknown}): HResult; stdcall;
+                                out ppv: PUnknown): HResult; stdcall;
 
   end;
   IID_ITypeFactory = ITypeFactory;
@@ -1739,11 +1739,6 @@ type
 
 
   // Additional Prototypes for ALL Interfaces
-
-  {$NODEFINE PVariantArgList}
-  PVariantArgList = ^TVariantArgList;
-  {$NODEFINE TVariantArgList}
-  TVariantArgList = array[0..65534] of VariantArg;
 
   // End of Additional Prototypes
 

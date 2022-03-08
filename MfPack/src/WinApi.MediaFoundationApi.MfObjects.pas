@@ -1126,7 +1126,7 @@ type
     function GetBlob(const guidKey: TGUID;
                      out pBuf: PUINT8;
                      out cbBufSize: UINT32;
-                     {out} pcbBlobSize: PUINT32): HResult; stdcall;
+                     out pcbBlobSize: PUINT32): HResult; stdcall;
     // Usage example:
     // var
     //    pArea: MFVideoArea;
@@ -1345,10 +1345,10 @@ type
                      out pdwFlags: DWord): HResult; stdcall;
 
     function GetRepresentation(const guidRepresentation: TGuid;
-                               out ppvRepresentation): HResult; stdcall;
+                               out ppvRepresentation: LPVOID): HResult; stdcall;
 
     function FreeRepresentation(const guidRepresentation: TGuid;
-                                pvRepresentation: Pointer): HResult; stdcall;
+                                pvRepresentation: LPVOID): HResult; stdcall;
   end;
   IID_IMFMediaType = IMFMediaType;
   {$EXTERNALSYM IID_IMFMediaType}
@@ -1392,7 +1392,7 @@ type
     //Retrieves an alternative representation of the media type. (Deprecated)
 
     function GetVideoRepresentation(const guidRepresentation: TGuid;
-                                    out ppvRepresentation;
+                                    out ppvRepresentation: LPVOID;
                                     lStride: LONG): HResult; stdcall;
   end;
   IID_IMFVideoMediaType = IMFVideoMediaType;
@@ -1605,15 +1605,15 @@ type
     function GetElementCount(out pcElements: DWord): HResult; stdcall;
 
     function GetElement(dwElementIndex: DWord;
-                        {out} ppUnkElement: PIUnknown): HResult; stdcall;
+                        out ppUnkElement: IUnknown): HResult; stdcall;
 
     function AddElement(pUnkElement: IUnknown): HResult; stdcall;
 
     function RemoveElement(dwElementIndex: DWord;
-                           {out} ppUnkElement: PIUnknown): HResult; stdcall;
+                           out ppUnkElement: IUnknown): HResult; stdcall;
 
     function InsertElementAt(dwIndex: DWord;
-                             pUnknown_: IUnknown): HResult; stdcall;
+                             pUnfknown_: IUnknown): HResult; stdcall;
 
     function RemoveAllElements(): HResult; stdcall;
 
@@ -1996,7 +1996,7 @@ type
     function CreateByteStreamProxy(pByteStream: IMFByteStream;
                                    pAttributes: IMFAttributes;
                                    const riid: REFIID;
-                                   {out} ppvObject: Pointer): HResult; stdcall;
+                                   out ppvObject: LPVOID): HResult; stdcall;
 
   end;
   IID_IMFByteStreamProxyClassFactory = IMFByteStreamProxyClassFactory;

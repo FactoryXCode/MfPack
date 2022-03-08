@@ -1,5 +1,5 @@
 # MfSimpleCaptureToFile
-Version: X 3.1.0
+Version: X 3.1.1
 
 
 NOTES: 
@@ -15,6 +15,6 @@ Project location: https://github.com/FactoryXCode/MfPack
                   https://sourceforge.net/projects/MFPack
 
 First release date: 2018/02/05
-Final release date: 2021/11/19
+Final release date: 08-03-2022
 
 Copyright © FactoryX. All rights reserved.

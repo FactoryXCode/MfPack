@@ -10,7 +10,7 @@
 // Release date: 28-07-2020
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Definitions for kernel mode code OPM communication.
 //
 // Organisation: FactoryX
@@ -27,7 +27,7 @@
 // Remarks: NTDDI_VERSION >= NTDDI_WIN10_VB
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

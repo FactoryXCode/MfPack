@@ -296,13 +296,13 @@ type
                                    pwszURL: LPCWSTR;
                                    pAttributes: IMFAttributes;
                                    const riid: REFIID;
-                                   out ppvObject): HResult; stdcall;
+                                   out ppvObject: Pointer {LPVOID}): HResult; stdcall;
 
     function CreateInstanceFromObject(const clsid: REFCLSID;
                                       punkObject: IUnknown;
                                       pAttributes: IMFAttributes;
                                       const riid: REFIID;
-                                      out ppvObject): HResult; stdcall;
+                                      out ppvObject: Pointer {LPVOID}): HResult; stdcall;
 
   end;
   IID_IMFReadWriteClassFactory = IMFReadWriteClassFactory;
@@ -342,10 +342,10 @@ type
 
     function GetNativeMediaType(dwStreamIndex: DWORD;
                                 dwMediaTypeIndex: DWORD;
-                                {out} ppMediaType: PIMFMediaType): HResult; stdcall;
+                                out ppMediaType: IMFMediaType): HResult; stdcall;
 
     function GetCurrentMediaType(dwStreamIndex: DWORD;
-                                 {out} ppMediaType: PIMFMediaType): HResult; stdcall;
+                                 out ppMediaType: IMFMediaType): HResult; stdcall;
 
     function SetCurrentMediaType(dwStreamIndex: DWORD;
                       {Reserved} pdwReserved: DWORD;
@@ -404,7 +404,7 @@ type
     function GetServiceForStream(dwStreamIndex: DWORD;
                                  const guidService: REFGUID;
                                  const riid: REFIID;
-                                 out ppvObject): HResult; stdcall;
+                                 out ppvObject: Pointer {LPVOID}): HResult; stdcall;
 
     function GetPresentationAttribute(const dwStreamIndex: DWORD;
                                       const guidAttribute: REFGUID;
@@ -555,7 +555,7 @@ type
     function GetServiceForStream(dwStreamIndex: DWord;
                                  const guidService: REFGUID;
                                  const riid: REFIID;
-                                 out ppvObject): HResult; stdcall;
+                                 out ppvObject: Pointer {LPVOID}): HResult; stdcall;
 
     function GetStatistics(dwStreamIndex: DWord;
                            out pStats: MF_SINK_WRITER_STATISTICS): HResult; stdcall;

@@ -10,7 +10,7 @@
 // Release date: 21-11-2019
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description:
 //   This application demonstrates using the Media Foundation
 //   source reader to extract decoded audio from an audio/video file.
