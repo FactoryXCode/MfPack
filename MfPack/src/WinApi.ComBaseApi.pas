@@ -10,7 +10,7 @@
 // Release date: 08-07-2012
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Base Component Object Model defintions.
 //
 // Organisation: FactoryX
@@ -26,7 +26,7 @@
 //
 // Remarks:
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -290,7 +290,7 @@ const
 
   function CoGetDefaultContext(aptType: APTTYPE;
                                const riid: TGUID;
-                               out ppv: PPointer): HResult; stdcall;
+                               out ppv: Pointer): HResult; stdcall;
   {$EXTERNALSYM CoGetDefaultContext}
 
   // definition for Win7 new APIs
@@ -333,7 +333,7 @@ type
   {$EXTERNALSYM CoAllowUnmarshalerCLSID}
 
   function CoGetObjectContext(const riid: TGUID;
-                              out ppv): HResult; stdcall;
+                              {out} ppv: Pointer): HResult; stdcall;
   {$EXTERNALSYM CoGetObjectContext}
 
   //* register/revoke/get class objects */
@@ -342,7 +342,7 @@ type
                             dwClsContext: DWORD;
                             pvReserved: Pointer;
                             const riid: TGUID;
-                            out ppv): HResult; stdcall;
+                            {out} ppv: Pointer): HResult; stdcall;
   {$EXTERNALSYM CoGetClassObject}
 
   function CoRegisterClassObject(const rclsid: TGUID;
@@ -402,7 +402,7 @@ type
 
   function CoUnmarshalInterface(stm: IStream;
                                 const iid: TGUID;
-                                out ppv): HResult; stdcall;
+                                {out} ppv: Pointer): HResult; stdcall;
   {$EXTERNALSYM CoUnmarshalInterface}
 
   function CoMarshalHresult(pstm: LPSTREAM;
@@ -461,7 +461,7 @@ type
 
   function CoGetInterfaceAndReleaseStream(pStm: IStream;
                                           const iid: TGUID;
-                                          out ppv): HResult; stdcall;
+                                          {out} ppv: Pointer): HResult; stdcall;
   {$EXTERNALSYM CoGetInterfaceAndReleaseStream}
 
   function CoCreateFreeThreadedMarshaler(punkOuter: IUnknown;
@@ -571,7 +571,7 @@ const
                             unkOuter: IUnknown;
                             dwClsContext: Longint;
                             const riid: TGUID;
-                            out ppv): HResult; stdcall;
+                            {out} ppv: Pointer): HResult; stdcall;
   {$EXTERNALSYM CoCreateInstance}
 
   function CoCreateInstanceEx(const Clsid: TGUID;
@@ -790,7 +790,7 @@ type
 
   DLLGetClassObject = function(const rclsid: TGUID;
                                const riid: TGUID;
-                               out ppv): HResult; stdcall;
+                               {out} ppv: Pointer): HResult; stdcall;
   {$EXTERNALSYM DLLGetClassObject}
 
   DLLCanUnloadNow = function(): HResult; stdcall;

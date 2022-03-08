@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 //
 // Description: Windows Imaging Component (WIC) API.
 //              This module contains the public data structures and API definitions
@@ -25,6 +25,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 19/02/2022 Tony                Fixed REFWICPixelFormatGUID issues.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -32,7 +33,7 @@
 //          It is not recommended to use the rtl versions <= Delphi 10.4
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -1632,8 +1633,8 @@ type
                         alphaThresholdPercent: Double;
                         paletteTranslate: WICBitmapPaletteType): HResult; stdcall;
 
-    function CanConvert(srcPixelFormat: REFWICPixelFormatGUID;
-                        dstPixelFormat: REFWICPixelFormatGUID;
+    function CanConvert(const srcPixelFormat: REFWICPixelFormatGUID;
+                        const dstPixelFormat: REFWICPixelFormatGUID;
                         var pfCanConvert: BOOL): HResult; stdcall;
   end;
   IID_IWICFormatConverter = IWICFormatConverter;
@@ -1651,15 +1652,15 @@ type
 
     function Initialize(ppPlanes: PIWICBitmapSource;
                         cPlanes: UINT;
-                        dstFormat: REFWICPixelFormatGUID;
+                        const dstFormat: REFWICPixelFormatGUID;
                         dither: WICBitmapDitherType;
                         const pIPalette: IWICPalette;
                         alphaThresholdPercent: Double;
                         paletteTranslate: WICBitmapPaletteType): HResult; stdcall;
 
-    function CanConvert(pSrcPixelFormats: PWICPixelFormatGUID;
+    function CanConvert(const pSrcPixelFormats: PWICPixelFormatGUID;
                         cSrcPlanes: UINT;
-                        dstPixelFormat: REFWICPixelFormatGUID;
+                        const dstPixelFormat: REFWICPixelFormatGUID;
                         out pfCanConvert: BOOL): HResult; stdcall;
   end;
   IID_IWICPlanarFormatConverter = IWICPlanarFormatConverter;
@@ -1794,7 +1795,7 @@ type
     function Initialize(pIBitmapSource: IWICBitmapSource;
                         pIContextSource: IWICColorContext;
                         pIContextDest: IWICColorContext;
-                        pixelFmtDest: REFWICPixelFormatGUID): HResult; stdcall;
+                        const pixelFmtDest: REFWICPixelFormatGUID): HResult; stdcall;
   end;
   IID_IWICColorTransform = IWICColorTransform;
   {$EXTERNALSYM IID_IWICColorTransform}
@@ -2429,7 +2430,7 @@ type
 
     function CreateBitmap(uiWidth: UINT;
                           uiHeight: UINT;
-                          pixelFormat: REFWICPixelFormatGUID;
+                          const pixelFormat: REFWICPixelFormatGUID;
                           option: WICBitmapCreateCacheOption;
                           out ppIBitmap: IWICBitmap): HResult; stdcall;
 

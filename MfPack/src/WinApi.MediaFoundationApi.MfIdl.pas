@@ -5959,7 +5959,7 @@ type
   {$EXTERNALSYM MFCreateMFByteStreamOnStreamEx}
 
   function MFCreateStreamOnMFByteStreamEx(var pByteStream: IMFByteStream;
-                                          riid: REFIID;
+                                          const riid: REFIID;
                                           ppv: Pointer): HResult; stdcall;
   {$EXTERNALSYM MFCreateStreamOnMFByteStreamEx}
 
@@ -5977,7 +5977,7 @@ type
 
   // Enumerates a list of audio or video capture devices.
   function MFEnumDeviceSources(pAttributes: IMFAttributes;
-                               out pppSourceActivate: PIMFActivate; // Pointer to array of IMFActivate
+                               var pppSourceActivate: PIMFActivate; // Pointer to array of IMFActivate
                                out pcSourceActivate: UINT32): HResult; stdcall;
   {$EXTERNALSYM MFEnumDeviceSources}
 
