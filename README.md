@@ -23,7 +23,7 @@
 
 # MfPack 
 
-Version X 3.1.0 
+Version X 3.1.1 
 Delphi XE2 up to and including Delphi 10.4  
 SDK version: 10.0.22000.0 (Windows 11)
 
@@ -129,5 +129,9 @@ SDK version: 10.0.22000.0 (Windows 11)
   *discards them.*
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ChatDemo.jfif)
+
+**MFFrameCapture sample**
+*This sample demonstrates how to take a framecapture from a video stream, either the a-synchronous or synchronous way.*
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfFrameCapture.png)
 
 **© FactoryX. All rights reserved.***
