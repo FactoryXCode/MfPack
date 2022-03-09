@@ -10,7 +10,7 @@
 // Release date: 21-12-2019
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 //
 // Description:
 //   This application demonstrates using the Media Foundation
@@ -775,12 +775,12 @@ begin
   //
   // First deselect all streams
   if SUCCEEDED(hr) then
-    hr := pReader.SetStreamSelection(DWORD(MF_SOURCE_READER_ALL_STREAMS),
+    hr := pReader.SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS,
                                      False);
 
   // Second, selected the desired stream
   if SUCCEEDED(hr) then
-    hr := pReader.SetStreamSelection(DWORD(MF_SOURCE_READER_FIRST_AUDIO_STREAM),
+    hr := pReader.SetStreamSelection(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
                                      True);
 
   // Return the PCM format to the caller.

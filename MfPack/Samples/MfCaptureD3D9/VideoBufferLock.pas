@@ -9,7 +9,7 @@
 // Release date: 08-03-2018
 // Language: ENU
 //
-// Version: 3.1.0
+// Version: 3.1.1
 //
 // Description: Requires Windows 7 or later.
 //              Manages video preview.
@@ -24,10 +24,10 @@
 // 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -119,7 +119,6 @@ var
 begin
   inherited Create();
   m_bLocked := False;
-  m_p2DBuffer := Nil;
   m_pBuffer := pBuffer;
   // Query for the 2-D buffer interface. OK if this fails.
   // The IMFMediaBuffer is optimized to receive the IMF2DBuffer.
@@ -134,8 +133,8 @@ end;
 destructor TVideoBufferLock.Destroy();
 begin
   UnlockBuffer(); // Unlock the buffer
-  safeRelease(m_pBuffer);
-  m_p2DBuffer := Nil;
+  SafeRelease(m_pBuffer);
+  SafeRelease(m_p2DBuffer);
   inherited Destroy();
 end;
 

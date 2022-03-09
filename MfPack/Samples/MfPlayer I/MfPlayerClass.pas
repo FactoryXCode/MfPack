@@ -32,7 +32,7 @@
 //          This sample shows how to implement the TInterfacedObject.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

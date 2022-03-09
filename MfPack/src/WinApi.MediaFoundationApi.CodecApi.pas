@@ -10,7 +10,7 @@
 // Release date: 17-10-2015
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: CodecAPI Definitions.
 //
 // Organisation: FactoryX
@@ -28,7 +28,7 @@
 //          Maybe we need the Macro's later (see the original headerfile.)
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

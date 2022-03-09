@@ -9,7 +9,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: TimedText callback implementation.
 //
 // Company: FactoryX
@@ -28,7 +28,7 @@
 //          All TimedText interfaces require Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

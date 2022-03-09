@@ -10,7 +10,7 @@
 // Release date: 06-10-2015
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: This header is used by Windows Search.
 //
 // Organisation: FactoryX
@@ -27,7 +27,7 @@
 // Remarks: This is the newest WinApi.StructuredQueryCondition.pas
 // 
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

@@ -10,7 +10,7 @@
 // Release date: 04-08-2016
 // Language: ENU
 //
-// Version: 3.1.0
+// Version: 3.1.1
 // Description: An extended Peakmeter component based on the Mf Peakmeter Sample.
 //
 // Company: FactoryX
@@ -28,7 +28,7 @@
 //          Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34               q

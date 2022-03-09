@@ -10,7 +10,7 @@
 // Release date: 04-09-2015
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: -
 //
 // Organisation: FactoryX
@@ -46,7 +46,7 @@
 //          Fields with a Common Type Specification.
 // 
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -1372,8 +1372,8 @@ type
     //  Note: This method may not be called from a real-time processing thread.
     //
 
-    function IsInputFormatSupported({in }pRequestedInputFormat: IAudioMediaType;
-                                   {out} ppSupportedInputFormat: PIAudioMediaType): HResult; stdcall;
+    function IsInputFormatSupported({in} pRequestedInputFormat: IAudioMediaType;
+                                    {out} ppSupportedInputFormat: PIAudioMediaType): HResult; stdcall;
     // Description:
     //
     //  Verifies that a specific auxiliary input format is supported.

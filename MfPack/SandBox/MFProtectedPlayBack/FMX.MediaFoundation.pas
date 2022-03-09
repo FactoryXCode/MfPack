@@ -452,10 +452,10 @@ begin
 
       hr := (FMediaEngine as IMFMediaEngineProtectedContent).SetContentProtectionManager(FContentProtectionManager);
       if FAILED(hr) then
-        ShowMessage('Funtion SetContentProtectionManager failed');
+        ShowMessage('Function SetContentProtectionManager failed');
     end
   else
-    ShowMessage('Funtion CreateInstance failed');
+    ShowMessage('Function CreateInstance failed');
 end;
 
 

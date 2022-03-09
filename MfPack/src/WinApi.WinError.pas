@@ -10,7 +10,7 @@
 // Release date: 01-05-2019
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Error code definitions for the Win32 API functions.
 //
 // Organisation: FactoryX
@@ -28,7 +28,7 @@
 //          Error code definitions from Delphi <= ver 10.4
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

@@ -10,7 +10,7 @@
 // Release date: 24-01-2020
 // Language: ENU
 //
-// Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: This is a modified class of the Transcoder sample,
 //
 // Company: FactoryX
@@ -27,7 +27,7 @@
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -264,7 +264,7 @@ begin
 
   if SUCCEEDED(hr) then
     hr := pAvailableTypes.GetElement(0,
-                                     @pUnkAudioType);
+                                     pUnkAudioType);
 
   if SUCCEEDED(hr) then
     hr := pUnkAudioType.QueryInterface(IID_IMFMediaType,

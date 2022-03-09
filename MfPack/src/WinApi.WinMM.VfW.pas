@@ -10,7 +10,7 @@
 // Release date: 17-05-2020
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Video for windows include file for WIN32.
 //
 // Organisation: FactoryX
@@ -65,7 +65,7 @@
 //    can lead to mismatches that result in compilation or runtime errors.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

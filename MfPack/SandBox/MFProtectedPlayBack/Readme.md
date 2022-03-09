@@ -1,12 +1,9 @@
-# MFCaptureToFile Sample
+# MFProtectedPlayBack Sample
 Version: X 3.1.1
 
 Description:
-  ========================================================================
-      WIN32 APPLICATION : MFCaptureToFile Sample Project Overview
-  ========================================================================
 
-  This sample demonstrates how to capture video from camera to a file.
+  This sample demonstrates ...
 
   Note that this sample requires Windows 10 or later. 
 
@@ -20,6 +17,6 @@ Project: Media Foundation - MFPack - Samples
 Project location: http://sourceforge.net/projects/MFPack
 
 First release date: 01-02-2022
-Final release date: 08-03-2022
+Final release date: 01-02-2022
 
 Copyright © FactoryX. All rights reserved.

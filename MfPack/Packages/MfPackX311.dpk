@@ -1,4 +1,4 @@
-package MfPackX310;
+package MfPackX311;
 
 {$R *.res}
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
@@ -155,7 +155,6 @@ contains
   WinApi.KsProxy in '..\src\WinApi.KsProxy.pas',
   WinApi.MediaObj in '..\src\WinApi.MediaObj.pas',
   WinApi.Ks in '..\src\WinApi.Ks.pas',
-  WinApi.Dbt in '..\src\WinApi.Dbt.pas',
   WinApi.DevPropDef in '..\src\WinApi.DevPropDef.pas',
   WinApi.DvdMedia in '..\src\WinApi.DvdMedia.pas',
   WinApi.Evntcons in '..\src\WinApi.Evntcons.pas',
@@ -189,7 +188,7 @@ contains
   WinApi.WinMM.VfwMsgs in '..\src\WinApi.WinMM.VfwMsgs.pas',
   WinApi.WinMM.MSAcmDrv in '..\src\WinApi.WinMM.MSAcmDrv.pas',
   WinApi.WinMM.MSAcmDlg in '..\src\WinApi.WinMM.MSAcmDlg.pas',
-  WinApi.Avrt in '..\src\WinApi.Avrt.pas',
+  System.Services.Avrt in '..\src\System.Services.Avrt.pas',
   WinApi.CoreAudioApi.AudioClientActivationParams in '..\src\WinApi.CoreAudioApi.AudioClientActivationParams.pas',
   WinApi.CoreAudioApi.AudioEndpoints in '..\src\WinApi.CoreAudioApi.AudioEndpoints.pas',
   WinApi.CoreAudioApi.AudioStateMonitorApi in '..\src\WinApi.CoreAudioApi.AudioStateMonitorApi.pas',
@@ -197,6 +196,8 @@ contains
   WinApi.Mpeg2Error in '..\src\WinApi.Mpeg2Error.pas',
   WinApi.MpegType in '..\src\WinApi.MpegType.pas',
   WinApi.MediaFoundationApi.MfVirtualCamera in '..\src\WinApi.MediaFoundationApi.MfVirtualCamera.pas',
-  WinApi.MediaFoundationApi.ICodecApi in '..\src\WinApi.MediaFoundationApi.ICodecApi.pas';
+  WinApi.MediaFoundationApi.ICodecApi in '..\src\WinApi.MediaFoundationApi.ICodecApi.pas',
+  System.Services.AtlThunk in '..\src\System.Services.AtlThunk.pas',
+  System.Services.Dbt in '..\src\System.Services.Dbt.pas';
 
 end.

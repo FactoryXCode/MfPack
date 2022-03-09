@@ -2476,7 +2476,7 @@ const
   function MFCreateMediaExtensionActivate(szActivatableClassId: PCWSTR;
                                           pConfiguration: IUnknown;
                                           const riid: REFIID;
-                                          out ppvObject: Pointer): HResult; stdcall;
+                                          out ppvObject: LPVOID): HResult; stdcall;
   {$EXTERNALSYM MFCreateMediaExtensionActivate}
 //#endif // (WINVER >= _WIN32_WINNT_WIN8)
 

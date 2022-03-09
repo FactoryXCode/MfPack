@@ -10,7 +10,7 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: X3DAudio is an API used with XAudio2 to position sound in 3D space
 //              to create the illusion of sound coming from a point in space
 //              relative to the position of the camera.
@@ -63,7 +63,7 @@
 //          See https://docs.microsoft.com/en-gb/windows/desktop/xaudio2/x3daudio how to
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

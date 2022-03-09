@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Multimedia Registration
 //
 // Organisation: FactoryX
@@ -28,7 +28,7 @@
 //          IUnknown(Pointer), IUnknown(Object), IUnknown(Nil) etc.
 // 
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

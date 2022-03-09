@@ -10,7 +10,7 @@
 // Release date: 04-10-2020
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Ducking Capture dialog that defines the entry point for the application.
 //
 //              WIN32 APPLICATION : Ducking Capture Sample Project Overview
@@ -34,7 +34,7 @@
 // Remarks: Note that this sample requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

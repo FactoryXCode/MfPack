@@ -9,7 +9,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: This class uses the IMFMediaEngine based on HTML 5 and
 //              the TimedText interfaces for subtitles.
 //
@@ -28,7 +28,7 @@
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -76,6 +76,9 @@ uses
   System.SysUtils,
   System.Win.ComObj,
   System.SyncObjs,
+  System.Types,
+  {WIC}
+  WinApi.WIC.WinCodec,
   {MfPack}
   WinApi.MediaFoundationApi.MfUtils,
   WinApi.MediaFoundationApi.MfMetLib,
@@ -167,6 +170,7 @@ type
     procedure OnSupportedRatesChanged(event: DWORD);
     procedure OnAudioEndPointChanged(event: DWORD);
 
+
   private
     {private fields}
     pr_Volume: Double;
@@ -240,11 +244,23 @@ type
 
     procedure SetRedraw();
     function ResizeVideo(nr: TRect): HResult;
+
     // Queries the Media Engine to find out whether a new video frame is ready.
-    function GetVideoStreamTick(): LONGLONG;
+    function GetVideoStreamTick(out lstrtick: LongLong): HResult;
+    function GetVideoFrame(SourceRect: TRectF; DestRecr: TRect; var wicbmp: IWICBitmap): HResult;
+
     function GetTimedTextInterface(url: string;
                                    fExt: string;
                                    lang: PWideChar): HResult;
+    // This method corresponds to the canPlayType attribute of the HTMLMediaElement interface in HTML5.
+    // NOTE: The value "probably" is used because a MIME type for a media resource is generally not a complete description of the resource.
+    //       For example, "video/mp4" specifies an MP4 file with video, but does not describe the codec.
+    //       Even with the optional codecs parameter, the MIME type omits some information, such as the actual coded bit rate.
+    //       Therefore, it is usually impossible to be certain that playback is possible until the actual media resource is opened.
+    //       To get information about the streamcontent use function GetMediaDescription in unit WinApi.MediaFoundationApi.MfMetLib.pas.
+    function CanPlayStream(RFC4281Tag: PWideChar;
+                           out Answer: MF_MEDIA_ENGINE_CANPLAY): HResult;
+
   end;
 
 
@@ -318,7 +334,7 @@ try
 
   // Call MFCreateAttributes to create the attribute store.
   hres := MFCreateAttributes(li_Attributes,
-                             2);
+                             3);
 
   if FAILED(hr) then
     begin
@@ -335,8 +351,8 @@ try
   // more info about this.
 
   // Set the callback pointer on the Media Engine
-  hres := li_Attributes.SetUnknown(MF_MEDIA_ENGINE_CALLBACK,
-                                   Self);
+  hr := li_Attributes.SetUnknown(MF_MEDIA_ENGINE_CALLBACK,
+                                 Self);
   if FAILED(hr) then
     begin
       MessageBox(0,
@@ -356,10 +372,20 @@ try
       Exit();
     end;
 
-  // Create the mediaEngine
+  // Set MF_MEDIA_ENGINE_VIDEO_OUTPUT_FORMAT attribute for frame server-mode
+  hr := li_Attributes.SetUINT32(MF_MEDIA_ENGINE_VIDEO_OUTPUT_FORMAT,
+                                pt_hwndVideo);
+  if FAILED(hr) then
+    begin
+      hres := hr;
+      Exit();
+    end;
+
+
+  // Creates a new instance of the Media Engine.
   hr := li_MediaEngineClassFactory.CreateInstance(0,
                                                   li_Attributes,
-                                                  IMFMediaEngine(pr_MediaEngine));
+                                                  IUnknown(pr_MediaEngine));
 
   if FAILED(hr) then
     begin
@@ -391,7 +417,7 @@ begin
   // Release the global interfaces
   pr_MediaEngine := Nil;
   // Release CriticalSection
-  FreeAndNil(pt_CritSec);
+  pt_CritSec.Destroy();
   // Close the media foundation platform and end COM
   {void} CloseMF();
   inherited Destroy();
@@ -569,7 +595,6 @@ begin
                            goto doexit;
                          end;
   end;
-
 
 
   pu_CurrPosition := pr_MediaEngine.GetCurrentTime;
@@ -921,16 +946,68 @@ begin
 end;
 
 
-// Event handler
-function TcMediaEngine.GetVideoStreamTick(): LONGLONG;
+// Event handler  Do not call this method in rendering mode or audio-only mode.
+function TcMediaEngine.GetVideoStreamTick(out lstrtick: LongLong): HResult;
 var
   llstrtick: LONGLONG;
+  hr: HResult;
 
 begin
-  if Succeeded(pr_MediaEngine.OnVideoStreamTick(llstrtick)) then
-    Result := llstrtick
+  pt_CritSec.Enter;
+  if pu_RenderingState in [rsPlaying, rsPaused] then
+    begin
+      hr := pr_MediaEngine.OnVideoStreamTick(llstrtick);
+
+      if Succeeded(hr) then
+        lstrtick := llstrtick
+      else
+        lstrtick := -1;
+    end
   else
-    Result := -1;
+    hr := E_FAIL;
+
+  pt_CritSec.Leave;
+
+  Result := hr;
+end;
+
+
+function TcMediaEngine.GetVideoFrame(SourceRect: TRectF; DestRecr: TRect; var wicbmp: IWICBitmap): HResult;
+var
+  lrStrTick: LongLong;
+  vVideoNRect: TRectF;
+  vRect: TRect;
+  vMFARGB: MFARGB;
+  hr: HResult;
+
+begin
+  pt_CritSec.Enter;
+  //while hr = S_False do
+  //  begin
+      //hr := GetVideoStreamTick(lrStrTick);
+      hr := pr_MediaEngine.OnVideoStreamTick(lrStrTick);
+   // end;
+
+  if Succeeded(hr) then
+    begin
+      vMFARGB.rgbBlue  := 0;
+      vMFARGB.rgbGreen := 0;
+      vMFARGB.rgbRed   := 0;
+      vMFARGB.rgbAlpha := 0;
+      pause;
+
+      hr := pr_MediaEngine.TransferVideoFrame(IUnknown(wicbmp),
+                                              @SourceRect,
+                                              @DestRecr,
+                                              vMFARGB);
+    end;
+
+  if Succeeded(hr) then
+    begin
+
+    end;
+  pt_CritSec.Leave;
+  Result := hr;
 end;
 
 
@@ -1009,6 +1086,19 @@ begin
 done:
   Result := hres;
 
+end;
+
+
+function TcMediaEngine.CanPlayStream(RFC4281Tag: PWideChar;
+                                     out Answer: MF_MEDIA_ENGINE_CANPLAY): HResult;
+var
+  hr : HResult;
+
+begin
+  hr := pr_MediaEngine.CanPlayType(RFC4281Tag,
+                                   Answer);
+
+  Result := hr;
 end;
 
 

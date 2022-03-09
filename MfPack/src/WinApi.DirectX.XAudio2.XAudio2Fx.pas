@@ -9,7 +9,7 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Declarations for the audio effects included with XAudio2.
 //              Windows 8 XAudio 2.8 or later
 //
@@ -28,7 +28,7 @@
 // Remarks: This version of XAudio2 is available only in Windows 8 or later.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

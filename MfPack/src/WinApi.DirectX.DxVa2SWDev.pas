@@ -10,7 +10,7 @@
 // Release date: 02-10-2015
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: DirectX Video Acceleration 2 header file for software video
 //              processing devices.
 //              https://docs.microsoft.com/en-us/windows/win32/medfound/directx-video-acceleration-2-0
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

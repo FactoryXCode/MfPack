@@ -10,7 +10,7 @@
 // Release date: 04-05-2012
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Audio Endpoint Volume API
 //              Provides Volume and muting control for an audio endpoint,
 //              either per-channel or total volume.
@@ -37,7 +37,7 @@
 //          Requires Windows Vista or later.
 // 
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

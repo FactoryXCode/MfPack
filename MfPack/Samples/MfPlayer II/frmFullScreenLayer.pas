@@ -9,7 +9,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Requires Windows 7 or later.
 //              This unit is used as fullscreen layer, if not using the EVR's
 //              fullscreen option which is deprecated.
@@ -28,7 +28,7 @@
 // Remarks: -
 //
 // Related objects: MfPack Samples 3.1.0
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 // Compiler version: 23 up to 34
 // TODO: -

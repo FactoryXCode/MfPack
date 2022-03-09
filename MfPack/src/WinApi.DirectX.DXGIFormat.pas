@@ -9,7 +9,7 @@
 // Release date: 12-10-2015
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 //
 // Description: Microsoft DirectX Graphics Infrastructure API
 //              Direct3D include file DXGI_FORMAT enumeration for the D3D11 API.
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

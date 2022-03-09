@@ -994,7 +994,7 @@ type
 
     function CreateInstance(const clsid: REFCLSID;
                             const riid: REFIID;
-                            {out} ppvObject: Pointer): HResult; stdcall;
+                            out ppvObject: LPVOID): HResult; stdcall;
     // Parameters
     //  [in] clsid
     //  The CLSID of the object to create.

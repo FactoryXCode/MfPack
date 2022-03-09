@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Defines for document package target interfaces.
 //
 // Organisation: FactoryX
@@ -27,7 +27,7 @@
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -99,7 +99,7 @@ type
     // This method is called for createing a target instance.")]
     function GetPackageTarget({in} const guidTargetType: TGUID;
                               {in} const riid: TGUID;
-                              out ppvTarget: Pointer): HResult; stdcall;
+                              out ppvTarget): HResult; stdcall;
 
     function Cancel(): HResult; stdcall;
   end;
@@ -109,10 +109,10 @@ type
 
   PPrintDocumentPackageCompletion = ^PrintDocumentPackageCompletion;
   PrintDocumentPackageCompletion              = (
-    PrintDocumentPackageCompletion_InProgress	= 0,
-    PrintDocumentPackageCompletion_Completed	= ( PrintDocumentPackageCompletion_InProgress + 1),
-    PrintDocumentPackageCompletion_Canceled	= ( PrintDocumentPackageCompletion_Completed + 1),
-    PrintDocumentPackageCompletion_Failed	= ( PrintDocumentPackageCompletion_Canceled + 1)
+    PrintDocumentPackageCompletion_InProgress = 0,
+    PrintDocumentPackageCompletion_Completed  = ( PrintDocumentPackageCompletion_InProgress + 1),
+    PrintDocumentPackageCompletion_Canceled   = ( PrintDocumentPackageCompletion_Completed + 1),
+    PrintDocumentPackageCompletion_Failed     = ( PrintDocumentPackageCompletion_Canceled + 1)
   );
   {$EXTERNALSYM PrintDocumentPackageCompletion}
 

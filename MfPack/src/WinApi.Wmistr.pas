@@ -10,7 +10,7 @@
 // Release date: 22-12-2016
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: WMI structure definitions
 //
 // Organisation: FactoryX
@@ -27,7 +27,7 @@
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

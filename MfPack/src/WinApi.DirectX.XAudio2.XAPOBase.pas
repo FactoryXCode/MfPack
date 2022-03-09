@@ -9,7 +9,7 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: -
 //
 // Organisation: FactoryX
@@ -26,7 +26,7 @@
 // Remarks: See WinApi.DirectX.XAudio2.XAPO.pas for the rules governing XAPO interface behaviour.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

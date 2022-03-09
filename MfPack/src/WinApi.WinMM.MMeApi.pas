@@ -10,7 +10,7 @@
 // Release date: 17-05-2020
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: ApiSet Contract for api-ms-win-mm-mme-l1-1-0
 //              Part of Windows Multimedia
 //              See: https://docs.microsoft.com/en-us/windows/win32/api/_multimedia/
@@ -29,7 +29,7 @@
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -569,12 +569,12 @@ type
 
 
   function waveOutGetDevCapsA(uDeviceID: UINT_PTR;
-                              out pwoc: LPWAVEOUTCAPSA;
+                              {out} pwoc: LPWAVEOUTCAPSA;
                               cbwoc: UINT): MMRESULT; stdcall;
   {$EXTERNALSYM waveOutGetDevCapsA}
 
   function waveOutGetDevCapsW(uDeviceID: UINT_PTR;
-                              out pwoc: LPWAVEOUTCAPSW;
+                              {out} pwoc: LPWAVEOUTCAPSW;
                               cbwoc: UINT): MMRESULT; stdcall;
   {$EXTERNALSYM waveOutGetDevCapsW}
 
@@ -598,7 +598,7 @@ type
 
   { UniCode }
   function waveOutGetErrorTextW(mmrError: MMRESULT;
-                                {out} pszText: PWideChar;
+                                out pszText: PWideChar;
                                 cchText: UINT): MMRESULT; stdcall;
   {$EXTERNALSYM waveOutGetErrorTextW}
 
@@ -660,7 +660,7 @@ type
   {$EXTERNALSYM waveOutSetPitch}
 
   function waveOutGetPlaybackRate(hwo: HWAVEOUT;
-                                  {out} pdwRate: PDWORD): MMRESULT; stdcall;
+                                  out pdwRate: PDWORD): MMRESULT; stdcall;
   {$EXTERNALSYM waveOutGetPlaybackRate}
 
   function waveOutSetPlaybackRate(hwo: HWAVEOUT;
@@ -682,34 +682,34 @@ type
 
 
   function waveInGetDevCapsA(uDeviceID: UINT_PTR;
-                             {out} pwic: LPWAVEINCAPSA;
+                             out pwic: LPWAVEINCAPSA;
                              cbwic: UINT): MMRESULT; stdcall;
   {$EXTERNALSYM waveInGetDevCapsA}
 
   function waveInGetDevCapsW(uDeviceID: UINT_PTR;
-                             {out} pwic: LPWAVEINCAPSW;
+                             out pwic: LPWAVEINCAPSW;
                              cbwic: UINT): MMRESULT; stdcall;
   {$EXTERNALSYM waveInGetDevCapsW}
 
   { Delphi }
   function waveInGetDevCaps(uDeviceID: UINT_PTR;
-                            {out} pwic: LPWAVEINCAPSW;
+                            out pwic: LPWAVEINCAPSW;
                             cbwic: UINT): MMRESULT; stdcall;
 
 
   function waveInGetErrorTextA(mmrError: MMRESULT;
-                               {out} pszText: PAnsiChar;
+                               out pszText: PAnsiChar;
                                cchText: UINT): MMRESULT; stdcall;
   {$EXTERNALSYM waveInGetErrorTextA}
 
   function waveInGetErrorTextW(mmrError: MMRESULT;
-                               {out} pszText: PWideChar;
+                               out pszText: PWideChar;
                                cchText: UINT): MMRESULT; stdcall;
   {$EXTERNALSYM waveInGetErrorTextW}
 
   { Delphi }
   function waveInGetErrorText(mmrError: MMRESULT;
-                              {out} pszText: PWideChar;
+                              out pszText: PWideChar;
                               cchText: UINT): MMRESULT; stdcall;
 
 

@@ -10,7 +10,7 @@
 // Release date: 02-06-2016
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: This file includes all the data structures defined for the IVPConfig
 // interface.
 //
@@ -28,7 +28,7 @@
 // Remarks: Requires Windows Vista or later.
 // 
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34

@@ -10,7 +10,7 @@
 // Release date: 08-07-2012
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Component object model definitions.
 //
 // Organisation: FactoryX
@@ -27,7 +27,7 @@
 // Remarks:
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -192,23 +192,23 @@ type
   {$EXTERNALSYM CoFreeAllLibraries}
 
 
-  function CoGetInstanceFromFile(pServerInfo: PCoServerInfo;
-                                 const pclsid: PCLSID; // = ^GUID
-                                 punkOuter: IUnknown;
+  function CoGetInstanceFromFile({in, optional} pServerInfo: PCoServerInfo;
+                                 {in, optional} pclsid: PCLSID; // = ^GUID
+                                 {in, optional} punkOuter: PUnknown;
                                  dwClsCtx: DWORD;
                                  grfMode: DWORD;
                                  pwszName: PWideChar;
                                  dwCount: DWORD;
-                                 pResults: PMULTI_QI): HResult; stdcall;
+                                 {in, out} var pResults: PMULTI_QI): HResult; stdcall;
   {$EXTERNALSYM CoGetInstanceFromFile}
 
-  function CoGetInstanceFromIStorage(pServerInfo: PCoServerInfo;
-                                     const pclsid: PCLSID;
-                                     punkOuter: IUnknown;
+  function CoGetInstanceFromIStorage({in, optional} pServerInfo: PCoServerInfo;
+                                     {in, optional} pclsid: PCLSID;
+                                     {in, optional} punkOuter: IUnknown;
                                      dwClsCtx: DWORD;
                                      pstg: IUnknown; {IStorage}
                                      dwCount: DWORD;
-                                     rgmqResults: PMULTI_QI): HResult; stdcall;
+                                     {in, out} var rgmqResults: PMULTI_QI): HResult; stdcall;
   {$EXTERNALSYM CoGetInstanceFromIStorage}
 
 
@@ -319,13 +319,13 @@ type
   function BindMoniker(pmk: IMoniker;
                        grfOpt: DWORD;
                        const iidResult: TGUID;
-                       out vResult): HResult; stdcall;
+                       out vResult: LPVOID): HResult; stdcall;
   {$EXTERNALSYM BindMoniker}
 
   function CoGetObject(lpszName: PWideChar;
                        pBindOptions: BIND_OPTS;
                        const iid: TGUID;
-                       var ppv: pointer): HResult; stdcall;
+                       out ppv): HResult; stdcall;
   {$EXTERNALSYM CoGetObject}
 
   function MkParseDisplayName(pbc: IBindCtx;

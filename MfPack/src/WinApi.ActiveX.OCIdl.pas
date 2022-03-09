@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 //
 // Description: This header is used by Component Object Model (COM).
 //
@@ -29,7 +29,7 @@
 //
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -1451,7 +1451,7 @@ type
     function SetSite(pUnkSite: IUnknown ): HResult; stdcall;
 
     function GetSite(const riid: REFIID;
-                     out ppvSite: IUnknown): HResult; stdcall;
+                     out ppvSite): HResult; stdcall;
 
   end;
   IID_IObjectWithSite = IObjectWithSite;

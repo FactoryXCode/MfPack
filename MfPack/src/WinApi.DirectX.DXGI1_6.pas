@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: Microsoft DirectX Graphics Infrastructure API
 //
 // Organisation: FactoryX
@@ -27,7 +27,7 @@
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -228,7 +228,7 @@ type
     function EnumAdapterByGpuPreference(Adapter: UINT;
                                         GpuPreference: DXGI_GPU_PREFERENCE;
                                         riid: TGuid;
-                                        out ppvAdapter: Pointer): HResult; stdcall;
+                                        out ppvAdapter): HResult; stdcall;
 
   end;
   IID_IDXGIFactory6 = IDXGIFactory6;

@@ -9,7 +9,7 @@
 // Release date: 08-03-2019
 // Language: ENU
 //
-// Version: 3.1.0
+// Version: 3.1.1
 //
 // Description: Manages the Direct3D device.
 //
@@ -24,10 +24,10 @@
 // 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -267,7 +267,7 @@ end;
 //-------------------------------------------------------------------
 destructor TDrawDevice.Destroy();
 begin
-  DestroyDevice();
+  //DestroyDevice();
   inherited Destroy();
 end;
 

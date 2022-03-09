@@ -9,7 +9,7 @@
 // Release date: 24-04-2019
 // Language: ENU
 //
-// Version: 3.1.0
+// Revision Version: 3.1.1
 // Description: This player version is based on the IMFMediaEngine and
 //              the TimedText interfaces for subtitles.
 //
@@ -28,7 +28,7 @@
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -73,6 +73,7 @@ uses
   System.SysUtils,
   System.Variants,
   System.Classes,
+  System.Win.ComObj,
   {Vcl}
   Vcl.Graphics,
   Vcl.Controls,
@@ -86,6 +87,8 @@ uses
   WinApi.MediaFoundationApi.MfUtils,
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfMetLib,
+  {WIC}
+  WinApi.WIC.WinCodec,
   {Project}
   MediaEngineClass,
   TimedTextNotifyClass,
@@ -145,6 +148,7 @@ type
     pb_IsFullScreen: Boolean;
     ph_FloatingForm: HWnd;
     pi_AspectRatio: Single;
+    wic_ImagingFactory: IWICImagingFactory;
 
     procedure OnMeTimerUpdate(var message: TMessage); message WM_TIMERUPDATE;
     // TimedTextNotify messages
@@ -166,6 +170,9 @@ type
     procedure ResetInterface();
     procedure RealignInterface();
     function ReleaseEngine(): HResult;
+    // test
+    procedure GetBitmap;
+
   end;
 
 
@@ -342,11 +349,52 @@ begin
 end;
 
 
+
+
+procedure TFeMediaEnginePlayer.GetBitmap;
+var
+  rct: TRect;
+  nrct: TRectF;
+  WICdestSurf: IWICBitmap;
+  hr: HResult;
+
+begin
+  nrct.Left := pnlVideo.BoundsRect.Left;
+  nrct.Right := pnlVideo.BoundsRect.Right;
+  nrct.Top := pnlVideo.BoundsRect.Top;
+  nrct.Bottom := pnlVideo.BoundsRect.Bottom;
+
+  rct.Left := pnlVideo.BoundsRect.Left;
+  rct.Right := pnlVideo.BoundsRect.Right;
+  rct.Top := pnlVideo.BoundsRect.Top;
+  rct.Bottom := pnlVideo.BoundsRect.Bottom;
+  rct.Width := pnlVideo.BoundsRect.Width;
+  rct.Height :=  pnlVideo.BoundsRect.Height;
+
+  // create the WICImagingFactory
+  wic_ImagingFactory := CreateCOMObject(CLSID_WICImagingFactory) as IWICImagingFactory;
+
+  // create the wicbitmap
+  hr := wic_ImagingFactory.CreateBitmap(UINT(rct.Width),
+                                        UINT(rct.Height),
+                                        GUID_WICPixelFormat32bppRGB, // or GUID_WICPixelFormat24bppRGB
+                                        WICBitmapCacheOnDemand,
+                                        WICdestSurf);
+  if SUCCEEDED(hr) then
+    hr := gi_MediaEngine.GetVideoFrame(nrct,
+                                       rct,
+                                       WICdestSurf);
+
+end;
+
+
+
+
 // There is no way of getting a picture frame while the MediaEngine is in rendering mode.
 // As work a round we take a 1:1 snapshot from the video surface.
 procedure TFeMediaEnginePlayer.mnuTakeScreenshotClick(Sender: TObject);
 var
-  rc: Trect;
+  rc: TRect;
   ScrCanvas: TCanvas;
   bm: TBitmap;
 
@@ -355,6 +403,10 @@ begin
   if Assigned(gi_MediaEngine) then
     if gi_MediaEngine.pu_RenderingState in [rsPlaying, rsPaused] then
       begin
+
+        //test
+        GetBitmap;
+        exit;
 
         rc := pnlVideo.BoundsRect;
 

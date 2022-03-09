@@ -9,7 +9,7 @@
 // Release date: 08-03-2019
 // Language: ENU
 //
-// Version: 3.1.0
+// Version: 3.1.1
 //
 // Description: Manages video preview.
 //
@@ -24,10 +24,10 @@
 // 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -67,12 +67,12 @@ uses
   WinApi.Windows,
   WinApi.Messages,
   WinApi.WinApiTypes,
-  WinApi.Dbt,
   WinApi.ComBaseApi,
   {System}
   System.Classes,
   System.SysUtils,
   System.SyncObjs,
+  System.Services.Dbt,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfUtils,
   WinApi.MediaFoundationApi.MfObjects,
@@ -149,6 +149,8 @@ type
   private
     m_bFirstSample: BOOL;
     m_llBaseTime: LongLong;
+    m_pwszSymbolicLink: LPWSTR;
+    m_cchSymbolicLink: UINT32;
 
     // Constructor
     constructor Create(hVideo: HWND;
@@ -165,8 +167,7 @@ type
     m_draw: TDrawDevice;           // Manages the Direct3D device.
 
   public
-    m_pwszSymbolicLink: LPWSTR;
-    m_cchSymbolicLink: UINT32;
+
     m_Request: TRequest;
 
     // Constructor is private. Use static CreateInstance method to create.
@@ -186,8 +187,8 @@ type
     function SetDevice(pActivate: IMFActivate): HResult;
     function CloseDevice(): HResult;
     function ResizeVideo(): HResult;
-    function CheckDeviceLost(pHdr: PDEV_BROADCAST_HDR;
-                             out pbDeviceLost: BOOL): HResult;
+
+    property DeviceSymbolicLink: LPWSTR read m_pwszSymbolicLink;
 
   end;
 
@@ -270,10 +271,7 @@ begin
   m_draw.DestroyDevice();
   m_draw.Free;
   m_draw := Nil;
-  //CloseDevice();
-  FCritSec.Free;
-  FCritSec := Nil;
-
+  FCritSec.Destroy;
   inherited Destroy();
 end;
 //
@@ -642,7 +640,7 @@ begin
 
           hr := TryMediaType(pType);
 
-          pType := Nil;
+          SafeRelease(pType);
 
           if SUCCEEDED(hr) then
             Break;  // Found an output type.
@@ -700,54 +698,6 @@ begin
     end;
   FCritSec.Leave;
   Result := hr;
-end;
-
-
-//-------------------------------------------------------------------
-//  CheckDeviceLost
-//  Checks whether the current device has been lost.
-//
-//  The application should call this method in response to a
-//  WM_DEVICECHANGE message. (The application must register for
-//  device notification to receive this message.)
-//-------------------------------------------------------------------
-function TCPreview.CheckDeviceLost(pHdr: PDEV_BROADCAST_HDR;
-                                   out pbDeviceLost: BOOL): HResult;
-var
-  pDi: DEV_BROADCAST_DEVICEINTERFACE;
-
-begin
-
-  //if (pbDeviceLost = Nil) then
-   // begin
-  //    Result:= E_POINTER;
-  //    Exit;
-  //  end;
-
-  pbDeviceLost := False;
-
-  if (pHdr.dbch_devicetype <> DBT_DEVTYP_DEVICEINTERFACE) then
-    begin
-      Result := S_OK;
-      Exit;
-    end;
-
-   pDi := Default(DEV_BROADCAST_DEVICEINTERFACE);
-   pDi.dbcc_size := pHdr.dbch_size;
-   pDi.dbcc_devicetype := pHdr.dbch_devicetype;
-   pDi.dbcc_reserved := pHdr.dbch_reserved;
-
-  FCritSec.Enter;
-
-  if Assigned(m_pwszSymbolicLink) then
-    begin
-      if (StrComp(m_pwszSymbolicLink, @pDi.dbcc_name) = 0) then
-        pbDeviceLost := True;
-    end;
-
-  FCritSec.Leave;
-
-  Result := S_OK;
 end;
 
 end.

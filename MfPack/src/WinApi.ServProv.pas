@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.0
+// Revision Version: 3.1.1
 //
 // Description: IServiceProvider description.
 //
@@ -29,7 +29,7 @@
 //
 //
 // Related objects: -
-// Related projects: MfPackX310
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
@@ -81,7 +81,7 @@ type
   ['{6d5140c1-7436-11ce-8034-00aa006009fa}']
     function  QueryService(const guidService: TGUID;
                            const riid: TGUID;
-                           var ppvObject: Pointer): HResult; stdcall;
+                           var ppvObject): HResult; stdcall;
   end;
   IID_IServiceProvider = IServiceProvider;
   {$EXTERNALSYM IID_IServiceProvider}
