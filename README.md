@@ -131,7 +131,8 @@ SDK version: 10.0.22000.0 (Windows 11)
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ChatDemo.jfif)
 
 **MFFrameCapture sample**
-*This sample demonstrates how to take a framecapture from a video stream, either the a-synchronous or synchronous way.*
+
+*This sample demonstrates how to get a framecapture from a video stream, either the a-synchronous or synchronous way.*
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfFrameCapture.png)
 
 **© FactoryX. All rights reserved.***
