@@ -132,7 +132,8 @@ SDK version: 10.0.22000.0 (Windows 11)
 
 **MFFrameCapture sample**
 
-*This sample demonstrates how to get a framecapture from a video stream, either the a-synchronous or synchronous way.*
+* Demonstrates how to cature an image (synchronous or A-synchronous) using the IMFSourceReader.*
+
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfFrameCapture.png)
 
 **© FactoryX. All rights reserved.***
