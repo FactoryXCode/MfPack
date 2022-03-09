@@ -132,7 +132,7 @@ SDK version: 10.0.22000.0 (Windows 11)
 
 **MFFrameCapture sample**
 
-* Demonstrates how to cature an image (synchronous or A-synchronous) using the IMFSourceReader.*
+*Demonstrates how to cature an image (synchronous or A-synchronous) using the IMFSourceReader.*
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfFrameCapture.png)
 
