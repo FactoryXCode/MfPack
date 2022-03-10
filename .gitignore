@@ -11,3 +11,4 @@ FastMM/
 Win32/
 Win64/
 *.exe
+*.groupproj
