@@ -66,7 +66,12 @@ uses
   WinApi.DirectX.DCommon,
   WinApi.DirectX.DXGI,
   WinApi.DirectX.DXGIFormat,
+  {$IF CompilerVersion > 33}
+  // Delphi 10.4 or above
   // WinApi.DXGI included with Delphi <= 10.3.3 is not up to date!
+  WinApi.D2D1,
+  WinApi.DxgiFormat,
+  {$ENDIF}
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MfUtils,
@@ -135,9 +140,17 @@ begin
                                         pFactory));
   if Result then
     begin
+      {$IF CompilerVersion > 33}
+      // Delphi 10.4 or above
+      oProperties.&type := D2D1_RENDER_TARGET_TYPE_DEFAULT;
+      oProperties.PixelFormat.Format := DXGI_FORMAT_B8G8R8A8_UNORM;
+      oProperties.PixelFormat.alphaMode := D2D1_ALPHA_MODE_IGNORE;
+      {$ELSE}
       oProperties._type := D2D1_RENDER_TARGET_TYPE_DEFAULT;
       oProperties._PixelFormat.Format := WinApi.DirectX.DXGIFormat.DXGI_FORMAT_B8G8R8A8_UNORM;
       oProperties._PixelFormat.alphaMode := D2D1_ALPHA_MODE_IGNORE;
+      {$ENDIF}
+
       oProperties.dpiX := 0;
       oProperties.dpiY := 0;
 
@@ -152,11 +165,18 @@ end;
 procedure TSampleConverter.CreateDirect2DBitmapProperties;
 var
   oPixelFormat: D2D1_PIXEL_FORMAT;
-
 begin
-  oPixelFormat.Format := WinApi.DirectX.DXGIFormat.DXGI_FORMAT_B8G8R8A8_UNORM;
   oPixelFormat.alphaMode := D2D1_ALPHA_MODE_IGNORE;
+
+  {$IF CompilerVersion > 33}
+  // Delphi 10.4 or above
+  oPixelFormat.Format := DXGI_FORMAT_B8G8R8A8_UNORM;
+  F2DBitmapProperties.PixelFormat := oPixelFormat;
+  {$ELSE}
+  oPixelFormat.Format := WinApi.DirectX.DXGIFormat.DXGI_FORMAT_B8G8R8A8_UNORM;
   F2DBitmapProperties._PixelFormat := oPixelFormat;
+  {$ENDIF}
+
   F2DBitmapProperties.dpiX := FDPI;
   F2DBitmapProperties.dpiY := FDPI;
 end;
@@ -176,7 +196,6 @@ var
   iActualBMPDataSize: Integer;
   iExpectedBMPDataSize: Integer;
   pClipRect: PRect;
-
 begin
   AError := '';
 
@@ -201,11 +220,17 @@ begin
         if Result then
           begin
             // Bind the render target to the bitmap
-            // Note: When going in to async mode, and going to into this function, frendertarget is lost, so we need to reinitialize a new rendertarget.
+            {$IF CompilerVersion > 33}
+             // Delphi 10.4 or above
+            Result := SUCCEEDED(FRenderTarget.BindDC(AImage.Canvas.Handle, AImage.Canvas.ClipRect));
+            {$ELSE}
+
             CopyTRectToPRect(AImage.Canvas.ClipRect,
                              pClipRect);
             Result := SUCCEEDED(FRenderTarget.BindDC(AImage.Canvas.Handle,
                                                      pClipRect));
+            {$ENDIF}
+
             if Result then
               begin
                 // Create the 2D bitmap interface
