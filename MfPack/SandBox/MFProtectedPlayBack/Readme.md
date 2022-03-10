@@ -1,11 +1,10 @@
 # MFProtectedPlayBack Sample
-Version: X 3.1.1
+Version: under construction
 
 Description:
 
-  This sample demonstrates ...
-
-  Note that this sample requires Windows 10 or later. 
+  A DRM enabled player component (TControl) of audio and video using Media Foundation.
+  This sample is a Delphi (FireMonkey) version of the [ProtectedPlayback Sample](https://docs.microsoft.com/en-us/windows/win32/medfound/protectedplayback-sample) included in the Media Foundation SDK. 
 
 NOTES: 
  - This release is updated for compiler version 17 up to 34.
@@ -14,9 +13,10 @@ NOTES:
  - Minimum supported MfPack version: 3.1.1
 
 Project: Media Foundation - MFPack - Samples
-Project location: http://sourceforge.net/projects/MFPack
+Project location: https://github.com/FactoryXCode/MfPack
+                  https://sourceforge.net/projects/MFPack
 
 First release date: 01-02-2022
-Final release date: 01-02-2022
+Final release date: unknown
 
 Copyright © FactoryX. All rights reserved.

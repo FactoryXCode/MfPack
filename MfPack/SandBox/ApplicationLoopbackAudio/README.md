@@ -34,7 +34,7 @@ NOTES:
  - This release is updated for compiler version 17 up to 34.
  - SDK version 10.0.20348.0
  - Requires Windows 10 build 20348 or later.
- - Minimum supported MfPack version: 3.0.0
+ - Minimum supported MfPack version: 3.1.0
 
 Project: Media Foundation - MFPack - Samples
 Project location: https://github.com/FactoryXCode/MfPack
