@@ -4,7 +4,7 @@ Version: X 3.1.1
 
 Description:
 
-  Demonstrates how to cature an image (synchronous or A-synchronous) using the Source Reader.
+  Demonstrates how to cature an image (synchronous or A-synchronous) using the IMFSourceReader.
 
 NOTES: 
  - This release is updated for compiler version 17 up to 34.
