@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: Â© FactoryX. All rights reserved.
 //
 // Project: MfPack - CoreAudio - WASAPI
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 28-07-2020
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.1.1
 // Description: Definitions for kernel mode code OPM communication.
 //
 // Organisation: FactoryX
@@ -27,10 +27,10 @@
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX311
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
+// Compiler version: 23 up to 34
 // SDK version: 10.0.19041.0
 //
 // Todo: -

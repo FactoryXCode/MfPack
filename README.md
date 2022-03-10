@@ -23,7 +23,7 @@
 
 # MfPack 
 
-Version X 3.1.0 
+Version X 3.1.1 
 Delphi XE2 up to and including Delphi 10.4  
 SDK version: 10.0.22000.0 (Windows 11)
 
@@ -118,7 +118,8 @@ SDK version: 10.0.22000.0 (Windows 11)
 **Simple Player**
 
 *Demonstrates audio/video playback using the IMFPMediaPlayer and IMFPMediaPlayerCallback API.*
-*Note: This API is deprecated, but still functional in Windows 10 version 2004 (May 2020 update).*
+*Note: This API is deprecated, but still -partly- functional in Windows 10 version 2004 (May 2020 update).*
+       It's not recommemble to use this API, because of many issues concerning playing different formats.
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/SimplePlayer.jfif)
 
@@ -129,5 +130,11 @@ SDK version: 10.0.22000.0 (Windows 11)
   *discards them.*
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ChatDemo.jfif)
+
+**MFFrameCapture sample**
+
+*Demonstrates how to cature an image (synchronous or A-synchronous) using the IMFSourceReader.*
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfFrameCapture.png)
 
 **© FactoryX. All rights reserved.***

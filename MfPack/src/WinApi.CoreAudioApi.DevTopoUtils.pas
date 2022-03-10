@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: Â© FactoryX. All rights reserved.
 //
 // Project: MfPack - CoreAudio - Device Topology Utilities
 // Project location: https://sourceforge.net/projects/MFPack
@@ -10,7 +10,7 @@
 // Release date: 18-12-2015
 // Language: ENU
 //
-// Revision Version: 3.0.1
+// Revision Version: 3.1.1
 // Description: DeviceTopology API Utils, provides helpers for the DeviceTopology API.
 //
 // Organisation: FactoryX
@@ -32,7 +32,7 @@
 //          Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX311
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
