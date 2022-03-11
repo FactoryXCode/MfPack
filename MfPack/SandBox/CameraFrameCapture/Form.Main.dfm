@@ -55,6 +55,7 @@ object FrmMain: TFrmMain
       Width = 259
       Height = 23
       Style = csDropDownList
+      DropDownCount = 30
       TabOrder = 0
       OnChange = HandleSelectedDeviceChange
     end
