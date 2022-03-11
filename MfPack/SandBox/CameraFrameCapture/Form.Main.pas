@@ -35,6 +35,12 @@ uses
   Support;
 
 type
+  TDeviceDetails = record
+    sOriginalName : string;
+    sUpdatedName : string;
+    iCount : Integer;
+  end;
+
   TFrmMain = class(TForm)
     pnlTop: TPanel;
     cbxCaptureDevices: TComboBox;
@@ -76,6 +82,7 @@ type
 
     function StartCapture: Boolean;
     function GetDefaultSaveName: string;
+    function DeviceExists(ADevices : TArray<TDeviceDetails>; const AName: string; out AIndex : Integer): Boolean;
 
     procedure WMDeviceChange(var Msg: TMessage); message WM_DEVICECHANGE;
 
@@ -436,6 +443,9 @@ procedure TFrmMain.PopulateDeviceList;
 var
   oResult : HRESULT;
   i : Integer;
+  oDevices : TArray<TDeviceDetails>;
+  iCount : Integer;
+  iIndex : Integer;
 begin
   BeginBusy;
   try
@@ -445,16 +455,59 @@ begin
                                    FDeviceProperties);
     cbxCaptureDevices.Items.Add('None');
 
+    SetLength(oDevices, Length(FDeviceProperties));
+
+    // Update display name for devices with the same name.
+    for i:= Low(FDeviceProperties) to High(FDeviceProperties) do
+    begin
+      if DeviceExists(oDevices, FDeviceProperties[i].sFriendlyName, iIndex) then
+      begin
+        iCount := oDevices[iIndex].iCount + 1;
+        if iCount = 2 then
+          // Update the first device to include '(1)'
+          oDevices[iIndex].sUpdatedName := Format('%s (%d)', [oDevices[iIndex].sOriginalName, oDevices[iIndex].iCount]);
+      end
+      else
+        iCount := 1;
+
+      oDevices[i].sOriginalName := FDeviceProperties[i].sFriendlyName;
+      if iCount > 1 then
+        oDevices[i].sUpdatedName := Format('%s (%d)', [FDeviceProperties[i].sFriendlyName, iCount])
+      else
+        oDevices[i].sUpdatedName := oDevices[i].sOriginalName;
+      oDevices[i].iCount := iCount;
+    end;
+
+
     if SUCCEEDED(oResult) then
     begin
-      for i:= Low(FDeviceProperties) to High(FDeviceProperties) do
-        cbxCaptureDevices.Items.Add(FDeviceProperties[i].sFriendlyName);
+      for i:= Low(oDevices) to High(oDevices) do
+        cbxCaptureDevices.Items.Add(oDevices[i].sUpdatedName);
 
       cbxCaptureDevices.ItemIndex := 0;
     end;
   finally
     EndBusy;
   end;
+end;
+
+function TFrmMain.DeviceExists(ADevices : TArray<TDeviceDetails>; const AName: string; out AIndex : Integer): Boolean;
+var
+  i : Integer;
+begin
+  AIndex := -1;
+  i := Length(ADevices) - 1;
+
+  // Find the last item in the array, with the same name
+  while (AIndex = -1) and (i > -1) do
+  begin
+    Result := SameText(AName, ADevices[i].sOriginalName);
+    if Result then
+      AIndex := i;
+    dec(i);
+  end;
+
+  Result := AIndex >= 0;
 end;
 
 procedure TFrmMain.Log(const AText: string; ALogType: TLogType);
