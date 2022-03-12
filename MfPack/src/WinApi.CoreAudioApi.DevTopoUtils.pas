@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: Â© FactoryX. All rights reserved.
+// Copyright: © FactoryX. All rights reserved.
 //
 // Project: MfPack - CoreAudio - Device Topology Utilities
 // Project location: https://sourceforge.net/projects/MFPack
@@ -35,7 +35,7 @@
 // Related projects: MfPackX311
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
+// Compiler version: 23 up to 34
 // SDK version: 10.0.19041.0
 //
 // Todo: -

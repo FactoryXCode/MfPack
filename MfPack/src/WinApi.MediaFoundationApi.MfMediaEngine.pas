@@ -23,6 +23,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 // 06/03/2022 Tony                Fixed IMFMediaEngineClassFactory.CreateInstance
+// 12/03/2022 Tony                Corrected IMFMediaEngineNeedKeyNotify
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8.1 or later.
@@ -1524,20 +1525,20 @@ type
 
 
   //+-----------------------------------------------------------------------------
-  //  Interface:  IMFMediaKeysNotify
+  //  Interface:  IMFMediaEngineNeedKeyNotify
   //  Synopsis:   Implement NeedKey
   //------------------------------------------------------------------------------
-  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFMediaKeysNotify);'}
-  {$EXTERNALSYM IMFMediaKeysNotify}
-  IMFMediaKeysNotify = interface(IUnknown)
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFMediaEngineNeedKeyNotify);'}
+  {$EXTERNALSYM IMFMediaEngineNeedKeyNotify}
+  IMFMediaEngineNeedKeyNotify = interface(IUnknown)
   ['{46a30204-a696-4b18-8804-246b8f031bb1}']
     procedure NeedKey(initData: PByte;
                       cb: DWORD); stdcall;
 
   end;
-  // IMFMediaKeysNotify
-  IID_IMFMediaKeysNotify = IMFMediaKeysNotify;
-  {$EXTERNALSYM IID_IMFMediaKeysNotify}
+  // IMFMediaEngineNeedKeyNotify
+  IID_IMFMediaEngineNeedKeyNotify = IMFMediaEngineNeedKeyNotify;
+  {$EXTERNALSYM IID_IMFMediaEngineNeedKeyNotify}
 
 
 
