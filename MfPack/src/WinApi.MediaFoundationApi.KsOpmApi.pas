@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: Â© FactoryX. All rights reserved.
+// Copyright: © FactoryX. All rights reserved.
 //
 // Project: MfPack - CoreAudio - WASAPI
 // Project location: https://sourceforge.net/projects/MFPack
