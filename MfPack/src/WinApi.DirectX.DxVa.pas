@@ -1853,7 +1853,11 @@ type
     rcTarget: TRect; // RECT
     rtTarget: REFERENCE_TIME;
     NumSourceSurfaces: DWORD;
-    Alpha: FLOAT;
+    {$IFDEF WIN32}
+    Alpha: Float32;
+    {$ELSE}
+    Alpha: Float64;
+    {$ENDIF}
     Source: array[0..MAX_DEINTERLACE_SURFACES - 1] of DXVA_VideoSample32;
     DestinationFormat: DWORD;
     DestinationFlags: DWORD;
