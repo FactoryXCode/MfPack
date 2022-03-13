@@ -82,8 +82,8 @@ type
     iFrameRateDenominator: UINT32;   // The lower 32 bits of the MF_MT_FRAME_RATE attribute value
     oSubType : TGUID;
   end;
-
   TVideoFormats = TArray<TVideoFormat>;
+
 
   TCameraCaptureAsync = class(TFileCaptureAsync)
   private
@@ -92,14 +92,17 @@ type
     function PopulateStreamFormats: Boolean;
     function PopulateFormatDetails(const AMediaFormat : IMFMediaType; var ADetails : TVideoFormat) : Boolean;
     function ActiveDevice(const ADeviceSymbolicLink: PWideChar; out AMediaSource: IMFMediaSource): Boolean;
+    function SetMediaType(const AMediaType : IMFMediaType) : Boolean;
   protected
-    function SampleWithinTolerance(ARequestedTime: TTimeSpan;
-                                   AActualTime: TTimeSpan): Boolean; override;
+    function SampleWithinTolerance(ARequestedTime: TTimeSpan; AActualTime: TTimeSpan): Boolean; override;
+    function SetMediaFormat: Boolean; override;
+
     procedure ResetVariables; override;
   public
     constructor Create; override;
 
 
+    function SupportedFormat(const AFormatSubType : TGUID) : Boolean;
     function OpenDeviceSource(const ADeviceSymbolicLink : PWideChar): Boolean;
     function GetCurrentFormat(var AFormat : TVideoFormat) : Boolean;
 
@@ -146,6 +149,11 @@ begin
           // Set MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING to TRUE so the Source Reader will convert YUV video to RGB-32.
           Result := SUCCEEDED(oAttributes.SetUINT32(MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING,
                                                           1));
+
+         if Result then
+         Result := SUCCEEDED(oAttributes.SetUINT32(MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS,
+                                                    1));
+
          if Result then
             Result := ConfigureSourceReader(oAttributes);
 
@@ -263,6 +271,7 @@ begin
         pMediaType := nil;
       end;
     end;
+
   end;
 end;
 
@@ -276,6 +285,13 @@ begin
                                    pMediaType)) and SetMediaType(pMediaType);
 end;
 
+
+function TCameraCaptureAsync.SupportedFormat(const AFormatSubType: TGUID): Boolean;
+begin
+  Result := True;
+  // TODO - Filter for types we want to allows, such as
+  // (AFormatSubType = MFVideoFormat_YUY2) or (AFormatSubType = MFVideoFormat_RGB32);
+end;
 
 function TCameraCaptureAsync.PopulateFormatDetails(const AMediaFormat : IMFMediaType; var ADetails : TVideoFormat) : Boolean;
 var
@@ -311,6 +327,51 @@ begin
                                            oSubType)) then
     ADetails.oSubType := oSubType;
 end;
+
+function TCameraCaptureAsync.SetMediaFormat: Boolean;
+var
+  pMediaType: IMFMediaType;
+begin
+  // Configure the source reader to give us progressive RGB32 frames.
+  Result := SUCCEEDED(MFCreateMediaType(pMediaType));
+
+  if Result then
+    Result := SUCCEEDED(pMediaType.SetGUID(MF_MT_MAJOR_TYPE,
+                                           MFMediaType_Video));
+
+  if Result then
+    Result := SUCCEEDED(pMediaType.SetGUID(MF_MT_SUBTYPE,
+                                           MFVideoFormat_RGB32));
+
+
+  if Result then
+    Result := SUCCEEDED(FSourceReader.SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                                          0,
+                                                          pMediaType));
+
+end;
+
+function TCameraCaptureAsync.SetMediaType(const AMediaType : IMFMediaType) : Boolean;
+var
+  pMediaType : IMFMediaType;
+begin
+  // Configure the source reader to give us progressive RGB32 frames.
+  Result := SUCCEEDED(MFCreateMediaType(pMediaType));
+
+  if Result then
+    Result := SUCCEEDED(AMediaType.CopyAllItems(pMediaType));
+
+  if Result then
+    Result := SUCCEEDED(FSourceReader.SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                                         0,
+                                                          pMediaType));
+
+  FSourceReader.SetStreamSelection(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                   True);
+
+  GetVideoFormat(False);
+end;
+
 
 procedure TCameraCaptureAsync.RequestFrame;
 begin

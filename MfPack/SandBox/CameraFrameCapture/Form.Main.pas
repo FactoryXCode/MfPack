@@ -24,6 +24,7 @@ uses
   Vcl.Dialogs,
   Vcl.ExtCtrls,
   Vcl.StdCtrls,
+  Vcl.Clipbrd,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfMetLib,
@@ -32,7 +33,8 @@ uses
   {Application}
   MfDeviceCaptureClass,
   CameraCapture.Asynchronous,
-  Support;
+  Support,
+  Vcl.Menus;
 
 type
   TDeviceDetails = record
@@ -63,6 +65,15 @@ type
     sdSaveFrame: TSaveDialog;
     btnStartBurst: TButton;
     btnStopBurst: TButton;
+    MainMenu1: TMainMenu;
+    File1: TMenuItem;
+    mnEdit: TMenuItem;
+    mnLogLevel: TMenuItem;
+    mnDebugLevel: TMenuItem;
+    mnInfoLevel: TMenuItem;
+    mnWarningLevel: TMenuItem;
+    mnErrorLevel: TMenuItem;
+    btnCopyLog: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnRefreshDevicesClick(Sender: TObject);
@@ -76,6 +87,9 @@ type
     procedure HandlFormShow(Sender: TObject);
     procedure HandleStartBurstCapture(Sender: TObject);
     procedure HandleStopBurstCapture(Sender: TObject);
+    procedure OnExit(Sender: TObject);
+    procedure HandleLogLevelChange(Sender: TObject);
+    procedure HandleCopyLog(Sender: TObject);
   private
     FLogLevel: TLogType;
     FFormatSettings: TFormatSettings;
@@ -90,6 +104,8 @@ type
 
     function StartCapturePreview : Boolean;
     function GetDefaultSaveName: string;
+    function UpdateCaptureFormat : Boolean;
+    function UpdatePreviewFormat : Boolean;
     function DeviceExists(ADevices : TArray<TDeviceDetails>; const AName: string; out AIndex : Integer): Boolean;
 
     procedure WMDeviceChange(var Msg: TMessage); message WM_DEVICECHANGE;
@@ -105,11 +121,11 @@ type
     procedure ClearImage;
     procedure UpdateEnabledStates;
     procedure PopulateResolutions;
-    procedure HandleResolutionChanged;
     procedure RestoreDefaults;
     procedure UpdateSelectedDevice;
     procedure ClearValues;
     procedure RequestFrame;
+    procedure UpdateLogLevelMenu;
   public
     { Public declarations }
   end;
@@ -177,7 +193,9 @@ begin
   FLogLevel := ltInfo;
 
   // Set a default video device - for debugging
-  FDefaultDeviceName := '';
+  FDefaultDeviceName := 'USB Camera VID:1133 PID:2448';
+
+  UpdateLogLevelMenu;
 end;
 
 procedure TFrmMain.HandlFormShow(Sender: TObject);
@@ -228,7 +246,39 @@ end;
 
 procedure TFrmMain.cbxResolutionChange(Sender: TObject);
 begin
-  HandleResolutionChanged;
+  if cbxResolution.ItemIndex > -1 then
+  begin
+    UpdateCaptureFormat;
+    UpdatePreviewFormat;
+  end;
+end;
+
+function TFrmMain.UpdateCaptureFormat: Boolean;
+var
+  oFormat : TVideoFormat;
+begin
+  Result := FCapture.SourceOpen;
+
+  if Result then
+  begin
+    Log('Updating capture format', ltInfo);
+
+    Result := FCapture.SetVideoFormat(cbxResolution.ItemIndex) and FCapture.GetCurrentFormat(oFormat);
+
+    if Result then
+      Log(Format('Capture format change to %d x %d', [oFormat.iFrameWidth, oFormat.iFrameHeigth]), ltInfo)
+    else
+      Log('Failed to set capture format', ltError);
+
+    UpdateEnabledStates;
+  end;
+end;
+
+function TFrmMain.UpdatePreviewFormat : Boolean;
+begin
+  Result:= Assigned(MfDeviceCapture);
+  if Result then
+     Result := MfDeviceCapture.SetVideoFormat(cbxResolution.ItemIndex)
 end;
 
 function TFrmMain.StartCapturePreview: Boolean;
@@ -244,20 +294,10 @@ begin
   end;
 end;
 
-procedure TFrmMain.HandleResolutionChanged;
-var
-  oFormat : TVideoFormat;
-begin
-  if FCapture.SourceOpen then
-  begin
-    Log('Updating capture format', ltInfo);
-    if FCapture.SetVideoFormat(cbxResolution.ItemIndex) and FCapture.GetCurrentFormat(oFormat) then
-      Log(Format('Capture format change to %d x %d', [oFormat.iFrameWidth, oFormat.iFrameHeigth]), ltInfo)
-    else
-      Log('Failed to set capture format', ltError);
 
-    UpdateEnabledStates;
-  end;
+procedure TFrmMain.HandleCopyLog(Sender: TObject);
+begin
+  Clipboard.AsText := memLog.Lines.Text;
 end;
 
 procedure TFrmMain.HandleFrameFound(ABitmap: TBitmap;
@@ -459,11 +499,13 @@ begin
     begin
       Log('Device selected', ltInfo);
 
-      // Prepare the frame capture for the device
-      FCapture.OpenDeviceSource(ADevice.oExtendedDetails.lpSymbolicLink);
+
     end
     else
       Log('Failed to set video device', ltError);
+
+    // Prepare the frame capture for the device
+    FCapture.OpenDeviceSource(ADevice.oExtendedDetails.lpSymbolicLink);
 
     UpdateEnabledStates;
   finally
@@ -479,7 +521,6 @@ var
   i : Integer;
 begin
   cbxResolution.Clear;
-
   if Assigned(FCapture) and FCapture.SourceOpen then
   begin
     Log('Populating device resolutions', ltInfo);
@@ -488,9 +529,13 @@ begin
     for oFormat in FCapture.VideoFormats  do
     begin
       sFormatDescription := Format('%d x %d (%d fps. %s)', [oFormat.iFrameWidth, oFormat.iFrameHeigth, oFormat.iFrameRateNumerator, GetGUIDNameConst(oFormat.oSubType)]);
-//      if oFormats[i].bSelected then
-//        iSelectedIndex := i;
-      cbxResolution.Items.Add(sFormatDescription);
+      if FCapture.SupportedFormat(oFormat.oSubType) then
+      begin
+  //      if oFormats[i].bSelected then
+  //        iSelectedIndex := i;
+        cbxResolution.Items.Add(sFormatDescription);
+        Log('Adding resoultion: ' + sFormatDescription, ltDebug);
+      end;
     end;
 
     if iSelectedIndex > - 1 then
@@ -600,9 +645,16 @@ begin
                                     FFormatSettings) + cTab + ALogType.AsDisplay + cTab + 'Memory Used: ' + GetMemoryUsed + cTab + AText);
 end;
 
+procedure TFrmMain.OnExit(Sender: TObject);
+begin
+   Application.Terminate;
+end;
+
 procedure TFrmMain.UpdateEnabledStates;
 var
   oCurrentFormat : TVideoFormat;
+  iPreviewWidth : Integer;
+  iPreviewHeight : Integer;
 begin
   btnCaptureFrame.Enabled := FCapture.SourceOpen;
   cbxResolution.Enabled := FCapture.SourceOpen and (cbxCaptureDevices.ItemIndex > 0);
@@ -613,7 +665,10 @@ begin
   grpFrameCapture.Caption := 'Frame Capture';
 
   if FCapture.SourceOpen and FCapture.GetCurrentFormat(oCurrentFormat) then
-    grpFrameCapture.Caption := Format(grpFrameCapture.Caption + ' (%d x %d ) ', [oCurrentFormat.iFrameWidth, oCurrentFormat.iFrameHeigth]);
+    grpFrameCapture.Caption := Format('Frame Capture (%d x %d ) ', [oCurrentFormat.iFrameWidth, oCurrentFormat.iFrameHeigth]);
+
+  if Assigned(MfDeviceCapture) and MfDeviceCapture.GetCurrentFormat(iPreviewWidth, iPreviewHeight) then
+    grpVideoPreview.Caption := Format('Capture Preview (%d x %d ) ', [iPreviewWidth, iPreviewHeight]);
 end;
 
 procedure TFrmMain.BeginBusy;
@@ -624,6 +679,24 @@ end;
 procedure TFrmMain.EndBusy;
 begin
   Screen.Cursor := crDefault;
+end;
+
+procedure TFrmMain.HandleLogLevelChange(Sender: TObject);
+begin
+  if Sender is TMenuItem then
+    begin
+      FLogLevel := TLogType(TMenuItem(Sender).Tag);
+      UpdateLogLevelMenu;
+    end;
+end;
+
+procedure TFrmMain.UpdateLogLevelMenu;
+var
+  i: Integer;
+
+begin
+  for i := 0 to mnLogLevel.Count - 1 do
+    mnLogLevel.Items[i].Checked := Ord(FLogLevel) = mnLogLevel.Items[i].Tag;
 end;
 
 

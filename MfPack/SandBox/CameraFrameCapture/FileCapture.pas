@@ -103,7 +103,6 @@ type
     function GetDuration: TTimeSpan;
 
     function SetPosition(APosition: TTimeSpan): Boolean;
-
   protected
     FSourceReader: IMFSourceReader;
 
@@ -119,9 +118,9 @@ type
     procedure HandleMediaFormatChanged; virtual;
 
     function SelectVideoStream: Boolean;
-    function GetVideoFormat(AMediaTypeChanged: Boolean): Boolean;
+    function SetMediaFormat: Boolean; virtual;
 
-    function SetMediaType(const AMediaType : IMFMediaType) : Boolean;
+    function GetVideoFormat(AMediaTypeChanged: Boolean): Boolean;
 
     procedure ProcessSample(ASample: IMFSample;
                             ATimeStamp: TTimeSpan); virtual; abstract;
@@ -197,7 +196,6 @@ end;
 
 destructor TFileCapture.Destroy;
 begin
-  // Would FeeAndNil be an option?  Tony: I think so .. I'll try out And Yes it does.
   FreeAndNil(FSampleConverter);
   inherited;
 end;
@@ -242,8 +240,7 @@ procedure TFileCapture.ReturnSample(ASample: IMFSample;
                                     ATimeStamp: TTimeSpan);
 var
   oBitmap: TBitmap;
-  sError: string;
-
+  sError : string;
 begin
 
 {$IF COMPILERVERSION >= 34.0}
@@ -446,6 +443,21 @@ end;
 
 
 function TFileCapture.SelectVideoStream: Boolean;
+begin
+  Result := SetMediaFormat;
+
+
+  // Select the first video stream
+  if Result then
+    Result := SUCCEEDED(FSourceReader.SetStreamSelection(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                                         True));
+
+  if not Result then
+    Log('SelectVideoStream failed',
+        ltError);
+end;
+
+function TFileCapture.SetMediaFormat : Boolean;
 var
   pMediaType: IMFMediaType;
 
@@ -465,15 +477,6 @@ begin
     Result := SUCCEEDED(FSourceReader.SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
                                                           0,
                                                           pMediaType));
-
-  // Select the first video stream
-  if Result then
-    Result := SUCCEEDED(FSourceReader.SetStreamSelection(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                                         True));
-
-  if not Result then
-    Log('SelectVideoStream failed',
-        ltError);
 end;
 
 
@@ -594,14 +597,6 @@ begin
         ltError);
 end;
 
-
-function TFileCapture.SetMediaType(const AMediaType : IMFMediaType) : Boolean;
-begin
-  Result := SUCCEEDED(FSourceReader.SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                                          0,
-                                                          AMediaType));
-  HandleMediaFormatChanged;
-end;
 
 function TFileCapture.SampleWithinTolerance(ARequestedTime: TTimeSpan;
                                             AActualTime: TTimeSpan): Boolean;

@@ -77,6 +77,7 @@ uses
   System.SysUtils,
   System.Classes,
   System.Types,
+  VCL.Graphics,
   {ActiveX}
   WinApi.ActiveX.PropIdl,
   {MfPack}
@@ -87,7 +88,8 @@ uses
   WinApi.MediaFoundationApi.Evr,
   WinApi.MediaFoundationApi.Evr9,
   WinApi.MediaFoundationApi.MfError,
-  WinApi.MediaFoundationApi.MfMetLib;
+  WinApi.MediaFoundationApi.MfMetLib,
+  WinApi.MediaFoundationApi.MfReadWrite;
 
   {$TYPEINFO ON}
 
@@ -291,6 +293,10 @@ type
                                     var pbDeviceLost: Boolean): HRESULT;
     function VideoDetected(): Boolean; // returns m_bHasVideo;
 
+    function SetVideoFormat(AIndex : Integer) : Boolean;
+
+    function GetCurrentFormat(var AWidth : Integer; var AHeight : Integer) : Boolean;
+
     property State: TCeState read m_State write m_State;
     property Request: TRequest read m_Request write m_Request;
     property SetVideoSurface: HWND read GetVideoScreen write SetVideoScreen;
@@ -337,6 +343,7 @@ begin
   hr:= m_pSession.BeginGetEvent(IMFAsyncCallback(Self), Nil);
   if FAILED(hr) then
     goto done;
+
 
 done:
   Result:= hr;
@@ -1409,6 +1416,68 @@ begin
   m_bHasVideo := HasVideo();
   Result := m_bHasVideo;
 end;
+
+function TMfCaptureEngine.GetCurrentFormat(var AWidth : Integer; var AHeight : Integer) : Boolean;
+var
+  pPD: IMFPresentationDescriptor;
+  pSD: IMFStreamDescriptor;
+  bSelected : LongBool;
+  pHandler: IMFMediaTypeHandler;
+  pType : IMFMediaType;
+  uiWidth : UInt32;
+  uHeight : UInt32;
+begin
+  AWidth := 0;
+  AHeight := 0;
+
+
+  Result := SUCCEEDED(m_pSource.CreatePresentationDescriptor(pPD));
+
+  if Result then
+    Result := SUCCEEDED(pPD.GetStreamDescriptorByIndex(0,
+                                      bSelected,
+                                     pSD));
+  if Result then
+    Result := SUCCEEDED(pSD.GetMediaTypeHandler(pHandler));
+
+  if Result then
+    Result := SUCCEEDED(pHandler.GetCurrentMediaType(pType));
+
+  if Result and SUCCEEDED(MFGetAttributeSize(pType,
+                       MF_MT_FRAME_SIZE,
+                       uiWidth,
+                       uHeight)) then
+   if Result then
+   begin
+     AWidth := uiWidth;
+     AHeight := uHeight;
+   end;
+
+end;
+
+function TMfCaptureEngine.SetVideoFormat(AIndex : Integer) : Boolean;
+var
+  pPD: IMFPresentationDescriptor;
+  pSD: IMFStreamDescriptor;
+  bSelected : LongBool;
+  pHandler: IMFMediaTypeHandler;
+  pType : IMFMediaType;
+begin
+  Result := SUCCEEDED(m_pSource.CreatePresentationDescriptor(pPD));
+  if Result then
+    Result := SUCCEEDED(pPD.GetStreamDescriptorByIndex(0,
+                                      bSelected,
+                                     pSD));
+  if Result then
+    Result := SUCCEEDED(pSD.GetMediaTypeHandler(pHandler));
+
+  if Result then
+    Result := SUCCEEDED(pHandler.GetMediaTypeByIndex(DWord(AIndex), pType));
+
+  if Result then
+    Result := SUCCEEDED(pHandler.SetCurrentMediaType(pType));
+end;
+
 
 // Sets the desired clipping window/control
 procedure TMfCaptureEngine.SetVideoScreen(val: HWND);

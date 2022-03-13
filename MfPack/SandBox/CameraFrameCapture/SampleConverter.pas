@@ -220,9 +220,12 @@ begin
         if Result then
           Result := iActualBMPDataSize = iExpectedBMPDataSize;
 
-        if not Result then        
+        if not Result then
+        begin
           AError := Format('Sample size does not match expected size. Current: %d. Expected: %d',
                            [iActualBMPDataSize, iExpectedBMPDataSize]);
+        end;
+
         if Result then
           begin
             // Bind the render target to the bitmap

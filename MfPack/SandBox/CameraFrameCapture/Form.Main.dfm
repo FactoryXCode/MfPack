@@ -2,7 +2,7 @@ object FrmMain: TFrmMain
   Left = 0
   Top = 0
   Caption = 'Media Foundation Camera Capture Demo'
-  ClientHeight = 743
+  ClientHeight = 723
   ClientWidth = 1205
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -11,6 +11,7 @@ object FrmMain: TFrmMain
   Font.Name = 'Segoe UI'
   Font.Style = []
   Font.Quality = fqClearTypeNatural
+  Menu = MainMenu1
   Position = poDesktopCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -62,9 +63,8 @@ object FrmMain: TFrmMain
     object cbxResolution: TComboBox
       Left = 513
       Top = 8
-      Width = 360
+      Width = 288
       Height = 23
-      Style = csDropDownList
       TabOrder = 1
       OnChange = cbxResolutionChange
     end
@@ -80,7 +80,7 @@ object FrmMain: TFrmMain
     object memLog: TMemo
       Left = 94
       Top = 37
-      Width = 1069
+      Width = 1091
       Height = 79
       Anchors = [akLeft, akTop, akRight]
       ReadOnly = True
@@ -88,7 +88,7 @@ object FrmMain: TFrmMain
       TabOrder = 3
     end
     object btnClearLog: TButton
-      Left = 1088
+      Left = 1110
       Top = 122
       Width = 75
       Height = 25
@@ -98,7 +98,7 @@ object FrmMain: TFrmMain
       OnClick = btnClearLogClick
     end
     object btnCaptureFrame: TButton
-      Left = 647
+      Left = 783
       Top = 122
       Width = 91
       Height = 25
@@ -108,7 +108,7 @@ object FrmMain: TFrmMain
       OnClick = btnCaptureFrameClick
     end
     object btnSaveImage: TButton
-      Left = 1000
+      Left = 896
       Top = 122
       Width = 75
       Height = 25
@@ -118,7 +118,7 @@ object FrmMain: TFrmMain
       OnClick = HandleSaveImageClick
     end
     object btnStartBurst: TButton
-      Left = 753
+      Left = 94
       Top = 122
       Width = 113
       Height = 25
@@ -127,27 +127,38 @@ object FrmMain: TFrmMain
       OnClick = HandleStartBurstCapture
     end
     object btnStopBurst: TButton
-      Left = 877
+      Left = 229
       Top = 122
       Width = 113
       Height = 25
+      Anchors = [akLeft]
       Caption = 'Stop Burst Capture'
       TabOrder = 8
       OnClick = HandleStopBurstCapture
+    end
+    object btnCopyLog: TButton
+      Left = 1022
+      Top = 122
+      Width = 75
+      Height = 25
+      Anchors = [akTop, akRight]
+      Caption = 'Copy Log'
+      TabOrder = 9
+      OnClick = HandleCopyLog
     end
   end
   object pnlBottom: TPanel
     Left = 0
     Top = 161
     Width = 1205
-    Height = 582
+    Height = 562
     Align = alClient
     TabOrder = 1
     object grpVideoPreview: TGroupBox
       Left = 1
       Top = 1
       Width = 607
-      Height = 580
+      Height = 560
       Align = alClient
       Caption = ' Capture Preview '
       DefaultHeaderFont = False
@@ -169,7 +180,7 @@ object FrmMain: TFrmMain
         Left = 2
         Top = 17
         Width = 603
-        Height = 561
+        Height = 541
         Align = alClient
         BevelOuter = bvNone
         Color = clBlack
@@ -184,7 +195,7 @@ object FrmMain: TFrmMain
       Left = 608
       Top = 1
       Width = 596
-      Height = 580
+      Height = 560
       Align = alRight
       Caption = ' Frame Capture '
       DefaultHeaderFont = False
@@ -199,7 +210,7 @@ object FrmMain: TFrmMain
         Left = 2
         Top = 17
         Width = 592
-        Height = 561
+        Height = 541
         Align = alClient
         Caption = 'No Image. Waiting frame capture...'
         Color = clMedGray
@@ -209,7 +220,7 @@ object FrmMain: TFrmMain
           Left = 1
           Top = 1
           Width = 590
-          Height = 559
+          Height = 539
           Align = alClient
           AutoSize = True
           Center = True
@@ -229,5 +240,38 @@ object FrmMain: TFrmMain
       'g, *.jpeg)|*.jpg'
     Left = 32
     Top = 328
+  end
+  object MainMenu1: TMainMenu
+    Left = 336
+    Top = 401
+    object File1: TMenuItem
+      Caption = 'File'
+      object mnEdit: TMenuItem
+        Caption = 'Exit'
+        OnClick = OnExit
+      end
+    end
+    object mnLogLevel: TMenuItem
+      Caption = 'Log Level'
+      object mnDebugLevel: TMenuItem
+        Caption = 'Debug'
+        OnClick = HandleLogLevelChange
+      end
+      object mnInfoLevel: TMenuItem
+        Tag = 1
+        Caption = 'Info'
+        OnClick = HandleLogLevelChange
+      end
+      object mnWarningLevel: TMenuItem
+        Tag = 2
+        Caption = 'Warning'
+        OnClick = HandleLogLevelChange
+      end
+      object mnErrorLevel: TMenuItem
+        Tag = 3
+        Caption = 'Error'
+        OnClick = HandleLogLevelChange
+      end
+    end
   end
 end
