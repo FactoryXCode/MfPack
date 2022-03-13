@@ -121,6 +121,8 @@ type
     function SelectVideoStream: Boolean;
     function GetVideoFormat(AMediaTypeChanged: Boolean): Boolean;
 
+    function SetMediaType(const AMediaType : IMFMediaType) : Boolean;
+
     procedure ProcessSample(ASample: IMFSample;
                             ATimeStamp: TTimeSpan); virtual; abstract;
 
@@ -592,6 +594,14 @@ begin
         ltError);
 end;
 
+
+function TFileCapture.SetMediaType(const AMediaType : IMFMediaType) : Boolean;
+begin
+  Result := SUCCEEDED(FSourceReader.SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                                          0,
+                                                          AMediaType));
+  HandleMediaFormatChanged;
+end;
 
 function TFileCapture.SampleWithinTolerance(ARequestedTime: TTimeSpan;
                                             AActualTime: TTimeSpan): Boolean;

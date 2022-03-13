@@ -216,7 +216,11 @@ begin
         // For full frame capture, use the buffer dimensions for the data size check
         iExpectedBMPDataSize := (AVideoInfo.iBufferWidth * 4) * AVideoInfo.iBufferHeight;
         iActualBMPDataSize := Integer(cbBitmapData);
-        if iActualBMPDataSize <> iExpectedBMPDataSize then
+
+        if Result then
+          Result := iActualBMPDataSize = iExpectedBMPDataSize;
+
+        if not Result then        
           AError := Format('Sample size does not match expected size. Current: %d. Expected: %d',
                            [iActualBMPDataSize, iExpectedBMPDataSize]);
         if Result then

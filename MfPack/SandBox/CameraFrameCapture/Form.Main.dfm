@@ -15,6 +15,7 @@ object FrmMain: TFrmMain
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnPaint = FormPaint
+  OnShow = HandlFormShow
   PixelsPerInch = 96
   TextHeight = 15
   object pnlTop: TPanel
@@ -54,7 +55,6 @@ object FrmMain: TFrmMain
       Top = 8
       Width = 259
       Height = 23
-      Style = csDropDownList
       DropDownCount = 30
       TabOrder = 0
       OnChange = HandleSelectedDeviceChange
@@ -62,7 +62,7 @@ object FrmMain: TFrmMain
     object cbxResolution: TComboBox
       Left = 513
       Top = 8
-      Width = 259
+      Width = 360
       Height = 23
       Style = csDropDownList
       TabOrder = 1
@@ -98,7 +98,7 @@ object FrmMain: TFrmMain
       OnClick = btnClearLogClick
     end
     object btnCaptureFrame: TButton
-      Left = 984
+      Left = 647
       Top = 122
       Width = 91
       Height = 25
@@ -108,7 +108,7 @@ object FrmMain: TFrmMain
       OnClick = btnCaptureFrameClick
     end
     object btnSaveImage: TButton
-      Left = 896
+      Left = 1000
       Top = 122
       Width = 75
       Height = 25
@@ -116,6 +116,24 @@ object FrmMain: TFrmMain
       Caption = 'Save Image'
       TabOrder = 6
       OnClick = HandleSaveImageClick
+    end
+    object btnStartBurst: TButton
+      Left = 753
+      Top = 122
+      Width = 113
+      Height = 25
+      Caption = 'Start Burst Capture'
+      TabOrder = 7
+      OnClick = HandleStartBurstCapture
+    end
+    object btnStopBurst: TButton
+      Left = 877
+      Top = 122
+      Width = 113
+      Height = 25
+      Caption = 'Stop Burst Capture'
+      TabOrder = 8
+      OnClick = HandleStopBurstCapture
     end
   end
   object pnlBottom: TPanel
@@ -143,7 +161,7 @@ object FrmMain: TFrmMain
       HeaderFont.Color = clBlack
       HeaderFont.Height = 18
       HeaderFont.Name = 'Segoe UI'
-      HeaderFont.Style = [fsBold]
+      HeaderFont.Style = []
       HeaderFont.Quality = fqClearTypeNatural
       ParentFont = False
       TabOrder = 0
@@ -174,7 +192,7 @@ object FrmMain: TFrmMain
       HeaderFont.Color = clWindowText
       HeaderFont.Height = 18
       HeaderFont.Name = 'Segoe UI'
-      HeaderFont.Style = [fsBold]
+      HeaderFont.Style = []
       HeaderFont.Quality = fqClearTypeNatural
       TabOrder = 1
       object pnlFrameCapture: TPanel

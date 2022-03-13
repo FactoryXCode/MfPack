@@ -154,6 +154,7 @@ type
     constructor Create(hVideo: HWND; hMainForm: HWND); overload;
     function GetVideoDisplay: IMFVideoDisplayControl;
     function GetDevice: IMFActivate;
+    function GetMediaSource : IMFMediaSource;
 
   protected
 
@@ -290,15 +291,13 @@ type
                                     var pbDeviceLost: Boolean): HRESULT;
     function VideoDetected(): Boolean; // returns m_bHasVideo;
 
-    // Get the available capture formats
-    function EnumerateFormats(var ACaptureForms : TCaptureFormatArray) : Boolean;
-
     property State: TCeState read m_State write m_State;
     property Request: TRequest read m_Request write m_Request;
     property SetVideoSurface: HWND read GetVideoScreen write SetVideoScreen;
     property VideoRectangle: TRECT read GetVideoRectangle;
     property VideoDisplay : IMFVideoDisplayControl read GetVideoDisplay;
     property Device :  IMFActivate read GetDevice;
+    property MediaSource : IMFMediaSource read GetMediaSource;
   end;
 
 var
@@ -568,104 +567,6 @@ end;
 destructor TMfCaptureEngine.Destroy;
 begin
   inherited Destroy;
-end;
-
-
-function TMfCaptureEngine.EnumerateFormats(var ACaptureForms: TCaptureFormatArray) : Boolean;
-var
-  pPresentation : IMFPresentationDescriptor;
-  dStreamCount : DWord;
-  i : Integer;
-  oResult : HResult;
-  pSourceSD: IMFStreamDescriptor;
-  pMediaTypeHandler: IMFMediaTypeHandler;
-  pMediaType: IMFMediaType;
-  uiNumerator: UINT32;
-  uiDenominator : UINT32;
-  uiHeigth : UINT32;
-  uiWidth : UINT32;
-begin
-  SetLength(ACaptureForms, 0);
-  Result := Assigned(m_pSource);
-
-  if Result then
-  begin
-    Result := SUCCEEDED(m_pSource.CreatePresentationDescriptor(pPresentation));
-
-    if Result then
-      Result := SUCCEEDED(pPresentation.GetStreamDescriptorCount(dStreamCount));
-
-    if Result then
-    begin
-      SetLength(ACaptureForms, dStreamCount);
-
-      for i := 0 to dStreamCount - 1 do
-      begin
-        ACaptureForms[i].dwStreamIndex := i;
-
-        pSourceSD := nil;
-
-        // Get stream descriptor interface
-        oResult := pPresentation.GetStreamDescriptorByIndex(i,                    // Zero-based index of the stream.
-                                                ACaptureForms[i].bSelected, // TRUE if the stream is currently selected, FALSE if the stream is currently deselected.
-                                                pSourceSD);           // Receives a pointer to the stream descriptor's IMFStreamDescriptor interface. The caller must release the interface.
-
-        // Store the streamID
-        if SUCCEEDED(oResult) then
-          oResult := pSourceSD.GetStreamIdentifier(ACaptureForms[i].dwStreamId);
-
-        // Get the media major type
-        if SUCCEEDED(oResult) then
-          oResult := GetMediaType(pSourceSD,
-                             ACaptureForms[i].idStreamMajorTypeGuid,
-                             ACaptureForms[i].bCompressed);
-
-
-        // Figure out what media type we are dealing with
-        if SUCCEEDED(oResult) then
-          oResult := GetMediaDescription(ACaptureForms[i].idStreamMajorTypeGuid,
-                                    ACaptureForms[i].idStreamMediaType);
-
-        // If video stream then try to get the properties of this stream
-        if SUCCEEDED(oResult) and (ACaptureForms[i].idStreamMediaType = mtVideo) then
-        begin
-          oResult := pSourceSD.GetMediaTypeHandler(pMediaTypeHandler);
-
-          if SUCCEEDED(oResult) then
-            oResult := pMediaTypeHandler.GetCurrentMediaType(pMediaType);
-
-          // Get the video frame rate
-          // To calculate the framerate in FPS : Single(uiNumerator / uiDenominator)
-          if SUCCEEDED(oResult) then
-          begin
-            oResult := GetFrameRate(pMediaType,
-                               uiNumerator,
-                               uiDenominator);
-            ACaptureForms[i].video_FrameRateNumerator := uiNumerator;
-            ACaptureForms[i].video_FrameRateDenominator := uiDenominator;
-          end;
-
-          // Get the pixel aspect ratio
-          // To calculate the pixel aspect ratio: Single(uiNumerator / uiDenominator)
-          if SUCCEEDED(oResult) then
-          begin
-            GetPixelAspectRatio(pMediaType,
-                                      uiNumerator,
-                                      uiDenominator);
-            ACaptureForms[i].video_PixelAspectRatioNumerator := uiNumerator;
-            ACaptureForms[i].video_PixelAspectRatioDenominator := uiDenominator;
-
-            // Get the video frame size
-            GetFrameSize(pMediaType,
-                               uiWidth,
-                               uiHeigth);
-            ACaptureForms[i].video_FrameSizeWidth := uiWidth;
-            ACaptureForms[i].video_FrameSizeHeigth := uiHeigth;
-          end;
-        end;
-      end;
-    end;
-  end;
 end;
 
 // Start & stop
@@ -1129,6 +1030,11 @@ begin
 
 done:
   Result := hr;
+end;
+
+function TMfCaptureEngine.GetMediaSource : IMFMediaSource;
+begin
+  Result := m_pSource;
 end;
 
 function TMfCaptureEngine.GetDevice: IMFActivate;

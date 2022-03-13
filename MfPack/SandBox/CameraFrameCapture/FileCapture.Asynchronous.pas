@@ -194,9 +194,9 @@ end;
 procedure TFileCaptureAsync.HandleMediaFormatChanged;
 begin
   inherited;
-  ReadNextSample;
+  if FFindingSample then
+    ReadNextSample;
 end;
-
 
 procedure TFileCaptureAsync.HandleMessages(var AMessage: TMessage;
                                            var AHandled: Boolean);

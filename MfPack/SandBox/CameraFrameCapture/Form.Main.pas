@@ -14,9 +14,9 @@ uses
   System.Variants,
   System.Classes,
   System.UITypes,
-  System.Services.Dbt,
   System.TimeSpan,
   System.IOUtils,
+  System.Services.Dbt,
   {VCL}
   Vcl.Graphics,
   Vcl.Controls,
@@ -36,8 +36,9 @@ uses
 
 type
   TDeviceDetails = record
+    oExtendedDetails : TDeviceProperties;
     sOriginalName : string;
-    sUpdatedName : string;
+    sUniqueName : string;
     iCount : Integer;
   end;
 
@@ -60,6 +61,8 @@ type
     grpFrameCapture: TGroupBox;
     btnSaveImage: TButton;
     sdSaveFrame: TSaveDialog;
+    btnStartBurst: TButton;
+    btnStopBurst: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnRefreshDevicesClick(Sender: TObject);
@@ -70,8 +73,10 @@ type
     procedure btnCaptureFrameClick(Sender: TObject);
     procedure HandleSaveImageClick(Sender: TObject);
     procedure cbxResolutionChange(Sender: TObject);
+    procedure HandlFormShow(Sender: TObject);
+    procedure HandleStartBurstCapture(Sender: TObject);
+    procedure HandleStopBurstCapture(Sender: TObject);
   private
-    FDeviceProperties : TDevicePropertiesArray;
     FLogLevel: TLogType;
     FFormatSettings: TFormatSettings;
     FCapture: TCameraCaptureAsync;
@@ -79,25 +84,32 @@ type
     FCaptureStart: int64;
     FDefaultDeviceName : string;
     FLastFrameTime : TTimeSpan;
+    FDevices : TArray<TDeviceDetails>;
+    FBurstCaptureEnabled : Boolean;
+    FBurstStartTime : TDateTime;
 
-    function StartCapture: Boolean;
+    function StartCapturePreview : Boolean;
     function GetDefaultSaveName: string;
     function DeviceExists(ADevices : TArray<TDeviceDetails>; const AName: string; out AIndex : Integer): Boolean;
 
     procedure WMDeviceChange(var Msg: TMessage); message WM_DEVICECHANGE;
 
     procedure PopulateDeviceList;
-    procedure DestroyCapture;
+    procedure StopCapturePreview;
     procedure Log(const AText: string; ALogType: TLogType);
     procedure SetDefaults;
     procedure BeginBusy;
     procedure EndBusy;
-    procedure SetDevice(const ADeviceProperties: TDeviceProperties);
+    procedure SetDevice(const ADevice : TDeviceDetails);
     procedure HandleFrameFound(ABitmap: TBitmap; ATimeStamp: TTimeSpan);
     procedure ClearImage;
     procedure UpdateEnabledStates;
     procedure PopulateResolutions;
     procedure HandleResolutionChanged;
+    procedure RestoreDefaults;
+    procedure UpdateSelectedDevice;
+    procedure ClearValues;
+    procedure RequestFrame;
   public
     { Public declarations }
   end;
@@ -108,19 +120,19 @@ var
 implementation
 
 uses
-    VCL.Imaging.pngimage,
-    VCL.Imaging.jpeg;
+  System.DateUtils,
+  VCL.Imaging.pngimage,
+  VCL.Imaging.jpeg;
 
 {$R *.dfm}
 
 procedure TFrmMain.FormCreate(Sender: TObject);
-var
-  iDefaultDeviceIndex : Integer;
 begin
   CoInitializeEx(Nil,
                  COINIT_APARTMENTTHREADED);
 
-   if FAILED(MFStartup(MF_VERSION, 0)) then
+  // Startup Media Foundation
+  if FAILED(MFStartup(MF_VERSION, 0)) then
       begin
         MessageBox(0,
                    lpcwstr('Your computer does not support this Media Foundation API version' + IntToStr(MF_VERSION) + '.'),
@@ -129,36 +141,35 @@ begin
         Application.Terminate;
    end;
 
+   ClearValues;
+
+   // Create capture class
    FCapture := TCameraCaptureAsync.Create;
    FCapture.OnFrameFound := HandleFrameFound;
    FCapture.OnLog := Log;
 
-   FFrequency := 0;
-   FCaptureStart := 0;
-   FLastFrameTime := TTimeSpan.Zero;
-
    FFormatSettings := TFormatSettings.Create;
 
    SetDefaults;
-
    PopulateDeviceList;
-
-   iDefaultDeviceIndex := cbxCaptureDevices.Items.IndexOf(FDefaultDeviceName);
-
-   if iDefaultDeviceIndex > -1 then
-     cbxCaptureDevices.ItemIndex := iDefaultDeviceIndex;
-
-   StartCapture;
-
    UpdateEnabledStates;
 end;
 
 procedure TFrmMain.FormDestroy(Sender: TObject);
 begin
+  StopCapturePreview;
   FCapture.Free;
-  DestroyCapture;
   MFShutdown;
   CoUnInitialize;
+end;
+
+procedure TFrmMain.ClearValues;
+begin
+  FFrequency := 0;
+  FCaptureStart := 0;
+  FLastFrameTime := TTimeSpan.Zero;
+  SetLength(FDevices, 0);
+  FBurstCaptureEnabled := False;
 end;
 
 procedure TFrmMain.SetDefaults;
@@ -169,9 +180,36 @@ begin
   FDefaultDeviceName := '';
 end;
 
+procedure TFrmMain.HandlFormShow(Sender: TObject);
+begin
+  RestoreDefaults;
+end;
+
+procedure TFrmMain.RestoreDefaults;
+var
+  iDefaultDeviceIndex : Integer;
+begin
+  // Set the default startup device if it exists
+  iDefaultDeviceIndex := cbxCaptureDevices.Items.IndexOf(FDefaultDeviceName);
+
+  if iDefaultDeviceIndex > -1 then
+  begin
+   cbxCaptureDevices.ItemIndex := iDefaultDeviceIndex;
+   UpdateSelectedDevice;
+  end;
+end;
+
 procedure TFrmMain.btnCaptureFrameClick(Sender: TObject);
 begin
-  ClearImage;
+  RequestFrame;
+end;
+
+procedure TFrmMain.RequestFrame;
+begin
+  // Only clear the image on request if we are not in burst capture mode
+  if not FBurstCaptureEnabled then
+    ClearImage;
+
   QueryPerformanceFrequency(FFrequency);
   QueryPerformanceCounter(FCaptureStart);
   Log('Requesting frame.', ltInfo);
@@ -193,7 +231,7 @@ begin
   HandleResolutionChanged;
 end;
 
-function TFrmMain.StartCapture: Boolean;
+function TFrmMain.StartCapturePreview: Boolean;
 begin
   Result:= Assigned(MfDeviceCapture);
   if not Result then
@@ -207,15 +245,25 @@ begin
 end;
 
 procedure TFrmMain.HandleResolutionChanged;
+var
+  oFormat : TVideoFormat;
 begin
-  // ---- TODO ---
+  if FCapture.SourceOpen then
+  begin
+    Log('Updating capture format', ltInfo);
+    if FCapture.SetVideoFormat(cbxResolution.ItemIndex) and FCapture.GetCurrentFormat(oFormat) then
+      Log(Format('Capture format change to %d x %d', [oFormat.iFrameWidth, oFormat.iFrameHeigth]), ltInfo)
+    else
+      Log('Failed to set capture format', ltError);
+
+    UpdateEnabledStates;
+  end;
 end;
 
 procedure TFrmMain.HandleFrameFound(ABitmap: TBitmap;
                                     ATimeStamp: TTimeSpan);
 var
   iCaptureEnd: int64;
-
 begin
   QueryPerformanceCounter(iCaptureEnd);
   Log(Format('Image found in %f milliseconds. Frames Skipped: %d',
@@ -231,9 +279,16 @@ begin
     FreeAndNil(ABitmap);
   end;
 
+  if FBurstCaptureEnabled then
+  begin
+    FBurstCaptureEnabled := (SecondsBetween(Now, FBurstStartTime) <= 10);
+    if FBurstCaptureEnabled then
+      RequestFrame;
+  end;
 
   UpdateEnabledStates;
 end;
+
 
 function TFrmMain.GetDefaultSaveName : string;
 begin
@@ -266,7 +321,7 @@ begin
   end;
 end;
 
-procedure TFrmMain.DestroyCapture;
+procedure TFrmMain.StopCapturePreview;
 begin
    if Assigned(MfDeviceCapture) then
    begin
@@ -284,7 +339,7 @@ begin
 end;
 
 procedure TFrmMain.FormPaint(Sender: TObject);
-  var
+var
   ps: PAINTSTRUCT;
   vHdc: HDC;
 begin
@@ -361,27 +416,51 @@ end;
 
 procedure TFrmMain.HandleSelectedDeviceChange(Sender: TObject);
 begin
+  UpdateSelectedDevice;
+end;
+
+procedure TFrmMain.HandleStartBurstCapture(Sender: TObject);
+begin
+  UpdateEnabledStates;
+  FBurstStartTime := Now;
+  FBurstCaptureEnabled := True;
+  RequestFrame;
+end;
+
+procedure TFrmMain.HandleStopBurstCapture(Sender: TObject);
+begin
+  FBurstCaptureEnabled := False;
+  UpdateEnabledStates;
+end;
+
+procedure TFrmMain.UpdateSelectedDevice;
+begin
+  FCapture.CloseSource;
+
   if cbxCaptureDevices.ItemIndex = 0 then
-    DestroyCapture
-  else
-    SetDevice(FDeviceProperties[cbxCaptureDevices.ItemIndex - 1]);
+    StopCapturePreview
+  else if cbxCaptureDevices.ItemIndex > 0 then
+  begin
+    StartCapturePreview;
+    SetDevice(FDevices[cbxCaptureDevices.ItemIndex - 1]);
+  end;
 
   PopulateResolutions;
   UpdateEnabledStates;
 end;
 
-procedure TFrmMain.SetDevice(const ADeviceProperties : TDeviceProperties);
+procedure TFrmMain.SetDevice(const ADevice : TDeviceDetails);
 begin
   BeginBusy;
   try
-    Log('Setting selected device', ltInfo);
+    Log('Setting selected device to: ' + ADevice.sUniqueName, ltInfo);
 
-    if SUCCEEDED(MfDeviceCapture.SetDevice(ADeviceProperties)) then
+    if SUCCEEDED(MfDeviceCapture.SetDevice(ADevice.oExtendedDetails)) then
     begin
       Log('Device selected', ltInfo);
 
       // Prepare the frame capture for the device
-      FCapture.OpenDeviceSource(MfDeviceCapture.Device);
+      FCapture.OpenDeviceSource(ADevice.oExtendedDetails.lpSymbolicLink);
     end
     else
       Log('Failed to set video device', ltError);
@@ -394,31 +473,30 @@ end;
 
 procedure TFrmMain.PopulateResolutions;
 var
-  oFormats : TCaptureFormatArray;
   sFormatDescription : string;
   iSelectedIndex : Integer;
+  oFormat : TVideoFormat;
   i : Integer;
 begin
   cbxResolution.Clear;
 
-  if Assigned(MfDeviceCapture) then
+  if Assigned(FCapture) and FCapture.SourceOpen then
   begin
-    Log('Populate device resolutions - Start', ltInfo);
+    Log('Populating device resolutions', ltInfo);
     iSelectedIndex := -1;
-    MfDeviceCapture.EnumerateFormats(oFormats);
 
-    for i := 0 to Length(oFormats) - 1 do
+    for oFormat in FCapture.VideoFormats  do
     begin
-      sFormatDescription := Format('%dx%d (%d fps)', [oFormats[i].video_FrameSizeWidth, oFormats[i].video_FrameSizeHeigth, oFormats[i].video_FrameRateNumerator]);
-      if oFormats[i].bSelected then
-        iSelectedIndex := i;
+      sFormatDescription := Format('%d x %d (%d fps. %s)', [oFormat.iFrameWidth, oFormat.iFrameHeigth, oFormat.iFrameRateNumerator, GetGUIDNameConst(oFormat.oSubType)]);
+//      if oFormats[i].bSelected then
+//        iSelectedIndex := i;
       cbxResolution.Items.Add(sFormatDescription);
     end;
 
     if iSelectedIndex > - 1 then
       cbxResolution.ItemIndex := iSelectedIndex;
 
-    Log('Populate device resolutions - End', ltInfo);
+    Log(Format('Found (%d) device resolutions', [cbxResolution.Items.Count]), ltInfo);
   end;
 end;
 
@@ -429,60 +507,64 @@ var
 begin
   // Set video size
   if Assigned(MfDeviceCapture) then
-    begin
-      crD.left := 0;
-      crD.top := 0;
-      crD.right := pnlVideo.ClientWidth;
-      crD.bottom := pnlVideo.ClientHeight;
-      pcrD := @crD;
-      MfDeviceCapture.ResizeVideo(pcrD);
-    end;
+  begin
+    crD.left := 0;
+    crD.top := 0;
+    crD.right := pnlVideo.ClientWidth;
+    crD.bottom := pnlVideo.ClientHeight;
+    pcrD := @crD;
+    MfDeviceCapture.ResizeVideo(pcrD);
+  end;
 end;
 
 procedure TFrmMain.PopulateDeviceList;
 var
   oResult : HRESULT;
   i : Integer;
-  oDevices : TArray<TDeviceDetails>;
   iCount : Integer;
   iIndex : Integer;
+  oDeviceProperties : TDevicePropertiesArray;
 begin
   BeginBusy;
   try
-    SetLength(FDeviceProperties, 0);
+    SetLength(oDeviceProperties, 0);
     cbxCaptureDevices.Clear;
+
     oResult := EnumCaptureDeviceSources(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID,
-                                   FDeviceProperties);
+                                   oDeviceProperties);
     cbxCaptureDevices.Items.Add('None');
 
-    SetLength(oDevices, Length(FDeviceProperties));
+    SetLength(FDevices, Length(oDeviceProperties));
 
     // Update display name for devices with the same name.
-    for i:= Low(FDeviceProperties) to High(FDeviceProperties) do
+    for i:= Low(oDeviceProperties) to High(oDeviceProperties) do
     begin
-      if DeviceExists(oDevices, FDeviceProperties[i].sFriendlyName, iIndex) then
+      if DeviceExists(FDevices, oDeviceProperties[i].sFriendlyName, iIndex) then
       begin
-        iCount := oDevices[iIndex].iCount + 1;
+        iCount := FDevices[iIndex].iCount + 1;
         if iCount = 2 then
           // Update the first device to include '(1)'
-          oDevices[iIndex].sUpdatedName := Format('%s (%d)', [oDevices[iIndex].sOriginalName, oDevices[iIndex].iCount]);
+          FDevices[iIndex].sUniqueName := Format('%s (%d)', [FDevices[iIndex].sOriginalName, FDevices[iIndex].iCount]);
       end
       else
         iCount := 1;
 
-      oDevices[i].sOriginalName := FDeviceProperties[i].sFriendlyName;
+      // Keep a reference to the full device details
+      FDevices[i].oExtendedDetails := oDeviceProperties[i];
+      FDevices[i].sOriginalName := oDeviceProperties[i].sFriendlyName;
+
       if iCount > 1 then
-        oDevices[i].sUpdatedName := Format('%s (%d)', [FDeviceProperties[i].sFriendlyName, iCount])
+        FDevices[i].sUniqueName := Format('%s (%d)', [oDeviceProperties[i].sFriendlyName, iCount])
       else
-        oDevices[i].sUpdatedName := oDevices[i].sOriginalName;
-      oDevices[i].iCount := iCount;
+        FDevices[i].sUniqueName := FDevices[i].sOriginalName;
+      FDevices[i].iCount := iCount;
     end;
 
 
     if SUCCEEDED(oResult) then
     begin
-      for i:= Low(oDevices) to High(oDevices) do
-        cbxCaptureDevices.Items.Add(oDevices[i].sUpdatedName);
+      for i:= Low(FDevices) to High(FDevices) do
+        cbxCaptureDevices.Items.Add(FDevices[i].sUniqueName);
 
       cbxCaptureDevices.ItemIndex := 0;
     end;
@@ -519,10 +601,19 @@ begin
 end;
 
 procedure TFrmMain.UpdateEnabledStates;
+var
+  oCurrentFormat : TVideoFormat;
 begin
   btnCaptureFrame.Enabled := FCapture.SourceOpen;
   cbxResolution.Enabled := FCapture.SourceOpen and (cbxCaptureDevices.ItemIndex > 0);
   btnSaveImage.Enabled := Assigned(picFrame.Picture.Bitmap) and not picFrame.Picture.Bitmap.Empty;
+  btnStartBurst.Enabled := FCapture.SourceOpen and not FBurstCaptureEnabled;
+  btnStopBurst.Enabled := FBurstCaptureEnabled;
+
+  grpFrameCapture.Caption := 'Frame Capture';
+
+  if FCapture.SourceOpen and FCapture.GetCurrentFormat(oCurrentFormat) then
+    grpFrameCapture.Caption := Format(grpFrameCapture.Caption + ' (%d x %d ) ', [oCurrentFormat.iFrameWidth, oCurrentFormat.iFrameHeigth]);
 end;
 
 procedure TFrmMain.BeginBusy;
