@@ -33021,12 +33021,12 @@ const
 // indicate success).
 //
 
-function SUCCEEDED(hr: DWORD): BOOL; inline;
+function SUCCEEDED(hr: HResult): BOOL; inline;
 
 //
 // and the inverse
 //
-function FAILED(hr: DWORD): BOOL; inline;
+function FAILED(hr: HResult): BOOL; inline;
 
 
 //
@@ -71799,12 +71799,12 @@ const
 implementation
 
 
-function SUCCEEDED(hr: DWORD): BOOL; inline;
+function SUCCEEDED(hr: HResult): BOOL; inline;
 begin
   Result := (HResult(hr) >= 0);
 end;
 
-function FAILED(hr: DWORD): BOOL; inline;
+function FAILED(hr: HResult): BOOL; inline;
 begin
   Result := (HResult(hr) < 0);
 end;
