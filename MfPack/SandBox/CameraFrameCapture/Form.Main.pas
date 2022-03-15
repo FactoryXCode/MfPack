@@ -264,8 +264,13 @@ procedure TFrmMain.HandleResolutionChanged;
 begin
   if cbxResolution.ItemIndex > -1 then
   begin
-    UpdateCaptureFormat;
-    UpdatePreviewFormat;
+    BeginBusy;
+    try
+      UpdateCaptureFormat;
+      UpdatePreviewFormat;
+    finally
+      EndBusy;
+    end;
   end;
 end;
 
@@ -585,7 +590,8 @@ begin
 
     for oFormat in FCapture.VideoFormats  do
     begin
-      sFormatDescription := Format('%d x %d (%d fps. %s)', [oFormat.iFrameWidth, oFormat.iFrameHeigth, oFormat.iFrameRateNumerator, GetGUIDNameConst(oFormat.oSubType)]);
+      sFormatDescription := Format('%d x %d   (%d fps)    %s',
+      [oFormat.iFrameWidth, oFormat.iFrameHeigth, oFormat.iFramesPerSecond, GetGUIDNameConst(oFormat.oSubType)]);
         // TODO - Determine what format is currently selected
   //      if oFormats[i].bSelected then
   //        iSelectedIndex := i;

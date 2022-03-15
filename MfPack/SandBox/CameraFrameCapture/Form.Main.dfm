@@ -27,8 +27,6 @@ object FrmMain: TFrmMain
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitLeft = -1
-    ExplicitTop = -5
     DesignSize = (
       1205
       161)

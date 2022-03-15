@@ -76,10 +76,9 @@ uses
 
 type
   TVideoFormat = record
-    iFrameHeigth: UINT32;                  // Output frame heigth
-    iFrameWidth: UINT32;                   // Output frame width
-    iFrameRateNumerator: UINT32;     // The upper 32 bits of the MF_MT_FRAME_RATE attribute value
-    iFrameRateDenominator: UINT32;   // The lower 32 bits of the MF_MT_FRAME_RATE attribute value
+    iFrameHeigth: Integer;
+    iFrameWidth: Integer;
+    iFramesPerSecond : Integer;
     oSubType : TGUID;
   end;
   TVideoFormats = TArray<TVideoFormat>;
@@ -95,6 +94,7 @@ type
     function SetMediaType(const AMediaType : IMFMediaType) : Boolean;
   protected
     function SampleWithinTolerance(ARequestedTime: TTimeSpan; AActualTime: TTimeSpan): Boolean; override;
+    function ConfigureSourceReader(const AAttributes: IMFAttributes) : Boolean; override;
     function SetMediaFormat: Boolean; override;
 
     procedure ResetVariables; override;
@@ -140,18 +140,8 @@ begin
       Result := ActiveDevice(ADeviceSymbolicLink, pSource);
       try
        if Result then
-         // Configure the source reader to perform video processing.
           Result := SUCCEEDED(MFCreateAttributes(oAttributes,
                                                  1));
-
-        if Result then
-          // Set MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING to TRUE so the Source Reader will convert YUV video to RGB-32.
-          Result := SUCCEEDED(oAttributes.SetUINT32(MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING,
-                                                          1));
-
-         if Result then
-         Result := SUCCEEDED(oAttributes.SetUINT32(MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS,
-                                                    1));
 
          if Result then
             Result := ConfigureSourceReader(oAttributes);
@@ -175,6 +165,24 @@ begin
      end;
   end;
 end;
+
+
+function TCameraCaptureAsync.ConfigureSourceReader(const AAttributes: IMFAttributes): Boolean;
+begin
+  inherited;
+  // Enables advanced video processing by the Source Reader, including color space conversion, deinterlacing, video resizing,
+  // and frame-rate conversion.
+  Result := SUCCEEDED(AAttributes.SetUINT32(MF_SOURCE_READER_ENABLE_ADVANCED_VIDEO_PROCESSING, 1));
+
+  if Result then
+    Result := SUCCEEDED(AAttributes.SetUINT32(MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS, 1));
+
+  // This must be disable with Advanced Video Processing enabled
+  if Result then
+    Result := SUCCEEDED(AAttributes.SetUINT32(MF_READWRITE_DISABLE_CONVERTERS, 0));
+
+end;
+
 
 function TCameraCaptureAsync.ActiveDevice(const ADeviceSymbolicLink : PWideChar; out AMediaSource : IMFMediaSource) : Boolean;
 var
@@ -323,13 +331,11 @@ begin
                         MF_MT_FRAME_RATE,
                         uiNumerator,
                         uiDenominator));
-     ADetails.iFrameRateNumerator := uiNumerator;
-     ADetails.iFrameRateDenominator := uiDenominator;
+     ADetails.iFramesPerSecond := Round(uiNumerator / uiDenominator);
    end;
 
-   if SUCCEEDED(AMediaFormat.GetGUID(MF_MT_SUBTYPE,
-                                           oSubType)) then
-    ADetails.oSubType := oSubType;
+   if SUCCEEDED(AMediaFormat.GetGUID(MF_MT_SUBTYPE, oSubType)) then
+     ADetails.oSubType := oSubType;
 end;
 
 function TCameraCaptureAsync.SetMediaFormat: Boolean;
