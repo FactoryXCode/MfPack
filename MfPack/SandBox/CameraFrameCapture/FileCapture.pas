@@ -103,6 +103,7 @@ type
     function GetDuration: TTimeSpan;
 
     function SetPosition(APosition: TTimeSpan): Boolean;
+    procedure SetOnLog(const Value: TLogEvent);
   protected
     FSourceReader: IMFSourceReader;
 
@@ -153,7 +154,7 @@ type
     procedure CancelCapture;
 
     // Event hooks
-    property OnLog: TLogEvent read FOnLog write FOnLog;
+    property OnLog: TLogEvent read FOnLog write SetOnLog;
     property OnFrameFound: TFrameEvent read FOnFrameFound write FOnFrameFound;
 
     property RequestedTime: TTimeSpan read FRequestedTime;
@@ -323,6 +324,7 @@ end;
 
 procedure TFileCapture.HandleMediaFormatChanged;
 begin
+  Log('Media Format Changed', ltInfo);
   GetVideoFormat(True);
   FSourceReader.SetStreamSelection(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
                                    True);
@@ -403,41 +405,34 @@ var
   uHeight: UINT32;
   uWidth: UINT32;
   pInputType: IMFMediaType;
-
 begin
   Result := SUCCEEDED(FSourceReader.GetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
                                                         pInputType));
 
   if Result and SUCCEEDED(pInputType.GetGUID(MF_MT_SUBTYPE,
                                              oSubType)) then
-    begin
-      // Make sure it is RGB 32
-      if (oSubType = MFVideoFormat_RGB32) then
+  begin
+      FVideoInfo.oSubType := oSubType;
+
+      Result := SUCCEEDED(MFGetAttributeSize(pInputType,
+                                             MF_MT_FRAME_SIZE,
+                                             uWidth,
+                                             uHeight));
+      if Result then
         begin
-          Result := SUCCEEDED(MFGetAttributeSize(pInputType,
-                                                 MF_MT_FRAME_SIZE,
-                                                 uWidth,
-                                                 uHeight));
-          if Result then
+          FVideoInfo.iBufferWidth := uWidth;
+          FVideoInfo.iBufferHeight := uHeight;
+
+          // If the source type has changed the video buffer dimensions have changed.
+          // We still want to use the original video dimensions for the full frame capture, not the buffer dimensions.
+          if not AMediaTypeChanged then
             begin
-              FVideoInfo.iBufferWidth := uWidth;
-              FVideoInfo.iBufferHeight := uHeight;
-
-              // If the source type has changed the video buffer dimensions have changed.
-              // We still want to use the original video dimensions for the full frame capture, not the buffer dimensions.
-              if not AMediaTypeChanged then
-                begin
-                  FVideoInfo.iVideoWidth := uWidth;
-                  FVideoInfo.iVideoHeight := uHeight;
-                end;
+              FVideoInfo.iVideoWidth := uWidth;
+              FVideoInfo.iVideoHeight := uHeight;
             end;
+        end;
 
-          FVideoInfo.iStride := MFGetAttributeUINT32(pInputType,
-                                                     MF_MT_DEFAULT_STRIDE,
-                                                     1);
-        end
-      else
-        Log('GetVideoFormat. Video is not RGB 32 format', ltError);
+      SampleConverter.UpdateConverter(pInputType);
     end;
 end;
 
@@ -445,7 +440,6 @@ end;
 function TFileCapture.SelectVideoStream: Boolean;
 begin
   Result := SetMediaFormat;
-
 
   // Select the first video stream
   if Result then
@@ -479,6 +473,13 @@ begin
                                                           pMediaType));
 end;
 
+
+procedure TFileCapture.SetOnLog(const Value: TLogEvent);
+begin
+  FOnLog := Value;
+  if Assigned(FSampleConverter) then
+   FSampleConverter.OnLog := FOnLog;
+end;
 
 function TFileCapture.CreateSourceReader(const AURL: string): Boolean;
 var

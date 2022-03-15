@@ -101,10 +101,9 @@ type
   public
     constructor Create; override;
 
-
-    function SupportedFormat(const AFormatSubType : TGUID) : Boolean;
     function OpenDeviceSource(const ADeviceSymbolicLink : PWideChar): Boolean;
     function GetCurrentFormat(var AFormat : TVideoFormat) : Boolean;
+    function FormatSupported(AFormatIndex: Integer): Boolean;
 
     function SetVideoFormat(AFormatIndex : Integer) : Boolean;
 
@@ -265,8 +264,9 @@ begin
           inc(iCount);
           SetLength(FVideoFormats, iCount);
           PopulateFormatDetails(pMediaType, FVideoFormats[iCount - 1]);
-          inc(iTypeIndex);
         end;
+
+        inc(iTypeIndex);
       finally
         pMediaType := nil;
       end;
@@ -275,6 +275,17 @@ begin
   end;
 end;
 
+function TCameraCaptureAsync.FormatSupported(AFormatIndex: Integer): Boolean;
+var
+  pMediaType : IMFMediaType;
+  oSubType : TGUID;
+begin
+  Result := SUCCEEDED(SourceReader.GetNativeMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
+                                   AFormatIndex,
+                                   pMediaType)) and SUCCEEDED(pMediaType.GetGUID(MF_MT_SUBTYPE,
+                                           oSubType))
+                                           and SampleConverter.IsInputSupported(oSubType);
+end;
 
 function TCameraCaptureAsync.SetVideoFormat(AFormatIndex: Integer): Boolean;
 var
@@ -285,13 +296,6 @@ begin
                                    pMediaType)) and SetMediaType(pMediaType);
 end;
 
-
-function TCameraCaptureAsync.SupportedFormat(const AFormatSubType: TGUID): Boolean;
-begin
-  Result := True;
-  // TODO - Filter for types we want to allows, such as
-  // (AFormatSubType = MFVideoFormat_YUY2) or (AFormatSubType = MFVideoFormat_RGB32);
-end;
 
 function TCameraCaptureAsync.PopulateFormatDetails(const AMediaFormat : IMFMediaType; var ADetails : TVideoFormat) : Boolean;
 var

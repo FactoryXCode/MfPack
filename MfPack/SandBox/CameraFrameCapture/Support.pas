@@ -101,7 +101,7 @@ type
     iVideoHeight: Integer;
     iBufferWidth: Integer;
     iBufferHeight: Integer;
-    iStride: Integer;
+    oSubType : TGUID;
     procedure Reset;
   end;
 
@@ -123,7 +123,7 @@ type
   function IsURL(const APath: string): Boolean;
   function GetMemoryUsed: string;
 
-const
+  const
   cTab = #9;
 
 implementation
@@ -287,7 +287,7 @@ begin
   iVideoHeight := 0;
   iBufferWidth := 0;
   iBufferHeight := 0;
-  iStride := 0;
 end;
+
 
 end.

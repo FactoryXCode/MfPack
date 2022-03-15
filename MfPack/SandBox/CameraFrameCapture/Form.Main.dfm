@@ -27,6 +27,8 @@ object FrmMain: TFrmMain
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitLeft = -1
+    ExplicitTop = -5
     DesignSize = (
       1205
       161)
@@ -50,6 +52,13 @@ object FrmMain: TFrmMain
       Width = 23
       Height = 15
       Caption = 'Log:'
+    end
+    object lblSupported: TLabel
+      Left = 814
+      Top = 13
+      Width = 22
+      Height = 15
+      Caption = 'N/A'
     end
     object cbxCaptureDevices: TComboBox
       Left = 94

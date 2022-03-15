@@ -71,45 +71,65 @@ uses
   // WinApi.DXGI included with Delphi <= 10.3.3 is not up to date!
   WinApi.D2D1,
   WinApi.DxgiFormat,
+  WinAPI.ActiveX,
+  WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.WmCodecDsp,
+  WinApi.ComBaseApi,
   {$ENDIF}
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfTransform,
+  WinApi.MediaFoundationApi.MfMetLib,
+  WinApi.UuIds,
   {VCL}
   VCL.Graphics,
   {System}
+  System.SysUtils,
   System.Classes,
   System.Types,
   {Application}
   Support;
 
+
 type
   TSampleConverter = class(TPersistent)
   protected
     FRenderTarget: ID2D1DCRenderTarget;
-
+    FOutputType : IMFMediaType;
+    FTransform : IMFTransform;
+    FOnLog: TLogEvent;
+    FSupportedInputs : TArray<TGUID>;
   private
     FDPI: Integer;
     F2DBitmapProperties: D2D1_BITMAP_PROPERTIES;
     procedure CreateDirect2DBitmapProperties;
     function CreateRenderTarget: Boolean;
+    function ConvertSampleToRGB(const AInputSample : IMFSample; out AConvertedSample : IMFSample) : Boolean;
+    function CheckSucceeded(AStatus : HRESULT; const AMethod : string; ALogFailure : Boolean = True): Boolean;
+    function IndexOf(const AInput: TGUID; const AValues: array of TGUID): Integer;
 
+    procedure FreeConverter;
+    procedure NotifyBeginStreaming;
+    procedure SetSupportedInputs;
   public
     constructor Create;
     destructor Destroy; override;
+
+    function UpdateConverter(const AInputType: IMFMediaType): Boolean;
 
     function BitmapFromSample(const ASample: IMFSample;
                               const AVideoInfo: TVideoFormatInfo;
                               var AError: string;
                               var AImage: TBitmap): Boolean;
+
+    function IsInputSupported(const AInputFormat : TGUID) : Boolean;
+
+    // Event hooks
+    property OnLog: TLogEvent read FOnLog write FOnLog;
   end;
 
 implementation
-
-uses
-  {System}
-  System.SysUtils;
-
 
 constructor TSampleConverter.Create;
 begin
@@ -117,16 +137,55 @@ begin
   FDPI := DevicePixelPerInch;
   CreateRenderTarget;
   CreateDirect2DBitmapProperties;
+  SetSupportedInputs;
 end;
 
 
 destructor TSampleConverter.Destroy;
 begin
-  inherited;
+  FreeConverter;
   FRenderTarget.Flush();
   SafeRelease(FRenderTarget);
+  inherited;
 end;
 
+procedure TSampleConverter.SetSupportedInputs;
+begin
+  SetLength(FSupportedInputs, 20);
+  FSupportedInputs[0] := MFVideoFormat_RGB24;
+  FSupportedInputs[1] := MFVideoFormat_RGB32;
+  FSupportedInputs[2] := MFVideoFormat_RGB555;
+  FSupportedInputs[3] := MFVideoFormat_RGB565;
+  FSupportedInputs[4] := MFVideoFormat_RGB8;
+  FSupportedInputs[5] := MFVideoFormat_AYUV;
+  FSupportedInputs[6] := MFVideoFormat_I420;
+  FSupportedInputs[7] := MFVideoFormat_IYUV;
+  FSupportedInputs[8] := MFVideoFormat_NV11;
+  FSupportedInputs[9] := MFVideoFormat_NV12;
+  FSupportedInputs[10] := MFVideoFormat_UYVY;
+  FSupportedInputs[11] := MFVideoFormat_V216;
+  FSupportedInputs[12] := MFVideoFormat_V410;
+  FSupportedInputs[13] := MFVideoFormat_Y41P;
+  FSupportedInputs[14] := MFVideoFormat_Y41T;
+  FSupportedInputs[15] := MFVideoFormat_Y42T;
+  FSupportedInputs[16] := MFVideoFormat_YUY2;
+  FSupportedInputs[17] := MFVideoFormat_YV12;
+  FSupportedInputs[18] := MFVideoFormat_YVU9;
+  FSupportedInputs[19] := MFVideoFormat_YVYU;
+end;
+
+
+function TSampleConverter.IsInputSupported(const AInputFormat: TGUID): Boolean;
+begin
+  Result := IndexOf(AInputFormat, FSupportedInputs) > -1;
+end;
+
+function TSampleConverter.IndexOf(const AInput : TGUID; const AValues : array of TGUID) : Integer;
+begin
+  Result := high(AValues);
+  while (Result >= low(AValues)) and (AInput <> AValues[Result]) do
+    Dec(Result);
+end;
 
 function TSampleConverter.CreateRenderTarget: Boolean;
 var
@@ -198,11 +257,22 @@ var
   {$IFDEF CompilerVersion <= 33}
   pClipRect: PRect;
   {$ENDIF}
+  pConvertedSample : IMFSample;
 begin
   AError := '';
+  pConvertedSample := nil;
 
-  // Converts a sample with multiple buffers into a sample with a single buffer.
-  Result := SUCCEEDED(ASample.ConvertToContiguousBuffer(pBuffer));
+  if AVideoInfo.oSubType <> MFVideoFormat_RGB32 then
+  begin
+    Result := ConvertSampleToRGB(ASample, pConvertedSample);
+
+    if Result then
+     // Converts a sample with multiple buffers into a sample with a single buffer.
+    Result := SUCCEEDED(pConvertedSample.ConvertToContiguousBuffer(pBuffer));
+  end
+  else
+    // Converts a sample with multiple buffers into a sample with a single buffer.
+    Result := SUCCEEDED(ASample.ConvertToContiguousBuffer(pBuffer));
 
   try
 
@@ -274,6 +344,116 @@ begin
     {$ENDIF}
   end;
 
+  if Assigned(pConvertedSample) then
+    SafeRelease(pConvertedSample)
+
+end;
+
+procedure TSampleConverter.FreeConverter;
+begin
+  SafeRelease(FTransform);
+  FOutputType := nil;
+end;
+
+function TSampleConverter.UpdateConverter(const AInputType : IMFMediaType) : Boolean;
+begin
+  FreeConverter;
+
+  // Create the color converter
+  // See: https://docs.microsoft.com/en-us/windows/win32/medfound/colorconverter
+  Result := SUCCEEDED(CoCreateInstance(CLSID_CColorConvertDMO, nil, CLSCTX_INPROC_SERVER, IID_IMFTransform, FTransform));
+
+  if Result then
+  begin
+    // Set the input type for the transform
+    if Result then
+      Result := SUCCEEDED(FTransform.SetInputType(0, AInputType, 0));
+
+    // Create the output type
+    if Result then
+      Result := SUCCEEDED(MFCreateMediaType(FOutputType));
+
+    // Copy all the properties from the input type to the output
+    if Result then
+      Result := SUCCEEDED(AInputType.CopyAllItems(FOutputType));
+
+    // Set sub type RGB32
+    if Result then
+      Result := SUCCEEDED(FOutputType.SetGUID(MF_MT_SUBTYPE, MFVideoFormat_RGB32));
+
+    // Assign the output type to the transform
+    if Result then
+      Result := SUCCEEDED(FTransform.SetOutputType(0, FOutputType, 0));
+
+    NotifyBeginStreaming;
+  end;
+end;
+
+procedure TSampleConverter.NotifyBeginStreaming;
+begin
+  // This should speed up the first frame request.
+  // See: https://docs.microsoft.com/en-us/windows/win32/medfound/mft-message-notify-begin-streaming
+  FTransform.ProcessMessage(MFT_MESSAGE_NOTIFY_BEGIN_STREAMING, 0);
+end;
+
+function TSampleConverter.ConvertSampleToRGB(const AInputSample : IMFSample; out AConvertedSample : IMFSample) : Boolean;
+var
+  oStatus : DWord;
+  oResult : HResult;
+  pBufferOut : IMFMediaBuffer;
+  oOutputDataBuffer : MFT_OUTPUT_DATA_BUFFER;
+  oOutputStreamInfo : MFT_OUTPUT_STREAM_INFO;
+  iFrequency: int64;
+  iConvertStart: int64;
+  iConvertEnd : int64;
+begin
+  QueryPerformanceFrequency(iFrequency);
+  QueryPerformanceCounter(iConvertStart);
+
+  Result := CheckSUCCEEDED(FTransform.ProcessInput(0, AInputSample, 0), 'ConvertSampleToRGB');
+
+  if Result then
+  begin
+    Result := SUCCEEDED(FTransform.GetOutputStreamInfo(0, oOutputStreamInfo));
+    try
+      if Result then
+        Result := SUCCEEDED(MFCreateMemoryBuffer(oOutputStreamInfo.cbSize, pBufferOut));
+
+      if Result then
+        Result := SUCCEEDED(MFCreateSample(AConvertedSample));
+
+      if Result then
+        Result := SUCCEEDED(AConvertedSample.AddBuffer(pBufferOut));
+
+      if Result then
+      begin
+        oOutputDataBuffer.dwStreamID := 0;
+        oOutputDataBuffer.dwStatus := 0;
+        oOutputDataBuffer.pSample := AConvertedSample;
+        oOutputDataBuffer.pEvents := nil;
+
+        oResult := FTransform.ProcessOutput(DWord(MFT_PROCESS_OUTPUT_DISCARD_WHEN_NO_BUFFER), 1, @oOutputDataBuffer, oStatus);
+        Result := SUCCEEDED(oResult);
+      end;
+    finally
+      pBufferOut := nil;
+    end;
+  end;
+
+  QueryPerformanceCounter(iConvertEnd);
+  if Assigned(OnLog)  then
+   OnLog(Format('ConvertSampleToRGB took %f milliseconds.',
+               [(iConvertEnd - iConvertStart) / iFrequency * 1000]),
+                                 ltDebug);
+
+end;
+
+
+function TSampleConverter.CheckSucceeded(AStatus : HRESULT; const AMethod : string; ALogFailure : Boolean = True) : Boolean;
+begin
+ Result := SUCCEEDED(AStatus);
+ if not Result and Assigned(OnLog) then
+    OnLog(Format('Method "%s" failed. Error code: %d',  [AMethod, AStatus]), ltError);
 end;
 
 end.

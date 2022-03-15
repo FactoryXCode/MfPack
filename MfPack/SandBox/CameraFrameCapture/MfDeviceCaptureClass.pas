@@ -1430,29 +1430,31 @@ begin
   AWidth := 0;
   AHeight := 0;
 
-
-  Result := SUCCEEDED(m_pSource.CreatePresentationDescriptor(pPD));
-
+  Result := Assigned(m_pSource);
   if Result then
-    Result := SUCCEEDED(pPD.GetStreamDescriptorByIndex(0,
-                                      bSelected,
-                                     pSD));
-  if Result then
-    Result := SUCCEEDED(pSD.GetMediaTypeHandler(pHandler));
+  begin
+    Result := SUCCEEDED(m_pSource.CreatePresentationDescriptor(pPD));
 
-  if Result then
-    Result := SUCCEEDED(pHandler.GetCurrentMediaType(pType));
+    if Result then
+      Result := SUCCEEDED(pPD.GetStreamDescriptorByIndex(0,
+                                        bSelected,
+                                       pSD));
+    if Result then
+      Result := SUCCEEDED(pSD.GetMediaTypeHandler(pHandler));
 
-  if Result and SUCCEEDED(MFGetAttributeSize(pType,
-                       MF_MT_FRAME_SIZE,
-                       uiWidth,
-                       uHeight)) then
-   if Result then
-   begin
-     AWidth := uiWidth;
-     AHeight := uHeight;
-   end;
+    if Result then
+      Result := SUCCEEDED(pHandler.GetCurrentMediaType(pType));
 
+    if Result and SUCCEEDED(MFGetAttributeSize(pType,
+                         MF_MT_FRAME_SIZE,
+                         uiWidth,
+                         uHeight)) then
+     if Result then
+     begin
+       AWidth := uiWidth;
+       AHeight := uHeight;
+     end;
+  end;
 end;
 
 function TMfCaptureEngine.SetVideoFormat(AIndex : Integer) : Boolean;
@@ -1463,7 +1465,7 @@ var
   pHandler: IMFMediaTypeHandler;
   pType : IMFMediaType;
 begin
-  Result := SUCCEEDED(m_pSource.CreatePresentationDescriptor(pPD));
+  Result := Assigned(m_pSource) and SUCCEEDED(m_pSource.CreatePresentationDescriptor(pPD));
   if Result then
     Result := SUCCEEDED(pPD.GetStreamDescriptorByIndex(0,
                                       bSelected,
