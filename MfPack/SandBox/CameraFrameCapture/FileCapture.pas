@@ -252,24 +252,26 @@ begin
   oBitmap.Width := VideoInfo.iVideoWidth;
   oBitmap.Height := VideoInfo.iVideoHeight;
 {$ENDIF}
-
   if SampleConverter.BitmapFromSample(ASample,
                                       VideoInfo,
                                       sError,
                                       oBitmap) then
     begin
+      SafeRelease(ASample);
+
       if Assigned(OnFrameFound) then
         OnFrameFound(oBitmap,
                      ATimeStamp);
     end
   else
     begin
+    SafeRelease(ASample);
       Log('Failed to create BMP from frame sample: ' + sError,
           ltError);
       FreeAndNil(oBitmap);
     end;
 
-  SafeRelease(ASample);
+
 end;
 
 

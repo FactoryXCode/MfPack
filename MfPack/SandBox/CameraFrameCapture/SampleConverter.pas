@@ -93,6 +93,8 @@ uses
 
 
 type
+  TSampleReturnType = (srImage, srImageAndData, srData);
+
   TSampleConverter = class(TPersistent)
   protected
     FRenderTarget: ID2D1DCRenderTarget;
@@ -103,6 +105,8 @@ type
   private
     FDPI: Integer;
     F2DBitmapProperties: D2D1_BITMAP_PROPERTIES;
+    FSampleReturnType : TSampleReturnType;
+
     procedure CreateDirect2DBitmapProperties;
     function CreateRenderTarget: Boolean;
     function ConvertSampleToRGB(const AInputSample : IMFSample; out AConvertedSample : IMFSample) : Boolean;
@@ -112,6 +116,7 @@ type
     procedure FreeConverter;
     procedure NotifyBeginStreaming;
     procedure SetSupportedInputs;
+    procedure RenderToBMP(ASourceRect : TRect; const ASurface : ID2D1Bitmap);
   public
     constructor Create;
     destructor Destroy; override;
@@ -125,9 +130,12 @@ type
 
     function IsInputSupported(const AInputFormat : TGUID) : Boolean;
 
+    property SampleReturnType : TSampleReturnType read FSampleReturnType write FSampleReturnType;
+
     // Event hooks
     property OnLog: TLogEvent read FOnLog write FOnLog;
   end;
+
 
 implementation
 
@@ -201,11 +209,13 @@ begin
     begin
       {$IF CompilerVersion > 33}
       // Delphi 10.4 or above
-      oProperties.&type := D2D1_RENDER_TARGET_TYPE_DEFAULT;
+      // For some reason software rendering appears to perform slightly better.
+      // Change to 'D2D1_RENDER_TARGET_TYPE_DEFAULT' to test otherwise.
+      oProperties.&type := D2D1_RENDER_TARGET_TYPE_SOFTWARE;
       oProperties.PixelFormat.Format := DXGI_FORMAT_B8G8R8A8_UNORM;
       oProperties.PixelFormat.alphaMode := D2D1_ALPHA_MODE_IGNORE;
       {$ELSE}
-      oProperties._type := D2D1_RENDER_TARGET_TYPE_DEFAULT;
+      oProperties._type := D2D1_RENDER_TARGET_TYPE_SOFTWARE;
       oProperties._PixelFormat.Format := WinApi.DirectX.DXGIFormat.DXGI_FORMAT_B8G8R8A8_UNORM;
       oProperties._PixelFormat.alphaMode := D2D1_ALPHA_MODE_IGNORE;
       {$ENDIF}
@@ -283,13 +293,13 @@ begin
                                        @cbBitmapData));
       try
         iPitch := 4 * AVideoInfo.iVideoWidth;
+
         // For full frame capture, use the buffer dimensions for the data size check
         iExpectedBMPDataSize := (AVideoInfo.iBufferWidth * 4) * AVideoInfo.iBufferHeight;
         iActualBMPDataSize := Integer(cbBitmapData);
 
         if Result then
           Result := iActualBMPDataSize = iExpectedBMPDataSize;
-
         if not Result then
         begin
           AError := Format('Sample size does not match expected size. Current: %d. Expected: %d',
@@ -322,13 +332,9 @@ begin
                                                                o2DBitmap));
               end;
 
-            // Draw the 2D bitmap to the render target
+             // Draw the 2D bitmap to the render target
             if Result then
-              begin
-                FRenderTarget.BeginDraw;
-                FRenderTarget.DrawBitmap(o2DBitmap);
-                FRenderTarget.EndDraw();
-              end;
+              RenderToBMP(AImage.Canvas.ClipRect, o2DBitmap);
           end;
 
       finally
@@ -345,8 +351,28 @@ begin
   end;
 
   if Assigned(pConvertedSample) then
-    SafeRelease(pConvertedSample)
+    SafeRelease(pConvertedSample);
+end;
 
+procedure TSampleConverter.RenderToBMP(ASourceRect : TRect; const ASurface : ID2D1Bitmap);
+var
+  iFrequency: int64;
+  iStart: int64;
+  iEnd : int64;
+begin
+  QueryPerformanceFrequency(iFrequency);
+  QueryPerformanceCounter(iStart);
+
+  FRenderTarget.BeginDraw;
+  try
+    FRenderTarget.DrawBitmap(ASurface);
+  finally
+    FRenderTarget.EndDraw();
+  end;
+
+  QueryPerformanceCounter(iEnd);
+  if Assigned(OnLog) then
+      OnLog(Format('RenderBMP took %f milliseconds',[(iEnd - iStart) / iFrequency * 1000]), ltDebug);
 end;
 
 procedure TSampleConverter.FreeConverter;
@@ -436,7 +462,7 @@ begin
         Result := SUCCEEDED(oResult);
       end;
     finally
-      pBufferOut := nil;
+      SafeRelease(pBufferOut);
     end;
   end;
 

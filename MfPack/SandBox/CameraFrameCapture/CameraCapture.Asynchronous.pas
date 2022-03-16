@@ -180,7 +180,6 @@ begin
   // This must be disable with Advanced Video Processing enabled
   if Result then
     Result := SUCCEEDED(AAttributes.SetUINT32(MF_READWRITE_DISABLE_CONVERTERS, 0));
-
 end;
 
 
@@ -304,7 +303,6 @@ begin
                                    pMediaType)) and SetMediaType(pMediaType);
 end;
 
-
 function TCameraCaptureAsync.PopulateFormatDetails(const AMediaFormat : IMFMediaType; var ADetails : TVideoFormat) : Boolean;
 var
   uiHeigth : UINT32;
@@ -376,6 +374,8 @@ begin
                                                          0,
                                                           pMediaType));
 
+  // Only select the video stream
+  FSourceReader.SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS, False);
   FSourceReader.SetStreamSelection(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
                                    True);
 
@@ -394,6 +394,7 @@ begin
   inherited;
   MaxFramesToSkip := 1;
 end;
+
 
 function TCameraCaptureAsync.SampleWithinTolerance(ARequestedTime, AActualTime: TTimeSpan): Boolean;
 begin

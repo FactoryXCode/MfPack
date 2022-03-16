@@ -34,7 +34,8 @@ uses
   MfDeviceCaptureClass,
   CameraCapture.Asynchronous,
   Support,
-  Vcl.Menus;
+  FileCapture.Asynchronous,
+  Vcl.Menus, Vcl.ComCtrls;
 
 type
   TDeviceDetails = record
@@ -75,6 +76,9 @@ type
     mnErrorLevel: TMenuItem;
     btnCopyLog: TButton;
     lblSupported: TLabel;
+    tcCapture: TPageControl;
+    tbFrame: TTabSheet;
+    spResize: TSplitter;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnRefreshDevicesClick(Sender: TObject);
@@ -102,9 +106,10 @@ type
     FDefaultResolution : string;
     FLastFrameTime : TTimeSpan;
     FDevices : TArray<TDeviceDetails>;
-    FBurstCaptureEnabled : Boolean;
     FBurstStartTime : TDateTime;
     FCurrentDevice : TDeviceDetails;
+    FCurrentCaptureFormat : TVideoFormat;
+    FBurstCaptureEnabled : Boolean;
 
     function StartCapturePreview : Boolean;
     function GetDefaultSaveName: string;
@@ -204,7 +209,7 @@ begin
   // Set a default values for selection on load.
   // Examples below
   //FDefaultDeviceName := 'Logitech HD Webcam C615';
-  //FDefaultResolution := '1600 x 896 (20 fps. MFVideoFormat_I420)';
+  //FDefaultResolution := '1600 x 896     (30 fps)    MFVideoFormat_I420';
 
   UpdateLogLevelMenu;
 end;
@@ -242,7 +247,8 @@ begin
   QueryPerformanceFrequency(FFrequency);
   QueryPerformanceCounter(FCaptureStart);
   Log('Requesting frame.', ltInfo);
-  FCapture.RequestFrame;
+
+  FCapture.RequestFrame
 end;
 
 procedure TFrmMain.btnClearLogClick(Sender: TObject);
@@ -275,8 +281,6 @@ begin
 end;
 
 function TFrmMain.UpdateCaptureFormat: Boolean;
-var
-  oFormat : TVideoFormat;
 begin
   Result := FCapture.SourceOpen;
 
@@ -289,10 +293,10 @@ begin
 
       Log('Updating capture format', ltInfo);
 
-      Result := FCapture.SetVideoFormat(cbxResolution.ItemIndex) and FCapture.GetCurrentFormat(oFormat);
+      Result := FCapture.SetVideoFormat(cbxResolution.ItemIndex) and FCapture.GetCurrentFormat(FCurrentCaptureFormat);
 
       if Result then
-        Log(Format('Capture format change to %d x %d', [oFormat.iFrameWidth, oFormat.iFrameHeigth]), ltInfo)
+        Log(Format('Capture format change to %d x %d', [FCurrentCaptureFormat.iFrameWidth, FCurrentCaptureFormat.iFrameHeigth]), ltInfo)
       else
         Log('Failed to set capture format', ltError);
 
@@ -336,11 +340,14 @@ var
   iCaptureEnd: int64;
 begin
   // Do as little as possible here, otherwise burst captured will be slowed.
-  QueryPerformanceCounter(iCaptureEnd);
-  Log(Format('Image found in %f milliseconds. Frames Skipped: %d',
-             [(iCaptureEnd - FCaptureStart) / FFrequency * 1000,
+  if (FCaptureStart > 0) then
+  begin
+    QueryPerformanceCounter(iCaptureEnd);
+    Log(Format('Image returned in %f milliseconds. %d x %d. Frames Skipped: %d',
+             [(iCaptureEnd - FCaptureStart) / FFrequency * 1000, FCurrentCaptureFormat.iFrameWidth, FCurrentCaptureFormat.iFrameHeigth,
                                FCapture.FramesSkipped]),
                                ltInfo);
+  end;
 
   try
     // Display captured frame
@@ -521,16 +528,16 @@ procedure TFrmMain.StopBurstCapture;
 var
   iBurstDurationSeconds : Integer;
   iCapturedFramesPerSecond : Integer;
-  oFormat : TVideoFormat;
 begin
+  FBurstCaptureEnabled := False;
+
   iBurstDurationSeconds := SecondsBetween(FBurstStartTime, Now);
   iCapturedFramesPerSecond := Round(FBurstCaptureCount / iBurstDurationSeconds);
 
-  FBurstCaptureEnabled := False;
   UpdateEnabledStates;
-  if FCapture.GetCurrentFormat(oFormat) then
-    Log(Format('Burst capture stopped. Captured %d frames (%d x %d) in %d seconds. Frames per second: %d', [FBurstCaptureCount, oFormat.iFrameWidth, //
-     oFormat.iFrameHeigth,  iBurstDurationSeconds, iCapturedFramesPerSecond]), ltInfo);
+
+  Log(Format('Burst capture stopped. Captured %d frames (%d x %d) in %d seconds. Frames per second: %d', [FBurstCaptureCount, FCurrentCaptureFormat.iFrameWidth, //
+   FCurrentCaptureFormat.iFrameHeigth,  iBurstDurationSeconds, iCapturedFramesPerSecond]), ltInfo);
 end;
 
 procedure TFrmMain.UpdateSelectedDevice;
@@ -590,7 +597,7 @@ begin
 
     for oFormat in FCapture.VideoFormats  do
     begin
-      sFormatDescription := Format('%d x %d   (%d fps)    %s',
+      sFormatDescription := Format('%d x %d     (%d fps)    %s',
       [oFormat.iFrameWidth, oFormat.iFrameHeigth, oFormat.iFramesPerSecond, GetGUIDNameConst(oFormat.oSubType)]);
         // TODO - Determine what format is currently selected
   //      if oFormats[i].bSelected then
@@ -725,7 +732,6 @@ end;
 
 procedure TFrmMain.UpdateEnabledStates;
 var
-  oCurrentFormat : TVideoFormat;
   iPreviewWidth : Integer;
   iPreviewHeight : Integer;
 begin
@@ -733,8 +739,8 @@ begin
 
   grpFrameCapture.Caption := 'Frame Capture';
 
-  if FCapture.SourceOpen and FCapture.GetCurrentFormat(oCurrentFormat) then
-    grpFrameCapture.Caption := Format('Frame Capture (%d x %d ) ', [oCurrentFormat.iFrameWidth, oCurrentFormat.iFrameHeigth]);
+  if FCapture.SourceOpen then
+    grpFrameCapture.Caption := Format('Frame Capture (%d x %d ) ', [FCurrentCaptureFormat.iFrameWidth, FCurrentCaptureFormat.iFrameHeigth]);
 
   if Assigned(MfDeviceCapture) and MfDeviceCapture.GetCurrentFormat(iPreviewWidth, iPreviewHeight) then
     grpVideoPreview.Caption := Format('Capture Preview (%d x %d ) ', [iPreviewWidth, iPreviewHeight]);
@@ -746,7 +752,7 @@ begin
   cbxResolution.Enabled := FCapture.SourceOpen and (cbxCaptureDevices.ItemIndex > 0);
   btnSaveImage.Enabled := Assigned(picFrame.Picture.Bitmap) and not picFrame.Picture.Bitmap.Empty;
   btnStartBurst.Enabled := FCapture.SourceOpen and not FBurstCaptureEnabled;
-  btnStopBurst.Enabled := FBurstCaptureEnabled;
+  btnStopBurst.Enabled := FCapture.SourceOpen and FBurstCaptureEnabled;
 end;
 
 procedure TFrmMain.BeginBusy;

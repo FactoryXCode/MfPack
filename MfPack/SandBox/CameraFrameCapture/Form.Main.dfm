@@ -46,7 +46,7 @@ object FrmMain: TFrmMain
     end
     object lblLog: TLabel
       Left = 16
-      Top = 72
+      Top = 73
       Width = 23
       Height = 15
       Caption = 'Log:'
@@ -161,10 +161,19 @@ object FrmMain: TFrmMain
     Height = 562
     Align = alClient
     TabOrder = 1
+    object spResize: TSplitter
+      Left = 605
+      Top = 1
+      Height = 560
+      Align = alRight
+      ResizeStyle = rsUpdate
+      ExplicitLeft = 570
+      ExplicitTop = 206
+    end
     object grpVideoPreview: TGroupBox
       Left = 1
       Top = 1
-      Width = 607
+      Width = 604
       Height = 560
       Align = alClient
       Caption = ' Capture Preview '
@@ -183,10 +192,11 @@ object FrmMain: TFrmMain
       HeaderFont.Quality = fqClearTypeNatural
       ParentFont = False
       TabOrder = 0
+      ExplicitWidth = 607
       object pnlVideo: TPanel
         Left = 2
         Top = 17
-        Width = 603
+        Width = 600
         Height = 541
         Align = alClient
         BevelOuter = bvNone
@@ -196,6 +206,7 @@ object FrmMain: TFrmMain
         ParentDoubleBuffered = False
         TabOrder = 0
         OnResize = pnlVideoResize
+        ExplicitWidth = 603
       end
     end
     object grpFrameCapture: TGroupBox
@@ -205,6 +216,7 @@ object FrmMain: TFrmMain
       Height = 560
       Align = alRight
       Caption = ' Frame Capture '
+      Color = clBtnFace
       DefaultHeaderFont = False
       HeaderFont.Charset = DEFAULT_CHARSET
       HeaderFont.Color = clWindowText
@@ -212,30 +224,50 @@ object FrmMain: TFrmMain
       HeaderFont.Name = 'Segoe UI'
       HeaderFont.Style = []
       HeaderFont.Quality = fqClearTypeNatural
+      ParentBackground = False
+      ParentColor = False
       TabOrder = 1
-      object pnlFrameCapture: TPanel
+      object tcCapture: TPageControl
         Left = 2
         Top = 17
         Width = 592
         Height = 541
+        ActivePage = tbFrame
         Align = alClient
-        Caption = 'No Image. Waiting frame capture...'
-        Color = clMedGray
-        ParentBackground = False
         TabOrder = 0
-        object picFrame: TImage
-          Left = 1
-          Top = 1
-          Width = 590
-          Height = 539
-          Align = alClient
-          AutoSize = True
-          Center = True
-          Proportional = True
-          ExplicitLeft = 0
-          ExplicitTop = 5
-          ExplicitWidth = 618
-          ExplicitHeight = 584
+        object tbFrame: TTabSheet
+          Caption = 'Frame'
+          object pnlFrameCapture: TPanel
+            Left = 0
+            Top = 0
+            Width = 584
+            Height = 511
+            Align = alClient
+            Caption = 'No Image. Waiting frame capture...'
+            Color = clMedGray
+            DoubleBuffered = False
+            ParentBackground = False
+            ParentDoubleBuffered = False
+            TabOrder = 0
+            ExplicitLeft = 328
+            ExplicitTop = 288
+            ExplicitWidth = 256
+            ExplicitHeight = 223
+            object picFrame: TImage
+              Left = 1
+              Top = 1
+              Width = 582
+              Height = 509
+              Align = alClient
+              AutoSize = True
+              Center = True
+              Proportional = True
+              ExplicitLeft = 408
+              ExplicitTop = 344
+              ExplicitWidth = 170
+              ExplicitHeight = 157
+            end
+          end
         end
       end
     end
