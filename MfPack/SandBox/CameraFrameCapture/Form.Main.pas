@@ -35,12 +35,15 @@ uses
   WinApi.MediaFoundationApi.MfIdl,
   {Application}
   Support,
+  SampleConverter,
   CameraCapture,
   CameraCapture.Asynchronous,
   CameraCapture.Synchronous;
 
 
 type
+  TCapturePreviewType = (ptNone, ptNormal);
+
   TDeviceDetails = record
     oExtendedDetails : TDeviceProperties;
     sOriginalName : string;
@@ -49,7 +52,6 @@ type
   end;
 
   TFrmMain = class(TForm)
-    pnlTop: TPanel;
     cbxCaptureDevices: TComboBox;
     lblSelectDevice: TLabel;
     lblResoltution: TLabel;
@@ -75,14 +77,20 @@ type
     lblSupported: TLabel;
     lblMethod: TLabel;
     cboMethod: TComboBox;
-    pnlBottom: TPanel;
     tcCapture: TPageControl;
     tsFrame: TTabSheet;
     pnlFrameCapture: TPanel;
     pbCapture: TPaintBox;
-    chkEnablePreview: TCheckBox;
+    pcSetup: TPageControl;
+    tsSetup: TTabSheet;
+    tsAdvanced: TTabSheet;
+    cbxPreviewType: TComboBox;
+    cbxRenderMode: TComboBox;
+    lblPreviewType: TLabel;
+    Label1: TLabel;
     cbxDuration: TComboBox;
     lblSeconds: TLabel;
+    Label2: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnRefreshDevicesClick(Sender: TObject);
@@ -100,6 +108,8 @@ type
     procedure HandleMethodChanged(Sender: TObject);
     procedure HandleCapturePaint(Sender: TObject);
     procedure HandleChangeEnablePreview(Sender: TObject);
+    procedure HandlePreviewTypeChange(Sender: TObject);
+    procedure HandleRenderModeChange(Sender: TObject);
   private
     FLogLevel: TLogType;
     FFormatSettings: TFormatSettings;
@@ -107,6 +117,7 @@ type
     FCaptureMethod: TCaptureMethod;
     FBurstCaptureCount : Integer;
     FLastCapturedFrame : TBitmap;
+    FPreviewType : TCapturePreviewType;
 
     FDefaultDeviceName : string;
     FDefaultResolution : string;
@@ -185,6 +196,8 @@ begin
 
    FFormatSettings := TFormatSettings.Create;
 
+   pcSetup.ActivePageIndex := 0;
+
    SetDefaults;
 
    cboMethod.ItemIndex := Ord(FCaptureMethod);
@@ -243,6 +256,7 @@ end;
 procedure TFrmMain.SetDefaults;
 begin
   FLogLevel := ltInfo;
+  FPreviewType := ptNormal;
 
   // Set a default values for selection on load.
   // Examples below
@@ -302,6 +316,11 @@ begin
   HandleResolutionChanged;
 end;
 
+procedure TFrmMain.HandleRenderModeChange(Sender: TObject);
+begin
+  FCapture.SampleConverter.RenderType := TRenderType(Ord(cbxRenderMode.ItemIndex));
+end;
+
 procedure TFrmMain.HandleResolutionChanged;
 begin
   if cbxResolution.ItemIndex > -1 then
@@ -353,7 +372,7 @@ end;
 
 procedure TFrmMain.HandleChangeEnablePreview(Sender: TObject);
 begin
-  if chkEnablePreview.Checked then
+  if FPreviewType <> ptNone then
     pnlFrameCapture.Caption := 'No Image. Waiting frame capture...'
   else
   begin
@@ -392,7 +411,6 @@ begin
 
   try
     // Display captured frame
-    if chkEnablePreview.Checked then
       UpdateCapturedFrame(ABitmap);
   finally
     FreeAndNil(ABitmap);
@@ -417,7 +435,7 @@ var
   iTop : Integer;
   iLeft : Integer;
 begin
-  if Assigned(FLastCapturedFrame) and not FLastCapturedFrame.Empty then
+  if (FPreviewType <> ptNone) and Assigned(FLastCapturedFrame) and not FLastCapturedFrame.Empty then
   begin
     // Scale and center the image
     GetPaintArea(iWidth, iHeight, iTop, iLeft);
@@ -575,7 +593,6 @@ begin
 
     if iSelectedIndex > - 1 then
       cbxResolution.ItemIndex := iSelectedIndex;
-
 
     if FDefaultResolution <> '' then
     begin
@@ -735,6 +752,11 @@ begin
     ClearImage;
     CaptureMethod := TCaptureMethod(TComboBox(Sender).ItemIndex);
   end;
+end;
+
+procedure TFrmMain.HandlePreviewTypeChange(Sender: TObject);
+begin
+  FPreviewType := TCapturePreviewType(ord(cbxPreviewType.ItemIndex));
 end;
 
 procedure TFrmMain.UpdateLogLevelMenu;

@@ -94,7 +94,7 @@ uses
 
 
 type
-  TSampleReturnType = (srImage, srImageAndData, srData);
+  TRenderType = (rtDefault, rtHardware, rtSoftware);
 
   TSampleConverter = class(TPersistent)
   protected
@@ -103,10 +103,10 @@ type
     FTransform : IMFTransform;
     FOnLog: TLogEvent;
     FSupportedInputs : TArray<TGUID>;
+    FRenderType : TRenderType;
   private
     FDPI: Integer;
     F2DBitmapProperties: D2D1_BITMAP_PROPERTIES;
-    FSampleReturnType : TSampleReturnType;
 
     procedure CreateDirect2DBitmapProperties;
     function CreateRenderTarget: Boolean;
@@ -118,6 +118,7 @@ type
     procedure NotifyBeginStreaming;
     procedure SetSupportedInputs;
     procedure RenderToBMP(ASourceRect : TRect; const ASurface : ID2D1Bitmap);
+    procedure SetRenderType(const AValue: TRenderType);
   public
     constructor Create;
     destructor Destroy; override;
@@ -131,7 +132,7 @@ type
 
     function IsInputSupported(const AInputFormat : TGUID) : Boolean;
 
-    property SampleReturnType : TSampleReturnType read FSampleReturnType write FSampleReturnType;
+    property RenderType : TRenderType read FRenderType write SetRenderType;
 
     // Event hooks
     property OnLog: TLogEvent read FOnLog write FOnLog;
@@ -143,6 +144,7 @@ implementation
 constructor TSampleConverter.Create;
 begin
   inherited;
+  FRenderType := rtSoftware;
   FDPI := DevicePixelPerInch;
   CreateRenderTarget;
   CreateDirect2DBitmapProperties;
@@ -184,6 +186,20 @@ begin
 end;
 
 
+procedure TSampleConverter.SetRenderType(const AValue: TRenderType);
+begin
+  if AValue <> FRenderType then
+  begin
+    FRenderType := AValue;
+    FRenderTarget.Flush();
+    SafeRelease(FRenderTarget);
+
+    CreateRenderTarget;
+    CreateDirect2DBitmapProperties;
+  end;
+end;
+
+
 function TSampleConverter.IsInputSupported(const AInputFormat: TGUID): Boolean;
 begin
   Result := IndexOf(AInputFormat, FSupportedInputs) > -1;
@@ -200,6 +216,7 @@ function TSampleConverter.CreateRenderTarget: Boolean;
 var
   pFactory: ID2D1Factory;
   oProperties: D2D1_RENDER_TARGET_PROPERTIES;
+  oRenderType : TD2D1RenderTargetType;
 
 begin
   Result := SUCCEEDED(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED,
@@ -207,28 +224,37 @@ begin
                                         Nil,
                                         pFactory));
   if Result then
-    begin
-      {$IF CompilerVersion > 33}
-      // Delphi 10.4 or above
-      // For some reason software rendering appears to perform slightly better.
-      // Change to 'D2D1_RENDER_TARGET_TYPE_DEFAULT' to test otherwise.
-      oProperties.&type := D2D1_RENDER_TARGET_TYPE_SOFTWARE;
-      oProperties.PixelFormat.Format := DXGI_FORMAT_B8G8R8A8_UNORM;
-      oProperties.PixelFormat.alphaMode := D2D1_ALPHA_MODE_IGNORE;
-      {$ELSE}
-      oProperties._type := D2D1_RENDER_TARGET_TYPE_SOFTWARE;
-      oProperties._PixelFormat.Format := WinApi.DirectX.DXGIFormat.DXGI_FORMAT_B8G8R8A8_UNORM;
-      oProperties._PixelFormat.alphaMode := D2D1_ALPHA_MODE_IGNORE;
-      {$ENDIF}
-
-      oProperties.dpiX := 0;
-      oProperties.dpiY := 0;
-
-      oProperties.usage := D2D1_RENDER_TARGET_USAGE_NONE;
-      oProperties.minLevel := D2D1_FEATURE_LEVEL_DEFAULT;
-      Result := SUCCEEDED(pFactory.CreateDCRenderTarget(oProperties,
-                                                        FRenderTarget));
+  begin
+    case FRenderType of
+      rtDefault:
+        oRenderType := D2D1_RENDER_TARGET_TYPE_DEFAULT;
+      rtHardware:
+        oRenderType := D2D1_RENDER_TARGET_TYPE_HARDWARE;
+      rtSoftware:
+        oRenderType := D2D1_RENDER_TARGET_TYPE_SOFTWARE;
+      else
+        oRenderType := D2D1_RENDER_TARGET_TYPE_DEFAULT;
     end;
+
+    {$IF CompilerVersion > 33}
+    // Delphi 10.4 or above
+    oProperties.&type := oRenderType;
+    oProperties.PixelFormat.Format := DXGI_FORMAT_B8G8R8A8_UNORM;
+    oProperties.PixelFormat.alphaMode := D2D1_ALPHA_MODE_IGNORE;
+    {$ELSE}
+    oProperties._type := oRenderType;
+    oProperties._PixelFormat.Format := WinApi.DirectX.DXGIFormat.DXGI_FORMAT_B8G8R8A8_UNORM;
+    oProperties._PixelFormat.alphaMode := D2D1_ALPHA_MODE_IGNORE;
+    {$ENDIF}
+
+    oProperties.dpiX := 0;
+    oProperties.dpiY := 0;
+
+    oProperties.usage := D2D1_RENDER_TARGET_USAGE_NONE;
+    oProperties.minLevel := D2D1_FEATURE_LEVEL_DEFAULT;
+    Result := SUCCEEDED(pFactory.CreateDCRenderTarget(oProperties,
+                                                      FRenderTarget));
+  end;
 end;
 
 

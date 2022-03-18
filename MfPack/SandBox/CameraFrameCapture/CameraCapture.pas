@@ -139,7 +139,6 @@ type
     function ConfigureSourceReader(const AAttributes: IMFAttributes) : Boolean; virtual;
 
     property SourceReader: IMFSourceReader read FSourceReader;
-    property SampleConverter: TSampleConverter read FSampleConverter;
     property AwaitingFlush: Boolean read FAwaitingFlush;
     property CritSec : TMFCritSec read FCritSec;
   public
@@ -179,6 +178,7 @@ type
     property BurstEnabled : Boolean read FBurstEnabled;
 
     property VideoFormats : TVideoFormats read FVideoFormats;
+    property SampleConverter: TSampleConverter read FSampleConverter;
   end;
 
 implementation
