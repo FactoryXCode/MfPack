@@ -67,7 +67,9 @@ uses
   {System}
   System.TimeSpan,
   {VLC}
-  VCL.Graphics;
+  VCL.Graphics,
+  VCL.Imaging.pngimage,
+  VCL.Imaging.jpeg;
 
   function ToSize(AKilobytes: int64): string;
   function ProcessMemoryUsage: int64;
@@ -85,8 +87,9 @@ type
   TCaptureMethod = (cmSync,
                     cmAsync);
 
-  TFrameEvent = procedure(ABitmap: VCL.Graphics.TBitmap;
-                          ATimeStamp: TTimeSpan) of object;
+  TImageType = (itBitmap, itPNG, itJPG);
+
+  TFrameEvent = procedure(ABitmap: VCL.Graphics.TBitmap) of object;
 
   TLogEvent = reference to procedure(const AMessage: string;
                                      ALogType: TLogType);
@@ -122,6 +125,8 @@ type
                                  AWait: Cardinal = INFINITE);
   function IsURL(const APath: string): Boolean;
   function GetMemoryUsed: string;
+
+  procedure SaveImage(AInput : TBitmap; const APath : string; AType : TImageType);
 
   const
   cTab = #9;
@@ -201,6 +206,43 @@ begin
     Result := Format('%.2d:%.2d:%.2d:%.2d', [ATime.Hours, ATime.Minutes, ATime.Seconds, ATime.Milliseconds])
   else
     Result := Format('%.2d:%.2d:%.2d', [ATime.Hours, ATime.Minutes, ATime.Seconds]);
+end;
+
+procedure SaveImage(AInput : TBitmap; const APath : string; AType : TImageType);
+var
+  pPng: TPngImage;
+  pJpg: TJPEGImage;
+begin
+  case AType of
+    itBitmap :
+     begin
+         AInput.SaveToFile(APath);
+       end;
+    itPNG :
+     begin
+         pPng := TPngImage.Create;
+         pPng.Assign(AInput);
+         AInput.SaveToFile(APath);
+
+         if Assigned(pPng) then
+           pPng.Free;
+       end;
+    itJPG :
+     begin
+         pJpg := TJPEGImage.Create;
+         // Adjust performance, compression etc.
+         pJpg.Performance := jpBestQuality;
+         pJpg.ProgressiveEncoding := True;
+         pJpg.ProgressiveDisplay := True;
+         //pJpg.CompressionQuality := 30;
+         pJpg.Compress;
+         pJpg.Assign(AInput);
+         pjpg.SaveToFile(APath);
+
+         if Assigned(pJpg) then
+           pJpg.Free;
+       end;
+  end;
 end;
 
 

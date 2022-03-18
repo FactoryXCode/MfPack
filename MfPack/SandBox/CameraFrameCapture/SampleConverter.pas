@@ -7,7 +7,7 @@
 //                   https://github.com/FactoryXCode/MfPack
 // Module: SampleConverter.pas
 // Kind: Pascal Unit
-// Release date: 22-09-2021
+// Release date: 18-03-2022
 // Language: ENU
 //
 // Revision Version: 3.1.1
@@ -24,6 +24,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 22/03/2022 Ciaran              Added support for sample conversion using color converter
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.

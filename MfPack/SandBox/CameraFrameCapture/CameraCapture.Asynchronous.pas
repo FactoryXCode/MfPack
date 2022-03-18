@@ -7,7 +7,7 @@
 //                   https://github.com/FactoryXCode/MfPack
 // Module:  CameraCapture.Asynchronous.pas
 // Kind: Pascal Unit
-// Release date: 22-09-2021
+// Release date: 18-03-2022
 // Language: ENU
 //
 // Revision Version: 3.1.1
@@ -64,324 +64,205 @@ uses
   WinAPI.Messages,
   WinAPI.Windows,
   {System}
-  System.TimeSpan,
   System.SysUtils,
   {MediaFoundationApi}
   WinAPI.MediaFoundationApi.MfReadWrite,
   WinAPI.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MfIdl,
   WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.MfUtils,
   {Application}
-  FileCapture.Asynchronous;
+  CameraCapture,
+  MessageHandler,
+  Support;
+
+const
+  WM_FLUSH_COMPLETE = WM_USER + 1001;
+  WM_MEDIA_FORMAT_CHANGED = WM_USER + 1002;
+  WM_SAMPLE_FOUND = WM_USER + 1003;
 
 type
-  TVideoFormat = record
-    iFrameHeigth: Integer;
-    iFrameWidth: Integer;
-    iFramesPerSecond : Integer;
-    oSubType : TGUID;
+  PSampleReply = ^TSampleReply;
+  TSampleReply = record
+    oSample: IMFSample;
   end;
-  TVideoFormats = TArray<TVideoFormat>;
 
-
-  TCameraCaptureAsync = class(TFileCaptureAsync)
+  TCameraCaptureAsync = class(TCameraCapture, IMFSourceReaderCallback)
   private
-    FVideoFormats : TVideoFormats;
+    FMessageHandler: TMessageHandler;
+    FFindingSample: Boolean;
+    FSampleReply: TSampleReply;
 
-    function PopulateStreamFormats: Boolean;
-    function PopulateFormatDetails(const AMediaFormat : IMFMediaType; var ADetails : TVideoFormat) : Boolean;
-    function ActiveDevice(const ADeviceSymbolicLink: PWideChar; out AMediaSource: IMFMediaSource): Boolean;
-    function SetMediaType(const AMediaType : IMFMediaType) : Boolean;
+    procedure HandleMessages(var AMessage: TMessage;
+                             var AHandled: Boolean);
+    procedure NotifyMediaFormatChanged;
+    procedure HandleSampleFoundMessage(var AMessage: TMessage);
+
+    {$region 'IMFSourceReaderCallback methods'}
+    function OnReadSample(hrStatus: HRESULT;
+                          dwStreamIndex: DWord;
+                          dwStreamFlags: DWord;
+                          llTimestamp: LONGLONG;
+                          pSample: IMFSample): HRESULT; stdcall;
+
+    function OnFlush(dwStreamIndex: DWord): HRESULT; stdcall;
+    function OnEvent(dwStreamIndex: DWord;
+                     pEvent: IMFMediaEvent): HRESULT; stdcall;
+    function ReadNextSample: Boolean;
+    {$endregion}
+
   protected
-    function SampleWithinTolerance(ARequestedTime: TTimeSpan; AActualTime: TTimeSpan): Boolean; override;
     function ConfigureSourceReader(const AAttributes: IMFAttributes) : Boolean; override;
-    function SetMediaFormat: Boolean; override;
+    procedure ProcessSample(ASample: IMFSample); override;
 
     procedure ResetVariables; override;
   public
     constructor Create; override;
+    destructor Destroy; override;
 
-    function OpenDeviceSource(const ADeviceSymbolicLink : PWideChar): Boolean;
-    function GetCurrentFormat(var AFormat : TVideoFormat) : Boolean;
-    function FormatSupported(AFormatIndex: Integer): Boolean;
-
-    function SetVideoFormat(AFormatIndex : Integer) : Boolean;
-
-    procedure RequestFrame; reintroduce;
-
-    property VideoFormats : TVideoFormats read FVideoFormats;
+    procedure RequestFrame; override;
   end;
 
 implementation
 
-uses
-  Support;
-
 constructor TCameraCaptureAsync.Create;
 begin
   inherited;
-  SetLength(FVideoFormats, 0);
+  FMessageHandler := TMessageHandler.Create;
+  FMessageHandler.OnMessage := HandleMessages;
 end;
 
-function TCameraCaptureAsync.OpenDeviceSource(const ADeviceSymbolicLink : PWideChar): Boolean;
-var
-  pSource: IMFMediaSource;
-  oAttributes: IMFAttributes;
+destructor TCameraCaptureAsync.Destroy;
 begin
-  CloseSource;
+  FMessageHandler.RemoveHandle;
+  FreeAndNil(FMessageHandler);
+  inherited;
+end;
 
-  Result := ADeviceSymbolicLink <> '';
+function TCameraCaptureAsync.OnEvent(dwStreamIndex: DWord; pEvent: IMFMediaEvent): HRESULT;
+begin
+  // Note: This will be called in a worker thread.
+  Result := S_OK;
+end;
 
-  if Result then
-  begin
-     CritSec.Lock;
-     try
-      // Create the media source for the device.
-      Result := ActiveDevice(ADeviceSymbolicLink, pSource);
+function TCameraCaptureAsync.OnFlush(dwStreamIndex: DWord): HRESULT;
+begin
+  // Note: This will be called in a worker thread.
+  Result := S_OK;
+
+  PostMessage(FMessageHandler.Handle,
+              WM_FLUSH_COMPLETE,
+              0,
+              0);
+  HandleThreadMessages(GetCurrentThread());
+end;
+
+function TCameraCaptureAsync.OnReadSample(hrStatus: HRESULT; dwStreamIndex, dwStreamFlags: DWord; llTimestamp: LONGLONG;
+  pSample: IMFSample): HRESULT;
+var
+  bEndOfStream: Boolean;
+begin
+  // Note: This will be called in a worker thread. Be careful of accessing anything outside of this method.
+  Result := hrStatus;
+  try
+    if SUCCEEDED(Result) then
+    begin
+      CritSec.Lock;
       try
-       if Result then
-          Result := SUCCEEDED(MFCreateAttributes(oAttributes,
-                                                 1));
+        bEndOfStream := (dwStreamFlags = MF_SOURCE_READERF_ENDOFSTREAM);
 
-         if Result then
-            Result := ConfigureSourceReader(oAttributes);
-
-          if Result then
-            Result := SUCCEEDED(MFCreateSourceReaderFromMediaSource(pSource,
-                                                     oAttributes,
-                                                      FSourceReader));
+        if (dwStreamFlags = MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED) then
+          NotifyMediaFormatChanged
+        else if not Assigned(pSample) and (FramesSkipped < MaxFramesToSkip) and not bEndOfStream then
+        begin
+          ReadNextSample;
+          HandleFrameSkipped;
+        end
+        else if Assigned(pSample) then
+        begin
+          ProcessSample(pSample);
+          FFindingSample := False;
+        end;
       finally
-        pSource := nil;
+        CritSec.Unlock;
       end;
-
-      if Result then
-        Result := PopulateStreamFormats;
-
-      if Result then
-        // By default, select the first stream
-        Result := SelectVideoStream and GetVideoFormat(False);
-     finally
-       CritSec.Unlock;
-     end;
+    end;
+  finally
+    SafeRelease(pSample);
   end;
 end;
 
+procedure TCameraCaptureAsync.ProcessSample(ASample: IMFSample);
+begin
+  // Note: This will be called in a worker thread.
+  // _AddRef will be called, so the sample will not be released until the message is handled.
+
+  FSampleReply.oSample := ASample;
+
+  if not PostMessage(FMessageHandler.Handle,
+                     WM_SAMPLE_FOUND,
+                     0,
+                     LPARAM(@FSampleReply)) then
+    begin
+      SafeRelease(FSampleReply.oSample);
+    end;
+
+  if BurstEnabled then
+    ReadNextSample;
+
+  HandleThreadMessages(GetCurrentThread());
+end;
 
 function TCameraCaptureAsync.ConfigureSourceReader(const AAttributes: IMFAttributes): Boolean;
 begin
-  inherited;
-  // Enables advanced video processing by the Source Reader, including color space conversion, deinterlacing, video resizing,
-  // and frame-rate conversion.
-  Result := SUCCEEDED(AAttributes.SetUINT32(MF_SOURCE_READER_ENABLE_ADVANCED_VIDEO_PROCESSING, 1));
+  Result := inherited;
 
   if Result then
-    Result := SUCCEEDED(AAttributes.SetUINT32(MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS, 1));
-
-  // This must be disable with Advanced Video Processing enabled
-  if Result then
-    Result := SUCCEEDED(AAttributes.SetUINT32(MF_READWRITE_DISABLE_CONVERTERS, 0));
+    Result := SUCCEEDED(AAttributes.SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK,
+                                    Self));
+  if not Result then
+    Log('Failed to configure source reader callback',
+        ltError);
 end;
 
-
-function TCameraCaptureAsync.ActiveDevice(const ADeviceSymbolicLink : PWideChar; out AMediaSource : IMFMediaSource) : Boolean;
-var
-  oAttributes: IMFAttributes;
-  ppDevices : PIMFActivate;
-  iCount : UINT32;
-  iDeviceIndex : Integer;
-  i : Integer;
-  pcchLength: UINT32;
-  m_pwszSymbolicLink: PWideChar;
+procedure TCameraCaptureAsync.HandleMessages(var AMessage: TMessage; var AHandled: Boolean);
 begin
-  Result := SUCCEEDED(MFCreateAttributes(oAttributes,
-                     1));
-
-  // Ask for source type to be video capture devices
-  if Result then
-    Result := SUCCEEDED(oAttributes.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
-                              MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID));
-
-  if Result then
-  begin
-    try
-      // Enumerate the devices.
-      Result := SUCCEEDED(MFEnumDeviceSources(oAttributes,
-                              ppDevices,
-                              iCount));
-
-      iDeviceIndex := -1;
-      for i := 0 to iCount - 1 do
-      begin
-        {$POINTERMATH ON}
-        ppDevices[i].GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
-                                             m_pwszSymbolicLink,
-                                             pcchLength);
-        {$POINTERMATH OFF}
-        // Check the symbolic link to see if this is the device we want.
-        if SameText(m_pwszSymbolicLink, ADeviceSymbolicLink) then
-           iDeviceIndex := i;
-      end;
-
-      if iDeviceIndex > - 1 then
-      {$POINTERMATH ON}
-        // Active the device based on the index found
-        Result := SUCCEEDED(ppDevices[iDeviceIndex].ActivateObject(IID_IMFMediaSource,
-                                         AMediaSource));
-      {$POINTERMATH OFF}
-    finally
-      ppDevices := nil;
-    end;
-  end;
-end;
-
-function TCameraCaptureAsync.GetCurrentFormat(var AFormat : TVideoFormat) : Boolean;
-var
-  pCurrentType : IMFMediaType;
-begin
-  Result := SourceOpen and SUCCEEDED(SourceReader.GetCurrentMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM), pCurrentType));
-  if Result then
-    Result := PopulateFormatDetails(pCurrentType, AFormat);
-end;
-
-function TCameraCaptureAsync.PopulateStreamFormats : Boolean;
-var
-  pMediaType : IMFMediaType;
-  bTypeFound : Boolean;
-  iTypeIndex : Integer;
-  oMajorType : TGUID;
-  iCount : Integer;
-begin
-  SetLength(FVideoFormats, 0);
-  Result := SourceOpen;
-
-  if Result then
-  begin
-    iTypeIndex := 0;
-    iCount := 0;
-    bTypeFound := True;
-
-    while bTypeFound do
+  if AMessage.Msg = WM_FLUSH_COMPLETE then
     begin
-      bTypeFound := SUCCEEDED(SourceReader.GetNativeMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
-                                   iTypeIndex,
-                                   pMediaType));
-      try
-        if bTypeFound and SUCCEEDED(pMediaType.GetMajorType(oMajorType)) and (oMajorType = MFMediaType_Video) then
-        begin
-          inc(iCount);
-          SetLength(FVideoFormats, iCount);
-          PopulateFormatDetails(pMediaType, FVideoFormats[iCount - 1]);
-        end;
-
-        inc(iTypeIndex);
-      finally
-        pMediaType := nil;
-      end;
-    end;
-
-  end;
+      AHandled := True;
+      HandleFlushComplete;
+    end
+  else if AMessage.Msg = WM_MEDIA_FORMAT_CHANGED then
+    begin
+      AHandled := True;
+      HandleMediaFormatChanged;
+    end
+  else if AMessage.Msg = WM_SAMPLE_FOUND then
+    begin
+      AHandled := True;
+      HandleSampleFoundMessage(AMessage);
+    end
+  else
+    AHandled := False;
 end;
 
-function TCameraCaptureAsync.FormatSupported(AFormatIndex: Integer): Boolean;
+procedure TCameraCaptureAsync.HandleSampleFoundMessage(var AMessage: TMessage);
 var
-  pMediaType : IMFMediaType;
-  oSubType : TGUID;
+  oSampleReply: PSampleReply;
 begin
-  Result := SUCCEEDED(SourceReader.GetNativeMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
-                                   AFormatIndex,
-                                   pMediaType)) and SUCCEEDED(pMediaType.GetGUID(MF_MT_SUBTYPE,
-                                           oSubType))
-                                           and SampleConverter.IsInputSupported(oSubType);
+  oSampleReply := PSampleReply(AMessage.LPARAM);
+  ReturnSample(oSampleReply.oSample);
 end;
 
-function TCameraCaptureAsync.SetVideoFormat(AFormatIndex: Integer): Boolean;
-var
-  pMediaType : IMFMediaType;
+procedure TCameraCaptureAsync.NotifyMediaFormatChanged;
 begin
-  Result := SUCCEEDED(SourceReader.GetNativeMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
-                                   AFormatIndex,
-                                   pMediaType)) and SetMediaType(pMediaType);
+  // Note: This will be called in a worker thread.
+  PostMessage(FMessageHandler.Handle,
+              WM_MEDIA_FORMAT_CHANGED,
+              0,
+              0);
+  HandleThreadMessages(GetCurrentThread());
 end;
-
-function TCameraCaptureAsync.PopulateFormatDetails(const AMediaFormat : IMFMediaType; var ADetails : TVideoFormat) : Boolean;
-var
-  uiHeigth : UINT32;
-  uiWidth : UINT32;
-  uiNumerator: UINT32;
-  uiDenominator : UINT32;
-  oSubType : TGUID;
-begin
-   // Get the video frame size
-   Result := SUCCEEDED(MFGetAttributeSize(AMediaFormat,
-                       MF_MT_FRAME_SIZE,
-                       uiWidth,
-                       uiHeigth));
-   if Result then
-   begin
-     ADetails.iFrameWidth := uiWidth;
-     ADetails.iFrameHeigth := uiHeigth;
-   end;
-
-   // Get the frame rate
-   if Result then
-   begin
-     Result := SUCCEEDED(MFGetAttributeRatio(AMediaFormat,
-                        MF_MT_FRAME_RATE,
-                        uiNumerator,
-                        uiDenominator));
-     ADetails.iFramesPerSecond := Round(uiNumerator / uiDenominator);
-   end;
-
-   if SUCCEEDED(AMediaFormat.GetGUID(MF_MT_SUBTYPE, oSubType)) then
-     ADetails.oSubType := oSubType;
-end;
-
-function TCameraCaptureAsync.SetMediaFormat: Boolean;
-var
-  pMediaType: IMFMediaType;
-begin
-  // Configure the source reader to give us progressive RGB32 frames.
-  Result := SUCCEEDED(MFCreateMediaType(pMediaType));
-
-  if Result then
-    Result := SUCCEEDED(pMediaType.SetGUID(MF_MT_MAJOR_TYPE,
-                                           MFMediaType_Video));
-
-  if Result then
-    Result := SUCCEEDED(pMediaType.SetGUID(MF_MT_SUBTYPE,
-                                           MFVideoFormat_RGB32));
-
-
-  if Result then
-    Result := SUCCEEDED(FSourceReader.SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                                          0,
-                                                          pMediaType));
-
-end;
-
-function TCameraCaptureAsync.SetMediaType(const AMediaType : IMFMediaType) : Boolean;
-var
-  pMediaType : IMFMediaType;
-begin
-  // Configure the source reader to give us progressive RGB32 frames.
-  Result := SUCCEEDED(MFCreateMediaType(pMediaType));
-
-  if Result then
-    Result := SUCCEEDED(AMediaType.CopyAllItems(pMediaType));
-
-  if Result then
-    Result := SUCCEEDED(FSourceReader.SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                                         0,
-                                                          pMediaType));
-
-  // Only select the video stream
-  FSourceReader.SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS, False);
-  FSourceReader.SetStreamSelection(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                   True);
-
-  GetVideoFormat(False);
-end;
-
 
 procedure TCameraCaptureAsync.RequestFrame;
 begin
@@ -389,19 +270,35 @@ begin
   ReadNextSample;
 end;
 
+function TCameraCaptureAsync.ReadNextSample: Boolean;
+var
+  oResult: HRESULT;
+
+begin
+  Result := Assigned(SourceReader);
+
+  if Result then
+  begin
+    StartTimer;
+    FFindingSample := True;
+    oResult := SourceReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                       0,
+                                       nil,
+                                       nil,
+                                       nil,
+                                       nil);
+    Result := SUCCEEDED(oResult);
+    if not Result then
+      HandleSampleReadError(oResult);
+  end;
+end;
+
+
 procedure TCameraCaptureAsync.ResetVariables;
 begin
   inherited;
   MaxFramesToSkip := 1;
 end;
-
-
-function TCameraCaptureAsync.SampleWithinTolerance(ARequestedTime, AActualTime: TTimeSpan): Boolean;
-begin
-  // No sample tolerance - we want the first frame we find for live capture
-  Result := True;
-end;
-
 
 
 end.

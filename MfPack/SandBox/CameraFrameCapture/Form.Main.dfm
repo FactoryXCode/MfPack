@@ -12,10 +12,10 @@ object FrmMain: TFrmMain
   Font.Style = []
   Font.Quality = fqClearTypeNatural
   Menu = MainMenu1
+  OldCreateOrder = True
   Position = poDesktopCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  OnPaint = FormPaint
   OnShow = HandlFormShow
   PixelsPerInch = 96
   TextHeight = 15
@@ -57,6 +57,20 @@ object FrmMain: TFrmMain
       Width = 22
       Height = 15
       Caption = 'N/A'
+    end
+    object lblMethod: TLabel
+      Left = 16
+      Top = 128
+      Width = 45
+      Height = 15
+      Caption = 'Method:'
+    end
+    object lblSeconds: TLabel
+      Left = 487
+      Top = 128
+      Width = 43
+      Height = 15
+      Caption = 'seconds'
     end
     object cbxCaptureDevices: TComboBox
       Left = 94
@@ -125,20 +139,21 @@ object FrmMain: TFrmMain
       OnClick = HandleSaveImageClick
     end
     object btnStartBurst: TButton
-      Left = 94
+      Left = 313
       Top = 122
       Width = 113
       Height = 25
+      Anchors = [akTop, akRight]
       Caption = 'Start Burst Capture'
       TabOrder = 7
       OnClick = HandleStartBurstCapture
     end
     object btnStopBurst: TButton
-      Left = 229
+      Left = 536
       Top = 122
       Width = 113
       Height = 25
-      Anchors = [akLeft]
+      Anchors = [akTop, akRight]
       Caption = 'Stop Burst Capture'
       TabOrder = 8
       OnClick = HandleStopBurstCapture
@@ -153,6 +168,47 @@ object FrmMain: TFrmMain
       TabOrder = 9
       OnClick = HandleCopyLog
     end
+    object cboMethod: TComboBox
+      Left = 94
+      Top = 122
+      Width = 105
+      Height = 23
+      Style = csDropDownList
+      ItemIndex = 0
+      TabOrder = 10
+      Text = 'Synchronous'
+      OnChange = HandleMethodChanged
+      Items.Strings = (
+        'Synchronous'
+        'Asynchronous')
+    end
+    object chkEnablePreview: TCheckBox
+      Left = 205
+      Top = 126
+      Width = 97
+      Height = 17
+      Caption = 'Enable Preview'
+      Checked = True
+      State = cbChecked
+      TabOrder = 11
+      OnClick = HandleChangeEnablePreview
+    end
+    object cbxDuration: TComboBox
+      Left = 432
+      Top = 122
+      Width = 49
+      Height = 23
+      Style = csDropDownList
+      ItemIndex = 0
+      TabOrder = 12
+      Text = '10'
+      Items.Strings = (
+        '10'
+        '30'
+        '60'
+        '90'
+        '120')
+    end
   end
   object pnlBottom: TPanel
     Left = 0
@@ -161,112 +217,37 @@ object FrmMain: TFrmMain
     Height = 562
     Align = alClient
     TabOrder = 1
-    object spResize: TSplitter
-      Left = 605
-      Top = 1
-      Height = 560
-      Align = alRight
-      ResizeStyle = rsUpdate
-      ExplicitLeft = 570
-      ExplicitTop = 206
-    end
-    object grpVideoPreview: TGroupBox
+    object tcCapture: TPageControl
       Left = 1
       Top = 1
-      Width = 604
+      Width = 1203
       Height = 560
+      ActivePage = tsFrame
       Align = alClient
-      Caption = ' Capture Preview '
-      DefaultHeaderFont = False
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -12
-      Font.Name = 'Segoe UI'
-      Font.Style = []
-      Font.Quality = fqClearTypeNatural
-      HeaderFont.Charset = DEFAULT_CHARSET
-      HeaderFont.Color = clBlack
-      HeaderFont.Height = 18
-      HeaderFont.Name = 'Segoe UI'
-      HeaderFont.Style = []
-      HeaderFont.Quality = fqClearTypeNatural
-      ParentFont = False
       TabOrder = 0
-      ExplicitWidth = 607
-      object pnlVideo: TPanel
-        Left = 2
-        Top = 17
-        Width = 600
-        Height = 541
-        Align = alClient
-        BevelOuter = bvNone
-        Color = clBlack
-        DoubleBuffered = True
-        ParentBackground = False
-        ParentDoubleBuffered = False
-        TabOrder = 0
-        OnResize = pnlVideoResize
-        ExplicitWidth = 603
-      end
-    end
-    object grpFrameCapture: TGroupBox
-      Left = 608
-      Top = 1
-      Width = 596
-      Height = 560
-      Align = alRight
-      Caption = ' Frame Capture '
-      Color = clBtnFace
-      DefaultHeaderFont = False
-      HeaderFont.Charset = DEFAULT_CHARSET
-      HeaderFont.Color = clWindowText
-      HeaderFont.Height = 18
-      HeaderFont.Name = 'Segoe UI'
-      HeaderFont.Style = []
-      HeaderFont.Quality = fqClearTypeNatural
-      ParentBackground = False
-      ParentColor = False
-      TabOrder = 1
-      object tcCapture: TPageControl
-        Left = 2
-        Top = 17
-        Width = 592
-        Height = 541
-        ActivePage = tbFrame
-        Align = alClient
-        TabOrder = 0
-        object tbFrame: TTabSheet
-          Caption = 'Frame'
-          object pnlFrameCapture: TPanel
-            Left = 0
-            Top = 0
-            Width = 584
-            Height = 511
+      object tsFrame: TTabSheet
+        Caption = 'Frame'
+        object pnlFrameCapture: TPanel
+          Left = 0
+          Top = 0
+          Width = 1195
+          Height = 530
+          Align = alClient
+          Caption = 'No Image. Waiting frame capture...'
+          Color = clMedGray
+          DoubleBuffered = False
+          ParentBackground = False
+          ParentDoubleBuffered = False
+          TabOrder = 0
+          object pbCapture: TPaintBox
+            Left = 1
+            Top = 1
+            Width = 1193
+            Height = 528
             Align = alClient
-            Caption = 'No Image. Waiting frame capture...'
-            Color = clMedGray
-            DoubleBuffered = False
-            ParentBackground = False
-            ParentDoubleBuffered = False
-            TabOrder = 0
-            ExplicitLeft = 328
-            ExplicitTop = 288
-            ExplicitWidth = 256
-            ExplicitHeight = 223
-            object picFrame: TImage
-              Left = 1
-              Top = 1
-              Width = 582
-              Height = 509
-              Align = alClient
-              AutoSize = True
-              Center = True
-              Proportional = True
-              ExplicitLeft = 408
-              ExplicitTop = 344
-              ExplicitWidth = 170
-              ExplicitHeight = 157
-            end
+            OnPaint = HandleCapturePaint
+            ExplicitLeft = 0
+            ExplicitTop = 0
           end
         end
       end
