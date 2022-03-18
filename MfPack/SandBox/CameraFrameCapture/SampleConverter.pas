@@ -119,6 +119,7 @@ type
     procedure SetSupportedInputs;
     procedure RenderToBMP(ASourceRect : TRect; const ASurface : ID2D1Bitmap);
     procedure SetRenderType(const AValue: TRenderType);
+    procedure DestroyRenderTarget;
   public
     constructor Create;
     destructor Destroy; override;
@@ -155,9 +156,14 @@ end;
 destructor TSampleConverter.Destroy;
 begin
   FreeConverter;
+  DestroyRenderTarget;
+  inherited;
+end;
+
+procedure TSampleConverter.DestroyRenderTarget;
+begin
   FRenderTarget.Flush();
   SafeRelease(FRenderTarget);
-  inherited;
 end;
 
 procedure TSampleConverter.SetSupportedInputs;
@@ -191,9 +197,8 @@ begin
   if AValue <> FRenderType then
   begin
     FRenderType := AValue;
-    FRenderTarget.Flush();
-    SafeRelease(FRenderTarget);
 
+    DestroyRenderTarget;
     CreateRenderTarget;
     CreateDirect2DBitmapProperties;
   end;
@@ -225,16 +230,12 @@ begin
                                         pFactory));
   if Result then
   begin
-    case FRenderType of
-      rtDefault:
-        oRenderType := D2D1_RENDER_TARGET_TYPE_DEFAULT;
-      rtHardware:
-        oRenderType := D2D1_RENDER_TARGET_TYPE_HARDWARE;
-      rtSoftware:
-        oRenderType := D2D1_RENDER_TARGET_TYPE_SOFTWARE;
-      else
-        oRenderType := D2D1_RENDER_TARGET_TYPE_DEFAULT;
-    end;
+    if FRenderType = rtHardware then
+      oRenderType := D2D1_RENDER_TARGET_TYPE_HARDWARE
+    else if FRenderType = rtSoftware then
+      oRenderType := D2D1_RENDER_TARGET_TYPE_SOFTWARE
+    else
+      oRenderType := D2D1_RENDER_TARGET_TYPE_DEFAULT;
 
     {$IF CompilerVersion > 33}
     // Delphi 10.4 or above
