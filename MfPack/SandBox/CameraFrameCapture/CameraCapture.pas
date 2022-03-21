@@ -78,6 +78,7 @@ uses
 
 type
   TVideoFormat = record
+    iMediaIndex : Integer;
     iFrameHeigth: Integer;
     iFrameWidth: Integer;
     iFramesPerSecond : Integer;
@@ -85,6 +86,7 @@ type
   end;
   TVideoFormats = TArray<TVideoFormat>;
 
+  TOnCalculateComplete = reference to procedure(const AFramesPerSecond : Integer);
 
   TCameraCapture = class(TInterfacedPersistent)
   private
@@ -97,19 +99,26 @@ type
     FOnFrameFound: TFrameEvent;
     FSampleConverter: TSampleConverter;
     FBurstEnabled : Boolean;
+    FCancelBurst : Boolean;
     FVideoFormats : TVideoFormats;
     FCritSec: TMFCritSec;
     FTimerFrequency: int64;
     FTimerStart: int64;
     FTimerEnd : int64;
+    FMinimumFrameRate : Integer;
+    FMaxFrameRateReadable : Integer;
 
     procedure SetMaxFramesToSkip(const AValue: Integer);
 
     function GetMaxFramesToSkip: Integer;
     function GetSourceOpen: Boolean;
     procedure SetOnLog(const Value: TLogEvent);
+    function IsFormatAvailable(const AMediaType: IMFMediaType): Boolean;
+    function GetFrameRate(const AMediaFormat: IMFMediaType): Integer;
   protected
     FSourceReader: IMFSourceReader;
+    FOnCalculateComplete : TOnCalculateComplete;
+    FCalculatingMax : Boolean;
 
     procedure HandleFlushComplete; virtual;
     procedure HandleFrameSkipped;
@@ -141,6 +150,8 @@ type
     property SourceReader: IMFSourceReader read FSourceReader;
     property AwaitingFlush: Boolean read FAwaitingFlush;
     property CritSec : TMFCritSec read FCritSec;
+    property OnCalculateComplete : TOnCalculateComplete read FOnCalculateComplete write FOnCalculateComplete;
+    property CalculatingMax : Boolean read FCalculatingMax write FCalculatingMax;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -162,15 +173,18 @@ type
     procedure StopBurst; virtual;
 
     function SetVideoFormat(AFormatIndex : Integer) : Boolean;
-
     function GetCurrentFormat(var AFormat : TVideoFormat) : Boolean;
-    function FormatSupported(AFormatIndex: Integer): Boolean;
 
     // Event hooks
     property OnLog: TLogEvent read FOnLog write SetOnLog;
     property OnFrameFound: TFrameEvent read FOnFrameFound write FOnFrameFound;
 
     property FramesSkipped: Integer read FFramesSkipped;
+    property MaxFrameRateReadable : Integer read FMaxFrameRateReadable;
+
+    // For debugging/testing purpose.
+    // Calculate the current readable frame read within 5 seconds
+    procedure CalculateMaxFrameRate(AOnComplete : TOnCalculateComplete); virtual;
 
     property SourceOpen: Boolean read GetSourceOpen;
     property VideoInfo: TVideoFormatInfo read FVideoInfo;
@@ -179,6 +193,7 @@ type
 
     property VideoFormats : TVideoFormats read FVideoFormats;
     property SampleConverter: TSampleConverter read FSampleConverter;
+    property MinimumFrameRate : Integer read FMinimumFrameRate write FMinimumFrameRate;
   end;
 
 implementation
@@ -210,6 +225,10 @@ begin
   FTimerEnd := 0;
   FCritSec := TMFCritSec.Create;
 
+  FCalculatingMax := False;
+  FMinimumFrameRate := 24;
+  FCancelBurst := False;
+
   FSampleConverter := TSampleConverter.Create;
 end;
 
@@ -220,6 +239,13 @@ begin
   SafeDelete(FCritSec);
   FreeAndNil(FSampleConverter);
   inherited;
+end;
+
+procedure TCameraCapture.CalculateMaxFrameRate(AOnComplete: TOnCalculateComplete);
+begin
+  FCalculatingMax := True;
+  FMaxFrameRateReadable := 0;
+  FOnCalculateComplete := AOnComplete;
 end;
 
 procedure TCameraCapture.CancelCapture;
@@ -256,33 +282,34 @@ var
   oBitmap: TBitmap;
   sError : string;
 begin
-{$IF COMPILERVERSION >= 34.0}
-  oBitmap := TBitmap.Create(FVideoInfo.iVideoWidth,
-                            FVideoInfo.iVideoHeight);
-{$ELSE}
-  oBitmap := TBitmap.Create();
-  oBitmap.Width := VideoInfo.iVideoWidth;
-  oBitmap.Height := VideoInfo.iVideoHeight;
-{$ENDIF}
-  if SampleConverter.BitmapFromSample(ASample,
-                                      VideoInfo,
-                                      sError,
-                                      oBitmap) then
-    begin
+  if not FCancelBurst then
+  begin
+  {$IF COMPILERVERSION >= 34.0}
+    oBitmap := TBitmap.Create(FVideoInfo.iVideoWidth,
+                              FVideoInfo.iVideoHeight);
+  {$ELSE}
+    oBitmap := TBitmap.Create();
+    oBitmap.Width := VideoInfo.iVideoWidth;
+    oBitmap.Height := VideoInfo.iVideoHeight;
+  {$ENDIF}
+    if SampleConverter.BitmapFromSample(ASample,
+                                        VideoInfo,
+                                        sError,
+                                        oBitmap) then
+      begin
+        SafeRelease(ASample);
+
+        if Assigned(OnFrameFound) then
+          OnFrameFound(oBitmap);
+      end
+    else
+      begin
       SafeRelease(ASample);
-
-      if Assigned(OnFrameFound) then
-        OnFrameFound(oBitmap);
-    end
-  else
-    begin
-    SafeRelease(ASample);
-      Log('Failed to create BMP from frame sample: ' + sError,
-          ltError);
-      FreeAndNil(oBitmap);
-    end;
-
-
+        Log('Failed to create BMP from frame sample: ' + sError,
+            ltError);
+        FreeAndNil(oBitmap);
+      end;
+  end;
 end;
 
 
@@ -303,6 +330,8 @@ end;
 
 procedure TCameraCapture.HandleFlushComplete;
 begin
+  Log('Flush - Complete',
+      ltInfo);
   FAwaitingFlush := False;
 end;
 
@@ -319,24 +348,15 @@ begin
   SelectVideoStream;
 end;
 
-function TCameraCapture.FormatSupported(AFormatIndex: Integer): Boolean;
-var
-  pMediaType : IMFMediaType;
-  oSubType : TGUID;
-begin
-  Result := SUCCEEDED(SourceReader.GetNativeMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
-                                   AFormatIndex,
-                                   pMediaType)) and SUCCEEDED(pMediaType.GetGUID(MF_MT_SUBTYPE,
-                                           oSubType))
-                                           and SampleConverter.IsInputSupported(oSubType);
-end;
-
 function TCameraCapture.SetVideoFormat(AFormatIndex: Integer): Boolean;
 var
   pMediaType : IMFMediaType;
+  iMediaIndex : Integer;
 begin
+  iMediaIndex := FVideoFormats[AFormatIndex].iMediaIndex;
+
   Result := SUCCEEDED(SourceReader.GetNativeMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
-                                   AFormatIndex,
+                                   iMediaIndex,
                                    pMediaType)) and SetMediaType(pMediaType);
 end;
 
@@ -344,14 +364,13 @@ function TCameraCapture.SetMediaType(const AMediaType : IMFMediaType) : Boolean;
 var
   pMediaType : IMFMediaType;
 begin
-  // Configure the source reader to give us progressive RGB32 frames.
   Result := SUCCEEDED(MFCreateMediaType(pMediaType));
 
   if Result then
     Result := SUCCEEDED(AMediaType.CopyAllItems(pMediaType));
 
   if Result then
-    Result := SUCCEEDED(FSourceReader.SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+    Result := SUCCEEDED(FSourceReader.SetCurrentMediaType(DWord(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
                                                          0,
                                                           pMediaType));
   if Result then
@@ -365,7 +384,7 @@ function TCameraCapture.GetCurrentFormat(var AFormat : TVideoFormat) : Boolean;
 var
   pCurrentType : IMFMediaType;
 begin
-  Result := SourceOpen and SUCCEEDED(SourceReader.GetCurrentMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM), pCurrentType));
+  Result := SourceOpen and SUCCEEDED(SourceReader.GetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM, pCurrentType));
   if Result then
     Result := PopulateFormatDetails(pCurrentType, AFormat);
 end;
@@ -475,8 +494,8 @@ function TCameraCapture.PopulateStreamFormats : Boolean;
 var
   pMediaType : IMFMediaType;
   bTypeFound : Boolean;
-  iTypeIndex : Integer;
-  oMajorType : TGUID;
+  iMediaTypeIndex : Integer;
+
   iCount : Integer;
 begin
   SetLength(FVideoFormats, 0);
@@ -484,24 +503,25 @@ begin
 
   if Result then
   begin
-    iTypeIndex := 0;
+    iMediaTypeIndex := 0;
     iCount := 0;
     bTypeFound := True;
 
     while bTypeFound do
     begin
-      bTypeFound := SUCCEEDED(SourceReader.GetNativeMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
-                                   iTypeIndex,
+      bTypeFound := SUCCEEDED(SourceReader.GetNativeMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                   iMediaTypeIndex,
                                    pMediaType));
       try
-        if bTypeFound and SUCCEEDED(pMediaType.GetMajorType(oMajorType)) and (oMajorType = MFMediaType_Video) then
+        if bTypeFound and IsFormatAvailable(pMediaType) then
         begin
           inc(iCount);
           SetLength(FVideoFormats, iCount);
           PopulateFormatDetails(pMediaType, FVideoFormats[iCount - 1]);
+          FVideoFormats[iCount - 1].iMediaIndex := iMediaTypeIndex;
         end;
 
-        inc(iTypeIndex);
+        inc(iMediaTypeIndex);
       finally
         pMediaType := nil;
       end;
@@ -510,13 +530,22 @@ begin
   end;
 end;
 
+function TCameraCapture.IsFormatAvailable(const AMediaType : IMFMediaType) : Boolean;
+var
+  oMajorType : TGUID;
+  oSubType : TGUID;
+begin
+  Result := SUCCEEDED(AMediaType.GetMajorType(oMajorType)) and (oMajorType = MFMediaType_Video)
+            and SUCCEEDED(AMediaType.GetGUID(MF_MT_SUBTYPE, oSubType))
+            and SampleConverter.IsInputSupported(oSubType)
+            and (GetFrameRate(AMediaType) >= FMinimumFrameRate);
+end;
+
 
 function TCameraCapture.PopulateFormatDetails(const AMediaFormat : IMFMediaType; var ADetails : TVideoFormat) : Boolean;
 var
   uiHeigth : UINT32;
   uiWidth : UINT32;
-  uiNumerator: UINT32;
-  uiDenominator : UINT32;
   oSubType : TGUID;
 begin
    // Get the video frame size
@@ -531,19 +560,25 @@ begin
    end;
 
    // Get the frame rate
-   if Result then
-   begin
-     Result := SUCCEEDED(MFGetAttributeRatio(AMediaFormat,
-                        MF_MT_FRAME_RATE,
-                        uiNumerator,
-                        uiDenominator));
-     ADetails.iFramesPerSecond := Round(uiNumerator / uiDenominator);
-   end;
+   ADetails.iFramesPerSecond := GetFrameRate(AMediaFormat);
 
    if SUCCEEDED(AMediaFormat.GetGUID(MF_MT_SUBTYPE, oSubType)) then
      ADetails.oSubType := oSubType;
 end;
 
+function TCameraCapture.GetFrameRate(const AMediaFormat : IMFMediaType) : Integer;
+var
+  uiNumerator: UINT32;
+  uiDenominator : UINT32;
+begin
+  if SUCCEEDED(MFGetAttributeRatio(AMediaFormat,
+                        MF_MT_FRAME_RATE,
+                        uiNumerator,
+                        uiDenominator)) then
+    Result := Round(uiNumerator / uiDenominator)
+  else
+    Result := 0;
+end;
 
 
 
@@ -586,12 +621,12 @@ begin
   // and frame-rate conversion.
   Result := SUCCEEDED(AAttributes.SetUINT32(MF_SOURCE_READER_ENABLE_ADVANCED_VIDEO_PROCESSING, 1));
 
-  if Result then
-    Result := SUCCEEDED(AAttributes.SetUINT32(MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS, 1));
+ if Result then
+   Result := SUCCEEDED(AAttributes.SetUINT32(MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS, 1));
 
   // This must be disable with Advanced Video Processing enabled
-  if Result then
-    Result := SUCCEEDED(AAttributes.SetUINT32(MF_READWRITE_DISABLE_CONVERTERS, 0));
+ if Result then
+   Result := SUCCEEDED(AAttributes.SetUINT32(MF_READWRITE_DISABLE_CONVERTERS, 0));
 end;
 
 function TCameraCapture.GetVideoFormat(AMediaTypeChanged: Boolean): Boolean;
@@ -656,18 +691,25 @@ end;
 procedure TCameraCapture.StartBurst;
 begin
   StopBurst;
-  FBurstEnabled := True;
-  RequestFrame;
+  if not FBurstEnabled then
+  begin
+    FBurstEnabled := True;
+    RequestFrame;
+  end;
 end;
 
 procedure TCameraCapture.StopBurst;
 begin
-  FBurstEnabled := False;
+  if FBurstEnabled then
+  begin
+    FCancelBurst := True;
+    FBurstEnabled := False;
+  end;
 end;
 
 procedure TCameraCapture.RequestFrame;
 begin
-  //
+  FCancelBurst := False;
 end;
 
 procedure TCameraCapture.StartTimer;

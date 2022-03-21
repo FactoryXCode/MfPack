@@ -19,12 +19,21 @@ object FrmMain: TFrmMain
   OnShow = HandlFormShow
   PixelsPerInch = 96
   TextHeight = 15
+  object Label5: TLabel
+    Left = 464
+    Top = 58
+    Width = 508
+    Height = 15
+    Caption = 
+      'Calculate the maximum frame rate currently readable from the cam' +
+      'era at the selected resolution'
+  end
   object pcSetup: TPageControl
     Left = 0
     Top = 0
     Width = 1213
     Height = 201
-    ActivePage = tsAdvanced
+    ActivePage = tsSetup
     Align = alTop
     TabOrder = 0
     object tsSetup: TTabSheet
@@ -47,7 +56,7 @@ object FrmMain: TFrmMain
         Caption = 'Method:'
       end
       object lblResoltution: TLabel
-        Left = 448
+        Left = 480
         Top = 10
         Width = 59
         Height = 15
@@ -60,26 +69,25 @@ object FrmMain: TFrmMain
         Height = 15
         Caption = 'Select Device:'
       end
-      object lblSupported: TLabel
-        Left = 814
-        Top = 13
-        Width = 22
+      object Label4: TLabel
+        Left = 522
+        Top = 139
+        Width = 261
         Height = 15
-        Caption = 'N/A'
+        Caption = '(Full resolution image). Preview below is reduced.'
       end
       object btnCaptureFrame: TButton
-        Left = 831
-        Top = 129
+        Left = 341
+        Top = 131
         Width = 91
         Height = 25
-        Anchors = [akTop, akRight]
         Caption = 'Capture Frame'
         TabOrder = 0
         OnClick = btnCaptureFrameClick
       end
       object btnClearLog: TButton
         Left = 1118
-        Top = 130
+        Top = 129
         Width = 75
         Height = 25
         Anchors = [akTop, akRight]
@@ -89,7 +97,7 @@ object FrmMain: TFrmMain
       end
       object btnCopyLog: TButton
         Left = 1030
-        Top = 130
+        Top = 129
         Width = 75
         Height = 25
         Anchors = [akTop, akRight]
@@ -107,34 +115,22 @@ object FrmMain: TFrmMain
         OnClick = btnRefreshDevicesClick
       end
       object btnSaveImage: TButton
-        Left = 949
-        Top = 129
+        Left = 442
+        Top = 131
         Width = 75
         Height = 25
-        Anchors = [akTop, akRight]
         Caption = 'Save Image'
         TabOrder = 4
         OnClick = HandleSaveImageClick
       end
-      object btnStartBurst: TButton
-        Left = 577
-        Top = 129
+      object btnToggleBurst: TButton
+        Left = 216
+        Top = 131
         Width = 113
         Height = 25
-        Anchors = [akTop, akRight]
         Caption = 'Start Burst Capture'
         TabOrder = 5
-        OnClick = HandleStartBurstCapture
-      end
-      object btnStopBurst: TButton
-        Left = 704
-        Top = 129
-        Width = 113
-        Height = 25
-        Anchors = [akTop, akRight]
-        Caption = 'Stop Burst Capture'
-        TabOrder = 6
-        OnClick = HandleStopBurstCapture
+        OnClick = HandleToggleBurst
       end
       object cboMethod: TComboBox
         Left = 94
@@ -143,7 +139,7 @@ object FrmMain: TFrmMain
         Height = 23
         Style = csDropDownList
         ItemIndex = 0
-        TabOrder = 7
+        TabOrder = 6
         Text = 'Synchronous'
         OnChange = HandleMethodChanged
         Items.Strings = (
@@ -156,15 +152,15 @@ object FrmMain: TFrmMain
         Width = 259
         Height = 23
         DropDownCount = 30
-        TabOrder = 8
+        TabOrder = 7
         OnChange = HandleSelectedDeviceChange
       end
       object cbxResolution: TComboBox
-        Left = 513
+        Left = 545
         Top = 8
         Width = 288
         Height = 23
-        TabOrder = 9
+        TabOrder = 8
         OnChange = cbxResolutionChange
       end
       object memLog: TMemo
@@ -175,7 +171,7 @@ object FrmMain: TFrmMain
         Anchors = [akLeft, akTop, akRight]
         ReadOnly = True
         ScrollBars = ssVertical
-        TabOrder = 10
+        TabOrder = 9
       end
     end
     object tsAdvanced: TTabSheet
@@ -209,10 +205,56 @@ object FrmMain: TFrmMain
         Height = 15
         Caption = 'Burst duration:'
       end
+      object lblResolution: TLabel
+        Left = 11
+        Top = 116
+        Width = 86
+        Height = 15
+        Caption = 'Resolution filter:'
+      end
+      object Label3: TLabel
+        Left = 194
+        Top = 116
+        Width = 74
+        Height = 15
+        Caption = 'fps and above'
+      end
+      object lblMaxDesc: TLabel
+        Left = 392
+        Top = 50
+        Width = 457
+        Height = 15
+        Caption = 
+          'Estimate the maximum frame rate readable from the camera at the ' +
+          'selected resolution.'
+      end
+      object lblMaxDesc2: TLabel
+        Left = 392
+        Top = 92
+        Width = 448
+        Height = 15
+        Caption = 
+          'Limiting factors include: CPU, GPU and for many web cameras - lo' +
+          'w light conditions.'
+      end
+      object lblCurrentMethod: TLabel
+        Left = 535
+        Top = 29
+        Width = 115
+        Height = 15
+        Caption = 'Capture method: N/A'
+      end
+      object lblMaxDesc1: TLabel
+        Left = 392
+        Top = 70
+        Width = 237
+        Height = 15
+        Caption = 'This excludes time taken to return the image.'
+      end
       object cbxPreviewType: TComboBox
         Left = 139
         Top = 20
-        Width = 145
+        Width = 180
         Height = 23
         Style = csDropDownList
         ItemIndex = 1
@@ -226,7 +268,7 @@ object FrmMain: TFrmMain
       object cbxRenderMode: TComboBox
         Left = 139
         Top = 49
-        Width = 145
+        Width = 180
         Height = 23
         Style = csDropDownList
         ItemIndex = 2
@@ -254,6 +296,32 @@ object FrmMain: TFrmMain
           '90'
           '120')
       end
+      object cbxFrameRateMin: TComboBox
+        Left = 139
+        Top = 111
+        Width = 49
+        Height = 23
+        Style = csDropDownList
+        ItemIndex = 1
+        TabOrder = 3
+        Text = '24'
+        OnChange = HandleMinimumFrameRateChange
+        Items.Strings = (
+          '10'
+          '24'
+          '29'
+          '30'
+          '60')
+      end
+      object btnCalculateMax: TButton
+        Left = 392
+        Top = 19
+        Width = 129
+        Height = 25
+        Caption = 'Calculate Frame Rate'
+        TabOrder = 4
+        OnClick = HandleCalculateMax
+      end
     end
   end
   object tcCapture: TPageControl
@@ -264,8 +332,6 @@ object FrmMain: TFrmMain
     ActivePage = tsFrame
     Align = alClient
     TabOrder = 1
-    ExplicitTop = 300
-    ExplicitHeight = 451
     object tsFrame: TTabSheet
       Caption = 'Frame'
       object pnlFrameCapture: TPanel
@@ -280,8 +346,6 @@ object FrmMain: TFrmMain
         ParentBackground = False
         ParentDoubleBuffered = False
         TabOrder = 0
-        ExplicitWidth = 1203
-        ExplicitHeight = 719
         object pbCapture: TPaintBox
           Left = 1
           Top = 1

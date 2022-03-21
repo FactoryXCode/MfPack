@@ -74,6 +74,7 @@ uses
   {Application}
   CameraCapture,
   MessageHandler,
+  System.DateUtils,
   Support;
 
 const
@@ -92,6 +93,8 @@ type
     FMessageHandler: TMessageHandler;
     FFindingSample: Boolean;
     FSampleReply: TSampleReply;
+    FMaxCalcStartTime : TDateTime;
+    FSampleReadCount : Integer;
 
     procedure HandleMessages(var AMessage: TMessage;
                              var AHandled: Boolean);
@@ -114,11 +117,14 @@ type
   protected
     function ConfigureSourceReader(const AAttributes: IMFAttributes) : Boolean; override;
     procedure ProcessSample(ASample: IMFSample); override;
+    procedure Flush; override;
 
     procedure ResetVariables; override;
   public
     constructor Create; override;
     destructor Destroy; override;
+
+    procedure CalculateMaxFrameRate(AOnComplete : TOnCalculateComplete); override;
 
     procedure RequestFrame; override;
   end;
@@ -128,6 +134,8 @@ implementation
 constructor TCameraCaptureAsync.Create;
 begin
   inherited;
+  FMaxCalcStartTime := 0;
+  FSampleReadCount := 0;
   FMessageHandler := TMessageHandler.Create;
   FMessageHandler.OnMessage := HandleMessages;
 end;
@@ -137,6 +145,14 @@ begin
   FMessageHandler.RemoveHandle;
   FreeAndNil(FMessageHandler);
   inherited;
+end;
+
+procedure TCameraCaptureAsync.Flush;
+begin
+  inherited;
+  Log('Flush - Begin',
+      ltInfo);
+  SourceReader.Flush(MF_SOURCE_READER_ALL_STREAMS);
 end;
 
 function TCameraCaptureAsync.OnEvent(dwStreamIndex: DWord; pEvent: IMFMediaEvent): HRESULT;
@@ -180,7 +196,18 @@ begin
         end
         else if Assigned(pSample) then
         begin
-          ProcessSample(pSample);
+          FCalculatingMax := SecondsBetween(Now, FMaxCalcStartTime) <= 10;
+          if FCalculatingMax then
+          begin
+            // Exclude the time taken to read the first sample
+            if FSampleReadCount = 0 then
+              FMaxCalcStartTime := Now;
+            inc(FSampleReadCount);
+            ReadNextSample;
+          end
+          else
+            ProcessSample(pSample);
+
           FFindingSample := False;
         end;
       finally
@@ -211,6 +238,32 @@ begin
     ReadNextSample;
 
   HandleThreadMessages(GetCurrentThread());
+end;
+
+procedure TCameraCaptureAsync.CalculateMaxFrameRate(AOnComplete: TOnCalculateComplete);
+var
+  iDurationSec : Integer;
+  iSampleReadCount : Integer;
+begin
+  inherited;
+  FMaxCalcStartTime := Now;
+  FSampleReadCount := 0;
+
+  ReadNextSample;
+
+  while FCalculatingMax do
+  begin
+    HandleThreadMessages(GetCurrentThread());
+    Sleep(1000);
+  end;
+
+  iSampleReadCount := FSampleReadCount;
+  iDurationSec := SecondsBetween(FMaxCalcStartTime, Now);
+
+  Flush;
+
+  if Assigned(OnCalculateComplete) then
+    OnCalculateComplete(Round(iSampleReadCount / iDurationSec));
 end;
 
 function TCameraCaptureAsync.ConfigureSourceReader(const AAttributes: IMFAttributes): Boolean;
@@ -266,6 +319,7 @@ end;
 
 procedure TCameraCaptureAsync.RequestFrame;
 begin
+  inherited;
   ResetFramesSkipped;
   ReadNextSample;
 end;

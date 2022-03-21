@@ -63,8 +63,7 @@ type
     btnCaptureFrame: TButton;
     btnSaveImage: TButton;
     sdSaveFrame: TSaveDialog;
-    btnStartBurst: TButton;
-    btnStopBurst: TButton;
+    btnToggleBurst: TButton;
     MainMenu1: TMainMenu;
     File1: TMenuItem;
     mnEdit: TMenuItem;
@@ -74,7 +73,6 @@ type
     mnWarningLevel: TMenuItem;
     mnErrorLevel: TMenuItem;
     btnCopyLog: TButton;
-    lblSupported: TLabel;
     lblMethod: TLabel;
     cboMethod: TComboBox;
     tcCapture: TPageControl;
@@ -91,6 +89,16 @@ type
     cbxDuration: TComboBox;
     lblSeconds: TLabel;
     Label2: TLabel;
+    lblResolution: TLabel;
+    cbxFrameRateMin: TComboBox;
+    Label3: TLabel;
+    btnCalculateMax: TButton;
+    lblMaxDesc: TLabel;
+    Label5: TLabel;
+    lblMaxDesc2: TLabel;
+    lblCurrentMethod: TLabel;
+    lblMaxDesc1: TLabel;
+    Label4: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnRefreshDevicesClick(Sender: TObject);
@@ -100,7 +108,7 @@ type
     procedure HandleSaveImageClick(Sender: TObject);
     procedure cbxResolutionChange(Sender: TObject);
     procedure HandlFormShow(Sender: TObject);
-    procedure HandleStartBurstCapture(Sender: TObject);
+    procedure HandleToggleBurst(Sender: TObject);
     procedure HandleStopBurstCapture(Sender: TObject);
     procedure OnExit(Sender: TObject);
     procedure HandleLogLevelChange(Sender: TObject);
@@ -110,6 +118,8 @@ type
     procedure HandleChangeEnablePreview(Sender: TObject);
     procedure HandlePreviewTypeChange(Sender: TObject);
     procedure HandleRenderModeChange(Sender: TObject);
+    procedure HandleMinimumFrameRateChange(Sender: TObject);
+    procedure HandleCalculateMax(Sender: TObject);
   private
     FLogLevel: TLogType;
     FFormatSettings: TFormatSettings;
@@ -156,6 +166,8 @@ type
     procedure PaintLastCapture;
     procedure GetPaintArea(var AWidth : Integer; var AHeight : Integer; var ATop : Integer; var ALeft : Integer);
     procedure GetBurstDetails(var ADurationSec, AFramesPerSecond: Integer);
+    procedure HandleCalculateMaxComplete(const AFramesPerSecond: Integer);
+    procedure StartBurstCapture;
   public
     property CaptureMethod: TCaptureMethod read FCaptureMethod write SetCaptureMethod;
   end;
@@ -191,6 +203,17 @@ begin
    FCapture := TCameraCaptureAsync.Create;
    FCapture.OnFrameFound := HandleFrameFound;
    FCapture.OnLog := Log;
+
+  {$IFDEF DEBUG}
+   Caption := Caption + ' (DEBUG BUILD)';
+  {$ENDIF}
+
+  {$IFDEF WIN32}
+     Caption := Caption + ' 32-bit';
+  {$ELSE}
+     Caption := Caption + ' 64-bit';
+  {$ENDIF}
+
 
    FLastCapturedFrame := TBitmap.Create;
 
@@ -236,6 +259,8 @@ begin
   else
     FCapture := TCameraCaptureAsync.Create;
 
+  lblCurrentMethod.Caption := 'Capture method: ' + FCaptureMethod.AsDisplay;
+
   FCapture.OnFrameFound := HandleFrameFound;
   FCapture.OnLog := Log;
 
@@ -265,7 +290,9 @@ begin
 
   UpdateLogLevelMenu;
 
-  CaptureMethod := cmAsync;
+  CaptureMethod := cmASync;
+
+  FCapture.MinimumFrameRate := StrToInt(cbxFrameRateMin.Text);
 end;
 
 procedure TFrmMain.HandlFormShow(Sender: TObject);
@@ -341,28 +368,35 @@ begin
 
   if Result then
   begin
-    if FCapture.FormatSupported(cbxResolution.ItemIndex) then
-    begin
-      lblSupported.Caption := 'Format is supported for capture';
-      lblSupported.Font.Color := clGreen;
+    Result := FCapture.SetVideoFormat(cbxResolution.ItemIndex) and FCapture.GetCurrentFormat(FCurrentCaptureFormat);
 
-      Log('Updating capture format', ltInfo);
-
-      Result := FCapture.SetVideoFormat(cbxResolution.ItemIndex) and FCapture.GetCurrentFormat(FCurrentCaptureFormat);
-
-      if Result then
-        Log(Format('Capture format change to %d x %d', [FCurrentCaptureFormat.iFrameWidth, FCurrentCaptureFormat.iFrameHeigth]), ltInfo)
-      else
-        Log('Failed to set capture format', ltError);
-
-      UpdateEnabledStates;
-    end
+    if Result then
+      Log(Format('Capture format change to %d x %d', [FCurrentCaptureFormat.iFrameWidth, FCurrentCaptureFormat.iFrameHeigth]), ltInfo)
     else
-    begin
-      lblSupported.Caption := 'Format is NOT supported for capture';
-      lblSupported.Font.Color := clRed;
-    end;
+      Log('Failed to set capture format', ltError);
+
+    UpdateEnabledStates;
   end;
+end;
+
+procedure TFrmMain.HandleCalculateMax(Sender: TObject);
+begin
+  btnCalculateMax.Caption := 'Calculating...';
+  BeginBusy;
+  try
+    FCapture.CalculateMaxFrameRate(HandleCalculateMaxComplete);
+  finally
+    EndBusy;
+  end;
+end;
+
+procedure TFrmMain.HandleCalculateMaxComplete(const AFramesPerSecond : Integer);
+begin
+  btnCalculateMax.Caption := 'Calculate Max';
+  MessageDlg(Format('Estimated readable frame rate: %d (fps).' + #13#10 +
+          'Current Format: %d x %d (%d fps)', [AFramesPerSecond,
+          FCurrentCaptureFormat.iFrameWidth, FCurrentCaptureFormat.iFrameHeigth, FCurrentCaptureFormat.iFramesPerSecond]), mtInformation,
+          [mbOk], 0, mbOk);
 end;
 
 procedure TFrmMain.HandleCapturePaint(Sender: TObject);
@@ -502,14 +536,23 @@ begin
   UpdateSelectedDevice;
 end;
 
-procedure TFrmMain.HandleStartBurstCapture(Sender: TObject);
+procedure TFrmMain.HandleToggleBurst(Sender: TObject);
 begin
-  UpdateEnabledStates;
+  if FCapture.BurstEnabled then
+    StopBurstCapture
+  else
+    StartBurstCapture;
+end;
+
+procedure TFrmMain.StartBurstCapture;
+begin
   FBurstCaptureCount := 0;
   FBurstStartTime := Now;
   FBurstStatisticsUpdate := Now;
   FBurstDurationSeconds := StrToInt(cbxDuration.Text);
   FCapture.StartBurst;
+  btnToggleBurst.Caption := 'Stop Burst Capture';
+  UpdateEnabledStates;
 end;
 
 procedure TFrmMain.HandleStopBurstCapture(Sender: TObject);
@@ -524,6 +567,8 @@ var
 begin
   FCapture.StopBurst;
 
+  btnToggleBurst.Caption := 'Start Burst Capture';
+
   UpdateEnabledStates;
 
   GetBurstDetails(iDuration, iFrameRate);
@@ -536,7 +581,11 @@ end;
 procedure TFrmMain.GetBurstDetails(var ADurationSec : Integer; var AFramesPerSecond : Integer);
 begin
   ADurationSec := SecondsBetween(FBurstStartTime, Now);
-  AFramesPerSecond := Round(FBurstCaptureCount / ADurationSec);
+
+  if ADurationSec > 0 then
+    AFramesPerSecond := Round(Max(1, FBurstCaptureCount) / ADurationSec)
+  else
+    AFramesPerSecond := 0;
 end;
 
 procedure TFrmMain.UpdateSelectedDevice;
@@ -619,6 +668,8 @@ var
 begin
   BeginBusy;
   try
+    SetLength(FDevices, 0);
+
     SetLength(oDeviceProperties, 0);
     cbxCaptureDevices.Clear;
 
@@ -719,11 +770,10 @@ end;
 
 procedure TFrmMain.UpdateCaptureButtons;
 begin
-  btnCaptureFrame.Enabled := FCapture.SourceOpen;
+  btnCaptureFrame.Enabled := FCapture.SourceOpen and not FCapture.BurstEnabled;
   cbxResolution.Enabled := FCapture.SourceOpen and (cbxCaptureDevices.ItemIndex > 0);
   btnSaveImage.Enabled := Assigned(FLastCapturedFrame) and not FLastCapturedFrame.Empty;
-  btnStartBurst.Enabled := FCapture.SourceOpen and not FCapture.BurstEnabled;
-  btnStopBurst.Enabled := FCapture.SourceOpen and FCapture.BurstEnabled;
+  btnToggleBurst.Enabled := FCapture.SourceOpen;
 end;
 
 procedure TFrmMain.BeginBusy;
@@ -752,6 +802,12 @@ begin
     ClearImage;
     CaptureMethod := TCaptureMethod(TComboBox(Sender).ItemIndex);
   end;
+end;
+
+procedure TFrmMain.HandleMinimumFrameRateChange(Sender: TObject);
+begin
+  FCapture.MinimumFrameRate := StrToInt(cbxFrameRateMin.Text);
+  UpdateSelectedDevice;
 end;
 
 procedure TFrmMain.HandlePreviewTypeChange(Sender: TObject);

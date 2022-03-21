@@ -87,6 +87,10 @@ type
   TCaptureMethod = (cmSync,
                     cmAsync);
 
+  TCaptureMethodHelper = record helper for TCaptureMethod
+    function AsDisplay: string;
+  end;
+
   TImageType = (itBitmap, itPNG, itJPG);
 
   TFrameEvent = procedure(ABitmap: VCL.Graphics.TBitmap) of object;
@@ -331,5 +335,15 @@ begin
   iBufferHeight := 0;
 end;
 
+
+{ TCaptureMethodHelper }
+
+function TCaptureMethodHelper.AsDisplay: string;
+begin
+  if Self = cmSync then
+    Result := 'Synchronous'
+  else
+    Result := 'Asynchronous'
+end;
 
 end.

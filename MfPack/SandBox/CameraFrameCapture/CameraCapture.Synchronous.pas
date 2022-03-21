@@ -65,6 +65,7 @@ uses
   WinApi.MediaFoundationApi.MfReadWrite,
   WinApi.MediaFoundationApi.MfObjects,
   {System}
+  System.Classes,
   System.TimeSpan,
   System.DateUtils,
   {Application}
@@ -78,6 +79,7 @@ type
                             out ASample: IMFSample): Boolean;
   public
     procedure RequestFrame; override;
+    procedure CalculateMaxFrameRate(AOnComplete : TOnCalculateComplete); override;
     procedure Flush; override;
   end;
 
@@ -166,6 +168,44 @@ begin
   ReturnSample(ASample);
 end;
 
+
+procedure TCameraCaptureSync.CalculateMaxFrameRate(AOnComplete: TOnCalculateComplete);
+var
+  dtStartTime : TDateTime;
+  dwStreamFlags: DWord;
+  pSample: IMFSample;
+  bFound : Boolean;
+  iDurationSec : Integer;
+  iSampleReadCount : Integer;
+begin
+  inherited;
+  bFound := True;
+  dtStartTime := Now;
+  iSampleReadCount := 0;
+  while (SecondsBetween(Now, dtStartTime) <= 10) and bFound do
+  begin
+    bFound := SUCCEEDED(SourceReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                              0,
+                              Nil,
+                              @dwStreamFlags,
+                              Nil,
+                              @pSample));
+
+    if Assigned(pSample) then
+    begin
+      // Exclude the time taken to read the first sample
+      if iSampleReadCount = 0 then
+        dtStartTime := Now;
+      inc(iSampleReadCount);
+      SafeRelease(pSample);
+    end;
+  end;
+
+  iDurationSec := SecondsBetween(dtStartTime, Now);
+
+  if Assigned(OnCalculateComplete) then
+    OnCalculateComplete(Round(iSampleReadCount / iDurationSec));
+end;
 
 procedure TCameraCaptureSync.Flush;
 var
