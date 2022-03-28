@@ -77,6 +77,12 @@ uses
   SampleConverter;
 
 type
+  TCaptureReturnType = (rtImage, rtMemoryStream);
+
+  TCaptureReturnTypeHelper = record helper for TCaptureReturnType
+    function AsDisplay: string;
+  end;
+
   TVideoFormat = record
     iMediaIndex : Integer;
     iFrameHeigth: Integer;
@@ -92,6 +98,7 @@ type
   private
     FMaxFramesToSkip: Integer;
     FOnLog: TLogEvent;
+    FOnFrameDataFound : TFrameDataEvent;
     FAwaitingFlush: Boolean;
     FFramesSkipped: Integer;
     FVideoInfo: TVideoFormatInfo;
@@ -102,11 +109,11 @@ type
     FCancelBurst : Boolean;
     FVideoFormats : TVideoFormats;
     FCritSec: TMFCritSec;
-    FTimerFrequency: int64;
     FTimerStart: int64;
     FTimerEnd : int64;
     FMinimumFrameRate : Integer;
     FMaxFrameRateReadable : Integer;
+    FCaptureReturnType : TCaptureReturnType;
 
     procedure SetMaxFramesToSkip(const AValue: Integer);
 
@@ -115,6 +122,8 @@ type
     procedure SetOnLog(const Value: TLogEvent);
     function IsFormatAvailable(const AMediaType: IMFMediaType): Boolean;
     function GetFrameRate(const AMediaFormat: IMFMediaType): Integer;
+    procedure ReturnImageFromSample(ASample: IMFSample);
+    procedure ReturnDataFromSample(ASample: IMFSample);
   protected
     FSourceReader: IMFSourceReader;
     FOnCalculateComplete : TOnCalculateComplete;
@@ -178,6 +187,7 @@ type
     // Event hooks
     property OnLog: TLogEvent read FOnLog write SetOnLog;
     property OnFrameFound: TFrameEvent read FOnFrameFound write FOnFrameFound;
+    property OnFrameDataFound : TFrameDataEvent read FOnFrameDataFound write FOnFrameDataFound;
 
     property FramesSkipped: Integer read FFramesSkipped;
     property MaxFrameRateReadable : Integer read FMaxFrameRateReadable;
@@ -194,6 +204,7 @@ type
     property VideoFormats : TVideoFormats read FVideoFormats;
     property SampleConverter: TSampleConverter read FSampleConverter;
     property MinimumFrameRate : Integer read FMinimumFrameRate write FMinimumFrameRate;
+    property CaptureReturnType : TCaptureReturnType read FCaptureReturnType write FCaptureReturnType;
   end;
 
 implementation
@@ -220,10 +231,11 @@ begin
   Inherited;
   ResetVariables;
   SetLength(FVideoFormats, 0);
-  FTimerFrequency := 0;
   FTimerStart := 0;
   FTimerEnd := 0;
   FCritSec := TMFCritSec.Create;
+
+  FCaptureReturnType := rtImage;
 
   FCalculatingMax := False;
   FMinimumFrameRate := 24;
@@ -278,40 +290,57 @@ begin
 end;
 
 procedure TCameraCapture.ReturnSample(ASample: IMFSample);
+begin
+  if not FCancelBurst then
+  begin
+    if FCaptureReturnType = rtImage then
+       ReturnImageFromSample(ASample)
+    else
+       ReturnDataFromSample(ASample)
+  end;
+end;
+
+procedure TCameraCapture.ReturnImageFromSample(ASample : IMFSample);
 var
   oBitmap: TBitmap;
   sError : string;
 begin
-  if not FCancelBurst then
+  if SampleConverter.BitmapFromSample(ASample,
+                                      VideoInfo,
+                                      sError,
+                                      oBitmap) then
   begin
-  {$IF COMPILERVERSION >= 34.0}
-    oBitmap := TBitmap.Create(FVideoInfo.iVideoWidth,
-                              FVideoInfo.iVideoHeight);
-  {$ELSE}
-    oBitmap := TBitmap.Create();
-    oBitmap.Width := VideoInfo.iVideoWidth;
-    oBitmap.Height := VideoInfo.iVideoHeight;
-  {$ENDIF}
-    if SampleConverter.BitmapFromSample(ASample,
-                                        VideoInfo,
-                                        sError,
-                                        oBitmap) then
-      begin
-        SafeRelease(ASample);
+    SafeRelease(ASample);
 
-        if Assigned(OnFrameFound) then
-          OnFrameFound(oBitmap);
-      end
-    else
-      begin
-      SafeRelease(ASample);
-        Log('Failed to create BMP from frame sample: ' + sError,
-            ltError);
-        FreeAndNil(oBitmap);
-      end;
+    if Assigned(OnFrameFound) then
+      OnFrameFound(oBitmap);
+  end
+  else
+  begin
+    SafeRelease(ASample);
+    Log('Failed to create BMP from frame sample: ' + sError, ltError);
+    FreeAndNil(oBitmap);
   end;
 end;
 
+procedure TCameraCapture.ReturnDataFromSample(ASample : IMFSample);
+var
+  oData : TMemoryStream;
+  sError : string;
+begin
+  if SampleConverter.DataFromSample(ASample, VideoInfo, sError, oData) then
+  begin
+    SafeRelease(ASample);
+
+    if Assigned(OnFrameDataFound) then
+      OnFrameDataFound(oData);
+  end
+  else
+  begin
+    SafeRelease(ASample);
+    Log('Failed to return data from frame sample: ' + sError, ltError);
+  end;
+end;
 
 procedure TCameraCapture.Flush;
 begin
@@ -648,6 +677,8 @@ begin
                                              MF_MT_FRAME_SIZE,
                                              uWidth,
                                              uHeight));
+
+
       if Result then
         begin
           FVideoInfo.iBufferWidth := uWidth;
@@ -661,6 +692,10 @@ begin
               FVideoInfo.iVideoHeight := uHeight;
             end;
         end;
+
+       FVideoInfo.iStride := MFGetAttributeUINT32(pInputType,
+                                                   MF_MT_DEFAULT_STRIDE,
+                                                   1);
 
       SampleConverter.UpdateConverter(pInputType);
     end;
@@ -714,7 +749,6 @@ end;
 
 procedure TCameraCapture.StartTimer;
 begin
- QueryPerformanceFrequency(FTimerFrequency);
  QueryPerformanceCounter(FTimerStart);
 end;
 
@@ -725,8 +759,8 @@ end;
 
 function TCameraCapture.GetTimerMs: Double;
 begin
-  if FTimerFrequency > 0 then
-    Result := (FTimerEnd - FTimerStart) / FTimerFrequency * 1000
+  if TimerFrequency > 0 then
+    Result := (FTimerEnd - FTimerStart) / TimerFrequency * 1000
   else
     Result := 0;
 end;
@@ -740,6 +774,18 @@ end;
 procedure TCameraCapture.SetMaxFramesToSkip(const AValue: Integer);
 begin
   FMaxFramesToSkip := AValue;
+end;
+
+{ TCaptureReturnTypeHelper }
+
+function TCaptureReturnTypeHelper.AsDisplay: string;
+begin
+  case Self of
+    rtImage:
+      Result := 'Direct 2D';
+    rtMemoryStream:
+      Result := 'Memory Stream';
+  end;
 end;
 
 end.

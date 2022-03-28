@@ -113,6 +113,8 @@ type
     function ConvertSampleToRGB(const AInputSample : IMFSample; out AConvertedSample : IMFSample) : Boolean;
     function CheckSucceeded(AStatus : HRESULT; const AMethod : string; ALogFailure : Boolean = True): Boolean;
     function IndexOf(const AInput: TGUID; const AValues: array of TGUID): Integer;
+    function GetBMPFileHeader: BITMAPFILEHEADER;
+    function GetBMPFileInfo(const AVideoInfo: TVideoFormatInfo): BITMAPINFOHEADER;
 
     procedure FreeConverter;
     procedure NotifyBeginStreaming;
@@ -131,6 +133,8 @@ type
                               var AError: string;
                               var AImage: TBitmap): Boolean;
 
+    function DataFromSample(const ASample : IMFSample; const AVideoInfo: TVideoFormatInfo; var AError : string; out AMemoryStream : TMemoryStream): Boolean;
+
     function IsInputSupported(const AInputFormat : TGUID) : Boolean;
 
     property RenderType : TRenderType read FRenderType write SetRenderType;
@@ -141,6 +145,8 @@ type
 
 
 implementation
+
+
 
 constructor TSampleConverter.Create;
 begin
@@ -190,7 +196,6 @@ begin
   FSupportedInputs[18] := MFVideoFormat_YVU9;
   FSupportedInputs[19] := MFVideoFormat_YVYU;
 end;
-
 
 procedure TSampleConverter.SetRenderType(const AValue: TRenderType);
 begin
@@ -279,6 +284,87 @@ begin
 end;
 
 
+function TSampleConverter.DataFromSample(const ASample : IMFSample; const AVideoInfo: TVideoFormatInfo; var AError : string; out AMemoryStream : TMemoryStream): Boolean;
+var
+  pBuffer: IMFMediaBuffer;
+  pConvertedSample : IMFSample;
+  pBitmapData: PByte;
+  cbBitmapData: DWord;
+  iActualDataSize : Integer;
+  iExpectedDataSize : Integer;
+  oFileHeader : BITMAPFILEHEADER;
+  oFileInfo : BITMAPINFOHEADER;
+begin
+  if AVideoInfo.oSubType <> MFVideoFormat_RGB32 then
+  begin
+    Result := ConvertSampleToRGB(ASample, pConvertedSample);
+
+    if Result then
+     // Converts a sample with multiple buffers into a sample with a single buffer.
+    Result := SUCCEEDED(pConvertedSample.ConvertToContiguousBuffer(pBuffer));
+  end
+  else
+    // Converts a sample with multiple buffers into a sample with a single buffer.
+    Result := SUCCEEDED(ASample.ConvertToContiguousBuffer(pBuffer));
+
+  if Result then
+  begin
+    Result := SUCCEEDED(pBuffer.Lock(pBitmapData, Nil, @cbBitmapData));
+    try
+      if Result then
+      begin
+        // For full frame capture, use the buffer dimensions for the data size check
+        iExpectedDataSize := (AVideoInfo.iBufferWidth * 4) * AVideoInfo.iBufferHeight;
+        iActualDataSize := Integer(cbBitmapData);
+
+        if Result then
+          Result := iActualDataSize = iExpectedDataSize;
+        if not Result then
+        begin
+          AError := Format('Sample size does not match expected size. Current: %d. Expected: %d',
+                           [iActualDataSize, iExpectedDataSize]);
+        end;
+
+        AMemoryStream := TMemoryStream.Create;
+        oFileHeader := GetBMPFileHeader;
+        oFileInfo := GetBMPFileInfo(AVideoInfo);
+        AMemoryStream.Write(oFileHeader, SizeOf(oFileHeader));
+        AMemoryStream.Write(oFileInfo, SizeOf(oFileInfo));
+        AMemoryStream.Write(pBitmapData[0], iActualDataSize);
+      end;
+    finally
+      pBuffer.Unlock;
+      SafeRelease(pBuffer);
+    end;
+  end;
+
+  if Assigned(pConvertedSample) then
+    SafeRelease(pConvertedSample);
+
+end;
+
+function TSampleConverter.GetBMPFileHeader : BITMAPFILEHEADER;
+begin
+  Result.bfType := Ord('B') or (Ord('M') shl 8); // Type is "BM" for BitMap
+  Result.bfSize := sizeof(Result.bfOffBits) + sizeof(RGBTRIPLE);
+  Result.bfReserved1 := 0;
+  Result.bfReserved2 := 0;
+  Result.bfOffBits := sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+end;
+
+function TSampleConverter.GetBMPFileInfo(const AVideoInfo: TVideoFormatInfo) : BITMAPINFOHEADER;
+begin
+  Result.biSize := sizeof(BITMAPINFOHEADER);
+  Result.biWidth := AVideoInfo.iVideoWidth;
+  // See: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapinfoheader
+  Result.biHeight := -AVideoInfo.iVideoHeight;
+  Result.biPlanes := 1;
+  Result.biBitCount := 32;
+  Result.biCompression := BI_RGB;
+  Result.biClrImportant := 0;
+  Result.biClrUsed := 0;
+end;
+
 function TSampleConverter.BitmapFromSample(const ASample: IMFSample;
                                            const AVideoInfo: TVideoFormatInfo;
                                            var AError: string;
@@ -300,6 +386,17 @@ begin
   AError := '';
   pConvertedSample := nil;
 
+  {$IF COMPILERVERSION >= 34.0}
+  AImage := TBitmap.Create(AVideoInfo.iVideoWidth,
+                            AVideoInfo.iVideoHeight);
+  {$ELSE}
+  AImage := TBitmap.Create();
+  AImage.Width := AVideoInfo.iVideoWidth;
+  AImage.Height := AVideoInfo.iVideoHeight;
+  {$ENDIF}
+
+  AImage.PixelFormat := pf24Bit;
+
   if AVideoInfo.oSubType <> MFVideoFormat_RGB32 then
   begin
     Result := ConvertSampleToRGB(ASample, pConvertedSample);
@@ -313,12 +410,9 @@ begin
     Result := SUCCEEDED(ASample.ConvertToContiguousBuffer(pBuffer));
 
   try
-
   if Result then
     begin
-      Result := SUCCEEDED(pBuffer.Lock(pBitmapData,
-                                       Nil,
-                                       @cbBitmapData));
+      Result := SUCCEEDED(pBuffer.Lock(pBitmapData, Nil, @cbBitmapData));
       try
         iPitch := 4 * AVideoInfo.iVideoWidth;
 
@@ -335,7 +429,7 @@ begin
         end;
 
         if Result then
-          begin
+        begin
             // Bind the render target to the bitmap
             {$IF CompilerVersion > 33}
              // Delphi 10.4 or above
@@ -382,13 +476,12 @@ begin
     SafeRelease(pConvertedSample);
 end;
 
+
 procedure TSampleConverter.RenderToBMP(ASourceRect : TRect; const ASurface : ID2D1Bitmap);
 var
-  iFrequency: int64;
   iStart: int64;
   iEnd : int64;
 begin
-  QueryPerformanceFrequency(iFrequency);
   QueryPerformanceCounter(iStart);
 
   FRenderTarget.BeginDraw;
@@ -400,7 +493,7 @@ begin
 
   QueryPerformanceCounter(iEnd);
   if Assigned(OnLog) then
-      OnLog(Format('RenderBMP took %f milliseconds',[(iEnd - iStart) / iFrequency * 1000]), ltDebug);
+      OnLog(Format('RenderBMP took %f milliseconds',[(iEnd - iStart) / TimerFrequency * 1000]), ltDebug);
 end;
 
 procedure TSampleConverter.FreeConverter;
@@ -457,11 +550,9 @@ var
   pBufferOut : IMFMediaBuffer;
   oOutputDataBuffer : MFT_OUTPUT_DATA_BUFFER;
   oOutputStreamInfo : MFT_OUTPUT_STREAM_INFO;
-  iFrequency: int64;
   iConvertStart: int64;
   iConvertEnd : int64;
 begin
-  QueryPerformanceFrequency(iFrequency);
   QueryPerformanceCounter(iConvertStart);
 
   Result := CheckSUCCEEDED(FTransform.ProcessInput(0, AInputSample, 0), 'ConvertSampleToRGB');
@@ -497,7 +588,7 @@ begin
   QueryPerformanceCounter(iConvertEnd);
   if Assigned(OnLog)  then
    OnLog(Format('ConvertSampleToRGB took %f milliseconds.',
-               [(iConvertEnd - iConvertStart) / iFrequency * 1000]),
+               [(iConvertEnd - iConvertStart) / TimerFrequency * 1000]),
                                  ltDebug);
 
 end;

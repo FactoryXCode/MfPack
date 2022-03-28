@@ -65,6 +65,7 @@ uses
   WinAPI.Windows,
   WinAPI.psAPI,
   {System}
+  System.Classes,
   System.TimeSpan,
   {VLC}
   VCL.Graphics,
@@ -93,6 +94,7 @@ type
 
   TImageType = (itBitmap, itPNG, itJPG);
 
+  TFrameDataEvent = procedure(AMemoryStream : TMemoryStream) of object;
   TFrameEvent = procedure(ABitmap: VCL.Graphics.TBitmap) of object;
 
   TLogEvent = reference to procedure(const AMessage: string;
@@ -108,13 +110,13 @@ type
     iVideoHeight: Integer;
     iBufferWidth: Integer;
     iBufferHeight: Integer;
+    iStride: Integer;
     oSubType : TGUID;
     procedure Reset;
   end;
 
 
   // CriticalSection
-
   TMFCritSec = class
   private
     FCriticalSection: TRTLCriticalSection;
@@ -132,7 +134,10 @@ type
 
   procedure SaveImage(AInput : TBitmap; const APath : string; AType : TImageType);
 
-  const
+threadvar
+  TimerFrequency: Int64;
+
+const
   cTab = #9;
 
 implementation
@@ -345,5 +350,8 @@ begin
   else
     Result := 'Asynchronous'
 end;
+
+initialization
+  QueryPerformanceFrequency(TimerFrequency);
 
 end.
