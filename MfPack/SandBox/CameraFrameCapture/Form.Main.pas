@@ -417,6 +417,7 @@ begin
   begin
     try
       FLastCapturedFrame.LoadFromStream(FLastMemoryStream);
+      FLastCapturedFrame.PixelFormat := pf24bit;
       PaintLastCapture;
     except
       on E : Exception do
