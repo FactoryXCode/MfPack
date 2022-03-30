@@ -22,15 +22,15 @@ object FrmMain: TFrmMain
     Left = 0
     Top = 0
     Width = 1212
-    Height = 233
-    ActivePage = tsSetup
+    Height = 193
+    ActivePage = tsDiagnostics
     Align = alTop
     TabOrder = 0
     object tsSetup: TTabSheet
       Caption = 'Setup'
       DesignSize = (
         1204
-        203)
+        163)
       object lblLog: TLabel
         Left = 16
         Top = 73
@@ -58,20 +58,6 @@ object FrmMain: TFrmMain
         Width = 45
         Height = 15
         Caption = 'Method:'
-      end
-      object lblPreviewType: TLabel
-        Left = 216
-        Top = 140
-        Width = 101
-        Height = 22
-        Caption = 'Image Return Type:'
-      end
-      object Label1: TLabel
-        Left = 16
-        Top = 176
-        Width = 45
-        Height = 15
-        Caption = 'Capture:'
       end
       object btnClearLog: TButton
         Left = 1123
@@ -128,7 +114,6 @@ object FrmMain: TFrmMain
         ReadOnly = True
         ScrollBars = ssVertical
         TabOrder = 5
-        ExplicitWidth = 1099
       end
       object cboMethod: TComboBox
         Left = 94
@@ -145,8 +130,8 @@ object FrmMain: TFrmMain
           'Asynchronous')
       end
       object btnToggleBurst: TButton
-        Left = 216
-        Top = 168
+        Left = 393
+        Top = 132
         Width = 113
         Height = 25
         Caption = 'Start Burst Capture'
@@ -154,11 +139,11 @@ object FrmMain: TFrmMain
         OnClick = HandleToggleBurst
       end
       object btnCaptureFrame: TButton
-        Left = 94
-        Top = 168
+        Left = 276
+        Top = 132
         Width = 105
         Height = 25
-        Caption = 'Single Frame'
+        Caption = 'Single Capture'
         TabOrder = 8
         OnClick = HandleCaptureFrame
       end
@@ -173,8 +158,8 @@ object FrmMain: TFrmMain
         OnClick = HandleSaveImageClick
       end
       object chkDisplayPreview: TCheckBox
-        Left = 527
-        Top = 136
+        Left = 518
+        Top = 137
         Width = 114
         Height = 17
         Caption = 'Display Preview'
@@ -183,89 +168,53 @@ object FrmMain: TFrmMain
         TabOrder = 10
         OnClick = HandlePreviewChange
       end
-      object cbxRenderType: TComboBox
-        Left = 331
-        Top = 132
-        Width = 180
-        Height = 23
-        Style = csDropDownList
-        ItemIndex = 1
-        TabOrder = 11
-        Text = 'Memory Stream (Quicker)'
-        OnChange = HandlePreviewTypeChange
-        Items.Strings = (
-          'Direct2D (Slower)'
-          'Memory Stream (Quicker)')
-      end
     end
     object tsOptions: TTabSheet
       Caption = 'Options'
       ImageIndex = 1
-      object lblRenderTypeTitle: TLabel
-        Left = 11
-        Top = 26
-        Width = 122
-        Height = 15
-        Caption = 'Direct2D render mode: '
-      end
       object lblSeconds: TLabel
-        Left = 530
-        Top = 25
+        Left = 196
+        Top = 29
         Width = 43
         Height = 15
         Caption = 'seconds'
       end
       object Label2: TLabel
-        Left = 347
+        Left = 11
         Top = 25
         Width = 78
         Height = 15
         Caption = 'Burst duration:'
       end
       object lblResolution: TLabel
-        Left = 347
-        Top = 58
+        Left = 11
+        Top = 54
         Width = 86
         Height = 15
         Caption = 'Resolution filter:'
       end
       object lblFPSDesc: TLabel
-        Left = 530
-        Top = 58
+        Left = 194
+        Top = 54
         Width = 74
         Height = 15
         Caption = 'fps and above'
       end
       object lblLogLevel: TLabel
         Left = 11
-        Top = 61
+        Top = 89
         Width = 53
         Height = 15
         Caption = 'Log Level:'
       end
-      object cbxRenderMode: TComboBox
-        Left = 139
-        Top = 20
-        Width = 180
-        Height = 23
-        Style = csDropDownList
-        ItemIndex = 2
-        TabOrder = 0
-        Text = 'Software'
-        OnChange = HandleRenderModeChange
-        Items.Strings = (
-          'Default'
-          'Hardware'
-          'Software')
-      end
       object cbxDuration: TComboBox
-        Left = 475
+        Left = 139
         Top = 20
         Width = 49
         Height = 23
         Style = csDropDownList
         ItemIndex = 0
-        TabOrder = 1
+        TabOrder = 0
         Text = '10'
         Items.Strings = (
           '10'
@@ -275,13 +224,13 @@ object FrmMain: TFrmMain
           '120')
       end
       object cbxFrameRateMin: TComboBox
-        Left = 475
-        Top = 53
+        Left = 139
+        Top = 49
         Width = 49
         Height = 23
         Style = csDropDownList
         ItemIndex = 1
-        TabOrder = 2
+        TabOrder = 1
         Text = '24'
         OnChange = HandleMinimumFrameRateChange
         Items.Strings = (
@@ -293,12 +242,12 @@ object FrmMain: TFrmMain
       end
       object cboLogLevel: TComboBox
         Left = 139
-        Top = 53
+        Top = 82
         Width = 180
         Height = 23
         Style = csDropDownList
         ItemIndex = 1
-        TabOrder = 3
+        TabOrder = 2
         Text = 'Info'
         OnChange = HandleLogLevelChange
         Items.Strings = (
@@ -365,20 +314,21 @@ object FrmMain: TFrmMain
   end
   object tcCapture: TPageControl
     Left = 0
-    Top = 233
+    Top = 193
     Width = 1212
-    Height = 544
+    Height = 584
     ActivePage = tsFrame
     Align = alClient
     TabOrder = 1
-    ExplicitTop = 235
+    ExplicitTop = 233
+    ExplicitHeight = 544
     object tsFrame: TTabSheet
       Caption = 'Frame'
       object pbCapture: TPaintBox
         Left = 0
         Top = 0
         Width = 1204
-        Height = 514
+        Height = 554
         Align = alClient
         OnPaint = HandleCapturePaint
         ExplicitLeft = 240

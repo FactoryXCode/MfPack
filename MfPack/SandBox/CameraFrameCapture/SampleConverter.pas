@@ -7,13 +7,13 @@
 //                   https://github.com/FactoryXCode/MfPack
 // Module: SampleConverter.pas
 // Kind: Pascal Unit
-// Release date: 18-03-2022
+// Release date: 29-03-2022
 // Language: ENU
 //
 // Revision Version: 3.1.1
 //
 // Description:
-//   This unit uses the D2D1 API to perform the translation from sample to bitmap.
+//   This unit returns a BMP memory stream from an IMFSample.
 //
 // Organisation: FactoryX
 // Initiator(s): Ciaran
@@ -63,20 +63,10 @@ interface
 uses
   {Winapi}
   WinApi.Windows,
-  WinApi.DirectX.D2D1,
-  WinApi.DirectX.DCommon,
-  WinApi.DirectX.DXGI,
-  WinApi.DirectX.DXGIFormat,
-  {$IF CompilerVersion > 33}
-  // Delphi 10.4 or above
-  // WinApi.DXGI included with Delphi <= 10.3.3 is not up to date!
-  WinApi.D2D1,
-  WinApi.DxgiFormat,
   WinAPI.ActiveX,
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.WmCodecDsp,
   WinApi.ComBaseApi,
-  {$ENDIF}
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MfUtils,
@@ -94,22 +84,13 @@ uses
 
 
 type
-  TRenderType = (rtDefault, rtHardware, rtSoftware);
-
   TSampleConverter = class(TPersistent)
   protected
-    FRenderTarget: ID2D1DCRenderTarget;
     FOutputType : IMFMediaType;
     FTransform : IMFTransform;
     FOnLog: TLogEvent;
     FSupportedInputs : TArray<TGUID>;
-    FRenderType : TRenderType;
   private
-    FDPI: Integer;
-    F2DBitmapProperties: D2D1_BITMAP_PROPERTIES;
-
-    procedure CreateDirect2DBitmapProperties;
-    function CreateRenderTarget: Boolean;
     function ConvertSampleToRGB(const AInputSample : IMFSample; out AConvertedSample : IMFSample) : Boolean;
     function CheckSucceeded(AStatus : HRESULT; const AMethod : string; ALogFailure : Boolean = True): Boolean;
     function IndexOf(const AInput: TGUID; const AValues: array of TGUID): Integer;
@@ -119,25 +100,14 @@ type
     procedure FreeConverter;
     procedure NotifyBeginStreaming;
     procedure SetSupportedInputs;
-    procedure RenderToBMP(ASourceRect : TRect; const ASurface : ID2D1Bitmap);
-    procedure SetRenderType(const AValue: TRenderType);
-    procedure DestroyRenderTarget;
   public
     constructor Create;
     destructor Destroy; override;
 
     function UpdateConverter(const AInputType: IMFMediaType): Boolean;
-
-    function BitmapFromSample(const ASample: IMFSample;
-                              const AVideoInfo: TVideoFormatInfo;
-                              var AError: string;
-                              var AImage: TBitmap): Boolean;
-
     function DataFromSample(const ASample : IMFSample; const AVideoInfo: TVideoFormatInfo; var AError : string; out AMemoryStream : TMemoryStream): Boolean;
 
     function IsInputSupported(const AInputFormat : TGUID) : Boolean;
-
-    property RenderType : TRenderType read FRenderType write SetRenderType;
 
     // Event hooks
     property OnLog: TLogEvent read FOnLog write FOnLog;
@@ -146,30 +116,16 @@ type
 
 implementation
 
-
-
 constructor TSampleConverter.Create;
 begin
   inherited;
-  FRenderType := rtSoftware;
-  FDPI := DevicePixelPerInch;
-  CreateRenderTarget;
-  CreateDirect2DBitmapProperties;
   SetSupportedInputs;
 end;
-
 
 destructor TSampleConverter.Destroy;
 begin
   FreeConverter;
-  DestroyRenderTarget;
   inherited;
-end;
-
-procedure TSampleConverter.DestroyRenderTarget;
-begin
-  FRenderTarget.Flush();
-  SafeRelease(FRenderTarget);
 end;
 
 procedure TSampleConverter.SetSupportedInputs;
@@ -197,19 +153,6 @@ begin
   FSupportedInputs[19] := MFVideoFormat_YVYU;
 end;
 
-procedure TSampleConverter.SetRenderType(const AValue: TRenderType);
-begin
-  if AValue <> FRenderType then
-  begin
-    FRenderType := AValue;
-
-    DestroyRenderTarget;
-    CreateRenderTarget;
-    CreateDirect2DBitmapProperties;
-  end;
-end;
-
-
 function TSampleConverter.IsInputSupported(const AInputFormat: TGUID): Boolean;
 begin
   Result := IndexOf(AInputFormat, FSupportedInputs) > -1;
@@ -221,68 +164,6 @@ begin
   while (Result >= low(AValues)) and (AInput <> AValues[Result]) do
     Dec(Result);
 end;
-
-function TSampleConverter.CreateRenderTarget: Boolean;
-var
-  pFactory: ID2D1Factory;
-  oProperties: D2D1_RENDER_TARGET_PROPERTIES;
-  oRenderType : TD2D1RenderTargetType;
-
-begin
-  Result := SUCCEEDED(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED,
-                                        IID_ID2D1Factory,
-                                        Nil,
-                                        pFactory));
-  if Result then
-  begin
-    if FRenderType = rtHardware then
-      oRenderType := D2D1_RENDER_TARGET_TYPE_HARDWARE
-    else if FRenderType = rtSoftware then
-      oRenderType := D2D1_RENDER_TARGET_TYPE_SOFTWARE
-    else
-      oRenderType := D2D1_RENDER_TARGET_TYPE_DEFAULT;
-
-    {$IF CompilerVersion > 33}
-    // Delphi 10.4 or above
-    oProperties.&type := oRenderType;
-    oProperties.PixelFormat.Format := DXGI_FORMAT_B8G8R8A8_UNORM;
-    oProperties.PixelFormat.alphaMode := D2D1_ALPHA_MODE_IGNORE;
-    {$ELSE}
-    oProperties._type := oRenderType;
-    oProperties._PixelFormat.Format := WinApi.DirectX.DXGIFormat.DXGI_FORMAT_B8G8R8A8_UNORM;
-    oProperties._PixelFormat.alphaMode := D2D1_ALPHA_MODE_IGNORE;
-    {$ENDIF}
-
-    oProperties.dpiX := 0;
-    oProperties.dpiY := 0;
-
-    oProperties.usage := D2D1_RENDER_TARGET_USAGE_NONE;
-    oProperties.minLevel := D2D1_FEATURE_LEVEL_DEFAULT;
-    Result := SUCCEEDED(pFactory.CreateDCRenderTarget(oProperties,
-                                                      FRenderTarget));
-  end;
-end;
-
-
-procedure TSampleConverter.CreateDirect2DBitmapProperties;
-var
-  oPixelFormat: D2D1_PIXEL_FORMAT;
-begin
-  oPixelFormat.alphaMode := D2D1_ALPHA_MODE_IGNORE;
-
-  {$IF CompilerVersion > 33}
-  // Delphi 10.4 or above
-  oPixelFormat.Format := DXGI_FORMAT_B8G8R8A8_UNORM;
-  F2DBitmapProperties.PixelFormat := oPixelFormat;
-  {$ELSE}
-  oPixelFormat.Format := WinApi.DirectX.DXGIFormat.DXGI_FORMAT_B8G8R8A8_UNORM;
-  F2DBitmapProperties._PixelFormat := oPixelFormat;
-  {$ENDIF}
-
-  F2DBitmapProperties.dpiX := FDPI;
-  F2DBitmapProperties.dpiY := FDPI;
-end;
-
 
 function TSampleConverter.DataFromSample(const ASample : IMFSample; const AVideoInfo: TVideoFormatInfo; var AError : string; out AMemoryStream : TMemoryStream): Boolean;
 var
@@ -340,7 +221,6 @@ begin
 
   if Assigned(pConvertedSample) then
     SafeRelease(pConvertedSample);
-
 end;
 
 function TSampleConverter.GetBMPFileHeader : BITMAPFILEHEADER;
@@ -365,140 +245,10 @@ begin
   Result.biClrUsed := 0;
 end;
 
-function TSampleConverter.BitmapFromSample(const ASample: IMFSample;
-                                           const AVideoInfo: TVideoFormatInfo;
-                                           var AError: string;
-                                           var AImage: TBitmap): Boolean;
-var
-  pBuffer: IMFMediaBuffer;
-  pBitmapData: PByte;
-  cbBitmapData: DWord;
-  o2DBitmap: ID2D1Bitmap;
-  oSize: D2D1_SIZE_U;
-  iPitch: Integer;
-  iActualBMPDataSize: Integer;
-  iExpectedBMPDataSize: Integer;
-  {$IFDEF CompilerVersion <= 33}
-  pClipRect: PRect;
-  {$ENDIF}
-  pConvertedSample : IMFSample;
-begin
-  AError := '';
-  pConvertedSample := nil;
-
-  {$IF COMPILERVERSION >= 34.0}
-  AImage := TBitmap.Create(AVideoInfo.iVideoWidth,
-                            AVideoInfo.iVideoHeight);
-  {$ELSE}
-  AImage := TBitmap.Create();
-  AImage.Width := AVideoInfo.iVideoWidth;
-  AImage.Height := AVideoInfo.iVideoHeight;
-  {$ENDIF}
-
-  AImage.PixelFormat := pf24Bit;
-
-  if AVideoInfo.oSubType <> MFVideoFormat_RGB32 then
-  begin
-    Result := ConvertSampleToRGB(ASample, pConvertedSample);
-
-    if Result then
-     // Converts a sample with multiple buffers into a sample with a single buffer.
-    Result := SUCCEEDED(pConvertedSample.ConvertToContiguousBuffer(pBuffer));
-  end
-  else
-    // Converts a sample with multiple buffers into a sample with a single buffer.
-    Result := SUCCEEDED(ASample.ConvertToContiguousBuffer(pBuffer));
-
-  try
-  if Result then
-    begin
-      Result := SUCCEEDED(pBuffer.Lock(pBitmapData, Nil, @cbBitmapData));
-      try
-        iPitch := 4 * AVideoInfo.iVideoWidth;
-
-        // For full frame capture, use the buffer dimensions for the data size check
-        iExpectedBMPDataSize := (AVideoInfo.iBufferWidth * 4) * AVideoInfo.iBufferHeight;
-        iActualBMPDataSize := Integer(cbBitmapData);
-
-        if Result then
-          Result := iActualBMPDataSize = iExpectedBMPDataSize;
-        if not Result then
-        begin
-          AError := Format('Sample size does not match expected size. Current: %d. Expected: %d',
-                           [iActualBMPDataSize, iExpectedBMPDataSize]);
-        end;
-
-        if Result then
-        begin
-            // Bind the render target to the bitmap
-            {$IF CompilerVersion > 33}
-             // Delphi 10.4 or above
-            Result := SUCCEEDED(FRenderTarget.BindDC(AImage.Canvas.Handle, AImage.Canvas.ClipRect));
-            {$ELSE}
-
-            CopyTRectToPRect(AImage.Canvas.ClipRect,
-                             pClipRect);
-            Result := SUCCEEDED(FRenderTarget.BindDC(AImage.Canvas.Handle,
-                                                     pClipRect));
-            {$ENDIF}
-
-            if Result then
-              begin
-                // Create the 2D bitmap interface
-                oSize.Width := AVideoInfo.iVideoWidth;
-                oSize.Height := AVideoInfo.iVideoHeight;
-                Result := SUCCEEDED(FRenderTarget.CreateBitmap(oSize,
-                                                               pBitmapData,
-                                                               iPitch,
-                                                               F2DBitmapProperties,
-                                                               o2DBitmap));
-              end;
-
-             // Draw the 2D bitmap to the render target
-            if Result then
-              RenderToBMP(AImage.Canvas.ClipRect, o2DBitmap);
-          end;
-
-      finally
-        pBuffer.Unlock;
-        SafeRelease(pBuffer);
-      end;
-    end;
-
-  finally
-    pBitmapData := Nil;
-    {$IFDEF CompilerVersion <= 33}
-    pClipRect := Nil;
-    {$ENDIF}
-  end;
-
-  if Assigned(pConvertedSample) then
-    SafeRelease(pConvertedSample);
-end;
-
-
-procedure TSampleConverter.RenderToBMP(ASourceRect : TRect; const ASurface : ID2D1Bitmap);
-var
-  iStart: int64;
-  iEnd : int64;
-begin
-  QueryPerformanceCounter(iStart);
-
-  FRenderTarget.BeginDraw;
-  try
-    FRenderTarget.DrawBitmap(ASurface);
-  finally
-    FRenderTarget.EndDraw();
-  end;
-
-  QueryPerformanceCounter(iEnd);
-  if Assigned(OnLog) then
-      OnLog(Format('RenderBMP took %f milliseconds',[(iEnd - iStart) / TimerFrequency * 1000]), ltDebug);
-end;
-
 procedure TSampleConverter.FreeConverter;
 begin
-  SafeRelease(FTransform);
+  if Assigned(FTransform) then
+    SafeRelease(FTransform);
   FOutputType := nil;
 end;
 

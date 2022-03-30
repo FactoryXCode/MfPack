@@ -7,7 +7,7 @@
 //                   https://github.com/FactoryXCode/MfPack
 // Module: Support.pas
 // Kind: Pascal Unit
-// Release date: 22-09-2021
+// Release date: 29-03-2022
 // Language: ENU
 //
 // Revision Version: 3.1.1
@@ -76,7 +76,6 @@ uses
   function ProcessMemoryUsage: int64;
   function TimeSpanToDisplay(ATime: TTimeSpan;
                              AIncludeMilliseconds: Boolean = False): string;
-  function DevicePixelPerInch: Integer;
 
 type
 
@@ -95,8 +94,6 @@ type
   TImageType = (itBitmap, itPNG, itJPG);
 
   TFrameDataEvent = procedure(AMemoryStream : TMemoryStream) of object;
-  TFrameEvent = procedure(ABitmap: VCL.Graphics.TBitmap) of object;
-
   TLogEvent = reference to procedure(const AMessage: string;
                                      ALogType: TLogType);
 
@@ -115,7 +112,6 @@ type
     procedure Reset;
   end;
 
-
   // CriticalSection
   TMFCritSec = class
   private
@@ -129,7 +125,6 @@ type
 
   procedure HandleThreadMessages(AThread: THandle;
                                  AWait: Cardinal = INFINITE);
-  function IsURL(const APath: string): Boolean;
   function GetMemoryUsed: string;
 
   procedure SaveImage(AInput : TBitmap; const APath : string; AType : TImageType);
@@ -144,28 +139,6 @@ implementation
 
 uses
   System.SysUtils;
-
-function DevicePixelPerInch: Integer;
-var
-  oCompatibleDC: HDC;
-  oDC: HDC;
-
-begin
-  oDC := GetDC(0);
-  try
-    oCompatibleDC := CreateCompatibleDC(oDC);
-    try
-      SetMapMode(oCompatibleDC, MM_TEXT);
-      Result := GetDeviceCaps(oCompatibleDC,
-                              LOGPIXELSX);
-    finally
-      DeleteDC(oCompatibleDC);
-    end;
-  finally
-    ReleaseDC(0,
-              oDC);
-  end;
-end;
 
 function ProcessMemoryUsage: int64;
 var
@@ -254,13 +227,6 @@ begin
   end;
 end;
 
-
-function IsURL(const APath: string): Boolean;
-begin
-  Result := APath.StartsWith('https://') or APath.StartsWith('http://') or APath.StartsWith('www.')
-end;
-
-
 { TMFCritSec }
 
 constructor TMFCritSec.Create;
@@ -268,25 +234,21 @@ begin
   InitializeCriticalSection(FCriticalSection);
 end;
 
-
 destructor TMFCritSec.Destroy;
 begin
   DeleteCriticalSection(FCriticalSection);
   inherited;
 end;
 
-
 procedure TMFCritSec.Lock;
 begin
   EnterCriticalSection(FCriticalSection);
 end;
 
-
 procedure TMFCritSec.Unlock;
 begin
   LeaveCriticalSection(FCriticalSection);
 end;
-
 
 procedure HandleThreadMessages(AThread: THandle;
                                AWait: Cardinal = INFINITE);
@@ -339,7 +301,6 @@ begin
   iBufferWidth := 0;
   iBufferHeight := 0;
 end;
-
 
 { TCaptureMethodHelper }
 
