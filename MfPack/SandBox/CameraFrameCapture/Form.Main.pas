@@ -542,6 +542,8 @@ var
   iDuration : Integer;
   iFrameRate : Integer;
 begin
+  GetBurstDetails(iDuration, iFrameRate);
+
   if chkExperimental.Checked then
     FCapture.StopThreadBurst
   else
@@ -550,8 +552,6 @@ begin
   btnToggleBurst.Caption := 'Start Burst Capture';
 
   UpdateEnabledStates;
-
-  GetBurstDetails(iDuration, iFrameRate);
 
   Log(Format('Burst capture stopped. Source: %d x %d (%d fps). Captured %d frames in %d seconds (%d fps).',
    [FCurrentCaptureFormat.iFrameWidth, FCurrentCaptureFormat.iFrameHeigth,
