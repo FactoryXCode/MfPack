@@ -236,8 +236,8 @@ begin
 
   HandleThreadMessages(GetCurrentThread());
 
-  if BurstEnabled then
-    ReadNextSample;
+ if BurstEnabled and not FThreadBurst then
+   ReadNextSample;
 end;
 
 procedure TCameraCaptureAsync.CalculateMaxFrameRate(AOnComplete: TOnCalculateComplete);

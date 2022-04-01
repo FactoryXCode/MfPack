@@ -85,13 +85,6 @@ type
               ltWarning,
               ltError);
 
-  TCaptureMethod = (cmSync,
-                    cmAsync);
-
-  TCaptureMethodHelper = record helper for TCaptureMethod
-    function AsDisplay: string;
-  end;
-
   TImageType = (itBitmap, itPNG, itJPG);
 
   TFrameDataEvent = procedure(AMemoryStream : TMemoryStream) of object;
@@ -305,15 +298,6 @@ begin
   iBufferHeight := 0;
 end;
 
-{ TCaptureMethodHelper }
-
-function TCaptureMethodHelper.AsDisplay: string;
-begin
-  if Self = cmSync then
-    Result := 'Synchronous'
-  else
-    Result := 'Asynchronous'
-end;
 
 initialization
   QueryPerformanceFrequency(TimerFrequency);

@@ -10,8 +10,7 @@ uses
   CameraCapture in 'CameraCapture.pas',
   MessageHandler in 'MessageHandler.pas',
   SampleConverter in 'SampleConverter.pas',
-  CameraCapture.Asynchronous in 'CameraCapture.Asynchronous.pas',
-  CameraCapture.Synchronous in 'CameraCapture.Synchronous.pas';
+  CameraCapture.Asynchronous in 'CameraCapture.Asynchronous.pas';
 
 {$R *.res}
 

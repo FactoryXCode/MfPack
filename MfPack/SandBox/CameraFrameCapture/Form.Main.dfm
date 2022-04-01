@@ -22,7 +22,7 @@ object FrmMain: TFrmMain
     Left = 0
     Top = 0
     Width = 1212
-    Height = 201
+    Height = 193
     ActivePage = tsSetup
     Align = alTop
     TabOrder = 0
@@ -30,7 +30,7 @@ object FrmMain: TFrmMain
       Caption = 'Setup'
       DesignSize = (
         1204
-        171)
+        163)
       object lblLog: TLabel
         Left = 16
         Top = 73
@@ -52,23 +52,16 @@ object FrmMain: TFrmMain
         Height = 15
         Caption = 'Select Device:'
       end
-      object lblMethod: TLabel
-        Left = 14
-        Top = 140
-        Width = 45
-        Height = 15
-        Caption = 'Method:'
-      end
       object lblSeconds: TLabel
-        Left = 648
-        Top = 141
+        Left = 392
+        Top = 140
         Width = 43
         Height = 15
         Caption = 'seconds'
       end
       object lblLogLevel: TLabel
-        Left = 707
-        Top = 141
+        Left = 742
+        Top = 139
         Width = 53
         Height = 15
         Caption = 'Log Level:'
@@ -86,6 +79,13 @@ object FrmMain: TFrmMain
         Width = 29
         Height = 15
         Caption = 'Show'
+      end
+      object Label1: TLabel
+        Left = 16
+        Top = 137
+        Width = 45
+        Height = 15
+        Caption = 'Capture:'
       end
       object btnClearLog: TButton
         Left = 1123
@@ -143,36 +143,22 @@ object FrmMain: TFrmMain
         ScrollBars = ssVertical
         TabOrder = 5
       end
-      object cboMethod: TComboBox
-        Left = 94
-        Top = 133
-        Width = 105
-        Height = 23
-        Style = csDropDownList
-        ItemIndex = 0
-        TabOrder = 6
-        Text = 'Synchronous'
-        OnChange = HandleMethodChanged
-        Items.Strings = (
-          'Synchronous'
-          'Asynchronous')
-      end
       object btnToggleBurst: TButton
-        Left = 472
-        Top = 132
+        Left = 216
+        Top = 131
         Width = 113
         Height = 25
         Caption = 'Start Burst Capture'
-        TabOrder = 7
+        TabOrder = 6
         OnClick = HandleToggleBurst
       end
       object btnCaptureFrame: TButton
-        Left = 349
-        Top = 132
+        Left = 94
+        Top = 131
         Width = 105
         Height = 25
         Caption = 'Single Capture'
-        TabOrder = 8
+        TabOrder = 7
         OnClick = HandleCaptureFrame
       end
       object btnSaveImage: TButton
@@ -182,28 +168,28 @@ object FrmMain: TFrmMain
         Height = 25
         Anchors = [akTop, akRight]
         Caption = 'Save Image'
-        TabOrder = 9
+        TabOrder = 8
         OnClick = HandleSaveImageClick
       end
       object chkDisplayPreview: TCheckBox
-        Left = 218
-        Top = 137
+        Left = 446
+        Top = 138
         Width = 104
         Height = 17
         Caption = 'Display Preview'
         Checked = True
         State = cbChecked
-        TabOrder = 10
+        TabOrder = 9
         OnClick = HandlePreviewChange
       end
       object cbxDuration: TComboBox
-        Left = 591
-        Top = 133
+        Left = 335
+        Top = 132
         Width = 49
         Height = 23
         Style = csDropDownList
         ItemIndex = 0
-        TabOrder = 11
+        TabOrder = 10
         Text = '10'
         Items.Strings = (
           '10'
@@ -213,13 +199,13 @@ object FrmMain: TFrmMain
           '120')
       end
       object cboLogLevel: TComboBox
-        Left = 766
-        Top = 133
+        Left = 801
+        Top = 131
         Width = 99
         Height = 23
         Style = csDropDownList
         ItemIndex = 1
-        TabOrder = 12
+        TabOrder = 11
         Text = 'Debug'
         OnChange = HandleLogLevelChange
         Items.Strings = (
@@ -236,7 +222,7 @@ object FrmMain: TFrmMain
         Height = 23
         Style = csDropDownList
         ItemIndex = 1
-        TabOrder = 13
+        TabOrder = 12
         Text = '24'
         OnChange = HandleMinimumFrameRateChange
         Items.Strings = (
@@ -245,6 +231,14 @@ object FrmMain: TFrmMain
           '29'
           '30'
           '60')
+      end
+      object chkExperimental: TCheckBox
+        Left = 555
+        Top = 139
+        Width = 161
+        Height = 17
+        Caption = 'Experimental Burst Mode'
+        TabOrder = 13
       end
     end
     object tsDiagnostics: TTabSheet
@@ -304,19 +298,21 @@ object FrmMain: TFrmMain
   end
   object tcCapture: TPageControl
     Left = 0
-    Top = 201
+    Top = 193
     Width = 1212
-    Height = 576
+    Height = 584
     ActivePage = tsFrame
     Align = alClient
     TabOrder = 1
+    ExplicitTop = 201
+    ExplicitHeight = 576
     object tsFrame: TTabSheet
       Caption = 'Frame'
       object pbCapture: TPaintBox
         Left = 0
         Top = 0
         Width = 1204
-        Height = 546
+        Height = 554
         Align = alClient
         OnPaint = HandleCapturePaint
         ExplicitLeft = 240

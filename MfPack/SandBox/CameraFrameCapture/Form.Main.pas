@@ -72,10 +72,8 @@ type
     lblMaxDesc2: TLabel;
     pbCapture: TPaintBox;
     lblMaxTitle: TLabel;
-    cboMethod: TComboBox;
     btnToggleBurst: TButton;
     btnCaptureFrame: TButton;
-    lblMethod: TLabel;
     btnSaveImage: TButton;
     chkDisplayPreview: TCheckBox;
     cbxDuration: TComboBox;
@@ -85,6 +83,8 @@ type
     cbxFrameRateMin: TComboBox;
     lblFPSDesc: TLabel;
     Label2: TLabel;
+    Label1: TLabel;
+    chkExperimental: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnRefreshDevicesClick(Sender: TObject);
@@ -98,7 +98,6 @@ type
     procedure HandleStopBurstCapture(Sender: TObject);
     procedure HandleLogLevelChange(Sender: TObject);
     procedure HandleCopyLog(Sender: TObject);
-    procedure HandleMethodChanged(Sender: TObject);
     procedure HandleCapturePaint(Sender: TObject);
     procedure HandleMinimumFrameRateChange(Sender: TObject);
     procedure HandleCalculateMax(Sender: TObject);
@@ -108,7 +107,6 @@ type
     FLogLevel: TLogType;
     FFormatSettings: TFormatSettings;
     FCapture: TCameraCapture;
-    FCaptureMethod: TCaptureMethod;
     FBurstCaptureCount : Integer;
     FLastCapturedFrame : TBitmap;
 
@@ -141,8 +139,6 @@ type
     procedure HandleResolutionChanged;
     procedure StopBurstCapture;
     procedure HandleBurstMode;
-    procedure UpdateCaptureButtons;
-    procedure SetCaptureMethod(const AValue: TCaptureMethod);
     procedure DestroyCapture;
     procedure PaintLastCapture;
     procedure GetPaintArea(var AWidth : Integer; var AHeight : Integer; var ATop : Integer; var ALeft : Integer);
@@ -154,8 +150,7 @@ type
     procedure LoadImageFromStream;
     procedure PaintMessage(const AText: string);
     procedure UpdateLogLevel;
-  public
-    property CaptureMethod: TCaptureMethod read FCaptureMethod write SetCaptureMethod;
+    procedure UpdateCaptureButtons;
   end;
 
 var
@@ -211,8 +206,6 @@ begin
 
    SetDefaults;
 
-   cboMethod.ItemIndex := Ord(FCaptureMethod);
-
    PopulateDeviceList;
    UpdateEnabledStates;
    UpdateLogLevel;
@@ -235,34 +228,6 @@ begin
   SetLength(FDevices, 0);
 end;
 
-procedure TFrmMain.SetCaptureMethod(const AValue: TCaptureMethod);
-var
-  iCurrentResolutionIndex : Integer;
-begin
-  iCurrentResolutionIndex := cbxResolution.ItemIndex;
-
-  FCaptureMethod := AValue;
-
-  DestroyCapture;
-
-  if FCaptureMethod = cmSync then
-    FCapture := TCameraCaptureSync.Create
-  else
-    FCapture := TCameraCaptureAsync.Create;
-
-  lblCurrentMethod.Caption := 'Capture method: ' + FCaptureMethod.AsDisplay;
-
-  FCapture.OnFrameDataFound := HandleFrameDataFound;
-  FCapture.OnLog := Log;
-
-  UpdateSelectedDevice;
-  cbxResolution.ItemIndex := iCurrentResolutionIndex;
-  HandleResolutionChanged;
-
-  FCapture.GetCurrentFormat(FCurrentCaptureFormat);
-  UpdateEnabledStates;
-end;
-
 procedure TFrmMain.DestroyCapture;
 begin
   if Assigned(FCapture) then
@@ -275,7 +240,6 @@ begin
   // Examples below
   //FDefaultDeviceName := 'HD Webcam C615';
   //FDefaultResolution := '1920 x 1080   (30 fps)    MFVideoFormat_NV12';
-  CaptureMethod := cmASync;
 
   FCapture.MinimumFrameRate := StrToInt(cbxFrameRateMin.Text);
 end;
@@ -427,7 +391,7 @@ var
 begin
   FCapture.StopTimer;
 
-  if FCapture.BurstEnabled and (FLogLevel = ltInfo) then
+  if FCapture.BurstEnabled then
   begin
     if MillisecondsBetween(Now, FBurstStatisticsUpdate) > 1000 then
     begin
@@ -558,7 +522,12 @@ begin
   FBurstStartTime := Now;
   FBurstStatisticsUpdate := Now;
   FBurstDurationSeconds := StrToInt(cbxDuration.Text);
-  FCapture.StartBurst;
+
+  if chkExperimental.Checked then
+    FCapture.StartThreadBurst
+  else
+    FCapture.StartBurst;
+
   btnToggleBurst.Caption := 'Stop Burst Capture';
   UpdateEnabledStates;
 end;
@@ -573,7 +542,10 @@ var
   iDuration : Integer;
   iFrameRate : Integer;
 begin
-  FCapture.StopBurst;
+  if chkExperimental.Checked then
+    FCapture.StopThreadBurst
+  else
+    FCapture.StopBurst;
 
   btnToggleBurst.Caption := 'Start Burst Capture';
 
@@ -797,15 +769,6 @@ end;
 procedure TFrmMain.UpdateLogLevel;
 begin
   FLogLevel := TLogType(cboLogLevel.ItemIndex);
-end;
-
-procedure TFrmMain.HandleMethodChanged(Sender: TObject);
-begin
-  if Sender is TComboBox then
-  begin
-    ClearImage;
-    CaptureMethod := TCaptureMethod(TComboBox(Sender).ItemIndex);
-  end;
 end;
 
 procedure TFrmMain.HandleMinimumFrameRateChange(Sender: TObject);

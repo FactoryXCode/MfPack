@@ -94,6 +94,16 @@ type
 
   TOnCalculateComplete = reference to procedure(const AFramesPerSecond : Integer);
 
+  TCameraCapture = class;
+
+  TBurstThread = class(TThread)
+  private
+    FOwner : TCameraCapture;
+  public
+    constructor Create(AOwner : TCameraCapture); overload;
+    procedure Execute; override;
+  end;
+
   TCameraCapture = class(TInterfacedPersistent)
   private
     FMaxFramesToSkip: Integer;
@@ -126,6 +136,8 @@ type
     FSourceReader: IMFSourceReader;
     FOnCalculateComplete : TOnCalculateComplete;
     FCalculatingMax : Boolean;
+    FBurstThread : TBurstThread;
+    FThreadBurst : Boolean;
 
     procedure HandleFlushComplete; virtual;
     procedure HandleFrameSkipped;
@@ -179,6 +191,9 @@ type
     procedure StartBurst; virtual;
     procedure StopBurst; virtual;
 
+    procedure StartThreadBurst;
+    procedure StopThreadBurst;
+
     function SetVideoFormat(AFormatIndex : Integer) : Boolean;
     function GetCurrentFormat(var AFormat : TVideoFormat) : Boolean;
 
@@ -227,6 +242,7 @@ begin
   Inherited;
   ResetVariables;
   SetLength(FVideoFormats, 0);
+  FThreadBurst := False;
   FTimerStart := 0;
   FTimerEnd := 0;
   FCritSec := TMFCritSec.Create;
@@ -285,7 +301,9 @@ end;
 
 procedure TCameraCapture.ReturnSample(ASample: IMFSample);
 begin
-  if not FCancelBurst then
+  if FCancelBurst then
+    SafeRelease(ASample)
+  else
     ReturnDataFromSample(ASample)
 end;
 
@@ -691,10 +709,13 @@ end;
 
 procedure TCameraCapture.StartBurst;
 begin
+  FThreadBurst := False;
+
   StopBurst;
   if not FBurstEnabled then
   begin
     FBurstEnabled := True;
+    FCancelBurst := False;
     RequestFrame;
   end;
 end;
@@ -708,15 +729,45 @@ begin
   end;
 end;
 
+procedure TCameraCapture.StartThreadBurst;
+begin
+  FThreadBurst := True;
+
+  StopThreadBurst;
+  if not FBurstEnabled then
+  begin
+    FBurstEnabled := True;
+    FCancelBurst := False;
+    FBurstThread := TBurstThread.Create(Self);
+    FBurstThread.FreeOnTerminate := True;
+  end;
+end;
+
+procedure TCameraCapture.StopThreadBurst;
+begin
+ if FBurstEnabled then
+  begin
+    FCancelBurst := True;
+    FBurstEnabled := False;
+
+    if Assigned(FBurstThread) then
+      FBurstThread.Terminate;
+
+    Flush;
+  end;
+end;
+
 procedure TCameraCapture.RequestFrame;
 begin
   FCancelBurst := False;
 end;
 
+
 procedure TCameraCapture.StartTimer;
 begin
- QueryPerformanceCounter(FTimerStart);
+  QueryPerformanceCounter(FTimerStart);
 end;
+
 
 procedure TCameraCapture.StopTimer;
 begin
@@ -751,6 +802,31 @@ begin
       Result := 'Direct 2D';
     rtMemoryStream:
       Result := 'Memory Stream';
+  end;
+end;
+
+{ TBurstThread }
+
+constructor TBurstThread.Create(AOwner: TCameraCapture);
+begin
+  Create;
+  FOwner := AOwner;
+end;
+
+procedure TBurstThread.Execute;
+var
+  bFoundFrame : Boolean;
+begin
+  bFoundFrame := True;
+  while (not Terminated) and Assigned(FOwner.SourceReader) and bFoundFrame do
+  begin
+    bFoundFrame := SUCCEEDED(FOwner.SourceReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                       0,
+                                       nil,
+                                       nil,
+                                       nil,
+                                       nil));
+    Sleep(1);
   end;
 end;
 
