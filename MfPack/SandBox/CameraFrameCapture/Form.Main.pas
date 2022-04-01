@@ -66,7 +66,6 @@ type
     tsSetup: TTabSheet;
     tsDiagnostics: TTabSheet;
     btnCalculateMax: TButton;
-    lblCurrentMethod: TLabel;
     lblMaxDesc: TLabel;
     lblMaxDesc1: TLabel;
     lblMaxDesc2: TLabel;
@@ -437,7 +436,6 @@ begin
         Log(Format('Paint image in %f milliseconds. %d x %d.',
                [(iTimerEnd - iTimerStart) / TimerFrequency * 1000, FCurrentCaptureFormat.iFrameWidth, FCurrentCaptureFormat.iFrameHeigth]),
                                  ltDebug1);
-
   end
   else
     PaintMessage('Waiting for image capture... ')
@@ -616,7 +614,6 @@ begin
     begin
       sFormatDescription := Format('%d x %d   (%d fps)    %s',
       [oFormat.iFrameWidth, oFormat.iFrameHeigth, oFormat.iFramesPerSecond, GetGUIDNameConst(oFormat.oSubType)]);
-      // TODO - Determine what format is currently selected
       cbxResolution.Items.Add(sFormatDescription);
     end;
 

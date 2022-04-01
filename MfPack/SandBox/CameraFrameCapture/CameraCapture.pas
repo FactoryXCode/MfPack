@@ -77,12 +77,6 @@ uses
   SampleConverter;
 
 type
-  TCaptureReturnType = (rtImage, rtMemoryStream);
-
-  TCaptureReturnTypeHelper = record helper for TCaptureReturnType
-    function AsDisplay: string;
-  end;
-
   TVideoFormat = record
     iMediaIndex : Integer;
     iFrameHeigth: Integer;
@@ -322,6 +316,7 @@ begin
   else
   begin
     SafeRelease(ASample);
+
     Log('Failed to return data from frame sample: ' + sError, ltError);
   end;
 end;
@@ -343,8 +338,7 @@ end;
 
 procedure TCameraCapture.HandleFlushComplete;
 begin
-  Log('Flush - Complete',
-      ltInfo);
+  Log('Flush complete', ltInfo);
   FAwaitingFlush := False;
 end;
 
@@ -352,7 +346,6 @@ procedure TCameraCapture.HandleFrameSkipped;
 begin
   inc(FFramesSkipped);
 end;
-
 
 procedure TCameraCapture.HandleMediaFormatChanged;
 begin
@@ -392,7 +385,6 @@ begin
   GetVideoFormat(False);
 end;
 
-
 function TCameraCapture.GetCurrentFormat(var AFormat : TVideoFormat) : Boolean;
 var
   pCurrentType : IMFMediaType;
@@ -401,7 +393,6 @@ begin
   if Result then
     Result := PopulateFormatDetails(pCurrentType, AFormat);
 end;
-
 
 function TCameraCapture.OpenDeviceSource(const AMediaSource : IMFMediaSource) : Boolean;
 var
@@ -449,7 +440,6 @@ begin
      end;
   end;
 end;
-
 
 function TCameraCapture.ActiveDevice(const ADeviceSymbolicLink : PWideChar; out AMediaSource : IMFMediaSource) : Boolean;
 var
@@ -502,7 +492,6 @@ begin
   end;
 end;
 
-
 function TCameraCapture.PopulateStreamFormats : Boolean;
 var
   pMediaType : IMFMediaType;
@@ -554,7 +543,6 @@ begin
             and (GetFrameRate(AMediaType) >= FMinimumFrameRate);
 end;
 
-
 function TCameraCapture.PopulateFormatDetails(const AMediaFormat : IMFMediaType; var ADetails : TVideoFormat) : Boolean;
 var
   uiHeigth : UINT32;
@@ -593,8 +581,6 @@ begin
     Result := 0;
 end;
 
-
-
 procedure TCameraCapture.HandleSampleReadError(AResult: HResult);
 var
   sError: string;
@@ -619,14 +605,11 @@ begin
 end;
 
 
-procedure TCameraCapture.Log(const AMessage: string;
-                           const AType: TLogType);
+procedure TCameraCapture.Log(const AMessage: string; const AType: TLogType);
 begin
   if Assigned(FOnLog) then
-    FOnLog(AMessage,
-           AType);
+    FOnLog(AMessage, AType);
 end;
-
 
 function TCameraCapture.ConfigureSourceReader(const AAttributes: IMFAttributes) : Boolean;
 begin
@@ -782,7 +765,6 @@ begin
     Result := 0;
 end;
 
-
 procedure TCameraCapture.ResetFramesSkipped;
 begin
   FFramesSkipped := 0;
@@ -791,18 +773,6 @@ end;
 procedure TCameraCapture.SetMaxFramesToSkip(const AValue: Integer);
 begin
   FMaxFramesToSkip := AValue;
-end;
-
-{ TCaptureReturnTypeHelper }
-
-function TCaptureReturnTypeHelper.AsDisplay: string;
-begin
-  case Self of
-    rtImage:
-      Result := 'Direct 2D';
-    rtMemoryStream:
-      Result := 'Memory Stream';
-  end;
 end;
 
 { TBurstThread }
@@ -815,17 +785,23 @@ end;
 
 procedure TBurstThread.Execute;
 var
-  bFoundFrame : Boolean;
+  bContinue : Boolean;
 begin
-  bFoundFrame := True;
-  while (not Terminated) and Assigned(FOwner.SourceReader) and bFoundFrame do
+  bContinue := True;
+  while bContinue and (not Terminated) and Assigned(FOwner.SourceReader) do
   begin
-    bFoundFrame := SUCCEEDED(FOwner.SourceReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+    bContinue := SUCCEEDED(FOwner.SourceReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
                                        0,
                                        nil,
                                        nil,
                                        nil,
                                        nil));
+
+    // The sleep helps, but does not completely eliminate memory leaks within the Media Foundations cache
+    // Flushing the source reader should release the memory.
+    // https://github.com/microsoft/Windows-classic-samples/issues/108
+    // https://social.msdn.microsoft.com/Forums/en-US/c2b39d7b-5203-492c-9663-75d1601f82c7/
+    // memory-leak-imfsourcereaderreadsample-method?forum=mediafoundationdevelopment
     Sleep(1);
   end;
 end;

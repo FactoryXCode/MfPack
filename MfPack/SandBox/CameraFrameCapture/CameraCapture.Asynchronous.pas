@@ -150,8 +150,7 @@ end;
 procedure TCameraCaptureAsync.Flush;
 begin
   inherited;
-  Log('Flush - Begin',
-      ltInfo);
+  Log('Flushing source', ltInfo);
   SourceReader.Flush(MF_SOURCE_READER_ALL_STREAMS);
 end;
 

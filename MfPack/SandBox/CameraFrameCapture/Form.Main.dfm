@@ -2,8 +2,8 @@ object FrmMain: TFrmMain
   Left = 0
   Top = 0
   Caption = 'Media Foundation Camera Capture Demo'
-  ClientHeight = 777
-  ClientWidth = 1212
+  ClientHeight = 837
+  ClientWidth = 1214
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -21,15 +21,16 @@ object FrmMain: TFrmMain
   object pcSetup: TPageControl
     Left = 0
     Top = 0
-    Width = 1212
+    Width = 1214
     Height = 193
-    ActivePage = tsSetup
+    ActivePage = tsDiagnostics
     Align = alTop
     TabOrder = 0
+    ExplicitWidth = 1212
     object tsSetup: TTabSheet
       Caption = 'Setup'
       DesignSize = (
-        1204
+        1206
         163)
       object lblLog: TLabel
         Left = 16
@@ -92,7 +93,6 @@ object FrmMain: TFrmMain
         Top = 130
         Width = 70
         Height = 25
-        Anchors = [akTop, akRight]
         Caption = 'Clear Log'
         TabOrder = 0
         OnClick = btnClearLogClick
@@ -102,7 +102,6 @@ object FrmMain: TFrmMain
         Top = 130
         Width = 70
         Height = 25
-        Anchors = [akTop, akRight]
         Caption = 'Copy Log'
         TabOrder = 1
         OnClick = HandleCopyLog
@@ -136,12 +135,13 @@ object FrmMain: TFrmMain
       object memLog: TMemo
         Left = 94
         Top = 37
-        Width = 1098
+        Width = 1100
         Height = 86
         Anchors = [akLeft, akTop, akRight]
         ReadOnly = True
         ScrollBars = ssVertical
         TabOrder = 5
+        ExplicitWidth = 1098
       end
       object btnToggleBurst: TButton
         Left = 216
@@ -166,7 +166,6 @@ object FrmMain: TFrmMain
         Top = 130
         Width = 70
         Height = 25
-        Anchors = [akTop, akRight]
         Caption = 'Save Image'
         TabOrder = 8
         OnClick = HandleSaveImageClick
@@ -244,13 +243,6 @@ object FrmMain: TFrmMain
     object tsDiagnostics: TTabSheet
       Caption = 'Diagnostics'
       ImageIndex = 2
-      object lblCurrentMethod: TLabel
-        Left = 159
-        Top = 53
-        Width = 115
-        Height = 15
-        Caption = 'Capture method: N/A'
-      end
       object lblMaxDesc: TLabel
         Left = 16
         Top = 82
@@ -299,20 +291,20 @@ object FrmMain: TFrmMain
   object tcCapture: TPageControl
     Left = 0
     Top = 193
-    Width = 1212
-    Height = 584
+    Width = 1214
+    Height = 644
     ActivePage = tsFrame
     Align = alClient
     TabOrder = 1
-    ExplicitTop = 201
-    ExplicitHeight = 576
+    ExplicitWidth = 1212
+    ExplicitHeight = 584
     object tsFrame: TTabSheet
       Caption = 'Frame'
       object pbCapture: TPaintBox
         Left = 0
         Top = 0
-        Width = 1204
-        Height = 554
+        Width = 1206
+        Height = 614
         Align = alClient
         OnPaint = HandleCapturePaint
         ExplicitLeft = 240
