@@ -79,7 +79,8 @@ uses
 
 type
 
-  TLogType = (ltDebug,
+  TLogType = (ltDebug1,
+              ltDebug,
               ltInfo,
               ltWarning,
               ltError);
@@ -290,6 +291,8 @@ begin
       Result := 'Error';
     ltDebug:
       Result := 'Debug';
+    ltDebug1:
+      Result := 'Debug1';
   end;
 end;
 

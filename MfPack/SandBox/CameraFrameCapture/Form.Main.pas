@@ -64,21 +64,12 @@ type
     tsFrame: TTabSheet;
     pcSetup: TPageControl;
     tsSetup: TTabSheet;
-    tsOptions: TTabSheet;
-    cbxDuration: TComboBox;
-    lblSeconds: TLabel;
-    Label2: TLabel;
-    lblResolution: TLabel;
-    cbxFrameRateMin: TComboBox;
-    lblFPSDesc: TLabel;
     tsDiagnostics: TTabSheet;
     btnCalculateMax: TButton;
     lblCurrentMethod: TLabel;
     lblMaxDesc: TLabel;
     lblMaxDesc1: TLabel;
     lblMaxDesc2: TLabel;
-    lblLogLevel: TLabel;
-    cboLogLevel: TComboBox;
     pbCapture: TPaintBox;
     lblMaxTitle: TLabel;
     cboMethod: TComboBox;
@@ -87,6 +78,13 @@ type
     lblMethod: TLabel;
     btnSaveImage: TButton;
     chkDisplayPreview: TCheckBox;
+    cbxDuration: TComboBox;
+    lblSeconds: TLabel;
+    cboLogLevel: TComboBox;
+    lblLogLevel: TLabel;
+    cbxFrameRateMin: TComboBox;
+    lblFPSDesc: TLabel;
+    Label2: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnRefreshDevicesClick(Sender: TObject);
@@ -155,6 +153,7 @@ type
     procedure UpdateReturnTimer;
     procedure LoadImageFromStream;
     procedure PaintMessage(const AText: string);
+    procedure UpdateLogLevel;
   public
     property CaptureMethod: TCaptureMethod read FCaptureMethod write SetCaptureMethod;
   end;
@@ -193,6 +192,9 @@ begin
 
   {$IFDEF DEBUG}
    Caption := Caption + ' (DEBUG BUILD)';
+   cboLogLevel.ItemIndex := 1;
+  {$ELSE}
+   cboLogLevel.ItemIndex := 2;
   {$ENDIF}
 
   {$IFDEF WIN32}
@@ -213,6 +215,7 @@ begin
 
    PopulateDeviceList;
    UpdateEnabledStates;
+   UpdateLogLevel;
 end;
 
 procedure TFrmMain.FormDestroy(Sender: TObject);
@@ -268,8 +271,6 @@ end;
 
 procedure TFrmMain.SetDefaults;
 begin
-  FLogLevel := ltInfo;
-
   // Set a default values for selection on load.
   // Examples below
   //FDefaultDeviceName := 'HD Webcam C615';
@@ -426,7 +427,7 @@ var
 begin
   FCapture.StopTimer;
 
-  if FCapture.BurstEnabled then
+  if FCapture.BurstEnabled and (FLogLevel = ltInfo) then
   begin
     if MillisecondsBetween(Now, FBurstStatisticsUpdate) > 1000 then
     begin
@@ -471,7 +472,7 @@ begin
     QueryPerformanceCounter(iTimerEnd);
         Log(Format('Paint image in %f milliseconds. %d x %d.',
                [(iTimerEnd - iTimerStart) / TimerFrequency * 1000, FCurrentCaptureFormat.iFrameWidth, FCurrentCaptureFormat.iFrameHeigth]),
-                                 ltDebug);
+                                 ltDebug1);
 
   end
   else
@@ -789,6 +790,11 @@ begin
 end;
 
 procedure TFrmMain.HandleLogLevelChange(Sender: TObject);
+begin
+  UpdateLogLevel;
+end;
+
+procedure TFrmMain.UpdateLogLevel;
 begin
   FLogLevel := TLogType(cboLogLevel.ItemIndex);
 end;

@@ -22,15 +22,15 @@ object FrmMain: TFrmMain
     Left = 0
     Top = 0
     Width = 1212
-    Height = 193
-    ActivePage = tsDiagnostics
+    Height = 201
+    ActivePage = tsSetup
     Align = alTop
     TabOrder = 0
     object tsSetup: TTabSheet
       Caption = 'Setup'
       DesignSize = (
         1204
-        163)
+        171)
       object lblLog: TLabel
         Left = 16
         Top = 73
@@ -58,6 +58,34 @@ object FrmMain: TFrmMain
         Width = 45
         Height = 15
         Caption = 'Method:'
+      end
+      object lblSeconds: TLabel
+        Left = 648
+        Top = 141
+        Width = 43
+        Height = 15
+        Caption = 'seconds'
+      end
+      object lblLogLevel: TLabel
+        Left = 707
+        Top = 141
+        Width = 53
+        Height = 15
+        Caption = 'Log Level:'
+      end
+      object lblFPSDesc: TLabel
+        Left = 929
+        Top = 13
+        Width = 74
+        Height = 15
+        Caption = 'fps and above'
+      end
+      object Label2: TLabel
+        Left = 839
+        Top = 13
+        Width = 29
+        Height = 15
+        Caption = 'Show'
       end
       object btnClearLog: TButton
         Left = 1123
@@ -130,7 +158,7 @@ object FrmMain: TFrmMain
           'Asynchronous')
       end
       object btnToggleBurst: TButton
-        Left = 393
+        Left = 472
         Top = 132
         Width = 113
         Height = 25
@@ -139,7 +167,7 @@ object FrmMain: TFrmMain
         OnClick = HandleToggleBurst
       end
       object btnCaptureFrame: TButton
-        Left = 276
+        Left = 349
         Top = 132
         Width = 105
         Height = 25
@@ -158,9 +186,9 @@ object FrmMain: TFrmMain
         OnClick = HandleSaveImageClick
       end
       object chkDisplayPreview: TCheckBox
-        Left = 518
+        Left = 218
         Top = 137
-        Width = 114
+        Width = 104
         Height = 17
         Caption = 'Display Preview'
         Checked = True
@@ -168,53 +196,14 @@ object FrmMain: TFrmMain
         TabOrder = 10
         OnClick = HandlePreviewChange
       end
-    end
-    object tsOptions: TTabSheet
-      Caption = 'Options'
-      ImageIndex = 1
-      object lblSeconds: TLabel
-        Left = 196
-        Top = 29
-        Width = 43
-        Height = 15
-        Caption = 'seconds'
-      end
-      object Label2: TLabel
-        Left = 11
-        Top = 25
-        Width = 78
-        Height = 15
-        Caption = 'Burst duration:'
-      end
-      object lblResolution: TLabel
-        Left = 11
-        Top = 54
-        Width = 86
-        Height = 15
-        Caption = 'Resolution filter:'
-      end
-      object lblFPSDesc: TLabel
-        Left = 194
-        Top = 54
-        Width = 74
-        Height = 15
-        Caption = 'fps and above'
-      end
-      object lblLogLevel: TLabel
-        Left = 11
-        Top = 89
-        Width = 53
-        Height = 15
-        Caption = 'Log Level:'
-      end
       object cbxDuration: TComboBox
-        Left = 139
-        Top = 20
+        Left = 591
+        Top = 133
         Width = 49
         Height = 23
         Style = csDropDownList
         ItemIndex = 0
-        TabOrder = 0
+        TabOrder = 11
         Text = '10'
         Items.Strings = (
           '10'
@@ -223,14 +212,31 @@ object FrmMain: TFrmMain
           '90'
           '120')
       end
+      object cboLogLevel: TComboBox
+        Left = 766
+        Top = 133
+        Width = 99
+        Height = 23
+        Style = csDropDownList
+        ItemIndex = 1
+        TabOrder = 12
+        Text = 'Debug'
+        OnChange = HandleLogLevelChange
+        Items.Strings = (
+          'Debug1'
+          'Debug'
+          'Info'
+          'Warning'
+          'Error')
+      end
       object cbxFrameRateMin: TComboBox
-        Left = 139
-        Top = 49
+        Left = 874
+        Top = 8
         Width = 49
         Height = 23
         Style = csDropDownList
         ItemIndex = 1
-        TabOrder = 1
+        TabOrder = 13
         Text = '24'
         OnChange = HandleMinimumFrameRateChange
         Items.Strings = (
@@ -239,22 +245,6 @@ object FrmMain: TFrmMain
           '29'
           '30'
           '60')
-      end
-      object cboLogLevel: TComboBox
-        Left = 139
-        Top = 82
-        Width = 180
-        Height = 23
-        Style = csDropDownList
-        ItemIndex = 1
-        TabOrder = 2
-        Text = 'Info'
-        OnChange = HandleLogLevelChange
-        Items.Strings = (
-          'Debug'
-          'Info'
-          'Warning'
-          'Error')
       end
     end
     object tsDiagnostics: TTabSheet
@@ -314,21 +304,19 @@ object FrmMain: TFrmMain
   end
   object tcCapture: TPageControl
     Left = 0
-    Top = 193
+    Top = 201
     Width = 1212
-    Height = 584
+    Height = 576
     ActivePage = tsFrame
     Align = alClient
     TabOrder = 1
-    ExplicitTop = 233
-    ExplicitHeight = 544
     object tsFrame: TTabSheet
       Caption = 'Frame'
       object pbCapture: TPaintBox
         Left = 0
         Top = 0
         Width = 1204
-        Height = 554
+        Height = 546
         Align = alClient
         OnPaint = HandleCapturePaint
         ExplicitLeft = 240

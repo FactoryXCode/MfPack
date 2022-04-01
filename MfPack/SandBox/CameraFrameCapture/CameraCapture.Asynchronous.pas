@@ -234,10 +234,10 @@ begin
       SafeRelease(FSampleReply.oSample);
     end;
 
+  HandleThreadMessages(GetCurrentThread());
+
   if BurstEnabled then
     ReadNextSample;
-
-  HandleThreadMessages(GetCurrentThread());
 end;
 
 procedure TCameraCaptureAsync.CalculateMaxFrameRate(AOnComplete: TOnCalculateComplete);

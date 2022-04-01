@@ -339,7 +339,7 @@ begin
   if Assigned(OnLog)  then
    OnLog(Format('ConvertSampleToRGB took %f milliseconds.',
                [(iConvertEnd - iConvertStart) / TimerFrequency * 1000]),
-                                 ltDebug);
+                                 ltDebug1);
 
 end;
 
