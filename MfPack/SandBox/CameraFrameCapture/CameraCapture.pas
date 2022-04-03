@@ -93,9 +93,12 @@ type
   TBurstThread = class(TThread)
   private
     FOwner : TCameraCapture;
+    FTimerFrequency : Int64;
+    FCurrentFPS : Integer;
   public
     constructor Create(AOwner : TCameraCapture); overload;
     procedure Execute; override;
+    property CurrentFPS : Integer read FCurrentFPS write FCurrentFPS;
   end;
 
   TCameraCapture = class(TInterfacedPersistent)
@@ -713,6 +716,8 @@ begin
 end;
 
 procedure TCameraCapture.StartThreadBurst;
+var
+  oCurrentFormat : TVideoFormat;
 begin
   FThreadBurst := True;
 
@@ -721,7 +726,11 @@ begin
   begin
     FBurstEnabled := True;
     FCancelBurst := False;
+
+    GetCurrentFormat(oCurrentFormat);
+
     FBurstThread := TBurstThread.Create(Self);
+    FBurstThread.CurrentFPS := oCurrentFormat.iFramesPerSecond;
     FBurstThread.FreeOnTerminate := True;
   end;
 end;
@@ -735,8 +744,6 @@ begin
 
     if Assigned(FBurstThread) then
       FBurstThread.Terminate;
-
-    Flush;
   end;
 end;
 
@@ -781,28 +788,43 @@ constructor TBurstThread.Create(AOwner: TCameraCapture);
 begin
   Create;
   FOwner := AOwner;
+  QueryPerformanceFrequency(FTimerFrequency);
 end;
 
 procedure TBurstThread.Execute;
 var
   bContinue : Boolean;
+  iFrameRequestCount : Integer;
+  iCaptureStartMs : Int64;
+const
+  MAX_FPS_BUFFER = 5;
 begin
   bContinue := True;
+  iFrameRequestCount := 0;
+  iCaptureStartMs := PerformanceCounterMilliseconds(FTimerFrequency);
+
   while bContinue and (not Terminated) and Assigned(FOwner.SourceReader) do
   begin
-    bContinue := SUCCEEDED(FOwner.SourceReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+    // Do not keeping requesting frames more than needed to obtain the max FPS.
+    // Hammering ReadSample inside a loop can cause memory leaks within the sample cache.
+    if iFrameRequestCount < (FCurrentFPS + MAX_FPS_BUFFER) then
+    begin
+     bContinue := SUCCEEDED(FOwner.SourceReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
                                        0,
                                        nil,
                                        nil,
                                        nil,
                                        nil));
+      inc(iFrameRequestCount);
+    end;
 
-    // The sleep helps, but does not completely eliminate memory leaks within the Media Foundations cache
-    // Flushing the source reader should release the memory.
-    // https://github.com/microsoft/Windows-classic-samples/issues/108
-    // https://social.msdn.microsoft.com/Forums/en-US/c2b39d7b-5203-492c-9663-75d1601f82c7/
-    // memory-leak-imfsourcereaderreadsample-method?forum=mediafoundationdevelopment
-    Sleep(1);
+    if PerformanceCounterMilliseconds(FTimerFrequency) > (iCaptureStartMs + 1000) then
+    begin
+      FOwner.OnLog(Format('Thread frame request count %d', [iFrameRequestCount]), ltDebug1);
+
+      iFrameRequestCount := 0;
+      iCaptureStartMs := PerformanceCounterMilliseconds(FTimerFrequency);
+    end;
   end;
 end;
 

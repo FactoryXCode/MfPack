@@ -122,6 +122,7 @@ type
   function GetMemoryUsed: string;
 
   procedure SaveImage(AInput : TBitmap; const APath : string; AType : TImageType);
+  function PerformanceCounterMilliseconds(AFrequency : Int64): Int64;
 
 threadvar
   TimerFrequency: Int64;
@@ -297,6 +298,19 @@ begin
   iBufferWidth := 0;
   iBufferHeight := 0;
 end;
+
+function PerformanceCounterMilliseconds(AFrequency : Int64): Int64;
+var
+  iCount : Int64;
+begin
+ if AFrequency = 0 then
+   Result := 0
+ else
+ begin
+   QueryPerformanceCounter(iCount);
+   Result := Round(iCount / AFrequency * 1000);
+ end;
+end; { PerformanceCounterToMS }
 
 
 initialization
