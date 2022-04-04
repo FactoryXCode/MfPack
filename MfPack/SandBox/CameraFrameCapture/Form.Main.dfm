@@ -1,7 +1,7 @@
 object FrmMain: TFrmMain
   Left = 0
   Top = 0
-  Caption = 'Media Foundation Camera Capture Demo'
+  Caption = 'Media Foundation Asynchronous Camera Capture Demo'
   ClientHeight = 837
   ClientWidth = 1214
   Color = clBtnFace
@@ -22,16 +22,15 @@ object FrmMain: TFrmMain
     Left = 0
     Top = 0
     Width = 1214
-    Height = 193
-    ActivePage = tsDiagnostics
+    Height = 233
+    ActivePage = tsSetup
     Align = alTop
     TabOrder = 0
-    ExplicitWidth = 1212
     object tsSetup: TTabSheet
       Caption = 'Setup'
       DesignSize = (
         1206
-        163)
+        203)
       object lblLog: TLabel
         Left = 16
         Top = 73
@@ -55,14 +54,14 @@ object FrmMain: TFrmMain
       end
       object lblSeconds: TLabel
         Left = 392
-        Top = 140
+        Top = 172
         Width = 43
         Height = 15
         Caption = 'seconds'
       end
       object lblLogLevel: TLabel
-        Left = 742
-        Top = 139
+        Left = 16
+        Top = 132
         Width = 53
         Height = 15
         Caption = 'Log Level:'
@@ -83,14 +82,14 @@ object FrmMain: TFrmMain
       end
       object Label1: TLabel
         Left = 16
-        Top = 137
+        Top = 169
         Width = 45
         Height = 15
         Caption = 'Capture:'
       end
       object btnClearLog: TButton
-        Left = 1123
-        Top = 130
+        Left = 335
+        Top = 129
         Width = 70
         Height = 25
         Caption = 'Clear Log'
@@ -98,11 +97,11 @@ object FrmMain: TFrmMain
         OnClick = btnClearLogClick
       end
       object btnCopyLog: TButton
-        Left = 1035
-        Top = 130
-        Width = 70
+        Left = 216
+        Top = 129
+        Width = 113
         Height = 25
-        Caption = 'Copy Log'
+        Caption = 'Copy to clipboard'
         TabOrder = 1
         OnClick = HandleCopyLog
       end
@@ -141,11 +140,10 @@ object FrmMain: TFrmMain
         ReadOnly = True
         ScrollBars = ssVertical
         TabOrder = 5
-        ExplicitWidth = 1098
       end
       object btnToggleBurst: TButton
         Left = 216
-        Top = 131
+        Top = 163
         Width = 113
         Height = 25
         Caption = 'Start Burst Capture'
@@ -154,7 +152,7 @@ object FrmMain: TFrmMain
       end
       object btnCaptureFrame: TButton
         Left = 94
-        Top = 131
+        Top = 163
         Width = 105
         Height = 25
         Caption = 'Single Capture'
@@ -162,8 +160,8 @@ object FrmMain: TFrmMain
         OnClick = HandleCaptureFrame
       end
       object btnSaveImage: TButton
-        Left = 944
-        Top = 130
+        Left = 575
+        Top = 163
         Width = 70
         Height = 25
         Caption = 'Save Image'
@@ -171,8 +169,8 @@ object FrmMain: TFrmMain
         OnClick = HandleSaveImageClick
       end
       object chkDisplayPreview: TCheckBox
-        Left = 446
-        Top = 138
+        Left = 465
+        Top = 169
         Width = 104
         Height = 17
         Caption = 'Display Preview'
@@ -183,7 +181,7 @@ object FrmMain: TFrmMain
       end
       object cbxDuration: TComboBox
         Left = 335
-        Top = 132
+        Top = 164
         Width = 49
         Height = 23
         Style = csDropDownList
@@ -198,9 +196,9 @@ object FrmMain: TFrmMain
           '120')
       end
       object cboLogLevel: TComboBox
-        Left = 801
-        Top = 131
-        Width = 99
+        Left = 94
+        Top = 129
+        Width = 105
         Height = 23
         Style = csDropDownList
         ItemIndex = 1
@@ -231,37 +229,13 @@ object FrmMain: TFrmMain
           '30'
           '60')
       end
-      object chkExperimental: TCheckBox
-        Left = 555
-        Top = 139
-        Width = 161
-        Height = 17
-        Caption = 'Experimental Burst Mode'
-        TabOrder = 13
-      end
     end
     object tsDiagnostics: TTabSheet
       Caption = 'Diagnostics'
       ImageIndex = 2
-      object lblMaxDesc: TLabel
-        Left = 16
-        Top = 82
-        Width = 457
-        Height = 15
-        Caption = 
-          'Estimate the maximum frame rate readable from the camera at the ' +
-          'selected resolution.'
-      end
-      object lblMaxDesc1: TLabel
-        Left = 479
-        Top = 82
-        Width = 237
-        Height = 15
-        Caption = 'This excludes time taken to return the image.'
-      end
       object lblMaxDesc2: TLabel
         Left = 16
-        Top = 103
+        Top = 80
         Width = 448
         Height = 15
         Caption = 
@@ -271,11 +245,12 @@ object FrmMain: TFrmMain
       object lblMaxTitle: TLabel
         Left = 16
         Top = 23
-        Width = 511
+        Width = 811
         Height = 15
         Caption = 
           'Calculate the maximum frame rate currently readable from the cam' +
-          'era at the selected resolution.'
+          'era at the selected resolution. This excludes time taken to rend' +
+          'er and return the image.'
       end
       object btnCalculateMax: TButton
         Left = 16
@@ -290,21 +265,21 @@ object FrmMain: TFrmMain
   end
   object tcCapture: TPageControl
     Left = 0
-    Top = 193
+    Top = 233
     Width = 1214
-    Height = 644
+    Height = 604
     ActivePage = tsFrame
     Align = alClient
     TabOrder = 1
-    ExplicitWidth = 1212
-    ExplicitHeight = 584
+    ExplicitTop = 193
+    ExplicitHeight = 644
     object tsFrame: TTabSheet
       Caption = 'Frame'
       object pbCapture: TPaintBox
         Left = 0
         Top = 0
         Width = 1206
-        Height = 614
+        Height = 574
         Align = alClient
         OnPaint = HandleCapturePaint
         ExplicitLeft = 240

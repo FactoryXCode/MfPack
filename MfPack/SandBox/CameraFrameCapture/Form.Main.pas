@@ -37,8 +37,7 @@ uses
   Support,
   SampleConverter,
   CameraCapture,
-  CameraCapture.Asynchronous,
-  CameraCapture.Synchronous;
+  CameraCapture.Asynchronous;
 
 
 type
@@ -66,8 +65,6 @@ type
     tsSetup: TTabSheet;
     tsDiagnostics: TTabSheet;
     btnCalculateMax: TButton;
-    lblMaxDesc: TLabel;
-    lblMaxDesc1: TLabel;
     lblMaxDesc2: TLabel;
     pbCapture: TPaintBox;
     lblMaxTitle: TLabel;
@@ -83,7 +80,6 @@ type
     lblFPSDesc: TLabel;
     Label2: TLabel;
     Label1: TLabel;
-    chkExperimental: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnRefreshDevicesClick(Sender: TObject);
@@ -105,7 +101,7 @@ type
   private
     FLogLevel: TLogType;
     FFormatSettings: TFormatSettings;
-    FCapture: TCameraCapture;
+    FCapture: TCameraCaptureAsync;
     FBurstCaptureCount : Integer;
     FLastCapturedFrame : TBitmap;
 
@@ -521,10 +517,7 @@ begin
   FBurstStatisticsUpdate := Now;
   FBurstDurationSeconds := StrToInt(cbxDuration.Text);
 
-  if chkExperimental.Checked then
-    FCapture.StartThreadBurst
-  else
-    FCapture.StartBurst;
+  FCapture.StartBurst;
 
   btnToggleBurst.Caption := 'Stop Burst Capture';
   UpdateEnabledStates;
@@ -542,10 +535,7 @@ var
 begin
   GetBurstDetails(iDuration, iFrameRate);
 
-  if chkExperimental.Checked then
-    FCapture.StopThreadBurst
-  else
-    FCapture.StopBurst;
+  FCapture.StopBurst;
 
   btnToggleBurst.Caption := 'Start Burst Capture';
 

@@ -90,17 +90,6 @@ type
 
   TCameraCapture = class;
 
-  TBurstThread = class(TThread)
-  private
-    FOwner : TCameraCapture;
-    FTimerFrequency : Int64;
-    FCurrentFPS : Integer;
-  public
-    constructor Create(AOwner : TCameraCapture); overload;
-    procedure Execute; override;
-    property CurrentFPS : Integer read FCurrentFPS write FCurrentFPS;
-  end;
-
   TCameraCapture = class(TInterfacedPersistent)
   private
     FMaxFramesToSkip: Integer;
@@ -111,8 +100,6 @@ type
     FVideoInfo: TVideoFormatInfo;
     FSupportsSeek: Boolean;
     FSampleConverter: TSampleConverter;
-    FBurstEnabled : Boolean;
-    FCancelBurst : Boolean;
     FVideoFormats : TVideoFormats;
     FCritSec: TMFCritSec;
     FTimerStart: int64;
@@ -128,13 +115,10 @@ type
     function GetFrameRate(const AMediaFormat: IMFMediaType): Integer;
 
     procedure SetOnLog(const Value: TLogEvent);
-    procedure ReturnDataFromSample(ASample: IMFSample);
   protected
     FSourceReader: IMFSourceReader;
     FOnCalculateComplete : TOnCalculateComplete;
     FCalculatingMax : Boolean;
-    FBurstThread : TBurstThread;
-    FThreadBurst : Boolean;
 
     procedure HandleFlushComplete; virtual;
     procedure HandleFrameSkipped;
@@ -146,6 +130,7 @@ type
     function ActiveDevice(const ADeviceSymbolicLink: PWideChar; out AMediaSource: IMFMediaSource): Boolean;
 
     procedure ResetVariables; virtual;
+    procedure ReturnDataFromSample(ASample: IMFSample);
 
     procedure HandleSampleReadError(AResult: HResult);
 
@@ -157,7 +142,6 @@ type
     function GetVideoFormat(AMediaTypeChanged: Boolean): Boolean;
 
     procedure ProcessSample(ASample: IMFSample); virtual; abstract;
-    procedure ReturnSample(ASample: IMFSample);
 
     procedure Log(const AMessage: string;
                   const AType: TLogType);
@@ -184,13 +168,6 @@ type
     procedure CloseSource;
     procedure CancelCapture;
 
-    procedure RequestFrame; virtual;
-    procedure StartBurst; virtual;
-    procedure StopBurst; virtual;
-
-    procedure StartThreadBurst;
-    procedure StopThreadBurst;
-
     function SetVideoFormat(AFormatIndex : Integer) : Boolean;
     function GetCurrentFormat(var AFormat : TVideoFormat) : Boolean;
 
@@ -208,7 +185,6 @@ type
     property SourceOpen: Boolean read GetSourceOpen;
     property VideoInfo: TVideoFormatInfo read FVideoInfo;
     property SupportsSeek: Boolean read FSupportsSeek;
-    property BurstEnabled : Boolean read FBurstEnabled;
 
     property VideoFormats : TVideoFormats read FVideoFormats;
     property SampleConverter: TSampleConverter read FSampleConverter;
@@ -239,14 +215,12 @@ begin
   Inherited;
   ResetVariables;
   SetLength(FVideoFormats, 0);
-  FThreadBurst := False;
   FTimerStart := 0;
   FTimerEnd := 0;
   FCritSec := TMFCritSec.Create;
 
   FCalculatingMax := False;
   FMinimumFrameRate := 24;
-  FCancelBurst := False;
 
   FSampleConverter := TSampleConverter.Create;
 end;
@@ -254,7 +228,6 @@ end;
 
 destructor TCameraCapture.Destroy;
 begin
-  StopBurst;
   SafeDelete(FCritSec);
   FreeAndNil(FSampleConverter);
   inherited;
@@ -290,18 +263,9 @@ end;
 procedure TCameraCapture.ResetVariables;
 begin
   FVideoInfo.Reset;
-  FBurstEnabled := False;
   FAwaitingFlush := False;
   FSupportsSeek := False;
   FMaxFramesToSkip := 40;
-end;
-
-procedure TCameraCapture.ReturnSample(ASample: IMFSample);
-begin
-  if FCancelBurst then
-    SafeRelease(ASample)
-  else
-    ReturnDataFromSample(ASample)
 end;
 
 procedure TCameraCapture.ReturnDataFromSample(ASample : IMFSample);
@@ -693,71 +657,10 @@ begin
    FSampleConverter.OnLog := FOnLog;
 end;
 
-procedure TCameraCapture.StartBurst;
-begin
-  FThreadBurst := False;
-
-  StopBurst;
-  if not FBurstEnabled then
-  begin
-    FBurstEnabled := True;
-    FCancelBurst := False;
-    RequestFrame;
-  end;
-end;
-
-procedure TCameraCapture.StopBurst;
-begin
-  if FBurstEnabled then
-  begin
-    FCancelBurst := True;
-    FBurstEnabled := False;
-  end;
-end;
-
-procedure TCameraCapture.StartThreadBurst;
-var
-  oCurrentFormat : TVideoFormat;
-begin
-  FThreadBurst := True;
-
-  StopThreadBurst;
-  if not FBurstEnabled then
-  begin
-    FBurstEnabled := True;
-    FCancelBurst := False;
-
-    GetCurrentFormat(oCurrentFormat);
-
-    FBurstThread := TBurstThread.Create(Self);
-    FBurstThread.CurrentFPS := oCurrentFormat.iFramesPerSecond;
-    FBurstThread.FreeOnTerminate := True;
-  end;
-end;
-
-procedure TCameraCapture.StopThreadBurst;
-begin
- if FBurstEnabled then
-  begin
-    FCancelBurst := True;
-    FBurstEnabled := False;
-
-    if Assigned(FBurstThread) then
-      FBurstThread.Terminate;
-  end;
-end;
-
-procedure TCameraCapture.RequestFrame;
-begin
-  FCancelBurst := False;
-end;
-
-
 procedure TCameraCapture.StartTimer;
 begin
   QueryPerformanceCounter(FTimerStart);
 end;
-
 
 procedure TCameraCapture.StopTimer;
 begin
@@ -780,52 +683,6 @@ end;
 procedure TCameraCapture.SetMaxFramesToSkip(const AValue: Integer);
 begin
   FMaxFramesToSkip := AValue;
-end;
-
-{ TBurstThread }
-
-constructor TBurstThread.Create(AOwner: TCameraCapture);
-begin
-  Create;
-  FOwner := AOwner;
-  QueryPerformanceFrequency(FTimerFrequency);
-end;
-
-procedure TBurstThread.Execute;
-var
-  bContinue : Boolean;
-  iFrameRequestCount : Integer;
-  iCaptureStartMs : Int64;
-const
-  MAX_FPS_BUFFER = 5;
-begin
-  bContinue := True;
-  iFrameRequestCount := 0;
-  iCaptureStartMs := PerformanceCounterMilliseconds(FTimerFrequency);
-
-  while bContinue and (not Terminated) and Assigned(FOwner.SourceReader) do
-  begin
-    // Do not keeping requesting frames more than needed to obtain the max FPS.
-    // Hammering ReadSample inside a loop can cause memory leaks within the sample cache.
-    if iFrameRequestCount < (FCurrentFPS + MAX_FPS_BUFFER) then
-    begin
-     bContinue := SUCCEEDED(FOwner.SourceReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                       0,
-                                       nil,
-                                       nil,
-                                       nil,
-                                       nil));
-      inc(iFrameRequestCount);
-    end;
-
-    if PerformanceCounterMilliseconds(FTimerFrequency) > (iCaptureStartMs + 1000) then
-    begin
-      FOwner.OnLog(Format('Thread frame request count %d', [iFrameRequestCount]), ltDebug1);
-
-      iFrameRequestCount := 0;
-      iCaptureStartMs := PerformanceCounterMilliseconds(FTimerFrequency);
-    end;
-  end;
 end;
 
 end.

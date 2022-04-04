@@ -64,6 +64,7 @@ uses
   WinAPI.Messages,
   WinAPI.Windows,
   {System}
+  System.Classes,
   System.SysUtils,
   {MediaFoundationApi}
   WinAPI.MediaFoundationApi.MfReadWrite,
@@ -81,12 +82,28 @@ const
   WM_FLUSH_COMPLETE = WM_USER + 1001;
   WM_MEDIA_FORMAT_CHANGED = WM_USER + 1002;
   WM_SAMPLE_FOUND = WM_USER + 1003;
+  WM_REQUEST_FLUSH = WM_USER + 1004;
 
 type
   PSampleReply = ^TSampleReply;
   TSampleReply = record
     oSample: IMFSample;
   end;
+
+  TBurstThread = class(TThread)
+  private
+    FSourceReader : IMFSourceReader;
+    FTimerFrequency : Int64;
+    FCurrentFPS : Integer;
+    FMessageHandle : Hwnd;
+  public
+    constructor Create(const ASourceReader : IMFSourceReader); overload;
+    procedure Execute; override;
+
+    property CurrentFPS : Integer read FCurrentFPS write FCurrentFPS;
+    property MessageHandle : Hwnd read FMessageHandle write FMessageHandle;
+  end;
+
 
   TCameraCaptureAsync = class(TCameraCapture, IMFSourceReaderCallback)
   private
@@ -95,6 +112,9 @@ type
     FSampleReply: TSampleReply;
     FMaxCalcStartTime : TDateTime;
     FSampleReadCount : Integer;
+    FBurstThread : TBurstThread;
+    FCancelBurst : Boolean;
+    FBurstEnabled : Boolean;
 
     procedure HandleMessages(var AMessage: TMessage;
                              var AHandled: Boolean);
@@ -124,9 +144,13 @@ type
     constructor Create; override;
     destructor Destroy; override;
 
+    procedure StartBurst;
+    procedure StopBurst;
+
     procedure CalculateMaxFrameRate(AOnComplete : TOnCalculateComplete); override;
 
-    procedure RequestFrame; override;
+    procedure RequestFrame;
+    property BurstEnabled : Boolean read FBurstEnabled;
   end;
 
 implementation
@@ -138,10 +162,13 @@ begin
   FSampleReadCount := 0;
   FMessageHandler := TMessageHandler.Create;
   FMessageHandler.OnMessage := HandleMessages;
+  FCancelBurst := False;
+  FBurstEnabled := False;
 end;
 
 destructor TCameraCaptureAsync.Destroy;
 begin
+  StopBurst;
   FMessageHandler.RemoveHandle;
   FreeAndNil(FMessageHandler);
   inherited;
@@ -234,9 +261,6 @@ begin
     end;
 
   HandleThreadMessages(GetCurrentThread());
-
- if BurstEnabled and not FThreadBurst then
-   ReadNextSample;
 end;
 
 procedure TCameraCaptureAsync.CalculateMaxFrameRate(AOnComplete: TOnCalculateComplete);
@@ -277,9 +301,45 @@ begin
         ltError);
 end;
 
+procedure TCameraCaptureAsync.StartBurst;
+var
+  oCurrentFormat : TVideoFormat;
+begin
+  StopBurst;
+  if not FBurstEnabled then
+  begin
+    FBurstEnabled := True;
+    FCancelBurst := False;
+
+    GetCurrentFormat(oCurrentFormat);
+
+    FBurstThread := TBurstThread.Create(SourceReader);
+    FBurstThread.MessageHandle := FMessageHandler.Handle;
+    FBurstThread.CurrentFPS := oCurrentFormat.iFramesPerSecond;
+    FBurstThread.FreeOnTerminate := True;
+  end;
+end;
+
+procedure TCameraCaptureAsync.StopBurst;
+begin
+ if FBurstEnabled then
+  begin
+    FCancelBurst := True;
+    FBurstEnabled := False;
+
+    if Assigned(FBurstThread) then
+      FBurstThread.Terminate;
+  end;
+end;
+
 procedure TCameraCaptureAsync.HandleMessages(var AMessage: TMessage; var AHandled: Boolean);
 begin
-  if AMessage.Msg = WM_FLUSH_COMPLETE then
+  if AMessage.Msg = WM_REQUEST_FLUSH then
+    begin
+      AHandled := True;
+      Flush;
+    end
+  else if AMessage.Msg = WM_FLUSH_COMPLETE then
     begin
       AHandled := True;
       HandleFlushComplete;
@@ -303,7 +363,11 @@ var
   oSampleReply: PSampleReply;
 begin
   oSampleReply := PSampleReply(AMessage.LPARAM);
-  ReturnSample(oSampleReply.oSample);
+
+  if FCancelBurst then
+    SafeRelease(oSampleReply.oSample)
+  else
+    ReturnDataFromSample(oSampleReply.oSample)
 end;
 
 procedure TCameraCaptureAsync.NotifyMediaFormatChanged;
@@ -319,6 +383,7 @@ end;
 procedure TCameraCaptureAsync.RequestFrame;
 begin
   inherited;
+  FCancelBurst := False;
   ResetFramesSkipped;
   ReadNextSample;
 end;
@@ -352,6 +417,60 @@ begin
   inherited;
   MaxFramesToSkip := 1;
 end;
+
+
+{ TBurstThread }
+
+constructor TBurstThread.Create(const ASourceReader : IMFSourceReader);
+begin
+  Create;
+  FSourceReader := ASourceReader;
+  QueryPerformanceFrequency(FTimerFrequency);
+end;
+
+procedure TBurstThread.Execute;
+var
+  bContinue : Boolean;
+  iFrameRequestCount : Integer;
+  iCaptureStartMs : Int64;
+const
+  MAX_FPS_BUFFER = 5;
+begin
+  bContinue := True;
+  iFrameRequestCount := 0;
+  iCaptureStartMs := PerformanceCounterMilliseconds(FTimerFrequency);
+
+  while bContinue and (not Terminated) and Assigned(FSourceReader) do
+  begin
+    // Do not keep requesting frames more than needed to obtain the max FPS.
+    // Hammering ReadSample inside a loop can cause memory leaks within the sample cache.
+    if iFrameRequestCount < (FCurrentFPS + MAX_FPS_BUFFER) then
+    begin
+     bContinue := SUCCEEDED(FSourceReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                       0,
+                                       nil,
+                                       nil,
+                                       nil,
+                                       nil));
+      inc(iFrameRequestCount);
+    end;
+
+    if PerformanceCounterMilliseconds(FTimerFrequency) > (iCaptureStartMs + 1000) then
+    begin
+      iFrameRequestCount := 0;
+      iCaptureStartMs := PerformanceCounterMilliseconds(FTimerFrequency);
+    end;
+  end;
+
+  if Terminated then
+  begin
+      PostMessage(FMessageHandle,
+              WM_REQUEST_FLUSH,
+              0,
+              0);
+  end;
+end;
+
 
 
 end.
