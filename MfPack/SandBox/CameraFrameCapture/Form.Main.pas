@@ -233,8 +233,8 @@ procedure TFrmMain.SetDefaults;
 begin
   // Set a default values for selection on load.
   // Examples below
-  //FDefaultDeviceName := 'HD Webcam C615';
-  //FDefaultResolution := '1920 x 1080   (30 fps)    MFVideoFormat_NV12';
+  //FDefaultDeviceName := 'HD USB CAMERA';
+  //FDefaultResolution := '3840 x 2160   (30 fps)    MFVideoFormat_NV12';
 
   FCapture.MinimumFrameRate := StrToInt(cbxFrameRateMin.Text);
 end;

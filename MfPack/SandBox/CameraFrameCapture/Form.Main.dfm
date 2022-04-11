@@ -88,7 +88,7 @@ object FrmMain: TFrmMain
         Caption = 'Capture:'
       end
       object btnClearLog: TButton
-        Left = 335
+        Left = 314
         Top = 129
         Width = 70
         Height = 25
@@ -99,9 +99,9 @@ object FrmMain: TFrmMain
       object btnCopyLog: TButton
         Left = 216
         Top = 129
-        Width = 113
+        Width = 73
         Height = 25
-        Caption = 'Copy to clipboard'
+        Caption = 'Copy Log'
         TabOrder = 1
         OnClick = HandleCopyLog
       end
@@ -155,7 +155,7 @@ object FrmMain: TFrmMain
         Top = 163
         Width = 105
         Height = 25
-        Caption = 'Single Capture'
+        Caption = 'Single Frame'
         TabOrder = 7
         OnClick = HandleCaptureFrame
       end
@@ -271,8 +271,6 @@ object FrmMain: TFrmMain
     ActivePage = tsFrame
     Align = alClient
     TabOrder = 1
-    ExplicitTop = 193
-    ExplicitHeight = 644
     object tsFrame: TTabSheet
       Caption = 'Frame'
       object pbCapture: TPaintBox

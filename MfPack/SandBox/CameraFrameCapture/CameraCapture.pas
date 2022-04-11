@@ -328,9 +328,13 @@ var
 begin
   iMediaIndex := FVideoFormats[AFormatIndex].iMediaIndex;
 
-  Result := SUCCEEDED(SourceReader.GetNativeMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
+  try
+    Result := SUCCEEDED(SourceReader.GetNativeMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
                                    iMediaIndex,
                                    pMediaType)) and SetMediaType(pMediaType);
+  finally
+    SafeRelease(pMediaType);
+  end;
 end;
 
 function TCameraCapture.SetMediaType(const AMediaType : IMFMediaType) : Boolean;
@@ -339,26 +343,38 @@ var
 begin
   Result := SUCCEEDED(MFCreateMediaType(pMediaType));
 
-  if Result then
-    Result := SUCCEEDED(AMediaType.CopyAllItems(pMediaType));
+  try
+    if Result then
+      Result := SUCCEEDED(AMediaType.CopyAllItems(pMediaType));
 
-  if Result then
-    Result := SUCCEEDED(FSourceReader.SetCurrentMediaType(DWord(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
-                                                         0,
-                                                          pMediaType));
-  if Result then
-    Result := SelectVideoStream;
+    if Result then
+      Result := SUCCEEDED(FSourceReader.SetCurrentMediaType(DWord(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
+                                                           0,
+                                                            pMediaType));
+    if Result then
+      Result := SelectVideoStream;
 
-  GetVideoFormat(False);
+    GetVideoFormat(False);
+  finally
+    SafeRelease(pMediaType);
+  end;
 end;
 
 function TCameraCapture.GetCurrentFormat(var AFormat : TVideoFormat) : Boolean;
 var
   pCurrentType : IMFMediaType;
 begin
-  Result := SourceOpen and SUCCEEDED(SourceReader.GetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM, pCurrentType));
+  Result := SourceOpen;
+
   if Result then
-    Result := PopulateFormatDetails(pCurrentType, AFormat);
+  begin
+    try
+      Result := SUCCEEDED(SourceReader.GetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM, pCurrentType)) and
+        PopulateFormatDetails(pCurrentType, AFormat);
+    finally
+      SafeRelease(pCurrentType);
+    end;
+  end;
 end;
 
 function TCameraCapture.OpenDeviceSource(const AMediaSource : IMFMediaSource) : Boolean;
@@ -551,7 +567,6 @@ end;
 procedure TCameraCapture.HandleSampleReadError(AResult: HResult);
 var
   sError: string;
-
 begin
   case AResult of
     E_POINTER:

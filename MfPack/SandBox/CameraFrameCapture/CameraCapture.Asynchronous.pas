@@ -90,21 +90,6 @@ type
     oSample: IMFSample;
   end;
 
-  TBurstThread = class(TThread)
-  private
-    FSourceReader : IMFSourceReader;
-    FTimerFrequency : Int64;
-    FCurrentFPS : Integer;
-    FMessageHandle : Hwnd;
-  public
-    constructor Create(const ASourceReader : IMFSourceReader); overload;
-    procedure Execute; override;
-
-    property CurrentFPS : Integer read FCurrentFPS write FCurrentFPS;
-    property MessageHandle : Hwnd read FMessageHandle write FMessageHandle;
-  end;
-
-
   TCameraCaptureAsync = class(TCameraCapture, IMFSourceReaderCallback)
   private
     FMessageHandler: TMessageHandler;
@@ -112,7 +97,6 @@ type
     FSampleReply: TSampleReply;
     FMaxCalcStartTime : TDateTime;
     FSampleReadCount : Integer;
-    FBurstThread : TBurstThread;
     FCancelBurst : Boolean;
     FBurstEnabled : Boolean;
 
@@ -232,7 +216,13 @@ begin
             ReadNextSample;
           end
           else
+          begin
+            if BurstEnabled then
+              ReadNextSample;
+
             ProcessSample(pSample);
+          end;
+
 
           FFindingSample := False;
         end;
@@ -313,10 +303,7 @@ begin
 
     GetCurrentFormat(oCurrentFormat);
 
-    FBurstThread := TBurstThread.Create(SourceReader);
-    FBurstThread.MessageHandle := FMessageHandler.Handle;
-    FBurstThread.CurrentFPS := oCurrentFormat.iFramesPerSecond;
-    FBurstThread.FreeOnTerminate := True;
+    RequestFrame;
   end;
 end;
 
@@ -326,9 +313,6 @@ begin
   begin
     FCancelBurst := True;
     FBurstEnabled := False;
-
-    if Assigned(FBurstThread) then
-      FBurstThread.Terminate;
   end;
 end;
 
@@ -417,60 +401,5 @@ begin
   inherited;
   MaxFramesToSkip := 1;
 end;
-
-
-{ TBurstThread }
-
-constructor TBurstThread.Create(const ASourceReader : IMFSourceReader);
-begin
-  Create;
-  FSourceReader := ASourceReader;
-  QueryPerformanceFrequency(FTimerFrequency);
-end;
-
-procedure TBurstThread.Execute;
-var
-  bContinue : Boolean;
-  iFrameRequestCount : Integer;
-  iCaptureStartMs : Int64;
-const
-  MAX_FPS_BUFFER = 5;
-begin
-  bContinue := True;
-  iFrameRequestCount := 0;
-  iCaptureStartMs := PerformanceCounterMilliseconds(FTimerFrequency);
-
-  while bContinue and (not Terminated) and Assigned(FSourceReader) do
-  begin
-    // Do not keep requesting frames more than needed to obtain the max FPS.
-    // Hammering ReadSample inside a loop can cause memory leaks within the sample cache.
-    if iFrameRequestCount < (FCurrentFPS + MAX_FPS_BUFFER) then
-    begin
-     bContinue := SUCCEEDED(FSourceReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                       0,
-                                       nil,
-                                       nil,
-                                       nil,
-                                       nil));
-      inc(iFrameRequestCount);
-    end;
-
-    if PerformanceCounterMilliseconds(FTimerFrequency) > (iCaptureStartMs + 1000) then
-    begin
-      iFrameRequestCount := 0;
-      iCaptureStartMs := PerformanceCounterMilliseconds(FTimerFrequency);
-    end;
-  end;
-
-  if Terminated then
-  begin
-      PostMessage(FMessageHandle,
-              WM_REQUEST_FLUSH,
-              0,
-              0);
-  end;
-end;
-
-
 
 end.
