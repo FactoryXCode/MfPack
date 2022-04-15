@@ -1835,8 +1835,8 @@ type
     SampleFormat: DWORD;
     SampleFlags: DWORD;
     lpDDSSrcSurface: DWORD;         // 32 bit pointer size
-    rcSrc: TRect; // RECT
-    rcDst: TRect; // RECT
+    rcSrc: TRect; 
+    rcDst: TRect;
     Palette: array[0..15] of DXVA_AYUVsample2;
     // Pad: DWORD;
     // 4 bytes of padding added by the compiler to align the struct to 8 bytes.
@@ -1850,7 +1850,7 @@ type
   _DXVA_DeinterlaceBltEx32 = record
     Size: DWORD;
     BackgroundColor: DXVA_AYUVsample2;
-    rcTarget: TRect; // RECT
+    rcTarget: TRect;
     rtTarget: REFERENCE_TIME;
     NumSourceSurfaces: DWORD;
     {$IFDEF WIN32}

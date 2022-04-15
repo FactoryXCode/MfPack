@@ -23,6 +23,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 15/04/2022 Tony                Changed RECT declarations to TRect.
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -814,8 +815,8 @@ type
     SampleFormat: DWORD;
     SampleFlags: DWORD;
     lpDDSSrcSurface: DWORD;         // 32 bit pointer size
-    rcSrc: RECT;
-    rcDst: RECT;
+    rcSrc: TRect;
+    rcDst: TRect;
     Palette: array[0..15] of DXVA_AYUVsample2;
     // DWORD Pad;
     // 4 bytes of padding added by the compiler to align the struct to 8 bytes.
@@ -828,7 +829,7 @@ type
   _DXVA_DeinterlaceBltEx32 = record
     Size: DWORD;
     BackgroundColor: DXVA_AYUVsample2;
-    rcTarget: RECT;
+    rcTarget: TRect;
     rtTarget: REFERENCE_TIME;
     NumSourceSurfaces: DWORD;
     Alpha: Single;

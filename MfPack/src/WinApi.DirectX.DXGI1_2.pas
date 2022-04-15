@@ -213,7 +213,7 @@ type
   PDXGI_OUTDUPL_MOVE_RECT = ^DXGI_OUTDUPL_MOVE_RECT;
   DXGI_OUTDUPL_MOVE_RECT = record
     SourcePoint: TPoint;
-    DestinationRect: TRect;  // RECT
+    DestinationRect: TRect;
   end;
   {$EXTERNALSYM DXGI_OUTDUPL_MOVE_RECT}
 
