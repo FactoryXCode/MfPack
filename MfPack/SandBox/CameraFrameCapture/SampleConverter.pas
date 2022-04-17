@@ -57,9 +57,7 @@
 // in full at the top of the file.
 //==============================================================================
 unit SampleConverter;
-
 interface
-
 uses
   {Winapi}
   WinApi.Windows,
@@ -72,6 +70,8 @@ uses
   WinApi.MediaFoundationApi.MfUtils,
   WinApi.MediaFoundationApi.MfTransform,
   WinApi.MediaFoundationApi.MfMetLib,
+  WinApi.MediaFoundationApi.MfError,
+  WinApi.MediaFoundationApi.MfIdl,
   WinApi.UuIds,
   {VCL}
   VCL.Graphics,
@@ -81,7 +81,6 @@ uses
   System.Types,
   {Application}
   Support;
-
 
 type
   TSampleConverter = class(TPersistent)
@@ -96,38 +95,32 @@ type
     function IndexOf(const AInput: TGUID; const AValues: array of TGUID): Integer;
     function GetBMPFileHeader: BITMAPFILEHEADER;
     function GetBMPFileInfo(const AVideoInfo: TVideoFormatInfo): BITMAPINFOHEADER;
-
     procedure FreeConverter;
     procedure NotifyBeginStreaming;
     procedure SetSupportedInputs;
   public
     constructor Create;
     destructor Destroy; override;
-
     function UpdateConverter(const AInputType: IMFMediaType): Boolean;
     function DataFromSample(const ASample : IMFSample; const AVideoInfo: TVideoFormatInfo; var AError : string; out AMemoryStream : TMemoryStream): Boolean;
-
     function IsInputSupported(const AInputFormat : TGUID) : Boolean;
-
     // Event hooks
     property OnLog: TLogEvent read FOnLog write FOnLog;
   end;
 
-
 implementation
+
 
 constructor TSampleConverter.Create;
 begin
   inherited;
   SetSupportedInputs;
 end;
-
 destructor TSampleConverter.Destroy;
 begin
   FreeConverter;
   inherited;
 end;
-
 procedure TSampleConverter.SetSupportedInputs;
 begin
   SetLength(FSupportedInputs, 20);
@@ -152,19 +145,16 @@ begin
   FSupportedInputs[18] := MFVideoFormat_YVU9;
   FSupportedInputs[19] := MFVideoFormat_YVYU;
 end;
-
 function TSampleConverter.IsInputSupported(const AInputFormat: TGUID): Boolean;
 begin
   Result := IndexOf(AInputFormat, FSupportedInputs) > -1;
 end;
-
 function TSampleConverter.IndexOf(const AInput : TGUID; const AValues : array of TGUID) : Integer;
 begin
   Result := high(AValues);
   while (Result >= low(AValues)) and (AInput <> AValues[Result]) do
     Dec(Result);
 end;
-
 function TSampleConverter.DataFromSample(const ASample : IMFSample; const AVideoInfo: TVideoFormatInfo; var AError : string; out AMemoryStream : TMemoryStream): Boolean;
 var
   pBuffer: IMFMediaBuffer;
@@ -179,7 +169,6 @@ begin
   if AVideoInfo.oSubType <> MFVideoFormat_RGB32 then
   begin
     Result := ConvertSampleToRGB(ASample, pConvertedSample);
-
     if Result then
      // Converts a sample with multiple buffers into a sample with a single buffer.
     Result := SUCCEEDED(pConvertedSample.ConvertToContiguousBuffer(pBuffer));
@@ -187,7 +176,6 @@ begin
   else
     // Converts a sample with multiple buffers into a sample with a single buffer.
     Result := SUCCEEDED(ASample.ConvertToContiguousBuffer(pBuffer));
-
   if Result then
   begin
     Result := SUCCEEDED(pBuffer.Lock(pBitmapData, Nil, @cbBitmapData));
@@ -197,7 +185,6 @@ begin
         // For full frame capture, use the buffer dimensions for the data size check
         iExpectedDataSize := (AVideoInfo.iBufferWidth * 4) * AVideoInfo.iBufferHeight;
         iActualDataSize := Integer(cbBitmapData);
-
         if Result then
           Result := iActualDataSize = iExpectedDataSize;
         if not Result then
@@ -205,7 +192,6 @@ begin
           AError := Format('Sample size does not match expected size. Current: %d. Expected: %d',
                            [iActualDataSize, iExpectedDataSize]);
         end;
-
         AMemoryStream := TMemoryStream.Create;
         oFileHeader := GetBMPFileHeader;
         oFileInfo := GetBMPFileInfo(AVideoInfo);
@@ -218,11 +204,9 @@ begin
       SafeRelease(pBuffer);
     end;
   end;
-
   if Assigned(pConvertedSample) then
     SafeRelease(pConvertedSample);
 end;
-
 function TSampleConverter.GetBMPFileHeader : BITMAPFILEHEADER;
 begin
   Result.bfType := Ord('B') or (Ord('M') shl 8); // Type is "BM" for BitMap
@@ -231,34 +215,31 @@ begin
   Result.bfReserved2 := 0;
   Result.bfOffBits := sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
 end;
-
 function TSampleConverter.GetBMPFileInfo(const AVideoInfo: TVideoFormatInfo) : BITMAPINFOHEADER;
 begin
+  // See: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapinfoheader
   Result.biSize := sizeof(BITMAPINFOHEADER);
   Result.biWidth := AVideoInfo.iVideoWidth;
-  // See: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapinfoheader
-  Result.biHeight := -AVideoInfo.iVideoHeight;
+  Result.biHeight := AVideoInfo.iVideoHeight;
   Result.biPlanes := 1;
   Result.biBitCount := 32;
   Result.biCompression := BI_RGB;
   Result.biClrImportant := 0;
   Result.biClrUsed := 0;
 end;
-
 procedure TSampleConverter.FreeConverter;
 begin
   if Assigned(FTransform) then
     SafeRelease(FTransform);
   FOutputType := nil;
 end;
-
 function TSampleConverter.UpdateConverter(const AInputType : IMFMediaType) : Boolean;
 begin
   FreeConverter;
 
-  // Create the color converter
-  // See: https://docs.microsoft.com/en-us/windows/win32/medfound/colorconverter
-  Result := SUCCEEDED(CoCreateInstance(CLSID_CColorConvertDMO, nil, CLSCTX_INPROC_SERVER, IID_IMFTransform, FTransform));
+  // Create Video Processor MFT
+  // https://docs.microsoft.com/en-us/windows/win32/medfound/video-processor-mft
+  Result := SUCCEEDED(CoCreateInstance(CLSID_VideoProcessorMFT, nil, CLSCTX_INPROC_SERVER, IID_IMFTransform, FTransform));
 
   if Result then
   begin
@@ -285,14 +266,12 @@ begin
     NotifyBeginStreaming;
   end;
 end;
-
 procedure TSampleConverter.NotifyBeginStreaming;
 begin
   // This should speed up the first frame request.
   // See: https://docs.microsoft.com/en-us/windows/win32/medfound/mft-message-notify-begin-streaming
   FTransform.ProcessMessage(MFT_MESSAGE_NOTIFY_BEGIN_STREAMING, 0);
 end;
-
 function TSampleConverter.ConvertSampleToRGB(const AInputSample : IMFSample; out AConvertedSample : IMFSample) : Boolean;
 var
   oStatus : DWord;
@@ -305,7 +284,7 @@ var
 begin
   QueryPerformanceCounter(iConvertStart);
 
-  Result := CheckSUCCEEDED(FTransform.ProcessInput(0, AInputSample, 0), 'ConvertSampleToRGB');
+  Result := CheckSucceeded(FTransform.ProcessInput(0, AInputSample, 0), 'Transform.ProcessInput');
 
   if Result then
   begin
@@ -313,22 +292,21 @@ begin
     try
       if Result then
         Result := SUCCEEDED(MFCreateMemoryBuffer(oOutputStreamInfo.cbSize, pBufferOut));
-
       if Result then
         Result := SUCCEEDED(MFCreateSample(AConvertedSample));
-
       if Result then
         Result := SUCCEEDED(AConvertedSample.AddBuffer(pBufferOut));
-
       if Result then
       begin
         oOutputDataBuffer.dwStreamID := 0;
         oOutputDataBuffer.dwStatus := 0;
         oOutputDataBuffer.pSample := AConvertedSample;
         oOutputDataBuffer.pEvents := nil;
-
-        oResult := FTransform.ProcessOutput(DWord(MFT_PROCESS_OUTPUT_DISCARD_WHEN_NO_BUFFER), 1, @oOutputDataBuffer, oStatus);
+        oResult := FTransform.ProcessOutput(0, 1, @oOutputDataBuffer, oStatus);
         Result := SUCCEEDED(oResult);
+
+        // If we don't flush we will get MF_E_NOTACCEPTING on next ProcessInput
+        FTransform.ProcessMessage(MFT_MESSAGE_COMMAND_FLUSH, 0);
       end;
     finally
       SafeRelease(pBufferOut);
@@ -340,9 +318,7 @@ begin
    OnLog(Format('ConvertSampleToRGB took %f milliseconds.',
                [(iConvertEnd - iConvertStart) / TimerFrequency * 1000]),
                                  ltDebug1);
-
 end;
-
 
 function TSampleConverter.CheckSucceeded(AStatus : HRESULT; const AMethod : string; ALogFailure : Boolean = True) : Boolean;
 begin
@@ -350,5 +326,4 @@ begin
  if not Result and Assigned(OnLog) then
     OnLog(Format('Method "%s" failed. Error code: %d',  [AMethod, AStatus]), ltError);
 end;
-
 end.
