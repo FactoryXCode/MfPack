@@ -53,8 +53,8 @@ object FrmMain: TFrmMain
         Caption = 'Select Device:'
       end
       object lblSeconds: TLabel
-        Left = 392
-        Top = 172
+        Left = 547
+        Top = 173
         Width = 43
         Height = 15
         Caption = 'seconds'
@@ -88,9 +88,9 @@ object FrmMain: TFrmMain
         Caption = 'Capture:'
       end
       object btnClearLog: TButton
-        Left = 314
+        Left = 345
         Top = 129
-        Width = 70
+        Width = 113
         Height = 25
         Caption = 'Clear Log'
         TabOrder = 0
@@ -99,7 +99,7 @@ object FrmMain: TFrmMain
       object btnCopyLog: TButton
         Left = 216
         Top = 129
-        Width = 73
+        Width = 113
         Height = 25
         Caption = 'Copy Log'
         TabOrder = 1
@@ -141,14 +141,14 @@ object FrmMain: TFrmMain
         ScrollBars = ssVertical
         TabOrder = 5
       end
-      object btnToggleBurst: TButton
+      object btnStartBurstCapture: TButton
         Left = 216
         Top = 163
         Width = 113
         Height = 25
         Caption = 'Start Burst Capture'
         TabOrder = 6
-        OnClick = HandleToggleBurst
+        OnClick = HandleStartBurstCapture
       end
       object btnCaptureFrame: TButton
         Left = 94
@@ -160,8 +160,8 @@ object FrmMain: TFrmMain
         OnClick = HandleCaptureFrame
       end
       object btnSaveImage: TButton
-        Left = 575
-        Top = 163
+        Left = 730
+        Top = 162
         Width = 70
         Height = 25
         Caption = 'Save Image'
@@ -169,8 +169,8 @@ object FrmMain: TFrmMain
         OnClick = HandleSaveImageClick
       end
       object chkDisplayPreview: TCheckBox
-        Left = 465
-        Top = 169
+        Left = 620
+        Top = 168
         Width = 104
         Height = 17
         Caption = 'Display Preview'
@@ -180,8 +180,8 @@ object FrmMain: TFrmMain
         OnClick = HandlePreviewChange
       end
       object cbxDuration: TComboBox
-        Left = 335
-        Top = 164
+        Left = 490
+        Top = 165
         Width = 49
         Height = 23
         Style = csDropDownList
@@ -228,6 +228,15 @@ object FrmMain: TFrmMain
           '29'
           '30'
           '60')
+      end
+      object btnStopBurstCapture: TButton
+        Left = 345
+        Top = 163
+        Width = 113
+        Height = 25
+        Caption = 'Stop Burst Capture'
+        TabOrder = 13
+        OnClick = HandleStopBurstCapture
       end
     end
     object tsDiagnostics: TTabSheet
