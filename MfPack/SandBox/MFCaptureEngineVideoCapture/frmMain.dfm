@@ -50,12 +50,13 @@ object MainWindow: TMainWindow
     ShowCaption = False
     ShowHint = False
     TabOrder = 1
+    ExplicitTop = 11
   end
   object pnlSnapShot: TPanel
-    Left = 801
+    Left = 768
     Top = 23
-    Width = 277
-    Height = 193
+    Width = 310
+    Height = 234
     Anchors = [akTop, akRight]
     BevelOuter = bvLowered
     ShowCaption = False
@@ -63,12 +64,47 @@ object MainWindow: TMainWindow
     object pbCapture: TPaintBox
       Left = 1
       Top = 1
-      Width = 275
-      Height = 191
+      Width = 308
+      Height = 199
       Align = alClient
       Color = clBackground
       ParentColor = False
       ExplicitTop = 0
+      ExplicitWidth = 275
+      ExplicitHeight = 145
+    end
+    object Bevel2: TBevel
+      Left = 1
+      Top = 200
+      Width = 308
+      Height = 33
+      Align = alBottom
+      ExplicitTop = 206
+    end
+    object butSaveToFile: TButton
+      Left = 91
+      Top = 206
+      Width = 73
+      Height = 25
+      Hint = 'Save photo to file'
+      Caption = '&Save To File'
+      Enabled = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 0
+    end
+    object Button1: TButton
+      Left = 12
+      Top = 206
+      Width = 73
+      Height = 25
+      Hint = 'Save photo to file'
+      Caption = '&Take Photo'
+      Enabled = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 1
+      OnClick = Button1Click
     end
   end
   object MainMenu: TMainMenu
@@ -86,6 +122,7 @@ object MainWindow: TMainWindow
       end
       object mnuStartRecording: TMenuItem
         Caption = 'Start Recording'
+        OnClick = mnuStartRecordingClick
       end
       object mnuTakePhoto: TMenuItem
         Caption = 'Take Photo'
@@ -99,9 +136,9 @@ object MainWindow: TMainWindow
       end
     end
   end
-  object SaveFileDialog: TSaveDialog
+  object SaveFileDlg: TSaveDialog
     DefaultExt = '.mp4'
-    FileName = 'MyVideo.mp4'
+    FileName = 'MyPhoto.bmp'
     Filter = 
       'BMP image (*.bmp)|*.bmp|PNG image (*.png)|*.png|JPEG image (*.jp' +
       'g, *.jpeg)|*.jpg'
@@ -110,7 +147,7 @@ object MainWindow: TMainWindow
   end
   object ApplicationEvents: TApplicationEvents
     OnMessage = ApplicationEventsMessage
-    Left = 176
-    Top = 33
+    Left = 200
+    Top = 41
   end
 end

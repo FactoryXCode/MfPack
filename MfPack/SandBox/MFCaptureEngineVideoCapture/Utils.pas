@@ -7,6 +7,8 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.WinApiTypes,
+  {VCL}
+  Vcl.Graphics,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfIdl,
@@ -226,6 +228,19 @@ begin
 
 done:
   Result := hr;
+end;
+
+
+function ProcessSample(pSample: IMFSample): HResult;
+var
+  bmp: TBitmap;
+
+begin
+  bmp := TBitmap.Create();
+  bmp.Width := 400;
+  bmp.Height := 100;
+
+
 end;
 
 end.

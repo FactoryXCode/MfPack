@@ -14,6 +14,7 @@ uses
   System.Classes,
   System.Win.ComObj,
   System.SysUtils,
+  System.IOUtils,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfIdl,
@@ -170,7 +171,8 @@ type
     function StopPreview(): HResult;
     function StartRecord(pszDestinationFile: PCWSTR): HResult;
     function StopRecord(): HResult;
-    function TakePhoto(snsOptions: TSnapShotOptions): HResult;
+    function TakePhoto(snsOptions: TSnapShotOptions;
+                       pExt: PWideChar = nil): HResult;
 
     property SleepState: Boolean write SetSleepState;
     property IsRecording: Boolean read m_bRecording;
@@ -399,17 +401,27 @@ end;
 
 
 function TCaptureManager.TCaptureEngineOnSampleCallback.OnSample(pSample: IMFSample): HResult;
+var
+  mfBuffer: IMFMediaBuffer;
+  hr: HResult;
+
 begin
 
-  if pSample <> nil then
-    m_pManager.m_SampleFromCallBack.pSample := pSample;
+  if (pSample <> nil) then
+    begin
+      hr := pSample.ConvertToContiguousBuffer(mfBuffer);
 
-  if not PostMessage(DestHandle,
+      mfBuffer.
+
+      m_pManager.m_SampleFromCallBack.pSample := pSample;
+
+     if not PostMessage(DestHandle,
                      WM_RECIEVED_SAMPLE_FROM_CALLBACK,
                      0,
                      LPARAM(@m_pManager.m_SampleFromCallBack)) then
     begin
       SafeRelease(m_pManager.m_SampleFromCallBack.pSample);
+    end;
     end;
 end;
 
@@ -803,9 +815,7 @@ begin
 end;
 
 
-
-
-
+// Start recording to file
 function TCaptureManager.StartRecord(pszDestinationFile: PCWSTR): HResult;
 var
   pszExt: string;
@@ -930,7 +940,8 @@ begin
 end;
 
 
-function TCaptureManager.TakePhoto(snsOptions: TSnapShotOptions): HResult;
+function TCaptureManager.TakePhoto(snsOptions: TSnapShotOptions;
+                                   pExt: PWideChar = Nil): HResult;
 var
   hr: HResult;
   pSink: IMFCaptureSink;
@@ -941,6 +952,9 @@ var
   bHasPhotoStream: Boolean;
   dwSinkStreamIndex: DWord;
   pszFileName: PWideChar;
+  pszPicPath: PWideChar;
+  sExt: PWideChar;
+  fPath: TPath;
 
 label
   Done;
@@ -992,14 +1006,29 @@ begin
     ssoFile:     begin
                    // ToDo: implement save to file (eg: My Photo's)
                    // to file
-                   hr := pPhoto.SetOutputFileName(pszFileName);
+
+                   // get the My Pictures Folder path use fPath.GetSharedPicturesPath for the shared folder
+                   pszPicPath := PWideChar(fPath.GetPicturesPath);
+                   pszFileName := Format('MyPicture_%s%s' [DateToStr(Now()), pExt]);
+
+                   hr := pPhoto.SetOutputFileName(pszPicPath + pszFileName);
                    if FAILED(hr) then
                      goto Done;
+
+                   
+
+
                  end;
 
     ssoCallBack: begin
                    // ToDo: implement save to ISample > preview window
                    // to callback
+
+
+
+
+
+
                    hr := pPhoto.SetSampleCallback(m_pOnSampleCallback);
                    if FAILED(hr) then
                      goto Done;
@@ -1014,7 +1043,6 @@ begin
   hr := m_pEngine.TakePhoto();
   if FAILED(hr) then
     goto Done;
-
 
   m_bPhotoPending := True;
 
@@ -1063,10 +1091,10 @@ var
   i: Integer;
 
 begin
-  {$POINTERMATH ON}
+{$POINTERMATH ON}
   for i := 0 to count -1 do
     SafeRelease(ppDevices[i]);
-  {$POINTERMATH OFF}
+{$POINTERMATH OFF}
   CoTaskMemFree(ppDevices);
   inherited;
 end;

@@ -31,7 +31,7 @@ uses
   WinApi.MediaFoundationApi.MfUtils,
   {Application}
   CaptureEngine,
-  dlgChooseDevice;
+  dlgChooseDevice, Vcl.StdCtrls;
 
 const
   IDTIMEOUT      = 'Unable to set the capture device.';
@@ -54,7 +54,7 @@ type
     mnuChooseDevice: TMenuItem;
     mnuStartRecording: TMenuItem;
     mnuTakePhoto: TMenuItem;
-    SaveFileDialog: TSaveDialog;
+    SaveFileDlg: TSaveDialog;
     Bevel1: TBevel;
     N1: TMenuItem;
     Exit1: TMenuItem;
@@ -63,6 +63,9 @@ type
     pnlSnapShot: TPanel;
     pbCapture: TPaintBox;
     ApplicationEvents: TApplicationEvents;
+    butSaveToFile: TButton;
+    Bevel2: TBevel;
+    Button1: TButton;
     procedure FormDestroy(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure ApplicationEventsMessage(var Msg: tagMSG; var Handled: Boolean);
@@ -70,6 +73,8 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure mnuStartPreviewClick(Sender: TObject);
     procedure mnuTakePhotoClick(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure mnuStartRecordingClick(Sender: TObject);
   private
     { Private declarations }
     hPreview: HWND;
@@ -112,6 +117,9 @@ end;
 
 procedure TMainWindow.ApplicationEventsMessage(var Msg: tagMSG;
                                                var Handled: Boolean);
+var
+  psample: IMFSample;
+
 begin
 
   //if msg.hwnd = MainWindow.Handle then
@@ -131,8 +139,27 @@ begin
       Exit;
     end;
 
+  // We did recieve a sample from TCaptureManager.TCaptureEngineOnSampleCallback.OnSample
+  if msg.message = WM_RECIEVED_SAMPLE_FROM_CALLBACK then
+    begin
+      psample := IMFSample(@msg.lParam);
+
+      // process the sample
+      ProcessSample(pSample);
+
+
+      Handled := True;
+      Exit;
+    end;
+
   Handled := False;
 
+end;
+
+
+procedure TMainWindow.Button1Click(Sender: TObject);
+begin
+  mnuTakePhotoClick(Self);
 end;
 
 
@@ -268,21 +295,7 @@ begin
       iDevice := DeviceParam.selection;
     end;
 
-
-        {INT_PTR result = DialogBoxParam(GetModuleHandle(NULL),
-            MAKEINTRESOURCE(IDD_CHOOSE_DEVICE), hwnd,
-            ChooseDeviceDlgProc, (LPARAM)&param);
-
-        if ((result == IDOK) && (param.selection != (UINT32)-1))
-        {
-            UINT iDevice = param.selection;
-
-            if (iDevice >= param.count)
-            {
-                hr = E_UNEXPECTED;
-                goto done;
-            }
-  {$POINTERMATH ON}
+{$POINTERMATH ON}
   hr := g_pEngine.InitializeCaptureManager(hPreview,
                                            DeviceParam.ppDevices[iDevice]);
   if FAILED(hr) then
@@ -291,15 +304,13 @@ begin
   SafeRelease(pSelectedDevice);
 
   pSelectedDevice := DeviceParam.ppDevices[iDevice];
-
-  {$POINTERMATH OFF}
+{$POINTERMATH OFF}
 
 done:
   SafeRelease(&pAttributes);
 {$IF DEBUG}
   if FAILED(hr) then
-    OutputDebugString(format('Error: %s (hr = %d)', [IDS_ERR_SET_DEVICE, hr]));
-
+    OutputDebugString(PWideChar(format('Error: %s (hr = %d)', [IDTIMEOUT, hr])));
 {$ENDIF}
 
   UpdateUI();
@@ -359,20 +370,24 @@ var
   hr: HResult;
 begin
   hr := g_pEngine.StartPreview();
-
+{$IF DEBUG}
   if FAILED(hr) then
-    OutputDebugString(PWIDECHAR(format('Error: %s (hr = %d)', [ERR_RECORD, hr])));
-
+    OutputDebugString(PWideChar(format('Error: %s (hr = %d)', [ERR_RECORD, hr])));
+{$ENDIF}
   UpdateUI();
 end;
 
+
+procedure TMainWindow.mnuStartRecordingClick(Sender: TObject);
+begin
+
+
+  g_pEngine.StartRecord('');
+end;
+
+
 procedure TMainWindow.mnuTakePhotoClick(Sender: TObject);
 var
-  wsfilename: WideChar;
-  psi: IShellItem;
-  pszFolderPath: PWideChar;
-  ftime: SYSTEMTIME;
-  cpath: PChar;
   hr: HResult;
 
 label
@@ -380,22 +395,21 @@ label
 
 begin
 
-  hr := g_pEngine.TakePhoto(snsOptions: TSnapShotOptions);
+
+
+  hr := g_pEngine.TakePhoto(ssoCallBack);
   if FAILED(hr) then
     goto Done;
 
 
 Done:
 
-  CoTaskMemFree(pszFolderPath);
-                                              `
-       // if (FAILED(hr))
-        {
-            ShowError(hwnd, IDS_ERR_PHOTO, hr);
-        }
+{$IF DEBUG}
+  if FAILED(hr) then
+     OutputDebugString(PWideChar(format('Error: %s (hr = %d)', [ERR_PHOTO, hr])));
+{$ENDIF}
   UpdateUI();
 end;
 
-end;
 
 end.
