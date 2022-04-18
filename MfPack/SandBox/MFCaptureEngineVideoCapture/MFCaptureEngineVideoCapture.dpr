@@ -1,11 +1,17 @@
 program MFCaptureEngineVideoCapture;
 
 uses
+
+  {$IFDEF FASTMM}
+  FastMM4,
+  {$ELSE IFDEF madExcept}
   madExcept,
   madLinkDisAsm,
   madListHardware,
   madListProcesses,
   madListModules,
+  {$ENDIF}
+
   Vcl.Forms,
   frmMain in 'frmMain.pas' {MainWindow},
   CaptureEngine in 'CaptureEngine.pas',
