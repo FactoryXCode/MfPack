@@ -74,7 +74,9 @@ uses
   WinApi.MediaFoundationApi.MfIdl,
   {Application}
   Support,
-  SampleConverter;
+  SampleConverter,
+  Winapi.D3D11,
+  Winapi.D3DCommon;
 
 type
   TVideoFormat = record
@@ -106,6 +108,7 @@ type
     FTimerEnd : int64;
     FMinimumFrameRate : Integer;
     FMaxFrameRateReadable : Integer;
+    FDXResetToken : UINT;
 
     procedure SetMaxFramesToSkip(const AValue: Integer);
 
@@ -115,10 +118,20 @@ type
     function GetFrameRate(const AMediaFormat: IMFMediaType): Integer;
 
     procedure SetOnLog(const Value: TLogEvent);
+    function SetupDirectXAccereration(oAttributes: IMFAttributes): Boolean;
+    procedure DestroyDirectXDevice;
+    procedure SetEnabledDirectX(const AValue: Boolean);
   protected
     FSourceReader: IMFSourceReader;
     FOnCalculateComplete : TOnCalculateComplete;
     FCalculatingMax : Boolean;
+
+    // Direct X
+    FDirectXDevice: ID3D11Device;
+    FFeatureLevel : D3D_FEATURE_LEVEL;
+    FContext : ID3D11DeviceContext;
+    FManager : IMFDXGIDeviceManager;
+    FEnabledDirectX : Boolean;
 
     procedure HandleFlushComplete; virtual;
     procedure HandleFrameSkipped;
@@ -189,6 +202,7 @@ type
     property VideoFormats : TVideoFormats read FVideoFormats;
     property SampleConverter: TSampleConverter read FSampleConverter;
     property MinimumFrameRate : Integer read FMinimumFrameRate write FMinimumFrameRate;
+    property EnabledDirectX : Boolean read FEnabledDirectX write SetEnabledDirectX;
   end;
 
 implementation
@@ -199,6 +213,7 @@ uses
   WinAPI.WinApiTypes,
   WinAPI.MediaFoundationApi.MfError,
   WinAPI.ActiveX.PropVarUtil,
+  Winapi.D3D10,
   {System}
   System.Math,
   System.SysUtils,
@@ -206,7 +221,6 @@ uses
   System.Types,
   {VCL}
   VCL.Graphics;
-
 
 { TCameraCapture }
 
@@ -219,6 +233,7 @@ begin
   FTimerEnd := 0;
   FCritSec := TMFCritSec.Create;
 
+  FEnabledDirectX := False;
   FCalculatingMax := False;
   FMinimumFrameRate := 24;
 
@@ -230,6 +245,7 @@ destructor TCameraCapture.Destroy;
 begin
   SafeDelete(FCritSec);
   FreeAndNil(FSampleConverter);
+  DestroyDirectXDevice;
   inherited;
 end;
 
@@ -393,9 +409,59 @@ begin
   if Result then
     Result := PopulateStreamFormats;
 
+
   if Result then
     // By default, select the first stream
     Result := SelectVideoStream and GetVideoFormat(False);
+end;
+
+function TCameraCapture.SetupDirectXAccereration(oAttributes : IMFAttributes) : Boolean;
+var
+  oFlags : UINT;
+  pMultithread: ID3D10Multithread;
+begin
+  oFlags := D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+
+  Result := SUCCEEDED(D3D11CreateDevice(
+    nil, // Default adapter
+    D3D_DRIVER_TYPE_HARDWARE, // A hardware driver, which implements Direct3D features in hardware.
+    0,
+    oFlags,
+    nil, 0, // default feature
+    D3D11_SDK_VERSION,
+    FDirectXDevice,
+    FFeatureLevel,
+    FContext
+  ));
+
+  if Result then
+  begin
+    Result := SUCCEEDED(FDirectXDevice.QueryInterface(IID_ID3D10Multithread,
+                                  pMultithread));
+
+    if Result then
+      pMultithread.SetMultithreadProtected(True);
+
+    SafeRelease(pMultithread);
+  end;
+
+  if Result then
+    Result := SUCCEEDED(MFCreateDXGIDeviceManager(FDXResetToken, FManager));
+
+  if Result then
+    Result := SUCCEEDED(FManager.ResetDevice(FDirectXDevice, FDXResetToken));
+
+  if Result then
+    Result := SUCCEEDED(oAttributes.SetUnknown(MF_SOURCE_READER_D3D_MANAGER, FManager));
+end;
+
+procedure TCameraCapture.DestroyDirectXDevice;
+begin
+  if Assigned(FManager) then
+    FManager.ResetDevice(FDirectXDevice, FDXResetToken);
+
+  SafeRelease(FDirectXDevice);
+  SafeRelease(FManager);
 end;
 
 function TCameraCapture.OpenDeviceSource(const ADeviceSymbolicLink : PWideChar): Boolean;
@@ -595,6 +661,9 @@ end;
 
 function TCameraCapture.ConfigureSourceReader(const AAttributes: IMFAttributes) : Boolean;
 begin
+  if FEnabledDirectX then
+    SetupDirectXAccereration(AAttributes);
+
   // Enables advanced video processing by the Source Reader, including color space conversion, deinterlacing, video resizing,
   // and frame-rate conversion.
   Result := SUCCEEDED(AAttributes.SetUINT32(MF_SOURCE_READER_ENABLE_ADVANCED_VIDEO_PROCESSING, 1));
@@ -646,7 +715,7 @@ begin
                                                    MF_MT_DEFAULT_STRIDE,
                                                    1);
 
-      SampleConverter.UpdateConverter(pInputType);
+      SampleConverter.UpdateConverter(FManager, pInputType);
     end;
 end;
 
@@ -693,6 +762,13 @@ end;
 procedure TCameraCapture.ResetFramesSkipped;
 begin
   FFramesSkipped := 0;
+end;
+
+procedure TCameraCapture.SetEnabledDirectX(const AValue: Boolean);
+begin
+  FEnabledDirectX := AValue;
+  if not FEnabledDirectX then
+    DestroyDirectXDevice;
 end;
 
 procedure TCameraCapture.SetMaxFramesToSkip(const AValue: Integer);

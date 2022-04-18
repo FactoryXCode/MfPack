@@ -95,13 +95,14 @@ type
     function IndexOf(const AInput: TGUID; const AValues: array of TGUID): Integer;
     function GetBMPFileHeader: BITMAPFILEHEADER;
     function GetBMPFileInfo(const AVideoInfo: TVideoFormatInfo): BITMAPINFOHEADER;
+    function CreateTransform(const AManager: IMFDXGIDeviceManager; const AInputType: IMFMediaType): Boolean;
     procedure FreeConverter;
     procedure NotifyBeginStreaming;
     procedure SetSupportedInputs;
   public
     constructor Create;
     destructor Destroy; override;
-    function UpdateConverter(const AInputType: IMFMediaType): Boolean;
+    function UpdateConverter(const AManager : IMFDXGIDeviceManager; const AInputType: IMFMediaType): Boolean;
     function DataFromSample(const ASample : IMFSample; const AVideoInfo: TVideoFormatInfo; var AError : string; out AMemoryStream : TMemoryStream): Boolean;
     function IsInputSupported(const AInputFormat : TGUID) : Boolean;
     // Event hooks
@@ -116,11 +117,13 @@ begin
   inherited;
   SetSupportedInputs;
 end;
+
 destructor TSampleConverter.Destroy;
 begin
   FreeConverter;
   inherited;
 end;
+
 procedure TSampleConverter.SetSupportedInputs;
 begin
   SetLength(FSupportedInputs, 20);
@@ -145,16 +148,19 @@ begin
   FSupportedInputs[18] := MFVideoFormat_YVU9;
   FSupportedInputs[19] := MFVideoFormat_YVYU;
 end;
+
 function TSampleConverter.IsInputSupported(const AInputFormat: TGUID): Boolean;
 begin
   Result := IndexOf(AInputFormat, FSupportedInputs) > -1;
 end;
+
 function TSampleConverter.IndexOf(const AInput : TGUID; const AValues : array of TGUID) : Integer;
 begin
   Result := high(AValues);
   while (Result >= low(AValues)) and (AInput <> AValues[Result]) do
     Dec(Result);
 end;
+
 function TSampleConverter.DataFromSample(const ASample : IMFSample; const AVideoInfo: TVideoFormatInfo; var AError : string; out AMemoryStream : TMemoryStream): Boolean;
 var
   pBuffer: IMFMediaBuffer;
@@ -166,16 +172,12 @@ var
   oFileHeader : BITMAPFILEHEADER;
   oFileInfo : BITMAPINFOHEADER;
 begin
-  if AVideoInfo.oSubType <> MFVideoFormat_RGB32 then
-  begin
-    Result := ConvertSampleToRGB(ASample, pConvertedSample);
-    if Result then
-     // Converts a sample with multiple buffers into a sample with a single buffer.
-    Result := SUCCEEDED(pConvertedSample.ConvertToContiguousBuffer(pBuffer));
-  end
-  else
+  Result := ConvertSampleToRGB(ASample, pConvertedSample);
+
+  if Result then
     // Converts a sample with multiple buffers into a sample with a single buffer.
-    Result := SUCCEEDED(ASample.ConvertToContiguousBuffer(pBuffer));
+    Result := SUCCEEDED(pConvertedSample.ConvertToContiguousBuffer(pBuffer));
+
   if Result then
   begin
     Result := SUCCEEDED(pBuffer.Lock(pBitmapData, Nil, @cbBitmapData));
@@ -207,6 +209,7 @@ begin
   if Assigned(pConvertedSample) then
     SafeRelease(pConvertedSample);
 end;
+
 function TSampleConverter.GetBMPFileHeader : BITMAPFILEHEADER;
 begin
   Result.bfType := Ord('B') or (Ord('M') shl 8); // Type is "BM" for BitMap
@@ -215,6 +218,7 @@ begin
   Result.bfReserved2 := 0;
   Result.bfOffBits := sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
 end;
+
 function TSampleConverter.GetBMPFileInfo(const AVideoInfo: TVideoFormatInfo) : BITMAPINFOHEADER;
 begin
   // See: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapinfoheader
@@ -227,13 +231,22 @@ begin
   Result.biClrImportant := 0;
   Result.biClrUsed := 0;
 end;
+
 procedure TSampleConverter.FreeConverter;
 begin
   if Assigned(FTransform) then
     SafeRelease(FTransform);
   FOutputType := nil;
 end;
-function TSampleConverter.UpdateConverter(const AInputType : IMFMediaType) : Boolean;
+
+function TSampleConverter.UpdateConverter(const AManager : IMFDXGIDeviceManager; const AInputType: IMFMediaType) : Boolean;
+begin
+  Result := CreateTransform(AManager, AInputType);
+
+  NotifyBeginStreaming;
+end;
+
+function TSampleConverter.CreateTransform(const AManager : IMFDXGIDeviceManager; const AInputType: IMFMediaType) : Boolean;
 begin
   FreeConverter;
 
@@ -263,15 +276,19 @@ begin
     if Result then
       Result := SUCCEEDED(FTransform.SetOutputType(0, FOutputType, 0));
 
-    NotifyBeginStreaming;
+    // Is this needed?
+    //if Assigned(AManager) then
+    //  FTransform.ProcessMessage(MFT_MESSAGE_SET_D3D_MANAGER, UInt64(AManager));
   end;
 end;
+
 procedure TSampleConverter.NotifyBeginStreaming;
 begin
   // This should speed up the first frame request.
   // See: https://docs.microsoft.com/en-us/windows/win32/medfound/mft-message-notify-begin-streaming
   FTransform.ProcessMessage(MFT_MESSAGE_NOTIFY_BEGIN_STREAMING, 0);
 end;
+
 function TSampleConverter.ConvertSampleToRGB(const AInputSample : IMFSample; out AConvertedSample : IMFSample) : Boolean;
 var
   oStatus : DWord;
@@ -326,4 +343,5 @@ begin
  if not Result and Assigned(OnLog) then
     OnLog(Format('Method "%s" failed. Error code: %d',  [AMethod, AStatus]), ltError);
 end;
+
 end.

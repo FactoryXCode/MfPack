@@ -77,6 +77,8 @@ type
     Label2: TLabel;
     Label1: TLabel;
     btnStopBurstCapture: TButton;
+    tsAdvanced: TTabSheet;
+    chkDirect2D: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnRefreshDevicesClick(Sender: TObject);
@@ -95,6 +97,7 @@ type
     procedure HandleCalculateMax(Sender: TObject);
     procedure HandleDisplayImage(Sender: TObject);
     procedure HandlePreviewChange(Sender: TObject);
+    procedure ToggleEnabledDirectX(Sender: TObject);
   private
     FLogLevel: TLogType;
     FFormatSettings: TFormatSettings;
@@ -139,14 +142,17 @@ type
     procedure LoadImageFromStream;
     procedure PaintMessage(const AText: string);
     procedure UpdateLogLevel;
-    procedure HandleIdle(Sender: TObject; var Done: Boolean);
   end;
 var
   FrmMain: TFrmMain;
+
 implementation
+
 uses
   System.DateUtils;
+
 {$R *.dfm}
+
 procedure TFrmMain.FormCreate(Sender: TObject);
 begin
   CoInitializeEx(Nil,
@@ -161,7 +167,6 @@ begin
         Application.Terminate;
    end;
    ClearValues;
-   Application.OnIdle := HandleIdle;
    // Create capture class
    FCapture := TCameraCaptureAsync.Create;
    FCapture.OnFrameDataFound := HandleFrameDataFound;
@@ -186,6 +191,7 @@ begin
    UpdateEnabledStates;
    UpdateLogLevel;
 end;
+
 procedure TFrmMain.FormDestroy(Sender: TObject);
 begin
   DestroyCapture;
@@ -194,6 +200,7 @@ begin
   MFShutdown;
   CoUnInitialize;
 end;
+
 procedure TFrmMain.ClearValues;
 begin
   FImageCleared := False;
@@ -201,23 +208,27 @@ begin
   FBurstDurationSeconds := 0;
   SetLength(FDevices, 0);
 end;
+
 procedure TFrmMain.DestroyCapture;
 begin
   if Assigned(FCapture) then
     FreeAndNil(FCapture);
 end;
+
 procedure TFrmMain.SetDefaults;
 begin
   // Set a default values for selection on load.
   // Examples below
-  //FDefaultDeviceName := 'HD USB CAMERA';
-  //FDefaultResolution := '3840 x 2160   (30 fps)    MFVideoFormat_NV12';
+  FDefaultDeviceName := 'HD USB CAMERA';
+  FDefaultResolution := '3840 x 2160   (30 fps)    MFVideoFormat_NV12';
   FCapture.MinimumFrameRate := StrToInt(cbxFrameRateMin.Text);
 end;
+
 procedure TFrmMain.HandlFormShow(Sender: TObject);
 begin
   RestoreDefaults;
 end;
+
 procedure TFrmMain.RestoreDefaults;
 var
   iDefaultDeviceIndex : Integer;
@@ -230,22 +241,27 @@ begin
    UpdateSelectedDevice;
   end;
 end;
+
 procedure TFrmMain.HandleCaptureFrame(Sender: TObject);
 begin
   FCapture.RequestFrame;
 end;
+
 procedure TFrmMain.btnClearLogClick(Sender: TObject);
 begin
   memLog.Lines.Clear;
 end;
+
 procedure TFrmMain.btnRefreshDevicesClick(Sender: TObject);
 begin
   PopulateDeviceList;
 end;
+
 procedure TFrmMain.cbxResolutionChange(Sender: TObject);
 begin
   HandleResolutionChanged;
 end;
+
 procedure TFrmMain.HandleResolutionChanged;
 begin
   if cbxResolution.ItemIndex > -1 then
@@ -259,6 +275,7 @@ begin
     end;
   end;
 end;
+
 function TFrmMain.UpdateCaptureFormat: Boolean;
 begin
   Result := FCapture.SourceOpen;
@@ -269,9 +286,11 @@ begin
       Log(Format('Capture format change to %d x %d', [FCurrentCaptureFormat.iFrameWidth, FCurrentCaptureFormat.iFrameHeigth]), ltInfo)
     else
       Log('Failed to set capture format', ltError);
+
     UpdateEnabledStates;
   end;
 end;
+
 procedure TFrmMain.HandleCalculateMax(Sender: TObject);
 begin
   btnCalculateMax.Caption := 'Calculating...';
@@ -282,6 +301,7 @@ begin
     EndBusy;
   end;
 end;
+
 procedure TFrmMain.HandleCalculateMaxComplete(const AFramesPerSecond : Integer);
 begin
   btnCalculateMax.Caption := 'Calculate Max';
@@ -290,18 +310,22 @@ begin
           FCurrentCaptureFormat.iFrameWidth, FCurrentCaptureFormat.iFrameHeigth, FCurrentCaptureFormat.iFramesPerSecond]), mtInformation,
           [mbOk], 0, mbOk);
 end;
+
 procedure TFrmMain.HandleCapturePaint(Sender: TObject);
 begin
   PaintLastCapture;
 end;
+
 procedure TFrmMain.HandleCopyLog(Sender: TObject);
 begin
   Clipboard.AsText := memLog.Lines.Text;
 end;
+
 procedure TFrmMain.HandleDisplayImage(Sender: TObject);
 begin
   LoadImageFromStream;
 end;
+
 procedure TFrmMain.LoadImageFromStream;
 begin
   if Assigned(FLastMemoryStream) then
@@ -316,6 +340,7 @@ begin
     end;
   end;
 end;
+
 procedure TFrmMain.HandleFrameDataFound(AMemoryStream : TMemoryStream);
 begin
   FImageCleared := False;
@@ -330,6 +355,7 @@ begin
     LoadImageFromStream;
   HandleBurstMode;
 end;
+
 procedure TFrmMain.UpdateReturnTimer;
 var
   iDuration : Integer;
@@ -350,10 +376,7 @@ begin
                [FCapture.GetTimerMs, FCurrentCaptureFormat.iFrameWidth, FCurrentCaptureFormat.iFrameHeigth]),
                                  ltInfo);
 end;
-procedure TFrmMain.HandleIdle(Sender: TObject; var Done: Boolean);
-begin
-  UpdateEnabledStates;
-end;
+
 procedure TFrmMain.PaintLastCapture;
 var
   iWidth : Integer;
@@ -385,6 +408,7 @@ begin
   else
     PaintMessage('Waiting for image capture... ')
 end;
+
 procedure TFrmMain.PaintMessage(const AText : string);
 var
   iWidth : Integer;
@@ -397,6 +421,7 @@ begin
   pbCapture.Canvas.Font.Name := 'Segoe UI';
   pbCapture.Canvas.TextOut(Round((pbCapture.Width - iWidth) / 2), 20, AText);
 end;
+
 procedure TFrmMain.GetPaintArea(var AWidth : Integer; var AHeight : Integer; var ATop : Integer; var ALeft : Integer);
 var
   iRatio : Double;
@@ -414,6 +439,7 @@ begin
   ATop := (pbCapture.Height - AHeight) div 2;
   ALeft := (pbCapture.Width - AWidth) div 2;
 end;
+
 procedure TFrmMain.HandleBurstMode;
 begin
   if FCapture.BurstEnabled then
@@ -423,11 +449,13 @@ begin
       StopBurstCapture;
   end;
 end;
+
 procedure TFrmMain.ClearImage;
 begin
   FImageCleared := True;
   PaintLastCapture;
 end;
+
 procedure TFrmMain.HandleSaveImageClick(Sender: TObject);
 begin
   if not FLastCapturedFrame.Empty then
@@ -437,15 +465,18 @@ begin
       SaveImage(FLastCapturedFrame, sdSaveFrame.FileName, TImageType(Ord(sdSaveFrame.FilterIndex - 1)));
   end;
 end;
+
 procedure TFrmMain.HandleSelectedDeviceChange(Sender: TObject);
 begin
   UpdateSelectedDevice;
 end;
+
 procedure TFrmMain.HandleStartBurstCapture(Sender: TObject);
 begin
   if not FCapture.BurstEnabled then
     StartBurstCapture;
 end;
+
 procedure TFrmMain.StartBurstCapture;
 begin
   FBurstCaptureCount := 0;
@@ -455,11 +486,13 @@ begin
   FCapture.StartBurst;
   UpdateEnabledStates;
 end;
+
 procedure TFrmMain.HandleStopBurstCapture(Sender: TObject);
 begin
   if not FCapture.BurstEnabled then
     StopBurstCapture;
 end;
+
 procedure TFrmMain.StopBurstCapture;
 var
   iDuration : Integer;
@@ -472,6 +505,13 @@ begin
    [FCurrentCaptureFormat.iFrameWidth, FCurrentCaptureFormat.iFrameHeigth,
    FCurrentCaptureFormat.iFramesPerSecond, FBurstCaptureCount, iDuration, iFrameRate]), ltInfo);
 end;
+
+procedure TFrmMain.ToggleEnabledDirectX(Sender: TObject);
+begin
+  FCapture.EnabledDirectX := chkDirect2D.Checked;
+  UpdateSelectedDevice;
+end;
+
 procedure TFrmMain.GetBurstDetails(var ADurationSec : Integer; var AFramesPerSecond : Integer);
 begin
   ADurationSec := SecondsBetween(FBurstStartTime, Now);
@@ -480,6 +520,7 @@ begin
   else
     AFramesPerSecond := 0;
 end;
+
 procedure TFrmMain.UpdateSelectedDevice;
 begin
   FCapture.CloseSource;
@@ -488,6 +529,7 @@ begin
   PopulateResolutions;
   UpdateEnabledStates;
 end;
+
 procedure TFrmMain.SetDevice(const ADevice : TDeviceDetails);
 begin
   BeginBusy;
@@ -503,29 +545,33 @@ begin
     EndBusy;
   end;
 end;
+
 procedure TFrmMain.PopulateResolutions;
 var
   sFormatDescription : string;
-  iSelectedIndex : Integer;
   oFormat : TVideoFormat;
   iDefaultIndex : Integer;
+  sCurrentResolution : string;
 begin
+  if FDefaultResolution <> '' then
+    sCurrentResolution := FDefaultResolution
+  else
+    sCurrentResolution := cbxResolution.Text;
+
   cbxResolution.Clear;
   if Assigned(FCapture) and FCapture.SourceOpen then
   begin
     Log('Populating device resolutions', ltInfo);
-    iSelectedIndex := -1;
     for oFormat in FCapture.VideoFormats  do
     begin
       sFormatDescription := Format('%d x %d   (%d fps)    %s',
       [oFormat.iFrameWidth, oFormat.iFrameHeigth, oFormat.iFramesPerSecond, GetGUIDNameConst(oFormat.oSubType)]);
       cbxResolution.Items.Add(sFormatDescription);
     end;
-    if iSelectedIndex > - 1 then
-      cbxResolution.ItemIndex := iSelectedIndex;
-    if FDefaultResolution <> '' then
+
+    if sCurrentResolution <> '' then
     begin
-      iDefaultIndex := cbxResolution.Items.IndexOf(FDefaultResolution);
+      iDefaultIndex := cbxResolution.Items.IndexOf(sCurrentResolution);
       if iDefaultIndex > -1 then
       begin
         cbxResolution.ItemIndex := iDefaultIndex;
@@ -536,6 +582,7 @@ begin
     Log(Format('Found (%d) supported resolutions', [cbxResolution.Items.Count]), ltInfo);
   end;
 end;
+
 procedure TFrmMain.PopulateDeviceList;
 var
   oResult : HRESULT;
@@ -585,6 +632,7 @@ begin
     EndBusy;
   end;
 end;
+
 function TFrmMain.DeviceExists(ADevices : TArray<TDeviceDetails>; const AName: string; out AIndex : Integer): Boolean;
 var
   i : Integer;
@@ -601,6 +649,7 @@ begin
   end;
   Result := AIndex >= 0;
 end;
+
 procedure TFrmMain.Log(const AText: string; ALogType: TLogType);
 var
   sThread : string;
@@ -617,39 +666,47 @@ begin
                                     cTab + 'Memory Used: ' + GetMemoryUsed + cTab + AText);
   end;
 end;
+
 procedure TFrmMain.UpdateEnabledStates;
 begin
   if FCapture.SourceOpen then
     tsFrame.Caption := Format('Frame Capture (%d x %d ) ', [FCurrentCaptureFormat.iFrameWidth, FCurrentCaptureFormat.iFrameHeigth])
   else
     tsFrame.Caption := 'Frame Capture';
+
   btnCaptureFrame.Enabled := FCapture.SourceOpen and not FCapture.BurstEnabled;
   cbxResolution.Enabled := FCapture.SourceOpen and (cbxCaptureDevices.ItemIndex > 0);
   btnSaveImage.Enabled := Assigned(FLastCapturedFrame) and not FLastCapturedFrame.Empty;
   btnStartBurstCapture.Enabled := FCapture.SourceOpen and not FCapture.BurstEnabled;
   btnStopBurstCapture.Enabled :=  FCapture.SourceOpen and FCapture.BurstEnabled;
 end;
+
 procedure TFrmMain.BeginBusy;
 begin
   Screen.Cursor := crHourGlass;
 end;
+
 procedure TFrmMain.EndBusy;
 begin
   Screen.Cursor := crDefault;
 end;
+
 procedure TFrmMain.HandleLogLevelChange(Sender: TObject);
 begin
   UpdateLogLevel;
 end;
+
 procedure TFrmMain.UpdateLogLevel;
 begin
   FLogLevel := TLogType(cboLogLevel.ItemIndex);
 end;
+
 procedure TFrmMain.HandleMinimumFrameRateChange(Sender: TObject);
 begin
   FCapture.MinimumFrameRate := StrToInt(cbxFrameRateMin.Text);
   UpdateSelectedDevice;
 end;
+
 procedure TFrmMain.HandlePreviewChange(Sender: TObject);
 begin
   pbCapture.Repaint;

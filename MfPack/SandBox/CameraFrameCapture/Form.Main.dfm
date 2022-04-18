@@ -239,6 +239,20 @@ object FrmMain: TFrmMain
         OnClick = HandleStopBurstCapture
       end
     end
+    object tsAdvanced: TTabSheet
+      Caption = 'Advanced'
+      ImageIndex = 2
+      object chkDirect2D: TCheckBox
+        Left = 16
+        Top = 16
+        Width = 183
+        Height = 17
+        Caption = 'Enable Direct X decoding'
+        TabOrder = 0
+        WordWrap = True
+        OnClick = ToggleEnabledDirectX
+      end
+    end
     object tsDiagnostics: TTabSheet
       Caption = 'Diagnostics'
       ImageIndex = 2
