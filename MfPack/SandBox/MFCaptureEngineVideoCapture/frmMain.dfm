@@ -50,7 +50,6 @@ object MainWindow: TMainWindow
     ShowCaption = False
     ShowHint = False
     TabOrder = 1
-    ExplicitTop = 11
   end
   object pnlSnapShot: TPanel
     Left = 768

@@ -145,7 +145,7 @@ begin
       psample := IMFSample(@msg.lParam);
 
       // process the sample
-      ProcessSample(pSample);
+      {ProcessSample(pSample); } {TODO Needs implementation -cGeneral : ActionItem}
 
 
       Handled := True;

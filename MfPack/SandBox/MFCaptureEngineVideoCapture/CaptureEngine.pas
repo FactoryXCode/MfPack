@@ -27,6 +27,7 @@ uses
   Winapi.D3DCommon,
   WinApi.D3D11,
   {Application}
+  SampleConverter,
   Utils;
 
 
@@ -411,8 +412,9 @@ begin
     begin
       hr := pSample.ConvertToContiguousBuffer(mfBuffer);
 
-      mfBuffer.
+      { TODO : convert sample to bitmap send bitmap to mainform snapshot rect (TPaintbox) }
 
+      bla
       m_pManager.m_SampleFromCallBack.pSample := pSample;
 
      if not PostMessage(DestHandle,
