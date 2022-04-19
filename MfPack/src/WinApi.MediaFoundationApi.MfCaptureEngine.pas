@@ -131,19 +131,19 @@ type
 
 const
     //
-    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW  = UINT($fffffffa); // The preferred stream for previewing video
+    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW  = DWord($fffffffa); // The preferred stream for previewing video
     {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW}
-    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD   = UINT($fffffff9); // The preferred stream for recording video
+    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD   = DWord($fffffff9); // The preferred stream for recording video
     {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD}
-    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO          = UINT($fffffff8); // The first independent photo stream if present, or else the same stream chosen by MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW
+    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO          = DWord($fffffff8); // The first independent photo stream if present, or else the same stream chosen by MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW
     {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO}
-    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_AUDIO          = UINT($fffffff7); // The first available audio stream
+    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_AUDIO          = DWord($fffffff7); // The first available audio stream
     {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_AUDIO}
     {NTDDI_VERSION > NTDDI_WIN10_FE}
-    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_METADATA       = UINT($fffffff6); // The first available metadata stream
+    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_METADATA       = DWord($fffffff6); // The first available metadata stream
     {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_METADATA}
     {END NTDDI_VERSION}
-    MF_CAPTURE_ENGINE_MEDIASOURCE                                = UINT($ffffffff);
+    MF_CAPTURE_ENGINE_MEDIASOURCE                                = DWord($ffffffff);
     {$EXTERNALSYM MF_CAPTURE_ENGINE_MEDIASOURCE}
 
 

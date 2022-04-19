@@ -25,7 +25,8 @@
 // 13/08/2020 All                 Enigma release. New layout and namespaces
 // 10/12/2020                     Compatibility update.
 // 25/01/2021 Tony/Jasper S.      Changed TCHAR and wchar_t implementation
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/10/2021 All                 Updated to 10.0.22000.0
+// 10/04/2022 Tony                Added
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.

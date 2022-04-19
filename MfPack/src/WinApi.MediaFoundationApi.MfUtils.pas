@@ -162,6 +162,7 @@ type
                             wMinorVersion: Word;
                             wServicePackMajor: Word): Boolean;
 
+
   // C++ translations
   //=================
   function UIntAdd(var uAugend: UINT32;
@@ -1521,5 +1522,8 @@ begin
   data := (data AND (Not ((index AND $FF) shl (index shr 8)))) or
           ((value AND index AND $FF) shl (index shr 8));
 end;
+
+
+
 
 end.
