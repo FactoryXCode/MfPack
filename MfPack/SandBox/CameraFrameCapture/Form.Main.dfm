@@ -23,7 +23,7 @@ object FrmMain: TFrmMain
     Top = 0
     Width = 1214
     Height = 233
-    ActivePage = tsSetup
+    ActivePage = tsAdvanced
     Align = alTop
     TabOrder = 0
     object tsSetup: TTabSheet
@@ -242,6 +242,20 @@ object FrmMain: TFrmMain
     object tsAdvanced: TTabSheet
       Caption = 'Advanced'
       ImageIndex = 2
+      object lblBrightness: TLabel
+        Left = 16
+        Top = 48
+        Width = 61
+        Height = 15
+        Caption = 'Brightness: '
+      end
+      object lblBrightnessValue: TLabel
+        Left = 291
+        Top = 48
+        Width = 36
+        Height = 15
+        Caption = '[Value]'
+      end
       object chkDirect2D: TCheckBox
         Left = 16
         Top = 16
@@ -251,6 +265,29 @@ object FrmMain: TFrmMain
         TabOrder = 0
         WordWrap = True
         OnClick = ToggleEnabledDirectX
+      end
+      object tbBrightness: TTrackBar
+        Left = 83
+        Top = 44
+        Width = 201
+        Height = 24
+        Max = 64
+        Min = -64
+        ParentShowHint = False
+        ShowHint = True
+        ShowSelRange = False
+        TabOrder = 1
+        TickStyle = tsNone
+        OnChange = HandleBrightnessChanged
+      end
+      object btnResetBrightness: TButton
+        Left = 344
+        Top = 44
+        Width = 75
+        Height = 25
+        Caption = 'Reset'
+        TabOrder = 2
+        OnClick = HandleResetBrightness
       end
     end
     object tsDiagnostics: TTabSheet

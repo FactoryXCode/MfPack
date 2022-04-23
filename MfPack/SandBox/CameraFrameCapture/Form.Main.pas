@@ -79,6 +79,10 @@ type
     btnStopBurstCapture: TButton;
     tsAdvanced: TTabSheet;
     chkDirect2D: TCheckBox;
+    tbBrightness: TTrackBar;
+    lblBrightness: TLabel;
+    lblBrightnessValue: TLabel;
+    btnResetBrightness: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnRefreshDevicesClick(Sender: TObject);
@@ -98,8 +102,11 @@ type
     procedure HandleDisplayImage(Sender: TObject);
     procedure HandlePreviewChange(Sender: TObject);
     procedure ToggleEnabledDirectX(Sender: TObject);
+    procedure HandleBrightnessChanged(Sender: TObject);
+    procedure HandleResetBrightness(Sender: TObject);
   private
     FLogLevel: TLogType;
+    FUpdating : Boolean;
     FFormatSettings: TFormatSettings;
     FCapture: TCameraCaptureAsync;
     FBurstCaptureCount : Integer;
@@ -142,6 +149,8 @@ type
     procedure LoadImageFromStream;
     procedure PaintMessage(const AText: string);
     procedure UpdateLogLevel;
+    procedure GetCurrentBrightness;
+    procedure SetBrightness(AValue : Integer);
   end;
 var
   FrmMain: TFrmMain;
@@ -182,6 +191,8 @@ begin
   {$ELSE}
      Caption := Caption + ' 64-bit';
   {$ENDIF}
+   FUpdating := False;
+   lblBrightnessValue.Caption := '';
    FLastCapturedFrame := TBitmap.Create;
    FFormatSettings := TFormatSettings.Create;
    pcSetup.ActivePageIndex := 0;
@@ -219,8 +230,8 @@ procedure TFrmMain.SetDefaults;
 begin
   // Set a default values for selection on load.
   // Examples below
-  FDefaultDeviceName := 'HD USB CAMERA';
-  FDefaultResolution := '3840 x 2160   (30 fps)    MFVideoFormat_NV12';
+  //FDefaultDeviceName := 'HD USB CAMERA';
+  //FDefaultResolution := '3840 x 2160   (30 fps)    MFVideoFormat_NV12';
   FCapture.MinimumFrameRate := StrToInt(cbxFrameRateMin.Text);
 end;
 
@@ -262,6 +273,11 @@ begin
   HandleResolutionChanged;
 end;
 
+procedure TFrmMain.HandleResetBrightness(Sender: TObject);
+begin
+  tbBrightness.Position := FCapture.BrightnessControl.FDefault;
+end;
+
 procedure TFrmMain.HandleResolutionChanged;
 begin
   if cbxResolution.ItemIndex > -1 then
@@ -287,7 +303,25 @@ begin
     else
       Log('Failed to set capture format', ltError);
 
+    GetCurrentBrightness;
     UpdateEnabledStates;
+  end;
+end;
+
+procedure TFrmMain.GetCurrentBrightness;
+begin
+  FUpdating := True;
+  try
+    btnResetBrightness.Enabled := FCapture.BrightnessControl.FManualControl;
+
+    tbBrightness.Enabled := FCapture.BrightnessControl.FManualControl;
+    tbBrightness.Min := FCapture.BrightnessControl.FMin;
+    tbBrightness.Max := FCapture.BrightnessControl.FMax;
+
+    tbBrightness.Position := FCapture.Brightness;
+    lblBrightnessValue.Caption := tbBrightness.Position.ToString;
+  finally
+    FUpdating := False;
   end;
 end;
 
@@ -440,6 +474,20 @@ begin
   ALeft := (pbCapture.Width - AWidth) div 2;
 end;
 
+procedure TFrmMain.HandleBrightnessChanged(Sender: TObject);
+begin
+  SetBrightness(tbBrightness.Position);
+end;
+
+procedure TFrmMain.SetBrightness(AValue : Integer);
+begin
+  FCapture.Brightness := AValue;
+  lblBrightnessValue.Caption := AValue.ToString;
+
+  if not FUpdating and FCapture.SourceOpen then
+    FCapture.RequestFrame;
+end;
+
 procedure TFrmMain.HandleBurstMode;
 begin
   if FCapture.BurstEnabled then
@@ -510,6 +558,8 @@ procedure TFrmMain.ToggleEnabledDirectX(Sender: TObject);
 begin
   FCapture.EnabledDirectX := chkDirect2D.Checked;
   UpdateSelectedDevice;
+  GetCurrentBrightness;
+  FCapture.RequestFrame;
 end;
 
 procedure TFrmMain.GetBurstDetails(var ADurationSec : Integer; var AFramesPerSecond : Integer);

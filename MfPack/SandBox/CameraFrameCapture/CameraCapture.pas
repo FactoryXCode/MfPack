@@ -72,6 +72,7 @@ uses
   WinAPI.MediaFoundationApi.MfObjects,
   WinAPI.MediaFoundationApi.MfUtils,
   WinApi.MediaFoundationApi.MfIdl,
+  WinApi.StrmIf,
   {Application}
   Support,
   SampleConverter,
@@ -92,6 +93,16 @@ type
 
   TCameraCapture = class;
 
+  TCameraBrightness = record
+    FMin : Integer;
+    FMax : Integer;
+    FStep : Integer;
+    FDefault : Integer;
+    FManualControl : Boolean;
+
+    procedure Reset;
+  end;
+
   TCameraCapture = class(TInterfacedPersistent)
   private
     FMaxFramesToSkip: Integer;
@@ -109,6 +120,8 @@ type
     FMinimumFrameRate : Integer;
     FMaxFrameRateReadable : Integer;
     FDXResetToken : UINT;
+    FVideoAmp : IAMVideoProcAmp;
+    FCameraBrightness : TCameraBrightness;
 
     procedure SetMaxFramesToSkip(const AValue: Integer);
 
@@ -121,6 +134,10 @@ type
     function SetupDirectXAccereration(oAttributes: IMFAttributes): Boolean;
     procedure DestroyDirectXDevice;
     procedure SetEnabledDirectX(const AValue: Boolean);
+    function CheckSucceeded(AStatus: HRESULT; const AMethod: string; ALogFailure: Boolean = True): Boolean;
+    function GetBrightness: Integer;
+    procedure SetBrightness(const AValue: Integer);
+    function ConfigureVideoProcAmp(const AMediaSource : IMFMediaSource): Boolean;
   protected
     FSourceReader: IMFSourceReader;
     FOnCalculateComplete : TOnCalculateComplete;
@@ -203,6 +220,10 @@ type
     property SampleConverter: TSampleConverter read FSampleConverter;
     property MinimumFrameRate : Integer read FMinimumFrameRate write FMinimumFrameRate;
     property EnabledDirectX : Boolean read FEnabledDirectX write SetEnabledDirectX;
+
+    property Brightness : Integer read GetBrightness write SetBrightness;
+
+    property BrightnessControl : TCameraBrightness read FCameraBrightness;
   end;
 
 implementation
@@ -282,6 +303,7 @@ begin
   FAwaitingFlush := False;
   FSupportsSeek := False;
   FMaxFramesToSkip := 40;
+  FCameraBrightness.Reset;
 end;
 
 procedure TCameraCapture.ReturnDataFromSample(ASample : IMFSample);
@@ -409,30 +431,83 @@ begin
   if Result then
     Result := PopulateStreamFormats;
 
+  if Result then
+    ConfigureVideoProcAmp(AMediaSource);
 
   if Result then
     // By default, select the first stream
     Result := SelectVideoStream and GetVideoFormat(False);
 end;
 
+function TCameraCapture.ConfigureVideoProcAmp(const AMediaSource : IMFMediaSource) : Boolean;
+var
+  oCaps : Integer;
+begin
+  Result := SUCCEEDED(AMediaSource.QueryInterface(IAMVideoProcAmp, FVideoAmp));
+  FCameraBrightness.Reset;
+
+  if Result then
+  begin
+    Result := SUCCEEDED(FVideoAmp.GetRange(VideoProcAmp_Brightness, FCameraBrightness.FMin, FCameraBrightness.FMax, FCameraBrightness.FStep, FCameraBrightness.FDefault, oCaps));
+
+    if Result then
+      FCameraBrightness.FManualControl := oCaps = Ord(VideoProcAmp_Flags_Manual);
+  end;
+end;
+
+procedure TCameraCapture.SetBrightness(const AValue: Integer);
+var
+  oFlags : Long;
+begin
+  oFlags := 0;
+  if Assigned(FVideoAmp) then
+    FVideoAmp.Set_(VideoProcAmp_Brightness, AValue, oFlags);
+end;
+
+function TCameraCapture.GetBrightness: Integer;
+var
+  iValue : Integer;
+  oFlags : Integer;
+begin
+  oFlags := 0;
+  if Assigned(FVideoAmp) and SUCCEEDED(FVideoAmp.Get(VideoProcAmp_Brightness, iValue, oFlags)) then
+    Result := iValue
+  else
+    Result := 0;
+end;
+
+
 function TCameraCapture.SetupDirectXAccereration(oAttributes : IMFAttributes) : Boolean;
 var
   oFlags : UINT;
   pMultithread: ID3D10Multithread;
+  oFeatureLevels: array[0..6] of D3D_FEATURE_LEVEL;
+const
+   // This should be in the D3D11_CREATE_DEVICE_FLAG enumeration of WinApi.D3D11.pas
+   D3D11_CREATE_DEVICE_VIDEO_SUPPORT = $800;
 begin
   oFlags := D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 
-  Result := SUCCEEDED(D3D11CreateDevice(
+  oFeatureLevels[0] := D3D_FEATURE_LEVEL_11_1;
+  oFeatureLevels[1] := D3D_FEATURE_LEVEL_11_0;
+  oFeatureLevels[2] := D3D_FEATURE_LEVEL_10_1;
+  oFeatureLevels[3] := D3D_FEATURE_LEVEL_10_0;
+  oFeatureLevels[4] := D3D_FEATURE_LEVEL_9_3;
+  oFeatureLevels[5] := D3D_FEATURE_LEVEL_9_2;
+  oFeatureLevels[6] := D3D_FEATURE_LEVEL_9_1;
+
+  Result := CheckSucceeded(D3D11CreateDevice(
     nil, // Default adapter
     D3D_DRIVER_TYPE_HARDWARE, // A hardware driver, which implements Direct3D features in hardware.
     0,
     oFlags,
-    nil, 0, // default feature
+    @oFeatureLevels,
+    Length(oFeatureLevels),
     D3D11_SDK_VERSION,
     FDirectXDevice,
     FFeatureLevel,
     FContext
-  ));
+  ), 'Create D3D11 device');
 
   if Result then
   begin
@@ -774,6 +849,25 @@ end;
 procedure TCameraCapture.SetMaxFramesToSkip(const AValue: Integer);
 begin
   FMaxFramesToSkip := AValue;
+end;
+
+function TCameraCapture.CheckSucceeded(AStatus : HRESULT; const AMethod : string; ALogFailure : Boolean = True) : Boolean;
+begin
+ Result := SUCCEEDED(AStatus);
+ if not Result and Assigned(OnLog) then
+    OnLog(Format('Method "%s" failed. Error code: %d',  [AMethod, AStatus]), ltError);
+end;
+
+
+{ TCameraBrightness }
+
+procedure TCameraBrightness.Reset;
+begin
+  FMin := 0;
+  FMax := 0;
+  FStep := 0;
+  FDefault := 0;
+  FManualControl := False;
 end;
 
 end.

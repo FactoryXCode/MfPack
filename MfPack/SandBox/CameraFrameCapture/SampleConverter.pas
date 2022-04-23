@@ -172,11 +172,15 @@ var
   oFileHeader : BITMAPFILEHEADER;
   oFileInfo : BITMAPINFOHEADER;
 begin
-  Result := ConvertSampleToRGB(ASample, pConvertedSample);
-
-  if Result then
-    // Converts a sample with multiple buffers into a sample with a single buffer.
+  if AVideoInfo.oSubType <> MFVideoFormat_RGB32 then
+  begin
+    Result := ConvertSampleToRGB(ASample, pConvertedSample);
+    if Result then
+     // Converts a sample with multiple buffers into a sample with a single buffer.
     Result := SUCCEEDED(pConvertedSample.ConvertToContiguousBuffer(pBuffer));
+  end
+  else
+    Result := ConvertSampleToRGB(ASample, pConvertedSample);
 
   if Result then
   begin
