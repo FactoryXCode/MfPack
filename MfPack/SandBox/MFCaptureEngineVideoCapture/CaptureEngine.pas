@@ -48,7 +48,7 @@ const
   IDS_ERR_RECORD                      = 105;
   IDS_ERR_CAPTURE                     = 106;
   IDS_ERR_PHOTO                       = 107;
-
+  IDS_ERR_BADREQUEST                  = 108;
 
 
 var
@@ -111,7 +111,6 @@ type
 
   type TCaptureManagerCallBack = class(TInterfacedPersistent, IMFCaptureEngineOnEventCallback)
     private
-      m_cRef: Longint;
       m_hwnd: HWND;
 
       // Implementation of IMFCaptureEngineOnEventCallback
@@ -160,9 +159,9 @@ type
 
     m_SampleFromCallBack: TSampleFromCallBack;
 
-    a_VideoFormatInfo: TArray<TVideoFormatInfo>;
+    a_VideoFormatInfo: array of TVideoFormatInfo;
     m_SampleConverter: TSampleConverter;
-
+    FCritSec: TMFCritSec;
 
     constructor Create(_hwnd: HWND);
     procedure DestroyCaptureEngine();
@@ -180,9 +179,11 @@ type
     procedure SetSleepState(fSleeping: Boolean);
     function UpdateVideo(): HResult;
 
-    function GetCaptureDeviceCaps(const iDevIndex: DWord): HResult;
+    function GetCaptureDeviceCaps(const iDevIndex: DWord;
+                                  const dwStreamType: DWord = MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD): HResult;
 
   public
+
 
     destructor Destroy(); override;
 
@@ -309,7 +310,7 @@ end;
 
 constructor TCaptureManager.TCaptureManagerCallBack.Create(_hwnd: HWND);
 begin
-  inherited;
+  inherited Create();
   m_hwnd := _hwnd;
   m_fSleeping := False;
   m_pManager := Nil;
@@ -319,7 +320,7 @@ end;
 destructor TCaptureManager.TCaptureManagerCallBack.Destroy();
 begin
   //
-  inherited;
+  inherited Destroy();
 end;
 
 
@@ -392,6 +393,26 @@ begin
           else if (guidType = MF_CAPTURE_ENGINE_PHOTO_TAKEN) then
             begin
               // Notice the app the snapshot has been taken.
+
+            end
+          else if guidType = MF_CAPTURE_SOURCE_CURRENT_DEVICE_MEDIA_TYPE_SET then
+            begin
+              // Signal all is ready for captureing.
+
+            end
+          else if guidType = MF_CAPTURE_ENGINE_ERROR then
+            begin
+              // Oops, error uccured.
+
+            end
+          else if guidType = MF_CAPTURE_SINK_PREPARED then
+            begin
+              // Signals that the capture sink is prepared to accept GetService calls
+
+            end
+          else if guidType = MF_CAPTURE_ENGINE_OUTPUT_MEDIA_TYPE_SET then
+            begin
+              // Signals that the output type has been set on captureengine in response to IMFCaptureSink2.SetOutputType
 
             end
           else
@@ -577,6 +598,7 @@ end;
 constructor TCaptureManager.Create(_hwnd: HWND);
 begin
   inherited Create();
+  FCritSec := TMFCritSec.Create;
   m_hwndEvent := _hwnd;
   m_hwndPreview := 0;
   m_bRecording := False;
@@ -590,6 +612,7 @@ end;
 destructor TCaptureManager.Destroy();
 begin
   DestroyCaptureEngine();
+  SafeDelete(FCritSec);
   inherited;
 end;
 
@@ -625,8 +648,6 @@ begin
   m_bRecording := False;
   m_bPhotoPending := False;
   m_errorID := 0;
-
-  SetLength(a_VideoFormatInfo, 0);
 
 end;
 
@@ -857,6 +878,10 @@ begin
         else if (guidType = MF_CAPTURE_ENGINE_ERROR) then
           begin
             DestroyCaptureEngine();
+            SetErrorID(hrStatus, IDS_ERR_CAPTURE);
+          end
+        else if (hrstatus = MF_E_INVALIDREQUEST) then
+          begin
             SetErrorID(hrStatus, IDS_ERR_CAPTURE);
           end
         else if (FAILED(hrStatus)) then
@@ -1120,12 +1145,24 @@ end;
 
  { TODO 1 -oTony :
 This function is not working very well. Somehow m_pSource (IMFCaptureSource) returns
--1072875854 ( $C00D36B2) 'The request is invalid in the current state.' }
-function TCaptureManager.GetCaptureDeviceCaps(const iDevIndex: DWord): HResult;
+-1072875854 ( $C00D36B2) 'The request is invalid in the current state.'}
+
+// Note:
+// dwStreamType parameter can only be one of the following:
+//   MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW
+//   MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD
+//   MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO
+//   MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_AUDIO
+//   MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_METADATA
+//   MF_CAPTURE_ENGINE_MEDIASOURCE
+//
+function TCaptureManager.GetCaptureDeviceCaps(const iDevIndex: DWord;
+                                              const dwStreamType: DWord = MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD): HResult;
 var
   pSource: IMFCaptureSource;
   mediaType: IMFMediaType;
   i: Integer;
+  iCount: UINT32;
   hr: HResult;
 
   //
@@ -1144,10 +1181,11 @@ var
   iMaxFrameRateDenominator: UINT32;
   iMinFrameRate: UINT32;
   iMinFrameRateDenominator: UINT32;
-  aStreamCategory: MF_CAPTURE_ENGINE_STREAM_CATEGORY;
 
 begin
 try
+
+
 
   if not DeviceParam.DeviceIsSelected then
     begin
@@ -1157,28 +1195,29 @@ try
 
   hr := m_pEngine.GetSource(pSource);
 
-  // Do we need this?
-  hr := pSource.GetCurrentDeviceMediaType(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO,
-                                          MediaType);
-  // Do we need this?
-  hr := pSource.GetDeviceStreamCategory(iDevIndex,
-                                        aStreamCategory);
+  if SUCCEEDED(hr) then
+    hr := DeviceParam.Device.GetCount(iCount);
 
   if SUCCEEDED(hr) then
     begin
+
+  FCritSec.Lock;
 
       i := 0;
       SetLength(a_VideoFormatInfo,
                 0);
 
       // Get all capabillities
-      while (hr = S_OK) and (i <= 20) do
+      for i := 0 to iCount-1 do
         begin
-          hr := MFCreateMediaType(mediaType);
+         // hr := MFCreateMediaType(mediaType);
 
-          hr := pSource.GetAvailableDeviceMediaType(DWord(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO),
+          hr := pSource.GetAvailableDeviceMediaType(dwStreamType,
                                                     i,
                                                     @mediaType);
+          if (hr = MF_E_NO_MORE_TYPES) then
+            break;
+
 
           hr := mediaType.GetGUID(MF_MT_MAJOR_TYPE,
                                   fMajorType);
@@ -1215,13 +1254,11 @@ try
                                     iMaxFrameRateDenominator);
 
 
-          if (hr = MF_E_NO_MORE_TYPES) or (FAILED(hr)) then
-            break
-          else
+
+          if SUCCEEDED(hr) then
             begin
-              inc(i);
               SetLength(a_VideoFormatInfo,
-                        i);
+                        i+1);
               a_VideoFormatInfo[i].iVideoWidth := iVideoWidth;
               a_VideoFormatInfo[i].iVideoHeight := iVideoHeight;
               a_VideoFormatInfo[i].iBufferWidth := iBufferWidth;
@@ -1234,14 +1271,14 @@ try
               a_VideoFormatInfo[i].iMaxFrameRate := iMaxFrameRate;
               a_VideoFormatInfo[i].iMaxFrameRateDenominator := iMaxFrameRateDenominator;
               a_VideoFormatInfo[i].iMinFrameRate := iMinFrameRate;
-              a_VideoFormatInfo[i].iMinFrameRateDenominator :=  iMinFrameRateDenominator;
-
-              mediaType := nil;
+              a_VideoFormatInfo[i].iMinFrameRateDenominator := iMinFrameRateDenominator;
             end;
+
       end;
     end;
 
 finally
+  FCritSec.Unlock;
   Result := hr;
 end;
 end;

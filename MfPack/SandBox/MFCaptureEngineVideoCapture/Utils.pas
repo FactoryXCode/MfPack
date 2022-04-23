@@ -26,7 +26,17 @@ const
   ERR_CAPTURE    = 'An error occurred during capture.';
   ERR_PHOTO      = 'Unable to capture still photo.';
 
-
+type
+  // CriticalSection
+  TMFCritSec = class
+  private
+    FCriticalSection: TRTLCriticalSection;
+  public
+    constructor Create();
+    destructor Destroy(); override;
+    procedure Lock();
+    procedure Unlock();
+  end;
 
   // Helper: Returns the frame size from a video media type.
   function GetFrameSize(pType: IMFMediaType;
@@ -53,7 +63,36 @@ const
                                 guidEncodingType: REFGUID): HResult;
 
 
+
+
 implementation
+
+
+{ TMFCritSec }
+
+constructor TMFCritSec.Create();
+begin
+  InitializeCriticalSection(FCriticalSection);
+end;
+
+
+destructor TMFCritSec.Destroy();
+begin
+  DeleteCriticalSection(FCriticalSection);
+  inherited;
+end;
+
+
+procedure TMFCritSec.Lock();
+begin
+  EnterCriticalSection(FCriticalSection);
+end;
+
+procedure TMFCritSec.Unlock();
+begin
+  LeaveCriticalSection(FCriticalSection);
+end;
+
 
 
 
@@ -249,7 +288,6 @@ begin
   bmp := TBitmap.Create();
   bmp.Width := 400;
   bmp.Height := 100;
-
 
 end;
 

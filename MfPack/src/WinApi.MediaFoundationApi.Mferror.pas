@@ -242,7 +242,7 @@ const
   MF_E_BUFFERTOOSMALL                   = _HRESULT_TYPEDEF_($C00D36B1);
   {$EXTERNALSYM MF_E_BUFFERTOOSMALL}
 
-//                  F
+//
 // MessageId: MF_E_INVALIDREQUEST
 //
 // MessageText:

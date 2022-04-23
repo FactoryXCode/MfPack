@@ -23,6 +23,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 // 07/03/2022 Tony                Fixed IMFCaptureEngineClassFactory.CreateInstance
+// 22/04/2022 Tony                Fixed IMFCaptureSource.GetAvailableDeviceMediaType
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -156,20 +157,22 @@ type
 
   // Defines the source stream category
   PMF_CAPTURE_ENGINE_STREAM_CATEGORY = ^MF_CAPTURE_ENGINE_STREAM_CATEGORY;
-  MF_CAPTURE_ENGINE_STREAM_CATEGORY                     = (
-    MF_CAPTURE_ENGINE_STREAM_CATEGORY_VIDEO_PREVIEW     = $00000000, // Video Preview stream
-    MF_CAPTURE_ENGINE_STREAM_CATEGORY_VIDEO_CAPTURE     = $00000001, // Video Capture Stream
-    MF_CAPTURE_ENGINE_STREAM_CATEGORY_PHOTO_INDEPENDENT = $00000002, // Independent photo stream
-    MF_CAPTURE_ENGINE_STREAM_CATEGORY_PHOTO_DEPENDENT   = $00000003, // Dependent photo stream
-    MF_CAPTURE_ENGINE_STREAM_CATEGORY_AUDIO             = $00000004, // Audio stream
-    MF_CAPTURE_ENGINE_STREAM_CATEGORY_UNSUPPORTED       = $00000005, // Unsupported stream
-    {NTDDI_VERSION > NTDDI_WIN10_FE}
-    MF_CAPTURE_ENGINE_STREAM_CATEGORY_METADATA          = $00000006  // Video Metadata stream
-  );
+  MF_CAPTURE_ENGINE_STREAM_CATEGORY = DWord;
   {$EXTERNALSYM MF_CAPTURE_ENGINE_STREAM_CATEGORY}
 
+  const
+    MF_CAPTURE_ENGINE_STREAM_CATEGORY_VIDEO_PREVIEW     = MF_CAPTURE_ENGINE_STREAM_CATEGORY($00000000); // Video Preview stream
+    MF_CAPTURE_ENGINE_STREAM_CATEGORY_VIDEO_CAPTURE     = MF_CAPTURE_ENGINE_STREAM_CATEGORY($00000001); // Video Capture Stream
+    MF_CAPTURE_ENGINE_STREAM_CATEGORY_PHOTO_INDEPENDENT = MF_CAPTURE_ENGINE_STREAM_CATEGORY($00000002); // Independent photo stream
+    MF_CAPTURE_ENGINE_STREAM_CATEGORY_PHOTO_DEPENDENT   = MF_CAPTURE_ENGINE_STREAM_CATEGORY($00000003); // Dependent photo stream
+    MF_CAPTURE_ENGINE_STREAM_CATEGORY_AUDIO             = MF_CAPTURE_ENGINE_STREAM_CATEGORY($00000004); // Audio stream
+    MF_CAPTURE_ENGINE_STREAM_CATEGORY_UNSUPPORTED       = MF_CAPTURE_ENGINE_STREAM_CATEGORY($00000005); // Unsupported stream
+    {NTDDI_VERSION > NTDDI_WIN10_FE}
+    MF_CAPTURE_ENGINE_STREAM_CATEGORY_METADATA          = MF_CAPTURE_ENGINE_STREAM_CATEGORY($00000006);  // Video Metadata stream
 
 
+
+type
   //////////////////////////////////////////////////////////////////////////////
   //
   // MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE Enumeration
@@ -301,12 +304,12 @@ const
 
   // MF_CAPTURE_ENGINE_CAMERA_STREAM_BLOCKED
   // Signals that video capture is being blocked by the driver.
-  MF_CAPTURE_ENGINE_CAMERA_STREAM_BLOCKED :	TGUID = '{A4209417-8D39-46F3-B759-5912528F4207}';
+  MF_CAPTURE_ENGINE_CAMERA_STREAM_BLOCKED : TGUID = '{A4209417-8D39-46F3-B759-5912528F4207}';
   {$EXTERNALSYM MF_CAPTURE_ENGINE_CAMERA_STREAM_BLOCKED}
 
   // MF_CAPTURE_ENGINE_CAMERA_STREAM_UNBLOCKED
   // Signals that video capture is restored after being blocked.
-  MF_CAPTURE_ENGINE_CAMERA_STREAM_UNBLOCKED :	TGUID = '{9BE9EEF0-CDAF-4717-8564-834AAE66415C}';
+  MF_CAPTURE_ENGINE_CAMERA_STREAM_UNBLOCKED :  TGUID = '{9BE9EEF0-CDAF-4717-8564-834AAE66415C}';
   {$EXTERNALSYM MF_CAPTURE_ENGINE_CAMERA_STREAM_UNBLOCKED}
 
   // MF_CAPTURE_ENGINE_D3D_MANAGER
@@ -398,21 +401,21 @@ const
   // MF_CAPTURE_ENGINE_ENABLE_CAMERA_STREAMSTATE_NOTIFICATION
   // Data type:  UINT32 - 0/not present - do not eanble notification.  Non-zero, enable notification.
   // Indicates whether stream state notification should be enabled or not.
-  MF_CAPTURE_ENGINE_ENABLE_CAMERA_STREAMSTATE_NOTIFICATION :	TGUID = '{4C808E9D-AAED-4713-90FB-CB24064AB8DA}';
+  MF_CAPTURE_ENGINE_ENABLE_CAMERA_STREAMSTATE_NOTIFICATION :  TGUID = '{4C808E9D-AAED-4713-90FB-CB24064AB8DA}';
   {$EXTERNALSYM MF_CAPTURE_ENGINE_ENABLE_CAMERA_STREAMSTATE_NOTIFICATION}
 
   // {8e3f5bd5-dbbf-42f0-8542-d07a3971762a}
   // MF_CAPTURE_ENGINE_MEDIA_CATEGORY
   // Data type:  UINT32 - values come from the MF_CAPTURE_ENGINE_MEDIA_CATEGORY_TYPE enumeration.
   // Attribute that dictates the media capture category used by the capture engine.
-  MF_CAPTURE_ENGINE_MEDIA_CATEGORY :	TGUID = '{8E3F5BD5-DBBF-42F0-8542-D07A3971762A}';
+  MF_CAPTURE_ENGINE_MEDIA_CATEGORY :  TGUID = '{8E3F5BD5-DBBF-42F0-8542-D07A3971762A}';
   {$EXTERNALSYM MF_CAPTURE_ENGINE_MEDIA_CATEGORY}
 
   // {10f1be5e-7e11-410b-973d-f4b6109000fe}
   // MF_CAPTURE_ENGINE_AUDIO_PROCESSING
   // Data type:  UINT32 - values come from the MF_CAPTURE_ENGINE_AUDIO_PROCESSING_MODE enumeration.
   // Attribute that defines the audio processing mode to be used during capture.
-  MF_CAPTURE_ENGINE_AUDIO_PROCESSING :	TGUID = '{10F1BE5E-7E11-410B-973D-F4B6109000FE}';
+  MF_CAPTURE_ENGINE_AUDIO_PROCESSING : TGUID = '{10F1BE5E-7E11-410B-973D-F4B6109000FE}';
   {$EXTERNALSYM MF_CAPTURE_ENGINE_AUDIO_PROCESSING}
 
 
@@ -444,7 +447,7 @@ const
   // CaptureEngine will internally use the KSCAMERAPROFILE_Legacy. If this attribute is set to
   // GUID_NULL, it will inform the camera driver that the application is profile aware and should
   // provide the full range of media types.
-  MF_CAPTURE_ENGINE_SELECTEDCAMERAPROFILE :	TGUID = '{03160B7E-1C6F-4DB2-AD56-A7C430F82392}';
+  MF_CAPTURE_ENGINE_SELECTEDCAMERAPROFILE : TGUID = '{03160B7E-1C6F-4DB2-AD56-A7C430F82392}';
   {$EXTERNALSYM MF_CAPTURE_ENGINE_SELECTEDCAMERAPROFILE}
 
   // {3CE88613-2214-46C3-B417-82F8A313C9C3}
@@ -452,7 +455,7 @@ const
   // Data Type:  UINT32.
   // The UINT32 representing the index of the profile.  If this index is not present, the selected
   // profile index is assumed to be 0.
-  MF_CAPTURE_ENGINE_SELECTEDCAMERAPROFILE_INDEX :	TGUID = '{3CE88613-2214-46C3-B417-82F8A313C9C3}';
+  MF_CAPTURE_ENGINE_SELECTEDCAMERAPROFILE_INDEX :  TGUID = '{3CE88613-2214-46C3-B417-82F8A313C9C3}';
   {$EXTERNALSYM MF_CAPTURE_ENGINE_SELECTEDCAMERAPROFILE_INDEX}
 
 
@@ -785,6 +788,8 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFCaptureSource);'}
   {$EXTERNALSYM IMFCaptureSource}
+  PIMFCaptureSource = ^IMFCaptureSource;
+  {$EXTERNALSYM PIMFCaptureSource}
   IMFCaptureSource = interface(IUnknown)
   ['{439a42a8-0d2c-4505-be83-f79b2a05d5c4}']
 
@@ -838,7 +843,7 @@ type
 
     function GetAvailableDeviceMediaType(dwSourceStreamIndex: DWORD;
                                          dwMediaTypeIndex: DWORD;
-                                         ppMediaType: PIMFMediaType = Nil): HResult; stdcall;
+                                         {out} ppMediaType: PIMFMediaType): HResult; stdcall;
     // Gets an available media type for a stream from the device.
     // <param name = "dwSourceStreamIndex">
     // Zero based stream index of source.
