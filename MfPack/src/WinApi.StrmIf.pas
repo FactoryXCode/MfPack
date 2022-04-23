@@ -2628,18 +2628,18 @@ type
   IAMVideoProcAmp = interface(IUnknown)
     ['{C6E13360-30AC-11d0-A18C-00A0C9118956}']
 
-    function GetRange(Property_: LONG; { VideoProcAmpProperty }
+    function GetRange(Property_: VideoProcAmpProperty; { VideoProcAmpProperty }
                       out pMin: LONG;
-                      pMax: LONG;
-                      pSteppingDelta: LONG;
-                      pDefault: LONG;
+                      out pMax: LONG;
+                      out pSteppingDelta: LONG;
+                      out pDefault: LONG;
                       out pCapsFlags: LONG { VideoProcAmpFlags }): HResult; stdcall;
 
     function Set_(Property_: VideoProcAmpProperty;
                   lValue: LONG;
                   Flags: LONG { VideoProcAmpFlags }): HResult; stdcall;
 
-    function Get(Property_: LONG { VideoProcAmpProperty };
+    function Get(Property_: VideoProcAmpProperty { VideoProcAmpProperty };
                  out lValue: LONG;
                  out Flags: LONG { VideoProcAmpFlags }): HResult; stdcall;
 
