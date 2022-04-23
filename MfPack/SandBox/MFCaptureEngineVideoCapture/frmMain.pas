@@ -22,6 +22,7 @@ uses
   Vcl.AppEvnts,
   Vcl.ExtCtrls,
   Vcl.ComCtrls,
+  Vcl.StdCtrls,
   {ActiveX}
   WinApi.ActiveX.ObjBase,
   {MediaFoundationApi}
@@ -31,19 +32,8 @@ uses
   WinApi.MediaFoundationApi.MfUtils,
   {Application}
   CaptureEngine,
-  dlgChooseDevice, Vcl.StdCtrls;
-
-const
-  IDTIMEOUT      = 'Unable to set the capture device.';
-  ERR_INITIALIZE = 'Unable to initialize the capture engine.';
-  ERR_PREVIEW    = 'An error occurred during preview.';
-  ERR_RECORD     = 'An error occurred during recording.';
-  ERR_CAPTURE    = 'An error occurred during capture.';
-  ERR_PHOTO      = 'Unable to capture still photo.';
-
-
-
-//function ChooseDeviceDlgProc(msg: TMessage): Integer;
+  dlgChooseDevice,
+  Utils;
 
 
 type
@@ -75,15 +65,14 @@ type
     procedure mnuTakePhotoClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure mnuStartRecordingClick(Sender: TObject);
+
   private
     { Private declarations }
     hPreview: HWND;
-    hStatus: HWND;
     bRecording: Boolean;
     bPreviewing: Boolean;
-    pSelectedDevice: IMFActivate;
+    //g_fSleepState: Boolean;
 
-    g_fSleepState: Boolean;
 
     // Messages
     procedure OnSize(var message: TWMSize); message WM_SIZE;
@@ -121,17 +110,6 @@ var
   psample: IMFSample;
 
 begin
-
-  //if msg.hwnd = MainWindow.Handle then
-  //  begin
-      if msg.message = WM_CHOOSE_DEVICEDLG_ITEMINDEX then
-        begin
-           DeviceParam.selection := msg.lParam;
-           DeviceParam.SelectedDeviceName := LPWSTR(msg.WParam);
-           Handled := True;
-           Exit;
-        end;
-   // end;
 
   if msg.hwnd = pnlPreview.Handle then
     begin
@@ -177,7 +155,7 @@ label
 
 begin
   // Initialize COM
-  CoInitializeEx(Nil,
+  CoInitializeEx(nil,
                  COINIT_APARTMENTTHREADED);
 
   // Startup Media Foundation
@@ -194,13 +172,16 @@ begin
 
    // Create the captureengine
 
-   hr := TCaptureManager.CreateInstance(Self.Handle,
-                                        g_pEngine);
+   hr := TCaptureManager.CreateCaptureEngine(Handle,
+                                             g_pEngine);
    if FAILED(hr) then
      goto Done;
 
+   // Create DeviceParam class that holds the Activate pointers of the selected device.
+   DeviceParam := TChooseDeviceParam.Create();
+
    hr := g_pEngine.InitializeCaptureManager(hPreview,
-                                            pSelectedDevice);
+                                            DeviceParam.Device);
    if FAILED(hr) then
      begin
 
@@ -232,11 +213,7 @@ end;
 
 procedure TMainWindow.mnuChooseDeviceClick(Sender: TObject);
 var
-  pAttributes: IMFAttributes;
-  iDevice: UINT32;
   i: Integer;
-  uiNameLen: UINT32;
-  szName: LPWSTR;
   hr: HResult;
 
 label
@@ -244,70 +221,42 @@ label
 
 begin
 
-
-  hr := MFCreateAttributes(pAttributes,
-                           1);
-  if FAILED(hr) then
-    goto Done;
-
-  // create ChooseDeviceParam class
-  DeviceParam := TChooseDeviceParam.Create();
-
-  // Ask for source type = video capture devices
-  hr := pAttributes.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
-                            MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
-  if FAILED(hr) then
-    goto Done;
-
-  // Enumerate devices.
-  hr := MFEnumDeviceSources(pAttributes,
-                            DeviceParam.ppDevices,
-                            DeviceParam.count);
-  if FAILED(hr) then
-    goto Done;
-
- // Populate the listbox with camera's found
-  if Assigned(ChooseDeviceDlg) then
+  // To be sure the dialog is created
+  if not Assigned(ChooseDeviceDlg) then
     begin
-      // Clear the combobox
-      ChooseDeviceDlg.lbxDeviceList.Clear;
-      // Fill the combobox with found capture devices
-      for i := 0 to DeviceParam.count - 1 do
-        begin
-          // Try to get the display-friendly-name.
-{$POINTERMATH ON}
-          hr := DeviceParam.ppDevices[i].GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME,
-                                                            szName,
-                                                            uiNameLen);
-{$POINTERMATH OFF}
-          // Append the friendly name to the combobox.
-          ChooseDeviceDlg.lbxDeviceList.Items.Append(szName);
-          // Show the first in the list
-          ChooseDeviceDlg.lbxDeviceList.ItemIndex:= 0;
-        end;
+      Application.CreateForm(TChooseDeviceDlg, ChooseDeviceDlg);
+      ChooseDeviceDlg.Visible := False;
+    end;
+
+  // Populate the listbox with camera's found
+  // ========================================
+
+  // Clear the combobox
+  ChooseDeviceDlg.lbxDeviceList.Clear;
+  // Fill the combobox with found capture devices
+  for i := 0 to DeviceParam.Count - 1 do
+    begin
+
+      // Choose device index and set params
+      DeviceParam.DeviceIndex := i;
+
+      // Append the friendly name to the combobox.
+      ChooseDeviceDlg.lbxDeviceList.Items.Append(DeviceParam.DeviceName);
+      // Show the first in the list
+      ChooseDeviceDlg.lbxDeviceList.ItemIndex := 0;
     end;
 
   // Ask the user to select one.
   if ChooseDeviceDlg.ShowModal = 1212 then
     begin
-      //OutputDebugString(format('Error: %s (hr = %d)', ['', hr]));
-      Application.ProcessMessages;
-      iDevice := DeviceParam.selection;
+      hr := g_pEngine.InitializeCaptureManager(hPreview,
+                                               DeviceParam.Device);
+      if FAILED(hr) then
+        goto Done;
     end;
 
-{$POINTERMATH ON}
-  hr := g_pEngine.InitializeCaptureManager(hPreview,
-                                           DeviceParam.ppDevices[iDevice]);
-  if FAILED(hr) then
-    goto Done;
+Done:
 
-  SafeRelease(pSelectedDevice);
-
-  pSelectedDevice := DeviceParam.ppDevices[iDevice];
-{$POINTERMATH OFF}
-
-done:
-  SafeRelease(&pAttributes);
 {$IF DEBUG}
   if FAILED(hr) then
     OutputDebugString(PWideChar(format('Error: %s (hr = %d)', [IDTIMEOUT, hr])));
@@ -318,12 +267,16 @@ done:
 end;
 
 
+
 procedure TMainWindow.UpdateUI();
 var
   bEnableRecording: BOOL;
   bEnablePhoto: BOOL;
 
 begin
+  bEnablePhoto := False;
+  bEnableRecording := False;
+
   if not g_pEngine.IsRecording then
     begin
       bRecording := g_pEngine.IsRecording;
@@ -365,9 +318,11 @@ begin
 
 end;
 
+
 procedure TMainWindow.mnuStartPreviewClick(Sender: TObject);
 var
   hr: HResult;
+
 begin
   hr := g_pEngine.StartPreview();
 {$IF DEBUG}

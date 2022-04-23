@@ -18,6 +18,16 @@ uses
   WinApi.MediaFoundationApi.MfMetLib;
 
 
+const
+  IDTIMEOUT      = 'Unable to set the capture device.';
+  ERR_INITIALIZE = 'Unable to initialize the capture engine.';
+  ERR_PREVIEW    = 'An error occurred during preview.';
+  ERR_RECORD     = 'An error occurred during recording.';
+  ERR_CAPTURE    = 'An error occurred during capture.';
+  ERR_PHOTO      = 'Unable to capture still photo.';
+
+
+
   // Helper: Returns the frame size from a video media type.
   function GetFrameSize(pType: IMFMediaType;
                         out pWidth: UINT32;
