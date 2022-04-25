@@ -423,6 +423,17 @@ begin
   iVideoHeight := 0;
   iBufferWidth := 0;
   iBufferHeight := 0;
+  iStride := 0;
+  // Major & Subtypes
+  fSubType := GUID_NULL;
+  fMajorType := GUID_NULL;
+  // Supported framerates
+  iFrameRate := 0;
+  iFrameRateDenominator := 0;
+  iMaxFrameRate := 0;
+  iMaxFrameRateDenominator := 0;
+  iMinFrameRate := 0;
+  iMinFrameRateDenominator := 0;
 end;
 
 end.

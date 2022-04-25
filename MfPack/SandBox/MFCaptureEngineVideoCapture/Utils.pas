@@ -7,6 +7,7 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.WinApiTypes,
+  WinApi.Messages,
   {VCL}
   Vcl.Graphics,
   {MediaFoundationApi}
@@ -25,6 +26,10 @@ const
   ERR_RECORD     = 'An error occurred during recording.';
   ERR_CAPTURE    = 'An error occurred during capture.';
   ERR_PHOTO      = 'Unable to capture still photo.';
+
+
+  procedure HandleThreadMessages(AThread: THandle;
+                                 AWait: Cardinal = INFINITE);
 
 type
   // CriticalSection
@@ -173,7 +178,7 @@ begin
 
   // Configure the video format for the recording sink.
   hr := pSource.GetCurrentDeviceMediaType(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD,
-                                          pMediaType);
+                                          @pMediaType);
   if FAILED(hr) then
     goto Done;
 
@@ -289,6 +294,34 @@ begin
   bmp.Width := 400;
   bmp.Height := 100;
 
+end;
+
+
+procedure HandleThreadMessages(AThread: THandle;
+                               AWait: Cardinal = INFINITE);
+var
+  oMsg: TMsg;
+
+begin
+
+  while (MsgWaitForMultipleObjects(1,
+                                   AThread,
+                                   False,
+                                   AWait,
+                                   QS_ALLINPUT) = WAIT_OBJECT_0 + 1) do
+    begin
+      PeekMessage(oMsg,
+                  0,
+                  0,
+                  0,
+                  PM_REMOVE);  // Messages are not removed from the queue after processing by PeekMessage.
+
+      if oMsg.Message = WM_QUIT then
+        Exit;
+
+      TranslateMessage(oMsg);
+      DispatchMessage(oMsg);
+    end;
 end;
 
 end.

@@ -56,7 +56,6 @@ type
     butSaveToFile: TButton;
     Bevel2: TBevel;
     Button1: TButton;
-    procedure FormDestroy(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure ApplicationEventsMessage(var Msg: tagMSG; var Handled: Boolean);
     procedure mnuChooseDeviceClick(Sender: TObject);
@@ -143,7 +142,13 @@ end;
 
 procedure TMainWindow.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
+ // CanClose := False;
   FreeAndNil(DeviceParam);
+  SafeDelete(g_pEngine);
+  PostQuitMessage(0);
+  MFShutdown();
+  CoUnInitialize();
+  //CanClose := True;
 end;
 
 procedure TMainWindow.FormCreate(Sender: TObject);
@@ -199,15 +204,6 @@ Done:
   if FAILED(hr) then
     Application.Terminate;
 
-end;
-
-
-procedure TMainWindow.FormDestroy(Sender: TObject);
-begin
-  SafeDelete(g_pEngine);
-  PostQuitMessage(0);
-  MFShutdown();
-  CoUnInitialize();
 end;
 
 
