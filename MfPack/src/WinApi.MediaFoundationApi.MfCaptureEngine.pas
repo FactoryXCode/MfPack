@@ -131,6 +131,10 @@ type
 
 
 const
+    // Not published in the SDK!
+    MF_CAPTURE_ENGINE_FIRST_SOURCE_PHOTO_STREAM                  = DWord($FFFFFFFB);
+    MF_CAPTURE_ENGINE_FIRST_SOURCE_VIDEO_STREAM                  = DWord($FFFFFFFC);
+    MF_CAPTURE_ENGINE_FIRST_SOURCE_AUDIO_STREAM                  = DWord($FFFFFFFD);
     //
     MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW  = DWord($fffffffa); // The preferred stream for previewing video
     {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW}
@@ -169,7 +173,6 @@ type
     MF_CAPTURE_ENGINE_STREAM_CATEGORY_UNSUPPORTED       = MF_CAPTURE_ENGINE_STREAM_CATEGORY($00000005); // Unsupported stream
     {NTDDI_VERSION > NTDDI_WIN10_FE}
     MF_CAPTURE_ENGINE_STREAM_CATEGORY_METADATA          = MF_CAPTURE_ENGINE_STREAM_CATEGORY($00000006);  // Video Metadata stream
-
 
 
 type
@@ -843,7 +846,7 @@ type
 
     function GetAvailableDeviceMediaType(dwSourceStreamIndex: DWORD;
                                          dwMediaTypeIndex: DWORD;
-                                         {out} ppMediaType: PIMFMediaType): HResult; stdcall;
+                                         ppMediaType: PIMFMediaType): HResult; stdcall;
     // Gets an available media type for a stream from the device.
     // <param name = "dwSourceStreamIndex">
     // Zero based stream index of source.
@@ -861,7 +864,7 @@ type
     // Pointer to IMFMediaType.
 
     function GetCurrentDeviceMediaType(dwSourceStreamIndex: DWORD;
-                                       out ppMediaType: IMFMediaType): HResult; stdcall;
+                                       {out} ppMediaType: PIMFMediaType): HResult; stdcall;
     // Gets the currently set media type for a stream from the device
     // <param name = "dwSourceStreamIndex">
     // Zero based stream index of source
