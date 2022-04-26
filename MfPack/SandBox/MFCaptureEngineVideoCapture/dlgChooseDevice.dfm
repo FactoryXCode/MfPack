@@ -9,7 +9,7 @@ object ChooseDeviceDlg: TChooseDeviceDlg
   Color = clBtnFace
   ParentFont = True
   OldCreateOrder = True
-  Position = poScreenCenter
+  Position = poMainFormCenter
   PixelsPerInch = 96
   TextHeight = 13
   object btnOK: TButton

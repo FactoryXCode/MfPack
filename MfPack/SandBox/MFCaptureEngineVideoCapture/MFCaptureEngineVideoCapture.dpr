@@ -1,22 +1,21 @@
 program MFCaptureEngineVideoCapture;
 
 uses
-
   {$IFDEF FASTMM}
   FastMM4,
-  {$ELSE IFDEF madExcept}
+  {$ELSE}
   madExcept,
   madLinkDisAsm,
   madListHardware,
   madListProcesses,
   madListModules,
-  {$ENDIF}
-
+  {$ENDIF }
   Vcl.Forms,
   frmMain in 'frmMain.pas' {MainWindow},
   CaptureEngine in 'CaptureEngine.pas',
   dlgChooseDevice in 'dlgChooseDevice.pas' {ChooseDeviceDlg},
-  Utils in 'Utils.pas';
+  Utils in 'Utils.pas',
+  SampleConverter in 'SampleConverter.pas';
 
 {$R *.res}
 

@@ -41,21 +41,15 @@ begin
 end;
 
 
-
 procedure TChooseDeviceDlg.btnOKClick(Sender: TObject);
 begin
-
   if lbxDeviceList.ItemIndex >= 0 then
     begin
-      PostMessage(g_pEngine.PreviewHandle,
-                  WM_CHOOSE_DEVICEDLG_ITEMINDEX,
-                  WPARAM(LPWSTR(lbxDeviceList.Items[lbxDeviceList.ItemIndex])),
-                  LPARAM(lbxDeviceList.ItemIndex));
+      // Set DeviceParam properties
+      DeviceParam.DeviceIndex := lbxDeviceList.ItemIndex;
+      DeviceParam.DeviceIsSelected := True;
       ModalResult := 1212;
-    end
-  else
-    btnCancelClick(Self);
-
+    end;
 end;
 
 end.

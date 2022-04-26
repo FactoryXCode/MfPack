@@ -2292,7 +2292,7 @@ begin
   if (SUCCEEDED(hr)) then
     begin
       hr := pMediaType.GetGUID(MF_MT_SUBTYPE,
-                              guidSubtype);
+                               guidSubtype);
     end;
 
   // Check whether the stream is compressed.

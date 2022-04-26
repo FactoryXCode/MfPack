@@ -7,6 +7,7 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.WinApiTypes,
+  WinApi.Messages,
   {VCL}
   Vcl.Graphics,
   {MediaFoundationApi}
@@ -17,6 +18,30 @@ uses
   WinApi.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MfMetLib;
 
+
+const
+  IDTIMEOUT      = 'Unable to set the capture device.';
+  ERR_INITIALIZE = 'Unable to initialize the capture engine.';
+  ERR_PREVIEW    = 'An error occurred during preview.';
+  ERR_RECORD     = 'An error occurred during recording.';
+  ERR_CAPTURE    = 'An error occurred during capture.';
+  ERR_PHOTO      = 'Unable to capture still photo.';
+
+
+  procedure HandleThreadMessages(AThread: THandle;
+                                 AWait: Cardinal = INFINITE);
+
+type
+  // CriticalSection
+  TMFCritSec = class
+  private
+    FCriticalSection: TRTLCriticalSection;
+  public
+    constructor Create();
+    destructor Destroy(); override;
+    procedure Lock();
+    procedure Unlock();
+  end;
 
   // Helper: Returns the frame size from a video media type.
   function GetFrameSize(pType: IMFMediaType;
@@ -43,7 +68,36 @@ uses
                                 guidEncodingType: REFGUID): HResult;
 
 
+
+
 implementation
+
+
+{ TMFCritSec }
+
+constructor TMFCritSec.Create();
+begin
+  InitializeCriticalSection(FCriticalSection);
+end;
+
+
+destructor TMFCritSec.Destroy();
+begin
+  DeleteCriticalSection(FCriticalSection);
+  inherited;
+end;
+
+
+procedure TMFCritSec.Lock();
+begin
+  EnterCriticalSection(FCriticalSection);
+end;
+
+procedure TMFCritSec.Unlock();
+begin
+  LeaveCriticalSection(FCriticalSection);
+end;
+
 
 
 
@@ -124,7 +178,7 @@ begin
 
   // Configure the video format for the recording sink.
   hr := pSource.GetCurrentDeviceMediaType(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD,
-                                          pMediaType);
+                                          @pMediaType);
   if FAILED(hr) then
     goto Done;
 
@@ -240,7 +294,34 @@ begin
   bmp.Width := 400;
   bmp.Height := 100;
 
+end;
 
+
+procedure HandleThreadMessages(AThread: THandle;
+                               AWait: Cardinal = INFINITE);
+var
+  oMsg: TMsg;
+
+begin
+
+  while (MsgWaitForMultipleObjects(1,
+                                   AThread,
+                                   False,
+                                   AWait,
+                                   QS_ALLINPUT) = WAIT_OBJECT_0 + 1) do
+    begin
+      PeekMessage(oMsg,
+                  0,
+                  0,
+                  0,
+                  PM_REMOVE);  // Messages are not removed from the queue after processing by PeekMessage.
+
+      if oMsg.Message = WM_QUIT then
+        Exit;
+
+      TranslateMessage(oMsg);
+      DispatchMessage(oMsg);
+    end;
 end;
 
 end.

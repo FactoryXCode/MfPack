@@ -84,12 +84,22 @@ uses
 type
   TVideoFormatInfo = record
   public
-    iVideoWidth: Integer;
-    iVideoHeight: Integer;
-    iBufferWidth: Integer;
-    iBufferHeight: Integer;
-    iStride: Integer;
-    oSubType: TGUID;
+    iVideoWidth: UINT32;
+    iVideoHeight: UINT32;
+    iBufferWidth: UINT32;
+    iBufferHeight: UINT32;
+    iStride: UINT32;
+    // Major & Subtypes
+    fSubType: TGuid;
+    fMajorType: TGuid;
+    // Supported framerates
+    iFrameRate: UINT32;
+    iFrameRateDenominator: UINT32;
+    iMaxFrameRate: UINT32;
+    iMaxFrameRateDenominator: UINT32;
+    iMinFrameRate: UINT32;
+    iMinFrameRateDenominator: UINT32;
+
     procedure Reset;
   end;
 
@@ -104,9 +114,7 @@ type
   private
     function ConvertSampleToRGB(const AInputSample: IMFSample;
                                 out AConvertedSample: IMFSample): HResult;
-    function CheckSucceeded(AStatus: HRESULT;
-                            const AMethod: string;
-                            ALogFailure: Boolean = True): HResult;
+
     function IndexOf(const AInput: TGUID;
                      const AValues: array of TGUID): Integer;
 
@@ -125,7 +133,6 @@ type
     function UpdateConverter(const AInputType: IMFMediaType): HResult;
     function DataFromSample(const ASample: IMFSample;
                             const AVideoInfo: TVideoFormatInfo;
-                            var AError: string;
                             out AMemoryStream: TMemoryStream): HResult;
 
     function IsInputSupported(const AInputFormat: TGUID): Integer;
@@ -178,8 +185,8 @@ end;
 
 function TSampleConverter.IsInputSupported(const AInputFormat: TGUID): Integer;
 begin
-  Result := IndexOf(AInputFormat,
-                    FSupportedInputs) > -1;
+  Result := Integer(IndexOf(AInputFormat,
+                    FSupportedInputs) > -1);
 end;
 
 
@@ -208,7 +215,7 @@ var
 
 begin
 
-  if AVideoInfo.oSubType <> MFVideoFormat_RGB32 then
+  if AVideoInfo.fSubType <> MFVideoFormat_RGB32 then
     begin
       hr := ConvertSampleToRGB(ASample,
                                    pConvertedSample);
@@ -244,8 +251,8 @@ begin
 
             AMemoryStream := TMemoryStream.Create;
 
-            fBmpFileHeader := GetBMPFileHeader;
-            fBmpFileInfo := GetBMPFileInfo(AVideoInfo);
+           // fBmpFileHeader := GetBMPFileHeader;
+          //  fBmpFileInfo := GetBMPFileInfo(AVideoInfo);
 
             AMemoryStream.Write(fBmpFileHeader,
                                 SizeOf(fBmpFileHeader));
@@ -416,6 +423,17 @@ begin
   iVideoHeight := 0;
   iBufferWidth := 0;
   iBufferHeight := 0;
+  iStride := 0;
+  // Major & Subtypes
+  fSubType := GUID_NULL;
+  fMajorType := GUID_NULL;
+  // Supported framerates
+  iFrameRate := 0;
+  iFrameRateDenominator := 0;
+  iMaxFrameRate := 0;
+  iMaxFrameRateDenominator := 0;
+  iMinFrameRate := 0;
+  iMinFrameRateDenominator := 0;
 end;
 
 end.
