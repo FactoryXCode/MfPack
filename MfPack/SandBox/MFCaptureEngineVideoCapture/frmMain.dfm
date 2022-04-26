@@ -112,6 +112,7 @@ object MainWindow: TMainWindow
       Caption = 'Capture'
       object mnuStartPreview: TMenuItem
         Caption = 'Start Preview'
+        Enabled = False
         OnClick = mnuStartPreviewClick
       end
       object mnuChooseDevice: TMenuItem

@@ -142,13 +142,13 @@ end;
 
 procedure TMainWindow.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
- // CanClose := False;
+  CanClose := False;
   FreeAndNil(DeviceParam);
   SafeDelete(g_pEngine);
   PostQuitMessage(0);
   MFShutdown();
   CoUnInitialize();
-  //CanClose := True;
+  CanClose := True;
 end;
 
 procedure TMainWindow.FormCreate(Sender: TObject);

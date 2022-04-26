@@ -106,25 +106,32 @@ type
   // CaptureManager class
   // Wraps the capture engine and implements the event callback and OnSampleCallback in a nested class.
 type
-  TCaptureManager = class(TInterfacedPersistent)
-  private
+  TCaptureManager = class
 
+{$REGION TCaptureManagerCallBack}
+  // The event callback object.
   type TCaptureManagerCallBack = class(TInterfacedPersistent, IMFCaptureEngineOnEventCallback)
     private
       m_hwnd: HWND;
+      m_fSleeping: Boolean;
 
       // Implementation of IMFCaptureEngineOnEventCallback
       function OnEvent(pEvent: IMFMediaEvent): HResult; stdcall;
-      //
 
     public
-      m_fSleeping: Boolean;
+
       m_pManager: TCaptureManager;
 
-      constructor Create(_hwnd: HWND); virtual;
+      constructor Create(_hwnd: HWND);
       destructor Destroy(); override;
-    end;
 
+      property IsSleeping: Boolean read m_fSleeping write m_fSleeping default False;
+    end;
+{$ENDREGION}
+
+
+{$REGION TCaptureEngineOnSampleCallback}
+  // OnSampleCallBack object
   type TCaptureEngineOnSampleCallback = class(TInterfacedPersistent, IMFCaptureEngineOnSampleCallback)
     private
       DestHandle: HWnd;
@@ -135,12 +142,14 @@ type
     public
       m_pManager: TCaptureManager;
 
-      constructor Create(_hwnd: HWND); virtual;
+      constructor Create(_hwnd: HWND);
       destructor Destroy(); override;
 
     end;
+{$ENDREGION}
 
   private
+
     m_pEngine: IMFCaptureEngine;
     m_pPreview: IMFCapturePreviewSink;
 
@@ -311,14 +320,12 @@ begin
   inherited Create();
   m_hwnd := _hwnd;
   m_fSleeping := False;
-  m_pManager := Nil;
 end;
 
 
 destructor TCaptureManager.TCaptureManagerCallBack.Destroy();
 begin
-  if Assigned(m_pManager) then
-    SafeDelete(m_pManager);
+  Safe_Release(m_pManager);
   inherited Destroy();
 end;
 
@@ -349,7 +356,7 @@ begin
 
 Done:
   if Assigned(pEngine) then
-    SafeDelete(pEngine);
+    Safe_Release(pEngine);
 
   Result := hr;
 end;
@@ -366,7 +373,7 @@ begin
   // Post a message to the application window, so the event is handled
   // on the application's main thread.
 
-  if not m_fSleeping then
+  if not IsSleeping then
     begin
       // We're about to fall asleep, that means we've just asked the CE to stop the preview
       // and record.  We need to handle it here since our message pump may be gone.
@@ -447,7 +454,8 @@ end;
 destructor TCaptureManager.TCaptureEngineOnSampleCallback.Destroy();
 begin
   //FreeAndNil(m_SampleConverter);
-  inherited;
+  Safe_Release(m_pManager);
+  inherited Destroy();
 end;
 
 
@@ -481,7 +489,7 @@ begin
                         0,
                         LPARAM(@m_pManager.m_SampleFromCallBack)) then
     begin
-      SafeRelease(m_pManager.m_SampleFromCallBack.pSample);
+      Safe_Release(m_pManager.m_SampleFromCallBack.pSample);
     end;
     end;
 
@@ -610,8 +618,8 @@ end;
 
 destructor TCaptureManager.Destroy();
 begin
-  //
-  inherited;
+  DestroyCaptureEngine();
+  inherited Destroy();
 end;
 
 
@@ -629,11 +637,13 @@ begin
   if Assigned(m_pEngine) then
     SafeRelease(m_pEngine);
 
+  // Use SafeDelete ( = FreeAndNil) to release these classes!
   if Assigned(m_pCallback) then
-    SafeDelete(m_pCallback);
+   SafeDelete(m_pCallback);
 
   if Assigned(m_pOnSampleCallback) then
     SafeDelete(m_pOnSampleCallback);
+  // ========================================================
 
   if Assigned(g_pDXGIMan) then
     begin
@@ -642,10 +652,10 @@ begin
     end;
 
   // release the D3D11 interfaces
-
-  SafeRelease(g_pDX11Device);
-
-  SafeRelease(g_pDXGIMan);
+  if Assigned(g_pDX11Device) then
+    SafeRelease(g_pDX11Device);
+  if Assigned(g_pDXGIMan) then
+    SafeRelease(g_pDXGIMan);
 
   m_bPreviewing := False;
   m_bRecording := False;
