@@ -537,7 +537,7 @@ end;
 
 procedure TFrmMain.HandleStopBurstCapture(Sender: TObject);
 begin
-  if not FCapture.BurstEnabled then
+  if FCapture.BurstEnabled then
     StopBurstCapture;
 end;
 
