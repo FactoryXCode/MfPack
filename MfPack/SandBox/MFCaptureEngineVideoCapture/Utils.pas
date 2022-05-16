@@ -285,16 +285,7 @@ done:
 end;
 
 
-function ProcessSample(pSample: IMFSample): HResult;
-var
-  bmp: TBitmap;
 
-begin
-  bmp := TBitmap.Create();
-  bmp.Width := 400;
-  bmp.Height := 100;
-
-end;
 
 
 procedure HandleThreadMessages(AThread: THandle;
