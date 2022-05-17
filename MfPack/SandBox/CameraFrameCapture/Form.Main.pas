@@ -35,7 +35,7 @@ uses
   Support,
   SampleConverter,
   CameraCapture,
-  CameraCapture.Asynchronous;
+  CameraCapture.Asynchronous, Vcl.NumberBox;
 
 type
   TDeviceDetails = record
@@ -44,6 +44,7 @@ type
     sUniqueName : string;
     iCount : Integer;
   end;
+
   TFrmMain = class(TForm)
     cbxCaptureDevices: TComboBox;
     lblSelectDevice: TLabel;
@@ -140,7 +141,7 @@ type
     procedure HandleBurstMode;
     procedure DestroyCapture;
     procedure PaintLastCapture;
-    procedure GetPaintArea(var AWidth : Integer; var AHeight : Integer; var ATop : Integer; var ALeft : Integer);
+    procedure GetPaintArea(AImage : TBitmap; var AWidth : Integer; var AHeight : Integer; var ATop : Integer; var ALeft : Integer);
     procedure GetBurstDetails(var ADurationSec, AFramesPerSecond: Integer);
     procedure HandleCalculateMaxComplete(const AFramesPerSecond: Integer);
     procedure StartBurstCapture;
@@ -151,6 +152,7 @@ type
     procedure UpdateLogLevel;
     procedure GetCurrentBrightness;
     procedure SetBrightness(AValue : Integer);
+    procedure CopyStream(AMemoryStream: TMemoryStream);
   end;
 var
   FrmMain: TFrmMain;
@@ -176,6 +178,7 @@ begin
         Application.Terminate;
    end;
    ClearValues;
+
    // Create capture class
    FCapture := TCameraCaptureAsync.Create;
    FCapture.OnFrameDataFound := HandleFrameDataFound;
@@ -192,6 +195,7 @@ begin
      Caption := Caption + ' 64-bit';
   {$ENDIF}
    FUpdating := False;
+
    lblBrightnessValue.Caption := '';
    FLastCapturedFrame := TBitmap.Create;
    FFormatSettings := TFormatSettings.Create;
@@ -298,6 +302,7 @@ begin
   if Result then
   begin
     Result := FCapture.SetVideoFormat(cbxResolution.ItemIndex) and FCapture.GetCurrentFormat(FCurrentCaptureFormat);
+
     if Result then
       Log(Format('Capture format change to %d x %d', [FCurrentCaptureFormat.iFrameWidth, FCurrentCaptureFormat.iFrameHeigth]), ltInfo)
     else
@@ -358,16 +363,26 @@ end;
 procedure TFrmMain.HandleDisplayImage(Sender: TObject);
 begin
   LoadImageFromStream;
+  PaintLastCapture;
 end;
 
 procedure TFrmMain.LoadImageFromStream;
+var
+  iTimerStart : Int64;
+  iTimerEnd : Int64;
 begin
   if Assigned(FLastMemoryStream) then
   begin
+    QueryPerformanceCounter(iTimerStart);
     try
-      FLastCapturedFrame.LoadFromStream(FLastMemoryStream);
       FLastCapturedFrame.PixelFormat := pf24bit;
-      PaintLastCapture;
+      FLastCapturedFrame.LoadFromStream(FLastMemoryStream);
+
+
+      QueryPerformanceCounter(iTimerEnd);
+        Log(Format('LoadImageFromStream took %f milliseconds. %d x %d.',
+               [(iTimerEnd - iTimerStart) / TimerFrequency * 1000, FCurrentCaptureFormat.iFrameWidth, FCurrentCaptureFormat.iFrameHeigth]),
+                                 ltDebug1);
     except
       on E : Exception do
         Log('Failed to load BMP from memory stream. Error: %s' + E.Message, ltError);
@@ -379,15 +394,26 @@ procedure TFrmMain.HandleFrameDataFound(AMemoryStream : TMemoryStream);
 begin
   FImageCleared := False;
   UpdateReturnTimer;
+
   try
-    FLastMemoryStream.Clear;
-    FLastMemoryStream.LoadFromStream(AMemoryStream);
+    CopyStream(AMemoryStream);
   finally
     AMemoryStream.Free;
   end;
+
   if chkDisplayPreview.Checked then
+  begin
     LoadImageFromStream;
+    PaintLastCapture;
+  end;
+
   HandleBurstMode;
+end;
+
+procedure TFrmMain.CopyStream(AMemoryStream : TMemoryStream);
+begin
+  FLastMemoryStream.Clear;
+  FLastMemoryStream.LoadFromStream(AMemoryStream);
 end;
 
 procedure TFrmMain.UpdateReturnTimer;
@@ -426,18 +452,21 @@ begin
   if not FImageCleared and Assigned(FLastCapturedFrame) and not FLastCapturedFrame.Empty then
   begin
     QueryPerformanceCounter(iTimerStart);
-    // Scale and center the image
-    GetPaintArea(iWidth, iHeight, iTop, iLeft);
     SetStretchBltMode(pbCapture.Canvas.Handle,HALFTONE);
     SetBrushOrgEx(pbCapture.Canvas.Handle, 0, 0, nil);
-    // Stretch draw
+
+    // Scale and center the image
+    GetPaintArea(FLastCapturedFrame, iWidth, iHeight, iTop, iLeft);
+
+    // Stretch draw the whole image
     StretchBlt(pbCapture.Canvas.Handle, iLeft, iTop, iWidth,
       iHeight, FLastCapturedFrame.Canvas.Handle, 0, 0, FLastCapturedFrame.Width,
       FLastCapturedFrame.Height, SRCCOPY);
+
     QueryPerformanceCounter(iTimerEnd);
-        Log(Format('Paint image in %f milliseconds. %d x %d.',
-               [(iTimerEnd - iTimerStart) / TimerFrequency * 1000, FCurrentCaptureFormat.iFrameWidth, FCurrentCaptureFormat.iFrameHeigth]),
-                                 ltDebug1);
+      Log(Format('Paint image took %f milliseconds. %d x %d.',
+             [(iTimerEnd - iTimerStart) / TimerFrequency * 1000, FCurrentCaptureFormat.iFrameWidth, FCurrentCaptureFormat.iFrameHeigth]),
+                               ltDebug1);
   end
   else
     PaintMessage('Waiting for image capture... ')
@@ -456,20 +485,21 @@ begin
   pbCapture.Canvas.TextOut(Round((pbCapture.Width - iWidth) / 2), 20, AText);
 end;
 
-procedure TFrmMain.GetPaintArea(var AWidth : Integer; var AHeight : Integer; var ATop : Integer; var ALeft : Integer);
+procedure TFrmMain.GetPaintArea(AImage : TBitmap; var AWidth : Integer; var AHeight : Integer; var ATop : Integer; var ALeft : Integer);
 var
   iRatio : Double;
   iHeightRatio : Double;
   iWidthRatio : Double;
 begin
-  iHeightRatio := pbCapture.Height / FLastCapturedFrame.Height;
-  iWidthRatio := pbCapture.Width / FLastCapturedFrame.Width;
+  iHeightRatio := pbCapture.Height / AImage.Height;
+  iWidthRatio := pbCapture.Width / AImage.Width;
   if iHeightRatio > iWidthRatio then
     iRatio := Min(1, iWidthRatio)
   else
     iRatio := Min(1, iHeightRatio);
-  AWidth := Round(FLastCapturedFrame.Width * iRatio);
-  AHeight := Round(FLastCapturedFrame.Height * iRatio);
+
+  AWidth := Round(AImage.Width * iRatio);
+  AHeight := Round(AImage.Height * iRatio);
   ATop := (pbCapture.Height - AHeight) div 2;
   ALeft := (pbCapture.Width - AWidth) div 2;
 end;
@@ -590,6 +620,7 @@ begin
     // Prepare the frame capture for the device
     if not FCapture.OpenDeviceSource(ADevice.oExtendedDetails.lpSymbolicLink) then
       Log('Failed to set video device', ltError);
+
     UpdateEnabledStates;
   finally
     EndBusy;

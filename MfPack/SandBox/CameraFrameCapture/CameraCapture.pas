@@ -448,7 +448,8 @@ begin
 
   if Result then
   begin
-    Result := SUCCEEDED(FVideoAmp.GetRange(VideoProcAmp_Brightness, FCameraBrightness.FMin, FCameraBrightness.FMax, FCameraBrightness.FStep, FCameraBrightness.FDefault, oCaps));
+    Result := SUCCEEDED(FVideoAmp.GetRange(VideoProcAmp_Brightness, FCameraBrightness.FMin, FCameraBrightness.FMax,
+      FCameraBrightness.FStep, FCameraBrightness.FDefault, oCaps));
 
     if Result then
       FCameraBrightness.FManualControl := oCaps = Ord(VideoProcAmp_Flags_Manual);
@@ -621,7 +622,6 @@ var
   pMediaType : IMFMediaType;
   bTypeFound : Boolean;
   iMediaTypeIndex : Integer;
-
   iCount : Integer;
 begin
   SetLength(FVideoFormats, 0);

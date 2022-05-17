@@ -239,7 +239,6 @@ procedure TCameraCaptureAsync.ProcessSample(ASample: IMFSample);
 begin
   // Note: This will be called in a worker thread.
   // _AddRef will be called, so the sample will not be released until the message is handled.
-
   FSampleReply.oSample := ASample;
 
   if not PostMessage(FMessageHandler.Handle,
@@ -319,25 +318,25 @@ end;
 procedure TCameraCaptureAsync.HandleMessages(var AMessage: TMessage; var AHandled: Boolean);
 begin
   if AMessage.Msg = WM_REQUEST_FLUSH then
-    begin
-      AHandled := True;
-      Flush;
-    end
+   begin
+    AHandled := True;
+    Flush;
+  end
   else if AMessage.Msg = WM_FLUSH_COMPLETE then
-    begin
-      AHandled := True;
-      HandleFlushComplete;
-    end
+  begin
+    AHandled := True;
+    HandleFlushComplete;
+  end
   else if AMessage.Msg = WM_MEDIA_FORMAT_CHANGED then
-    begin
-      AHandled := True;
-      HandleMediaFormatChanged;
-    end
+  begin
+    AHandled := True;
+    HandleMediaFormatChanged;
+  end
   else if AMessage.Msg = WM_SAMPLE_FOUND then
-    begin
-      AHandled := True;
-      HandleSampleFoundMessage(AMessage);
-    end
+  begin
+    AHandled := True;
+    HandleSampleFoundMessage(AMessage);
+  end
   else
     AHandled := False;
 end;
@@ -375,7 +374,6 @@ end;
 function TCameraCaptureAsync.ReadNextSample: Boolean;
 var
   oResult: HRESULT;
-
 begin
   Result := Assigned(SourceReader);
 
