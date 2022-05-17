@@ -98,7 +98,6 @@ object MainWindow: TMainWindow
       Height = 25
       Hint = 'Save photo to file'
       Caption = '&Take Photo'
-      Enabled = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 1

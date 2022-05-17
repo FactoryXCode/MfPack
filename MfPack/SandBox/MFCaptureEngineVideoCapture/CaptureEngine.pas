@@ -103,46 +103,63 @@ type
                       ssoStream);
 
 
+
+
+
   // CaptureManager class
   // Wraps the capture engine and implements the event callback and OnSampleCallback in a nested class.
 type
   TCaptureManager = class(TInterfacedPersistent)
-  private
 
+{$REGION TCaptureManagerCallBack}
+  // The event callback object.
   type TCaptureManagerCallBack = class(TInterfacedPersistent, IMFCaptureEngineOnEventCallback)
     private
       m_hwnd: HWND;
+      m_fSleeping: Boolean;
 
       // Implementation of IMFCaptureEngineOnEventCallback
       function OnEvent(pEvent: IMFMediaEvent): HResult; stdcall;
-      //
 
     public
-      m_fSleeping: Boolean;
+
       m_pManager: TCaptureManager;
 
       constructor Create(_hwnd: HWND); virtual;
       destructor Destroy(); override;
-    end;
 
+      property IsSleeping: Boolean read m_fSleeping write m_fSleeping;
+    end;
+{$ENDREGION}
+
+
+{$REGION TCaptureEngineOnSampleCallback}
+  // OnSampleCallBack object
   type TCaptureEngineOnSampleCallback = class(TInterfacedPersistent, IMFCaptureEngineOnSampleCallback)
     private
       DestHandle: HWnd;
-
+      m_pManager2: TCaptureManager;
       // Implementation of IMFCaptureEngineOnEventCallback
       function OnSample(pSample: IMFSample): HResult; stdcall;
       //
     public
-      m_pManager: TCaptureManager;
 
-      constructor Create(_hwnd: HWND); virtual;
+
+      constructor Create(_hwnd: HWND);
       destructor Destroy(); override;
 
     end;
+{$ENDREGION}
+
+  protected
+
+    a_VideoFormatInfo: TVideoFormatInfoArray;
 
   private
+
     m_pEngine: IMFCaptureEngine;
     m_pPreview: IMFCapturePreviewSink;
+    m_pPhotoSink: IMFCapturePhotoSink;
 
     m_hwndEvent: HWND;
     m_hwndPreview: HWND;
@@ -156,14 +173,14 @@ type
 
     m_errorID: UINT;
     m_hEvent: THandle;
+    FSnapShotOptions: TSnapShotOptions;
 
     m_SampleFromCallBack: TSampleFromCallBack;
 
-    a_VideoFormatInfo: array of TVideoFormatInfo;
     m_SampleConverter: TSampleConverter;
     FCritSec: TMFCritSec;
 
-    constructor Create(_hwnd: HWND);
+    constructor Create(_hwnd: HWND); virtual;
     procedure DestroyCaptureEngine();
 
     procedure SetErrorID(hr: HResult; id: UINT);
@@ -174,9 +191,9 @@ type
     procedure OnPreviewStopped(hrStatus: HResult);
     procedure OnRecordStarted(hrStatus: HResult);
     procedure OnRecordStopped(hrStatus: HResult);
+    procedure OnPhotoTaken(hrStatus: HResult);
 
     procedure WaitForResult();
-    procedure SetSleepState(fSleeping: Boolean);
     function UpdateVideo(): HResult;
 
     function GetCaptureDeviceCaps(const dwStreamType: DWord = MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO): HResult;
@@ -191,8 +208,6 @@ type
     function InitializeCaptureManager(hwndPreview: HWND;
                                       Unk: IUnknown): HResult;
 
-
-
     function OnCaptureEvent(wParam: WPARAM;
                             lParam: LPARAM): HResult;
 
@@ -200,13 +215,13 @@ type
     function StopPreview(): HResult;
     function StartRecord(pszDestinationFile: PCWSTR): HResult;
     function StopRecord(): HResult;
-    function TakePhoto(snsOptions: TSnapShotOptions;
-                       pExt: PWideChar = nil): HResult;
+    function TakePhoto(ASnapShotOption: TSnapShotOptions): HResult;
 
-    property SleepState: Boolean write SetSleepState;
     property IsRecording: Boolean read m_bRecording;
     property IsPreviewing: Boolean read m_bPreviewing;
     property IsPhotoPending: Boolean read m_bPhotoPending;
+    property SnapShotOptions: TSnapShotOptions read FSnapShotOptions write FSnapShotOptions;
+    property SupportedVideoFormats: TVideoFormatInfoArray read a_VideoFormatInfo;
 
     property PreviewHandle: HWND read m_hwndPreview;
     property EventHandle: HWND read m_hwndEvent;
@@ -311,14 +326,12 @@ begin
   inherited Create();
   m_hwnd := _hwnd;
   m_fSleeping := False;
-  m_pManager := Nil;
 end;
 
 
 destructor TCaptureManager.TCaptureManagerCallBack.Destroy();
 begin
-  if Assigned(m_pManager) then
-    SafeDelete(m_pManager);
+  Safe_Release(m_pManager);
   inherited Destroy();
 end;
 
@@ -343,13 +356,12 @@ begin
       goto Done;
     end;
 
-
   ppEngine := pEngine;
   pEngine := nil;
 
 Done:
   if Assigned(pEngine) then
-    SafeDelete(pEngine);
+    Safe_Release(pEngine);
 
   Result := hr;
 end;
@@ -366,7 +378,7 @@ begin
   // Post a message to the application window, so the event is handled
   // on the application's main thread.
 
-  if not m_fSleeping then
+  if not IsSleeping then
     begin
       // We're about to fall asleep, that means we've just asked the CE to stop the preview
       // and record.  We need to handle it here since our message pump may be gone.
@@ -379,9 +391,20 @@ begin
 
       if SUCCEEDED(hr) then
         begin
-          if (guidType = MF_CAPTURE_ENGINE_PREVIEW_STOPPED) then
+
+          if (guidType = MF_CAPTURE_ENGINE_PREVIEW_STARTED) then
+            begin
+              m_pManager.OnPreviewStarted(hrStatus);
+              SetEvent(m_pManager.m_hEvent);
+            end
+          else if (guidType = MF_CAPTURE_ENGINE_PREVIEW_STOPPED) then
             begin
               m_pManager.OnPreviewStopped(hrStatus);
+              SetEvent(m_pManager.m_hEvent);
+            end
+          else if (guidType = MF_CAPTURE_ENGINE_RECORD_STARTED) then
+            begin
+              m_pManager.OnRecordStarted(hrStatus);
               SetEvent(m_pManager.m_hEvent);
             end
           else if (guidType = MF_CAPTURE_ENGINE_RECORD_STOPPED) then
@@ -392,6 +415,7 @@ begin
           else if (guidType = MF_CAPTURE_ENGINE_PHOTO_TAKEN) then
             begin
               // Notice the app the snapshot has been taken.
+              m_pManager.OnPhotoTaken(hrStatus);
               SetEvent(m_pManager.m_hEvent);
             end
           else if guidType = MF_CAPTURE_SOURCE_CURRENT_DEVICE_MEDIA_TYPE_SET then
@@ -440,14 +464,14 @@ constructor TCaptureManager.TCaptureEngineOnSampleCallback.Create(_hwnd: HWND);
 begin
   inherited Create();
   DestHandle := _hwnd;
- // m_SampleConverter := TSampleConverter.Create();
+  m_pManager2 := TCaptureManager.Create(_hwnd);
 end;
 
 
 destructor TCaptureManager.TCaptureEngineOnSampleCallback.Destroy();
 begin
-  //FreeAndNil(m_SampleConverter);
-  inherited;
+  Safe_Release(m_pManager2);
+  inherited Destroy();
 end;
 
 
@@ -474,14 +498,14 @@ begin
 
      
 
-      m_pManager.m_SampleFromCallBack.pSample := pSample;
+      m_pManager2.m_SampleFromCallBack.pSample := pSample;
 
      if not PostMessage(DestHandle,
                         WM_RECIEVED_SAMPLE_FROM_CALLBACK,
                         0,
-                        LPARAM(@m_pManager.m_SampleFromCallBack)) then
+                        LPARAM(@m_pManager2.m_SampleFromCallBack)) then
     begin
-      SafeRelease(m_pManager.m_SampleFromCallBack.pSample);
+      Safe_Release(m_pManager2.m_SampleFromCallBack.pSample);
     end;
     end;
 
@@ -536,7 +560,9 @@ begin
       goto Done;
     end;
 
-  m_pOnSampleCallback.m_pManager := Self;
+  //m_pOnSampleCallback. := m_pManager2.m_pOnSampleCallback;
+
+
 
   m_hwndPreview := hwndPreview;
 
@@ -580,6 +606,8 @@ begin
   if DeviceParam.DeviceIsSelected then
     hr := GetCaptureDeviceCaps(DeviceParam.DeviceIndex);
 
+
+
   // ignore returnvalue MF_E_INVALIDREQUEST in case user did not select a device .
   if (hr <> S_OK)  then
     hr := S_OK;
@@ -598,6 +626,7 @@ constructor TCaptureManager.Create(_hwnd: HWND);
 begin
   inherited Create();
   FCritSec := TMFCritSec.Create;
+  m_SampleConverter := TSampleConverter.Create();
   m_hwndEvent := _hwnd;
   m_hwndPreview := 0;
   m_bRecording := False;
@@ -610,8 +639,10 @@ end;
 
 destructor TCaptureManager.Destroy();
 begin
-  //
-  inherited;
+  DestroyCaptureEngine();
+  FreeAndNil(m_SampleConverter);
+  SafeDelete(FCritSec);
+  inherited Destroy();
 end;
 
 
@@ -629,11 +660,13 @@ begin
   if Assigned(m_pEngine) then
     SafeRelease(m_pEngine);
 
+  // Use SafeDelete (FreeAndNil) to release these classes!
   if Assigned(m_pCallback) then
-    SafeDelete(m_pCallback);
+   SafeDelete(m_pCallback);
 
   if Assigned(m_pOnSampleCallback) then
-    SafeDelete(m_pOnSampleCallback);
+      SafeDelete(m_pOnSampleCallback);
+  // ========================================================
 
   if Assigned(g_pDXGIMan) then
     begin
@@ -642,17 +675,18 @@ begin
     end;
 
   // release the D3D11 interfaces
-
-  SafeRelease(g_pDX11Device);
-
-  SafeRelease(g_pDXGIMan);
+  if Assigned(g_pDX11Device) then
+    SafeRelease(g_pDX11Device);
+  if Assigned(g_pDXGIMan) then
+    SafeRelease(g_pDXGIMan);
 
   m_bPreviewing := False;
   m_bRecording := False;
   m_bPhotoPending := False;
   m_errorID := 0;
-  SafeDelete(FCritSec);
 
+  SetLength(a_VideoFormatInfo,
+            0);
 end;
 
 
@@ -694,6 +728,65 @@ end;
 procedure TCaptureManager.OnRecordStopped(hrStatus: HResult);
 begin
    m_bRecording := False;
+end;
+
+
+procedure TCaptureManager.OnPhotoTaken(hrStatus: HResult);
+var
+  hr: HResult;
+  pExt: PWideChar;
+  pszFileName: PWideChar;
+  pszPicPath: PWideChar;
+  pszOutputFileName: PWideChar;
+  fPath: TPath;
+
+label
+  Done;
+
+begin
+  m_bPhotoPending := False;
+  WaitForResult();
+
+  // Decide where the snapshot should be send through
+  case SnapShotOptions of
+    ssoFile:     begin
+                   // ToDo: implement save to file (eg: My Photo's)
+                   // to file
+
+                   // get the My Pictures Folder path use fPath.GetSharedPicturesPath for the shared folder
+                   pszPicPath := PWideChar(fPath.GetPicturesPath);
+                   pszFileName := LPWSTR(Format('MyPicture_%s%s', [DateToStr(Now()), pExt]));
+                   pszOutputFileName :=  LPWSTR(Format('%s%s', [pszPicPath, pszFileName]));
+                   hr := m_pPhotoSink.SetOutputFileName(pszOutputFileName);
+                   if FAILED(hr) then
+                     goto Done;
+
+                 end;
+
+    ssoCallBack: begin
+
+                   // ToDo: implement save to ISample > preview window
+                   // to callback
+
+                   // Note:
+                   //   Calling this method overrides any previous call to IMFCapturePhotoSink.SetOutputByteStream or
+                   //   IMFCapturePhotoSink.SetOutputFileName.
+                   // When called the event will be handled by OnSampleCallBack
+                   hr := m_pPhotoSink.SetSampleCallback(m_pOnSampleCallback);
+                   if FAILED(hr) then
+                     goto Done;
+
+
+                 end;
+
+    ssoStream:   begin
+                   // Save to stream
+                   // NOT IMPLEMENTED
+                 end;
+  end;
+
+Done:
+
 end;
 
 
@@ -797,7 +890,7 @@ begin
       goto Done;
     end;
 
-  if m_bPreviewing then
+  if not m_bPreviewing then
     begin
       hr := S_OK;
       goto Done;
@@ -876,7 +969,7 @@ begin
           end
         else if (guidType = MF_CAPTURE_ENGINE_PHOTO_TAKEN) then
           begin
-            m_bPhotoPending := false;
+            OnPhotoTaken(hrStatus);
             SetErrorID(hrStatus, IDS_ERR_PHOTO);
           end
         else if (guidType = MF_CAPTURE_ENGINE_ERROR) then
@@ -1024,25 +1117,21 @@ begin
 end;
 
 
-function TCaptureManager.TakePhoto(snsOptions: TSnapShotOptions;
-                                   pExt: PWideChar = Nil): HResult;
+function TCaptureManager.TakePhoto(ASnapShotOption: TSnapShotOptions): HResult;
 var
   hr: HResult;
   pSink: IMFCaptureSink;
-  pPhoto: IMFCapturePhotoSink;
   pSource: IMFCaptureSource;
   pMediaType: IMFMediaType;
   pMediaType2: IMFMediaType;
   dwSinkStreamIndex: DWord;
-  pszFileName: PWideChar;
-  pszPicPath: PWideChar;
-  pszOutputFileName: PWideChar;
-  fPath: TPath;
+
 
 label
   Done;
 
 begin
+  SnapShotOptions := ASnapShotOption;
 
   // Get a pointer to the photo sink.
   hr := m_pEngine.GetSink(MF_CAPTURE_ENGINE_SINK_TYPE_PHOTO,
@@ -1051,9 +1140,11 @@ begin
     goto Done;
 
   hr := pSink.QueryInterface(IID_IMFCapturePhotoSink,
-                             pPhoto);
+                             m_pPhotoSink);
   if FAILED(hr) then
     goto Done;
+
+  m_pPhotoSink.
 
   hr := m_pEngine.GetSource(pSource);
   if FAILED(hr) then
@@ -1066,58 +1157,27 @@ begin
 
   // Configure the photo format
   hr := CreatePhotoMediaType(pMediaType,
+                             MFImageFormat_RGB32,
                              pMediaType2);
   if FAILED(hr) then
     goto Done;
 
-  hr := pPhoto.RemoveAllStreams();
+  hr := pMediaType2.SetUINT32(MF_MT_ALL_SAMPLES_INDEPENDENT,
+                              UINT32(TRUE));
+  if FAILED(hr) then
+    goto Done;
+
+  hr := m_pPhotoSink.RemoveAllStreams();
   if FAILED(hr) then
     goto Done;
 
   // Try to connect the first still image stream to the photo sink
-  hr := pPhoto.AddStream(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO,
-                         pMediaType2,
-                         nil,
-                         dwSinkStreamIndex);
+  hr := m_pPhotoSink.AddStream(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO,
+                               pMediaType2,
+                               nil,
+                               dwSinkStreamIndex);
   if FAILED(hr) then
     goto Done;
-
-
-  // Decide where the snapshot should be send through
-  case snsOptions of
-    ssoFile:     begin
-                   // ToDo: implement save to file (eg: My Photo's)
-                   // to file
-
-                   // get the My Pictures Folder path use fPath.GetSharedPicturesPath for the shared folder
-                   pszPicPath := PWideChar(fPath.GetPicturesPath);
-                   pszFileName := LPWSTR(Format('MyPicture_%s%s', [DateToStr(Now()), pExt]));
-                   pszOutputFileName :=  LPWSTR(Format('%s%s', [pszPicPath, pszFileName]));
-                   hr := pPhoto.SetOutputFileName(pszOutputFileName);
-                   if FAILED(hr) then
-                     goto Done;
-
-                 end;
-
-    ssoCallBack: begin
-                   // ToDo: implement save to ISample > preview window
-                   // to callback
-
-
-
-
-
-
-                   hr := pPhoto.SetSampleCallback(m_pOnSampleCallback);
-                   if FAILED(hr) then
-                     goto Done;
-                 end;
-
-    ssoStream:   begin
-                   // Save to stream
-                   // NOT IMPLEMENTED
-                 end;
-  end;
 
   hr := m_pEngine.TakePhoto();
   if FAILED(hr) then
@@ -1127,13 +1187,6 @@ begin
 
 done:
   Result := hr;
-end;
-
-
-procedure TCaptureManager.SetSleepState(fSleeping: Boolean);
-begin
-  if Assigned(m_pCallback) then
-    m_pCallback.m_fSleeping := fSleeping;
 end;
 
 
@@ -1147,9 +1200,6 @@ begin
     Result := S_OK;
 end;
 
- { TODO 1 -oTony :
-This function is not working very well. Somehow m_pSource (IMFCaptureSource) returns
--1072875854 ( $C00D36B2) 'The request is invalid in the current state.'}
 
 // Note:
 // dwStreamType parameter can only be one of the following:
@@ -1162,19 +1212,28 @@ function TCaptureManager.GetCaptureDeviceCaps(const dwStreamType: DWord = MF_CAP
 var
   pSource: IMFCaptureSource;
   mediaType: IMFMediaType;
-  i: Integer;
+  i, j: Integer;
   iCount: UINT32;
   hr: HResult;
   aVideoInfo: TVideoFormatInfo;
+  fCurrThread: THandle;
+  fCurrThreadPrio: Integer;
 
 begin
 try
 
   FCritSec.Lock;
 
+  // Get and set to boost current threadPriority
+  fCurrThread := GetCurrentThread();
+  fCurrThreadPrio := GetThreadPriority(fCurrThread);
+  SetThreadPriority(fCurrThread,
+                    THREAD_PRIORITY_TIME_CRITICAL);
+
+
   if (DeviceParam.DeviceIsSelected = False) then
     begin
-      hr := MF_E_INVALIDREQUEST;  // m_pEngine has not been completly initialized eg user did not select a device.
+      hr := MF_E_INVALIDREQUEST;  // m_pEngine has not been completely initialized eg user did not select a device.
       Exit;
     end;
 
@@ -1182,19 +1241,20 @@ try
 
   if SUCCEEDED(hr) then
     begin
-      i := 0;
+
       SetLength(a_VideoFormatInfo,
                 0);
-
+      i := 0;
+      j := 0;
       // Process all messages to prevent IMFCaptureSource.GetAvailableDeviceMediaType resulting in
       // $C00D36B2 (The request is invalid in the current state.),
       // since IMFCaptureEngine operates Asynchronous.
-      HandleThreadMessages(GetCurrentThread());
+      WaitForResult();
 
       // Get all capabillities
       while (hr = S_OK) do
         begin
-          mediaType := Nil;
+          mediaType := nil;
           hr := MFCreateMediaType(mediaType);
 
           hr := pSource.GetAvailableDeviceMediaType(dwStreamType,
@@ -1220,9 +1280,12 @@ try
           aVideoInfo.iBufferWidth := aVideoInfo.iVideoWidth;
           aVideoInfo.iBufferHeight := aVideoInfo.iVideoHeight;
 
+          // Get the stride to find out if the bitmap is top-down or bottom-up.
           aVideoInfo.iStride := MFGetAttributeUINT32(mediaType,
                                                      MF_MT_DEFAULT_STRIDE,
                                                      1);
+
+          aVideoInfo.bTopDown := (aVideoInfo.iStride > 0);
 
           hr := MFGetAttributeRatio(mediaType,
                                     MF_MT_FRAME_RATE,
@@ -1239,13 +1302,28 @@ try
                                     aVideoInfo.iMaxFrameRate,
                                     aVideoInfo.iMaxFrameRateDenominator);
 
+         // Get the pixel aspect ratio. (This value might not be set.)
+         hr := MFGetAttributeRatio(mediaType,
+                                   MF_MT_PIXEL_ASPECT_RATIO,
+                                   aVideoInfo.AspectRatioNumerator,
+                                   aVideoInfo.AspectRatioDenominator);
+
           if SUCCEEDED(hr) then
             begin
-              Inc(i);
-              SetLength(a_VideoFormatInfo,
-                        i);
-              a_VideoFormatInfo[i] := aVideoInfo;
+              // check if the format is supported
+              if m_SampleConverter.IsInputSupported(aVideoInfo.fSubType,
+                                                    aVideoInfo.iFrameRate) >= 0 then
+                begin
+                  SetLength(a_VideoFormatInfo,
+                            j+1);
+                  CopyMemory(@a_VideoFormatInfo[j],
+                             @aVideoInfo,
+                             SizeOf(TVideoFormatInfo));
+                  inc(j);
+                end;
+
               aVideoInfo.Reset;
+              Inc(i);
             end;
         end;
     end;
@@ -1254,7 +1332,8 @@ finally
 
   if (hr = MF_E_NO_MORE_TYPES) then
     hr := S_OK;
-
+  // Set thread back to original values
+  SetThreadPriority(fCurrThread, fCurrThreadPrio);
   FCritSec.Unlock;
 
   Result := hr;
@@ -1267,8 +1346,6 @@ begin
   WaitForSingleObject(m_hEvent,
                       INFINITE);
 end;
-
-
 
 
 constructor TChooseDeviceParam.Create();

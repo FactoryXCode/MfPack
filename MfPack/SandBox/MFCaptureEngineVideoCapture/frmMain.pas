@@ -130,7 +130,6 @@ begin
     end;
 
   Handled := False;
-
 end;
 
 
@@ -142,14 +141,15 @@ end;
 
 procedure TMainWindow.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
- // CanClose := False;
+  CanClose := False;
   FreeAndNil(DeviceParam);
   SafeDelete(g_pEngine);
   PostQuitMessage(0);
   MFShutdown();
   CoUnInitialize();
-  //CanClose := True;
+  CanClose := True;
 end;
+
 
 procedure TMainWindow.FormCreate(Sender: TObject);
 var
@@ -217,12 +217,25 @@ label
 
 begin
 
+  if g_pEngine.IsPreviewing then
+    g_pEngine.StopPreview;
+  if g_pEngine.IsRecording then
+    g_pEngine.StopRecord;
+  HandleThreadMessages(GetCurrentThread());
+
+  //UpdateUI();
+
   // To be sure the dialog is created
   if not Assigned(ChooseDeviceDlg) then
     begin
       Application.CreateForm(TChooseDeviceDlg, ChooseDeviceDlg);
       ChooseDeviceDlg.Visible := False;
     end;
+
+  // Destroy and Create DeviceParam class that holds the Activate pointers of the selected device.
+  if Assigned(DeviceParam) then
+    SafeDelete(DeviceParam);
+  DeviceParam := TChooseDeviceParam.Create();
 
   // Populate the listbox with camera's found
   // ========================================
@@ -245,6 +258,8 @@ begin
   // Ask the user to select one.
   if ChooseDeviceDlg.ShowModal = 1212 then
     begin
+      hPreview := pnlPreview.Handle;
+
       hr := g_pEngine.InitializeCaptureManager(hPreview,
                                                DeviceParam.Device);
       if FAILED(hr) then
@@ -332,8 +347,8 @@ end;
 procedure TMainWindow.mnuStartRecordingClick(Sender: TObject);
 begin
 
-
   g_pEngine.StartRecord('');
+
 end;
 
 

@@ -73,6 +73,7 @@ uses
   WinApi.MediaFoundationApi.MfUtils,
   WinApi.MediaFoundationApi.MfTransform,
   WinApi.UuIds,
+  WinApi.MediaFoundationApi.MfMetLib,
   {VCL}
   VCL.Graphics,
   {System}
@@ -89,6 +90,7 @@ type
     iBufferWidth: UINT32;
     iBufferHeight: UINT32;
     iStride: UINT32;
+    bTopDown: Boolean;
     // Major & Subtypes
     fSubType: TGuid;
     fMajorType: TGuid;
@@ -99,10 +101,15 @@ type
     iMaxFrameRateDenominator: UINT32;
     iMinFrameRate: UINT32;
     iMinFrameRateDenominator: UINT32;
+    // AspectRatio
+    AspectRatioSupported: Boolean;
+    AspectRatioNumerator: UINT32;
+    AspectRatioDenominator: UINT32;
 
     procedure Reset;
   end;
 
+  TVideoFormatInfoArray = TArray<TVideoFormatInfo>;
 
 type
   TSampleConverter = class(TPersistent)
@@ -112,15 +119,17 @@ type
     FSupportedInputs: TArray<TGUID>;
 
   private
+    iMinimumSupportedFrameRate: Integer;   // 24 f/sec
+    FWicImage: TWICImage;
+
     function ConvertSampleToRGB(const AInputSample: IMFSample;
                                 out AConvertedSample: IMFSample): HResult;
 
     function IndexOf(const AInput: TGUID;
                      const AValues: array of TGUID): Integer;
 
-    procedure GetBMPFileHeader(out pBmpFileHeader: BITMAPFILEHEADER);
-    procedure GetBMPFileInfo(const AVideoInfo: TVideoFormatInfo;
-                             out bmpFileHeader: BITMAPINFOHEADER);
+    function GetBMPFileHeader(): BITMAPFILEHEADER;
+    function GetBMPFileInfo(const AVideoInfo: TVideoFormatInfo): BITMAPINFOHEADER;
 
     procedure FreeConverter();
     procedure NotifyBeginStreaming();
@@ -135,7 +144,14 @@ type
                             const AVideoInfo: TVideoFormatInfo;
                             out AMemoryStream: TMemoryStream): HResult;
 
-    function IsInputSupported(const AInputFormat: TGUID): Integer;
+    function IsInputSupported(const AInputFormat: TGUID;
+                              const AFrameRate: Integer): Integer;
+
+    function TransportImage(const sample: IMFSample;
+                            const aMediaType: IMFMediaType;
+                            const HWnd: HWND): HResult;
+
+    property MinimumSupportedFrameRate: Integer read iMinimumSupportedFrameRate write iMinimumSupportedFrameRate;
 
   end;
 
@@ -146,6 +162,7 @@ implementation
 constructor TSampleConverter.Create();
 begin
   inherited;
+  iMinimumSupportedFrameRate := 24;
   SetSupportedInputs;
 end;
 
@@ -183,10 +200,14 @@ begin
 end;
 
 
-function TSampleConverter.IsInputSupported(const AInputFormat: TGUID): Integer;
+function TSampleConverter.IsInputSupported(const AInputFormat: TGUID;
+                                           const AFrameRate: Integer): Integer;
 begin
-  Result := Integer(IndexOf(AInputFormat,
-                    FSupportedInputs) > -1);
+  if (AFrameRate >= iMinimumSupportedFrameRate) then
+      Result := Integer(IndexOf(AInputFormat,
+                        FSupportedInputs) > -1)
+  else
+     Result := -1;
 end;
 
 
@@ -251,8 +272,9 @@ begin
 
             AMemoryStream := TMemoryStream.Create;
 
-           // fBmpFileHeader := GetBMPFileHeader;
-          //  fBmpFileInfo := GetBMPFileInfo(AVideoInfo);
+            fBmpFileHeader := GetBMPFileHeader();
+            fBmpFileInfo := GetBMPFileInfo(AVideoInfo);
+
 
             AMemoryStream.Write(fBmpFileHeader,
                                 SizeOf(fBmpFileHeader));
@@ -260,6 +282,7 @@ begin
                                 SizeOf(fBmpFileInfo));
             AMemoryStream.Write(pBitmapData[0],
                                 iActualDataSize);
+
           end;
       finally
         pBuffer.Unlock;
@@ -272,28 +295,26 @@ begin
 end;
 
 
-procedure TSampleConverter.GetBMPFileHeader(out pBmpFileHeader: BITMAPFILEHEADER);
+function TSampleConverter.GetBMPFileHeader : BITMAPFILEHEADER;
 begin
-  pBmpFileHeader.bfType := Ord('B') or (Ord('M') shl 8); // Type is "BM" for BitMap
-  pBmpFileHeader.bfSize := sizeof(pBmpFileHeader.bfOffBits) + sizeof(RGBTRIPLE);
-  pBmpFileHeader.bfReserved1 := 0;
-  pBmpFileHeader.bfReserved2 := 0;
-  pBmpFileHeader.bfOffBits := sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+  Result.bfType := Ord('B') or (Ord('M') shl 8); // Type is "BM" for BitMap
+  Result.bfSize := sizeof(Result.bfOffBits) + sizeof(RGBTRIPLE);
+  Result.bfReserved1 := 0;
+  Result.bfReserved2 := 0;
+  Result.bfOffBits := sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
 end;
 
-
-procedure TSampleConverter.GetBMPFileInfo(const AVideoInfo: TVideoFormatInfo;
-                                          out bmpFileHeader: BITMAPINFOHEADER);
+function TSampleConverter.GetBMPFileInfo(const AVideoInfo: TVideoFormatInfo) : BITMAPINFOHEADER;
 begin
-  bmpFileHeader.biSize := sizeof(BITMAPINFOHEADER);
-  bmpFileHeader.biWidth := AVideoInfo.iVideoWidth;
   // See: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapinfoheader
-  bmpFileHeader.biHeight       := -AVideoInfo.iVideoHeight;
-  bmpFileHeader.biPlanes       := 1;
-  bmpFileHeader.biBitCount     := 32;
-  bmpFileHeader.biCompression  := BI_RGB;
-  bmpFileHeader.biClrImportant := 0;
-  bmpFileHeader.biClrUsed      := 0;
+  Result.biSize := sizeof(BITMAPINFOHEADER);
+  Result.biWidth := AVideoInfo.iVideoWidth;
+  Result.biHeight := AVideoInfo.iVideoHeight;
+  Result.biPlanes := 1;
+  Result.biBitCount := 32;
+  Result.biCompression := BI_RGB;
+  Result.biClrImportant := 0;
+  Result.biClrUsed := 0;
 end;
 
 
@@ -416,6 +437,36 @@ begin
 end;
 
 
+
+function TSampleConverter.TransportImage(const sample: IMFSample;
+                                         const aMediaType: IMFMediaType;
+                                         const HWnd: HWND): HResult;
+var
+  hr: HResult;
+  bmpInfoHdr: PBITMAPINFOHEADER;
+  dwSize:  DWord;
+  wicimage2: TWicImage;
+
+begin
+
+  try
+  //sample.
+  hr := GetBitmapInfoHeaderFromMFMediaType(aMediaType,
+                                           bmpInfoHdr,
+                                           dwSize);
+
+  //hr := sample.
+
+
+  FWicImage := TwicImage.Create();
+  //FWicImage.
+
+  finally
+    FreeAndNil(FWicImage);
+  end;
+end;
+
+
 { TVideoFormatInfo }
 procedure TVideoFormatInfo.Reset;
 begin
@@ -424,6 +475,7 @@ begin
   iBufferWidth := 0;
   iBufferHeight := 0;
   iStride := 0;
+  bTopDown := False;
   // Major & Subtypes
   fSubType := GUID_NULL;
   fMajorType := GUID_NULL;
@@ -434,6 +486,13 @@ begin
   iMaxFrameRateDenominator := 0;
   iMinFrameRate := 0;
   iMinFrameRateDenominator := 0;
+  // Aspectratio
+  AspectRatioSupported := False;
+  AspectRatioNumerator := 0;
+  AspectRatioDenominator := 0;
 end;
+
+
+
 
 end.
