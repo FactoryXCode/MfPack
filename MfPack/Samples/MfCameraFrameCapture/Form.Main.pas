@@ -455,6 +455,10 @@ begin
     SetStretchBltMode(pbCapture.Canvas.Handle,HALFTONE);
     SetBrushOrgEx(pbCapture.Canvas.Handle, 0, 0, nil);
 
+    // Fill the background
+    pbCapture.Canvas.Brush.Color := clBtnFace;
+    pbCapture.Canvas.FillRect(pbCapture.BoundsRect);
+
     // Scale and center the image
     GetPaintArea(FLastCapturedFrame, iWidth, iHeight, iTop, iLeft);
 
