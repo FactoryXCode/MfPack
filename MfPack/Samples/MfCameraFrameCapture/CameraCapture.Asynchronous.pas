@@ -120,8 +120,8 @@ type
 
   protected
     function ConfigureSourceReader(const AAttributes: IMFAttributes) : Boolean; override;
-    procedure ProcessSample(ASample: IMFSample); override;
     procedure Flush; override;
+    procedure ProcessSample(ASample: IMFSample); override;
 
     procedure ResetVariables; override;
   public
@@ -222,7 +222,6 @@ begin
 
             ProcessSample(pSample);
           end;
-
 
           FFindingSample := False;
         end;
@@ -348,7 +347,13 @@ begin
   oSampleReply := PSampleReply(AMessage.LPARAM);
 
   if FCancelBurst then
-    SafeRelease(oSampleReply.oSample)
+  begin
+    if Assigned(oSampleReply.oSample) then
+    begin
+      oSampleReply.oSample.RemoveAllBuffers;
+      SafeRelease(oSampleReply.oSample);
+    end;
+  end
   else
     ReturnDataFromSample(oSampleReply.oSample)
 end;
@@ -365,7 +370,6 @@ end;
 
 procedure TCameraCaptureAsync.RequestFrame;
 begin
-  inherited;
   FCancelBurst := False;
   ResetFramesSkipped;
   ReadNextSample;
@@ -388,6 +392,7 @@ begin
                                        nil,
                                        nil);
     Result := SUCCEEDED(oResult);
+
     if not Result then
       HandleSampleReadError(oResult);
   end;
