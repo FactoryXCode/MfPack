@@ -108,6 +108,7 @@ type
   private
     FLogLevel: TLogType;
     FUpdating : Boolean;
+    FDisplayingMessage : Boolean;
     FFormatSettings: TFormatSettings;
     FCapture: TCameraCaptureAsync;
     FBurstCaptureCount : Integer;
@@ -218,6 +219,7 @@ end;
 
 procedure TFrmMain.ClearValues;
 begin
+  FDisplayingMessage := False;
   FImageCleared := False;
   FBurstStatisticsUpdate := 0;
   FBurstDurationSeconds := 0;
@@ -335,6 +337,7 @@ begin
   btnCalculateMax.Caption := 'Calculating...';
   BeginBusy;
   try
+    Log('Calculating max frame rate', ltInfo);
     FCapture.CalculateMaxFrameRate(HandleCalculateMaxComplete);
   finally
     EndBusy;
@@ -342,12 +345,18 @@ begin
 end;
 
 procedure TFrmMain.HandleCalculateMaxComplete(const AFramesPerSecond : Integer);
+var
+  sMessage : string;
 begin
   btnCalculateMax.Caption := 'Calculate Max';
-  MessageDlg(Format('Estimated readable frame rate: %d (fps).' + #13#10 +
+
+  sMessage := Format('Estimated readable frame rate: %d (fps).' + #13#10 +
           'Current Format: %d x %d (%d fps)', [AFramesPerSecond,
-          FCurrentCaptureFormat.iFrameWidth, FCurrentCaptureFormat.iFrameHeigth, FCurrentCaptureFormat.iFramesPerSecond]), mtInformation,
-          [mbOk], 0, mbOk);
+          FCurrentCaptureFormat.iFrameWidth, FCurrentCaptureFormat.iFrameHeigth, FCurrentCaptureFormat.iFramesPerSecond]);
+
+  Log(sMessage, ltInfo);
+
+  MessageDlg(sMessage, mtInformation, [mbOk], 0, mbOk);
 end;
 
 procedure TFrmMain.HandleCapturePaint(Sender: TObject);
@@ -456,8 +465,13 @@ begin
     SetBrushOrgEx(pbCapture.Canvas.Handle, 0, 0, nil);
 
     // Fill the background
-    pbCapture.Canvas.Brush.Color := clBtnFace;
-    pbCapture.Canvas.FillRect(pbCapture.BoundsRect);
+    if FDisplayingMessage then
+    begin
+      pbCapture.Canvas.Brush.Color := clBtnFace;
+      pbCapture.Canvas.FillRect(pbCapture.BoundsRect);
+
+      FDisplayingMessage := False;
+    end;
 
     // Scale and center the image
     GetPaintArea(FLastCapturedFrame, iWidth, iHeight, iTop, iLeft);
@@ -487,6 +501,7 @@ begin
   iWidth := pbCapture.Canvas.TextWidth(AText);
   pbCapture.Canvas.Font.Name := 'Segoe UI';
   pbCapture.Canvas.TextOut(Round((pbCapture.Width - iWidth) / 2), 20, AText);
+  FDisplayingMessage := True;
 end;
 
 procedure TFrmMain.GetPaintArea(AImage : TBitmap; var AWidth : Integer; var AHeight : Integer; var ATop : Integer; var ALeft : Integer);
