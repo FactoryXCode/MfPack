@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX311/Samples/MFFrameSample
+// Related projects: MfPackX311/Samples/CameraFrameCapture
 //
 // Compiler version: 23 up to 34
 // SDK version: 10.0.22000.0
@@ -85,9 +85,11 @@ type
               ltWarning,
               ltError);
 
-  TImageType = (itBitmap, itPNG, itJPG);
+  TImageType = (itBitmap,
+                itPNG,
+                itJPG);
 
-  TFrameDataEvent = procedure(AMemoryStream : TMemoryStream) of object;
+  TFrameDataEvent = procedure(AMemoryStream: TMemoryStream) of object;
   TLogEvent = reference to procedure(const AMessage: string;
                                      ALogType: TLogType);
 
@@ -102,27 +104,31 @@ type
     iBufferWidth: Integer;
     iBufferHeight: Integer;
     iStride: Integer;
-    oSubType : TGUID;
-    procedure Reset;
+    oSubType: TGUID;
+
+    procedure Reset();
   end;
 
   // CriticalSection
   TMFCritSec = class
   private
     FCriticalSection: TRTLCriticalSection;
+
   public
-    constructor Create;
-    destructor Destroy; override;
-    procedure Lock;
-    procedure Unlock;
+    constructor Create();
+    destructor Destroy(); override;
+    procedure Lock();
+    procedure Unlock();
   end;
 
   procedure HandleThreadMessages(AThread: THandle;
                                  AWait: Cardinal = INFINITE);
-  function GetMemoryUsed: string;
+  function GetMemoryUsed(): string;
 
-  procedure SaveImage(AInput : TBitmap; const APath : string; AType : TImageType);
-  function PerformanceCounterMilliseconds(AFrequency : Int64): Int64;
+  procedure SaveImage(AInput: TBitmap;
+                      const APath: string;
+                      AType: TImageType);
+  function PerformanceCounterMilliseconds(AFrequency: Int64): Int64;
 
 threadvar
   TimerFrequency: Int64;
@@ -130,19 +136,23 @@ threadvar
 const
   cTab = #9;
 
+
 implementation
+
 
 uses
   System.SysUtils;
 
-function ProcessMemoryUsage: int64;
+function ProcessMemoryUsage(): int64;
 var
   oCounters: TProcessMemoryCounters;
 
 begin
   Result := 0;
   try
-    FillChar(oCounters, SizeOf(oCounters), 0);
+    FillChar(oCounters,
+             SizeOf(oCounters),
+             0);
     oCounters.cb := SizeOf(TProcessMemoryCounters);
     GetProcessMemoryInfo(GetCurrentProcess,
                          @oCounters,
@@ -153,10 +163,12 @@ begin
   end;
 end;
 
-function GetMemoryUsed: string;
+
+function GetMemoryUsed(): string;
 begin
   Result := ToSize(Round(ProcessMemoryUsage / 1024));
 end;
+
 
 function ToSize(AKilobytes: int64): string;
 const
@@ -185,62 +197,66 @@ begin
     Result := Format('%.2d:%.2d:%.2d', [ATime.Hours, ATime.Minutes, ATime.Seconds]);
 end;
 
-procedure SaveImage(AInput : TBitmap; const APath : string; AType : TImageType);
+
+procedure SaveImage(AInput: TBitmap;
+                    const APath: string;
+                    AType: TImageType);
 var
   pPng: TPngImage;
   pJpg: TJPEGImage;
+
 begin
   case AType of
     itBitmap :
-     begin
+      begin
          AInput.SaveToFile(APath);
-       end;
+      end;
     itPNG :
-     begin
+      begin
          pPng := TPngImage.Create;
          pPng.Assign(AInput);
          AInput.SaveToFile(APath);
 
          if Assigned(pPng) then
            pPng.Free;
-       end;
+      end;
     itJPG :
-     begin
-         pJpg := TJPEGImage.Create;
-         // Adjust performance, compression etc.
-         pJpg.Performance := jpBestQuality;
-         pJpg.ProgressiveEncoding := True;
-         pJpg.ProgressiveDisplay := True;
-         //pJpg.CompressionQuality := 30;
-         pJpg.Compress;
-         pJpg.Assign(AInput);
-         pjpg.SaveToFile(APath);
+      begin
+        pJpg := TJPEGImage.Create;
+        // Adjust performance, compression etc.
+        pJpg.Performance := jpBestQuality;
+        pJpg.ProgressiveEncoding := True;
+        pJpg.ProgressiveDisplay := True;
+        //pJpg.CompressionQuality := 30;
+        pJpg.Compress;
+        pJpg.Assign(AInput);
+        pjpg.SaveToFile(APath);
 
-         if Assigned(pJpg) then
-           pJpg.Free;
-       end;
+        if Assigned(pJpg) then
+          pJpg.Free();
+      end;
   end;
 end;
 
 { TMFCritSec }
 
-constructor TMFCritSec.Create;
+constructor TMFCritSec.Create();
 begin
   InitializeCriticalSection(FCriticalSection);
 end;
 
-destructor TMFCritSec.Destroy;
+destructor TMFCritSec.Destroy();
 begin
   DeleteCriticalSection(FCriticalSection);
   inherited;
 end;
 
-procedure TMFCritSec.Lock;
+procedure TMFCritSec.Lock();
 begin
   EnterCriticalSection(FCriticalSection);
 end;
 
-procedure TMFCritSec.Unlock;
+procedure TMFCritSec.Unlock();
 begin
   LeaveCriticalSection(FCriticalSection);
 end;
@@ -291,7 +307,7 @@ begin
 end;
 
 { TVideoFormatInfo }
-procedure TVideoFormatInfo.Reset;
+procedure TVideoFormatInfo.Reset();
 begin
   iVideoWidth := 0;
   iVideoHeight := 0;
@@ -299,17 +315,19 @@ begin
   iBufferHeight := 0;
 end;
 
-function PerformanceCounterMilliseconds(AFrequency : Int64): Int64;
+
+function PerformanceCounterMilliseconds(AFrequency: Int64): Int64;
 var
-  iCount : Int64;
+  iCount: Int64;
+
 begin
  if AFrequency = 0 then
    Result := 0
  else
- begin
-   QueryPerformanceCounter(iCount);
-   Result := Round(iCount / AFrequency * 1000);
- end;
+   begin
+     QueryPerformanceCounter(iCount);
+     Result := Round(iCount / AFrequency * 1000);
+   end;
 end; { PerformanceCounterToMS }
 
 

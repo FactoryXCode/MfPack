@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX311/Samples/MFFrameSample
+// Related projects: MfPackX311/Samples/CameraFrameCapture
 //
 // Compiler version: 23 up to 34
 // SDK version: 10.0.22000.0
@@ -80,11 +80,11 @@ type
 
   public
 
-    constructor Create;
-    destructor Destroy; override;
+    constructor Create();
+    destructor Destroy(); override;
 
-    procedure AllocateHandle;
-    procedure RemoveHandle;
+    procedure AllocateHandle();
+    procedure RemoveHandle();
 
     property Handle: HWND read FWinHandle;
     property OnMessage: TOnHandleMessage read FOnHandleMessage write FOnHandleMessage;
@@ -94,39 +94,45 @@ implementation
 
 { TMessageHandler }
 
-constructor TMessageHandler.Create;
+constructor TMessageHandler.Create();
 begin
   inherited;
   FWinHandle := INVALID_HANDLE_VALUE;
   AllocateHandle;
 end;
 
-destructor TMessageHandler.Destroy;
+
+destructor TMessageHandler.Destroy();
 begin
   RemoveHandle;
   inherited;
 end;
 
-procedure TMessageHandler.AllocateHandle;
+
+procedure TMessageHandler.AllocateHandle();
 begin
   RemoveHandle;
   FWinHandle := AllocateHWnd(HandleWindowsMessage);
 end;
 
-procedure TMessageHandler.RemoveHandle;
+
+procedure TMessageHandler.RemoveHandle();
 begin
   DeallocateHWnd(FWinHandle);
   FWinHandle := INVALID_HANDLE_VALUE;
 end;
 
+
 procedure TMessageHandler.HandleWindowsMessage(var AMessage: TMessage);
 var
   bHandled: boolean;
+
 begin
   bHandled := False;
 
   if Assigned(FOnHandleMessage) then
-    FOnHandleMessage(AMessage, bHandled);
+    FOnHandleMessage(AMessage,
+                     bHandled);
 
   if bHandled then
     AMessage.Result := 0
