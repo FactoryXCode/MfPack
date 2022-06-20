@@ -9,6 +9,7 @@ uses
   WinApi.ComBaseApi,
   Winapi.ShlObj,
   Winapi.KnownFolders,
+  WinApi.WinApiTypes,
   {System}
   System.SysUtils,
   System.Variants,
@@ -52,12 +53,11 @@ type
     pnlPreview: TPanel;
     pnlSnapShot: TPanel;
     pbCapture: TPaintBox;
-    ApplicationEvents: TApplicationEvents;
     butSaveToFile: TButton;
     Bevel2: TBevel;
     Button1: TButton;
+    ApplicationEvents: TApplicationEvents;
     procedure FormCreate(Sender: TObject);
-    procedure ApplicationEventsMessage(var Msg: tagMSG; var Handled: Boolean);
     procedure mnuChooseDeviceClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure mnuStartPreviewClick(Sender: TObject);
@@ -70,18 +70,18 @@ type
     hPreview: HWND;
     bRecording: Boolean;
     bPreviewing: Boolean;
-    //g_fSleepState: Boolean;
-
 
     // Messages
     procedure OnSize(var message: TWMSize); message WM_SIZE;
-
     // Update menuitems and status
     procedure UpdateUI();
+    // Catches all messages to this object.
+   // procedure HandleCaptureEngineMessages(var Msg: TMsg;
+   //                                       var Handled: Boolean);
 
   public
     { Public declarations }
-
+    procedure WndProc(var Msg: TMessage); override;
   end;
 
 var
@@ -96,41 +96,115 @@ implementation
 
 // OnResize
 procedure TMainWindow.OnSize(var message: TWMSize);
+var
+  crD: MFVideoNormalizedRect;
+  pcrD: PMFVideoNormalizedRect;
+
 begin
-  inherited;
-  //
+  // Set video size
+  if Assigned(FCaptureManager) then
+    begin
+      crD.left := 0;
+      crD.top := 0;
+      crD.right := pbCapture.ClientWidth;
+      crD.bottom := pbCapture.ClientHeight;
+      pcrD := @crD;
+
+      FCaptureManager.UpdateVideo(pcrD);
+    end;
 end;
 
 
+{procedure TMainWindow.HandleCaptureEngineMessages(var Msg: TMsg;
+                                                  var Handled: Boolean);
+var
+  psample: IMFSample;
+  wp: Pointer;
+  lp: Pointer;
 
-procedure TMainWindow.ApplicationEventsMessage(var Msg: tagMSG;
-                                               var Handled: Boolean);
+begin
+
+try
+
+  case Msg.message of
+
+    // We did recieve a sample from TCaptureManager.TCaptureEngineOnSampleCallback.OnSample
+    WM_RECIEVED_SAMPLE_FROM_CALLBACK:
+      begin
+        psample := IMFSample(@Msg.WParam);
+
+        // process the sample
+        // ProcessSample(pSample); } {TODO Needs implementation -cGeneral : ActionItem
+        Handled := True;
+      end;
+
+    WM_APP_CAPTURE_EVENT:
+      begin
+        wp := Pointer(Msg.WParam);
+        lp := Pointer(Msg.LParam);
+        Handled := True;
+       // FCaptureManager.OnCaptureEvent(wp,
+       //                                lp);
+
+      end;
+  end;
+
+
+except
+  on E : Exception do
+   ShowMessage(format('%s error raised, with message %s',
+                      [E.ClassName, E.Message]));
+end;
+end; }
+
+
+
+procedure TMainWindow.WndProc(var Msg: TMessage);
 var
   psample: IMFSample;
 
 begin
 
-  if msg.hwnd = pnlPreview.Handle then
-    begin
-      Handled := True;
-      Exit;
-    end;
+try
+try
 
-  // We did recieve a sample from TCaptureManager.TCaptureEngineOnSampleCallback.OnSample
-  if msg.message = WM_RECIEVED_SAMPLE_FROM_CALLBACK then
-    begin
-      psample := IMFSample(@msg.lParam);
+  case Msg.Msg of
 
-      // process the sample
-      {ProcessSample(pSample); } {TODO Needs implementation -cGeneral : ActionItem}
+    // We did recieve a sample from TCaptureManager.TCaptureEngineOnSampleCallback.OnSample
+    WM_RECIEVED_SAMPLE_FROM_CALLBACK:
+      begin
+        psample := IMFSample(Pointer(Msg.WParam));
 
+        // process the sample
+        // ProcessSample(pSample);  {TODO Needs implementation -cGeneral : ActionItem
 
-      Handled := True;
-      Exit;
-    end;
+      end;
 
-  Handled := False;
+    WM_APP_CAPTURE_EVENT:
+      begin
+        FCaptureManager.OnCaptureEvent(Msg.WParam,
+                                       Msg.LParam);
+        WaitForSingleObject(Handle,
+                            INFINITE);
+      end;
+
+      // Any other messages are passed to DefWindowProc, which tells Windows to handle the message.
+    else
+      msg.Result := DefWindowProc(Handle,
+                                  Msg.Msg,
+                                  Msg.WParam,
+                                  Msg.LParam);
+  end;
+except
+  on E : Exception do
+   ShowMessage(format('%s error raised, with message %s',
+                      [E.ClassName, E.Message]));
 end;
+finally
+  inherited WndProc(Msg);
+end;
+end;
+
 
 
 procedure TMainWindow.Button1Click(Sender: TObject);
@@ -142,8 +216,8 @@ end;
 procedure TMainWindow.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   CanClose := False;
-  FreeAndNil(DeviceParam);
-  SafeDelete(g_pEngine);
+  FreeAndNil(FDeviceParam);
+  SafeDelete(FCaptureManager);
   PostQuitMessage(0);
   MFShutdown();
   CoUnInitialize();
@@ -159,6 +233,7 @@ label
   Done;
 
 begin
+
   // Initialize COM
   CoInitializeEx(nil,
                  COINIT_APARTMENTTHREADED);
@@ -178,15 +253,15 @@ begin
    // Create the captureengine
 
    hr := TCaptureManager.CreateCaptureEngine(Handle,
-                                             g_pEngine);
+                                             FCaptureManager);
    if FAILED(hr) then
      goto Done;
 
    // Create DeviceParam class that holds the Activate pointers of the selected device.
-   DeviceParam := TChooseDeviceParam.Create();
+   FDeviceParam := TChooseDeviceParam.Create();
 
-   hr := g_pEngine.InitializeCaptureManager(hPreview,
-                                            DeviceParam.Device);
+   hr := FCaptureManager.InitializeCaptureManager(hPreview, Handle,
+                                                  FDeviceParam.Device);
    if FAILED(hr) then
      begin
 
@@ -217,12 +292,13 @@ label
 
 begin
 
-  if g_pEngine.IsPreviewing then
-    g_pEngine.StopPreview;
-  if g_pEngine.IsRecording then
-    g_pEngine.StopRecord;
-  HandleThreadMessages(GetCurrentThread());
+  if FCaptureManager.IsPreviewing then
+    FCaptureManager.StopPreview;
+  if FCaptureManager.IsRecording then
+    FCaptureManager.StopRecord;
 
+  HandleThreadMessages(GetCurrentThread());
+  Sleep(1000);
   //UpdateUI();
 
   // To be sure the dialog is created
@@ -233,9 +309,9 @@ begin
     end;
 
   // Destroy and Create DeviceParam class that holds the Activate pointers of the selected device.
-  if Assigned(DeviceParam) then
-    SafeDelete(DeviceParam);
-  DeviceParam := TChooseDeviceParam.Create();
+  if Assigned(FDeviceParam) then
+    SafeDelete(FDeviceParam);
+  FDeviceParam := TChooseDeviceParam.Create();
 
   // Populate the listbox with camera's found
   // ========================================
@@ -243,14 +319,14 @@ begin
   // Clear the combobox
   ChooseDeviceDlg.lbxDeviceList.Clear;
   // Fill the combobox with found capture devices
-  for i := 0 to DeviceParam.Count - 1 do
+  for i := 0 to FDeviceParam.Count - 1 do
     begin
 
       // Choose device index and set params
-      DeviceParam.DeviceIndex := i;
+      FDeviceParam.DeviceIndex := i;
 
       // Append the friendly name to the combobox.
-      ChooseDeviceDlg.lbxDeviceList.Items.Append(DeviceParam.DeviceName);
+      ChooseDeviceDlg.lbxDeviceList.Items.Append(FDeviceParam.DeviceName);
       // Show the first in the list
       ChooseDeviceDlg.lbxDeviceList.ItemIndex := 0;
     end;
@@ -260,8 +336,9 @@ begin
     begin
       hPreview := pnlPreview.Handle;
 
-      hr := g_pEngine.InitializeCaptureManager(hPreview,
-                                               DeviceParam.Device);
+      hr := FCaptureManager.InitializeCaptureManager(hPreview,
+                                                     Handle,
+                                                     FDeviceParam.Device);
       if FAILED(hr) then
         goto Done;
     end;
@@ -288,9 +365,9 @@ begin
   bEnablePhoto := False;
   bEnableRecording := False;
 
-  if not g_pEngine.IsRecording then
+  if not FCaptureManager.IsRecording then
     begin
-      bRecording := g_pEngine.IsRecording;
+      bRecording := FCaptureManager.IsRecording;
 
       if bRecording then
         mnuStartRecording.Caption := 'Stop Recording'
@@ -298,9 +375,9 @@ begin
         mnuStartRecording.Caption := 'Start Recording';
     end;
 
-  if g_pEngine.IsPreviewing then
+  if FCaptureManager.IsPreviewing then
     begin
-      bPreviewing := g_pEngine.IsPreviewing;
+      bPreviewing := FCaptureManager.IsPreviewing;
       if bPreviewing then
         begin
           mnuStartPreview.Caption := 'Stop Preview';
@@ -313,7 +390,7 @@ begin
 
   if bRecording then
     StatusBar.SimpleText := 'Recording'
-  else if g_pEngine.IsPreviewing then
+  else if FCaptureManager.IsPreviewing then
     StatusBar.SimpleText := 'Previewing'
   else
     begin
@@ -321,7 +398,7 @@ begin
       bEnableRecording := False;
     end;
 
-  if (g_pEngine.IsPreviewing or g_pEngine.IsPhotoPending) then
+  if (FCaptureManager.IsPreviewing or FCaptureManager.IsPhotoPending) then
     bEnablePhoto := False;
 
   mnuStartRecording.Enabled := bEnableRecording;
@@ -335,11 +412,13 @@ var
   hr: HResult;
 
 begin
-  hr := g_pEngine.StartPreview();
+  hr := FCaptureManager.StartPreview();
 {$IF DEBUG}
   if FAILED(hr) then
     OutputDebugString(PWideChar(format('Error: %s (hr = %d)', [ERR_RECORD, hr])));
 {$ENDIF}
+  if FAILED(hr) then
+    Exit;
   UpdateUI();
 end;
 
@@ -347,7 +426,7 @@ end;
 procedure TMainWindow.mnuStartRecordingClick(Sender: TObject);
 begin
 
-  g_pEngine.StartRecord('');
+  FCaptureManager.StartRecord('');
 
 end;
 
@@ -360,10 +439,9 @@ label
   Done;
 
 begin
-
-
-
-  hr := g_pEngine.TakePhoto(ssoCallBack);
+  hr := E_FAIL;
+  if Assigned(FCaptureManager) then
+    hr := FCaptureManager.TakePhoto(ssoCallBack);
   if FAILED(hr) then
     goto Done;
 

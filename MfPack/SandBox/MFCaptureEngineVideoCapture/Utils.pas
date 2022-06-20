@@ -16,7 +16,8 @@ uses
   WinApi.MediaFoundationApi.MfError,
   WinApi.MediaFoundationApi.MfCaptureEngine,
   WinApi.MediaFoundationApi.MfObjects,
-  WinApi.MediaFoundationApi.MfMetLib;
+  WinApi.MediaFoundationApi.MfMetLib,
+  WinApi.MediaFoundationApi.MfUtils;
 
 
 const
@@ -178,7 +179,7 @@ begin
 
   // Configure the video format for the recording sink.
   hr := pSource.GetCurrentDeviceMediaType(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD,
-                                          @pMediaType);
+                                          pMediaType);
   if FAILED(hr) then
     goto Done;
 
@@ -285,9 +286,6 @@ done:
 end;
 
 
-
-
-
 procedure HandleThreadMessages(AThread: THandle;
                                AWait: Cardinal = INFINITE);
 var
@@ -313,6 +311,76 @@ begin
       TranslateMessage(oMsg);
       DispatchMessage(oMsg);
     end;
+end;
+
+
+// This method returns a IMFActivate that is able to render to a window or any other visual component that has a THandle (HWND)
+function CreateMediaSinkActivate(pSourceSD: IMFStreamDescriptor;
+                                 dwStream: DWORD;
+                                 hVideoWindow: HWND; // Handle to the video clipping window.
+                                 pActivate: IMFActivate): HRESULT;
+var
+  hr: HResult;
+  pmtHandler: IMFMediaTypeHandler;
+  pmfActivate: IMFActivate;
+  guidMajorType: TGUID;
+  pmfStreamSink: IMFStreamSink;
+  pmfVideoSink: IMFMediaSink;
+  dwID: DWord;
+
+label
+  Done;
+
+begin
+
+  // Get the media type handler for the stream.
+  hr := pSourceSD.GetMediaTypeHandler(pmtHandler);
+  if FAILED(hr) then
+    goto done;
+
+
+  // Get the major media type.
+  hr := pmtHandler.GetMajorType(guidMajorType);
+  if FAILED(hr) then
+    goto Done;
+
+  // Create an IMFActivate object for the renderer, based on the media type.
+  if IsEqualGuid(MFMediaType_Video, guidMajorType) then
+    begin
+      // Create the video renderer.
+      hr := MFCreateVideoRendererActivate(hVideoWindow,
+                                          pActivate);
+
+      hr := pActivate.ActivateObject(IID_IMFMediaSink,
+                                     Pointer(pmfVideoSink));
+      if SUCCEEDED(hr) then
+        begin
+
+          hr := pmfVideoSink.AddStreamSink(dwStream,
+                                           nil,
+                                           pmfStreamSink);
+          if SUCCEEDED(hr) then
+            begin
+              hr := pmfStreamSink.GetIdentifier(dwID);
+              if SUCCEEDED(hr) then
+                SafeRelease(pmfStreamSink);
+            end;
+        end;
+    end
+  else
+      begin
+        hr := MF_E_CAPTURE_SOURCE_NO_VIDEO_STREAM_PRESENT;
+        // Optionally, you could deselect this stream instead of failing.
+      end;
+
+  if FAILED(hr) then
+    goto Done;
+
+  // Return IMFActivate pointer to caller.
+  pActivate := pmfActivate;
+
+done:
+  Result := hr;
 end;
 
 end.

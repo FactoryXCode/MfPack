@@ -15,7 +15,7 @@ uses
   CaptureEngine in 'CaptureEngine.pas',
   dlgChooseDevice in 'dlgChooseDevice.pas' {ChooseDeviceDlg},
   Utils in 'Utils.pas',
-  SampleConverter in 'SampleConverter.pas';
+  SampleConverter_V1 in 'SampleConverter_V1.pas';
 
 {$R *.res}
 

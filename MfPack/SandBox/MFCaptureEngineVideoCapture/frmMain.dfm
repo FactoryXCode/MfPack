@@ -68,8 +68,6 @@ object MainWindow: TMainWindow
       Color = clBackground
       ParentColor = False
       ExplicitTop = 0
-      ExplicitWidth = 275
-      ExplicitHeight = 145
     end
     object Bevel2: TBevel
       Left = 1
@@ -143,8 +141,7 @@ object MainWindow: TMainWindow
     Top = 32
   end
   object ApplicationEvents: TApplicationEvents
-    OnMessage = ApplicationEventsMessage
-    Left = 200
-    Top = 41
+    Left = 184
+    Top = 33
   end
 end

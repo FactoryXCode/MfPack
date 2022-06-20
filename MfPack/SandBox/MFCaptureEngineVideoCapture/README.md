@@ -1,21 +1,26 @@
-CaptureEngine video capture sample
-==================================
+# MfCaptureEngineVideoCapture
 
-This sample demonstrates how to use the [Media Foundation](http://msdn.microsoft.com/en-us/library/windows/desktop/ms694197) [**CaptureEngine**](http://msdn.microsoft.com/en-us/library/windows/desktop/hh162749) to capture video from a capture device, such as a webcam.
+Version: X 3.1.1
 
-Note: function TCaptureManager.GetCaptureDeviceCaps is not working very well. Somehow m_pSource (IMFCaptureSource) returns
--1072875854 ( $C00D36B2) "The request is invalid in the current state."
+Description:
+  Demonstrates how to capture an snapshot or a recording (A-synchronous) from a capture device, such as a webcam using the Source Reader with preview.
 
-Operating system requirements
------------------------------
+NOTES:
+ - With A Little Help From My Friends [HELP](https://youtu.be/GooL7-iPMYI) we can implement the captured snapshot from IMFMediaSample ;-)
+ - This release is updated for compiler version 17 up to 34.
+ - SDK version 10.0.22000.0 (Win 11)
+ - Requires Windows 10 or later.
+ - Minimum supported MfPack version: 3.1.1
 
-Client
+Project: Media Foundation - MFPack - Samples
+Project location: https://github.com/FactoryXCode/MfPack
+                  https://sourceforge.net/projects/MFPack
 
-Windows 8.1
+First release date: 05-03-2022
+Final release date: 20-06-2022
 
-Server
+Copyright © FactoryX. All rights reserved.
 
-Windows Server 2012 R2
 
 
 

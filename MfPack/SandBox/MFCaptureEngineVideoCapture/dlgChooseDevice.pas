@@ -46,8 +46,8 @@ begin
   if lbxDeviceList.ItemIndex >= 0 then
     begin
       // Set DeviceParam properties
-      DeviceParam.DeviceIndex := lbxDeviceList.ItemIndex;
-      DeviceParam.DeviceIsSelected := True;
+      FDeviceParam.DeviceIndex := lbxDeviceList.ItemIndex;
+      FDeviceParam.DeviceIsSelected := True;
       ModalResult := 1212;
     end;
 end;
