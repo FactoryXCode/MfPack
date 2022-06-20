@@ -805,7 +805,7 @@ try
 
   hr := (m_pSession as IMFGetService).GetService(MR_STREAM_VOLUME_SERVICE,
                                                  IID_IMFAudioStreamVolume,
-                                                 pVol);
+                                                 Pointer(pVol));
 
   if SUCCEEDED(hr) then
     begin
@@ -995,7 +995,7 @@ try
   MFGetService(m_pSession,
                MR_VIDEO_RENDER_SERVICE,
                IID_IMFVideoDisplayControl,
-               m_pVideoDisplay);
+               Pointer(m_pVideoDisplay));
   if (FAILED(hr)) then
     Abort; //silent exception
 
@@ -1607,7 +1607,7 @@ begin
 
   hr := (m_pSession as IMFGetService).GetService(MR_STREAM_VOLUME_SERVICE,
                                                 IID_IMFAudioStreamVolume,
-                                                pVol);
+                                                Pointer(pVol));
   // We could also implement stereo or balanced output.
   // but that is a nice goal for using your own creativity.
   if SUCCEEDED(hr) then

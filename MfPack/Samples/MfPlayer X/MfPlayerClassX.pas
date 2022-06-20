@@ -984,7 +984,7 @@ try
 
   hr:= (m_pSession as IMFGetService).GetService(MR_STREAM_VOLUME_SERVICE,
                                                 IID_IMFAudioStreamVolume,
-                                                pVol);
+                                                Pointer(pVol));
   if SUCCEEDED(hr) then
     begin
       // Get the number of soundchannels from the stream
@@ -1291,7 +1291,7 @@ begin
   hr := MFGetService(m_pSession,
                      MR_VIDEO_RENDER_SERVICE,
                      IID_IMFVideoDisplayControl,
-                     m_pVideoDisplay);
+                     Pointer(m_pVideoDisplay));
 
   if (FAILED(hr)) then
     begin
@@ -1782,7 +1782,7 @@ try
         begin
           hr:= (m_pSession as IMFGetService).GetService(MR_VIDEO_MIXER_SERVICE,
                                                         IID_IMFVideoProcessor,
-                                                        FVideoProcessor);
+                                                        Pointer(FVideoProcessor));
           if (SUCCEEDED(hr)) then
             hr := FVideoProcessor.GetBackgroundColor(FBGColor);
         end
@@ -2255,7 +2255,7 @@ begin
       hr:= MFGetService(m_pSession,
                         MF_RATE_CONTROL_SERVICE,
                         IID_IMFRateSupport,
-                        m_pRateSupport);
+                        Pointer(m_pRateSupport));
     end;
 
   // Get the RateControl interface
@@ -2269,7 +2269,7 @@ begin
     hr:= MFGetService(m_pSession,
                       MF_RATE_CONTROL_SERVICE,
                       IID_IMFRateControl,
-                      m_pRateControl);
+                      Pointer(m_pRateControl));
 
 
   // - By calling IMFGetService.GetService on the Media Session.
@@ -2499,7 +2499,7 @@ begin
 
   hr := (m_pSession as IMFGetService).GetService(MR_STREAM_VOLUME_SERVICE,
                                                  IID_IMFAudioStreamVolume,
-                                                 pVol);
+                                                 Pointer(pVol));
 
   // Get the number of channels
   if (SUCCEEDED(hr)) then

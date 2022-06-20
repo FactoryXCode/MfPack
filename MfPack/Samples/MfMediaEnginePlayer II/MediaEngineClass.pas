@@ -975,8 +975,6 @@ end;
 function TcMediaEngine.GetVideoFrame(SourceRect: TRectF; DestRecr: TRect; var wicbmp: IWICBitmap): HResult;
 var
   lrStrTick: LongLong;
-  vVideoNRect: TRectF;
-  vRect: TRect;
   vMFARGB: MFARGB;
   hr: HResult;
 
@@ -1048,7 +1046,7 @@ begin
       hres := MFGetService(pr_MediaEngine,
                            MF_MEDIA_ENGINE_TIMEDTEXT,
                            IID_IMFTimedText,
-                           pr_TimedText);
+                           Pointer(pr_TimedText));
 
      if Failed(hres) then
        goto done;

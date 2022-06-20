@@ -373,7 +373,6 @@ end;
 //------------------------------------------------------------------------------
 procedure TfrmMain.OnDeviceChange(var AMessage: TMessage);
 var
-  hr: HRESULT;  // For debugging only
   bDeviceLost: BOOL;
   PDevBroadcastHeader: PDEV_BROADCAST_HDR;
   pDevBroadCastIntf: PDEV_BROADCAST_DEVICEINTERFACE;
@@ -387,7 +386,7 @@ begin
   bDeviceLost := False;
 
   // Check if the current device was lost.
-  if AMessage.WParam = DBT_DEVICEREMOVECOMPLETE then
+  if (AMessage.WParam = DBT_DEVICEREMOVECOMPLETE) then
     begin
       // Check if the current video capture device was lost.
 
@@ -399,18 +398,14 @@ begin
       pDevBroadCastIntf := PDEV_BROADCAST_DEVICEINTERFACE(PDevBroadcastHeader);
       // Note: Since Windows 8 the value of dbcc_name is no longer the devicename, but the symboliclink of the device.
       pwDevSymbolicLink := PChar(@pDevBroadCastIntf^.dbcc_name);
-
-      hr := S_OK;
       bDeviceLost := False;
-
       if StrIComp(PWideChar(g_pPreview.DeviceSymbolicLink),
                   PWideChar(pwDevSymbolicLink)) = 0 then
         bDeviceLost := True;
+    end;
 
-     end;
 
-
-  if (FAILED(hr) or (bDeviceLost = True)) then
+  if (bDeviceLost = True) then
     begin
       g_pPreview.CloseDevice();
 

@@ -1198,7 +1198,7 @@ try
   // When returned value = -2147467262,  then No such interface supported. (0x80004002, $80004002)
   hr := (m_pSession as IMFGetService).GetService(MR_STREAM_VOLUME_SERVICE,
                                                 IID_IMFAudioStreamVolume,
-                                                pVol);
+                                                Pointer(pVol));
   if SUCCEEDED(hr) then
     begin
       hr := pVol.GetChannelCount(nChannels);
@@ -1307,7 +1307,7 @@ try
   hr := MFGetService(m_pSession,
                      MR_VIDEO_RENDER_SERVICE,
                      IID_IMFVideoDisplayControl,
-                     m_pVideoDisplay);
+                     Pointer(m_pVideoDisplay));
 
   if SUCCEEDED(hr) then
     begin
@@ -1791,7 +1791,7 @@ begin
 
   hr := (m_pSession as IMFGetService).GetService(MR_STREAM_VOLUME_SERVICE,
                                                  IID_IMFAudioStreamVolume,
-                                                 pVol);
+                                                 Pointer(pVol));
   // We could also implement stereo or balanced output.
   // but that is a nice goal for using your own creativity.
   if SUCCEEDED(hr) then

@@ -594,7 +594,7 @@ begin
   // Create the media source for the device.
   if SUCCEEDED(hr) then
     hr := pActivate.ActivateObject(IID_IMFMediaSource,
-                                   pSource);
+                                   Pointer(pSource));
 
   // Get the symbolic link.
   if SUCCEEDED(hr) then

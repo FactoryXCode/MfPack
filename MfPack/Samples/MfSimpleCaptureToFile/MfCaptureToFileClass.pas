@@ -573,7 +573,7 @@ begin
 
   // Create the media source for the device.
   hr := pActivate.ActivateObject(IID_IMFMediaSource,
-                                 pSource);
+                                 Pointer(pSource));
 
   // Get the symbolic link. This is needed to handle device-
   // loss notifications. (See CheckDeviceLost.)

@@ -589,7 +589,7 @@ try
         begin
           hr := (m_pSession as IMFGetService).GetService(MR_VIDEO_MIXER_SERVICE,
                                                          IID_IMFVideoProcessor,
-                                                         FVideoProcessor);
+                                                         Pointer(FVideoProcessor));
           if SUCCEEDED(hr) then
             hr := FVideoProcessor.GetBackgroundColor(FBGColor);
         end
@@ -788,7 +788,7 @@ begin
   hr := MFGetService(m_pSession,
                      MR_VIDEO_RENDER_SERVICE,
                      IID_IMFVideoDisplayControl,
-                     m_pVideoDisplay);
+                     Pointer(m_pVideoDisplay));
 
   if FAILED(hr) then
     begin
@@ -1080,7 +1080,7 @@ try
       if (count > 0) then
         begin
           hr := ppDevices[DeviceProperty.uiDeviceIndex].ActivateObject(IID_IMFMediaSource,
-                                                                       pSource);
+                                                                       Pointer(pSource));
           if SUCCEEDED(hr) then
             begin
               m_pActivate := ppDevices[DeviceProperty.uiDeviceIndex];
