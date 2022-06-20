@@ -4,7 +4,7 @@ Version: X 3.1.1
 
 Description:
 
-  Demonstrates how to capture an image (synchronous or A-synchronous) from a camera using the Source Reader.
+  Demonstrates how to capture an image (A-synchronous) from a camera using the Source Reader.
 
 NOTES: 
  - This release is updated for compiler version 17 up to 34.
