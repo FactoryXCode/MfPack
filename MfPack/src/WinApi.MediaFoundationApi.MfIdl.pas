@@ -1808,7 +1808,7 @@ type
 
     function GetPresentationClock(out ppPresentationClock: IMFPresentationClock): HResult; stdcall;
 
-    function Shutdown: HResult; stdcall;
+    function Shutdown(): HResult; stdcall;
 
   end;
   IID_IMFMediaSink = IMFMediaSink;
@@ -2265,7 +2265,7 @@ type
 
     function GetService(const guidService: TGUID;
                         const riid: TGUID;
-                        out ppvObject): HResult; stdcall;
+                        out ppvObject: Pointer {LPVOID}): HResult; stdcall;
 
   end;
   IID_IMFGetService = IMFGetService;
@@ -5686,7 +5686,7 @@ type
   function MFGetService(punkObject: IUnknown;
                         const guidService: REFGUID;
                         const riid: REFIID;
-                        out ppvObject): HResult; stdcall;
+                        out ppvObject: LPVOID): HResult; stdcall;
   {$EXTERNALSYM MFGetService}
 
   function MFGetSystemTime(): MFTIME; stdcall;

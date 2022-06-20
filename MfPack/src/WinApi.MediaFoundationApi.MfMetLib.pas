@@ -27,6 +27,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
 // 15/01/2022                     Introduction of System.Services API implementation
+// 24/05/2022 Tony                Added new methods.
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -194,7 +195,10 @@ type
   TStreamContents = _StreamContents;
   TStreamContentsArray = array of TStreamContents;
 
-
+  // Gets an interface pointer from a Media Foundation collection.
+  function GetCollectionObject(pCollection: IMFCollection;
+                               const dwIndex: DWORD;
+                               out ppObject): HRESULT;
 
 // EVENTS
 // ======
@@ -222,7 +226,7 @@ type
   // NOTE: This is the replacement for earlier function CreateMediaSourceFromUrl
   function CreateObjectFromUrl(const sURL: WideString;           // URL of the source.
                                out pSource: IMFMediaSource;      // The received object (mediasource or bytestream)
-                               pStore: IPropertyStore = Nil;     // Optional property store
+                               pStore: IPropertyStore = nil;     // Optional property store
                                const dwFlags: DWord = MF_RESOLUTION_MEDIASOURCE): HRESULT;  // Create a source object.
 
   // Deprecated, use CreateObjectFromUrl.
@@ -232,10 +236,10 @@ type
   // Begins an asynchronous request to create a media source or a byte stream from a URL.
   function CreateObjectFromUrlAsync(const sURL: WideString;
                                     pCallback: IMFAsyncCallback;
-                                    pStore: IPropertyStore = Nil;
+                                    pStore: IPropertyStore = nil;
                                     const dwFlags: DWord = MF_RESOLUTION_MEDIASOURCE;
-                                    pIUnknownCancelCookie: IUnknown = Nil;
-                                    punkState: IUnknown = Nil): HRESULT;
+                                    pIUnknownCancelCookie: IUnknown = nil;
+                                    punkState: IUnknown = nil): HRESULT;
 
   // The aggregated media source is useful for combining streams from separate media sources.
   // For example, you can use it to combine a video capture source and an audio capture source.
@@ -244,16 +248,25 @@ type
                                   out ppAggSource: IMFMediaSource): HRESULT;
 
 
-
-// SINKS
-// =====
-
-  // Create an activation object for a renderer, based on the stream media type.
-  function CreateMediaSinkActivate(pSourceSD: IMFStreamDescriptor;
-                                   hVideoWnd: HWND;
-                                   out ppActivate: IMFActivate): HRESULT;
+// SINKS AND SOURCEREADERS
+// =======================
 
 
+  // Creates a sourcereader or sinkwriter depending on the given CLSID.
+  function CreateReaderWriter(const clsidObject: TGUID;   // CLSID_MFSinkWriter or CLSID_MFSourceReader
+                              initSource: IMFMediaSource; // Must be the the initial MediaSource!
+                              attributes: IMFAttributes;  // Attributes must be set before using this method!
+                              out iunkObject: IUnknown): HResult;
+
+  // This method returns a video activation object that is able to render to a window or
+  // any other visual component that has a THandle (HWND).
+  function CreateVideoMediaSinkActivate(pSourceSD: IMFStreamDescriptor;
+                                        hVideoWnd: HWND;
+                                        out mfActivate: IMFActivate): HRESULT;
+
+  // This method returns an audio activation object for a renderer.
+  function CreateAudioMediaSinkActivate(pSourceSD: IMFStreamDescriptor;
+                                        out mfActivate: IMFActivate): HRESULT;
 
 // TOPOLOGIES
 // ==========
@@ -278,7 +291,7 @@ type
   //
   //  pTopology: Pointer to the topology object.
   //  pSourcePD: The source's presentation descriptor.
-  //  iStream: Index of the stream to render.
+  //  dwStream: Index of the stream to render.
   //
   //  Pre-conditions: The topology must be created already.
   //
@@ -291,7 +304,7 @@ type
   function AddBranchToPartialTopology(pTopology: IMFTopology;
                                       pSource: IMFMediaSource;
                                       pPD: IMFPresentationDescriptor;
-                                      iStream: DWord;
+                                      dwStream: DWord;
                                       hVideoWnd: HWND): HRESULT;
 
   // Create the nodes and connect them.
@@ -309,9 +322,7 @@ type
   function GetDurationFromTopology(pTopology: IMFTopology;
                                    out phnsDuration: LONGLONG): HRESULT;
 
-  function GetCollectionObject(pCollection: IMFCollection;
-                               const dwIndex: DWORD;
-                               out ppObject): HRESULT;
+
 
 // Source nodes
 // ============
@@ -511,7 +522,8 @@ type
   // Before you start capturing from a device, call the RegisterDeviceNotification
   // function to register for device notifications.
   // Register for the KSCATEGORY_CAPTURE device class, as shown in this function.
-  function RegisterForDeviceNotification(hwnd: HWND; out g_hdevnotify: HDEVNOTIFY): HRESULT;
+  function RegisterForDeviceNotification(hw: HWND;
+                                         out g_hdevnotify: HDEVNOTIFY): HRESULT;
 
   // Before an application is closing, unregister for device notifications.
   function UnRegisterForDeviceNotification(g_hdevnotify: HDEVNOTIFY): HRESULT;
@@ -582,8 +594,8 @@ type
  // Enumerates the audio rendering devices and assigns the first device or nDevice in the list to the SAR.
  function EnumAudioRenderingDevices(nDevice: UInt;
                                     out wstrID: PWideChar; // Id
-                                    pSink: IMFMediaSink = Nil;  // Streaming audio renderer (SAR)
-                                    pActivate: IMFActivate = Nil // Activation object, which can be used to create the SAR.
+                                    pSink: IMFMediaSink = nil;  // Streaming audio renderer (SAR)
+                                    pActivate: IMFActivate = nil // Activation object, which can be used to create the SAR.
                                     ): HResult;
 
 
@@ -615,9 +627,10 @@ type
                                out ppNewMediaType: IMFMediaType): HRESULT;
 
 
-  // Creates a JPEG image type that is compatible with a specified video media type.
+  // Creates a JPEG, RGB32 or WIC GUID_ContainerFormat imagetype that is compatible with a specified video media type.
   function CreatePhotoMediaType(pSrcMediaType: IMFMediaType;
-                                out ppPhotoMediaType: IMFMediaType): HRESULT ;
+                                psubTypeGuid: TGuid;  {can be one of the following: MFImageFormat_RGB32, MFImageFormat_JPEG etc}
+                                var pPhotoMediaType: IMFMediaType): HRESULT ;
 
 
   // VIDEO MEDIA TYPE HELPERS //////////////////////////////////////////////////
@@ -782,6 +795,9 @@ type
   // TODO: Implement as sample (MfPack/Samples/CPlayerEx).
 
 
+
+
+
 const
 
 // Aliases section
@@ -854,7 +870,11 @@ begin
                                    INFINITE,
                                    QS_ALLINPUT) = WAIT_OBJECT_0 + 1) do
     begin
-      PeekMessage(Msg, 0, 0, 0, PM_REMOVE);
+      PeekMessage(Msg,
+                  0,
+                  0,
+                  0,
+                  PM_REMOVE);
       if Msg.Message = WM_QUIT then
         Exit;
       TranslateMessage(Msg);
@@ -901,7 +921,7 @@ end;
 // NOTE: This is the replacement for earlier function CreateMediaSourceFromUrl
 function CreateObjectFromUrl(const sURL: WideString;
                              out pSource: IMFMediaSource;
-                             pStore: IPropertyStore = Nil;
+                             pStore: IPropertyStore = nil;
                              const dwFlags: DWord = MF_RESOLUTION_MEDIASOURCE): HRESULT;
 var
   ObjectType: MF_OBJECT_TYPE;
@@ -952,10 +972,10 @@ end;
 // Begins an asynchronous request to create a media source or a byte stream from a URL.
 function CreateObjectFromUrlAsync(const sURL: WideString;
                                   pCallback: IMFAsyncCallback;
-                                  pStore: IPropertyStore = Nil;
+                                  pStore: IPropertyStore = nil;
                                   const dwFlags: DWord = MF_RESOLUTION_MEDIASOURCE;
-                                  pIUnknownCancelCookie: IUnknown = Nil;
-                                  punkState: IUnknown = Nil): HRESULT;
+                                  pIUnknownCancelCookie: IUnknown = nil;
+                                  punkState: IUnknown = nil): HRESULT;
 var
   pSourceResolver: IMFSourceResolver;
   hr: HRESULT;
@@ -975,9 +995,9 @@ begin
   hr := pSourceResolver.BeginCreateObjectFromURL(LPCWSTR(sURL),         // URL of the source.
                                                  dwFlags,               // Create a source object.
                                                  pStore,                // Optional property store.
-                                                 pIUnknownCancelCookie, // Receives an IUnknown pointer or the value Nil.
+                                                 pIUnknownCancelCookie, // Receives an IUnknown pointer or the value nil.
                                                  pCallback,             // Pointer to the IMFAsyncCallback interface of a callback object. The caller must implement this interface.
-                                                 punkState);            // Pointer to the IUnknown interface of a state object, defined by the caller. This parameter can be Nil.
+                                                 punkState);            // Pointer to the IUnknown interface of a state object, defined by the caller. This parameter can be nil.
 
   if (FAILED(hr)) then
     goto done;
@@ -997,8 +1017,8 @@ var
   pCollection: IMFCollection;
 
 begin
-  ppAggSource := Nil;
-  pCollection := Nil;
+  ppAggSource := nil;
+  pCollection := nil;
 
   hr := MFCreateCollection(pCollection);
 
@@ -1018,10 +1038,99 @@ begin
 end;
 
 
-//  Create an activation object for a renderer, based on the stream media type.
-function CreateMediaSinkActivate(pSourceSD: IMFStreamDescriptor;
-                                 hVideoWnd: HWND;
-                                 out ppActivate: IMFActivate): HRESULT;
+
+
+// SINKS AND SOURCEREADERS
+// =======================
+
+
+// Creates a sourcereader or sinkwriter depending on the given CLSID
+function CreateReaderWriter(const clsidObject: TGUID;   // CLSID_MFSinkWriter or CLSID_MFSourceReader
+                            initSource: IMFMediaSource; // Must be the the initial MediaSource!
+                            attributes: IMFAttributes;  // Attributes must be set before using this method!
+                            out iunkObject: IUnknown): HResult;
+var
+  hr: HResult;
+  factory: IMFReadWriteClassFactory;
+
+begin
+  hr := E_INVALIDARG;
+  factory := CreateCOMObject(CLSID_MFReadWriteClassFactory) as IMFReadWriteClassFactory;
+
+  if (clsidObject = CLSID_MFSinkWriter) then
+    begin
+      hr := factory.CreateInstanceFromObject(clsidObject,
+                                             initSource,
+                                             attributes,
+                                             IID_IMFMediaSink,
+                                             Pointer(iunkObject));
+    end
+  else if (clsidObject = CLSID_MFSourceReader) then
+    begin
+      hr := factory.CreateInstanceFromObject(clsidObject,
+                                             initSource,
+                                             attributes,
+                                             CLSID_MFSourceReader,
+                                             Pointer(iunkObject));
+    end;
+
+  Result := hr;
+end;
+
+
+// This method returns a video activation object that is able to render to a window or
+// any other visual component that has a THandle (HWND).
+function CreateVideoMediaSinkActivate(pSourceSD: IMFStreamDescriptor;
+                                      hVideoWnd: HWND;
+                                      out mfActivate: IMFActivate): HRESULT;
+var
+  phandler: IMFMediaTypeHandler;
+  pActivate: IMFActivate;
+  guidMajorType: TGUID;
+  hr: HRESULT;
+
+label
+  Done;
+
+begin
+  // Get the media type handler for the stream
+  hr := pSourceSD.GetMediaTypeHandler(pHandler);
+  if FAILED(hr) then
+    goto Done;
+
+  // Get the major media type
+  hr := pHandler.GetMajorType(guidMajorType);
+  if FAILED(hr) then
+    goto Done;
+
+  // Create an IMFActivate object for the renderer, based on the media type
+  if IsEqualGuid(MFMediaType_Video,
+                 guidMajorType) then
+    begin
+      hr := MFCreateVideoRendererActivate(hVideoWnd,
+                                          pActivate);
+      if FAILED(hr) then
+       goto Done;
+
+
+    end
+  else
+    hr := MF_E_CAPTURE_SOURCE_NO_VIDEO_STREAM_PRESENT;
+
+  if FAILED(hr) then
+    goto Done;
+
+  // Return IMFactivate pointer to caller
+  mfActivate := pActivate;
+
+done:
+  Result := hr;
+end;
+
+
+// This method returns an audio activation object for a renderer.
+function CreateAudioMediaSinkActivate(pSourceSD: IMFStreamDescriptor;
+                                      out mfActivate: IMFActivate): HRESULT;
 var
   phandler: IMFMediaTypeHandler;
   pActivate: IMFActivate;
@@ -1046,18 +1155,14 @@ begin
   if IsEqualGuid(MFMediaType_Audio,
                 guidMajorType) then
     hr := MFCreateAudioRendererActivate(pActivate)
-  else if IsEqualGuid(MFMediaType_Video,
-                      guidMajorType) then
-    hr := MFCreateVideoRendererActivate(hVideoWnd,
-                                        pActivate)
   else
-    hr := E_FAIL;
+    hr := MF_E_CAPTURE_SOURCE_NO_AUDIO_STREAM_PRESENT;
 
   if FAILED(hr) then
     goto Done;
 
   // Return IMFactivate pointer to caller
-  ppActivate := pActivate;
+  mfActivate := pActivate;
 
 done:
   Result := hr;
@@ -1176,7 +1281,7 @@ label
   done;
 
 begin
-  ppNode := Nil;
+  ppNode := nil;
 
   // Create the node.
   hr := MFCreateTopologyNode(MF_TOPOLOGY_SOURCESTREAM_NODE,
@@ -1263,7 +1368,7 @@ var
   hr: HRESULT;
 
 begin
-  ppNode := Nil;
+  ppNode := nil;
 
   // Create the node.
   hr := MFCreateTopologyNode(MF_TOPOLOGY_OUTPUT_NODE,
@@ -1303,7 +1408,7 @@ end;
 function AddBranchToPartialTopology(pTopology: IMFTopology;
                                     pSource: IMFMediaSource;
                                     pPD: IMFPresentationDescriptor;
-                                    iStream: DWord;
+                                    dwStream: DWord;
                                     hVideoWnd: HWND): HRESULT;
 var
   pSD: IMFStreamDescriptor;
@@ -1318,24 +1423,31 @@ label
 
 begin
   // Use assertions only for debugging purposes
-  assert(pTopology <> Nil);
+  {$IF DEBUG}
+  assert(pTopology <> nil);
+  {$ENDIF}
 
   // Get the stream descriptor for this stream.
-  hr := pPD.GetStreamDescriptorByIndex(iStream,
+  hr := pPD.GetStreamDescriptorByIndex(dwStream,
                                        fSelected,
                                        pSD);
-  if (FAILED(hr)) then
+  if FAILED(hr) then
     goto done;
 
   // Create the topology branch only if the stream is selected.
   // Otherwise, do nothing.
-  if (fSelected) then
+  if fSelected then
     begin
       // create the media sink activation object
-      hr := CreateMediaSinkActivate(pSD,
-                                    hVideoWnd,
-                                    pSinkActivate);
-      if (FAILED(hr)) then
+      hr := CreateVideoMediaSinkActivate(pSD,
+                                         hVideoWnd,
+                                         pSinkActivate);
+
+      if (hr = MF_E_CAPTURE_SOURCE_NO_VIDEO_STREAM_PRESENT) then
+        hr := CreateAudioMediaSinkActivate(pSD,
+                                           pSinkActivate);
+
+      if FAILED(hr) then
         goto done;
 
       // Create a source node for this stream.
@@ -1409,9 +1521,13 @@ begin
       // Create the media sink activation object.
       if (SUCCEEDED(hr)) then
         begin
-          hr := CreateMediaSinkActivate(pSD,
-                                        hVideoWnd,
-                                        pSinkActivate);
+          hr := CreateVideoMediaSinkActivate(pSD,
+                                             hVideoWnd,
+                                             pSinkActivate);
+
+          if hr = MF_E_CAPTURE_SOURCE_NO_VIDEO_STREAM_PRESENT then
+            hr := CreateAudioMediaSinkActivate(pSD,
+                                               pSinkActivate);
         end;
 
       // Create the output node for the renderer.
@@ -1564,7 +1680,7 @@ var
   hr: HRESULT;
 
 begin
-  ppNode := Nil;
+  ppNode := nil;
 
   // Create the node.
   hr := MFCreateTopologyNode(MF_TOPOLOGY_TRANSFORM_NODE,
@@ -1593,7 +1709,7 @@ var
   hr: HRESULT;
 
 begin
-  ppNode := Nil;
+  ppNode := nil;
 
   // Create the node.
   hr := MFCreateTopologyNode(MF_TOPOLOGY_TRANSFORM_NODE,
@@ -1623,7 +1739,7 @@ var
   hr: HRESULT;
 
 begin
-  ppNode := Nil;
+  ppNode := nil;
 
   // Create the node.
   hr := MFCreateTopologyNode(MF_TOPOLOGY_TRANSFORM_NODE,
@@ -1747,6 +1863,7 @@ done:
 end;
 
 
+// Gets an interface pointer from a Media Foundation collection.
 function GetCollectionObject(pCollection: IMFCollection;
                              const dwIndex: DWORD;
                              out ppObject): HRESULT;
@@ -1778,18 +1895,19 @@ var
   pRateControl: IMFRateControl;
 
 begin
-  pRateControl := Nil;
+  pRateControl := nil;
   PropVariantInit(pvar);
 
   // Get the rate control service.
   hr := MFGetService(pMediaSession,
                      MF_RATE_CONTROL_SERVICE,
                      IID_IMFRateControl,
-                     pRateControl);
+                     Pointer(pRateControl));
 
   // Set the playback rate to zero without thinning.
   if (SUCCEEDED(hr)) then
-    hr := pRateControl.SetRate(Boolean(0), 0.0);
+    hr := pRateControl.SetRate(Boolean(0),
+                               0.0);
 
   // Create the Media Session start position.
   if (SeekTime = PRESENTATION_CURRENT_POSITION)then
@@ -1831,13 +1949,13 @@ var
 
 begin
 
-  pRateControl := Nil;
+  pRateControl := nil;
 
   // Get the rate control object from the Media Session.
   hr := MFGetService(pMediaSession,
                      MF_RATE_CONTROL_SERVICE,
                      IID_IMFRateControl,
-                     pRateControl);
+                     Pointer(pRateControl));
 
   // Set the playback rate.
   if (SUCCEEDED(hr)) then
@@ -1869,8 +1987,8 @@ function SetMediaStop(pTopology: IMFTopology;
     hr: HRESULT;
 
   begin
-    ppObject := Nil;   // zero output
-    pUnk := Nil;
+    ppObject := nil;   // zero output
+    pUnk := nil;
 
     hr := pCollection.GetElement(dwIndex,
                                  pUnk);
@@ -1903,8 +2021,8 @@ begin
       for i := 0 to cNodes - 1 do
         begin
           hr := GetCollectionObject(pCol,
-                                   i,
-                                   @pNode);
+                                    i,
+                                    @pNode);
           if SUCCEEDED(hr) then
             begin
               pNode.SetUINT64(MF_TOPONODE_MEDIASTOP,
@@ -1967,7 +2085,7 @@ begin
   hr := MFGetService(pSession,
                      MF_TOPONODE_ATTRIBUTE_EDITOR_SERVICE,
                      IID_IMFTopologyNodeAttributeEditor,
-                     pAttr);
+                     Pointer(pAttr));
   if FAILED(hr) then
     goto done;
 
@@ -2053,7 +2171,7 @@ try
   hr := MFTEnumEx(mft,
                   enumflag,
                   @info,    // Input type
-                  Nil,      // Output type
+                  nil,      // Output type
                   ppMFTActivate, // array of IMFActivate
                   count);        // number of returned elements
 
@@ -2067,7 +2185,7 @@ try
   if (SUCCEEDED(hr)) then
     begin
       hr := ppMFTActivate[0].ActivateObject(IID_IMFActivate,
-                                            ppDecoder);
+                                            Pointer(ppDecoder));
     end;
 {$POINTERMATH OFF}
 
@@ -2109,7 +2227,7 @@ try
                   MFT_ENUM_FLAG_SYNCMFT or
                   MFT_ENUM_FLAG_LOCALMFT or
                   MFT_ENUM_FLAG_SORTANDFILTER,
-                  Nil,       // Input type
+                  nil,       // Input type
                   @info,     // Output type
                   ppActivate,
                   count);
@@ -2124,7 +2242,7 @@ try
   if SUCCEEDED(hr) then
     begin
       hr := ppActivate[0].ActivateObject(IID_IMFTransform,
-                                         ppEncoder);
+                                         Pointer(ppEncoder));
     end;
 {$POINTERMATH OFF}
 
@@ -2177,7 +2295,7 @@ try
   hr := MFTEnumEx(MFT_CATEGORY_VIDEO_DECODER,
                   unFlags,
                   @info,     // Input type
-                  Nil,       // Output type
+                  nil,       // Output type
                   ppActivate,
                   count);
 
@@ -2191,7 +2309,7 @@ try
   if (SUCCEEDED(hr)) then
     begin
       hr := ppActivate[0].ActivateObject(IID_IMFTransform,
-                                         ppDecoder);
+                                         Pointer(ppDecoder));
     end;
 {$POINTERMATH OFF}
 
@@ -2335,8 +2453,8 @@ begin
               hr := MFTEnum(guidDecoderCategory,
                             0,                   // Reserved
                             @mftinfo,            // Input type to match. (Encoded type.)
-                            Nil,                 // Output type to match. (Don't care.)
-                            Nil,                 // Attributes to match. (None.)
+                            nil,                 // Output type to match. (Don't care.)
+                            nil,                 // Attributes to match. (None.)
                             @ppDecoderCLSIDs[0], // Receives an array of CLSIDs.
                             cDecoderCLSIDs);     // Receives the size of the array.
             end;
@@ -2459,7 +2577,7 @@ begin
           DeviceProperties[_i].lpSymbolicLink := szName;
         end;
 
-      szName := Nil;
+      szName := nil;
 
       if (FAILED(hr)) then
         goto done;
@@ -2492,10 +2610,10 @@ var
   hr: HRESULT;
 
 begin
-  ppSource := Nil;
-  ppActivate := Nil;
+  ppSource := nil;
+  ppActivate := nil;
   count := 0;
-  pConfig := Nil;
+  pConfig := nil;
   hr := S_OK;
 
 try
@@ -2528,7 +2646,7 @@ try
       if (count > 0) then
         begin
           hr := ppDevices[DeviceProperty.uiDeviceIndex].ActivateObject(IID_IMFMediaSource,
-                                                                       ppSource);
+                                                                       Pointer(ppSource));
           if Succeeded(hr) then
             ppActivate := ppDevices[DeviceProperty.uiDeviceIndex];
         end
@@ -2613,7 +2731,7 @@ begin
 
   while (SUCCEEDED(hr)) do
     begin
-      pType := Nil;
+      pType := nil;
       hr := pReader.GetNativeMediaType(dwStreamIndex,
                                        dwMediaTypeIndex, // MF_SOURCE_READER_CURRENT_TYPE_INDEX
                                        pType);
@@ -2955,7 +3073,8 @@ end;
 // Device Loss
 // ===========
 // Allways call UnregisterDeviceNotification (Windows) when finnished
-function RegisterForDeviceNotification(hwnd: HWND; out g_hdevnotify: HDEVNOTIFY): HRESULT;
+function RegisterForDeviceNotification(hw: HWND;
+                                       out g_hdevnotify: HDEVNOTIFY): HRESULT;
 var
   di: DEV_BROADCAST_DEVICEINTERFACE;
 
@@ -2965,11 +3084,11 @@ begin
   di.dbcc_devicetype := DBT_DEVTYP_DEVICEINTERFACE;
   di.dbcc_classguid := KSCATEGORY_CAPTURE;
 
-  g_hdevnotify := RegisterDeviceNotification(hwnd,
+  g_hdevnotify := RegisterDeviceNotification(hw,
                                              @di,
                                              DEVICE_NOTIFY_WINDOW_HANDLE);
 
-  if (g_hdevnotify = Nil) then
+  if (g_hdevnotify = nil) then
     Result := E_FAIL // {include winerror for this} HRESULT_FROM_WIN32(GetLastError())  // or use HRESULT_FROM_NT()
   else
     Result := S_OK;
@@ -2982,7 +3101,7 @@ var
 
 begin
   hr := S_OK;
-  if (g_hdevnotify <> Nil) then
+  if (g_hdevnotify <> nil) then
     if UnregisterDeviceNotification(g_hdevnotify) then
       hr := S_OK
     else
@@ -3056,7 +3175,7 @@ begin
           hr := MFGetService(pNodeObject,
                              MR_VIDEO_ACCELERATION_SERVICE,
                              IID_IDirect3DDeviceManager9,
-                             pD3DManager);
+                             Pointer(pD3DManager));
         end;
 
       if SUCCEEDED(hr) then
@@ -3138,7 +3257,7 @@ begin
       if (count > 0) and (iDeviceIndex <= count) then
         begin
           hr := ppDevices[iDeviceIndex].ActivateObject(IID_IMFMediaSource,
-                                                       ppSource);
+                                                       Pointer(ppSource));
         end
       else
         begin
@@ -3146,7 +3265,7 @@ begin
         end;
     end;
 
-  ppDevices := Nil;
+  ppDevices := nil;
 
 {$POINTERMATH OFF}
   Result := hr;
@@ -3273,7 +3392,7 @@ begin
         if SUCCEEDED(hr) then
           iList.Append(szFriendlyName);
 
-        szFriendlyName := Nil;
+        szFriendlyName := nil;
 
     end;
 {$POINTERMATH OFF}
@@ -3282,8 +3401,8 @@ end;
 
 function EnumAudioRenderingDevices(nDevice: UInt;
                                    out wstrID: PWideChar; // Device ID.
-                                   pSink: IMFMediaSink = Nil;  // Streaming audio renderer (SAR)
-                                   pActivate: IMFActivate = Nil // Activation object, which can be used to create the SAR.
+                                   pSink: IMFMediaSink = nil;  // Streaming audio renderer (SAR)
+                                   pActivate: IMFActivate = nil // Activation object, which can be used to create the SAR.
                                    ): HResult;
 var
   hr: HResult;
@@ -3296,7 +3415,7 @@ begin
 
   // Create the device enumerator.
   hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
-                         Nil,
+                         nil,
                          CLSCTX_ALL,
                          IID_IMMDeviceEnumerator,
                          pEnum);
@@ -3419,12 +3538,12 @@ label
   done;
 
 begin
-  pBMIH := Nil;
-  ppBmih := Nil;
+  pBMIH := nil;
+  ppBmih := nil;
   pcbSize := 0;
 
   majorType := GUID_NULL;
-  pmt := Nil;
+  pmt := nil;
 
   // Verify that this is a video type.
   hr := pType.GetMajorType(majorType);
@@ -3466,7 +3585,7 @@ begin
     cbSize := (pmt.cbFormat - cbOffset);
 
     pBMIH := CoTaskMemAlloc(cbSize);
-    if (pBMIH = Nil) then
+    if (pBMIH = nil) then
       begin
         hr := E_OUTOFMEMORY;
         goto done;
@@ -3579,43 +3698,41 @@ end;
 
 //
 function CreatePhotoMediaType(pSrcMediaType: IMFMediaType;
-                              out ppPhotoMediaType: IMFMediaType): HRESULT;
-const
-  uiFrameRateNumerator   = UINT32(30);
-  uiFrameRateDenominator = UINT32(1);
-
+                              psubTypeGuid: TGuid; {can be one of the following: MFImageFormat_RGB32, MFImageFormat_JPEG or WIC guidContainerFormats like GUID_ContainerFormatBmp etc.}
+                              var pPhotoMediaType: IMFMediaType): HRESULT;
 var
   hr: HRESULT;
 
 label
-  done;
+  Done;
 
 begin
-  ppPhotoMediaType := Nil;
 
-  hr := MFCreateMediaType(ppPhotoMediaType);
+  hr := MFCreateMediaType(pPhotoMediaType);
   if (FAILED(hr)) then
     goto done;
 
-  hr := ppPhotoMediaType.SetGUID(MF_MT_MAJOR_TYPE,
-                                 MFMediaType_Image);
+  hr := pPhotoMediaType.SetGUID(MF_MT_MAJOR_TYPE,
+                                MFMediaType_Image);
   if (FAILED(hr)) then
     goto done;
 
-  hr := ppPhotoMediaType.SetGUID(MF_MT_SUBTYPE,
-                                 MFImageFormat_JPEG { = GUID_ContainerFormatJpeg});
+  hr := pPhotoMediaType.SetGUID(MF_MT_SUBTYPE,
+                                pSubTypeGuid);
   if (FAILED(hr)) then
     goto done;
 
   hr := CopyAttribute(pSrcMediaType,
-                      ppPhotoMediaType,
+                      pPhotoMediaType,
                       MF_MT_FRAME_SIZE);
   if (FAILED(hr)) then
     goto done;
 
-done:
+Done:
   Result := hr;
+
 end;
+
 
 //
 function GetFrameRate(pAttributes: IMFAttributes;
@@ -3674,8 +3791,8 @@ end;
 
 //
 function SetFrameSizeOnMediaType(pType: IMFMediaType;
-                                   uiWidth: UINT32;
-                                   uiHeigth: UINT32): HResult; inline;
+                                 uiWidth: UINT32;
+                                 uiHeigth: UINT32): HResult; inline;
 begin
   Result := MFSetAttributeSize(pType,
                                MF_MT_FRAME_SIZE,
@@ -3742,7 +3859,7 @@ begin
   hr := MFGetService(pSource,
                      MF_METADATA_PROVIDER_SERVICE,
                      IID_IMFMetadataProvider,
-                     pProvider);
+                     Pointer(pProvider));
 
   if FAILED(hr) then
     goto done;
@@ -3916,7 +4033,7 @@ try
                 end;
             end;
 
-          pwszValue := Nil;
+          pwszValue := nil;
           pcchLength := 0;
           // Retrieves a wide-character string associated with a key (MF_SD_STREAM_NAME)
           // If a stream is not provided with a name the Hresult will be MF_E_ATTRIBUTENOTFOUND.
@@ -4026,7 +4143,8 @@ begin
 end;
 
 
-//
+// Returns the mediatype associated with the Major guid.
+// To get the major type call function GetMediaType
 function GetMediaDescription(pMajorGuid: TGuid;
                              out mtMediaType: TMediaTypes): HRESULT;
 var
@@ -4368,10 +4486,10 @@ begin
         end; //if mediatype = audio
      end; //end if
 
-      pPD := Nil;
-      pSD := Nil;
-      pHandler := Nil;
-      pType := Nil;
+      pPD := nil;
+      pSD := nil;
+      pHandler := nil;
+      pType := nil;
       inc(i);
 
    until (i > cTypes);  // end repeat
@@ -4404,7 +4522,7 @@ begin
   // This is just a check, because normally CoInitialize should be initialized
   // before starting MF.
 
-  hr := CoInitialize(Nil);
+  hr := CoInitialize(nil);
   if (hr and $80000000 = 0) then
     CoUnInitialize()
   else
@@ -4413,7 +4531,7 @@ begin
 
   // Create the device enumerator.
   hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
-                         Nil,
+                         nil,
                          CLSCTX_ALL,
                          IID_IMMDeviceEnumerator,
                          IUnknown(pEnumerator));
@@ -4428,12 +4546,12 @@ begin
   if Succeeded(hr) then
     hr := pDevice.Activate(IID_IAudioSessionManager,
                            CLSCTX_ALL,
-                           Nil,
+                           nil,
                            Pointer(pSessionManager));
 
   // Get a reference to the session manager.
   if Succeeded(hr) then
-    hr := pSessionManager.GetAudioSessionControl(Nil,
+    hr := pSessionManager.GetAudioSessionControl(nil,
                                                  0,
                                                  pSessionControl);
 
@@ -4462,7 +4580,7 @@ done:
 end;
 
 
-//  Sami/smi
+// Sami/smi
 //=================
 
 // This function Sets the current SAMI style, specified by index and
@@ -4489,7 +4607,7 @@ begin
   hr := MFGetService(pSource,
                      MF_SAMI_SERVICE,
                      IID_IMFSAMIStyle,
-                     pSami);
+                     Pointer(pSami));
 
   if FAILED(hr) then
     goto done;
@@ -4607,8 +4725,8 @@ begin
   video_FrameSizeHeigth := 0;
   video_FrameSizeWidth := 0;
 
-  audio_lpLangShortName := Nil;
-  audio_lpLangFullName := Nil;
+  audio_lpLangShortName := nil;
+  audio_lpLangFullName := nil;
   audio_wsAudioDescr := '';
   audio_iAudioChannels := 0;
   audio_iSamplesPerSec := 0;

@@ -2389,20 +2389,6 @@ type
 {$ENDIF}
 
 
-{$IFNDEF MFVideoNormalizedRect}
-  PMFVideoNormalizedRect = ^MFVideoNormalizedRect;
-  MFVideoNormalizedRect = record
-    left: FLOAT;
-    top: FLOAT;
-    right: FLOAT;
-    bottom: FLOAT;
-  end;
-  {$EXTERNALSYM MFVideoNormalizedRect}
-  TMFVideoNormalizedRect = MFVideoNormalizedRect;
-  {$DEFINE MFVideoNormalizedRect}
-{$ENDIF}
-
-
 {$IFDEF MFP_LPRECT}
   LPRECT = ^TRect;
 {$ENDIF}

@@ -1734,13 +1734,11 @@ type
 
   // Interface IMFActivate
   // =====================
-  // Enables the application to defer the creation of an object.
-  // This interface is exposed by activation objects.
-  // NOTE:  Typically, the application calls some function that returns an IMFActivate pointer and
-  //        then passes that pointer to another component.
-  //        The other component calls ActivateObject at a later time to create the object.
-  //        In the protected media path (PMP), the IMFActivate pointer might be marshaled to the
-  //        protected process, so that the object can be created in that process.
+  // The IMFActivate interface is a base interface for Activate objects.
+  // An Activate object is a helper object which creates and keeps a pointer to the real object.
+  // MF pipeline uses activate objects instead of real objects in partial topologies.
+  // The ActivateObject(...) method should always return the same instance of the object until either
+  // ShutdownObject() or DetachObject() is called, then it can create a new instance.
   //
   PIMFActivate = ^IMFActivate;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFActivate);'}
@@ -1760,7 +1758,7 @@ type
     //     Will contain the requested interface
     // </param>
     function ActivateObject(const riid: REFIID;
-                            out ppv): HResult; stdcall;
+                            out ppv: Pointer): HResult; stdcall;
 
     // <summary>
     //     Shuts down the internal represented object

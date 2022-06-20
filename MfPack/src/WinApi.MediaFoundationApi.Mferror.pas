@@ -2048,7 +2048,7 @@ const
 //
 // Sink could not create valid output file because required headers were not provided to the sink.%0
 //
-  MF_E_SINK_HEADERS_NOT_FOUND         = _HRESULT_TYPEDEF_ ($C00D4A45);
+  MF_E_SINK_HEADERS_NOT_FOUND          = _HRESULT_TYPEDEF_($C00D4A45);
   {$EXTERNALSYM MF_E_SINK_HEADERS_NOT_FOUND}
 
 /////////////////////////////////////////////////////////////////////////
@@ -2616,7 +2616,7 @@ const
 // The input stream has invalid and illegal resolution.
 // Output should stop on next ProcessOutput call after the invalid and illegal resolution is detected.%0
 //
-  MF_E_TRANSFORM_STREAM_INVALID_RESOLUTION = _HRESULT_TYPEDEF_ ($C00D6D79);
+  MF_E_TRANSFORM_STREAM_INVALID_RESOLUTION  = _HRESULT_TYPEDEF_($C00D6D79);
   {$EXTERNALSYM MF_E_TRANSFORM_STREAM_INVALID_RESOLUTION}
 
 //
@@ -2626,7 +2626,7 @@ const
 //
 // The transform cannot be asynchronous in current context.%0
 //
-  MF_E_TRANSFORM_ASYNC_MFT_NOT_SUPPORTED = _HRESULT_TYPEDEF_ ($C00D6D7A);
+  MF_E_TRANSFORM_ASYNC_MFT_NOT_SUPPORTED  = _HRESULT_TYPEDEF_($C00D6D7A);
   {$EXTERNALSYM MF_E_TRANSFORM_ASYNC_MFT_NOT_SUPPORTED}
 
 //
@@ -2636,7 +2636,7 @@ const
 //
 // It is not supported in the current context to have the transform copy attributes from an input sample to an output sample.%0
 //
-  MF_E_TRANSFORM_EXATTRIBUTE_NOT_SUPPORTED = _HRESULT_TYPEDEF_ ($C00D6D7C);
+  MF_E_TRANSFORM_EXATTRIBUTE_NOT_SUPPORTED  = _HRESULT_TYPEDEF_($C00D6D7C);
   {$EXTERNALSYM MF_E_TRANSFORM_EXATTRIBUTE_NOT_SUPPORTED}
 
 
@@ -3270,7 +3270,7 @@ const
 //
 // The clock can't return a valid time because the audio position returned from the audio playback device is unexpected.%0
 //
-  MF_E_CLOCK_AUDIO_DEVICE_POSITION_UNEXPECTED = _HRESULT_TYPEDEF_ ($000D9C45);
+  MF_E_CLOCK_AUDIO_DEVICE_POSITION_UNEXPECTED  = _HRESULT_TYPEDEF_($000D9C45);
   {$EXTERNALSYM MF_E_CLOCK_AUDIO_DEVICE_POSITION_UNEXPECTED}
 
 //
@@ -3280,7 +3280,7 @@ const
 //
 // The clock can't return a valid render time because the audio position specified to the clock is unexpected.%0
 //
-  MF_E_CLOCK_AUDIO_RENDER_POSITION_UNEXPECTED= _HRESULT_TYPEDEF_ ($000D9C46);
+  MF_E_CLOCK_AUDIO_RENDER_POSITION_UNEXPECTED  = _HRESULT_TYPEDEF_($000D9C46);
   {$EXTERNALSYM MF_E_CLOCK_AUDIO_RENDER_POSITION_UNEXPECTED}
 
 //
@@ -3290,7 +3290,7 @@ const
 //
 // The clock can't return a valid render position because the timestamp specified to the clock is unexpected.%0
 //
-  MF_E_CLOCK_AUDIO_RENDER_TIME_UNEXPECTED= _HRESULT_TYPEDEF_ ($000D9C47);
+  MF_E_CLOCK_AUDIO_RENDER_TIME_UNEXPECTED  = _HRESULT_TYPEDEF_($000D9C47);
   {$EXTERNALSYM MF_E_CLOCK_AUDIO_RENDER_TIME_UNEXPECTED}
 
 
@@ -3470,7 +3470,7 @@ const
 //
 // No capture devices are available.%0
 //
-  MF_E_NO_CAPTURE_DEVICES_AVAILABLE   = _HRESULT_TYPEDEF_ ($C00DABE0);
+  MF_E_NO_CAPTURE_DEVICES_AVAILABLE    = _HRESULT_TYPEDEF_($C00DABE0);
   {$EXTERNALSYM MF_E_NO_CAPTURE_DEVICES_AVAILABLE}
 
 //
@@ -3480,7 +3480,7 @@ const
 //
 // No output was set for recording.%0
 //
-  MF_E_CAPTURE_SINK_OUTPUT_NOT_SET    = _HRESULT_TYPEDEF_ ($C00DABE1);
+  MF_E_CAPTURE_SINK_OUTPUT_NOT_SET     = _HRESULT_TYPEDEF_($C00DABE1);
   {$EXTERNALSYM MF_E_CAPTURE_SINK_OUTPUT_NOT_SET}
 
 //
@@ -3490,7 +3490,7 @@ const
 //
 // The current capture sink configuration does not support mirroring.%0
 //
-  MF_E_CAPTURE_SINK_MIRROR_ERROR      = _HRESULT_TYPEDEF_ ($C00DABE2);
+  MF_E_CAPTURE_SINK_MIRROR_ERROR       = _HRESULT_TYPEDEF_($C00DABE2);
   {$EXTERNALSYM MF_E_CAPTURE_SINK_MIRROR_ERROR}
 
 //
@@ -3500,7 +3500,7 @@ const
 //
 // The current capture sink configuration does not support rotation.%0
 //
-  MF_E_CAPTURE_SINK_ROTATE_ERROR      = _HRESULT_TYPEDEF_ ($C00DABE3);
+  MF_E_CAPTURE_SINK_ROTATE_ERROR       = _HRESULT_TYPEDEF_($C00DABE3);
   {$EXTERNALSYM MF_E_CAPTURE_SINK_ROTATE_ERROR}
 
 //
@@ -3510,7 +3510,7 @@ const
 //
 // The op is invalid.%0
 //
-  MF_E_CAPTURE_ENGINE_INVALID_OP      = _HRESULT_TYPEDEF_ ($C00DABE4);
+  MF_E_CAPTURE_ENGINE_INVALID_OP       = _HRESULT_TYPEDEF_($C00DABE4);
   {$EXTERNALSYM MF_E_CAPTURE_ENGINE_INVALID_OP}
 
 //
@@ -3520,7 +3520,7 @@ const
 //
 // The effects previously added were incompatible with the new topology which caused all effects to be removed.%0
 //
-  MF_E_CAPTURE_ENGINE_ALL_EFFECTS_REMOVED = _HRESULT_TYPEDEF_ ($C00DABE5);
+  MF_E_CAPTURE_ENGINE_ALL_EFFECTS_REMOVED  = _HRESULT_TYPEDEF_($C00DABE5);
   {$EXTERNALSYM MF_E_CAPTURE_ENGINE_ALL_EFFECTS_REMOVED}
 
 //
@@ -3530,7 +3530,7 @@ const
 //
 // The current capture source does not have an independent photo stream.%0
 //
-  MF_E_CAPTURE_SOURCE_NO_INDEPENDENT_PHOTO_STREAM_PRESENT = _HRESULT_TYPEDEF_ ($C00DABE6);
+  MF_E_CAPTURE_SOURCE_NO_INDEPENDENT_PHOTO_STREAM_PRESENT  = _HRESULT_TYPEDEF_($C00DABE6);
   {$EXTERNALSYM MF_E_CAPTURE_SOURCE_NO_INDEPENDENT_PHOTO_STREAM_PRESENT}
 
 //
@@ -3540,7 +3540,7 @@ const
 //
 // The current capture source does not have a video stream.%0
 //
-  MF_E_CAPTURE_SOURCE_NO_VIDEO_STREAM_PRESENT = _HRESULT_TYPEDEF_ ($C00DABE7);
+  MF_E_CAPTURE_SOURCE_NO_VIDEO_STREAM_PRESENT  = _HRESULT_TYPEDEF_($C00DABE7);
   {$EXTERNALSYM MF_E_CAPTURE_SOURCE_NO_VIDEO_STREAM_PRESENT}
 
 //
@@ -3550,7 +3550,7 @@ const
 //
 // The current capture source does not have an audio stream.%0
 //
-  MF_E_CAPTURE_SOURCE_NO_AUDIO_STREAM_PRESENT = _HRESULT_TYPEDEF_ ($C00DABE8);
+  MF_E_CAPTURE_SOURCE_NO_AUDIO_STREAM_PRESENT  = _HRESULT_TYPEDEF_($C00DABE8);
   {$EXTERNALSYM MF_E_CAPTURE_SOURCE_NO_AUDIO_STREAM_PRESENT}
 
 //
@@ -3560,7 +3560,7 @@ const
 //
 // The capture source device has an asynchronous extended property operation in progress.%0
 //
-  MF_E_CAPTURE_SOURCE_DEVICE_EXTENDEDPROP_OP_IN_PROGRESS= _HRESULT_TYPEDEF_ ($C00DABE9);
+  MF_E_CAPTURE_SOURCE_DEVICE_EXTENDEDPROP_OP_IN_PROGRESS = _HRESULT_TYPEDEF_($C00DABE9);
   {$EXTERNALSYM MF_E_CAPTURE_SOURCE_DEVICE_EXTENDEDPROP_OP_IN_PROGRESS}
 
 //
@@ -3570,7 +3570,7 @@ const
 //
 // A property cannot be set because a photo or photo sequence is in progress.%0
 //
-  MF_E_CAPTURE_PROPERTY_SET_DURING_PHOTO = _HRESULT_TYPEDEF_ ($C00DABEA);
+  MF_E_CAPTURE_PROPERTY_SET_DURING_PHOTO  = _HRESULT_TYPEDEF_($C00DABEA);
   {$EXTERNALSYM MF_E_CAPTURE_PROPERTY_SET_DURING_PHOTO}
 
 //
@@ -3580,7 +3580,7 @@ const
 //
 // No more samples in queue.%0
 //
-  MF_E_CAPTURE_NO_SAMPLES_IN_QUEUE    = _HRESULT_TYPEDEF_ ($C00DABEB);
+  MF_E_CAPTURE_NO_SAMPLES_IN_QUEUE     = _HRESULT_TYPEDEF_($C00DABEB);
   {$EXTERNALSYM MF_E_CAPTURE_NO_SAMPLES_IN_QUEUE}
 
 //
@@ -3590,7 +3590,7 @@ const
 //
 // Hardware accelerated thumbnail generation is not supported for the currently selected mediatype on the mediacapture stream.%0
 //
-  MF_E_HW_ACCELERATED_THUMBNAIL_NOT_SUPPORTED = _HRESULT_TYPEDEF_ ($C00DABEC);
+  MF_E_HW_ACCELERATED_THUMBNAIL_NOT_SUPPORTED  = _HRESULT_TYPEDEF_($C00DABEC);
   {$EXTERNALSYM MF_E_HW_ACCELERATED_THUMBNAIL_NOT_SUPPORTED}
 
 //
@@ -3600,7 +3600,7 @@ const
 //
 // Capture device that is present on the system is not supported by Media Foundation.%0
 //
-  MF_E_UNSUPPORTED_CAPTURE_DEVICE_PRESENT = _HRESULT_TYPEDEF_ ($C00DABED);
+  MF_E_UNSUPPORTED_CAPTURE_DEVICE_PRESENT  = _HRESULT_TYPEDEF_($C00DABED);
   {$EXTERNALSYM MF_E_UNSUPPORTED_CAPTURE_DEVICE_PRESENT}
 
 
@@ -3617,7 +3617,7 @@ const
 //
 // Media Source type is not supported in Media Timeline Controller scenarios.%0
 //
-  MF_E_TIMELINECONTROLLER_UNSUPPORTED_SOURCE_TYPE= _HRESULT_TYPEDEF_ ($C00DAFC8);
+  MF_E_TIMELINECONTROLLER_UNSUPPORTED_SOURCE_TYPE = _HRESULT_TYPEDEF_($C00DAFC8);
   {$EXTERNALSYM MF_E_TIMELINECONTROLLER_UNSUPPORTED_SOURCE_TYPE}
 
 //
@@ -3627,7 +3627,7 @@ const
 //
 // Operation is not allowed when Media Timeline Controller is attached.%0
 //
-  MF_E_TIMELINECONTROLLER_NOT_ALLOWED = _HRESULT_TYPEDEF_ ($C00DAFC9);
+  MF_E_TIMELINECONTROLLER_NOT_ALLOWED  = _HRESULT_TYPEDEF_($C00DAFC9);
   {$EXTERNALSYM MF_E_TIMELINECONTROLLER_NOT_ALLOWED}
 
 //
@@ -3637,7 +3637,7 @@ const
 //
 // Attaching Media Timeline Controller is blocked because of the current state of the object.%0
 //
-  MF_E_TIMELINECONTROLLER_CANNOT_ATTACH= _HRESULT_TYPEDEF_ ($C00DAFCA);
+  MF_E_TIMELINECONTROLLER_CANNOT_ATTACH = _HRESULT_TYPEDEF_($C00DAFCA);
   {$EXTERNALSYM MF_E_TIMELINECONTROLLER_CANNOT_ATTACH}
 
 
@@ -3654,7 +3654,7 @@ const
 //
 // Connection to app service providing a media extension failed.%0
 //
-  MF_E_MEDIA_EXTENSION_APPSERVICE_CONNECTION_FAILED= _HRESULT_TYPEDEF_ ($C00DB3B0);
+  MF_E_MEDIA_EXTENSION_APPSERVICE_CONNECTION_FAILED  = _HRESULT_TYPEDEF_($C00DB3B0);
   {$EXTERNALSYM MF_E_MEDIA_EXTENSION_APPSERVICE_CONNECTION_FAILED}
 
 //
@@ -3664,7 +3664,7 @@ const
 //
 // App service providing a media extension failed to process the request.%0
 //
-  MF_E_MEDIA_EXTENSION_APPSERVICE_REQUEST_FAILED= _HRESULT_TYPEDEF_ ($C00DB3B1);
+  MF_E_MEDIA_EXTENSION_APPSERVICE_REQUEST_FAILED  = _HRESULT_TYPEDEF_($C00DB3B1);
   {$EXTERNALSYM MF_E_MEDIA_EXTENSION_APPSERVICE_REQUEST_FAILED}
 
 //
@@ -3674,7 +3674,7 @@ const
 //
 // Package integrity check for app failed.%0
 //
-  MF_E_MEDIA_EXTENSION_PACKAGE_INTEGRITY_CHECK_FAILED= _HRESULT_TYPEDEF_ ($C00DB3B2);
+  MF_E_MEDIA_EXTENSION_PACKAGE_INTEGRITY_CHECK_FAILED = _HRESULT_TYPEDEF_($C00DB3B2);
   {$EXTERNALSYM MF_E_MEDIA_EXTENSION_PACKAGE_INTEGRITY_CHECK_FAILED}
 
 //
@@ -3684,7 +3684,7 @@ const
 //
 // License check for app failed.%0
 //
-  MF_E_MEDIA_EXTENSION_PACKAGE_LICENSE_INVALID= _HRESULT_TYPEDEF_ ($C00DB3B3);
+  MF_E_MEDIA_EXTENSION_PACKAGE_LICENSE_INVALID = _HRESULT_TYPEDEF_($C00DB3B3);
   {$EXTERNALSYM MF_E_MEDIA_EXTENSION_PACKAGE_LICENSE_INVALID}
 
 
@@ -3715,7 +3715,6 @@ const
   
 
   // Additional Prototypes for ALL interfaces
-
 
   // End of Additional Prototypes
 

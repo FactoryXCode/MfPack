@@ -169,6 +169,7 @@ const
   CLSID_WICRAWDecoder          : TGUID = '{41945702-8302-44A6-9445-AC98E8AFA086}';
   {$EXTERNALSYM CLSID_WICRAWDecoder}
 
+  {Container formats}
   GUID_ContainerFormatBmp      : TGUID = '{0af1d87e-fcfe-4188-bdeb-a7906471cbe3}';
   {$EXTERNALSYM GUID_ContainerFormatBmp}
   GUID_ContainerFormatPng      : TGUID = '{1b7cfaf4-713f-473c-bbcd-6137425faeaf}';

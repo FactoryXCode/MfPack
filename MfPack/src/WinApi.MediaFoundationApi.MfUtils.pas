@@ -327,6 +327,9 @@ type
   procedure CopyVNRectToTRect(const rs: MFVideoNormalizedRect;
                               out rd: TRect); inline;
 
+  // Copy a PMFVideoNormalizedRect to a TRect
+  procedure CopyPVNRectToTRect(rs: PMFVideoNormalizedRect;
+                               out rd: TRect); inline;
 
   // TRect methods //
 
@@ -455,18 +458,18 @@ const
 // SafeRelease
 // Many of the code (examples) in the documentation use the SafeRelease method to
 // release COM interfaced objects.
-// Note: The object does initiate a reference call
+// Note: The object does initiate a reference call.
 procedure SafeRelease(var IUnk);
 begin
-  if IUnknown(IUnk) <> Nil then
-    IUnknown(IUnk) := Nil;
+  if IUnknown(IUnk) <> nil then
+    IUnknown(IUnk) := nil;
 end;
 
-// Note: Here the object does NOT initiate a reference call
+// Note: Here the object does NOT initiate a reference call.
 procedure Safe_Release(var IUnk);
 begin
   if Assigned(IUnknown(IUnk)) then
-    Pointer(IUnknown(IUnk)) := Nil;
+    Pointer(IUnknown(IUnk)) := nil;
 end;
 
 
@@ -483,7 +486,7 @@ var
   Tmp: TObject;
 begin
   Tmp := TObject(Obj);
-  Pointer(Obj) := Nil;
+  Pointer(Obj) := nil;
   Tmp.Free;
 end;
 
@@ -1248,7 +1251,15 @@ begin
   rd.Right := Trunc(rs.Right);
 end;
 
-
+// Copy a PMFVideoNormalizedRect to a TRect
+procedure CopyPVNRectToTRect(rs: PMFVideoNormalizedRect;
+                             out rd: TRect); inline;
+begin
+  rd.Top := Trunc(rs^.Top);
+  rd.Bottom := Trunc(rs^.Bottom);
+  rd.Left := Trunc(rs^.Left);
+  rd.Right := Trunc(rs^.Right);
+end;
 
 // TRect methods ///////////////////////////////////////////////////////////////
 

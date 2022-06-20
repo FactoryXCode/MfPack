@@ -86,17 +86,6 @@ uses
   {$I 'WinApiTypes.inc'}
 
 
-type
-
-  PMFVideoNormalizedRect = ^MFVideoNormalizedRect;
-  MFVideoNormalizedRect = record
-    left: Single;
-    top: Single;
-    right: Single;
-    bottom: Single;
-  end;
-  {$EXTERNALSYM MFVideoNormalizedRect}
-
 
   //////////////////////////////////////////////////////////////////////////////
   //
@@ -105,7 +94,7 @@ type
   /////////////////////////////////////////////////////////////////////////////
 
   // Defines a capture device type
-
+type
   PMfCaptureEngineDeviceType = ^MF_CAPTURE_ENGINE_DEVICE_TYPE;
   MF_CAPTURE_ENGINE_DEVICE_TYPE         = (
     MF_CAPTURE_ENGINE_DEVICE_TYPE_AUDIO = $00000000,  // Audio device which is a microphone
@@ -691,7 +680,7 @@ type
     // IUnknown(IDCompositionVisual)
 
     function UpdateVideo(pSrc: PMFVideoNormalizedRect;
-                         pDst: PRECT;
+                         pDst: TRECT;
                          pBorderClr: PCOLORREF): HResult; stdcall;
     // Updates the video frame.
     // Call this method when the preview window receives a WM_PAINT or WM_SIZE mes
@@ -864,7 +853,7 @@ type
     // Pointer to IMFMediaType.
 
     function GetCurrentDeviceMediaType(dwSourceStreamIndex: DWORD;
-                                       {out} ppMediaType: PIMFMediaType): HResult; stdcall;
+                                       out ppMediaType: IMFMediaType): HResult; stdcall;
     // Gets the currently set media type for a stream from the device
     // <param name = "dwSourceStreamIndex">
     // Zero based stream index of source
@@ -1047,9 +1036,9 @@ type
   IMFCaptureSink2 = interface(IMFCaptureSink)
   ['{f9e4219e-6197-4b5e-b888-bee310ab2c59}']
 
-    function SetOutputMediaType(const dwStreamIndex: DWORD;
-                                pMediaType: IMFMediaType;
-                                pEncodingAttributes: IMFAttributes): HResult; stdcall;
+    function SetOutputMediaType(dwStreamIndex: DWORD;
+                                const pMediaType: PIMFMediaType;
+                                const pEncodingAttributes: PIMFAttributes): HResult; stdcall;
 
   end;
   // IMFCaptureSink2

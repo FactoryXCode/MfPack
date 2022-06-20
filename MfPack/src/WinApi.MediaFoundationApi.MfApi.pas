@@ -4608,7 +4608,7 @@ const
   {$EXTERNALSYM MFCreateMediaType}
 
   function MFCreateMFVideoFormatFromMFMediaType(pMFType: IMFMediaType;
-                                                out ppMFVF: MFVIDEOFORMAT;  // must be deleted with CoTaskMemFree
+                                                out ppMFVF: MFVIDEOFORMAT;  // must be released from memory with CoTaskMemFree
                                                 out pcbSize: UINT32): HResult; stdcall;
   {$EXTERNALSYM MFCreateMFVideoFormatFromMFMediaType}
 

@@ -265,13 +265,9 @@ type
   //   right: FLOAT;
   //   bottom: FLOAT;
   // end;
+  //NOTE:
+  // This rect is defined in unit WinApi.WinApiTypes
 
-{$IFNDEF MFVideoNormalizedRect}
-  PMFVideoNormalizedRect = PRectF;
-  MFVideoNormalizedRect = TRectF;
-  {$EXTERNALSYM MFVideoNormalizedRect}
-{$DEFINE MFVideoNormalizedRect}
-{$ENDIF}
 
 
   PMfvpMessageType = ^MFVP_MESSAGE_TYPE;
@@ -666,7 +662,7 @@ type
   function MFCreateVideoMixer(pOwner: IUnknown;
                               const riidDevice: REFIID;
                               const riid: REFIID;
-                              out ppVideoMixer: IUnknown): HRESULT; stdcall;
+                              out ppVideoMixer: Pointer): HRESULT; stdcall;
   {$EXTERNALSYM MFCreateVideoMixer}
 
 
@@ -686,9 +682,9 @@ type
   function MFCreateVideoMixerAndPresenter(pMixerOwner: IUnknown;
                                           pPresenterOwner: IUnknown;
                                           const riidMixer: REFIID;
-                                          out ppvVideoMixer: IUnknown;
+                                          out ppvVideoMixer: Pointer;
                                           const riidPresenter: REFIID;
-                                          out ppvVideoPresenter: IUnknown): HRESULT; stdcall;
+                                          out ppvVideoPresenter: Pointer): HRESULT; stdcall;
   {$EXTERNALSYM MFCreateVideoMixerAndPresenter}
 
 
@@ -698,7 +694,7 @@ type
   //riidRenderer : Interface identifier (IID) of the requested interface on the EVR.
   //ppVideoRenderer : Receives a pointer to the requested interface. The caller must release the interface.
   function MFCreateVideoRenderer(const riidRenderer: REFIID;
-                                 out ppVideoRenderer: IUnknown): HRESULT; stdcall;
+                                 out ppVideoRenderer: Pointer): HRESULT; stdcall;
   {$EXTERNALSYM MFCreateVideoRenderer}
 
 
