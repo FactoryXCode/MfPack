@@ -153,18 +153,18 @@ type
     FManager: IMFDXGIDeviceManager;
     FEnabledDirectX: Boolean;
 
-    procedure HandleFlushComplete; virtual;
+    procedure HandleFlushComplete(); virtual;
     procedure HandleFrameSkipped();
     procedure ResetFramesSkipped();
 
-    function PopulateStreamFormats: Boolean;
+    function PopulateStreamFormats(): Boolean;
     function SetMediaType(const AMediaType: IMFMediaType): Boolean;
     function PopulateFormatDetails(const AMediaFormat: IMFMediaType;
                                    var ADetails: TVideoFormat): Boolean;
     function ActiveDevice(const ADeviceSymbolicLink: PWideChar;
                           out AMediaSource: IMFMediaSource): Boolean;
 
-    procedure ResetVariables; virtual;
+    procedure ResetVariables(); virtual;
     procedure ReturnDataFromSample(ASample: IMFSample);
 
     procedure HandleSampleReadError(AResult: HResult);
