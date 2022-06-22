@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: Â© FactoryX. All rights reserved.
 //
 // Project: MfPack - MediaFoundation
 // Project location: https://sourceforge.net/projects/MFPack
@@ -88,9 +88,8 @@ type
     FOutputType: IMFMediaType;
     FTransform: IMFTransform;
     FOnLog: TLogEvent;
-    FSupportedInputs: TArray<TGUID>;
-    FTopDownFormats: TArray<TGUID>;
-
+    FSupportedInputs : TArray<TGUID>;
+    FTopDownFormats : TArray<TGUID>;
   private
     function ConvertSampleToRGB(const AInputSample: IMFSample;
                                 out AConvertedSample: IMFSample): Boolean;
@@ -107,7 +106,6 @@ type
     procedure FreeConverter();
     procedure NotifyBeginStreaming();
     procedure SetSupportedInputs();
-
   public
     constructor Create();
     destructor Destroy(); override;
@@ -169,7 +167,6 @@ begin
   FTopDownFormats[0] := MFVideoFormat_AYUV;
   FTopDownFormats[1] := MFVideoFormat_IYUV;
   FTopDownFormats[2] := MFVideoFormat_YUY2;
-end;
 
 
 function TSampleConverter.IsTopDown(const ASubFormat: TGUID): Boolean;
