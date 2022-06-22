@@ -90,6 +90,7 @@ type
     FOnLog: TLogEvent;
     FSupportedInputs : TArray<TGUID>;
     FTopDownFormats : TArray<TGUID>;
+    
   private
     function ConvertSampleToRGB(const AInputSample: IMFSample;
                                 out AConvertedSample: IMFSample): Boolean;
@@ -106,6 +107,7 @@ type
     procedure FreeConverter();
     procedure NotifyBeginStreaming();
     procedure SetSupportedInputs();
+    
   public
     constructor Create();
     destructor Destroy(); override;
@@ -178,7 +180,8 @@ end;
 
 function TSampleConverter.IsInputSupported(const AInputFormat: TGUID): Boolean;
 begin
-  Result := IndexOf(AInputFormat, FSupportedInputs) > -1;
+  Result := IndexOf(AInputFormat, 
+                    FSupportedInputs) > -1;
 end;
 
 
@@ -252,7 +255,7 @@ begin
 end;
 
 
-function TSampleConverter.GetBMPFileHeader: BITMAPFILEHEADER;
+function TSampleConverter.GetBMPFileHeader(): BITMAPFILEHEADER;
 begin
   Result.bfType := Ord('B') or (Ord('M') shl 8); // Type is "BM" for BitMap
   Result.bfSize := sizeof(Result.bfOffBits) + sizeof(RGBTRIPLE);
@@ -352,7 +355,7 @@ begin
 end;
 
 
-procedure TSampleConverter.NotifyBeginStreaming;
+procedure TSampleConverter.NotifyBeginStreaming();
 begin
   // This should speed up the first frame request.
   // See: https://docs.microsoft.com/en-us/windows/win32/medfound/mft-message-notify-begin-streaming
