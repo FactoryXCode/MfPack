@@ -1,4 +1,4 @@
-// FactoryX
+﻿// FactoryX
 //
 // Copyright: © FactoryX. All rights reserved.
 //
@@ -167,6 +167,7 @@ begin
   FTopDownFormats[0] := MFVideoFormat_AYUV;
   FTopDownFormats[1] := MFVideoFormat_IYUV;
   FTopDownFormats[2] := MFVideoFormat_YUY2;
+end;
 
 
 function TSampleConverter.IsTopDown(const ASubFormat: TGUID): Boolean;

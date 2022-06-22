@@ -1,4 +1,4 @@
-// FactoryX
+﻿// FactoryX
 //
 // Copyright: © FactoryX. All rights reserved.
 //
@@ -235,14 +235,17 @@ begin
             ProcessSample(pSample);
           end;
 
+
           FFindingSample := False;
         end;
+      finally
+        CritSec.Unlock;
       end;
+    end;
   finally
     SafeRelease(pSample);
   end;
 end;
-
 
 procedure TCameraCaptureAsync.ProcessSample(ASample: IMFSample);
 begin
