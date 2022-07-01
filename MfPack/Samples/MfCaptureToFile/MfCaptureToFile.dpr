@@ -3,7 +3,8 @@ program MfCaptureToFile;
 uses
   {$IFDEF FASTMM}
   FastMM4,
-  {$ELSE IFDEF madExcept}
+  {$ENDIF}
+  {$IFDEF MAD}
   madExcept,
   madLinkDisAsm,
   madListHardware,

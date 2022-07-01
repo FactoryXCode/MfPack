@@ -1,13 +1,18 @@
 program TMfMediaEnginePlayer;
 
 uses
-{$IFDEF MadExcept}
+
+  {$IFDEF FASTMM}
+  FastMM4,
+  {$ENDIF }
+  {$IFDEF MAD}
   madExcept,
   madLinkDisAsm,
   madListHardware,
   madListProcesses,
   madListModules,
-{$ENDIF}
+  {$ENDIF }
+
   Vcl.Forms,
   Vcl.Themes,
   Vcl.Styles,

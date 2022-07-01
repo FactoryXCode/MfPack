@@ -9,7 +9,7 @@
 // Release date: 24-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 // Description: This player version is based on the IMFMediaEngine and
 //              the TimedText interfaces for subtitles.
 //
@@ -22,17 +22,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: -
 //
-// Compiler version: 23 up to 34
-// SDK version: 10.0.22000.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //
@@ -171,7 +171,7 @@ type
     procedure RealignInterface();
     function ReleaseEngine(): HResult;
     // test
-    procedure GetBitmap;
+    function GetBitmap(): HResult;
 
   end;
 
@@ -349,9 +349,7 @@ begin
 end;
 
 
-
-
-procedure TFeMediaEnginePlayer.GetBitmap;
+function TFeMediaEnginePlayer.GetBitmap(): HResult;
 var
   rct: TRect;
   nrct: TRectF;
@@ -385,9 +383,9 @@ begin
                                        rct,
                                        WICdestSurf);
 
+  Result := hr;
+
 end;
-
-
 
 
 // There is no way of getting a picture frame while the MediaEngine is in rendering mode.

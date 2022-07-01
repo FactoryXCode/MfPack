@@ -1,13 +1,18 @@
 program MfCaptureD3D9;
 
 uses
-  {$IFDEF MadExcept}
+
+  {$IFDEF FASTMM}
+  FastMM4,
+  {$ENDIF}
+  {$IFDEF MAD}
   madExcept,
   madLinkDisAsm,
   madListHardware,
   madListProcesses,
   madListModules,
   {$ENDIF}
+
   Vcl.Forms,
   frmMfCaptureD3D9 in 'frmMfCaptureD3D9.pas' {frmMain},
   dlgSelDevice in 'dlgSelDevice.pas' {dlgSelectDevice},

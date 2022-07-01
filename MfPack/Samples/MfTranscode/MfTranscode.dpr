@@ -1,18 +1,19 @@
 program MfTranscode;
 
 uses
-
-{$IFDEF MadExcept}
-  madExcept,
+  {$IFDEF FASTMM}
+  FastMM4,
   madLinkDisAsm,
   madListHardware,
   madListProcesses,
   madListModules,
-{$ENDIF}
+  {$ENDIF }
+  {$IFDEF MAD}
+  madExcept,
+  {$ENDIF }
   Vcl.Forms,
   frmTranscode in 'frmTranscode.pas' {frmTranscoder},
-  Transcoder in 'Transcoder.pas',
-  Helpers in 'Helpers.pas';
+  Transcoder in 'Transcoder.pas';
 
 {$R *.res}
 

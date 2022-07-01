@@ -2,13 +2,17 @@ program SimplePlayer;
 
 uses
 
-{$IFDEF MadExcept}
+  {$IFDEF FASTMM}
+  FastMM4,
+  {$ENDIF }
+  {$IFDEF MAD}
   madExcept,
   madLinkDisAsm,
   madListHardware,
   madListProcesses,
   madListModules,
-{$ENDIF}
+  {$ENDIF }
+
   Vcl.Forms,
   frmSimplePlayer in 'frmSimplePlayer.pas' {Form1};
 

@@ -9,7 +9,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 // Description: Requires Windows 7 or later.
 //              This unit is used as fullscreen layer, if not using the EVR's
 //              fullscreen option which is deprecated.
@@ -22,17 +22,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: MfPack Samples 3.1.0
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: -
-// Compiler version: 23 up to 34
+// Compiler version: 23 up to 35
 // TODO: -
-// SDK version: 10.0.22000.0
+// SDK version: 10.0.22621.0
 // =============================================================================
 // Source: -
 //

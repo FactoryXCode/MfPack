@@ -10,7 +10,7 @@
 // Release date: 22-09-2021
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 //
 // Description:
 //   This unit uses the D2D1 API to perform the translation from sample to bitmap.
@@ -23,16 +23,16 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX311/Samples/MFFrameSample
+// Related projects: MfPackX312/Samples/MFFrameSample
 //
-// Compiler version: 23 up to 34
-// SDK version: 10.0.22000.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //
@@ -66,12 +66,7 @@ uses
   WinApi.DirectX.DCommon,
   WinApi.DirectX.DXGI,
   WinApi.DirectX.DXGIFormat,
-  {$IF CompilerVersion > 33}
-  // Delphi 10.4 or above
   // WinApi.DXGI included with Delphi <= 10.3.3 is not up to date!
-  WinApi.D2D1,
-  WinApi.DxgiFormat,
-  {$ENDIF}
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MfUtils,
@@ -140,17 +135,9 @@ begin
                                         pFactory));
   if Result then
     begin
-      {$IF CompilerVersion > 33}
-      // Delphi 10.4 or above
-      oProperties.&type := D2D1_RENDER_TARGET_TYPE_DEFAULT;
-      oProperties.PixelFormat.Format := DXGI_FORMAT_B8G8R8A8_UNORM;
-      oProperties.PixelFormat.alphaMode := D2D1_ALPHA_MODE_IGNORE;
-      {$ELSE}
       oProperties._type := D2D1_RENDER_TARGET_TYPE_DEFAULT;
       oProperties._PixelFormat.Format := WinApi.DirectX.DXGIFormat.DXGI_FORMAT_B8G8R8A8_UNORM;
       oProperties._PixelFormat.alphaMode := D2D1_ALPHA_MODE_IGNORE;
-      {$ENDIF}
-
       oProperties.dpiX := 0;
       oProperties.dpiY := 0;
 
@@ -165,18 +152,11 @@ end;
 procedure TSampleConverter.CreateDirect2DBitmapProperties;
 var
   oPixelFormat: D2D1_PIXEL_FORMAT;
+
 begin
-  oPixelFormat.alphaMode := D2D1_ALPHA_MODE_IGNORE;
-
-  {$IF CompilerVersion > 33}
-  // Delphi 10.4 or above
-  oPixelFormat.Format := DXGI_FORMAT_B8G8R8A8_UNORM;
-  F2DBitmapProperties.PixelFormat := oPixelFormat;
-  {$ELSE}
   oPixelFormat.Format := WinApi.DirectX.DXGIFormat.DXGI_FORMAT_B8G8R8A8_UNORM;
+  oPixelFormat.alphaMode := D2D1_ALPHA_MODE_IGNORE;
   F2DBitmapProperties._PixelFormat := oPixelFormat;
-  {$ENDIF}
-
   F2DBitmapProperties.dpiX := FDPI;
   F2DBitmapProperties.dpiY := FDPI;
 end;
@@ -196,6 +176,7 @@ var
   iActualBMPDataSize: Integer;
   iExpectedBMPDataSize: Integer;
   pClipRect: PRect;
+
 begin
   AError := '';
 
@@ -220,17 +201,11 @@ begin
         if Result then
           begin
             // Bind the render target to the bitmap
-            {$IF CompilerVersion > 33}
-             // Delphi 10.4 or above
-            Result := SUCCEEDED(FRenderTarget.BindDC(AImage.Canvas.Handle, AImage.Canvas.ClipRect));
-            {$ELSE}
-
+            // Note: When going in to async mode, and going to into this function, frendertarget is lost, so we need to reinitialize a new rendertarget.
             CopyTRectToPRect(AImage.Canvas.ClipRect,
                              pClipRect);
             Result := SUCCEEDED(FRenderTarget.BindDC(AImage.Canvas.Handle,
                                                      pClipRect));
-            {$ENDIF}
-
             if Result then
               begin
                 // Create the 2D bitmap interface

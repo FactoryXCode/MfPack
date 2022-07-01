@@ -10,7 +10,7 @@
 // Release date: 24-01-2020
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 // Description: This is a modified class of the Transcoder sample,
 //
 // Company: FactoryX
@@ -21,17 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: -
 //
-// Compiler version: 23 up to 34
-// SDK version: 10.0.22000.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //
@@ -80,8 +80,7 @@ uses
   WinApi.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MfError,
   WinApi.MediaFoundationApi.MfUtils,
-  {Project}
-  Helpers;
+  WinApi.MediaFoundationApi.MfMetLib;
 
 const
   WM_PROGRESSNOTIFY = WM_APP + 1;
@@ -195,8 +194,14 @@ begin
     end;
 
   // Create the media source.
-  hr := CreateMediaSource(sURL,
-                          m_pSource);
+  { This method is deprecated
+    hr := CreateMediaSourceFromUrl(sURL,
+                                   m_pSource);
+  }
+
+  // Create the media source.
+  hr := CreateObjectFromUrl(sURL,
+                            m_pSource);
 
   // Create the media session.
   if SUCCEEDED(hr) then

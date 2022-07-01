@@ -1,11 +1,18 @@
 program MfSimpleCaptureToFile;
 
 uses
+
+  {$IFDEF FASTMM}
+  FastMM4,
+  {$ENDIF}
+  {$IFDEF MAD}
   madExcept,
   madLinkDisAsm,
   madListHardware,
   madListProcesses,
   madListModules,
+  {$ENDIF}
+
   Vcl.Forms,
   frmSimpleCaptureToFile in 'frmSimpleCaptureToFile.pas' {Frm_SimpleCapture},
   MfCaptureToFileClass in 'MfCaptureToFileClass.pas';

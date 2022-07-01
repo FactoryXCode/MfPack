@@ -9,7 +9,7 @@
 // Release date: 05-07-2020
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 // Description: Demonstrates audio/video playback using the IMFPMediaPlayer API.
 //              Note: This API is deprecated!
 //
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
@@ -34,12 +34,12 @@
 //          To change volume, press left arrow (decrease) or right arrow (increase).
 //
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: It's not recommended to use this api.
 //               As MS said this api is deprecated and support for most media types is not (fully) supported.
 //
-// Compiler version: 23 up to 34
-// SDK version: 10.0.22000.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //

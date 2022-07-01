@@ -1,13 +1,18 @@
 program TMFPlayer;
 
 uses
-{$IFDEF madExcept}
+
+  {$IFDEF FASTMM}
+  FastMM4,
+  {$ENDIF}
+  {$IFDEF MAD}
   madExcept,
   madLinkDisAsm,
   madListHardware,
   madListProcesses,
   madListModules,
-{$ENDIF}
+  {$ENDIF}
+
   Vcl.Forms,
   frmMfPlayer in 'frmMfPlayer.pas' {frm_MfPlayer},
   MfPlayerClass in 'MfPlayerClass.pas',

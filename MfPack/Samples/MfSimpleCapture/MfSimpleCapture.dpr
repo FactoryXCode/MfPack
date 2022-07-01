@@ -1,13 +1,18 @@
 program MfSimpleCapture;
 
 uses
-{$IFDEF MadExcept}
+
+  {$IFDEF FASTMM}
+  FastMM4,
+  {$ENDIF}
+  {$IFDEF MAD}
   madExcept,
   madLinkDisAsm,
   madListHardware,
   madListProcesses,
   madListModules,
-{$ENDIF}
+  {$ENDIF}
+
   Vcl.Forms,
   MfDeviceCaptureClass in 'MfDeviceCaptureClass.pas',
   frmSimpleCapture in 'frmSimpleCapture.pas' {Frm_SimpleCapture},
@@ -18,7 +23,7 @@ uses
 begin
 
   // Check for memoryleaks (debug mode (F9) only!)
-{$IFNDEF MadExcept}
+{$IFNDEF MAD}
   {$WARN SYMBOL_PLATFORM OFF}
   ReportMemoryLeaksOnShutdown := (DebugHook <> 0);
   {$WARN SYMBOL_PLATFORM ON}

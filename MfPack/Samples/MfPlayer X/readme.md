@@ -1,14 +1,14 @@
 # MfPlayer X
-Version: X 3.1.1
+Version: X 3.1.2
 
 Description:
-Requires Windows 8 or later.
+Requires Windows 7 or later.
 
 
 NOTES: 
  - This release is updated for compiler version 23 up to 34.
- - SDK version 10.0.22000.0 (Win 11)
- - Minimum supported MfPack version: 3.0.0
+ - SDK version 10.0.22621.0 (Win 11)
+ - Minimum supported MfPack version: 3.1.1
 
 This is an example that shows how to use the IMFTimer, language tags,  
 subtitles (SubRip and MicroDvd), RegEx (Regular Expressions) and how to get media properties.
@@ -22,6 +22,6 @@ Project location: https://github.com/FactoryXCode/MfPack
                   https://sourceforge.net/projects/MFPack
 
 First release date: 05-02-2016
-Final release date: 08-03-2022
+Final release date: 01-07-2022
 
 Copyright © FactoryX. All rights reserved.
