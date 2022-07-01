@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 // Description: This unit holds basic Media Foundation methods needed to play,
 //              record, encode, decode, etc.
 //
@@ -25,19 +25,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
-// 15/01/2022                     Introduction of System.Services API implementation
-// 24/05/2022 Tony                Added new methods.
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 // -----------------------------------------------------------------------------
 //
-// Remarks: Requires Windows Vista or later.
+// Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: -
 //
-// Compiler version: 23 up to 34
-// SDK version: 10.0.22000.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //
@@ -107,6 +105,7 @@ uses
   WinApi.MediaFoundationApi.MfReadWrite,
   WinApi.MediaFoundationApi.WMCodecDsp,
   WinApi.MediaFoundationApi.MfError,
+  WinApi.MediaFoundationApi.MfCaptureEngine,
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioPolicy,
   WinApi.CoreAudioApi.MMDeviceApi;
@@ -126,12 +125,14 @@ type
 
   // used in arrays to hold enum data.
   TDeviceProperties = record
+  public
     riid: TGuid;
     count: UINT32;
     uiDeviceIndex: UINT32;
     sFriendlyName: string;
     lpSymbolicLink: LPWSTR;
     chSymbolicLink: UINT32;
+    procedure Reset();
   end;
 
   // Arrays that holds retrieved devices by name and/or index
@@ -158,10 +159,7 @@ type
   // Stream contents
   PStreamContents = ^TStreamContents;
   _StreamContents = record
-    public
-      procedure Init();
-    public
-
+  public
     dwStreamIndex: DWORD;                 // The stream index (zero based !)
     dwStreamID: DWORD;                    // The stream identifier (see: https://msdn.microsoft.com/en-us/library/windows/desktop/ms703852)
     bSelected: BOOL;                      // The currently selected stream.
@@ -191,9 +189,12 @@ type
     audio_iSamplesPerSec: UINT32;         // Audio Samples per second.
     audio_iBitsPerSample: UINT32;         // Audio bits per sample.
     audio_dwFormatTag: DWORD;             // FormatTag is the replacement for FOURCC
+
+    procedure Reset();
   end;
   TStreamContents = _StreamContents;
   TStreamContentsArray = array of TStreamContents;
+
 
   // Gets an interface pointer from a Media Foundation collection.
   function GetCollectionObject(pCollection: IMFCollection;
@@ -208,7 +209,8 @@ type
 
   // Alternative for ProcessMessages
   // Usage: HandleMessages(GetThreadHandle());
-  procedure HandleMessages(hThread: THandle);
+  procedure HandleMessages(AThread: THandle;
+                           AWait: Cardinal = INFINITE);
 
 
 // Media Samples
@@ -274,7 +276,7 @@ type
   // Creates a playback topology from the media source.
   //
   // Pre-condition: The media source must be created already.
-  // Call CreateMediaSource() before calling this method
+  // Call CreateMediaSourceFromUrl() or  CreateMediaSourceFromUrlAsync() before calling this method
   // Create a playback topology from a media source.
   function CreatePlaybackTopology(pSource: IMFMediaSource;               // Media source.
                                   pPD: IMFPresentationDescriptor;        // Presentation descriptor.
@@ -316,6 +318,7 @@ type
                                                  iStream: DWORD;                  // Stream index.
                                                  hVideoWnd: HWND): HRESULT;       // Window for video playback.
 
+  // Given a topology, returns a pointer to the presentation descriptor.
   function GetPresentationDescriptorFromTopology(pTopology: IMFTopology;
                                                  out ppPD: IMFPresentationDescriptor): HRESULT;
 
@@ -470,6 +473,26 @@ type
                                 out opCLSID: CLSID): HRESULT;  // Receives the CLSID of the decoder.
 
 
+  // Configures the recordsink for video.
+  function ConfigureVideoEncoding(pSource: IMFCaptureSource;
+                                  pRecord: IMFCaptureRecordSink;
+                                  const guidEncodingType: REFGUID): HResult;
+
+  // Configures the recordsink for audio (if audiostream is present).
+  function ConfigureAudioEncoding(pSource: IMFCaptureSource;
+                                  pRecord: IMFCaptureRecordSink;
+                                  const guidEncodingType: REFGUID): HResult;
+
+
+  // To set a capture format:
+  //   1 - Get a pointer to the IMFMediaTypeHandler interface, as shown under Enumerations / function EnumerateCaptureFormats.
+  //   2 - Call IMFMediaTypeHandler.GetMediaTypeByIndex to get the desired format, specified by index.
+  //   3 - Call IMFMediaTypeHandler.SetCurrentMediaType to set the format.
+  //
+  // If you do not set the capture format, the capturedevice will use its default format.
+  // This function sets the capture format.
+  function SetDeviceFormat(pSource: IMFMediaSource;
+                           dwFormatIndex: DWORD): HResult;
 
 // Enumerations
 // ============
@@ -491,7 +514,7 @@ type
   //  Call IMFActivate.ActivateObject to get a pointer to the IMFMediaSource interface.
   //
   // This function provide the steps 1 to 3:
-  function EnumCaptureDeviceSources(AttributeSourceType: TGuid;
+  function EnumCaptureDeviceSources(const pAttributeSourceType: TGuid;
                                     out DeviceProperties: TDevicePropertiesArray): HRESULT;
   // This function activates a selected device stored in TDevicePropsM
   function CreateCaptureDeviceInstance(DeviceProperty: TDeviceProperties;
@@ -499,7 +522,11 @@ type
                                        out ppActivate: IMFActivate): HRESULT;
 
   // Enumerates the capture formats for a device.
-  function EnumerateCaptureFormats(pSource: IMFMediaSource): HRESULT;
+  // Note: See also function SetDeviceFormat
+  // This function returns an pointer array of IMFMediaType.
+  // To get the current capture device's IMFMediaSource object, call IMFCaptureSource.GetCaptureDeviceSource.
+  function EnumerateCaptureFormats(pSource: IMFMediaSource;
+                                   out ppMediaType: PIMFMediaType): HRESULT;
 
   // Enumerates mediatypes for a stream
   // To get one of the media types for a stream, call the IMFSourceReader.GetNativeMediaType method.
@@ -583,7 +610,8 @@ type
                             out iList: TStringList); // output
 
   //
-  function SetMaxFrameRate(pSource: IMFMediaSource; dwTypeIndex: DWORD): HRESULT;
+  function SetMaxFrameRate(pSource: IMFMediaSource;
+                           dwTypeIndex: DWORD): HRESULT;
 
 
 
@@ -599,10 +627,8 @@ type
                                     ): HResult;
 
 
-  // Helper methods
-  // ==============
-  //
-  // Defined in WinApi.MediaFoundationApi.MfpUtils
+// Helper methods
+// ==============
 
   // This function fills in a BITMAPINFOHEADER structure from a video media type.
   // Note that this conversions loses some of the format information (interlacing, frame rate,
@@ -633,17 +659,17 @@ type
                                 var pPhotoMediaType: IMFMediaType): HRESULT ;
 
 
-  // VIDEO MEDIA TYPE HELPERS //////////////////////////////////////////////////
 
-  // NOTE: The parameter pAttributes accepts type IMFAttributes and IMFMediaType
+// VIDEO MEDIA TYPE HELPERS //////////////////////////////////////////////////
+//============================================================================
 
   // Helper function to get the frame rate from a video media type.
-  function GetFrameRate(pAttributes: IMFAttributes;
+  function GetFrameRate(pType: IMFMediaType;
                         out uiNumerator: UINT32;
                         out uiDenominator: UINT32): HResult;
 
   // Helper function to set the frame rate on a video media type.
-  function SetFrameRate(pAttributes: IMFAttributes;
+  function SetFrameRate(pType: IMFMediaType;
                         uiNumerator: UINT32;
                         uiDenominator: UINT32): HResult;
 
@@ -668,6 +694,10 @@ type
                                    uiWidth: UINT32;
                                    uiHeigth: UINT32): HResult; inline;
 
+  // Helper to get the encoding bitrate from a media type.
+  function GetEncodingBitrate(pType: IMFMediaType;
+                              out uiEncodingBitrate: UINT32): HResult;
+
   // Helper function to get the pixel aspect ratio from a video media type.
   function GetPixelAspectRatio(pAttributes: IMFAttributes;
                                out uiNumerator: UINT32;
@@ -682,7 +712,9 @@ type
   function SetOutputRectangleAspectRatio(pAttributes: IMFAttributes;
                                          stVideoPadFlags: MFVideoPadFlags = MFVideoPadFlag_PAD_TO_None): HResult;
 
-  //////////////////////////////////////////////////////////////////////////////
+  // Helper function to check if
+
+//////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -827,6 +859,18 @@ const
   User32Lib = 'User32.dll';
 
 
+procedure TDeviceProperties.Reset();
+begin
+  riid := GUID_NULL;
+  count := 0;
+  uiDeviceIndex := 0;
+  sFriendlyName := '';
+  lpSymbolicLink := nil;
+  chSymbolicLink := 0;
+end;
+
+
+
 function GetEventObject(pEvent: IMFMediaEvent;
                         out ppObject): HRESULT;
 var
@@ -853,32 +897,30 @@ begin
 end;
 
 
-procedure HandleMessages(hThread: THandle);
+procedure HandleMessages(AThread: THandle;
+                         AWait: Cardinal = INFINITE);
 var
-  Msg: TMsg;
-  th: THandle;
+  pMsg: TMsg;
 
 begin
-  if hThread = 0 then
-    th := GetCurrentThread()
-  else
-    th := hThread;
 
   while (MsgWaitForMultipleObjects(1,
-                                   th,
+                                   AThread,
                                    False,
-                                   INFINITE,
+                                   AWait,
                                    QS_ALLINPUT) = WAIT_OBJECT_0 + 1) do
     begin
-      PeekMessage(Msg,
+      PeekMessage(pMsg,
                   0,
                   0,
                   0,
-                  PM_REMOVE);
-      if Msg.Message = WM_QUIT then
+                  PM_REMOVE);  // Messages are not removed from the queue after processing by PeekMessage.
+
+      if pMsg.Message = WM_QUIT then
         Exit;
-      TranslateMessage(Msg);
-      DispatchMessage(Msg);
+
+      TranslateMessage(pMsg);
+      DispatchMessage(pMsg);
     end;
 end;
 
@@ -1817,7 +1859,7 @@ begin
   // Get the PD, which is stored as an attribute.
   hr := pNode.GetUnknown(MF_TOPONODE_PRESENTATION_DESCRIPTOR,
                          IID_IMFPresentationDescriptor,
-                         ppPD);
+                         Pointer(ppPD));
 
 done:
   Result := hr;
@@ -1850,7 +1892,7 @@ begin
 
   hr := pNode.GetUnknown(MF_TOPONODE_PRESENTATION_DESCRIPTOR,
                          IID_IMFPresentationDescriptor,
-                         pPD);
+                         Pointer(pPD));
   if FAILED(hr) then
     goto done;
 
@@ -2046,12 +2088,12 @@ end;
 //   This method takes the topology ID and a pointer to a MFTOPONODE_ATTRIBUTE_UPDATE structure.
 //   Initialize the structure as follows.
 //
-//    Member	           Value
+//    Member             Value
 //    ------------------ ------------------------------------------------------------------------------
-//    NodeId	           The node ID. To get the node ID, call call IMFTopologyNode.GetTopoNodeID.
-//    guidAttributeKey	 MF_TOPONODE_MEDIASTOP
-//    attrType	         MF_ATTRIBUTE_UINT64
-//    u64	               The stop time, in 100-nanosecond units.
+//    NodeId             The node ID. To get the node ID, call call IMFTopologyNode.GetTopoNodeID.
+//    guidAttributeKey   MF_TOPONODE_MEDIASTOP
+//    attrType           MF_ATTRIBUTE_UINT64
+//    u64                The stop time, in 100-nanosecond units.
 //
 function SetMediaStopDynamic(pSession: IMFMediaSession;
                              pTopology: IMFTopology;
@@ -2483,9 +2525,9 @@ end;
 
 // Enumerates a list of audio or video capture devices.
 // Parameters:
-// AttributeSourceType:  MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID or MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_AUDCAP_GUID
-// DeviceProperties:  TDevicePropsA record
-function EnumCaptureDeviceSources(AttributeSourceType: TGuid;
+// [in] AttributeSourceType:  MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID or MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_AUDCAP_GUID
+// [out] DeviceProperties:  TDevicePropsArray
+function EnumCaptureDeviceSources(const pAttributeSourceType: TGuid;
                                   out DeviceProperties: TDevicePropertiesArray): HRESULT;
 var
   hr: HRESULT;
@@ -2505,14 +2547,14 @@ begin
 
   // Create an attribute store to specify the enumeration parameters.
   hr := MFCreateAttributes(pAttributes,
-                           0);
+                           1);
   if (FAILED(hr)) then
     begin
       goto done;
     end;
 
   hr := pAttributes.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
-                            AttributeSourceType); // Source type: video or audio capture devices
+                            pAttributeSourceType); // Source type: video or audio capture devices
 
   if (FAILED(hr)) then
     begin
@@ -2557,11 +2599,12 @@ begin
           DeviceProperties[_i].uiDeviceIndex := _i;
           DeviceProperties[_i].sFriendlyName := String(szName);
           // Add the Interface identifier (IID) of the requested interface.
-          DeviceProperties[_i].riid := AttributeSourceType;
+          DeviceProperties[_i].riid := pAttributeSourceType;
         end;
 
        // Try to get the SymbolicLink name.
-      if IsEqualGuid(AttributeSourceType, MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID) then
+      if IsEqualGuid(pAttributeSourceType,
+                     MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID) then
         // Video
         hr := ppDevices[_i].GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
                                                szName,
@@ -2583,6 +2626,8 @@ begin
         goto done;
     end;
 
+{$POINTERMATH OFF}
+
   // Normally this is the point where you will create the media source object.
   // Call it like this:
   // hr := ppDevices[0].ActivateObject(IID_IMFMediaSource,
@@ -2594,9 +2639,7 @@ begin
   // function ActivateObj(const DeviceProperty: TDevicePropsA): HRESULT;
 
 done:
-{$POINTERMATH OFF}
   Result := hr;
-
 end;
 
 
@@ -2609,62 +2652,57 @@ var
   ppDevices: PIMFActivate;  // Pointer to array of IMFActivate
   hr: HRESULT;
 
-begin
-  ppSource := nil;
-  ppActivate := nil;
-  count := 0;
-  pConfig := nil;
-  hr := S_OK;
+label
+  Done;
 
-try
+begin
+  count := 0;
 
   // Create an attribute store to hold the search criteria.
   hr := MFCreateAttributes(pConfig,
-                          0);
+                           1);
+  if FAILED(hr) then
+    goto Done;
 
   // Request video capture devices.
-  if SUCCEEDED(hr) then
-    begin
-      hr := pConfig.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
+  hr := pConfig.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
                             DeviceProperty.riid);
-    end;
+  if FAILED(hr) then
+    goto Done;
 
   // Enumerate the devices again, because in the mean while a device could be
   // disconnected.
-  if SUCCEEDED(hr) then
-    begin
-      hr := MFEnumDeviceSources(pConfig,
-                                ppDevices,
-                                count);
-    end;
+  hr := MFEnumDeviceSources(pConfig,
+                            ppDevices,
+                            count);
+  if FAILED(hr) then
+    goto Done;
 
 {$POINTERMATH ON}
 
   // Create a media source from the selected device.
-  if SUCCEEDED(hr) then
+  if (count > 0) then
     begin
-      if (count > 0) then
-        begin
-          hr := ppDevices[DeviceProperty.uiDeviceIndex].ActivateObject(IID_IMFMediaSource,
-                                                                       Pointer(ppSource));
-          if Succeeded(hr) then
-            ppActivate := ppDevices[DeviceProperty.uiDeviceIndex];
-        end
-      else
-        begin
-          hr := MF_E_NOT_FOUND;
-        end;
-    end;
+      hr := ppDevices[DeviceProperty.uiDeviceIndex].ActivateObject(IID_IMFMediaSource,
+                                                                   Pointer(ppSource));
+      if FAILED(hr) then
+        goto Done;
 
-finally
+      ppActivate := ppDevices[DeviceProperty.uiDeviceIndex];
+    end
+  else
+    hr := MF_E_NOT_FOUND;
+
 {$POINTERMATH OFF}
+
+Done:
   Result := hr;
-end;
 end;
 
 
 //
-function EnumerateCaptureFormats(pSource: IMFMediaSource): HRESULT;
+function EnumerateCaptureFormats(pSource: IMFMediaSource;
+                                 out ppMediaType: PIMFMediaType): HRESULT;
 var
   pPD: IMFPresentationDescriptor;
   pSD: IMFStreamDescriptor;
@@ -2676,7 +2714,7 @@ var
   i: Integer;
 
 label
-  done;
+  Done;
 
 begin
 
@@ -2706,17 +2744,18 @@ begin
                                          pType);
       if FAILED(hr) then
         goto done;
-
-     // todo: LogMediaType(pType);
-     // OutputDebugString(L"\n");
-     // GetTypeName(TypeInfo(IMFMediaType))
+      {$POINTERMATH ON}
+      // store the mediatypes in the array
+      ppMediaType[i] := pType;
+      {$POINTERMATH OFF}
+      SafeRelease(pType);
     end;
 
-done:
+Done:
   Result := hr;
 end;
 
-
+//
 function EnumerateTypesForStream(pReader: IMFSourceReader;
                                  dwStreamIndex: DWORD): HRESULT;
 var
@@ -3398,7 +3437,7 @@ begin
 {$POINTERMATH OFF}
 end;
 
-
+//
 function EnumAudioRenderingDevices(nDevice: UInt;
                                    out wstrID: PWideChar; // Device ID.
                                    pSink: IMFMediaSink = nil;  // Streaming audio renderer (SAR)
@@ -3463,7 +3502,7 @@ begin
   CoTaskMemFree(wstrID);
 end;
 
-
+//
 function SetMaxFrameRate(pSource: IMFMediaSource; dwTypeIndex: DWORD): HRESULT;
 var
   pPD: IMFPresentationDescriptor;
@@ -3735,22 +3774,22 @@ end;
 
 
 //
-function GetFrameRate(pAttributes: IMFAttributes;
+function GetFrameRate(pType: IMFMediaType;
                       out uiNumerator: UINT32;
                       out uiDenominator: UINT32): HResult;
 begin
-  Result := MFGetAttributeRatio(pAttributes,
+  Result := MFGetAttributeRatio(pType,
                                 MF_MT_FRAME_RATE,
                                 uiNumerator,
                                 uiDenominator);
 end;
 
 
-function SetFrameRate(pAttributes: IMFAttributes;
+function SetFrameRate(pType: IMFMediaType;
                       uiNumerator: UINT32;
                       uiDenominator: UINT32): HResult;
 begin
-  Result := MFSetAttributeRatio(pAttributes,
+  Result := MFSetAttributeRatio(pType,
                                 MF_MT_FRAME_RATE,
                                 uiNumerator,
                                 uiDenominator);
@@ -3798,6 +3837,42 @@ begin
                                MF_MT_FRAME_SIZE,
                                uiWidth,
                                uiHeigth);
+end;
+
+//
+function GetEncodingBitrate(pType: IMFMediaType;
+                            out uiEncodingBitrate: UINT32): HResult;
+var
+  uiWidth: UINT32;
+  uiHeight: UINT32;
+  uiBitrate: Single;
+  uiFrameRateNum: UINT32;
+  uiFrameRateDenom: UINT32;
+  hr: HResult;
+
+label
+  Done;
+
+begin
+
+  hr := GetFrameSize(pType,
+                     uiWidth,
+                     uiHeight);
+  if FAILED(hr) then
+    goto Done;
+
+  hr := GetFrameRate(pType,
+                     uiFrameRateNum,
+                     uiFrameRateDenom);
+  if FAILED(hr) then
+    goto Done;
+
+  uiBitrate := (((uiWidth / 3.0) * uiHeight) * uiFrameRateNum) / uiFrameRateDenom;
+
+  uiEncodingBitrate := Round(uiBitrate);
+
+done:
+  Result := hr;
 end;
 
 //
@@ -3974,7 +4049,7 @@ try
       for i := 0 to sdCount - 1 do
         begin
            // Initialize the record
-           alsCont[i].Init();
+           alsCont[i].Reset();
 
            // Store the stream index
            alsCont[i].dwStreamIndex := i;
@@ -4707,7 +4782,7 @@ end;
 
 
 // TStreamContents record
-procedure TStreamContents.Init();
+procedure TStreamContents.Reset();
 begin
 
   dwStreamIndex := 0;
@@ -4735,9 +4810,181 @@ begin
 end;
 
 
+// Configuratio for Encoding video & audio
+//========================================
+
+function ConfigureVideoEncoding(pSource: IMFCaptureSource;
+                                pRecord: IMFCaptureRecordSink;
+                                const guidEncodingType: REFGUID): HResult;
+var
+  pMediaType: IMFMediaType;
+  pMediaType2: IMFMediaType;
+  guidSubType: TGUID;
+  uiEncodingBitrate: UINT32;
+  dwSinkStreamIndex: DWORD;
+  hr: HResult;
+
+label
+  Done;
+
+begin
+  guidSubType := GUID_NULL;
+
+  // Configure the video format for the recording sink.
+  hr := pSource.GetCurrentDeviceMediaType(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD,
+                                          pMediaType);
+  if FAILED(hr) then
+    goto Done;
+
+  hr := CloneVideoMediaType(pMediaType,
+                            guidEncodingType,
+                            pMediaType2);
+  if FAILED(hr) then
+    goto Done;
+
+
+  hr := pMediaType.GetGUID(MF_MT_SUBTYPE,
+                           guidSubType);
+  if FAILED(hr) then
+    goto Done;
+
+  if (guidSubType = MFVideoFormat_H264_ES) and (guidSubType = MFVideoFormat_H264) then
+    begin
+      // When the webcam supports H264_ES or H264, we just bypass the stream.
+      // The output from Capture engine shall be the same as the native type supported by the webcam
+      hr := pMediaType2.SetGUID(MF_MT_SUBTYPE,
+                                MFVideoFormat_H264);
+    end
+  else
+    begin
+      hr := GetEncodingBitrate(pMediaType2,
+                               uiEncodingBitrate);
+      if FAILED(hr) then
+        goto Done;
+
+        hr := pMediaType2.SetUINT32(MF_MT_AVG_BITRATE,
+                                    uiEncodingBitrate);
+    end;
+
+  if FAILED(hr) then
+    goto Done;
+
+  // Connect the video stream to the recording sink.
+  hr := pRecord.AddStream(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD,
+                          pMediaType2,
+                          nil,
+                          dwSinkStreamIndex);
+
+done:
+  Result := hr;
+end;
+
+
+function ConfigureAudioEncoding(pSource: IMFCaptureSource;
+                                pRecord: IMFCaptureRecordSink;
+                                const guidEncodingType: REFGUID): HResult;
+var
+  pAvailableTypes: IMFCollection;
+  pMediaType: IMFMediaType;
+  pAttributes: IMFAttributes;
+  dwSinkStreamIndex: DWORD;
+  hr: HResult;
+
+label
+  Done;
+
+begin
+  // Configure the audio format for the recording sink.
+
+  hr := MFCreateAttributes(pAttributes,
+                           1);
+  if FAILED(hr) then
+    goto Done;
+
+  // Enumerate low latency media types
+  hr := pAttributes.SetUINT32(MF_LOW_LATENCY,
+                              UINT32(True));
+  if FAILED(hr) then
+    goto Done;
+
+  // Get a list of encoded output formats that are supported by the encoder.
+  hr := MFTranscodeGetAudioOutputAvailableTypes(guidEncodingType,
+                                                MFT_ENUM_FLAG_ALL or MFT_ENUM_FLAG_SORTANDFILTER,
+                                                pAttributes,
+                                                pAvailableTypes);
+  if FAILED(hr) then
+    goto Done;
+
+  // Pick the first format from the list.
+  hr := GetCollectionObject(pAvailableTypes,
+                            0,
+                            pMediaType);
+  if FAILED(hr) then
+    goto Done;
+
+  // Connect the audio stream to the recording sink.
+  hr := pRecord.AddStream(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_AUDIO,
+                          pMediaType,
+                          nil,
+                          dwSinkStreamIndex);
+
+  if (hr = MF_E_INVALIDSTREAMNUMBER) then
+    begin
+      // If an audio device is not present, allow video only recording
+      hr := S_OK;
+    end;
+
+done:
+  Result := hr;
+end;
+
+
+//
+function SetDeviceFormat(pSource: IMFMediaSource;
+                         dwFormatIndex: DWORD): HResult;
+var
+  pPD: IMFPresentationDescriptor;
+  pSD: IMFStreamDescriptor;
+  pHandler: IMFMediaTypeHandler;
+  pType: IMFMediaType;
+  hr: HResult;
+  fSelected: Bool;
+
+label
+  Done;
+
+begin
+
+  hr := pSource.CreatePresentationDescriptor(pPD);
+  if FAILED(hr) then
+    goto Done;
+
+  hr := pPD.GetStreamDescriptorByIndex(0,
+                                       fSelected,
+                                       pSD);
+  if FAILED(hr) then
+    goto Done;
+
+  hr := pSD.GetMediaTypeHandler(pHandler);
+  if FAILED(hr) then
+    goto Done;
+
+  hr := pHandler.GetMediaTypeByIndex(dwFormatIndex,
+                                     pType);
+  if FAILED(hr) then
+    goto Done;
+
+  hr := pHandler.SetCurrentMediaType(pType);
+
+done:
+  Result := hr;
+end;
+
+
 
 // External methods
 //=================
+
 {$WARN SYMBOL_PLATFORM OFF}
   function SetForegroundWindow; external User32Lib name 'SetForegroundWindow' delayed;
   // If the window was brought to the foreground, the return value is nonzero.

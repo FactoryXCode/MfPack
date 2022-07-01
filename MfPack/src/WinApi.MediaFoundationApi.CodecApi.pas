@@ -10,7 +10,7 @@
 // Release date: 17-10-2015
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 // Description: CodecAPI Definitions.
 //
 // Organisation: FactoryX
@@ -21,18 +21,18 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //          Maybe we need the Macro's later (see the original headerfile.)
 //
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: -
 //
-// Compiler version: 23 up to 34
-// SDK version: 10.0.22000.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //
@@ -776,6 +776,36 @@ const
                                                                       D3: $40bb;
                                                                       D4: ($8e, $e4, $07, $55, $3e, $7e, $2d, $3a));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncChromaUpdateTime}
+
+  STATIC_CODECAPI_AVEncAACEnableVBR                        : TGUID = (D1: $e836bb98;
+                                                                      D2: $fca3;
+                                                                      D3: $44b6;
+                                                                      D4: ($9a, $39, $24, $78, $6b, $e4, $1b, $e1));
+  {$EXTERNALSYM STATIC_CODECAPI_AVEncAACEnableVBR}
+
+ STATIC_CODECAPI_AVEncVideoConsecutiveFramesForLayer      : TGUID = (D1: $0AF35522;
+                                                                      D2: $D984;
+                                                                      D3: $45ae;
+                                                                      D4: ($BB, $B8, $53, $93, $3E, $0A, $B1, $B5));
+  {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoConsecutiveFramesForLayer}
+
+  STATIC_CODECAPI_AVEncVideoMaxNumRefFrameForLayer         : TGUID = (D1: $3141C639;
+                                                                      D2: $6329;
+                                                                      D3: $40d1;
+                                                                      D4: ($B7, $E7, $2F, $0E, $3A, $C1, $8E, $02));
+  {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoMaxNumRefFrameForLayer}
+
+  STATIC_CODECAPI_AVEncTileRows                            : TGUID = (D1: $FBC650FC;
+                                                                      D2: $41AB;
+                                                                      D3: $4f9b;
+                                                                      D4: ($84, $B5, $06, $5B, $E9, $CD, $99, $EE));
+  {$EXTERNALSYM STATIC_CODECAPI_AVEncTileRows}
+
+  STATIC_CODECAPI_AVEncTileColumns                         : TGUID = (D1: $B4B31205;
+                                                                      D2: $01E8;
+                                                                      D3: $452c;
+                                                                      D4: ($B8, $76, $8C, $65, $06, $54, $59, $25));
+  {$EXTERNALSYM STATIC_CODECAPI_AVEncTileColumns}
 // end of static definitions }
 
 
@@ -2005,6 +2035,7 @@ const
   // Read-only
   // Provides the time until the encoder plans to update progressive
   // areas of the video frame.
+  {$EXTERNALSYM AVEncProgressiveUpdateTime}
   AVEncProgressiveUpdateTime :  TGUID = '{649faf66-afc6-4828-8fdc-0771cd9ab17d}';
 
   // AVEncNextChromaTime (UINT32)
@@ -2012,6 +2043,34 @@ const
   // Provides the time until the encoder plans to update chroma
   // in the video frame.
   AVEncChromaUpdateTime :  TGUID = '{4b4fd998-4274-40bb-8ee4-07553e7e2d3a}';
+  {$EXTERNALSYM AVEncChromaUpdateTime}
+
+  // AVEncAACEnableVBR (BOOL)
+  // Indicates whether the AAC encoder should use VBR encoding.
+  AVEncAACEnableVBR :  TGUID = '{e836bb98-fca3-44b6-9a39-24786be41be1}';
+  {$EXTERNALSYM AVEncAACEnableVBR}
+
+  // AVEncVideoConsecutiveFramesForLayer (UINT32)
+  // Indicates the number of consecutive frames at a given temporal layer.
+  // Set the CODECAPI_AVEncVideoSelectLayer property first to specify the temporal layer.
+  AVEncVideoConsecutiveFramesForLayer :  TGUID = '{0AF35522-D984-45ae-BBB8-53933E0AB1B5}';
+  {$EXTERNALSYM AVEncVideoConsecutiveFramesForLayer}
+
+  // AVEncVideoMaxNumRefFrameForLayer (UINT32)
+  // Used to limit the number of reference frames for a given temporal layer.
+  // Set the CODECAPI_AVEncVideoSelectLayer property first to specify the temporal layer.
+  AVEncVideoMaxNumRefFrameForLayer :  TGUID = '{3141C639-6329-40d1-B7E7-2F0E3AC18E02}';
+  {$EXTERNALSYM AVEncVideoMaxNumRefFrameForLayer}
+
+  // AVEncTileRows (UINT32)
+  // Specifies the number of tile rows to encode.
+  AVEncTileRows :  TGUID = '{FBC650FC-41AB-4f9b-84B5-065BE9CD99EE}';
+  {$EXTERNALSYM AVEncTileRows}
+
+  // AVEncTileColumns (UINT32)
+  // Specifies the number of tile columns to encode.
+  AVEncTileColumns :  TGUID = '{B4B31205-01E8-452c-B876-8C6506545925}';
+  {$EXTERNALSYM AVEncTileColumns}
 
   // AVScenarioInfo (UINT32)
   AVScenarioInfo :  TGUID = '{b28a6e64-3ff9-446a-8a4b-0d7a53413236}';
@@ -2670,6 +2729,41 @@ const
   {$EXTERNALSYM eAVEncVP9VProfile_420_12}
 
 
+
+type
+  PeAVEncAV1VProfile = ^eAVEncAV1VProfile;
+  eAVEncAV1VProfile = UINT32;
+  {$EXTERNALSYM eAVEncAV1VProfile}
+
+const
+  eAVEncAV1VProfile_unknown               = eAVEncAV1VProfile(0);
+  {$EXTERNALSYM eAVEncAV1VProfile_unknown}
+  eAVEncAV1VProfile_Main_420_8            = eAVEncAV1VProfile(1);
+  {$EXTERNALSYM eAVEncAV1VProfile_Main_420_8}
+  eAVEncAV1VProfile_Main_420_10           = eAVEncAV1VProfile(2);
+  {$EXTERNALSYM eAVEncAV1VProfile_Main_420_10}
+  eAVEncAV1VProfile_Main_400_8            = eAVEncAV1VProfile(3);
+  {$EXTERNALSYM eAVEncAV1VProfile_Main_400_8}
+  eAVEncAV1VProfile_Main_400_10           = eAVEncAV1VProfile(4);
+  {$EXTERNALSYM eAVEncAV1VProfile_Main_400_10}
+  eAVEncAV1VProfile_High_444_8            = eAVEncAV1VProfile(5);
+  {$EXTERNALSYM eAVEncAV1VProfile_High_444_8}
+  eAVEncAV1VProfile_High_444_10           = eAVEncAV1VProfile(6);
+  {$EXTERNALSYM eAVEncAV1VProfile_High_444_10}
+  eAVEncAV1VProfile_Professional_420_12   = eAVEncAV1VProfile(7);
+  {$EXTERNALSYM eAVEncAV1VProfile_Professional_420_12}
+  eAVEncAV1VProfile_Professional_400_12   = eAVEncAV1VProfile(8);
+  {$EXTERNALSYM eAVEncAV1VProfile_Professional_400_12}
+  eAVEncAV1VProfile_Professional_444_12   = eAVEncAV1VProfile(9);
+  {$EXTERNALSYM eAVEncAV1VProfile_Professional_444_12}
+  eAVEncAV1VProfile_Professional_422_8    = eAVEncAV1VProfile(10);
+  {$EXTERNALSYM eAVEncAV1VProfile_Professional_422_8}
+  eAVEncAV1VProfile_Professional_422_10   = eAVEncAV1VProfile(11);
+  {$EXTERNALSYM eAVEncAV1VProfile_Professional_422_10}
+  eAVEncAV1VProfile_Professional_422_12   = eAVEncAV1VProfile(12);
+  {$EXTERNALSYM eAVEncAV1VProfile_Professional_422_12}
+
+
 type
   PeAVEncH263PictureType = ^eAVEncH263PictureType;
   eAVEncH263PictureType = UINT32;
@@ -2694,6 +2788,21 @@ const
   {$EXTERNALSYM eAVEncH264PictureType_P}
   eAVEncH264PictureType_B   = eAVEncH264PictureType(2);
   {$EXTERNALSYM eAVEncH264PictureType_B}
+
+
+type
+  PeAVEncAV1PictureType = ^eAVEncAV1PictureType;
+  eAVEncAV1PictureType = UINT32;
+  {$EXTERNALSYM eAVEncAV1PictureType}
+const
+  eAVEncAV1PictureType_Key         = eAVEncAV1PictureType(0);
+  {$EXTERNALSYM eAVEncAV1PictureType_Key}
+  eAVEncAV1PictureType_Intra_Only  = eAVEncAV1PictureType(1);
+  {$EXTERNALSYM eAVEncAV1PictureType_Intra_Only}
+  eAVEncAV1PictureType_Inter       = eAVEncAV1PictureType(2);
+  {$EXTERNALSYM eAVEncAV1PictureType_Inter}
+  eAVEncAV1PictureType_Switch      = eAVEncAV1PictureType(3);
+  {$EXTERNALSYM eAVEncAV1PictureType_Switch}
 
 
 type
@@ -2768,6 +2877,42 @@ const
   {$EXTERNALSYM eAVEncH265VLevel6_1}
   eAVEncH265VLevel6_2      = eAVEncH265VLevel(186);
   {$EXTERNALSYM eAVEncH265VLevel6_2}
+
+
+type
+  PeAVEncAV1VLevel = ^eAVEncAV1VLevel;
+  eAVEncAV1VLevel = UINT32;
+  {$EXTERNALSYM eAVEncAV1VLevel}
+const
+  eAVEncAV1VLevel2        = eAVEncAV1VLevel(0);
+  {$EXTERNALSYM eAVEncAV1VLevel2}
+  eAVEncAV1VLevel2_1      = eAVEncAV1VLevel(1);
+  {$EXTERNALSYM eAVEncAV1VLevel2_1}
+  eAVEncAV1VLevel3        = eAVEncAV1VLevel(4);
+  {$EXTERNALSYM eAVEncAV1VLevel3}
+  eAVEncAV1VLevel3_1      = eAVEncAV1VLevel(5);
+  {$EXTERNALSYM eAVEncAV1VLevel3_1}
+  eAVEncAV1VLevel4        = eAVEncAV1VLevel(8);
+  {$EXTERNALSYM eAVEncAV1VLevel4}
+  eAVEncAV1VLevel4_1      = eAVEncAV1VLevel(9);
+  {$EXTERNALSYM eAVEncAV1VLevel4_1}
+  eAVEncAV1VLevel5        = eAVEncAV1VLevel(12);
+  {$EXTERNALSYM eAVEncAV1VLevel5}
+  eAVEncAV1VLevel5_1      = eAVEncAV1VLevel(13);
+  {$EXTERNALSYM eAVEncAV1VLevel5_1}
+  eAVEncAV1VLevel5_2      = eAVEncAV1VLevel(14);
+  {$EXTERNALSYM eAVEncAV1VLevel5_2}
+  eAVEncAV1VLevel5_3      = eAVEncAV1VLevel(15);
+  {$EXTERNALSYM eAVEncAV1VLevel5_3}
+  eAVEncAV1VLevel6        = eAVEncAV1VLevel(16);
+  {$EXTERNALSYM eAVEncAV1VLevel6}
+  eAVEncAV1VLevel6_1      = eAVEncAV1VLevel(17);
+  {$EXTERNALSYM eAVEncAV1VLevel6_1}
+  eAVEncAV1VLevel6_2      = eAVEncAV1VLevel(18);
+  {$EXTERNALSYM eAVEncAV1VLevel6_2}
+  eAVEncAV1VLevel6_3      = eAVEncAV1VLevel(19);
+  {$EXTERNALSYM eAVEncAV1VLevel6_3}
+
 
 
 type

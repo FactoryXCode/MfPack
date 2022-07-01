@@ -10,7 +10,7 @@
 // Release date: 12-10-2015
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 // Description:
 //
 // Organisation: FactoryX
@@ -21,17 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Build 22000 or later.
 //
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: -
 //
-// Compiler version: 23 up to 34
-// SDK version: 10.0.22000.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //
@@ -90,16 +90,64 @@ const
   // be set to DEVPROP_TRUE.  If this property is missing
   // applications must assume the camera is a non-virtual
   // camera.
-  DEVPKEY_DeviceInterface_IsVirtualCamera  :   PROPERTYKEY  = (fmtid: (D1: $6EDC630D;
-                                                                       D2: $C2E3;
-                                                                       D3: $43B7;
-                                                                       D4: ($B2, $D1, $20, $52, $5A, $1A, $F1, $20));
-                                                                       Pid: 3);
+  DEVPKEY_DeviceInterface_IsVirtualCamera                  :   PROPERTYKEY  = (fmtid: (D1: $6EDC630D;
+                                                                                       D2: $C2E3;
+                                                                                       D3: $43B7;
+                                                                                       D4: ($B2, $D1, $20, $52, $5A, $1A, $F1, $20));
+                                                                                       Pid: 3);
   {$EXTERNALSYM DEVPKEY_DeviceInterface_IsVirtualCamera}
 
 
 
-{NTDDI_VERSION >= NTDDI_WIN10_CO}
+{if NTDDI_VERSION >= NTDDI_WIN10_NI}
+
+  // DEVPROPKEY set on a camera interface property store
+  // indicating the camera can enable MS Camera Effects.
+  //
+  // Type:  DEVPROP_BOOLEAN
+  // {6EDC630D-C2E3-43B7-B2D1-20525A1AF120}, 4")
+  DEVPKEY_DeviceInterface_IsWindowsCameraEffectAvailable     :  PROPERTYKEY = (fmtid: (D1: $6EDC630D;
+                                                                                       D2: $C2E3;
+                                                                                       D3: $43B7;
+                                                                                       D4: ($B2, $D1, $20, $52, $5A, $1A, $F1, $20));
+                                                                                       Pid: 4);
+
+  // 28A5531A-57DD-4FD5-AAA7-385ABF57D785
+  //
+  // Type:  UINT32
+  //
+  // Attribute set during camera creation.  If set to non-zero
+  // value camera effects will be enabled.  If the camera being
+  // created does not have
+  // DEVPKEY_DeviceInterface_IsWindowsCameraEffectAvailable
+  // property set to true, setting this attribute during camera
+  // initialization will result in an MF_E_INVALIDREQUEST
+  // failure.
+  MF_DEVSOURCE_ATTRIBUTE_ENABLE_MS_CAMERA_EFFECTS            : TGUID = '{28A5531A-57DD-4FD5-AAA7-385ABF57D785}';
+
+  // {1BB79E7C-5D83-438C-94D8-E5F0DF6D3279}
+  //
+  // Type:  IUnknown
+  //
+  // IMFCollection object containing the IMFMediaSourceEx of the
+  // various associated physical cameras for the virtual camera.
+  // This attribute will be set on the IMFActivate's attribute
+  // prior to calling IMFActivate::ActivateObject() method.
+  MF_VIRTUALCAMERA_ASSOCIATED_CAMERA_SOURCES                 : TGUID = '{1BB79E7C-5D83-438C-94D8-E5F0DF6D3279}';
+
+  // {F0273718-4A4D-4AC5-A15D-305EB5E90667}
+  //
+  // Type:  UINT32
+  //
+  // If present and non-zero, the virtual camera custom media
+  // source is requesting the pipeline to provide the associated
+  // physical camera sources.  If this attribute is not present
+  // or set to 0, associated physical cameras will not be
+  // provided through the
+  // MF_VIRTUALCAMERA_ASSOCIATED_CAMERA_SOURCES attribute.
+  MF_VIRTUALCAMERA_PROVIDE_ASSOCIATED_CAMERA_SOURCES         : TGUID = '{F0273718-4A4D-4AC5-A15D-305EB5E90667}';
+
+ {end NTDDI_VERSION >= NTDDI_WIN10_NI}
 
 
   // MF_VIRTUALCAMERA_CONFIGURATION_APP_PACKAGE_FAMILY_NAME

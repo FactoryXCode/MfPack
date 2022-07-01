@@ -10,7 +10,7 @@
 // Release date: 02-06-2016
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 // Description: WDM-CSA Multimedia Definitions.
 //
 // Organisation: FactoryX
@@ -21,17 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 // 
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: -
 //
-// Compiler version: 23 up to 34
-// SDK version: 10.0.22000.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //
@@ -6544,6 +6544,10 @@ const
   {$EXTERNALSYM KSCAMERA_EXTENDEDPROP_EYEGAZECORRECTION_OFF}
   KSCAMERA_EXTENDEDPROP_EYEGAZECORRECTION_ON                          = $0000000000000001;
   {$EXTERNALSYM KSCAMERA_EXTENDEDPROP_EYEGAZECORRECTION_ON}
+  // if (NTDDI_VERSION >= NTDDI_WIN10_NI)
+  KSCAMERA_EXTENDEDPROP_EYEGAZECORRECTION_STARE                       = $0000000000000002;
+  {$EXTERNALSYM KSCAMERA_EXTENDEDPROP_EYEGAZECORRECTION_STARE}
+  // endif //  (NTDDI_VERSION >= NTDDI_WIN10_NI)
 
   KSCAMERA_EXTENDEDPROP_BACKGROUNDSEGMENTATION_OFF                    = $0000000000000000;
   {$EXTERNALSYM KSCAMERA_EXTENDEDPROP_BACKGROUNDSEGMENTATION_OFF}
@@ -6551,6 +6555,10 @@ const
   {$EXTERNALSYM KSCAMERA_EXTENDEDPROP_BACKGROUNDSEGMENTATION_BLUR}
   KSCAMERA_EXTENDEDPROP_BACKGROUNDSEGMENTATION_MASK                   = $0000000000000002;
   {$EXTERNALSYM KSCAMERA_EXTENDEDPROP_BACKGROUNDSEGMENTATION_MASK}
+  // if (NTDDI_VERSION >= NTDDI_WIN10_NI)
+  KSCAMERA_EXTENDEDPROP_BACKGROUNDSEGMENTATION_SHALLOWFOCUS           = $0000000000000004;
+  {$EXTERNALSYM KSCAMERA_EXTENDEDPROP_BACKGROUNDSEGMENTATION_SHALLOWFOCUS}
+  // endif //  (NTDDI_VERSION >= NTDDI_WIN10_NI)
 
   // Digital Window Framing Flags
   KSCAMERA_EXTENDEDPROP_DIGITALWINDOW_MANUAL                          = $0000000000000000;
@@ -8163,10 +8171,13 @@ type
   // define new property id
   PKSPROPERTY_JACK = ^KSPROPERTY_JACK;
   KSPROPERTY_JACK = (
-    KSPROPERTY_JACK_DESCRIPTION = 1,
+    KSPROPERTY_JACK_DESCRIPTION  = 1,
     KSPROPERTY_JACK_DESCRIPTION2 = 2,
-    KSPROPERTY_JACK_SINK_INFO = 3,
-    KSPROPERTY_JACK_CONTAINERID = 4
+    KSPROPERTY_JACK_SINK_INFO    = 3,
+    KSPROPERTY_JACK_CONTAINERID  = 4,
+    // if (NTDDI_VERSION >= NTDDI_WIN10_NI)
+    KSPROPERTY_JACK_DESCRIPTION3 = 5
+    //endif // (NTDDI_VERSION >= NTDDI_WIN10_NI)
   );
   {$EXTERNALSYM KSPROPERTY_JACK}
 
@@ -8236,6 +8247,7 @@ type
 
   // structure for KSPROPERTY_JACK_DESCRIPTION pin property
   PKSJACK_DESCRIPTION = ^KSJACK_DESCRIPTION;
+  {$EXTERNALSYM PKSJACK_DESCRIPTION}
   KSJACK_DESCRIPTION = record
     ChannelMapping: DWORD;
     Color: DWORD;                   // 0x00rrggbb; (NOT a COLORREF)
@@ -8248,6 +8260,7 @@ type
   {$EXTERNALSYM KSJACK_DESCRIPTION}
 
   PKSJACK_SINK_CONNECTIONTYPE = ^KSJACK_SINK_CONNECTIONTYPE;
+  {$EXTERNALSYM PKSJACK_SINK_CONNECTIONTYPE}
   KSJACK_SINK_CONNECTIONTYPE = (
     KSJACK_SINK_CONNECTIONTYPE_HDMI = 0,          // HDMI
     KSJACK_SINK_CONNECTIONTYPE_DISPLAYPORT = 1    // DisplayPort
@@ -8264,6 +8277,7 @@ const
 type
 
   PKSJACK_SINK_INFORMATION = ^_tagKSJACK_SINK_INFORMATION;
+  {$EXTERNALSYM PKSJACK_SINK_INFORMATION}
   _tagKSJACK_SINK_INFORMATION = record
     ConnType: KSJACK_SINK_CONNECTIONTYPE;                                          // Connection Type
     ManufacturerId: WORD;                                                          // Sink manufacturer ID
@@ -8291,6 +8305,7 @@ const
 type
   // This record is also defined in MfPack.DeviceTopology.pas !
   PKSJACK_DESCRIPTION2 = ^_tagKSJACK_DESCRIPTION2;
+  {$EXTERNALSYM PKSJACK_DESCRIPTION2}
   _tagKSJACK_DESCRIPTION2 = record
     DeviceStateInfo: DWORD;         // Top 16 bits: Report current device state, active, streaming, idle, or hardware not ready
                                     // Bottom 16 bits: detailed reason to further explain state in top 16 bits
@@ -8300,6 +8315,18 @@ type
   {$EXTERNALSYM _tagKSJACK_DESCRIPTION2}
   KSJACK_DESCRIPTION2 = _tagKSJACK_DESCRIPTION2;
   {$EXTERNALSYM KSJACK_DESCRIPTION2}
+
+  // if (NTDDI_VERSION >= NTDDI_WIN10_NI)
+  PKSJACK_DESCRIPTION3 = ^_tagKSJACK_DESCRIPTION3;
+  {$EXTERNALSYM PKSJACK_DESCRIPTION3}
+  _tagKSJACK_DESCRIPTION3 = record
+    ConfigId: ULONG;                // Driver defined bitmask or enum describing the current configuration, changing this value causes
+                                    // audioendpointbuilder to refresh the cache to ensure that the published endpoint matches the current config.
+  end;
+  {$EXTERNALSYM _tagKSJACK_DESCRIPTION3}
+  KSJACK_DESCRIPTION3 = _tagKSJACK_DESCRIPTION3;
+  {$EXTERNALSYM KSJACK_DESCRIPTION3}
+  //endif // (NTDDI_VERSION >= NTDDI_WIN10_NI)
 
 
 // NTDDI_VERSION >= NTDDI_WIN10_VB
@@ -8409,6 +8436,28 @@ type
   {$EXTERNALSYM KSAUDIOENGINE_VOLUMELEVEL}
   PKSAUDIOENGINE_VOLUMELEVEL = ^_tagKSAUDIOENGINE_VOLUMELEVEL;
    {$EXTERNALSYM PKSAUDIOENGINE_VOLUMELEVEL}
+
+  // if (NTDDI_VERSION >= NTDDI_WIN10_NI)
+  PEDeviceControlUseType = ^EDeviceControlUseType;
+  EDeviceControlUseType        = (
+    eDeviceControlUseMissing   = 0,
+    eDeviceControlUsePrimary   = 1,
+    eDeviceControlUseSecondary = 2
+  );
+  {$EXTERNALSYM EDeviceControlUseType}
+
+  PKSAUDIOENGINE_DEVICECONTROLS = ^_tagKSAUDIOENGINE_DEVICECONTROLS;
+  {$EXTERNALSYM PKSAUDIOENGINE_DEVICECONTROLS}
+  _tagKSAUDIOENGINE_DEVICECONTROLS = record
+    Volume: EDeviceControlUseType;
+    Mute: EDeviceControlUseType;
+    PeakMeter: EDeviceControlUseType;
+  end;
+  {$EXTERNALSYM _tagKSAUDIOENGINE_DEVICECONTROLS}
+  KSAUDIOENGINE_DEVICECONTROLS = _tagKSAUDIOENGINE_DEVICECONTROLS;
+  {$EXTERNALSYM KSAUDIOENGINE_DEVICECONTROLS}
+  // endif // (NTDDI_VERSION >= NTDDI_WIN10_NI)
+
 
 
   //===========================================================================

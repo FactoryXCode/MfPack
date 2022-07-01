@@ -10,7 +10,7 @@
 // Release date: 01-05-2019
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 // Description: Error code definitions for the Win32 API functions.
 //
 // Organisation: FactoryX
@@ -21,18 +21,18 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: When using MfPack, use this unit and not the outdated
-//          Error code definitions from Delphi <= ver 10.4
+//          Error code definitions from Embarcadero Delphi <= ver 10.4
 //
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: -
 //
-// Compiler version: 23 up to 34
-// SDK version: 10.0.22000.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //
@@ -4044,7 +4044,7 @@ const
 //
 // The CimFS image is corrupt.
 //
-  ERROR_CIMFS_IMAGE_CORRUPT           = 470;
+  ERROR_CIMFS_IMAGE_CORRUPT = 470;
   {$EXTERNALSYM ERROR_CIMFS_IMAGE_CORRUPT}
 
 //
@@ -4064,7 +4064,7 @@ const
 //
 // The storage stack returned STATUS_ACCESS_DENEID for the current operation.
 //
-  ERROR_STORAGE_STACK_ACCESS_DENIED   = 472;
+  ERROR_STORAGE_STACK_ACCESS_DENIED = 472;
   {$EXTERNALSYM ERROR_STORAGE_STACK_ACCESS_DENIED}
 
 //
@@ -4076,6 +4076,27 @@ const
 //
   ERROR_INSUFFICIENT_VIRTUAL_ADDR_RESOURCES = 473;
   {$EXTERNALSYM ERROR_INSUFFICIENT_VIRTUAL_ADDR_RESOURCES}
+
+//
+// MessageId: ERROR_INDEX_OUT_OF_BOUNDS
+//
+// MessageText:
+//
+// The specified index is beyond the bounds of valid range.
+//
+  ERROR_INDEX_OUT_OF_BOUNDS  = 474;
+  {$EXTERNALSYM ERROR_INDEX_OUT_OF_BOUNDS}
+
+//
+// MessageId: ERROR_CLOUD_FILE_US_MESSAGE_TIMEOUT
+//
+// MessageText:
+//
+// The cloud provider failed to acknowledge a message before the time-out expired.
+//
+  ERROR_CLOUD_FILE_US_MESSAGE_TIMEOUT = 475;
+  {$EXTERNALSYM ERROR_CLOUD_FILE_US_MESSAGE_TIMEOUT}
+
 
 //
 // **** Available SYSTEM error codes ****
@@ -4353,8 +4374,68 @@ const
 //
 // The volume is opened for exclusive write access, preventing files from being opened for write access.
 //
-  ERROR_VOLUME_WRITE_ACCESS_DENIED    = 508;
+  ERROR_VOLUME_WRITE_ACCESS_DENIED = 508;
   {$EXTERNALSYM ERROR_VOLUME_WRITE_ACCESS_DENIED}
+
+//
+// MessageId: ERROR_NOT_SUPPORTED_WITH_CACHED_HANDLE
+//
+// MessageText:
+//
+// The specified operation is not supported on a file opened for cached IO.
+//
+  {$EXTERNALSYM ERROR_NOT_SUPPORTED_WITH_CACHED_HANDLE}
+  ERROR_NOT_SUPPORTED_WITH_CACHED_HANDLE = 509;
+
+//
+// MessageId: ERROR_FS_METADATA_INCONSISTENT
+//
+// MessageText:
+//
+// The file system encountered a metadata file with inconsistent data.
+//
+  ERROR_FS_METADATA_INCONSISTENT = 510;
+  {$EXTERNALSYM ERROR_FS_METADATA_INCONSISTENT}
+
+//
+// MessageId: ERROR_BLOCK_WEAK_REFERENCE_INVALID
+//
+// MessageText:
+//
+// A file system block being referenced has been modified after containing a weak reference.
+//
+  ERROR_BLOCK_WEAK_REFERENCE_INVALID = 511;
+  {$EXTERNALSYM ERROR_BLOCK_WEAK_REFERENCE_INVALID}
+
+//
+// MessageId: ERROR_BLOCK_SOURCE_WEAK_REFERENCE_INVALID
+//
+// MessageText:
+//
+// The source file system block being referenced has been modified after containing a weak reference.
+//
+  ERROR_BLOCK_SOURCE_WEAK_REFERENCE_INVALID = 512;
+  {$EXTERNALSYM ERROR_BLOCK_SOURCE_WEAK_REFERENCE_INVALID}
+
+//
+// MessageId: ERROR_BLOCK_TARGET_WEAK_REFERENCE_INVALID
+//
+// MessageText:
+//
+// The target file system block being referenced has been modified after containing a weak reference.
+//
+  ERROR_BLOCK_TARGET_WEAK_REFERENCE_INVALID = 513;
+  {$EXTERNALSYM ERROR_BLOCK_TARGET_WEAK_REFERENCE_INVALID}
+
+//
+// MessageId: ERROR_BLOCK_SHARED
+//
+// MessageText:
+//
+// The target file system block is shared between multiple extents.
+//
+  ERROR_BLOCK_SHARED = 514;
+  {$EXTERNALSYM ERROR_BLOCK_SHARED}
 
 //
 // **** Available SYSTEM error codes ****
@@ -14286,8 +14367,28 @@ const
 //
 // The specified printer cannot be shared.
 //
-  ERROR_PRINTER_NOT_SHAREABLE         = 3022;
+  ERROR_PRINTER_NOT_SHAREABLE = 3022;
   {$EXTERNALSYM ERROR_PRINTER_NOT_SHAREABLE}
+
+//
+// MessageId: ERROR_SERVER_SERVICE_CALL_REQUIRES_SMB1
+//
+// MessageText:
+//
+// The requested function requires SMB1 to be present and enabled.
+//
+  ERROR_SERVER_SERVICE_CALL_REQUIRES_SMB1 = 3023;
+  {$EXTERNALSYM ERROR_SERVER_SERVICE_CALL_REQUIRES_SMB1}
+
+//
+// MessageId: ERROR_NETWORK_AUTHENTICATION_PROMPT_CANCELED
+//
+// MessageText:
+//
+// The user canceled the authentication prompt to a remote server.
+//
+  ERROR_NETWORK_AUTHENTICATION_PROMPT_CANCELED = 3024;
+  {$EXTERNALSYM ERROR_NETWORK_AUTHENTICATION_PROMPT_CANCELED}
 
 
 ///////////////////////////////////////////////////
@@ -14951,7 +15052,10 @@ const
 
 ///////////////////////////////////////////////////
 //                                               //
-//                  Available                    //
+//    SMB error codes, in the Win32 code space   //
+//                                               //
+// Not to be confused with Facility=SMB codes in //
+// the HRESULT code space.                       //
 //                                               //
 //                 4150 to 4199                  //
 ///////////////////////////////////////////////////
@@ -16261,9 +16365,36 @@ const
 
 ///////////////////////////////////////////////////
 //                                               //
+//   System Integrity Error codes (continued)    //
+//                                               //
+//                 4580 to 4589                  //
+///////////////////////////////////////////////////
+
+//
+// MessageId: ERROR_SYSTEM_INTEGRITY_REPUTATION_UNFRIENDLY_FILE
+//
+// MessageText:
+//
+// System Integrity policy has been violated.  Unfriendly file.
+//
+  ERROR_SYSTEM_INTEGRITY_REPUTATION_UNFRIENDLY_FILE = 4580;
+  {$EXTERNALSYM ERROR_SYSTEM_INTEGRITY_REPUTATION_UNFRIENDLY_FILE}
+
+//
+// MessageId: ERROR_SYSTEM_INTEGRITY_REPUTATION_UNATTAINABLE
+//
+// MessageText:
+//
+// System Integrity policy has been violated.  Failed to obtain file reputation because an infrastructure issue occurred. Try again later.
+//
+  ERROR_SYSTEM_INTEGRITY_REPUTATION_UNATTAINABLE = 4581;
+  {$EXTERNALSYM ERROR_SYSTEM_INTEGRITY_REPUTATION_UNATTAINABLE}
+
+///////////////////////////////////////////////////
+//                                               //
 //                  Available                    //
 //                                               //
-//                 4580 to 4599                  //
+//                 4590 to 4599                  //
 ///////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////
@@ -24862,6 +24993,26 @@ const
   ERROR_WEAK_WHFBKEY_BLOCKED          = 8651;
   {$EXTERNALSYM ERROR_WEAK_WHFBKEY_BLOCKED}
 
+//
+// MessageId: ERROR_DS_PER_ATTRIBUTE_AUTHZ_FAILED_DURING_ADD
+//
+// MessageText:
+//
+// The add object operation failed because the caller was not authorized to add one or more attributes included in the request.
+//
+  ERROR_DS_PER_ATTRIBUTE_AUTHZ_FAILED_DURING_ADD = 8652;
+  {$EXTERNALSYM ERROR_DS_PER_ATTRIBUTE_AUTHZ_FAILED_DURING_ADD}
+
+//
+// MessageId: ERROR_LOCAL_POLICY_MODIFICATION_NOT_SUPPORTED
+//
+// MessageText:
+//
+// The local account policy modification request was rejected because the policy is controlled by a regional authority.
+//
+  ERROR_LOCAL_POLICY_MODIFICATION_NOT_SUPPORTED = 8653;
+  {$EXTERNALSYM ERROR_LOCAL_POLICY_MODIFICATION_NOT_SUPPORTED}
+
 
 ///////////////////////////////////////////////////
 //                                                /
@@ -31590,6 +31741,16 @@ const
   ERROR_MRM_MISSING_DEFAULT_LANGUAGE  = 15160;
   {$EXTERNALSYM ERROR_MRM_MISSING_DEFAULT_LANGUAGE}
 
+//
+// MessageId: ERROR_MRM_SCOPE_ITEM_CONFLICT
+//
+// MessageText:
+//
+// An entity was defined as both resource and scope, which is not allowed.
+//
+  ERROR_MRM_SCOPE_ITEM_CONFLICT       = 15161;
+  {$EXTERNALSYM ERROR_MRM_SCOPE_ITEM_CONFLICT}
+
 
 
 ///////////////////////////////////////////////////
@@ -32606,6 +32767,37 @@ const
 //
   ERROR_PACKAGE_NOT_REGISTERED_FOR_USER = 15669;
   {$EXTERNALSYM ERROR_PACKAGE_NOT_REGISTERED_FOR_USER}
+
+//
+// MessageId: ERROR_PACKAGE_NAME_MISMATCH
+//
+// MessageText:
+//
+// The provided package name does not match the expected package name. Check the AppXDeployment-Server event log for details.
+//
+  ERROR_PACKAGE_NAME_MISMATCH         = 15670;
+  {$EXTERNALSYM ERROR_PACKAGE_NAME_MISMATCH}
+
+//
+// MessageId: ERROR_APPINSTALLER_URI_IN_USE
+//
+// MessageText:
+//
+// The provided .appinstaller URI is already being used by another package family. Check the AppXDeployment-Server event log for details.
+//
+  ERROR_APPINSTALLER_URI_IN_USE       = 15671;
+  {$EXTERNALSYM ERROR_APPINSTALLER_URI_IN_USE}
+
+//
+// MessageId: ERROR_APPINSTALLER_IS_MANAGED_BY_SYSTEM
+//
+// MessageText:
+//
+// The package family's auto update settings are being managed at system priority and cannot be changed at default priority. Please contact your system administrator for help with the error.
+//
+  ERROR_APPINSTALLER_IS_MANAGED_BY_SYSTEM = 15672;
+  {$EXTERNALSYM ERROR_APPINSTALLER_IS_MANAGED_BY_SYSTEM}
+
 
 
 //////////////////////////
@@ -43046,6 +43238,17 @@ const
   {$EXTERNALSYM CERTSRV_E_PENDING_CLIENT_RESPONSE}
 
 //
+// MessageId: CERTSRV_E_SEC_EXT_DIRECTORY_SID_REQUIRED
+//
+// MessageText:
+//
+// The Active Directory SID is unavailable and cannot be added to the custom security extension.
+//
+  CERTSRV_E_SEC_EXT_DIRECTORY_SID_REQUIRED = HRESULT($80094821);
+  {$EXTERNALSYM CERTSRV_E_SEC_EXT_DIRECTORY_SID_REQUIRED}
+
+
+//
 // The range $5000-$51ff is reserved for XENROLL errors.
 //
 //
@@ -43777,6 +43980,7 @@ const
 //
 // Since these error codes aren't in the standard Win32 range (i.e., 0-64K), define a
 // macro to map either Win32 or SetupAPI error codes into an HRESULT.
+// NOTE: HRESULT_FROM_SETUPAPI(x) used to be a macro, however we now run it as an inline function.
 //
 function HRESULT_FROM_SETUPAPI(x: DWORD): HRESULT; inline;
 
@@ -46486,7 +46690,7 @@ const
 //
 // MessageText:
 //
-// Invalid Schema, Message Format Error from server.
+// Invalid message from the Mobile Device Management (MDM) server.
 //
   MENROLL_E_DEVICE_MESSAGE_FORMAT_ERROR= HRESULT($80180001);
   {$EXTERNALSYM MENROLL_E_DEVICE_MESSAGE_FORMAT_ERROR}
@@ -46496,7 +46700,7 @@ const
 //
 // MessageText:
 //
-// Server failed to authenticate the user.
+// The Mobile Device Management (MDM) server failed to authenticate the user. Try again or contact your system administrator.
 //
   MENROLL_E_DEVICE_AUTHENTICATION_ERROR = HRESULT($80180002);
   {$EXTERNALSYM MENROLL_E_DEVICE_AUTHENTICATION_ERROR}
@@ -46506,7 +46710,7 @@ const
 //
 // MessageText:
 //
-// The user is not authorized to enroll.
+// The user is not authorized to enroll to Mobile Device Management (MDM). Try again or contact your system administrator.
 //
   MENROLL_E_DEVICE_AUTHORIZATION_ERROR = HRESULT($80180003);
   {$EXTERNALSYM MENROLL_E_DEVICE_AUTHORIZATION_ERROR}
@@ -46516,7 +46720,7 @@ const
 //
 // MessageText:
 //
-// The user has no permission for the certificate template or the certificate authority is unreachable.
+// The user has no permission for the certificate template or the certificate authority is unreachable. Try again or contact your system administrator.
 //
   MENROLL_E_DEVICE_CERTIFICATEREQUEST_ERROR = HRESULT($80180004);
   {$EXTERNALSYM MENROLL_E_DEVICE_CERTIFICATEREQUEST_ERROR}
@@ -46526,7 +46730,7 @@ const
 //
 // MessageText:
 //
-// The MDM server encountered an error.
+// The Mobile Device Management (MDM) server encountered an error. Try again or contact your system administrator.
 //
   MENROLL_E_DEVICE_CONFIGMGRSERVER_ERROR = HRESULT($80180005);
   {$EXTERNALSYM MENROLL_E_DEVICE_CONFIGMGRSERVER_ERROR}
@@ -46536,7 +46740,7 @@ const
 //
 // MessageText:
 //
-// There was an unhandled exception on the server.
+// There was an unhandled exception on the Mobile Device Management (MDM) server. Try again or contact your system administrator.
 //
   MENROLL_E_DEVICE_INTERNALSERVICE_ERROR = HRESULT($80180006);
   {$EXTERNALSYM MENROLL_E_DEVICE_INTERNALSERVICE_ERROR}
@@ -46546,7 +46750,7 @@ const
 //
 // MessageText:
 //
-// The server was not able to validate the user credentials.
+// The Mobile Device Management (MDM) server was not able to validate your account. Try again or contact your system administrator.
 //
   MENROLL_E_DEVICE_INVALIDSECURITY_ERROR = HRESULT($80180007);
   {$EXTERNALSYM MENROLL_E_DEVICE_INVALIDSECURITY_ERROR}
@@ -46556,7 +46760,7 @@ const
 //
 // MessageText:
 //
-// Unknown server error.
+// Unknown Mobile Device Management (MDM) server error. Try again or contact your system administrator.
 //
   MENROLL_E_DEVICE_UNKNOWN_ERROR      = HRESULT($80180008);
   {$EXTERNALSYM MENROLL_E_DEVICE_UNKNOWN_ERROR}
@@ -46566,7 +46770,7 @@ const
 //
 // MessageText:
 //
-// Another enrollment operation is currently underway.
+// Another enrollment operation is currently in progress.
 //
   MENROLL_E_ENROLLMENT_IN_PROGRESS    = HRESULT($80180009);
   {$EXTERNALSYM MENROLL_E_ENROLLMENT_IN_PROGRESS}
@@ -46586,7 +46790,7 @@ const
 //
 // MessageText:
 //
-// During discovery the security certificate date was invalid.
+// There was a Mobile Device Management (MDM) certificate error. The security certificate date is invalid. Try again or contact your system administrator.
 //
   MENROLL_E_DISCOVERY_SEC_CERT_DATE_INVALID = HRESULT($8018000D);
   {$EXTERNALSYM MENROLL_E_DISCOVERY_SEC_CERT_DATE_INVALID}
@@ -46596,7 +46800,7 @@ const
 //
 // MessageText:
 //
-// A password is needed, but was not supplied.
+// A password is required to authenticate your account or device, but was not supplied. Please try again.
 //
   MENROLL_E_PASSWORD_NEEDED           = HRESULT($8018000E);
   {$EXTERNALSYM MENROLL_E_PASSWORD_NEEDED}
@@ -46606,7 +46810,7 @@ const
 //
 // MessageText:
 //
-// An error occurred during WAB enrollment.
+// There was a problem authenticating your account or device. Try again or contact your system administrator.
 //
   MENROLL_E_WAB_ERROR                 = HRESULT($8018000F);
   {$EXTERNALSYM MENROLL_E_WAB_ERROR}
@@ -46636,27 +46840,27 @@ const
 //
 // MessageText:
 //
-// The SSL cert was not valid.
+// There was a Mobile Device Management (MDM) certificate error. Try again or contact your system administrator.
 //
   MENROLL_E_INVALIDSSLCERT            = HRESULT($80180012);
   {$EXTERNALSYM MENROLL_E_INVALIDSSLCERT}
 
 //
-// MessageId: MENROLL_E_DEVICEAPREACHED
+// MessageId: MENROLL_E_DEVICECAPREACHED
 //
 // MessageText:
 //
-// The account has too many devices enrolled. Delete or unenroll old ones to fix this error.
+// The account has too many devices enrolled to Mobile Device Management (MDM). Delete or unenroll old devices to fix this error.
 //
-  MENROLL_E_DEVICEAPREACHED           = HRESULT($80180013);
-  {$EXTERNALSYM MENROLL_E_DEVICEAPREACHED}
+  MENROLL_E_DEVICECAPREACHED          = HRESULT($80180013);
+  {$EXTERNALSYM MENROLL_E_DEVICECAPREACHED}
 
 //
 // MessageId: MENROLL_E_DEVICENOTSUPPORTED
 //
 // MessageText:
 //
-// A specific platform or version is not supported.
+// The Mobile Device Management (MDM) server doesn't support this platform or version, consider upgrading your device.
 //
   MENROLL_E_DEVICENOTSUPPORTED        = HRESULT($80180014);
   {$EXTERNALSYM MENROLL_E_DEVICENOTSUPPORTED}
@@ -46666,7 +46870,7 @@ const
 //
 // MessageText:
 //
-// Mobile device management is generally not supported for this device.
+// Mobile Device Management (MDM) is generally not supported for this device.
 //
   MENROLL_E_NOT_SUPPORTED             = HRESULT($80180015);
   {$EXTERNALSYM MENROLL_E_NOT_SUPPORTED}
@@ -46676,7 +46880,7 @@ const
 //
 // MessageText:
 //
-// The device is attempting to renew, but the server rejected the request. Check renew schedule on the device.
+// The device is attempting to renew the Mobile Device Management (MDM) certificate, but the server rejected the request. Check renew schedule on the device.
 //
   MENROLL_E_NOTELIGIBLETORENEW        = HRESULT($80180016);
   {$EXTERNALSYM MENROLL_E_NOTELIGIBLETORENEW}
@@ -46686,7 +46890,7 @@ const
 //
 // MessageText:
 //
-// Account is in maintenance; retry later.
+// The Mobile Device Management (MDM) server states your account is in maintenance, try again later.
 //
   MENROLL_E_INMAINTENANCE             = HRESULT($80180017);
   {$EXTERNALSYM MENROLL_E_INMAINTENANCE}
@@ -46696,7 +46900,7 @@ const
 //
 // MessageText:
 //
-// The license of the user is in bad state blocking enrollment.
+// There was an error with your Mobile Device Management (MDM) user license. Contact your system administrator.
 //
   MENROLL_E_USER_LICENSE              = HRESULT($80180018);
   {$EXTERNALSYM MENROLL_E_USER_LICENSE}
@@ -46706,7 +46910,7 @@ const
 //
 // MessageText:
 //
-// The server rejected the Enrollment Data.
+// The Mobile Device Management (MDM) server rejected the enrollment data. The server may not be configured correctly.
 //
   MENROLL_E_ENROLLMENTDATAINVALID     = HRESULT($80180019);
   {$EXTERNALSYM MENROLL_E_ENROLLMENTDATAINVALID}
@@ -46836,7 +47040,7 @@ const
 //
 // MessageText:
 //
-// Mobile Device Management (MDM) was blocked, possibly by Group Policy or the SetManagedExternally function.
+// Mobile Device Management (MDM) was blocked, possibly by Group Policy or the local management agent.
 //
   MENROLL_E_DEVICE_MANAGEMENT_BLOCKED = HRESULT($80180026);
   {$EXTERNALSYM MENROLL_E_DEVICE_MANAGEMENT_BLOCKED}
@@ -47891,6 +48095,25 @@ const
   ERROR_GRAPHICS_VAIL_FAILED_TO_SEND_COMPOSITION_WINDOW_DPI_MESSAGE = HRESULT($C0262016);
   {$EXTERNALSYM ERROR_GRAPHICS_VAIL_FAILED_TO_SEND_COMPOSITION_WINDOW_DPI_MESSAGE}
 
+//
+// MessageId: ERROR_GRAPHICS_LINK_CONFIGURATION_IN_PROGRESS
+//
+// MessageText:
+//
+// Link configuration for the display timing is still in progress.
+//
+  ERROR_GRAPHICS_LINK_CONFIGURATION_IN_PROGRESS = HRESULT($C0262017);
+  {$EXTERNALSYM ERROR_GRAPHICS_LINK_CONFIGURATION_IN_PROGRESS}
+
+//
+// MessageId: ERROR_GRAPHICS_MPO_ALLOCATION_UNPINNED
+//
+// MessageText:
+//
+// The allocation for the MPO has been unpinned.
+//
+  ERROR_GRAPHICS_MPO_ALLOCATION_UNPINNED = HRESULT($C0262018);
+  {$EXTERNALSYM ERROR_GRAPHICS_MPO_ALLOCATION_UNPINNED}
 
 //
 // Video Memory Manager (VidMM) subsystem errors {$2100..$21ff}
@@ -53277,6 +53500,17 @@ const
   TPM_E_TOO_MUCH_DATA                 = HRESULT($80290602);
   {$EXTERNALSYM TPM_E_TOO_MUCH_DATA}
 
+//
+// MessageId: TPM_E_TPM_GENERATED_EPS
+//
+// MessageText:
+//
+// Unable to fetch EK Certificate if TPM-generated EPS (after a TPM2_ChangeEPS).
+//
+  TPM_E_TPM_GENERATED_EPS             = HRESULT($80290603);
+  {$EXTERNALSYM TPM_E_TPM_GENERATED_EPS}
+
+
 
 //
 // If the application is designed to use TCG defined TPM return codes
@@ -55837,6 +56071,57 @@ const
   FVE_E_TPM_CONTEXT_SETUP_NOT_SUPPORTED = HRESULT($803100E7);
   {$EXTERNALSYM FVE_E_TPM_CONTEXT_SETUP_NOT_SUPPORTED}
 
+//
+// MessageId: FVE_E_UPDATE_INVALID_CONFIG
+//
+// MessageText:
+//
+// The Secure Boot update was not applied due to a known incompatibility with the current BitLocker configuration.
+//
+  FVE_E_UPDATE_INVALID_CONFIG         = HRESULT($803100E8);
+  {$EXTERNALSYM FVE_E_UPDATE_INVALID_CONFIG}
+
+//
+// MessageId: FVE_E_AAD_SERVER_FAIL_RETRY_AFTER
+//
+// MessageText:
+//
+// The AAD request has failed and it has been advised to backoff to prevent throttling. Device will retry soon.
+//
+  FVE_E_AAD_SERVER_FAIL_RETRY_AFTER   = HRESULT($803100E9);
+  {$EXTERNALSYM FVE_E_AAD_SERVER_FAIL_RETRY_AFTER}
+
+//
+// MessageId: FVE_E_AAD_SERVER_FAIL_BACKOFF
+//
+// MessageText:
+//
+// The AAD request has failed due to server issues and it has been advised to backoff to prevent throttling. Device will retry soon.
+//
+  FVE_E_AAD_SERVER_FAIL_BACKOFF       = HRESULT($803100EA);
+  {$EXTERNALSYM FVE_E_AAD_SERVER_FAIL_BACKOFF}
+
+//
+// MessageId: FVE_E_DATASET_FULL
+//
+// MessageText:
+//
+// This operation cannot be completed because dataset is full.
+//
+  FVE_E_DATASET_FULL                  = HRESULT($803100EB);
+  {$EXTERNALSYM FVE_E_DATASET_FULL}
+
+//
+// MessageId: FVE_E_METADATA_FULL
+//
+// MessageText:
+//
+// This operation cannot be completed because BitLocker Drive Encryption metadata area is full. Consider removing unnecessary key protectors for this drive.
+//
+  FVE_E_METADATA_FULL                 = HRESULT($803100EC);
+  {$EXTERNALSYM FVE_E_METADATA_FULL}
+
+
 
 //
 // =======================================================
@@ -57947,6 +58232,56 @@ const
   {$EXTERNALSYM ERROR_HV_MSR_ACCESS_FAILED}
 
 //
+// MessageId: ERROR_HV_INSUFFICIENT_MEMORY_MIRRORING
+//
+// MessageText:
+//
+// There is not enough memory in the hypervisor pool to complete the mirroring operation.
+//
+  ERROR_HV_INSUFFICIENT_MEMORY_MIRRORING = _NDIS_ERROR_TYPEDEF_($C0350081);
+  {$EXTERNALSYM ERROR_HV_INSUFFICIENT_MEMORY_MIRRORING}
+
+//
+// MessageId: ERROR_HV_INSUFFICIENT_CONTIGUOUS_MEMORY_MIRRORING
+//
+// MessageText:
+//
+// There is not enough contiguous memory in the hypervisor pool to complete the mirroring operation.
+//
+  ERROR_HV_INSUFFICIENT_CONTIGUOUS_MEMORY_MIRRORING = _NDIS_ERROR_TYPEDEF_($C0350082);
+  {$EXTERNALSYM ERROR_HV_INSUFFICIENT_CONTIGUOUS_MEMORY_MIRRORING}
+
+//
+// MessageId: ERROR_HV_INSUFFICIENT_CONTIGUOUS_ROOT_MEMORY
+//
+// MessageText:
+//
+// There is not enough contiguous memory in the root partition's pool to complete the operation.
+//
+  ERROR_HV_INSUFFICIENT_CONTIGUOUS_ROOT_MEMORY = _NDIS_ERROR_TYPEDEF_($C0350083);
+  {$EXTERNALSYM ERROR_HV_INSUFFICIENT_CONTIGUOUS_ROOT_MEMORY}
+
+//
+// MessageId: ERROR_HV_INSUFFICIENT_ROOT_MEMORY_MIRRORING
+//
+// MessageText:
+//
+// There is not enough memory in the root partition's pool to complete the mirroring operation.
+//
+  ERROR_HV_INSUFFICIENT_ROOT_MEMORY_MIRRORING = _NDIS_ERROR_TYPEDEF_($C0350084);
+  {$EXTERNALSYM ERROR_HV_INSUFFICIENT_ROOT_MEMORY_MIRRORING}
+
+//
+// MessageId: ERROR_HV_INSUFFICIENT_CONTIGUOUS_ROOT_MEMORY_MIRRORING
+//
+// MessageText:
+//
+// There is not enough contiguous memory in the root partition's pool to complete the mirroring operation.
+//
+  ERROR_HV_INSUFFICIENT_CONTIGUOUS_ROOT_MEMORY_MIRRORING = _NDIS_ERROR_TYPEDEF_($C0350085);
+  {$EXTERNALSYM ERROR_HV_INSUFFICIENT_CONTIGUOUS_ROOT_MEMORY_MIRRORING}
+
+//
 // MessageId: ERROR_HV_NOT_PRESENT
 //
 // MessageText:
@@ -57955,6 +58290,7 @@ const
 //
   ERROR_HV_NOT_PRESENT                = _NDIS_ERROR_TYPEDEF_($C0351000);
   {$EXTERNALSYM ERROR_HV_NOT_PRESENT}
+
 
 //
 // Virtualization error codes - these codes are used by the Virtualization Infrastructure Driver (VID) and other components
@@ -58381,6 +58717,67 @@ const
 //
   ERROR_VID_VTL_ACCESS_DENIED         = _NDIS_ERROR_TYPEDEF_($C037002A);
   {$EXTERNALSYM ERROR_VID_VTL_ACCESS_DENIED}
+
+//
+// MessageId: ERROR_VID_INSUFFICIENT_RESOURCES_RESERVE
+//
+// MessageText:
+//
+// Failed to allocate backing memory due to insufficient memory resources.
+//
+  ERROR_VID_INSUFFICIENT_RESOURCES_RESERVE = _NDIS_ERROR_TYPEDEF_($C037002B);
+  {$EXTERNALSYM ERROR_VID_INSUFFICIENT_RESOURCES_RESERVE}
+
+//
+// MessageId: ERROR_VID_INSUFFICIENT_RESOURCES_PHYSICAL_BUFFER
+//
+// MessageText:
+//
+// Failed to allocate memory for the physical buffer used to back certain internal structures.
+//
+  ERROR_VID_INSUFFICIENT_RESOURCES_PHYSICAL_BUFFER = _NDIS_ERROR_TYPEDEF_($C037002C);
+  {$EXTERNALSYM ERROR_VID_INSUFFICIENT_RESOURCES_PHYSICAL_BUFFER}
+
+//
+// MessageId: ERROR_VID_INSUFFICIENT_RESOURCES_HV_DEPOSIT
+//
+// MessageText:
+//
+// Failed to allocate memory to be deposited in the hypervisor.
+//
+  ERROR_VID_INSUFFICIENT_RESOURCES_HV_DEPOSIT = _NDIS_ERROR_TYPEDEF_($C037002D);
+  {$EXTERNALSYM ERROR_VID_INSUFFICIENT_RESOURCES_HV_DEPOSIT}
+
+//
+// MessageId: ERROR_VID_MEMORY_TYPE_NOT_SUPPORTED
+//
+// MessageText:
+//
+// Memory type not supported for requested operation.
+//
+  ERROR_VID_MEMORY_TYPE_NOT_SUPPORTED = _NDIS_ERROR_TYPEDEF_($C037002E);
+  {$EXTERNALSYM ERROR_VID_MEMORY_TYPE_NOT_SUPPORTED}
+
+//
+// MessageId: ERROR_VID_INSUFFICIENT_RESOURCES_WITHDRAW
+//
+// MessageText:
+//
+// Failed to withdraw memory.
+//
+  ERROR_VID_INSUFFICIENT_RESOURCES_WITHDRAW= _NDIS_ERROR_TYPEDEF_($C037002F);
+  {$EXTERNALSYM ERROR_VID_INSUFFICIENT_RESOURCES_WITHDRAW}
+
+//
+// MessageId: ERROR_VID_PROCESS_ALREADY_SET
+//
+// MessageText:
+//
+// The process has already been set.
+//
+  ERROR_VID_PROCESS_ALREADY_SET       = _NDIS_ERROR_TYPEDEF_($C0370030);
+  {$EXTERNALSYM ERROR_VID_PROCESS_ALREADY_SET}
+
 
 //
 // Host compute service errors ($0100-$01ff)
@@ -58898,6 +59295,16 @@ const
   HCS_E_SYSTEM_NOT_CONFIGURED_FOR_OPERATION = HRESULT($80370120);
   {$EXTERNALSYM HCS_E_SYSTEM_NOT_CONFIGURED_FOR_OPERATION}
 
+//
+// MessageId: HCS_E_OPERATION_ALREADY_CANCELLED
+//
+// MessageText:
+//
+// The operation has already been cancelled.
+//
+  HCS_E_OPERATION_ALREADY_CANCELLED = HRESULT($80370121);
+  {$EXTERNALSYM HCS_E_OPERATION_ALREADY_CANCELLED}
+
 
 //
 // Virtual networking errors ($0200-$02ff)
@@ -59176,6 +59583,20 @@ const
 //
   VM_SAVED_STATE_DUMP_E_VP_VTL_NOT_ENABLED = HRESULT($C0370509);
   {$EXTERNALSYM VM_SAVED_STATE_DUMP_E_VP_VTL_NOT_ENABLED}
+
+//
+// DM / Resize related error codes ($0600-$06ff)
+//
+
+//
+// MessageId: ERROR_DM_OPERATION_LIMIT_EXCEEDED
+//
+// MessageText:
+//
+// The attempted DM / resize operation exceeds the supported size.
+//
+  ERROR_DM_OPERATION_LIMIT_EXCEEDED = HRESULT($C0370600);
+  {$EXTERNALSYM ERROR_DM_OPERATION_LIMIT_EXCEEDED}
 
 
 //
@@ -63903,6 +64324,16 @@ const
   ERROR_SPACES_CACHE_FULL             = HRESULT($80E70026);
   {$EXTERNALSYM ERROR_SPACES_CACHE_FULL}
 
+//
+// MessageId: ERROR_SPACES_REPAIR_IN_PROGRESS
+//
+// MessageText:
+//
+// Repair is in progress.
+//
+  ERROR_SPACES_REPAIR_IN_PROGRESS = HRESULT($80E70027);
+  {$EXTERNALSYM ERROR_SPACES_REPAIR_IN_PROGRESS}
+
 
 //
 // Volsnap errors
@@ -64643,6 +65074,22 @@ const
 //
   DXGI_ERROR_ALREADY_EXISTS           = HRESULT($887A0036);
   {$EXTERNALSYM DXGI_ERROR_ALREADY_EXISTS}
+
+
+//
+// DXGI errors that are produced by the DDisplay
+//
+
+//
+// MessageId: DXGI_ERROR_MPO_UNPINNED
+//
+// MessageText:
+//
+// The allocation of the MPO plane has been unpinned
+//
+  DXGI_ERROR_MPO_UNPINNED = HRESULT($887A0064);
+  {$EXTERNALSYM DXGI_ERROR_MPO_UNPINNED}
+
 
 
 //
@@ -71789,6 +72236,15 @@ const
   IORING_E_CORRUPT                    = HRESULT($80460007);
   {$EXTERNALSYM IORING_E_CORRUPT}
 
+//
+// MessageId: IORING_E_COMPLETION_QUEUE_TOO_FULL
+//
+// MessageText:
+//
+// The completion queue does not have enough free space, to post completions, for all entries being submitted.
+//
+  IORING_E_COMPLETION_QUEUE_TOO_FULL = HRESULT($80460008);
+  {$EXTERNALSYM IORING_E_COMPLETION_QUEUE_TOO_FULL}
 
 
   // Additional Prototypes for ALL interfaces

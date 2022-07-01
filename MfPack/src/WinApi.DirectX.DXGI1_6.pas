@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 // Description: Microsoft DirectX Graphics Infrastructure API
 //
 // Organisation: FactoryX
@@ -21,17 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: -
 //
-// Compiler version: 23 up to 34
-// SDK version: 10.0.22000.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //
@@ -126,7 +126,6 @@ const
   {$EXTERNALSYM DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE}
 
 // =============================================================================
-
 
 type
   PDXGI_ADAPTER_DESC3 = ^DXGI_ADAPTER_DESC3;
@@ -228,7 +227,7 @@ type
     function EnumAdapterByGpuPreference(Adapter: UINT;
                                         GpuPreference: DXGI_GPU_PREFERENCE;
                                         riid: TGuid;
-                                        out ppvAdapter): HResult; stdcall;
+                                        out ppvAdapter: Pointer): HResult; stdcall;
 
   end;
   IID_IDXGIFactory6 = IDXGIFactory6;
@@ -252,13 +251,34 @@ type
   IID_IDXGIFactory7 = IDXGIFactory7;
   {$EXTERNALSYM IID_IDXGIFactory7}
 
-//--------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+// if (NTDDI_VERSION >= NTDDI_WIN10_NI)
+
+  // Disables v-blank virtualization for the process.
+  // This virtualization is used by the dynamic refresh rate (DRR) feature by default for
+  // all swap chains to maintain a steady virtualized present rate and v-blank cadence from
+  // IDXGIOutput.WaitForVBlank.
+  // By disabling virtualization, these APIs will see the changing refresh rate.
+  function DXGIDisableVBlankVirtualization(): HResult; stdcall;
+
+// endif (NTDDI_VERSION >= NTDDI_WIN10_NI)
+
 
   // Additional Prototypes for ALL interfaces
 
   // End of Additional Prototypes
 
 implementation
+
+const
+  DXGI1_6lib = 'dxgi.dll';
+
+{$WARN SYMBOL_PLATFORM OFF}
+
+  function DXGIDisableVBlankVirtualization; external DXGI1_6lib name 'DXGIDisableVBlankVirtualization' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+
+{$WARN SYMBOL_PLATFORM ON}
 
   // Implement Additional functions here.
 

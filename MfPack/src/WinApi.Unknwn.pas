@@ -10,7 +10,7 @@
 // Release date: 08-07-2012
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 2000 Pro or later.
@@ -32,11 +32,11 @@
 //          use the System.IUnknown interface.
 // 
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: -
 //
-// Compiler version: 23 up to 34
-// SDK version: 10.0.22000.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //
@@ -126,7 +126,7 @@ type
 //  IUnknown = interface
 //  ['{00000000-0000-0000-C000-000000000046}']
 //    function QueryInterface(const riid: REFIID;
-//                            out ppvObject): HResult; stdcall;
+//                            out ppvObject: Pointer): HResult; stdcall;
     // Parameters
     //  riid [in]
     //    The identifier of the interface being requested.
@@ -207,7 +207,7 @@ type
   ['{00000001-0000-0000-C000-000000000046}']
     function CreateInstance(const pUnkOuter: IUnknown;
                             const riid: REFIID;
-                            out ppvObject): HResult; stdcall;
+                            out ppvObject: Pointer): HResult; stdcall;
 
     function LockServer(fLock: BOOL): HResult; stdcall;
 

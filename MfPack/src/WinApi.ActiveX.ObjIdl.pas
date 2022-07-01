@@ -10,7 +10,7 @@
 // Release date: 13-02-2016
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 // Description: Variant and PropVariant helpers.
 //
 // Organisation: FactoryX
@@ -21,22 +21,22 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8.1 or later.
 //
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: -
 //
-// Compiler version: 23 up to 34
-// SDK version: 10.0.22000.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //
 //==============================================================================
-// Source: ObjIdl.h
+// Source: ObjIdl.idl
 //
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //==============================================================================
@@ -144,6 +144,7 @@ type
   LPMALLOCSPY = ^IMallocSpy;
   {$EXTERNALSYM LPMALLOCSPY}
   IMallocSpy = interface;
+  {$EXTERNALSYM IMallocSpy}
 
   PIBindCtx = ^IBindCtx;
   LPBC = ^IBindCtx;
@@ -1693,6 +1694,9 @@ type
   end;
   IID_IApartmentShutdown = IApartmentShutdown;
   {$EXTERNALSYM IID_IApartmentShutdown}
+
+
+
 
 
   // Additional Prototypes for ALL interfaces

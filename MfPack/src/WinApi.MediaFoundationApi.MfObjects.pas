@@ -10,7 +10,7 @@
 // Release date: 29-06-2012
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or higher.
@@ -34,7 +34,7 @@
 //         Fields with a Common Type Specification.
 //
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -1142,7 +1142,7 @@ type
 
     function GetUnknown(const guidKey: TGUID;
                         const riid: REFIID;
-                        out ppv): HResult; stdcall;
+                        out ppv: LPVOID): HResult; stdcall;
 
     function SetItem(const guidKey: TGUID;
                      const Value: PROPVARIANT): HResult; stdcall;
@@ -1758,7 +1758,7 @@ type
     //     Will contain the requested interface
     // </param>
     function ActivateObject(const riid: REFIID;
-                            out ppv: Pointer): HResult; stdcall;
+                            out ppv: LPVOID): HResult; stdcall;
 
     // <summary>
     //     Shuts down the internal represented object

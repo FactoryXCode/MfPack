@@ -10,7 +10,7 @@
 // Release date: 04-05-2012
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 // Description: AudioClient API interface definition.
 //
 // Organisation: FactoryX
@@ -21,17 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: -
 //
-// Compiler version: 23 up to 34
-// SDK version: 10.0.22000.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //
@@ -65,6 +65,7 @@ interface
 
 uses
   {WinApi}
+  WinApi.Windows,
   WinApi.WinApiTypes,
   WinApi.WinError,
   WinApi.WinMM.MMReg,  // for WAVEFORMATEX
@@ -291,8 +292,7 @@ type
     //
     //  StreamFlags - [in]
     //    Optional flags that can be specified to control stream creation.
-    //
-    //    Possible flags are:
+    //    Possible flags include:
     //
     //    AUDCLNT_STREAMFLAGS_CROSSPROCESS - Treats a non-NULL audio session guid specified for this stream as a
     //    cross-process session, for purposes of volume and policy control. Otherwise, the default is for audio
@@ -305,6 +305,8 @@ type
     //
     //    AUDCLNT_STREAMFLAGS_EVENTCALLBACK - specifies that a client will supply an event handle
     //    to be signaled for "pull model" render or capture.
+    //
+    //     For a complete list of flags, see WinApi.CoreAudio.AudioSessionTypes.pas
     //
     //  hnsBufferDuration - [in]
     //    Duration to use for the buffer that the audio application will
@@ -678,17 +680,31 @@ type
     //
     // Return values:
     //
-    //    S_OK if successful, failure otherwise.
-    //    AUDCLNT_E_NOT_INITIALIZED if audio stream hasn't been successfully initialized.
-    //    AUDCLNT_E_NOT_STOPPED if audio stream hasn't been stopped.
-    //    AUDCLNT_E_DEVICE_INVALIDATED, if WAS device format was changed or device was removed.
-    //    AUDCLNT_E_EVENTHANDLE_NOT_EXPECTED, if Initialize was not called with the
-    //                                          AUDCLNT_STREAMFLAGS_EVENTCALLBACK flag
+    //      S_OK if successful, failure otherwise.
+    //      AUDCLNT_E_NOT_INITIALIZED if audio stream hasn't been successfully initialized.
+    //      AUDCLNT_E_NOT_STOPPED if audio stream hasn't been stopped.
+    //      AUDCLNT_E_DEVICE_INVALIDATED, if WAS device format was changed or device was removed.
+    //      AUDCLNT_E_WRONG_ENDPOINT_TYPE if the service is recognized but not applicable to the audio endpoint type
+    //      E_INVALIDARG if the service is not supported by this audio stream based on how the stream was initialized
+    //      E_NOINTERFACE if the service is not implemented
     //
     // Remarks:
     //
-    //    The event handle should be "auto reset" and the client is responsible for closing / freeing
-    //    this event handle
+    //  The services supported via the method include:
+    //
+    //  IAudioRenderClient
+    //  IAudioCaptureClient
+    //  IAudioClock
+    //  IAudioClockAdjustment
+    //  IAudioSessionControl
+    //  IAudioStreamVolume
+    //  ISimpleAudioVolume
+    //  IChannelAudioVolume
+    //  IAudioAmbisonicsControl
+    //  IAudioClientDuckingControl
+    //  IAudioEffectsManager
+    //  IAudioViewManagerService
+    //  IAcousticEchoCancellationControl
     //
 
     function GetService(const riid: TGUID;
@@ -1487,6 +1503,31 @@ type
   {$EXTERNALSYM IID_IAudioClientDuckingControl}
 
 
+  // Interface IAudioViewManagerService
+  // ==================================
+  // Description: IAudioViewManagerService interface
+  // Use IAudioClient.GetService to obtain this interface.
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioViewManagerService);'}
+  {$EXTERNALSYM IAudioViewManagerService}
+  IAudioViewManagerService = interface(IUnknown)
+  ['{A7A7EF10-1F49-45E0-AD35-612057CC8F74}']
+  //-------------------------------------------------------------------------
+  // Description:
+  //
+  //     Associate the audio stream to a given HWND
+  //
+  // Parameters:
+  //
+  //     hwnd - [in] HWND to be associated with the audio stream
+  //
+  //
+    function SetAudioStreamWindow({in} const _hwnd: HWND): HResult; stdcall;
+  end;
+  IID_IAudioViewManagerService = IAudioViewManagerService;
+  {$EXTERNALSYM IID_IAudioViewManagerService}
+
+
   AUDIO_EFFECT_STATE = (
                         AUDIO_EFFECT_STATE_OFF = 0,
                         AUDIO_EFFECT_STATE_ON
@@ -1889,6 +1930,21 @@ type
   {$EXTERNALSYM IID_IAudioAmbisonicsControl}
 
 
+  // Interface IAcousticEchoCancellationControl
+  //===========================================
+  // Description: IAcousticEchoCancellationControl interface
+  // Use IAudioClient.GetService to obtain this interface.
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAcousticEchoCancellationControl);'}
+  {$EXTERNALSYM IAcousticEchoCancellationControl}
+  IAcousticEchoCancellationControl = interface(IUnknown)
+  ['{f4ae25b5-aaa3-437d-b6b3-dbbe2d0e9549}']
+
+    function SetEchoCancellationRenderEndpoint(endpointId: PWideChar): HResult; stdcall;
+  end;
+
+
+
 const
 
   // error codes
@@ -1984,6 +2040,7 @@ const
   {See: IAudioSessionControl2 interface}
   AUDCLNT_S_NO_SINGLE_PROCESS             = $8889000D;  //AUDCLNT_SUCCESS($00D)
   {$EXTERNALSYM AUDCLNT_S_NO_SINGLE_PROCESS}
+
 
 
   // Additional Prototypes for ALL interfaces

@@ -1,4 +1,4 @@
-package MfPackX311;
+package MfPackX312;
 
 {$R *.res}
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
@@ -198,6 +198,7 @@ contains
   WinApi.MediaFoundationApi.MfVirtualCamera in '..\src\WinApi.MediaFoundationApi.MfVirtualCamera.pas',
   WinApi.MediaFoundationApi.ICodecApi in '..\src\WinApi.MediaFoundationApi.ICodecApi.pas',
   System.Services.AtlThunk in '..\src\System.Services.AtlThunk.pas',
-  System.Services.Dbt in '..\src\System.Services.Dbt.pas';
+  System.Services.Dbt in '..\src\System.Services.Dbt.pas',
+  WinApi.CoreAudioApi.AudioEngineExtensionApo in '..\src\WinApi.CoreAudioApi.AudioEngineExtensionApo.pas';
 
 end.

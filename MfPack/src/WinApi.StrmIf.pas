@@ -10,7 +10,7 @@
 // Release date: 12/12/2015
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 // Description: ActiveMovie interface definitions.
 //              also included with DirectShow.pas.
 //
@@ -22,18 +22,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
-// 11/01/2022 Tony                Fixed IMediaSample2 interface
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 // 
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: -
 //
-// Compiler version: 23 up to 34
-// SDK version: 10.0.22000.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //
@@ -3891,7 +3890,7 @@ type
     AM_INTF_SEARCH_INPUT_PIN   = $1,
     AM_INTF_SEARCH_OUTPUT_PIN  = $2,
     AM_INTF_SEARCH_FILTER      = $4
-  );
+    );
   {$EXTERNALSYM _AM_INTF_SEARCH_FLAGS}
   AM_INTF_SEARCH_FLAGS = _AM_INTF_SEARCH_FLAGS;
   {$EXTERNALSYM AM_INTF_SEARCH_FLAGS}
@@ -3907,8 +3906,8 @@ type
 
       function FindUpstreamInterface(pPin: IPin;
                                      const riid: TGUID;
-                                     out ppvInterface;
-                                     dwFlags: DWORD { AM_INTF_SEARCH_FLAGS }): HResult; stdcall;
+                                     out ppvInterface: Pointer;
+                                     dwFlags: DWord {AM_INTF_SEARCH_FLAGS}): HResult; stdcall;
 
       function SyncUsingStreamOffset(bUseStreamOffset: BOOL): HResult; stdcall;
 
@@ -6309,7 +6308,7 @@ type
       function GetFiltergraph(out ppGB: IGraphBuilder): HResult; stdcall;
 
       function GetDvdInterface(const riid: REFIID;
-                               out ppvIF): HResult; stdcall;
+                               out ppvIF: Pointer): HResult; stdcall;
 
       function RenderDvdVideoVolume(const lpcwszPathName: LPCWSTR;
                                     dwFlags: DWORD;
@@ -6362,8 +6361,8 @@ type
   PAM_OVERLAY_NOTIFY_FLAGS = ^_AM_OVERLAY_NOTIFY_FLAGS;
   _AM_OVERLAY_NOTIFY_FLAGS = (
     AM_OVERLAY_NOTIFY_VISIBLE_CHANGE  = $1,
-    AM_OVERLAY_NOTIFY_SOURCE_CHANGE    = $2,
-    AM_OVERLAY_NOTIFY_DEST_CHANGE      = $4);
+    AM_OVERLAY_NOTIFY_SOURCE_CHANGE   = $2,
+    AM_OVERLAY_NOTIFY_DEST_CHANGE     = $4);
   {$EXTERNALSYM _AM_OVERLAY_NOTIFY_FLAGS}
   AM_OVERLAY_NOTIFY_FLAGS = _AM_OVERLAY_NOTIFY_FLAGS;
   {$EXTERNALSYM AM_OVERLAY_NOTIFY_FLAGS}

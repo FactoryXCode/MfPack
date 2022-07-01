@@ -10,7 +10,7 @@
 // Release date: 04-05-2012
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 // Description: IAudioMediaType definition.
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -33,11 +33,11 @@
 //          Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: -
 //
-// Compiler version: 23 up to 34
-// SDK version: 10.0.22000.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //
@@ -90,52 +90,52 @@ uses
 
 const
 
-	// Flag for clients of IControlChangeNotify.OnNotify to allow those clients to
-	// identify hardware initiated notifications.
-	DEVTOPO_HARDWARE_INITIATED_EVENTCONTEXT = ' draH ';
-	{$EXTERNALSYM DEVTOPO_HARDWARE_INITIATED_EVENTCONTEXT}
-	EVENTCONTEXT_VOLUMESLIDER 			: TGUID = '{E2C2E9DE-09B1-4B04-84E5-07931225EE04}';
-	{$EXTERNALSYM EVENTCONTEXT_VOLUMESLIDER}
+  // Flag for clients of IControlChangeNotify.OnNotify to allow those clients to
+  // identify hardware initiated notifications.
+  DEVTOPO_HARDWARE_INITIATED_EVENTCONTEXT = ' draH ';
+  {$EXTERNALSYM DEVTOPO_HARDWARE_INITIATED_EVENTCONTEXT}
+  EVENTCONTEXT_VOLUMESLIDER       : TGUID = '{E2C2E9DE-09B1-4B04-84E5-07931225EE04}';
+  {$EXTERNALSYM EVENTCONTEXT_VOLUMESLIDER}
 
 
 // Enum Structs
 type
 
-	PKSDATAFORMAT = ^KSDATAFORMAT;
-	KSDATAFORMAT = record
-		FormatSize: ULONG;
-		Flags: ULONG;
-		SampleSize: ULONG;
+  PKSDATAFORMAT = ^KSDATAFORMAT;
+  KSDATAFORMAT = record
+    FormatSize: ULONG;
+    Flags: ULONG;
+    SampleSize: ULONG;
     Reserved: ULONG;
-		MajorFormat: TGUID;
-		SubFormat: TGUID;
-		Specifier: TGUID;
+    MajorFormat: TGUID;
+    SubFormat: TGUID;
+    Specifier: TGUID;
   end;
-	{$EXTERNALSYM KSDATAFORMAT}
+  {$EXTERNALSYM KSDATAFORMAT}
 
 
 // Is also defined in directShow9.pas
 {$IFDEF DEFINE_KSIDENTIFIER}
   __MIDL___MIDL_itf_devicetopology_0000_0000_0001 = record
-		case Integer of
+    case Integer of
       0: (Set_  : TGUID;
           Id    : ULONG;
           Flags : ULONG);
       1: (Alignment : int64);
-	end;
+  end;
   {$EXTERNALSYM __MIDL___MIDL_itf_devicetopology_0000_0000_0001}
   KSIDENTIFIER = __MIDL___MIDL_itf_devicetopology_0000_0000_0001
   {$EXTERNALSYM KSIDENTIFIER}
-	PKSIDENTIFIER = ^KSIDENTIFIER;
-	KSPROPERTY = KSIDENTIFIER;
-	{$EXTERNALSYM KSPROPERTY}
-	PKSPROPERTY = ^KSPROPERTY;
-	KSMETHOD = KSIDENTIFIER;
-	{$EXTERNALSYM KSMETHOD}
-	PKSMETHOD = ^KSMETHOD;
-	KSEVENT = KSIDENTIFIER;
-	{$EXTERNALSYM KSEVENT}
-	PKSEVENT = ^KSEVENT;
+  PKSIDENTIFIER = ^KSIDENTIFIER;
+  KSPROPERTY = KSIDENTIFIER;
+  {$EXTERNALSYM KSPROPERTY}
+  PKSPROPERTY = ^KSPROPERTY;
+  KSMETHOD = KSIDENTIFIER;
+  {$EXTERNALSYM KSMETHOD}
+  PKSMETHOD = ^KSMETHOD;
+  KSEVENT = KSIDENTIFIER;
+  {$EXTERNALSYM KSEVENT}
+  PKSEVENT = ^KSEVENT;
 {$ENDIF}
 
   PEPcxConnectionType = ^TEPcxConnectionType;
@@ -230,12 +230,12 @@ type
   TKsjackDescription = __MIDL___MIDL_itf_devicetopology_0000_0000_0009;
 
 
-	PLuid = ^LUID;
-	LUID = record
-		LowPart: DWORD;
-		HighPart: LONG;
-	end;
-	{$EXTERNALSYM LUID}
+  PLuid = ^LUID;
+  LUID = record
+    LowPart: DWORD;
+    HighPart: LONG;
+  end;
+  {$EXTERNALSYM LUID}
 
 
   PKsjackSinkConnectiontype = ^TKsjackSinkConnectiontype;
@@ -253,20 +253,20 @@ type
 
 
   PKSJACK_SINK_INFORMATION = ^KSJACK_SINK_INFORMATION;
-	_tagKSJACK_SINK_INFORMATION = record
-		ConnType: KSJACK_SINK_CONNECTIONTYPE;   // Connection Type
-		ManufacturerId: WORD;                   // Sink manufacturer ID
-		ProductId: WORD;                        // Sink product ID
-		AudioLatency: WORD;                     // Sink audio latency
+  _tagKSJACK_SINK_INFORMATION = record
+    ConnType: KSJACK_SINK_CONNECTIONTYPE;   // Connection Type
+    ManufacturerId: WORD;                   // Sink manufacturer ID
+    ProductId: WORD;                        // Sink product ID
+    AudioLatency: WORD;                     // Sink audio latency
     HDCPCapable: BOOL;                      // HDCP Support
     AICapable: BOOL;                        // ACP Packet, ISRC1, and ISRC2 Support
     SinkDescriptionLength: UCHAR;           // Monitor/Sink name length
-		SinkDescription: array[0..31] of WideChar;  // Monitor/Sink name
-		PortId: LUID;                           // Video port identifier
+    SinkDescription: array[0..31] of WideChar;  // Monitor/Sink name
+    PortId: LUID;                           // Video port identifier
   end;
-	{$EXTERNALSYM _tagKSJACK_SINK_INFORMATION}
-	KSJACK_SINK_INFORMATION = _tagKSJACK_SINK_INFORMATION;
-	{$EXTERNALSYM KSJACK_SINK_INFORMATION}
+  {$EXTERNALSYM _tagKSJACK_SINK_INFORMATION}
+  KSJACK_SINK_INFORMATION = _tagKSJACK_SINK_INFORMATION;
+  {$EXTERNALSYM KSJACK_SINK_INFORMATION}
 
 
   // The KSJACK_DESCRIPTION2 structure describes an audio jack.
@@ -276,13 +276,13 @@ type
   // NOTE: This structure is also defined in MfPack.KsMedia.pas (ksmedia.h)!
   //
   PKSJACK_DESCRIPTION2 = ^KSJACK_DESCRIPTION2;
-	_tagKSJACK_DESCRIPTION2 = record
-		DeviceStateInfo: DWORD;
-		JackCapabilities: DWORD;
+  _tagKSJACK_DESCRIPTION2 = record
+    DeviceStateInfo: DWORD;
+    JackCapabilities: DWORD;
   end;
-	{$EXTERNALSYM _tagKSJACK_DESCRIPTION2}
-	KSJACK_DESCRIPTION2 = _tagKSJACK_DESCRIPTION2;
-	{$EXTERNALSYM KSJACK_DESCRIPTION2}
+  {$EXTERNALSYM _tagKSJACK_DESCRIPTION2}
+  KSJACK_DESCRIPTION2 = _tagKSJACK_DESCRIPTION2;
+  {$EXTERNALSYM KSJACK_DESCRIPTION2}
   // Members
   //  DeviceStateInfo
   //    Reserved for future use.
@@ -293,6 +293,19 @@ type
   //    MfPack.Ksmedia.pas as follows:
   //    - JACKDESC2_PRESENCE_DETECT_CAPABILITY ($00000001)
   //    - JACKDESC2_DYNAMIC_FORMAT_CHANGE_CAPABILITY ($00000002)
+
+//if (NTDDI_VERSION >= NTDDI_WIN10_NI)
+
+  _tagKSJACK_DESCRIPTION3 = record
+    ConfigId: ULONG;                // Driver defined bitmask or enum describing the current configuration, changing this value causes
+                                     // audioendpointbuilder to refresh the cache to ensure that the published endpoint matches the current config.
+  end;
+  KSJACK_DESCRIPTION3 = _tagKSJACK_DESCRIPTION3;
+  {$EXTERNALSYM KSJACK_DESCRIPTION3}
+  PKSJACK_DESCRIPTION3 = ^_tagKSJACK_DESCRIPTION3;
+  {$EXTERNALSYM PKSJACK_DESCRIPTION3}
+
+  //end NTDDI_VERSION >= NTDDI_WIN10_NI)
 
   PDataFlow = ^TDataFlow;
   {$EXTERNALSYM __MIDL___MIDL_itf_devicetopology_0000_0000_0011}
@@ -338,11 +351,11 @@ type
 
 type
 
-	// Forward declarations of interfaces defined in the type library
-	IPart = interface;
-	IControlInterface = interface;
+  // Forward declarations of interfaces defined in the type library
+  IPart = interface;
+  IControlInterface = interface;
   IDeviceTopology = interface;
-	IControlChangeNotify = interface;
+  IControlChangeNotify = interface;
 
 
   // Interfaces Type Library
@@ -351,32 +364,32 @@ type
 
   // Interface IKsControl
   // ====================
-	// This interface is deprecated as all of DirectMusic.
-	// Deprecated components are considered obsolete.
-	// NOTE: See ks.h, ksproxy.h and DirectShow9.pas
+  // This interface is deprecated as all of DirectMusic.
+  // Deprecated components are considered obsolete.
+  // NOTE: See ks.h, ksproxy.h and DirectShow9.pas
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IKsControl);'}
-	{$EXTERNALSYM IKsControl}
-	IKsControl = interface(IUnknown)
-	['{28F54685-06FD-11D2-B27A-00A0C9223196}']
-	 function KsProperty(ksProperty: PKSPROPERTY;
+  {$EXTERNALSYM IKsControl}
+  IKsControl = interface(IUnknown)
+  ['{28F54685-06FD-11D2-B27A-00A0C9223196}']
+   function KsProperty(ksProperty: PKSPROPERTY;
                        PropertyLength: ULONG;
                        var PropertyData: Pointer;
                        DataLength: UINT;
                        out BytesReturned: ULONG): HRESULT; stdcall;
 
-	 function KsMethod(Method: PKSMETHOD;
+   function KsMethod(Method: PKSMETHOD;
                      MethodLength: ULong;
                      var MethodData: Pointer;
                      DataLength: ULong;
                      out BytesReturned: ULong): HRESULT; stdcall;
 
-	 function KsEvent({OPTIONAL}Event: PKSEVENT;
+   function KsEvent({OPTIONAL}Event: PKSEVENT;
                     EventLength: ULONG;
                     var EventData: Pointer;
                     DataLength: ULONG;
                     out BytesReturned: ULONG): HRESULT; stdcall;
-	end;
+  end;
   IID_IKsControl = IKsControl;
   {$EXTERNALSYM IID_IKsControl}
 
@@ -384,31 +397,31 @@ type
   // Interface IPerChannelDbLevel
   // ============================
   // Represents a generic subunit control interface that provides per-channel control over the volume level,
-	// in decibels, of an audio stream or of a frequency band in an audio stream.
-	// A positive volume level represents gain, and a negative value represents attenuation.
-	// Clients do not call the methods in this interface directly.
-	// Instead, this interface serves as the base interface for the following interfaces, which clients do call directly:
-	// IAudioBass Interface, IAudioMidrange Interface, IAudioTreble Interface, IAudioVolumeLevel Interface.
+  // in decibels, of an audio stream or of a frequency band in an audio stream.
+  // A positive volume level represents gain, and a negative value represents attenuation.
+  // Clients do not call the methods in this interface directly.
+  // Instead, this interface serves as the base interface for the following interfaces, which clients do call directly:
+  // IAudioBass Interface, IAudioMidrange Interface, IAudioTreble Interface, IAudioVolumeLevel Interface.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IPerChannelDbLevel);'}
-	{$EXTERNALSYM IPerChannelDbLevel}
-	IPerChannelDbLevel = interface(IUnknown)
-	['{85401FD4-6DE4-4b9d-9869-2D6753A82F3C}']
-		function GetChannelCount(out pcChannels: UINT): HRESULT; stdcall;
+  {$EXTERNALSYM IPerChannelDbLevel}
+  IPerChannelDbLevel = interface(IUnknown)
+  ['{85401FD4-6DE4-4b9d-9869-2D6753A82F3C}']
+    function GetChannelCount(out pcChannels: UINT): HRESULT; stdcall;
 
-		function GetLevel(nChannel: UINT;
+    function GetLevel(nChannel: UINT;
                       out pfLevelDB: FLOAT): HRESULT; stdcall;
 
-		function GetLevelRange(nChannel: UINT;
+    function GetLevelRange(nChannel: UINT;
                            out pfMinLevelDB: FLOAT;
                            out pfMaxLevelDB: FLOAT;
                            out pfStepping: FLOAT): HRESULT; stdcall;
 
-		function SetLevel(nChannel: UINT;
+    function SetLevel(nChannel: UINT;
                       fLevelDB: FLOAT;
                       const pguidEventContext: TGUID): HRESULT; stdcall;
 
-		function SetLevelAllChannels(aLevelsDB: PFLOAT;
+    function SetLevelAllChannels(aLevelsDB: PFLOAT;
                                  cChannels: ULONG;
                                  const pguidEventContext: TGUID): HRESULT; stdcall;
     // The SetLevelAllChannels method sets the volume levels, in decibels,
@@ -427,25 +440,25 @@ type
     //  This parameter points to an event-context GUID.
 
 
-		function SetLevelUniform(fLevelDB: FLOAT;
+    function SetLevelUniform(fLevelDB: FLOAT;
                              const pguidEventContext: TGUID): HRESULT; stdcall;
 
-	end;
+  end;
   IID_IPerChannelDbLevel = IPerChannelDbLevel;
   {$EXTERNALSYM IID_IPerChannelDbLevel}
 
 
   // Interface IAudioVolumeLevel
   // ===========================
-	// Inherited members from of IPerChannelDbLevel.
-	// Those will only work, if the HARDWARE supports it!
+  // Inherited members from of IPerChannelDbLevel.
+  // Those will only work, if the HARDWARE supports it!
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioVolumeLevel);'}
   {$EXTERNALSYM IAudioVolumeLevel}
   IAudioVolumeLevel = interface(IPerChannelDbLevel)
-	['{7FB7B48F-531D-44A2-BCB3-5AD5A134B3DC}']
+  ['{7FB7B48F-531D-44A2-BCB3-5AD5A134B3DC}']
 
-	end;
+  end;
   IID_IAudioVolumeLevel = IAudioVolumeLevel;
   {$EXTERNALSYM IID_IAudioVolumeLevel}
 
@@ -455,16 +468,16 @@ type
   // Provides access to a hardware channel-configuration control.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioChannelConfig);'}
-	{$EXTERNALSYM IAudioChannelConfig}
-	IAudioChannelConfig = interface(IUnknown)
-	['{BB11C46F-EC28-493C-B88A-5DB88062CE98}']
+  {$EXTERNALSYM IAudioChannelConfig}
+  IAudioChannelConfig = interface(IUnknown)
+  ['{BB11C46F-EC28-493C-B88A-5DB88062CE98}']
 
-		function GetChannelConfig(out pdwConfig: DWord): HRESULT; stdcall;
+    function GetChannelConfig(out pdwConfig: DWord): HRESULT; stdcall;
 
-		function SetChannelConfig(dwConfig: DWord;
+    function SetChannelConfig(dwConfig: DWord;
                               const pguidEventContext: TGUID): HRESULT; stdcall;
 
-	end;
+  end;
   IID_IAudioChannelConfig = IAudioChannelConfig;
   {$EXTERNALSYM IID_IAudioChannelConfig}
 
@@ -473,15 +486,15 @@ type
   // ========================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioLoudness);'}
-	{$EXTERNALSYM IAudioLoudness}
-	IAudioLoudness = interface(IUnknown)
-	['{7D8B1437-DD53-4350-9C1B-1EE2890BD938}']
-		function GetEnabled(out pbEnabled: BOOL): HRESULT; stdcall;
+  {$EXTERNALSYM IAudioLoudness}
+  IAudioLoudness = interface(IUnknown)
+  ['{7D8B1437-DD53-4350-9C1B-1EE2890BD938}']
+    function GetEnabled(out pbEnabled: BOOL): HRESULT; stdcall;
 
-		function SetEnabled(bEnable: BOOL;
+    function SetEnabled(bEnable: BOOL;
                         const pguidEventContext: TGUID): HRESULT; stdcall;
 
-	end;
+  end;
   IID_IAudioLoudness = IAudioLoudness;
   {$EXTERNALSYM IID_IAudioLoudness}
 
@@ -492,15 +505,15 @@ type
   // Provides access to a hardware multiplexer control (input selector)
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioInputSelector);'}
-	{$EXTERNALSYM IAudioInputSelector}
-	IAudioInputSelector = interface(IUnknown)
-	['{4F03DC02-5E6E-4653-8F72-A030C123D598}']
-		function GetSelection(out pnIdSelected: UINT): HRESULT; stdcall;
+  {$EXTERNALSYM IAudioInputSelector}
+  IAudioInputSelector = interface(IUnknown)
+  ['{4F03DC02-5E6E-4653-8F72-A030C123D598}']
+    function GetSelection(out pnIdSelected: UINT): HRESULT; stdcall;
 
-		function SetSelection(nIdSelect: UINT;
+    function SetSelection(nIdSelect: UINT;
                           const pguidEventContext: TGUID): HRESULT; stdcall;
 
-	end;
+  end;
   IID_IAudioInputSelector = IAudioInputSelector;
   {$EXTERNALSYM IID_IAudioInputSelector}
 
@@ -510,48 +523,48 @@ type
   // Provides access to a hardware de-multiplexer control (output selector)
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioOutputSelector);'}
-	{$EXTERNALSYM IAudioOutputSelector}
-	IAudioOutputSelector = interface(IUnknown)
-	['{82149A85-DBA6-4487-86BB-EA8F7FEFCC71}']
-		function GetSelection(out pnIdSelected: UINT): HRESULT; stdcall;
+  {$EXTERNALSYM IAudioOutputSelector}
+  IAudioOutputSelector = interface(IUnknown)
+  ['{82149A85-DBA6-4487-86BB-EA8F7FEFCC71}']
+    function GetSelection(out pnIdSelected: UINT): HRESULT; stdcall;
 
-		function SetSelection(nIdSelect: UINT;
+    function SetSelection(nIdSelect: UINT;
                           const pguidEventContext: TGUID): HRESULT; stdcall;
 
-	end;
+  end;
   IID_IAudioOutputSelector = IAudioOutputSelector;
   {$EXTERNALSYM IID_IAudioOutputSelector}
 
 
   // Interface IAudioMute
   // ====================
-	// Also implemented in MMDEvApi
+  // Also implemented in MMDEvApi
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioMute);'}
-	{$EXTERNALSYM IAudioMute}
-	IAudioMute = interface(IUnknown)
-	['{DF45AEEA-B74A-4B6B-AFAD-2366B6AA012E}']
-		function SetMute(bMute: BOOL;
+  {$EXTERNALSYM IAudioMute}
+  IAudioMute = interface(IUnknown)
+  ['{DF45AEEA-B74A-4B6B-AFAD-2366B6AA012E}']
+    function SetMute(bMute: BOOL;
                      const pguidEventContext: TGUID): HRESULT; stdcall;
 
-		function GetMute(out pbMute: BOOL): HRESULT; stdcall;
+    function GetMute(out pbMute: BOOL): HRESULT; stdcall;
 
-	end;
+  end;
   IID_IAudioMute = IAudioMute;
   {$EXTERNALSYM IID_IAudioMute}
 
 
   // Interface IAudioBass
   // ====================
-	// Inherited member from of IPerChannelDbLevel.
-	// Those will only work, if the HARDWARE supports it!
+  // Inherited member from of IPerChannelDbLevel.
+  // Those will only work, if the HARDWARE supports it!
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioBass);'}
-	{$EXTERNALSYM IAudioBass}
-	IAudioBass = interface(IPerChannelDbLevel)
-	['{A2B1A1D9-4DB3-425D-A2B2-BD335CB3E2E5}']
+  {$EXTERNALSYM IAudioBass}
+  IAudioBass = interface(IPerChannelDbLevel)
+  ['{A2B1A1D9-4DB3-425D-A2B2-BD335CB3E2E5}']
 
-	end;
+  end;
   IID_IAudioBass = IAudioBass;
   {$EXTERNALSYM IID_IAudioBass}
 
@@ -559,14 +572,14 @@ type
   // Interface IAudioMidrange
   // ========================
   // Inherited member from of IPerChannelDbLevel.
-	// Those will only work, if the HARDWARE supports it!
+  // Those will only work, if the HARDWARE supports it!
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioMidrange);'}
-	{$EXTERNALSYM IAudioMidrange}
-	IAudioMidrange = interface(IPerChannelDbLevel)
-	['{5E54B6D7-B44B-40D9-9A9E-E691D9CE6EDF}']
+  {$EXTERNALSYM IAudioMidrange}
+  IAudioMidrange = interface(IPerChannelDbLevel)
+  ['{5E54B6D7-B44B-40D9-9A9E-E691D9CE6EDF}']
 
-	end;
+  end;
   IID_IAudioMidrange = IAudioMidrange;
   {$EXTERNALSYM IID_IAudioMidrange}
 
@@ -574,14 +587,14 @@ type
   // Interface IAudioTreble
   // ======================
   // Inherited member from of IPerChannelDbLevel.
-	// Those will only work, if the HARDWARE supports it!
+  // Those will only work, if the HARDWARE supports it!
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(xxx);'}
-	{$EXTERNALSYM IAudioTreble}
-	IAudioTreble = interface(IPerChannelDbLevel)
-	['{0A717812-694E-4907-B74B-BAFA5CFDCA7B}']
+  {$EXTERNALSYM IAudioTreble}
+  IAudioTreble = interface(IPerChannelDbLevel)
+  ['{0A717812-694E-4907-B74B-BAFA5CFDCA7B}']
 
-	end;
+  end;
   IID_IAudioTreble = IAudioTreble;
   {$EXTERNALSYM IID_IAudioTreble}
 
@@ -591,16 +604,16 @@ type
   // Provides access to a hardware automatic gain control (AGC)
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioAutoGainControl);'}
-	{$EXTERNALSYM IAudioAutoGainControl}
-	IAudioAutoGainControl = interface(IUnknown)
-	['{85401FD4-6DE4-4b9d-9869-2D6753A82F3C}']
+  {$EXTERNALSYM IAudioAutoGainControl}
+  IAudioAutoGainControl = interface(IUnknown)
+  ['{85401FD4-6DE4-4b9d-9869-2D6753A82F3C}']
 
-		function GetEnabled(out pbEnabled: BOOL): HRESULT; stdcall;
+    function GetEnabled(out pbEnabled: BOOL): HRESULT; stdcall;
 
-		function SetEnabled(bEnable: BOOL;
+    function SetEnabled(bEnable: BOOL;
                         const pguidEventContext: TGUID): HRESULT; stdcall;
 
-	end;
+  end;
   IID_IAudioAutoGainControl = IAudioAutoGainControl;
   {$EXTERNALSYM IID_IAudioAutoGainControl}
 
@@ -608,20 +621,20 @@ type
   // Interface IAudioPeakMeter
   // =========================
   // Provides access to a hardware peak-meter control.
-	// When there is no hardware peakmeter, use: MMDevApi.IAudioMeterInformation,
+  // When there is no hardware peakmeter, use: MMDevApi.IAudioMeterInformation,
   // that supports both hardware and software.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioPeakMeter);'}
-	{$EXTERNALSYM IAudioPeakMeter}
-	IAudioPeakMeter = interface(IUnknown)
-	['{DD79923C-0599-45e0-B8B6-C8DF7DB6E796}']
+  {$EXTERNALSYM IAudioPeakMeter}
+  IAudioPeakMeter = interface(IUnknown)
+  ['{DD79923C-0599-45e0-B8B6-C8DF7DB6E796}']
 
-		function GetChannelCount(out pcChannels: UINT): HRESULT; stdcall;
+    function GetChannelCount(out pcChannels: UINT): HRESULT; stdcall;
 
-		function GetLevel(nChannel: UINT;
+    function GetLevel(nChannel: UINT;
                       out pfLevel: FLOAT): HRESULT; stdcall;
 
-	end;
+  end;
   IID_IAudioPeakMeter = IAudioPeakMeter;
   {$EXTERNALSYM IID_IAudioPeakMeter}
 
@@ -632,9 +645,9 @@ type
   // Activatable on IPart interface on an KS Filter devicetopology object.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IDeviceSpecificProperty);'}
-	{$EXTERNALSYM IDeviceSpecificProperty}
-	IDeviceSpecificProperty = interface(IUnknown)
-	['{3B22BCBF-2586-4af0-8583-205D391B807C}']
+  {$EXTERNALSYM IDeviceSpecificProperty}
+  IDeviceSpecificProperty = interface(IUnknown)
+  ['{3B22BCBF-2586-4af0-8583-205D391B807C}']
 
     function GetType(out pVType: TVarType): HRESULT; stdcall;
 
@@ -645,94 +658,148 @@ type
                       cbValue: Dword;
                       const pguidEventContext: LPCGUID): HRESULT; stdcall;
 
-		function Get4BRange(out plMin: LONG;
+    function Get4BRange(out plMin: LONG;
                         out plMax: LONG;
                         out plStepping: LONG): HRESULT; stdcall;
 
-	end;
+  end;
   IID_IDeviceSpecificProperty = IDeviceSpecificProperty;
   {$EXTERNALSYM IID_IDeviceSpecificProperty}
 
 
   // Interface IKsFormatSupport
   // ==========================
-	// Provides information about the audio data formats that are supported by a
+  // Provides information about the audio data formats that are supported by a
   // software-configured I/O connection
-	// (typically a DMA channel) between an audio adapter device and system memory.
+  // (typically a DMA channel) between an audio adapter device and system memory.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IKsFormatSupport);'}
-	{$EXTERNALSYM IKsFormatSupport}
-	IKsFormatSupport = interface(IUnknown)
-	['{3CB4A69D-BB6F-4D2B-95B7-452D2C155DB5}']
+  {$EXTERNALSYM IKsFormatSupport}
+  IKsFormatSupport = interface(IUnknown)
+  ['{3CB4A69D-BB6F-4D2B-95B7-452D2C155DB5}']
 
-		function GetDevicePreferredFormat(out ppKsFormat: KSDATAFORMAT): HRESULT; stdcall;
+    function GetDevicePreferredFormat(out ppKsFormat: KSDATAFORMAT): HRESULT; stdcall;
     // The GetDevicePreferredFormat method gets the preferred audio stream format for the connection.
-		// cbFormat = the size in bytes of the buffer that contains the format specifier.
+    // cbFormat = the size in bytes of the buffer that contains the format specifier.
 
-		function IsFormatSupported(pKsFormat: KSDATAFORMAT;
+    function IsFormatSupported(pKsFormat: KSDATAFORMAT;
                                cbFormat: DWord;
                                out pbSupported: BOOL): HRESULT; stdcall;
     // The IsFormatSupported method indicates whether the audio endpoint device supports the specified audio stream format.
 
-	end;
+  end;
   IID_IKsFormatSupport = IKsFormatSupport;
   {$EXTERNALSYM IID_IKsFormatSupport}
 
 
   // Interface IKsJackDescription
   // ============================
-	// provides information about the jacks or internal connectors that provide a physical connection between
-	// a device on an audio adapter and an external or internal endpoint device (for example, a microphone or CD player).
-	// This interface is implemented < Windows 7!
+  // provides information about the jacks or internal connectors that provide a physical connection between
+  // a device on an audio adapter and an external or internal endpoint device (for example, a microphone or CD player).
+  // This interface is implemented < Windows 7!
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IKsJackDescription);'}
-	{$EXTERNALSYM IKsJackDescription}
-	IKsJackDescription = interface(IUnknown)
-	['{82149A85-DBA6-4487-86BB-EA8F7FEFCC71}']
+  {$EXTERNALSYM IKsJackDescription}
+  IKsJackDescription = interface(IUnknown)
+  ['{82149A85-DBA6-4487-86BB-EA8F7FEFCC71}']
 
-		function GetJackCount(out pcJacks: UINT): HRESULT; stdcall;
+    function GetJackCount(out pcJacks: UINT): HRESULT; stdcall;
 
-		function GetJackDescription(nJack: UINT;
+    function GetJackDescription(nJack: UINT;
                                 out pDescription: KSJACK_DESCRIPTION): HRESULT; stdcall;
 
-	end;
+  end;
   IID_IKsJackDescription = IKsJackDescription;
   {$EXTERNALSYM IID_IKsJackDescription}
 
 
   // Interface IKsJackDescription2
   // =============================
-	// provides information about the jacks or internal connectors that provide a physical connection between
-	// a device on an audio adapter and an external or internal endpoint device (for example, a microphone or CD player).
-	// This interface is implemented >= Windows 7!
+  // provides information about the jacks or internal connectors that provide a physical connection between
+  // a device on an audio adapter and an external or internal endpoint device (for example, a microphone or CD player).
+  // This interface is implemented >= Windows 7!
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IKsJackDescription2);'}
-	{$EXTERNALSYM IKsJackDescription2}
-	IKsJackDescription2 = interface(IUnknown)
-	['{478F3A9B-E0C9-4827-9228-6F5505FFE76A}']
+  {$EXTERNALSYM IKsJackDescription2}
+  IKsJackDescription2 = interface(IUnknown)
+  ['{478F3A9B-E0C9-4827-9228-6F5505FFE76A}']
 
-		function GetJackCount(out pcJacks: UINT): HRESULT; stdcall;
+    function GetJackCount(out pcJacks: UINT): HRESULT; stdcall;
 
-		function GetJackDescription2(nJack: UINT;
+    function GetJackDescription2(nJack: UINT;
                                  out pDescription2: KSJACK_DESCRIPTION2): HRESULT; stdcall;
 
-	end;
+  end;
   IID_IKsJackDescription2 = IKsJackDescription2;
   {$EXTERNALSYM IID_IKsJackDescription2}
+
+//if (NTDDI_VERSION >= NTDDI_WIN10_NI)
+
+  // Interface IKSJackDescription3
+  //==============================
+  //
+  //  Provides access to jack KSJACK_DESCRIPTION3 supported by hardware
+  //
+  // Activatable on:
+  //      IPart interface (bridge pin connector) on an KS Filter devicetopology object
+  //
+  // ----------------------------------------------------------------------
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IKsJackDescription3);'}
+  {$EXTERNALSYM IKsJackDescription3}
+  IKsJackDescription3 = interface(IUnknown)
+  ['{E3F6778B-6660-4CC8-A291-ECC4192D9967}']
+    //-------------------------------------------------------------------------
+    // Description:
+    //
+    //  Retrieves the number of Jacks on this connector.
+    //
+    // Parameters:
+    //
+    //      pcJacks - [out] Number of Jacks on this connector
+    //
+    // Return values:
+    //      S_OK if successful
+    //
+    function GetJackCount(out pcJacks: UINT): HResult; stdcall;
+
+
+    //-------------------------------------------------------------------------
+    // Description:
+    //
+    //  Retrieves the description of the specified Jack
+    //
+    // Parameters:
+    //
+    //      nJack        - [in]  The index of the jack for which to get information.
+    //                           nJack must be less than the count returned from GetJackCount
+    //      pDescription - [out] Pointer to a caller-allocated buffer into which the method writes
+    //                           a structure of type KSJACK_DESCRIPTION3 that contains information about the jack.
+    //
+    // Return values:
+    //      S_OK if successful
+    //
+    function GetJackDescription3(nJack: UINT;
+                                 out pDescription3: KSJACK_DESCRIPTION3): HResult; stdcall;
+
+  end;
+  IID_IKsJackDescription3 = IKsJackDescription3;
+  {$EXTERNALSYM IID_IKsJackDescription3}
+
+// endif // (NTDDI_VERSION >= NTDDI_WIN10_NI)
 
 
   // Interface IKsJackSinkInformation
   // ================================
-	// Provides access to jack sink information if the jack is supported by the hardware.
+  // Provides access to jack sink information if the jack is supported by the hardware.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IKsJackSinkInformation);'}
-	{$EXTERNALSYM IKsJackSinkInformation}
-	IKsJackSinkInformation = interface(IUnknown)
-	['{D9BD72ED-290F-4581-9FF3-61027A8FE532}']
+  {$EXTERNALSYM IKsJackSinkInformation}
+  IKsJackSinkInformation = interface(IUnknown)
+  ['{D9BD72ED-290F-4581-9FF3-61027A8FE532}']
 
-		function GetJackSinkInformation(out pJackSinkInformation: KSJACK_SINK_INFORMATION): HRESULT; stdcall;
+    function GetJackSinkInformation(out pJackSinkInformation: KSJACK_SINK_INFORMATION): HRESULT; stdcall;
 
-	end;
+  end;
   IID_IKsJackSinkInformation = IKsJackSinkInformation;
   {$EXTERNALSYM IID_IKsJackSinkInformation}
 
@@ -746,7 +813,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IKsJackContainerId);'}
   {$EXTERNALSYM IKsJackContainerId}
   IKsJackContainerId = interface(IUnknown)
-	['{C99AF463-D629-4EC4-8C00-E54D68154248}']
+  ['{C99AF463-D629-4EC4-8C00-E54D68154248}']
 
     function GetJackContainerId(out pJackContainerId: TGUID): HResult; stdcall;
     // Description:
@@ -767,9 +834,9 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IPartsList);'}
   {$EXTERNALSYM IPartsList}
   IPartsList = interface(IUnknown)
-	['{6DAA848C-5EB0-45CC-AEA5-998A2CDA1FFB}']
+  ['{6DAA848C-5EB0-45CC-AEA5-998A2CDA1FFB}']
 
-		function GetCount(out pCount: UINT): HRESULT; stdcall;
+    function GetCount(out pCount: UINT): HRESULT; stdcall;
     // Description:
     //  Gets the number of Parts in this PartsList
     // Parameters:
@@ -777,7 +844,7 @@ type
     // Return values:
     //    S_OK if successful
 
-		function GetPart(nIndex: UINT;
+    function GetPart(nIndex: UINT;
                      out ppPart: IPart): HRESULT; stdcall;
     // Description:
     //    Gets a Part at the specified index from the PartsList
@@ -786,24 +853,24 @@ type
     //    ppPart - [out] The part at the specified index.
     // Return values:
     //    S_OK if successful
-	end;
+  end;
   IID_IPartsList = IPartsList;
   {$EXTERNALSYM IID_IPartsList}
 
 
   // Interface IPart
   // ===============
-	// Represents a part (connector or sub-unit) of a device topology.
+  // Represents a part (connector or sub-unit) of a device topology.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IPart);'}
-	{$EXTERNALSYM IPart}
-	IPart = interface(IUnknown)
-	['{AE2DE0E4-5BCA-4F2D-AA46-5D13F8FDB3A9}']
-		// The interface id for the requested control function.
+  {$EXTERNALSYM IPart}
+  IPart = interface(IUnknown)
+  ['{AE2DE0E4-5BCA-4F2D-AA46-5D13F8FDB3A9}']
+    // The interface id for the requested control function.
     // The client should set this parameter to one of the following REFIID values:
-		// IID_IAudioAutoGainControl, IID_IAudioBass, IID_IAudioChannelConfig, IID_IAudioInputSelector, IID_IAudioLoudness
-		// IID_IAudioMidrange, IID_IAudioMute, IID_IAudioOutputSelector, IID_IAudioPeakMeter, IID_IAudioTreble, IID_IAudioVolumeLevel
-		// IID_IDeviceSpecificProperty, IID_IKsFormatSupport, IID_IKsJackDescription
+    // IID_IAudioAutoGainControl, IID_IAudioBass, IID_IAudioChannelConfig, IID_IAudioInputSelector, IID_IAudioLoudness
+    // IID_IAudioMidrange, IID_IAudioMute, IID_IAudioOutputSelector, IID_IAudioPeakMeter, IID_IAudioTreble, IID_IAudioVolumeLevel
+    // IID_IDeviceSpecificProperty, IID_IKsFormatSupport, IID_IKsJackDescription
 
     function GetName(out ppwstrName: LPWSTR): HRESULT; stdcall;
     // Description:
@@ -857,7 +924,7 @@ type
 
     function EnumPartsIncoming(out ppParts: IPartsList): HRESULT; stdcall;
 
-		function EnumPartsOutgoing(out ppParts: IPartsList): HRESULT; stdcall;
+    function EnumPartsOutgoing(out ppParts: IPartsList): HRESULT; stdcall;
 
     function GetTopologyObject(out ppTopology: IDeviceTopology): HRESULT; stdcall;
 
@@ -865,24 +932,24 @@ type
                       const refiid: REFIID;
                       out ppvObject): HRESULT; stdcall;
 
-		function UnregisterControlChangeCallback(pNotify: IControlChangeNotify): HRESULT; stdcall;
+    function UnregisterControlChangeCallback(pNotify: IControlChangeNotify): HRESULT; stdcall;
 
     function RegisterControlChangeCallback(const riid: REFGUID;
                                            pNotify: IControlChangeNotify): HRESULT; stdcall;
 
-	end;
+  end;
   IID_IPart = IPart;
   {$EXTERNALSYM IID_IPart}
 
 
   // Interface IConnector
   // ====================
-	// Represents a point of connection between components.
+  // Represents a point of connection between components.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IConnector);'}
-	{$EXTERNALSYM IConnector}
-	IConnector = interface(IUnknown)
-	['{9c2c4058-23f5-41de-877a-df3af236a09e}']
+  {$EXTERNALSYM IConnector}
+  IConnector = interface(IUnknown)
+  ['{9c2c4058-23f5-41de-877a-df3af236a09e}']
     function GetType(out pType: ConnectorType): HRESULT; stdcall;
 
     function GetDataFlow(out pFlow: DataFlow): HRESULT; stdcall;
@@ -899,7 +966,7 @@ type
 
     function IdConnectedTo(out ppwstrDeviceId: LPWSTR): HRESULT; stdcall;
 
-	end;
+  end;
   IID_IConnector = IConnector;
   {$EXTERNALSYM IID_IConnector}
 
@@ -910,11 +977,11 @@ type
   // does not have additional members.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ISubUnit);'}
-	{$EXTERNALSYM ISubUnit}
-	ISubUnit = interface(IUnknown)
-	['{82149A85-DBA6-4487-86BB-EA8F7FEFCC71}']
+  {$EXTERNALSYM ISubUnit}
+  ISubUnit = interface(IUnknown)
+  ['{82149A85-DBA6-4487-86BB-EA8F7FEFCC71}']
 
-	end;
+  end;
   IID_ISubUnit = ISubUnit;
   {$EXTERNALSYM IID_ISubUnit}
 
@@ -924,32 +991,32 @@ type
   // Represents a control interface on a part (connector or subunit) in a device topology.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IControlInterface);'}
-	{$EXTERNALSYM IControlInterface}
-	IControlInterface = interface(IUnknown)
-	['{45d37c3f-5140-444a-ae24-400789f3cbf3}']
+  {$EXTERNALSYM IControlInterface}
+  IControlInterface = interface(IUnknown)
+  ['{45d37c3f-5140-444a-ae24-400789f3cbf3}']
 
-		function GetIID(out pIID: TGuid): HRESULT; stdcall;
+    function GetIID(out pIID: TGuid): HRESULT; stdcall;
     // The GetIID method gets the interface ID of the function-specific control interface of the part.
-		function GetName(out ppwstrName: LPWSTR): HRESULT; stdcall;
+    function GetName(out ppwstrName: LPWSTR): HRESULT; stdcall;
     // The GetName method gets the friendly name for the audio function that the control interface encapsulates.
 
-	end;
+  end;
   IID_IControlInterface = IControlInterface;
   {$EXTERNALSYM IID_IControlInterface}
 
 
-	// Interface IControlChangeNotify
+  // Interface IControlChangeNotify
   // ==============================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IControlChangeNotify);'}
-	{$EXTERNALSYM IControlChangeNotify}
-	IControlChangeNotify = interface(IUnknown)
-	['{A09513ED-C709-4d21-BD7B-5F34C47F3947}']
+  {$EXTERNALSYM IControlChangeNotify}
+  IControlChangeNotify = interface(IUnknown)
+  ['{A09513ED-C709-4d21-BD7B-5F34C47F3947}']
 
-		function OnNotify(dwSenderProcessId: DWord;
+    function OnNotify(dwSenderProcessId: DWord;
                       pguidEventContext: LPCGUID = Nil): HRESULT; stdcall;
 
-	end;
+  end;
   IID_IControlChangeNotify = IControlChangeNotify;
   {$EXTERNALSYM IID_IControlChangeNotify}
 
@@ -976,13 +1043,13 @@ type
   // SelectCaptureDevice functions in DevTopoUtils.pas
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IDeviceTopology);'}
-	{$EXTERNALSYM IDeviceTopology}
-	IDeviceTopology = interface(IUnknown)
-	['{2A07407E-6497-4A18-9787-32F79BD0D98F}']
+  {$EXTERNALSYM IDeviceTopology}
+  IDeviceTopology = interface(IUnknown)
+  ['{2A07407E-6497-4A18-9787-32F79BD0D98F}']
 
     function GetConnectorCount(out pCount: UINT): HRESULT; stdcall;
 
-		function GetConnector(nIndex: UINT;
+    function GetConnector(nIndex: UINT;
                           out ppConnector: IConnector): HRESULT; stdcall;
 
     function GetSubunitCount(out pCount: UINT): HRESULT; stdcall;
@@ -993,14 +1060,14 @@ type
     function GetPartById(nId: UINT;
                          out ppPart: IPart): HRESULT; stdcall;
 
-		function GetDeviceId(out ppwstrDeviceId: LPWSTR): HRESULT; stdcall;
+    function GetDeviceId(out ppwstrDeviceId: LPWSTR): HRESULT; stdcall;
 
-		function GetSignalPath(pIPartFrom: IPart;
+    function GetSignalPath(pIPartFrom: IPart;
                            pIPartTo: IPart;
                            bRejectMixedPaths: BOOL;
                            out ppParts: IPartsList): HRESULT; stdcall;
 
-	end;
+  end;
   IID_IDeviceTopology = IDeviceTopology;
   {$EXTERNALSYM IID_IDeviceTopology}
 

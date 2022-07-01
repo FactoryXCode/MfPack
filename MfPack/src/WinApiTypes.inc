@@ -10,9 +10,8 @@
 // Release date: 04-01-2016
 // Language: ENU
 //
-// Revision Version: 3.1.1
-// Description: Holds compiler definitions used by Media Foundation,
-//              WASAPI and Core Audio.
+// Revision Version: 3.1.2
+// Description: Holds compiler definitions for MfPack.
 //
 //
 //              Example: {$INCLUDE 'WinApiTypes.inc'}
@@ -23,17 +22,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: All future updates (releases) will be named to an artist except for
 //          the major Windows updates. So, we started with ISÁK.
 //
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: -
-// Compiler version: 23 up to 34
-// SDK version: 10.0.22000.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 // Todo: -
 // =============================================================================
 // Source: -
@@ -74,10 +73,11 @@ const
 //
 // Value for NTDDI_VERSION            |  Minimum system required
 //------------------------------------+-----------------------------------------
+  
+  MFPACK_NTDDI_WIN10_NI     = $0A00000C; // Windows 11 22621
   MFPACK_NTDDI_WIN10_CO     = $0A00000B; // Windows 11 22000
   MFPACK_NTDDI_WIN10_MN     = $0A000009; // Windows 10 20348
   MFPACK_NTDDI_WIN10_FE     = $0A00000A; // Windows 10 19041
-
   MFPACK_NTDDI_WIN10_VB     = $0A000008; // Windows 10 2004
   MFPACK_NTDDI_WIN10_19H1   = $0A000007; // Windows 10 19H1
   MFPACK_NTDDI_WIN10_RS5    = $0A000006; // Windows 10 Redstone 5
@@ -128,7 +128,7 @@ const
   MFPACK_WIN32_WINNT_WIN10_MN       = $0A000009; // Windows 10
   MFPACK_WIN32_WINNT_WIN10_FE       = $0A00000A; // Windows 10
   MFPACK_WIN32_WINNT_WIN10_CO       = $0A00000B; // Windows 11 22000
-
+  MFPACK_WIN32_WIN10_WIN10_NI       = $0A00000C; // Windows 11 22621
 //
 // _WIN32_WINNT version constants from sdkddkver.h
 //
@@ -261,10 +261,10 @@ const
   {$EXTERNALSYM NTDDI_WIN10_FE}
   NTDDI_WIN10_CO                      = $0A00000B;
   {$EXTERNALSYM NTDDI_WIN10_CO}
-
-  {$EXTERNALSYM NTDDI_WIN10_VB}
+  NTDDI_WIN10_NI                      = $0A00000C;
+  {$EXTERNALSYM NTDDI_WIN10_NI}
   // Latest WDK version
-  WDK_NTDDI_VERSION                   = NTDDI_WIN10_CO;
+  WDK_NTDDI_VERSION                   = NTDDI_WIN10_NI;
   {$EXTERNALSYM WDK_NTDDI_VERSION}
 
 
@@ -272,7 +272,7 @@ const
 //
   MFPACK_WINVER        = _WIN32_WINNT_WIN10;
   MFPACK_WIN32_WINNT   = _WIN32_WINNT_WIN10;
-  MFPACK_NTDDI_VERSION = NTDDI_WIN10_CO;
+  MFPACK_NTDDI_VERSION = NTDDI_WIN10_NI;
 
 
 
@@ -374,7 +374,9 @@ const
 // {$DEFINE MFPACK_VERSION_264#1_UP} // Kraftwerk #1 Autobahn release, update 13#1, WIN10 May 2020 final update (2004))
 // {$DEFINE MFPACK_VERSION_264#2_UP} // Kraftwerk #1 The Model release, update 13#2, WIN10 May 2020 final update (2004))
 // {$DEFINE MFPACK_VERSION_300_UP} // Enigma release, Milestone update 14.
-{$DEFINE MFPACK_VERSION_310_UP} // Bowie release, Milestone update 15.
+// {$DEFINE MFPACK_VERSION_310_UP} // Bowie release, Milestone update 15.
+// {$DEFINE MFPACK_VERSION_311_UP} // Bowie release, Milestone update 16.
+{$DEFINE MFPACK_VERSION_312_UP} // Mercury release, Milestone update 17.
 
 // WARNINGS
 // enable/disable compiler warnings.
@@ -418,7 +420,7 @@ const
 
 const
 // a global version ID (for internal use only).
-MfpVersion   = '3.1.0'; // Release version.
+MfpVersion   = '3.1.2'; // Release version.
 
 
 

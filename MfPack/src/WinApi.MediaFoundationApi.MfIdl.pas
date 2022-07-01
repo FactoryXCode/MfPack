@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 // Description: Media Foundation basic control-layer interfaces.
 //
 // Organisation: FactoryX
@@ -21,17 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: -
 //
-// Compiler version: 23 up to 34
-// SDK version: 10.0.22000.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //
@@ -1143,6 +1143,15 @@ const
   // and requires FrameServer for control and media flow, all other uses are not supported.
   CLSID_FrameServerNetworkCameraSource :  TGUID = '{7A213AA7-866F-414A-8C1A-275C7283A395}';
 
+  // CLSID_CameraConfigurationManager
+  //
+  // Data type: GUID CLSID for creating the
+  // IMFCameraConfigurationManager.
+  //
+  // {6C92B540-5854-4A17-92B6-AC89C96E9683}
+  CLSID_CameraConfigurationManager : TGUID = '{6C92B540-5854-4A17-92B6-AC89C96E9683}';
+
+
   MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_AUDCAP_GUID            : TGUID = '{14dd9a1c-7cff-41be-b1b9-ba1ac6ecb571}';
   {$EXTERNALSYM MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_AUDCAP_GUID}
   MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID            : TGUID = '{8ac3587a-4ae7-42d8-99e0-0a6013eef90f}';
@@ -1554,7 +1563,7 @@ const
 
 
 type
-  // typedef unsigned __int64 TOPOID; >> MfpTypes
+  // typedef unsigned __int64 TOPOID; >> WinApi.WinApiTypes.pas
 
   // Forward interface definitions
 
@@ -1575,6 +1584,8 @@ type
   IMFHttpDownloadRequest = interface;
   PIMFHttpDownloadSession = ^IMFHttpDownloadSession;
   IMFHttpDownloadSession = interface;
+
+
 
   // Interface IMFMediaSession
   // =========================
@@ -4049,10 +4060,10 @@ type
     ['{994e23ad-1cc2-493c-b9fa-46f1cb040fa4}']
 
       function GetRemoteObject(const riid: REFIID;
-                               out ppv): HResult; stdcall;
+                               out ppv: Pointer): HResult; stdcall;
 
       function GetRemoteHost(const riid: REFIID;
-                             out ppv): HResult; stdcall;
+                             out ppv: Pointer): HResult; stdcall;
 
   end;
   IID_IMFRemoteProxy = IMFRemoteProxy;
@@ -4070,7 +4081,7 @@ type
                              pUnk: IUnknown): HRESULT; stdcall;
 
       function LoadReference(const riid: REFIID;
-                             out ppv): HRESULT; stdcall;
+                             out ppv: Pointer): HRESULT; stdcall;
 
   end;
   IID_IMFObjectReferenceStream = IMFObjectReferenceStream;
@@ -4091,7 +4102,7 @@ type
       function CreateObjectByCLSID(const clsid: REFCLSID;
                                    pStream: IStream;
                                    const riid: REFIID;
-                                   out ppv): HResult; stdcall;
+                                   out ppv: Pointer): HResult; stdcall;
 
   end;
   IID_IMFPMPHost = IMFPMPHost;
@@ -4340,7 +4351,7 @@ type
       function ActivateClassById(id: LPCWSTR;
                                  pStream: IStream;
                                  const riid: REFIID;
-                                 out ppv): HResult; stdcall;
+                                 out ppv: Pointer): HResult; stdcall;
 
   end;
   IID_IMFPMPHostApp = IMFPMPHostApp;
@@ -5846,7 +5857,7 @@ type
   {$EXTERNALSYM MFCreateProxyLocator}
 
   function MFCreateNetSchemePlugin(const riid: REFIID;
-                                   out ppvHandler): HResult; stdcall;
+                                   out ppvHandler: LPVOID): HResult; stdcall;
   {$EXTERNALSYM MFCreateNetSchemePlugin}
 
 
@@ -6037,10 +6048,21 @@ type
   {$EXTERNALSYM MFCreateContentDecryptorContext}
 
 const
-   MFStreamExtension_ExtendedCameraIntrinsics : TGUID = '{aa74b3df-9a2c-48d6-8393-5bd1c1a81e6e}';
-   {$EXTERNALSYM MFStreamExtension_ExtendedCameraIntrinsics}
-   MFSampleExtension_ExtendedCameraIntrinsics : TGUID = '{560bc4a5-4de0-4113-9cdc-832db974f03d}';
-   {$EXTERNALSYM MFSampleExtension_ExtendedCameraIntrinsics}
+  MFStreamExtension_ExtendedCameraIntrinsics : TGUID = '{aa74b3df-9a2c-48d6-8393-5bd1c1a81e6e}';
+  {$EXTERNALSYM MFStreamExtension_ExtendedCameraIntrinsics}
+  MFSampleExtension_ExtendedCameraIntrinsics : TGUID = '{560bc4a5-4de0-4113-9cdc-832db974f03d}';
+  {$EXTERNALSYM MFSampleExtension_ExtendedCameraIntrinsics}
+
+// if (NTDDI_VERSION >= NTDDI_WIN10_NI)
+
+  // {94DD0C30-28C7-4EFB-9D6B-812300FB0C7F}
+  // KSPROPERTYSETID_ANYCAMERACONTROL
+  // This represents that a control is contained in a custom property set
+  KSPROPERTYSETID_ANYCAMERACONTROL :  TGUID = '{94DD0C30-28C7-4EFB-9D6B-812300FB0C7F}';
+  {$EXTERNALSYM KSPROPERTYSETID_ANYCAMERACONTROL}
+
+// end (NTDDI_VERSION >= NTDDI_WIN10_NI)
+
 
 //#if (NTDDI_VERSION >= NTDDI_WIN10_RS5)
 
@@ -6074,10 +6096,10 @@ const
 // end NTDDI_VERSION >= NTDDI_WIN10_VB
 
 
-type
 
 {NTDDI_VERSION >= NTDDI_WIN10_CO}
 
+type
 
   // <summary>
   // This enum defines the possible occlusion states for a camera
@@ -6090,8 +6112,6 @@ type
     MFCameraOcclusionState_OccludedByCameraHardware = $2
   );
   {$EXTERNALSYM MFCameraOcclusionState}
-
-
 
   // IMFCameraOcclusionStateReport Interface
   // =======================================
@@ -6136,7 +6156,6 @@ type
   // ========================================
   // This interface represents the main camera occlusion state monitor object.
   //
-  PIMFCameraOcclusionStateMonitor = ^IMFCameraOcclusionStateMonitor;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFCameraOcclusionStateMonitor);'}
   {$EXTERNALSYM IMFCameraOcclusionStateMonitor}
   IMFCameraOcclusionStateMonitor = interface(IUnknown)
@@ -6155,7 +6174,288 @@ type
   IID_IMFCameraOcclusionStateMonitor = IMFCameraOcclusionStateMonitor;
   {$EXTERNALSYM IID_IMFCameraOcclusionStateReport}
 
+{END NTDDI_VERSION >= NTDDI_WIN10_CO}
 
+
+{IF (NTDDI_VERSION >= NTDDI_WIN10_NI}
+
+type
+
+  // Interface IMFCameraControlNotify
+  //=================================
+  // <summary>
+  // This interface represents the callback mechanism for the camera control monitor object.
+  // A client passes an implmented instance of this interface when creating a monitor
+  // </summary>
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFCameraControlNotify);'}
+  {$EXTERNALSYM IMFCameraControlNotify}
+  IMFCameraControlNotify = interface(IUnknown)
+  ['{E8F2540D-558A-4449-8B64-4863467A9FE8}']
+    // This method represents the notification callback for changes to controls.
+    //
+    // <param name = "controlSet">
+    // If provided controlSet GUID is MF_CAMERACONTROL_PROPSET_CUSTOM, then the callback was invoked by a
+    // subscription for a change to a control outside the supported Property Sets
+    // </param>
+    // <param name = "id">
+    // This is the id of the control in its set.
+    // </param>
+    procedure OnChange(const controlSet: REFGUID;
+                       const id: UINT32); stdcall;
+
+    // This method notifies client if an unrecoverable error occurs within the monitor.
+    // After call returns to monitor, it will cleanup and remove reference to IMFCameraControlNotify
+    // There is not a need to call IMFCameraControlMonitor::Shutdown after receiving an OnError
+    //
+    // <param name = "hrStatus">
+    // The internal error code.
+    // If E_OUTOFMEMORY, then there were not enough resources available for the monitor to function properly
+    // If MF_INVALID_STATE_ERR, then there has been some corruption of memory states.
+    // </param>
+    procedure OnError(hrStatus: HResult); stdcall;
+
+  end;
+  IID_IMFCameraControlNotify = IMFCameraControlNotify;
+  {$EXTERNALSYM IID_IMFCameraControlNotify}
+
+
+  // Interface IMFCameraControlMonitor
+  //==================================
+  //
+  // This interface represents the main camera control monitor object.
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFCameraControlMonitor);'}
+  {$EXTERNALSYM IMFCameraControlMonitor}
+  IMFCameraControlMonitor = interface(IUnknown)
+  ['{4D46F2C9-28BA-4970-8C7B-1F0C9D80AF69}']
+    // This function will start the monitor. The monitor will call OnChange on Subscriptions linked to changed controls
+    //If called when Monitor is already started or has shutdown, method will return error MF_E_INVALIDREQUEST
+
+    function Start(): HResult; stdcall;
+
+
+    // This function will stop the monitor. A client can stop the monitor to pause notifications.
+    // In Stopped state, client can Add/Remove Control Subscriptions.
+    // If called when Monitor is already stopped or has shutdown, method will return error MF_E_INVALIDREQUEST.
+    function Stop(): HResult; stdcall;
+
+
+    // This function will add to the list of controls for which the client wants to be notified
+    // If the provided controlSet is MF_CAMERACONTROL_PROPSET_CUSTOM, then the monitor's callback will be called for the change of "Any Control"
+    // If called when Monitor is in Start or Shutdown state, method will return error MF_E_INVALIDREQUEST
+    // If controlSet is not MF_CAMERACONTROL_PROPSET_CUSTOM, PROPSETID_VIDCAP_VIDEOPROCAMP, PROPSETID_VIDCAP_CAMERACONTROL or
+    // KSPROPERTYSETID_ExtendedCameraControl then method will return with error E_INVALIDARG.
+    function AddControlSubscription(const controlSet: TGUID;
+                                    const id: UINT32): HResult; stdcall;
+
+
+    // This function will remove the subscription for this control from the monitor
+    // If the provided controlSet is MF_CAMERACONTROL_PROPSET_CUSTOM, then the subscription for "Any Control" change will be removed
+    // If called when Monitor is in Start or Shutdown state, method will return with error MF_E_INVALIDREQUEST
+    // If provided control description does not match a current subscription, method will return with error MF_E_NOT_FOUND.
+    function RemoveControlSubscription(const controlSet: TGUID;
+                                       const id: UINT32): HResult; stdcall;
+
+    // This function will cleanup and shutdown the monitor.
+    // It is acceptable to call Shutdown even if monitor is not in stop state
+    // After Shutdown, a client cannot call on the Monitor to Add/Remove Control Subscriptions or Start/Stop notifications
+    procedure Shutdown();
+
+  end;
+  IID_IMFCameraControlMonitor = IMFCameraControlMonitor;
+  {$EXTERNALSYM IID_IMFCameraControlMonitor}
+
+
+  PMF_CAMERA_CONTROL_CONFIGURATION_TYPE = ^MF_CAMERA_CONTROL_CONFIGURATION_TYPE;
+  MF_CAMERA_CONTROL_CONFIGURATION_TYPE            = (
+    MF_CAMERA_CONTROL_CONFIGURATION_TYPE_PRESTART = 0,
+    MF_CAMERA_CONTROL_CONFIGURATION_TYPE_POSTSTART );
+  {$EXTERNALSYM MF_CAMERA_CONTROL_CONFIGURATION_TYPE}
+
+
+  PMF_CAMERA_CONTROL_RANGE_INFO = ^MF_CAMERA_CONTROL_RANGE_INFO;
+  MF_CAMERA_CONTROL_RANGE_INFO = record
+    minValue: LONG;
+    maxValue: LONG;
+    stepValue: LONG;
+    defaultValue: LONG;
+  end;
+  {$EXTERNALSYM MF_CAMERA_CONTROL_RANGE_INFO}
+
+
+   // Interface IMFCameraControlDefaults
+   //===================================
+   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFCameraControlDefaults);'}
+   {$EXTERNALSYM IMFCameraControlDefaults}
+   IMFCameraControlDefaults = interface(IUnknown)
+   ['{75510662-B034-48F4-88A7-8DE61DAA4AF9}']
+
+    // <summary>
+    // Gets the configuration type (pre-start or post-start).  Some
+    // camera level controls can only be set after the camera has
+    // started (such as focus/brightness/whitebalance) since the
+    // controls require frame data for the parameters to converge.
+    // While still other types of controls can only be configured
+    // when the camera is not in a running state (such as HDR
+    // support) since it requires a re-programming of the camera
+    // mode.
+    //
+    // Whether a well known control is pre or post start is
+    // specified in the DDI specification of the control.
+    // (NOTE:  If the DDI specification does not explicitly
+    // indicate the control is a pre-start control, caller must
+    // assume the control is post-start).
+    // </summary>
+    function GetType(): MF_CAMERA_CONTROL_CONFIGURATION_TYPE;  stdcall;
+
+    // <summary>
+    // The legacy PROPSETID_VIDCAP_VIDEOPROCAMP and
+    // PROPSETID_VIDCAP_CAMERACONTROL control sets provide a
+    // min/max/step/default value which bounds the acceptable range
+    // of values that can be configured.
+    //
+    // For other controls, the caller is responsible for knowing
+    // whether the underlying control supports the basic range
+    // information.  Calling into this method for a control that
+    // does not support basic range will return MF_E_NOT_FOUND.
+    // </summary>
+    function GetRangeInfo(out rangeInfo: MF_CAMERA_CONTROL_RANGE_INFO): HResult; stdcall;
+
+    // <summary>
+    // Because the camera control schema and optional data payload
+    // schema can be arbitrary (the only constraint is that all
+    // control schema must have KSPROPERTY as the first structure
+    // in the binary format), this method provides the caller a way
+    // to modify the contents of the control and data payload
+    // directly.
+    //
+    // UnlockControlData must be called before the collection this
+    // control is contained in is sent to
+    // IMFCameraConfigurationManager::SaveDefaults() method.
+    // </summary>
+    function LockControlData(out control: Pointer;
+                             out controlSize: ULONG;
+                             out data: Pointer;
+                             out dataSize: ULONG): HResult; stdcall;
+
+    // <summary>
+    // Once UnlockControlData is called, the caller must not attempt to
+    // modify the buffer pointer returned from LockControlData.  Doing
+    // so will result in undefined behavior.
+    // </summary>
+    function UnlockControlData(): HResult; stdcall;
+
+   end;
+   IID_IMFCameraControlDefaults = IMFCameraControlDefaults;
+  {$EXTERNALSYM IID_IMFCameraControlDefaults}
+
+
+  // Interface IMFCameraControlDefaultsCollection
+  //=============================================
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFCameraControlDefaultsCollection);'}
+  {$EXTERNALSYM IMFCameraControlDefaultsCollection}
+  IMFCameraControlDefaultsCollection = interface(IMFAttributes)
+  ['{92D43D0F-54A8-4BAE-96DA-356D259A5C26}']
+
+    /// <summary>
+    /// Return the number of controls currently in the collection.
+    /// </summary>
+    function GetControlCount(): ULONG; stdcall;
+
+    /// <summary>
+    /// Return the control based on the 0 based index provided.  The
+    /// index provided must be -1 of the control count.
+    /// </summary>
+    function GetControl(index: ULONG;
+                        out configuration: IMFCameraControlDefaults): HResult; stdcall;
+
+    /// <summary>
+    /// Add a new extended camera control to the collection.  The
+    /// controlId provided must be an id in the
+    /// KSPROPERTYSETID_ExtendedCameraControl property set.
+    ///
+    /// The streamId is only used when the underlying camera control
+    /// is a pin level control, otherwise this value is ignored.
+    ///
+    /// Depending on the control, the data payload size/schema may
+    /// vary.  The dataSize must be valid for the control payload
+    /// schema so the control can reserve the buffer required.
+    /// </summary>
+    function GetOrAddExtendedControl(configType: MF_CAMERA_CONTROL_CONFIGURATION_TYPE;
+                                     constrolId: ULONG;
+                                     streamId: DWORD;
+                                     dataSize: ULONG;
+                                     out defaults: IMFCameraControlDefaults): HResult; stdcall;
+
+    /// <summary>
+    /// For custom controls, controlSet/controlId are based on the
+    /// custom control DDI published by the camera driver vendor.
+    /// Similarly, the controlSize and dataSize are based on the DDI
+    /// published by the vendor.
+    ///
+    /// NOTE:  controlSize must be >= sizeof(KSPROPERTY) even for
+    /// custom controls.
+    /// </summary>
+    function GetOrAddControl(configType: MF_CAMERA_CONTROL_CONFIGURATION_TYPE;
+                             const controlSet: REFGUID;
+                             constrolId: ULONG;
+                             controlSize: ULONG;
+                             dataSize: ULONG;
+                             out defaults: IMFCameraControlDefaults): HResult; stdcall;
+
+    /// <summary>
+    /// Removes a control based on the set/id.
+    /// </summary>
+    function RemoveControl(const controlSet: REFGUID;
+                           constrolId: ULONG): HResult; stdcall;
+
+    /// <summary>
+    /// Removes all controls in the collection.
+    /// </summary>
+    function RemoveAllControls(): HResult; stdcall;
+
+  end;
+  IID_IMFCameraControlDefaultsCollection = IMFCameraControlDefaultsCollection;
+  {$EXTERNALSYM IID_IMFCameraControlDefaultsCollection}
+
+
+  // Interface IMFCameraConfigurationManager
+  //========================================
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFCameraConfigurationManager);'}
+  {$EXTERNALSYM IMFCameraConfigurationManager}
+  IMFCameraConfigurationManager = interface(IUnknown)
+  ['{A624F617-4704-4206-8A6D-EBDA4A093985}']
+
+    /// Loads the camera control defaults as specified by the
+    /// MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK in
+    /// the cameraAttributes parameter.
+    /// If there are no default controls specified, the resulting
+    /// collection will be empty (GetControlCount returns 0)
+    ///
+    /// NOTE: If the
+    /// MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK is
+    /// not set, this method will return MF_E_ATTRIBUTENOTFOUND.
+    function LoadDefaults(cameraAttributes: IMFAttributes;
+                          out configurations: IMFCameraControlDefaultsCollection): HResult; stdcall;
+
+    /// Save the collection of camera control defaults.  The
+    /// information will be stored on the camera defined by the
+    /// MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK when
+    /// the collection was loaded.  Saving an empty collection will
+    /// result in all the existing control defaults being cleared.
+    function SaveDefaults(configurations: IMFCameraControlDefaultsCollection): HResult; stdcall;
+
+    /// Shutdown the configuration manager.  Subsequent calls to
+    /// LoadDefaults/SaveDefaults after the
+    /// IMFCameraConfigurationManager is shutdown will result in
+    /// MF_E_SHUTDOWN error.
+    procedure Shutdown(); stdcall;
+
+  end;
+  IID_IMFCameraConfigurationManager = IMFCameraConfigurationManager;
+  {$EXTERNALSYM IID_IMFCameraConfigurationManager}
+
+// if NTDDI_VERSION >= NTDDI_WIN10_NI
 
   // Allows app to create Camera Occlusion State Monitor for the given camera device.
   // The symbolicLink should be from the camera that is already activated, otherwise
@@ -6172,13 +6472,36 @@ type
   // </param>
   function MFCreateCameraOcclusionStateMonitor(symbolicLink: PWideChar;
                                                callback: IMFCameraOcclusionStateReportCallback;
-                                               out occlusionStateMonitor: PIMFCameraOcclusionStateMonitor): HRESULT; stdcall;
+                                               out occlusionStateMonitor: IMFCameraOcclusionStateMonitor): HRESULT; stdcall;
+  {$EXTERNALSYM MFCreateCameraOcclusionStateMonitor}
 
-{END NTDDI_VERSION >= NTDDI_WIN10_CO}
+
+{if NTDDI_VERSION >= NTDDI_WIN10_NI}
+  // function MFCreateCameraControlMonitor
+  //======================================
+  // <summary>
+  // Allows app to create CameraControlMonitor.
+  // If provided symbolic link name does not match a camera device, then method will return E_INVALIDARG
+  // </summary>
+  // <param name = "symbolicLink">
+  // String symbolic link name of the video capture device that is active.
+  // </param>
+  // <param name = "callback">
+  // Pointer to an object that implements the callback interface.
+  // </param>
+  // <param name = "ppCameraControlMonitor">
+  // Specifies a pointer to a variable where the IMFCameraControlMonitor object
+  // will be stored.
+  // </param>
+  function  MFCreateCameraControlMonitor(symbolicLink: PWideChar;
+                                         callback: IMFCameraControlNotify;
+                                         out ppCameraControlMonitor: IMFCameraControlMonitor): HResult; stdcall;
+  {$EXTERNALSYM MFCreateCameraControlMonitor}
+{endif NTDDI_VERSION >= NTDDI_WIN10_NI}
+
 
 
   // Additional Prototypes for ALL interfaces
-
 
   // End of Additional Prototypes
 
@@ -6295,7 +6618,10 @@ const
   function MFCreateRelativePanelWatcher;         external MfIdlLib3 name 'MFCreateRelativePanelWatcher' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   // end NTDDI_VERSION >= NTDDI_WIN10_VB
 
+  // NTDDI_VERSION >= NTDDI_WIN10_NI
   function MFCreateCameraOcclusionStateMonitor;  external MfIdlLib3 name 'MFCreateCameraOcclusionStateMonitor' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateCameraControlMonitor;         external MfIdlLib3 name 'MFCreateCameraControlMonitor' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  // end NTDDI_VERSION >= NTDDI_WIN10_VB
 
 {$WARN SYMBOL_PLATFORM ON}
 

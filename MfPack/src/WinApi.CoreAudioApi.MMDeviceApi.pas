@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -33,11 +33,11 @@
 //          Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: -
 //
-// Compiler version: 23 up to 34
-// SDK version: 10.0.22000.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //
@@ -444,30 +444,21 @@ type
     //  This parameter points to a null-terminated, wide-character string containing the endpoint ID.
     //  The string remains valid for the duration of the call.
     //  If the user has removed or disabled the default device for a particular role,
-    //  and no other device is available to assume that role, then pwstrDefaultDeviceId is NULL.
+    //  and no other device is available to assume that role, then pwstrDefaultDeviceId is nil.
 
     function OnDefaultDeviceChanged(flow: EDataFlow;
                                     role: ERole;
-                                    pwstrDefaultDeviceId: LPCWSTR): HRESULT; stdcall;
-    // The OnDefaultDeviceChanged method notifies the client that the default audio endpoint device for a particular device role has changed.
-    // Parameters
-    //   flow [in]
-    //    The data-flow direction of the endpoint device.
-    //    This parameter is set to one of the following EDataFlow enumeration values:
-    //     - eRender  : The data-flow direction for a rendering device is eRender.
-    //     - eCapture : The data-flow direction for a capture device is eCapture.
-    //   role [in]
-    //    The device role of the audio endpoint device.
-    //    This parameter is set to one of the following ERole enumeration values:
-    //    - eConsole
-    //    - eMultimedia
-    //    - eCommunications
-    //   pwstrDefaultDevice [in]
-    //    Pointer to the endpoint ID string that identifies the audio endpoint device.
-    //    This parameter points to a null-terminated, wide-character string containing the endpoint ID.
-    //    The string remains valid for the duration of the call.
-    //    If the user has removed or disabled the default device for a particular role,
-    //    and no other device is available to assume that role, then pwstrDefaultDevice is NIL.
+                                    pwstrDefaultDeviceId: PWideChar): HResult; stdcall;
+    // Description:
+    //   Called by the MMDeviceEnumerator object when the default Endpoint device for a given role changes
+    //
+    // Parameters:
+    //   flow                 - [in] The dataflow direction
+    //   role                 - [in] The role
+    //   pwstrDefaultDeviceId - [in] The ID of the Endpoint device that is now the default for the specified role
+    //
+    // Return values:
+    //   ignored
 
     function OnPropertyValueChanged(pwstrDeviceId: LPCWSTR;
                                     key: PROPERTYKEY): HRESULT; stdcall;

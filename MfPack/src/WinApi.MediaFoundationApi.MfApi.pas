@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 // Description: Requires Windows Vista or later.
 //              MfApi.pas is the unit containing the APIs for using the MF platform.
 //
@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -46,11 +46,11 @@
 //          Fields with a Common Type Specification.
 //
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: -
 //
-// Compiler version: 23 up to 34
-// SDK version: 10.0.22000.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //
@@ -2260,9 +2260,9 @@ const
   // Requires >= Windows 7.
   //
   // MFT_ENUM_FLAG_HARDWARE
-  // The MFT performs hardware-based data processing, using either the AVStream driver or a GPU-based proxy MFT. M
+  // The MFT performs hardware-based data processing, using either the AVStream driver or a GPU-based proxy MFT.
   // FTs in this category always process data asynchronously. See Hardware MFTs.
-  // Note  This flag applies to video codecs and video processors that perform their work entirely in hardware.
+  // Note:  This flag applies to video codecs and video processors that perform their work entirely in hardware.
   // It does not apply to software decoders that use DirectX Video Acceleration to assist decoding.
   // Requires >= Windows 7.
   //
@@ -2567,8 +2567,9 @@ type
   //   Declares a GUID named MFVideoFormat_ABCD_Format.
   //     DEFINE_MEDIATYPE_GUID(MFVideoFormat_ABCD_Format, FCC('ABCD'));
 
-// video media types ///////////////////////////////////////////////////////////
 
+
+// video media types ///////////////////////////////////////////////////////////
 
 
 

@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 // Description: Defines for document package target interfaces.
 //
 // Organisation: FactoryX
@@ -21,17 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: -
 //
-// Compiler version: 23 up to 34
-// SDK version: 10.0.22000.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //
@@ -63,7 +63,8 @@ unit WinApi.DirectX.DocumentTarget;
 interface
 
 uses
-
+  {WinApi}
+  WinApi.WinApiTypes,
   {ActiveX}
   WinApi.ActiveX.ObjIdlbase;
 
@@ -99,7 +100,7 @@ type
     // This method is called for createing a target instance.")]
     function GetPackageTarget({in} const guidTargetType: TGUID;
                               {in} const riid: TGUID;
-                              out ppvTarget): HResult; stdcall;
+                              out ppvTarget: Pointer): HResult; stdcall;
 
     function Cancel(): HResult; stdcall;
   end;
@@ -170,6 +171,30 @@ type
   {$EXTERNALSYM IID_IPrintDocumentPackageTargetFactory}
 
 
+  // Interface IPrintDocumentPackageTarget2
+  // ======================================
+  // Allows users to see if the target printer is an Internet Printing Protocol(Ipp) Printer,
+  // and returns IppPrinterDevice if the target is an Ipp Printer.
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IPrintDocumentPackageTarget2);'}
+  {$EXTERNALSYM IPrintDocumentPackageTarget2}
+  IPrintDocumentPackageTarget2 = interface(IUnknown)
+  ['{c560298a-535c-48f9-866a-632540660cb4}']
+
+    // This method returns true if the printer is an IppPrinter.
+    function GetIsTargetIppPrinter(out isIppPrinter: BOOL): HResult; stdcall;
+
+    // This method returns IppPrinterDevice for the target printer.
+    function GetTargetIppPrintDevice(const riid: REFIID;
+                                     out ppvTarget: Pointer): HResult; stdcall;
+
+  end;
+  IID_IPrintDocumentPackageTarget2 = IPrintDocumentPackageTarget2;
+  {$EXTERNALSYM IID_IPrintDocumentPackageTarget2}
+
+
+
+
 const
 
   ID_DOCUMENTPACKAGETARGET_MSXPS   : TGUID = '{9cae40a8-ded1-41c9-a9fd-d735ef33aeda}';
@@ -186,6 +211,8 @@ const
   {$EXTERNALSYM ID_DOCUMENTPACKAGETARGET_OPENXPS_WITH_3D}
 
 //#endif // (NTDDI_VERSION >= NTDDI_WINBLUE)
+
+
 
 
   // Additional Prototypes for ALL interfaces

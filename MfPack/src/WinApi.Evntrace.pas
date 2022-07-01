@@ -10,7 +10,7 @@
 // Release date: 24-11-2015
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 // Description: Public headers for event tracing control applications,
 // consumers and providers.
 //
@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: LIBRARY CHANGES:
@@ -32,11 +32,11 @@
 //          See: const EvntraceLib declaration.
 //
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: -
 //
-// Compiler version: 23 up to 34
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //
@@ -475,24 +475,26 @@ const
   // Event types for system configuration records
   // ============================================
 
-  EVENT_TRACE_TYPE_CONFIG_CPU          = $0A;  // CPU Configuration
+  EVENT_TRACE_TYPE_CONFIG_CPU             = $0A;  // CPU Configuration
   {$EXTERNALSYM EVENT_TRACE_TYPE_CONFIG_CPU}
-  EVENT_TRACE_TYPE_CONFIG_PHYSICALDISK = $0B;  // Physical Disk Configuration
+  EVENT_TRACE_TYPE_CONFIG_PHYSICALDISK    = $0B;  // Physical Disk Configuration
   {$EXTERNALSYM EVENT_TRACE_TYPE_CONFIG_PHYSICALDISK}
-  EVENT_TRACE_TYPE_CONFIG_LOGICALDISK  = $0C;  // Logical Disk Configuration
+  EVENT_TRACE_TYPE_CONFIG_LOGICALDISK     = $0C;  // Logical Disk Configuration
   {$EXTERNALSYM EVENT_TRACE_TYPE_CONFIG_LOGICALDISK}
-  EVENT_TRACE_TYPE_CONFIG_NIC          = $0D;  // NIC Configuration
+  EVENT_TRACE_TYPE_CONFIG_NIC             = $0D;  // NIC Configuration
   {$EXTERNALSYM EVENT_TRACE_TYPE_CONFIG_NIC}
-  EVENT_TRACE_TYPE_CONFIG_VIDEO        = $0E;  // Video Adapter Configuration
+  EVENT_TRACE_TYPE_CONFIG_VIDEO           = $0E;  // Video Adapter Configuration
   {$EXTERNALSYM EVENT_TRACE_TYPE_CONFIG_VIDEO}
-  EVENT_TRACE_TYPE_CONFIG_SERVICES     = $0F;  // Active Services
+  EVENT_TRACE_TYPE_CONFIG_SERVICES        = $0F;  // Active Services
   {$EXTERNALSYM EVENT_TRACE_TYPE_CONFIG_SERVICES}
-  EVENT_TRACE_TYPE_CONFIG_POWER        = $10;  // ACPI Configuration
+  EVENT_TRACE_TYPE_CONFIG_POWER           = $10;  // ACPI Configuration
   {$EXTERNALSYM EVENT_TRACE_TYPE_CONFIG_POWER}
-  EVENT_TRACE_TYPE_CONFIG_NETINFO      = $11;  // Networking Configuration
+  EVENT_TRACE_TYPE_CONFIG_NETINFO         = $11;  // Networking Configuration
   {$EXTERNALSYM EVENT_TRACE_TYPE_CONFIG_NETINFO}
-  EVENT_TRACE_TYPE_CONFIG_OPTICALMEDIA = $12;  // Optical Media Configuration
+  EVENT_TRACE_TYPE_CONFIG_OPTICALMEDIA    = $12;  // Optical Media Configuration
   {$EXTERNALSYM EVENT_TRACE_TYPE_CONFIG_OPTICALMEDIA}
+  EVENT_TRACE_TYPE_CONFIG_PHYSICALDISK_EX = $13;  // Physical Disk Extended Configuration
+  {$EXTERNALSYM EVENT_TRACE_TYPE_CONFIG_PHYSICALDISK_EX}
 
   EVENT_TRACE_TYPE_CONFIG_IRQ             = $15;  // IRQ assigned to devices
   {$EXTERNALSYM EVENT_TRACE_TYPE_CONFIG_IRQ}
@@ -1723,6 +1725,19 @@ type
   ETW_PMC_COUNTER_OWNERSHIP_STATUS = _ETW_PMC_COUNTER_OWNERSHIP_STATUS;
 
 
+  PETW_PMC_SESSION_INFO = ^ETW_PMC_SESSION_INFO;
+  ETW_PMC_SESSION_INFO = record
+    NextEntryOffset: ULONG;
+    LoggerId: USHORT;
+    Reserved: USHORT;
+    ProfileSourceCount: ULONG;
+    HookIdCount: ULONG;
+    // These two fields follow as a ULONG blob after the initial header.
+    // ULONG ProfileSources[]; // Count indicated by ProfileSourceCount
+    // USHORT HookIds[]; // Count indicated by HookIdCount
+  end;
+  {$EXTERNALSYM ETW_PMC_SESSION_INFO}
+
 
   // An EVENT_TRACE consists of a fixed header (EVENT_TRACE_HEADER) and
   // optionally a variable portion pointed to by MofData. The datablock
@@ -1768,6 +1783,57 @@ type
   PEVENT_RECORD_CALLBACK = ^EVENT_RECORD_CALLBACK;
   EVENT_RECORD_CALLBACK = procedure (EventRecord: PEVENT_RECORD); stdcall;
   {$EXTERNALSYM EVENT_RECORD_CALLBACK}
+
+  PETW_BUFFER_HEADER = ^ETW_BUFFER_HEADER;
+  ETW_BUFFER_HEADER = record
+    Reserved1: array[0..3] of ULONG;
+    TimeStamp: LARGE_INTEGER;        // Time of flush
+    Reserved2: array[0..3] of ULONG;
+    ClientContext: ETW_BUFFER_CONTEXT;
+    Reserved3: ULONG;
+    FilledBytes: ULONG;              // Number of bytes written to the buffer.  Essentially the filled length of the buffer.
+    Reserved4: array[0..4] of ULONG;
+  end;
+  {$EXTERNALSYM ETW_BUFFER_HEADER}
+
+  // Structure passed to the BufferCallback containing information on the
+  // current state of the processing session.
+  PETW_BUFFER_CALLBACK_INFORMATION = ^ETW_BUFFER_CALLBACK_INFORMATION;
+  ETW_BUFFER_CALLBACK_INFORMATION = record
+    TraceHandle: TRACEHANDLE;
+    LogfileHeader: PTRACE_LOGFILE_HEADER;
+    BuffersRead: ULONG;
+  end;
+  {$EXTERNALSYM ETW_BUFFER_CALLBACK_INFORMATION}
+
+  PETW_BUFFER_CALLBACK = function (Buffer: ETW_BUFFER_HEADER;
+                                   BufferSize: ULONG;
+                                   ConsumerInfo: ETW_BUFFER_CALLBACK_INFORMATION;
+                                   {In_opt} CallbackContext: Pointer): Bool; stdcall;
+
+  PETW_PROCESS_TRACE_MODES = ^ETW_PROCESS_TRACE_MODES;
+  ETW_PROCESS_TRACE_MODES                = (
+    ETW_PROCESS_TRACE_MODE_NONE          = 0,
+    ETW_PROCESS_TRACE_MODE_RAW_TIMESTAMP = $00000001
+  );
+  {$EXTERNALSYM ETW_PROCESS_TRACE_MODES}
+
+  // Configuration options to pass into OpenTrace style functions.
+  PETW_OPEN_TRACE_OPTIONS = ^ETW_OPEN_TRACE_OPTIONS;
+  ETW_OPEN_TRACE_OPTIONS = record
+    ProcessTraceModes: ETW_PROCESS_TRACE_MODES;
+    // This callback will be called for each event in time order.
+    // If left nil, all event playback code will be bypassed.
+    EventCallback: PEVENT_RECORD_CALLBACK;
+    EventCallbackContext: Pointer;
+    // This callback will get called once buffer processing is complete.
+    BufferCallback: PETW_BUFFER_CALLBACK;
+    BufferCallbackContext: Pointer;
+  end;
+  {$EXTERNALSYM ETW_OPEN_TRACE_OPTIONS}
+
+  PETW_BUFFER_COMPLETION_CALLBACK = procedure(Buffer: ETW_BUFFER_HEADER;
+                                              {In_opt} CallbackContext: Pointer); stdcall;
 
 
   // Prototype for service request callback. Data providers register with WMI
@@ -2461,14 +2527,26 @@ type
     //
     //      Input Format: TRACE_STACK_CACHING_INFO
     //
-    TraceUnifiedStackCachingInfo = 26
+    TraceUnifiedStackCachingInfo = 26,
+
+    //
+    // TracePmcSessionInformation:
+    //    TraceQueryInformation
+    //      Queries information about enabled PMC counters for all sessions.
+    //
+    //      Output Format: The supplied output buffer will be set to a blob of filled out ETW_PMC_SESSION_INFO.
+    //                     The NextEntryOffset member of each item will be set to the offset from the start of
+    //                     the current item to the next item, or 0 if there are no more items.
+    //                     The ProfileSourceCount and HookId count members will be set to the number of items that
+    //                     exist in the ProfileSources array and HookIds arrays, respectively.
+    //
+    TracePmcSessionInformation = 27
   );
   {$EXTERNALSYM _TRACE_QUERY_INFO_CLASS}
   TRACE_QUERY_INFO_CLASS = _TRACE_QUERY_INFO_CLASS;
   {$EXTERNALSYM TRACE_QUERY_INFO_CLASS}
   TRACE_INFO_CLASS = TRACE_QUERY_INFO_CLASS;
   {$EXTERNALSYM TRACE_INFO_CLASS}
-
 
 //#if (WINVER >= _WIN32_WINNT_VISTA)
   function EnumerateTraceGuidsEx(TraceQueryInfoClass: TRACE_QUERY_INFO_CLASS;
@@ -2639,7 +2717,10 @@ type
   PETW_PROCESS_HANDLE_INFO_TYPE = ^ETW_PROCESS_HANDLE_INFO_TYPE;
   _ETW_PROCESS_HANDLE_INFO_TYPE  = (
     EtwQueryPartitionInformation = 1,
-    EtwQueryProcessHandleInfoMax = 2);
+    EtwQueryProcessHandleInfoMax = 2,
+    EtwQueryLastDroppedTimes     = 3,
+    EtwQueryLogFileHeader        = 4
+    );
   {$EXTERNALSYM _ETW_PROCESS_HANDLE_INFO_TYPE}
   ETW_PROCESS_HANDLE_INFO_TYPE = _ETW_PROCESS_HANDLE_INFO_TYPE;
   {$EXTERNALSYM ETW_PROCESS_HANDLE_INFO_TYPE}
@@ -2685,7 +2766,7 @@ type
   function OpenTraceW(var Logfile: PEVENT_TRACE_LOGFILEW): TRACEHANDLE; stdcall;
   {$EXTERNALSYM OpenTraceW}
 
-  function ProcessTrace(HandleArray: TRACEHANDLE;
+  function ProcessTrace(HandleArray: PTRACEHANDLE;
                         HandleCount: ULONG;
                         StartTime: FILETIME;
                         EndTime: FILETIME): ULONG; stdcall;
@@ -2693,6 +2774,43 @@ type
 
   function CloseTrace(_TraceHandle: TRACEHANDLE): ULONG; stdcall;
   {$EXTERNALSYM CloseTrace}
+
+
+
+
+  function OpenTraceFromBufferStream(Options: ETW_OPEN_TRACE_OPTIONS;
+                                     BufferCompletionCallback: PETW_BUFFER_COMPLETION_CALLBACK;
+                                     {_In_opt_} BufferCompletionContext: Pointer): TRACEHANDLE; stdcall;
+  {$EXTERNALSYM OpenTraceFromBufferStream}
+
+  function OpenTraceFromRealTimeLogger(LoggerName: PWideChar;
+                                       Options: ETW_OPEN_TRACE_OPTIONS;
+                                       {_Out_opt_} LogFileHeader: PTRACE_LOGFILE_HEADER): TRACEHANDLE; stdcall;
+  {$EXTERNALSYM OpenTraceFromRealTimeLogger}
+
+  function OpenTraceFromRealTimeLoggerWithAllocationOptions(LoggerName: PWideChar;
+                                                            Options: ETW_OPEN_TRACE_OPTIONS;
+                                                            AllocationSize: ULONG_PTR;
+                                                            {_In_opt_} MemoryPartitionHandle: THandle;
+                                                            {_Out_opt_} LogFileHeader: PTRACE_LOGFILE_HEADER): TRACEHANDLE; stdcall;
+  {$EXTERNALSYM OpenTraceFromRealTimeLoggerWithAllocationOptions}
+
+  function OpenTraceFromFile(LogFileName: PWideChar;
+                             Options: ETW_OPEN_TRACE_OPTIONS;
+                             {_Out_otp_} LogFileHeader: PTRACE_LOGFILE_HEADER): TRACEHANDLE; stdcall;
+  {$EXTERNALSYM OpenTraceFromFile}
+
+  function ProcessTraceBufferIncrementReference(const TraceHandle: TRACEHANDLE;
+                                                Buffer: ETW_BUFFER_HEADER): ULONG; stdcall;
+  {$EXTERNALSYM ProcessTraceBufferIncrementReference}
+
+  function ProcessTraceBufferDecrementReference(const Buffer: ETW_BUFFER_HEADER): ULONG; stdcall;
+  {$EXTERNALSYM ProcessTraceBufferDecrementReference}
+
+  function ProcessTraceAddBufferToBufferStream(const TraceHandle: TRACEHANDLE;
+                                               Buffer: ETW_BUFFER_HEADER;
+                                               BufferSize: ULONG): ULONG; stdcall;
+  {$EXTERNALSYM ProcessTraceAddBufferToBufferStream}
 
   function SetTraceCallback(const pGuid: PGUID;
                             EventCallback: EVENT_CALLBACK): ULONG; stdcall;
@@ -2785,6 +2903,13 @@ const
   function OpenTraceW; external EvntraceLib name 'OpenTraceW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function ProcessTrace; external EvntraceLib name 'ProcessTrace' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function CloseTrace; external EvntraceLib name 'CloseTrace' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function OpenTraceFromBufferStream; external EvntraceLib name 'OpenTraceFromBufferStream' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function OpenTraceFromRealTimeLogger; external EvntraceLib name 'OpenTraceFromRealTimeLogger' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function OpenTraceFromRealTimeLoggerWithAllocationOptions; external EvntraceLib name 'OpenTraceFromRealTimeLoggerWithAllocationOptions' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function OpenTraceFromFile; external EvntraceLib name 'OpenTraceFromFile' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function ProcessTraceBufferIncrementReference; external EvntraceLib name 'ProcessTraceBufferIncrementReference' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function ProcessTraceBufferDecrementReference; external EvntraceLib name 'ProcessTraceBufferDecrementReference' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function ProcessTraceAddBufferToBufferStream; external EvntraceLib name 'ProcessTraceAddBufferToBufferStream' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function SetTraceCallback; external EvntraceLib name 'SetTraceCallback' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function RemoveTraceCallback ; external EvntraceLib name 'RemoveTraceCallback' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 {$WARN SYMBOL_PLATFORM ON}

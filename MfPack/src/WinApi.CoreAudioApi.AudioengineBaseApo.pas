@@ -10,7 +10,7 @@
 // Release date: 04-09-2015
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.1.2
 // Description: -
 //
 // Organisation: FactoryX
@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -46,11 +46,11 @@
 //          Fields with a Common Type Specification.
 // 
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX312
 // Known Issues: -
 //
-// Compiler version: 23 up to 34
-// SDK version: 10.0.22000.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //
@@ -512,24 +512,158 @@ const
                                                                                 pid: 20);
   {$EXTERNALSYM PKEY_CompositeFX_Offload_ModeEffectClsid}
 
+  // PKEY_FX_SupportAppLauncher:
+  // vartype = VT_LPWSTR
+  // {D04E05A6-594B-4FB6-A80D-01AF5EED7D1D},21
+  PKEY_FX_SupportAppLauncher                          :  PROPERTYKEY = (fmtid: (D1: $D04E05A6;
+                                                                                D2: $594B;
+                                                                                D3: $4fb6;
+                                                                                D4: ($A8, $0D, $01, $AF, $5E, $ED, $7D, $1D));
+                                                                                Pid: 21);
+  {$EXTERNALSYM PKEY_FX_SupportAppLauncher}
+
+  // PKEY_FX_SupportedFormats:
+  // vartype = VT_LPWSTR
+  // {D04E05A6-594B-4FB6-A80D-01AF5EED7D1D},22
+  PKEY_FX_SupportedFormats                            :  PROPERTYKEY = (fmtid: (D1: $D04E05A6;
+                                                                                D2: $594B;
+                                                                                D3: $4fb6;
+                                                                                D4: ($A8, $0D, $01, $AF, $5E, $ED, $7D, $1D));
+                                                                                Pid: 22);
+  {$EXTERNALSYM PKEY_FX_SupportedFormats}
+
+  // PKEY_FX_Enumerator:
+  // vartype = VT_VECTOR | VT_LPWSTR
+  // {D04E05A6-594B-4FB6-A80D-01AF5EED7D1D},23
+  PKEY_FX_Enumerator                                  :  PROPERTYKEY = (fmtid: (D1: $D04E05A6;
+                                                                                D2: $594B;
+                                                                                D3: $4fb6;
+                                                                                D4: ($A8, $0D, $01, $AF, $5E, $ED, $7D, $1D));
+                                                                                Pid: 23);
+  {$EXTERNALSYM PKEY_FX_Enumerator}
+
+  // PKEY_FX_VersionMajor:
+  // vartype = VT_I4
+  // {D04E05A6-594B-4FB6-A80D-01AF5EED7D1D},24
+  PKEY_FX_VersionMajor                                :  PROPERTYKEY = (fmtid: (D1: $D04E05A6;
+                                                                                D2: $594B;
+                                                                                D3: $4fb6;
+                                                                                D4: ($A8, $0D, $01, $AF, $5E, $ED, $7D, $1D));
+                                                                                Pid: 24);
+  {$EXTERNALSYM PKEY_FX_VersionMajor}
+
+  // PKEY_FX_VersionMinor:
+  // vartype = VT_I4
+  // {D04E05A6-594B-4FB6-A80D-01AF5EED7D1D},25
+  PKEY_FX_VersionMinor                                :  PROPERTYKEY = (fmtid: (D1: $D04E05A6;
+                                                                                D2: $594B;
+                                                                                D3: $4fb6;
+                                                                                D4: ($A8, $0D, $01, $AF, $5E, $ED, $7D, $1D));
+                                                                                Pid: 25);
+  {$EXTERNALSYM PKEY_FX_VersionMinor}
+
+  // PKEY_FX_Author:
+  // vartype = VT_I4
+  // {D04E05A6-594B-4FB6-A80D-01AF5EED7D1D},26
+  PKEY_FX_Author                                      :  PROPERTYKEY = (fmtid: (D1: $D04E05A6;
+                                                                                D2: $594B;
+                                                                                D3: $4fb6;
+                                                                                D4: ($A8, $0D, $01, $AF, $5E, $ED, $7D, $1D));
+                                                                                Pid: 26);
+  {$EXTERNALSYM PKEY_FX_Author}
+
+  // PKEY_FX_ObjectId:
+  // vartype = VT_I4
+  // {D04E05A6-594B-4FB6-A80D-01AF5EED7D1D},27
+  PKEY_FX_ObjectId                                    :  PROPERTYKEY = (fmtid: (D1: $D04E05A6;
+                                                                                D2: $594B;
+                                                                                D3: $4fb6;
+                                                                                D4: ($A8, $0D, $01, $AF, $5E, $ED, $7D, $1D));
+                                                                                Pid: 27);
+  {$EXTERNALSYM PKEY_FX_ObjectId}
+
+
+  // PKEY_FX_State:
+  // vartype = VT_I4
+  // {D04E05A6-594B-4FB6-A80D-01AF5EED7D1D},28
+  PKEY_FX_State                                       :  PROPERTYKEY = (fmtid: (D1: $D04E05A6;
+                                                                                D2: $594B;
+                                                                                D3: $4fb6;
+                                                                                D4: ($A8, $0D, $01, $AF, $5E, $ED, $7D, $1D));
+                                                                                Pid: 28);
+  {$EXTERNALSYM PKEY_FX_State}
+
+  // PKEY_FX_EffectPackSchema_Version:
+  // vartype = VT_LPWSTR
+  // {D04E05A6-594B-4FB6-A80D-01AF5EED7D1D},29
+  PKEY_FX_EffectPackSchema_Version                    :  PROPERTYKEY = (fmtid: (D1: $D04E05A6;
+                                                                                D2: $594B;
+                                                                                D3: $4fb6;
+                                                                                D4: ($A8, $0D, $01, $AF, $5E, $ED, $7D, $1D));
+                                                                                Pid: 29);
+  {$EXTERNALSYM PKEY_FX_EffectPackSchema_Version}
+
+  // PKEY_FX_ApplyToBluetooth:
+  // vartype = VT_I4
+  // {D04E05A6-594B-4FB6-A80D-01AF5EED7D1D},30
+  PKEY_FX_ApplyToBluetooth                            :  PROPERTYKEY = (fmtid: (D1: $D04E05A6;
+                                                                                D2: $594B;
+                                                                                D3: $4fb6;
+                                                                                D4: ($A8, $0D, $01, $AF, $5E, $ED, $7D, $1D));
+                                                                                Pid: 30);
+  {$EXTERNALSYM PKEY_FX_ApplyToBluetooth}
+
+  // PKEY_FX_ApplyToUsb:
+  // vartype = VT_I4
+  // {D04E05A6-594B-4FB6-A80D-01AF5EED7D1D},31
+  PKEY_FX_ApplyToUsb                                  :  PROPERTYKEY = (fmtid: (D1: $D04E05A6;
+                                                                                D2: $594B;
+                                                                                D3: $4fb6;
+                                                                                D4: ($A8, $0D, $01, $AF, $5E, $ED, $7D, $1D));
+                                                                                Pid: 31);
+  {$EXTERNALSYM PKEY_FX_ApplyToUsb}
+
+  // PKEY_FX_ApplyToRender:
+  // vartype = VT_I4
+  // {D04E05A6-594B-4FB6-A80D-01AF5EED7D1D},32
+  PKEY_FX_ApplyToRender                               :  PROPERTYKEY = (fmtid: (D1: $D04E05A6;
+                                                                                D2: $594B;
+                                                                                D3: $4fb6;
+                                                                                D4: ($A8, $0D, $01, $AF, $5E, $ED, $7D, $1D));
+                                                                                Pid: 32);
+  {$EXTERNALSYM PKEY_FX_ApplyToRender}
+
+  // PKEY_FX_ApplyToCapture:
+  // vartype = VT_I4
+  // {D04E05A6-594B-4FB6-A80D-01AF5EED7D1D},33
+  PKEY_FX_ApplyToCapture                              :  PROPERTYKEY = (fmtid: (D1: $D04E05A6;
+                                                                                D2: $594B;
+                                                                                D3: $4fb6;
+                                                                                D4: ($A8, $0D, $01, $AF, $5E, $ED, $7D, $1D));
+                                                                                Pid: 33);
+  {$EXTERNALSYM PKEY_FX_ApplyToCapture}
 
 
   // PKEY_SFX_ProcessingModes_Supported_For_Streaming:
   // Lists the signal processing modes supported by the stream effect APO.
   // This list only includes signal processing modes where the APO actually processes the audio signal during streaming.
   // This list does not include any signal processing modes supported by the APO for discovery purposes only.
-  PKEY_SFX_ProcessingModes_Supported_For_Streaming:   PROPERTYKEY = (fmtid:  (D1: $d3993a3f; D2:$99c2; D3:$4402;
-                                                                              D4: ($b5, $ec, $a9, $2a, $3, $67, $66, $4b));
-                                                                              pid: 5);
+  PKEY_SFX_ProcessingModes_Supported_For_Streaming  :   PROPERTYKEY = (fmtid:  (D1: $d3993a3f;
+                                                                                D2:$99c2;
+                                                                                D3:$4402;
+                                                                                D4: ($b5, $ec, $a9, $2a, $3, $67, $66, $4b));
+                                                                                pid: 5);
   {$EXTERNALSYM PKEY_SFX_ProcessingModes_Supported_For_Streaming}
 
 
   // Lists the signal processing modes supported by the mode effect APO.
   // This list only includes signal processing modes where the APO actually processes the audio signal during streaming.
   // This list does not include any signal processing modes supported by the APO for discovery purposes only.
-  PKEY_MFX_ProcessingModes_Supported_For_Streaming:   PROPERTYKEY = (fmtid:  (D1: $d3993a3f; D2:$99c2; D3:$4402;
-                                                                              D4: ($b5, $ec, $a9, $2a, $3, $67, $66, $4b));
-                                                                              pid: 6);
+  PKEY_MFX_ProcessingModes_Supported_For_Streaming  :   PROPERTYKEY = (fmtid:  (D1: $d3993a3f;
+                                                                                D2:$99c2;
+                                                                                D3:$4402;
+                                                                                D4: ($b5, $ec, $a9, $2a, $3, $67, $66, $4b));
+                                                                                pid: 6);
   {$EXTERNALSYM PKEY_MFX_ProcessingModes_Supported_For_Streaming}
 
   // Lists the signal processing modes supported by the endpoint effect APO.
@@ -540,27 +674,27 @@ const
                                                                               pid: 7);
   {$EXTERNALSYM PKEY_EFX_ProcessingModes_Supported_For_Streaming}
 
-  PKEY_SFX_KeywordDetector_ProcessingModes_Supported_For_Streaming :	PROPERTYKEY = (fmtid: (D1: $d3993a3f; D2: $99c2; D3: $4402;
+  PKEY_SFX_KeywordDetector_ProcessingModes_Supported_For_Streaming : PROPERTYKEY = (fmtid: (D1: $d3993a3f; D2: $99c2; D3: $4402;
                                                                                              D4: ($b5, $ec, $a9, $2a, $3, $67, $66, $4b));
                                                                                              pid: 8);
   {$EXTERNALSYM PKEY_SFX_KeywordDetector_ProcessingModes_Supported_For_Streaming}
 
-  PKEY_MFX_KeywordDetector_ProcessingModes_Supported_For_Streaming :	PROPERTYKEY = (fmtid: (D1: $d3993a3f; D2: $99c2; D3: $4402;
+  PKEY_MFX_KeywordDetector_ProcessingModes_Supported_For_Streaming :  PROPERTYKEY = (fmtid: (D1: $d3993a3f; D2: $99c2; D3: $4402;
                                                                                              D4: ($b5, $ec, $a9, $2a, $3, $67, $66, $4b));
                                                                                              pid: 9);
   {$EXTERNALSYM PKEY_MFX_KeywordDetector_ProcessingModes_Supported_For_Streaming}
 
-  PKEY_EFX_KeywordDetector_ProcessingModes_Supported_For_Streaming :	PROPERTYKEY = (fmtid: (D1: $d3993a3f; D2: $99c2; D3: $4402;
+  PKEY_EFX_KeywordDetector_ProcessingModes_Supported_For_Streaming :  PROPERTYKEY = (fmtid: (D1: $d3993a3f; D2: $99c2; D3: $4402;
                                                                                              D4: ($b5, $ec, $a9, $2a, $3, $67, $66, $4b));
                                                                                              pid: 10);
   {$EXTERNALSYM PKEY_EFX_KeywordDetector_ProcessingModes_Supported_For_Streaming}
 
-  PKEY_SFX_Offload_ProcessingModes_Supported_For_Streaming         :	PROPERTYKEY = (fmtid: (D1: $d3993a3f; D2: $99c2; D3: $4402;
+  PKEY_SFX_Offload_ProcessingModes_Supported_For_Streaming         :  PROPERTYKEY = (fmtid: (D1: $d3993a3f; D2: $99c2; D3: $4402;
                                                                                              D4: ($b5, $ec, $a9, $2a, $3, $67, $66, $4b));
                                                                                              pid: 11);
   {$EXTERNALSYM PKEY_SFX_Offload_ProcessingModes_Supported_For_Streaming}
 
-  PKEY_MFX_Offload_ProcessingModes_Supported_For_Streaming         :	PROPERTYKEY = (fmtid: (D1: $d3993a3f; D2: $99c2; D3: $4402;
+  PKEY_MFX_Offload_ProcessingModes_Supported_For_Streaming         :  PROPERTYKEY = (fmtid: (D1: $d3993a3f; D2: $99c2; D3: $4402;
                                                                                              D4: ($b5, $ec, $a9, $2a, $3, $67, $66, $4b));
                                                                                              pid: 12);
   {$EXTERNALSYM PKEY_MFX_Offload_ProcessingModes_Supported_For_Streaming}
@@ -576,6 +710,16 @@ const
                                                                                              D4: ($b5, $ec, $a9, $2a, $03, $67, $66, $4b));
                                                                                              Pid: 13);
   {$EXTERNALSYM PKEY_APO_SWFallback_ProcessingModes}
+
+  // PKEY_FX_EffectPack_Schema_V1:
+  // {7abf23d9-727e-4d0b-86a3-dd501d260001}
+  // Effect pack schema version 1 GUID, used with PKEY_FX_EffectPackSchema_Version
+  PKEY_FX_EffectPack_Schema_V1 : TGUID = (D1: $7abf23d9;
+                                          D2: $727e;
+                                          D3: $4d0b;
+                                          D4: ($86, $a3, $dd, $50, $1d, $26, $0, $1));
+  {$EXTERNALSYM PKEY_FX_EffectPack_Schema_V1}
+
 
 
 type
