@@ -255,10 +255,18 @@ begin
     //
     //  Create our shutdown event - we want an auto reset event that starts in the not-signaled state.
     //
+    {$IF CompilerVersion > 29}
     _ShutdownEvent := CreateEventEx(Nil,
                                     Nil,
                                     0,
                                     EVENT_MODIFY_STATE or SYNCHRONIZE);
+    {$ELSE}
+    _ShutdownEvent := CreateEvent(Nil,
+                                  False,
+                                  True,
+                                  LPCWSTR('ShutdownEvent'));
+    {$ENDIF}
+
     if _ShutdownEvent = 0 then
       begin
         MessageBox(_AppWindow,
@@ -269,10 +277,18 @@ begin
         Exit;
       end;
 
+    {$IF CompilerVersion > 29}
     _AudioSamplesReadyEvent := CreateEventEx(Nil,
                                              Nil,
                                              0,
                                              EVENT_MODIFY_STATE or SYNCHRONIZE);
+
+    {$ELSE}
+    _AudioSamplesReadyEvent := CreateEvent(Nil,
+                                           False,
+                                           True,
+                                           LPCWSTR('AudioSamplesReadyEvent'));
+    {$ENDIF}
     if _ShutdownEvent = 0 then
       begin
         MessageBox(_AppWindow,

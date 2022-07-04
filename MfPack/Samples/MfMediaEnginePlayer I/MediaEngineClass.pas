@@ -75,11 +75,11 @@ uses
   {ActiveX}
   WinApi.ActiveX.ObjBase,
   {MfPack}
-  MediaFoundationApi.MfUtils,
-  MediaFoundationApi.MfApi,
-  MediaFoundationApi.MfObjects,
-  MediaFoundationApi.MfMediaEngine,
-  MediaFoundationApi.MfMetLib;
+  WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.MfObjects,
+  WinApi.MediaFoundationApi.MfMediaEngine,
+  WinApi.MediaFoundationApi.MfMetLib;
 
 
   {$TYPEINFO ON}

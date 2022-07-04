@@ -66,6 +66,9 @@ interface
 uses
   {WinApi}
   WinApi.Windows,
+{$IF CompilerVersion < 30}
+  WinApi.WinApiTypes,
+{$ENDIF}
   {DirectX}
   WinApi.DirectX.DXGIType,
   WinApi.DirectX.DXGICommon,

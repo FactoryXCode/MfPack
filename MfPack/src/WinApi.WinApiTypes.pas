@@ -2332,7 +2332,11 @@ type
 
 {$IFDEF MFP_UINT8}
   PUINT8 = ^UINT8;
+  {$IF CompilerVersion < 30}
+  UINT8 = Byte;
+  {$ELSE}
   UINT8 = type Byte;
+  {$ENDIF}
   {$EXTERNALSYM UINT8}
 {$ENDIF}
 

@@ -69,6 +69,9 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.WinMM.MMReg,
+{$IF CompilerVersion < 30}
+  WinApi.WinApiTypes,
+{$ENDIF}
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioSessionTypes;
 
@@ -490,7 +493,7 @@ type
   // client must call IXAudio2SourceVoice.Discontinuity after submitting it.
   PXAUDIO2_BUFFER_WMA = ^XAUDIO2_BUFFER_WMA;
   XAUDIO2_BUFFER_WMA = record
-    pDecodedPacketCumulativeBytes: PUINT32; {or TUINT32Array} // Decoded packet's cumulative size array.
+    pDecodedPacketCumulativeBytes: PUINT32;  // Decoded packet's cumulative size array.
                                              //  Each element is the number of bytes accumulated
                                              //  when the corresponding XWMA packet is decoded in
                                              //  order.  The array must have PacketCount elements.

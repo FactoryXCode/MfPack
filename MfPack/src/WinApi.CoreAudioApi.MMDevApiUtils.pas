@@ -87,6 +87,7 @@ uses
   System.VarUtils,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfError,
   {CoreAudioApi}
   WinApi.CoreAudioApi.MMDeviceApi,
   WinApi.CoreAudioApi.AudioPolicy,
@@ -416,40 +417,41 @@ var
   i: Integer;
   dwState: DWord;
 
-  procedure CheckHr(hres: HResult);
-    begin
-      if FAILED(hres) then
-        Abort;
-    end;
+label
+  Done;
 
 begin
-  hr := S_OK;
-
-try
-try
-  SetLength(endpointdevices, 0);
+  SetLength(endpointdevices,
+            0);
 
   if (state = 0) then
     state := $0000000F; {15 = ALL}
 
   // Create the enumerator
-  CheckHr( CoCreateInstance(CLSID_MMDeviceEnumerator,
-                            Nil,
-                            CLSCTX_ALL,
-                            IID_IMMDeviceEnumerator,
-                            pEnumerator) );
+  hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
+                         nil,
+                         CLSCTX_ALL,
+                         IID_IMMDeviceEnumerator,
+                         pEnumerator);
+  if FAILED(hr) then
+    goto Done;
 
-  CheckHr( pEnumerator.EnumAudioEndpoints(EDataFlow(flow),
-                                          state,
-                                          pCollection));
+  hr := pEnumerator.EnumAudioEndpoints(EDataFlow(flow),
+                                       state,
+                                       pCollection);
+  if FAILED(hr) then
+    goto Done;
 
-  CheckHr( pCollection.GetCount(count) );
+  hr := pCollection.GetCount(count);
+  if FAILED(hr) then
+    goto Done;
 
   // No endpoints found.
   if (count = 0) then
     begin
       devicesCount := 0;
-      Exit;
+      hr := MF_E_NOT_FOUND;
+      goto Done;
     end;
 
   // Store devices found
@@ -465,25 +467,43 @@ try
   for i := 0 to count -1 do
     begin
       // Get pointer to endpoint i.
-      CheckHr( pCollection.Item(i,
-                                pEndpoint) );
+      hr := pCollection.Item(i,
+                             pEndpoint);
+      if FAILED(hr) then
+        goto Done;
+
       // Get the endpoint ID string.
-      CheckHr( pEndpoint.GetId(pwszID) );
+      hr := pEndpoint.GetId(pwszID);
+      if FAILED(hr) then
+        goto Done;
+
       // Get the endpoint state
-      CheckHr( pEndpoint.GetState(dwState) );
+      hr := pEndpoint.GetState(dwState);
+      if FAILED(hr) then
+        goto Done;
+
       // Open propertystore, to get device descriptions
-      CheckHr( pEndpoint.OpenPropertyStore(STGM_READ,
-                                           pProps) );
+      hr := pEndpoint.OpenPropertyStore(STGM_READ,
+                                        pProps);
+      if FAILED(hr) then
+        goto Done;
 
       // Get the endpoint's friendly-name property.
-      CheckHr( pProps.GetValue(PKEY_DeviceInterface_FriendlyName,
-                               DevIfaceName) );
+      hr :=  pProps.GetValue(PKEY_DeviceInterface_FriendlyName,
+                             DevIfaceName);
+      if FAILED(hr) then
+        goto Done;
       // Get the endpoint's device description property.
-      CheckHr( pProps.GetValue(PKEY_Device_DeviceDesc,
-                               DevDesc) );
+      hr := pProps.GetValue(PKEY_Device_DeviceDesc,
+                            DevDesc);
+      if FAILED(hr) then
+        goto Done;
+
       // Get the endpoint's device name property.
-      CheckHr( pProps.GetValue(PKEY_Device_FriendlyName,
-                               DevName) );
+      hr := pProps.GetValue(PKEY_Device_FriendlyName,
+                            DevName);
+      if FAILED(hr) then
+        goto Done;
 
       // Store endpoint's properties in array.
       endpointdevices[i].DevInterfaceName := DevIfaceName.pwszVal;
@@ -498,16 +518,12 @@ try
       SafeRelease(pEndpoint);
     end;
 
-except
-  // Do Nothing. Caller is responsible for error handling.
-end;
-finally
+Done:
   PropVariantClearSafe(DevIfaceName);
   PropVariantClearSafe(DevDesc);
   PropVariantClearSafe(DevName);
-  pwszID := Nil;
+  pwszID := nil;
   Result := hr;
-end;
 end;
 
 

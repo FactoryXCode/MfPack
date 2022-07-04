@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.1.0
+// Version: 3.1.2
 // Description: This is the basic class of MfPlayer,
 //              containing the necessary methodes to play a mediafile
 //              For indepth information see the included examples (CPlayer)
@@ -1129,7 +1129,10 @@ try
                                             bufSize,
                                             timestamp);
       if FAILED(hr) then
-        Exit;
+        begin
+          Result := hr;
+          Exit;
+        end;
 
       data := buffer;
     end;
@@ -1744,6 +1747,7 @@ try
   if (m_pSession = nil) then
     begin
       hr := MF_E_INVALIDREQUEST;
+      Result := hr;
       Exit;
     end;
 

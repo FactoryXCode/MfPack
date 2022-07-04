@@ -66,6 +66,9 @@ uses
 
   {Winapi}
   Winapi.Windows,
+{$IF CompilerVersion < 30}
+  WinApi.WinApiTypes,
+{$ENDIF}
   WinApi.Evntprov;
 
   {$WEAKPACKAGEUNIT ON}

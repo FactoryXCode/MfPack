@@ -848,7 +848,7 @@ var
   hr: HRESULT;
 
 begin
-  hr:= S_OK;
+  hr := S_OK;
 
 try
   // Use assertions in debug mode only!
@@ -859,7 +859,7 @@ try
              sizeof(BITMAPINFOHEADER));
   bmi.biSize := sizeof(BITMAPINFOHEADER);
 
-  data := Nil;
+  data := nil;
   bufsize := $0000;
   hr := E_FAIL;
 
@@ -871,7 +871,7 @@ try
                                             timestamp);
       if FAILED(hr) then
         begin
-          hr := E_FAIL;
+          Result := hr;
           Exit;
         end;
       data := buffer;
@@ -889,7 +889,6 @@ try
                      bmi.biWidth * bmi.biBitCount div 8);
           Inc(data, bmi.biWidth * bmi.biBitCount div 8);
         end;
-
       hr := S_OK;
     end;
 

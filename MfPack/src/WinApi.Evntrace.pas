@@ -71,6 +71,9 @@ uses
 
   {Winapi}
   Winapi.Windows,
+{$IF CompilerVersion < 30}
+  WinApi.WinApiTypes,
+{$ENDIF}
   Winapi.Wmistr,
   Winapi.evntprov,
   Winapi.Evntcons;

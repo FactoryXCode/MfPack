@@ -68,6 +68,9 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.WinError,
+{$IF CompilerVersion < 30}
+  WinApi.WinApiTypes,
+{$ENDIF}
   {DirectX}
   WinApi.DirectX.DCommon;
 

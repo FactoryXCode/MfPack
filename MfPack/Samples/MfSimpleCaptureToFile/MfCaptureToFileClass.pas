@@ -10,7 +10,7 @@
 // Release date: 09-02-2018
 // Language: ENU
 //
-// Version: 3.1.0
+// Version: 3.1.2
 //
 // Description: Device capture class based on MFCaptureToFile example
 //
