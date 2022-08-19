@@ -24,7 +24,22 @@
 // 19/08/2022 Tony                Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: -
+// Remarks: How to use:
+//            1 Create the class.
+//             {$IFDEF DEBUG}
+//             FMediaTypeDebug := TMediaTypeDebug.Create();
+//             {$ENDIF}
+//
+//            2 Check the contents and store to file.
+//              {$IFDEF DEBUG}
+//              FMediaTypeDebug.LogMediaType(pYourMediaType);
+//              FMediaTypeDebug.SafeDebugResultsToFile();
+//              {$ENDIF}
+//
+//            3 When done Destroy the class.
+//              {$IFDEF DEBUG}
+//              FMediaTypeDebug.Free();
+//              {$ENDIF}
 //
 // Related objects: -
 // Related projects: MfPackX312
