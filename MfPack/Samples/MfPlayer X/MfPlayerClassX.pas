@@ -733,6 +733,18 @@ end;
 // The destructor
 destructor TMfPlayerX.Destroy();
 begin
+  //if you don't de-reference all the interfaces before closing everything,
+  //you will get an access violation
+  m_pSession:= nil;
+  m_pSource:= nil;
+  m_pVideoDisplay:= nil;
+  m_pTopology:= nil;
+  m_pTimeSource:= nil;
+  m_pClockStateSink:= nil;
+  m_pRateControl:= nil;
+  m_pRateSupport:= nil;
+  m_pSourcePD  := nil;
+
   DeAllocateHWnd(m_hwndThis);
   // Shutdown the Media Foundation platform
   MFShutdown();
