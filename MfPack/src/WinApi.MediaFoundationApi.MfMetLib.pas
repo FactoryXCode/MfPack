@@ -286,7 +286,7 @@ type
                           out ppObject): HRESULT;
 
   // Alternative for ProcessMessages
-  // Usage: HandleMessages(GetThreadHandle());
+  // Usage: HandleMessages(GetCurrentThread());
   procedure HandleMessages(AThread: THandle;
                            AWait: Cardinal = INFINITE);
 
