@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 09/08/2011 Tony                Fixed IMFAttributes.GetBlob
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or higher.
@@ -860,7 +861,7 @@ type
 
   PMFOffset = ^MFOffset;
   _MFOffset = record
-     fract: WORD;
+    fract: WORD;
     value: SHORT;
   end;
   {$EXTERNALSYM _MFOffset}
@@ -873,7 +874,7 @@ type
                         // This coordinate might have a fractional value.
     OffsetY: MFOffset;  // Contains the y-coordinate of the upper-left corner of the rectangle.
                         // This coordinate might have a fractional value.
-     Area: SIZE;        // A SIZE structure that contains the width and height of the rectangle.
+    Area: SIZE;         // A SIZE structure that contains the width and height of the rectangle.
   end;
   {$EXTERNALSYM _MFVideoArea}
   MFVideoArea = _MFVideoArea;
@@ -1124,9 +1125,9 @@ type
                          out pcbBlobSize: UINT32): HResult; stdcall;
 
     function GetBlob(const guidKey: TGUID;
-                     out pBuf: PUINT8;
-                     out cbBufSize: UINT32;
-                     out pcbBlobSize: PUINT32): HResult; stdcall;
+                     {out} pBuf: PUINT8;
+                     {in} cbBufSize: UINT32;
+                     {out} pcbBlobSize: PUINT32 = nil): HResult; stdcall;
     // Usage example:
     // var
     //    pArea: MFVideoArea;

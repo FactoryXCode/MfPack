@@ -301,7 +301,7 @@ type
   PCAUI = ^CAUI;
   tagCAUI = record
     cElems: ULONG;
-    pElems: PUSHORT;
+    pElems: PWord;
   end;
   {$EXTERNALSYM tagCAUI}
   CAUI = tagCAUI;
@@ -580,94 +580,83 @@ type
   REFPROPVARIANT = ^tagPROPVARIANT;
   {$EXTERNALSYM REFPROPVARIANT}
 
-  tagPROPVARIANT = record
-    vt: VarType;
-    wReserved1: PROPVAR_PAD1;
-    wReserved2: PROPVAR_PAD2;
-    wReserved3: PROPVAR_PAD3;
-
-    case Integer of
-      VT_I1:                      (cVal: AnsiChar);
-      VT_UI1:                     (bVal: UCHAR);
-      VT_I2:                      (iVal: SHORT);
-      VT_UI2:                     (uiVal: USHORT);
-      VT_I4:                      (lVal: LONG);
-      VT_UI4:                     (ulVal: ULONG);
-      VT_INT:                     (intVal: INT);
-      VT_UINT:                    (uintVal: UINT);
-      VT_I8:                      (hVal: LARGE_INTEGER);
-      VT_UI8:                     (uhVal: ULARGE_INTEGER);
-      VT_R4:                      (fltVal: FLOAT);
-      VT_R8:                      (dblVal: DOUBLE);
-      VT_BOOL:                    (boolVal: VARIANT_BOOL);
-      VT_ERROR:                   (scode: SCODE);
-      VT_CY:                      (cyVal: CY);
-      VT_DATE:                    (date: DATE);
-      VT_FILETIME:                (filetime: FILETIME);
-      VT_CLSID:                   (puuid: PCLSID);
-      VT_CF:                      (pclipdata: PCLIPDATA);
-      VT_BSTR:                    (bstrVal: BSTR);
-      VT_BSTR_BLOB:               (bstrblobVal: BSTRBLOB);
-      VT_BLOB,
-      VT_BLOB_OBJECT:             (blob: BLOB);
-      VT_LPSTR:                   (pszVal: LPSTR);
-      VT_LPWSTR:                  (pwszVal: LPWSTR);
-      VT_UNKNOWN:                 (punkVal: PIUnknown);
-      VT_DISPATCH:                (pdispVal: PIDispatch);
-      VT_STREAM,
-      VT_STREAMED_OBJECT:         (pStream: PIStream);
-      VT_STORAGE,
-      VT_STORED_OBJECT:           (pStorage: PIStorage);
-      VT_VERSIONED_STREAM:        (pVersionedStream: LPVERSIONEDSTREAM);
-      VT_ARRAY:                   (parray: PSAFEARRAY);
-      VT_VECTOR OR VT_I1:         (cac: CAC);
-      VT_VECTOR OR VT_UI1:        (caub: CAUB);
-      VT_VECTOR OR VT_I2:         (cai: CAI);
-      VT_VECTOR OR VT_UI2:        (caui: CAUI);
-      VT_VECTOR OR VT_I4:         (cal: CAL);
-      VT_VECTOR OR VT_UI4:        (caul: CAUL);
-      VT_VECTOR OR VT_I8:         (cah: CAH);
-      VT_VECTOR OR VT_UI8:        (cauh: CAUH);
-      VT_VECTOR OR VT_R4:         (caflt: CAFLT);
-      VT_VECTOR OR VT_R8:         (cadbl: CADBL);
-      VT_VECTOR OR VT_BOOL:       (cabool: CABOOL);
-      VT_VECTOR OR VT_ERROR:      (cascode: CASCODE);
-      VT_VECTOR OR VT_CY:         (cacy: CACY);
-      VT_VECTOR OR VT_DATE:       (cadate: CADATE);
-      VT_VECTOR OR VT_FILETIME:   (cafiletime: CAFILETIME);
-      VT_VECTOR OR VT_CLSID:      (cauuid: CACLSID);
-      VT_VECTOR OR VT_CF:         (caclipdata: CACLIPDATA);
-      VT_VECTOR OR VT_BSTR:       (cabstr: CABSTR);
-      VT_VECTOR OR VT_BSTR_BLOB:  (cabstrblob: CABSTRBLOB);
-      VT_VECTOR OR VT_LPSTR:      (calpstr: CALPSTR);
-      VT_VECTOR OR VT_LPWSTR:     (calpwstr: PCALPWSTR);
-      VT_VECTOR OR VT_VARIANT:    (capropvar: CAPROPVARIANT);
-      VT_BYREF OR VT_I1:          (pcVal: PAnsiChar);
-      VT_BYREF OR VT_UI1:         (pbVal: PUCHAR);
-      VT_BYREF OR VT_I2:          (piVal: PSHORT);
-      VT_BYREF OR VT_UI2:         (puiVal: PUSHORT);
-      VT_BYREF OR VT_I4:          (plVal: PLONG);
-      VT_BYREF OR VT_UI4:         (pulVal: PULONG);
-      VT_BYREF OR VT_INT:         (pintVal: PINT);
-      VT_BYREF OR VT_UINT:        (puintVal: PUINT);
-      VT_BYREF OR VT_R4:          (pfltVal: PFLOAT);
-      VT_BYREF OR VT_R8:          (pdblVal: PDOUBLE);
-      VT_BYREF OR VT_BOOL:        (pboolVal: PVARIANT_BOOL);
-      VT_BYREF OR VT_DECIMAL:     (pdecVal: PDECIMAL);
-      VT_BYREF OR VT_ERROR:       (pscode: PSCODE);
-      VT_BYREF OR VT_CY:          (pcyVal: PCY);
-      VT_BYREF OR VT_DATE:        (pdate: POLE_DATE);
-      VT_BYREF OR VT_BSTR:        (pbstrVal: PBSTR);
-      VT_BYREF OR VT_UNKNOWN:     (ppunkVal: PPointer); // you have to cast this like: IUnknown(yourpropvar.ppunkVal).QueryInterface(IID_IUnknown, pObject);  {object = pointer}
-      VT_BYREF OR VT_DISPATCH:    (ppdispVal: PPointer); // = IDispatch
-      VT_BYREF OR VT_ARRAY:       (pparray: PSAFEARRAY);
-      VT_BYREF OR VT_VARIANT:     (pvarVal: PPROPVARIANT); // = PPROPVARIANT
-  end;
   {$EXTERNALSYM tagPROPVARIANT}
-  PROPVARIANT = tagPROPVARIANT;
+  tagPROPVARIANT = record
+    vt: TVarType;
+    wReserved1: Word;
+    wReserved2: Word;
+    wReserved3: Word;
+    case Integer of
+      VT_I1: (cVal: ShortInt);
+      VT_UI1: (bVal: Byte);
+      VT_I2: (iVal: SHORT);
+      VT_UI2: (uiVal: Word);
+      VT_BOOL: (boolVal: WordBool);
+      80: (bool: WordBool);
+      VT_I4: (lVal: Longint);
+      VT_UI4: (ulVal: Cardinal);
+      VT_R4: (fltVal: Single);
+      VT_ERROR: (scode: SCODE);
+      VT_I8: (hVal: LARGE_INTEGER);
+      VT_UI8: (uhVal: ULARGE_INTEGER);
+      VT_R8: (dblVal: Double);
+      VT_CY: (cyVal: Currency);
+      VT_DATE: (date: Double);
+      VT_FILETIME: (filetime: TFileTime);
+      VT_CLSID: (puuid: PGUID);
+      VT_BLOB: (blob: tagBLOB);
+      VT_CF: (pclipdata: PClipData);
+      VT_STREAM: (pStream: Pointer); // Pointer(IStream)
+      VT_VERSIONED_STREAM: (pVersionedStream: Pointer);  // Pointer(LPVERSIONEDSTREAM)
+      VT_STORAGE: (pStorage: Pointer);  // Pointer(IStorage)
+      VT_BSTR: (bstrVal: PWideChar);
+      VT_LPSTR: (pszVal: PAnsiChar);
+      VT_LPWSTR: (pwszVal: PWideChar);
+      VT_SAFEARRAY: (parray: PSAFEARRAY);
+      VT_VECTOR or VT_UI1: (caub: CAUB);
+      VT_VECTOR or VT_I1: (cai: CAI);
+      VT_VECTOR or VT_UI2: (caui: CAUI);
+      VT_VECTOR or VT_BOOL: (cabool: CABOOL);
+      VT_VECTOR or VT_I4: (cal: CAL);
+      VT_VECTOR or VT_UI4: (caul: CAUL);
+      VT_VECTOR or VT_R4: (caflt: CAFLT);
+      VT_VECTOR or VT_ERROR: (cascode: CASCODE);
+      VT_VECTOR or VT_I8: (cah: CAH);
+      VT_VECTOR or VT_UI8: (cauh: CAUH);
+      VT_VECTOR or VT_R8: (cadbl: CADBL);
+      VT_VECTOR or VT_CY: (cacy: CACY);
+      VT_VECTOR or VT_DATE: (cadate: CADATE);
+      VT_VECTOR or VT_FILETIME: (cafiletime: CAFILETIME);
+      VT_VECTOR or VT_CLSID: (cauuid: CACLSID);
+      VT_VECTOR or VT_CF: (caclipdata: CACLIPDATA);
+      VT_VECTOR or VT_BSTR: (cabstr: CABSTR);
+      VT_VECTOR or VT_LPSTR: (calpstr: CALPSTR);
+      VT_VECTOR or VT_LPWSTR: (calpwstr: CALPWSTR );
+      VT_VECTOR or VT_VARIANT: (capropvar: CAPROPVARIANT);
+      VT_BYREF or VT_I1: (pcVal: PAnsiChar);
+      VT_BYREF or VT_UI1: (pbVal: PByte);
+      VT_BYREF or VT_I2: (piVal: PSmallInt);
+      VT_BYREF or VT_UI2: (puiVal: PWord);
+      VT_BYREF or VT_I4: (plVal: PLongInt);
+      VT_BYREF or 81: (pintVal: PInteger);
+      VT_BYREF or VT_UI4: (pulVal: PCardinal);
+      VT_BYREF or 82: (puintVal: PLongword);
+      VT_BYREF or VT_R4: (pfltVal: PSingle);
+      VT_BYREF or VT_R8: (pdblVal: PDouble);
+      VT_BYREF or VT_BOOL: (pboolVal: PBOOL);
+      VT_BYREF or VT_DECIMAL: (pdecVal: PDecimal);
+      VT_BYREF or VT_ERROR: (pscode: PSCODE);
+      VT_BYREF or VT_CY: (pcyVal: PCurrency);
+      VT_BYREF or VT_DATE: (pdate: PDate);
+      VT_BYREF or VT_BSTR: (pbstrVal: PBSTR);
+      VT_BYREF or VT_UNKNOWN: (ppunkVal: PPointer);
+      VT_BYREF or VT_DISPATCH: (ppdispVal: PPointer);
+      VT_BYREF or VT_SAFEARRAY:(pparray: PSAFEARRAY);
+      VT_BYREF or VT_VARIANT: (pvarVal: PPROPVARIANT);
+  end;
   {$EXTERNALSYM PROPVARIANT}
+  PROPVARIANT = tagPROPVARIANT;
   TPropVariant = tagPROPVARIANT;
-  PROPVARIANTArray = array [0..65535] of PROPVARIANT;
 
   // PIDMSI_STATUS value definitions
   PPIDMSI_STATUS_VALUE = ^PIDMSI_STATUS_VALUE;

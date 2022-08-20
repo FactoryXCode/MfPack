@@ -71,8 +71,8 @@ const
 // The macros and compiler directives for all windows versions are described in
 // sdkddkver.h (Master include file for versioning windows SDK/DDK.)
 //
-// Value for NTDDI_VERSION            |  Minimum system required
-//------------------------------------+-----------------------------------------
+// Value for NTDDI_VERSION              |  Minimum system required
+//--------------------------------------+-----------------------------------------
   
   MFPACK_NTDDI_WIN10_NI     = $0A00000C; // Windows 11 22621
   MFPACK_NTDDI_WIN10_CO     = $0A00000B; // Windows 11 22000
@@ -380,7 +380,7 @@ const
 
 // WARNINGS
 // enable/disable compiler warnings.
-// Set in your IDE evironment or here in case MfPack only should be affected.
+// Set in your IDE environment or here in case MfPack only should be affected.
 
 // {$WARN BOUNDS_ERROR ON}   // Enable W1012 Constant expression violates subrange bounds
 // {$WARN BOUNDS_ERROR OFF}  // Disable W1012 Constant expression violates subrange bounds
@@ -421,16 +421,15 @@ const
 const
 // a global version ID (for internal use only).
 MfpVersion   = '3.1.2'; // Release version.
+{$DEFINE MFP_VERSION_312}
 
 
-
-//Definitions WinApiTypes
-//=======================
+// Definitions WinApiTypes
+//========================
 // When encountering declaration issues with rtl definitions,
 // you should enable or disable the definitions for
 // WinApi.WinApiTypes.pas, etc. here.
 // To do so, just (un)comment the definition you (don't) need.
-
 
 
 // WinApiTypes.pas

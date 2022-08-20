@@ -4167,8 +4167,8 @@ type
     function GetStyleCount(out pdwCount: DWord): HResult; stdcall;
     // Gets the total number of styles
 
-    function GetStyles(out pPropVarStyleArray: PROPVARIANTarray): HResult; stdcall;
-    // Gets all of the styles as a string array in a PROPVARIANT (TMfPPROPVARIANT).
+    function GetStyles(out pPropVarStyleArray: PPROPVARIANT {Pointer that holds an array of PROPVARIANT}): HResult; stdcall;
+    // Gets all of the styles as a string array in a PROPVARIANT (tagPPROPVARIANT).
     // The caller must properly clear the PROPVARIANT to avoid memory leaks.
 
     function SetSelectedStyle(pwszStyle: LPCWSTR): HResult; stdcall;
@@ -6205,7 +6205,7 @@ type
 
     // This method notifies client if an unrecoverable error occurs within the monitor.
     // After call returns to monitor, it will cleanup and remove reference to IMFCameraControlNotify
-    // There is not a need to call IMFCameraControlMonitor::Shutdown after receiving an OnError
+    // There is not a need to call IMFCameraControlMonitor.Shutdown after receiving an OnError
     //
     // <param name = "hrStatus">
     // The internal error code.

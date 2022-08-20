@@ -12,7 +12,7 @@
 //
 // Revision Version: 3.1.2
 // Description: Generic converted Windows (c/cpp) types for Win32 / Win64 compatibility
-//              used by DirectX, Media Foundation and Core Audio.
+//              used by DirectX, Media Foundation, Core Audio etc.
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -123,6 +123,7 @@ const
 {$undef MFP_GUID} // Sorry ;-)
 {$endif}
 
+
 // In Delphi you should implement a GUID that needs to be defined this way:
 //
 //  Guidname: TGUID = '{B502D1BC-9A57-11d0-8FDE-00C04FD9189D}';
@@ -152,6 +153,7 @@ const
 //***********************************************************************************************
 
 type
+
 
 {$IFDEF MFP_DWORD}
    DWORD = System.Types.DWORD;
@@ -254,7 +256,7 @@ type
 
 
 {$IFDEF MFP_OLECHAR}
-  POLECHAR = ^OLECHAR;
+  POLECHAR = PWideChar;
   {$IFDEF UNICODE}
   OLECHAR = WideChar;
   {$EXTERNALSYM OLECHAR}
@@ -266,17 +268,17 @@ type
 
 
 {$IFDEF MFP_POLESTR}
- PPOLESTR = ^POLESTR;
+ PPOLESTR = PWideString;
  POLESTR = PWideString;
 {$ENDIF}
 
 
 {$IFDEF MFP_LPOLESTR}
   {$IFDEF UNICODE}
-    LPOLESTR = ^PWideChar;
+    LPOLESTR = PWideChar;
     {$EXTERNALSYM LPOLESTR}
   {$ELSE}
-    LPOLESTR = ^PAnsiChar;
+    LPOLESTR = PAnsiChar;
     {$EXTERNALSYM LPOLESTR}
   {$ENDIF}
 {$ENDIF}
@@ -371,12 +373,14 @@ type
 
 {$IFDEF MFP_ULARGE_INTEGER}
   PULARGE_INTEGER = ^ULARGE_INTEGER;
-  ULARGE_INTEGER = record
+  _ULARGE_INTEGER = record
   case integer of
     0: (LowPart: DWORD;
         HighPart: DWORD);
     1: (QuadPart: ULONGLONG);
   end;
+  {$EXTERNALSYM _ULARGE_INTEGER}
+  ULARGE_INTEGER = _ULARGE_INTEGER;
   {$EXTERNALSYM ULARGE_INTEGER}
 {$ENDIF}
 
@@ -900,7 +904,7 @@ type
   LPBLOB = ^tagBLOB;
   tagBLOB = record
     cbSize: ULONG;
-    pBlobData: PByte;
+    pBlobData: Pointer;
   end;
   {$EXTERNALSYM tagBLOB}
   BLOB = tagBLOB;
@@ -1856,12 +1860,12 @@ type
 //  PDATE = ^DATE;
 //  DATE = Double;
 
-
+// Note: Minimum supported client is Windows 10 Build 20348
 {$IFDEF MFP_CY}
   PCy = ^CY;
   LPCY = ^CY;
   tagCY = record
-  case integer of
+  case {DUMMYUNIONNAME} Integer of
     0: (Lo: ULONG; Hi: LongInt);
     1: (iInt64: LONGLONG);
   end;
@@ -1875,11 +1879,11 @@ type
   PDECIMAL = ^DECIMAL;
   tagDEC = record
     wReserved: WORD;
-    case integer of
+    case {DUMMYUNIONNAME} integer of
       0: (scale: Byte;
           sign: Byte;
           Hi32: DWORD;
-      case integer of
+      case {DUMMYUNIONNAME1} integer of
         0: (Lo32: DWORD;
             Mid32: DWORD);
         1: (Lo64: LONGLONG));
@@ -2102,13 +2106,16 @@ const
 type
 
   // Generic types
+
   // PIUnknown = ^IUnknown; > defined in WinApi.Unknwn.pas
+
   PHDC = ^HDC;
   {$EXTERNALSYM PHDC}
 
 {$IFDEF MFP_FOURCC}
    FOURCC = DWORD;
    {$DEFINE FOURCC}
+   {$EXTERNALSYM FOURCC}
 {$ENDIF}
 
 
@@ -2199,7 +2206,7 @@ type
   PuCLSSPEC = ^uCLSSPEC;
   uCLSSPEC = record
     tyspec: DWORD;
-    case integer of
+    case {DUMMYNAME} integer of
       0: (clsid: CLSID);
       1: (pFileExt: PWideChar);
       2: (pMimeType: PWideChar);
@@ -2332,11 +2339,7 @@ type
 
 {$IFDEF MFP_UINT8}
   PUINT8 = ^UINT8;
-  {$IF CompilerVersion < 30}
   UINT8 = Byte;
-  {$ELSE}
-  UINT8 = type Byte;
-  {$ENDIF}
   {$EXTERNALSYM UINT8}
 {$ENDIF}
 
@@ -2903,9 +2906,13 @@ type
 
 {$IFDEF MFP_MemoryAllocator}
 type
-  PMemoryAllocator = ^MemoryAllocator;
-  MemoryAllocator = function(Size: DWORD): Pointer; stdcall;
-  {$EXTERNALSYM MemoryAllocator}
+  PMemoryAllocator = ^IMemoryAllocator;
+  {$EXTERNALSYM PMemoryAllocator}
+  IMemoryAllocator = interface(IUnknown)
+     procedure Allocate(cbSize: ULONG); stdcall;
+     procedure Free(pv: Pointer); stdcall;
+  end;
+  {$EXTERNALSYM IMemoryAllocator}
 {$ENDIF}
 
 
@@ -2924,7 +2931,9 @@ const
   {$EXTERNALSYM ERROR_SEVERITY_ERROR}
 {$ENDIF}
 
-
+ {MfApi}
+ // Keep this name convention for backward compatibilly.
+ INTSAFE_E_ARITHMETIC_OVERFLOW : HRESULT = integer($80070216);
 
 // wingdi.h
 
@@ -3026,8 +3035,6 @@ type
   TDISPID = Longint;
   {$EXTERNALSYM TDISPID}
 {$ENDIF}
-
-
 
   // Additional Prototypes for ALL interfaces
 
