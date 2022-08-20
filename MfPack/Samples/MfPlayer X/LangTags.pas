@@ -68,7 +68,7 @@ interface
 uses
   {WinApi}
   WinApi.Windows,
-  //WinApi.Globalization,
+  WinApi.Globalization,
   {System}
   System.Classes,
   System.SysUtils,

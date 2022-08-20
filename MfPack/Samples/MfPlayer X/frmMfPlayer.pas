@@ -365,9 +365,7 @@ begin
           lst := lst + 'FormatTag     : ' + IntToStr(MfPlayerX.StreamContents[i].audio_dwFormatTag) + #13;
           lst := lst + 'SamplesPerSec : ' + IntToStr(MfPlayerX.StreamContents[i].audio_iSamplesPerSec) + #13;
           lst := lst + 'BitsPerSample : ' + IntToStr(MfPlayerX.StreamContents[i].audio_iBitsPerSample) + #13 + #13;
-
-          lst := lst + 'Compressed    : ' + MfpBoolToStr(MfPlayerX.StreamContents[i].bCompressed) + #13;
-
+          lst := lst + 'Compressed    : ' + BoolToStr(MfPlayerX.StreamContents[i].bCompressed) + #13;
         end;
     end;
   ShowMessage(lst);
@@ -403,10 +401,12 @@ begin
       if (MfPlayerX.State in [Stopped, closed]) then
         begin
           MfPlayerX.ShutDown();
+
           MfPlayerX.Free;
           MfPlayerX := nil;
         end;
     end;
+
 end;
 
 
@@ -821,8 +821,9 @@ end;
 //------------------------------------------------------------------------------
 procedure Tfrm_MfPlayer.WMSize(var Msg: TWMSize);
 begin
-  Inherited;  // OnResize method will be handled first
-
+  inherited;  // OnResize method will be handled first
+  if bAppIsClosing then
+    Exit;
   if Assigned(FloatingForm) then
     SendMessage(ph_FloatingForm,
                 WM_PARENTSIZECHANGED,
@@ -835,6 +836,9 @@ end;
 procedure Tfrm_MfPlayer.WMMove(var Msg: TWMMove);
 begin
   inherited;
+  if bAppIsClosing then
+    Exit;
+
   if Assigned(FloatingForm) then
     SendMessage(ph_FloatingForm,
                 WM_PARENTPOSCHANGED,

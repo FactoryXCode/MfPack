@@ -237,8 +237,7 @@ begin
 end;
 
 
-procedure TFloatingForm.FormCloseQuery(Sender: TObject;
-                                       var CanClose: Boolean);
+procedure TFloatingForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   CanClose := False;
   FreeAndNil(fLayerFont);
@@ -403,10 +402,6 @@ var
   txt: string;
 
 begin
-  // a request to stop playing is pending.
-  // Nothing to do here
-  if (MfPlayerX.Request = reqStop) then
-    Exit;
 
   if (MfPlayerX.Position = 0) and (Assigned(fTimedText)) then
     begin
@@ -420,7 +415,7 @@ begin
 
 
   // If a subtitle text is ready to be presented, show it.
-  if bNewTrackAvailable and (MfPlayerX.State = Started)  then
+  if bNewTrackAvailable then
     begin
 
       label1.Caption := 'Position : ' + IntToStr(MfPlayerX.Position) +

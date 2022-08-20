@@ -603,7 +603,7 @@ begin
           // Complete shutdown operations.
           // First shut down the media source. (Synchronous operation, no events.)
           if Assigned(m_pSource) then
-            {Void} m_pSource.Shutdown;
+            {Void} m_pSource.Shutdown();
 
           // Then close the media session. (Synchronous operation, no events.)
           // Now the following steps needs to be taken o safelyend the session without memory leaks:
@@ -848,7 +848,7 @@ var
   hr: HRESULT;
 
 begin
-  hr := S_OK;
+  hr:= S_OK;
 
 try
   // Use assertions in debug mode only!
@@ -859,7 +859,7 @@ try
              sizeof(BITMAPINFOHEADER));
   bmi.biSize := sizeof(BITMAPINFOHEADER);
 
-  data := nil;
+  data := Nil;
   bufsize := $0000;
   hr := E_FAIL;
 
@@ -871,7 +871,7 @@ try
                                             timestamp);
       if FAILED(hr) then
         begin
-          Result := hr;
+          hr := E_FAIL;
           Exit;
         end;
       data := buffer;
@@ -889,6 +889,7 @@ try
                      bmi.biWidth * bmi.biBitCount div 8);
           Inc(data, bmi.biWidth * bmi.biBitCount div 8);
         end;
+
       hr := S_OK;
     end;
 
@@ -2649,6 +2650,8 @@ begin
       mfpControl.Request:= reqNone;
     end;
 
+  // Handle messages in queue.
+  HandleMessages(GetCurrentThread());
   UpdateCaption();
   Result:= hr;
 end;

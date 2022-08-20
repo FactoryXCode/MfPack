@@ -5,7 +5,7 @@ uses
   {$IFDEF FASTMM}
   FastMM4,
   {$ENDIF}
-  {$IFDEF MAD}
+  {$IFDEF madExcept}
   madExcept,
   madLinkDisAsm,
   madListHardware,
@@ -29,7 +29,7 @@ uses
 begin
 
    // Check for memoryleaks (debug mode (F9) only!)
-{$IFNDEF MadExcept}
+{$IFNDEF madExcept}
   {$IFDEF DEBUG}
     {$WARN SYMBOL_PLATFORM OFF}
     ReportMemoryLeaksOnShutdown := (DebugHook <> 0);

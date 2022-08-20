@@ -1,5 +1,5 @@
 # MfPlayer X
-Version: X 3.1.2
+Version: X 3.1.3
 
 Description:
 Requires Windows 7 or later.
@@ -22,6 +22,6 @@ Project location: https://github.com/FactoryXCode/MfPack
                   https://sourceforge.net/projects/MFPack
 
 First release date: 05-02-2016
-Final release date: 01-07-2022
+Final release date: 21-08-2022
 
 Copyright © FactoryX. All rights reserved.

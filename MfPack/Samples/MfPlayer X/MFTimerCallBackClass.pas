@@ -190,16 +190,18 @@ function TMFCallBack.Invoke(pAsyncResult: IMFAsyncResult): HResult;
 var
   hr: HResult;
 
-label
-  Done;
-
 begin
+  hr := S_OK;
 
-  if Not Assigned(MFPresentationClock) then
+try
+  if not Assigned(MFPresentationClock) then
     begin
       hr := MF_E_NO_CLOCK;
-      goto Done;
+      Exit;
     end;
+
+  if not Assigned(MfTimer) then
+    Exit;
 
   hr := MfTimer.SetTimer(m_TimerFlags, // Absolute or Relative
                          TimerResolution,
@@ -214,7 +216,7 @@ begin
   // NOTE: If the clock is stopped, the method returns MF_S_CLOCK_STOPPED.
   //       The callback will not be invoked until the clock is started.
 
-  if SUCCEEDED(hr) then
+  if (hr = S_OK) then
     begin
       // Gets the clocktime in 100-nano second units.
       hr := MFPresentationClock.GetTime(m_hnsClockTime);
@@ -226,14 +228,18 @@ begin
     end;
 
   if (hr = MF_S_CLOCK_STOPPED) then
-    goto Done;
+    begin
+
+    end;
 
  if (hr = MF_E_SHUTDOWN) then
-   hr := CancelTimer(m_CancellationObject);
+    begin
+      hr := CancelTimer(m_CancellationObject);
+    end;
 
-Done:
+finally
   Result := hr;
-
+end;
 end;
 
 
