@@ -109,7 +109,6 @@ contains
   WinApi.MediaFoundationApi.MfMetLib in '..\src\WinApi.MediaFoundationApi.MfMetLib.pas',
   WinApi.MediaFoundationApi.MfApi in '..\src\WinApi.MediaFoundationApi.MfApi.pas',
   WinApi.MediaFoundationApi.MfUtils in '..\src\WinApi.MediaFoundationApi.MfUtils.pas',
-  WinApi.MediaFoundationApi.MfpMediaTypeDebug in '..\src\WinApi.MediaFoundationApi.MfpMediaTypeDebug.pas',
   WinApi.CoreAudioApi.MMDevApiUtils in '..\src\WinApi.CoreAudioApi.MMDevApiUtils.pas',
   WinApi.CoreAudioApi.DevTopoUtils in '..\src\WinApi.CoreAudioApi.DevTopoUtils.pas',
   WinApi.CoreAudioApi.SpatialAudioMetadata in '..\src\WinApi.CoreAudioApi.SpatialAudioMetadata.pas',
@@ -199,6 +198,7 @@ contains
   WinApi.MediaFoundationApi.ICodecApi in '..\src\WinApi.MediaFoundationApi.ICodecApi.pas',
   System.Services.AtlThunk in '..\src\System.Services.AtlThunk.pas',
   System.Services.Dbt in '..\src\System.Services.Dbt.pas',
-  WinApi.CoreAudioApi.AudioEngineExtensionApo in '..\src\WinApi.CoreAudioApi.AudioEngineExtensionApo.pas';
+  WinApi.CoreAudioApi.AudioEngineExtensionApo in '..\src\WinApi.CoreAudioApi.AudioEngineExtensionApo.pas',
+  WinApi.MediaFoundationApi.MfMediaTypeDebug in '..\src\WinApi.MediaFoundationApi.MfMediaTypeDebug.pas';
 
 end.

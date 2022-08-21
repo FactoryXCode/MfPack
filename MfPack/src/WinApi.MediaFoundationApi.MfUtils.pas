@@ -97,10 +97,11 @@ type
 
   TPComObj = array of Pointer;
 
-  // Use for releasing interfaces. The object does initiate a reference call.
+  // Use for releasing interfaces.
   procedure SafeRelease(const [ref] IUnk: IUnknown);
-  // Use for releasing interfaces. The object does NOT initiate a reference call.
-  procedure Safe_Release(const [ref] IUnk: IUnknown);
+
+  // Use for releasing interfaces C++ style. Note: The object does NOT initiate a reference call.
+  procedure Safe_Release(var IUnk);
 
   // Identical methods, both can be called.
   procedure FreeAndNil(const [ref] Obj: TObject); inline;
@@ -482,9 +483,8 @@ const
 // SafeRelease
 // Many of the code (examples) in the documentation use the SafeRelease method to
 // release COM interfaced objects.
-// Note: The object does initiate a reference call.
 procedure SafeRelease(const [ref] IUnk: IUnknown);
-{$IF not De﻿fined(AUT﻿OREFCOUNT)}
+{$IF NOT DEFINED(AUTOREFCOUNT)}
 var
   Temp: IUnknown;
 
@@ -499,16 +499,17 @@ begin
 end;
 {$ENDIF}
 
-// Note: Here the object does NOT initiate a reference call.
-procedure Safe_Release(const [ref] IUnk: IUnknown); inline;
+
+procedure Safe_Release(var IUnk);
 begin
-  SafeRelease(IUnk);
+  if Assigned(IUnknown(IUnk)) then
+    Pointer(IUnknown(IUnk)) := nil;
 end;
 
 
 // From DS, same as SafeDelete
 procedure FreeAndNil(const [ref] Obj: TObject); inline;
-{$IF not De﻿fined(AUT﻿OREFCOUNT)}
+{$IF NOT DEFINED(AUTOREFCOUNT)}
 var
   Temp: TObject;
 
