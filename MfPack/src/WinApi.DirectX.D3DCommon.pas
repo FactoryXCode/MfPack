@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.2
+// Revision Version: 3.1.3
 //
 // Description: D3D-version-neutral runtime information.
 //
@@ -22,8 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/08/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows Vista or later.
@@ -88,23 +87,15 @@ uses
 //----------------------------------------------------------------------------
 
 type
-  PD3D_DRIVER_TYPE = ^D3D_DRIVER_TYPE;
-  D3D_DRIVER_TYPE = DWord;
-  {$EXTERNALSYM D3D_DRIVER_TYPE}
-const
-  D3D_DRIVER_TYPE_UNKNOWN   = D3D_DRIVER_TYPE(0);
-  {$EXTERNALSYM D3D_DRIVER_TYPE_UNKNOWN}
-  D3D_DRIVER_TYPE_HARDWARE  = D3D_DRIVER_TYPE(1);
-  {$EXTERNALSYM D3D_DRIVER_TYPE_HARDWARE}
-  D3D_DRIVER_TYPE_REFERENCE = D3D_DRIVER_TYPE(2);
-  {$EXTERNALSYM D3D_DRIVER_TYPE_REFERENCE}
-  D3D_DRIVER_TYPE_NULL      = D3D_DRIVER_TYPE(3);
-  {$EXTERNALSYM D3D_DRIVER_TYPE_NULL}
-  D3D_DRIVER_TYPE_SOFTWARE  = D3D_DRIVER_TYPE(4);
-  {$EXTERNALSYM D3D_DRIVER_TYPE_SOFTWARE}
-  D3D_DRIVER_TYPE_WARP      = D3D_DRIVER_TYPE(5);
-  {$EXTERNALSYM D3D_DRIVER_TYPE_WARP}
 
+  D3D_DRIVER_TYPE = (D3D_DRIVER_TYPE_UNKNOWN	= 0,
+                     D3D_DRIVER_TYPE_HARDWARE	= (D3D_DRIVER_TYPE_UNKNOWN + 1),
+                     D3D_DRIVER_TYPE_REFERENCE	= (D3D_DRIVER_TYPE_HARDWARE + 1),
+                     D3D_DRIVER_TYPE_NULL	= (D3D_DRIVER_TYPE_REFERENCE + 1),
+                     D3D_DRIVER_TYPE_SOFTWARE	= (D3D_DRIVER_TYPE_NULL + 1),
+                     D3D_DRIVER_TYPE_WARP	= (D3D_DRIVER_TYPE_SOFTWARE + 1)
+                    );
+  {$EXTERNALSYM D3D_DRIVER_TYPE}
 
 type
   PD3D_FEATURE_LEVEL = ^D3D_FEATURE_LEVEL;
@@ -1600,10 +1591,17 @@ const
   WKPDID_D3D12UniqueObjectId   : TGUID = '{1b39de15-ec04-4bae-ba4d-8cef79fc04c1}';
 
 
- // We left the macro's out for now, because they lack documentation at this time.
+// Macro's
+
+// Those are moved to WinApi.DirectX.D3D11.pas
+//#define D3D_SET_OBJECT_NAME_N_A(pObject, Chars, pName) (pObject)->SetPrivateData(WKPDID_D3DDebugObjectName, Chars, pName)
+//#define D3D_SET_OBJECT_NAME_A(pObject, pName) D3D_SET_OBJECT_NAME_N_A(pObject, lstrlenA(pName), pName)
+
+//#define D3D_SET_OBJECT_NAME_N_W(pObject, Chars, pName) (pObject)->SetPrivateData(WKPDID_D3DDebugObjectNameW, Chars*2, pName)
+//#define D3D_SET_OBJECT_NAME_W(pObject, pName) D3D_SET_OBJECT_NAME_N_W(pObject, wcslen(pName), pName)
+
 
 const
-
   D3D_COMPONENT_MASK_X                = 1;
   {$EXTERNALSYM D3D_COMPONENT_MASK_X}
   D3D_COMPONENT_MASK_Y                = 2;

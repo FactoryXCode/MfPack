@@ -107,6 +107,8 @@ uses
   WinApi.MediaFoundationApi.WMCodecDsp,
   WinApi.MediaFoundationApi.MfError,
   WinApi.MediaFoundationApi.MfCaptureEngine,
+
+
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioPolicy,
   WinApi.CoreAudioApi.MMDeviceApi;
@@ -202,7 +204,6 @@ type
     aAudioFormats: TMFAudioFormatArray; // Audio capabilities of the device supported by Media Foundation.
     dwSupportedFormats: DWord; // Number of mediatype formats of the capturedevice supported by Media Foundation.
     dwNativeFormats: DWord;    // Number of native mediatype formats of the capturedevice.
-    mfActivate: IMFActivate; // IMFActivate interface of the device.
     procedure Reset();       // Resets the record to default.
   end;
 
@@ -744,9 +745,10 @@ type
                          const key: TGUID): HRESULT;
 
 
-  // Creates a compatible video format with a different subtype.
-  function CloneVideoMediaType(pSrcMediaType: IMFMediaType;
-                               guidSubType: REFGUID;
+  // Creates a compatible video format with a different subtype if param guidSubType <> GUID_NULL else
+  // the SubType will be the source subtype.
+  function CloneVideoMediaType(const pSrcMediaType: IMFMediaType;
+                               const guidSubType: REFGUID;
                                out ppNewMediaType: IMFMediaType): HRESULT;
 
 
@@ -959,6 +961,11 @@ const
 
 implementation
 
+uses
+  {$IFDEF DEBUG}
+  WinApi.MediaFoundationApi.MfMediaTypeDebug;
+  {$ENDIF}
+
 const
   User32Lib = 'User32.dll';
 
@@ -1034,8 +1041,6 @@ begin
   for i := 0 to Length(aVideoFormats) - 1 do
     aVideoFormats[i].Reset;
   aVideoFormats := nil;
-
-  SafeRelease(mfActivate);
 end;
 
 
@@ -2897,7 +2902,6 @@ begin
       if SUCCEEDED(hr) then
         begin
           pDeviceProperties[i].lpSymbolicLink := szSymLink;
-          pDeviceProperties[i].mfActivate := ppDevices[i];
 
           //====================================================================
 
@@ -2981,8 +2985,7 @@ begin
     end;
 
 Done:
-  ReleaseActivateArray(uiCount,
-                       ppDevices);
+  ReleaseActivateArray(ppDevices);
   Result := hr;
 end;
 
@@ -3115,20 +3118,26 @@ begin
       // The application should process the needs.
       pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].bMFSupported := IsMfSupportedFormat(pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].fSubType);
       pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].FormatsIndex := dwIndex;
-      pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].mfMediaType := pMediaType;
 
-      // copy
+      hr := MfCreateMediaType(pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].mfMediaType);
 
-      //CopyMemory(@pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex],
-      //           @VideoInfo,
-      //           SizeOf(TVideoFormatInfo));
+      if SUCCEEDED(hr) then
+        pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].mfMediaType := pMediaType
+        //CloneVideoMediaType(pMediaType,
+        //                    GUID_NULL,
+        //                    pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].mfMediaType)
+      else
+        Break;
 
-      //VideoInfo.Reset();
       Inc(dwNativeCount);
       Inc(dwIndex);
     end;
 
 Done:
+   //If a failure occurs, the entire array will be cleared.
+   if FAILED(hr) then
+     pDeviceProperties := nil;
+
   // Store supported formats only.
   pDeviceProperties[pDeviceIndex].dwSupportedFormats := dwSupportedCount;
   // Store unsupported and supported formats.
@@ -3191,8 +3200,7 @@ begin
 {$POINTERMATH OFF}
 
 Done:
-  ReleaseActivateArray(count,
-                       ppDevices);
+  ReleaseActivateArray(ppDevices);
   Result := hr;
 end;
 
@@ -3890,9 +3898,8 @@ begin
         end;
     end;
 
-  for i := 0 to count -1 do
+  for i := 0 to count - 1 do
     SafeRelease(ppDevices[i]);
-
   CoTaskMemFree(ppDevices);
 
 {$POINTERMATH OFF}
@@ -4254,49 +4261,62 @@ var
   hr: HRESULT;
 
 begin
-
-  PropVariantInit(pvar);
-
-  hr := pSrc.GetItem(key,
-                     pvar);
-
-  if (SUCCEEDED(hr)) then
+  if Assigned(pSrc) then
     begin
-      hr := pDest.SetItem(key,
-                          pvar);
+      PropVariantInit(pvar);
+      hr := pSrc.GetItem(key,
+                         pvar);
+      if (SUCCEEDED(hr)) then
+        hr := pDest.SetItem(key,
+                            pvar);
       PropVariantClear(pvar);
-    end;
-
+    end
+  else
+    hr := E_POINTER;
   Result := hr;
-
 end;
 
 
 
-// Creates a compatible video format with a different subtype.
-function CloneVideoMediaType(pSrcMediaType: IMFMediaType;
-                             guidSubType: REFGUID;
+// Creates a compatible video format with a different subtype if param guidSubType <> GUID_NULL else
+// the SubType will be the source subtype.
+function CloneVideoMediaType(const pSrcMediaType: IMFMediaType;
+                             const guidSubType: REFGUID;
                              out ppNewMediaType: IMFMediaType): HRESULT;
 var
   hr: HRESULT;
-
+  rGuid: REFGUID;
+ // {$IFDEF DEBUG}
+ // FMediaTypeDebug: TMediaTypeDebug;
+ // {$ENDIF}
 label
   done;
 
 begin
 
+// For debug use.
+//  {$IFDEF DEBUG}
+//  FMediaTypeDebug := TMediaTypeDebug.Create();
+//  FMediaTypeDebug.LogMediaType(pSrcMediaType);
+//  FMediaTypeDebug.SafeDebugResultsToFile('MFMetLib CloneVideoMediaType');
+//  FreeAndNil(FMediaTypeDebug);
+//  {$ENDIF}
+
   hr := MFCreateMediaType(ppNewMediaType);
   if (FAILED(hr)) then
     goto done;
 
-
-  hr := ppNewMediaType.SetGUID(MF_MT_MAJOR_TYPE,
-                               MFMediaType_Video);
+  if (guidSubType = GUID_NULL) then
+    hr := pSrcMediaType.GetGUID(MF_MT_SUBTYPE,
+                                rGuid)
+  else
+    hr := ppNewMediaType.SetGUID(MF_MT_SUBTYPE,
+                                 guidSubType);
   if (FAILED(hr)) then
     goto done;
 
-  hr := ppNewMediaType.SetGUID(MF_MT_SUBTYPE,
-                               guidSubType);
+  hr := ppNewMediaType.SetGUID(MF_MT_MAJOR_TYPE,
+                               MFMediaType_Video);
   if (FAILED(hr)) then
     goto done;
 
@@ -5877,7 +5897,6 @@ begin
        goto Done;
 
     end;
-
 
 done:
   Result := hr;

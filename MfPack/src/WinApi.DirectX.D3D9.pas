@@ -10,7 +10,7 @@
 // Release date: 14-01-2018
 // Language: ENU
 //
-// Revision Version: 3.1.2
+// Revision Version: 3.1.3
 // Description: Direct3D include file
 //
 // Organisation: FactoryX
@@ -21,8 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 28/08/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: New apps should use the latest Direct3D API
@@ -65,14 +64,14 @@ unit WinApi.DirectX.D3D9;
 interface
 
 uses
-
   {WinApi}
   WinApi.Windows,
   {System}
   System.Types,
   {DirectX}
-  WinApi.DirectX.D3d9Types,
-  WinApi.DirectX.D3d9Caps;
+  WinApi.DirectX.D3DCommon,
+  WinApi.DirectX.D3D9Types,
+  WinApi.DirectX.D3D9Caps;
 
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
@@ -806,7 +805,7 @@ type
 
     function SetPrivateData(const refguid: TGUID;
                             const pData: PVOID;
-                            SizeOfData,
+                            SizeOfData: DWORD;
                             Flags: DWORD): HResult; stdcall;
 
     function GetPrivateData(const refguid: TGUID;
@@ -1221,8 +1220,8 @@ type
     function GetDevice(out ppDevice: IDirect3DDevice9): HResult; stdcall;
 
     function SetPrivateData(const refguid: TGuid;
-                            const pData; SizeOfData,
-                            Flags: DWord): HResult; stdcall;
+                            const pData; DWORD,
+                            Flags: DWORD): HResult; stdcall;
 
     function GetPrivateData(const refguid: TGuid;
                             pData: Pointer;
@@ -1231,7 +1230,7 @@ type
     function FreePrivateData(const refguid: TGUID): HResult; stdcall;
 
     function GetContainer(const riid: TGUID;
-                          var ppContainer: Pointer): HResult; stdcall;
+                          [ref] const ppContainer: Pointer): HResult; stdcall;
 
     function GetDesc(out pDesc: D3DVolume_Desc): HResult; stdcall;
 
@@ -1949,17 +1948,16 @@ implementation
 const
   D3D9Lib                = 'D3d9.dll';
 
+function MAKE_D3DHRESULT(Code: DWORD): DWORD; inline;
+begin
+  Result:= DWORD((1 shl 31) or (_FACD3D shl 16)) or Code;
+end;
 
-  // Macro's
-  function MAKE_D3DHRESULT(Code: DWORD): DWORD;
-  begin
-    Result:= DWORD((1 shl 31) or (_FACD3D shl 16)) or Code;
-  end;
 
-  function MAKE_D3DSTATUS(Code: DWORD): DWORD;
-  begin
-    Result:= DWORD((0 shl 31) or (_FACD3D shl 16)) or Code;
-  end;
+function MAKE_D3DSTATUS(Code: DWORD): DWORD; inline;
+begin
+  Result:= DWORD((0 shl 31) or (_FACD3D shl 16)) or Code;
+end;
 
 
 {$WARN SYMBOL_PLATFORM OFF}
@@ -1985,7 +1983,7 @@ function Direct3DCreate9(SDKVersion: LongWord): IDirect3D9; stdcall;
 begin
   // Cast returned pointer to IDirect3D9 pointer.
   Result:= IDirect3D9(_Direct3DCreate9(SDKVersion));
-  // release from autoincrement reference count
+  // Release from autoincrement reference count
   if Assigned(Result) then
     Result._Release;
 end;

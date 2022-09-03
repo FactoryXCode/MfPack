@@ -129,7 +129,7 @@ const
     {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW}
     MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD   = DWord($fffffff9); // The preferred stream for recording video
     {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD}
-    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO          = DWord($fffffff8); // The first independent photo stream if present, or else the same stream chosen by MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW
+    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO          = DWord($fffffff8); // The first independent photo stream if present, or else the same stream choosen by MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW
     {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO}
     MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_AUDIO          = DWord($fffffff7); // The first available audio stream
     {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_AUDIO}
@@ -498,7 +498,7 @@ type
   IMFCaptureEngineOnEventCallback = interface(IUnknown)
   ['{aeda51c0-9025-4983-9012-de597b88b089}']
 
-    function OnEvent(pEvent: IMFMediaEvent): HResult; stdcall;
+    function OnEvent(const pEvent: IMFMediaEvent): HResult; stdcall;
     // Callback function that completes an asynchronous call on the capture engine.
     //
     // <param name = "IMFMediaEvent">
@@ -820,7 +820,7 @@ type
     // <param name = "pUnknown">
     // Pointer to IUnknown, can be an IMFTransform or IMFActivate.
 
-    function RemoveEffect(dwSourceStreamIndex: DWORD;
+    function RemoveEffect(const dwSourceStreamIndex: DWORD;
                           pUnknown_: IUnknown): HResult; stdcall;
     // Allows an app to remove an effect to the device stream.
     // <param name = "dwSourceStreamIndex">
@@ -828,14 +828,14 @@ type
     // <param name = "pUnknown">
     // Pointer to IUnknown, can be an IMFTransform or IMFActivate.
 
-    function RemoveAllEffects(dwSourceStreamIndex: DWORD): HResult; stdcall;
+    function RemoveAllEffects(const dwSourceStreamIndex: DWORD): HResult; stdcall;
     // Allows an app to remove all effects from to the device stream.
     // <param name = "dwSourceStreamIndex">
     // Zero based stream index of source.
 
-    function GetAvailableDeviceMediaType(dwSourceStreamIndex: DWORD;
-                                         dwMediaTypeIndex: DWORD;
-                                         ppMediaType: PIMFMediaType): HResult; stdcall;
+    function GetAvailableDeviceMediaType(const dwSourceStreamIndex: DWORD;
+                                         const dwMediaTypeIndex: DWORD;
+                                         out ppMediaType: PIMFMediaType): HResult; stdcall;
     // Gets an available media type for a stream from the device.
     // <param name = "dwSourceStreamIndex">
     // Zero based stream index of source.
@@ -844,7 +844,7 @@ type
     // <param name = "ppMediaType">
     // Receives a pointer to IMFMediaType. App should release this.
 
-    function SetCurrentDeviceMediaType(dwSourceStreamIndex: DWORD;
+    function SetCurrentDeviceMediaType(const dwSourceStreamIndex: DWORD;
                                        pMediaType: IMFMediaType): HResult; stdcall;
     // Sets a media type for an stream from the device.
     // <param name = "dwSourceStreamIndex">
@@ -852,7 +852,7 @@ type
     // <param name = "pMediaType">
     // Pointer to IMFMediaType.
 
-    function GetCurrentDeviceMediaType(dwSourceStreamIndex: DWORD;
+    function GetCurrentDeviceMediaType(const dwSourceStreamIndex: DWORD;
                                        out ppMediaType: IMFMediaType): HResult; stdcall;
     // Gets the currently set media type for a stream from the device
     // <param name = "dwSourceStreamIndex">
@@ -865,7 +865,7 @@ type
     // <param name = "pdwStreamCount">
     // Receives the number of streams available.
 
-    function GetDeviceStreamCategory(dwSourceStreamIndex: DWORD;
+    function GetDeviceStreamCategory(const dwSourceStreamIndex: DWORD;
                                      out pStreamCategory: MF_CAPTURE_ENGINE_STREAM_CATEGORY): HResult; stdcall;
     // Gets the stream category for a given source stream index
     // <param name = "dwSourceStreamIndex">
@@ -915,8 +915,8 @@ type
   ['{a6bba433-176b-48b2-b375-53aa03473207}']
     function Initialize(pEventCallback: IMFCaptureEngineOnEventCallback;
                         pAttributes: IMFAttributes;
-                        pAudioSource: IUnknown;
-                        pVideoSource: IUnknown): HResult; stdcall;
+                        const pAudioSource: IUnknown;
+                        const pVideoSource: IUnknown): HResult; stdcall;
     // Initializes the the capture engine.
     // App should listen for MF_CAPTURE_ENGINE_INITIALIZED via IMFCaptureEngineOnEventCallback.
     // <param name ="pEventCallback">
@@ -962,7 +962,7 @@ type
     // <param name = "ppSink">
     // Receives a pointer to IMFCaptureSink interface.
 
-    function GetSource(out ppSource: IMFCaptureSource): HResult; stdcall;
+    function GetSource({out} ppSource: PIMFCaptureSource): HResult; stdcall;
     // Method to obtain access to IMFCaptureSource.
     // <param name = "ppSource">
     // Receives a pointer to IMFCaptureSource interface.

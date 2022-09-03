@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.1.2
+// Revision Version: 3.1.3
 // Description: Requires Windows Vista or later.
 //              MfApi.pas is the unit containing the APIs for using the MF platform.
 //
@@ -101,7 +101,6 @@ uses
   WinApi.DirectX.DXGIFormat,
   WinApi.DirectX.D3D9Types,
   {MediaFoundationApi}
-  WinApi.MediaFoundationApi.MfUtils,
   WinApi.MediaFoundationApi.MfObjects;
 
   {$WEAKPACKAGEUNIT ON}
@@ -4323,6 +4322,11 @@ const
 
 //#endif (NTDDI_VERSION >= NTDDI_WIN10_RS4)
 
+  // > Win 8
+  // Specifies that a media type is auto-decoded.
+  // {ea031a62-8bbb-43c5-b5c4-572d2d231c18}                                    {BOOL stored as UINT32}
+  MD_MT_FSSourceTypeDecoded : TGUID = '{ea031a62-8bbb-43c5-b5c4-572d2d231c18}';
+  // end Win 8
 
   // Save original format information for AVI and WAV files
   //=======================================================
@@ -5366,6 +5370,49 @@ const
   //    Receives the low-order 32 bits.
 
 
+  // Multiplies one value of type SIZE_T by another.
+  // Example: hhresult = SizeTMult(length, sizeof(WCHAR), cb);
+  // Parameters
+  // cbMultiplicand [in]
+  //    Type: SIZE_T
+  //    The value to be multiplied by cbMultiplier.
+  // cbMultiplier [in]
+  //    Type: SIZE_T
+  //    The value by which to multiply cbMultiplicand.
+  // pcbResult [out]
+  //    Type: SIZE_T*
+  //    A pointer to the result.
+  //    If the operation results in a value that overflows or underflows the capacity of the type,
+  //    the function returns INTSAFE_E_ARITHMETIC_OVERFLOW and this parameter is not valid.
+  // NOTE: This function is also declared in WinApi.MediaFoundationApi.MfUtils.pas
+  function UIntAdd(var uAugend: UINT32;
+                   const uAddend: UINT32;
+                   out puResult: PUINT32): HRESULT; inline;
+
+  // Adds two values of type UINT.
+  // Parameters
+  // uAugend [in]
+  //    Type: UINT
+  //    The first value in the equation.
+  // uAddend [in]
+  //    Type: UINT
+  //    The value to add to uAugend.
+  // puResult [out]
+  //    Type: PUINT
+  //    A pointer to the sum.
+  //    If the operation results in a value that overflows or underflows the capacity of the type,
+  //    the function returns INTSAFE_E_ARITHMETIC_OVERFLOW and this parameter is not valid.
+  // Return value
+  // Type: HRESULT
+  //    If this function succeeds, it returns S_OK. Otherwise, it returns an HRESULT error code.
+  // Remarks
+  // This is one of a set of inline functions designed to provide arithmetic operations and
+  // perform validity checks with minimal impact on performance.
+  // NOTE: This function is also declared in WinApi.MediaFoundationApi.MfUtils.pas
+  function SizeTMult(const cbMultiplicand: SIZE_T;
+                     const cbMultiplier: SIZE_T;
+                     out pcbResult: PSIZE_T): HRESULT; inline;
+
 
   // Packs a UINT32 width value and a UINT32 height value into a UINT64 value that represents a size.
   // Returns the packed UINT64 value.
@@ -6069,15 +6116,45 @@ const
   procedure MFHeapFree;                          external MfApiLibA name 'MFHeapFree' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFllMulDiv;                           external MfApiLibA name 'MFllMulDiv' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFGetContentProtectionSystemCLSID;    external MfApiLibA name 'MFGetContentProtectionSystemCLSID' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  // Win10_VB  // check lib after MS release
-  function MFCombineSamples;                     external MfApiLibA {TODO: check for proper lib} name 'MFCombineSamples' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function MFSplitSample;                        external MfApiLibA {TODO: check for proper lib} name 'MFSplitSample' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  // end Win10_VB
+  function MFCombineSamples;                     external MfApiLibA name 'MFCombineSamples' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFSplitSample;                        external MfApiLibA name 'MFSplitSample' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
   {$WARN SYMBOL_PLATFORM ON}
 
 // internal functions converted from MACRO'S
 //==========================================
+
+
+function UIntAdd(var uAugend: UINT32;
+                 const uAddend: UINT32;
+                 out puResult: PUINT32): HRESULT; inline;
+begin
+  try
+    uAugend := uAugend + uAddend;
+    puResult := Pointer(uAugend);
+
+    Result := S_OK;
+  except //Silent exception
+    Result := INTSAFE_E_ARITHMETIC_OVERFLOW;
+  end;
+end;
+
+
+
+function SizeTMult(const cbMultiplicand: SIZE_T;
+                   const cbMultiplier: SIZE_T;
+                   out pcbResult: PSIZE_T): HRESULT; inline;
+begin
+  try
+    pcbResult := Pointer(cbMultiplier * cbMultiplicand);
+    Result := S_OK;
+  except //Silent exception
+    Result := INTSAFE_E_ARITHMETIC_OVERFLOW;
+  end;
+end; // SizeTMult
+
+
+
 function PackSize(unWidth: UINT32;
                   unHeight: UINT32): UINT64;
 begin

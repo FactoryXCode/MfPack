@@ -80,6 +80,7 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.WinApiTypes,
+  WinApi.UuIds,
   {System}
   System.SysUtils,
   System.Classes,
@@ -126,7 +127,8 @@ type
     // Call this method to log
     function LogMediaType(pType: IMFMediaType): HRESULT;
     // Call this method to save the log to file.
-    procedure SafeDebugResultsToFile(const pFileName: string = 'MFMediaTypeDebug';
+    procedure SafeDebugResultsToFile(const pMethodName: string = '';
+                                     const pFileName: string = 'MFMediaTypeDebug';
                                      const pExt: string = '.txt');
 
     property DebugResults: TStringList read slDebug;
@@ -147,6 +149,7 @@ end;
 destructor TMediaTypeDebug.Destroy();
 begin
   slDebug.Free();
+  slDebug := nil;
   inherited Destroy();
 end;
 
@@ -161,6 +164,13 @@ label
   Return;
 
 begin
+
+  if not Assigned(pType) then
+    begin
+      hr := E_POINTER;
+      goto Return;
+    end;
+
   hr := pType.GetCount(unCount);
   if FAILED(hr) then
     goto Return;
@@ -185,29 +195,50 @@ Return:
 end;
 
 
-procedure TMediaTypeDebug.SafeDebugResultsToFile(const pFileName: string = 'MFMediaTypeDebug';
+procedure TMediaTypeDebug.SafeDebugResultsToFile(const pMethodName: string = '';
+                                                 const pFileName: string = 'MFMediaTypeDebug';
                                                  const pExt: string = '.txt');
+const
+  scFormat = '%s/%s%s(%d)%s';
+
 var
   i: Integer;
   sFileName: string;
+  sMetName: string;
   sDir: string;
+
   bFileExists: Boolean;
 
 begin
   i := 0;
   bFileExists := True;
   sDir := ExtractFileDir(Application.ExeName);
-  sFileName := Format('%s/%s(%d)%s',
-                      [sDir, pFileName, i, pExt]);
+  if pMethodName = '' then
+    sMetName := ''
+  else
+    sMetName := Format('_%s',[pMethodName]);
 
-  while (bFileExists = False) do
+  sFileName := Format(scFormat,
+                      [sDir,
+                       pFileName,
+                       sMetName,
+                       i,
+                       pExt]);
+
+  while (bFileExists = True) do
     begin
       if FileExists(sFileName) then
-        sFileName := Format('%s/%s(%d)%s',
-                            [sDir, pFileName, i, pExt])
+        begin
+          sFileName := Format(scFormat,
+                              [sDir,
+                               pFileName,
+                               sMetName,
+                               i,
+                               pExt]);
+          Inc(i);
+        end
       else
         bFileExists := False;
-      Inc(i);
     end;
 
   slDebug.SaveToFile(sFileName);
@@ -231,6 +262,9 @@ end;
 
 //
 function TMediaTypeDebug.GetGuidNameConst(const pGuid: TGUID): string;
+var
+  sUnkGuid: string;
+
 begin
 
   if IsEqualGuid(pGuid,
@@ -255,7 +289,7 @@ begin
                        MF_MT_WRAPPED_TYPE) then
     Result := 'MF_MT_WRAPPED_TYPE'
   else if IsEqualGuid(pGuid,
-                       MF_MT_AUDIO_NUM_CHANNELS) then
+                       MF_MT_AUDIO_NUM_CHANNELS) then            //FORMAT_VideoInfo2
     Result := 'MF_MT_AUDIO_NUM_CHANNELS'
   else if IsEqualGuid(pGuid,
                        MF_MT_AUDIO_SAMPLES_PER_SECOND) then
@@ -435,11 +469,14 @@ begin
                        MF_MT_MPEG4_CURRENT_SAMPLE_ENTRY) then
     Result := 'MF_MT_MPEG4_CURRENT_SAMPLE_ENTRY'
   else if IsEqualGuid(pGuid,
-                       MF_MT_ORIGINAL_4CC) then
+                      MF_MT_ORIGINAL_4CC) then
     Result := 'MF_MT_ORIGINAL_4CC'
   else if IsEqualGuid(pGuid,
-                       MF_MT_ORIGINAL_WAVE_FORMAT_TAG) then
+                      MF_MT_ORIGINAL_WAVE_FORMAT_TAG) then
     Result := 'MF_MT_ORIGINAL_WAVE_FORMAT_TAG'
+  else if IsEqualGuid(pGuid,
+                      MD_MT_FSSourceTypeDecoded) then
+    Result := 'MD_MT_FSSourceTypeDecoded'
 
 
   // Media types
@@ -656,8 +693,38 @@ begin
   else if IsEqualGuid(pGuid,
                        MFAudioFormat_ADTS) then //       WAVE_FORMAT_MPEG_ADTS_AAC
     Result := 'MFAudioFormat_ADTS'
-  else
-    Result := 'Unknown format.';
+
+
+  // Format Types
+
+
+  else if IsEqualGuid(pGuid,
+                      FORMAT_None) then          //      FORMAT_None
+    Result := 'FORMAT_None'
+  else if IsEqualGuid(pGuid,
+                      FORMAT_VideoInfo) then     //      FORMAT_VideoInfo
+    Result := 'FORMAT_VideoInfo'
+  else if IsEqualGuid(pGuid,
+                      FORMAT_VideoInfo2) then    //      FORMAT_VideoInfo2
+    Result := 'FORMAT_VideoInfo2'
+  else if IsEqualGuid(pGuid,
+                      FORMAT_WaveFormatEx) then  //      FORMAT_WaveFormatEx
+    Result := 'FORMAT_WaveFormatEx'
+  else if IsEqualGuid(pGuid,
+                      FORMAT_MPEGVideo) then     //      FORMAT_MPEGVideo
+    Result := 'FORMAT_MPEGVideo'
+  else if IsEqualGuid(pGuid,
+                      FORMAT_MPEGStreams) then   //      FORMAT_MPEGStreams
+    Result := 'FORMAT_MPEGStreams'
+  else if IsEqualGuid(pGuid,
+                      FORMAT_DvInfo) then        //      FORMAT_DvInfo & DVINFO
+    Result := 'FORMAT_DvInfo, DVINFO'
+
+  else                                           //      Unknown format
+    begin
+      sUnkGuid := GUIDToString(pGuid);
+      Result := Format('Unknown format: %s', [sUnkGuid]);
+    end;
 end;
 
 //
@@ -806,9 +873,6 @@ end;
 function TMediaTypeDebug.LogVideoArea(const pPropVar: PROPVARIANT): HRESULT;
 var
   pArea: MFVideoArea;
-  i: Integer;
-  ix, iy: SmallInt;
-
 
 begin
 
@@ -817,12 +881,6 @@ begin
   else
     begin
 {$POINTERMATH ON}
-      // test  to check elements
-      for i := 0 to pPropVar.caub.cElems -1 do
-        begin
-          ix := pPropVar.caub.pElems[i];
-        end;
-
       pArea := MakeArea(pPropVar.caub.pElems[0],
                         pPropVar.caub.pElems[1],
                         pPropVar.caub.pElems[2],

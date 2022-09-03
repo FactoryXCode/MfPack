@@ -98,18 +98,19 @@ type
   TPComObj = array of Pointer;
 
   // Use for releasing interfaces.
-  procedure SafeRelease(const [ref] IUnk: IUnknown);
+  procedure SafeRelease(var IUnk);
 
+  {$IF COMPILERVERSION < 25.0}
   // Use for releasing interfaces C++ style. Note: The object does NOT initiate a reference call.
   procedure Safe_Release(var IUnk);
+  {$ENDIF}
 
   // Identical methods, both can be called.
   procedure FreeAndNil(const [ref] Obj: TObject); inline;
   procedure SafeDelete(const [ref] Obj: TObject); inline;
 
   //
-  procedure ReleaseActivateArray(pCount: UINT32;
-                                 ppDevArray: PIMFActivate);
+  procedure ReleaseActivateArray(ppDevArray: PIMFActivate);
 
   // Compare GUIDS
   function InlineIsEqualGUID(rguid1: TGUID;
@@ -480,32 +481,41 @@ const
   VER_PRODUCT_TYPE      = $80;
 
 
+
 // SafeRelease
 // Many of the code (examples) in the documentation use the SafeRelease method to
 // release COM interfaced objects.
-procedure SafeRelease(const [ref] IUnk: IUnknown);
-{$IF NOT DEFINED(AUTOREFCOUNT)}
-var
-  Temp: IUnknown;
-
+// Version > Delphi XE3
+{$IF COMPILERVERSION > 24.0}
+procedure SafeRelease(var IUnk);
+{$IF NOT DEFINED(AUTOREFCOUNT)}  // Note: The object does initiate a reference call.
 begin
-  Temp := IUnk;
-  IUNKnown(pointer(@IUnk)^) := nil;
-  //IUnk._Release;
+  if Assigned(IUnknown(IUnk)) then
+    Pointer(IUnknown(IUnk)) := nil;
 end;
-{$ELSE}
+{$ELSE} // Note: Here the object does NOT initiate a reference call.
 begin
-  IUnk := nil;
+  if IUnknown(IUnk) <> nil then
+    IUnknown(IUnk) := nil;
 end;
 {$ENDIF}
+{$ENDIF}
 
+// Version < Delphi XE4
+{$IF COMPILERVERSION < 25.0}
+procedure SafeRelease(var IUnk);
+// Note: The object does initiate a reference call.
+begin
+  if Assigned(IUnknown(IUnk)) then
+    Pointer(IUnknown(IUnk)) := nil;
+end;
 
 procedure Safe_Release(var IUnk);
 begin
   if Assigned(IUnknown(IUnk)) then
     Pointer(IUnknown(IUnk)) := nil;
 end;
-
+{$ENDIF}
 
 // From DS, same as SafeDelete
 procedure FreeAndNil(const [ref] Obj: TObject); inline;
@@ -534,14 +544,15 @@ end;
 
 
 // Releases a IMFActivate pointer
-procedure ReleaseActivateArray(pCount: UINT32;
-                               ppDevArray: PIMFActivate);
+procedure ReleaseActivateArray(ppDevArray: PIMFActivate);
 var
   i: Integer;
+  uiCount: UINT32;
 
 begin
 {$POINTERMATH ON}
-  for i := 0 to pCount -1 do
+  ppDevArray[0].GetCount(uiCount);
+  for i := 0 to uiCount -1 do
     SafeRelease(ppDevArray[i]);
 {$POINTERMATH OFF}
   CoTaskMemFree(ppDevArray);
@@ -1690,6 +1701,8 @@ begin
   data := (data AND (not (mask shl offset)))
           OR DWORD(val shl offset);
 end;
+
+// Note: UINT can be casted as DWORD, use Set/GetDWordBits
 
 // WORD
 // Getter

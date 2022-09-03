@@ -10,7 +10,7 @@
 // Release date: 29-07-2012
 // Language: ENU
 //
-// Revision Version: 3.1.2
+// Revision Version: 3.1.3
 // Description: Generic converted Windows (c/cpp) types for Win32 / Win64 compatibility
 //              used by DirectX, Media Foundation, Core Audio etc.
 //
@@ -1061,14 +1061,14 @@ type
 
 {$IFDEF MFP_WPARAM}
   PWPARAM = ^WPARAM;
-  WPARAM = Cardinal;
+  WPARAM = UINT_PTR;
   {$EXTERNALSYM WPARAM}
 {$ENDIF}
 
 
 {$IFDEF MFP_LPARAM}
   PLPARAM = ^LPARAM;
-  LPARAM = LONG_PTR;
+  LPARAM = INT_PTR;
   {$EXTERNALSYM LPARAM}
 {$ENDIF}
 

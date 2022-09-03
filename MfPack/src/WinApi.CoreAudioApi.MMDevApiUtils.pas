@@ -417,41 +417,41 @@ var
   i: Integer;
   dwState: DWord;
 
-label
-  Done;
+  procedure CheckHr(hres: HResult);
+    begin
+      if FAILED(hres) then
+        Abort;
+    end;
 
 begin
-  SetLength(endpointdevices,
-            0);
+  hr := S_OK;
+
+try
+try
+  SetLength(endpointdevices, 0);
 
   if (state = 0) then
     state := $0000000F; {15 = ALL}
 
   // Create the enumerator
-  hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
-                         nil,
-                         CLSCTX_ALL,
-                         IID_IMMDeviceEnumerator,
-                         pEnumerator);
-  if FAILED(hr) then
-    goto Done;
+  CheckHr( CoCreateInstance(CLSID_MMDeviceEnumerator,
+                            Nil,
+                            CLSCTX_ALL,
+                            IID_IMMDeviceEnumerator,
+                            pEnumerator) );
 
-  hr := pEnumerator.EnumAudioEndpoints(EDataFlow(flow),
-                                       state,
-                                       pCollection);
-  if FAILED(hr) then
-    goto Done;
+  CheckHr( pEnumerator.EnumAudioEndpoints(EDataFlow(flow),
+                                          state,
+                                          pCollection));
 
-  hr := pCollection.GetCount(count);
-  if FAILED(hr) then
-    goto Done;
+  CheckHr( pCollection.GetCount(count) );
 
   // No endpoints found.
   if (count = 0) then
     begin
       devicesCount := 0;
-      hr := MF_E_NOT_FOUND;
-      goto Done;
+      Result := MF_E_NOT_FOUND;
+      Exit;
     end;
 
   // Store devices found
@@ -467,43 +467,25 @@ begin
   for i := 0 to count -1 do
     begin
       // Get pointer to endpoint i.
-      hr := pCollection.Item(i,
-                             pEndpoint);
-      if FAILED(hr) then
-        goto Done;
-
+      CheckHr( pCollection.Item(i,
+                                pEndpoint) );
       // Get the endpoint ID string.
-      hr := pEndpoint.GetId(pwszID);
-      if FAILED(hr) then
-        goto Done;
-
+      CheckHr( pEndpoint.GetId(pwszID) );
       // Get the endpoint state
-      hr := pEndpoint.GetState(dwState);
-      if FAILED(hr) then
-        goto Done;
-
+      CheckHr( pEndpoint.GetState(dwState) );
       // Open propertystore, to get device descriptions
-      hr := pEndpoint.OpenPropertyStore(STGM_READ,
-                                        pProps);
-      if FAILED(hr) then
-        goto Done;
+      CheckHr( pEndpoint.OpenPropertyStore(STGM_READ,
+                                           pProps) );
 
       // Get the endpoint's friendly-name property.
-      hr :=  pProps.GetValue(PKEY_DeviceInterface_FriendlyName,
-                             DevIfaceName);
-      if FAILED(hr) then
-        goto Done;
+      CheckHr( pProps.GetValue(PKEY_DeviceInterface_FriendlyName,
+                               DevIfaceName) );
       // Get the endpoint's device description property.
-      hr := pProps.GetValue(PKEY_Device_DeviceDesc,
-                            DevDesc);
-      if FAILED(hr) then
-        goto Done;
-
+      CheckHr( pProps.GetValue(PKEY_Device_DeviceDesc,
+                               DevDesc) );
       // Get the endpoint's device name property.
-      hr := pProps.GetValue(PKEY_Device_FriendlyName,
-                            DevName);
-      if FAILED(hr) then
-        goto Done;
+      CheckHr( pProps.GetValue(PKEY_Device_FriendlyName,
+                               DevName) );
 
       // Store endpoint's properties in array.
       endpointdevices[i].DevInterfaceName := DevIfaceName.pwszVal;
@@ -518,12 +500,16 @@ begin
       SafeRelease(pEndpoint);
     end;
 
-Done:
+except
+  // Do Nothing. Caller is responsible for error handling.
+end;
+finally
   PropVariantClearSafe(DevIfaceName);
   PropVariantClearSafe(DevDesc);
   PropVariantClearSafe(DevName);
   pwszID := nil;
   Result := hr;
+end;
 end;
 
 
