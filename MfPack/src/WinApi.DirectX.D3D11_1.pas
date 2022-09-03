@@ -66,7 +66,6 @@ unit WinApi.DirectX.D3D11_1;
 interface
 
 uses
-
   {WinApi}
   WinApi.Windows,
   WinApi.WinApiTypes,
@@ -163,6 +162,7 @@ type
     ['{cc86fabe-da55-401d-85e7-e3c9de2877e9}']
 
     procedure GetDesc1(out pDesc: D3D11_BLEND_DESC1); stdcall;
+
   end;
   IID_ID3D11BlendState1 = ID3D11BlendState1;
   {$EXTERNALSYM IID_ID3D11BlendState1}
@@ -644,7 +644,7 @@ type
   ID3D11Device1 = interface(ID3D11Device)
   ['{a04bfb29-08ef-43d6-a49c-a9bdbdcbe686}']
 
-    procedure GetImmediateContext1([ref] const ppImmediateContext: ID3D11DeviceContext1); stdcall
+    procedure GetImmediateContext1([ref] const ppImmediateContext: ID3D11DeviceContext1); stdcall;
 
     function CreateDeferredContext1(ContextFlags: UINT;  // Reserved parameter; must be 0
                                    [ref] const ppDeferredContext: ID3D11DeviceContext1): HResult; stdcall;
@@ -690,7 +690,7 @@ type
 
     procedure SetMarker(Name: PWideChar); stdcall;
 
-    function GetStatus( void ): BOOL; stdcall;
+    function GetStatus(): BOOL; stdcall;
   end;
   IID_ID3DUserDefinedAnnotation = ID3DUserDefinedAnnotation;
   {$EXTERNALSYM IID_ID3DUserDefinedAnnotation}
