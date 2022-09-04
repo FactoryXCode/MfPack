@@ -199,6 +199,7 @@ contains
   System.Services.AtlThunk in '..\src\System.Services.AtlThunk.pas',
   System.Services.Dbt in '..\src\System.Services.Dbt.pas',
   WinApi.CoreAudioApi.AudioEngineExtensionApo in '..\src\WinApi.CoreAudioApi.AudioEngineExtensionApo.pas',
-  WinApi.MediaFoundationApi.MfMediaTypeDebug in '..\src\WinApi.MediaFoundationApi.MfMediaTypeDebug.pas';
+  WinApi.MediaFoundationApi.MfMediaTypeDebug in '..\src\WinApi.MediaFoundationApi.MfMediaTypeDebug.pas',
+  WinApi.DirectX.D3D11 in '..\src\WinApi.DirectX.D3D11.pas';
 
 end.
