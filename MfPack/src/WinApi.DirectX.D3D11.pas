@@ -24,9 +24,10 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 31/08/2022                     Updated to latest D3D11 version.
 //------------------------------------------------------------------------------
 //
-// Remarks: Embarcadero's Delphi 10.4 D3D11.pas is outdated!
+// Remarks: Embarcadero's <= Delphi 10.4 D3D11.pas is outdated!
 //
 // Related objects: -
 // Related projects: MfPackX312
@@ -1154,7 +1155,8 @@ type
     D3D11_RESOURCE_DIMENSION_BUFFER = 1,
     D3D11_RESOURCE_DIMENSION_TEXTURE1D = 2,
     D3D11_RESOURCE_DIMENSION_TEXTURE2D = 3,
-    D3D11_RESOURCE_DIMENSION_TEXTURE3D = 4);
+    D3D11_RESOURCE_DIMENSION_TEXTURE3D = 4
+    );
   {$EXTERNALSYM D3D11_RESOURCE_DIMENSION}
 
   D3D11_SRV_DIMENSION = D3D_SRV_DIMENSION;
@@ -1167,7 +1169,8 @@ type
     D3D11_DSV_DIMENSION_TEXTURE2D = 3,
     D3D11_DSV_DIMENSION_TEXTURE2DARRAY = 4,
     D3D11_DSV_DIMENSION_TEXTURE2DMS = 5,
-    D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY = 6);
+    D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY = 6
+    );
   {$EXTERNALSYM D3D11_DSV_DIMENSION}
 
 
@@ -1180,7 +1183,8 @@ type
     D3D11_RTV_DIMENSION_TEXTURE2DARRAY = 5,
     D3D11_RTV_DIMENSION_TEXTURE2DMS = 6,
     D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY = 7,
-    D3D11_RTV_DIMENSION_TEXTURE3D = 8);
+    D3D11_RTV_DIMENSION_TEXTURE3D = 8
+    );
   {$EXTERNALSYM D3D11_RTV_DIMENSION}
 
   D3D11_UAV_DIMENSION = (
@@ -1190,14 +1194,16 @@ type
     D3D11_UAV_DIMENSION_TEXTURE1DARRAY = 3,
     D3D11_UAV_DIMENSION_TEXTURE2D = 4,
     D3D11_UAV_DIMENSION_TEXTURE2DARRAY = 5,
-    D3D11_UAV_DIMENSION_TEXTURE3D = 8);
+    D3D11_UAV_DIMENSION_TEXTURE3D = 8
+    );
   {$EXTERNALSYM D3D11_UAV_DIMENSION}
 
   D3D11_USAGE = (
     D3D11_USAGE_DEFAULT = 0,
     D3D11_USAGE_IMMUTABLE = 1,
     D3D11_USAGE_DYNAMIC = 2,
-    D3D11_USAGE_STAGING = 3);
+    D3D11_USAGE_STAGING = 3
+    );
   {$EXTERNALSYM D3D11_USAGE}
 
   D3D11_RESOURCE_MISC_FLAG = (
@@ -1285,12 +1291,14 @@ type
     D3D11_COMPARISON_GREATER = 5,
     D3D11_COMPARISON_NOT_EQUAL = 6,
     D3D11_COMPARISON_GREATER_EQUAL = 7,
-    D3D11_COMPARISON_ALWAYS = 8);
+    D3D11_COMPARISON_ALWAYS = 8
+    );
   {$EXTERNALSYM D3D11_COMPARISON_FUNC}
 
   D3D11_DEPTH_WRITE_MASK = (
     D3D11_DEPTH_WRITE_MASK_ZERO = 0,
-    D3D11_DEPTH_WRITE_MASK_ALL = 1);
+    D3D11_DEPTH_WRITE_MASK_ALL = 1
+    );
   {$EXTERNALSYM D3D11_DEPTH_WRITE_MASK}
 
   D3D11_STENCIL_OP = (
@@ -1301,7 +1309,8 @@ type
     D3D11_STENCIL_OP_DECR_SAT = 5,
     D3D11_STENCIL_OP_INVERT = 6,
     D3D11_STENCIL_OP_INCR = 7,
-    D3D11_STENCIL_OP_DECR = 8);
+    D3D11_STENCIL_OP_DECR = 8
+    );
   {$EXTERNALSYM D3D11_STENCIL_OP}
 
   D3D11_DEPTH_STENCILOP_DESC = record
@@ -1379,7 +1388,8 @@ type
     D3D11_BLEND_SRC1_COLOR = 16,
     D3D11_BLEND_INV_SRC1_COLOR = 17,
     D3D11_BLEND_SRC1_ALPHA = 18,
-    D3D11_BLEND_INV_SRC1_ALPHA = 19);
+    D3D11_BLEND_INV_SRC1_ALPHA = 19
+    );
   {$EXTERNALSYM D3D11_BLEND}
 
   D3D11_BLEND_OP = (
@@ -1387,7 +1397,8 @@ type
     D3D11_BLEND_OP_SUBTRACT = 2,
     D3D11_BLEND_OP_REV_SUBTRACT = 3,
     D3D11_BLEND_OP_MIN = 4,
-    D3D11_BLEND_OP_MAX = 5);
+    D3D11_BLEND_OP_MAX = 5
+    );
   {$EXTERNALSYM D3D11_BLEND_OP}
 
   D3D11_COLOR_WRITE_ENABLE = (
@@ -1396,9 +1407,10 @@ type
     D3D11_COLOR_WRITE_ENABLE_BLUE = 4,
     D3D11_COLOR_WRITE_ENABLE_ALPHA = 8,
     D3D11_COLOR_WRITE_ENABLE_ALL = (D3D11_COLOR_WRITE_ENABLE_RED +
-                                     D3D11_COLOR_WRITE_ENABLE_GREEN +
-                                     D3D11_COLOR_WRITE_ENABLE_BLUE +
-                                     D3D11_COLOR_WRITE_ENABLE_ALPHA));
+                                    D3D11_COLOR_WRITE_ENABLE_GREEN +
+                                    D3D11_COLOR_WRITE_ENABLE_BLUE +
+                                    D3D11_COLOR_WRITE_ENABLE_ALPHA)
+    );
   {$EXTERNALSYM D3D11_COLOR_WRITE_ENABLE}
 
   D3D11_RENDER_TARGET_BLEND_DESC = record
@@ -1418,7 +1430,9 @@ type
     AlphaToCoverageEnable: BOOL;
     IndependentBlendEnable: BOOL;
     RenderTarget: array [0..7] of D3D11_RENDER_TARGET_BLEND_DESC;
-    constructor Create(Default: boolean); overload;
+
+    constructor Create(Default: Boolean); overload;
+
     constructor Create(const o: D3D11_BLEND_DESC); overload;
   end;
   {$EXTERNALSYM D3D11_BLEND_DESC}
@@ -1487,7 +1501,6 @@ type
   IID_ID3D11RasterizerState = ID3D11RasterizerState;
 
 
-
   D3D11_SUBRESOURCE_DATA = record
     pSysMem: Pointer;
     SysMemPitch: UINT;
@@ -1513,11 +1526,13 @@ type
   PID3D11Resource = ^ID3D11Resource;
   ID3D11Resource = interface (ID3D11DeviceChild)
   ['{DC8E63F3-D12B-4952-B47B-5E45026A862D}']
+
     procedure GetType(out pResourceDimension: D3D11_RESOURCE_DIMENSION); stdcall;
 
     procedure SetEvictionPriority(EvictionPriority: UINT); stdcall;
 
     function GetEvictionPriority: UINT; stdcall;
+
   end;
   IID_ID3D11Resource = ID3D11Resource;
   {$EXTERNALSYM IID_ID3D11Resource}
@@ -1657,13 +1672,19 @@ type
     BindFlags: UINT;
     CPUAccessFlags: UINT;
     MiscFlags: UINT;
+
   public
     constructor Create(const o: D3D11_TEXTURE3D_DESC); overload;
-    constructor Create(aFormat: DXGI_FORMAT; aWidth: UINT; aHeight: UINT;
-                      aDepth: UINT; aMipLevels: UINT = 0;
-                      aBindFlags: UINT = UINT(D3D11_BIND_SHADER_RESOURCE);
-                      aUsage: D3D11_USAGE = D3D11_USAGE_DEFAULT;
-                      aCpuaccessFlags: UINT = 0; aMiscFlags: UINT = 0); overload;
+
+    constructor Create(aFormat: DXGI_FORMAT;
+                       aWidth: UINT;
+                       aHeight: UINT;
+                       aDepth: UINT;
+                       aMipLevels: UINT = 0;
+                       aBindFlags: UINT = UINT(D3D11_BIND_SHADER_RESOURCE);
+                       aUsage: D3D11_USAGE = D3D11_USAGE_DEFAULT;
+                       aCpuaccessFlags: UINT = 0;
+                       aMiscFlags: UINT = 0); overload;
   end;
   {$EXTERNALSYM D3D11_TEXTURE3D_DESC}
   PD3D11_TEXTURE3D_DESC = ^D3D11_TEXTURE3D_DESC;
@@ -1944,6 +1965,7 @@ type
     ViewDimension: D3D11_RTV_DIMENSION;
     public
       constructor Create(const o: D3D11_RENDER_TARGET_VIEW_DESC); overload;
+
       constructor Create(aViewDimension: D3D11_RTV_DIMENSION;
                          aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
                          aMipSlice: UINT = 0;        {FirstElement for BUFFER}
@@ -2057,20 +2079,33 @@ type
     Format: DXGI_FORMAT;
     ViewDimension: D3D11_DSV_DIMENSION;
     Flags: UINT;
+
     public
       constructor Create(const o: D3D11_DEPTH_STENCIL_VIEW_DESC); overload;
+
       constructor Create(aViewDimension: D3D11_DSV_DIMENSION;
-                  aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
-                  aMipSlice: UINT = 0; aFirstArraySlice: UINT = 0;
-                  aArraySize : UINT = UINT(-1); aFlags: UINT = 0); overload;
-      constructor Create(pTex1D: ID3D11Texture1D; aViewDimension: D3D11_DSV_DIMENSION;
-                  aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
-                  aMipSlice: UINT = 0; aFirstArraySlice: UINT = 0; aArraySize: UINT = UINT(-1);
-                  aFlags: UINT = 0); overload;
-      constructor Create(pTex2D: ID3D11Texture2D; aViewDimension: D3D11_DSV_DIMENSION;
-                  aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
-                  aMipSlice: UINT = 0; aFirstArraySlice: UINT = 0; aArraySize: UINT = UINT(-1);
-                  aFlags: UINT = 0); overload;
+                         aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
+                         aMipSlice: UINT = 0;
+                         aFirstArraySlice: UINT = 0;
+                         aArraySize: UINT = UINT(-1);
+                         aFlags: UINT = 0); overload;
+
+      constructor Create(pTex1D: ID3D11Texture1D;
+                         aViewDimension: D3D11_DSV_DIMENSION;
+                         aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
+                         aMipSlice: UINT = 0;
+                         aFirstArraySlice: UINT = 0;
+                         aArraySize: UINT = UINT(-1);
+                         aFlags: UINT = 0); overload;
+
+      constructor Create(pTex2D: ID3D11Texture2D;
+                         aViewDimension: D3D11_DSV_DIMENSION;
+                         aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
+                         aMipSlice: UINT = 0;
+                         aFirstArraySlice: UINT = 0;
+                         aArraySize: UINT = UINT(-1);
+                         aFlags: UINT = 0); overload;
+
     case Byte of
       0: (Texture1D: D3D11_TEX1D_DSV);
       1: (Texture1DArray: D3D11_TEX1D_ARRAY_DSV);
@@ -2148,26 +2183,41 @@ type
   D3D11_UNORDERED_ACCESS_VIEW_DESC = record
     Format: DXGI_FORMAT;
     ViewDimension: D3D11_UAV_DIMENSION;
+
     public
       constructor Create(const o: D3D11_UNORDERED_ACCESS_VIEW_DESC); overload;
+
       constructor Create(aViewDimension: D3D11_UAV_DIMENSION;
-                  aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
-                  aMipSlice: UINT = 0; (* FirstElement for BUFFER *)
-                  aFirstArraySlice: UINT = 0; (* NumElements for BUFFER, FirstWSlice for TEXTURE3D *)
-                  aArraySize: UINT = UINT(-1); (* WSize for TEXTURE3D *)
-                  aFlags: UINT = 0 (* BUFFER only *)); overload;
+                         aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
+                         aMipSlice: UINT = 0; (* FirstElement for BUFFER *)
+                         aFirstArraySlice: UINT = 0; (* NumElements for BUFFER, FirstWSlice for TEXTURE3D *)
+                         aArraySize: UINT = UINT(-1); (* WSize for TEXTURE3D *)
+                         aFlags: UINT = 0 (* BUFFER only *)); overload;
+
       constructor Create(aBuffer: ID3D11Buffer; aFormat: DXGI_FORMAT;
-                  aFirstElement: UINT; aNumElements: UINT;
-                  aFlags: UINT = 0); overload;
+                         aFirstElement: UINT;
+                         aNumElements: UINT;
+                         aFlags: UINT = 0); overload;
+
       constructor Create(pTex1D: ID3D11Texture1D; aViewDimension: D3D11_UAV_DIMENSION;
-                  aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN; aMipSlice : UINT = 0;
-                  aFirstArraySlice: UINT = 0; aArraySize: UINT = UINT(-1)); overload;
-      constructor Create(pTex2D: ID3D11Texture2D; aViewDimension: D3D11_UAV_DIMENSION;
-                  aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN; aMipSlice : UINT = 0;
-                  aFirstArraySlice: UINT = 0; aArraySize: UINT = UINT(-1)); overload;
-      constructor Create(pTex3D: ID3D11Texture3D;
-                  aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN; aMipSlice : UINT = 0;
-                  aFirstWSlice: UINT = 0; awSize: UINT = UINT(-1)); overload;
+                         aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
+                         aMipSlice: UINT = 0;
+                         aFirstArraySlice: UINT = 0;
+                         aArraySize: UINT = UINT(-1)); overload;
+
+      constructor Create(pTex2D: ID3D11Texture2D;
+                         aViewDimension: D3D11_UAV_DIMENSION;
+                         aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
+                         aMipSlice : UINT = 0;
+                         aFirstArraySlice: UINT = 0;
+                         aArraySize: UINT = UINT(-1)); overload;
+
+     constructor Create(pTex3D: ID3D11Texture3D;
+                        aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
+                        aMipSlice : UINT = 0;
+                        aFirstWSlice: UINT = 0;
+                        awSize: UINT = UINT(-1)); overload;
+
     case Byte of
       0: (Buffer: D3D11_BUFFER_UAV);
       1: (Texture1D: D3D11_TEX1D_UAV);
@@ -2339,7 +2389,7 @@ type
     public
       constructor Create(const o: D3D11_SAMPLER_DESC); overload;
 
-      constructor Create(isDefault: boolean); overload;
+      constructor Create(isDefault: Boolean); overload;
 
       constructor Create(aFilter: D3D11_FILTER;
                          aAddressU: D3D11_TEXTURE_ADDRESS_MODE;
@@ -3733,7 +3783,7 @@ type
     property YCbCr_Matrix: Integer index $0201 read GetBits write SetBits;  //  1 bit at offset 2
     property YCbCr_xvYCC: Integer index $0301 read GetBits write SetBits;   //  1 bit at offset 3
     property Nominal_Range: Integer index $0402 read GetBits write SetBits; //  2 bits at offset 4   // D3D11_VIDEO_PROCESSOR_NOMINAL_RANGE
-    property Reserved: Integer index $0626 read GetBits write SetBits;      //  26 bits at offset 6
+    property Reserved: Integer index $061A read GetBits write SetBits;      //  26 bits at offset 6
   end;
   {$EXTERNALSYM D3D11_VIDEO_PROCESSOR_COLOR_SPACE}
 
@@ -4636,7 +4686,6 @@ type
     function CreateVideoProcessorEnumerator(pDesc: D3D11_VIDEO_PROCESSOR_CONTENT_DESC;
                                             [ref] const ppEnum: ID3D11VideoProcessorEnumerator): HRESULT; stdcall;
 
-    // Check
     function GetVideoDecoderProfileCount(): UINT; stdcall;
 
     function GetVideoDecoderProfile(Index: UINT;
@@ -4802,7 +4851,8 @@ type
 
 
 
-// helper funcions.
+  // helper methods.
+  // ===============
 
   // Helper functionality has been added to the records, since we cannot add
   // operator overload to a record helper.
@@ -5033,9 +5083,9 @@ function D3D11_ENCODE_ANISOTROPIC_FILTER(bComparison: UINT): D3D11_FILTER;
 begin
   Result := D3D11_FILTER(D3D11_ANISOTROPIC_FILTERING_BIT or
             UINT(D3D11_ENCODE_BASIC_FILTER(UINT(D3D11_FILTER_TYPE_LINEAR),
-                              UINT(D3D11_FILTER_TYPE_LINEAR),
-                              UINT(D3D11_FILTER_TYPE_LINEAR),
-                              bComparison)));
+            UINT(D3D11_FILTER_TYPE_LINEAR),
+            UINT(D3D11_FILTER_TYPE_LINEAR),
+            bComparison)));
 end;
 
 
@@ -5045,9 +5095,9 @@ begin
 end;
 
 
-function D3D11_DECODE_MAG_FILTER(d3d11Filter: UINT):D3D11_FILTER_TYPE;
+function D3D11_DECODE_MAG_FILTER(d3d11Filter: UINT): D3D11_FILTER_TYPE;
 begin
-  Result := D3D11_FILTER_TYPE((d3d11Filter shr D3D11_MAG_FILTER_SHIFT) and D3D11_FILTER_TYPE_MASK) ;
+  Result := D3D11_FILTER_TYPE((d3d11Filter shr D3D11_MAG_FILTER_SHIFT) and D3D11_FILTER_TYPE_MASK);
 end;
 
 
@@ -5133,14 +5183,19 @@ end;
 // =============================================================================
 
 
-{ D3D11_BOX}
-
+{D3D11_BOX}
 constructor D3D11_BOX.Create(const o: D3D11_BOX);
 begin
   Self := o;
 end;
 
-constructor D3D11_BOX.Create(aLeft, aTop, aFront, aRight, aBottom, aBack: LONG);
+
+constructor D3D11_BOX.Create(aLeft: LONG;
+                             aTop: LONG;
+                             aFront: LONG;
+                             aRight: LONG;
+                             aBottom: LONG;
+                             aBack: LONG);
 begin
   left := aLeft;
   top := aTop;
@@ -5150,53 +5205,65 @@ begin
   back := aBack;
 end;
 
-class operator D3D11_BOX.Equal(const l, r: D3D11_BOX): Boolean;
+
+class operator D3D11_BOX.Equal(const l: D3D11_BOX;
+                               const r: D3D11_BOX): Boolean;
 begin
   Result := (l.left = r.left) and (l.top = r.top) and (l.front = r.front) and
             (l.right = r.right) and (l.bottom = r.bottom) and (l.back = r.back);
 end;
 
-class operator D3D11_BOX.NotEqual(const l, r: D3D11_BOX): Boolean;
+
+class operator D3D11_BOX.NotEqual(const l: D3D11_BOX;
+                                  const r: D3D11_BOX): Boolean;
 begin
   Result := Not (l = r);
 end;
 
-{ D3D11_DEPTH_STENCIL_DESC}
 
+{D3D11_DEPTH_STENCIL_DESC}
 constructor D3D11_DEPTH_STENCIL_DESC.Create(const o: D3D11_DEPTH_STENCIL_DESC);
 begin
   Self := o;
 end;
 
+
 constructor D3D11_DEPTH_STENCIL_DESC.Create(default: boolean);
 const
-  defaultStencilOp: D3D11_DEPTH_STENCILOP_DESC =
-          (StencilFailOp : D3D11_STENCIL_OP_KEEP;
-           StencilDepthFailOp: D3D11_STENCIL_OP_KEEP;
-           StencilPassOp:D3D11_STENCIL_OP_KEEP;
-           StencilFunc: D3D11_COMPARISON_ALWAYS);
+  defaultStencilOp: D3D11_DEPTH_STENCILOP_DESC = (StencilFailOp: D3D11_STENCIL_OP_KEEP;
+  StencilDepthFailOp: D3D11_STENCIL_OP_KEEP;
+  StencilPassOp: D3D11_STENCIL_OP_KEEP;
+  StencilFunc: D3D11_COMPARISON_ALWAYS);
+
 begin
   if default then
-  begin
-    DepthEnable := True;
-    DepthWriteMask := D3D11_DEPTH_WRITE_MASK_ALL;
-    DepthFunc := D3D11_COMPARISON_LESS;
-    StencilEnable := False;
-    StencilReadMask := D3D11_DEFAULT_STENCIL_READ_MASK;
-    StencilWriteMask := D3D11_DEFAULT_STENCIL_WRITE_MASK;
-    FrontFace := defaultStencilOp;
-    BackFace := defaultStencilOp;
-  end;
+    begin
+      DepthEnable := True;
+      DepthWriteMask := D3D11_DEPTH_WRITE_MASK_ALL;
+      DepthFunc := D3D11_COMPARISON_LESS;
+      StencilEnable := False;
+      StencilReadMask := D3D11_DEFAULT_STENCIL_READ_MASK;
+      StencilWriteMask := D3D11_DEFAULT_STENCIL_WRITE_MASK;
+      FrontFace := defaultStencilOp;
+      BackFace := defaultStencilOp;
+    end;
 end;
 
+
 constructor D3D11_DEPTH_STENCIL_DESC.Create(aDepthEnable: BOOL;
-  aDepthWriteMask: D3D11_DEPTH_WRITE_MASK; aDepthFunc: D3D11_COMPARISON_FUNC;
-  aStencilEnable: BOOL; aStencilReadMask, aStencilWriteMask: UINT8;
-  aFrontStencilFailOp, aFrontStencilDepthFailOp,
-  aFrontStencilPassOp: D3D11_STENCIL_OP;
-  aFrontStencilFunc: D3D11_COMPARISON_FUNC; aBackStencilFailOp,
-  aBackStencilDepthFailOp, aBackStencilPassOp: D3D11_STENCIL_OP;
-  aBackStencilFunc: D3D11_COMPARISON_FUNC);
+                                            aDepthWriteMask: D3D11_DEPTH_WRITE_MASK;
+                                            aDepthFunc: D3D11_COMPARISON_FUNC;
+                                            aStencilEnable: BOOL;
+                                            aStencilReadMask: UINT8;
+                                            aStencilWriteMask: UINT8;
+                                            aFrontStencilFailOp: D3D11_STENCIL_OP;
+                                            aFrontStencilDepthFailOp: D3D11_STENCIL_OP;
+                                            aFrontStencilPassOp: D3D11_STENCIL_OP;
+                                            aFrontStencilFunc: D3D11_COMPARISON_FUNC;
+                                            aBackStencilFailOp: D3D11_STENCIL_OP;
+                                            aBackStencilDepthFailOp: D3D11_STENCIL_OP;
+                                            aBackStencilPassOp: D3D11_STENCIL_OP;
+                                            aBackStencilFunc: D3D11_COMPARISON_FUNC);
 begin
   DepthEnable := aDepthEnable;
   DepthWriteMask := aDepthWriteMask;
@@ -5214,48 +5281,51 @@ begin
   BackFace.StencilFunc := aBackStencilFunc;
 end;
 
-{ D3D11_BLEND_DESC}
 
-constructor D3D11_BLEND_DESC.Create(Default: boolean);
+{D3D11_BLEND_DESC}
+constructor D3D11_BLEND_DESC.Create(Default: Boolean);
 const
-  defaultRenderTargetBlendDesc: D3D11_RENDER_TARGET_BLEND_DESC =
-    (BlendEnable: False;
-    SrcBlend: D3D11_BLEND_ONE;
-    DestBlend: D3D11_BLEND_ZERO;
-    BlendOp: D3D11_BLEND_OP_ADD;
-    SrcBlendAlpha: D3D11_BLEND_ONE;
-    DestBlendAlpha: D3D11_BLEND_ZERO;
-    BlendOpAlpha: D3D11_BLEND_OP_ADD;
-    RenderTargetWriteMask: UInt8(D3D11_COLOR_WRITE_ENABLE_ALL));
+  defaultRenderTargetBlendDesc: D3D11_RENDER_TARGET_BLEND_DESC = (BlendEnable: False;
+  SrcBlend: D3D11_BLEND_ONE;
+  DestBlend: D3D11_BLEND_ZERO;
+  BlendOp: D3D11_BLEND_OP_ADD;
+  SrcBlendAlpha: D3D11_BLEND_ONE;
+  DestBlendAlpha: D3D11_BLEND_ZERO;
+  BlendOpAlpha: D3D11_BLEND_OP_ADD;
+  RenderTargetWriteMask: UInt8(D3D11_COLOR_WRITE_ENABLE_ALL));
+
 var
-  I: Integer;
+  i: Integer;
+
 begin
   if Default then
-  begin
-    AlphaToCoverageEnable := False;
-    IndependentBlendEnable := False;
-    for I := 0 to D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT - 1 do
+    begin
+      AlphaToCoverageEnable := False;
+      IndependentBlendEnable := False;
+    for i := 0 to D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT - 1 do
       RenderTarget[i] := defaultRenderTargetBlendDesc;
   end;
 end;
+
 
 constructor D3D11_BLEND_DESC.Create(const o: D3D11_BLEND_DESC);
 begin
   Self := o;
 end;
 
-{ D3D11_RASTERIZER_DESC}
 
+{D3D11_RASTERIZER_DESC}
 constructor D3D11_RASTERIZER_DESC.Create(const o: D3D11_RASTERIZER_DESC);
 begin
   Self := o;
 end;
 
-constructor D3D11_RASTERIZER_DESC.Create(Default: boolean);
+
+constructor D3D11_RASTERIZER_DESC.Create(Default: Boolean);
 begin
   FillMode := D3D11_FILL_SOLID;
   CullMode := D3D11_CULL_BACK;
-  FrontCounterClockwise := FALSE;
+  FrontCounterClockwise := False;
   DepthBias := D3D11_DEFAULT_DEPTH_BIAS;
   DepthBiasClamp := D3D11_DEFAULT_DEPTH_BIAS_CLAMP;
   SlopeScaledDepthBias := D3D11_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
@@ -5264,6 +5334,7 @@ begin
   MultisampleEnable := False;
   AntialiasedLineEnable := False;
 end;
+
 
 constructor D3D11_RASTERIZER_DESC.Create(aFillMode: D3D11_FILL_MODE;
                                          aCullMode: D3D11_CULL_MODE;
@@ -5288,34 +5359,45 @@ begin
   AntialiasedLineEnable := aAntialiasedLineEnable;
 end;
 
-{ D3D11_BUFFER_DESC}
 
+{D3D11_BUFFER_DESC}
 constructor D3D11_BUFFER_DESC.Create(const o: D3D11_BUFFER_DESC);
 begin
   Self := o;
 end;
 
-constructor D3D11_BUFFER_DESC.Create(aByteWidth, aBindFlags: UINT;
-  aUsage: D3D11_USAGE; aCpuaccessFlags, aMiscFlags, aStructureByteStride: UINT);
+
+constructor D3D11_BUFFER_DESC.Create(aByteWidth: UINT;
+                                     aBindFlags: UINT;
+                                     aUsage: D3D11_USAGE = D3D11_USAGE_DEFAULT;
+                                     aCpuaccessFlags: UINT = 0;
+                                     aMiscFlags: UINT = 0;
+                                     aStructureByteStride: UINT = 0);
 begin
   ByteWidth := aByteWidth;
   Usage := aUsage;
   BindFlags := aBindFlags;
-  CPUAccessFlags := aCpuaccessFlags ;
+  CPUAccessFlags := aCpuaccessFlags;
   MiscFlags := aMiscFlags;
   StructureByteStride := aStructureByteStride;
 end;
 
-{ D3D11_TEXTURE1D_DESC}
 
+{D3D11_TEXTURE1D_DESC}
 constructor D3D11_TEXTURE1D_DESC.Create(const o: D3D11_TEXTURE1D_DESC);
 begin
   Self := o;
 end;
 
-constructor D3D11_TEXTURE1D_DESC.Create(aFormat: DXGI_FORMAT; aWidth,
-  aArraySize, aMipLevels, aBindFlags: UINT; aUsage: D3D11_USAGE;
-  aCpuaccessFlags, aMiscFlags: UINT);
+
+constructor D3D11_TEXTURE1D_DESC.Create(aFormat: DXGI_FORMAT;
+                                        aWidth: UINT;
+                                        aArraySize: UINT = 1;
+                                        aMipLevels: UINT = 0;
+                                        aBindFlags: UINT = UINT(D3D11_BIND_SHADER_RESOURCE);
+                                        aUsage: D3D11_USAGE = D3D11_USAGE_DEFAULT;
+                                        aCpuaccessFlags: UINT = 0;
+                                        aMiscFlags: UINT = 0);
 begin
   Width := aWidth;
   MipLevels := aMipLevels;
@@ -5327,16 +5409,25 @@ begin
   MiscFlags := aMiscFlags;
 end;
 
-{ D3D11_TEXTURE2D_DESC}
 
+{D3D11_TEXTURE2D_DESC}
 constructor D3D11_TEXTURE2D_DESC.Create(const o: D3D11_TEXTURE2D_DESC);
 begin
   Self := o;
 end;
 
-constructor D3D11_TEXTURE2D_DESC.Create(aFormat: DXGI_FORMAT; aWidth, aHeight,
-  aArraySize, aMipLevels, aBindFlags: UINT; aUsage: D3D11_USAGE;
-  aCpuaccessFlags, aSampleCount, aSampleQuality, aMiscFlags: UINT);
+
+constructor D3D11_TEXTURE2D_DESC.Create(aFormat: DXGI_FORMAT;
+                                        aWidth: UINT;
+                                        aHeight: UINT;
+                                        aArraySize: UINT = 1;
+                                        aMipLevels: UINT = 0;
+                                        aBindFlags: UINT = UINT(D3D11_BIND_SHADER_RESOURCE);
+                                        aUsage: D3D11_USAGE = D3D11_USAGE_DEFAULT;
+                                        aCpuaccessFlags: UINT = 0;
+                                        aSampleCount: UINT = 1;
+                                        aSampleQuality: UINT = 0;
+                                        aMiscFlags: UINT = 0);
 begin
   Width := aWidth;
   Height := aHeight;
@@ -5351,16 +5442,23 @@ begin
   MiscFlags := aMiscFlags;
 end;
 
-{ D3D11_TEXTURE3D_DESC}
 
+{D3D11_TEXTURE3D_DESC}
 constructor D3D11_TEXTURE3D_DESC.Create(const o: D3D11_TEXTURE3D_DESC);
 begin
   Self := o;
 end;
 
-constructor D3D11_TEXTURE3D_DESC.Create(aFormat: DXGI_FORMAT; aWidth, aHeight,
-  aDepth, aMipLevels, aBindFlags: UINT; aUsage: D3D11_USAGE; aCpuaccessFlags,
-  aMiscFlags: UINT);
+
+constructor D3D11_TEXTURE3D_DESC.Create(aFormat: DXGI_FORMAT;
+                                        aWidth: UINT;
+                                        aHeight: UINT;
+                                        aDepth: UINT;
+                                        aMipLevels: UINT = 0;
+                                        aBindFlags: UINT = UINT(D3D11_BIND_SHADER_RESOURCE);
+                                        aUsage: D3D11_USAGE = D3D11_USAGE_DEFAULT;
+                                        aCpuaccessFlags: UINT = 0;
+                                        aMiscFlags: UINT = 0);
 begin
   Width := aWidth;
   Height := aHeight;
@@ -5373,87 +5471,95 @@ begin
   MiscFlags := aMiscFlags;
 end;
 
-{ D3D11_SHADER_RESOURCE_VIEW_DESC}
 
-constructor D3D11_SHADER_RESOURCE_VIEW_DESC.Create(
-  const o: D3D11_SHADER_RESOURCE_VIEW_DESC);
+{D3D11_SHADER_RESOURCE_VIEW_DESC}
+constructor D3D11_SHADER_RESOURCE_VIEW_DESC.Create(const o: D3D11_SHADER_RESOURCE_VIEW_DESC);
 begin
   Self := o;
 end;
 
-constructor D3D11_SHADER_RESOURCE_VIEW_DESC.Create(
-  aViewDimension: D3D11_SRV_DIMENSION; aFormat: DXGI_FORMAT; aMostDetailedMip,
-  aMipLevels, aFirstArraySlice, aArraySize, aFlags: UINT);
+
+constructor D3D11_SHADER_RESOURCE_VIEW_DESC.Create(aViewDimension: D3D11_SRV_DIMENSION;
+                                                   aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
+                                                   aMostDetailedMip: UINT = 0;
+                                                   aMipLevels : UINT = UINT(-1);
+                                                   aFirstArraySlice: UINT = 0;
+                                                   aArraySize : UINT = UINT(-1);
+                                                   aFlags: UINT = 0);
 begin
   Format := aFormat;
   ViewDimension := aViewDimension;
+
   case aViewDimension of
-    D3D11_SRV_DIMENSION_BUFFER:
-    begin
-      Buffer.FirstElement := aMostDetailedMip;
-      Buffer.NumElements := aMipLevels;
-    end;
-    D3D11_SRV_DIMENSION_TEXTURE1D:
-    begin
-      Texture1D.MostDetailedMip := aMostDetailedMip;
-      Texture1D.MipLevels := aMipLevels;
-    end;
-    D3D11_SRV_DIMENSION_TEXTURE1DARRAY:
-    begin
-      Texture1DArray.MostDetailedMip := aMostDetailedMip;
-      Texture1DArray.MipLevels := aMipLevels;
-      Texture1DArray.FirstArraySlice := aFirstArraySlice;
-      Texture1DArray.ArraySize := aArraySize;
-    end;
-    D3D11_SRV_DIMENSION_TEXTURE2D:
-    begin
-      Texture2D.MostDetailedMip := aMostDetailedMip;
-      Texture2D.MipLevels := aMipLevels;
-    end;
-    D3D11_SRV_DIMENSION_TEXTURE2DARRAY:
-    begin
-      Texture2DArray.MostDetailedMip := aMostDetailedMip;
-      Texture2DArray.MipLevels := aMipLevels;
-      Texture2DArray.FirstArraySlice := aFirstArraySlice;
-      Texture2DArray.ArraySize := aArraySize;
-    end;
-    D3D11_SRV_DIMENSION_TEXTURE2DMS:
-    begin
-      // do nothing;
-    end;
-    D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY:
-    begin
-      Texture2DMSArray.FirstArraySlice := aFirstArraySlice;
-      Texture2DMSArray.ArraySize := aArraySize;
-    end;
-    D3D11_SRV_DIMENSION_TEXTURE3D:
-    begin
-      Texture3D.MostDetailedMip := aMostDetailedMip;
-      Texture3D.MipLevels := aMipLevels;
-    end;
-    D3D11_SRV_DIMENSION_TEXTURECUBE:
-    begin
-      TextureCube.MostDetailedMip := aMostDetailedMip;
-      TextureCube.MipLevels := aMipLevels;
-    end;
-    D3D11_SRV_DIMENSION_TEXTURECUBEARRAY:
-    begin
-      TextureCubeArray.MostDetailedMip := aMostDetailedMip;
-      TextureCubeArray.MipLevels := aMipLevels;
-      TextureCubeArray.First2DArrayFace := aFirstArraySlice;
-      TextureCubeArray.NumCubes := aArraySize;
-    end;
-    D3D11_SRV_DIMENSION_BUFFEREX:
-    begin
-      BufferEx.FirstElement := aMostDetailedMip;
-      BufferEx.NumElements := aMipLevels;
-      BufferEx.Flags := aFlags;
-    end;
+    D3D11_SRV_DIMENSION_BUFFER: begin
+                                  Buffer.FirstElement := aMostDetailedMip;
+                                  Buffer.NumElements := aMipLevels;
+                                end;
+    
+    D3D11_SRV_DIMENSION_TEXTURE1D: begin
+                                     Texture1D.MostDetailedMip := aMostDetailedMip;
+                                     Texture1D.MipLevels := aMipLevels;
+                                   end;
+    
+    D3D11_SRV_DIMENSION_TEXTURE1DARRAY: begin
+                                          Texture1DArray.MostDetailedMip := aMostDetailedMip;
+                                          Texture1DArray.MipLevels := aMipLevels;
+                                          Texture1DArray.FirstArraySlice := aFirstArraySlice;
+                                          Texture1DArray.ArraySize := aArraySize;
+                                        end;
+    
+    D3D11_SRV_DIMENSION_TEXTURE2D: begin
+                                     Texture2D.MostDetailedMip := aMostDetailedMip;
+                                     Texture2D.MipLevels := aMipLevels;
+                                   end;
+
+    D3D11_SRV_DIMENSION_TEXTURE2DARRAY: begin
+                                          Texture2DArray.MostDetailedMip := aMostDetailedMip;
+                                          Texture2DArray.MipLevels := aMipLevels;
+                                          Texture2DArray.FirstArraySlice := aFirstArraySlice;
+                                          Texture2DArray.ArraySize := aArraySize;
+                                        end;
+    
+    D3D11_SRV_DIMENSION_TEXTURE2DMS: begin
+                                       // Do nothing;
+                                     end;
+    
+    D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY: begin
+                                            Texture2DMSArray.FirstArraySlice := aFirstArraySlice;
+                                            Texture2DMSArray.ArraySize := aArraySize;
+                                          end;
+    
+    D3D11_SRV_DIMENSION_TEXTURE3D: begin
+                                     Texture3D.MostDetailedMip := aMostDetailedMip;
+                                     Texture3D.MipLevels := aMipLevels;
+                                   end;
+    
+    D3D11_SRV_DIMENSION_TEXTURECUBE: begin
+                                       TextureCube.MostDetailedMip := aMostDetailedMip;
+                                       TextureCube.MipLevels := aMipLevels;
+                                     end;
+    
+    D3D11_SRV_DIMENSION_TEXTURECUBEARRAY: begin
+                                            TextureCubeArray.MostDetailedMip := aMostDetailedMip;
+                                            TextureCubeArray.MipLevels := aMipLevels;
+                                            TextureCubeArray.First2DArrayFace := aFirstArraySlice;
+                                            TextureCubeArray.NumCubes := aArraySize;
+                                          end;
+    
+    D3D11_SRV_DIMENSION_BUFFEREX: begin
+                                    BufferEx.FirstElement := aMostDetailedMip;
+                                    BufferEx.NumElements := aMipLevels;
+                                    BufferEx.Flags := aFlags;
+                                  end;
   end;
 end;
 
+
 constructor D3D11_SHADER_RESOURCE_VIEW_DESC.Create(aBuffer: ID3D11Buffer;
-  aFormat: DXGI_FORMAT; aFirstElement, aNumElements, aFlags: UINT);
+                                                   aFormat: DXGI_FORMAT;
+                                                   aFirstElement: UINT;
+                                                   aNumElements: UINT;
+                                                   aFlags: UINT = 0);
 begin
   Format := aFormat;
   ViewDimension := D3D11_SRV_DIMENSION_BUFFEREX;
@@ -5462,11 +5568,17 @@ begin
   BufferEx.Flags := aFlags;
 end;
 
+
 constructor D3D11_SHADER_RESOURCE_VIEW_DESC.Create(pTex1D: ID3D11Texture1D;
-  aViewDimension: D3D11_SRV_DIMENSION; aFormat: DXGI_FORMAT; aMostDetailedMip,
-  aMipLevels, aFirstArraySlice, aArraySize: UINT);
+                                                   aViewDimension: D3D11_SRV_DIMENSION;
+                                                   aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
+                                                   aMostDetailedMip: UINT = 0;
+                                                   aMipLevels: UINT = UINT(-1);
+                                                   aFirstArraySlice: UINT = 0;
+                                                   aArraySize: UINT = UINT(-1));
 var
   TexDesc: D3D11_TEXTURE1D_DESC;
+
 begin
   ViewDimension := aViewDimension;
   if ((DXGI_FORMAT_UNKNOWN = aFormat) or (UINT(-1) = aMipLevels) or
@@ -5480,30 +5592,38 @@ begin
       if (UINT(-1) = aArraySize) then
          aArraySize := TexDesc.ArraySize - aFirstArraySlice;
   end;
+
   Format := aFormat;
+
   case aViewDimension of
-    D3D11_SRV_DIMENSION_TEXTURE1D:
-    begin
-      Texture1D.MostDetailedMip := aMostDetailedMip;
-      Texture1D.MipLevels := aMipLevels;
-    end;
-    D3D11_SRV_DIMENSION_TEXTURE1DARRAY:
-    begin
-      Texture1DArray.MostDetailedMip := aMostDetailedMip;
-      Texture1DArray.MipLevels := aMipLevels;
-      Texture1DArray.FirstArraySlice := aFirstArraySlice;
-      Texture1DArray.ArraySize := aArraySize;
-    end;
+    D3D11_SRV_DIMENSION_TEXTURE1D: begin
+                                     Texture1D.MostDetailedMip := aMostDetailedMip;
+                                     Texture1D.MipLevels := aMipLevels;
+                                   end;
+    
+    D3D11_SRV_DIMENSION_TEXTURE1DARRAY: begin
+                                          Texture1DArray.MostDetailedMip := aMostDetailedMip;
+                                          Texture1DArray.MipLevels := aMipLevels;
+                                          Texture1DArray.FirstArraySlice := aFirstArraySlice;
+                                          Texture1DArray.ArraySize := aArraySize;
+                                        end;
   end;
 end;
 
+
 constructor D3D11_SHADER_RESOURCE_VIEW_DESC.Create(pTex2D: ID3D11Texture2D;
-  aViewDimension: D3D11_SRV_DIMENSION; aFormat: DXGI_FORMAT; aMostDetailedMip,
-  aMipLevels, aFirstArraySlice, aArraySize: UINT);
+                                                   aViewDimension: D3D11_SRV_DIMENSION;
+                                                   aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
+                                                   aMostDetailedMip: UINT = 0;
+                                                   aMipLevels: UINT = UINT(-1);
+                                                   aFirstArraySlice: UINT = 0;
+                                                   aArraySize: UINT = UINT(-1));
 var
   TexDesc: D3D11_TEXTURE2D_DESC;
+
 begin
   ViewDimension := aViewDimension;
+
   if ((DXGI_FORMAT_UNKNOWN = aFormat) or
       ((UINT(-1) = aMipLevels) and
           (D3D11_SRV_DIMENSION_TEXTURE2DMS <> aViewDimension) and
@@ -5519,71 +5639,78 @@ begin
     if (UINT(-1) = aMipLevels) then
       aMipLevels := TexDesc.MipLevels - aMostDetailedMip;
     if (UINT(-1) = aArraySize) then
-    begin
-      aArraySize := TexDesc.ArraySize - aFirstArraySlice;
-      if (D3D11_SRV_DIMENSION_TEXTURECUBEARRAY = aViewDimension) then
-        aArraySize := aArraySize div 6;
-    end;
+      begin
+        aArraySize := TexDesc.ArraySize - aFirstArraySlice;
+        if (D3D11_SRV_DIMENSION_TEXTURECUBEARRAY = aViewDimension) then
+          aArraySize := aArraySize div 6;
+      end;
   end;
+
   Format := aFormat;
+
   case viewDimension of
-    D3D11_SRV_DIMENSION_TEXTURE2D:
-    begin
-      Texture2D.MostDetailedMip := aMostDetailedMip;
-      Texture2D.MipLevels := aMipLevels;
-    end;
-    D3D11_SRV_DIMENSION_TEXTURE2DARRAY:
-    begin
-      Texture2DArray.MostDetailedMip := aMostDetailedMip;
-      Texture2DArray.MipLevels := aMipLevels;
-      Texture2DArray.FirstArraySlice := aFirstArraySlice;
-      Texture2DArray.ArraySize := aArraySize;
-    end;
-    D3D11_SRV_DIMENSION_TEXTURE2DMS:
-    begin
-      // do nothing
-    end;
-    D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY:
-    begin
-      Texture2DMSArray.FirstArraySlice := aFirstArraySlice;
-      Texture2DMSArray.ArraySize := aArraySize;
-    end;
-    D3D11_SRV_DIMENSION_TEXTURECUBE:
-    begin
-      TextureCube.MostDetailedMip := aMostDetailedMip;
-      TextureCube.MipLevels := aMipLevels;
-    end;
-    D3D11_SRV_DIMENSION_TEXTURECUBEARRAY:
-    begin
-      TextureCubeArray.MostDetailedMip := aMostDetailedMip;
-      TextureCubeArray.MipLevels := aMipLevels;
-      TextureCubeArray.First2DArrayFace := aFirstArraySlice;
-      TextureCubeArray.NumCubes := aArraySize;
-    end;
+    D3D11_SRV_DIMENSION_TEXTURE2D: begin
+                                     Texture2D.MostDetailedMip := aMostDetailedMip;
+                                     Texture2D.MipLevels := aMipLevels;
+                                   end;
+    
+    D3D11_SRV_DIMENSION_TEXTURE2DARRAY: begin
+                                          Texture2DArray.MostDetailedMip := aMostDetailedMip;
+                                          Texture2DArray.MipLevels := aMipLevels;
+                                          Texture2DArray.FirstArraySlice := aFirstArraySlice;
+                                          Texture2DArray.ArraySize := aArraySize;
+                                        end;
+    
+    D3D11_SRV_DIMENSION_TEXTURE2DMS: begin
+                                       // Nothing todo
+                                     end;
+    
+    D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY: begin
+                                            Texture2DMSArray.FirstArraySlice := aFirstArraySlice;
+                                            Texture2DMSArray.ArraySize := aArraySize;
+                                          end;
+
+    D3D11_SRV_DIMENSION_TEXTURECUBE: begin
+                                       TextureCube.MostDetailedMip := aMostDetailedMip;
+                                       TextureCube.MipLevels := aMipLevels;
+                                     end;
+    
+    D3D11_SRV_DIMENSION_TEXTURECUBEARRAY: begin
+                                            TextureCubeArray.MostDetailedMip := aMostDetailedMip;
+                                            TextureCubeArray.MipLevels := aMipLevels;
+                                            TextureCubeArray.First2DArrayFace := aFirstArraySlice;
+                                            TextureCubeArray.NumCubes := aArraySize;
+                                          end;
   end;
 end;
 
+
 constructor D3D11_SHADER_RESOURCE_VIEW_DESC.Create(pTex3D: ID3D11Texture3D;
-  aFormat: DXGI_FORMAT; aMostDetailedMip, aMipLevels: UINT);
+                                                   aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
+                                                   aMostDetailedMip: UINT = 0;
+                                                   aMipLevels: UINT = UINT(-1));
 var
   TexDesc: D3D11_TEXTURE3D_DESC;
+
 begin
   ViewDimension := D3D11_SRV_DIMENSION_TEXTURE3D;
+
   if ((DXGI_FORMAT_UNKNOWN = aFormat) or (UINT(-1) = aMipLevels)) then
-  begin
-    pTex3D.GetDesc(TexDesc);
-    if (DXGI_FORMAT_UNKNOWN = aFormat) then
-      aFormat := TexDesc.Format;
-    if (UINT(-1) = aMipLevels) then
-      aMipLevels := TexDesc.MipLevels - aMostDetailedMip;
-  end;
+    begin
+      pTex3D.GetDesc(TexDesc);
+      if (DXGI_FORMAT_UNKNOWN = aFormat) then
+        aFormat := TexDesc.Format;
+      if (UINT(-1) = aMipLevels) then
+        aMipLevels := TexDesc.MipLevels - aMostDetailedMip;
+    end;
+
   Format := aFormat;
   Texture3D.MostDetailedMip := aMostDetailedMip;
   Texture3D.MipLevels := aMipLevels;
 end;
 
-{ D3D11_RENDER_TARGET_VIEW_DESC}
 
+{D3D11_RENDER_TARGET_VIEW_DESC}
 constructor D3D11_RENDER_TARGET_VIEW_DESC.Create(
   const o: D3D11_RENDER_TARGET_VIEW_DESC);
 begin
@@ -5591,9 +5718,10 @@ begin
 end;
 
 constructor D3D11_RENDER_TARGET_VIEW_DESC.Create(aViewDimension: D3D11_RTV_DIMENSION;
-                                                 aFormat: DXGI_FORMAT; aMipSlice,
-                                                 aFirstArraySlice,
-                                                 aArraySize: UINT);
+                                                 aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
+                                                 aMipSlice: UINT = 0;
+                                                 aFirstArraySlice: UINT = 0;
+                                                 aArraySize: UINT = UINT(-1));
 begin
   Format := aFormat;
   ViewDimension := aViewDimension;
@@ -5654,10 +5782,10 @@ end;
 
 constructor D3D11_RENDER_TARGET_VIEW_DESC.Create(pTex1D: ID3D11Texture1D;
                                                  aViewDimension: D3D11_RTV_DIMENSION;
-                                                 aFormat: DXGI_FORMAT;
-                                                 aMipSlice: UINT;
-                                                 aFirstArraySlice: UINT;
-                                                 aArraySize: UINT);
+                                                 aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
+                                                 aMipSlice: UINT = 0;
+                                                 aFirstArraySlice: UINT = 0;
+                                                 aArraySize: UINT = UINT(-1));
 var
   TexDesc: D3D11_TEXTURE1D_DESC;
 
@@ -5693,10 +5821,10 @@ end;
 
 constructor D3D11_RENDER_TARGET_VIEW_DESC.Create(pTex2D: ID3D11Texture2D;
                                                  aViewDimension: D3D11_RTV_DIMENSION;
-                                                 aFormat: DXGI_FORMAT;
-                                                 aMipSlice: UINT;
-                                                 aFirstArraySlice: UINT;
-                                                 aArraySize: UINT);
+                                                 aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
+                                                 aMipSlice: UINT = 0;
+                                                 aFirstArraySlice: UINT = 0;
+                                                 aArraySize: UINT = UINT(-1));
 var
   TexDesc: D3D11_TEXTURE2D_DESC;
 
@@ -5736,15 +5864,15 @@ begin
                                             Texture2DMSArray.FirstArraySlice := aFirstArraySlice;
                                             Texture2DMSArray.ArraySize := aArraySize;
                                           end;
-  end; // case
+  end;
 end;
 
 
 constructor D3D11_RENDER_TARGET_VIEW_DESC.Create(pTex3D: ID3D11Texture3D;
-                                                 aFormat: DXGI_FORMAT;
-                                                 aMipSlice: UINT;
-                                                 aFirstWSlice: UINT;
-                                                 awSize: UINT);
+                                                 aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
+                                                 aMipSlice: UINT = 0;
+                                                 aFirstWSlice: UINT = 0;
+                                                 awSize: UINT = UINT(-1));
 var
   TexDesc: D3D11_TEXTURE3D_DESC;
 
@@ -5770,7 +5898,6 @@ end;
 
 
 { D3D11_VIEWPORT}
-
 constructor D3D11_VIEWPORT.Create(const o: D3D11_VIEWPORT);
 begin
   Self := o;
@@ -5781,8 +5908,8 @@ constructor D3D11_VIEWPORT.Create(aTopLeftX: FLOAT;
                                   aTopLeftY: FLOAT;
                                   aWidth: FLOAT;
                                   aHeight: FLOAT;
-                                  aMinDepth: FLOAT;
-                                  aMaxDepth: FLOAT);
+                                  aMinDepth: FLOAT = D3D11_MIN_DEPTH;
+                                  aMaxDepth: FLOAT = D3D11_MAX_DEPTH);
 begin
   TopLeftX := aTopLeftX;
   TopLeftY := aTopLeftY;
@@ -5795,9 +5922,9 @@ end;
 
 constructor D3D11_VIEWPORT.Create(buff: ID3D11Buffer;
                                   pRTView: ID3D11RenderTargetView;
-                                  aTopLeftX: FLOAT;
-                                  aMinDepth: FLOAT;
-                                  aMaxDepth: FLOAT);
+                                  aTopLeftX: FLOAT = 0.0;
+                                  aMinDepth: FLOAT = D3D11_MIN_DEPTH;
+                                  aMaxDepth: FLOAT = D3D11_MAX_DEPTH);
 var
   RTVDesc: D3D11_RENDER_TARGET_VIEW_DESC;
   NumElements: UINT;
@@ -5816,6 +5943,7 @@ begin
   MinDepth := aMinDepth;
   MaxDepth := aMaxDepth;
 end;
+
 
 constructor D3D11_VIEWPORT.Create(pTex1D: ID3D11Texture1D;
                                   pRTView: ID3D11RenderTargetView;
@@ -5856,10 +5984,10 @@ end;
 
 constructor D3D11_VIEWPORT.Create(pTex2D: ID3D11Texture2D;
                                   pRTView: ID3D11RenderTargetView;
-                                  aTopLeftX: FLOAT;
-                                  aTopLeftY: FLOAT;
-                                  aMinDepth: FLOAT;
-                                  aMaxDepth: FLOAT);
+                                  aTopLeftX: FLOAT = 0.0;
+                                  aTopLeftY: FLOAT = 0.0;
+                                  aMinDepth: FLOAT = D3D11_MIN_DEPTH;
+                                  aMaxDepth: FLOAT = D3D11_MAX_DEPTH);
 var
   TexDesc: D3D11_TEXTURE2D_DESC;
   RTVDesc: D3D11_RENDER_TARGET_VIEW_DESC;
@@ -5873,13 +6001,21 @@ begin
   MipSlice := 0;
 
   case RTVDesc.ViewDimension of
-    D3D11_RTV_DIMENSION_TEXTURE2D: MipSlice := RTVDesc.Texture2D.MipSlice;
+    D3D11_RTV_DIMENSION_TEXTURE2D: begin
+                                     MipSlice := RTVDesc.Texture2D.MipSlice;
+                                   end;
 
-    D3D11_RTV_DIMENSION_TEXTURE2DARRAY: MipSlice := RTVDesc.Texture2DArray.MipSlice;
+    D3D11_RTV_DIMENSION_TEXTURE2DARRAY: begin
+                                          MipSlice := RTVDesc.Texture2DArray.MipSlice;
+                                        end;
 
-    D3D11_RTV_DIMENSION_TEXTURE2DMS: ; // Skip
+    D3D11_RTV_DIMENSION_TEXTURE2DMS: begin
+                                       // Nothing todo.
+                                     end;
 
-    D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY:; // Skip
+    D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY: begin
+                                            // Nothing todo.
+                                          end;
   end;
 
   SubResourceWidth := TexDesc.Width div (UINT(1) shl MipSlice);
@@ -5905,10 +6041,10 @@ end;
 
 constructor D3D11_VIEWPORT.Create(pTex3D: ID3D11Texture3D;
                                   pRTView: ID3D11RenderTargetView;
-                                  aTopLeftX: FLOAT;
-                                  aTopLeftY: FLOAT;
-                                  aMinDepth: FLOAT;
-                                  aMaxDepth: FLOAT);
+                                  aTopLeftX: FLOAT = 0.0;
+                                  aTopLeftY: FLOAT = 0.0;
+                                  aMinDepth: FLOAT = D3D11_MIN_DEPTH;
+                                  aMaxDepth: FLOAT = D3D11_MAX_DEPTH);
 var
   TexDesc: D3D11_TEXTURE3D_DESC;
   RTVDesc: D3D11_RENDER_TARGET_VIEW_DESC;
@@ -5922,7 +6058,9 @@ begin
   MipSlice := 0;
 
   case RTVDesc.ViewDimension of
-    D3D11_RTV_DIMENSION_TEXTURE3D: MipSlice := RTVDesc.Texture3D.MipSlice;
+    D3D11_RTV_DIMENSION_TEXTURE3D: begin
+                                     MipSlice := RTVDesc.Texture3D.MipSlice;
+                                   end;
   end;
 
   SubResourceWidth := TexDesc.Width div (UINT(1) shl MipSlice);
@@ -5953,18 +6091,20 @@ end;
 
 
 constructor D3D11_DEPTH_STENCIL_VIEW_DESC.Create(aViewDimension: D3D11_DSV_DIMENSION;
-                                                 aFormat: DXGI_FORMAT;
-                                                 aMipSlice: UINT;
-                                                 aFirstArraySlice: UINT;
-                                                 aArraySize: UINT;
-                                                 aFlags: UINT);
+                                                 aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
+                                                 aMipSlice: UINT = 0;
+                                                 aFirstArraySlice: UINT = 0;
+                                                 aArraySize: UINT = UINT(-1);
+                                                 aFlags: UINT = 0);
 begin
   Format := aFormat;
   ViewDimension := aViewDimension;
   Flags := aFlags;
 
   case aViewDimension of
-    D3D11_DSV_DIMENSION_TEXTURE1D: Texture1D.MipSlice := aMipSlice;
+    D3D11_DSV_DIMENSION_TEXTURE1D: begin
+                                     Texture1D.MipSlice := aMipSlice;
+                                   end;
 
     D3D11_DSV_DIMENSION_TEXTURE1DARRAY: begin
                                           Texture1DArray.MipSlice := aMipSlice;
@@ -5972,7 +6112,9 @@ begin
                                           Texture1DArray.ArraySize := aArraySize;
                                         end;
 
-    D3D11_DSV_DIMENSION_TEXTURE2D: Texture2D.MipSlice := aMipSlice;
+    D3D11_DSV_DIMENSION_TEXTURE2D: begin
+                                     Texture2D.MipSlice := aMipSlice;
+                                   end;
 
     D3D11_DSV_DIMENSION_TEXTURE2DARRAY: begin
                                           Texture2DArray.MipSlice := aMipSlice;
@@ -5980,7 +6122,9 @@ begin
                                           Texture2DArray.ArraySize := aArraySize;
                                          end;
 
-    D3D11_DSV_DIMENSION_TEXTURE2DMS: ; // Skip
+    D3D11_DSV_DIMENSION_TEXTURE2DMS: begin
+                                       // Nothing todo.
+                                     end;
 
     D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY: begin
                                             Texture2DMSArray.FirstArraySlice := aFirstArraySlice;
@@ -5992,10 +6136,11 @@ end;
 
 constructor D3D11_DEPTH_STENCIL_VIEW_DESC.Create(pTex1D: ID3D11Texture1D;
                                                  aViewDimension: D3D11_DSV_DIMENSION;
-                                                 aFormat: DXGI_FORMAT; aMipSlice,
-                                                 aFirstArraySlice: UINT;
-                                                 aArraySize: UINT;
-                                                 aFlags: UINT);
+                                                 aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
+                                                 aMipSlice: UINT = 0;
+                                                 aFirstArraySlice: UINT = 0;
+                                                 aArraySize: UINT = UINT(-1);
+                                                 aFlags: UINT = 0);
 var
   TexDesc: D3D11_TEXTURE1D_DESC;
 
@@ -6015,24 +6160,27 @@ begin
 
   Format := aFormat;
 
-  case viewDimension of
-    D3D11_DSV_DIMENSION_TEXTURE1D: Texture1D.MipSlice := aMipSlice;
+  case aViewDimension of
+    D3D11_DSV_DIMENSION_TEXTURE1D: begin
+                                     Texture1D.MipSlice := aMipSlice;
+                                   end;
+
     D3D11_DSV_DIMENSION_TEXTURE1DARRAY: begin
                                           Texture1DArray.MipSlice := aMipSlice;
                                           Texture1DArray.FirstArraySlice := aFirstArraySlice;
                                           Texture1DArray.ArraySize := aArraySize;
                                         end;
-  end; // case
+  end;
 end;
 
 
 constructor D3D11_DEPTH_STENCIL_VIEW_DESC.Create(pTex2D: ID3D11Texture2D;
                                                  aViewDimension: D3D11_DSV_DIMENSION;
-                                                 aFormat: DXGI_FORMAT;
-                                                 aMipSlice: UINT;
-                                                 aFirstArraySlice: UINT;
-                                                 aArraySize: UINT;
-                                                 aFlags: UINT);
+                                                 aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
+                                                 aMipSlice: UINT = 0;
+                                                 aFirstArraySlice: UINT = 0;
+                                                 aArraySize: UINT = UINT(-1);
+                                                 aFlags: UINT = 0);
 var
   TexDesc: D3D11_TEXTURE2D_DESC;
 
@@ -6080,11 +6228,11 @@ end;
 
 
 constructor D3D11_UNORDERED_ACCESS_VIEW_DESC.Create(aViewDimension: D3D11_UAV_DIMENSION;
-                                                    aFormat: DXGI_FORMAT;
-                                                    aMipSlice: UINT;
-                                                    aFirstArraySlice: UINT;
-                                                    aArraySize: UINT;
-                                                    aFlags: UINT);
+                                                    aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
+                                                    aMipSlice: UINT = 0;
+                                                    aFirstArraySlice: UINT = 0;
+                                                    aArraySize: UINT = UINT(-1);
+                                                    aFlags: UINT = 0);
 begin
   Format := aFormat;
   ViewDimension := aViewDimension;
@@ -6125,7 +6273,7 @@ constructor D3D11_UNORDERED_ACCESS_VIEW_DESC.Create(aBuffer: ID3D11Buffer;
                                                     aFormat: DXGI_FORMAT;
                                                     aFirstElement: UINT;
                                                     aNumElements: UINT;
-                                                    aFlags: UINT);
+                                                    aFlags: UINT = 0);
 begin
   Format := aFormat;
   ViewDimension := D3D11_UAV_DIMENSION_BUFFER;
@@ -6139,8 +6287,8 @@ constructor D3D11_UNORDERED_ACCESS_VIEW_DESC.Create(pTex1D: ID3D11Texture1D;
                                                     aViewDimension: D3D11_UAV_DIMENSION;
                                                     aFormat: DXGI_FORMAT;
                                                     aMipSlice: UINT;
-                                                    aFirstArraySlice: UINT;
-                                                    aArraySize: UINT);
+                                                    aFirstArraySlice: UINT = 0;
+                                                    aArraySize: UINT = UINT(-1));
 var
   TexDesc: D3D11_TEXTURE1D_DESC;
 
@@ -6173,9 +6321,10 @@ end;
 
 constructor D3D11_UNORDERED_ACCESS_VIEW_DESC.Create(pTex2D: ID3D11Texture2D;
                                                     aViewDimension: D3D11_UAV_DIMENSION;
-                                                    aFormat: DXGI_FORMAT; aMipSlice,
-                                                    aFirstArraySlice: UINT;
-                                                    aArraySize: UINT);
+                                                    aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
+                                                    aMipSlice : UINT = 0;
+                                                    aFirstArraySlice: UINT = 0;
+                                                    aArraySize: UINT = UINT(-1));
 var
   TexDesc: D3D11_TEXTURE2D_DESC;
 
@@ -6207,10 +6356,10 @@ end;
 
 
 constructor D3D11_UNORDERED_ACCESS_VIEW_DESC.Create(pTex3D: ID3D11Texture3D;
-                                                    aFormat: DXGI_FORMAT;
-                                                    aMipSlice: UINT;
-                                                    aFirstWSlice: UINT;
-                                                    awSize: UINT);
+                                                    aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
+                                                    aMipSlice : UINT = 0;
+                                                    aFirstWSlice: UINT = 0;
+                                                    awSize: UINT = UINT(-1));
 var
   TexDesc: D3D11_TEXTURE3D_DESC;
 
@@ -6242,7 +6391,7 @@ begin
 end;
 
 
-constructor D3D11_SAMPLER_DESC.Create(isDefault: boolean);
+constructor D3D11_SAMPLER_DESC.Create(isDefault: Boolean);
 begin
   Filter := D3D11_FILTER_MIN_MAG_MIP_LINEAR;
   AddressU := D3D11_TEXTURE_ADDRESS_CLAMP;
