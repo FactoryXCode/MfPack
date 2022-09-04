@@ -2198,7 +2198,8 @@ type
                          aNumElements: UINT;
                          aFlags: UINT = 0); overload;
 
-      constructor Create(pTex1D: ID3D11Texture1D; aViewDimension: D3D11_UAV_DIMENSION;
+      constructor Create(pTex1D: ID3D11Texture1D;
+                         aViewDimension: D3D11_UAV_DIMENSION;
                          aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
                          aMipSlice: UINT = 0;
                          aFirstArraySlice: UINT = 0;
@@ -2755,7 +2756,7 @@ type
                             [ref] const ppSamplers: PID3D11SamplerState); stdcall;
 
     procedure VSSetShader(pVertexShader: ID3D11VertexShader;
-                          [ref] const ppClassInstances: ID3D11ClassInstance;
+                          [ref] const ppClassInstances: PID3D11ClassInstance;
                           NumClassInstances: UINT); stdcall;
 
     procedure DrawIndexed(IndexCount: UINT;
@@ -2897,14 +2898,14 @@ type
                                     DstZ: UINT;
                                     const pSrcResource: ID3D11Resource;
                                     SrcSubresource: UINT;
-                                    const pSrcBox: PD3D11_BOX); stdcall;
+                                    const pSrcBox: D3D11_BOX); stdcall;
 
     procedure CopyResource(pDstResource: ID3D11Resource;
                            pSrcResource: ID3D11Resource); stdcall;
 
     procedure  UpdateSubresource(pDstResource: ID3D11Resource;
                                  DstSubresource: UINT;
-                                 const pDstBox: PD3D11_BOX;
+                                 const pDstBox: D3D11_BOX;
                                  const pSrcData: Pointer;
                                  SrcRowPitch: UINT;
                                  SrcDepthPitch: UINT); stdcall;
@@ -6284,8 +6285,8 @@ end;
 
 constructor D3D11_UNORDERED_ACCESS_VIEW_DESC.Create(pTex1D: ID3D11Texture1D;
                                                     aViewDimension: D3D11_UAV_DIMENSION;
-                                                    aFormat: DXGI_FORMAT;
-                                                    aMipSlice: UINT;
+                                                    aFormat: DXGI_FORMAT = DXGI_FORMAT_UNKNOWN;
+                                                    aMipSlice: UINT = 0;
                                                     aFirstArraySlice: UINT = 0;
                                                     aArraySize: UINT = UINT(-1));
 var

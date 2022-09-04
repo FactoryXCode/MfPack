@@ -2,7 +2,7 @@
 //
 // Copyright: © FactoryX. All rights reserved.
 //
-// Project: WinApi.DirectX - D3D1
+// Project: WinApi.DirectX - D3D11
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: WinApi.DirectX.D3D11_2.pas
@@ -12,7 +12,7 @@
 //
 // Revision Version: 3.1.3
 //
-// Description: Contains interface definitions for the D3D11.1 API.
+// Description: Contains interface definitions for the D3D11.2 API.
 //              Microsoft DirectX D3D11 used by Media Foundation.
 //              You can use Direct3D 11 graphics to create 3-D graphics for games,
 //              scientific and desktop apps.

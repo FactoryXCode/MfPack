@@ -2,7 +2,7 @@
 //
 // Copyright: © FactoryX. All rights reserved.
 //
-// Project: WinApi.DirectX - D3D1
+// Project: WinApi.DirectX - D3D11
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: WinApi.DirectX.D3D11_1.pas
