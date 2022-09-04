@@ -201,5 +201,6 @@ contains
   WinApi.CoreAudioApi.AudioEngineExtensionApo in '..\src\WinApi.CoreAudioApi.AudioEngineExtensionApo.pas',
   WinApi.MediaFoundationApi.MfMediaTypeDebug in '..\src\WinApi.MediaFoundationApi.MfMediaTypeDebug.pas',
   WinApi.DirectX.D3D11 in '..\src\WinApi.DirectX.D3D11.pas';
-
+  WinApi.DirectX.D3D11_1 in '..\src\WinApi.DirectX.D3D11_2.pas',
+  WinApi.DirectX.D3D11_2 in '..\src\WinApi.DirectX.D3D11_2.pas',
 end.
