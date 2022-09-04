@@ -24,7 +24,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
-// 31/08/2022                     Updated to latest D3D11 version.
+// 31/08/2022                     Updated to latest D3D11 SDK 10.0.22621.0 version.
 //------------------------------------------------------------------------------
 //
 // Remarks: Embarcadero's <= Delphi 10.4 D3D11.pas is outdated!
@@ -39,10 +39,9 @@
 // Todo: -
 //
 //==============================================================================
-// Source: D3D11.h, D3D11.pas
+// Source: D3D11.h
 //
 // Copyright (c) Microsoft Corporation. All rights reserved.
-// Copyright(c) 2012-2021 Embarcadero Technologies, Inc.
 //==============================================================================
 //
 // LICENSE
