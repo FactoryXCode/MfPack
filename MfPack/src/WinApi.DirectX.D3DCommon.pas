@@ -45,10 +45,11 @@
 //
 // LICENSE
 //
-// The contents of this file are subject to the Mozilla Public License
-// Version 2.0 (the "License"); you may not use this file except in
-// compliance with the License. You may obtain a copy of the License at
-// https://www.mozilla.org/en-US/MPL/2.0/
+//  The contents of this file are subject to the
+//  GNU General Public License v3.0 (the "License");
+//  you may not use this file except in
+//  compliance with the License. You may obtain a copy of the License at
+//  https://www.gnu.org/licenses/gpl-3.0.html
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
@@ -535,7 +536,7 @@ type
 
 type
   PD3D_SRV_DIMENSION = ^D3D_SRV_DIMENSION;
-  D3D_SRV_DIMENSION = DWord;
+  D3D_SRV_DIMENSION = DWORD;
   {$EXTERNALSYM D3D_SRV_DIMENSION}
 const
   D3D_SRV_DIMENSION_UNKNOWN              = D3D_SRV_DIMENSION(0);
