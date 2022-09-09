@@ -11,7 +11,7 @@
   * Multimedia Device (MMDevice) API
 - Microsoft Media Foundation API (successor of DirectShow).
 - XAudio2 API (XBox game development)
-- Microsoft DirectX API's (D2D1, DirectComposition, DXGI, DirectWrite and DXVA)
+- Microsoft DirectX API's (D2D1, D3D11, DirectComposition, DXGI, DirectWrite and DXVA)
 - Windows Imaging Component (WIC) API.
 - MPEG2 API.
 - The COMPLETE Windows Media (WinMM) API.
@@ -133,7 +133,7 @@ SDK version: 10.0.22621.0 (Windows 11)
 
 **MFFrameCapture sample**
 
-*Demonstrates how to cature an image (synchronous or A-synchronous) using the IMFSourceReader.*
+*Demonstrates how to capture an image (synchronous or A-synchronous) using the IMFSourceReader.*
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfFrameCapture.png)
 
