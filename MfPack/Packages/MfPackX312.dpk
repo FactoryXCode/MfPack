@@ -204,6 +204,7 @@ contains
   WinApi.WinMM.VfwExt in '..\src\WinApi.WinMM.VfwExt.pas',
   WinApi.WinMM.VfwMsgs in '..\src\WinApi.WinMM.VfwMsgs.pas',
   WinApi.Wmistr in '..\src\WinApi.Wmistr.pas',
-  WinApi.DirectX.D3D11_4 in '..\src\WinApi.DirectX.D3D11_4.pas';
+  WinApi.DirectX.D3D11_4 in '..\src\WinApi.DirectX.D3D11_4.pas',
+  WinApi.DirectX.D3D11Shader in '..\src\WinApi.DirectX.D3D11Shader.pas';
 
 end.

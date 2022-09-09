@@ -10,7 +10,7 @@
 // Release date: 09-10-2015
 // Language: ENU
 //
-// Revision Version: 3.1.2
+// Revision Version: 3.1.3
 // Description: -
 //
 // Organisation: FactoryX
@@ -45,11 +45,12 @@
 //
 // LICENSE
 // 
-// The contents of this file are subject to the Mozilla Public License
-// Version 2.0 (the "License"); you may not use this file except in
-// compliance with the License. You may obtain a copy of the License at
-// https://www.mozilla.org/en-US/MPL/2.0/
-// 
+//  The contents of this file are subject to the
+//  GNU General Public License v3.0 (the "License");
+//  you may not use this file except in
+//  compliance with the License. You may obtain a copy of the License at
+//  https://www.gnu.org/licenses/gpl-3.0.html
+//
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
 // License for the specific language governing rights and limitations
@@ -498,7 +499,7 @@ type
   IMFCaptureEngineOnEventCallback = interface(IUnknown)
   ['{aeda51c0-9025-4983-9012-de597b88b089}']
 
-    function OnEvent(const pEvent: IMFMediaEvent): HResult; stdcall;
+    function OnEvent(pEvent: IMFMediaEvent): HResult; stdcall;
     // Callback function that completes an asynchronous call on the capture engine.
     //
     // <param name = "IMFMediaEvent">
@@ -962,7 +963,7 @@ type
     // <param name = "ppSink">
     // Receives a pointer to IMFCaptureSink interface.
 
-    function GetSource({out} ppSource: PIMFCaptureSource): HResult; stdcall;
+    function GetSource([ref] const ppSource: IMFCaptureSource): HResult; stdcall;
     // Method to obtain access to IMFCaptureSource.
     // <param name = "ppSource">
     // Receives a pointer to IMFCaptureSource interface.
