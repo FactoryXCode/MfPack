@@ -14,8 +14,8 @@
 // Description: Media Foundation basic control-layer interfaces.
 //
 // Organisation: FactoryX
-// Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Ciaran, (TopPlay)
+// Initiator(s): Tony (maXcomX), Peter Larson (OzShips)
+// Contributor(s): Tony Kalf (maXcomX)
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
@@ -24,10 +24,10 @@
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: -
+// Remarks: Embarcadero's <= Delphi 10.4 D3D12 is outdated!
 //
 // Related objects: -
-// Related projects: MfPackX312
+// Related projects: MfPackX313
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -1951,19 +1951,16 @@ const
 //----------------------------------------------------------------------------------------------------------
 
 
-
 type
 
-
-    // Forwarded interface declarations
+  // Forwarded interface declarations
   ID3D12CommandQueue = interface;
   ID3D12RootSignature = interface;
-  ID3D12DeviceChild = interface;
   ID3D12Resource = interface;
   ID3D12Device = interface;
   ID3D12Object = interface;
+  ID3D12DeviceChild = Interface;
   ID3D12LifetimeTracker = interface;
-
 
 
   PD3D12_GPU_VIRTUAL_ADDRESS = ^D3D12_GPU_VIRTUAL_ADDRESS;
@@ -2323,6 +2320,48 @@ type
     ConservativeRaster: D3D12_CONSERVATIVE_RASTERIZATION_MODE;
   end;
   {$EXTERNALSYM D3D12_RASTERIZER_DESC}
+
+
+  // Interface ID3D12Object
+  // ======================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12Object);'}
+  {$EXTERNALSYM ID3D12Object}
+  ID3D12Object = interface(IUnknown)
+    ['{C4FEC28F-7966-4E95-9F94-F431CB56C3B8}']
+
+    function GetPrivateData(const guid: TGUID;
+                            var pDataSize: UINT;
+                            pData: pointer): HRESULT; stdcall;
+
+    function SetPrivateData(const guid: TGUID;
+                            DataSize: UINT;
+                            const pData: Pointer): HRESULT; stdcall;
+
+    function SetPrivateDataInterface(const guid: TGUID;
+                                     const pdata: IUnknown): HRESULT; stdcall;
+
+    function SetName(Name: LPCWSTR): HRESULT; stdcall;
+
+  end;
+  IID_ID3D12Object = ID3D12Object;
+  {$EXTERNALSYM IID_ID3D12Object}
+
+
+  // Interface ID3D12DeviceChild
+  // ============================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DeviceChild);'}
+  {$EXTERNALSYM ID3D12DeviceChild}
+  ID3D12DeviceChild = Interface(ID3D12Object)
+    ['{905db94b-a00c-4140-9df5-2b64ca9ea357}']
+
+    function GetDevice(const riid: REFIID;
+                       out ppvDevice): HRESULT; stdcall;
+
+  end;
+  IID_ID3D12DeviceChild = ID3D12DeviceChild;
+  {$EXTERNALSYM IID_ID3D12DeviceChild}
 
 
   //////////////////////////////////////////////////////////////////////////////
@@ -2833,7 +2872,6 @@ type
     {_Out_} PriorityForTypeIsSupported: BOOL;
   end;
   {$EXTERNALSYM D3D12_FEATURE_DATA_COMMAND_QUEUE_PRIORITY}
-
 
 
   // D3D12_FEATURE_D3D12_OPTIONS3
@@ -4525,42 +4563,43 @@ type
   // Interface ID3D12Object
   // ======================
   //
-  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12Object);'}
-  {$EXTERNALSYM ID3D12Object}
-  ID3D12Object = interface(IUnknown)
-  ['{C4FEC28F-7966-4E95-9F94-F431CB56C3B8}']
-    function GetPrivateData(const guid: TGUID;
-                            var pDataSize: UINT;
-                            pData: pointer): HRESULT; stdcall;
+//  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12Object);'}
+//  {$EXTERNALSYM ID3D12Object}
+//  ID3D12Object = interface(IUnknown)
+//    ['{C4FEC28F-7966-4E95-9F94-F431CB56C3B8}']
 
-    function SetPrivateData(const guid: TGUID;
-                            DataSize: UINT;
-                            const pData: Pointer): HRESULT; stdcall;
+//    function GetPrivateData(const guid: TGUID;
+//                            var pDataSize: UINT;
+//                            pData: pointer): HRESULT; stdcall;
 
-    function SetPrivateDataInterface(const guid: TGUID;
-                                     const pdata: IUnknown): HRESULT; stdcall;
+//    function SetPrivateData(const guid: TGUID;
+//                            DataSize: UINT;
+//                            const pData: Pointer): HRESULT; stdcall;
 
-    function SetName(Name: LPCWSTR): HRESULT; stdcall;
+//    function SetPrivateDataInterface(const guid: TGUID;
+//                                     const pdata: IUnknown): HRESULT; stdcall;
 
-  end;
-  IID_ID3D12Object = ID3D12Object;
-  {$EXTERNALSYM IID_ID3D12Object}
+//    function SetName(Name: LPCWSTR): HRESULT; stdcall;
+
+//  end;
+//  IID_ID3D12Object = ID3D12Object;
+//  {$EXTERNALSYM IID_ID3D12Object}
 
 
   // Interface ID3D12DeviceChild
   // ============================
   //
-  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DeviceChild);'}
-  {$EXTERNALSYM ID3D12DeviceChild}
-  ID3D12DeviceChild = Interface(ID3D12Object)
-    ['{905db94b-a00c-4140-9df5-2b64ca9ea357}']
+//  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DeviceChild);'}
+//  {$EXTERNALSYM ID3D12DeviceChild}
+//  ID3D12DeviceChild = Interface(ID3D12Object)
+//    ['{905db94b-a00c-4140-9df5-2b64ca9ea357}']
 
-    function GetDevice(const riid: REFIID;
-                       out ppvDevice): HRESULT; stdcall;
+//    function GetDevice(const riid: REFIID;
+//                       out ppvDevice): HRESULT; stdcall;
 
-  end;
-  IID_ID3D12DeviceChild = ID3D12DeviceChild;
-  {$EXTERNALSYM IID_ID3D12DeviceChild}
+//  end;
+//  IID_ID3D12DeviceChild = ID3D12DeviceChild;
+//  {$EXTERNALSYM IID_ID3D12DeviceChild}
 
 
 
@@ -7095,16 +7134,6 @@ type
   //          D3D12CreateDevice
   //
   ///////////////////////////////////////////////////////////////////////////
-  PFN_D3D12_CREATE_DEVICE = function(pAdapter: IUnknown;
-                                     MinimumFeatureLevel: D3D_FEATURE_LEVEL;
-                                     const riid: REFIID;
-                                     out ppDevice): HRESULT; stdcall;
-  {$EXTERNALSYM PFN_D3D12_CREATE_DEVICE}
-
-  PFN_D3D12_GET_DEBUG_INTERFACE = function(const riid: REFIID;
-                                           out ppvDebug): HRESULT; stdcall;
-  {$EXTERNALSYM PFN_D3D12_GET_DEBUG_INTERFACE}
-
 
   function D3D12CreateDevice(pAdapter: IUnknown;
                              MinimumFeatureLevel: D3D_FEATURE_LEVEL;
@@ -7157,12 +7186,6 @@ type
   //
   // --------------------------------------------------------------------------------------------------------------------------------
 
-type
-
- PFN_D3D12_GET_INTERFACE = function(const rclsid: REFCLSID;
-                                    const riid: REFIID;
-                                    out ppvDebug): HRESULT; stdcall;
- {$EXTERNALSYM PFN_D3D12_GET_INTERFACE}
 
  function D3D12GetInterface(const rclsid: REFCLSID;
                             const riid: REFIID;
@@ -7177,6 +7200,7 @@ type
   //============================================================================
 
 type
+
   // Interface ID3D12SDKConfiguration
   // =================================
   //
