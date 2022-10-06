@@ -1816,7 +1816,13 @@ type
   {$EXTERNALSYM IID_ID3D12InfoQueue1}
 
 
+  // Additional Prototypes for ALL interfaces
+
+  // End of Additional Prototypes
+
 implementation
+
+  // Implement Additional Prototypes here.
 
 const
   D3D12SDKLayersLib = 'd3d12SDKLayers.dll';
