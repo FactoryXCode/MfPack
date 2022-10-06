@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.1.2
+// Revision Version: 3.1.3
 // Description: Media Foundation basic control-layer interfaces.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX312
+// Related projects: MfPackX313
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -5990,7 +5990,7 @@ type
   // Enumerates a list of audio or video capture devices.
   function MFEnumDeviceSources(pAttributes: IMFAttributes;
                                [ref] const pppSourceActivate: PIMFActivate; // Pointer to array of IMFActivate
-                               out pcSourceActivate: UINT32): HResult; stdcall;
+                               out pcSourceActivate: INT): HResult; stdcall;
   {$EXTERNALSYM MFEnumDeviceSources}
 
   // pAttributes [in]

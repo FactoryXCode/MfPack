@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX312
+// Related projects: MfPackX313
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -44,10 +44,11 @@
 //
 // LICENSE
 //
-// The contents of this file are subject to the Mozilla Public License
-// Version 2.0 (the "License"); you may not use this file except in
-// compliance with the License. You may obtain a copy of the License at
-// https://www.mozilla.org/en-US/MPL/2.0/
+//  The contents of this file are subject to the
+//  GNU General Public License v3.0 (the "License");
+//  you may not use this file except in
+//  compliance with the License. You may obtain a copy of the License at
+//  https://www.gnu.org/licenses/gpl-3.0.html
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
@@ -128,14 +129,14 @@ const
 //
 //  Guidname: TGUID = '{B502D1BC-9A57-11d0-8FDE-00C04FD9189D}';
 //
-// Or like this (both ways are permitted, how ever, the last one should be used if the guid is an item of change):
+// Or like this (both ways are permitted, however, the latter should be used if the guid is an item of change):
 //
 //  Guidname: TGUID = (D1: $5cefee10;
 //                     D2: $e210;
 //                     D3: $45c6;
 //                     D4: ($9e, $28, $f5, $a8, $73, $1c, $96, $c7));
 //
-// To keep things simple: don't use the commented out _GUID in this unit,
+// To keep things simple: Don't use the commented out _GUID in this unit,
 //                        but the one declared in System
 //
 // See comments in WinApi.ActiveX.PropKeyDef.pas
@@ -1205,8 +1206,13 @@ type
 
 
 {$IFDEF MFP_PCHAR}
-  PCHAR = PWideChar;
-  {$EXTERNALSYM PCHAR}
+  {$IFDEF UNICODE}
+    PCHAR = PWideChar;  // >= Delphi 2009
+    {$EXTERNALSYM PCHAR}
+  {$ELSE}
+    PCHAR = PAnsiChar;  // < Delphi 2009
+    {$EXTERNALSYM PCHAR}
+  {$ENDIF}
 {$ENDIF}
 
 
@@ -1436,6 +1442,12 @@ type
   CShort = SmallInt;
   {$EXTERNALSYM CShort}
 {$ENDIF}
+
+
+{$IFDEF MFP_PINT8}
+  PINT8 = ^INT8;
+{$ENDIF}
+
 
 // This structure is used by console functions to specify rectangular areas of console screen buffers,
 // where the coordinates specify the rows and columns of screen-buffer character cells.

@@ -10,7 +10,7 @@
 // Release date: 30-05-2018
 // Language: ENU
 //
-// Revision Version: 3.1.2
+// Revision Version: 3.1.3
 // Description: Provides functionality required for all Windows Runtime classes.
 //
 // Organisation: FactoryX
@@ -39,7 +39,7 @@
 //          All Windows Runtime classes must implement the IInspectable sinterface.
 // 
 // Related objects: -
-// Related projects: MfPackX312
+// Related projects: MfPackX313
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -55,11 +55,12 @@
 //
 // LICENSE
 // 
-// The contents of this file are subject to the Mozilla Public License
-// Version 2.0 (the "License"); you may not use this file except in
-// compliance with the License. You may obtain a copy of the License at
-// https://www.mozilla.org/en-US/MPL/2.0/
-// 
+//  The contents of this file are subject to the
+//  GNU General Public License v3.0 (the "License");
+//  you may not use this file except in
+//  compliance with the License. You may obtain a copy of the License at
+//  https://www.gnu.org/licenses/gpl-3.0.html
+//
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
 // License for the specific language governing rights and limitations
@@ -109,7 +110,7 @@ type
   {$EXTERNALSYM IInspectable}
   IInspectable = interface(IUnknown)
   ['{AF86E2E0-B12D-4c6a-9C5A-D7AA65101E90}']
-
+     
     function GetIids(out iidCount: ULONG;
                      out iids: PGuid): HRESULT; stdcall;
 

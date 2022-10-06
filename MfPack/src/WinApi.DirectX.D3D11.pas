@@ -17,20 +17,20 @@
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
+// Contributor(s): Tony Kalf (maXcomX)
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 // 31/08/2022                     Updated to latest D3D11 SDK 10.0.22621.0 version.
 //------------------------------------------------------------------------------
 //
-// Remarks: Embarcadero's <= Delphi 10.4 D3D11.pas is outdated!
+// Remarks: Embarcadero's <= Delphi 10.4 D3D11 is outdated!
 //
 // Related objects: -
-// Related projects: MfPackX312
+// Related projects: MfPackX313
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -67,6 +67,9 @@ interface
 
 {$HPPEMIT '#include "D3D11.h"'}
 {$HPPEMIT '#include "D3DCommon.h"'}
+{$HPPEMIT '#include "dxgiommon.h"'}
+{$HPPEMIT '#include "dxgiformat.h"'}
+{$HPPEMIT '#include "dxgi.h"'}
 
 uses
   {Winapi}
@@ -910,10 +913,6 @@ const
   D3D11_MAP_WRITE_NO_OVERWRITE = 5;
   {$EXTERNALSYM D3D11_MAP_WRITE_NO_OVERWRITE}
 
-  // Delphi spec.
-type
-  FixedFLOATArray = array [0..3] of FLOAT;
-  FixedUINTArray = array [0..3] of UINT;
 
   // const  are placed here to prevent E2086
 const
@@ -2923,7 +2922,7 @@ type
                                                         const pUAVInitialCounts: PUINT); stdcall;
 
     procedure OMSetBlendState(pBlendState: ID3D11BlendState;
-                              const BlendFactor: FixedFLOATArray;
+                              const BlendFactor: Fixed3FLOATArray;
                               SampleMask: UINT); stdcall;
 
     procedure OMSetDepthStencilState(pDepthStencilState: ID3D11DepthStencilState;
@@ -2980,13 +2979,13 @@ type
                                  pSrcView: ID3D11UnorderedAccessView); stdcall;
 
     procedure ClearRenderTargetView(pRenderTargetView: ID3D11RenderTargetView;
-                                    const ColorRGBA: FixedFLOATArray); stdcall;
+                                    const ColorRGBA: Fixed3FLOATArray); stdcall;
 
     procedure ClearUnorderedAccessViewUint(pUnorderedAccessView: ID3D11UnorderedAccessView;
-                                           const Values: FixedUINTArray); stdcall;
+                                           const Values: Fixed3UINTArray); stdcall;
 
     procedure ClearUnorderedAccessViewFloat(pUnorderedAccessView: ID3D11UnorderedAccessView;
-                                            const Values: FixedFLOATArray); stdcall;
+                                            const Values: Fixed3FLOATArray); stdcall;
 
     procedure ClearDepthStencilView(DepthStencilView: ID3D11DepthStencilView;
                                     ClearFlags: UINT;
@@ -3145,7 +3144,7 @@ type
                                                          Specify nil for this parameter when retrieval of unordered-access views is not required.}
 
     procedure OMGetBlendState(out ppBlendState: ID3D11BlendState;
-                              out BlendFactor: FixedFLOATArray;
+                              out BlendFactor: Fixed3FLOATArray;
                               out pSampleMask: UINT); stdcall;
 
     procedure OMGetDepthStencilState(out ppDepthStencilState: ID3D11DepthStencilState;
@@ -6563,9 +6562,12 @@ end;
 
 
 {$WARN SYMBOL_PLATFORM OFF}
+
 function D3D11CreateDevice; external D3D11Lib name 'D3D11CreateDevice' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function D3D11CreateDeviceAndSwapChain; external D3D11Lib name 'D3D11CreateDeviceAndSwapChain' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+
 {$WARN SYMBOL_PLATFORM ON}
 
+  // Implement Additional Prototypes here.
 
 end.

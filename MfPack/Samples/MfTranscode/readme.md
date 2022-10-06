@@ -1,5 +1,5 @@
 # MfTranscode
-Version: X 3.1.2
+Version: X 3.1.3
 
 NOTES: 
  - This release is updated for compiler version 17 up to 35.

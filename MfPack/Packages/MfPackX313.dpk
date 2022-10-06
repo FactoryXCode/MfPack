@@ -1,4 +1,4 @@
-package MfPackX312;
+package MfPackX313;
 
 {$R *.res}
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
@@ -87,13 +87,18 @@ contains
   WinApi.DirectX.D2D1Svg in '..\src\WinApi.DirectX.D2D1Svg.pas',
   WinApi.DirectX.D2DBaseTypes in '..\src\WinApi.DirectX.D2DBaseTypes.pas',
   WinApi.DirectX.D2DErr in '..\src\WinApi.DirectX.D2DErr.pas',
+  WinApi.DirectX.D3D9 in '..\src\WinApi.DirectX.D3D9.pas',
+  WinApi.DirectX.D3D9Caps in '..\src\WinApi.DirectX.D3D9Caps.pas',
+  WinApi.DirectX.D3D9Types in '..\src\WinApi.DirectX.D3D9Types.pas',
   WinApi.DirectX.D3D11 in '..\src\WinApi.DirectX.D3D11.pas',
   WinApi.DirectX.D3D11_1 in '..\src\WinApi.DirectX.D3D11_1.pas',
   WinApi.DirectX.D3D11_2 in '..\src\WinApi.DirectX.D3D11_2.pas',
   WinApi.DirectX.D3D11_3 in '..\src\WinApi.DirectX.D3D11_3.pas',
-  WinApi.DirectX.D3D9 in '..\src\WinApi.DirectX.D3D9.pas',
-  WinApi.DirectX.D3D9Caps in '..\src\WinApi.DirectX.D3D9Caps.pas',
-  WinApi.DirectX.D3D9Types in '..\src\WinApi.DirectX.D3D9Types.pas',
+  WinApi.DirectX.D3D11_4 in '..\src\WinApi.DirectX.D3D11_4.pas',
+  WinApi.DirectX.D3D11Shader in '..\src\WinApi.DirectX.D3D11Shader.pas',
+  Winapi.DirectX.D3D12 in '..\src\Winapi.DirectX.D3D12.pas',
+  WinApi.DirectX.D3D12Video in '..\src\WinApi.DirectX.D3D12Video.pas',
+  WinApi.DirectX.D3D11on12 in '..\src\WinApi.DirectX.D3D11on12.pas',
   WinApi.DirectX.D3DCommon in '..\src\WinApi.DirectX.D3DCommon.pas',
   WinApi.DirectX.DCommon in '..\src\WinApi.DirectX.DCommon.pas',
   WinApi.DirectX.DComp in '..\src\WinApi.DirectX.DComp.pas',
@@ -204,7 +209,6 @@ contains
   WinApi.WinMM.VfwExt in '..\src\WinApi.WinMM.VfwExt.pas',
   WinApi.WinMM.VfwMsgs in '..\src\WinApi.WinMM.VfwMsgs.pas',
   WinApi.Wmistr in '..\src\WinApi.Wmistr.pas',
-  WinApi.DirectX.D3D11_4 in '..\src\WinApi.DirectX.D3D11_4.pas',
-  WinApi.DirectX.D3D11Shader in '..\src\WinApi.DirectX.D3D11Shader.pas';
+  WinApi.DirectX.D3D12Compatibility in '..\src\WinApi.DirectX.D3D12Compatibility.pas';
 
 end.

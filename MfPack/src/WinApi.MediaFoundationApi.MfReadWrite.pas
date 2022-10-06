@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.1.2
+// Revision Version: 3.1.3
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later (See: Remarks).
@@ -30,7 +30,7 @@
 //                   IUnknown(Pointer), IUnknown(Object), IUnknown(Nil) etc.
 //
 // Related objects: -
-// Related projects: MfPackX312
+// Related projects: MfPackX313
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -46,11 +46,12 @@
 //
 // LICENSE
 // 
-// The contents of this file are subject to the Mozilla Public License
-// Version 2.0 (the "License"); you may not use this file except in
-// compliance with the License. You may obtain a copy of the License at
-// https://www.mozilla.org/en-US/MPL/2.0/
-// 
+//  The contents of this file are subject to the
+//  GNU General Public License v3.0 (the "License");
+//  you may not use this file except in
+//  compliance with the License. You may obtain a copy of the License at
+//  https://www.gnu.org/licenses/gpl-3.0.html
+//
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
 // License for the specific language governing rights and limitations
@@ -326,7 +327,6 @@ type
   // The MF Source Reader provides a simple programming model that allows
   // applications to easily access multimedia content from files or devices.
   //
-  // NOTE:  THIS, AS IS IN HEADERSEQUENCE DIFFERS FROM Microsoft Docs!
   //
   PIMFSourceReader = ^IMFSourceReader;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSourceReader);'}
@@ -340,6 +340,8 @@ type
     function SetStreamSelection(dwStreamIndex: DWORD;
                                 const fSelected: Boolean): HResult; stdcall;
 
+    // Gets a format that is supported natively by the media source.
+    // Note: To check if a format is supported by Media Foundation see: https://docs.microsoft.com/en-us/windows/win32/medfound/supported-media-formats-in-media-foundation
     function GetNativeMediaType(dwStreamIndex: DWORD;
                                 dwMediaTypeIndex: DWORD;
                                 out ppMediaType: IMFMediaType): HResult; stdcall;

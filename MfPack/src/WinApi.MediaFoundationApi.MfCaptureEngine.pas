@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 // 07/03/2022 Tony                Fixed IMFCaptureEngineClassFactory.CreateInstance
 // 22/04/2022 Tony                Fixed IMFCaptureSource.GetAvailableDeviceMediaType
 //------------------------------------------------------------------------------
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX312
+// Related projects: MfPackX313
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -836,7 +836,7 @@ type
 
     function GetAvailableDeviceMediaType(const dwSourceStreamIndex: DWORD;
                                          const dwMediaTypeIndex: DWORD;
-                                         out ppMediaType: PIMFMediaType): HResult; stdcall;
+                                         out ppMediaType: IMFMediaType): HResult; stdcall;  //Tony
     // Gets an available media type for a stream from the device.
     // <param name = "dwSourceStreamIndex">
     // Zero based stream index of source.
@@ -886,7 +886,7 @@ type
     // <param name = "fMirrorState">
     // Boolean flag indicating the current mirror state (true=on, false=off).
 
-    function GetStreamIndexFromFriendlyName(uifriendlyName: UINT32;
+    function GetStreamIndexFromFriendlyName(const uifriendlyName: UINT32;
                                             out pdwActualStreamIndex: DWORD): HResult; stdcall;
     // Translates a friendly stream name to an actual device stream index.
     // <param name = "uifriendlyName">
@@ -915,9 +915,9 @@ type
   IMFCaptureEngine = interface(IUnknown)
   ['{a6bba433-176b-48b2-b375-53aa03473207}']
     function Initialize(pEventCallback: IMFCaptureEngineOnEventCallback;
-                        pAttributes: IMFAttributes;
-                        const pAudioSource: IUnknown;
-                        const pVideoSource: IUnknown): HResult; stdcall;
+                        const pAttributes: IMFAttributes = nil;
+                        const pAudioSource: IUnknown = nil;
+                        const pVideoSource: IUnknown = nil): HResult; stdcall;
     // Initializes the the capture engine.
     // App should listen for MF_CAPTURE_ENGINE_INITIALIZED via IMFCaptureEngineOnEventCallback.
     // <param name ="pEventCallback">
@@ -956,7 +956,7 @@ type
     // App should listen for MF_CAPTURE_ENGINE_PHOTO_TAKEN via IMFCaptureEngineOnEventCallback.
 
     function GetSink(mfCaptureEngineSinkType: MF_CAPTURE_ENGINE_SINK_TYPE;
-                     out ppSink: IMFCaptureSink): HResult; stdcall;
+                     [ref] const ppSink: IMFCaptureSink): HResult; stdcall;
     // Method to obtain access to an IMFCaptureSink.
     // <param name = "mfCaptureEngineSinkType">
     // Specifies the capture sink type from the MF_CAPTURE_ENGINE_SINK_TYPE enumeration.

@@ -10,7 +10,7 @@
 // Release date: 24-11-2015
 // Language: ENU
 //
-// Revision Version: 3.1.2
+// Revision Version: 3.1.3
 // Description: Public headers for event tracing control applications,
 // consumers and providers.
 //
@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: LIBRARY CHANGES:
@@ -32,7 +32,7 @@
 //          See: const EvntraceLib declaration.
 //
 // Related objects: -
-// Related projects: MfPackX312
+// Related projects: MfPackX313
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -52,7 +52,12 @@
 // Version 2.0 (the "License"); you may not use this file except in
 // compliance with the License. You may obtain a copy of the License at
 // https://www.mozilla.org/en-US/MPL/2.0/
-// 
+//  The contents of this file are subject to the
+//  GNU General Public License v3.0 (the "License");
+//  you may not use this file except in
+//  compliance with the License. You may obtain a copy of the License at
+//  https://www.gnu.org/licenses/gpl-3.0.html
+//
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
 // License for the specific language governing rights and limitations
@@ -71,12 +76,10 @@ uses
 
   {Winapi}
   Winapi.Windows,
-{$IF CompilerVersion < 30}
-  WinApi.WinApiTypes,
-{$ENDIF}
   Winapi.Wmistr,
   Winapi.evntprov,
-  Winapi.Evntcons;
+  Winapi.Evntcons,
+  WinApi.WinApiTypes;
 
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}

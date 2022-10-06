@@ -25,14 +25,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 // 13/08/2022 Tony                Implemented more functionality and updated methods.
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX312
+// Related projects: MfPackX313
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -48,10 +48,11 @@
 //
 // LICENSE
 //
-// The contents of this file are subject to the Mozilla Public License
-// Version 2.0 (the "License"); you may not use this file except in
-// compliance with the License. You may obtain a copy of the License at
-// https://www.mozilla.org/en-US/MPL/2.0/
+//  The contents of this file are subject to the
+//  GNU General Public License v3.0 (the "License");
+//  you may not use this file except in
+//  compliance with the License. You may obtain a copy of the License at
+//  https://www.gnu.org/licenses/gpl-3.0.html
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
@@ -193,10 +194,9 @@ type
 
   // Used in arrays to hold enum data.
   TDeviceProperties = record
-  public
     riId: TGuid;             // Source type: video or audio capture devices.
-    uiCount: UINT32;         // Number of devices of the same type and brand.
-    uiDeviceIndex: UINT32;   // Zero based device index.
+    iCount: Integer;         // Number of devices of the same type and brand.
+    iDeviceIndex: Integer;   // Zero based device index.
     lpFriendlyName: LPWSTR;  // Readable string from the system .
     lpDisplayName: LPWSTR;   // Displayname of the FriendlyName when doubles are found.
     lpSymbolicLink: LPWSTR;  // Device symlink.
@@ -204,7 +204,8 @@ type
     aAudioFormats: TMFAudioFormatArray; // Audio capabilities of the device supported by Media Foundation.
     dwSupportedFormats: DWord; // Number of mediatype formats of the capturedevice supported by Media Foundation.
     dwNativeFormats: DWord;    // Number of native mediatype formats of the capturedevice.
-    procedure Reset();       // Resets the record to default.
+    public
+      procedure Reset();       // Resets the record to default.
   end;
 
   // Array that holds retrieved devices by name and/or index
@@ -231,7 +232,6 @@ type
   // Stream contents
   PStreamContents = ^TStreamContents;
   _StreamContents = record
-  public
     dwStreamIndex: DWORD;                 // The stream index (zero based !)
     dwStreamID: DWORD;                    // The stream identifier (see: https://msdn.microsoft.com/en-us/library/windows/desktop/ms703852)
     bSelected: BOOL;                      // The currently selected stream.
@@ -265,13 +265,11 @@ type
                                           // multiplied by the number of bytes per audio sample.
 
     audio_dwFormatTag: DWORD;             // FormatTag is the replacement of FOURCC
-
-    procedure Reset();
+    public
+      procedure Reset();
   end;
   TStreamContents = _StreamContents;
   TStreamContentsArray = array of TStreamContents;
-
-
 
 
 
@@ -297,7 +295,7 @@ type
 
   // Create a sample and add a buffer to it.
   function CreateMediaSample(cbData: DWORD;
-                             ppSample: IMFSample): HRESULT;
+                             out pSample: IMFSample): HRESULT;
 
 
 // MEDIA SOURCE
@@ -616,6 +614,8 @@ type
                                 pDeviceIndex: DWord = 0;
                                 pStreamIndex: DWord = MF_SOURCE_READER_FIRST_VIDEO_STREAM): HResult;
 
+  function GetSupportedVideoFormats(CurrentArray: TDevicePropertiesArray): TDevicePropertiesArray;
+
   // This function activates a selected device stored in TDeviceProperties
   function CreateCaptureDeviceInstance(pDeviceProperties: TDeviceProperties;
                                        out ppSource: IMFMediaSource;
@@ -695,7 +695,7 @@ type
 // =======================
 
   // Creates a media source for the choosen deviceindex of the video capture device in the enumeration list.
-  function CreateVideoCaptureDevice(const iDeviceIndex: UINT32;
+  function CreateVideoCaptureDevice(const iDeviceIndex: Integer;
                                     out pSource: IMFMediaSource): HRESULT; overload;
 
   // Does the same if you know the symbolic link
@@ -740,9 +740,13 @@ type
                                               ): HRESULT;
 
   // Copy an attribute value from one attribute store to another.
-  function CopyAttribute(pSrc: IMFAttributes;
-                         pDest: IMFAttributes;
-                         const key: TGUID): HRESULT;
+  function CopyAttribute(const pSrc: IMFAttributes;
+                         var pDest: IMFAttributes;
+                         const key: TGUID): HRESULT; overload;
+
+  function CopyAttribute(const pSrc: IMFMediaType;
+                         var pDest: IMFMediaType;
+                         const key: TGUID): HRESULT; overload;
 
 
   // Creates a compatible video format with a different subtype if param guidSubType <> GUID_NULL else
@@ -759,7 +763,7 @@ type
   //
   // WARNING: DON'T USE MFImageFormat_RGB32! (This will end with a WINCODEC_ERR_COMPONENTNOTFOUND)
   function CreatePhotoMediaType(psubTypeGuid: TGuid;
-                                out pPhotoMediaType: IMFMediaType): HRESULT ;
+                                var pPhotoMediaType: IMFMediaType): HRESULT ;
 
 
 
@@ -1030,8 +1034,8 @@ var
 
 begin
   riId := GUID_NULL;
-  uiCount := 0;
-  uiDeviceIndex := 0;
+  iCount := 0;
+  iDeviceIndex := 0;
   lpFriendlyName := nil;
   lpDisplayName := nil;
   lpSymbolicLink := nil;
@@ -1100,24 +1104,24 @@ end;
 
 // Create a sample and add a buffer to it.
 function CreateMediaSample(cbData: DWORD;
-                           ppSample: IMFSample): HRESULT;
+                           out pSample: IMFSample): HRESULT;
 var
   hr: HRESULT;
-  pSample: IMFSample;
+  mfSample: IMFSample;
   pBuffer: IMFMediaBuffer;
 
 begin
-  hr := MFCreateSample(pSample);
+  hr := MFCreateSample(mfSample);
 
   if SUCCEEDED(hr) then
     hr := MFCreateMemoryBuffer(cbData,
                                pBuffer);
 
   if SUCCEEDED(hr) then
-    hr := pSample.AddBuffer(pBuffer);
+    hr := mfSample.AddBuffer(pBuffer);
 
   if SUCCEEDED(hr) then
-    ppSample := pSample;
+    pSample := mfSample;
 
   Result := hr;
 end;
@@ -1257,7 +1261,7 @@ function CreateVideoDeviceSource(DeviceIndex: DWord;
                                  out pSource: IMFMediaSource): HResult;
 var
   hr: HResult;
-  count: UINT32;
+  icount: INT;
   i: Integer;
   MediaSource: IMFMediaSource;
   pAttributes: IMFAttributes;
@@ -1283,12 +1287,12 @@ begin
   // Enumerate devices first.
   hr := MFEnumDeviceSources(pAttributes,
                             ppDevices,
-                            count);
+                            iCount);
   if FAILED(hr) then
     goto Done;
 
-  if (DeviceIndex > count) or
-     (count = 0) then
+  if (DeviceIndex > DWORD(icount)) or
+     (icount = 0) then
     begin
       hr := MF_E_NO_CAPTURE_DEVICES_AVAILABLE;
       goto done;
@@ -1311,7 +1315,7 @@ begin
 Done:
 
 {$POINTERMATH ON}
-  for i := 0 to count -1 do
+  for i := 0 to iCount -1 do
    SafeRelease(ppDevices[i]);
 {$POINTERMATH ON}
 
@@ -2794,13 +2798,14 @@ function EnumCaptureDeviceSources(const pAttributeSourceType: TGuid;
     Result := (pIndex >= 0);
   end;
   {$ENDREGION}
+
 var
   hr: HRESULT;
   pAttributes: IMFAttributes;
   pMediaSource: IMFMediaSource;
   pSourceReader: IMFSourceReader;
   ppDevices: PIMFActivate; // Pointer to array of IMFActivate
-  uiCount: UINT32;
+  iCount: Integer;
   uiNameLen: UINT32;
   iIndex: Integer;
   szName,
@@ -2844,7 +2849,7 @@ begin
   // Enumerate devices.
   hr := MFEnumDeviceSources(pAttributes,
                             ppDevices,   // pointer to array of IMFActivate interfaces.
-                            uiCount);    // Number of elements (ppDevices)
+                            iCount);    // Number of elements (ppDevices)
 
   if (FAILED(hr)) then
     begin
@@ -2852,7 +2857,7 @@ begin
       goto Done;
     end;
 
-  if (uiCount = 0) then
+  if (iCount = 0) then
     begin
       // Nothing found
       hr := MF_E_NOT_FOUND;
@@ -2861,11 +2866,11 @@ begin
 
   //Set the new length
   SetLength(pDeviceProperties,
-            uiCount);
+            iCount);
 
 {$POINTERMATH ON}
 
-  for i := 0 to uiCount -1 do
+  for i := 0 to iCount -1 do
     begin
 
       // Try to get the readable name.
@@ -2876,7 +2881,7 @@ begin
         goto Done;
 
       // Add the fiendlyname to the list.
-      pDeviceProperties[i].uiDeviceIndex := i;
+      pDeviceProperties[i].iDeviceIndex := i;
       pDeviceProperties[i].lpFriendlyName := szName;
 
       // Add the Interface identifier (IID) of the requested interface.
@@ -2964,24 +2969,24 @@ begin
                       pDeviceProperties[i].lpFriendlyName,
                       iIndex) then
         begin
-          uiCount := pDeviceProperties[iIndex].uiCount + 1;
-          if (uiCount >= 2) then
+          iCount := pDeviceProperties[iIndex].iCount + 1;
+          if (iCount >= 2) then
             begin
               // Update the first device to include '(1)'
               pDeviceProperties[iIndex].lpDisplayName := StrToPWideChar(Format('%s (%d)',
                                                                                [pDeviceProperties[iIndex].lpFriendlyName,
-                                                                                pDeviceProperties[iIndex].uiCount]));
+                                                                                pDeviceProperties[iIndex].iCount]));
 
-              pDeviceProperties[iIndex].uiCount := uiCount;
+              pDeviceProperties[iIndex].iCount := iCount;
             end
           else
             begin
               pDeviceProperties[iIndex].lpDisplayName := pDeviceProperties[iIndex].lpFriendlyName;
-              pDeviceProperties[iIndex].uiCount := 1;
+              pDeviceProperties[iIndex].iCount := 1;
             end;
         end
       else
-        uiCount := 1;
+        iCount := 1;
     end;
 
 Done:
@@ -3094,8 +3099,8 @@ begin
 
       // Get the stride to find out if the bitmap is top-down or bottom-up.
       pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iStride := MFGetAttributeUINT32(pMediaType,
-                                                                        MF_MT_DEFAULT_STRIDE,
-                                                                        1);
+                                                                                             MF_MT_DEFAULT_STRIDE,
+                                                                                             1);
       pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].bIsTopDown := (pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iStride > 0);
 
       // Get the pixel aspect ratio. (This value might not be set.)
@@ -3123,9 +3128,6 @@ begin
 
       if SUCCEEDED(hr) then
         pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].mfMediaType := pMediaType
-        //CloneVideoMediaType(pMediaType,
-        //                    GUID_NULL,
-        //                    pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].mfMediaType)
       else
         Break;
 
@@ -3146,12 +3148,31 @@ Done:
 end;
 
 
+function GetSupportedVideoFormats(CurrentArray: TDevicePropertiesArray): TDevicePropertiesArray;
+var
+  i, j: Integer;
+
+begin
+
+
+  for i := 0 to Length(CurrentArray) -1 do
+    begin
+      for j := 0 to Length(CurrentArray[i].aVideoFormats) -1 do
+        if CurrentArray[i].aVideoFormats[j].bMFSupported then
+          begin
+            SetLength(Result[i].aVideoFormats, 1);
+            Result[i].aVideoFormats[j] := CurrentArray[i].aVideoFormats[j]
+          end;
+    end;
+
+end;
+
 // CreateCaptureDeviceInstance
 function CreateCaptureDeviceInstance(pDeviceProperties: TDeviceProperties;
                                      out ppSource: IMFMediaSource;
                                      out ppActivate: IMFActivate): HRESULT;
 var
-  count: UINT32;
+  count: INT;
   pConfig: IMFAttributes;
   ppDevices: PIMFActivate;  // Pointer to array of IMFActivate
   hr: HRESULT;
@@ -3187,12 +3208,12 @@ begin
   // Create a media source from the selected device.
   if (count > 0) then
     begin
-      hr := ppDevices[pDeviceProperties.uiDeviceIndex].ActivateObject(IID_IMFMediaSource,
+      hr := ppDevices[pDeviceProperties.iDeviceIndex].ActivateObject(IID_IMFMediaSource,
                                                                       Pointer(ppSource));
       if FAILED(hr) then
         goto Done;
 
-      ppActivate := ppDevices[pDeviceProperties.uiDeviceIndex];
+      ppActivate := ppDevices[pDeviceProperties.iDeviceIndex];
     end
   else
     hr := MF_E_NOT_FOUND;
@@ -3850,10 +3871,10 @@ end;
 // The following fuction creates a media source for the given video capture device (iDeviceIndex) in
 // the enumeration list:
 //
-function CreateVideoCaptureDevice(const iDeviceIndex: UINT32;
+function CreateVideoCaptureDevice(const iDeviceIndex: Integer;
                                   out pSource: IMFMediaSource): HRESULT; overload;
 var
-  count: UINT32;
+  count: INT;
   i: Integer;
   pConfig: IMFAttributes;
   ppDevices: PIMFActivate; // Pointer to array of IMFActivate interfaces
@@ -4253,8 +4274,32 @@ end;
 
 
 //
-function CopyAttribute(pSrc: IMFAttributes;
-                       pDest: IMFAttributes;
+function CopyAttribute(const pSrc: IMFAttributes;
+                       var pDest: IMFAttributes;
+                       const key: TGUID): HRESULT;
+var
+  pvar: PROPVARIANT;
+  hr: HRESULT;
+
+begin
+  if Assigned(pSrc) then
+    begin
+      PropVariantInit(pvar);
+      hr := pSrc.GetItem(key,
+                         pvar);
+      if (SUCCEEDED(hr)) then
+        hr := pDest.SetItem(key,
+                            pvar);
+      PropVariantClear(pvar);
+    end
+  else
+    hr := E_POINTER;
+  Result := hr;
+end;
+
+
+function CopyAttribute(const pSrc: IMFMediaType;
+                       var pDest: IMFMediaType;
                        const key: TGUID): HRESULT;
 var
   pvar: PROPVARIANT;
@@ -4278,6 +4323,7 @@ end;
 
 
 
+
 // Creates a compatible video format with a different subtype if param guidSubType <> GUID_NULL else
 // the SubType will be the source subtype.
 function CloneVideoMediaType(const pSrcMediaType: IMFMediaType;
@@ -4286,9 +4332,12 @@ function CloneVideoMediaType(const pSrcMediaType: IMFMediaType;
 var
   hr: HRESULT;
   rGuid: REFGUID;
+  tmpMediaType: IMFMediaType;
+
  // {$IFDEF DEBUG}
  // FMediaTypeDebug: TMediaTypeDebug;
  // {$ENDIF}
+
 label
   done;
 
@@ -4302,7 +4351,7 @@ begin
 //  FreeAndNil(FMediaTypeDebug);
 //  {$ENDIF}
 
-  hr := MFCreateMediaType(ppNewMediaType);
+  hr := MFCreateMediaType(tmpMediaType);
   if (FAILED(hr)) then
     goto done;
 
@@ -4310,39 +4359,41 @@ begin
     hr := pSrcMediaType.GetGUID(MF_MT_SUBTYPE,
                                 rGuid)
   else
-    hr := ppNewMediaType.SetGUID(MF_MT_SUBTYPE,
-                                 guidSubType);
+    hr := tmpMediaType.SetGUID(MF_MT_SUBTYPE,
+                               guidSubType);
   if (FAILED(hr)) then
     goto done;
 
-  hr := ppNewMediaType.SetGUID(MF_MT_MAJOR_TYPE,
-                               MFMediaType_Video);
+  hr := tmpMediaType.SetGUID(MF_MT_MAJOR_TYPE,
+                             MFMediaType_Video);
   if (FAILED(hr)) then
     goto done;
 
   hr := CopyAttribute(pSrcMediaType,
-                      ppNewMediaType,
+                      tmpMediaType,
                       MF_MT_FRAME_SIZE);
   if (FAILED(hr)) then
     goto done;
 
   hr := CopyAttribute(pSrcMediaType,
-                      ppNewMediaType,
+                      tmpMediaType,
                       MF_MT_FRAME_RATE);
   if (FAILED(hr)) then
     goto done;
 
   hr := CopyAttribute(pSrcMediaType,
-                      ppNewMediaType,
+                      tmpMediaType,
                       MF_MT_PIXEL_ASPECT_RATIO);
   if (FAILED(hr)) then
     goto done;
 
   hr := CopyAttribute(pSrcMediaType,
-                      ppNewMediaType,
+                      tmpMediaType,
                       MF_MT_INTERLACE_MODE);
   if (FAILED(hr)) then
     goto done;
+
+  ppNewMediaType := tmpMediaType;
 
 done:
   Result := hr;
@@ -4351,7 +4402,7 @@ end;
 
 //
 function CreatePhotoMediaType(psubTypeGuid: TGuid; {can be one of the following: MFImageFormat_RGB32, MFImageFormat_JPEG or WIC guidContainerFormats like GUID_ContainerFormatBmp etc.}
-                              out pPhotoMediaType: IMFMediaType): HRESULT;
+                              var pPhotoMediaType: IMFMediaType): HRESULT;
 
 const
   uiFrameRateNumerator = 30;

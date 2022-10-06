@@ -29,7 +29,7 @@
 //            New apps should use the latest Direct3D API
 //
 // Related objects: -
-// Related projects: MfPackX312
+// Related projects: MfPackX313
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -67,7 +67,8 @@ unit WinApi.DirectX.D3DCommon;
 interface
 
 uses
-  Winapi.Windows;
+  WinApi.Windows,
+  WinApi.WinApiTypes;
 
   {$WEAKPACKAGEUNIT ON}
   {$ALIGN ON}
@@ -1632,6 +1633,11 @@ const
 
 
   // Additional Prototypes for ALL interfaces
+
+  // Used by D3D11 and D3D12
+type
+  Fixed3FLOATArray = array [0..3] of FLOAT;
+  Fixed3UINTArray = array [0..3] of UINT;
 
   // End of Additional Prototypes
 

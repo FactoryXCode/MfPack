@@ -22,14 +22,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 // 13/08/2022 Tony                Implemented more functionality and updated methods.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX312
+// Related projects: MfPackX313
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -45,10 +45,11 @@
 //
 // LICENSE
 //
-// The contents of this file are subject to the Mozilla Public License
-// Version 2.0 (the "License"); you may not use this file except in
-// compliance with the License. You may obtain a copy of the License at
-// https://www.mozilla.org/en-US/MPL/2.0/
+//  The contents of this file are subject to the
+//  GNU General Public License v3.0 (the "License");
+//  you may not use this file except in
+//  compliance with the License. You may obtain a copy of the License at
+//  https://www.gnu.org/licenses/gpl-3.0.html
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
@@ -59,16 +60,6 @@
 // in full at the top of the file.
 //==============================================================================
 unit WinApi.MediaFoundationApi.MfUtils;
-
-  {$WEAKPACKAGEUNIT ON}
-  {$ALIGN ON}
-  {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
 
 interface
 
@@ -90,6 +81,16 @@ uses
   WinApi.MediaFoundationApi.MfIdl,
   WinApi.MediaFoundationApi.Evr,
   WinApi.MediaFoundationApi.MfError;
+
+  {$WEAKPACKAGEUNIT ON}
+  {$ALIGN ON}
+  {$MINENUMSIZE 4}
+
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
 
   {$I 'WinApiTypes.inc'}
 
@@ -405,16 +406,27 @@ type
   // Source: Embarcadero
   //================================
 
+  // UINT64
+  // Getter
+  function Get64bitBits(const data: UINT64;
+                        const index: Integer): Integer; inline;
+
+  // Setter
+  procedure Set64bitBits(var data: UINT64;
+                         const index: Integer;
+                         const value: Integer); inline;
+
+
   // DWORD
   // Getter
   function GetDWordBits(const data: DWORD;
                         const index: Integer): Integer; inline;
 
-
   // Setter
   procedure SetDWordBits(var data: DWORD;
                          const index: Integer;
                          const value: Integer); inline;
+
 
   // WORD
   // Getter
@@ -428,6 +440,7 @@ type
                         const value: Integer); inline;
 
 
+
   // BYTE
   // Getter
   function GetByteBits(const data: Byte;
@@ -438,6 +451,7 @@ type
   procedure SetByteBits(var data: Byte;
                         const index: Integer;
                         const value: Integer); inline;
+
 
   // System
   //=======
@@ -1670,6 +1684,39 @@ end;
 // Bitshifting helpers
 // Source: Patrick van Logchem, Embarcadero
 //=========================================
+
+// UINT64
+// getter
+function Get64bitBits(const data: UINT64;
+                      const index: Integer): Integer; inline;
+begin
+  Result := (data shr (index shr 8)) AND // offset
+            ((1 shl Byte(index)) - 1);   // mask
+end;
+
+// Setter
+procedure Set64bitBits(var data: UINT64;
+                       const index: Integer;
+                       const value: Integer); inline;
+var
+  offset: Byte;
+  mask: Integer;
+  val: Integer;
+
+begin
+  val := value;
+  Mask := ((1 shl Byte(index)) - 1);
+
+  //Assert(value <= Mask);
+  if val > mask then
+    val := mask;
+
+  offset := index shr 8;
+  data := (data AND (not (mask shl offset)))
+           OR UINT64(val shl offset);
+end;
+
+
 
 // DWORD
 // Getter

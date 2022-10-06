@@ -10,7 +10,7 @@
 // Release date: 01-05-2019
 // Language: ENU
 //
-// Revision Version: 3.1.2
+// Revision Version: 3.1.3
 // Description: Error code definitions for the Win32 API functions.
 //
 // Organisation: FactoryX
@@ -21,14 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: When using MfPack, use this unit and not the outdated
 //          Error code definitions from Embarcadero Delphi <= ver 10.4
 //
 // Related objects: -
-// Related projects: MfPackX312
+// Related projects: MfPackX313
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -44,10 +44,11 @@
 //
 // LICENSE
 //
-// The contents of this file are subject to the Mozilla Public License
-// Version 2.0 (the "License"); you may not use this file except in
-// compliance with the License. You may obtain a copy of the License at
-// https://www.mozilla.org/en-US/MPL/2.0/
+//  The contents of this file are subject to the
+//  GNU General Public License v3.0 (the "License");
+//  you may not use this file except in
+//  compliance with the License. You may obtain a copy of the License at
+//  https://www.gnu.org/licenses/gpl-3.0.html
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
@@ -33213,18 +33214,18 @@ const
 // indicate success).
 //
 
-function SUCCEEDED(hr: HResult): BOOL; inline;
+function SUCCEEDED(hr: HResult): Boolean; inline;
 
 //
 // and the inverse
 //
-function FAILED(hr: HResult): BOOL; inline;
+function FAILED(hr: HResult): Boolean; inline;
 
 
 //
 // Generic test for error on any status value.
 //
-function IS_ERROR(Status: DWORD): BOOL; inline;
+function IS_ERROR(Status: DWORD): Boolean; inline;
 
 
 //
@@ -72255,17 +72256,17 @@ const
 implementation
 
 
-function SUCCEEDED(hr: HResult): BOOL; inline;
+function SUCCEEDED(hr: HResult): Boolean; inline;
 begin
   Result := (HResult(hr) >= 0);
 end;
 
-function FAILED(hr: HResult): BOOL; inline;
+function FAILED(hr: HResult): Boolean; inline;
 begin
   Result := (HResult(hr) < 0);
 end;
 
-function IS_ERROR(Status: DWORD): BOOL; inline;
+function IS_ERROR(Status: DWORD): Boolean; inline;
 begin
   Result := ((NativeUInt(Status) shr 31) = SEVERITY_ERROR);
 end;

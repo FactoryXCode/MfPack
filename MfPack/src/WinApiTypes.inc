@@ -10,7 +10,7 @@
 // Release date: 04-01-2016
 // Language: ENU
 //
-// Revision Version: 3.1.2
+// Revision Version: 3.1.3
 // Description: Holds compiler definitions for MfPack.
 //
 //
@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: All future updates (releases) will be named to an artist except for
@@ -376,7 +376,8 @@ const
 // {$DEFINE MFPACK_VERSION_300_UP} // Enigma release, Milestone update 14.
 // {$DEFINE MFPACK_VERSION_310_UP} // Bowie release, Milestone update 15.
 // {$DEFINE MFPACK_VERSION_311_UP} // Bowie release, Milestone update 16.
-{$DEFINE MFPACK_VERSION_312_UP} // Mercury release, Milestone update 17.
+// {$DEFINE MFPACK_VERSION_312_UP} // Mercury release, Milestone update 17.
+{$DEFINE MFPACK_VERSION_313_UP} // PiL release, Milestone update 18.
 
 // WARNINGS
 // enable/disable compiler warnings.
@@ -420,7 +421,7 @@ const
 
 const
 // a global version ID (for internal use only).
-MfpVersion   = '3.1.2'; // Release version.
+MfpVersion   = '3.1.3'; // Release version.
 {$DEFINE MFP_VERSION_312}
 
 
@@ -814,6 +815,9 @@ MfpVersion   = '3.1.2'; // Release version.
 
  {$DEFINE MFP_CSHORT}
 // {$UNDEF MFP_CSHORT}
+
+ {$DEFINE MFP_PINT8}
+// {$UNDEF MFP_PINT8}
 
  {$DEFINE MFP_SMALL_RECT}
 // {$UNDEF MFP_SMALL_RECT}

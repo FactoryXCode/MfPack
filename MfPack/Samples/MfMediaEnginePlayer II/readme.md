@@ -1,5 +1,5 @@
 # MfMediaEnginePlayer
-Version: X 3.1.2
+Version: X 3.1.3
 
 Description: 
   A mediaengine player sample with support for 
