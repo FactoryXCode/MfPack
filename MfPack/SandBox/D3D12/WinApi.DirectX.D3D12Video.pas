@@ -5,13 +5,13 @@
 // Project: MfPack - Media Foundation
 // Project location: https://sourceforge.net/projects/MfPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: WinApi.MediaFoundationApi.MfMediaTypeDebug.pas
+// Module: WinApi.DirectX.D3D12Video.pas
 // Kind: Pascal / Delphi unit
 // Release date: 13-08-2022
 // Language: ENU
 //
 // Revision Version: 3.1.3
-// Description: Code to view the contents of a media type (IMFMediaType) while debugging.
+// Description: -
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -36,7 +36,7 @@
 // Todo: -
 //
 //==============================================================================
-// Source: Microsoft
+// Source: D3D12Video.h
 //
 // Copyright (c) Microsoft Corporation. Licensed under the MIT license.
 //==============================================================================
@@ -61,6 +61,12 @@
 unit WinApi.DirectX.D3D12Video;
 
 interface
+
+  {$HPPEMIT '#include "D3D12Video.h"'}
+  {$HPPEMIT '#include "DXGIFormat.h"'}
+  {$HPPEMIT '#include "DXGICommon.h"'}
+  {$HPPEMIT '#include "D3D12.h"'}
+  {$HPPEMIT '#include "D3DCommon.h"'}
 
 uses
 
