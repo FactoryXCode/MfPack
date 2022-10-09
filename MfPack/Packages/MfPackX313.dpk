@@ -96,9 +96,13 @@ contains
   WinApi.DirectX.D3D11_3 in '..\src\WinApi.DirectX.D3D11_3.pas',
   WinApi.DirectX.D3D11_4 in '..\src\WinApi.DirectX.D3D11_4.pas',
   WinApi.DirectX.D3D11Shader in '..\src\WinApi.DirectX.D3D11Shader.pas',
-  Winapi.DirectX.D3D12 in '..\src\Winapi.DirectX.D3D12.pas',
+  WinApi.DirectX.D3D12 in '..\src\Winapi.DirectX.D3D12.pas',
   WinApi.DirectX.D3D12Video in '..\src\WinApi.DirectX.D3D12Video.pas',
   WinApi.DirectX.D3D11on12 in '..\src\WinApi.DirectX.D3D11on12.pas',
+  WinApi.DirectX.D3D12Compatibility in '..\src\WinApi.DirectX.D3D12Compatibility.pas',
+  WinApi.DirectX.D3D12Shader in '..\src\WinApi.DirectX.D3D12Shader.pas',
+  WinApi.DirectX.D3D12SDKLayers in '..\src\WinApi.DirectX.D3D12SDKLayers.pas',
+  WinApi.DirectX.HolographicSpaceInterop in '..\src\WinApi.DirectX.HolographicSpaceInterop.pas',
   WinApi.DirectX.D3DCommon in '..\src\WinApi.DirectX.D3DCommon.pas',
   WinApi.DirectX.DCommon in '..\src\WinApi.DirectX.DCommon.pas',
   WinApi.DirectX.DComp in '..\src\WinApi.DirectX.DComp.pas',
@@ -119,7 +123,7 @@ contains
   WinApi.DirectX.DXGIFormat in '..\src\WinApi.DirectX.DXGIFormat.pas',
   WinApi.DirectX.DXGIMessages in '..\src\WinApi.DirectX.DXGIMessages.pas',
   WinApi.DirectX.DXGIType in '..\src\WinApi.DirectX.DXGIType.pas',
-  WinApi.DirectX.DXVA in '..\src\WinApi.DirectX.DXVA.pas',
+  WinApi.DirectX.DxVa in '..\src\WinApi.DirectX.DxVa.pas',
   WinApi.DirectX.DXVA2Api in '..\src\WinApi.DirectX.DXVA2Api.pas',
   WinApi.DirectX.DXVA2SWDev in '..\src\WinApi.DirectX.DXVA2SWDev.pas',
   WinApi.DirectX.DXVA2Trace in '..\src\WinApi.DirectX.DXVA2Trace.pas',
@@ -208,7 +212,7 @@ contains
   WinApi.WinMM.VfW in '..\src\WinApi.WinMM.VfW.pas',
   WinApi.WinMM.VfwExt in '..\src\WinApi.WinMM.VfwExt.pas',
   WinApi.WinMM.VfwMsgs in '..\src\WinApi.WinMM.VfwMsgs.pas',
-  WinApi.Wmistr in '..\src\WinApi.Wmistr.pas',
-  WinApi.DirectX.D3D12Compatibility in '..\src\WinApi.DirectX.D3D12Compatibility.pas';
+  WinApi.Wmistr in '..\src\WinApi.Wmistr.pas';
+
 
 end.
