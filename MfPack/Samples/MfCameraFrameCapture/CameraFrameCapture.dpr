@@ -3,7 +3,8 @@ program CameraFrameCapture;
 uses
   {$IFDEF FASTMM}
   FastMM4,
-  {$ENDIF }
+  {$ENDIF}
+
   {$IFDEF MAD}
   madExcept,
   madLinkDisAsm,
@@ -11,6 +12,7 @@ uses
   madListProcesses,
   madListModules,
   {$ENDIF }
+
   Vcl.Forms,
   Form.Main in 'Form.Main.pas' {FrmMain},
   Support in 'Support.pas',

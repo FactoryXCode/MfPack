@@ -10,7 +10,7 @@
 // Release date: 29-03-2022
 // Language: ENU
 //
-// Revision Version: 3.1.2
+// Revision Version: 3.1.3
 //
 // Description:
 //   This unit is the application mainform.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX312/Samples/CameraFrameCapture
+// Related projects: MfPackX313/Samples/CameraFrameCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.22621.0
@@ -849,11 +849,14 @@ var
 begin
   BeginBusy();
   try
-    SetLength(FDevices, 0);
-    SetLength(oDeviceProperties, 0);
+    SetLength(FDevices,
+              0);
+    SetLength(oDeviceProperties,
+              0);
     cbxCaptureDevices.Clear;
+
     oResult := EnumCaptureDeviceSources(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID,
-                                   oDeviceProperties);
+                                        oDeviceProperties);
     cbxCaptureDevices.Items.Add('None');
     SetLength(FDevices,
               Length(oDeviceProperties));
@@ -861,7 +864,7 @@ begin
     // Update display name for devices with the same name.
     for i:= Low(oDeviceProperties) to High(oDeviceProperties) do
       begin
-        if DeviceExists(FDevices, oDeviceProperties[i].sFriendlyName, iIndex) then
+        if DeviceExists(FDevices, oDeviceProperties[i].lpFriendlyName, iIndex) then
           begin
             iCount := FDevices[iIndex].iCount + 1;
             if iCount = 2 then
@@ -875,10 +878,10 @@ begin
 
         // Keep a reference to the full device details
         FDevices[i].oExtendedDetails := oDeviceProperties[i];
-        FDevices[i].sOriginalName := oDeviceProperties[i].sFriendlyName;
+        FDevices[i].sOriginalName := oDeviceProperties[i].lpFriendlyName;
         if (iCount > 1 ) then
           FDevices[i].sUniqueName := Format('%s (%d)',
-                                            [oDeviceProperties[i].sFriendlyName,
+                                            [oDeviceProperties[i].lpFriendlyName,
                                             iCount])
         else
           FDevices[i].sUniqueName := FDevices[i].sOriginalName;

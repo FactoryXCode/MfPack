@@ -23,15 +23,11 @@ object FrmMain: TFrmMain
     Top = 0
     Width = 1214
     Height = 233
-    ActivePage = tsAdvanced
+    ActivePage = tsSetup
     Align = alTop
     TabOrder = 0
     object tsSetup: TTabSheet
       Caption = 'Setup'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         1206
         203)
@@ -246,10 +242,6 @@ object FrmMain: TFrmMain
     object tsAdvanced: TTabSheet
       Caption = 'Advanced'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object lblBrightness: TLabel
         Left = 16
         Top = 48
@@ -301,10 +293,6 @@ object FrmMain: TFrmMain
     object tsDiagnostics: TTabSheet
       Caption = 'Diagnostics'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object lblMaxDesc2: TLabel
         Left = 16
         Top = 80
@@ -345,10 +333,6 @@ object FrmMain: TFrmMain
     TabOrder = 1
     object tsFrame: TTabSheet
       Caption = 'Frame'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object pbCapture: TPaintBox
         Left = 0
         Top = 0

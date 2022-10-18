@@ -162,8 +162,7 @@ type
     iVideoHeight: UINT32;
     iBufferWidth: UINT32;
     iBufferHeight: UINT32;
-    iStride: UINT32;
-    bIsTopDown: Boolean;
+    iStride: UINT32;    // Stride is positive for top-down images, and negative for bottom-up images.
 
     // Major & Subtypes
     fSubType: TGuid;
@@ -695,7 +694,7 @@ type
 // =======================
 
   // Creates a media source for the choosen deviceindex of the video capture device in the enumeration list.
-  function CreateVideoCaptureDevice(const iDeviceIndex: Integer;
+  function CreateVideoCaptureDevice(const iDeviceIndex: UINT32;
                                     out pSource: IMFMediaSource): HRESULT; overload;
 
   // Does the same if you know the symbolic link
@@ -823,10 +822,7 @@ type
   function SetOutputRectangleAspectRatio(pAttributes: IMFAttributes;
                                          stVideoPadFlags: MFVideoPadFlags = MFVideoPadFlag_PAD_TO_None): HResult; inline;
 
-  // Helper function to check if
-
-//////////////////////////////////////////////////////////////////////////////
-
+////////////////////////////////////////////////////////////////////////////////
 
 
   // Gets metadata from a media source or other object.
@@ -1005,7 +1001,6 @@ begin
   iBufferWidth := 0;
   iBufferHeight := 0;
   iStride := 0;
-  bIsTopDown := False;
 
   // Major & Subtypes
   fSubType := GUID_NULL;
@@ -1261,7 +1256,7 @@ function CreateVideoDeviceSource(DeviceIndex: DWord;
                                  out pSource: IMFMediaSource): HResult;
 var
   hr: HResult;
-  icount: INT;
+  icount: UINT32;
   i: Integer;
   MediaSource: IMFMediaSource;
   pAttributes: IMFAttributes;
@@ -2805,7 +2800,7 @@ var
   pMediaSource: IMFMediaSource;
   pSourceReader: IMFSourceReader;
   ppDevices: PIMFActivate; // Pointer to array of IMFActivate
-  iCount: Integer;
+  iCount: UINT32;
   uiNameLen: UINT32;
   iIndex: Integer;
   szName,
@@ -3097,11 +3092,10 @@ begin
       if FAILED(hr) then
         Break;
 
-      // Get the stride to find out if the bitmap is top-down or bottom-up.
+      // Get the stride to find out if the image is top-down or bottom-up.
       pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iStride := MFGetAttributeUINT32(pMediaType,
                                                                                              MF_MT_DEFAULT_STRIDE,
                                                                                              1);
-      pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].bIsTopDown := (pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iStride > 0);
 
       // Get the pixel aspect ratio. (This value might not be set.)
       hr := MFGetAttributeRatio(pMediaType,
@@ -3172,7 +3166,7 @@ function CreateCaptureDeviceInstance(pDeviceProperties: TDeviceProperties;
                                      out ppSource: IMFMediaSource;
                                      out ppActivate: IMFActivate): HRESULT;
 var
-  count: INT;
+  count: UINT32;
   pConfig: IMFAttributes;
   ppDevices: PIMFActivate;  // Pointer to array of IMFActivate
   hr: HRESULT;
@@ -3871,10 +3865,10 @@ end;
 // The following fuction creates a media source for the given video capture device (iDeviceIndex) in
 // the enumeration list:
 //
-function CreateVideoCaptureDevice(const iDeviceIndex: Integer;
+function CreateVideoCaptureDevice(const iDeviceIndex: UINT32;
                                   out pSource: IMFMediaSource): HRESULT; overload;
 var
-  count: INT;
+  count: UINT32;
   i: Integer;
   pConfig: IMFAttributes;
   ppDevices: PIMFActivate; // Pointer to array of IMFActivate interfaces

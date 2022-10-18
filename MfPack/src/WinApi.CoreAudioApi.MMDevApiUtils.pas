@@ -451,7 +451,7 @@ try
   if (count = 0) then
     begin
       devicesCount := 0;
-      Result := MF_E_NOT_FOUND;
+      hr := MF_E_NOT_FOUND;
       Exit;
     end;
 

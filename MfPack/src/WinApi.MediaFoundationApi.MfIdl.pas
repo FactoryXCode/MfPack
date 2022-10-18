@@ -5990,7 +5990,7 @@ type
   // Enumerates a list of audio or video capture devices.
   function MFEnumDeviceSources(pAttributes: IMFAttributes;
                                [ref] const pppSourceActivate: PIMFActivate; // Pointer to array of IMFActivate
-                               out pcSourceActivate: INT): HResult; stdcall;
+                               out pcSourceActivate: UINT32): HResult; stdcall;
   {$EXTERNALSYM MFEnumDeviceSources}
 
   // pAttributes [in]
