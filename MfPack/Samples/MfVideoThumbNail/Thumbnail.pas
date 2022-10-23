@@ -10,7 +10,7 @@
 // Release date: 08-07-2012
 // Language: ENU
 //
-// Revision Version: 3.1.2
+// Revision Version: 3.1.3
 // Description: Videothumbnail generator.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX312
+// Related projects: MfPackX313
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -94,7 +94,7 @@ const
 
 type
 
-  TThumbnailGenerator = class
+  TThumbnailGenerator = class(TObject)
   private
 
     llSampleTime: LONGLONG;
@@ -141,11 +141,8 @@ implementation
 //-------------------------------------------------------------------
 constructor TThumbnailGenerator.Create();
 begin
-  if (m_pReader = Nil) then
-    begin
-      ZeroMemory(@m_format,
-                 sizeof(m_format));
-    end;
+  if (m_pReader = nil) then
+    m_format := Default(TFormatInfo);
 end;
 
 //-------------------------------------------------------------------
@@ -154,8 +151,6 @@ end;
 destructor TThumbnailGenerator.Destroy();
 begin
   SafeRelease(m_pReader);
-  ZeroMemory(@m_format,
-             sizeof(m_format));
 end;
 
 
@@ -190,7 +185,7 @@ var
 begin
 
   // debug: check sprite index
-  //iSpriteIndex:= pSprite.m_SpriteIndex;
+  //iSpriteIndex := pSprite.m_SpriteIndex;
 
   dwFlags := 0;
   pBitmapData := Nil;      // Bitmap data
@@ -236,7 +231,7 @@ begin
   repeat
     begin
 
-      pSampleTmp := Nil;
+      SafeRelease(pSampleTmp);
 
       // Read Sample
       hr := m_pReader.ReadSample(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
@@ -256,8 +251,7 @@ begin
 
 
           if hr = E_POINTER then
-
-         goto done;
+            goto done;
         end;
 
       if (dwFlags = DWORD(MF_SOURCE_READERF_ENDOFSTREAM)) then
@@ -271,19 +265,15 @@ begin
           hr := GetVideoFormat(m_format);
 
           if (FAILED(hr)) then
-            begin
-              goto done;
-            end;
+            goto done;
         end;
 
-      if (pSampleTmp = Nil) then
-        begin
-          continue;
-        end;
+      if not Assigned(pSampleTmp) then
+        continue;
 
       // We got a sample. Hold onto it.
 
-      pSample := Nil;
+      SafeRelease(pSample);
       pSample := pSampleTmp;
 
       if (SUCCEEDED(pSample.GetSampleTime(hnsTimeStamp))) then
@@ -297,13 +287,13 @@ begin
           if ((cSkipped < MAX_FRAMES_TO_SKIP) AND
                  (hnsTimeStamp + SEEK_TOLERANCE < hnsPos)) then
             begin
-                pSampleTmp := Nil;
+                SafeRelease(pSampleTmp);
                 inc(cSkipped);
                 Continue;
             end;
         end;
 
-        pSampleTmp := Nil;
+        SafeRelease(pSampleTmp);
 
         hnsPos := hnsTimeStamp;
         bBreak := TRUE;
@@ -321,28 +311,24 @@ begin
       hr := pSample.ConvertToContiguousBuffer(pBuffer);
 
       if FAILED(hr) then
-        begin
-          goto done;
-        end;
+        goto done;
 
       // get the frame time of the sample
       hr := pSample.GetSampleTime(llSampleTime);
 
       if (FAILED(hr)) then
-        begin
-          goto done;
-        end;
+        goto done;
 
       hr := pBuffer.Lock(pBitmapData,
                          Nil,
                          @cbBitmapData);
 
       if (FAILED(hr)) then
-        begin
-          goto done;
-        end;
+        goto done;
 
+      {$IFDEF DEBUG}
       assert(cbBitmapData = (pitch * m_format.imageHeightPels));  // debug!
+      {$ENDIF}
 
       hr := pRT.CreateBitmap(D2D1SizeU(m_format.imageWidthPels,
                                        m_format.imageHeightPels),
@@ -354,9 +340,7 @@ begin
 
 
       if (FAILED(hr)) then
-        begin
-          goto done;
-        end;
+        goto done;
 
       pSprite.SetBitmap(pBitmap,
                         m_format);
@@ -369,13 +353,7 @@ begin
 done:
 
   if Assigned(pBitmapData) then
-    begin
-      pBuffer.Unlock();
-    end;
-
-  pBuffer := Nil;
-  pSample := Nil;
-  pSampleTmp := Nil;
+    pBuffer.Unlock();
 
   Result := hr;
 end;
@@ -391,7 +369,6 @@ var
   pType: IMFMediaType;
 
 begin
-  pType := Nil;
 
   // Configure the source reader to give us progressive RGB32 frames.
   // The source reader will load the decoder if needed.
@@ -413,7 +390,7 @@ begin
 
   if (SUCCEEDED(hr)) then
     begin
-      hr := m_pReader.SetCurrentMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
+      hr := m_pReader.SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
                                           0,
                                           pType);
     end;
@@ -421,17 +398,14 @@ begin
   // Ensure the stream is selected.
   if (SUCCEEDED(hr)) then
     begin
-      hr := m_pReader.SetStreamSelection(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
+      hr := m_pReader.SetStreamSelection(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
                                          TRUE);
 
     end;
 
   if (SUCCEEDED(hr)) then
-    begin
-      hr := GetVideoFormat(m_format);
-    end;
+    hr := GetVideoFormat(m_format);
 
-  SafeRelease(pType);
   Result := hr;
 end;
 
@@ -462,7 +436,7 @@ begin
   par.Numerator := 0;
   par.Denominator := 0;
 
-  format := pFormat;
+  format := Default(TFormatInfo);
   subtype := GUID_NULL;
   pType := Nil;
 
@@ -531,7 +505,6 @@ begin
   pFormat := format;
 
 done:
-  SafeRelease(pType);
   Result := hr;
 end;
 
@@ -543,7 +516,6 @@ var
   pAttributes: IMFAttributes;
 
 begin
-  pAttributes := Nil;
 
   SafeRelease(m_pReader);
 
@@ -589,7 +561,7 @@ var
 begin
   PropVariantInit(_var);
 
-  if (m_pReader = Nil) then
+  if not Assigned(m_pReader) then
     begin
       Result := MF_E_NOT_INITIALIZED;
       Exit;
@@ -601,7 +573,9 @@ begin
 
   if (SUCCEEDED(hr)) then
     begin
+      {$IFDEF DEBUG}
       assert(_var.vt = VT_UI8);  // debug
+      {$ENDIF}
       phnsDuration := _var.hVal.QuadPart;
     end;
 
@@ -623,7 +597,7 @@ begin
   flags := 0;
   PropVariantInit(_var);
 
-  if (m_pReader = Nil) then
+  if not Assigned(m_pReader) then
     begin
       Result:= MF_E_NOT_INITIALIZED;
       Exit;
@@ -646,9 +620,7 @@ begin
       // If the source has slow seeking, we will treat it as
       // not supporting seeking.
       if ((flags AND ULONG(MFMEDIASOURCE_CAN_SEEK)) and (flags AND ULONG(MFMEDIASOURCE_HAS_SLOW_SEEK))) = 0 then
-        begin
-          pbCanSeek := TRUE;
-        end;
+        pbCanSeek := TRUE;
     end;
 
   PropVariantClear(_var);

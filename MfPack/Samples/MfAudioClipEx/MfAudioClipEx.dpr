@@ -4,7 +4,7 @@ uses
   {$IFDEF FASTMM}
   FastMM4,
   {$ENDIF}
-  {$IFDEF MAD}
+  {$IFDEF madExcept}
   madExcept,
   madLinkDisAsm,
   madListHardware,
@@ -29,7 +29,7 @@ begin
 
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
-  Application.Title := 'MfAudioClipEx version 3.0.0';
+  Application.Title := 'MfAudioClipEx version 3.1.3';
   Application.CreateForm(TAudioClipExFrm, AudioClipExFrm);
   Application.Run;
 end.

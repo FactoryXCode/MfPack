@@ -10,7 +10,7 @@
 // Release date: 08-07-2012
 // Language: ENU
 //
-// Revision Version: 3.1.2
+// Revision Version: 3.1.3
 // Description: Videothumbnail sprite.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX312
+// Related projects: MfPackX313
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -92,7 +92,7 @@ const
 type
 
   TFormatInfo = record
-    public
+  public
     imageWidthPels: UINT32;
     imageHeightPels: UINT32;
     bTopDown: BOOL;
@@ -106,7 +106,7 @@ type
             _BITMAP);
 type
 
-  TSprite = class
+  TSprite = class(TObject)
   private
 
     m_pBitmap: ID2D1Bitmap;
@@ -176,12 +176,10 @@ end;
 implementation
 
 
+
 procedure TFormatInfo.SetRectEmpty();
 begin
-  imageWidthPels := 0;
-  imageHeightPels := 0;
-  bTopDown := FALSE;
-  rcPicture := rcPicture.Empty();
+  Self := Default(TFormatInfo);
 end;
 
 
@@ -196,13 +194,13 @@ end;
 //Sprite();
 constructor TSprite.Create();
 begin
-  m_pBitmap:= Nil;
-  m_bAnimating:= FALSE;
-  m_timeStart:= 0;
-  m_timeEnd:= 0;
-  m_fAngle:= 0;
-  m_theta:= 0;
-  m_bTopDown:= False;
+  m_pBitmap := nil;
+  m_bAnimating := FALSE;
+  m_timeStart := 0;
+  m_timeEnd := 0;
+  m_fAngle := 0;
+  m_theta := 0;
+  m_bTopDown := False;
 end;
 
 //-------------------------------------------------------------------
@@ -213,7 +211,7 @@ destructor TSprite.Destroy();
 begin
   if Assigned(m_pBitmap) then
     begin
-      m_pBitmap := Nil;
+      SafeRelease(m_pBitmap);
     end;
 end;
 
@@ -234,7 +232,6 @@ procedure TSprite.SetBitmap(pBitmap: ID2D1Bitmap;
                             const pformat: TFormatInfo);
 begin
   SafeRelease(m_pBitmap);
-  m_pBitmap := Nil;
 
   if Assigned(pBitmap) then
     begin

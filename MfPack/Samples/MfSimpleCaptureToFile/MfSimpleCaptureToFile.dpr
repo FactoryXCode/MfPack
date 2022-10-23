@@ -5,7 +5,7 @@ uses
   {$IFDEF FASTMM}
   FastMM4,
   {$ENDIF}
-  {$IFDEF MAD}
+  {$IFDEF madExcept}
   madExcept,
   madLinkDisAsm,
   madListHardware,
@@ -21,11 +21,13 @@ uses
 
 begin
 
-  // Check for memoryleaks (debug mode (F9) only!)
-  {$WARN SYMBOL_PLATFORM OFF}
-  ReportMemoryLeaksOnShutdown := DebugHook <> 0;
-  {$WARN SYMBOL_PLATFORM ON}
 
+  // Check for memoryleaks (debug mode (F9) only!)
+  {$IFNDEF madExcept}
+  {$WARN SYMBOL_PLATFORM OFF}
+  ReportMemoryLeaksOnShutdown := (DebugHook <> 0);
+  {$WARN SYMBOL_PLATFORM ON}
+  {$ENDIF}
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.Title := 'Simple Caption To File example, version 2.6.4';

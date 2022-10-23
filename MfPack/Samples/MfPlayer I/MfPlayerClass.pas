@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.1.2
+// Revision Version: 3.1.3
 // Description: This is the basic class of MfPlayer,
 //              containing the necessary methodes to play a mediafile
 //              For indepth information see the included examples (CPlayer)
@@ -25,14 +25,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
 //          This sample shows how to implement the TInterfacedObject.
 //
 // Related objects: -
-// Related projects: MfPackX312
+// Related projects: MfPackX313
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -79,6 +79,7 @@ uses
   System.Win.ComObj,
   System.SysUtils,
   System.Types,
+  System.Classes,
   {VCL}
   VCL.Graphics,
   VCL.ExtCtrls,
@@ -161,7 +162,7 @@ type
   end;
 
 
-  TMfPlayer = class(TInterfacedObject, TMfAsyncCallback)
+  TMfPlayer = class(TInterfacedPersistent, TMfAsyncCallback)
   private
   {private fields}
 
@@ -456,8 +457,8 @@ begin
   if (SUCCEEDED(hr)) then
     begin
       if (vvar.vt = VT_UNKNOWN) then
-        hr := vvar.punkVal.QueryInterface(IID_IUnknown,
-                                          ppObject)
+        hr := vvar.ppunkVal.QueryInterface(IID_IUnknown,
+                                           ppObject)
       else
         hr := MF_E_INVALIDTYPE;
 
@@ -716,8 +717,13 @@ begin
   // handle that case, we must call Shutdown() in the destructor. The
   // circular ref-count problem does not occcur if CreateInstance has failed.
   ShutDown();
+
+  SafeRelease(m_pVideoDisplay);
   // Release the timer.
+  FTimer.Enabled := False;
   FreeAndNil(FTimer);
+  SafeRelease(MfAsyncCallback);
+
   CoUninitialize();
   MFShutdown();
   inherited BeforeDestruction();
@@ -794,8 +800,8 @@ begin
   m_bPending := False;
   m_dCaps := 0;
   FFileName := '';
-  m_pSession := nil;
-  m_pSource := nil;
+  SafeRelease(m_pSession);
+  SafeRelease(m_pSource);
   if Assigned(FTimer) then
     FTimer.Enabled := False;
 end;
@@ -830,7 +836,7 @@ begin
         goto done;
 
       // Wait for the close operation to complete for 2 seconds
-      dwWaitResult := WaitForSingleObject(THandle(FhCloseEvent), 2000);
+      dwWaitResult := WaitForSingleObject(THandle(FhCloseEvent), 1000);
 
       if (dwWaitResult = WAIT_TIMEOUT) then
         m_dWaitResult := dwWaitResult;
@@ -850,9 +856,8 @@ begin
       hr := m_pSession.Shutdown();
     end;
 
-  m_pSource := Nil;
-  m_pSession := Nil;
   Clear();
+
   m_state.Command := CmdClosed;
   m_state.State := Closed;
 
@@ -917,6 +922,7 @@ end;
 // The destructor
 destructor TMfPlayer.Destroy();
 begin
+
   inherited Destroy();
 end;
 
@@ -1130,7 +1136,6 @@ try
                                             timestamp);
       if FAILED(hr) then
         begin
-          Result := hr;
           Exit;
         end;
 
@@ -1747,7 +1752,6 @@ try
   if (m_pSession = nil) then
     begin
       hr := MF_E_INVALIDREQUEST;
-      Result := hr;
       Exit;
     end;
 

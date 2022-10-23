@@ -89,7 +89,7 @@ object MainWindow: TMainWindow
       ShowHint = True
       TabOrder = 0
     end
-    object Button1: TButton
+    object butTakePhoto: TButton
       Left = 12
       Top = 206
       Width = 73
@@ -99,12 +99,12 @@ object MainWindow: TMainWindow
       ParentShowHint = False
       ShowHint = True
       TabOrder = 1
-      OnClick = Button1Click
+      OnClick = butTakePhotoClick
     end
   end
   object MainMenu: TMainMenu
-    Left = 24
-    Top = 32
+    Left = 30
+    Top = 36
     object Capture1: TMenuItem
       Caption = 'Capture'
       object mnuStartPreview: TMenuItem
@@ -117,10 +117,12 @@ object MainWindow: TMainWindow
       end
       object mnuStartRecording: TMenuItem
         Caption = 'Start Recording'
+        Enabled = False
         OnClick = mnuStartRecordingClick
       end
       object mnuTakePhoto: TMenuItem
         Caption = 'Take Photo'
+        Enabled = False
         OnClick = mnuTakePhotoClick
       end
       object N1: TMenuItem
@@ -138,10 +140,6 @@ object MainWindow: TMainWindow
       'BMP image (*.bmp)|*.bmp|PNG image (*.png)|*.png|JPEG image (*.jp' +
       'g, *.jpeg)|*.jpg'
     Left = 96
-    Top = 32
-  end
-  object ApplicationEvents: TApplicationEvents
-    Left = 184
-    Top = 33
+    Top = 36
   end
 end

@@ -10,7 +10,7 @@
 // Release date: 21-11-2019
 // Language: ENU
 //
-// Revision Version: 3.1.2
+// Revision Version: 3.1.3
 // Description:
 //   This application demonstrates using the Media Foundation
 //   source reader to extract decoded audio from an audio/video file.
@@ -32,17 +32,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: >= MfPackX300
-// Known Issues: The SourceReader has a bug that prevents releasing internal readbuffers
-//               at low latency when reading a media file in Windows 10 November 2019 update (H1903).
-//               To fix this latency issue, we did implement MsgWaitForMultipleObjects to give the
-//               ReadSample method time to release it's internal buffers.
+// Related projects: MfPackX313
+// Known Issues: -
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.22621.0

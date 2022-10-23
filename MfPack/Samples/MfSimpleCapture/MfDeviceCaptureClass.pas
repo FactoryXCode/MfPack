@@ -9,7 +9,7 @@
 // Release date: 08-02-2018
 // Language: ENU
 //
-// Revision Version: 3.1.2
+// Revision Version: 3.1.3
 //
 // Description: This is the basic class of MfSimpleCapture,
 //              containing the necessary methodes to capture media streams.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX312
+// Related projects: MfPackX313
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -1079,11 +1079,11 @@ try
     begin
       if (count > 0) then
         begin
-          hr := ppDevices[DeviceProperty.uiDeviceIndex].ActivateObject(IID_IMFMediaSource,
-                                                                       Pointer(pSource));
+          hr := ppDevices[DeviceProperty.iDeviceIndex].ActivateObject(IID_IMFMediaSource,
+                                                                      Pointer(pSource));
           if SUCCEEDED(hr) then
             begin
-              m_pActivate := ppDevices[DeviceProperty.uiDeviceIndex];
+              m_pActivate := ppDevices[DeviceProperty.iDeviceIndex];
             end;
         end
       else
@@ -1104,7 +1104,7 @@ try
     begin
       m_pSource := pSource;
       m_pwszSymbolicLink := DeviceProperty.lpSymbolicLink;
-      m_cchSymbolicLink := DeviceProperty.chSymbolicLink;
+      m_cchSymbolicLink := DeviceProperty.iDeviceIndex;
     end;
 
 finally

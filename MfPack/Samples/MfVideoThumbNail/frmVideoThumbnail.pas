@@ -10,7 +10,7 @@
 // Release date: 08-07-2012
 // Language: ENU
 //
-// Revision Version: 3.1.2
+// Revision Version: 3.1.3
 // Description: Videothumbnail Mainform
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX312
+// Related projects: MfPackX313
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -248,7 +248,7 @@ var
 
 begin
 
-  if (g_pRT <> Nil) then
+  if (g_pRT <> nil) then
     begin
 
       d2d1su := D2D1SizeU(Form1.Width,
@@ -343,20 +343,23 @@ begin
   bTerminate := True;
 
   if assigned(g_ThumbnailGen) then
-    g_ThumbnailGen.Free();
+    begin
+      FreeAndNil(g_ThumbnailGen);
+    end;
 
   if assigned(g_Timer) then
     begin
-      g_Timer.Free();
+      FreeAndNil(g_Timer);
     end;
 
-  g_pRT := Nil;
+  SafeRelease(g_pRT);
 
   for i := 0 to MAX_SPRITES do
     begin
       g_pSprites[i].Clear();
-      g_pSprites[i].Free();
+      FreeAndNil(g_pSprites[i]);
     end;
+
 end;
 
 
@@ -395,7 +398,9 @@ begin
           // Generate new sprites.
           if (SUCCEEDED(hr)) then
             begin
-              assert(g_pRT <> Nil); // debug
+              {$IFDEF DEBUG}
+              assert(g_pRT <> nil);
+              {$ENDIF}
               hr := g_ThumbnailGen.CreateBitmaps(g_pRT,
                                                  MAX_SPRITES,
                                                  g_pSprites);

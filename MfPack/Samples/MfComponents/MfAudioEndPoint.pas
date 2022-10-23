@@ -10,7 +10,7 @@
 // Release date: 13-08-2020
 // Language: ENU
 //
-// Version: 3.1.1
+// Version: 3.1.3
 //
 // Description: Component to manage capture or render endpoints and properties.
 //              It also provides an audio endpoint callback.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX312
+// Related projects: MfPackX313
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

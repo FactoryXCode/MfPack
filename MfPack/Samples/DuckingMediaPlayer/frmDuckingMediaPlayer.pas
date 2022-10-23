@@ -10,7 +10,7 @@
 // Release date: 05-07-2020
 // Language: ENU
 //
-// Version: 3.1.1
+// Version: 3.1.3
 // Description: This sample implements a simple media player that responds to the "ducking"
 //              feature in Windows 7 and higher.
 //              It also implements a volume control which tracks
@@ -25,7 +25,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
@@ -33,11 +33,11 @@
 //          feature in Windows 7 and higher.
 //
 // Related objects: -
-// Related projects: MfPackX312
+// Related projects: MfPackX313
 // Known Issues: -
 //
-// Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //

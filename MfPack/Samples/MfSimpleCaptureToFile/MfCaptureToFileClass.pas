@@ -10,7 +10,7 @@
 // Release date: 09-02-2018
 // Language: ENU
 //
-// Version: 3.1.2
+// Revision Version: 3.1.3
 //
 // Description: Device capture class based on MFCaptureToFile example
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX312
+// Related projects: MfPackX313
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -398,7 +398,7 @@ begin
 
 Done:
 
-  FreeAndNil(pSample);  // Must do! Else the sample pool will be exhausted after 20 samples
+  SafeRelease(pSample);  // Must do! Else the sample pool will be exhausted after 20 samples
   if FAILED(hr) then
     SetWindowText(m_hwndEvent,
                   'Capture Failure! (' + IntToStr(hr) + ')');

@@ -89,6 +89,7 @@ type
     FTransform : IMFTransform;
     FOnLog: TLogEvent;
     FSupportedInputs : TArray<TGUID>;
+    FTopDownFormats : TArray<TGUID>;
   private
     function ConvertSampleToRGB(const AInputSample : IMFSample; out AConvertedSample : IMFSample) : Boolean;
     function CheckSucceeded(AStatus : HRESULT; const AMethod : string; ALogFailure : Boolean = True): Boolean;
@@ -96,6 +97,7 @@ type
     function GetBMPFileHeader: BITMAPFILEHEADER;
     function GetBMPFileInfo(const AVideoInfo: TVideoFormatInfo): BITMAPINFOHEADER;
     function CreateTransform(const AManager: IMFDXGIDeviceManager; const AInputType: IMFMediaType): Boolean;
+    function IsTopDown(const ASubFormat: TGUID): Boolean;
     procedure FreeConverter;
     procedure NotifyBeginStreaming;
     procedure SetSupportedInputs;
@@ -147,6 +149,17 @@ begin
   FSupportedInputs[17] := MFVideoFormat_YUY2;
   FSupportedInputs[18] := MFVideoFormat_YV12;
   FSupportedInputs[19] := MFVideoFormat_YVYU;
+
+  SetLength(FTopDownFormats, 3);
+  // Update list as needed for formats that return top-down data.
+  FTopDownFormats[0] := MFVideoFormat_AYUV;
+  FTopDownFormats[1] := MFVideoFormat_IYUV;
+  FTopDownFormats[2] := MFVideoFormat_YUY2;
+end;
+
+function TSampleConverter.IsTopDown(const ASubFormat : TGUID) : Boolean;
+begin
+  Result := IndexOf(ASubFormat, FTopDownFormats) > -1;
 end;
 
 function TSampleConverter.IsInputSupported(const AInputFormat: TGUID): Boolean;
@@ -228,7 +241,12 @@ begin
   // See: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapinfoheader
   Result.biSize := sizeof(BITMAPINFOHEADER);
   Result.biWidth := AVideoInfo.iVideoWidth;
-  Result.biHeight := AVideoInfo.iVideoHeight;
+
+  if IsTopDown(AVideoInfo.oSubType) then
+    Result.biHeight := -AVideoInfo.iVideoHeight
+  else
+    Result.biHeight := AVideoInfo.iVideoHeight;
+
   Result.biPlanes := 1;
   Result.biBitCount := 32;
   Result.biCompression := BI_RGB;

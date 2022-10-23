@@ -28,14 +28,20 @@ uses
   WinApi.MediaFoundationApi.MfReadWrite,
   WinApi.MediaFoundationApi.MfMetLib,
   WinAPI.MediaFoundationApi.MfUtils,
+  {$IFDEF DEBUG}
+  WinApi.MediaFoundationApi.MfMediaTypeDebug,
+  {$ENDIF}
   {WIC}
   WinApi.WIC.WinCodec,
-  {DirectX}
-  Winapi.D3DCommon,
-  WinApi.D3D11,
+  {DirectX Note: Do not use d3d11 <= Delphi 10.4}
+  Winapi.DirectX.D3DCommon,
+  WinApi.DirectX.D3D11,
   {Application}
   SampleConverter_V1,
+  DeviceExplorer,
   Utils;
+
+{$DEFINE LOGDEBUG}
 
 
 const
@@ -59,41 +65,6 @@ var
   g_ResetToken: UINT;
 
 type
-  //
-  // ChooseDeviceParam class
-  //
-  // Holds an array of IMFActivate pointers that represent video
-  // capture devices.
-  //
-  TChooseDeviceParam = class(TObject)
-  private
-    apDevices: PIMFActivate;        // Pointer to array of IMFActivate pointers.
-    apDevice: IMFActivate;          // Device that has been selected
-    ucount: UINT32;                 // Number of elements in the array.
-    uSelection: UINT32;             // Selected device, by array index.
-    lpSelectedDeviceName: LPWSTR;   // Selected device name.
-    lpSelectedSymbolicLink: LPWSTR; // Selected device symbolic link.
-    bIsSelected: Boolean;
-
-    function Initialize(): HResult;
-    procedure SetSelection(iIndex: UINT32);
-
-  public
-
-    constructor Create();
-    destructor Destroy(); override;
-
-    // Use this property to get and set all params from the PIMFActivate pointerarray
-    property DeviceIndex: UINT32 read uSelection write SetSelection;
-    property DeviceIsSelected: Boolean read bIsSelected write bIsSelected;
-    property Device: IMFActivate read apDevice;
-    property Count: UINT32 read ucount;
-    property DeviceName: PWideChar read lpSelectedDeviceName;
-    property SymbolicLink: PWideChar read lpSelectedSymbolicLink;
-  end;
-
-
-type
   PSampleFromCallBack = ^TSampleFromCallBack;
   TSampleFromCallBack = record
     pSample: IMFSample;
@@ -102,9 +73,6 @@ type
   TSnapShotOptions = (ssoFile,
                       ssoCallBack,
                       ssoStream);
-
-
-
 
 
   // CaptureManager class
@@ -125,7 +93,7 @@ type
 
       FCapMan: TCaptureManager;
 
-      constructor Create(_hwnd: HWND); virtual;
+      constructor Create(_hwnd: HWND); //virtual;
       destructor Destroy(); override;
 
     end;
@@ -142,20 +110,21 @@ type
       function OnSample(pSample: IMFSample): HResult; stdcall;
       //
     public
-      constructor Create(_hwnd: HWND); virtual;
+      constructor Create(_hwnd: HWND); //virtual;
       destructor Destroy(); override;
 
     end;
 {$ENDREGION}
 
-  protected
-
-    a_VideoFormatInfo: TVideoFormatInfoArray;
 
   private
 
     FCaptureEngine: IMFCaptureEngine;
     FCapturePreviewSink: IMFCapturePreviewSink;
+
+    {$IFDEF DEBUG}
+      FMediaTypeDebug: TMediaTypeDebug;
+    {$ENDIF}
 
     hwndMainForm: HWND;
     hwndPreviewWindow: HWND;
@@ -166,71 +135,73 @@ type
     bPreviewing: Boolean;
     bRecording: Boolean;
     bPhotoPending: Boolean;
-
-    errorID: UINT;
+    bPhotoTaken: Boolean;
+    bEngineIsInitialized: Boolean;
+    bCaptureSinkReady: Boolean;
 
     FSnapShotOptions: TSnapShotOptions;
 
     FSampleFromCallBack: TSampleFromCallBack;
-
-    FSampleConverter: TSampleConverter;
     FCritSec: TMFCritSec;
 
     constructor Create(pEvent: HWND); virtual;
     procedure DestroyCaptureEngine();
 
-    procedure SetErrorID(hr: HResult; id: UINT);
-
-    // Capture Engine Event Handlers
+    // Capture Event Handlers
     procedure OnCaptureEngineInitialized(hrStatus: HResult);
     procedure OnPreviewStarted(hrStatus: HResult);
     procedure OnPreviewStopped(hrStatus: HResult);
+    procedure OnCaptureEngineOutputMediaTypeSet(hrStatus: HResult);
     procedure OnRecordStarted(hrStatus: HResult);
     procedure OnRecordStopped(hrStatus: HResult);
     procedure OnPhotoTaken(hrStatus: HResult);
+    procedure OnCaptureSinkPrepared(hrStatus: HResult);
 
-    procedure WaitForResult();
-
-    function GetCaptureDeviceCaps(const dwStreamType: DWord = MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO): HResult;
     function SetSnapShotOption(pPhotoSink: IMFCapturePhotoSink): HResult;
-
 
   public
     FhEvent: THandle;
+    FSampleConverter: TSampleConverter;
 
     destructor Destroy(); override;
 
     class function CreateCaptureEngine(hEvent: HWND;
-                                       out ppEngine: TCaptureManager): HResult;
+                                       out pEngine: TCaptureManager): HResult;
 
-    function InitializeCaptureManager(hPreviewObject: HWND;
-                                      hMainForm: HWND;
-                                      Unk: IUnknown): HResult;
+    function InitializeCaptureManager(const hPreviewObject: HWND;
+                                      const hMainForm: HWND;
+                                      const Unk: IUnknown): HResult;
 
-    function OnCaptureEvent(pwParam: WPARAM;
-                            plParam: LPARAM): HResult;
+    function OnCaptureEvent(var pwParam: WPARAM;
+                            var plParam: LPARAM): HResult;
 
-    function UpdateVideo(psrc: PMFVideoNormalizedRect): HResult;
+    function UpdateVideo(pSrc: PMFVideoNormalizedRect): HResult;
+
+
+    function SetVideoFormat(): HResult;
+    function SetMediaType(pMediaType: IMFMediaType): HResult;
+    function GetCurrentFormat(): TVideoFormatInfo;
 
     function StartPreview(): HResult;
     function StopPreview(): HResult;
-    function StartRecord(pszDestinationFile: PCWSTR): HResult;
-    function StopRecord(): HResult;
+    function StartRecording(pszDestinationFile: PCWSTR): HResult;
+    function StopRecording(): HResult;
     function TakePhoto(ASnapShotOption: TSnapShotOptions): HResult;
 
     property IsRecording: Boolean read bRecording write bRecording;
     property IsPreviewing: Boolean read bPreviewing write bPreviewing;
     property IsPhotoPending: Boolean read bPhotoPending write bPhotoPending;
-    property SnapShotOptions: TSnapShotOptions read FSnapShotOptions write FSnapShotOptions;
-    property SupportedVideoFormats: TVideoFormatInfoArray read a_VideoFormatInfo;
+    property IsPhotoTaken: Boolean read bPhotoTaken write bPhotoTaken;
+    property IsInitialized: Boolean read bEngineIsInitialized;
 
+    property SnapShotOption: TSnapShotOptions read FSnapShotOptions write FSnapShotOptions;
     property PreviewHandle: HWND read hwndPreviewWindow write hwndPreviewWindow;
     property EventHandle: HWND read hwndMainForm;
+
   end;
 
 var
   FCaptureManager: TCaptureManager;
-  FDeviceParam: TChooseDeviceParam;
 
 
 implementation
@@ -292,6 +263,7 @@ begin
 end;
 
 
+//
 function CreateD3DManager(): HResult;
 var
   hr: HResult;
@@ -313,56 +285,51 @@ begin
     hr := g_pDXGIMan.ResetDevice(g_pDX11Device,
                                  g_ResetToken);
 
-  SafeRelease(pDX11DeviceContext);
-
   Result := hr;
 end;
 
 
 
 // CaptureManagerCallBack routines /////////////////////////////////////////////
-
+//
 constructor TCaptureManager.TCaptureManagerCallBack.Create(_hwnd: HWND);
 begin
   inherited Create();
   hwndHandle := _hwnd;
 end;
 
-
+//
 destructor TCaptureManager.TCaptureManagerCallBack.Destroy();
 begin
-  Safe_Release(FCapMan);
+  SafeRelease(FCapMan);
   inherited Destroy();
 end;
 
-
+//
 class function TCaptureManager.CreateCaptureEngine(hEvent: HWND;
-                                                   out ppEngine: TCaptureManager): HResult;
+                                                   out pEngine: TCaptureManager): HResult;
 var
   hr: HResult;
-  pEngine: TCaptureManager;
+  cmEngine: TCaptureManager;
 
 label
   Done;
 
 begin
   hr := S_OK;
-  ppEngine := nil;
+  pEngine := nil;
 
-  pEngine := TCaptureManager.Create(hEvent);
-  if not Assigned(pEngine) then
+  cmEngine := TCaptureManager.Create(hEvent);
+  if not Assigned(cmEngine) then
     begin
       hr := E_OUTOFMEMORY;
       goto Done;
     end;
 
-  ppEngine := pEngine;
-  pEngine := nil;
+  pEngine := cmEngine;
 
 Done:
-  if Assigned(pEngine) then
-    Safe_Release(pEngine);
-
+  SafeRelease(cmEngine);
   Result := hr;
 end;
 
@@ -371,6 +338,7 @@ end;
 function TCaptureManager.TCaptureManagerCallBack.OnEvent(pEvent: IMFMediaEvent): HResult;
 var
   hr: HResult;
+  i: Integer;
 
 begin
 
@@ -378,22 +346,24 @@ begin
   // on the application's main thread.
   // The application will release the pointer when it handles the message.
 
-  {if not PostMessage(FCapMan.hwndMainForm,
-                     WM_APP_CAPTURE_EVENT,
-                     WParam(IMFMediaEvent(Pointer(pEvent))),
-                     LPARAM(0)) then
-
-    Result := E_FAIL
+  { if PostMessage(FCapMan.hwndMainForm,
+                 WM_APP_CAPTURE_EVENT,
+                 WParam(IMFMediaEvent(Pointer(pEvent))),
+                 LPARAM(0)) then
+    hr := S_OK
   else
-    Result := S_OK;}
+    hr := E_FAIL; }
 
+  i := SendMessage(FCapMan.hwndMainForm,
+                   WM_APP_CAPTURE_EVENT,
+                   WParam(IMFMediaEvent(pEvent)),
+                  LPARAM(0));
+  if (i > 0) then
+    hr := S_OK
+  else
+    hr := E_FAIL;
 
-  SendMessage(FCapMan.hwndMainForm,
-                     WM_APP_CAPTURE_EVENT,
-                     WParam(pEvent),
-                     LPARAM(0));
-  Result := S_OK;
-
+  Result := hr;
 end;
 
 
@@ -409,7 +379,7 @@ end;
 
 destructor TCaptureManager.TCaptureEngineOnSampleCallback.Destroy();
 begin
-  Safe_Release(m_pManager2);
+  SafeRelease(m_pManager2);
   inherited Destroy();
 end;
 
@@ -444,7 +414,7 @@ begin
                         WPARAM(m_pManager2.FSampleFromCallBack),
                         0);
 
-     // Safe_Release(m_pManager2.FSampleFromCallBack.pSample);
+     // SafeRelease(m_pManager2.FSampleFromCallBack.pSample);
 
     end;
 
@@ -456,27 +426,30 @@ end;
 // CaptureManager routines /////////////////////////////////////////////////////
 
 
-function TCaptureManager.InitializeCaptureManager(hPreviewObject: HWND;
-                                                  hMainForm: HWND;
-                                                  Unk: IUnknown): HResult;
+function TCaptureManager.InitializeCaptureManager(const hPreviewObject: HWND;
+                                                  const hMainForm: HWND;
+                                                  const Unk: IUnknown): HResult;
 var
   hr: HResult;
-  pAttributes: IMFAttributes;
-  pFactory: IMFCaptureEngineClassFactory;
+  mfAttributes: IMFAttributes;
+  mfFactory: IMFCaptureEngineClassFactory;
 
 label
   Done;
 
 begin
+  if (Unk = nil) then
+    begin
+      hr := E_POINTER;
+      goto Done;
+    end;
 
   DestroyCaptureEngine();
 
-  hwndPreviewWindow := hPreviewObject;
-
-  FhEvent := CreateEvent(Nil,
+  FhEvent := CreateEvent(nil,
                          False,
                          False,
-                         Nil);
+                         nil);
 
   if FhEvent = 0 then
     begin
@@ -493,6 +466,7 @@ begin
     end;
 
   FCaptureManagerCallBack.FCapMan := Self;
+  hwndPreviewWindow := hPreviewObject;
 
   // Create the OnSampleCallBack class
   FCaptureEngineOnSampleCallback := TCaptureEngineOnSampleCallback.Create(hwndMainForm);
@@ -502,85 +476,104 @@ begin
       goto Done;
     end;
 
-
   // Create a D3D Manager
   hr := CreateD3DManager();
   if FAILED(hr) then
     goto Done;
 
-  hr := MFCreateAttributes(pAttributes,
+  hr := MFCreateAttributes(mfAttributes,
                            1);
   if FAILED(hr) then
     goto Done;
 
-  hr := pAttributes.SetUnknown(MF_CAPTURE_ENGINE_D3D_MANAGER,
-                               g_pDXGIMan);
+  hr := mfAttributes.SetUnknown(MF_CAPTURE_ENGINE_D3D_MANAGER,
+                                g_pDXGIMan);
   if FAILED(hr) then
     goto Done;
 
+
+  // Create the captureengine
   // Create the factory object for the capture engine.
-  // pr_MediaEngineClassFactory is a reference to the IMFMediaEngineClassFactory interface
-  pFactory := CreateCOMObject(CLSID_MFCaptureEngineClassFactory) as IMFCaptureEngineClassFactory;
-  if not Assigned(pFactory) then
-    goto Done;
+  // pr_MediaEngineClassFactory is a reference to the IMFMediaEngineClassFactory interface.
 
-  // Create and initialize the capture engine.
-  hr := pFactory.CreateInstance(CLSID_MFCaptureEngine,
-                                IID_IMFCaptureEngine,
-                                Pointer(FCaptureEngine));
-
+  // C++ style:
+  hr := CoCreateInstance(CLSID_MFCaptureEngineClassFactory,
+                         nil,
+                         CLSCTX_INPROC_SERVER,
+                         IID_IMFCaptureEngineClassFactory,
+                         mfFactory);
   if FAILED(hr) then
     goto Done;
 
+  // Or Delphi style:
+  //mfFactory := CreateCOMObject(CLSID_MFCaptureEngineClassFactory) as IMFCaptureEngineClassFactory;
+  //if not Assigned(mfFactory) then
+  //  goto Done;
+
+  // Create and initialize the CaptureEngine.
+  hr := mfFactory.CreateInstance(CLSID_MFCaptureEngine,
+                                 IID_IMFCaptureEngine,
+                                 Pointer(FCaptureEngine));
+  if FAILED(hr) then
+    goto Done;
+
+
+  // Initialize the captureengine
   hr := FCaptureEngine.Initialize(FCaptureManagerCallBack,
-                                  pAttributes,
+                                  mfAttributes,
                                   nil,
-                                  Unk);
+                                  {IMFActivate} Unk);
 
-  if FAILED(hr) then
-    goto Done;
-
-  if FDeviceParam.DeviceIsSelected then
-    hr := GetCaptureDeviceCaps(FDeviceParam.DeviceIndex);
-
-  // ignore returnvalue MF_E_INVALIDREQUEST in case user did not select a device .
-  if (hr <> S_OK)  then
-    hr := S_OK;
 
 Done:
+  // Ignore returnvalue MF_E_INVALIDREQUEST in case user did not select a device .
+  if (hr = MF_E_INVALIDREQUEST) then
+    hr := S_OK;
 
-{$IF DEBUG}
   if FAILED(hr) then
-    OutputDebugString(PWideChar(format('Error: %s (hr = %d)', [ERR_INITIALIZE, hr])));
-{$ENDIF}
+    ErrMsg(ERR_INITIALIZE,
+           hr);
+
   Result := hr;
 end;
 
 
+// Create
 constructor TCaptureManager.Create(pEvent: HWND);
 begin
   inherited Create();
+
+  {$IFDEF DEBUG}
+  FMediaTypeDebug := TMediaTypeDebug.Create();
+  {$ENDIF}
 
   FCritSec := TMFCritSec.Create;
   FSampleConverter := TSampleConverter.Create();
   hwndMainForm := pEvent;
   bRecording := False;
   bPreviewing := False;
-  FhEvent := 0;
   bPhotoPending := False;
-  errorID := 0;
+  bEngineIsInitialized := False;
+  FhEvent := 0;
 end;
 
 
+// Destroy
 destructor TCaptureManager.Destroy();
 begin
   DestroyCaptureEngine();
   FreeAndNil(FSampleConverter);
   SafeDelete(FCritSec);
+  {$IFDEF DEBUG}
+  FMediaTypeDebug.Free();
+  {$ENDIF}
+
   inherited Destroy();
 end;
 
 
+// DestroyCaptureEngine
+// Callers: Destroy, OnCaptureEvent, InitializeCaptureManager
 procedure TCaptureManager.DestroyCaptureEngine();
 begin
   if FhEvent <> 0 then
@@ -595,12 +588,11 @@ begin
   if Assigned(FCaptureEngine) then
     SafeRelease(FCaptureEngine);
 
-  // Use SafeDelete (FreeAndNil) to release these classes!
   if Assigned(FCaptureManagerCallBack) then
-   SafeDelete(FCaptureManagerCallBack);
+   SafeRelease(FCaptureManagerCallBack);
 
   if Assigned(FCaptureEngineOnSampleCallback) then
-      SafeDelete(FCaptureEngineOnSampleCallback);
+      SafeRelease(FCaptureEngineOnSampleCallback);
   // ========================================================
 
   if Assigned(g_pDXGIMan) then
@@ -618,61 +610,153 @@ begin
   IsPreviewing := False;
   IsRecording := False;
   IsPhotoPending := False;
-  errorID := 0;
-
-  SetLength(a_VideoFormatInfo,
-            0);
+  bEngineIsInitialized := False;
 end;
 
 
-procedure TCaptureManager.SetErrorID(hr: HResult; id: UINT);
+// OnCaptureEvent
+// Handle an event from the capture engine.
+// NOTE: This method is called from the application's UI thread.
+function TCaptureManager.OnCaptureEvent(var pwParam: WPARAM;
+                                        var plParam: LPARAM): HResult;
+var
+  guidType: TGUID;
+  hrStatus: HResult;
+  hr: HResult;
+  pEvent: IMFMediaEvent;
+
 begin
+
+  pEvent := IMFMediaEvent(pwParam);
+
+  hr := pEvent.GetStatus(hrStatus);
+  if FAILED(hr) then
+    hrStatus := hr;
+
+  hr := pEvent.GetExtendedType(guidType);
   if SUCCEEDED(hr) then
-    errorID := 0
-  else
-    errorID := id;
+    begin
+
+      if (guidType = MF_CAPTURE_ENGINE_INITIALIZED) then
+        OnCaptureEngineInitialized(hrStatus)
+      else if (guidType = MF_CAPTURE_ENGINE_PREVIEW_STARTED) then
+        OnPreviewStarted(hrStatus)
+      else if (guidType = MF_CAPTURE_ENGINE_PREVIEW_STOPPED) then
+        OnPreviewStopped(hrStatus)
+      else if (guidType = MF_CAPTURE_ENGINE_OUTPUT_MEDIA_TYPE_SET) then
+        OnCaptureEngineOutputMediaTypeSet(hrStatus)
+      else if (guidType = MF_CAPTURE_ENGINE_RECORD_STARTED)  then
+        OnRecordStarted(hrStatus)
+      else if (guidType = MF_CAPTURE_ENGINE_RECORD_STOPPED) then
+        OnRecordStopped(hrStatus)
+      else if (guidType = MF_CAPTURE_ENGINE_PHOTO_TAKEN) then
+        OnPhotoTaken(hrStatus)
+      else if guidType = MF_CAPTURE_SINK_PREPARED then
+        OnCaptureSinkPrepared(hrStatus)
+      else if (guidType = MF_CAPTURE_ENGINE_ERROR) then
+        DestroyCaptureEngine()
+      else if (hrstatus = MF_E_INVALIDREQUEST) then
+        ErrMsg('OnCaptureEvent: Invalid request',
+               hr)
+      else if (FAILED(hrStatus)) then
+        ErrMsg('OnCaptureEvent: Unexpected error',
+               hr);
+    end;
+
+   SetEvent(FhEvent);
+   Result := hrStatus;
 end;
 
 
+// OnCaptureEngineInitialized
 // Capture Engine Event Handlers
 procedure TCaptureManager.OnCaptureEngineInitialized(hrStatus: HResult);
 begin
   if (hrStatus = MF_E_NO_CAPTURE_DEVICES_AVAILABLE) then
     hrStatus := S_OK;  // No capture device. Not an application error.
+  bEngineIsInitialized := SUCCEEDED(hrStatus);
+
+  if FAILED(hrStatus) then
+    ErrMsg('OnCaptureEngineInitialized ' + ERR_INITIALIZE,
+           hrStatus);
 end;
 
 
+// OnPreviewStarted
 procedure TCaptureManager.OnPreviewStarted(hrStatus: HResult);
 begin
   IsPreviewing := SUCCEEDED(hrStatus);
+  if FAILED(hrStatus) then
+    ErrMsg('OnPreviewStarted: ' + ERR_PREVIEW,
+           hrStatus);
 end;
 
 
+// OnPreviewStopped
 procedure TCaptureManager.OnPreviewStopped(hrStatus: HResult);
 begin
-  IsPreviewing := False;
+  IsPreviewing := not SUCCEEDED(hrStatus);
+  if FAILED(hrStatus) then
+    ErrMsg('OnPreviewStopped: ' + ERR_PREVIEW,
+           hrStatus);
+end;
+
+// OnCaptureEngineOutputMediaTypeSet
+procedure TCaptureManager.OnCaptureEngineOutputMediaTypeSet(hrStatus: HResult);
+begin
+  if FAILED(hrStatus) then
+    ErrMsg('OnCaptureEngineOutputMediaTypeSet: ' + ERR_OUTPUT_MEDIATYPE_SET,
+           hrStatus);
 end;
 
 
+// OnRecordStarted
 procedure TCaptureManager.OnRecordStarted(hrStatus: HResult);
 begin
   IsRecording := SUCCEEDED(hrStatus);
+  if FAILED(hrStatus) then
+    ErrMsg('OnRecordStarted: ' + ERR_RECORD,
+           hrStatus);
 end;
 
 
+// OnRecordStopped
 procedure TCaptureManager.OnRecordStopped(hrStatus: HResult);
 begin
-   IsRecording := False;
+  IsRecording := not SUCCEEDED(hrStatus);
+  if FAILED(hrStatus) then
+    ErrMsg('OnRecordStopped: ' + ERR_RECORD,
+           hrStatus);
+
 end;
 
 
-
+// OnPhotoTaken
 procedure TCaptureManager.OnPhotoTaken(hrStatus: HResult);
 begin
+  bPhotoTaken := SUCCEEDED(hrStatus);
+  if FAILED(hrStatus) then
+    ErrMsg('OnPhotoTaken: ' + ERR_PHOTO,
+           hrStatus)
+  else //S_OK
+    begin
+      //FSampleConverter.UpdateConverter()
+    end;
 
 end;
 
 
+// OnCaptureSinkPrepared
+procedure TCaptureManager.OnCaptureSinkPrepared(hrStatus: HResult);
+begin
+  bCaptureSinkReady :=  SUCCEEDED(hrStatus);
+  if FAILED(hrStatus) then
+    ErrMsg('OnCaptureSinkPrepared: ' + ERR_CAPTURE,
+           hrStatus);
+end;
+
+
+// StartPreview
 function TCaptureManager.StartPreview(): HResult;
 var
   pCaptureSink: IMFCaptureSink;
@@ -686,8 +770,9 @@ label
   Done;
 
 begin
+  FCritSec.Lock;
 
-  if Not Assigned(FCaptureEngine) then
+  if not Assigned(FCaptureEngine) then
     begin
       hr := MF_E_NOT_INITIALIZED;
       goto Done;
@@ -714,18 +799,31 @@ begin
         goto Done;
 
       hr := FCapturePreviewSink.SetRenderHandle(hwndPreviewWindow);
-
       if FAILED(hr) then
         goto Done;
 
       hr := FCaptureEngine.GetSource(pCaptureSource);
+      if FAILED(hr) then
+        goto Done;
 
+      // Create an empty MediaType.
+      // It is advised to do so when passing a mediatype interface to a method.
+      hr := MFCreateMediaType(pMediaType);
       if FAILED(hr) then
         goto Done;
 
       // Configure the video format for the preview sink.
       hr := pCaptureSource.GetCurrentDeviceMediaType(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW,
                                                      pMediaType);
+      if FAILED(hr) then
+        goto Done;
+
+      {$IFDEF DEBUG}
+      FMediaTypeDebug.LogMediaType(pMediaType);
+      FMediaTypeDebug.SafeDebugResultsToFile('StartPreview');
+      {$ENDIF}
+
+      hr := MFCreateMediaType(pMediaType2);
       if FAILED(hr) then
         goto Done;
 
@@ -736,28 +834,39 @@ begin
         goto Done;
 
       hr := pMediaType2.SetUINT32(MF_MT_ALL_SAMPLES_INDEPENDENT,
-                                  UINT(True));
+                                  1 { = UINT(True)});
       if FAILED(hr) then
         goto Done;
+
+
+      {$IFDEF DEBUG}
+      FMediaTypeDebug.LogMediaType(pMediaType2);
+      FMediaTypeDebug.SafeDebugResultsToFile('StartPreview');
+      {$ENDIF}
 
       // Connect the video stream to the preview sink.
       hr := FCapturePreviewSink.AddStream(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW,
                                           pMediaType2,
-                                          Nil,
+                                          nil,
                                           dwSinkStreamIndex);
-
       if FAILED(hr) then
         goto Done;
     end;
 
-
   hr := FCaptureEngine.StartPreview();
 
+
 Done:
+  FCritSec.Unlock;
+  if FAILED(hr) then
+    ErrMsg('StartPreview',
+            hr);
+
   Result := hr;
 end;
 
 
+// StopPreview
 function TCaptureManager.StopPreview(): HResult;
 var
   hr: HResult;
@@ -767,7 +876,7 @@ label
 
 begin
 
-  if Not Assigned(FCaptureEngine) then
+  if not Assigned(FCaptureEngine) then
     begin
       hr := MF_E_NOT_INITIALIZED;
       goto Done;
@@ -784,105 +893,20 @@ begin
   if FAILED(hr) then
     goto Done;
 
-  WaitForResult();
+  HandleMessages(GetCurrentThread());
 
 done:
+  if FAILED(hr) then
+    ErrMsg('StopPreview',
+            hr);
+
   Result := hr;
 end;
 
 
-// Handle an event from the capture engine.
-// NOTE: This method is called from the application's UI thread.
-function TCaptureManager.OnCaptureEvent(pwParam: WPARAM;
-                                        plParam: LPARAM): HResult;
-var
-  guidType: TGUID;
-  hrStatus: HResult;
-  hr: HResult;
-  pEvent: IMFMediaEvent;
-
-begin
-
-  pEvent := IMFMediaEvent(pwParam);
-
-  hr := pEvent.GetStatus(hrStatus);
-  if FAILED(hr) then
-    hrStatus := hr;
-
-
-  hr := pEvent.GetExtendedType(guidType);
-  if SUCCEEDED(hr) then
-    begin
-
-{$IF DEBUG}
-      if SUCCEEDED(StringFromCLSID(guidType,
-                                   str)) then
-        begin
-          OutputDebugString(format('MF_CAPTURE_ENGINE_EVENT: %s (hr = %d)', [str, hrStatus]));
-          CoTaskMemFree(str);
-        end;
-{$ENDIF}
-
-        if (guidType = MF_CAPTURE_ENGINE_INITIALIZED) then
-          begin
-            OnCaptureEngineInitialized(hrStatus);
-            SetErrorID(hrStatus,
-                       IDS_ERR_INITIALIZE);
-          end
-        else if (guidType = MF_CAPTURE_ENGINE_PREVIEW_STARTED) then
-          begin
-            OnPreviewStarted(hrStatus);
-            SetErrorID(hrStatus,
-                       IDS_ERR_PREVIEW);
-          end
-        else if (guidType = MF_CAPTURE_ENGINE_PREVIEW_STOPPED) then
-          begin
-            OnPreviewStopped(hrStatus);
-            SetErrorID(hrStatus, IDS_ERR_PREVIEW);
-          end
-        else if (guidType = MF_CAPTURE_ENGINE_RECORD_STARTED)  then
-          begin
-            OnRecordStarted(hrStatus);
-            SetErrorID(hrStatus, IDS_ERR_RECORD);
-          end
-        else if (guidType = MF_CAPTURE_ENGINE_RECORD_STOPPED) then
-          begin
-            OnRecordStopped(hrStatus);
-            SetErrorID(hrStatus, IDS_ERR_RECORD);
-          end
-        else if (guidType = MF_CAPTURE_ENGINE_PHOTO_TAKEN) then
-          begin
-            OnPhotoTaken(hrStatus);
-            SetErrorID(hrStatus, IDS_ERR_PHOTO);
-          end
-        else if guidType = MF_CAPTURE_SINK_PREPARED then
-          begin
-
-            SetErrorID(hrStatus, IDS_ERR_CAPTURE_SINK_PREPARED);
-          end
-        else if (guidType = MF_CAPTURE_ENGINE_ERROR) then
-          begin
-            DestroyCaptureEngine();
-            SetErrorID(hrStatus, IDS_ERR_CAPTURE);
-          end
-        else if (hrstatus = MF_E_INVALIDREQUEST) then
-          begin
-            SetErrorID(hrStatus, IDS_ERR_CAPTURE);
-          end
-        else if (FAILED(hrStatus)) then
-         begin
-            SetErrorID(hrStatus, IDS_ERR_CAPTURE);
-         end
-    end;
-
-   SetEvent(FhEvent);
-
-   Result := hrStatus;
-end;
-
-
+// StartRecord
 // Start recording to file
-function TCaptureManager.StartRecord(pszDestinationFile: PCWSTR): HResult;
+function TCaptureManager.StartRecording(pszDestinationFile: PCWSTR): HResult;
 var
   pszExt: string;
   guidVideoEncoding: TGUID;
@@ -957,7 +981,7 @@ begin
   if FAILED(hr) then
     goto Done;
 
-  // Configure the video and audio streams.
+  // Configure the video and/or audio streams.
   if (guidVideoEncoding <> GUID_NULL) then
     begin
       hr := ConfigureVideoEncoding(pSource,
@@ -984,11 +1008,15 @@ begin
   IsRecording := True;
 
 done:
+  if FAILED(hr) then
+    ErrMsg('StartRecording',
+            hr);
+
   Result := hr;
 end;
 
 
-function TCaptureManager.StopRecord(): HResult;
+function TCaptureManager.StopRecording(): HResult;
 var
   hr: HResult;
 
@@ -999,8 +1027,12 @@ begin
     begin
       hr := FCaptureEngine.StopRecord(True,
                                       False);
-      WaitForResult();
+      HandleMessages(GetCurrentThread());
     end;
+
+  if FAILED(hr) then
+    ErrMsg('StopRecording',
+            hr);
 
   Result := hr;
 end;
@@ -1022,7 +1054,7 @@ label
   Done;
 
 begin
-  SnapShotOptions := ASnapShotOption;
+  SnapShotOption := ASnapShotOption;
   bHasPhotoStream := True;
 
   // Get a pointer to the photo sink.
@@ -1040,8 +1072,21 @@ begin
   if FAILED(hr) then
     goto Done;
 
+  hr := MfCreateMediaType(pMediaType);
+  if FAILED(hr) then
+    goto Done;
+
   hr := pCaptureSource.GetCurrentDeviceMediaType(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO,
                                                  pMediaType);
+  if FAILED(hr) then
+    goto Done;
+
+  {$IFDEF DEBUG}
+  FMediaTypeDebug.LogMediaType(pMediaType);
+  FMediaTypeDebug.SafeDebugResultsToFile('TakePhoto');
+  {$ENDIF}
+
+  hr := MfCreateMediaType(pMediaType2);
   if FAILED(hr) then
     goto Done;
 
@@ -1050,11 +1095,15 @@ begin
   //       Valid subformats are:
   //         MFImageFormat_JPEG, GUID_ContainerFormatBmp, GUID_ContainerFormatJpeg etc.
   //         DON'T USE MFImageFormat_RGB32! (This will end with a WINCODEC_ERR_COMPONENTNOTFOUND)
-  hr := CreatePhotoMediaType(pMediaType,
-                             GUID_ContainerFormatBmp,
-                             pMediaType2);
+  hr := CreatePhotoMediaType(GUID_ContainerFormatBmp,
+                             pMediaType{2});
   if FAILED(hr) then
     goto Done;
+
+  {$IFDEF DEBUG}
+  FMediaTypeDebug.LogMediaType(pMediaType2);
+  FMediaTypeDebug.SafeDebugResultsToFile('TakePhoto');
+  {$ENDIF}
 
   hr := pCapturePhotoSink.RemoveAllStreams();
   if FAILED(hr) then
@@ -1064,7 +1113,7 @@ begin
   // Try to connect the first still image stream to the photo sink returns the streamindex for added stream.
   if bHasPhotoStream then
     hr := pCapturePhotoSink.AddStream(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO,
-                                      pMediaType2,
+                                      pMediaType,
                                       nil,
                                       {out} dwSinkStreamIndex);
   if FAILED(hr) then
@@ -1075,17 +1124,12 @@ begin
     goto Done;
 
   // E_NOTIMPL
-  hr := pCapturePhotoSink.GetService(dwSinkStreamIndex,
-                                     GUID_NULL,
-                                     IID_IMFSinkWriter,
-                                     IUnknown(pSinkWriter));
-  if hr = -2147467263 {'$80004001 = E_NOTIMPL'} then
-    begin
-      hr := S_OK;
-      {$IF DEBUG}
-       OutputDebugString(format('Warning: %s (hr = %d) IMFSinkWriter is not implemented.', [E_NOTIMPL, hr]));
-      {$ENDIF}
-    end;
+  //hr := pCapturePhotoSink.GetService(dwSinkStreamIndex,
+  //                                   GUID_NULL,
+  //                                   IID_IMFSinkWriter,
+  //                                   IUnknown(pSinkWriter));
+  //if FAILED(hr) then
+  //  goto Done;
 
 
   hr := FCaptureEngine.TakePhoto();
@@ -1097,10 +1141,13 @@ begin
 Done:
   SafeRelease(pCapturePhotoSink);
   SafeRelease(pCaptureSink);
+  if FAILED(hr) then
+    ErrMsg('TakePhoto',
+            hr);
   Result := hr;
 end;
 
-
+//
 function TCaptureManager.UpdateVideo(psrc: PMFVideoNormalizedRect): HResult;
 var
   rdest: TRect;
@@ -1116,161 +1163,81 @@ begin
 end;
 
 
-// Note:
-// dwStreamType parameter can only be one of the following:
-//   MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW
-//   MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD
-//   MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO
-//   MF_CAPTURE_ENGINE_MEDIASOURCE
 //
-function TCaptureManager.GetCaptureDeviceCaps(const dwStreamType: DWord = MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO): HResult;
+function TCaptureManager.SetVideoFormat(): HResult;
 var
-  pSource: IMFCaptureSource;
-  mediaType: IMFMediaType;
-  i, j: Integer;
-  //uiCount: UINT32;
   hr: HResult;
-  aVideoInfo: TVideoFormatInfo;
+  uiDeviceIndex: UINT32;
+  uiFormatIndex: UINT32;
 
 begin
-  hr := S_OK;
-
-try
-
-  FCritSec.Lock;
-
-  if (FDeviceParam.DeviceIsSelected = False) then
-    begin
-      hr := MF_E_INVALIDREQUEST;  // m_pEngine has not been completely initialized eg user did not select a device.
-      Exit;
-    end;
-
-  hr := FCaptureEngine.GetSource(pSource);
-
-  if SUCCEEDED(hr) then
-    begin
-
-      SetLength(a_VideoFormatInfo,
-                0);
-      i := 0;
-      j := 0;
-      // Process all messages to prevent IMFCaptureSource.GetAvailableDeviceMediaType resulting in
-      // $C00D36B2 (The request is invalid in the current state.),
-      // since IMFCaptureEngine operates Asynchronous.
-      WaitForResult();
-
-      // Get all capabillities
-      while (hr = S_OK) do
-        begin
-          mediaType := nil;
-          hr := MFCreateMediaType(mediaType);
-
-          hr := pSource.GetAvailableDeviceMediaType(dwStreamType,
-                                                    i,
-                                                    @mediaType);
-          if (hr = MF_E_NO_MORE_TYPES) then
-             begin
-               Break;
-             end;
-
-          hr := mediaType.GetGUID(MF_MT_MAJOR_TYPE,
-                                  aVideoInfo.fMajorType);
-
-          hr := mediaType.GetGUID(MF_MT_SUBTYPE,
-                                  aVideoInfo.fSubType);
-
-          hr := MFGetAttributeSize(mediaType,
-                                   MF_MT_FRAME_SIZE,
-                                   aVideoInfo.iVideoWidth,
-                                   aVideoInfo.iVideoHeight);
-
-          // Set these values to 'remember' original width and height.
-          aVideoInfo.iBufferWidth := aVideoInfo.iVideoWidth;
-          aVideoInfo.iBufferHeight := aVideoInfo.iVideoHeight;
-
-          // Get the stride to find out if the bitmap is top-down or bottom-up.
-          aVideoInfo.iStride := MFGetAttributeUINT32(mediaType,
-                                                     MF_MT_DEFAULT_STRIDE,
-                                                     1);
-
-          aVideoInfo.bTopDown := (aVideoInfo.iStride > 0);
-
-          hr := MFGetAttributeRatio(mediaType,
-                                    MF_MT_FRAME_RATE,
-                                    aVideoInfo.iFrameRate,
-                                    aVideoInfo.iFrameRateDenominator);
-
-          hr := MFGetAttributeRatio(mediaType,
-                                    MF_MT_FRAME_RATE_RANGE_MIN,
-                                    aVideoInfo.iMinFrameRate,
-                                    aVideoInfo.iMinFrameRateDenominator);
-
-          hr := MFGetAttributeRatio(mediaType,
-                                    MF_MT_FRAME_RATE_RANGE_MAX,
-                                    aVideoInfo.iMaxFrameRate,
-                                    aVideoInfo.iMaxFrameRateDenominator);
-
-         // Get the pixel aspect ratio. (This value might not be set.)
-         hr := MFGetAttributeRatio(mediaType,
-                                   MF_MT_PIXEL_ASPECT_RATIO,
-                                   aVideoInfo.AspectRatioNumerator,
-                                   aVideoInfo.AspectRatioDenominator);
-
-          if SUCCEEDED(hr) then
-            begin
-              // check if the format is supported
-              if FSampleConverter.IsInputSupported(aVideoInfo.fSubType) then
-                begin
-                  SetLength(a_VideoFormatInfo,
-                            j +1);
-                  CopyMemory(@a_VideoFormatInfo[j],
-                             @aVideoInfo,
-                             SizeOf(TVideoFormatInfo));
-                  inc(j);
-                end;
-
-              aVideoInfo.Reset;
-              Inc(i);
-            end;
-        end;
-    end;
-
-finally
-
-  if (hr = MF_E_NO_MORE_TYPES) then
-    hr := S_OK;
-
-  FCritSec.Unlock;
-
+  uiDeviceIndex := FDeviceExplorer.DeviceIndex;
+  uiFormatIndex := FDeviceExplorer.FormatIndex;
+  hr := SetMediaType(FDeviceExplorer.DeviceProperties[uiDeviceIndex].aVideoFormats[uiFormatIndex].mfMediaType);
   Result := hr;
 end;
+
+
+// SetMediaType
+function TCaptureManager.SetMediaType(pMediaType: IMFMediaType): HResult;
+var
+  mfCaptureSource: IMFCAptureSource;
+  hr: HResult;
+
+begin
+
+  {$IFDEF DEBUG}
+  FMediaTypeDebug.LogMediaType(pMediaType);
+  FMediaTypeDebug.SafeDebugResultsToFile('SetMediaType');
+  {$ENDIF}
+
+  hr := FCaptureEngine.GetSource(mfCaptureSource);
+  if SUCCEEDED(hr) then
+    hr := mfCaptureSource.SetCurrentDeviceMediaType(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW, //MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                                    pMediaType);
+  Result := hr;
+
 end;
 
 
+// GetCurrentFormat
+function TCaptureManager.GetCurrentFormat(): TVideoFormatInfo;
+begin
+  Result := FDeviceExplorer.VideoFormat;
+end;
+
+
+// SetSnapShotOption
 function TCaptureManager.SetSnapShotOption(pPhotoSink: IMFCapturePhotoSink): HResult;
 var
   hr: HResult;
-  pExt: PWideChar;
-  pszFileName: PWideChar;
-  pszPicPath: PWideChar;
+  pszFileName,
+  pszPicPath,
   pszOutputFileName: PWideChar;
-  fPath: TPath;
+
+const
+  pExt = '.bmp';
 
 label
   Done;
 
 begin
-
+  hr := S_OK;
   // Decide where the snapshot should be send through
-  case SnapShotOptions of
+  case SnapShotOption of
     ssoFile:     begin
                    // ToDo: implement save to file (eg: My Photo's)
                    // to file
 
                    // get the My Pictures Folder path use fPath.GetSharedPicturesPath for the shared folder
-                   pszPicPath := PWideChar(fPath.GetPicturesPath);
-                   pszFileName := LPWSTR(Format('MyPicture_%s%s', [DateToStr(Now()), pExt]));
-                   pszOutputFileName :=  LPWSTR(Format('%s%s', [pszPicPath, pszFileName]));
+                   pszPicPath := StrToPWideChar(TPath.GetPicturesPath);
+                   pszFileName := StrToPWideChar(Format('MyPicture_%s%s',
+                                                        [DateToStr(Now()),
+                                                         pExt]));
+
+                   pszOutputFileName := StrToPWideChar(Format('%s%s',
+                                                              [pszPicPath,
+                                                               pszFileName]));
 
                    hr := pPhotoSink.SetOutputFileName(pszOutputFileName);
                    if FAILED(hr) then
@@ -1307,128 +1274,10 @@ begin
 
 Done:
   if FAILED(hr) then
-    begin
-      {$IF DEBUG}
-      OutputDebugString(format('TakePhoto Failed: OnPhotoTaken (hr = %d)', [hr]));
-      {$ELSE}
-      MessageBox(0,
-                 lpcwstr(format('TakePhoto Failed: OnPhotoTaken (hr = %d)', [hr])),
-                 lpcwstr('TakePhoto Failed'),
-                 MB_ICONWARNING);
-      {$ENDIF}
-    end;
-end;
-
-
-procedure TCaptureManager.WaitForResult();
-begin
-  WaitForSingleObject(FhEvent,
-                      INFINITE);
-end;
-
-
-constructor TChooseDeviceParam.Create();
-begin
-  inherited;
-  Initialize();
-end;
-
-
-destructor TChooseDeviceParam.Destroy();
-var
-  i: Integer;
-
-begin
-{$POINTERMATH ON}
-  for i := 0 to count -1 do
-    SafeRelease(apDevices[i]);
-{$POINTERMATH OFF}
-  SafeRelease(apDevice);
-  CoTaskMemFree(apDevices);
-  inherited;
-end;
-
-
-function TChooseDeviceParam.Initialize(): HResult;
-var
-  pAttributes: IMFAttributes;
-  hr: HResult;
-
-label
-  Done;
-
-begin
-  hr := MFCreateAttributes(pAttributes,
-                           1);
-  if FAILED(hr) then
-    goto Done;
-
-  // Ask for source type = video capture devices
-  hr := pAttributes.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
-                            MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
-  if FAILED(hr) then
-    goto Done;
-
-  // Enumerate devices.
-  hr := MFEnumDeviceSources(pAttributes,
-                            apDevices,
-                            uCount);
-  if FAILED(hr) then
-    goto Done;
-
-  // Set index to first device in the list.
-  if uCount > 0 then
-    SetSelection(0)
-  else
-    hr := MF_E_NO_CAPTURE_DEVICES_AVAILABLE;
-
-  bIsSelected := False;
-
-Done:
+    ErrMsg('OnPhotoTaken',
+           hr);
   Result := hr;
 end;
-
-
-procedure TChooseDeviceParam.SetSelection(iIndex: UINT32);
-var
-  szStr: LPWSTR;
-  uiLen: UINT32;
-  hr: HResult;
-
-begin
-
-  if (iIndex < uCount) then
-    begin
-
-      SafeRelease(apDevice);
-      uSelection := iindex;
-
-{$POINTERMATH ON}
-
-      apDevice := apDevices[iIndex];
-
-      // Try to get the display-friendly-name.
-      hr := apDevices[iIndex].GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME,
-                                                 szStr,
-                                                 uiLen);
-      if SUCCEEDED(hr) then
-        lpSelectedDeviceName := szStr
-      else
-        lpSelectedDeviceName := PWideChar(format('Error: hr = %d', [hr]));
-
-      // Try to get the display-friendly-name.
-      hr := apDevices[iIndex].GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
-                                                 szStr,
-                                                 uiLen);
-      if SUCCEEDED(hr) then
-        lpSelectedSymbolicLink := szStr
-      else
-        lpSelectedSymbolicLink := PWideChar(format('Error: hr = %d', [hr]));
-    end;
-
-{$POINTERMATH OFF}
-end;
-
 
 end.
 

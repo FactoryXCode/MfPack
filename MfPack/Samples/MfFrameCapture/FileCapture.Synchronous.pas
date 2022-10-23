@@ -10,7 +10,7 @@
 // Release date: 22-09-2021
 // Language: ENU
 //
-// Revision Version: 3.1.2
+// Revision Version: 3.1.3
 //
 // Description:
 //   This unit shows how to get a videoframe from a file source in sync mode.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX312/Samples/MFFrameSample
+// Related projects: MfPackX313/Samples/MFFrameSample
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.22621.0

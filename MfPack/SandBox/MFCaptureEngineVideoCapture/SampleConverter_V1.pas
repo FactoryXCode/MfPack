@@ -23,8 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/10/2021 All                 Bowie release  SDK 10.0.22000.0 (Windows 11)
-// 22/03/2022 Ciaran              Added support for sample conversion using color converter
+// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -57,7 +56,9 @@
 // in full at the top of the file.
 //==============================================================================
 unit SampleConverter_V1;
+
 interface
+
 uses
   {Winapi}
   WinApi.Windows,
@@ -65,6 +66,12 @@ uses
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.WmCodecDsp,
   WinApi.ComBaseApi,
+  {System}
+  System.SysUtils,
+  System.Classes,
+  System.Types,
+  {VCL}
+  VCL.Graphics,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MfUtils,
@@ -73,67 +80,32 @@ uses
   WinApi.MediaFoundationApi.MfError,
   WinApi.MediaFoundationApi.MfIdl,
   WinApi.UuIds,
-  {VCL}
-  VCL.Graphics,
-  {System}
-  System.SysUtils,
-  System.Classes,
-  System.Types;
+  {Application}
+  DeviceExplorer,
+  Utils;
 
 type
-  TVideoFormatInfo = record
-  public
-    iVideoWidth: UINT32;
-    iVideoHeight: UINT32;
-    iBufferWidth: UINT32;
-    iBufferHeight: UINT32;
-    iStride: UINT32;
-    bTopDown: Boolean;
-
-    // Major & Subtypes
-    fSubType: TGuid;
-    fMajorType: TGuid;
-
-    // Supported framerates
-    iFrameRate: UINT32;
-    iFrameRateDenominator: UINT32;
-    iMaxFrameRate: UINT32;
-    iMaxFrameRateDenominator: UINT32;
-    iMinFrameRate: UINT32;
-    iMinFrameRateDenominator: UINT32;
-
-    // AspectRatio
-    AspectRatioSupported: Boolean;
-    AspectRatioNumerator: UINT32;
-    AspectRatioDenominator: UINT32;
-
-    procedure Reset();
-  end;
-
-  TVideoFormatInfoArray = TArray<TVideoFormatInfo>;
-
-type
-  TSampleConverter = class(TPersistent)
+  TSampleConverter = class
   protected
     FOutputType: IMFMediaType;
     FTransform: IMFTransform;
-    FSupportedInputs: TArray<TGUID>;
-    FTopDownFormats: TArray<TGUID>;
+    FSupportedInputs: array of TGUID;
+    FTopDownFormats: array of TGUID;
 
   private
 
-    function ConvertSampleToRGB(const AInputSample: IMFSample;
-                                out AConvertedSample: IMFSample): HResult;
+    function ConvertSampleToRGB(const pInputSample: IMFSample;
+                                out pConvertedSample: IMFSample): HResult;
 
-    function IndexOf(const AInput: TGUID;
-                     const AValues: array of TGUID): Integer;
+    function IndexOf(const pInput: TGUID;
+                     const pValues: array of TGUID): Integer;
 
     function GetBMPFileHeader(): BITMAPFILEHEADER;
-    function GetBMPFileInfo(const AVideoInfo: TVideoFormatInfo): BITMAPINFOHEADER;
-    function CreateTransform(const AManager: IMFDXGIDeviceManager;
-                             const AInputType: IMFMediaType): HResult;
+    function GetBMPFileInfo(const pVideoInfo: TVideoFormatInfo): BITMAPINFOHEADER;
+    function CreateTransform(const pManager: IMFDXGIDeviceManager;
+                             const pInputType: IMFMediaType): HResult;
 
-    function IsTopDown(const ASubFormat: TGUID): Boolean;
+    function IsTopDown(const pSubFormat: TGUID): Boolean;
 
     procedure FreeConverter();
     procedure NotifyBeginStreaming();
@@ -143,14 +115,14 @@ type
     constructor Create();
     destructor Destroy(); override;
 
-    function UpdateConverter(const AManager: IMFDXGIDeviceManager;
-                             const AInputType: IMFMediaType): HResult;
+    function UpdateConverter(const pManager: IMFDXGIDeviceManager;
+                             const pInputType: IMFMediaType): HResult;
 
-    function DataFromSample(const ASample: IMFSample;
-                            const AVideoInfo: TVideoFormatInfo;
-                            out AMemoryStream: TMemoryStream): HResult;
+    function DataFromSample(const pSample: IMFSample;
+                            const pVideoInfo: TVideoFormatInfo;
+                            out pStream: TMemoryStream): HResult;
 
-    function IsInputSupported(const AInputFormat : TGUID) : Boolean;
+    function IsInputSupported(const pInputFormat: TGUID) : Boolean;
 
   end;
 
@@ -160,21 +132,22 @@ implementation
 
 constructor TSampleConverter.Create();
 begin
-  inherited;
-  SetSupportedInputs;
+  inherited Create();
+  SetSupportedInputs();
 end;
 
 
 destructor TSampleConverter.Destroy();
 begin
-  FreeConverter;
+  FreeConverter();
   inherited;
 end;
 
 
-procedure TSampleConverter.SetSupportedInputs;
+procedure TSampleConverter.SetSupportedInputs();
 begin
   SetLength(FSupportedInputs, 20);
+
   FSupportedInputs[0] := MFVideoFormat_ARGB32;
   FSupportedInputs[1] := MFVideoFormat_RGB24;
   FSupportedInputs[2] := MFVideoFormat_RGB32;
@@ -204,29 +177,31 @@ begin
 end;
 
 
-function TSampleConverter.IsTopDown(const ASubFormat: TGUID): Boolean;
+function TSampleConverter.IsTopDown(const pSubFormat: TGUID): Boolean;
 begin
-  Result := IndexOf(ASubFormat, FTopDownFormats) > -1;
+  Result := IndexOf(pSubFormat,
+                    FTopDownFormats) > -1;
 end;
 
 
-function TSampleConverter.IsInputSupported(const AInputFormat: TGUID) : Boolean;
+function TSampleConverter.IsInputSupported(const pInputFormat: TGUID): Boolean;
 begin
-  Result := IndexOf(AInputFormat, FSupportedInputs) > -1;
+  Result := IsMfSupportedFormat(pInputFormat);
 end;
 
 
-function TSampleConverter.IndexOf(const AInput: TGUID; const AValues: array of TGUID): Integer;
+function TSampleConverter.IndexOf(const pInput: TGUID;
+                                  const pValues: array of TGUID): Integer;
 begin
-  Result := high(AValues);
-  while (Result >= low(AValues)) and (AInput <> AValues[Result]) do
+  Result := high(pValues);
+  while (Result >= low(pValues)) and (pInput <> pValues[Result]) do
     Dec(Result);
 end;
 
-
-function TSampleConverter.DataFromSample(const ASample: IMFSample;
-                                         const AVideoInfo: TVideoFormatInfo;
-                                         out AMemoryStream: TMemoryStream): HResult;
+ // 1st step
+function TSampleConverter.DataFromSample(const pSample: IMFSample;
+                                         const pVideoInfo: TVideoFormatInfo;
+                                         out pStream: TMemoryStream): HResult;
 var
   hr: HResult;
   pBuffer: IMFMediaBuffer;
@@ -240,19 +215,19 @@ var
 
 begin
 
-  if (AVideoInfo.fSubType <> MFVideoFormat_RGB32) then
+  if (pVideoInfo.fSubType <> MFVideoFormat_RGB32) then
     begin
-      hr := ConvertSampleToRGB(ASample,
+      hr := ConvertSampleToRGB(pSample,
                                pConvertedSample);
-      if SUCCEEDED(hr) then
+      if (SUCCEEDED(hr)) then
         // Converts a sample with multiple buffers into a sample with a single buffer.
         hr := pConvertedSample.ConvertToContiguousBuffer(pBuffer);
     end
   else
-    hr := ConvertSampleToRGB(ASample,
+    hr := ConvertSampleToRGB(pSample,
                              pConvertedSample);
 
-  if SUCCEEDED(hr) then
+  if (SUCCEEDED(hr)) then
     begin
 
       hr := pBuffer.Lock(pBitmapData,
@@ -260,10 +235,10 @@ begin
                          @cbBitmapData);
 
       try
-      if SUCCEEDED(hr) then
+      if (SUCCEEDED(hr)) then
         begin
           // For full frame capture, use the buffer dimensions for the data size check
-          iExpectedDataSize := (AVideoInfo.iBufferWidth * 4) * AVideoInfo.iBufferHeight;
+          iExpectedDataSize := (pVideoInfo.iBufferWidth * 4) * pVideoInfo.iBufferHeight;
           iActualDataSize := Integer(cbBitmapData);
 
           if (iActualDataSize <> iExpectedDataSize) then
@@ -274,21 +249,24 @@ begin
               {$ENDIF}
               hr := E_FAIL;
             end;
-        AMemoryStream := TMemoryStream.Create;
+
+        pStream := TMemoryStream.Create;
         oFileHeader := GetBMPFileHeader;
-        oFileInfo := GetBMPFileInfo(AVideoInfo);
-        AMemoryStream.Write(oFileHeader, SizeOf(oFileHeader));
-        AMemoryStream.Write(oFileInfo, SizeOf(oFileInfo));
-        AMemoryStream.Write(pBitmapData[0], iActualDataSize);
+        oFileInfo := GetBMPFileInfo(pVideoInfo);
+        pStream.Write(oFileHeader, SizeOf(oFileHeader));
+        pStream.Write(oFileInfo, SizeOf(oFileInfo));
+        pStream.Write(pBitmapData[0], iActualDataSize);
+
       end;
     finally
-      pBuffer.Unlock;
+      pBuffer.Unlock();
       SafeRelease(pBuffer);
     end;
   end;
 
   if Assigned(pConvertedSample) then
     SafeRelease(pConvertedSample);
+  Result := hr;
 end;
 
 
@@ -302,16 +280,16 @@ begin
 end;
 
 
-function TSampleConverter.GetBMPFileInfo(const AVideoInfo: TVideoFormatInfo): BITMAPINFOHEADER;
+function TSampleConverter.GetBMPFileInfo(const pVideoInfo: TVideoFormatInfo): BITMAPINFOHEADER;
 begin
   // See: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapinfoheader
   Result.biSize := sizeof(BITMAPINFOHEADER);
-  Result.biWidth := AVideoInfo.iVideoWidth;
+  Result.biWidth := pVideoInfo.iVideoWidth;
 
-  if IsTopDown(AVideoInfo.fSubType) then
-    Result.biHeight := -AVideoInfo.iVideoHeight
+  if IsTopDown(pVideoInfo.fSubType) then
+    Result.biHeight := -pVideoInfo.iVideoHeight
   else
-    Result.biHeight := AVideoInfo.iVideoHeight;
+    Result.biHeight := pVideoInfo.iVideoHeight;
 
   Result.biPlanes := 1;
   Result.biBitCount := 32;
@@ -327,14 +305,20 @@ begin
   FOutputType := nil;
 end;
 
-function TSampleConverter.UpdateConverter(const AManager: IMFDXGIDeviceManager; const AInputType: IMFMediaType): HResult;
+
+function TSampleConverter.UpdateConverter(const pManager: IMFDXGIDeviceManager;
+                                          const pInputType: IMFMediaType): HResult;
 begin
-  Result := CreateTransform(AManager, AInputType);
+  Result := CreateTransform(pManager,
+                            pInputType);
 
   NotifyBeginStreaming;
 end;
 
-function TSampleConverter.CreateTransform(const AManager: IMFDXGIDeviceManager; const AInputType: IMFMediaType): HResult;
+
+
+function TSampleConverter.CreateTransform(const pManager: IMFDXGIDeviceManager;
+                                          const pInputType: IMFMediaType): HResult;
 var
   hr: HResult;
 
@@ -354,7 +338,7 @@ begin
       // Set the input type for the transform
       if SUCCEEDED(hr) then
         hr := FTransform.SetInputType(0,
-                                      AInputType,
+                                      pInputType,
                                       0);
 
       // Create the output type
@@ -363,7 +347,7 @@ begin
 
       // Copy all the properties from the input type to the output
       if SUCCEEDED(hr) then
-        hr := AInputType.CopyAllItems(FOutputType);
+        hr := pInputType.CopyAllItems(FOutputType);
 
       // Set sub type RGB32
       if SUCCEEDED(hr) then
@@ -395,44 +379,41 @@ begin
 end;
 
 
-function TSampleConverter.ConvertSampleToRGB(const AInputSample: IMFSample;
-                                             out AConvertedSample: IMFSample): HResult;
+function TSampleConverter.ConvertSampleToRGB(const pInputSample: IMFSample;
+                                             out pConvertedSample: IMFSample): HResult;
 var
   hr: HResult;
-  oStatus: DWord;
-  oResult: HResult;
+  dwStatus: DWord;
   pBufferOut: IMFMediaBuffer;
-  oOutputDataBuffer: MFT_OUTPUT_DATA_BUFFER;
-  oOutputStreamInfo: MFT_OUTPUT_STREAM_INFO;
-  iConvertStart: int64;
-  iConvertEnd: int64;
+  pOutputDataBuffer: MFT_OUTPUT_DATA_BUFFER;
+  pOutputStreamInfo: MFT_OUTPUT_STREAM_INFO;
 
 begin
 
   hr := FTransform.ProcessInput(0,
-                                AInputSample,
+                                pInputSample,
                                 0);
 
   if SUCCEEDED(hr) then
     begin
-      hr := FTransform.GetOutputStreamInfo(0, oOutputStreamInfo);
+      hr := FTransform.GetOutputStreamInfo(0, pOutputStreamInfo);
       try
         if SUCCEEDED(hr) then
-          hr := MFCreateMemoryBuffer(oOutputStreamInfo.cbSize, pBufferOut);
+          hr := MFCreateMemoryBuffer(pOutputStreamInfo.cbSize, pBufferOut);
         if SUCCEEDED(hr) then
-          hr := MFCreateSample(AConvertedSample);
+          hr := MFCreateSample(pConvertedSample);
         if SUCCEEDED(hr) then
-          hr := AConvertedSample.AddBuffer(pBufferOut);
+          hr := pConvertedSample.AddBuffer(pBufferOut);
         if SUCCEEDED(hr)  then
           begin
-            oOutputDataBuffer.dwStreamID := 0;
-            oOutputDataBuffer.dwStatus := 0;
-            oOutputDataBuffer.pSample := AConvertedSample;
-            oOutputDataBuffer.pEvents := nil;
+            pOutputDataBuffer.dwStreamID := 0;
+            pOutputDataBuffer.dwStatus := 0;
+            pOutputDataBuffer.pSample := pConvertedSample;
+            pOutputDataBuffer.pEvents := nil;
             hr := FTransform.ProcessOutput(0,
                                            1,
-                                           @oOutputDataBuffer,
-                                           oStatus);
+                                           @pOutputDataBuffer,
+                                           dwStatus);
             // If we don't flush we will get MF_E_NOTACCEPTING on next ProcessInput
             FTransform.ProcessMessage(MFT_MESSAGE_COMMAND_FLUSH,
                                       0);
@@ -442,34 +423,6 @@ begin
       end;
   end;
   Result := hr;
-end;
-
-{ TVideoFormatInfo }
-procedure TVideoFormatInfo.Reset();
-begin
-  iVideoWidth := 0;
-  iVideoHeight := 0;
-  iBufferWidth := 0;
-  iBufferHeight := 0;
-  iStride := 0;
-  bTopDown := False;
-
-  // Major & Subtypes
-  fSubType := GUID_NULL;
-  fMajorType := GUID_NULL;
-
-  // Supported framerates
-  iFrameRate := 0;
-  iFrameRateDenominator := 0;
-  iMaxFrameRate := 0;
-  iMaxFrameRateDenominator := 0;
-  iMinFrameRate := 0;
-  iMinFrameRateDenominator := 0;
-
-  // Aspectratio
-  AspectRatioSupported := False;
-  AspectRatioNumerator := 0;
-  AspectRatioDenominator := 0;
 end;
 
 end.

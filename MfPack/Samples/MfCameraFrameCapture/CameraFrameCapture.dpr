@@ -5,7 +5,7 @@ uses
   FastMM4,
   {$ENDIF}
 
-  {$IFDEF MAD}
+  {$IFDEF madExcept}
   madExcept,
   madLinkDisAsm,
   madListHardware,

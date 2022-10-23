@@ -10,7 +10,7 @@
 // Release date: 04-10-2020
 // Language: ENU
 //
-// Revision Version: 3.1.2
+// Revision Version: 3.1.3
 // Description: Ducking Capture dialog that defines the entry point for the application.
 //
 //              WIN32 APPLICATION : Ducking Capture Sample Project Overview
@@ -28,14 +28,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Note that this sample requires Windows 7 or later.
 //          This sample uses the CALLBACK_WINDOW callbacktype as used in the original C++ sample.
 //
 // Related objects: -
-// Related projects: MfPackX312
+// Related projects: MfPackX313
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -405,14 +405,12 @@ begin
   //
   if ((currentSel = g_WasapiComboBoxIndex) and (g_CurrentChat.TransportType() = ChatTransportWasapi)) then
     begin
-
       //
       //  The user switched between render and capture. Delete the existing chat transport and create a new one.
       //
       g_CurrentChat.Shutdown();
       g_CurrentChat.Free;
       g_CurrentChat := Nil;
-
       //
       //  Reinstantiate the WASAPI transport.
       //
@@ -429,7 +427,6 @@ begin
                    'Unable to initialize chat',
                    'Error',
                    MB_OK);
-
       //
       //  Sync the UI to the state again - we're not playing but after initializing the state might change.
       //

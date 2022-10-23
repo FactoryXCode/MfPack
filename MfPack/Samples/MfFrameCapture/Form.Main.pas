@@ -10,7 +10,7 @@
 // Release date: 22-09-2021
 // Language: ENU
 //
-// Revision Version: 3.1.2
+// Revision Version: 3.1.3
 //
 // Description:
 //   This unit is the application mainform.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/06/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX312/Samples/MFFrameSample
+// Related projects: MfPackX313/Samples/MFFrameSample
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.22621.0
@@ -295,7 +295,10 @@ begin
     Result := FCapture.OpenSource(AURL);
   finally
     Log(Format('Opened video. Width: %d. Height: %d. Duration: %s. Supports Seek: %s', [FCapture.VideoInfo.iVideoWidth,
-      FCapture.VideoInfo.iVideoHeight, TimeSpanToDisplay(FCapture.Duration), BoolToStr(FCapture.SupportsSeek, True)]), ltInfo);
+                                                                                        FCapture.VideoInfo.iVideoHeight,
+                                                                                        TimeSpanToDisplay(FCapture.Duration),
+                                                                                        BoolToStr(FCapture.SupportsSeek)]),
+                                                                                        ltInfo);
   end;
 
   if Result then
@@ -523,7 +526,8 @@ begin
 end;
 
 
-procedure TFrmMain.Log(const AText: string; ALogType: TLogType);
+procedure TFrmMain.Log(const AText: string;
+                       ALogType: TLogType);
 begin
   if ALogType >= FLogLevel then
     memLog.Lines.Add(FormatDateTime('yyyy/mm/dd HH:mm:ss.zzz',
