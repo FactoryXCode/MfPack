@@ -67,6 +67,8 @@ The folllowing API's are included, to support Media Foundation.
  - DirectWrite API
  - DXGI API
  - XAudio2 API
+ - Windows Imaging Component (WIC) API
+ - Windows Media API
 
 Notes
 ===== 
