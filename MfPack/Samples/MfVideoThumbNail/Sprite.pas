@@ -369,6 +369,7 @@ begin
   // Start with an identity transform.
   mat := D2D1_MATRIX_3X2_F.Identity();
 
+
   // If the image is bottom-up, flip around the x-axis.
   if (m_bTopDown = FALSE) then
     begin
@@ -425,7 +426,8 @@ begin
 
   mat.Invert();
   pt := D2DMatrix3X2FTransformPoint(mat,
-                                    D2D1PointF(x, y));
+                                    D2D1PointF(x,
+                                               y));
 
   if (pt.x >= m_fill.left) AND (pt.x <= m_fill.right) AND (pt.y >= m_fill.top) AND (pt.y <= m_fill.bottom) then
     begin

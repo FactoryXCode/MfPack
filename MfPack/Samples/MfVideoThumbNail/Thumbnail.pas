@@ -69,7 +69,7 @@ uses
   System.Classes,
   System.Math,
   System.SysUtils,
-  {MfPack dx}
+  {MfPack DirectX}
   WinApi.DirectX.DCommon,
   WinApi.DirectX.DXGIFormat,
   WinApi.DirectX.D2D1,

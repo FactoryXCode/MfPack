@@ -72,9 +72,11 @@ uses
   WinApi.DirectX.D2D1Helper;
 
 
-type
 
+{$IFDEF USE_D2D_MATRIX_3X2_F_VERSION2}
+type
   D2DMatrix3x2FHelper = Matrix3x2FHelper;
+{$ENDIF}
 
 
   function WidthD2D1RectF(const d2d1rect: D2D1_RECT_F): FLOAT; inline;
@@ -188,6 +190,7 @@ begin
   Result.x := point.x * pmat._11 + point.y * pmat._21 + pmat._31;
   Result.y := point.x * pmat._12 + point.y * pmat._22 + pmat._32;
 end;
+
 
 // Note that the Alphachannel will not be altered
 function D2D1TColorF(dcolor: TColor;

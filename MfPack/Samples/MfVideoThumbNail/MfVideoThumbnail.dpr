@@ -4,7 +4,7 @@ uses
 
   {$IFDEF FASTMM}
   FastMM4,
-  {$ENDIF }
+  {$ENDIF}
 
   Vcl.Forms,
   frmVideoThumbnail in 'frmVideoThumbnail.pas' {Form1},
@@ -18,11 +18,10 @@ uses
 begin
 
   // Check for memoryleaks (debug mode (F9) only!)
-  {$IFDEF DEBUG}
-    {$WARN SYMBOL_PLATFORM OFF}
-    ReportMemoryLeaksOnShutdown := (DebugHook <> 0);
-    {$WARN SYMBOL_PLATFORM ON}
-  {$ENDIF}
+  {$WARN SYMBOL_PLATFORM OFF}
+  ReportMemoryLeaksOnShutdown := (DebugHook <> 0);
+  {$WARN SYMBOL_PLATFORM ON}
+
 
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
