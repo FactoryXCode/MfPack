@@ -81,12 +81,6 @@ uses
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
-  // For matrix D2D_MATRIX_3X2_F there are 2 flavours:
-  //  version 1:  can be used by all Delphi versions.
-  //  version 2: Delphi 10 and up contains helpers that are introduced in Delphi XE3 and above.
-  //{$DEFINE USE_D2D_MATRIX_3X2_F_VERSION1}   // Disable this directive if you want to use version 2.
-  {$DEFINE USE_D2D_MATRIX_3X2_F_VERSION2} // Enable this directive if you want to use version 2.
-
 // Enums =======================================================================
 
 type
@@ -287,9 +281,6 @@ type
   {$EXTERNALSYM D2D_SIZE_U}
 
 
-
-{$IFDEF USE_D2D_MATRIX_3X2_F_VERSION2}
-
   // Represents a 3-by-2 matrix.
 
   PD2D_MATRIX_3X2_F = ^D2D_MATRIX_3X2_F;
@@ -353,43 +344,40 @@ type
   end;
   {$EXTERNALSYM D2D_MATRIX_3X2_F}
 
-{$ENDIF}
 
+// When using Delphi version < XE3 the D2D_MATRIX_3X2_F record should be used like this:
+//
+// Delphi < XE3
+//
+//  {DUMMYSTRUCTNAME}
+//  D2D_MATRIX_3X2_F_Struct1 = record
+//    m11: FLOAT;
+//    m12: FLOAT;
+//    m21: FLOAT;
+//    m22: FLOAT;
+//    dx:  FLOAT;
+//    dy:  FLOAT;
+//  end;
 
-  // Delphi < XE3
-
-{$IFDEF USE_D2D_MATRIX_3X2_F_VERSION1}
-
-  {DUMMYSTRUCTNAME}
-  D2D_MATRIX_3X2_F_Struct1 = record
-    m11: FLOAT;
-    m12: FLOAT;
-    m21: FLOAT;
-    m22: FLOAT;
-    dx:  FLOAT;
-    dy:  FLOAT;
-  end;
-
-  {DUMMYSTRUCTNAME2}
-  D2D_MATRIX_3X2_F_Struct2 = record
-    _11: FLOAT;
-    _12: FLOAT;
-    _21: FLOAT;
-    _22: FLOAT;
-    _31: FLOAT;
-    _32: FLOAT;
-  end;
-
-  PD2D_MATRIX_3X2_F = ^D2D_MATRIX_3X2_F;
-  D2D_MATRIX_3X2_F = record
-  case Integer of
-    0: (struct1: D2D_MATRIX_3X2_F_Struct1);
-    1: (struct2: D2D_MATRIX_3X2_F_Struct2);
-    2: (m: array [0..2, 0..1] of FLOAT);
-  end;
-  {$EXTERNALSYM D2D_MATRIX_3X2_F}
-
-{$ENDIF}
+//  {DUMMYSTRUCTNAME2}
+//  D2D_MATRIX_3X2_F_Struct2 = record
+//    _11: FLOAT;
+//    _12: FLOAT;
+//    _21: FLOAT;
+//    _22: FLOAT;
+//    _31: FLOAT;
+//    _32: FLOAT;
+//  end;
+//
+//  PD2D_MATRIX_3X2_F = ^D2D_MATRIX_3X2_F;
+//  D2D_MATRIX_3X2_F = record
+//  case Integer of
+//    0: (struct1: D2D_MATRIX_3X2_F_Struct1);
+//    1: (struct2: D2D_MATRIX_3X2_F_Struct2);
+//    2: (m: array [0..2, 0..1] of FLOAT);
+//  end;
+//  {$EXTERNALSYM D2D_MATRIX_3X2_F}
+//
 
 
   // D2D_MATRIX_4X3_F
@@ -593,7 +581,6 @@ end;
 
 
 // D2D_MATRIX_3X2_F
-{$IFDEF USE_D2D_MATRIX_3X2_F_VERSION2}
 class function D2D_MATRIX_3X2_F.Init(const m11: FLOAT;
                                      const m12: FLOAT;
                                      const m21: FLOAT;
@@ -711,7 +698,6 @@ begin
   Result := (size1.width = size2.width) AND (size1.height = size2.height);
 end;
 
-{$ENDIF}
 {$ENDIF} // end
 
   // Implement Additional functions here.

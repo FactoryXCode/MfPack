@@ -91,7 +91,6 @@ uses
   // Forward declared IdentityMatrix function to allow matrix class to use
   // these constructors.
   //
-
   function IdentityMatrix(): D2D1_MATRIX_3X2_F; inline;
   {$EXTERNALSYM IdentityMatrix}
 
@@ -192,7 +191,7 @@ type
 
     // Delphi Note: The default value will be set in the funtionbody
     function BrushProperties(transform: D2D1_MATRIX_3X2_F{ = IdentityMatrix()};
-                         opacity: FLOAT = 1.0): D2D1_BRUSH_PROPERTIES; inline;
+                             opacity: FLOAT = 1.0): D2D1_BRUSH_PROPERTIES; inline;
     {$EXTERNALSYM BrushProperties}
 
     function GradientStop(position: FLOAT;
@@ -282,7 +281,6 @@ type
                                      tag1: D2D1_TAG = 0;
                                      tag2: D2D1_TAG = 0): D2D1_DRAWING_STATE_DESCRIPTION; inline;
     {$EXTERNALSYM DrawingStateDescription}
-
 
 
 
@@ -617,8 +615,6 @@ type
 {$ENDIF}
 
 
-{$IF CompilerVersion > 23}  // > XE2
-
   // D2D1_MATRIX_3X2_F
   Matrix3x2FHelper = record helper for D2D1_MATRIX_3X2_F
     public
@@ -700,8 +696,6 @@ type
                    const size2: D2D1_SIZE_U): Boolean;
   end;
   {$EXTERNALSYM Matrix3x2FHelper}
-{$ENDIF}
-
 
 
   // Additional Prototypes
@@ -883,6 +877,7 @@ begin
       _32 := 0.0;
     end;
 end;
+
 
 // D2D1_RECT_F
 function RectF(left: FLOAT = 0.0;
@@ -1131,7 +1126,6 @@ begin
   Result.presentOptions := presentOptions;
 end;
 
-
 function LayerParameters(contentBounds: D2D1_RECT_F;
                          maskTransform: D2D1_MATRIX_3X2_F;
                          geometricMask: ID2D1Geometry = Nil;
@@ -1309,7 +1303,6 @@ begin
             (rd shl 16) or
             (gr shl 8) or bl;
 end;
-
 
 //
 // Matrix3x2F // D2D1Matrix3x2FHelper
@@ -1540,7 +1533,6 @@ begin
   Result := (size1.width = size2.width) AND (size1.height = size2.height);
 end;
 
-//{$ENDIF}
 
 function IdentityMatrix(): D2D1_MATRIX_3X2_F;
 begin
@@ -1556,7 +1548,6 @@ begin
       _32 := 0.0;
     end;
 end;
-
 
 
 // Implement Additional functions here.
