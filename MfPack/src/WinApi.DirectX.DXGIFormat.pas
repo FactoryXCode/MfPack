@@ -67,6 +67,10 @@ unit WinApi.DirectX.DXGIFormat;
 
 interface
 
+uses
+  {WinApi}
+  WinApi.Windows;
+
   {$MINENUMSIZE 4}
   {$WEAKPACKAGEUNIT}
 
@@ -87,9 +91,8 @@ const
 //=================
 
 type
-  PDxGiFormat = ^DXGI_FORMAT;
   PDXGI_FORMAT = ^DXGI_FORMAT;
-  DXGI_FORMAT = Cardinal {UINT};
+  DXGI_FORMAT = UINT;
   {$EXTERNALSYM DXGI_FORMAT}
 const
     DXGI_FORMAT_UNKNOWN                                 = DXGI_FORMAT(0);

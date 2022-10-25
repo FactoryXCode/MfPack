@@ -24,6 +24,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 25/10/2022 Tony                Fixed wrong declarations of some D2D1 matrixes.
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows Vista or later.
@@ -69,6 +70,8 @@ interface
 
 uses
 
+  {WinApi}
+  WinApi.WinApiTypes,
   {System}
   System.Types,
   System.SysUtils,
@@ -78,6 +81,11 @@ uses
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
+  // For matrix D2D_MATRIX_3X2_F there are 2 flavours:
+  //  version 1:  can be used by all Delphi versions.
+  //  version 2: Delphi 10 and up contains helpers that are introduced in Delphi XE3 and above.
+  //{$DEFINE USE_D2D_MATRIX_3X2_F_VERSION1}   // Disable this directive if you want to use version 2.
+  {$DEFINE USE_D2D_MATRIX_3X2_F_VERSION2} // Enable this directive if you want to use version 2.
 
 // Enums =======================================================================
 
@@ -124,7 +132,7 @@ const
   // The glyph has SVG outlines as standard XML.
   // <remarks>
   // Fonts may store the content gzip'd rather than plain text);
-  // indicated by the first two bytes as gzip header {0x1F 0x8B}.
+  // indicated by the first two bytes as gzip header {$1F $8B}.
   // </remarks>
   DWRITE_GLYPH_IMAGE_FORMATS_SVG                    = DWRITE_GLYPH_IMAGE_FORMATS($00000008);
   {$EXTERNALSYM DWRITE_GLYPH_IMAGE_FORMATS_SVG}
@@ -183,8 +191,8 @@ type
   // Represents an x-coordinate and y-coordinate pair in two-dimensional space.
   PD2D_POINT_2F = ^D2D_POINT_2F;
   D2D_POINT_2F = record
-    x: Single;
-    y: Single;
+    x: FLOAT;
+    y: FLOAT;
 
     // Delphi Note: Translations to/from Delphi TPoint
     class operator Implicit(AValue: TPoint): D2D_POINT_2F;
@@ -201,8 +209,8 @@ type
   // A vector of 2 FLOAT values (x, y).
   PD2D_VECTOR_2F = ^D2D_VECTOR_2F;
   D2D_VECTOR_2F = record
-    x: Single;
-    y: Single;
+    x: FLOAT;
+    y: FLOAT;
   end;
   {$EXTERNALSYM D2D_VECTOR_2F}
 
@@ -210,9 +218,9 @@ type
   // A vector of 3 FLOAT values (x, y, z).
   PD2D_VECTOR_3F = ^D2D_VECTOR_3F;
   D2D_VECTOR_3F = record
-    x: Single;
-    y: Single;
-    z: Single;
+    x: FLOAT;
+    y: FLOAT;
+    z: FLOAT;
   end;
   {$EXTERNALSYM D2D_VECTOR_3F}
 
@@ -220,10 +228,10 @@ type
   // A vector of 4 FLOAT values (x, y, z, w).
   PD2D_VECTOR_4F = ^D2D_VECTOR_4F;
   D2D_VECTOR_4F = record
-    x: Single;
-    y: Single;
-    z: Single;
-    w: Single;
+    x: FLOAT;
+    y: FLOAT;
+    z: FLOAT;
+    w: FLOAT;
   end;
   {$EXTERNALSYM D2D_VECTOR_4F}
 
@@ -232,10 +240,10 @@ type
   // (left, top) and the coordinates of the lower-right corner (right, bottom).
   PD2D_RECT_F = ^D2D_RECT_F;
   D2D_RECT_F = record
-    left: Single;
-    top: Single;
-    right: Single;
-    bottom: Single;
+    left: FLOAT;
+    top: FLOAT;
+    right: FLOAT;
+    bottom: FLOAT;
     // Delphi Note:  TRect conversion methods
     class operator Implicit(aValue: TRect): D2D_RECT_F;
     class operator Explicit(aValue: D2D_RECT_F): TRect;
@@ -263,8 +271,8 @@ type
   // Stores an ordered pair of floats, typically the width and height of a rectangle.
   PD2D_SIZE_F = ^D2D_SIZE_F;
   D2D_SIZE_F = record
-    width: Single;
-    height: Single;
+    width: FLOAT;
+    height: FLOAT;
   end;
   {$EXTERNALSYM D2D_SIZE_F}
 
@@ -279,33 +287,37 @@ type
   {$EXTERNALSYM D2D_SIZE_U}
 
 
+
+{$IFDEF USE_D2D_MATRIX_3X2_F_VERSION2}
+
   // Represents a 3-by-2 matrix.
-  // Delphi Note:
+
   PD2D_MATRIX_3X2_F = ^D2D_MATRIX_3X2_F;
   D2D_MATRIX_3X2_F = record
     // Horizontal scaling / cosine of rotation
-    _11: Single;
+    _11: FLOAT;
     // Vertical shear / sine of rotation
-    _12: Single;
+    _12: FLOAT;
 
     // Horizontal shear / negative sine of rotation
-    _21: Single;
+    _21: FLOAT;
     // Vertical scaling / cosine of rotation
-    _22: Single;
+    _22: FLOAT;
 
     // Horizontal shift (always orthogonal regardless of rotation)
-    _31: Single;
+    _31: FLOAT;
     // Vertical shift (always orthogonal regardless of rotation)
-    _32: Single;
+    _32: FLOAT;
+
 
     // Helpers
-
-    class function Init(const m11: Single;
-                        const m12: Single;
-                        const m21: Single;
-                        const m22: Single;
-                        const dx: Single;
-                        const dy: Single): D2D_MATRIX_3X2_F; static;
+    // =========================================================================
+    class function Init(const m11: FLOAT;
+                        const m12: FLOAT;
+                        const m21: FLOAT;
+                        const m22: FLOAT;
+                        const dx: FLOAT;
+                        const dy: FLOAT): D2D_MATRIX_3X2_F; static;
 
     class operator Multiply(const left: D2D_MATRIX_3X2_F;
                             const right: D2D_MATRIX_3X2_F): D2D_MATRIX_3X2_F;
@@ -314,16 +326,13 @@ type
                               const mrx2: D2D_MATRIX_3X2_F): D2D_MATRIX_3X2_F; static;
 
 {$IF CompilerVersion < 23}  // < XE3
+
     // Record helpers were introduced in Delphi XE3.
     // To keep the code usable for earlier Delphi versions and preventing circular reference errors,
     // we added the helper methods here from MfPack.D2D1Helper.pas
 
-
     class operator Equal(const matrix1: D2D_MATRIX_3X2_F;
                          const matrix2: D2D_MATRIX_3X2_F): Boolean;
-
-
-
 
     class function Identity(): D2D_MATRIX_3X2_F; static;
 
@@ -332,7 +341,7 @@ type
     class function ReinterpretBaseType(const pMatrix: PD2D_MATRIX_3X2_F): D2D_MATRIX_3X2_F; overload; static;
     class function ReinterpretBaseType(const pMatrix: D2D_MATRIX_3X2_F): PD2D_MATRIX_3X2_F; overload; static;
 
-    function Determinant(): Single;
+    function Determinant(): FLOAT;
 
     function IsIdentity(): Boolean;
 
@@ -344,85 +353,137 @@ type
   end;
   {$EXTERNALSYM D2D_MATRIX_3X2_F}
 
+{$ENDIF}
 
+
+  // Delphi < XE3
+
+{$IFDEF USE_D2D_MATRIX_3X2_F_VERSION1}
+
+  {DUMMYSTRUCTNAME}
+  D2D_MATRIX_3X2_F_Struct1 = record
+    m11: FLOAT;
+    m12: FLOAT;
+    m21: FLOAT;
+    m22: FLOAT;
+    dx:  FLOAT;
+    dy:  FLOAT;
+  end;
+
+  {DUMMYSTRUCTNAME2}
+  D2D_MATRIX_3X2_F_Struct2 = record
+    _11: FLOAT;
+    _12: FLOAT;
+    _21: FLOAT;
+    _22: FLOAT;
+    _31: FLOAT;
+    _32: FLOAT;
+  end;
+
+  PD2D_MATRIX_3X2_F = ^D2D_MATRIX_3X2_F;
+  D2D_MATRIX_3X2_F = record
+  case Integer of
+    0: (struct1: D2D_MATRIX_3X2_F_Struct1);
+    1: (struct2: D2D_MATRIX_3X2_F_Struct2);
+    2: (m: array [0..2, 0..1] of FLOAT);
+  end;
+  {$EXTERNALSYM D2D_MATRIX_3X2_F}
+
+{$ENDIF}
+
+
+  // D2D_MATRIX_4X3_F
+  D2D_MATRIX_4X3_F_Struct = record
+    _11: FLOAT;
+    _12: FLOAT;
+    _13: FLOAT;
+
+    _21: FLOAT;
+    _22: FLOAT;
+    _23: FLOAT;
+
+    _31: FLOAT;
+    _32: FLOAT;
+    _33: FLOAT;
+
+    _41: FLOAT;
+    _42: FLOAT;
+    _43: FLOAT;
+  end;
 
   // Represents a 4-by-3 matrix.
   PD2D_MATRIX_4X3_F = ^D2D_MATRIX_4X3_F;
-  D2D_MATRIX_4X3_F = Object //record
-    _11: Single;
-    _12: Single;
-    _13: Single;
-
-    _21: Single;
-    _22: Single;
-    _23: Single;
-
-    _31: Single;
-    _32: Single;
-    _33: Single;
-
-    _41: Single;
-    _42: Single;
-    _43: Single;
+  D2D_MATRIX_4X3_F = record
+    case Integer of
+      0: ({DUMMYSTRUCTNAME} struct: D2D_MATRIX_4X3_F_Struct);
+      1: (m: array [0..3, 0..2] of FLOAT);
   end;
   {$EXTERNALSYM D2D_MATRIX_4X3_F}
 
 
+  // PD2D_MATRIX_4X4_F
+  D2D_MATRIX_4X4_F_Struct = record
+    _11: FLOAT;
+    _12: FLOAT;
+    _13: FLOAT;
+    _14: FLOAT;
+    _21: FLOAT;
+    _22: FLOAT;
+    _23: FLOAT;
+    _24: FLOAT;
+    _31: FLOAT;
+    _32: FLOAT;
+    _33: FLOAT;
+    _34: FLOAT;
+    _41: FLOAT;
+    _42: FLOAT;
+    _43: FLOAT;
+    _44: FLOAT;
+  end;
+
   // Represents a 4-by-4 matrix.
   PD2D_MATRIX_4X4_F = ^D2D_MATRIX_4X4_F;
-  D2D_MATRIX_4X4_F = Object //record
-    _11: Single;
-    _12: Single;
-    _13: Single;
-    _14: Single;
-
-    _21: Single;
-    _22: Single;
-    _23: Single;
-    _24: Single;
-
-    _31: Single;
-    _32: Single;
-    _33: Single;
-    _34: Single;
-
-    _41: Single;
-    _42: Single;
-    _43: Single;
-    _44: Single;
+  D2D_MATRIX_4X4_F = record
+    case Integer of
+      0: ({DUMMYSTRUCTNAME} struct: D2D_MATRIX_4X4_F_Struct);
+      1: (m: array [0..3, 0..3] of FLOAT);
   end;
   {$EXTERNALSYM D2D_MATRIX_4X4_F}
 
 
+  // D2D_MATRIX_5X4_F
+  D2D_MATRIX_5X4_F_Struct = record
+    _11: FLOAT;
+    _12: FLOAT;
+    _13: FLOAT;
+    _14: FLOAT;
+    _21: FLOAT;
+    _22: FLOAT;
+    _23: FLOAT;
+    _24: FLOAT;
+    _31: FLOAT;
+    _32: FLOAT;
+    _33: FLOAT;
+    _34: FLOAT;
+    _41: FLOAT;
+    _42: FLOAT;
+    _43: FLOAT;
+    _44: FLOAT;
+    _51: FLOAT;
+    _52: FLOAT;
+    _53: FLOAT;
+    _54: FLOAT;
+  end;
+
   // Represents a 5-by-4 matrix.
   PD2D_MATRIX_5X4_F = ^D2D_MATRIX_5X4_F;
-  D2D_MATRIX_5X4_F = Object //record
-    _11: Single;
-    _12: Single;
-    _13: Single;
-    _14: Single;
-
-    _21: Single;
-    _22: Single;
-    _23: Single;
-    _24: Single;
-
-    _31: Single;
-    _32: Single;
-    _33: Single;
-    _34: Single;
-
-    _41: Single;
-    _42: Single;
-    _43: Single;
-    _44: Single;
-
-    _51: Single;
-    _52: Single;
-    _53: Single;
-    _54: Single;
+  D2D_MATRIX_5X4_F = record
+  case Integer of
+    0: ({DUMMYSTRUCTNAME} struct: D2D_MATRIX_5X4_F_Struct);
+    1: (m: array [0..4, 0..3] of FLOAT);
   end;
   {$EXTERNALSYM D2D_MATRIX_5X4_F}
+
 
 
   PD2D1_POINT_2F = ^D2D1_POINT_2F;
@@ -470,8 +531,8 @@ type
 
   // Additional Prototypes for ALL interfaces
 
-  function D2SizeF(width: Single;
-                   height: Single): D2D_SIZE_F;
+  function D2SizeF(width: FLOAT;
+                   height: FLOAT): D2D_SIZE_F;
   {$EXTERNALSYM D2SizeF}
 
   function D2SizeU(width: UINT32;
@@ -483,8 +544,8 @@ type
 implementation
 
 
-function D2SizeF(width: Single;
-                 height: Single): D2D_SIZE_F;
+function D2SizeF(width: FLOAT;
+                 height: FLOAT): D2D_SIZE_F;
 begin
   Result.width := width;
   Result.height := height;
@@ -532,13 +593,13 @@ end;
 
 
 // D2D_MATRIX_3X2_F
-
-class function D2D_MATRIX_3X2_F.Init(const m11: Single;
-                                     const m12: Single;
-                                     const m21: Single;
-                                     const m22: Single;
-                                     const dx: Single;
-                                     const dy: Single): D2D1_MATRIX_3X2_F;
+{$IFDEF USE_D2D_MATRIX_3X2_F_VERSION2}
+class function D2D_MATRIX_3X2_F.Init(const m11: FLOAT;
+                                     const m12: FLOAT;
+                                     const m21: FLOAT;
+                                     const m22: FLOAT;
+                                     const dx: FLOAT;
+                                     const dy: FLOAT): D2D1_MATRIX_3X2_F;
 begin
   Result._11 := m11;
   Result._12 := m12;
@@ -620,7 +681,7 @@ begin
 end;
 
 
-function D2D_MATRIX_3X2_F.Determinant(): Single;
+function D2D_MATRIX_3X2_F.Determinant(): FLOAT;
 begin
   Result := (_11 * _21) - (_12 * _21);
 end;
@@ -650,6 +711,7 @@ begin
   Result := (size1.width = size2.width) AND (size1.height = size2.height);
 end;
 
+{$ENDIF}
 {$ENDIF} // end
 
   // Implement Additional functions here.
