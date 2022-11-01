@@ -116,8 +116,17 @@ type
   MFT_INPUT_DATA_BUFFER_FLAGS = _MFT_INPUT_DATA_BUFFER_FLAGS;
   {$EXTERNALSYM MFT_INPUT_DATA_BUFFER_FLAGS}
 const
-  MFT_INPUT_DATA_BUFFER_PLACEHOLDER	= MAXDW;  // Reserved. Do not use.
+  //
+  // Not carried over from DMO (IMediaObject), but should be
+  // reserved so no new MFT flag clashes with them:
+  //
+  // DMO_INPUT_DATA_BUFFER_SYNCPOINT       = $00000001,
+  // DMO_INPUT_DATA_BUFFER_TIME            = $00000002,
+  // DMO_INPUT_DATA_BUFFER_TIMELENGTH      = $00000004
+  MFT_INPUT_DATA_BUFFER_PLACEHOLDER	= MAXDW;  // right now there are no flags defined
 
+
+// Per-buffer flags that apply to output buffers.
 type
   PMFT_OUTPUT_DATA_BUFFER_FLAGS = ^MFT_OUTPUT_DATA_BUFFER_FLAGS;
   _MFT_OUTPUT_DATA_BUFFER_FLAGS = DWord;
@@ -125,8 +134,23 @@ type
   MFT_OUTPUT_DATA_BUFFER_FLAGS = _MFT_OUTPUT_DATA_BUFFER_FLAGS;
   {$EXTERNALSYM MFT_OUTPUT_DATA_BUFFER_FLAGS}
 const
+  //
+  // Not carried over from DMO (IMediaObject), but should be
+  // reserved so no new MFT flag clashes with them:
+  //
+  // DMO_OUTPUT_DATA_BUFFER_SYNCPOINT        = $00000001,
+  // DMO_OUTPUT_DATA_BUFFER_TIME             = $00000002,
+  // DMO_OUTPUT_DATA_BUFFER_TIMELENGTH       = $00000004,
+
+  //
+  // This flag means the object can produce more samples without any more input.
+  //
   MFT_OUTPUT_DATA_BUFFER_INCOMPLETE	= MFT_OUTPUT_DATA_BUFFER_FLAGS($1000000);
   {$EXTERNALSYM MFT_OUTPUT_DATA_BUFFER_INCOMPLETE}
+
+  //
+  // New for MFT
+  //
   MFT_OUTPUT_DATA_BUFFER_FORMAT_CHANGE	= MFT_OUTPUT_DATA_BUFFER_FLAGS($100);
   {$EXTERNALSYM MFT_OUTPUT_DATA_BUFFER_FORMAT_CHANGE}
   MFT_OUTPUT_DATA_BUFFER_STREAM_END	= MFT_OUTPUT_DATA_BUFFER_FLAGS($200);
@@ -135,14 +159,22 @@ const
   {$EXTERNALSYM MFT_OUTPUT_DATA_BUFFER_NO_SAMPLE}
 
 
+// Flags returned by GetInputStatusFlags()
 type
-  // Flags returned by GetInputStatusFlags()
   PMFT_INPUT_STATUS_FLAGS = ^MFT_INPUT_STATUS_FLAGS;
   _MFT_INPUT_STATUS_FLAGS = DWord;
   {$EXTERNALSYM _MFT_INPUT_STATUS_FLAGS}
   MFT_INPUT_STATUS_FLAGS = _MFT_INPUT_STATUS_FLAGS;
   {$EXTERNALSYM MFT_INPUT_STATUS_FLAGS}
 const
+  //
+  // Carried over from DMO (IMediaObject)
+  //
+
+  //
+  // ACCEPT_DATA indicates that the input stream is ready to accept
+  // new data via ProcessInput().
+  //
   MFT_INPUT_STATUS_ACCEPT_DATA = MFT_INPUT_STATUS_FLAGS($1);
     {$EXTERNALSYM MFT_INPUT_STATUS_ACCEPT_DATA}
 
@@ -156,14 +188,18 @@ const
   MFT_OUTPUT_STATUS_SAMPLE_READY	= MFT_OUTPUT_STATUS_FLAGS($1);
   {$EXTERNALSYM MFT_OUTPUT_STATUS_SAMPLE_READY}
 
+
+// Flags returned by GetInputStreamInfo()
 type
-  // Flags returned by GetInputStreamInfo()
   PMFT_INPUT_STREAM_INFO_FLAGS = ^MFT_INPUT_STREAM_INFO_FLAGS;
   _MFT_INPUT_STREAM_INFO_FLAGS = DWord;
   {$EXTERNALSYM _MFT_INPUT_STREAM_INFO_FLAGS}
   MFT_INPUT_STREAM_INFO_FLAGS = _MFT_INPUT_STREAM_INFO_FLAGS;
   {$EXTERNALSYM MFT_INPUT_STREAM_INFO_FLAGS}
 const
+  //
+  // Carried over from DMO (IMediaObject)
+  //
   MFT_INPUT_STREAM_WHOLE_SAMPLES	          = MFT_INPUT_STREAM_INFO_FLAGS($1);
   {$EXTERNALSYM MFT_INPUT_STREAM_WHOLE_SAMPLES}
   MFT_INPUT_STREAM_SINGLE_SAMPLE_PER_BUFFER	= MFT_INPUT_STREAM_INFO_FLAGS($2);
@@ -172,6 +208,10 @@ const
   {$EXTERNALSYM MFT_INPUT_STREAM_FIXED_SAMPLE_SIZE}
   MFT_INPUT_STREAM_HOLDS_BUFFERS	          = MFT_INPUT_STREAM_INFO_FLAGS($8);
   {$EXTERNALSYM MFT_INPUT_STREAM_HOLDS_BUFFERS}
+
+  //
+  // New for MFT
+  //
   MFT_INPUT_STREAM_DOES_NOT_ADDREF	        = MFT_INPUT_STREAM_INFO_FLAGS($100);
   {$EXTERNALSYM MFT_INPUT_STREAM_DOES_NOT_ADDREF}
   MFT_INPUT_STREAM_REMOVABLE	              = MFT_INPUT_STREAM_INFO_FLAGS($200);
@@ -181,8 +221,9 @@ const
   MFT_INPUT_STREAM_PROCESSES_IN_PLACE	      = MFT_INPUT_STREAM_INFO_FLAGS($800);
   {$EXTERNALSYM MFT_INPUT_STREAM_PROCESSES_IN_PLACE}
 
+
+// Flags returned by GetOutputStreamInfo()
 type
-  // Flags returned by GetOutputStreamInfo()
   PMFT_OUTPUT_STREAM_INFO_FLAGS = ^MFT_OUTPUT_STREAM_INFO_FLAGS;
   _MFT_OUTPUT_STREAM_INFO_FLAGS = DWord;
   {$EXTERNALSYM _MFT_OUTPUT_STREAM_INFO_FLAGS}
@@ -202,6 +243,10 @@ const
   {$EXTERNALSYM MFT_OUTPUT_STREAM_DISCARDABLE}
   MFT_OUTPUT_STREAM_OPTIONAL	                = MFT_OUTPUT_STREAM_INFO_FLAGS($10);
   {$EXTERNALSYM MFT_OUTPUT_STREAM_OPTIONAL}
+
+  //
+  // New for MFT
+  //
   MFT_OUTPUT_STREAM_PROVIDES_SAMPLES	        = MFT_OUTPUT_STREAM_INFO_FLAGS($100);
   {$EXTERNALSYM MFT_OUTPUT_STREAM_PROVIDES_SAMPLES}
   MFT_OUTPUT_STREAM_CAN_PROVIDE_SAMPLES	      = MFT_OUTPUT_STREAM_INFO_FLAGS($200);
@@ -211,8 +256,9 @@ const
   MFT_OUTPUT_STREAM_REMOVABLE	                = MFT_OUTPUT_STREAM_INFO_FLAGS($800);
   {$EXTERNALSYM MFT_OUTPUT_STREAM_REMOVABLE}
 
+
+// SetType flags
 type
-  // SetType flags
   PMFT_SET_TYPE_FLAGS = ^MFT_SET_TYPE_FLAGS;
   _MFT_SET_TYPE_FLAGS = DWord;
   {$EXTERNALSYM _MFT_SET_TYPE_FLAGS}
@@ -230,16 +276,21 @@ const
   MFT_SET_TYPE_CLEAR      = MFT_SET_TYPE_FLAGS($00000002); // unset
 
 
+// ProcessOutput() dwFlags (signals from caller to MFT)
 type
-  // ProcessOutput() dwFlags (signals from caller to MFT)
   PMFT_PROCESS_OUTPUT_FLAGS = ^MFT_PROCESS_OUTPUT_FLAGS;
   _MFT_PROCESS_OUTPUT_FLAGS = DWord;
   {$EXTERNALSYM _MFT_PROCESS_OUTPUT_FLAGS}
   MFT_PROCESS_OUTPUT_FLAGS = _MFT_PROCESS_OUTPUT_FLAGS;
   {$EXTERNALSYM MFT_PROCESS_OUTPUT_FLAGS}
 const
+  //
+  // Carried over from DMO (IMediaObject)
+  //
   MFT_PROCESS_OUTPUT_DISCARD_WHEN_NO_BUFFER	= MFT_PROCESS_OUTPUT_FLAGS($1); // discard this sample if pSample ptr is Nil.
   {$EXTERNALSYM MFT_PROCESS_OUTPUT_DISCARD_WHEN_NO_BUFFER}
+
+  // New flags for MFTs
   MFT_PROCESS_OUTPUT_REGENERATE_LAST_OUTPUT = MFT_PROCESS_OUTPUT_FLAGS($2); // New flags for MFTs
   {$EXTERNALSYM MFT_PROCESS_OUTPUT_REGENERATE_LAST_OUTPUT}
 
@@ -268,11 +319,10 @@ type
 
 
 const
-
-  MFT_STREAMS_UNLIMITED               = $7FFFFFFF;
-  {$EXTERNALSYM MFT_STREAMS_UNLIMITED}
   // used by GetStreamLimits - the transform returns it in ^pdwInputMaximum or ^pdwOutputMaximum
   // to mean that the MFT has no theoretical stream limit.
+  MFT_STREAMS_UNLIMITED               = $7FFFFFFF;
+  {$EXTERNALSYM MFT_STREAMS_UNLIMITED}
   MFT_OUTPUT_BOUND_LOWER_UNBOUNDED    = MINLONGLONG;
   {$EXTERNALSYM MFT_OUTPUT_BOUND_LOWER_UNBOUNDED}
   // Used by SetOutputBounds when the lower or upper limit are unbounded.
@@ -369,15 +419,26 @@ type
   {$EXTERNALSYM STREAM_MEDIUM}
 
 
+  //
+  // To be implemented if Devicesource needs to load device MFT, which is the
+  // first component to process the samples from the source.It can also be used
+  // to snoop on property commands flowing through the pipeline just before they
+  // are sent to the source.
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  // Internal MF Interface to get/set media type from/to device directly
+  //
+  //////////////////////////////////////////////////////////////////////////////
   PDeviceStreamState = ^DeviceStreamState;
   _DeviceStreamState           = (
     DeviceStreamState_Stop     = 0,
     {$EXTERNALSYM DeviceStreamState_Stop}
-    DeviceStreamState_Pause    = (DeviceStreamState_Stop  + 1),
+    DeviceStreamState_Pause    = (DeviceStreamState_Stop + 1),
     {$EXTERNALSYM DeviceStreamState_Pause}
-    DeviceStreamState_Run      = (DeviceStreamState_Pause  + 1),
+    DeviceStreamState_Run      = (DeviceStreamState_Pause + 1),
     {$EXTERNALSYM DeviceStreamState_Run}
-    DeviceStreamState_Disabled = (DeviceStreamState_Run  + 1)
+    DeviceStreamState_Disabled = (DeviceStreamState_Run + 1)
   );
     {$EXTERNALSYM DeviceStreamState_Disabled}
   {$EXTERNALSYM _DeviceStreamState}
@@ -385,7 +446,7 @@ type
   {$EXTERNALSYM DeviceStreamState}
 
 
-  // redefine all the method names to have MFT at the beginning so they don't class with DMO methods.
+  // Redefine all the method names to have MFT at the beginning so they don't class with DMO methods.
 {$ifdef MFT_UNIQUE_METHOD_NAMES}
   GetStreamLimits                     = MFTGetStreamLimits;
   {$EXTERNALSYM GetStreamLimits}
@@ -439,6 +500,10 @@ type
   IMFTransform = interface(IUnknown)
     ['{bf94c121-5b05-4e6f-8000-ba598961414d}']
 
+    //
+    // Stream enumeration
+    //
+
     function GetStreamLimits(out pdwInputMinimum: DWORD;
                              out pdwInputMaximum: DWORD;
                              out pdwOutputMinimum: DWORD;
@@ -471,13 +536,24 @@ type
     function AddInputStreams(cStreams: DWORD;
                              adwStreamIDs: PDWORD): HResult; stdcall;
 
+    //
+    // Mediatypes
+    //
+
+    //
+    // GetxxxAvailableType - iterate through media types supported by a stream.
+    //
     function GetInputAvailableType(dwInputStreamID: DWORD;
-                                   dwTypeIndex: DWORD;
+                                   dwTypeIndex: DWORD; // 0-based
                                    out ppType: IMFMediaType): HResult; stdcall;
 
     function GetOutputAvailableType(dwOutputStreamID: DWORD;
-                                    dwTypeIndex: DWORD;
-                                    var ppType: IMFMediaType): HResult; stdcall;
+                                    dwTypeIndex: DWORD; // 0-based
+                                    out ppType: IMFMediaType): HResult; stdcall;
+
+    //
+    // SetxxxType - tell the object the type of data it will work with.
+    //
 
     function SetInputType(dwInputStreamID: DWORD;
                           pType: IMFMediaType;
@@ -487,33 +563,59 @@ type
                            pType: IMFMediaType;
                            dwFlags: DWORD): HResult; stdcall;
 
+    //
+    // GetxxxCurrentType - get the current type set for the given stream index.
+    //
+
     function GetInputCurrentType(dwInputStreamID: DWORD;
                                  out ppType: IMFMediaType): HResult; stdcall;
 
     function GetOutputCurrentType(dwOutputStreamID: DWORD;
                                   out ppType: IMFMediaType): HResult; stdcall;
 
-    function GetInputStatus(dwInputStreamID: DWORD;
-                            out pdwFlags: DWORD): HResult; stdcall;
+    //
+    // Streaming / state methods
+    //
 
+    // GetInputStatus - the only flag defined right now is MFT_INPUT_STATUS_ACCEPT_DATA.
+    function GetInputStatus(dwInputStreamID: DWORD;
+                            out pdwFlags: DWORD {MFT_INPUT_STATUS_ACCEPT_DATA}): HResult; stdcall;
+
+    // GetOutputStatus - the only flag defined right now is MFT_OUTPUT_STATUS_SAMPLE_READY.
     function GetOutputStatus(out pdwFlags: DWORD): HResult; stdcall;
 
+    //
+    // SetOutputBounds - optional interface to tell transform the desired
+    // range of output times desired. Implementation is optional.
+    //
     function SetOutputBounds(hnsLowerBound: LONGLONG;
                              hnsUpperBound: LONGLONG): HResult; stdcall;
 
     function ProcessEvent(dwInputStreamID: DWORD;
                           pEvent: IMFMediaEvent): HResult; stdcall;
 
+    //
+    // ProcessMessage - used to send a notification or command to a transform
+    //
     function ProcessMessage(eMessage: MFT_MESSAGE_TYPE;
                             ulParam: ULONG_PTR): HResult; stdcall;
 
+    //
+    // Pass one new buffer to an input stream
+    //
     function ProcessInput(const dwInputStreamID: DWORD;
                           const pSample: IMFSample;
                           dwFlags: DWORD = 0): HResult; stdcall;
 
-    function ProcessOutput(dwFlags: DWORD;
-                           cOutputBufferCount: DWORD;
-                           pOutputSamples: PMFT_OUTPUT_DATA_BUFFER;
+    //
+    // ProcessOutput() - generate output for current input buffers
+    //
+    // Output stream specific status information is returned in the
+    // dwStatus member of each buffer wrapper structure.
+    //
+    function ProcessOutput(dwFlags: DWORD; // MFT_PROCESS_OUTPUT_FLAGS
+                           cOutputBufferCount: DWORD; // # returned by GetStreamCount()
+                           pOutputSamples: PMFT_OUTPUT_DATA_BUFFER;  // one per stream
                            out pdwStatus: DWORD): HResult; stdcall;
 
   end;
@@ -628,6 +730,11 @@ type
 
 const
 
+  // MEDeviceStreamCreated
+  // Type: UINT32
+  // {0252a1cf-3540-43b4-9164-d72eb405fa40}
+  //
+  // Custom event to indicate device stream has been created
   MEDeviceStreamCreated : TGUID = '{0252a1cf-3540-43b4-9164-d72eb405fa40}';
   {$EXTERNALSYM MEDeviceStreamCreated}
 
@@ -642,6 +749,7 @@ const
                                                             pid: $01);
   {$EXTERNALSYM MFPKEY_CLSID}
 
+  // ExAttribute-supported MFTs
   MFPKEY_CATEGORY                  : PROPERTYKEY = (fmtid: (D1: $c57a84c0;
                                                             D2: $1a80;
                                                             D3: $40a3;
@@ -656,6 +764,7 @@ const
                                                             pid: $01);
   {$EXTERNALSYM MFPKEY_EXATTRIBUTE_SUPPORTED}
 
+  // Audio Multichannel
   MFPKEY_MULTICHANNEL_CHANNEL_MASK : PROPERTYKEY = (fmtid: (D1: $58bdaf8c;
                                                             D2: $3224;
                                                             D3: $4692;
@@ -664,12 +773,25 @@ const
   {$EXTERNALSYM MFPKEY_MULTICHANNEL_CHANNEL_MASK}
 
 
+  //////////////////////////////////////////////////////////////////////////////
+  // GENERIC MFT ATTRIBUTES
+
+  // MF_SA_D3D_AWARE
+  // Data type: UINT32
+  // If present and set to a nonzero value, indicates that this transform is
+  // D3D-aware and can accept a D3D manager via the MFT_MESSAGE_SET_D3D_MANAGER
+  // message.
   MF_SA_D3D_AWARE              : TGUID =  (D1: $eaa35c29;
                                            D2: $775e;
                                            D3: $488e;
                                            D4: ($9b, $61, $b3, $28, $3e, $49, $58, $3b));
   {$EXTERNALSYM MF_SA_D3D_AWARE}
 
+  // MF_SA_REQUIRED_SAMPLE_COUNT
+  // Data type: UINT32
+  // If present, indicates the number of samples that an MFT requires to be
+  // allocated.  This value is used if the next node downstream has an
+  // IMFVideoSampleAllocator.
   MF_SA_REQUIRED_SAMPLE_COUNT  : TGUID =  (D1: $18802c61;
                                            D2: $324b;
                                            D3: $4952;
@@ -682,23 +804,44 @@ const
                                            D4: ($b0, $64, $39, $9d, $c6, $11, $f, $29));
   {$EXTERNALSYM MFT_END_STREAMING_AWARE}
 
+
+  // #if (NTDDI_VERSION >= NTDDI_WIN10_RS2)
+
+  // MF_SA_AUDIO_ENDPOINT_AWARE  {C0381701-805C-42B2-AC8D-E2B4BF21F4F8}
+  // Data type: BOOL
+  // If present and set to a nonzero value, indicates that this decoder
+  // transform is audio endpoint device-aware and can accept the audio
+  // endpoint ID via the MFT_AUDIO_DECODER_AUDIO_ENDPOINT_ID attribute.
   MF_SA_AUDIO_ENDPOINT_AWARE   : TGUID =  (D1: $c0381701;
                                            D2: $805c;
                                            D3: $42b2;
                                            D4: ($ac, $8d, $e2, $b4, $bf, $21, $f4, $f8));
   {$EXTERNALSYM MF_SA_AUDIO_ENDPOINT_AWARE}
 
+  // MFT_AUDIO_DECODER_AUDIO_ENDPOINT_ID  {C7CCDD6E-5398-4695-8BE7-51B3E95111BD}
+  // Data type: LPCWSTR
+  // If set on the transform to a nonzero value, indicates that the data from
+  // this audio decoder transform will be rendered on the audio endpoint
+  // device specified by the null-terminated wide-character string.
   MFT_AUDIO_DECODER_AUDIO_ENDPOINT_ID        : TGUID =  (D1: $c7ccdd6e;
                                                          D2: $5398;
                                                          D3: $4695;
                                                          D4: ($8b, $e7, $51, $b3, $e9, $51, $11, $bd));
   {$EXTERNALSYM MFT_AUDIO_DECODER_AUDIO_ENDPOINT_ID}
 
+  // MFT_AUDIO_DECODER_SPATIAL_METADATA_CLIENT  {05987DF4-1270-4999-925F-8E939A7C0AF7}
+  // Data type: IUnknown pointer
+  // If present and set to a nonzero value, indicates that this audio decoder
+  // will expect metadata items collections to be activated using the specified
+  // audio metadata client, specified by the ISpatialAudioMetadataClient interface.
   MFT_AUDIO_DECODER_SPATIAL_METADATA_CLIENT  : TGUID =  (D1: $5987df4;
                                                          D2: $1270;
                                                          D3: $4999;
                                                          D4: ($92, $5f, $8e, $93, $9a, $7c, $0a, $f7));
   {$EXTERNALSYM MFT_AUDIO_DECODER_SPATIAL_METADATA_CLIENT}
+
+// #endif //(NTDDI_VERSION >= NTDDI_WIN10_RS2)
+
 
 
   // MF_SA_REQUIRED_SAMPLE_COUNT_PROGRESSIVE

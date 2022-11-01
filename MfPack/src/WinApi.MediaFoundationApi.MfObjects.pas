@@ -102,6 +102,21 @@ const
 
   // Interface IMFMediaType
 
+  //
+  // IsEqual flags
+  //
+
+  // For audio
+  // Major type match = both are audio
+  // Subtype match = format types match = iscompressed for both matches
+  // Format_data match = format blocks match exactly
+
+  // For video
+  // Major type match = both are video
+  // Sub type match = bit format for both are the same
+  // Format type match = both of them have format blocks
+  // Format_data match = both format blocks match exactly
+
   MF_MEDIATYPE_EQUAL_MAJOR_TYPES      = $00000001;
   {$EXTERNALSYM MF_MEDIATYPE_EQUAL_MAJOR_TYPES}
   MF_MEDIATYPE_EQUAL_FORMAT_TYPES     = $00000002;
@@ -1330,6 +1345,64 @@ type
   {$EXTERNALSYM IID_IMF2DBuffer}
 
 
+  PMF2DBufferLockFlags = ^MF2DBuffer_LockFlags;
+  _MF2DBuffer_LockFlags               = (
+    MF2DBuffer_LockFlags_LockTypeMask = $1 or $2 or $3,
+    MF2DBuffer_LockFlags_Read         = $1,
+    MF2DBuffer_LockFlags_Write        = $2,
+    MF2DBuffer_LockFlags_ReadWrite    = $3,
+    MF2DBuffer_LockFlags_ForceDWORD   = $7FFFFFFF
+  );
+  {$EXTERNALSYM _MF2DBuffer_LockFlags}
+  MF2DBuffer_LockFlags = _MF2DBuffer_LockFlags;
+  {$EXTERNALSYM MF2DBuffer_LockFlags}
+
+
+  // Interface IMF2DBuffer2
+  // =======================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMF2DBuffer2);'}
+  {$EXTERNALSYM IMF2DBuffer2}
+  IMF2DBuffer2 = interface(IMF2DBuffer)
+    ['{33ae5ea6-4316-436f-8ddd-d73d22f829ec}']
+
+    function Lock2DSize(lockFlags: MF2DBuffer_LockFlags;
+                        out ppbScanline0: PByte;
+                        out plPitch: LONG;
+                        out ppbBufferStart: PByte;
+                        out pcbBufferLength: DWORD): HRESULT; stdcall;
+
+    function Copy2DTo(pDestBuffer: IMF2DBuffer2): HRESULT; stdcall;
+
+  end;
+  IID_IMF2DBuffer2 = IMF2DBuffer2;
+  {$EXTERNALSYM IID_IMF2DBuffer2}
+
+
+  // Interface IMFDXGIBuffer
+  // ========================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFDXGIBuffer);'}
+  {$EXTERNALSYM IMFDXGIBuffer}
+  IMFDXGIBuffer = interface(IUnknown)
+    ['{e7174cfa-1c9e-48b1-8866-626226bfc258}']
+
+    function GetResource(const riid: REFIID;
+                         out ppvObject: Pointer): HRESULT; stdcall;
+
+    function GetSubresourceIndex(out puSubresource: UINT): HRESULT; stdcall;
+
+    function GetUnknown(const guid: REFIID;
+                        const riid: REFIID;
+                        out ppvObject: PPointer): HRESULT; stdcall;
+
+    function SetUnknown(const guid: REFIID;
+                        pUnkData: IUnknown): HRESULT; stdcall;
+  end;
+  IID_IMFDXGIBuffer = IMFDXGIBuffer;
+  {$EXTERNALSYM IID_IMFDXGIBuffer}
+
+
   // Interface IMFMediaType
   // ======================
   // Represents a description of a media format.
@@ -1368,7 +1441,13 @@ type
   {$EXTERNALSYM IMFAudioMediaType}
   IMFAudioMediaType = interface(IMFMediaType)
   ['{26a0adc3-ce26-4672-9304-69552edd3faf}']
-
+    //
+    // This method has been deprecated, and its use should be avoided.
+    // There are no guarantees about how long the memory pointed to by the
+    // return value will be valid.
+    // Applications are advised to use MFCreateWaveFormatExFromMFMediaType()
+    // instead.
+    //
     function GetAudioFormat(): PWAVEFORMATEX; stdcall;
 
   end;
