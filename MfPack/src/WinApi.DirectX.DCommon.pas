@@ -381,7 +381,8 @@ type
 
 
   // D2D_MATRIX_4X3_F
-  D2D_MATRIX_4X3_F_Struct = record
+  D2D_MATRIX_4X3_F_Struct = Object //record
+  public
     _11: FLOAT;
     _12: FLOAT;
     _13: FLOAT;
@@ -410,7 +411,8 @@ type
 
 
   // PD2D_MATRIX_4X4_F
-  D2D_MATRIX_4X4_F_Struct = record
+  D2D_MATRIX_4X4_F_Struct = Object //record
+  public
     _11: FLOAT;
     _12: FLOAT;
     _13: FLOAT;
@@ -432,6 +434,7 @@ type
   // Represents a 4-by-4 matrix.
   PD2D_MATRIX_4X4_F = ^D2D_MATRIX_4X4_F;
   D2D_MATRIX_4X4_F = record
+  public
     case Integer of
       0: ({DUMMYSTRUCTNAME} struct: D2D_MATRIX_4X4_F_Struct);
       1: (m: array [0..3, 0..3] of FLOAT);
@@ -440,7 +443,7 @@ type
 
 
   // D2D_MATRIX_5X4_F
-  D2D_MATRIX_5X4_F_Struct = record
+  D2D_MATRIX_5X4_F_Struct = Object //record
     _11: FLOAT;
     _12: FLOAT;
     _13: FLOAT;
@@ -466,6 +469,7 @@ type
   // Represents a 5-by-4 matrix.
   PD2D_MATRIX_5X4_F = ^D2D_MATRIX_5X4_F;
   D2D_MATRIX_5X4_F = record
+  public
   case Integer of
     0: ({DUMMYSTRUCTNAME} struct: D2D_MATRIX_5X4_F_Struct);
     1: (m: array [0..4, 0..3] of FLOAT);

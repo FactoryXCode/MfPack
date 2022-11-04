@@ -108,8 +108,6 @@ uses
   WinApi.MediaFoundationApi.WMCodecDsp,
   WinApi.MediaFoundationApi.MfError,
   WinApi.MediaFoundationApi.MfCaptureEngine,
-
-
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioPolicy,
   WinApi.CoreAudioApi.MMDeviceApi;

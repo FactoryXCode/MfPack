@@ -85,7 +85,7 @@ type
 
   //Matrix4x3F as D2D1_MATRIX_4X3_F;
   // In Delphi you can't inherid from a record
-  Matrix4x3F = Object(D2D1_MATRIX_4X3_F)
+  Matrix4x3F = Object(D2D_MATRIX_4X3_F_Struct)
 
         constructor Create(m11: Single = 1;
                            m12: Single = 0;
@@ -105,7 +105,7 @@ type
   end;
 
 
-  Matrix4x4F = Object(D2D1_MATRIX_4X4_F)
+  Matrix4x4F = Object(D2D_MATRIX_4X4_F_Struct)
     public
 
         constructor Create(m11: Single = 1;
@@ -176,7 +176,7 @@ type
 
     end;
 
-  Matrix5x4F = Object(D2D1_MATRIX_5X4_F)
+  Matrix5x4F = Object(D2D_MATRIX_5X4_F_Struct)
   public
 
     constructor Create(m11: Single = 1;
