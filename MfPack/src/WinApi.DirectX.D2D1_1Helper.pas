@@ -21,6 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
+// 04/11/2022 Tony                Fixed wrong declarations of some D2D1 matrices.
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 // 20/12/2021 Jim Hawkins         Added system.math in uses clause, removed Single casting.
 //------------------------------------------------------------------------------
@@ -85,124 +86,67 @@ type
 
   //Matrix4x3F as D2D1_MATRIX_4X3_F;
   // In Delphi you can't inherid from a record
-  Matrix4x3F = Object(D2D_MATRIX_4X3_F_Struct)
-
-        constructor Create(m11: Single = 1;
-                           m12: Single = 0;
-                           m13: Single = 0;
-
-                           m21: Single = 0;
-                           m22: Single = 1;
-                           m23: Single = 0;
-
-                           m31: Single = 0;
-                           m32: Single = 0;
-                           m33: Single = 1;
-
-                           m41: Single = 0;
-                           m42: Single = 0;
-                           m43: Single = 0);
+  Matrix4x3F = record helper for D2D_MATRIX_4X3_F
+  public
+    procedure Init();
   end;
 
 
-  Matrix4x4F = Object(D2D_MATRIX_4X4_F_Struct)
-    public
-
-        constructor Create(m11: Single = 1;
-                           m12: Single = 0;
-                           m13: Single = 0;
-                           m14: Single = 0;
-
-                           m21: Single = 0;
-                           m22: Single = 1;
-                           m23: Single = 0;
-                           m24: Single = 0;
-
-                           m31: Single = 0;
-                           m32: Single = 0;
-                           m33: Single = 1;
-                           m34: Single = 0;
-
-                           m41: Single = 0;
-                           m42: Single = 0;
-                           m43: Single = 0;
-                           m44: Single = 1);
-
-        function Translation(x: Single;
-                             y: Single;
-                             z: Single): Matrix4x4F; inline;
-
-        function Scale(x: Single;
-                       y: Single;
-                       z: Single): Matrix4x4F; inline;
-
-        function RotationX(degreeX: Single): Matrix4x4F; inline;
-
-        function RotationY(degreeY: Single): Matrix4x4F; inline;
-
-        function RotationZ(degreeZ: Single): Matrix4x4F; inline;
-
-        //
-        // 3D Rotation matrix for an arbitrary axis specified by x, y and z
-        //
-
-        function RotationArbitraryAxis(x: Single;
-                                       y: Single;
-                                       z: Single;
-                                       degree: Single): Matrix4x4F; inline;
-
-        function SkewX(degreeX: Single): Matrix4x4F; inline;
-
-        function SkewY(degreeY: Single): Matrix4x4F; inline;
-
-        function PerspectiveProjection(depth: Single): Matrix4x4F; inline;
-
-
-        //
-        // Functions for convertion from the base D2D1_MATRIX_4X4_f to
-        // this type without making a copy
-        //
-
-        function ReinterpretBaseType(const pMatrix: D2D1_MATRIX_4X4_F): Matrix4x4F;
-
-        function Determinant(): Single; inline;
-
-        function IsIdentity(): Boolean; inline;
-
-        procedure SetProduct(var a: Matrix4x4F;
-                             var b: Matrix4x4F); inline;
-
-        function product(matrix: Matrix4x4F): Matrix4x4F; inline;
-
-    end;
-
-  Matrix5x4F = Object(D2D_MATRIX_5X4_F_Struct)
+  Matrix4x4F = record helper for D2D_MATRIX_4X4_F
   public
+    procedure Init(); inline;
 
-    constructor Create(m11: Single = 1;
-                       m12: Single = 0;
-                       m13: Single = 0;
-                       m14: Single = 0;
+    function Translation(x: Single;
+                         y: Single;
+                         z: Single): D2D_MATRIX_4X4_F; inline;
 
-                       m21: Single = 0;
-                       m22: Single = 1;
-                       m23: Single = 0;
-                       m24: Single = 0;
+    function Scale(x: Single;
+                       y: Single;
+                       z: Single): D2D_MATRIX_4X4_F; inline;
 
-                       m31: Single = 0;
-                       m32: Single = 0;
-                       m33: Single = 1;
-                       m34: Single = 0;
+    function RotationX(degreeX: Single): D2D_MATRIX_4X4_F; inline;
 
-                       m41: Single = 0;
-                       m42: Single = 0;
-                       m43: Single = 0;
-                       m44: Single = 1;
+    function RotationY(degreeY: Single): D2D_MATRIX_4X4_F; inline;
 
-                       m51: Single = 0;
-                       m52: Single = 0;
-                       m53: Single = 0;
-                       m54: Single = 0);
+    function RotationZ(degreeZ: Single): D2D_MATRIX_4X4_F; inline;
+
+    //
+    // 3D Rotation matrix for an arbitrary axis specified by x, y and z
+    //
+
+    function RotationArbitraryAxis(x: Single;
+                                   y: Single;
+                                   z: Single;
+                                   degree: Single): D2D_MATRIX_4X4_F; inline;
+
+    function SkewX(degreeX: Single): D2D_MATRIX_4X4_F; inline;
+
+    function SkewY(degreeY: Single): D2D_MATRIX_4X4_F; inline;
+
+    function PerspectiveProjection(depth: Single): D2D_MATRIX_4X4_F; inline;
+
+
+    //
+    // Functions for convertion from the base D2D1_MATRIX_4X4_f to
+    // this type without making a copy
+    //
+
+    function ReinterpretBaseType(const pMatrix: D2D1_MATRIX_4X4_F): D2D_MATRIX_4X4_F;
+
+    function Determinant(pUnion: Word): Single; inline;
+
+    function IsIdentity(): Boolean; inline;
+
+    procedure SetProduct(var a: D2D_MATRIX_4X4_F;
+                         var b: D2D_MATRIX_4X4_F); inline;
+
+    function product(matrix: D2D_MATRIX_4X4_F): D2D_MATRIX_4X4_F; inline;
+
+  end;
+
+  Matrix5x4F = record helper for D2D_MATRIX_5X4_F
+  public
+    procedure Init(); inline;
 
   end;
 
@@ -350,152 +294,189 @@ function SetDpiCompensatedEffectInput(deviceContext: ID2D1DeviceContext;
 implementation
 
 
-constructor Matrix4x3F.Create(m11: Single = 1;
-                              m12: Single = 0;
-                              m13: Single = 0;
-
-                              m21: Single = 0;
-                              m22: Single = 1;
-                              m23: Single = 0;
-
-                              m31: Single = 0;
-                              m32: Single = 0;
-                              m33: Single = 1;
-
-                              m41: Single = 0;
-                              m42: Single = 0;
-                              m43: Single = 0);
+procedure Matrix4x3F.Init();
 begin
-  _11 := m11;
-  _12 := m12;
-  _13 := m13;
+  struct._11 := 1;
+  struct._12 := 0;
+  struct._13 := 0;
 
-  _21 := m21;
-  _22 := m22;
-  _23 := m23;
+  struct._21 := 0;
+  struct._22 := 1;
+  struct._23 := 0;
 
-  _31 := m31;
-  _32 := m32;
-  _33 := m33;
+  struct._31 := 0;
+  struct._32 := 0;
+  struct._33 := 1;
 
-  _41 := m41;
-  _42 := m42;
-  _43 := m43;
+  struct._41 := 0;
+  struct._42 := 0;
+  struct._43 := 0;
+
+  m[0,0] := struct._11;
+  m[0,1] := struct._12;
+  m[0,2] := struct._13;
+
+  m[1,0] := struct._21;
+  m[1,1] := struct._22;
+  m[1,2] := struct._23;
+
+  m[2,0] := struct._31;
+  m[2,1] := struct._32;
+  m[2,2] := struct._33;
+
+  m[3,0] := struct._41;
+  m[3,1] := struct._42;
+  m[3,2] := struct._43;
+
 end;
 
 
-constructor Matrix4x4F.Create(m11: Single = 1;
-                              m12: Single = 0;
-                              m13: Single = 0;
-                              m14: Single = 0;
-
-                              m21: Single = 0;
-                              m22: Single = 1;
-                              m23: Single = 0;
-                              m24: Single = 0;
-
-                              m31: Single = 0;
-                              m32: Single = 0;
-                              m33: Single = 1;
-                              m34: Single = 0;
-
-                              m41: Single = 0;
-                              m42: Single = 0;
-                              m43: Single = 0;
-                              m44: Single = 1);
+procedure Matrix4x4f.Init();
 begin
-  inherited;
-  _11 := m11;
-  _12 := m12;
-  _13 := m13;
-  _14 := m14;
+  struct._11 := 1;
+  struct._12 := 0;
+  struct._13 := 0;
+  struct._14 := 0;
 
-  _21 := m21;
-  _22 := m22;
-  _23 := m23;
-  _24 := m24;
+  struct._21 := 0;
+  struct._22 := 1;
+  struct._23 := 0;
+  struct._24 := 0;
 
-  _31 := m31;
-  _32 := m32;
-  _33 := m33;
-  _34 := m34;
+  struct._31 := 0;
+  struct._32 := 0;
+  struct._33 := 1;
+  struct._34 := 0;
 
-  _41 := m41;
-  _42 := m42;
-  _43 := m43;
-  _44 := m44;
+  struct._41 := 0;
+  struct._42 := 0;
+  struct._43 := 0;
+  struct._44 := 1;
+
+  m[0,0] := struct._11;
+  m[0,1] := struct._12;
+  m[0,2] := struct._13;
+  m[0,3] := struct._14;
+
+  m[1,0] := struct._21;
+  m[1,1] := struct._22;
+  m[1,2] := struct._23;
+  m[1,3] := struct._24;
+
+  m[2,0] := struct._31;
+  m[2,1] := struct._32;
+  m[2,2] := struct._33;
+  m[2,3] := struct._34;
+
+  m[3,0] := struct._41;
+  m[3,1] := struct._42;
+  m[3,2] := struct._43;
+  m[3,3] := struct._44;
+
 end;
 
 
 function Matrix4x4f.Translation(x: Single;
                                 y: Single;
-                                z: Single): Matrix4x4F;
-var
-  transl: Matrix4x4F;
-
+                                z: Single): D2D_MATRIX_4X4_F;
 begin
+  struct._11 := 1.0;
+  struct._12 := 0.0;
+  struct._13 := 0.0;
+  struct._14 := 0.0;
 
-  transl._11 := 1.0;
-  transl._12 := 0.0;
-  transl._13 := 0.0;
-  transl._14 := 0.0;
+  struct._21 := 0.0;
+  struct._22 := 1.0;
+  struct._23 := 0.0;
+  struct._24 := 0.0;
 
-  transl._21 := 0.0;
-  transl._22 := 1.0;
-  transl._23 := 0.0;
-  transl._24 := 0.0;
+  struct._31 := 0.0;
+  struct._32 := 0.0;
+  struct._33 := 1.0;
+  struct._34 := 0.0;
 
-  transl._31 := 0.0;
-  transl._32 := 0.0;
-  transl._33 := 1.0;
-  transl._34 := 0.0;
+  struct._41 := x;
+  struct._42 := y;
+  struct._43 := z;
+  struct._44 := 1.0;
 
-  transl._41 := x;
-  transl._42 := y;
-  transl._43 := z;
-  transl._44 := 1.0;
+  m[0,0] := struct._11;
+  m[0,1] := struct._12;
+  m[0,2] := struct._13;
+  m[0,3] := struct._14;
 
-  Result := transl;
+  m[1,0] := struct._21;
+  m[1,1] := struct._22;
+  m[1,2] := struct._23;
+  m[1,3] := struct._24;
+
+  m[2,0] := struct._31;
+  m[2,1] := struct._32;
+  m[2,2] := struct._33;
+  m[2,3] := struct._34;
+
+  m[3,0] := struct._41;
+  m[3,1] := struct._42;
+  m[3,2] := struct._43;
+  m[3,3] := struct._44;
+
+  Result := Self;
 end;
 
 
 function Matrix4x4f.Scale(x: Single;
                          y: Single;
-                         z: Single): Matrix4x4F;
-var
-   scl: Matrix4x4F;
-
+                         z: Single): D2D_MATRIX_4X4_F;
 begin
-   scl._11 := x;
-   scl._12 := 0.0;
-   scl._13 := 0.0;
-   scl._14 := 0.0;
+  struct._11 := x;
+  struct._12 := 0.0;
+  struct._13 := 0.0;
+  struct._14 := 0.0;
 
-   scl._21 := 0.0;
-   scl._22 := y;
-   scl._23 := 0.0;
-   scl._24 := 0.0;
+  struct._21 := 0.0;
+  struct._22 := y;
+  struct._23 := 0.0;
+  struct._24 := 0.0;
 
-   scl._31 := 0.0;
-   scl._32 := 0.0;
-   scl._33 := z;
-   scl._34 := 0.0;
+  struct._31 := 0.0;
+  struct._32 := 0.0;
+  struct._33 := z;
+  struct._34 := 0.0;
 
-   scl._41 := 0.0;
-   scl._42 := 0.0;
-   scl._43 := 0.0;
-   scl._44 := 1.0;
+  struct._41 := 0.0;
+  struct._42 := 0.0;
+  struct._43 := 0.0;
+  struct._44 := 1.0;
 
-   Result := scl;
+  m[0,0] := struct._11;
+  m[0,1] := struct._12;
+  m[0,2] := struct._13;
+  m[0,3] := struct._14;
+
+  m[1,0] := struct._21;
+  m[1,1] := struct._22;
+  m[1,2] := struct._23;
+  m[1,3] := struct._24;
+
+  m[2,0] := struct._31;
+  m[2,1] := struct._32;
+  m[2,2] := struct._33;
+  m[2,3] := struct._34;
+
+  m[3,0] := struct._41;
+  m[3,1] := struct._42;
+  m[3,2] := struct._43;
+  m[3,3] := struct._44;
+
+  Result := Self;
 end;
 
 
-function Matrix4x4f.RotationX(degreeX: Single): Matrix4x4F;
+function Matrix4x4f.RotationX(degreeX: Single): D2D_MATRIX_4X4_F;
 var
   angleInRadian: Single;
   sinAngle: Single;
   cosAngle: Single;
-  MRotationX: Matrix4x4F;
 
 begin
   // angleInRadian := degreeX * (Pi / 180.0);  // same as DegToRad(degreeX)
@@ -507,36 +488,55 @@ begin
              sinAngle,
              cosAngle);
 
-  MRotationX._11 := 1;
-  MRotationX._12 := 0;
-  MRotationX._13 := 0;
-  MRotationX._14 := 0;
+  struct._11 := 1;
+  struct._12 := 0;
+  struct._13 := 0;
+  struct._14 := 0;
 
-  MRotationX._21 := 0;
-  MRotationX._22 := cosAngle;
-  MRotationX._23 := sinAngle;
-  MRotationX._24 := 0;
+  struct._21 := 0;
+  struct._22 := cosAngle;
+  struct._23 := sinAngle;
+  struct._24 := 0;
 
-  MRotationX._31 := 0;
-  MRotationX._32 := -sinAngle;
-  MRotationX._33 := cosAngle;
-  MRotationX._34 := 0;
+  struct._31 := 0;
+  struct._32 := -sinAngle;
+  struct._33 := cosAngle;
+  struct._34 := 0;
 
-  MRotationX._41 := 0;
-  MRotationX._42 := 0;
-  MRotationX._43 := 0;
-  MRotationX._44 := 1;
+  struct._41 := 0;
+  struct._42 := 0;
+  struct._43 := 0;
+  struct._44 := 1;
 
-  Result := MRotationX;
+  m[0,0] := struct._11;
+  m[0,1] := struct._12;
+  m[0,2] := struct._13;
+  m[0,3] := struct._14;
+
+  m[1,0] := struct._21;
+  m[1,1] := struct._22;
+  m[1,2] := struct._23;
+  m[1,3] := struct._24;
+
+  m[2,0] := struct._31;
+  m[2,1] := struct._32;
+  m[2,2] := struct._33;
+  m[2,3] := struct._34;
+
+  m[3,0] := struct._41;
+  m[3,1] := struct._42;
+  m[3,2] := struct._43;
+  m[3,3] := struct._44;
+
+  Result := Self;
 end;
 
 
-function Matrix4x4F.RotationZ(degreeZ: Single): Matrix4x4F;
+function Matrix4x4F.RotationZ(degreeZ: Single): D2D_MATRIX_4X4_F;
 var
   angleInRadian: Single;
   sinAngle: Single;
   cosAngle: Single;
-  MRotationZ: Matrix4x4F;
 
 begin
   // angleInRadian := degreeZ * (Pi / 180.0); same as DegToRad(degreeZ)
@@ -548,41 +548,60 @@ begin
              sinAngle,
              cosAngle);
 
-  MRotationZ._11 := cosAngle;
-  MRotationZ._12 := sinAngle;
-  MRotationZ._13 := 0;
-  MRotationZ._14 := 0;
+  struct._11 := cosAngle;
+  struct._12 := sinAngle;
+  struct._13 := 0;
+  struct._14 := 0;
 
-  MRotationZ._21 := -sinAngle;
-  MRotationZ._22 := cosAngle;
-  MRotationZ._23 := 0;
-  MRotationZ._24 := 0;
+  struct._21 := -sinAngle;
+  struct._22 := cosAngle;
+  struct._23 := 0;
+  struct._24 := 0;
 
-  MRotationZ._31 := 0;
-  MRotationZ._32 := 0;
-  MRotationZ._33 := 1;
-  MRotationZ._34 := 0;
+  struct._31 := 0;
+  struct._32 := 0;
+  struct._33 := 1;
+  struct._34 := 0;
 
-  MRotationZ._41 := 0;
-  MRotationZ._42 := 0;
-  MRotationZ._43 := 0;
-  MRotationZ._44 := 1;
+  struct._41 := 0;
+  struct._42 := 0;
+  struct._43 := 0;
+  struct._44 := 1;
 
-  Result := MRotationZ;
+  m[0,0] := struct._11;
+  m[0,1] := struct._12;
+  m[0,2] := struct._13;
+  m[0,3] := struct._14;
+
+  m[1,0] := struct._21;
+  m[1,1] := struct._22;
+  m[1,2] := struct._23;
+  m[1,3] := struct._24;
+
+  m[2,0] := struct._31;
+  m[2,1] := struct._32;
+  m[2,2] := struct._33;
+  m[2,3] := struct._34;
+
+  m[3,0] := struct._41;
+  m[3,1] := struct._42;
+  m[3,2] := struct._43;
+  m[3,3] := struct._44;
+
+  Result := Self;
 end;
 
 
 function Matrix4x4F.RotationArbitraryAxis(x: Single;
                                           y: Single;
                                           z: Single;
-                                          degree: Single): Matrix4x4F;
+                                          degree: Single): D2D_MATRIX_4X4_F;
 var
   magnitude: Single;
   angleInRadian: Single;
   sinAngle: Single;
   cosAngle: Single;
   oneMinusCosAngle: Single;
-  MRotationArb: Matrix4x4F;
 
 begin
   // Normalize the vector represented by x, y, and z
@@ -604,35 +623,55 @@ begin
 
   oneMinusCosAngle := 1 - cosAngle;
 
-  MRotationArb._11 := (1 + oneMinusCosAngle * (x * x - 1));
-  MRotationArb._12 := z * sinAngle + oneMinusCosAngle * x * y;
-  MRotationArb._13 := -y * sinAngle + oneMinusCosAngle * x * z;
-  MRotationArb._14 := 0;
+  struct._11 := (1 + oneMinusCosAngle * (x * x - 1));
+  struct._12 := z * sinAngle + oneMinusCosAngle * x * y;
+  struct._13 := -y * sinAngle + oneMinusCosAngle * x * z;
+  struct._14 := 0;
 
-  MRotationArb._21 := -z * sinAngle + oneMinusCosAngle * y * x;
-  MRotationArb._22 := 1 + oneMinusCosAngle * y * y - 1;
-  MRotationArb._23 := x * sinAngle + oneMinusCosAngle * y * z;
-  MRotationArb._24 := 0;
+  struct._21 := -z * sinAngle + oneMinusCosAngle * y * x;
+  struct._22 := 1 + oneMinusCosAngle * y * y - 1;
+  struct._23 := x * sinAngle + oneMinusCosAngle * y * z;
+  struct._24 := 0;
 
-  MRotationArb._31 := y * sinAngle + oneMinusCosAngle * z * x;
-  MRotationArb._32 := -x * sinAngle + oneMinusCosAngle * z * y;
-  MRotationArb._33 := 1             + oneMinusCosAngle * (z * z - 1) ;
-  MRotationArb._34 := 0;
+  struct._31 := y * sinAngle + oneMinusCosAngle * z * x;
+  struct._32 := -x * sinAngle + oneMinusCosAngle * z * y;
+  struct._33 := 1             + oneMinusCosAngle * (z * z - 1) ;
+  struct._34 := 0;
 
-  MRotationArb._41 := 0;
-  MRotationArb._42 := 0;
-  MRotationArb._43 := 0;
-  MRotationArb._44 := 1;
+  struct._41 := 0;
+  struct._42 := 0;
+  struct._43 := 0;
+  struct._44 := 1;
 
-  Result := MRotationArb;
+  m[0,0] := struct._11;
+  m[0,1] := struct._12;
+  m[0,2] := struct._13;
+  m[0,3] := struct._14;
+
+  m[1,0] := struct._21;
+  m[1,1] := struct._22;
+  m[1,2] := struct._23;
+  m[1,3] := struct._24;
+
+  m[2,0] := struct._31;
+  m[2,1] := struct._32;
+  m[2,2] := struct._33;
+  m[2,3] := struct._34;
+
+  m[3,0] := struct._41;
+  m[3,1] := struct._42;
+  m[3,2] := struct._43;
+  m[3,3] := struct._44;
+
+
+  Result := Self;
 end;
 
 
-function Matrix4x4F.SkewX(degreeX: Single): Matrix4x4F;
+function Matrix4x4F.SkewX(degreeX: Single): D2D_MATRIX_4X4_F;
 var
   angleInRadian: Single;
   tanAngle: Single;
-  MSkewX: Matrix4x4F;
 
 begin
 
@@ -640,35 +679,54 @@ begin
   angleInRadian := DegToRad(degreeX);
   tanAngle := D2D1Tan(angleInRadian);
 
-  MSkewX._11 := 1;
-  MSkewX._12 := 0;
-  MSkewX._13 := 0;
-  MSkewX._14 := 0;
+  struct._11 := 1;
+  struct._12 := 0;
+  struct._13 := 0;
+  struct._14 := 0;
 
-  MSkewX._21 := tanAngle;
-  MSkewX._22 := 1;
-  MSkewX._23 := 0;
-  MSkewX._24 := 0;
+  struct._21 := tanAngle;
+  struct._22 := 1;
+  struct._23 := 0;
+  struct._24 := 0;
 
-  MSkewX._31 := 0;
-  MSkewX._32 := 0;
-  MSkewX._33 := 1;
-  MSkewX._34 := 0;
+  struct._31 := 0;
+  struct._32 := 0;
+  struct._33 := 1;
+  struct._34 := 0;
 
-  MSkewX._41 := 0;
-  MSkewX._42 := 0;
-  MSkewX._43 := 0;
-  MSkewX._44 := 1;
+  struct._41 := 0;
+  struct._42 := 0;
+  struct._43 := 0;
+  struct._44 := 1;
 
-  Result := MSkewX;
+  m[0,0] := struct._11;
+  m[0,1] := struct._12;
+  m[0,2] := struct._13;
+  m[0,3] := struct._14;
+
+  m[1,0] := struct._21;
+  m[1,1] := struct._22;
+  m[1,2] := struct._23;
+  m[1,3] := struct._24;
+
+  m[2,0] := struct._31;
+  m[2,1] := struct._32;
+  m[2,2] := struct._33;
+  m[2,3] := struct._34;
+
+  m[3,0] := struct._41;
+  m[3,1] := struct._42;
+  m[3,2] := struct._43;
+  m[3,3] := struct._44;
+
+  Result := Self;
 end;
 
 
-function Matrix4x4F.SkewY(degreeY: Single): Matrix4x4F;
+function Matrix4x4F.SkewY(degreeY: Single): D2D_MATRIX_4X4_F;
 var
   angleInRadian: Single;
   tanAngle: Single;
-  MSkewY: Matrix4x4F;
 
 begin
 
@@ -676,33 +734,53 @@ begin
   angleInRadian := DegToRad(degreeY);
   tanAngle := D2D1Tan(angleInRadian);
 
-  MSkewY._11 := 1;
-  MSkewY._12 := tanAngle;
-  MSkewY._13 := 0;
-  MSkewY._14 := 0;
+  struct._11 := 1;
+  struct._12 := tanAngle;
+  struct._13 := 0;
+  struct._14 := 0;
 
-  MSkewY._21 := 0;
-  MSkewY._22 := 1;
-  MSkewY._23 := 0;
-  MSkewY._24 := 0;
+  struct._21 := 0;
+  struct._22 := 1;
+  struct._23 := 0;
+  struct._24 := 0;
 
-  MSkewY._31 := 0;
-  MSkewY._32 := 0;
-  MSkewY._33 := 1;
-  MSkewY._34 := 0;
+  struct._31 := 0;
+  struct._32 := 0;
+  struct._33 := 1;
+  struct._34 := 0;
 
-  MSkewY._41 := 0;
-  MSkewY._42 := 0;
-  MSkewY._43 := 0;
-  MSkewY._44 := 1;
+  struct._41 := 0;
+  struct._42 := 0;
+  struct._43 := 0;
+  struct._44 := 1;
 
-  Result := MSkewY;
+  m[0,0] := struct._11;
+  m[0,1] := struct._12;
+  m[0,2] := struct._13;
+  m[0,3] := struct._14;
+
+  m[1,0] := struct._21;
+  m[1,1] := struct._22;
+  m[1,2] := struct._23;
+  m[1,3] := struct._24;
+
+  m[2,0] := struct._31;
+  m[2,1] := struct._32;
+  m[2,2] := struct._33;
+  m[2,3] := struct._34;
+
+  m[3,0] := struct._41;
+  m[3,1] := struct._42;
+  m[3,2] := struct._43;
+  m[3,3] := struct._44;
+
+  Result := Self;
 end;
 
-function Matrix4x4F.PerspectiveProjection(depth: Single): Matrix4x4F;
+
+function Matrix4x4F.PerspectiveProjection(depth: Single): D2D_MATRIX_4X4_F;
 var
   proj: Single;
-  MProjection: Matrix4x4F;
 
 begin
   proj := 0;
@@ -710,67 +788,112 @@ begin
   if (depth > 0) then
     proj := -1 / depth;
 
+  struct._11 := 1;
+  struct._12 := 0;
+  struct._13 := 0;
+  struct._14 := 0;
 
-  MProjection._11 := 1;
-  MProjection._12 := 0;
-  MProjection._13 := 0;
-  MProjection._14 := 0;
+  struct._21 := 0;
+  struct._22 := 1;
+  struct._23 := 0;
+  struct._24 := 0;
 
-  MProjection._21 := 0;
-  MProjection._22 := 1;
-  MProjection._23 := 0;
-  MProjection._24 := 0;
+  struct._31 := 0;
+  struct._32 := 0;
+  struct._33 := 1;
+  struct._34 := proj;
 
-  MProjection._31 := 0;
-  MProjection._32 := 0;
-  MProjection._33 := 1;
-  MProjection._34 := proj;
+  struct._41 := 0;
+  struct._42 := 0;
+  struct._43 := 0;
+  struct._44 := 1;
 
-  MProjection._41 := 0;
-  MProjection._42 := 0;
-  MProjection._43 := 0;
-  MProjection._44 := 1;
+  m[0,0] := struct._11;
+  m[0,1] := struct._12;
+  m[0,2] := struct._13;
+  m[0,3] := struct._14;
 
-  Result := MProjection;
+  m[1,0] := struct._21;
+  m[1,1] := struct._22;
+  m[1,2] := struct._23;
+  m[1,3] := struct._24;
+
+  m[2,0] := struct._31;
+  m[2,1] := struct._32;
+  m[2,2] := struct._33;
+  m[2,3] := struct._34;
+
+  m[3,0] := struct._41;
+  m[3,1] := struct._42;
+  m[3,2] := struct._43;
+  m[3,3] := struct._44;
+
+  Result := Self;
 end;
 
 
-function Matrix4x4F.ReinterpretBaseType(const pMatrix: D2D1_MATRIX_4X4_F): Matrix4x4F;
+function Matrix4x4F.ReinterpretBaseType(const pMatrix: D2D1_MATRIX_4X4_F): D2D_MATRIX_4X4_F;
 begin
-  Result := Matrix4x4F(pMatrix);
+  Result := D2D_MATRIX_4X4_F(pMatrix);
 end;
 
 
 function Matrix4x4F.IsIdentity(): Boolean;
 begin
-  Result := ( _11 = 1.0 ) And
-            ( _12 = 0.0 ) And
-            ( _13 = 0.0 ) And
-            ( _14 = 0.0 ) And
+  Result := False;
 
-            ( _21 = 0.0 ) And
-            ( _22 = 1.0 ) And
-            ( _23 = 0.0 ) And
-            ( _24 = 0.0 ) And
+  if ( struct._11 = 1.0 ) and
+            ( struct._12 = 0.0 ) and
+            ( struct._13 = 0.0 ) and
+            ( struct._14 = 0.0 ) and
 
-            ( _31 = 0.0 ) And
-            ( _32 = 0.0 ) And
-            ( _33 = 1.0 ) And
-            ( _34 = 0.0 ) And
+            ( struct._21 = 0.0 ) and
+            ( struct._22 = 1.0 ) and
+            ( struct._23 = 0.0 ) and
+            ( struct._24 = 0.0 ) and
 
-            ( _41 = 0.0 ) And
-            ( _42 = 0.0 ) And
-            ( _43 = 0.0 ) And
-            ( _44 = 1.0);
+            ( struct._31 = 0.0 ) and
+            ( struct._32 = 0.0 ) and
+            ( struct._33 = 1.0 ) and
+            ( struct._34 = 0.0 ) and
+
+            ( struct._41 = 0.0 ) and
+            ( struct._42 = 0.0 ) and
+            ( struct._43 = 0.0 ) and
+            ( struct._44 = 1.0) then
+
+            Result := True
+  else if
+
+            (m[0,0] = 1.0) and
+            (m[0,1] = 0.0) and
+            (m[0,2] = 0.0) and
+            (m[0,3] = 0.0) and
+
+            (m[1,0] = 0.0) and
+            (m[1,1] = 1.0) and
+            (m[1,2] = 0.0) and
+            (m[1,3] = 0.0) and
+
+            (m[2,0] = 0.0) and
+            (m[2,1] = 0.0) and
+            (m[2,2] = 1.0) and
+            (m[2,3] = 0.0) and
+
+            (m[3,0] = 0.0) and
+            (m[3,1] = 0.0) and
+            (m[3,2] = 0.0) and
+            (m[3,3] = 1.0) then
+            Result := True;
+
 end;
 
 
-function Matrix4x4F.RotationY(degreeY: Single): Matrix4x4F;
+function Matrix4x4F.RotationY(degreeY: Single): D2D_MATRIX_4X4_F;
 var
   angleInRadian: Single;
   sinAngle: Single;
   cosAngle: Single;
-  MRotationY: Matrix4x4F;
 
 begin
   // angleInRadian := degreeY * (Pi / 180.0); // same as DegToRad(degreeY)
@@ -782,31 +905,52 @@ begin
              sinAngle,
              cosAngle);
 
-  MRotationY._11 := cosAngle;
-  MRotationY._12 := 0;
-  MRotationY._13 := -sinAngle;
-  MRotationY._14 := 0;
+  struct._11 := cosAngle;
+  struct._12 := 0;
+  struct._13 := -sinAngle;
+  struct._14 := 0;
 
-  MRotationY._21 := 0;
-  MRotationY._22 := 1;
-  MRotationY._23 := 0;
-  MRotationY._24 := 0;
+  struct._21 := 0;
+  struct._22 := 1;
+  struct._23 := 0;
+  struct._24 := 0;
 
-  MRotationY._31 := sinAngle;
-  MRotationY._32 := 0;
-  MRotationY._33 := cosAngle;
-  MRotationY._34 := 0;
+  struct._31 := sinAngle;
+  struct._32 := 0;
+  struct._33 := cosAngle;
+  struct._34 := 0;
 
-  MRotationY._41 := 0;
-  MRotationY._42 := 0;
-  MRotationY._43 := 0;
-  MRotationY._44 := 1;
+  struct._41 := 0;
+  struct._42 := 0;
+  struct._43 := 0;
+  struct._44 := 1;
 
-  Result := MRotationY;
+
+  m[0,0] := cosAngle;
+  m[0,1] := 0.0;
+  m[0,2] := -sinAngle;
+  m[0,3] := 0.0;
+
+  m[1,0] := 0.0;
+  m[1,1] := 1.0;
+  m[1,2] := 0.0;
+  m[1,3] := 0.0;
+
+  m[2,0] := sinAngle;
+  m[2,1] := 0.0;
+  m[2,2] := cosAngle;
+  m[2,3] := 0.0;
+
+  m[3,0] := 0.0;
+  m[3,1] := 0.0;
+  m[3,2] := 0.0;
+  m[3,3] := 1.0;
+
+  Result := Self;
 end;
 
 
-function Matrix4x4f.Determinant(): Single;
+function Matrix4x4f.Determinant(pUnion: Word): Single;
 var
   minor1: Single;
   minor2: Single;
@@ -814,97 +958,132 @@ var
   minor4: Single;
 
 begin
-  minor1 := _41 * (_12 * (_23 * _34 - _33 * _24) - _13 * (_22 * _34 - _24 * _32) + _14 * (_22 * _33 - _23 * _32));
-  minor2 := _42 * (_11 * (_21 * _34 - _31 * _24) - _13 * (_21 * _34 - _24 * _31) + _14 * (_21 * _33 - _23 * _31));
-  minor3 := _43 * (_11 * (_22 * _34 - _32 * _24) - _12 * (_21 * _34 - _24 * _31) + _14 * (_21 * _32 - _22 * _31));
-  minor4 := _44 * (_11 * (_22 * _33 - _32 * _23) - _12 * (_21 * _33 - _23 * _31) + _13 * (_21 * _32 - _22 * _31));
+  if (pUnion = 0) then
+    begin
+      minor1 := struct._41 * (struct._12 * (struct._23 * struct._34 - struct._33 * struct._24) - struct._13 * (struct._22 * struct._34 - struct._24 * struct._32) + struct._14 * (struct._22 * struct._33 - struct._23 * struct._32));
+      minor2 := struct._42 * (struct._11 * (struct._21 * struct._34 - struct._31 * struct._24) - struct._13 * (struct._21 * struct._34 - struct._24 * struct._31) + struct._14 * (struct._21 * struct._33 - struct._23 * struct._31));
+      minor3 := struct._43 * (struct._11 * (struct._22 * struct._34 - struct._32 * struct._24) - struct._12 * (struct._21 * struct._34 - struct._24 * struct._31) + struct._14 * (struct._21 * struct._32 - struct._22 * struct._31));
+      minor4 := struct._44 * (struct._11 * (struct._22 * struct._33 - struct._32 * struct._23) - struct._12 * (struct._21 * struct._33 - struct._23 * struct._31) + struct._13 * (struct._21 * struct._32 - struct._22 * struct._31));
+    end
+  else
+    begin
+      minor1 := m[3,0] * (m[0,1] * (m[1,2] * m[2,3] - m[2,2] * m[1,3]) - m[0,2] * (m[1,1] * m[2,3] - m[1,3] * m[2,1]) + m[0,3] * (m[1,1] * m[2,2] - m[1,2] * m[2,1]));
+      minor2 := m[3,1] * (m[0,1] * (m[1,0] * m[2,3] - m[2,0] * m[1,3]) - m[0,2] * (m[1,0] * m[2,3] - m[1,3] * m[2,0]) + m[0,3] * (m[1,0] * m[2,2] - m[1,2] * m[2,0]));
+      minor3 := m[3,2] * (m[0,0] * (m[1,1] * m[2,3] - m[2,1] * m[1,3]) - m[0,1] * (m[1,0] * m[2,3] - m[1,3] * m[2,0]) + m[0,3] * (m[1,0] * m[2,1] - m[1,1] * m[2,0]));
+      minor4 := m[3,3] * (m[0,0] * (m[1,1] * m[2,2] - m[2,1] * m[1,2]) - m[0,1] * (m[1,0] * m[2,2] - m[1,2] * m[2,0]) + m[0,2] * (m[1,0] * m[2,1] - m[1,1] * m[2,0]));
+    end;
 
   Result := (minor1 - minor2) + (minor3 - minor4);
+
 end;
 
 
-procedure Matrix4x4f.SetProduct(var a: Matrix4x4F;
-                                var b: Matrix4x4F);
+procedure Matrix4x4f.SetProduct(var a: D2D_MATRIX_4X4_F;
+                                var b: D2D_MATRIX_4X4_F);
 begin
-  _11 := a._11 * b._11 + a._12 * b._21 + a._13 * b._31 + a._14 * b._41;
-  _12 := a._11 * b._12 + a._12 * b._22 + a._13 * b._32 + a._14 * b._42;
-  _13 := a._11 * b._13 + a._12 * b._23 + a._13 * b._33 + a._14 * b._43;
-  _14 := a._11 * b._14 + a._12 * b._24 + a._13 * b._34 + a._14 * b._44;
+  struct._11 := a.struct._11 * b.struct._11 + a.struct._12 * b.struct._21 + a.struct._13 * b.struct._31 + a.struct._14 * b.struct._41;
+  struct._12 := a.struct._11 * b.struct._12 + a.struct._12 * b.struct._22 + a.struct._13 * b.struct._32 + a.struct._14 * b.struct._42;
+  struct._13 := a.struct._11 * b.struct._13 + a.struct._12 * b.struct._23 + a.struct._13 * b.struct._33 + a.struct._14 * b.struct._43;
+  struct._14 := a.struct._11 * b.struct._14 + a.struct._12 * b.struct._24 + a.struct._13 * b.struct._34 + a.struct._14 * b.struct._44;
 
-  _21 := a._21 * b._11 + a._22 * b._21 + a._23 * b._31 + a._24 * b._41;
-  _22 := a._21 * b._12 + a._22 * b._22 + a._23 * b._32 + a._24 * b._42;
-  _23 := a._21 * b._13 + a._22 * b._23 + a._23 * b._33 + a._24 * b._43;
-  _24 := a._21 * b._14 + a._22 * b._24 + a._23 * b._34 + a._24 * b._44;
+  struct._21 := a.struct._21 * b.struct._11 + a.struct._22 * b.struct._21 + a.struct._23 * b.struct._31 + a.struct._24 * b.struct._41;
+  struct._22 := a.struct._21 * b.struct._12 + a.struct._22 * b.struct._22 + a.struct._23 * b.struct._32 + a.struct._24 * b.struct._42;
+  struct._23 := a.struct._21 * b.struct._13 + a.struct._22 * b.struct._23 + a.struct._23 * b.struct._33 + a.struct._24 * b.struct._43;
+  struct._24 := a.struct._21 * b.struct._14 + a.struct._22 * b.struct._24 + a.struct._23 * b.struct._34 + a.struct._24 * b.struct._44;
 
-  _31 := a._31 * b._11 + a._32 * b._21 + a._33 * b._31 + a._34 * b._41;
-  _32 := a._31 * b._12 + a._32 * b._22 + a._33 * b._32 + a._34 * b._42;
-  _33 := a._31 * b._13 + a._32 * b._23 + a._33 * b._33 + a._34 * b._43;
-  _34 := a._31 * b._14 + a._32 * b._24 + a._33 * b._34 + a._34 * b._44;
+  struct._31 := a.struct._31 * b.struct._11 + a.struct._32 * b.struct._21 + a.struct._33 * b.struct._31 + a.struct._34 * b.struct._41;
+  struct._32 := a.struct._31 * b.struct._12 + a.struct._32 * b.struct._22 + a.struct._33 * b.struct._32 + a.struct._34 * b.struct._42;
+  struct._33 := a.struct._31 * b.struct._13 + a.struct._32 * b.struct._23 + a.struct._33 * b.struct._33 + a.struct._34 * b.struct._43;
+  struct._34 := a.struct._31 * b.struct._14 + a.struct._32 * b.struct._24 + a.struct._33 * b.struct._34 + a.struct._34 * b.struct._44;
 
-  _41 := a._41 * b._11 + a._42 * b._21 + a._43 * b._31 + a._44 * b._41;
-  _42 := a._41 * b._12 + a._42 * b._22 + a._43 * b._32 + a._44 * b._42;
-  _43 := a._41 * b._13 + a._42 * b._23 + a._43 * b._33 + a._44 * b._43;
-  _44 := a._41 * b._14 + a._42 * b._24 + a._43 * b._34 + a._44 * b._44;
+  struct._41 := a.struct._41 * b.struct._11 + a.struct._42 * b.struct._21 + a.struct._43 * b.struct._31 + a.struct._44 * b.struct._41;
+  struct._42 := a.struct._41 * b.struct._12 + a.struct._42 * b.struct._22 + a.struct._43 * b.struct._32 + a.struct._44 * b.struct._42;
+  struct._43 := a.struct._41 * b.struct._13 + a.struct._42 * b.struct._23 + a.struct._43 * b.struct._33 + a.struct._44 * b.struct._43;
+  struct._44 := a.struct._41 * b.struct._14 + a.struct._42 * b.struct._24 + a.struct._43 * b.struct._34 + a.struct._44 * b.struct._44;
+
+
+  m[0,0] := struct._11;
+  m[0,1] := struct._12;
+  m[0,2] := struct._13;
+  m[0,3] := struct._14;
+
+  m[1,0] := struct._21;
+  m[1,1] := struct._22;
+  m[1,2] := struct._23;
+  m[1,3] := struct._24;
+
+  m[2,0] := struct._31;
+  m[2,1] := struct._32;
+  m[2,2] := struct._33;
+  m[2,3] := struct._34;
+
+  m[3,0] := struct._41;
+  m[3,1] := struct._42;
+  m[3,2] := struct._43;
+  m[3,3] := struct._44;
+
 end;
 
 
-function Matrix4x4f.product(matrix: Matrix4x4F): Matrix4x4F;
+function Matrix4x4f.product(matrix: D2D_MATRIX_4X4_F): D2D_MATRIX_4X4_F;
 begin
   result.SetProduct(Self,
                     matrix);
 end;
 
 
-constructor Matrix5x4f.Create(m11: Single = 1;
-                              m12: Single = 0;
-                              m13: Single = 0;
-                              m14: Single = 0;
-
-                              m21: Single = 0;
-                              m22: Single = 1;
-                              m23: Single = 0;
-                              m24: Single = 0;
-
-                              m31: Single = 0;
-                              m32: Single = 0;
-                              m33: Single = 1;
-                              m34: Single = 0;
-
-                              m41: Single = 0;
-                              m42: Single = 0;
-                              m43: Single = 0;
-                              m44: Single = 1;
-
-                              m51: Single = 0;
-                              m52: Single = 0;
-                              m53: Single = 0;
-                              m54: Single = 0);
+procedure Matrix5x4f.Init();
 begin
-  inherited;
-  _11 := m11;
-  _12 := m12;
-  _13 := m13;
-  _14 := m14;
+  struct._11 := 1.0;
+  struct._12 := 0.0;
+  struct._13 := 0.0;
+  struct._14 := 0.0;
 
-  _21 := m21;
-  _22 := m22;
-  _23 := m23;
-  _24 := m24;
+  struct._21 := 0.0;
+  struct._22 := 1.0;
+  struct._23 := 0.0;
+  struct._24 := 0.0;
 
-  _31 := m31;
-  _32 := m32;
-  _33 := m33;
-  _34 := m34;
+  struct._31 := 0.0;
+  struct._32 := 0.0;
+  struct._33 := 1.0;
+  struct._34 := 0.0;
 
-  _41 := m41;
-  _42 := m42;
-  _43 := m43;
-  _44 := m44;
+  struct._41 := 0.0;
+  struct._42 := 0.0;
+  struct._43 := 0.0;
+  struct._44 := 1.0;
 
-  _51 := m51;
-  _52 := m52;
-  _53 := m53;
-  _54 := m54;
+  struct._51 := 0.0;
+  struct._52 := 0.0;
+  struct._53 := 0.0;
+  struct._54 := 0.0;
+
+  m[0,0] := struct._11;
+  m[0,1] := struct._12;
+  m[0,2] := struct._13;
+  m[0,3] := struct._14;
+
+  m[1,0] := struct._21;
+  m[1,1] := struct._22;
+  m[1,2] := struct._23;
+  m[1,3] := struct._24;
+
+  m[2,0] := struct._31;
+  m[2,1] := struct._32;
+  m[2,2] := struct._33;
+  m[2,3] := struct._34;
+
+  m[3,0] := struct._41;
+  m[3,1] := struct._42;
+  m[3,2] := struct._43;
+  m[3,3] := struct._44;
+
+  m[4,0] := struct._51;
+  m[4,1] := struct._52;
+  m[4,2] := struct._53;
+  m[4,3] := struct._54;
+
 end;
 
 
