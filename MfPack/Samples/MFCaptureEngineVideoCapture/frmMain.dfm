@@ -28,27 +28,32 @@ object MainWindow: TMainWindow
     ExplicitTop = -6
     ExplicitWidth = 1011
   end
-  object StatusBar: TStatusBar
-    Left = 0
-    Top = 705
-    Width = 1086
-    Height = 33
-    Panels = <>
-    SimplePanel = True
-    SimpleText = 'Please'
-  end
   object pnlPreview: TPanel
     Left = 0
     Top = 17
     Width = 1086
-    Height = 688
+    Height = 721
     Align = alClient
     Color = 5197615
     ParentBackground = False
     ParentShowHint = False
     ShowCaption = False
     ShowHint = False
-    TabOrder = 1
+    TabOrder = 0
+    ExplicitHeight = 688
+    object pnlInfo: TPanel
+      Left = 1
+      Top = 692
+      Width = 1084
+      Height = 28
+      Align = alBottom
+      Alignment = taLeftJustify
+      Caption = 'pnlInfo'
+      ParentBackground = False
+      TabOrder = 0
+      ExplicitLeft = 2
+      ExplicitTop = 694
+    end
   end
   object pnlSnapShot: TPanel
     Left = 768
@@ -58,7 +63,7 @@ object MainWindow: TMainWindow
     Anchors = [akTop, akRight]
     BevelOuter = bvLowered
     ShowCaption = False
-    TabOrder = 2
+    TabOrder = 1
     object pbCapture: TPaintBox
       Left = 1
       Top = 1
@@ -88,6 +93,7 @@ object MainWindow: TMainWindow
       ParentShowHint = False
       ShowHint = True
       TabOrder = 0
+      OnClick = butSaveToFileClick
     end
     object butTakePhoto: TButton
       Left = 12
@@ -96,6 +102,7 @@ object MainWindow: TMainWindow
       Height = 25
       Hint = 'Save photo to file'
       Caption = '&Take Photo'
+      Enabled = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 1
@@ -103,8 +110,8 @@ object MainWindow: TMainWindow
     end
   end
   object MainMenu: TMainMenu
-    Left = 30
-    Top = 36
+    Left = 32
+    Top = 38
     object Capture1: TMenuItem
       Caption = 'Capture'
       object mnuStartPreview: TMenuItem
@@ -130,6 +137,7 @@ object MainWindow: TMainWindow
       end
       object Exit1: TMenuItem
         Caption = 'Exit'
+        OnClick = Exit1Click
       end
     end
   end
@@ -140,6 +148,6 @@ object MainWindow: TMainWindow
       'BMP image (*.bmp)|*.bmp|PNG image (*.png)|*.png|JPEG image (*.jp' +
       'g, *.jpeg)|*.jpg'
     Left = 96
-    Top = 36
+    Top = 38
   end
 end

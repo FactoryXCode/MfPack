@@ -1,3 +1,61 @@
+// FactoryX
+//
+// Copyright: © FactoryX. All rights reserved.
+//
+// Project: MfPack - MediaFoundation
+// Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
+// Module: dlgChooseDevice.pas
+// Kind: Pascal Unit
+// Release date: 18-11-2022
+// Language: ENU
+//
+// Revision Version: 3.1.3
+//
+// Description:
+//   Dialog to pick a videodevice and it's (supported) resolutions and samplerates.
+//
+// Organisation: FactoryX
+// Initiator(s): Tony (maXcomX)
+// Contributor(s): Tony (maXcomX)
+//
+//------------------------------------------------------------------------------
+// CHANGE LOG
+// Date       Person              Reason
+// ---------- ------------------- ----------------------------------------------
+// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+//------------------------------------------------------------------------------
+//
+// Remarks: Requires Windows 10 (2H20) or later.
+//
+// Related objects: -
+// Related projects: MfPackX313/Samples/MFCaptureEngineVideoCapture
+//
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
+//
+// Todo: -
+//
+//==============================================================================
+// Source: -
+//==============================================================================
+//
+// LICENSE
+//
+//  The contents of this file are subject to the
+//  GNU General Public License v3.0 (the "License");
+//  you may not use this file except in
+//  compliance with the License. You may obtain a copy of the License at
+//  https://www.gnu.org/licenses/gpl-3.0.html
+//
+// Software distributed under the License is distributed on an "AS IS"
+// basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+// License for the specific language governing rights and limitations
+// under the License.
+//
+// Users may distribute this source code provided that this header is included
+// in full at the top of the file.
+//==============================================================================
 unit dlgChooseDevice;
 
 interface
