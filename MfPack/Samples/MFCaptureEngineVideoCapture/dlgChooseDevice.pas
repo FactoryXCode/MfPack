@@ -240,10 +240,24 @@ try
 
   sgResolutions.ColCount := 5;
   sgResolutions.RowCount := 1;
+
+  sgResolutions.ColWidths[0] := 80;
+  sgResolutions.ColWidths[1] := 60;
+  sgResolutions.ColWidths[2] := 120;
+  sgResolutions.ColWidths[3] := 120;
+  sgResolutions.ColWidths[4] := -1; // Hide column
+
+  sgResolutions.Width :=  sgResolutions.ColWidths[0] +
+                          sgResolutions.ColWidths[1] +
+                          sgResolutions.ColWidths[2] +
+                          sgResolutions.ColWidths[3] +
+                          sgResolutions.ColCount;
+
   sgResolutions.Cells[0, 0] := 'Height x Width';
   sgResolutions.Cells[1, 0] := 'FPS';
-  sgResolutions.Cells[2, 0] := 'Video format';
-  sgResolutions.Cells[3, 0] := 'Supported output';
+  sgResolutions.Cells[2, 0] := 'Video Format';
+  sgResolutions.Cells[3, 0] := 'Supported Format';
+
   sgResolutions.Cells[4, 0] := 'Formats index';  // This a hidden column.
   rc := 1;
 
@@ -265,7 +279,7 @@ try
         begin
           if bSupportedFormatsOnly then
             begin
-              if FDeviceExplorer.DeviceProperties[i].aVideoFormats[j].bMFSupported then
+              if FDeviceExplorer.DeviceProperties[i].aVideoFormats[j].bMFSupported and (FDeviceExplorer.DeviceProperties[i].aVideoFormats[j].iFrameRate > 29) then
                 begin
                   AddFormat(rc, i, j);
                   Inc(rc);

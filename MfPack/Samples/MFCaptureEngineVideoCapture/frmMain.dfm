@@ -1,10 +1,12 @@
 object MainWindow: TMainWindow
   Left = 0
   Top = 0
+  BorderWidth = 1
   Caption = 'Capture Engine Application Sample'
-  ClientHeight = 738
-  ClientWidth = 1086
+  ClientHeight = 736
+  ClientWidth = 1084
   Color = clBtnFace
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -15,103 +17,106 @@ object MainWindow: TMainWindow
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   DesignSize = (
-    1086
-    738)
+    1084
+    736)
   PixelsPerInch = 96
   TextHeight = 13
-  object Bevel1: TBevel
-    Left = 0
-    Top = 0
-    Width = 1086
-    Height = 17
-    Align = alTop
-    ExplicitTop = -6
-    ExplicitWidth = 1011
-  end
   object pnlPreview: TPanel
     Left = 0
-    Top = 17
-    Width = 1086
-    Height = 721
+    Top = 0
+    Width = 1084
+    Height = 736
     Align = alClient
+    AutoSize = True
     Color = 5197615
+    UseDockManager = False
     ParentBackground = False
     ParentShowHint = False
     ShowCaption = False
     ShowHint = False
     TabOrder = 0
-    ExplicitHeight = 688
+    ExplicitLeft = -1
+    ExplicitWidth = 1086
+    ExplicitHeight = 738
     object pnlInfo: TPanel
       Left = 1
-      Top = 692
-      Width = 1084
+      Top = 707
+      Width = 1082
       Height = 28
       Align = alBottom
       Alignment = taLeftJustify
+      AutoSize = True
       Caption = 'pnlInfo'
       ParentBackground = False
       TabOrder = 0
-      ExplicitLeft = 2
-      ExplicitTop = 694
+      ExplicitTop = 692
+      ExplicitWidth = 1084
     end
   end
   object pnlSnapShot: TPanel
-    Left = 768
-    Top = 23
+    Left = 773
+    Top = 0
     Width = 310
     Height = 234
     Anchors = [akTop, akRight]
-    BevelOuter = bvLowered
+    BevelOuter = bvNone
+    Color = clBackground
+    ParentBackground = False
     ShowCaption = False
     TabOrder = 1
+    ExplicitLeft = 775
     object pbCapture: TPaintBox
-      Left = 1
-      Top = 1
-      Width = 308
-      Height = 199
+      Left = 0
+      Top = 0
+      Width = 310
+      Height = 206
       Align = alClient
       Color = clBackground
       ParentColor = False
-      ExplicitTop = 0
+      ExplicitLeft = 2
+      ExplicitHeight = 201
     end
-    object Bevel2: TBevel
-      Left = 1
-      Top = 200
-      Width = 308
-      Height = 33
+    object pnlControls: TPanel
+      Left = 0
+      Top = 206
+      Width = 310
+      Height = 28
       Align = alBottom
-      ExplicitTop = 206
-    end
-    object butSaveToFile: TButton
-      Left = 91
-      Top = 206
-      Width = 73
-      Height = 25
-      Hint = 'Save photo to file'
-      Caption = '&Save To File'
-      Enabled = False
-      ParentShowHint = False
-      ShowHint = True
+      Caption = 'pnlControls'
+      ParentBackground = False
+      ShowCaption = False
       TabOrder = 0
-      OnClick = butSaveToFileClick
-    end
-    object butTakePhoto: TButton
-      Left = 12
-      Top = 206
-      Width = 73
-      Height = 25
-      Hint = 'Save photo to file'
-      Caption = '&Take Photo'
-      Enabled = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 1
-      OnClick = butTakePhotoClick
+      object butSaveToFile: TButton
+        Left = 91
+        Top = 1
+        Width = 73
+        Height = 25
+        Hint = 'Save photo to file'
+        Caption = '&Save To File'
+        Enabled = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 0
+        OnClick = butSaveToFileClick
+      end
+      object butTakePhoto: TButton
+        Left = 12
+        Top = 1
+        Width = 73
+        Height = 25
+        Hint = 'Save photo to file'
+        Caption = '&Take Photo'
+        Enabled = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 1
+        OnClick = butTakePhotoClick
+      end
     end
   end
   object MainMenu: TMainMenu
     Left = 32
-    Top = 38
+    Top = 40
     object Capture1: TMenuItem
       Caption = 'Capture'
       object mnuStartPreview: TMenuItem

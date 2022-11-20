@@ -636,8 +636,13 @@ type
   // Returns the name of a guid
   function GetGUIDNameConst(const guid: TGUID): string;
 
-  // Checks if a given subtype is supported by Media Foundation.
-  function IsMfSupportedFormat(pSubType: TGuid): Boolean; inline;
+  // Checks if a given input subtype is supported by Media Foundation MFT.
+  function IsMfSupportedFormat(pSubType: TGuid): Boolean; inline; deprecated;
+  function IsMftSupportedInputFormat(pSubType: TGuid): Boolean; inline;
+
+  // Checks if a given output subtype is supported by Media Foundation MFT.
+  function IsMftSupportedOutputFormat(pSubType: TGuid): Boolean; inline;
+
 
 // Device Loss
 // ===========
@@ -3000,7 +3005,6 @@ var
   dwCount: DWord;
   dwSupportedCount: DWord;
   dwNativeCount: DWord;
-  //VideoInfo: TVideoFormatInfo;
 
 label
   Done;
@@ -3105,9 +3109,9 @@ begin
 
 
       // On this point we check if the format is supported or not.
-      // See https://docs.microsoft.com/en-us/windows/win32/medfound/video-processor-mft#input-formats
-
+      // See: https://learn.microsoft.com/en-us/windows/win32/medfound/video-processor-mft#input-formats
       pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].bMFSupported := IsMfSupportedFormat(pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].fSubType);
+
       if pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].bMFSupported then
         Inc(dwSupportedCount);
 
@@ -3132,7 +3136,7 @@ Done:
    if FAILED(hr) then
      pDeviceProperties := nil;
 
-  // Store supported formats only.
+  // Store supported output formats only.
   pDeviceProperties[pDeviceIndex].dwSupportedFormats := dwSupportedCount;
   // Store unsupported and supported formats.
   pDeviceProperties[pDeviceIndex].dwNativeFormats := dwNativeCount;
@@ -3664,7 +3668,14 @@ Done:
 end;
 
 
+// Deprecated, renamed to IsMfSupportedInputFormat
 function IsMfSupportedFormat(pSubType: TGuid): Boolean; inline;
+begin
+  Result := IsMftSupportedInputFormat(pSubType);
+end;
+
+
+function IsMftSupportedInputFormat(pSubType: TGuid): Boolean; inline;
 var
   bRes: Boolean;
   arSubTypes: array [0..19] of TGuid;
@@ -3676,7 +3687,8 @@ label
 begin
   bRes := False;
 
-  // Supported subtype formats
+  // Supported subtype formats for input.
+  // See: https://learn.microsoft.com/en-us/windows/win32/medfound/video-processor-mft#input-formats
   arSubTypes[0]  := MFVideoFormat_ARGB32;
   arSubTypes[1]  := MFVideoFormat_RGB24;
   arSubTypes[2]  := MFVideoFormat_RGB32;
@@ -3711,6 +3723,50 @@ begin
 Done:
   Result := bRes;
 end;
+
+
+function IsMftSupportedOutputFormat(pSubType: TGuid): Boolean; inline;
+var
+  bRes: Boolean;
+  arSubTypes: array [0..13] of TGuid;
+  i: Integer;
+
+label
+  Done;
+
+begin
+  bRes := False;
+
+  // Supported subtype formats for output.
+  // See: https://learn.microsoft.com/en-us/windows/win32/medfound/video-processor-mft#output-formats
+  arSubTypes[0]  := MFVideoFormat_ARGB32;
+  arSubTypes[1]  := MFVideoFormat_AYUV;
+  arSubTypes[2]  := MFVideoFormat_I420;
+  arSubTypes[3]  := MFVideoFormat_IYUV;
+  arSubTypes[4]  := MFVideoFormat_NV12;
+  arSubTypes[5]  := MFVideoFormat_RGB24;
+  arSubTypes[6]  := MFVideoFormat_RGB32;
+  arSubTypes[7]  := MFVideoFormat_RGB555;
+  arSubTypes[8]  := MFVideoFormat_RGB565;
+  arSubTypes[9]  := MFVideoFormat_UYVY;
+  arSubTypes[10] := MFVideoFormat_V216;
+  arSubTypes[11] := MFVideoFormat_YUY2;
+  arSubTypes[12] := MFVideoFormat_YV12;
+
+  for i := 0 to Length(arSubTypes) -1 do
+    begin
+      if IsEqualGuid(pSubType,
+                     arSubTypes[i]) then
+        begin
+          bRes := True;
+          goto done;
+        end;
+    end;
+
+Done:
+  Result := bRes;
+end;
+
 
 
 // Device Loss

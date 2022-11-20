@@ -112,16 +112,15 @@ type
     mnuStartRecording: TMenuItem;
     mnuTakePhoto: TMenuItem;
     SaveFileDlg: TSaveDialog;
-    Bevel1: TBevel;
     N1: TMenuItem;
     Exit1: TMenuItem;
     pnlPreview: TPanel;
     pnlSnapShot: TPanel;
     pbCapture: TPaintBox;
-    butSaveToFile: TButton;
-    Bevel2: TBevel;
-    butTakePhoto: TButton;
     pnlInfo: TPanel;
+    pnlControls: TPanel;
+    butSaveToFile: TButton;
+    butTakePhoto: TButton;
     procedure FormCreate(Sender: TObject);
     procedure mnuChooseDeviceClick(Sender: TObject);
     procedure mnuStartPreviewClick(Sender: TObject);
@@ -166,6 +165,8 @@ type
 
   public
     { Public declarations }
+
+    // Messagehandler
     procedure WndProc(var Msg: TMessage); override;
 
   end;
@@ -188,9 +189,10 @@ var
   pcrD: PMFVideoNormalizedRect;
 
 begin
+  inherited;
+
   if not Visible then
     Exit;
-
 
   if Assigned(FCaptureManager) then
     begin
@@ -202,8 +204,6 @@ begin
 
       FCaptureManager.UpdateVideo(pcrD);
     end;
-
-  inherited;
 end;
 
 
@@ -378,10 +378,10 @@ var
 begin
   if not bImageCleared and Assigned(bm) and not bm.Empty then
     begin
-
+      // Clear the area
       pbCapture.Canvas.Brush.Style := bsSolid;
       pbCapture.Canvas.Brush.Color := clBlack;
-      pbCapture.Canvas.FillRect(bm.Canvas.ClipRect);
+      pbCapture.Canvas.FillRect(pbCapture.Canvas.ClipRect);
 
       SetStretchBltMode(pbCapture.Canvas.Handle,
                         HALFTONE);

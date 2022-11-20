@@ -156,7 +156,9 @@ type
 
   PIEnumMoniker = ^IEnumMoniker;
   LPENUMMONIKER = ^IEnumMoniker;
+  {$EXTERNALSYM LPENUMMONIKER}
   IEnumMoniker = interface;
+  {$EXTERNALSYM IEnumMoniker}
 
   PIRunnableObject = ^IRunnableObject;
   LPRUNNABLEOBJECT = ^IRunnableObject;
@@ -270,6 +272,7 @@ type
   LPINITIALIZESPY = ^IInitializeSpy;
   {$EXTERNALSYM LPINITIALIZESPY}
   IInitializeSpy = interface;
+
 
 
   // Interface IMallocSpy

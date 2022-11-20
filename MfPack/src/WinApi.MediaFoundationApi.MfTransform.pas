@@ -287,7 +287,7 @@ const
   //
   // Carried over from DMO (IMediaObject)
   //
-  MFT_PROCESS_OUTPUT_DISCARD_WHEN_NO_BUFFER	= MFT_PROCESS_OUTPUT_FLAGS($1); // discard this sample if pSample ptr is Nil.
+  MFT_PROCESS_OUTPUT_DISCARD_WHEN_NO_BUFFER	= MFT_PROCESS_OUTPUT_FLAGS($1); // discard this sample if pSample ptr is nil.
   {$EXTERNALSYM MFT_PROCESS_OUTPUT_DISCARD_WHEN_NO_BUFFER}
 
   // New flags for MFTs
@@ -613,7 +613,7 @@ type
     // Output stream specific status information is returned in the
     // dwStatus member of each buffer wrapper structure.
     //
-    function ProcessOutput(dwFlags: DWORD; // MFT_PROCESS_OUTPUT_FLAGS
+    function ProcessOutput(dwFlags: MFT_PROCESS_OUTPUT_FLAGS; // MFT_PROCESS_OUTPUT_FLAGS
                            cOutputBufferCount: DWORD; // # returned by GetStreamCount()
                            pOutputSamples: PMFT_OUTPUT_DATA_BUFFER;  // one per stream
                            out pdwStatus: DWORD): HResult; stdcall;

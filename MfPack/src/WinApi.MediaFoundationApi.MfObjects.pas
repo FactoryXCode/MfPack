@@ -976,7 +976,9 @@ type
   MFVideoCompressedInfo = _MFVideoCompressedInfo;
   {$EXTERNALSYM MFVideoCompressedInfo}
 
-
+  // Applications should avoid using this structure.
+  // Instead, it is recommended that applications use attributes to describe the video format.
+  // See: https://learn.microsoft.com/en-us/windows/win32/api/mfobjects/ns-mfobjects-mfvideoformat
   PMFVIDEOFORMAT = ^MFVIDEOFORMAT;
   _MFVIDEOFORMAT = record
     dwSize: DWORD;
