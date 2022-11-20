@@ -5,7 +5,7 @@ object ChooseDeviceDlg: TChooseDeviceDlg
   BorderStyle = bsDialog
   Caption = 'Select Camera'
   ClientHeight = 281
-  ClientWidth = 695
+  ClientWidth = 718
   Color = clBtnFace
   ParentFont = True
   OldCreateOrder = True
@@ -63,7 +63,7 @@ object ChooseDeviceDlg: TChooseDeviceDlg
   object sgResolutions: TStringGrid
     Left = 277
     Top = 34
-    Width = 410
+    Width = 438
     Height = 201
     DefaultRowHeight = 18
     DrawingStyle = gdsClassic
@@ -77,7 +77,7 @@ object ChooseDeviceDlg: TChooseDeviceDlg
       113
       57
       147
-      89
+      114
       80)
   end
   object cbxSupportedFormatsOnly: TCheckBox
