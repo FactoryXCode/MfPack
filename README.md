@@ -149,4 +149,4 @@ SDK version: 10.0.22621.0 (Windows 11)
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MFCaptureEngineVideoCapture.png)
 
-**© FactoryX. All rights reserved.***
+**© FactoryX. All rights reserved.**
