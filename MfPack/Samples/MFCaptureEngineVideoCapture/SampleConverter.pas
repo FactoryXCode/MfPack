@@ -235,7 +235,7 @@ begin
                          nil,
                          @cbBitmapData);
       if FAILED(hr) then
-        goto done;
+        goto done;  // No need to unlock
 
 
       // For full frame capture, use the buffer dimensions for the data size check
@@ -244,7 +244,6 @@ begin
 
       if (iActualDataSize = iExpectedDataSize) then
         begin
-
             AMemoryStream := TMemoryStream.Create;
             oFileHeader := GetBMPFileHeader;
             oFileInfo := GetBMPFileInfo(AVideoInfo);
@@ -255,12 +254,13 @@ begin
       else
         begin
           hr := ERROR_INCORRECT_SIZE;
+          pBuffer.Unlock();
           goto done;
         end;
-      end;
+      pBuffer.Unlock();
+    end;
 
 done:
-  pBuffer.Unlock();
   SafeRelease(pBuffer);
   if Assigned(pConvertedSample) then
     SafeRelease(pConvertedSample);
@@ -412,7 +412,6 @@ label
 
 begin
 
-
   hr := FTransform.ProcessInput(0,
                                 AInputSample,
                                 0);
@@ -421,7 +420,6 @@ begin
 
   hr := FTransform.GetOutputStreamInfo(0,
                                        pOutputStreamInfo);
-
   if SUCCEEDED(hr) then
     hr := MFCreateMemoryBuffer(pOutputStreamInfo.cbSize,
                                pBufferOut);
@@ -438,21 +436,23 @@ begin
       pOutputDataBuffer.pSample := AConvertedSample;
       pOutputDataBuffer.pEvents := nil;
 
-      hr := FTransform.ProcessOutput(0,
+      hr := FTransform.ProcessOutput(MFT_PROCESS_OUTPUT_DISCARD_WHEN_NO_BUFFER,
                                      1,
                                      @pOutputDataBuffer,
                                      dwStatus);
+      if FAILED(hr) then
+        goto done;
 
       // If we don't flush we will get MF_E_NOTACCEPTING on next ProcessInput
-      FTransform.ProcessMessage(MFT_MESSAGE_COMMAND_FLUSH,
-                                0);
+      if SUCCEEDED(hr) then
+        hr := FTransform.ProcessMessage(MFT_MESSAGE_COMMAND_FLUSH,
+                                        0);
     end;
 
 done:
   SafeRelease(pBufferOut);
   Result := hr;
 end;
-
 
 end.
 

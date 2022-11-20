@@ -60,6 +60,10 @@ unit dlgChooseDevice;
 
 interface
 
+
+  // Undefine this when not needed!
+  {$DEFINE SAVE_DEBUG_REPORT}
+
 uses
   {WinApi}
   Winapi.Windows,
@@ -145,7 +149,7 @@ begin
       else
         begin
 
-{$IFDEF DEBUG}
+{$IFDEF SAVE_DEBUG_REPORT}
           OutputDebugString(StrToPWideChar(format('Error: %s (hr = %d)',
                                                   [ERR_SET_DEVICE,
                                                    E_FAIL])));
@@ -185,8 +189,11 @@ end;
 // Populate the listboxes with camera's and properties found on this system
 // ========================================================================
 function TChooseDeviceDlg.Populate(bSupportedFormatsOnly: Boolean): HResult;
+
    // Helper
-   procedure AddFormat(iCol: Integer; iDev: Integer; iForm: Integer);
+   procedure AddFormat(iCol: Integer;
+                       iDev: Integer;
+                       iForm: Integer);
      begin
        {Width and Height}
        sgResolutions.Cells[0, iCol] := Format('%d x %d',
@@ -200,9 +207,10 @@ function TChooseDeviceDlg.Populate(bSupportedFormatsOnly: Boolean): HResult;
        sgResolutions.Cells[2, iCol] := Format('%s',
                                               [GetGUIDNameConst(FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].fSubType)]);
 
-       {Supported by MF}
+       {Supported by MF input but not on output}
+       //
        sgResolutions.Cells[3, iCol] := Format('%s',
-                                              [BoolToStrYesNo(FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].bMFSupported)]);
+                                              [BoolToStrYesNo(FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].bMFSupported and (FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].iFrameRate > 29))]);
        {Index}
        sgResolutions.Cells[4, iCol] := Format('%d',
                                               [FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].FormatsIndex]);
@@ -235,7 +243,7 @@ try
   sgResolutions.Cells[0, 0] := 'Height x Width';
   sgResolutions.Cells[1, 0] := 'FPS';
   sgResolutions.Cells[2, 0] := 'Video format';
-  sgResolutions.Cells[3, 0] := 'Supported';
+  sgResolutions.Cells[3, 0] := 'Supported output';
   sgResolutions.Cells[4, 0] := 'Formats index';  // This a hidden column.
   rc := 1;
 
@@ -290,6 +298,7 @@ finally
   Result := hr;
 end;
 end;
+
 
 procedure TChooseDeviceDlg.sgResolutionsClick(Sender: TObject);
 begin
