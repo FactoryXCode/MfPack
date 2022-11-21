@@ -3,7 +3,7 @@
 Version: X 3.1.3
 
 Description:
-  Demonstrates how to capture an snapshot or a recording (A-synchronous) from a capture device, such as a webcam using the IMFCaptureEngine and IMFCapturePreviewSink.
+  Demonstrates how to capture a snapshot or a recording (A-synchronous) from a capture device, such as a webcam using the IMFCaptureEngine and IMFCapturePreviewSink.
 
 NOTES: 
  - This release is updated for compiler version 17 up to 35.
