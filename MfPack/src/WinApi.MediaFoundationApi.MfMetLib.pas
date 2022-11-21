@@ -59,9 +59,10 @@
 // License for the specific language governing rights and limitations
 // under the License.
 //
-//
-// Users may distribute this source code provided that this header is included
-// in full at the top of the file.
+// Non commercial users may distribute this source code provided that this
+// header is included in full at the top of the file.
+// Commercial users are not allowed to distribute this source code as part of
+// their product without implicit permission.
 //
 //==============================================================================
 unit WinApi.MediaFoundationApi.MfMetLib;
@@ -3110,14 +3111,14 @@ begin
 
       // On this point we check if the format is supported or not.
       // See: https://learn.microsoft.com/en-us/windows/win32/medfound/video-processor-mft#input-formats
-      pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].bMFSupported := IsMfSupportedFormat(pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].fSubType);
+      pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].bMFSupported := IsMftSupportedInputFormat(pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].fSubType);
 
       if pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].bMFSupported then
         Inc(dwSupportedCount);
 
       // We get all native types. Unsupported formats are marked as unsupported.
       // The application should process the needs.
-      pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].bMFSupported := IsMfSupportedFormat(pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].fSubType);
+      pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].bMFSupported := IsMftSupportedInputFormat(pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].fSubType);
       pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].FormatsIndex := dwIndex;
 
       hr := MfCreateMediaType(pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].mfMediaType);
@@ -3326,7 +3327,7 @@ begin
 
       if pMfSupportedOnly then
         begin
-          if IsMfSupportedFormat(fSubType) then
+          if IsMftSupportedInputFormat(fSubType) then
             begin
               inc(dwMfSupportedCount);
               inc(dwNativeCount);

@@ -53,8 +53,11 @@
 // License for the specific language governing rights and limitations
 // under the License.
 //
-// Users may distribute this source code provided that this header is included
-// in full at the top of the file.
+// Non commercial users may distribute this sourcecode provided that this
+// header is included in full at the top of the file.
+// Commercial users are not allowed to distribute this sourcecode as part of
+// their product without implicit permission.
+//
 //==============================================================================
 unit DeviceExplorer;
 
@@ -109,18 +112,18 @@ type
                                                 // Extended array of TDeviceProperties.
 
     FVideoFormatInfo: TVideoFormatInfo;         // Current video format.
-    iDevices: Integer;              // Number of elements in the array.
-    iSelection: Integer;            // Selected device, by array index.
-    iVideoFormatIndex: Integer ;     // Selected video format.
-    lpSelectedDeviceName: LPWSTR;   // Selected device name.
-    lpSelectedSymbolicLink: LPWSTR; // Selected device symbolic link.
-    gSelectedDeviceGuid: TGuid;     // Guid of the selected device.
-    dwSupportedFormats: DWord;
-    dwNativeFormats: DWord;
-    bIsSelected: Boolean;           // Did user select a device?
+    iDevices: Integer;                          // Number of elements in the array.
+    iSelection: Integer;                        // Selected device, by array index.
+    iVideoFormatIndex: Integer ;                // Selected video format.
+    lpSelectedDeviceName: LPWSTR;               // Selected device name.
+    lpSelectedSymbolicLink: LPWSTR;             // Selected device symbolic link.
+    gSelectedDeviceGuid: TGuid;                 // Guid of the selected device.
+    dwSupportedFormats: DWord;                  // Number of supported input formats.
+    dwNativeFormats: DWord;                     // Number of all native formats found on a device.
+    bIsSelected: Boolean;                       // Did user select a device?
 
-    FMediaType: IMFMediaType;      // Selected mediatype.
-    FActivate: IMFActivate;        // Selected Activation interface
+    FMediaType: IMFMediaType;                   // Selected mediatype.
+    FActivate: IMFActivate;                     // Selected Activation interface
 
     {$IFDEF SAVE_DEBUG_REPORT}
       FMediaTypeDebug: TMediaTypeDebug;
@@ -139,8 +142,10 @@ type
     /// Steps to manage this class
     ///  1 - Call Create, this initializes the class.
     ///  2 - The application should pick te device and videoformat.
-    ///  3 - Call ActivateDevice. Activates the selected device and selected video format.
-    ///
+    ///  3 - Set DeviceParam properties (SetCurrentDeviceProperties). This will activate the selected device and selected video format.
+    ///  4 - Call GetActivationObjects to get the activate object.
+    ///  5 - Call FCaptureManager.InitializeCaptureManager to activate the capture manager.
+    ///  6 - Call FCaptureManager.StartPreview to start previewing.
     ///  On a device lost, call GetCaptureDeviceCaps first and the application should select another device.
     ///  after this call ActivateDevice again.
 
@@ -264,7 +269,6 @@ var
   i: Integer;
 
 begin
-//  FCritSec.Lock;
 
   for i := 0 to Length(FDeviceProperties) -1 do
     FDeviceProperties[i].Reset;
@@ -280,9 +284,7 @@ begin
   bIsSelected := False;
   SafeRelease(FMediaType);
   SafeRelease(FActivate);
-  //SafeRelease(FMediaSource);
 
-//  FCritSec.Unlock;
 end;
 
 //
@@ -299,8 +301,6 @@ label
   Done;
 
 begin
-
-//  FCritSec.Lock;
 
   if (pDeviceIndex < FDeviceProperties[pDeviceIndex].iCount) then
     begin
@@ -376,7 +376,6 @@ begin
     hr := ERROR_INVALID_PARAMETER;
 
 Done:
-//  FCritSec.Unlock;
   Result := hr;
 end;
 
