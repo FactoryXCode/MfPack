@@ -23,6 +23,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 25/11/2022 Tony                Updated MFCopyImage.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -72,9 +73,13 @@
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
 // License for the specific language governing rights and limitations
 // under the License.
-// 
-// Users may distribute this source code provided that this header is included
-// in full at the top of the file.
+//
+// Explanatory memorandum:
+// Non commercial users may distribute this sourcecode provided that this
+// header is included in full at the top of the file.
+// Commercial users are not allowed to distribute this sourcecode as part of
+// their product.
+//
 //==============================================================================
 unit WinApi.MediaFoundationApi.MfApi;
 
@@ -5170,7 +5175,7 @@ const
 
   function MFCopyImage(pDest: PByte;
                        lDestStride: LONG;
-                       pSrc: PByte;
+                       const pSrc: PByte;
                        lSrcStride: LONG;
                        dwWidthInBytes: DWORD;
                        dwLines: DWORD): HRESULT; stdcall;
