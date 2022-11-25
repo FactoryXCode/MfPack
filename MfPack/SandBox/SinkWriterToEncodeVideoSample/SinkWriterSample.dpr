@@ -1,11 +1,7 @@
 program SinkWriterSample;
 
 uses
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
+
   Vcl.Forms,
   frmMain in 'frmMain.pas' {MainForm},
   SinkWriterClass in 'SinkWriterClass.pas';
