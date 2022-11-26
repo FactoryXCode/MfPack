@@ -72,6 +72,7 @@ uses
   WinApi.WinApiTypes,
   {system}
   System.Classes,
+  System.SysUtils,
   {ActiveX}
   WinApi.ActiveX.ObjBase,
   {MediaFoundationApi}
@@ -101,23 +102,27 @@ type
     videoFrameBuffer: array of DWORD;
 
 
-    function InitializeSinkWriter(out ppWriter: IMFSinkWriter;
+    function InitializeSinkWriter(const sExt: string;
+                                  out ppWriter: IMFSinkWriter;
                                   out pStreamIndex: DWORD): HResult;
+
     function WriteFrame(pWriter: IMFSinkWriter;
-                    streamIndex: DWORD;
-                    const rtStart: HNSTIME {Time stamp}): HResult;
+                        streamIndex: DWORD;
+                        const rtStart: HNSTIME {Time stamp}): HResult;
 
   public
 
     constructor Create();
     destructor Destroy(); override;
 
-    function RunSinkWriter(): HResult;
+    function RunSinkWriter(sExt: string;
+                           const gEncodingFormat: TGuid): HResult;
 
   end;
 
   var
     FSampleSinkWriter: TSampleSinkWriter;
+
 
 implementation
 
@@ -147,7 +152,8 @@ end;
 // 7 Call MFShutdown.
 // 8 Call CoUninitialize.
 //
-function TSampleSinkWriter.RunSinkWriter(): HResult;
+function TSampleSinkWriter.RunSinkWriter(sExt: string;
+                                         const gEncodingFormat: TGuid): HResult;
 var
   hr: HResult;
   i: DWord;
@@ -157,7 +163,7 @@ var
 
 begin
   VIDEO_FRAME_DURATION := 10 * 1000 * 1000 div VIDEO_FPS;
-  VIDEO_ENCODING_FORMAT := MFVideoFormat_WMV3;
+  VIDEO_ENCODING_FORMAT := gEncodingFormat;
   VIDEO_INPUT_FORMAT := MFVideoFormat_RGB32;
   VIDEO_PELS := VIDEO_WIDTH * VIDEO_HEIGHT;
   VIDEO_FRAME_COUNT := 20 * VIDEO_FPS;
@@ -180,7 +186,8 @@ begin
       hr := MFStartup(MF_VERSION);
       if SUCCEEDED(hr) then
         begin
-          hr := InitializeSinkWriter(pSinkWriter,
+          hr := InitializeSinkWriter(sExt,
+                                     pSinkWriter,
                                      stream);
           if SUCCEEDED(hr) then
             begin
@@ -219,7 +226,8 @@ end;
 // 7 The sink writer is now ready to accept input samples.
 // The following function shows these steps.
 //
-function TSampleSinkWriter.InitializeSinkWriter(out ppWriter: IMFSinkWriter;
+function TSampleSinkWriter.InitializeSinkWriter(const sExt: string;
+                                                out ppWriter: IMFSinkWriter;
                                                 out pStreamIndex: DWORD): HResult;
 var
   hr: HResult;
@@ -229,7 +237,9 @@ var
   streamIndex: DWORD;
 
 begin
-  hr := MFCreateSinkWriterFromURL(PWideChar('output.wmv'),
+
+
+  hr := MFCreateSinkWriterFromURL(PWideChar(Format('output.%s', [sExt])),
                                   nil,
                                   nil,
                                   pSinkWriter);

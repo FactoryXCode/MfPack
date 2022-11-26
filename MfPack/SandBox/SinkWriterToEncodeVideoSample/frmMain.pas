@@ -66,16 +66,22 @@ unit frmMain;
 interface
 
 uses
+  {WinApi}
   Winapi.Windows,
   Winapi.Messages,
+  {System}
   System.SysUtils,
   System.Variants,
   System.Classes,
+  {Vcl}
   Vcl.Graphics,
   Vcl.Controls,
   Vcl.Forms,
   Vcl.Dialogs,
   Vcl.StdCtrls,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfApi,
+  {Application}
   SinkWriterClass;
 
 
@@ -83,9 +89,15 @@ type
   TMainForm = class(TForm)
     butExecute: TButton;
     lblInfo: TLabel;
+    Label1: TLabel;
+    cbxOutputFormat: TComboBox;
     procedure butExecuteClick(Sender: TObject);
+    procedure cbxOutputFormatCloseUp(Sender: TObject);
   private
     { Private declarations }
+    tgEncodingFormat: TGuid;
+    sExtension: string;
+
   public
     { Public declarations }
   end;
@@ -102,14 +114,40 @@ implementation
 procedure TMainForm.butExecuteClick(Sender: TObject);
 begin
   FSampleSinkWriter := TSampleSinkWriter.Create();
-  if SUCCEEDED(FSampleSinkWriter.RunSinkWriter()) then
+
+  if SUCCEEDED(FSampleSinkWriter.RunSinkWriter(sExtension,
+                                               tgEncodingFormat)) then
     lblInfo.Caption := 'File is succesfully created!'
   else
     lblInfo.Caption := 'Oops, something went wrong :-('
 end;
 
+// Choose the output format
+// Note that this is a small list. To create more valid formats see:
+// See: https://github.com/MicrosoftDocs/win32/blob/docs/desktop-src/medfound/h-264-video-encoder.md
+procedure TMainForm.cbxOutputFormatCloseUp(Sender: TObject);
+begin
 
-
-
+  if (cbxOutputFormat.ItemIndex > -1) then
+    begin
+      sExtension := LowerCase(cbxOutputFormat.Items[cbxOutputFormat.ItemIndex]);
+      if sExtension = 'mp4' then
+        tgEncodingFormat := MFVideoFormat_H264
+      else if sExtension = 'wmf' then
+        tgEncodingFormat := MFVideoFormat_WMV3
+      else if sExtension = 'avi' then
+        tgEncodingFormat := MFVideoFormat_IYUV // Supported formats:
+                                               // MFVideoFormat_I420
+                                               // MFVideoFormat_IYUV
+                                               // MFVideoFormat_NV12
+                                               // MFVideoFormat_YUY2
+                                               // MFVideoFormat_YV12
+      else // default
+        begin
+          sExtension := 'mp4';
+          tgEncodingFormat := MFVideoFormat_H264;
+        end;
+    end;
+end;
 
 end.
