@@ -77,10 +77,7 @@ uses
   WinApi.ActiveX.ObjBase,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
-  WinApi.MediaFoundationApi.MfIdl,
   WinApi.MediaFoundationApi.MfReadWrite,
-  WinApi.MediaFoundationApi.MfError,
-  WinApi.MediaFoundationApi.MfUtils,
   WinApi.MediaFoundationApi.Mfobjects;
 
 const
@@ -103,6 +100,7 @@ type
 
 
     function InitializeSinkWriter(const sExt: string;
+                                  const sEncFormat: string;
                                   out ppWriter: IMFSinkWriter;
                                   out pStreamIndex: DWORD): HResult;
 
@@ -116,6 +114,7 @@ type
     destructor Destroy(); override;
 
     function RunSinkWriter(sExt: string;
+                           sEncFormat: string;
                            const gEncodingFormat: TGuid): HResult;
 
   end;
@@ -153,6 +152,7 @@ end;
 // 8 Call CoUninitialize.
 //
 function TSampleSinkWriter.RunSinkWriter(sExt: string;
+                                         sEncFormat: string;
                                          const gEncodingFormat: TGuid): HResult;
 var
   hr: HResult;
@@ -187,6 +187,7 @@ begin
       if SUCCEEDED(hr) then
         begin
           hr := InitializeSinkWriter(sExt,
+                                     sEncFormat,
                                      pSinkWriter,
                                      stream);
           if SUCCEEDED(hr) then
@@ -227,6 +228,7 @@ end;
 // The following function shows these steps.
 //
 function TSampleSinkWriter.InitializeSinkWriter(const sExt: string;
+                                                const sEncFormat: string;
                                                 out ppWriter: IMFSinkWriter;
                                                 out pStreamIndex: DWORD): HResult;
 var
@@ -239,7 +241,7 @@ var
 begin
 
 
-  hr := MFCreateSinkWriterFromURL(PWideChar(Format('output.%s', [sExt])),
+  hr := MFCreateSinkWriterFromURL(PWideChar(Format('output_%s.%s', [sEncFormat, sExt])),
                                   nil,
                                   nil,
                                   pSinkWriter);

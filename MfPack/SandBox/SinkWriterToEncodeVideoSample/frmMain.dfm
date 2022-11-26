@@ -11,11 +11,13 @@ object MainForm: TMainForm
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  OnCloseQuery = FormCloseQuery
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object lblInfo: TLabel
     Left = 0
-    Top = 94
+    Top = 96
     Width = 431
     Height = 17
     Alignment = taCenter
@@ -62,16 +64,26 @@ object MainForm: TMainForm
     OnClick = butExecuteClick
   end
   object cbxOutputFormat: TComboBox
-    Left = 152
-    Top = 38
-    Width = 147
+    Left = 98
+    Top = 44
+    Width = 73
     Height = 21
     TabOrder = 1
     Text = 'MP4'
     OnCloseUp = cbxOutputFormatCloseUp
     Items.Strings = (
       'MP4'
-      'WMF'
+      'WMV'
       'AVI')
+  end
+  object cbxEncodingFormat: TComboBox
+    Left = 184
+    Top = 44
+    Width = 145
+    Height = 21
+    TabOrder = 2
+    OnCloseUp = cbxEncodingFormatCloseUp
+    Items.Strings = (
+      '-')
   end
 end
