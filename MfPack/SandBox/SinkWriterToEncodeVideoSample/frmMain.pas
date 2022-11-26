@@ -133,7 +133,7 @@ begin
       sExtension := LowerCase(cbxOutputFormat.Items[cbxOutputFormat.ItemIndex]);
       if sExtension = 'mp4' then
         tgEncodingFormat := MFVideoFormat_H264
-      else if sExtension = 'wmf' then
+      else if sExtension = 'wmv' then
         tgEncodingFormat := MFVideoFormat_WMV3
       else if sExtension = 'avi' then
         tgEncodingFormat := MFVideoFormat_IYUV // Supported formats:
