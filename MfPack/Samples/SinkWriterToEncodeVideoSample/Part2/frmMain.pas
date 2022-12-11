@@ -141,6 +141,8 @@ begin
     begin
       sBitmapFile := odlgBitmapFile.FileName;
     end;
+
+  SafeDelete(odlgBitmapFile);
 end;
 
 
