@@ -24,6 +24,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 // 13/08/2022 Tony                Implemented more functionality and updated methods.
+// 11/12/2022 Tony                Added some modifications.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -56,11 +57,11 @@
 // License for the specific language governing rights and limitations
 // under the License.
 //
-//
+// Explanatory memorandum:
 // Non commercial users may distribute this sourcecode provided that this
 // header is included in full at the top of the file.
 // Commercial users are not allowed to distribute this sourcecode as part of
-// their product without implicit permission.
+// their product.
 //
 //==============================================================================
 unit WinApi.MediaFoundationApi.MfUtils;
@@ -260,6 +261,15 @@ type
   // Copies RGBTRIPLE src to RGBTRIPLE srd
   procedure CopyRgbTriple(src: RGBTRIPLE;
                           out srd: RGBTRIPLE); inline;
+
+  // Copies RGBTRIPLE src to RGBQUAD srd
+  procedure CopyRgbTripleToRgbQuad(src: RGBTRIPLE;
+                                   out srd: RGBQUAD); inline;
+
+  // Copies RGBQUAD src to RGBTRIPLE srd
+  procedure CopyRgbQuadToRgbTriple(src: RGBQUAD;
+                                   out srd: RGBTRIPLE); inline;
+
 
   // copies a DWord (COLORREF) to RGBTRIPLE
   procedure CopyClrRefToRgbTriple(src: COLORREF;
@@ -1226,9 +1236,9 @@ end;
 procedure CopyMFARGBToTColor(const argb: MFARGB;
                              out cColor: TColor); inline;
 begin
-  cColor := ((argb.rgbRed shl 16) or
+  cColor := ((argb.rgbRed shl 0) or
              (argb.rgbGreen shl 8) or
-             (argb.rgbBlue shl 0) or
+             (argb.rgbBlue shl 16) or
              (argb.rgbAlpha shl 24));
 end;
 
@@ -1254,6 +1264,26 @@ begin
 end;
 
 
+procedure CopyRgbTripleToRgbQuad(src: RGBTRIPLE;
+                                 out srd: RGBQUAD); inline;
+begin
+  srd.rgbBlue := src.rgbtBlue;
+  srd.rgbGreen := src.rgbtGreen;
+  srd.rgbRed := src.rgbtRed;
+  srd.rgbReserved := Byte(0);
+end;
+
+
+// Copies RGBQUAD src to RGBTRIPLE srd
+procedure CopyRgbQuadToRgbTriple(src: RGBQUAD;
+                                 out srd: RGBTRIPLE); inline;
+begin
+  srd.rgbtBlue := src.rgbBlue;
+  srd.rgbtGreen := src.rgbGreen;
+  srd.rgbtRed := src.rgbRed;
+end;
+
+
 // copies a DWord (COLORREF) to RGBTRIPLE
 procedure CopyClrRefToRgbTriple(src: COLORREF;
                                 out srd: RGBTRIPLE); inline;
@@ -1265,6 +1295,7 @@ end;
 
 
 // copies a RGBTRIPLE to DWord (COLORREF)
+// Note the Delphi RGBTriple has a reversed RGBA order (BGRA), the color calculation has to be reversed too.
 procedure CopyRgbTripleToClrRef(src: RGBTRIPLE;
                                 out srd: COLORREF); inline;
 begin
@@ -1276,13 +1307,14 @@ end;
 
 
 // copies a RGBQUAD to DWord (COLORREF)
+// Note the Delphi RGBQuad has a reversed RGB order (BGR), the color calculation has to be reversed too.
 procedure CopyRGBQuadToClrRef(src: RGBQUAD;
                               out srd: COLORREF); inline;
 begin
-  srd := ((src.rgbRed shl 16) or
-          (src.rgbGreen shl 8) or
-          (src.rgbBlue shl 0) or
-          (src.rgbReserved shl 24)); // this should always be 0!
+  srd := ((DWord(src.rgbRed) shl 16) or
+          (DWord(src.rgbGreen) shl 8) or
+          (DWord(src.rgbBlue) shl 0) or
+          (DWord(src.rgbReserved) shl 24)); // this should always be 0!
 end;
 
 
@@ -1331,7 +1363,9 @@ end;
 //  Any coordinates of N that fall outside the range [0...1] are mapped to positions
 //  outside the rectangle R.
 //
-// A normalized rectangle can be used to specify a region within a video rectangle without knowing the resolution or even the aspect ratio of the video. For example, the upper-left quadrant is defined as {0.0, 0.0, 0.5, 0.5}.
+// A normalized rectangle can be used to specify a region within a video rectangle,
+// without knowing the resolution or even the aspect ratio of the video.
+// For example, the upper-left quadrant is defined as {0.0, 0.0, 0.5, 0.5}.
 
 
 // Note: TRect/TRectF record methods are defined in Delphi

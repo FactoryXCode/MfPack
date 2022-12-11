@@ -219,7 +219,7 @@ try
     begin
       sBitmapFile := dlgOpenPicture.FileName;
       imgBitmap.Picture.LoadFromFile(sBitmapFile);
-      lblInfo.Caption := 'Select ''Create Video File'' or select ''Video output'' to configure the video.';
+      lblInfo.Caption := 'Select ''Render Video File'' or select ''Video output'' to configure the video.';
       mnuCreateFile.Enabled := True;
     end
   else

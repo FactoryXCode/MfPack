@@ -9,7 +9,8 @@ uses
   Vcl.Forms,
   frmMain in 'frmMain.pas' {MainForm},
   SinkWriterClass in 'SinkWriterClass.pas',
-  dlgVideoOutput in 'dlgVideoOutput.pas' {dlgVideoSetttings};
+  dlgVideoOutput in 'dlgVideoOutput.pas' {dlgVideoSetttings},
+  Utils in 'Utils.pas';
 
 {$R *.res}
 

@@ -7,7 +7,7 @@
 //                   https://github.com/FactoryXCode/MfPack
 // Module: SinkWriterClass.pas
 // Kind: Pascal / Delphi unit
-// Release date: 27-06-2012
+// Release date: 11-12-2012
 // Language: ENU
 //
 // Revision Version: 3.1.3
@@ -82,7 +82,9 @@ uses
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfReadWrite,
   WinApi.MediaFoundationApi.Mfobjects,
-  WinApi.MediaFoundationApi.MfUtils;
+  WinApi.MediaFoundationApi.MfUtils,
+  {Application}
+  Utils;
 
 
 type
@@ -128,6 +130,8 @@ type
                         streamIndex: DWORD;
                         const rtStart: HNSTIME {Time stamp}): HResult;
 
+    function SetBitmapToVideoFormat(aBmpFileName: string): HResult;
+
   public
 
     constructor Create();
@@ -163,20 +167,10 @@ type
     // FVideoPixels = 640 * 480
     // FFileExtension = MP4
 
-
   end;
 
   var
     FSampleSinkWriter: TSampleSinkWriter;
-
-
-  // Helper methods
-  function SetPointer(const aPointer: Pointer;
-                      aOffset: NativeInt): Pointer; inline;
-
-  procedure ResizeBitmap(aBitmap: TBitmap;
-                         const ToWidth: Integer;
-                         const ToHeight: Integer);
 
 
 implementation
@@ -221,28 +215,7 @@ end;
 
 procedure TSampleSinkWriter.SetVideoDuration(aValue: UINT64);
 begin
-
-end;
-
-function SetPointer(const aPointer: Pointer;
-                    aOffset: NativeInt): Pointer; inline;
-begin
-  Result := Pointer(NativeInt(aPointer) + aOffset);
-end;
-
-
-procedure ResizeBitmap(aBitmap: TBitmap;
-                         const ToWidth: Integer;
-                         const ToHeight: Integer);
-begin
-  aBitmap.Canvas.StretchDraw(Rect(0,
-                                  0,
-                                  ToWidth,
-                                  ToHeight),
-                             aBitmap);
-
-  aBitmap.SetSize(ToWidth,
-                  ToHeight);
+  FVideoDuration := aValue;
 end;
 
 
@@ -267,6 +240,88 @@ begin
 end;
 
 
+function TSampleSinkWriter.SetBitmapToVideoFormat(aBmpFileName: string): HResult;
+var
+  hr: HResult;
+  d: Integer;
+  x, y: NativeInt;
+  bmSource: TBitmap;
+  BytesPerPixel: NativeInt;
+  ScanLine0: Pointer;
+  BytesPerLine: NativeInt;
+  FmtPf24Bit: TRgbTriple;
+  PFmtPf24Bit: PRgbTriple;
+  dwPxl: COLORREF;
+
+label
+  Done;
+
+begin
+  if not FileExists(aBmpFileName) then
+    begin
+      hr := ERROR_CANT_RESOLVE_FILENAME;
+      goto Done;
+    end;
+
+  bmSource := TBitmap.Create();
+  // Load the original bitmap from file
+  bmSource.LoadFromFile(aBmpFileName);
+
+  // Vheck for valid pizelformat
+  if (bmSource.PixelFormat <> pf24Bit) then
+    begin
+      hr := ERROR_NOT_SUPPORTED;
+      goto Done;
+    end;
+
+  // Resize the bitmap to the desired videoframe size.
+  ResizeBitmap(bmSource,
+               FVideoWidth,
+               FVideoHeigth);
+
+  // Optional save the bitmap to file
+  if FSaveResizedBitmap then
+    begin
+      bmSource.SaveToFile(Format('%dx%d_%s',[FVideoWidth, FVideoHeigth, ExtractFileName(aBmpFileName)]));
+    end;
+
+  // Check if the bitmap is 24 bit (for example Paint3D can only store 24bit format bitmaps)
+  FBitmapPixelFormat := bmSource.PixelFormat;
+
+  BytesPerPixel := SizeOf(FmtPf24Bit);
+  ScanLine0 := bmSource.ScanLine[0];
+  BytesPerLine := NativeInt(bmSource.ScanLine[1]) - NativeInt(ScanLine0);
+  FVideoPixels := (abs(BytesPerLine) * bmSource.Height);
+  // Dimension the array to calculated range.
+  SetLength(FVideoFrameBuffer,
+            FVideoPixels);
+
+  d := 0;
+  // Scan and copy the rgb24bit records to COLORREF values (4 Bytes).
+  for y := (FVideoHeigth - 1) downto 0 do
+    begin
+      for x := 0 to FVideoWidth - 1 do
+        begin
+          PFmtPf24Bit := SetPointer(ScanLine0,
+                                   (BytesPerLine * y) + (x * BytesPerPixel));
+          FmtPf24Bit := PFmtPf24Bit^;
+
+          // Transform rgbtriple to COLORREF.
+          CopyRgbTripleToClrRef(FmtPf24Bit,
+                                dwPxl);
+
+          FVideoFrameBuffer[d] := dwPxl;
+          inc(d);
+        end;
+    end;
+
+Done:
+  SafeDelete(bmSource);
+  Result := hr;
+end;
+
+
+
 // Inside this function, the following steps will be performed.
 //
 // 1 Call CoInitializeEx to initialize the COM library.
@@ -287,90 +342,27 @@ function TSampleSinkWriter.RunSinkWriter(sExt: string;
                                          aVideoHeigth: DWord = 480): HResult;
 var
   hr: HResult;
-  i, d: DWord;
-  x, y: NativeInt;
+  i: Integer;
   stream: DWORD;
   pSinkWriter: IMFSinkWriter;
   rtStart: HNSTIME;
-  bmSource: TBitmap;
-  BytesPerPixel: NativeInt;
-  ScanLine0: Pointer;
-  BytesPerLine: NativeInt;
-  FmtPf24Bit: TRgbTriple;
-  PFmtPf24Bit: PRgbTriple;
-  Pixel: COLORREF;
 
 label
   Done;
 
 begin
-
-  if not FileExists(aBmpFileName) then
-    begin
-      hr := ERROR_CANT_RESOLVE_FILENAME;
-      goto Done;
-    end;
-
   FVideoFrameDuration := 10 * 1000 * 1000 div FVideoFps;
   FVideoEncodingFormat := gEncodingFormat;
   FVideoInputFormat := MFVideoFormat_RGB32;
-  // Duration of the video in seconds
+  // aVideoLenght is the given duration of the video in seconds.
   FVideoFrameCount := aVideoLenght * FVideoFps;
   FVideoWidth := aVideoWidth;
   FVideoHeigth := aVideoHeigth;
 
-/////////////////////////////////////////////////////////////////////////////
+  hr := SetBitmapToVideoFormat(aBmpFileName);
 
-  bmSource := TBitmap.Create();
-  // Load the original bitmap from file
-  bmSource.LoadFromFile(aBmpFileName);
-
-  // Vheck for valid pizelformat
-  if (bmSource.PixelFormat <> pf24Bit) then
-    begin
-      hr := ERROR_NOT_SUPPORTED;
-      goto Done;
-    end;
-
-  // Shrink the bitmap size to the desired videoframe size.
-  ResizeBitmap(bmSource,
-               FVideoWidth,
-               FVideoHeigth);
-
-  if FSaveResizedBitmap then
-    begin
-      bmSource.SaveToFile(Format('%dx%d_%s',[FVideoWidth, FVideoHeigth, ExtractFileName(aBmpFileName)]));
-    end;
-
-
-  // Check if the bitmap is 24 bit (for example Paint3D can only store 24bit format bitmaps)
-  FBitmapPixelFormat := bmSource.PixelFormat;
-
-  BytesPerPixel := SizeOf(FmtPf24Bit); //SizeOf(TRgbQuad);
-  ScanLine0 := bmSource.ScanLine[0];
-  BytesPerLine := NativeInt(bmSource.ScanLine[1]) - NativeInt(ScanLine0);
-  FVideoPixels := (abs(BytesPerLine) * bmSource.Height);
-  SetLength(FVideoFrameBuffer,
-            FVideoPixels);
-
-  d := 0;
-
-  for y := (FVideoHeigth - 1) downto 0 do
-    begin
-      for x := 0 to FVideoWidth - 1 do
-        begin
-          PFmtPf24Bit := SetPointer(ScanLine0,
-                                   (BytesPerLine * y) + (x * BytesPerPixel));
-          FmtPf24Bit := PFmtPf24Bit^;
-
-          // Transform rgbtriple to COLORREF.
-          CopyRgbTripleToClrRef(FmtPf24Bit,
-                                Pixel);
-
-          FVideoFrameBuffer[d] := Pixel;
-          inc(d);
-        end;
-    end;
+  if FAILED(hr) then
+    goto Done;
 
   rtStart := 0;
 
@@ -409,7 +401,6 @@ begin
     end;
 
 Done:
-  SafeDelete(bmSource);
   Result := hr;
 end;
 
