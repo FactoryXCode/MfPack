@@ -7,7 +7,7 @@
 //                   https://github.com/FactoryXCode/MfPack
 // Module: SinkWriterClass.pas
 // Kind: Pascal / Delphi unit
-// Release date: 11-12-2012
+// Release date: 25-11-2022
 // Language: ENU
 //
 // Revision Version: 3.1.3

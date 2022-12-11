@@ -1,9 +1,9 @@
 object MainForm: TMainForm
   Left = 0
   Top = 0
-  Caption = 'MainForm'
+  Caption = 'Using sinkwriter to encode video Sample2'
   ClientHeight = 522
-  ClientWidth = 673
+  ClientWidth = 667
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -19,7 +19,7 @@ object MainForm: TMainForm
   object lblInfo: TLabel
     Left = 0
     Top = 498
-    Width = 673
+    Width = 667
     Height = 24
     Align = alBottom
     Alignment = taCenter
