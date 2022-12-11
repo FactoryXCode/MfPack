@@ -1,9 +1,9 @@
-# SinkWriterToEncodeVideoSample - Part 2
+# SinkWriterToEncodeVideoSamples
 
 Version: X 3.1.3
 
 Description:
-  This sample demonstrates how to use the SinkWriter to encode a video file from a bitmap.
+  These samples demonstrates how to use the SinkWriter to encode a video file from a bitmap.
   This sample has 2 levels:
   Sample 1 creates a simple green bitmap (640x480) and store it to a file with a length of 20 seconds.
   Sample 2 demonstrates how to use the SinkWriter to encode a video file from a bitmap file.
