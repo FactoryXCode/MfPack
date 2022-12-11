@@ -96,6 +96,7 @@ type
     // Settings
 
     FVideoFrameDuration: UINT64;
+    FVideoDuration: UINT64;
     FVideoEncodingFormat: TGUID;
     FVideoInputFormat: TGUID;
     FVideoPixels: UINT32;
@@ -106,6 +107,7 @@ type
     FVideoBitRate: UINT32;
     FVideoFrameBuffer: array of COLORREF;
     FSaveResizedBitmap: Boolean;
+    FVideoFileName: string;
 
     // Setters
     procedure SetVideoFps(aValue: UINT32);
@@ -115,6 +117,7 @@ type
     procedure SetVideoPixels(aValue: UINT32);
     procedure SetVideoFrameCount(aValue: UINT32);
     procedure SetVideoFrameDuration(aValue: UINT64);
+    procedure SetVideoDuration(aValue: UINT64);
 
     function InitializeSinkWriter(const sExt: string;
                                   const sEncFormat: string;
@@ -134,7 +137,7 @@ type
                            sEncFormat: string;
                            const gEncodingFormat: TGuid;
                            aBmpFileName: string;
-                           aVideoLenght: UINT32 = 1;
+                           aVideoLenght: UINT64 = 1;
                            aVideoWidth: DWord = 640;
                            aVideoHeigth: DWord = 480): HResult;
 
@@ -142,6 +145,7 @@ type
     property VideoHeight: UINT32 read FVideoHeigth;
     property VideoWidth: UINT32 read FVideoWidth;
     property VideoFps: UINT32 read FVideoFps write SetVideoFps;
+    property VideoDuration: UINT64 read FVideoDuration write SetVideoDuration;
     property VideoBitRate: UINT32 read FVideoBitRate write SetVideoBitRate;
     property VideoEncodingFormat: TGUID read FVideoEncodingFormat write SetVideoEncodingFormat;
     property VideoInputFormat: TGUID read FVideoInputFormat write SetVideoInputFormat;
@@ -149,6 +153,7 @@ type
     property VideoFrameCount: UINT32 read FVideoFrameCount write SetVideoFrameCount;
     property VideoFrameDuration: UINT64 read FVideoFrameDuration write SetVideoFrameDuration;
     property SaveResizedBitmap: Boolean read FSaveResizedBitmap write FSaveResizedBitmap;
+    property VideoFileName: string read FVideoFileName;
 
     // By default these properties are:
     // FVideoFrameDuration = {10 * 1000 * 1000} 10000000 div 30
@@ -214,6 +219,11 @@ begin
   FVideoFrameDuration := aValue;
 end;
 
+procedure TSampleSinkWriter.SetVideoDuration(aValue: UINT64);
+begin
+
+end;
+
 function SetPointer(const aPointer: Pointer;
                     aOffset: NativeInt): Pointer; inline;
 begin
@@ -272,7 +282,7 @@ function TSampleSinkWriter.RunSinkWriter(sExt: string;
                                          sEncFormat: string;
                                          const gEncodingFormat: TGuid;
                                          aBmpFileName: string;
-                                         aVideoLenght: UINT32 = 1;
+                                         aVideoLenght: UINT64 = 1;
                                          aVideoWidth: DWord = 640;
                                          aVideoHeigth: DWord = 480): HResult;
 var
@@ -282,9 +292,6 @@ var
   stream: DWORD;
   pSinkWriter: IMFSinkWriter;
   rtStart: HNSTIME;
-
-  ////////////////////////
-
   bmSource: TBitmap;
   BytesPerPixel: NativeInt;
   ScanLine0: Pointer;
@@ -292,8 +299,6 @@ var
   FmtPf24Bit: TRgbTriple;
   PFmtPf24Bit: PRgbTriple;
   Pixel: COLORREF;
-
-  ///////////////////////
 
 label
   Done;
@@ -433,8 +438,9 @@ var
   streamIndex: DWORD;
 
 begin
+  FVideoFileName := Format('output_%s.%s', [sEncFormat, sExt]);
 
-  hr := MFCreateSinkWriterFromURL(PWideChar(Format('output_%s.%s', [sEncFormat, sExt])),
+  hr := MFCreateSinkWriterFromURL(PWideChar(FVideoFileName),
                                   nil,
                                   nil,
                                   pSinkWriter);
