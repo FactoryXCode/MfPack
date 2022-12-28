@@ -36,7 +36,8 @@
 // Todo: -
 //
 //==============================================================================
-// Source: -
+// Source: https://learn.microsoft.com/en-us/windows/win32/medfound/tutorial--using-the-sink-writer-to-encode-video
+//         https://learn.microsoft.com/nl-nl/windows/win32/medfound/tutorial--encoding-an-mp4-file-?redirectedfrom=MSDN
 //
 // Copyright (c) FactoryX. All rights reserved.
 //==============================================================================
@@ -95,36 +96,37 @@ type
     lblInfo: TLabel;
     MainMenu: TMainMenu;
     File1: TMenuItem;
-    Open1: TMenuItem;
+    mnuSelectOneBitmap: TMenuItem;
     Exit1: TMenuItem;
     N1: TMenuItem;
-    Settings1: TMenuItem;
-    Videooutput1: TMenuItem;
+    mmnuSettings: TMenuItem;
+    mnuVideoOutput: TMenuItem;
     dlgOpenPicture: TOpenPictureDialog;
-    mnuCreateFile: TMenuItem;
+    mnuRender: TMenuItem;
     imgBitmap: TImage;
     mnuPlayVideoFile: TMenuItem;
+    mnuSelectMultipleBitmaps: TMenuItem;
+    N2: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-    procedure Open1Click(Sender: TObject);
-    procedure mnuCreateFileClick(Sender: TObject);
-    procedure Videooutput1Click(Sender: TObject);
+    procedure mnuSelectOneBitmapClick(Sender: TObject);
+    procedure mnuRenderClick(Sender: TObject);
+    procedure mnuVideoOutputClick(Sender: TObject);
     procedure mnuPlayVideoFileClick(Sender: TObject);
+    procedure mnuSelectMultipleBitmapsClick(Sender: TObject);
+    procedure Exit1Click(Sender: TObject);
 
   private
     { Private declarations }
 
+    procedure CheckBitmapFormat(var bmp: TBitmap);
+    // Recieve messages from the sinkwriter.
+    procedure OnProcesBmp(var Msg: TMessage); message WM_BITMAP_PROCESSING_MSG;
+    procedure OnSinkWriterMsg(var Msg: TMessage); message WM_SINKWRITER_WRITES_BITMAP;
+
   public
     { Public declarations }
-
-    tgEncodingFormat: TGuid;
-    sEncodingFormat: string;
-    sBitmapFile: string;
-    sExtension: string;
-    dwSelectedVideoHeight: DWord;
-    dwSelectedVideoWidth: DWord;
-    iVideoLength: UINT32;
-    bSaveResizedBitmap: Boolean;
+    FBitmapFiles: TStringList;
 
   end;
 
@@ -140,29 +142,26 @@ uses
   dlgVideoOutput;
 
 
-procedure TMainForm.mnuCreateFileClick(Sender: TObject);
+procedure TMainForm.mnuRenderClick(Sender: TObject);
 var
   hr: HResult;
 
 begin
-  if not FileExists(sBitmapFile) then
+
+  MainMenu.Items.Enabled := False;
+
+  if (FBitmapFiles.Count = 0) then
     begin
       ShowMessage('You did not select a bitmap file');
       Exit;
     end;
 
-  FSampleSinkWriter := TSampleSinkWriter.Create();
+  lblInfo.Caption := 'Rendering the bitmaps. This can take a while..';
 
-  FSampleSinkWriter.SaveResizedBitmap := bSaveResizedBitmap;
+  // Let the sinkwriter process the bitmaps.
+  hr := FSinkWriter.RunSinkWriter(FBitmapFiles);
 
-  // We could set the params to it's class properties, but that's up to you.
-  hr := FSampleSinkWriter.RunSinkWriter(sExtension,
-                                        sEncodingFormat,
-                                        tgEncodingFormat,
-                                        sBitmapFile,
-                                        iVideoLength,
-                                        dwSelectedVideoWidth,
-                                        dwSelectedVideoHeight);
+  MainMenu.Items.Enabled := True;
 
   if SUCCEEDED(hr) then
     begin
@@ -183,58 +182,169 @@ procedure TMainForm.mnuPlayVideoFileClick(Sender: TObject);
 begin
   ShellExecute(Handle,
                'open',
-               PWideChar(FSampleSinkWriter.VideoFileName),
+               PWideChar(FSinkWriter.SinkWriterParams.pwcVideoFileName),
                nil,
                nil,
                SW_SHOWNORMAL) ;
 end;
 
+
+procedure TMainForm.Exit1Click(Sender: TObject);
+begin
+  Close();
+end;
+
+
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   CanClose := False;
-  SafeDelete(FSampleSinkWriter);
+  SafeDelete(FSinkWriter);
+  SafeDelete(FBitmapFiles);
   CanClose := True;
 end;
 
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-  sExtension := 'mp4';
-  tgEncodingFormat := MFVideoFormat_H264;
-  sEncodingFormat  := 'MFVideoFormat_H264';
-  dwSelectedVideoHeight := 480;
-  dwSelectedVideoWidth  := 640;
-  iVideoLength := 20;
-  bSaveResizedBitmap := False;
+
+  FSinkWriter := TSinkWriter.Create(Handle);
+
+  // Default settings
+  FSinkWriter.SinkWriterParams.Init();
+  FBitmapFiles := TStringList.Create();
 end;
 
 
-procedure TMainForm.Open1Click(Sender: TObject);
+procedure TMainForm.CheckBitmapFormat(var bmp: TBitmap);
 begin
-try
+  // if we have an unsupported format, we change it to the proper one and use this copy of the original.
+  // The original file will be untouched.
+  if (bmp.PixelFormat <> pf24bit) then
+    begin
+      lblInfo.Caption := Format('Unsupported pixelformat (%s)! The selected file pixelformat has been converted to 24 bit',
+                                [PixelFormatToStr(bmp.PixelFormat)]);
+      bmp.PixelFormat := pf24Bit;
+      FBitmapFiles.Strings[0] := Format('%s_%s.bmp',
+                                        [ChangeFileExt(FBitmapFiles.Strings[0], ''),
+                                         PixelFormatToStr(bmp.PixelFormat)]);
+      bmp.SaveToFile(FBitmapFiles.Strings[0]);
+    end;
+end;
 
+
+procedure TMainForm.mnuSelectOneBitmapClick(Sender: TObject);
+begin
+var
+  bm: TBitmap;
+
+try
+  bm := TBitmap.Create();
+  FBitmapFiles.Clear();
   dlgOpenPicture := TOpenPictureDialog.Create(Self);
   dlgOpenPicture.InitialDir := GetCurrentDir();
+
   if dlgOpenPicture.Execute then
     begin
-      sBitmapFile := dlgOpenPicture.FileName;
-      imgBitmap.Picture.LoadFromFile(sBitmapFile);
+      FBitmapFiles.Append(dlgOpenPicture.FileName);
+      bm.LoadFromFile(FBitmapFiles.Strings[0]);
+      CheckBitmapFormat(bm);
+      imgBitmap.Picture.Assign(bm);
       lblInfo.Caption := 'Select ''Render Video File'' or select ''Video output'' to configure the video.';
-      mnuCreateFile.Enabled := True;
+      mnuRender.Enabled := True;
     end
   else
     begin
-      lblInfo.Caption := 'Select ''Open Bitmap''';
-      mnuCreateFile.Enabled := False;
+      lblInfo.Caption := 'Select ''Select Single Bitmap'' or ''Select Multiple Bitmaps''';
+      mnuRender.Enabled := False;
     end;
 
 finally
+  SafeDelete(bm);
   SafeDelete(dlgOpenPicture);
 end;
 end;
 
 
-procedure TMainForm.Videooutput1Click(Sender: TObject);
+procedure TMainForm.mnuSelectMultipleBitmapsClick(Sender: TObject);
+Var
+  Path: string;
+  SearchRec: TSearchRec;
+  DirList: TStringList;
+  hr: HResult;
+  i: Integer;
+  bm: TBitmap;
+
+begin
+  hr := S_OK;
+
+  if dlgOpenPicture.Execute then
+    begin
+
+      // Create a stringlist to add the filenames found.
+      DirList := TStringList.Create;
+      DirList.Sorted := True;
+
+      try
+        FBitmapFiles.Clear;
+        //Get the path of the selected file
+        Path := ExtractFileDir(dlgOpenPicture.FileName);
+
+        lblInfo.Caption := 'Moment, processing the bitmaps...';
+
+        {$WARN SYMBOL_PLATFORM OFF}
+        if FindFirst(IncludeTrailingPathDelimiter(Path) + '*.bmp',
+                     faArchive,
+                     SearchRec) = 0 then
+        {$WARN SYMBOL_PLATFORM ON}
+          begin
+            repeat
+              DirList.Add(SearchRec.Name); //Fill the list
+            until FindNext(SearchRec) <> 0;
+            FindClose(SearchRec);
+          end;
+
+        // process the bitmaps found
+        FBitmapFiles.SetStrings(DirList);
+
+        if (FBitmapFiles.Count = 0) then
+          begin
+            lblInfo.Caption := 'No bitmaps found.';
+            Exit;
+          end;
+
+        bm := TBitmap.Create();
+        // Check if each bitmap pixelformat is 24bit and change it when not.
+        for i := 0 to FBitmapFiles.Count - 1 do
+          begin
+            bm.FreeImage();
+            bm.LoadFromFile(FBitmapFiles[i]);
+            CheckBitmapFormat(bm);
+          end;
+
+      finally
+
+        DirList.Free;
+        SafeDelete(bm);
+
+        if Failed(hr) then
+          begin
+            lblInfo.Font.Color := clRed;
+            lblInfo.Caption := 'Could not load the bitmaps.';
+            mnuRender.Enabled := False;
+          end
+        else
+          begin
+            lblInfo.Font.Color := clWindowText;
+            lblInfo.Caption := 'Select ''Render Video File'' or select ''Video output'' to configure the video.';
+            mnuRender.Enabled := True;
+            imgBitmap.Picture.LoadFromFile(FBitmapFiles[0]);
+          end;
+      end;
+    end;
+end;
+
+
+procedure TMainForm.mnuVideoOutputClick(Sender: TObject);
 begin
   // Create the dialog if it's not allready done.
   if not Assigned(dlgVideoSetttings) then
@@ -247,12 +357,34 @@ begin
   // Ask the user to select one.
   if dlgVideoSetttings.ShowModal = mrOk then
     begin
-      lblInfo.Caption := 'Select ''Create Video File''';
+      lblInfo.Caption := 'Select ''Select Single Bitmap'', ''Select Multiple Bitmaps'' or ''Render Video File''';
     end
   else
     begin
       // User canceled.
     end;
 end;
+
+
+procedure TMainForm.OnProcesBmp(var Msg: TMessage);
+begin
+  // We did recieve a message from SinkWriter.SetBitmapToVideoFormat
+  lblInfo.Caption := Format('Processing Bitmap %d of %d.',
+                             [Msg.LParam,
+                              FBitmapFiles.Count]);
+  lblInfo.Update();
+end;
+
+
+procedure TMainForm.OnSinkWriterMsg(var Msg: TMessage);
+begin
+  // We did recieve a message from SinkWriter.RunSinkWriter
+  lblInfo.Caption := Format('Writing Frame %d of %d to file: %s.',
+                            [Msg.LParam,
+                             FBitmapFiles.Count,
+                             FSinkWriter.SinkWriterParams.pwcVideoFileName]);
+  lblInfo.Update();
+end;
+
 
 end.

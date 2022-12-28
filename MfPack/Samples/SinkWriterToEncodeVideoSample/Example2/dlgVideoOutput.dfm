@@ -3,7 +3,7 @@ object dlgVideoSetttings: TdlgVideoSetttings
   Top = 108
   BorderStyle = bsDialog
   Caption = 'Video output settings'
-  ClientHeight = 219
+  ClientHeight = 264
   ClientWidth = 297
   Color = clBtnFace
   ParentFont = True
@@ -16,7 +16,7 @@ object dlgVideoSetttings: TdlgVideoSetttings
     Left = 3
     Top = 8
     Width = 286
-    Height = 169
+    Height = 225
     ParentShowHint = False
     Shape = bsFrame
     ShowHint = False
@@ -44,15 +44,47 @@ object dlgVideoSetttings: TdlgVideoSetttings
   end
   object Label4: TLabel
     Left = 24
-    Top = 116
-    Width = 53
-    Height = 18
+    Top = 147
+    Width = 85
+    Height = 19
+    Hint = 'Buffer latency. By default this is 10 milliseconds.'
     AutoSize = False
-    Caption = 'Duration:'
+    Caption = 'Buffer latency'
+  end
+  object Label5: TLabel
+    Left = 24
+    Top = 104
+    Width = 59
+    Height = 19
+    Hint = 'Frames Per Second'
+    AutoSize = False
+    Caption = 'Frame rate'
+    ParentShowHint = False
+    ShowHint = True
+  end
+  object Label6: TLabel
+    Left = 100
+    Top = 104
+    Width = 59
+    Height = 19
+    Hint = 'Frames Per Second'
+    AutoSize = False
+    Caption = 'Bit rate (bits per second)'
+    ParentShowHint = False
+    ShowHint = True
+  end
+  object Label7: TLabel
+    Left = 100
+    Top = 147
+    Width = 82
+    Height = 21
+    Hint = 'Time in 100 nanoseconds units.'
+    AutoSize = False
+    Caption = 'Frame time units'
   end
   object OKBtn: TButton
     Left = 8
-    Top = 186
+    Top = 235
     Width = 75
     Height = 25
     Caption = 'OK'
@@ -62,7 +94,7 @@ object dlgVideoSetttings: TdlgVideoSetttings
   end
   object CancelBtn: TButton
     Left = 89
-    Top = 187
+    Top = 236
     Width = 75
     Height = 25
     Cancel = True
@@ -94,37 +126,75 @@ object dlgVideoSetttings: TdlgVideoSetttings
       '-')
   end
   object cbxDimensions: TComboBox
-    Left = 22
-    Top = 81
+    Left = 24
+    Top = 80
     Width = 151
     Height = 21
     TabOrder = 4
     OnCloseUp = cbxDimensionsCloseUp
-    Items.Strings = (
-      'SD  480p (480 x 640)'
-      'HD  720p (1280 x 720)'
-      'Full HD 1080p (1920 x 1080)')
   end
-  object edVideoLength: TEdit
-    Left = 73
-    Top = 113
+  object edLatency: TEdit
+    Left = 24
+    Top = 163
     Width = 48
     Height = 21
-    Hint = 'Duration in seconds'
+    Hint = 'Buffer latency. By default this is 10 milliseconds.'
     NumbersOnly = True
     ParentShowHint = False
     ShowHint = True
     TabOrder = 5
-    Text = '20'
-    OnChange = edVideoLengthChange
+    Text = '10'
+    OnChange = edLatencyChange
   end
   object cbSaveResizedBitmap: TCheckBox
-    Left = 22
-    Top = 147
+    Left = 24
+    Top = 201
     Width = 223
-    Height = 18
-    Caption = 'Save resized source bitmap to file.'
+    Height = 16
+    Caption = 'Save resized source bitmap(s) to file(s).'
     TabOrder = 6
     OnClick = cbSaveResizedBitmapClick
+  end
+  object edFps: TEdit
+    Left = 24
+    Top = 119
+    Width = 48
+    Height = 21
+    Hint = 
+      'FrameRate in FPS. The less movement the less FPS are needed. Def' +
+      'ault is 12 FPS for animations.'
+    NumbersOnly = True
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 7
+    Text = '12'
+    OnChange = edFpsChange
+    OnEnter = edFpsEnter
+  end
+  object edBitRate: TEdit
+    Left = 100
+    Top = 119
+    Width = 59
+    Height = 21
+    Hint = 'BitRate: Default is 800000 bits per second.'
+    NumbersOnly = True
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 8
+    Text = '8000000'
+    OnChange = edBitRateChange
+  end
+  object edFrameTimeUnits: TEdit
+    Left = 100
+    Top = 163
+    Width = 48
+    Height = 21
+    Hint = 'Time in 100 nanoseconds units.'
+    NumbersOnly = True
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 9
+    Text = '10000'
+    OnChange = edFrameTimeUnitsChange
   end
 end

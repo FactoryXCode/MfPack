@@ -11,7 +11,7 @@
 // Language: ENU
 //
 // Revision Version: 3.1.3
-// Description: Contains some bitmap helpers.
+// Description: Contains bitmap helpers.
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -37,6 +37,7 @@
 //
 //==============================================================================
 // Source: https://learn.microsoft.com/en-us/windows/win32/medfound/tutorial--using-the-sink-writer-to-encode-video
+//         https://blog.dummzeuch.de/2019/12/12/accessing-bitmap-pixels-with-less-scanline-calls-in-delphi/
 //
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //==============================================================================
@@ -68,6 +69,7 @@ interface
 uses
   {WinApi}
   WinApi.Windows,
+  WinApi.WinApiTypes,
   {System}
   System.Types,
   {Vcl}
@@ -75,12 +77,18 @@ uses
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfUtils;
 
+
+{$IF SizeOf(Pointer) = 4}
+type NativeInt = Integer;   // Correction for NativeInt on Delphi <= 2007 (8 bytes to 4 bytes).
+{$IFEND}
+
 type
+
   pRGBArray = ^TRGBArray;
   TRGBArray = array[0..32767] of TRGBTriple;
 
   // Sets the pointer to the correct pixel offset.
-  // See: https://blog.dummzeuch.de/2019/12/12/accessing-bitmap-pixels-with-less-scanline-calls-in-delphi/
+  // See for details: https://blog.dummzeuch.de/2019/12/12/accessing-bitmap-pixels-with-less-scanline-calls-in-delphi/
   function SetPointer(const aPointer: Pointer;
                       aOffset: NativeInt): Pointer; inline;
 
@@ -94,6 +102,21 @@ type
   procedure ResizeBitmap(aBitmap: TBitmap;
                          toWidth: Integer;
                          toHeight: Integer);
+
+  // Calculates nanoseconds to milliseconds.
+  function NsecToMsec(nSec: Int64): Int64; inline;
+
+  // Calculates frame duration in 100 nanoseconds units.
+  function CalcFrameDuration(aLatency: UINT32;
+                             aFrameRate: Double): HNSTIME;
+
+  // Performance or latency calculation
+  function PerformanceCounterMilliseconds(AFrequency: Int64): Int64;
+
+
+threadvar
+  TimerFrequency: Int64;
+
 
 
 implementation
@@ -186,5 +209,39 @@ begin
 
   SafeDelete(bTmp);
 end;
+
+
+//
+function NsecToMsec(nSec: Int64): Int64; inline;
+begin
+  Result := Round(nSec / 1000000);
+end;
+
+//
+function CalcFrameDuration(aLatency: UINT32;
+                           aFrameRate: Double): HNSTIME;
+const
+  msec = (1000 * 1000); // One millisecond = 1,000,000 nano seconds
+begin
+  Result := Round(ALatency * msec / AFrameRate);
+end;
+
+//
+function PerformanceCounterMilliseconds(AFrequency: Int64): Int64;
+var
+  iCount: Int64;
+
+begin
+ if (AFrequency = 0) then
+   Result := 0
+ else
+   begin
+     QueryPerformanceCounter(iCount);
+     Result := Round(iCount / AFrequency * 1000);
+   end;
+end;
+
+initialization
+  QueryPerformanceFrequency(TimerFrequency);
 
 end.
