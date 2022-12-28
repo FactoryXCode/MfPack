@@ -150,8 +150,8 @@ SDK version: 10.0.22621.0 (Windows 11)
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MFCaptureEngineVideoCapture.jpg)
 
-
 **SinkWriterToEncodeVideo Sample**
+
 *Example 1 creates a simple green bitmap (640x480) and store it to a file with a length of 20 seconds.*
 *Example 2 demonstrates how to use the SinkWriter to create a video from one or more bitmap files.*
   
