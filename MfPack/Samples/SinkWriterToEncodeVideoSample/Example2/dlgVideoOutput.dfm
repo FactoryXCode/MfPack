@@ -64,8 +64,8 @@ object dlgVideoSetttings: TdlgVideoSetttings
   end
   object Label6: TLabel
     Left = 100
-    Top = 104
-    Width = 59
+    Top = 107
+    Width = 127
     Height = 19
     Hint = 'Frames Per Second'
     AutoSize = False
