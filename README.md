@@ -146,8 +146,15 @@ SDK version: 10.0.22621.0 (Windows 11)
 **CaptureEngineVideoCapture sample**
 *Demonstrates how to capture a snapshot or a recording (A-synchronous) from a capture device,*
 *such as a webcam using the IMFCaptureEngine and IMFCapturePreviewSink.*
-*This sample also demonstrates how to use the MfMediaTypeDebug API*
+*This sample also demonstrates how to use the MfMediaTypeDebug API.*
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MFCaptureEngineVideoCapture.jpg)
 
+**SinkWriterToEncodeVideo Sample**
+
+*Example 1 creates a simple green bitmap (640x480) and store it to a file with a length of 20 seconds.*
+*Example 2 demonstrates how to use the SinkWriter to create a video from one or more bitmap files.*
+  
+ ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/SinkWriterSample.png) 
+  
 **© FactoryX. All rights reserved.**
