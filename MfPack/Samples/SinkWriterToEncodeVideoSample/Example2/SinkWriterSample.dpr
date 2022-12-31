@@ -1,11 +1,17 @@
 program SinkWriterSample;
 
 uses
+  {$IFDEF FASTMM}
+  FastMM4,
+  {$ENDIF }
+  {$IFDEF MadExcept}
   madExcept,
   madLinkDisAsm,
   madListHardware,
   madListProcesses,
   madListModules,
+  {$ENDIF }
+  
   Vcl.Forms,
   frmMain in 'frmMain.pas' {MainForm},
   SinkWriterClass in 'SinkWriterClass.pas',
