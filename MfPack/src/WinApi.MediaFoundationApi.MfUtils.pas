@@ -231,8 +231,8 @@ type
   function GetOSArchitecture(): string;
 
 
-  // Colors
-  //=======
+  // Colors and pixelformats
+  //========================
 
   // Translates a HTML color name name to TColor
   // Example: 'Red' >> TColor($0000FF) = TColors.Red = clRed;
@@ -291,6 +291,8 @@ type
   function ConvertYCrCbToRGB(aY: Integer;
                              aCr: Integer;
                              aCb: Integer): RGBQUAD; inline;
+
+  function PixelFormatToStr(PixelFmt: TPixelFormat): string; inline;
 
 
   // External
@@ -941,6 +943,18 @@ end;
 // Time formatting & conversion functions
 //=======================================
 
+function NanoSecondsToMilliSeconds(aNanoSec: Int64): Int64; inline;
+begin
+  Result :=  aNanoSec div 1000;
+end;
+
+
+function MilliSecondsToSeconds(aSec: Int64): Single; inline;
+begin
+  Result :=  aSec / 1000;
+end;
+
+
 // Converts Hns to a time string format
 function HnsTimeToStr(hns: MFTIME;
                       ShowMilliSeconds: Boolean = True;
@@ -1350,7 +1364,23 @@ begin
 end;
 
 
-// inline functions
+function PixelFormatToStr(PixelFmt: TPixelFormat): string; inline;
+begin
+  case PixelFmt of
+    pfDevice : Result := 'pfDevice';
+    pf1bit   : Result := 'pf1bit';
+    pf4bit   : Result := 'pf4bit';
+    pf8bit   : Result := 'pf8bit';
+    pf15bit  : Result := 'pf15bit';
+    pf16bit  : Result := 'pf16bit';
+    pf24bit  : Result := 'pf24bit';
+    pf32bit  : Result := 'pf32bit';
+    pfCustom : Result := 'pfCustom';
+    else
+      Result := 'Unknown';
+  end;
+end;
+
 
 // MFVideoNormalizedRect structure
 // Defines a normalized rectangle, which is used to specify sub-rectangles in a

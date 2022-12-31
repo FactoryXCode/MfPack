@@ -4705,7 +4705,7 @@ const
 
   function MFFrameRateToAverageTimePerFrame(unNumerator: UINT32; // The numerator of the frame rate.
                                             unDenominator: UINT32; // The denominator of the frame rate.
-                                            out punAverageTimePerFrame: UINT64): HRESULT; stdcall; // Receives the average duration of a video frame, in 100-nanosecond units.
+                                            out punAverageTimePerFrame: REFERENCE_TIME): HRESULT; stdcall; // Receives the average duration of a video frame, in 100-nanosecond units.
   {$EXTERNALSYM MFFrameRateToAverageTimePerFrame}
 
   // Calculates the frame rate, in frames per second, from the average duration of a video frame.
@@ -4715,7 +4715,7 @@ const
   //  if they need to translate between the older format structures and the media type attributes used in Media Foundation.
   //  This function uses a look-up table for certain common durations.
   //  The table is listed in the Remarks section for the MFFrameRateToAverageTimePerFrame function.
-  function MFAverageTimePerFrameToFrameRate(unAverageTimePerFrame: UINT64;  // The average duration of a video frame, in 100-nanosecond units.
+  function MFAverageTimePerFrameToFrameRate(unAverageTimePerFrame: REFERENCE_TIME;  // The average duration of a video frame, in 100-nanosecond units.
                                             out punNumerator: UINT32; // Receives the numerator of the frame rate.
                                             out punDenominator: UINT32): HRESULT; stdcall; // Receives the denominator of the frame rate.
   {$EXTERNALSYM MFAverageTimePerFrameToFrameRate}

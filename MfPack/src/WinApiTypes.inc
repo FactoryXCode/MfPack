@@ -440,6 +440,9 @@ MfpVersion   = '3.1.3'; // Release version.
 {$DEFINE MFP_DWORD}
 // {$UNDEF MFP_DWORD}
 
+{$DEFINE MFP_MFP_NATIVEINT}
+// {$UNDEF MFP_MFP_NATIVEINT}
+
 
 // GuidDef.h
 //----------
