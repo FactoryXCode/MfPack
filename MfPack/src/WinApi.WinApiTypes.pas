@@ -24,6 +24,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 // 21/12/2022 Tony                Added correction for NativeInt on Delphi <= 2007
+// 05/01/2023 Tony                Corrected HNSTIME to TLargeInteger.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -2489,9 +2490,9 @@ type
 
 {$IFDEF MFP_HNSTIME}
   PHnstime = ^HNSTIME;
-  HNSTIME = LONGLONG;
+  HNSTIME = TLargeInteger {LONGLONG = Int64};
   {$EXTERNALSYM HNSTIME}
-  THnstime = LONGLONG;
+  THnstime = HNSTIME;
 {$ENDIF}
 
 

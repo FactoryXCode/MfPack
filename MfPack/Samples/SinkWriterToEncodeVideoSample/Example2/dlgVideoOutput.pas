@@ -201,7 +201,7 @@ end;
 
 procedure TdlgVideoSetttings.edFrameTimeUnitsChange(Sender: TObject);
 begin
-  if (StrToInt(edFrameTimeUnits.Text) <= 10000) then
+  if (StrToInt(edFrameTimeUnits.Text) < 10000) then
     ShowMessage('You must enter a number >= 10000')
   else
     FSinkWriter.SinkWriterParams.dwFrameTimeUnits := StrToInt(edFrameTimeUnits.Text);
@@ -221,7 +221,7 @@ begin
   else
     begin
       FSinkWriter.SinkWriterParams.uiLatency := StrToInt(edLatency.Text);
-      FSinkWriter.SinkWriterParams.rtSampleDuration := Round(FSinkWriter.SinkWriterParams.uiLatency * FSinkWriter.SinkWriterParams.dwFrameTimeUnits / FSinkWriter.SinkWriterParams.dbFrameRate);
+      FSinkWriter.SinkWriterParams.rtSampleDuration := (FSinkWriter.SinkWriterParams.uiLatency * FSinkWriter.SinkWriterParams.dwFrameTimeUnits) div Round(FSinkWriter.SinkWriterParams.dbFrameRate);
     end;
 end;
 
