@@ -53,10 +53,13 @@
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
 // License for the specific language governing rights and limitations
 // under the License.
-// 
-// Users may distribute this source code provided that this header is included
-// in full at the top of the file.
-// 
+//
+// Explanatory memorandum:
+// Non commercial users may distribute this sourcecode provided that this
+// header is included in full at the top of the file.
+// Commercial users are not allowed to distribute this sourcecode as part of
+// their product.
+//
 //==============================================================================
 unit WinApi.DirectX.D3D9;
 
@@ -286,7 +289,7 @@ type
 
     function GetDeviceCaps(out pCaps: D3DCAPS9): HResult; stdcall;
 
-    function GetDisplayMode(iSwapChain: DWORD;
+    function GetDisplayMode(iSwapChain: UINT;
                             out pMode: D3DDISPLAYMODE): HResult; stdcall;
 
     function GetCreationParameters(out pParameters: D3DDEVICE_CREATION_PARAMETERS): HResult; stdcall;
@@ -307,9 +310,9 @@ type
     function GetSwapChain(iSwapChain: DWORD;
                           out pSwapChain: IDirect3DSwapChain9): HResult; stdcall;
 
-    function GetNumberOfSwapChains: DWORD; stdcall;
+    function GetNumberOfSwapChains(): DWORD; stdcall;
 
-    function Reset(const pPresentationParameters: D3DPRESENT_PARAMETERS): HResult; stdcall;
+    function Reset(var pPresentationParameters: D3DPRESENT_PARAMETERS): HResult; stdcall;
 
     function Present(pSourceRect: PRect;
                      pDestRect: PRect;

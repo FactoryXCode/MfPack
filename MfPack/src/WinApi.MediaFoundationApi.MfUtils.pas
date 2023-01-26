@@ -192,8 +192,8 @@ type
   // Time formatting
   // Converts 100-Nano second units (Hns unit) to time string format.
   function HnsTimeToStr(hns: MFTIME;
-                        ShowMilliSeconds: Boolean = True;
-                        DelimiterFormat: string = ':'): string; overload; inline;
+                        DelimiterFormat: string;
+                        ShowMilliSeconds: Boolean = True): string; overload; inline;
 
   function HnsTimeToStr(hns: MFTIME;
                         ShowMilliSeconds: Boolean = True): string; overload; inline;
@@ -957,8 +957,8 @@ end;
 
 // Converts Hns to a time string format
 function HnsTimeToStr(hns: MFTIME;
-                      ShowMilliSeconds: Boolean = True;
-                      DelimiterFormat: string = ':'): string; inline;
+                      DelimiterFormat: string;
+                      ShowMilliSeconds: Boolean = True): string; inline;
 var
   hours,
   mins,
@@ -966,7 +966,6 @@ var
   millisec: Word;
 
 begin
-
 
 try
   hours := hns div MFTIME(36000000000);
@@ -980,6 +979,8 @@ try
 
   millisec := hns div 10000;
 
+  if DelimiterFormat = '' then
+    DelimiterFormat := ':';
 
   if ShowMilliSeconds then
     Result := Format('%2.2d%s%2.2d%s%2.2d,%3.3d', [hours, DelimiterFormat, mins, DelimiterFormat, secs, DelimiterFormat, millisec])

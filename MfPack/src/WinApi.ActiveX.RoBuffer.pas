@@ -2,26 +2,26 @@
 //
 // Copyright: © FactoryX. All rights reserved.
 //
-// Project: WinApi.DirectX - D2D1
+// Project: WinApi.DirectX - DXGI
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: WinApi.DirectX.D2DErr.pas
+// Module: WinApi.ActiveX.RoBuffer.pas
 // Kind: Pascal / Delphi unit
-// Release date: 30-04-2019
+// Release date: 03-11-2022
 // Language: ENU
 //
 // Revision Version: 3.1.3
-// Description: Helper files over the D2D interfaces and APIs.
+// Description: -
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
+// Contributor(s): Tony Kalf (maXcomX).
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 04/11/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -36,7 +36,7 @@
 // Todo: -
 //
 //==============================================================================
-// Source: D2DErr.h
+// Source: robuffer.h
 //
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //==============================================================================
@@ -61,66 +61,59 @@
 // their product.
 //
 //==============================================================================
-unit WinApi.DirectX.D2DErr;
+unit WinApi.ActiveX.RoBuffer;
 
-  {$HPPEMIT '#include "D2DErr.h"'}
+  {$HPPEMIT '#include "robuffer.h"'}
 
 interface
 
 uses
-  {WinApi}
-  WinApi.Windows,
-  WinApi.WinError;
+  WinApi.ActiveX.ObjIdlbase,
+  WinApi.ActiveX.ObjIdl;
 
-const
-
-  //+---------------------------------------------------------------------------
-  //
-  // D2D error codes
-  //
-  //----------------------------------------------------------------------------
-
-  //
-  //  Error codes shared with WINCODECS
-  //
-
-  //
-  // The pixel format is not supported.
-  //
-  D2DERR_UNSUPPORTED_PIXEL_FORMAT     = WINCODEC_ERR_UNSUPPORTEDPIXELFORMAT;
-  {$EXTERNALSYM D2DERR_UNSUPPORTED_PIXEL_FORMAT}
-
-  //
-  // Error codes that were already returned in prior versions and were part of the
-  // MIL facility.
-
-  //
-  // Error codes mapped from WIN32 where there isn't already another HRESULT based
-  // define
-  //
-
-  //
-  // The supplied buffer was too small to accommodate the data.
-  //
-  D2DERR_INSUFFICIENT_BUFFER          = HRESULT(ERROR_INSUFFICIENT_BUFFER);
-  {$EXTERNALSYM D2DERR_INSUFFICIENT_BUFFER}
+  {$WEAKPACKAGEUNIT ON}
 
 
-  //
-  // The file specified was not found.
-  //
-  D2DERR_FILE_NOT_FOUND               = HRESULT(ERROR_FILE_NOT_FOUND);
-  {$EXTERNALSYM D2DERR_FILE_NOT_FOUND}
+  // Provides a standard IBuffer marshaler to implement the semantics
+  // associated with the IBuffer interface when it is marshaled.
+  function RoGetBufferMarshaler(bufferMarshaler: IMarshal): HRESULT; stdcall;
+  {$EXTERNALSYM RoGetBufferMarshaler}
 
+type
+
+  // Interface IBufferByteAccess
+  // ============================
+  // Represents a buffer as an array of bytes.
   //
-  // D2D specific codes now live in winerror.h / MfPack.WinError.pas
-  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IBufferByteAccess);'}
+  {$EXTERNALSYM IBufferByteAccess}
+  IBufferByteAccess = Interface(IUnknown)
+    ['{905a0fef-bc53-11df-8c49-001e4fc686da}']
+
+    // An IBuffer object is created by a client, and the buffer is provided by IBufferByteAccess.Buffer.
+    function Buffer(out value: Pbyte): HRESULT; stdcall;
+
+  end;
+  IID_IBufferByteAccess = IBufferByteAccess;
+  {$EXTERNALSYM IID_IBufferByteAccess}
+
+
 
   // Additional Prototypes for ALL interfaces
 
   // End of Additional Prototypes
 
 implementation
+
+const
+  RoBufferLib = 'Wintypes.dll';
+
+
+{$WARN SYMBOL_PLATFORM OFF}
+
+  function RoGetBufferMarshaler; external RoBufferLib name 'RoGetBufferMarshaler' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+
+{$WARN SYMBOL_PLATFORM ON}
 
   // Implement Additional functions here.
 

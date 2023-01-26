@@ -1226,9 +1226,9 @@ type
   IMFMediaBuffer = interface(IUnknown)
   ['{045FA593-8799-42b8-BC8D-8968C6453507}']
 
-    function Lock(out ppbBuffer: PByte;     // Receives a pointer to the start of the buffer.
-                  pcbMaxLength: PDWord;     // Receives the maximum amount of data that can be written to the buffer. This parameter can be Nil.
-                  pcbCurrentLength: PDWord  // Receives the length of the valid data in the buffer, in bytes. This parameter can be Nil.
+    function Lock(out ppbBuffer: PByte;           // Receives a pointer to the start of the buffer.
+                  {out} pcbMaxLength: PDWord;     // Receives the maximum amount of data that can be written to the buffer. This parameter can be nil.
+                  {out} pcbCurrentLength: PDWord  // Receives the length of the valid data in the buffer, in bytes. This parameter can be nil.
                   ): HResult; stdcall;
 
     function Unlock(): HResult; stdcall;
@@ -1278,7 +1278,7 @@ type
     function GetBufferCount(out pdwBufferCount: DWord): HResult; stdcall;
 
     function GetBufferByIndex(dwIndex: DWord;
-                              out ppBuffer: PIMFMediaBuffer): HResult; stdcall;
+                              out ppBuffer: IMFMediaBuffer): HResult; stdcall;
 
     function ConvertToContiguousBuffer(out ppBuffer: IMFMediaBuffer): HResult; stdcall;
 
@@ -1845,7 +1845,7 @@ type
     //     Will contain the requested interface
     // </param>
     function ActivateObject(const riid: REFIID;
-                            out ppv: LPVOID): HResult; stdcall;
+                            {out}const [ref] ppv): HResult; stdcall;
 
     // <summary>
     //     Shuts down the internal represented object

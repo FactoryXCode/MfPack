@@ -361,11 +361,11 @@ type
                                 const varPosition: PROPVARIANT): HResult; stdcall;
 
     function ReadSample(dwStreamIndex: DWORD;   // The stream to pull data from.
-                        dwControlFlags: DWORD;  // A bitwise OR of zero or more flags from the MF_SOURCE_READER_CONTROL_FLAG enumeration.
-         {out optional} pdwActualStreamIndex: PDWORD = Nil;  // Receives the zero-based index of the stream.
-         {out optional} pdwStreamFlags: PDWORD = Nil;        // Receives a bitwise OR of zero or more flags from the MF_SOURCE_READER_FLAG enumeration.
-         {out optional} pllTimestamp: PLONGLONG = Nil;       // Receives the time stamp of the sample, or the time of the stream event indicated in pdwStreamFlags. The time is given in 100-nanosecond units.
-         {out optional} ppSample: PIMFSample = Nil): HResult; stdcall;
+                        dwControlFlags: MF_SOURCE_READER_CONTROL_FLAG;  // A bitwise OR of zero or more flags from the MF_SOURCE_READER_CONTROL_FLAG enumeration.
+         {out optional} pdwActualStreamIndex: PDWORD = nil;  // Receives the zero-based index of the stream.
+         {out optional} pdwStreamFlags: PDWORD = nil;        // Receives a bitwise OR of zero or more flags from the MF_SOURCE_READER_FLAG enumeration.
+         {out optional} pllTimestamp: PLONGLONG = nil;       // Receives the time stamp of the sample, or the time of the stream event indicated in pdwStreamFlags. The time is given in 100-nanosecond units.
+         {out optional} ppSample: IMFSample = nil): HResult; stdcall;
 
     // function ReadSample: Remarks
     // ============================
@@ -469,7 +469,7 @@ type
     function OnReadSample(hrStatus: HRESULT;     // Specifies the error code if an error occurred while processing the sample request.
                           dwStreamIndex: DWORD;  // Specifies the stream index for the sample.
                           dwStreamFlags: DWORD;  // Specifies the accumulated flags for the stream.
-                          llTimestamp: LONGLONG; // Contains the presentation time of the sample.
+                          llTimestamp: HNSTIME;  // Contains the presentation time of the sample.
                                                  // If MF_SOURCE_READERF_STREAM_TICK is set for the stream flags,
                                                  // then this contains the timestamp for the stream tick.
                           pSample: IMFSample): HResult; stdcall; // Contains the next sample for the stream. It is possible for
