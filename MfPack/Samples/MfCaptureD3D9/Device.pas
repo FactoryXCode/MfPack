@@ -27,7 +27,7 @@
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX313
+// Related projects: MfPackX314
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -54,8 +54,10 @@
 // License for the specific language governing rights and limitations
 // under the License.
 //
-// Users may distribute this source code provided that this header is included
-// in full at the top of the file.
+// Non commercial users may distribute this sourcecode provided that this
+// header is included in full at the top of the file.
+// Commercial users are not allowed to distribute this sourcecode as part of
+// their product.
 //
 //==============================================================================
 unit Device;
@@ -83,7 +85,7 @@ uses
 
 
 const
-  NUM_BACK_BUFFERS = DWORD(2);
+  NUM_BACK_BUFFERS = UINT(2);
 
 
 
@@ -144,7 +146,7 @@ var
 
 type
 
-  TDrawDevice = class(TObject)
+  TDrawDevice = class
   private
     m_hwnd: HWND;
     m_d3dpp: D3DPRESENT_PARAMETERS;
@@ -163,7 +165,7 @@ type
     m_ConvertFn: IMAGE_TRANSFORM_FN;     // Function to convert the video to RGB32
 
     function SetConversionFunction(subtype: REFGUID): HResult;
-    function CreateSwapChains(): HResult;
+    function CreateSwapChains(hw: HWND): HResult;
 
   public
     m_srcWidth: UINT32;
@@ -175,6 +177,8 @@ type
     destructor Destroy(); override;  // DestroyDevice
 
     function CreateDevice(hw: HWND): HResult;
+    function SetD3DPresentParameters(const hw: HWND;
+                                     out D3DParams: D3DPRESENT_PARAMETERS): HResult;
     function ResetDevice(): HResult;
     procedure DestroyDevice();
 
@@ -238,15 +242,15 @@ begin
   inherited Create();
 
   m_hwnd := 0;
-  m_pD3D := Nil;
-  m_pDevice := Nil;
-  m_pSwapChain := Nil;
+  m_pD3D := nil;
+  m_pDevice := nil;
+  m_pSwapChain := nil;
   m_format := D3DFMT_UNKNOWN;
   m_srcwidth := 0;
   m_srcheight := 0;
   m_lDefaultStride := 0;
   m_interlace := MFVideoInterlace_Unknown;
-  m_convertFn := Nil; //If we had pointer sisters or brothers
+  m_convertFn := nil; //If we had pointer sisters or brothers
 
   m_PixelAR.Numerator := 1;
   m_PixelAR.Denominator := 1;
@@ -267,7 +271,7 @@ end;
 //-------------------------------------------------------------------
 destructor TDrawDevice.Destroy();
 begin
-  //DestroyDevice();
+  DestroyDevice();
   inherited Destroy();
 end;
 
@@ -282,7 +286,6 @@ function TDrawDevice.CreateDevice(hw: HWND): HResult;
 var
   hr: HRESULT;
   pp: D3DPRESENT_PARAMETERS;
-  mode: D3DDISPLAYMODE;
 
 label
   done;
@@ -292,44 +295,27 @@ begin
   // Nothing todo > exit
   if Assigned(m_pDevice) then
     begin
-      Result := S_OK;
-      Exit;
+      hr := S_OK;
+      goto done;
     end;
 
   // Create the Direct3D object.
-  if (m_pD3D = Nil) then
+  if (m_pD3D = nil) then
     begin
       m_pD3D := Direct3DCreate9(D3D_SDK_VERSION);
       //m_pD3D:= IDirect3D9(_Direct3DCreate9(D3D_SDK_VERSION));
 
-      if (m_pD3D = Nil) then
+      if (m_pD3D = nil) then
         begin
-          Result := E_FAIL;
-          Exit;
+          hr := E_FAIL;
+          goto done;
         end;
     end;
 
-  hr := m_pD3D.GetAdapterDisplayMode(D3DADAPTER_DEFAULT,
-                                     mode);
-
-  if FAILED(hr) then
+  hr := SetD3DPresentParameters(hw,
+                                pp);
+  if FAILED(hw) then
     goto done;
-
-  hr := m_pD3D.CheckDeviceType(D3DADAPTER_DEFAULT,
-                               D3DDEVTYPE_HAL,
-                               mode.Format,
-                               D3DFMT_X8R8G8B8,
-                               True);    // windowed
-  if FAILED(hr) then
-    goto done;
-
-  pp := Default(D3DPRESENT_PARAMETERS);
-
-  pp.BackBufferFormat := D3DFMT_X8R8G8B8;
-  pp.SwapEffect := D3DSWAPEFFECT_COPY;
-  pp.PresentationInterval := D3DPRESENT_INTERVAL_IMMEDIATE;
-  pp.Windowed := TRUE;
-  pp.hDeviceWindow := hw;
 
   hr := m_pD3D.CreateDevice(D3DADAPTER_DEFAULT,
                             D3DDEVTYPE_HAL,
@@ -340,7 +326,7 @@ begin
 
   if FAILED(hr) then
     begin
-      if (hr = -2005530516) then  // This is a well known error if D3DPRESENT_PARAMETERS parameters have an incorrect value.
+      if (hr = -2005530516) then  // This is a well known error if one or more D3DPRESENT_PARAMETERS parameters have an incorrect value.
         MessageBox(0,
                    lpwstr('Error: Failed to create D3D device'),
                    lpwstr('DirectX is unable to create a device with current D3DPRESENT_PARAMETERS settings.'),
@@ -361,6 +347,57 @@ done:
 end;
 
 
+//------------------------------------------------------------------------------
+//
+// Fills the D3DPRESENT_PARAMETERS record.
+//
+//------------------------------------------------------------------------------
+
+function TDrawDevice.SetD3DPresentParameters(const hw: HWND;
+                                             out D3DParams: D3DPRESENT_PARAMETERS): HResult;
+var
+  hr: HRESULT;
+  mode: D3DDISPLAYMODE;
+
+label
+  done;
+
+begin
+  hr := m_pD3D.GetAdapterDisplayMode(D3DADAPTER_DEFAULT,
+                                     mode);
+
+  if FAILED(hr) then
+    goto done;
+
+  hr := m_pD3D.CheckDeviceType(D3DADAPTER_DEFAULT,
+                               D3DDEVTYPE_HAL,
+                               mode.Format,
+                               D3DFMT_X8R8G8B8,
+                               True);    // windowed
+  if FAILED(hr) then
+    goto done;
+
+  D3DParams := Default(D3DPRESENT_PARAMETERS);
+
+  D3DParams.BackBufferWidth := m_srcWidth;
+  D3DParams.BackBufferHeight := m_srcHeight;
+  D3DParams.Windowed := True;
+  D3DParams.SwapEffect := D3DSWAPEFFECT_FLIP;
+  D3DParams.hDeviceWindow := hw;
+  D3DParams.BackBufferFormat := Mode.Format; // D3DFMT_X8R8G8B8 = 22
+  D3DParams.Flags := D3DPRESENTFLAG_VIDEO or D3DPRESENTFLAG_DEVICECLIP or
+              D3DPRESENTFLAG_LOCKABLE_BACKBUFFER;
+  D3DParams.PresentationInterval := D3DPRESENT_INTERVAL_IMMEDIATE;
+  D3DParams.BackBufferCount := NUM_BACK_BUFFERS;
+
+  D3DParams.MultiSampleType := D3DMULTISAMPLE_NONE;
+  D3DParams.MultiSampleQuality := 0;
+
+done:
+  Result := hr;
+end;
+
+
 //-------------------------------------------------------------------
 // ResetD3DDevice
 //
@@ -375,11 +412,15 @@ label
   Done;
 
 begin
-  hr := S_OK;
 
-  if (m_pDevice <> Nil) then
+  hr := TestCooperativeLevel();
+
+  if (m_pDevice <> nil) then
     begin
       d3dpp := m_d3dpp;
+
+      // We have to release the swapchain before calling Reset.
+      SafeRelease(m_pSwapChain);
 
       hr := m_pDevice.Reset(d3dpp);
 
@@ -387,16 +428,16 @@ begin
         DestroyDevice();
     end;
 
-  if m_pDevice = Nil then
+  if (m_pDevice = nil) then
     begin
       hr := CreateDevice(m_hwnd);
       if FAILED(hr) then
         goto Done;
     end;
 
-  if ((m_pSwapChain = Nil) and (m_format <> D3DFMT_UNKNOWN)) then
+  if ((m_pSwapChain = nil) and (m_format <> D3DFMT_UNKNOWN)) then
     begin
-      hr := CreateSwapChains();
+      hr := CreateSwapChains(m_Hwnd);
       if FAILED(hr) then
         goto done;
       UpdateDestinationRect();
@@ -426,7 +467,7 @@ end;
 function TDrawDevice.SetVideoType(pType: IMFMediaType): HResult;
 var
   hr: HRESULT;
-  subtype: REFGUID; //TGUID;
+  subtype: REFGUID;
   PAR: MFRatio;
 
 label
@@ -495,7 +536,7 @@ begin
 
   // Create Direct3D swap chains.
 
-  hr := CreateSwapChains();
+  hr := CreateSwapChains(m_Hwnd);
 
   if FAILED(hr) then
     goto done;
@@ -509,7 +550,7 @@ done:
   if FAILED(hr) then
     begin
       m_format := D3DFMT_UNKNOWN;
-      m_convertFn := Nil;
+      m_convertFn := nil;
     end;
   Result := hr;
 end;
@@ -526,29 +567,30 @@ var
   lStride: LONG;
   lr: D3DLOCKED_RECT;
   pSurf: IDirect3DSurface9;
-  pBB:   IDirect3DSurface9;
-  buffer: TVideoBufferLock;
+  pBB: IDirect3DSurface9;
+  VideoBufferLock: TVideoBufferLock;
 
 label
   done;
 
 begin
-  pbScanline0 := Nil;
+
+  if (not Assigned(m_pDevice)) or (not Assigned(m_pSwapChain)) then
+    begin
+      hr := E_POINTER;
+      goto done;
+    end;
+
+  if not Assigned(m_convertFn) then
+    begin
+      hr := MF_E_INVALIDREQUEST;
+      goto done;
+    end;
+
+  pbScanline0 := nil;
   lStride := 0;
 
-  if Not Assigned(m_convertFn) then
-    begin
-      Result := MF_E_INVALIDREQUEST;
-      Exit;
-    end;
-
-  if (m_pDevice = Nil) or (m_pSwapChain = Nil) then
-    begin
-      Result := S_OK;
-      Exit;
-    end;
-
-  buffer := TVideoBufferLock.Create(pBuffer); // Helper object to lock the video buffer.
+  VideoBufferLock := TVideoBufferLock.Create(pBuffer); // Helper object to lock the video buffer.
 
   hr := TestCooperativeLevel();
   if FAILED(hr) then
@@ -556,10 +598,10 @@ begin
 
   // Lock the video buffer. This method returns a pointer to the first scan
   // line in the image, and the stride in bytes.
-  hr := buffer.LockBuffer(m_lDefaultStride,
-                          m_srcHeight,
-                          pbScanline0,
-                          lStride);
+  hr := VideoBufferLock.LockBuffer(m_lDefaultStride,
+                                   m_srcHeight,
+                                   pbScanline0,
+                                   lStride);
   if FAILED(hr) then
     goto done;
 
@@ -572,7 +614,7 @@ begin
 
   // Lock the swap-chain surface.
   hr := pSurf.LockRect(lr,
-                       Nil,
+                       nil,
                        D3DLOCK_NOSYSLOCK);
   if FAILED(hr) then
     goto done;
@@ -598,7 +640,7 @@ begin
     goto done;
 
   hr := m_pDevice.ColorFill(pBB,
-                            Nil,
+                            nil,
                             D3DCOLOR_XRGB(0,
                                           0,
                                           $80));   // Blue background
@@ -607,7 +649,7 @@ begin
 
   // Blit the frame.
   hr := m_pDevice.StretchRect(pSurf,
-                              Nil,
+                              nil,
                               pBB,
                               @m_rcDest,
                               D3DTEXF_LINEAR);
@@ -615,17 +657,18 @@ begin
     goto done;
 
   // Present the frame.
-  hr := m_pDevice.Present(Nil,
-                          Nil,
+  hr := m_pDevice.Present(nil,
+                          nil,
                           0,
-                          Nil);
+                          nil);
 
 done:
 
-  FreeAndNil(buffer); // MUST DO!!! Otherwise the buffer stays in locked state and
-                      // OnReadSample will halt after approx 10 samples (because of an exhausted sample pool)
+  VideoBufferLock.Free; // MUST DO!!! Otherwise the buffer stays in locked state and
+  VideoBufferLock := nil;                             // OnReadSample will halt after approx 10 samples (because of an exhausted sample pool)
 
-  pbScanline0 := Nil;
+  pbScanline0 := nil;
+
   Result := hr;
 end;
 
@@ -675,32 +718,37 @@ var
 
 begin
 
-  if (m_pDevice = Nil) then
+  if (m_pDevice = nil) then
     begin
       Result := E_FAIL;
       Exit;
     end;
 
   // Check the current status of D3D9 device.
-  hr:= m_pDevice.TestCooperativeLevel();
+  hr := m_pDevice.TestCooperativeLevel();
 
   case hr of
 
-    D3D_OK:                 begin
-                              hr := S_OK;
-                            end;
+    D3D_OK:                     begin
+                                  hr := S_OK;
+                                end;
 
-    D3DERR_DEVICELOST:      begin
-                              hr := S_OK;
-                            end;
+    D3DERR_DEVICELOST,
+    D3DERR_DEVICEREMOVED:       begin
+                                  hr := S_OK;
+                                end;
 
-    D3DERR_DEVICENOTRESET:  begin
-                              hr := ResetDevice();
-                            end;
+    D3DERR_DEVICENOTRESET:      begin
+                                  hr := ResetDevice();
+                                end;
 
-    else                    begin
-                              // Some other failure.
-                            end;
+    D3DERR_DRIVERINTERNALERROR: begin
+                                  hr := ResetDevice();
+                                end;
+
+    else                        begin
+                                  // Some other failure.
+                                end;
   end;
 
   Result := hr;
@@ -716,7 +764,7 @@ var
   i: Integer;
 
 begin
-  m_convertFn := Nil;
+  m_convertFn := nil;
 
   for i := 0 to g_cFormats -1 do
     begin
@@ -736,30 +784,21 @@ end;
 //
 // Create Direct3D swap chains.
 //-------------------------------------------------------------------
-function TDrawDevice.CreateSwapChains(): HResult;
+function TDrawDevice.CreateSwapChains(hw: HWND): HResult;
 var
   hr: HRESULT;
   pp: D3DPRESENT_PARAMETERS;
 
 begin
-  //pp := 0; << Use Default() to accomplish the same
-  pp := Default(D3DPRESENT_PARAMETERS);
 
   SafeRelease(m_pSwapChain);
 
-  pp.BackBufferWidth := m_srcWidth;
-  pp.BackBufferHeight := m_srcHeight;
-  pp.Windowed := TRUE;
-  pp.SwapEffect := D3DSWAPEFFECT_FLIP;
-  pp.hDeviceWindow := m_hwnd;
-  pp.BackBufferFormat := D3DFMT_X8R8G8B8;
-  pp.Flags := D3DPRESENTFLAG_VIDEO or D3DPRESENTFLAG_DEVICECLIP or
-              D3DPRESENTFLAG_LOCKABLE_BACKBUFFER;
-  pp.PresentationInterval := D3DPRESENT_INTERVAL_IMMEDIATE;
-  pp.BackBufferCount := NUM_BACK_BUFFERS;
+  hr := SetD3DPresentParameters(hw,
+                                pp);
 
-  hr := m_pDevice.CreateAdditionalSwapChain(pp,
-                                            m_pSwapChain);
+  if SUCCEEDED(hr) then
+    hr := m_pDevice.CreateAdditionalSwapChain(pp,
+                                              m_pSwapChain);
 
   Result := hr;
 end;
@@ -962,8 +1001,8 @@ begin
   lpBitsCr := lpBitsCb + 1;
   Y := 0;
 
-  repeat
   //for (UINT y = 0; y < dwHeightInPixels; y += 2)
+  repeat
 
     lpLineY1 := lpBitsY;
     lpLineY2 := lpBitsY + lsrcStride;
@@ -1062,7 +1101,6 @@ begin
 
   iDstWidth := rcDst.Width;
   iDstHeight := rcDst.Height;
-
 
   if (MulDiv(iSrcWidth,
              iDstHeight,
@@ -1194,6 +1232,5 @@ begin
 
   Result := hr;
 end;
-
 
 end.

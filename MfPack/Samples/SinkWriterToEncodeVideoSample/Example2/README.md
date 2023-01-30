@@ -1,6 +1,6 @@
 # SinkWriterToEncodeVideoSample - Part 2
 
-Version: X 3.1.3
+Version: X 3.1.4
 
 Description:
   This sample demonstrates how to use the SinkWriter to encode a video file from

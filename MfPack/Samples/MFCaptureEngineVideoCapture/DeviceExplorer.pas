@@ -10,7 +10,7 @@
 // Release date: 18-11-2022
 // Language: ENU
 //
-// Revision Version: 3.1.3
+// Revision Version: 3.1.4
 //
 // Description:
 //   This unit contains the DeviceExplorer class to discover video devices like webcams etc.
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX313/Samples/MFCaptureEngineVideoCapture
+// Related projects: MfPackX314/Samples/MFCaptureEngineVideoCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.22621.0
@@ -42,11 +42,10 @@
 //
 // LICENSE
 //
-//  The contents of this file are subject to the
-//  GNU General Public License v3.0 (the "License");
-//  you may not use this file except in
-//  compliance with the License. You may obtain a copy of the License at
-//  https://www.gnu.org/licenses/gpl-3.0.html
+// The contents of this file are subject to the Mozilla Public License
+// Version 2.0 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at
+// https://www.mozilla.org/en-US/MPL/2.0/
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
@@ -56,7 +55,7 @@
 // Non commercial users may distribute this sourcecode provided that this
 // header is included in full at the top of the file.
 // Commercial users are not allowed to distribute this sourcecode as part of
-// their product without implicit permission.
+// their product.
 //
 //==============================================================================
 unit DeviceExplorer;
@@ -136,7 +135,7 @@ type
 
   public
 
-    constructor Create(out pResult: HResult);
+    constructor Create(out pResult: HResult); reintroduce;
     destructor Destroy(); override;
 
     /// Steps to manage this class
@@ -199,6 +198,7 @@ begin
   if FAILED(hr) then
     ShowMessage(format('No capture devices found. (count = %d hr = %d)',
                        [uiCount, hr]));
+  iDevices := uiCount;
   pResult := hr;
 end;
 
@@ -239,6 +239,7 @@ begin
   ResetCaptureDeviceCaps();
   {$IFDEF SAVE_DEBUG_REPORT}
   FMediaTypeDebug.Free();
+  FMediaTypeDebug := nil;
   {$ENDIF}
   inherited Destroy();
 end;
@@ -250,7 +251,6 @@ var
   hr: HResult;
 
 begin
-
   // Clear existing content.
   ResetCaptureDeviceCaps();
 
@@ -269,10 +269,11 @@ var
   i: Integer;
 
 begin
-
   for i := 0 to Length(FDeviceProperties) -1 do
     FDeviceProperties[i].Reset;
+
   FDeviceProperties := nil;
+  FVideoFormatInfo.Reset();
 
   // Clear class properties
   iDevices := -1;
@@ -284,7 +285,6 @@ begin
   bIsSelected := False;
   SafeRelease(FMediaType);
   SafeRelease(FActivate);
-
 end;
 
 //
@@ -302,7 +302,7 @@ label
 
 begin
 
-  if (pDeviceIndex < FDeviceProperties[pDeviceIndex].iCount) then
+  if (pDeviceIndex < Length(FDeviceProperties)) then
     begin
 
       iSelection := pDeviceIndex;
@@ -320,6 +320,7 @@ begin
       FMediaTypeDebug.SafeDebugResultsToFile('TDeviceExplorer.SetCurrentDeviceProperties');
       {$ENDIF}
 
+      SafeRelease(FMediaType);
       CloneVideoMediaType(DeviceProperties[pDeviceIndex].aVideoFormats[pFormatsIndex].mfMediaType,
                           GUID_NULL,
                           FMediaType);
@@ -329,21 +330,22 @@ begin
       FMediaTypeDebug.SafeDebugResultsToFile('TDeviceExplorer.SetCurrentDeviceProperties');
       {$ENDIF}
 
+      SafeRelease(FActivate);
 
-{$POINTERMATH ON}
       hr := GetActivationObjects(mfActivate,
                                  uiCount);
       if FAILED(hr) then
         goto done;
 
       if (uiCount > 0) and (pDeviceIndex > -1) then
-        FActivate := mfActivate[pDeviceIndex]
+{$POINTERMATH ON}
+       FActivate := mfActivate[pDeviceIndex]
+{$POINTERMATH OFF}
       else
         begin
           hr := ERROR_INVALID_PARAMETER;
           goto done;
         end;
-{$POINTERMATH OFF}
 
       // Set the videoformat that has been selected by user.
       FVideoFormatInfo.Reset();
@@ -361,10 +363,13 @@ begin
 
           if SUCCEEDED(hr) then
             begin
-              HandleMessages(GetCurrentThread());
+
               hr := SetDeviceFormat(pMediaSource,
                                     DeviceProperties[pDeviceIndex].aVideoFormats[pFormatsIndex].mfMediaType,
                                     pFormatsIndex);
+
+              if SUCCEEDED(hr) then
+                hr := pMediaSource.Shutdown;
             end;
           if FAILED(hr) then
             goto Done;

@@ -10,7 +10,7 @@
 // Release date: 21-12-2019
 // Language: ENU
 //
-// Revision Version: 3.1.3
+// Revision Version: 3.1.4
 // Description:
 //   This application demonstrates using the Media Foundation
 //   source reader to extract decoded audio from an audio/video file.
@@ -37,7 +37,7 @@
 // Remarks: Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX313
+// Related projects: MfPackX314
 // Known Issues: The IMFSourceReader.ReadSample method eats a lot of CPU cycles and
 //               power on low latency file reading.
 //
@@ -64,8 +64,11 @@
 // License for the specific language governing rights and limitations
 // under the License.
 //
-// Users may distribute this source code provided that this header is included
-// in full at the top of the file.
+// Non commercial users may distribute this sourcecode provided that this
+// header is included in full at the top of the file.
+// Commercial users are not allowed to distribute this sourcecode as part of
+// their product.
+//
 //==============================================================================
 unit frmAudioClipEx;
 

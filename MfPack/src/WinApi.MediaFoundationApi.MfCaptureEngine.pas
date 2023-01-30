@@ -10,7 +10,7 @@
 // Release date: 09-10-2015
 // Language: ENU
 //
-// Revision Version: 3.1.3
+// Revision Version: 3.1.4
 // Description: -
 //
 // Organisation: FactoryX
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX313
+// Related projects: MfPackX314
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -44,19 +44,17 @@
 //==============================================================================
 //
 // LICENSE
-// 
-//  The contents of this file are subject to the
-//  GNU General Public License v3.0 (the "License");
-//  you may not use this file except in
-//  compliance with the License. You may obtain a copy of the License at
-//  https://www.gnu.org/licenses/gpl-3.0.html
+//
+// The contents of this file are subject to the Mozilla Public License
+// Version 2.0 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at
+// https://www.mozilla.org/en-US/MPL/2.0/
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
 // License for the specific language governing rights and limitations
 // under the License.
 //
-// Explanatory memorandum:
 // Non commercial users may distribute this sourcecode provided that this
 // header is included in full at the top of the file.
 // Commercial users are not allowed to distribute this sourcecode as part of
@@ -919,9 +917,9 @@ type
   IMFCaptureEngine = interface(IUnknown)
   ['{a6bba433-176b-48b2-b375-53aa03473207}']
     function Initialize(pEventCallback: IMFCaptureEngineOnEventCallback;
-                        const pAttributes: IMFAttributes = nil;
-                        const pAudioSource: IUnknown = nil;
-                        const pVideoSource: IUnknown = nil): HResult; stdcall;
+                        pAttributes: IMFAttributes = nil;
+                        pAudioSource: IUnknown = nil;
+                        pVideoSource: IUnknown = nil): HResult; stdcall;
     // Initializes the the capture engine.
     // App should listen for MF_CAPTURE_ENGINE_INITIALIZED via IMFCaptureEngineOnEventCallback.
     // <param name ="pEventCallback">
@@ -960,14 +958,14 @@ type
     // App should listen for MF_CAPTURE_ENGINE_PHOTO_TAKEN via IMFCaptureEngineOnEventCallback.
 
     function GetSink(mfCaptureEngineSinkType: MF_CAPTURE_ENGINE_SINK_TYPE;
-                     [ref] const ppSink: IMFCaptureSink): HResult; stdcall;
+                     out ppSink: IMFCaptureSink): HResult; stdcall;
     // Method to obtain access to an IMFCaptureSink.
     // <param name = "mfCaptureEngineSinkType">
     // Specifies the capture sink type from the MF_CAPTURE_ENGINE_SINK_TYPE enumeration.
     // <param name = "ppSink">
     // Receives a pointer to IMFCaptureSink interface.
 
-    function GetSource([ref] const ppSource: IMFCaptureSource): HResult; stdcall;
+    function GetSource(out ppSource: IMFCaptureSource): HResult; stdcall;
     // Method to obtain access to IMFCaptureSource.
     // <param name = "ppSource">
     // Receives a pointer to IMFCaptureSource interface.

@@ -28,12 +28,11 @@ object ChooseDeviceDlg: TChooseDeviceDlg
   end
   object btnOK: TButton
     Left = 521
-    Top = 248
+    Top = 246
     Width = 75
     Height = 25
     Caption = 'OK'
     Default = True
-    Enabled = False
     TabOrder = 0
     OnClick = btnOKClick
   end
@@ -73,7 +72,6 @@ object ChooseDeviceDlg: TChooseDeviceDlg
     Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goRowSelect]
     ScrollBars = ssVertical
     TabOrder = 3
-    OnClick = sgResolutionsClick
     ColWidths = (
       83
       108

@@ -10,7 +10,7 @@
 // Release date: 18-11-2022
 // Language: ENU
 //
-// Revision Version: 3.1.3
+// Revision Version: 3.1.4
 //
 // Description:
 //   Dialog to pick a videodevice and it's (supported) resolutions and samplerates.
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX313/Samples/MFCaptureEngineVideoCapture
+// Related projects: MfPackX314/Samples/MFCaptureEngineVideoCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.22621.0
@@ -42,11 +42,10 @@
 //
 // LICENSE
 //
-//  The contents of this file are subject to the
-//  GNU General Public License v3.0 (the "License");
-//  you may not use this file except in
-//  compliance with the License. You may obtain a copy of the License at
-//  https://www.gnu.org/licenses/gpl-3.0.html
+// The contents of this file are subject to the Mozilla Public License
+// Version 2.0 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at
+// https://www.mozilla.org/en-US/MPL/2.0/
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
@@ -56,7 +55,7 @@
 // Non commercial users may distribute this sourcecode provided that this
 // header is included in full at the top of the file.
 // Commercial users are not allowed to distribute this sourcecode as part of
-// their product without implicit permission.
+// their product.
 //
 //==============================================================================
 unit dlgChooseDevice;
@@ -103,7 +102,6 @@ type
     procedure btnOKClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure lbxDeviceListClick(Sender: TObject);
-    procedure sgResolutionsClick(Sender: TObject);
     procedure cbxSupportedFormatsOnlyClick(Sender: TObject);
   private
     { Private declarations }
@@ -111,7 +109,9 @@ type
     iSelectedDevice: Integer;
     iSelectedFormat: Integer;
 
-    function Populate(bSupportedFormatsOnly: Boolean): HResult;
+    procedure PopulateDevices();
+    procedure ClearFormatsList();
+    function PopulateFormats(bSupportedFormatsOnly: Boolean): HResult;
 
   public
     { Public declarations }
@@ -172,26 +172,68 @@ end;
 
 procedure TChooseDeviceDlg.cbxSupportedFormatsOnlyClick(Sender: TObject);
 begin
-  Populate(cbxSupportedFormatsOnly.Checked);
+  PopulateFormats(cbxSupportedFormatsOnly.Checked);
 end;
+
 
 // FormCreate
 procedure TChooseDeviceDlg.FormCreate(Sender: TObject);
 begin
   iSelectedDevice := -1;
   iSelectedFormat := -1;
-  populate(True);
+  PopulateDevices();
 end;
 
 
 procedure TChooseDeviceDlg.lbxDeviceListClick(Sender: TObject);
 begin
-  btnOK.Enabled := ((lbxDeviceList.ItemIndex > -1) and (sgResolutions.Row > 0));
+  if (lbxDeviceList.ItemIndex > -1) then
+    begin
+      iSelectedDevice := lbxDeviceList.ItemIndex;
+      PopulateFormats(cbxSupportedFormatsOnly.Checked);
+      btnOK.Enabled := True;
+    end
+  else
+    begin
+      btnOK.Enabled := False;
+      iSelectedDevice := -1;
+    end;
 end;
+
+
+procedure TChooseDeviceDlg.PopulateDevices();
+var
+  i: Integer;
+
+begin
+  lbxDeviceList.Clear;
+
+  // Append the friendly name to the combobox.
+  for i := 0 to FDeviceExplorer.DevicesCount -1 do
+    lbxDeviceList.Items.Append(FDeviceExplorer.DeviceProperties[i].lpDisplayName);
+
+  // Choose first device in the list
+  lbxDeviceList.ItemIndex := 0;
+  iSelectedDevice := lbxDeviceList.ItemIndex;
+  PopulateFormats(cbxSupportedFormatsOnly.Checked);
+end;
+
+
+procedure TChooseDeviceDlg.ClearFormatsList();
+var
+  i: Integer;
+
+begin
+  for i := 0 to sgResolutions.ColCount - 1 do
+    sgResolutions.Cols[i].Clear;
+  sgResolutions.RowCount := 1;
+  sgResolutions.Repaint;
+end;
+
 
 // Populate the listboxes with camera's and properties found on this system
 // ========================================================================
-function TChooseDeviceDlg.Populate(bSupportedFormatsOnly: Boolean): HResult;
+function TChooseDeviceDlg.PopulateFormats(bSupportedFormatsOnly: Boolean): HResult;
 
    // Helper
    procedure AddFormat(iCol: Integer;
@@ -221,7 +263,6 @@ function TChooseDeviceDlg.Populate(bSupportedFormatsOnly: Boolean): HResult;
 
 var
   i,
-  j,
   rc: Integer;
   hr: HResult;
 
@@ -230,16 +271,22 @@ label
 
 begin
   hr := S_OK;
-try
-try
 
   if (FDeviceExplorer.DevicesCount = 0) then
     begin
-      hr :=  MF_E_NO_CAPTURE_DEVICES_AVAILABLE;
+      Result := MF_E_NO_CAPTURE_DEVICES_AVAILABLE;
       Exit;
     end;
 
-  lbxDeviceList.Clear;
+  if (iSelectedDevice < 0) then
+    begin
+      Result := E_INVALIDARG;
+      Exit;
+    end;
+try
+try
+
+  ClearFormatsList();
 
   sgResolutions.ColCount := 5;
   sgResolutions.RowCount := 1;
@@ -248,7 +295,7 @@ try
   sgResolutions.ColWidths[1] := 60;
   sgResolutions.ColWidths[2] := 120;
   sgResolutions.ColWidths[3] := 120;
-  sgResolutions.ColWidths[4] := -1; // Hide column
+  sgResolutions.ColWidths[4] := -1; // Hide last column
 
   sgResolutions.Width :=  sgResolutions.ColWidths[0] +
                           sgResolutions.ColWidths[1] +
@@ -264,48 +311,43 @@ try
   sgResolutions.Cells[4, 0] := 'Formats index';  // This a hidden column.
   rc := 1;
 
-   // Fill the combobox with found capture devices
-  for i := 0 to FDeviceExplorer.DevicesCount - 1 do
+
+  // List devicecapabilities.
+
+  {$IFDEF ConditionalExpressions}
+    {$IF CompilerVersion > 31.0}
+       sgResolutions.BeginUpdate();
+    {$IFEND}
+  {$ENDIF}
+
+  for i := 0 to FDeviceExplorer.NativeFormats -1 do
     begin
-      // Append the friendly name to the combobox.
-      lbxDeviceList.Items.Append(FDeviceExplorer.DeviceProperties[i].lpDisplayName);
-
-      // List devicecapabilities.
-
-      {$IFDEF ConditionalExpressions}
-        {$IF CompilerVersion > 31.0}
-          sgResolutions.BeginUpdate();
-        {$IFEND}
-      {$ENDIF}
-
-      for j := 1 to FDeviceExplorer.NativeFormats -1 do
+      if bSupportedFormatsOnly then
         begin
-          if bSupportedFormatsOnly then
+          if FDeviceExplorer.DeviceProperties[iSelectedDevice].aVideoFormats[i].bMFSupported and (FDeviceExplorer.DeviceProperties[iSelectedDevice].aVideoFormats[i].iFrameRate > 29) then
             begin
-              if FDeviceExplorer.DeviceProperties[i].aVideoFormats[j].bMFSupported and (FDeviceExplorer.DeviceProperties[i].aVideoFormats[j].iFrameRate > 29) then
-                begin
-                  AddFormat(rc, i, j);
-                  Inc(rc);
-                  sgResolutions.RowCount := rc;
-                end;
-            end
-          else   // all
-            begin
-              AddFormat(rc, i, j);
+              AddFormat(rc,
+                        iSelectedDevice,
+                        i);
               Inc(rc);
               sgResolutions.RowCount := rc;
             end;
+        end
+      else   // all
+        begin
+          AddFormat(rc,
+                    iSelectedDevice,
+                    i);
+          Inc(rc);
+          sgResolutions.RowCount := rc;
         end;
-
-      {$IFDEF ConditionalExpressions}
-        {$IF CompilerVersion > 31.0}
-           sgResolutions.EndUpdate();
-        {$IFEND}
-      {$ENDIF}
     end;
 
-  // Select the first in the devices list
-  lbxDeviceList.ItemIndex := 0;
+  {$IFDEF ConditionalExpressions}
+    {$IF CompilerVersion > 31.0}
+       sgResolutions.EndUpdate();
+    {$IFEND}
+  {$ENDIF}
 
 except
   hr := E_FAIL;
@@ -316,11 +358,6 @@ finally
 end;
 end;
 
-
-procedure TChooseDeviceDlg.sgResolutionsClick(Sender: TObject);
-begin
-  lbxDeviceListClick(Self);
-end;
 
 end.
 

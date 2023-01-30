@@ -9,7 +9,7 @@
 // Release date: 05-07-2020
 // Language: ENU
 //
-// Revision Version: 3.1.3
+// Revision Version: 3.1.4
 // Description: Demonstrates audio/video playback using the IMFPMediaPlayer API.
 //              Note: This API is deprecated!
 //
@@ -35,7 +35,7 @@
 //          To change volume, press left arrow (decrease) or right arrow (increase).
 //
 // Related objects: -
-// Related projects: MfPackX313
+// Related projects: MfPackX314
 // Known Issues: It's not recommended to use this api.
 //               As MS said this api is deprecated and support for most media types is not (fully) supported.
 //
@@ -62,9 +62,10 @@
 // License for the specific language governing rights and limitations
 // under the License.
 //
-//
-// Users may distribute this source code provided that this header is included
-// in full at the top of the file.
+// Non commercial users may distribute this sourcecode provided that this
+// header is included in full at the top of the file.
+// Commercial users are not allowed to distribute this sourcecode as part of
+// their product.
 //
 //==============================================================================
 unit frmSimplePlayer;

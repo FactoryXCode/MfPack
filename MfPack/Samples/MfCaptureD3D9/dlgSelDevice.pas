@@ -26,7 +26,7 @@
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX313
+// Related projects: MfPackX314
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -53,15 +53,10 @@
 // License for the specific language governing rights and limitations
 // under the License.
 //
-// Groupname: FactoryX
-// The Initial Developers of the Original Code are: Tony Kalf (maXcomX)
-//                                                  Peter Larson (ozships)
-//
-// Contributor(s): Tony Kalf (maXcomX),
-//                 Peter Larson (ozships),
-//
-// Users may distribute this source code provided that this header is included
-// in full at the top of the file.
+// Non commercial users may distribute this sourcecode provided that this
+// header is included in full at the top of the file.
+// Commercial users are not allowed to distribute this sourcecode as part of
+// their product.
 //
 //==============================================================================
 
@@ -85,6 +80,7 @@ uses
   Vcl.ExtCtrls,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfObjects,
+  WinApi.MediaFoundationApi.MfUtils,
   {Project}
   Preview;
 
@@ -94,7 +90,7 @@ type
     butCancel: TButton;
     Bevel1: TBevel;
     ComboBox1: TComboBox;
-    procedure ComboBox1Click(Sender: TObject);
+    procedure butOkClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -104,16 +100,14 @@ type
 var
   dlgSelectDevice: TdlgSelectDevice;
 
-
-
 implementation
 
 {$R *.dfm}
 
-procedure TdlgSelectDevice.ComboBox1Click(Sender: TObject);
+procedure TdlgSelectDevice.butOkClick(Sender: TObject);
 begin
   param.selection := ComboBox1.ItemIndex;
-  param.sSelection := LPWSTR(ComboBox1.Items[ComboBox1.ItemIndex]);
+  param.pwcSelection := StrToPWideChar(ComboBox1.Items[ComboBox1.ItemIndex]);
 end;
 
 end.

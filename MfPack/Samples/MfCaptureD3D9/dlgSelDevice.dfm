@@ -24,14 +24,15 @@ object dlgSelectDevice: TdlgSelectDevice
     ExplicitHeight = 162
   end
   object butOk: TButton
-    Left = 292
-    Top = 10
+    Left = 294
+    Top = 9
     Width = 75
     Height = 25
     Caption = 'Ok'
     Default = True
     ModalResult = 1
     TabOrder = 0
+    OnClick = butOkClick
   end
   object butCancel: TButton
     Left = 292
@@ -50,6 +51,5 @@ object dlgSelectDevice: TdlgSelectDevice
     Height = 21
     TabOrder = 2
     Text = 'ComboBox1'
-    OnClick = ComboBox1Click
   end
 end

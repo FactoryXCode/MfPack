@@ -10,7 +10,7 @@
 // Release date: 18-11-2022
 // Language: ENU
 //
-// Revision Version: 3.1.3
+// Revision Version: 3.1.4
 //
 // Description:
 //   This unit contains the captureengine.
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX313/Samples/MFCaptureEngineVideoCapture
+// Related projects: MfPackX314/Samples/MFCaptureEngineVideoCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.22621.0
@@ -42,11 +42,10 @@
 //
 // LICENSE
 //
-//  The contents of this file are subject to the
-//  GNU General Public License v3.0 (the "License");
-//  you may not use this file except in
-//  compliance with the License. You may obtain a copy of the License at
-//  https://www.gnu.org/licenses/gpl-3.0.html
+// The contents of this file are subject to the Mozilla Public License
+// Version 2.0 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at
+// https://www.mozilla.org/en-US/MPL/2.0/
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
@@ -56,7 +55,7 @@
 // Non commercial users may distribute this sourcecode provided that this
 // header is included in full at the top of the file.
 // Commercial users are not allowed to distribute this sourcecode as part of
-// their product without implicit permission.
+// their product.
 //
 //==============================================================================
 unit CaptureEngine;
@@ -134,11 +133,11 @@ type
                       ssoCallBack,
                       ssoStream);
 
-
   // CaptureManager class
   // Wraps the capture engine and implements the event callback and OnSampleCallback in a nested class.
 type
-  TCaptureManager = class(TPersistent)
+  TCaptureManager = class(TObject)
+  protected
 
 {$REGION TCaptureManagerCallBack}
   // The event callback object.
@@ -153,7 +152,7 @@ type
 
       FCapMan: TCaptureManager;
 
-      constructor Create(_hwnd: HWND);
+      constructor Create(_hwnd: HWND); reintroduce;
       destructor Destroy(); override;
 
     end;
@@ -171,16 +170,14 @@ type
       function OnSample(pSample: IMFSample): HResult; stdcall;
       //
     public
-      constructor Create(_hwnd: HWND);
+      constructor Create(_hwnd: HWND); reintroduce;
       destructor Destroy(); override;
 
       property SampleFromCallBack: IMFSample read FSampleFromCallBack write FSampleFromCallBack;
     end;
 {$ENDREGION}
 
-
   private
-
     FCaptureEngine: IMFCaptureEngine;
     FCapturePreviewSink: IMFCapturePreviewSink;
 
@@ -204,7 +201,7 @@ type
     FSnapShotOptions: TSnapShotOptions;
     FCritSec: TMFCritSec;
 
-    constructor Create(pEvent: HWND); virtual;
+    constructor Create(pEvent: HWND); reintroduce;
     procedure DestroyCaptureEngine();
 
     // Capture Event Handlers
@@ -224,15 +221,16 @@ type
 
     destructor Destroy(); override;
 
+
     class function CreateCaptureEngine(hEvent: HWND;
                                        out pEngine: TCaptureManager): HResult;
 
-    function InitializeCaptureManager(const hPreviewObject: HWND;
-                                      const hMainForm: HWND;
-                                      const Unk: IUnknown): HResult;
+    function InitializeCaptureManager(hPreviewObject: HWND;
+                                      hMainForm: HWND;
+                                      Unk: IUnknown): HResult;
 
-    function OnCaptureEvent(var pwParam: WPARAM;
-                            var plParam: LPARAM): HResult;
+    procedure OnCaptureEvent(aWParam: WPARAM;
+                             aLParam: LPARAM);
 
     function UpdateVideo(pSrc: PMFVideoNormalizedRect): HResult;
 
@@ -248,6 +246,7 @@ type
     function TakePhoto(ASnapShotOption: TSnapShotOptions;
                        pMediaType: IMFMediaType): HResult;
 
+    procedure ResetCaptureManager();
 
     property IsRecording: Boolean read bRecording write bRecording;
     property IsPreviewing: Boolean read bPreviewing write bPreviewing;
@@ -267,13 +266,12 @@ var
 
 implementation
 
-
 uses
   WinApi.D3D10,
   WinApi.Unknwn;
 
 
-// D3D11 ///////////////////////////////////////////////////////////////////////
+// D3D11 //////////////IsPreviewing/////////////////////////////////////////////////////////
 
 function CreateDX11Device(out ppDevice: ID3D11Device;
                           out ppDeviceContext: ID3D11DeviceContext;
@@ -403,11 +401,14 @@ begin
   // on the application's main thread.
   // The application will release the pointer when it handles the message.
   if Assigned(FCapMan) then
-    SendMessage(FCapMan.hwndMainForm,
-                WM_APP_CAPTURE_EVENT,
-                WParam(IMFMediaEvent(pEvent)),
-                LPARAM(0));
+    begin
+      SendMessage(FCapMan.hwndMainForm,
+                  WM_APP_CAPTURE_EVENT,
+                  WParam(0),
+                  LPARAM(Pointer(pEvent)));
+    end;
   Result := S_OK;
+  //FCritSec.
 end;
 
 
@@ -440,7 +441,7 @@ begin
     SendMessage(hwndDest,
                 WM_RECIEVED_SAMPLE_FROM_CALLBACK,
                 WPARAM(Pointer(pSample)),
-                0)
+                LPARAM(0))
   else
     hr := E_POINTER;
 
@@ -453,9 +454,9 @@ end;
 // CaptureManager routines /////////////////////////////////////////////////////
 
 
-function TCaptureManager.InitializeCaptureManager(const hPreviewObject: HWND;
-                                                  const hMainForm: HWND;
-                                                  const Unk: IUnknown): HResult;
+function TCaptureManager.InitializeCaptureManager(hPreviewObject: HWND;
+                                                  hMainForm: HWND;
+                                                  Unk: IUnknown): HResult;
 var
   hr: HResult;
   mfAttributes: IMFAttributes;
@@ -597,14 +598,14 @@ end;
 
 
 // DestroyCaptureEngine
-// Callers: Destroy, OnCaptureEvent, InitializeCaptureManager
+// Callers: Destroy, OnCaptureEvent, InitializeCaptureManager, Reset.
 procedure TCaptureManager.DestroyCaptureEngine();
 begin
-  if FhEvent <> 0 then
-     begin
-       CloseHandle(FhEvent);
-       FhEvent := 0;
-     end;
+  if (FhEvent <> 0) then
+    begin
+      CloseHandle(FhEvent);
+      FhEvent := 0;
+    end;
 
   if Assigned(FCapturePreviewSink) then
     SafeRelease(FCapturePreviewSink);
@@ -641,8 +642,8 @@ end;
 // OnCaptureEvent
 // Handle an event from the capture engine.
 // NOTE: This method is called from the application's UI thread.
-function TCaptureManager.OnCaptureEvent(var pwParam: WPARAM;
-                                        var plParam: LPARAM): HResult;
+procedure TCaptureManager.OnCaptureEvent(aWParam: WPARAM;
+                                         aLParam: LPARAM);
 var
   guidType: TGUID;
   hrStatus: HResult;
@@ -651,7 +652,7 @@ var
 
 begin
 
-  pEvent := IMFMediaEvent(pwParam);
+  pEvent := IMFMediaEvent(aLParam);
 
   hr := pEvent.GetStatus(hrStatus);
   if FAILED(hr) then
@@ -689,13 +690,11 @@ begin
 
    SetEvent(FhEvent);
 
-   // Signal for an statusupdate.
+   // Send statusupdate to the mainform.
    SendMessage(hwndMainForm,
                WM_APP_CAPTURE_EVENT_HANDLED,
-               WParam(0),
+               WParam(hrStatus),
                LPARAM(0));
-
-   Result := hrStatus;
 end;
 
 
@@ -726,10 +725,11 @@ end;
 // OnPreviewStopped
 procedure TCaptureManager.OnPreviewStopped(hrStatus: HResult);
 begin
-  IsPreviewing := not SUCCEEDED(hrStatus);
+  IsPreviewing := False;
   if FAILED(hrStatus) then
     ErrMsg('OnPreviewStopped: ' + ERR_PREVIEW,
            hrStatus);
+
 end;
 
 // OnCaptureEngineOutputMediaTypeSet
@@ -758,7 +758,6 @@ begin
   if FAILED(hrStatus) then
     ErrMsg('OnRecordStopped: ' + ERR_RECORD,
            hrStatus);
-
 end;
 
 
@@ -773,14 +772,13 @@ begin
     begin
       //FSampleConverter.UpdateConverter()
     end;
-
 end;
 
 
 // OnCaptureSinkPrepared
 procedure TCaptureManager.OnCaptureSinkPrepared(hrStatus: HResult);
 begin
-  bCaptureSinkReady :=  SUCCEEDED(hrStatus);
+  bCaptureSinkReady := SUCCEEDED(hrStatus);
   if FAILED(hrStatus) then
     ErrMsg('OnCaptureSinkPrepared: ' + ERR_CAPTURE,
            hrStatus);
@@ -886,6 +884,7 @@ begin
 
   hr := FCaptureEngine.StartPreview();
 
+  IsPreviewing := SUCCEEDED(hr);
 
 Done:
   FCritSec.Unlock;
@@ -906,6 +905,7 @@ label
   Done;
 
 begin
+  FCritSec.Lock;
 
   if not Assigned(FCaptureEngine) then
     begin
@@ -924,9 +924,10 @@ begin
   if FAILED(hr) then
     goto Done;
 
-  HandleMessages(GetCurrentThread());
+  IsPreviewing := False;
 
 done:
+  FCritSec.Unlock;
   if FAILED(hr) then
     ErrMsg('StopPreview',
             hr);
@@ -1073,10 +1074,10 @@ function TCaptureManager.TakePhoto(ASnapShotOption: TSnapShotOptions;
                                    pMediaType: IMFMediaType): HResult;
 var
   hr: HResult;
-   pCaptureSink: IMFCaptureSink;
-   pCapturePhotoSink: IMFCapturePhotoSink;
-   bHasPhotoStream: Boolean;
-   dwSinkStreamIndex: DWORD;
+  pCaptureSink: IMFCaptureSink;
+  pCapturePhotoSink: IMFCapturePhotoSink;
+  bHasPhotoStream: Boolean;
+  dwSinkStreamIndex: DWORD;
 
 label
   Done;
@@ -1132,6 +1133,14 @@ Done:
             hr);
   Result := hr;
 end;
+
+
+// call this method before initiating a new engine.
+procedure TCaptureManager.ResetCaptureManager();
+begin
+  DestroyCaptureEngine();
+end;
+
 
 //
 function TCaptureManager.UpdateVideo(psrc: PMFVideoNormalizedRect): HResult;

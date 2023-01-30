@@ -10,7 +10,7 @@
 // Release date: 18-11-2022
 // Language: ENU
 //
-// Revision Version: 3.1.3
+// Revision Version: 3.1.4
 //
 // Description:
 //   Helpers for the MFCaptureEngineVideoCapture
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX313/Samples/MFCaptureEngineVideoCapture
+// Related projects: MfPackX314/Samples/MFCaptureEngineVideoCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.22621.0
@@ -42,11 +42,10 @@
 //
 // LICENSE
 //
-//  The contents of this file are subject to the
-//  GNU General Public License v3.0 (the "License");
-//  you may not use this file except in
-//  compliance with the License. You may obtain a copy of the License at
-//  https://www.gnu.org/licenses/gpl-3.0.html
+// The contents of this file are subject to the Mozilla Public License
+// Version 2.0 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at
+// https://www.mozilla.org/en-US/MPL/2.0/
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
@@ -56,7 +55,7 @@
 // Non commercial users may distribute this sourcecode provided that this
 // header is included in full at the top of the file.
 // Commercial users are not allowed to distribute this sourcecode as part of
-// their product without implicit permission.
+// their product.
 //
 //==============================================================================
 unit Utils;
@@ -70,7 +69,7 @@ interface
 uses
   {WinApi}
   WinApi.Windows,
-
+  WinAPI.Messages,
   {System}
   System.Classes,
   system.Sysutils,
@@ -93,7 +92,8 @@ const
   ERR_CAPTURE    = 'An error occurred during capture.';
   ERR_PHOTO      = 'Unable to capture still photo.';
   ERR_OUTPUT_MEDIATYPE_SET = 'Unable to set the CaptureEngine MediaType output.';
-  ERR_SET_DEVICE = 'Selecting a device failed.';
+  ERR_SET_DEVICE   = 'Selecting a device failed.';
+  ERR_STOP_PREVIEW = 'Stopping preview failed.';
 
 type
 

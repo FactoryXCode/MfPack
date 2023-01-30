@@ -28,7 +28,7 @@
 //          Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX313
+// Related projects: MfPackX314
 // Known Issues: -
 //
 // Compiler version: 23 up to 35               q
@@ -54,16 +54,10 @@
 // License for the specific language governing rights and limitations
 // under the License.
 //
-// Groupname: FactoryX
-// The Initial Developers of the Original Code are: Tony Kalf (maXcomX)
-//                                                  Peter Larson (ozships)
-//                                                  Ramyses De Macedo Rodrigues
-// Contributor(s): Tony Kalf (maXcomX),
-//                 Peter Larson (ozships),
-//
-//
-// Users may distribute this source code provided that this header is included
-// in full at the top of the file.
+// Non commercial users may distribute this sourcecode provided that this
+// header is included in full at the top of the file.
+// Commercial users are not allowed to distribute this sourcecode as part of
+// their product.
 //
 //==============================================================================
 

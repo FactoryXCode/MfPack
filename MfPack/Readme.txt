@@ -1,4 +1,3 @@
-
 /* Recommended project settings */
 
 
@@ -62,14 +61,10 @@ DirectX
 The folllowing API's are included, to support Media Foundation.
 
  - D2D1 API
- - D3D11 API (Since the introduction of Windows 11, this is a part of the MediaFoundation API. Note: The D3D11 API that comes with Delphi version <= 10.4 is out of date)
- - D3D12 API (Since the introduction of Windows 11, this is a part of the MediaFoundation API. Note: The D3D12 API that comes with Delphi version <= 10.4 is out of date)
  - DirectComposition API
  - DirectWrite API
  - DXGI API
  - XAudio2 API
- - Windows Imaging Component (WIC) API
- - Windows Media API
 
 Notes
 ===== 

@@ -156,7 +156,7 @@ object frmMain: TfrmMain
   TextHeight = 13
   object MainMenu1: TMainMenu
     Left = 38
-    Top = 21
+    Top = 25
     object File1: TMenuItem
       Caption = 'File'
       object SelectDevice1: TMenuItem

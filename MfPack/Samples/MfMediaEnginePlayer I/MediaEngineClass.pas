@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Revision Version: 3.1.3
+// Revision Version: 3.1.4
 // Description: This class uses the IMFMediaEngine based on extended HTML5.
 //
 // Company: FactoryX
@@ -27,7 +27,7 @@
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX313
+// Related projects: MfPackX314
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -44,17 +44,19 @@
 // LICENSE
 //
 // The contents of this file are subject to the Mozilla Public License
-// Version 1.1 (the "License"); you may not use this file except in
+// Version 2.0 (the "License"); you may not use this file except in
 // compliance with the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/MPL-1.1.html
+// https://www.mozilla.org/en-US/MPL/2.0/
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
 // License for the specific language governing rights and limitations
 // under the License.
 //
-// Users may distribute this source code provided that this header is included
-// in full at the top of the file.
+// Non commercial users may distribute this sourcecode provided that this
+// header is included in full at the top of the file.
+// Commercial users are not allowed to distribute this sourcecode as part of
+// their product.
 //
 //==============================================================================
 unit MediaEngineClass;

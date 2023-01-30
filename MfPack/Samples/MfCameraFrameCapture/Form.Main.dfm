@@ -152,7 +152,7 @@ object FrmMain: TFrmMain
       end
       object btnCaptureFrame: TButton
         Left = 94
-        Top = 163
+        Top = 165
         Width = 105
         Height = 25
         Caption = 'Single Frame'
@@ -161,7 +161,7 @@ object FrmMain: TFrmMain
       end
       object btnSaveImage: TButton
         Left = 730
-        Top = 162
+        Top = 163
         Width = 70
         Height = 25
         Caption = 'Save Image'

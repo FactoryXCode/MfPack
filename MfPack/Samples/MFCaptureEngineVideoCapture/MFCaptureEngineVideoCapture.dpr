@@ -1,7 +1,7 @@
 program MFCaptureEngineVideoCapture;
 
 uses
-  {$IFDEF madExcept}
+  {$IFDEF MadExcept}
   madExcept,
   madLinkDisAsm,
   madListHardware,

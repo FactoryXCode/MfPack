@@ -10,7 +10,7 @@
 // Release date: 22-09-2021
 // Language: ENU
 //
-// Revision Version: 3.1.3
+// Revision Version: 3.1.4
 //
 // Description:
 //   This unit uses the D2D1 API to perform the translation from sample to bitmap.
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX313/Samples/MFFrameSample
+// Related projects: MfPackX314/Samples/MFFrameSample
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.22621.0
@@ -52,8 +52,11 @@
 // License for the specific language governing rights and limitations
 // under the License.
 //
-// Users may distribute this source code provided that this header is included
-// in full at the top of the file.
+// Non commercial users may distribute this sourcecode provided that this
+// header is included in full at the top of the file.
+// Commercial users are not allowed to distribute this sourcecode as part of
+// their product.
+//
 //==============================================================================
 unit SampleConverter;
 

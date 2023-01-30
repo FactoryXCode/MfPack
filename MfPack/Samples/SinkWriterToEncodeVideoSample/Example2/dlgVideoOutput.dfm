@@ -94,7 +94,7 @@ object dlgVideoSetttings: TdlgVideoSetttings
   end
   object CancelBtn: TButton
     Left = 89
-    Top = 236
+    Top = 235
     Width = 75
     Height = 25
     Cancel = True

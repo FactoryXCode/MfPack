@@ -27,7 +27,7 @@
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX313
+// Related projects: MfPackX314
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -88,23 +88,24 @@ uses
 //
 //-------------------------------------------------------------------
 type
-  TVideoBufferLock = class(TObject)
+  TVideoBufferLock = class
   private
     //
     m_pBuffer: IMFMediaBuffer;
     m_p2DBuffer: IMF2DBuffer;
     m_bLocked: BOOL;
+    procedure UnlockBuffer();
 
   public
     // Constructor & destructor
     constructor Create(pBuffer: IMFMediaBuffer);
     destructor Destroy(); override;
 
-    procedure UnlockBuffer();
+
     function LockBuffer(lDefaultStride: LONG;     // Minimum stride (with no padding).
                         dwHeightInPixels: DWORD;  // Height of the image, in pixels.
-                        var ppbScanLine0: PByte;  // Receives a pointer to the start of scan line 0.
-                        var plStride: LONG        // Receives the actual stride.
+                        out ppbScanLine0: PByte;  // Receives a pointer to the start of scan line 0.
+                        out plStride: LONG        // Receives the actual stride.
                         ): HRESULT;
   end;
 
@@ -139,6 +140,8 @@ begin
 end;
 
 
+
+
 //-------------------------------------------------------------------
 // LockBuffer
 //
@@ -151,8 +154,8 @@ end;
 
 function TVideoBufferLock.LockBuffer(lDefaultStride: LONG;     // Minimum stride (with no padding).
                                      dwHeightInPixels: DWORD;  // Height of the image, in pixels.
-                                     var ppbScanLine0: PByte;  // Receives a pointer to the start of scan line 0.
-                                     var plStride: LONG): HRESULT;
+                                     out ppbScanLine0: PByte;  // Receives a pointer to the start of scan line 0.
+                                     out plStride: LONG): HRESULT;
 var
   hr: HRESULT;
   pData: PByte;  // Any use of PByte require {$POINTERMATH ON)
@@ -167,11 +170,10 @@ begin
   else
     begin
       // Use non-2D version.
-      pData := Nil;
 
       hr := m_pBuffer.Lock(pData,
-                           Nil,
-                           Nil);
+                           nil,
+                           nil);
 
       if SUCCEEDED(hr) then
         begin
@@ -229,6 +231,5 @@ begin
     end;
 
 end;
-
 
 end.

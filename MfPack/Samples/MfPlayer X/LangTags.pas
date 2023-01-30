@@ -10,7 +10,7 @@
 // Release date: 13-08-2019
 // Language: ENU
 //
-// Revision Version: 3.1.3
+// Revision Version: 3.1.4
 // Description: Language tag definitions file.
 //
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -25,7 +25,7 @@
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX313
+// Related projects: MfPackX314
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -56,8 +56,8 @@
 //                                                  Peter Larson (ozships)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
-// Users may distribute this source code provided that this header is included
-// in full at the top of the file.
+// Non commercial users may distribute this source code provided that this header is included this source code provided that this header is included
+// in full at the top of the file. Commercial users are not allowed to include this API as part of their product without implicit permission.
 //
 //==============================================================================
 unit LangTags;

@@ -10,8 +10,8 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Revision Version: 3.1.3
-// Description: This unit holds basic Media Foundation methods needed to play,
+// Revision Version: 3.1.4
+// Description: This unit contains basic Media Foundation methods needed to play,
 //              record, encode, decode, etc.
 //
 // Company: FactoryX
@@ -27,12 +27,13 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 // 13/08/2022 Tony                Implemented more functionality and updated methods.
+// 30/01/2023 Tony                Updated some.
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX313
+// Related projects: MfPackX314
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -48,18 +49,16 @@
 //
 // LICENSE
 //
-//  The contents of this file are subject to the
-//  GNU General Public License v3.0 (the "License");
-//  you may not use this file except in
-//  compliance with the License. You may obtain a copy of the License at
-//  https://www.gnu.org/licenses/gpl-3.0.html
+// The contents of this file are subject to the Mozilla Public License
+// Version 2.0 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at
+// https://www.mozilla.org/en-US/MPL/2.0/
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
 // License for the specific language governing rights and limitations
 // under the License.
 //
-// Explanatory memorandum:
 // Non commercial users may distribute this sourcecode provided that this
 // header is included in full at the top of the file.
 // Commercial users are not allowed to distribute this sourcecode as part of
@@ -196,7 +195,7 @@ type
     riId: TGuid;             // Source type: video or audio capture devices.
     iCount: Integer;         // Number of devices of the same type and brand.
     iDeviceIndex: Integer;   // Zero based device index.
-    lpFriendlyName: LPWSTR;  // Readable string from the system .
+    lpFriendlyName: LPWSTR;  // Readable string from the system.
     lpDisplayName: LPWSTR;   // Displayname of the FriendlyName when doubles are found.
     lpSymbolicLink: LPWSTR;  // Device symlink.
     aVideoFormats: TVideoFormatInfoArray; // Video capabilities of the device supported by Media Foundation.
@@ -413,13 +412,13 @@ type
 
   // Creates and initializes a source node from a MediaSource.
   function AddSourceNode(pTopology: IMFTopology;                  // Topology.
-                         pSource: IMFMediaSource;               // Media source.
+                         pSource: IMFMediaSource;                 // Media source.
                          pPD: IMFPresentationDescriptor;          // Presentation descriptor.
                          pSD: IMFStreamDescriptor;                // Stream descriptor.
                          out ppNode: IMFTopologyNode): HRESULT;   // Receives the node pointer.
 
   // Creates and initializes a source node from a MediaSource.
-  function AddSourceStreamNode(pSource: IMFMediaSource;             // Media source.
+  function AddSourceStreamNode(pSource: IMFMediaSource;               // Media source.
                                pSourcePD: IMFPresentationDescriptor;  // Presentation descriptor.
                                pSourceSD: IMFStreamDescriptor;        // Stream descriptor.
                                out ppNode: IMFTopologyNode): HRESULT; // Receives the node pointer.
@@ -490,7 +489,7 @@ type
   // For each output node in the topology, set the value of the MF_TOPONODE_MEDIASTOP
   // to the stop time in 100-nanosecond (hns) units.
   // Note that setting this attribute after playback starts has no effect.
-  // Therefore, set the attribute before calling IMFMediaSession.Start.
+  // Therefore, set the attribute before calling IMFMediaSession.Start().
   // The following code shows how to set the stop time on an existing topology.
 
   function SetMediaStop(pTopology: IMFTopology;
@@ -577,10 +576,10 @@ type
   //
   // If you do not set the capture format, the capturedevice will use its default format.
   // This function sets the capture format.
-  function SetDeviceFormat(const pSource: IMFMediaSource;
+  function SetDeviceFormat(pSource: IMFMediaSource;
                            dwFormatIndex: DWORD): HResult; overload;
-  function SetDeviceFormat(const pSource: IMFMediaSource;
-                           const pMediaType: IMFMediaType;
+  function SetDeviceFormat(pSource: IMFMediaSource;
+                           pMediaType: IMFMediaType;
                            dwFormatIndex: DWORD): HResult; overload;
 
 
@@ -629,6 +628,7 @@ type
 
   // Counts mediatypes from a device
   // When the list index goes out of bounds, GetNativeMediaType returns MF_E_NO_MORE_TYPES.
+  // This is not an error, but indicates the end of the list.
   // Set MfSupportedOnly to False if you want to get the total of all native types from the device.
   function CountTypesFromDevice(pReader: IMFSourceReader;
                                 const pStreamIndex: DWORD;
@@ -744,18 +744,18 @@ type
                                               ): HRESULT;
 
   // Copy an attribute value from one attribute store to another.
-  function CopyAttribute(const pSrc: IMFAttributes;
+  function CopyAttribute(pSrc: IMFAttributes;
                          var pDest: IMFAttributes;
                          const key: TGUID): HRESULT; overload;
 
-  function CopyAttribute(const pSrc: IMFMediaType;
+  function CopyAttribute(pSrc: IMFMediaType;
                          var pDest: IMFMediaType;
                          const key: TGUID): HRESULT; overload;
 
 
   // Creates a compatible video format with a different subtype if param guidSubType <> GUID_NULL else
   // the SubType will be the source subtype.
-  function CloneVideoMediaType(const pSrcMediaType: IMFMediaType;
+  function CloneVideoMediaType(pSrcMediaType: IMFMediaType;
                                const guidSubType: REFGUID;
                                out ppNewMediaType: IMFMediaType): HRESULT;
 
@@ -861,7 +861,7 @@ type
   function GetMediaDescription(pMajorGuid: TGuid;
                                out mtMediaType: TMediaTypes): HRESULT;
 
-  // Gets audio (EndPoint)device capabillyties
+  // Gets audio (EndPoint)device capabilities
   function GetAudioFormat(var pMfAudioFormat: TMFAudioFormat): HRESULT;
 
   // Gets audio stream info
@@ -1044,7 +1044,11 @@ begin
 
   for i := 0 to Length(aVideoFormats) - 1 do
     aVideoFormats[i].Reset;
+  for i := 0 to Length(aAudioFormats) - 1 do
+    aAudioFormats[i].Reset;
+
   aVideoFormats := nil;
+  aAudioFormats := nil;
 end;
 
 
@@ -3007,6 +3011,7 @@ var
   dwCount: DWord;
   dwSupportedCount: DWord;
   dwNativeCount: DWord;
+  i: Integer;
 
 label
   Done;
@@ -3136,7 +3141,11 @@ begin
 Done:
    //If a failure occurs, the entire array will be cleared.
    if FAILED(hr) then
-     pDeviceProperties := nil;
+     begin
+       for i := 0 to Length(pDeviceProperties) do
+         pDeviceProperties[i].Reset;
+       pDeviceProperties := nil;
+     end;
 
   // Store supported output formats only.
   pDeviceProperties[pDeviceIndex].dwSupportedFormats := dwSupportedCount;
@@ -4324,7 +4333,7 @@ end;
 
 
 //
-function CopyAttribute(const pSrc: IMFAttributes;
+function CopyAttribute(pSrc: IMFAttributes;
                        var pDest: IMFAttributes;
                        const key: TGUID): HRESULT;
 var
@@ -4348,7 +4357,7 @@ begin
 end;
 
 
-function CopyAttribute(const pSrc: IMFMediaType;
+function CopyAttribute(pSrc: IMFMediaType;
                        var pDest: IMFMediaType;
                        const key: TGUID): HRESULT;
 var
@@ -4376,7 +4385,7 @@ end;
 
 // Creates a compatible video format with a different subtype if param guidSubType <> GUID_NULL else
 // the SubType will be the source subtype.
-function CloneVideoMediaType(const pSrcMediaType: IMFMediaType;
+function CloneVideoMediaType(pSrcMediaType: IMFMediaType;
                              const guidSubType: REFGUID;
                              out ppNewMediaType: IMFMediaType): HRESULT;
 var
@@ -5905,7 +5914,7 @@ end;
 
 
 //
-function SetDeviceFormat(const pSource: IMFMediaSource;
+function SetDeviceFormat(pSource: IMFMediaSource;
                          dwFormatIndex: DWORD): HResult;
 var
   pPD: IMFPresentationDescriptor;
@@ -5955,8 +5964,8 @@ end;
 
 
 //
-function SetDeviceFormat(const pSource: IMFMediaSource;
-                         const pMediaType: IMFMediaType;
+function SetDeviceFormat(pSource: IMFMediaSource;
+                         pMediaType: IMFMediaType;
                          dwFormatIndex: DWORD): HResult;
 var
   pPD: IMFPresentationDescriptor;

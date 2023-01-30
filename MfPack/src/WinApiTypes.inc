@@ -10,7 +10,7 @@
 // Release date: 04-01-2016
 // Language: ENU
 //
-// Revision Version: 3.1.3
+// Revision Version: 3.1.4
 // Description: Holds compiler definitions for MfPack.
 //
 //
@@ -29,7 +29,7 @@
 //          the major Windows updates. So, we started with ISÁK.
 //
 // Related objects: -
-// Related projects: MfPackX312
+// Related projects: MfPackX314
 // Known Issues: -
 // Compiler version: 23 up to 35
 // SDK version: 10.0.22621.0
@@ -43,22 +43,19 @@
 // LICENSE
 //
 // The contents of this file are subject to the Mozilla Public License
-// Version 1.1 (the "License"); you may not use this file except in
+// Version 2.0 (the "License"); you may not use this file except in
 // compliance with the License. You may obtain a copy of the License at
-// http://www.mozilla.org/MPL/MPL-1.1.html
+// https://www.mozilla.org/en-US/MPL/2.0/
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
 // License for the specific language governing rights and limitations
 // under the License.
 //
-// Groupname: FactoryX
-// The Initial Developers of the Original Code are: Tony Kalf (maXcomX)
-//                                                  Peter Larson (ozships)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
-//
-// Users may distribute this source code provided that this header is included
-// in full at the top of the file.
+// Non commercial users may distribute this sourcecode provided that this
+// header is included in full at the top of the file.
+// Commercial users are not allowed to distribute this sourcecode as part of
+// their product.
 //
 //==============================================================================
 
@@ -377,7 +374,8 @@ const
 // {$DEFINE MFPACK_VERSION_310_UP} // Bowie release, Milestone update 15.
 // {$DEFINE MFPACK_VERSION_311_UP} // Bowie release, Milestone update 16.
 // {$DEFINE MFPACK_VERSION_312_UP} // Mercury release, Milestone update 17.
-{$DEFINE MFPACK_VERSION_313_UP} // PiL release, Milestone update 18.
+// {$DEFINE MFPACK_VERSION_313_UP} // PiL release, Milestone update 18.
+{$DEFINE MFPACK_VERSION_314_UP} // PiL release, update 19.
 
 // WARNINGS
 // enable/disable compiler warnings.

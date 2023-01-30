@@ -35,9 +35,6 @@ object MainWindow: TMainWindow
     ShowCaption = False
     ShowHint = False
     TabOrder = 0
-    ExplicitLeft = -1
-    ExplicitWidth = 1086
-    ExplicitHeight = 738
     object pnlInfo: TPanel
       Left = 1
       Top = 707
@@ -49,8 +46,6 @@ object MainWindow: TMainWindow
       Caption = 'pnlInfo'
       ParentBackground = False
       TabOrder = 0
-      ExplicitTop = 692
-      ExplicitWidth = 1084
     end
   end
   object pnlSnapShot: TPanel
@@ -64,7 +59,6 @@ object MainWindow: TMainWindow
     ParentBackground = False
     ShowCaption = False
     TabOrder = 1
-    ExplicitLeft = 775
     object pbCapture: TPaintBox
       Left = 0
       Top = 0
@@ -115,27 +109,22 @@ object MainWindow: TMainWindow
     end
   end
   object MainMenu: TMainMenu
-    Left = 32
-    Top = 40
+    Left = 30
+    Top = 38
     object Capture1: TMenuItem
       Caption = 'Capture'
-      object mnuStartPreview: TMenuItem
-        Caption = 'Start Preview'
-        OnClick = mnuStartPreviewClick
-      end
       object mnuChooseDevice: TMenuItem
         Caption = 'Choose Device'
         OnClick = mnuChooseDeviceClick
+      end
+      object mnuStartPreview: TMenuItem
+        Caption = 'Start Preview'
+        OnClick = mnuStartPreviewClick
       end
       object mnuStartRecording: TMenuItem
         Caption = 'Start Recording'
         Enabled = False
         OnClick = mnuStartRecordingClick
-      end
-      object mnuTakePhoto: TMenuItem
-        Caption = 'Take Photo'
-        Enabled = False
-        OnClick = mnuTakePhotoClick
       end
       object N1: TMenuItem
         Caption = '-'

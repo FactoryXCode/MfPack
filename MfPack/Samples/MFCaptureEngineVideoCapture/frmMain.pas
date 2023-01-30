@@ -10,7 +10,7 @@
 // Release date: 18-11-2022
 // Language: ENU
 //
-// Revision Version: 3.1.3
+// Revision Version: 3.1.4
 //
 // Description:
 //   Main form.
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX313/Samples/MFCaptureEngineVideoCapture
+// Related projects: MfPackX314/Samples/MFCaptureEngineVideoCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.22621.0
@@ -42,11 +42,10 @@
 //
 // LICENSE
 //
-//  The contents of this file are subject to the
-//  GNU General Public License v3.0 (the "License");
-//  you may not use this file except in
-//  compliance with the License. You may obtain a copy of the License at
-//  https://www.gnu.org/licenses/gpl-3.0.html
+// The contents of this file are subject to the Mozilla Public License
+// Version 2.0 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at
+// https://www.mozilla.org/en-US/MPL/2.0/
 //
 // Software distributed under the License is distributed on an "AS IS"
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
@@ -56,7 +55,7 @@
 // Non commercial users may distribute this sourcecode provided that this
 // header is included in full at the top of the file.
 // Commercial users are not allowed to distribute this sourcecode as part of
-// their product without implicit permission.
+// their product.
 //
 //==============================================================================
 unit frmMain;
@@ -113,7 +112,6 @@ type
     mnuStartPreview: TMenuItem;
     mnuChooseDevice: TMenuItem;
     mnuStartRecording: TMenuItem;
-    mnuTakePhoto: TMenuItem;
     SaveFileDlg: TSaveDialog;
     N1: TMenuItem;
     Exit1: TMenuItem;
@@ -127,7 +125,6 @@ type
     procedure FormCreate(Sender: TObject);
     procedure mnuChooseDeviceClick(Sender: TObject);
     procedure mnuStartPreviewClick(Sender: TObject);
-    procedure mnuTakePhotoClick(Sender: TObject);
     procedure butTakePhotoClick(Sender: TObject);
     procedure mnuStartRecordingClick(Sender: TObject);
     procedure butSaveToFileClick(Sender: TObject);
@@ -148,15 +145,26 @@ type
     iSampleTime: Int64;
     FSampleConverter: TSampleConverter;
 
+    function CreateCaptureObjects(): HResult;
+    procedure DestroyCaptureObjects();
     function CreateDeviceExplorer(): HResult;
 
-    // Messages
+    // Windows messages
     procedure OnSize(var message: TWMSize); message WM_SIZE;
     procedure OnDeviceChange(var AMessage: TMessage); message WM_DEVICECHANGE;
 
+    // Captureengine message handlers
+    // These methods handle messages  from the CptureEngine.
+    procedure OnCaptureEvent(var AMessage: TMessage); message WM_APP_CAPTURE_EVENT;
+    procedure OnRecievedSample(var AMessage: TMessage); message WM_RECIEVED_SAMPLE_FROM_CALLBACK;
+    procedure OnHandledCaptureEvent(var AMessage: TMessage); message WM_APP_CAPTURE_EVENT_HANDLED;
+    // Another option to handle the CaptureEngine messages is to use the WndProc method.
+    // procedure WndProc(var Msg: TMessage); override;
+
     // Update menuitems and status
     procedure UpdateUI();
-    // process sample in main thread
+
+    // Process sample in main thread
     function ProcessSample(const aSample: IMFSample): HResult;
     procedure PaintCapture(bm: TMfpBitmap);
     procedure GetPaintArea(AImage: TMfpBitmap;
@@ -169,8 +177,8 @@ type
   public
     { Public declarations }
 
-    // Messagehandler
-    procedure WndProc(var Msg: TMessage); override;
+    // Destroy all objects and reinitialize them.
+    procedure ReInitializeCaptureObjects();
 
   end;
 
@@ -257,13 +265,57 @@ begin
 end;
 
 
-// WndProc
+//------------------------------------------------------------------------------
+//  OnCaptureEvent
+//
+//  Handles WM_APP_CAPTURE_EVENT messages.
+//------------------------------------------------------------------------------
+procedure TMainWindow.OnCaptureEvent(var AMessage: TMessage);
+begin
+  FCaptureManager.OnCaptureEvent(AMessage.WParam,
+                                 AMessage.LParam);
+
+  WaitForSingleObject(Handle,
+                      INFINITE);
+end;
+
+
+//------------------------------------------------------------------------------
+//  OnRecievedSample
+//
+//  Handles WM_RECIEVED_SAMPLE_FROM_CALLBACK messages.
+//------------------------------------------------------------------------------
+procedure TMainWindow.OnRecievedSample(var AMessage: TMessage);
+var
+  psample: IMFSample;
+begin
+  psample := IMFSample(Pointer(AMessage.WParam));
+  // process the sample
+  ProcessSample(pSample);
+end;
+
+
+//------------------------------------------------------------------------------
+//  OnHandledCaptureEvent
+//
+//  Handles WM_APP_CAPTURE_EVENT_HANDLED messages.
+//------------------------------------------------------------------------------
+procedure TMainWindow.OnHandledCaptureEvent(var AMessage: TMessage);
+begin
+  if SUCCEEDED(HResult(AMessage.WParam)) then
+    UpdateUI()
+  else
+    ErrMsg('CaptureManager reported a failure.',
+           HResult(AMessage.WParam));
+end;
+
+
+// using WndProc
+{
 procedure TMainWindow.WndProc(var Msg: TMessage);
 var
   psample: IMFSample;
-  {$IFDEF SAVE_DEBUG_REPORT}
-  hr: HResult;
-  {$ENDIF}
+
 begin
 
   case Msg.Msg of
@@ -278,22 +330,23 @@ begin
 
     WM_APP_CAPTURE_EVENT:
       begin
-        {$IFDEF SAVE_DEBUG_REPORT}
-        hr := {$ENDIF} FCaptureManager.OnCaptureEvent(Msg.WParam,
-                                                      Msg.LParam);
-        {$IFDEF SAVE_DEBUG_REPORT}
-        ErrMsg('FCaptureManager.OnCaptureEvent failed.',
-               hr);
-        {$ENDIF}
+
+        FCaptureManager.OnCaptureEvent(Msg.WParam,
+                                       Msg.LParam);
 
         WaitForSingleObject(Handle,
                             INFINITE);
       end;
 
-    // When a capture event is processed by the capture engine, update the statusbar.
+    // When a capture event is processed by the capture engine, update the statusbar and menu.
     WM_APP_CAPTURE_EVENT_HANDLED:
       begin
-        UpdateUI();
+        if SUCCEEDED(HResult(Msg.WParam)) then
+          UpdateUI()
+        else
+          ErrMsg('CaptureManager repported a failure.',
+                 HResult(Msg.WParam));
+
       end;
 
     // Any other messages are passed to DefWindowProc, which tells Windows to handle the message.
@@ -305,8 +358,7 @@ begin
   end;
 
   inherited WndProc(Msg);
-
-end;
+end; }
 
 
 // ProcessSample
@@ -464,36 +516,13 @@ function TMainWindow.GetDefaultSaveName(): string;
 begin
 
   Result := 'Capture_' + HnsTimeToStr(iSampleTime,
-                                      False,
-                                      '_');
+                                      '_',
+                                      False);
 end;
 
 
 // butTakePhotoClick
 procedure TMainWindow.butTakePhotoClick(Sender: TObject);
-begin
-  mnuTakePhotoClick(Self);
-end;
-
-
-// FormCreate
-procedure TMainWindow.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-begin
-  CanClose := False;
-  if Assigned(bmCapturedFrame) then
-    SafeDelete(bmCapturedFrame);
-  SafeDelete(FCaptureManager);
-  SafeRelease(pSelectedDevice);
-  SafeDelete(FDeviceExplorer);
-  SafeDelete(FSampleConverter);
-
-  MFShutdown();
-  CoUnInitialize();
-  CanClose := True;
-end;
-
-
-procedure TMainWindow.FormCreate(Sender: TObject);
 var
   hr: HResult;
 
@@ -501,29 +530,59 @@ label
   Done;
 
 begin
-  iSelectedDevice := -1;
-  iSelectedFormat := -1;
+  hr := E_FAIL;
 
-  // Initialize COM
-  CoInitializeEx(nil,
-                 COINIT_APARTMENTTHREADED);
-  // Startup Media Foundation
-  hr := MFStartup(MF_VERSION,
-                  0);
-
+  if Assigned(FCaptureManager) then
+    hr := FCaptureManager.TakePhoto(ssoCallBack,
+                                    FDeviceExplorer.DeviceProperties[FDeviceExplorer.DeviceIndex].aVideoFormats[FDeviceExplorer.FormatIndex].mfMediaType);
   if FAILED(hr) then
+    goto Done;
+
+Done:
+  if FAILED(hr) then
+    ErrMsg('butTakePhotoClick: ' + ERR_PHOTO,
+            hr);
+end;
+
+// Reinitialize all objects
+procedure TMainWindow.ReInitializeCaptureObjects();
+begin
+  DestroyCaptureObjects();
+  if FAILED(CreateCaptureObjects()) then
     begin
-      MessageBox(0,
-                 lpcwstr('Your computer does not support this Media Foundation API version' + IntToStr(MF_VERSION) + '.'),
-                 lpcwstr('MFStartup Failure!'),
-                 MB_ICONSTOP);
-      goto Done;
-   end;
+      ErrMsg('AfterConstruction: Can not create CaptureManager. The application will be closed.',
+             E_FAIL);
+      Exit;
+    end;
+end;
 
-  // Initialize the deviceexlorer and captureengine
 
-  hPreview := pnlPreview.Handle;
-  hCaptureHandle := pbCapture.Canvas.Handle;
+procedure TMainWindow.DestroyCaptureObjects();
+begin
+  if Assigned(bmCapturedFrame) then
+    FreeAndNil(bmCapturedFrame);
+
+  if Assigned(FCaptureManager) then
+     FreeAndNil(FCaptureManager);
+
+  if Assigned(pSelectedDevice) then
+    SafeRelease(pSelectedDevice);
+
+  if Assigned(FDeviceExplorer) then
+     FreeAndNil(FDeviceExplorer);
+
+  if Assigned(FSampleConverter) then
+     FreeAndNil(FSampleConverter);
+end;
+
+
+function TMainWindow.CreateCaptureObjects(): HResult;
+var
+  hr: HResult;
+label
+  done;
+
+begin
 
   // Create DeviceExplorer properties of the capture devices.
   hr := CreateDeviceExplorer();
@@ -544,6 +603,56 @@ begin
   FSampleConverter := TSampleConverter.Create();
 
   UpdateUI();
+done:
+  Result := hr;
+end;
+
+
+// FormCreate
+procedure TMainWindow.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  CanClose := False;
+
+  DestroyCaptureObjects();
+
+  MFShutdown();
+  CoUnInitialize();
+  CanClose := True;
+end;
+
+
+procedure TMainWindow.FormCreate(Sender: TObject);
+var
+  hr: HResult;
+
+label
+  Done;
+
+begin
+
+  // Initialize COM
+  CoInitializeEx(nil,
+                 COINIT_APARTMENTTHREADED);
+  // Startup Media Foundation
+  hr := MFStartup(MF_VERSION,
+                  0);
+
+  if FAILED(hr) then
+    begin
+      MessageBox(0,
+                 lpcwstr('Your computer does not support this Media Foundation API version' + IntToStr(MF_VERSION) + '.'),
+                 lpcwstr('MFStartup Failure!'),
+                 MB_ICONSTOP);
+      goto Done;
+   end;
+
+  iSelectedDevice := -1;
+  iSelectedFormat := -1;
+  hPreview := pnlPreview.Handle;
+  hCaptureHandle := pbCapture.Canvas.Handle;
+
+  //Create objects
+  hr := CreateCaptureObjects();
 
 Done:
   if FAILED(hr) then
@@ -593,13 +702,8 @@ label
   Done;
 
 begin
-  hr := S_OK;
-  // Create DeviceExplorer properties of the capture devices.
-  if not Assigned(FDeviceExplorer) then
-    hr := CreateDeviceExplorer();
-  if FAILED(hr) then
-    goto Done;
 
+  // Stop the current manager
   if Assigned(FCaptureManager) then
     begin
       if FCaptureManager.IsPreviewing then
@@ -607,10 +711,6 @@ begin
       if FCaptureManager.IsRecording then
         FCaptureManager.StopRecording();
     end;
-
-  iSelectedDevice := -1;
-  iSelectedFormat := -1;
-  UpdateUI();
 
   // Create the dialog if it's not allready done.
   if not Assigned(ChooseDeviceDlg) then
@@ -621,7 +721,7 @@ begin
     end;
 
   // Ask the user to select one.
-  if ChooseDeviceDlg.ShowModal = 1212 then
+  if (ChooseDeviceDlg.ShowModal = 1212) then
     begin
 
       iSelectedDevice := ChooseDeviceDlg.SelectedDevice;
@@ -636,6 +736,7 @@ begin
       if FAILED(hr) then
         goto Done;
 
+      SafeRelease(pSelectedDevice);
       pSelectedDevice := FDeviceExplorer.DeviceActivationObject;
 
       hr := FCaptureManager.InitializeCaptureManager(hPreview,
@@ -669,6 +770,7 @@ var
   bEnablePreview: Boolean;
 
 begin
+
   bEnablePhoto := False;
   bEnableRecording := False;
   bEnablePreview := ((iSelectedDevice > -1) and (iSelectedFormat > -1));
@@ -698,16 +800,15 @@ begin
   if FCaptureManager.IsPreviewing then
     begin
       bPreviewing := FCaptureManager.IsPreviewing;
-      if bPreviewing then
-        begin
-          mnuStartPreview.Caption := 'Stop Preview';
-          bEnableRecording := True;
-          bEnablePhoto := True;
-        end
-      else
-        begin
-          mnuStartPreview.Caption := 'Start Preview';
-        end;
+      mnuStartPreview.Caption := 'Stop Preview';
+      mnuStartPreview.Tag := 1;
+      bEnableRecording := True;
+      bEnablePhoto := True;
+    end
+  else
+    begin
+      mnuStartPreview.Caption := 'Start Preview';
+      mnuStartPreview.Tag := 0;
     end;
 
   if bRecording then
@@ -723,13 +824,14 @@ begin
     bEnablePhoto := False;
 
   mnuStartRecording.Enabled := bEnableRecording;
-  mnuTakePhoto.Enabled := bEnablePhoto;
   mnuStartPreview.Enabled := bEnablePreview;
 
 end;
 
 
 // mnuStartPreviewClick
+// Dont' call UpdateUI() when adressing the capture engine,
+// this method will be called when the capture engine OnCaptureEvent is handled.
 procedure TMainWindow.mnuStartPreviewClick(Sender: TObject);
 var
   hr: HResult;
@@ -737,18 +839,26 @@ var
 begin
   if Assigned(FCaptureManager) then
     begin
-
-      hr := FCaptureManager.StartPreview();
-      if FAILED(hr) then
+      if (mnuStartPreview.Tag = 0) then
         begin
-          butTakePhoto.Enabled := False;
-          ErrMsg('mnuStartPreviewClick ' + ERR_PREVIEW,
-                 hr);
-          Exit;
+          hr := FCaptureManager.StartPreview();
+          if FAILED(hr) then
+            begin
+              butTakePhoto.Enabled := False;
+              ErrMsg('mnuStartPreviewClick ' + ERR_PREVIEW,
+                     hr);
+              Exit;
+            end;
+          butSaveToFile.Enabled := False;
+          butTakePhoto.Enabled := True;
+        end
+      else
+        begin
+          hr := FCaptureManager.StopPreview();
+          if FAILED(hr) then
+            ErrMsg('mnuStartPreviewClick ' + ERR_STOP_PREVIEW,
+                   hr);
         end;
-      butSaveToFile.Enabled := False;
-      butTakePhoto.Enabled := True;
-      UpdateUI();
     end;
 end;
 
@@ -757,32 +867,6 @@ end;
 procedure TMainWindow.mnuStartRecordingClick(Sender: TObject);
 begin
   FCaptureManager.StartRecording(nil);
-end;
-
-
-// mnuTakePhotoClick
-procedure TMainWindow.mnuTakePhotoClick(Sender: TObject);
-var
-  hr: HResult;
-
-label
-  Done;
-
-begin
-  hr := E_FAIL;
-
-  if Assigned(FCaptureManager) then
-    hr := FCaptureManager.TakePhoto(ssoCallBack,
-                                    FDeviceExplorer.DeviceProperties[FDeviceExplorer.DeviceIndex].aVideoFormats[FDeviceExplorer.FormatIndex].mfMediaType);
-  if FAILED(hr) then
-    goto Done;
-
-Done:
-  if FAILED(hr) then
-    ErrMsg('mnuTakePhotoClick: ERR_PHOTO',
-            hr)
-  else
-    UpdateUI();
 end;
 
 
