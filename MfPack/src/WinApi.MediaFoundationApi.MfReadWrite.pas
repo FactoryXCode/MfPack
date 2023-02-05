@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 02/02/2023 Tony                Changed IMFSourceReader.ReadSample parameters.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later (See: Remarks).
@@ -359,11 +360,11 @@ type
                                 const varPosition: PROPVARIANT): HResult; stdcall;
 
     function ReadSample(dwStreamIndex: DWORD;   // The stream to pull data from.
-                        dwControlFlags: MF_SOURCE_READER_CONTROL_FLAG;  // A bitwise OR of zero or more flags from the MF_SOURCE_READER_CONTROL_FLAG enumeration.
-         {out optional} pdwActualStreamIndex: PDWORD = nil;  // Receives the zero-based index of the stream.
-         {out optional} pdwStreamFlags: PDWORD = nil;        // Receives a bitwise OR of zero or more flags from the MF_SOURCE_READER_FLAG enumeration.
-         {out optional} pllTimestamp: PLONGLONG = nil;       // Receives the time stamp of the sample, or the time of the stream event indicated in pdwStreamFlags. The time is given in 100-nanosecond units.
-         {out optional} ppSample: IMFSample = nil): HResult; stdcall;
+                        dwControlFlags: DWORD;  // A bitwise OR of zero or more flags from the MF_SOURCE_READER_CONTROL_FLAG enumeration.
+        {out, optional} pdwActualStreamIndex: PDWORD;  // Receives the zero-based index of the stream.
+        {out, optional} pdwStreamFlags: PDWORD;        // Receives a bitwise OR of zero or more flags from the MF_SOURCE_READER_FLAG enumeration.
+        {out, optional} pllTimestamp: PLONGLONG;       // Receives the time stamp of the sample, or the time of the stream event indicated in pdwStreamFlags. The time is given in 100-nanosecond units.
+        {out, optional} ppSample: PIMFSample): HResult; stdcall;
 
     // function ReadSample: Remarks
     // ============================
@@ -379,7 +380,7 @@ type
     // Asynchronous Mode
     // -----------------
     // In asynchronous mode:
-    // - All of the [out] parameters must be Nil. Otherwise, the method returns E_INVALIDARG.
+    // - All of the [out] parameters must be nil. Otherwise, the method returns E_INVALIDARG.
     // - The method returns immediately.
     // - When the operation completes, the application's IMFSourceReaderCallback.OnReadSample method is called.
     // - If an error occurs, the method can fail either synchronously or asynchronously.
@@ -412,7 +413,7 @@ type
 
     function GetPresentationAttribute(const dwStreamIndex: DWORD;
                                       const guidAttribute: REFGUID;
-                                      var pvarAttribute: PROPVARIANT): HResult; stdcall;
+                                      out pvarAttribute: PROPVARIANT): HResult; stdcall;
 
   end;
   IID_IMFSourceReader = IMFSourceReader;
@@ -442,7 +443,7 @@ type
 
     function GetTransformForStream(dwStreamIndex: DWORD;
                                    dwTransformIndex: DWORD;
-                                   var pGuidCategory: TGUID;
+                                   out pGuidCategory: TGUID;
                                    out ppTransform: IMFTransform): HResult; stdcall;
 
   end;

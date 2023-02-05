@@ -1213,10 +1213,10 @@ type
 
   // Interface IMFMediaBuffer
   // ========================
-  //     The IMFMediaBuffer interface represent a buffer of multimedia data
-  //     for any possible multimedia type.
-  //     It provides methods for accessing the buffer pointer, the current
-  //     length, and the maximum length of the buffer
+  // The IMFMediaBuffer interface represent a buffer of multimedia data
+  // for any possible multimedia type.
+  // It provides methods for accessing the buffer pointer, the current
+  // length, and the maximum length of the buffer.
   //
   PIMFMediaBuffer = ^IMFMediaBuffer;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFMediaBuffer);'}
@@ -1224,7 +1224,7 @@ type
   IMFMediaBuffer = interface(IUnknown)
   ['{045FA593-8799-42b8-BC8D-8968C6453507}']
 
-    function Lock(out ppbBuffer: PByte;           // Receives a pointer to the start of the buffer.
+    function Lock(out ppbBuffer: PByte;        // Receives a pointer to the start of the buffer.
                   {out} pcbMaxLength: PDWord;     // Receives the maximum amount of data that can be written to the buffer. This parameter can be nil.
                   {out} pcbCurrentLength: PDWord  // Receives the length of the valid data in the buffer, in bytes. This parameter can be nil.
                   ): HResult; stdcall;
@@ -1254,6 +1254,7 @@ type
   // It is also valid to have an empty sample with no buffers.
   //
   PIMFSample = ^IMFSample;
+  PPIMFSample = ^PIMFSample; //a test issue
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSample);'}
   {$EXTERNALSYM IMFSample}
   IMFSample = interface(IMFAttributes)
@@ -1843,7 +1844,7 @@ type
     //     Will contain the requested interface
     // </param>
     function ActivateObject(const riid: REFIID;
-                            {out}const [ref] ppv): HResult; stdcall;
+                            out ppv): HResult; stdcall;  {const [ref]}
 
     // <summary>
     //     Shuts down the internal represented object

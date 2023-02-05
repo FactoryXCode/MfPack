@@ -75,15 +75,6 @@ uses
   WinApi.DirectX.D3D9Types,
   WinApi.DirectX.D3D9Caps;
 
-  {$WEAKPACKAGEUNIT ON}
-  {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
 
 {$IFNDEF DIRECT3D_VERSION}
 const
@@ -434,9 +425,9 @@ type
 
     function GetDepthStencilSurface(out ppZStencilSurface: IDirect3DSurface9): HResult; stdcall;
 
-    function BeginScene: HResult; stdcall;
+    function BeginScene(): HResult; stdcall;
 
-    function EndScene: HResult; stdcall;
+    function EndScene(): HResult; stdcall;
 
     function Clear(Count: DWORD;
                    pRects: PD3DRECT;
@@ -1172,7 +1163,7 @@ type
   ['{0cfbaf3a-9ff6-429a-99b3-a2796af8b89b}']
     //*** IDirect3DSurface9 methods ***//
     function GetContainer(const riid: TGuid;
-                          out ppContainer{: Pointer}): HResult; stdcall;
+                          out ppContainer {Void}): HResult; stdcall;
 
     function GetDesc(out pDesc: D3DSURFACE_DESC): HResult; stdcall;
 
@@ -1180,7 +1171,7 @@ type
                       pRect: PRect;
                       Flags: DWORD): HResult; stdcall;
 
-    function UnlockRect: HResult; stdcall;
+    function UnlockRect(): HResult; stdcall;
 
     function GetDC(out phdc: HDC): HResult; stdcall;
 
