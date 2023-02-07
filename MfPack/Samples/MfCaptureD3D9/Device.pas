@@ -664,14 +664,16 @@ begin
                           nil);
 
 done:
-
-  VideoBufferLock.Free; // MUST DO!!! Otherwise the buffer stays in locked state and
-  VideoBufferLock := nil;                             // OnReadSample will halt after approx 10 samples (because of an exhausted sample pool)
+  if Assigned(VideoBufferLock) then
+    begin
+      FreeAndNil(VideoBufferLock); // MUST DO!!! Otherwise the buffer stays in locked state and
+                                   // OnReadSample will halt after approx 10 samples (because of an exhausted sample pool)
+    end;
 
   pbScanline0 := nil;
-
   Result := hr;
 end;
+
 
 //-------------------------------------------------------------------
 //  IsFormatSupported

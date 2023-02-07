@@ -132,9 +132,6 @@ type
     m_pwszSymbolicLink: LPWSTR;
     m_cchSymbolicLink: UINT32;
 
-    function ReadNewSample(): HResult;
-    function DrawFrame(pBuffer: IMFMediaBuffer): HResult;
-
     // Implementation of the interface /////////////////////////////////////////
     function OnReadSample(hrStatus: HRESULT;
                           dwStreamIndex: DWord;
@@ -157,9 +154,7 @@ type
     function Initialize(): HResult;
     procedure NotifyError(hr: HResult);
     function TryMediaType(pType: IMFMediaType): HResult;
-    function CloseDevice(): HResult;
     function ResizeVideo(): HResult;
-
 
   public
 
@@ -178,6 +173,7 @@ type
     ////////////////////////////////////////////////////////////////////////////
 
     function SetDevice(pActivate: IMFActivate): HResult;
+    function CloseDevice(): HResult;
     property DeviceSymbolicLink: LPWSTR read m_pwszSymbolicLink;
 
   end;
@@ -263,30 +259,19 @@ end;
 // Destructor
 destructor TCPreview.Destroy();
 begin
+  // CloseDevice() is called in BeforeDestruction()
+
   if Assigned(m_pSource) then
-    begin
-      m_pSource.Shutdown();
-      SafeRelease(m_pSource);
-    end;
+    SafeRelease(m_pSource);
 
   if Assigned(m_pReader) then
-    begin
-      m_pReader.Flush(MF_SOURCE_READER_ALL_STREAMS);
-      SafeRelease(m_pReader);
-    end;
+    SafeRelease(m_pReader);
 
   if Assigned(m_draw) then
     begin
       m_draw.DestroyDevice();
       FreeAndnil(m_draw);
     end;
-
-  if Assigned(m_pwszSymbolicLink) then
-    begin
-      CoTaskMemFree(m_pwszSymbolicLink);
-      m_pwszSymbolicLink := nil;
-      m_cchSymbolicLink := 0;
-   end;
 
   FCritSec.Destroy;
   inherited Destroy();
@@ -325,9 +310,16 @@ begin
 
   if Assigned(m_pReader) then
     begin
-      //m_pReader.SetStreamSelection(0, False);
+      if Assigned(m_pSource) then
+        begin
+          m_pSource.Shutdown();
+        end;
       m_pReader.Flush(MF_SOURCE_READER_ALL_STREAMS);
     end;
+
+ CoTaskMemFree(m_pwszSymbolicLink);
+ m_pwszSymbolicLink := nil;
+ m_cchSymbolicLink := 0;
 
  FCritSec.Leave;
  Result := S_OK;
@@ -414,24 +406,6 @@ end;
 
 
 /////////////// TMFSourceReaderCallback methods ////////////////////////////////
-
-function TCPreview.ReadNewSample(): HResult;
-begin
-  Result := g_pPreview.m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                            0,
-                                            nil,
-                                            nil,
-                                            nil,
-                                            nil);
-end;
-
-
-function  TCPreview.DrawFrame(pBuffer: IMFMediaBuffer): HResult;
-begin
-  Result := g_pPreview.m_draw.DrawFrame(pBuffer);
-end;
-
-
 
 //------------------------------------------------------------------------------
 // OnReadSample

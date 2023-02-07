@@ -206,6 +206,10 @@ end;
 //-------------------------------------------------------------------
 procedure TfrmMain.CleanUp();
 begin
+
+  if Assigned(g_pPreview) then
+    FreeAndNil(g_pPreview);
+
   // Release the selectdialog device
   if Assigned(dlgSelectDevice) then
     dlgSelectDevice.Close();
@@ -215,10 +219,6 @@ begin
       UnregisterDeviceNotification(g_hdevnotify);
       g_hdevnotify := nil;
     end;
-
-  if Assigned(g_pPreview) then
-    FreeAndNil(g_pPreview);
-
 end;
 
 
