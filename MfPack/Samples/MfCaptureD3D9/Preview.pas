@@ -9,7 +9,7 @@
 // Release date: 08-03-2019
 // Language: ENU
 //
-// Version: 3.1.3
+// Version: 3.1.4
 //
 // Description: Manages video preview.
 //
@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 07/02/2023 Tony                Fixed issues with OnReadSample and bufferlock.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -116,13 +117,12 @@ type
   // request commands for a-syncrone handling
   TRequest = (reqNone, reqResize, reqSample);
 
-
   TCPreview = class(TInterfacedPersistent, IMFSourceReaderCallback)
   private
 
     m_pReader: IMFSourceReader;
+    m_pSource: IMFMediaSource;
     m_draw: TDrawDevice;           // Manages the Direct3D device.
-    FCritSec: TCriticalSection;
 
     m_hwndVideo: HWND;             // Video window.
     m_hwndEvent: HWND;             // Application window to receive events.
@@ -147,17 +147,11 @@ type
     function OnEvent(dwStreamIndex: DWord;
                      pEvent: IMFMediaEvent): HResult; stdcall;
 
-    // IMFSourceReaderCallback2
-    {function OnTransformChange(): HResult; stdcall;
-
-    function OnStreamError(dwStreamIndex: DWORD;
-                           hrStatus: HResult): HResult; stdcall;}
-
     ////////////////////////////////////////////////////////////////////////////
 
     // Constructor
     constructor Create(hVideo: HWND;
-                       hEvent: HWND); virtual;
+                       hEvent: HWND); reintroduce; virtual;
 
 
     function Initialize(): HResult;
@@ -170,6 +164,7 @@ type
   public
 
     m_Request: TRequest;
+    FCritSec: TCriticalSection;
 
     // Constructor is private. Use static CreateInstance method to create.
     class function CreateInstance(hVideo: HWND;
@@ -268,8 +263,17 @@ end;
 // Destructor
 destructor TCPreview.Destroy();
 begin
+  if Assigned(m_pSource) then
+    begin
+      m_pSource.Shutdown();
+      SafeRelease(m_pSource);
+    end;
+
   if Assigned(m_pReader) then
-    SafeRelease(m_pReader);
+    begin
+      m_pReader.Flush(MF_SOURCE_READER_ALL_STREAMS);
+      SafeRelease(m_pReader);
+    end;
 
   if Assigned(m_draw) then
     begin
@@ -414,7 +418,11 @@ end;
 function TCPreview.ReadNewSample(): HResult;
 begin
   Result := g_pPreview.m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                          0);
+                                            0,
+                                            nil,
+                                            nil,
+                                            nil,
+                                            nil);
 end;
 
 
@@ -446,30 +454,23 @@ begin
 
   hr := S_OK;
   FCritSec.Enter();
-  //
- // if (g_pPreview = nil) then
-  //  begin
-  //    hr := E_POINTER;
-  //    goto done;
-  //  end;
 
- // if (g_pPreview.m_pReader = nil) and (pSample = nil) then
- //   begin
- //     hr := E_POINTER;
- //     goto done;
- //   end;
+  if not Assigned(g_pPreview) then
+    goto done;
 
- // if FAILED(hrStatus) then
- //   begin
- //     hr := hrStatus;
- //     goto done;
- //   end;
+  if (g_pPreview.m_pReader = nil) and (pSample = nil) then
+    begin
+      hr := E_POINTER;
+      goto done;
+    end;
+
+  if FAILED(hrStatus) then
+    hr := hrStatus;
 
   if SUCCEEDED(hr) then
     begin
       if Assigned(pSample) then
         begin
-
           if g_pPreview.m_bFirstSample then
             begin
               g_pPreview.m_llBaseTime := llTimeStamp;
@@ -477,9 +478,7 @@ begin
             end;
 
           // rebase the time stamp
-          dec(llTimeStamp,
-              m_llBaseTime);
-
+          llTimeStamp := llTimeStamp - g_pPreview.m_llBaseTime;
           hr := pSample.SetSampleTime(llTimeStamp);
 
           // Get the video frame buffer from the sample.
@@ -488,97 +487,58 @@ begin
             hr := pSample.GetBufferByIndex(0,
                                            pBuffer);
           // or like this (both are permitted)
-           //hr := pSample.ConvertToContiguousBuffer(@pBuffer);
-
+          //   hr := pSample.ConvertToContiguousBuffer(pBuffer);
 
           // Draw the frame and create the lockbuffer (buffer)
           if SUCCEEDED(hr) then
-            hr := DrawFrame(pBuffer);
+            hr := g_pPreview.m_draw.DrawFrame(pBuffer);
 
-          //pBuffer := nil;
-          //pSample := nil;
+          //pSample := nil; // You must clear the sample before getting another one.
         end;
     end;
 
-   hr := ReadNewSample();
+  // Request the next frame.
+  if SUCCEEDED(hr) then
+    begin
+     if g_pPreview.m_pReader <> nil then
+       hr := g_pPreview.m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                             0,
+                                             nil,   // actual
+                                             nil,   // flags
+                                             nil,   // timestamp
+                                             nil)   // sample optional
+     else
+       begin
+         hr := E_POINTER;
+         goto done;
+       end;
+    end;
+
   // Here you could implement the stream flags, like:
   // check the StreamFlags
-  {  if SUCCEEDED(hr) then
-      begin
-        case dwStreamFlags of
-        MF_SOURCE_READERF_ERROR:                    begin
-                                                      {An error occurred.
-                                                       If you receive this flag, do not make any further calls to IMFSourceReader methods.}
-        //                                            end;
-        //MF_SOURCE_READERF_ENDOFSTREAM:              begin
-                                                      {The source reader reached the end of the stream.}
-        //                                            end;
-        //MF_SOURCE_READERF_NEWSTREAM:                begin
-                                                      {One or more new streams were created.
-                                                       Respond to this flag by doing at least one of the following:
-                                                       - Set the output types on the new streams.
-                                                       - Update the stream selection by selecting or deselecting streams.}
-        //                                            end;
-        //MF_SOURCE_READERF_NATIVEMEDIATYPECHANGED:   begin
-                                                     {The native format has changed for one or more streams.
-                                                      The native format is the format delivered by the media source before any decoders are inserted.}
-        //                                            end;
-       // MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED:  begin
-                                                      {The current media has type changed for one or more streams.
-                                                       To get the current media type, call the IMFSourceReader.GetCurrentMediaType method.}
-       //                                             end;
-      //  MF_SOURCE_READERF_STREAMTICK:               begin
-                                                      {There is a gap in the stream.
-                                                       This flag corresponds to an MEStreamTick event from the media source.}
-       //                                             end;
-      //  MF_SOURCE_READERF_ALLEFFECTSREMOVED:        begin
-                                                      {All transforms inserted by the application have been removed for a particular stream.
-                                                       This could be due to a dynamic format change from a source or decoder that prevents custom transforms from
-                                                       being used because they cannot handle the new media type.}
-      //                                              end;
-        //else
-          // Show timeframes in Mainwindow caption
-          SetWindowText(g_pPreview.m_hwndEvent,
-                        'Capturing: ' + HnsTimeToStr(llTimestamp,
-                                                     false));
 
-          // On resize, resize the picture to destination size.
-          // Note: On critical events, like for example OnResize, we need to process these when a sample
-          //       is ready. (Note: Remember we are dealing with asynchronous mode event handling)
-          //if (g_pPreview.m_Request = ReqResize) then
-          //  begin
-          //    g_pPreview.ResizeVideo();
-          //    g_pPreview.m_Request := ReqNone;
-          //  end;
-       // end;
-      //end;
+  // Show timeframes in Mainwindow caption
+  SetWindowText(g_pPreview.m_hwndEvent,
+                'Capturing: ' + HnsTimeToStr(llTimestamp, false));
 
-  // Request the next frame.
-  //if SUCCEEDED(hr) then
-    //begin
-     //if (g_pPreview.m_pReader <> nil) then
-     //  begin
-     //    pBuffer := nil;
-    //     pSample := nil; // You must clear the sample before getting another one.
-     //    hr := g_pPreview.m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-     //                                         0);
-     //  end
-   //  else
-    //   begin
-    //    hr := E_POINTER;
-     //    goto done;
-    //   end;
-   // end;
+  // On resize, resize the picture to destination size.
+  // Note: On critical events, like for example OnResize, we need to process these when a sample
+  //       is ready. (Note: Remember we are dealing with asynchronous mode event handling)
+  if (g_pPreview.m_Request = ReqResize) then
+    begin
+      g_pPreview.ResizeVideo();
+      g_pPreview.m_Request := ReqNone;
+    end;
+
 
 done:
-  pBuffer := nil;
-  pSample := nil;
-
-  FCritSec.Leave();
 
   if FAILED(hr) then
     g_pPreview.NotifyError(hr);
+  pBuffer := nil;
 
+  FCritSec.Leave();
+  SetEvent(m_hwndEvent);
   Result := hr;
 end;
 
@@ -590,7 +550,7 @@ end;
 
 
 function TCPreview.OnEvent(dwStreamIndex: DWord;
-                                         pEvent: IMFMediaEvent): HResult; stdcall;
+                           pEvent: IMFMediaEvent): HResult; stdcall;
 begin
   Result := S_OK;
 end;
@@ -606,7 +566,6 @@ end;
 function TCPreview.SetDevice(pActivate: IMFActivate): HResult;
 var
   hr: HRESULT;
-  pSource: IMFMediaSource;
   pAttributes: IMFAttributes;
   pType: IMFMediaType;
   i: Integer;
@@ -621,7 +580,7 @@ begin
   // Create the media source for the device.
   if SUCCEEDED(hr) then
     hr := pActivate.ActivateObject(IID_IMFMediaSource,
-                                   {Pointer} pSource);
+                                   {Pointer} m_pSource);
 
   // Get the symbolic link.
   if SUCCEEDED(hr) then
@@ -649,7 +608,7 @@ begin
                                  Self);
 
   if SUCCEEDED(hr) then
-    hr := MFCreateSourceReaderFromMediaSource(pSource,
+    hr := MFCreateSourceReaderFromMediaSource(m_pSource,
                                               pAttributes,
                                               m_pReader);
 
@@ -678,7 +637,11 @@ begin
     begin
       // Ask for the first sample. From here the IMFSourceReaderCallback.OnReadSample will be activated
       hr := m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                 0);
+                                 0,
+                                 nil,
+                                 nil,
+                                 nil,
+                                 nil);
 
       m_bFirstSample := True;
       m_llBaseTime := 0;
@@ -686,9 +649,9 @@ begin
 
   if FAILED(hr) then
     begin
-      if Assigned(pSource) then
+      if Assigned(m_pSource) then
         begin
-          pSource.Shutdown();
+          m_pSource.Shutdown();
           // NOTE: The source reader shuts down the media source
           // by default, but we might not have gotten that far.
         end;

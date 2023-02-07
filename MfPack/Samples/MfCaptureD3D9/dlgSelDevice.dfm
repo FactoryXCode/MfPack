@@ -4,7 +4,7 @@ object dlgSelectDevice: TdlgSelectDevice
   ActiveControl = butOk
   BorderStyle = bsDialog
   Caption = 'Select Device'
-  ClientHeight = 80
+  ClientHeight = 93
   ClientWidth = 377
   Color = clBtnFace
   ParentFont = True
@@ -16,7 +16,7 @@ object dlgSelectDevice: TdlgSelectDevice
     Left = 0
     Top = 0
     Width = 281
-    Height = 80
+    Height = 93
     Align = alLeft
     Shape = bsFrame
     ExplicitLeft = 8

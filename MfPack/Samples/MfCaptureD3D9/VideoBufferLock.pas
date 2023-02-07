@@ -9,10 +9,9 @@
 // Release date: 08-03-2018
 // Language: ENU
 //
-// Version: 3.1.3
+// Version: 3.1.4
 //
-// Description: Requires Windows 7 or later.
-//              Manages video preview.
+// Description: Manages automatic videobuffer lock.
 //
 // Intiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
@@ -22,16 +21,17 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 07/02/2023 Tony                Fixed issues with OnReadSample and bufferlock.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX313
 // Known Issues: -
 //
-// Compiler version: 23 up to 35
-// SDK version: 10.0.22621.0
+// Compiler version: 23 up to 33
+// SDK version: 10.0.19041.0
 //
 // Todo: -
 //
@@ -72,14 +72,6 @@ uses
   WinApi.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MfError;
 
-  {$MINENUMSIZE 4}
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
-
 
 //-------------------------------------------------------------------
 //  VideoBufferLock class
@@ -88,24 +80,23 @@ uses
 //
 //-------------------------------------------------------------------
 type
-  TVideoBufferLock = class
+  TVideoBufferLock = class(TObject)
   private
     //
     m_pBuffer: IMFMediaBuffer;
     m_p2DBuffer: IMF2DBuffer;
     m_bLocked: BOOL;
-    procedure UnlockBuffer();
 
   public
     // Constructor & destructor
-    constructor Create(pBuffer: IMFMediaBuffer);
+    constructor Create(const pBuffer: IMFMediaBuffer);
     destructor Destroy(); override;
 
-
+    procedure UnlockBuffer();
     function LockBuffer(lDefaultStride: LONG;     // Minimum stride (with no padding).
                         dwHeightInPixels: DWORD;  // Height of the image, in pixels.
-                        out ppbScanLine0: PByte;  // Receives a pointer to the start of scan line 0.
-                        out plStride: LONG        // Receives the actual stride.
+                        var ppbScanLine0: PByte;  // Receives a pointer to the start of scan line 0.
+                        var plStride: LONG        // Receives the actual stride.
                         ): HRESULT;
   end;
 
@@ -113,13 +104,14 @@ type
 implementation
 
 
-constructor TVideoBufferLock.Create(pBuffer: IMFMediaBuffer);
+constructor TVideoBufferLock.Create(const pBuffer: IMFMediaBuffer);
 var
   hr : HRESULT;
 
 begin
   inherited Create();
   m_bLocked := False;
+  m_p2DBuffer := Nil;
   m_pBuffer := pBuffer;
   // Query for the 2-D buffer interface. OK if this fails.
   // The IMFMediaBuffer is optimized to receive the IMF2DBuffer.
@@ -134,12 +126,10 @@ end;
 destructor TVideoBufferLock.Destroy();
 begin
   UnlockBuffer(); // Unlock the buffer
-  SafeRelease(m_pBuffer);
-  SafeRelease(m_p2DBuffer);
+  m_pBuffer := Nil;
+  m_p2DBuffer := Nil;
   inherited Destroy();
 end;
-
-
 
 
 //-------------------------------------------------------------------
@@ -154,8 +144,8 @@ end;
 
 function TVideoBufferLock.LockBuffer(lDefaultStride: LONG;     // Minimum stride (with no padding).
                                      dwHeightInPixels: DWORD;  // Height of the image, in pixels.
-                                     out ppbScanLine0: PByte;  // Receives a pointer to the start of scan line 0.
-                                     out plStride: LONG): HRESULT;
+                                     var ppbScanLine0: PByte;  // Receives a pointer to the start of scan line 0.
+                                     var plStride: LONG): HRESULT;
 var
   hr: HRESULT;
   pData: PByte;  // Any use of PByte require {$POINTERMATH ON)
@@ -170,10 +160,11 @@ begin
   else
     begin
       // Use non-2D version.
+      pData := Nil;
 
       hr := m_pBuffer.Lock(pData,
-                           nil,
-                           nil);
+                           Nil,
+                           Nil);
 
       if SUCCEEDED(hr) then
         begin
@@ -231,5 +222,6 @@ begin
     end;
 
 end;
+
 
 end.
