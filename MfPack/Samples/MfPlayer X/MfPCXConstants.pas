@@ -11,7 +11,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.1.0
+// Version: 3.1.4
 // Description: Holds global constants for timedtext.
 //
 // Company: FactoryX

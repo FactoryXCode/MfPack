@@ -10,7 +10,7 @@
 // Release date: 13-08-2019
 // Language: ENU
 //
-// Version: 3.1.3
+// Version: 3.1.4
 // Description: A Timercallback class for the IMFTimer interface.
 //
 // Company: FactoryX
@@ -198,12 +198,15 @@ begin
 try
   if not Assigned(MFPresentationClock) then
     begin
-      hr := MF_E_NO_CLOCK;
+      Result := MF_E_NO_CLOCK;
       Exit;
     end;
 
   if not Assigned(MfTimer) then
-    Exit;
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
 
   hr := MfTimer.SetTimer(m_TimerFlags, // Absolute or Relative
                          TimerResolution,

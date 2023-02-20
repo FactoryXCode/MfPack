@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.1.3
+// Version: 3.1.4
 // Description: Floating form that projects TimedText.
 //
 //

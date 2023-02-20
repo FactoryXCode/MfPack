@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.1.3
+// Version: 3.1.4
 // Description: This unit contains methods to get and
 //              present TimedText from currently SubRib and MicroDvd files.
 //
@@ -336,14 +336,14 @@ try
   // check if Url has filename
   if (sUrl = '') then
     begin
-      hr := ERROR_INVALID_PARAMETER;
+      Result := ERROR_INVALID_PARAMETER;
       Exit;
     end;
 
   // Check if the file exists
   if Not FileExists(sUrl) then
     begin
-      hr := ERROR_FILE_NOT_FOUND;
+      Result := ERROR_FILE_NOT_FOUND;
       Exit;
     end;
 
@@ -382,7 +382,7 @@ try
 
   if (Length(pc_LanguageTags.TimedTxtPropsArray) = 0) then
     begin
-      hr := ERROR_FILE_NOT_FOUND;
+      Result := ERROR_FILE_NOT_FOUND;
       Exit;
     end;
 
@@ -417,7 +417,10 @@ srt:
             end;
         end;
     end;
-  Exit;
+  begin
+    Result := S_OK;
+    Exit;
+  end;
 
 // from here we try to get the language of the .sub (MicroDvd) file
 sub:
@@ -450,7 +453,10 @@ sub:
             end;
         end;
     end;
-  Exit;
+  begin
+    Result := S_OK;
+    Exit;
+  end;
 
 finally
   // store

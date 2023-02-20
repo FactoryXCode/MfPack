@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.1.3
+// Version: 3.1.4
 // Description: MfPlayer X: Requires Windows 7 or later.
 //
 // Company: FactoryX
@@ -95,7 +95,8 @@ uses
   FloatingFrm,
   TimedTextClass,
   LangTags,
-  MfPCXConstants;
+  MfPCXConstants,
+  QueueTimer;
 
 type
   // By default the form is the videowindow.
@@ -137,6 +138,7 @@ type
     mnuCinema: TMenuItem;
     mnuSixteenByNine: TMenuItem;
     mnuFourByThree: TMenuItem;
+    QTimer1: TQTimer;
     procedure mnuOpenClick(Sender: TObject);
     procedure mnuExitClick(Sender: TObject);
     procedure mnuSetPositionClick(Sender: TObject);

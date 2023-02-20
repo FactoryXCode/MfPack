@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.1.3
+// Version: 3.1.4
 // Description: This is the extended basic player class (version X),
 //              containing the necessary methodes to play a mediafile
 //              For indepth information see the included examples (CPlayer)
@@ -19,7 +19,10 @@
 //
 // Company: FactoryX
 // Intiator(s): Ramyses De Macedo Rodrigues, Tony (maXcomX), Peter (OzShips).
-// Contributor(s): Ramyses De Macedo Rodrigues, Tony Kalf (maXcomX), Peter Larson (ozships).
+// Contributor(s): Ramyses De Macedo Rodrigues,
+//                 Tony Kalf (maXcomX),
+//                 Peter Larson (ozships),
+//                 Jason Nelson (adaloveless)
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
@@ -105,8 +108,8 @@ uses
   MfPCXConstants,
   LangTags,
   {MfComponents}
-  QueueTimer;  {if getting an error about a missing dcu, install MfComponents first or
-                add the searchpath to MfComponents in your project options}
+  UniThreadTimer;  {if getting an error about a missing dcu, install MfComponents first or
+                    add the searchpath to MfComponents in your project options}
 
 type
   TRedrawStatus = (rdStarted,
@@ -735,6 +738,18 @@ end;
 // The destructor
 destructor TMfPlayerX.Destroy();
 begin
+  // If you don't de-reference all the interfaces before closing everything,
+  // you will get an access violation
+  m_pSession := nil;
+  m_pSource := nil;
+  m_pVideoDisplay := nil;
+  m_pTopology := nil;
+  m_pTimeSource := nil;
+  m_pClockStateSink := nil;
+  m_pRateControl := nil;
+  m_pRateSupport := nil;
+  m_pSourcePD := nil;
+
   DeAllocateHWnd(m_hwndThis);
   // Shutdown the Media Foundation platform
   MFShutdown();
@@ -873,7 +888,7 @@ try
                                             timestamp);
       if FAILED(hr) then
         begin
-          hr := E_FAIL;
+          Result := E_FAIL;
           Exit;
         end;
       data := buffer;

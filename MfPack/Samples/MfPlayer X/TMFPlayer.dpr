@@ -1,7 +1,6 @@
 program TMFPlayer;
 
 uses
-
   {$IFDEF FASTMM}
   FastMM4,
   {$ENDIF}
@@ -22,7 +21,8 @@ uses
   MfPlayerClassX in 'MfPlayerClassX.pas',
   MFTimerCallBackClass in 'MFTimerCallBackClass.pas',
   MfPCXConstants in 'MfPCXConstants.pas',
-  dlgTimedTextLanguages in 'dlgTimedTextLanguages.pas' {DlgTimedTextLanguages};
+  dlgTimedTextLanguages in 'dlgTimedTextLanguages.pas' {DlgTimedTextLanguages},
+  UniThreadTimer in 'UniThreadTimer.pas';
 
 {$R *.res}
 
