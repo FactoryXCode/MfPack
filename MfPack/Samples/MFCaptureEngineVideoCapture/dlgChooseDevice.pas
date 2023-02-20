@@ -24,6 +24,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/02/2023 Tony                Fixed switching camera issue that results in Access Denied error.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -106,18 +107,12 @@ type
   private
     { Private declarations }
 
-    iSelectedDevice: Integer;
-    iSelectedFormat: Integer;
-
     procedure PopulateDevices();
     procedure ClearFormatsList();
     function PopulateFormats(bSupportedFormatsOnly: Boolean): HResult;
 
   public
     { Public declarations }
-
-    property SelectedDevice: LongInt read iSelectedDevice;
-    property SelectedFormat: LongInt read iSelectedFormat;
 
   end;
 
@@ -142,21 +137,21 @@ begin
   if (lbxDeviceList.ItemIndex >= 0) and (sgResolutions.Row > 0) then
     begin
 
-      iSelectedDevice := lbxDeviceList.ItemIndex;
-      iSelectedFormat := StrToInt(sgResolutions.Cells[4, sgResolutions.Row]);
+      FChooseDeviceParam.SelectedDevice := lbxDeviceList.ItemIndex;
+      FChooseDeviceParam.SelectedFormat := StrToInt(sgResolutions.Cells[4, sgResolutions.Row]);
 
-      if (iSelectedDevice > -1) and (iSelectedFormat > -1) then
+      if (FChooseDeviceParam.SelectedDevice > -1) and (FChooseDeviceParam.SelectedFormat > -1) then
         begin
           ModalResult := 1212;
         end
       else
         begin
 
-{$IFDEF SAVE_DEBUG_REPORT}
+          {$IFDEF SAVE_DEBUG_REPORT}
           OutputDebugString(StrToPWideChar(format('Error: %s (hr = %d)',
                                                   [ERR_SET_DEVICE,
                                                    E_FAIL])));
-{$ENDIF}
+          {$ENDIF}
           ModalResult := 0;
         end;
     end
@@ -179,8 +174,9 @@ end;
 // FormCreate
 procedure TChooseDeviceDlg.FormCreate(Sender: TObject);
 begin
-  iSelectedDevice := -1;
-  iSelectedFormat := -1;
+  // Assume no selection for now.
+  FChooseDeviceParam.SelectedDevice := -1;
+  FChooseDeviceParam.SelectedFormat := -1;
   PopulateDevices();
 end;
 
@@ -189,14 +185,14 @@ procedure TChooseDeviceDlg.lbxDeviceListClick(Sender: TObject);
 begin
   if (lbxDeviceList.ItemIndex > -1) then
     begin
-      iSelectedDevice := lbxDeviceList.ItemIndex;
+      FChooseDeviceParam.SelectedDevice := lbxDeviceList.ItemIndex;
       PopulateFormats(cbxSupportedFormatsOnly.Checked);
       btnOK.Enabled := True;
     end
   else
     begin
       btnOK.Enabled := False;
-      iSelectedDevice := -1;
+      FChooseDeviceParam.SelectedDevice := -1;
     end;
 end;
 
@@ -214,7 +210,7 @@ begin
 
   // Choose first device in the list
   lbxDeviceList.ItemIndex := 0;
-  iSelectedDevice := lbxDeviceList.ItemIndex;
+  FChooseDeviceParam.SelectedDevice := lbxDeviceList.ItemIndex;
   PopulateFormats(cbxSupportedFormatsOnly.Checked);
 end;
 
@@ -246,8 +242,7 @@ function TChooseDeviceDlg.PopulateFormats(bSupportedFormatsOnly: Boolean): HResu
                                                FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].iVideoHeight]);
        {Framerate}
        sgResolutions.Cells[1, iCol] := Format('%n',
-                                              [GetFrameRateFromRatio(FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].iFrameRate,
-                                               FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].iFrameRateDenominator)]);
+                                              [FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].iFrameRate]);
        {Subtype}
        sgResolutions.Cells[2, iCol] := Format('%s',
                                               [GetGUIDNameConst(FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].fSubType)]);
@@ -255,7 +250,8 @@ function TChooseDeviceDlg.PopulateFormats(bSupportedFormatsOnly: Boolean): HResu
        {Supported by MF input but not on output}
        //
        sgResolutions.Cells[3, iCol] := Format('%s',
-                                              [BoolToStrYesNo(FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].bMFSupported and (FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].iFrameRate > 29))]);
+                                              [BoolToStrYesNo(FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].bMFSupported and
+                                              (FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].iFrameRate > 29))]);
        {Index}
        sgResolutions.Cells[4, iCol] := Format('%d',
                                               [FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].FormatsIndex]);
@@ -278,7 +274,7 @@ begin
       Exit;
     end;
 
-  if (iSelectedDevice < 0) then
+  if (FChooseDeviceParam.SelectedDevice < 0) then
     begin
       Result := E_INVALIDARG;
       Exit;
@@ -324,10 +320,11 @@ try
     begin
       if bSupportedFormatsOnly then
         begin
-          if FDeviceExplorer.DeviceProperties[iSelectedDevice].aVideoFormats[i].bMFSupported and (FDeviceExplorer.DeviceProperties[iSelectedDevice].aVideoFormats[i].iFrameRate > 29) then
+          if FDeviceExplorer.DeviceProperties[FChooseDeviceParam.SelectedDevice].aVideoFormats[i].bMFSupported and
+            (FDeviceExplorer.DeviceProperties[FChooseDeviceParam.SelectedDevice].aVideoFormats[i].iFrameRate > 29.0) then
             begin
               AddFormat(rc,
-                        iSelectedDevice,
+                        FChooseDeviceParam.SelectedDevice,
                         i);
               Inc(rc);
               sgResolutions.RowCount := rc;
@@ -336,7 +333,7 @@ try
       else   // all
         begin
           AddFormat(rc,
-                    iSelectedDevice,
+                    FChooseDeviceParam.SelectedDevice,
                     i);
           Inc(rc);
           sgResolutions.RowCount := rc;

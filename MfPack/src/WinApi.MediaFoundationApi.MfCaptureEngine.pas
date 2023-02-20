@@ -24,6 +24,7 @@
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 // 07/03/2022 Tony                Fixed IMFCaptureEngineClassFactory.CreateInstance
 // 22/04/2022 Tony                Fixed IMFCaptureSource.GetAvailableDeviceMediaType
+// 20/02/2023 Tony                Fixed some issues.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -124,25 +125,24 @@ type
 
 const
     // Not published in the SDK!
-    MF_CAPTURE_ENGINE_FIRST_SOURCE_PHOTO_STREAM                  = DWord($FFFFFFFB);
-    MF_CAPTURE_ENGINE_FIRST_SOURCE_VIDEO_STREAM                  = DWord($FFFFFFFC);
-    MF_CAPTURE_ENGINE_FIRST_SOURCE_AUDIO_STREAM                  = DWord($FFFFFFFD);
-    //
-    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW  = DWord($fffffffa); // The preferred stream for previewing video
+    MF_CAPTURE_ENGINE_FIRST_SOURCE_PHOTO_STREAM                  = NativeUInt($FFFFFFFB);
+    MF_CAPTURE_ENGINE_FIRST_SOURCE_VIDEO_STREAM                  = NativeUInt($FFFFFFFC);
+    MF_CAPTURE_ENGINE_FIRST_SOURCE_AUDIO_STREAM                  = NativeUInt($FFFFFFFD);
+
+    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW  = NativeUInt($fffffffa); // The preferred stream for previewing video
     {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW}
-    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD   = DWord($fffffff9); // The preferred stream for recording video
+    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD   = NativeUInt($fffffff9); // The preferred stream for recording video
     {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD}
-    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO          = DWord($fffffff8); // The first independent photo stream if present, or else the same stream choosen by MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW
+    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO          = NativeUInt($fffffff8); // The first independent photo stream if present, or else the same stream choosen by MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW
     {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO}
-    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_AUDIO          = DWord($fffffff7); // The first available audio stream
+    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_AUDIO          = NativeUInt($fffffff7); // The first available audio stream
     {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_AUDIO}
     {NTDDI_VERSION > NTDDI_WIN10_FE}
-    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_METADATA       = DWord($fffffff6); // The first available metadata stream
+    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_METADATA       = NativeUInt($fffffff6); // The first available metadata stream
     {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_METADATA}
     {END NTDDI_VERSION}
-    MF_CAPTURE_ENGINE_MEDIASOURCE                                = DWord($ffffffff);
+    MF_CAPTURE_ENGINE_MEDIASOURCE                                = NativeUInt($ffffffff);
     {$EXTERNALSYM MF_CAPTURE_ENGINE_MEDIASOURCE}
-
 
 type
   //////////////////////////////////////////////////////////////////////////////
@@ -546,6 +546,7 @@ type
   // within the Capture Engine. The app obtains a
   // pointer to this interface using IMFCaptureEngine.GetSink.
   //
+  PIMFCaptureSink = ^IMFCaptureSink;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFCaptureSink);'}
   {$EXTERNALSYM IMFCaptureSink}
   IMFCaptureSink = interface(IUnknown)
@@ -672,7 +673,7 @@ type
   IMFCapturePreviewSink = interface(IMFCaptureSink)
   ['{77346cfd-5b49-4d73-ace0-5b52a859f2e0}']
 
-    function SetRenderHandle(handle: THandle): HResult; stdcall;
+    function SetRenderHandle(handle: HWND): HResult; stdcall;
     // Allows an app to render samples
     // <param name = "handle">
     // HWND (= THandle)
@@ -682,9 +683,9 @@ type
     // <param name = "pSurface">
     // IUnknown(IDCompositionVisual)
 
-    function UpdateVideo(pSrc: PMFVideoNormalizedRect;
-                         pDst: TRECT;
-                         pBorderClr: PCOLORREF): HResult; stdcall;
+    function UpdateVideo({optional} pSrc: PMFVideoNormalizedRect;
+                         {optional} pDst: PRECT;
+                         {optional} pBorderClr: PCOLORREF): HResult; stdcall;
     // Updates the video frame.
     // Call this method when the preview window receives a WM_PAINT or WM_SIZE mes
     // Parameters
@@ -734,7 +735,7 @@ type
     // <param name = "dwRotationValue">
     // The degree by which the video is rotated.  Valid values are 0, 90, 180, or 270 degrees.
 
-    function SetCustomSink(var pMediaSink: IMFMediaSink): HResult; stdcall;
+    function SetCustomSink(pMediaSink: IMFMediaSink): HResult; stdcall;
     // Allows an app to set a custom sink for the preview path
     // <param name = "pMediaSink">
     // Pointer to IUnknown(IMFMediaSink) interface.
@@ -943,8 +944,8 @@ type
     // Asynchronous method to start recording.
     // App should listen for MF_CAPTURE_ENGINE_RECORD_STARTED via IMFCaptureEngineOnEventCallback.
 
-    function StopRecord(bFinalize: BOOL;
-                        bFlushUnprocessedSamples: BOOL): HResult; stdcall;
+    function StopRecord(const bFinalize: BOOL;
+                        const bFlushUnprocessedSamples: BOOL): HResult; stdcall;
     // Asynchronous method to stop recording.
     // App should listen for MF_CAPTURE_ENGINE_RECORD_STOPPED via IMFCaptureEngineOnEventCallback.
     // <param name = "bFinalize">

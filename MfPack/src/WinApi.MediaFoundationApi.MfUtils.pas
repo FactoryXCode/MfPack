@@ -25,6 +25,7 @@
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 // 13/08/2022 Tony                Implemented more functionality and updated methods.
 // 11/12/2022 Tony                Added some modifications.
+// 20/02/2023 Tony                Fixed some issues with SafeRelease/SaveDelete.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -103,18 +104,12 @@ type
 
   // Use for releasing interfaces.
   procedure SafeRelease(var IUnk);
-
-  {$IF COMPILERVERSION < 25.0}
-  // Use for releasing interfaces C++ style. Note: The object does NOT initiate a reference call.
-  procedure Safe_Release(var IUnk);
-  {$ENDIF}
+  // Use for releasing objects.
+  procedure SAFE_RELEASE(var Obj);
 
   // Identical methods, both can be called.
-  procedure FreeAndNil(const [ref] Obj: TObject); inline;
-  procedure SafeDelete(const [ref] Obj: TObject); inline;
-
-  //
-  procedure ReleaseActivateArray(ppDevArray: PIMFActivate);
+  procedure FreeAndNil(var Obj); inline;
+  procedure SafeDelete(var Obj); inline;
 
   // Compare GUIDS
   function InlineIsEqualGUID(rguid1: TGUID;
@@ -360,6 +355,9 @@ type
   procedure CopyPVNRectToTRect(rs: PMFVideoNormalizedRect;
                                out rd: TRect); inline;
 
+  // Copy a PMFVideoNormalizedRect to a PRect
+  procedure CopyPVNRectToPRect(rs: PMFVideoNormalizedRect;
+                               out rd: PRect); inline;
   // TRect methods //
 
   // Copy TRect values to another TRect
@@ -513,83 +511,43 @@ const
   VER_PRODUCT_TYPE      = $80;
 
 
-
 // SafeRelease
 // Many of the code (examples) in the documentation use the SafeRelease method to
 // release COM interfaced objects.
-// Version > Delphi XE3
-{$IF COMPILERVERSION > 24.0}
+// Note: The object does initiate a reference call
 procedure SafeRelease(var IUnk);
-{$IF NOT DEFINED(AUTOREFCOUNT)}  // Note: The object does initiate a reference call.
 begin
-  if Assigned(IUnknown(IUnk)) then
-    Pointer(IUnknown(IUnk)) := nil;
-end;
-{$ELSE} // Note: Here the object does NOT initiate a reference call.
-begin
-  if IUnknown(IUnk) <> nil then
+  if (IUnknown(IUnk) <> nil) then
     IUnknown(IUnk) := nil;
 end;
-{$ENDIF}
-{$ENDIF}
 
-// Version < Delphi XE4
-{$IF COMPILERVERSION < 25.0}
-procedure SafeRelease(var IUnk);
-// Note: The object does initiate a reference call.
+// Note: Here the object does NOT initiate a reference call
+procedure SAFE_RELEASE(var Obj);
 begin
-  if Assigned(IUnknown(IUnk)) then
-    Pointer(IUnknown(IUnk)) := nil;
+  if Assigned(IUnknown(Obj)) then
+    begin
+      Pointer(IUnknown(Obj)) := nil;
+    end;
 end;
 
-procedure Safe_Release(var IUnk);
-begin
-  if Assigned(IUnknown(IUnk)) then
-    Pointer(IUnknown(IUnk)) := nil;
-end;
-{$ENDIF}
 
 // From DS, same as SafeDelete
-procedure FreeAndNil(const [ref] Obj: TObject); inline;
-{$IF NOT DEFINED(AUTOREFCOUNT)}
+procedure FreeAndNil(var Obj);
+begin
+  SafeDelete(Obj);
+end;
+
+// Frees an Object or TInterfacedPersitant reference and sets this reference to zero.
+// This is actually the same method as FeeAndNil as used in DirectShow.
+// NOTE: Use SafeRelease for freeing an interfaced object.
+procedure SafeDelete(var Obj);
 var
-  Temp: TObject;
-
+  Tmp: TObject;
 begin
-  Temp := Obj;
-  TObject(Pointer(@Obj)^) := nil;
-  Temp.Free;
+  Tmp := TObject(Obj);
+  Pointer(Obj) := Nil;
+  Tmp.Free;
 end;
-{$ELSE}
-begin
-  Obj := nil;
-end;
-{$ENDIF}
-
-
-// Frees an Object reference and sets this referencecount to zero.
-// This is actually the same method as FeeAndNil as used, for example, in DirectShow.
-procedure SafeDelete(const [ref] Obj: TObject); inline;
-begin
-  FreeAndNil(Obj);
-end;
-
-
-// Releases a IMFActivate pointer
-procedure ReleaseActivateArray(ppDevArray: PIMFActivate);
-var
-  i: Integer;
-  uiCount: UINT32;
-
-begin
-{$POINTERMATH ON}
-  ppDevArray[0].GetCount(uiCount);
-  for i := 0 to uiCount -1 do
-    SafeRelease(ppDevArray[i]);
-{$POINTERMATH OFF}
-  CoTaskMemFree(ppDevArray);
-end;
-
 
 
 {$WARN SYMBOL_PLATFORM OFF}
@@ -1535,6 +1493,17 @@ begin
   rd.Left := Trunc(rs^.Left);
   rd.Right := Trunc(rs^.Right);
 end;
+
+// Copy a PMFVideoNormalizedRect to a PRect
+procedure CopyPVNRectToPRect(rs: PMFVideoNormalizedRect;
+                             out rd: PRect); inline;
+begin
+  rd.Top := Trunc(rs.Top);
+  rd.Bottom := Trunc(rs.Bottom);
+  rd.Left := Trunc(rs.Left);
+  rd.Right := Trunc(rs.Right);
+end;
+
 
 // TRect methods ///////////////////////////////////////////////////////////////
 

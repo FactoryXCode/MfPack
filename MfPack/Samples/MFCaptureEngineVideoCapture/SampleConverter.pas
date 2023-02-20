@@ -24,6 +24,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/02/2023 Tony                Fixed switching camera issue that results in Access Denied error.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -96,7 +97,7 @@ type
     FTopDownFormats : TArray<TGUID>;
 
   private
-    function ConvertSampleToRGB(const AInputSample: IMFSample;
+    function ConvertSampleToRGB(AInputSample: IMFSample;
                                 out AConvertedSample: IMFSample): HResult;
 
     function IndexOf(const AInput: TGUID;
@@ -400,7 +401,7 @@ begin
 end;
 
 
-function TSampleConverter.ConvertSampleToRGB(const AInputSample: IMFSample;
+function TSampleConverter.ConvertSampleToRGB(AInputSample: IMFSample;
                                              out AConvertedSample: IMFSample): HResult;
 var
   dwStatus: DWord;

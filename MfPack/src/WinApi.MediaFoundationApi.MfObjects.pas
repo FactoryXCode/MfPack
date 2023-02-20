@@ -1173,19 +1173,19 @@ type
     function DeleteAllItems(): HResult; stdcall;
 
     function SetUINT32(const guidKey: TGUID;
-                       const unValue: UINT32): HResult; stdcall;
+                       unValue: UINT32): HResult; stdcall;
 
     function SetUINT64(const guidKey: TGUID;
-                       const unValue: UINT64): HResult; stdcall;
+                       unValue: UINT64): HResult; stdcall;
 
     function SetDouble(const guidKey: TGUID;
-                       const fValue: Double): HResult; stdcall;
+                       fValue: Double): HResult; stdcall;
 
     function SetGUID(const guidKey: TGUID;
-                     const guidValue: REFGUID): HResult; stdcall;
+                     const [ref] guidValue: REFGUID): HResult; stdcall;
 
     function SetString(const guidKey: TGUID;
-                       const wszValue: LPCWSTR): HResult; stdcall;
+                       wszValue: LPCWSTR): HResult; stdcall;
 
     function SetBlob(const guidKey: TGUID;
                      pBuf: UINT8;
@@ -1200,7 +1200,7 @@ type
 
     function GetCount(out pcItems: UINT32): HResult; stdcall;
 
-    function GetItemByIndex(const unIndex: UINT32;
+    function GetItemByIndex(unIndex: UINT32;
                             const guidKey: TGUID;
                             var pValue: PROPVARIANT): HResult; stdcall;
 

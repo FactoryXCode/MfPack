@@ -91,19 +91,35 @@ type
 
   // maps unsigned 8 bits/channel to D3DCOLOR
   // values must be in the range 0 through 255!
-  function D3DCOLOR_ARGB(a: Int32; r: Int32; g: Int32; b: Int32): D3DCOLOR; inline;
+  function D3DCOLOR_ARGB(a: Int32;
+                         r: Int32;
+                         g: Int32;
+                         b: Int32): D3DCOLOR; inline;
 
-  function D3DCOLOR_RGBA(r: Int32; g: Int32; b: Int32; a: Int32): D3DCOLOR; inline;
+  function D3DCOLOR_RGBA(r: Int32;
+                         g: Int32;
+                         b: Int32;
+                         a: Int32): D3DCOLOR; inline;
 
-  function D3DCOLOR_XRGB(r: Int32; g: Int32; b: Int32): D3DCOLOR; inline;
+  function D3DCOLOR_XRGB(r: Int32;
+                         g: Int32;
+                         b: Int32): D3DCOLOR; inline;
 
-  function D3DCOLOR_XYUV(y: Int32; u: Int32; v: Int32): D3DCOLOR; inline;
+  function D3DCOLOR_XYUV(y: Int32;
+                         u: Int32;
+                         v: Int32): D3DCOLOR; inline;
 
-  function D3DCOLOR_AYUV(a: Int32; y: Int32; u: Int32; v: Int32): D3DCOLOR; inline;
+  function D3DCOLOR_AYUV(a: Int32;
+                         y: Int32;
+                         u: Int32;
+                         v: Int32): D3DCOLOR; inline;
 
 
   // maps floating point channels (0.0 to 1.0 range) to D3DCOLOR
-  function D3DCOLOR_COLORVALUE(r: Single; g: Single; b: Single; a: Single): D3DCOLOR; inline;
+  function D3DCOLOR_COLORVALUE(r: Single;
+                               g: Single;
+                               b: Single;
+                               a: Single): D3DCOLOR; inline;
   {$EXTERNALSYM D3DCOLOR_COLORVALUE}
 
 type
@@ -173,7 +189,7 @@ type
     Y: DWORD;                        { Viewport Top left }
     Width: DWORD;
     Height: DWORD;                   { Viewport Dimensions }
-    MinZ: Single;                     { Min/max of clip Volume }
+    MinZ: Single;                    { Min/max of clip Volume }
     MaxZ: Single;
   end;
   {$EXTERNALSYM _D3DVIEWPORT9}

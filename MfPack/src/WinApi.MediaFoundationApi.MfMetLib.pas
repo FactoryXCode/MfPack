@@ -113,18 +113,7 @@ uses
   WinApi.CoreAudioApi.AudioPolicy,
   WinApi.CoreAudioApi.MMDeviceApi;
 
-  {$WEAKPACKAGEUNIT ON}
-  {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$I 'WinApiTypes.inc'}
-
-
 
 type
 
@@ -144,7 +133,8 @@ type
     unBlockAlignment: UINT32;
     unAvgBytesPerSec: UINT32;
     unChannelMask: UINT32;
-    procedure Reset();
+    public
+      procedure Reset();
   end;
   // Array that holds audio data
   TMFAudioFormatArray = array of TMFAudioFormat;
@@ -156,6 +146,7 @@ type
     // The index of the native format found on a device
     FormatsIndex: Integer;
     mfMediaType: IMFMediaType; // MediaType interface.
+
     // Dimensions
     iVideoWidth: UINT32;
     iVideoHeight: UINT32;
@@ -168,7 +159,8 @@ type
     fMajorType: TGuid;
 
     // Supported framerates
-    iFrameRate: UINT32;
+    iFrameRate: Float;
+    iFrameRateNumerator: UINT32;
     iFrameRateDenominator: UINT32;
     iMaxFrameRate: UINT32;
     iMaxFrameRateDenominator: UINT32;
@@ -182,8 +174,8 @@ type
 
     // Is supported by Media Foundation
     bMFSupported: Boolean;
-
-    procedure Reset();
+    public
+      procedure Reset();
   end;
 
   // Array that holds retrieved capabillities records
@@ -283,7 +275,7 @@ type
                           out ppObject): HRESULT;
 
   // Alternative for ProcessMessages
-  // Usage: HandleMessages(GetCurrentThread());
+  // Example usage: HandleMessages(GetCurrentThread());
   procedure HandleMessages(AThread: THandle;
                            AWait: Cardinal = INFINITE);
 
@@ -629,7 +621,8 @@ type
   // Counts mediatypes from a device
   // When the list index goes out of bounds, GetNativeMediaType returns MF_E_NO_MORE_TYPES.
   // This is not an error, but indicates the end of the list.
-  // Set MfSupportedOnly to False if you want to get the total of all native types from the device.
+  // Set MfSupportedOnly to False if you want to get the total of all native types from the device and
+  // to True for Media Foundation supported formats
   function CountTypesFromDevice(pReader: IMFSourceReader;
                                 const pStreamIndex: DWORD;
                                 out pCount: DWord;
@@ -1013,6 +1006,7 @@ begin
 
   // Supported framerates
   iFrameRate := 0;
+  iFrameRateNumerator := 0;
   iFrameRateDenominator := 0;
   iMaxFrameRate := 0;
   iMaxFrameRateDenominator := 0;
@@ -1044,11 +1038,11 @@ begin
 
   for i := 0 to Length(aVideoFormats) - 1 do
     aVideoFormats[i].Reset;
+  CoTaskMemFree(aVideoFormats);
   for i := 0 to Length(aAudioFormats) - 1 do
     aAudioFormats[i].Reset;
+  CoTaskMemFree(aAudioFormats);
 
-  aVideoFormats := nil;
-  aAudioFormats := nil;
 end;
 
 
@@ -1312,17 +1306,11 @@ begin
     goto Done;
 
   pSource := MediaSource;
-  // pSource._AddRef();
-
-{$POINTERMATH OFF}
 
 Done:
 
-{$POINTERMATH ON}
   for i := 0 to iCount -1 do
    SafeRelease(ppDevices[i]);
-{$POINTERMATH ON}
-
   CoTaskMemFree(ppDevices);
   Result := hr;
 end;
@@ -2994,7 +2982,7 @@ begin
     end;
 
 Done:
-  ReleaseActivateArray(ppDevices);
+
   Result := hr;
 end;
 
@@ -3082,10 +3070,14 @@ begin
 
       hr := MFGetAttributeRatio(pMediaType,
                                 MF_MT_FRAME_RATE,
-                                pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iFrameRate,
+                                pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iFrameRateNumerator,
                                 pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iFrameRateDenominator);
       if FAILED(hr) then
         Break;
+
+      // Calculate framerate ( = FrameRateNumerator / iFrameRateDenominator )
+      pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iFrameRate := GetFrameRateFromRatio(pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iFrameRateNumerator,
+                                                                                                 pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iFrameRateDenominator);
 
       hr := MFGetAttributeRatio(pMediaType,
                                 MF_MT_FRAME_RATE_RANGE_MIN,
@@ -3139,18 +3131,20 @@ begin
     end;
 
 Done:
-   //If a failure occurs, the entire array will be cleared.
-   if FAILED(hr) then
+
+   if SUCCEEDED(hr) then
+     begin
+       // Store supported output formats only.
+       pDeviceProperties[pDeviceIndex].dwSupportedFormats := dwSupportedCount;
+       // Store unsupported and supported formats.
+       pDeviceProperties[pDeviceIndex].dwNativeFormats := dwNativeCount;
+     end
+   else // If a failure occurs, the entire array will be cleared.
      begin
        for i := 0 to Length(pDeviceProperties) do
          pDeviceProperties[i].Reset;
        pDeviceProperties := nil;
      end;
-
-  // Store supported output formats only.
-  pDeviceProperties[pDeviceIndex].dwSupportedFormats := dwSupportedCount;
-  // Store unsupported and supported formats.
-  pDeviceProperties[pDeviceIndex].dwNativeFormats := dwNativeCount;
   Result := hr;
 end;
 
@@ -3179,6 +3173,7 @@ function CreateCaptureDeviceInstance(pDeviceProperties: TDeviceProperties;
                                      out ppSource: IMFMediaSource;
                                      out ppActivate: IMFActivate): HRESULT;
 var
+  i: Integer;
   count: UINT32;
   pConfig: IMFAttributes;
   ppDevices: PIMFActivate;  // Pointer to array of IMFActivate
@@ -3225,10 +3220,12 @@ begin
   else
     hr := MF_E_NOT_FOUND;
 
-{$POINTERMATH OFF}
-
 Done:
-  ReleaseActivateArray(ppDevices);
+
+  for i := 0 to Count -1 do
+   SafeRelease(ppDevices[i]);
+
+  CoTaskMemFree(ppDevices);
   Result := hr;
 end;
 

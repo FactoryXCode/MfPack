@@ -24,6 +24,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/02/2023 Tony                Fixed switching camera issue that results in Access Denied error.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -134,18 +135,16 @@ type
   private
     { Private declarations }
     hPreview: HWND;
-    hCaptureHandle: HDC;
     bRecording: Boolean;
     bPreviewing: Boolean;
     bImageCleared: Boolean;
     bmCapturedFrame: TMfpBitmap;
-    pSelectedDevice: IMFActivate;
     iSelectedDevice: Integer;
     iSelectedFormat: Integer;
-    iSampleTime: Int64;
+    lSampleTime: LongLong;
     FSampleConverter: TSampleConverter;
+    pSelectedDevice: IMFActivate;
 
-    function CreateCaptureObjects(): HResult;
     procedure DestroyCaptureObjects();
     function CreateDeviceExplorer(): HResult;
 
@@ -153,32 +152,23 @@ type
     procedure OnSize(var message: TWMSize); message WM_SIZE;
     procedure OnDeviceChange(var AMessage: TMessage); message WM_DEVICECHANGE;
 
-    // Captureengine message handlers
-    // These methods handle messages  from the CptureEngine.
-    procedure OnCaptureEvent(var AMessage: TMessage); message WM_APP_CAPTURE_EVENT;
-    procedure OnRecievedSample(var AMessage: TMessage); message WM_RECIEVED_SAMPLE_FROM_CALLBACK;
-    procedure OnHandledCaptureEvent(var AMessage: TMessage); message WM_APP_CAPTURE_EVENT_HANDLED;
-    // Another option to handle the CaptureEngine messages is to use the WndProc method.
-    // procedure WndProc(var Msg: TMessage); override;
 
     // Update menuitems and status
     procedure UpdateUI();
 
     // Process sample in main thread
-    function ProcessSample(const aSample: IMFSample): HResult;
+    function ProcessSample(aSample: IMFSample): HResult;
     procedure PaintCapture(bm: TMfpBitmap);
     procedure GetPaintArea(AImage: TMfpBitmap;
                            var AWidth: Integer;
                            var AHeight: Integer;
                            var ATop: Integer;
                            var ALeft: Integer);
-    function GetDefaultSaveName: string;
 
   public
     { Public declarations }
-
-    // Destroy all objects and reinitialize them.
-    procedure ReInitializeCaptureObjects();
+    // Captureengine message handler
+    procedure WndProc(var Message: TMessage); override;
 
   end;
 
@@ -212,7 +202,6 @@ begin
       crD.right := pbCapture.ClientWidth;
       crD.bottom := pbCapture.ClientHeight;
       pcrD := @crD;
-
       FCaptureManager.UpdateVideo(pcrD);
     end;
 end;
@@ -265,104 +254,62 @@ begin
 end;
 
 
-//------------------------------------------------------------------------------
-//  OnCaptureEvent
-//
-//  Handles WM_APP_CAPTURE_EVENT messages.
-//------------------------------------------------------------------------------
-procedure TMainWindow.OnCaptureEvent(var AMessage: TMessage);
-begin
-  FCaptureManager.OnCaptureEvent(AMessage.WParam,
-                                 AMessage.LParam);
-
-  WaitForSingleObject(Handle,
-                      INFINITE);
-end;
-
-
-//------------------------------------------------------------------------------
-//  OnRecievedSample
-//
-//  Handles WM_RECIEVED_SAMPLE_FROM_CALLBACK messages.
-//------------------------------------------------------------------------------
-procedure TMainWindow.OnRecievedSample(var AMessage: TMessage);
+// WndProc
+procedure TMainWindow.WndProc(var message: TMessage);
 var
-  psample: IMFSample;
-begin
-  psample := IMFSample(Pointer(AMessage.WParam));
-  // process the sample
-  ProcessSample(pSample);
-end;
-
-
-//------------------------------------------------------------------------------
-//  OnHandledCaptureEvent
-//
-//  Handles WM_APP_CAPTURE_EVENT_HANDLED messages.
-//------------------------------------------------------------------------------
-procedure TMainWindow.OnHandledCaptureEvent(var AMessage: TMessage);
-begin
-  if SUCCEEDED(HResult(AMessage.WParam)) then
-    UpdateUI()
-  else
-    ErrMsg('CaptureManager reported a failure.',
-           HResult(AMessage.WParam));
-end;
-
-
-// using WndProc
-{
-procedure TMainWindow.WndProc(var Msg: TMessage);
-var
-  psample: IMFSample;
+  hr: HResult;
+  pSample: IMFSample;
 
 begin
 
-  case Msg.Msg of
+  case message.Msg of
 
     // We did recieve a sample from TCaptureManager.TCaptureEngineOnSampleCallback.OnSample
     WM_RECIEVED_SAMPLE_FROM_CALLBACK:
       begin
-        psample := IMFSample(Pointer(Msg.WParam));
-        // process the sample
-        ProcessSample(pSample);
+        pSample := IMFSample(Pointer(message.WParam));
+        if Assigned(pSample) then
+          // process the sample
+          ProcessSample(pSample);
       end;
 
     WM_APP_CAPTURE_EVENT:
       begin
-
-        FCaptureManager.OnCaptureEvent(Msg.WParam,
-                                       Msg.LParam);
-
-        WaitForSingleObject(Handle,
-                            INFINITE);
+        hr := FCaptureManager.OnCaptureEvent(message.WParam,
+                                             message.LParam);
+        if FAILED(hr) then
+          begin
+            ErrMsg('Capturemanager.OnCaptureEvent reported an error',
+                   hr);
+          end;
       end;
 
     // When a capture event is processed by the capture engine, update the statusbar and menu.
     WM_APP_CAPTURE_EVENT_HANDLED:
       begin
-        if SUCCEEDED(HResult(Msg.WParam)) then
+
+        if SUCCEEDED(HResult(message.WParam)) then
           UpdateUI()
         else
           ErrMsg('CaptureManager repported a failure.',
-                 HResult(Msg.WParam));
+                 HResult(message.WParam));
 
       end;
 
     // Any other messages are passed to DefWindowProc, which tells Windows to handle the message.
     else
-      msg.Result := DefWindowProc(Handle,
-                                  Msg.Msg,
-                                  Msg.WParam,
-                                  Msg.LParam);
+      message.Result := DefWindowProc(Handle,
+                                      message.Msg,
+                                      message.WParam,
+                                      message.LParam);
   end;
 
-  inherited WndProc(Msg);
-end; }
+  inherited WndProc(message);
+end;
 
 
 // ProcessSample
-function TMainWindow.ProcessSample(const aSample: IMFSample): HResult;
+function TMainWindow.ProcessSample(aSample: IMFSample): HResult;
 var
   hr: HResult;
   FMemoryStream: TMemoryStream;
@@ -397,7 +344,7 @@ begin
           bmCapturedFrame.LoadFromStream(FMemoryStream);
           if not bmCapturedFrame.Empty then
             begin
-              hr := aSample.GetSampleTime(iSampleTime);
+              hr := aSample.GetSampleTime(lSampleTime);
               if FAILED(hr) then
                 goto done;
 
@@ -417,7 +364,8 @@ begin
     hr := E_POINTER;
 
 done:
-  FMemoryStream.Destroy();
+  if Assigned(FMemoryStream) then
+    FMemoryStream.Destroy();
   Result := hr;
 end;
 
@@ -501,7 +449,9 @@ end;
 procedure TMainWindow.butSaveToFileClick(Sender: TObject);
 begin
 
-  SaveFileDlg.FileName := GetDefaultSaveName();
+  SaveFileDlg.FileName := Format('Capture_%s', [HnsTimeToStr(lSampleTime,
+                                                             '_',
+                                                             False)]);
   if SaveFileDlg.Execute then
     begin
       SaveImage(bmCapturedFrame,
@@ -512,22 +462,12 @@ begin
 end;
 
 
-function TMainWindow.GetDefaultSaveName(): string;
-begin
-
-  Result := 'Capture_' + HnsTimeToStr(iSampleTime,
-                                      '_',
-                                      False);
-end;
-
-
 // butTakePhotoClick
 procedure TMainWindow.butTakePhotoClick(Sender: TObject);
 var
   hr: HResult;
-
 label
-  Done;
+  done;
 
 begin
   hr := E_FAIL;
@@ -538,73 +478,26 @@ begin
   if FAILED(hr) then
     goto Done;
 
-Done:
+done:
   if FAILED(hr) then
     ErrMsg('butTakePhotoClick: ' + ERR_PHOTO,
             hr);
-end;
-
-// Reinitialize all objects
-procedure TMainWindow.ReInitializeCaptureObjects();
-begin
-  DestroyCaptureObjects();
-  if FAILED(CreateCaptureObjects()) then
-    begin
-      ErrMsg('AfterConstruction: Can not create CaptureManager. The application will be closed.',
-             E_FAIL);
-      Exit;
-    end;
 end;
 
 
 procedure TMainWindow.DestroyCaptureObjects();
 begin
   if Assigned(bmCapturedFrame) then
-    FreeAndNil(bmCapturedFrame);
+    SafeDelete(bmCapturedFrame);
 
   if Assigned(FCaptureManager) then
-     FreeAndNil(FCaptureManager);
-
-  if Assigned(pSelectedDevice) then
-    SafeRelease(pSelectedDevice);
-
-  if Assigned(FDeviceExplorer) then
-     FreeAndNil(FDeviceExplorer);
-
-  if Assigned(FSampleConverter) then
-     FreeAndNil(FSampleConverter);
-end;
-
-
-function TMainWindow.CreateCaptureObjects(): HResult;
-var
-  hr: HResult;
-label
-  done;
-
-begin
-
-  // Create DeviceExplorer properties of the capture devices.
-  hr := CreateDeviceExplorer();
-  if FAILED(hr) then
-    goto Done;
-
-  // Create the capture engine
-  hr := TCaptureManager.CreateCaptureEngine(Handle,
-                                            FCaptureManager);
-  if FAILED(hr) then
     begin
-      ErrMsg('AfterConstruction: Can not create CaptureManager. The application will be closed.',
-             hr);
-      goto Done;
+      FCaptureManager.ResetCaptureManager();
+      SafeDelete(FCaptureManager);
     end;
 
-  // Create the sampleconverter
-  FSampleConverter := TSampleConverter.Create();
+  FChooseDeviceParam.Reset();
 
-  UpdateUI();
-done:
-  Result := hr;
 end;
 
 
@@ -615,6 +508,14 @@ begin
 
   DestroyCaptureObjects();
 
+  if Assigned(FSampleConverter) then
+     FreeAndNil(FSampleConverter);
+
+  if Assigned(FDeviceExplorer) then
+     begin
+       FreeAndNil(FDeviceExplorer);
+     end;
+
   MFShutdown();
   CoUnInitialize();
   CanClose := True;
@@ -624,18 +525,17 @@ end;
 procedure TMainWindow.FormCreate(Sender: TObject);
 var
   hr: HResult;
-
 label
-  Done;
+  done;
 
 begin
 
   // Initialize COM
   CoInitializeEx(nil,
-                 COINIT_APARTMENTTHREADED);
+                 COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE);
   // Startup Media Foundation
   hr := MFStartup(MF_VERSION,
-                  0);
+                  MFSTARTUP_FULL);
 
   if FAILED(hr) then
     begin
@@ -644,17 +544,50 @@ begin
                  lpcwstr('MFStartup Failure!'),
                  MB_ICONSTOP);
       goto Done;
-   end;
+    end;
 
   iSelectedDevice := -1;
   iSelectedFormat := -1;
   hPreview := pnlPreview.Handle;
-  hCaptureHandle := pbCapture.Canvas.Handle;
 
-  //Create objects
-  hr := CreateCaptureObjects();
+  // Create DeviceExplorer
+  hr := CreateDeviceExplorer();
+  // There is no need to shutdown the application, because a user can still add devices.
+  if (hr = MF_E_NO_CAPTURE_DEVICES_AVAILABLE) then
+    begin
+      hr := S_OK;
+      goto done;
+    end;
+  // All other failures will result in termination.
+  if FAILED(hr) then
+    begin
+      MessageBox(0,
+                 lpcwstr('Failed to create the DeviceExplorer, Resultcode = (' + IntToStr(hr) + ').'),
+                 lpcwstr('DeviceExplorer Failure!'),
+                 MB_ICONSTOP);
+      goto done;
+    end;
 
-Done:
+  // Create the capture engine
+  FCaptureManager := TCaptureManager.Create(Handle);
+
+  if not Assigned(FCaptureManager) then
+    begin
+      ErrMsg('AfterConstruction: Can not create CaptureManager. The application will be closed.',
+             E_POINTER);
+      goto done;
+    end;
+
+  hr := FCaptureManager.InitializeCaptureManager(hPreview,
+                                                 Handle,
+                                                 pSelectedDevice);
+  if SUCCEEDED(hr) then
+    // Create the sampleconverter
+    FSampleConverter := TSampleConverter.Create()
+  else
+    hr := E_POINTER;
+
+done:
   if FAILED(hr) then
     Application.Terminate;
 end;
@@ -665,9 +598,8 @@ end;
 function TMainWindow.CreateDeviceExplorer(): HResult;
 var
   hr: HResult;
-
 label
-  Done;
+  done;
 
 begin
 
@@ -688,7 +620,7 @@ begin
                          [hr]));
       goto Done;
     end;
-Done:
+done:
   Result := hr;
 end;
 
@@ -697,9 +629,11 @@ end;
 procedure TMainWindow.mnuChooseDeviceClick(Sender: TObject);
 var
   hr: HResult;
+  pAttributes: IMFAttributes;
+  i: Integer;
 
 label
-  Done;
+  done;
 
 begin
 
@@ -712,32 +646,34 @@ begin
         FCaptureManager.StopRecording();
     end;
 
-  // Create the dialog if it's not allready done.
-  if not Assigned(ChooseDeviceDlg) then
-    begin
-      Application.CreateForm(TChooseDeviceDlg,
-                             ChooseDeviceDlg);
-      ChooseDeviceDlg.Visible := False;
-    end;
+  hr := MFCreateAttributes(pAttributes,
+                           1);
+
+  hr := pAttributes.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
+                            MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
+
+  hr := MFEnumDeviceSources(pAttributes,
+                            FChooseDeviceParam.ppDevices,
+                            FChooseDeviceParam.count);
+
 
   // Ask the user to select one.
   if (ChooseDeviceDlg.ShowModal = 1212) then
     begin
-
-      iSelectedDevice := ChooseDeviceDlg.SelectedDevice;
-      iSelectedFormat := ChooseDeviceDlg.SelectedFormat;
+      {$POINTERMATH ON}
+      pSelectedDevice := FChooseDeviceParam.ppDevices[FChooseDeviceParam.SelectedDevice];
+      {$POINTERMATH OFF}
+      iSelectedDevice := FChooseDeviceParam.SelectedDevice;
+      iSelectedFormat := FChooseDeviceParam.SelectedFormat;
       hPreview := pnlPreview.Handle;
-      SafeRelease(pSelectedDevice);
 
-      // Set DeviceParam properties
+      // Set DeviceExplorer properties
       hr := FDeviceExplorer.SetCurrentDeviceProperties(iSelectedDevice,
-                                                       iSelectedFormat,
-                                                       False);
+                                                       iSelectedFormat);
       if FAILED(hr) then
         goto Done;
 
-      SafeRelease(pSelectedDevice);
-      pSelectedDevice := FDeviceExplorer.DeviceActivationObject;
+      {$POINTERMATH ON}
 
       hr := FCaptureManager.InitializeCaptureManager(hPreview,
                                                      Handle,
@@ -751,13 +687,18 @@ begin
       hr := S_OK;
     end;
 
-Done:
-  if FAILED(hr) then
+done:
+
+  if (hr = MF_E_NO_CAPTURE_DEVICES_AVAILABLE) or (FChooseDeviceParam.Count = 0) then
+    ShowMessage(format('No capture devices found on this system (hr = %d)',
+                       [hr]))
+  else if FAILED(hr) then
     begin
       ErrMsg(ERR_INITIALIZE + ' The application will be closed.',
              hr);
       Application.Terminate();
     end;
+
   UpdateUI();
 end;
 
@@ -805,6 +746,8 @@ begin
       bEnableRecording := True;
       bEnablePhoto := True;
     end
+  else if FCaptureManager.IsPhotoPending then
+    bEnablePhoto := False
   else
     begin
       mnuStartPreview.Caption := 'Start Preview';
@@ -820,12 +763,9 @@ begin
       bEnableRecording := False;
     end;
 
-  if (FCaptureManager.IsPreviewing or FCaptureManager.IsPhotoPending) then
-    bEnablePhoto := False;
-
   mnuStartRecording.Enabled := bEnableRecording;
   mnuStartPreview.Enabled := bEnablePreview;
-
+  //pnlControls.Enabled := bEnablePhoto;
 end;
 
 
@@ -851,10 +791,12 @@ begin
             end;
           butSaveToFile.Enabled := False;
           butTakePhoto.Enabled := True;
+          mnuStartPreview.Tag := 1;
         end
       else
         begin
           hr := FCaptureManager.StopPreview();
+          mnuStartPreview.Tag := 0;
           if FAILED(hr) then
             ErrMsg('mnuStartPreviewClick ' + ERR_STOP_PREVIEW,
                    hr);

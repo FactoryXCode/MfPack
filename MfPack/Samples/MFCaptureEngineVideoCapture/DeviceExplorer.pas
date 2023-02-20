@@ -24,6 +24,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/02/2023 Tony                Fixed switching camera issue that results in Access Denied error.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -122,7 +123,7 @@ type
     bIsSelected: Boolean;                       // Did user select a device?
 
     FMediaType: IMFMediaType;                   // Selected mediatype.
-    FActivate: IMFActivate;                     // Selected Activation interface
+    FActivation: IMFActivate;
 
     {$IFDEF SAVE_DEBUG_REPORT}
       FMediaTypeDebug: TMediaTypeDebug;
@@ -132,6 +133,8 @@ type
     function GetCaptureDevices(out pCount: UINT32): HRESULT;
     // Clear all.
     procedure ResetCaptureDeviceCaps();
+
+    procedure SetMediaType(aMediaType: IMFMediaType);
 
   public
 
@@ -151,13 +154,14 @@ type
 
     // Use this function to get and set all devices and params.
     function SetCurrentDeviceProperties(pDeviceIndex: Integer;   // = zero based
-                                        pFormatsIndex: Integer;  // = zero based
-                                        pSetFormat: Boolean = False): HRESULT;
+                                        pFormatsIndex: Integer): HRESULT;   // = zero based
+
 
     // Gets the activate interfaces from all capturedevices found on this system.
     function GetActivationObjects(out ppActivate: PIMFActivate;
                                   out pCount: UINT32): HResult;
 
+    // Current (selected) DeviceProperties
     property DevicesCount: Integer read iDevices;
     property DeviceIndex: Integer read iSelection;
     property FormatIndex: Integer read iVideoFormatIndex;
@@ -169,8 +173,8 @@ type
     property DeviceIsSelected: Boolean read bIsSelected;
     property DeviceSymbolicLink: PWideChar read lpSelectedSymbolicLink;
     property VideoFormat: TVideoFormatInfo read FVideoFormatInfo;
-    property MediaType: IMFMediaType read FMediaType;
-    property DeviceActivationObject: IMFActivate read FActivate;
+    property MediaType: IMFMediaType read FMediaType write SetMediaType;
+
   end;
 
 var
@@ -215,16 +219,15 @@ begin
     begin
       if (uiC = 0) then
         begin
-{$IFDEF SAVE_DEBUG_REPORT}
+          {$IFDEF SAVE_DEBUG_REPORT}
           OutputDebugString(StrToPWideChar(format('No devices found. (%d)',
                                            [uiC])));
-{$ENDIF}
+          {$ENDIF}
           hr := MF_E_NO_CAPTURE_DEVICES_AVAILABLE;
         end
       else  // Set the first device as default device.
         SetCurrentDeviceProperties(0,
-                                   0,
-                                   False);
+                                   0);
     end;
 
   pCount := uiC;
@@ -272,7 +275,7 @@ begin
   for i := 0 to Length(FDeviceProperties) -1 do
     FDeviceProperties[i].Reset;
 
-  FDeviceProperties := nil;
+  CoTaskMemFree(FDeviceProperties);
   FVideoFormatInfo.Reset();
 
   // Clear class properties
@@ -284,18 +287,14 @@ begin
   gSelectedDeviceGuid := GUID_NULL;
   bIsSelected := False;
   SafeRelease(FMediaType);
-  SafeRelease(FActivate);
+
 end;
 
 //
 function TDeviceExplorer.SetCurrentDeviceProperties(pDeviceIndex: Integer;
-                                                    pFormatsIndex: Integer;
-                                                    pSetFormat: Boolean = False): HResult;
+                                                    pFormatsIndex: Integer): HResult;
 var
   hr: HResult;
-  pMediaSource: IMFMediaSource;
-  mfActivate: PIMFActivate;
-  uiCount: UINT32;
 
 label
   Done;
@@ -308,12 +307,13 @@ begin
       iSelection := pDeviceIndex;
       bIsSelected := True;
       iVideoFormatIndex := pFormatsIndex;
-      iDevices := FDeviceProperties[pDeviceIndex].iCount;
+      iDevices := Length(FDeviceProperties);
       lpSelectedDeviceName := FDeviceProperties[pDeviceIndex].lpDisplayName;
       gSelectedDeviceGuid := FDeviceProperties[pDeviceIndex].riId;
       lpSelectedSymbolicLink := FDeviceProperties[pDeviceIndex].lpSymbolicLink;
       dwNativeFormats := FDeviceProperties[pDeviceIndex].dwNativeFormats;
       dwSupportedFormats := FDeviceProperties[pDeviceIndex].dwSupportedFormats;
+
 
       {$IFDEF SAVE_DEBUG_REPORT}
       FMediaTypeDebug.LogMediaType(DeviceProperties[pDeviceIndex].aVideoFormats[pFormatsIndex].mfMediaType);
@@ -321,61 +321,22 @@ begin
       {$ENDIF}
 
       SafeRelease(FMediaType);
-      CloneVideoMediaType(DeviceProperties[pDeviceIndex].aVideoFormats[pFormatsIndex].mfMediaType,
-                          GUID_NULL,
-                          FMediaType);
+      SafeRelease(FActivation);
+
+      hr := CloneVideoMediaType(DeviceProperties[pDeviceIndex].aVideoFormats[pFormatsIndex].mfMediaType,
+                                MFVideoFormat_RGB32 {GUID_NULL},
+                                FMediaType);
+      if FAILED(hr) then
+        goto done;
 
       {$IFDEF SAVE_DEBUG_REPORT}
       FMediaTypeDebug.LogMediaType(FMediaType);
       FMediaTypeDebug.SafeDebugResultsToFile('TDeviceExplorer.SetCurrentDeviceProperties');
       {$ENDIF}
 
-      SafeRelease(FActivate);
-
-      hr := GetActivationObjects(mfActivate,
-                                 uiCount);
-      if FAILED(hr) then
-        goto done;
-
-      if (uiCount > 0) and (pDeviceIndex > -1) then
-{$POINTERMATH ON}
-       FActivate := mfActivate[pDeviceIndex]
-{$POINTERMATH OFF}
-      else
-        begin
-          hr := ERROR_INVALID_PARAMETER;
-          goto done;
-        end;
-
       // Set the videoformat that has been selected by user.
       FVideoFormatInfo.Reset();
       FVideoFormatInfo := FDeviceProperties[pDeviceIndex].aVideoFormats[pFormatsIndex];
-
-      // Optionally set the device video format
-      if pSetFormat then
-        begin
-
-          hr := mfActivate.DetachObject();
-
-          if SUCCEEDED(hr) then
-            hr := mfActivate.ActivateObject(IID_IMFMediaSource,
-                                            Pointer(pMediaSource));
-
-          if SUCCEEDED(hr) then
-            begin
-
-              hr := SetDeviceFormat(pMediaSource,
-                                    DeviceProperties[pDeviceIndex].aVideoFormats[pFormatsIndex].mfMediaType,
-                                    pFormatsIndex);
-
-              if SUCCEEDED(hr) then
-                hr := pMediaSource.Shutdown;
-            end;
-          if FAILED(hr) then
-            goto Done;
-        end
-      else
-        hr := S_OK;
     end
   else
     hr := ERROR_INVALID_PARAMETER;
@@ -389,6 +350,7 @@ function TDeviceExplorer.GetActivationObjects(out ppActivate: PIMFActivate;
                                               out pCount: UINT32): HResult;
 var
   mfAttributes: IMFAttributes;
+  pActivate: PIMFActivate;
   hr: HResult;
 
 begin
@@ -403,9 +365,19 @@ begin
   if SUCCEEDED(hr) then
     // Enumerate devices.
     hr := MFEnumDeviceSources(mfAttributes,
-                              ppActivate,
+                              pActivate,
                               pCount);
+
+  ppActivate := pActivate;
+  SafeRelease(pActivate);
   Result := hr;
+end;
+
+
+procedure TDeviceExplorer.SetMediaType(aMediaType: IMFMediaType);
+begin
+  SafeRelease(FMediaType);
+  FMediaType := aMediaType;
 end;
 
 end.

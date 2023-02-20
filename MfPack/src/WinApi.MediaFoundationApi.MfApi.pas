@@ -2130,7 +2130,7 @@ const
   ///////////////////////////////  Attributes //////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
-  function MFCreateAttributes([ref] const ppMFAttributes: IMFAttributes;
+  function MFCreateAttributes(out ppMFAttributes: IMFAttributes;
                               cInitialSize: UINT32): HResult; stdcall;
   {$EXTERNALSYM MFCreateAttributes}
 

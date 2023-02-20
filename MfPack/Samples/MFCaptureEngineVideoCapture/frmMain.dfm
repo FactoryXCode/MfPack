@@ -76,7 +76,6 @@ object MainWindow: TMainWindow
       Width = 310
       Height = 28
       Align = alBottom
-      Caption = 'pnlControls'
       ParentBackground = False
       ShowCaption = False
       TabOrder = 0
@@ -109,7 +108,7 @@ object MainWindow: TMainWindow
     end
   end
   object MainMenu: TMainMenu
-    Left = 30
+    Left = 32
     Top = 38
     object Capture1: TMenuItem
       Caption = 'Capture'

@@ -24,6 +24,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/02/2023 Tony                Fixed switching camera issue that results in Access Denied error.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -70,9 +71,12 @@ uses
   {WinApi}
   WinApi.Windows,
   WinAPI.Messages,
+  WinApi.ComBaseApi,
   {System}
   System.Classes,
   system.Sysutils,
+  {ActiveX}
+  WinApi.ActiveX.PropIdl,
   {Vcl}
   Vcl.Dialogs,
   Vcl.Graphics,
@@ -80,8 +84,11 @@ uses
   Vcl.Imaging.jpeg,
   {MediaFoundationApi}
   WinApi.WinApiTypes,
-  WinApi.MediaFoundationApi.MfUtils;
-
+  WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.MfObjects,
+  WinApi.MediaFoundationApi.MfIdl,
+  WinApi.MediaFoundationApi.MfMetLib;
 
 
 const
@@ -96,6 +103,15 @@ const
   ERR_STOP_PREVIEW = 'Stopping preview failed.';
 
 type
+
+  TChooseDeviceParam = record
+    ppDevices: PIMFActivate;
+    Count: UINT32;
+    SelectedDevice: Integer;
+    SelectedFormat: Integer;
+    public
+      procedure Reset();
+  end;
 
   TFrameDataEvent = procedure(AMemoryStream: TMemoryStream) of object;
 
@@ -116,7 +132,6 @@ type
     procedure Unlock();
 
   end;
-
 
   // To make earlier versions of TBitmap compatible with Seattle and above.
   // CompilerVersion < Delphi 10 Seattle
@@ -145,7 +160,35 @@ type
                                  ShowMilliSeconds: Boolean = True;
                                  DelimiterFormat: string = ':'): string; inline;
 
+
+  function CloneVideoMediaType(pSrcMediaType: IMFMediaType;
+                             const guidSubType: REFGUID;
+                             out ppNewMediaType: IMFMediaType): HResult;
+
+  function CopyAttribute(pSrc: IMFAttributes;
+                         pDest: IMFAttributes;
+                         const key: TGUID): HResult; inline;
+
+  function GetActivationObjects(out ppActivate: PIMFActivate;
+                                out pCount: UINT32): HResult;
+
+
 implementation
+
+
+procedure TChooseDeviceParam.Reset();
+var
+  i: Integer;
+
+begin
+{$POINTERMATH ON}
+  for i := 0 to count -1 do
+    SafeRelease(ppDevices[i]);
+  CoTaskMemFree(ppDevices);
+
+  SelectedDevice := -1;
+  SelectedFormat := -1;
+end;
 
 
 { TMFCritSec }
@@ -302,6 +345,104 @@ try
 except
   on exception do Result:= '00:00:00,000';
 end;
+end;
+
+
+function CloneVideoMediaType(pSrcMediaType: IMFMediaType;
+                             const guidSubType: REFGUID;
+                             out ppNewMediaType: IMFMediaType): HResult;
+var
+  hr: HResult;
+  pNewMediaType: IMFMediaType;
+
+label
+  done;
+begin
+
+  hr := MFCreateMediaType(pNewMediaType);
+  if FAILED(hr) then
+    goto done;
+
+  hr := pNewMediaType.SetGUID(MF_MT_MAJOR_TYPE,
+                              MFMediaType_Video);
+  if FAILED(hr) then
+    goto done;
+
+  hr := pNewMediaType.SetGUID(MF_MT_SUBTYPE,
+                              guidSubType);
+  if FAILED(hr) then
+    goto done;
+
+  hr := CopyAttribute(pSrcMediaType, pNewMediaType, MF_MT_FRAME_SIZE);
+  if FAILED(hr) then
+    goto done;
+
+  hr := CopyAttribute(pSrcMediaType, pNewMediaType, MF_MT_FRAME_RATE);
+  if FAILED(hr) then
+    goto done;
+
+  hr := CopyAttribute(pSrcMediaType, pNewMediaType, MF_MT_PIXEL_ASPECT_RATIO);
+  if FAILED(hr) then
+    goto done;
+
+  hr := CopyAttribute(pSrcMediaType, pNewMediaType, MF_MT_INTERLACE_MODE);
+  if FAILED(hr) then
+    goto done;
+
+  ppNewMediaType := pNewMediaType;
+
+done:
+  SafeRelease(pNewMediaType);
+  Result := hr;
+end;
+
+
+function CopyAttribute(pSrc: IMFAttributes;
+                       pDest: IMFAttributes;
+                       const key: TGUID): HResult;
+var
+  hr: HResult;
+  pVar: PROPVARIANT;
+begin
+  PropVariantInit(pVar);
+  hr := pSrc.GetItem(key,
+                     pVar);
+
+  if SUCCEEDED(hr) then
+    begin
+      hr := pDest.SetItem(key,
+                          pVar);
+      PropVariantClear(pVar);
+    end;
+  Result := hr;
+end;
+
+
+function GetActivationObjects(out ppActivate: PIMFActivate;
+                              out pCount: UINT32): HResult;
+var
+  mfAttributes: IMFAttributes;
+  pActivate: PIMFActivate;
+  hr: HResult;
+
+begin
+  hr := MFCreateAttributes(mfAttributes,
+                           1);
+
+  if SUCCEEDED(hr) then
+    // Ask for source type = video capture devices
+    hr := mfAttributes.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
+                               MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
+
+  if SUCCEEDED(hr) then
+    // Enumerate devices.
+    hr := MFEnumDeviceSources(mfAttributes,
+                              pActivate,
+                              pCount);
+
+  ppActivate := pActivate;
+  SafeRelease(pActivate);
+  Result := hr;
 end;
 
 end.
