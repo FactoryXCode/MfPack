@@ -700,7 +700,7 @@ type
     //  pBorderClr [in]
     //    The border color. Use the RGB macro to create this value.
 
-    function SetSampleCallback(dwStreamSinkIndex: DWORD;
+    function SetSampleCallback(const dwStreamSinkIndex: DWORD;
                                pCallback: IMFCaptureEngineOnSampleCallback): HResult; stdcall;
     // Allows an app to retrieve samples via a callback
     // <param name = "dwSinkStreamIndex">

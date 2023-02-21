@@ -102,14 +102,23 @@ type
 
   TPComObj = array of Pointer;
 
-  // Use for releasing interfaces.
   procedure SafeRelease(var IUnk);
   // Use for releasing objects.
-  procedure SAFE_RELEASE(var Obj);
+  procedure SAFE_RELEASE(var IUnk);
 
+  // Use for releasing interfaces.
+  {$IF COMPILERVERSION < 25.0}
   // Identical methods, both can be called.
+  // Warning: Obj must be an instance of a TObject descendant!
   procedure FreeAndNil(var Obj); inline;
   procedure SafeDelete(var Obj); inline;
+  {$ENDIF}
+
+
+  {$IF COMPILERVERSION > 24.0}
+  procedure FreeAndNil(const [ref] Obj: TObject); inline;
+  procedure SafeDelete(const [ref] Obj: TObject); inline;
+  {$ENDIF}
 
   // Compare GUIDS
   function InlineIsEqualGUID(rguid1: TGUID;
@@ -517,37 +526,50 @@ const
 // Note: The object does initiate a reference call
 procedure SafeRelease(var IUnk);
 begin
-  if (IUnknown(IUnk) <> nil) then
+  if Assigned(IUnknown(IUnk)) then
+    Pointer(IUnknown(IUnk)) := nil;
+end;
+
+// Use for releasing objects.
+// Note: Here the object does NOT initiate a reference call.
+procedure SAFE_RELEASE(var IUnk);
+begin
+   if (IUnknown(IUnk) <> nil) then
     IUnknown(IUnk) := nil;
 end;
 
-// Note: Here the object does NOT initiate a reference call
-procedure SAFE_RELEASE(var Obj);
-begin
-  if Assigned(IUnknown(Obj)) then
-    begin
-      Pointer(IUnknown(Obj)) := nil;
-    end;
-end;
+////////////////////////////////////////////////////////////////////////////////
 
 
-// From DS, same as SafeDelete
-procedure FreeAndNil(var Obj);
+// Version > Delphi XE3 ////////////////////////////////////////////////////////
+{$IF COMPILERVERSION > 24.0}
+
+procedure FreeAndNil(const [ref] Obj: TObject);
 begin
   SafeDelete(Obj);
 end;
 
+
 // Frees an Object or TInterfacedPersitant reference and sets this reference to zero.
 // This is actually the same method as FeeAndNil as used in DirectShow.
 // NOTE: Use SafeRelease for freeing an interfaced object.
-procedure SafeDelete(var Obj);
+procedure SafeDelete(const [ref] Obj: TObject);
+{$IF NOT DEFINED(AUTOREFCOUNT)}
 var
-  Tmp: TObject;
+  Temp: TObject;
 begin
-  Tmp := TObject(Obj);
-  Pointer(Obj) := Nil;
-  Tmp.Free;
+  Temp := Obj;
+  TObject(Pointer(@Obj)^) := nil;
+  Temp.Free;
 end;
+{$ELSE}
+begin
+  Obj := nil;
+end;
+{$ENDIF}
+{$ENDIF}
+
+////////////////////////////////////////////////////////////////////////////////
 
 
 {$WARN SYMBOL_PLATFORM OFF}

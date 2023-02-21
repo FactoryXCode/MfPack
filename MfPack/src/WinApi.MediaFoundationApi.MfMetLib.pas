@@ -1399,7 +1399,7 @@ begin
 
   // Return IMFactivate pointer to caller
   mfActivate := pActivate;
-
+  CoTaskMemFree(pActivate);
 done:
   Result := hr;
 end;
@@ -1440,7 +1440,7 @@ begin
 
   // Return IMFactivate pointer to caller
   mfActivate := pActivate;
-
+  CoTaskMemFree(pActivate);
 done:
   Result := hr;
 end;
@@ -2520,10 +2520,12 @@ try
     begin
       hr := ppActivate[0].ActivateObject(IID_IMFTransform,
                                          Pointer(ppEncoder));
+
     end;
 {$POINTERMATH OFF}
 
 finally
+  CoTaskMemFree(ppActivate);
   Result := hr;
 end;
 end;
@@ -3173,7 +3175,6 @@ function CreateCaptureDeviceInstance(pDeviceProperties: TDeviceProperties;
                                      out ppSource: IMFMediaSource;
                                      out ppActivate: IMFActivate): HRESULT;
 var
-  i: Integer;
   count: UINT32;
   pConfig: IMFAttributes;
   ppDevices: PIMFActivate;  // Pointer to array of IMFActivate
@@ -3221,10 +3222,6 @@ begin
     hr := MF_E_NOT_FOUND;
 
 Done:
-
-  for i := 0 to Count -1 do
-   SafeRelease(ppDevices[i]);
-
   CoTaskMemFree(ppDevices);
   Result := hr;
 end;
@@ -4173,8 +4170,8 @@ begin
                                     pSink);
     end;
 
-  Result := hr;
   CoTaskMemFree(wstrID);
+  Result := hr;
 end;
 
 
