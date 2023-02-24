@@ -32,6 +32,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 02/02/2023 Tony                Changed IMFSourceReader.ReadSample parameters.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
@@ -184,7 +185,7 @@ begin
   if SUCCEEDED(hr) then
     begin
       hr := MFCreateSourceReaderFromURL(wszSourceFile,
-                                        Nil,
+                                        nil,
                                         pReader);
 
       if FAILED(hr) then
@@ -201,7 +202,7 @@ begin
       hFile := CreateFile(wszTargetFile,
                           GENERIC_WRITE,
                           FILE_SHARE_READ,
-                          Nil,
+                          nil,
                           CREATE_ALWAYS,
                           0,
                           0);
@@ -227,7 +228,6 @@ begin
       Exit;
     end;
 
-
   // Clean up.
   if (hFile <> INVALID_HANDLE_VALUE) then
     CloseHandle(hFile);
@@ -243,7 +243,6 @@ end;
 // Writes a WAVE file by getting audio data from the source reader.
 //
 //-------------------------------------------------------------------
-
 function WriteWaveFile(pReader: IMFSourceReader;    // Pointer to the source reader.
                        const hFile: THandle;                // Handle to the output file.
                        msecAudioData: LONG): HResult;
@@ -302,7 +301,6 @@ end;
 // audio format and the maximum duration of the WAVE file.
 // The return value is the size of the desired audio clip in bytes
 //-------------------------------------------------------------------
-
 function CalculateMaxAudioDataSize(pAudioType: IMFMediaType;     // The PCM audio format.
                                    cbHeader: DWORD;              // The size of the WAVE file header.
                                    msecAudioData: DWORD): DWord;
@@ -353,7 +351,6 @@ end;
 // Selects an audio stream from the source file, and configures the
 // stream to deliver decoded PCM audio.
 //-------------------------------------------------------------------
-
 function ConfigureAudioStream(pReader: IMFSourceReader;    // Pointer to the source reader.
                               out ppPCMAudio: IMFMediaType): HResult;
 var
@@ -408,6 +405,7 @@ begin
   // SafeRelease(pPartialType);
   Result := hr;
 end;
+
 
 //-------------------------------------------------------------------
 // WriteWaveHeader
@@ -491,14 +489,13 @@ begin
   Result := hr;
 end;
 
+
 //-------------------------------------------------------------------
 // WriteWaveData
 //
 // Decodes PCM audio data from the source file and writes it to
 // the WAVE file.
-// IMPORTANT NOTE: IMFSourceReader.ReadSample has a serious latency bug.
 //-------------------------------------------------------------------
-
 function WriteWaveData(const hFile: THandle;        // Output file.
                        pReader: IMFSourceReader;    // Source reader.
                        cbMaxAudioData: DWORD;       // Maximum amount of audio data (bytes).
@@ -511,60 +508,41 @@ var
   pSample: IMFSample;
   pBuffer: IMFMediaBuffer;
   dwFlags: DWORD;
-
-(* Those are not necessary to make the pReader.ReadSample work in this case.
-   Please read the comments in the MfPack.MfReadWrite
-   If you want to run the SourceReader in async state, activate these parameters. *)
-
-  // ActualStreamIndex: DWORD;
-  // Timestamp: LONGLONG;
+  ActualStreamIndex: DWORD;
+  Timestamp: LONGLONG;
 
 begin
   hr := E_FAIL;
   cbAudioData := 0;
   cbBuffer := 0;
-  pAudioData := Nil;
-  pBuffer := Nil;
-
+  pAudioData := nil;
+  pBuffer := nil;
 
   // Get audio samples from the source reader.
   while (cbAudioData < cbMaxAudioData) do
     begin
 
       // Read the next sample.
-      hr := pReader.ReadSample(DWORD(MF_SOURCE_READER_FIRST_AUDIO_STREAM),
+      // The SourceReader is in Synchronous Mode
+      hr := pReader.ReadSample(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
                                0,
-                               Nil, //@ActualStreamIndex, // ActualStreamIndex, may be Nil
+                               @ActualStreamIndex,
                                @dwFlags,
-                               Nil, //@Timestamp, // Timestamp, may be Nil
+                               @Timestamp,
                                @pSample);
-
-      (* Important Note:
-         On Windows 7 or Windows 10 an error $8007000E (0x8007000E)
-         with message 'Not enough storage is available to complete this operation.' might occure.
-         This is because of a latency issue produced by the ReadSample method in MfReadWrite.dll.
-         A solution for this latency issue is to implement MsgWaitForMultipleObjects, to give the
-         ReadSample method more time to organize it's internal samplepool. *)
-      // Implement if necessary
-      // MsgWaitForMultipleObjects(0,
-      //                           Nil^,
-      //                           False,  // do NOT set this to true!
-      //                           0,
-      //                           QS_ALLINPUT);
-
       if FAILED(hr) then
         Break;
       
       // Check whether the data is still valid
-      if (DWord(MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED) and dwFlags <> 0) then
+      if (MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED and dwFlags <> 0) then
 			  Break;
 
       // Check for EOF
-      if (DWord(MF_SOURCE_READERF_ENDOFSTREAM) and dwFlags <> 0) then
+      if (MF_SOURCE_READERF_ENDOFSTREAM and dwFlags <> 0) then
 			  Break;
 
-      // If the sample is Nil, there is a gap in the data stream that can't be filled; No reason to quit though..
-      if (pSample = Nil) then
+      // If the sample is nil, there is a gap in the data stream that can't be filled; No reason to quit though..
+      if (pSample = nil) then
         Continue;
 
       // Get a pointer to the audio data in the sample.
@@ -574,7 +552,7 @@ begin
         Break;
 
       hr := pBuffer.Lock(pAudioData,
-                         Nil,
+                         nil,
                          @cbBuffer);
 
       if FAILED(hr) then
@@ -594,7 +572,7 @@ begin
 
       // Unlock the buffer.
       hr := pBuffer.Unlock();
-      pAudioData := Nil;
+      pAudioData := nil;
 
       if FAILED(hr) then
         Break;
@@ -605,10 +583,6 @@ begin
       // We reached the end of data required
       if (cbAudioData >= cbMaxAudioData) then
         Break;
-
-      // Do NOT use SafeRelease! That will mess up the sample pool and serious memory leaks will occure.
-      pBuffer := Nil;
-      pSample := Nil;
 
       // User wants to abort
       if bFlush then

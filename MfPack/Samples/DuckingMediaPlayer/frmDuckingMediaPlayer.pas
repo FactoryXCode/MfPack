@@ -340,18 +340,20 @@ end;
 //
 procedure TForm1.tbVolumeSliderChange(Sender: TObject);
 var
-  volumePosition: Integer;
+  sVolumePosition: Single;
+  sVolume: Single;
 
 begin
-  volumePosition := tbVolumeSlider.Position;
-  g_MediaPlayer.SetVolume(Single(volumePosition) / 100.0);
+  sVolumePosition := tbVolumeSlider.Position;
+  sVolume := (sVolumePosition / 100);
+  g_MediaPlayer.SetVolume(sVolume);
 end;
 
 //
 // Update the progress slider to match the current playback position.
 // NOTE:
 //  We used the TTimerclass which use the Windows API timer functions SetTimer and KillTimer as been used in the official MS sample.
-//  Since Delphi doen't have slider component, we use the TTrackBar for this. In other samples we used the TProgressBar.
+//  Since Delphi doesn't have a slider component, we use the TTrackBar for this. Using a TProgressBar is also used (see player samples).
 procedure TForm1.tmrProgressTimer(Sender: TObject);
 var
   position: LongInt;
