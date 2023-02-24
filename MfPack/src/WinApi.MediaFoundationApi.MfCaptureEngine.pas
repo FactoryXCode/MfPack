@@ -116,32 +116,32 @@ type
   // Defines the capture sink type
   PMfCaptureEngineSinkType = ^MF_CAPTURE_ENGINE_SINK_TYPE;
   MF_CAPTURE_ENGINE_SINK_TYPE           = (
-    MF_CAPTURE_ENGINE_SINK_TYPE_RECORD  = 0,  // Record sink, used for outputting compressed data
-    MF_CAPTURE_ENGINE_SINK_TYPE_PREVIEW = $1, // Record sink, used for outputting uncompressed data or rendering video
-    MF_CAPTURE_ENGINE_SINK_TYPE_PHOTO   = $2  // Photo sink, used for retrieving a single photograph
+    MF_CAPTURE_ENGINE_SINK_TYPE_RECORD  = 0,  // A recording sink, for capturing audio and video to a file.
+    MF_CAPTURE_ENGINE_SINK_TYPE_PREVIEW = $1, // A preview sink, for previewing live audio or video.
+    MF_CAPTURE_ENGINE_SINK_TYPE_PHOTO   = $2  // A photo sink, for capturing still images.
   );
   {$EXTERNALSYM MF_CAPTURE_ENGINE_SINK_TYPE}
 
 
 const
     // Not published in the SDK!
-    MF_CAPTURE_ENGINE_FIRST_SOURCE_PHOTO_STREAM                  = NativeUInt($FFFFFFFB);
-    MF_CAPTURE_ENGINE_FIRST_SOURCE_VIDEO_STREAM                  = NativeUInt($FFFFFFFC);
-    MF_CAPTURE_ENGINE_FIRST_SOURCE_AUDIO_STREAM                  = NativeUInt($FFFFFFFD);
+    MF_CAPTURE_ENGINE_FIRST_SOURCE_PHOTO_STREAM                  = DWord($FFFFFFFB);
+    MF_CAPTURE_ENGINE_FIRST_SOURCE_VIDEO_STREAM                  = DWord($FFFFFFFC);
+    MF_CAPTURE_ENGINE_FIRST_SOURCE_AUDIO_STREAM                  = DWord($FFFFFFFD);
 
-    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW  = NativeUInt($fffffffa); // The preferred stream for previewing video
+    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW  = DWord($fffffffa); // The preferred stream for previewing video
     {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW}
-    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD   = NativeUInt($fffffff9); // The preferred stream for recording video
+    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD   = DWord($fffffff9); // The preferred stream for recording video
     {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD}
-    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO          = NativeUInt($fffffff8); // The first independent photo stream if present, or else the same stream choosen by MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW
+    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO          = DWord($fffffff8); // The first independent photo stream if present, or else the same stream choosen by MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW
     {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_PHOTO}
-    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_AUDIO          = NativeUInt($fffffff7); // The first available audio stream
+    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_AUDIO          = DWord($fffffff7); // The first available audio stream
     {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_AUDIO}
     {NTDDI_VERSION > NTDDI_WIN10_FE}
-    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_METADATA       = NativeUInt($fffffff6); // The first available metadata stream
+    MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_METADATA       = DWord($fffffff6); // The first available metadata stream
     {$EXTERNALSYM MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_METADATA}
     {END NTDDI_VERSION}
-    MF_CAPTURE_ENGINE_MEDIASOURCE                                = NativeUInt($ffffffff);
+    MF_CAPTURE_ENGINE_MEDIASOURCE                                = DWord($ffffffff);
     {$EXTERNALSYM MF_CAPTURE_ENGINE_MEDIASOURCE}
 
 type

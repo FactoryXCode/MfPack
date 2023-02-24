@@ -120,7 +120,7 @@ type
                 itJPG);
 
   // CriticalSection
-  TMFCritSec = class
+  TMFCritSec = class(TObject)
   private
     FCriticalSection: TRTLCriticalSection;
 
@@ -186,6 +186,7 @@ begin
     SafeRelease(ppDevices[i]);
   CoTaskMemFree(ppDevices);
 
+  Count := 0;
   SelectedDevice := -1;
   SelectedFormat := -1;
 end;

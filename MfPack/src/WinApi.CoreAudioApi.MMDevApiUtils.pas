@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 24/02/2023 Tony                Updated function GetEndpointDevices.
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -452,7 +453,7 @@ try
   if (count = 0) then
     begin
       devicesCount := 0;
-      hr := MF_E_NOT_FOUND;
+      Result := MF_E_NOT_FOUND;
       Exit;
     end;
 

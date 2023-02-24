@@ -105,6 +105,14 @@ object MainWindow: TMainWindow
         TabOrder = 1
         OnClick = butTakePhotoClick
       end
+      object chkNoPreview: TCheckBox
+        Left = 176
+        Top = 6
+        Width = 97
+        Height = 15
+        Caption = 'Auto Save'
+        TabOrder = 2
+      end
     end
   end
   object MainMenu: TMainMenu

@@ -242,7 +242,7 @@ function TChooseDeviceDlg.PopulateFormats(bSupportedFormatsOnly: Boolean): HResu
                                                FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].iVideoHeight]);
        {Framerate}
        sgResolutions.Cells[1, iCol] := Format('%n',
-                                              [FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].iFrameRate]);
+                                              [FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].fFrameRate]);
        {Subtype}
        sgResolutions.Cells[2, iCol] := Format('%s',
                                               [GetGUIDNameConst(FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].fSubType)]);
@@ -251,7 +251,7 @@ function TChooseDeviceDlg.PopulateFormats(bSupportedFormatsOnly: Boolean): HResu
        //
        sgResolutions.Cells[3, iCol] := Format('%s',
                                               [BoolToStrYesNo(FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].bMFSupported and
-                                              (FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].iFrameRate > 29))]);
+                                              (FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].fFrameRate > 29.0))]);
        {Index}
        sgResolutions.Cells[4, iCol] := Format('%d',
                                               [FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].FormatsIndex]);
@@ -284,20 +284,31 @@ try
 
   ClearFormatsList();
 
+
   sgResolutions.ColCount := 5;
   sgResolutions.RowCount := 1;
 
-  sgResolutions.ColWidths[0] := 80;
+  // For some reason, the methods to dimension TStringGrid changed?
+  {$IF CompilerVersion < 31.0}
+  sgResolutions.ColWidths[0] := 100;
   sgResolutions.ColWidths[1] := 60;
-  sgResolutions.ColWidths[2] := 120;
+  sgResolutions.ColWidths[2] := 140;
   sgResolutions.ColWidths[3] := 120;
   sgResolutions.ColWidths[4] := -1; // Hide last column
+  {$ELSE}
+  sgResolutions.ColWidths[0] := 200;
+  sgResolutions.ColWidths[1] := 110;
+  sgResolutions.ColWidths[2] := 220;
+  sgResolutions.ColWidths[3] := 200;
+  sgResolutions.ColWidths[4] := -1; // Hide last column
 
-  sgResolutions.Width :=  sgResolutions.ColWidths[0] +
-                          sgResolutions.ColWidths[1] +
-                          sgResolutions.ColWidths[2] +
-                          sgResolutions.ColWidths[3] +
-                          sgResolutions.ColCount;
+  {$ENDIF}
+
+  //sgResolutions.Width :=  sgResolutions.ColWidths[0] +
+  //                        sgResolutions.ColWidths[1] +
+  //                        sgResolutions.ColWidths[2] +
+  //                        sgResolutions.ColWidths[3] +
+  //                        sgResolutions.ColCount;
 
   sgResolutions.Cells[0, 0] := 'Height x Width';
   sgResolutions.Cells[1, 0] := 'FPS';
@@ -306,7 +317,6 @@ try
 
   sgResolutions.Cells[4, 0] := 'Formats index';  // This a hidden column.
   rc := 1;
-
 
   // List devicecapabilities.
 
@@ -321,7 +331,7 @@ try
       if bSupportedFormatsOnly then
         begin
           if FDeviceExplorer.DeviceProperties[FChooseDeviceParam.SelectedDevice].aVideoFormats[i].bMFSupported and
-            (FDeviceExplorer.DeviceProperties[FChooseDeviceParam.SelectedDevice].aVideoFormats[i].iFrameRate > 29.0) then
+            (FDeviceExplorer.DeviceProperties[FChooseDeviceParam.SelectedDevice].aVideoFormats[i].fFrameRate > 29.0) then
             begin
               AddFormat(rc,
                         FChooseDeviceParam.SelectedDevice,

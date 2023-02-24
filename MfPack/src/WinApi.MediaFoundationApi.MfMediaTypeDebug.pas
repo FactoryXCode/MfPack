@@ -150,7 +150,8 @@ end;
 
 destructor TMediaTypeDebug.Destroy();
 begin
-  FreeAndNil(slDebug);
+  slDebug.Free();
+  slDebug := nil;
   inherited Destroy();
 end;
 

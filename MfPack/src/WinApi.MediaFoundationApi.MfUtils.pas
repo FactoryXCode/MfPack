@@ -87,16 +87,8 @@ uses
   WinApi.MediaFoundationApi.MfError;
 
   {$WEAKPACKAGEUNIT ON}
-  {$ALIGN ON}
-  {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
-
   {$I 'WinApiTypes.inc'}
+  {$DEFINE IGNORE_COMPILERVERSION}
 
 type
 
@@ -104,21 +96,10 @@ type
 
   procedure SafeRelease(var IUnk);
   // Use for releasing objects.
-  procedure SAFE_RELEASE(var IUnk);
+  procedure SAFE_RELEASE(const [ref] IUnk);
 
-  // Use for releasing interfaces.
-  {$IF COMPILERVERSION < 25.0}
-  // Identical methods, both can be called.
-  // Warning: Obj must be an instance of a TObject descendant!
-  procedure FreeAndNil(var Obj); inline;
-  procedure SafeDelete(var Obj); inline;
-  {$ENDIF}
+  procedure Cpp_FreeAndNil(var Obj: TObject);
 
-
-  {$IF COMPILERVERSION > 24.0}
-  procedure FreeAndNil(const [ref] Obj: TObject); inline;
-  procedure SafeDelete(const [ref] Obj: TObject); inline;
-  {$ENDIF}
 
   // Compare GUIDS
   function InlineIsEqualGUID(rguid1: TGUID;
@@ -520,54 +501,31 @@ const
   VER_PRODUCT_TYPE      = $80;
 
 
+
 // SafeRelease
 // Many of the code (examples) in the documentation use the SafeRelease method to
 // release COM interfaced objects.
-// Note: The object does initiate a reference call
+// Note: The object does initiate a reference call.
 procedure SafeRelease(var IUnk);
 begin
-  if Assigned(IUnknown(IUnk)) then
-    Pointer(IUnknown(IUnk)) := nil;
-end;
-
-// Use for releasing objects.
-// Note: Here the object does NOT initiate a reference call.
-procedure SAFE_RELEASE(var IUnk);
-begin
-   if (IUnknown(IUnk) <> nil) then
+  if (IUnknown(IUnk) <> nil) then
     IUnknown(IUnk) := nil;
 end;
 
-////////////////////////////////////////////////////////////////////////////////
-
-
-// Version > Delphi XE3 ////////////////////////////////////////////////////////
-{$IF COMPILERVERSION > 24.0}
-
-procedure FreeAndNil(const [ref] Obj: TObject);
+// Note: Here the object does NOT initiate a reference call.
+procedure Safe_Release(const [ref] IUnk);
 begin
-  SafeDelete(Obj);
+  if Assigned(IUnknown(IUnk)) then
+    IUnknown(Pointer(@IUnk)^):= nil;
 end;
 
-
-// Frees an Object or TInterfacedPersitant reference and sets this reference to zero.
-// This is actually the same method as FeeAndNil as used in DirectShow.
-// NOTE: Use SafeRelease for freeing an interfaced object.
-procedure SafeDelete(const [ref] Obj: TObject);
-{$IF NOT DEFINED(AUTOREFCOUNT)}
-var
-  Temp: TObject;
+// Equivalent method of CPPFreeAndNil
+procedure Cpp_FreeAndNil(var Obj: TObject);
 begin
-  Temp := Obj;
-  TObject(Pointer(@Obj)^) := nil;
-  Temp.Free;
-end;
-{$ELSE}
-begin
+  Obj.Free();
   Obj := nil;
 end;
-{$ENDIF}
-{$ENDIF}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -5,7 +5,7 @@ object ChooseDeviceDlg: TChooseDeviceDlg
   BorderStyle = bsDialog
   Caption = 'Select Camera'
   ClientHeight = 281
-  ClientWidth = 718
+  ClientWidth = 709
   Color = clBtnFace
   ParentFont = True
   OldCreateOrder = True
@@ -27,7 +27,7 @@ object ChooseDeviceDlg: TChooseDeviceDlg
     ParentFont = False
   end
   object btnOK: TButton
-    Left = 521
+    Left = 541
     Top = 246
     Width = 75
     Height = 25
@@ -37,7 +37,7 @@ object ChooseDeviceDlg: TChooseDeviceDlg
     OnClick = btnOKClick
   end
   object btnCancel: TButton
-    Left = 602
+    Left = 622
     Top = 246
     Width = 75
     Height = 25

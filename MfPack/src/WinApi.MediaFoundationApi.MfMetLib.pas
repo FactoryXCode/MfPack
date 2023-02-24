@@ -159,7 +159,7 @@ type
     fMajorType: TGuid;
 
     // Supported framerates
-    iFrameRate: Float;
+    fFrameRate: Float;
     iFrameRateNumerator: UINT32;
     iFrameRateDenominator: UINT32;
     iMaxFrameRate: UINT32;
@@ -759,9 +759,11 @@ type
   //         MFImageFormat_JPEG, GUID_ContainerFormatBmp, GUID_ContainerFormatJpeg etc.
   //
   // WARNING: DON'T USE MFImageFormat_RGB32! (This will end with a WINCODEC_ERR_COMPONENTNOTFOUND)
-  function CreatePhotoMediaType(psubTypeGuid: TGuid;
-                                var pPhotoMediaType: IMFMediaType): HRESULT ;
-
+  function CreatePhotoMediaType(const psubTypeGuid: TGuid;
+                                var pPhotoMediaType: IMFMediaType): HRESULT; overload;
+  function CreatePhotoMediaType(const psubTypeGuid: TGuid;
+                                pSrcMediaType: IMFMediaType;
+                                out ppPhotoMediaType: IMFMediaType): HRESULT; overload;
 
 
 // VIDEO MEDIA TYPE HELPERS //////////////////////////////////////////////////
@@ -1005,7 +1007,7 @@ begin
   fMajorType := GUID_NULL;
 
   // Supported framerates
-  iFrameRate := 0;
+  fFrameRate := 0.0;
   iFrameRateNumerator := 0;
   iFrameRateDenominator := 0;
   iMaxFrameRate := 0;
@@ -1399,7 +1401,6 @@ begin
 
   // Return IMFactivate pointer to caller
   mfActivate := pActivate;
-  CoTaskMemFree(pActivate);
 done:
   Result := hr;
 end;
@@ -1440,7 +1441,7 @@ begin
 
   // Return IMFactivate pointer to caller
   mfActivate := pActivate;
-  CoTaskMemFree(pActivate);
+
 done:
   Result := hr;
 end;
@@ -3078,7 +3079,7 @@ begin
         Break;
 
       // Calculate framerate ( = FrameRateNumerator / iFrameRateDenominator )
-      pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iFrameRate := GetFrameRateFromRatio(pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iFrameRateNumerator,
+      pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].fFrameRate := GetFrameRateFromRatio(pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iFrameRateNumerator,
                                                                                                  pDeviceProperties[pDeviceIndex].aVideoFormats[dwIndex].iFrameRateDenominator);
 
       hr := MFGetAttributeRatio(pMediaType,
@@ -4454,13 +4455,8 @@ end;
 
 
 //
-function CreatePhotoMediaType(psubTypeGuid: TGuid; {can be one of the following: MFImageFormat_RGB32, MFImageFormat_JPEG or WIC guidContainerFormats like GUID_ContainerFormatBmp etc.}
+function CreatePhotoMediaType(const psubTypeGuid: TGuid; {can be one of the following: MFImageFormat_RGB32, MFImageFormat_JPEG or WIC guidContainerFormats like GUID_ContainerFormatBmp etc.}
                               var pPhotoMediaType: IMFMediaType): HRESULT;
-
-const
-  uiFrameRateNumerator = 30;
-  uiFrameRateDenominator = 1;
-
 var
   hr: HRESULT;
   mfPhotoMediaType: IMFMediaType;
@@ -4494,9 +4490,47 @@ begin
 
 Done:
   Result := hr;
-
 end;
 
+// overloaded function
+function CreatePhotoMediaType(const psubTypeGuid: TGuid;
+                              pSrcMediaType: IMFMediaType;
+                              out ppPhotoMediaType: IMFMediaType): HResult;
+var
+  hr: HResult;
+  pPhotoMediaType: IMFMediaType;
+
+label
+  done;
+begin
+
+  ppPhotoMediaType := nil;
+
+  hr := MFCreateMediaType(pPhotoMediaType);
+  if (FAILED(hr)) then
+    goto done;
+
+  hr := pPhotoMediaType.SetGUID(MF_MT_MAJOR_TYPE,
+                                MFMediaType_Image);
+  if (FAILED(hr)) then
+    goto done;
+
+  hr := pPhotoMediaType.SetGUID(MF_MT_SUBTYPE,
+                                psubTypeGuid);
+  if (FAILED(hr)) then
+    goto done;
+
+  hr := CopyAttribute(pSrcMediaType,
+                      pPhotoMediaType,
+                      MF_MT_FRAME_SIZE);
+  if (FAILED(hr)) then
+    goto done;
+
+  ppPhotoMediaType := pPhotoMediaType;
+
+done:
+  Result := hr;
+end;
 
 //
 function GetFrameRate(pType: IMFMediaType;

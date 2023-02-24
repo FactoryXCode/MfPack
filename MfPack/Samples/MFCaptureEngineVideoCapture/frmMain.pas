@@ -123,6 +123,7 @@ type
     pnlControls: TPanel;
     butSaveToFile: TButton;
     butTakePhoto: TButton;
+    chkNoPreview: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure mnuChooseDeviceClick(Sender: TObject);
     procedure mnuStartPreviewClick(Sender: TObject);
@@ -151,7 +152,6 @@ type
     // Windows messages
     procedure OnSize(var message: TWMSize); message WM_SIZE;
     procedure OnDeviceChange(var AMessage: TMessage); message WM_DEVICECHANGE;
-
 
     // Update menuitems and status
     procedure UpdateUI();
@@ -247,7 +247,7 @@ begin
 
   if (bDeviceLost = True) then
     begin
-      SafeDelete(FCaptureManager);
+      FreeAndNil(FCaptureManager);
       ErrMsg(Format('Lost capture device %s.' + #13 + 'Please select another device or reconnect.', [FDeviceExplorer.DeviceDisplayName]),
              DBT_DEVICEREMOVECOMPLETE);
     end;
@@ -332,7 +332,7 @@ begin
   if Assigned(FMemoryStream) then
     begin
       if Assigned(bmCapturedFrame) then
-        SafeDelete(bmCapturedFrame);
+        FreeAndNil(bmCapturedFrame);
       // stream returned, let's assign to preview
       bmCapturedFrame := TMfpBitmap.Create;
       bmCapturedFrame.PixelFormat := pf32bit;
@@ -466,14 +466,19 @@ end;
 procedure TMainWindow.butTakePhotoClick(Sender: TObject);
 var
   hr: HResult;
+  SnapShotOption: TSnapShotOptions;
 label
   done;
 
 begin
   hr := E_FAIL;
+  if chkNoPreview.Checked then
+    SnapShotOption := ssoFile
+  else
+    SnapShotOption := ssoCallBack;
 
   if Assigned(FCaptureManager) then
-    hr := FCaptureManager.TakePhoto(ssoCallBack,
+    hr := FCaptureManager.TakePhoto(SnapShotOption,
                                     FDeviceExplorer.DeviceProperties[FDeviceExplorer.DeviceIndex].aVideoFormats[FDeviceExplorer.FormatIndex].mfMediaType);
   if FAILED(hr) then
     goto Done;
@@ -488,12 +493,12 @@ end;
 procedure TMainWindow.DestroyCaptureObjects();
 begin
   if Assigned(bmCapturedFrame) then
-    SafeDelete(bmCapturedFrame);
+    FreeAndNil(bmCapturedFrame);
 
   if Assigned(FCaptureManager) then
     begin
       FCaptureManager.ResetCaptureManager();
-      SafeDelete(FCaptureManager);
+      FCaptureManager.Free;
     end;
 
   FChooseDeviceParam.Reset();
@@ -605,7 +610,7 @@ begin
 
   // Destroy and Create DeviceParam class that holds the Activate pointers and other properties of the selected device.
   if Assigned(FDeviceExplorer) then
-    SafeDelete(FDeviceExplorer);
+    FreeAndNil(FDeviceExplorer);
 
   FDeviceExplorer := TDeviceExplorer.Create(hr);
 
@@ -630,7 +635,6 @@ procedure TMainWindow.mnuChooseDeviceClick(Sender: TObject);
 var
   hr: HResult;
   pAttributes: IMFAttributes;
-  i: Integer;
 
 label
   done;
@@ -648,14 +652,19 @@ begin
 
   hr := MFCreateAttributes(pAttributes,
                            1);
+  if FAILED(hr) then
+    goto Done;
 
   hr := pAttributes.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
                             MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
+  if FAILED(hr) then
+    goto Done;
 
   hr := MFEnumDeviceSources(pAttributes,
                             FChooseDeviceParam.ppDevices,
                             FChooseDeviceParam.count);
-
+  if FAILED(hr) then
+    goto Done;
 
   // Ask the user to select one.
   if (ChooseDeviceDlg.ShowModal = 1212) then
@@ -765,7 +774,7 @@ begin
 
   mnuStartRecording.Enabled := bEnableRecording;
   mnuStartPreview.Enabled := bEnablePreview;
-  //pnlControls.Enabled := bEnablePhoto;
+  pnlControls.Enabled := bEnablePhoto;
 end;
 
 

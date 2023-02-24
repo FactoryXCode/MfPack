@@ -1,7 +1,7 @@
 object frmMain: TfrmMain
   Left = 0
   Top = 0
-  Caption = 'MFCapture Sample Application'
+  Caption = 'MFCapture D3D9 Sample Application'
   ClientHeight = 403
   ClientWidth = 804
   Color = clNone
@@ -148,7 +148,7 @@ object frmMain: TfrmMain
   KeyPreview = True
   Menu = MainMenu1
   OldCreateOrder = False
-  Position = poDesktopCenter
+  Position = poScreenCenter
   Visible = True
   OnCloseQuery = FormCloseQuery
   OnShow = FormShow

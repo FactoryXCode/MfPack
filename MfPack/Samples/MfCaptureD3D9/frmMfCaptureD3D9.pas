@@ -447,7 +447,7 @@ function TfrmMain.ShutDown(): Boolean;
 begin
   // Clean up all instances
   CleanUp();
-  CoTaskMemFree(param.ppDevices);
+
   Result := True;
 end;
 
