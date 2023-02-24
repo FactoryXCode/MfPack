@@ -170,7 +170,7 @@ end;
 
 destructor TFileCaptureAsync.Destroy;
 begin
-  SafeDelete(FCritSec);
+  FreeAndNil(FCritSec);
   FMessageHandler.RemoveHandle;
   FreeAndNil(FMessageHandler);
   inherited;

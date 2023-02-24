@@ -87,7 +87,7 @@ const
 
 type
 
-  TSampleSinkWriter = class
+  TSampleSinkWriter = class(TObject)
   private
     VIDEO_FRAME_DURATION: UINT64;
     VIDEO_ENCODING_FORMAT: TGUID;

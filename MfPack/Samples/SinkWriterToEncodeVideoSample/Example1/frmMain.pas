@@ -204,7 +204,7 @@ end;
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   CanClose := False;
-  SafeDelete(FSampleSinkWriter);
+  FreeAndNil(FSampleSinkWriter);
   CanClose := True;
 end;
 

@@ -290,7 +290,7 @@ begin
   if Assigned(CaptureEngine) then
     begin
       CaptureEngine.EndCaptureSession();
-      SafeDelete(CaptureEngine);
+      FreeAndNil(CaptureEngine);
     end;
 
   if Assigned(DeviceList) then
@@ -580,7 +580,7 @@ var
 begin
   hr := CaptureEngine.EndCaptureSession();
 
-  SafeRelease(CaptureEngine);
+  CaptureEngine := nil;
 
   UpdateDeviceList();
 

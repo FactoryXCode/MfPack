@@ -160,11 +160,8 @@ type
 
     m_pwszSymbolicLink: LPWSTR;
 
-
-    function OpenMediaSource(var pSource: IMFMediaSource): HResult;
     function ConfigureCapture(var param: EncodingParameters): HResult;
     function EndCaptureInternal(): HResult;
-
 
     // IMFSourceReaderCallback /////////////////////////////////////////////////
     function OnReadSample(hrStatus: HRESULT;
@@ -361,7 +358,11 @@ begin
 
   // Read another sample.
   hr := m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                             0);
+                             0,
+                             nil,
+                             nil,
+                             nil,
+                             nil);
 
   // check the StreamFlags
     if SUCCEEDED(hr) then
@@ -444,33 +445,6 @@ end;
 
 
 // Public methods //////////////////////////////////////////////////////////////
-
-//-------------------------------------------------------------------
-// OpenMediaSource
-//
-// Set up preview for a specified media source.
-//-------------------------------------------------------------------
-function TCaptureToFile.OpenMediaSource(var pSource: IMFMediaSource): HRESULT;
-var
-  hr: HRESULT;
-  pAttributes: IMFAttributes;
-
-begin
-
-  hr := MFCreateAttributes(pAttributes,
-                           2);
-
-  if SUCCEEDED(hr) then
-    hr:= pAttributes.SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK,
-                                Self);
-
-  if SUCCEEDED(hr) then
-    hr:= MFCreateSourceReaderFromMediaSource(pSource,
-                                             pAttributes,
-                                             m_pReader);
-
-  Result := hr;
-end;
 
 
 //-------------------------------------------------------------------
@@ -565,12 +539,13 @@ function TCaptureToFile.StartCapture(pActivate: IMFActivate;
 var
   hr: HRESULT;
   pSource: IMFMediaSource;
+  pAttributes: IMFAttributes;
   pcchLength: UINT32;
-  pFileName: WideString;
+  pFileName: PWideChar;
 
 begin
 
-  pFileName := wszFileName;
+  pFileName := StrToPWideChar(wszFileName);
 
   // Create the media source for the device.
   hr := pActivate.ActivateObject(IID_IMFMediaSource,
@@ -584,7 +559,17 @@ begin
                                        m_pwszSymbolicLink,
                                        pcchLength);
   if SUCCEEDED(hr) then
-    hr:= OpenMediaSource(pSource);
+    hr := MFCreateAttributes(pAttributes,
+                           2);
+
+  if SUCCEEDED(hr) then
+    hr:= pAttributes.SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK,
+                                Self);
+
+  if SUCCEEDED(hr) then
+    hr:= MFCreateSourceReaderFromMediaSource(pSource,
+                                             pAttributes,
+                                             m_pReader);
 
   // Create the sink writer
   if SUCCEEDED(hr) then

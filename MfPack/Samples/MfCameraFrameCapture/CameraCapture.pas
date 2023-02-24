@@ -76,11 +76,13 @@ uses
   WinAPI.MediaFoundationApi.MfUtils,
   WinApi.MediaFoundationApi.MfIdl,
   WinApi.StrmIf,
+  {DirectX}
+  Winapi.DirectX.D3D11,
+  WinApi.DirectX.D3DCommon,
   {Application}
   Support,
-  SampleConverter,
-  Winapi.D3D11,
-  Winapi.D3DCommon;
+  SampleConverter;
+
 
 type
   TVideoFormat = record
@@ -275,7 +277,7 @@ end;
 
 destructor TCameraCapture.Destroy();
 begin
-  SafeDelete(FCritSec);
+  FreeAndNil(FCritSec);
   FreeAndNil(FSampleConverter);
   DestroyDirectXDevice;
   inherited;

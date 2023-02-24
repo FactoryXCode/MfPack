@@ -70,6 +70,7 @@ uses
   WinApi.WinApiTypes,
   {System}
   System.Types,
+  System.SysUtils,
   {Vcl}
   Vcl.Graphics,
   {MediaFoundationApi}
@@ -205,7 +206,7 @@ begin
                       0,
                       bTmp);
 
-  SafeDelete(bTmp);
+  FreeAndNil(bTmp);
 end;
 
 

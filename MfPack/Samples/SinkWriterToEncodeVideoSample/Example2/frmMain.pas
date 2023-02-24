@@ -196,8 +196,8 @@ end;
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   CanClose := False;
-  SafeDelete(FSinkWriter);
-  SafeDelete(FBitmapFiles);
+  FreeAndNil(FSinkWriter);
+  FreeAndNil(FBitmapFiles);
   CanClose := True;
 end;
 
@@ -231,10 +231,9 @@ end;
 
 
 procedure TMainForm.mnuSelectOneBitmapClick(Sender: TObject);
-begin
 var
   bm: TBitmap;
-
+begin
 try
   bm := TBitmap.Create();
   FBitmapFiles.Clear();
@@ -257,8 +256,8 @@ try
     end;
 
 finally
-  SafeDelete(bm);
-  SafeDelete(dlgOpenPicture);
+  FreeAndNil(bm);
+  FreeAndNil(dlgOpenPicture);
 end;
 end;
 
@@ -302,7 +301,7 @@ begin
           end;
 
         // process the bitmaps found
-        FBitmapFiles.SetStrings(DirList);
+        FBitmapFiles.AddStrings(DirList);
 
         if (FBitmapFiles.Count = 0) then
           begin
@@ -322,7 +321,7 @@ begin
       finally
 
         DirList.Free;
-        SafeDelete(bm);
+        FreeAndNil(bm);
 
         if Failed(hr) then
           begin

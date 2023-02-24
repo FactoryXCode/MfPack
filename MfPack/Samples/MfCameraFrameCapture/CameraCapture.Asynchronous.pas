@@ -66,6 +66,7 @@ uses
   {Winapi}
   WinAPI.Messages,
   WinAPI.Windows,
+  WinApi.WinApiTypes,
   {System}
   System.Classes,
   System.SysUtils,
@@ -417,19 +418,20 @@ var
   oResult: HRESULT;
 
 begin
+
   Result := Assigned(SourceReader);
 
   if Result then
-  begin
-    StartTimer;
-    FFindingSample := True;
-    oResult := SourceReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                       0,
-                                       nil,
-                                       nil,
-                                       nil,
-                                       nil);
-    Result := SUCCEEDED(oResult);
+    begin
+      StartTimer;
+      FFindingSample := True;
+      oResult := SourceReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                         0,
+                                         nil,
+                                         nil,
+                                         nil,
+                                         nil);
+      Result := SUCCEEDED(oResult);
 
     if not Result then
       HandleSampleReadError(oResult);

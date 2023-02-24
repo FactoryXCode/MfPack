@@ -120,7 +120,7 @@ type
   end;
 
 
-  TSinkWriter = class
+  TSinkWriter = class(TObject)
   private
     hwndCaller: HWND;  // Usually the UI.
     // Bitmap specs
@@ -289,7 +289,7 @@ begin
     end;
 
 Done:
-  SafeDelete(bmSource);
+  FreeAndNil(bmSource);
   Result := hr;
 end;
 

@@ -364,7 +364,7 @@ begin
   if Assigned(m_pWriter) then
     SafeRelease(m_pWriter);
 
-  m_critsec.Destroy();
+  FreeAndNil(m_critsec);
 
   inherited Destroy();
 end;
@@ -517,7 +517,11 @@ begin
 
   // Read another sample.
   hr := m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                             0);
+                             0,
+                             nil,
+                             nil,
+                             nil,
+                             nil);
 
 done:
   if FAILED(hr) then
@@ -595,7 +599,11 @@ begin
 
       // Request the first video frame.
       hr := m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                 0);
+                                 0,
+                                 nil,
+                                 nil,
+                                 nil,
+                                 nil);
     end;
 
   if SUCCEEDED(hr) then
