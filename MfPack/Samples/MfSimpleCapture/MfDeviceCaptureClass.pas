@@ -24,6 +24,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 03/03/2023                     Updated and fixed device notification issues.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
@@ -124,17 +125,14 @@ type
 
   TMfCaptureEngine = class(TInterfacedPersistent, IMFAsyncCallback)
   private
-    // Constructor is private. Use static CreateInstance method to instantiate.
-    constructor Create(hVideo: HWND; hMainForm: HWND); overload;
-
-  protected
 
     stRedrawStatus     : TRedrawStatus;
     m_bHasVideo        : LongBool;
 
     m_pwszSymbolicLink : PWideChar;
-
     m_cchSymbolicLink  : UINT32;
+    m_pwszDeviceName   : PWideChar;
+    m_cchDeviceName    : UINT32;
 
     m_State            : TCeState;
     m_Request          : TRequest;
@@ -146,22 +144,23 @@ type
 
     // Handles
     m_hwndEvent:         HWND;                      // App window handle to receive events.
-    m_hwndVideo:         HWND;                      // Stored handle of videosurface
-    m_hwnd_MainForm:     HWND;                      // Handle to the main form
+    m_hwndVideo:         HWND;                      // Stored handle of videosurface.
+    m_hwnd_MainForm:     HWND;                      // Handle to the main form.
 
     // Colorkey needed to draw transparent on the videosurface.
     FBGColor: COLORREF;
 
     // interfaces
-    m_pSession:          IMFMediaSession;           // Media Session
-    m_pSource:           IMFMediaSource;            // Media Source
-    m_pVideoDisplay:     IMFVideoDisplayControl;    // Video control
-    m_pActivate:         IMFActivate;               // The device Activate interface
-
-    m_hdevnotify:        HDEVNOTIFY;
-
+    m_pSession:          IMFMediaSession;           // Media Session.
+    m_pSource:           IMFMediaSource;            // Media Source.
+    m_pVideoDisplay:     IMFVideoDisplayControl;    // Video control.
+    m_pActivate:         IMFActivate;               // The device Activate interface.
+    p_hdevnotify:        HDEVNOTIFY;                // Devicenotify pointer.
 
     // Methods
+    // Constructor is private. Use static CreateInstance method to instantiate.
+    constructor Create(hVideo: HWND;
+                       hMainForm: HWND); overload;
 
     // create a new instance of the media session
     function CreateSession(): HRESULT;
@@ -241,9 +240,16 @@ type
     // Destructor is private. Caller should call Release.
     destructor Destroy; override;
 
+    // Initialize the device and start capturing.
+    function SetDevice(DeviceProperty: TDeviceProperties): HRESULT;
+
     // Release all resources held by this object.
     // Call this from the mainform's OnDestroy
     function ShutDownEngine(): HRESULT;
+
+    // Device loss checker
+    function CheckCaptureDeviceLost(var pHdr: PDEV_BROADCAST_HDR;
+                                    var pbDeviceLost: Boolean): HRESULT;
 
     // public Video functionality
     //
@@ -254,14 +260,9 @@ type
     // e.g., when the application receives a WM_SIZE message.
     function ResizeVideo(dRect: LPRECT): HRESULT;
 
-
     // Capture methods
-    function SetDevice(DeviceProperty: TDeviceProperties): HRESULT;  //Set the device
     function PrepareSession(): HRESULT;  // Prepares the session for recording
-    function CheckCaptureDeviceLost(var pHdr: PDEV_BROADCAST_HDR;
-                                    var pbDeviceLost: Boolean): HRESULT;
     function VideoDetected(): Boolean; // returns m_bHasVideo;
-
 
     property State: TCeState read m_State write m_State;
     property Request: TRequest read m_Request write m_Request;
@@ -272,7 +273,7 @@ type
 
 var
   MfDeviceCapture: TMfCaptureEngine;
-
+  FDevicePropertiesArray: TDevicePropertiesArray;
 
   procedure ShowErrorMessage(hwnd: HWND; fmt: LPCWSTR; hrErr: HRESULT);
 
@@ -290,21 +291,23 @@ label
 
 begin
   // Close the old session, if any.
-  hr:= CloseSession();
+  hr := CloseSession();
   if FAILED(hr) then
     goto done;
 
   assert(m_State = Closed);
 
   // Create the media session.
-  hr:= MFCreateMediaSession(Nil, m_pSession);
+  hr := MFCreateMediaSession(nil,
+                             m_pSession);
   if FAILED(hr) then
     goto done;
 
-  m_State:= Ready;
+  m_State := Ready;
 
   // Start pulling events from the media session
-  hr:= m_pSession.BeginGetEvent(IMFAsyncCallback(Self), Nil);
+  hr := m_pSession.BeginGetEvent(IMFAsyncCallback(Self),
+                                 nil);
   if FAILED(hr) then
     goto done;
 
@@ -332,11 +335,14 @@ begin
   hr := s_ok;
 
   // release the video display object
-  SafeRelease(m_pVideoDisplay);
+  if Assigned(m_pVideoDisplay) then
+    SafeRelease(m_pVideoDisplay);
 
   // First close the media session.
   if not Assigned(m_pSession) then
-    goto Done;
+    begin
+      goto Done;
+    end;
 
   State := Closing;
 
@@ -359,22 +365,22 @@ begin
     begin
       // Shut down the media source. (Synchronous operation, no events.)
       if Assigned(m_pSource) then
-        {Void} m_pSource.Shutdown;
+        {Void} m_pSource.Shutdown();
 
       // Shut down the media session. (Synchronous operation, no events.)
       if Assigned(m_pSession) then
-        {Void} m_pSession.Shutdown;
+        {Void} m_pSession.Shutdown();
     end;
+
+  Clear();
 
   // Release the global interfaces
   SafeRelease(m_pSession);
   SafeRelease(m_pSource);
   SafeRelease(m_pActivate);
-  State := Closed;
-  // Unregister device notification
-  hr := UnRegisterForDeviceNotification(m_hdevnotify);
 
 done:
+  State := Closed;
   Result := hr;
 end;
 
@@ -406,9 +412,6 @@ try
   if SUCCEEDED(StopRecording()) then
     hr := CloseSession();  // Close the session
 
-  // Shutdown the Media Foundation platform
-  hr := MFShutdown();
-
   if (hCloseEvent <> 0) then
     begin
       if CloseHandle(THandle(hCloseEvent)) then
@@ -419,6 +422,7 @@ try
       else
         hr := E_FAIL;
     end;
+
   Result := hr;
 except
   // Do nothing
@@ -438,17 +442,19 @@ begin
       Exit;
     end;
 
-  h := CreateEvent(Nil,
+  h := CreateEvent(nil,
                    False,
                    False,
-                   Nil);
+                   nil);
 
   hCloseEvent := h;
 
   if (hCloseEvent = 0) then
     Result := GetLastError()
   else
-    Result := S_OK;
+    begin
+      Result := S_OK;
+    end;
 end;
 
 
@@ -457,12 +463,13 @@ procedure TMfCaptureEngine.Clear();
 begin
   // reset vars
   m_bHasVideo := False;
-  m_pwszSymbolicLink := Nil;
+  m_pwszSymbolicLink := nil;
   m_cchSymbolicLink := 0;
   m_State := Closed ;
   m_Request := reqNone;
   dwSessionCaps := 0;
   m_dWaitResult := 0;
+
 end;
 
 
@@ -471,24 +478,23 @@ end;
 //  ppPlayer: Receives an AddRef's pointer to the CPreview object.
 //            The caller must release the pointer.
 //-------------------------------------------------------------------
-constructor TMfCaptureEngine.Create(hVideo: HWND; hMainForm: HWND);
+constructor TMfCaptureEngine.Create(hVideo: HWND;
+                                    hMainForm: HWND);
 var
   hr: HRESULT;
 
 begin
   inherited Create();
 
-  m_pSource:= Nil;
+  m_hwndVideo := hVideo;
+  m_hwnd_MainForm := hMainForm;
+  m_hwndEvent := hMainForm;
 
-  m_hwndVideo:= hVideo;
-  m_hwnd_MainForm:= hMainForm;
-  m_hwndEvent:= hMainForm;
+  m_bHasVideo := False;
+  m_pwszSymbolicLink := nil;
+  m_cchSymbolicLink := 0;
 
-  m_bHasVideo:= False;
-  m_pwszSymbolicLink:= Nil;
-  m_cchSymbolicLink:= 0;
-
-  hr:= Initialize();
+  hr := Initialize();
 
   if FAILED(hr) then
     begin
@@ -511,7 +517,7 @@ begin
   pCaptureEngine := TMfCaptureEngine.Create(hVideo,
                                             hMainForm);
 
-  if (pCaptureEngine = Nil) then
+  if not Assigned(pCaptureEngine) then
     begin
       Result := E_OUTOFMEMORY;
       Exit;
@@ -528,6 +534,11 @@ end;
 procedure TMfCaptureEngine.BeforeDestruction();
 begin
   Clear();
+
+  // Unregister existing device
+  UnregisterForDeviceNotification(p_hdevnotify);
+  p_hdevnotify := nil;
+
   MFShutdown();
   inherited;
 end;
@@ -538,8 +549,6 @@ destructor TMfCaptureEngine.Destroy;
 begin
   inherited Destroy;
 end;
-
-
 
 
 // Start & stop
@@ -626,7 +635,7 @@ begin
       else
         begin
           hr := m_pSession.Stop();
-          Clear();
+          //Clear();
           m_bPending := True;
         end;
     end
@@ -840,6 +849,7 @@ begin
   Result := S_OK;
 end;
 
+
 // Handler for MENewPresentation event.
 // This event is sent if the media source has a new presentation, which
 // requires a new topology.
@@ -854,7 +864,7 @@ label
   done;
 
 begin
-  dwSourceStreams:= 0;
+  dwSourceStreams := 0;
 
   // Get the presentation descriptor from the event.
   hr := GetEventObject(pEvent,
@@ -1034,9 +1044,9 @@ begin
   count := 0;
 
   // Release the current instance of the player (if any).
-  Clear();
+  //Clear();
   // Close session and release interfaces
-  CloseSession();
+  //CloseSession();
 
   // Prepare the device
   // ==================
@@ -1100,13 +1110,9 @@ try
   if SUCCEEDED(hr) then
     hr := CreateVideoCaptureDeviceBySymolicLink(DeviceProperty.lpSymbolicLink,
                                                 pSource);
-  // Set source and symboliclink, needed for devicelost
-  if SUCCEEDED(hr) then
-    begin
-      m_pSource := pSource;
-      m_pwszSymbolicLink := DeviceProperty.lpSymbolicLink;
-      m_cchSymbolicLink := DeviceProperty.iDeviceIndex;
-    end;
+  if not RegisterForDeviceNotification(m_hwnd_MainForm,
+                                       p_hdevnotify) then
+  hr := GetLastError();
 
 finally
 
@@ -1114,9 +1120,12 @@ finally
 
   // Prepare the recording session
   if SUCCEEDED(hr) then
-    PrepareSession();
+    begin
+      m_pSource := pSource;
+      PrepareSession();
+    end;
 
-  Result:= hr;
+  Result := hr;
 end;
 end;
 
@@ -1192,13 +1201,19 @@ try
 
   if SUCCEEDED(hr) then
     begin
-      // Register device notification
-
       //
       hr := GetSymbolicLink(m_pActivate,
                             m_pwszSymbolicLink,
                             m_cchSymbolicLink,
                             MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK);
+      if FAILED(hr) then
+        goto done;
+
+      hr := GetDeviceName(m_pActivate,
+                          m_pwszDeviceName,
+                          m_cchDeviceName);
+      if FAILED(hr) then
+        goto done;
 
       // Set state to "open pending"
       State := OpenPending;
@@ -1239,6 +1254,8 @@ function TMfCaptureEngine.CheckCaptureDeviceLost(var pHdr: PDEV_BROADCAST_HDR;
 var
   hr: HRESULT;
   pDi: PDEV_BROADCAST_DEVICEINTERFACE;
+  pDeviceName: string;
+  pSymbolicLink: string;
 
 label
   done;
@@ -1247,11 +1264,12 @@ begin
   hr := S_OK;
   pbDeviceLost := False;
 
-  if (m_pSource = Nil) or (pHdr = Nil) then
+  if (m_pSource = nil) or (pHdr = nil) then
     begin
       hr := S_OK;
       goto done;
     end;
+
 
   if (pHdr.dbch_devicetype <> DBT_DEVTYP_DEVICEINTERFACE) then
     begin
@@ -1259,13 +1277,20 @@ begin
       goto done;
     end;
 
-  // Compare the device name with the symbolic link.
-  pDi := PDEV_BROADCAST_DEVICEINTERFACE(pHdr);
+  // Unregister existing device
+  UnregisterForDeviceNotification(p_hdevnotify);
+  p_hdevnotify := nil;
 
+  pDi := PDEV_BROADCAST_DEVICEINTERFACE(pHdr);
+  // Now dereference the struct's field dbcc_name : array [0..0] of AnsiChar for a readable string.
+  pDeviceName := PChar(@pDi^.dbcc_name);
+  pSymbolicLink := m_pwszSymbolicLink;
+
+  // Compare the device name with the symbolic link.
   if Assigned(m_pwszSymbolicLink) then
     begin
       // Perform a lowercase comparison of strings.
-      if AnsiCompareText(m_pwszSymbolicLink^, pDi.dbcc_name) = 0 then
+      if AnsiCompareText(pSymbolicLink, pDeviceName) = 0 then
         begin
           pbDeviceLost := True;
           hr := ERROR_DEVICE_REMOVED;

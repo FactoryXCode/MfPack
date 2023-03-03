@@ -9,19 +9,19 @@ object dlgChooseDevice: TdlgChooseDevice
   ParentFont = True
   OldCreateOrder = True
   Position = poScreenCenter
-  Visible = True
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object Bevel1: TBevel
-    Left = 8
-    Top = 8
-    Width = 275
-    Height = 31
+    Left = 0
+    Top = 0
+    Width = 291
+    Height = 45
+    Align = alTop
     Shape = bsFrame
   end
   object butOk: TButton
-    Left = 8
+    Left = 122
     Top = 48
     Width = 75
     Height = 25
@@ -32,7 +32,7 @@ object dlgChooseDevice: TdlgChooseDevice
     OnClick = butOkClick
   end
   object butCancel: TButton
-    Left = 89
+    Left = 203
     Top = 48
     Width = 75
     Height = 25

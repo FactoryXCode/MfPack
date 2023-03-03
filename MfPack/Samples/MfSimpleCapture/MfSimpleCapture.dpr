@@ -1,18 +1,16 @@
 program MfSimpleCapture;
 
 uses
-
   {$IFDEF FASTMM}
   FastMM4,
-  {$ENDIF}
+  {$ENDIF }
   {$IFDEF madExcept}
   madExcept,
   madLinkDisAsm,
   madListHardware,
   madListProcesses,
   madListModules,
-  {$ENDIF}
-
+  {$ENDIF }
   Vcl.Forms,
   MfDeviceCaptureClass in 'MfDeviceCaptureClass.pas',
   frmSimpleCapture in 'frmSimpleCapture.pas' {Frm_SimpleCapture},
@@ -31,5 +29,6 @@ begin
   Application.Initialize;
   Application.MainFormOnTaskbar:= True;
   Application.CreateForm(TFrm_SimpleCapture, Frm_SimpleCapture);
+  Application.CreateForm(TdlgChooseDevice, dlgChooseDevice);
   Application.Run;
 end.

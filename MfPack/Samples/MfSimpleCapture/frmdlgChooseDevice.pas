@@ -24,6 +24,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 03/03/2023                     Updated and fixed device notification issues.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
@@ -92,15 +93,15 @@ type
     butCancel: TButton;
     Bevel1: TBevel;
     cbxCaptureDevices: TComboBox;
-    procedure FormShow(Sender: TObject);
     procedure butOkClick(Sender: TObject);
     procedure butCancelClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     { Private declarations }
 
   public
     { Public declarations }
-     dpa: TDevicePropertiesArray;
+    iSelectedDevice: Integer;
   end;
 
 var
@@ -117,54 +118,40 @@ end;
 
 procedure TdlgChooseDevice.butOkClick(Sender: TObject);
 var
-  hr: HRESULT;
-  _i: Integer;
-
+  i: Integer;
 begin
-  hr := S_OK;
-  butOk.Enabled := False;
-  for _i:= Low(dpa) to High(dpa) do
+  for i := 0 to Length(FDevicePropertiesArray) -1 do
     begin
-      if (dpa[_i].lpFriendlyName = cbxCaptureDevices.Text) then
+      if (FDevicePropertiesArray[i].lpFriendlyName = cbxCaptureDevices.Text) then
         begin
-          hr := MfDeviceCapture.SetDevice(dpa[_i]);
-          butOk.Enabled := True;
+          iSelectedDevice := i;
           Break;
         end;
     end;
-
-  if FAILED(hr) then
-    GetLastError();
-
-  Close();
+  ModalResult := 111;
 end;
 
 
 procedure TdlgChooseDevice.FormShow(Sender: TObject);
 var
-  hr: HRESULT;
-  _i: Integer;
-
+  i: Integer;
 begin
-  cbxCaptureDevices.Clear;
-  butOk.Enabled:= False;
+  cbxCaptureDevices.Clear();
+  butOk.Enabled := False;
 
-  hr := EnumCaptureDeviceSources(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID,
-                                 dpa);
-
-  if SUCCEEDED(hr) then
+  if Length(FDevicePropertiesArray) = 0 then
     begin
-      for _i:= Low(dpa) to High(dpa) do
-        cbxCaptureDevices.Items.Add(dpa[_i].lpFriendlyName);
+      cbxCaptureDevices.Items.Append('COULD NOT FIND A DEVICE');
+      cbxCaptureDevices.ItemIndex := 0;
+    end
+  else
+    begin
+      for i:= 0 to Length(FDevicePropertiesArray) -1 do
+        cbxCaptureDevices.Items.Add(FDevicePropertiesArray[i].lpFriendlyName);
 
       cbxCaptureDevices.ItemIndex := 0;
       butOk.Enabled := True;
-    end
-  else
-   begin
-     cbxCaptureDevices.Items.Append('COULD NOT FIND A DEVICE');
-     cbxCaptureDevices.ItemIndex := 0;
-   end;
+    end;
 end;
 
 end.

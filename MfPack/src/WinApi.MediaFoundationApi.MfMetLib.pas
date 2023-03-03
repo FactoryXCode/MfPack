@@ -28,6 +28,7 @@
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 // 13/08/2022 Tony                Implemented more functionality and updated methods.
 // 30/01/2023 Tony                Updated some.
+// 03/03/2023                     Updated and fixed device notification issues.
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -118,7 +119,7 @@ uses
 type
 
   //
-  TMFAudioFormat = record
+  TMFAudioFormat = {$IFDEF UNICODE} record {$ELSE} object {$ENDIF} // Compatible with all Delphi versions.
     mfSource: IMFMediaSource; // MediaSource must be created before use!
     tgMajorFormat: TGUID;
     tgSubFormat: TGUID;
@@ -141,7 +142,7 @@ type
 
 
   // Used by TDeviceProperties, holding capabillities of a video capture device
-  TVideoFormatInfo = record
+  TVideoFormatInfo = {$IFDEF UNICODE} record {$ELSE} object {$ENDIF} // Compatible with all Delphi versions.
   public
     // The index of the native format found on a device
     FormatsIndex: Integer;
@@ -183,7 +184,7 @@ type
 
 
   // Used in arrays to hold enum data.
-  TDeviceProperties = record
+  TDeviceProperties = {$IFDEF UNICODE} record {$ELSE} object {$ENDIF}  // Compatible with all Delphi versions.
     riId: TGuid;             // Source type: video or audio capture devices.
     iCount: Integer;         // Number of devices of the same type and brand.
     iDeviceIndex: Integer;   // Zero based device index.
@@ -194,6 +195,7 @@ type
     aAudioFormats: TMFAudioFormatArray; // Audio capabilities of the device supported by Media Foundation.
     dwSupportedFormats: DWord; // Number of mediatype formats of the capturedevice supported by Media Foundation.
     dwNativeFormats: DWord;    // Number of native mediatype formats of the capturedevice.
+    pActivate: IMFActivate;    // The activation object of the device.
     public
       procedure Reset();       // Resets the record to default.
   end;
@@ -221,7 +223,7 @@ type
 
   // Stream contents
   PStreamContents = ^TStreamContents;
-  _StreamContents = record
+  _StreamContents = {$IFDEF UNICODE} record {$ELSE} object {$ENDIF}  // Compatible with all Delphi versions.
     dwStreamIndex: DWORD;                 // The stream index (zero based !)
     dwStreamID: DWORD;                    // The stream identifier (see: https://msdn.microsoft.com/en-us/library/windows/desktop/ms703852)
     bSelected: BOOL;                      // The currently selected stream.
@@ -647,12 +649,15 @@ type
   // function to register for device notifications.
   // Register for the KSCATEGORY_CAPTURE device class, as shown in this function.
   function RegisterForDeviceNotification(hw: HWND;
-                                         out g_hdevnotify: HDEVNOTIFY): HRESULT;
+                                         out g_hdevnotify: HDEVNOTIFY): Bool;
 
-  // Before an application is closing, unregister for device notifications.
-  function UnRegisterForDeviceNotification(g_hdevnotify: HDEVNOTIFY): HRESULT;
+  // Before an application or device is closing, unregister for device notifications.
+  function UnRegisterForDeviceNotification(g_hdevnotify: HDEVNOTIFY): Bool;
 
-  // Get the Symbolic Link of the Device
+
+// Device SymLink & FriendlyName
+//==============================
+  // Get the Symbolic Link of the device.
   // Enumerate the video devices on the system, as described in Enumerating Video Capture Devices.
   // Choose a device from the list, and then query the activation object for the
   // MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK (= default) or MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_AUDCAP_SYMBOLIC_LINK attribute,
@@ -662,6 +667,10 @@ type
                            out g_cchSymbolicLink: UINT32;
                            devMediaType: TGUID): HRESULT;
 
+  // Get the readable name of the device.
+  function GetDeviceName(pActivate: IMFActivate;
+                         out g_pwszDeviceName: PWideChar;
+                         out g_cchDeviceName: UINT32): HRESULT;
 
 
   // Enable Video Acceleration
@@ -870,7 +879,7 @@ type
                            out pBlockAlignment: UINT32): HRESULT;
 
 // Ducking
-//========
+// =======
 
   // The following code gets a reference to the IAudioSessionControl2
   // interface and call its methods to determine whether the stream associated with
@@ -900,7 +909,7 @@ type
 
 
 // Media files duration and filesize
-//==================================
+// =================================
 
   // Getting the File Duration
   // To get the duration of a media file, call the IMFSourceReader.GetPresentationAttribute method and
@@ -2335,8 +2344,12 @@ function SetMediaStopDynamic(pSession: IMFMediaSession;
                              pTopology: IMFTopology;
                              stop: LONGLONG): HRESULT;
 const
-  MAXUINT32 = 4294967294;  // UINT32 0..4294967295 on 32 bit platforms.
-                           // Int64 on 64 bit platforms.
+  {$IFDEF WIN32}
+  MAXVALUE = 4294967294;  // UINT32 0..4294967295 on 32 bit platforms.
+  {$ELSE}
+  MAXVALUE = 9223372036854775806;  // Int64 on 64 bit platforms.
+  {$ENDIF}
+
 var
   pAttr: IMFTopologyNodeAttributeEditor;
   pCol: IMFCollection;
@@ -2346,7 +2359,7 @@ var
   nodeID: TOPOID;
   cNodes: DWORD;
   i: Integer;
-  update: MFTOPONODE_ATTRIBUTE_UPDATE;
+  update: PMFTOPONODE_ATTRIBUTE_UPDATE;
 
 label
   done;
@@ -3141,6 +3154,8 @@ Done:
        pDeviceProperties[pDeviceIndex].dwSupportedFormats := dwSupportedCount;
        // Store unsupported and supported formats.
        pDeviceProperties[pDeviceIndex].dwNativeFormats := dwNativeCount;
+       // the activation object
+
      end
    else // If a failure occurs, the entire array will be cleared.
      begin
@@ -3779,42 +3794,36 @@ end;
 // ===========
 // Allways call UnregisterDeviceNotification (Windows) when finnished
 function RegisterForDeviceNotification(hw: HWND;
-                                       out g_hdevnotify: HDEVNOTIFY): HRESULT;
+                                       out g_hdevnotify: HDEVNOTIFY): Bool;
 var
   di: DEV_BROADCAST_DEVICEINTERFACE;
 
 begin
+  if (hw > 0) then
+    begin
+      di.dbcc_size := SizeOf(di);
+      di.dbcc_devicetype := DBT_DEVTYP_DEVICEINTERFACE;
+      di.dbcc_classguid := KSCATEGORY_VIDEO_CAMERA; //KSCATEGORY_CAPTURE;
 
-  di.dbcc_size := SizeOf(di);
-  di.dbcc_devicetype := DBT_DEVTYP_DEVICEINTERFACE;
-  di.dbcc_classguid := KSCATEGORY_CAPTURE;
-
-  g_hdevnotify := RegisterDeviceNotification(hw,
-                                             @di,
-                                             DEVICE_NOTIFY_WINDOW_HANDLE);
-
-  if (g_hdevnotify = nil) then
-    Result := E_FAIL // {include winerror for this} HRESULT_FROM_WIN32(GetLastError())  // or use HRESULT_FROM_NT()
-  else
-    Result := S_OK;
+      g_hdevnotify := RegisterDeviceNotification(hw,
+                                                 @di,
+                                                 DEVICE_NOTIFY_WINDOW_HANDLE);
+    end;
+  Result := Assigned(g_hdevnotify);
 end;
 
-
-function UnRegisterForDeviceNotification(g_hdevnotify: HDEVNOTIFY): HRESULT;
-var
-  hr : HResult;
-
-begin
-  hr := S_OK;
-  if (g_hdevnotify <> nil) then
-    if UnregisterDeviceNotification(g_hdevnotify) then
-      hr := S_OK
-    else
-      hr := E_FAIL;
-  Result := hr;
-end;
 
 //
+function UnRegisterForDeviceNotification(g_hdevnotify: HDEVNOTIFY): Bool;
+begin
+  Result := True;
+  if Assigned(g_hdevnotify) then
+    Result := UnregisterDeviceNotification(g_hdevnotify);
+end;
+
+
+// Device SymLink & FriendlyName
+//==============================
 function GetSymbolicLink(pActivate: IMFActivate;
                          out g_pwszSymbolicLink: PWideChar;
                          out g_cchSymbolicLink: UINT32;
@@ -3832,7 +3841,21 @@ begin
     Result := E_FAIL;
 end;
 
+
 //
+function GetDeviceName(pActivate: IMFActivate;
+                       out g_pwszDeviceName: PWideChar;
+                       out g_cchDeviceName: UINT32): HRESULT;
+begin
+  Result := (pActivate as IMFAttributes).GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME,
+                                                                g_pwszDeviceName,
+                                                                g_cchDeviceName);
+end;
+
+
+
+// Enable Video Acceleration
+// =========================
 function FindDeviceManager(pTopology: IMFTopology;          // Topology to search.
                            out ppDeviceManager: IInterface;     // Receives a pointer to the device manager.
                            out ppNode: IMFTopologyNode): HRESULT;

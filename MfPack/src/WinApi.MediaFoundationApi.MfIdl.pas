@@ -3238,14 +3238,18 @@ type
 
   // Interface IMFTopologyNodeAttributeEditor
   // ========================================
+  // IMFTopologyNodeAttributeEditor interface is exposed by pipeline to allow application to change
+  // properties on the toponode objects during playback.
+  // In the current implementation, the only supported property is MF_TOPONODE_MEDIASTOP.
+  // Pipeline will ignore all other properties.
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFTopologyNodeAttributeEditor);'}
   {$EXTERNALSYM IMFTopologyNodeAttributeEditor}
   IMFTopologyNodeAttributeEditor = interface(IUnknown)
   ['{676aa6dd-238a-410d-bb99-65668d01605a}']
-
-    function UpdateNodeAttributes(TopoId: TOPOID;
-                                  cUpdates: DWORD;
-                                  pUpdates: MFTOPONODE_ATTRIBUTE_UPDATE): HResult; stdcall;
+    function UpdateNodeAttributes(TopoId: TOPOID; // Reserved.
+                                  cUpdates: DWORD; // The number of elements in the pUpdates array.
+                                  pUpdates: PMFTOPONODE_ATTRIBUTE_UPDATE  // Pointer to an array of MFTOPONODE_ATTRIBUTE_UPDATE structures. Each element of the array updates one attribute on a node.
+                                  ): HResult; stdcall;
   end;
   IID_IMFTopologyNodeAttributeEditor = IMFTopologyNodeAttributeEditor;
   {$EXTERNALSYM IID_IMFTopologyNodeAttributeEditor}
