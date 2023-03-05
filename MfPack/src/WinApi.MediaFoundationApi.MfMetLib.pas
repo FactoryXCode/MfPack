@@ -2372,6 +2372,7 @@ begin
       Exit;
     end;
 
+  update := nil;
 
   hr := MFGetService(pSession,
                      MF_TOPONODE_ATTRIBUTE_EDITOR_SERVICE,
@@ -2401,23 +2402,28 @@ begin
         goto done;
 
       hr := pNode.GetTopoNodeID(nodeID);
-      if FAILED(hr) then
-        goto done;
 
-      update.NodeId := nodeID;
-      update.guidAttributeKey := MF_TOPONODE_MEDIASTOP;
-      update.attrType := MF_ATTRIBUTE_UINT64;
-      // Be careful to set the value of attrType correctly.
-      // Although u64 is a 32-bit type, the method requires that attrType be set to MF_ATTRIBUTE_UINT64.
-      update.u64 := UINT32(stop); // ! See Remarks !
+      if SUCCEEDED(hr) then
+        begin
+          update^.NodeId := nodeID;
+          update^.guidAttributeKey := MF_TOPONODE_MEDIASTOP;
+          update^.attrType := MF_ATTRIBUTE_UINT64;
+          // Be careful to set the value of attrType correctly.
+          // Although u64 is a 32-bit type, the method requires that attrType be set to MF_ATTRIBUTE_UINT64.
+          update^.u64 := UINT32(stop); // ! See Remarks !
 
-      hr := pAttr.UpdateNodeAttributes(id,
-                                       1,
-                                       update);
-      if FAILED(hr) then
-        goto done;
+
+          hr := pAttr.UpdateNodeAttributes(id,
+                                           1,
+                                           update);
+          if FAILED(hr) then
+            goto done;
+        end;
 
       SafeRelease(pNode);
+
+      if FAILED(hr) then
+        goto done;
     end;
 
 done:
@@ -3796,17 +3802,24 @@ end;
 function RegisterForDeviceNotification(hw: HWND;
                                        out g_hdevnotify: HDEVNOTIFY): Bool;
 var
-  di: DEV_BROADCAST_DEVICEINTERFACE;
+  devbroadcastdevice: DEV_BROADCAST_DEVICEINTERFACE;
+  iSize: Integer;
 
 begin
   if (hw > 0) then
     begin
-      di.dbcc_size := SizeOf(di);
-      di.dbcc_devicetype := DBT_DEVTYP_DEVICEINTERFACE;
-      di.dbcc_classguid := KSCATEGORY_VIDEO_CAMERA; //KSCATEGORY_CAPTURE;
+      iSize := SizeOf(DEV_BROADCAST_DEVICEINTERFACE);
+      ZeroMemory(@devbroadcastdevice,
+                 iSize);
+
+      devbroadcastdevice.dbcc_size := iSize;
+      devbroadcastdevice.dbcc_devicetype := DBT_DEVTYP_DEVICEINTERFACE;
+      devbroadcastdevice.dbcc_reserved := 0;
+      devbroadcastdevice.dbcc_classguid := KSCATEGORY_VIDEO_CAMERA; // KSCATEGORY_CAPTURE : Since windows 10 you should not use this guid to register for device loss! Otherwise it will return a wrong symoliclink when detecting a device lost.
+      devbroadcastdevice.dbcc_name := #0;
 
       g_hdevnotify := RegisterDeviceNotification(hw,
-                                                 @di,
+                                                 @devbroadcastdevice,
                                                  DEVICE_NOTIFY_WINDOW_HANDLE);
     end;
   Result := Assigned(g_hdevnotify);
