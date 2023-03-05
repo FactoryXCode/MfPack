@@ -23,6 +23,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 04/03/2023                     Updated device loss notify.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
@@ -75,6 +76,8 @@ uses
   {System}
   System.SysUtils,
   System.Classes,
+  System.UITypes,
+  System.Services.Dbt,
   {Vcl}
   Vcl.Graphics,
   Vcl.Controls,
@@ -89,6 +92,7 @@ uses
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfMetLib,
   {Project}
   MfCaptureToFileClass;
 
@@ -139,6 +143,9 @@ type
     { Private declarations }
     pszFile: PWideChar;
     bAppIsClosing: Boolean;
+    m_hdevnotify: HDEVNOTIFY;  {pointer, function RegisterForDeviceNotification}
+    bDeviceLost: Boolean;
+    iSelectedDevice: Integer;
     MfCaptureToFileEngine: TCaptureToFile;
 
     //Quits the session and releases the capture engine
@@ -149,6 +156,10 @@ type
 
     function StartCapture(): HRESULT;
     procedure StopCapture();
+
+    // Listen for WM_DEVICECHANGE messages.
+    // The lParam message parameter is a pointer to a DEV_BROADCAST_HDR structure.
+    procedure OnDeviceChange(var AMessage: TMessage); message WM_DEVICECHANGE;
 
   public
     { Public declarations }
@@ -169,14 +180,11 @@ implementation
 //-------------------------------------------------------------------
 procedure TFrm_SimpleCapture.QuitSession();
 begin
-  if Assigned(MfCaptureToFileEngine) then
-    begin
-      if MfCaptureToFileEngine.State = State_Capturing then
-        {void} MfCaptureToFileEngine.EndCaptureSession();
-
-      MfCaptureToFileEngine.Free;
-      MfCaptureToFileEngine := Nil;
-    end;
+  StopCapture();
+  MfCaptureToFileEngine.Free;
+  MfCaptureToFileEngine := nil;
+  butStartCapture.Enabled := True;
+  butStopCapture.Enabled := False;
 end;
 
 
@@ -218,6 +226,7 @@ begin
   CanClose := False;
   // Before closing the app, clean up.
   QuitSession();
+  UnRegisterForDeviceNotification(m_hdevnotify);
   CanClose := True;
 end;
 
@@ -233,6 +242,12 @@ begin
   if SUCCEEDED(hr) then
     hr := UpdateDeviceList();
 
+  if (RegisterForDeviceNotification(Handle,
+                                    m_hdevnotify) = False) then
+        MessageBox(0,
+                   PWideChar('RegisterForDeviceNotification failed!'),
+                   nil,
+                   MB_OK);
   if FAILED(hr) then
     ShowMessage('Function UpdateDeviceList() Failed!');
 end;
@@ -247,7 +262,7 @@ end;
 function TFrm_SimpleCapture.UpdateDeviceList(): HRESULT;
 var
   hr: HRESULT;
-  szFriendlyName: PWideChar;
+  szFriendlyName: string;
   iDevice: Integer;
 
 label
@@ -258,10 +273,10 @@ begin
   if Assigned(MfDeviceList) then
     begin
       cbxSelectDevice.Clear;
-      szFriendlyName := Nil;
+      szFriendlyName := '';
       MfDeviceList.Clear();
 
-      hr:= MfDeviceList.EnumerateDevices();
+      hr := MfDeviceList.EnumerateDevices();
 
       if FAILED(hr) then
         goto Done;
@@ -282,8 +297,7 @@ begin
           // array index. Therefore, set the array index as item data.
           cbxSelectDevice.ItemIndex := iDevice;
 
-          CoTaskMemFree(szFriendlyName);
-          szFriendlyName := Nil;
+          szFriendlyName := '';
         end;
       cbxSelectDevice.ItemIndex := 0;
     end
@@ -308,7 +322,7 @@ var
 
 begin
   // First get the index of the selected item in the combo box.
-  iListIndex:= cbxSelectDevice.ItemIndex;
+  iListIndex := cbxSelectDevice.ItemIndex;
 
   // Now find the index of the device within the device list.
   //
@@ -317,9 +331,9 @@ begin
   // order of the device list.
 
   // Now create the media source.
-  hr:= MfDeviceList.GetDevice(iListIndex,
-                              ppActivate);
-
+  hr := MfDeviceList.GetDevice(iListIndex,
+                               ppActivate);
+  iSelectedDevice := iListIndex;
   Result := hr;
 end;
 
@@ -370,9 +384,18 @@ begin
     end;
 
   if FAILED(hr) then
-    ShowMessage('Error: Starting capture. Result: ' + IntToStr(hr));
+    begin
+      ShowMessage('Error: Starting capture. Result: ' + IntToStr(hr));
+      butStartCapture.Enabled := True;
+      butStopCapture.Enabled := False;
+    end
+  else
+    begin
+      butStartCapture.Enabled := False;
+      butStopCapture.Enabled := True;
+    end;
 
-  Result:= hr;
+  Result := hr;
 end;
 
 
@@ -382,6 +405,8 @@ var
 
 begin
   hr := S_OK;
+  if not Assigned(MfCaptureToFileEngine) then
+    Exit;
 
   if (MfCaptureToFileEngine.State = State_Capturing) then
     hr := MfCaptureToFileEngine.EndCaptureSession();
@@ -395,7 +420,16 @@ begin
   // source is released.
 
   if FAILED(hr) then
-    ShowMessage('Error: Stopping capture. File might be corrupted. Result: ' + IntToStr(hr));
+    begin
+      ShowMessage('Error: Stopping capture. File might be corrupted. Result: ' + IntToStr(hr));
+      butStartCapture.Enabled := True;
+      butStopCapture.Enabled := True;
+    end
+  else
+    begin
+      butStartCapture.Enabled := True;
+      butStopCapture.Enabled := False;
+    end;
 
 end;
 
@@ -407,17 +441,74 @@ begin
   // Create the devicelist object
   if not Assigned(MfDeviceList) then
     begin
-      MfDeviceList := Nil;
       MfDeviceList := TDeviceList.Create();
     end;
 
   // Create the cature engine
   if not Assigned(MfCaptureToFileEngine) then
     begin
-      MfCaptureToFileEngine := Nil;
+      MfCaptureToFileEngine := nil;
       MfCaptureToFileEngine := TCaptureToFile.Create(Frm_SimpleCapture.Handle);  // Must be main form or a parent window !!!
       Result := S_OK;
     end;
 end;
 
+
+// Message listener
+// Listen for WM_DEVICECHANGE messages.
+// The lParam message parameter is a pointer to a DEV_BROADCAST_HDR structure.
+//-----------------------------------------------------------------------------
+// OnDeviceChange
+//
+// Handles WM_DEVICECHANGE messages.
+//-----------------------------------------------------------------------------
+procedure TFrm_SimpleCapture.OnDeviceChange(var AMessage: TMessage);
+var
+  PDevBroadcastHeader: PDEV_BROADCAST_HDR;
+  pDevBroadCastIntf: PDEV_BROADCAST_DEVICEINTERFACE;
+  pwDevSymbolicLink: PWideChar;
+  hr: HResult;
+
+begin
+
+  if (AMessage.WParam = DBT_DEVICEREMOVECOMPLETE) then
+    begin
+      // Check for added/removed devices, regardless of whether
+      // the application is capturing video at this time.
+      UpdateDeviceList();
+
+      // Check if the current video capture device was lost.
+      if (PDEV_BROADCAST_HDR(AMessage.LParam).dbch_devicetype <> DBT_DEVTYP_DEVICEINTERFACE) then
+        Exit;
+
+      // Get the symboliclink of the lost device and check.
+      PDevBroadcastHeader := PDEV_BROADCAST_HDR(AMessage.LParam);
+      pDevBroadCastIntf := PDEV_BROADCAST_DEVICEINTERFACE(PDevBroadcastHeader);
+
+      // Note: Since Windows 8 the value of dbcc_name is no longer the devicename, but the symboliclink of the device.
+      // Dereference the struct's field dbcc_name (array [0..0] of WideChar) for a readable string.
+      pwDevSymbolicLink := PChar(@pDevBroadCastIntf^.dbcc_name);
+
+      hr := S_OK;
+      bDeviceLost := False;
+
+      if Assigned(MfCaptureToFileEngine) then
+        if MfCaptureToFileEngine.IsCapturing() then
+          begin
+            if (StrIComp(PWideChar(MfCaptureToFileEngine.DeviceSymbolicLink),
+                         PWideChar(pwDevSymbolicLink)) = 0) then
+              bDeviceLost := True;
+
+            if (FAILED(hr) or bDeviceLost) then
+              begin
+                // Show dialog with info about which device is disconnected.
+                MessageDlg(Format('Lost capture device %s.', [MfCaptureToFileEngine.DeviceName]),
+                mtError,
+                mbOKCancel,
+                0);
+                StopCapture();
+              end;
+          end;
+    end;
+end;
 end.

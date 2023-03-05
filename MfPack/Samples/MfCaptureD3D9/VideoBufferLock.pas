@@ -22,6 +22,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 // 07/02/2023 Tony                Fixed issues with OnReadSample and bufferlock.
+// 04/03/2023 Tony                Updated Device loss methods.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.

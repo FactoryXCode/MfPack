@@ -211,7 +211,7 @@ implementation
 constructor TDeviceList.Create();
 begin
   inherited Create();
-  m_ppDevices := Nil;
+  m_ppDevices := nil;
   m_cDevices := 0;
 end;
 
@@ -233,10 +233,10 @@ begin
   if Assigned(m_ppDevices) then
     begin
       for i := 0 to m_cDevices -1 do
-        m_ppDevices[i] := Nil;
+        m_ppDevices[i] := nil;
 
       CoTaskMemFree(m_ppDevices);
-      m_ppDevices := Nil;
+      m_ppDevices := nil;
       m_cDevices := 0;
     end;
 end;
@@ -364,7 +364,7 @@ begin
   if Assigned(m_pWriter) then
     SafeRelease(m_pWriter);
 
-  FreeAndNil(m_critsec);
+  FreeAndnil(m_critsec);
 
   inherited Destroy();
 end;
@@ -441,14 +441,14 @@ begin
                                   LPCWSTR(''),
                                   MFT_ENUM_FLAG_SYNCMFT,
                                   0,
-                                  Nil,
+                                  nil,
                                   0,
-                                  Nil);
+                                  nil);
 
   if SUCCEEDED(hr) then
     hr := m_pWriter.SetInputMediaType(sink_stream,
                                       pType,
-                                      Nil);
+                                      nil);
 
   if SUCCEEDED(hr) then
     hr := m_pWriter.BeginWriting();
@@ -584,8 +584,8 @@ begin
   // Create the sink writer
   if SUCCEEDED(hr) then
     hr := MFCreateSinkWriterFromURL(pwszFileName,
-                                    Nil,
-                                    Nil,
+                                    nil,
+                                    nil,
                                     m_pWriter);
 
   // Set up the encoding parameters.
@@ -629,7 +629,7 @@ var
   hr: HResult;
 
 begin
-  m_critsec.Enter;
+
   hr := S_OK;
 
   if Assigned(m_pWriter) then
@@ -639,13 +639,11 @@ begin
   SafeRelease(m_pReader);
 
   CoTaskMemFree(m_DeviceFriendlyName);
-  m_DeviceFriendlyName := Nil;
+  m_DeviceFriendlyName := nil;
   CoTaskMemFree(m_DeviceSymbolicLink);
-  m_DeviceSymbolicLink := Nil;
+  m_DeviceSymbolicLink := nil;
 
   State := State_NotReady;
-
-  m_critsec.Leave;
 
   Result := hr;
 end;
@@ -658,7 +656,7 @@ var
 begin
   m_critsec.Enter;
 
-  bIsCapturing := (m_pWriter <> Nil);
+  bIsCapturing := (m_pWriter <> nil);
 
   if bIsCapturing then
     State := State_Capturing

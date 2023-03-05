@@ -35,7 +35,7 @@ object dlgSelectDevice: TdlgSelectDevice
     OnClick = butOkClick
   end
   object butCancel: TButton
-    Left = 292
+    Left = 294
     Top = 40
     Width = 75
     Height = 25

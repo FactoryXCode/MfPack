@@ -14,13 +14,13 @@ NOTES:
  - This release is updated for compiler version 17 up to 35.
  - SDK version 10.0.22621.0 (Win 11)
  - Requires Windows 10 or later.
- - Minimum supported MfPack version: 3.1.1
+ - Minimum supported MfPack version: 3.1.4
 
 Project: Media Foundation - MFPack - Samples
 Project location: http://sourceforge.net/projects/MFPack
 
 First release date: 01-02-2022
-Final release date: 30-01-2023
+Final release date: 05-03-2023
 
 
 Copyright © FactoryX. All rights reserved.

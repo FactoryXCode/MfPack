@@ -186,6 +186,8 @@ type
     FCurrentCaptureFormat: TVideoFormat;
     FLastMemoryStream: TMemoryStream;
     FImageCleared: Boolean;
+    ptrDeviceNotify: HDEVNOTIFY;
+
 
     function UpdateCaptureFormat(): Boolean;
     function DeviceExists(ADevices: TArray<TDeviceDetails>;
@@ -226,6 +228,8 @@ type
     procedure GetCurrentBrightness();
     procedure SetBrightness(AValue: Integer);
     procedure CopyStream(AMemoryStream: TMemoryStream);
+    procedure OnDeviceChange(var AMessage: TMessage); message WM_DEVICECHANGE;
+
   end;
 
 var
@@ -280,16 +284,24 @@ begin
    PopulateDeviceList();
    UpdateEnabledStates();
    UpdateLogLevel();
+
+   // Device loss notify
+   RegisterForDeviceNotification(Handle,
+                                 ptrDeviceNotify);
 end;
+
 
 procedure TFrmMain.FormDestroy(Sender: TObject);
 begin
   DestroyCapture();
   FLastMemoryStream.Free();
   FLastCapturedFrame.Free();
+  UnRegisterForDeviceNotification(ptrDeviceNotify);
+  ptrDeviceNotify := nil;
   MFShutdown();
   CoUnInitialize();
 end;
+
 
 procedure TFrmMain.ClearValues();
 begin
@@ -300,6 +312,7 @@ begin
   SetLength(FDevices, 
             0);
 end;
+
 
 procedure TFrmMain.DestroyCapture();
 begin
@@ -316,10 +329,12 @@ begin
   FCapture.MinimumFrameRate := StrToInt(cbxFrameRateMin.Text);
 end;
 
+
 procedure TFrmMain.HandlFormShow(Sender: TObject);
 begin
   RestoreDefaults;
 end;
+
 
 procedure TFrmMain.RestoreDefaults();
 var
@@ -335,30 +350,36 @@ begin
     end;
 end;
 
+
 procedure TFrmMain.HandleCaptureFrame(Sender: TObject);
 begin
   FCapture.RequestFrame;
 end;
+
 
 procedure TFrmMain.btnClearLogClick(Sender: TObject);
 begin
   memLog.Lines.Clear();
 end;
 
+
 procedure TFrmMain.btnRefreshDevicesClick(Sender: TObject);
 begin
   PopulateDeviceList();
 end;
+
 
 procedure TFrmMain.cbxResolutionChange(Sender: TObject);
 begin
   HandleResolutionChanged();
 end;
 
+
 procedure TFrmMain.HandleResetBrightness(Sender: TObject);
 begin
   tbBrightness.Position := FCapture.BrightnessControl.FDefault;
 end;
+
 
 procedure TFrmMain.HandleResolutionChanged();
 begin
@@ -373,6 +394,7 @@ begin
       end;
     end;
 end;
+
 
 function TFrmMain.UpdateCaptureFormat(): Boolean;
 begin
@@ -395,6 +417,7 @@ begin
     end;
 end;
 
+
 procedure TFrmMain.GetCurrentBrightness();
 begin
   FUpdating := True;
@@ -412,6 +435,7 @@ begin
   end;
 end;
 
+
 procedure TFrmMain.HandleCalculateMax(Sender: TObject);
 begin
   btnCalculateMax.Caption := 'Calculating...';
@@ -423,6 +447,7 @@ begin
     EndBusy();
   end;
 end;
+
 
 procedure TFrmMain.HandleCalculateMaxComplete(const AFramesPerSecond: Integer);
 var
@@ -445,21 +470,25 @@ begin
              mbOk);
 end;
 
+
 procedure TFrmMain.HandleCapturePaint(Sender: TObject);
 begin
   PaintLastCapture();
 end;
+
 
 procedure TFrmMain.HandleCopyLog(Sender: TObject);
 begin
   Clipboard.AsText := memLog.Lines.Text;
 end;
 
+
 procedure TFrmMain.HandleDisplayImage(Sender: TObject);
 begin
   LoadImageFromStream();
   PaintLastCapture();
 end;
+
 
 procedure TFrmMain.LoadImageFromStream();
 var
@@ -487,6 +516,7 @@ begin
     end;
 end;
 
+
 procedure TFrmMain.HandleFrameDataFound(AMemoryStream: TMemoryStream);
 begin
   FImageCleared := False;
@@ -507,11 +537,13 @@ begin
   HandleBurstMode();
 end;
 
+
 procedure TFrmMain.CopyStream(AMemoryStream: TMemoryStream);
 begin
   FLastMemoryStream.Clear();
   FLastMemoryStream.LoadFromStream(AMemoryStream);
 end;
+
 
 procedure TFrmMain.UpdateReturnTimer();
 var
@@ -538,6 +570,7 @@ begin
                 FCurrentCaptureFormat.iFrameHeigth]),
         ltInfo);
 end;
+
 
 procedure TFrmMain.PaintLastCapture();
 var
@@ -723,6 +756,7 @@ begin
   if FCapture.BurstEnabled then
     StopBurstCapture();
 end;
+
 
 procedure TFrmMain.StopBurstCapture();
 var
@@ -939,10 +973,10 @@ begin
       else
         sThread := IntToStr(GetCurrentThreadId);
         
-    memLog.Lines.Add(FormatDateTime('yyyy/mm/dd HH:mm:ss.zzz',
-                                    Now,
-                                    FFormatSettings) + cTab + ALogType.AsDisplay + cTab + 'Thread:  ' + sThread +
-                                    cTab + 'Memory Used: ' + GetMemoryUsed + cTab + AText);
+      memLog.Lines.Add(FormatDateTime('yyyy/mm/dd HH:mm:ss.zzz',
+                                      Now,
+                                      FFormatSettings) + cTab + ALogType.AsDisplay + cTab + 'Thread:  ' + sThread +
+                                      cTab + 'Memory Used: ' + GetMemoryUsed + cTab + AText);
     end;
 end;
 
@@ -996,6 +1030,62 @@ end;
 procedure TFrmMain.HandlePreviewChange(Sender: TObject);
 begin
   pbCapture.Repaint();
+end;
+
+
+//-----------------------------------------------------------------------------
+// OnDeviceChange
+//
+// Handles WM_DEVICECHANGE messages.
+//-----------------------------------------------------------------------------
+procedure TFrmMain.OnDeviceChange(var AMessage: TMessage);
+var
+  PDevBroadcastHeader: PDEV_BROADCAST_HDR;
+  pDevBroadCastIntf: PDEV_BROADCAST_DEVICEINTERFACE;
+  pwDevSymbolicLink: PWideChar;
+  hr: HResult;
+  bDeviceLost: BOOL;
+
+begin
+
+  if (AMessage.WParam = DBT_DEVICEREMOVECOMPLETE) then
+    begin
+      // Check for added/removed devices, regardless of whether
+      // the application is capturing video at this time.
+      PopulateDeviceList();
+
+      // Now check if the current video capture device was lost.
+
+      if (PDEV_BROADCAST_HDR(AMessage.LParam).dbch_devicetype <> DBT_DEVTYP_DEVICEINTERFACE) then
+        Exit;
+
+      // Get the symboliclink of the lost device and check.
+      PDevBroadcastHeader := PDEV_BROADCAST_HDR(AMessage.LParam);
+      pDevBroadCastIntf := PDEV_BROADCAST_DEVICEINTERFACE(PDevBroadcastHeader);
+
+      // Note: Since Windows 8 the value of dbcc_name is no longer the devicename, but the symboliclink of the device.
+      // Dereference the struct's field dbcc_name (array [0..0] of WideChar) for a readable string.
+      pwDevSymbolicLink := PChar(@pDevBroadCastIntf^.dbcc_name);
+
+      hr := S_OK;
+      bDeviceLost := False;
+
+      if Assigned(FCapture) then
+        begin
+          if (StrIComp(FCurrentDevice.oExtendedDetails.lpSymbolicLink,
+                       pwDevSymbolicLink) = 0) then
+              bDeviceLost := True;
+
+            if (FAILED(hr) or bDeviceLost) then
+              begin
+                // Show dialog with info about which device is disconnected.
+                MessageDlg(Format('Lost capture device %s.', [FCurrentDevice.sUniqueName]),
+                mtError,
+                mbOKCancel,
+                0);
+              end;
+        end;
+    end;
 end;
 
 end.

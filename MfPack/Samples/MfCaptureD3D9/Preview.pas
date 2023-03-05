@@ -23,6 +23,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 // 07/02/2023 Tony                Fixed issues with OnReadSample and bufferlock.
+// 04/03/2023 Tony                Updated Device loss methods.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -116,6 +117,7 @@ type
 
   // request commands for a-syncrone handling
   TRequest = (reqNone, reqResize, reqSample);
+  TState = (stInitializing, stError, stCapturing, stStopped);
 
   TCPreview = class(TInterfacedPersistent, IMFSourceReaderCallback)
   private
@@ -126,11 +128,12 @@ type
 
     m_hwndVideo: HWND;             // Video window.
     m_hwndEvent: HWND;             // Application window to receive events.
+    m_state: TState;
 
     m_bFirstSample: BOOL;
     m_llBaseTime: LongLong;
-    m_pwszSymbolicLink: LPWSTR;
-    m_cchSymbolicLink: UINT32;
+    m_strSymbolicLink: string;
+    m_strDeviceName: string;
 
     // Implementation of the interface /////////////////////////////////////////
     function OnReadSample(hrStatus: HRESULT;
@@ -174,8 +177,10 @@ type
 
     function SetDevice(pActivate: IMFActivate): HResult;
     function CloseDevice(): HResult;
-    property DeviceSymbolicLink: LPWSTR read m_pwszSymbolicLink;
 
+    property DeviceSymbolicLink: string read m_strSymbolicLink;
+    property DeviceName: string read m_strDeviceName;
+    property State: TState read m_state;
   end;
 
   // helper
@@ -237,8 +242,7 @@ begin
   m_draw := nil;
   m_hwndVideo := hVideo;     // Handle to the video window.
   m_hwndEvent := hEvent;     // Handle to the window to receive notifications.
-  m_pwszSymbolicLink := nil;
-  m_cchSymbolicLink := 0;
+  m_State := stInitializing;
 
   // Create the callback
   FCritSec := TCriticalSection.Create();
@@ -317,12 +321,11 @@ begin
       m_pReader.Flush(MF_SOURCE_READER_ALL_STREAMS);
     end;
 
- CoTaskMemFree(m_pwszSymbolicLink);
- m_pwszSymbolicLink := nil;
- m_cchSymbolicLink := 0;
-
- FCritSec.Leave;
- Result := S_OK;
+  m_strSymbolicLink := '';
+  m_strDeviceName := '';
+  m_State := stStopped;
+  FCritSec.Leave;
+  Result := S_OK;
 end;
 
 
@@ -466,15 +469,13 @@ begin
           // Draw the frame and create the lockbuffer (buffer)
           if SUCCEEDED(hr) then
             hr := g_pPreview.m_draw.DrawFrame(pBuffer);
-
-          //pSample := nil; // You must clear the sample before getting another one.
         end;
     end;
 
   // Request the next frame.
   if SUCCEEDED(hr) then
     begin
-     if g_pPreview.m_pReader <> nil then
+     if Assigned(g_pPreview.m_pReader) then
        hr := g_pPreview.m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
                                              0,
                                              nil,   // actual
@@ -508,7 +509,13 @@ begin
 done:
 
   if FAILED(hr) then
-    g_pPreview.NotifyError(hr);
+    begin
+      g_pPreview.NotifyError(hr);
+      m_State := stError;
+    end
+  else
+    m_State := stCapturing;
+
   pBuffer := nil;
 
   FCritSec.Leave();
@@ -543,6 +550,12 @@ var
   pAttributes: IMFAttributes;
   pType: IMFMediaType;
   i: Integer;
+  m_pwszSymbolicLink: PWideChar;
+  m_pwszDeviceName: PWideChar;
+  m_cchAllocStr: UINT32;
+
+label
+  done;
 
 begin
   hr := S_OK;
@@ -550,17 +563,33 @@ begin
   // Release the current device, if any.
   if Assigned(m_pReader) then
     hr := CloseDevice();
+  if FAILED(hr) then
+    goto done;
 
   // Create the media source for the device.
-  if SUCCEEDED(hr) then
-    hr := pActivate.ActivateObject(IID_IMFMediaSource,
-                                   {Pointer} m_pSource);
+  hr := pActivate.ActivateObject(IID_IMFMediaSource,
+                                 {Pointer} m_pSource);
+  if FAILED(hr) then
+    goto done;
 
   // Get the symbolic link.
-  if SUCCEEDED(hr) then
-    hr := pActivate.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
-                                       m_pwszSymbolicLink,
-                                       m_cchSymbolicLink);
+  hr := pActivate.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
+                                     m_pwszSymbolicLink,
+                                     m_cchAllocStr);
+  if FAILED(hr) or (m_cchAllocStr = 0) then
+    goto done;
+
+  m_strSymbolicLink := WideCharToString(m_pwszSymbolicLink);
+
+  hr := pActivate.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME,
+                                     m_pwszDeviceName,
+                                     m_cchAllocStr);
+  if FAILED(hr) or (m_cchAllocStr = 0) then
+    goto done;
+
+  m_strDeviceName := WideCharToString(m_pwszSymbolicLink);
+
+
 
   //
   // Create the source reader.
@@ -568,58 +597,59 @@ begin
 
   // Create an attribute store to hold initialization settings.
 
-  if SUCCEEDED(hr) then
-    hr := MFCreateAttributes(pAttributes,
-                             2);
+  hr := MFCreateAttributes(pAttributes,
+                           2);
+  if FAILED(hr) then
+    goto done;
 
-  if SUCCEEDED(hr) then
-    hr := pAttributes.SetUINT32(MF_READWRITE_DISABLE_CONVERTERS,
-                               {TRUE}UINT32(1));
+  hr := pAttributes.SetUINT32(MF_READWRITE_DISABLE_CONVERTERS,
+                             {TRUE}UINT32(1));
+  if FAILED(hr) then
+    goto done;
 
   // Set the callback pointer.
-  if SUCCEEDED(hr) then
-    hr := pAttributes.SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK,
-                                 Self);
+  hr := pAttributes.SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK,
+                               Self);
+  if FAILED(hr) then
+    goto done;
 
-  if SUCCEEDED(hr) then
-    hr := MFCreateSourceReaderFromMediaSource(m_pSource,
-                                              pAttributes,
-                                              m_pReader);
+  hr := MFCreateSourceReaderFromMediaSource(m_pSource,
+                                            pAttributes,
+                                            m_pReader);
+  if FAILED(hr) then
+    goto done;
 
   // Try to find a suitable output type.
-  if SUCCEEDED(hr) then
+
+  for i := 0 to g_cFormats -1 do
     begin
-      for i := 0 to g_cFormats -1 do
-        begin
-          hr := m_pReader.GetNativeMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                             i,
-                                             pType);
+      hr := m_pReader.GetNativeMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                         i,
+                                         pType);
 
-          if FAILED(hr) then
-            Break;
+      if FAILED(hr) then
+        Break;
 
-          hr := TryMediaType(pType);
+      hr := TryMediaType(pType);
 
-          SafeRelease(pType);
+      SafeRelease(pType);
 
-          if SUCCEEDED(hr) then
-            Break;  // Found an output type.
-      end;
+      if SUCCEEDED(hr) then
+        Break;  // Found an output type.
     end;
+  if FAILED(hr) then
+    goto done;
 
-  if SUCCEEDED(hr) then
-    begin
-      // Ask for the first sample. From here the IMFSourceReaderCallback.OnReadSample will be activated
-      hr := m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                 0,
-                                 nil,
-                                 nil,
-                                 nil,
-                                 nil);
+  // Ask for the first sample. From here the IMFSourceReaderCallback.OnReadSample will be activated
+  hr := m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                             0,
+                             nil,
+                             nil,
+                             nil,
+                             nil);
 
-      m_bFirstSample := True;
-      m_llBaseTime := 0;
-    end;
+  m_bFirstSample := True;
+  m_llBaseTime := 0;
 
   if FAILED(hr) then
     begin
@@ -632,6 +662,7 @@ begin
       CloseDevice();
     end;
 
+done:
   Result := hr;
 end;
 

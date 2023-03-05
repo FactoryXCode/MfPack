@@ -23,6 +23,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 04/03/2023                     Updated device loss notify.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
@@ -83,6 +84,7 @@ uses
   WinApi.ActiveX.PropIdl,
   {MfPack}
   WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfMetLib,
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfIdl,
   WinApi.MediaFoundationApi.MfObjects,
@@ -121,7 +123,9 @@ type
     function GetDevice(const index: UINT32;
                        out ppActivate: IMFActivate): HRESULT;
     function GetDeviceName(const index: UINT32;
-                           out ppszName: PWideChar): HRESULT;
+                           out strName: string): HRESULT;
+    function GetDeviceSymLink(const index: UINT32;
+                              out ppszSymLink: PWideChar): HRESULT;
   end;
 
 
@@ -145,11 +149,7 @@ type
 
   TCaptureToFile = class(TInterfacedPersistent, IMFSourceReaderCallback)
   protected
-
-    devBcDi: DEV_BROADCAST_DEVICEINTERFACE;
-
     m_State: TState;
-
     m_hwndEvent: HWND;         // Application window to receive events.
 
     m_pReader: IMFSourceReader;
@@ -158,7 +158,8 @@ type
     m_bFirstSample: BOOL;
     m_llBaseTime: LongLong;
 
-    m_pwszSymbolicLink: LPWSTR;
+    m_strSymbolicLink: string;
+    m_strName: string;
 
     function ConfigureCapture(var param: EncodingParameters): HResult;
     function EndCaptureInternal(): HResult;
@@ -181,7 +182,7 @@ type
 
     // Constructor & destuctor
     //
-    constructor Create(hMainForm: HWND); overload;
+    constructor Create(hMainForm: HWND); reintroduce;
     // Clean up al objects here, before destroy is called
     procedure BeforeDestruction(); override;
     // Caller should call Release.
@@ -194,18 +195,17 @@ type
                           param: EncodingParameters): HResult;
     function EndCaptureSession(): HResult;
     function IsCapturing(): BOOL;
-    function CheckDeviceLost(const pHdr: DEV_BROADCAST_HDR;
-                             out pbDeviceLost: LongBool): HResult;
 
   published
     property State: TState read m_State write m_State;
-
+    property DeviceName: string read m_strName;
+    property DeviceSymbolicLink: string read m_strSymbolicLink;
 end;
 
 var
   MfDeviceList: TDeviceList;
   MfStatus: TMfStatus;       // Status of MediaFoundation
-  g_hdevnotify: HDEVNOTIFY;  {pointer, function RegisterForDeviceNotification}
+
 
 // Helpers
 //========
@@ -225,7 +225,7 @@ var
   // Before you start capturing from a device, call the RegisterDeviceNotification
   // function to register for device notifications.
   // Register for the KSCATEGORY_CAPTURE device class, as shown in this function.
-  function RegisterForDeviceNotification(hwnd: HWND): HRESULT;
+
 
 implementation
 
@@ -244,32 +244,22 @@ end;
 
 // Constructor & destructor section ////////////////////////////////////////////
 constructor TCaptureToFile.Create(hMainForm: HWND);
-var
-  hr: HRESULT;
-
 begin
   inherited Create();
 
   if (MfStatus = MfStarted) then
     begin
       m_hwndEvent := hMainForm;
-      hr := RegisterForDeviceNotification(m_hwndEvent);
-      if FAILED(hr) then
-        MessageBox(0,
-                   PWideChar('RegisterForDeviceNotification failed!'),
-                   Nil,
-                   MB_OK);
     end;
 end;
 
 //
 procedure TCaptureToFile.BeforeDestruction();
 begin
-
   Clear();
 
   MfDeviceList.Free;
-  MfDeviceList := Nil;
+  MfDeviceList := nil;
 
   MFShutdown();
   CoUninitialize;
@@ -353,7 +343,7 @@ begin
       if FAILED(hr) then { goto done; }
         goto Done;
 
-      pSample := Nil;  // Must do!
+      pSample := nil;  // Must do!
     end;
 
   // Read another sample.
@@ -487,15 +477,15 @@ begin
                                     LPCWSTR(''),
                                     MFT_ENUM_FLAG_SYNCMFT,
                                     0,
-                                    Nil,
+                                    nil,
                                     0,
-                                    Nil);
+                                    nil);
     end;
 
   if SUCCEEDED(hr) then
     hr := m_pWriter.SetInputMediaType(sink_stream,
                                       pType,
-                                      Nil);
+                                      nil);
 
 
   Result := hr;
@@ -520,9 +510,6 @@ begin
   SafeRelease(m_pWriter);
   SafeRelease(m_pReader);
 
-  CoTaskMemFree(m_pwszSymbolicLink);
-  m_pwszSymbolicLink := Nil;
-
   Result := hr;
 end;
 
@@ -542,6 +529,11 @@ var
   pAttributes: IMFAttributes;
   pcchLength: UINT32;
   pFileName: PWideChar;
+  pDeviceName: PWideChar;
+  pSymLink: PWideChar;
+
+label
+  done;
 
 begin
 
@@ -550,64 +542,78 @@ begin
   // Create the media source for the device.
   hr := pActivate.ActivateObject(IID_IMFMediaSource,
                                  Pointer(pSource));
+  if FAILED(hr) then
+    goto done;
 
   // Get the symbolic link. This is needed to handle device-
   // loss notifications. (See CheckDeviceLost.)
+  hr := pActivate.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
+                                     pSymLink,
+                                     pcchLength);
+  if FAILED(hr) then
+    goto done;
 
-  if SUCCEEDED(hr) then
-    hr := pActivate.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
-                                       m_pwszSymbolicLink,
-                                       pcchLength);
-  if SUCCEEDED(hr) then
-    hr := MFCreateAttributes(pAttributes,
+  m_strSymbolicLink := WideCharToString(pSymLink);
+
+  // Get displayed device name
+  hr := pActivate.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME,
+                                     pDeviceName,
+                                     pcchLength);
+  if FAILED(hr) then
+    goto done;
+
+  m_strName := WideCharToString(pDeviceName);
+
+  hr := MFCreateAttributes(pAttributes,
                            2);
+  if FAILED(hr) then
+    goto done;
 
-  if SUCCEEDED(hr) then
-    hr:= pAttributes.SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK,
-                                Self);
+  hr:= pAttributes.SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK,
+                              Self);
+  if FAILED(hr) then
+    goto done;
 
-  if SUCCEEDED(hr) then
-    hr:= MFCreateSourceReaderFromMediaSource(pSource,
-                                             pAttributes,
-                                             m_pReader);
+  hr:= MFCreateSourceReaderFromMediaSource(pSource,
+                                           pAttributes,
+                                           m_pReader);
+  if FAILED(hr) then
+    goto done;
 
   // Create the sink writer
-  if SUCCEEDED(hr) then
-    hr := MFCreateSinkWriterFromURL(pFileName,
-                                    Nil,
-                                    Nil,
-                                    m_pWriter);
+  hr := MFCreateSinkWriterFromURL(pFileName,
+                                  nil,
+                                  nil,
+                                  m_pWriter);
+  if FAILED(hr) then
+    goto done;
 
   // Set up the encoding parameters.
-   if SUCCEEDED(hr) then
-     hr := ConfigureCapture(param);
+  hr := ConfigureCapture(param);
+  if FAILED(hr) then
+    goto done;
 
 
-   if SUCCEEDED(hr) then
-     begin
-        m_bFirstSample := True;
-        m_llBaseTime := 0;
+  m_bFirstSample := True;
+  m_llBaseTime := 0;
 
-        // Request the first video frame.
-        // This function will fire the OnReadSample events.
-        hr := m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                   0,
-                                   Nil,
-                                   Nil,
-                                   Nil,
-                                   Nil);  // No sample needed for first time.
-     end;
+  // Request the first video frame.
+  // This function will fire the OnReadSample events.
+  hr := m_pReader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                             0,
+                             nil,
+                             nil,
+                             nil,
+                             nil);  // No sample needed for first time.
+  if FAILED(hr) then
+    goto done;
 
+  // Begin writing (must be initialized before any atempt by the sink is made to write data to the file.)
+  State := State_Capturing;
+  hr := m_pWriter.BeginWriting();
 
-    // Begin writing (must be initialized before any atempt by the sink is made to write data to the file.)
-    if SUCCEEDED(hr) then
-      begin
-        State := State_Capturing;
-        hr := m_pWriter.BeginWriting();
-      end;
-
-
-    Result := hr;
+done:
+  Result := hr;
 end;
 
 //------------------------------------------------------------------------------
@@ -643,57 +649,24 @@ var
   bIsCapturing: BOOL;
 
 begin
-  bIsCapturing := (m_pWriter <> Nil) ;
+  bIsCapturing := (m_pWriter <> nil) ;
   Result := bIsCapturing;
 end;
 
-//------------------------------------------------------------------------------
+
+//-------------------------------------------------------------------
 //  CheckDeviceLost
 //  Checks whether the video capture device was removed.
 //
 //  The application calls this method when it receives a
-//  WM_DEVICECHANGE message. To make this happen the application should register
-//  for devicechange notifications.
-//------------------------------------------------------------------------------
-function TCaptureToFile.CheckDeviceLost(const pHdr: DEV_BROADCAST_HDR;
-                                        out pbDeviceLost: LongBool): HRESULT;
-var
-  pDi: DEV_BROADCAST_DEVICEINTERFACE;
+//  WM_DEVICECHANGE message.
+//
+//  Compare the device notification message against the symbolic link of your device, as follows:
+//  1. Check the dbch_devicetype member of the DEV_BROADCAST_HDR structure.
+//     If the value is DBT_DEVTYP_DEVICEINTERFACE, cast the structure pointer to a DEV_BROADCAST_DEVICEINTERFACE structure.
+//  2. Compare the dbcc_name member of this structure to the symbolic link of the device.
+//-------------------------------------------------------------------
 
-label
-  Done;
-
-begin
-
-  if (pbDeviceLost = False) then
-    begin
-      Result := E_POINTER;
-      Exit;
-    end;
-
-  pbDeviceLost := False;
-
-  if IsCapturing() then
-    goto done;
-
-  if (pHdr.dbch_devicetype <> DBT_DEVTYP_DEVICEINTERFACE) then
-    goto done;
-
-  //DEV_BROADCAST_DEVICEINTERFACE(pHdr)
-  pDi := Default(DEV_BROADCAST_DEVICEINTERFACE);
-  pDi.dbcc_size := pHdr.dbch_size;
-  pDi.dbcc_devicetype := pHdr.dbch_devicetype;
-  pDi.dbcc_reserved := pHdr.dbch_reserved;
-
-  // Compare the device name with the symbolic link.
-
-  if Assigned(m_pwszSymbolicLink) then
-    if (StrComp(m_pwszSymbolicLink, @pDi.dbcc_name) = 0) then
-      pbDeviceLost := True;
-
-done:
-  Result:= S_OK;
-end;
 
 
 
@@ -723,7 +696,7 @@ procedure TDeviceList.Clear();
 begin
   // Release the pointer to array
   CoTaskMemFree(m_ppDevices);
-  m_ppDevices := Nil;
+  m_ppDevices := nil;
   m_cDevices := 0;
 end;
 
@@ -765,6 +738,7 @@ begin
   Result := hr;
 end;
 
+
 //
 function TDeviceList.GetDevice(const index: UINT32;
                                out ppActivate: IMFActivate): HRESULT;
@@ -780,13 +754,49 @@ begin
 
   ppActivate := m_ppDevices[index];
 
+
 {$POINTERMATH OFF}
   Result :=  S_OK;
 end;
 
 //
 function TDeviceList.GetDeviceName(const index: UINT32;
-                                   out ppszName: PWideChar): HRESULT;
+                                   out strName: string): HRESULT;
+var
+  hr: HRESULT;
+  pcchLength: UINT32;
+  ppszName: PWideChar;
+
+label
+  Done;
+
+begin
+
+  if (index >= Count()) then
+    begin
+      hr := E_INVALIDARG;
+      goto Done;
+    end;
+
+{$POINTERMATH ON}
+  hr := m_ppDevices[index].GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME,
+                                              ppszName,
+                                              pcchLength);
+{$POINTERMATH OFF}
+
+  // Convert to string strName
+  if SUCCEEDED(hr) then
+    strName := WideCharToString(ppszName)
+  else
+    strName := 'Unknown';
+
+done:
+  Result := hr;
+end;
+
+
+function TDeviceList.GetDeviceSymLink(const index: UINT32;
+                                      out ppszSymLink: PWideChar): HRESULT;
 var
   hr: HRESULT;
   pcchLength: UINT32;
@@ -803,8 +813,8 @@ begin
     end;
 
 {$POINTERMATH ON}
-  hr:= m_ppDevices[index].GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME,
-                                             ppszName,
+  hr:= m_ppDevices[index].GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
+                                             ppszSymLink,
                                              pcchLength);
 {$POINTERMATH OFF}
 
@@ -849,6 +859,7 @@ begin
   // provide a list to the user and have the user select the
   // camera's output format. That is outside the scope of this
   // sample, however.
+  // You may look in to the MFCaptureEngineVideoCapture sample on how to.
 
   hr := pReader.GetNativeMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
                                    0,  // Type index
@@ -865,8 +876,6 @@ begin
     // The list of acceptable types.
     // MFVideoFormat_NV12, MFVideoFormat_YUY2, MFVideoFormat_UYVY,
     // MFVideoFormat_RGB32, MFVideoFormat_RGB24, MFVideoFormat_IYUV);
-
-
 
 
   for _i := 0 to SizeOf(subtypes) - 1 do
@@ -991,26 +1000,6 @@ begin
 end;
 
 
-function RegisterForDeviceNotification(hwnd: HWND): HRESULT;
-var
-  di: DEV_BROADCAST_DEVICEINTERFACE;
-
-begin
-
-  di.dbcc_size := SizeOf(di);
-  di.dbcc_devicetype := DBT_DEVTYP_DEVICEINTERFACE;
-  di.dbcc_classguid := KSCATEGORY_CAPTURE;
-
-  g_hdevnotify := RegisterDeviceNotification(hwnd,
-                                             @di,
-                                             DEVICE_NOTIFY_WINDOW_HANDLE);
-
-  if (g_hdevnotify = Nil) then
-    Result := E_FAIL // {include winerror for this} HRESULT_FROM_WIN32(GetLastError())  // or use HRESULT_FROM_NT()
-  else
-    Result := S_OK;
-end;
-
 
 // End Helpers /////////////////////////////////////////////////////////////////
 
@@ -1021,7 +1010,7 @@ end;
 initialization
 
   // Initialize the COM library
-  CoInitializeEx(Nil,
+  CoInitializeEx(nil,
                  COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE);
 
   // Possible values are: MfStarted, MfStopped

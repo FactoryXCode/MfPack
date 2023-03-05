@@ -24,6 +24,7 @@
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 // 29/01/2222 Tony                Changed OnDeviceChange for compatibility with Win 10/11
 // 07/02/2023 Tony                Fixed issues with OnReadSample and bufferlock.
+// 04/03/2023 Tony                Updated Device loss methods.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -77,6 +78,7 @@ uses
   System.SysUtils,
   System.Classes,
   System.Services.Dbt,
+  System.UITypes,
   {Vcl}
   Vcl.Graphics,
   Vcl.Controls,
@@ -90,6 +92,7 @@ uses
   WinApi.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfIdl,
+  WinApi.MediaFoundationApi.MfMetLib,
   {ActiveX}
   WinApi.ActiveX.ObjBase,
   {Project}
@@ -120,7 +123,8 @@ type
     hwWindowHandle: HWND; // handle to recieve messages
     g_hdevnotify: HDEVNOTIFY;
 
-    function DelayedOnCreate(): BOOL;
+    function RegisterDeviceNotifications(): BOOL;
+    function GetDevices(): HResult;
     procedure OnChooseDevice(const hw: HWND;
                              const bPrompt: BOOL);
     procedure OnDeviceChange(var AMessage: TMessage); message WM_DEVICECHANGE;
@@ -214,13 +218,37 @@ begin
   if Assigned(dlgSelectDevice) then
     dlgSelectDevice.Close();
 
-  if Assigned(g_hdevnotify) then
-    begin
-      UnregisterDeviceNotification(g_hdevnotify);
-      g_hdevnotify := nil;
-    end;
+  UnRegisterForDeviceNotification(g_hdevnotify);
+
 end;
 
+
+function TfrmMain.GetDevices(): HResult;
+var
+  hr: HRESULT;
+  pAttributes: IMFAttributes;
+
+label
+  done;
+
+begin
+  // Initialize an attribute store to specify enumeration parameters.
+  hr := MFCreateAttributes(pAttributes,
+                           1);
+  if FAILED(hr) then
+    goto done;
+
+  // Enumerate devices.
+  hr := MFEnumDeviceSources(pAttributes,
+                            param.ppDevices,
+                            param.count);
+  if FAILED(hr) then
+    goto done;
+  // NOTE: param.count might be zero.
+
+done:
+  Result := hr;
+end;
 
 //-------------------------------------------------------------------
 //  OnChooseDevice
@@ -363,46 +391,54 @@ end;
 //------------------------------------------------------------------------------
 procedure TfrmMain.OnDeviceChange(var AMessage: TMessage);
 var
-  bDeviceLost: BOOL;
   PDevBroadcastHeader: PDEV_BROADCAST_HDR;
   pDevBroadCastIntf: PDEV_BROADCAST_DEVICEINTERFACE;
   pwDevSymbolicLink: PWideChar;
+  bDeviceLost: Bool;
+  hr: HResult;
 
 begin
-
-  if (g_pPreview = Nil) then
+  if not Assigned(g_pPreview) then
     Exit;
 
-  bDeviceLost := False;
-
-  // Check if the current device was lost.
   if (AMessage.WParam = DBT_DEVICEREMOVECOMPLETE) then
     begin
-      // Check if the current video capture device was lost.
+      // Check for added/removed devices, regardless of whether
+      // the application is capturing video at this time.
+      GetDevices();
 
-      if PDEV_BROADCAST_HDR(AMessage.LParam).dbch_devicetype <> DBT_DEVTYP_DEVICEINTERFACE then
+      // Now check if the current video capture device was lost.
+
+      if (PDEV_BROADCAST_HDR(AMessage.LParam).dbch_devicetype <> DBT_DEVTYP_DEVICEINTERFACE) then
         Exit;
 
       // Get the symboliclink of the lost device and check.
       PDevBroadcastHeader := PDEV_BROADCAST_HDR(AMessage.LParam);
       pDevBroadCastIntf := PDEV_BROADCAST_DEVICEINTERFACE(PDevBroadcastHeader);
+
       // Note: Since Windows 8 the value of dbcc_name is no longer the devicename, but the symboliclink of the device.
+      // Dereference the struct's field dbcc_name (array [0..0] of WideChar) for a readable string.
       pwDevSymbolicLink := PChar(@pDevBroadCastIntf^.dbcc_name);
+
+      hr := S_OK;
       bDeviceLost := False;
-      if StrIComp(PWideChar(g_pPreview.DeviceSymbolicLink),
-                  PWideChar(pwDevSymbolicLink)) = 0 then
-        bDeviceLost := True;
-    end;
 
+      if Assigned(g_pPreview) then
+        if (g_pPreview.State = stCapturing) then
+          begin
+            if (StrIComp(PWideChar(g_pPreview.DeviceSymbolicLink),
+                         PWideChar(pwDevSymbolicLink)) = 0) then
+              bDeviceLost := True;
 
-  if (bDeviceLost = True) then
-    begin
-      SafeRelease(g_pPreview); //.CloseDevice();
-
-      MessageBox(hwWindowHandle,
-                 lpcwstr('Lost the capture device.'),
-                 lpcwstr(frmMain.caption),
-                 MB_OK);
+            if (FAILED(hr) or bDeviceLost) then
+              begin
+                MessageDlg(Format('Lost capture device %s.', [g_pPreview.DeviceName]),
+                           mtError,
+                           mbOKCancel,
+                           MB_OK);
+                SafeRelease(g_pPreview); //.CloseDevice();
+              end;
+          end;
     end;
 end;
 
@@ -438,7 +474,7 @@ end;
 // Only when the form is in visible state, it's safe to initiate D3D9 objects.
 procedure TfrmMain.OnWindowVisible(var message: TMessage);
 begin
-  if not DelayedOnCreate() then
+  if not RegisterDeviceNotifications() then
     application.Terminate;  //
 end;
 
@@ -453,43 +489,19 @@ end;
 
 
 //
-// Initiate the D3D9 objects
+// Initiate DeviceNotifications
 //
-function TfrmMain.DelayedOnCreate(): BOOL;
-var
-  di: DEV_BROADCAST_DEVICEINTERFACE;
-  sz: Integer;
-
+function TfrmMain.RegisterDeviceNotifications(): BOOL;
 begin
   Result := False;
-
-  // Register this window to get device notification messages.
-  sz := SizeOf(DEV_BROADCAST_DEVICEINTERFACE);
-  ZeroMemory(@di,
-             sz);
-
-  di.dbcc_size := sz;
-  di.dbcc_devicetype := DBT_DEVTYP_DEVICEINTERFACE;
-  di.dbcc_reserved := 0;
-  di.dbcc_classguid := KSCATEGORY_VIDEO_CAMERA; // KSCATEGORY_CAPTURE : Since windows 10 you should not use this guid to register for device loss!
-                                                // Otherwise it will return a wrong symoliclink when detecting a device lost.
-  di.dbcc_name := #0;
-
-  g_hdevnotify := RegisterDeviceNotification(hwWindowHandle,
-                                             @di,
-                                             DEVICE_NOTIFY_WINDOW_HANDLE);
-
-  if (g_hdevnotify = nil) then
+  if not RegisterForDeviceNotification(hwWindowHandle,
+                                       g_hdevnotify) then
     begin
       ShowMessage('RegisterDeviceNotification failed. ' + IntToStr(GetLastError()));
       Exit;
     end;
-
-  ZeroMemory(@di,
-             sz);
   Result := True;
 end;
-
 
 
 procedure TfrmMain.Exit1Click(Sender: TObject);
@@ -497,12 +509,13 @@ begin
   Close();
 end;
 
+
 // Since the mainform is the first unit to be initialized, we put the
 // initialization code here.
 
 initialization
   // Initialize the COM library
-  if SUCCEEDED(CoInitializeEx(Nil,
+  if SUCCEEDED(CoInitializeEx(nil,
                               COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE)) then
 
     if FAILED(MFStartup(MF_VERSION,

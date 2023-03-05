@@ -77,6 +77,7 @@ uses
   System.SysUtils,
   System.Variants,
   System.Classes,
+  System.UITypes,
   System.Services.Dbt,
   System.Math,
   {VCL}
@@ -116,14 +117,13 @@ type
     SaveFileDlg: TSaveDialog;
     N1: TMenuItem;
     Exit1: TMenuItem;
-    pnlPreview: TPanel;
     pnlSnapShot: TPanel;
     pbCapture: TPaintBox;
-    pnlInfo: TPanel;
     pnlControls: TPanel;
     butSaveToFile: TButton;
     butTakePhoto: TButton;
     chkNoPreview: TCheckBox;
+    pnlInfo: TPanel;
     procedure FormCreate(Sender: TObject);
     procedure mnuChooseDeviceClick(Sender: TObject);
     procedure mnuStartPreviewClick(Sender: TObject);
@@ -136,22 +136,20 @@ type
   private
     { Private declarations }
     hPreview: HWND;
+    ptrDevNotify: HDEVNOTIFY; // Devicenotify pointer.
     bRecording: Boolean;
     bPreviewing: Boolean;
     bImageCleared: Boolean;
+    bDeviceLost: Bool;
     bmCapturedFrame: TMfpBitmap;
     iSelectedDevice: Integer;
     iSelectedFormat: Integer;
+    pSelectedDevice: IMFActivate;
     lSampleTime: LongLong;
     FSampleConverter: TSampleConverter;
-    pSelectedDevice: IMFActivate;
 
     procedure DestroyCaptureObjects();
     function CreateDeviceExplorer(): HResult;
-
-    // Windows messages
-    procedure OnSize(var message: TWMSize); message WM_SIZE;
-    procedure OnDeviceChange(var AMessage: TMessage); message WM_DEVICECHANGE;
 
     // Update menuitems and status
     procedure UpdateUI();
@@ -165,10 +163,15 @@ type
                            var ATop: Integer;
                            var ALeft: Integer);
 
+    // Messages
+    procedure OnSize(var message: TWMSize); message WM_SIZE;
+    procedure OnRecievedSample(var AMessage: TMessage); message WM_RECIEVED_SAMPLE_FROM_CALLBACK;
+    procedure OnCaptureEvent(var AMessage: TMessage); message WM_APP_CAPTURE_EVENT;
+    procedure OnCaptureEventHandled(var AMessage: TMessage); message WM_APP_CAPTURE_EVENT_HANDLED;
+    procedure OnDeviceChange(var AMessage: TMessage); message WM_DEVICECHANGE;
+
   public
     { Public declarations }
-    // Captureengine message handler
-    procedure WndProc(var Message: TMessage); override;
 
   end;
 
@@ -207,104 +210,96 @@ begin
 end;
 
 
-//------------------------------------------------------------------------------
-//  OnDeviceChange
-//
-//  Handles WM_DEVICECHANGE messages. (see messagehook method)
-//------------------------------------------------------------------------------
+procedure TMainWindow.OnRecievedSample(var AMessage: TMessage);
+var
+  pSample: IMFSample;
+begin
+  pSample := IMFSample(Pointer(AMessage.WParam));
+  // process the sample
+  if Assigned(pSample) then
+    ProcessSample(pSample);
+end;
+
+
+procedure TMainWindow.OnCaptureEvent(var AMessage: TMessage);
+var
+  hr: HResult;
+begin
+  hr := FCaptureManager.OnCaptureEvent(AMessage.WParam,
+                                       AMessage.LParam);
+  if FAILED(hr) then
+    begin
+      ErrMsg('Capturemanager.OnCaptureEvent reported an error',
+             hr);
+    end;
+end;
+
+
+procedure TMainWindow.OnCaptureEventHandled(var AMessage: TMessage);
+begin
+  if SUCCEEDED(HResult(AMessage.WParam)) then
+    UpdateUI()
+  else
+    ErrMsg('CaptureManager reported a failure.',
+           HResult(AMessage.WParam));
+end;
+
+
 procedure TMainWindow.OnDeviceChange(var AMessage: TMessage);
 var
-  bDeviceLost: BOOL;
   PDevBroadcastHeader: PDEV_BROADCAST_HDR;
   pDevBroadCastIntf: PDEV_BROADCAST_DEVICEINTERFACE;
-  pwDevSymbolicLink: PWideChar;
+  pwcDevSymbolicLink: PWideChar;
+  pwcCurrentDeviceSymLink: PWideChar;
+  hr: HResult;
+  strCurrentDeviceName: string;
 
 begin
-
-  if not Assigned(FCaptureManager) then
-    Exit;
-
-  bDeviceLost := False;
-
-  // Check if the current device was lost.
   if (AMessage.WParam = DBT_DEVICEREMOVECOMPLETE) then
     begin
-      // Check if the current video capture device was lost.
+      // remember the current device that is activated
+      strCurrentDeviceName := WideCharToString(FDeviceExplorer.DeviceDisplayName);
+      pwcCurrentDeviceSymLink := FDeviceExplorer.DeviceSymbolicLink;
 
+      // Check for added/removed devices, regardless of whether
+      // the application is capturing video at this time.
+      if FAILED(CreateDeviceExplorer()) then
+        Exit;
+
+      // Check if the current video capture device was lost.
       if (PDEV_BROADCAST_HDR(AMessage.LParam).dbch_devicetype <> DBT_DEVTYP_DEVICEINTERFACE) then
         Exit;
 
       // Get the symboliclink of the lost device and check.
       PDevBroadcastHeader := PDEV_BROADCAST_HDR(AMessage.LParam);
       pDevBroadCastIntf := PDEV_BROADCAST_DEVICEINTERFACE(PDevBroadcastHeader);
+
       // Note: Since Windows 8 the value of dbcc_name is no longer the devicename, but the symboliclink of the device.
-      pwDevSymbolicLink := PChar(@pDevBroadCastIntf^.dbcc_name);
+      // Dereference the struct's field dbcc_name (array [0..0] of WideChar) for a readable string.
+      pwcDevSymbolicLink := PChar(@pDevBroadCastIntf^.dbcc_name);
+
+      hr := S_OK;
       bDeviceLost := False;
-      if StrIComp(PWideChar(FDeviceExplorer.DeviceSymbolicLink),
-                  PWideChar(pwDevSymbolicLink)) = 0 then
-        bDeviceLost := True;
-    end;
 
-  if (bDeviceLost = True) then
-    begin
-      FreeAndNil(FCaptureManager);
-      ErrMsg(Format('Lost capture device %s.' + #13 + 'Please select another device or reconnect.', [FDeviceExplorer.DeviceDisplayName]),
-             DBT_DEVICEREMOVECOMPLETE);
-    end;
-end;
-
-
-// WndProc
-procedure TMainWindow.WndProc(var message: TMessage);
-var
-  hr: HResult;
-  pSample: IMFSample;
-
-begin
-
-  case message.Msg of
-
-    // We did recieve a sample from TCaptureManager.TCaptureEngineOnSampleCallback.OnSample
-    WM_RECIEVED_SAMPLE_FROM_CALLBACK:
-      begin
-        pSample := IMFSample(Pointer(message.WParam));
-        if Assigned(pSample) then
-          // process the sample
-          ProcessSample(pSample);
-      end;
-
-    WM_APP_CAPTURE_EVENT:
-      begin
-        hr := FCaptureManager.OnCaptureEvent(message.WParam,
-                                             message.LParam);
-        if FAILED(hr) then
+      if Assigned(FCaptureManager) then
+        if FCaptureManager.IsPreviewing or FCaptureManager.IsRecording then
           begin
-            ErrMsg('Capturemanager.OnCaptureEvent reported an error',
-                   hr);
+            if (StrIComp(pwcCurrentDeviceSymLink,
+                         pwcDevSymbolicLink) = 0) then
+              bDeviceLost := True;
+
+            if (FAILED(hr) or bDeviceLost) then
+              begin
+                MessageDlg(Format('Lost capture device: %s', [strCurrentDeviceName]),
+                           mtError,
+                           mbOKCancel,
+                           0);
+                iSelectedDevice := -1;
+                iSelectedFormat := -1;
+                UpdateUI();
+              end;
           end;
-      end;
-
-    // When a capture event is processed by the capture engine, update the statusbar and menu.
-    WM_APP_CAPTURE_EVENT_HANDLED:
-      begin
-
-        if SUCCEEDED(HResult(message.WParam)) then
-          UpdateUI()
-        else
-          ErrMsg('CaptureManager repported a failure.',
-                 HResult(message.WParam));
-
-      end;
-
-    // Any other messages are passed to DefWindowProc, which tells Windows to handle the message.
-    else
-      message.Result := DefWindowProc(Handle,
-                                      message.Msg,
-                                      message.WParam,
-                                      message.LParam);
-  end;
-
-  inherited WndProc(message);
+    end;
 end;
 
 
@@ -521,6 +516,9 @@ begin
        FreeAndNil(FDeviceExplorer);
      end;
 
+  UnRegisterForDeviceNotification(ptrDevNotify);
+  ptrDevNotify := nil;
+
   MFShutdown();
   CoUnInitialize();
   CanClose := True;
@@ -553,13 +551,18 @@ begin
 
   iSelectedDevice := -1;
   iSelectedFormat := -1;
-  hPreview := pnlPreview.Handle;
+  bDeviceLost := False;
+  hPreview := Handle;
 
-  // Create DeviceExplorer
+  // Create DeviceExplorer here to check for suitable devices.
   hr := CreateDeviceExplorer();
   // There is no need to shutdown the application, because a user can still add devices.
   if (hr = MF_E_NO_CAPTURE_DEVICES_AVAILABLE) then
     begin
+      MessageBox(0,
+                 lpcwstr('Currently there are no devices found: Please insert a device.'),
+                 lpcwstr('No capture devices found.'),
+                 MB_ICONWARNING);
       hr := S_OK;
       goto done;
     end;
@@ -591,6 +594,11 @@ begin
     FSampleConverter := TSampleConverter.Create()
   else
     hr := E_POINTER;
+
+  //
+  if not RegisterForDeviceNotification(Handle,
+                                       ptrDevNotify) then
+    hr := E_FAIL;
 
 done:
   if FAILED(hr) then
@@ -653,18 +661,23 @@ begin
   hr := MFCreateAttributes(pAttributes,
                            1);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   hr := pAttributes.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
                             MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   hr := MFEnumDeviceSources(pAttributes,
                             FChooseDeviceParam.ppDevices,
                             FChooseDeviceParam.count);
   if FAILED(hr) then
-    goto Done;
+    goto done;
+
+  // Get a new instance of the device explorer
+  hr := CreateDeviceExplorer();
+  if FAILED(hr) then
+    goto done;
 
   // Ask the user to select one.
   if (ChooseDeviceDlg.ShowModal = 1212) then
@@ -674,7 +687,7 @@ begin
       {$POINTERMATH OFF}
       iSelectedDevice := FChooseDeviceParam.SelectedDevice;
       iSelectedFormat := FChooseDeviceParam.SelectedFormat;
-      hPreview := pnlPreview.Handle;
+      hPreview := Handle;
 
       // Set DeviceExplorer properties
       hr := FDeviceExplorer.SetCurrentDeviceProperties(iSelectedDevice,
@@ -725,6 +738,22 @@ begin
   bEnableRecording := False;
   bEnablePreview := ((iSelectedDevice > -1) and (iSelectedFormat > -1));
 
+  if bDeviceLost then
+    begin
+      if FCaptureManager.IsRecording then
+        FCaptureManager.StopRecording()
+      else if FCaptureManager.IsPreviewing then
+        FCaptureManager.StopPreview;
+
+      mnuStartRecording.Caption := 'Start Recording';
+      mnuStartPreview.Tag := 0;
+      mnuStartRecording.Enabled := bEnableRecording;
+      mnuStartPreview.Enabled := False;
+      pnlInfo.Caption := 'Please select a device.';
+      pnlControls.Enabled := False;
+      bDeviceLost := False;
+      Exit;
+    end;
 
   if not Assigned(FCaptureManager) then
     begin
@@ -732,10 +761,14 @@ begin
       Exit;
     end;
 
-  if not FCaptureManager.IsInitialized then
+  if not FCaptureManager.IsInitialized or (iSelectedDevice = -1) then
     pnlInfo.Caption := 'Please select a device.'
   else
-    pnlInfo.Caption := 'Please select ''Start Preview''';
+    begin
+      pnlInfo.Caption := 'Please select ''Start Preview'' or ''Choose Device ''';
+      mnuStartPreview.Caption := 'Start Preview';
+      mnuStartPreview.Tag := 0;
+    end;
 
   if not FCaptureManager.IsRecording then
     begin

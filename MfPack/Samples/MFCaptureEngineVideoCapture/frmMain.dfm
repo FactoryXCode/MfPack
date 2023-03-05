@@ -3,9 +3,9 @@ object MainWindow: TMainWindow
   Top = 0
   BorderWidth = 1
   Caption = 'Capture Engine Application Sample'
-  ClientHeight = 736
-  ClientWidth = 1084
-  Color = clBtnFace
+  ClientHeight = 654
+  ClientWidth = 1091
+  Color = 5197615
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -17,39 +17,12 @@ object MainWindow: TMainWindow
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   DesignSize = (
-    1084
-    736)
+    1091
+    654)
   PixelsPerInch = 96
   TextHeight = 13
-  object pnlPreview: TPanel
-    Left = 0
-    Top = 0
-    Width = 1084
-    Height = 736
-    Align = alClient
-    AutoSize = True
-    Color = 5197615
-    UseDockManager = False
-    ParentBackground = False
-    ParentShowHint = False
-    ShowCaption = False
-    ShowHint = False
-    TabOrder = 0
-    object pnlInfo: TPanel
-      Left = 1
-      Top = 707
-      Width = 1082
-      Height = 28
-      Align = alBottom
-      Alignment = taLeftJustify
-      AutoSize = True
-      Caption = 'pnlInfo'
-      ParentBackground = False
-      TabOrder = 0
-    end
-  end
   object pnlSnapShot: TPanel
-    Left = 773
+    Left = 780
     Top = 0
     Width = 310
     Height = 234
@@ -58,7 +31,8 @@ object MainWindow: TMainWindow
     Color = clBackground
     ParentBackground = False
     ShowCaption = False
-    TabOrder = 1
+    TabOrder = 0
+    ExplicitLeft = 773
     object pbCapture: TPaintBox
       Left = 0
       Top = 0
@@ -79,6 +53,7 @@ object MainWindow: TMainWindow
       ParentBackground = False
       ShowCaption = False
       TabOrder = 0
+      ExplicitLeft = 2
       object butSaveToFile: TButton
         Left = 91
         Top = 1
@@ -114,6 +89,24 @@ object MainWindow: TMainWindow
         TabOrder = 2
       end
     end
+  end
+  object pnlInfo: TPanel
+    Left = -2
+    Top = 627
+    Width = 1099
+    Height = 28
+    Align = alCustom
+    Anchors = [akLeft, akRight]
+    AutoSize = True
+    Caption = '-'
+    DoubleBuffered = True
+    ParentBackground = False
+    ParentDoubleBuffered = False
+    ParentShowHint = False
+    ShowHint = False
+    TabOrder = 1
+    ExplicitTop = 646
+    ExplicitWidth = 1079
   end
   object MainMenu: TMainMenu
     Left = 32

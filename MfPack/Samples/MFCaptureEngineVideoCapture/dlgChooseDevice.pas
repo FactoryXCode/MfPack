@@ -101,9 +101,9 @@ type
     cbxSupportedFormatsOnly: TCheckBox;
     procedure btnCancelClick(Sender: TObject);
     procedure btnOKClick(Sender: TObject);
-    procedure FormCreate(Sender: TObject);
     procedure lbxDeviceListClick(Sender: TObject);
     procedure cbxSupportedFormatsOnlyClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     { Private declarations }
 
@@ -171,16 +171,6 @@ begin
 end;
 
 
-// FormCreate
-procedure TChooseDeviceDlg.FormCreate(Sender: TObject);
-begin
-  // Assume no selection for now.
-  FChooseDeviceParam.SelectedDevice := -1;
-  FChooseDeviceParam.SelectedFormat := -1;
-  PopulateDevices();
-end;
-
-
 procedure TChooseDeviceDlg.lbxDeviceListClick(Sender: TObject);
 begin
   if (lbxDeviceList.ItemIndex > -1) then
@@ -224,6 +214,15 @@ begin
     sgResolutions.Cols[i].Clear;
   sgResolutions.RowCount := 1;
   sgResolutions.Repaint;
+end;
+
+
+procedure TChooseDeviceDlg.FormShow(Sender: TObject);
+begin
+  // Assume no selection for now.
+  FChooseDeviceParam.SelectedDevice := -1;
+  FChooseDeviceParam.SelectedFormat := -1;
+  PopulateDevices();
 end;
 
 

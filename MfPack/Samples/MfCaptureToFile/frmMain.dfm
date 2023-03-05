@@ -72,7 +72,7 @@ object dlgMfCaptureToFile: TdlgMfCaptureToFile
     OnClick = rbWMVClick
   end
   object butCapture: TButton
-    Left = 240
+    Left = 242
     Top = 139
     Width = 105
     Height = 33

@@ -179,6 +179,7 @@ function TCameraCaptureAsync.OnEvent(dwStreamIndex: DWord;
                                      pEvent: IMFMediaEvent): HRESULT;
 begin
   // Note: This will be called in a worker thread.
+
   Result := S_OK;
 end;
 

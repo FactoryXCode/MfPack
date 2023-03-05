@@ -177,7 +177,6 @@ type
     bPhotoTaken: Boolean;
     bEngineIsInitialized: Boolean;
     bCaptureSinkReady: Boolean;
-
     FSnapShotOptions: TSnapShotOptions;
     FCritSec: TMFCritSec;
 
@@ -235,6 +234,7 @@ type
     property SnapShotOption: TSnapShotOptions read FSnapShotOptions write FSnapShotOptions;
     property PreviewHandle: HWND read hwndPreviewWindow write hwndPreviewWindow;
     property EventHandle: HWND read hwndMainForm;
+
   end;
 
 var

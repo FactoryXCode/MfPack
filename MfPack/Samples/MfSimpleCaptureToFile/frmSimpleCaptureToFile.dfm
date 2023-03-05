@@ -3,7 +3,7 @@ object Frm_SimpleCapture: TFrm_SimpleCapture
   Top = 0
   Caption = 'Mf Simple Capture To File example'
   ClientHeight = 197
-  ClientWidth = 320
+  ClientWidth = 341
   Color = clBtnFace
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
@@ -12,7 +12,7 @@ object Frm_SimpleCapture: TFrm_SimpleCapture
   Font.Style = []
   Menu = MainMenu1
   OldCreateOrder = False
-  Position = poDesktopCenter
+  Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   PixelsPerInch = 96
@@ -20,7 +20,7 @@ object Frm_SimpleCapture: TFrm_SimpleCapture
   object pnlControls: TPanel
     Left = 0
     Top = 158
-    Width = 320
+    Width = 341
     Height = 39
     Align = alBottom
     BevelInner = bvLowered
@@ -31,6 +31,8 @@ object Frm_SimpleCapture: TFrm_SimpleCapture
     Font.Style = []
     ParentFont = False
     TabOrder = 0
+    ExplicitTop = 160
+    ExplicitWidth = 320
     object butStopCapture: TButton
       Left = 92
       Top = 7
@@ -38,6 +40,7 @@ object Frm_SimpleCapture: TFrm_SimpleCapture
       Height = 25
       Hint = 'Stop Capturing'
       Caption = 'Stop Capture'
+      Enabled = False
       Font.Charset = ANSI_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -70,7 +73,7 @@ object Frm_SimpleCapture: TFrm_SimpleCapture
   object Panel1: TPanel
     Left = 0
     Top = 0
-    Width = 320
+    Width = 341
     Height = 158
     Align = alClient
     BevelOuter = bvNone
@@ -81,8 +84,9 @@ object Frm_SimpleCapture: TFrm_SimpleCapture
     Font.Style = []
     ParentFont = False
     TabOrder = 1
+    ExplicitTop = 1
     object Label1: TLabel
-      Left = 6
+      Left = 18
       Top = 8
       Width = 109
       Height = 13
@@ -95,7 +99,7 @@ object Frm_SimpleCapture: TFrm_SimpleCapture
       ParentFont = False
     end
     object Label2: TLabel
-      Left = 6
+      Left = 18
       Top = 56
       Width = 56
       Height = 13
@@ -110,11 +114,11 @@ object Frm_SimpleCapture: TFrm_SimpleCapture
     object Bevel1: TBevel
       Left = 6
       Top = 99
-      Width = 304
+      Width = 325
       Height = 50
     end
     object cbxSelectDevice: TComboBox
-      Left = 6
+      Left = 18
       Top = 24
       Width = 304
       Height = 21
@@ -127,7 +131,7 @@ object Frm_SimpleCapture: TFrm_SimpleCapture
       TabOrder = 0
     end
     object edOutputFile: TEdit
-      Left = 6
+      Left = 18
       Top = 72
       Width = 304
       Height = 21
