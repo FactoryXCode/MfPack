@@ -228,7 +228,7 @@ const
 
   function MFPutWorkItemEx2(dwQueue: DWORD;
                             Priority: LONG;
-                            var pResult: IMFAsyncResult): HResult; stdcall;
+                            pResult: IMFAsyncResult): HResult; stdcall;
   {$EXTERNALSYM MFPutWorkItemEx2}
   // Puts an asynchronous operation on a work queue, with a specified priority.
   // Parameters
