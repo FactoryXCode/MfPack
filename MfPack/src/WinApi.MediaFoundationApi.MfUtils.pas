@@ -26,6 +26,8 @@
 // 13/08/2022 Tony                Implemented more functionality and updated methods.
 // 11/12/2022 Tony                Added some modifications.
 // 20/02/2023 Tony                Fixed some issues with SafeRelease/SaveDelete.
+// 11/03/2023 Tony                Added CreateFile2 function (fileapi.h). See:
+//                                https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfile2
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -467,11 +469,17 @@ type
   function BoolToStr(const aBoolean: Boolean): string; inline;
 
 
+  // Since Win 10, use this function to create a file.
+  function CreateFile2(lpFileName: PWideChar;
+      {[in]}           dwDesiredAccess: DWORD;
+      {[in]}           dwShareMode: DWORD;
+      {[in]}           dwCreationDisposition: DWORD;
+      {[in, optional]} pCreateExParams: LPCREATEFILE2_EXTENDED_PARAMETERS): THandle; stdcall;
+
 implementation
 
 uses
-  TypInfo;
-
+  System.TypInfo;
 
 const
   Kernel32Lib = 'kernel32.dll';
@@ -1887,5 +1895,8 @@ begin
   else
     Result := 'False';
 end;
+
+
+function CreateFile2; external Kernel32Lib name 'CreateFile2';
 
 end.

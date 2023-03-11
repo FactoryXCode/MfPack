@@ -607,39 +607,40 @@ const
                               dwFlags: DWORD): LPMMIOPROC; stdcall;
   {$EXTERNALSYM mmioInstallIOProcW}
 
-
-  function mmioOpen(pszFileName: PWideChar;
-                    pmmioinfo: LPCMMIOINFO;
-                    fdwOpen: DWORD): HMMIO; stdcall;
+  // This funtion is deprecated. Instead use CreateFile or CreateFile2.
+  function mmioOpen(szFileName: LPWSTR;
+                    lpmmioinfo: PMMIOInfo;
+                    dwOpenFlags: DWORD): HMMIO; stdcall;
   {$EXTERNALSYM mmioOpen}
 
-  function mmioOpenA(pszFileName: PAnsiChar;
-                    pmmioinfo: LPCMMIOINFO;
-                    fdwOpen: DWORD): HMMIO; stdcall;
+  function mmioOpenA(szFileName: LPSTR;
+                     szNewFileName: LPSTR;
+                     lpmmioinfo: PMMIOInfo;
+                     dwRenameFlags: DWORD): HMMIO; stdcall;
   {$EXTERNALSYM mmioOpenA}
 
-  function mmioOpenW(pszFileName: PWideChar;
-                     pmmioinfo: LPCMMIOINFO;
-                     fdwOpen: DWORD): HMMIO; stdcall;
+  function mmioOpenW(szFileName: LPWSTR;
+                     lpmmioinfo: PMMIOInfo;
+                     dwOpenFlags: DWORD): HMMIO; stdcall;
   {$EXTERNALSYM mmioOpenW}
 
 
-  function mmioRename(pszFileName: PWideChar;
-                      pszNewFileName: PWideChar;
-                      {_In_opt_} pmmioinfo: LPCMMIOINFO;
-                      fdwRename: DWORD): MMRESULT; stdcall;
+  function mmioRename(szFileName:LPWSTR;
+                      szNewFileName: LPWSTR;
+                      lpmmioinfo: PMMIOInfo;
+                      dwRenameFlags: DWORD): MMRESULT; stdcall;
   {$EXTERNALSYM mmioRename}
 
-  function mmioRenameA(pszFileName: PAnsiChar;
-                       pszNewFileName: PAnsiChar;
-                       {_In_opt_} pmmioinfo: LPCMMIOINFO;
-                       fdwRename: DWORD): MMRESULT; stdcall;
+  function mmioRenameA(szFileName: LPSTR;
+                       szNewFileName: LPSTR;
+                       lpmmioinfo: PMMIOInfo;
+                       dwRenameFlags: DWORD): MMRESULT; stdcall;
   {$EXTERNALSYM mmioRenameA}
 
-  function mmioRenameW(pszFileName: PWideChar;
-                       pszNewFileName: PWideChar;
-                       {_In_opt_} pmmioinfo: LPCMMIOINFO;
-                       fdwRename: DWORD): MMRESULT; stdcall;
+  function mmioRenameW(szFileName: LPWSTR;
+                       szNewFileName: LPWSTR;
+                       lpmmioinfo: PMMIOInfo;
+                       dwRenameFlags: DWORD): MMRESULT; stdcall;
   {$EXTERNALSYM mmioRenameW}
 
   function mmioClose(hmmio: HMMIO;
@@ -735,6 +736,7 @@ function mmioInstallIOProc; external MMiscApiLib name 'mmioInstallIOProcW';
 function mmioInstallIOProcA; external MMiscApiLib name 'mmioInstallIOProcA';
 function mmioInstallIOProcW; external MMiscApiLib name 'mmioInstallIOProcW';
 
+// Deprecated
 function mmioOpen; external MMiscApiLib name 'mmioOpenW';
 function mmioOpenA; external MMiscApiLib name 'mmioOpenA';
 function mmioOpenW; external MMiscApiLib name 'mmioOpenW';
