@@ -139,8 +139,8 @@ SDK version: 10.0.22621.0 (Windows 11)
 
 **LoopBackCapture**
 
-*This sample shows, how to capture sound from your soundcard using WASAPI and save this capture
-*with the quality that is supported by your soundcard.
+*This sample shows, how to capture sound from your soundcard using WASAPI and save this capture*
+*with the quality that is supported by your soundcard.*
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopBackCapture.png)
 
