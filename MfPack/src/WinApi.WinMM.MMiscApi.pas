@@ -24,6 +24,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 12/03/2023 Tony                Updated mmio
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -380,7 +381,7 @@ type
   { a huge version of LPSTR }
 
   PHMMIO = ^HMMIO;
-  HMMIO = IntPtr;      { a handle to an open file }
+  HMMIO = IntPtr;      {a handle to an open file}
   {$EXTERNALSYM HMMIO}
 
 
@@ -598,13 +599,13 @@ const
   {$EXTERNALSYM mmioInstallIOProc}
 
   function mmioInstallIOProcA(fccIOProc: FOURCC;
-                              {_In_opt_} pIOProc: LPMMIOPROC;
+                              {_In_opt_} pIOProc: PMMIOPROC;
                               dwFlags: DWORD): LPMMIOPROC; stdcall;
   {$EXTERNALSYM mmioInstallIOProcA}
 
   function mmioInstallIOProcW(fccIOProc: FOURCC;
-                              {_In_opt_} pIOProc: LPMMIOPROC;
-                              dwFlags: DWORD): LPMMIOPROC; stdcall;
+                              {_In_opt_} pIOProc: PMMIOPROC;
+                              dwFlags: DWORD): PMMIOPROC; stdcall;
   {$EXTERNALSYM mmioInstallIOProcW}
 
   // This funtion is deprecated. Instead use CreateFile or CreateFile2.
@@ -663,12 +664,12 @@ const
   {$EXTERNALSYM mmioSeek}
 
   function mmioGetInfo(hmmio: HMMIO;
-                       lpmmioinfo: LPMMIOINFO;
+                       lpmmioinfo: PMMIOINFO;
                        uFlags: UINT): MMRESULT; stdcall;
   {$EXTERNALSYM mmioGetInfo}
 
   function mmioSetInfo(hmmio: HMMIO;
-                       lpmmioinfo: LPMMIOINFO;
+                       lpmmioinfo: PMMIOINFO;
                        uFlags: UINT): MMRESULT; stdcall;
   {$EXTERNALSYM mmioSetInfo}
 
@@ -683,7 +684,7 @@ const
   {$EXTERNALSYM mmioFlush}
 
   function mmioAdvance(hmmio: HMMIO;
-                       lpmmioinfo: LPMMIOINFO; uFlags: UINT): MMRESULT; stdcall;
+                       lpmmioinfo: PMMIOINFO; uFlags: UINT): MMRESULT; stdcall;
   {$EXTERNALSYM mmioAdvance}
 
   function mmioSendMessage(hmmio: HMMIO;
@@ -694,17 +695,17 @@ const
 
   function mmioDescend(hmmio: HMMIO;
                        lpck: LPMMCKINFO;
-                       lpckParent: LPMMCKINFO;
+                       lpckParent: PMMCKINFO;
                        uFlags: UINT): MMRESULT; stdcall;
   {$EXTERNALSYM mmioDescend}
 
   function mmioAscend(hmmio: HMMIO;
-                      lpck: LPMMCKINFO;
+                      lpck: PMMCKINFO;
                       uFlags: UINT): MMRESULT; stdcall;
   {$EXTERNALSYM mmioAscend}
 
   function mmioCreateChunk(hmmio: HMMIO;
-                           lpck: LPMMCKINFO;
+                           lpck: PMMCKINFO;
                            uFlags: UINT): MMRESULT; stdcall;
   {$EXTERNALSYM mmioCreateChunk}
 
@@ -736,8 +737,8 @@ function mmioInstallIOProc; external MMiscApiLib name 'mmioInstallIOProcW';
 function mmioInstallIOProcA; external MMiscApiLib name 'mmioInstallIOProcA';
 function mmioInstallIOProcW; external MMiscApiLib name 'mmioInstallIOProcW';
 
-// Deprecated
-function mmioOpen; external MMiscApiLib name 'mmioOpenW';
+
+function mmioOpen; external MMiscApiLib name 'mmioOpenW'; // Deprecated
 function mmioOpenA; external MMiscApiLib name 'mmioOpenA';
 function mmioOpenW; external MMiscApiLib name 'mmioOpenW';
 

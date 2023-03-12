@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 12/03/2023 Tony                Updated to match mmio
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -70,7 +71,8 @@ uses
   WinApi.Windows,
   WinApi.WinApiTypes,
   WinApi.WinError,
-  WinApi.WinMM.MMReg,  // for WAVEFORMATEX
+  //WinApi.WinMM.MMReg,  // for WAVEFORMATEX
+  WinApi.WinMM.MMeApi,
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioMediaType,
   WinApi.CoreAudioApi.AudioSessionTypes;
@@ -268,12 +270,12 @@ type
   IAudioClient = interface(IUnknown)
   ['{1CB9AD4C-DBFA-4c32-B178-C2F568A703B2}']
 
-    function Initialize(const ShareMode: AUDCLNT_SHAREMODE;
-                        const StreamFlags: DWord;
+    function Initialize(ShareMode: AUDCLNT_SHAREMODE;
+                        StreamFlags: DWord;
                         hnsBufferDuration: REFERENCE_TIME;
                         hnsPeriodicity: REFERENCE_TIME;
-                        const pFormat: PWaveFormatEx;
-                        {optional, can be Nil or a pointer to GUID_NULL} AudioSessionGuid: LPCGUID): HResult; stdcall;
+                        pFormat: PWAVEFORMATEX;
+                        {optional, can be Nil or a pointer to GUID_NULL} const AudioSessionGuid: {LPC}TGUID): HResult; stdcall;
     // Description:
     //
     //  Initializes the audio stream by creating a connection to the Windows Audio System (WAS)
@@ -536,7 +538,7 @@ type
     //  This method does not require that the Initialize method be called first.
     //
 
-    function GetMixFormat(out ppDeviceFormat: PWAVEFORMATEX): HResult; stdcall;
+    function GetMixFormat([ref] const ppDeviceFormat: PWAVEFORMATEX): HResult; stdcall;
     // Description:
     //
     //  Returns the current format of the WAS for this device. This is a device method

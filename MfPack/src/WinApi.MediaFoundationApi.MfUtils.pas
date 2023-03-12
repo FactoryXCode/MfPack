@@ -1726,10 +1726,10 @@ function MAKEFOURCC(const ch0: AnsiChar;
                     const ch2: AnsiChar;
                     const ch3: AnsiChar): FOURCC; inline;
 begin
-  Result := DWORD(Ord(ch3)) or
-            (DWORD(Ord(ch2)) shl 8) or
-            (DWORD(Ord(ch1)) shl 16) or
-            (DWORD(Ord(ch0)) shl 24);
+  Result := DWORD(Ord(ch0)) or
+            (DWORD(Ord(ch1)) shl 8) or
+            (DWORD(Ord(ch2)) shl 16) or
+            (DWORD(Ord(ch3)) shl 24);
 end;
 
 
@@ -1738,12 +1738,12 @@ end;
 // Get FOURCC as string
 function GETFOURCC(frcc: FOURCC): WideString; inline;
 var
-    afc : array[0..3] of AnsiChar;
+  afc : array[0..3] of AnsiChar;
 begin
-  afc[3] := AnsiChar(ord(frcc));
-  afc[2] := AnsiChar(ord(frcc shr 8));
-  afc[1] := AnsiChar(ord(frcc shr 16));
-  afc[0] := AnsiChar(ord(frcc shr 24));
+  afc[0] := AnsiChar(ord(frcc));
+  afc[1] := AnsiChar(ord(frcc shr 8));
+  afc[2] := AnsiChar(ord(frcc shr 16));
+  afc[3] := AnsiChar(ord(frcc shr 24));
   Result := UpperCase(WideString(afc));
 end;
 

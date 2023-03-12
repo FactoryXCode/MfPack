@@ -108,33 +108,33 @@ const
 
   // The DEVICE_STATE_XXX constants indicate the current state of an audio endpoint device.
 
-  DEVICE_STATE_ACTIVE                 = $00000001;  // The audio endpoint device is active.
-  {$EXTERNALSYM DEVICE_STATE_ACTIVE}                // That is, the audio adapter that connects to the endpoint device is present and enabled.
-                                                    // In addition, if the endpoint device plugs into a jack on the adapter,
-                                                    // then the endpoint device is plugged in.
+  DEVICE_STATE_ACTIVE                 = DWORD($00000001);  // The audio endpoint device is active.
+  {$EXTERNALSYM DEVICE_STATE_ACTIVE}                       // That is, the audio adapter that connects to the endpoint device is present and enabled.
+                                                           // In addition, if the endpoint device plugs into a jack on the adapter,
+                                                           // then the endpoint device is plugged in.
 
-  DEVICE_STATE_DISABLED               = $00000002;  // The audio endpoint device is disabled.
-  {$EXTERNALSYM DEVICE_STATE_DISABLED}              // The user has disabled the device in the Windows multimedia control panel,
-                                                    // Mmsys.cpl.
+  DEVICE_STATE_DISABLED               = DWORD($00000002);  // The audio endpoint device is disabled.
+  {$EXTERNALSYM DEVICE_STATE_DISABLED}                     // The user has disabled the device in the Windows multimedia control panel,
+                                                           // Mmsys.cpl.
 
-  DEVICE_STATE_NOTPRESENT             = $00000004;  // The audio endpoint device is not present because the audio adapter that connects to
-  {$EXTERNALSYM DEVICE_STATE_NOTPRESENT}            // the endpoint device has been removed from the system,
-                                                    // or the user has disabled the adapter device in Device Manager.
+  DEVICE_STATE_NOTPRESENT             = DWORD($00000004);  // The audio endpoint device is not present because the audio adapter that connects to
+  {$EXTERNALSYM DEVICE_STATE_NOTPRESENT}                   // the endpoint device has been removed from the system,
+                                                           // or the user has disabled the adapter device in Device Manager.
 
-  DEVICE_STATE_UNPLUGGED              = $00000008;  // The audio endpoint device is unplugged.
-  {$EXTERNALSYM DEVICE_STATE_UNPLUGGED}              // The audio adapter that contains the jack for the endpoint device is present and enabled,
-                                                    // but the endpoint device is not plugged into the jack.
-                                                    // Only a device with jack-presence detection can be in this state.
-                                                    // For more information about jack-presence detection, see Audio Endpoint Devices.
+  DEVICE_STATE_UNPLUGGED              = DWORD($00000008);  // The audio endpoint device is unplugged.
+  {$EXTERNALSYM DEVICE_STATE_UNPLUGGED}                    // The audio adapter that contains the jack for the endpoint device is present and enabled,
+                                                           // but the endpoint device is not plugged into the jack.
+                                                           // Only a device with jack-presence detection can be in this state.
+                                                           // For more information about jack-presence detection, see Audio Endpoint Devices.
 
-  DEVICE_STATEMASK_ALL                = $0000000F;  // Includes audio endpoint devices in all states—active, disabled, not present, and unplugged.
+  DEVICE_STATEMASK_ALL                = DWORD($0000000F);  // Includes audio endpoint devices in all states—active, disabled, not present, and unplugged.
   {$EXTERNALSYM DEVICE_STATEMASK_ALL}
 
 
-  ENDPOINT_SYSFX_ENABLED              = $00000000;  // System Effects are enabled.
+  ENDPOINT_SYSFX_ENABLED              = DWORD($00000000);  // System Effects are enabled.
   {$EXTERNALSYM ENDPOINT_SYSFX_ENABLED}
 
-  ENDPOINT_SYSFX_DISABLED             = $00000001;  // System Effects are disabled.
+  ENDPOINT_SYSFX_DISABLED             = DWORD($00000001);  // System Effects are disabled.
   {$EXTERNALSYM ENDPOINT_SYSFX_DISABLED}
 
 
@@ -258,7 +258,7 @@ const
 
 type
   // LPCGUID = PGUID;   // declared in WinApi.MediaFoundationApi.MfTypes, See: ComObj for TGuid specs
-  HANDLE = System.THandle;
+  // HANDLE = System.THandle;
 
   // Note:
   // Skip the auto wrapper MIDL recordnames generated for COM enumerations (__MIDL___MIDL_itf_name_xxx_xxx)
@@ -523,7 +523,7 @@ type
 
     function GetId(out ppstrId: PWideChar): HRESULT; stdcall;    //250815a, modified; issue reported by mbergstrand
 
-    function GetState(out pdwState: UINT): HRESULT; stdcall;
+    function GetState(out pdwState: DWord): HRESULT; stdcall;
     // Parameters
     // pdwState [out]
     //  Pointer to a DWORD variable into which the method writes the current state of the device.
@@ -664,9 +664,9 @@ type
                                      role: eRole;
                                      out ppEndpoint: IMMDevice): HRESULT; stdcall;
 
-    function GetDevice(pwstrId: PWChar;  // Pointer to a string containing the endpoint ID.
-                                         // The caller typically obtains this string from the IMMDevice.GetId method or
-                                         // from one of the methods in the IMMNotificationClient interface.
+    function GetDevice(pwstrId: LPCWSTR;  // Pointer to a string containing the endpoint ID.
+                                          // The caller typically obtains this string from the IMMDevice.GetId method or
+                                          // from one of the methods in the IMMNotificationClient interface.
                        out ppDevice: IMMDevice): HRESULT; stdcall;
 
     function RegisterEndpointNotificationCallback(pClient: IMMNotificationClient): HRESULT; stdcall;
