@@ -1,6 +1,10 @@
 # MfPack
 
  Delphi translations for Microsoft Media Foundation and related API's.
+ 
+If you have a request, question or idea, please commit to [Discussions](https://github.com/FactoryXCode/MfPack/discussions).
+
+If you encounter a bug, [Issues](https://github.com/FactoryXCode/MfPack/issues) is the right place to drop.
 
 # MfPack covers the Delphi translations of:
 
@@ -16,7 +20,6 @@
 - MPEG2 API.
 - The COMPLETE Windows Media (WinMM) API.
 - Media Foundation samples.
-
 
 # <u>Latest release:</u> 
 
