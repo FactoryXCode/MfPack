@@ -142,7 +142,7 @@ begin
   if bAppIsClosing then
     Exit;
 
-  if (Msg.Msg = WM_STOPREQUEST) then // Check for timer messages
+  if (Msg.Msg = WM_STOPREQUEST) then // Check for "stop recording" request send from the main window.
     try
       bStopRec := Boolean(Msg.WParam);
     except
