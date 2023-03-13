@@ -4,7 +4,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   BorderStyle = bsDialog
   Caption = 'Loopback Capture Sample'
   ClientHeight = 147
-  ClientWidth = 358
+  ClientWidth = 430
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -31,8 +31,8 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   end
   object lblFileExt: TLabel
     Left = 299
-    Top = 40
-    Width = 41
+    Top = 39
+    Width = 50
     Height = 21
     Hint = 'Enter a file name without extension.'
     AutoSize = False
@@ -70,7 +70,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   end
   object edFileName: TEdit
     Left = 34
-    Top = 40
+    Top = 39
     Width = 265
     Height = 21
     Alignment = taRightJustify
@@ -90,7 +90,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   object sbMsg: TStatusBar
     Left = 0
     Top = 123
-    Width = 358
+    Width = 430
     Height = 24
     Panels = <>
     SimplePanel = True
@@ -108,5 +108,18 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     ShowHint = True
     TabOrder = 4
     OnClick = butPlayDataClick
+  end
+  object cbxDontOverWrite: TCheckBox
+    Left = 88
+    Top = 18
+    Width = 115
+    Height = 15
+    Hint = 'Do not overwrite files with the same name.'
+    Caption = 'Don'#39't Overwrite'
+    Checked = True
+    ParentShowHint = False
+    ShowHint = True
+    State = cbChecked
+    TabOrder = 5
   end
 end

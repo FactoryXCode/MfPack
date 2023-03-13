@@ -71,6 +71,7 @@ uses
   Winapi.ShellAPI,
   {System}
   System.SysUtils,
+  System.DateUtils,
   System.Variants,
   System.Classes,
   {Vcl}
@@ -80,12 +81,14 @@ uses
   Vcl.Dialogs,
   Vcl.StdCtrls,
   Vcl.ComCtrls,
+  Vcl.Menus,
   {WinMM}
   WinApi.WinMM.MMiscApi,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
   {Application}
-  WasapiLoopback;
+  WasapiLoopback,
+  Utils;
 
 type
   TfrmLoopBackCapture = class(TForm)
@@ -96,6 +99,7 @@ type
     lblFileExt: TLabel;
     sbMsg: TStatusBar;
     butPlayData: TButton;
+    cbxDontOverWrite: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure butStartClick(Sender: TObject);
     procedure butStopClick(Sender: TObject);
@@ -105,8 +109,8 @@ type
   private
     { Private declarations }
     oAudioSink: TAudioSink;
-    aFileName: LPWSTR;
     iProgress: Int64;
+    sFileName: string;
 
     function StartCapture(): HResult;
 
@@ -149,13 +153,15 @@ end;
 procedure TfrmLoopBackCapture.OnAudioSinkProgressEvent(var aMessage: TMessage);
 begin
   inc(iProgress, aMessage.WParam);
-  sbMsg.SimpleText := Format('Bytes processed: %d',[iProgress]);
+  sbMsg.SimpleText := Format('Capturing from source: Bytes processed: %d',[iProgress]);
 end;
 
 
 function TfrmLoopBackCapture.StartCapture(): HResult;
 var
   hr: HResult;
+  i: Integer;
+  bFileExists: Boolean;
 
 label
   done;
@@ -164,7 +170,7 @@ begin
   hr := S_OK;
   iProgress := 0;
   // Create the AudioSink object.
-  oAudioSink := TAudioSink.Create(Handle);
+  //oAudioSink := TAudioSink.Create(Handle);
 
   if not Assigned(oAudioSink) then
     begin
@@ -174,12 +180,30 @@ begin
 
   if SUCCEEDED(hr) then
     begin
-      aFileName := StrToPWideChar(edFileName.Text + lblFileExt.Caption);
+      sFileName := Format('%s%s', [edFileName.Text, lblFileExt.Caption]);
+
+      if cbxDontOverWrite.Checked then
+        begin
+          bFileExists := True;
+          i := 0;
+          while (bFileExists = True) do
+            begin
+              if FileExists(sFileName) then
+                begin
+                  sFileName := Format('%s(%d)%s', [edFileName.Text, i, lblFileExt.Caption]);
+                  Inc(i);
+                end
+              else
+               bFileExists := False;
+            end;
+        end;
+
       butStop.Enabled := True;
       butStart.Enabled := False;
       butPlayData.Enabled := False;
+      // Capture the audio stream from the default rendering device.
       hr := oAudioSink.RecordAudioStream(oAudioSink,
-                                         aFileName);
+                                         StrToPWideChar(sFileName));
       if FAILED(hr) then
         begin
           butStop.Enabled := False;
@@ -196,11 +220,12 @@ procedure TfrmLoopBackCapture.butPlayDataClick(Sender: TObject);
 begin
   ShellExecute(Handle,
                'open',
-               StrToPWideChar(edFileName.Text + lblFileExt.Caption),
+               StrToPWideChar(sFileName),
                nil,
                nil,
                SW_SHOWNORMAL) ;
 end;
+
 
 procedure TfrmLoopBackCapture.butStartClick(Sender: TObject);
 begin
@@ -210,7 +235,11 @@ end;
 
 procedure TfrmLoopBackCapture.butStopClick(Sender: TObject);
 begin
-  SendMessage(oAudioSink.hwHWND, WM_STOPREQUEST, 1, 0);
+  SendMessage(oAudioSink.hwHWND,
+              WM_STOPREQUEST,
+              1,
+              0);
+  HandleThreadMessages(GetCurrentThread(), 100);
 end;
 
 
@@ -244,6 +273,9 @@ begin
                    MB_ICONSTOP);
         Abort();
       end;
+
+  // Create the AudioSink object.
+  oAudioSink := TAudioSink.Create(Handle);
 end;
 
 end.
