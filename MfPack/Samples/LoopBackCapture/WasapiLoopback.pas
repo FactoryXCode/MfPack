@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: Â© FactoryX. All rights reserved.
+// Copyright: © FactoryX. All rights reserved.
 //
 // Project: MfPack - MediaFoundation
 // Project location: https://sourceforge.net/projects/MFPack
@@ -98,10 +98,11 @@ type
   protected
     hThreadId: TThreadID;
     hmFile: HMMIO;
+    hPipe: THandle; // The returned pipe or mailslot from OpenFile
+
   private
     bStopRec: Boolean;
     bAppIsClosing: Boolean;
-    pFileName: LPWSTR;
     hwOwner: HWND; // The handle of the caller.
 
     procedure WndProc(var Msg: TMessage);
@@ -117,7 +118,7 @@ type
     function FinishWaveFile(var pckRIFF: MMCKINFO;
                             var pckData: MMCKINFO): UINT;
 
-    function OpenFile(): HResult;
+    function OpenFile(ppfileName: LPWSTR): HResult;
 
   public
     hwHWND: HWND; // the handle of this object.
@@ -142,7 +143,7 @@ begin
   if bAppIsClosing then
     Exit;
 
-  if (Msg.Msg = WM_STOPREQUEST) then // Check for "stop recording" request send from the main window.
+  if (Msg.Msg = WM_STOPREQUEST) then // Check for timer messages
     try
       bStopRec := Boolean(Msg.WParam);
     except
@@ -404,9 +405,10 @@ label
   done;
 
 begin
-  pFileName := ppFileName;
+  bStopRec := False;
+
   // Create the initial audio file
-  hr := OpenFile();
+  hr := OpenFile(ppFileName);
   if FAILED(hr) then
     goto done;
 
@@ -540,8 +542,11 @@ begin
                        ckRIFF);
 
 done:
-   mmioClose(hmFile,
-                0);
+  mmioClose(hmFile,
+            0);
+
+  //if (hPipe <> 0) then
+  //  CloseHandle(hPipe);
 
   // Send capturing stopped.
   SendMessage(hwOwner,
@@ -554,25 +559,50 @@ done:
 end;
 
 
-function TAudioSink.OpenFile(): HResult;
+function TAudioSink.OpenFile(ppfileName: LPWSTR): HResult;
 var
   hr: HResult;
   mi: PMMIOINFO;
 
 begin
   hr := S_OK;
+  // The mmioOpen function is deprecated!
+  // But if you still want to use it, un-comment the code below and comment out the CreateFile stuff.
   // Must set PMMIOINFO to nil otherwise mmioOpen wil raise a pointer error.
   mi := nil;
-  hmFile := mmioOpen(pFileName,     // some flags cause mmioOpen write to this buffer
+  hmFile := mmioOpen(ppFileName,    // some flags cause mmioOpen write to this buffer
                      mi,            // but not any that we're using
                      MMIO_WRITE or MMIO_CREATE);
 
   if (hmFile = 0) then
     begin
       hr := E_FAIL;
-      ErrMsg(Format('mmioOpen(%s) failed. wErrorRet = %d',[WideCharToString(pFileName) , GetLastError()]), hr);
+      ErrMsg(Format('mmioOpen(%s) failed. wErrorRet = %d',[WideCharToString(ppFileName) , GetLastError()]), hr);
     end;
 
+  //hPipe := CreateFile2(ppFileName,
+  //                     FILE_SHARE_DELETE or FILE_SHARE_READ or FILE_SHARE_WRITE,
+  //                    0,
+  //                     CREATE_ALWAYS,
+  //                     nil);
+
+  //hPipe := CreateFile(ppFileName,
+  //                    GENERIC_READ or GENERIC_WRITE,
+  //                    FILE_SHARE_DELETE or FILE_SHARE_READ or FILE_SHARE_WRITE,
+  //                    nil,
+  //                    CREATE_ALWAYS,
+  //                    FILE_ATTRIBUTE_NORMAL,
+  //                    0);
+
+  //if (hPipe = INVALID_HANDLE_VALUE) then
+  //  begin
+  //    hr := E_FAIL;
+  //    hPipe := 0;
+  //    ErrMsg(Format('CreateFile(%s) failed. wErrorRet = %d',[WideCharToString(ppFileName) , GetLastError()]), hr);
+  //  end;
+
+ //if (hPipe <> 0) then
+ //   CloseHandle(hPipe);
   Result := hr;
 end;
 
