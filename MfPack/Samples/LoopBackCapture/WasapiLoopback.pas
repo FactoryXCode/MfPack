@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: Â© FactoryX. All rights reserved.
 //
 // Project: MfPack - MediaFoundation
 // Project location: https://sourceforge.net/projects/MFPack
@@ -111,11 +111,11 @@ type
                       pwfx: PWAVEFORMATEX): HResult;
 
     function WriteWaveHeader(pwfx: PWAVEFORMATEX;
-                             pckRIFF: MMCKINFO;
-                             pckData: MMCKINFO): UINT;
+                             var pckRIFF: MMCKINFO;
+                             var pckData: MMCKINFO): UINT;
 
-    function FinishWaveFile(pckRIFF: MMCKINFO;
-                            pckData: MMCKINFO): UINT;
+    function FinishWaveFile(var pckRIFF: MMCKINFO;
+                            var pckData: MMCKINFO): UINT;
 
     function OpenFile(): HResult;
 
@@ -223,8 +223,8 @@ end;
 // /////////////////////////////////////////////////////////////////////////////
 
 function TAudioSink.WriteWaveHeader(pwfx: PWAVEFORMATEX;
-                                    pckRIFF: MMCKINFO;
-                                    pckData: MMCKINFO): UINT;
+                                    var pckRIFF: MMCKINFO;
+                                    var pckData: MMCKINFO): UINT;
 var
   mResult: MMRESULT;
   mChunk: MMCKINFO;
@@ -338,8 +338,8 @@ begin
 end;
 
 
-function TAudioSink.FinishWaveFile(pckRIFF: MMCKINFO;
-                                   pckData: MMCKINFO): UINT;
+function TAudioSink.FinishWaveFile(var pckRIFF: MMCKINFO;
+                                   var pckData: MMCKINFO): UINT;
 var
   mResult: MMRESULT;
 
@@ -570,7 +570,7 @@ begin
   if (hmFile = 0) then
     begin
       hr := E_FAIL;
-      ErrMsg(Format('CreateFile2(%s) failed. wErrorRet = %d',[WideCharToString(pFileName) , GetLastError()]), hr);
+      ErrMsg(Format('mmioOpen(%s) failed. wErrorRet = %d',[WideCharToString(pFileName) , GetLastError()]), hr);
     end;
 
   Result := hr;
