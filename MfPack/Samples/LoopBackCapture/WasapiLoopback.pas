@@ -71,6 +71,8 @@ uses
   {System}
   System.Classes,
   System.SysUtils,
+  {ActiveX}
+  WinApi.ActiveX.ObjBase,
   {WinMM}
   WinApi.WinMM.MMSysCom,
   WinApi.WinMM.MMiscApi,
@@ -81,6 +83,7 @@ uses
   WinApi.CoreAudioApi.AudioSessionTypes,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfApi,
   {Application}
   Utils;
 
@@ -96,9 +99,7 @@ type
 
   TAudioSink = class(TObject)
   protected
-    hThreadId: TThreadID;
     hmFile: HMMIO;
-    hPipe: THandle; // The returned pipe or mailslot from OpenFile
 
   private
     bStopRec: Boolean;
@@ -162,8 +163,27 @@ end;
 
 
 constructor TAudioSink.Create(hwEvents: HWND);
+var
+  hr: HResult;
+
 begin
   inherited Create();
+
+  hr := CoInitializeEx(nil,
+                       COINIT_MULTITHREADED);
+
+  if SUCCEEDED(hr) then
+    // Check if the current MF version match user's
+    if FAILED(MFStartup(MF_VERSION, 0)) then
+      begin
+        MessageBox(0,
+                   LPCWSTR('Your computer does not support this Media Foundation API version' +
+                           IntToStr(MF_VERSION) + '.'),
+                   LPCWSTR('MFStartup Failure!'),
+                   MB_ICONSTOP);
+        Abort();
+      end;
+
   hwOwner := hwEvents;
   bAppIsClosing := False;
   hwHWND := AllocateHWnd(WndProc);
@@ -210,13 +230,13 @@ begin
       goto done;
     end;
 
-  // Send score
+  HandleThreadMessages(GetCurrentThread);
+
+  // Send score. Don't use PostMessage because it set priority above this thread.
   SendMessage(hwOwner,
               WM_PROGRESSNOTIFY,
               NumFrames,
               0);
-
-  HandleThreadMessages(GetCurrentThread(), 100);
 done:
   Result := hr;
 end;
@@ -401,11 +421,16 @@ var
   //
   cycle : Int64;
 
+  pu64DevicePosition: UINT64;
+  pu64QPCPosition: UINT64;
+
 label
   done;
 
 begin
   bStopRec := False;
+  pu64DevicePosition := 0;
+  pu64QPCPosition := 0;
 
   // Create the initial audio file
   hr := OpenFile(ppFileName);
@@ -500,8 +525,8 @@ begin
           hr := pCaptureClient.GetBuffer(pData,
                                          numFramesAvailable,
                                          flags,
-                                         0,
-                                         0);
+                                         pu64DevicePosition,
+                                         pu64QPCPosition);
           if FAILED(hr) then
             goto done;
 
@@ -542,11 +567,8 @@ begin
                        ckRIFF);
 
 done:
-  mmioClose(hmFile,
-            0);
-
-  //if (hPipe <> 0) then
-  //  CloseHandle(hPipe);
+   mmioClose(hmFile,
+             0);
 
   // Send capturing stopped.
   SendMessage(hwOwner,
@@ -566,8 +588,9 @@ var
 
 begin
   hr := S_OK;
-  // The mmioOpen function is deprecated!
-  // But if you still want to use it, un-comment the code below and comment out the CreateFile stuff.
+
+  // The mmioOpen() function is deprecated, but still can be used in Win 11
+
   // Must set PMMIOINFO to nil otherwise mmioOpen wil raise a pointer error.
   mi := nil;
   hmFile := mmioOpen(ppFileName,    // some flags cause mmioOpen write to this buffer
@@ -580,29 +603,6 @@ begin
       ErrMsg(Format('mmioOpen(%s) failed. wErrorRet = %d',[WideCharToString(ppFileName) , GetLastError()]), hr);
     end;
 
-  //hPipe := CreateFile2(ppFileName,
-  //                     FILE_SHARE_DELETE or FILE_SHARE_READ or FILE_SHARE_WRITE,
-  //                    0,
-  //                     CREATE_ALWAYS,
-  //                     nil);
-
-  //hPipe := CreateFile(ppFileName,
-  //                    GENERIC_READ or GENERIC_WRITE,
-  //                    FILE_SHARE_DELETE or FILE_SHARE_READ or FILE_SHARE_WRITE,
-  //                    nil,
-  //                    CREATE_ALWAYS,
-  //                    FILE_ATTRIBUTE_NORMAL,
-  //                    0);
-
-  //if (hPipe = INVALID_HANDLE_VALUE) then
-  //  begin
-  //    hr := E_FAIL;
-  //    hPipe := 0;
-  //    ErrMsg(Format('CreateFile(%s) failed. wErrorRet = %d',[WideCharToString(ppFileName) , GetLastError()]), hr);
-  //  end;
-
- //if (hPipe <> 0) then
- //   CloseHandle(hPipe);
   Result := hr;
 end;
 

@@ -67,7 +67,6 @@ uses
   WinApi.Windows,
   WinApi.Messages,
   WinApi.ComBaseApi,
-  WinApi.ActiveX.ObjBase,
   Winapi.ShellAPI,
   {System}
   System.SysUtils,
@@ -84,8 +83,6 @@ uses
   Vcl.Menus,
   {WinMM}
   WinApi.WinMM.MMiscApi,
-  {MediaFoundationApi}
-  WinApi.MediaFoundationApi.MfApi,
   {Application}
   WasapiLoopback,
   Utils;
@@ -248,32 +245,12 @@ procedure TfrmLoopBackCapture.FormCloseQuery(Sender: TObject;
 begin
   CanClose := False;
   FreeAndNil(oAudioSink);
-  MFShutdown();
-  CoUninitialize();
   CanClose := True;
 end;
 
 
 procedure TfrmLoopBackCapture.FormCreate(Sender: TObject);
-var
-  hr: HResult;
-
 begin
-  hr := CoInitializeEx(nil,
-                       COINIT_MULTITHREADED);
-
-  if SUCCEEDED(hr) then
-    // Check if the current MF version match user's
-    if FAILED(MFStartup(MF_VERSION, 0)) then
-      begin
-        MessageBox(0,
-                   LPCWSTR('Your computer does not support this Media Foundation API version' +
-                           IntToStr(MF_VERSION) + '.'),
-                   LPCWSTR('MFStartup Failure!'),
-                   MB_ICONSTOP);
-        Abort();
-      end;
-
   // Create the AudioSink object.
   oAudioSink := TAudioSink.Create(Handle);
 end;

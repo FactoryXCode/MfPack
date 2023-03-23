@@ -6,6 +6,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   ClientHeight = 147
   ClientWidth = 430
   Color = clBtnFace
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -92,7 +93,9 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     Top = 123
     Width = 430
     Height = 24
+    DoubleBuffered = True
     Panels = <>
+    ParentDoubleBuffered = False
     SimplePanel = True
     SimpleText = 'Start Capture'
   end
