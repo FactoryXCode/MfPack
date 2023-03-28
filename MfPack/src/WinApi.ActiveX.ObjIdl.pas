@@ -1702,6 +1702,131 @@ type
   {$EXTERNALSYM IID_IApartmentShutdown}
 
 
+  PCoserverinfo = ^COSERVERINFO;
+  _COSERVERINFO = record
+    dwReserved1: DWORD;
+    pwszName: LPWSTR;
+    pAuthInfo: PCOAUTHINFO;
+    dwReserved2: DWORD;
+  end;
+  {$EXTERNALSYM _COSERVERINFO}
+  COSERVERINFO = _COSERVERINFO;
+  {$EXTERNALSYM COSERVERINFO}
+
+
+  // Interface IMarshal
+  // ==================
+  //
+  LPMARSHAL = ^IMarshal;
+  {$EXTERNALSYM LPMARSHAL}
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMarshal);'}
+  {$EXTERNALSYM IMarshal}
+  IMarshal = interface(IUnknown)
+  ['{00000003-0000-0000-C000-000000000046}']
+
+    function GetUnmarshalClass(const riid: REFIID;
+                               pv: Pointer;
+                               dwDestContext: DWORD;
+                 {in Reserved} pvDestContext: Pointer; // must be nil
+                               mshlflags: DWORD;
+                               out pCid: CLSID): HResult; stdcall;
+
+    function GetMarshalSizeMax(const riid: REFIID;
+                      {In_opt} pv: Pointer;
+                               dwDestContext: DWORD;
+                 {in Reserved} pvDestContext: Pointer; // must be nil
+                               mshlflags: DWORD;
+                               out pSize: PDWORD): HResult; stdcall;
+
+    function MarshalInterface(pStm: IStream;
+                              const riid: REFIID;
+                     {In_opt} pv: Pointer;
+                              dwDestContext: DWORD;
+                {in Reserved} pvDestContext: Pointer; // must be nil
+                              mshlflags: DWORD): HResult; stdcall;
+
+    function UnmarshalInterface(pStm: IStream;
+                                const riid: REFIID;
+                       {Outptr} out ppv: Pointer): HResult; stdcall;
+
+    function ReleaseMarshalData(pStm: IStream): HResult; stdcall;
+
+    function DisconnectObject(dwReserved: DWORD): HResult; stdcall;
+  end;
+  IID_IMarshal = IMarshal;
+  {$EXTERNALSYM IID_IMarshal}
+
+
+  // Interface INoMarshal
+  // ====================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(INoMarshal);'}
+  {$EXTERNALSYM INoMarshal}
+  INoMarshal = interface(IUnknown)
+  ['{ecc8691b-c1db-4dc0-855e-65f6c551af49}']
+
+  end;
+  IID_INoMarshal = INoMarshal;
+  {$EXTERNALSYM IID_INoMarshal}
+
+
+  // Interface IAgileObject
+  // ======================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAgileObject);'}
+  {$EXTERNALSYM IAgileObject}
+  IAgileObject = interface(IUnknown)
+  ['{94ea2b94-e9cc-49e0-c0ff-ee64ca8f5b90}']
+
+  end;
+  IID_IAgileObject = IAgileObject;
+  {$EXTERNALSYM IID_IAgileObject}
+
+
+  PActivationtype = ^ACTIVATIONTYPE;
+  tagACTIVATIONTYPE              = (
+    ACTIVATIONTYPE_UNCATEGORIZED = 0,
+    ACTIVATIONTYPE_FROM_MONIKER  = $1,
+    ACTIVATIONTYPE_FROM_DATA     = $2,
+    ACTIVATIONTYPE_FROM_STORAGE  = $4,
+    ACTIVATIONTYPE_FROM_STREAM   = $8,
+    ACTIVATIONTYPE_FROM_FILE     = $10
+  );
+  {$EXTERNALSYM tagACTIVATIONTYPE}
+  ACTIVATIONTYPE = tagACTIVATIONTYPE;
+  {$EXTERNALSYM ACTIVATIONTYPE}
+
+
+  // Interface IAgileObject
+  // ======================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IActivationFilter);'}
+  {$EXTERNALSYM IActivationFilter}
+  IActivationFilter = interface(IUnknown)
+  ['{00000017-0000-0000-C000-000000000046}']
+
+    function HandleActivation(dwActivationType: DWORD;
+                              const rclsid: REFCLSID;
+                              out pReplacementClsId: CLSID): HResult; stdcall;
+
+  end;
+  IID_IActivationFilter = IActivationFilter;
+  {$EXTERNALSYM IID_IActivationFilter}
+
+
+  // Interface IMarshal2
+  // ===================
+  //
+  LPMARSHAL2 = ^IMarshal2;
+  {$EXTERNALSYM LPMARSHAL2}
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMarshal2);'}
+  {$EXTERNALSYM IMarshal2}
+  IMarshal2 = interface(IMarshal)
+  ['{000001cf-0000-0000-C000-000000000046}']
+
+  end;
+  IID_IMarshal2 = IMarshal2;
+  {$EXTERNALSYM IID_IMarshal2}
 
 
 

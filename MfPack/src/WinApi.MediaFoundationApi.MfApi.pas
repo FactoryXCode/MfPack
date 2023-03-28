@@ -85,6 +85,8 @@ unit WinApi.MediaFoundationApi.MfApi;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
   {WinApi}
   WinApi.Windows,
@@ -96,9 +98,13 @@ uses
   WinApi.StrMif,
   WinApi.Unknwn,
   WinApi.ComBaseApi,
-  {WinApi.ActiveX}
-  WinApi.ActiveX.PropSys,
+  {ActiveX}
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.ActiveX,
+  {$ELSE}
   WinApi.ActiveX.PropIdl,
+  WinApi.ActiveX.PropSys,
+  {$ENDIF}
   {System}
   System.Types,
   {DirectX or use rtl, Clootie Dx}
@@ -650,10 +656,10 @@ const
   //
 
 
-  function MFLockSharedWorkQueue(wszClass: PCWSTR;
+  function MFLockSharedWorkQueue(wszClass: LPCWSTR;
                                  BasePriority: LONG;
                                  var pdwTaskId: DWORD;
-                                 out pID: DWORD): HResult; stdcall;
+                                 out pID: DWORD): HResult; stdcall
   {$EXTERNALSYM MFLockSharedWorkQueue}
   // Obtains and locks a shared work queue.
   // Parameters

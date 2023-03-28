@@ -84,9 +84,8 @@ const
   // a process ID instead of the device interface path of a physical audio device.
   // Use this for the deviceInterfacePath parameter of ActivateAudioInterfaceAsync when
   // AUDIOCLIENT_ACTIVATION_PARAMS.ActivationType is set to AUDIOCLIENT_ACTIVATION_TYPE_PROCESS_LOOPBACK.
-  {$EXTERNALSYM VIRTUAL_AUDIO_DEVICE_PROCESS_LOOPBACK}
   VIRTUAL_AUDIO_DEVICE_PROCESS_LOOPBACK = 'VAD\\Process_Loopback';
-
+  {$EXTERNALSYM VIRTUAL_AUDIO_DEVICE_PROCESS_LOOPBACK}
 
 type
 
@@ -122,7 +121,7 @@ type
   PAUDIOCLIENT_ACTIVATION_PARAMS = AUDIOCLIENT_ACTIVATION_TYPE;
   AUDIOCLIENT_ACTIVATION_PARAMS = record
     ActivationType: AUDIOCLIENT_ACTIVATION_TYPE;
-    case Integer of
+    case Integer of   // Used when ActivationType is AUDIOCLIENT_ACTIVATION_TYPE_PROCESS_LOOPBACK.
       0: (ProcessLoopbackParams: AUDIOCLIENT_PROCESS_LOOPBACK_PARAMS);
     end;
   {$EXTERNALSYM PAUDIOCLIENT_ACTIVATION_PARAMS}

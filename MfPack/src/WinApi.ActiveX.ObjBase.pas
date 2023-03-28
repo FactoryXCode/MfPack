@@ -77,7 +77,6 @@ uses
   WinApi.ActiveX.ObjIdl,
   WinApi.ActiveX.ObjIdlbase;
 
-
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}
@@ -103,9 +102,10 @@ const
   COINIT_MULTITHREADED     = $0; // = combaseapi COINITBASE_MULTITHREADED
   {$EXTERNALSYM COINIT_MULTITHREADED}
   COINIT_APARTMENTTHREADED = $2;   // Apartment model
-
-  // These constants are only valid on Windows NT 4.0
   {$EXTERNALSYM COINIT_APARTMENTTHREADED}
+  
+  // These constants are only valid on Windows NT 4.0
+  // ================================================
   COINIT_DISABLE_OLE1DDE   = $4;   // Don't use DDE for Ole1 support.
   {$EXTERNALSYM COINIT_DISABLE_OLE1DDE}
   COINIT_SPEED_OVER_MEMORY = $8;   // Trade memory for speed.
@@ -202,7 +202,7 @@ type
                                  grfMode: DWORD;
                                  pwszName: PWideChar;
                                  dwCount: DWORD;
-                                 {in, out} var pResults: PMULTI_QI): HResult; stdcall;
+                                 {in, out} var pResults: MULTI_QI): HResult; stdcall;
   {$EXTERNALSYM CoGetInstanceFromFile}
 
   function CoGetInstanceFromIStorage({in, optional} pServerInfo: PCoServerInfo;
@@ -211,7 +211,7 @@ type
                                      dwClsCtx: DWORD;
                                      pstg: IUnknown; {IStorage}
                                      dwCount: DWORD;
-                                     {in, out} var rgmqResults: PMULTI_QI): HResult; stdcall;
+                                     {in, out} var rgmqResults: MULTI_QI): HResult; stdcall;
   {$EXTERNALSYM CoGetInstanceFromIStorage}
 
 
@@ -349,7 +349,7 @@ type
   {$EXTERNALSYM MonikerCommonPrefixWith}
 
   function CreateBindCtx(reserved: DWORD;
-                         out ppbc: PIBindCtx): HResult; stdcall;
+                         out ppbc: IBindCtx): HResult; stdcall;
   {$EXTERNALSYM CreateBindCtx}
 
   function CreateGenericComposite(pmkFirst: IMoniker;

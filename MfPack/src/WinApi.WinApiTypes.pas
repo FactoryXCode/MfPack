@@ -67,6 +67,7 @@ unit WinApi.WinApiTypes;
   {$HPPEMIT '#include "wtypes.h"'}
   {$HPPEMIT '#include "guiddef.h"'}
   {$HPPEMIT '#include "WTypesbase.h"'}
+  {$HPPEMIT '#include "fileapi.h"'}
 
 interface
 
@@ -87,6 +88,20 @@ uses
   {$ENDIF}
 
   {$I 'WinApiTypes.inc'}
+
+
+// =============================================================================
+// Source: fileapi.h
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
+//==============================================================================
+const
+  INVALID_FILE_SIZE                   = DWORD($FFFFFFFF);
+  {$EXTERNALSYM INVALID_FILE_SIZE}
+  INVALID_SET_FILE_POINTER            = DWORD(-1);
+  {$EXTERNALSYM INVALID_SET_FILE_POINTER}
+  INVALID_FILE_ATTRIBUTES             = DWORD(-1);
+  {$EXTERNALSYM INVALID_FILE_ATTRIBUTES}
 
 
 // =============================================================================
@@ -158,7 +173,6 @@ const
 //***********************************************************************************************
 
 type
-
 
 {$IFDEF MFP_DWORD}
    DWORD = System.Types.DWORD;
@@ -912,19 +926,6 @@ type
 {$ENDIF}
 
 
-{$IFDEF MFP_BLOB}
-  PBLOB = ^BLOB;
-  LPBLOB = ^tagBLOB;
-  tagBLOB = record
-    cbSize: ULONG;
-    pBlobData: Pointer;
-  end;
-  {$EXTERNALSYM tagBLOB}
-  BLOB = tagBLOB;
-  {$EXTERNALSYM BLOB}
-{$ENDIF}
-
-
 // =============================================================================
 // Source: wtypes.h
 // Microsoft Windows
@@ -940,6 +941,21 @@ type
 // interface IWinTypes
 
 type
+
+//{$UNDEF MFP_BLOB}
+// See wtypes.h and nspapi.h for this definition of BLOB.
+{$IFDEF MFP_BLOB}
+  PBLOB = ^BLOB;
+  LPBLOB = ^tagBLOB;
+  tagBLOB = record
+    cbSize: ULONG; // In delphi up to ver 10.4 this is defined as Longint.
+    pBlobData: Pointer {PByte}; // In delphi up to ver 10.4 this is defined as Pointer.
+  end;
+  {$EXTERNALSYM tagBLOB}
+  BLOB = tagBLOB;
+  {$EXTERNALSYM BLOB}
+{$ENDIF}
+
 
 {$IFDEF MFP_RemHGLOBAL}
   PRemHGLOBAL = ^RemHGLOBAL;
@@ -1297,10 +1313,12 @@ type
 {$IFDEF MFP_LPWSTR}
   PWSTR = PWideChar;
   {$EXTERNALSYM PWSTR}
-  PLPWSTR = ^LPWSTR;
-  {$EXTERNALSYM PLPWSTR}
-  LPWSTR = PWSTR;
+  LPWSTR = PWideChar;
   {$EXTERNALSYM LPWSTR}
+  {$IF COMPILERVERSION < 21}
+    PLPWSTR = ^LPWSTR;
+    {$EXTERNALSYM PLPWSTR}
+  {$ENDIF}
 {$ENDIF}
 
 
@@ -3252,8 +3270,11 @@ type
   LPCREATEFILE2_EXTENDED_PARAMETERS = ^_CREATEFILE2_EXTENDED_PARAMETERS;
   {$EXTERNALSYM LPCREATEFILE2_EXTENDED_PARAMETERS}
 
+// WinApi.ActiveX.ObjIdl
+type
+  SNB = ^LPOLESTR;
 
-  // End of Additional Prototypes
+  // End of Additional P rototypes
 
 implementation
 

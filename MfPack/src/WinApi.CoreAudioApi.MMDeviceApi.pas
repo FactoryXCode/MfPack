@@ -67,9 +67,11 @@
 //==============================================================================
 unit WinApi.CoreAudioApi.MMDeviceApi;
 
+  {$HPPEMIT '#include "mmdeviceapi.h"'}
+
 interface
 
-  {$HPPEMIT '#include "mmdeviceapi.h"'}
+// {$DEFINE USE_EMBARCADERO_DEF}
 
 uses
 
@@ -77,11 +79,15 @@ uses
   WinApi.WinError,
   WinApi.WinApiTypes,
   {ActiveX}
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.PropSys,
+  WinApi.ActiveX,
+  {$ELSE}
   WinApi.ActiveX.PropIdl,
   WinApi.ActiveX.PropSys,
+  {$ENDIF}
   {CoreAudioApi}
   WinApi.CoreAudioApi.DeviceTopology;
-
 
   {$WEAKPACKAGEUNIT ON}
   {$ALIGN ON}
@@ -612,13 +618,13 @@ type
   IAudioSystemEffectsPropertyStore = interface(IUnknown)
   ['{302AE7F9-D7E0-43E4-971B-1F8293613D2A}']
     function OpenDefaultPropertyStore(stgmAccess: DWORD;
-                                      {out} propStore: PIPropertyStore): HRESULT; stdcall;
+                                      out propStore: IPropertyStore): HRESULT; stdcall;
 
     function OpenUserPropertyStore(stgmAccess: DWORD;
-                                   {out} propStore: PIPropertyStore): HRESULT; stdcall;
+                                   out propStore: IPropertyStore): HRESULT; stdcall;
 
     function OpenVolatilePropertyStore(stgmAccess: DWORD;
-                                       {out} propStore: PIPropertyStore): HRESULT; stdcall;
+                                       out propStore: IPropertyStore): HRESULT; stdcall;
 
     function ResetUserPropertyStore(): HRESULT; stdcall;
 
@@ -713,6 +719,7 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IActivateAudioInterfaceCompletionHandler);'}
   {$EXTERNALSYM IActivateAudioInterfaceCompletionHandler}
+  PIActivateAudioInterfaceCompletionHandler = ^IActivateAudioInterfaceCompletionHandler;
   IActivateAudioInterfaceCompletionHandler = interface(IUnknown)
   ['{41D949AB-9862-444A-80F6-C261334DA5EB}']
 
@@ -751,15 +758,11 @@ type
   //   and asynchronously returns a pointer to the specified interface
   // ----------------------------------------------------------------------
   function ActivateAudioInterfaceAsync(deviceInterfacePath: LPCWSTR;
-                                       const riid: REFIID;
-                                       {opt} activationParams: PROPVARIANT;
-                                       completionHandler: IActivateAudioInterfaceCompletionHandler;
-                                       out activationOperation: IActivateAudioInterfaceAsyncOperation): HResult; stdcall;
+                                       const riid: TGUID;
+                                       activationParams: PPROPVARIANT;
+                                       completionDelegate: IActivateAudioInterfaceCompletionHandler;
+                                       out activationOperation: IActivateAudioInterfaceAsyncOperation): HRESULT; stdcall;
   {$EXTERNALSYM ActivateAudioInterfaceAsync}
-
-
-
-
 
 type
 
@@ -771,9 +774,6 @@ type
     pPnpDevnode: IMMDevice;
   end;
   {$EXTERNALSYM AudioExtensionParams}
-
-
-
 
 
   // Additional Prototypes for ALL interfaces
@@ -788,7 +788,7 @@ const
   MMDeviceApiLib = 'Mmdevapi.dll';
 
 {$WARN SYMBOL_PLATFORM OFF}
-  function ActivateAudioInterfaceAsync; external MMDeviceApiLib name 'ActivateAudioInterfaceAsync' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function ActivateAudioInterfaceAsync; external MMDeviceApiLib name 'ActivateAudioInterfaceAsync' {$IF COMPILERVERSION > 20.0} delayed; {$ENDIF}
 {$WARN SYMBOL_PLATFORM ON}
 
 end.

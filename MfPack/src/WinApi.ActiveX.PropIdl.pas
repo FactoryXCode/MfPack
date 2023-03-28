@@ -28,7 +28,7 @@
 //          Delphi : The IUnknown entries of functions should be casted like this:
 //          IUnknown(Pointer), IUnknown(Object), IUnknown(Nil) etc.
 //          This module can be replaced by WinApi.ActiveX, if your version of Delphi ActiveX is >= XE2.
-//          In that case you have to include WinApi.ActiveX for every MFPack unit and change the mfPROPVARIANT with the ActiveX one.
+//          In that case you may whish to include WinApi.ActiveX for an MFPack unit and change the PROPVARIANT with the ActiveX tagPROPVARIANT.
 //
 // Related objects: -
 // Related projects: MfPackX314
@@ -79,6 +79,7 @@ uses
   WinApi.ActiveX.ObjIdlbase,
   WinApi.ActiveX.ObjIdl,
   WinApi.ActiveX.OaIdl;
+
 
   {$MINENUMSIZE 4}
 
@@ -263,7 +264,7 @@ type
   LPVERSIONEDSTREAM = ^VERSIONEDSTREAM;
   tagVersionedStream = record
     guidVersion: TGUID;
-    pStream: PIStream;
+    pStream: IStream;
   end;
   {$EXTERNALSYM tagVersionedStream}
   VERSIONEDSTREAM = tagVersionedStream;
@@ -439,7 +440,7 @@ type
   PCALPWSTR = ^CALPWSTR;
   tagCALPWSTR = record
     cElems: ULONG;
-    pElems: LPWSTR;
+    pElems: PLPWSTR;
   end;
   {$EXTERNALSYM tagCALPWSTR}
   CALPWSTR = tagCALPWSTR;
