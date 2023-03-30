@@ -1772,7 +1772,13 @@ type
 
   // Interface IAgileObject
   // ======================
-  //
+  // The IAgileObject interface is a marker interface that indicates that an object
+  // is free threaded and can be called from any apartment.
+  // Unlike what happens when aggregating the Free Threaded Marshaler (FTM),
+  // implementing the IAgileObject interface doesn't affect what happens when marshaling a call.
+  // Instead, the IAgileObject interface is recognized by the Global Interface Table (GIT).
+  // When an object that implements the IAgileObject interface is placed in the GIT and
+  // localized to another apartment, the object is called directly in the new apartment, rather than marshaling.
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAgileObject);'}
   {$EXTERNALSYM IAgileObject}
   IAgileObject = interface(IUnknown)
