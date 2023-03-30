@@ -1764,7 +1764,7 @@ type
   {$EXTERNALSYM INoMarshal}
   INoMarshal = interface(IUnknown)
   ['{ecc8691b-c1db-4dc0-855e-65f6c551af49}']
-
+    // public
   end;
   IID_INoMarshal = INoMarshal;
   {$EXTERNALSYM IID_INoMarshal}
@@ -1777,7 +1777,7 @@ type
   {$EXTERNALSYM IAgileObject}
   IAgileObject = interface(IUnknown)
   ['{94ea2b94-e9cc-49e0-c0ff-ee64ca8f5b90}']
-
+    // public
   end;
   IID_IAgileObject = IAgileObject;
   {$EXTERNALSYM IID_IAgileObject}
@@ -1797,8 +1797,8 @@ type
   {$EXTERNALSYM ACTIVATIONTYPE}
 
 
-  // Interface IAgileObject
-  // ======================
+  // Interface IActivationFilter
+  // ===========================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IActivationFilter);'}
   {$EXTERNALSYM IActivationFilter}
@@ -1823,7 +1823,7 @@ type
   {$EXTERNALSYM IMarshal2}
   IMarshal2 = interface(IMarshal)
   ['{000001cf-0000-0000-C000-000000000046}']
-
+    // public
   end;
   IID_IMarshal2 = IMarshal2;
   {$EXTERNALSYM IID_IMarshal2}
