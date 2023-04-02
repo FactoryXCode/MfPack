@@ -1,4 +1,10 @@
-# MfPack
+### Before going on, some policy:
+- If you have a request, question, idea or need help, please commit to [Discussions](https://github.com/FactoryXCode/MfPack/discussions).
+
+- If you encounter a bug then [Issues](https://github.com/FactoryXCode/MfPack/issues) is the one and only place to be.
+
+
+# About MfPack
 
  Delphi translations for Microsoft Media Foundation and related API's.
 
@@ -11,19 +17,18 @@
   * Multimedia Device (MMDevice) API
 - Microsoft Media Foundation API (successor of DirectShow).
 - XAudio2 API (XBox game development)
-- Microsoft DirectX API's (D2D1, DirectComposition, DXGI, DirectWrite and DXVA)
+- Microsoft DirectX API's (D2D1, D3D9, D3D11, D3D12, DirectComposition, DXGI, DirectWrite and DXVA) Note that D3D11 and above are part of Media Foundation.
 - Windows Imaging Component (WIC) API.
 - MPEG2 API.
 - The COMPLETE Windows Media (WinMM) API.
 - Media Foundation samples.
-
 
 # <u>Latest release:</u> 
 
 
 # MfPack 
 
-Version X 3.1.4 
+Version X 3.1.4
 Delphi XE2 up to and including Delphi 12 
 SDK version: 10.0.22621.0 (Windows 11)
 
@@ -133,15 +138,44 @@ SDK version: 10.0.22621.0 (Windows 11)
 
 **MFFrameCapture sample**
 
-*Demonstrates how to cature an image (synchronous or A-synchronous) using the IMFSourceReader.*
+*Demonstrates how to capture an image (synchronous or A-synchronous) using the IMFSourceReader.*
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfFrameCapture.png)
 
-**LoopBackCapture**
+**CameraFrameCapture sample**
+*Demonstrates how to capture a still image or so called snapshot (A-synchronous) from a* 
+*capture device such as a webcam or camera using the IMFSourceReader.*
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/CameraFrameCaptureSample.png)
+
+**CaptureEngineVideoCapture sample**
+*Demonstrates how to capture a snapshot or a recording (A-synchronous) from a capture device,*
+*such as a webcam using the IMFCaptureEngine and IMFCapturePreviewSink.*
+*This sample also demonstrates how to use the MfMediaTypeDebug API.*
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MFCaptureEngineVideoCapture.jpg)
+
+**SinkWriterToEncodeVideo Sample**
+
+*Example 1 creates a simple green bitmap (640x480) and store it to a file with a length of 20 seconds.*
+*Example 2 demonstrates how to use the SinkWriter to create a video from one or more bitmap files.*
+  
+ ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/SinkWriterSample.png)
+
+**LoopBackCapture Sample 1**
 
 *This sample shows, how to capture sound from your soundcard using WASAPI and save this capture*
 *with the quality that is supported by your soundcard.*
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopBackCapture.png)
 
-**© FactoryX. All rights reserved.***
+
+**LoopBackCapture Sample 2**
+
+*Demonstrates how to capture system audio either from a specific process tree or for all process except a process tree and
+the use of ActivateAudioInterfaceAsync Win32 API with a new initialization structure,
+with the quality that is supported by your soundcard.*
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopBackCapture_2.png)  
+  
+**© FactoryX. All rights reserved.**
