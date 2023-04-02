@@ -79,13 +79,13 @@ interface
   (*$HPPEMIT '' *)
 
 uses
+  {WinApi}
   WinApi.Windows,
+  {WinMM}
   WinApi.WinMM.MMSysCom,
   WinApi.WinMM.MMiscApi,
   WinApi.WinMM.MMiscApi2,
   WinApi.WinMM.PlaySoundApi;
-
-
 
 
   //****************************************************************************
@@ -542,7 +542,6 @@ type
 type
 
   PWAVEFORMATEX = ^tWAVEFORMATEX;
-  {$EXTERNALSYM PWAVEFORMATEX}
   tWAVEFORMATEX = record
     wFormatTag: WORD;               { format type }
     nChannels: WORD;                { number of channels (i.e. mono, stereo...) }

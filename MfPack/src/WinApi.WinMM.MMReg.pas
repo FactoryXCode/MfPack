@@ -78,6 +78,7 @@ interface
 uses
   {WinApi}
   WinApi.Windows,
+  {WinMM}
   WinApi.WinMM.MMiscApi,
   WinApi.WinMM.MMeApi;
 

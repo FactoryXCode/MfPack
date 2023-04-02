@@ -10,7 +10,7 @@
 // Release date: 04-05-2012
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 // Description: AudioClient API interface definition.
 //
 // Organisation: FactoryX
@@ -23,9 +23,10 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 // 12/03/2023 Tony                Updated to match mmio
+// 02/04/2023 All                 Pre-release to 3.1.5
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows Vista or later.
+// Remarks: Requires Windows 8 or later.
 //
 // Related objects: -
 // Related projects: MfPackX314
@@ -71,7 +72,8 @@ uses
   WinApi.Windows,
   WinApi.WinApiTypes,
   WinApi.WinError,
-  //WinApi.WinMM.MMReg,  // for WAVEFORMATEX
+  {WinMM}
+  //WinApi.WinMM.MMReg,
   WinApi.WinMM.MMeApi,
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioMediaType,
@@ -491,9 +493,9 @@ type
     //  Once the audio stream has been successfully initialized, this call should always succeed.
     //
 
-    function IsFormatSupported(const ShareMode: AUDCLNT_SHAREMODE;
-                               const pFormat: PWaveFormatEx;
-                               const ppClosestMatch: PWaveFormatEx // Exclusive mode can't suggest a "closest match", you have to set this param to Nil.
+    function IsFormatSupported(ShareMode: AUDCLNT_SHAREMODE;
+                               pFormat: WaveFormatEx;
+                               out ppClosestMatch: PWaveFormatEx // Exclusive mode can't suggest a "closest match", you have to set this param to Nil.
                                ): HResult; stdcall;
     // Description:
     //
@@ -538,7 +540,7 @@ type
     //  This method does not require that the Initialize method be called first.
     //
 
-    function GetMixFormat([ref] const ppDeviceFormat: PWAVEFORMATEX): HResult; stdcall;
+    function GetMixFormat({out} ppDeviceFormat: PWAVEFORMATEX): HResult; stdcall;
     // Description:
     //
     //  Returns the current format of the WAS for this device. This is a device method
@@ -1070,11 +1072,12 @@ type
   {$EXTERNALSYM IAudioCaptureClient}
   IAudioCaptureClient = interface(IUnknown)
   ['{C8ADBD64-E71E-48a0-A4DE-185C395CD317}']
+
     function GetBuffer(out ppData: PByte;
                        out pNumFramesToRead: UINT32;
                        out pdwFlags: AUDCLNT_BUFFERFLAGS;
-                       {out} pu64DevicePosition: UINT64;
-                       {out} pu64QPCPosition: UINT64): HResult; stdcall;
+                       out pu64DevicePosition: UINT64;
+                       out pu64QPCPosition: UINT64): HResult; stdcall;
     //-------------------------------------------------------------------------
     // Description:
     //
