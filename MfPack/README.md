@@ -176,6 +176,6 @@ SDK version: 10.0.22621.0 (Windows 11)
 the use of ActivateAudioInterfaceAsync Win32 API with a new initialization structure,
 with the quality that is supported by your soundcard.*
 
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopBackCapture_2.png)  
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopBackAudioCapture_2.jpg)  
   
 **© FactoryX. All rights reserved.**
