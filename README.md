@@ -162,11 +162,20 @@ SDK version: 10.0.22621.0 (Windows 11)
   
  ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/SinkWriterSample.png)
 
-**LoopBackCapture**
+**LoopBackCapture Sample 1**
 
 *This sample shows, how to capture sound from your soundcard using WASAPI and save this capture*
 *with the quality that is supported by your soundcard.*
 
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopBackCapture.png) 
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopBackCapture.png)
+
+
+**LoopBackCapture Sample 2**
+
+*Demonstrates how to capture system audio either from a specific process tree or for all process except a process tree and
+the use of ActivateAudioInterfaceAsync Win32 API with a new initialization structure,
+with the quality that is supported by your soundcard.*
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopBackCapture_2.png)  
   
 **© FactoryX. All rights reserved.**
