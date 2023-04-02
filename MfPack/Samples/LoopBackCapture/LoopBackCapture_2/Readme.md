@@ -25,7 +25,7 @@ desired capture mode (including the process tree or excluding it), and the outpu
 
 Examples:
 
-* Capture audio from process xxxx and its children: `ApplicationLoopback 1234 includetree Captured.wav`
+* Capture audio from process xxxx and its children: `ApplicationLoopback xxxx includetree Captured.wav`
 * Capture audio from all process except process xxxx and its children: `ApplicationLoopback xxxx excludetree Captured.wav`
 
 
