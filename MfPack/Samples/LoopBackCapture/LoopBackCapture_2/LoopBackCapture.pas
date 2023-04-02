@@ -95,9 +95,14 @@ uses
 const
   BITS_PER_BYTE = 8;
   WM_PROGRESSNOTIFY = WM_USER + 1001;
+  WM_RECORDINGSTOPPEDNOTYFY = WM_USER + 1002;
 
 var
   oCriticalSection: TrtlCriticalSection;
+  // Events should be declared in a global scope.
+  gs_SampleReadyEvent: TEvent;
+  gs_hActivateCompleted: TEvent;
+  gs_hCaptureStopped: TEvent;
 
 type
   // NB: All states >= Initialized will allow some methods
@@ -135,10 +140,6 @@ type
     m_xStopCapture: TCallbackAsync;
     m_xSampleReady: TCallbackAsync;
     m_xFinishCapture: TCallbackAsync;
-
-    m_SampleReadyEvent: TEvent;
-    m_hActivateCompleted: TEvent;
-    m_hCaptureStopped: TEvent;
 
     m_SampleReadyKey: MFWORKITEM_KEY;
     m_CaptureFormat: WAVEFORMATEX;
@@ -328,7 +329,7 @@ begin
     goto leave;
 
   // Tell the system which event handle it should signal when an audio buffer is ready to be processed by the client
-  hr := m_AudioClient.SetEventHandle(m_SampleReadyEvent.Handle);
+  hr := m_AudioClient.SetEventHandle(gs_SampleReadyEvent.Handle);
   if FAILED(hr) then
     goto leave;
 
@@ -341,7 +342,7 @@ begin
   m_DeviceState := Initialized;
 
   // Let ActivateAudioInterface know that m_activateResult has the result of the activation attempt.
-  m_hActivateCompleted.SetEvent();
+  gs_hActivateCompleted.SetEvent();
 
 leave:
   Result := hr;
@@ -371,7 +372,7 @@ begin
       if SUCCEEDED(hr) then
         begin
           m_DeviceState := Capturing;
-          hr := MFPutWaitingWorkItem(m_SampleReadyEvent.Handle,
+          hr := MFPutWaitingWorkItem(gs_SampleReadyEvent.Handle,
                                      0,
                                      m_SampleReadyAsyncResult,
                                      m_SampleReadyKey);
@@ -426,10 +427,34 @@ var
 begin
   // FixWAVHeader will set the DeviceStateStopped when all async tasks are complete
   hr := FixWAVHeader();
-  m_DeviceState := Stopped;
-  m_hCaptureStopped.SetEvent();
+
+  if SUCCEEDED(hr) then
+    begin
+      m_DeviceState := Stopped;
+      gs_hCaptureStopped.SetEvent();
+      hr := EventWait(gs_hCaptureStopped);
+
+      if SUCCEEDED(hr) then
+        if (m_hPipe <> 0) then
+          begin
+            CloseHandle(m_hPipe);
+            m_hPipe := 0;
+            SendMessage(hwOwner,
+                        WM_RECORDINGSTOPPEDNOTYFY,
+                        0,
+                        0);
+          end;
+    end
+  else // nothing to play :-(
+    begin
+      m_DeviceState := Stopped;
+      gs_hCaptureStopped.SetEvent();
+      hr := EventWait(gs_hCaptureStopped);
+    end;
+
   Result := hr;
 end;
+
 
 //
 //  OnSampleReady()
@@ -448,7 +473,7 @@ begin
       if (m_DeviceState = Capturing) then
         begin
           // Re-queue work item for next sample
-          hr := MFPutWaitingWorkItem(m_SampleReadyEvent.Handle,
+          hr := MFPutWaitingWorkItem(gs_SampleReadyEvent.Handle,
                                      0,
                                      m_SampleReadyAsyncResult,
                                      m_SampleReadyKey);
@@ -473,8 +498,7 @@ begin
   Reset();
 
   // Create events for sample ready or user stop
-  //m_SampleReadyEvent := TEvent.Create(nil, False, False, '', False);
-  m_SampleReadyEvent := TEvent.Create(nil, False, False, '', True);
+  gs_SampleReadyEvent := TEvent.Create(nil, False, False, '', True);
 
   // Register MMCSS work queue
   hr := MFLockSharedWorkQueue(PWideChar('Capture'),
@@ -488,11 +512,9 @@ begin
   m_xSampleReady.SetQueueID(m_dwQueueID);
 
   // Create the completion event as auto-reset
-  //m_hActivateCompleted := TEvent.Create(nil, False, False, '', False);
-  m_hActivateCompleted := TEvent.Create(nil, False, False, '', True);
+  gs_hActivateCompleted := TEvent.Create(nil, False, False, '', True);
   // Create the capture-stopped event as auto-reset
-  //m_hCaptureStopped :=  TEvent.Create();
-  m_hCaptureStopped := TEvent.Create(nil, False, False, '', True);
+  gs_hCaptureStopped := TEvent.Create(nil, False, False, '', True);
 
 leave:
 
@@ -642,7 +664,7 @@ begin
     end;
 
   // Write the total file size, minus RIFF chunk and size
-  // sizeof(DWord) = sizeof(FOURCC)
+  // SizeOf(DWord) = SizeOf(FOURCC)
   dwPtr := SetFilePointer(m_hPipe,
                           SizeOf(DWord),
                           nil,
@@ -843,7 +865,7 @@ begin
       goto leave;
     end;
 
-  hr := EventWait(m_hActivateCompleted);
+  hr := EventWait(gs_hActivateCompleted);
 
 leave:
   PropVariantClear(activateParams);
@@ -872,6 +894,8 @@ begin
     begin
       ErrMsg(Format('MFPutWorkItem2 failed. LastError = %d',[GetLastError()]), hr);
     end;
+
+
   Result := hr;
 end;
 
@@ -894,25 +918,25 @@ try
     end;
 
   // Free the events but reset first and then wait until all events are processed.
-  if Assigned(m_SampleReadyEvent) then
+  if Assigned(gs_SampleReadyEvent) then
     begin
-      m_SampleReadyEvent.ResetEvent;
-      hr := EventWait(m_SampleReadyEvent);
-      FreeAndNil(m_SampleReadyEvent);
+      gs_SampleReadyEvent.ResetEvent;
+      hr := EventWait(gs_SampleReadyEvent);
+      FreeAndNil(gs_SampleReadyEvent);
     end;
 
-  if Assigned(m_hActivateCompleted) then
+  if Assigned(gs_hActivateCompleted) then
     begin
-      m_hActivateCompleted.ResetEvent;
-      hr := EventWait(m_hActivateCompleted);
-      FreeAndNil(m_hActivateCompleted);
+      gs_hActivateCompleted.ResetEvent;
+      hr := EventWait(gs_hActivateCompleted);
+      FreeAndNil(gs_hActivateCompleted);
     end;
 
-  if Assigned(m_hCaptureStopped) then
+  if Assigned(gs_hCaptureStopped) then
     begin
-      m_hCaptureStopped.ResetEvent;
-      hr := EventWait(m_hCaptureStopped);
-      FreeAndNil(m_hCaptureStopped);
+      gs_hCaptureStopped.ResetEvent;
+      hr := EventWait(gs_hCaptureStopped);
+      FreeAndNil(gs_hCaptureStopped);
     end;
 
   if FAILED(hr) then
@@ -1022,14 +1046,14 @@ begin
                            m_xStopCapture,
                            nil);
       if SUCCEEDED(hr) then
-        hr := EventWait(m_hCaptureStopped);
+        hr := EventWait(gs_hCaptureStopped);
     end;
 
   Result := hr;
 end;
 
 
-// TAsyncCallback //////////////////////////////////////////////////////
+// TAsyncCallback //////////////////////////////////////////////////////////////
 
 constructor TCallbackAsync.Create(AParent: TLoopbackCapture;
                                   ASyncCmd: TAsyncCmd;
@@ -1058,6 +1082,7 @@ begin
 end;
 
 
+// All callbacks are derived from this and will process this invoke.
 function TCallbackAsync.Invoke(pResult: IMFAsyncResult): HResult;
 var
   hr: HResult;
@@ -1069,7 +1094,7 @@ begin
     SampleReady:   hr := _parent.OnSampleReady(pResult);
     FinishCapture: hr := _parent.OnFinishCapture(pResult);
     else
-      hr := S_FALSE;  // no error but wrong command.
+      hr := S_FALSE;  // No error, but wrong command.
   end;
   Result := hr;
 end;
@@ -1079,7 +1104,6 @@ procedure TCallbackAsync.SetQueueID(dwQueueID: DWord);
 begin
   _dwQueueID := dwQueueID;
 end;
-
 
 
 initialization

@@ -106,13 +106,15 @@ type
     Bevel1: TBevel;
     butGetPID: TButton;
     procedure FormCreate(Sender: TObject);
-    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure FormCloseQuery(Sender: TObject;
+                             var CanClose: Boolean);
     procedure butPlayDataClick(Sender: TObject);
     procedure butStartClick(Sender: TObject);
     procedure butStopClick(Sender: TObject);
     procedure butGetPIDClick(Sender: TObject);
-    procedure edFileNameKeyUp(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
+    procedure edFileNameKeyUp(Sender: TObject;
+                              var Key: Word;
+                              Shift: TShiftState);
   private
     { Private declarations }
     sFileName: string;
@@ -122,7 +124,8 @@ type
     bIncludeProcessTree: Boolean;
     oLoopbackCapture: TLoopbackCapture;
 
-    procedure OnAudioSinkProgressEvent(var AMessage: TMessage); message WM_PROGRESSNOTIFY;
+    procedure OnProgressEvent(var AMessage: TMessage); message WM_PROGRESSNOTIFY;
+    procedure OnRecordingStopped(var AMessage: TMessage); message WM_RECORDINGSTOPPEDNOTYFY;
     function StartCapture(): HResult;
 
   public
@@ -304,9 +307,15 @@ done:
 end;
 
 
-procedure TfrmMain.OnAudioSinkProgressEvent(var aMessage: TMessage);
+procedure TfrmMain.OnProgressEvent(var aMessage: TMessage);
 begin
   sbMsg.SimpleText := Format('Capturing from source: Bytes processed: %d',[aMessage.WParam]);
+end;
+
+
+procedure TfrmMain.OnRecordingStopped(var AMessage: TMessage);
+begin
+  butPlayData.Enabled := True;
 end;
 
 end.

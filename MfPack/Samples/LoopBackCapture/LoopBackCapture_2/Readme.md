@@ -1,4 +1,4 @@
-# LoopbackCapture Sample 2
+# LoopbackCapture Sample 1
 
 Version: X 3.1.5
 

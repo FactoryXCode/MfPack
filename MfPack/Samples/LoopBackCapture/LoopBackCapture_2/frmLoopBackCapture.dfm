@@ -81,7 +81,6 @@ object frmMain: TfrmMain
     ParentDoubleBuffered = False
     SimplePanel = True
     SimpleText = 'Start Capture'
-    ExplicitTop = 204
   end
   object butStart: TButton
     Left = 72
