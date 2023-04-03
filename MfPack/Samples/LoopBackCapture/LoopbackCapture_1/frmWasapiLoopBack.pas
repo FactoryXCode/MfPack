@@ -66,26 +66,18 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.Messages,
-  WinApi.ComBaseApi,
   Winapi.ShellAPI,
   {System}
   System.SysUtils,
-  System.DateUtils,
-  System.Variants,
-  System.Classes,
   {Vcl}
-  Vcl.Graphics,
   Vcl.Controls,
   Vcl.Forms,
-  Vcl.Dialogs,
   Vcl.StdCtrls,
   Vcl.ComCtrls,
   Vcl.Menus,
-  {WinMM}
-  WinApi.WinMM.MMiscApi,
   {Application}
   WasapiLoopback,
-  Utils;
+  Utils, System.Classes;
 
 type
   TfrmLoopBackCapture = class(TForm)
@@ -166,8 +158,6 @@ label
 begin
   hr := S_OK;
   iProgress := 0;
-  // Create the AudioSink object.
-  //oAudioSink := TAudioSink.Create(Handle);
 
   if not Assigned(oAudioSink) then
     begin
