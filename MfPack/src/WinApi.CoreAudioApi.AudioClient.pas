@@ -24,6 +24,7 @@
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 // 12/03/2023 Tony                Updated to match mmio
 // 02/04/2023 All                 Pre-release to 3.1.5
+// 03/04/2023 Tony                Fixed IAudioClient.GetMixFormat.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or later.
@@ -540,7 +541,7 @@ type
     //  This method does not require that the Initialize method be called first.
     //
 
-    function GetMixFormat({out} ppDeviceFormat: PWAVEFORMATEX): HResult; stdcall;
+    function GetMixFormat(out ppDeviceFormat: PWAVEFORMATEX): HResult; stdcall;
     // Description:
     //
     //  Returns the current format of the WAS for this device. This is a device method
