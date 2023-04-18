@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: Â© FactoryX. All rights reserved.
 //
 // Project: MfPack - MediaFoundation
 // Project location: https://sourceforge.net/projects/MFPack
@@ -26,7 +26,8 @@
 //
 // Remarks: Requires Windows 7 or higher.
 //          BUILD Version: 0001    // Increment this if a change has global effects
-//          File for APIs provided by PSAPI.DLL. (note that these functions are part of Kernel32.dll)
+//          File for APIs provided by PSAPI.DLL. 
+//          (Note that this API is NOT part of Kernel32.dll as MS docs says.)
 //
 // Related objects: -
 // Related projects: MfPackX315
