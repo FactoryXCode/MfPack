@@ -206,7 +206,7 @@ type
     //  codes from this method.
     //
 
-    function OnGroupingParamChanged(NewGroupingParam: TGUID;
+    function OnGroupingParamChanged(const NewGroupingParam: TGUID;
                                     const EventContext: TGUID): HResult; stdcall;
     // Description:
     //      Called when the grouping param of an Audio Session changes.

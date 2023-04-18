@@ -757,9 +757,9 @@ type
   // * activation parameters specific to the interface being activated
   //   and asynchronously returns a pointer to the specified interface
   // ----------------------------------------------------------------------
-  function ActivateAudioInterfaceAsync(deviceInterfacePath: LPCWSTR;
+  function ActivateAudioInterfaceAsync(const deviceInterfacePath: LPCWSTR;
                                        const riid: TGUID;
-                                       activationParams: PPROPVARIANT;
+                                       const activationParams: {P}PROPVARIANT;
                                        completionDelegate: IActivateAudioInterfaceCompletionHandler;
                                        out activationOperation: IActivateAudioInterfaceAsyncOperation): HRESULT; stdcall;
   {$EXTERNALSYM ActivateAudioInterfaceAsync}

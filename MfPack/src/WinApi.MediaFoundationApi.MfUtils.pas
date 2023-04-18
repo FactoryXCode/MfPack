@@ -69,11 +69,19 @@ unit WinApi.MediaFoundationApi.MfUtils;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
   {WinApi}
   WinApi.Windows,
   WinApi.WinApiTypes,
   WinApi.ComBaseApi,
+  {ActiveX}
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.ActiveX,
+  {$ELSE}
+  WinApi.ActiveX.PropIdl,
+  {$ENDIF}
   {System}
   System.SysUtils,
   System.UITypes,
@@ -102,6 +110,7 @@ type
 
   procedure Cpp_FreeAndNil(var Obj: TObject);
 
+  procedure PropVariantClearSafe(var pv: PROPVARIANT); inline;
 
   // Compare GUIDS
   function InlineIsEqualGUID(rguid1: TGUID;
@@ -285,7 +294,7 @@ type
                            var lplpsz: POleStr): HResult; stdcall;
 
   // Simplified helper of StringToWideChar function
-  function StrToPWideChar(const source: string): PWideChar; inline;
+  function StrToPWideChar(source: string): PWideChar; inline;
 
 
   // MFVideoNormalizedRect methods
@@ -476,6 +485,20 @@ type
       {[in]}           dwCreationDisposition: DWORD;
       {[in, optional]} pCreateExParams: LPCREATEFILE2_EXTENDED_PARAMETERS): THandle; stdcall;
 
+
+  // Strings
+  function StringCbCat(pszDest: PChar;
+                       cbDest: SIZE_T;
+                       const pszSrc: string): HRESULT;
+
+  function StringCbCatA(pszDest: PAnsiChar;
+                        cbDest: SIZE_T;
+                        pszSrc: PAnsiChar): HRESULT; stdcall;
+
+  function StringCbCatW(pszDest: PWideChar;
+                        cbDest: SIZE_T;
+                        pszSrc: PWideChar): HRESULT; stdcall;
+
 implementation
 
 uses
@@ -520,6 +543,7 @@ begin
     IUnknown(IUnk) := nil;
 end;
 
+
 // Note: Here the object does NOT initiate a reference call.
 procedure Safe_Release(const [ref] IUnk);
 begin
@@ -527,11 +551,19 @@ begin
     IUnknown(Pointer(@IUnk)^):= nil;
 end;
 
+
 // Equivalent method of CPPFreeAndNil
 procedure Cpp_FreeAndNil(var Obj: TObject);
 begin
   Obj.Free();
   Obj := nil;
+end;
+
+
+procedure PropVariantClearSafe(var pv: PROPVARIANT);
+begin
+  ZeroMemory(@pv,
+             SizeOf(pv));
 end;
 
 
@@ -1698,7 +1730,7 @@ end;
 
 
 // Simplified helper of StringToWideChar function
-function StrToPWideChar(const source: string): PWideChar; inline;
+function StrToPWideChar(source: string): PWideChar; inline;
 var
   pwResult: PWideChar;
 
@@ -1898,5 +1930,28 @@ end;
 
 
 function CreateFile2; external Kernel32Lib name 'CreateFile2';
+
+
+
+// Strings
+function StringCbCat(pszDest: PChar;
+                     cbDest: SIZE_T;
+                     const pszSrc: string): HRESULT;
+begin
+  // choose the appropriate function based on the string type
+  {$IFDEF UNICODE}
+  Result := StringCbCatW(pszDest,
+                         cbDest,
+                         PWideChar(WideString(pszSrc)));
+  {$ELSE}
+  Result := StringCbCatA(pszDest,
+                         cbDest,
+                         PAnsiChar(AnsiString(pszSrc)));
+  {$ENDIF}
+
+end;
+
+function StringCbCatA; external Kernel32Lib name 'StringCbCatA';
+function StringCbCatW; external Kernel32Lib name 'StringCbCatW';
 
 end.

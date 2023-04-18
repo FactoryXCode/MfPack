@@ -69,6 +69,8 @@ unit WinApi.CoreAudioApi.MMDevApiUtils;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
   {WinApi}
   WinApi.Windows,
@@ -77,12 +79,20 @@ uses
   WinApi.StrMif,
   WinApi.Coml2Api,
   WinApi.ComBaseApi,
+  {WinMM}
   WinApi.WinMM.MMreg,
   WinApi.WinMM.MMDdk,
   {ActiveX}
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.PropSys,
+  WinApi.ActiveX,
+  {$ELSE}
   WinApi.ActiveX.PropIdl,
   WinApi.ActiveX.PropSys,
   WinApi.ActiveX.ObjBase,
+  {$ENDIF}
+
+
   {System}
   System.Classes,
   System.Win.ComObj,
@@ -153,7 +163,7 @@ type
  //   https://docs.microsoft.com/en-us/windows/win32/coreaudio/audio-events-for-legacy-audio-applications
  //-----------------------------------------------------------
 
-  TAudioVolumeEvents = class(TObject)
+TAudioVolumeEvents = class(TObject)
   private
     hrStatus: HRESULT;
     pManager: IAudioSessionManager;
@@ -275,7 +285,7 @@ implementation
 
 // Constructor
 constructor TAudioVolumeEvents.Create(flow: EDataFlow;
-                                      role: ERole; 
+                                      role: ERole;
                                       AudioEvents: IAudioSessionEvents);
 var
   pEnumerator: IMMDeviceEnumerator;
@@ -345,9 +355,8 @@ end;
 
 end;
 
-
 // Destructor
-destructor TAudioVolumeEvents.Destroy;
+destructor TAudioVolumeEvents.Destroy();
 begin
   if Assigned(pControl) then
     begin
@@ -355,12 +364,11 @@ begin
     end;
   SafeRelease(pManager);
   SafeRelease(pControl);
-  SafeRelease(pAudioEvents);
   inherited Destroy;
 end;
 
 
-function TAudioVolumeEvents.GetStatus(): HRESULT;  { return _hrStatus; }
+function TAudioVolumeEvents.GetStatus(): HResult;
 begin
   Result := hrStatus;
 end;
@@ -402,6 +410,14 @@ end;
 
 // Get GetEndpointDevices
 // Remarks: the index of endpointdevices indicates also the device index.
+// Parameters
+// flow: eRender, eCapture or eAll.
+// state: value of this parameter is one of the following: DEVICE_STATE_ACTIVE
+//                                                         DEVICE_STATE_DISABLED
+//                                                         DEVICE_STATE_NOTPRESENT
+//                                                         DEVICE_STATE_UNPLUGGED
+// endpointdevices: Dynamic array that holds EndPointDevice properties.
+// devicesCount: Number of specified devices found
 function GetEndpointDevices(const flow: EDataFlowEx;
                             state: DWord;
                             out endpointdevices: TEndPointDeviceArray;
@@ -420,6 +436,9 @@ var
   i: Integer;
   dwState: DWord;
 
+label
+  done;
+
   procedure CheckHr(hres: HResult);
     begin
       if FAILED(hres) then
@@ -429,38 +448,38 @@ var
 begin
   hr := S_OK;
 
-try
-try
-  SetLength(endpointdevices, 0);
+  SetLength(endpointdevices,
+            0);
 
   if (state = 0) then
     state := $0000000F; {15 = ALL}
 
   // Create the enumerator
-  CheckHr( CoCreateInstance(CLSID_MMDeviceEnumerator,
-                            Nil,
-                            CLSCTX_ALL,
-                            IID_IMMDeviceEnumerator,
-                            pEnumerator) );
+  CheckHr(CoCreateInstance(CLSID_MMDeviceEnumerator,
+                           nil,
+                           CLSCTX_ALL,
+                           IID_IMMDeviceEnumerator,
+                           pEnumerator));
 
-  CheckHr( pEnumerator.EnumAudioEndpoints(EDataFlow(flow),
-                                          state,
-                                          pCollection));
+  CheckHr(pEnumerator.EnumAudioEndpoints(EDataFlow(flow),
+                                         state,
+                                         pCollection));
 
-  CheckHr( pCollection.GetCount(count) );
+  CheckHr(pCollection.GetCount(count));
 
   // No endpoints found.
   if (count = 0) then
     begin
       devicesCount := 0;
-      Result := MF_E_NOT_FOUND;
-      Exit;
+      hr := MF_E_NOT_FOUND;
+      goto done;
     end;
 
   // Store devices found
   devicesCount := count;
   // expand the array (in case we have an open array)
-  SetLength(endpointdevices, count);
+  SetLength(endpointdevices,
+            count);
   // Initialize containers for property values.
   PropVariantInit(DevIfaceName);
   PropVariantInit(DevDesc);
@@ -470,25 +489,25 @@ try
   for i := 0 to count -1 do
     begin
       // Get pointer to endpoint i.
-      CheckHr( pCollection.Item(i,
-                                pEndpoint) );
+      CheckHr(pCollection.Item(i,
+                               pEndpoint));
       // Get the endpoint ID string.
-      CheckHr( pEndpoint.GetId(pwszID) );
+      CheckHr(pEndpoint.GetId(pwszID));
       // Get the endpoint state
-      CheckHr( pEndpoint.GetState(dwState) );
+      CheckHr(pEndpoint.GetState(dwState));
       // Open propertystore, to get device descriptions
-      CheckHr( pEndpoint.OpenPropertyStore(STGM_READ,
-                                           pProps) );
+      CheckHr(pEndpoint.OpenPropertyStore(STGM_READ,
+                                          pProps));
 
       // Get the endpoint's friendly-name property.
-      CheckHr( pProps.GetValue(PKEY_DeviceInterface_FriendlyName,
-                               DevIfaceName) );
+      CheckHr(pProps.GetValue(PKEY_DeviceInterface_FriendlyName,
+                              DevIfaceName));
       // Get the endpoint's device description property.
-      CheckHr( pProps.GetValue(PKEY_Device_DeviceDesc,
-                               DevDesc) );
+      CheckHr(pProps.GetValue(PKEY_Device_DeviceDesc,
+                              DevDesc));
       // Get the endpoint's device name property.
-      CheckHr( pProps.GetValue(PKEY_Device_FriendlyName,
-                               DevName) );
+      CheckHr(pProps.GetValue(PKEY_Device_FriendlyName,
+                              DevName));
 
       // Store endpoint's properties in array.
       endpointdevices[i].DevInterfaceName := DevIfaceName.pwszVal;
@@ -503,16 +522,12 @@ try
       SafeRelease(pEndpoint);
     end;
 
-except
-  // Do Nothing. Caller is responsible for error handling.
-end;
-finally
+done:
   PropVariantClearSafe(DevIfaceName);
   PropVariantClearSafe(DevDesc);
   PropVariantClearSafe(DevName);
   pwszID := nil;
   Result := hr;
-end;
 end;
 
 

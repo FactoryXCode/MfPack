@@ -125,7 +125,9 @@ uses
   {$I 'WinApiTypes.inc'}
 
 type
+  PMFWORKITEM_KEY = ^MFWORKITEM_KEY;
   MFWORKITEM_KEY = UInt64;
+  {$EXTERNALSYM MFWORKITEM_KEY}
 
 const
   MF_SDK_VERSION                      = $0002;
@@ -250,7 +252,7 @@ const
   //    A pointer to the IMFAsyncResult interface of an asynchronous result object.
   //    To create the result object, call MFCreateAsyncResult.
 
-  function MFPutWaitingWorkItem(hEvent: THandle;
+  function MFPutWaitingWorkItem(const hEvent: THandle;
                                 Priority: LONG;
                                 pResult: IMFAsyncResult;
                                 out pKey: MFWORKITEM_KEY ): HResult; stdcall;
@@ -268,7 +270,7 @@ const
   // pKey [out]
   //    Receives a key that can be used to cancel the wait.
   //    To cancel the wait, call MFCancelWorkItem and pass this key in the Key parameter.
-  //    This parameter can be Nil.
+  //    This parameter can be 0.
 
   function MFAllocateSerialWorkQueue(dwWorkQueue: DWORD;
                                      out pdwWorkQueue: DWORD): HResult; stdcall;
@@ -329,7 +331,7 @@ const
   //    Due to asynchronous nature of timers, application might still get a
   //    timer callback after MFCancelWorkItem has returned.
 
-  function MFCancelWorkItem(Key: MFWORKITEM_KEY): HResult; stdcall;
+  function MFCancelWorkItem(const Key: MFWORKITEM_KEY): HResult; stdcall;
   {$EXTERNALSYM MFCancelWorkItem}
   // Attempts to cancel an asynchronous operation that was scheduled with
   // MFScheduleWorkItem or MFScheduleWorkItemEx.
