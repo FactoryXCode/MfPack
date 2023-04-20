@@ -193,6 +193,6 @@ The application is provided with a dialog to select the running process from the
 a button to get the current PID of your application.
 *
 
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopBackAudioCapture_2.jpg)  
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/Loopback_2.png)  
   
 **© FactoryX. All rights reserved.**
