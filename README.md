@@ -190,8 +190,7 @@ process receives silence.
 
 To use this sample, obtain the process ID for the process tree you wish to capture or exclude from capture.
 The application is provided with a dialog to select the running process from the process tree you want to pick and
-a button to get the current PID of your application.
-*
+a button to get the current PID of your application.*
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/Loopback_2.png)  
   
