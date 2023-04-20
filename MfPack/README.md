@@ -173,8 +173,25 @@ SDK version: 10.0.22621.0 (Windows 11)
 **LoopBackCapture Sample 2**
 
 *Demonstrates how to capture system audio either from a specific process tree or for all process except a process tree and
-the use of ActivateAudioInterfaceAsync Win32 API with a new initialization structure,
-with the quality that is supported by your soundcard.*
+the use of ActivateAudioInterfaceAsync Win32 API with a new initialization structure. 
+The new data structure makes it possible to restrict captured audio data to that rendered by a specific 
+process and any of its child processes. Windows 10 has always supported capturing all audio that is played on 
+an audio endpoint (referred to as "system" loopback capture), which captures all audio from all apps that 
+are playing sounds on the chosen audio endpoint. 
+
+With the new structure, only audio from the specified process, and its children, will be captured. Audio rendered by
+other processes will not be captured. A flag is also provided to reverse the behavior, capturing all system
+audio *except* those from the the specified process (and its children). Furthermore, the capture is not tied to a 
+specific audio endpoint, eliminating the need to create a separate IAudioClient to capture from each physical 
+audio endpoint. 
+
+If the processes whose audio will be captured does not have any audio rendering streams, then the capturing 
+process receives silence.
+
+To use this sample, obtain the process ID for the process tree you wish to capture or exclude from capture.
+The application is provided with a dialog to select the running process from the process tree you want to pick and
+a button to get the current PID of your application.
+*
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopBackAudioCapture_2.jpg)  
   

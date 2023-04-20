@@ -81,13 +81,14 @@ uses
   Vcl.Forms,
   Vcl.Dialogs,
   Vcl.ComCtrls,
-  Vcl.StdCtrls,
+  Vcl.StdCtrls, Vcl.ExtCtrls,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfUtils,
   WinApi.CoreAudioApi.MMDeviceApi,
   Common,
-  LoopbackCapture, Vcl.ExtCtrls;
+  LoopbackCapture,
+  ProcessInfoDlg;
 
 type
   TfrmMain = class(TForm)
@@ -105,6 +106,10 @@ type
     rb1: TRadioButton;
     Bevel1: TBevel;
     butGetPID: TButton;
+    Button1: TButton;
+    Bevel2: TBevel;
+    Label2: TLabel;
+    edProcName: TEdit;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject;
                              var CanClose: Boolean);
@@ -115,6 +120,9 @@ type
     procedure edFileNameKeyUp(Sender: TObject;
                               var Key: Word;
                               Shift: TShiftState);
+    procedure Button1Click(Sender: TObject);
+    procedure edPIDKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+
   private
     { Private declarations }
     sFileName: string;
@@ -123,6 +131,7 @@ type
     iProgress: Int64;
     bIncludeProcessTree: Boolean;
     oLoopbackCapture: TLoopbackCapture;
+    processId: Integer;
 
     procedure OnProgressEvent(var AMessage: TMessage); message WM_PROGRESSNOTIFY;
     procedure OnRecordingStopped(var AMessage: TMessage); message WM_RECORDINGSTOPPEDNOTYFY;
@@ -186,6 +195,30 @@ begin
 end;
 
 
+procedure TfrmMain.Button1Click(Sender: TObject);
+begin
+  // Create the dialog if it's not allready done.
+  if not Assigned(dlgProcessInfo) then
+    begin
+      Application.CreateForm(TdlgProcessInfo,
+                             dlgProcessInfo);
+      dlgProcessInfo.Visible := False;
+    end;
+
+  // Ask the user to select one.
+  if (dlgProcessInfo.ShowModal = mrOk) then
+    begin
+      processId := dlgProcessInfo.SelectedPID;
+      edPID.Text := IntToStr(processId);
+      edProcName.Text := dlgProcessInfo.SelectedProcName;
+    end
+  else
+    begin
+      // User canceled.
+    end;
+end;
+
+
 procedure TfrmMain.edFileNameKeyUp(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
@@ -193,9 +226,20 @@ begin
 end;
 
 
+procedure TfrmMain.edPIDKeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+var
+  i: Integer;
+begin
+  if TryStrToInt(edPID.Text, i) and (i >= 0) then
+   processId := i;
+end;
+
+// Get the PID from this application
 procedure TfrmMain.butGetPIDClick(Sender: TObject);
 begin
   edPID.Text := IntToStr(GetCurrentProcessId());
+  edProcName.Text := Application.Title;
 end;
 
 
@@ -219,7 +263,6 @@ var
   hr: HResult;
   i: Integer;
   bFileExists: Boolean;
-  processId: Integer;
 
 label
   done;

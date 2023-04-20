@@ -4,8 +4,8 @@ object frmMain: TfrmMain
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'LoopBackCapture Sample 2'
-  ClientHeight = 232
-  ClientWidth = 424
+  ClientHeight = 309
+  ClientWidth = 428
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -19,15 +19,21 @@ object frmMain: TfrmMain
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
+  object Bevel2: TBevel
+    Left = 8
+    Top = 8
+    Width = 405
+    Height = 171
+  end
   object Bevel1: TBevel
     Left = 8
-    Top = 113
+    Top = 181
     Width = 405
-    Height = 83
+    Height = 93
   end
   object Label1: TLabel
     Left = 29
-    Top = 127
+    Top = 195
     Width = 79
     Height = 13
     Hint = 'Enter a file name without extension.'
@@ -38,7 +44,7 @@ object frmMain: TfrmMain
   end
   object lblFileExt: TLabel
     Left = 294
-    Top = 142
+    Top = 210
     Width = 27
     Height = 16
     Hint = 'Enter a file name without extension.'
@@ -58,7 +64,7 @@ object frmMain: TfrmMain
   object Label3: TLabel
     AlignWithMargins = True
     Left = 15
-    Top = 39
+    Top = 49
     Width = 92
     Height = 17
     Hint = 
@@ -71,20 +77,38 @@ object frmMain: TfrmMain
     AutoSize = False
     Caption = 'Process ID (PID):'
   end
+  object Label2: TLabel
+    AlignWithMargins = True
+    Left = 15
+    Top = 72
+    Width = 92
+    Height = 17
+    Hint = 
+      'Obtain the process ID for the process tree you wish to capture o' +
+      'r exclude from capture.'#10'You can use Task Manager or the tlist pr' +
+      'ogram to get this ID. Run the sample with the process ID, the'#10'de' +
+      'sired capture mode (including the process tree or excluding it),' +
+      ' and the output WAV file.'
+    Alignment = taRightJustify
+    AutoSize = False
+    Caption = 'Process Name:'
+  end
   object sbMsg: TStatusBar
     Left = 0
-    Top = 208
-    Width = 424
+    Top = 285
+    Width = 428
     Height = 24
     DoubleBuffered = True
     Panels = <>
     ParentDoubleBuffered = False
     SimplePanel = True
     SimpleText = 'Start Capture'
+    ExplicitTop = 208
+    ExplicitWidth = 493
   end
   object butStart: TButton
     Left = 72
-    Top = 169
+    Top = 237
     Width = 85
     Height = 27
     Caption = 'Start Capture'
@@ -93,7 +117,7 @@ object frmMain: TfrmMain
   end
   object butStop: TButton
     Left = 163
-    Top = 169
+    Top = 237
     Width = 85
     Height = 27
     Caption = 'Stop Capture'
@@ -103,7 +127,7 @@ object frmMain: TfrmMain
   end
   object edFileName: TEdit
     Left = 29
-    Top = 142
+    Top = 210
     Width = 265
     Height = 21
     Alignment = taRightJustify
@@ -123,7 +147,7 @@ object frmMain: TfrmMain
   end
   object butPlayData: TButton
     Left = 254
-    Top = 169
+    Top = 237
     Width = 80
     Height = 27
     Hint = 'Play recorded data.'
@@ -135,7 +159,7 @@ object frmMain: TfrmMain
     OnClick = butPlayDataClick
   end
   object cbxDontOverWrite: TCheckBox
-    Left = 26
+    Left = 22
     Top = 16
     Width = 253
     Height = 15
@@ -149,26 +173,27 @@ object frmMain: TfrmMain
   end
   object edPID: TEdit
     Left = 113
-    Top = 37
-    Width = 182
+    Top = 46
+    Width = 106
     Height = 21
     Hint = 'Enter a numeric value!'
     ParentShowHint = False
     ShowHint = True
     TabOrder = 6
     Text = '1234'
+    OnKeyUp = edPIDKeyUp
   end
   object rb2: TRadioButton
-    Left = 26
-    Top = 85
+    Left = 22
+    Top = 147
     Width = 291
     Height = 17
     Caption = 'Capture audio from process ID (PID)  and its children'
     TabOrder = 7
   end
   object rb1: TRadioButton
-    Left = 26
-    Top = 62
+    Left = 22
+    Top = 124
     Width = 365
     Height = 17
     Caption = 
@@ -179,15 +204,39 @@ object frmMain: TfrmMain
     TabStop = True
   end
   object butGetPID: TButton
-    Left = 306
-    Top = 35
-    Width = 75
-    Height = 23
+    Left = 19
+    Top = 95
+    Width = 97
+    Height = 21
     Hint = 'Get the Program ID of this application.'
     Caption = 'Get PID'
     ParentShowHint = False
     ShowHint = True
     TabOrder = 9
     OnClick = butGetPIDClick
+  end
+  object Button1: TButton
+    Left = 122
+    Top = 95
+    Width = 97
+    Height = 22
+    Hint = 'Pick a Program ID from a running process.'
+    Caption = 'Show Processes'
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 10
+    OnClick = Button1Click
+  end
+  object edProcName: TEdit
+    Left = 113
+    Top = 68
+    Width = 286
+    Height = 21
+    ParentShowHint = False
+    ReadOnly = True
+    ShowHint = True
+    TabOrder = 11
+    Text = 'Unknown'
+    OnKeyUp = edPIDKeyUp
   end
 end

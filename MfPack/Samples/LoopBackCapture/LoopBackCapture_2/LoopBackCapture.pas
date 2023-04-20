@@ -856,7 +856,7 @@ begin
 
   hr := ActivateAudioInterfaceAsync(LPCWSTR(VIRTUAL_AUDIO_DEVICE_PROCESS_LOOPBACK),
                                     IID_IAudioClient,
-                                    @activateParams,
+                                    activateParams,
                                     Self,
                                     asyncOp);
   if FAILED(hr) then

@@ -69,7 +69,9 @@ uses
   System.Sysutils,
   System.Threading,
   System.SyncObjs,
+  System.Classes,
   {Vcl}
+  Vcl.Grids,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfUtils;
 
@@ -77,7 +79,7 @@ uses
   {$DEFINE SHOW_IN_MESSAGES_IDE}
 
 
-  // Simple error handler that reports by default in the IDE Messages screen or
+  // Simple error message handler that reports by default in the IDE Messages screen or
   // shows a messagedialog at runtime.
   procedure ErrMsg(pErrMsg: string;
                    pHr: HResult);
@@ -88,8 +90,18 @@ uses
   function EventWait(EventObj: TEvent;
                      Period: Integer = 100): HResult;
 
+  // Grid sorting methods (Author: Peter Below)
+  procedure SortStringgrid(Grid: TStringGrid;
+                           byColumn: LongInt;
+                           ascending: Boolean );
+
+
 
 implementation
+
+uses
+  Vcl.Forms,
+  Vcl.Controls;
 
 
 // ErrMsg
@@ -156,6 +168,88 @@ begin
       hr := S_OK;
   end;
   Result := hr;
+end;
+
+
+procedure SortStringgrid(Grid: TStringGrid;
+                         byColumn: LongInt;
+                         ascending: Boolean);
+  // Helpers
+  procedure ExchangeGridRows(i: Integer;
+                             j: Integer);
+  var
+    k: Integer;
+  begin
+    for k := 0 To Grid.ColCount -1 Do
+      Grid.Cols[k].Exchange(i,
+                            j);
+  end;
+
+  procedure QuickSort(L: Integer;
+                      R: Integer);
+  var
+    I: Integer;
+    J: Integer;
+    P: string;
+  begin
+    repeat
+      I := L;
+      J := R;
+      P := Grid.Cells[byColumn, (L + R) shr 1];
+      repeat
+        while (CompareStr(Grid.Cells[byColumn, I],
+                          P) < 0) do
+          Inc(I);
+        while (CompareStr(Grid.Cells[byColumn, J],
+                          P) > 0) do
+          Dec(J);
+        if (I <= J) then
+          begin
+            if (I <> J) Then
+              ExchangeGridRows(I,
+                               J);
+            Inc(I);
+            Dec(J);
+          end;
+      until (I > J);
+
+      if (L < J) then
+        QuickSort(L, J);
+      L := I;
+    until (I >= R);
+  end;
+
+  procedure InvertGrid();
+  var
+    i, j: Integer;
+  begin
+    i := Grid.Fixedrows;
+    j := Grid.Rowcount -1;
+    while (i < j) do
+      begin
+        ExchangeGridRows( I, J );
+        Inc(i);
+        Dec(j);
+      end; { While }
+   end;
+
+begin
+  Screen.Cursor := crHourglass;
+  Grid.Perform(WM_SETREDRAW,
+               0,
+               0);
+  try
+    QuickSort(Grid.FixedRows,
+              Grid.Rowcount-1 );
+    if not ascending Then
+      InvertGrid();
+  finally
+    Grid.Perform(WM_SETREDRAW,
+                 1,
+                 0);
+    Grid.Refresh;
+    Screen.Cursor := crDefault;
+  end;
 end;
 
 end.
