@@ -161,7 +161,7 @@ procedure TfrmMain.butPlayDataClick(Sender: TObject);
 begin
   ShellExecute(Handle,
                'open',
-               StrToPWideChar(sFileName),
+               StrToPWideChar(sFileName + lblFileExt.Caption),
                nil,
                nil,
                SW_SHOWNORMAL) ;
@@ -329,7 +329,7 @@ begin
   if SUCCEEDED(hr) then
     begin
 
-      sFileName := Format('%s%s', [edFileName.Text, lblFileExt.Caption]);
+      sFileName := Format('%s', [edFileName.Text]);
       if (sOrgFileName = '') or bEdited then
         begin
           sOrgFileName := sFileName;
@@ -342,13 +342,13 @@ begin
           i := 0;
           while (bFileExists = True) do
             begin
-              if FileExists(sFileName) then
+              if FileExists(sFileName + lblFileExt.Caption) then
                 begin
                   if (sOrgFileName = sFileName) then
-                    sFileName := Format('%s(%d)%s', [edFileName.Text, i, lblFileExt.Caption])
+                    sFileName := Format('%s(%d)', [edFileName.Text, i])
                   else
                     begin
-                      sFileName := Format('%s(%d)%s', [sOrgFileName, i, lblFileExt.Caption]);
+                      sFileName := Format('%s(%d)', [sOrgFileName, i]);
                       edFileName.Text := sFileName;
                     end;
                   Inc(i);
@@ -359,8 +359,7 @@ begin
         end;
 
       // Show new filename to user.
-      edFileName.Text := ChangeFileExt(ExtractFileName(sFileName), '');
-      lblFileExt.Caption :=  ExtractFileExt(sFileName);
+      edFileName.Text := sFileName;
 
       butStop.Enabled := True;
       butStart.Enabled := False;
@@ -371,7 +370,7 @@ begin
                                                processId,
                                                bIncludeProcessTree,
                                                aWavFmt,
-                                               LPCWSTR(sFileName));
+                                               LPCWSTR(sFileName + lblFileExt.Caption));
       if FAILED(hr) then
         begin
           butStop.Enabled := False;
