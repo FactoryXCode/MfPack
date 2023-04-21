@@ -24,7 +24,7 @@
 // 02/04/2023 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 8 or later.
+// Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
 // Related projects: MfPackX314

@@ -1,11 +1,17 @@
 program LoopBackCapture2;
 
 uses
+  {$IFDEF FASTMM}
+  FastMM4,
+  {$ENDIF}
+  {$IFDEF madExcept}
   madExcept,
   madLinkDisAsm,
   madListHardware,
   madListProcesses,
   madListModules,
+  {$ENDIF}
+
   Vcl.Forms,
   frmLoopBackCapture in 'frmLoopBackCapture.pas' {frmMain},
   Common in 'Common.pas',

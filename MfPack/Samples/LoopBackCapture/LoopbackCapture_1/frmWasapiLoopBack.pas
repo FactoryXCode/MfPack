@@ -67,6 +67,7 @@ uses
   WinApi.Windows,
   WinApi.Messages,
   Winapi.ShellAPI,
+  WinApi.WinApiTypes,
   {System}
   System.SysUtils,
   {Vcl}
@@ -190,7 +191,7 @@ begin
       butPlayData.Enabled := False;
       // Capture the audio stream from the default rendering device.
       hr := oAudioSink.RecordAudioStream(oAudioSink,
-                                         StrToPWideChar(sFileName));
+                                         LPWSTR(sFileName));
       if FAILED(hr) then
         begin
           butStop.Enabled := False;
@@ -207,7 +208,7 @@ procedure TfrmLoopBackCapture.butPlayDataClick(Sender: TObject);
 begin
   ShellExecute(Handle,
                'open',
-               StrToPWideChar(sFileName),
+               LPWSTR(sFileName),
                nil,
                nil,
                SW_SHOWNORMAL) ;

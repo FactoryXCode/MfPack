@@ -98,7 +98,7 @@ object dlgProcessInfo: TdlgProcessInfo
     OnClick = butSortClick
   end
   object cbxSortOnColumn: TCheckBox
-    Left = 218
+    Left = 216
     Top = 302
     Width = 98
     Height = 15
