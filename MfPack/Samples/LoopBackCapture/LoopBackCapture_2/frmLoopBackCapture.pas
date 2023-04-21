@@ -81,7 +81,8 @@ uses
   Vcl.Forms,
   Vcl.Dialogs,
   Vcl.ComCtrls,
-  Vcl.StdCtrls, Vcl.ExtCtrls,
+  Vcl.StdCtrls,
+  Vcl.ExtCtrls,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfUtils,
@@ -93,24 +94,24 @@ uses
 type
   TfrmMain = class(TForm)
     sbMsg: TStatusBar;
-    Label1: TLabel;
-    lblFileExt: TLabel;
-    butStart: TButton;
-    butStop: TButton;
-    edFileName: TEdit;
-    butPlayData: TButton;
     cbxDontOverWrite: TCheckBox;
     edPID: TEdit;
     Label3: TLabel;
     rb2: TRadioButton;
     rb1: TRadioButton;
-    Bevel1: TBevel;
     butGetPID: TButton;
     Button1: TButton;
     Bevel2: TBevel;
     Label2: TLabel;
     edProcName: TEdit;
     cbxStayOnTop: TCheckBox;
+    Panel1: TPanel;
+    Label1: TLabel;
+    lblFileExt: TLabel;
+    butStart: TButton;
+    butStop: TButton;
+    edFileName: TEdit;
+    butPlayData: TButton;
     Label4: TLabel;
     rb44: TRadioButton;
     rb48: TRadioButton;
