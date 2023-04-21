@@ -110,6 +110,10 @@ type
     Bevel2: TBevel;
     Label2: TLabel;
     edProcName: TEdit;
+    cbxStayOnTop: TCheckBox;
+    Label4: TLabel;
+    rb44: TRadioButton;
+    rb48: TRadioButton;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject;
                              var CanClose: Boolean);
@@ -122,6 +126,7 @@ type
                               Shift: TShiftState);
     procedure Button1Click(Sender: TObject);
     procedure edPIDKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure cbxStayOnTopClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -132,6 +137,7 @@ type
     bIncludeProcessTree: Boolean;
     oLoopbackCapture: TLoopbackCapture;
     processId: Integer;
+    aWavFmt: TWavFormat;
 
     procedure OnProgressEvent(var AMessage: TMessage); message WM_PROGRESSNOTIFY;
     procedure OnRecordingStopped(var AMessage: TMessage); message WM_RECORDINGSTOPPEDNOTYFY;
@@ -219,6 +225,27 @@ begin
 end;
 
 
+procedure TfrmMain.cbxStayOnTopClick(Sender: TObject);
+begin
+  if cbxStayOnTop.Checked then
+    SetWindowPos(Handle,
+                 HWND_TOPMOST,
+                 0,
+                 0,
+                 0,
+                 0,
+                 SWP_NoMove or SWP_NoSize)
+  else
+    SetWindowPos(Handle,
+                 HWND_NOTOPMOST,
+                 0,
+                 0,
+                 0,
+                 0,
+                 SWP_NoMove or SWP_NoSize);
+end;
+
+
 procedure TfrmMain.edFileNameKeyUp(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
@@ -292,6 +319,11 @@ begin
   else if rb2.Checked then
     bIncludeProcessTree := True;
 
+  // Bitrate
+  if rb44.Checked then
+    aWavFmt := fmt44100
+  else if rb48.Checked then
+    aWavFmt := fmt48000;
 
   if SUCCEEDED(hr) then
     begin
@@ -337,6 +369,7 @@ begin
       hr := oLoopbackCapture.StartCaptureAsync(Handle,
                                                processId,
                                                bIncludeProcessTree,
+                                               aWavFmt,
                                                LPCWSTR(sFileName));
       if FAILED(hr) then
         begin
@@ -352,13 +385,16 @@ end;
 
 procedure TfrmMain.OnProgressEvent(var aMessage: TMessage);
 begin
-  sbMsg.SimpleText := Format('Capturing from source: Bytes processed: %d',[aMessage.WParam]);
+  iProgress := aMessage.WParam;
+  sbMsg.SimpleText := Format('Capturing from source: Bytes processed: %d',[iProgress]);
+
 end;
 
 
 procedure TfrmMain.OnRecordingStopped(var AMessage: TMessage);
 begin
   butPlayData.Enabled := True;
+  sbMsg.SimpleText := Format('Capturing Stopped: %s bytes processed.', [iProgress.ToString()]);
 end;
 
 end.

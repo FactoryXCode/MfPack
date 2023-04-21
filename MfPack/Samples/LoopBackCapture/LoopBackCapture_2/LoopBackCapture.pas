@@ -22,7 +22,6 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 02/04/2023 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
-// 21/04/2023 Tony                Fixed wrong initialization when recording more than once.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -193,7 +192,7 @@ type
     function StartCaptureAsync(const hWindow: HWND;
                                const processId: DWord;
                                includeProcessTree: Boolean;
-                               //const wavFormat: TWavFormat; // TODO:
+                               const wavFormat: TWavFormat;
                                const outputFileName: LPCWSTR): HResult;
 
     function StopCaptureAsync(): HResult;
@@ -300,9 +299,7 @@ begin
     begin
       m_CaptureFormat.wFormatTag := WAVE_FORMAT_PCM;
       m_CaptureFormat.nChannels := 2;
-      // For now we keep 44.00 kHz.
-      m_WavFormat := fmt44100;
-      // TODO: Format calculations. 
+
       if (m_WavFormat = fmt44100) then
         begin
           m_CaptureFormat.nSamplesPerSec := 44100;
@@ -311,7 +308,7 @@ begin
       else
         begin
           m_CaptureFormat.nSamplesPerSec := 48000;
-          m_CaptureFormat.wBitsPerSample := 32;
+          m_CaptureFormat.wBitsPerSample := 24;
         end;
 
       m_CaptureFormat.nBlockAlign := (m_CaptureFormat.nChannels * m_CaptureFormat.wBitsPerSample) div BITS_PER_BYTE;
@@ -1023,7 +1020,7 @@ end;
 function TLoopbackCapture.StartCaptureAsync(const hWindow: HWND;
                                             const processId: DWord;
                                             includeProcessTree: Boolean;
-                                            // const wavFormat: TWavFormat;
+                                            const wavFormat: TWavFormat;
                                             const outputFileName: LPCWSTR): HResult;
 var
   hr: HResult;
