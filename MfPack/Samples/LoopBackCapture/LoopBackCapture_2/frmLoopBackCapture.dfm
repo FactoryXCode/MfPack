@@ -106,11 +106,11 @@ object frmMain: TfrmMain
   object rb1: TRadioButton
     Left = 22
     Top = 172
-    Width = 365
+    Width = 385
     Height = 17
     Caption = 
-      'Capture audio from all process except process ID (PID) and its c' +
-      'hildren'
+      'Capture audio from all processes except process ID (PID) and its' +
+      ' children'
     TabOrder = 4
   end
   object butGetPID: TButton
