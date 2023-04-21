@@ -66,7 +66,7 @@ object frmMain: TfrmMain
     ParentDoubleBuffered = False
     SimplePanel = True
     SimpleText = 'Start Capture'
-    ExplicitTop = 305
+    ExplicitTop = 334
   end
   object cbxDontOverWrite: TCheckBox
     Left = 22
@@ -269,17 +269,23 @@ object frmMain: TfrmMain
       Top = 12
       Width = 65
       Height = 13
+      Hint = '44.100 kHz at 16 bits'
       Caption = '44.1 kHz'
       Checked = True
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 4
       TabStop = True
     end
     object rb48: TRadioButton
       Left = 124
       Top = 12
-      Width = 95
+      Width = 65
       Height = 13
+      Hint = '48.000 kHz at 24 bits'
       Caption = '48 kHz'
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 5
     end
   end
