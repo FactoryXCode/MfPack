@@ -79,8 +79,9 @@ uses
   Vcl.Dialogs,
   Vcl.StdCtrls,
   Vcl.Grids,
+  Vcl.ExtCtrls,
   {Application}
-  Common, Vcl.ExtCtrls;
+  Common;
 
 type
   TdlgProcessInfo = class(TForm)
@@ -164,7 +165,7 @@ begin
 
       {$IFDEF ConditionalExpressions}
         {$IF CompilerVersion > 31.0}
-          sgResolutions.BeginUpdate();
+          sgProcesses.BeginUpdate();
         {$IFEND}
       {$ENDIF}
 
@@ -190,7 +191,7 @@ begin
 
   {$IFDEF ConditionalExpressions}
     {$IF CompilerVersion > 31.0}
-       sgResolutions.EndUpdate();
+       sgProcesses.EndUpdate();
     {$IFEND}
   {$ENDIF}
   CloseHandle(hHandle);

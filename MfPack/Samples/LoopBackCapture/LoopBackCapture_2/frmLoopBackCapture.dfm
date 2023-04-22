@@ -66,7 +66,6 @@ object frmMain: TfrmMain
     ParentDoubleBuffered = False
     SimplePanel = True
     SimpleText = 'Start Capture'
-    ExplicitTop = 334
   end
   object cbxDontOverWrite: TCheckBox
     Left = 22
@@ -162,7 +161,7 @@ object frmMain: TfrmMain
   end
   object Panel1: TPanel
     Left = 8
-    Top = 207
+    Top = 206
     Width = 405
     Height = 121
     BevelOuter = bvLowered
@@ -174,13 +173,13 @@ object frmMain: TfrmMain
       Height = 13
       Hint = 'Enter a file name without extension.'
       AutoSize = False
-      Caption = 'FileName'
+      Caption = 'FileName:'
       ParentShowHint = False
       ShowHint = True
     end
     object lblFileExt: TLabel
-      Left = 358
-      Top = 37
+      Left = 267
+      Top = 39
       Width = 27
       Height = 16
       Hint = 'Enter a file name without extension.'
@@ -232,9 +231,9 @@ object frmMain: TfrmMain
       OnClick = butStopClick
     end
     object edFileName: TEdit
-      Left = 93
-      Top = 37
-      Width = 265
+      Left = 61
+      Top = 39
+      Width = 205
       Height = 21
       Alignment = taRightJustify
       AutoSize = False
