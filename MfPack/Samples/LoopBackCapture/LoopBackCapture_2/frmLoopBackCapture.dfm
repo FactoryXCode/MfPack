@@ -82,7 +82,7 @@ object frmMain: TfrmMain
   end
   object edPID: TEdit
     Left = 113
-    Top = 67
+    Top = 65
     Width = 106
     Height = 21
     Hint = 'Enter a numeric value!'
@@ -146,6 +146,7 @@ object frmMain: TfrmMain
     ShowHint = True
     TabOrder = 7
     Text = 'Unknown'
+    OnChange = edProcNameChange
     OnKeyUp = edPIDKeyUp
   end
   object cbxStayOnTop: TCheckBox
@@ -212,8 +213,8 @@ object frmMain: TfrmMain
       Caption = 'Bitrate:'
     end
     object butStart: TButton
-      Left = 11
-      Top = 84
+      Left = 8
+      Top = 86
       Width = 85
       Height = 27
       Caption = 'Start Capture'

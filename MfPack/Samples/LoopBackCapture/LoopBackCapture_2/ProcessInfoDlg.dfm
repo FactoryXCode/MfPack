@@ -62,7 +62,7 @@ object dlgProcessInfo: TdlgProcessInfo
   end
   object sgProcesses: TStringGrid
     Left = 8
-    Top = 30
+    Top = 32
     Width = 308
     Height = 243
     ColCount = 2

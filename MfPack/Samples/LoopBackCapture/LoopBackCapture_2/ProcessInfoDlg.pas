@@ -187,14 +187,14 @@ begin
                             lppe.th32ProcessID);
             end;
         end;
-    end;
 
-  {$IFDEF ConditionalExpressions}
-    {$IF CompilerVersion > 31.0}
-       sgProcesses.EndUpdate();
-    {$IFEND}
-  {$ENDIF}
-  CloseHandle(hHandle);
+      {$IFDEF ConditionalExpressions}
+        {$IF CompilerVersion > 31.0}
+          sgProcesses.EndUpdate();
+        {$IFEND}
+      {$ENDIF}
+      CloseHandle(hHandle);
+    end;
 end;
 
 
@@ -215,6 +215,7 @@ begin
                  aCol,
                  cbxSort.Checked);
 end;
+
 
 procedure TdlgProcessInfo.FormShow(Sender: TObject);
 begin
