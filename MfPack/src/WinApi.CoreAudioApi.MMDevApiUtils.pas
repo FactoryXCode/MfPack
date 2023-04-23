@@ -10,7 +10,7 @@
 // Release date: 04-05-2012
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 // Description: MMDevApiUtils, Device api helper routines >= Win 8
 //
 // Organisation: FactoryX
@@ -23,6 +23,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
 // 24/02/2023 Tony                Updated function GetEndpointDevices.
+// 23/04/2023 Tony                Added function GetJackInfo.
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -33,7 +34,7 @@
 //          Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX301
+// Related projects: MfPackX314
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -130,10 +131,11 @@ type
    DevInterfaceName: LPWSTR;  // The friendly name of the audio adapter to which the endpoint device is attached (for example, "XYZ Audio Adapter").
    DeviceDesc: LPWSTR;        // The device description of the endpoint device (for example, "Speakers").
    DeviceName: LPWSTR;        // The friendly name of the endpoint device (for example, "Speakers (XYZ Audio Adapter)").
-   pwszID: LPWSTR;            //
+   pwszID: LPWSTR;            // Internal ID.
    dwState: DWord;            // State of the device (disconnected, active, unplugged or not present)
    sState: string;            // State of the device in readable string
-   iID: integer;              // Device index ID, starting with 0
+   iID: Integer;              // Device index ID, starting with 0
+   DataFlow: EDataFlow;       // eRender or eCapture.
   end;
   EndPointDevice = _EndPointDevice;
   TEndPointDevice = _EndPointDevice;
@@ -188,7 +190,7 @@ TAudioVolumeEvents = class(TObject)
   // This function enumerates all audio rendering endpoint devices.
   // It returns an array of TEndPointDevice.
   // Params:
-  //   {in}     flow: eRender, eCapture or eAll
+  //   {in}     flow: eRender or eCapture
   //   {in}     state: Set this parameter to the bitwise OR of one or more DEVICE_STATE_XXX constants
   //   {out}    endpointdevices: Returns an array of TEndPointDevices.
   //   {out}    Number of endpoints returned.
@@ -279,6 +281,13 @@ TAudioVolumeEvents = class(TObject)
   //-----------------------------------------------------------
   function GetWaveOutId(role: ERole;
                         out pWaveOutId: PInteger): HRESULT;
+
+  //-----------------------------------------------------------
+  // Get the IKsJackDescription interface that describes the
+  // audio jack or jacks that the endpoint device plugs into.
+  //-----------------------------------------------------------
+  function GetJackInfo(pDevice: IMMDevice;
+                       out ppJackDesc: IKsJackDescription): HResult;
 
 
 implementation
@@ -517,6 +526,7 @@ begin
       endpointdevices[i].dwState := dwState;
       endpointdevices[i].sState := GetDeviceStateAsString(dwState);
       endpointdevices[i].iID := i;
+      endpointdevices[i].DataFlow := EDataFlow(flow);
 
       SafeRelease(pProps);
       SafeRelease(pEndpoint);
@@ -605,6 +615,7 @@ done:
   PropVariantClear(pvvar);
   Result := hr;
 end;
+
 
 function GetDeviceStateAsString(state: DWord): string;
 begin
@@ -895,6 +906,68 @@ leave:
     CoTaskMemFree(pstrEndpointIdKey);  // Nil pointer okay
     CoTaskMemFree(pstrEndpointId);
     Result := hr;
+end;
+
+
+function GetJackInfo(pDevice: IMMDevice;
+                     out ppJackDesc: IKsJackDescription): HResult;
+var
+  hr: HResult;
+  pDeviceTopology: IDeviceTopology;
+  pConnFrom: IConnector;
+  pConnTo: IConnector;
+  pPart: IPart;
+  pJackDesc: IKsJackDescription;
+
+label
+  leave;
+
+begin
+
+  // Get the endpoint device's IDeviceTopology interface.
+  hr := pDevice.Activate(IID_IDeviceTopology,
+                         CLSCTX_ALL,
+                         nil,
+                         Pointer(pDeviceTopology));
+
+  if FAILED(hr) then
+    goto leave;
+
+  // The device topology for an endpoint device always
+  // contains just one connector (connector number 0).
+  hr := pDeviceTopology.GetConnector(0,
+                                     pConnFrom);
+  if FAILED(hr) then
+    goto leave;
+
+  // Step across the connection to the jack on the adapter.
+  hr := pConnFrom.GetConnectedTo(pConnTo);
+
+  if (hr = ERROR_PATH_NOT_FOUND) then
+    // The adapter device is not currently active.
+    hr := E_NOINTERFACE;
+
+  if FAILED(hr) then
+    goto leave;
+
+
+  // Get the connector's IPart interface.
+  hr := pConnTo.QueryInterface(IID_IPart,
+                               Pointer(pPart));
+  if FAILED(hr) then
+    goto leave;
+
+  // Activate the connector's IKsJackDescription interface.
+  hr := pPart.Activate(CLSCTX_INPROC_SERVER,
+                       IID_IKsJackDescription,
+                       Pointer(pJackDesc));
+  if FAILED(hr) then
+    goto leave;
+
+  ppJackDesc := pJackDesc;
+
+leave:
+  Result := hr;
 end;
 
 

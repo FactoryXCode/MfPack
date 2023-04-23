@@ -10,7 +10,7 @@
 // Release date: 12-03-2023
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 //
 // Description:
 //   This unit contains the WASAPI loopback class.
@@ -91,8 +91,8 @@ const
   REFTIMES_PER_MILLISEC               = 10000;
   WM_BUSYNOTIFY                       = WM_USER + 1001;
   WM_PROGRESSNOTIFY                   = WM_USER + 1002;
-  WM_STOPREQUEST                      = WM_USER + 1010;
   WM_CAPTURINGSTOPPED                 = WM_USER + 1011;
+
 type
 
   TAudioSink = class(TObject)
@@ -102,9 +102,7 @@ type
   private
     bStopRec: Boolean;
     bAppIsClosing: Boolean;
-    hwOwner: HWND; // The handle of the caller.
-
-    procedure WndProc(var Msg: TMessage);
+    hwOwner: HWND; // The handle of the caller (usually the mainform).
 
     function CopyData(pData: PByte;
                       NumFrames: UINT32;
@@ -120,14 +118,15 @@ type
     function OpenFile(ppfileName: LPWSTR): HResult;
 
   public
-    hwHWND: HWND; // the handle of this object.
 
     constructor Create(hwEvents: HWND); reintroduce;
     destructor Destroy(); override;
 
-    function RecordAudioStream(pAudioSink: TAudioSink;
+    function RecordAudioStream(dataFlow: EDataFlow;  // eRender or eCapture
+                               role: ERole;          // eConsole, eMultimedia or eCommunications
                                ppfileName: LPWSTR): HResult;
 
+    property StopRecording: Boolean read bStopRec write bStopRec;
   end;
 
 
@@ -136,34 +135,9 @@ implementation
 
 // TAudioSink //////////////////////////////////////////////////////////////////
 
-procedure TAudioSink.WndProc(var Msg: TMessage);
-begin
-  // prevent processing messages when app is shutting down.
-  if bAppIsClosing then
-    Exit;
-
-  if (Msg.Msg = WM_STOPREQUEST) then // Check for timer messages
-    try
-      bStopRec := Boolean(Msg.WParam);
-    except
-      //Application.HandleException(Self);
-      // Do nothing
-    end
-  // Any other messages are passed to DefWindowProc, which tells Windows to handle the message.
-  // NOTE: The first parameter, hwHWND, is the handle of the window receiving this message.
-  //       It is obtained from the call to AllocateHWnd in the Constructor.
-  else
-    msg.Result := DefWindowProc(hwHWND,
-                                Msg.Msg,
-                                Msg.WParam,
-                                Msg.LParam);
-end;
-
-
 constructor TAudioSink.Create(hwEvents: HWND);
 begin
   inherited Create();
-
 
   // Check if the current MF version match user's
   if FAILED(MFStartup(MF_VERSION, 0)) then
@@ -178,14 +152,13 @@ begin
 
   hwOwner := hwEvents;
   bAppIsClosing := False;
-  hwHWND := AllocateHWnd(WndProc);
+
 end;
 
 
 destructor TAudioSink.Destroy();
 begin
   bAppIsClosing := True;
-  DeallocateHWnd(hwHWND);
   MFShutdown();
   inherited Destroy();
 end;
@@ -392,7 +365,8 @@ end;
 // The function uses this buffer to stream data from the
 // capture device. The main loop runs every 1/2 second.
 //-----------------------------------------------------------
-function TAudioSink.RecordAudioStream(pAudioSink: TAudioSink;
+function TAudioSink.RecordAudioStream(dataFlow: EDataFlow;  // eRender or eCapture
+                                      role: ERole;          // eConsole, eMultimedia or eCommunications
                                       ppfileName: LPWSTR): HResult;
 var
   hr: HResult;
@@ -445,9 +419,8 @@ begin
     goto done;
 
   // Get the default endpoint. See MMDeviceApi line 278 for explanation.
-  // Normally you wpuld check if a capture device is present, on most laptops there is none.
-  hr := pEnumerator.GetDefaultAudioEndpoint(eRender,     //or eCapture,
-                                            eMultimedia, //or eConsole,
+  hr := pEnumerator.GetDefaultAudioEndpoint(dataFlow, // eRender or eCapture,
+                                            role,     // eMultimedia, eConsole or eCommunications
                                             pDevice);
   if FAILED(hr) then
     goto done;
@@ -529,9 +502,9 @@ begin
             end;
 
           // Copy the available capture data to the audio sink.
-          hr := pAudioSink.CopyData(pData,
-                                    numFramesAvailable,
-                                    ppwfx);
+          hr := CopyData(pData,
+                         numFramesAvailable,
+                         ppwfx);
           if FAILED(hr) then
             goto done;
 
