@@ -79,6 +79,8 @@ uses
   Winapi.Windows,
   Winapi.Messages,
   WinApi.WinApiTypes,
+  WinApi.ComBaseApi,
+  WinApi.ActiveX.ObjBase,
   {System}
   System.SysUtils,
   System.Variants,
@@ -314,14 +316,28 @@ begin
   CanClose := False;
   butCancelClick(Self); // when sampling is going on, we need to send a message to quit.
 
-  MfAudioClip.Free;
+  MfAudioClip.Free();
+  CoUninitialize();
   CanClose := True;
 end;
 
 
 procedure TAudioClipExFrm.FormCreate(Sender: TObject);
+var
+  hr: HResult;
 begin
   prbProgress.Max := prbProgress.Width;
+
+  hr := CoInitializeEx(nil,
+                       COINIT_MULTITHREADED);
+  if FAILED(hr) then
+    begin
+      MessageBox(0,
+                 lpcwstr('Initialize Com Failure.' + 'The application will closed.'),
+                 lpcwstr('Com Failure'),
+                 MB_ICONSTOP);
+      Close();
+    end;
 end;
 
 
