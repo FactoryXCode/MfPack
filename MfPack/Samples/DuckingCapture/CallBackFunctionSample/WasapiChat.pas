@@ -73,7 +73,7 @@ uses
   System.Classes,
   System.SysUtils,
   {WinMM}
-  WinApi.WinMM.MMReg,
+  WinApi.WinMM.MMeApi,
   WinApi.WinMM.MMSysCom,
   {CoreAudioApi}
   WinApi.CoreAudioApi.MMDeviceAPI,
@@ -415,7 +415,7 @@ begin
                                 500000,
                                 0,
                                 mixFormat,
-                                @chatGuid);
+                                chatGuid);
 
   CoTaskMemFree(@mixFormat);
   mixFormat := Nil;

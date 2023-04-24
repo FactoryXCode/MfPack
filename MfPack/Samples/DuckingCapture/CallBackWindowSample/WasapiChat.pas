@@ -133,9 +133,9 @@ var
   framesAvailable: UINT32;
   flags: AUDCLNT_BUFFERFLAGS;
   flow: eDataFlow;
-  iAClient: IAudioClient;
-  iRClient: IAudioRenderClient;
-  iCClient: IAudioCaptureClient;
+  pAudioClient: IAudioClient;
+  pRenderClient: IAudioRenderClient;
+  pCaptureClient: IAudioCaptureClient;
 
 begin
 
@@ -147,9 +147,9 @@ begin
   stillPlaying := True;
   // to keep the enigine run smoothly, we localise the global vars.
   flow := chat._Flow;
-  iRClient := chat._RenderClient;
-  iCClient := chat._CaptureClient;
-  iAClient := chat._AudioClient;
+  pRenderClient := chat._RenderClient;
+  pCaptureClient := chat._CaptureClient;
+  pAudioClient := chat._AudioClient;
 
   SetLength(waitArray, 2);
   waitArray[0] := chat._ShutdownEvent;
@@ -177,23 +177,23 @@ begin
                              //      (a) there's no way of reporting the failure
                              //      (b) once the streaming engine has started there's really no way for it to fail.
                              //
-                             if flow = eRender then
+                             if (flow = eRender) then
                                begin
-                                 hr := iAClient.GetCurrentPadding(framesAvailable);
-                                 hr := iRClient.GetBuffer(framesAvailable,
-                                                          pData);
-                                 hr := iRClient.ReleaseBuffer(framesAvailable,
-                                                              AUDCLNT_BUFFERFLAGS_SILENT);
+                                 hr := pAudioClient.GetCurrentPadding(framesAvailable);
+                                 hr := pRenderClient.GetBuffer(framesAvailable,
+                                                               pData);
+                                 hr := pRenderClient.ReleaseBuffer(framesAvailable,
+                                                                   AUDCLNT_BUFFERFLAGS_SILENT);
                                end
-                             else
+                             else // eCapture
                                begin
-                                 hr := iAClient.GetCurrentPadding(framesAvailable);
-                                 hr := iCClient.GetBuffer(pData,
-                                                          framesAvailable,
-                                                          flags,
-                                                          0,
-                                                          0);
-                                 hr := iCClient.ReleaseBuffer(framesAvailable);
+                                 hr := pAudioClient.GetCurrentPadding(framesAvailable);
+                                 hr := pCaptureClient.GetBuffer(pData,
+                                                                framesAvailable,
+                                                                flags,
+                                                                0,
+                                                                0);
+                                 hr := pCaptureClient.ReleaseBuffer(framesAvailable);
                                end;
                            end;
       end;
@@ -376,7 +376,7 @@ begin
       Exit;
     end;
 
-  hr := _AudioClient.GetMixFormat(mixFormat);
+  hr := _AudioClient.GetMixFormat(@mixFormat);
   if FAILED(hr) then
     begin
       MessageBox(_AppWindow,
@@ -415,8 +415,8 @@ begin
                                 HideFromMixer,
                                 500000,
                                 0,
-                                mixFormat,
-                                @chatGuid);
+                                @mixFormat,
+                                chatGuid);
 
   CoTaskMemFree(@mixFormat);
   mixFormat := Nil;
@@ -462,7 +462,7 @@ begin
   //
   //  Now create the thread which is going to drive the "Chat".
   //
-  _ChatThread := BeginThread(Nil,
+  _ChatThread := BeginThread(nil,
                              0,
                              Addr(WasapiChatThread),
                              Addr(Self),

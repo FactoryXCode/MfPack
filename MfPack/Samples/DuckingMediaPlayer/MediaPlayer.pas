@@ -145,7 +145,7 @@ type
                                     ChangedChannel: UINT;
                                     const EventContext: TGUID): HResult; stdcall; { return S_OK; }
 
-    function OnGroupingParamChanged(NewGroupingParam: TGUID;
+    function OnGroupingParamChanged(const NewGroupingParam: TGUID;
                                     const EventContext: TGUID): HResult; stdcall; { return S_OK; }
 
     function OnStateChanged(NewState: AudioSessionState): HResult; stdcall; { return S_OK; }
@@ -916,7 +916,7 @@ begin
 end;
 
 
-function TCMediaPlayer.OnGroupingParamChanged(NewGroupingParam: TGUID;
+function TCMediaPlayer.OnGroupingParamChanged(const NewGroupingParam: TGUID;
                                               const EventContext: TGUID): HResult; stdcall; { return S_OK; }
 begin
   // to prevent "Return value might be undefined" compilerwarning
