@@ -94,7 +94,6 @@ uses
 type
   TfrmMain = class(TForm)
     sbMsg: TStatusBar;
-    cbxDontOverWrite: TCheckBox;
     edPID: TEdit;
     Label3: TLabel;
     rb2: TRadioButton;
@@ -115,6 +114,7 @@ type
     Label4: TLabel;
     rb44: TRadioButton;
     rb48: TRadioButton;
+    cbxDontOverWrite: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject;
                              var CanClose: Boolean);
@@ -294,8 +294,9 @@ end;
 
 procedure TfrmMain.FormCreate(Sender: TObject);
 begin
-  bEdited := False;
   oLoopbackCapture := TLoopbackCapture.Create(Handle);
+  butGetPID.OnClick(Self);
+  bEdited := False;
 end;
 
 

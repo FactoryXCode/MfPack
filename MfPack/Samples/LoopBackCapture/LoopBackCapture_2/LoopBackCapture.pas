@@ -851,13 +851,9 @@ begin
               end;
           end;
 
-        // Release buffer back
-        hr := m_AudioCaptureClient.ReleaseBuffer(FramesAvailable);
-
         // Increase the size of our 'data' chunk. m_cbDataSize needs to be accurate.
         inc(m_cbDataSize, cbBytesToCapture);
         inc(NumBytesWritten, dwBytesWritten);
-
         HandleThreadMessages(GetCurrentThread);
         // Send score. Don't use PostMessage because it set priority above this thread.
         SendMessage(hwOwner,
@@ -865,6 +861,10 @@ begin
                     NumBytesWritten,
                     0);
         Data := nil;
+
+        // Release buffer back
+        hr := m_AudioCaptureClient.ReleaseBuffer(FramesAvailable);
+        HandleThreadMessages(GetCurrentThread);
     end;
 
 leave:

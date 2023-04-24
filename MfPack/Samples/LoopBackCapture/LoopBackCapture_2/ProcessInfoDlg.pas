@@ -127,8 +127,10 @@ end;
 
 procedure TdlgProcessInfo.butOkClick(Sender: TObject);
 begin
-  SelectedPID := StrToInt(sgProcesses.Cells[1, sgProcesses.Row]);
-  SelectedProcName := sgProcesses.Cells[0, sgProcesses.Row];
+  SelectedPID := StrToInt(sgProcesses.Cells[1,
+                                            sgProcesses.Row]);
+  SelectedProcName := sgProcesses.Cells[0,
+                                        sgProcesses.Row];
   ModalResult := mrOk;
 end;
 
@@ -136,7 +138,9 @@ end;
 procedure TdlgProcessInfo.butRefreshClick(Sender: TObject);
 
   // helper
-  procedure PopulateCells(iIndex: Integer; sName: string; iPid: Integer);
+  procedure PopulateCells(iIndex: Integer;
+                          sName: string;
+                          iPid: Integer);
   begin
     {Process name}
     sgProcesses.Cells[0, iIndex] := sName;
@@ -242,7 +246,9 @@ begin
   sgProcesses.ColWidths[1] := 190;
   {$ENDIF}
 
-  sgProcesses.Width := sgProcesses.ColWidths[0] + sgProcesses.ColWidths[1] + (sgProcesses.BevelWidth * 2);
+  sgProcesses.Width := sgProcesses.ColWidths[0] +
+                       sgProcesses.ColWidths[1] +
+                       (sgProcesses.BevelWidth * 2);
 
   sgProcesses.Cells[0, 0] := 'Process Name';
   sgProcesses.Cells[1, 0] := 'Process ID (PID)';

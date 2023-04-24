@@ -3,7 +3,7 @@ object dlgProcessInfo: TdlgProcessInfo
   Top = 0
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
-  Caption = 'Get running processes'
+  Caption = 'Choose a process'
   ClientHeight = 369
   ClientWidth = 328
   Color = clBtnFace
