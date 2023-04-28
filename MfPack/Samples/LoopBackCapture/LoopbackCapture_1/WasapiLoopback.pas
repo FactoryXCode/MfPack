@@ -94,6 +94,10 @@ const
   WM_CAPTURINGSTOPPED                 = WM_USER + 1011;
 
 type
+  TDevicePeriod =(dpDeviceDefault,
+                  dpDeviceMinimum,
+                  dpAverage);
+
 
   TAudioSink = class(TObject)
   protected
@@ -124,6 +128,7 @@ type
 
     function RecordAudioStream(dataFlow: EDataFlow;  // eRender or eCapture
                                role: ERole;          // eConsole, eMultimedia or eCommunications
+                               buffersize: TDevicePeriod;
                                ppfileName: LPWSTR): HResult;
 
     property StopRecording: Boolean read bStopRec write bStopRec;
@@ -367,12 +372,15 @@ end;
 //-----------------------------------------------------------
 function TAudioSink.RecordAudioStream(dataFlow: EDataFlow;  // eRender or eCapture
                                       role: ERole;          // eConsole, eMultimedia or eCommunications
+                                      buffersize: TDevicePeriod;
                                       ppfileName: LPWSTR): HResult;
 var
   hr: HResult;
   mr: MMResult;
-  hnsRequestedDuration: REFERENCE_TIME;
+  hnsDefaultDevicePeriod: REFERENCE_TIME;
+  hnsMinimumDevicePeriod: REFERENCE_TIME;
   hnsActualDuration: REFERENCE_TIME;
+  hnsSelectedDevicePeriod: REFERENCE_TIME;
   bufferFrameCount: UINT32;
   numFramesAvailable: UINT32;
   pEnumerator: IMMDeviceEnumerator;
@@ -387,9 +395,10 @@ var
   ppwfx: PWAVEFORMATEX;
   //
   cycle : Int64;
-
   pu64DevicePosition: UINT64;
   pu64QPCPosition: UINT64;
+  //
+
 
 label
   done;
@@ -405,7 +414,6 @@ begin
   if FAILED(hr) then
     goto done;
 
-  hnsRequestedDuration := REFTIMES_PER_SEC;
   packetLength := 0;
 
   // Enumerate on capture and render devices
@@ -432,14 +440,36 @@ begin
   if FAILED(hr) then
     goto done;
 
+  // Get the mixformat from the WAS
+  // See the comments on IAudioClient.GetMixFormat
+  // The original sample creates a far to big buffer (100 times),
+  // that will cause sound disturbtion if the buffersize exceeds the capacity of the sound device,
+  // especially when capture sound from a streamer like Youtube.
+  //
   hr := pAudioClient.GetMixFormat(ppwfx);
+  if FAILED(hr) then
+    goto done;
+
+  //
+  hr := pAudioClient.GetDevicePeriod(@hnsDefaultDevicePeriod,
+                                     @hnsMinimumDevicePeriod);
+
+  // User selected a bufferzize
+  if (buffersize = dpAverage) then
+    hnsSelectedDevicePeriod := hnsDefaultDevicePeriod + hnsMinimumDevicePeriod div 2
+  else if (buffersize = dpDeviceDefault) then
+    hnsSelectedDevicePeriod := hnsDefaultDevicePeriod
+  else
+    hnsSelectedDevicePeriod := hnsMinimumDevicePeriod;
+
+
   if FAILED(hr) then
     goto done;
 
   hr := pAudioClient.Initialize(AUDCLNT_SHAREMODE_SHARED,
                                 AUDCLNT_STREAMFLAGS_LOOPBACK,
-                                hnsRequestedDuration,
-                                0,
+                                hnsSelectedDevicePeriod,
+                                0, // Must be zero when using shared mode.
                                 ppwfx,
                                 GUID_NULL);
   if FAILED(hr) then

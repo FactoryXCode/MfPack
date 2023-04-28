@@ -8,8 +8,12 @@ Description:
   using WASAPI in combination with mmio to write wav-files.
   Note that mmioOpen() is deprecated as mentioned in the documents, 
   but this seems to be a bug in the documentation since Windows Vista.
+  The sample difference from the original sample where the audioclient buffersize is fixed that leads to an oversized buffer on modern audio devices.
+  This sample lets you to choose between different latency's for better sound to eliminate buffer related gliches.
 
-NOTES: 
+NOTES:
+ - The sound you recorded cn different from what you hear on the speakers.
+   This is caused by the fact Windows 11 has an internal process to "smooth" audio output (you can disable this feature in the Windows Audio settings)
  - This release is updated for compiler version 17 up to 34.
  - SDK version 10.0.22621.0 (Win 11)
  - Requires Windows 10 or later.
@@ -20,6 +24,6 @@ Project location: https://github.com/FactoryXCode/MfPack
                   https://sourceforge.net/projects/MFPack
 
 First release date: 12-03-2023
-Final release date: 23/04/2023
+Final release date: 29/04/2023
 
 Copyright © FactoryX. All rights reserved.

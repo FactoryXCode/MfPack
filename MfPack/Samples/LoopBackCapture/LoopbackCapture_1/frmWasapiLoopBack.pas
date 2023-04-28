@@ -105,6 +105,10 @@ type
     cbxStayOnTop: TCheckBox;
     Bevel1: TBevel;
     Button2: TButton;
+    Panel3: TPanel;
+    rbAvBufSize: TRadioButton;
+    rbDefBufSize: TRadioButton;
+    rbMinBufSize: TRadioButton;
     procedure FormCreate(Sender: TObject);
     procedure butStartClick(Sender: TObject);
     procedure butStopClick(Sender: TObject);
@@ -120,7 +124,7 @@ type
     sFileName: string;
     oDataFlow: EDataFlow;
     oRole: ERole;
-
+    oBufferSize: TDevicePeriod;
     function StartCapture(): HResult;
 
     procedure OnAudioSinkCaptureStopped(var aMessage: TMessage); message WM_CAPTURINGSTOPPED;
@@ -222,9 +226,18 @@ begin
           oRole := eMultimedia;
         end;
 
+      // Buffersize depends on latency and bitrate
+      if rbAvBufSize.Checked then
+        oBufferSize := dpAverage
+      else if rbDefBufSize.Checked then
+        oBufferSize := dpDeviceDefault
+      else
+        oBufferSize := dpDeviceMinimum;
+
       // Capture the audio stream from the default rendering device.
       hr := oAudioSink.RecordAudioStream(oDataFlow,
                                          oRole,
+                                         oBufferSize,
                                          LPWSTR(sFileName));
       if FAILED(hr) then
         begin

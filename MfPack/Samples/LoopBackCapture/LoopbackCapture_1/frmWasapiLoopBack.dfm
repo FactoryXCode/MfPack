@@ -4,7 +4,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'Loopback Capture Sample'
-  ClientHeight = 370
+  ClientHeight = 457
   ClientWidth = 445
   Color = clBtnFace
   DoubleBuffered = True
@@ -20,14 +20,14 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   PixelsPerInch = 96
   TextHeight = 13
   object Bevel1: TBevel
-    Left = 7
-    Top = 221
+    Left = 8
+    Top = 323
     Width = 430
-    Height = 82
+    Height = 73
   end
   object Label1: TLabel
-    Left = 16
-    Top = 254
+    Left = 13
+    Top = 351
     Width = 79
     Height = 13
     Hint = 'Enter a file name without extension.'
@@ -43,8 +43,8 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     ShowHint = True
   end
   object lblFileExt: TLabel
-    Left = 281
-    Top = 273
+    Left = 280
+    Top = 370
     Width = 50
     Height = 21
     Hint = 'Enter a file name without extension.'
@@ -60,28 +60,9 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     ShowHint = True
     Transparent = False
   end
-  object butStart: TButton
-    Left = 8
-    Top = 312
-    Width = 85
-    Height = 27
-    Caption = 'Start Capture'
-    TabOrder = 0
-    OnClick = butStartClick
-  end
-  object butStop: TButton
-    Left = 99
-    Top = 313
-    Width = 85
-    Height = 27
-    Caption = 'Stop Capture'
-    Enabled = False
-    TabOrder = 1
-    OnClick = butStopClick
-  end
   object edFileName: TEdit
-    Left = 16
-    Top = 273
+    Left = 13
+    Top = 370
     Width = 265
     Height = 21
     Alignment = taRightJustify
@@ -98,9 +79,106 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     TabOrder = 2
     Text = 'loopback-capture'
   end
+  object Panel3: TPanel
+    Left = 8
+    Top = 221
+    Width = 430
+    Height = 97
+    Hint = 
+      'The capture buffersize depending on the audiodevice specs and so' +
+      'urce latency '
+    Alignment = taLeftJustify
+    BevelOuter = bvLowered
+    Caption = '  Capture Buffersize'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 10
+    VerticalAlignment = taAlignTop
+    object rbAvBufSize: TRadioButton
+      Left = 8
+      Top = 24
+      Width = 403
+      Height = 17
+      Hint = 'Best for capturing streams like YouTube'
+      ParentCustomHint = False
+      Caption = 
+        'Average buffersize (Best for capturing streams from a fast inter' +
+        'net connection)'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 0
+    end
+    object rbDefBufSize: TRadioButton
+      Left = 9
+      Top = 47
+      Width = 402
+      Height = 17
+      Hint = 'Best for capturing local streams'
+      Caption = 'Default buffersize (Best for capturing local streams)'
+      Checked = True
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 1
+      TabStop = True
+    end
+    object rbMinBufSize: TRadioButton
+      Left = 9
+      Top = 70
+      Width = 402
+      Height = 17
+      Hint = 'Best for capturing low latency streams or slow internet.'
+      Caption = 
+        'Minimum buffersize (Best for capturing low latency streams or sl' +
+        'ow internet)'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 2
+    end
+  end
+  object butStart: TButton
+    Left = 8
+    Top = 400
+    Width = 85
+    Height = 27
+    Caption = 'Start Capture'
+    TabOrder = 0
+    OnClick = butStartClick
+  end
+  object butStop: TButton
+    Left = 99
+    Top = 401
+    Width = 85
+    Height = 27
+    Caption = 'Stop Capture'
+    Enabled = False
+    TabOrder = 1
+    OnClick = butStopClick
+  end
   object sbMsg: TStatusBar
     Left = 0
-    Top = 346
+    Top = 433
     Width = 445
     Height = 24
     DoubleBuffered = True
@@ -108,11 +186,11 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     ParentDoubleBuffered = False
     SimplePanel = True
     SimpleText = 'Start Capture'
-    ExplicitLeft = 2
+    ExplicitTop = 345
   end
   object butPlayData: TButton
     Left = 191
-    Top = 312
+    Top = 400
     Width = 80
     Height = 27
     Hint = 'Play recorded data.'
@@ -124,8 +202,8 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     OnClick = butPlayDataClick
   end
   object cbxDontOverWrite: TCheckBox
-    Left = 16
-    Top = 230
+    Left = 13
+    Top = 330
     Width = 189
     Height = 15
     Hint = 'Do not overwrite files with the same name.'
@@ -190,8 +268,8 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     end
   end
   object Panel2: TPanel
-    Left = 8
-    Top = 111
+    Left = 7
+    Top = 112
     Width = 430
     Height = 104
     Alignment = taLeftJustify
