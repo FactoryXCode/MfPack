@@ -25,6 +25,7 @@
 // 12/03/2023 Tony                Updated to match mmio
 // 02/04/2023 All                 Pre-release to 3.1.5
 // 03/04/2023 Tony                Fixed IAudioClient.GetMixFormat.
+// 28/04/2023 Tony                Fixed AudioClient.IsFormatSupported
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or later.
@@ -495,9 +496,9 @@ type
     //
 
     function IsFormatSupported(ShareMode: AUDCLNT_SHAREMODE;
-                               pFormat: WaveFormatEx;
+                               const pFormat: PWaveFormatEx;
                                out ppClosestMatch: PWaveFormatEx // Exclusive mode can't suggest a "closest match", you have to set this param to Nil.
-                               ): HResult; stdcall;
+                              ): HResult; stdcall;
     // Description:
     //
     //  Provides a way for the user to determine, prior to initialization, whether a given format
@@ -544,28 +545,58 @@ type
     function GetMixFormat([ref] const ppDeviceFormat: PWAVEFORMATEX): HResult; stdcall;
     // Description:
     //
-    //  Returns the current format of the WAS for this device. This is a device method
-    //  which doesn't require prior audio stream initialization.
+    //  The GetMixFormat method retrieves the stream format that the audio engine uses for its
+    //  internal processing of shared-mode streams.
     //
     // Parameters:
     //
     //  ppDeviceFormat - [out]
-    //    Address for returning a pointer to the current audio device format.
-    //    This is the format the WAS will use to communicate with the device and is determined
-    //    by the preferred device format set in the control panel. The memory returned should
-    //    be freed by the caller using CoTaskMemFree() on the returned memory pointer.
+    //    Pointer variable into which the method writes the address of the mix format.
+    //    This parameter must be a valid, non-Nil pointer to a pointer variable.
+    //    The method writes the address of a WAVEFORMATEX (or WAVEFORMATEXTENSIBLE) structure to this variable.
+    //    The method allocates the storage for the structure.
+    //    The caller is responsible for freeing the storage, when it is no longer needed, by calling the CoTaskMemFree function.
+    //    If the GetMixFormat call fails, *ppDeviceFormat is Nil.
+    //    For information about WAVEFORMATEX, WAVEFORMATEXTENSIBLE, and CoTaskMemFree, see the Windows SDK documentation.
     //
     // Return Values:
     //
     //    S_OK if successful, failure otherwise.
     //    AUDCLNT_E_DEVICE_INVALIDATED, if WAS device was removed.
+    //    AUDCLNT_E_SERVICE_NOT_RUNNING, The Windows audio service is not running.
+    //    E_POINTER, Parameter ppDeviceFormat is nil.
+    //    E_OUTOFMEMORY, Out of memory.
+    //
     //
     // Remarks:
     //
-    //  This method may be called at any time and will always return the same format.
+    //   The client can call this method before calling the IAudioClient.Initialize method.
+    //   When creating a shared-mode stream for an audio endpoint device,
+    //   the Initialize method always accepts the stream format obtained from a GetMixFormat call on the same device.
     //
-    //  For all cases where the format type contains > 2 channels, the WAVEFORMATEXTENSIBLE type
-    //  will be used and the returned dwChannelMask field will be set correctly.
+    //   The mix format is the format that the audio engine uses internally for digital processing of shared-mode streams.
+    //   This format is not necessarily a format that the audio endpoint device supports.
+    //   Thus, the caller might not succeed in creating an exclusive-mode stream with a format obtained by calling GetMixFormat.
+    //
+    //   For example, to facilitate digital audio processing, the audio engine might use a mix format that represents samples as
+    //   floating-point values.
+    //   If the device supports only integer PCM samples, then the engine converts the samples to or from integer PCM values at
+    //   the connection between the device and the engine.
+    //   However, to avoid resampling, the engine might use a mix format with a sample rate that the device supports.
+    //
+    //   To determine whether the Initialize method can create a shared-mode or exclusive-mode stream with a particular format,
+    //   call the IAudioClient.IsFormatSupported method.
+    //
+    //   By itself, a WAVEFORMATEX structure cannot specify the mapping of channels to speaker positions.
+    //   In addition, although WAVEFORMATEX specifies the size of the container for each audio sample,
+    //   it cannot specify the number of bits of precision in a sample (for example, 20 bits of precision in a 24-bit container).
+    //   However, the WAVEFORMATEXTENSIBLE structure can specify both the mapping of channels to speakers and
+    //   the number of bits of precision in each sample.
+    //   For this reason, the GetMixFormat method retrieves a format descriptor that is in the form of a
+    //   WAVEFORMATEXTENSIBLE structure instead of a standalone WAVEFORMATEX structure.
+    //   Through the ppDeviceFormat parameter, the method outputs a pointer to the WAVEFORMATEX structure that is
+    //   embedded at the start of this WAVEFORMATEXTENSIBLE structure.
+    //   For more information about WAVEFORMATEX and WAVEFORMATEXTENSIBLE, see the Windows DDK documentation.
     //
 
     function GetDevicePeriod({out_opt} phnsDefaultDevicePeriod: PREFERENCE_TIME;
