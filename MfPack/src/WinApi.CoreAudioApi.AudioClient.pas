@@ -541,7 +541,7 @@ type
     //  This method does not require that the Initialize method be called first.
     //
 
-    function GetMixFormat(out ppDeviceFormat: PWAVEFORMATEX): HResult; stdcall;
+    function GetMixFormat([ref] const ppDeviceFormat: PWAVEFORMATEX): HResult; stdcall;
     // Description:
     //
     //  Returns the current format of the WAS for this device. This is a device method
