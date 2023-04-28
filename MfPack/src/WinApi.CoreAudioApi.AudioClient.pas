@@ -497,7 +497,7 @@ type
 
     function IsFormatSupported(ShareMode: AUDCLNT_SHAREMODE;
                                const pFormat: PWaveFormatEx;
-                               out ppClosestMatch: PWaveFormatEx // Exclusive mode can't suggest a "closest match", you have to set this param to Nil.
+                               [ref] const ppClosestMatch: PWaveFormatEx // Exclusive mode can't suggest a "closest match", you have to set this param to Nil.
                               ): HResult; stdcall;
     // Description:
     //
