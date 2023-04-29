@@ -186,7 +186,6 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     ParentDoubleBuffered = False
     SimplePanel = True
     SimpleText = 'Start Capture'
-    ExplicitTop = 345
   end
   object butPlayData: TButton
     Left = 191
@@ -198,7 +197,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     Enabled = False
     ParentShowHint = False
     ShowHint = True
-    TabOrder = 4
+    TabOrder = 3
     OnClick = butPlayDataClick
   end
   object cbxDontOverWrite: TCheckBox
@@ -212,7 +211,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     ParentShowHint = False
     ShowHint = True
     State = cbChecked
-    TabOrder = 5
+    TabOrder = 4
   end
   object Panel1: TPanel
     Left = 8
@@ -228,7 +227,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     Font.Name = 'Tahoma'
     Font.Style = [fsBold]
     ParentFont = False
-    TabOrder = 6
+    TabOrder = 5
     VerticalAlignment = taAlignTop
     object rbRenderingDevice: TRadioButton
       Left = 8
@@ -281,7 +280,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     Font.Name = 'Tahoma'
     Font.Style = [fsBold]
     ParentFont = False
-    TabOrder = 7
+    TabOrder = 6
     VerticalAlignment = taAlignTop
     object rbConsole: TRadioButton
       Left = 8
@@ -346,7 +345,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     Caption = 'Stay On Top'
     ParentShowHint = False
     ShowHint = False
-    TabOrder = 8
+    TabOrder = 7
     OnClick = cbxStayOnTopClick
   end
   object Button2: TButton
@@ -357,7 +356,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     Caption = 'Show Devices'
     ParentShowHint = False
     ShowHint = True
-    TabOrder = 9
+    TabOrder = 8
     OnClick = Button2Click
   end
 end

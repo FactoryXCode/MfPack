@@ -266,7 +266,6 @@ end;
 
 procedure TfrmLoopBackCapture.butStartClick(Sender: TObject);
 begin
-  Self.BorderIcons := [biMinimize];
   StartCapture();
 end;
 

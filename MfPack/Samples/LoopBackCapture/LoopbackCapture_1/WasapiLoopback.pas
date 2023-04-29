@@ -552,6 +552,7 @@ begin
            bStopRec := True;
 
           inc(cycle, 1);
+          HandleThreadMessages(GetCurrentThread);
         end;
     end;
 
