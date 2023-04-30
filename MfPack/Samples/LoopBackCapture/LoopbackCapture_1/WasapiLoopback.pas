@@ -441,18 +441,20 @@ begin
     goto done;
 
   // Get the mixformat from the WAS
-  // See the comments on IAudioClient.GetMixFormat
-  // The original sample creates a far to big buffer (100 times),
-  // that will cause sound disturbtion if the buffersize exceeds the capacity of the sound device,
-  // especially when capture sound from a streamer like Youtube.
+  // See the comments on IAudioClient.GetMixFormat.
   //
   hr := pAudioClient.GetMixFormat(ppwfx);
   if FAILED(hr) then
     goto done;
 
+  // The original sample creates a to large DevicePeriod,
+  // that will cause sound disturbtion if the DevicePeriod exceeds the capacity of the sound device,
+  // especially when capture sound from a streameservice like YouTube or other high latency services.
   //
   hr := pAudioClient.GetDevicePeriod(@hnsDefaultDevicePeriod,
                                      @hnsMinimumDevicePeriod);
+  if FAILED(hr) then
+    goto done;
 
   // User selected a bufferzize
   if (buffersize = dpAverage) then
@@ -461,10 +463,6 @@ begin
     hnsSelectedDevicePeriod := hnsDefaultDevicePeriod
   else
     hnsSelectedDevicePeriod := hnsMinimumDevicePeriod;
-
-
-  if FAILED(hr) then
-    goto done;
 
   hr := pAudioClient.Initialize(AUDCLNT_SHAREMODE_SHARED,
                                 AUDCLNT_STREAMFLAGS_LOOPBACK,

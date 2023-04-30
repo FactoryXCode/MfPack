@@ -4,8 +4,8 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'Loopback Capture Sample'
-  ClientHeight = 457
-  ClientWidth = 445
+  ClientHeight = 464
+  ClientWidth = 472
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -21,9 +21,9 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   TextHeight = 13
   object Bevel1: TBevel
     Left = 8
-    Top = 323
-    Width = 430
-    Height = 73
+    Top = 316
+    Width = 454
+    Height = 85
   end
   object Label1: TLabel
     Left = 13
@@ -81,15 +81,15 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   end
   object Panel3: TPanel
     Left = 8
-    Top = 221
-    Width = 430
+    Top = 214
+    Width = 454
     Height = 97
     Hint = 
       'The capture buffersize depending on the audiodevice specs and so' +
       'urce latency '
     Alignment = taLeftJustify
     BevelOuter = bvLowered
-    Caption = '  Capture Buffersize'
+    Caption = '  Capture Processing Interval'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
@@ -101,13 +101,13 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     object rbAvBufSize: TRadioButton
       Left = 9
       Top = 47
-      Width = 403
+      Width = 434
       Height = 17
       Hint = 'Best for capturing streams like YouTube'
       ParentCustomHint = False
       Caption = 
-        'Average buffersize (Best for capturing low latency  streams or f' +
-        'ast internet)'
+        'Average processing interval (Best for capturing low latency  str' +
+        'eams or fast internet)'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -124,7 +124,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       Width = 402
       Height = 17
       Hint = 'Best for capturing local streams'
-      Caption = 'Default buffersize (Best for capturing local streams)'
+      Caption = 'Default processing interval (Best for capturing local streams)'
       Checked = True
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -140,12 +140,12 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     object rbMinBufSize: TRadioButton
       Left = 9
       Top = 70
-      Width = 402
+      Width = 433
       Height = 17
       Hint = 'Best for capturing low latency streams or slow internet.'
       Caption = 
-        'Minimum buffersize (Best for capturing high latency streams or s' +
-        'low internet)'
+        'Minimum processing interval (Best for capturing high latency str' +
+        'eams or slow internet)'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -159,7 +159,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   end
   object butStart: TButton
     Left = 8
-    Top = 400
+    Top = 407
     Width = 85
     Height = 27
     Caption = 'Start Capture'
@@ -168,7 +168,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   end
   object butStop: TButton
     Left = 99
-    Top = 401
+    Top = 408
     Width = 85
     Height = 27
     Caption = 'Stop Capture'
@@ -178,18 +178,20 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   end
   object sbMsg: TStatusBar
     Left = 0
-    Top = 433
-    Width = 445
+    Top = 440
+    Width = 472
     Height = 24
     DoubleBuffered = True
     Panels = <>
     ParentDoubleBuffered = False
     SimplePanel = True
     SimpleText = 'Start Capture'
+    ExplicitLeft = 2
+    ExplicitTop = 433
   end
   object butPlayData: TButton
-    Left = 191
-    Top = 400
+    Left = 190
+    Top = 408
     Width = 80
     Height = 27
     Hint = 'Play recorded data.'
@@ -216,7 +218,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   object Panel1: TPanel
     Left = 8
     Top = 34
-    Width = 430
+    Width = 454
     Height = 72
     Alignment = taLeftJustify
     BevelOuter = bvLowered
@@ -267,10 +269,10 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     end
   end
   object Panel2: TPanel
-    Left = 7
-    Top = 112
-    Width = 430
-    Height = 104
+    Left = 8
+    Top = 111
+    Width = 455
+    Height = 98
     Alignment = taLeftJustify
     BevelOuter = bvLowered
     Caption = '  Data-flow Direction'
@@ -349,8 +351,8 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     OnClick = cbxStayOnTopClick
   end
   object Button2: TButton
-    Left = 340
-    Top = 6
+    Left = 365
+    Top = 7
     Width = 97
     Height = 22
     Caption = 'Show Devices'

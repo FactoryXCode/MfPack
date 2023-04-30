@@ -62,7 +62,6 @@ object frmMain: TfrmMain
     ParentDoubleBuffered = False
     SimplePanel = True
     SimpleText = 'Start Capture'
-    ExplicitTop = 326
   end
   object edPID: TEdit
     Left = 113
@@ -200,12 +199,12 @@ object frmMain: TfrmMain
     object lblBuffDuration: TLabel
       AlignWithMargins = True
       Left = 22
-      Top = 44
-      Width = 151
+      Top = 46
+      Width = 199
       Height = 17
       Hint = 'Set the length of the AudioClient BufferDuration. '
       AutoSize = False
-      Caption = 'AudioClientBufferDuration:'
+      Caption = 'AudioClient Buffer Duration:'
       ParentShowHint = False
       ShowHint = True
     end
@@ -267,11 +266,11 @@ object frmMain: TfrmMain
       TabOrder = 3
     end
     object edBufferDuration: TEdit
-      Left = 152
-      Top = 41
+      Left = 158
+      Top = 43
       Width = 69
       Height = 21
-      Hint = 'Set the length of the AudioClient BufferDuration. '
+      Hint = 'Set the length of the AudioClient Buffer Duration. '
       NumbersOnly = True
       ParentShowHint = False
       ShowHint = True
