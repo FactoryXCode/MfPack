@@ -18,8 +18,8 @@ object dlgProcessInfo: TdlgProcessInfo
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
-    Left = 12
-    Top = 11
+    Left = 13
+    Top = 13
     Width = 90
     Height = 13
     Caption = 'Running processes'
@@ -70,7 +70,8 @@ object dlgProcessInfo: TdlgProcessInfo
     DrawingStyle = gdsClassic
     FixedColor = clSilver
     FixedCols = 0
-    RowCount = 2
+    RowCount = 1
+    FixedRows = 0
     Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goRowSelect]
     ScrollBars = ssVertical
     TabOrder = 2

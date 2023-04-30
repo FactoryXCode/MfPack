@@ -83,6 +83,7 @@ uses
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfError,
   {CoreAudioApi}
   WinApi.CoreAudioApi.MMDeviceApi,
   WinApi.CoreAudioApi.AudioClient,
@@ -152,6 +153,7 @@ type
     m_cbHeaderSize: DWord;
     m_cbDataSize: DWord;
     m_WavFormat: TWavFormat;
+    m_BufferDuration: REFERENCE_TIME;
 
     hwOwner: HWND;
 
@@ -178,8 +180,6 @@ type
     procedure Reset();
     procedure SetDeviceStateErrorIfFailed(hr: HResult);
 
-    procedure SetWavFormat(aFormat: TWavFormat);
-
   public
 
     constructor Create(hMF: HWND);
@@ -193,11 +193,13 @@ type
                                const processId: DWord;
                                includeProcessTree: Boolean;
                                const wavFormat: TWavFormat;
+                               const bufferDuration: REFERENCE_TIME;
                                const outputFileName: LPCWSTR): HResult;
 
     function StopCaptureAsync(): HResult;
 
-    property WavFormat: TWavFormat read m_WavFormat write SetWavFormat;
+    property WavFormat: TWavFormat read m_WavFormat;
+    property AudioClientBufferDuration: REFERENCE_TIME read m_BufferDuration;
 
   end;
 
@@ -294,7 +296,9 @@ begin
 
   // The app can call m_AudioClient.GetMixFormat to get the capture format if such is implemented.
   hr := m_AudioClient.GetMixFormat(@m_CaptureFormat);
-  // Set 16 - bit PCM format manualy when we get an E_NOTIMPL result.
+
+
+  // Set 16 - bit PCM format manualy when we get an E_NOTIMPL result from GetMixFormat.
   if (hr = E_NOTIMPL) then
     begin
       m_CaptureFormat.wFormatTag := WAVE_FORMAT_PCM;
@@ -317,10 +321,11 @@ begin
   else if FAILED(hr) then
     goto leave;
 
+
   // Initialize the AudioClient in Shared Mode with the user specified buffer
   hr := m_AudioClient.Initialize(AUDCLNT_SHAREMODE_SHARED,
                                  AUDCLNT_STREAMFLAGS_LOOPBACK or AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
-                                 200000,
+                                 100000, // This is a fictional size. Most hardware values are in between 100000 and 60000, 100ms/sec.
                                  AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM,
                                  @m_CaptureFormat,
                                  GUID_NULL);
@@ -854,7 +859,7 @@ begin
         // Increase the size of our 'data' chunk. m_cbDataSize needs to be accurate.
         inc(m_cbDataSize, cbBytesToCapture);
         inc(NumBytesWritten, dwBytesWritten);
-        HandleThreadMessages(GetCurrentThread);
+
         // Send score. Don't use PostMessage because it set priority above this thread.
         SendMessage(hwOwner,
                     WM_PROGRESSNOTIFY,
@@ -1010,19 +1015,13 @@ begin
 end;
 
 
-procedure TLoopbackCapture.SetWavFormat(aFormat:  TWavFormat);
-begin
-  m_WavFormat := aFormat;
-end;
-
-
-
 // PUBLIC
 
 function TLoopbackCapture.StartCaptureAsync(const hWindow: HWND;
                                             const processId: DWord;
                                             includeProcessTree: Boolean;
                                             const wavFormat: TWavFormat;
+                                            const bufferDuration: REFERENCE_TIME;
                                             const outputFileName: LPCWSTR): HResult;
 var
   hr: HResult;
@@ -1045,6 +1044,7 @@ begin
 
   hwOwner := hWindow;
   m_outputFileName := outputFileName;
+  m_BufferDuration := bufferDuration;
 
   hr := InitializeLoopbackCapture();
   if FAILED(hr) then

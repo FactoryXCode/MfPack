@@ -551,8 +551,8 @@ begin
          if cycle >= (3600 * 16) then
            bStopRec := True;
 
-          inc(cycle, 1);
-          HandleThreadMessages(GetCurrentThread);
+         Inc(cycle,
+             1);
         end;
     end;
 

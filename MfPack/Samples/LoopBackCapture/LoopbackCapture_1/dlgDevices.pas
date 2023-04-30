@@ -174,7 +174,7 @@ begin
 
   {$IFDEF ConditionalExpressions}
     {$IF CompilerVersion > 31.0}
-      sgProcesses.BeginUpdate();
+      sgRenderingDevices.BeginUpdate();
     {$IFEND}
   {$ENDIF}
   // Get rendering devices first
@@ -213,7 +213,7 @@ begin
 
   {$IFDEF ConditionalExpressions}
     {$IF CompilerVersion > 31.0}
-      sgProcesses.EndUpdate();
+      sgRenderingDevices.EndUpdate();
     {$IFEND}
   {$ENDIF}
 end;

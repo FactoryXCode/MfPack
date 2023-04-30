@@ -99,15 +99,15 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     TabOrder = 10
     VerticalAlignment = taAlignTop
     object rbAvBufSize: TRadioButton
-      Left = 8
-      Top = 24
+      Left = 9
+      Top = 47
       Width = 403
       Height = 17
       Hint = 'Best for capturing streams like YouTube'
       ParentCustomHint = False
       Caption = 
-        'Average buffersize (Best for capturing streams from a fast inter' +
-        'net connection)'
+        'Average buffersize (Best for capturing low latency  streams or f' +
+        'ast internet)'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -120,7 +120,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     end
     object rbDefBufSize: TRadioButton
       Left = 9
-      Top = 47
+      Top = 24
       Width = 402
       Height = 17
       Hint = 'Best for capturing local streams'
@@ -144,8 +144,8 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       Height = 17
       Hint = 'Best for capturing low latency streams or slow internet.'
       Caption = 
-        'Minimum buffersize (Best for capturing low latency streams or sl' +
-        'ow internet)'
+        'Minimum buffersize (Best for capturing high latency streams or s' +
+        'low internet)'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11

@@ -1,10 +1,10 @@
 object frmMain: TfrmMain
   Left = 0
   Top = 0
-  BorderIcons = [biSystemMenu]
+  BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'LoopBackCapture Sample 2'
-  ClientHeight = 354
+  ClientHeight = 388
   ClientWidth = 418
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -24,12 +24,12 @@ object frmMain: TfrmMain
     Width = 418
     Height = 175
     Align = alTop
-    ExplicitTop = 3
+    ExplicitTop = 2
   end
   object Label3: TLabel
     AlignWithMargins = True
     Left = 15
-    Top = 46
+    Top = 44
     Width = 92
     Height = 17
     Hint = 
@@ -54,7 +54,7 @@ object frmMain: TfrmMain
   end
   object sbMsg: TStatusBar
     Left = 0
-    Top = 326
+    Top = 360
     Width = 418
     Height = 28
     DoubleBuffered = True
@@ -62,7 +62,7 @@ object frmMain: TfrmMain
     ParentDoubleBuffered = False
     SimplePanel = True
     SimpleText = 'Start Capture'
-    ExplicitTop = 328
+    ExplicitTop = 326
   end
   object edPID: TEdit
     Left = 113
@@ -70,6 +70,7 @@ object frmMain: TfrmMain
     Width = 106
     Height = 21
     Hint = 'Enter a numeric value!'
+    NumbersOnly = True
     ParentShowHint = False
     ShowHint = True
     TabOrder = 1
@@ -97,7 +98,7 @@ object frmMain: TfrmMain
     TabStop = True
   end
   object butGetPID: TButton
-    Left = 19
+    Left = 22
     Top = 92
     Width = 97
     Height = 22
@@ -109,7 +110,7 @@ object frmMain: TfrmMain
     OnClick = butGetPIDClick
   end
   object Button1: TButton
-    Left = 122
+    Left = 124
     Top = 92
     Width = 97
     Height = 22
@@ -130,13 +131,12 @@ object frmMain: TfrmMain
     ShowHint = True
     TabOrder = 6
     Text = 'Unknown'
-    OnChange = edProcNameChange
     OnKeyUp = edPIDKeyUp
   end
   object cbxStayOnTop: TCheckBox
     Left = 22
-    Top = 13
-    Width = 91
+    Top = 15
+    Width = 79
     Height = 15
     Caption = 'Stay On Top'
     ParentShowHint = False
@@ -148,14 +148,13 @@ object frmMain: TfrmMain
     Left = 0
     Top = 175
     Width = 418
-    Height = 150
+    Height = 142
     Align = alTop
     BevelOuter = bvLowered
     TabOrder = 8
-    ExplicitTop = 177
     object Label1: TLabel
-      Left = 10
-      Top = 73
+      Left = 22
+      Top = 109
       Width = 79
       Height = 13
       Hint = 'Enter a file name without extension.'
@@ -165,8 +164,8 @@ object frmMain: TfrmMain
       ShowHint = True
     end
     object lblFileExt: TLabel
-      Left = 266
-      Top = 70
+      Left = 278
+      Top = 106
       Width = 27
       Height = 16
       Hint = 'Enter a file name without extension.'
@@ -185,7 +184,7 @@ object frmMain: TfrmMain
     end
     object Label4: TLabel
       AlignWithMargins = True
-      Left = 10
+      Left = 22
       Top = 9
       Width = 44
       Height = 17
@@ -198,28 +197,21 @@ object frmMain: TfrmMain
       AutoSize = False
       Caption = 'Bitrate:'
     end
-    object butStart: TButton
-      Left = 7
-      Top = 116
-      Width = 85
-      Height = 27
-      Caption = 'Start Capture'
-      TabOrder = 0
-      OnClick = butStartClick
-    end
-    object butStop: TButton
-      Left = 96
-      Top = 116
-      Width = 85
-      Height = 27
-      Caption = 'Stop Capture'
-      Enabled = False
-      TabOrder = 1
-      OnClick = butStopClick
+    object lblBuffDuration: TLabel
+      AlignWithMargins = True
+      Left = 22
+      Top = 44
+      Width = 151
+      Height = 17
+      Hint = 'Set the length of the AudioClient BufferDuration. '
+      AutoSize = False
+      Caption = 'AudioClientBufferDuration:'
+      ParentShowHint = False
+      ShowHint = True
     end
     object edFileName: TEdit
-      Left = 60
-      Top = 70
+      Left = 72
+      Top = 106
       Width = 205
       Height = 21
       Alignment = taRightJustify
@@ -233,25 +225,12 @@ object frmMain: TfrmMain
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
-      TabOrder = 2
+      TabOrder = 0
       Text = 'loopback-capture'
       OnKeyUp = edFileNameKeyUp
     end
-    object butPlayData: TButton
-      Left = 185
-      Top = 116
-      Width = 80
-      Height = 27
-      Hint = 'Play recorded data.'
-      Caption = 'Play data'
-      Enabled = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 3
-      OnClick = butPlayDataClick
-    end
     object rb44: TRadioButton
-      Left = 52
+      Left = 64
       Top = 10
       Width = 65
       Height = 13
@@ -260,11 +239,11 @@ object frmMain: TfrmMain
       Checked = True
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 4
+      TabOrder = 1
       TabStop = True
     end
     object rb48: TRadioButton
-      Left = 123
+      Left = 135
       Top = 10
       Width = 65
       Height = 13
@@ -272,11 +251,11 @@ object frmMain: TfrmMain
       Caption = '48 kHz'
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 5
+      TabOrder = 2
     end
     object cbxDontOverWrite: TCheckBox
-      Left = 10
-      Top = 39
+      Left = 22
+      Top = 75
       Width = 185
       Height = 15
       Hint = 'Do not overwrite files with the same name.'
@@ -285,7 +264,52 @@ object frmMain: TfrmMain
       ParentShowHint = False
       ShowHint = True
       State = cbChecked
-      TabOrder = 6
+      TabOrder = 3
     end
+    object edBufferDuration: TEdit
+      Left = 152
+      Top = 41
+      Width = 69
+      Height = 21
+      Hint = 'Set the length of the AudioClient BufferDuration. '
+      NumbersOnly = True
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 4
+      Text = '1000000'
+      OnKeyUp = edPIDKeyUp
+    end
+  end
+  object butStart: TButton
+    Left = 16
+    Top = 325
+    Width = 85
+    Height = 27
+    Caption = 'Start Capture'
+    TabOrder = 9
+    OnClick = butStartClick
+  end
+  object butStop: TButton
+    Left = 107
+    Top = 325
+    Width = 85
+    Height = 27
+    Caption = 'Stop Capture'
+    Enabled = False
+    TabOrder = 10
+    OnClick = butStopClick
+  end
+  object butPlayData: TButton
+    Left = 197
+    Top = 325
+    Width = 80
+    Height = 27
+    Hint = 'Play recorded data.'
+    Caption = 'Play data'
+    Enabled = False
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 11
+    OnClick = butPlayDataClick
   end
 end

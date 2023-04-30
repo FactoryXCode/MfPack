@@ -155,7 +155,7 @@ var
 
 begin
 
-  i := 1;
+  i := 0;
 
   hHandle := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,
                                       0);
@@ -249,9 +249,6 @@ begin
   sgProcesses.Width := sgProcesses.ColWidths[0] +
                        sgProcesses.ColWidths[1] +
                        (sgProcesses.BevelWidth * 2);
-
-  sgProcesses.Cells[0, 0] := 'Process Name';
-  sgProcesses.Cells[1, 0] := 'Process ID (PID)';
 
 end;
 
