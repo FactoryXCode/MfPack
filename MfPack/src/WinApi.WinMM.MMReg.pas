@@ -4500,17 +4500,20 @@ type
   // Use this for all NON PCM formats
   // (information common to all formats)
 
-{$IFNDEF _WAVEFORMATEX_DEFINED}
-  PWAVEFORMATEX = ^WAVEFORMATEX;
+{$IFNDEF _WAVEFORMATEX_}
+{$DEFINE _WAVEFORMATEX_}
+type
+
+  PWAVEFORMATEX = ^tWAVEFORMATEX;
   tWAVEFORMATEX = record
-    wFormatTag: WORD;                { format type }
-    nChannels: WORD;                 { number of channels (i.e. mono, stereo...) }
-    nSamplesPerSec: DWORD;           { sample rate }
-    nAvgBytesPerSec: DWORD;          { for buffer estimation }
-    nBlockAlign: WORD;               { block size of data }
-    wBitsPerSample: WORD;            { Number of bits per sample of mono data }
-    cbSize: WORD;                    { The count in bytes of the size of
-                                       extra information (after cbSize) }
+    wFormatTag: WORD;               { format type }
+    nChannels: WORD;                { number of channels (i.e. mono, stereo...) }
+    nSamplesPerSec: DWORD;          { sample rate }
+    nAvgBytesPerSec: DWORD;         { for buffer estimation }
+    nBlockAlign: WORD;              { block size of data }
+    wBitsPerSample: WORD;           { number of bits per sample of mono data }
+    cbSize: WORD;                   { the count in bytes of the size of }
+                                    { extra information (after cbSize) }
   end;
   {$EXTERNALSYM tWAVEFORMATEX}
   WAVEFORMATEX = tWAVEFORMATEX;
@@ -4520,7 +4523,8 @@ type
   LPWAVEFORMATEX = ^tWAVEFORMATEX;
   {$EXTERNALSYM LPWAVEFORMATEX}
   LPCWAVEFORMATEX = ^WAVEFORMATEX;
-  {$EXTERNALSYM LPCWAVEFORMATEX}{$DEFINE _WAVEFORMATEX_DEFINED}
+  {$EXTERNALSYM LPCWAVEFORMATEX}
+
 {$ENDIF} // _WAVEFORMATEX_
 
 const

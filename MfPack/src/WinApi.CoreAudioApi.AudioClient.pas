@@ -25,13 +25,14 @@
 // 12/03/2023 Tony                Updated to match mmio
 // 02/04/2023 All                 Pre-release to 3.1.5
 // 03/04/2023 Tony                Fixed IAudioClient.GetMixFormat.
-// 28/04/2023 Tony                Fixed AudioClient.IsFormatSupported
+// 28/04/2023 Tony                Fixed AudioClient.IsFormatSupported.
+// 02/05/2023 Tony                Changed IAudioCaptureClient.GetBuffer params.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or later.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -279,7 +280,7 @@ type
                         hnsBufferDuration: REFERENCE_TIME;
                         hnsPeriodicity: REFERENCE_TIME;
                         pFormat: PWAVEFORMATEX;
-                        {optional, can be Nil or a pointer to GUID_NULL} const AudioSessionGuid: {LPC}TGUID): HResult; stdcall;
+                        {optional, can be Nil or a pointer to GUID_NULL} const AudioSessionGuid: LPCGUID): HResult; stdcall;
     // Description:
     //
     //  Initializes the audio stream by creating a connection to the Windows Audio System (WAS)
@@ -1108,8 +1109,8 @@ type
     function GetBuffer(out ppData: PByte;
                        out pNumFramesToRead: UINT32;
                        out pdwFlags: AUDCLNT_BUFFERFLAGS;
-                       out pu64DevicePosition: UINT64;
-                       out pu64QPCPosition: UINT64): HResult; stdcall;
+                       {out} pu64DevicePosition: PUINT64;
+                       {out} pu64QPCPosition: PUINT64): HResult; stdcall;
     //-------------------------------------------------------------------------
     // Description:
     //
