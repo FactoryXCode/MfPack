@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 02/04/2023 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 05/05/2023 Tony                Updated and fixed some isues.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -153,7 +154,7 @@ type
     m_cbHeaderSize: DWord;
     m_cbDataSize: DWord;
     m_WavFormat: TWavFormat;
-    m_BufferDuration: REFERENCE_TIME;
+    m_DevicePeriod: REFERENCE_TIME;
 
     hwOwner: HWND;
 
@@ -193,13 +194,13 @@ type
                                const processId: DWord;
                                includeProcessTree: Boolean;
                                const wavFormat: TWavFormat;
-                               const bufferDuration: REFERENCE_TIME;
+                               const devicePeriod: REFERENCE_TIME;
                                const outputFileName: LPCWSTR): HResult;
 
     function StopCaptureAsync(): HResult;
 
     property WavFormat: TWavFormat read m_WavFormat;
-    property AudioClientBufferDuration: REFERENCE_TIME read m_BufferDuration;
+    property AudioClientDevicePeriod: REFERENCE_TIME read m_DevicePeriod;
 
   end;
 
@@ -321,14 +322,13 @@ begin
   else if FAILED(hr) then
     goto leave;
 
-
   // Initialize the AudioClient in Shared Mode with the user specified buffer
   hr := m_AudioClient.Initialize(AUDCLNT_SHAREMODE_SHARED,
                                  AUDCLNT_STREAMFLAGS_LOOPBACK or AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
-                                 100000, // This is a fictional size. Most hardware values are in between 100000 and 60000, 100ms/sec.
-                                 AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM,
+                                 m_DevicePeriod, // Most hardware values are in between 100000 and 60000, 100ms/sec.
+                                 0, // Must be zero in shared mode.
                                  @m_CaptureFormat,
-                                 GUID_NULL);
+                                 @GUID_NULL);
   if FAILED(hr) then
     goto leave;
 
@@ -804,7 +804,7 @@ begin
 
   //while SUCCEEDED(m_AudioCaptureClient.GetNextPacketSize(FramesAvailable)) and (FramesAvailable > 0) do
 
-  while {True and} (m_DeviceState <> Stopping) or (m_DeviceState <> Stopped) or (m_DeviceState <> Error) do
+  while (m_DeviceState <> Stopping) or (m_DeviceState <> Stopped) or (m_DeviceState <> Error) do
     begin
 
       if not Assigned(m_AudioCaptureClient) then
@@ -832,8 +832,8 @@ begin
         hr := m_AudioCaptureClient.GetBuffer(PByte(Data),
                                              FramesAvailable,
                                              dwCaptureFlags,
-                                             u64DevicePosition,
-                                             u64QPCPosition);
+                                             @u64DevicePosition,
+                                             @u64QPCPosition);
         if FAILED(hr) then
           begin
              ErrMsg(Format('m_AudioCaptureClient.GetBuffer failed. LastError = %d',[GetLastError()]), hr);
@@ -860,6 +860,7 @@ begin
         inc(m_cbDataSize, cbBytesToCapture);
         inc(NumBytesWritten, dwBytesWritten);
 
+        HandleThreadMessages(GetCurrentThread());
         // Send score. Don't use PostMessage because it set priority above this thread.
         SendMessage(hwOwner,
                     WM_PROGRESSNOTIFY,
@@ -869,7 +870,6 @@ begin
 
         // Release buffer back
         hr := m_AudioCaptureClient.ReleaseBuffer(FramesAvailable);
-        HandleThreadMessages(GetCurrentThread);
     end;
 
 leave:
@@ -1021,7 +1021,7 @@ function TLoopbackCapture.StartCaptureAsync(const hWindow: HWND;
                                             const processId: DWord;
                                             includeProcessTree: Boolean;
                                             const wavFormat: TWavFormat;
-                                            const bufferDuration: REFERENCE_TIME;
+                                            const devicePeriod: REFERENCE_TIME;
                                             const outputFileName: LPCWSTR): HResult;
 var
   hr: HResult;
@@ -1044,7 +1044,7 @@ begin
 
   hwOwner := hWindow;
   m_outputFileName := outputFileName;
-  m_BufferDuration := bufferDuration;
+  m_DevicePeriod := DevicePeriod;
 
   hr := InitializeLoopbackCapture();
   if FAILED(hr) then

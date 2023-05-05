@@ -27,6 +27,7 @@
 // 03/04/2023 Tony                Fixed IAudioClient.GetMixFormat.
 // 28/04/2023 Tony                Fixed AudioClient.IsFormatSupported.
 // 02/05/2023 Tony                Changed IAudioCaptureClient.GetBuffer params.
+// 05/05/2023 Tony                Updated hnsPeriodicity documentation in AudioClient.Activate.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or later.
@@ -346,12 +347,17 @@ type
     //    needed during streaming to compute render buffer request sizes.
     //
     //  hnsPeriodicity - [in]
-    //    The length in 100-nanosecond (hns) units of a single packet. A packet is
-    //    a single unit of transfer from the client to the KS endpoint. A certain number of "frames" or
-    //    "samples" will be contained in a packet, based on the number of samples / second designated in
-    //    pFormat.  In a similar manner to hnsBufferDuration, if the time requested doesn't fall on a frame
-    //    boundary, the duration will be rounded up to the next higher frame. This value cannot be less
-    //    than the minimum periodicity reported by the GetDevicePeriod() method.
+    //    The device period.
+    //    This parameter can be nonzero only in exclusive mode.
+    //    In shared mode, always set this parameter to 0.
+    //    In exclusive mode, this parameter specifies the requested scheduling period for successive
+    //    buffer accesses by the audio endpoint device.
+    //    If the requested device period lies outside the range that is set by the device's minimum period and
+    //    the system's maximum period, then the method clamps the period to that range.
+    //    If this parameter is 0, the method sets the device period to its default value.
+    //    To obtain the default device period, call the IAudioClient.GetDevicePeriod method.
+    //    If the AUDCLNT_STREAMFLAGS_EVENTCALLBACK stream flag is set and AUDCLNT_SHAREMODE_EXCLUSIVE is set as
+    //    the ShareMode, then hnsPeriodicity must be nonzero and equal to hnsBufferDuration.
     //
     //  pFormat - [in]
     //    pointer to the application's desired audio stream format.

@@ -23,13 +23,6 @@ It also demonstrates how to get a processes by using the tlhelp32 API, to list a
 The application is provided with a dialog to select a running process from the process tree you want to pick and has
 a button to get the current PID of your application.
 
-Examples:
-
-* Capture audio from process xxxx and its children: `ApplicationLoopback xxxx includetree Captured.wav`
-* Capture audio from all process except process xxxx and its children: `ApplicationLoopback xxxx excludetree Captured.wav`
-
-
-
 NOTES: 
  - This release is updated for compiler version 17 up to 34.
  - SDK version 10.0.22621.0 (Win 11)
@@ -41,6 +34,6 @@ Project location: https://github.com/FactoryXCode/MfPack
                   https://sourceforge.net/projects/MFPack
 
 First release date: 02-04-2023
-Final release date: 20/04/2023
+Final release date: 05/05/2023
 
 Copyright © FactoryX. All rights reserved.

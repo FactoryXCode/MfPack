@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 02/04/2023 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 05/05/2023 Tony                Updated and fixed some isues.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -94,7 +95,6 @@ uses
 
 type
   TfrmMain = class(TForm)
-    sbMsg: TStatusBar;
     edPID: TEdit;
     Label3: TLabel;
     rb2: TRadioButton;
@@ -109,15 +109,19 @@ type
     Label1: TLabel;
     lblFileExt: TLabel;
     edFileName: TEdit;
-    Label4: TLabel;
-    rb44: TRadioButton;
-    rb48: TRadioButton;
     cbxDontOverWrite: TCheckBox;
-    lblBuffDuration: TLabel;
-    edBufferDuration: TEdit;
     butStart: TButton;
     butStop: TButton;
     butPlayData: TButton;
+    lblMsg: TLabel;
+    Bevel1: TBevel;
+    Bevel3: TBevel;
+    Panel3: TPanel;
+    lblDevicePeriod: TLabel;
+    tbDevicePeriod: TTrackBar;
+    Label4: TLabel;
+    rb44: TRadioButton;
+    rb48: TRadioButton;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject;
                              var CanClose: Boolean);
@@ -131,6 +135,7 @@ type
     procedure Button1Click(Sender: TObject);
     procedure edPIDKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure cbxStayOnTopClick(Sender: TObject);
+    procedure tbDevicePeriodChange(Sender: TObject);
 
   private
     { Private declarations }
@@ -142,7 +147,7 @@ type
     oLoopbackCapture: TLoopbackCapture;
     aprocessId: Integer;
     aWavFmt: TWavFormat;
-    aBufferFormat: REFERENCE_TIME;
+    oDevicePeriod: REFERENCE_TIME;
 
     procedure OnProgressEvent(var AMessage: TMessage); message WM_PROGRESSNOTIFY;
     procedure OnRecordingStopped(var AMessage: TMessage); message WM_RECORDINGSTOPPEDNOTYFY;
@@ -294,9 +299,8 @@ procedure TfrmMain.FormCreate(Sender: TObject);
 begin
   oLoopbackCapture := TLoopbackCapture.Create(Handle);
   butGetPID.OnClick(Self);
+  oDevicePeriod := tbDevicePeriod.Position * AUDIO_BUFFER_FMT;
   bEdited := False;
-  aBufferFormat := AUDIO_BUFFER_FMT;
-  edBufferDuration.Text := IntToStr(aBufferFormat);
 end;
 
 
@@ -327,17 +331,13 @@ begin
       edPID.Text := IntToStr(aprocessId);
     end;
 
-  aBufferFormat := StrToInt(edBufferDuration.Text);
-  if (aBufferFormat < AUDIO_BUFFER_FMT) then
-    begin
-      aBufferFormat := AUDIO_BUFFER_FMT;
-      edBufferDuration.Text := IntToStr(aBufferFormat);
-    end;
-
   if rb1.Checked then
     bIncludeProcessTree := False
   else if rb2.Checked then
     bIncludeProcessTree := True;
+
+  // Buffersize depends on latency and bitrate
+  oDevicePeriod := tbDevicePeriod.Position * AUDIO_BUFFER_FMT;
 
   // Bitrate
   if rb44.Checked then
@@ -347,7 +347,6 @@ begin
 
   if SUCCEEDED(hr) then
     begin
-
       sFileName := Format('%s', [edFileName.Text]);
       if (sOrgFileName = '') or bEdited then
         begin
@@ -389,7 +388,7 @@ begin
                                                aprocessId,
                                                bIncludeProcessTree,
                                                aWavFmt,
-                                               aBufferFormat,
+                                               oDevicePeriod,
                                                LPCWSTR(sFileName + lblFileExt.Caption));
       if FAILED(hr) then
         begin
@@ -406,15 +405,21 @@ end;
 procedure TfrmMain.OnProgressEvent(var aMessage: TMessage);
 begin
   iProgress := aMessage.WParam;
-  sbMsg.SimpleText := Format('Capturing from source: Bytes processed: %d',[iProgress]);
-
+  lblMsg.Caption := Format('Capturing from source: Bytes processed: %d',[iProgress]);
 end;
 
 
 procedure TfrmMain.OnRecordingStopped(var AMessage: TMessage);
 begin
   butPlayData.Enabled := True;
-  sbMsg.SimpleText := Format('Capturing Stopped: %s bytes processed.', [iProgress.ToString()]);
+  lblMsg.Caption := Format('Capturing Stopped: %s bytes processed.', [iProgress.ToString()]);
+end;
+
+
+procedure TfrmMain.tbDevicePeriodChange(Sender: TObject);
+begin
+  lblDevicePeriod.Caption := Format('Device Period (%d MilliSeconds)', [tbDevicePeriod.Position]);
+  oDevicePeriod := tbDevicePeriod.Position * AUDIO_BUFFER_FMT;
 end;
 
 end.
