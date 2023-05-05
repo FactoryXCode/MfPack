@@ -193,11 +193,6 @@ It also demonstrates how to get a process by using the tlhelp32 API, to list a s
 The application is provided with a dialog to select a running process from the process tree you want to pick and has
 a button to get the current PID of your application.
 
-Examples:
-
-* Capture audio from process xxxx and its children: `ApplicationLoopback xxxx includetree Captured.wav`
-* Capture audio from all process except process xxxx and its children: `ApplicationLoopback xxxx excludetree Captured.wav`
-
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/Loopback_2.png)  
   
 **© FactoryX. All rights reserved.**
