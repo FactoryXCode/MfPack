@@ -1052,7 +1052,7 @@ type
     // 'pFormat' in the annotation below refers to the WAVEFORMATEX structure used to initialize IAudioClient.
     //
     function GetBuffer(const NumFramesRequested: UINT;
-                       {out} ppData: PByte): HResult; stdcall;    // modified by Jacob C
+                       out ppData: PByte): HResult; stdcall;    // modified by Jacob C
 
     //-------------------------------------------------------------------------
     // Description:

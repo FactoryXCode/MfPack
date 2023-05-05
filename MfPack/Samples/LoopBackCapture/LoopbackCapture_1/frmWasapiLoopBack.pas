@@ -89,12 +89,7 @@ type
   TfrmLoopBackCapture = class(TForm)
     butStart: TButton;
     butStop: TButton;
-    edFileName: TEdit;
-    Label1: TLabel;
-    lblFileExt: TLabel;
-    sbMsg: TStatusBar;
     butPlayData: TButton;
-    cbxDontOverWrite: TCheckBox;
     Panel1: TPanel;
     rbRenderingDevice: TRadioButton;
     rbCaptureDevice: TRadioButton;
@@ -103,19 +98,25 @@ type
     rbMultimedia: TRadioButton;
     rbCommunications: TRadioButton;
     cbxStayOnTop: TCheckBox;
-    Bevel1: TBevel;
-    Button2: TButton;
+    butShowdlgDevices: TButton;
     Panel3: TPanel;
-    rbAvBufSize: TRadioButton;
-    rbDefBufSize: TRadioButton;
-    rbMinBufSize: TRadioButton;
+    tbDevicePeriod: TTrackBar;
+    lblDevicePeriod: TLabel;
+    Panel4: TPanel;
+    Label1: TLabel;
+    lblFileExt: TLabel;
+    edFileName: TEdit;
+    cbxDontOverWrite: TCheckBox;
+    lblMsg: TLabel;
+    Bevel1: TBevel;
     procedure FormCreate(Sender: TObject);
     procedure butStartClick(Sender: TObject);
     procedure butStopClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure butPlayDataClick(Sender: TObject);
     procedure cbxStayOnTopClick(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
+    procedure butShowdlgDevicesClick(Sender: TObject);
+    procedure tbDevicePeriodChange(Sender: TObject);
 
   private
     { Private declarations }
@@ -124,9 +125,10 @@ type
     sFileName: string;
     oDataFlow: EDataFlow;
     oRole: ERole;
-    oBufferSize: TDevicePeriod;
-    function StartCapture(): HResult;
+    oDevicePeriod: DWord;
 
+    procedure EnablePanels(aEnabled: Boolean);
+    function StartCapture(): HResult;
     procedure OnAudioSinkCaptureStopped(var aMessage: TMessage); message WM_CAPTURINGSTOPPED;
     procedure OnAudioSinkProgressEvent(var AMessage: TMessage); message WM_PROGRESSNOTIFY;
 
@@ -146,30 +148,42 @@ uses
   WinApi.MediaFoundationApi.MfUtils;
 
 
+procedure TfrmLoopBackCapture.EnablePanels(aEnabled: Boolean);
+begin
+  Panel1.Enabled := aEnabled;
+  Panel2.Enabled := aEnabled;
+  Panel3.Enabled := aEnabled;
+  Panel4.Enabled := aEnabled;
+end;
+
+
 procedure TfrmLoopBackCapture.OnAudioSinkCaptureStopped(var aMessage: TMessage);
 begin
   if (aMessage.WParam = S_OK) then
     begin
-      sbMsg.SimpleText := Format('Capturing stopped. Captured %s bytes.', [iProgress.ToString()]);
+      lblMsg.Caption := Format('Capturing stopped. Captured %s bytes.', [iProgress.ToString()]);
       butPlayData.Enabled := True;
+
     end
   else if (aMessage.WParam <> S_OK) then
     begin
-      sbMsg.SimpleText := Format('Capturing stopped because of an error (hr = %d). Captured %s bytes.', [aMessage.WParam, iProgress.ToString()]);
+      lblMsg.Caption := Format('Capturing stopped because of an error (hr = %d). Captured %s bytes.', [aMessage.WParam, iProgress.ToString()]);
       butPlayData.Enabled := False;
     end;
 
   butStop.Enabled := False;
   butStart.Enabled := True;
-  Panel1.Enabled := True;
-  Panel2.Enabled := True;
+  EnablePanels(True);
+
 end;
 
 
 procedure TfrmLoopBackCapture.OnAudioSinkProgressEvent(var aMessage: TMessage);
 begin
-  inc(iProgress, aMessage.WParam);
-  sbMsg.SimpleText := Format('Capturing from source: Bytes processed: %s',[iProgress.ToString]);
+  inc(iProgress,
+      aMessage.WParam);
+
+  lblMsg.Caption := Format('Capturing from source: Bytes processed: %s',[iProgress.ToString]);
 end;
 
 
@@ -209,17 +223,16 @@ begin
                   Inc(i);
                 end
               else
-               bFileExists := False;
+                bFileExists := False;
             end;
         end;
 
       butStop.Enabled := True;
       butStart.Enabled := False;
       butPlayData.Enabled := False;
-      Panel1.Enabled := False;
-      Panel2.Enabled := False;
+      EnablePanels(False);
 
-      // user settings from dlg
+      // User did not choose settings from dlg
       if oDataFlow = eDataFlow(-1) then
         begin
           oDataFlow := eRender;
@@ -227,24 +240,18 @@ begin
         end;
 
       // Buffersize depends on latency and bitrate
-      if rbAvBufSize.Checked then
-        oBufferSize := dpAverage
-      else if rbDefBufSize.Checked then
-        oBufferSize := dpDeviceDefault
-      else
-        oBufferSize := dpDeviceMinimum;
+      oDevicePeriod := tbDevicePeriod.Position * 100000;
 
       // Capture the audio stream from the default rendering device.
       hr := oAudioSink.RecordAudioStream(oDataFlow,
                                          oRole,
-                                         oBufferSize,
+                                         oDevicePeriod,
                                          LPWSTR(sFileName));
       if FAILED(hr) then
         begin
           butStop.Enabled := False;
           butStart.Enabled := True;
-          Panel1.Enabled := True;
-          Panel2.Enabled := true;
+          EnablePanels(True);
           goto done;
         end;
     end;
@@ -273,13 +280,12 @@ end;
 procedure TfrmLoopBackCapture.butStopClick(Sender: TObject);
 begin
   oAudioSink.StopRecording := True;
-  Panel1.Enabled := True;
-  Panel2.Enabled := True;
+  EnablePanels(True);
   Self.BorderIcons := [biSystemMenu, biMinimize];
 end;
 
 
-procedure TfrmLoopBackCapture.Button2Click(Sender: TObject);
+procedure TfrmLoopBackCapture.butShowdlgDevicesClick(Sender: TObject);
 begin
   // Create the dialog if it's not allready done.
   if not Assigned(DevicesDlg) then
@@ -295,7 +301,7 @@ begin
       oDataFlow := DevicesDlg.oDataFlow;
       rbRenderingDevice.Checked := (oDataFlow = eRender);
       rbCaptureDevice.Checked := (oDataFlow = eCapture);
-      sbMsg.SimpleText := Format('Please select a%s.',[Panel2.Caption]);
+      lblMsg.Caption := Format('Please select a%s.',[Panel2.Caption]);
     end
   else
     begin
@@ -303,7 +309,7 @@ begin
       // Set radiobuttons to default.
       rbRenderingDevice.Checked := True;
       rbMultimedia.Checked := True;
-      sbMsg.SimpleText := 'Start Capture';
+      lblMsg.Caption := 'Start Capture';
     end;
 end;
 
@@ -334,6 +340,10 @@ procedure TfrmLoopBackCapture.FormCloseQuery(Sender: TObject;
   var CanClose: Boolean);
 begin
   CanClose := False;
+  if not oAudioSink.StopRecording then
+    begin
+      oAudioSink.StopRecording := True;
+    end;
   FreeAndNil(oAudioSink);
   CanClose := True;
 end;
@@ -344,6 +354,17 @@ begin
   // Create the AudioSink object.
   oAudioSink := TAudioSink.Create(Handle);
   oDataFlow := eDataFlow(-1);
+  tbDevicePeriod.Position := 10;
+  oDevicePeriod := tbDevicePeriod.Position * 10000;
+  lblDevicePeriod.Caption := Format('Device Period (%d milliseconds)', [tbDevicePeriod.Position]);
+
+end;
+
+
+procedure TfrmLoopBackCapture.tbDevicePeriodChange(Sender: TObject);
+begin
+  lblDevicePeriod.Caption := Format('Device Period (%d MilliSeconds)', [tbDevicePeriod.Position]);
+  oDevicePeriod := tbDevicePeriod.Position * 10000;
 end;
 
 end.
