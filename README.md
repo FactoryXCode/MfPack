@@ -21,7 +21,7 @@
 - Windows Imaging Component (WIC) API.
 - MPEG2 API.
 - The COMPLETE Windows Media (WinMM) API.
-- Media Foundation samples.
+- Media Foundation and WASAPI samples.
 
 # <u>Latest release:</u> 
 
