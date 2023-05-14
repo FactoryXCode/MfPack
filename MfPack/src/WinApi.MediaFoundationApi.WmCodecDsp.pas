@@ -65,12 +65,18 @@ unit WinApi.MediaFoundationApi.WmCodecDsp;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
   {WinApi}
   WinApi.WinApiTypes,
   WinApi.MediaObj,
   {ActiveX}
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.ActiveX,
+  {$ELSE}
   WinApi.ActiveX.PropKeyDef,
+  {$ENDIF}
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfError;
 

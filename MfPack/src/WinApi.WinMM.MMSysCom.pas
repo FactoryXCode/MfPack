@@ -63,6 +63,15 @@
 // =============================================================================
 unit WinApi.WinMM.MMSysCom;
 
+interface
+
+  (*$HPPEMIT '#include <mmsyscom.h>' *)
+
+uses
+  {WinApi}
+  WinApi.Windows,
+  WinApi.WinApiTypes;
+
   {$MINENUMSIZE 4}
   {$WEAKPACKAGEUNIT}
   {$IFDEF WIN32}
@@ -70,15 +79,6 @@ unit WinApi.WinMM.MMSysCom;
   {$ELSE}
     {$ALIGN 8} // Win64
   {$ENDIF}
-
-interface
-
-  (*$HPPEMIT '#include <mmsyscom.h>' *)
-
-uses
-  WinApi.Windows,
-  WinApi.WinApiTypes;
-
 
   {$I 'WinApiTypes.inc'}
 

@@ -71,15 +71,35 @@ unit WinApi.CoreAudioApi.AudioEngineExtensionApo;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
+  {WinApi}
   WinApi.Windows,
-  WinApi.PropSys,
   WinApi.ServProv,
   WinApi.WinApiTypes,
+  {ActiveX}
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.PropSys,
+  WinApi.ActiveX,
+  {$ELSE}
+  WinApi.ActiveX,
+  WinApi.ActiveX.PropSys,
+  {$ENDIF}
+  {CoreAudioApi}
   WinApi.CoreAudioApi.MMDeviceApi,
   WinApi.CoreAudioApi.AudioEngineBaseApo,
   WinApi.CoreAudioApi.EndPointVolume;
 
+  {$MINENUMSIZE 4}
+
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
+
+  {$I 'WinApiTypes.inc'}
 
 const
   SID_AudioProcessingObjectRTQueue         : TGUID = '{458c1a1f-6899-4c12-99ac-e2e6ac253104}';

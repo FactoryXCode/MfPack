@@ -69,6 +69,7 @@ interface
 uses
   {WinApi}
   WinApi.WinApiTypes,
+  {WinMM}
   WinApi.WinMM.MMReg,
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioSessionTypes,

@@ -61,6 +61,18 @@
 //==============================================================================
 unit WinApi.WinMM.MSAcmDrv;
 
+interface
+
+  (*$HPPEMIT '#include <msacmdrv.h>' *)
+
+uses
+  {WinApi}
+  WinApi.Windows,
+  {WinMM}
+  WinApi.WinMM.MsAcm,
+  WinApi.WinMM.MMiscApi,
+  WinApi.WinMM.MMReg;
+
   {$MINENUMSIZE 4}
   {$WEAKPACKAGEUNIT}
   {$IFDEF WIN32}
@@ -69,15 +81,6 @@ unit WinApi.WinMM.MSAcmDrv;
     {$ALIGN 8} // Win64
   {$ENDIF}
 
-interface
-
-  (*$HPPEMIT '#include <msacmdrv.h>' *)
-
-uses
-  WinApi.Windows,
-  WinApi.WinMM.MsAcm,
-  WinApi.WinMM.MMiscApi,
-  WinApi.WinMM.MMReg;
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ;
 //

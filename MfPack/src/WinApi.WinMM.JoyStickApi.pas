@@ -78,7 +78,9 @@ interface
   (*$HPPEMIT '' *)
 
 uses
+  {WinApi}
   WinApi.Windows,
+  {WinMM}
   WinApi.WinMM.MMSysCom;
 
   //****************************************************************************

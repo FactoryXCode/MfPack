@@ -72,6 +72,7 @@ uses
 
   {WinApi}
   WinApi.WinApiTypes,
+  Winapi.ActiveX,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfObjects;
 

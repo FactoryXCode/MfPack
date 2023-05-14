@@ -76,6 +76,8 @@ uses
   WinApi.DirectX.D3D9,
   WinApi.DirectX.DXVA,
   WinApi.DirectX.DXVAHd,
+  {ActiveX}
+  WinApi.ActiveX,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfObjects;
@@ -1488,7 +1490,9 @@ var
 
 begin     //
   // Get the interlace mode. An example from M$ that didn't work :-)
-  interlace:= MFGetAttributeUINT32(pType, MF_MT_INTERLACE_MODE, ord(MFVideoInterlace_Unknown));
+  interlace := MFGetAttributeUINT32(pType,
+                                    MF_MT_INTERLACE_MODE,
+                                    ord(MFVideoInterlace_Unknown));
   // The values for interlace mode translate directly, except for mixed
   // interlace or progressive mode.
 
@@ -1501,37 +1505,49 @@ begin     //
   // The remaining values translate directly.
   // Use the "no-fail" attribute functions and default to "unknown."
   // Same Issue
-  RetVal:= MFGetAttributeUINT32(pType, MF_MT_VIDEO_CHROMA_SITING, ord(MFVideoChromaSubsampling_Unknown));
+  RetVal := MFGetAttributeUINT32(pType,
+                                 MF_MT_VIDEO_CHROMA_SITING,
+                                 ord(MFVideoChromaSubsampling_Unknown));
   if not (FAILED(RetVal)) then
     pFormat.VideoChromaSubsampling := RetVal
   else
     Abort;
 
-  RetVal:= MFGetAttributeUINT32(pType, MF_MT_VIDEO_NOMINAL_RANGE, ord(MFNominalRange_Unknown));
+  RetVal := MFGetAttributeUINT32(pType,
+                                 MF_MT_VIDEO_NOMINAL_RANGE,
+                                 ord(MFNominalRange_Unknown));
   if not (FAILED(RetVal)) then
     pFormat.NominalRange := RetVal
   else
     Abort;
 
-  RetVal:= MFGetAttributeUINT32(pType, MF_MT_YUV_MATRIX, ord(MFVideoTransferMatrix_Unknown));
+  RetVal := MFGetAttributeUINT32(pType,
+                                 MF_MT_YUV_MATRIX,
+                                 ord(MFVideoTransferMatrix_Unknown));
   if not (FAILED(RetVal)) then
      pFormat.VideoTransferMatrix := RetVal
   else
     Abort;
 
-  RetVal:= MFGetAttributeUINT32(pType, MF_MT_VIDEO_LIGHTING, ord(MFVideoLighting_Unknown));
+  RetVal := MFGetAttributeUINT32(pType,
+                                 MF_MT_VIDEO_LIGHTING,
+                                 ord(MFVideoLighting_Unknown));
   if not (FAILED(RetVal)) then
     pFormat.VideoLighting := RetVal
   else
     Abort;
 
-  RetVal:= MFGetAttributeUINT32(pType, MF_MT_VIDEO_PRIMARIES, ord(MFVideoPrimaries_Unknown));
+  RetVal := MFGetAttributeUINT32(pType,
+                                 MF_MT_VIDEO_PRIMARIES,
+                                 ord(MFVideoPrimaries_Unknown));
   if not (FAILED(RetVal)) then
     pFormat.VideoPrimaries := RetVal
   else
     Abort;
 
-  RetVal:= MFGetAttributeUINT32(pType, MF_MT_TRANSFER_FUNCTION, ord(MFVideoTransFunc_Unknown));
+  RetVal := MFGetAttributeUINT32(pType,
+                                 MF_MT_TRANSFER_FUNCTION,
+                                 ord(MFVideoTransFunc_Unknown));
   if not (FAILED(RetVal)) then
     pFormat.VideoTransferFunction := RetVal
   else

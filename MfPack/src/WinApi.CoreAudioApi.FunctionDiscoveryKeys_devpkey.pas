@@ -74,11 +74,18 @@ unit WinApi.CoreAudioApi.FunctionDiscoveryKeys_devpkey;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
   {MfPack}
   WinApi.WinApiTypes,
   WinApi.DevPropDef,
-  WinApi.PropSys;
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.PropSys,
+  WinApi.ActiveX;
+  {$ELSE}
+  WinApi.ActiveX.PropSys;
+  {$ENDIF}
 
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}

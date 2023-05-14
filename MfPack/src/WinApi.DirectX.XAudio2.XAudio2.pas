@@ -70,8 +70,9 @@ interface
 uses
   {WinApi}
   WinApi.Windows,
-  WinApi.WinMM.MMReg,
   WinApi.WinApiTypes,
+  {WinMM}
+  WinApi.WinMM.MMReg,
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioSessionTypes;
 

@@ -64,15 +64,22 @@ unit WinApi.Coml2Api;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
 
   {WinApi}
   WinApi.Windows,
   WinApi.WinApiTypes,
   {ActiveX}
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.ActiveX;
+  {$ELSE}
   WinApi.ActiveX.ObjIdl,
   WinApi.ActiveX.ObjIdlbase,
   WinApi.ActiveX.PropIdl;
+  {$ENDIF}
+
 
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}

@@ -99,6 +99,23 @@
 //==============================================================================
 unit WinApi.WinMM.VfW;
 
+interface
+
+ {$HPPEMIT '#include "vfw.h"'}
+
+uses
+  {WinApi}
+  WinApi.Windows,
+  WinApi.Messages,
+  WinApi.CommDlg,
+  WinApi.WinApiTypes,
+  WinApi.WinError,
+  {Vcl}
+  Vcl.Dialogs,
+  {WinMM}
+  WinApi.WinMM.MMiscApi,
+  WinApi.WinMM.MMeApi;
+
   {$MINENUMSIZE 4}
   {$WEAKPACKAGEUNIT}
   {$IFDEF WIN32}
@@ -106,20 +123,6 @@ unit WinApi.WinMM.VfW;
   {$ELSE}
     {$ALIGN 8} // Win64
   {$ENDIF}
-
-interface
-
- {$HPPEMIT '#include "vfw.h"'}
-
-uses
-  WinApi.Windows,
-  WinApi.Messages,
-  WinApi.CommDlg,
-  Vcl.Dialogs,
-  WinApi.WinApiTypes,
-  WinApi.WinError,
-  WinApi.WinMM.MMiscApi,
-  WinApi.WinMM.MMeApi;
 
 
   //****************************************************************************

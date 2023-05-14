@@ -70,7 +70,9 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.WinApiTypes,
-  WinApi.DevPropDef;
+  WinApi.DevPropDef,
+  {ActiveX}
+  WinApi.ActiveX;
 
   {$MINENUMSIZE 4}
 

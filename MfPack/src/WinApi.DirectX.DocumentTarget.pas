@@ -65,11 +65,18 @@ unit WinApi.DirectX.DocumentTarget;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
   {WinApi}
   WinApi.WinApiTypes,
   {ActiveX}
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.ActiveX;
+  {$ELSE}
   WinApi.ActiveX.ObjIdlbase;
+  {$ENDIF}
+
 
   {$MINENUMSIZE 4}
 

@@ -75,6 +75,7 @@ uses
   {ActiveX}
   WinApi.ActiveX.ObjIdlbase;
 
+
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

@@ -67,13 +67,20 @@ unit WinApi.MediaFoundationApi.MfContentDecryptionModule;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
   {WinApi}
   WinApi.Windows,
   WinApi.WinApiTypes,
   {ActiveX}
-  WinApi.ActiveX.PropSys,
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.PropSys,
+  WinApi.ActiveX,
+  {$ELSE}
   WinApi.ActiveX.ObjIdlbase,
+  WinApi.ActiveX.PropSys,
+  {$ENDIF}
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfIdl,
   WinApi.MediaFoundationApi.MfObjects,

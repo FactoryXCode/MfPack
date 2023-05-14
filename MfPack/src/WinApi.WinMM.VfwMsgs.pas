@@ -61,6 +61,10 @@
 //==============================================================================
 unit WinApi.WinMM.VfwMsgs;
 
+  (*$HPPEMIT '#include <vfwmsgs.h>' *)
+
+interface
+
   {$MINENUMSIZE 4}
   {$WEAKPACKAGEUNIT}
   {$IFDEF WIN32}
@@ -68,10 +72,6 @@ unit WinApi.WinMM.VfwMsgs;
   {$ELSE}
     {$ALIGN 8} // Win64
   {$ENDIF}
-
-interface
-
-  (*$HPPEMIT '#include <vfwmsgs.h>' *)
 
    // no longer used  - but might get
    // our own facility in the future?

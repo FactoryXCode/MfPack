@@ -69,15 +69,21 @@ unit WinApi.WIC.WinCodec;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
 
   {WinApi}
   WinApi.Windows,
   WinApi.WinError,
   {ActiveX}
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.ActiveX,
+  {$ELSE}
   WinApi.ActiveX.PropIdl,
   WinApi.ActiveX.ObjIdlBase,
   WinApi.ActiveX.OcIdl,
+  {$ENDIF}
   {DirectX}
   WinApi.DirectX.DXGIFormat,
   WinApi.DirectX.DXGIType,

@@ -69,12 +69,19 @@ unit WinApi.CoreAudioApi.SpatialAudioMetadata;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
   {MfPack}
   WinApi.WinApiTypes,
+  {WinMM}
   WinApi.WinMM.MMReg,
   {ActiveX}
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.ActiveX,
+  {$ELSE}
   WinApi.ActiveX.PropIdl,
+  {$ENDIF}
   {CoreAudioApi}
   WinApi.CoreAudioApi.Audiosessiontypes,
   WinApi.CoreAudioApi.SpatialAudioClient;

@@ -64,8 +64,10 @@ unit WinApi.MpegType;
 interface
 
 uses
+  {WinApi}
   WinApi.Windows,
   WinApi.StrmIf,
+  {WinMM}
   WinApi.WinMM.MMReg;
 
 //

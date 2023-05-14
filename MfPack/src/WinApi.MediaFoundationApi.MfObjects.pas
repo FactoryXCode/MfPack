@@ -73,6 +73,8 @@ unit WinApi.MediaFoundationApi.MfObjects;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
   {WinApi}
   Winapi.Windows,
@@ -81,10 +83,14 @@ uses
   WinApi.WinMM.MMReg,
   WinApi.MediaObj,
   {ActiveX}
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.PropSys,
+  WinApi.ActiveX;
+  {$ELSE}
   WinApi.ActiveX.PropSys,
   WinApi.ActiveX.PropIdl,
   WinApi.ActiveX.ObjIdlbase;
-
+  {$ENDIF}
 
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
@@ -1110,7 +1116,7 @@ type
                          out pType: MF_ATTRIBUTE_TYPE): HResult; stdcall;
 
     function CompareItem(const guidKey: REFGUID;
-                         const Value: REFPROPVARIANT;
+                         const Value: {REF}PROPVARIANT;
                          out pbResult: BOOL): HResult; stdcall;
 
     function Compare(const pTheirs: IMFAttributes;

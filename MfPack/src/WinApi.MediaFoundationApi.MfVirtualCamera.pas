@@ -66,11 +66,15 @@ unit WinApi.MediaFoundationApi.MfVirtualCamera;
 interface
 
 uses
-  Windows,
+  {WinApi}
+  WinApi.Windows,
   WinApi.WinApiTypes,
+  WinApi.DevPropDef,
+  {ActiveX}
+  WinApi.ActiveX,
+  {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfObjects,
-  WinApi.MediaFoundationApi.MfIdl,
-  WinApi.DevPropDef;
+  WinApi.MediaFoundationApi.MfIdl;
 
   {$MINENUMSIZE 4}
 

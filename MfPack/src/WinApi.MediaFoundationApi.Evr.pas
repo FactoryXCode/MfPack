@@ -76,6 +76,8 @@ unit WinApi.MediaFoundationApi.Evr;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
   {WinApi}
   WinApi.Windows,
@@ -83,7 +85,11 @@ uses
   WinApi.MediaObj,
   WinApi.StrMif,
   {ActiveX}
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.ActiveX,
+  {$ELSE}
   WinApi.ActiveX.PropIdl,
+  {$ENDIF}
   {System}
   System.Types,
   {MediaFoundationApi}

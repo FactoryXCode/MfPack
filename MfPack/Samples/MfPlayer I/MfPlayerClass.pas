@@ -1119,7 +1119,9 @@ begin
 
 try
   // use assertions in debug mode only.
+  {$IFDEF DEBUG}
   Assert(bit <> Nil);
+  {$IFEND}
   data := Nil;
 
   // Set the biSize member of the structure to sizeof(BITMAPINFOHEADER)
@@ -1136,9 +1138,7 @@ try
                                             bufSize,
                                             timestamp);
       if FAILED(hr) then
-        begin
-          Exit;
-        end;
+        Exit;
 
       data := buffer;
     end;
@@ -1759,7 +1759,8 @@ try
   varStart.vt := VT_I8;
   varStart.hVal.QuadPart := tPos;
 
-  hr := m_pSession.Start(GUID_NULL, varStart);
+  hr := m_pSession.Start(GUID_NULL,
+                         varStart);
 
   if (SUCCEEDED(hr)) then
     begin

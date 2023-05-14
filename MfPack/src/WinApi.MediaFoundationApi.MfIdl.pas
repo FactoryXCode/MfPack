@@ -65,15 +65,22 @@ unit WinApi.MediaFoundationApi.MfIdl;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
   {WinApi}
   WinApi.Windows,
   WinApi.WinApiTypes,
   WinApi.Unknwn,
   {ActiveX}
-  WinApi.ActiveX.PropSys,
-  WinApi.ActiveX.PropIdl,
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.PropSys,
+  WinApi.ActiveX,
+  {$ELSE}
   WinApi.ActiveX.ObjIdlbase,
+  WinApi.ActiveX.PropIdl,
+  WinApi.ActiveX.PropSys,
+  {$ENDIF}
   {MfPack}
   WinApi.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MfTransform;
@@ -4177,7 +4184,7 @@ type
     // Gets all of the styles as a string array in a PROPVARIANT (tagPPROPVARIANT).
     // The caller must properly clear the PROPVARIANT to avoid memory leaks.
 
-    function SetSelectedStyle(pwszStyle: LPCWSTR): HResult; stdcall;
+    function SetSelectedStyle(pwszStyle: PLPWSTR): HResult; stdcall;
     // Sets the current selected style to the provided style.
 
     function GetSelectedStyle(out ppwszStyle: LPWSTR): HResult; stdcall;

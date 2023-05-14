@@ -73,6 +73,9 @@ uses
   WinApi.VpType,
   WinApi.KsProxy,
   WinApi.Ks,
+  {ActiveX}
+  WinApi.ActiveX,
+  {WinMM}
   WinApi.WinMM.MMReg;
 
   {$WEAKPACKAGEUNIT ON}

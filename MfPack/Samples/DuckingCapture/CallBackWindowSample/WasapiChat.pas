@@ -191,8 +191,8 @@ begin
                                  hr := pCaptureClient.GetBuffer(pData,
                                                                 framesAvailable,
                                                                 flags,
-                                                                0,
-                                                                0);
+                                                                nil,
+                                                                nil);
                                  hr := pCaptureClient.ReleaseBuffer(framesAvailable);
                                end;
                            end;
@@ -416,7 +416,7 @@ begin
                                 500000,
                                 0,
                                 @mixFormat,
-                                chatGuid);
+                                @chatGuid);
 
   CoTaskMemFree(@mixFormat);
   mixFormat := Nil;

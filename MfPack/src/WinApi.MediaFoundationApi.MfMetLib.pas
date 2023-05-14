@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 // Description: This unit contains basic Media Foundation methods needed to play,
 //              record, encode, decode, etc.
 //
@@ -29,6 +29,7 @@
 // 13/08/2022 Tony                Implemented more functionality and updated methods.
 // 30/01/2023 Tony                Updated some.
 // 03/03/2023                     Updated and fixed device notification issues.
+// 03/04/2023 Tony                added CopyWaveFormatEx method.
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -70,6 +71,8 @@ unit WinApi.MediaFoundationApi.MfMetLib;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
 
   {WinApi}
@@ -84,13 +87,17 @@ uses
   WinApi.UuIds,
   WinApi.AmVideo,
   WinApi.Dvdmedia,
-  WinApi.WinMM.MMReg,
   WinApi.ComBaseApi,
   {ActiveX}
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.PropSys,
+  WinApi.ActiveX,
+  {$ELSE}
   WinApi.ActiveX.PropVarUtil,
   WinApi.ActiveX.PropIdl,
   WinApi.ActiveX.ObjBase,
   WinApi.ActiveX.PropSys,
+  {$ENDIF}
   {System}
   System.Win.ComObj,
   System.Classes,
@@ -98,6 +105,8 @@ uses
   System.Services.Dbt,
   {DirectX}
   WinApi.DirectX.DxVa2Api,
+  {WinMM}
+  WinApi.WinMM.MMReg,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfUtils,
   WinApi.MediaFoundationApi.MfApi,
@@ -581,7 +590,7 @@ type
 // ============
 
   // To enumerate the video capture devices on the system, do the following:
-  // Call function EnumVideoCaptureDeviceSources with the following parameters:
+  // Call function EnumCaptureDeviceSources with the following parameters:
   //  Parameters:  AttributeSourceType: MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_AUDCAP_GUID for audio or
   //                                    MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID for video.
   //               DeviceProperties: array of TDevicePropsA.
@@ -964,9 +973,8 @@ const
 
 // Misc
 // ====
-//
-
-
+procedure CopyWaveFormatEx(const SourceFmt: WAVEFORMATEX;
+                           out DestFmt: PWAVEFORMATEX);
 
 implementation
 
@@ -6074,6 +6082,23 @@ begin
 
 done:
   Result := hr;
+end;
+
+
+procedure CopyWaveFormatEx(const SourceFmt: WAVEFORMATEX;
+                           out DestFmt: PWAVEFORMATEX);
+begin
+  // Allocate memory for DestFormat
+  GetMem(DestFmt,
+         SizeOf(WAVEFORMATEX));
+
+  // Copy SourceFormat to DestFormat
+  Move(SourceFmt,
+       DestFmt^,
+       SizeOf(WAVEFORMATEX));
+
+  // User is responsible to free the memory occupied by the result.
+  // Like: FreeMem(DestFmt);
 end;
 
 // External methods

@@ -65,12 +65,19 @@ unit WinApi.StructuredQueryCondition_2020;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
   {WinApi}
   WinApi.WinApiTypes,
   {ActiveX}
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.ActiveX;
+  {$ELSE}
   WinApi.ActiveX.PropIdl,
   WinApi.ActiveX.ObjIdl;
+  {$ENDIF}
+
 
   {$MINENUMSIZE 4}
 

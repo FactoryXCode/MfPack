@@ -67,6 +67,8 @@ unit WinApi.WIC.WinCodecSdk;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
 
   {WinApi}
@@ -74,10 +76,14 @@ uses
   {WIC}
   WinApi.WIC.WinCodec,
   {ActiveX}
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.ActiveX;
+  {$ELSE}
   WinApi.ActiveX.ObjIdlBase,
   WinApi.ActiveX.ObjIdl,
   WinApi.ActiveX.OcIdl,
   WinApi.ActiveX.PropIdl;
+  {$ENDIF}
 
   {$MINENUMSIZE 4}
 

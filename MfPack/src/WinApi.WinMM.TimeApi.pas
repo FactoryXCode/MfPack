@@ -64,6 +64,16 @@
 
 unit WinApi.WinMM.TimeApi;
 
+interface
+
+ {$HPPEMIT '#include "timeapi.h"'}
+
+uses
+  {WinApi}
+  WinApi.Windows,
+  {WinMM}
+  WinApi.WinMM.MMSysCom;
+
   {$MINENUMSIZE 4}
   {$WEAKPACKAGEUNIT}
   {$IFDEF WIN32}
@@ -71,14 +81,6 @@ unit WinApi.WinMM.TimeApi;
   {$ELSE}
     {$ALIGN 8} // Win64
   {$ENDIF}
-
-interface
-
- {$HPPEMIT '#include "timeapi.h"'}
-
-uses
-  WinApi.Windows,
-  WinApi.WinMM.MMSysCom;
 
   //****************************************************************************
   //

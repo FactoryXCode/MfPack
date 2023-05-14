@@ -63,12 +63,18 @@ unit WinApi.MediaFoundationApi.CameraUIControl;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
   {WinApi}
   WinApi.WinApiTypes,
   {ActiveX}
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.ActiveX;
+  {$ELSE}
   WinApi.ActiveX.OaIdl;
-
+  {$ENDIF}
+  
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

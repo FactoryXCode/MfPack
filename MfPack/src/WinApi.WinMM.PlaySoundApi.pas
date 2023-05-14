@@ -61,6 +61,16 @@
 //==============================================================================
 unit WinApi.WinMM.PlaySoundApi;
 
+interface
+
+  (*$HPPEMIT '#include <playsoundapi.h>' *)
+
+uses
+  {WinApi}
+  WinApi.WinApiTypes,
+  {WinMM}
+  WinApi.WinMM.MMSysCom;
+
   {$MINENUMSIZE 4}
   {$IFDEF WIN32}
     {$ALIGN 1}
@@ -68,14 +78,6 @@ unit WinApi.WinMM.PlaySoundApi;
     {$ALIGN 8} // Win64
   {$ENDIF}
   {$WEAKPACKAGEUNIT}
-
-interface
-
-  (*$HPPEMIT '#include <playsoundapi.h>' *)
-
-uses
-  WinApi.WinApiTypes,
-  WinApi.WinMM.MMSysCom;
 
 
    {***************************************************************************

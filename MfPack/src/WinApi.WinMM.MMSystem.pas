@@ -85,6 +85,7 @@ interface
  {$HPPEMIT '#include "timeapi.h"'}
 
 uses
+  {WinApi}
   WinApi.Windows;
 
   {$WEAKPACKAGEUNIT ON}

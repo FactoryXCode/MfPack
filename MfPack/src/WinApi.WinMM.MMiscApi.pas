@@ -77,6 +77,7 @@ interface
   {$HPPEMIT '#include "mmiscapi.h"'}
 
 uses
+  {WinApi}
   WinApi.Windows,
   WinApi.WinApiTypes,
   WinApi.WinMM.MMSysCom;
@@ -694,7 +695,7 @@ const
   {$EXTERNALSYM mmioSendMessage}
 
   function mmioDescend(hmmio: HMMIO;
-                       lpck: LPMMCKINFO;
+                       lpck: PMMCKINFO;
                        lpckParent: PMMCKINFO;
                        uFlags: UINT): MMRESULT; stdcall;
   {$EXTERNALSYM mmioDescend}

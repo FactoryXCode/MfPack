@@ -67,14 +67,21 @@ unit WinApi.MediaFoundationApi.MfMediaEngine;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
   {WinApi}
   WinApi.Windows,
   WinApi.WinApiTypes,
   WinApi.Unknwn,
   {ActiveX}
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.PropSys,
+  WinApi.ActiveX,
+  {$ELSE}
   WinApi.ActiveX.PropIdl,
   WinApi.ActiveX.PropSys,
+  {$ENDIF}
   {System}
   System.Types,
   {MediaFoundationApi}

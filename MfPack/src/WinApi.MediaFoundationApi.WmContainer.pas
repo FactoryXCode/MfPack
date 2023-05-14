@@ -65,13 +65,20 @@ unit WinApi.MediaFoundationApi.WmContainer;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
 
   {WinApi}
   WinApi.WinApiTypes,
   {ActiveX}
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.ActiveX,
+  WinApi.PropSys,
+  {$ELSE}
   WinApi.ActiveX.PropSys,
   WinApi.ActiveX.PropIdl,
+  {$ENDIF}
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MfIdl;

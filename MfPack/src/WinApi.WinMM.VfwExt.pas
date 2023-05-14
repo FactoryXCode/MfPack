@@ -62,6 +62,15 @@
 //==============================================================================
 unit WinApi.WinMM.VfwExt;
 
+interface
+
+  (*$HPPEMIT '#include <vfwmsgs.h>' *)
+
+uses
+  {WinApi}
+  WinApi.Windows,
+  Winapi.CommCtrl;
+
   {$MINENUMSIZE 4}
   {$WEAKPACKAGEUNIT}
   {$IFDEF WIN32}
@@ -69,14 +78,6 @@ unit WinApi.WinMM.VfwExt;
   {$ELSE}
     {$ALIGN 8} // Win64
   {$ENDIF}
-
-interface
-
-  (*$HPPEMIT '#include <vfwmsgs.h>' *)
-
-uses
-  WinApi.Windows,
-  Winapi.CommCtrl;
 
 const
 

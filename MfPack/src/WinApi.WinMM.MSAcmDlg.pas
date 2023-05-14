@@ -61,6 +61,14 @@
 //==============================================================================
 unit WinApi.WinMM.MSAcmDlg;
 
+interface
+
+  (*$HPPEMIT '#include <MSAcmDlg.h>' *)
+
+uses
+  {WinApi}
+  WinApi.Windows;
+
   {$MINENUMSIZE 4}
   {$WEAKPACKAGEUNIT}
   {$IFDEF WIN32}
@@ -69,12 +77,6 @@ unit WinApi.WinMM.MSAcmDlg;
     {$ALIGN 8} // Win64
   {$ENDIF}
 
-interface
-
-  (*$HPPEMIT '#include <MSAcmDlg.h>' *)
-
-uses
-  WinApi.Windows;
 
 const
 

@@ -75,6 +75,7 @@ uses
 
   {WinApi}
   WinApi.Windows,
+  {WinMM}
   WinApi.WinMM.MMReg,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfObjects;

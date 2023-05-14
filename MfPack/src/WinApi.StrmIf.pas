@@ -66,15 +66,21 @@ unit WinApi.StrmIf;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
   {WinApi}
   WinApi.Windows,
   WinApi.MMSystem,
   WinApi.WinApiTypes,
   {WinApi.ActiveX}
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.ActiveX,
+  {$ELSE}
   WinApi.ActiveX.ObjIdl,
   WinApi.ActiveX.ObjIdlbase,
   WinApi.ActiveX.OaIdl,
+  {$ENDIF}
   {Use WinApi or Clootie Dx}
   WinApi.DirectDraw,
   {System}
@@ -530,7 +536,7 @@ type
   ICreateDevEnum = interface(IUnknown)
     ['{29840822-5B84-11D0-BD3B-00A0C911CE86}']
     function CreateClassEnumerator(const clsidDeviceClass: REFCLSID;
-                                   out ppEnumMoniker: PIEnumMoniker;
+                                   out ppEnumMoniker: IEnumMoniker;
                                    const dwFlags: DWORD): HResult; stdcall;
 
   end;

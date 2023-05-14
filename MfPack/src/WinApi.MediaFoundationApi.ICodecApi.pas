@@ -63,10 +63,19 @@ unit WinApi.MediaFoundationApi.ICodecApi;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
+  {WinApi}
   WinApi.Windows,
+  {ActiveX}
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.ActiveX;
+  {$ELSE}
   WinApi.ActiveX,
   WinApi.ActiveX.OaIdl;
+  {$ENDIF}
+
 
   {$MINENUMSIZE 4}
 

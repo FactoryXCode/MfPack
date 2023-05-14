@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 12/03/2023 Tony                Altered some functions and EndPointArray.
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -68,6 +69,8 @@ unit WinApi.CoreAudioApi.DevTopoUtils;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
   {WinApi}
 	WinApi.Windows,
@@ -75,8 +78,13 @@ uses
   WinApi.ComBaseApi,
   WinApi.Coml2Api,
   {ActiveX}
-  WinApi.ActiveX.PropSys,
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.PropSys,
+  WinApi.ActiveX,
+  {$ELSE}
   WinApi.ActiveX.PropIdl,
+  WinApi.ActiveX.PropSys,
+  {$ENDIF}
   {System}
   System.SysUtils,
   {MediaFoundationApi}
@@ -111,8 +119,8 @@ type
   FEndPoint = TEndPoint;
   PfEndPoint = ^TEndPoint;
   //
-  {$NODEFINE EndPointArray}
-  EndPointArray = array [0..65535] of TEndPoint;
+  {$NODEFINE TEndPointArray}
+  TEndPointArray = array of TEndPoint;
 
 
   // The following code shows how to obtain the IDeviceTopology interface for
@@ -121,7 +129,7 @@ type
 
   // The GetHardwareDeviceTopology function in the previous code example performs the following
   // steps to obtain the IDeviceTopology interface for the input multiplexer device:
-  //  1 Call the IMMDevice::Activate method to get the IDeviceTopology interface for the endpoint device.
+  //  1 Call the IMMDevice.Activate method to get the IDeviceTopology interface for the endpoint device.
   //  2 With the IDeviceTopology interface obtained in the preceding step,
   //    call the IDeviceTopology.GetConnector method to get the IConnector interface of the
   //    single connector (connector number 0) in the endpoint device.
@@ -163,7 +171,7 @@ type
   // rendering endpoint devices. It gets the friendly name
   // and endpoint ID (string and integer) of each endpoint device.
   //-----------------------------------------------------------
-  function GetEndpointNames(var aEp: EndPointArray): HRESULT;
+  function GetEndpointNames(out aEp: TEndPointArray): HRESULT;
 
 
 implementation
@@ -178,54 +186,47 @@ var
   pConnHWDev: IConnector;
   pPartConn: IPart;
 
-begin
-  // Initialize vars
-  hr:= S_OK;
+label
+  done;
 
-try
-try
+begin
+
   // Get the endpoint device's IDeviceTopology interface.
-  hr:= pEndptDev.Activate(IID_IDeviceTopology,
-                          UINT(CLSCTX_ALL),
-                          Nil,
-                          Pointer(pDevTopoEndpt));
+  hr := pEndptDev.Activate(IID_IDeviceTopology,
+                           UINT(CLSCTX_ALL),
+                           nil,
+                           Pointer(pDevTopoEndpt));
   if Failed(hr) then
-    Abort;
+    goto done;
 
   // The device topology for an endpoint device always
   // contains just one connector (connector number 0).
 
-  hr:= pDevTopoEndpt.GetConnector(0,
-                                  pConnEndpt);
+  hr := pDevTopoEndpt.GetConnector(0,
+                                   pConnEndpt);
   if Failed(hr) then
-    Abort;
+    goto done;
 
   // Use the connector in the endpoint device to get the
   // connector in the adapter device.
-  hr:= pConnEndpt.GetConnectedTo(pConnHWDev);
+  hr := pConnEndpt.GetConnectedTo(pConnHWDev);
   if Failed(hr) then
-    Abort;
+    goto done;
 
   // Query the connector in the adapter device for
   // its IPart interface.
-  hr:= pConnHWDev.QueryInterface(IID_IPart,
-                                 pPartConn);
+  hr := pConnHWDev.QueryInterface(IID_IPart,
+                                  pPartConn);
   if Failed(hr) then
-    Abort;
+    goto done;
 
   // Use the connector's IPart interface to get the
   // IDeviceTopology interface for the adapter device.
-  hr:= pPartConn.GetTopologyObject(ppDevTopo);
-  if Failed(hr) then
-    Abort;
+  hr := pPartConn.GetTopologyObject(ppDevTopo);
 
-except
-  //do nothing, or something if you need to...
-end;
-finally
+done:
   // When going out of scope, the interface objects will be automatically eliminated
-  Result:= hr;
-end;
+  Result := hr;
 end;
 
 
@@ -246,45 +247,44 @@ var
   localId: UINT;
   pParts: IPartsList;
 
+label
+  done;
+
 begin
   //intialize
   bConnected := True;
-  hr := E_FAIL;
 
-try
-try
-
-  if (pEndptDev = NIL) then
+  if (pEndptDev = nil) then
     begin
       hr := E_POINTER;
-      Abort;
+      goto done;
     end;
 
   // Get the endpoint device's IDeviceTopology interface.
   hr := pEndptDev.Activate(IID_IDeviceTopology,
                            CLSCTX_ALL,
-                           Nil,
+                           nil,
                            Pointer(pDeviceTopology));
   if Failed(hr) then
-    Abort;
+    goto done;
 
   // The device topology for an endpoint device always
   // contains just one connector (connector number 0).
   hr := pDeviceTopology.GetConnector(0,
                                      pConnFrom);
-  SafeRelease(pDeviceTopology);
   if Failed(hr) then
-    Abort;
+    goto done;
 
   // Make sure that this is a capture device.
   hr := pConnFrom.GetDataFlow(flow);
   if Failed(hr) then
-    Abort;
+    goto done;
 
   if (flow = _Out) then
     begin
       // Error -- this is a rendering device.
       hr := HRESULT(AUDCLNT_E_WRONG_ENDPOINT_TYPE);
+      goto done;
     end;
 
   // Outer loop: Each iteration traverses the data path
@@ -293,119 +293,104 @@ try
   while True do
     begin
       hr := pConnFrom.IsConnected(bConnected);
-      if Failed(hr) then
-        Abort;
 
-      // Does this connector connect to another device?
-      if (bConnected = False) then
-        begin
-          // This is the end of the data path that
-          // stretches from the endpoint device to the
-          // system bus or external bus. Verify that
-          // the connection type is Software_IO.
-          hr := pConnFrom.GetType(connType);
-          if Failed(hr) then
-            Abort;
+      if SUCCEEDED(hr) then
+        // Does this connector connect to another device?
+        if (bConnected = False) then
+          begin
+            // This is the end of the data path that
+            // stretches from the endpoint device to the
+            // system bus or external bus. Verify that
+            // the connection type is Software_IO.
+            hr := pConnFrom.GetType(connType);
 
-          if (connType = Software_IO) then
-            break  // finished
-          else
-            begin
-              hr := E_FAIL;
-              Abort;
-            end;
-        end;
+            if SUCCEEDED(hr) then
+              if (connType = Software_IO) then
+                break  // finished
+              else
+                begin
+                  hr := E_FAIL;
+                end;
+          end;
 
-      // Get the connector in the next device topology,
-      // which lies on the other side of the connection.
-      hr := pConnFrom.GetConnectedTo(pConnTo);
-      if Failed(hr) then
-        Abort;
-
+      if SUCCEEDED(hr) then
+        // Get the connector in the next device topology,
+        // which lies on the other side of the connection.
+        hr := pConnFrom.GetConnectedTo(pConnTo);
       SafeRelease(pConnFrom);
 
-      // Get the connector's IPart interface.
-      hr := pConnTo.QueryInterface(IID_IPart,
-                                   pPartPrev);
-      if Failed(hr) then
-        Abort;
-      SafeRelease(pConnTo);
+      if SUCCEEDED(hr) then
+        // Get the connector's IPart interface.
+        hr := pConnTo.QueryInterface(IID_IPart,
+                                     pPartPrev);
 
-      // Inner loop: Each iteration traverses one link in a
-      // device topology and looks for input multiplexers.
-      while True do
-        begin
-          // Follow downstream link to next part.
-          hr := pPartPrev.EnumPartsOutgoing(pParts);
-          if Failed(hr) then
-            Abort;
+      if SUCCEEDED(hr) then
+        // Inner loop: Each iteration traverses one link in a
+        // device topology and looks for input multiplexers.
+        while True do
+          begin
+            // Follow downstream link to next part.
+            hr := pPartPrev.EnumPartsOutgoing(pParts);
 
-          hr := pParts.GetPart(0, pPartNext);
+            if SUCCEEDED(hr) then
+              hr := pParts.GetPart(0,
+                                   pPartNext);
             SafeRelease(pParts);
-          if Failed(hr) then
-            Abort;
 
-          hr := pPartNext.GetPartType(_parttype);
-          if Failed(hr) then
-            Abort;
+            if SUCCEEDED(hr) then
+              hr := pPartNext.GetPartType(_parttype);
 
-          if (_parttype = Connector) then
-            begin
-              // We've reached the output connector that
-              // lies at the end of this device topology.
-              hr := pPartNext.QueryInterface(IID_IConnector,
-                                             pConnFrom);
-              if Failed(hr) then
-                Abort;
+            if SUCCEEDED(hr) then
+              if (_parttype = Connector) then
+                begin
+                  // We've reached the output connector that
+                  // lies at the end of this device topology.
+                  hr := pPartNext.QueryInterface(IID_IConnector,
+                                                 pConnFrom);
+                  if FAILED(hr) then
+                    begin
+                      goto done;
+                    end;
 
-              SafeRelease(pPartPrev);
-              SafeRelease(pPartNext);
-              break;
-            end;
+                  SafeRelease(pPartPrev);
+                  SafeRelease(pPartNext);
+                  break;
+                end;
 
-          // Failure of the following call means only that
-          // the part is not a MUX (input selector).
-          hr := pPartNext.Activate(CLSCTX_ALL,
-                                   IID_IAudioInputSelector,
-                                   pSelector);
-          if (hr = S_OK) then
-            begin
-              // We found a MUX (input selector), so select
-              // the input from our endpoint device.
-              hr := pPartPrev.GetLocalId(localId);
-              if Failed(hr) then
-                Abort;
+            // Failure of the following call means only that
+            // the part is not a MUX (input selector).
+            hr := pPartNext.Activate(CLSCTX_ALL,
+                                     IID_IAudioInputSelector,
+                                     pSelector);
+            if SUCCEEDED(hr) then
+              begin
+                // We found a MUX (input selector), so select
+                // the input from our endpoint device.
+                hr := pPartPrev.GetLocalId(localId);
 
-              hr := pSelector.SetSelection(localId,
-                                           GUID_NULL);
-              if Failed(hr) then
-                Abort;
+                if SUCCEEDED(hr) then
+                  hr := pSelector.SetSelection(localId,
+                                               GUID_NULL);
 
-              SafeRelease(pSelector);
-
-            end;
+                SafeRelease(pSelector);
+                if FAILED(hr) then
+                  goto done;
+              end;
 
         SafeRelease(pSelector);
         pPartPrev := pPartNext;
-        pPartNext := Nil;
+        pPartNext := nil;
 
-      end;  // Inner loop
-
+          end;  // Inner loop
     end; // Outer loop
 
-
-
-except
-  // Do nothing, or something....
-end;
-finally
+done:
   Result:= hr;
 {$WARNINGS ON}
 end;
-end;
 
 
-function GetEndpointNames(var aEp: EndPointArray): HRESULT;
+function GetEndpointNames(out aEp: TEndPointArray): HRESULT;
 var
   hr: HResult;
   pEnumerator: IMMDeviceEnumerator;
@@ -423,7 +408,7 @@ label
 begin
 
   hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
-                         Nil,
+                         nil,
                          CLSCTX_ALL,
                          IID_IMMDeviceEnumerator,
                          pEnumerator);
@@ -436,7 +421,7 @@ begin
   if FAILED(hr) then
     goto leave;
 
-  hr:= pCollection.GetCount(count);
+  hr := pCollection.GetCount(count);
   if FAILED(hr) then
     goto leave;
 
@@ -444,7 +429,10 @@ begin
   if (count = 0) then
     goto leave;
 
-  // Each loop prints the name of an endpoint device.
+  // Expand the endpoint array
+  SetLength(aEp, count);
+
+  // Each loop gets the name of an endpoint device.
   for i := 0 to count -1 do
     begin
         // Get pointer to endpoint number i.
@@ -472,23 +460,18 @@ begin
         if FAILED(hr) then
           goto leave;
 
-        // expand the array (in case we an open array)
-        //SetLength(aEp,
-        //          i);
-
         // Set endpoint friendly name and endpoint ID.
         aEp[i].sName := varName.pwszVal;
         aEp[i].pwszID := pwszID;
         aEp[i].iID := i;
 
         CoTaskMemFree(pwszID);
-        pwszID := Nil;
+        pwszID := nil;
 
         PropVariantClear(varName);
         SafeRelease(pProps);
         SafeRelease(pEndpoint);
     end;
-
 
 leave: // Error
     Result:= hr;

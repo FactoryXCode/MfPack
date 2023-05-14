@@ -71,7 +71,9 @@ uses
 
   {WinApi}
   WinApi.Windows,
-  WinApi.WinApiTypes;
+  WinApi.WinApiTypes,
+  {ActiveX}
+  WinApi.ActiveX;
 
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}

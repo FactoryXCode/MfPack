@@ -142,8 +142,9 @@ uses
 
   {WinApi}
   WinApi.WinApiTypes,
-  WinApi.WinMM.MMReg,
-  WinApi.ComBaseApi;
+  WinApi.ComBaseApi,
+  {WinMM}
+  WinApi.WinMM.MMReg;
 
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}

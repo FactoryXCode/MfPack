@@ -74,7 +74,9 @@ interface
   (*$HPPEMIT '#include <mciapi.h>' *)
 
 uses
+  {WinApi}
   WinApi.Windows,
+  {WinMM}
   WinApi.WinMM.MMSysCom,
   WinApi.WinMM.MMiscApi;
 

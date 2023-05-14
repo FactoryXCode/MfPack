@@ -88,13 +88,23 @@ unit WinApi.CoreAudioApi.AudioengineBaseApo;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
 
   {WinApi}
   WinApi.Windows,
   WinApi.WinApiTypes,
-  {WinApi.ActiveX}
+  {ActiveX}
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.PropSys,
+  WinApi.ActiveX,
+  {$ELSE}
+  WinApi.ActiveX.ObjIdl,
+  WinApi.ActiveX.ObjIdlbase,
+  WinApi.ActiveX.PropIdl,
   WinApi.ActiveX.PropSys,
+  {$ENDIF}
   {WinApi.CoreAudioApi}
   WinApi.CoreAudioApi.AudioAPOTypes,
   WinApi.CoreAudioApi.AudioMediaType,
@@ -358,7 +368,7 @@ type
   APOInitSystemEffects = record
     APOInit: APOInitBaseStruct;                // currently defined in AudioEngineBaseAPO.idl
     pAPOEndpointProperties: ^IPropertyStore;
-    pAPOSystemEffectsProperties: IPropertyStore;
+    pAPOSystemEffectsProperties: ^IPropertyStore;
     pReserved: Pointer;                        // TBD for Transport Endpoint interface
     pDeviceCollection: ^IMMDeviceCollection;   // A collection of Endpoint, Topology filter, Wave filter.
   end;

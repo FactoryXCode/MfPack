@@ -67,10 +67,11 @@ interface
 
 uses
 
-  {MfPack}
+  {WinApi}
   WinApi.WinApiTypes,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfObjects,
+  {CoreAudioApi}
   WinApi.CoreAudioApi.SpatialAudioMetadata,
   WinApi.CoreAudioApi.SpatialAudioClient;
 

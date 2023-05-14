@@ -179,7 +179,8 @@ begin
   if (Enabled = True) then
     begin
       thTimerThread := TTimerThread.Create(Self);
-      thTimerThread.Resume;
+      // thTimerThread.Resume;  // Deprecated;  Use TThread.Start instead.
+      thTimerThread.Start;
     end;
 end;
 

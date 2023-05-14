@@ -78,20 +78,27 @@ unit WinApi.MediaFoundationApi.MfMediaTypeDebug;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
   {WinApi}
   WinApi.Windows,
   WinApi.WinApiTypes,
   WinApi.UuIds,
+  WinApi.ComBaseApi,
   {System}
   System.SysUtils,
   System.Classes,
   {ActiveX}
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.PropSys,
+  WinApi.ActiveX,
+  {$ELSE}
+  WinApi.ActiveX.ObjBase,
   WinApi.ActiveX.PropVarUtil,
   WinApi.ActiveX.PropIdl,
-  WinApi.ActiveX.ObjBase,
-  WinApi.ComBaseApi,
   WinApi.ActiveX.PropSys,
+  {$ENDIF}
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfUtils,
   WinApi.MediaFoundationApi.MfMetLib,

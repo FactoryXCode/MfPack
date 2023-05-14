@@ -80,8 +80,11 @@ interface
   (*$HPPEMIT '' *)
 
 uses
+  {WinApi}
   WinApi.Windows,
+  {System}
   System.Types,
+  {WinMM}
   WinApi.WinMM.MCIApi,
   WinApi.WinMM.MMiscApi,
   WinApi.WinMM.MMDdk;

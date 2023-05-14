@@ -64,14 +64,21 @@ unit WinApi.ComBaseApi;
 
 interface
 
+// {$DEFINE USE_EMBARCADERO_DEF}
+
 uses
   {WinApi}
   WinApi.Windows,
   WinApi.WinApiTypes,
   {ActiveX}
   WinApi.ActiveX.ObjIdlbase,
+  {$IFDEF USE_EMBARCADERO_DEF}
+  WinApi.ActiveX;
+  {$ELSE}
   WinApi.ActiveX.ObjIdl,
   WinApi.ActiveX.PropIdl;
+  {$ENDIF}
+
 
   {$MINENUMSIZE 4}
 
@@ -488,7 +495,7 @@ type
   //* Call Security. *//
   function CoInitializeSecurity(pSecDesc: Pointer;
                                 cAuthSvc: LONG;
-                                asAuthSvc: PSOLE_AUTHENTICATION_SERVICE;
+                                asAuthSvc: SOLE_AUTHENTICATION_SERVICE;
                                 pReserved1: Pointer;
                                 dwAuthnLevel: DWORD;
                                 dImpLevel: DWORD;

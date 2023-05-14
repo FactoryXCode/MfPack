@@ -82,6 +82,7 @@ interface
   (*$HPPEMIT '#include <mciavi.h>' *)
 
 uses
+  {WinMM}
   WinApi.WinMM.MCIApi;
 
   //

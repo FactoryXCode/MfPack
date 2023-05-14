@@ -189,8 +189,8 @@ begin
                                  hr := iCClient.GetBuffer(pData,
                                                           framesAvailable,
                                                           flags,
-                                                          0,
-                                                          0);
+                                                          nil,
+                                                          nil);
                                  hr := iCClient.ReleaseBuffer(framesAvailable);
                                end;
                            end;
@@ -415,7 +415,7 @@ begin
                                 500000,
                                 0,
                                 mixFormat,
-                                chatGuid);
+                                @chatGuid);
 
   CoTaskMemFree(@mixFormat);
   mixFormat := Nil;
