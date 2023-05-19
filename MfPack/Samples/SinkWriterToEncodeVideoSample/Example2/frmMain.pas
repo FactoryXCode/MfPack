@@ -217,6 +217,7 @@ end;
 procedure TMainForm.mnuSelectOneBitmapClick(Sender: TObject);
 var
   bm: TBitmap;
+
 begin
 try
   bm := TBitmap.Create();
@@ -250,15 +251,12 @@ Var
   Path: string;
   SearchRec: TSearchRec;
   DirList: TStringList;
-  hr: HResult;
-  bm: TBitmap;
 
 begin
-  hr := S_OK;
 
   if dlgOpenPicture.Execute then
     begin
-
+      mnuRender.Enabled := False;
       // Create a stringlist to add the filenames found.
       DirList := TStringList.Create;
       DirList.Sorted := True;
@@ -277,7 +275,7 @@ begin
         {$WARN SYMBOL_PLATFORM ON}
           begin
             repeat
-              DirList.Add(IncludeTrailingPathDelimiter(Path)+SearchRec.Name); //Fill the list
+              DirList.Add(IncludeTrailingPathDelimiter(Path) + SearchRec.Name); //Fill the list
             until FindNext(SearchRec) <> 0;
             FindClose(SearchRec);
           end;
@@ -291,26 +289,14 @@ begin
             Exit;
           end;
 
-        bm := TBitmap.Create();
-
       finally
 
         DirList.Free;
-        FreeAndNil(bm);
+        lblInfo.Font.Color := clWindowText;
+        lblInfo.Caption := 'Select ''Render Video File'' or select ''Video output'' to configure the video.';
+        mnuRender.Enabled := True;
+        imgBitmap.Picture.LoadFromFile(FBitmapFiles[0]);
 
-        if Failed(hr) then
-          begin
-            lblInfo.Font.Color := clRed;
-            lblInfo.Caption := 'Could not load the bitmaps.';
-            mnuRender.Enabled := False;
-          end
-        else
-          begin
-            lblInfo.Font.Color := clWindowText;
-            lblInfo.Caption := 'Select ''Render Video File'' or select ''Video output'' to configure the video.';
-            mnuRender.Enabled := True;
-            imgBitmap.Picture.LoadFromFile(FBitmapFiles[0]);
-          end;
       end;
     end;
 end;
@@ -327,7 +313,7 @@ begin
     end;
 
   // Ask the user to select one.
-  if dlgVideoSetttings.ShowModal = mrOk then
+  if (dlgVideoSetttings.ShowModal = mrOk) then
     begin
       lblInfo.Caption := 'Select ''Select Single Bitmap'', ''Select Multiple Bitmaps'' or ''Render Video File''';
     end
@@ -358,9 +344,10 @@ begin
   lblInfo.Update();
 end;
 
+
 initialization
 
-ReportMemoryLeaksOnShutDown:=true;
+  ReportMemoryLeaksOnShutDown := True;
 
 
 end.

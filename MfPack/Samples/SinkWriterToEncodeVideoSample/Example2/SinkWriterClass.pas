@@ -290,7 +290,7 @@ var
   rtStart: HNSTIME;
 
 label
-  Done;
+  done;
 
 begin
 
@@ -305,67 +305,64 @@ begin
 
   rtStart := 0;
 
-  hr := CoInitializeEx(nil, COINIT_APARTMENTTHREADED);
+  hr := CoInitializeEx(nil,
+                       COINIT_APARTMENTTHREADED);
 
   if SUCCEEDED(hr) then
-  begin
-    hr := MFStartup(MF_VERSION);
-    if SUCCEEDED(hr) then
     begin
-      hr := InitializeSinkWriter(pSinkWriter, stream);
-
+      hr := MFStartup(MF_VERSION);
       if SUCCEEDED(hr) then
-      begin
-        // Handle the number of bitmaps in the list.
-        for i := 0 to aBmpFileList.Count - 1 do
         begin
+          hr := InitializeSinkWriter(pSinkWriter,
+                                     stream);
 
-          //Resize and store to FrameBufferArray
-          hr := SetBitmapToVideoFormat(aBmpFileList.Strings[i]);
-          if FAILED(hr) then
-            goto Done;
+          if SUCCEEDED(hr) then
+            begin
+              // Handle the number of bitmaps in the list.
+              for i := 0 to aBmpFileList.Count - 1 do
+                begin
+                  // Resize and store to FrameBufferArray
+                  hr := SetBitmapToVideoFormat(aBmpFileList.Strings[i]);
+                  if FAILED(hr) then
+                    goto done;
 
-          // Send message to UI.
-          SendMessage(hwndCaller,
-                      WM_SINKWRITER_WRITES_BITMAP,
-                      WParam(0),
-                      LParam(i));
+                  // Send message to UI.
+                  SendMessage(hwndCaller,
+                              WM_SINKWRITER_WRITES_BITMAP,
+                              WParam(0),
+                              LParam(i));
 
-          // Send frames to the sink writer.
-          for j := 0 to SinkWriterParams.uiFrameCount - 1 do
-          begin
-            hr := WriteFrame(pSinkWriter,
-                             stream,
-                             rtStart);
-            if FAILED(hr) then
-              Break;
+                 // Send frames to the sink writer.
+                 for j := 0 to SinkWriterParams.uiFrameCount - 1 do
+                   begin
+                     hr := WriteFrame(pSinkWriter,
+                                      stream,
+                                      rtStart);
+                     if FAILED(hr) then
+                       Break;
 
-            inc(rtStart, SinkWriterParams.rtSampleDuration);
+                     inc(rtStart, SinkWriterParams.rtSampleDuration);
 
-            MsgWaitForMultipleObjects(0,
-                                      nil^,
-                                      False, // do NOT set this to true!
-                                      0,
-                                      QS_ALLINPUT);
-
-          end;
-
-        end;
-      end;
-    // You must call IMFSinkWriter.BeginWriting before calling this method.
-    // Otherwise, the method returns MF_E_INVALIDREQUEST.
-    if SUCCEEDED(hr) then
-      begin
-        hr := pSinkWriter.Finalize();
-      end;
+                     MsgWaitForMultipleObjects(0,
+                                               nil^,
+                                               False, // do NOT set this to true!
+                                               0,
+                                               QS_ALLINPUT);
+                   end;
+                end;
+            end;
+          // You must call IMFSinkWriter.BeginWriting before calling this method.
+          // Otherwise, the method returns MF_E_INVALIDREQUEST.
+          if SUCCEEDED(hr) then
+            begin
+              hr := pSinkWriter.Finalize();
+            end;
     end;
-
     MFShutdown();
     CoUninitialize();
-
   end;
 
-Done:
+done:
   Result := hr;
 end;
 
@@ -392,8 +389,8 @@ var
   streamIndex: DWORD;
 
 begin
-  SinkWriterParams.pwcVideoFileName := Format('output_%s.%s',
-    [SinkWriterParams.sEncodingFormat, SinkWriterParams.pwcVideoFileExtension]);
+  SinkWriterParams.pwcVideoFileName := Format('output_%s.%s', [SinkWriterParams.sEncodingFormat,
+                                                               SinkWriterParams.pwcVideoFileExtension]);
 
   hr := MFCreateSinkWriterFromURL(PWideChar(SinkWriterParams.pwcVideoFileName),
                                   nil,
@@ -455,8 +452,6 @@ begin
   if SUCCEEDED(hr) then
     pMediaTypeOut.SetUINT32(MF_MT_SAMPLE_SIZE, {4 is the size of DWord or rgbquad in bytes}
                             SinkWriterParams.dwWidth * SinkWriterParams.dwHeigth * 4);
-
-
 
   // end make some faster
 

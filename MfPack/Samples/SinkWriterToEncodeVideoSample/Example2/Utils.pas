@@ -155,7 +155,7 @@ begin
                 DeviceContext) then
       begin
         bmPitch := -4 * Source.Width;
-        bmProps := Default (D2D1_BITMAP_PROPERTIES1); // ZeroMemory
+        bmProps := Default(D2D1_BITMAP_PROPERTIES1); // ZeroMemory
         bmProps._pixelFormat.Format := DXGI_FORMAT_B8G8R8A8_UNORM;
         bmProps._pixelFormat.alphaMode := D2D1_ALPHA_MODE_IGNORE;
         xscale := NewWidth / Source.Width;
@@ -186,7 +186,8 @@ begin
     else
       begin
         CanvasD2D.BeginDraw;
-        CanvasD2D.StretchDraw(Rect(0, 0, NewWidth, NewHeight), Source);
+        CanvasD2D.StretchDraw(Rect(0, 0, NewWidth, NewHeight),
+                              Source);
         CanvasD2D.EndDraw;
       end;
   finally
@@ -227,7 +228,7 @@ end;
 
 //
 function CalcFrameDuration(aLatency: UINT32;
-                            aFrameRate: Double): HNSTIME;
+                           aFrameRate: Double): HNSTIME;
 const
   msec = (1000 * 1000); // One millisecond = 1,000,000 nano seconds
 
@@ -252,7 +253,6 @@ begin
 end;
 
 initialization
-
-QueryPerformanceFrequency(TimerFrequency);
+  QueryPerformanceFrequency(TimerFrequency);
 
 end.
