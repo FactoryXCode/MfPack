@@ -10,7 +10,7 @@
 // Release date: 29-07-2012
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 // Description: Generic converted Windows (c/cpp) types for Win32 / Win64 compatibility
 //              used by DirectX, Media Foundation, Core Audio etc.
 //
@@ -30,7 +30,7 @@
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -185,12 +185,10 @@ type
 {$ENDIF}
 
 
-{$IFDEF MFP_NATIVEINT}
 {$IF SizeOf(Pointer) = 4}
 type
   NativeInt = Integer;   // Correction for NativeInt on Delphi <= 2007 (8 bytes to 4 bytes).
 {$IFEND}
-{$ENDIF}
 
 
 {$IFDEF MFP_LPGUID}

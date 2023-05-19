@@ -192,6 +192,6 @@ It also demonstrates how to get a process by using the tlhelp32 API, to list a s
 The application is provided with a dialog to select a running process from the process tree you want to pick and has
 a button to get the current PID of your application.
 
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/Loopback_2.png)  
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopbackCapture2.png)  
   
 **© FactoryX. All rights reserved.**

@@ -10,7 +10,7 @@
 // Release date: 04-01-2016
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 // Description: Holds compiler definitions for MfPack.
 //
 //
@@ -29,7 +29,7 @@
 //          the major Windows updates. So, we started with ISÁK.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 // Compiler version: 23 up to 35
 // SDK version: 10.0.22621.0
@@ -437,9 +437,6 @@ MfpVersion   = '3.1.3'; // Release version.
 
 {$DEFINE MFP_DWORD}
 // {$UNDEF MFP_DWORD}
-
-{$DEFINE MFP_MFP_NATIVEINT}
-// {$UNDEF MFP_MFP_NATIVEINT}
 
 
 // GuidDef.h
