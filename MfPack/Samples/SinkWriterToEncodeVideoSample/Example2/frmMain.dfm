@@ -11,10 +11,8 @@ object MainForm: TMainForm
   Font.Name = 'Tahoma'
   Font.Style = []
   Menu = MainMenu
-  OldCreateOrder = False
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
-  PixelsPerInch = 96
   TextHeight = 13
   object lblInfo: TLabel
     Left = 0
@@ -38,7 +36,6 @@ object MainForm: TMainForm
     Width = 667
     Height = 287
     Align = alTop
-    ExplicitLeft = -2
   end
   object MainMenu: TMainMenu
     Left = 46

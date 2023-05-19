@@ -1,17 +1,8 @@
 program SinkWriterSample;
-
 uses
   {$IFDEF FASTMM}
   FastMM4,
-  {$ENDIF}
-  {$IFDEF MadExcept}
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
-  {$ENDIF}
-  
+  {$ENDIF }
   Vcl.Forms,
   frmMain in 'frmMain.pas' {MainForm},
   SinkWriterClass in 'SinkWriterClass.pas',
@@ -19,7 +10,6 @@ uses
   Utils in 'Utils.pas';
 
 {$R *.res}
-
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;

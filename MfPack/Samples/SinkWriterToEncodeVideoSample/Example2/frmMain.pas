@@ -116,8 +116,9 @@ type
 
   private
     { Private declarations }
-
-    procedure CheckBitmapFormat(var bmp: TBitmap);
+    //This procedure is now obsolete, we change to the correct format on the fly
+    //without the need to save to file.
+    //procedure CheckBitmapFormat(var bmp: TBitmap);
     // Recieve messages from the sinkwriter.
     procedure OnProcesBmp(var Msg: TMessage); message WM_BITMAP_PROCESSING_MSG;
     procedure OnSinkWriterMsg(var Msg: TMessage); message WM_SINKWRITER_WRITES_BITMAP;
@@ -213,23 +214,6 @@ begin
 end;
 
 
-procedure TMainForm.CheckBitmapFormat(var bmp: TBitmap);
-begin
-  // if we have an unsupported format, we change it to the proper one and use this copy of the original.
-  // The original file will be untouched.
-  if (bmp.PixelFormat <> pf24bit) then
-    begin
-      lblInfo.Caption := Format('Unsupported pixelformat (%s)! The selected file pixelformat has been converted to 24 bit',
-                                [PixelFormatToStr(bmp.PixelFormat)]);
-      bmp.PixelFormat := pf24Bit;
-      FBitmapFiles.Strings[0] := Format('%s_%s.bmp',
-                                        [ChangeFileExt(FBitmapFiles.Strings[0], ''),
-                                         PixelFormatToStr(bmp.PixelFormat)]);
-      bmp.SaveToFile(FBitmapFiles.Strings[0]);
-    end;
-end;
-
-
 procedure TMainForm.mnuSelectOneBitmapClick(Sender: TObject);
 var
   bm: TBitmap;
@@ -244,7 +228,7 @@ try
     begin
       FBitmapFiles.Append(dlgOpenPicture.FileName);
       bm.LoadFromFile(FBitmapFiles.Strings[0]);
-      CheckBitmapFormat(bm);
+      //CheckBitmapFormat(bm);
       imgBitmap.Picture.Assign(bm);
       lblInfo.Caption := 'Select ''Render Video File'' or select ''Video output'' to configure the video.';
       mnuRender.Enabled := True;
@@ -295,7 +279,7 @@ begin
         {$WARN SYMBOL_PLATFORM ON}
           begin
             repeat
-              DirList.Add(SearchRec.Name); //Fill the list
+              DirList.Add(IncludeTrailingPathDelimiter(Path)+SearchRec.Name); //Fill the list
             until FindNext(SearchRec) <> 0;
             FindClose(SearchRec);
           end;
@@ -311,12 +295,12 @@ begin
 
         bm := TBitmap.Create();
         // Check if each bitmap pixelformat is 24bit and change it when not.
-        for i := 0 to FBitmapFiles.Count - 1 do
-          begin
-            bm.FreeImage();
-            bm.LoadFromFile(FBitmapFiles[i]);
-            CheckBitmapFormat(bm);
-          end;
+//        for i := 0 to FBitmapFiles.Count - 1 do
+//          begin
+//            bm.FreeImage();
+//            bm.LoadFromFile(FBitmapFiles[i]);
+//            CheckBitmapFormat(bm);
+//          end;
 
       finally
 
@@ -382,6 +366,10 @@ begin
                              FSinkWriter.SinkWriterParams.pwcVideoFileName]);
   lblInfo.Update();
 end;
+
+initialization
+
+ReportMemoryLeaksOnShutDown:=true;
 
 
 end.
