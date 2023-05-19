@@ -10,18 +10,20 @@
 // Release date: 25-11-2022
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 // Description: Contains an example of how to use the Sink Writer to encode video.
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX)
+// Contributor(s): Tony Kalf (maXcomX), Renate Schaaf.
 //
 // ------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 18/05/2023 Renate              Fixed runtime error on selecting multiple bitmaps.
+//                                Speedup of bitmap resizing using D2D1_1
 // ------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -75,7 +77,6 @@ uses
   {system}
   System.Classes,
   System.SysUtils,
-
   {Vcl}
   Vcl.Graphics,
   {ActiveX}
@@ -127,10 +128,11 @@ type
     FArraySize: Integer;
 
     function InitializeSinkWriter(out ppWriter: IMFSinkWriter;
-      out pStreamIndex: DWORD): HResult;
+                                  out pStreamIndex: DWORD): HResult;
 
-    function WriteFrame(pWriter: IMFSinkWriter; streamIndex: DWORD;
-       const rtStart: HNSTIME { Time stamp } ): HResult;
+    function WriteFrame(pWriter: IMFSinkWriter;
+                        streamIndex: DWORD;
+                        const rtStart: HNSTIME { Time stamp } ): HResult;
 
     function SetBitmapToVideoFormat(const aBmpFile: string): HResult;
 
@@ -145,7 +147,7 @@ type
     function RunSinkWriter(aBmpFileList: TStringList): HResult;
 
     property SaveResizedBitmap: Boolean read FSaveResizedBitmap
-      write FSaveResizedBitmap;
+                                        write FSaveResizedBitmap;
     property BitmapPixelFormat: TPixelFormat read FBitmapPixelFormat;
     property Items: Integer read FArraySize;
 
@@ -154,7 +156,9 @@ type
 var
   FSinkWriter: TSinkWriter;
 
+
 implementation
+
 
 constructor TSinkWriter.Create(hCaller: HWND);
 begin
@@ -165,32 +169,32 @@ begin
   FArraySize := 0;
 end;
 
+
 destructor TSinkWriter.Destroy();
 begin
   //
   inherited Destroy();
 end;
 
+
 // Transforms one bitmap at a time to the video-format. After transforming we write the frame immediately
 function TSinkWriter.SetBitmapToVideoFormat(const aBmpFile: string): HResult;
 var
   hr: HResult;
-  i, d: Integer;
+  d: Integer;
   x, y: NativeInt;
   bmSource: TBitmap;
-  BytesPerPixel: NativeInt;
   ScanLine0: Pointer;
   BytesPerLine: NativeInt;
-  FmtPf32Bit: TRgbQuad;
   PFmtPf32Bit: PRgbQuad;
   PRow: PByte;
   dwPxl: COLORREF;
 
 label
-  Done;
+  done;
 
 begin
-  hr := S_OK;
+
   SetLength(SinkWriterParams.FrameBufferArray, 0);
   bmSource := TBitmap.Create();
   // from here we alter the bitmap format to the video format.
@@ -198,7 +202,7 @@ begin
   if not FileExists(aBmpFile) then
   begin
     hr := ERROR_CANT_RESOLVE_FILENAME;
-    goto Done;
+    goto done;
   end;
 
   if not bmSource.Empty then
@@ -210,58 +214,61 @@ begin
   // Check for valid pizelformat
   if (bmSource.PixelFormat <> pf32Bit) then
     bmSource.PixelFormat := pf32Bit;
-  // begin
-  // hr := ERROR_NOT_SUPPORTED;
-  // goto Done;
-  // end;
 
   // Resize the bitmap to the desired videoframe size.
-  ResizeBitmap(bmSource, SinkWriterParams.dwWidth, SinkWriterParams.dwHeigth);
+  ResizeBitmap(bmSource,
+               SinkWriterParams.dwWidth,
+               SinkWriterParams.dwHeigth);
 
   // Optional save the bitmap to file
   if FSaveResizedBitmap then
   begin
     bmSource.SaveToFile(Format('%dx%d_%s', [SinkWriterParams.dwWidth,
-      SinkWriterParams.dwHeigth, ExtractFileName(aBmpFile)]));
+                                            SinkWriterParams.dwHeigth,
+                                            ExtractFileName(aBmpFile)]));
   end;
 
   FBitmapPixelFormat := bmSource.PixelFormat;
 
-  BytesPerPixel := SizeOf(FmtPf32Bit);
   ScanLine0 := bmSource.ScanLine[SinkWriterParams.dwHeigth - 1];
   BytesPerLine := 4 * bmSource.Width;
-  // NativeInt(bmSource.ScanLine[1]) - NativeInt(ScanLine0);
   SinkWriterParams.uiSizeInPixels := (abs(BytesPerLine) * bmSource.Height);
 
-  hr := MFCalculateImageSize(MFVideoFormat_RGB32, SinkWriterParams.dwWidth,
-    SinkWriterParams.dwHeigth, SinkWriterParams.uiSizeInPixels);
+  hr := MFCalculateImageSize(MFVideoFormat_RGB32,
+                             SinkWriterParams.dwWidth,
+                             SinkWriterParams.dwHeigth,
+                             SinkWriterParams.uiSizeInPixels);
 
   // Dimension the array to calculated range.
-  SetLength(SinkWriterParams.FrameBufferArray, SinkWriterParams.uiSizeInPixels);
+  SetLength(SinkWriterParams.FrameBufferArray,
+            SinkWriterParams.uiSizeInPixels);
 
   d := 0;
   // Scan and copy the rgb24bit records to COLORREF values (4 Bytes).
   PRow := ScanLine0;
   for y := (SinkWriterParams.dwHeigth - 1) downto 0 do
-  begin
-    PFmtPf32Bit := PRgbQuad(PRow);
-    for x := 0 to SinkWriterParams.dwWidth - 1 do
     begin
-      // Transform rgbtriple to COLORREF so the sinkwriter can handle this value.
-      // Note: A COLORREF (DWORD) value has a length of 4 bytes, equivalent to RGBQUAD.
-      CopyRgbQuadToClrRef(PFmtPf32Bit^, dwPxl);
+      PFmtPf32Bit := PRgbQuad(PRow);
+      for x := 0 to SinkWriterParams.dwWidth - 1 do
+        begin
+          // Transform rgbtriple to COLORREF so the sinkwriter can handle this value.
+          // Note: A COLORREF (DWORD) value has a length of 4 bytes, equivalent to RGBQUAD.
+          CopyRgbQuadToClrRef(PFmtPf32Bit^,
+                              dwPxl);
 
-      // Here we decide to store the array in memory or to file
-      SinkWriterParams.FrameBufferArray[d] := dwPxl;
-      inc(d);
-      inc(PFmtPf32Bit);
+          // Here we decide to store the array in memory or to file
+          SinkWriterParams.FrameBufferArray[d] := dwPxl;
+          inc(d);
+          inc(PFmtPf32Bit);
+        end;
+      inc(PRow, BytesPerLine);
     end;
-    inc(PRow, BytesPerLine);
-  end;
-Done:
+
+done:
   FreeAndNil(bmSource);
   Result := hr;
 end;
+
 
 // Inside this function, the following steps will be performed.
 //
@@ -288,16 +295,13 @@ label
 begin
 
   // Calculate the average time/frame
-  SinkWriterParams.rtSampleDuration :=
-    Round(SinkWriterParams.uiLatency * 100 * 100 /
-    SinkWriterParams.dbFrameRate);
+  SinkWriterParams.rtSampleDuration := Round(SinkWriterParams.uiLatency * 100 * 100 / SinkWriterParams.dbFrameRate);
   // Or use this method
   // MFFrameRateToAverageTimePerFrame
 
   SinkWriterParams.gdInputFormat := MFVideoFormat_RGB32;
   // aVideoLenght is the given duration of the video in seconds.
-  SinkWriterParams.uiFrameCount := SinkWriterParams.uiLatency *
-    Round(SinkWriterParams.dbFrameRate);
+  SinkWriterParams.uiFrameCount := SinkWriterParams.uiLatency * Round(SinkWriterParams.dbFrameRate);
 
   rtStart := 0;
 
@@ -322,35 +326,37 @@ begin
             goto Done;
 
           // Send message to UI.
-          SendMessage(hwndCaller, WM_SINKWRITER_WRITES_BITMAP, WParam(0),
-            LParam(i));
+          SendMessage(hwndCaller,
+                      WM_SINKWRITER_WRITES_BITMAP,
+                      WParam(0),
+                      LParam(i));
 
           // Send frames to the sink writer.
           for j := 0 to SinkWriterParams.uiFrameCount - 1 do
           begin
-            hr := WriteFrame(pSinkWriter, stream, rtStart);
+            hr := WriteFrame(pSinkWriter,
+                             stream,
+                             rtStart);
             if FAILED(hr) then
               Break;
 
             inc(rtStart, SinkWriterParams.rtSampleDuration);
 
-            MsgWaitForMultipleObjects(0, Nil^, False,
-              // do NOT set this to true!
-              0, QS_ALLINPUT);
+            MsgWaitForMultipleObjects(0,
+                                      nil^,
+                                      False, // do NOT set this to true!
+                                      0,
+                                      QS_ALLINPUT);
 
           end;
 
         end;
       end;
-      // You must call IMFSinkWriter.BeginWriting before calling this method.
-      // Otherwise, the method returns MF_E_INVALIDREQUEST.
-      // if SUCCEEDED(hr) then
-      // hr := pSinkWriter.Flush(stream);
-      if SUCCEEDED(hr) then
+    // You must call IMFSinkWriter.BeginWriting before calling this method.
+    // Otherwise, the method returns MF_E_INVALIDREQUEST.
+    if SUCCEEDED(hr) then
       begin
-
-        if SUCCEEDED(hr) then
-          hr := pSinkWriter.Finalize();
+        hr := pSinkWriter.Finalize();
       end;
     end;
 
@@ -362,6 +368,7 @@ begin
 Done:
   Result := hr;
 end;
+
 
 // Initialize the Sink Writer
 // To initialize the sink writer, perform the following steps.
@@ -376,7 +383,7 @@ end;
 // The following function shows these steps.
 //
 function TSinkWriter.InitializeSinkWriter(out ppWriter: IMFSinkWriter;
-  out pStreamIndex: DWORD): HResult;
+                                          out pStreamIndex: DWORD): HResult;
 var
   hr: HResult;
   pSinkWriter: IMFSinkWriter;
@@ -389,88 +396,112 @@ begin
     [SinkWriterParams.sEncodingFormat, SinkWriterParams.pwcVideoFileExtension]);
 
   hr := MFCreateSinkWriterFromURL(PWideChar(SinkWriterParams.pwcVideoFileName),
-    nil, nil, pSinkWriter);
+                                  nil,
+                                  nil,
+                                  pSinkWriter);
 
   // Set the output media type.
   if SUCCEEDED(hr) then
     hr := MFCreateMediaType(pMediaTypeOut);
 
   if SUCCEEDED(hr) then
-    hr := pMediaTypeOut.SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
+    hr := pMediaTypeOut.SetGUID(MF_MT_MAJOR_TYPE,
+                                MFMediaType_Video);
 
   if SUCCEEDED(hr) then
     hr := pMediaTypeOut.SetGUID(MF_MT_SUBTYPE,
-      SinkWriterParams.gdEncodingFormat);
+                                SinkWriterParams.gdEncodingFormat);
 
   if SUCCEEDED(hr) then
     hr := pMediaTypeOut.SetUINT32(MF_MT_AVG_BITRATE,
-      SinkWriterParams.dwBitRate);
+                                  SinkWriterParams.dwBitRate);
 
   if SUCCEEDED(hr) then
     hr := pMediaTypeOut.SetUINT32(MF_MT_INTERLACE_MODE,
-      MFVideoInterlace_Progressive);
+                                  MFVideoInterlace_Progressive);
   if SUCCEEDED(hr) then
-    hr := MFSetAttributeSize(pMediaTypeOut, MF_MT_FRAME_SIZE,
-      SinkWriterParams.dwWidth, SinkWriterParams.dwHeigth);
+    hr := MFSetAttributeSize(pMediaTypeOut,
+                             MF_MT_FRAME_SIZE,
+                             SinkWriterParams.dwWidth,
+                             SinkWriterParams.dwHeigth);
 
   if SUCCEEDED(hr) then
     hr := MFSetAttributeRatio(pMediaTypeOut, MF_MT_FRAME_RATE,
       Round(SinkWriterParams.dbFrameRate), 1);
 
   if SUCCEEDED(hr) then
-    hr := MFSetAttributeRatio(pMediaTypeOut, MF_MT_PIXEL_ASPECT_RATIO, 1, 1);
+    hr := MFSetAttributeRatio(pMediaTypeOut,
+                              MF_MT_PIXEL_ASPECT_RATIO,
+                              1,
+                              1);
   if SUCCEEDED(hr) then
-    pMediaTypeOut.SetUINT32(MF_SINK_WRITER_DISABLE_THROTTLING, UINT32(True));
+    pMediaTypeOut.SetUINT32(MF_SINK_WRITER_DISABLE_THROTTLING,
+                            UINT32(True));
 
   // make some faster
 
   if SUCCEEDED(hr) then
-    pMediaTypeOut.SetUINT32(MF_MT_DEFAULT_STRIDE, SinkWriterParams.dwWidth * 4);
-  // 4 is the size of DWord or rgbquad in bytes
+    pMediaTypeOut.SetUINT32(MF_MT_DEFAULT_STRIDE,
+                            SinkWriterParams.dwWidth * 4); {4 is the size of DWord or rgbquad in bytes}
 
   if SUCCEEDED(hr) then
-    pMediaTypeOut.SetUINT32(MF_MT_FIXED_SIZE_SAMPLES, UINT32(1));
+    pMediaTypeOut.SetUINT32(MF_MT_FIXED_SIZE_SAMPLES,
+                            UINT32(1));
 
   if SUCCEEDED(hr) then
-    pMediaTypeOut.SetUINT32(MF_MT_ALL_SAMPLES_INDEPENDENT, UINT32(1));
+    pMediaTypeOut.SetUINT32(MF_MT_ALL_SAMPLES_INDEPENDENT,
+                            UINT32(1));
 
   if SUCCEEDED(hr) then
-    pMediaTypeOut.SetUINT32(MF_MT_SAMPLE_SIZE, SinkWriterParams.dwWidth *
-      SinkWriterParams.dwHeigth * 4);
-  // 4 is the size of DWord or rgbquad in bytes
+    pMediaTypeOut.SetUINT32(MF_MT_SAMPLE_SIZE, {4 is the size of DWord or rgbquad in bytes}
+                            SinkWriterParams.dwWidth * SinkWriterParams.dwHeigth * 4);
+
+
 
   // end make some faster
 
   if SUCCEEDED(hr) then
-    hr := pSinkWriter.AddStream(pMediaTypeOut, streamIndex);
+    hr := pSinkWriter.AddStream(pMediaTypeOut,
+                                streamIndex);
 
   // Set the input media type.
   if SUCCEEDED(hr) then
     hr := MFCreateMediaType(pMediaTypeIn);
 
   if SUCCEEDED(hr) then
-    hr := pMediaTypeIn.SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
+    hr := pMediaTypeIn.SetGUID(MF_MT_MAJOR_TYPE,
+                               MFMediaType_Video);
 
   if SUCCEEDED(hr) then
-    hr := pMediaTypeIn.SetGUID(MF_MT_SUBTYPE, SinkWriterParams.gdInputFormat);
+    hr := pMediaTypeIn.SetGUID(MF_MT_SUBTYPE,
+                               SinkWriterParams.gdInputFormat);
 
   if SUCCEEDED(hr) then
     hr := pMediaTypeIn.SetUINT32(MF_MT_INTERLACE_MODE,
-      MFVideoInterlace_Progressive);
+                                 MFVideoInterlace_Progressive);
 
   if SUCCEEDED(hr) then
-    hr := MFSetAttributeSize(pMediaTypeIn, MF_MT_FRAME_SIZE,
-      SinkWriterParams.dwWidth, SinkWriterParams.dwHeigth);
+    hr := MFSetAttributeSize(pMediaTypeIn,
+                             MF_MT_FRAME_SIZE,
+                             SinkWriterParams.dwWidth,
+                             SinkWriterParams.dwHeigth);
 
   if SUCCEEDED(hr) then
-    hr := MFSetAttributeRatio(pMediaTypeIn, MF_MT_FRAME_RATE,
-      Round(SinkWriterParams.dbFrameRate), 1);
+    hr := MFSetAttributeRatio(pMediaTypeIn,
+                              MF_MT_FRAME_RATE,
+                              Round(SinkWriterParams.dbFrameRate),
+                              1);
 
   if SUCCEEDED(hr) then
-    hr := MFSetAttributeRatio(pMediaTypeIn, MF_MT_PIXEL_ASPECT_RATIO, 1, 1);
+    hr := MFSetAttributeRatio(pMediaTypeIn,
+                              MF_MT_PIXEL_ASPECT_RATIO,
+                              1,
+                              1);
 
   if SUCCEEDED(hr) then
-    hr := pSinkWriter.SetInputMediaType(streamIndex, pMediaTypeIn, nil);
+    hr := pSinkWriter.SetInputMediaType(streamIndex,
+                                        pMediaTypeIn,
+                                        nil);
 
   // Tell the sink writer to start accepting data.
   if SUCCEEDED(hr) then
@@ -485,6 +516,7 @@ begin
 
   Result := hr;
 end;
+
 
 // This code performs the following steps.
 //
@@ -516,8 +548,9 @@ end;
 //
 // 10 Call IMFSinkWriter.WriteSample to send the media sample to the sink writer.
 //
-function TSinkWriter.WriteFrame(pWriter: IMFSinkWriter; streamIndex: DWORD;
-   const rtStart: HNSTIME): HResult;
+function TSinkWriter.WriteFrame(pWriter: IMFSinkWriter;
+                                streamIndex: DWORD;
+                                const rtStart: HNSTIME): HResult;
 var
   hr: HResult;
   pSample: IMFSample;
@@ -527,7 +560,7 @@ var
   dwBuffer: DWORD;
 
 label
-  Done;
+  done;
 
 begin
 
@@ -545,18 +578,18 @@ begin
     goto Done;
 
   if SUCCEEDED(hr) then
-  begin
-    hr := MFCopyImage(pData { Destination buffer. } ,
-      lLineWidth { Destination stride. } ,
-      PByte(SinkWriterParams.FrameBufferArray),
-      { First row in source image. }
-      lLineWidth { Source stride. } , lLineWidth { Image width in bytes. } ,
-      SinkWriterParams.dwHeigth { Image height in pixels. } );
+    begin
+      hr := MFCopyImage(pData { Destination buffer. } ,
+                        lLineWidth { Destination stride. } ,
+                        PByte(SinkWriterParams.FrameBufferArray), { First row in source image. }
+                        lLineWidth { Source stride. },
+                        lLineWidth { Image width in bytes. } ,
+                        SinkWriterParams.dwHeigth { Image height in pixels. } );
     // Aternative
     // CopyMemory(pData,
-    // PByte(SinkWriterParams.arFrameBufferArray[bitmapIndex]),
-    // lLineWidth * SinkWriterParams.dwHeigth);
-  end;
+    //            PByte(SinkWriterParams.arFrameBufferArray[bitmapIndex]),
+    //            lLineWidth * SinkWriterParams.dwHeigth);
+    end;
 
   if Assigned(pBuffer) then
     pBuffer.Unlock();
@@ -581,10 +614,13 @@ begin
 
   // Send the sample to the Sink Writer.
   if SUCCEEDED(hr) then
-    hr := pWriter.WriteSample(streamIndex, pSample);
-Done:
+    hr := pWriter.WriteSample(streamIndex,
+                              pSample);
+
+done:
   Result := hr;
 end;
+
 
 procedure TSinkWriterParams.Init();
 begin

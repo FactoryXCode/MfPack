@@ -10,18 +10,20 @@
 // Release date: 25-11-2022
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 // Description: UI for example of how to use the SinkWriter.
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX)
+// Contributor(s): Tony Kalf (maXcomX), Renate Schaaf.
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 18/05/2023 Renate              Fixed runtime error on selecting multiple bitmaps.
+//                                Speedup of bitmap resizing using D2D1_1
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -116,9 +118,7 @@ type
 
   private
     { Private declarations }
-    //This procedure is now obsolete, we change to the correct format on the fly
-    //without the need to save to file.
-    //procedure CheckBitmapFormat(var bmp: TBitmap);
+
     // Recieve messages from the sinkwriter.
     procedure OnProcesBmp(var Msg: TMessage); message WM_BITMAP_PROCESSING_MSG;
     procedure OnSinkWriterMsg(var Msg: TMessage); message WM_SINKWRITER_WRITES_BITMAP;
@@ -228,7 +228,6 @@ try
     begin
       FBitmapFiles.Append(dlgOpenPicture.FileName);
       bm.LoadFromFile(FBitmapFiles.Strings[0]);
-      //CheckBitmapFormat(bm);
       imgBitmap.Picture.Assign(bm);
       lblInfo.Caption := 'Select ''Render Video File'' or select ''Video output'' to configure the video.';
       mnuRender.Enabled := True;
@@ -252,7 +251,6 @@ Var
   SearchRec: TSearchRec;
   DirList: TStringList;
   hr: HResult;
-  i: Integer;
   bm: TBitmap;
 
 begin
@@ -294,13 +292,6 @@ begin
           end;
 
         bm := TBitmap.Create();
-        // Check if each bitmap pixelformat is 24bit and change it when not.
-//        for i := 0 to FBitmapFiles.Count - 1 do
-//          begin
-//            bm.FreeImage();
-//            bm.LoadFromFile(FBitmapFiles[i]);
-//            CheckBitmapFormat(bm);
-//          end;
 
       finally
 
