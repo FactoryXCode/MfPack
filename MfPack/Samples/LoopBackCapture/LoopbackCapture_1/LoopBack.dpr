@@ -3,13 +3,6 @@ program LoopBack;
 uses
   {$IFDEF FASTMM}
   FastMM4,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
-  {$ENDIF }
-  {$IFDEF madExcept}
-  madExcept,
   {$ENDIF }
   Vcl.Forms,
   frmWasapiLoopBack in 'frmWasapiLoopBack.pas' {frmLoopBackCapture},

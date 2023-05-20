@@ -100,8 +100,8 @@ type
     cbxStayOnTop: TCheckBox;
     butShowdlgDevices: TButton;
     Panel3: TPanel;
-    tbDevicePeriod: TTrackBar;
-    lblDevicePeriod: TLabel;
+    tbBufferDuration: TTrackBar;
+    lblBufferDuration: TLabel;
     Panel4: TPanel;
     Label1: TLabel;
     lblFileExt: TLabel;
@@ -116,7 +116,7 @@ type
     procedure butPlayDataClick(Sender: TObject);
     procedure cbxStayOnTopClick(Sender: TObject);
     procedure butShowdlgDevicesClick(Sender: TObject);
-    procedure tbDevicePeriodChange(Sender: TObject);
+    procedure tbBufferDurationChange(Sender: TObject);
 
   private
     { Private declarations }
@@ -125,15 +125,17 @@ type
     sFileName: string;
     oDataFlow: EDataFlow;
     oRole: ERole;
-    oDevicePeriod: DWord;
+    oBufferDuration: REFERENCE_TIME;
 
     procedure EnablePanels(aEnabled: Boolean);
     function StartCapture(): HResult;
     procedure OnAudioSinkCaptureStopped(var aMessage: TMessage); message WM_CAPTURINGSTOPPED;
     procedure OnAudioSinkProgressEvent(var AMessage: TMessage); message WM_PROGRESSNOTIFY;
+    procedure SetBufferDuration();
 
   public
     { Public declarations }
+
   end;
 
 var
@@ -179,11 +181,14 @@ end;
 
 
 procedure TfrmLoopBackCapture.OnAudioSinkProgressEvent(var aMessage: TMessage);
+var
+  iLatency: NativeInt;
+
 begin
   inc(iProgress,
       aMessage.WParam);
-
-  lblMsg.Caption := Format('Capturing from source: Bytes processed: %s',[iProgress.ToString]);
+  iLatency := NativeInt(aMessage.LParam);
+  lblMsg.Caption := Format('Capturing from source: Bytes processed: %s (Latency: %d)',[iProgress.ToString, iLatency]);
 end;
 
 
@@ -240,12 +245,12 @@ begin
         end;
 
       // Buffersize depends on latency and bitrate
-      oDevicePeriod := tbDevicePeriod.Position * 100000;
+      SetBufferDuration();
 
       // Capture the audio stream from the default rendering device.
       hr := oAudioSink.RecordAudioStream(oDataFlow,
                                          oRole,
-                                         oDevicePeriod,
+                                         oBufferDuration,
                                          LPWSTR(sFileName));
       if FAILED(hr) then
         begin
@@ -354,17 +359,29 @@ begin
   // Create the AudioSink object.
   oAudioSink := TAudioSink.Create(Handle);
   oDataFlow := eDataFlow(-1);
-  tbDevicePeriod.Position := 10;
-  oDevicePeriod := tbDevicePeriod.Position * 10000;
-  lblDevicePeriod.Caption := Format('Device Period (%d milliseconds)', [tbDevicePeriod.Position]);
-
+  tbBufferDuration.Position := 10;
+  SetBufferDuration();
 end;
 
 
-procedure TfrmLoopBackCapture.tbDevicePeriodChange(Sender: TObject);
+procedure TfrmLoopBackCapture.tbBufferDurationChange(Sender: TObject);
 begin
-  lblDevicePeriod.Caption := Format('Device Period (%d MilliSeconds)', [tbDevicePeriod.Position]);
-  oDevicePeriod := tbDevicePeriod.Position * 10000;
+  SetBufferDuration();
 end;
+
+
+procedure TfrmLoopBackCapture.SetBufferDuration();
+var
+  sms: string;
+
+begin
+  oBufferDuration := (REFTIMES_PER_MILLISEC * 1000) * tbBufferDuration.Position;
+  if (oBufferDuration > 10000000) then
+    sms := 'milliseconds'
+  else
+    sms := 'millisecond';
+  lblBufferDuration.Caption := Format('Capture Buffer Length(%d %s)', [tbBufferDuration.Position, sms])
+end;
+
 
 end.

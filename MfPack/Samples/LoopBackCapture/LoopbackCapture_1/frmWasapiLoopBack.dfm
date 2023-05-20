@@ -24,6 +24,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     Top = 414
     Width = 472
     Height = 24
+    Margins.Left = 6
     Align = alBottom
     AutoSize = False
     Caption = 'Start Capture'
@@ -51,7 +52,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       'urce latency '
     Alignment = taLeftJustify
     BevelOuter = bvLowered
-    Caption = '  Capture Processing Interval'
+    Caption = '  Capture Buffer'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
@@ -60,12 +61,12 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     ParentFont = False
     TabOrder = 7
     VerticalAlignment = taAlignTop
-    object lblDevicePeriod: TLabel
-      Left = 9
+    object lblBufferDuration: TLabel
+      Left = 8
       Top = 26
-      Width = 147
+      Width = 188
       Height = 13
-      Caption = 'Device Period (10 MilliSeconds)'
+      Caption = 'Capture Buffer Length : 10 milliseconds'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -73,15 +74,15 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       Font.Style = []
       ParentFont = False
     end
-    object tbDevicePeriod: TTrackBar
+    object tbBufferDuration: TTrackBar
       Left = 0
-      Top = 39
+      Top = 41
       Width = 455
       Height = 25
-      Max = 100
-      Position = 10
+      Max = 20
+      Position = 5
       TabOrder = 0
-      OnChange = tbDevicePeriodChange
+      OnChange = tbBufferDurationChange
     end
   end
   object butStart: TButton

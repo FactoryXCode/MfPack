@@ -930,7 +930,7 @@ type
     //  The periodicity of the engine is described as the rate at which the engine wakes an event driven audio client
     //  for transferring audio data to/from the engine.
     //  The values returned depends on the characteristics of the audio client as specified through a previous call to
-    //  IAudioClient2::SetClientProperties
+    //  IAudioClient2.SetClientProperties
     //
     // Parameters:
     //
@@ -966,7 +966,7 @@ type
     function InitializeSharedAudioStream(StreamFlags: DWORD;
                                          PeriodInFrames: UINT32;
                                          pFormat: PWAVEFORMATEX;
-                                         AudioSessionGuid: TGUID): HResult; stdcall;
+                                         {optional} AudioSessionGuid: LPCGUID): HResult; stdcall;
     // Description:
     //
     //  Initializes a shared stream with the specified periodicity.
