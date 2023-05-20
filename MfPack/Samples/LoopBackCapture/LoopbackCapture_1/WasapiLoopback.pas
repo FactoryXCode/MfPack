@@ -503,6 +503,11 @@ begin
 
   cycle := 0;
 
+  // Get the stream latency (normally this should be 0)
+  hr := pAudioClient.GetStreamLatency(pHnsLatency);
+  if FAILED(hr) then
+    goto done;
+
   // Each loop fills about half of the shared buffer.
   while (bStopRec = FALSE) do
     begin
@@ -527,14 +532,8 @@ begin
             Break;
 
           if (flags = AUDCLNT_BUFFERFLAGS_SILENT) then
-            begin
-              pData := nil;  // Tell CopyData to write silence.
-            end;
-
-          // Get the stream latency (normally this would be 0)
-          hr := pAudioClient.GetStreamLatency(pHnsLatency);
-            if FAILED(hr) then
-              Break;
+            pData := nil;  // Tell CopyData to write silence.
+                           // When a sound is detected, the app will act and process data.
 
           // Copy the available capture data to the audio sink.
           hr := CopyData(pData,
