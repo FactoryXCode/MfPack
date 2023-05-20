@@ -5,8 +5,10 @@ Version: X 3.1.5
 Description:
   These samples demonstrates how to use the SinkWriter to encode a video file from a bitmap.
   This sample has 2 levels:
-  Example 1 creates a simple green bitmap (640x480) and store it to a file with a length of 20 seconds.
-  Example 2 demonstrates how to use the SinkWriter to create a video from a bitmap file.
+  
+  Example 1 Creates a simple green bitmap (640x480) and store it to a file with a length of 20 seconds.
+  
+  Example 2 Demonstrates how to use the IMFSinkWriter to create a video from one or more bitmap files using the D2D1 API.
 
 Supported output formats are: MP4, AVI and WMF.
 
