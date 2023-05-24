@@ -28,7 +28,7 @@
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX314/Samples/CaptureLoopBack
+// Related projects: MfPack/Samples/LoopbackCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.22621.0

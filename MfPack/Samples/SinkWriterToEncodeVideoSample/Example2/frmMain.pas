@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPack/Samples/SinkWriterToEncodeVideoSample
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -38,8 +38,8 @@
 // Todo: -
 //
 //==============================================================================
-// Source: https://learn.microsoft.com/en-us/windows/win32/medfound/tutorial--using-the-sink-writer-to-encode-video
-//         https://learn.microsoft.com/nl-nl/windows/win32/medfound/tutorial--encoding-an-mp4-file-?redirectedfrom=MSDN
+// Source:
+//   https://learn.microsoft.com/en-us/windows/win32/medfound/tutorial--using-the-sink-writer-to-encode-video
 //
 // Copyright (c) FactoryX. All rights reserved.
 //==============================================================================

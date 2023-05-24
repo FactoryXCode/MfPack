@@ -80,7 +80,7 @@ object dlgVideoSetttings: TdlgVideoSetttings
     Height = 21
     Hint = 'Time in 100 nanoseconds units.'
     AutoSize = False
-    Caption = 'Frame time units'
+    Caption = 'Frame time'
   end
   object OKBtn: TButton
     Left = 8
@@ -189,7 +189,7 @@ object dlgVideoSetttings: TdlgVideoSetttings
     Top = 163
     Width = 48
     Height = 21
-    Hint = 'Time in 100 nanoseconds units.'
+    Hint = 'Time in 100 nanoseconds units. (minimum is 1 ms (10000 units))'
     NumbersOnly = True
     ParentShowHint = False
     ShowHint = True

@@ -10,7 +10,7 @@
 // Release date: 29-06-2012
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 // Description: -
 //
 // Organisation: FactoryX
@@ -35,7 +35,7 @@
 //         Fields with a Common Type Specification.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
@@ -601,21 +601,23 @@ type
   MFVideoInterlaceMode = _MFVideoInterlaceMode;
   {$EXTERNALSYM MFVideoInterlaceMode}
 const
-  MFVideoInterlace_Unknown                     = MFVideoInterlaceMode(0);
+  MFVideoInterlace_Unknown                     = MFVideoInterlaceMode(0);  // The type of interlacing is not known.
   {$EXTERNALSYM MFVideoInterlace_Unknown}
-  MFVideoInterlace_Progressive                 = MFVideoInterlaceMode(2);
+  MFVideoInterlace_Progressive                 = MFVideoInterlaceMode(2);  // Progressive frames.
   {$EXTERNALSYM MFVideoInterlace_Progressive}
-  MFVideoInterlace_FieldInterleavedUpperFirst  = MFVideoInterlaceMode(3);
+  MFVideoInterlace_FieldInterleavedUpperFirst  = MFVideoInterlaceMode(3);  // Interlaced frames. Each frame contains two fields.
+                                                                           // The field lines are interleaved, with the upper field appearing on the first line.
   {$EXTERNALSYM MFVideoInterlace_FieldInterleavedUpperFirst}
-  MFVideoInterlace_FieldInterleavedLowerFirst  = MFVideoInterlaceMode(4);
+  MFVideoInterlace_FieldInterleavedLowerFirst  = MFVideoInterlaceMode(4);  // Interlaced frames. Each frame contains two fields.
+                                                                           // The field lines are interleaved, with the lower field appearing on the first line.
   {$EXTERNALSYM MFVideoInterlace_FieldInterleavedLowerFirst}
-  MFVideoInterlace_FieldSingleUpper            = MFVideoInterlaceMode(5);
+  MFVideoInterlace_FieldSingleUpper            = MFVideoInterlaceMode(5);  // Interlaced frames. Each frame contains one field, with the upper field appearing first.
   {$EXTERNALSYM MFVideoInterlace_FieldSingleUpper}
-  MFVideoInterlace_FieldSingleLower            = MFVideoInterlaceMode(6);
+  MFVideoInterlace_FieldSingleLower            = MFVideoInterlaceMode(6);  // Interlaced frames. Each frame contains one field, with the lower field appearing first.
   {$EXTERNALSYM MFVideoInterlace_FieldSingleLower}
-  MFVideoInterlace_MixedInterlaceOrProgressive = MFVideoInterlaceMode(7);
+  MFVideoInterlace_MixedInterlaceOrProgressive = MFVideoInterlaceMode(7);  // The stream contains a mix of interlaced and progressive modes.
   {$EXTERNALSYM MFVideoInterlace_MixedInterlaceOrProgressive}
-  MFVideoInterlace_Last                        = MFVideoInterlace_MixedInterlaceOrProgressive + 1;
+  MFVideoInterlace_Last                        = MFVideoInterlace_MixedInterlaceOrProgressive + 1; // Reserved
   {$EXTERNALSYM MFVideoInterlace_Last}
   //MFVideoInterlace_ForceDWORD                  = FORCEDWORD);
 
@@ -626,6 +628,9 @@ const
   {$EXTERNALSYM MFVideoInterlace_FieldSingleLowerFirst}
 
 
+  // MFVideoTransferFunction enumeration.
+  // For more information about these values, see the remarks for the DXVA2_VideoTransferFunction enumeration,
+  // which is the DirectX Video Acceleration (DXVA) equivalent of this enumeration.
 type
   PMFVideoTransferFunction = ^MFVideoTransferFunction;
   _MFVideoTransferFunction = UINT32;
@@ -633,47 +638,61 @@ type
   MFVideoTransferFunction = _MFVideoTransferFunction;
   {$EXTERNALSYM MFVideoTransferFunction}
 const
-  MFVideoTransFunc_Unknown     = MFVideoTransferFunction(0);
+  MFVideoTransFunc_Unknown     = MFVideoTransferFunction(0); // Unknown. Treat as MFVideoTransFunc_709.
   {$EXTERNALSYM MFVideoTransFunc_Unknown}
-  MFVideoTransFunc_10          = MFVideoTransferFunction(1);
+  MFVideoTransFunc_10          = MFVideoTransferFunction(1); // Linear RGB (gamma = 1.0).
   {$EXTERNALSYM MFVideoTransFunc_10}
-  MFVideoTransFunc_18          = MFVideoTransferFunction(2);
+  MFVideoTransFunc_18          = MFVideoTransferFunction(2); // True 1.8 gamma, L' = L^1/1.8.
   {$EXTERNALSYM MFVideoTransFunc_18}
-  MFVideoTransFunc_20          = MFVideoTransferFunction(3);
+  MFVideoTransFunc_20          = MFVideoTransferFunction(3); // True 2.0 gamma, L' = L^1/2.0.
   {$EXTERNALSYM MFVideoTransFunc_20}
-  MFVideoTransFunc_22          = MFVideoTransferFunction(4);
+  MFVideoTransFunc_22          = MFVideoTransferFunction(4); // True 2.2 gamma, L' = L^1/2.2. This transfer function is used in ITU-R BT.470-2 System M (NTSC).
   {$EXTERNALSYM MFVideoTransFunc_22}
-  MFVideoTransFunc_709         = MFVideoTransferFunction(5);
+  MFVideoTransFunc_709         = MFVideoTransferFunction(5); // ITU-R BT.709 transfer function.
+                                                             // Gamma 2.2 curve with a linear segment in the lower range.
+                                                             // This transfer function is used in BT.709, BT.601, SMPTE 296M, SMPTE 170M, BT.470, and SPMTE 274M.
+                                                             // In addition BT-1361 uses this function within the range [0...1].
   {$EXTERNALSYM MFVideoTransFunc_709}
-  MFVideoTransFunc_240M        = MFVideoTransferFunction(6);
+  MFVideoTransFunc_240M        = MFVideoTransferFunction(6); // SPMTE 240M transfer function. Gamma 2.2 curve with a linear segment in the lower range.
   {$EXTERNALSYM MFVideoTransFunc_240M}
-  MFVideoTransFunc_sRGB        = MFVideoTransferFunction(7);
+  MFVideoTransFunc_sRGB        = MFVideoTransferFunction(7); // sRGB transfer function. Gamma 2.4 curve with a linear segment in the lower range.
   {$EXTERNALSYM MFVideoTransFunc_sRGB}
-  MFVideoTransFunc_28          = MFVideoTransferFunction(8);
+  MFVideoTransFunc_28          = MFVideoTransferFunction(8); // True 2.8 gamma. L' = L^1/2.8. This transfer function is used in ITU-R BT.470-2 System B, G (PAL).
   {$EXTERNALSYM MFVideoTransFunc_28}
-  MFVideoTransFunc_Log_100     = MFVideoTransferFunction(9);
+  MFVideoTransFunc_Log_100     = MFVideoTransferFunction(9); // Logarithmic transfer (100:1 range); for example, as used in H.264 video.
   {$EXTERNALSYM MFVideoTransFunc_Log_100}
-  MFVideoTransFunc_Log_316     = MFVideoTransferFunction(10);
+
+  {The following elements requires Windows 7 or later.}
+
+  MFVideoTransFunc_Log_316     = MFVideoTransferFunction(10); // Logarithmic transfer (316.22777:1 range); for example, as used in H.264 video.
   {$EXTERNALSYM MFVideoTransFunc_Log_316}
-  MFVideoTransFunc_709_sym     = MFVideoTransferFunction(11);
+  MFVideoTransFunc_709_sym     = MFVideoTransferFunction(11); // Symmetric ITU-R BT.709.
   {$EXTERNALSYM MFVideoTransFunc_709_sym}
-  MFVideoTransFunc_2020_const  = MFVideoTransferFunction(12);
+  MFVideoTransFunc_2020_const  = MFVideoTransferFunction(12); // Constant luminance ITU-R BT.2020. See Recommendation ITU-R BT.2020-2.
+                                                              // See: https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.2020-2-201510-I!!PDF-E.pdf
   {$EXTERNALSYM MFVideoTransFunc_2020_const}
-  MFVideoTransFunc_2020        = MFVideoTransferFunction(13);
+
+  {The following elements requires Windows 8 or later.}
+
+  MFVideoTransFunc_2020        = MFVideoTransferFunction(13); // Non-constant luminance ITU-R BT.2020.
+                                                              // See: https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.2020-2-201510-I!!PDF-E.pdf
   {$EXTERNALSYM MFVideoTransFunc_2020}
-  MFVideoTransFunc_26          = MFVideoTransferFunction(14);
+  MFVideoTransFunc_26          = MFVideoTransferFunction(14); // True 2.6 gamma, L’=L^1/2.6
   {$EXTERNALSYM MFVideoTransFunc_26}
   MFVideoTransFunc_2084        = MFVideoTransferFunction(15); // SMPTE ST.2084
   {$EXTERNALSYM MFVideoTransFunc_2084}
   MFVideoTransFunc_HLG         = MFVideoTransferFunction(16); // Hybrid Log-Gamma, ARIB STD-B67
   {$EXTERNALSYM MFVideoTransFunc_HLG}
-// >= NTDDI_WIN10_RS4)
+
+  {The following elements requires Windows 10, version 1703 (NTDDI_WIN10_RS4) or later.}
+
   MFVideoTransFunc_10_rel      = MFVideoTransferFunction(17); // No gamma, display referred (relative)
   {$EXTERNALSYM MFVideoTransFunc_10_rel}
-// end
-  FVideoTransFunc_Last         = MFVideoTransFunc_HLG + 1;
+
+  FVideoTransFunc_Last         = MFVideoTransFunc_HLG + 1;    // Reserved.
   {$EXTERNALSYM FVideoTransFunc_Last}
   // MFVideoTransFunc_ForceMFVideoTransferFunction = FORCEMFVideoTransferFunction;
+
 
 type
   PMFVideoPrimaries = ^MFVideoPrimaries;
@@ -2120,12 +2139,12 @@ type
   // functions /////////////////////////////////////////////////////////////////
 
   function MFSerializeAttributesToStream(pAttr: IMFAttributes;
-                                         dwOptions: DWord;
+                                         dwOptions: DWord;  // Bitwise OR of zero or more flags from the MF_ATTRIBUTE_SERIALIZE_OPTIONS enumeration.
                                          pStm: IStream): HResult; stdcall;
   {$EXTERNALSYM MFSerializeAttributesToStream}
 
   function MFDeserializeAttributesFromStream(pAttr: IMFAttributes;
-                                             dwOptions: DWord;
+                                             dwOptions: DWord;  // Bitwise OR of zero or more flags from the MF_ATTRIBUTE_SERIALIZE_OPTIONS enumeration.
                                              pStm: IStream): HResult; stdcall;
   {$EXTERNALSYM MFDeserializeAttributesFromStream}
 

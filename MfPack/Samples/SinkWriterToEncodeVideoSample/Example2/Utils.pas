@@ -15,7 +15,7 @@
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Charles Hacker, Renate Schaaf.
+// Contributor(s): Tony Kalf (maXcomX), Renate Schaaf.
 //
 // ------------------------------------------------------------------------------
 // CHANGE LOG
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPack/Samples/SinkWriterToEncodeVideoSample
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -38,8 +38,8 @@
 // Todo: -
 //
 // ==============================================================================
-// Source: https://learn.microsoft.com/en-us/windows/win32/medfound/tutorial--using-the-sink-writer-to-encode-video
-// https://blog.dummzeuch.de/2019/12/12/accessing-bitmap-pixels-with-less-scanline-calls-in-delphi/
+// Source:
+//   https://learn.microsoft.com/en-us/windows/win32/medfound/tutorial--using-the-sink-writer-to-encode-video
 //
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ==============================================================================
@@ -78,17 +78,7 @@ uses
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfUtils;
 
-type
-
-  pRGBArray = ^TRGBArray;
-  TRGBArray = array [0 .. 32767] of TRGBTriple;
-
-  // Sets the pointer to the correct pixel offset.
-  // See for details: https://blog.dummzeuch.de/2019/12/12/accessing-bitmap-pixels-with-less-scanline-calls-in-delphi/
-  function SetPointer(const aPointer: Pointer;
-                      aOffset: NativeInt): Pointer; inline;
-
-  // Now uses Direct2D for resizing. Better quality and much faster.
+  // Now uses Direct2D for resizing. Better quality and much faster than version 3.1.4
   procedure ResizeBitmap(aBitmap: TBitmap;
                          toWidth: Integer;
                          toHeight: Integer);
@@ -99,13 +89,6 @@ type
   // Calculates frame duration in 100 nanoseconds units.
   function CalcFrameDuration(aLatency: UINT32;
                              aFrameRate: Double): HNSTIME;
-
-  // Performance or latency calculation
-  function PerformanceCounterMilliseconds(aFrequency: Int64): Int64;
-
-threadvar
-  TimerFrequency: Int64;
-
 
 
 implementation
@@ -119,13 +102,6 @@ uses
   WinApi.DirectX.D2D1,
   WinApi.DirectX.DXGIFormat,
   WinApi.DirectX.DXGIType;
-
-
-function SetPointer(const aPointer: Pointer;
-                    aOffset: NativeInt): Pointer; inline;
-begin
-  Result := Pointer(NativeInt(aPointer) + aOffset);
-end;
 
 
 procedure ScaleDirect2D1(NewWidth: Integer;
@@ -236,23 +212,5 @@ begin
   Result := Round(aLatency * msec / aFrameRate);
 end;
 
-
-//
-function PerformanceCounterMilliseconds(AFrequency: Int64): Int64;
-var
-  iCount: Int64;
-
-begin
-  if (AFrequency = 0) then
-    Result := 0
-  else
-  begin
-    QueryPerformanceCounter(iCount);
-    Result := Round(iCount / AFrequency * 1000);
-  end;
-end;
-
-initialization
-  QueryPerformanceFrequency(TimerFrequency);
 
 end.

@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX314/Samples/CaptureLoopBack
+// Related projects: MfPack/Samples/LoopbackCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.22621.0
@@ -254,9 +254,9 @@ begin
 
   // write the WAVEFORMATEX data to it
   iBytesInWfx := SizeOf(WAVEFORMATEX) + ppwfx.cbSize;
-  iBytesWritten :=  mmioWrite(hmFile,
-                              PAnsiChar(ppwfx),
-                              iBytesInWfx);
+  iBytesWritten := mmioWrite(hmFile,
+                             PAnsiChar(ppwfx),
+                             iBytesInWfx);
 
   if (iBytesWritten <> iBytesInWfx) then
     begin
@@ -531,9 +531,10 @@ begin
           if FAILED(hr) then
             Break;
 
+          // Tell CopyData to write silence.
+          // When a sound is detected, the app will act and process data.
           if (flags = AUDCLNT_BUFFERFLAGS_SILENT) then
-            pData := nil;  // Tell CopyData to write silence.
-                           // When a sound is detected, the app will act and process data.
+            pData := nil;
 
           // Copy the available capture data to the audio sink.
           hr := CopyData(pData,

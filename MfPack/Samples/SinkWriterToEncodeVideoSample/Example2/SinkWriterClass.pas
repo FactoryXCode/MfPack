@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPack/Samples/SinkWriterToEncodeVideoSample
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -38,8 +38,8 @@
 // Todo: -
 //
 // ==============================================================================
-// Source: https://learn.microsoft.com/en-us/windows/win32/medfound/tutorial--using-the-sink-writer-to-encode-video
-// https://learn.microsoft.com/nl-nl/windows/win32/medfound/tutorial--encoding-an-mp4-file-?redirectedfrom=MSDN
+// Source:
+//   https://learn.microsoft.com/en-us/windows/win32/medfound/tutorial--using-the-sink-writer-to-encode-video
 //
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ==============================================================================
@@ -92,6 +92,7 @@ uses
 const
   WM_BITMAP_PROCESSING_MSG = WM_USER + 11;
   WM_SINKWRITER_WRITES_BITMAP = WM_USER + 12;
+  FRAME_TIME_UNITS = 10000; {1 ms = 10000 100-nanosecond units}
 
 type
 
@@ -293,16 +294,6 @@ label
   done;
 
 begin
-
-  // Calculate the average time/frame
-  SinkWriterParams.rtSampleDuration := Round(SinkWriterParams.uiLatency * 100 * 100 / SinkWriterParams.dbFrameRate);
-  // Or use this method
-  // MFFrameRateToAverageTimePerFrame
-
-  SinkWriterParams.gdInputFormat := MFVideoFormat_RGB32;
-  // aVideoLenght is the given duration of the video in seconds.
-  SinkWriterParams.uiFrameCount := SinkWriterParams.uiLatency * Round(SinkWriterParams.dbFrameRate);
-
   rtStart := 0;
 
   hr := CoInitializeEx(nil,
@@ -318,6 +309,17 @@ begin
 
           if SUCCEEDED(hr) then
             begin
+              // Calculate the average time/frame
+              SinkWriterParams.rtSampleDuration := Round(SinkWriterParams.uiLatency * FRAME_TIME_UNITS / SinkWriterParams.dbFrameRate);
+              // Or use this method
+              hr := MFFrameRateToAverageTimePerFrame(SinkWriterParams.uiLatency * FRAME_TIME_UNITS,
+                                                     Trunc(SinkWriterParams.dbFrameRate),
+                                                     SinkWriterParams.rtSampleDuration);
+
+              SinkWriterParams.gdInputFormat := MFVideoFormat_RGB32;
+              // aVideoLenght is the given duration of the video in seconds.
+              SinkWriterParams.uiFrameCount := SinkWriterParams.uiLatency * Round(SinkWriterParams.dbFrameRate);
+
               // Handle the number of bitmaps in the list.
               for i := 0 to aBmpFileList.Count - 1 do
                 begin
@@ -423,8 +425,10 @@ begin
                              SinkWriterParams.dwHeigth);
 
   if SUCCEEDED(hr) then
-    hr := MFSetAttributeRatio(pMediaTypeOut, MF_MT_FRAME_RATE,
-      Round(SinkWriterParams.dbFrameRate), 1);
+    hr := MFSetAttributeRatio(pMediaTypeOut,
+                              MF_MT_FRAME_RATE,
+                              Round(SinkWriterParams.dbFrameRate),
+                              1);
 
   if SUCCEEDED(hr) then
     hr := MFSetAttributeRatio(pMediaTypeOut,
@@ -628,11 +632,11 @@ begin
   // Initial latency = sample processing time from input to output.
   // The FrameRate expressed in Frames Per Second (FPS) is the number of frames per second.
   dbFrameRate := 30.0; // FPS
-  dwFrameTimeUnits := 10000;
+  dwFrameTimeUnits := FRAME_TIME_UNITS;
   dwHeigth := 480;
   dwWidth := 640;
   // Duration per sample, also known as Frame Duration, in 100-nanosecond units .
-  rtSampleDuration := Round(uiLatency * dwFrameTimeUnits / dbFrameRate);
+  rtSampleDuration := Round(uiLatency * FRAME_TIME_UNITS / dbFrameRate);
   uiSizeInPixels := dwWidth * dwHeigth;
   uiFrameCount := 20 * Round(dbFrameRate);
   sResolutionDescription := 'SD    480p  (640 x 480)';

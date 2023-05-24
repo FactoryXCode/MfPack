@@ -10,7 +10,7 @@
 // Release date: 12-03-2023
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 //
 // Description:
 //   This unit contains helper methods for the LoopBack sample.
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX314/Samples/CaptureLoopBack
+// Related projects: MfPack/Samples/LoopbackCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.22621.0
