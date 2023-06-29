@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 // Description: Multimedia Registration
 //
 // Organisation: FactoryX
@@ -28,7 +28,7 @@
 //          IUnknown(Pointer), IUnknown(Object), IUnknown(Nil) etc.
 // 
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -4017,434 +4017,540 @@ const
   // WAVE form wFormatTag IDs
   // ========================
 
-  WAVE_FORMAT_UNKNOWN               = $0000;  // Microsoft Corporation
+  WAVE_FORMAT_UNKNOWN                 = $0000;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_UNKNOWN}
-  WAVE_FORMAT_PCM                   = $0001;  // updt 100812
-  {$EXTERNALSYM WAVE_FORMAT_PCM}
-  WAVE_FORMAT_ADPCM                 = $0002;  // Microsoft Corporation
+  WAVE_FORMAT_ADPCM                   = $0002;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_ADPCM}
-  WAVE_FORMAT_IEEE_FLOAT            = $0003;  // Microsoft Corporation
+  WAVE_FORMAT_IEEE_FLOAT              = $0003;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_IEEE_FLOAT}
-                                              //  IEEE754: range (+1, -1]
-                                              //  32-bit/64-bit format as defined by
-                                              //  MSVC++ float/double type
-  WAVE_FORMAT_VSELP                 = $0004;  // Compaq Computer Corp. //
+  WAVE_FORMAT_VSELP                   = $0004;  { Compaq Computer Corp. }
   {$EXTERNALSYM WAVE_FORMAT_VSELP}
-  WAVE_FORMAT_IBM_CVSD              = $0005;  // IBM Corporation
+  WAVE_FORMAT_IBM_CVSD                = $0005;  { IBM Corporation }
   {$EXTERNALSYM WAVE_FORMAT_IBM_CVSD}
-  WAVE_FORMAT_ALAW                  = $0006;  // Microsoft Corporation
+  WAVE_FORMAT_ALAW                    = $0006;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_ALAW}
-  WAVE_FORMAT_MULAW                 = $0007;  // Microsoft Corporation
+  WAVE_FORMAT_MULAW                   = $0007;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_MULAW}
-  WAVE_FORMAT_DTS                   = $0008;  // Microsoft Corporation //
+  WAVE_FORMAT_DTS                     = $0008;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_DTS}
-  WAVE_FORMAT_DRM                   = $0009;  // Microsoft Corporation //
+  WAVE_FORMAT_DRM                     = $0009;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_DRM}
-  WAVE_FORMAT_WMAVOICE9             = $000A;  /// Microsoft Corporation ///updt 100812
+  WAVE_FORMAT_WMAVOICE9               = $000A;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_WMAVOICE9}
-  WAVE_FORMAT_WMAVOICE10            = $000B;  /// Microsoft Corporation ///updt 100812
+  WAVE_FORMAT_WMAVOICE10              = $000B;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_WMAVOICE10}
-  WAVE_FORMAT_OKI_ADPCM             = $0010;  // OKI
+  WAVE_FORMAT_OKI_ADPCM               = $0010;  { OKI }
   {$EXTERNALSYM WAVE_FORMAT_OKI_ADPCM}
-  WAVE_FORMAT_DVI_ADPCM             = $0011;  // Intel Corporation
+  WAVE_FORMAT_DVI_ADPCM               = $0011;  { Intel Corporation }
   {$EXTERNALSYM WAVE_FORMAT_DVI_ADPCM}
-  WAVE_FORMAT_IMA_ADPCM             = WAVE_FORMAT_DVI_ADPCM; // Intel Corporation
+  WAVE_FORMAT_IMA_ADPCM               = WAVE_FORMAT_DVI_ADPCM;  {  Intel Corporation }
   {$EXTERNALSYM WAVE_FORMAT_IMA_ADPCM}
-  WAVE_FORMAT_MEDIASPACE_ADPCM      = $0012;  // Videologic
+  WAVE_FORMAT_MEDIASPACE_ADPCM        = $0012;  { Videologic }
   {$EXTERNALSYM WAVE_FORMAT_MEDIASPACE_ADPCM}
-  WAVE_FORMAT_SIERRA_ADPCM          = $0013;  // Sierra Semiconductor Corp
+  WAVE_FORMAT_SIERRA_ADPCM            = $0013;  { Sierra Semiconductor Corp }
   {$EXTERNALSYM WAVE_FORMAT_SIERRA_ADPCM}
-  WAVE_FORMAT_G723_ADPCM            = $0014;  // Antex Electronics Corporation
+  WAVE_FORMAT_G723_ADPCM              = $0014;  { Antex Electronics Corporation }
   {$EXTERNALSYM WAVE_FORMAT_G723_ADPCM}
-  WAVE_FORMAT_DIGISTD               = $0015;  // DSP Solutions, Inc.
+  WAVE_FORMAT_DIGISTD                 = $0015;  { DSP Solutions, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_DIGISTD}
-  WAVE_FORMAT_DIGIFIX               = $0016;  // DSP Solutions, Inc.
+  WAVE_FORMAT_DIGIFIX                 = $0016;  { DSP Solutions, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_DIGIFIX}
-  WAVE_FORMAT_DIALOGIC_OKI_ADPCM    = $0017;  // Dialogic Corporation
+  WAVE_FORMAT_DIALOGIC_OKI_ADPCM      = $0017;  { Dialogic Corporation }
   {$EXTERNALSYM WAVE_FORMAT_DIALOGIC_OKI_ADPCM}
-  WAVE_FORMAT_MEDIAVISION_ADPCM     = $0018;  // Media Vision, Inc. //
+  WAVE_FORMAT_MEDIAVISION_ADPCM       = $0018;  { Media Vision, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_MEDIAVISION_ADPCM}
-  WAVE_FORMAT_CU_CODEC              = $0019;  // Hewlett-Packard Company //
+  WAVE_FORMAT_CU_CODEC                = $0019;  { Hewlett-Packard Company }
   {$EXTERNALSYM WAVE_FORMAT_CU_CODEC}
-  WAVE_FORMAT_YAMAHA_ADPCM          = $0020;  // Yamaha Corporation of America
+  WAVE_FORMAT_HP_DYN_VOICE            = $001A;  { Hewlett-Packard Company }
+  {$EXTERNALSYM WAVE_FORMAT_HP_DYN_VOICE}
+  WAVE_FORMAT_YAMAHA_ADPCM            = $0020;  { Yamaha Corporation of America }
   {$EXTERNALSYM WAVE_FORMAT_YAMAHA_ADPCM}
-  WAVE_FORMAT_SONARC                = $0021;  // Speech Compression
+  WAVE_FORMAT_SONARC                  = $0021;  { Speech Compression }
   {$EXTERNALSYM WAVE_FORMAT_SONARC}
-  WAVE_FORMAT_DSPGROUP_TRUESPEECH   = $0022;  // DSP Group, Inc
+  WAVE_FORMAT_DSPGROUP_TRUESPEECH     = $0022;  { DSP Group, Inc }
   {$EXTERNALSYM WAVE_FORMAT_DSPGROUP_TRUESPEECH}
-  WAVE_FORMAT_ECHOSC1               = $0023;  // Echo Speech Corporation
+  WAVE_FORMAT_ECHOSC1                 = $0023;  { Echo Speech Corporation }
   {$EXTERNALSYM WAVE_FORMAT_ECHOSC1}
-  WAVE_FORMAT_AUDIOFILE_AF36        = $0024;  //
+  WAVE_FORMAT_AUDIOFILE_AF36          = $0024;  { Virtual Music, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_AUDIOFILE_AF36}
-  WAVE_FORMAT_APTX                  = $0025;  // Audio Processing Technology
+  WAVE_FORMAT_APTX                    = $0025;  { Audio Processing Technology }
   {$EXTERNALSYM WAVE_FORMAT_APTX}
-  WAVE_FORMAT_AUDIOFILE_AF10        = $0026;  //
+  WAVE_FORMAT_AUDIOFILE_AF10          = $0026;  { Virtual Music, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_AUDIOFILE_AF10}
-  WAVE_FORMAT_PROSODY_1612          = $0027;  // Aculab plc //
+  WAVE_FORMAT_PROSODY_1612            = $0027;  { Aculab plc }
   {$EXTERNALSYM WAVE_FORMAT_PROSODY_1612}
-  WAVE_FORMAT_LRC                   = $0028;  // Merging Technologies S.A. //
+  WAVE_FORMAT_LRC                     = $0028;  { Merging Technologies S.A. }
   {$EXTERNALSYM WAVE_FORMAT_LRC}
-  WAVE_FORMAT_DOLBY_AC2             = $0030;  // Dolby Laboratories
+  WAVE_FORMAT_DOLBY_AC2               = $0030;  { Dolby Laboratories }
   {$EXTERNALSYM WAVE_FORMAT_DOLBY_AC2}
-  WAVE_FORMAT_GSM610                = $0031;  // Microsoft Corporation
+  WAVE_FORMAT_GSM610                  = $0031;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_GSM610}
-  WAVE_FORMAT_MSNAUDIO              = $0032;  // Microsoft Corporation //
+  WAVE_FORMAT_MSNAUDIO                = $0032;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_MSNAUDIO}
-  WAVE_FORMAT_ANTEX_ADPCME          = $0033;  // Antex Electronics Corporation
+  WAVE_FORMAT_ANTEX_ADPCME            = $0033;  { Antex Electronics Corporation }
   {$EXTERNALSYM WAVE_FORMAT_ANTEX_ADPCME}
-  WAVE_FORMAT_CONTROL_RES_VQLPC     = $0034;  // Control Resources Limited
+  WAVE_FORMAT_CONTROL_RES_VQLPC       = $0034;  { Control Resources Limited }
   {$EXTERNALSYM WAVE_FORMAT_CONTROL_RES_VQLPC}
-  WAVE_FORMAT_DIGIREAL              = $0035;  // DSP Solutions, Inc.
+  WAVE_FORMAT_DIGIREAL                = $0035;  { DSP Solutions, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_DIGIREAL}
-  WAVE_FORMAT_DIGIADPCM             = $0036;  // DSP Solutions, Inc.
+  WAVE_FORMAT_DIGIADPCM               = $0036;  { DSP Solutions, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_DIGIADPCM}
-  WAVE_FORMAT_CONTROL_RES_CR10      = $0037;  // Control Resources Limited
+  WAVE_FORMAT_CONTROL_RES_CR10        = $0037;  { Control Resources Limited }
   {$EXTERNALSYM WAVE_FORMAT_CONTROL_RES_CR10}
-  WAVE_FORMAT_NMS_VBXADPCM          = $0038;  // Natural MicroSystems
+  WAVE_FORMAT_NMS_VBXADPCM            = $0038;  { Natural MicroSystems }
   {$EXTERNALSYM WAVE_FORMAT_NMS_VBXADPCM}
-  WAVE_FORMAT_CS_IMAADPCM           = $0039;  // Crystal Semiconductor IMA ADPCM
+  WAVE_FORMAT_CS_IMAADPCM             = $0039;  { Crystal Semiconductor IMA ADPCM }
   {$EXTERNALSYM WAVE_FORMAT_CS_IMAADPCM}
-  WAVE_FORMAT_ECHOSC3               = $003A;  // Echo Speech Corporation //
+  WAVE_FORMAT_ECHOSC3                 = $003A;  { Echo Speech Corporation }
   {$EXTERNALSYM WAVE_FORMAT_ECHOSC3}
-  WAVE_FORMAT_ROCKWELL_ADPCM        = $003B;  // Rockwell International //
+  WAVE_FORMAT_ROCKWELL_ADPCM          = $003B;  { Rockwell International }
   {$EXTERNALSYM WAVE_FORMAT_ROCKWELL_ADPCM}
-  WAVE_FORMAT_ROCKWELL_DIGITALK     = $003C;  // Rockwell International //
+  WAVE_FORMAT_ROCKWELL_DIGITALK       = $003C;  { Rockwell International }
   {$EXTERNALSYM WAVE_FORMAT_ROCKWELL_DIGITALK}
-  WAVE_FORMAT_XEBEC                 = $003D;  // Xebec Multimedia Solutions Limited //
+  WAVE_FORMAT_XEBEC                   = $003D;  { Xebec Multimedia Solutions Limited }
   {$EXTERNALSYM WAVE_FORMAT_XEBEC}
-  WAVE_FORMAT_G721_ADPCM            = $0040;  // Antex Electronics Corporation
+  WAVE_FORMAT_G721_ADPCM              = $0040;  { Antex Electronics Corporation }
   {$EXTERNALSYM WAVE_FORMAT_G721_ADPCM}
-  WAVE_FORMAT_G728_CELP             = $0041;  // Antex Electronics Corporation //
+  WAVE_FORMAT_G728_CELP               = $0041;  { Antex Electronics Corporation }
   {$EXTERNALSYM WAVE_FORMAT_G728_CELP}
-  WAVE_FORMAT_MSG723                = $0042;  // Microsoft Corporation //
+  WAVE_FORMAT_MSG723                  = $0042;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_MSG723}
-  WAVE_FORMAT_MPEG                  = $0050;  // Microsoft Corporation
+  WAVE_FORMAT_INTEL_G723_1            = $0043;  { Intel Corp. }
+  {$EXTERNALSYM WAVE_FORMAT_INTEL_G723_1}
+  WAVE_FORMAT_INTEL_G729              = $0044;  { Intel Corp. }
+  {$EXTERNALSYM WAVE_FORMAT_INTEL_G729}
+  WAVE_FORMAT_SHARP_G726              = $0045;  { Sharp }
+  {$EXTERNALSYM WAVE_FORMAT_SHARP_G726}
+  WAVE_FORMAT_MPEG                    = $0050;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_MPEG}
-  WAVE_FORMAT_RT24                  = $0052;  // InSoft, Inc. //
+  WAVE_FORMAT_RT24                    = $0052;  { InSoft, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_RT24}
-  WAVE_FORMAT_PAC                   = $0053;  // InSoft, Inc. //
+  WAVE_FORMAT_PAC                     = $0053;  { InSoft, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_PAC}
-  WAVE_FORMAT_MPEGLAYER3            = $0055;  // ISO/MPEG Layer3 Format Tag //
+  WAVE_FORMAT_MPEGLAYER3              = $0055;  { ISO/MPEG Layer3 Format Tag }
   {$EXTERNALSYM WAVE_FORMAT_MPEGLAYER3}
-  WAVE_FORMAT_LUCENT_G723           = $0059;  // Lucent Technologies //
+  WAVE_FORMAT_LUCENT_G723             = $0059;  { Lucent Technologies }
   {$EXTERNALSYM WAVE_FORMAT_LUCENT_G723}
-  WAVE_FORMAT_CIRRUS                = $0060;  // Cirrus Logic //
+  WAVE_FORMAT_CIRRUS                  = $0060;  { Cirrus Logic }
   {$EXTERNALSYM WAVE_FORMAT_CIRRUS}
-  WAVE_FORMAT_ESPCM                 = $0061;  // ESS Technology //
+  WAVE_FORMAT_ESPCM                   = $0061;  { ESS Technology }
   {$EXTERNALSYM WAVE_FORMAT_ESPCM}
-  WAVE_FORMAT_VOXWARE               = $0062;  // Voxware Inc //
+  WAVE_FORMAT_VOXWARE                 = $0062;  { Voxware Inc }
   {$EXTERNALSYM WAVE_FORMAT_VOXWARE}
-  WAVE_FORMAT_CANOPUS_ATRAC         = $0063;  // Canopus, co., Ltd. //
+  WAVE_FORMAT_CANOPUS_ATRAC           = $0063;  { Canopus, co., Ltd. }
   {$EXTERNALSYM WAVE_FORMAT_CANOPUS_ATRAC}
-  WAVE_FORMAT_G726_ADPCM            = $0064;  // APICOM //
+  WAVE_FORMAT_G726_ADPCM              = $0064;  { APICOM }
   {$EXTERNALSYM WAVE_FORMAT_G726_ADPCM}
-  WAVE_FORMAT_G722_ADPCM            = $0065;  // APICOM //
+  WAVE_FORMAT_G722_ADPCM              = $0065;  { APICOM }
   {$EXTERNALSYM WAVE_FORMAT_G722_ADPCM}
-  WAVE_FORMAT_DSAT_DISPLAY          = $0067;  // Microsoft Corporation //
+  WAVE_FORMAT_DSAT                    = $0066;  { Microsoft Corporation }
+  {$EXTERNALSYM WAVE_FORMAT_DSAT}
+  WAVE_FORMAT_DSAT_DISPLAY            = $0067;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_DSAT_DISPLAY}
-  WAVE_FORMAT_VOXWARE_BYTE_ALIGNED  = $0069;  // Voxware Inc //
+  WAVE_FORMAT_VOXWARE_BYTE_ALIGNED    = $0069;  { Voxware Inc }
   {$EXTERNALSYM WAVE_FORMAT_VOXWARE_BYTE_ALIGNED}
-  WAVE_FORMAT_VOXWARE_AC8           = $0070;  // Voxware Inc //
+  WAVE_FORMAT_VOXWARE_AC8             = $0070;  { Voxware Inc }
   {$EXTERNALSYM WAVE_FORMAT_VOXWARE_AC8}
-  WAVE_FORMAT_VOXWARE_AC10          = $0071;  // Voxware Inc //
+  WAVE_FORMAT_VOXWARE_AC10            = $0071;  { Voxware Inc }
   {$EXTERNALSYM WAVE_FORMAT_VOXWARE_AC10}
-  WAVE_FORMAT_VOXWARE_AC16          = $0072;  // Voxware Inc //
+  WAVE_FORMAT_VOXWARE_AC16            = $0072;  { Voxware Inc }
   {$EXTERNALSYM WAVE_FORMAT_VOXWARE_AC16}
-  WAVE_FORMAT_VOXWARE_AC20          = $0073;  // Voxware Inc //
+  WAVE_FORMAT_VOXWARE_AC20            = $0073;  { Voxware Inc }
   {$EXTERNALSYM WAVE_FORMAT_VOXWARE_AC20}
-  WAVE_FORMAT_VOXWARE_RT24          = $0074;  // Voxware Inc //
+  WAVE_FORMAT_VOXWARE_RT24            = $0074;  { Voxware Inc }
   {$EXTERNALSYM WAVE_FORMAT_VOXWARE_RT24}
-  WAVE_FORMAT_VOXWARE_RT29          = $0075;  // Voxware Inc //
+  WAVE_FORMAT_VOXWARE_RT29            = $0075;  { Voxware Inc }
   {$EXTERNALSYM WAVE_FORMAT_VOXWARE_RT29}
-  WAVE_FORMAT_VOXWARE_RT29HW        = $0076;  // Voxware Inc //
+  WAVE_FORMAT_VOXWARE_RT29HW          = $0076;  { Voxware Inc }
   {$EXTERNALSYM WAVE_FORMAT_VOXWARE_RT29HW}
-  WAVE_FORMAT_VOXWARE_VR12          = $0077;  // Voxware Inc //
+  WAVE_FORMAT_VOXWARE_VR12            = $0077;  { Voxware Inc }
   {$EXTERNALSYM WAVE_FORMAT_VOXWARE_VR12}
-  WAVE_FORMAT_VOXWARE_VR18          = $0078;  // Voxware Inc //
+  WAVE_FORMAT_VOXWARE_VR18            = $0078;  { Voxware Inc }
   {$EXTERNALSYM WAVE_FORMAT_VOXWARE_VR18}
-  WAVE_FORMAT_VOXWARE_TQ40          = $0079;  // Voxware Inc //
+  WAVE_FORMAT_VOXWARE_TQ40            = $0079;  { Voxware Inc }
   {$EXTERNALSYM WAVE_FORMAT_VOXWARE_TQ40}
-  WAVE_FORMAT_SOFTSOUND             = $0080;  // Softsound, Ltd. //
+  WAVE_FORMAT_VOXWARE_SC3             = $007A;  { Voxware Inc }
+  {$EXTERNALSYM WAVE_FORMAT_VOXWARE_SC3}
+  WAVE_FORMAT_VOXWARE_SC3_1           = $007B;  { Voxware Inc }
+  {$EXTERNALSYM WAVE_FORMAT_VOXWARE_SC3_1}
+  WAVE_FORMAT_SOFTSOUND               = $0080;  { Softsound, Ltd. }
   {$EXTERNALSYM WAVE_FORMAT_SOFTSOUND}
-  WAVE_FORMAT_VOXWARE_TQ60          = $0081;  // Voxware Inc //
+  WAVE_FORMAT_VOXWARE_TQ60            = $0081;  { Voxware Inc }
   {$EXTERNALSYM WAVE_FORMAT_VOXWARE_TQ60}
-  WAVE_FORMAT_MSRT24                = $0082;  // Microsoft Corporation //
+  WAVE_FORMAT_MSRT24                  = $0082;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_MSRT24}
-  WAVE_FORMAT_G729A                 = $0083;  // AT&T Labs, Inc. //
+  WAVE_FORMAT_G729A                   = $0083;  { AT&T Labs, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_G729A}
-  WAVE_FORMAT_MVI_MVI2              = $0084;  // Motion Pixels //
+  WAVE_FORMAT_MVI_MVI2                = $0084;  { Motion Pixels }
   {$EXTERNALSYM WAVE_FORMAT_MVI_MVI2}
-  WAVE_FORMAT_DF_G726               = $0085;  // DataFusion Systems (Pty) (Ltd) //
+  WAVE_FORMAT_DF_G726                 = $0085;  { DataFusion Systems (Pty) (Ltd) }
   {$EXTERNALSYM WAVE_FORMAT_DF_G726}
-  WAVE_FORMAT_DF_GSM610             = $0086;  // DataFusion Systems (Pty) (Ltd) //
+  WAVE_FORMAT_DF_GSM610               = $0086;  { DataFusion Systems (Pty) (Ltd) }
   {$EXTERNALSYM WAVE_FORMAT_DF_GSM610}
-  WAVE_FORMAT_ISIAUDIO              = $0088;  // Iterated Systems, Inc. //
+  WAVE_FORMAT_ISIAUDIO                = $0088;  { Iterated Systems, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_ISIAUDIO}
-  WAVE_FORMAT_ONLIVE                = $0089;  // OnLive! Technologies, Inc. //
+  WAVE_FORMAT_ONLIVE                  = $0089;  { OnLive! Technologies, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_ONLIVE}
-  WAVE_FORMAT_SBC24                 = $0091;  // Siemens Business Communications Sys //
+  WAVE_FORMAT_MULTITUDE_FT_SX20       = $008A;  { Multitude Inc. }
+  {$EXTERNALSYM WAVE_FORMAT_MULTITUDE_FT_SX20}
+  WAVE_FORMAT_INFOCOM_ITS_G721_ADPCM  = $008B;  { Infocom }
+  {$EXTERNALSYM WAVE_FORMAT_INFOCOM_ITS_G721_ADPCM}
+  WAVE_FORMAT_CONVEDIA_G729           = $008C;  { Convedia Corp. }
+  {$EXTERNALSYM WAVE_FORMAT_CONVEDIA_G729}
+  WAVE_FORMAT_CONGRUENCY              = $008D;  { Congruency Inc. }
+  {$EXTERNALSYM WAVE_FORMAT_CONGRUENCY}
+  WAVE_FORMAT_SBC24                   = $0091;  { Siemens Business Communications Sys }
   {$EXTERNALSYM WAVE_FORMAT_SBC24}
-  WAVE_FORMAT_DOLBY_AC3_SPDIF       = $0092;  // Sonic Foundry //
+  WAVE_FORMAT_DOLBY_AC3_SPDIF         = $0092;  { Sonic Foundry }
   {$EXTERNALSYM WAVE_FORMAT_DOLBY_AC3_SPDIF}
-  WAVE_FORMAT_MEDIASONIC_G723       = $0093;  // MediaSonic //
+  WAVE_FORMAT_MEDIASONIC_G723         = $0093;  { MediaSonic }
   {$EXTERNALSYM WAVE_FORMAT_MEDIASONIC_G723}
-  WAVE_FORMAT_PROSODY_8KBPS         = $0094;  // Aculab plc //
+  WAVE_FORMAT_PROSODY_8KBPS           = $0094;  { Aculab plc }
   {$EXTERNALSYM WAVE_FORMAT_PROSODY_8KBPS}
-  WAVE_FORMAT_ZYXEL_ADPCM           = $0097;  // ZyXEL Communications, Inc. //
+  WAVE_FORMAT_ZYXEL_ADPCM             = $0097;  { ZyXEL Communications, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_ZYXEL_ADPCM}
-  WAVE_FORMAT_PHILIPS_LPCBB         = $0098;  // Philips Speech Processing //
+  WAVE_FORMAT_PHILIPS_LPCBB           = $0098;  { Philips Speech Processing }
   {$EXTERNALSYM WAVE_FORMAT_PHILIPS_LPCBB}
-  WAVE_FORMAT_PACKED                = $0099;  // Studer Professional Audio AG //
+  WAVE_FORMAT_PACKED                  = $0099;  { Studer Professional Audio AG }
   {$EXTERNALSYM WAVE_FORMAT_PACKED}
-  WAVE_FORMAT_MALDEN_PHONYTALK      = $00A0;  // Malden Electronics Ltd. //
+  WAVE_FORMAT_MALDEN_PHONYTALK        = $00A0;  { Malden Electronics Ltd. }
   {$EXTERNALSYM WAVE_FORMAT_MALDEN_PHONYTALK}
-  WAVE_FORMAT_RHETOREX_ADPCM        = $0100;  // Rhetorex Inc. //
+  WAVE_FORMAT_RACAL_RECORDER_GSM      = $00A1;  { Racal recorders }
+  {$EXTERNALSYM WAVE_FORMAT_RACAL_RECORDER_GSM}
+  WAVE_FORMAT_RACAL_RECORDER_G720_A   = $00A2;  { Racal recorders }
+  {$EXTERNALSYM WAVE_FORMAT_RACAL_RECORDER_G720_A}
+  WAVE_FORMAT_RACAL_RECORDER_G723_1   = $00A3;  { Racal recorders }
+  {$EXTERNALSYM WAVE_FORMAT_RACAL_RECORDER_G723_1}
+  WAVE_FORMAT_RACAL_RECORDER_TETRA_ACELP = $00A4;  { Racal recorders }
+  {$EXTERNALSYM WAVE_FORMAT_RACAL_RECORDER_TETRA_ACELP}
+  WAVE_FORMAT_NEC_AAC                 = $00B0;  { NEC Corp. }
+  {$EXTERNALSYM WAVE_FORMAT_NEC_AAC}
+  WAVE_FORMAT_RAW_AAC1                = $00FF;  { For Raw AAC, with format block AudioSpecificConfig() (as defined by MPEG-4), that follows WAVEFORMATEX }
+  {$EXTERNALSYM WAVE_FORMAT_RAW_AAC1}
+  WAVE_FORMAT_RHETOREX_ADPCM          = $0100;  { Rhetorex Inc. }
   {$EXTERNALSYM WAVE_FORMAT_RHETOREX_ADPCM}
-  WAVE_FORMAT_IRAT                  = $0101;  // BeCubed Software Inc. //
+  WAVE_FORMAT_IRAT                    = $0101;  { BeCubed Software Inc. }
   {$EXTERNALSYM WAVE_FORMAT_IRAT}
-  WAVE_FORMAT_VIVO_G723             = $0111;  // Vivo Software //
+  WAVE_FORMAT_VIVO_G723               = $0111;  { Vivo Software }
   {$EXTERNALSYM WAVE_FORMAT_VIVO_G723}
-  WAVE_FORMAT_VIVO_SIREN            = $0112;  // Vivo Software //
+  WAVE_FORMAT_VIVO_SIREN              = $0112;  { Vivo Software }
   {$EXTERNALSYM WAVE_FORMAT_VIVO_SIREN}
-  WAVE_FORMAT_DIGITAL_G723          = $0123;  // Digital Equipment Corporation //
+  WAVE_FORMAT_PHILIPS_CELP            = $0120;  { Philips Speech Processing }
+  {$EXTERNALSYM WAVE_FORMAT_PHILIPS_CELP}
+  WAVE_FORMAT_PHILIPS_GRUNDIG         = $0121;  { Philips Speech Processing }
+  {$EXTERNALSYM WAVE_FORMAT_PHILIPS_GRUNDIG}
+  WAVE_FORMAT_DIGITAL_G723            = $0123;  { Digital Equipment Corporation }
   {$EXTERNALSYM WAVE_FORMAT_DIGITAL_G723}
-  WAVE_FORMAT_SANYO_LD_ADPCM        = $0125;  // Sanyo Electric Co., Ltd. //
+  WAVE_FORMAT_SANYO_LD_ADPCM          = $0125;  { Sanyo Electric Co., Ltd. }
   {$EXTERNALSYM WAVE_FORMAT_SANYO_LD_ADPCM}
-  WAVE_FORMAT_SIPROLAB_ACEPLNET     = $0130;  // Sipro Lab Telecom Inc. //
+  WAVE_FORMAT_SIPROLAB_ACEPLNET       = $0130;  { Sipro Lab Telecom Inc. }
   {$EXTERNALSYM WAVE_FORMAT_SIPROLAB_ACEPLNET}
-  WAVE_FORMAT_SIPROLAB_ACELP4800    = $0131;  // Sipro Lab Telecom Inc. //
+  WAVE_FORMAT_SIPROLAB_ACELP4800      = $0131;  { Sipro Lab Telecom Inc. }
   {$EXTERNALSYM WAVE_FORMAT_SIPROLAB_ACELP4800}
-  WAVE_FORMAT_SIPROLAB_ACELP8V3     = $0132;  // Sipro Lab Telecom Inc. //
+  WAVE_FORMAT_SIPROLAB_ACELP8V3       = $0132;  { Sipro Lab Telecom Inc. }
   {$EXTERNALSYM WAVE_FORMAT_SIPROLAB_ACELP8V3}
-  WAVE_FORMAT_SIPROLAB_G729         = $0133;  // Sipro Lab Telecom Inc. //
+  WAVE_FORMAT_SIPROLAB_G729           = $0133;  { Sipro Lab Telecom Inc. }
   {$EXTERNALSYM WAVE_FORMAT_SIPROLAB_G729}
-  WAVE_FORMAT_SIPROLAB_G729A        = $0134;  // Sipro Lab Telecom Inc. //
+  WAVE_FORMAT_SIPROLAB_G729A          = $0134;  { Sipro Lab Telecom Inc. }
   {$EXTERNALSYM WAVE_FORMAT_SIPROLAB_G729A}
-  WAVE_FORMAT_SIPROLAB_KELVIN       = $0135;  // Sipro Lab Telecom Inc. //
+  WAVE_FORMAT_SIPROLAB_KELVIN         = $0135;  { Sipro Lab Telecom Inc. }
   {$EXTERNALSYM WAVE_FORMAT_SIPROLAB_KELVIN}
-  WAVE_FORMAT_G726ADPCM             = $0140;  // Dictaphone Corporation //
+  WAVE_FORMAT_VOICEAGE_AMR            = $0136;  { VoiceAge Corp. }
+  {$EXTERNALSYM WAVE_FORMAT_VOICEAGE_AMR}
+  WAVE_FORMAT_G726ADPCM               = $0140;  { Dictaphone Corporation }
   {$EXTERNALSYM WAVE_FORMAT_G726ADPCM}
-  WAVE_FORMAT_QUALCOMM_PUREVOICE    = $0150;  // Qualcomm, Inc. //
+  WAVE_FORMAT_DICTAPHONE_CELP68       = $0141;  { Dictaphone Corporation }
+  {$EXTERNALSYM WAVE_FORMAT_DICTAPHONE_CELP68}
+  WAVE_FORMAT_DICTAPHONE_CELP54       = $0142;  { Dictaphone Corporation }
+  {$EXTERNALSYM WAVE_FORMAT_DICTAPHONE_CELP54}
+  WAVE_FORMAT_QUALCOMM_PUREVOICE      = $0150;  { Qualcomm, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_QUALCOMM_PUREVOICE}
-  WAVE_FORMAT_QUALCOMM_HALFRATE     = $0151;  // Qualcomm, Inc. //
+  WAVE_FORMAT_QUALCOMM_HALFRATE       = $0151;  { Qualcomm, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_QUALCOMM_HALFRATE}
-  WAVE_FORMAT_TUBGSM                = $0155;  // Ring Zero Systems, Inc. //
+  WAVE_FORMAT_TUBGSM                  = $0155;  { Ring Zero Systems, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_TUBGSM}
-  WAVE_FORMAT_MSAUDIO1              = $0160;  // Microsoft Corporation //
+  WAVE_FORMAT_MSAUDIO1                = $0160;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_MSAUDIO1}
-  WAVE_FORMAT_WMAUDIO2              = $0161;  /// Microsoft Corporation /// updt 100812
+  WAVE_FORMAT_WMAUDIO2                = $0161;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_WMAUDIO2}
-  WAVE_FORMAT_WMAUDIO3              = $0162;  /// Microsoft Corporation /// updt 100812
+  WAVE_FORMAT_WMAUDIO3                = $0162;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_WMAUDIO3}
-  WAVE_FORMAT_WMAUDIO_LOSSLESS      = $0163;  /// Microsoft Corporation /// updt 100812
+  WAVE_FORMAT_WMAUDIO_LOSSLESS        = $0163;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_WMAUDIO_LOSSLESS}
-  WAVE_FORMAT_WMASPDIF              = $0164;  /// Microsoft Corporation /// updt 100812
+  WAVE_FORMAT_WMASPDIF                = $0164;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_WMASPDIF}
-  WAVE_FORMAT_UNISYS_NAP_ADPCM      = $0170;  // Unisys Corp. //
+  WAVE_FORMAT_UNISYS_NAP_ADPCM        = $0170;  { Unisys Corp. }
   {$EXTERNALSYM WAVE_FORMAT_UNISYS_NAP_ADPCM}
-  WAVE_FORMAT_UNISYS_NAP_ULAW       = $0171;  // Unisys Corp. //
+  WAVE_FORMAT_UNISYS_NAP_ULAW         = $0171;  { Unisys Corp. }
   {$EXTERNALSYM WAVE_FORMAT_UNISYS_NAP_ULAW}
-  WAVE_FORMAT_UNISYS_NAP_ALAW       = $0172;  // Unisys Corp. //
+  WAVE_FORMAT_UNISYS_NAP_ALAW         = $0172;  { Unisys Corp. }
   {$EXTERNALSYM WAVE_FORMAT_UNISYS_NAP_ALAW}
-  WAVE_FORMAT_UNISYS_NAP_16K        = $0173;  // Unisys Corp. //
+  WAVE_FORMAT_UNISYS_NAP_16K          = $0173;  { Unisys Corp. }
   {$EXTERNALSYM WAVE_FORMAT_UNISYS_NAP_16K}
-  WAVE_FORMAT_CREATIVE_ADPCM        = $0200;  // Creative Labs, Inc
+  WAVE_FORMAT_SYCOM_ACM_SYC008        = $0174;  { SyCom Technologies }
+  {$EXTERNALSYM WAVE_FORMAT_SYCOM_ACM_SYC008}
+  WAVE_FORMAT_SYCOM_ACM_SYC701_G726L  = $0175;  { SyCom Technologies }
+  {$EXTERNALSYM WAVE_FORMAT_SYCOM_ACM_SYC701_G726L}
+  WAVE_FORMAT_SYCOM_ACM_SYC701_CELP54 = $0176;  { SyCom Technologies }
+  {$EXTERNALSYM WAVE_FORMAT_SYCOM_ACM_SYC701_CELP54}
+  WAVE_FORMAT_SYCOM_ACM_SYC701_CELP68 = $0177;  { SyCom Technologies }
+  {$EXTERNALSYM WAVE_FORMAT_SYCOM_ACM_SYC701_CELP68}
+  WAVE_FORMAT_KNOWLEDGE_ADVENTURE_ADPCM = $0178;  { Knowledge Adventure, Inc. }
+  {$EXTERNALSYM WAVE_FORMAT_KNOWLEDGE_ADVENTURE_ADPCM}
+  WAVE_FORMAT_FRAUNHOFER_IIS_MPEG2_AAC= $0180;  { Fraunhofer IIS }
+  {$EXTERNALSYM WAVE_FORMAT_FRAUNHOFER_IIS_MPEG2_AAC}
+  WAVE_FORMAT_DTS_DS                  = $0190;  { Digital Theatre Systems, Inc. }
+  {$EXTERNALSYM WAVE_FORMAT_DTS_DS}
+  WAVE_FORMAT_CREATIVE_ADPCM          = $0200;  { Creative Labs, Inc }
   {$EXTERNALSYM WAVE_FORMAT_CREATIVE_ADPCM}
-  WAVE_FORMAT_CREATIVE_FASTSPEECH8  = $0202;  // Creative Labs, Inc
+  WAVE_FORMAT_CREATIVE_FASTSPEECH8    = $0202;  { Creative Labs, Inc }
   {$EXTERNALSYM WAVE_FORMAT_CREATIVE_FASTSPEECH8}
-  WAVE_FORMAT_CREATIVE_FASTSPEECH10 = $0203;  // Creative Labs, Inc
+  WAVE_FORMAT_CREATIVE_FASTSPEECH10   = $0203;  { Creative Labs, Inc }
   {$EXTERNALSYM WAVE_FORMAT_CREATIVE_FASTSPEECH10}
-  WAVE_FORMAT_UHER_ADPCM            = $0210;  // UHER informatic GmbH //
+  WAVE_FORMAT_UHER_ADPCM              = $0210;  { UHER informatic GmbH }
   {$EXTERNALSYM WAVE_FORMAT_UHER_ADPCM}
-  WAVE_FORMAT_QUARTERDECK           = $0220;  // Quarterdeck Corporation //
+  WAVE_FORMAT_ULEAD_DV_AUDIO          = $0215;  { Ulead Systems, Inc. }
+  {$EXTERNALSYM WAVE_FORMAT_ULEAD_DV_AUDIO}
+  WAVE_FORMAT_ULEAD_DV_AUDIO_1        = $0216;  { Ulead Systems, Inc. }
+  {$EXTERNALSYM WAVE_FORMAT_ULEAD_DV_AUDIO_1}
+  WAVE_FORMAT_QUARTERDECK             = $0220;  { Quarterdeck Corporation }
   {$EXTERNALSYM WAVE_FORMAT_QUARTERDECK}
-  WAVE_FORMAT_ILINK_VC              = $0230;  // I-link Worldwide //
+  WAVE_FORMAT_ILINK_VC                = $0230;  { I-link Worldwide }
   {$EXTERNALSYM WAVE_FORMAT_ILINK_VC}
-  WAVE_FORMAT_RAW_SPORT             = $0240;  // Aureal Semiconductor //
+  WAVE_FORMAT_RAW_SPORT               = $0240;  { Aureal Semiconductor }
   {$EXTERNALSYM WAVE_FORMAT_RAW_SPORT}
-  WAVE_FORMAT_ESST_AC3              = $0241;  // ESS Technology, Inc. //
+  WAVE_FORMAT_ESST_AC3                = $0241;  { ESS Technology, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_ESST_AC3}
-  WAVE_FORMAT_IPI_HSX               = $0250;  // Interactive Products, Inc. //
+  WAVE_FORMAT_GENERIC_PASSTHRU        = $0249;
+  {$EXTERNALSYM WAVE_FORMAT_GENERIC_PASSTHRU}
+  WAVE_FORMAT_IPI_HSX                 = $0250;  { Interactive Products, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_IPI_HSX}
-  WAVE_FORMAT_IPI_RPELP             = $0251;  // Interactive Products, Inc. //
+  WAVE_FORMAT_IPI_RPELP               = $0251;  { Interactive Products, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_IPI_RPELP}
-  WAVE_FORMAT_CS2                   = $0260;  // Consistent Software //
+  WAVE_FORMAT_CS2                     = $0260;  { Consistent Software }
   {$EXTERNALSYM WAVE_FORMAT_CS2}
-  WAVE_FORMAT_SONY_SCX              = $0270;  // Sony Corp. //
+  WAVE_FORMAT_SONY_SCX                = $0270;  { Sony Corp. }
   {$EXTERNALSYM WAVE_FORMAT_SONY_SCX}
-  WAVE_FORMAT_FM_TOWNS_SND          = $0300;  // Fujitsu Corp.
+  WAVE_FORMAT_SONY_SCY                = $0271;  { Sony Corp. }
+  {$EXTERNALSYM WAVE_FORMAT_SONY_SCY}
+  WAVE_FORMAT_SONY_ATRAC3             = $0272;  { Sony Corp. }
+  {$EXTERNALSYM WAVE_FORMAT_SONY_ATRAC3}
+  WAVE_FORMAT_SONY_SPC                = $0273;  { Sony Corp. }
+  {$EXTERNALSYM WAVE_FORMAT_SONY_SPC}
+  WAVE_FORMAT_TELUM_AUDIO             = $0280;  { Telum Inc. }
+  {$EXTERNALSYM WAVE_FORMAT_TELUM_AUDIO}
+  WAVE_FORMAT_TELUM_IA_AUDIO          = $0281;  { Telum Inc. }
+  {$EXTERNALSYM WAVE_FORMAT_TELUM_IA_AUDIO}
+  WAVE_FORMAT_NORCOM_VOICE_SYSTEMS_ADPCM = $0285;  { Norcom Electronics Corp. }
+  {$EXTERNALSYM WAVE_FORMAT_NORCOM_VOICE_SYSTEMS_ADPCM}
+  WAVE_FORMAT_FM_TOWNS_SND            = $0300;  { Fujitsu Corp. }
   {$EXTERNALSYM WAVE_FORMAT_FM_TOWNS_SND}
-  WAVE_FORMAT_BTV_DIGITAL           = $0400;  // Brooktree Corporation //
+  WAVE_FORMAT_MICRONAS                = $0350;  { Micronas Semiconductors, Inc. }
+  {$EXTERNALSYM WAVE_FORMAT_MICRONAS}
+  WAVE_FORMAT_MICRONAS_CELP833        = $0351;  { Micronas Semiconductors, Inc. }
+  {$EXTERNALSYM WAVE_FORMAT_MICRONAS_CELP833}
+  WAVE_FORMAT_BTV_DIGITAL             = $0400;  { Brooktree Corporation }
   {$EXTERNALSYM WAVE_FORMAT_BTV_DIGITAL}
-  WAVE_FORMAT_QDESIGN_MUSIC         = $0450;  // QDesign Corporation //
+  WAVE_FORMAT_INTEL_MUSIC_CODER       = $0401;  { Intel Corp. }
+  {$EXTERNALSYM WAVE_FORMAT_INTEL_MUSIC_CODER}
+  WAVE_FORMAT_INDEO_AUDIO             = $0402;  { Ligos }
+  {$EXTERNALSYM WAVE_FORMAT_INDEO_AUDIO}
+  WAVE_FORMAT_QDESIGN_MUSIC           = $0450;  { QDesign Corporation }
   {$EXTERNALSYM WAVE_FORMAT_QDESIGN_MUSIC}
-  WAVE_FORMAT_VME_VMPCM             = $0680;  // AT&T Labs, Inc. //
+  WAVE_FORMAT_ON2_VP7_AUDIO           = $0500;  { On2 Technologies }
+  {$EXTERNALSYM WAVE_FORMAT_ON2_VP7_AUDIO}
+  WAVE_FORMAT_ON2_VP6_AUDIO           = $0501;  { On2 Technologies }
+  {$EXTERNALSYM WAVE_FORMAT_ON2_VP6_AUDIO}
+  WAVE_FORMAT_VME_VMPCM               = $0680;  { AT&T Labs, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_VME_VMPCM}
-  WAVE_FORMAT_TPC                   = $0681;  // AT&T Labs, Inc. //
+  WAVE_FORMAT_TPC                     = $0681;  { AT&T Labs, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_TPC}
-  WAVE_FORMAT_OLIGSM                = $1000;  // Ing C. Olivetti & C., S.p.A.
+  WAVE_FORMAT_LIGHTWAVE_LOSSLESS      = $08AE;  { Clearjump }
+  {$EXTERNALSYM WAVE_FORMAT_LIGHTWAVE_LOSSLESS}
+  WAVE_FORMAT_OLIGSM                  = $1000;  { Ing C. Olivetti & C., S.p.A. }
   {$EXTERNALSYM WAVE_FORMAT_OLIGSM}
-  WAVE_FORMAT_OLIADPCM              = $1001;  // Ing C. Olivetti & C., S.p.A.
+  WAVE_FORMAT_OLIADPCM                = $1001;  { Ing C. Olivetti & C., S.p.A. }
   {$EXTERNALSYM WAVE_FORMAT_OLIADPCM}
-  WAVE_FORMAT_OLICELP               = $1002;  // Ing C. Olivetti & C., S.p.A.
+  WAVE_FORMAT_OLICELP                 = $1002;  { Ing C. Olivetti & C., S.p.A. }
   {$EXTERNALSYM WAVE_FORMAT_OLICELP}
-  WAVE_FORMAT_OLISBC                = $1003;  // Ing C. Olivetti & C., S.p.A.
+  WAVE_FORMAT_OLISBC                  = $1003;  { Ing C. Olivetti & C., S.p.A. }
   {$EXTERNALSYM WAVE_FORMAT_OLISBC}
-  WAVE_FORMAT_OLIOPR                = $1004;  // Ing C. Olivetti & C., S.p.A.
+  WAVE_FORMAT_OLIOPR                  = $1004;  { Ing C. Olivetti & C., S.p.A. }
   {$EXTERNALSYM WAVE_FORMAT_OLIOPR}
-  WAVE_FORMAT_LH_CODEC              = $1100;  // Lernout & Hauspie //
+  WAVE_FORMAT_LH_CODEC                = $1100;  { Lernout & Hauspie }
   {$EXTERNALSYM WAVE_FORMAT_LH_CODEC}
-  WAVE_FORMAT_NORRIS                = $1400;  // Norris Communications, Inc. //
+  WAVE_FORMAT_LH_CODEC_CELP           = $1101;  { Lernout & Hauspie }
+  {$EXTERNALSYM WAVE_FORMAT_LH_CODEC_CELP}
+  WAVE_FORMAT_LH_CODEC_SBC8           = $1102;  { Lernout & Hauspie }
+  {$EXTERNALSYM WAVE_FORMAT_LH_CODEC_SBC8}
+  WAVE_FORMAT_LH_CODEC_SBC12          = $1103;  { Lernout & Hauspie }
+  {$EXTERNALSYM WAVE_FORMAT_LH_CODEC_SBC12}
+  WAVE_FORMAT_LH_CODEC_SBC16          = $1104;  { Lernout & Hauspie }
+  {$EXTERNALSYM WAVE_FORMAT_LH_CODEC_SBC16}
+  WAVE_FORMAT_NORRIS                  = $1400;  { Norris Communications, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_NORRIS}
-  WAVE_FORMAT_SOUNDSPACE_MUSICOMPRESS = $1500;  // AT&T Labs, Inc. //
+  WAVE_FORMAT_ISIAUDIO_2              = $1401;  { ISIAudio }
+  {$EXTERNALSYM WAVE_FORMAT_ISIAUDIO_2}
+  WAVE_FORMAT_SOUNDSPACE_MUSICOMPRESS = $1500;  { AT&T Labs, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_SOUNDSPACE_MUSICOMPRESS}
-  WAVE_FORMAT_MPEG_ADTS_AAC           = $1600; // Microsoft Corporation ///updt 100812 added
+  WAVE_FORMAT_MPEG_ADTS_AAC           = $1600;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_MPEG_ADTS_AAC}
-  WAVE_FORMAT_MPEG_RAW_AAC            = $1601; // Microsoft Corporation ///updt 100812 added
+  WAVE_FORMAT_MPEG_RAW_AAC            = $1601;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_MPEG_RAW_AAC}
-  WAVE_FORMAT_MPEG_LOAS               = $1602; // Microsoft Corporation (MPEG-4 Audio Transport Streams (LOAS/LATM) ///updt 100812 added
+  WAVE_FORMAT_MPEG_LOAS               = $1602;  { Microsoft Corporation (MPEG-4 Audio Transport Streams (LOAS/LATM) }
   {$EXTERNALSYM WAVE_FORMAT_MPEG_LOAS}
-  WAVE_FORMAT_NOKIA_MPEG_ADTS_AAC     = $1608; // Microsoft Corporation ///updt 100812 added
+  WAVE_FORMAT_NOKIA_MPEG_ADTS_AAC     = $1608;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_NOKIA_MPEG_ADTS_AAC}
-  WAVE_FORMAT_NOKIA_MPEG_RAW_AAC      = $1609; // Microsoft Corporation ///updt 100812 added
+  WAVE_FORMAT_NOKIA_MPEG_RAW_AAC      = $1609;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_NOKIA_MPEG_RAW_AAC}
-  WAVE_FORMAT_VODAFONE_MPEG_ADTS_AAC  = $160A; // Microsoft Corporation ///updt 100812 added
+  WAVE_FORMAT_VODAFONE_MPEG_ADTS_AAC  = $160A;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_VODAFONE_MPEG_ADTS_AAC}
-  WAVE_FORMAT_VODAFONE_MPEG_RAW_AAC   = $160B; // Microsoft Corporation ///updt 100812 added
+  WAVE_FORMAT_VODAFONE_MPEG_RAW_AAC   = $160B;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_VODAFONE_MPEG_RAW_AAC}
-  WAVE_FORMAT_MPEG_HEAAC              = $1610; // Microsoft Corporation (MPEG-2 AAC or MPEG-4 HE-AAC v1/v2 streams with any payload (ADTS, ADIF, LOAS/LATM, RAW). Format block includes MP4 AudioSpecificConfig() -- see HEAACWAVEFORMAT below ///updt 100812 added
+  WAVE_FORMAT_MPEG_HEAAC              = $1610;  { Microsoft Corporation (MPEG-2 AAC or MPEG-4 HE-AAC v1/v2 streams with any payload (ADTS, ADIF, LOAS/LATM, RAW). Format block includes MP4 AudioSpecificConfig() -- see HEAACWAVEFORMAT below }
   {$EXTERNALSYM WAVE_FORMAT_MPEG_HEAAC}
-  WAVE_FORMAT_DVM                     = $2000;  // FAST Multimedia AG //
+  WAVE_FORMAT_VOXWARE_RT24_SPEECH     = $181C;  { Voxware Inc. }
+  {$EXTERNALSYM WAVE_FORMAT_VOXWARE_RT24_SPEECH}
+  WAVE_FORMAT_SONICFOUNDRY_LOSSLESS   = $1971;  { Sonic Foundry }
+  {$EXTERNALSYM WAVE_FORMAT_SONICFOUNDRY_LOSSLESS}
+  WAVE_FORMAT_INNINGS_TELECOM_ADPCM   = $1979;  { Innings Telecom Inc. }
+  {$EXTERNALSYM WAVE_FORMAT_INNINGS_TELECOM_ADPCM}
+  WAVE_FORMAT_LUCENT_SX8300P          = $1C07;  { Lucent Technologies }
+  {$EXTERNALSYM WAVE_FORMAT_LUCENT_SX8300P}
+  WAVE_FORMAT_LUCENT_SX5363S          = $1C0C;  { Lucent Technologies }
+  {$EXTERNALSYM WAVE_FORMAT_LUCENT_SX5363S}
+  WAVE_FORMAT_CUSEEME                 = $1F03;  { CUSeeMe }
+  {$EXTERNALSYM WAVE_FORMAT_CUSEEME}
+  WAVE_FORMAT_NTCSOFT_ALF2CM_ACM      = $1FC4;  { NTCSoft }
+  {$EXTERNALSYM WAVE_FORMAT_NTCSOFT_ALF2CM_ACM}
+  WAVE_FORMAT_DVM                     = $2000;  { FAST Multimedia AG }
   {$EXTERNALSYM WAVE_FORMAT_DVM}
-
-  WAVE_FORMAT_DTS2                        = $2001;
+  WAVE_FORMAT_DTS2                    = $2001;
   {$EXTERNALSYM WAVE_FORMAT_DTS2}
-  WAVE_FORMAT_MAKEAVIS                    = $3313;
+  WAVE_FORMAT_MAKEAVIS                = $3313;
   {$EXTERNALSYM WAVE_FORMAT_MAKEAVIS}
-  WAVE_FORMAT_DIVIO_MPEG4_AAC             = $4143;  { Divio, Inc. }
+  WAVE_FORMAT_DIVIO_MPEG4_AAC         = $4143;  { Divio, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_DIVIO_MPEG4_AAC}
-  WAVE_FORMAT_NOKIA_ADAPTIVE_MULTIRATE    = $4201;  { Nokia }
+  WAVE_FORMAT_NOKIA_ADAPTIVE_MULTIRATE= $4201;  { Nokia }
   {$EXTERNALSYM WAVE_FORMAT_NOKIA_ADAPTIVE_MULTIRATE}
-  WAVE_FORMAT_DIVIO_G726                  = $4243;  { Divio, Inc. }
+  WAVE_FORMAT_DIVIO_G726              = $4243;  { Divio, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_DIVIO_G726}
-  WAVE_FORMAT_LEAD_SPEECH                 = $434C;  { LEAD Technologies }
+  WAVE_FORMAT_LEAD_SPEECH             = $434C;  { LEAD Technologies }
   {$EXTERNALSYM WAVE_FORMAT_LEAD_SPEECH}
-  WAVE_FORMAT_LEAD_VORBIS                 = $564C;  { LEAD Technologies }
+  WAVE_FORMAT_LEAD_VORBIS             = $564C;  { LEAD Technologies }
   {$EXTERNALSYM WAVE_FORMAT_LEAD_VORBIS}
-  WAVE_FORMAT_WAVPACK_AUDIO               = $5756;  { xiph.org }
+  WAVE_FORMAT_WAVPACK_AUDIO           = $5756;  { xiph.org }
   {$EXTERNALSYM WAVE_FORMAT_WAVPACK_AUDIO}
-  WAVE_FORMAT_ALAC                        = $6C61;  { Apple Lossless }
+  WAVE_FORMAT_ALAC                    = $6C61;  { Apple Lossless }
   {$EXTERNALSYM WAVE_FORMAT_ALAC}
-  WAVE_FORMAT_OGG_VORBIS_MODE_1           = $674F;  { Ogg Vorbis }
+  WAVE_FORMAT_OGG_VORBIS_MODE_1       = $674F;  { Ogg Vorbis }
   {$EXTERNALSYM WAVE_FORMAT_OGG_VORBIS_MODE_1}
-  WAVE_FORMAT_OGG_VORBIS_MODE_2           = $6750;  { Ogg Vorbis }
+  WAVE_FORMAT_OGG_VORBIS_MODE_2       = $6750;  { Ogg Vorbis }
   {$EXTERNALSYM WAVE_FORMAT_OGG_VORBIS_MODE_2}
-  WAVE_FORMAT_OGG_VORBIS_MODE_3           = $6751;  { Ogg Vorbis }
+  WAVE_FORMAT_OGG_VORBIS_MODE_3       = $6751;  { Ogg Vorbis }
   {$EXTERNALSYM WAVE_FORMAT_OGG_VORBIS_MODE_3}
-  WAVE_FORMAT_OGG_VORBIS_MODE_1_PLUS      = $676F;  { Ogg Vorbis }
+  WAVE_FORMAT_OGG_VORBIS_MODE_1_PLUS  = $676F;  { Ogg Vorbis }
   {$EXTERNALSYM WAVE_FORMAT_OGG_VORBIS_MODE_1_PLUS}
-  WAVE_FORMAT_OGG_VORBIS_MODE_2_PLUS      = $6770;  { Ogg Vorbis }
+  WAVE_FORMAT_OGG_VORBIS_MODE_2_PLUS  = $6770;  { Ogg Vorbis }
   {$EXTERNALSYM WAVE_FORMAT_OGG_VORBIS_MODE_2_PLUS}
-  WAVE_FORMAT_OGG_VORBIS_MODE_3_PLUS      = $6771;  { Ogg Vorbis }
+  WAVE_FORMAT_OGG_VORBIS_MODE_3_PLUS  = $6771;  { Ogg Vorbis }
   {$EXTERNALSYM WAVE_FORMAT_OGG_VORBIS_MODE_3_PLUS}
-  WAVE_FORMAT_3COM_NBX                    = $7000;  { 3COM Corp. }
+  WAVE_FORMAT_3COM_NBX                = $7000;  { 3COM Corp. }
   {$EXTERNALSYM WAVE_FORMAT_3COM_NBX}
-  WAVE_FORMAT_OPUS                        = $704F;  { Opus }
+  WAVE_FORMAT_OPUS                    = $704F;  { https://opus-codec.org }
   {$EXTERNALSYM WAVE_FORMAT_OPUS}
-  WAVE_FORMAT_FAAD_AAC                    = $706D;
+  WAVE_FORMAT_FAAD_AAC                = $706D;
   {$EXTERNALSYM WAVE_FORMAT_FAAD_AAC}
-  WAVE_FORMAT_AMR_NB                      = $7361;  { AMR Narrowband }
+  WAVE_FORMAT_AMR_NB                  = $7361;  { AMR Narrowband }
   {$EXTERNALSYM WAVE_FORMAT_AMR_NB}
-  WAVE_FORMAT_AMR_WB                      = $7362;  { AMR Wideband }
+  WAVE_FORMAT_AMR_WB                  = $7362;  { AMR Wideband }
   {$EXTERNALSYM WAVE_FORMAT_AMR_WB}
-  WAVE_FORMAT_AMR_WP                      = $7363;  { AMR Wideband Plus }
+  WAVE_FORMAT_AMR_WP                  = $7363;  { AMR Wideband Plus }
   {$EXTERNALSYM WAVE_FORMAT_AMR_WP}
-  WAVE_FORMAT_GSM_AMR_CBR                 = $7A21;  { GSMA/3GPP }
+  WAVE_FORMAT_GSM_AMR_CBR             = $7A21;  { GSMA/3GPP }
   {$EXTERNALSYM WAVE_FORMAT_GSM_AMR_CBR}
-  WAVE_FORMAT_GSM_AMR_VBR_SID             = $7A22;  { GSMA/3GPP }
+  WAVE_FORMAT_GSM_AMR_VBR_SID         = $7A22;  { GSMA/3GPP }
   {$EXTERNALSYM WAVE_FORMAT_GSM_AMR_VBR_SID}
-  WAVE_FORMAT_COMVERSE_INFOSYS_G723_1     = $A100;  { Comverse Infosys }
+  WAVE_FORMAT_COMVERSE_INFOSYS_G723_1 = $A100;  { Comverse Infosys }
   {$EXTERNALSYM WAVE_FORMAT_COMVERSE_INFOSYS_G723_1}
-  WAVE_FORMAT_COMVERSE_INFOSYS_AVQSBC     = $A101;  { Comverse Infosys }
+  WAVE_FORMAT_COMVERSE_INFOSYS_AVQSBC = $A101;  { Comverse Infosys }
   {$EXTERNALSYM WAVE_FORMAT_COMVERSE_INFOSYS_AVQSBC}
-  WAVE_FORMAT_COMVERSE_INFOSYS_SBC        = $A102;  { Comverse Infosys }
+  WAVE_FORMAT_COMVERSE_INFOSYS_SBC    = $A102;  { Comverse Infosys }
   {$EXTERNALSYM WAVE_FORMAT_COMVERSE_INFOSYS_SBC}
-  WAVE_FORMAT_SYMBOL_G729_A               = $A103;  { Symbol Technologies }
+  WAVE_FORMAT_SYMBOL_G729_A           = $A103;  { Symbol Technologies }
   {$EXTERNALSYM WAVE_FORMAT_SYMBOL_G729_A}
-  WAVE_FORMAT_VOICEAGE_AMR_WB             = $A104;  { VoiceAge Corp. }
+  WAVE_FORMAT_VOICEAGE_AMR_WB         = $A104;  { VoiceAge Corp. }
   {$EXTERNALSYM WAVE_FORMAT_VOICEAGE_AMR_WB}
-  WAVE_FORMAT_INGENIENT_G726              = $A105;  { Ingenient Technologies, Inc. }
+  WAVE_FORMAT_INGENIENT_G726          = $A105;  { Ingenient Technologies, Inc. }
   {$EXTERNALSYM WAVE_FORMAT_INGENIENT_G726}
-  WAVE_FORMAT_MPEG4_AAC                   = $A106;  { ISO/MPEG-4 }
+  WAVE_FORMAT_MPEG4_AAC               = $A106;  { ISO/MPEG-4 }
   {$EXTERNALSYM WAVE_FORMAT_MPEG4_AAC}
-  WAVE_FORMAT_ENCORE_G726                 = $A107;  { Encore Software }
+  WAVE_FORMAT_ENCORE_G726             = $A107;  { Encore Software }
   {$EXTERNALSYM WAVE_FORMAT_ENCORE_G726}
-  WAVE_FORMAT_ZOLL_ASAO                   = $A108;  { ZOLL Medical Corp. }
+  WAVE_FORMAT_ZOLL_ASAO               = $A108;  { ZOLL Medical Corp. }
   {$EXTERNALSYM WAVE_FORMAT_ZOLL_ASAO}
-  WAVE_FORMAT_SPEEX_VOICE                 = $A109;  { xiph.org }
+  WAVE_FORMAT_SPEEX_VOICE             = $A109;  { xiph.org }
   {$EXTERNALSYM WAVE_FORMAT_SPEEX_VOICE}
-  WAVE_FORMAT_VIANIX_MASC                 = $A10A;  { Vianix LLC }
+  WAVE_FORMAT_VIANIX_MASC             = $A10A;  { Vianix LLC }
   {$EXTERNALSYM WAVE_FORMAT_VIANIX_MASC}
-  WAVE_FORMAT_WM9_SPECTRUM_ANALYZER       = $A10B;  { Microsoft }
+  WAVE_FORMAT_WM9_SPECTRUM_ANALYZER   = $A10B;  { Microsoft }
   {$EXTERNALSYM WAVE_FORMAT_WM9_SPECTRUM_ANALYZER}
-  WAVE_FORMAT_WMF_SPECTRUM_ANAYZER        = $A10C;  { Microsoft }
+  WAVE_FORMAT_WMF_SPECTRUM_ANAYZER    = $A10C;  { Microsoft }
   {$EXTERNALSYM WAVE_FORMAT_WMF_SPECTRUM_ANAYZER}
-  WAVE_FORMAT_GSM_610                     = $A10D;
+  WAVE_FORMAT_GSM_610                 = $A10D;
   {$EXTERNALSYM WAVE_FORMAT_GSM_610}
-  WAVE_FORMAT_GSM_620                     = $A10E;
+  WAVE_FORMAT_GSM_620                 = $A10E;
   {$EXTERNALSYM WAVE_FORMAT_GSM_620}
-  WAVE_FORMAT_GSM_660                     = $A10F;
+  WAVE_FORMAT_GSM_660                 = $A10F;
   {$EXTERNALSYM WAVE_FORMAT_GSM_660}
-  WAVE_FORMAT_GSM_690                     = $A110;
+  WAVE_FORMAT_GSM_690                 = $A110;
   {$EXTERNALSYM WAVE_FORMAT_GSM_690}
-  WAVE_FORMAT_GSM_ADAPTIVE_MULTIRATE_WB   = $A111;
+  WAVE_FORMAT_GSM_ADAPTIVE_MULTIRATE_WB = $A111;
   {$EXTERNALSYM WAVE_FORMAT_GSM_ADAPTIVE_MULTIRATE_WB}
-  WAVE_FORMAT_POLYCOM_G722                = $A112;  { Polycom }
+  WAVE_FORMAT_POLYCOM_G722            = $A112;  { Polycom }
   {$EXTERNALSYM WAVE_FORMAT_POLYCOM_G722}
-  WAVE_FORMAT_POLYCOM_G728                = $A113;  { Polycom }
+  WAVE_FORMAT_POLYCOM_G728            = $A113;  { Polycom }
   {$EXTERNALSYM WAVE_FORMAT_POLYCOM_G728}
-  WAVE_FORMAT_POLYCOM_G729_A              = $A114;  { Polycom }
+  WAVE_FORMAT_POLYCOM_G729_A          = $A114;  { Polycom }
   {$EXTERNALSYM WAVE_FORMAT_POLYCOM_G729_A}
-  WAVE_FORMAT_POLYCOM_SIREN               = $A115;  { Polycom }
+  WAVE_FORMAT_POLYCOM_SIREN           = $A115;  { Polycom }
   {$EXTERNALSYM WAVE_FORMAT_POLYCOM_SIREN}
-  WAVE_FORMAT_GLOBAL_IP_ILBC              = $A116;  { Global IP }
+  WAVE_FORMAT_GLOBAL_IP_ILBC          = $A116;  { Global IP }
   {$EXTERNALSYM WAVE_FORMAT_GLOBAL_IP_ILBC}
-  WAVE_FORMAT_RADIOTIME_TIME_SHIFT_RADIO  = $A117;  { RadioTime }
+  WAVE_FORMAT_RADIOTIME_TIME_SHIFT_RADIO = $A117;  { RadioTime }
   {$EXTERNALSYM WAVE_FORMAT_RADIOTIME_TIME_SHIFT_RADIO}
-  WAVE_FORMAT_NICE_ACA                    = $A118;  { Nice Systems }
+  WAVE_FORMAT_NICE_ACA                = $A118;  { Nice Systems }
   {$EXTERNALSYM WAVE_FORMAT_NICE_ACA}
-  WAVE_FORMAT_NICE_ADPCM                  = $A119;  { Nice Systems }
+  WAVE_FORMAT_NICE_ADPCM              = $A119;  { Nice Systems }
   {$EXTERNALSYM WAVE_FORMAT_NICE_ADPCM}
-  WAVE_FORMAT_VOCORD_G721                 = $A11A;  { Vocord Telecom }
+  WAVE_FORMAT_VOCORD_G721             = $A11A;  { Vocord Telecom }
   {$EXTERNALSYM WAVE_FORMAT_VOCORD_G721}
-  WAVE_FORMAT_VOCORD_G726                 = $A11B;  { Vocord Telecom }
+  WAVE_FORMAT_VOCORD_G726             = $A11B;  { Vocord Telecom }
   {$EXTERNALSYM WAVE_FORMAT_VOCORD_G726}
-  WAVE_FORMAT_VOCORD_G722_1               = $A11C;  { Vocord Telecom }
+  WAVE_FORMAT_VOCORD_G722_1           = $A11C;  { Vocord Telecom }
   {$EXTERNALSYM WAVE_FORMAT_VOCORD_G722_1}
-  WAVE_FORMAT_VOCORD_G728                 = $A11D;  { Vocord Telecom }
+  WAVE_FORMAT_VOCORD_G728             = $A11D;  { Vocord Telecom }
   {$EXTERNALSYM WAVE_FORMAT_VOCORD_G728}
-  WAVE_FORMAT_VOCORD_G729                 = $A11E;  { Vocord Telecom }
+  WAVE_FORMAT_VOCORD_G729             = $A11E;  { Vocord Telecom }
   {$EXTERNALSYM WAVE_FORMAT_VOCORD_G729}
-  WAVE_FORMAT_VOCORD_G729_A               = $A11F;  { Vocord Telecom }
+  WAVE_FORMAT_VOCORD_G729_A           = $A11F;  { Vocord Telecom }
   {$EXTERNALSYM WAVE_FORMAT_VOCORD_G729_A}
-  WAVE_FORMAT_VOCORD_G723_1               = $A120;  { Vocord Telecom }
+  WAVE_FORMAT_VOCORD_G723_1           = $A120;  { Vocord Telecom }
   {$EXTERNALSYM WAVE_FORMAT_VOCORD_G723_1}
-  WAVE_FORMAT_VOCORD_LBC                  = $A121;  { Vocord Telecom }
+  WAVE_FORMAT_VOCORD_LBC              = $A121;  { Vocord Telecom }
   {$EXTERNALSYM WAVE_FORMAT_VOCORD_LBC}
-  WAVE_FORMAT_NICE_G728                   = $A122;  { Nice Systems }
+  WAVE_FORMAT_NICE_G728               = $A122;  { Nice Systems }
   {$EXTERNALSYM WAVE_FORMAT_NICE_G728}
-  WAVE_FORMAT_FRACE_TELECOM_G729          = $A123;  { France Telecom }
+  WAVE_FORMAT_FRACE_TELECOM_G729      = $A123;  { France Telecom }
   {$EXTERNALSYM WAVE_FORMAT_FRACE_TELECOM_G729}
-  WAVE_FORMAT_CODIAN                      = $A124;  { CODIAN }
+  WAVE_FORMAT_CODIAN                  = $A124;  { CODIAN }
   {$EXTERNALSYM WAVE_FORMAT_CODIAN}
-  WAVE_FORMAT_DOLBY_AC4                   = $AC40;  { Dolby AC-4 }
+  WAVE_FORMAT_DOLBY_AC4               = $AC40;  { Dolby AC-4 }
   {$EXTERNALSYM WAVE_FORMAT_DOLBY_AC4}
-  WAVE_FORMAT_DOLBY_AC4_IMS               = $AC41;  { Dolby AC-4 Immersive Stereo }
-  {$EXTERNALSYM WAVE_FORMAT_DOLBY_AC4_IMS}
-  WAVE_FORMAT_FLAC                        = $F1AC;  { flac.sourceforge.net }
+  WAVE_FORMAT_FLAC                    = $F1AC;  { https://xiph.org/flac/}
   {$EXTERNALSYM WAVE_FORMAT_FLAC}
 
-  WAVE_FORMAT_EXTENSIBLE                  = $FFFE;  // Microsoft
+  WAVE_FORMAT_EXTENSIBLE              = $FFFE;  // Microsoft
   {$EXTERNALSYM WAVE_FORMAT_EXTENSIBLE}
 
   //
@@ -4575,6 +4681,7 @@ type
   // ======================================================================
 
   PWAVEFORMATPCMEX = ^WAVEFORMATPCMEX;
+  {$EXTERNALSYM PWAVEFORMATPCMEX}
   NPWAVEFORMATPCMEX = ^WAVEFORMATPCMEX;
   {$EXTERNALSYM NPWAVEFORMATPCMEX}
   LPWAVEFORMATPCMEX = ^WAVEFORMATPCMEX;
@@ -4655,31 +4762,42 @@ type
 
   // Define data for MS ADPCM
 
-  PADPCMCoefSet = ^ADPCMCoefSet;
-  NPADPCMCOEFSET = ^ADPCMCOEFSET;
-  LPADPCMCOEFSET = ^ADPCMCOEFSET;
-  ADPCMCoefSet = record
+  PADPCMCOEFSET = ^ADPCMCoefSet_tag;
+  {$EXTERNALSYM PADPCMCOEFSET}
+  ADPCMCoefSet_tag = record
     iCoef1: Word;
     iCoef2: Word;
   end;
+  {$EXTERNALSYM ADPCMCoefSet_tag}
+  ADPCMCoefSet = ADPCMCoefSet_tag;
   {$EXTERNALSYM ADPCMCoefSet}
+  NPADPCMCOEFSET = ^ADPCMCOEFSET;
+  {$EXTERNALSYM NPADPCMCOEFSET}
+  LPADPCMCOEFSET = ^ADPCMCOEFSET;
+  {$EXTERNALSYM LPADPCMCOEFSET}
 
 
-  PADPCMWaveFormat = ^ADPCMWaveFormat;
-  ADPCMWaveFormat = record
+  PADPCMWAVEFORMAT = ^ADPCMWaveFormat_tag;
+  {$EXTERNALSYM PADPCMWAVEFORMAT}
+  ADPCMWaveFormat_tag = record
     wfx: TWaveFormatEx;
     wSamplesPerBlock: Word;
     wNumCoef: Word;
     aCoef: array [0..1] of ADPCMCoefSet;
   end;
+  {$EXTERNALSYM ADPCMWaveFormat_tag}
+  ADPCMWaveFormat = ADPCMWaveFormat_tag;
   {$EXTERNALSYM ADPCMWaveFormat}
+  NPADPCMWAVEFORMAT = ^ADPCMWAVEFORMAT;
+  {$EXTERNALSYM NPADPCMWAVEFORMAT}
+  LPADPCMWAVEFORMAT = ^ADPCMWAVEFORMAT;
+  {$EXTERNALSYM LPADPCMWAVEFORMAT}
 
 
   //  Microsoft's DRM structure definitions
 
-  PDRMWAVEFORMAT = ^DRMWAVEFORMAT;
-  NPDRMWAVEFORMAT = ^DRMWAVEFORMAT;
-  LPDRMWAVEFORMAT = ^DRMWAVEFORMAT;
+  PDRMWAVEFORMAT = ^drmwaveformat_tag;
+  {$EXTERNALSYM PDRMWAVEFORMAT}
   drmwaveformat_tag = record
     wfx: WAVEFORMATEX;
     wReserved: WORD;
@@ -4689,18 +4807,28 @@ type
   {$EXTERNALSYM drmwaveformat_tag}
   DRMWAVEFORMAT = drmwaveformat_tag;
   {$EXTERNALSYM DRMWAVEFORMAT}
+  NPDRMWAVEFORMAT = ^PDRMWAVEFORMAT;
+  {$EXTERNALSYM NPDRMWAVEFORMAT}
+  LPDRMWAVEFORMAT = ^NPDRMWAVEFORMAT;
+  {$EXTERNALSYM LPDRMWAVEFORMAT}
 
 
   //  Intel's DVI ADPCM structure definitions
   //
   //      for WAVE_FORMAT_DVI_ADPCM   ($0011)
-
-  PDVIADPCMWaveFormat = ^DVIADPCMWaveFormat;
-  DVIADPCMWaveFormat = record
+  PDVIADPCMWAVEFORMAT = ^DVIADPCMWaveFormat_tag;
+  {$EXTERNALSYM PDVIADPCMWAVEFORMAT}
+  DVIADPCMWaveFormat_tag = record
     wfx: WaveFormatEx;
     wSamplesPerBlock: Word;
   end;
+  {$EXTERNALSYM DVIADPCMWaveFormat_tag}
+  DVIADPCMWaveFormat = DVIADPCMWaveFormat_tag;
   {$EXTERNALSYM DVIADPCMWaveFormat}
+  NPDVIADPCMWAVEFORMAT = ^PDVIADPCMWAVEFORMAT;
+  {$EXTERNALSYM NPDVIADPCMWAVEFORMAT}
+  LPDVIADPCMWAVEFORMAT = ^NPDVIADPCMWAVEFORMAT;
+  {$EXTERNALSYM LPDVIADPCMWAVEFORMAT}
 
 
   //  IMA endorsed ADPCM structure definitions--note that this is exactly
@@ -4708,260 +4836,390 @@ type
   //
   //      for WAVE_FORMAT_IMA_ADPCM   ($0011)
 
-  PIMAADPCMWaveFormat = ^IMAADPCMWaveFormat;
-  IMAADPCMWaveFormat = record
+  PIMAADPCMWAVEFORMAT = ^IMAADPCMWaveFormat_tag;
+  {$EXTERNALSYM PIMAADPCMWAVEFORMAT}
+  IMAADPCMWaveFormat_tag = record
     wfx: WaveFormatEx;
     wSamplesPerBlock: Word;
   end;
+  {$EXTERNALSYM IMAADPCMWaveFormat_tag}
+  IMAADPCMWaveFormat = IMAADPCMWaveFormat_tag;
   {$EXTERNALSYM IMAADPCMWaveFormat}
+  NPIMAADPCMWAVEFORMAT = PIMAADPCMWAVEFORMAT;
+  {$EXTERNALSYM NPIMAADPCMWAVEFORMAT}
+  LPIMAADPCMWAVEFORMAT = NPIMAADPCMWAVEFORMAT;
+  {$EXTERNALSYM LPIMAADPCMWAVEFORMAT}
 
 
   // VideoLogic's Media Space ADPCM Structure definitions
   // for  WAVE_FORMAT_MEDIASPACE_ADPCM    ($0012)
 
-  PMediaSpaceADPCMWaveFormat = ^MediaSpaceADPCMWaveFormat;
-  MediaSpaceADPCMWaveFormat = record
+  PMEDIASPACEADPCMWAVEFORMAT = ^MediaSpaceADPCMWaveFormat_tag;
+  {$EXTERNALSYM PMEDIASPACEADPCMWAVEFORMAT}
+  MediaSpaceADPCMWaveFormat_tag = record
     wfx: WaveFormatEx;
     wRevision: Word;
   end;
+  {$EXTERNALSYM MediaSpaceADPCMWaveFormat_tag}
+  MediaSpaceADPCMWaveFormat = MediaSpaceADPCMWaveFormat_tag;
   {$EXTERNALSYM MediaSpaceADPCMWaveFormat}
+  NPMEDIASPACEADPCMWAVEFORMAT = ^PMEDIASPACEADPCMWAVEFORMAT;
+  {$EXTERNALSYM NPMEDIASPACEADPCMWAVEFORMAT}
+  LPMEDIASPACEADPCMWAVEFORMAT = ^NPMEDIASPACEADPCMWAVEFORMAT;
+  {$EXTERNALSYM LPMEDIASPACEADPCMWAVEFORMAT}
+
 
 
   //  Sierra Semiconductor
   //  for WAVE_FORMAT_SIERRA_ADPCM   ($0013)
 
-  PSierraADPCMWaveFormat = ^SierraADPCMWaveFormat;
-  SierraADPCMWaveFormat = record
+  PSIERRAADPCMWAVEFORMAT = ^SierraADPCMWaveFormat_tag;
+  {$EXTERNALSYM PSIERRAADPCMWAVEFORMAT}
+  SierraADPCMWaveFormat_tag = record
     wfx: TWaveFormatEx;
     wRevision: Word;
   end;
+  SierraADPCMWaveFormat = SierraADPCMWaveFormat_tag;
   {$EXTERNALSYM SierraADPCMWaveFormat}
+  NPSIERRAADPCMWAVEFORMAT = ^PSIERRAADPCMWAVEFORMAT;
+  {$EXTERNALSYM NPSIERRAADPCMWAVEFORMAT}
+  LPSIERRAADPCMWAVEFORMAT = ^NPSIERRAADPCMWAVEFORMAT;
+  {$EXTERNALSYM LPSIERRAADPCMWAVEFORMAT}
 
 
   //  Antex Electronics  structure definitions
   //      for WAVE_FORMAT_G723_ADPCM   ($0014)
-
-  PG723_ADPCMWaveFormat = ^G723_ADPCMWaveFormat;
-  G723_ADPCMWaveFormat = record
+  PG723_ADPCMWAVEFORMAT = ^G723_ADPCMWaveFormat_tag;
+  {$EXTERNALSYM PG723_ADPCMWAVEFORMAT}
+  G723_ADPCMWaveFormat_tag = record
     wfx: TWaveFormatEx;
     cbExtraSize: Word;
     nAuxBlockSize: Word;
   end;
+  G723_ADPCMWaveFormat = G723_ADPCMWaveFormat_tag;
   {$EXTERNALSYM G723_ADPCMWaveFormat}
+  NPG723_ADPCMWAVEFORMAT = ^PG723_ADPCMWAVEFORMAT;
+  {$EXTERNALSYM NPG723_ADPCMWAVEFORMAT}
+  LPG723_ADPCMWAVEFORMAT = ^NPG723_ADPCMWAVEFORMAT;
+  {$EXTERNALSYM LPG723_ADPCMWAVEFORMAT}
 
 
   //  DSP Solutions (formerly DIGISPEECH) structure definitions
   //
   //      for WAVE_FORMAT_DIGISTD   ($0015)
 
-  PDigiStdWaveFormat = ^DigiStdWaveFormat;
-  DigiStdWaveFormat = record
+  PDIGISTDWAVEFORMAT = ^G723_ADPCMWaveFormat_tag;
+  {$EXTERNALSYM PDIGISTDWAVEFORMAT}
+  DigiStdWaveFormat_tag = record
     wfx: WaveFormatEx;
   end;
   {$EXTERNALSYM DigiStdWaveFormat}
+  NPDIGISTDWAVEFORMAT = ^PDIGISTDWAVEFORMAT;
+  {$EXTERNALSYM NPDIGISTDWAVEFORMAT}
+  LPDIGISTDWAVEFORMAT = ^NPDIGISTDWAVEFORMAT;
+  {$EXTERNALSYM LPDIGISTDWAVEFORMAT}
 
 
   //  DSP Solutions (formerly DIGISPEECH) structure definitions
   //
   //      for WAVE_FORMAT_DIGIFIX   ($0016)
 
-  PDigiFixWaveFormat = ^DigiFixWaveFormat;
-  DigiFixWaveFormat = record
+  PDIGIFIXWAVEFORMAT = ^DigiFixWaveFormat_tag;
+  {$EXTERNALSYM PDIGIFIXWAVEFORMAT}
+  DigiFixWaveFormat_tag = record
     wfx: WaveFormatEx;
   end;
+  DigiFixWaveFormat = DigiFixWaveFormat_tag;
   {$EXTERNALSYM DigiFixWaveFormat}
+  NPDIGIFIXWAVEFORMAT = ^DIGIFIXWAVEFORMAT;
+  {$EXTERNALSYM NPDIGIFIXWAVEFORMAT}
+  LPDIGIFIXWAVEFORMAT = ^DIGIFIXWAVEFORMAT;
+  {$EXTERNALSYM LPDIGIFIXWAVEFORMAT}
 
 
   //   Dialogic Corporation
   // WAVEFORMAT_DIALOGIC_OKI_ADPCM   ($0017)
 
-  PDialogIkokiADPCMWaveFormat = ^DialogIkokiADPCMWaveFormat;
-  DialogIkokiADPCMWaveFormat = record
+  PDIALOGICOKIADPCMWAVEFORMAT = ^DialogIkokiADPCMWaveFormat_tag;
+  {$EXTERNALSYM PDIALOGICOKIADPCMWAVEFORMAT}
+  DialogIkokiADPCMWaveFormat_tag = record
     wfx: WaveFormatEx;
   end;
+  DialogIkokiADPCMWaveFormat = DialogIkokiADPCMWaveFormat_tag;
   {$EXTERNALSYM DialogIkokiADPCMWaveFormat}
+  NPDIALOGICOKIADPCMWAVEFORMAT = ^PDIALOGICOKIADPCMWAVEFORMAT;
+  {$EXTERNALSYM NPDIALOGICOKIADPCMWAVEFORMAT}
+  LPDIALOGICOKIADPCMWAVEFORMAT = ^NPDIALOGICOKIADPCMWAVEFORMAT;
+  {$EXTERNALSYM LPDIALOGICOKIADPCMWAVEFORMAT}
 
 
   //  Yamaha Compression's ADPCM structure definitions
   //
   //      for WAVE_FORMAT_YAMAHA_ADPCM   ($0020)
 
-  PYamaha_ADPCMWaveFormat = ^Yamaha_ADPCMWaveFormat;
-  Yamaha_ADPCMWaveFormat = record
+  PYAMAHA_ADPCMWAVEFORMAT = ^yamaha_adpmcwaveformat_tag;
+  {$EXTERNALSYM PYAMAHA_ADPCMWAVEFORMAT}
+  yamaha_adpmcwaveformat_tag = record
     wfx: WaveFormatEx;
   end;
   {$EXTERNALSYM Yamaha_ADPCMWaveFormat}
+  yamaha_adpmcwaveformat = yamaha_adpmcwaveformat_tag;
+  NPYAMAHA_ADPCMWAVEFORMAT = ^PYAMAHA_ADPCMWAVEFORMAT;
+  {$EXTERNALSYM NPYAMAHA_ADPCMWAVEFORMAT}
+  LPYAMAHA_ADPCMWAVEFORMAT = ^NPYAMAHA_ADPCMWAVEFORMAT;
+  {$EXTERNALSYM LPYAMAHA_ADPCMWAVEFORMAT}
 
 
   //  Speech Compression's Sonarc structure definitions
   //
   //      for WAVE_FORMAT_SONARC   ($0021)
 
-  PSonarcWaveFormat = ^SonarcWaveFormat;
-  SonarcWaveFormat = record
+  PSONARCWAVEFORMAT = ^sonarcwaveformat_tag;
+  {$EXTERNALSYM PSONARCWAVEFORMAT}
+  sonarcwaveformat_tag = record
     wfx: WaveFormatEx;
     wCompType: Word;
   end;
+  SonarcWaveFormat = sonarcwaveformat_tag;
   {$EXTERNALSYM SonarcWaveFormat}
+  NPSONARCWAVEFORMAT = ^SONARCWAVEFORMAT;
+  {$EXTERNALSYM NPSONARCWAVEFORMAT}
+  LPSONARCWAVEFORMAT = ^SONARCWAVEFORMAT;
+  {$EXTERNALSYM LPSONARCWAVEFORMAT}
 
 
   //  DSP Groups's TRUESPEECH structure definitions
   //
   //      for WAVE_FORMAT_DSPGROUP_TRUESPEECH   ($0022)
 
-  PTrueSpeechWaveFormat = ^TrueSpeechWaveFormat;
-  TrueSpeechWaveFormat = record
+  PTRUESPEECHWAVEFORMAT = ^truespeechwaveformat_tag;
+  {$EXTERNALSYM PTRUESPEECHWAVEFORMAT}
+  truespeechwaveformat_tag = record
     wfx: WaveFormatEx;
     wRevision: Word;
     wSamplesPerBlock: Word;
     abReserved: array [0 .. 27] of Byte;
   end;
+  TrueSpeechWaveFormat = truespeechwaveformat_tag;
   {$EXTERNALSYM TrueSpeechWaveFormat}
+  NPTRUESPEECHWAVEFORMAT = ^PTRUESPEECHWAVEFORMAT;
+  {$EXTERNALSYM NPTRUESPEECHWAVEFORMAT}
+  LPTRUESPEECHWAVEFORMAT = ^NPTRUESPEECHWAVEFORMAT;
+  {$EXTERNALSYM LPTRUESPEECHWAVEFORMAT}
 
 
   //  Echo Speech Corp structure definitions
   //
   //      for WAVE_FORMAT_ECHOSC1   ($0023)
-  PEchoSC1WaveFormat = ^EchoSC1WaveFormat;
-  EchoSC1WaveFormat = record
+  PECHOSC1WAVEFORMAT = ^EchoSC1WaveFormat;
+  {$EXTERNALSYM PECHOSC1WAVEFORMAT}
+  echosc1waveformat_tag = record
     wfx: WaveFormatEx;
   end;
+  EchoSC1WaveFormat = echosc1waveformat_tag;
   {$EXTERNALSYM EchoSC1WaveFormat}
+  {$EXTERNALSYM NPECHOSC1WAVEFORMAT}
+  NPECHOSC1WAVEFORMAT = ^PECHOSC1WAVEFORMAT;
+  {$EXTERNALSYM LPECHOSC1WAVEFORMAT}
+  LPECHOSC1WAVEFORMAT = ^NPECHOSC1WAVEFORMAT;
 
 
   //  Audiofile Inc.structure definitions
   //
   //      for WAVE_FORMAT_AUDIOFILE_AF36   ($0024)
-  PAudioFile_AF36WaveFormat = ^AudioFile_AF36WaveFormat;
-  AudioFile_AF36WaveFormat = record
+  PAUDIOFILE_AF36WAVEFORMAT = ^audiofile_af36waveformat_tag;
+  {$EXTERNALSYM PAUDIOFILE_AF36WAVEFORMAT}
+  audiofile_af36waveformat_tag = record
     wfx: WaveFormatEx;
   end;
+  AudioFile_AF36WaveFormat = audiofile_af36waveformat_tag;
   {$EXTERNALSYM AudioFile_AF36WaveFormat}
+  NPAUDIOFILE_AF36WAVEFORMAT = ^PAUDIOFILE_AF36WAVEFORMAT;
+  {$EXTERNALSYM NPAUDIOFILE_AF36WAVEFORMAT}
+  LPAUDIOFILE_AF36WAVEFORMAT = ^NPAUDIOFILE_AF36WAVEFORMAT;
+  {$EXTERNALSYM LPAUDIOFILE_AF36WAVEFORMAT}
 
 
   //  Audio Processing Technology structure definitions
   //
   //      for WAVE_FORMAT_APTX   ($0025)
-  PAPTXWaveFormat = ^APTXWaveFormat;
-  APTXWaveFormat = record
+  PAPTXWAVEFORMAT = ^APTXWaveFormat;
+  {$EXTERNALSYM PAPTXWAVEFORMAT}  aptxwaveformat_tag = record
     wfx: WaveFormatEx;
   end;
+  APTXWaveFormat = aptxwaveformat_tag;
   {$EXTERNALSYM APTXWaveFormat}
+  NPAPTXWAVEFORMAT = ^PAPTXWAVEFORMAT;
+  {$EXTERNALSYM NPAPTXWAVEFORMAT}
+  LPAPTXWAVEFORMAT = ^NPAPTXWAVEFORMAT;
+  {$EXTERNALSYM LPAPTXWAVEFORMAT}
 
 
   //  Audiofile Inc.structure definitions
   //
   //      for WAVE_FORMAT_AUDIOFILE_AF10   ($0026)
 
-  PAudioFile_AF10WaveFormat = ^AudioFile_AF10WaveFormat;
-  AudioFile_AF10WaveFormat = record
+  PAUDIOFILE_AF10WAVEFORMAT = ^audiofile_af10waveformat_tag;
+  {$EXTERNALSYM PAUDIOFILE_AF10WAVEFORMAT}
+  audiofile_af10waveformat_tag = record
     wfx: WaveFormatEx;
   end;
+  AudioFile_AF10WaveFormat = audiofile_af10waveformat_tag;
   {$EXTERNALSYM AudioFile_AF10WaveFormat}
+  NPAUDIOFILE_AF10WAVEFORMAT = ^AUDIOFILE_AF10WAVEFORMAT;
+  {$EXTERNALSYM NPAUDIOFILE_AF10WAVEFORMAT}
+  LPAUDIOFILE_AF10WAVEFORMAT = ^AUDIOFILE_AF10WAVEFORMAT;
+  {$EXTERNALSYM LPAUDIOFILE_AF10WAVEFORMAT}
 
 
   // Dolby's AC-2 wave format structure definition
   //
   //           WAVE_FORMAT_DOLBY_AC2    ($0030)
 
-  PDolbyAC2WaveFormat = ^DolbyAC2WaveFormat;
-  DolbyAC2WaveFormat = record
+  PDolbyAC2WaveFormat = ^dolbyac2waveformat_tag;
+  dolbyac2waveformat_tag = record
     wfx: WaveFormatEx;
     nAuxBitsCode: Word;
   end;
+  DolbyAC2WaveFormat = dolbyac2waveformat_tag;
   {$EXTERNALSYM DolbyAC2WaveFormat}
 
 
   // Microsoft's
   // WAVE_FORMAT_GSM 610           $0031
 
-  PGSM610WaveFormat = ^GSM610WaveFormat;
-  GSM610WaveFormat = record
+  PGSM610WAVEFORMAT = ^GSM610WaveFormat;
+  {$EXTERNALSYM PGSM610WAVEFORMAT}
+  gsm610waveformat_tag = record
     wfx: WaveFormatEx;
   end;
+  {$EXTERNALSYM gsm610waveformat_tag}
+  GSM610WaveFormat = gsm610waveformat_tag;
   {$EXTERNALSYM GSM610WaveFormat}
+  NPGSM610WAVEFORMAT = ^GSM610WAVEFORMAT;
+  {$EXTERNALSYM NPGSM610WAVEFORMAT}
+  LPGSM610WAVEFORMAT = ^GSM610WAVEFORMAT;
+  {$EXTERNALSYM LPGSM610WAVEFORMAT}
 
 
   //      Antex Electronics Corp
   //
   //      for WAVE_FORMAT_ADPCME                  ($0033)
 
-  PADPCMEWaveFormat = ^ADPCMEWaveFormat;
-  ADPCMEWaveFormat = record
+  PADPCMEWAVEFORMAT = ^adpcmewaveformat_tag;
+  {$EXTERNALSYM PADPCMEWAVEFORMAT}
+  adpcmewaveformat_tag = record
     wfx: WaveFormatEx;
     wSamplesPerBlock: Word;
   end;
   {$EXTERNALSYM ADPCMEWaveFormat}
+  ADPCMEWaveFormat = adpcmewaveformat_tag;
+  NPADPCMEWAVEFORMAT = ^PADPCMEWAVEFORMAT;
+  {$EXTERNALSYM NPADPCMEWAVEFORMAT}
+  LPADPCMEWAVEFORMAT = ^NPADPCMEWAVEFORMAT;
+  {$EXTERNALSYM LPADPCMEWAVEFORMAT}
 
 
   // Control Resources Limited
   // WAVE_FORMAT_CONTROL_RES_VQLPC              $0034
 
-  PContresVQLPCWaveFormat = ^ContresVQLPCWaveFormat;
-  {$EXTERNALSYM PContresVQLPCWaveFormat}
-  ContresVQLPCWaveFormat = record
+  PCONTRESVQLPCWAVEFORMAT = ^contres_vqlpcwaveformat_tag;
+  {$EXTERNALSYM PCONTRESVQLPCWAVEFORMAT}
+  contres_vqlpcwaveformat_tag = record
     wfx: WaveFormatEx;
     wSamplesPerBlock: Word;
   end;
+  {$EXTERNALSYM contres_vqlpcwaveformat_tag}
+  ContresVQLPCWaveFormat = contres_vqlpcwaveformat_tag;
+  {$EXTERNALSYM ContresVQLPCWaveFormat}
+  NPCONTRESVQLPCWAVEFORMAT = ^CONTRESVQLPCWAVEFORMAT;
+  {$EXTERNALSYM NPCONTRESVQLPCWAVEFORMAT}
+  LPCONTRESVQLPCWAVEFORMAT = ^CONTRESVQLPCWAVEFORMAT;
+  {$EXTERNALSYM LPCONTRESVQLPCWAVEFORMAT}
 
 
   // for WAVE_FORMAT_DIGIREAL                   ($0035)
 
-  PDIGIREALWAVEFORMAT = ^DIGIREALWAVEFORMAT;
-  DIGIREALWAVEFORMAT = record
+  PDIGIREALWAVEFORMAT = ^digirealwaveformat_tag;
+  {$EXTERNALSYM PDIGIREALWAVEFORMAT}
+  digirealwaveformat_tag = record
     wfx: WaveFormatEx;
     wSamplesPerBlock: Word;
   end;
-  {$EXTERNALSYM DIGIREALWAVEFORMAT}
+  {$EXTERNALSYM digirealwaveformat_tag}
+  digirealwaveformat = digirealwaveformat_tag;
+  {$EXTERNALSYM digirealwaveformat}
+  NPDIGIREALWAVEFORMAT = ^PDIGIREALWAVEFORMAT;
+  {$EXTERNALSYM NPDIGIREALWAVEFORMAT}
+  LPDIGIREALWAVEFORMAT = ^NPDIGIREALWAVEFORMAT;
+  {$EXTERNALSYM LPDIGIREALWAVEFORMAT}
 
 
   //  DSP Solutions
   //
   //  for WAVE_FORMAT_DIGIADPCM   ($0036)
 
-  PDIGIADPCMWAVEFORMAT = ^DIGIADPCMWAVEFORMAT;
-  NPDIGIADPCMWAVEFORMAT = ^DIGIADPCMWAVEFORMAT;
-  {$EXTERNALSYM NPDIGIADPCMWAVEFORMAT}
-  LPDIGIADPCMWAVEFORMAT = ^DIGIADPCMWAVEFORMAT;
-  {$EXTERNALSYM LPDIGIADPCMWAVEFORMAT}
-  DIGIADPCMWAVEFORMAT = record
+  PDIGIADPCMWAVEFORMAT = ^digiadpcmmwaveformat_tag;
+  {$EXTERNALSYM PDIGIADPCMWAVEFORMAT}
+  digiadpcmmwaveformat_tag = record
     wfx: TWaveFormatEx;
     wSamplesPerBlock: Word;
   end;
-  {$EXTERNALSYM DIGIADPCMWAVEFORMAT}
+  {$EXTERNALSYM digiadpcmmwaveformat_tag}
+  digiadpcmmwaveformat = digiadpcmmwaveformat_tag;
+  {$EXTERNALSYM digiadpcmmwaveformat}
+  NPDIGIADPCMWAVEFORMAT = ^PDIGIADPCMWAVEFORMAT;
+  {$EXTERNALSYM NPDIGIADPCMWAVEFORMAT}
+  LPDIGIADPCMWAVEFORMAT = ^NPDIGIADPCMWAVEFORMAT;
+  {$EXTERNALSYM LPDIGIADPCMWAVEFORMAT}
 
 
   // Control Resources Limited
   // WAVE_FORMAT_CONTROL_RES_CR10          $0037
 
-  PContResCR10WaveFormat = ^ContResCR10WaveFormat;
-  ContResCR10WaveFormat = record
+  PCONTRESCR10WAVEFORMAT = ^ContResCR10WaveFormat_tag;
+  {$EXTERNALSYM PCONTRESCR10WAVEFORMAT}
+  ContResCR10WaveFormat_tag = record
     wfx: WaveFormatEx;
     wSamplesPerBlock: Word;
   end;
+  {$EXTERNALSYM ContResCR10WaveFormat_tag}
+  ContResCR10WaveFormat = ContResCR10WaveFormat_tag;
   {$EXTERNALSYM ContResCR10WaveFormat}
+  NPCONTRESCR10WAVEFORMAT = ^PCONTRESCR10WAVEFORMAT;
+  {$EXTERNALSYM NPCONTRESCR10WAVEFORMAT}
+  LPCONTRESCR10WAVEFORMAT = ^NPCONTRESCR10WAVEFORMAT;
+  {$EXTERNALSYM LPCONTRESCR10WAVEFORMAT}
 
 
   //  Natural Microsystems
   //
   //      for WAVE_FORMAT_NMS_VBXADPCM   ($0038)
 
-  PVBXADPCMWaveFormat = ^VBXADPCMWaveFormat;
-  VBXADPCMWaveFormat = record
+  PNMS_VBXADPCMWAVEFORMAT = ^nms_vbxadpcmmwaveformat_tag;
+  {$EXTERNALSYM PNMS_VBXADPCMWAVEFORMAT}
+  nms_vbxadpcmmwaveformat_tag = record
     wfx: WaveFormatEx;
     wSamplesPerBlock: Word;
   end;
-  {$EXTERNALSYM VBXADPCMWaveFormat}
+  {$EXTERNALSYM nms_vbxadpcmmwaveformat_tag}
+  nms_vbxadpcmmwaveformat = nms_vbxadpcmmwaveformat_tag;
+  {$EXTERNALSYM nms_vbxadpcmmwaveformat}
+  NPNMS_VBXADPCMWAVEFORMAT = ^PNMS_VBXADPCMWAVEFORMAT;
+  {$EXTERNALSYM NPNMS_VBXADPCMWAVEFORMAT}
+  LPNMS_VBXADPCMWAVEFORMAT = ^NPNMS_VBXADPCMWAVEFORMAT;
+  {$EXTERNALSYM LPNMS_VBXADPCMWAVEFORMAT}
 
 
   //  Antex Electronics  structure definitions
   //
   //      for WAVE_FORMAT_G721_ADPCM   ($0040)
-  PG721_ADPCMWaveFormat = ^G721_ADPCMWaveFormat;
-  G721_ADPCMWaveFormat = record
+  PG721_ADPCMWaveFormat = ^g721_adpcmwaveformat_tag;
+  g721_adpcmwaveformat_tag = record
     wfx: WaveFormatEx;
     wSamplesPerBlock: Word;
   end;
+  g721_adpcmwaveformat = g721_adpcmwaveformat_tag;
   {$EXTERNALSYM G721_ADPCMWaveFormat}
 
 
@@ -4969,8 +5227,9 @@ type
   //
   //  MPEG-1 audio wave format (audio layer only).   ($0050)
 
-  PMPEG1WaveFormat = ^MPEG1WaveFormat;
-  MPEG1WaveFormat = record
+  PMPEG1WAVEFORMAT = ^MPEG1WaveFormat_tag;
+  {$EXTERNALSYM PMPEG1WaveFormat}
+  MPEG1WaveFormat_tag = record
     wfx: WaveFormatEx;
     fwHeadLayer: Word;
     dwHeadBitrate: DWORD;
@@ -4981,10 +5240,11 @@ type
     dwPTSlow: DWORD;
     dwPTShigh: DWORD;
   end;
+  MPEG1WaveFormat = MPEG1WaveFormat_tag;
   {$EXTERNALSYM MPEG1WaveFormat}
-  NPMPEG1WAVEFORMAT = ^MPEG1WAVEFORMAT;
+  NPMPEG1WAVEFORMAT = ^PMPEG1WAVEFORMAT;
   {$EXTERNALSYM NPMPEG1WAVEFORMAT}
-  LPMPEG1WAVEFORMAT = ^MPEG1WAVEFORMAT;
+  LPMPEG1WAVEFORMAT = ^NPMPEG1WAVEFORMAT;
   {$EXTERNALSYM LPMPEG1WAVEFORMAT}
 
 
@@ -5019,7 +5279,7 @@ const
   // for WAVE_FORMAT_MPEGLAYER3 ($0055)
   // ===================================
 
-  MPEGLAYER3_WFX_EXTRA_BYTES          = 12;
+  MPEGLAYER3_WFX_EXTRA_BYTES   = 12;
   {$EXTERNALSYM MPEGLAYER3_WFX_EXTRA_BYTES}
 
 type
@@ -5027,11 +5287,8 @@ type
   // WAVE_FORMAT_MPEGLAYER3 format sructure
   // ======================================
 
-  PMPEGLAYER3WAVEFORMAT = ^MPEGLAYER3WAVEFORMAT;
-  NPMPEGLAYER3WAVEFORMAT = ^MPEGLAYER3WAVEFORMAT;
-  {$EXTERNALSYM LPMPEGLAYER3WAVEFORMAT}
-  LPMPEGLAYER3WAVEFORMAT = ^MPEGLAYER3WAVEFORMAT;
-  {$EXTERNALSYM NPMPEGLAYER3WAVEFORMAT}
+  PMPEGLAYER3WAVEFORMAT = ^mpeglayer3waveformat_tag;
+  {$EXTERNALSYM PMPEGLAYER3WAVEFORMAT}
   mpeglayer3waveformat_tag = record
     wfx: WAVEFORMATEX;
     wID: WORD;
@@ -5041,8 +5298,12 @@ type
     nCodecDelay: WORD;
   end;
   {$EXTERNALSYM mpeglayer3waveformat_tag}
-  MPEGLAYER3WAVEFORMAT = mpeglayer3waveformat_tag;
+  mpeglayer3waveformat = mpeglayer3waveformat_tag;
   {$EXTERNALSYM MPEGLAYER3WAVEFORMAT}
+  NPMPEGLAYER3WAVEFORMAT = ^PMPEGLAYER3WAVEFORMAT;
+  {$EXTERNALSYM NPMPEGLAYER3WAVEFORMAT}
+  LPMPEGLAYER3WAVEFORMAT = ^NPMPEGLAYER3WAVEFORMAT;
+  {$EXTERNALSYM LPMPEGLAYER3WAVEFORMAT}
 
   // =========================================================================;
 
@@ -5140,11 +5401,8 @@ const
 
 type
 
-  PHEAACWAVEINFO = ^HEAACWAVEINFO;
-  NPHEAACWAVEINFO = ^HEAACWAVEINFO;
-  {$EXTERNALSYM NPHEAACWAVEINFO}
-  LPHEAACWAVEINFO = ^HEAACWAVEINFO;
-  {$EXTERNALSYM LPHEAACWAVEINFO}
+  PHEAACWAVEINFO = ^heaacwaveinfo_tag;
+  {$EXTERNALSYM PHEAACWAVEINFO}
   heaacwaveinfo_tag = record
     // Defines core AAC properties. See description above. WAVEFORMATEX is of size 18 bytes.
     wfx: WAVEFORMATEX;
@@ -5182,23 +5440,28 @@ type
     dwReserved2: DWORD;
   end;
   {$EXTERNALSYM heaacwaveinfo_tag}
-  HEAACWAVEINFO = heaacwaveinfo_tag; // this structure has a size of 30 bytes
+  heaacwaveinfo = heaacwaveinfo_tag; // this structure has a size of 30 bytes
   {$EXTERNALSYM HEAACWAVEINFO}
+  NPHEAACWAVEINFO = ^PHEAACWAVEINFO;
+  {$EXTERNALSYM NPHEAACWAVEINFO}
+  LPHEAACWAVEINFO = ^NPHEAACWAVEINFO;
+  {$EXTERNALSYM LPHEAACWAVEINFO}
 
 
   // This structure describes the format block for wStructType=0
   PHEAACWAVEFORMAT = ^HEAACWAVEFORMAT;
-  NPHEAACWAVEFORMAT = ^HEAACWAVEFORMAT;
-  {$EXTERNALSYM NPHEAACWAVEFORMAT}
-  LPHEAACWAVEFORMAT = ^HEAACWAVEFORMAT;
-  {$EXTERNALSYM LPHEAACWAVEFORMAT}
+  {$EXTERNALSYM PHEAACWAVEFORMAT}
   heaacwaveformat_tag = record
     wfInfo: HEAACWAVEINFO;                        // This structure has a size of 30 bytes
     pbAudioSpecificConfig: array [0..0] of Byte;  // First byte of AudioSpecificConfig()
   end;
   {$EXTERNALSYM heaacwaveformat_tag}
-  HEAACWAVEFORMAT = heaacwaveformat_tag;  // This structure has a size of 31 bytes
+  heaacwaveformat = heaacwaveformat_tag;  // This structure has a size of 31 bytes
   {$EXTERNALSYM HEAACWAVEFORMAT}
+  NPHEAACWAVEFORMAT = ^PHEAACWAVEFORMAT;
+  {$EXTERNALSYM NPHEAACWAVEFORMAT}
+  LPHEAACWAVEFORMAT = ^NPHEAACWAVEFORMAT;
+  {$EXTERNALSYM LPHEAACWAVEFORMAT}
 
 
 
@@ -5230,17 +5493,18 @@ const
 
 type
 
-  LPMSAUDIO1WAVEFORMAT = ^MSAUDIO1WAVEFORMAT;
-  {$EXTERNALSYM LPMSAUDIO1WAVEFORMAT}
   PMSAUDIO1WAVEFORMAT = ^msaudio1waveformat_tag;
+  {$EXTERNALSYM PMSAUDIO1WAVEFORMAT}
   msaudio1waveformat_tag = record
     wfx: WAVEFORMATEX;
     wSamplesPerBlock: WORD;         // only counting "new" samples "= half of what will be used due to overlapping
     wEncodeOptions: WORD;
   end;
   {$EXTERNALSYM msaudio1waveformat_tag}
-  MSAUDIO1WAVEFORMAT = msaudio1waveformat_tag;
+  msaudio1waveformat = msaudio1waveformat_tag;
   {$EXTERNALSYM MSAUDIO1WAVEFORMAT}
+  LPMSAUDIO1WAVEFORMAT = ^MSAUDIO1WAVEFORMAT;
+  {$EXTERNALSYM LPMSAUDIO1WAVEFORMAT}
 
 const
 
@@ -5248,7 +5512,7 @@ const
   {$EXTERNALSYM MSAUDIO1_BITS_PER_SAMPLE}
   MSAUDIO1_MAX_CHANNELS               = WMAUDIO_MAX_CHANNELS;
   {$EXTERNALSYM MSAUDIO1_MAX_CHANNELS}
-  MSAUDIO1_WFX_EXTRA_BYTES            = (sizeof (MSAUDIO1WAVEFORMAT)- sizeof (WAVEFORMATEX));
+  MSAUDIO1_WFX_EXTRA_BYTES            = (SizeOf(MSAUDIO1WAVEFORMAT) - SizeOf(WAVEFORMATEX));
   {$EXTERNALSYM MSAUDIO1_WFX_EXTRA_BYTES}
 
   //  Windows Media Audio V2
@@ -5262,9 +5526,8 @@ const
 
 type
 
-  LPWMAUDIO2WAVEFORMAT = ^WMAUDIO2WAVEFORMAT;
-  {$EXTERNALSYM LPWMAUDIO2WAVEFORMAT}
   PWMAUDIO2WAVEFORMAT = ^wmaudio2waveformat_tag;
+  {$EXTERNALSYM PWMAUDIO2WAVEFORMAT}
   wmaudio2waveformat_tag = record
     wfx: WAVEFORMATEX;
     dwSamplesPerBlock: DWORD;        // only counting "new" samples "= half of what will be used due to overlapping
@@ -5272,8 +5535,10 @@ type
     dwSuperBlockAlign: DWORD;       // the big size...  should be multiples of wfx.nBlockAlign.
   end;
   {$EXTERNALSYM wmaudio2waveformat_tag}
-  WMAUDIO2WAVEFORMAT = wmaudio2waveformat_tag;
+  wmaudio2waveformat = wmaudio2waveformat_tag;
   {$EXTERNALSYM WMAUDIO2WAVEFORMAT}
+  LPWMAUDIO2WAVEFORMAT = ^PWMAUDIO2WAVEFORMAT;
+  {$EXTERNALSYM LPWMAUDIO2WAVEFORMAT}
 
 
 const
@@ -5282,10 +5547,8 @@ const
   {$EXTERNALSYM WMAUDIO2_BITS_PER_SAMPLE}
   WMAUDIO2_MAX_CHANNELS               = WMAUDIO_MAX_CHANNELS;
   {$EXTERNALSYM WMAUDIO2_MAX_CHANNELS}
-  WMAUDIO2_WFX_EXTRA_BYTES            = (sizeof (WMAUDIO2WAVEFORMAT)- sizeof (WAVEFORMATEX));
+  WMAUDIO2_WFX_EXTRA_BYTES            = (SizeOf(WMAUDIO2WAVEFORMAT) - SizeOf(WAVEFORMATEX));
   {$EXTERNALSYM WMAUDIO2_WFX_EXTRA_BYTES}
-
-
   //  Windows Media Audio V3
   //
   //      for WAVE_FORMAT_WMAUDIO3        ($0162)
@@ -5293,9 +5556,8 @@ const
 
 type
 
-  LPWMAUDIO3WAVEFORMAT = ^WMAUDIO3WAVEFORMAT;
-  {$EXTERNALSYM LPWMAUDIO3WAVEFORMAT}
   PWMAUDIO3WAVEFORMAT = ^wmaudio3waveformat_tag;
+  {$EXTERNALSYM PWMAUDIO3WAVEFORMAT}
   wmaudio3waveformat_tag = record
     wfx: WAVEFORMATEX;
     wValidBitsPerSample: WORD;       // bits of precision
@@ -5306,13 +5568,14 @@ type
     wReserved3: WORD;
   end;
   {$EXTERNALSYM wmaudio3waveformat_tag}
-  WMAUDIO3WAVEFORMAT = wmaudio3waveformat_tag;
+  wmaudio3waveformat = wmaudio3waveformat_tag;
   {$EXTERNALSYM WMAUDIO3WAVEFORMAT}
-
+  LPWMAUDIO3WAVEFORMAT = ^PWMAUDIO3WAVEFORMAT;
+  {$EXTERNALSYM LPWMAUDIO3WAVEFORMAT}
 
 const
 
-  WMAUDIO3_WFX_EXTRA_BYTES            = (sizeof (WMAUDIO3WAVEFORMAT)- sizeof (WAVEFORMATEX));
+  WMAUDIO3_WFX_EXTRA_BYTES            = (SizeOf (WMAUDIO3WAVEFORMAT) - SizeOf (WAVEFORMATEX));
   {$EXTERNALSYM WMAUDIO3_WFX_EXTRA_BYTES}
 
 
@@ -5320,96 +5583,162 @@ type
 
   //  Creative's ADPCM structure definitions
   //  for WAVE_FORMAT_CREATIVE_ADPCM   ($0200)
-  PCreativeADPCMWaveFormat = ^CreativeADPCMWaveFormat;
-  CreativeADPCMWaveFormat = record
+  PCREATIVEADPCMWAVEFORMAT = ^creative_adpcmwaveformat_tag;
+  {$EXTERNALSYM PCREATIVEADPCMWAVEFORMAT}
+  creative_adpcmwaveformat_tag = record
     wfx: WaveFormatEx;
     wRevision: Word;
   end;
+  {$EXTERNALSYM creative_adpcmwaveformat_tag}
+  Creative_ADPCMWaveFormat = creative_adpcmwaveformat_tag;
   {$EXTERNALSYM CreativeADPCMWaveFormat}
+  NPCREATIVEADPCMWAVEFORMAT = ^PCREATIVEADPCMWAVEFORMAT;
+  {$EXTERNALSYM NPCREATIVEADPCMWAVEFORMAT}
+  LPCREATIVEADPCMWAVEFORMAT = ^NPCREATIVEADPCMWAVEFORMAT;
+  {$EXTERNALSYM LPCREATIVEADPCMWAVEFORMAT}
+
 
 
   // Creative FASTSPEECH
   // WAVEFORMAT_CREATIVE_FASTSPEECH8   ($0202)
-  PCreativeFastSpeech8WaveFormat = ^CreativeFastSpeech8WaveFormat;
-  CreativeFastSpeech8WaveFormat = record
+  PCREATIVEFASTSPEECH8WAVEFORMAT = ^creative_fastspeech8format_tag;
+  {$EXTERNALSYM PCREATIVEFASTSPEECH8WAVEFORMAT}
+  creative_fastspeech8format_tag = record
     wfx: WaveFormatEx;
     wRevision: Word;
   end;
+  {$EXTERNALSYM creative_fastspeech8format_tag}
+  Creative_FastSpeech8WaveFormat = creative_fastspeech8format_tag;
   {$EXTERNALSYM CreativeFastSpeech8WaveFormat}
+  NPCREATIVEFASTSPEECH8WAVEFORMAT = ^PCREATIVEFASTSPEECH8WAVEFORMAT;
+  {$EXTERNALSYM NPCREATIVEFASTSPEECH8WAVEFORMAT}
+  LPCREATIVEFASTSPEECH8WAVEFORMAT = ^NPCREATIVEFASTSPEECH8WAVEFORMAT;
+  {$EXTERNALSYM LPCREATIVEFASTSPEECH8WAVEFORMAT}
 
 
   // Creative FASTSPEECH
   // WAVEFORMAT_CREATIVE_FASTSPEECH10   ($0203)
-  PCreativeFastSpeech10WaveFormat = ^CreativeFastSpeech10WaveFormat;
-  CreativeFastSpeech10WaveFormat = record
+  PCREATIVEFASTSPEECH10WAVEFORMAT = ^creative_fastspeech10format_tag;
+  {$EXTERNALSYM PCREATIVEFASTSPEECH10WAVEFORMAT}
+  creative_fastspeech10format_tag = record
     wfx: WaveFormatEx;
     wRevision: Word;
   end;
+  {$EXTERNALSYM creative_fastspeech10format_tag}
+  Creative_FastSpeech10WaveFormat = creative_fastspeech10format_tag;
   {$EXTERNALSYM CreativeFastSpeech10WaveFormat}
+  NPCREATIVEFASTSPEECH10WAVEFORMAT = ^PCREATIVEFASTSPEECH10WAVEFORMAT;
+  {$EXTERNALSYM NPCREATIVEFASTSPEECH10WAVEFORMAT}
+  LPCREATIVEFASTSPEECH10WAVEFORMAT = ^NPCREATIVEFASTSPEECH10WAVEFORMAT;
+  {$EXTERNALSYM LPCREATIVEFASTSPEECH10WAVEFORMAT}
 
 
   //  Fujitsu FM Towns 'SND' structure
   //  for WAVE_FORMAT_FMMTOWNS_SND   ($0300)
-  PFMTowns_Snd_WaveFormat = ^FMTowns_Snd_WaveFormat;
-  FMTowns_Snd_WaveFormat = record
+  PFMTOWNS_SND_WAVEFORMAT = ^FMTowns_Snd_WaveFormat_tag;
+  {$EXTERNALSYM PFMTOWNS_SND_WAVEFORMAT}
+  FMTowns_Snd_WaveFormat_tag = record
     wfx: WaveFormatEx;
     wRevision: Word;
   end;
+  {$EXTERNALSYM FMTowns_Snd_WaveFormat_tag}
+  FMTowns_Snd_WaveFormat = FMTowns_Snd_WaveFormat_tag;
   {$EXTERNALSYM FMTowns_Snd_WaveFormat}
+  NPFMTOWNS_SND_WAVEFORMAT = ^PFMTOWNS_SND_WAVEFORMAT;
+  {$EXTERNALSYM NPFMTOWNS_SND_WAVEFORMAT}
+  LPFMTOWNS_SND_WAVEFORMAT = ^NPFMTOWNS_SND_WAVEFORMAT;
+  {$EXTERNALSYM LPFMTOWNS_SND_WAVEFORMAT}
 
 
   //  Olivetti structure
   //  for WAVE_FORMAT_OLIGSM   ($1000)
-  POliGSMWaveFormat = ^OliGSMWaveFormat;
-  OliGSMWaveFormat = record
+  POliGSMWaveFormat = ^OliGSMWaveFormat_tag;
+  {$EXTERNALSYM POliGSMWaveFormat}
+  OliGSMWaveFormat_tag = record
     wfx: WaveFormatEx;
   end;
+  {$EXTERNALSYM OliGSMWaveFormat_tag}
+  OliGSMWaveFormat = OliGSMWaveFormat_tag;
   {$EXTERNALSYM OliGSMWaveFormat}
 
 
   //  Olivetti structure
   //  for WAVE_FORMAT_OLIADPCM   ($1001)
-  POliADPCMWaveFormat = ^OliADPCMWaveFormat;
-  OliADPCMWaveFormat = record
+  POLIADPCMWAVEFORMAT = ^OliADPCMWaveFormat_tag;
+  {$EXTERNALSYM POliADPCMWaveFormat}
+  OliADPCMWaveFormat_tag = record
     wfx: WaveFormatEx;
   end;
+  {$EXTERNALSYM olicelpwaveformat_tag}
+  OliADPCMWaveFormat = OliADPCMWaveFormat_tag;
   {$EXTERNALSYM OliADPCMWaveFormat}
+  NPOLIADPCMWAVEFORMAT = ^POLIADPCMWAVEFORMAT;
+  {$EXTERNALSYM NPOLIADPCMWAVEFORMAT}
+  LPOLIADPCMWAVEFORMAT = ^NPOLIADPCMWAVEFORMAT;
+  {$EXTERNALSYM LPOLIADPCMWAVEFORMAT}
 
 
   //  Olivetti structure
   //      for WAVE_FORMAT_OLICELP   ($1002)
-  POliCelpWaveFormat = ^OliCelpWaveFormat;
-  OliCelpWaveFormat = record
+  POLICELPWAVEFORMAT = ^OliCelpWaveFormat_tag;
+  {$EXTERNALSYM POLICELPWAVEFORMAT}
+  olicelpwaveformat_tag = record
     wfx: WaveFormatEx;
   end;
+  OliCelpWaveFormat = OliCelpWaveFormat_tag;
+  NPOLICELPWAVEFORMAT = ^POLICELPWAVEFORMAT;
   {$EXTERNALSYM OliCelpWaveFormat}
+  LPOLICELPWAVEFORMAT = ^NPOLICELPWAVEFORMAT;
+  {$EXTERNALSYM LPOLICELPWAVEFORMAT}
 
 
-  //  Olivetti structure
-  //  for WAVE_FORMAT_OLISBC   ($1003)
- POliSbcWaveFormat = ^OliSbcWaveFormat;
- OliSbcWaveFormat = record
+  // Olivetti structure
+  // for WAVE_FORMAT_OLISBC   ($1003)
+
+  POliSbcWaveFormat = ^OliSbcWaveFormat_tag;
+  OliSbcWaveFormat_tag = record
     wfx: WaveFormatEx;
   end;
- {$EXTERNALSYM OliSbcWaveFormat}
+  {$EXTERNALSYM OliSbcWaveFormat_tag}
+  OliSbcWaveFormat = OliSbcWaveFormat_tag;
+  {$EXTERNALSYM OliSbcWaveFormat}
+  NPOLISBCWAVEFORMAT = ^POLISBCWAVEFORMAT;
+  {$EXTERNALSYM NPOLISBCWAVEFORMAT}
+  LPOLISBCWAVEFORMAT = ^NPOLISBCWAVEFORMAT;
+  {$EXTERNALSYM LPOLISBCWAVEFORMAT}
 
 
   //  Olivetti structure
   //  for WAVE_FORMAT_OLIOPR   ($1004)
-  POliOprWaveFormat = ^OliOprWaveFormat;
+  POLIOPRWAVEFORMAT = ^olioprwaveformat_tag;
   {$EXTERNALSYM OliOprWaveFormat}
-  OliOprWaveFormat = record
+   olioprwaveformat_tag = record
     wfx: WaveFormatEx;
   end;
+  {$EXTERNALSYM olioprwaveformat_tag}
+  OliOprWaveFormat = olioprwaveformat_tag;
+  {$EXTERNALSYM OliOprWaveFormat}
+  NPOLIOPRWAVEFORMAT = ^OLIOPRWAVEFORMAT;
+  {$EXTERNALSYM NPOLIOPRWAVEFORMAT}
+  LPOLIOPRWAVEFORMAT = ^OLIOPRWAVEFORMAT;
+  {$EXTERNALSYM LPOLIOPRWAVEFORMAT}
 
 
-  //  Crystal Semiconductor IMA ADPCM format
-  //  for WAVE_FORMAT_CS_IMAADPCM   ($0039)
-  PCSIMAADPCMWaveFormat = ^CSIMAADPCMWaveFormat;
-  CSIMAADPCMWaveFormat = record
+  // Crystal Semiconductor IMA ADPCM format
+  // for WAVE_FORMAT_CS_IMAADPCM   ($0039)
+  PCSIMAADPCMWAVEFORMAT = ^CSIMAADPCMWaveFormat_tag;
+  {$EXTERNALSYM PCSIMAADPCMWAVEFORMAT}
+  CSIMAADPCMWaveFormat_tag = record
     wfx: WaveFormatEx;
   end;
+  {$EXTERNALSYM CSIMAADPCMWaveFormat_tag}
+  CSIMAADPCMWaveFormat = CSIMAADPCMWaveFormat_tag;
   {$EXTERNALSYM CSIMAADPCMWaveFormat}
+  NPCSIMAADPCMWAVEFORMAT = ^CSIMAADPCMWAVEFORMAT;
+  {$EXTERNALSYM NPCSIMAADPCMWAVEFORMAT}
+  LPCSIMAADPCMWAVEFORMAT = ^CSIMAADPCMWAVEFORMAT;
+  {$EXTERNALSYM LPCSIMAADPCMWAVEFORMAT}
+
 
   // =========================================================================;
   //
@@ -5427,11 +5756,8 @@ const
 
 type
 
-  PWAVEFILTER = ^WAVEFILTER;
-  NPWAVEFILTER = ^WAVEFILTER;
-  {$EXTERNALSYM NPWAVEFILTER}
-  LPWAVEFILTER = ^WAVEFILTER;
-  {$EXTERNALSYM LPWAVEFILTER}
+  PWAVEFILTER = ^WaveFilter_tag;
+  {$EXTERNALSYM PWAVEFILTER}
   WaveFilter_tag = record
     cbStruct: DWORD;                      // Size of the filter in bytes
     dwFilterTag: DWORD;                   // filter type
@@ -5439,8 +5765,12 @@ type
     dwReserved: array [0 .. 4] of DWORD;  // Reserved for system use
   end;
   {$EXTERNALSYM WaveFilter_tag}
-  WAVEFILTER = WaveFilter_tag;
+  WaveFilter = WaveFilter_tag;
   {$EXTERNALSYM WAVEFILTER}
+  NPWAVEFILTER = ^PWAVEFILTER;
+  {$EXTERNALSYM NPWAVEFILTER}
+  LPWAVEFILTER = ^NPWAVEFILTER;
+  {$EXTERNALSYM LPWAVEFILTER}
 
 
 const
@@ -5449,18 +5779,18 @@ const
 
 type
 
-  PVOLUMEWAVEFILTER = ^VOLUMEWAVEFILTER;
-  NPVOLUMEWAVEFILTER = ^VOLUMEWAVEFILTER;
-  {$EXTERNALSYM NPVOLUMEWAVEFILTER}
-  LPVOLUMEWAVEFILTER = ^VOLUMEWAVEFILTER;
-  {$EXTERNALSYM LPVOLUMEWAVEFILTER}
+  PVOLUMEWAVEFILTER = ^wavefilter_volume_tag;
   wavefilter_volume_tag = record
     wfltr: WaveFilter;
     dwVolume: DWORD;
   end;
   {$EXTERNALSYM wavefilter_volume_tag}
-  VOLUMEWAVEFILTER = wavefilter_volume_tag;
+  WavefilterVolume = wavefilter_volume_tag;
   {$EXTERNALSYM VOLUMEWAVEFILTER}
+  NPVOLUMEWAVEFILTER = ^PVOLUMEWAVEFILTER;
+  {$EXTERNALSYM NPVOLUMEWAVEFILTER}
+  LPVOLUMEWAVEFILTER = ^NPVOLUMEWAVEFILTER;
+  {$EXTERNALSYM LPVOLUMEWAVEFILTER}
 
 
 const
@@ -5470,19 +5800,19 @@ const
 
 type
 
-  PECHOWAVEFILTER = ^ECHOWAVEFILTER;
-  NPECHOWAVEFILTER = ^ECHOWAVEFILTER;
-  {$EXTERNALSYM NPECHOWAVEFILTER}
-  LPECHOWAVEFILTER = ^ECHOWAVEFILTER;
-  {$EXTERNALSYM LPECHOWAVEFILTER}
+  PECHOWAVEFILTER = ^wavefilter_echo_tag;
   wavefilter_echo_tag = record
     wfltr: WaveFilter;
     dwVolume: DWORD;
     dwDelay: DWORD;
   end;
   {$EXTERNALSYM wavefilter_echo_tag}
-  ECHOWAVEFILTER = wavefilter_echo_tag;
+  EchoWavefilter = wavefilter_echo_tag;
   {$EXTERNALSYM ECHOWAVEFILTER}
+  NPECHOWAVEFILTER = ^ECHOWAVEFILTER;
+  {$EXTERNALSYM NPECHOWAVEFILTER}
+  LPECHOWAVEFILTER = ^ECHOWAVEFILTER;
+  {$EXTERNALSYM LPECHOWAVEFILTER}
 
 
   // New RIFF WAVE Chunks
@@ -5496,7 +5826,7 @@ const
 type
 
   Ps_RIFFWAVE_INST = ^s_RIFFWAVE_INST;
-  s_RIFFWAVE_INST = record
+  tag_s_RIFFWAVE_inst = record
     bUnshiftedNote: Byte;
     chFineTune: ShortInt;
     chGain: ShortInt;
@@ -5505,7 +5835,8 @@ type
     bLowVelocity: Byte;
     bHighVelocity: Byte;
   end;
-  {$EXTERNALSYM s_RIFFWAVE_INST}
+  s_RIFFWAVE_inst = tag_s_RIFFWAVE_inst;
+  {$EXTERNALSYM s_RIFFWAVE_inst}
 
 
   // New RIFF Forms
@@ -5584,6 +5915,14 @@ type
     bmi: BitmapInfoHeader;
     // extended BITMAPINFOHEADER fields
     biExtDataOffset: DWORD;
+
+    // Other stuff will go here
+
+    // ...
+
+    // Format-specific information
+    // biExtDataOffset points here
+
   end;
   {$EXTERNALSYM ExBmInfoHeader}
 

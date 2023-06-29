@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 // Description: Requires Windows Vista or later.
 //              MfApi.pas is the unit containing the APIs for using the MF platform.
 //
@@ -23,7 +23,6 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
-// 25/11/2022 Tony                Updated MFCopyImage.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -47,7 +46,7 @@
 //          Fields with a Common Type Specification.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -2339,12 +2338,12 @@ const
 
   // Starting in Windows 7, applications should use the MFTEnumEx function instead!
   function MFTEnum(const guidCategory: TGUID;   // GUID that specifies the category of MFTs to enumerate.
-                   Flags: UINT32;         // Reserved. Must be zero.
+                   Flags: UINT32;               // Reserved. Must be zero.
                    pInputType: PMFT_REGISTER_TYPE_INFO;  // Pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an input media type to match.
-                                                         // This parameter can be Nil. If Nil, all input types are matched.
+                                                         // This parameter can be nil. If nil, all input types are matched.
                    pOutputType: PMFT_REGISTER_TYPE_INFO; // Pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an output media type to match.
-                                                         // This parameter can be Nil. If Nil, all output types are matched.
-                   pAttributes: PIMFAttributes;    // Reserved. Set to Nil.
+                                                         // This parameter can be nil. If nil, all output types are matched.
+                   pAttributes: PIMFAttributes;    // Reserved. Set to nil.
              {out} ppclsidMFT: PCLSID;             // Receives an array of CLSIDs. To create an MFT from this list, call CoCreateInstance with one of the CLSIDs.
                                                    // To get information about a particular MFT from its CLSID, call MFTGetInfo.
                                                    // The caller must free the memory for the array by calling CoTaskMemFree.
@@ -2663,6 +2662,29 @@ const
                                    D3: $0010;
                                    D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
   {$EXTERNALSYM MFVideoFormat_RGB8}
+
+  // Luminance and Depth Formats. //////////////////////////////////////////////
+
+  MFVideoFormat_L8      : TGUID = (D1: $00000050 {D3DFMT_L8};
+                                   D2: $0000;
+                                   D3: $0010;
+                                   D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
+  {$EXTERNALSYM MFVideoFormat_L8}
+
+  MFVideoFormat_L16     : TGUID = (D1: $00000081 {D3DFMT_L16};
+                                   D2: $0000;
+                                   D3: $0010;
+                                   D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
+  {$EXTERNALSYM MFVideoFormat_L16}
+
+  MFVideoFormat_D16     : TGUID = (D1: $00000080 {D3DFMT_D16};
+                                   D2: $0000;
+                                   D3: $0010;
+                                   D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
+  {$EXTERNALSYM MFVideoFormat_D16}
+
+ ///////////////////////////////////////////////////////////////////////////////
+
 
   // We could translate with the FCC MACRO, but this is not possible in conjunction with constant expressions in
   // Delphi.

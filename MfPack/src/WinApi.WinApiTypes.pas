@@ -139,9 +139,9 @@ const
 {$ENDIF}
 
 
-{$ifdef MFP_GUID}
-{$undef MFP_GUID} // Sorry ;-)
-{$endif}
+{$IFDEF MFP_GUID}
+{$UNDEF MFP_GUID} // Sorry ;-)
+{$ENDIF}
 
 
 // In Delphi you should implement a GUID that needs to be defined this way:
@@ -186,9 +186,8 @@ type
 
 
 {$IF SizeOf(Pointer) = 4}
-type
   NativeInt = Integer;   // Correction for NativeInt on Delphi <= 2007 (8 bytes to 4 bytes).
-{$IFEND}
+{$ENDIF}
 
 
 {$IFDEF MFP_LPGUID}

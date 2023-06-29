@@ -10,7 +10,7 @@
 // Release date: 29-07-2012
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 // Description: Common methods used by Media Foundation,
 //              Core Audio etc..
 //
@@ -23,17 +23,12 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
-// 13/08/2022 Tony                Implemented more functionality and updated methods.
-// 11/12/2022 Tony                Added some modifications.
-// 20/02/2023 Tony                Fixed some issues with SafeRelease/SaveDelete.
-// 11/03/2023 Tony                Added CreateFile2 function (fileapi.h). See:
-//                                https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfile2
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -42,9 +37,7 @@
 // Todo: -
 //
 //==============================================================================
-// Source: Some parts from Msdn
-//
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Source: See comments.
 //==============================================================================
 //
 // LICENSE
@@ -472,7 +465,9 @@ type
 
   // System
   //=======
-  function BoolToStrYesNo(const aBoolean: Boolean): string; inline;
+  function BoolToStrYesNo(const aBoolean: Boolean;
+                          sYes: string = 'Yes';
+                          sNo: string = 'No'): string; inline;
   // = BoolToStr, For backward compatibility
   function MfpBoolToStr(const aBoolean: Boolean): string; inline;
   function BoolToStr(const aBoolean: Boolean): string; inline;
@@ -1365,13 +1360,12 @@ end;
 //
 //  The coordinate (0.0, 0.0) on N is mapped to the upper-left corner of R.
 //  The coordinate (1.0, 1.0) on N is mapped to the lower-right corner of R.
-//  Any coordinates of N that fall outside the range [0...1] are mapped to positions
+//  Any coordinates of N that fall outside the range [0..1] are mapped to positions
 //  outside the rectangle R.
 //
 // A normalized rectangle can be used to specify a region within a video rectangle,
 // without knowing the resolution or even the aspect ratio of the video.
 // For example, the upper-left quadrant is defined as {0.0, 0.0, 0.5, 0.5}.
-
 
 // Note: TRect/TRectF record methods are defined in Delphi
 
@@ -1740,7 +1734,9 @@ begin
   GetMem(pwResult,
          (Length(source) +1) * SizeOf(PWideChar));
   try
-    StringToWideChar(source, pwResult, Length(source) +1); // +1 because a pending 0 is added
+    StringToWideChar(source,
+                     pwResult,
+                     Length(source) +1); // +1 because a pending 0 is added
   finally
     //
     Result := pwResult;
@@ -1902,12 +1898,14 @@ end;
 
 
 // System
-function BoolToStrYesNo(const aBoolean: Boolean): string; inline;
+function BoolToStrYesNo(const aBoolean: Boolean;
+                        sYes: string = 'Yes';
+                        sNo: string = 'No'): string; inline;
 begin
   if aBoolean then
-    Result := 'Yes'
+    Result := sYes
   else
-    Result := 'No';
+    Result := sNo;
 end;
 
 

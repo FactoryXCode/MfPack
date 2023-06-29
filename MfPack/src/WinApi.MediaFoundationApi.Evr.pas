@@ -10,7 +10,7 @@
 // Release date: 07-07-2012
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 // Description: The enhanced video renderer (EVR) is a component that displays video on the user's
 //              monitor.
 //              Two versions of the EVR exist:
@@ -38,7 +38,7 @@
 //         IUnknown(Pointer), IUnknown(Object), IUnknown(Nil) etc.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -145,6 +145,7 @@ const
   {$EXTERNALSYM D3DFMT_X4R4G4B4}
   D3DFMT_A2B10G10R10  = D3DFORMAT(31);
   {$EXTERNALSYM D3DFMT_A2B10G10R10}
+
   D3DFMT_G16R16       = D3DFORMAT(34);
   {$EXTERNALSYM D3DFMT_G16R16}
   D3DFMT_A8P8         = D3DFORMAT(40);

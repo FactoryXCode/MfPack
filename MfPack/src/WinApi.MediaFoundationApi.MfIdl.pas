@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 // Description: Media Foundation basic control-layer interfaces.
 //
 // Organisation: FactoryX
@@ -27,7 +27,7 @@
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -6627,7 +6627,7 @@ const
   function MFCreateExtendedCameraIntrinsicModel; external MfIdlLib4 name 'MFCreateExtendedCameraIntrinsicModel' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   // end NTDDI_VERSION >= NTDDI_WIN10_RS5
 
-  // NTDDI_VERSION >= NTDDI_WIN10_VB  TODO: which lib?
+  // NTDDI_VERSION >= NTDDI_WIN10_VB
   function MFCreateRelativePanelWatcher;         external MfIdlLib3 name 'MFCreateRelativePanelWatcher' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   // end NTDDI_VERSION >= NTDDI_WIN10_VB
 
