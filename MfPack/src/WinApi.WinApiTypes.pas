@@ -185,7 +185,7 @@ type
 {$ENDIF}
 
 
-{$IF SizeOf(Pointer) = 4}
+{$IF COMPILERVERSION < 20.0}
   NativeInt = Integer;   // Correction for NativeInt on Delphi <= 2007 (8 bytes to 4 bytes).
 {$ENDIF}
 
