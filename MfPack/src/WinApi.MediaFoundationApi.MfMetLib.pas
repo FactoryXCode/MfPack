@@ -3477,6 +3477,8 @@ begin
                          0,
                          'Sub type GUID for a media type.') then
      goto Done;
+
+
    if IfEqualReturnProps(MF_MT_ALL_SAMPLES_INDEPENDENT,
                          'MF_MT_ALL_SAMPLES_INDEPENDENT',
                          '',
@@ -3609,6 +3611,8 @@ begin
                          0,
                          'Specifies the audio profile and level of an Advanced Audio Coding (AAC) stream.') then
      goto Done;
+
+   // Properties
    if IfEqualReturnProps(MF_MT_FRAME_SIZE,
                          'MF_MT_FRAME_SIZE',
                          '',
@@ -4465,153 +4469,146 @@ begin
                          WAVE_FORMAT_DOLBY_AC4,
                          'Dolby lossy audio compression format (AC-4) that can contain audio channels and/or audio objects.') then
      goto Done;
-   if IfEqualReturnProps(MFAudioFormat_Dolby_AC4_IMS,
-                         'MFAudioFormat_Dolby_AC4_IMS',
-                         'WAVE_FORMAT_DOLBY_AC4_IMS',
-                         WAVE_FORMAT_DOLBY_AC4_IMS,
-                         'Dolby lossy audio compression format (AC-4) that can contain audio channels and/or audio objects.') then
-     goto Done;  //
    if IfEqualReturnProps(MEDIASUBTYPE_RAW_AAC1,
                          'MEDIASUBTYPE_RAW_AAC1',
                          'WAVE_FORMAT_RAW_AAC1',
                          WAVE_FORMAT_RAW_AAC1,
                          'Advanced Audio Coding (AAC). This subtype is used for AAC contained in an AVI file.') then
 
-
    // The following audio types are not derived from an existing FormatTag ( = FOURCC)
 
    if IfEqualReturnProps(MFAudioFormat_Dolby_AC3,
                          'MFAudioFormat_Dolby_AC3',
-                         '',
-                         0,
+                         'NONE',
+                         FCC('NONE'),
                          'Dolby Digital (also known as AC-3) lossy audio compression format.') then
      goto Done;
    if IfEqualReturnProps(MFAudioFormat_Dolby_DDPlus,
                          'MFAudioFormat_Dolby_DDPlus',
-                         '',
-                         0,
+                         'NONE',
+                         FCC('NONE'),
                          'Dolby Digital Plus (also known as E-AC-3) lossy audio codec based on Dolby Digital that is backward compatible.') then
      goto Done;
    if IfEqualReturnProps(MFAudioFormat_Dolby_AC4_V1,
                          'MFAudioFormat_Dolby_AC4_V1',
-                         '',
-                         0,
+                         'NONE',
+                         FCC('NONE'),
                          'Dolby AC-4 bitstream versions 0 and 1 audio codec.') then
      goto Done;
    if IfEqualReturnProps(MFAudioFormat_Dolby_AC4_V2,
                          'MFAudioFormat_Dolby_AC4_V2',
-                         '',
-                         0,
+                         'NONE',
+                         FCC('NONE'),
                          'Dolby AC-4 bitstream version 2 audio codec. (Supports Immersive Stereo.)') then
      goto Done;
    if IfEqualReturnProps(MFAudioFormat_Dolby_AC4_V1_ES,
                          'MFAudioFormat_Dolby_AC4_V1_ES',
-                         '',
-                         0,
+                         'NONE',
+                         FCC('NONE'),
                          'Dolby version 1 lossy audio format used for AC-4 streams that use ac4_syncframe and the optional crc at the end of each frame.') then
      goto Done;
    if IfEqualReturnProps(MFAudioFormat_Dolby_AC4_V2_ES,
                          'MFAudioFormat_Dolby_AC4_V2_ES',
-                         '',
-                         0,
+                         'NONE',
+                         FCC('NONE'),
                          'Dolby version 2 lossy audio format used for AC-4 streams that use ac4_syncframe and the optional crc at the end of each frame.') then
      goto Done;
    if IfEqualReturnProps(MFAudioFormat_Vorbis,
                          'MFAudioFormat_Vorbis',
-                         '',
-                         0,
+                         'NONE',
+                         FCC('NONE'),
                          'Vorbis audio codec based on Modified Discrete Cosine Transform. (https://xiph.org)') then
      goto Done;
    if IfEqualReturnProps(MFAudioFormat_DTS_RAW,
                          'MFAudioFormat_DTS_RAW',
-                         '',
-                         0,
+                         'NONE',
+                         FCC('NONE'),
                          'Digital Theater Systems (DTS) raw audio codec.') then
      goto Done;
    if IfEqualReturnProps(MFAudioFormat_DTS_HD,
                          'MFAudioFormat_DTS_HD',
-                         '',
-                         0,
+                         'NONE',
+                         FCC('NONE'),
                          'Digital Theater Systems (DTS) High Definition audio codec.') then
      goto Done;
    if IfEqualReturnProps(MFAudioFormat_DTS_XLL,
                          'MFAudioFormat_DTS_XLL',
-                         '',
-                         0,
+                         'NONE',
+                         FCC('NONE'),
                          'Digital Theater Systems (DTS) XLL audio codec.') then
      goto Done;
    if IfEqualReturnProps(MFAudioFormat_DTS_LBR,
                          'MFAudioFormat_DTS_LBR',
-                         '',
-                         0,
+                         'NONE',
+                         FCC('NONE'),
                          'Digital Theater Systems (DTS) Low Bitrate (LBR) audio codec.') then
      goto Done;
    if IfEqualReturnProps(MFAudioFormat_DTS_UHD,
                          'MFAudioFormat_DTS_UHD',
-                         '',
-                         0,
+                         'NONE',
+                         FCC('NONE'),
                          'Digital Theater Systems (DTS) Ultra High Definition (UHD) audio codec.') then
      goto Done;
    if IfEqualReturnProps(MFAudioFormat_DTS_UHDY,
                          'MFAudioFormat_DTS_UHDY',
-                         '',
-                         0,
+                         'NONE',
+                         FCC('NONE'),
                          'Digital Theater Systems (DTS) Ultra High Definition (UHDY) audio codec.') then
      goto Done;
    if IfEqualReturnProps(MFAudioFormat_Float_SpatialObjects,
                          'MFAudioFormat_Float_SpatialObjects',
-                         '',
-                         0,
+                         'NONE',
+                         FCC('NONE'),
                          'Uncompressed IEEE floating-point audio.') then
      goto Done;
    if IfEqualReturnProps(MFAudioFormat_LPCM,
                          'MFAudioFormat_LPCM',
-                         '',
-                         0,
+                         'NONE',
+                         FCC('NONE'),
                          'LPCM audio with headers for encapsulation in an MPEG2 bitstream.') then
      goto Done;
    if IfEqualReturnProps(MFAudioFormat_PCM_HDCP,
                          'MFAudioFormat_PCM_HDCP',
-                         '',
-                         0,
+                         'NONE',
+                         FCC('NONE'),
                          'Uncompressed PCM audio. (High-bandwidth Digital Content Protection)') then
      goto Done;
    if IfEqualReturnProps(MFAudioFormat_Dolby_AC3_HDCP,
                          'MFAudioFormat_Dolby_AC3_HDCP',
-                         '',
-                         0,
+                         'NONE',
+                         FCC('NONE'),
                          'Dolby Digital, also called Dolby AC-3 (High-bandwidth Digital Content Protection)') then
      goto Done;
    if IfEqualReturnProps(MFAudioFormat_AAC_HDCP,
                          'MFAudioFormat_AAC_HDCP',
-                         '',
-                         0,
+                         'NONE',
+                         FCC('NONE'),
                          'High-Efficiency Advanced Audio Coding (HE-AAC)(High-bandwidth Digital Content Protection).') then
      goto Done;
    if IfEqualReturnProps(MFAudioFormat_ADTS_HDCP,
                          'MFAudioFormat_ADTS_HDCP',
-                         '',
-                         0,
+                         'NONE',
+                         FCC('NONE'),
                          'Advanced Audio Coding (AAC) in Audio Data Transport Stream (ADTS) (High-bandwidth Digital Content Protection) format.') then
      goto Done;
    if IfEqualReturnProps(MFAudioFormat_Base_HDCP,
                          'MFAudioFormat_Base_HDCP',
-                         '',
-                         0,
+                         'NONE',
+                         FCC('NONE'),
                          'Base HDCP (High-bandwidth Digital Content Protection) audio.') then
      goto Done;
 
    // Video Formats
    if IfEqualReturnProps(MFVideoFormat_H264_HDCP,
                          'MFVideoFormat_H264_HDCP',
-                         '',
-                         0,
+                         'NONE',
+                         FCC('NONE'),
                          'H.264 (High-bandwidth Digital Content Protection).') then
      goto Done;
    if IfEqualReturnProps(MFVideoFormat_HEVC_HDCP,
                          'MFVideoFormat_HEVC_HDCP',
-                         '',
-                         0,
+                         'NONE',
+                         FCC('NONE'),
                          'H.265/HEVC content in Annex B format (High-bandwidth Digital Content Protection) and can be used in mp4 and m2ts files.') then
      goto Done;
 

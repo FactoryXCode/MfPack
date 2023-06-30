@@ -132,8 +132,7 @@ type
     destructor Destroy(); override;
 
     // Call this method to log
-    function LogMediaType(pType: IMFMediaType;
-                          const aCount: UINT32): HRESULT;
+    function LogMediaType(pType: IMFMediaType): HRESULT;
     // Call this method to save each log to a separate file.
     procedure SafeDebugResultsToFile(const pMethodName: string = '';
                                      const pFileName: string = 'MFMediaTypeDebug';
@@ -164,8 +163,7 @@ begin
 end;
 
 
-function TMediaTypeDebug.LogMediaType(pType: IMFMediaType;
-                                      const aCount: UINT32): HRESULT;
+function TMediaTypeDebug.LogMediaType(pType: IMFMediaType): HRESULT;
 var
   hr: HResult;
   unCount: UINT32;
