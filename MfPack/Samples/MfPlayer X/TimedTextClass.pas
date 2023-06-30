@@ -336,14 +336,16 @@ try
   // check if Url has filename
   if (sUrl = '') then
     begin
-      Result := ERROR_INVALID_PARAMETER;
+      hr := ERROR_INVALID_PARAMETER;
+      Result := hr;
       Exit;
     end;
 
   // Check if the file exists
   if Not FileExists(sUrl) then
     begin
-      Result := ERROR_FILE_NOT_FOUND;
+      hr := ERROR_FILE_NOT_FOUND;
+      Result := hr;
       Exit;
     end;
 
@@ -382,7 +384,8 @@ try
 
   if (Length(pc_LanguageTags.TimedTxtPropsArray) = 0) then
     begin
-      Result := ERROR_FILE_NOT_FOUND;
+      hr := ERROR_FILE_NOT_FOUND;
+      Result := hr;
       Exit;
     end;
 
@@ -418,7 +421,8 @@ srt:
         end;
     end;
   begin
-    Result := S_OK;
+    hr := S_OK;
+    Result := hr;
     Exit;
   end;
 
@@ -454,7 +458,8 @@ sub:
         end;
     end;
   begin
-    Result := S_OK;
+    hr := S_OK;
+    Result := hr;
     Exit;
   end;
 

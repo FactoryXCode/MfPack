@@ -832,10 +832,16 @@ end;
 
 procedure TFrmMain.PopulateResolutions();
 var
+  hr: HResult;
   sFormatDescription: string;
   oFormat: TVideoFormat;
   iDefaultIndex: Integer;
   sCurrentResolution: string;
+  //
+  sGuidName: string;
+  sFormatTag: string;
+  dwFOURCC: DWord;
+  sFmtDesc: string;
 
 begin
   if (FDefaultResolution <> '') then
@@ -850,12 +856,21 @@ begin
           ltInfo);
       for oFormat in FCapture.VideoFormats  do
         begin
-          sFormatDescription := Format('%d x %d   (%d fps)    %s',
-                                       [oFormat.iFrameWidth,
-                                       oFormat.iFrameHeigth,
-                                       oFormat.iFramesPerSecond,
-                                       GetGUIDNameConst(oFormat.oSubType)]);
-          cbxResolution.Items.Add(sFormatDescription);
+          hr := GetGUIDNameConst(oFormat.oSubType,
+                                 sGuidName,
+                                 sFormatTag,
+                                 dwFOURCC,
+                                 sFmtDesc);
+          if SUCCEEDED(hr) then
+            begin
+              sFormatDescription := Format('(4CC: %s)  %d x %d   (fps: %d)   %s ',
+                                           [sFormatTag,
+                                            oFormat.iFrameWidth,
+                                            oFormat.iFrameHeigth,
+                                            oFormat.iFramesPerSecond,
+                                            sFmtDesc]);
+              cbxResolution.Items.Add(sFormatDescription);
+            end;
         end;
 
       if sCurrentResolution <> '' then

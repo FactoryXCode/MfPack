@@ -911,7 +911,7 @@ try
     end;
 
 finally
-  Result:= hr;
+  Result := hr;
 end;
 end;
 

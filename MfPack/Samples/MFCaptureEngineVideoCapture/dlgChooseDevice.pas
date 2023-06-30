@@ -234,7 +234,20 @@ function TChooseDeviceDlg.PopulateFormats(bSupportedFormatsOnly: Boolean): HResu
    procedure AddFormat(iCol: Integer;
                        iDev: Integer;
                        iForm: Integer);
+   var
+     sGuidName: string;
+     sFormatTag: string;
+     dwFOURCC: DWord;
+     sFmtDesc: string;
+
      begin
+       GetGUIDNameConst(FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].fSubType,
+                        sGuidName,
+                        sFormatTag,
+                        dwFOURCC,
+                        sFmtDesc);
+
+
        {Width and Height}
        sgResolutions.Cells[0, iCol] := Format('%d x %d',
                                               [FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].iVideoWidth,
@@ -244,10 +257,9 @@ function TChooseDeviceDlg.PopulateFormats(bSupportedFormatsOnly: Boolean): HResu
                                               [FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].fFrameRate]);
        {Subtype}
        sgResolutions.Cells[2, iCol] := Format('%s',
-                                              [GetGUIDNameConst(FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].fSubType)]);
+                                              [sFormatTag]);
 
        {Supported by MF input but not on output}
-       //
        sgResolutions.Cells[3, iCol] := Format('%s',
                                               [BoolToStrYesNo(FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].bMFSupported and
                                               (FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].fFrameRate > 29.0))]);
@@ -291,7 +303,7 @@ try
   {$IF CompilerVersion < 31.0}
   sgResolutions.ColWidths[0] := 100;
   sgResolutions.ColWidths[1] := 60;
-  sgResolutions.ColWidths[2] := 140;
+  sgResolutions.ColWidths[2] := 100;
   sgResolutions.ColWidths[3] := 120;
   sgResolutions.ColWidths[4] := -1; // Hide last column
   {$ELSE}
@@ -300,21 +312,14 @@ try
   sgResolutions.ColWidths[2] := 220;
   sgResolutions.ColWidths[3] := 200;
   sgResolutions.ColWidths[4] := -1; // Hide last column
-
   {$ENDIF}
-
-  //sgResolutions.Width :=  sgResolutions.ColWidths[0] +
-  //                        sgResolutions.ColWidths[1] +
-  //                        sgResolutions.ColWidths[2] +
-  //                        sgResolutions.ColWidths[3] +
-  //                        sgResolutions.ColCount;
 
   sgResolutions.Cells[0, 0] := 'Height x Width';
   sgResolutions.Cells[1, 0] := 'FPS';
   sgResolutions.Cells[2, 0] := 'Video Format';
   sgResolutions.Cells[3, 0] := 'Supported Format';
 
-  sgResolutions.Cells[4, 0] := 'Formats index';  // This a hidden column.
+  sgResolutions.Cells[4, 0] := 'Formats index';  // This is a hidden column.
   rc := 1;
 
   // List devicecapabilities.

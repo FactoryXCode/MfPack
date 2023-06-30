@@ -63,9 +63,7 @@
 //
 //==============================================================================
 unit dlgVideoOutput;
-
 interface
-
 uses
   {Winapi}
   Winapi.Windows,
@@ -84,7 +82,6 @@ uses
   WinApi.MediaFoundationApi.MfApi,
   {Application}
   SinkWriterClass;
-
 type
   TdlgVideoSetttings = class(TForm)
     OKBtn: TButton;
@@ -96,8 +93,6 @@ type
     Label2: TLabel;
     Label3: TLabel;
     cbxDimensions: TComboBox;
-    edLatency: TEdit;
-    Label4: TLabel;
     cbSaveResizedBitmap: TCheckBox;
     Label5: TLabel;
     edFps: TEdit;
@@ -110,34 +105,30 @@ type
     procedure FormCreate(Sender: TObject);
     procedure cbxDimensionsCloseUp(Sender: TObject);
     procedure cbSaveResizedBitmapClick(Sender: TObject);
-    procedure edLatencyChange(Sender: TObject);
     procedure edFpsChange(Sender: TObject);
     procedure edBitRateChange(Sender: TObject);
     procedure edFpsEnter(Sender: TObject);
     procedure edFrameTimeUnitsChange(Sender: TObject);
   private
     { Private declarations }
+    //procedure CalculateAverageFrameRate();
+
   public
     { Public declarations }
   end;
-
 var
   dlgVideoSetttings: TdlgVideoSetttings;
 
-
 implementation
-
 {$R *.dfm}
 
 
 procedure TdlgVideoSetttings.cbxOutputFormatCloseUp(Sender: TObject);
 begin
-
   if (cbxOutputFormat.ItemIndex > -1) then
     begin
       FSinkWriter.SinkWriterParams.pwcVideoFileExtension := PWideChar(LowerCase(cbxOutputFormat.Items[cbxOutputFormat.ItemIndex]));
       cbxEncodingFormat.Clear;
-
       // populate the cbxEncodingFormat with supported formats when ouputformat is selected.
       if FSinkWriter.SinkWriterParams.pwcVideoFileExtension = 'mp4' then
         begin
@@ -168,9 +159,15 @@ begin
 end;
 
 
+//procedure TdlgVideoSetttings.CalculateAverageFrameRate();
+//begin
+//  if (FSinkWriter.SinkWriterParams.dbFrameRate > 0.0)  and (FSinkWriter.SinkWriterParams.dwFrameTimeUnits >= 10000 ) then
+//    FSinkWriter.SinkWriterParams.rtAverageTimePerFrame := (FSinkWriter.SinkWriterParams.dwFrameTimeUnits) div Round(FSinkWriter.SinkWriterParams.dbFrameRate);
+//end;
+
+
 procedure TdlgVideoSetttings.edFpsChange(Sender: TObject);
 begin
-
   if (StrToFloat(edFps.Text) <= 0) then
     ShowMessage('You must enter a number > 0')
   else
@@ -187,7 +184,6 @@ begin
     5: begin
          edFps.Hint := '2K supports 12, 24, 25, 29.97, 30, 48, 50, 59.94 and 60 FPS.';
        end;
-
     7: begin
          edFps.Hint := '4K supports 24, 25, 29.97, 30, 48, 50, 59.94 and 60 FPS.';
        end;
@@ -201,7 +197,7 @@ end;
 
 procedure TdlgVideoSetttings.edFrameTimeUnitsChange(Sender: TObject);
 begin
-  if (StrToInt(edFrameTimeUnits.Text) < 10000) then
+  if (StrToInt(edFrameTimeUnits.Text) < 10000 { = 1 ms }) then
     ShowMessage('You must enter a number >= 10000')
   else
     FSinkWriter.SinkWriterParams.dwFrameTimeUnits := StrToInt(edFrameTimeUnits.Text);
@@ -211,18 +207,6 @@ end;
 procedure TdlgVideoSetttings.edBitRateChange(Sender: TObject);
 begin
   FSinkWriter.SinkWriterParams.dwBitRate := StrToInt(edBitRate.Text);
-end;
-
-
-procedure TdlgVideoSetttings.edLatencyChange(Sender: TObject);
-begin
-  if (StrToInt(edLatency.Text) <= 0) then
-    ShowMessage('You must enter a number > 0')
-  else
-    begin
-      FSinkWriter.SinkWriterParams.uiLatency := StrToInt(edLatency.Text);
-      FSinkWriter.SinkWriterParams.rtSampleDuration := (FSinkWriter.SinkWriterParams.uiLatency * FSinkWriter.SinkWriterParams.dwFrameTimeUnits) div Round(FSinkWriter.SinkWriterParams.dbFrameRate);
-    end;
 end;
 
 
@@ -237,15 +221,12 @@ procedure TdlgVideoSetttings.FormCreate(Sender: TObject);
 begin
   if not Assigned(FSinkWriter) then
     Close();
-
   // Set initial states and values.
   cbxOutputFormat.ItemIndex := cbxOutputFormat.Items.IndexOf(FSinkWriter.SinkWriterParams.pwcVideoFileExtension);
   cbxOutputFormatCloseUp(Self);
-
   //cbxEncodingFormatCloseUp
   cbxEncodingFormatCloseUp(Self);
   cbxEncodingFormat.ItemIndex := cbxEncodingFormat.Items.IndexOf(FSinkWriter.SinkWriterParams.sEncodingFormat);
-
   cbxDimensions.Clear;
   // Add common used resolutions
   cbxDimensions.Items.Append('SD    360p  (640 x 360)');
@@ -256,27 +237,23 @@ begin
   cbxDimensions.Items.Append('2K   1080p  (2048 x 1080)');
   cbxDimensions.Items.Append('QHD  1440p  (2560 x 1440)');
   cbxDimensions.Items.Append('4K   2160p  (3840 x 2160)');
-
   cbxDimensions.ItemIndex := cbxDimensions.Items.IndexOf(FSinkWriter.SinkWriterParams.sResolutionDescription);
   cbxDimensionsCloseUp(Self);
-
-  edLatency.Text := IntToStr(FSinkWriter.SinkWriterParams.uiLatency);
   edBitRate.Text := IntToStr(FSinkWriter.SinkWriterParams.dwBitRate);
   edFps.Text := FloatToStr(FSinkWriter.SinkWriterParams.dbFrameRate);
   cbSaveResizedBitmap.Checked := FSinkWriter.SaveResizedBitmap;
-
 end;
 
 
 procedure TdlgVideoSetttings.cbxDimensionsCloseUp(Sender: TObject);
 begin
-
 // List of resolutions (Beware that Facebook and Youtube supports their own formats)
 //
 // SD (Standard Definition)
 // 640 x 360 (360p) 4:3
 // 640 x 480 (480p) 4:3
 //
+
 // HD (High Definition)
 // 1280 x 720 (720p) 16:9
 //
@@ -294,7 +271,6 @@ begin
 // 3840 x 2160 (2160p) 1:1.9
 // Note that this resolution must have a minimum framerate of 24 FPS.
 //
-
   case cbxDimensions.ItemIndex of
     0:  begin
           FSinkWriter.SinkWriterParams.dwWidth  := 640;
@@ -341,7 +317,6 @@ begin
   end;
 end;
 
-
 // Choose the output format
 // Note that this is a small list. To create more valid formats see:
 // See: https://github.com/MicrosoftDocs/win32/blob/docs/desktop-src/medfound/h-264-video-encoder.md
@@ -371,5 +346,4 @@ begin
           FSinkWriter.SinkWriterParams.sEncodingFormat := 'MFVideoFormat_H264';
         end;
     end;end;
-
 end.

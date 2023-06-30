@@ -85,6 +85,7 @@ uses
 
 
 type
+
   TVideoFormat = record
     iMediaIndex: Integer;
     iFrameHeigth: Integer;

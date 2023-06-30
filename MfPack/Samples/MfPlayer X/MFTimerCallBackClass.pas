@@ -198,20 +198,22 @@ begin
 try
   if not Assigned(MFPresentationClock) then
     begin
-      Result := MF_E_NO_CLOCK;
+      hr := MF_E_NO_CLOCK;
+      Result := hr;
       Exit;
     end;
 
   if not Assigned(MfTimer) then
     begin
-      Result := E_POINTER;
+      hr := E_POINTER;
+      Result := hr;
       Exit;
     end;
 
   hr := MfTimer.SetTimer(m_TimerFlags, // Absolute or Relative
                          TimerResolution,
                          IMFAsyncCallback(Self),
-                         Nil,
+                         nil,
                          @m_CancellationObject);
 
   // The timer's return code is one of those:
