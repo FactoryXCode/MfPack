@@ -3263,12 +3263,7 @@ const
                                            D2: $0000;
                                            D3: $0010;
                                            D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
-
-  MFAudioFormat_Dolby_AC4_IMS   : TGUID = (D1: WAVE_FORMAT_DOLBY_AC4_IMS;
-                                           D2: $0000;
-                                           D3: $0010;
-                                           D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
-
+  {$EXTERNALSYM MFAudioFormat_Dolby_AC4}
 
 
   // These audio types are not derived from an existing wFormatTag

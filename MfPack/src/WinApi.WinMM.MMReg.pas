@@ -4569,7 +4569,7 @@ type
 
 {$IFNDEF _WAVE_FORMAT_PCM_DEFINED}
   // general waveform format structure (information common to all formats)
-  PWAVEFORMAT   = ^WAVEFORMAT;
+  PWAVEFORMAT   = ^waveformat_tag;
   waveformat_tag = record
     wFormatTag: WORD;                 // format type
     nChannels: WORD;                  // number of channels (i.e. mono, stereo...)
@@ -4578,26 +4578,32 @@ type
     nBlockAlign: WORD;                // block size of data
   end;
   {$EXTERNALSYM waveformat_tag}
-  WAVEFORMAT    = waveformat_tag;
+  WaveFormat = waveformat_tag;
   {$EXTERNALSYM WAVEFORMAT}
-  NPWAVEFORMAT  = PWAVEFORMAT;
+  NPWAVEFORMAT = WaveFormat;
   {$EXTERNALSYM NPWAVEFORMAT}
-  LPWAVEFORMAT  = PWAVEFORMAT;
+  LPWAVEFORMAT = WaveFormat;
   {$EXTERNALSYM LPWAVEFORMAT}
 
+
   // specific waveform format structure for PCM data
-  PPCMWAVEFORMAT = ^PCMWAVEFORMAT;
-  NPPCMWAVEFORMAT = ^PCMWAVEFORMAT;
-  LPPCMWAVEFORMAT = ^PCMWAVEFORMAT;
+  PPCMWAVEFORMAT = ^pcmwaveformat_tag;
+  {$EXTERNALSYM PPCMWAVEFORMAT}
   pcmwaveformat_tag = record
     wf: WAVEFORMAT;
     wBitsPerSample: WORD;
   end;
   {$EXTERNALSYM pcmwaveformat_tag}
-  PCMWAVEFORMAT = pcmwaveformat_tag;
+  PCMWaveFormat = pcmwaveformat_tag;
   {$EXTERNALSYM PCMWAVEFORMAT}
+  NPPCMWAVEFORMAT = ^PCMWaveFormat;
+  {$EXTERNALSYM NPPCMWAVEFORMAT}
+  LPPCMWAVEFORMAT = ^PCMWaveFormat;
+  {$EXTERNALSYM LPPCMWAVEFORMAT}
+
+
 {$DEFINE _WAVE_FORMAT_PCM_DEFINED}
-{$DEFINE WAVE_FORMAT_PCM = 1}
+const WAVE_FORMAT_PCM = 1;
 {$ENDIF} // WAVE_FORMAT_PCM
 
 
@@ -4611,6 +4617,7 @@ type
 type
 
   PWAVEFORMATEX = ^tWAVEFORMATEX;
+  {$EXTERNALSYM PWAVEFORMATEX}
   tWAVEFORMATEX = record
     wFormatTag: WORD;               { format type }
     nChannels: WORD;                { number of channels (i.e. mono, stereo...) }
@@ -4624,9 +4631,9 @@ type
   {$EXTERNALSYM tWAVEFORMATEX}
   WAVEFORMATEX = tWAVEFORMATEX;
   {$EXTERNALSYM WAVEFORMATEX}
-  NPWAVEFORMATEX = ^tWAVEFORMATEX;
+  NPWAVEFORMATEX = ^WAVEFORMATEX;
   {$EXTERNALSYM NPWAVEFORMATEX}
-  LPWAVEFORMATEX = ^tWAVEFORMATEX;
+  LPWAVEFORMATEX = ^WAVEFORMATEX;
   {$EXTERNALSYM LPWAVEFORMATEX}
   LPCWAVEFORMATEX = ^WAVEFORMATEX;
   {$EXTERNALSYM LPCWAVEFORMATEX}
@@ -4659,6 +4666,7 @@ type
 {$ALIGN ON}
 
   PWAVEFORMATEXTENSIBLE = ^WAVEFORMATEXTENSIBLE;
+  {$EXTERNALSYM PWAVEFORMATEXTENSIBLE}
   WAVEFORMATEXTENSIBLE = record
     Format : WAVEFORMATEX;
     Samples : record                      // union part
@@ -4762,35 +4770,35 @@ type
 
   // Define data for MS ADPCM
 
-  PADPCMCOEFSET = ^ADPCMCoefSet_tag;
+  PADPCMCOEFSET = ^adpcmcoef_tag;
   {$EXTERNALSYM PADPCMCOEFSET}
-  ADPCMCoefSet_tag = record
+  adpcmcoef_tag = record
     iCoef1: Word;
     iCoef2: Word;
   end;
-  {$EXTERNALSYM ADPCMCoefSet_tag}
-  ADPCMCoefSet = ADPCMCoefSet_tag;
+  {$EXTERNALSYM adpcmcoef_tag}
+  ADPCMCoefSet = adpcmcoef_tag;
   {$EXTERNALSYM ADPCMCoefSet}
-  NPADPCMCOEFSET = ^ADPCMCOEFSET;
+  NPADPCMCOEFSET = ^ADPCMCoefSet;
   {$EXTERNALSYM NPADPCMCOEFSET}
-  LPADPCMCOEFSET = ^ADPCMCOEFSET;
+  LPADPCMCOEFSET = ^ADPCMCoefSet;
   {$EXTERNALSYM LPADPCMCOEFSET}
 
 
-  PADPCMWAVEFORMAT = ^ADPCMWaveFormat_tag;
+  PADPCMWAVEFORMAT = ^adpcmwaveformat_tag;
   {$EXTERNALSYM PADPCMWAVEFORMAT}
-  ADPCMWaveFormat_tag = record
+  adpcmwaveformat_tag = record
     wfx: TWaveFormatEx;
     wSamplesPerBlock: Word;
     wNumCoef: Word;
     aCoef: array [0..1] of ADPCMCoefSet;
   end;
-  {$EXTERNALSYM ADPCMWaveFormat_tag}
-  ADPCMWaveFormat = ADPCMWaveFormat_tag;
+  {$EXTERNALSYM adpcmwaveformat_tag}
+  ADPCMWaveFormat = adpcmwaveformat_tag;
   {$EXTERNALSYM ADPCMWaveFormat}
-  NPADPCMWAVEFORMAT = ^ADPCMWAVEFORMAT;
+  NPADPCMWAVEFORMAT = ^ADPCMWaveFormat;
   {$EXTERNALSYM NPADPCMWAVEFORMAT}
-  LPADPCMWAVEFORMAT = ^ADPCMWAVEFORMAT;
+  LPADPCMWAVEFORMAT = ^ADPCMWaveFormat;
   {$EXTERNALSYM LPADPCMWAVEFORMAT}
 
 
@@ -4805,29 +4813,29 @@ type
     wfxSecure: WAVEFORMATEX;
   end;
   {$EXTERNALSYM drmwaveformat_tag}
-  DRMWAVEFORMAT = drmwaveformat_tag;
+  DRMWaveFormat = drmwaveformat_tag;
   {$EXTERNALSYM DRMWAVEFORMAT}
-  NPDRMWAVEFORMAT = ^PDRMWAVEFORMAT;
+  NPDRMWAVEFORMAT = ^DRMWaveFormat;
   {$EXTERNALSYM NPDRMWAVEFORMAT}
-  LPDRMWAVEFORMAT = ^NPDRMWAVEFORMAT;
+  LPDRMWAVEFORMAT = ^DRMWaveFormat;
   {$EXTERNALSYM LPDRMWAVEFORMAT}
 
 
   //  Intel's DVI ADPCM structure definitions
   //
   //      for WAVE_FORMAT_DVI_ADPCM   ($0011)
-  PDVIADPCMWAVEFORMAT = ^DVIADPCMWaveFormat_tag;
+  PDVIADPCMWAVEFORMAT = ^dvi_adpcmwaveformat_tag;
   {$EXTERNALSYM PDVIADPCMWAVEFORMAT}
-  DVIADPCMWaveFormat_tag = record
+  dvi_adpcmwaveformat_tag = record
     wfx: WaveFormatEx;
     wSamplesPerBlock: Word;
   end;
-  {$EXTERNALSYM DVIADPCMWaveFormat_tag}
-  DVIADPCMWaveFormat = DVIADPCMWaveFormat_tag;
+  {$EXTERNALSYM dvi_adpcmwaveformat_tag}
+  DVIADPCMWaveFormat = dvi_adpcmwaveformat_tag;
   {$EXTERNALSYM DVIADPCMWaveFormat}
-  NPDVIADPCMWAVEFORMAT = ^PDVIADPCMWAVEFORMAT;
+  NPDVIADPCMWAVEFORMAT = ^DVIADPCMWaveFormat;
   {$EXTERNALSYM NPDVIADPCMWAVEFORMAT}
-  LPDVIADPCMWAVEFORMAT = ^NPDVIADPCMWAVEFORMAT;
+  LPDVIADPCMWAVEFORMAT = ^DVIADPCMWaveFormat;
   {$EXTERNALSYM LPDVIADPCMWAVEFORMAT}
 
 
@@ -4836,36 +4844,36 @@ type
   //
   //      for WAVE_FORMAT_IMA_ADPCM   ($0011)
 
-  PIMAADPCMWAVEFORMAT = ^IMAADPCMWaveFormat_tag;
+  PIMAADPCMWAVEFORMAT = ^ima_adpcmwaveformat_tag;
   {$EXTERNALSYM PIMAADPCMWAVEFORMAT}
-  IMAADPCMWaveFormat_tag = record
+  ima_adpcmwaveformat_tag = record
     wfx: WaveFormatEx;
     wSamplesPerBlock: Word;
   end;
-  {$EXTERNALSYM IMAADPCMWaveFormat_tag}
-  IMAADPCMWaveFormat = IMAADPCMWaveFormat_tag;
+  {$EXTERNALSYM ima_adpcmwaveformat_tag}
+  IMAADPCMWaveFormat = ima_adpcmwaveformat_tag;
   {$EXTERNALSYM IMAADPCMWaveFormat}
-  NPIMAADPCMWAVEFORMAT = PIMAADPCMWAVEFORMAT;
+  NPIMAADPCMWAVEFORMAT = IMAADPCMWaveFormat;
   {$EXTERNALSYM NPIMAADPCMWAVEFORMAT}
-  LPIMAADPCMWAVEFORMAT = NPIMAADPCMWAVEFORMAT;
+  LPIMAADPCMWAVEFORMAT = IMAADPCMWaveFormat;
   {$EXTERNALSYM LPIMAADPCMWAVEFORMAT}
 
 
   // VideoLogic's Media Space ADPCM Structure definitions
   // for  WAVE_FORMAT_MEDIASPACE_ADPCM    ($0012)
 
-  PMEDIASPACEADPCMWAVEFORMAT = ^MediaSpaceADPCMWaveFormat_tag;
+  PMEDIASPACEADPCMWAVEFORMAT = ^mediaspace_adpcmwaveformat_tag;
   {$EXTERNALSYM PMEDIASPACEADPCMWAVEFORMAT}
-  MediaSpaceADPCMWaveFormat_tag = record
+  mediaspace_adpcmwaveformat_tag = record
     wfx: WaveFormatEx;
     wRevision: Word;
   end;
-  {$EXTERNALSYM MediaSpaceADPCMWaveFormat_tag}
-  MediaSpaceADPCMWaveFormat = MediaSpaceADPCMWaveFormat_tag;
+  {$EXTERNALSYM mediaspace_adpcmwaveformat_tag}
+  MediaSpaceADPCMWaveFormat = mediaspace_adpcmwaveformat_tag;
   {$EXTERNALSYM MediaSpaceADPCMWaveFormat}
-  NPMEDIASPACEADPCMWAVEFORMAT = ^PMEDIASPACEADPCMWAVEFORMAT;
+  NPMEDIASPACEADPCMWAVEFORMAT = ^MediaSpaceADPCMWaveFormat;
   {$EXTERNALSYM NPMEDIASPACEADPCMWAVEFORMAT}
-  LPMEDIASPACEADPCMWAVEFORMAT = ^NPMEDIASPACEADPCMWAVEFORMAT;
+  LPMEDIASPACEADPCMWAVEFORMAT = ^MediaSpaceADPCMWaveFormat;
   {$EXTERNALSYM LPMEDIASPACEADPCMWAVEFORMAT}
 
 
@@ -4873,34 +4881,36 @@ type
   //  Sierra Semiconductor
   //  for WAVE_FORMAT_SIERRA_ADPCM   ($0013)
 
-  PSIERRAADPCMWAVEFORMAT = ^SierraADPCMWaveFormat_tag;
+  PSIERRAADPCMWAVEFORMAT = ^sierra_adpcmwaveformat_tag;
   {$EXTERNALSYM PSIERRAADPCMWAVEFORMAT}
-  SierraADPCMWaveFormat_tag = record
+  sierra_adpcmwaveformat_tag = record
     wfx: TWaveFormatEx;
     wRevision: Word;
   end;
-  SierraADPCMWaveFormat = SierraADPCMWaveFormat_tag;
+  {$EXTERNALSYM sierra_adpcmwaveformat_tag}
+  SierraADPCMWaveFormat = sierra_adpcmwaveformat_tag;
   {$EXTERNALSYM SierraADPCMWaveFormat}
-  NPSIERRAADPCMWAVEFORMAT = ^PSIERRAADPCMWAVEFORMAT;
+  NPSIERRAADPCMWAVEFORMAT = ^SierraADPCMWaveFormat;
   {$EXTERNALSYM NPSIERRAADPCMWAVEFORMAT}
-  LPSIERRAADPCMWAVEFORMAT = ^NPSIERRAADPCMWAVEFORMAT;
+  LPSIERRAADPCMWAVEFORMAT = ^SierraADPCMWaveFormat;
   {$EXTERNALSYM LPSIERRAADPCMWAVEFORMAT}
 
 
   //  Antex Electronics  structure definitions
   //      for WAVE_FORMAT_G723_ADPCM   ($0014)
-  PG723_ADPCMWAVEFORMAT = ^G723_ADPCMWaveFormat_tag;
+  PG723_ADPCMWAVEFORMAT = ^g723_adpcmwaveformat_tag;
   {$EXTERNALSYM PG723_ADPCMWAVEFORMAT}
-  G723_ADPCMWaveFormat_tag = record
+  g723_adpcmwaveformat_tag = record
     wfx: TWaveFormatEx;
     cbExtraSize: Word;
     nAuxBlockSize: Word;
   end;
-  G723_ADPCMWaveFormat = G723_ADPCMWaveFormat_tag;
+  {$EXTERNALSYM g723_adpcmwaveformat_tag}
+  G723_ADPCMWaveFormat = g723_adpcmwaveformat_tag;
   {$EXTERNALSYM G723_ADPCMWaveFormat}
-  NPG723_ADPCMWAVEFORMAT = ^PG723_ADPCMWAVEFORMAT;
+  NPG723_ADPCMWAVEFORMAT = ^G723_ADPCMWaveFormat;
   {$EXTERNALSYM NPG723_ADPCMWAVEFORMAT}
-  LPG723_ADPCMWAVEFORMAT = ^NPG723_ADPCMWAVEFORMAT;
+  LPG723_ADPCMWAVEFORMAT = ^G723_ADPCMWaveFormat;
   {$EXTERNALSYM LPG723_ADPCMWAVEFORMAT}
 
 
@@ -4913,10 +4923,12 @@ type
   DigiStdWaveFormat_tag = record
     wfx: WaveFormatEx;
   end;
+  {$EXTERNALSYM DigiStdWaveFormat_tag}
+  DigiStdWaveFormat = DigiStdWaveFormat_tag;
   {$EXTERNALSYM DigiStdWaveFormat}
-  NPDIGISTDWAVEFORMAT = ^PDIGISTDWAVEFORMAT;
+  NPDIGISTDWAVEFORMAT = ^DigiStdWaveFormat;
   {$EXTERNALSYM NPDIGISTDWAVEFORMAT}
-  LPDIGISTDWAVEFORMAT = ^NPDIGISTDWAVEFORMAT;
+  LPDIGISTDWAVEFORMAT = ^DigiStdWaveFormat;
   {$EXTERNALSYM LPDIGISTDWAVEFORMAT}
 
 
@@ -4929,27 +4941,29 @@ type
   DigiFixWaveFormat_tag = record
     wfx: WaveFormatEx;
   end;
+  {$EXTERNALSYM DigiFixWaveFormat_tag}
   DigiFixWaveFormat = DigiFixWaveFormat_tag;
   {$EXTERNALSYM DigiFixWaveFormat}
-  NPDIGIFIXWAVEFORMAT = ^DIGIFIXWAVEFORMAT;
+  NPDIGIFIXWAVEFORMAT = ^DigiFixWaveFormat;
   {$EXTERNALSYM NPDIGIFIXWAVEFORMAT}
-  LPDIGIFIXWAVEFORMAT = ^DIGIFIXWAVEFORMAT;
+  LPDIGIFIXWAVEFORMAT = ^DigiFixWaveFormat;
   {$EXTERNALSYM LPDIGIFIXWAVEFORMAT}
 
 
   //   Dialogic Corporation
   // WAVEFORMAT_DIALOGIC_OKI_ADPCM   ($0017)
 
-  PDIALOGICOKIADPCMWAVEFORMAT = ^DialogIkokiADPCMWaveFormat_tag;
+  PDIALOGICOKIADPCMWAVEFORMAT = ^creative_fastspeechformat_tag;
   {$EXTERNALSYM PDIALOGICOKIADPCMWAVEFORMAT}
-  DialogIkokiADPCMWaveFormat_tag = record
+  creative_fastspeechformat_tag = record
     wfx: WaveFormatEx;
   end;
-  DialogIkokiADPCMWaveFormat = DialogIkokiADPCMWaveFormat_tag;
+  {$EXTERNALSYM creative_fastspeechformat_tag}
+  DialogIkokiADPCMWaveFormat = creative_fastspeechformat_tag;
   {$EXTERNALSYM DialogIkokiADPCMWaveFormat}
-  NPDIALOGICOKIADPCMWAVEFORMAT = ^PDIALOGICOKIADPCMWAVEFORMAT;
+  NPDIALOGICOKIADPCMWAVEFORMAT = ^DialogIkokiADPCMWaveFormat;
   {$EXTERNALSYM NPDIALOGICOKIADPCMWAVEFORMAT}
-  LPDIALOGICOKIADPCMWAVEFORMAT = ^NPDIALOGICOKIADPCMWAVEFORMAT;
+  LPDIALOGICOKIADPCMWAVEFORMAT = ^DialogIkokiADPCMWaveFormat;
   {$EXTERNALSYM LPDIALOGICOKIADPCMWAVEFORMAT}
 
 
@@ -4962,11 +4976,12 @@ type
   yamaha_adpmcwaveformat_tag = record
     wfx: WaveFormatEx;
   end;
-  {$EXTERNALSYM Yamaha_ADPCMWaveFormat}
-  yamaha_adpmcwaveformat = yamaha_adpmcwaveformat_tag;
-  NPYAMAHA_ADPCMWAVEFORMAT = ^PYAMAHA_ADPCMWAVEFORMAT;
+  {$EXTERNALSYM yamaha_adpmcwaveformat_tag}
+  YamahaADPMCWaveFormat = yamaha_adpmcwaveformat_tag;
+  {$EXTERNALSYM YamahaADPMCWaveFormat}
+  NPYAMAHA_ADPCMWAVEFORMAT = ^YamahaADPMCWaveFormat;
   {$EXTERNALSYM NPYAMAHA_ADPCMWAVEFORMAT}
-  LPYAMAHA_ADPCMWAVEFORMAT = ^NPYAMAHA_ADPCMWAVEFORMAT;
+  LPYAMAHA_ADPCMWAVEFORMAT = ^YamahaADPMCWaveFormat;
   {$EXTERNALSYM LPYAMAHA_ADPCMWAVEFORMAT}
 
 
@@ -4980,11 +4995,12 @@ type
     wfx: WaveFormatEx;
     wCompType: Word;
   end;
+  {$EXTERNALSYM sonarcwaveformat_tag}
   SonarcWaveFormat = sonarcwaveformat_tag;
   {$EXTERNALSYM SonarcWaveFormat}
-  NPSONARCWAVEFORMAT = ^SONARCWAVEFORMAT;
+  NPSONARCWAVEFORMAT = ^SonarcWaveFormat;
   {$EXTERNALSYM NPSONARCWAVEFORMAT}
-  LPSONARCWAVEFORMAT = ^SONARCWAVEFORMAT;
+  LPSONARCWAVEFORMAT = ^SonarcWaveFormat;
   {$EXTERNALSYM LPSONARCWAVEFORMAT}
 
 
@@ -5000,11 +5016,12 @@ type
     wSamplesPerBlock: Word;
     abReserved: array [0 .. 27] of Byte;
   end;
+  {$EXTERNALSYM truespeechwaveformat_tag}
   TrueSpeechWaveFormat = truespeechwaveformat_tag;
   {$EXTERNALSYM TrueSpeechWaveFormat}
-  NPTRUESPEECHWAVEFORMAT = ^PTRUESPEECHWAVEFORMAT;
+  NPTRUESPEECHWAVEFORMAT = ^TrueSpeechWaveFormat;
   {$EXTERNALSYM NPTRUESPEECHWAVEFORMAT}
-  LPTRUESPEECHWAVEFORMAT = ^NPTRUESPEECHWAVEFORMAT;
+  LPTRUESPEECHWAVEFORMAT = ^TrueSpeechWaveFormat;
   {$EXTERNALSYM LPTRUESPEECHWAVEFORMAT}
 
 
@@ -5016,12 +5033,13 @@ type
   echosc1waveformat_tag = record
     wfx: WaveFormatEx;
   end;
+  {$EXTERNALSYM echosc1waveformat_tag}
   EchoSC1WaveFormat = echosc1waveformat_tag;
   {$EXTERNALSYM EchoSC1WaveFormat}
   {$EXTERNALSYM NPECHOSC1WAVEFORMAT}
-  NPECHOSC1WAVEFORMAT = ^PECHOSC1WAVEFORMAT;
+  NPECHOSC1WAVEFORMAT = ^EchoSC1WaveFormat;
   {$EXTERNALSYM LPECHOSC1WAVEFORMAT}
-  LPECHOSC1WAVEFORMAT = ^NPECHOSC1WAVEFORMAT;
+  LPECHOSC1WAVEFORMAT = ^EchoSC1WaveFormat;
 
 
   //  Audiofile Inc.structure definitions
@@ -5032,11 +5050,12 @@ type
   audiofile_af36waveformat_tag = record
     wfx: WaveFormatEx;
   end;
+  {$EXTERNALSYM audiofile_af36waveformat_tag}
   AudioFile_AF36WaveFormat = audiofile_af36waveformat_tag;
   {$EXTERNALSYM AudioFile_AF36WaveFormat}
-  NPAUDIOFILE_AF36WAVEFORMAT = ^PAUDIOFILE_AF36WAVEFORMAT;
+  NPAUDIOFILE_AF36WAVEFORMAT = ^AudioFile_AF36WaveFormat;
   {$EXTERNALSYM NPAUDIOFILE_AF36WAVEFORMAT}
-  LPAUDIOFILE_AF36WAVEFORMAT = ^NPAUDIOFILE_AF36WAVEFORMAT;
+  LPAUDIOFILE_AF36WAVEFORMAT = ^AudioFile_AF36WaveFormat;
   {$EXTERNALSYM LPAUDIOFILE_AF36WAVEFORMAT}
 
 
@@ -5044,14 +5063,16 @@ type
   //
   //      for WAVE_FORMAT_APTX   ($0025)
   PAPTXWAVEFORMAT = ^APTXWaveFormat;
-  {$EXTERNALSYM PAPTXWAVEFORMAT}  aptxwaveformat_tag = record
+  {$EXTERNALSYM PAPTXWAVEFORMAT}
+  aptxwaveformat_tag = record
     wfx: WaveFormatEx;
   end;
+  {$EXTERNALSYM aptxwaveformat_tag}
   APTXWaveFormat = aptxwaveformat_tag;
   {$EXTERNALSYM APTXWaveFormat}
-  NPAPTXWAVEFORMAT = ^PAPTXWAVEFORMAT;
+  NPAPTXWAVEFORMAT = ^APTXWaveFormat;
   {$EXTERNALSYM NPAPTXWAVEFORMAT}
-  LPAPTXWAVEFORMAT = ^NPAPTXWAVEFORMAT;
+  LPAPTXWAVEFORMAT = ^APTXWaveFormat;
   {$EXTERNALSYM LPAPTXWAVEFORMAT}
 
 
@@ -5064,11 +5085,12 @@ type
   audiofile_af10waveformat_tag = record
     wfx: WaveFormatEx;
   end;
+  {$EXTERNALSYM audiofile_af10waveformat_tag}
   AudioFile_AF10WaveFormat = audiofile_af10waveformat_tag;
   {$EXTERNALSYM AudioFile_AF10WaveFormat}
-  NPAUDIOFILE_AF10WAVEFORMAT = ^AUDIOFILE_AF10WAVEFORMAT;
+  NPAUDIOFILE_AF10WAVEFORMAT = ^AudioFile_AF10WaveFormat;
   {$EXTERNALSYM NPAUDIOFILE_AF10WAVEFORMAT}
-  LPAUDIOFILE_AF10WAVEFORMAT = ^AUDIOFILE_AF10WAVEFORMAT;
+  LPAUDIOFILE_AF10WAVEFORMAT = ^AudioFile_AF10WaveFormat;
   {$EXTERNALSYM LPAUDIOFILE_AF10WAVEFORMAT}
 
 
@@ -5081,6 +5103,7 @@ type
     wfx: WaveFormatEx;
     nAuxBitsCode: Word;
   end;
+  {$EXTERNALSYM dolbyac2waveformat_tag}
   DolbyAC2WaveFormat = dolbyac2waveformat_tag;
   {$EXTERNALSYM DolbyAC2WaveFormat}
 
@@ -5096,9 +5119,9 @@ type
   {$EXTERNALSYM gsm610waveformat_tag}
   GSM610WaveFormat = gsm610waveformat_tag;
   {$EXTERNALSYM GSM610WaveFormat}
-  NPGSM610WAVEFORMAT = ^GSM610WAVEFORMAT;
+  NPGSM610WAVEFORMAT = ^GSM610WaveFormat;
   {$EXTERNALSYM NPGSM610WAVEFORMAT}
-  LPGSM610WAVEFORMAT = ^GSM610WAVEFORMAT;
+  LPGSM610WAVEFORMAT = ^GSM610WaveFormat;
   {$EXTERNALSYM LPGSM610WAVEFORMAT}
 
 
@@ -5112,11 +5135,12 @@ type
     wfx: WaveFormatEx;
     wSamplesPerBlock: Word;
   end;
-  {$EXTERNALSYM ADPCMEWaveFormat}
+  {$EXTERNALSYM adpcmewaveformat_tag}
   ADPCMEWaveFormat = adpcmewaveformat_tag;
-  NPADPCMEWAVEFORMAT = ^PADPCMEWAVEFORMAT;
+  {$EXTERNALSYM ADPCMEWaveFormat}
+  NPADPCMEWAVEFORMAT = ^ADPCMEWaveFormat;
   {$EXTERNALSYM NPADPCMEWAVEFORMAT}
-  LPADPCMEWAVEFORMAT = ^NPADPCMEWAVEFORMAT;
+  LPADPCMEWAVEFORMAT = ^ADPCMEWaveFormat;
   {$EXTERNALSYM LPADPCMEWAVEFORMAT}
 
 
@@ -5132,9 +5156,9 @@ type
   {$EXTERNALSYM contres_vqlpcwaveformat_tag}
   ContresVQLPCWaveFormat = contres_vqlpcwaveformat_tag;
   {$EXTERNALSYM ContresVQLPCWaveFormat}
-  NPCONTRESVQLPCWAVEFORMAT = ^CONTRESVQLPCWAVEFORMAT;
+  NPCONTRESVQLPCWAVEFORMAT = ^ContresVQLPCWaveFormat;
   {$EXTERNALSYM NPCONTRESVQLPCWAVEFORMAT}
-  LPCONTRESVQLPCWAVEFORMAT = ^CONTRESVQLPCWAVEFORMAT;
+  LPCONTRESVQLPCWAVEFORMAT = ^ContresVQLPCWaveFormat;
   {$EXTERNALSYM LPCONTRESVQLPCWAVEFORMAT}
 
 
@@ -5147,11 +5171,11 @@ type
     wSamplesPerBlock: Word;
   end;
   {$EXTERNALSYM digirealwaveformat_tag}
-  digirealwaveformat = digirealwaveformat_tag;
+  DigiRealWaveFormat = digirealwaveformat_tag;
   {$EXTERNALSYM digirealwaveformat}
-  NPDIGIREALWAVEFORMAT = ^PDIGIREALWAVEFORMAT;
+  NPDIGIREALWAVEFORMAT = ^DigiRealWaveFormat;
   {$EXTERNALSYM NPDIGIREALWAVEFORMAT}
-  LPDIGIREALWAVEFORMAT = ^NPDIGIREALWAVEFORMAT;
+  LPDIGIREALWAVEFORMAT = ^DigiRealWaveFormat;
   {$EXTERNALSYM LPDIGIREALWAVEFORMAT}
 
 
@@ -5168,27 +5192,27 @@ type
   {$EXTERNALSYM digiadpcmmwaveformat_tag}
   digiadpcmmwaveformat = digiadpcmmwaveformat_tag;
   {$EXTERNALSYM digiadpcmmwaveformat}
-  NPDIGIADPCMWAVEFORMAT = ^PDIGIADPCMWAVEFORMAT;
+  NPDIGIADPCMWAVEFORMAT = ^digiadpcmmwaveformat;
   {$EXTERNALSYM NPDIGIADPCMWAVEFORMAT}
-  LPDIGIADPCMWAVEFORMAT = ^NPDIGIADPCMWAVEFORMAT;
+  LPDIGIADPCMWAVEFORMAT = ^digiadpcmmwaveformat;
   {$EXTERNALSYM LPDIGIADPCMWAVEFORMAT}
 
 
   // Control Resources Limited
   // WAVE_FORMAT_CONTROL_RES_CR10          $0037
 
-  PCONTRESCR10WAVEFORMAT = ^ContResCR10WaveFormat_tag;
+  PCONTRESCR10WAVEFORMAT = ^contres_cr10waveformat_tag;
   {$EXTERNALSYM PCONTRESCR10WAVEFORMAT}
-  ContResCR10WaveFormat_tag = record
+  contres_cr10waveformat_tag = record
     wfx: WaveFormatEx;
     wSamplesPerBlock: Word;
   end;
-  {$EXTERNALSYM ContResCR10WaveFormat_tag}
-  ContResCR10WaveFormat = ContResCR10WaveFormat_tag;
+  {$EXTERNALSYM contres_cr10waveformat_tag}
+  ContResCR10WaveFormat = contres_cr10waveformat_tag;
   {$EXTERNALSYM ContResCR10WaveFormat}
-  NPCONTRESCR10WAVEFORMAT = ^PCONTRESCR10WAVEFORMAT;
+  NPCONTRESCR10WAVEFORMAT = ^ContResCR10WaveFormat;
   {$EXTERNALSYM NPCONTRESCR10WAVEFORMAT}
-  LPCONTRESCR10WAVEFORMAT = ^NPCONTRESCR10WAVEFORMAT;
+  LPCONTRESCR10WAVEFORMAT = ^ContResCR10WaveFormat;
   {$EXTERNALSYM LPCONTRESCR10WAVEFORMAT}
 
 
@@ -5203,33 +5227,38 @@ type
     wSamplesPerBlock: Word;
   end;
   {$EXTERNALSYM nms_vbxadpcmmwaveformat_tag}
-  nms_vbxadpcmmwaveformat = nms_vbxadpcmmwaveformat_tag;
+  NMS_VBXADPCMMWaveFormat = nms_vbxadpcmmwaveformat_tag;
   {$EXTERNALSYM nms_vbxadpcmmwaveformat}
-  NPNMS_VBXADPCMWAVEFORMAT = ^PNMS_VBXADPCMWAVEFORMAT;
+  NPNMS_VBXADPCMWAVEFORMAT = ^NMS_VBXADPCMMWaveFormat;
   {$EXTERNALSYM NPNMS_VBXADPCMWAVEFORMAT}
-  LPNMS_VBXADPCMWAVEFORMAT = ^NPNMS_VBXADPCMWAVEFORMAT;
+  LPNMS_VBXADPCMWAVEFORMAT = ^NMS_VBXADPCMMWaveFormat;
   {$EXTERNALSYM LPNMS_VBXADPCMWAVEFORMAT}
 
 
   //  Antex Electronics  structure definitions
   //
   //      for WAVE_FORMAT_G721_ADPCM   ($0040)
-  PG721_ADPCMWaveFormat = ^g721_adpcmwaveformat_tag;
+  PG721_ADPCMWAVEFORMAT = ^g721_adpcmwaveformat_tag;
   g721_adpcmwaveformat_tag = record
     wfx: WaveFormatEx;
     wSamplesPerBlock: Word;
   end;
+  {$EXTERNALSYM g721_adpcmwaveformat_tag}
   g721_adpcmwaveformat = g721_adpcmwaveformat_tag;
   {$EXTERNALSYM G721_ADPCMWaveFormat}
+  NPG721_ADPCMWAVEFORMAT = ^g721_adpcmwaveformat;
+  {$EXTERNALSYM NPG721_ADPCMWAVEFORMAT}
+  LPG721_ADPCMWAVEFORMAT = ^g721_adpcmwaveformat;
+  {$EXTERNALSYM LPG721_ADPCMWAVEFORMAT}
 
 
   // Microsoft MPEG audio WAV definition
   //
   //  MPEG-1 audio wave format (audio layer only).   ($0050)
 
-  PMPEG1WAVEFORMAT = ^MPEG1WaveFormat_tag;
+  PMPEG1WAVEFORMAT = ^mpeg1waveformat_tag;
   {$EXTERNALSYM PMPEG1WaveFormat}
-  MPEG1WaveFormat_tag = record
+  mpeg1waveformat_tag = record
     wfx: WaveFormatEx;
     fwHeadLayer: Word;
     dwHeadBitrate: DWORD;
@@ -5240,11 +5269,12 @@ type
     dwPTSlow: DWORD;
     dwPTShigh: DWORD;
   end;
+  {$EXTERNALSYM mpeg1waveformat_tag}
   MPEG1WaveFormat = MPEG1WaveFormat_tag;
   {$EXTERNALSYM MPEG1WaveFormat}
-  NPMPEG1WAVEFORMAT = ^PMPEG1WAVEFORMAT;
+  NPMPEG1WAVEFORMAT = ^MPEG1WaveFormat;
   {$EXTERNALSYM NPMPEG1WAVEFORMAT}
-  LPMPEG1WAVEFORMAT = ^NPMPEG1WAVEFORMAT;
+  LPMPEG1WAVEFORMAT = ^MPEG1WaveFormat;
   {$EXTERNALSYM LPMPEG1WAVEFORMAT}
 
 
@@ -5298,11 +5328,11 @@ type
     nCodecDelay: WORD;
   end;
   {$EXTERNALSYM mpeglayer3waveformat_tag}
-  mpeglayer3waveformat = mpeglayer3waveformat_tag;
+  MPEGLayer3WaveFormat = mpeglayer3waveformat_tag;
   {$EXTERNALSYM MPEGLAYER3WAVEFORMAT}
-  NPMPEGLAYER3WAVEFORMAT = ^PMPEGLAYER3WAVEFORMAT;
+  NPMPEGLAYER3WAVEFORMAT = ^MPEGLayer3WaveFormat;
   {$EXTERNALSYM NPMPEGLAYER3WAVEFORMAT}
-  LPMPEGLAYER3WAVEFORMAT = ^NPMPEGLAYER3WAVEFORMAT;
+  LPMPEGLAYER3WAVEFORMAT = ^MPEGLayer3WaveFormat;
   {$EXTERNALSYM LPMPEGLAYER3WAVEFORMAT}
 
   // =========================================================================;
@@ -5440,11 +5470,11 @@ type
     dwReserved2: DWORD;
   end;
   {$EXTERNALSYM heaacwaveinfo_tag}
-  heaacwaveinfo = heaacwaveinfo_tag; // this structure has a size of 30 bytes
+  HEAACWaveInfo = heaacwaveinfo_tag; // this structure has a size of 30 bytes
   {$EXTERNALSYM HEAACWAVEINFO}
-  NPHEAACWAVEINFO = ^PHEAACWAVEINFO;
+  NPHEAACWAVEINFO = ^HEAACWaveInfo;
   {$EXTERNALSYM NPHEAACWAVEINFO}
-  LPHEAACWAVEINFO = ^NPHEAACWAVEINFO;
+  LPHEAACWAVEINFO = ^HEAACWaveInfo;
   {$EXTERNALSYM LPHEAACWAVEINFO}
 
 
@@ -5456,11 +5486,11 @@ type
     pbAudioSpecificConfig: array [0..0] of Byte;  // First byte of AudioSpecificConfig()
   end;
   {$EXTERNALSYM heaacwaveformat_tag}
-  heaacwaveformat = heaacwaveformat_tag;  // This structure has a size of 31 bytes
+  HEAACWaveFormat = heaacwaveformat_tag;  // This structure has a size of 31 bytes
   {$EXTERNALSYM HEAACWAVEFORMAT}
-  NPHEAACWAVEFORMAT = ^PHEAACWAVEFORMAT;
+  NPHEAACWAVEFORMAT = ^HEAACWaveFormat;
   {$EXTERNALSYM NPHEAACWAVEFORMAT}
-  LPHEAACWAVEFORMAT = ^NPHEAACWAVEFORMAT;
+  LPHEAACWAVEFORMAT = ^HEAACWaveFormat;
   {$EXTERNALSYM LPHEAACWAVEFORMAT}
 
 
@@ -5503,7 +5533,7 @@ type
   {$EXTERNALSYM msaudio1waveformat_tag}
   msaudio1waveformat = msaudio1waveformat_tag;
   {$EXTERNALSYM MSAUDIO1WAVEFORMAT}
-  LPMSAUDIO1WAVEFORMAT = ^MSAUDIO1WAVEFORMAT;
+  LPMSAUDIO1WAVEFORMAT = ^msaudio1waveformat;
   {$EXTERNALSYM LPMSAUDIO1WAVEFORMAT}
 
 const
@@ -5527,7 +5557,6 @@ const
 type
 
   PWMAUDIO2WAVEFORMAT = ^wmaudio2waveformat_tag;
-  {$EXTERNALSYM PWMAUDIO2WAVEFORMAT}
   wmaudio2waveformat_tag = record
     wfx: WAVEFORMATEX;
     dwSamplesPerBlock: DWORD;        // only counting "new" samples "= half of what will be used due to overlapping
@@ -5535,9 +5564,9 @@ type
     dwSuperBlockAlign: DWORD;       // the big size...  should be multiples of wfx.nBlockAlign.
   end;
   {$EXTERNALSYM wmaudio2waveformat_tag}
-  wmaudio2waveformat = wmaudio2waveformat_tag;
+  WMAudio2WaveFormat = wmaudio2waveformat_tag;
   {$EXTERNALSYM WMAUDIO2WAVEFORMAT}
-  LPWMAUDIO2WAVEFORMAT = ^PWMAUDIO2WAVEFORMAT;
+  LPWMAUDIO2WAVEFORMAT = ^WMAudio2WaveFormat;
   {$EXTERNALSYM LPWMAUDIO2WAVEFORMAT}
 
 
@@ -5568,14 +5597,14 @@ type
     wReserved3: WORD;
   end;
   {$EXTERNALSYM wmaudio3waveformat_tag}
-  wmaudio3waveformat = wmaudio3waveformat_tag;
+  WMAudio3WaveFormat = wmaudio3waveformat_tag;
   {$EXTERNALSYM WMAUDIO3WAVEFORMAT}
-  LPWMAUDIO3WAVEFORMAT = ^PWMAUDIO3WAVEFORMAT;
+  LPWMAUDIO3WAVEFORMAT = ^WMAudio3WaveFormat;
   {$EXTERNALSYM LPWMAUDIO3WAVEFORMAT}
 
 const
 
-  WMAUDIO3_WFX_EXTRA_BYTES            = (SizeOf (WMAUDIO3WAVEFORMAT) - SizeOf (WAVEFORMATEX));
+  WMAUDIO3_WFX_EXTRA_BYTES            = (SizeOf(WMAUDIO3WAVEFORMAT) - SizeOf(WAVEFORMATEX));
   {$EXTERNALSYM WMAUDIO3_WFX_EXTRA_BYTES}
 
 
@@ -5590,11 +5619,11 @@ type
     wRevision: Word;
   end;
   {$EXTERNALSYM creative_adpcmwaveformat_tag}
-  Creative_ADPCMWaveFormat = creative_adpcmwaveformat_tag;
+  CreativeADPCMWaveFormat = creative_adpcmwaveformat_tag;
   {$EXTERNALSYM CreativeADPCMWaveFormat}
-  NPCREATIVEADPCMWAVEFORMAT = ^PCREATIVEADPCMWAVEFORMAT;
+  NPCREATIVEADPCMWAVEFORMAT = ^CreativeADPCMWaveFormat;
   {$EXTERNALSYM NPCREATIVEADPCMWAVEFORMAT}
-  LPCREATIVEADPCMWAVEFORMAT = ^NPCREATIVEADPCMWAVEFORMAT;
+  LPCREATIVEADPCMWAVEFORMAT = ^CreativeADPCMWaveFormat;
   {$EXTERNALSYM LPCREATIVEADPCMWAVEFORMAT}
 
 
@@ -5608,11 +5637,11 @@ type
     wRevision: Word;
   end;
   {$EXTERNALSYM creative_fastspeech8format_tag}
-  Creative_FastSpeech8WaveFormat = creative_fastspeech8format_tag;
+  CreativeFastSpeech8WaveFormat = creative_fastspeech8format_tag;
   {$EXTERNALSYM CreativeFastSpeech8WaveFormat}
-  NPCREATIVEFASTSPEECH8WAVEFORMAT = ^PCREATIVEFASTSPEECH8WAVEFORMAT;
+  NPCREATIVEFASTSPEECH8WAVEFORMAT = ^CreativeFastSpeech8WaveFormat;
   {$EXTERNALSYM NPCREATIVEFASTSPEECH8WAVEFORMAT}
-  LPCREATIVEFASTSPEECH8WAVEFORMAT = ^NPCREATIVEFASTSPEECH8WAVEFORMAT;
+  LPCREATIVEFASTSPEECH8WAVEFORMAT = ^CreativeFastSpeech8WaveFormat;
   {$EXTERNALSYM LPCREATIVEFASTSPEECH8WAVEFORMAT}
 
 
@@ -5625,11 +5654,11 @@ type
     wRevision: Word;
   end;
   {$EXTERNALSYM creative_fastspeech10format_tag}
-  Creative_FastSpeech10WaveFormat = creative_fastspeech10format_tag;
+  CreativeFastSpeech10WaveFormat = creative_fastspeech10format_tag;
   {$EXTERNALSYM CreativeFastSpeech10WaveFormat}
-  NPCREATIVEFASTSPEECH10WAVEFORMAT = ^PCREATIVEFASTSPEECH10WAVEFORMAT;
+  NPCREATIVEFASTSPEECH10WAVEFORMAT = ^CreativeFastSpeech10WaveFormat;
   {$EXTERNALSYM NPCREATIVEFASTSPEECH10WAVEFORMAT}
-  LPCREATIVEFASTSPEECH10WAVEFORMAT = ^NPCREATIVEFASTSPEECH10WAVEFORMAT;
+  LPCREATIVEFASTSPEECH10WAVEFORMAT = ^CreativeFastSpeech10WaveFormat;
   {$EXTERNALSYM LPCREATIVEFASTSPEECH10WAVEFORMAT}
 
 
@@ -5637,74 +5666,80 @@ type
   //  for WAVE_FORMAT_FMMTOWNS_SND   ($0300)
   PFMTOWNS_SND_WAVEFORMAT = ^FMTowns_Snd_WaveFormat_tag;
   {$EXTERNALSYM PFMTOWNS_SND_WAVEFORMAT}
-  FMTowns_Snd_WaveFormat_tag = record
+  fmtowns_snd_waveformat_tag = record
     wfx: WaveFormatEx;
     wRevision: Word;
   end;
-  {$EXTERNALSYM FMTowns_Snd_WaveFormat_tag}
-  FMTowns_Snd_WaveFormat = FMTowns_Snd_WaveFormat_tag;
-  {$EXTERNALSYM FMTowns_Snd_WaveFormat}
-  NPFMTOWNS_SND_WAVEFORMAT = ^PFMTOWNS_SND_WAVEFORMAT;
+  {$EXTERNALSYM fmtowns_snd_waveformat_tag}
+  FMTownsSndWaveFormat = fmtowns_snd_waveformat_tag;
+  {$EXTERNALSYM FMTownsSndWaveFormat}
+  NPFMTOWNS_SND_WAVEFORMAT = ^FMTownsSndWaveFormat;
   {$EXTERNALSYM NPFMTOWNS_SND_WAVEFORMAT}
-  LPFMTOWNS_SND_WAVEFORMAT = ^NPFMTOWNS_SND_WAVEFORMAT;
+  LPFMTOWNS_SND_WAVEFORMAT = ^FMTownsSndWaveFormat;
   {$EXTERNALSYM LPFMTOWNS_SND_WAVEFORMAT}
 
 
   //  Olivetti structure
   //  for WAVE_FORMAT_OLIGSM   ($1000)
-  POliGSMWaveFormat = ^OliGSMWaveFormat_tag;
+  POLIGSMWAVEFORMAT = ^oligsmwaveformat_tag;
   {$EXTERNALSYM POliGSMWaveFormat}
-  OliGSMWaveFormat_tag = record
+  oligsmwaveformat_tag = record
     wfx: WaveFormatEx;
   end;
-  {$EXTERNALSYM OliGSMWaveFormat_tag}
+  {$EXTERNALSYM oligsmwaveformat_tag}
   OliGSMWaveFormat = OliGSMWaveFormat_tag;
   {$EXTERNALSYM OliGSMWaveFormat}
+  NPOLIGSMWAVEFORMAT = ^OliGSMWaveFormat;
+  {$EXTERNALSYM NPOLIGSMWAVEFORMAT}
+  LPOLIGSMWAVEFORMAT = ^OliGSMWaveFormat;
+  {$EXTERNALSYM LPOLIGSMWAVEFORMAT}
 
 
   //  Olivetti structure
   //  for WAVE_FORMAT_OLIADPCM   ($1001)
-  POLIADPCMWAVEFORMAT = ^OliADPCMWaveFormat_tag;
+  POLIADPCMWAVEFORMAT = ^oliadpcmwaveformat_tag;
   {$EXTERNALSYM POliADPCMWaveFormat}
-  OliADPCMWaveFormat_tag = record
+  oliadpcmwaveformat_tag = record
     wfx: WaveFormatEx;
   end;
   {$EXTERNALSYM olicelpwaveformat_tag}
-  OliADPCMWaveFormat = OliADPCMWaveFormat_tag;
+  OliADPCMWaveFormat = oliadpcmwaveformat_tag;
   {$EXTERNALSYM OliADPCMWaveFormat}
-  NPOLIADPCMWAVEFORMAT = ^POLIADPCMWAVEFORMAT;
+  NPOLIADPCMWAVEFORMAT = ^OliADPCMWaveFormat;
   {$EXTERNALSYM NPOLIADPCMWAVEFORMAT}
-  LPOLIADPCMWAVEFORMAT = ^NPOLIADPCMWAVEFORMAT;
+  LPOLIADPCMWAVEFORMAT = ^OliADPCMWaveFormat;
   {$EXTERNALSYM LPOLIADPCMWAVEFORMAT}
 
 
   //  Olivetti structure
   //      for WAVE_FORMAT_OLICELP   ($1002)
-  POLICELPWAVEFORMAT = ^OliCelpWaveFormat_tag;
+  POLICELPWAVEFORMAT = ^olicelpwaveformat_tag;
   {$EXTERNALSYM POLICELPWAVEFORMAT}
   olicelpwaveformat_tag = record
     wfx: WaveFormatEx;
   end;
-  OliCelpWaveFormat = OliCelpWaveFormat_tag;
-  NPOLICELPWAVEFORMAT = ^POLICELPWAVEFORMAT;
+  {$EXTERNALSYM olicelpwaveformat_tag}
+  OliCelpWaveFormat = olicelpwaveformat_tag;
   {$EXTERNALSYM OliCelpWaveFormat}
-  LPOLICELPWAVEFORMAT = ^NPOLICELPWAVEFORMAT;
+  NPOLICELPWAVEFORMAT = ^OliCelpWaveFormat;
+  {$EXTERNALSYM OliCelpWaveFormat}
+  LPOLICELPWAVEFORMAT = ^OliCelpWaveFormat;
   {$EXTERNALSYM LPOLICELPWAVEFORMAT}
 
 
   // Olivetti structure
   // for WAVE_FORMAT_OLISBC   ($1003)
 
-  POliSbcWaveFormat = ^OliSbcWaveFormat_tag;
-  OliSbcWaveFormat_tag = record
+  POliSbcWaveFormat = ^olisbcwaveformat_tag;
+  olisbcwaveformat_tag = record
     wfx: WaveFormatEx;
   end;
-  {$EXTERNALSYM OliSbcWaveFormat_tag}
-  OliSbcWaveFormat = OliSbcWaveFormat_tag;
+  {$EXTERNALSYM olisbcwaveformat_tag}
+  OliSbcWaveFormat = olisbcwaveformat_tag;
   {$EXTERNALSYM OliSbcWaveFormat}
-  NPOLISBCWAVEFORMAT = ^POLISBCWAVEFORMAT;
+  NPOLISBCWAVEFORMAT = ^OliSbcWaveFormat;
   {$EXTERNALSYM NPOLISBCWAVEFORMAT}
-  LPOLISBCWAVEFORMAT = ^NPOLISBCWAVEFORMAT;
+  LPOLISBCWAVEFORMAT = ^OliSbcWaveFormat;
   {$EXTERNALSYM LPOLISBCWAVEFORMAT}
 
 
@@ -5718,25 +5753,25 @@ type
   {$EXTERNALSYM olioprwaveformat_tag}
   OliOprWaveFormat = olioprwaveformat_tag;
   {$EXTERNALSYM OliOprWaveFormat}
-  NPOLIOPRWAVEFORMAT = ^OLIOPRWAVEFORMAT;
+  NPOLIOPRWAVEFORMAT = ^OliOprWaveFormat;
   {$EXTERNALSYM NPOLIOPRWAVEFORMAT}
-  LPOLIOPRWAVEFORMAT = ^OLIOPRWAVEFORMAT;
+  LPOLIOPRWAVEFORMAT = ^OliOprWaveFormat;
   {$EXTERNALSYM LPOLIOPRWAVEFORMAT}
 
 
   // Crystal Semiconductor IMA ADPCM format
   // for WAVE_FORMAT_CS_IMAADPCM   ($0039)
-  PCSIMAADPCMWAVEFORMAT = ^CSIMAADPCMWaveFormat_tag;
+  PCSIMAADPCMWAVEFORMAT = ^csimaadpcmwaveformat_tag;
   {$EXTERNALSYM PCSIMAADPCMWAVEFORMAT}
-  CSIMAADPCMWaveFormat_tag = record
+  csimaadpcmwaveformat_tag = record
     wfx: WaveFormatEx;
   end;
-  {$EXTERNALSYM CSIMAADPCMWaveFormat_tag}
-  CSIMAADPCMWaveFormat = CSIMAADPCMWaveFormat_tag;
+  {$EXTERNALSYM csimaadpcmwaveformat_tag}
+  CSIMAADPCMWaveFormat = csimaadpcmwaveformat_tag;
   {$EXTERNALSYM CSIMAADPCMWaveFormat}
-  NPCSIMAADPCMWAVEFORMAT = ^CSIMAADPCMWAVEFORMAT;
+  NPCSIMAADPCMWAVEFORMAT = ^CSIMAADPCMWaveFormat;
   {$EXTERNALSYM NPCSIMAADPCMWAVEFORMAT}
-  LPCSIMAADPCMWAVEFORMAT = ^CSIMAADPCMWAVEFORMAT;
+  LPCSIMAADPCMWAVEFORMAT = ^CSIMAADPCMWaveFormat;
   {$EXTERNALSYM LPCSIMAADPCMWAVEFORMAT}
 
 
@@ -5756,20 +5791,20 @@ const
 
 type
 
-  PWAVEFILTER = ^WaveFilter_tag;
+  PWAVEFILTER = ^wavefilter_tag;
   {$EXTERNALSYM PWAVEFILTER}
-  WaveFilter_tag = record
+  wavefilter_tag = record
     cbStruct: DWORD;                      // Size of the filter in bytes
     dwFilterTag: DWORD;                   // filter type
     fdwFilter: DWORD;                     // Flags for the filter (Universal Dfns)
     dwReserved: array [0 .. 4] of DWORD;  // Reserved for system use
   end;
-  {$EXTERNALSYM WaveFilter_tag}
-  WaveFilter = WaveFilter_tag;
+  {$EXTERNALSYM wavefilter_tag}
+  WaveFilter = wavefilter_tag;
   {$EXTERNALSYM WAVEFILTER}
-  NPWAVEFILTER = ^PWAVEFILTER;
+  NPWAVEFILTER = ^WaveFilter;
   {$EXTERNALSYM NPWAVEFILTER}
-  LPWAVEFILTER = ^NPWAVEFILTER;
+  LPWAVEFILTER = ^WaveFilter;
   {$EXTERNALSYM LPWAVEFILTER}
 
 
@@ -5780,16 +5815,17 @@ const
 type
 
   PVOLUMEWAVEFILTER = ^wavefilter_volume_tag;
+  {$EXTERNALSYM PVOLUMEWAVEFILTER}
   wavefilter_volume_tag = record
     wfltr: WaveFilter;
     dwVolume: DWORD;
   end;
   {$EXTERNALSYM wavefilter_volume_tag}
   WavefilterVolume = wavefilter_volume_tag;
-  {$EXTERNALSYM VOLUMEWAVEFILTER}
-  NPVOLUMEWAVEFILTER = ^PVOLUMEWAVEFILTER;
+  {$EXTERNALSYM WavefilterVolume}
+  NPVOLUMEWAVEFILTER = ^WavefilterVolume;
   {$EXTERNALSYM NPVOLUMEWAVEFILTER}
-  LPVOLUMEWAVEFILTER = ^NPVOLUMEWAVEFILTER;
+  LPVOLUMEWAVEFILTER = ^WavefilterVolume;
   {$EXTERNALSYM LPVOLUMEWAVEFILTER}
 
 
@@ -5801,6 +5837,7 @@ const
 type
 
   PECHOWAVEFILTER = ^wavefilter_echo_tag;
+  {$EXTERNALSYM PECHOWAVEFILTER}
   wavefilter_echo_tag = record
     wfltr: WaveFilter;
     dwVolume: DWORD;
@@ -5809,9 +5846,9 @@ type
   {$EXTERNALSYM wavefilter_echo_tag}
   EchoWavefilter = wavefilter_echo_tag;
   {$EXTERNALSYM ECHOWAVEFILTER}
-  NPECHOWAVEFILTER = ^ECHOWAVEFILTER;
+  NPECHOWAVEFILTER = ^EchoWavefilter;
   {$EXTERNALSYM NPECHOWAVEFILTER}
-  LPECHOWAVEFILTER = ^ECHOWAVEFILTER;
+  LPECHOWAVEFILTER = ^EchoWavefilter;
   {$EXTERNALSYM LPECHOWAVEFILTER}
 
 
@@ -5835,6 +5872,7 @@ type
     bLowVelocity: Byte;
     bHighVelocity: Byte;
   end;
+  {$EXTERNALSYM tag_s_RIFFWAVE_inst}
   s_RIFFWAVE_inst = tag_s_RIFFWAVE_inst;
   {$EXTERNALSYM s_RIFFWAVE_inst}
 
