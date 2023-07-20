@@ -54,7 +54,7 @@ SDK version: 10.0.22621.0 (Windows 11)
 
 *Demonstrates using the transcode API to transcode a source file (audio or video) to*
 *a different format (audio or video) supported by Media Foundation.* 
-* *
+
 *Supported, but not limited, formats in this sample are:*
 
 *Audio*
@@ -62,12 +62,11 @@ SDK version: 10.0.22621.0 (Windows 11)
 *- Waveform Audio File Format (wav)*
 *- MPEG-4 Audio (m4a)*
 *- Free Lossless Audio Codec (flac)*
-* *
+
 *Video
 *- Audio Video Interleave (avi)*
 *- MPEG-4 Video and Audio (mp4)*
 *- Windows Movie (wmv)*
-* *
 
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/mftransform.jfif)
@@ -116,9 +115,7 @@ SDK version: 10.0.22621.0 (Windows 11)
                *subtitles (SubRip and MicroDvd), RegEx (Regular Expressions) and how to get media properties.*
 
 
-
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfMediaPlayer_X.jfif)
-
 
 
 ****
@@ -131,14 +128,6 @@ SDK version: 10.0.22621.0 (Windows 11)
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/DuckingMediaPlayerSample.jpg)
 
-
-**Simple Player**
-
-*Demonstrates audio/video playback using the IMFPMediaPlayer and IMFPMediaPlayerCallback API.*
-*Note: This API is deprecated, but still -partly- functional in Windows 10 version 2004 (May 2020 update).*
-       It's not recommemble to use this API, because of many issues concerning playing different formats.
-
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/SimplePlayer.jfif)
 
 **Ducking Capture Sample**
 
