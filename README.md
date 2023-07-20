@@ -69,7 +69,7 @@ SDK version: 10.0.22621.0 (Windows 11)
 *- Windows Movie (wmv)*
 
 
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/mftransform Sample 2.png)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfTranscode%20Sample%202.png)
 
 **MfSimpleCapture sample**
 
