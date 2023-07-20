@@ -109,12 +109,15 @@ type
     Button1: TButton;
     butGetDevice: TButton;
     pnlVideo: TPanel;
+    cboRotation: TComboBox;
+    lblRotation: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormPaint(Sender: TObject);
     procedure pnlVideoResize(Sender: TObject);
     procedure butGetDeviceClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure HandleRotationChanged(Sender: TObject);
 
   private
     { Private declarations }
@@ -256,6 +259,11 @@ begin
     end;
 end;
 
+
+procedure TFrm_SimpleCapture.HandleRotationChanged(Sender: TObject);
+begin
+  MfDeviceCapture.Rotation := StrToInt(cboRotation.Text);
+end;
 
 // Message listener
 // Listen for WM_DEVICECHANGE messages. The lParam message parameter is a pointer to a DEV_BROADCAST_HDR structure.

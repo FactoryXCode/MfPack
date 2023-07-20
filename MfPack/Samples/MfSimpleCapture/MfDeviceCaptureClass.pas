@@ -150,6 +150,8 @@ type
     // Colorkey needed to draw transparent on the videosurface.
     FBGColor: COLORREF;
 
+    FRotation : Integer;
+
     // interfaces
     m_pSession:          IMFMediaSession;           // Media Session.
     m_pSource:           IMFMediaSource;            // Media Source.
@@ -226,6 +228,10 @@ type
     // Get or set the videosurface
     procedure SetVideoScreen(val: HWND);
     function GetVideoScreen(): HWND;
+
+    procedure SetRotation(AValue : Integer);
+    function SetStreamRotation(const ASource : IMFMediaSource; AStreamIndex : Integer; ARotation : Integer) : Boolean;
+
     // Get the video Normalized Rectangle
     function GetVideoRectangle(): TRECT;
 
@@ -263,6 +269,8 @@ type
     // Capture methods
     function PrepareSession(): HRESULT;  // Prepares the session for recording
     function VideoDetected(): Boolean; // returns m_bHasVideo;
+
+    property Rotation : Integer read FRotation write SetRotation;
 
     property State: TCeState read m_State write m_State;
     property Request: TRequest read m_Request write m_Request;
@@ -493,6 +501,7 @@ begin
   m_bHasVideo := False;
   m_pwszSymbolicLink := nil;
   m_cchSymbolicLink := 0;
+  FRotation := 0;
 
   hr := Initialize();
 
@@ -513,7 +522,6 @@ var
   pCaptureEngine: TMfCaptureEngine;
 
 begin
-
   pCaptureEngine := TMfCaptureEngine.Create(hVideo,
                                             hMainForm);
 
@@ -1199,6 +1207,8 @@ try
   if FAILED(hr) then
     dwSessionCaps := $0001;
 
+  SetStreamRotation(m_pSource, 0, FRotation);
+
   if SUCCEEDED(hr) then
     begin
       //
@@ -1394,13 +1404,43 @@ begin
   Result := m_bHasVideo;
 end;
 
+procedure TMfCaptureEngine.SetRotation(AValue : Integer);
+begin
+  if AValue <> FRotation then
+  begin
+    FRotation := AValue;
+    if Assigned(m_pSource) then
+      PrepareSession;
+  end;
+end;
+
+function TMfCaptureEngine.SetStreamRotation(const ASource : IMFMediaSource; AStreamIndex : Integer; ARotation : Integer) : Boolean;
+var
+  pPD : IMFPresentationDescriptor;
+  pSD : IMFStreamDescriptor;
+  pHandler : IMFMediaTypeHandler;
+  pMediaType : IMFMediaType;
+  fSelected : BOOL;
+begin
+  // Calls can be combined if no additional error handling is added at each stage.
+  Result := Succeeded(ASource.CreatePresentationDescriptor(pPD)) and Succeeded(pPD.GetStreamDescriptorByIndex(AStreamIndex, fSelected, pSD));
+
+  if Result then
+    Result := Succeeded(pSD.GetMediaTypeHandler(pHandler));
+
+  if Result then
+    Result := Succeeded(pHandler.GetCurrentMediaType(pMediaType));
+
+   if Result then
+    Result := Succeeded(pMediaType.SetUINT32(MF_MT_VIDEO_ROTATION, ARotation));
+end;
+
 // Sets the desired clipping window/control
 procedure TMfCaptureEngine.SetVideoScreen(val: HWND);
 begin
   if Assigned(m_pVideoDisplay) then
     m_pVideoDisplay.SetVideoWindow(val);
 end;
-
 
 function TMfCaptureEngine.GetVideoScreen(): HWND;
 begin
