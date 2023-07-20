@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -1759,10 +1759,8 @@ begin
 end;
 
 
-
-
-// Get FOURCC as string
-function GETFOURCC(frcc: FOURCC): WideString; inline;
+// Get FOURCC as string (little-endian)
+function GETFOURCC(frcc: DWord): WideString; inline;
 var
   afc : array[0..3] of AnsiChar;
 begin
@@ -1772,7 +1770,6 @@ begin
   afc[3] := AnsiChar(ord(frcc shr 24));
   Result := UpperCase(WideString(afc));
 end;
-
 
 
 // Bitshifting helpers

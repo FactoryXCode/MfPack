@@ -1,5 +1,5 @@
 # DuckingCapture Sample
-Version: X 3.1.4
+Version: X 3.1.5
 
 Description:
   ========================================================================
@@ -24,6 +24,6 @@ Project: Media Foundation - MFPack - Samples
 Project location: http://sourceforge.net/projects/MFPack
 
 First release date: 05-07-2020
-Final release date: 30-01-2023
+Final release date: 18/07/2023
 
 Copyright © FactoryX. All rights reserved.

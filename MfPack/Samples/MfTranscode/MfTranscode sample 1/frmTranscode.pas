@@ -10,8 +10,9 @@
 // Release date: 24-01-2020
 // Language: ENU
 //
-// Revision Version: 3.1.4
-// Description: This is a modified translation of the Transcoder sample,
+// Revision Version: 3.1.5
+// Description: Transcoding Example 1.
+//              This is a modified translation of the Microsoft Transcoder sample,
 //              The original is a commandline app.
 //
 // Company: FactoryX
@@ -22,12 +23,12 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -118,7 +119,7 @@ type
     { Private declarations }
     sInputFile: PWideChar;   // Audio source file name
     sOutputFile: PWideChar;  // Output file name
-    transcoder: TTranscoder; // transcoder object
+    FTranscoder: TTranscoder; // transcoder object
     stopwatch: TStopWatch;
     ElapsedSet: Boolean;
 
@@ -173,28 +174,28 @@ var
 
 begin
   // Create the transcoder object
-  transcoder := TTranscoder.Create(Self.Handle);
+  FTranscoder := TTranscoder.Create(Self.Handle);
   // Create a stopwatch to calculate the estimated rendering time.
   stopwatch := TStopWatch.Create();
   ElapsedSet := False;
 
-  if Not Assigned(transcoder) then
+  if Not Assigned(FTranscoder) then
     Exit;
 
   // Create a media source for the input file.
-  hr := transcoder.OpenFile(sInputFile);
+  hr := FTranscoder.OpenFile(sInputFile);
   if SUCCEEDED(hr) then
     begin
       Caption := Format('Opened file: %s.', [sInputFile]);
       // Configure the profile and build a topology.
-      hr := transcoder.ConfigureAudioOutput();
+      hr := FTranscoder.ConfigureAudioOutput();
     end;
 
   if SUCCEEDED(hr) then
-    hr := transcoder.ConfigureVideoOutput();
+    hr := FTranscoder.ConfigureVideoOutput();
 
   if SUCCEEDED(hr) then
-    hr := transcoder.ConfigureContainer();
+    hr := FTranscoder.ConfigureContainer();
 
   butStop.Enabled := True;
   butExecute.Enabled := False;
@@ -205,7 +206,7 @@ begin
 
   // Transcode and generate the output file.
   if SUCCEEDED(hr) then
-    hr := transcoder.EncodeToFile(sOutputFile);
+    hr := FTranscoder.EncodeToFile(sOutputFile);
 
   if SUCCEEDED(hr) then
     Caption := Format('Output file created: %s', [sOutputFile]);
@@ -227,10 +228,10 @@ end;
 procedure TfrmTranscoder.Reset(const hr: HResult);
 begin
   // When finished, release the engine.
-  if Assigned(transcoder) then
+  if Assigned(FTranscoder) then
     begin
-      transcoder.Free;
-      transcoder := Nil;
+      FTranscoder.Free;
+      FTranscoder := nil;
     end;
 
   butExecute.Enabled := False;
@@ -250,7 +251,7 @@ end;
 
 procedure TfrmTranscoder.butStopClick(Sender: TObject);
 begin
-  {void} transcoder.Stop();
+  {void} FTranscoder.Stop();
 end;
 
 
@@ -264,8 +265,8 @@ procedure TfrmTranscoder.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   CanClose := False;
   // Terminate a running Transcode process.
-  if Assigned(transcoder) then
-      transcoder.Stop();
+  if Assigned(FTranscoder) then
+      FTranscoder.Stop();
   CanClose := True;
 end;
 
@@ -295,7 +296,7 @@ begin //Position
   // WParam 1 is a progress msg event
   if (Msg.WParam = 1) then
     begin
-      CurrPosition := Round((100 * transcoder.m_Position) / transcoder.m_Duration);
+      CurrPosition := Round((100 * FTranscoder.m_Position) / FTranscoder.m_Duration);
       // We wait until we reached 1st 1% to calculate the estimated rendering end time
       if (CurrPosition = 1) and (ElapsedSet = False) then  // calculate 1st 1%
         begin

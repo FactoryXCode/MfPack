@@ -10,7 +10,7 @@
 // Release date: 09-10-2015
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 // 06/03/2022 Tony                Fixed IMFMediaEngineClassFactory.CreateInstance
 // 12/03/2022 Tony                Corrected IMFMediaEngineNeedKeyNotify
 //------------------------------------------------------------------------------
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 8.1 or later.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -782,7 +782,7 @@ type
     // Playback state
     function GetCurrentTime(): Double; stdcall;
 
-    function SetCurrentTime(const seekTime: Double): HResult; stdcall;
+    function SetCurrentTime(seekTime: Double): HResult; stdcall;
 
     function GetStartTime(): Double; stdcall;
 
@@ -2078,7 +2078,7 @@ type
   IMFTimedText = interface(IUnknown)
   ['{1f2a94c9-a3df-430d-9d0f-acd85ddc29af}']
 
-    function RegisterNotifications(const notify: IMFTimedTextNotify): HResult; stdcall;
+    function RegisterNotifications(notify: IMFTimedTextNotify): HResult; stdcall;
 
     function SelectTrack(trackId: DWORD;
                          selected: BOOL): HResult; stdcall;
@@ -2094,7 +2094,7 @@ type
                                   _label: LPCWSTR;
                                   language: LPCWSTR;
                                   kind: MF_TIMED_TEXT_TRACK_KIND;
-                                  isDefault: BOOL;
+                                  isDefault: BOOL; // Specifies whether to add the default data source. Specify TRUE to add the default data source or FALSE otherwise.
                                   out trackId: DWORD): HResult; stdcall;
 
     function AddTrack(_label: LPWSTR;
@@ -2440,7 +2440,7 @@ type
 
 
   // Interface IMFTimedTextBouten
-  // ==========================
+  // ============================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFTimedTextBouten);'}
   PIMFTimedTextBouten = ^IMFTimedTextBouten;
@@ -2459,7 +2459,7 @@ type
 
 
   // Interface IMFTimedTextBouten
-  // ==========================
+  // ============================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFTimedTextStyle2);'}
   PIMFTimedTextStyle2 = ^IMFTimedTextStyle2;

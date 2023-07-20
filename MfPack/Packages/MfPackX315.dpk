@@ -1,4 +1,4 @@
-package MfPackX314;
+package MfPackX315;
 
 {$R *.res}
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
@@ -21,7 +21,7 @@ package MfPackX314;
 {$TYPEDADDRESS OFF}
 {$VARSTRINGCHECKS ON}
 {$WRITEABLECONST OFF}
-{$MINENUMSIZE 4}
+{$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
 {$DEFINE DEBUG}
 {$ENDIF IMPLICITBUILDING}
@@ -45,6 +45,7 @@ contains
   WinApi.ActiveX.PropKeyDef in '..\src\WinApi.ActiveX.PropKeyDef.pas',
   WinApi.ActiveX.PropSys in '..\src\WinApi.ActiveX.PropSys.pas',
   WinApi.ActiveX.PropVarUtil in '..\src\WinApi.ActiveX.PropVarUtil.pas',
+  WinApi.ActiveX.RoBuffer in '..\src\WinApi.ActiveX.RoBuffer.pas',
   WinApi.AmVideo in '..\src\WinApi.AmVideo.pas',
   WinApi.ComBaseApi in '..\src\WinApi.ComBaseApi.pas',
   WinApi.Coml2Api in '..\src\WinApi.Coml2Api.pas',
@@ -87,22 +88,21 @@ contains
   WinApi.DirectX.D2D1Svg in '..\src\WinApi.DirectX.D2D1Svg.pas',
   WinApi.DirectX.D2DBaseTypes in '..\src\WinApi.DirectX.D2DBaseTypes.pas',
   WinApi.DirectX.D2DErr in '..\src\WinApi.DirectX.D2DErr.pas',
-  WinApi.DirectX.D3D9 in '..\src\WinApi.DirectX.D3D9.pas',
-  WinApi.DirectX.D3D9Caps in '..\src\WinApi.DirectX.D3D9Caps.pas',
-  WinApi.DirectX.D3D9Types in '..\src\WinApi.DirectX.D3D9Types.pas',
   WinApi.DirectX.D3D11 in '..\src\WinApi.DirectX.D3D11.pas',
   WinApi.DirectX.D3D11_1 in '..\src\WinApi.DirectX.D3D11_1.pas',
   WinApi.DirectX.D3D11_2 in '..\src\WinApi.DirectX.D3D11_2.pas',
   WinApi.DirectX.D3D11_3 in '..\src\WinApi.DirectX.D3D11_3.pas',
   WinApi.DirectX.D3D11_4 in '..\src\WinApi.DirectX.D3D11_4.pas',
-  WinApi.DirectX.D3D11Shader in '..\src\WinApi.DirectX.D3D11Shader.pas',
-  Winapi.DirectX.D3D12 in '..\src\Winapi.DirectX.D3D12.pas',
-  WinApi.DirectX.D3D12Video in '..\src\WinApi.DirectX.D3D12Video.pas',
   WinApi.DirectX.D3D11on12 in '..\src\WinApi.DirectX.D3D11on12.pas',
+  WinApi.DirectX.D3D11Shader in '..\src\WinApi.DirectX.D3D11Shader.pas',
+  WinApi.DirectX.D3D12 in '..\src\WinApi.DirectX.D3D12.pas',
   WinApi.DirectX.D3D12Compatibility in '..\src\WinApi.DirectX.D3D12Compatibility.pas',
-  WinApi.DirectX.D3D12Shader in '..\src\WinApi.DirectX.D3D12Shader.pas',
   WinApi.DirectX.D3D12SDKLayers in '..\src\WinApi.DirectX.D3D12SDKLayers.pas',
-  WinApi.DirectX.HolographicSpaceInterop in '..\src\WinApi.DirectX.HolographicSpaceInterop.pas',
+  WinApi.DirectX.D3D12Shader in '..\src\WinApi.DirectX.D3D12Shader.pas',
+  WinApi.DirectX.D3D12Video in '..\src\WinApi.DirectX.D3D12Video.pas',
+  WinApi.DirectX.D3D9 in '..\src\WinApi.DirectX.D3D9.pas',
+  WinApi.DirectX.D3D9Caps in '..\src\WinApi.DirectX.D3D9Caps.pas',
+  WinApi.DirectX.D3D9Types in '..\src\WinApi.DirectX.D3D9Types.pas',
   WinApi.DirectX.D3DCommon in '..\src\WinApi.DirectX.D3DCommon.pas',
   WinApi.DirectX.DCommon in '..\src\WinApi.DirectX.DCommon.pas',
   WinApi.DirectX.DComp in '..\src\WinApi.DirectX.DComp.pas',
@@ -129,6 +129,7 @@ contains
   WinApi.DirectX.DXVA2Trace in '..\src\WinApi.DirectX.DXVA2Trace.pas',
   WinApi.DirectX.DXVA9Typ in '..\src\WinApi.DirectX.DXVA9Typ.pas',
   WinApi.DirectX.DXVAHd in '..\src\WinApi.DirectX.DXVAHd.pas',
+  WinApi.DirectX.HolographicSpaceInterop in '..\src\WinApi.DirectX.HolographicSpaceInterop.pas',
   WinApi.DirectX.XAudio2.HrtfApoApi in '..\src\WinApi.DirectX.XAudio2.HrtfApoApi.pas',
   WinApi.DirectX.XAudio2.X3DAudio in '..\src\WinApi.DirectX.XAudio2.X3DAudio.pas',
   WinApi.DirectX.XAudio2.XAPO in '..\src\WinApi.DirectX.XAudio2.XAPO.pas',
@@ -174,6 +175,7 @@ contains
   WinApi.MediaFoundationApi.WmCodecDsp in '..\src\WinApi.MediaFoundationApi.WmCodecDsp.pas',
   WinApi.MediaFoundationApi.WmContainer in '..\src\WinApi.MediaFoundationApi.WmContainer.pas',
   WinApi.MediaObj in '..\src\WinApi.MediaObj.pas',
+  WinApi.MfPack.PsApi in '..\src\WinApi.MfPack.PsApi.pas',
   WinApi.Mpeg2Bits in '..\src\WinApi.Mpeg2Bits.pas',
   WinApi.Mpeg2Data in '..\src\WinApi.Mpeg2Data.pas',
   WinApi.Mpeg2Error in '..\src\WinApi.Mpeg2Error.pas',

@@ -83,14 +83,25 @@ uses
 
 const
   WM_TIMEDTEXTNOTIFY = WM_USER + 1002;
+  WM_ERROR_TIMEDTEXTNOTYFY  = WM_USER + 1003;
 
   // SubtitleFileExtensions
-   EXTSUBRIP    = '.srt';
-   EXTSUBVIEWER = '.sub';   // > not implemented
-   EXTYOUTUBE   = '.sbv';   // > not implemented
-   EXTSAMI      = '.smi';
+   EXT_WEBVTT    = '.vtt';   // See: https://www.w3.org/TR/webvtt1/
+   EXT_SUBRIP    = '.srt';
+   EXT_SUBVIEWER = '.sub';   // > not i`mplemented
+   EXT_YOUTUBE   = '.sbv';   // > not implemented
+   EXT_SAMI      = '.smi';
 
 type
+
+  // Error
+  PTimedTxtError = ^TTimedTxtError;
+  TTimedTxtError = record
+    errorCode: MF_TIMED_TEXT_ERROR_CODE;
+    TrackReadyState: MF_TIMED_TEXT_TRACK_READY_STATE;
+    extendedErrorCode: HResult;
+    sourceTrackId: DWORD
+  end;
 
   TcTimedTextNotify = class(TInterfacedObject, IMFTimedTextNotify)
   private
@@ -111,6 +122,9 @@ type
     ttLiveText: LPWSTR;      // live text / comment that can be injected.
 
     bTrackAdded: Boolean;
+
+    FTimedTxtError: TTimedTxtError;
+    PPTimedTxtError: PTimedTxtError;
 
     // EVENT HANDLERS ////
     //////////////////////////////////////////////////////
@@ -139,6 +153,9 @@ type
     // Send message to caller new text is presented
     procedure NotifyUpdate();
 
+    // Sends errors to the caller.
+    procedure SendErrorNotification(aLParam: LPARAM);
+
     // Set font properties, if defined in the subtitlefile
     procedure SetFontProperties(fstyle: IMFTimedTextStyle);
 
@@ -155,7 +172,6 @@ type
     function GetEndTime(): Double;
     function GetTimeSpan(): Double;
 
-
   public
 
     // Constructor
@@ -166,6 +182,8 @@ type
 
     // Destructor
     destructor Destroy(); override;
+
+
 
     // Properties
     property LiveText: String read GetLiveText write SetLiveText;
@@ -202,7 +220,6 @@ begin
   ttnmsg_Font.Color := clWhite;
   ttnmsg_Font.Size := 12;
   ttnmsg_Font.Style := [fsBold];
-
 end;
 
 
@@ -213,8 +230,6 @@ begin
 
   inherited Destroy();
 end;
-
-
 
 
 // callback methods
@@ -259,8 +274,12 @@ begin
        end;
     // MF_TIMED_TEXT_TRACK_READY_STATE_ERROR  > Track error occurred.
     3: begin
-         // Not implemented
-
+         FTimedTxtError.errorCode := MF_TIMED_TEXT_ERROR_CODE_DATA_FORMAT; //Format error occured.
+         FTimedTxtError.extendedErrorCode := HRESULT($C00D3E8C);  // The Media format is recognized but is invalid.
+         FTimedTxtError.sourceTrackId := trackId;
+         FTimedTxtError.TrackReadyState := MF_TIMED_TEXT_TRACK_READY_STATE_ERROR;
+         PPTimedTxtError := @FTimedTxtError;
+         SendErrorNotification(0);
        end;
   end;
 end;
@@ -270,7 +289,11 @@ procedure TcTimedTextNotify.Error(errorCode: MF_TIMED_TEXT_ERROR_CODE;
                                   extendedErrorCode: HResult;
                                   sourceTrackId: DWORD);
 begin
-  // Not implemented
+  FTimedTxtError.errorCode := errorCode;
+  FTimedTxtError.extendedErrorCode := extendedErrorCode;
+  FTimedTxtError.sourceTrackId := sourceTrackId;
+  PPTimedTxtError := @FTimedTxtError;
+  SendErrorNotification(1);
 end;
 
 
@@ -364,18 +387,25 @@ begin
 end;
 
 
-// Send text and properties to caller
+// Send text and properties to caller.
 procedure TcTimedTextNotify.NotifyUpdate();
 begin
-
-  // Send a message to the caller a text event occured
+  // Send a message to the caller a text event occured.
   SendMessage(gv_Handle,
               WM_TIMEDTEXTNOTIFY,
               WPARAM(1),
               0);
-
 end;
 
+// Send an error notification to the caller.
+procedure TcTimedTextNotify.SendErrorNotification(aLParam: LPARAM);
+begin
+  // Send a message to the caller an error event occured.
+  SendMessage(gv_Handle,
+              WM_ERROR_TIMEDTEXTNOTYFY,
+              WPARAM(PPTimedTxtError),
+              LPARAM(1));
+end;
 
 
 procedure TcTimedTextNotify.SetFontProperties(fstyle: IMFTimedTextStyle);

@@ -10,7 +10,7 @@
 // Release date: 30-05-2018
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 // Description: Provides functionality required for all Windows Runtime classes.
 //
 // Organisation: FactoryX
@@ -39,7 +39,7 @@
 //          All Windows Runtime classes must implement the IInspectable sinterface.
 // 
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

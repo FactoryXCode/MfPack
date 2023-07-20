@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 // 12/03/2023 Tony                Updated to match mmio
 // 02/04/2023 All                 Pre-release to 3.1.5
 // 03/04/2023 Tony                Fixed IAudioClient.GetMixFormat.

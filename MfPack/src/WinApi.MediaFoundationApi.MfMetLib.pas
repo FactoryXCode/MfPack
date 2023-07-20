@@ -25,7 +25,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 // 13/08/2022 Tony                Implemented more functionality and updated methods.
 // 30/01/2023 Tony                Updated some.
 // 03/03/2023                     Updated and fixed device notification issues.
@@ -35,7 +35,7 @@
 // Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -135,8 +135,8 @@ type
     wcMajorFormat: string; // readable guid of majorformat
     tgSubFormat: TGUID;
     wcSubFormat: string; // readable guid of subformat
-    unFormatTag: UINT32; // FormatTag (FOURCC)
-    wcFormatTag: string; // Readable formattag
+    dwFormatTag: DWord;  // FormatTag or FOURCC if present.
+    wcFormatTag: string; // Readable formattag or FOURCC
     wsDescr: string;     // Description about the format or codec see: function GetAudioDescr
     wsGuid: string;      // See: function GetAudioDescr
     unChannels: UINT32;
@@ -148,6 +148,9 @@ type
     unBlockAlignment: UINT32;
     unAvgBytesPerSec: UINT32;
     unChannelMask: UINT32;
+    dbBitRate_kbps: Double; // Bitrate (kbps) = (Average Bytes Per Sample * 8) / 1000.
+    dbSampleRate_khz: Double; // Samplerate (khz) = Samples Per Second / 1000.
+
     // FLAC extra data
     unFlacMaxBlockSize: UINT32;
     public
@@ -257,14 +260,17 @@ type
     bCompressed: BOOL;                    // Compressed format.
 
     // Video
-    video_FrameRateNumerator: UINT32;     // The upper 32 bits of the MF_MT_FRAME_RATE attribute value
-    video_FrameRateDenominator: UINT32;   // The lower 32 bits of the MF_MT_FRAME_RATE attribute value
+
     // NOTE:
     //  To calculate the framerate in FPS use this formula: Double(video_FrameRateNominator / video_FrameRateDenominator)
-    video_PixelAspectRatioNumerator: UINT32;   // The upper 32 bits of the MF_MT_PIXEL_ASPECT_RATIO attribute value
-    video_PixelAspectRatioDenominator: UINT32; // The lower 32 bits of the MF_MT_PIXEL_ASPECT_RATIO attribute value
+    video_FrameRateNumerator: UINT32;     // The upper 32 bits of the MF_MT_FRAME_RATE attribute value
+    video_FrameRateDenominator: UINT32;   // The lower 32 bits of the MF_MT_FRAME_RATE attribute value
+
     // NOTE:
     //  To calculate the pixel aspect ratio use this formula: Double(video_PixelAspectRatioNumerator / video_PixelAspectRatioDenominator)
+    video_PixelAspectRatioNumerator: UINT32;   // The upper 32 bits of the MF_MT_PIXEL_ASPECT_RATIO attribute value
+    video_PixelAspectRatioDenominator: UINT32; // The lower 32 bits of the MF_MT_PIXEL_ASPECT_RATIO attribute value
+
     video_FrameSizeHeigth: UINT32;        // Output frame heigth
     video_FrameSizeWidth: UINT32;         // Output frame width
 
@@ -279,8 +285,16 @@ type
     audio_iblockAlignment: UINT32;        // Block alignment, in bytes, for an audio media type.
                                           // Note: For PCM audio formats, the block alignment is equal to the number of audio channels
                                           // multiplied by the number of bytes per audio sample.
-
+    audio_AverageSampleRate: UINT32;      // The average sample rate in bytes per second.
     audio_dwFormatTag: DWORD;             // FormatTag is the replacement of FOURCC
+
+    // NOTE:
+    // To calculate bit rate in kbps use this formula:
+    // Bitrate (kbps) = (Average Bytes Per Sample * 8) / 1000.
+    audio_BitRate_kbps: Double;
+    // To calculate sample rate in khz.
+    // Samplerate (khz) = Samples Per Second / 1000.
+    audio_SampleRate_khz: Double;
     public
       procedure Reset();
   end;
@@ -918,7 +932,10 @@ type
                            out pChannels: UINT32;
                            out pSamplesPerSec: UINT32;
                            out pBitsPerSample: UINT32;
-                           out pBlockAlignment: UINT32): HRESULT;
+                           out pBlockAlignment: UINT32;
+                           out pAverageSampleRate: UINT32;
+                           out pBitRate: Double;
+                           out pSampleRate: Double): HRESULT;
 
   // Gets the Windows supported audio encoder formats (MFT's).
   function GetWinAudioEncoderFormats(const mfAudioFormat: TGuid;
@@ -1033,7 +1050,7 @@ begin
   tgMajorFormat := GUID_NULL;
   tgSubFormat := GUID_NULL;
 
-  unFormatTag := 0;
+  dwFormatTag := 0;
   wsDescr := '';
   unChannels := 0;
   unSamplesPerSec := 0;
@@ -1043,6 +1060,8 @@ begin
   unBlockAlignment := 0;
   unAvgBytesPerSec := 0;
   unChannelMask := 0;
+  dbBitRate_kbps := 0.0;
+  dbSampleRate_khz := 0.0;
 end;
 
 
@@ -4618,6 +4637,7 @@ Done:
   aGuidName := sGuidName;
   aFormatTag := sFormatTag;
   aFOURCC := dwFOURCC;
+  aFmtDesc := sFmtDesc;
 end;
 
 
@@ -5824,7 +5844,10 @@ try
                                     alsCont[i].audio_iAudioChannels,
                                     alsCont[i].audio_iSamplesPerSec,
                                     alsCont[i].audio_iBitsPerSample,
-                                    alsCont[i].audio_iblockAlignment);
+                                    alsCont[i].audio_iblockAlignment,
+                                    alsCont[i].audio_AverageSampleRate,
+                                    alsCont[i].audio_BitRate_kbps,
+                                    alsCont[i].audio_SampleRate_khz);
 
 
               // Retrieves a wide-character string associated with a key (MF_SD_LANGUAGE).
@@ -6114,7 +6137,7 @@ begin
           GetGUIDNameConst(pMfAudioFormat.tgSubFormat,
                            pMfAudioFormat.wcSubFormat,
                            pMfAudioFormat.wcFormatTag,
-                           pMfAudioFormat.unFormatTag,
+                           pMfAudioFormat.dwFormatTag,
                            pMfAudioFormat.wsDescr);
 
 
@@ -6138,6 +6161,12 @@ begin
           pMfAudioFormat.unAvgBytesPerSec := MFGetAttributeUINT32(pType,
                                                                   MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
                                                                   0);
+
+          // Bitrate (kbps) calculation.
+          pMfAudioFormat.dbBitRate_kbps := (pMfAudioFormat.unAvgBytesPerSec * 8) / 1000;
+
+          // Samplerate (khz) calculation.
+          pMfAudioFormat.dbSampleRate_khz := pMfAudioFormat.unSamplesPerSec /1000;
 
           // Number of audio samples per second in an audio media type.
           pMfAudioFormat.dblFloatSamplePerSec := MFGetAttributeDouble(pType,
@@ -6221,7 +6250,10 @@ function GetAudioSubType(mSource: IMFMediaSource;
                          out pChannels: UINT32;
                          out psamplesPerSec: UINT32;
                          out pbitsPerSample: UINT32;
-                         out pBlockAlignment: UINT32): HRESULT;
+                         out pBlockAlignment: UINT32;
+                         out pAverageSampleRate: UINT32;
+                         out pBitRate: Double;
+                         out pSampleRate: Double): HRESULT;
 
 var
   hr: HResult;
@@ -6319,12 +6351,20 @@ begin
                                                 MF_MT_AUDIO_SAMPLES_PER_SECOND,
                                                 0);
 
+          // Note: Some encoded audio formats do not contain a value for bits/sample.
+          // In that case, use a default value of 16. Most codecs will accept this value.
           pBitsPerSample := MFGetAttributeUINT32(mfType,
                                                  MF_MT_AUDIO_BITS_PER_SAMPLE,
                                                  16);
 
-          // Note: Some encoded audio formats do not contain a value for bits/sample.
-          // In that case, use a default value of 16. Most codecs will accept this value.
+          pAverageSampleRate := MFGetAttributeUINT32(mfType,
+                                                     MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
+                                                     0);
+          // Bitrate (kbps)
+          pBitRate := (pAverageSampleRate * 8) / 1000;
+
+          // Samplerate (khz)
+          pSampleRate := pSamplesPerSec / 1000;
 
           if (pChannels = 0) or (pSamplesPerSec = 0) then
             begin
@@ -6413,7 +6453,7 @@ begin
           GetGUIDNameConst(aAudioFmts[i].tgSubFormat,
                            aAudioFmts[i].wcSubFormat,
                            aAudioFmts[i].wcFormatTag,
-                           aAudioFmts[i].unFormatTag,
+                           aAudioFmts[i].dwFormatTag,
                            aAudioFmts[i].wsDescr);
 
           // Get information from the audio format.

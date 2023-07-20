@@ -87,6 +87,7 @@ uses
   {MfPack}
   WinApi.MediaFoundationApi.MfUtils,
   WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.MfMediaEngine,
   WinApi.MediaFoundationApi.MfMetLib,
   {WIC}
   WinApi.WIC.WinCodec,
@@ -154,6 +155,8 @@ type
     procedure OnMeTimerUpdate(var message: TMessage); message WM_TIMERUPDATE;
     // TimedTextNotify messages
     procedure OnTextNotify(var message: TMessage); message WM_TIMEDTEXTNOTIFY;
+    procedure OnErrorNotify(var message: TMessage); message WM_ERROR_TIMEDTEXTNOTYFY;
+
     // Create FloatingForm
     procedure CreateSubTitleLayer(bShowCustomText: Boolean);
     procedure SetParentRect();
@@ -273,6 +276,23 @@ begin
       FloatingForm.LayerFont := gi_MediaEngine.pr_TimedTextNotify.Font;
       FloatingForm.SubtitleText := gi_MediaEngine.pr_TimedTextNotify.SubTitle;
     end;
+end;
+
+
+procedure TFeMediaEnginePlayer.OnErrorNotify(var message: TMessage);
+var
+  ttxtNotiFy: TTimedTxtError;
+
+begin
+  ttxtNotiFy := PTimedTxtError(message.WParam)^;
+
+  if (message.LParam = 0) then // 0 = TimedTextNotify.TrackReadyStateChanged event.
+    ShowMessage(Format('TimedTextNotify reported an error. Errorcode: %d HResult: %d TrackId: %d',
+                         [DWord(ttxtNotiFy.errorCode), ttxtNotiFy.extendedErrorCode, ttxtNotiFy.sourceTrackId]))
+  else if (message.LParam = 1) then  // 1 = Event is intialized by the TimedTextNotify.Error event.
+    ShowMessage(Format('TimedTextNotify reported an error. Ready state: %d HResult: %d TrackId: %d',
+                         [DWord(ttxtNotiFy.TrackReadyState), ttxtNotiFy.extendedErrorCode, ttxtNotiFy.sourceTrackId]));
+
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -469,8 +489,8 @@ begin
   // Get the mediafile to play
   if dlgOpenUrl.Execute then
     begin
-      hr := gi_MediaEngine.OpenURL(PWideChar(dlgOpenUrl.Filename),
-                                   EXTSUBRIP);
+
+      hr := gi_MediaEngine.OpenURL(PWideChar(dlgOpenUrl.Filename));
       if Succeeded(hr) then
         CreateSubTitleLayer(True);
     end
@@ -482,18 +502,27 @@ end;
 procedure TFeMediaEnginePlayer.prbProgressMouseUp(Sender: TObject; Button: TMouseButton;
                                                   Shift: TShiftState; X, Y: Integer);
 var
+  hr: HResult;
   fPos: Double;
 
 begin
+
   if (X <= 0) then
     fPos:= 0.0
   else
     fPos:= ((X / prbProgress.Width) * gi_MediaEngine.pu_Duration);
 
-  gi_MediaEngine.SetPosition(fPos); // set new StartPosition
+  hr := gi_MediaEngine.SetPosition(fPos); // set new StartPosition
 
-  //FrameStep
- // gi_MediaEngine.FrameStep(True);
+  if FAILED(hr) then
+    begin
+      ShowMessage(Format('SetPosition failed with error code: %d. We start all over again.', [hr]));
+      gi_MediaEngine.SetPosition(0);
+    end;
+
+
+  //while (pt_RequestMsg <> rMsgNone) do
+   // HandleMessages(GetCurrentThread());
 end;
 
 

@@ -108,7 +108,8 @@ type
                  rMsgNone,
                  rMsgPause,
                  rMsgStop,
-                 rMsgPlay);
+                 rMsgPlay,
+                 rMsgSetPosition);
 
 
 
@@ -182,6 +183,8 @@ type
 
     // Creates an instance of the Media Engine.
     // Note: Before using this interface, CoInitializeEx and MFStartup should be initialized.
+    // On Delphi visual (VCL Forms Application) applications, CoInitialize(Ex) is called by default,
+    // so, there is no need to call this function.
     // To get a pointer to this interface, call CoCreateInstance.
     // The class identifier is CLSID_MFMediaEngineClassFactory.
     //pr_MediaEngineClassFactory: IMFMediaEngineClassFactory;
@@ -240,7 +243,7 @@ type
     // Frame capture /////////////////////////////////////////////////////
     // It's currently not possible to capture a frame in rendering mode.
     // For this, the MediaEngine needs to be initialized as frame server.
-    // However, we created a work around on this See: frmMfMediaEnginePlayer.
+    // However, we created a work around on this, See: frmMfMediaEnginePlayer.
     //////////////////////////////////////////////////////////////////////
 
     procedure SetRedraw();
@@ -348,7 +351,7 @@ try
      end;
 
   // Set the required attributes
-  // See: https://docs.microsoft.com/windows/desktop/api/mfmediaengine/nf-mfmediaengine-imfmediaengineclassfactory-createinstance for
+  // See: https://learn.microsoft.com/en-us/windows/win32/api/mfmediaengine/nf-mfmediaengine-imfmediaengineclassfactory-createinstance for
   // more info about this.
 
   // Set the callback pointer on the Media Engine
@@ -402,7 +405,7 @@ try
   pt_CritSec := TCriticalSection.Create();
 
   // Note: local interface declarations will be released if going out of scope.
-  //       There is no need to release them manually.
+  //       There is no need to release them manualy.
 
 except
   // Silent Exception
@@ -416,7 +419,7 @@ end;
 destructor TcMediaEngine.Destroy();
 begin
   // Release the global interfaces
-  pr_MediaEngine := Nil;
+  pr_MediaEngine := nil;
   // Release CriticalSection
   pt_CritSec.Destroy();
   // Close the media foundation platform and end COM
@@ -527,7 +530,6 @@ begin
   // Immediately start playing when the source is loaded.
   if pu_bPlayAfterLoaded then
     {void} pr_MediaEngine.Play();
-
 end;
 
 
@@ -559,46 +561,50 @@ label
 begin
   hr := S_OK;
 
-  if Not Assigned(pr_MediaEngine) then
+  if not Assigned(pr_MediaEngine) then
     Exit;
 
   // Request handlers
   if pt_RequestMsg <> rMsgNone then
 
   case pt_RequestMsg of
-  rMsgSetVolume:         begin
+    rMsgSetVolume:       begin
                            hr := pr_MediaEngine.SetVolume(pr_Volume);
                          end;
-  rMsgSetBalance:        begin
+    rMsgSetBalance:      begin
                            hr := pr_MediaEngine.SetBalance(pr_Balance);
                          end;
-  rMsgUpdateVideoStream: begin
+    rMsgUpdateVideoStream: begin
                            hr := pr_MediaEngine.UpdateVideoStream(Nil,
                                                                   @pt_rcpdest,
                                                                   Nil);
                          end;
-  rMsgFlush:             begin
+    rMsgFlush:           begin
                            hr := pr_MediaEngine.Shutdown();
                            goto doexit;
                          end;
-  rMsgPause:             begin
+    rMsgPause:           begin
                            hr := pr_MediaEngine.Pause();
-                           FrameStep(True);
+                           FrameStep(True); // go forward 1 frame
                            goto doexit;
                          end;
-  rMsgStop:              begin
+    rMsgStop:            begin
                            if SUCCEEDED(pr_MediaEngine.Pause()) then
                              begin
-                               hr := pr_MediaEngine.SetCurrentTime(0.0);
+                               hr := pr_MediaEngine.SetCurrentTimeEx(0.0,
+                                                                     MF_MEDIA_ENGINE_SEEK_MODE_APPROXIMATE);
                                SetWindowText(pt_hwndEvent,
                                              'STOPPED');
                              end;
                            goto doexit;
                          end;
+    rMsgPlay:            begin
+                           FrameStep(False);
+                         end;
   end;
 
 
-  pu_CurrPosition := pr_MediaEngine.GetCurrentTime;
+  pu_CurrPosition := pr_MediaEngine.GetCurrentTime();
   // Send message to the caller, for instance to update a progressbar
   SendMessage(pt_hwndCaller,
               WM_TIMERUPDATE,
@@ -1018,7 +1024,7 @@ function TcMediaEngine.GetTimedTextInterface(url: string;
                                              fExt: string;
                                              lang: PWideChar): HResult;
 var
-  hres: HResult;
+  hr: HResult;
   pwstxtUrl: PWideChar;
   strtxtUrl: String; // temp for conversion
   trackId: DWord;
@@ -1026,13 +1032,13 @@ var
 label done;
 
 begin
-  trackId := 0;
+  trackId := 1;
   strtxtUrl := ChangeFileExt(url,
                              fExt);
 
   if not FileExists(strtxtUrl) then
     begin
-      hres := ERROR_FILE_NOT_FOUND;
+      hr := ERROR_FILE_NOT_FOUND;
       goto done;
     end;
 
@@ -1044,12 +1050,12 @@ begin
     begin
 
       // Call MFGetService to get the IMFTimedText interface.
-      hres := MFGetService(pr_MediaEngine,
+      hr := MFGetService(pr_MediaEngine,
                            MF_MEDIA_ENGINE_TIMEDTEXT,
                            IID_IMFTimedText,
                            Pointer(pr_TimedText));
 
-     if Failed(hres) then
+     if Failed(hr) then
        goto done;
 
      // Create the TimedText callback interface
@@ -1058,32 +1064,33 @@ begin
                                                     Nil,
                                                     pt_hwndCaller);
 
-     if Not Assigned(pr_TimedTextNotify) then
+     if not Assigned(pr_TimedTextNotify) then
        begin
-         hres := E_POINTER;
+         hr := E_POINTER;
          goto done;
        end;
 
     end;
 
-  hres := pr_TimedText.AddDataSourceFromUrl(pwstxtUrl,
-                                            nil,
-                                            nil,
-                                            MF_TIMED_TEXT_TRACK_KIND_SUBTITLES, // The kind of timed text track is subtitles.)
-                                            True,
-                                            trackId);
+  hr := pr_TimedText.AddDataSourceFromUrl(pwstxtUrl,
+                                          nil,
+                                          nil,
+                                          MF_TIMED_TEXT_TRACK_KIND_SUBTITLES, // The kind of timed text track is subtitles.)
+                                          True,
+                                          trackId);
 
-  if Failed(hres) then
+  if Failed(hr) then
     goto done;
 
 
   // Register TimedTextNotify for callbacks
-  hres := pr_TimedText.RegisterNotifications(pr_TimedTextNotify);
-  if Failed(hres) then
+  if Assigned(pr_TimedTextNotify) then
+    hr := pr_TimedText.RegisterNotifications(pr_TimedTextNotify);
+  if Failed(hr) then
     goto done;
 
 done:
-  Result := hres;
+  Result := hr;
 
 end;
 
@@ -1107,12 +1114,14 @@ function TcMediaEngine.OpenURL(const pwURL: PWideChar;
                                SubTitleFileExt: string = ''): HResult;
 var
   hr: HResult;
+  sSubtitleExt: string;
 
 label done;
 
 begin
+  sSubtitleExt := SubTitleFileExt;
 
-  if Not Assigned(pr_MediaEngine) then
+  if not Assigned(pr_MediaEngine) then
     begin
       hr := E_POINTER;
       goto done;
@@ -1140,15 +1149,33 @@ begin
     end;
 
   // Get the subtitles, if no file exists, continue.
-  if (SubTitleFileExt <> '')  then
+  if (sSubtitleExt = '')  then
     begin
-      hr := GetTimedTextInterface(pwURL,
-                                  SubTitleFileExt,
-                                  Nil);
+      if FileExists(ChangeFileExt(pwURL, EXT_WEBVTT)) then
+        sSubtitleExt := EXT_WEBVTT
+      else if FileExists(ChangeFileExt(pwURL, EXT_SUBRIP)) then
+        sSubtitleExt := EXT_SUBRIP
+      else if FileExists(ChangeFileExt(pwURL, EXT_SUBRIP)) then
+        sSubtitleExt := EXT_SUBRIP
+      else
+        sSubtitleExt := '';
+
+      if (sSubtitleExt <> '') then
+        begin
+          hr := GetTimedTextInterface(pwURL,
+                                      sSubtitleExt,
+                                      nil);
+        end
+      else
+        hr := E_NOT_SET;
 
       if FAILED(hr) then
-        hr := S_FALSE;
-    end;
+        goto done;
+    end
+  else
+    hr := GetTimedTextInterface(pwURL,
+                                sSubtitleExt,
+                                nil);
 
 done:
   Result:= hr;
@@ -1163,8 +1190,8 @@ label
   done;
 
 begin
-
- if pu_SourceURL <> '' then
+ pt_CritSec.Enter;
+ if (pu_SourceURL <> '') then
    begin
      hr := pr_MediaEngine.EnableTimeUpdateTimer(True);
      if FAILED(hr) then
@@ -1178,17 +1205,20 @@ begin
    hr := E_INVALIDARG;
 
 done:
+  pt_CritSec.Leave;
   Result := hr;
 end;
 
 
 procedure TcMediaEngine.Pause();
 begin
+  pt_CritSec.Enter;
   // Send request required, as this is an async method
   // The request will be handled during the ontime eventhandler
   pt_RequestMsg := rMsgPause;
   while (pt_RequestMsg <> rMsgNone) do
     HandleMessages(GetCurrentThread());
+  pt_CritSec.Leave;
 end;
 
 
@@ -1197,9 +1227,11 @@ end;
 // At stop the mediafile will be reset to it's begin and starts all over again when playbutton is pressed.
 procedure TcMediaEngine.Stop();
 begin
+  pt_CritSec.Enter;
   pt_RequestMsg := rMsgStop;
-  while (pt_RequestMsg <> rMsgNone) do
-    HandleMessages(GetCurrentThread());
+  //while (pt_RequestMsg <> rMsgNone) do
+  //  HandleMessages(GetCurrentThread());
+  pt_CritSec.Leave;
 end;
 
 
@@ -1208,6 +1240,7 @@ end;
 // before playing a new mediasource.
 procedure TcMediaEngine.FlushPlayer();
 begin
+  pt_CritSec.Enter;
   // Stop the player and release all it's resources
   if pu_RenderingState <> rsPlaying then
     pr_MediaEngine.Shutdown()  //direct handling
@@ -1218,28 +1251,33 @@ begin
       while (pt_RequestMsg <> rMsgNone) do
         HandleMessages(GetCurrentThread());
     end;
+  pt_CritSec.Leave;
 end;
 
 
 procedure TcMediaEngine.SetVolume(dVol: Double);
 begin
+  pt_CritSec.Enter;
   // Result := gi_MediaEngine.SetVolume(dVol); >> Don't use this directly,
   // but let it be done in the eventhandler, to prevent application is going into zombie state.
   pt_RequestMsg := rMsgSetVolume;
   pr_Volume := dVol;
   while (pt_RequestMsg <> rMsgNone) do
     HandleMessages(GetCurrentThread());
+  pt_CritSec.Leave;
 end;
 
 
 procedure TcMediaEngine.SetBalance(dBal: Double);
 begin
+  pt_CritSec.Enter;
   // Result := gi_MediaEngine.SetBalance(dBal); >> Don't use this directly,
   // but let it be done in the eventhandler, to prevent application is going into zombie state.
   pt_RequestMsg := rMsgSetBalance;
   pr_Balance := dBal;
   while (pt_RequestMsg <> rMsgNone) do
     HandleMessages(GetCurrentThread());
+  pt_CritSec.Leave;
 end;
 
 
@@ -1253,10 +1291,19 @@ end;
 
 function TcMediaEngine.SetPosition(sTime: Double): HResult;
 begin
-  Result := pr_MediaEngine.SetCurrentTime(sTime);
+  pt_CritSec.Enter;
+  Result := pr_MediaEngine.SetCurrentTimeEx(sTime,
+                                            MF_MEDIA_ENGINE_SEEK_MODE_APPROXIMATE);
+  FrameStep(False); // go backward 1 frame
+  Play();
+  //while (pt_RequestMsg <> rMsgNone) do
+  //  HandleMessages(GetCurrentThread());
+  pt_CritSec.Leave;
 end;
 
-// Use framestep after pause, to get an accurate playback position
+
+// Use framestep after pause, to get an accurate playback position.
+// Specify TRUE to step forward or FALSE to step backward.
 // See: https://docs.microsoft.com/en-us/windows/win32/api/mfmediaengine/nf-mfmediaengine-imfmediaengine-getcurrenttime
 function TcMediaEngine.FrameStep(goForward: BOOL): HResult;
 begin
@@ -1266,6 +1313,7 @@ end;
 
 procedure TcMediaEngine.SetRedraw();
 begin
+  pt_CritSec.Enter;
   // Stop flickering of controls and subtitle when resizing.
   if (pt_RedrawStatus = rdStarted) then
     begin
@@ -1283,7 +1331,7 @@ begin
                   0);
 
       RedrawWindow(pt_hwndVideo,
-                   Nil,
+                   nil,
                    0,
                    RDW_ERASE OR
                    RDW_FRAME OR
@@ -1292,6 +1340,7 @@ begin
 
       pt_RedrawStatus := rdStarted;
     end;
+  pt_CritSec.Leave;
 end;
 
 
@@ -1307,7 +1356,6 @@ try
 
   if Assigned(pr_MediaEngine) then
     begin
-
       // Stop repaint
       SetRedraw();
 
@@ -1337,16 +1385,9 @@ var
 
 begin
   // Initialize the COM library.
-  hr := CoInitializeEx(Nil,
-                       COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE);
-  if FAILED(hr) then
-    begin
-      MessageBox(0,
-                 LPCWSTR('COM library initialisation failure.'),
-                 LPCWSTR('COM Failure!'),
-                 MB_ICONSTOP);
-      Abort();
-    end;
+  // Note: Delphi Form Applications initialize com by default.
+  //hr := CoInitializeEx(Nil,
+  //                     COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE);
 
   // Intialize the Media Foundation platform and
   // check if the current MF version match user's version
@@ -1369,9 +1410,6 @@ function CloseMF(): HResult;
 begin
   // Shutdown MF
   Result := MFShutdown();
-  // Shutdown COM
-  CoUninitialize();
 end;
-
 
 end.

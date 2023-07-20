@@ -10,7 +10,7 @@
 // Release date: 24-01-2020
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 // Description: This is a modified class of the Transcoder sample,
 //
 // Company: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -102,7 +102,7 @@ type
     function Shutdown(): HResult;
     function Transcode(): HResult;
     function Start(): HResult;
-    // usage;  arrayindex := GetMediaFromContArray(mtAudio or mtVideo);
+    // Usage:  arrayindex := GetMediaFromContArray(mtAudio or mtVideo);
     function GetMediaFromContArray(const mitype: TMediaTypes): Integer;
 
   public
@@ -114,7 +114,7 @@ type
 
     function OpenFile(sURL: PWideChar): HResult;
     function ConfigureAudioOutput(): HResult;
-    function ConfigureVideoOutput(vWidth: UInt32 = 320; vHeight: UInt32 = 240): HResult;
+    function ConfigureVideoOutput(): HResult;
     function ConfigureContainer(): HResult;
     function EncodeToFile(sURL: PWideChar): HResult;
     function Stop(): Boolean;
@@ -130,7 +130,7 @@ constructor TTranscoder.Create(clHandle: HWnd);
 begin
   inherited Create();
 
-  CoInitializeEx(Nil,
+  CoInitializeEx(nil,
                  COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE);
 
   // Check if the current MF version match user's
@@ -242,7 +242,7 @@ var
 begin
 
   {$IFDEF DEBUG}
-  assert(m_pProfile <> Nil);
+  assert(m_pProfile <> nil);
   {$ENDIF}
 
   dwMTCount := 0;
@@ -252,7 +252,7 @@ begin
 
   hr := MFTranscodeGetAudioOutputAvailableTypes(MFAudioFormat_WMAudioV9,
                                                 DWord(MFT_ENUM_FLAG_ALL),
-                                                Nil,
+                                                nil,
                                                 pAvailableTypes);
 
   // Get the number of elements in the list.
@@ -307,7 +307,7 @@ end;
 //
 //-------------------------------------------------------------------
 
-function TTranscoder.ConfigureVideoOutput(vWidth: Uint32 = 320; vHeight: Uint32 = 240): HResult;
+function TTranscoder.ConfigureVideoOutput(): HResult;
 var
   hr: HResult;
   pVideoAttrs: IMFAttributes;
@@ -316,11 +316,18 @@ var
 
 begin
   {$IFDEF DEBUG}
-  assert(m_pProfile <> Nil);
+  assert(m_pProfile <> nil);
   {$ENDIF}
 
   // Get the video properties from the array
   arIndex := GetMediaFromContArray(mtVideo);
+
+  // Check if video is present. If not, nothing to do here.
+  if (pCont[arIndex].idStreamMediaType <> mtVideo) then
+    begin
+      Result := S_OK;
+      Exit;
+    end;
 
   // Configure the video stream
 
@@ -338,7 +345,8 @@ begin
   uiRate := Round(pCont[arIndex].video_FrameRateNumerator / pCont[arIndex].video_FrameRateDenominator);
   if SUCCEEDED(hr) then
     hr := MFSetAttributeRatio(pVideoAttrs,
-                              MF_MT_FRAME_RATE, uiRate,
+                              MF_MT_FRAME_RATE,
+                              uiRate,
                               1);
 
   // Set the frame size. This size is just a guess, to get the original size you have to call
@@ -498,7 +506,10 @@ begin
           if (m_pClock <> Nil) then
             begin
               {void} m_pClock.GetTime(m_Position);
-              SendMessage(rcHandle, WM_PROGRESSNOTIFY, WParam(1), LParam(0));
+              SendMessage(rcHandle,
+                          WM_PROGRESSNOTIFY,
+                          WParam(1),
+                          LParam(0));
             end;
         end;
 
@@ -608,11 +619,11 @@ var
 
 begin
   {$IFDEF DEBUG}
-  assert(m_pSession <> Nil);
+  assert(m_pSession <> nil);
   {$ENDIF}
 
   if Assigned(m_pClock) then
-    m_pClock := Nil;
+    m_pClock := nil;
 
   // We want the size of the sourcefile
   // Get the presentation descriptor from the topology.
@@ -693,13 +704,13 @@ end;
 
 function TTranscoder.GetMediaFromContArray(const mitype: TMediaTypes): Integer;
 var
-  I: Integer;
+  i: Integer;
 begin
   Result := 0;
   if Assigned(pCont) then
     if Length(pCont) > 0 then
-      for I := 0 to Length(pCont)-1 do
-        if pCont[I].idStreamMediaType = mitype then
+      for i := 0 to Length(pCont)-1 do
+        if (pCont[i].idStreamMediaType = mitype) then
           begin
             Result := I;
             Break;

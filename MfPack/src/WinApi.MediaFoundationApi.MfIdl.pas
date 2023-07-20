@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -1040,8 +1040,8 @@ const
 
 //#if (WINVER >= _WIN32_WINNT_WIN8)
 
-  FTranscodeContainerType_FMPEG4                : TGUID = '{9ba876f1-419f-4b77-a1e0-35959d9d4004}';
-  {$EXTERNALSYM FTranscodeContainerType_FMPEG4}
+  MFTranscodeContainerType_FMPEG4               : TGUID = '{9ba876f1-419f-4b77-a1e0-35959d9d4004}';
+  {$EXTERNALSYM MFTranscodeContainerType_FMPEG4}
 
 //#endif // (WINVER >= _WIN32_WINNT_WIN8)
 

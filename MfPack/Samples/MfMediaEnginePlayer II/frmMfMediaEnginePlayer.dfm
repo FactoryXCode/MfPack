@@ -217,7 +217,7 @@ object FeMediaEnginePlayer: TFeMediaEnginePlayer
       OnClick = butStopClick
     end
     object butPause: TButton
-      Left = 73
+      Left = 74
       Top = 16
       Width = 55
       Height = 24
@@ -297,7 +297,7 @@ object FeMediaEnginePlayer: TFeMediaEnginePlayer
       OnMouseUp = prbProgressMouseUp
     end
     object butFullScreen: TButton
-      Left = 547
+      Left = 539
       Top = 16
       Width = 25
       Height = 24
@@ -318,7 +318,7 @@ object FeMediaEnginePlayer: TFeMediaEnginePlayer
     end
     object trbBalance: TTrackBar
       Left = 309
-      Top = 14
+      Top = 16
       Width = 82
       Height = 25
       Hint = 'Balance (Hit F1 to reset balance)'
@@ -385,7 +385,7 @@ object FeMediaEnginePlayer: TFeMediaEnginePlayer
   end
   object MainMenu1: TMainMenu
     Left = 32
-    Top = 16
+    Top = 18
     object muFile: TMenuItem
       Caption = '&File'
       object muOpen: TMenuItem

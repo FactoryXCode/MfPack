@@ -10,7 +10,7 @@
 // Release date: 01-05-2019
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 // Description: Error code definitions for the Win32 API functions.
 //
 // Organisation: FactoryX
@@ -21,14 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: When using MfPack, use this unit and not the outdated
 //          Error code definitions from Embarcadero Delphi <= ver 10.4
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -229,8 +229,12 @@ const
   {$EXTERNALSYM FACILITY_WINDOWS_STORE}
   FACILITY_INPUT                      = 64;
   {$EXTERNALSYM FACILITY_INPUT}
+  FACILITY_QUIC                       = 65;
+  {$EXTERNALSYM FACILITY_QUIC}
   FACILITY_EAP                        = 66;
   {$EXTERNALSYM FACILITY_EAP}
+  FACILITY_IORING                     = 67;
+  {$EXTERNALSYM FACILITY_IORING}
   FACILITY_WINDOWS_DEFENDER           = 80;
   {$EXTERNALSYM FACILITY_WINDOWS_DEFENDER}
   FACILITY_OPC                        = 81;
@@ -399,6 +403,8 @@ const
   {$EXTERNALSYM FACILITY_WEP}
   FACILITY_SYNCENGINE                 = 2050;
   {$EXTERNALSYM FACILITY_SYNCENGINE}
+  FACILITY_GAME                       = 2051;
+  {$EXTERNALSYM FACILITY_GAME}
   FACILITY_XBOX                       = 2339;
   {$EXTERNALSYM FACILITY_XBOX}
   FACILITY_PIX                        = 2748;
@@ -409,15 +415,15 @@ const
 // Define the severity codes
 //
 const
-  APPLICATION_ERROR_MASK       = $20000000;
+  APPLICATION_ERROR_MASK       = LongInt($20000000);
   {$EXTERNALSYM APPLICATION_ERROR_MASK}
-  ERROR_SEVERITY_SUCCESS       = $00000000;
+  ERROR_SEVERITY_SUCCESS       = LongInt($00000000);
   {$EXTERNALSYM ERROR_SEVERITY_SUCCESS}
-  ERROR_SEVERITY_INFORMATIONAL = $40000000;
+  ERROR_SEVERITY_INFORMATIONAL = LongInt($40000000);
   {$EXTERNALSYM ERROR_SEVERITY_INFORMATIONAL}
-  ERROR_SEVERITY_WARNING       = DWORD($80000000);
+  ERROR_SEVERITY_WARNING       = LongInt($80000000);
   {$EXTERNALSYM ERROR_SEVERITY_WARNING}
-  ERROR_SEVERITY_ERROR         = DWORD($C0000000);
+  ERROR_SEVERITY_ERROR         = LongInt($C0000000);
   {$EXTERNALSYM ERROR_SEVERITY_ERROR}
 
 //
@@ -33214,12 +33220,13 @@ const
 //
 // Generic test for success on any status value (non-negative numbers
 // indicate success).
+// Tests the severity bit of the SCODE or HRESULT; returns TRUE if the severity is one and FALSE if it is zero.
 //
-
 function SUCCEEDED(hr: HResult): Boolean; inline;
 
 //
 // and the inverse
+// Tests the severity bit of the SCODE or HRESULT; returns TRUE if the severity is one and FALSE if it is zero.
 //
 function FAILED(hr: HResult): Boolean; inline;
 
@@ -33227,43 +33234,43 @@ function FAILED(hr: HResult): Boolean; inline;
 //
 // Generic test for error on any status value.
 //
-function IS_ERROR(Status: DWORD): Boolean; inline;
+function IS_ERROR(Status: LongInt): Boolean; inline;
 
 
 //
 // Return the code
 //
-function HRESULT_CODE(hr: DWORD): DWORD; inline;
+function HRESULT_CODE(hr: LongInt): LongInt; inline;
 
-function SCODE_CODE(sc: DWORD): DWORD; inline;
+function SCODE_CODE(sc: LongInt): LongInt; inline;
 
 
 //
 //  Return the facility
 //
-function HRESULT_FACILITY(hr: DWORD): DWORD; inline;
+function HRESULT_FACILITY(hr: LongInt): LongInt; inline;
 
-function SCODE_FACILITY(sc: DWORD): DWORD; inline;
+function SCODE_FACILITY(sc: LongInt): LongInt; inline;
 
 
 //
 //  Return the severity
 //
-function HRESULT_SEVERITY(hr: DWORD): DWORD; inline;
+function HRESULT_SEVERITY(hr: LongInt): LongInt; inline;
 
-function SCODE_SEVERITY(sc: DWORD): DWORD; inline;
+function SCODE_SEVERITY(sc: LongInt): LongInt; inline;
 
 
 //
 // Create an HRESULT value from component pieces
 //
-function MAKE_HRESULT(sev: DWORD;
-                      fac: DWORD;
-                      code: DWORD): DWORD; inline;
+function MAKE_HRESULT(sev: LongInt;
+                      fac: LongInt;
+                      code: LongInt): LongInt; inline;
 
-function MAKE_SCODE(sev: DWORD;
-                    fac: DWORD;
-                    code: DWORD): DWORD; inline;
+function MAKE_SCODE(sev: LongInt;
+                    fac: LongInt;
+                    code: LongInt): LongInt; inline;
 
 
 const
@@ -33281,15 +33288,15 @@ const
 // HRESULT_FROM_WIN32(x) used to be a macro, however we now run it as an inline function
 // to prevent double evaluation of 'x'. If you still need the macro, you can use __HRESULT_FROM_WIN32(x)
 //
-function __HRESULT_FROM_WIN32(x: DWORD): HRESULT; inline;
+function __HRESULT_FROM_WIN32(x: LongInt): HRESULT; inline;
 
-function HRESULT_FROM_WIN32(x: DWORD): HRESULT; inline;
+function HRESULT_FROM_WIN32(x: LongInt): HRESULT; inline;
 
 
 //
 // Map an NT status value into a HRESULT
 //
-function HRESULT_FROM_NT(x: DWORD): HRESULT; inline;
+function HRESULT_FROM_NT(x: LongInt): HRESULT; inline;
 
 
 // ****** OBSOLETE functions ***************************************************
@@ -33301,17 +33308,17 @@ function HRESULT_FROM_NT(x: DWORD): HRESULT; inline;
 
 // Extract the SCODE from a HRESULT
 
-function GetScode(hr: DWORD): DWORD; inline;
+function GetScode(hr: LongInt): LongInt; inline;
 
 
 // Convert an SCODE into an HRESULT.
 
-function ResultFromScode(sc: DWORD): DWORD; inline;
+function ResultFromScode(sc: LongInt): LongInt; inline;
 
 
 // PropagateResult is a noop
-function PropagateResult(hrPrevious: DWORD;
-                         scBase: DWORD): DWORD; inline;
+function PropagateResult(hrPrevious: LongInt;
+                         scBase: LongInt): LongInt; inline;
 
 // ****** End of OBSOLETE functions.
 
@@ -43470,14 +43477,14 @@ const
   {$EXTERNALSYM MSSIPOTF_E_TABLE_TAGORDER}
 
 //
-// MessageId: MSSIPOTF_E_TABLE_LONGWORD
+// MessageId: MSSIPOTF_E_TABLE_LongInt
 //
 // MessageText:
 //
 // A table does not start on a long word boundary.
 //
-  MSSIPOTF_E_TABLE_LONGWORD           = HRESULT($80097007);
-  {$EXTERNALSYM MSSIPOTF_E_TABLE_LONGWORD}
+  MSSIPOTF_E_TABLE_LongInt           = HRESULT($80097007);
+  {$EXTERNALSYM MSSIPOTF_E_TABLE_LongInt}
 
 //
 // MessageId: MSSIPOTF_E_BAD_FIRST_TABLE_PLACEMENT
@@ -43985,7 +43992,7 @@ const
 // macro to map either Win32 or SetupAPI error codes into an HRESULT.
 // NOTE: HRESULT_FROM_SETUPAPI(x) used to be a macro, however we now run it as an inline function.
 //
-function HRESULT_FROM_SETUPAPI(x: DWORD): HRESULT; inline;
+function HRESULT_FROM_SETUPAPI(x: LongInt): HRESULT; inline;
 
 const
 //
@@ -47320,7 +47327,7 @@ const
 // Translation macro for converting FilterManager error codes only from:
 //     NTSTATUS  --> HRESULT
 //
-function FILTER_HRESULT_FROM_FLT_NTSTATUS(x: DWORD): DWORD; inline;
+function FILTER_HRESULT_FROM_FLT_NTSTATUS(x: LongInt): LongInt; inline;
 
 const
 
@@ -57213,7 +57220,7 @@ const
 //
 
 type
-  _NDIS_ERROR_TYPEDEF_ = DWORD;
+  _NDIS_ERROR_TYPEDEF_ = LongInt;
   {$EXTERNALSYM _NDIS_ERROR_TYPEDEF_}
 
 const
@@ -72263,121 +72270,138 @@ begin
   Result := (HResult(hr) >= 0);
 end;
 
+
 function FAILED(hr: HResult): Boolean; inline;
 begin
   Result := (HResult(hr) < 0);
 end;
 
-function IS_ERROR(Status: DWORD): Boolean; inline;
+
+function IS_ERROR(Status: LongInt): Boolean; inline;
 begin
   Result := ((NativeUInt(Status) shr 31) = SEVERITY_ERROR);
 end;
 
-function HRESULT_CODE(hr: DWORD): DWORD; inline;
+
+function HRESULT_CODE(hr: LongInt): LongInt; inline;
 begin
-  Result := (hr AND $FFFF);
+  Result := (hr and $FFFF);
 end;
 
-function SCODE_CODE(sc: DWORD): DWORD; inline;
+
+function SCODE_CODE(sc: LongInt): LongInt; inline;
 begin
-  Result := (sc AND $FFFF);
+  Result := (sc and $FFFF);
 end;
 
-function HRESULT_FACILITY(hr: DWORD): DWORD; inline;
+
+function HRESULT_FACILITY(hr: LongInt): LongInt; inline;
 begin
-  Result := ((hr shr 16) AND $1FFF);
+  Result := ((hr shr 16) and $1FFF);
 end;
 
-function SCODE_FACILITY(sc: DWORD): DWORD; inline;
+
+function SCODE_FACILITY(sc: LongInt): LongInt; inline;
 begin
-  Result := ((sc shr 16) AND $1FFF);
+  Result := ((sc shr 16) and $1FFF);
 end;
 
-function HRESULT_SEVERITY(hr: DWORD): DWORD; inline;
+
+function HRESULT_SEVERITY(hr: LongInt): LongInt; inline;
 begin
   Result := ((hr shr 31) and $1);
 end;
 
-function SCODE_SEVERITY(sc: DWORD): DWORD; inline;
+
+function SCODE_SEVERITY(sc: LongInt): LongInt; inline;
 begin
-  Result := ((sc shr 31) AND $1);
+  Result := ((sc shr 31) and $1);
 end;
 
-function MAKE_HRESULT(sev: DWORD;
-                      fac: DWORD;
-                      code: DWORD): DWORD; inline;
+
+function MAKE_HRESULT(sev: LongInt;
+                      fac: LongInt;
+                      code: LongInt): LongInt; inline;
 begin
-  Result := HRESULT((NativeUInt(sev) shl 31) OR
-            (NativeUInt(fac) shl 16) OR
-            NativeUInt(code));
+  Result := HRESULT((NativeUInt(sev) shl 31) or
+                    (NativeUInt(fac) shl 16) or
+                     NativeUInt(code));
 end;
 
-function MAKE_SCODE(sev: DWORD;
-                    fac: DWORD;
-                    code: DWORD): DWORD; inline;
+
+function MAKE_SCODE(sev: LongInt;
+                    fac: LongInt;
+                    code: LongInt): LongInt; inline;
 begin
-  Result := LongInt((NativeUInt(sev) shl 31) OR
-                   (NativeUInt(fac) shl 16) OR
-                    NativeUInt(code));
+  Result := LongInt((NativeUInt(sev) shl 31) or
+                    (NativeUInt(fac) shl 16) or
+                     NativeUInt(code));
 end;
 
-function __HRESULT_FROM_WIN32(x: DWORD): HResult; inline;
+
+function __HRESULT_FROM_WIN32(x: LongInt): HResult; inline;
 begin
   if HRESULT(x) <= 0 then
     Result := HRESULT(x)
   else
-    Result := HRESULT((x and $0000FFFF) OR
-                      (FACILITY_WIN32 shl 16) OR
-                       $80000000);
+    Result := HRESULT((x and $0000FFFF) or
+                      (FACILITY_WIN32 shl 16) or
+                       LongInt($80000000));
 end;
 
-function HRESULT_FROM_WIN32(x: DWORD): HRESULT; inline;
+
+function HRESULT_FROM_WIN32(x: LongInt): HRESULT; inline;
 begin
   Result := __HRESULT_FROM_WIN32(x);
 end;
 
-function HRESULT_FROM_NT(x: DWORD): HRESULT; inline;
+
+function HRESULT_FROM_NT(x: LongInt): HRESULT; inline;
 begin
-  Result := HResult(x OR FACILITY_NT_BIT);
+  Result := HResult(x or FACILITY_NT_BIT);
 end;
 
 
 // OBSOLETE FUNCTIONS //////////////////////////////////////////////////////////
 
-function GetScode(hr: DWORD): DWORD; inline;
+function GetScode(hr: LongInt): LongInt; inline;
 begin
   Result := LongInt(hr);
 end;
 
-function ResultFromScode(sc: DWORD): DWORD; inline;
+
+function ResultFromScode(sc: LongInt): LongInt; inline;
 begin
   Result := HResult(sc);
 end;
 
-function PropagateResult(hrPrevious: DWORD;
-                         scBase: DWORD): DWORD; inline;
+
+function PropagateResult(hrPrevious: LongInt;
+                         scBase: LongInt): LongInt; inline;
 begin
   Result := HResult(scBase);
 end;
 
+
 // END OF OBSOLETE FUNCTIONS ///////////////////////////////////////////////////
 
-function HRESULT_FROM_SETUPAPI(x: DWORD): HRESULT; inline;
+function HRESULT_FROM_SETUPAPI(x: LongInt): HRESULT; inline;
 begin
-  if (x AND (APPLICATION_ERROR_MASK OR ERROR_SEVERITY_ERROR)) = (APPLICATION_ERROR_MASK OR ERROR_SEVERITY_ERROR) then
+  if (x and (APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR)) = (APPLICATION_ERROR_MASK or ERROR_SEVERITY_ERROR) then
     begin
-      Result := HRESULT((x AND $0000FFFF) OR
-                        (FACILITY_SETUPAPI shl 16) OR
-                         $80000000);
+      Result := HRESULT((x and $0000FFFF) or
+                        (FACILITY_SETUPAPI shl 16) or
+                         LongInt($80000000));
     end
   else
     Result := HRESULT_FROM_WIN32(x);
 end;
 
-function FILTER_HRESULT_FROM_FLT_NTSTATUS(x: DWORD): DWORD; inline;
+
+function FILTER_HRESULT_FROM_FLT_NTSTATUS(x: LongInt): LongInt; inline;
 begin
-  if ((x AND $FFF0000) = $001C0000) then
-    Result := HResult((x AND $8000FFFF) OR (FACILITY_USERMODE_FILTER_MANAGER shl 16))
+  if ((x and $FFF0000) = $001C0000) then
+    Result := HResult((x and $8000FFFF) or (FACILITY_USERMODE_FILTER_MANAGER shl 16))
   else
     Result := x;
 end;

@@ -14,7 +14,7 @@ object frmTranscoder: TfrmTranscoder
   Font.Style = []
   Menu = MainMenu1
   OldCreateOrder = False
-  Position = poDesktopCenter
+  Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
   PixelsPerInch = 96
   TextHeight = 13
@@ -106,8 +106,8 @@ object frmTranscoder: TfrmTranscoder
     TabOrder = 3
   end
   object MainMenu1: TMainMenu
-    Left = 342
-    Top = 62
+    Left = 466
+    Top = 12
     object File1: TMenuItem
       Caption = 'File'
       object mnuOpenSourceFile: TMenuItem
@@ -129,13 +129,13 @@ object frmTranscoder: TfrmTranscoder
   end
   object OpenDialog1: TOpenDialog
     Filter = 'All files|*.*'
-    Left = 468
-    Top = 62
+    Left = 466
+    Top = 59
   end
   object SaveDialog1: TSaveDialog
     DefaultExt = '.wmf'
     Filter = 'Windows Movie (wmv)|.wmv|Windows Audio (wma)|.wma'
-    Left = 402
-    Top = 62
+    Left = 466
+    Top = 106
   end
 end
