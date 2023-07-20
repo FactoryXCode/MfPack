@@ -10,10 +10,12 @@ object Frm_SimpleCapture: TFrm_SimpleCapture
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  OldCreateOrder = True
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnPaint = FormPaint
+  PixelsPerInch = 96
   TextHeight = 13
   object pnlControls: TPanel
     Left = 0
@@ -25,7 +27,7 @@ object Frm_SimpleCapture: TFrm_SimpleCapture
     TabOrder = 0
     object lblRotation: TLabel
       Left = 216
-      Top = 24
+      Top = 20
       Width = 48
       Height = 13
       Caption = 'Rotation: '
@@ -49,7 +51,7 @@ object Frm_SimpleCapture: TFrm_SimpleCapture
       OnClick = butGetDeviceClick
     end
     object cboRotation: TComboBox
-      Left = 272
+      Left = 266
       Top = 17
       Width = 97
       Height = 21

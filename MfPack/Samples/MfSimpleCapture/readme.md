@@ -10,6 +10,7 @@ NOTES:
 
 This example shows, how you have to implement capturing
 within a session and handle device loss while capturing.
+It also demonstrate the use of rotating a video stream. Useful for handheld devices.
 
 Project: Media Foundation - MFPack - Samples
 Project location: https://github.com/FactoryXCode/MfPack
