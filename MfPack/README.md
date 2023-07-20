@@ -28,7 +28,7 @@
 
 # MfPack 
 
-Version X 3.1.4
+Version X 3.1.5
 Delphi XE2 up to and including Delphi 12 
 SDK version: 10.0.22621.0 (Windows 11)
 
@@ -118,15 +118,6 @@ SDK version: 10.0.22621.0 (Windows 11)
   *to the volume control in the volume mixer.* 
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/DuckingMediaPlayerSample.jpg)
-
-
-**Simple Player**
-
-*Demonstrates audio/video playback using the IMFPMediaPlayer and IMFPMediaPlayerCallback API.*
-*Note: This API is deprecated, but still -partly- functional in Windows 10 version 2004 (May 2020 update).*
-       It's not recommemble to use this API, because of many issues concerning playing different formats.
-
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/SimplePlayer.jfif)
 
 **Ducking Capture Sample**
 
