@@ -13,7 +13,7 @@ The Windows System Error Code Lookup Tool can be downloaded at:
 
 To use the tools application, add ../MfPack/src/dbg to your project's Searchpath.
 
-NOTES: 
+*NOTES:* 
  - This release is updated for compiler version 17 up to 34.
  - SDK version 10.0.22621.0 (Win 11)
  - Requires Windows 10 build 20348 or later.
