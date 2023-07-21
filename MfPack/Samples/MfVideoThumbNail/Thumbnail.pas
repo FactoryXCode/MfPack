@@ -10,7 +10,7 @@
 // Release date: 08-07-2012
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 // Description: Videothumbnail generator.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -191,15 +191,15 @@ begin
   //iSpriteIndex := pSprite.m_SpriteIndex;
 
   dwFlags := 0;
-  pBitmapData := Nil;      // Bitmap data
+  pBitmapData := nil;      // Bitmap data
   cbBitmapData := 0;       // Size of data, in bytes
   hnsTimeStamp := 0;
   bCanSeek := FALSE;       // Can the source seek?
   cSkipped := 0;           // Number of skipped frames
 
-  pBuffer := Nil;
-  pSample := Nil;
-  pBitmap := Nil;
+  pBuffer := nil;
+  pSample := nil;
+  pBitmap := nil;
 
   hr := CanSeek(bCanSeek);
   if (FAILED(hr)) then
@@ -208,7 +208,7 @@ begin
       Exit;
     end;
 
-  if (bCanSeek AND (hnsPos > 0)) then
+  if (bCanSeek and (hnsPos > 0)) then
     begin
       PropVariantInit(_var);
 
@@ -239,9 +239,9 @@ begin
       // Read Sample
       hr := m_pReader.ReadSample(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
                                  0,
-                                 Nil,
+                                 nil,
                                  @dwFlags,
-                                 Nil,
+                                 nil,
                                  @pSampleTmp);
 
       if (FAILED(hr)) then
@@ -287,7 +287,7 @@ begin
           // During this process, we might reach the end of the file, so we
           // always cache the last sample that we got (pSample).
 
-          if ((cSkipped < MAX_FRAMES_TO_SKIP) AND
+          if ((cSkipped < MAX_FRAMES_TO_SKIP) and
                  (hnsTimeStamp + SEEK_TOLERANCE < hnsPos)) then
             begin
                 SafeRelease(pSampleTmp);
@@ -323,7 +323,7 @@ begin
         goto done;
 
       hr := pBuffer.Lock(pBitmapData,
-                         Nil,
+                         nil,
                          @cbBitmapData);
 
       if (FAILED(hr)) then
@@ -441,7 +441,7 @@ begin
 
   format := Default(TFormatInfo);
   subtype := GUID_NULL;
-  pType := Nil;
+  pType := nil;
 
   // Get the media type from the stream.
   hr := m_pReader.GetCurrentMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
@@ -608,7 +608,7 @@ begin
 
   pbCanSeek := FALSE;
 
-  hr := m_pReader.GetPresentationAttribute(DWORD(MF_SOURCE_READER_MEDIASOURCE),
+  hr := m_pReader.GetPresentationAttribute(DWORD(MF_SOURCE_READER_FIRST_AUDIO_STREAM),
                                            MF_SOURCE_READER_MEDIASOURCE_CHARACTERISTICS,
                                            _var);
 
@@ -622,7 +622,7 @@ begin
     begin
       // If the source has slow seeking, we will treat it as
       // not supporting seeking.
-      if ((flags AND ULONG(MFMEDIASOURCE_CAN_SEEK)) and (flags AND ULONG(MFMEDIASOURCE_HAS_SLOW_SEEK))) = 0 then
+      if ((flags and ULONG(MFMEDIASOURCE_CAN_SEEK)) and (flags and ULONG(MFMEDIASOURCE_HAS_SLOW_SEEK))) = 0 then
         pbCanSeek := TRUE;
     end;
 
@@ -691,7 +691,7 @@ begin
 
   // Generate the bitmaps and invalidate the button controls so
   // they will be redrawn.
-  for i := 0 to count-1 do
+  for i := 0 to count -1 do
     begin
       hPos := hnsIncrement * (i + 1);
 

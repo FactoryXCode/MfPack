@@ -10,7 +10,7 @@
 // Release date: 08-07-2012
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 // Description: Simple timer class.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -113,10 +113,10 @@ end;
 
 destructor TSimpleTimer.Destroy();
 begin
-  if (m_bBeginPeriod = TRUE) then
+  if (m_bBeginPeriod = True) then
     begin
       timeEndPeriod(1);
-      m_bBeginPeriod := FALSE;
+      m_bBeginPeriod := False;
     end;
 
   if (m_hTimer > 0) then
@@ -134,9 +134,9 @@ var
   li: TLargeInteger;
 
 begin
-  m_hTimer := CreateWaitableTimer(Nil,
-                                  FALSE,
-                                  Nil);
+  m_hTimer := CreateWaitableTimer(nil,
+                                  False,
+                                  nil);
 
   if (m_hTimer = 0) then
     begin
@@ -149,8 +149,8 @@ begin
   if Not SetWaitableTimer(m_hTimer,
                           li,
                           lPeriodMsec,
-                          Nil,
-                          Nil,
+                          nil,
+                          nil,
                           FALSE) then
     begin
       Result := FALSE;

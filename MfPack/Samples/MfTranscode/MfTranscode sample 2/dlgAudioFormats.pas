@@ -74,6 +74,7 @@ uses
   Vcl.Buttons,
   Vcl.ExtCtrls,
   Vcl.Grids,
+  WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfMetLib,
   WinApi.MediaFoundationApi.MfUtils,
   Common;
@@ -175,8 +176,9 @@ end;
 function TAudioFormatDlg.GetAudioFormats(const AudioFormat: TGuid): HResult;
 begin
   ResetAudioFormatArray();
-  // Get all encoder formats from the selected audioformat.
+  // Get the encoder formats from the selected audioformat.
   Result := GetWinAudioEncoderFormats(AudioFormat,
+                                      MFT_ENUM_FLAG_TRANSCODE_ONLY,
                                       aAudioFmts);
   Populate();
 end;

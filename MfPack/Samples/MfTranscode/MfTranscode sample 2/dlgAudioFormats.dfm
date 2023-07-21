@@ -4,7 +4,7 @@ object AudioFormatDlg: TAudioFormatDlg
   BorderStyle = bsDialog
   Caption = 'Select Audio Format'
   ClientHeight = 339
-  ClientWidth = 422
+  ClientWidth = 425
   Color = clBtnFace
   ParentFont = True
   OldCreateOrder = True
@@ -15,10 +15,11 @@ object AudioFormatDlg: TAudioFormatDlg
   object Bevel1: TBevel
     Left = 0
     Top = 0
-    Width = 422
+    Width = 425
     Height = 302
     Align = alTop
     Shape = bsFrame
+    ExplicitWidth = 422
   end
   object lblAudioFmt: TLabel
     Left = 8
@@ -61,7 +62,7 @@ object AudioFormatDlg: TAudioFormatDlg
     Top = 308
     Width = 83
     Height = 25
-    Hint = 'Save formats to file (Supported formats.txt)'
+    Hint = 'Save formats to file (AudioProfiles.txt)'
     Caption = 'Save Formats'
     Default = True
     ParentShowHint = False
@@ -131,7 +132,7 @@ object AudioFormatDlg: TAudioFormatDlg
   object sgAudioFormats: TStringGrid
     Left = 9
     Top = 66
-    Width = 406
+    Width = 405
     Height = 229
     DefaultColWidth = 100
     FixedCols = 0

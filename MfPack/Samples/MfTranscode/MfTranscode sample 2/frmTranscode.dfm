@@ -147,7 +147,6 @@ object frmTranscoder: TfrmTranscoder
     Panels = <>
     SimplePanel = True
     SimpleText = 'Please select a sourcefile.'
-    ExplicitTop = 154
   end
   object MainMenu: TMainMenu
     Left = 468
@@ -179,7 +178,7 @@ object frmTranscoder: TfrmTranscoder
   end
   object dlgTarget: TSaveDialog
     DefaultExt = '.wav'
-    Left = 468
-    Top = 115
+    Left = 470
+    Top = 119
   end
 end

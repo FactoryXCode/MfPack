@@ -10,24 +10,24 @@
 // Release date: 08-07-2012
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 // Description: Videothumbnail sprite.
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (Ozships)
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -198,7 +198,7 @@ end;
 constructor TSprite.Create();
 begin
   m_pBitmap := nil;
-  m_bAnimating := FALSE;
+  m_bAnimating := False;
   m_timeStart := 0;
   m_timeEnd := 0;
   m_fAngle := 0;
@@ -269,7 +269,7 @@ begin
         // Apply the new position immediately
 
         m_nrcBound := bound2;
-        m_bAnimating := FALSE;
+        m_bAnimating := False;
         m_fAngle := 0.0;
     end
   else
@@ -308,7 +308,7 @@ begin
       Exit; // No bitmap; nothing to do.
     end;
 
-  if ((m_timeStart < fTime) AND (m_timeEnd > fTime)) then
+  if ((m_timeStart < fTime) and (m_timeEnd > fTime)) then
     begin
         // We are in the middle of an animation. Interpolate the position.
         v := multD2D1RectFxF(m_nrcAnimDistance,
@@ -316,7 +316,7 @@ begin
         m_nrcBound := SumD2D1RectF(v,
                                    m_nrcStartPosition);
     end
-  else if (m_bAnimating AND (fTime >= m_timeEnd)) then
+  else if (m_bAnimating and (fTime >= m_timeEnd)) then
     begin
         // We have reached the end of an animation.
         // Set the final position (avoids any rounding errors)
@@ -432,7 +432,7 @@ begin
                                     D2D1PointF(x,
                                                y));
 
-  if (pt.x >= m_fill.left) AND (pt.x <= m_fill.right) AND (pt.y >= m_fill.top) AND (pt.y <= m_fill.bottom) then
+  if (pt.x >= m_fill.left) and (pt.x <= m_fill.right) and (pt.y >= m_fill.top) and (pt.y <= m_fill.bottom) then
     begin
       Result := True;
     end

@@ -87,7 +87,6 @@ uses
   WinApi.MediaFoundationApi.MfError,
   WinApi.MediaFoundationApi.MfUtils,
   WinApi.MediaFoundationApi.MfMetLib,
-
   {Application}
   Common;
 
@@ -152,8 +151,9 @@ constructor TTranscoder.Create(clHandle: HWnd);
 begin
   inherited Create();
 
-  CoInitializeEx(nil,
-                 COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE);
+  // A Delphi Forms Application will initialize Com by default.
+  //CoInitializeEx(nil,
+  //               COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE);
 
   // Check if the current MF version match user's
   if FAILED(MFStartup(MF_VERSION, 0)) then
@@ -272,7 +272,7 @@ begin
   // audio encoder.
 
   hr := MFTranscodeGetAudioOutputAvailableTypes(mfAudioFormat,
-                                                DWord(MFT_ENUM_FLAG_ALL),
+                                                DWord(MFT_ENUM_FLAG_TRANSCODE_ONLY {MFT_ENUM_FLAG_ALL}),
                                                 nil,
                                                 pAvailableTypes);
 
@@ -305,6 +305,8 @@ begin
   FMediaTypeDebug.LogMediaType(pAudioType);
   FMediaTypeDebug.DebugResults.SaveToFile('AudioProfiles.txt');
   {$ENDIF}
+
+
 
   // Create a copy of the attribute store so that we can modify it safely.
   hr := MFCreateAttributes(pAudioAttrs,
@@ -382,8 +384,7 @@ begin
                               pCont[arIndex].video_FrameRateNumerator,
                               pCont[arIndex].video_FrameRateDenominator);
 
-  // Set the frame size. This size is just a guess, to get the original size you have to call
-  // MFGetAttributeSize from the source
+  // Set the frame size.
   if SUCCEEDED(hr) then
     hr := MFSetAttributeSize(pVideoAttrs,
                              MF_MT_FRAME_SIZE,
@@ -448,7 +449,7 @@ begin
 
   if SUCCEEDED(hr) then
     hr := pContainerAttrs.SetUINT32(MF_TRANSCODE_ADJUST_PROFILE,
-                                    DWord(MF_TRANSCODE_ADJUST_PROFILE_DEFAULT));
+                                    UINT32(MF_TRANSCODE_ADJUST_PROFILE_DEFAULT));
 
   // Set the attribute store on the transcode profile.
   if SUCCEEDED(hr) then

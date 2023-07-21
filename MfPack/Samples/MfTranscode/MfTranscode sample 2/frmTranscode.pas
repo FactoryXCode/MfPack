@@ -181,18 +181,12 @@ begin
            gContainerFormat := MFTranscodeContainerType_AVI;
          end;
       2: begin
-           // mov Apple QuickTime Movie
-           gVideoMediaFmt := MFVideoFormat_HEVC;
-           gAudioMediaFmt := MFAudioFormat_AAC;
-           gContainerFormat := MFTranscodeContainerType_3GP;
-         end;
-      3: begin
            // mp4
            gVideoMediaFmt := MFVideoFormat_H264;
            gAudioMediaFmt := MFAudioFormat_AAC;
            gContainerFormat := MFTranscodeContainerType_MPEG4;
          end;
-      4: begin
+      3: begin
            // wmv
            gVideoMediaFmt := MFVideoFormat_WMV3;
            gAudioMediaFmt := MFAudioFormat_WMAudioV9;
@@ -201,27 +195,27 @@ begin
 
       // Audio /////////////////////////////////////////////////////////////////
 
-      5: begin
+      4: begin
            // wav
            gAudioMediaFmt := MFAudioFormat_PCM;
            gContainerFormat := MFTranscodeContainerType_WAVE;
          end;
-      6: begin
+      5: begin
            // mp3
            gAudioMediaFmt := MFAudioFormat_MP3;
            gContainerFormat := MFTranscodeContainerType_MP3;
          end;
-      7: begin
+      6: begin
            // flac
            gAudioMediaFmt := MFAudioFormat_FLAC;
            gContainerFormat := MFTranscodeContainerType_FLAC;
          end;
-      8: begin
+      7: begin
            // m4a
            gAudioMediaFmt := MFAudioFormat_AAC;
            gContainerFormat := MFTranscodeContainerType_MPEG4;
          end;
-      9: begin
+      8: begin
            // wma
            gAudioMediaFmt := MFAudioFormat_WMAudioV9;
            gContainerFormat := MFTranscodeContainerType_ASF;
@@ -525,6 +519,5 @@ begin
   if (Msg.WParam = 0) then
     sbMsg.SimpleText := LPCWSTR(Msg.LParam);
 end;
-
 
 end.

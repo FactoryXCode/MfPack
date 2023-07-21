@@ -26,10 +26,6 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
-// 13/08/2022 Tony                Implemented more functionality and updated methods.
-// 30/01/2023 Tony                Updated some.
-// 03/03/2023                     Updated and fixed device notification issues.
-// 03/04/2023 Tony                added CopyWaveFormatEx method.
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -939,6 +935,7 @@ type
 
   // Gets the Windows supported audio encoder formats (MFT's).
   function GetWinAudioEncoderFormats(const mfAudioFormat: TGuid;
+                                     MftEnumFlag: MFT_ENUM_FLAG; // Flag for registering and enumeration Media Foundation Transforms (MFTs).
                                      out aAudioFmts: TMFAudioFormatArray): HResult;
 
 // Ducking
@@ -6390,6 +6387,7 @@ end;
 
 //
 function GetWinAudioEncoderFormats(const mfAudioFormat: TGuid;
+                                   MftEnumFlag: MFT_ENUM_FLAG;
                                    out aAudioFmts: TMFAudioFormatArray): HResult;
 var
   hr: HResult;
@@ -6408,7 +6406,7 @@ begin
   // Get the list of output formats supported by the Windows Media
   // audio encoder.
   hr := MFTranscodeGetAudioOutputAvailableTypes(mfAudioFormat,
-                                                DWord(MFT_ENUM_FLAG_ALL),
+                                                DWord(MftEnumFlag),
                                                 nil,
                                                 mfAvailableTypes);
 

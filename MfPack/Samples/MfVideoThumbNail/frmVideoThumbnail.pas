@@ -10,7 +10,7 @@
 // Release date: 08-07-2012
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 // Description: Videothumbnail Mainform
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -260,7 +260,7 @@ begin
       {void} g_pRT.Resize(d2d1su);
 
       InvalidateRect(Form1.Handle,
-                     Nil,
+                     nil,
                      FALSE);
     end;
 end;
@@ -298,9 +298,9 @@ begin
 
   bTerminate := False;
 
-  // Initialize COM
-  hr := CoInitializeEx(Nil,
-                       COINIT_APARTMENTTHREADED OR COINIT_DISABLE_OLE1DDE);
+  // We don't need to initialize COM, Delphi Forms Applications will do this by default.
+  //hr := CoInitializeEx(nil,
+  //                     COINIT_APARTMENTTHREADED OR COINIT_DISABLE_OLE1DDE);
 
   if (SUCCEEDED(hr)) then
     begin
@@ -347,12 +347,12 @@ begin
 
   if assigned(g_ThumbnailGen) then
     begin
-      FreeAndNil(g_ThumbnailGen);
+      FreeAndnil(g_ThumbnailGen);
     end;
 
   if assigned(g_Timer) then
     begin
-      FreeAndNil(g_Timer);
+      FreeAndnil(g_Timer);
     end;
 
   SafeRelease(g_pRT);
@@ -360,7 +360,7 @@ begin
   for i := 0 to MAX_SPRITES do
     begin
       g_pSprites[i].Clear();
-      FreeAndNil(g_pSprites[i]);
+      FreeAndnil(g_pSprites[i]);
     end;
 
 end;
@@ -392,7 +392,7 @@ begin
               g_pSprites[i].Clear();
             end;
 
-          if (g_pRT = Nil) then
+          if (g_pRT = nil) then
             begin
               // Create the Direct2D resources.
               hr := CreateDrawingResources(Form1.Handle);
@@ -498,15 +498,18 @@ begin
             dchdc);
 end;
 
+
 function DPIScaleX(iValue: Integer): Integer;
 begin
   Result := round(iValue / g_fDPIScaleX);
 end;
 
+
 function DPIScaleY(iValue: Integer): Integer;
 begin
   Result := round(iValue / g_fDPIScaleY);
 end;
+
 
 //-------------------------------------------------------------------
 // UnselectAllSprites: Unselects all sprites.
@@ -563,6 +566,7 @@ begin
   g_Selection := iSelection;
 end;
 
+
 //-------------------------------------------------------------------
 // CreateDrawingResources: Creates Direct2D resources.
 //-------------------------------------------------------------------
@@ -577,8 +581,8 @@ begin
 
   rcClient:= TRect.Empty();
 
-  pFactory := Nil;
-  pRenderTarget := Nil;
+  pFactory := nil;
+  pRenderTarget := nil;
 
   if Not GetClientRect(hw,
                        rcClient) then
@@ -589,7 +593,7 @@ begin
 
   hr := D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED,
                           IID_ID2D1Factory,
-                          Nil,
+                          nil,
                           pFactory);
 
   if (SUCCEEDED(hr)) then
@@ -650,9 +654,9 @@ begin
       // Update and draw each sprite.
       for i := 0 to MAX_SPRITES do
         begin
-          //pSprite:= Nil;
+          //pSprite:= nil;
           pSprite := g_pSprites[i];
-          if (pSprite <> Nil) then
+          if (pSprite <> nil) then
             begin
                 pSprite.Update(g_pRT,
                                fTime);
@@ -666,6 +670,7 @@ begin
 
   Result := hr;
 end;
+
 
 // Small & big thunmbrects initialization methods
 procedure InitSmallRects();
@@ -696,6 +701,5 @@ initialization
 
 finalization
   MFShutdown();
-  CoUninitialize();
 
 end.
