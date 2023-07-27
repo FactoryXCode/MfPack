@@ -79,7 +79,7 @@ SDK version: 10.0.22621.0 (Windows 11)
 
 
 
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleCapture.jpg)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleCapture.png)
 
 **MfPeakMeter and MfPeakMeterEx component sample**
 
