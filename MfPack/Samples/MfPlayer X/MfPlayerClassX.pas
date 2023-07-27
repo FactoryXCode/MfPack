@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.1.4
+// Version: 3.1.5
 // Description: This is the extended basic player class (version X),
 //              containing the necessary methodes to play a mediafile
 //              For indepth information see the included examples (CPlayer)
@@ -28,13 +28,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -542,7 +542,7 @@ try
     begin
       // This call will also destroy the ClockStateSink.
       if Succeeded(MFPresentationClock.RemoveClockStateSink(m_pClockStateSink)) then
-        MFPresentationClock := Nil;
+        MFPresentationClock := nil;
 
       FreeAndNil(m_pClockStateSink);
 
@@ -696,8 +696,8 @@ var
 begin
   inherited Create();
 
-  CoInitializeEx(Nil,
-                 COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE);
+  //CoInitializeEx(nil,
+  //               COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE);
 
   // Check if the current MF version match user's
   if FAILED(MFStartup(MF_VERSION, 0)) then
@@ -753,7 +753,7 @@ begin
   DeAllocateHWnd(m_hwndThis);
   // Shutdown the Media Foundation platform
   MFShutdown();
-  CoUninitialize();
+  //CoUninitialize();
   inherited Destroy;
 end;
 
@@ -876,7 +876,7 @@ try
              sizeof(BITMAPINFOHEADER));
   bmi.biSize := sizeof(BITMAPINFOHEADER);
 
-  data := Nil;
+  data := nil;
   bufsize := $0000;
   hr := E_FAIL;
 
@@ -1043,10 +1043,10 @@ begin
       Exit;
     end;
 
-  FhCloseEvent := CreateEvent(Nil,
+  FhCloseEvent := CreateEvent(nil,
                               True,
                               False,
-                              Nil);
+                              nil);
 
   if (FhCloseEvent = 0) then
     Result := GetLastError()
@@ -1646,26 +1646,26 @@ try
 
 
   // Create the FloatingForm for timedtext
-  if (FloatingForm = Nil) then
+  if (FloatingForm = nil) then
     FloatingForm := TFloatingForm.Create(Application,
                                          m_hwndVideo,
                                          sURL,
                                          SubtitleLanguage,
                                          ClockProps);
 
-  // The TimedText file (srt or sami) will be loaded automaticly by the floatingform/TimedTextClass,
+  // The TimedText file (srt, vtt or sub) will be loaded automaticly by the floatingform/TimedTextClass,
   // if one is present that matches the preferred language.
   // On this point the floatingform did a number of checks.
   // If there are no timedtextfiles, we will shut down the form.
   if assigned(FloatingForm) then
     begin
-      if FloatingForm.TimedTextFileIsLoaded = True then
+      if (FloatingForm.TimedTextFileIsLoaded = True) then
         // Store it's handle
         m_hwndFloatingForm := FloatingForm.Handle
       else
         begin
           m_hwndFloatingForm := 0;
-          FloatingForm.Close();
+          FreeAndNil(FloatingForm);
         end;
     end;
 
@@ -2747,7 +2747,6 @@ begin
 end;
 
 
-
 function TClockStateSink.OnClockSetRate(hnsSystemTime: MFTIME;
                                         flRate: Single): HResult;
 var
@@ -2763,10 +2762,12 @@ end;
 
 
 initialization
-  //
+  CoInitializeEx(nil,
+                 COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE);
 
 finalization
   // Not needed, but can't harm as well.
   MFShutdown();
+  CoUnInitialize();
 
 end.

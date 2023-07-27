@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.1.4
+// Version: 3.1.5
 // Description: This unit contains methods to get and
 //              present TimedText from currently SubRib and MicroDvd files.
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 // ----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -69,6 +69,7 @@ uses
   WinApi.Windows,
   WinApi.Messages,
   WinApi.WinApiTypes,
+  WinApi.WinError,
   {System}
   System.StrUtils,
   System.SysUtils,
@@ -142,7 +143,7 @@ type
     sp_FriendlyLangName         : string;                    // Friendly localised languagename
     bp_AutoFormatText           : Boolean;                   // Option for automated formatting
     cp_clDefaultTextColor       : TColor;                    // DEfault text color
-    lp_MatchList                : TStringlist;                  // Global matchlist, stores tracktimes
+    lp_MatchList                : TStringlist;               // Global matchlist, stores tracktimes
     tp_SubTitleTrack            : TSubTitleTrack;            // Presentation record
     fTrackFont                  : TFont;
 
@@ -160,15 +161,26 @@ type
     // Helper to get a valid colorvalue from a string
     function StrToColor(sValue: string): TColor;
 
-    // Process font tags and store to list
+    // Process srt font tags and store to list
     procedure ProcessSrtTags(fText: string;
                              trackIndex: integer;
                              txtLine: integer);
+    // Remove srt font tags
+    procedure DeleteSrtFontTags(var fText: string);
 
-    procedure DeleteFontTags(var fText: string);
+    // Process vtt font tags and store to list
+    procedure ProcessVttTags(fText: string;
+                             trackIndex: integer;
+                             txtLine: integer);
+
+    // Remove vtt font tags
+    procedure DeleteVttFontTags(var fText: string);
 
     // Write .srt file in to memory
     function ReadSubRipFile(const sUrl: WideString): HResult;
+
+    // Write .vtt file in to memory
+    function ReadWEBVTTFile(const sUrl: WideString): HResult;
 
     // Write .sub file in to memory
     function ReadMicroDvdFile(const sUrl: WideString): HResult;
@@ -314,7 +326,7 @@ begin
 end;
 
 
-// searches for srt or implemented formats and opens them by corresponding language
+// searches for srt or other implemented formats and opens them by corresponding language
 function TMfTimedText.OpenTimedTextFile(const sUrl: WideString): HResult;
 var
   hr: HResult;
@@ -323,7 +335,9 @@ var
   bFound: Boolean;
 
 label
-  srt, sub;
+  srt,
+  vtt,
+  sub;
 
 begin
   hr := S_OK;
@@ -342,7 +356,7 @@ try
     end;
 
   // Check if the file exists
-  if Not FileExists(sUrl) then
+  if not FileExists(sUrl) then
     begin
       hr := ERROR_FILE_NOT_FOUND;
       Result := hr;
@@ -363,7 +377,13 @@ try
   if (Length(pc_LanguageTags.TimedTxtPropsArray) > 0) then
     goto srt;
 
-
+  // Try to find WebVtt (.vtt) files  TODO:  set the SetPreferredLanguage ?
+  pc_LanguageTags.TimedTxtPropsArray := pc_LanguageTags.ReadFileTags(Path + UrlFileName,
+                                                                     PreferredLanguage,
+                                                                     0,
+                                                                     EXTWEBVTT);
+  if (Length(pc_LanguageTags.TimedTxtPropsArray) > 0) then
+    goto vtt;
 
   // Try to find MicroDvd (.sub) files  TODO:  set the SetPreferredLanguage ?
   pc_LanguageTags.TimedTxtPropsArray := pc_LanguageTags.ReadFileTags(Path + UrlFileName,
@@ -425,6 +445,44 @@ srt:
     Result := hr;
     Exit;
   end;
+
+// from here we try to get the language of the .vtt (WEBVTT) file
+vtt:
+
+  // NOTE: It's possible that tags will contain mymovie.vtt and - for example - mymovie[en_US].vtt are returning.
+  // In that case mymovie[en_US].vtt will be the preferred subtitle file.
+  if (Length(pc_LanguageTags.TimedTxtPropsArray) = 1) then
+    begin
+      hr := ReadSubRipFile(LPCWSTR(pc_LanguageTags.TimedTxtPropsArray[0].sFile));
+      // Found, store url and extension
+      if SUCCEEDED(hr) then
+        bFound := True;
+    end
+  else
+    begin
+      // compare, ignoring case
+      for I := 0 to High(pc_LanguageTags.TimedTxtPropsArray) do
+        begin
+          if IsMatch(PreferredLanguage + '_[A-Z][A-Z]',
+                     pc_LanguageTags.TimedTxtPropsArray[I].sFile) then
+            begin
+              hr := ReadWEBVTTFile(LPCWSTR(pc_LanguageTags.TimedTxtPropsArray[I].sFile));
+
+              // Found, store url and extension
+              if SUCCEEDED(hr) then
+                begin
+                  bFound := True;
+                  Break;
+               end;
+            end;
+        end;
+    end;
+  begin
+    hr := S_OK;
+    Result := hr;
+    Exit;
+  end;
+
 
 // from here we try to get the language of the .sub (MicroDvd) file
 sub:
@@ -581,7 +639,7 @@ try
     begin
       if (flTemp.Strings[I] = Trim('')) and (bPrev = False) then
         begin
-          flTemp.Strings[I] := '<E_T>';  // insert a track end tag
+          flTemp.Strings[I] := IMARKER;  // insert a track end tag
           inc(bPrev);
         end
       else if (flTemp.Strings[I] = Trim('')) and (bPrev = True) then
@@ -589,7 +647,6 @@ try
       else if (flTemp.Strings[I] <> Trim('')) then
         bPrev := False;
     end;
-
 
   SetLength(ap_SubTitleTracks, 1);
   aSize := 0;
@@ -638,7 +695,7 @@ try
           if (Pos(WTP, flTemp.Strings[I]) = 0) or (TryStrToInt(flTemp.Strings[I], intCheck) = false) then
             begin
               J := 0;
-              while (Pos('<E_T>', flTemp.Strings[I]) = 0) do
+              while (Pos(IMARKER, flTemp.Strings[I]) = 0) do
                 begin
                   inc(J);
                   // Increase the SubTitleLines array
@@ -647,6 +704,149 @@ try
                   // fTextFormat can be a custom or auto format, where autoformat is the format
                   // defined by the tags.
                   ProcessSrtTags(flTemp.Strings[I], aSize, J -1);
+                  Inc(I);
+                end;
+
+              // Add New record
+              if (Trim(flTemp.Strings[I]) <> '') and (I < flTemp.Count - 1) then
+                begin
+                  Inc(aSize);
+                  SetLength(ap_SubTitleTracks, aSize +1);
+                end;
+            end
+          else
+            // The file or format is corrupted
+            begin
+              hr := E_INVALIDARG;
+              Break;
+            end;
+        inc(I);
+   end; // while
+
+except
+  pwInt := PWideChar(InttoStr(hr));
+
+  MessageBox(0,
+             PWideChar('An exception has been returned. (hr: ' + pwInt + ')'),
+             PWideChar('Error'),
+             MB_ICONERROR);
+end;
+
+finally
+  flTemp.Free;
+  if FAILED(hr) then
+    begin
+      Clear();
+      lp_MatchList.Clear();
+    end;
+  Result := hr;
+end;
+end;
+
+
+function TMfTimedText.ReadWEBVTTFile(const sUrl: WideString): HResult;
+var
+  hr: HResult;
+  bPrev: Boolean;
+  I,
+  J,
+  aSize,
+  iMatches,
+  intCheck: Integer;
+  flTemp: TStrings;
+  pwInt: PWideChar;
+
+begin
+  hr := S_OK;
+  bPrev := False;
+  flTemp := TStringList.Create();
+  flTemp.LoadFromFile(sUrl);
+
+try
+try
+  if (flTemp.Count = 0) then
+    begin
+      hr := E_UNEXPECTED;
+      raise Exception.Create('Invalid file.');
+    end;
+
+   // Check if headertag is present at the first line and the 2 following should be empty.
+   if (flTemp.Strings[0] <> WVTT_WVTT) and (not flTemp.Strings[1].IsEmpty) and (not flTemp.Strings[2].IsEmpty)then
+     begin
+      hr := ERROR_BAD_FORMAT;
+      raise Exception.Create('Invalid format.');
+    end;
+
+  // Remove empty lines if more than 1 and/or insert a track marker
+  for I := flTemp.Count - 1 downto 0 do
+    begin
+      if (flTemp.Strings[I] = Trim('')) and (bPrev = False) then
+        begin
+          flTemp.Strings[I] := IMARKER;  // insert a track end tag
+          inc(bPrev);
+        end
+      else if (flTemp.Strings[I] = Trim('')) and (bPrev = True) then
+        flTemp.Delete(I)
+      else if (flTemp.Strings[I] <> Trim('')) then
+        bPrev := False;
+    end;
+
+  SetLength(ap_SubTitleTracks, 1);
+  aSize := 0;
+  I := 0;
+
+  while (I < flTemp.Count -1) do
+    begin
+      // Get index
+      if TryStrToInt(flTemp.Strings[I], intCheck) then  // we found a track index
+        begin
+          // Get the track index
+          if StrToIntDef(flTemp.Strings[I], 0) > 0 then
+            begin
+              ap_SubTitleTracks[aSize].stIndex := StrToIntDef(flTemp.Strings[I], 0);
+              ip_Tracks := ap_SubTitleTracks[aSize].stIndex;
+            end;
+        end
+      else
+        // Get time codes
+        if (Pos(WTP, flTemp.Strings[I]) > 0) then
+          begin
+            // Get the start and stop time from this format 00:00:00.000 --> 00:00:00.000
+            iMatches := GetMatchCount('[0-9][0-9]:[0-5][0-9]:[0-5][0-9].[0-9][0-9][0-9]',
+                                      flTemp.Strings[I],
+                                      [roSingleLine, roNotEmpty]);
+            // If we find the start and end time.
+            if (iMatches = 2) then
+              begin
+                // Calculate begin
+                ap_SubTitleTracks[aSize].Start := TimeToHnsTime(lp_MatchList.Strings[0], False);
+                // Calculate end
+                ap_SubTitleTracks[aSize].Stop := TimeToHnsTime(lp_MatchList.Strings[1], False);
+                // Calculate duration
+                ap_SubTitleTracks[aSize].Duration := ap_SubTitleTracks[aSize].Stop - ap_SubTitleTracks[aSize].Start;
+              end
+            else
+              // The file or format is corrupted
+              begin
+                hr := E_INVALIDARG;
+                Break;
+              end;
+            lp_MatchList.Clear();
+          end
+        else
+          // Get the text tracks
+          if (Pos(WTP, flTemp.Strings[I]) = 0) or (TryStrToInt(flTemp.Strings[I], intCheck) = false) then
+            begin
+              J := 0;
+              while (Pos(IMARKER, flTemp.Strings[I]) = 0) do
+                begin
+                  inc(J);
+                  // Increase the SubTitleLines array
+                  SetLength(ap_SubTitleTracks[aSize].TrackText, J);
+                  // Clear paragraph tags and set the fontproperties for each record.
+                  // fTextFormat can be a custom or auto format, where autoformat is the format
+                  // defined by the tags.
+                  ProcessVttTags(flTemp.Strings[I], aSize, J -1);
                   Inc(I);
                 end;
 
@@ -711,7 +911,7 @@ try
     begin
       if (flTemp.Strings[I] = Trim('')) and (bPrev = False) then
         begin
-          flTemp.Strings[I] := '<E_T>';  // insert a track end tag
+          flTemp.Strings[I] := IMARKER;  // insert a track end tag
           inc(bPrev);
         end
       else if (flTemp.Strings[I] = Trim('')) and (bPrev = True) then
@@ -775,11 +975,9 @@ procedure TMfTimedText.Clear();
 begin
   if Assigned(lp_MatchList) then
     begin
-      lp_MatchList.Clear;
+      lp_MatchList.Clear();
       lp_MatchList.Free;
     end;
-  if Assigned(fTimedText) then
-     fTimedText.Clear();
 
   SetLength(ap_SubTitleTracks, 0);
   Finalize(ap_SubTitleTracks);
@@ -900,6 +1098,7 @@ begin
     Result:= TColor(liColor);
 end;
 
+
 // SRT (SubRip) supports the following tags:
 //  SRTTAG_ITALIC_START = '<i>' or {i};
 //  SRTTAG_ITALIC_END = '</i>' or {/i};
@@ -918,7 +1117,7 @@ var
   iTest: Integer;
 
 begin
-  // Create the font, this can be Nil for default or a predefined font (like fTrackFont)
+  // Create the font, this can be nil for default or a predefined font (like fTrackFont)
   ap_SubTitleTracks[trackIndex].TrackText[txtLine].Create(fTrackFont);
 
   if AutoFormatText then
@@ -972,12 +1171,12 @@ begin
 
   // strip tags from textline
   sTmp := fText;
-  DeleteFontTags(sTmp);
+  DeleteSrtFontTags(sTmp);
   ap_SubTitleTracks[trackIndex].TrackText[txtLine].TextLine := sTmp;
 end;
 
 
-procedure TMfTimedText.DeleteFontTags(var fText: string);
+procedure TMfTimedText.DeleteSrtFontTags(var fText: string);
 
   function CleanUp(sTag: string): string;
     begin
@@ -998,6 +1197,79 @@ begin
    fText := CleanUp(SRTTAG_COLOR_START);
    fText := CleanUp(SRTTAG_COLOR_END);
    fText := CleanUp(SRTTAG_COLOR_EQOUTE);
+end;
+
+
+//
+procedure TMfTimedText.ProcessVttTags(fText: string;
+                                      trackIndex: integer;
+                                      txtLine: integer);
+var
+  sTmp: string;
+
+begin
+  // Create the font, this can be nil for default or a predefined font (like fTrackFont)
+  ap_SubTitleTracks[trackIndex].TrackText[txtLine].Create(fTrackFont);
+
+  if AutoFormatText then
+    begin
+     // Italic
+     if pos(WVTT_ITALIC_START, AnsiLowerCase(fText)) > 0 then
+       begin
+         fTrackFont.Style := fTrackFont.Style + [fsItalic];
+         ap_SubTitleTracks[trackIndex].TrackText[txtLine].TextFont.Style := fTrackFont.Style;
+       end;
+
+    // Bold
+    if pos(WVTT_BOLD_START, AnsiLowerCase(fText)) > 0 then
+      begin
+        fTrackFont.Style := fTrackFont.Style + [fsBold];
+        ap_SubTitleTracks[trackIndex].TrackText[txtLine].TextFont.Style := fTrackFont.Style;
+      end;
+
+    // Underline
+    if pos(WVTT_UNDERLINE_START, AnsiLowerCase(fText)) > 0 then
+      begin
+        fTrackFont.Style := fTrackFont.Style + [fsUnderline];
+        ap_SubTitleTracks[trackIndex].TrackText[txtLine].TextFont.Style := fTrackFont.Style;
+      end;
+
+    // Color
+    // The text anf text background color is not yet implemented, so, we keep it White text and transparent background.
+    fTrackFont.Color := clWhite;
+    ap_SubTitleTracks[trackIndex].TrackText[txtLine].TextFont.Color := fTrackFont.Color;
+
+  end; // AutoFormat
+
+  // strip tags from textline
+  sTmp := fText;
+  DeleteVttFontTags(sTmp);
+  ap_SubTitleTracks[trackIndex].TrackText[txtLine].TextLine := sTmp;
+end;
+
+
+//
+procedure TMfTimedText.DeleteVttFontTags(var fText: string);
+
+  function CleanUp(sTag: string): string;
+    begin
+      Result := StringReplace(fText,
+                              sTag,
+                              '',
+                              [rfReplaceAll, rfIgnoreCase]);
+    end;
+
+begin
+   fText := CleanUp(WVTT_ITALIC_START);
+   fText := CleanUp(WVTT_ITALIC_END);
+   fText := CleanUp(WVTT_BOLD_START);
+   fText := CleanUp(WVTT_BOLD_START);
+   fText := CleanUp(WVTT_BOLD_END);
+   fText := CleanUp(WVTT_UNDERLINE_START);
+   fText := CleanUp(WVTT_UNDERLINE_END);
+   fText := CleanUp(WVTT_RUBY_START);
+   fText := CleanUp(WVTT_RUBY_END);
+   // Text and text background colors are not implemented (yet).
 end;
 
 

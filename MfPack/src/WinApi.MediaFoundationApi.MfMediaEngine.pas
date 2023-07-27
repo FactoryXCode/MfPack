@@ -742,7 +742,7 @@ type
   //  Interface:  IMFMediaEngine
   //  Synopsis:   IMFMediaEngine provides audio and video playback for the
   //              HTML5 <audio> and <video> elements.
-  //  See http://dev.w3.org/html5/spec/video.html#video for details
+  //  See https://dev.w3.org/html5/spec/video.html#video for details
   //------------------------------------------------------------------------------
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFMediaEngine);'}
   {$EXTERNALSYM IMFMediaEngine}

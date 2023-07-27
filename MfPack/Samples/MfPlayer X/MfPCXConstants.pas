@@ -11,7 +11,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.1.4
+// Version: 3.1.5
 // Description: Holds global constants for timedtext.
 //
 // Company: FactoryX
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -87,6 +87,7 @@ const
 
   // Subtitle File Extensions
   EXTSUBRIP    = '.srt';  // SubRip
+  EXTWEBVTT    = '.vtt';  // WebVTT. WebVTT caption format for HTML5 media players.
   EXTMICRODVD  = '.sub';  // MicroDvd / SubViewer
 
   // YouTube (not implemented)
@@ -104,15 +105,13 @@ const
   // Media Foundation does not provide a component that displays SAMI captions.
   // The application must interpret the caption data that it receives from the SAMI media source.
 
-  // WebVTT caption format for HTML5 media players. (not implemented)
-  EXTWEBVTT    = '.vtt';
-
 
   TFLENGTH          = 8;
 
   LFEED             = #13;
   ULBR              = #13#10;
   LINEBR            = '<BR-';
+  IMARKER           = '<E_T>'; // Internal track marker.
 
   // SUB tags //////////////////////////////////////////////////////////////////
 
@@ -134,7 +133,7 @@ const
 
   // SRT tags //////////////////////////////////////////////////////////////////
 
-  WTP                    = '-->';   // srt time separator
+  WTP                    = '-->';   // srt and WebVTT time separator
   TIMECODELENGTH         = 12;      // Length of the srt-timecode
 
   // SRT (SubRip) supports the following font tags
@@ -151,7 +150,9 @@ const
   //////////////////////////////////////////////////////////////////////////////
 
 
-  // WEBVTT tags (not implemented) /////////////////////////////////////////////
+  // WEBVTT tags ///////////////////////////////////////////////////////////////
+  // See: https://www.w3.org/TR/webvtt1/#model-overview
+  WVTT_WVTT            = 'WEBVTT';
   WVTT_Mime            = 'text/vtt';
   WVTT_Kind            = 'WEBVTT Kind: ';
   WVTT_Lang            = 'Language: ';
@@ -185,6 +186,7 @@ const
   WVTT_BOLD_END        = '</b>';
   WVTT_UNDERLINE_START = '<u>';
   WVTT_UNDERLINE_END   = '</u>';
+  // Ruby
   WVTT_RUBY_START      = '<ruby>';
   WVTT_RUBY_END        = '</ruby>';
 
@@ -199,7 +201,7 @@ const
   AR_16_9  : Single = 1.777777777777778;
   // Mobile phones
   AR_9_16  : Single = 0.5625;
-  AR_18_9  : Single = 2.0;   // Univisium format: Google Pix, LG, Huawei etc.
+  AR_18_9  : Single = 2.0;   // Univisium format: Google Pixel, LG, Huawei etc.
   AR_195_9 : Single = 2.16;  // Apple, Samsung
   // Cinema
   AR_186_1 : Single = 1.86;

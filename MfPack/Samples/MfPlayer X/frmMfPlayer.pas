@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Version: 3.1.4
+// Version: 3.1.5
 // Description: MfPlayer X: Requires Windows 7 or later.
 //
 // Company: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -715,6 +715,7 @@ begin
   prbProgress.Max := prbProgress.Width;
   bAppIsClosing := False;
   pb_IsFullScreen := False;
+
 end;
 
 
@@ -785,7 +786,7 @@ begin
   Result:= E_FAIL;
   if not Assigned(MfPlayerX) then
     begin
-      MfPlayerX := Nil;
+      MfPlayerX := nil;
       // We want the video to be played on the VideoPanel, so, we use that handle.
       MfPlayerX := TMfPlayerX.Create(pnlVideo.Handle,       // The clipping window / control
                                      0,                     // The window or control that receives the custom messages. (like Subtitles)

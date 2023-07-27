@@ -1180,7 +1180,7 @@ type
     // Result := pType.GetBlob(MF_MT_PAN_SCAN_APERTURE,
     //                         @pArea,
     //                         sizeof(MFVideoArea),
-    //                         Nil);
+    //                         nil);
 
     function GetAllocatedBlob(const guidKey: TGUID;
                               out ppBuf: PUINT8;

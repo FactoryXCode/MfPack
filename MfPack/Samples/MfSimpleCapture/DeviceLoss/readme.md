@@ -6,9 +6,9 @@ NOTES:
  - This release is updated for compiler version 17 up to 35.
  - SDK version 10.0.22621.0 (Win 11)
  - Requires Windows 7 or later.
- - Minimum supported MfPack version: 3.1.5
+ - Minimum supported MfPack version: 3.1.3
 
-This example (based on the MfSimpleCapture example) shows, how you how to implement a deviceLoss handler
+This example shows, how you how to implement a deviceLoss handler
 within your code.
 
 Description

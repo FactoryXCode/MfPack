@@ -10,7 +10,7 @@
 // Release date: 13-08-2019
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 // Description: Language tag definitions file.
 //
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -19,13 +19,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -657,7 +657,7 @@ var
 
 begin
   // Do a initiate first to get the size of the buffer.
-  rSize := GetUserDefaultGeoTag(Nil,
+  rSize := GetUserDefaultGeoTag(nil,
                                 0);
   // Reserve memory for the buffer
   GetMem(Buffer, rSize);
@@ -713,7 +713,7 @@ begin
   // Do a initiate first to get the size of the buffer
   Size := GetLocaleInfo(LOCALE_USER_DEFAULT,
                         dwLocales,
-                        Nil,
+                        nil,
                         0);
   GetMem(Buffer, Size);
 

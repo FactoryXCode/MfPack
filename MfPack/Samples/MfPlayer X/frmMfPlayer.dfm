@@ -200,7 +200,7 @@ object frm_MfPlayer: Tfrm_MfPlayer
       OnMouseUp = prbProgressMouseUp
     end
     object butFullScreen: TButton
-      Left = 444
+      Left = 440
       Top = 16
       Width = 25
       Height = 24
@@ -249,12 +249,12 @@ object frm_MfPlayer: Tfrm_MfPlayer
   end
   object dlgOpenUrl: TOpenDialog
     Title = 'Open mediafile'
-    Left = 106
-    Top = 10
+    Left = 100
+    Top = 12
   end
   object MainMenu1: TMainMenu
     Left = 32
-    Top = 10
+    Top = 12
     object mnuFile: TMenuItem
       Caption = '&File'
       object mnuOpen: TMenuItem

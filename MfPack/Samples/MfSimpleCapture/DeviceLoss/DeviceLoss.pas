@@ -10,7 +10,7 @@
 // Release date: 26-02-2023
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.4
 // Description: This sample describes how to detect device loss when using a
 //              video capture device.
 //              It contains the following steps:
@@ -44,7 +44,7 @@
 //
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX314
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

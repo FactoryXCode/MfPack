@@ -9,7 +9,7 @@
 // Release date: 24-02-2012
 // Language: ENU
 //
-// Version: 3.1.4
+// Version: 3.1.5
 // Description: Universal threaded timer
 //              This timer can be used for a variety of tasks where you need a
 //              lightweight, precise and threadsave timer.
@@ -173,14 +173,14 @@ begin
   if Assigned(thTimerThread) then
     begin
       thTimerThread.Terminate;
-      thTimerThread := Nil;
+      thTimerThread := nil;
     end;
 
   if (Enabled = True) then
     begin
       thTimerThread := TTimerThread.Create(Self);
       // thTimerThread.Resume;  // Deprecated;  Use TThread.Start instead.
-      thTimerThread.Start;
+      thTimerThread.Start();
     end;
 end;
 

@@ -2224,6 +2224,7 @@ type
   // These flags are used in the following functions:
   //   MFTEnumEx: These flags control which Media Foundation transforms (MFTs) are enumerated, as well as the enumeration order.
   //   MFTRegister: A subset of these flags are used when registering an MFT.
+  //   MFTranscodeGetAudioOutputAvailableTypes:
 
   PMFT_ENUM_FLAG = ^MFT_ENUM_FLAG;
   _MFT_ENUM_FLAG = UINT32;

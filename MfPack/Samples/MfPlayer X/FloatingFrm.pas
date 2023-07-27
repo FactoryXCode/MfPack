@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -105,7 +105,7 @@ type
     Label2: TLabel;
 
     procedure AfterConstruction(); override;
-    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure FormDestroy(Sender: TObject);
 
   protected
     procedure CreateParams(var Params: TCreateParams); override;
@@ -146,7 +146,6 @@ type
     procedure WMParentPositionEvent(var Msg: TMessage); message WM_PARENTPOSCHANGED;
     procedure WMSizeEvent(var Msg: TMessage); message WM_SIZE;
     procedure WMSyscommand(var Msg: TWmSysCommand); message WM_SYSCOMMAND;
-
 
   public
     { Public declarations }
@@ -239,12 +238,10 @@ begin
 end;
 
 
-procedure TFloatingForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+procedure TFloatingForm.FormDestroy(Sender: TObject);
 begin
-  CanClose := False;
   FreeAndNil(fLayerFont);
   FreeAndNil(fTimedText);
-  CanClose := True;
 end;
 
 
@@ -257,7 +254,7 @@ begin
   fTimedText := TMfTimedText.Create(Self.Handle,
                                     fTimedTextFile,
                                     PreferredLanguage);
-  if (fTimedText = Nil) then
+  if (fTimedText = nil) then
     Close();
 
  // Initial text before subtitling starts (Optional)
