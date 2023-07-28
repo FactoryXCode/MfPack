@@ -48,7 +48,7 @@ object AudioFormatDlg: TAudioFormatDlg
     OnClick = butOkClick
   end
   object butCancel: TButton
-    Left = 338
+    Left = 339
     Top = 308
     Width = 75
     Height = 25

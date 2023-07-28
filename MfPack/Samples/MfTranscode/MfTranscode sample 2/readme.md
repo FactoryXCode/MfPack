@@ -20,20 +20,20 @@ Audio
   MPEG Audio Layer III (mp3)
   Free Lossless Audio Codec (flac)
   MPEG-4 Audio (m4a)
-  Windows Audio (wma)
+  Windows Media Audio (wma)
 
 Video
   Audio Video Interleave (avi)
-  Apple QuickTime Movie (mov)
-  MPEG-4 Video and Audio (mp4)
-  Windows Movie (wmv)
+  MPEG-4 Video with AAC Audio (mp4)
+  MPEG-4 Video with Dolby AC-3 Audio (mp4)
+  Windows Media Video (wmv)
 
 
 Project: Media Foundation - MFPack - Samples
 Project location: https://github.com/FactoryXCode/MfPack
                   https://sourceforge.net/projects/MFPack
 
-First release date: 24-01-2020
-Final release date: 21-07-2023
+First release date: 24/01/2020
+Final release date: 27/07/2023
 
 Copyright © FactoryX. All rights reserved.

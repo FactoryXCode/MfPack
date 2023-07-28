@@ -75,19 +75,21 @@ interface
     {$ENDIF}
     System.SysUtils;
 
+
 const
-  // File filters                                           filter index
-  VIDEO_FILE_FILTER = 'Audio Video Interleave|*.avi|' +         // 1
-                      'MPEG-4 Video and Audio|*.mp4|' +         // 2
-                      'Windows Movie|*.wmv';                    // 3
+  // File filters                                                   filter index
+  VIDEO_FILE_FILTER = 'Audio Video Interleave|*.avi|' +             // 1
+                      'MPEG-4 Video with AAC Audio|*.mp4|' +        // 2
+                      'MPEG-4 Video with Dolby AC-3 Audio|*.mp4|' + // 3
+                      'Windows Media Video|*.wmv';                  // 4
 
-  AUDIO_FILE_FILTER = 'Waveform Audio File Format|*.wav|' +     // 4
-                      'MPEG Audio Layer III|*.mp3|' +           // 5
-                      'Free Lossless Audio Codec|*.flac|' +     // 6
-                      'MPEG-4 Audio|*.m4a|' +                   // 7
-                      'Windows Audio|*.wma';                    // 8
+  AUDIO_FILE_FILTER = 'Waveform Audio File Format|*.wav|' +         // 5
+                      'MPEG Audio Layer III|*.mp3|' +               // 6
+                      'Free Lossless Audio Codec|*.flac|' +         // 7
+                      'MPEG-4 Audio|*.m4a|' +                       // 8
+                      'Windows Media Audio|*.wma';                  // 9
 
-  ALL_FILE_FILTER   = 'All Files|*.*';                          // 9  Source File Dialog only
+  ALL_FILE_FILTER   = 'All Files|*.*';                              // 10  Source File Dialog only
 
   {$IFDEF SAVE_DEBUG_REPORT}
   var FMediaTypeDebug: TMediaTypeDebug;

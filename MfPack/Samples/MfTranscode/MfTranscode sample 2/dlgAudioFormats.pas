@@ -174,13 +174,23 @@ end;
 
 
 function TAudioFormatDlg.GetAudioFormats(const AudioFormat: TGuid): HResult;
+var
+  hr: HResult;
 begin
   ResetAudioFormatArray();
   // Get the encoder formats from the selected audioformat.
-  Result := GetWinAudioEncoderFormats(AudioFormat,
-                                      MFT_ENUM_FLAG_TRANSCODE_ONLY,
-                                      aAudioFmts);
-  Populate();
+  hr := GetWinAudioEncoderFormats(AudioFormat,
+                                  MFT_ENUM_FLAG_ALL, {MFT_ENUM_FLAG_TRANSCODE_ONLY,}
+                                  aAudioFmts);
+  if SUCCEEDED(hr) then
+    Populate()
+  else
+    begin
+      // Show a message
+      DebugMsg(SysErrorMessage(hr),
+               hr);
+      butCancel.Click();
+    end;
 end;
 
 
@@ -188,7 +198,7 @@ procedure TAudioFormatDlg.SaveAudioFmtsToFile();
 var
   i: Integer;
   sTmp: string;
-  sl: tStringlist;
+  sl: TStringlist;
 
 begin
   sl :=  TStringlist.Create();

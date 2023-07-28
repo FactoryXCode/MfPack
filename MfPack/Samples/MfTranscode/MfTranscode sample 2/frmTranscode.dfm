@@ -4,7 +4,7 @@ object frmTranscoder: TfrmTranscoder
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'MfTranscoder Sample'
-  ClientHeight = 201
+  ClientHeight = 255
   ClientWidth = 528
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -20,8 +20,14 @@ object frmTranscoder: TfrmTranscoder
   OnMouseMove = FormMouseMove
   PixelsPerInch = 96
   TextHeight = 13
+  object Bevel1: TBevel
+    Left = 8
+    Top = 67
+    Width = 512
+    Height = 64
+  end
   object lblChooseSourceFile: TLabel
-    Left = 0
+    Left = 3
     Top = 16
     Width = 59
     Height = 13
@@ -40,7 +46,7 @@ object frmTranscoder: TfrmTranscoder
     OnMouseMove = lblChooseSourceFileMouseMove
   end
   object lblChooseTargetfile: TLabel
-    Left = 0
+    Left = 3
     Top = 43
     Width = 59
     Height = 13
@@ -60,8 +66,8 @@ object frmTranscoder: TfrmTranscoder
     OnMouseMove = lblChooseTargetfileMouseMove
   end
   object lblProgress: TLabel
-    Left = 9
-    Top = 76
+    Left = 8
+    Top = 140
     Width = 85
     Height = 13
     AutoSize = False
@@ -69,10 +75,58 @@ object frmTranscoder: TfrmTranscoder
   end
   object lblEstFinish: TLabel
     Left = 108
-    Top = 76
+    Top = 140
     Width = 99
     Height = 13
     Caption = 'Estimated finish at: -'
+  end
+  object Label1: TLabel
+    Left = 12
+    Top = 92
+    Width = 119
+    Height = 13
+    Alignment = taRightJustify
+    AutoSize = False
+    Caption = 'New video format : '
+  end
+  object Label2: TLabel
+    Left = 12
+    Top = 111
+    Width = 119
+    Height = 13
+    Alignment = taRightJustify
+    AutoSize = False
+    Caption = 'New audio format :'
+  end
+  object lblVideo: TLabel
+    Left = 133
+    Top = 92
+    Width = 7
+    Height = 13
+    Caption = '- '
+  end
+  object lblAudio: TLabel
+    Left = 133
+    Top = 111
+    Width = 4
+    Height = 13
+    Caption = '-'
+  end
+  object Label3: TLabel
+    Left = 12
+    Top = 73
+    Width = 119
+    Height = 13
+    Alignment = taRightJustify
+    AutoSize = False
+    Caption = 'New container format : '
+  end
+  object lblContainer: TLabel
+    Left = 133
+    Top = 73
+    Width = 7
+    Height = 13
+    Caption = '- '
   end
   object stxtSourceFile: TEdit
     Left = 65
@@ -93,12 +147,16 @@ object frmTranscoder: TfrmTranscoder
     Text = '-'
   end
   object Panel1: TPanel
-    Left = 8
-    Top = 126
-    Width = 513
+    Left = 0
+    Top = 191
+    Width = 528
     Height = 39
+    Align = alBottom
     BevelOuter = bvLowered
     TabOrder = 2
+    ExplicitLeft = 7
+    ExplicitTop = 185
+    ExplicitWidth = 513
     object butExecute: TButton
       Left = 6
       Top = 9
@@ -132,7 +190,7 @@ object frmTranscoder: TfrmTranscoder
   end
   object ProgressBar: TProgressBar
     Left = 8
-    Top = 94
+    Top = 159
     Width = 512
     Height = 21
     Smooth = True
@@ -141,12 +199,13 @@ object frmTranscoder: TfrmTranscoder
   end
   object sbMsg: TStatusBar
     Left = 0
-    Top = 176
+    Top = 230
     Width = 528
     Height = 25
     Panels = <>
     SimplePanel = True
     SimpleText = 'Please select a sourcefile.'
+    ExplicitTop = 176
   end
   object MainMenu: TMainMenu
     Left = 468

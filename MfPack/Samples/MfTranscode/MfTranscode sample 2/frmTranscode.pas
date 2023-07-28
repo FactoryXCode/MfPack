@@ -117,6 +117,13 @@ type
     N1: TMenuItem;
     butPlay: TButton;
     sbMsg: TStatusBar;
+    Label1: TLabel;
+    Label2: TLabel;
+    lblVideo: TLabel;
+    lblAudio: TLabel;
+    Label3: TLabel;
+    lblContainer: TLabel;
+    Bevel1: TBevel;
     procedure mnuOpenSourceFileClick(Sender: TObject);
     procedure mnuTargetfileClick(Sender: TObject);
     procedure butExecuteClick(Sender: TObject);
@@ -143,7 +150,8 @@ type
     FTranscoder: TTranscoder; // transcoder object
     FStopwatch: TStopWatch;
     bElapsedSet: Boolean;
-    iSelectedFormat: Integer;
+    iSelectedAudioFormat: Integer;
+    iSelectedContainerFmt: Integer;
 
     procedure Start();
     procedure Reset(const hr: HResult);
@@ -166,59 +174,96 @@ implementation
 procedure TfrmTranscoder.mnuTargetfileClick(Sender: TObject);
 begin
 
-  dlgTarget.FileName := ExtractFileName(sSourceFile);;
+  dlgTarget.FileName := ExtractFileName(sSourceFile);
   dlgTarget.FilterIndex := 1;
 
   if dlgTarget.Execute then
     begin
+      // Global var can be used to print details of the choosen formats (not implemented)
+      iSelectedContainerFmt := dlgTarget.FilterIndex;
+
       // Set the outputformat
-      case dlgTarget.FilterIndex of
+      case iSelectedContainerFmt of
       // Video /////////////////////////////////////////////////////////////
       1: begin
            // avi
            gVideoMediaFmt := MFVideoFormat_H264;
            gAudioMediaFmt := MFAudioFormat_AAC;
            gContainerFormat := MFTranscodeContainerType_AVI;
+           // We keep it simpel; show user the target formats.
+           lblContainer.Caption := 'Audio Video Interleave (AVI)';
+           lblVideo.Caption := 'H.264 video encoder';
+           lblAudio.Caption := 'Advanced Audio Coding (AAC)';
          end;
       2: begin
-           // mp4
+           // mp4 AAC
            gVideoMediaFmt := MFVideoFormat_H264;
            gAudioMediaFmt := MFAudioFormat_AAC;
            gContainerFormat := MFTranscodeContainerType_MPEG4;
+           lblContainer.Caption := 'MPEG 4 (mp4)';
+           lblVideo.Caption := 'H.264 video encoder';
+           lblAudio.Caption := 'Advanced Audio Coding (AAC)';
          end;
       3: begin
+           // MPEG-4 Video and Dolby AC-3 audio (Dolby Digital Audio Encoder)
+           gVideoMediaFmt := MFVideoFormat_H264;
+           gAudioMediaFmt := MFAudioFormat_Dolby_AC3;
+           gContainerFormat := MFTranscodeContainerType_MPEG4;
+           lblContainer.Caption := 'MPEG 4 (mp4)';
+           lblVideo.Caption := 'H.264 video encoder';
+           lblAudio.Caption := 'Dolby AC-3 audio';
+         end;
+      4: begin
            // wmv
            gVideoMediaFmt := MFVideoFormat_WMV3;
            gAudioMediaFmt := MFAudioFormat_WMAudioV9;
            gContainerFormat := MFTranscodeContainerType_ASF;
+           lblContainer.Caption := 'Advanced Systems Format (ASF)';
+           lblVideo.Caption := 'Windows Media Video (WMV)';
+           lblAudio.Caption := 'Windows Media Audio (WMA)';
          end;
 
       // Audio /////////////////////////////////////////////////////////////////
 
-      4: begin
+      5: begin
            // wav
            gAudioMediaFmt := MFAudioFormat_PCM;
            gContainerFormat := MFTranscodeContainerType_WAVE;
+           lblContainer.Caption := 'Waveform Audio File Format (wav)';
+           lblVideo.Caption := 'none';
+           lblAudio.Caption := 'Uncompressed PCM audio';
          end;
-      5: begin
+      6: begin
            // mp3
            gAudioMediaFmt := MFAudioFormat_MP3;
            gContainerFormat := MFTranscodeContainerType_MP3;
+           lblContainer.Caption := 'MPEG Audio Layer-3 (mp3)';
+           lblVideo.Caption := 'none';
+           lblAudio.Caption := 'MPEG Audio Layer-3';
          end;
-      6: begin
+      7: begin
            // flac
            gAudioMediaFmt := MFAudioFormat_FLAC;
            gContainerFormat := MFTranscodeContainerType_FLAC;
+           lblContainer.Caption := 'Free Lossless Audio Codec (flac)';
+           lblVideo.Caption := 'none';
+           lblAudio.Caption := 'Free Lossless Audio Codec';
          end;
-      7: begin
+      8: begin
            // m4a
            gAudioMediaFmt := MFAudioFormat_AAC;
            gContainerFormat := MFTranscodeContainerType_MPEG4;
+           lblContainer.Caption := 'MPEG 4 Audio only (m4a)';
+           lblVideo.Caption := 'none';
+           lblAudio.Caption := 'Advanced Audio Coding (AAC)';
          end;
-      8: begin
+      9: begin
            // wma
            gAudioMediaFmt := MFAudioFormat_WMAudioV9;
            gContainerFormat := MFTranscodeContainerType_ASF;
+           lblContainer.Caption := 'Windows Media Audio Format (wma)';
+           lblVideo.Caption := 'none';
+           lblAudio.Caption := 'Windows Media Audio 9 (WMA)';
          end;
       end;  // case
 
@@ -245,7 +290,7 @@ begin
       // Show the setAudio dialog to select the output encoding parameters of the choosen format.
       if (AudioFormatDlg.ShowModal = mrOk) then
         begin
-          iSelectedFormat := AudioFormatDlg.iSelectedFormat;
+          iSelectedAudioFormat := AudioFormatDlg.iSelectedFormat;
         end
       else
         begin
@@ -297,7 +342,7 @@ begin
       sbMsg.SimpleText := Format('Opened file: %s.', [sSourceFile]);
       // Configure the audio profile and add to topology.
       hr := FTranscoder.ConfigureAudioOutput(gAudioMediaFmt,
-                                             iSelectedFormat);
+                                             iSelectedAudioFormat);
     end;
 
   if SUCCEEDED(hr) then
@@ -363,7 +408,7 @@ begin
   gAudioMediaFmt := GUID_NULL;
   gVideoMediaFmt := GUID_NULL;
   gContainerFormat := GUID_NULL;
-  iSelectedFormat := -1;
+  iSelectedAudioFormat := -1;
   butPlay.Enabled := False;
   butExecute.Enabled := False;
   butStop.Enabled := False;
@@ -374,6 +419,9 @@ begin
   stxtTargetFile.Text := '-';
   lblProgress.Caption := 'Progress: -';
   lblEstFinish.Caption := 'Estimated finish at: -';
+  lblContainer.Caption := '-';
+  lblVideo.Caption := '-';
+  lblAudio.Caption := '-';
   ProgressBar.Position := 0;
 end;
 
@@ -503,7 +551,7 @@ begin
       // We wait until we reached 1st 1% to calculate the estimated rendering end time
       if (CurrPosition = 1) and (bElapsedSet = False) then  // calculate 1st 1%
         begin
-          bElapsedSet := true;
+          bElapsedSet := True;
           FStopwatch.Stop;
           lblEstFinish.Caption := Format('Estimated finish at: %s', [MSecToStr((FStopwatch.ElapsedMilliseconds * 100) + MillisecondOfTheDay(Now), False)]);
         end;

@@ -41,7 +41,6 @@ SDK version: 10.0.22621.0 (Windows 11)
 *This sample app needs the D2D1 Api. If your Delphi version doesn't have the latest D2D1 Api (May 2019 update), use the D2D1 MfPack version.*
 
 
-
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/VideoThumbNailsSample.jpg)
 
 **MediaEngine Player 2 & IMFTimedText sample**
@@ -49,16 +48,29 @@ SDK version: 10.0.22621.0 (Windows 11)
 *MediaEngine player (IMFMediaEngine(Ex)) with support for subtitles (closed captions) using the IMFTimedTextNotify interface.*
 
 
-
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MediaEnginePlayer2.jfif)
 
 **MfTranscode sample**
 
-*Shows how to use the transcode API, to transcode a source file to Windows Media format. This sample has some more features than the original MS sample.*
+*Demonstrates using the transcode API to transcode a source file (audio or video) to*
+*a different format (audio or video) supported by Media Foundation.* 
 
+*Supported, but not limited, formats in this sample are:*
 
+*Audio*
+  *Waveform Audio File Format (wav)*
+  *MPEG Audio Layer III (mp3)*
+  *Free Lossless Audio Codec (flac)*
+  *MPEG-4 Audio (m4a)*
+  *Windows Media Audio (wma)*
 
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/mftransform.jfif)
+*Video*
+  *Audio Video Interleave (avi)*
+  *MPEG-4 Video with AAC Audio (mp4)*
+  *MPEG-4 Video with Dolby AC-3 Audio (mp4)*
+  *Windows Media Video (wmv)*
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfTranscode%20Sample%202.png)
 
 **MfSimpleCapture sample**
 
@@ -68,7 +80,7 @@ SDK version: 10.0.22621.0 (Windows 11)
 
 
 
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleCapture.jpg)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleCapture.png)
 
 **MfPeakMeter and MfPeakMeterEx component sample**
 
@@ -104,9 +116,7 @@ SDK version: 10.0.22621.0 (Windows 11)
                *subtitles (SubRip and MicroDvd), RegEx (Regular Expressions) and how to get media properties.*
 
 
-
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfMediaPlayer_X.jfif)
-
 
 
 ****
@@ -118,6 +128,7 @@ SDK version: 10.0.22621.0 (Windows 11)
   *to the volume control in the volume mixer.* 
   
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/DuckingMediaPlayerSample.jpg)
+
 
 **Ducking Capture Sample**
 
@@ -183,6 +194,17 @@ It also demonstrates how to get a process by using the tlhelp32 API, to list a s
 The application is provided with a dialog to select a running process from the process tree you want to pick and has
 a button to get the current PID of your application.
 
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopbackCapture2.png)  
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopbackCapture2.png) 
+
+**Tools**
+* *
+**HResult Lookup Tool Application**
+
+*This tool can be used to determine HResult or Error codes returned by the Windows OS,*
+*featuring a detailed build in "HResult Lookup tool", the "Windows System Error Code Lookup Tool" and*
+*the "System.SysUtils.SysErrorMessage" function.*
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/HResultLookUpToolApp.png) 
+ 
   
 **© FactoryX. All rights reserved.**
