@@ -3268,7 +3268,7 @@ const
 
 
   // These audio types are not derived from an existing wFormatTag
-  MFAudioFormat_Dolby_AC3       :  TGUID = '{e06d802c-db46-11cf-b4d1-08005f6cbbea}';
+  MFAudioFormat_Dolby_AC3       :  TGUID = '{e06d802c-db46-11cf-b4d1-00805f6cbbea}';
   {$EXTERNALSYM MFAudioFormat_Dolby_AC3}
   // == MEDIASUBTYPE_DOLBY_AC3 defined in ksuuids.h
 
