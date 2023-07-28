@@ -6,7 +6,7 @@ NOTES:
  - Requires Windows 10 or later.
 
 First release date: 04-06-2012
-Final release date: 20/07/2023
+Final release date: 27/07/2023
 
 Copyright © FactoryX. All rights reserved.
 

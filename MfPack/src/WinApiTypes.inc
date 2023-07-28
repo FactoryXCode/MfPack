@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 27/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: All future updates (releases) will be named to an artist except for
@@ -375,7 +375,8 @@ const
 // {$DEFINE MFPACK_VERSION_311_UP} // Bowie release, Milestone update 16.
 // {$DEFINE MFPACK_VERSION_312_UP} // Mercury release, Milestone update 17.
 // {$DEFINE MFPACK_VERSION_313_UP} // PiL release, Milestone update 18.
-{$DEFINE MFPACK_VERSION_314_UP} // PiL release, update 19.
+// {$DEFINE MFPACK_VERSION_314_UP} // PiL release, update 19.
+{$DEFINE MFPACK_VERSION_315_UP}    // Carmel release, update 20.
 
 // WARNINGS
 // enable/disable compiler warnings.
