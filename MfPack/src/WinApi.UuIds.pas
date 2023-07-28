@@ -2368,7 +2368,7 @@ const
 
   // Additional prototypes for ALL interfaces
 
-  // End of Aadditional prototypes
+  // End of additional prototypes
 
 implementation
 
