@@ -2961,7 +2961,6 @@ const
                                D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
    {$EXTERNALSYM MFVideoFormat_H264}
 
-
   // Assume MFVideoFormat_H264 is frame aligned.
   // That is, each input sample has one complete compressed frame (one frame picture,
   // two field pictures or a single unpaired field picture)

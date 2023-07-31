@@ -21,14 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 02/04/2023 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
-// 05/05/2023 Tony                Updated and fixed some isues.
+// 31/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -107,22 +106,28 @@ var
   gs_hCaptureStopped: TEvent;
 
 type
-  // NB: All states >= Initialized will allow some methods
-  // to be called successfully on the Audio Client
   TDeviceState = (Uninitialized,
-                  Error,
-                  Initialized,
+                  Error,       // Implemented to prevent calls to IAudioCaptureClient.GetNextPacketSize.
+                               // See: OnAudioSampleRequested() and error handling.
+
+                  // All states >= Initialized will allow some methods
+                  // to be called successfully on the Audio Client.
+                  Initialized, // < from this one..
                   Starting,
                   Capturing,
                   Stopping,
-                  Stopped);
+                  Stopped); // < ..until here
 
   TAsyncCmd = (StartCapture,
                StopCapture,
                SampleReady,
                FinishCapture);
 
-  TWavFormat = (fmt44100, fmt48000);
+  TWavFormat = (fmt44100b16,
+                fmt48000b24,
+                fmt48000b32,
+                fmt96000b24,
+                fmt96000b32);
 
 type
 
@@ -154,7 +159,7 @@ type
     m_cbHeaderSize: DWord;
     m_cbDataSize: DWord;
     m_WavFormat: TWavFormat;
-    m_DevicePeriod: REFERENCE_TIME;
+    m_BufferDuration: REFERENCE_TIME;
 
     hwOwner: HWND;
 
@@ -194,13 +199,13 @@ type
                                const processId: DWord;
                                includeProcessTree: Boolean;
                                const wavFormat: TWavFormat;
-                               const devicePeriod: REFERENCE_TIME;
+                               const aBufferDuration: REFERENCE_TIME;
                                const outputFileName: LPCWSTR): HResult;
 
     function StopCaptureAsync(): HResult;
 
     property WavFormat: TWavFormat read m_WavFormat;
-    property AudioClientDevicePeriod: REFERENCE_TIME read m_DevicePeriod;
+    property AudioClientBufferDuration: REFERENCE_TIME read m_BufferDuration;
 
   end;
 
@@ -230,8 +235,6 @@ type
   end;
 
 implementation
-
-
 
 
 constructor TLoopbackCapture.Create(hMF: HWND);
@@ -305,15 +308,36 @@ begin
       m_CaptureFormat.wFormatTag := WAVE_FORMAT_PCM;
       m_CaptureFormat.nChannels := 2;
 
-      if (m_WavFormat = fmt44100) then
+      // set the formats: fmt44100b16, fmt48000b24, fmt48000b32, fmt96000b24, fmt96000b32
+      if (m_WavFormat = fmt44100b16) then
         begin
           m_CaptureFormat.nSamplesPerSec := 44100;
           m_CaptureFormat.wBitsPerSample := 16;
         end
-      else
+      else if (m_WavFormat = fmt48000b24) then
         begin
           m_CaptureFormat.nSamplesPerSec := 48000;
           m_CaptureFormat.wBitsPerSample := 24;
+        end
+      else if (m_WavFormat = fmt48000b24) then
+        begin
+          m_CaptureFormat.nSamplesPerSec := 48000;
+          m_CaptureFormat.wBitsPerSample := 32;
+        end
+      else if (m_WavFormat = fmt96000b24) then
+        begin
+          m_CaptureFormat.nSamplesPerSec := 96000;
+          m_CaptureFormat.wBitsPerSample := 24;
+        end
+      else if (m_WavFormat = fmt96000b32) then
+        begin
+          m_CaptureFormat.nSamplesPerSec := 96000;
+          m_CaptureFormat.wBitsPerSample := 32;
+        end
+      else
+        begin
+          m_CaptureFormat.nSamplesPerSec := 44100;
+          m_CaptureFormat.wBitsPerSample := 16;
         end;
 
       m_CaptureFormat.nBlockAlign := (m_CaptureFormat.nChannels * m_CaptureFormat.wBitsPerSample) div BITS_PER_BYTE;
@@ -322,11 +346,16 @@ begin
   else if FAILED(hr) then
     goto leave;
 
-  // Initialize the AudioClient in Shared Mode with the user specified buffer
+  // Initialize the AudioClient in Shared Mode with the user specified buffer.
+  // Note: - Shared Mode is needed when rendering from an audio application or process.
+  //       - Exclusive Mode is used when rendering from a hardware endpoint.
+  //       - Interface methods that are reffering to audioendpoints, will not work and returns E_NOTIMPL,
+  //         for example: GetBufferSize(), IsFormatSupported(), GetDevicePeriod() and GetMixFormat() methods.
+  //
   hr := m_AudioClient.Initialize(AUDCLNT_SHAREMODE_SHARED,
                                  AUDCLNT_STREAMFLAGS_LOOPBACK or AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
-                                 m_DevicePeriod, // Most hardware values are in between 100000 and 60000, 100ms/sec.
-                                 0, // Must be zero in shared mode.
+                                 m_BufferDuration, // Safe values should be inbetween 10.000 and 50.000 (10 - 50ms/sec) including latency.
+                                 0, // Must be zero in shared mode!
                                  @m_CaptureFormat,
                                  @GUID_NULL);
   if FAILED(hr) then
@@ -802,8 +831,9 @@ begin
   // We do this by calling IAudioCaptureClient.GetNextPacketSize
   // over and over again until it indicates there are no more packets remaining.
 
-  //while SUCCEEDED(m_AudioCaptureClient.GetNextPacketSize(FramesAvailable)) and (FramesAvailable > 0) do
+  // The original code: while SUCCEEDED(m_AudioCaptureClient.GetNextPacketSize(FramesAvailable)) and (FramesAvailable > 0) do
 
+  // We check the device state first and then call IAudioCaptureClient.GetNextPacketSize. This way we handle the internal async calls that could interfere first.
   while (m_DeviceState <> Stopping) or (m_DeviceState <> Stopped) or (m_DeviceState <> Error) do
     begin
 
@@ -1021,7 +1051,7 @@ function TLoopbackCapture.StartCaptureAsync(const hWindow: HWND;
                                             const processId: DWord;
                                             includeProcessTree: Boolean;
                                             const wavFormat: TWavFormat;
-                                            const devicePeriod: REFERENCE_TIME;
+                                            const aBufferDuration: REFERENCE_TIME;
                                             const outputFileName: LPCWSTR): HResult;
 var
   hr: HResult;
@@ -1044,7 +1074,8 @@ begin
 
   hwOwner := hWindow;
   m_outputFileName := outputFileName;
-  m_DevicePeriod := DevicePeriod;
+  m_BufferDuration := aBufferDuration;
+  m_WavFormat := wavFormat;
 
   hr := InitializeLoopbackCapture();
   if FAILED(hr) then
@@ -1130,7 +1161,7 @@ end;
 
 destructor TCallbackAsync.Destroy();
 begin
-
+  //
   inherited Destroy();
 end;
 

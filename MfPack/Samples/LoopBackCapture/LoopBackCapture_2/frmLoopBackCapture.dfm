@@ -4,7 +4,7 @@ object frmMain: TfrmMain
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'LoopBackCapture Sample 2'
-  ClientHeight = 431
+  ClientHeight = 473
   ClientWidth = 462
   Color = clBtnFace
   DoubleBuffered = True
@@ -56,7 +56,7 @@ object frmMain: TfrmMain
   end
   object lblMsg: TLabel
     Left = 0
-    Top = 406
+    Top = 448
     Width = 462
     Height = 24
     Margins.Left = 6
@@ -69,7 +69,7 @@ object frmMain: TfrmMain
   end
   object Bevel1: TBevel
     Left = 0
-    Top = 430
+    Top = 472
     Width = 462
     Height = 1
     Align = alBottom
@@ -80,13 +80,164 @@ object frmMain: TfrmMain
   end
   object Bevel3: TBevel
     Left = 0
-    Top = 405
+    Top = 447
     Width = 462
     Height = 1
     Align = alBottom
     Shape = bsTopLine
     ExplicitTop = 359
     ExplicitWidth = 418
+  end
+  object Panel3: TPanel
+    Left = 0
+    Top = 175
+    Width = 462
+    Height = 148
+    Hint = 
+      'The capture buffersize depending on the audiodevice specs and so' +
+      'urce latency '
+    Align = alTop
+    Alignment = taLeftJustify
+    BevelOuter = bvLowered
+    Caption = '  Buffer'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 11
+    VerticalAlignment = taAlignTop
+    object lblDeviceBufferDuration: TLabel
+      Left = 6
+      Top = 26
+      Width = 198
+      Height = 13
+      Caption = 'Device Buffer Duration (10 ms resolution)'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+    end
+    object Label4: TLabel
+      AlignWithMargins = True
+      Left = 6
+      Top = 73
+      Width = 44
+      Height = 17
+      Hint = 
+        'The bitrate is determinated by the hardware. Otherwise the bitra' +
+        'te will be the one choosen.'
+      AutoSize = False
+      Caption = 'Bitrate'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object tbDeviceBufferDuration: TTrackBar
+      Left = 0
+      Top = 42
+      Width = 455
+      Height = 25
+      Max = 100
+      Position = 10
+      TabOrder = 0
+      OnChange = tbDeviceBufferDurationChange
+    end
+    object rb441b16: TRadioButton
+      Left = 4
+      Top = 90
+      Width = 100
+      Height = 13
+      Hint = '44.100 kHz at 16 bits'
+      Caption = '44.1 kHz 16 bit'
+      Checked = True
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 1
+      TabStop = True
+    end
+    object rb48b24: TRadioButton
+      Left = 4
+      Top = 109
+      Width = 100
+      Height = 13
+      Hint = '48.000 kHz at 24 bits'
+      Caption = '48 kHz 24 bit'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 2
+    end
+    object rb48b32: TRadioButton
+      Left = 110
+      Top = 109
+      Width = 100
+      Height = 13
+      Hint = '48.000 kHz at 32 bits'
+      Caption = '48 kHz 32 bit'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 3
+    end
+    object rb96b24: TRadioButton
+      Left = 4
+      Top = 128
+      Width = 100
+      Height = 13
+      Hint = '96.000 kHz at 24 bits'
+      Caption = '96 kHz 24 bit'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 4
+    end
+    object rb96b32: TRadioButton
+      Left = 110
+      Top = 128
+      Width = 100
+      Height = 13
+      Hint = '96.000 kHz at 32 bits'
+      Caption = '96 kHz 32 bit'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 5
+    end
   end
   object edPID: TEdit
     Left = 113
@@ -170,13 +321,13 @@ object frmMain: TfrmMain
   end
   object Panel1: TPanel
     Left = 0
-    Top = 289
+    Top = 323
     Width = 462
     Height = 76
     Align = alTop
     BevelOuter = bvLowered
     TabOrder = 7
-    ExplicitTop = 257
+    ExplicitTop = 322
     object Label1: TLabel
       Left = 22
       Top = 45
@@ -243,7 +394,7 @@ object frmMain: TfrmMain
   end
   object butStart: TButton
     Left = 6
-    Top = 372
+    Top = 409
     Width = 85
     Height = 27
     Caption = 'Start Capture'
@@ -252,7 +403,7 @@ object frmMain: TfrmMain
   end
   object butStop: TButton
     Left = 97
-    Top = 372
+    Top = 409
     Width = 85
     Height = 27
     Caption = 'Stop Capture'
@@ -262,7 +413,7 @@ object frmMain: TfrmMain
   end
   object butPlayData: TButton
     Left = 187
-    Top = 372
+    Top = 409
     Width = 80
     Height = 27
     Hint = 'Play recorded data.'
@@ -272,100 +423,5 @@ object frmMain: TfrmMain
     ShowHint = True
     TabOrder = 10
     OnClick = butPlayDataClick
-  end
-  object Panel3: TPanel
-    Left = 0
-    Top = 175
-    Width = 462
-    Height = 114
-    Hint = 
-      'The capture buffersize depending on the audiodevice specs and so' +
-      'urce latency '
-    Align = alTop
-    Alignment = taLeftJustify
-    BevelOuter = bvLowered
-    Caption = '  Capture Processing Interval'
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Tahoma'
-    Font.Style = [fsBold]
-    ParentFont = False
-    TabOrder = 11
-    VerticalAlignment = taAlignTop
-    object lblDevicePeriod: TLabel
-      Left = 9
-      Top = 26
-      Width = 147
-      Height = 13
-      Caption = 'Device Period (10 MilliSeconds)'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-    end
-    object Label4: TLabel
-      AlignWithMargins = True
-      Left = 6
-      Top = 73
-      Width = 44
-      Height = 17
-      AutoSize = False
-      Caption = 'Bitrate'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
-    object tbDevicePeriod: TTrackBar
-      Left = 0
-      Top = 39
-      Width = 455
-      Height = 25
-      Max = 100
-      Position = 10
-      TabOrder = 0
-      OnChange = tbDevicePeriodChange
-    end
-    object rb44: TRadioButton
-      Left = 6
-      Top = 90
-      Width = 65
-      Height = 13
-      Hint = '44.100 kHz at 16 bits'
-      Caption = '44.1 kHz'
-      Checked = True
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 1
-      TabStop = True
-    end
-    object rb48: TRadioButton
-      Left = 77
-      Top = 90
-      Width = 65
-      Height = 13
-      Hint = '48.000 kHz at 24 bits'
-      Caption = '48 kHz'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 2
-    end
   end
 end

@@ -23,8 +23,6 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
-// 21/12/2022 Tony                Added correction for NativeInt on Delphi <= 2007
-// 05/01/2023 Tony                Corrected HNSTIME to TLargeInteger.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.

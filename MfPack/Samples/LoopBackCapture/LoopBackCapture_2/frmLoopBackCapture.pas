@@ -21,14 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 02/04/2023 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
-// 05/05/2023 Tony                Updated and fixed some isues.
+// 31/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX315
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -117,11 +116,14 @@ type
     Bevel1: TBevel;
     Bevel3: TBevel;
     Panel3: TPanel;
-    lblDevicePeriod: TLabel;
-    tbDevicePeriod: TTrackBar;
+    lblDeviceBufferDuration: TLabel;
+    tbDeviceBufferDuration: TTrackBar;
     Label4: TLabel;
-    rb44: TRadioButton;
-    rb48: TRadioButton;
+    rb441b16: TRadioButton;
+    rb48b24: TRadioButton;
+    rb48b32: TRadioButton;
+    rb96b24: TRadioButton;
+    rb96b32: TRadioButton;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject;
                              var CanClose: Boolean);
@@ -135,7 +137,7 @@ type
     procedure Button1Click(Sender: TObject);
     procedure edPIDKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure cbxStayOnTopClick(Sender: TObject);
-    procedure tbDevicePeriodChange(Sender: TObject);
+    procedure tbDeviceBufferDurationChange(Sender: TObject);
 
   private
     { Private declarations }
@@ -147,11 +149,12 @@ type
     oLoopbackCapture: TLoopbackCapture;
     aprocessId: Integer;
     aWavFmt: TWavFormat;
-    oDevicePeriod: REFERENCE_TIME;
+    aDeviceBufferDuration: REFERENCE_TIME;
 
     procedure OnProgressEvent(var AMessage: TMessage); message WM_PROGRESSNOTIFY;
     procedure OnRecordingStopped(var AMessage: TMessage); message WM_RECORDINGSTOPPEDNOTYFY;
     function StartCapture(): HResult;
+    procedure SetDeviceBufferDuration();
 
   public
     { Public declarations }
@@ -299,7 +302,7 @@ procedure TfrmMain.FormCreate(Sender: TObject);
 begin
   oLoopbackCapture := TLoopbackCapture.Create(Handle);
   butGetPID.OnClick(Self);
-  oDevicePeriod := tbDevicePeriod.Position * AUDIO_BUFFER_FMT;
+  SetDeviceBufferDuration();
   bEdited := False;
 end;
 
@@ -337,13 +340,19 @@ begin
     bIncludeProcessTree := True;
 
   // Buffersize depends on latency and bitrate
-  oDevicePeriod := tbDevicePeriod.Position * AUDIO_BUFFER_FMT;
+  SetDeviceBufferDuration();
 
-  // Bitrate
-  if rb44.Checked then
-    aWavFmt := fmt44100
-  else if rb48.Checked then
-    aWavFmt := fmt48000;
+  // Bitrate and resolution.
+  if rb441b16.Checked then
+    aWavFmt := fmt44100b16
+  else if rb48b24.Checked then
+    aWavFmt := fmt48000b24
+  else if rb48b32.Checked then
+    aWavFmt := fmt48000b32
+  else if rb96b24.Checked then
+    aWavFmt := fmt96000b24
+  else if rb96b32.Checked then
+    aWavFmt := fmt96000b32;
 
   if SUCCEEDED(hr) then
     begin
@@ -388,7 +397,7 @@ begin
                                                aprocessId,
                                                bIncludeProcessTree,
                                                aWavFmt,
-                                               oDevicePeriod,
+                                               aDeviceBufferDuration,
                                                LPCWSTR(sFileName + lblFileExt.Caption));
       if FAILED(hr) then
         begin
@@ -416,10 +425,17 @@ begin
 end;
 
 
-procedure TfrmMain.tbDevicePeriodChange(Sender: TObject);
+procedure TfrmMain.tbDeviceBufferDurationChange(Sender: TObject);
 begin
-  lblDevicePeriod.Caption := Format('Device Period (%d MilliSeconds)', [tbDevicePeriod.Position]);
-  oDevicePeriod := tbDevicePeriod.Position * AUDIO_BUFFER_FMT;
+  SetDeviceBufferDuration();
 end;
+
+
+procedure TfrmMain.SetDeviceBufferDuration();
+begin
+  lblDeviceBufferDuration.Caption := Format('Device buffer (%d MilliSeconds)', [tbDeviceBufferDuration.Position]);
+  aDeviceBufferDuration := tbDeviceBufferDuration.Position * AUDIO_BUFFER_FMT;
+end;
+
 
 end.

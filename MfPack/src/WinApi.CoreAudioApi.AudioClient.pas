@@ -270,7 +270,9 @@ type
 
   // Interface IAudioClient
   // ======================
-  //
+  // The IAudioClient interface enables a client to create and initialize an
+  // audio stream between an audio application and the audio engine (for a shared-mode stream) or
+  // the hardware buffer of an audio endpoint device (for an exclusive-mode stream).
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioClient);'}
   {$EXTERNALSYM IAudioClient}
   IAudioClient = interface(IUnknown)
@@ -337,9 +339,9 @@ type
     //    Applications wishing to use a larger shared buffer, with the goal of either:
     //    a) processing less often at the price of a higher latency or
     //    b) running with minimum latency and highest periodicity but filling less of the shared
-    //    buffer per-pass (double-buffering, for instance),
-    //    can do this by passing in the desired value for this parameter, noting the minimum
-    //    size requirement.
+    //       buffer per-pass (double-buffering, for instance),
+    //       can do this by passing in the desired value for this parameter, noting the minimum
+    //       size requirement.
     //
     //    If the time requested doesn't fall on a frame boundary, a duration of the next higher
     //    frame size will be used. The client must call the GetBufferSize() method after
@@ -606,8 +608,8 @@ type
     //   For more information about WAVEFORMATEX and WAVEFORMATEXTENSIBLE, see the Windows DDK documentation.
     //
 
-    function GetDevicePeriod({out_opt} phnsDefaultDevicePeriod: PREFERENCE_TIME;
-                             {out_opt} phnsMinimumDevicePeriod: PREFERENCE_TIME): HResult; stdcall;
+    function GetDevicePeriod({out_opt} phnsDefaultDevicePeriod: REFERENCE_TIME = 0;
+                             {out_opt} phnsMinimumDevicePeriod: REFERENCE_TIME = 0): HResult; stdcall;
     // Description:
     //
     //  Returns the periodicity of the WAS engine, in 100-nanosecond units.
