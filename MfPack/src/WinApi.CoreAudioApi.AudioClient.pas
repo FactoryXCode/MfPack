@@ -21,13 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
-// 12/03/2023 Tony                Updated to match mmio
-// 02/04/2023 All                 Pre-release to 3.1.5
-// 03/04/2023 Tony                Fixed IAudioClient.GetMixFormat.
-// 28/04/2023 Tony                Fixed AudioClient.IsFormatSupported.
-// 02/05/2023 Tony                Changed IAudioCaptureClient.GetBuffer params.
-// 05/05/2023 Tony                Updated hnsPeriodicity documentation in AudioClient.Activate.
+// 31/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or later.

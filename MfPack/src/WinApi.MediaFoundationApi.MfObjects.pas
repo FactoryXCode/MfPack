@@ -21,8 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
-// 09/08/2011 Tony                Fixed IMFAttributes.GetBlob
+// 01/08/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or higher.
@@ -1124,7 +1123,6 @@ type
   //
   PIMFAttributes = ^IMFAttributes;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFAttributes);'}
-  {$EXTERNALSYM IMFAttributes}
   IMFAttributes = interface(IUnknown)
   ['{2cd2d921-c447-44a7-a13c-4adabfc247e3}']
 
@@ -1232,6 +1230,7 @@ type
     function CopyAllItems(pDest: IMFAttributes): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFAttributes}
   IID_IMFAttributes = IMFAttributes;
   {$EXTERNALSYM IID_IMFAttributes}
 
@@ -1245,7 +1244,6 @@ type
   //
   PIMFMediaBuffer = ^IMFMediaBuffer;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFMediaBuffer);'}
-  {$EXTERNALSYM IMFMediaBuffer}
   IMFMediaBuffer = interface(IUnknown)
   ['{045FA593-8799-42b8-BC8D-8968C6453507}']
 
@@ -1263,6 +1261,7 @@ type
     function GetMaxLength(out pcbMaxLength: DWord): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFMediaBuffer}
   IID_IMFMediaBuffer = IMFMediaBuffer;
   {$EXTERNALSYM IID_IMFMediaBuffer}
 
@@ -1281,7 +1280,6 @@ type
   PIMFSample = ^IMFSample;
   PPIMFSample = ^PIMFSample; //a test issue
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSample);'}
-  {$EXTERNALSYM IMFSample}
   IMFSample = interface(IMFAttributes)
   ['{c40a00f2-b93a-4d80-ae8c-5a1c634f58e4}']
 
@@ -1317,6 +1315,7 @@ type
     function CopyToBuffer(pBuffer: IMFMediaBuffer): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFSample}
   IID_IMFSample = IMFSample;
   {$EXTERNALSYM IID_IMFSample}
 
@@ -1346,7 +1345,6 @@ type
   //
   PIMF2DBuffer = ^IMF2DBuffer;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMF2DBuffer);'}
-  {$EXTERNALSYM IMF2DBuffer}
   IMF2DBuffer = interface(IUnknown)
   ['{7DC9D5F9-9ED9-44ec-9BBF-0600BB589FBB}']
 
@@ -1371,6 +1369,7 @@ type
                                 cbSrcBuffer: DWord): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMF2DBuffer}
   IID_IMF2DBuffer = IMF2DBuffer;
   {$EXTERNALSYM IID_IMF2DBuffer}
 
@@ -1392,7 +1391,6 @@ type
   // =======================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMF2DBuffer2);'}
-  {$EXTERNALSYM IMF2DBuffer2}
   IMF2DBuffer2 = interface(IMF2DBuffer)
     ['{33ae5ea6-4316-436f-8ddd-d73d22f829ec}']
 
@@ -1405,6 +1403,7 @@ type
     function Copy2DTo(pDestBuffer: IMF2DBuffer2): HRESULT; stdcall;
 
   end;
+  {$EXTERNALSYM IMF2DBuffer2}
   IID_IMF2DBuffer2 = IMF2DBuffer2;
   {$EXTERNALSYM IID_IMF2DBuffer2}
 
@@ -1413,7 +1412,6 @@ type
   // ========================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFDXGIBuffer);'}
-  {$EXTERNALSYM IMFDXGIBuffer}
   IMFDXGIBuffer = interface(IUnknown)
     ['{e7174cfa-1c9e-48b1-8866-626226bfc258}']
 
@@ -1429,6 +1427,7 @@ type
     function SetUnknown(const guid: REFIID;
                         pUnkData: IUnknown): HRESULT; stdcall;
   end;
+  {$EXTERNALSYM IMFDXGIBuffer}
   IID_IMFDXGIBuffer = IMFDXGIBuffer;
   {$EXTERNALSYM IID_IMFDXGIBuffer}
 
@@ -1439,7 +1438,6 @@ type
   //
   PIMFMediaType = ^IMFMediaType;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFMediaType);'}
-  {$EXTERNALSYM IMFMediaType}
   IMFMediaType = interface(IMFAttributes)
   ['{44ae0fa8-ea31-4109-8d2e-4cae4997c555}']
     function GetMajorType(out pguidMajorType: TGuid): HResult; stdcall;
@@ -1455,6 +1453,7 @@ type
     function FreeRepresentation(const guidRepresentation: TGuid;
                                 pvRepresentation: LPVOID): HResult; stdcall;
   end;
+  {$EXTERNALSYM IMFMediaType}
   IID_IMFMediaType = IMFMediaType;
   {$EXTERNALSYM IID_IMFMediaType}
 
@@ -1468,7 +1467,6 @@ type
   //
   PIMFAudioMediaType = ^IMFAudioMediaType;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFAudioMediaType);'}
-  {$EXTERNALSYM IMFAudioMediaType}
   IMFAudioMediaType = interface(IMFMediaType)
   ['{26a0adc3-ce26-4672-9304-69552edd3faf}']
     //
@@ -1481,6 +1479,7 @@ type
     function GetAudioFormat(): PWAVEFORMATEX; stdcall;
 
   end;
+  {$EXTERNALSYM IMFAudioMediaType}
   IID_IMFAudioMediaType = IMFAudioMediaType;
   {$EXTERNALSYM IID_IMFAudioMediaType}
 
@@ -1494,7 +1493,6 @@ type
   //
   PIMFVideoMediaType = ^IMFVideoMediaType;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFVideoMediaType);'}
-  {$EXTERNALSYM IMFVideoMediaType}
   IMFVideoMediaType = interface(IMFMediaType)
   ['{b99f381f-a8f9-47a2-a5af-ca3a225a3890}']
 
@@ -1506,6 +1504,7 @@ type
                                     out ppvRepresentation: LPVOID;
                                     lStride: LONG): HResult; stdcall;
   end;
+  {$EXTERNALSYM IMFVideoMediaType}
   IID_IMFVideoMediaType = IMFVideoMediaType;
   {$EXTERNALSYM IID_IMFVideoMediaType}
 
@@ -1523,7 +1522,6 @@ type
   // </summary>
   PIMFAsyncResult = ^IMFAsyncResult;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFAsyncResult);'}
-  {$EXTERNALSYM IMFAsyncResult}
   IMFAsyncResult = interface(IUnknown)
   ['{ac6b7889-0740-4d51-8619-905994a55cc6}']
 
@@ -1538,6 +1536,7 @@ type
     function GetStateNoAddRef(): IUnknown; stdcall;
 
   end;
+  {$EXTERNALSYM IMFAsyncResult}
   IID_IMFAsyncResult = IMFAsyncResult;
   {$EXTERNALSYM IID_IMFAsyncResult}
 
@@ -1548,7 +1547,6 @@ type
   //
   PIMFAsyncCallback = ^IMFAsyncCallback;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFAsyncCallback);'}
-  {$EXTERNALSYM IMFAsyncCallback}
   IMFAsyncCallback = interface(IUnknown)
   ['{a27003cf-2354-4f2a-8d6a-ab7cff15437e}']
 
@@ -1558,6 +1556,7 @@ type
     function Invoke(pAsyncResult: IMFAsyncResult): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFAsyncCallback}
   IID_IMFAsyncCallback = IMFAsyncCallback;
   {$EXTERNALSYM IID_IMFAsyncCallback}
 
@@ -1571,7 +1570,6 @@ type
   //
   PIMFMediaEvent = ^IMFMediaEvent;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFMediaEvent);'}
-  {$EXTERNALSYM IMFMediaEvent}
   IMFMediaEvent = interface(IMFAttributes)
   ['{DF598932-F10C-4E39-BBA2-C308F101DAA3}']
 
@@ -1584,6 +1582,7 @@ type
     function GetValue(out pvValue: PROPVARIANT): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFMediaEvent}
   IID_IMFMediaEvent = IMFMediaEvent;
   {$EXTERNALSYM IID_IMFMediaEvent}
 
@@ -1598,7 +1597,6 @@ type
   //
   PIMFMediaEventGenerator = ^IMFMediaEventGenerator;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFMediaEventGenerator);'}
-  {$EXTERNALSYM IMFMediaEventGenerator}
   IMFMediaEventGenerator = interface(IUnknown)
   ['{2CD0BD52-BCD5-4B89-B62C-EADC0C031E7D}']
 
@@ -1616,6 +1614,7 @@ type
                         hrStatus: HRESULT;
                         pvValue: PROPVARIANT): HResult; stdcall;
   end;
+  {$EXTERNALSYM IMFMediaEventGenerator}
   IID_IMFMediaEventGenerator = IMFMediaEventGenerator;
   {$EXTERNALSYM IID_IMFMediaEventGenerator}
 
@@ -1629,13 +1628,13 @@ type
   // </summary>
   PIMFRemoteAsyncCallback = ^IMFRemoteAsyncCallback;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFRemoteAsyncCallback);'}
-  {$EXTERNALSYM IMFRemoteAsyncCallback}
   IMFRemoteAsyncCallback = interface(IUnknown)
   ['{a27003d0-2354-4f2a-8d6a-ab7cff15437e}']
 
     function Invoke(const hr: HRESULT;
                     pRemoteResult: IUnknown): HResult; stdcall;
   end;
+  {$EXTERNALSYM IMFRemoteAsyncCallback}
   IID_IMFRemoteAsyncCallback = IMFRemoteAsyncCallback;
   {$EXTERNALSYM IID_IMFRemoteAsyncCallback}
 
@@ -1647,7 +1646,6 @@ type
   // The IMFByteStream interface supports the typical stream operations, such as reading, writing, and seeking.
   //
   PIMFByteStream = ^IMFByteStream;
-  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFByteStream);'}
   {$EXTERNALSYM IMFByteStream}
   IMFByteStream = interface(IUnknown)
   ['{ad4c1b00-4bf7-422f-9175-756693d9130d}']
@@ -1698,6 +1696,7 @@ type
     function Close(): HResult; stdcall;
 
   end;
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFByteStream);'}
   IID_IMFByteStream = IMFByteStream;
   {$EXTERNALSYM IID_IMFByteStream}
 
@@ -1709,7 +1708,6 @@ type
   //
   PIMFCollection = ^IMFCollection;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFCollection);'}
-  {$EXTERNALSYM IMFCollection}
   IMFCollection = interface(IUnknown)
   ['{5BC8A76B-869A-46a3-9B03-FA218A66AEBE}']
 
@@ -1729,6 +1727,7 @@ type
     function RemoveAllElements(): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFCollection}
   IID_IMFCollection = IMFCollection;
   {$EXTERNALSYM IID_IMFCollection}
 
@@ -1745,7 +1744,6 @@ type
   //
   PIMFMediaEventQueue = ^IMFMediaEventQueue;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFMediaEventQueue);'}
-  {$EXTERNALSYM IMFMediaEventQueue}
   IMFMediaEventQueue = interface(IUnknown)
   ['{36f846fc-2256-48b6-b58e-e2b638316581}']
     // <summary>
@@ -1839,6 +1837,7 @@ type
     function Shutdown(): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFMediaEventQueue}
   IID_IMFMediaEventQueue = IMFMediaEventQueue;
   {$EXTERNALSYM IID_IMFMediaEventQueue}
 
@@ -1853,7 +1852,6 @@ type
   //
   PIMFActivate = ^IMFActivate;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFActivate);'}
-  {$EXTERNALSYM IMFActivate}
   IMFActivate = interface(IMFAttributes)
   ['{7FEE9E9A-4A89-47a6-899C-B6A53A70FB67}']
 
@@ -1886,11 +1884,13 @@ type
     function DetachObject(): HResult; stdcall;
 
    end;
+  {$EXTERNALSYM IMFActivate}
   IID_IMFActivate = IMFActivate;
   {$EXTERNALSYM IID_IMFActivate}
 
 
 // >= Windows 8
+
   // Interface IMFPluginControl
   // ==========================
   // Controls how media sources and transforms are enumerated in Microsoft Media Foundation.
@@ -1898,7 +1898,6 @@ type
   //
   PIMFPluginControl = ^IMFPluginControl;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFPluginControl);'}
-  {$EXTERNALSYM IMFPluginControl}
   IMFPluginControl = interface(IUnknown)
   ['{5c6c44bf-1db6-435b-9249-e8cd10fdec96}']
 
@@ -1926,7 +1925,8 @@ type
                          const clsid: REFCLSID;
                          disabled: BOOL): HResult; stdcall;
   end;
-  IID_IMFPluginControl = IMFPluginControl;
+   {$EXTERNALSYM IMFPluginControl}
+ IID_IMFPluginControl = IMFPluginControl;
   {$EXTERNALSYM IID_IMFPluginControl}
   // end >= Windows 8
 
@@ -1949,14 +1949,13 @@ type
   // ===========================
   PIMFPluginControl2 = ^IMFPluginControl2;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFPluginControl2);'}
-  {$EXTERNALSYM IMFPluginControl2}
   IMFPluginControl2 = interface(IMFPluginControl)
   ['{C6982083-3DDC-45CB-AF5E-0F7A8CE4DE77}']
 
     function SetPolicy(policy: MF_PLUGIN_CONTROL_POLICY): HResult; stdcall;
 
   end;
-  // IMFPluginControl2
+  {$EXTERNALSYM IMFPluginControl2}
   IID_IMFPluginControl2 = IMFPluginControl2;
   {$EXTERNALSYM IID_IMFPluginControl2}
 
@@ -1967,7 +1966,6 @@ type
   //
   PIMFDXGIDeviceManager = ^IMFDXGIDeviceManager;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFDXGIDeviceManager);'}
-  {$EXTERNALSYM IMFDXGIDeviceManager}
   IMFDXGIDeviceManager = interface(IUnknown)
   ['{eb533d5d-2db6-40f8-97a9-494692014f07}']
 
@@ -1994,7 +1992,7 @@ type
 
 
   end;
-  // IMFDXGIDeviceManager
+  {$EXTERNALSYM IMFDXGIDeviceManager}
   IID_IMFDXGIDeviceManager = IMFDXGIDeviceManager;
   {$EXTERNALSYM IID_IMFDXGIDeviceManager}
 
@@ -2015,7 +2013,6 @@ type
   //
   PIMFMuxStreamAttributesManager =^IMFMuxStreamAttributesManager;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFMuxStreamAttributesManager);'}
-  {$EXTERNALSYM IMFMuxStreamAttributesManager}
   IMFMuxStreamAttributesManager = interface(IUnknown)
   ['{CE8BD576-E440-43B3-BE34-1E53F565F7E8}']
 
@@ -2025,6 +2022,7 @@ type
                            out ppStreamAttributes: IMFAttributes): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFMuxStreamAttributesManager}
   IID_IMFMuxStreamAttributesManager = IMFMuxStreamAttributesManager;
   {$EXTERNALSYM IID_IMFMuxStreamAttributesManager}
 
@@ -2034,7 +2032,6 @@ type
   //
   PIMFMuxStreamMediaTypeManager =^IMFMuxStreamMediaTypeManager;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFMuxStreamMediaTypeManager);'}
-  {$EXTERNALSYM IMFMuxStreamMediaTypeManager}
   IMFMuxStreamMediaTypeManager = interface(IUnknown)
   ['{505A2C72-42F7-4690-AEAB-8F513D0FFDB8}']
 
@@ -2053,6 +2050,7 @@ type
                                     out pullStreamMask: ULONGLONG): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFMuxStreamMediaTypeManager}
   IID_IMFMuxStreamMediaTypeManager = IMFMuxStreamMediaTypeManager;
   {$EXTERNALSYM IID_IMFMuxStreamMediaTypeManager}
 
@@ -2062,7 +2060,6 @@ type
   //
   PIMFMuxStreamSampleManager =^IMFMuxStreamSampleManager;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFMuxStreamSampleManager);'}
-  {$EXTERNALSYM IMFMuxStreamSampleManager}
   IMFMuxStreamSampleManager = interface(IUnknown)
   ['{74ABBC19-B1CC-4E41-BB8B-9D9B86A8F6CA}']
 
@@ -2074,6 +2071,7 @@ type
     function GetStreamConfiguration(): ULONGLONG; stdcall;
 
   end;
+  {$EXTERNALSYM IMFMuxStreamSampleManager}
   IID_IMFMuxStreamSampleManager = IMFMuxStreamSampleManager;
   {$EXTERNALSYM IID_IMFMuxStreamSampleManager}
 
@@ -2084,7 +2082,6 @@ type
   // =========================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSecureBuffer);'}
-  {$EXTERNALSYM IMFSecureBuffer}
   IMFSecureBuffer = interface(IUnknown)
   ['{C1209904-E584-4752-A2D6-7F21693F8B21}']
     // <summary>
@@ -2094,12 +2091,12 @@ type
     function GetIdentifier(out pGuidIdentifier: TGUID): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFSecureBuffer}
   IID_IMFSecureBuffer = IMFSecureBuffer;
   {$EXTERNALSYM IID_IMFSecureBuffer}
 
 
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFByteStreamProxyClassFactory);'}
-  {$EXTERNALSYM IMFByteStreamProxyClassFactory}
   IMFByteStreamProxyClassFactory = interface(IUnknown)
   ['{a6b43f84-5c0a-42e8-a44d-b1857a76992f}']
     function CreateByteStreamProxy(pByteStream: IMFByteStream;
@@ -2108,12 +2105,12 @@ type
                                    out ppvObject: LPVOID): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFByteStreamProxyClassFactory}
   IID_IMFByteStreamProxyClassFactory = IMFByteStreamProxyClassFactory;
   {$EXTERNALSYM IID_IMFByteStreamProxyClassFactory}
 
 
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSampleOutputStream);'}
-  {$EXTERNALSYM IMFSampleOutputStream}
   IMFSampleOutputStream = interface(IUnknown)
   ['{8feed468-6f7e-440d-869a-49bdd283ad0d}']
     /// <summary>
@@ -2131,6 +2128,7 @@ type
     function Close(): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFSampleOutputStream}
   IID_IMFSampleOutputStream = IMFSampleOutputStream;
   {$EXTERNALSYM IID_IMFSampleOutputStream}
 

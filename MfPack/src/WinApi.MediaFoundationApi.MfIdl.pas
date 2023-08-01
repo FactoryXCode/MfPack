@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 01/08/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -3700,7 +3700,6 @@ type
   // Interface IMFSchemeHandler
   // ==========================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSchemeHandler);'}
-  {$EXTERNALSYM IMFSchemeHandler}
   IMFSchemeHandler = interface(IUnknown)
   ['{6D4C7B74-52A0-4bb7-B0DB-55F29F47A668}']
 
@@ -3718,6 +3717,7 @@ type
     function CancelObjectCreation(pIUnknownCancelCookie: IUnknown): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFSchemeHandler}
   IID_IMFSchemeHandler = IMFSchemeHandler;
   {$EXTERNALSYM IID_IMFSchemeHandler}
 
@@ -3725,7 +3725,6 @@ type
   // interface IMFByteStreamHandler
   // ==============================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFByteStreamHandler);'}
-  {$EXTERNALSYM IMFByteStreamHandler}
   IMFByteStreamHandler = interface(IUnknown)
   ['{BB420AA4-765B-4a1f-91FE-D6A8A143924C}']
 
@@ -3746,6 +3745,7 @@ type
     function GetMaxNumberOfBytesRequiredForResolution(out pqwBytes: QWORD): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFByteStreamHandler}
   IID_IMFByteStreamHandler = IMFByteStreamHandler;
   {$EXTERNALSYM IID_IMFByteStreamHandler}
 
@@ -3753,7 +3753,6 @@ type
   // Interface IMFTrustedInput
   // =========================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFTrustedInput);'}
-  {$EXTERNALSYM IMFTrustedInput}
   IMFTrustedInput = interface(IUnknown)
   ['{542612C4-A1B8-4632-B521-DE11EA64A0B0}']
 
@@ -3761,6 +3760,7 @@ type
                                     const riid: REFIID;
                                     out ppunkObject: IUnknown): HResult; stdcall;
   end;
+  {$EXTERNALSYM IMFTrustedInput}
   IID_IMFTrustedInput = IMFTrustedInput;
   {$EXTERNALSYM IID_IMFTrustedInput}
 
@@ -3810,7 +3810,6 @@ type
   // Interface IMFInputTrustAuthority
   // ================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFInputTrustAuthority);'}
-  {$EXTERNALSYM IMFInputTrustAuthority}
   IMFInputTrustAuthority = interface(IUnknown)
   ['{D19F8E98-B126-4446-890C-5DCB7AD71453}']
 
@@ -3830,6 +3829,7 @@ type
     function Reset(): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFInputTrustAuthority}
   IID_IMFInputTrustAuthority = IMFInputTrustAuthority;
   {$EXTERNALSYM IID_IMFInputTrustAuthority}
 
@@ -3837,7 +3837,6 @@ type
   // Interface IMFTrustedOutput
   // ==========================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFTrustedOutput);'}
-  {$EXTERNALSYM IMFTrustedOutput}
   IMFTrustedOutput = interface(IUnknown)
   ['{D19F8E95-B126-4446-890C-5DCB7AD71453}']
 
@@ -3849,6 +3848,7 @@ type
     function IsFinal(out pfIsFinal: BOOL): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFTrustedOutput}
   IID_IMFTrustedOutput = IMFTrustedOutput;
   {$EXTERNALSYM IID_IMFTrustedOutput}
 
@@ -3856,7 +3856,6 @@ type
   // interface IMFOutputTrustAuthority
   // =================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFOutputTrustAuthority);'}
-  {$EXTERNALSYM IMFOutputTrustAuthority}
   IMFOutputTrustAuthority = interface(IUnknown)
   ['{D19F8E94-B126-4446-890C-5DCB7AD71453}']
 
@@ -3868,6 +3867,7 @@ type
                        out cbTicket: DWORD): HRESULT; stdcall;
 
   end;
+  {$EXTERNALSYM IMFOutputTrustAuthority}
   IID_IMFOutputTrustAuthority = IMFOutputTrustAuthority;
   {$EXTERNALSYM IID_IMFOutputTrustAuthority}
 
@@ -3875,7 +3875,6 @@ type
   // Interface IMFOutputPolicy
   // =========================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFOutputPolicy);'}
-  {$EXTERNALSYM IMFOutputPolicy}
   IMFOutputPolicy = interface(IUnknown)
   ['{7F00F10A-DAED-41AF-AB26-5FDFA4DFBA3C}']
 
@@ -3890,6 +3889,7 @@ type
     function GetMinimumGRLVersion(out pdwMinimumGRLVersion: DWord): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFOutputPolicy}
   IID_IMFOutputPolicy = IMFOutputPolicy;
   {$EXTERNALSYM IID_IMFOutputPolicy}
 
@@ -3897,7 +3897,6 @@ type
   // Interface IMFOutputSchema
   // =========================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFOutputSchema);'}
-  {$EXTERNALSYM IMFOutputSchema}
   IMFOutputSchema = interface(IUnknown)
   ['{7BE0FC5B-ABD9-44FB-A5C8-F50136E71599}']
 
@@ -3908,6 +3907,7 @@ type
     function GetOriginatorID(out pguidOriginatorID: TGuid): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFOutputSchema}
   IID_IMFOutputSchema = IMFOutputSchema;
   {$EXTERNALSYM IID_IMFOutputSchema}
 
@@ -3953,7 +3953,6 @@ type
   // Interface IMFSecureChannel
   // ==========================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSecureChannel);'}
-  {$EXTERNALSYM IMFSecureChannel}
   IMFSecureChannel = interface(IUnknown)
   ['{d0ae555d-3b12-4d97-b060-0990bc5aeb67}']
 
@@ -3964,10 +3963,12 @@ type
                           cbSessionKey: DWORD): HResult; stdcall;
 
    end;
+  {$EXTERNALSYM IMFSecureChannel}
   IID_IMFSecureChannel = IMFSecureChannel;
   {$EXTERNALSYM IID_IMFSecureChannel}
 
   PSAMPLE_PROTECTION_VERSION = ^SAMPLE_PROTECTION_VERSION;
+  {$EXTERNALSYM PSAMPLE_PROTECTION_VERSION}
   SAMPLE_PROTECTION_VERSION              = (
     SAMPLE_PROTECTION_VERSION_NO         = 0,
     {$EXTERNALSYM SAMPLE_PROTECTION_VERSION_NO}
@@ -3986,7 +3987,6 @@ type
   // Interface IMFSampleProtection
   // =============================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSampleProtection);'}
-  {$EXTERNALSYM IMFSampleProtection}
   IMFSampleProtection = interface(IUnknown)
   ['{8e36395f-c7b9-43c4-a54d-512b4af63c95}']
 
@@ -4011,6 +4011,7 @@ type
                                  const cbSeed: DWord): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFSampleProtection}
   IID_IMFSampleProtection = IMFSampleProtection;
   {$EXTERNALSYM IID_IMFSampleProtection}
 
@@ -4018,13 +4019,13 @@ type
   // interface IMFMediaSinkPreroll
   // =============================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFMediaSinkPreroll);'}
-  {$EXTERNALSYM IMFMediaSinkPreroll}
   IMFMediaSinkPreroll = interface(IUnknown)
   ['{5dfd4b2a-7674-4110-a4e6-8a68fd5f3688}']
 
     function NotifyPreroll(hnsUpcomingStartTime: MFTIME): HRESULT; stdcall;
 
   end;
+  {$EXTERNALSYM IMFMediaSinkPreroll}
   IID_IMFMediaSinkPreroll = IMFMediaSinkPreroll;
   {$EXTERNALSYM IID_IMFMediaSinkPreroll}
 
@@ -4034,7 +4035,6 @@ type
   // Interface IMFFinalizableMediaSink
   // =================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFFinalizableMediaSink);'}
-  {$EXTERNALSYM IMFFinalizableMediaSink}
   IMFFinalizableMediaSink = interface(IUnknown)
     ['{EAECB74A-9A50-42ce-9541-6A7F57AA4AD7}']
 
@@ -4044,6 +4044,7 @@ type
       function EndFinalize(pResult: IMFAsyncResult): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFFinalizableMediaSink}
   IID_IMFFinalizableMediaSink = IMFFinalizableMediaSink;
   {$EXTERNALSYM IID_IMFFinalizableMediaSink}
 
@@ -4053,7 +4054,6 @@ type
   // interface IMFStreamingSinkConfig
   // ================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFStreamingSinkConfig);'}
-  {$EXTERNALSYM IMFStreamingSinkConfig}
   IMFStreamingSinkConfig = interface(IUnknown)
     ['{9db7aa41-3cc5-40d4-8509-555804ad34cc}']
 
@@ -4061,6 +4061,7 @@ type
                               qwSeekOffset: QWORD): HRESULT; stdcall;
 
   end;
+  {$EXTERNALSYM IMFStreamingSinkConfig}
   IID_IMFStreamingSinkConfig = IMFStreamingSinkConfig;
   {$EXTERNALSYM IID_IMFStreamingSinkConfig}
 
@@ -4068,7 +4069,6 @@ type
   // Interface IMFRemoteProxy
   // ========================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFRemoteProxy);'}
-  {$EXTERNALSYM IMFRemoteProxy}
   IMFRemoteProxy = interface(IUnknown)
     ['{994e23ad-1cc2-493c-b9fa-46f1cb040fa4}']
 
@@ -4079,6 +4079,7 @@ type
                              out ppv: Pointer): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFRemoteProxy}
   IID_IMFRemoteProxy = IMFRemoteProxy;
   {$EXTERNALSYM IID_IMFRemoteProxy}
 
@@ -4086,7 +4087,6 @@ type
   // interface IMFObjectReferenceStream
   // ==================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFObjectReferenceStream);'}
-  {$EXTERNALSYM IMFObjectReferenceStream}
   IMFObjectReferenceStream = interface(IUnknown)
     ['{09EF5BE3-C8A7-469e-8B70-73BF25BB193F}']
 
@@ -4097,6 +4097,7 @@ type
                              out ppv: Pointer): HRESULT; stdcall;
 
   end;
+  {$EXTERNALSYM IMFObjectReferenceStream}
   IID_IMFObjectReferenceStream = IMFObjectReferenceStream;
   {$EXTERNALSYM IID_IMFObjectReferenceStream}
 
@@ -4104,7 +4105,6 @@ type
   // Interface IMFPMPHost
   // ====================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFPMPHost);'}
-  {$EXTERNALSYM IMFPMPHost}
   IMFPMPHost = interface(IUnknown)
     ['{F70CA1A9-FDC7-4782-B994-ADFFB1C98606}']
 
@@ -4118,6 +4118,7 @@ type
                                    out ppv: Pointer): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFPMPHost}
   IID_IMFPMPHost = IMFPMPHost;
   {$EXTERNALSYM IID_IMFPMPHost}
 
@@ -4125,13 +4126,13 @@ type
   // Interface IMFPMPClient
   // ======================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFPMPClient);'}
-  {$EXTERNALSYM IMFPMPClient}
   IMFPMPClient = interface(IUnknown)
   ['{6C4E655D-EAD8-4421-B6B9-54DCDBBDF820}']
 
     function SetPMPHost(pPMPHost: IMFPMPHost): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFPMPClient}
   IID_IMFPMPClient = IMFPMPClient;
   {$EXTERNALSYM IID_IMFPMPClient}
 
@@ -4139,7 +4140,6 @@ type
   // Interface IMFPMPServer
   // ======================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFPMPServer);'}
-  {$EXTERNALSYM IMFPMPServer}
   IMFPMPServer = interface(IUnknown)
   ['{994e23af-1cc2-493c-b9fa-46f1cb040fa4}']
 
@@ -4152,6 +4152,7 @@ type
                                  out ppObject): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFPMPServer}
   IID_IMFPMPServer = IMFPMPServer;
   {$EXTERNALSYM IID_IMFPMPServer}
 
@@ -4159,13 +4160,13 @@ type
   // Interface IMFRemoteDesktopPlugin
   // ================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFRemoteDesktopPlugin);'}
-  {$EXTERNALSYM IMFRemoteDesktopPlugin}
   IMFRemoteDesktopPlugin = interface(IUnknown)
   ['{1cde6309-cae0-4940-907e-c1ec9c3d1d4a}']
 
     function UpdateTopology(var Topology: IMFTopology): HRESULT; stdcall;
 
   end;
+  {$EXTERNALSYM IMFRemoteDesktopPlugin}
   IID_IMFRemoteDesktopPlugin = IMFRemoteDesktopPlugin;
   {$EXTERNALSYM IID_IMFRemoteDesktopPlugin}
 
@@ -4173,7 +4174,6 @@ type
   // Interface IMFSAMIStyle
   // ======================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSAMIStyle);'}
-  {$EXTERNALSYM IMFSAMIStyle}
   IMFSAMIStyle = interface(IUnknown)
   ['{A7E025DD-5303-4a62-89D6-E747E1EFAC73}']
 
@@ -4191,6 +4191,7 @@ type
     // Gets the currently selected style.
     // The returned string must be deallocated using CoTaskMemFree().
   end;
+  {$EXTERNALSYM IMFSAMIStyle}
   IID_IMFSAMIStyle = IMFSAMIStyle;
   {$EXTERNALSYM IID_IMFSAMIStyle}
 
@@ -4200,7 +4201,6 @@ type
   // Interface IMFTranscodeProfile
   // =============================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFTranscodeProfile);'}
-  {$EXTERNALSYM IMFTranscodeProfile}
   IMFTranscodeProfile = interface(IUnknown)
   ['{4ADFDBA3-7AB0-4953-A62B-461E7FF3DA1E}']
 
@@ -4217,6 +4217,7 @@ type
     function GetContainerAttributes(out ppAttrs: IMFAttributes): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFTranscodeProfile}
   IID_IMFTranscodeProfile = IMFTranscodeProfile;
   {$EXTERNALSYM IID_IMFTranscodeProfile}
 
@@ -4265,7 +4266,6 @@ type
   // Interface IMFTranscodeSinkInfoProvider
   // =======================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFTranscodeSinkInfoProvider);'}
-  {$EXTERNALSYM IMFTranscodeSinkInfoProvider}
   IMFTranscodeSinkInfoProvider = interface(IUnknown)
   ['{8CFFCD2E-5A03-4a3a-AFF7-EDCD107C620E}']
 
@@ -4278,6 +4278,7 @@ type
     function GetSinkInfo(out pSinkInfo: MF_TRANSCODE_SINK_INFO): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFTranscodeSinkInfoProvider}
   IID_IMFTranscodeSinkInfoProvider = IMFTranscodeSinkInfoProvider;
   {$EXTERNALSYM IID_IMFTranscodeSinkInfoProvider}
 
@@ -4285,13 +4286,13 @@ type
   // Interface IMFFieldOfUseMFTUnlock
   // ================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFFieldOfUseMFTUnlock);'}
-  {$EXTERNALSYM IMFFieldOfUseMFTUnlock}
   IMFFieldOfUseMFTUnlock = interface(IUnknown)
   ['{508E71D3-EC66-4fc3-8775-B4B9ED6BA847}']
 
     function Unlock(pUnkMFT: IUnknown): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFFieldOfUseMFTUnlock}
   IID_IMFFieldOfUseMFTUnlock = IMFFieldOfUseMFTUnlock;
   {$EXTERNALSYM IID_IMFFieldOfUseMFTUnlock}
 
@@ -4316,7 +4317,6 @@ type
   // Interface IMFLocalMFTRegistration
   // =================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFLocalMFTRegistration);'}
-  {$EXTERNALSYM IMFLocalMFTRegistration}
   IMFLocalMFTRegistration = interface(IUnknown)
   ['{149c4d73-b4be-4f8d-8b87-079e926b6add}']
 
@@ -4324,6 +4324,7 @@ type
                           cMFTs: DWord): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFLocalMFTRegistration}
   IID_IMFLocalMFTRegistration = IMFLocalMFTRegistration;
   {$EXTERNALSYM IID_IMFLocalMFTRegistration}
 
@@ -4333,7 +4334,6 @@ type
   // Interface IMFCapturePhotoConfirmationInterface
   // ==============================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFCapturePhotoConfirmation);'}
-  {$EXTERNALSYM IMFCapturePhotoConfirmation}
   IMFCapturePhotoConfirmation = interface(IUnknown)
   ['{19f68549-ca8a-4706-a4ef-481dbc95e12c}']
 
@@ -4346,6 +4346,7 @@ type
     function GetPixelFormat(out subtype: TGUID): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFCapturePhotoConfirmation}
   IID_IMFCapturePhotoConfirmation = IMFCapturePhotoConfirmation;
   {$EXTERNALSYM IID_IMFCapturePhotoConfirmation}
 
@@ -4353,7 +4354,6 @@ type
   // Interface IMFPMPHostApp
   // =======================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFPMPHostApp);'}
-  {$EXTERNALSYM IMFPMPHostApp}
   IMFPMPHostApp = interface(IUnknown)
     ['{84d2054a-3aa1-4728-a3b0-440a418cf49c}']
 
@@ -4367,6 +4367,7 @@ type
                                  out ppv: Pointer): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFPMPHostApp}
   IID_IMFPMPHostApp = IMFPMPHostApp;
   {$EXTERNALSYM IID_IMFPMPHostApp}
 
@@ -4375,13 +4376,13 @@ type
   // Interface IMFPMPClientApp
   // =========================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFPMPClientApp);'}
-  {$EXTERNALSYM IMFPMPClientApp}
   IMFPMPClientApp = interface(IUnknown)
     ['{c004f646-be2c-48f3-93a2-a0983eba1108}']
 
       function SetPMPHost(pPMPHost: IMFPMPHostApp): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFPMPClientApp}
   IID_IMFPMPClientApp = IMFPMPClientApp;
   {$EXTERNALSYM IID_IMFPMPClientApp}
 
@@ -4391,13 +4392,13 @@ type
   // Interface IMFMediaStreamSourceSampleRequest
   // ===========================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFMediaStreamSourceSampleRequest);'}
-  {$EXTERNALSYM IMFMediaStreamSourceSampleRequest}
   IMFMediaStreamSourceSampleRequest = interface(IUnknown)
     ['{380b9af9-a85b-4e78-a2af-ea5ce645c6b4}']
 
       function SetSample(value: IMFSample): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFMediaStreamSourceSampleRequest}
   IID_IMFMediaStreamSourceSampleRequest = IMFMediaStreamSourceSampleRequest;
   {$EXTERNALSYM IID_IMFMediaStreamSourceSampleRequest}
 
@@ -4405,7 +4406,6 @@ type
   // Interface IMFTrackedSample
   // ==========================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFTrackedSample);'}
-  {$EXTERNALSYM IMFTrackedSample}
   IMFTrackedSample = interface(IUnknown)
     ['{245BF8E9-0755-40f7-88A5-AE0F18D55E17}']
 
@@ -4413,6 +4413,7 @@ type
                             pUnkState: IUnknown): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFTrackedSample}
   IID_IMFTrackedSample = IMFTrackedSample;
   {$EXTERNALSYM IID_IMFTrackedSample}
 
@@ -4423,7 +4424,6 @@ type
   // Interface IMFProtectedEnvironmentAccess
   // =======================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFProtectedEnvironmentAccess);'}
-  {$EXTERNALSYM IMFProtectedEnvironmentAccess}
   IMFProtectedEnvironmentAccess = interface(IUnknown)
     ['{ef5dc845-f0d9-4ec9-b00c-cb5183d38434}']
 
@@ -4436,6 +4436,7 @@ type
                        out output: PByte): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFProtectedEnvironmentAccess}
   IID_IMFProtectedEnvironmentAccess = IMFProtectedEnvironmentAccess;
   {$EXTERNALSYM IID_IMFProtectedEnvironmentAccess}
 
@@ -4443,7 +4444,6 @@ type
   // Interface IMFSignedLibrary
   // ===========================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSignedLibrary);'}
-  {$EXTERNALSYM IMFSignedLibrary}
   IMFSignedLibrary = interface(IUnknown)
     ['{4a724bca-ff6a-4c07-8e0d-7a358421cf06}']
 
@@ -4451,6 +4451,7 @@ type
                                    out address): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFSignedLibrary}
   IID_IMFSignedLibrary = IMFSignedLibrary;
   {$EXTERNALSYM IID_IMFSignedLibrary}
 
@@ -4458,7 +4459,6 @@ type
   // Interface IMFSystemId
   // ======================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSystemId);'}
-  {$EXTERNALSYM IMFSystemId}
   IMFSystemId = interface(IUnknown)
     ['{fff4af3a-1fc1-4ef9-a29b-d26c49e2f31a}']
 
@@ -4472,6 +4472,7 @@ type
                      out ppbOut: PByte): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFSystemId}
   IID_IMFSystemId = IMFSystemId;
   {$EXTERNALSYM IID_IMFSystemId}
 
@@ -4479,7 +4480,6 @@ type
   // Interface IMFContentProtectionDevice
   // ====================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFContentProtectionDevice);'}
-  {$EXTERNALSYM IMFContentProtectionDevice}
   IMFContentProtectionDevice = interface(IUnknown)
     ['{E6257174-A060-4C9A-A088-3B1B471CAD28}']
 
@@ -4493,6 +4493,7 @@ type
                                        out PrivateOutputByteCount: DWORD): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFContentProtectionDevice}
   IID_IMFContentProtectionDevice = IMFContentProtectionDevice;
   {$EXTERNALSYM IID_IMFContentProtectionDevice}
 
@@ -4500,7 +4501,6 @@ type
   // Interface IMFContentDecryptorContext
   // ====================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFContentDecryptorContext);'}
-  {$EXTERNALSYM IMFContentDecryptorContext}
   IMFContentDecryptorContext = interface(IUnknown)
     ['{7EC4B1BD-43FB-4763-85D2-64FCB5C5F4CB}']
 
@@ -4509,6 +4509,7 @@ type
                                      out OutputPrivateData: UINT64): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFContentDecryptorContext}
   IID_IMFContentDecryptorContext = IMFContentDecryptorContext;
   {$EXTERNALSYM IID_IMFContentDecryptorContext}
 
@@ -4620,7 +4621,6 @@ type
   //  * GetSourceOrigin() returns the W3C origin of the HTML5 media element.  Use CoTaskMemFree to free the string.
   //  * IsSameOrigin() returns true when the specified URL has the same origin as the HTML5 media element.
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFNetCrossOriginSupport);'}
-  {$EXTERNALSYM IMFNetCrossOriginSupport}
   IMFNetCrossOriginSupport = interface(IUnknown)
   ['{bc2b7d44-a72d-49d5-8376-1480dee58b22}']
 
@@ -4632,6 +4632,7 @@ type
                           out pfIsSameOrigin: BOOL): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFNetCrossOriginSupport}
   IID_IMFNetCrossOriginSupport = IMFNetCrossOriginSupport;
   {$EXTERNALSYM IID_IMFNetCrossOriginSupport}
 
@@ -4639,7 +4640,6 @@ type
   // Interface IMFHttpDownloadRequest
   // ===============================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFHttpDownloadRequest);'}
-  {$EXTERNALSYM IMFHttpDownloadRequest}
   IMFHttpDownloadRequest = interface(IUnknown)
   ['{F779FDDF-26E7-4270-8A8B-B983D1859DE0}']
 
@@ -4689,6 +4689,7 @@ type
     function Close(): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFHttpDownloadRequest}
   IID_IMFHttpDownloadRequest = IMFHttpDownloadRequest;
   {$EXTERNALSYM IID_IMFHttpDownloadRequest}
 
@@ -4696,7 +4697,6 @@ type
   // Interface IMFHttpDownloadSession
   // ================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFHttpDownloadSession);'}
-  {$EXTERNALSYM IMFHttpDownloadSession}
   IMFHttpDownloadSession = interface(IUnknown)
   ['{71FA9A2C-53CE-4662-A132-1A7E8CBF62DB}']
 
@@ -4713,6 +4713,7 @@ type
     function Close(): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFHttpDownloadSession}
   IID_IMFHttpDownloadSession = IMFHttpDownloadSession;
   {$EXTERNALSYM IID_IMFHttpDownloadSession}
 
@@ -4720,7 +4721,6 @@ type
   // Interface IMFHttpDownloadSessionProvider
   // ========================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFHttpDownloadSessionProvider);'}
-  {$EXTERNALSYM IMFHttpDownloadSessionProvider}
   IMFHttpDownloadSessionProvider = interface(IUnknown)
   ['{1B4CF4B9-3A16-4115-839D-03CC5C99DF01}']
 
@@ -4728,6 +4728,7 @@ type
                                        out ppDownloadSession: IMFHttpDownloadSession): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFHttpDownloadSessionProvider}
   IID_IMFHttpDownloadSessionProvider = IMFHttpDownloadSessionProvider;
   {$EXTERNALSYM IID_IMFHttpDownloadSessionProvider}
 
@@ -4735,7 +4736,6 @@ type
   // Interface IMFMediaSource2
   // =========================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFMediaSource2);'}
-  {$EXTERNALSYM IMFMediaSource2}
   IMFMediaSource2 = interface(IMFMediaSourceEx)
   ['{FBB03414-D13B-4786-8319-5AC51FC0A136}']
 
@@ -4743,6 +4743,7 @@ type
                           pMediaType: IMFMediaType): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFMediaSource2}
   IID_IMFMediaSource2 = IMFMediaSource2;
   {$EXTERNALSYM IID_IMFMediaSource2}
 
@@ -4750,7 +4751,6 @@ type
   // Interface IMFMediaStream2
   // =========================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFMediaStream2);'}
-  {$EXTERNALSYM IMFMediaStream2}
   IMFMediaStream2 = interface(IMFMediaStream)
   ['{C5BC37D6-75C7-46A1-A132-81B5F723C20F}']
 
@@ -4759,6 +4759,7 @@ type
     function GetStreamState(out value: MF_STREAM_STATE): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFMediaStream2}
   IID_IMFMediaStream2 = IMFMediaStream2;
   {$EXTERNALSYM IID_IMFMediaStream2}
 
@@ -4884,7 +4885,6 @@ type
   // Interface IMFSensorDevice
   // =========================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSensorDevice);'}
-  {$EXTERNALSYM IMFSensorDevice}
   IMFSensorDevice = interface(IUnknown)
   ['{FB9F48F2-2A18-4E28-9730-786F30F04DC4}']
 
@@ -4912,6 +4912,7 @@ type
     function GetSensorDeviceMode(out peMode: MFSensorDeviceMode): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFSensorDevice}
   IID_IMFSensorDevice = IMFSensorDevice;
   {$EXTERNALSYM IID_IMFSensorDevice}
 
@@ -4919,7 +4920,6 @@ type
   // Interface IMFSensorGroup
   // =========================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSensorGroup);'}
-  {$EXTERNALSYM IMFSensorGroup}
   IMFSensorGroup = interface(IUnknown)
   ['{4110243A-9757-461F-89F1-F22345BCAB4E}']
 
@@ -4943,6 +4943,7 @@ type
     function CreateMediaSource(out ppSource: IMFMediaSource): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFSensorGroup}
   IID_IMFSensorGroup = IMFSensorGroup;
   {$EXTERNALSYM IID_IMFSensorGroup}
 
@@ -4950,7 +4951,6 @@ type
   // Interface IMFSensorStream
   // =========================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSensorStream);'}
-  {$EXTERNALSYM IMFSensorStream}
   IMFSensorStream = interface(IMFAttributes)
   ['{E9A42171-C56E-498A-8B39-EDA5A070B7FC}']
 
@@ -4962,6 +4962,7 @@ type
     function CloneSensorStream(out ppStream: IMFSensorStream): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFSensorStream}
   IID_IMFSensorStream = IMFSensorStream;
   {$EXTERNALSYM IID_IMFSensorStream}
 
@@ -4969,7 +4970,6 @@ type
   // interface IMFSensorTransformFactory
   // ===================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSensorTransformFactory);'}
-  {$EXTERNALSYM IMFSensorTransformFactory}
   IMFSensorTransformFactory = interface(IUnknown)
   ['{EED9C2EE-66B4-4F18-A697-AC7D3960215C}']
 
@@ -4991,6 +4991,7 @@ type
                              out ppDeviceMFT: IMFDeviceTransform {see: MfPack.MFTransform}): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFSensorTransformFactory}
   IID_IMFSensorTransformFactory = IMFSensorTransformFactory;
   {$EXTERNALSYM IID_IMFSensorTransformFactory}
 
@@ -5000,7 +5001,6 @@ type
   // Interface IMFSensorProfile
   // ===========================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSensorProfile);'}
-  {$EXTERNALSYM IMFSensorProfile}
   IMFSensorProfile = interface(IUnknown)
   ['{22F765D1-8DAB-4107-846D-56BAF72215E7}']
 
@@ -5016,6 +5016,7 @@ type
     function AddBlockedControl(wzBlockedControl: LPWSTR): HRESULT; stdcall;
 
   end;
+  {$EXTERNALSYM IMFSensorProfile}
   IID_IMFSensorProfile = IMFSensorProfile;
   {$EXTERNALSYM IID_IMFSensorProfile}
 
@@ -5023,7 +5024,6 @@ type
   // Interface IMFSensorProfileCollection
   // ====================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSensorProfileCollection);'}
-  {$EXTERNALSYM IMFSensorProfileCollection}
   IMFSensorProfileCollection = interface(IUnknown)
   ['{C95EA55B-0187-48BE-9353-8D2507662351}']
 
@@ -5041,6 +5041,7 @@ type
 
       function RemoveProfile(ProfileId: SENSORPROFILEID): HRESULT; stdcall;
   end;
+  {$EXTERNALSYM IMFSensorProfileCollection}
   IID_IMFSensorProfileCollection = IMFSensorProfileCollection;
   {$EXTERNALSYM IID_IMFSensorProfileCollection}
 
@@ -5050,7 +5051,6 @@ type
   // Interface IMFSensorProcessActivity
   // ==================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSensorProcessActivity);'}
-  {$EXTERNALSYM IMFSensorProcessActivity}
   IMFSensorProcessActivity = interface(IUnknown)
   ['{39DC7F4A-B141-4719-813C-A7F46162A2B8}']
 
@@ -5063,6 +5063,7 @@ type
     function GetReportTime(out pft: FILETIME): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFSensorProcessActivity}
   IID_IMFSensorProcessActivity = IMFSensorProcessActivity;
   {$EXTERNALSYM IID_IMFSensorProcessActivity}
 
@@ -5070,7 +5071,6 @@ type
   // Interface IMFSensorActivityReport
   // ==================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSensorActivityReport);'}
-  {$EXTERNALSYM IMFSensorActivityReport}
   IMFSensorActivityReport = interface(IUnknown)
   ['{3E8C4BE1-A8C2-4528-90DE-2851BDE5FEAD}']
 
@@ -5088,6 +5088,7 @@ type
                                 out ppProcessActivity: IMFSensorProcessActivity): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFSensorActivityReport}
   IID_IMFSensorActivityReport = IMFSensorActivityReport;
   {$EXTERNALSYM IID_IMFSensorActivityReport}
 
@@ -5095,7 +5096,6 @@ type
   // Interface IMFSensorActivitiesReport
   // ===================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSensorActivitiesReport);'}
-  {$EXTERNALSYM IMFSensorActivitiesReport}
   IMFSensorActivitiesReport = interface(IUnknown)
   ['{683F7A5E-4A19-43CD-B1A9-DBF4AB3F7777}']
 
@@ -5108,6 +5108,7 @@ type
                                            out sensorActivityReport: IMFSensorActivityReport): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFSensorActivitiesReport}
   IID_IMFSensorActivitiesReport = IMFSensorActivitiesReport;
   {$EXTERNALSYM IID_IMFSensorActivitiesReport}
 
@@ -5115,13 +5116,13 @@ type
   // Interface IMFSensorActivitiesReportCallback
   // ===========================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSensorActivitiesReportCallback);'}
-  {$EXTERNALSYM IMFSensorActivitiesReportCallback}
   IMFSensorActivitiesReportCallback = interface(IUnknown)
   ['{DE5072EE-DBE3-46DC-8A87-B6F631194751}']
 
     function OnActivitiesReport(sensorActivitiesReport: IMFSensorActivitiesReport): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFSensorActivitiesReportCallback}
   IID_IMFSensorActivitiesReportCallback = IMFSensorActivitiesReportCallback;
   {$EXTERNALSYM IID_IMFSensorActivitiesReportCallback}
 
@@ -5129,7 +5130,6 @@ type
   // Interface IMFSensorActivityMonitor
   // ==================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSensorActivityMonitor);'}
-  {$EXTERNALSYM IMFSensorActivityMonitor}
   IMFSensorActivityMonitor = interface(IUnknown)
   ['{D0CEF145-B3F4-4340-A2E5-7A5080CA05CB}']
 
@@ -5138,6 +5138,7 @@ type
     function Stop(): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFSensorActivityMonitor}
   IID_IMFSensorActivityMonitor = IMFSensorActivityMonitor;
   {$EXTERNALSYM IID_IMFSensorActivityMonitor}
 
@@ -5149,7 +5150,6 @@ type
   // Interface IMFExtendedCameraIntrinsicModel
   // =========================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFExtendedCameraIntrinsicModel);'}
-  {$EXTERNALSYM IMFExtendedCameraIntrinsicModel}
   IMFExtendedCameraIntrinsicModel = interface(IUnknown)
   ['{5C595E64-4630-4231-855A-12842F733245}']
 
@@ -5160,6 +5160,7 @@ type
     function GetDistortionModelType(Out pDistortionModelType: MFCameraIntrinsic_DistortionModelType): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFExtendedCameraIntrinsicModel}
   IID_IMFExtendedCameraIntrinsicModel = IMFExtendedCameraIntrinsicModel;
   {$EXTERNALSYM IID_IMFExtendedCameraIntrinsicModel}
 
@@ -5167,7 +5168,6 @@ type
   // Interface IMFExtendedCameraIntrinsicsDistortionModel6KT
   // =======================================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFExtendedCameraIntrinsicsDistortionModel6KT);'}
-  {$EXTERNALSYM IMFExtendedCameraIntrinsicsDistortionModel6KT}
   IMFExtendedCameraIntrinsicsDistortionModel6KT = interface(IUnknown)
   ['{74C2653B-5F55-4EB1-9F0F-18B8F68B7D3D}']
 
@@ -5176,6 +5176,7 @@ type
     function SetDistortionModel(pDistortionModel: MFCameraIntrinsic_DistortionModel6KT): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFExtendedCameraIntrinsicsDistortionModel6KT}
   IID_IMFExtendedCameraIntrinsicsDistortionModel6KT = IMFExtendedCameraIntrinsicsDistortionModel6KT;
   {$EXTERNALSYM IID_IMFExtendedCameraIntrinsicsDistortionModel6KT}
 
@@ -5183,7 +5184,6 @@ type
   // Interface IMFExtendedCameraIntrinsicsDistortionModelArcTan
   // ==========================================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFExtendedCameraIntrinsicsDistortionModelArcTan);'}
-  {$EXTERNALSYM IMFExtendedCameraIntrinsicsDistortionModelArcTan}
   IMFExtendedCameraIntrinsicsDistortionModelArcTan = interface(IUnknown)
   ['{812D5F95-B572-45DC-BAFC-AE24199DDDA8}']
 
@@ -5192,6 +5192,7 @@ type
     function SetDistortionModel(pDistortionModel: MFCameraIntrinsic_DistortionModelArcTan): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFExtendedCameraIntrinsicsDistortionModelArcTan}
   IID_IMFExtendedCameraIntrinsicsDistortionModelArcTan = IMFExtendedCameraIntrinsicsDistortionModelArcTan;
   {$EXTERNALSYM IID_IMFExtendedCameraIntrinsicsDistortionModelArcTan}
 
@@ -5199,7 +5200,6 @@ type
   // Interface IMFExtendedCameraIntrinsics
   // =====================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFExtendedCameraIntrinsics);'}
-  {$EXTERNALSYM IMFExtendedCameraIntrinsics}
   IMFExtendedCameraIntrinsics = interface(IUnknown)
   ['{687F6DAC-6987-4750-A16A-734D1E7A10FE}']
 
@@ -5219,6 +5219,7 @@ type
     function AddIntrinsicModel(pIntrinsicModel: IMFExtendedCameraIntrinsicModel): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFExtendedCameraIntrinsics}
   IID_IMFExtendedCameraIntrinsics = IMFExtendedCameraIntrinsics;
   {$EXTERNALSYM IID_IMFExtendedCameraIntrinsics}
 
@@ -5233,7 +5234,6 @@ type
   // ==================================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFExtendedCameraControl);'}
-  {$EXTERNALSYM IMFExtendedCameraControl}
   IMFExtendedCameraControl = interface(IUnknown)
   ['{38E33520-FCA1-4845-A27A-68B7C6AB3789}']
     // <summary>
@@ -5284,6 +5284,7 @@ type
     function CommitSettings(): HRESULT; stdcall;
 
   end;
+  {$EXTERNALSYM IMFExtendedCameraControl}
   IID_IMFExtendedCameraControl = IMFExtendedCameraControl;
   {$EXTERNALSYM IID_IMFExtendedCameraControl}
 
@@ -5294,7 +5295,6 @@ type
   // =====================================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFExtendedCameraController);'}
-  {$EXTERNALSYM IMFExtendedCameraController}
   IMFExtendedCameraController = interface(IUnknown)
   ['{B91EBFEE-CA03-4AF4-8A82-A31752F4A0FC}']
     /// <summary>
@@ -5315,6 +5315,7 @@ type
                                       out ppControl: IMFExtendedCameraControl): HRESULT; stdcall;
 
   end;
+  {$EXTERNALSYM IMFExtendedCameraController}
   IID_IMFExtendedCameraController = IMFExtendedCameraController;
   {$EXTERNALSYM IID_IMFExtendedCameraController}
 
@@ -5324,7 +5325,6 @@ type
   // ================================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFRelativePanelReport);'}
-  {$EXTERNALSYM IMFRelativePanelReport}
   IMFRelativePanelReport = interface(IUnknown)
   ['{F25362EA-2C0E-447F-81E2-755914CDC0C3}']
     // <summary>
@@ -5337,6 +5337,7 @@ type
     // </param>
     function GetRelativePanel(out panel: ULONG): HRESULT; stdcall;
   end;
+  {$EXTERNALSYM IMFRelativePanelReport}
   IID_IMFRelativePanelReport = IMFRelativePanelReport;
   {$EXTERNALSYM IID_IMFRelativePanelReport}
 
@@ -5345,7 +5346,6 @@ type
   // ================================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFRelativePanelWatcher);'}
-  {$EXTERNALSYM IMFRelativePanelWatcher}
   IMFRelativePanelWatcher = interface(IMFShutdown)
   ['{421AF7F6-573E-4AD0-8FDA-2E57CEDB18C6}']
     function BeginGetReport(pCallback: IMFAsyncCallback;
@@ -5362,6 +5362,9 @@ type
     // </param>
     function GetReport(out ppRelativePanelReport: IMFRelativePanelReport): HRESULT; stdcall;
   end;
+  {$EXTERNALSYM IMFRelativePanelWatcher}
+  IID_IMFRelativePanelWatcher = IMFRelativePanelWatcher;
+  {$EXTERNALSYM IID_IMFRelativePanelWatcher}
 
 // end NTDDI_VERSION >= NTDDI_WIN10_VB
 
@@ -5372,7 +5375,6 @@ type
   // ========================================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFVideoCaptureSampleAllocator);'}
-  {$EXTERNALSYM IMFVideoCaptureSampleAllocator}
   IMFVideoCaptureSampleAllocator = interface(IMFVideoSampleAllocator)
   ['{725B77C7-CA9F-4FE5-9D72-9946BF9B3C70}']
     // <param name="cbSampleSize">
@@ -5414,6 +5416,7 @@ type
                                               pAttributes: IMFAttributes;
                                               pMediaType: IMFMediaType): HResult; stdcall;
   end;
+  {$EXTERNALSYM IMFVideoCaptureSampleAllocator}
   IID_IMFVideoCaptureSampleAllocator = IMFVideoCaptureSampleAllocator;
   {$EXTERNALSYM IID_IMFVideoCaptureSampleAllocator}
 
@@ -5439,7 +5442,6 @@ type
   // ===================================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFSampleAllocatorControl);'}
-  {$EXTERNALSYM IMFSampleAllocatorControl}
   IMFSampleAllocatorControl = interface(IUnknown)
   ['{DA62B958-3A38-4A97-BD27-149C640C0771}']
     // <summary>
@@ -5477,6 +5479,7 @@ type
                                out pdwInputStreamID: DWORD;
                                out peUsage: MFSampleAllocatorUsage): HResult; stdcall;
   end;
+  {$EXTERNALSYM IMFSampleAllocatorControl}
   IID_IMFSampleAllocatorControl = IMFSampleAllocatorControl;
   {$EXTERNALSYM IID_IMFSampleAllocatorControl}
 
@@ -6132,7 +6135,6 @@ type
   // adn is used to get the most recent camera occlusion state for the camera under monitoring.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFCameraOcclusionStateReport);'}
-  {$EXTERNALSYM IMFCameraOcclusionStateReport}
   IMFCameraOcclusionStateReport = interface(IUnknown)
   ['{1640B2CF-74DA-4462-A43B-B76D3BDC1434}']
 
@@ -6142,6 +6144,7 @@ type
     // </param>
     function GetOcclusionState(out occlusionState: DWORD): HRESULT; stdcall;
   end;
+  {$EXTERNALSYM IMFCameraOcclusionStateReport}
   IID_IMFCameraOcclusionStateReport = IMFCameraOcclusionStateReport;
   {$EXTERNALSYM IID_IMFCameraOcclusionStateReport}
 
@@ -6152,7 +6155,6 @@ type
   // an IMFCameraOcclusionStateMonitor object.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFCameraOcclusionStateReportCallback);'}
-  {$EXTERNALSYM IMFCameraOcclusionStateReportCallback}
   IMFCameraOcclusionStateReportCallback = interface(IUnknown)
   ['{6E5841C7-3889-4019-9035-783FB19B5948}']
     // This function will be called when the monitor detects that the occlusion state has changed.
@@ -6161,6 +6163,7 @@ type
     // </param>
     function OnOcclusionStateReport(occlusionStateReport: IMFCameraOcclusionStateReport): HRESULT; stdcall;
   end;
+  {$EXTERNALSYM IMFCameraOcclusionStateReportCallback}
   IID_IMFCameraOcclusionStateReportCallback = IMFCameraOcclusionStateReportCallback;
   {$EXTERNALSYM IID_IMFCameraOcclusionStateReportCallback}
 
@@ -6170,7 +6173,6 @@ type
   // This interface represents the main camera occlusion state monitor object.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFCameraOcclusionStateMonitor);'}
-  {$EXTERNALSYM IMFCameraOcclusionStateMonitor}
   IMFCameraOcclusionStateMonitor = interface(IUnknown)
   ['{CC692F46-C697-47E2-A72D-7B064617749B}']
     // This function will start the monitor and will immediately cause
@@ -6184,6 +6186,7 @@ type
     // is combination MFCameraOcclusionState flags. MFCameraOcclusionState_Open is always supported.
     function GetSupportedStates(): HRESULT; stdcall;
   end;
+  {$EXTERNALSYM IMFCameraOcclusionStateMonitor}
   IID_IMFCameraOcclusionStateMonitor = IMFCameraOcclusionStateMonitor;
   {$EXTERNALSYM IID_IMFCameraOcclusionStateReport}
 
@@ -6201,7 +6204,6 @@ type
   // A client passes an implmented instance of this interface when creating a monitor
   // </summary>
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFCameraControlNotify);'}
-  {$EXTERNALSYM IMFCameraControlNotify}
   IMFCameraControlNotify = interface(IUnknown)
   ['{E8F2540D-558A-4449-8B64-4863467A9FE8}']
     // This method represents the notification callback for changes to controls.
@@ -6228,6 +6230,7 @@ type
     procedure OnError(hrStatus: HResult); stdcall;
 
   end;
+  {$EXTERNALSYM IMFCameraControlNotify}
   IID_IMFCameraControlNotify = IMFCameraControlNotify;
   {$EXTERNALSYM IID_IMFCameraControlNotify}
 
@@ -6238,7 +6241,6 @@ type
   // This interface represents the main camera control monitor object.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFCameraControlMonitor);'}
-  {$EXTERNALSYM IMFCameraControlMonitor}
   IMFCameraControlMonitor = interface(IUnknown)
   ['{4D46F2C9-28BA-4970-8C7B-1F0C9D80AF69}']
     // This function will start the monitor. The monitor will call OnChange on Subscriptions linked to changed controls
@@ -6275,6 +6277,7 @@ type
     procedure Shutdown();
 
   end;
+  {$EXTERNALSYM IMFCameraControlMonitor}
   IID_IMFCameraControlMonitor = IMFCameraControlMonitor;
   {$EXTERNALSYM IID_IMFCameraControlMonitor}
 
@@ -6299,7 +6302,6 @@ type
    // Interface IMFCameraControlDefaults
    //===================================
    {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFCameraControlDefaults);'}
-   {$EXTERNALSYM IMFCameraControlDefaults}
    IMFCameraControlDefaults = interface(IUnknown)
    ['{75510662-B034-48F4-88A7-8DE61DAA4AF9}']
 
@@ -6358,15 +6360,15 @@ type
     // </summary>
     function UnlockControlData(): HResult; stdcall;
 
-   end;
-   IID_IMFCameraControlDefaults = IMFCameraControlDefaults;
+  end;
+  {$EXTERNALSYM IMFCameraControlDefaults}
+  IID_IMFCameraControlDefaults = IMFCameraControlDefaults;
   {$EXTERNALSYM IID_IMFCameraControlDefaults}
 
 
   // Interface IMFCameraControlDefaultsCollection
   //=============================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFCameraControlDefaultsCollection);'}
-  {$EXTERNALSYM IMFCameraControlDefaultsCollection}
   IMFCameraControlDefaultsCollection = interface(IMFAttributes)
   ['{92D43D0F-54A8-4BAE-96DA-356D259A5C26}']
 
@@ -6428,6 +6430,7 @@ type
     function RemoveAllControls(): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMFCameraControlDefaultsCollection}
   IID_IMFCameraControlDefaultsCollection = IMFCameraControlDefaultsCollection;
   {$EXTERNALSYM IID_IMFCameraControlDefaultsCollection}
 
@@ -6435,7 +6438,6 @@ type
   // Interface IMFCameraConfigurationManager
   //========================================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFCameraConfigurationManager);'}
-  {$EXTERNALSYM IMFCameraConfigurationManager}
   IMFCameraConfigurationManager = interface(IUnknown)
   ['{A624F617-4704-4206-8A6D-EBDA4A093985}']
 
@@ -6465,6 +6467,7 @@ type
     procedure Shutdown(); stdcall;
 
   end;
+  {$EXTERNALSYM IMFCameraConfigurationManager}
   IID_IMFCameraConfigurationManager = IMFCameraConfigurationManager;
   {$EXTERNALSYM IID_IMFCameraConfigurationManager}
 

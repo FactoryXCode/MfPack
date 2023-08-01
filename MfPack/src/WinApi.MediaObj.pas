@@ -259,7 +259,6 @@ type
   // Buffers passed to the IMediaObject.ProcessInput and ProcessOutput methods must implement this interface.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMediaBuffer);'}
-  {$EXTERNALSYM IMediaBuffer}
   IMediaBuffer = interface(IUnknown)
   ['{59eff8b9-938c-4a26-82f2-95cb84cdc837}']
     function SetLength(cbLength: DWORD): HResult; stdcall;
@@ -270,6 +269,7 @@ type
                                 out pcbLength: DWORD): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMediaBuffer}
   IID_IMediaBuffer = IMediaBuffer;
   {$EXTERNALSYM IID_IMediaBuffer}
 
@@ -279,7 +279,6 @@ type
   // The IMediaObject interface provides methods for manipulating a Microsoft DirectX Media Object (DMO).
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMediaObject);'}
-  {$EXTERNALSYM IMediaObject}
   IMediaObject = interface(IUnknown)
   ['{d8ad0f58-5494-4102-97c5-ec798e59bcf4}']
     function GetStreamCount(out pcInputStreams: DWORD;
@@ -353,6 +352,7 @@ type
     function Lock(const bLock: LONG): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMediaObject}
   IID_IMediaObject = IMediaObject;
   {$EXTERNALSYM IID_IMediaObject}
 
@@ -365,7 +365,6 @@ type
   // To enumerate registered DMOs, call the DMOEnum function.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IEnumDMO);'}
-  {$EXTERNALSYM IEnumDMO}
   IEnumDMO = interface(IUnknown)
   ['{2c3cd98a-2bfa-4a53-9c27-5249ba64ba0f}']
     function Next(cItemsToFetch: DWORD;
@@ -380,6 +379,7 @@ type
     function Clone(out ppEnum: IEnumDMO): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IEnumDMO}
   IID_IEnumDMO = IEnumDMO;
   {$EXTERNALSYM IID_IEnumDMO}
 
@@ -399,7 +399,6 @@ type
   // Therefore, an application is never obligated to use this interface, and a DMO is never guaranteed to implement it.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMediaObjectInPlace);'}
-  {$EXTERNALSYM IMediaObjectInPlace}
   IMediaObjectInPlace = interface(IUnknown)
   ['{651b9ad0-0fc7-4aa9-9538-d89931010741}']
     function Process(ulSize: ULONG;
@@ -412,6 +411,7 @@ type
     function GetLatency(out pLatencyTime: REFERENCE_TIME): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IMediaObjectInPlace}
   IID_IMediaObjectInPlace = IMediaObjectInPlace;
   {$EXTERNALSYM IID_IMediaObjectInPlace}
 
@@ -434,7 +434,6 @@ type
   //   To disable quality control, call SetStatus with no flag.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IDMOQualityControl);'}
-  {$EXTERNALSYM IDMOQualityControl}
   IDMOQualityControl = interface(IUnknown)
   ['{65abea96-cf36-453f-af8a-705e98f16260}']
     function SetNow(rtNow: REFERENCE_TIME): HResult; stdcall;
@@ -444,6 +443,7 @@ type
     function GetStatus(out pdwFlags: DWORD): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IDMOQualityControl}
   IID_IDMOQualityControl = IDMOQualityControl;
   {$EXTERNALSYM IID_IDMOQualityControl}
 
@@ -463,7 +463,6 @@ type
   // Video optimizations are negotiated separately for each output stream.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IDMOVideoOutputOptimizations);'}
-  {$EXTERNALSYM IDMOVideoOutputOptimizations}
   IDMOVideoOutputOptimizations = interface(IUnknown)
   ['{be8f4f4e-5b16-4d29-b350-7f6b5d9298ac}']
     function QueryOperationModePreferences(ulOutputStreamIndex: ULONG;
@@ -478,6 +477,7 @@ type
     function GetCurrentSampleRequirements(ulOutputStreamIndex: ULONG;
                                           var pdwRequestedFeatures: DWORD): HResult; stdcall;
   end;
+  {$EXTERNALSYM IDMOVideoOutputOptimizations}
   IID_IDMOVideoOutputOptimizations = IDMOVideoOutputOptimizations;
   {$EXTERNALSYM IID_IDMOVideoOutputOptimizations}
 
