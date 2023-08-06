@@ -25,7 +25,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 03/08/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 06/08/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -975,9 +975,11 @@ type
 
   // Helper function to get an attribute whose value is a string.
   function AttributeGetString(pAttributes: IMFAttributes;
+                              const guid: TGuid;  // for example: To get the MFT friendly name use MFT_FRIENDLY_NAME_Attribute
                               out pwcStr: PWideChar): HResult; overload;
 
   function AttributeGetString(pActivate: IMFActivate;
+                              const guid: TGuid;
                               out pwcStr: PWideChar): HResult; overload;
 
 // Ducking
@@ -6557,69 +6559,88 @@ done:
 end;
 
 
+
+{
+var
+  pString: PWideChar;
+  cchLength: UINT32;
+begin
+  cchLength := 200;
+  pString := New(PWideChar[cchLength + 1]);
+end;
+}
+
 function AttributeGetString(pAttributes: IMFAttributes;
+                            const guid: TGuid;
                             out pwcStr: PWideChar): HResult; overload;
 var
   hr: HResult;
   cchLength: UINT32;
   pString: PWideChar;
+  wcSize: UINT32;
 
 begin
 
-  hr := pAttributes.GetStringLength(MF_ATTRIBUTE_STRING,
+  hr := pAttributes.GetStringLength(guid,
                                     cchLength);
 
   if SUCCEEDED(hr) then
     begin
-      pString := New(PWideChar[cchLength + 1]);
-        if (pString = nil) then
-          hr := E_OUTOFMEMORY;
+      wcSize := (cchLength + 1) * SizeOf(WideChar);
+      GetMem(pString, wcSize);
+      if (pString = nil) then
+        hr := E_OUTOFMEMORY;
     end;
 
   if SUCCEEDED(hr) then
     begin
-      hr := pAttributes.GetString(MF_ATTRIBUTE_STRING,
+      hr := pAttributes.GetString(guid,
                                   pString,
-                                  cchLength + 1,
+                                  wcSize,
                                   cchLength);
     end;
 
+  // Free the allocated memory when it's no longer needed.
   if Assigned(pString) then
-    Dispose(pString);
+    FreeMem(pString);
 
   Result := hr;
 end;
 
 
 function AttributeGetString(pActivate: IMFActivate;
+                            const guid: TGuid;
                             out pwcStr: PWideChar): HResult; overload;
 var
   hr: HResult;
   cchLength: UINT32;
   pString: PWideChar;
+  wcSize: UINT32;
 
 begin
 
-  hr := pActivate.GetStringLength(MF_ATTRIBUTE_STRING,
+  hr := pActivate.GetStringLength(guid,
                                   cchLength);
 
   if SUCCEEDED(hr) then
     begin
-      pString := New(PWideChar[cchLength +1]);
-        if (pString = nil) then
-          hr := E_OUTOFMEMORY;
+      wcSize := (cchLength + 1) * SizeOf(WideChar);
+      GetMem(pString, wcSize);
+      if (pString = nil) then
+        hr := E_OUTOFMEMORY;
     end;
 
   if SUCCEEDED(hr) then
     begin
-      hr := pActivate.GetString(MF_ATTRIBUTE_STRING,
+      hr := pActivate.GetString(guid,
                                 pString,
-                                cchLength +1,
+                                wcSize,
                                 cchLength);
     end;
 
+  // Free the allocated memory when it's no longer needed.
   if Assigned(pString) then
-    Dispose(pString);
+    FreeMem(pString);
 
   Result := hr;
 end;
@@ -7188,7 +7209,7 @@ begin
 end;
 
 
-function CreateUncompressedVideoType(fccFormat: DWORD;
+function CreateUncompressedVideoType(const fccFormat: DWORD;
                                      aWidth: UINT32;
                                      aHeight: UINT32;
                                      interlaceMode: MFVideoInterlaceMode;
