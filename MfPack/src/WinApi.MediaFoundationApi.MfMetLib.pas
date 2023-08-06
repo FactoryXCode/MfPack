@@ -25,7 +25,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 03/08/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -124,7 +124,7 @@ uses
 
 type
 
-  //
+  // This record holds all audioformat parameters.
   TMFAudioFormat = {$IFDEF UNICODE} record {$ELSE} object {$ENDIF} // Compatible with all Delphi versions.
     mfSource: IMFMediaSource; // MediaSource must be created before use!
     tgMajorFormat: TGUID;
@@ -156,7 +156,7 @@ type
   TMFAudioFormatArray = array of TMFAudioFormat;
 
 
-  // Used by TDeviceProperties, holding capabillities of a video capture device
+  // Used by TDeviceProperties, holding capabillities of a video capture device.
   TVideoFormatInfo = {$IFDEF UNICODE} record {$ELSE} object {$ENDIF} // Compatible with all Delphi versions.
   public
     // The index of the native format found on a device
@@ -202,11 +202,11 @@ type
       procedure Reset();
   end;
 
-  // Array that holds retrieved capabillities records
+  // Array that holds retrieved capabillities records.
   TVideoFormatInfoArray = array of TVideoFormatInfo;
 
 
-  // Used in arrays to hold enum data.
+  // Used in arrays to hold capture device enum data.
   TDeviceProperties = {$IFDEF UNICODE} record {$ELSE} object {$ENDIF}  // Compatible with all Delphi versions.
     riId: TGuid;             // Source type: video or audio capture devices.
     iCount: Integer;         // Number of devices of the same type and brand.
@@ -244,7 +244,7 @@ type
                  mtUnknown                    // Unknown stream type.
                 );
 
-  // Stream contents
+  // Audio and video stream contents.
   PStreamContents = ^TStreamContents;
   _StreamContents = {$IFDEF UNICODE} record {$ELSE} object {$ENDIF}  // Compatible with all Delphi versions.
     dwStreamIndex: DWORD;                 // The stream index (zero based !)
@@ -298,13 +298,15 @@ type
   TStreamContentsArray = array of TStreamContents;
 
 
+// Collections
+// ===========
 
   // Gets an interface pointer from a Media Foundation collection.
   function GetCollectionObject(pCollection: IMFCollection;
                                const dwIndex: DWORD;
                                out ppObject): HRESULT;
 
-// EVENTS
+// Events
 // ======
 
   function GetEventObject(pEvent: IMFMediaEvent;
@@ -324,7 +326,7 @@ type
                              out pSample: IMFSample): HRESULT;
 
 
-// MEDIA SOURCE
+// Media Source
 // ============
 
   // Create a media object from an URL or stream.
@@ -338,7 +340,7 @@ type
   function CreateMediaSourceFromUrl(const sURL: WideString;
                                     out pSource: IMFMediaSource): HRESULT; deprecated 'Use function CreateObjectFromUrl';
 
-  // Begins an asynchronous request to create a media source or a byte stream from a URL.
+  // Begins an asynchronous request to create a media source or a byte stream from an URL.
   function CreateObjectFromUrlAsync(const sURL: WideString;
                                     pCallback: IMFAsyncCallback;
                                     pStore: IPropertyStore = nil;
@@ -352,13 +354,13 @@ type
                                   pSource2: IMFMediaSource;
                                   out ppAggSource: IMFMediaSource): HRESULT;
 
-  // The following method creates a media source for the given device ID.
+  // Create a media source for the given device ID.
   // Note: The application have to enumerate the device first.
   function CreateVideoDeviceSource(DeviceIndex: DWord;
                                    out pSource: IMFMediaSource): HResult;
 
 
-// SINKS AND SOURCEREADERS
+// Sink- and Sourcereaders
 // =======================
 
 
@@ -378,7 +380,8 @@ type
   function CreateAudioMediaSinkActivate(pSourceSD: IMFStreamDescriptor;
                                         out mfActivate: IMFActivate): HRESULT;
 
-// TOPOLOGIES
+
+// Topologies
 // ==========
 
   // Creates a playback topology from the media source.
@@ -391,11 +394,6 @@ type
                                   hVideoWnd: HWND;                       // Video window.
                                   var ppTopology: IMFTopology;           // Receives a pointer to the topology.
                                   dwSourceStreams: DWORD = 0): HRESULT;  // Recieves the number of streams
-
-  // This funtion is part of the MfPlayer class
-  //function CreateFullTopology(pSession: IMFMediaSession;
-  //                            pTopology: IMFTopology;
-  //                            var caps: DWord): HRESULT;
 
   //  Adds a topology branch for one stream.
   //
@@ -430,6 +428,7 @@ type
   function GetPresentationDescriptorFromTopology(pTopology: IMFTopology;
                                                  out ppPD: IMFPresentationDescriptor): HRESULT;
 
+  // Returns the duration from a topology.
   function GetDurationFromTopology(pTopology: IMFTopology;
                                    out phnsDuration: LONGLONG): HRESULT;
 
@@ -467,7 +466,7 @@ type
                           pStreamSink: IMFStreamSink;               // Stream sink.
                           out ppNode: IMFTopologyNode): HRESULT;    // Receives the node pointer.
 
-  //
+  // Creates an uotput node from a stream descriptor.
   function CreateOutputNode(pSourceSD: IMFStreamDescriptor;
                             hwndVideo: HWND;
                             out ppNode: IMFTopologyNode): HRESULT;
@@ -494,13 +493,14 @@ type
 
 
 
-// SEEKING & RATE
+// Seeking & Rate
 // ==============
 
+  // Scrub given a period (MFTime).
   function DoScrub(const SeekTime: MFTIME;
                    pMediaSession: IMFMediaSession): HRESULT;
 
-
+  // Set the playback rate within a mediasession.
   function SetPlaybackRate(pMediaSession: IMFMediaSession;
                            const rateRequested: MFTIME;
                            const bThin: Boolean): HRESULT;
@@ -510,7 +510,7 @@ type
 // ========
 
   // How to set a stop time for playback when using the Media Session.
-  // Setting the Stop Time Before Playback begins
+  // Sets the Stop Time Before Playback begins.
   //
   // Before you queue a topology for playback, you can specify the stop time by using
   // the MF_TOPONODE_MEDIASTOP attribute.
@@ -523,7 +523,7 @@ type
   function SetMediaStop(pTopology: IMFTopology;
                         stop: LONGLONG): HRESULT;
 
-  // Setting the stop time AFTER playback has started.
+  // Sets the stop time AFTER playback has started.
   //
   // There is a way to set the stop time after the Media Session starts playback,
   // by using the IMFTopologyNodeAttributeEditor interface.
@@ -540,10 +540,10 @@ type
                                stop: LONGLONG): HRESULT;
 
 
-// De- & encoders
+// De- & Encoders
 // ==============
 
-  // The following function searches for a video or audio decoder.
+  // This function searches for a video or audio decoder.
   // Asynchronous, hardware, transcode, and field-of-use decoders are excluded.
   // If a match is found, the code creates the first MFT in the list.
   function FindDecoderEx(const subtype: TGUID;                  // Subtype
@@ -592,7 +592,7 @@ type
                                   const guidEncodingType: REFGUID): HResult;
 
 
-  // Set the Video Capture Format for a capture device
+  // Sets the Video Capture Format for a capture device
   //
   // Preparation
   // Call method EnumerateCaptureFormats first to inventarize the supported capture formats of the device.
@@ -611,14 +611,46 @@ type
                            dwFormatIndex: DWORD): HResult; overload;
 
 
-   // List audio or video encoders on this system.
-   function ListEncoders(const subtype: TGUID;
-                         bAudio: Boolean;
-                         var aGuidArray: TClsidArray): Hresult;
+  // List audio or video encoders on this system.
+  function ListEncoders(const subtype: TGUID;
+                        bAudio: Boolean;
+                        var aGuidArray: TClsidArray): Hresult;
 
-   // Create an encoder found with function ListEncoders
-   function CreateEncoderFromClsid(mftCategory: CLSID;
-                                   out pEncoder: IMFTransform): HResult;
+  // Create an encoder found with function ListEncoders
+  function CreateEncoderFromClsid(mftCategory: CLSID;
+                                  out pEncoder: IMFTransform): HResult;
+
+
+  // The following functions might be useful when creating a video media type.
+  // ===========================================================================
+  // Function                                      Description
+  // --------------------------------------------  ------------------------------------------------------------------------------------------------
+  // MFAverageTimePerFrameToFrameRate	             Calculates the frame rate, given the average frame duration.
+  // MFCalculateImageSize	                         Calculates the image size for an uncompressed video format.
+  // MFFrameRateToAverageTimePerFrame	             Calculates the average duration of a video frame, given the frame rate.
+  // MFGetStrideForBitmapInfoHeader	               Returns the minimum surface stride for a video format. For more information, see Image Stride.
+  // MFInitVideoFormat	                           Initializes an MFVIDEOFORMAT structure for some standard video formats, such as NTSC television.
+  //                                               You can then use the structure to initialize a media type.
+  // MFIsFormatYUV	                               Queries whether a video format is a YUV format.
+
+
+  // This function fills in the most common information for an uncompressed video format.
+  // The function returns an IMFMediaType interface pointer.
+  // You can then add additional attributes to the media type as needed.
+  function CreateUncompressedVideoType(const fccFormat: DWORD;   // FOURCC or D3DFORMAT value.
+                                       aWidth: UINT32;
+                                       aHeight: UINT32;
+                                       interlaceMode: MFVideoInterlaceMode;
+                                       frameRate: MFRatio;
+                                       par: MFRatio;
+                                       out ppType: IMFMediaType): HResult;
+
+  // This funtion takes an encoded video format as input, and creates a matching uncompressed video type.
+  // This type would be suitable to set on an encoder or decoder.
+  function ConvertVideoTypeToUncompressedType(pType: IMFMediaType;       // Pointer to an encoded video type.
+                                              const subtype: TGUID;      // Uncompressed subtype (eg, RGB-32, AYUV)
+                                              out ppType: IMFMediaType   // Receives a matching uncompressed video type.
+                                              ): HResult;
 
 
 // Enumerations
@@ -629,6 +661,7 @@ type
   //  Parameters:  AttributeSourceType: MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_AUDCAP_GUID for audio or
   //                                    MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID for video.
   //               DeviceProperties: array of TDevicePropsA.
+  //
   //  1 Call MFCreateAttributes to create an attribute store.
   //    This function receives an empty IMFAttributes pointer.
   //  2 Call IMFAttributes.SetGUID to set the MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE attribute.
@@ -644,15 +677,17 @@ type
   function EnumCaptureDeviceSources(const pAttributeSourceType: TGuid;
                                     var pDeviceProperties: TDevicePropertiesArray): HRESULT;
 
-  // Retrieve all native video formats of a device and stores them in TDevicePropertiesArray
+  // Retrieves all native video formats of a device and stores them in TDevicePropertiesArray
   function GetCaptureDeviceCaps(pSourceReader: IMFSourceReader;
                                 var pDeviceProperties: TDevicePropertiesArray;
                                 pDeviceIndex: DWord = 0;
                                 pStreamIndex: DWord = MF_SOURCE_READER_FIRST_VIDEO_STREAM): HResult;
 
+  // Checks if the the formats stored in the TDevicePropertiesArray are
+  // supported by Media Foundation.
   function GetSupportedVideoFormats(CurrentArray: TDevicePropertiesArray): TDevicePropertiesArray;
 
-  // This function activates a selected device stored in TDeviceProperties
+  // This function activates a selected device stored in TDeviceProperties.
   function CreateCaptureDeviceInstance(pDeviceProperties: TDeviceProperties;
                                        out ppSource: IMFMediaSource;
                                        out ppActivate: IMFActivate): HRESULT;
@@ -667,7 +702,7 @@ type
   // Counts mediatypes from a device
   // When the list index goes out of bounds, GetNativeMediaType returns MF_E_NO_MORE_TYPES.
   // This is not an error, but indicates the end of the list.
-  // Set MfSupportedOnly to False if you want to get the total of all native types from the device and
+  // Set parameter MfSupportedOnly to False if you want to get the total of all native types from the device and
   // to True for Media Foundation supported formats
   function CountTypesFromDevice(pReader: IMFSourceReader;
                                 const pStreamIndex: DWORD;
@@ -682,7 +717,7 @@ type
                             out aFmtDesc: string): HResult;
 
   // Checks if a given input subtype is supported by Media Foundation MFT.
-  function IsMfSupportedFormat(pSubType: TGuid): Boolean; inline; deprecated;
+  function IsMfSupportedFormat(pSubType: TGuid): Boolean; inline; deprecated 'Use function IsMftSupportedInputFormat';
   function IsMftSupportedInputFormat(pSubType: TGuid): Boolean; inline;
 
   // Checks if a given output subtype is supported by Media Foundation MFT.
@@ -736,7 +771,7 @@ type
   // IDirect3DDeviceManager9 service.
   // Typically the enhanced video renderer (EVR) serves this role.
   //
-  // The following code shows a function that finds the device manager:
+  // The following function shows a function that finds the device manager:
 
   // Finds the node in the topology that provides the Direct3D device manager.
 
@@ -759,11 +794,11 @@ type
   // Takes an audio endpoint ID and creates a media source.
   function CreateAudioCaptureDevice(const pszEndPointID: LPCWSTR;
                                     out pSource: IMFMediaSource): HRESULT;
-  //
+  // Lists the devicenames from an IMFActivate array.
   procedure ListDeviceNames(ppDevices: PIMFActivate; // Pointer to array of IMFActivate
                             out iList: TStringList); // output
 
-  //
+  // Sets the maximum frame rate on the media source.
   function SetMaxFrameRate(pSource: IMFMediaSource;
                            dwTypeIndex: DWORD): HRESULT;
 
@@ -793,7 +828,7 @@ type
                                               out pcbSize: DWORD // Receives the size of the structure.
                                               ): HRESULT;
 
-  // Copy an attribute value from one attribute store to another.
+  // Copies an attribute value from one attribute store to another.
   function CopyAttribute(pSrc: IMFAttributes;
                          var pDest: IMFAttributes;
                          const key: TGUID): HRESULT; overload;
@@ -823,8 +858,8 @@ type
                                 out ppPhotoMediaType: IMFMediaType): HRESULT; overload;
 
 
-// VIDEO MEDIA TYPE HELPERS //////////////////////////////////////////////////
-//============================================================================
+// Video Media Type Helpers ////////////////////////////////////////////////////
+//==============================================================================
 
   // Helper function to get the frame rate from a video media type.
   function GetFrameRate(pType: IMFMediaType;
@@ -920,7 +955,7 @@ type
   // Gets audio (EndPoint)device capabilities
   function GetAudioFormat(var pMfAudioFormat: TMFAudioFormat): HRESULT;
 
-  // Gets audio stream info
+  // Gets audio stream info from a media source.
   function GetAudioSubType(mSource: IMFMediaSource;
                            out pSubType: TGUID;
                            out pFormatTag: DWord;
@@ -938,17 +973,24 @@ type
                                      MftEnumFlag: MFT_ENUM_FLAG; // Flag for registering and enumeration Media Foundation Transforms (MFTs).
                                      out aAudioFmts: TMFAudioFormatArray): HResult;
 
+  // Helper function to get an attribute whose value is a string.
+  function AttributeGetString(pAttributes: IMFAttributes;
+                              out pwcStr: PWideChar): HResult; overload;
+
+  function AttributeGetString(pActivate: IMFActivate;
+                              out pwcStr: PWideChar): HResult; overload;
+
 // Ducking
 // =======
 
-  // The following code gets a reference to the IAudioSessionControl2
+  // This function gets a reference to the IAudioSessionControl2
   // interface and call its methods to determine whether the stream associated with
   // the audio session is a system sound.
   function SetDuckingForSystemSounds(): HResult;
 
 
 // Sami (.smi .sami)
-// ===================
+// =================
 
   // Synchronized Accessible Media Interchange (SAMI) is a format for adding captions to digital media.
   // The captions are stored in a separate text file with the file name extension .smi or .sami.
@@ -961,7 +1003,7 @@ type
   // This interface is obtained by calling IMFGetService.GetService on the SAMI media source.
   // (If you are using the SAMI media source with the Media Session, call GetService on the Media Session.)
   // The service identifier is MF_SAMI_SERVICE.
-  //
+  // See: https://learn.microsoft.com/en-us/windows/win32/medfound/sami-media-source
   // The following function sets the current SAMI style, specified by index.
   function SetSAMIStyleByIndex(pSource: IMFMediaSource;
                                index: DWORD): HRESULT;
@@ -971,12 +1013,12 @@ type
 // Media files duration and filesize
 // =================================
 
-  // Getting the File Duration
+  // Getting the File Duration.
   // To get the duration of a media file, call the IMFSourceReader.GetPresentationAttribute method and
-  // request the MF_PD_DURATION attribute, as shown in the following code.
+  // request the MF_PD_DURATION attribute.
   function GetFileDuration(pReader: IMFSourceReader;
                            out phnsDuration: LONGLONG): HRESULT;
-  // Gets de file size
+  // Gets the file size.
   function GetFileSize(pReader: IMFSourceReader;
                        out phnsFileSize: LONGLONG): HRESULT;
 
@@ -1028,6 +1070,7 @@ procedure CopyWaveFormatEx(const SourceFmt: WAVEFORMATEX;
                            out DestFmt: PWAVEFORMATEX);
 
 implementation
+
 
 uses
   {$IFDEF DEBUG}
@@ -5661,7 +5704,7 @@ begin
 end;
 
 
-// The following example shows how to get an IMFMetadata pointer from a media source.
+// Get an IMFMetadata pointer from a media source.
 // Metadata contains descriptive information for the media content, such as title, artist, composer, and genre.
 // Metadata can also describe encoding parameters.
 // It can be faster to access this information through metadata than through media-type attributes.
@@ -5928,7 +5971,7 @@ end;
 end;
 
 
-// Shows how to get the media type handler, enumerate the preferred media types, and set the media type.
+// Get the media type handler, enumerate the preferred media types, and set the media type.
 function GetMediaType(pStreamDesc: IMFStreamDescriptor;
                       out tgMajorGuid: TGuid;
                       out bIsCompressedFormat: BOOL): HRESULT;
@@ -6514,8 +6557,76 @@ done:
 end;
 
 
+function AttributeGetString(pAttributes: IMFAttributes;
+                            out pwcStr: PWideChar): HResult; overload;
+var
+  hr: HResult;
+  cchLength: UINT32;
+  pString: PWideChar;
+
+begin
+
+  hr := pAttributes.GetStringLength(MF_ATTRIBUTE_STRING,
+                                    cchLength);
+
+  if SUCCEEDED(hr) then
+    begin
+      pString := New(PWideChar[cchLength + 1]);
+        if (pString = nil) then
+          hr := E_OUTOFMEMORY;
+    end;
+
+  if SUCCEEDED(hr) then
+    begin
+      hr := pAttributes.GetString(MF_ATTRIBUTE_STRING,
+                                  pString,
+                                  cchLength + 1,
+                                  cchLength);
+    end;
+
+  if Assigned(pString) then
+    Dispose(pString);
+
+  Result := hr;
+end;
+
+
+function AttributeGetString(pActivate: IMFActivate;
+                            out pwcStr: PWideChar): HResult; overload;
+var
+  hr: HResult;
+  cchLength: UINT32;
+  pString: PWideChar;
+
+begin
+
+  hr := pActivate.GetStringLength(MF_ATTRIBUTE_STRING,
+                                  cchLength);
+
+  if SUCCEEDED(hr) then
+    begin
+      pString := New(PWideChar[cchLength +1]);
+        if (pString = nil) then
+          hr := E_OUTOFMEMORY;
+    end;
+
+  if SUCCEEDED(hr) then
+    begin
+      hr := pActivate.GetString(MF_ATTRIBUTE_STRING,
+                                pString,
+                                cchLength +1,
+                                cchLength);
+    end;
+
+  if Assigned(pString) then
+    Dispose(pString);
+
+  Result := hr;
+end;
+
+
 // Ducking
-//========
+// =======
 function SetDuckingForSystemSounds(): HResult;
 var
   hr: HResult;
@@ -7075,6 +7186,182 @@ begin
   // User is responsible to free the memory occupied by the result.
   // Like: FreeMem(DestFmt);
 end;
+
+
+function CreateUncompressedVideoType(fccFormat: DWORD;
+                                     aWidth: UINT32;
+                                     aHeight: UINT32;
+                                     interlaceMode: MFVideoInterlaceMode;
+                                     frameRate: MFRatio;
+                                     par: MFRatio;
+                                     out ppType: IMFMediaType): HResult;
+var
+  hr: HResult;
+  subtype: TGUID;
+  lStride: LONG;
+  cbImage: UINT;
+  pType: IMFMediaType;
+
+label
+  done;
+
+begin
+  lStride := 0;
+  subtype := MFVideoFormat_Base;
+
+  // Set the subtype GUID from the FOURCC or D3DFORMAT value.
+  subtype.D1 := fccFormat;
+
+  hr := MFCreateMediaType(pType);
+  if FAILED(hr) then
+    goto done;
+
+  hr := pType.SetGUID(MF_MT_MAJOR_TYPE,
+                      MFMediaType_Video);
+  if FAILED(hr) then
+    goto done;
+
+  hr := pType.SetGUID(MF_MT_SUBTYPE,
+                      subtype);
+  if FAILED(hr) then
+    goto done;
+
+  hr := pType.SetUINT32(MF_MT_INTERLACE_MODE,
+                        interlaceMode);
+  if FAILED(hr) then
+    goto done;
+
+  hr := MFSetAttributeSize(pType,
+                           MF_MT_FRAME_SIZE,
+                           aWidth,
+                           aHeight);
+  if FAILED(hr) then
+    goto done;
+
+  // Calculate the default stride value.
+  hr := pType.SetUINT32(MF_MT_DEFAULT_STRIDE,
+                        UINT32(lStride));
+  if FAILED(hr) then
+    goto done;
+
+  // Calculate the image size in bytes.
+  hr := MFCalculateImageSize(subtype,
+                             aWidth,
+                             aHeight,
+                             cbImage);
+  if FAILED(hr) then
+    goto done;
+
+  hr := pType.SetUINT32(MF_MT_SAMPLE_SIZE,
+                        cbImage);
+  if FAILED(hr) then
+    goto done;
+
+  hr := pType.SetUINT32(MF_MT_FIXED_SIZE_SAMPLES,
+                        UINT32(1) {True});
+  if FAILED(hr) then
+    goto done;
+
+  hr := pType.SetUINT32(MF_MT_ALL_SAMPLES_INDEPENDENT,
+                        UINT32(1) {True});
+  if FAILED(hr) then
+    goto done;
+
+  // Frame rate
+  hr := MFSetAttributeRatio(pType,
+                            MF_MT_FRAME_RATE,
+                            frameRate.Numerator,
+                            frameRate.Denominator);
+  if FAILED(hr) then
+    goto done;
+
+  // Pixel aspect ratio
+  hr := MFSetAttributeRatio(pType,
+                            MF_MT_PIXEL_ASPECT_RATIO,
+                            par.Numerator,
+                            par.Denominator);
+  if FAILED(hr) then
+    goto done;
+
+  // Return the pointer to the caller.
+  ppType := pType;
+
+done:
+  Result := hr;
+
+end;
+
+
+function ConvertVideoTypeToUncompressedType(pType: IMFMediaType;     // Pointer to an encoded video type.
+                                            const subtype: TGUID;    // Uncompressed subtype (eg, RGB-32, AYUV)
+                                            out ppType: IMFMediaType // Receives a matching uncompressed video type.
+                                            ): HResult;
+var
+  hr: HResult;
+  pTypeUncomp: IMFMediaType;
+  majortype: TGUID;
+  par: MFRatio;
+
+label
+  done;
+
+begin
+
+  hr := pType.GetMajorType(majortype);
+  if FAILED(hr) then
+    goto done;
+
+  if not IsEqualGUID(majortype,
+                     MFMediaType_Video) then
+    begin
+      hr := MF_E_INVALIDMEDIATYPE;
+      goto done;
+    end;
+
+  // Create a new media type and copy over all of the items.
+  // This ensures that extended color information is retained.
+  hr := MFCreateMediaType(pTypeUncomp);
+  if FAILED(hr) then
+    goto done;
+
+  hr := pType.CopyAllItems(pTypeUncomp);
+  if FAILED(hr) then
+    goto done;
+
+  // Set the subtype.
+  hr := pTypeUncomp.SetGUID(MF_MT_SUBTYPE,
+                            subtype);
+  if FAILED(hr) then
+    goto done;
+
+  // Uncompressed means all samples are independent.
+  hr := pTypeUncomp.SetUINT32(MF_MT_ALL_SAMPLES_INDEPENDENT,
+                              UINT32(1) {True});
+  if FAILED(hr) then
+    goto done;
+
+  // Fix up PAR if not set on the original type.
+  hr := MFGetAttributeRatio(pTypeUncomp,
+                            MF_MT_PIXEL_ASPECT_RATIO,
+                            UINT32(par.Numerator),
+                            UINT32(par.Denominator));
+  if FAILED(hr) then
+    goto done;
+
+  // Default to square pixels.
+  hr := MFSetAttributeRatio(pTypeUncomp,
+                            MF_MT_PIXEL_ASPECT_RATIO,
+                            1,
+                            1);
+  if FAILED(hr) then
+    goto done;
+
+  ppType := pTypeUncomp;
+
+done:
+  Result := hr;
+end;
+
 
 // External methods
 //=================

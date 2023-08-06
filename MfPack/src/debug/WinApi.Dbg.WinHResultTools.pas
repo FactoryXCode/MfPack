@@ -83,7 +83,7 @@ uses
 const
   CRLF = #13 + #10;  // DOS carriage return.
   SDK_API_VERSION = '10.0.22621.0';  // Latest Win 11 API version.
-  // When needed, copy newer versions to ../MfPack/Tools/MicrosoftErrorLookupTool folder and
+  // When needed, copy newer versions to ..\MfPack\Tools\MicrosoftErrorLookupTool folder and
   // Adjust the file title here.
   WIN_ERROR_LOOKUP_TOOL = 'Err_6.4.5.exe';
 

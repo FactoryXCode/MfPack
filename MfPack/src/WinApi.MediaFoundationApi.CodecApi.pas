@@ -2664,6 +2664,7 @@ const
 
 
 type
+  //H.265/HEVC
   PeAVEncH265VProfile = ^eAVEncH265VProfile;
   eAVEncH265VProfile = UINT32;
   {$EXTERNALSYM eAVEncH265VProfile}

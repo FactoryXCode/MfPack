@@ -148,9 +148,8 @@ type
 
     // Get the current value of a parameter.
     //
-    function
-    GetValue (const Api: TGUID;
-              out Value: VARIANT): HResult; stdcall;
+    function GetValue (const Api: TGUID;
+                       out Value: VARIANT): HResult; stdcall;
 
     //
     // SetValue():

@@ -10,10 +10,10 @@ located at ../MfPack/Tools.
 The Windows System Error Code Lookup Tool can be downloaded at:
   https://learn.microsoft.com/en-us/windows/win32/debug/system-error-code-lookup-tool.
 When you need a version > 6.4.5, that is allready present, copy this tool 
-to ../MfPack/Tools/MicrosoftErrorLookupTool and Adjust the WIN_ERROR_LOOKUP_TOOL constant in
+to ../MfPack/Tools/MicrosoftErrorLookupTool and adjust the WIN_ERROR_LOOKUP_TOOL constant in
 the WinApi.Dbg.WinHResultTools.pas unit.
 
-To use the tools application, add ../MfPack/src/dbg to your project's Searchpath.
+To use the tools application, add ..\MfPack\src\dbg to your project's Searchpath.
 
 NOTES: 
  - This release is updated for compiler version 17 up to 34.
@@ -26,6 +26,6 @@ Project location: https://github.com/FactoryXCode/MfPack
                   https://sourceforge.net/projects/MFPack
 
 First release date: 09/07/2023
-Final release date: 18/07/2023
+Final release date: 06/08/2023
 
 Copyright © FactoryX. All rights reserved. 

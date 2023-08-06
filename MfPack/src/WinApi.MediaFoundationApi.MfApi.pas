@@ -2167,8 +2167,10 @@ const
 
 
 const           // updt 090812 add
-
+  //
   // MFT_CATEGORY
+  //
+  // MFT Registry categories.
   // The following GUIDs define categories for Media Foundation transforms (MFTs).
   // These categories are used to register and enumerate MFTs.
 
@@ -2197,7 +2199,7 @@ const           // updt 090812 add
   {$EXTERNALSYM MFT_CATEGORY_AUDIO_EFFECT}
 
   //#if (WINVER >= _WIN32_WINNT_WIN7)
-  // {302ea3fc-aa5f-47f9-9f7a-c2188bb16302}...MFT_CATEGORY_VIDEO_PROCESSOR
+  // {302ea3fc-aa5f-47f9-9f7a-c2188bb16302}   MFT_CATEGORY_VIDEO_PROCESSOR
   MFT_CATEGORY_VIDEO_PROCESSOR        : TGuid = '{302ea3fc-aa5f-47f9-9f7a-c2188bb16302}'; //updt 090812 correct GUID
   {$EXTERNALSYM MFT_CATEGORY_VIDEO_PROCESSOR}
   //#endif // (WINVER >= _WIN32_WINNT_WIN7)
@@ -2399,13 +2401,13 @@ const
   function MFTEnumEx(const guidCategory: TGuid;  // A GUID that specifies the category of MFTs to enumerate. For a list of MFT categories, see MFT_CATEGORY.
                      Flags: UINT32;  // The bitwise OR of zero or more flags from the _MFT_ENUM_FLAG enumeration.
                      pInputType: PMFT_REGISTER_TYPE_INFO; // A pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an input media type to match.
-                                                          // This parameter can be Nil. If Nil, all input types are matched.
+                                                          // This parameter can be nil. If nil, all input types are matched.
                      pOutputType: PMFT_REGISTER_TYPE_INFO;  // A pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an output media type to match.
-                                                            // This parameter can be Nil. If Nil, all output types are matched.
+                                                            // This parameter can be nil. If nil, all output types are matched.
                      out pppMFTActivate: PIMFActivate;  // Receives an array of IMFActivate interface pointers.
                                                         // Each pointer represents an activation object for an MFT that matches the search criteria.
                                                         // The function allocates the memory for the array. The caller must release the pointers and call the
-                                                        // CoTaskMemFree function to free the memory for the array.
+                                                        // CoTaskMemFree function to free the memory used by the array.
 
                      out pnumMFTActivate: UINT32): HResult; stdcall;  // Receives the number of elements in the pppMFTActivate array. If no MFTs match the search criteria, this parameter receives the value zero.
   {$EXTERNALSYM MFTEnumEx}
@@ -2416,9 +2418,10 @@ const
   // In Delphi XE7 CoTaskMemFree does not free the array at once this will result in a pointer error.
   // You need to itterate the array and call CoTaskMemFree for each interface item!
   //
-  // *pppMFTActivate must be released like this when using as global array:
+  // pppMFTActivate must be released like this when using as global array:
   //
   // Shut down and release the interface pointers.   (Don't use  for i := Low() to High() do !!)
+  // {$POINTERMATH ON}
   // for i := 0 to count -1 do   // count is a returned UINT32 from MFEnumDeviceSources
   //   begin
   //     CoTaskMemFree(pppMFTActivate[i]);
@@ -2427,7 +2430,7 @@ const
   //   end;
   //
   // SetLength(pppMFTActivate, 0);
-  //
+  // {$POINTERMATH OFF}
 
 
 
