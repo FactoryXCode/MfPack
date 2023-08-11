@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/08/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 11/08/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or higher.
@@ -38,7 +38,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.19041.0
+// SDK version: 10.0.22621.0
 //
 // Todo: -
 //
@@ -1153,12 +1153,12 @@ type
                      out pguidValue: TGuid): HResult; stdcall;
 
     function GetStringLength(const guidKey: TGUID;
-                             pcchLength: UINT32): HResult; stdcall;
+                             out pcchLength: UINT32): HResult; stdcall;
 
     function GetString(const guidKey: REFGUID;
                        out pwszValue: LPWSTR;
                        out cchBufSize: UINT32;
-                       pcchLength: UINT32): HResult; stdcall;
+                       out pcchLength: UINT32): HResult; stdcall;
 
     function GetAllocatedString(const guidKey: REFGUID;
                                 out ppwszValue: LPWSTR;
@@ -1182,7 +1182,7 @@ type
 
     function GetAllocatedBlob(const guidKey: TGUID;
                               out ppBuf: PUINT8;
-                              pcbSize: UINT32): HResult; stdcall;
+                              out pcbSize: UINT32): HResult; stdcall;
 
     function GetUnknown(const guidKey: TGUID;
                         const riid: REFIID;
