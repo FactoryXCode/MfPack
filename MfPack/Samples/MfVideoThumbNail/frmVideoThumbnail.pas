@@ -15,7 +15,7 @@
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Renate Schaap.
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
@@ -302,12 +302,10 @@ begin
   //hr := CoInitializeEx(nil,
   //                     COINIT_APARTMENTTHREADED OR COINIT_DISABLE_OLE1DDE);
 
-  if (SUCCEEDED(hr)) then
-    begin
-      // Initialize Media Foundation.
-      hr := MFStartup(MF_VERSION{,
-                      MFSTARTUP_FULL}); // The default is MFSTARTUP_FULL (0), so there is no need to add this parameter.
-    end;
+  //if (SUCCEEDED(hr)) then
+    // Initialize Media Foundation.
+    hr := MFStartup(MF_VERSION{,
+                    MFSTARTUP_FULL}); // The default is MFSTARTUP_FULL (0), so there is no need to add this parameter.
 
   // Set the background color
   BACKGROUND_COLOR := D2D1TColorF($2F4F4F);

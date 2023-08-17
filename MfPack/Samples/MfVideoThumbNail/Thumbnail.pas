@@ -15,7 +15,7 @@
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Renate Schaap.
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
@@ -608,9 +608,9 @@ begin
 
   pbCanSeek := FALSE;
 
-  hr := m_pReader.GetPresentationAttribute(DWORD(MF_SOURCE_READER_FIRST_AUDIO_STREAM),
-                                           MF_SOURCE_READER_MEDIASOURCE_CHARACTERISTICS,
-                                           _var);
+  hr := m_pReader.GetPresentationAttribute(MF_SOURCE_READER_MEDIASOURCE, 
+                                           MF_SOURCE_READER_MEDIASOURCE_CHARACTERISTICS, 
+                                           _var);                                       
 
   if (SUCCEEDED(hr)) then
     begin
