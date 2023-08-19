@@ -156,6 +156,7 @@ contains
   WinApi.MediaFoundationApi.MfApi in '..\src\WinApi.MediaFoundationApi.MfApi.pas',
   WinApi.MediaFoundationApi.MfCaptureEngine in '..\src\WinApi.MediaFoundationApi.MfCaptureEngine.pas',
   WinApi.MediaFoundationApi.MfContentDecryptionModule in '..\src\WinApi.MediaFoundationApi.MfContentDecryptionModule.pas',
+  WinApi.MediaFoundationApi.MfD3D12 in '..\src\WinApi.MediaFoundationApi.MfD3D12.pas',
   WinApi.MediaFoundationApi.MfError in '..\src\WinApi.MediaFoundationApi.MfError.pas',
   WinApi.MediaFoundationApi.MfIdl in '..\src\WinApi.MediaFoundationApi.MfIdl.pas',
   WinApi.MediaFoundationApi.MfMediaCapture in '..\src\WinApi.MediaFoundationApi.MfMediaCapture.pas',
@@ -214,6 +215,7 @@ contains
   WinApi.WinMM.VfW in '..\src\WinApi.WinMM.VfW.pas',
   WinApi.WinMM.VfwExt in '..\src\WinApi.WinMM.VfwExt.pas',
   WinApi.WinMM.VfwMsgs in '..\src\WinApi.WinMM.VfwMsgs.pas',
-  WinApi.Wmistr in '..\src\WinApi.Wmistr.pas';
+  WinApi.Wmistr in '..\src\WinApi.Wmistr.pas',
+  WinApi.KsUuIds in '..\src\WinApi.KsUuIds.pas';
 
 end.
