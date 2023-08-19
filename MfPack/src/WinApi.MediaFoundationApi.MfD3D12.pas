@@ -200,12 +200,9 @@ type
   {$EXTERNALSYM MF_MT_D3D_RESOURCE_VERSION_ENUM}
 
 const
-  //
-  //
+
   //
   // MF D3D12 synchronization attributes
-  //
-  //
   //
 
   // MF_D3D12_SYNCHRONIZATION_OBJECT
@@ -240,20 +237,20 @@ const
   // Data type: UINT32 (treat as Boolean)
   // This attribute indicates whether CPU access is required for the D3D12 resources.  Default value is 0 (FALSE).
   // {28ee9fe3-d481-46a6-b98a-7f-69-d5-28-0e-82}
-  MF_MT_D3D12_CPU_READBACK  : TGUID = (D1: $28ee9fe3;
-                                       D2: $d481;
-                                       D3: $46a6;
-                                       D4: ($b9, $8a, $7f, $69, $d5, $28, $e, $82));
+  MF_MT_D3D12_CPU_READBACK : TGUID = (D1: $28ee9fe3;
+                                      D2: $d481;
+                                      D3: $46a6;
+                                      D4: ($b9, $8a, $7f, $69, $d5, $28, $e, $82));
 
   // MF_MT_D3D12_TEXTURE_LAYOUT
   // Data type: UINT32
   // This attribute indicates the texture layout options that were used to create the resources.  The value of this attribute
   // corresponds to values in the D3D12_TEXTURE_LAYOUT enumeration.
   // {97c85caa-beb-4ee1-9715-f2-2f-ad-8c-10-f5}
-  MF_MT_D3D12_TEXTURE_LAYOUT  : TGUID = (D1: $97c85caa;
-                                         D2: $beb;
-                                         D3: $4ee1;
-                                         D4: ($97, $15, $f2, $2f, $ad, $8c, $10, $f5));
+  MF_MT_D3D12_TEXTURE_LAYOUT : TGUID = (D1: $97c85caa;
+                                        D2: $beb;
+                                        D3: $4ee1;
+                                        D4: ($97, $15, $f2, $2f, $ad, $8c, $10, $f5));
 
   // MF_MT_D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET
   // Data type: UINT32 (treat as Boolean)
@@ -261,10 +258,10 @@ const
   // with the media type.  The value of this attribute corresponds to the D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET value from
   // the D3D12_RESOURCE_FLAGS enumeration.
   // {eeac2585-3430-498c-84a2-77-b1-bb-a5-70-f6}
-  MF_MT_D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET  : TGUID = (D1: $eeac2585;
-                                                            D2: $3430;
-                                                            D3: $498c;
-                                                            D4: ($84, $a2, $77, $b1, $bb, $a5, $70, $f6));
+  MF_MT_D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET : TGUID = (D1: $eeac2585;
+                                                         D2: $3430;
+                                                         D3: $498c;
+                                                        D4: ($84, $a2, $77, $b1, $bb, $a5, $70, $f6));
 
   // MF_MT_D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL
   // Data type: UINT32 (treat as Boolean)
@@ -272,10 +269,10 @@ const
   // with the media type.  The value of this attribute corresponds to the D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL value
   // from the D3D12_RESOURCE_FLAGS enumeration.
   // {b1138dc3-01d5-4c14-9bdc-cd-c9-33-6f-55-b9}
-  MF_MT_D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL  : TGUID = (D1: $b1138dc3;
-                                                            D2: $1d5;
-                                                            D3: $4c14;
-                                                            D4: ($9b, $dc, $cd, $c9, $33, $6f, $55, $b9));
+  MF_MT_D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL : TGUID = (D1: $b1138dc3;
+                                                           D2: $1d5;
+                                                           D3: $4c14;
+                                                           D4: ($9b, $dc, $cd, $c9, $33, $6f, $55, $b9));
 
   // MF_MT_D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS
   // Data type: UINT32 (treat as Boolean)
@@ -283,10 +280,10 @@ const
   // with the media type.  The value of this attribute corresponds to the D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS value from
   // the D3D12_RESOURCE_FLAGS enumeration.
   // {82c85647-5057-4960-9559-f4-5b-8e-27-14-27}
-  MF_MT_D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS   : TGUID = (D1: $82c85647;
-                                                                D2: $5057;
-                                                                D3: $4960;
-                                                                D4: ($95, $59, $f4, $5b, $8e, $27, $14, $27));
+  MF_MT_D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : TGUID = (D1: $82c85647;
+                                                              D2: $5057;
+                                                              D3: $4960;
+                                                              D4: ($95, $59, $f4, $5b, $8e, $27, $14, $27));
 
   // MF_MT_D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE
   // Data type: UINT32 (treat as Boolean)
@@ -294,20 +291,20 @@ const
   // with the media type.  The value of this attribute corresponds to the D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE value from
   // the D3D12_RESOURCE_FLAGS enumeration.
   // {ba06bfac-ffe3-474a-ab55-16-1e-e4-41-7a-2e}
-  MF_MT_D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE  : TGUID = (D1: $ba06bfac;
-                                                             D2: $ffe3;
-                                                             D3: $474a;
-                                                             D4: ($ab, $55, $16, $1e, $e4, $41, $7a, $2e));
+  MF_MT_D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE : TGUID = (D1: $ba06bfac;
+                                                            D2: $ffe3;
+                                                            D3: $474a;
+                                                            D4: ($ab, $55, $16, $1e, $e4, $41, $7a, $2e));
 
   // MF_MT_D3D12_RESOURCE_FLAG_ALLOW_CROSS_ADAPTER
   // Data type: UINT32 (treat as Boolean)
   // This attribute indicates whether the resources in the stream can be used for cross-adapter data.  The value of this
   // attribute corresponds to the D3D12_RESOURCE_FLAG_ALLOW_CROSS_ADAPTER value from the D3D12_RESOURCE_FLAGS enumeration.
   // {a6a1e439-2f96-4ab5-98dc-ad-f7-49-73-50-5d}
-  MF_MT_D3D12_RESOURCE_FLAG_ALLOW_CROSS_ADAPTER  : TGUID = (D1: $a6a1e439;
-                                                            D2: $2f96;
-                                                            D3: $4ab5;
-                                                            D4: ($98, $dc, $ad, $f7, $49, $73, $50, $5d));
+  MF_MT_D3D12_RESOURCE_FLAG_ALLOW_CROSS_ADAPTER : TGUID = (D1: $a6a1e439;
+                                                           D2: $2f96;
+                                                           D3: $4ab5;
+                                                           D4: ($98, $dc, $ad, $f7, $49, $73, $50, $5d));
 
   // MF_MT_D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS
   // Data type: UINT32 (treat as Boolean)
@@ -315,40 +312,40 @@ const
   // command queues.  The value of this attribute corresponds to the D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS value from the
   // D3D12_RESOURCE_FLAGS enumeration.
   // {a4940b2-cfd6-4738-9d02-98-11-37-34-01-5a}
-  MF_MT_D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS  : TGUID = (D1: $a4940b2;
-                                                                  D2: $cfd6;
-                                                                  D3: $4738;
-                                                                  D4: ($9d, $2, $98, $11, $37, $34, $1, $5a));
+  MF_MT_D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS : TGUID = (D1: $a4940b2;
+                                                                 D2: $cfd6;
+                                                                 D3: $4738;
+                                                                 D4: ($9d, $2, $98, $11, $37, $34, $1, $5a));
 
   // MF_SA_D3D12_HEAP_FLAGS
   // Data type: UINT32
   // This attribute contains the value with the heap options used for the D3D12 resources in the stream.  The attribute
   // contains a bitwise-OR’d combination of D3D12_HEAP_FLAGS enumeration values.
   // {496b3266-d28f-4f8c-93a7-4a-59-6b-1a-31-a1}
-  MF_SA_D3D12_HEAP_FLAGS  : TGUID = (D1: $496b3266;
-                                     D2: $d28f;
-                                     D3: $4f8c;
-                                     D4: ($93, $a7, $4a, $59, $6b, $1a, $31, $a1));
+  MF_SA_D3D12_HEAP_FLAGS : TGUID = (D1: $496b3266;
+                                    D2: $d28f;
+                                    D3: $4f8c;
+                                    D4: ($93, $a7, $4a, $59, $6b, $1a, $31, $a1));
 
   // MF_SA_D3D12_HEAP_TYPE
   // Data type: UINT32
   // This attribute contains the value specifying the type of heap used for the D3D12 resources in the stream.  The value of
   // this attribute corresponds to a value from the D3D12_HEAP_TYPE enumeration.
   // {56f26a76-bbc1-4ce0-bb11-e2-23-68-d8-74-ed}
-  MF_SA_D3D12_HEAP_TYPE  : TGUID = (D1: $56f26a76;
-                                    D2: $bbc1;
-                                    D3: $4ce0;
-                                    D4: ($bb, $11, $e2, $23, $68, $d8, $74, $ed));
+  MF_SA_D3D12_HEAP_TYPE : TGUID = (D1: $56f26a76;
+                                   D2: $bbc1;
+                                   D3: $4ce0;
+                                   D4: ($bb, $11, $e2, $23, $68, $d8, $74, $ed));
 
   // MF_SA_D3D12_CLEAR_VALUE
   // Data type: BLOB
   // This attribute contains a blob with the information used to optimize clear operations for the D3D12 resources
   // in the stream.  The blob contains an instance of the D3D12_CLEAR_VALUE structure.
   // {86ba9a39-0526-495d-9ab5-54-ec-9f-ad-6f-c3}
-  MF_SA_D3D12_CLEAR_VALUE  : TGUID = (D1: $86ba9a39;
-                                      D2: $526;
-                                      D3: $495d;
-                                      D4: ($9a, $b5, $54, $ec, $9f, $ad, $6f, $c3));
+  MF_SA_D3D12_CLEAR_VALUE : TGUID = (D1: $86ba9a39;
+                                     D2: $526;
+                                     D3: $495d;
+                                     D4: ($9a, $b5, $54, $ec, $9f, $ad, $6f, $c3));
 
 
   // Additional Prototypes for ALL interfaces
