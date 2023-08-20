@@ -2398,7 +2398,7 @@ const
 
   // >= Win 7
 
-  function MFTEnumEx(const guidCategory: TGuid;  // A GUID that specifies the category of MFTs to enumerate. For a list of MFT categories, see MFT_CATEGORY.
+  function MFTEnumEx(guidCategory: TGuid;  // A GUID that specifies the category of MFTs to enumerate. For a list of MFT categories, see MFT_CATEGORY.
                      Flags: UINT32;  // The bitwise OR of zero or more flags from the _MFT_ENUM_FLAG enumeration.
                      pInputType: PMFT_REGISTER_TYPE_INFO; // A pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an input media type to match.
                                                           // This parameter can be nil. If nil, all input types are matched.
@@ -2408,6 +2408,8 @@ const
                                                         // Each pointer represents an activation object for an MFT that matches the search criteria.
                                                         // The function allocates the memory for the array. The caller must release the pointers and call the
                                                         // CoTaskMemFree function to free the memory used by the array.
+
+
 
                      out pnumMFTActivate: UINT32): HResult; stdcall;  // Receives the number of elements in the pppMFTActivate array. If no MFTs match the search criteria, this parameter receives the value zero.
   {$EXTERNALSYM MFTEnumEx}
@@ -2436,17 +2438,19 @@ const
 
 //#endif // (WINVER >= _WIN32_WINNT_WIN7)
 
+  //
+  // results pszName, ppInputTypes, and ppOutputTypes must be freed with CoTaskMemFree.
+  // ppAttributes must be released.
+  //
 
-  function MFTGetInfo(const clsidMFT: CLSID;
-                      out pszName: PWideChar;
-                      out ppInputTypes: PMFT_REGISTER_TYPE_INFO;
-                      out pcInputTypes: UINT32;
-                      out ppOutputTypes: PMFT_REGISTER_TYPE_INFO;
-                      out pcOutputTypes: UINT32; //updt 090812 typo fix
-                      out ppAttributes: IMFAttributes): HResult; stdcall;
+  function MFTGetInfo(clsidMFT: CLSID;
+                      var pszName: LPWSTR;
+                      var ppInputTypes: PMFT_REGISTER_TYPE_INFO;
+                      var pcInputTypes: UINT32;
+                      var ppOutputTypes: PMFT_REGISTER_TYPE_INFO;
+                      var pcOutputTypes: UINT32;
+                      var ppAttributes: IMFAttributes): HRESULT; stdcall;
   {$EXTERNALSYM MFTGetInfo}
-  // results *pszName, *ppInputTypes, and *ppOutputTypes must be freed by caller.
-
 
 
 //#if (WINVER >= _WIN32_WINNT_WIN7)
@@ -5894,7 +5898,7 @@ const
   //  pSample - a single combined sample that should be split up
   //  pOutputSamples - output array of split samples
   //  dwOutputSampleMaxCount - maximum array size (use the BufferCount on pSample to find out an upper bound)
-  //  pdwOutputSampleCount - actual number of output samples produce
+  //  pdwOutputSampleCount - actual number of output samples produced.
 
   function MFSplitSample(pSample: PIMFSample;
                          pOutputSamples: PIMFSample;  // Out, writes to dwOutputSampleMaxCount and pdwOutputSampleCount
@@ -6018,13 +6022,12 @@ begin
   Result.D4[5] := $38;
   Result.D4[6] := $9b;
   Result.D4[7] := $71;
-
 end;
 
 //--------------------- External definitions ---------------------------------
 
 const
-  MfApiLibA   = 'Mfplat.dll';
+  MfApiLibA   = 'mfplat.dll';
   MfApiLibB   = '';  // reserved
 
 {$WARN SYMBOL_PLATFORM OFF}
@@ -6164,7 +6167,7 @@ const
   {$WARN SYMBOL_PLATFORM ON}
 
 // internal functions converted from MACRO'S
-//=====================
+//==========================================
 
 
 //
@@ -6211,9 +6214,9 @@ procedure UnpackSize(unPacked: UINT64;
                      out punWidth: UINT32;
                      out punHeight: UINT32);
 begin
-    Unpack2UINT32AsUINT64(unPacked,
-                          punWidth,
-                          punHeight);
+  Unpack2UINT32AsUINT64(unPacked,
+                        punWidth,
+                        punHeight);
 end;
 
 

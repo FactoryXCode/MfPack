@@ -130,11 +130,11 @@ type
     tgMajorFormat: TGUID;
     wcMajorFormat: string; // readable guid of majorformat
     tgSubFormat: TGUID;
-    wcSubFormat: string; // readable guid of subformat
+    wcSubFormat: LPWSTR; // readable guid of subformat
     dwFormatTag: DWord;  // FormatTag or FOURCC if present.
-    wcFormatTag: string; // Readable formattag or FOURCC
-    wsDescr: string;     // Description about the format or codec see: function GetAudioDescr
-    wsGuid: string;      // See: function GetAudioDescr
+    wcFormatTag: LPWSTR; // Readable formattag or FOURCC
+    wsDescr: LPWSTR;     // Description about the format or codec see: function GetAudioDescr
+    wsGuid: LPWSTR;      // See: function GetAudioDescr
     unChannels: UINT32;
     unSamplesPerSec: UINT32;
     dblFloatSamplePerSec: Double;
@@ -297,6 +297,36 @@ type
   TStreamContents = _StreamContents;
   TStreamContentsArray = array of TStreamContents;
 
+
+  // Record that holds the readable major and subtypes and guidvalues.
+  MFT_REGISTER_TYPE_DESCR = record
+    RegisterTypeInfo: MFT_REGISTER_TYPE_INFO; // declared in MfObjects
+    GuidName: LPWSTR;
+    FormatTag: LPWSTR;
+    FOURCC: DWord;
+    majorTypeDescr: LPWSTR;
+    subTypeDescr: LPWSTR;
+  end;
+
+  // Record that holds information about a MFT.
+  TMftEnumInfo = record
+    pwcStr: PWideChar;
+    aInputTypes: array of MFT_REGISTER_TYPE_DESCR;
+    aOutputTypes: array of MFT_REGISTER_TYPE_DESCR;
+    pAttributes: IMFAttributes;
+    public
+      procedure Reset();
+  end;
+
+
+  // MFT CATEGORIES
+  TMftCategory = record
+    CategoryGuid: TGuid;
+    CategoryGuidName: string;
+    CategoryDescr: string;
+  end;
+
+  TMftCategoriesArray = array of TMftCategory;
 
 // Collections
 // ===========
@@ -519,7 +549,7 @@ type
   // Note that setting this attribute after playback starts has no effect.
   // Therefore, set the attribute before calling IMFMediaSession.Start().
   // The following code shows how to set the stop time on an existing topology.
-
+  //
   function SetMediaStop(pTopology: IMFTopology;
                         stop: LONGLONG): HRESULT;
 
@@ -534,7 +564,6 @@ type
   // using this interface is $FFFFFFFF, or just over 7 minutes.
   // This limitation is due to an incorrect structure definition.
   //
-
   function SetMediaStopDynamic(pSession: IMFMediaSession;
                                pTopology: IMFTopology;
                                stop: LONGLONG): HRESULT;
@@ -548,23 +577,53 @@ type
   // If a match is found, the code creates the first MFT in the list.
   function FindDecoderEx(const subtype: TGUID;                  // Subtype
                          bAudio: Boolean;                       // TRUE for audio, FALSE for video
-                         out ppDecoder: IMFTransform): HRESULT; // Receives a pointer to the decoder.
+                         out ppDecoder: IMFTransform            // Receives a pointer to the decoder.
+                         ): HRESULT; deprecated 'superseded by function GetCodec';
 
 
   // Searches for a video or audio encoder.
   // Asynchronous, hardware, transcode, and field-of-use encoders are excluded.
   function FindEncoderEx(const subtype: TGUID;                  // Subtype
                          const bAudio: Boolean;                 // TRUE for audio, FALSE for video
-                         out ppEncoder: IMFTransform): HRESULT; // Receives a pointer to the encoder.
+                         out ppEncoder: IMFTransform            // Receives a pointer to the encoder.
+                         ): HRESULT; deprecated 'superseded by function GetCodec';
 
-  // Searches for a video decoder, with options to include asynchronous, hardware,
-  // or transcode decoders.
-  function FindVideoDecoder(subtype: TGUID;
+  // This function is deprecated. Only here for backward compatibility.
+  function FindVideoDecoder(const subtype: TGUID;
                             bAllowAsync: Boolean;
                             bAllowHardware: Boolean;
                             bAllowTranscode: Boolean;
-                            ppDecoder: IMFTransform): HRESULT;
+                            out ppDecoder: IMFTransform): HRESULT;  deprecated 'superseded by function GetCodec';
 
+  // Enumerates mft's by category and returns an array of IMFActivate pointers.
+  function EnumMft(const mftCategory: TGuid;
+                   mftInput: PMFT_REGISTER_TYPE_INFO;   // This parameter can be nil. If nil, all input types are matched.
+                   mftOutput: PMFT_REGISTER_TYPE_INFO;  // This parameter can be nil. If nil, all output types are matched.
+                   out ppActivate: PIMFActivate;
+                   out count: UINT32): HResult;
+
+  // Find the in- and outputs of a MFTclsid (for example CLSID_CMSH264EncoderMFT)
+  function GetMftEnumInfo(const MftClsid: CLSID;
+                          out mftEnum: TMftEnumInfo): HResult;
+
+
+  // Searches for a codec (encoder or decoder), with options to include asynchronous, hardware,
+  // or transcode decoders, majortype and category. See: MFT_ENUM_FLAG
+  // For info for parameter mftRegisterTypeInfo.guidMajorType see: https://learn.microsoft.com/en-us/windows/win32/medfound/media-type-guids
+  // For info for parameter mftRegisterTypeInfo.guidSubtype see: https://learn.microsoft.com/en-us/windows/win32/medfound/video-subtype-guids
+  //                                                             https://learn.microsoft.com/en-us/windows/win32/medfound/audio-subtype-guids
+  // Valid value for parameter mftCategory: MFT_CATEGORY_VIDEO_ENCODER, MFT_CATEGORY_VIDEO_DECODER, MFT_CATEGORY_AUDIO_ENCODER, MFT_CATEGORY_AUDIO_DECODER.
+  // The value for parameter selIndex is 0 by default, which means the function will select the first mft in the list.
+  // If you want another fmt, you should call function EnumMft prior to this function to determine the mft from the list.
+  //
+  // Parameters mftRegisterTypeInput and mftRegisterTypeOutput values can be retrieved by calling function GetMftEnumInfo prior
+  // to calling this function. One or both parameters can be nil. If nil, all input or/and output types are matched.
+  function GetCodec(mftRegisterTypeInput: PMFT_REGISTER_TYPE_INFO;   // Input type.
+                    mftRegisterTypeOutput: PMFT_REGISTER_TYPE_INFO;  // Output type.
+                    const mftCategory: TGuid;
+                    out mftCodec: IMFTransform;
+                    flags: MFT_ENUM_FLAG = MFT_ENUM_FLAG_ALL;
+                    selIndex: Integer = 0): HRESULT;
 
   // Returns the MFT decoder based on the major type GUID.
   function GetDecoderCategory(const majorType: TGUID;
@@ -574,12 +633,15 @@ type
   function GetEncoderCategory(const majorType: TGUID;
                               out pCategory: TGUID): HRESULT;
 
+  // Returns an array of MFT guids, guid names and mft descriptions.
+  function GetMftCategories(): TArray<TMftCategory>;
+
+
   // Finds a decoder for a stream.
   //
   // If the stream is not compressed, pCLSID receives the value GUID_NULL.
   function FindDecoderForStream(pSD: IMFStreamDescriptor;      // Stream descriptor for the stream.
                                 out opCLSID: CLSID): HRESULT;  // Receives the CLSID of the decoder.
-
 
   // Configures the recordsink for video.
   function ConfigureVideoEncoding(pSource: IMFCaptureSource;
@@ -711,17 +773,22 @@ type
 
   // Returns the name, name of the formattag and FOURCC value of a guid.
   function GetGUIDNameConst(const guid: TGuid;
-                            out aGuidName: string;
-                            out aFormatTag: string;
+                            out aGuidName: LPWSTR;
+                            out aFormatTag: LPWSTR;
                             out aFOURCC: DWord;
-                            out aFmtDesc: string): HResult;
+                            out aFmtDesc: LPWSTR): HResult;
 
   // Checks if a given input subtype is supported by Media Foundation MFT.
   function IsMfSupportedFormat(pSubType: TGuid): Boolean; inline; deprecated 'Use function IsMftSupportedInputFormat';
   function IsMftSupportedInputFormat(pSubType: TGuid): Boolean; inline;
 
-  // Checks if a given output subtype is supported by Media Foundation MFT.
-  function IsMftSupportedOutputFormat(pSubType: TGuid): Boolean; inline;
+  // Returns an array of supported formats.
+  function GetSupportedMftOutputFormats(): TArray<TGuid>;
+
+  // Checks if a given output subtype is supported by Media Foundation MFT and if
+  // the format has top-down data (stride).
+  function IsMftSupportedOutputFormat(const pSubType: TGuid;
+                                      out IsTopDown: Boolean): Boolean; inline;
 
 
 // Device Loss
@@ -944,13 +1011,16 @@ type
                         out tgMajorGuid: TGuid;
                         out bIsCompressedFormat: BOOL): HRESULT;
 
+  // Check if a given guid is a major type.
+  function IsMajorType(const guid: TGuid): Boolean;
+
   // Returns the mediatype associated with the Major guid.
   // To get the major type call function GetMediaType
   function GetMediaDescription(const pMajorGuid: TGuid;
                                out mtMediaType: TMediaTypes): HRESULT;
 
   // Returns the name of the Majortype constant. (RTTI will not work on some Delphi versions)
-  function GetMajorTypeDescr(const pMajorGuid: TGuid): string;
+  function GetMajorTypeDescr(const pMajorGuid: TGuid): LPWSTR;
 
   // Gets audio (EndPoint)device capabilities
   function GetAudioFormat(var pMfAudioFormat: TMFAudioFormat): HRESULT;
@@ -975,7 +1045,7 @@ type
 
   // Helper function to get an attribute whose value is a string.
   function AttributeGetString(pAttributes: IMFAttributes;
-                              const guid: TGuid;  // for example: To get the MFT friendly name use MFT_FRIENDLY_NAME_Attribute
+                              const guid: TGuid;  // For example: To get the MFT friendly name use MFT_FRIENDLY_NAME_Attribute
                               out pwcStr: PWideChar): HResult; overload;
 
   function AttributeGetString(pActivate: IMFActivate;
@@ -1264,7 +1334,7 @@ var
   hr: HRESULT;
 
 label
-  Done;
+  done;
 
 begin
 
@@ -1279,7 +1349,7 @@ begin
   // Note: For simplicity this function uses the synchronous method on
   // IMFSourceResolver to create the media source. However, creating a media
   // source can take a noticeable amount of time, especially for a network source.
-  // For a more responsive UI, use the asynchronous BeginCreateObjectFromURL method.
+  // For a more responsive UI, use the asynchronous function CreateObjectFromUrlAsync.
 
   hr := pSourceResolver.CreateObjectFromURL(LPCWSTR(sURL), // URL of the source.
                                             dwFlags,       // Create a source object.
@@ -1297,7 +1367,7 @@ begin
 
   // This will work as well: pSource := IMFMediaSource(unkSource);
 
-Done:
+done:
   // unlike C/CPP Delphi cleans up all interfaces when going out of scope.
   Result := hr;
 end;
@@ -1315,7 +1385,7 @@ var
   hr: HRESULT;
 
 label
-  Done;
+  done;
 
 begin
 
@@ -1336,7 +1406,7 @@ begin
   if (FAILED(hr)) then
     goto done;
 
-Done:
+done:
   // unlike C/CPP Delphi cleans up all interfaces when going out of scope.
   Result := hr;
 end;
@@ -1383,7 +1453,7 @@ var
   ppDevices: PIMFActivate;
 
 label
-  Done;
+  done;
 
 begin
 
@@ -1391,20 +1461,20 @@ begin
   hr := MFCreateAttributes(pAttributes,
                            1);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   // Source type: video capture devices
   hr := pAttributes.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
                             MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   // Enumerate devices first.
   hr := MFEnumDeviceSources(pAttributes,
                             ppDevices,
                             iCount);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   if (DeviceIndex > DWORD(icount)) or
      (icount = 0) then
@@ -1420,11 +1490,11 @@ begin
                                               Pointer(MediaSource));
 
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   pSource := MediaSource;
 
-Done:
+done:
 
   for i := 0 to iCount -1 do
    SafeRelease(ppDevices[i]);
@@ -1484,18 +1554,18 @@ var
   hr: HRESULT;
 
 label
-  Done;
+  done;
 
 begin
   // Get the media type handler for the stream
   hr := pSourceSD.GetMediaTypeHandler(pHandler);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   // Get the major media type
   hr := pHandler.GetMajorType(guidMajorType);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   // Create an IMFActivate object for the renderer, based on the media type
   if IsEqualGuid(MFMediaType_Video,
@@ -1504,7 +1574,7 @@ begin
       hr := MFCreateVideoRendererActivate(hVideoWnd,
                                           pActivate);
       if FAILED(hr) then
-       goto Done;
+       goto done;
 
 
     end
@@ -1512,7 +1582,7 @@ begin
     hr := MF_E_CAPTURE_SOURCE_NO_VIDEO_STREAM_PRESENT;
 
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   // Return IMFactivate pointer to caller
   mfActivate := pActivate;
@@ -1531,18 +1601,18 @@ var
   hr: HRESULT;
 
 label
-  Done;
+  done;
 
 begin
   // Get the media type handler for the stream
   hr := pSourceSD.GetMediaTypeHandler(pHandler);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   // Get the major media type
   hr := pHandler.GetMajorType(guidMajorType);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   // Create an IMFActivate object for the renderer, based on the media type
   if IsEqualGuid(MFMediaType_Audio,
@@ -1552,7 +1622,7 @@ begin
     hr := MF_E_CAPTURE_SOURCE_NO_AUDIO_STREAM_PRESENT;
 
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   // Return IMFactivate pointer to caller
   mfActivate := pActivate;
@@ -1812,7 +1882,7 @@ var
   hr: HRESULT;
 
 label
-  Done;
+  done;
 
 begin
   // Use assertions only for debugging purposes
@@ -2536,171 +2606,89 @@ done:
   Result := hr;
 end;
 
-//
+// This function is deprecated. Only here for backward compatibility.
 function FindDecoderEx(const subtype: TGUID;         // Subtype
                        bAudio: Boolean;              // TRUE for audio, FALSE for video
                        out ppDecoder: IMFTransform): HRESULT;
-const
-  enumflag = MFT_ENUM_FLAG_SYNCMFT or
-             MFT_ENUM_FLAG_LOCALMFT or
-             MFT_ENUM_FLAG_SORTANDFILTER;
-
 var
-  hr: HRESULT;
-  count: UINT32;
-  ppMFTActivate: PIMFActivate;  // Pointer to array
-  info: MFT_REGISTER_TYPE_INFO;
-  mft: TGuid;
+  mftRegisterTypeInfo: MFT_REGISTER_TYPE_DESCR;
 
 begin
-  hr := S_OK;
-  count := 0;
-
-try
-
-  if bAudio = True then
+  if bAudio then
     begin
-      info.guidMajorType := MFMediaType_Audio;
-      info.guidSubtype := subtype;
-      mft := MFT_CATEGORY_AUDIO_DECODER;
+      mftRegisterTypeInfo.RegisterTypeInfo.guidMajorType := MFMediaType_Audio;
+      mftRegisterTypeInfo.RegisterTypeInfo.guidSubtype := subtype;
+
+      Result := GetCodec(nil,
+                         @mftRegisterTypeInfo,
+                         MFT_CATEGORY_AUDIO_DECODER,
+                         ppDecoder);
     end
   else
     begin
-      info.guidMajorType := MFMediaType_Video;
-      info.guidSubtype := subtype;
-      mft := MFT_CATEGORY_VIDEO_DECODER;
+      mftRegisterTypeInfo.RegisterTypeInfo.guidMajorType := MFMediaType_Video;
+      mftRegisterTypeInfo.RegisterTypeInfo.guidSubtype := subtype;
+      // Get readable type info
+      mftRegisterTypeInfo.majorTypeDescr := GetMajorTypeDescr(MFMediaType_Video);
+
+      Result := GetCodec(nil,
+                         @mftRegisterTypeInfo,
+                         MFT_CATEGORY_VIDEO_DECODER,
+                         ppDecoder);
     end;
-
-  hr := MFTEnumEx(mft,
-                  enumflag,
-                  @info,    // Input type
-                  nil,      // Output type
-                  ppMFTActivate, // array of IMFActivate
-                  count);        // number of returned elements
-
-  if (SUCCEEDED(hr) And (count = 0)) then
-    begin
-      hr := MF_E_TOPO_CODEC_NOT_FOUND;
-    end;
-
-{$POINTERMATH ON}
-  // Create the first decoder in the list.
-  if (SUCCEEDED(hr)) then
-    begin
-      hr := ppMFTActivate[0].ActivateObject(IID_IMFActivate,
-                                            Pointer(ppDecoder));
-    end;
-{$POINTERMATH OFF}
-
-finally
-  Result := hr;
-end;
 end;
 
-//
+
+// This function is deprecated. Only here for backward compatibility.
 function FindEncoderEx(const subtype: TGUID;
                        const bAudio: Boolean;
                        out ppEncoder: IMFTransform): HRESULT;
 var
-  hr: HRESULT;
-  count: UINT32;
-  ppActivate: PIMFActivate;
-  info: MFT_REGISTER_TYPE_INFO;
-  mft: TGuid;
+  mftRegisterTypeInfo: MFT_REGISTER_TYPE_INFO;
 
 begin
-  hr := S_OK;
 
-try
-
-  if (bAudio = true) then
+  if bAudio then
     begin
-      info.guidMajorType := MFMediaType_Audio;
-      info.guidSubtype := subtype;
-      mft := MFT_CATEGORY_AUDIO_ENCODER;
+      mftRegisterTypeInfo.guidMajorType := MFMediaType_Audio;
+      mftRegisterTypeInfo.guidSubtype := subtype;
+
+      Result := GetCodec(@mftRegisterTypeInfo,
+                         nil,
+                         MFT_CATEGORY_AUDIO_ENCODER,
+                         ppEncoder);
     end
   else
     begin
-      info.guidMajorType := MFMediaType_Video;
-      info.guidSubtype := subtype;
-      mft := MFT_CATEGORY_VIDEO_ENCODER
+      mftRegisterTypeInfo.guidMajorType := MFMediaType_Video;
+      mftRegisterTypeInfo.guidSubtype := subtype;
+
+      Result := GetCodec(@mftRegisterTypeInfo,
+                         nil,
+                         MFT_CATEGORY_VIDEO_ENCODER,
+                         ppEncoder);
     end;
-
-  hr := MFTEnumEx(mft,
-                  MFT_ENUM_FLAG_SYNCMFT or
-                  MFT_ENUM_FLAG_LOCALMFT or
-                  MFT_ENUM_FLAG_SORTANDFILTER,
-                  nil,       // Input type
-                  @info,     // Output type
-                  ppActivate,
-                  count);
-
-  if (SUCCEEDED(hr) And (count = 0)) then
-      begin
-        hr := MF_E_TOPO_CODEC_NOT_FOUND;
-      end;
-
-  // Create the first encoder in the list.
-{$POINTERMATH ON}
-  if SUCCEEDED(hr) then
-    begin
-      hr := ppActivate[0].ActivateObject(IID_IMFTransform,
-                                         Pointer(ppEncoder));
-
-    end;
-{$POINTERMATH OFF}
-
-finally
-  CoTaskMemFree(ppActivate);
-  Result := hr;
 end;
-end;
+
 
 //
-function FindVideoDecoder(subtype: TGUID;
-                          bAllowAsync: Boolean;
-                          bAllowHardware: Boolean;
-                          bAllowTranscode: Boolean;
-                          ppDecoder: IMFTransform): HRESULT;
+function EnumMft(const mftCategory: TGuid;
+                 mftInput: PMFT_REGISTER_TYPE_INFO;
+                 mftOutput: PMFT_REGISTER_TYPE_INFO;
+                 out ppActivate: PIMFActivate;
+                 out count: UINT32): HResult;
+const
+  unFlags = MFT_ENUM_FLAG_SYNCMFT or
+            MFT_ENUM_FLAG_LOCALMFT or
+            MFT_ENUM_FLAG_SORTANDFILTER;
 var
-  hr: HRESULT;
-  count: UINT32;
-  ppActivate: PIMFActivate;
-  info: MFT_REGISTER_TYPE_INFO;
-  unFlags: UINT32;
+  hr: HResult;
 
 begin
-  hr := S_OK;
-
-  unFlags := MFT_ENUM_FLAG_SYNCMFT or
-             MFT_ENUM_FLAG_LOCALMFT or
-             MFT_ENUM_FLAG_SORTANDFILTER;
-
-try
-
-  info.guidMajorType := MFMediaType_Video;
-  info.guidSubtype := subtype;
-
-  if (bAllowAsync = True) then
-    begin
-      unFlags := unFlags or MFT_ENUM_FLAG_ASYNCMFT;
-    end;
-
-  if (bAllowHardware = True) then
-    begin
-      unFlags := unFlags or MFT_ENUM_FLAG_HARDWARE;
-    end;
-
-  if (bAllowTranscode = True) then
-    begin
-      unFlags := unFlags or MFT_ENUM_FLAG_TRANSCODE_ONLY;
-    end;
-
-
-  hr := MFTEnumEx(MFT_CATEGORY_VIDEO_DECODER,
+  hr := MFTEnumEx(mftCategory,
                   unFlags,
-                  @info,     // Input type
-                  nil,       // Output type
+                  mftInput,     // Input type
+                  mftOutput,    // Output type
                   ppActivate,
                   count);
 
@@ -2709,14 +2697,123 @@ try
       hr := MF_E_TOPO_CODEC_NOT_FOUND;
     end;
 
+  Result := hr;
+end;
+
+
+//
+function GetMftEnumInfo(const MftClsid: CLSID;
+                        out mftEnum: TMftEnumInfo): HResult;
+var
+  hr: HResult;
+  i: Integer;
+  ppInputTypes: PMFT_REGISTER_TYPE_INFO;
+  pcInputTypes: UINT32;
+  ppOutputTypes: PMFT_REGISTER_TYPE_INFO;
+  pcOutputTypes: UINT32;
+
+begin
+  // check for valid enum ID
+
+  hr := MFTGetInfo(MftClsid,
+                   mftEnum.pwcStr,
+                   ppInputTypes,
+                   pcInputTypes,
+                   ppOutputTypes,
+                   pcOutputTypes,
+                   mftEnum.pAttributes);
+
+  SetLength(mftEnum.aInputTypes,
+            pcInputTypes);
+  SetLength(mftEnum.aOutputTypes,
+            pcOutputTypes);
+
+{$POINTERMATH ON}
+
+  // Get the supported input types.
+  for i := 0 to pcInputTypes -1 do
+    begin
+      mftEnum.aInputTypes[i].RegisterTypeInfo := ppInputTypes[i];
+      // Get the desriptions of the input formats.
+      // Get majortype info
+        GetGUIDNameConst(mftEnum.aInputTypes[i].RegisterTypeInfo.guidMajorType,
+                         mftEnum.aInputTypes[i].GuidName,
+                         mftEnum.aInputTypes[i].FormatTag,
+                         mftEnum.aInputTypes[i].FOURCC,
+                         mftEnum.aInputTypes[i].majorTypeDescr);
+      // Get subtype info
+        GetGUIDNameConst(mftEnum.aInputTypes[i].RegisterTypeInfo.guidSubtype,
+                         mftEnum.aInputTypes[i].GuidName,
+                         mftEnum.aInputTypes[i].FormatTag,
+                         mftEnum.aInputTypes[i].FOURCC,
+                         mftEnum.aInputTypes[i].subTypeDescr);
+    end;
+
+  // Get the supported output types.
+  for i := 0 to pcOutputTypes -1 do
+    begin
+      mftEnum.aOutputTypes[i].RegisterTypeInfo := ppOutputTypes[i];
+      // Get the desriptions of the output formats.
+      // Get majortype info
+        GetGUIDNameConst(mftEnum.aOutputTypes[i].RegisterTypeInfo.guidMajorType,
+                         mftEnum.aOutputTypes[i].GuidName,
+                         mftEnum.aOutputTypes[i].FormatTag,
+                         mftEnum.aOutputTypes[i].FOURCC,
+                         mftEnum.aOutputTypes[i].majorTypeDescr);
+      // Get subtype info
+        GetGUIDNameConst(mftEnum.aOutputTypes[i].RegisterTypeInfo.guidSubtype,
+                         mftEnum.aOutputTypes[i].GuidName,
+                         mftEnum.aOutputTypes[i].FormatTag,
+                         mftEnum.aOutputTypes[i].FOURCC,
+                         mftEnum.aOutputTypes[i].subTypeDescr);
+    end;
+
+  CoTaskMemFree(ppInputTypes);
+  CoTaskMemFree(ppOutputTypes);
+
+  Result := hr;
+end;
+
+
+function GetCodec(mftRegisterTypeInput: PMFT_REGISTER_TYPE_INFO;
+                  mftRegisterTypeOutput: PMFT_REGISTER_TYPE_INFO;
+                  const mftCategory: TGuid;
+                  out mftCodec: IMFTransform;
+                  flags: MFT_ENUM_FLAG = MFT_ENUM_FLAG_ALL;
+                  selIndex: Integer = 0): HResult;
+
+var
+  hr: HRESULT;
+  count: UINT32;
+  ppActivate: PIMFActivate;
+  attr: IMFAttributes;
+
+begin
+  hr := S_OK;
+try
+
+  hr := MFTEnumEx(mftCategory,
+                  flags,  // default = MFT_ENUM_FLAG_ALL
+                  mftRegisterTypeInput,  // Input type
+                  mftRegisterTypeOutput, // Output type
+                  ppActivate,  // Array of IMFActivate pointers
+                  count);      // number of pointers returned.
+
+  if (SUCCEEDED(hr) and (count = 0)) then
+    begin
+      hr := MF_E_TOPO_CODEC_NOT_FOUND;
+    end;
+
 {$POINTERMATH ON}
   // Create the first decoder in the list.
+  // Note: call function EnumMft to get the number of mft's, so you may select one from the index.
   if (SUCCEEDED(hr)) then
     begin
-      hr := ppActivate[0].ActivateObject(IID_IMFTransform,
-                                         Pointer(ppDecoder));
+      hr := ppActivate[selIndex].ActivateObject(IID_IMFTransform,
+                                                Pointer(mftCodec));
+      mftCodec.GetAttributes(attr);
+      //attr.GetString()
     end;
-{$POINTERMATH OFF}
 
 finally
   CoTaskMemFree(ppActivate);
@@ -2725,7 +2822,27 @@ end;
 end;
 
 
+// This function is deprecated. Only here for backward compatibility.
+function FindVideoDecoder(const subtype: TGUID;
+                          bAllowAsync: Boolean;
+                          bAllowHardware: Boolean;
+                          bAllowTranscode: Boolean;
+                          out ppDecoder: IMFTransform): HRESULT;
+var
+  mftRegisterTypeInfo: MFT_REGISTER_TYPE_INFO;
 
+begin
+  mftRegisterTypeInfo.guidMajorType := MFMediaType_Video;
+  mftRegisterTypeInfo.guidSubtype := subtype;
+
+  Result := GetCodec(@mftRegisterTypeInfo,
+                     nil,
+                     MFT_CATEGORY_VIDEO_DECODER,
+                     ppDecoder);
+end;
+
+
+//
 function GetDecoderCategory(const majorType: TGUID;
                             out pCategory: TGUID): HRESULT;
 var
@@ -2773,6 +2890,59 @@ begin
     end;
 
   Result := hr;
+end;
+
+
+function GetMftCategories(): TArray<TMftCategory>;
+begin
+  SetLength(Result, 12);
+
+  // video
+  Result[0].CategoryGuid := MFT_CATEGORY_VIDEO_DECODER;
+  Result[0].CategoryGuidName := 'MFT_CATEGORY_VIDEO_DECODER';
+  Result[0].CategoryDescr := 'Video decoder MFTs.';
+  Result[1].CategoryGuid := MFT_CATEGORY_VIDEO_ENCODER;
+  Result[1].CategoryGuidName := 'MFT_CATEGORY_VIDEO_ENCODER';
+  Result[1].CategoryDescr := 'Video encoder MFTs.';
+  Result[2].CategoryGuid := MFT_CATEGORY_VIDEO_PROCESSOR;
+  Result[2].CategoryGuidName := 'MFT_CATEGORY_VIDEO_PROCESSOR';
+  Result[2].CategoryDescr := 'Video processor MFTs.';
+  Result[3].CategoryGuid := MFT_CATEGORY_VIDEO_EFFECT;
+  Result[3].CategoryGuidName := 'MFT_CATEGORY_VIDEO_EFFECT';
+  Result[3].CategoryDescr := 'Video effect MFTs.';
+  Result[4].CategoryGuid := MFT_CATEGORY_VIDEO_RENDERER_EFFECT;
+  Result[4].CategoryGuidName := 'MFT_CATEGORY_VIDEO_RENDERER_EFFECT';
+  Result[4].CategoryDescr := 'Video renderer effect MFTs.';
+
+  // Audio
+  Result[5].CategoryGuid := MFT_CATEGORY_AUDIO_DECODER;
+  Result[5].CategoryGuidName := 'MFT_CATEGORY_AUDIO_DECODER';
+  Result[5].CategoryDescr := 'Audio decoder MFTs.';
+  Result[6].CategoryGuid := MFT_CATEGORY_AUDIO_ENCODER;
+  Result[6].CategoryGuidName := 'MFT_CATEGORY_AUDIO_ENCODER';
+  Result[6].CategoryDescr := 'Audio encoder MFTs.';
+  Result[7].CategoryGuid := MFT_CATEGORY_AUDIO_EFFECT;
+  Result[7].CategoryGuidName := 'MFT_CATEGORY_AUDIO_EFFECT';
+  Result[7].CategoryDescr := 'Audio effect MFTs.';
+
+  // Multiplexers and de-multiplexers
+  Result[8].CategoryGuid := MFT_CATEGORY_DEMULTIPLEXER;
+  Result[8].CategoryGuidName := 'MFT_CATEGORY_DEMULTIPLEXER';
+  Result[8].CategoryDescr := 'Demultiplexer MFTs.';
+  Result[9].CategoryGuid := MFT_CATEGORY_MULTIPLEXER;
+  Result[9].CategoryGuidName := 'MFT_CATEGORY_MULTIPLEXER';
+  Result[9].CategoryDescr := 'Multiplexer MFTs.';
+
+  // Encryptors
+  Result[10].CategoryGuid := MFT_CATEGORY_ENCRYPTOR;
+  Result[10].CategoryGuidName := 'MFT_CATEGORY_ENCRYPTOR';
+  Result[10].CategoryDescr := 'Encryptor MFTs.';
+
+  // Others
+  Result[11].CategoryGuid := MFT_CATEGORY_OTHER;
+  Result[11].CategoryGuidName := 'MFT_CATEGORY_OTHER';
+  Result[11].CategoryDescr := 'Miscellaneous MFTs.';
+
 end;
 
 
@@ -2934,7 +3104,7 @@ var
   j: integer;
 
 label
-  Done;
+  done;
 
 begin
 
@@ -2942,7 +3112,7 @@ begin
      (pAttributeSourceType <> MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_AUDCAP_GUID) then
     begin
       hr := E_INVALIDARG;
-      goto Done;
+      goto done;
     end;
 
   uiNameLen := 0;
@@ -2956,14 +3126,14 @@ begin
                            1);
   if (FAILED(hr)) then
     begin
-      goto Done;
+      goto done;
     end;
 
   hr := pAttributes.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
                             pAttributeSourceType); // Source type: video or audio capture device
 
   if (FAILED(hr)) then
-    goto Done;
+    goto done;
 
 
   // Enumerate devices.
@@ -2974,14 +3144,14 @@ begin
   if (FAILED(hr)) then
     begin
       GetLastError();
-      goto Done;
+      goto done;
     end;
 
   if (iCount = 0) then
     begin
       // Nothing found
       hr := MF_E_NOT_FOUND;
-      goto Done;
+      goto done;
     end;
 
   //Set the new length
@@ -2998,7 +3168,7 @@ begin
                                             szName,
                                             uiNameLen);
       if FAILED(hr) then
-        goto Done;
+        goto done;
 
       // Add the fiendlyname to the list.
       pDeviceProperties[i].iDeviceIndex := i;
@@ -3077,7 +3247,7 @@ begin
       szName := nil;
 
       if (FAILED(hr)) then
-        goto Done;
+        goto done;
     end;
 
 {$POINTERMATH OFF}
@@ -3109,7 +3279,7 @@ begin
         iCount := 1;
     end;
 
-Done:
+done:
 
   Result := hr;
 end;
@@ -3130,7 +3300,7 @@ var
   i: Integer;
 
 label
-  Done;
+  done;
 
 begin
 
@@ -3145,7 +3315,7 @@ begin
                              False); // We need all types, supported or not. The application has to manage which type is required.
 
   if FAILED(hr) or (dwCount = 0) then
-    goto Done;
+    goto done;
 
   // Set length of the capabillities array
   SetLength(pDeviceProperties[pDeviceIndex].aVideoFormats,
@@ -3258,7 +3428,7 @@ begin
       Inc(dwIndex);
     end;
 
-Done:
+done:
 
    if SUCCEEDED(hr) then
      begin
@@ -3309,7 +3479,7 @@ var
   hr: HRESULT;
 
 label
-  Done;
+  done;
 
 begin
   count := 0;
@@ -3318,13 +3488,13 @@ begin
   hr := MFCreateAttributes(pConfig,
                            1);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   // Request video capture devices.
   hr := pConfig.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
                         pDeviceProperties.riid);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   // Enumerate the devices again, because in the mean while a device could be
   // disconnected.
@@ -3332,7 +3502,7 @@ begin
                             ppDevices,
                             count);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
 {$POINTERMATH ON}
 
@@ -3342,14 +3512,14 @@ begin
       hr := ppDevices[pDeviceProperties.iDeviceIndex].ActivateObject(IID_IMFMediaSource,
                                                                       Pointer(ppSource));
       if FAILED(hr) then
-        goto Done;
+        goto done;
 
       ppActivate := ppDevices[pDeviceProperties.iDeviceIndex];
     end
   else
     hr := MF_E_NOT_FOUND;
 
-Done:
+done:
   CoTaskMemFree(ppDevices);
   Result := hr;
 end;
@@ -3369,7 +3539,7 @@ var
   i: Integer;
 
 label
-  Done;
+  done;
 
 begin
 
@@ -3406,7 +3576,7 @@ begin
       SafeRelease(pType);
     end;
 
-Done:
+done:
   Result := hr;
 end;
 
@@ -3486,22 +3656,22 @@ end;
 // Note: RTTI is not used, because it will not work on all Delphi versions.
 //       So, we do it the alternative way.
 function GetGUIDNameConst(const guid: TGuid;
-                          out aGuidName: string;
-                          out aFormatTag: string;
+                          out aGuidName: LPWSTR;
+                          out aFormatTag: LPWSTR;
                           out aFOURCC: DWord;
-                          out aFmtDesc: string): HResult;
+                          out aFmtDesc: LPWSTR): HResult;
 var
   hr: HResult;
-  sGuidName: string;
-  sFormatTag: string;
-  sFmtDesc: string;
+  sGuidName: LPWSTR;
+  sFormatTag: LPWSTR;
+  sFmtDesc: LPWSTR;
   dwFOURCC: DWord;
 
   function IfEqualReturnProps(const gtype: TGuid;
-                              const sgName: string;
-                              const sFmtTag: string;
+                              const sgName: LPWSTR;
+                              const sFmtTag: LPWSTR;
                               const dFCC: Dword;
-                              const sDesc: string): Boolean;
+                              const sDesc: LPWSTR): Boolean;
     begin
       sGuidName := '';
       if IsEqualGuid(guid,
@@ -3522,7 +3692,7 @@ var
     end;
 
 label
-  Done;
+  done;
 
 begin
 
@@ -3531,13 +3701,13 @@ begin
                          '',
                          0,
                          'Major type GUID for a media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_SUBTYPE,
                          'MF_MT_SUBTYPE',
                          '',
                          0,
                          'Sub type GUID for a media type.') then
-     goto Done;
+     goto done;
 
 
    if IfEqualReturnProps(MF_MT_ALL_SAMPLES_INDEPENDENT,
@@ -3545,133 +3715,133 @@ begin
                          '',
                          0,
                          'Specifies for a media type whether each sample is independent of the other samples in the stream.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_FIXED_SIZE_SAMPLES,
                          'MF_MT_FIXED_SIZE_SAMPLES',
                          '',
                          0,
                          'Specifies for a media type whether the samples have a fixed size.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_COMPRESSED,
                         'MF_MT_COMPRESSED',
                         '',
                         0,
                         'Specifies for a media type whether the media data is compressed.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_SAMPLE_SIZE,
                          'MF_MT_SAMPLE_SIZE',
                          '',
                          0,
                          'Specifies the size of each sample, in bytes, in a media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_WRAPPED_TYPE,
                          'MF_MT_WRAPPED_TYPE',
                          '',
                          0,
                          'Contains a media type that has been wrapped in another media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_AUDIO_NUM_CHANNELS,
                          'MF_MT_AUDIO_NUM_CHANNELS',
                          '',
                          0,
                          'Number of audio channels in an audio media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_AUDIO_SAMPLES_PER_SECOND,
                          'MF_MT_AUDIO_SAMPLES_PER_SECOND',
                          '',
                          0,
                          'Number of audio samples per second in an audio media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_AUDIO_FLOAT_SAMPLES_PER_SECOND,
                          'MF_MT_AUDIO_FLOAT_SAMPLES_PER_SECOND',
                          '',
                          0,
                          'Number of audio samples per second in an audio media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
                          'MF_MT_AUDIO_AVG_BYTES_PER_SECOND',
                          '',
                          0,
                          'Average number of bytes per second in an audio media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_AUDIO_BLOCK_ALIGNMENT,
                          'MF_MT_AUDIO_BLOCK_ALIGNMENT',
                          '',
                          0,
                          'Block alignment, in bytes, for an audio media type. Is minimum atomic unit of data for the audio format.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_AUDIO_BITS_PER_SAMPLE,
                          'MF_MT_AUDIO_BITS_PER_SAMPLE',
                          '',
                          0,
                          'Number of bits per audio sample in an audio media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_AUDIO_VALID_BITS_PER_SAMPLE,
                          'MF_MT_AUDIO_VALID_BITS_PER_SAMPLE',
                          '',
                          0,
                          'Number of valid bits of audio data in each audio sample.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_AUDIO_SAMPLES_PER_BLOCK,
                          'MF_MT_AUDIO_SAMPLES_PER_BLOCK',
                          '',
                          0,
                          'Number of audio samples contained in one compressed block of audio data.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_AUDIO_CHANNEL_MASK,
                          'MF_MT_AUDIO_CHANNEL_MASK',
                          '',
                          0,
                          'In an audio media type, specifies the assignment of audio channels to speaker positions.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_AUDIO_FOLDDOWN_MATRIX,
                          'MF_MT_AUDIO_FOLDDOWN_MATRIX',
                          '',
                          0,
                          'Specifies how an audio decoder should transform multichannel audio to stereo output (fold-down).') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_AUDIO_WMADRC_PEAKREF,
                          'MF_MT_AUDIO_WMADRC_PEAKREF',
                          '',
                          0,
                          'Reference peak volume level of a Windows Media Audio file.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_AUDIO_WMADRC_PEAKTARGET,
                         'MF_MT_AUDIO_WMADRC_PEAKTARGET',
                         '',
                         0,
                         'Target peak volume level of a Windows Media Audio file.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_AUDIO_WMADRC_AVGREF,
                          'MF_MT_AUDIO_WMADRC_AVGREF',
                          '',
                          0,
                          'Reference average volume level of a Windows Media Audio file.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_AUDIO_WMADRC_AVGTARGET,
                          'MF_MT_AUDIO_WMADRC_AVGTARGET',
                          '',
                          0,
                          'Target average volume level of a Windows Media Audio file.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_AUDIO_PREFER_WAVEFORMATEX,
                          'MF_MT_AUDIO_PREFER_WAVEFORMATEX',
                          '',
                          0,
                          'Specifies the preferred legacy format structure to use when converting an audio media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_AAC_PAYLOAD_TYPE,
                          'MF_MT_AAC_PAYLOAD_TYPE',
                          '',
                          0,
                          'Specifies the payload type of an Advanced Audio Coding (AAC) stream.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_AAC_AUDIO_PROFILE_LEVEL_INDICATION,
                          'MF_MT_AAC_AUDIO_PROFILE_LEVEL_INDICATION',
                          '',
                          0,
                          'Specifies the audio profile and level of an Advanced Audio Coding (AAC) stream.') then
-     goto Done;
+     goto done;
 
    // Properties
    if IfEqualReturnProps(MF_MT_FRAME_SIZE,
@@ -3679,271 +3849,271 @@ begin
                          '',
                          0,
                          'Width and height of a video frame, in pixels.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_FRAME_RATE,
                          'MF_MT_FRAME_RATE',
                          '',
                          0,
                          'Frame rate of a video media type, in frames per second.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_FRAME_RATE_RANGE_MAX,
                          'MF_MT_FRAME_RATE_RANGE_MAX',
                          '',
                          0,
                          'The maximum frame rate that is supported by a video capture device, in frames per second.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_FRAME_RATE_RANGE_MIN,
                          'MF_MT_FRAME_RATE_RANGE_MIN',
                          '',
                          0,
                          'The minimum frame rate that is supported by a video capture device, in frames per second.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_PIXEL_ASPECT_RATIO,
                          'MF_MT_PIXEL_ASPECT_RATIO',
                          '',
                          0,
                          'Pixel aspect ratio for a video media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_DRM_FLAGS,
                          'MF_MT_DRM_FLAGS',
                          '',
                          0,
                          'Specifies whether a video media type requires the enforcement of copy protection.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_PAD_CONTROL_FLAGS,
                          'MF_MT_PAD_CONTROL_FLAGS',
                          '',
                          0,
                          'Specifies the aspect ratio of the output rectangle for a video media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_SOURCE_CONTENT_HINT,
                          'MF_MT_SOURCE_CONTENT_HINT',
                          '',
                          0,
                          'Describes the intended aspect ratio for a video media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_VIDEO_CHROMA_SITING,
                          'MF_MT_VIDEO_CHROMA_SITING',
                          '',
                          0,
                          'Describes how chroma was sampled for a Y''Cb''Cr'' video media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_INTERLACE_MODE,
                          'MF_MT_INTERLACE_MODE',
                          '',
                          0,
                          'Describes how the frames in a video media type are interlaced.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_TRANSFER_FUNCTION,
                          'MF_MT_TRANSFER_FUNCTION',
                          '',
                          0,
                          'Specifies the conversion function from RGB to R''G''B'' for a video media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_VIDEO_PRIMARIES,
                          'MF_MT_VIDEO_PRIMARIES',
                          '',
                          0,
                          'Specifies the color primaries for a video media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_CUSTOM_VIDEO_PRIMARIES,
                          'MF_MT_CUSTOM_VIDEO_PRIMARIES',
                          '',
                          0,
                          'Specifies custom color primaries for a video media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_YUV_MATRIX,
                          'MF_MT_YUV_MATRIX',
                          '',
                          0,
                          'For YUV media types, defines the conversion matrix from the Y''Cb''Cr'' color space to the R''G''B'' color space.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_VIDEO_LIGHTING,
                          'MF_MT_VIDEO_LIGHTING',
                          '',
                          0,
                          'Specifies the optimal lighting conditions for a video media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_VIDEO_NOMINAL_RANGE,
                          'MF_MT_VIDEO_NOMINAL_RANGE',
                          '',
                          0,
                          'Specifies the nominal range of the color information in a video media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_GEOMETRIC_APERTURE,
                         'MF_MT_GEOMETRIC_APERTURE',
                         '',
                         0,
                         'Defines the geometric aperture for a video media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_MINIMUM_DISPLAY_APERTURE,
                          'MF_MT_MINIMUM_DISPLAY_APERTURE',
                          '',
                          0,
                          'Defines the display aperture, which is the region of a video frame that contains valid image data.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_PAN_SCAN_APERTURE,
                         'MF_MT_PAN_SCAN_APERTURE',
                         '',
                         0,
                         'Defines the pan/scan aperture, which is the 4x3 region of video that should be displayed in pan/scan mode.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_PAN_SCAN_ENABLED,
                          'MF_MT_PAN_SCAN_ENABLED',
                          '',
                          0,
                          'Specifies whether pan/scan mode is enabled.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_AVG_BITRATE,
                          'MF_MT_AVG_BITRATE',
                          '',
                          0,
                          'Approximate data rate of the video stream, in bits per second, for a video media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_AVG_BIT_ERROR_RATE,
                          'MF_MT_AVG_BIT_ERROR_RATE',
                          '',
                          0,
                          'Data error rate, in bit errors per second, for a video media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_MAX_KEYFRAME_SPACING,
                          'MF_MT_MAX_KEYFRAME_SPACING',
                          '',
                          0,
                          'Maximum number of frames from one key frame to the next, in a video media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_DEFAULT_STRIDE,
                          'MF_MT_DEFAULT_STRIDE',
                          '',
                          0,
                          'Default surface stride, for an uncompressed video media type. Stride is the number of bytes needed to go from one row of pixels to the next.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_PALETTE,
                          'MF_MT_PALETTE',
                          '',
                          0,
                          'Contains the palette entries for a video media type. Use this attribute for palettized video formats, such as RGB 8.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_USER_DATA,
                          'MF_MT_USER_DATA',
                          '',
                          0,
                          'Contains additional format data for a media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_AM_FORMAT_TYPE,
                          'MF_MT_AM_FORMAT_TYPE',
                          '',
                          0,
                          'Contains a DirectShow format GUID for a media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_MPEG_START_TIME_CODE,
                          'MF_MT_MPEG_START_TIME_CODE',
                          '',
                          0,
                          'Group-of-pictures (GOP) start time code, for an MPEG-1 or MPEG-2 video media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_MPEG2_PROFILE,
                          'MF_MT_MPEG2_PROFILE',
                          '',
                          0,
                          'Specifies the MPEG-2 or H.264 profile in a video media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_MPEG2_LEVEL,
                          'MF_MT_MPEG2_LEVEL',
                          '',
                          0,
                          'Specifies the MPEG-2 or H.264 level in a video media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_MPEG2_FLAGS,
                          'MF_MT_MPEG2_FLAGS',
                          '',
                          0,
                          'Contains miscellaneous flags for an MPEG-2 video media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_MPEG_SEQUENCE_HEADER,
                          'MF_MT_MPEG_SEQUENCE_HEADER',
                          '',
                          0,
                          'Contains the MPEG-1 or MPEG-2 sequence header for a video media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_DV_AAUX_SRC_PACK_0,
                          'MF_MT_DV_AAUX_SRC_PACK_0',
                          '',
                          0,
                          'Audio auxiliary (AAUX) source pack for the first audio block in a digital video (DV) media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_DV_AAUX_CTRL_PACK_0,
                          'MF_MT_DV_AAUX_CTRL_PACK_0',
                          '',
                          0,
                          'Audio auxiliary (AAUX) source control pack for the first audio block in a digital video (DV) media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_DV_AAUX_SRC_PACK_1,
                          'MF_MT_DV_AAUX_SRC_PACK_1',
                          '',
                          0,
                          'Audio auxiliary (AAUX) source pack for the second audio block in a digital video (DV) media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_DV_AAUX_CTRL_PACK_1,
                          'MF_MT_DV_AAUX_CTRL_PACK_1',
                          '',
                          0,
                          'Audio auxiliary (AAUX) source control pack for the second audio block in a digital video (DV) media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_DV_VAUX_SRC_PACK,
                          'MF_MT_DV_VAUX_SRC_PACK',
                          '',
                          0,
                          'Video auxiliary (VAUX) source pack in a digital video (DV) media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_DV_VAUX_CTRL_PACK,
                          'MF_MT_DV_VAUX_CTRL_PACK',
                          '',
                          0,
                          'Video auxiliary (VAUX) source control pack in a digital video (DV) media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_ARBITRARY_HEADER,
                          'MF_MT_ARBITRARY_HEADER',
                          '',
                          0,
                          'Type-specific data for a binary stream in an Advanced Systems Format (ASF) file.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_ARBITRARY_FORMAT,
                          'MF_MT_ARBITRARY_FORMAT',
                          '',
                          0,
                          'Additional format data for a binary stream in an Advanced Systems Format (ASF) file.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_IMAGE_LOSS_TOLERANT,
                          'MF_MT_IMAGE_LOSS_TOLERANT',
                          '',
                          0,
                          'Specifies whether an ASF image stream is a degradable JPEG type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_MPEG4_SAMPLE_DESCRIPTION,
                          'MF_MT_MPEG4_SAMPLE_DESCRIPTION',
                          '',
                          0,
                          'Contains the sample description box for an MP4 or 3GP file.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_MPEG4_CURRENT_SAMPLE_ENTRY,
                          'MF_MT_MPEG4_CURRENT_SAMPLE_ENTRY',
                          '',
                          0,
                          'Specifies the current entry in the sample description box for an MPEG-4 media type.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_ORIGINAL_4CC,
                          'MF_MT_ORIGINAL_4CC',
                          '',
                          0,
                          'Contains the original codec FOURCC for a video stream.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MF_MT_ORIGINAL_WAVE_FORMAT_TAG,
                          'MF_MT_ORIGINAL_WAVE_FORMAT_TAG',
                          '',
                          0,
                          'Contains the original WAVE format tag for an audio stream.') then
-     goto Done;
+     goto done;
 
    // Major Media types
 
@@ -3952,55 +4122,55 @@ begin
                          '',
                          0,
                          'Audio.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFMediaType_Video,
                          'MFMediaType_Video',
                          '',
                          0,
                          'Video') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFMediaType_Protected,
                          'MFMediaType_Protected',
                          '',
                          0,
                          'Protected content. (DRM)') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFMediaType_SAMI,
                          'MFMediaType_SAMI',
                          '',
                          0,
                          'Synchronized Accessible Media Interchange (SAMI) captions.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFMediaType_Script,
                          'MFMediaType_Script',
                          '',
                          0,
                          'Script stream.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFMediaType_Image,
                          'MFMediaType_Image',
                          '',
                          0,
                          'Still image stream.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFMediaType_HTML,
                          'MFMediaType_HTML',
                          '',
                          0,
                          '') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFMediaType_Binary,
                          'MFMediaType_Binary',
                          '',
                          0,
                          'Binary stream.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFMediaType_FileTransfer,
                          'MFMediaType_FileTransfer',
                          '',
                          0,
                          'A stream that contains data files.') then
-     goto Done;
+     goto done;
 
    // Video formats ////////////////////////////////////////////////////////////
 
@@ -4012,49 +4182,49 @@ begin
                          'D3DFMT_A8R8G8B8',
                          D3DFMT_A8R8G8B8,
                          'Uncompressed RGB Format, 32 bpp with alpha channel.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_RGB24,
                          'MFVideoFormat_RGB24',
                          'D3DFMT_R8G8B8',
                          D3DFMT_R8G8B8,
                          'Uncompressed RGB Format, 24 bpp.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_RGB32,
                          'MFVideoFormat_RGB32',
                          'D3DFMT_X8R8G8B8',
                          D3DFMT_X8R8G8B8,
                          'Uncompressed RGB Format, 32 bpp.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_RGB555,
                          'MFVideoFormat_RGB555',
                          'D3DFMT_X1R5G5B5',
                          D3DFMT_X1R5G5B5,
                          'Uncompressed RGB Format, 555, 16 bpp. (Same memory layout as D3DFMT_X1R5G5B5.)') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_RGB565,
                          'MFVideoFormat_RGB565',
                          'D3DFMT_R5G6B5',
                          D3DFMT_R5G6B5,
                          'Uncompressed RGB Format, 565, 16 bpp. (Same memory layout as D3DFMT_R5G6B5.)') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_RGB8,
                          'MFVideoFormat_RGB8',
                          'RGB8',
                          FCC('RGB8'),
                          'Uncompressed RGB Format, 8 bits per pixel (bpp). (Same memory layout as D3DFMT_P8.)') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_A16B16G16R16F,
                          'MFVideoFormat_A16B16G16R16F',
                          'D3DFMT_A16B16G16R16F',
                          D3DFMT_A16B16G16R16F,
                          'Uncompressed RGB Format, 16 bpp with alpha channel. (Same memory layout as D3DFMT_A16B16G16R16F)') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_A2R10G10B10,
                          'MFVideoFormat_A2R10G10B10',
                          'D3DFMT_A2B10G10R10',
                          D3DFMT_A2B10G10R10,
                          'Uncompressed RGB Format, 10 bpp for each color and 2 bpp for alpha. (Same memory layout as D3DFMT_A2B10G10R10)') then
-     goto Done;
+     goto done;
 
    // YUV Formats: 8-Bit and Palettized.
 
@@ -4063,91 +4233,91 @@ begin
                          'AI44',
                          FCC('AI44'),
                          'YUV 8-Bit and Palettized Format. Sampling: 4:4:4, Packed, Bits per channel: Palettized') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_AYUV,
                          'MFVideoFormat_AYUV',
                          'AYUV',
                          FCC('AYUV'),
                          'YUV 8-Bit and Palettized Format. Sampling: 4:4:4, Packed, Bits per channel: 8') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_I420,
                          'MFVideoFormat_I420',
                          'I420',
                          FCC('I420'),
                          'YUV 8-Bit and Palettized Format. Sampling: 4:2:0, Planar, Bits per channel: 8') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_IYUV,
                          'MFVideoFormat_IYUV',
                          'IYUV',
                          FCC('IYUV'),
                          'YUV 8-Bit and Palettized Format. Sampling: 4:2:0, Planar, Bits per channel: 8') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_NV11,
                          'MFVideoFormat_NV11',
                          'NV11',
                          FCC('NV11'),
                          'YUV 8-Bit and Palettized Format. Sampling: 4:1:1, Planar, Bits per channel: 8') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_NV12,
                          'MFVideoFormat_NV12',
                          'NV12',
                          FCC('NV12'),
                          'YUV 8-Bit and Palettized Format. Sampling: 4:2:0, Planar, Bits per channel: 8') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_NV21,
                          'MFVideoFormat_NV21',
                          'NV21',
                          FCC('NV21'),
                          'YUV 8-Bit and Palettized Format. Sampling: 4:2:0, Planar, Bits per channel: 8') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_UYVY,
                          'MFVideoFormat_UYVY',
                          'UYVY',
                          FCC('UYVY'),
                          'YUV 8-Bit and Palettized Format. Sampling: 4:2:2, Packed, Bits per channel: 8') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_Y41P,
                          'MFVideoFormat_Y41P',
                          'Y41P',
                          FCC('Y41P'),
                          'YUV 8-Bit and Palettized Format. Sampling: 4:1:1, Packed, Bits per channel: 8') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_Y41T,
                          'MFVideoFormat_Y41T',
                          'Y41T',
                          FCC('Y41T'),
                          'YUV 8-Bit and Palettized Format. Sampling: 4:1:1, Packed, Bits per channel: 8') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_Y42T,
                          'MFVideoFormat_Y42T',
                          'Y42T',
                          FCC('Y42T'),
                          'YUV 8-Bit and Palettized Format. Sampling: 4:2:2, Packed, Bits per channel: 8') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_YUY2,
                          'MFVideoFormat_YUY2',
                          'YUY2',
                          FCC('YUY2'),
                          'YUV 8-Bit and Palettized Format. Sampling: 4:2:2, Packed, Bits per channel: 8') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_YVU9,
                          'MFVideoFormat_YVU9',
                          'YUY9',
                          FCC('YUY9'),
                          'YUV 8-Bit and Palettized Format. Sampling: 8:4:4, Planar, Bits per channel: 9') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_YV12,
                          'MFVideoFormat_YV12',
                          'YV12',
                          FCC('YV12'),
                          'YUV 8-Bit and Palettized Format. Sampling: 4:2:0, Planar, Bits per channel: 8') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_YVYU,
                          'MFVideoFormat_YVYU',
                          'YVYU',
                          FCC('YVYU'),
                          'YUV 8-Bit and Palettized Format. Sampling: 4:2:2, Packed, Bits per channel: 8') then
-     goto Done;
+     goto done;
 
 
    // YUV Formats: 10-Bit and 16-Bit.
@@ -4157,49 +4327,49 @@ begin
                          'P010',
                          FCC('P010'),
                          'YUV 10-Bit Format. Sampling: 4:2:0, Planar, Bits per channel: 10') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_P016,
                          'MFVideoFormat_P016',
                          'P016',
                          FCC('P016'),
                          'YUV 16-Bit Format. Sampling: 4:2:0, Planar, Bits per channel: 16') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_P210,
                          'MFVideoFormat_P210',
                          'P210',
                          FCC('P210'),
                          'YUV 10-Bit Format. Sampling: 4:2:2, Planar, Bits per channel: 10') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_P216,
                          'MFVideoFormat_P216',
                          'P216',
                          FCC('P216'),
                          'YUV 16-Bit Format. Sampling: 4:2:0, Planar, Bits per channel: 16') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_Y210,
                          'MFVideoFormat_Y210',
                          'Y210',
                          FCC('Y210'),
                          'YUV 10-Bit Format. Sampling: 4:2:2, Packed, Bits per channel: 10') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_Y216,
                          'MFVideoFormat_v216',
                          'Y216',
                          FCC('Y216'),
                          'YUV 16-Bit Format. Sampling: 4:2:2, Packed, Bits per channel: 16') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_Y410,
                          'MFVideoFormat_Y410',
                          'Y410',
                          FCC('Y40 '),
                          'YUV 10-Bit Format. Sampling: 4:4:4, Packed, Bits per channel: 10') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_Y416,
                          'MFVideoFormat_Y416',
                          'Y416',
                          FCC('Y416'),
                          'YUV 10-Bit Format. Sampling: 4:4:4, Packed, Bits per channel: 10') then
-     goto Done;
+     goto done;
 
 
   // Luminance and Depth Formats
@@ -4209,19 +4379,19 @@ begin
                          'D3DFMT_L8',
                          D3DFMT_L8,
                          '8-bit luminance only. (bpp). (Same memory layout as D3DFMT_L8.)') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_L16,
                          'MFVideoFormat_L16',
                          'D3DFMT_L16',
                          D3DFMT_L16,
                          '16-bit luminance only. (Same memory layout as D3DFMT_L16.)') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_D16,
                          'MFVideoFormat_D16',
                          'D3DFMT_D16',
                          D3DFMT_D16,
                          '16-bit z-buffer depth. (Same memory layout as D3DFMT_D16.)') then
-     goto Done;
+     goto done;
 
 
    // Encoded Video Types
@@ -4231,175 +4401,175 @@ begin
                          'dv25',
                          FCC('dv25'),
                          'Encoded Video Type. DVCPRO 25 (525-60 or 625-50).') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_DV50,
                          'MFVideoFormat_DV50',
                          'dv50',
                          FCC('dv50'),
                          'Encoded Video Type. DVCPRO 50 (525-60 or 625-50).') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_DVC,
                          'MFVideoFormat_DVC',
                          'dvc ',
                          FCC('dvc '),
                          'Encoded Video Type. DVC/DV Video.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_DVH1,
                          'MFVideoFormat_DVH1',
                          'dvh1',
                          FCC('dvh1'),
                          'Encoded Video Type. DVCPRO 100 (1080/60i, 1080/50i, or 720/60P).') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_DVHD,
                          'MFVideoFormat_DVHD',
                          'dvhd',
                          FCC('dvhd'),
                          'Encoded Video Type. HD-DVCR (1125-60 or 1250-50).') then
-     goto Done;
+     goto done;
 
    if IfEqualReturnProps(MFVideoFormat_DVSD,
                          'MFVideoFormat_DVSD',
                          'dvsd',
                          FCC('dvsd'),
                          'Encoded Video Type. SDL-DVCR (525-60 or 625-50).') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_DVSL,
                          'MFVideoFormat_DVSL',
                          'dvsl', FCC('dvsl'),
                          'Encoded Video Type. SD-DVCR (525-60 or 625-50).') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_H264,
                          'MFVideoFormat_H263',
                          'H263',
                          FCC('H263'),
                          'Encoded Video Type. H.263 video.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_H264,
                          'MFVideoFormat_H264',
                          'H264',
                          FCC('H264'),
                          'Encoded Video Type. H.264 video.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_H264_ES,
                          'MFVideoFormat_H264_ES',
                          '',
                          0,
                          'Encoded Video Type. H.264 elementary stream. This media type is the same as MFVideoFormat_H264, except media samples contain a fragmented H.264 bitstream.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_HEVC,
                          'MFVideoFormat_HEVC',
                          'HEVC',
                          FCC('HEVC'),
                          'Encoded Video Type. The HEVC Main profile and Main Still Picture profile. Each sample contains one complete picture.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_HEVC_ES,
                          'MFVideoFormat_HEVC_ES',
                          'HEVS',
                          FCC('HEVS'),
                          'Encoded Video Type. This media type is the same as MFVideoFormat_HEVC, except media samples contain a fragmented HEVC bitstream. ') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_M4S2,
                          'MFVideoFormat_M4S2',
                          'M4S2',
                          FCC('M4S2'),
                          'Encoded Video Type. MPEG-4 part 2 video.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_MJPG,
                          'MFVideoFormat_MJPG',
                          'MJPG',
                          FCC('MJPG'),
                          'Encoded Video Type. Motion JPEG.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_MP43,
                          'MFVideoFormat_MP43',
                          'MP43',
                          FCC('MP43'),
                          'Encoded Video Type. Microsoft MPEG 4 codec version 3. This codec is no longer supported.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_MP4S,
                          'MFVideoFormat_MP4S',
                          'MP4S',
                          FCC('MP4S'),
                          'Encoded Video Type. ISO MPEG 4 codec version 1.' )then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_MP4V,
                          'MFVideoFormat_MP4V',
                          'MP4V',
                          FCC('MP4V'),
                          'Encoded Video Type. MPEG-4 part 2 video.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_MPEG2,
                          'MFVideoFormat_MPEG2',
                          '',
                          0,
                          'Encoded Video Type. MPEG-2 video.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_MPG1,
                          'MFVideoFormat_MPG1',
                          'MPG1',
                          FCC('MPG1'),
                          'Encoded Video Type. MPEG-1 video.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_VP80,
                          'MFVideoFormat_VP80',
                          'VP80',
                          FCC('VP80'),
                          'Encoded Video Type. VP8 video.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_VP90,
                          'MFVideoFormat_VP90',
                          'VP90',
                          FCC('VP90'),
                          'Encoded Video Type. VP9 video.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_MSS1,
                          'MFVideoFormat_MSS1',
                          'MSS1',
                          FCC('MSS1'),
                          'Encoded Video Type. Windows Media Screen codec version 1.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_MSS2,
                          'MFVideoFormat_MSS2',
                          'MSS2',
                          FCC('MSS2'),
                          'Encoded Video Type. Windows Media Screen codec version 2.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_WMV1,
                          'MFVideoFormat_WMV1',
                          'WMV1',
                          FCC('WMV1'),
                          'Encoded Video Type. Windows Media Video codec version 7.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_WMV2,
                          'MFVideoFormat_WMV2',
                          'WMV2',
                          FCC('WMV2'),
                          'Encoded Video Type. Windows Media Video 8 codec.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_WMV3,
                          'MFVideoFormat_WMV3',
                          'WMV3',
                          FCC('WMV3'),
                          'Encoded Video Type. Windows Media Video 9 codec.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_WVC1,
                          'MFVideoFormat_WVC1',
                          'WVC1',
                          FCC('WVC1'),
                          'Encoded Video Type. SMPTE 421M ("VC-1").') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_420O,
                          'MFVideoFormat_420O',
                          '420O',
                          FCC('420O'),
                          'Encoded Video Type. 8-bit per channel planar YUV 4:2:0 video.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_AV1,
                          'MFVideoFormat_AV1',
                          'AV01',
                          FCC('AV01'),
                          'Encoded Video Type. AV1 video.') then
-     goto Done;
+     goto done;
 
 
    // Audio formats
@@ -4409,127 +4579,127 @@ begin
                          'WAVE_FORMAT_PCM',
                          WAVE_FORMAT_PCM,
                          'Uncompressed PCM audio.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_Float,
                          'MFAudioFormat_Float',
                          'WAVE_FORMAT_IEEE_FLOAT',
                          WAVE_FORMAT_IEEE_FLOAT,
                          'Uncompressed IEEE floating-point audio.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_DTS,
                          'MFAudioFormat_DTS',
                          'WAVE_FORMAT_DTS',
                          WAVE_FORMAT_DTS,
                          'Microsoft DTS (Data Transformation Services Package File Format) audio.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_Dolby_AC3_SPDIF,
                          'MFAudioFormat_Dolby_AC3_SPDIF',
                          'WAVE_FORMAT_DOLBY_AC3_SPDIF',
                          WAVE_FORMAT_DOLBY_AC3_SPDIF,
                          'Dolby AC-3 audio over Sony/Philips Digital Interface (S/PDIF).') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_DRM,
                          'MFAudioFormat_DRM',
                          'WAVE_FORMAT_DRM',
                          WAVE_FORMAT_DRM,
                          'Audio Digital Rights Management codec.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_WMAudioV8,
                          'MFAudioFormat_WMAudioV8',
                          'WAVE_FORMAT_WMAUDIO2',
                          WAVE_FORMAT_WMAUDIO2,
                          'Windows Media Audio 8 codec, Windows Media Audio 9 codec, or Windows Media Audio 9.1 codec.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_WMAudioV9,
                          'MFAudioFormat_WMAudioV9',
                          'WAVE_FORMAT_WMAUDIO3',
                          WAVE_FORMAT_WMAUDIO3,
                          'Windows Media Audio 9 Professional audio codec or Windows Media Audio 9.1 Professional codec.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_WMAudio_Lossless,
                          'MFAudioFormat_WMAudio_Lossless',
                          'WAVE_FORMAT_WMAUDIO_LOSSLESS',
                          WAVE_FORMAT_WMAUDIO_LOSSLESS,
                          'Windows Media Audio 9 Lossless codec or Windows Media Audio 9.1 codec.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_WMASPDIF,
                          'MFAudioFormat_WMASPDIF',
                          'WAVE_FORMAT_WMASPDIF',
                          WAVE_FORMAT_WMASPDIF,
                          'Windows Media Audio S/PDIF.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_MSP1,
                          'MFAudioFormat_MSP1',
                          'WAVE_FORMAT_WMAVOICE9',
                          WAVE_FORMAT_WMAVOICE9,
                          'Windows Media Audio 9 Voice codec.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_MP3,
                          'MFAudioFormat_MP3',
                          'WAVE_FORMAT_MPEGLAYER3',
                          WAVE_FORMAT_MPEGLAYER3,
                          'MPEG Audio Layer-3 (MP3).') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_MPEG,
                          'MFAudioFormat_MPEG',
                          'WAVE_FORMAT_MPEG',
                          WAVE_FORMAT_MPEG,
                          'MPEG-1 audio payload.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_AAC,
                          'MFAudioFormat_AAC',
                          'WAVE_FORMAT_MPEG_HEAAC',
                          WAVE_FORMAT_MPEG_HEAAC,
                          'High-Efficiency Advanced Audio Coding (HE-AAC).') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_ADTS,
                          'MFAudioFormat_ADTS',
                          'WAVE_FORMAT_MPEG_ADTS_AAC',
                          WAVE_FORMAT_MPEG_ADTS_AAC,
                          'Advanced Audio Coding (AAC) in Audio Data Transport Stream (ADTS) format.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_AMR_NB,
                          'MFAudioFormat_AMR_NB',
                          'WAVE_FORMAT_AMR_NB',
                          WAVE_FORMAT_AMR_NB,
                          'Adaptive Multi-Rate Narrowband (NB) audio codec.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_AMR_WB,
                          'MFAudioFormat_AMR_WB',
                          'WAVE_FORMAT_AMR_WB',
                          WAVE_FORMAT_AMR_WB,
                          'ITU-T G.722.2, Adaptive Multi-Rate Wideband (WB) audio codec.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_AMR_WP,
                          'MFAudioFormat_AMR_WP',
                          'WAVE_FORMAT_AMR_WP',
                          WAVE_FORMAT_AMR_WP,
                          'ITU-T G.722.2, Adaptive Multi-Rate Wideband Plus (WP) audio codec.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_FLAC,
                          'MFAudioFormat_FLAC',
                          'WAVE_FORMAT_FLAC',
                          WAVE_FORMAT_FLAC,
                          'Free Lossless Audio Codec (FLAC).') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_ALAC,
                          'MFAudioFormat_ALAC',
                          'WAVE_FORMAT_ALAC',
                          WAVE_FORMAT_ALAC,
                          'Apple Lossless Audio Codec (ALAC).') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_Opus,
                          'MFAudioFormat_Opus',
                          'WAVE_FORMAT_OPUS',
                          WAVE_FORMAT_OPUS,
                          'Opus Interactive Audio Codec. (https://xiph.org)') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_Dolby_AC4,
                          'MFAudioFormat_Dolby_AC4',
                          'WAVE_FORMAT_DOLBY_AC4',
                          WAVE_FORMAT_DOLBY_AC4,
                          'Dolby lossy audio compression format (AC-4) that can contain audio channels and/or audio objects.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MEDIASUBTYPE_RAW_AAC1,
                          'MEDIASUBTYPE_RAW_AAC1',
                          'WAVE_FORMAT_RAW_AAC1',
@@ -4543,121 +4713,121 @@ begin
                          'NONE',
                          FCC('NONE'),
                          'Dolby Digital (also known as AC-3) lossy audio compression format.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_Dolby_DDPlus,
                          'MFAudioFormat_Dolby_DDPlus',
                          'NONE',
                          FCC('NONE'),
                          'Dolby Digital Plus (also known as E-AC-3) lossy audio codec based on Dolby Digital that is backward compatible.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_Dolby_AC4_V1,
                          'MFAudioFormat_Dolby_AC4_V1',
                          'NONE',
                          FCC('NONE'),
                          'Dolby AC-4 bitstream versions 0 and 1 audio codec.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_Dolby_AC4_V2,
                          'MFAudioFormat_Dolby_AC4_V2',
                          'NONE',
                          FCC('NONE'),
                          'Dolby AC-4 bitstream version 2 audio codec. (Supports Immersive Stereo.)') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_Dolby_AC4_V1_ES,
                          'MFAudioFormat_Dolby_AC4_V1_ES',
                          'NONE',
                          FCC('NONE'),
                          'Dolby version 1 lossy audio format used for AC-4 streams that use ac4_syncframe and the optional crc at the end of each frame.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_Dolby_AC4_V2_ES,
                          'MFAudioFormat_Dolby_AC4_V2_ES',
                          'NONE',
                          FCC('NONE'),
                          'Dolby version 2 lossy audio format used for AC-4 streams that use ac4_syncframe and the optional crc at the end of each frame.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_Vorbis,
                          'MFAudioFormat_Vorbis',
                          'NONE',
                          FCC('NONE'),
                          'Vorbis audio codec based on Modified Discrete Cosine Transform. (https://xiph.org)') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_DTS_RAW,
                          'MFAudioFormat_DTS_RAW',
                          'NONE',
                          FCC('NONE'),
                          'Digital Theater Systems (DTS) raw audio codec.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_DTS_HD,
                          'MFAudioFormat_DTS_HD',
                          'NONE',
                          FCC('NONE'),
                          'Digital Theater Systems (DTS) High Definition audio codec.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_DTS_XLL,
                          'MFAudioFormat_DTS_XLL',
                          'NONE',
                          FCC('NONE'),
                          'Digital Theater Systems (DTS) XLL audio codec.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_DTS_LBR,
                          'MFAudioFormat_DTS_LBR',
                          'NONE',
                          FCC('NONE'),
                          'Digital Theater Systems (DTS) Low Bitrate (LBR) audio codec.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_DTS_UHD,
                          'MFAudioFormat_DTS_UHD',
                          'NONE',
                          FCC('NONE'),
                          'Digital Theater Systems (DTS) Ultra High Definition (UHD) audio codec.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_DTS_UHDY,
                          'MFAudioFormat_DTS_UHDY',
                          'NONE',
                          FCC('NONE'),
                          'Digital Theater Systems (DTS) Ultra High Definition (UHDY) audio codec.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_Float_SpatialObjects,
                          'MFAudioFormat_Float_SpatialObjects',
                          'NONE',
                          FCC('NONE'),
                          'Uncompressed IEEE floating-point audio.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_LPCM,
                          'MFAudioFormat_LPCM',
                          'NONE',
                          FCC('NONE'),
                          'LPCM audio with headers for encapsulation in an MPEG2 bitstream.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_PCM_HDCP,
                          'MFAudioFormat_PCM_HDCP',
                          'NONE',
                          FCC('NONE'),
                          'Uncompressed PCM audio. (High-bandwidth Digital Content Protection)') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_Dolby_AC3_HDCP,
                          'MFAudioFormat_Dolby_AC3_HDCP',
                          'NONE',
                          FCC('NONE'),
                          'Dolby Digital, also called Dolby AC-3 (High-bandwidth Digital Content Protection)') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_AAC_HDCP,
                          'MFAudioFormat_AAC_HDCP',
                          'NONE',
                          FCC('NONE'),
                          'High-Efficiency Advanced Audio Coding (HE-AAC)(High-bandwidth Digital Content Protection).') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_ADTS_HDCP,
                          'MFAudioFormat_ADTS_HDCP',
                          'NONE',
                          FCC('NONE'),
                          'Advanced Audio Coding (AAC) in Audio Data Transport Stream (ADTS) (High-bandwidth Digital Content Protection) format.') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFAudioFormat_Base_HDCP,
                          'MFAudioFormat_Base_HDCP',
                          'NONE',
                          FCC('NONE'),
                          'Base HDCP (High-bandwidth Digital Content Protection) audio.') then
-     goto Done;
+     goto done;
 
    // Video Formats
    if IfEqualReturnProps(MFVideoFormat_H264_HDCP,
@@ -4665,16 +4835,16 @@ begin
                          'NONE',
                          FCC('NONE'),
                          'H.264 (High-bandwidth Digital Content Protection).') then
-     goto Done;
+     goto done;
    if IfEqualReturnProps(MFVideoFormat_HEVC_HDCP,
                          'MFVideoFormat_HEVC_HDCP',
                          'NONE',
                          FCC('NONE'),
                          'H.265/HEVC content in Annex B format (High-bandwidth Digital Content Protection) and can be used in mp4 and m2ts files.') then
-     goto Done;
+     goto done;
 
 
-Done:
+done:
   Result := hr;
   aGuidName := sGuidName;
   aFormatTag := sFormatTag;
@@ -4697,7 +4867,7 @@ var
   i: Integer;
 
 label
-  Done;
+  done;
 
 begin
   bRes := False;
@@ -4735,51 +4905,60 @@ begin
         end;
     end;
 
-Done:
+done:
   Result := bRes;
 end;
 
 
-function IsMftSupportedOutputFormat(pSubType: TGuid): Boolean; inline;
-var
-  bRes: Boolean;
-  arSubTypes: array [0..13] of TGuid;
-  i: Integer;
-
-label
-  Done;
-
+function GetSupportedMftOutputFormats(): TArray<TGuid>;
 begin
-  bRes := False;
 
+  SetLength(Result, 13);
   // Supported subtype formats for output.
   // See: https://learn.microsoft.com/en-us/windows/win32/medfound/video-processor-mft#output-formats
-  arSubTypes[0]  := MFVideoFormat_ARGB32;
-  arSubTypes[1]  := MFVideoFormat_AYUV;
-  arSubTypes[2]  := MFVideoFormat_I420;
-  arSubTypes[3]  := MFVideoFormat_IYUV;
-  arSubTypes[4]  := MFVideoFormat_NV12;
-  arSubTypes[5]  := MFVideoFormat_RGB24;
-  arSubTypes[6]  := MFVideoFormat_RGB32;
-  arSubTypes[7]  := MFVideoFormat_RGB555;
-  arSubTypes[8]  := MFVideoFormat_RGB565;
-  arSubTypes[9]  := MFVideoFormat_UYVY;
-  arSubTypes[10] := MFVideoFormat_V216;
-  arSubTypes[11] := MFVideoFormat_YUY2;
-  arSubTypes[12] := MFVideoFormat_YV12;
+  Result[0]  := MFVideoFormat_ARGB32;
+  Result[1]  := MFVideoFormat_AYUV;
+  Result[2]  := MFVideoFormat_I420;
+  Result[3]  := MFVideoFormat_IYUV;
+  Result[4]  := MFVideoFormat_NV12;
+  Result[5]  := MFVideoFormat_RGB24;
+  Result[6]  := MFVideoFormat_RGB32;
+  Result[7]  := MFVideoFormat_RGB555;
+  Result[8]  := MFVideoFormat_RGB565;
+  Result[9]  := MFVideoFormat_UYVY;
+  Result[10] := MFVideoFormat_V216;
+  Result[11] := MFVideoFormat_YUY2;
+  Result[12] := MFVideoFormat_YV12;
+end;
+
+
+function IsMftSupportedOutputFormat(const pSubType: TGuid;
+                                    out IsTopDown: Boolean): Boolean; inline;
+var
+  arSubTypes: TArray<TGuid>;
+  i, j: Integer;
+
+begin
+  Result := False;
+  IsTopDown := False;
+  arSubTypes := GetSupportedMftOutputFormats();
 
   for i := 0 to Length(arSubTypes) -1 do
     begin
       if IsEqualGuid(pSubType,
                      arSubTypes[i]) then
         begin
-          bRes := True;
-          goto done;
+          for j := 0 to 2 do
+            begin
+              if (pSubType = MFVideoFormat_AYUV) or
+                 (pSubType = MFVideoFormat_IYUV) or
+                 (pSubType = MFVideoFormat_YUY2) then
+                IsTopDown := True;
+            end;
+          Result := True;
+          Break;
         end;
     end;
-
-Done:
-  Result := bRes;
 end;
 
 
@@ -5486,7 +5665,7 @@ var
   mfPhotoMediaType: IMFMediaType;
 
 label
-  Done;
+  done;
 
 begin
 
@@ -5512,7 +5691,7 @@ begin
 
   pPhotoMediaType := mfPhotoMediaType;
 
-Done:
+done:
   Result := hr;
 end;
 
@@ -5648,7 +5827,7 @@ var
   hr: HResult;
 
 label
-  Done;
+  done;
 
 begin
 
@@ -5656,13 +5835,13 @@ begin
                      uiWidth,
                      uiHeight);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   hr := GetFrameRate(pType,
                      uiFrameRateNum,
                      uiFrameRateDenom);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   uiBitrate := (((uiWidth / 3.0) * uiHeight) * uiFrameRateNum) / uiFrameRateDenom;
 
@@ -6020,6 +6199,41 @@ begin
 end;
 
 
+// Check if a given guid is a major type.
+function IsMajorType(const guid: TGuid): Boolean;
+begin
+  if isEqualGuid(guid, MFMediaType_Default) then
+    Result := True
+  else if isEqualGuid(guid, MFMediaType_Audio) then
+    Result := True
+  else if isEqualGuid(guid, MFMediaType_Video) then
+    Result := True
+  else if isEqualGuid(guid, MFMediaType_Protected) then
+    Result := True
+  else if isEqualGuid(guid, MFMediaType_SAMI) then
+    Result := True
+  else if isEqualGuid(guid, MFMediaType_Script) then
+    Result := True
+  else if isEqualGuid(guid, MFMediaType_Image) then
+    Result := True
+  else if isEqualGuid(guid, MFMediaType_HTML) then
+    Result := True
+  else if isEqualGuid(guid, MFMediaType_Binary) then
+    Result := True
+  else if isEqualGuid(guid, MFMediaType_FileTransfer) then
+    Result := True
+  else if isEqualGuid(guid, MFMediaType_Stream) then
+    Result := True
+  else if isEqualGuid(guid, MFMediaType_MultiplexedFrames) then
+    Result := True
+  else if isEqualGuid(guid, MFMediaType_Subtitle) then
+    Result := True
+  else if isEqualGuid(guid, MFMediaType_Perception) then
+    Result := True
+  else
+    Result := False;
+end;
+
 // Returns the mediatype associated with the Major guid.
 // To get the major type call function GetMediaType
 function GetMediaDescription(const pMajorGuid: TGuid;
@@ -6068,7 +6282,7 @@ end;
 
 
 //
-function GetMajorTypeDescr(const pMajorGuid: TGuid): string;
+function GetMajorTypeDescr(const pMajorGuid: TGuid): LPWSTR;
 begin
   if isEqualGuid(pMajorGuid, MFMediaType_Default) then
     Result := 'MFMediaType_Default'
@@ -6559,17 +6773,6 @@ done:
 end;
 
 
-
-{
-var
-  pString: PWideChar;
-  cchLength: UINT32;
-begin
-  cchLength := 200;
-  pString := New(PWideChar[cchLength + 1]);
-end;
-}
-
 function AttributeGetString(pAttributes: IMFAttributes;
                             const guid: TGuid;
                             out pwcStr: PWideChar): HResult; overload;
@@ -6747,7 +6950,7 @@ var
   i: Integer;
 
 label
-  Done;
+  done;
 
 begin
   // Get the SAMIstyle interface
@@ -6888,7 +7091,7 @@ var
   hr: HResult;
 
 label
-  Done;
+  done;
 
 begin
   guidSubType := GUID_NULL;
@@ -6897,19 +7100,19 @@ begin
   hr := pSource.GetCurrentDeviceMediaType(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD,
                                           pMediaType);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   hr := CloneVideoMediaType(pMediaType,
                             guidEncodingType,
                             pMediaType2);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
 
   hr := pMediaType.GetGUID(MF_MT_SUBTYPE,
                            guidSubType);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   if IsEqualGUID(guidSubType,
                  MFVideoFormat_H264_ES) or
@@ -6926,14 +7129,14 @@ begin
       hr := GetEncodingBitrate(pMediaType2,
                                uiEncodingBitrate);
       if FAILED(hr) then
-        goto Done;
+        goto done;
 
       hr := pMediaType2.SetUINT32(MF_MT_AVG_BITRATE,
                                   uiEncodingBitrate);
     end;
 
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   // Connect the video stream to the recording sink.
   hr := pRecord.AddStream(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD,
@@ -6958,14 +7161,14 @@ var
   hr: HResult;
 
 label
-  Done;
+  done;
 
 begin
 
   if (guidEncodingType = GUID_NULL) then
     begin
       hr := ERROR_INVALID_PARAMETER;
-      goto Done;
+      goto done;
     end;
 
   // Configure the audio format for the recording sink.
@@ -6973,13 +7176,13 @@ begin
   hr := MFCreateAttributes(pAttributes,
                            1);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   // Enumerate low latency media types
   hr := pAttributes.SetUINT32(MF_LOW_LATENCY,
                               UINT32(True));
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   // Get a list of encoded output formats that are supported by the encoder.
   hr := MFTranscodeGetAudioOutputAvailableTypes(guidEncodingType,
@@ -6987,14 +7190,14 @@ begin
                                                 pAttributes,
                                                 pAvailableTypes);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   // Pick the first format from the list.
   hr := GetCollectionObject(pAvailableTypes,
                             0,
                             pMediaType);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   // Connect the audio stream to the recording sink.
   hr := pRecord.AddStream(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_AUDIO,
@@ -7026,23 +7229,23 @@ var
   dwCount: DWord;
 
 label
-  Done;
+  done;
 
 begin
 
   hr := pSource.CreatePresentationDescriptor(pPD);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   hr := pPD.GetStreamDescriptorByIndex(0,
                                        fSelected,
                                        pSD);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   hr := pSD.GetMediaTypeHandler(pHandler);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   pHandler.GetMediaTypeCount(dwCount);
 
@@ -7054,7 +7257,7 @@ begin
                                        pType);
 
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   hr := pHandler.SetCurrentMediaType(pType);
 
@@ -7077,23 +7280,23 @@ var
   dwCount: DWord;
 
 label
-  Done;
+  done;
 
 begin
 
   hr := pSource.CreatePresentationDescriptor(pPD);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   hr := pPD.GetStreamDescriptorByIndex(0,
                                        fSelected,
                                        pSD);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   hr := pSD.GetMediaTypeHandler(pHandler);
   if FAILED(hr) then
-    goto Done;
+    goto done;
 
   pHandler.GetMediaTypeCount(dwCount);
 
@@ -7104,7 +7307,7 @@ begin
       hr := pHandler.GetMediaTypeByIndex(0,
                                          pType);
       if FAILED(hr) then
-       goto Done;
+       goto done;
 
     end;
 
@@ -7383,6 +7586,17 @@ done:
   Result := hr;
 end;
 
+
+//
+procedure TMftEnumInfo.Reset();
+begin
+  // Clean up
+  CoTaskMemFree(pwcStr);
+  pwcStr := nil;
+  CoTaskMemFree(@aInputTypes);
+  CoTaskMemFree(@aInputTypes);
+  SafeRelease(pAttributes);
+end;
 
 // External methods
 //=================
