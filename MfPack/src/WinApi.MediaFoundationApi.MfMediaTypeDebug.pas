@@ -270,15 +270,15 @@ function TMediaTypeDebug.LogAttributeValueByIndex(pAttributes: IMFAttributes;
                                                   pIndex: DWord): HRESULT;
 var
   hr: HResult;
-  pwcGuidName: string;
-  pwcFormatTag: string;
+  pwcGuidName: LPWSTR;
+  pwcFormatTag: LPWSTR;
   pwcFOURCC: DWord;
-  pwcFmtDesc: string;
+  pwcFmtDesc: LPWSTR;
 
-  pwcValGuidName: string;
-  pwcValFormatTag: string;
+  pwcValGuidName: LPWSTR;
+  pwcValFormatTag: LPWSTR;
   pwcValFOURCC: DWord;
-  pwcValFmtDesc: string;
+  pwcValFmtDesc: LPWSTR;
 
   gdGuid: TGUID;
   pvVar: PROPVARIANT;
