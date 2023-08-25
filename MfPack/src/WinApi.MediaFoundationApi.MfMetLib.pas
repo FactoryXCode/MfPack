@@ -4703,8 +4703,8 @@ begin
   // The following audio types are not derived from an existing FormatTag ( = FOURCC)
   if IfEqualReturnProps(MFAudioFormat_Dolby_AC3,
                         'MFAudioFormat_Dolby_AC3',
-                        'NONE',
-                        0,
+                        'AC-3',
+                        FCC('AC-3'),
                         'Dolby Digital (also known as AC-3) lossy audio compression format.') then
     goto done;
   if IfEqualReturnProps(MFAudioFormat_Dolby_DDPlus,
