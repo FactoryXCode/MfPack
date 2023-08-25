@@ -25,7 +25,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 06/08/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 25/08/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -226,7 +226,7 @@ type
   // Array that holds retrieved devices by name and/or index
   TDevicePropertiesArray = array of TDeviceProperties;
 
-  // See https://docs.microsoft.com/en-us/windows/win32/medfound/media-type-guids and MfApi.pas
+  // See https://learn.microsoft.com/en-us/windows/win32/medfound/media-type-guids and MfApi.pas
   TMediaTypes = (mtDefault,                   // Default stream.
                  mtAudio,                     // Audio stream.
                  mtVideo,                     // Video stream.
@@ -1116,7 +1116,7 @@ type
   // The sequencer source enables an application to play a collection of media sources sequentially,
   // with seamless transitions between the sources.
   // You can use it to create playlists, or to play streams from multiple sources simultaneously.
-  // See: https://docs.microsoft.com/en-us/windows/win32/medfound/about-the-sequencer-source
+  // See: https://learn.microsoft.com/en-us/windows/win32/medfound/about-the-sequencer-source
 
 
 
@@ -2734,38 +2734,38 @@ begin
   for i := 0 to pcInputTypes -1 do
     begin
       mftEnum.aInputTypes[i].RegisterTypeInfo := ppInputTypes[i];
-      // Get the desriptions of the input formats.
+      // Get the descriptions of the input formats.
       // Get majortype info
-        GetGUIDNameConst(mftEnum.aInputTypes[i].RegisterTypeInfo.guidMajorType,
-                         mftEnum.aInputTypes[i].GuidName,
-                         mftEnum.aInputTypes[i].FormatTag,
-                         mftEnum.aInputTypes[i].FOURCC,
-                         mftEnum.aInputTypes[i].majorTypeDescr);
+      GetGUIDNameConst(mftEnum.aInputTypes[i].RegisterTypeInfo.guidMajorType,
+                       mftEnum.aInputTypes[i].GuidName,
+                       mftEnum.aInputTypes[i].FormatTag,
+                       mftEnum.aInputTypes[i].FOURCC,
+                       mftEnum.aInputTypes[i].majorTypeDescr);
       // Get subtype info
-        GetGUIDNameConst(mftEnum.aInputTypes[i].RegisterTypeInfo.guidSubtype,
-                         mftEnum.aInputTypes[i].GuidName,
-                         mftEnum.aInputTypes[i].FormatTag,
-                         mftEnum.aInputTypes[i].FOURCC,
-                         mftEnum.aInputTypes[i].subTypeDescr);
+      GetGUIDNameConst(mftEnum.aInputTypes[i].RegisterTypeInfo.guidSubtype,
+                       mftEnum.aInputTypes[i].GuidName,
+                       mftEnum.aInputTypes[i].FormatTag,
+                       mftEnum.aInputTypes[i].FOURCC,
+                       mftEnum.aInputTypes[i].subTypeDescr);
     end;
 
   // Get the supported output types.
   for i := 0 to pcOutputTypes -1 do
     begin
       mftEnum.aOutputTypes[i].RegisterTypeInfo := ppOutputTypes[i];
-      // Get the desriptions of the output formats.
+      // Get the descriptions of the output formats.
       // Get majortype info
-        GetGUIDNameConst(mftEnum.aOutputTypes[i].RegisterTypeInfo.guidMajorType,
-                         mftEnum.aOutputTypes[i].GuidName,
-                         mftEnum.aOutputTypes[i].FormatTag,
-                         mftEnum.aOutputTypes[i].FOURCC,
-                         mftEnum.aOutputTypes[i].majorTypeDescr);
+      GetGUIDNameConst(mftEnum.aOutputTypes[i].RegisterTypeInfo.guidMajorType,
+                       mftEnum.aOutputTypes[i].GuidName,
+                       mftEnum.aOutputTypes[i].FormatTag,
+                       mftEnum.aOutputTypes[i].FOURCC,
+                       mftEnum.aOutputTypes[i].majorTypeDescr);
       // Get subtype info
-        GetGUIDNameConst(mftEnum.aOutputTypes[i].RegisterTypeInfo.guidSubtype,
-                         mftEnum.aOutputTypes[i].GuidName,
-                         mftEnum.aOutputTypes[i].FormatTag,
-                         mftEnum.aOutputTypes[i].FOURCC,
-                         mftEnum.aOutputTypes[i].subTypeDescr);
+      GetGUIDNameConst(mftEnum.aOutputTypes[i].RegisterTypeInfo.guidSubtype,
+                       mftEnum.aOutputTypes[i].GuidName,
+                       mftEnum.aOutputTypes[i].FormatTag,
+                       mftEnum.aOutputTypes[i].FOURCC,
+                       mftEnum.aOutputTypes[i].subTypeDescr);
     end;
 
   CoTaskMemFree(ppInputTypes);
