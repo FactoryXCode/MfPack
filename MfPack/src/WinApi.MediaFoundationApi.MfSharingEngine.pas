@@ -71,7 +71,7 @@ uses
   WinApi.WinApiTypes,
   WinApi.Inspectable,
   {MediaFoundationApi}
-  WinApi.MediaFoundationApi.Mfobjects,
+  WinApi.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MFMediaEngine;
 
   {$WEAKPACKAGEUNIT ON}

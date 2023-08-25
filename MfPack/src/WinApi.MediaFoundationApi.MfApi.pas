@@ -5361,7 +5361,7 @@ const
 
 
 // IMFAttributes inline UTILITY FUNCTIONS - used for IMFMediaType as well //////
-// Note: these are internally methodes
+// Note: these are internal methods
 
 
   function HI32(unPacked: UINT64): UINT32; inline;
@@ -5404,50 +5404,6 @@ const
   //    Receives the high-order 32 bits.
   // punLow [out]
   //    Receives the low-order 32 bits.
-
-
-  // Multiplies one value of type SIZE_T by another.
-  // Example: hhresult = SizeTMult(length, sizeof(WCHAR), cb);
-  // Parameters
-  // cbMultiplicand [in]
-  //    Type: SIZE_T
-  //    The value to be multiplied by cbMultiplier.
-  // cbMultiplier [in]
-  //    Type: SIZE_T
-  //    The value by which to multiply cbMultiplicand.
-  // pcbResult [out]
-  //    Type: SIZE_T*
-  //    A pointer to the result.
-  //    If the operation results in a value that overflows or underflows the capacity of the type,
-  //    the function returns INTSAFE_E_ARITHMETIC_OVERFLOW and this parameter is not valid.
-  // NOTE: This function is also declared in WinApi.MediaFoundationApi.MfUtils.pas
-  function UIntAdd(var uAugend: UINT32;
-                   const uAddend: UINT32;
-                   out puResult: PUINT32): HRESULT; inline;
-
-  // Adds two values of type UINT.
-  // Parameters
-  // uAugend [in]
-  //    Type: UINT
-  //    The first value in the equation.
-  // uAddend [in]
-  //    Type: UINT
-  //    The value to add to uAugend.
-  // puResult [out]
-  //    Type: PUINT
-  //    A pointer to the sum.
-  //    If the operation results in a value that overflows or underflows the capacity of the type,
-  //    the function returns INTSAFE_E_ARITHMETIC_OVERFLOW and this parameter is not valid.
-  // Return value
-  // Type: HRESULT
-  //    If this function succeeds, it returns S_OK. Otherwise, it returns an HRESULT error code.
-  // Remarks
-  // This is one of a set of inline functions designed to provide arithmetic operations and
-  // perform validity checks with minimal impact on performance.
-  // NOTE: This function is also declared in WinApi.MediaFoundationApi.MfUtils.pas
-  function SizeTMult(const cbMultiplicand: SIZE_T;
-                     const cbMultiplier: SIZE_T;
-                     out pcbResult: PSIZE_T): HRESULT; inline;
 
 
   // Packs a UINT32 width value and a UINT32 height value into a UINT64 value that represents a size.
@@ -5908,7 +5864,51 @@ const
 //#endif // (NTDDI_VERSION >= NTDDI_WIN10_VB)
 
 
+
   // Additional Prototypes for ALL interfaces
+
+  // Multiplies one value of type SIZE_T by another.
+  // Example: hhresult = SizeTMult(length, sizeof(WCHAR), cb);
+  // Parameters
+  // cbMultiplicand [in]
+  //    Type: SIZE_T
+  //    The value to be multiplied by cbMultiplier.
+  // cbMultiplier [in]
+  //    Type: SIZE_T
+  //    The value by which to multiply cbMultiplicand.
+  // pcbResult [out]
+  //    Type: SIZE_T*
+  //    A pointer to the result.
+  //    If the operation results in a value that overflows or underflows the capacity of the type,
+  //    the function returns INTSAFE_E_ARITHMETIC_OVERFLOW and this parameter is not valid.
+  // NOTE: This function is also declared in WinApi.MediaFoundationApi.MfUtils.pas
+  function UIntAdd(var uAugend: UINT32;
+                   const uAddend: UINT32;
+                   out puResult: PUINT32): HRESULT; inline;
+
+  // Adds two values of type UINT.
+  // Parameters
+  // uAugend [in]
+  //    Type: UINT
+  //    The first value in the equation.
+  // uAddend [in]
+  //    Type: UINT
+  //    The value to add to uAugend.
+  // puResult [out]
+  //    Type: PUINT
+  //    A pointer to the sum.
+  //    If the operation results in a value that overflows or underflows the capacity of the type,
+  //    the function returns INTSAFE_E_ARITHMETIC_OVERFLOW and this parameter is not valid.
+  // Return value
+  // Type: HRESULT
+  //    If this function succeeds, it returns S_OK. Otherwise, it returns an HRESULT error code.
+  // Remarks
+  // This is one of a set of inline functions designed to provide arithmetic operations and
+  // perform validity checks with minimal impact on performance.
+  // NOTE: This function is also declared in WinApi.MediaFoundationApi.MfUtils.pas
+  function SizeTMult(const cbMultiplicand: SIZE_T;
+                     const cbMultiplier: SIZE_T;
+                     out pcbResult: PSIZE_T): HRESULT; inline;
 
   //// Delphi Helpers  /////////////////////////////////////////////////////////
 
@@ -5968,11 +5968,42 @@ begin
 end;
 
 
+//
+function UIntAdd(var uAugend: UINT32;
+                 const uAddend: UINT32;
+                 out puResult: PUINT32): HRESULT; inline;
+begin
+  try
+    uAugend := uAugend + uAddend;
+    puResult := Pointer(uAugend);
+
+    Result := S_OK;
+  except //Silent exception
+    Result := INTSAFE_E_ARITHMETIC_OVERFLOW;
+  end;
+end;
+
+
+//
+function SizeTMult(const cbMultiplicand: SIZE_T;
+                   const cbMultiplier: SIZE_T;
+                   out pcbResult: PSIZE_T): HRESULT; inline;
+begin
+  try
+    pcbResult := Pointer(cbMultiplier * cbMultiplicand);
+    Result := S_OK;
+  except //Silent exception
+    Result := INTSAFE_E_ARITHMETIC_OVERFLOW;
+  end;
+end; // SizeTMult
+
+
 // Helper function to access the macro translations, mentioned under REMARK#1
 function DefineMediaTypeGuidByFourCC(sFcc: TCh4): TGuid;
 begin
   Result := DEFINE_MEDIATYPE_GUID(FCC(sFcc));
 end;
+
 
 // Helper function to access the macro translations, mentioned under REMARK#1
 function DefineMediaTypeGuidByDWord(dwConst: DWord): TGuid;
@@ -6168,37 +6199,6 @@ const
 
 // internal functions converted from MACRO'S
 //==========================================
-
-
-//
-function UIntAdd(var uAugend: UINT32;
-                 const uAddend: UINT32;
-                 out puResult: PUINT32): HRESULT; inline;
-begin
-  try
-    uAugend := uAugend + uAddend;
-    puResult := Pointer(uAugend);
-
-    Result := S_OK;
-  except //Silent exception
-    Result := INTSAFE_E_ARITHMETIC_OVERFLOW;
-  end;
-end;
-
-
-//
-function SizeTMult(const cbMultiplicand: SIZE_T;
-                   const cbMultiplier: SIZE_T;
-                   out pcbResult: PSIZE_T): HRESULT; inline;
-begin
-  try
-    pcbResult := Pointer(cbMultiplier * cbMultiplicand);
-    Result := S_OK;
-  except //Silent exception
-    Result := INTSAFE_E_ARITHMETIC_OVERFLOW;
-  end;
-end; // SizeTMult
-
 
 //
 function PackSize(unWidth: UINT32;
