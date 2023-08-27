@@ -408,7 +408,7 @@ begin
                                       HrStr := 'MF_E_INSUFFICIENT_BUFFER';
                                       HrDescr := 'Insufficient memory for response.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D717A)  : begin
+    _HRESULT_TYPEDEF_($C00D36FA)  : begin
                                       HrStr := 'MF_E_CANNOT_CREATE_SINK';
                                       HrDescr := 'Activate failed to create mediasink. Call OutputNode.GetUINT32(MF_TOPONODE_MAJORTYPE) for more information. ';
                                     end;
