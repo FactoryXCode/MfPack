@@ -448,27 +448,27 @@ begin
                                       HrStr := 'MF_E_INVALID_CODEC_MERIT';
                                       HrDescr := 'The registered codec merit is not valid.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3705)  : begin
+    _HRESULT_TYPEDEF_($C00D3704)  : begin
                                       HrStr := 'MF_E_HW_MFT_FAILED_START_STREAMING';
                                       HrDescr := 'Hardware MFT failed to start streaming due to lack of hardware resources.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3706)  : begin
+    _HRESULT_TYPEDEF_($C00D3705)  : begin
                                       HrStr := 'MF_E_OPERATION_IN_PROGRESS';
                                       HrDescr := 'The operation is already in progress.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3707)  : begin
+    _HRESULT_TYPEDEF_($C00D3706)  : begin
                                       HrStr := 'MF_E_HARDWARE_DRM_UNSUPPORTED';
                                       HrDescr := 'No Hardware DRM support is available.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3708)  : begin
+    _HRESULT_TYPEDEF_($C00D3707)  : begin
                                       HrStr := 'MF_E_DURATION_TOO_LONG';
                                       HrDescr := 'The specified duration is too long.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3709)  : begin
+    _HRESULT_TYPEDEF_($C00D3708)  : begin
                                       HrStr := 'MF_E_OPERATION_UNSUPPORTED_AT_D3D_FEATURE_LEVEL';
                                       HrDescr := 'The attempted call or command is not supported with the DirectX version used by the component.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3708)  : begin
+    _HRESULT_TYPEDEF_($C00D3709)  : begin
                                       HrStr := 'MF_E_UNSUPPORTED_MEDIATYPE_AT_D3D_FEATURE_LEVEL';
                                       HrDescr := 'The specified media type is not supported with the DirectX version used by the component.';
                                     end;
