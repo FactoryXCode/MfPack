@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 01/08/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 12/09/2023 Tony                Fixed some wrong function parameters.
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -1666,20 +1667,20 @@ type
       function CreateObjectFromURL(const pwszURL: LPCWSTR;
                                    dwFlags: DWord;
                                    pProps: IPropertyStore; // can be nil
-                                   var pObjectType: MF_OBJECT_TYPE;
+                                   pObjectType: MF_OBJECT_TYPE;
                                    out ppObject: IUnknown): HResult; stdcall;
 
       function CreateObjectFromByteStream(pByteStream: IMFByteStream;
                                           const pwszURL: LPCWSTR; // can be nil
                                           dwFlags: DWord;
                                           pProps: IPropertyStore; // can be nil
-                                          var pObjectType: MF_OBJECT_TYPE;
+                                          pObjectType: MF_OBJECT_TYPE;
                                           out ppObject: IUnknown): HResult; stdcall;
 
       function BeginCreateObjectFromURL(const pwszURL: LPCWSTR;
                                         dwFlags: DWord;
                                         pProps: IPropertyStore; // can be nil
-                                        var ppIUnknownCancelCookie: IUnknown;
+                                        ppIUnknownCancelCookie: IUnknown;
                                         pCallback: IMFAsyncCallback;
                                         punkState: IUnknown): HResult; stdcall;
 
@@ -1745,11 +1746,17 @@ type
     ['{3C9B2EB9-86D5-4514-A394-F56664F9F0D8}']
 
       function GetSourceAttributes(out ppAttributes: IMFAttributes): HResult; stdcall;
+      // Gets an attribute store for the media source.
 
       function GetStreamAttributes(const dwStreamIdentifier: DWORD;
                                    out ppAttributes: IMFAttributes): HResult; stdcall;
+      // Gets an attribute store for a stream on the media source.
 
-      function SetD3DManager(var pManager: IUnknown): HResult; stdcall;
+      function SetD3DManager(pManager: IUnknown): HResult; stdcall;
+      // Sets a pointer to the Microsoft DirectX Graphics Infrastructure (DXGI) Device Manager on the media source.
+      // [in] pManager
+      // A pointer to the IUnknown interface of the DXGI Manager.
+      // The media source should query this pointer for the IMFDXGIDeviceManager interface.
 
    end;
   IID_IMFMediaSourceEx = IMFMediaSourceEx;
@@ -2093,8 +2100,8 @@ type
   // Interface IMFVideoRendererEffectControl
   // Configuration interface for Video Renderer Effects
   // ==================================================
-  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFVideoProcessorControl3);'}
-  {$EXTERNALSYM IMFVideoProcessorControl3}
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFVideoRendererEffectControl);'}
+  {$EXTERNALSYM IMFVideoRendererEffectControl}
   IMFVideoRendererEffectControl = interface(IUnknown)
     ['{604D33D7-CF23-41d5-8224-5BBBB1A87475}']
     // <summary>
@@ -2177,17 +2184,17 @@ type
 
   PMF_TOPOLOGY_TYPE = ^MF_TOPOLOGY_TYPE;
   MF_TOPOLOGY_TYPE                = (
-    MF_TOPOLOGY_OUTPUT_NODE       = 0,   // Output node. Represents a media sink in the topology.
-    MF_TOPOLOGY_SOURCESTREAM_NODE = (MF_TOPOLOGY_OUTPUT_NODE + 1), // Source node. Represents a media stream in the topology.
-    MF_TOPOLOGY_TRANSFORM_NODE    = (MF_TOPOLOGY_SOURCESTREAM_NODE + 1), // Transform node. Represents a Media Foundation Transform (MFT) in the topology.
-    MF_TOPOLOGY_TEE_NODE          = (MF_TOPOLOGY_TRANSFORM_NODE + 1), // Tee node.
+    MF_TOPOLOGY_OUTPUT_NODE       =  0,   // Output node. Represents a media sink in the topology.
+    MF_TOPOLOGY_SOURCESTREAM_NODE =  (MF_TOPOLOGY_OUTPUT_NODE + 1), // Source node. Represents a media stream in the topology.
+    MF_TOPOLOGY_TRANSFORM_NODE    =  (MF_TOPOLOGY_SOURCESTREAM_NODE + 1), // Transform node. Represents a Media Foundation Transform (MFT) in the topology.
+    MF_TOPOLOGY_TEE_NODE          =  (MF_TOPOLOGY_TRANSFORM_NODE + 1), // Tee node.
                                                                       // A tee node does not hold a pointer to an object.
                                                                       // Instead, it represents a fork in the stream.
                                                                       // A tee node has one input and multiple outputs,
                                                                       // and samples from the upstream node are delivered to
                                                                       // all of the downstream nodes.
 
-    MF_TOPOLOGY_MAX               = MAXDWORD // $ffffffff   Reserved.
+    MF_TOPOLOGY_MAX               =  MAXDWORD // $ffffffff   Reserved.
   );
   {$EXTERNALSYM MF_TOPOLOGY_TYPE}
 
