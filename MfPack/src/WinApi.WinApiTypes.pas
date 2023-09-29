@@ -357,13 +357,13 @@ type
   PULONGLONG = ^ULONGLONG;
   PLONGLONG = ^LONGLONG;
   LONGLONG = Int64;
-  {$IF COMPILERVERSION >= 11.0}
+  {$IF COMPILERVERSION > 18}
     {$IFDEF WIN64}
       ULONGLONG = UInt64;
       {$EXTERNALSYM ULONGLONG}
     {$ENDIF}
     {$IFDEF WIN32}
-      ULONGLONG = Int64;
+      ULONGLONG = UInt64;
       {$EXTERNALSYM ULONGLONG}
     {$ENDIF}
   {$ELSE}
@@ -3269,7 +3269,7 @@ type
 type
   SNB = ^LPOLESTR;
 
-  // End of Additional P rototypes
+  // End of Additional Prototypes
 
 implementation
 

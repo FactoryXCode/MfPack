@@ -26,6 +26,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 25/08/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 29/09/2023                     Added new video functions.
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -334,13 +335,13 @@ type
   // Gets an interface pointer from a Media Foundation collection.
   function GetCollectionObject(pCollection: IMFCollection;
                                const dwIndex: DWORD;
-                               out ppObject): HRESULT;
+                               out ppObject): HResult;
 
 // Events
 // ======
 
   function GetEventObject(pEvent: IMFMediaEvent;
-                          out ppObject): HRESULT;
+                          out ppObject): HResult;
 
   // Alternative for ProcessMessages
   // Example usage: HandleMessages(GetCurrentThread());
@@ -353,7 +354,7 @@ type
 
   // Create a sample and add a buffer to it.
   function CreateMediaSample(cbData: DWORD;
-                             out pSample: IMFSample): HRESULT;
+                             out pSample: IMFSample): HResult;
 
 
 // Media Source
@@ -364,11 +365,11 @@ type
   function CreateObjectFromUrl(const sURL: WideString;           // URL of the source.
                                out pSource: IMFMediaSource;      // The received object (mediasource or bytestream)
                                pStore: IPropertyStore = nil;     // Optional property store
-                               const dwFlags: DWord = MF_RESOLUTION_MEDIASOURCE): HRESULT;  // Create a source object.
+                               const dwFlags: DWord = MF_RESOLUTION_MEDIASOURCE): HResult;  // Create a source object.
 
   // Deprecated, use CreateObjectFromUrl.
   function CreateMediaSourceFromUrl(const sURL: WideString;
-                                    out pSource: IMFMediaSource): HRESULT; deprecated 'Use function CreateObjectFromUrl';
+                                    out pSource: IMFMediaSource): HResult; deprecated 'Use function CreateObjectFromUrl';
 
   // Begins an asynchronous request to create a media source or a byte stream from an URL.
   function CreateObjectFromUrlAsync(const sURL: WideString;
@@ -376,13 +377,13 @@ type
                                     pStore: IPropertyStore = nil;
                                     const dwFlags: DWord = MF_RESOLUTION_MEDIASOURCE;
                                     pIUnknownCancelCookie: IUnknown = nil;
-                                    punkState: IUnknown = nil): HRESULT;
+                                    punkState: IUnknown = nil): HResult;
 
   // The aggregated media source is useful for combining streams from separate media sources.
   // For example, you can use it to combine a video capture source and an audio capture source.
   function CreateAggregatedSource(pSource1: IMFMediaSource;
                                   pSource2: IMFMediaSource;
-                                  out ppAggSource: IMFMediaSource): HRESULT;
+                                  out ppAggSource: IMFMediaSource): HResult;
 
   // Create a media source for the given device ID.
   // Note: The application have to enumerate the device first.
@@ -404,11 +405,11 @@ type
   // any other visual component that has a THandle (HWND).
   function CreateVideoMediaSinkActivate(pSourceSD: IMFStreamDescriptor;
                                         hVideoWnd: HWND;
-                                        out mfActivate: IMFActivate): HRESULT;
+                                        out mfActivate: IMFActivate): HResult;
 
   // This method returns an audio activation object for a renderer.
   function CreateAudioMediaSinkActivate(pSourceSD: IMFStreamDescriptor;
-                                        out mfActivate: IMFActivate): HRESULT;
+                                        out mfActivate: IMFActivate): HResult;
 
 
 // Topologies
@@ -423,7 +424,7 @@ type
                                   pPD: IMFPresentationDescriptor;        // Presentation descriptor.
                                   hVideoWnd: HWND;                       // Video window.
                                   var ppTopology: IMFTopology;           // Receives a pointer to the topology.
-                                  dwSourceStreams: DWORD = 0): HRESULT;  // Recieves the number of streams
+                                  dwSourceStreams: DWORD = 0): HResult;  // Recieves the number of streams
 
   //  Adds a topology branch for one stream.
   //
@@ -443,7 +444,7 @@ type
                                       pSource: IMFMediaSource;
                                       pPD: IMFPresentationDescriptor;
                                       dwStream: DWord;
-                                      hVideoWnd: HWND): HRESULT;
+                                      hVideoWnd: HWND): HResult;
 
   // Create the nodes and connect them.
   // This function is very similar to the function named AddBranchToPartialTopology (Creates a playback topology).
@@ -452,15 +453,15 @@ type
                                                  pSource: IMFMediaSource;         // Media source.
                                                  pPD: IMFPresentationDescriptor;  // Presentation descriptor.
                                                  iStream: DWORD;                  // Stream index.
-                                                 hVideoWnd: HWND): HRESULT;       // Window for video playback.
+                                                 hVideoWnd: HWND): HResult;       // Window for video playback.
 
   // Given a topology, returns a pointer to the presentation descriptor.
   function GetPresentationDescriptorFromTopology(pTopology: IMFTopology;
-                                                 out ppPD: IMFPresentationDescriptor): HRESULT;
+                                                 out ppPD: IMFPresentationDescriptor): HResult;
 
   // Returns the duration from a topology.
   function GetDurationFromTopology(pTopology: IMFTopology;
-                                   out phnsDuration: LONGLONG): HRESULT;
+                                   out phnsDuration: LONGLONG): HResult;
 
 
 
@@ -472,13 +473,13 @@ type
                          pSource: IMFMediaSource;                 // Media source.
                          pPD: IMFPresentationDescriptor;          // Presentation descriptor.
                          pSD: IMFStreamDescriptor;                // Stream descriptor.
-                         out ppNode: IMFTopologyNode): HRESULT;   // Receives the node pointer.
+                         out ppNode: IMFTopologyNode): HResult;   // Receives the node pointer.
 
   // Creates and initializes a source node from a MediaSource.
   function AddSourceStreamNode(pSource: IMFMediaSource;               // Media source.
                                pSourcePD: IMFPresentationDescriptor;  // Presentation descriptor.
                                pSourceSD: IMFStreamDescriptor;        // Stream descriptor.
-                               out ppNode: IMFTopologyNode): HRESULT; // Receives the node pointer.
+                               out ppNode: IMFTopologyNode): HResult; // Receives the node pointer.
 
 
 
@@ -489,17 +490,17 @@ type
   function AddOutputNodeA(pTopology: IMFTopology;                 // Topology.
                           pActivate: IMFActivate;                 // Media sink activation object.
                           dwId: DWORD;                            // Identifier of the stream sink.
-                          out ppNode: IMFTopologyNode): HRESULT;  // Receives the node pointer.
+                          out ppNode: IMFTopologyNode): HResult;  // Receives the node pointer.
 
   // Creates and initializes an output node from a stream sink.
   function AddOutputNodeS(pTopology: IMFTopology;                   // Topology.
                           pStreamSink: IMFStreamSink;               // Stream sink.
-                          out ppNode: IMFTopologyNode): HRESULT;    // Receives the node pointer.
+                          out ppNode: IMFTopologyNode): HResult;    // Receives the node pointer.
 
   // Creates an uotput node from a stream descriptor.
   function CreateOutputNode(pSourceSD: IMFStreamDescriptor;
                             hwndVideo: HWND;
-                            out ppNode: IMFTopologyNode): HRESULT;
+                            out ppNode: IMFTopologyNode): HResult;
 
 
 
@@ -509,17 +510,17 @@ type
   // Creates and initializes a transform node from an MFT (IMFTransform).
   function AddTransformNodeM(pTopology: IMFTopology;                // Topology.
                              pMFT: IMFTransform;                    // MFT.
-                             out ppNode: IMFTopologyNode): HRESULT; // Receives the node pointer.
+                             out ppNode: IMFTopologyNode): HResult; // Receives the node pointer.
 
   // Creates and initializes a transform node from a CLSID.
   function AddTransformNodeC(pTopology: IMFTopology;                 // Topology.
                              const fclsid: CLSID;                    // CLSID of the MFT.
-                             out ppNode: IMFTopologyNode): HRESULT;  // Receives the node pointer.
+                             out ppNode: IMFTopologyNode): HResult;  // Receives the node pointer.
 
   // Creates and initializes a transform node from an activation object.
   function AddTransformNodeA(pTopology: IMFTopology;                 // Topology.
                              pActivate: IMFActivate;                 // MFT activation object.
-                             out ppNode: IMFTopologyNode): HRESULT;  // Receives the node pointer.
+                             out ppNode: IMFTopologyNode): HResult;  // Receives the node pointer.
 
 
 
@@ -528,12 +529,12 @@ type
 
   // Scrub given a period (MFTime).
   function DoScrub(const SeekTime: MFTIME;
-                   pMediaSession: IMFMediaSession): HRESULT;
+                   pMediaSession: IMFMediaSession): HResult;
 
   // Set the playback rate within a mediasession.
   function SetPlaybackRate(pMediaSession: IMFMediaSession;
                            const rateRequested: MFTIME;
-                           const bThin: Boolean): HRESULT;
+                           const bThin: Boolean): HResult;
 
 
 // Sessions
@@ -551,7 +552,7 @@ type
   // The following code shows how to set the stop time on an existing topology.
   //
   function SetMediaStop(pTopology: IMFTopology;
-                        stop: LONGLONG): HRESULT;
+                        stop: LONGLONG): HResult;
 
   // Sets the stop time AFTER playback has started.
   //
@@ -566,7 +567,7 @@ type
   //
   function SetMediaStopDynamic(pSession: IMFMediaSession;
                                pTopology: IMFTopology;
-                               stop: LONGLONG): HRESULT;
+                               stop: LONGLONG): HResult;
 
 
 // De- & Encoders
@@ -578,7 +579,7 @@ type
   function FindDecoderEx(const subtype: TGUID;                  // Subtype
                          bAudio: Boolean;                       // TRUE for audio, FALSE for video
                          out ppDecoder: IMFTransform            // Receives a pointer to the decoder.
-                         ): HRESULT; deprecated 'superseded by function GetCodec';
+                         ): HResult; deprecated 'superseded by function GetCodec';
 
 
   // Searches for a video or audio encoder.
@@ -586,14 +587,14 @@ type
   function FindEncoderEx(const subtype: TGUID;                  // Subtype
                          const bAudio: Boolean;                 // TRUE for audio, FALSE for video
                          out ppEncoder: IMFTransform            // Receives a pointer to the encoder.
-                         ): HRESULT; deprecated 'superseded by function GetCodec';
+                         ): HResult; deprecated 'superseded by function GetCodec';
 
   // This function is deprecated. Only here for backward compatibility.
   function FindVideoDecoder(const subtype: TGUID;
                             bAllowAsync: Boolean;
                             bAllowHardware: Boolean;
                             bAllowTranscode: Boolean;
-                            out ppDecoder: IMFTransform): HRESULT;  deprecated 'superseded by function GetCodec';
+                            out ppDecoder: IMFTransform): HResult;  deprecated 'superseded by function GetCodec';
 
   // Enumerates mft's by category and returns an array of IMFActivate pointers.
   function EnumMft(const mftCategory: TGuid;
@@ -623,15 +624,15 @@ type
                     const mftCategory: TGuid;
                     out mftCodec: IMFTransform;
                     flags: MFT_ENUM_FLAG = MFT_ENUM_FLAG_ALL;
-                    selIndex: Integer = 0): HRESULT;
+                    selIndex: Integer = 0): HResult;
 
   // Returns the MFT decoder based on the major type GUID.
   function GetDecoderCategory(const majorType: TGUID;
-                              out pCategory: TGUID): HRESULT;
+                              out pCategory: TGUID): HResult;
 
   // Returns the MFT encoder based on the major type GUID.
   function GetEncoderCategory(const majorType: TGUID;
-                              out pCategory: TGUID): HRESULT;
+                              out pCategory: TGUID): HResult;
 
   // Returns an array of MFT guids, guid names and mft descriptions.
   function GetMftCategories(): TArray<TMftCategory>;
@@ -641,7 +642,7 @@ type
   //
   // If the stream is not compressed, pCLSID receives the value GUID_NULL.
   function FindDecoderForStream(pSD: IMFStreamDescriptor;      // Stream descriptor for the stream.
-                                out opCLSID: CLSID): HRESULT;  // Receives the CLSID of the decoder.
+                                out opCLSID: CLSID): HResult;  // Receives the CLSID of the decoder.
 
   // Configures the recordsink for video.
   function ConfigureVideoEncoding(pSource: IMFCaptureSource;
@@ -737,7 +738,7 @@ type
   //
   // This function provide the steps 1 to 3:
   function EnumCaptureDeviceSources(const pAttributeSourceType: TGuid;
-                                    var pDeviceProperties: TDevicePropertiesArray): HRESULT;
+                                    var pDeviceProperties: TDevicePropertiesArray): HResult;
 
   // Retrieves all native video formats of a device and stores them in TDevicePropertiesArray
   function GetCaptureDeviceCaps(pSourceReader: IMFSourceReader;
@@ -752,14 +753,14 @@ type
   // This function activates a selected device stored in TDeviceProperties.
   function CreateCaptureDeviceInstance(pDeviceProperties: TDeviceProperties;
                                        out ppSource: IMFMediaSource;
-                                       out ppActivate: IMFActivate): HRESULT;
+                                       out ppActivate: IMFActivate): HResult;
 
   // Enumerates the capture formats for a device.
   // Note: See also function SetDeviceFormat
   // This function returns an pointer array of IMFMediaType.
   // To get the current capture device's IMFMediaSource object, call IMFCaptureSource.GetCaptureDeviceSource.
   function EnumerateCaptureFormats(pSource: IMFMediaSource;
-                                   out ppMediaType: PIMFMediaType): HRESULT;
+                                   out ppMediaType: PIMFMediaType): HResult;
 
   // Counts mediatypes from a device
   // When the list index goes out of bounds, GetNativeMediaType returns MF_E_NO_MORE_TYPES.
@@ -769,7 +770,7 @@ type
   function CountTypesFromDevice(pReader: IMFSourceReader;
                                 const pStreamIndex: DWORD;
                                 out pCount: DWord;
-                                const pMfSupportedOnly: Boolean = True): HRESULT;
+                                const pMfSupportedOnly: Boolean = True): HResult;
 
   // Returns the name, name of the formattag and FOURCC value of a guid.
   function GetGUIDNameConst(guid: TGuid;
@@ -815,12 +816,12 @@ type
   function GetSymbolicLink(pActivate: IMFActivate;
                            out g_pwszSymbolicLink: PWideChar;
                            out g_cchSymbolicLink: UINT32;
-                           devMediaType: TGUID): HRESULT;
+                           devMediaType: TGUID): HResult;
 
   // Get the readable name of the device.
   function GetDeviceName(pActivate: IMFActivate;
                          out g_pwszDeviceName: PWideChar;
-                         out g_cchDeviceName: UINT32): HRESULT;
+                         out g_cchDeviceName: UINT32): HResult;
 
 
   // Enable Video Acceleration
@@ -844,7 +845,7 @@ type
 
   function FindDeviceManager(pTopology: IMFTopology;            // Topology to search.
                              out ppDeviceManager: IInterface;   // Receives a pointer to the device manager.
-                             out ppNode: IMFTopologyNode): HRESULT;
+                             out ppNode: IMFTopologyNode): HResult;
 
 
 // Audio and video capture
@@ -852,22 +853,22 @@ type
 
   // Creates a media source for the choosen deviceindex of the video capture device in the enumeration list.
   function CreateVideoCaptureDevice(const iDeviceIndex: UINT32;
-                                    out pSource: IMFMediaSource): HRESULT; overload;
+                                    out pSource: IMFMediaSource): HResult; overload;
 
   // Does the same if you know the symbolic link
   function CreateVideoCaptureDevice(const pszSymbolicLink: LPCWSTR;
-                                    out pSource: IMFMediaSource): HRESULT; overload;
+                                    out pSource: IMFMediaSource): HResult; overload;
 
   // Takes an audio endpoint ID and creates a media source.
   function CreateAudioCaptureDevice(const pszEndPointID: LPCWSTR;
-                                    out pSource: IMFMediaSource): HRESULT;
+                                    out pSource: IMFMediaSource): HResult;
   // Lists the devicenames from an IMFActivate array.
   procedure ListDeviceNames(ppDevices: PIMFActivate; // Pointer to array of IMFActivate
                             out iList: TStringList); // output
 
   // Sets the maximum frame rate on the media source.
   function SetMaxFrameRate(pSource: IMFMediaSource;
-                           dwTypeIndex: DWORD): HRESULT;
+                           dwTypeIndex: DWORD): HResult;
 
 
 // SAR (Streaming Audio Renderer)
@@ -893,23 +894,23 @@ type
   function GetBitmapInfoHeaderFromMFMediaType(pType: IMFMediaType;     // Pointer to the media type.
                                               out ppBmih: PBITMAPINFOHEADER; // Receives a pointer to the structure.
                                               out pcbSize: DWORD // Receives the size of the structure.
-                                              ): HRESULT;
+                                              ): HResult;
 
   // Copies an attribute value from one attribute store to another.
   function CopyAttribute(pSrc: IMFAttributes;
                          var pDest: IMFAttributes;
-                         const key: TGUID): HRESULT; overload;
+                         const key: TGUID): HResult; overload;
 
   function CopyAttribute(pSrc: IMFMediaType;
                          var pDest: IMFMediaType;
-                         const key: TGUID): HRESULT; overload;
+                         const key: TGUID): HResult; overload;
 
 
   // Creates a compatible video format with a different subtype if param guidSubType <> GUID_NULL else
   // the SubType will be the source subtype.
   function CloneVideoMediaType(pSrcMediaType: IMFMediaType;
                                const guidSubType: REFGUID;
-                               out ppNewMediaType: IMFMediaType): HRESULT;
+                               out ppNewMediaType: IMFMediaType): HResult;
 
 
   // Creates a JPEG, RGB32 or WIC GUID_ContainerFormat imagetype that is compatible with a specified video media type.
@@ -919,10 +920,10 @@ type
   //
   // WARNING: DON'T USE MFImageFormat_RGB32! (This will end with a WINCODEC_ERR_COMPONENTNOTFOUND)
   function CreatePhotoMediaType(const psubTypeGuid: TGuid;
-                                var pPhotoMediaType: IMFMediaType): HRESULT; overload;
+                                var pPhotoMediaType: IMFMediaType): HResult; overload;
   function CreatePhotoMediaType(const psubTypeGuid: TGuid;
                                 pSrcMediaType: IMFMediaType;
-                                out ppPhotoMediaType: IMFMediaType): HRESULT; overload;
+                                out ppPhotoMediaType: IMFMediaType): HResult; overload;
 
 
 // Video Media Type Helpers ////////////////////////////////////////////////////
@@ -982,6 +983,22 @@ type
                                          stVideoPadFlags: MFVideoPadFlags = MFVideoPadFlag_PAD_TO_None): HResult; inline;
 
 
+  // Get display area from a media type.
+  function GetVideoDisplayArea(pType: IMFMediaType;
+                               out pArea: MFVideoArea): HResult;
+
+  // Convert a rectangle from one pixel aspect ratio (PAR) to another,
+  // while preserving the picture aspect ratio.
+  function CorrectAspectRatio(const src: TRect;
+                              const srcPAR: MFRatio;
+                              const destPAR: MFRatio): TRect;
+
+  // Calculates the letterbox area, given a source and destination rectangle.
+  // It is assumed that both rectangles have the same PAR.
+  function LetterBoxRect(const rcSrc: TRect;
+                         const rcDst: TRect): TRect;
+
+
 ////////////////////////////////////////////////////////////////////////////////
 
 
@@ -998,18 +1015,18 @@ type
   // Returns the stream identifier from an active stream, of a given streamtype.
   function GetActiveStreamIndex(stmediaType: TMediaTypes;
                                 pspd: IMFPresentationDescriptor;
-                                out dwStreamId: DWORD): HRESULT;
+                                out dwStreamId: DWORD): HResult;
 
   // Gets the streams information from a source  (like language, format, compression etc.)
   // It returns an array of the stream content values.
   function GetStreamContents(pspd: IMFPresentationDescriptor;
                              mSource: IMFMediaSource;
-                             var alsCont: TStreamContentsArray): HRESULT;
+                             var alsCont: TStreamContentsArray): HResult;
 
   // Returns the Major guid and compression.
   function GetMediaType(pStreamDesc: IMFStreamDescriptor;
                         out tgMajorGuid: TGuid;
-                        out bIsCompressedFormat: BOOL): HRESULT;
+                        out bIsCompressedFormat: BOOL): HResult;
 
   // Check if a given guid is a major type.
   function IsMajorType(const guid: TGuid): Boolean;
@@ -1017,13 +1034,13 @@ type
   // Returns the mediatype associated with the Major guid.
   // To get the major type call function GetMediaType
   function GetMediaDescription(const pMajorGuid: TGuid;
-                               out mtMediaType: TMediaTypes): HRESULT;
+                               out mtMediaType: TMediaTypes): HResult;
 
   // Returns the name of the Majortype constant. (RTTI will not work on some Delphi versions)
   function GetMajorTypeDescr(const pMajorGuid: TGuid): LPWSTR;
 
   // Gets audio (EndPoint)device capabilities
-  function GetAudioFormat(var pMfAudioFormat: TMFAudioFormat): HRESULT;
+  function GetAudioFormat(var pMfAudioFormat: TMFAudioFormat): HResult;
 
   // Gets audio stream info from a media source.
   function GetAudioSubType(mSource: IMFMediaSource;
@@ -1036,7 +1053,7 @@ type
                            out pBlockAlignment: UINT32;
                            out pAverageSampleRate: UINT32;
                            out pBitRate: Double;
-                           out pSampleRate: Double): HRESULT;
+                           out pSampleRate: Double): HResult;
 
   // Gets the Windows supported audio encoder formats (MFT's).
   function GetWinAudioEncoderFormats(const mfAudioFormat: TGuid;
@@ -1078,7 +1095,7 @@ type
   // See: https://learn.microsoft.com/en-us/windows/win32/medfound/sami-media-source
   // The following function sets the current SAMI style, specified by index.
   function SetSAMIStyleByIndex(pSource: IMFMediaSource;
-                               index: DWORD): HRESULT;
+                               index: DWORD): HResult;
 
 
 
@@ -1088,11 +1105,23 @@ type
   // Getting the File Duration.
   // To get the duration of a media file, call the IMFSourceReader.GetPresentationAttribute method and
   // request the MF_PD_DURATION attribute.
-  function GetFileDuration(pReader: IMFSourceReader;
-                           out phnsDuration: LONGLONG): HRESULT;
+  function GetFileDuration(pSource: IMFSourceReader;
+                           out phnsDuration: MFTIME): HResult; overload;
+
+  // Alternatively you might get the duration of a media file by calling the IMFMediaSource.CreatePresentationDescriptor method and
+  // request the MF_PD_DURATION attribute.
+  function GetFileDuration(pSource: IMFMediaSource;
+                           out pDuration: MFTIME): HResult; overload;
+
+
   // Gets the file size.
   function GetFileSize(pReader: IMFSourceReader;
-                       out phnsFileSize: LONGLONG): HRESULT;
+                       out phnsFileSize: ULONGLONG): HResult; overload;
+
+  // Alternatively you might get the filesize of a media file by calling the IMFMediaSource.CreatePresentationDescriptor method and
+  // request the MF_PD_TOTAL_FILE_SIZE attribute.
+  function GetFileSize(pReader: IMFMediaSource;
+                       out phnsFileSize: ULONGLONG): HResult; overload;
 
 
 // External methods
@@ -1127,7 +1156,7 @@ const
 
   // Renamed functions and procedures for backward compatibility
   CreateVideoCaptureDeviceBySymolicLink: function(const pszSymbolicLink: LPCWSTR;
-                                                  out ppSource: IMFMediaSource): HRESULT = CreateVideoCaptureDevice;
+                                                  out ppSource: IMFMediaSource): HResult = CreateVideoCaptureDevice;
 
 
 // System
@@ -1234,10 +1263,10 @@ end;
 
 
 function GetEventObject(pEvent: IMFMediaEvent;
-                        out ppObject): HRESULT;
+                        out ppObject): HResult;
 var
   vVar: PROPVARIANT;
-  hr: HRESULT;
+  hr: HResult;
 
 begin
 
@@ -1289,9 +1318,9 @@ end;
 
 // Create a sample and add a buffer to it.
 function CreateMediaSample(cbData: DWORD;
-                           out pSample: IMFSample): HRESULT;
+                           out pSample: IMFSample): HResult;
 var
-  hr: HRESULT;
+  hr: HResult;
   mfSample: IMFSample;
   pBuffer: IMFMediaBuffer;
 
@@ -1314,7 +1343,7 @@ end;
 
 // Deprecated, use CreateObjectFromUrl.
 function CreateMediaSourceFromUrl(const sURL: WideString;
-                                  out pSource: IMFMediaSource): HRESULT;
+                                  out pSource: IMFMediaSource): HResult;
 begin
   Result := CreateObjectFromUrl(sURL,
                                 pSource);
@@ -1326,12 +1355,12 @@ end;
 function CreateObjectFromUrl(const sURL: WideString;
                              out pSource: IMFMediaSource;
                              pStore: IPropertyStore = nil;
-                             const dwFlags: DWord = MF_RESOLUTION_MEDIASOURCE): HRESULT;
+                             const dwFlags: DWord = MF_RESOLUTION_MEDIASOURCE): HResult;
 var
   ObjectType: MF_OBJECT_TYPE;
   pSourceResolver: IMFSourceResolver;
   unkSource: IUnknown;
-  hr: HRESULT;
+  hr: HResult;
 
 label
   done;
@@ -1379,10 +1408,10 @@ function CreateObjectFromUrlAsync(const sURL: WideString;
                                   pStore: IPropertyStore = nil;
                                   const dwFlags: DWord = MF_RESOLUTION_MEDIASOURCE;
                                   pIUnknownCancelCookie: IUnknown = nil;
-                                  punkState: IUnknown = nil): HRESULT;
+                                  punkState: IUnknown = nil): HResult;
 var
   pSourceResolver: IMFSourceResolver;
-  hr: HRESULT;
+  hr: HResult;
 
 label
   done;
@@ -1415,9 +1444,9 @@ end;
 // Combine streams from separate media sources. For example one for audio and one for video
 function CreateAggregatedSource(pSource1: IMFMediaSource;
                                 pSource2: IMFMediaSource;
-                                out ppAggSource: IMFMediaSource): HRESULT;
+                                out ppAggSource: IMFMediaSource): HResult;
 var
-  hr: HRESULT;
+  hr: HResult;
   pCollection: IMFCollection;
 
 begin
@@ -1546,12 +1575,12 @@ end;
 // any other visual component that has a THandle (HWND).
 function CreateVideoMediaSinkActivate(pSourceSD: IMFStreamDescriptor;
                                       hVideoWnd: HWND;
-                                      out mfActivate: IMFActivate): HRESULT;
+                                      out mfActivate: IMFActivate): HResult;
 var
   phandler: IMFMediaTypeHandler;
   pActivate: IMFActivate;
   guidMajorType: TGUID;
-  hr: HRESULT;
+  hr: HResult;
 
 label
   done;
@@ -1593,12 +1622,12 @@ end;
 
 // This method returns an audio activation object for a renderer.
 function CreateAudioMediaSinkActivate(pSourceSD: IMFStreamDescriptor;
-                                      out mfActivate: IMFActivate): HRESULT;
+                                      out mfActivate: IMFActivate): HResult;
 var
   phandler: IMFMediaTypeHandler;
   pActivate: IMFActivate;
   guidMajorType: TGUID;
-  hr: HRESULT;
+  hr: HResult;
 
 label
   done;
@@ -1636,9 +1665,9 @@ end;
 function AddSourceStreamNode(pSource: IMFMediaSource;
                              pSourcePD: IMFPresentationDescriptor;
                              pSourceSD: IMFStreamDescriptor;
-                             out ppNode: IMFTopologyNode): HRESULT;
+                             out ppNode: IMFTopologyNode): HResult;
 var
-   hr: HRESULT;
+   hr: HResult;
 
 label
   done;
@@ -1687,7 +1716,7 @@ function CreatePlaybackTopology(pSource: IMFMediaSource;               // Media 
                                 pPD: IMFPresentationDescriptor;        // Presentation descriptor.
                                 hVideoWnd: HWND;                       // Video window.
                                 var ppTopology: IMFTopology;           // Receives a pointer to the topology.
-                                dwSourceStreams: DWORD = 0): HRESULT;
+                                dwSourceStreams: DWORD = 0): HResult;
 var
   tmpTopology: IMFTopology;
   hr: HResult;
@@ -1735,10 +1764,10 @@ function AddSourceNode(pTopology: IMFTopology;                   // Topology.
                        pSource: IMFMediaSource;                  // Media source.
                        pPD: IMFPresentationDescriptor;           // Presentation descriptor.
                        pSD: IMFStreamDescriptor;                 // Stream descriptor.
-                       out ppNode: IMFTopologyNode): HRESULT;    // Receives the node pointer.
+                       out ppNode: IMFTopologyNode): HResult;    // Receives the node pointer.
 
 var
-  hr: HRESULT;
+  hr: HResult;
 
 label
   done;
@@ -1783,9 +1812,9 @@ end;
 function AddOutputNodeA(pTopology: IMFTopology;                 // Topology.
                         pActivate: IMFActivate;                 // Media sink activation object.
                         dwId: DWORD;                            // Identifier of the stream sink.
-                        out ppNode: IMFTopologyNode): HRESULT;  // Receives the node pointer.
+                        out ppNode: IMFTopologyNode): HResult;  // Receives the node pointer.
 var
-  hr: HRESULT;
+  hr: HResult;
 
 label
   done;
@@ -1826,9 +1855,9 @@ end;
 
 function AddOutputNodeS(pTopology: IMFTopology;                   // Topology.
                         pStreamSink: IMFStreamSink;               // Stream sink.
-                        out ppNode: IMFTopologyNode): HRESULT;    // Receives the node pointer.
+                        out ppNode: IMFTopologyNode): HResult;    // Receives the node pointer.
 var
-  hr: HRESULT;
+  hr: HResult;
 
 begin
   ppNode := nil;
@@ -1872,14 +1901,14 @@ function AddBranchToPartialTopology(pTopology: IMFTopology;
                                     pSource: IMFMediaSource;
                                     pPD: IMFPresentationDescriptor;
                                     dwStream: DWord;
-                                    hVideoWnd: HWND): HRESULT;
+                                    hVideoWnd: HWND): HResult;
 var
   pSD: IMFStreamDescriptor;
   pSinkActivate: IMFActivate;
   pSourceNode: IMFTopologyNode;
   pOutputNode: IMFTopologyNode;
   fSelected: BOOL;
-  hr: HRESULT;
+  hr: HResult;
 
 label
   done;
@@ -1945,9 +1974,9 @@ function AddBranchToPartialTopologyWithDecoder(pTopology: IMFTopology;          
                                                pSource: IMFMediaSource;         // Media source.
                                                pPD: IMFPresentationDescriptor;  // Presentation descriptor.
                                                iStream: DWORD;                  // Stream index.
-                                               hVideoWnd: HWND): HRESULT;       // Window for video playback.
+                                               hVideoWnd: HWND): HResult;       // Window for video playback.
 var
-  hr: HRESULT;
+  hr: HResult;
   pSD: IMFStreamDescriptor;
   pSinkActivate: IMFActivate;
   pSourceNode: IMFTopologyNode;
@@ -2067,14 +2096,14 @@ end;
 //
 function CreateOutputNode(pSourceSD: IMFStreamDescriptor;
                           hwndVideo: HWND;
-                          out ppNode: IMFTopologyNode): HRESULT;
+                          out ppNode: IMFTopologyNode): HResult;
 var
   pNode: IMFTopologyNode;
   pHandler: IMFMediaTypeHandler;
   pRendererActivate: IMFActivate;
   guidMajorType: TGUID;
   streamID: DWORD;
-  hr: HRESULT;
+  hr: HResult;
 
 label
   done;
@@ -2138,9 +2167,9 @@ end;
 
 function AddTransformNodeM(pTopology: IMFTopology;      // Topology.
                            pMFT: IMFTransform;          // MFT.
-                           out ppNode: IMFTopologyNode): HRESULT;
+                           out ppNode: IMFTopologyNode): HResult;
 var
-  hr: HRESULT;
+  hr: HResult;
 
 begin
   ppNode := nil;
@@ -2167,9 +2196,9 @@ end;
 
 function AddTransformNodeC(pTopology: IMFTopology;                 // Topology.
                            const fclsid: CLSID;                    // CLSID of the MFT.
-                           out ppNode: IMFTopologyNode): HRESULT;  // Receives the node pointer.
+                           out ppNode: IMFTopologyNode): HResult;  // Receives the node pointer.
 var
-  hr: HRESULT;
+  hr: HResult;
 
 begin
   ppNode := nil;
@@ -2197,9 +2226,9 @@ end;
 
 function AddTransformNodeA(pTopology: IMFTopology;                 // Topology.
                            pActivate: IMFActivate;                 // MFT activation object.
-                           out ppNode: IMFTopologyNode): HRESULT;  // Receives the node pointer.
+                           out ppNode: IMFTopologyNode): HResult;  // Receives the node pointer.
 var
-  hr: HRESULT;
+  hr: HResult;
 
 begin
   ppNode := nil;
@@ -2226,9 +2255,9 @@ end;
 
 // Given a topology (pTopology), returns a pointer to the presentation descriptor.
 function GetPresentationDescriptorFromTopology(pTopology: IMFTopology;
-                                               out ppPD: IMFPresentationDescriptor): HRESULT;
+                                               out ppPD: IMFPresentationDescriptor): HResult;
 var
-  hr: HRESULT;
+  hr: HResult;
   pCollection: IMFCollection;
   pUnk: IUnknown;
   pNode: IMFTopologyNode;
@@ -2288,12 +2317,12 @@ end;
 
 //
 function GetDurationFromTopology(pTopology: IMFTopology;
-                                 out phnsDuration: LONGLONG): HRESULT;
+                                 out phnsDuration: LONGLONG): HResult;
 var
   pSourceNodes: IMFCollection;
   pNode: IMFTopologyNode;
   pPD: IMFPresentationDescriptor;
-  hr: HRESULT;
+  hr: HResult;
 
 label
   done;
@@ -2329,10 +2358,10 @@ end;
 // Gets an interface pointer from a Media Foundation collection.
 function GetCollectionObject(pCollection: IMFCollection;
                              const dwIndex: DWORD;
-                             out ppObject): HRESULT;
+                             out ppObject): HResult;
 var
   pUnk: IUnknown;
-  hr: HRESULT;
+  hr: HResult;
 
 begin
 
@@ -2351,9 +2380,9 @@ end;
 
 // SCRUBBING
 function DoScrub(const SeekTime: MFTIME;
-                 pMediaSession: IMFMediaSession): HRESULT;
+                 pMediaSession: IMFMediaSession): HResult;
 var
-  hr: HRESULT;
+  hr: HResult;
   pvar: PROPVARIANT;
   pRateControl: IMFRateControl;
 
@@ -2405,9 +2434,9 @@ end;
 
 function SetPlaybackRate(pMediaSession: IMFMediaSession;
                          const rateRequested: MFTIME;
-                         const bThin: Boolean): HRESULT;
+                         const bThin: Boolean): HResult;
 var
-  hr: HRESULT;
+  hr: HResult;
   pRateControl: IMFRateControl;
 
 begin
@@ -2440,14 +2469,14 @@ end;
 //   with a nested function.
 //
 function SetMediaStop(pTopology: IMFTopology;
-                      stop: LONGLONG): HRESULT;
+                      stop: LONGLONG): HResult;
 
   function GetCollectionObject(pCollection: IMFCollection;
                                dwIndex: DWORD;
-                               ppObject: Pointer): HRESULT;
+                               ppObject: Pointer): HResult;
   var
     pUnk: IUnknown;
-    hr: HRESULT;
+    hr: HResult;
 
   begin
     ppObject := nil;   // zero output
@@ -2467,7 +2496,7 @@ function SetMediaStop(pTopology: IMFTopology;
 var
   pCol: IMFCollection;
   cNodes: DWORD;
-  hr: HRESULT;
+  hr: HResult;
   i: Integer;
   pNode: IMFTopologyNode;
 
@@ -2518,7 +2547,7 @@ end;
 //
 function SetMediaStopDynamic(pSession: IMFMediaSession;
                              pTopology: IMFTopology;
-                             stop: LONGLONG): HRESULT;
+                             stop: LONGLONG): HResult;
 const
   {$IFDEF WIN32}
   MAXVALUE = 4294967294;  // UINT32 0..4294967295 on 32 bit platforms.
@@ -2530,7 +2559,7 @@ var
   pAttr: IMFTopologyNodeAttributeEditor;
   pCol: IMFCollection;
   pNode: IMFTopologyNode;
-  hr: HRESULT;
+  hr: HResult;
   id: TOPOID;
   nodeID: TOPOID;
   cNodes: DWORD;
@@ -2609,7 +2638,7 @@ end;
 // This function is deprecated. Only here for backward compatibility.
 function FindDecoderEx(const subtype: TGUID;         // Subtype
                        bAudio: Boolean;              // TRUE for audio, FALSE for video
-                       out ppDecoder: IMFTransform): HRESULT;
+                       out ppDecoder: IMFTransform): HResult;
 var
   mftRegisterTypeInfo: MFT_REGISTER_TYPE_DESCR;
 
@@ -2642,7 +2671,7 @@ end;
 // This function is deprecated. Only here for backward compatibility.
 function FindEncoderEx(const subtype: TGUID;
                        const bAudio: Boolean;
-                       out ppEncoder: IMFTransform): HRESULT;
+                       out ppEncoder: IMFTransform): HResult;
 var
   mftRegisterTypeInfo: MFT_REGISTER_TYPE_INFO;
 
@@ -2783,7 +2812,7 @@ function GetCodec(mftRegisterTypeInput: PMFT_REGISTER_TYPE_INFO;
                   selIndex: Integer = 0): HResult;
 
 var
-  hr: HRESULT;
+  hr: HResult;
   count: UINT32;
   ppActivate: PIMFActivate;
   attr: IMFAttributes;
@@ -2827,7 +2856,7 @@ function FindVideoDecoder(const subtype: TGUID;
                           bAllowAsync: Boolean;
                           bAllowHardware: Boolean;
                           bAllowTranscode: Boolean;
-                          out ppDecoder: IMFTransform): HRESULT;
+                          out ppDecoder: IMFTransform): HResult;
 var
   mftRegisterTypeInfo: MFT_REGISTER_TYPE_INFO;
 
@@ -2844,9 +2873,9 @@ end;
 
 //
 function GetDecoderCategory(const majorType: TGUID;
-                            out pCategory: TGUID): HRESULT;
+                            out pCategory: TGUID): HResult;
 var
-  hr: HRESULT;
+  hr: HResult;
 
 begin
   hr := S_OK;
@@ -2869,9 +2898,9 @@ end;
 
 
 function GetEncoderCategory(const majorType: TGUID;
-                            out pCategory: TGUID): HRESULT;
+                            out pCategory: TGUID): HResult;
 var
-  hr: HRESULT;
+  hr: HResult;
 
 begin
   hr := S_OK;
@@ -2948,9 +2977,9 @@ end;
 
 //
 function FindDecoderForStream(pSD: IMFStreamDescriptor; // Stream descriptor for the stream.
-                              out opCLSID: CLSID): HRESULT;  // Receives the CLSID of the decoder.
+                              out opCLSID: CLSID): HResult;  // Receives the CLSID of the decoder.
 var
-  hr: HRESULT;
+  hr: HResult;
   bIsCompressed: BOOL;
   guidMajorType: TGUID;
   guidSubtype: TGUID;
@@ -3062,7 +3091,7 @@ end;
 // [in] AttributeSourceType:  MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID or MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_AUDCAP_GUID
 // [in/out] DeviceProperties:  TDevicePropsArray
 function EnumCaptureDeviceSources(const pAttributeSourceType: TGuid;
-                                  var pDeviceProperties: TDevicePropertiesArray): HRESULT;
+                                  var pDeviceProperties: TDevicePropertiesArray): HResult;
 
   {$REGION Helper for function EnumCaptureDeviceSources}
   // Helper for function EnumCaptureDeviceSources
@@ -3090,7 +3119,7 @@ function EnumCaptureDeviceSources(const pAttributeSourceType: TGuid;
   {$ENDREGION}
 
 var
-  hr: HRESULT;
+  hr: HResult;
   pAttributes: IMFAttributes;
   pMediaSource: IMFMediaSource;
   pSourceReader: IMFSourceReader;
@@ -3471,12 +3500,12 @@ end;
 // CreateCaptureDeviceInstance
 function CreateCaptureDeviceInstance(pDeviceProperties: TDeviceProperties;
                                      out ppSource: IMFMediaSource;
-                                     out ppActivate: IMFActivate): HRESULT;
+                                     out ppActivate: IMFActivate): HResult;
 var
   count: UINT32;
   pConfig: IMFAttributes;
   ppDevices: PIMFActivate;  // Pointer to array of IMFActivate
-  hr: HRESULT;
+  hr: HResult;
 
 label
   done;
@@ -3527,13 +3556,13 @@ end;
 
 //
 function EnumerateCaptureFormats(pSource: IMFMediaSource;
-                                 out ppMediaType: PIMFMediaType): HRESULT;
+                                 out ppMediaType: PIMFMediaType): HResult;
 var
   pPD: IMFPresentationDescriptor;
   pSD: IMFStreamDescriptor;
   pHandler: IMFMediaTypeHandler;
   pType: IMFMediaType;
-  hr: HRESULT;
+  hr: HResult;
   fSelected: BOOL;
   cTypes: DWORD;
   i: Integer;
@@ -3584,9 +3613,9 @@ end;
 function CountTypesFromDevice(pReader: IMFSourceReader;
                               const pStreamIndex: DWord;
                               out pCount: DWord;
-                              const pMfSupportedOnly: Boolean = True): HRESULT;
+                              const pMfSupportedOnly: Boolean = True): HResult;
 var
-  hr: HRESULT;
+  hr: HResult;
   dwIndex: DWORD;
   dwNativeCount: DWord;
   dwMfSupportedCount: DWord;
@@ -4999,7 +5028,7 @@ end;
 function GetSymbolicLink(pActivate: IMFActivate;
                          out g_pwszSymbolicLink: PWideChar;
                          out g_cchSymbolicLink: UINT32;
-                         devMediaType: TGUID): HRESULT;
+                         devMediaType: TGUID): HResult;
 begin
 
   if IsEqualGuid(devMediaType, MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK) or
@@ -5017,7 +5046,7 @@ end;
 //
 function GetDeviceName(pActivate: IMFActivate;
                        out g_pwszDeviceName: PWideChar;
-                       out g_cchDeviceName: UINT32): HRESULT;
+                       out g_cchDeviceName: UINT32): HResult;
 begin
   Result := (pActivate as IMFAttributes).GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME,
                                                                 g_pwszDeviceName,
@@ -5030,9 +5059,9 @@ end;
 // =========================
 function FindDeviceManager(pTopology: IMFTopology;          // Topology to search.
                            out ppDeviceManager: IInterface;     // Receives a pointer to the device manager.
-                           out ppNode: IMFTopologyNode): HRESULT;
+                           out ppNode: IMFTopologyNode): HResult;
 var
-  hr: HRESULT;
+  hr: HResult;
   cNodes: WORD;
   bFound: Boolean;
   pNode: IMFTopologyNode;
@@ -5121,13 +5150,13 @@ end;
 // the enumeration list:
 //
 function CreateVideoCaptureDevice(const iDeviceIndex: UINT32;
-                                  out pSource: IMFMediaSource): HRESULT; overload;
+                                  out pSource: IMFMediaSource): HResult; overload;
 var
   count: UINT32;
   i: Integer;
   pConfig: IMFAttributes;
   ppDevices: PIMFActivate; // Pointer to array of IMFActivate interfaces
-  hr: HRESULT;
+  hr: HResult;
 
 begin
 
@@ -5179,11 +5208,11 @@ end;
 
 //
 function CreateVideoCaptureDevice(const pszSymbolicLink: LPCWSTR;
-                                  out pSource: IMFMediaSource): HRESULT; overload;
+                                  out pSource: IMFMediaSource): HResult; overload;
 
 var
   pAttributes: IMFAttributes;
-  hr: HRESULT;
+  hr: HResult;
 
 begin
 
@@ -5221,10 +5250,10 @@ end;
 // 4 Call either the MFCreateDeviceSource or MFCreateDeviceSourceActivate function.
 //
 function CreateAudioCaptureDevice(const pszEndPointID: LPCWSTR;
-                                  out pSource: IMFMediaSource): HRESULT;
+                                  out pSource: IMFMediaSource): HResult;
 var
   pAttributes: IMFAttributes;
-  hr: HRESULT;
+  hr: HResult;
 
 begin
 
@@ -5272,7 +5301,7 @@ procedure ListDeviceNames(ppDevices: PIMFActivate;
                           out iList: TStringList);
 var
   i: Integer;
-  hr: HRESULT;
+  hr: HResult;
   szFriendlyName: LPWSTR;
   cchName: UINT32;
   iCount: UINT32;
@@ -5373,7 +5402,7 @@ end;
 
 //
 function SetMaxFrameRate(pSource: IMFMediaSource;
-                         dwTypeIndex: DWORD): HRESULT;
+                         dwTypeIndex: DWORD): HResult;
 var
   pPD: IMFPresentationDescriptor;
   pSD: IMFStreamDescriptor;
@@ -5433,14 +5462,14 @@ end;
 function GetBitmapInfoHeaderFromMFMediaType(pType: IMFMediaType;     // Pointer to the media type.
                                             out ppBmih: PBITMAPINFOHEADER; // Receives a pointer to the structure.
                                             out pcbSize: DWORD // Receives the size of the structure.
-                                            ): HRESULT;
+                                            ): HResult;
 var
   majorType: TGUID;
   pmt: PAM_MEDIA_TYPE;
   cbSize: DWORD;
   cbOffset: DWORD;
   pBMIH: PBITMAPINFOHEADER;
-  hr: HRESULT;
+  hr: HResult;
   ulcbOffset: ULONG;
 
 label
@@ -5525,10 +5554,10 @@ end;
 //
 function CopyAttribute(pSrc: IMFAttributes;
                        var pDest: IMFAttributes;
-                       const key: TGUID): HRESULT;
+                       const key: TGUID): HResult;
 var
   pvar: PROPVARIANT;
-  hr: HRESULT;
+  hr: HResult;
 
 begin
   if Assigned(pSrc) then
@@ -5549,10 +5578,10 @@ end;
 
 function CopyAttribute(pSrc: IMFMediaType;
                        var pDest: IMFMediaType;
-                       const key: TGUID): HRESULT;
+                       const key: TGUID): HResult;
 var
   pvar: PROPVARIANT;
-  hr: HRESULT;
+  hr: HResult;
 
 begin
   if Assigned(pSrc) then
@@ -5577,9 +5606,9 @@ end;
 // the SubType will be the source subtype.
 function CloneVideoMediaType(pSrcMediaType: IMFMediaType;
                              const guidSubType: REFGUID;
-                             out ppNewMediaType: IMFMediaType): HRESULT;
+                             out ppNewMediaType: IMFMediaType): HResult;
 var
-  hr: HRESULT;
+  hr: HResult;
   rGuid: REFGUID;
   tmpMediaType: IMFMediaType;
 
@@ -5651,9 +5680,9 @@ end;
 
 //
 function CreatePhotoMediaType(const psubTypeGuid: TGuid; {can be one of the following: MFImageFormat_RGB32, MFImageFormat_JPEG or WIC guidContainerFormats like GUID_ContainerFormatBmp etc.}
-                              var pPhotoMediaType: IMFMediaType): HRESULT;
+                              var pPhotoMediaType: IMFMediaType): HResult;
 var
-  hr: HRESULT;
+  hr: HResult;
   mfPhotoMediaType: IMFMediaType;
 
 label
@@ -5877,6 +5906,191 @@ begin
 end;
 
 
+function GetVideoDisplayArea(pType: IMFMediaType;
+                             out pArea: MFVideoArea): HResult;
+var
+  hr: HResult;
+  bPanScan: Boolean;
+  pWidth: UINT32;
+  pHeight: UINT32;
+
+begin
+
+  hr := S_OK;
+  bPanScan := 0;
+  pWidth := 0;
+  pHeight := 0;
+
+  bPanScan := MFGetAttributeUINT32(pType,
+                                   MF_MT_PAN_SCAN_ENABLED,
+                                   {false} UINT32(0));
+
+  // In pan-and-scan mode, try to get the pan-and-scan region.
+  if bPanScan then
+    hr := pType.GetBlob(MF_MT_PAN_SCAN_APERTURE,
+                       @pArea,
+                       SizeOf(MFVideoArea),
+                       nil);
+
+  // If not in pan-and-scan mode, or the pan-and-scan region is not set,
+  // get the minimimum display aperture.
+
+  if (bPanScan = False) or (hr = MF_E_ATTRIBUTENOTFOUND) then
+    begin
+      hr := pType.GetBlob(MF_MT_MINIMUM_DISPLAY_APERTURE,
+                          @pArea,
+                          SizeOf(MFVideoArea),
+                          nil);
+
+      if hr = MF_E_ATTRIBUTENOTFOUND then
+        begin
+          // Minimum display aperture is not set.
+
+          // For backward compatibility with some components,
+          // check for a geometric aperture.
+
+          hr := pType.GetBlob(MF_MT_GEOMETRIC_APERTURE,
+                              @pArea,
+                              SizeOf(MFVideoArea),
+                              nil);
+        end;
+
+      // Default: Use the entire video area.
+
+      if hr = MF_E_ATTRIBUTENOTFOUND then
+        begin
+          hr := MFGetAttributeSize(pType,
+                                   MF_MT_FRAME_SIZE,
+                                   pWidth,
+                                   pHeight);
+
+          if SUCCEEDED(hr) then
+            pArea := MakeArea(0.0,
+                              0.0,
+                              pWidth,
+                              pHeight);
+        end;
+    end;
+  Result := hr;
+end;
+
+
+// Converts a rectangle from one pixel aspect ratio (PAR) to another PAR.
+// Returns the corrected rectangle.
+//
+// For example, a 720 x 486 rect with a PAR of 9:10, when converted to 1x1 PAR,
+// must be stretched to 720 x 540.
+function CorrectAspectRatio(const src: TRect;
+                            const srcPAR: MFRatio;
+                            const destPAR: MFRatio): TRect;
+var
+  rc: TRect;
+
+begin
+  // Start with a rectangle the same size as src, but offset to (0,0).
+  //rc := {0, 0, src.right - src.left, src.bottom - src.top};
+  rc.Left := 0;
+  rc.Top := 0;
+  rc.Right := src.Right - src.Left;
+  rc.Bottom := src.Bottom - src.Top;
+
+  // If the source and destination have the same PAR, there is nothing to do.
+  // Otherwise, adjust the image size, in two steps:
+  //  1. Transform from source PAR to 1:1
+  //  2. Transform from 1:1 to destination PAR.
+
+  if (srcPAR.Numerator <> destPAR.Numerator) or
+     (srcPAR.Denominator <> destPAR.Denominator) then
+    begin
+      // Correct for the source's PAR.
+
+      if (srcPAR.Numerator > srcPAR.Denominator) then
+        begin
+          // The source has "wide" pixels, so stretch the width.
+          rc.right := MulDiv(rc.Right,
+                             srcPAR.Numerator,
+                             srcPAR.Denominator);
+        end
+      else if (srcPAR.Numerator < srcPAR.Denominator) then
+        begin
+          // The source has "tall" pixels, so stretch the height.
+          rc.Bottom = MulDiv(rc.Bottom,
+                             srcPAR.Denominator,
+                             srcPAR.Numerator);
+        end;
+      // else: PAR is 1:1, which is a no-op.
+
+      // Next, correct for the target's PAR. This is the inverse operation of
+      // the previous.
+      if (destPAR.Numerator > destPAR.Denominator) then
+        begin
+            // The destination has "wide" pixels, so stretch the height.
+            rc.bottom = MulDiv(rc.bottom, destPAR.Numerator, destPAR.Denominator);
+        end
+      else if (destPAR.Numerator < destPAR.Denominator) then
+        begin
+          // The destination has "tall" pixels, so stretch the width.
+          rc.right := MulDiv(rc.Right,
+                             destPAR.Denominator,
+                             destPAR.Numerator);
+        end;
+      // else: PAR is 1:1, which is also a no-op.
+    end;
+  Result := rc;
+end;
+
+
+function LetterBoxRect(const rcSrc: TRect;
+                       const rcDst: TRect): TRect;
+var
+  iSrcWidth: Integer;
+  iSrcHeight: Integer;
+  iDstWidth: Integer;
+  iDstHeight: Integer;
+  iDstLBWidth: Integer;
+  iDstLBHeight: Integer;
+  lLeft: LONG;
+  lTop: LONG;
+  rc: TRect;
+
+begin
+  // Compute source/destination ratios.
+  iSrcWidth  := rcSrc.Right - rcSrc.left;
+  iSrcHeight := rcSrc.Bottom - rcSrc.top;
+  iDstWidth  := rcDst.Right - rcDst.Left;
+  iDstHeight := rcDst.Bottom - rcDst.Top;
+
+  if (MulDiv(iSrcWidth,
+             iDstHeight,
+             iSrcHeight) <= iDstWidth) then
+    begin
+      // Column letterboxing ("pillar box")
+      iDstLBWidth  := MulDiv(iDstHeight,
+                             iSrcWidth,
+                             iSrcHeight);
+      iDstLBHeight := iDstHeight;
+    end
+  else
+    begin
+        // Row letterboxing.
+        iDstLBWidth  = iDstWidth;
+        iDstLBHeight = MulDiv(iDstWidth,
+                              iSrcHeight,
+                              iSrcWidth);
+    end;
+
+  // Create a centered rectangle within the current destination rect.
+  lLeft := rcDst.Left + ((iDstWidth - iDstLBWidth) / 2);
+  lTop := rcDst.Top + ((iDstHeight - iDstLBHeight) / 2);
+  SetRect(rc,
+          lLeft,
+          lTop,
+          lLeft + iDstLBWidth,
+          lTop + iDstLBHeight);
+  Result := rc;
+end;
+
+
 // Get an IMFMetadata pointer from a media source.
 // Metadata contains descriptive information for the media content, such as title, artist, composer, and genre.
 // Metadata can also describe encoding parameters.
@@ -5885,7 +6099,7 @@ function GetMetadata(pSource: IMFMediaSource;
                      out ppMetadata: IMFMetadata;
                      dwStream: DWORD): HResult;
 var
-  hr: HRESULT;
+  hr: HResult;
   pPD: IMFPresentationDescriptor;
   pProvider: IMFMetadataProvider;
 
@@ -5923,7 +6137,7 @@ function GetActiveStreamIndex(stmediaType: TMediaTypes;          // [in] mediaty
                               pspd: IMFPresentationDescriptor;   // [in] presentation descriptor interface
                               out dwStreamId: DWORD): HResult;   // [out] stream identifier
 var
-  hr: HRESULT;
+  hr: HResult;
   sdCount: DWORD;
   i: Integer;
   pSourceSD: IMFStreamDescriptor;
@@ -5982,9 +6196,9 @@ end;
 // Retrieves information of the streams from a source
 function GetStreamContents(pspd: IMFPresentationDescriptor;
                            mSource: IMFMediaSource;
-                           var alsCont: TStreamContentsArray): HRESULT;
+                           var alsCont: TStreamContentsArray): HResult;
 var
-  hr: HRESULT;
+  hr: HResult;
   i: Integer;
   pSourceSD: IMFStreamDescriptor;
   pMediaTypeHandler: IMFMediaTypeHandler;
@@ -6147,9 +6361,9 @@ end;
 // Get the media type handler, enumerate the preferred media types, and set the media type.
 function GetMediaType(pStreamDesc: IMFStreamDescriptor;
                       out tgMajorGuid: TGuid;
-                      out bIsCompressedFormat: BOOL): HRESULT;
+                      out bIsCompressedFormat: BOOL): HResult;
 var
-  hr: HRESULT;
+  hr: HResult;
   cTypes: DWORD;
   pHandler: IMFMediaTypeHandler;
   pMediaType: IMFMediaType;
@@ -6229,9 +6443,9 @@ end;
 // Returns the mediatype associated with the Major guid.
 // To get the major type call function GetMediaType
 function GetMediaDescription(const pMajorGuid: TGuid;
-                             out mtMediaType: TMediaTypes): HRESULT;
+                             out mtMediaType: TMediaTypes): HResult;
 var
-  hr: HRESULT;
+  hr: HResult;
 
 begin
   hr := S_OK;
@@ -6308,8 +6522,9 @@ begin
     Result := 'MFMediaType_Unknown';
 end;
 
+
 //
-function GetAudioFormat(var pMfAudioFormat: TMFAudioFormat): HRESULT;
+function GetAudioFormat(var pMfAudioFormat: TMFAudioFormat): HResult;
 var
   hr: HResult;
   gMajorType: TGUID;
@@ -6501,7 +6716,7 @@ function GetAudioSubType(mSource: IMFMediaSource;
                          out pBlockAlignment: UINT32;
                          out pAverageSampleRate: UINT32;
                          out pBitRate: Double;
-                         out pSampleRate: Double): HRESULT;
+                         out pSampleRate: Double): HResult;
 
 var
   hr: HResult;
@@ -6933,9 +7148,9 @@ end;
 // The list of style names is also stored on the presentation descriptor, in the MF_PD_SAMI_STYLELIST attribute.
 //
 function SetSAMIStyleByIndex(pSource: IMFMediaSource;
-                             index: DWORD): HRESULT;
+                             index: DWORD): HResult;
 var
-  hr: HRESULT;
+  hr: HResult;
   pSami: IMFSAMIStyle;
   cStyles: DWORD;
   varStyles: PPROPVARIANT;
@@ -6990,10 +7205,10 @@ end;
 // Getting the File Duration
 // To get the duration of a media file, call the IMFSourceReader.GetPresentationAttribute method and
 // request the MF_PD_DURATION attribute, as shown in the following code.
-function GetFileDuration(pReader: IMFSourceReader;
-                         out phnsDuration: LONGLONG): HRESULT;
+function GetFileDuration(pSource: IMFSourceReader;
+                         out phnsDuration: MFTIME): HResult; overload;
 var
-  hr: HRESULT;
+  hr: HResult;
   pvVar: PROPVARIANT;
 
 begin
@@ -7002,15 +7217,33 @@ begin
   // Get file duration
   // Gets the duration in 100-nanosecond units.
   // Divide by 10,000,000 to get the duration in seconds.
-  hr := pReader.GetPresentationAttribute(MF_SOURCE_READER_MEDIASOURCE,
+  hr := pSource.GetPresentationAttribute(MF_SOURCE_READER_MEDIASOURCE,
                                          MF_PD_DURATION,
                                          pvVar);
-  if (SUCCEEDED(hr)) then
-    begin
-      hr := PropVariantToInt64(pvVar,
-                               phnsDuration);
-      PropVariantClear(pvVar);
-    end;
+  if SUCCEEDED(hr) then
+    hr := PropVariantToUInt64(pvVar,
+                              phnsDuration);
+
+  PropVariantClear(pvVar);
+  Result := hr;
+end;
+
+
+// Alternatively you might get the duration of a media file by calling the IMFMediaSource.CreatePresentationDescriptor method and
+// request the MF_PD_DURATION attribute, as shown in the following code.
+function GetFileDuration(pSource: IMFMediaSource;
+                         out pDuration: MFTIME): HResult; overload;
+var
+  hr: HResult;
+  pPD: IMFPresentationDescriptor;
+
+begin
+  pDuration := 0;
+
+  hr := pSource.CreatePresentationDescriptor(pPD);
+  if SUCCEEDED(hr) then
+    hr := pPD.GetUINT64(MF_PD_DURATION,
+                        pDuration);
 
   Result := hr;
 end;
@@ -7018,9 +7251,9 @@ end;
 
 // Gets de file size
 function GetFileSize(pReader: IMFSourceReader;
-                     out phnsFileSize: LONGLONG): HRESULT;
+                     out phnsFileSize: ULONGLONG): HResult; overload;
 var
-  hr: HRESULT;
+  hr: HResult;
   pvVar: PROPVARIANT;
 
 begin
@@ -7028,15 +7261,32 @@ begin
   hr := pReader.GetPresentationAttribute(MF_SOURCE_READER_MEDIASOURCE,
                                          MF_PD_TOTAL_FILE_SIZE,
                                          pvVar);
-  if (SUCCEEDED(hr)) then
-    begin
-      hr := PropVariantToInt64(pvVar,
-                               phnsFileSize);
-      PropVariantClear(pvVar);
-    end;
+  if SUCCEEDED(hr) then
+    hr := PropVariantToUInt64(pvVar,
+                              phnsFileSize);
+
+  PropVariantClear(pvVar);
+  Result := hr;
+end;
+
+// Alternatively you might get the filesize of a media file by calling the IMFMediaSource.CreatePresentationDescriptor method and
+// request the MF_PD_TOTAL_FILE_SIZE attribute.
+function GetFileSize(pReader: IMFMediaSource;
+                     out phnsFileSize: ULONGLONG): HResult; overload;
+var
+  hr: HResult;
+  pPD: IMFPresentationDescriptor;
+
+begin
+
+  hr := pReader.CreatePresentationDescriptor(pPD);
+  if SUCCEEDED(hr) then
+    hr := pPD.GetUINT64(MF_PD_TOTAL_FILE_SIZE,
+                        phnsFileSize);
 
   Result := hr;
 end;
+
 
 
 // TStreamContents record
