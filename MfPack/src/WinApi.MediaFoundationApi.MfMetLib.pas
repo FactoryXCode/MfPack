@@ -983,7 +983,7 @@ type
                                          stVideoPadFlags: MFVideoPadFlags = MFVideoPadFlag_PAD_TO_None): HResult; inline;
 
 
-  // Get display area from a media type.
+  // Gets display area from a media type.
   function GetVideoDisplayArea(pType: IMFMediaType;
                                out pArea: MFVideoArea): HResult;
 
@@ -5910,14 +5910,13 @@ function GetVideoDisplayArea(pType: IMFMediaType;
                              out pArea: MFVideoArea): HResult;
 var
   hr: HResult;
-  bPanScan: Boolean;
+  bPanScan: UINT32;
   pWidth: UINT32;
   pHeight: UINT32;
 
 begin
 
   hr := S_OK;
-  bPanScan := 0;
   pWidth := 0;
   pHeight := 0;
 
@@ -5926,7 +5925,7 @@ begin
                                    {false} UINT32(0));
 
   // In pan-and-scan mode, try to get the pan-and-scan region.
-  if bPanScan then
+  if (bPanScan <> 0) then
     hr := pType.GetBlob(MF_MT_PAN_SCAN_APERTURE,
                        @pArea,
                        SizeOf(MFVideoArea),
@@ -5935,7 +5934,7 @@ begin
   // If not in pan-and-scan mode, or the pan-and-scan region is not set,
   // get the minimimum display aperture.
 
-  if (bPanScan = False) or (hr = MF_E_ATTRIBUTENOTFOUND) then
+  if (bPanScan = 0) or (hr = MF_E_ATTRIBUTENOTFOUND) then
     begin
       hr := pType.GetBlob(MF_MT_MINIMUM_DISPLAY_APERTURE,
                           @pArea,
@@ -5957,7 +5956,7 @@ begin
 
       // Default: Use the entire video area.
 
-      if hr = MF_E_ATTRIBUTENOTFOUND then
+      if (hr = MF_E_ATTRIBUTENOTFOUND) then
         begin
           hr := MFGetAttributeSize(pType,
                                    MF_MT_FRAME_SIZE,
@@ -6014,9 +6013,9 @@ begin
       else if (srcPAR.Numerator < srcPAR.Denominator) then
         begin
           // The source has "tall" pixels, so stretch the height.
-          rc.Bottom = MulDiv(rc.Bottom,
-                             srcPAR.Denominator,
-                             srcPAR.Numerator);
+          rc.Bottom := MulDiv(rc.Bottom,
+                              srcPAR.Denominator,
+                              srcPAR.Numerator);
         end;
       // else: PAR is 1:1, which is a no-op.
 
@@ -6025,7 +6024,9 @@ begin
       if (destPAR.Numerator > destPAR.Denominator) then
         begin
             // The destination has "wide" pixels, so stretch the height.
-            rc.bottom = MulDiv(rc.bottom, destPAR.Numerator, destPAR.Denominator);
+            rc.bottom := MulDiv(rc.bottom,
+                                destPAR.Numerator,
+                                destPAR.Denominator);
         end
       else if (destPAR.Numerator < destPAR.Denominator) then
         begin
@@ -6073,15 +6074,15 @@ begin
   else
     begin
         // Row letterboxing.
-        iDstLBWidth  = iDstWidth;
-        iDstLBHeight = MulDiv(iDstWidth,
-                              iSrcHeight,
-                              iSrcWidth);
+        iDstLBWidth  := iDstWidth;
+        iDstLBHeight := MulDiv(iDstWidth,
+                               iSrcHeight,
+                               iSrcWidth);
     end;
 
   // Create a centered rectangle within the current destination rect.
-  lLeft := rcDst.Left + ((iDstWidth - iDstLBWidth) / 2);
-  lTop := rcDst.Top + ((iDstHeight - iDstLBHeight) / 2);
+  lLeft := rcDst.Left + ((iDstWidth - iDstLBWidth) div 2);
+  lTop := rcDst.Top + ((iDstHeight - iDstLBHeight) div 2);
   SetRect(rc,
           lLeft,
           lTop,
