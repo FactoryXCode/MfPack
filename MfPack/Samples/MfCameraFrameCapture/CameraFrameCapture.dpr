@@ -3,14 +3,6 @@ program CameraFrameCapture;
 uses
   {$IFDEF FASTMM}
   FastMM4,
-  {$ENDIF}
-
-  {$IFDEF madExcept}
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
   {$ENDIF }
 
   Vcl.Forms,

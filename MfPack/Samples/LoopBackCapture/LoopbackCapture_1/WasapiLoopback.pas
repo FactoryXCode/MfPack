@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 12/03/2023 Tony                PiL release  SDK 10.0.22621.0 (Windows 11)
+// 31/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -449,8 +449,8 @@ begin
   // The original sample creates a "gues what" bufferDuration,
   // that will cause sound disturbtion when capture sound from a streameservice like YouTube or other high latency services.
   // To prevent this, we use as a minimum the value of hnsDefaultDevicePeriod.
-  hr := pAudioClient.GetDevicePeriod(@hnsDefaultDevicePeriod,
-                                     @hnsMinimumDevicePeriod);
+  hr := pAudioClient.GetDevicePeriod(hnsDefaultDevicePeriod,
+                                     hnsMinimumDevicePeriod);
   if FAILED(hr) then
     goto done;
 
