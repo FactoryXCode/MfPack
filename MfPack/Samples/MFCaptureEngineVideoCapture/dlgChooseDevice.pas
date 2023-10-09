@@ -10,7 +10,7 @@
 // Release date: 18-11-2022
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.5
 //
 // Description:
 //   Dialog to pick a videodevice and it's (supported) resolutions and samplerates.
@@ -23,14 +23,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 // 20/02/2023 Tony                Fixed switching camera issue that results in Access Denied error.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX314/Samples/MFCaptureEngineVideoCapture
+// Related projects: MfPackX315/Samples/MFCaptureEngineVideoCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.22621.0
@@ -235,10 +235,10 @@ function TChooseDeviceDlg.PopulateFormats(bSupportedFormatsOnly: Boolean): HResu
                        iDev: Integer;
                        iForm: Integer);
    var
-     sGuidName: string;
-     sFormatTag: string;
+     sGuidName: LPWSTR;
+     sFormatTag: LPWSTR;
      dwFOURCC: DWord;
-     sFmtDesc: string;
+     sFmtDesc: LPWSTR;
 
      begin
        GetGUIDNameConst(FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].fSubType,
