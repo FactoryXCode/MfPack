@@ -202,7 +202,7 @@ a button to get the current PID of your application.
 
 *This tool can be used to determine HResult or Error codes returned by the Windows OS,*
 *featuring a detailed build in "HResult Lookup tool", the "Windows System Error Code Lookup Tool" and*
-*the "System.SysUtils.SysErrorMessage" function.*
+*the "System.SysUtils.SysErrorMessage" function, that provides the localized translation (language of your OS) of the HResult.*
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/HResultLookUpToolApp.png) 
  
