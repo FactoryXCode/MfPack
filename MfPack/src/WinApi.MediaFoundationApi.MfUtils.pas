@@ -494,6 +494,16 @@ type
                         cbDest: SIZE_T;
                         pszSrc: PWideChar): HRESULT; stdcall;
 
+  {$IF COMPILERVERSION < 29.0}
+  // Introduced: Delphi XE8
+  // Compares two Unicode strings.
+  // Digits in the strings are considered as numerical content rather than text.
+  // This test is not case-sensitive.
+  function StrCmpLogicalW(psz1: LPCWSTR;
+                          psz2: LPCWSTR): Integer; stdcall;
+  {$ENDIF}
+
+
 implementation
 
 uses
@@ -502,6 +512,7 @@ uses
 const
   Kernel32Lib = 'kernel32.dll';
   Ole32Lib = 'Ole32.dll';
+  Shlwapi32Lib = 'Shlwapi.dll';
 
 
   VER_EQUAL             = 1;
@@ -1925,7 +1936,6 @@ end;
 function CreateFile2; external Kernel32Lib name 'CreateFile2';
 
 
-
 // Strings
 function StringCbCat(pszDest: PChar;
                      cbDest: SIZE_T;
@@ -1944,7 +1954,12 @@ begin
 
 end;
 
+
 function StringCbCatA; external Kernel32Lib name 'StringCbCatA';
 function StringCbCatW; external Kernel32Lib name 'StringCbCatW';
+
+{$IF COMPILERVERSION < 29.0}
+function StrCmpLogicalW; external Shlwapi32Lib name 'StrCmpLogicalW';
+{$ENDIF}
 
 end.

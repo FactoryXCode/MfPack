@@ -602,8 +602,8 @@ type
     //   For more information about WAVEFORMATEX and WAVEFORMATEXTENSIBLE, see the Windows DDK documentation.
     //
 
-    function GetDevicePeriod({out_opt} phnsDefaultDevicePeriod: REFERENCE_TIME = 0;
-                             {out_opt} phnsMinimumDevicePeriod: REFERENCE_TIME = 0): HResult; stdcall;
+    function GetDevicePeriod(out phnsDefaultDevicePeriod: REFERENCE_TIME;
+                             out phnsMinimumDevicePeriod: REFERENCE_TIME): HResult; stdcall;
     // Description:
     //
     //  Returns the periodicity of the WAS engine, in 100-nanosecond units.

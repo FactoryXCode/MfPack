@@ -1002,6 +1002,12 @@ type
 ////////////////////////////////////////////////////////////////////////////////
 
 
+  // Dumps the media buffer contents of an IMFSample to a stream.
+  // [in] pSample: pointer to the media sample to dump the contents from.
+  // [in] pStream: pointer to the stream to write to.
+  function WriteSampleToStream(pSample: IMFSample;
+                               pStream: TMemoryStream): HResult;
+
   // Gets metadata from a media source or other object.
   // If a media source supports this interface, it must expose the interface as a service.
   // To get a pointer to this interface from a media source, call IMFGetService.GetService.
@@ -1027,6 +1033,14 @@ type
   function GetMediaType(pStreamDesc: IMFStreamDescriptor;
                         out tgMajorGuid: TGuid;
                         out bIsCompressedFormat: BOOL): HResult;
+
+  // Returns a matching MediaType interface.
+  function FindMatchingVideoType(pMediaTypeHandler: IMFMediaTypeHandler;
+                                 const gPixelFormat: TGUID;
+                                 pWidth: UINT32;
+                                 pHeight: UINT32;
+                                 pFps: UINT32;
+                                 out pOutMediaType: IMFMediaType): HResult;
 
   // Check if a given guid is a major type.
   function IsMajorType(const guid: TGuid): Boolean;
@@ -6092,6 +6106,50 @@ begin
 end;
 
 
+// Dumps the media buffer contents of an IMF sample to a stream.
+// [in] pSample: pointer to the media sample to dump the contents from.
+// [in] pStream: pointer to the stream to write to.
+function WriteSampleToStream(pSample: IMFSample;
+                             pStream: TMemoryStream): HResult;
+var
+  hr: HResult;
+  strres: LongInt;
+  MediaBuffer: IMFMediaBuffer;
+  BufferLength: DWORD;
+  ByteBuffer: PByte;
+  BufferMaxLength: DWORD;
+  BufferCurrLength: DWORD;
+
+label
+  done;
+
+begin
+  strres := 0;
+
+  hr := pSample.ConvertToContiguousBuffer(MediaBuffer);
+
+  if SUCCEEDED(hr) then
+    hr := MediaBuffer.GetCurrentLength(BufferLength);
+
+  if SUCCEEDED(hr) then
+    begin
+      BufferMaxLength := 0;
+      BufferCurrLength := 0;
+      hr := MediaBuffer.Lock(ByteBuffer,
+                             @BufferMaxLength,
+                             @BufferCurrLength);
+    end;
+  if SUCCEEDED(hr) then
+    strres := pStream.Write(ByteBuffer,
+                            BufferLength);
+  if (strres = 0) then
+    hr := E_FAIL;
+
+done:
+  Result := hr;
+end;
+
+
 // Get an IMFMetadata pointer from a media source.
 // Metadata contains descriptive information for the media content, such as title, artist, composer, and genre.
 // Metadata can also describe encoding parameters.
@@ -6403,6 +6461,77 @@ begin
         end;
    end;
  Result := hr;
+end;
+
+
+//
+function FindMatchingVideoType(pMediaTypeHandler: IMFMediaTypeHandler;
+                               const gPixelFormat: TGUID;
+                               pWidth: UINT32;
+                               pHeight: UINT32;
+                               pFps: UINT32;
+                               out pOutMediaType: IMFMediaType): HResult;
+var
+  hr: HResult;
+  i: Integer;
+  pMediaType: IMFMediaType;
+  mediaTypeCount: DWORD;
+  subType: TGUID;
+  uWidth: UINT32;
+  uHeigth: UINT32;
+  uFpsNumerator: UINT32;
+  uFpsDenominator: UINT32;
+
+label
+  done;
+
+begin
+  hr := pMediaTypeHandler.GetMediaTypeCount(mediaTypeCount);
+
+  if SUCCEEDED(hr) then
+    for i := 0 to mediaTypeCount -1 do
+      begin
+        hr := pMediaTypeHandler.GetMediaTypeByIndex(i,
+                                                    pMediaType);
+
+        if SUCCEEDED(hr) then
+          hr := pMediaType.GetGUID(MF_MT_SUBTYPE,
+                                   subType);
+
+        if SUCCEEDED(hr) then
+          hr := MFGetAttributeSize(pMediaType,
+                                   MF_MT_FRAME_SIZE,
+                                   uWidth,
+                                   uHeigth);
+
+        if SUCCEEDED(hr) then
+          hr := MFGetAttributeRatio(pMediaType,
+                                    MF_MT_FRAME_RATE,
+                                    uFpsNumerator,
+                                    uFpsDenominator);
+
+        if SUCCEEDED(hr) then
+          if (IsEqualGUID(gPixelFormat,
+                          subType)) and
+             (uWidth = pWidth) and
+             (uHeigth = pHeight) and
+             (pFps = uFpsNumerator) and
+             (uFpsDenominator = 1) then
+            begin
+              hr := pMediaType.CopyAllItems(pOutMediaType);
+
+              if SUCCEEDED(hr) then
+                begin
+                  Safe_Release(pMediaType);
+                  hr := S_OK;
+                  Break;
+                end;
+            end
+          else
+            Safe_Release(pMediaType);
+      end;
+done:
+  Result := hr;
 end;
 
 
