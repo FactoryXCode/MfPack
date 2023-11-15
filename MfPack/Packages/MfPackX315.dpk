@@ -216,6 +216,7 @@ contains
   WinApi.WinMM.VfwExt in '..\src\WinApi.WinMM.VfwExt.pas',
   WinApi.WinMM.VfwMsgs in '..\src\WinApi.WinMM.VfwMsgs.pas',
   WinApi.Wmistr in '..\src\WinApi.Wmistr.pas',
-  WinApi.KsUuIds in '..\src\WinApi.KsUuIds.pas';
+  WinApi.KsUuIds in '..\src\WinApi.KsUuIds.pas',
+  WinApi.MediaFoundation.AspectRatioCheat in '..\src\WinApi.MediaFoundation.AspectRatioCheat.pas';
 
 end.
