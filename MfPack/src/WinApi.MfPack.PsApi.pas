@@ -5,7 +5,7 @@
 // Project: MfPack - MediaFoundation
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: WinApi.PsApi.pas
+// Module: WinApi.MfPack.PsApi.pas
 // Kind: Pascal / Delphi unit
 // Release date: 16-04-2023
 // Language: ENU
@@ -69,7 +69,7 @@
 //
 //==============================================================================
 
-unit WinApi.PsApi;
+unit WinApi.MfPack.PsApi;
 
   {$HPPEMIT '#include "psapi.h"'}
 
