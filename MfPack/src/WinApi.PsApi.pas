@@ -5,7 +5,7 @@
 // Project: MfPack - MediaFoundation
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: WinApi.MfPack.PsApi.pas
+// Module: WinApi.PsApi.pas
 // Kind: Pascal / Delphi unit
 // Release date: 16-04-2023
 // Language: ENU
@@ -13,7 +13,7 @@
 // Revision Version: 3.1.5
 // Description: -
 //
-// Organisation: FactoryX
+// Organisation: FactoryX                          `
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX)
 //
@@ -21,15 +21,18 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 16/04/2023 All                 Pixies release  SDK 10.0.22621.0 (Windows 11)
+// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //          BUILD Version: 0001    // Increment this if a change has global effects
+//          The process status application programming interface (PSAPI) is a helper library that
+//          makes it easier for you to obtain information about processes and device drivers.
+//
 //          File for APIs provided by PSAPI.DLL.
 //          Note: We have to use run-time dynamic linking for this API and therefore
 //                we have to load psapi.dll (See hPSAPI := LoadLibrary(PsApiLib)).
-//                https://learn.microsoft.com/en-us/windows/win32/psapi/process-status-helper
+//                https://learn.microsoft.com/en-us/windows/win32/psapi/process-status-helper.
 //
 // Related objects: -
 // Related projects: MfPackX315
@@ -66,7 +69,7 @@
 //
 //==============================================================================
 
-unit WinApi.MfPack.PsApi;
+unit WinApi.PsApi;
 
   {$HPPEMIT '#include "psapi.h"'}
 
