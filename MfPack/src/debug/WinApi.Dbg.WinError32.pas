@@ -7831,11 +7831,11 @@ begin
                           end;
     LongInt($00002025)  : begin
                             HrStr := 'ERROR_DS_COMPARE_FALSE' ;
-                            HrDescr := 'The compare response was false.';
+                            HrDescr := 'The compare response was False.';
                           end;
     LongInt($00002026)  : begin
                             HrStr := 'ERROR_DS_COMPARE_TRUE' ;
-                            HrDescr := 'The compare response was true.';
+                            HrDescr := 'The compare response was True.';
                           end;
     LongInt($00002027)  : begin
                             HrStr := 'ERROR_DS_AUTH_METHOD_NOT_SUPPORTED' ;

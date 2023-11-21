@@ -1203,7 +1203,7 @@ begin
                                   end;
     LongInt($8001012A)          : begin
                                     HrStr := 'CO_E_ACCESSCHECKFAILED';
-                                    HrDescr := 'The system function AccessCheck returned false.';
+                                    HrDescr := 'The system function AccessCheck returned False.';
                                   end;
     LongInt($8001012B)          : begin
                                     HrStr := 'CO_E_NETACCESSAPIFAILED';

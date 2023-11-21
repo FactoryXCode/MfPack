@@ -21,18 +21,22 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 21/11/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
-//          BUILD Version: 0001    // Increment this if a change has global effects
-//          The process status application programming interface (PSAPI) is a helper library that
+// Remarks: The process status application programming interface (PSAPI) is a helper library that
 //          makes it easier for you to obtain information about processes and device drivers.
 //
+//          Requiress Windows 7 or higher.
+//
+//          Version: 2
+//
 //          File for APIs provided by PSAPI.DLL.
-//          Note: We have to use run-time dynamic linking for this API and therefore
-//                we have to load psapi.dll (See hPSAPI := LoadLibrary(PsApiLib)).
-//                https://learn.microsoft.com/en-us/windows/win32/psapi/process-status-helper.
+//          Notes: - The version included up to Delphi 11 is not complete ie missing some records and
+//                   64 bit function EnumProcessModulesEx.
+//                 - We have to use run-time dynamic linking for this API and therefore
+//                   we have to load psapi.dll (See hPSAPI := LoadLibrary(PsApiLib)).
+//                   https://learn.microsoft.com/en-us/windows/win32/psapi/process-status-helper.
 //
 // Related objects: -
 // Related projects: MfPackX315
@@ -91,6 +95,7 @@ uses
   {$I 'WinApiTypes.inc'}
 
 const
+  // See: https://learn.microsoft.com/en-us/windows/win32/api/psapi/nf-psapi-enumprocessmodulesex
   LIST_MODULES_DEFAULT                = $0;  // This is the default one app would get without any flag.
   {$EXTERNALSYM LIST_MODULES_DEFAULT}
   LIST_MODULES_32BIT                  = $01;  // list 32bit modules in the target process.
@@ -101,6 +106,10 @@ const
   // list all the modules
   LIST_MODULES_ALL                    = (LIST_MODULES_32BIT or LIST_MODULES_64BIT);
   {$EXTERNALSYM LIST_MODULES_ALL}
+
+// NTDDI_VERSION >= NTDDI_WIN7
+  PSAPI_VERSION                       = 2;
+  {$EXTERNALSYM PSAPI_VERSION}
 
 type
 
@@ -140,11 +149,17 @@ type
   TEnumProcesses = function(lpidProcess: LPDWORD;
                             cb: DWORD;
                             var cbNeeded: DWORD): BOOL stdcall;
-
+  // 32 bit os
   TEnumProcessModules = function(hProcess: THandle;
                                  lphModule: PHMODULE;
                                  cb: DWORD;
                                  var lpcbNeeded: DWORD): BOOL stdcall;
+  // 64 bit os
+  TEnumProcessModulesEx = function(hProcess: THandle;
+                             {out} lphModule: PHMODULE;
+                                   cb: DWORD;
+                             {out} var lpcbNeeded: DWORD;
+                                   dwFilterFlag: DWORD): BOOL stdcall;
 
   TGetModuleBaseNameA = function(hProcess: THandle;
                                  hModule: HMODULE;
@@ -411,12 +426,20 @@ type
                          var cbNeeded: DWORD): BOOL;
   {$EXTERNALSYM EnumProcesses}
 
+  // 32 bit os
   function EnumProcessModules(const hProcess: THandle;
                               lphModule: PHMODULE;
                               cb: DWORD;
                               var lpcbNeeded: DWORD): BOOL;
   {$EXTERNALSYM EnumProcessModules}
 
+  // 64 bit os
+  function EnumProcessModulesEx(const hProcess: THandle;
+                          {out} lphModule: PHMODULE;
+                                cb: DWORD;
+                                var lpcbNeeded: DWORD;
+                                dwFilterFlag: DWORD): BOOL;
+  {$EXTERNALSYM EnumProcessModulesEx}
 
   function GetModuleBaseName(hProcess: THandle;
                              hModule: HMODULE;
@@ -535,7 +558,8 @@ var
   hPSAPI: THandle;   // Do not forget to release when finished!
   _GetPerformanceInfo: TGetPerformanceInfo;
   _EnumProcesses: TEnumProcesses;
-  _EnumProcessModules: TEnumProcessModules;
+  _EnumProcessModules: TEnumProcessModules; // 32 bit
+  _EnumProcessModulesEx: TEnumProcessModulesEx;  // 64 bit
   _GetModuleBaseName: TGetModuleBaseNameW;
   _GetModuleFileNameEx: TGetModuleFileNameExW;
   _GetModuleBaseNameA: TGetModuleBaseNameA;
@@ -577,8 +601,12 @@ begin
       @_EnumProcesses := GetProcAddress(hPSAPI,
                                         'EnumProcesses');
 
+      // 32 bit os
       @_EnumProcessModules := GetProcAddress(hPSAPI,
                                              'EnumProcessModules');
+      // 64 bit os
+      @_EnumProcessModulesEx := GetProcAddress(hPSAPI,
+                                               'EnumProcessModulesEx');
 
       @_GetModuleBaseName := GetProcAddress(hPSAPI,
                                             'GetModuleBaseNameW');
@@ -649,7 +677,7 @@ end;
 
 
 function GetPerformanceInfo(pPerformanceInformation: PERFORMANCE_INFORMATION;
-                             cb: DWORD): BOOL;
+                            cb: DWORD): BOOL;
 begin
   if (CheckPSAPILoaded = True) then
     Result := _GetPerformanceInfo(pPerformanceInformation,
@@ -685,6 +713,24 @@ begin
   else
     Result := False;
 end;
+
+
+function EnumProcessModulesEx(const hProcess: THandle;
+                              lphModule: PHMODULE;
+                              cb: DWORD;
+                              var lpcbNeeded: DWORD;
+                              dwFilterFlag: DWORD): BOOL;
+begin
+  if (CheckPSAPILoaded = True) then
+    Result := _EnumProcessModulesEx(hProcess,
+                                    lphModule,
+                                    cb,
+                                    lpcbNeeded,
+                                    dwFilterFlag)
+  else
+    Result := False;
+end;
+
 
 
 function GetModuleBaseName(hProcess: THandle;
@@ -981,6 +1027,7 @@ begin
              ((1 shl Byte(aIndex)) - 1);   // mask
 end;
 
+
 procedure SetUBits(var Bits: ULONG_PTR;
                    const aIndex: Integer;
                    const aValue: ULONG_PTR);
@@ -1014,12 +1061,14 @@ begin
 end;
 // /////////////////////////////////////////////////////////////////////////////
 
+
 // PSAPI_WORKING_SET_EX_BLOCK //////////////////////////////////////////////////
 function STRUCT_0_PSAPI_WORKING_SET_EX_BLOCK.GetBits(const aIndex: Integer): ULONG_PTR;
 begin
   Result := GetUBits(Flags,
                      aIndex);
 end;
+
 
 procedure STRUCT_0_PSAPI_WORKING_SET_EX_BLOCK.SetBits(const aIndex: Integer;
                                                       const aValue: ULONG_PTR);
@@ -1035,6 +1084,7 @@ begin
   Result := GetUBits(Flags,
                      aIndex);
 end;
+
 
 procedure STRUCT_1_PSAPI_WORKING_SET_EX_BLOCK.SetBits(const aIndex: Integer;
                                                       const aValue: ULONG_PTR);
