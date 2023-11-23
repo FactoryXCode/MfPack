@@ -547,7 +547,7 @@ begin
   Inc(i);
   SetFrameRates(i,
                 23.976,
-                'Primitive animations.');
+                'Cinematic movies and television NTSC (intended color).');
 
   Inc(i);
   SetFrameRates(i,
