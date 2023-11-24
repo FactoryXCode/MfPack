@@ -11,10 +11,13 @@
 // Language: ENU
 //
 // Revision Version: 3.1.5
-// Description: This unit contains basic Media Foundation methods needed to play,
+// Description: MfPack Methods Library.
+//              This unit contains basic Media Foundation methods needed to play,
 //              record, encode, decode, etc.
+//              See: https://github.com/FactoryXCode/MfPack/wiki/MfPack-Methods-Library-Index
 //
-// Company: FactoryX
+//
+// Organisation: FactoryX
 // Intiator(s): Tony (maXcomX), Peter (OzShips), Ramyses De Macedo Rodrigues.
 // Contributor(s): Tony Kalf (maXcomX),
 //                 Peter Larson (ozships),
@@ -27,6 +30,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 25/08/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 // 29/09/2023                     Added new video functions.
+// 24/11/2023 Tony                Added function CreateTranscodeProfile.
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -41,7 +45,7 @@
 // Todo: -
 //
 // =============================================================================
-// Source: Parts of examples from MSDN.
+// Source: Parts and examples from learn.microsoft.com.
 //
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //==============================================================================
@@ -318,7 +322,6 @@ type
     public
       procedure Reset();
   end;
-
 
   // MFT CATEGORIES
   TMftCategory = record
@@ -643,6 +646,11 @@ type
   // If the stream is not compressed, pCLSID receives the value GUID_NULL.
   function FindDecoderForStream(pSD: IMFStreamDescriptor;      // Stream descriptor for the stream.
                                 out opCLSID: CLSID): HResult;  // Receives the CLSID of the decoder.
+
+  // Creates a transcode profile for the given params mfAudioFormat and mfTranscodeContainerType.
+  function CreateTranscodeProfile({in} mfAudioFormat: TGUID;  // For example: MFAudioFormat_WMAudioV9
+                                  {in} mfTranscodeContainerType: TGUID; // For example: MFTranscodeContainerType_ASF
+                                  out ppProfile: IMFTranscodeProfile): HResult;
 
   // Configures the recordsink for video.
   function ConfigureVideoEncoding(pSource: IMFCaptureSource;
@@ -5936,7 +5944,7 @@ begin
 
   bPanScan := MFGetAttributeUINT32(pType,
                                    MF_MT_PAN_SCAN_ENABLED,
-                                   {false} UINT32(0));
+                                   {False} UINT32(0));
 
   // In pan-and-scan mode, try to get the pan-and-scan region.
   if (bPanScan <> 0) then
@@ -7445,6 +7453,97 @@ begin
   audio_iSamplesPerSec := 0;
   audio_iBitsPerSample := 0;
   audio_dwFormatTag := 0;
+end;
+
+
+// Creates a transcode profile for the given params mfAudioFormat and mfTranscodeContainerType.
+function CreateTranscodeProfile({in} mfAudioFormat: TGUID;  // For example: MFAudioFormat_WMAudioV9
+                                {in} mfTranscodeContainerType: TGUID; // For example: MFTranscodeContainerType_ASF
+                                out ppProfile: IMFTranscodeProfile): HResult;
+var
+  hr: HResult;
+  pProfile: IMFTranscodeProfile;   // Transcode profile.
+  pAvailableTypes: IMFCollection;  // List of audio media types.
+  pAudioType: IMFMediaType;        // Audio media type.
+  pAudioAttrs: IMFAttributes;      // Copy of the audio media type.
+  pContainer: IMFAttributes;       // Container attributes.
+  dwMTCount: DWORD;
+  dwFlags: DWORD;
+
+label
+  done;
+
+begin
+
+  // Create an empty transcode profile.
+  hr := MFCreateTranscodeProfile(pProfile);
+  if FAILED(hr) then
+    goto done;
+
+  // Get output media types for the Windows Media audio encoder.
+
+  // Enumerate all codecs except for codecs with field-of-use restrictions.
+  // Sort the results.
+  dwFlags := (MFT_ENUM_FLAG_ALL and not MFT_ENUM_FLAG_FIELDOFUSE) or
+             MFT_ENUM_FLAG_SORTANDFILTER;
+
+  hr := MFTranscodeGetAudioOutputAvailableTypes(mfAudioFormat,
+                                                dwFlags,
+                                                nil,
+                                                pAvailableTypes);
+  if FAILED(hr) then
+    goto done;
+
+  hr := pAvailableTypes.GetElementCount(dwMTCount);
+  if FAILED(hr) then
+    goto done;
+
+  if (dwMTCount = 0) then
+    begin
+      hr := E_FAIL;
+      goto done;
+    end;
+
+  // Get the first audio type in the collection and make a copy.
+  hr := GetCollectionObject(pAvailableTypes,
+                            0,
+                            pAudioType);
+  if FAILED(hr) then
+    goto done;
+
+  hr := MFCreateAttributes(pAudioAttrs,
+                           0);
+  if FAILED(hr) then
+    goto done;
+
+  hr := pAudioType.CopyAllItems(pAudioAttrs);
+  if FAILED(hr) then
+    goto done;
+
+  // Set the audio attributes on the profile.
+  hr := pProfile.SetAudioAttributes(pAudioAttrs);
+  if FAILED(hr) then
+    goto done;
+
+  // Set the container attributes.
+  hr := MFCreateAttributes(pContainer,
+                           1);
+  if FAILED(hr) then
+    goto done;
+
+  hr := pContainer.SetGUID(MF_TRANSCODE_CONTAINERTYPE,
+                           mfTranscodeContainerType);
+  if FAILED(hr) then
+    goto done;
+
+  hr := pProfile.SetContainerAttributes(pContainer);
+  if FAILED(hr) then
+    goto done;
+
+  ppProfile := pProfile;
+
+done:
+  Result := hr;
 end;
 
 
