@@ -20,7 +20,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 09/07/2023 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -67,6 +67,7 @@ uses
   Winapi.Windows,
   Winapi.Messages,
   Winapi.ShellAPI,
+  WinApi.WinError,
   {System}
   System.SysUtils,
   System.Variants,
@@ -104,6 +105,17 @@ type
     rbSEMLTDLG: TRadioButton;
     Label3: TLabel;
     lbxReference: TListBox;
+    Bevel4: TBevel;
+    edSeverity: TEdit;
+    edFacility: TEdit;
+    edErrCode: TEdit;
+    butMakeHResult: TButton;
+    edHResult: TEdit;
+    Bevel5: TBevel;
+    Label1: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
     procedure butTransToHexClick(Sender: TObject);
     procedure butTransToDecClick(Sender: TObject);
     procedure butSearchClick(Sender: TObject);
@@ -115,6 +127,7 @@ type
     procedure butCloseClick(Sender: TObject);
     procedure butSearchMouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Integer);
+    procedure butMakeHResultClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -158,6 +171,15 @@ end;
 procedure TdlgHrTools.butCloseClick(Sender: TObject);
 begin
   Close();
+end;
+
+
+procedure TdlgHrTools.butMakeHResultClick(Sender: TObject);
+begin
+
+  edHResult.Text :=  Format('%d', [MAKE_HRESULT(StrToIntDef(edSeverity.Text, SEVERITY_ERROR),
+                                                StrToIntDef(edFacility.Text, FACILITY_WIN32),
+                                                StrToIntDef(edErrCode.Text, S_OK))]);
 end;
 
 

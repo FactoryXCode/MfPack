@@ -173,6 +173,7 @@ uses
   WinApi.Dbg.WinError32,
   WinApi.Dbg.WinMfError,
   WinApi.Dbg.D3DError,
+  WinApi.Dbg.StiErr,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfUtils;
 
@@ -279,7 +280,26 @@ begin
         end
       else
         rHrContent.Clear();
+
+      // Still Image APIs errors
+      hr := GetStiErrorDescription(aHResult,
+                                   rHrContent.hrStr,
+                                   rHrContent.hrDescr,
+                                   rHrContent.hrRegionDescr,
+                                   rHrContent.HeaderFile,
+                                   rHrContent.Reference);
+      if SUCCEEDED(hr) then
+        begin
+          hr := GetStiErrorRegion(aHResult,
+                                  rHrContent.hrRegionDescr);
+          if (hr <> S_OK) then
+            rHrContent.hrRegionDescr := 'Unknown Still Image API error region.';
+            goto done_HLD;
+        end
+      else
+        rHrContent.Clear();
     end;
+
 
 done_HLD:
 
