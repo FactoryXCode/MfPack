@@ -80,8 +80,8 @@ uses
   System.UITypes,
   System.Types,
   System.SyncObjs,
-  {Vcl}
-  Vcl.Graphics,
+  {VCL}
+  VCL.Graphics,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfObjects,
@@ -287,7 +287,7 @@ type
                            var lplpsz: POleStr): HResult; stdcall;
 
   // Simplified helper of StringToWideChar function
-  function StrToPWideChar(source: string): PWideChar; inline;
+  function StrToPWideChar(source: string): PWideChar; //inline;
 
 
   // MFVideoNormalizedRect methods
@@ -507,6 +507,7 @@ type
 implementation
 
 uses
+  {System}
   System.TypInfo;
 
 const
@@ -592,9 +593,9 @@ var
 begin
   rg1 := PIntegerArray(@rguid1);
   rg2 := PIntegerArray(@rguid2);
-  Result :=  (rg1^[0] = rg2^[0]) AND
-             (rg1^[1] = rg2^[1]) AND
-             (rg1^[2] = rg2^[2]) AND
+  Result :=  (rg1^[0] = rg2^[0]) and
+             (rg1^[1] = rg2^[1]) and
+             (rg1^[2] = rg2^[2]) and
              (rg1^[3] = rg2^[3]);
 end;
 
@@ -656,7 +657,7 @@ end;
 
 // WTypes.h
 
-//MACRO translations
+// MACRO translations
 //==================
 procedure DECIMAL_SETZERO(var dec: DECIMAL); inline;
 begin
@@ -686,7 +687,7 @@ function Clip(clr: Integer): Byte; inline;
 begin
   if (clr > 255) then
     Result := Byte(255)
-  else if clr < 0 then
+  else if (clr < 0) then
     Result := Byte(0)
   else
     Result := Byte(clr);
@@ -699,12 +700,12 @@ end;
 
 function VerifyVersionInfo(var LPOSVERSIONINFOEX : OSVERSIONINFOEX;
                            dwTypeMask: DWORD;
-                           dwlConditionMask: int64): BOOL; stdcall; external Kernel32Lib name 'VerifyVersionInfoA';
+                           dwlConditionMask: Int64): BOOL; stdcall; external Kernel32Lib name 'VerifyVersionInfoA';
 
 
-function VerSetConditionMask(dwlConditionMask: int64;
+function VerSetConditionMask(dwlConditionMask: Int64;
                              dwTypeBitMask: DWORD;
-                             dwConditionMask: Byte): int64; stdcall; external Kernel32Lib;
+                             dwConditionMask: Byte): Int64; stdcall; external Kernel32Lib;
 
 
 function IsWinVerOrHigher(wMajorVersion, wMinorVersion, wServicePackMajor: Word): Boolean;
@@ -714,7 +715,7 @@ var
 
 begin
   FillChar(osvi,
-           sizeof(osvi),
+           SizeOf(osvi),
            0);
   osvi.dwOSVersionInfoSize := SizeOf(osvi);
   FillChar(condmask,
@@ -965,9 +966,21 @@ try
     DelimiterFormat := ':';
 
   if ShowMilliSeconds then
-    Result := Format('%2.2d%s%2.2d%s%2.2d,%3.3d', [hours, DelimiterFormat, mins, DelimiterFormat, secs, DelimiterFormat, millisec])
+    Result := Format('%2.2d%s%2.2d%s%2.2d,%3.3d',
+                     [hours,
+                      DelimiterFormat,
+                      mins,
+                      DelimiterFormat,
+                      secs,
+                      DelimiterFormat,
+                      millisec])
   else
-    Result := Format('%2.2d%s%2.2d%s%2.2d', [hours, DelimiterFormat, mins, DelimiterFormat, secs]);
+    Result := Format('%2.2d%s%2.2d%s%2.2d',
+                     [hours,
+                      DelimiterFormat,
+                      mins,
+                      DelimiterFormat,
+                      secs]);
 
 except
   on exception do Result:= '00:00:00,000';
@@ -1001,9 +1014,16 @@ try
 
 
   if ShowMilliSeconds then
-    Result := Format('%2.2d:%2.2d:%2.2d,%3.3d', [hours, mins, secs, millisec])
+    Result := Format('%2.2d:%2.2d:%2.2d,%3.3d',
+                     [hours,
+                      mins,
+                      secs,
+                      millisec])
   else
-    Result := Format('%2.2d:%2.2d:%2.2d', [hours, mins, secs]);
+    Result := Format('%2.2d:%2.2d:%2.2d',
+                     [hours,
+                      mins,
+                      secs]);
 
 except
   on exception do Result:= '00:00:00,000';
@@ -1034,9 +1054,15 @@ try
   millisec := wMsec;
 
   if ShowMilliSeconds then
-    Result := Format('%2.2d:%2.2d:%2.2d,%3.3d', [hours, mins, secs, millisec])
+    Result := Format('%2.2d:%2.2d:%2.2d,%3.3d',
+                     [hours,
+                      mins,
+                      secs,
+                      millisec])
   else
-    Result := Format('%2.2d:%2.2d:%2.2d', [hours, mins, secs]);
+    Result := Format('%2.2d:%2.2d:%2.2d', [hours,
+                                           mins,
+                                           secs]);
 
 except
   on exception do Result:= '00:00:00,000';
@@ -1108,12 +1134,18 @@ begin
     if ShowMilliSec then
       begin
         splitsec := splitsec + secs;
-        result := Format('%2.2d:%2.2d:%2.2f', [hours, mins, splitsec]);
+        result := Format('%2.2d:%2.2d:%2.2f',
+                         [hours,
+                          mins,
+                          splitsec]);
       end
     else
       begin
         secs := secs + Round(splitsec);
-        result := Format('%2.2d:%2.2d:%2.2d', [hours, mins, secs]);
+        result := Format('%2.2d:%2.2d:%2.2d',
+                         [hours,
+                          mins,
+                          secs]);
       end;
 
   except
@@ -1174,7 +1206,7 @@ begin
 {$ENDIF}
 
     else
-      Result := 'Unknown OSarchitecture';
+      Result := 'Unknown OS architecture';
   end;
 end;
 
@@ -1202,9 +1234,15 @@ begin
   if (Length(aValue) <> 7) or (aValue[1] <> '#') then
     Result := aDefault
   else
-    Result := RGB(StrToInt('$' + Copy(aValue, 2, 2)),
-                  StrToInt('$' + Copy(aValue, 4, 2)),
-                  StrToInt('$' + Copy(aValue, 6, 2)));
+    Result := RGB(StrToInt('$' + Copy(aValue,
+                                      2,
+                                      2)),
+                  StrToInt('$' + Copy(aValue,
+                                      4,
+                                      2)),
+                  StrToInt('$' + Copy(aValue,
+                                      6,
+                                      2)));
 end;
 
 
@@ -1223,10 +1261,10 @@ end;
 procedure CopyTColorToMFARGB(const cColor: TColor;
                              out argb: MFARGB); inline;
 begin
-  argb.rgbBlue  := (cColor shr 16) AND $FF;
-  argb.rgbGreen := (cColor shr 8) AND $FF;
-  argb.rgbRed   := (cColor AND $FF);
-  argb.rgbAlpha := (cColor shr 24) AND $FF;
+  argb.rgbBlue  := (cColor shr 16) and $FF;
+  argb.rgbGreen := (cColor shr 8) and $FF;
+  argb.rgbRed   := (cColor and $FF);
+  argb.rgbAlpha := (cColor shr 24) and $FF;
 end;
 
 
@@ -1357,8 +1395,8 @@ begin
     pf24bit  : Result := 'pf24bit';
     pf32bit  : Result := 'pf32bit';
     pfCustom : Result := 'pfCustom';
-    else
-      Result := 'Unknown';
+  else
+    Result := 'Unknown';
   end;
 end;
 
@@ -1722,7 +1760,7 @@ begin
   area.OffsetY := MakeOffset(y);
   area.Area.cx := dwWidth;
   area.Area.cy := dwHeight;
- Result := area;
+  Result := area;
 end;
 
 
@@ -1733,7 +1771,7 @@ end;
 
 
 // Simplified helper of StringToWideChar function
-function StrToPWideChar(source: string): PWideChar; inline;
+function StrToPWideChar(source: string): PWideChar;// inline;
 var
   pwResult: PWideChar;
 
@@ -1792,7 +1830,7 @@ end;
 function Get64bitBits(const data: UINT64;
                       const index: Integer): Integer; inline;
 begin
-  Result := (data shr (index shr 8)) AND // offset
+  Result := (data shr (index shr 8)) and // offset
             ((1 shl Byte(index)) - 1);   // mask
 end;
 
@@ -1810,11 +1848,11 @@ begin
   Mask := ((1 shl Byte(index)) - 1);
 
   //Assert(value <= Mask);
-  if val > mask then
+  if (val > mask) then
     val := mask;
 
   offset := index shr 8;
-  data := (data AND (not (mask shl offset)))
+  data := (data and (not (mask shl offset)))
            OR UINT64(val shl offset);
 end;
 
@@ -1825,7 +1863,7 @@ end;
 function GetDWordBits(const data: DWORD;
                       const index: Integer): Integer; inline;
 begin
-  Result := (data shr (index shr 8)) AND // offset
+  Result := (data shr (index shr 8)) and // offset
             ((1 shl Byte(index)) - 1);   // mask
 end;
 
@@ -1842,12 +1880,12 @@ begin
   val := value;
   Mask := ((1 shl Byte(index)) - 1);
 
-  //Assert(value <= Mask);
+  // Assert(value <= Mask);
   if val > mask then
     val := mask;
 
   offset := index shr 8;
-  data := (data AND (not (mask shl offset)))
+  data := (data and (not (mask shl offset)))
           OR DWORD(val shl offset);
 end;
 
@@ -1858,7 +1896,7 @@ end;
 function GetWordBits(const data: WORD;
                      const index: Integer): WORD; inline;
 begin
-  Result := (data shr (index shr 8)) AND // offset
+  Result := (data shr (index shr 8)) and // offset
             ((1 shl Byte(index)) - 1);   // mask
 end;
 
@@ -1880,7 +1918,7 @@ begin
     val := mask;
 
   offset := index shr 8;
-  data := (data AND (not (mask shl offset)))
+  data := (data and (not (mask shl offset)))
           OR WORD(val shl offset);
 end;
 
@@ -1891,7 +1929,7 @@ end;
 function GetByteBits(const data: Byte;
                      const index: Integer): Byte; inline;
 begin
-  Result := (data shr (index shr 8)) AND
+  Result := (data shr (index shr 8)) and
             ((1 shl Byte(index)) - 1);
 end;
 
@@ -1900,8 +1938,8 @@ procedure SetByteBits(var data: Byte;
                       const index: Integer;
                       const value: Integer); inline;
 begin
-  data := (data AND (Not ((index AND $FF) shl (index shr 8)))) or
-          ((value AND index AND $FF) shl (index shr 8));
+  data := (data and (not ((index and $FF) shl (index shr 8)))) or
+          ((value and index and $FF) shl (index shr 8));
 end;
 
 
@@ -1932,10 +1970,6 @@ begin
     Result := 'False';
 end;
 
-
-function CreateFile2; external Kernel32Lib name 'CreateFile2';
-
-
 // Strings
 function StringCbCat(pszDest: PChar;
                      cbDest: SIZE_T;
@@ -1954,12 +1988,15 @@ begin
 
 end;
 
+{$WARN SYMBOL_PLATFORM OFF}
+function CreateFile2; external Kernel32Lib name 'CreateFile2' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
-function StringCbCatA; external Kernel32Lib name 'StringCbCatA';
-function StringCbCatW; external Kernel32Lib name 'StringCbCatW';
+function StringCbCatA; external Kernel32Lib name 'StringCbCatA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function StringCbCatW; external Kernel32Lib name 'StringCbCatW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
 {$IF COMPILERVERSION < 29.0}
-function StrCmpLogicalW; external Shlwapi32Lib name 'StrCmpLogicalW';
+function StrCmpLogicalW; external Shlwapi32Lib name 'StrCmpLogicalW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 {$ENDIF}
+{$WARN SYMBOL_PLATFORM ON}
 
 end.

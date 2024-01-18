@@ -147,39 +147,46 @@ const
 ///////////////////////////////   Startup/Shutdown  ////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-  // Initializes the platform object.
-  // Must be called before using Media Foundation.
-  // A matching MFShutdown call must be made when the application is done using
-  // Media Foundation.
-  // The "Version" parameter should be set to MF_API_VERSION.
-  // Application should not call MFStartup / MFShutdown from workqueue threads
-  //
-  // Default = MFSTARTUP_FULL
+  ///  <summary>Initializes the platform object.
+  ///  Must be called before using Media Foundation.
+  ///  A matching MFShutdown call must be made when the application is done using
+  ///  Media Foundation.
+  ///  Application should not call MFStartup / MFShutdown from workqueue threads.</summary>
+  ///  <param name="Version">This parameter should be set to MF_API_VERSION.</param>
+  ///  <param name="dwFlags">This parameter is optional. Default = MFSTARTUP_FULL </param>
   function MFStartup(const Version: ULONG = MF_API_VERSION;
                      const dwFlags: DWORD = MFSTARTUP_FULL): HRESULT; stdcall;
   {$EXTERNALSYM MFStartup}
 
-
-  // Shuts down the Microsoft Media Foundation platform.
-  // Call this function once for every call to MFStartup.
-  // Do not call this function from work queue threads.
+  ///  <summary>Shuts down the Microsoft Media Foundation platform.
+  ///  Call this function once for every call to MFStartup.
+  ///  Do not call this function from work queue threads.</summary>
   function MFShutdown(): HRESULT; stdcall;
   {$EXTERNALSYM MFShutdown}
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////    Platform    ///////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
-  // These functions can be used to keep the MF platform object in place.
-  // Every call to MFLockPlatform should have a matching call to MFUnlockPlatform
-
+  ///  <summary>These functions can be used to keep the MF platform object in place.
+  ///  Every call to MFLockPlatform should have a matching call to MFUnlockPlatform</summary>
+  ///
+  ///  <summary>Blocks the MFShutdown function.</summary>
+  ///  <see href="https://learn.microsoft.com/en-us/windows/win32/api/mfapi/nf-mfapi-mflockplatform">[mflockplatform]</see>
   function MFLockPlatform(): HResult; stdcall;
   {$EXTERNALSYM MFUnlockPlatform}
+  ///  <summary>Unlocks the Media Foundation platform after it was locked by a call to the MFLockPlatform function.</summary>
+  ///  <see href="https://learn.microsoft.com/en-us/windows/win32/api/mfapi/nf-mfapi-mfunlockplatform">[mfUnlockplatform]</see>
   function MFUnlockPlatform(): HResult; stdcall;
   {$EXTERNALSYM MFLockPlatform}
 
 ////////////////////////////////////////////////////////////////////////////////
 
+  ///  <summary>Puts an asynchronous operation on a work queue.</summary>
+  ///  <param name="dwQueue">The identifier for the work queue.</param>
+  ///  <param name="pCallback">A pointer to the IMFAsyncCallback interface.</param>
+  ///  <param name="pState">A pointer to the IUnknown interface of a state object, defined by the caller.
+  ///  This parameter can be nil. You can use this object to hold state information.</param>
+  ///  <see href="https://learn.microsoft.com/en-us/windows/win32/api/mfapi/nf-mfapi-mfputworkitem">[MFPutWorkItem]</see>
   function MFPutWorkItem(const dwQueue: DWORD;
                          pCallback: IMFAsyncCallback;
                          pState: IUnknown): HResult; stdcall;
@@ -1445,12 +1452,12 @@ const
   // it is set on input compressed sample to (H.264/HEVC) video decoder
   //
   // when present, it indicates video output in video render should resume on the first output (uncompressed) sample
-  // with the attribute MFSampleExtension_Encryption_ResumeVideoOutput set to true
+  // with the attribute MFSampleExtension_Encryption_ResumeVideoOutput set to True
   //
   // note: (H.264/HEVC) video decoder should buffer the attribute when video decoder
-  // detects the attribute set to true on some input sample, which might be dropped since
+  // detects the attribute set to True on some input sample, which might be dropped since
   // those input sample might not be decode-able because of missing references,
-  // and set the attribute to true on the first output sample not dropped in video decoder
+  // and set the attribute to True on the first output sample not dropped in video decoder
 
   MFSampleExtension_Encryption_NALUTypes  : TGUID = '{B0F067C7-714C-416C-8D59-5F4DDF8913B6}';
   {$EXTERNALSYM MFSampleExtension_Encryption_NALUTypes}
@@ -1636,7 +1643,7 @@ const
   MFSampleExtension_Timestamp    :  TGUID = '{1e436999-69be-4c7a-9369-70068c0260cb}';
   {$EXTERNALSYM MFSampleExtension_Timestamp}
   // MFSampleExtension_Timestamp
-  // Type: int64
+  // Type: Int64
   // { 1e436999-69be-4c7a-9369-70068c0260cb } MFSampleExtension_Timestamp  {INT64 }
   // The timestamp of a sample
   //
@@ -2260,7 +2267,7 @@ const
 
 
   // READ CAREFULLY!
-  //================
+  // ===============
   //
   // Valid MFT_ENUM_FLAG_ASYNCMFT flags for function MFTRegister
   // ==============================
@@ -2274,17 +2281,20 @@ const
   //
   // MFT_ENUM_FLAG_HARDWARE
   // The MFT performs hardware-based data processing, using either the AVStream driver or a GPU-based proxy MFT.
-  // FTs in this category always process data asynchronously. See Hardware MFTs.
+  // MFTs in this category always process data asynchronously. See Hardware MFTs.
   // Note:  This flag applies to video codecs and video processors that perform their work entirely in hardware.
   // It does not apply to software decoders that use DirectX Video Acceleration to assist decoding.
   // Requires >= Windows 7.
   //
   // MFT_ENUM_FLAG_SYNCMFT
   // The MFT performs synchronous processing in software. This flag does not apply to hardware transforms.
+  //
   // MFT_ENUM_FLAG_TRANSCODE_ONLY
   // The MFT is optimized for transcoding and should not be used for playback.
   // Requires >= Windows 7.
   //
+
+
   function MFTRegister(clsidMFT: CLSID;  // The CLSID of the MFT. The MFT must also be registered as a COM object using the same CLSID.
                        const guidCategory: TGuid; // GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY .
                        pszName: LPCWSTR;  // Wide-character string that contains the friendly name of the MFT.
@@ -3247,18 +3257,19 @@ const
 
 //  #if (WINVER >= _WIN32_WINNT_THRESHOLD)
 
+  // Free Lossless Audio Codec ( >= Win 10 )
   MFAudioFormat_FLAC            : TGUID = (D1: WAVE_FORMAT_FLAC;
                                            D2: $0000;
                                            D3: $0010;
                                            D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
   {$EXTERNALSYM MFAudioFormat_FLAC}
-
+  // Apple Lossless Audio Codec ( >= Win 10 )
   MFAudioFormat_ALAC            : TGUID = (D1: WAVE_FORMAT_ALAC;
                                            D2: $0000;
                                            D3: $0010;
                                            D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
   {$EXTERNALSYM MFAudioFormat_ALAC}
-
+  // Opus ( >= Win 10 )
   MFAudioFormat_Opus            : TGUID = (D1: WAVE_FORMAT_OPUS;
                                            D2: $0000;
                                            D3: $0010;
@@ -3638,7 +3649,7 @@ const
   {$EXTERNALSYM MF_MT_VIDEO_NO_FRAME_ORDERING}
   // MF_MT_VIDEO_NO_FRAME_ORDERING {3F5B106F-6BC2-4EE3-B7ED-892C18F5351}
   // Type: UINT32
-  // Description: MF_MT_VIDEO_NO_FRAME_ORDERING set to non-zero (true) means external users/apps know
+  // Description: MF_MT_VIDEO_NO_FRAME_ORDERING set to non-zero (True) means external users/apps know
   // that input video bitstream has no frame rerodering,
   // that is, the output and display order is the same as the input and decoding order
   // it will overwrite bitstream syntaxes even if bitstream syntaxes do not indicate
@@ -5423,21 +5434,22 @@ const
   //    Returns the packed UINT64 value.
 
 
-
-  // Gets the low-order and high-order UINT32 values from a UINT64 value that represnets a size.
-  // You can use this function to unpack a UINT64 value that you receive from the IMFAttributes.GetUINT64 method.
+  /// <summary>
+  /// Gets the low-order and high-order UINT32 values from a UINT64 value that represnets a size.
+  /// You can use this function to unpack a UINT64 value that you receive from the IMFAttributes.GetUINT64 method.
+  /// </summary>
+  /// <param name="unPacked"> [in] The value to convert.
+  /// </param>
+  /// <param name="swpunWidth"> [out] Receives the high-order 32 bits.
+  /// </param>
+  /// <param name="punHeight"> [out] Receives the low-order 32 bits.
+  /// </param>
+  ///
   procedure UnpackSize(unPacked: UINT64;
-                       out punWidth: UINT32;
+                       out swpunWidth: UINT32;
                        out punHeight: UINT32); inline;
   {$EXTERNALSYM UnpackSize}
-  //Parameters
-  //==========
-  // unPacked [in]
-  //    The value to convert.
-  // punWidth [out]
-  //    Receives the high-order 32 bits.
-  // punHeight [out]
-  //    Receives the low-order 32 bits.
+
 
 
 
@@ -6211,11 +6223,11 @@ end;
 
 //
 procedure UnpackSize(unPacked: UINT64;
-                     out punWidth: UINT32;
+                     out swpunWidth: UINT32;
                      out punHeight: UINT32);
 begin
   Unpack2UINT32AsUINT64(unPacked,
-                        punWidth,
+                        swpunWidth,
                         punHeight);
 end;
 

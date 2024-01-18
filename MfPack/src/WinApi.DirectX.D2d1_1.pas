@@ -15,8 +15,11 @@
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Tilo Güldner (TiloGueldner).
-//
+// Contributor(s): Tony Kalf (maXcomX),
+//                 Peter Larson (ozships),
+//                 Tilo Güldner (TiloGueldner),
+//                 (wsandor)
+//                                                                                                 f
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
@@ -779,11 +782,11 @@ type
                            strokeStyle: ID2D1StrokeStyle): HResult; stdcall;
 
     function DrawBitmap(bitmap: ID2D1Bitmap;
-                        destinationRectangle: D2D1_RECT_F;
+                        destinationRectangle: PD2D1_RECT_F;
                         opacity: Single;
                         interpolationMode: D2D1_INTERPOLATION_MODE;
-                        sourceRectangle: D2D1_RECT_F;
-                        perspectiveTransform: D2D1_MATRIX_4X4_F): HResult; stdcall;
+                        sourceRectangle: PD2D1_RECT_F;
+                        perspectiveTransform: PD2D1_MATRIX_4X4_F): HResult; stdcall;
 
     function DrawImage(image: ID2D1Image;
                        targetOffset: D2D1_POINT_2F;

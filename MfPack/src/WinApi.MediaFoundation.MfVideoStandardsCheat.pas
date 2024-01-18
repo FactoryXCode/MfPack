@@ -104,7 +104,7 @@ type
 
   TFrameRatesArray = array of TFrameRate;
 
-  /// <summary> This class stores most common resolutions, aspect ratios and framerates used today. </summary>
+  /// <summary> This class stores most common resolutions, aspect ratios and framerates used today.</summary>
   TVideoStandardsCheat = class
   private
     iCounter: Integer;

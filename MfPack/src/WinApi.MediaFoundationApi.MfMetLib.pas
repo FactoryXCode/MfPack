@@ -141,17 +141,25 @@ type
     wsDescr: LPWSTR;     // Description about the format or codec see: function GetAudioDescr
     wsGuid: LPWSTR;      // See: function GetAudioDescr
     unChannels: UINT32;
-    unSamplesPerSec: UINT32;
-    dblFloatSamplePerSec: Double;
+    unSamplesPerSec: UINT32; // Sample rate, in samples per second (Hertz).
+                             // Common values for unSamplesPerSec are 8.0 kHz, 11.025 kHz, 22.05 kHz, and 44.1 kHz.
+                             // To calculate unSamplesPerSec (samplerate) to kHz, use formula unSamplesPerSec / 1000.
+    dblFloatSamplePerSec: Double; // Sample rate floatingpoint. Number of audio samples per second in an audio media type.
+
     unSamplesPerBlock: UINT32;
     unValidBitsPerSample: UINT32;
     unBitsPerSample: UINT32;
-    unBlockAlignment: UINT32;
-    unAvgBytesPerSec: UINT32;
+    unBlockAlignment: UINT32; // Note: For PCM audio formats,
+                              //       the block alignment is equal to the number of audio channels multiplied by
+                              //       the number of bytes per audio sample.
+    unAvgBytesPerSec: UINT32; // Bytes per second or Bitrate.
+                              // To calculate the bitrate to (kbps) use formula: (Average Bytes Per Sample * 8) / 1000.
     unChannelMask: UINT32;
-    dbBitRate_kbps: Double; // Bitrate (kbps) = (Average Bytes Per Sample * 8) / 1000.
-    dbSampleRate_khz: Double; // Samplerate (khz) = Samples Per Second / 1000.
-
+    // AAC
+    unAACPayload: UINT32;
+    wsAACPayloadDescription: string;
+    unAACProfileLevel: UINT32;
+    wsAACProfileLevelDescription: string;
     // FLAC extra data
     unFlacMaxBlockSize: UINT32;
     public
@@ -296,6 +304,14 @@ type
     // To calculate sample rate in khz.
     // Samplerate (khz) = Samples Per Second / 1000.
     audio_SampleRate_khz: Double;
+
+    audio_ChannelMask: UINT32;
+    // AAC specific.
+    audio_ProfileAndLevel: UINT32;
+    audio_PayloadType: UINT32;
+    // FLAC specific.
+    audio_FLAC_: UINT32;
+
     public
       procedure Reset();
   end;
@@ -648,8 +664,8 @@ type
                                 out opCLSID: CLSID): HResult;  // Receives the CLSID of the decoder.
 
   // Creates a transcode profile for the given params mfAudioFormat and mfTranscodeContainerType.
-  function CreateTranscodeProfile({in} mfAudioFormat: TGUID;  // For example: MFAudioFormat_WMAudioV9
-                                  {in} mfTranscodeContainerType: TGUID; // For example: MFTranscodeContainerType_ASF
+  function CreateTranscodeProfile(const mfAudioFormat: TGUID;  // For example: MFAudioFormat_WMAudioV9
+                                  const mfTranscodeContainerType: TGUID; // For example: MFTranscodeContainerType_ASF
                                   out ppProfile: IMFTranscodeProfile): HResult;
 
   // Configures the recordsink for video.
@@ -840,7 +856,8 @@ type
   // Usually this step is performed by the topology loader, but if you add the decoder to
   // the topology manually, then you must perform this step yourself.
   // As a precondition for this step, all output nodes in the topology must be bound to media sinks.
-  // For more information, see Binding Output Nodes to Media Sinks.
+  // For more information, see:
+  //   https://learn.microsoft.com/en-us/windows/win32/medfound/binding-output-nodes-to-media-sinks
   //
   // First, find the object in the topology that hosts the Direct3D device manager.
   // To do so, get the object pointer from each node and query the object for the
@@ -1128,12 +1145,12 @@ type
   // To get the duration of a media file, call the IMFSourceReader.GetPresentationAttribute method and
   // request the MF_PD_DURATION attribute.
   function GetFileDuration(pSource: IMFSourceReader;
-                           out phnsDuration: MFTIME): HResult; overload;
+                           out phnsDuration: LONGLONG): HResult; overload;
 
   // Alternatively you might get the duration of a media file by calling the IMFMediaSource.CreatePresentationDescriptor method and
   // request the MF_PD_DURATION attribute.
   function GetFileDuration(pSource: IMFMediaSource;
-                           out pDuration: MFTIME): HResult; overload;
+                           out pDuration: LONGLONG): HResult; overload;
 
 
   // Gets the file size.
@@ -1168,7 +1185,7 @@ type
   // with seamless transitions between the sources.
   // You can use it to create playlists, or to play streams from multiple sources simultaneously.
   // See: https://learn.microsoft.com/en-us/windows/win32/medfound/about-the-sequencer-source
-
+  //      https://learn.microsoft.com/en-us/windows/win32/medfound/using-the-sequencer-source
 
 
 const
@@ -1191,6 +1208,12 @@ const
 // ====
 procedure CopyWaveFormatEx(const SourceFmt: WAVEFORMATEX;
                            out DestFmt: PWAVEFORMATEX);
+
+// Get the assignment of audio channels to speaker positions and name, from a given MF_MT_AUDIO_CHANNEL_MASK attribute.
+procedure GetSpeakersLayOut(const ChannelMatrix: UINT32;
+                            out aLayout: string;
+                            out aChannels: string);
+
 
 implementation
 
@@ -1223,8 +1246,11 @@ begin
   unBlockAlignment := 0;
   unAvgBytesPerSec := 0;
   unChannelMask := 0;
-  dbBitRate_kbps := 0.0;
-  dbSampleRate_khz := 0.0;
+  // AAC extra data.
+  unAACPayload := 0;
+  unAACProfileLevel := 0;
+  // FLAC extra data.
+  unFlacMaxBlockSize := 0;
 end;
 
 
@@ -2550,7 +2576,7 @@ end;
 
 // Important
 //  This interface has a serious limitation, because the stop time is specified as a 32-bit value.
-//  That means the maximum stop time that you can set using this interface is 0xFFFFFFFF,
+//  That means the maximum stop time that you can set using this interface is $FFFFFFFF,
 //  or just over 7 minutes. This limitation is due to an incorrect structure definition.
 //
 // To set the stop time using the IMFTopologyNodeAttributeEditor interface, perform the following steps.
@@ -2593,11 +2619,13 @@ label
 
 begin
 
+  {$IFDEF WIN32}
   if (stop > MAXUINT32) then
-    begin
-      Result := E_INVALIDARG;
-      Exit;
-    end;
+    stop := MAXUINT32;
+  {$ELSE}
+  if (stop > MAXUINT64) then
+    stop := MAXUINT64;
+  {$ENDIF}
 
   update := nil;
 
@@ -2636,9 +2664,12 @@ begin
           update^.guidAttributeKey := MF_TOPONODE_MEDIASTOP;
           update^.attrType := MF_ATTRIBUTE_UINT64;
           // Be careful to set the value of attrType correctly.
-          // Although u64 is a 32-bit type, the method requires that attrType be set to MF_ATTRIBUTE_UINT64.
-          update^.u64 := UINT32(stop); // ! See Remarks !
-
+          // Although u32 is a 32-bit type, the method requires that attrType be set to MF_ATTRIBUTE_UINT64.
+          {$IFDEF WIN32}
+          update^.u32 := UINT32(stop); // ! See Remarks !
+          {$ELSE} // Win64
+          update^.u64 := UINT64(stop);
+          {$ENDIF}
 
           hr := pAttr.UpdateNodeAttributes(id,
                                            1,
@@ -2656,6 +2687,7 @@ begin
 done:
   Result := hr;
 end;
+
 
 // This function is deprecated. Only here for backward compatibility.
 function FindDecoderEx(const subtype: TGUID;         // Subtype
@@ -6763,12 +6795,6 @@ begin
                                                                   MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
                                                                   0);
 
-          // Bitrate (kbps) calculation.
-          pMfAudioFormat.dbBitRate_kbps := (pMfAudioFormat.unAvgBytesPerSec * 8) / 1000;
-
-          // Samplerate (khz) calculation.
-          pMfAudioFormat.dbSampleRate_khz := pMfAudioFormat.unSamplesPerSec /1000;
-
           // Number of audio samples per second in an audio media type.
           pMfAudioFormat.dblFloatSamplePerSec := MFGetAttributeDouble(pType,
                                                                       MF_MT_AUDIO_FLOAT_SAMPLES_PER_SECOND,
@@ -6814,6 +6840,14 @@ begin
           pMfAudioFormat.unChannelMask := MFGetAttributeUINT32(pType,
                                                                MF_MT_AUDIO_CHANNEL_MASK,
                                                                (0));
+          // AAC specific
+          pMfAudioFormat.unAACPayload := MFGetAttributeUINT32(pType,
+                                                              MF_MT_AAC_PAYLOAD_TYPE,
+                                                              0);
+
+          pMfAudioFormat.unAACProfileLevel := MFGetAttributeUINT32(pType,
+                                                                   MF_MT_AAC_AUDIO_PROFILE_LEVEL_INDICATION,
+                                                                   0);
 
           // FLAC extra data.
           pMfAudioFormat.unFlacMaxBlockSize := MFGetAttributeUINT32(pType,
@@ -7073,11 +7107,12 @@ begin
                                                                      MF_MT_AUDIO_FLOAT_SAMPLES_PER_SECOND,
                                                                      0.0);
 
+          // Note: Some encoded audio formats do not contain a value for bits/sample.
+          // In that case, use a default value of 16. Most codecs will accept this value.
           aAudioFmts[i].unBitsPerSample := MFGetAttributeUINT32(mfAudioType,
                                                                 MF_MT_AUDIO_BITS_PER_SAMPLE,
                                                                 16);
-          // Note: Some encoded audio formats do not contain a value for bits/sample.
-          // In that case, use a default value of 16. Most codecs will accept this value.
+
 
           // Number of audio samples contained in one compressed block of audio data.
           aAudioFmts[i].unSamplesPerBlock := MFGetAttributeUINT32(mfAudioType,
@@ -7103,7 +7138,61 @@ begin
                                                               MF_MT_AUDIO_CHANNEL_MASK,
                                                               0);
 
-          // FLAC extra data.
+          // AAC specific
+          // Starting in Windows 8, the payload value can be 0 (raw AAC) or 1 (ADTS AAC).
+          aAudioFmts[i].unAACPayload := MFGetAttributeUINT32(mfAudioType,
+                                                             MF_MT_AAC_PAYLOAD_TYPE,
+                                                             0);
+          // unAACPayloadDescription
+          case aAudioFmts[i].unAACPayload of
+            0: aAudioFmts[i].wsAACPayloadDescription := 'Contains raw_data_block elements only (Raw AAC).';
+            1: aAudioFmts[i].wsAACPayloadDescription := 'Audio Data Transport Stream (ADTS).';
+            2: aAudioFmts[i].wsAACPayloadDescription := 'Audio Data Interchange Format (ADIF).';
+            3: aAudioFmts[i].wsAACPayloadDescription := 'MPEG-4 audio transport stream with a synchronization layer (LOAS) and a multiplex layer (LATM).';
+          end;
+
+
+          aAudioFmts[i].unAACProfileLevel := MFGetAttributeUINT32(mfAudioType,
+                                                                  MF_MT_AAC_AUDIO_PROFILE_LEVEL_INDICATION,
+                                                                  0);
+
+          // Add a readable profile description.
+          case aAudioFmts[i].unAACProfileLevel of
+            //$28
+            40: aAudioFmts[i].wsAACProfileLevelDescription := 'AAC Profile L2 (AAC-Low Complexity. Most used.)';
+            //$29
+            41: aAudioFmts[i].wsAACProfileLevelDescription := 'AAC Profile L2 (AAC-Low Complexity. Most used.)';
+            //$2A
+            42: aAudioFmts[i].wsAACProfileLevelDescription := 'AAC Profile L4 (AAC-Low Complexity)';
+            //$2B
+            43: aAudioFmts[i].wsAACProfileLevelDescription := 'AAC Profile L5 (AAC-Low Complexity)';
+
+            //$2C
+            44: aAudioFmts[i].wsAACProfileLevelDescription := 'High Efficiency v1 AAC Profile L2 (For low bitrates)';
+            //$2E
+            46: aAudioFmts[i].wsAACProfileLevelDescription := 'High Efficiency v1 AAC Profile L4 (For low bitrates)';
+            //$2F
+            47: aAudioFmts[i].wsAACProfileLevelDescription := 'High Efficiency v1 AAC Profile L5 (For low bitrates)';
+
+            //$30
+            48: aAudioFmts[i].wsAACProfileLevelDescription := 'High Efficiency v2 AAC Profile L2 (For very low bitrates)';
+            //$31
+            49: aAudioFmts[i].wsAACProfileLevelDescription := 'High Efficiency v2 AAC Profile L3 (For very low bitrates)';
+            //$32
+            50: aAudioFmts[i].wsAACProfileLevelDescription := 'High Efficiency v2 AAC Profile L4 (For very low bitrates)';
+            //$33
+            51: aAudioFmts[i].wsAACProfileLevelDescription := 'High Efficiency v2 AAC Profile L5 (For very low bitrates)';
+            // Not documented by MS
+            //$50
+            80: aAudioFmts[i].wsAACProfileLevelDescription := 'High Efficiency v2 AAC Profile. 8 channels (7.1)';
+            //$52
+            82: aAudioFmts[i].wsAACProfileLevelDescription := 'High Efficiency v2 AAC Profile. 8 channels (7.1)';
+            else
+               aAudioFmts[i].wsAACProfileLevelDescription := Format('Unknown AAC Profile Level %d.',
+                                                                    [aAudioFmts[i].unAACProfileLevel]);
+          end;
+
+          // FLAC specific
           aAudioFmts[i].unFlacMaxBlockSize := MFGetAttributeUINT32(mfAudioType,
                                                                    MF_MT_AUDIO_FLAC_MAX_BLOCK_SIZE,
                                                                    (0));
@@ -7344,7 +7433,7 @@ end;
 // To get the duration of a media file, call the IMFSourceReader.GetPresentationAttribute method and
 // request the MF_PD_DURATION attribute, as shown in the following code.
 function GetFileDuration(pSource: IMFSourceReader;
-                         out phnsDuration: MFTIME): HResult; overload;
+                         out phnsDuration: LONGLONG): HResult; overload;
 var
   hr: HResult;
   pvVar: PROPVARIANT;
@@ -7359,8 +7448,8 @@ begin
                                          MF_PD_DURATION,
                                          pvVar);
   if SUCCEEDED(hr) then
-    hr := PropVariantToUInt64(pvVar,
-                              phnsDuration);
+    hr := PropVariantToInt64(pvVar,
+                             phnsDuration);
 
   PropVariantClear(pvVar);
   Result := hr;
@@ -7370,7 +7459,7 @@ end;
 // Alternatively you might get the duration of a media file by calling the IMFMediaSource.CreatePresentationDescriptor method and
 // request the MF_PD_DURATION attribute, as shown in the following code.
 function GetFileDuration(pSource: IMFMediaSource;
-                         out pDuration: MFTIME): HResult; overload;
+                         out pDuration: LONGLONG): HResult; overload;
 var
   hr: HResult;
   pPD: IMFPresentationDescriptor;
@@ -7381,7 +7470,7 @@ begin
   hr := pSource.CreatePresentationDescriptor(pPD);
   if SUCCEEDED(hr) then
     hr := pPD.GetUINT64(MF_PD_DURATION,
-                        pDuration);
+                        UINT64(pDuration));
 
   Result := hr;
 end;
@@ -7453,12 +7542,18 @@ begin
   audio_iSamplesPerSec := 0;
   audio_iBitsPerSample := 0;
   audio_dwFormatTag := 0;
+  audio_ChannelMask := 0;
+  // AAC specific.
+  audio_ProfileAndLevel := 0;
+  audio_PayloadType := 0;
+  // FLAC specific.
+  audio_FLAC_ := 0;
 end;
 
 
 // Creates a transcode profile for the given params mfAudioFormat and mfTranscodeContainerType.
-function CreateTranscodeProfile({in} mfAudioFormat: TGUID;  // For example: MFAudioFormat_WMAudioV9
-                                {in} mfTranscodeContainerType: TGUID; // For example: MFTranscodeContainerType_ASF
+function CreateTranscodeProfile(const mfAudioFormat: TGUID;  // For example: MFAudioFormat_WMAudioV9
+                                const mfTranscodeContainerType: TGUID; // For example: MFTranscodeContainerType_ASF
                                 out ppProfile: IMFTranscodeProfile): HResult;
 var
   hr: HResult;
@@ -7883,6 +7978,100 @@ begin
 end;
 
 
+procedure GetSpeakersLayOut(const ChannelMatrix: UINT32;
+                            out aLayout: string;
+                            out aChannels: string);
+const
+  SPEAKER_FRONT_LEFT       = $00000001;
+  SPEAKER_FRONT_RIGHT      = $00000002;
+  SPEAKER_FRONT_CENTER     = $00000004;
+  SPEAKER_LOW_FREQUENCY    = $00000008;
+  SPEAKER_BACK_LEFT        = $00000010;
+  SPEAKER_BACK_RIGHT       = $00000020;
+  SPEAKER_FRONT_LEFT_OF_CENTER  = $00000040;
+  SPEAKER_FRONT_RIGHT_OF_CENTER = $00000080;
+  SPEAKER_BACK_CENTER      = $00000100;
+  SPEAKER_SIDE_LEFT        = $00000200;
+  SPEAKER_SIDE_RIGHT       = $00000400;
+  SPEAKER_TOP_CENTER       = $00000800;
+  SPEAKER_TOP_FRONT_LEFT   = $00001000;
+  SPEAKER_TOP_FRONT_CENTER = $00002000;
+  SPEAKER_TOP_FRONT_RIGHT  = $00004000;
+  SPEAKER_TOP_BACK_LEFT    = $00008000;
+  SPEAKER_TOP_BACK_CENTER  = $00010000;
+  SPEAKER_TOP_BACK_RIGHT   = $00020000;
+  SPEAKER_RESERVED         = $7FFC0000;  // bit mask locations reserved for future use
+  SPEAKER_ALL              = $80000000;  // used to specify that any possible permutation of speaker configurations
+
+  // Standard speaker geometry configurations, used with X3DAudioInitialize
+  SPEAKER_MONO             = SPEAKER_FRONT_CENTER;
+  SPEAKER_STEREO           = (SPEAKER_FRONT_LEFT or SPEAKER_FRONT_RIGHT);
+  SPEAKER_2POINT1          = (SPEAKER_FRONT_LEFT or SPEAKER_FRONT_RIGHT or SPEAKER_LOW_FREQUENCY);
+  SPEAKER_SURROUND         = (SPEAKER_FRONT_LEFT or SPEAKER_FRONT_RIGHT or SPEAKER_FRONT_CENTER or SPEAKER_BACK_CENTER);
+  SPEAKER_QUAD             = (SPEAKER_FRONT_LEFT or SPEAKER_FRONT_RIGHT or SPEAKER_BACK_LEFT or SPEAKER_BACK_RIGHT);
+  SPEAKER_4POINT1          = (SPEAKER_FRONT_LEFT or SPEAKER_FRONT_RIGHT or SPEAKER_LOW_FREQUENCY or SPEAKER_BACK_LEFT or SPEAKER_BACK_RIGHT);
+  SPEAKER_5POINT1          = (SPEAKER_FRONT_LEFT or SPEAKER_FRONT_RIGHT or SPEAKER_FRONT_CENTER or SPEAKER_LOW_FREQUENCY or SPEAKER_BACK_LEFT or SPEAKER_BACK_RIGHT);
+  SPEAKER_7POINT1          = (SPEAKER_FRONT_LEFT or SPEAKER_FRONT_RIGHT or SPEAKER_FRONT_CENTER or SPEAKER_LOW_FREQUENCY or SPEAKER_BACK_LEFT or SPEAKER_BACK_RIGHT or SPEAKER_FRONT_LEFT_OF_CENTER or SPEAKER_FRONT_RIGHT_OF_CENTER);
+  SPEAKER_5POINT1_SURROUND = (SPEAKER_FRONT_LEFT or SPEAKER_FRONT_RIGHT or SPEAKER_FRONT_CENTER or SPEAKER_LOW_FREQUENCY or SPEAKER_SIDE_LEFT or SPEAKER_SIDE_RIGHT);
+  SPEAKER_7POINT1_SURROUND = (SPEAKER_FRONT_LEFT or SPEAKER_FRONT_RIGHT or SPEAKER_FRONT_CENTER or SPEAKER_LOW_FREQUENCY or SPEAKER_BACK_LEFT or SPEAKER_BACK_RIGHT or SPEAKER_SIDE_LEFT or SPEAKER_SIDE_RIGHT);
+
+
+begin
+
+  case ChannelMatrix of
+    SPEAKER_MONO:      begin
+                         aLayout := 'Front Center.';
+                         aChannels := 'Mono';
+                       end;
+    SPEAKER_STEREO:    begin
+                         aLayout := 'Front Left & Front Right.';
+                         aChannels := 'Stereo';
+                       end;
+    SPEAKER_2POINT1:   begin
+                         aLayout := 'Front Left & Front Right & Low Frequentie.';
+                         aChannels := '2.1';
+                       end;
+    SPEAKER_SURROUND:  begin
+                         aLayout := 'Front Left & Front Right & Front Center & Back Center.';
+                         aChannels := 'Surround';
+                       end;
+    SPEAKER_QUAD:      begin
+                         aLayout := 'Front Left & Front Right & Back Left & Back Right.';
+                         aChannels := 'Quad';
+                       end;
+    SPEAKER_4POINT1:   begin
+                         aLayout := 'Front Left & Front Right & Low Frequentie & Back Left & Back Right.';
+                         aChannels := '4.1';
+                       end;
+
+    SPEAKER_5POINT1:   begin
+                         aLayout := 'Front Left & Front Right & Front Center & Low Frequentie & Back Left & Back Right.';
+                         aChannels := '5.1';
+                       end;
+
+    SPEAKER_7POINT1:   begin
+                         aLayout := 'Front Left & Front Right & Front Center & Low Frequentie & Back Left & Back Right & Front Left of Center & Front Right of Center';
+                         aChannels := '7.1';
+                       end;
+
+    SPEAKER_5POINT1_SURROUND:   begin
+                                  aLayout := 'Front Left & Front Right & Front Center & Low Frequentie & Side Left & Side Right.';
+                                  aChannels := '5.1 Surround';
+                                end;
+
+    SPEAKER_7POINT1_SURROUND:   begin
+                                  aLayout := 'Front Left & Front Right & Front Center & Low Frequentie & Back Left & Back Right & Side Left & Side Right.';
+                                  aChannels := '7.1 Surround';
+                                end;
+    else // Unknown
+      begin
+        aLayout := 'Unknown';
+        aChannels := 'Unknown';
+      end;
+  end;
+end;
+
+
 function CreateUncompressedVideoType(const fccFormat: DWORD;
                                      aWidth: UINT32;
                                      aHeight: UINT32;
@@ -8073,11 +8262,11 @@ end;
 //=================
 
 {$WARN SYMBOL_PLATFORM OFF}
-  function SetForegroundWindow; external User32Lib name 'SetForegroundWindow' delayed;
+  function SetForegroundWindow; external User32Lib name 'SetForegroundWindow' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   // If the window was brought to the foreground, the return value is nonzero.
   // If the window was not brought to the foreground, the return value is zero.
 
-  function LockSetForegroundWindow; external User32Lib name 'LockSetForegroundWindow' delayed;
+  function LockSetForegroundWindow; external User32Lib name 'LockSetForegroundWindow' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 {$WARN SYMBOL_PLATFORM ON}
 
 end.

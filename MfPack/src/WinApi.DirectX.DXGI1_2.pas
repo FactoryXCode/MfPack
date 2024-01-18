@@ -15,7 +15,10 @@
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Tilo Güldner.
+// Contributor(s): Tony Kalf (maXcomX),
+//                 Peter Larson (ozships),
+//                 Tilo Güldner,
+//                 (wsandor).
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
@@ -426,11 +429,11 @@ type
     function GetHwnd(out _pHwnd: HWND): HResult; stdcall;
 
     function GetCoreWindow(_refiid: TGuid;
-            out ppUnk: Pointer): HResult; stdcall;
+                           out ppUnk: Pointer): HResult; stdcall;
 
     function Present1(SyncInterval: UINT;
                       PresentFlags: UINT;
-                      pPresentParameters: DXGI_PRESENT_PARAMETERS): HResult; stdcall;
+                      pPresentParameters: PDXGI_PRESENT_PARAMETERS): HResult; stdcall;
 
     function IsTemporaryMonoSupported(): BOOL; stdcall;
 
