@@ -1480,9 +1480,6 @@ begin
                                                  pCallback,             // Pointer to the IMFAsyncCallback interface of a callback object. The caller must implement this interface.
                                                  punkState);            // Pointer to the IUnknown interface of a state object, defined by the caller. This parameter can be nil.
 
-  if (FAILED(hr)) then
-    goto done;
-
 done:
   // unlike C/CPP Delphi cleans up all interfaces when going out of scope.
   Result := hr;

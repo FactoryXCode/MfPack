@@ -23,6 +23,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 01/08/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 // 12/09/2023 Tony                Fixed some wrong function parameters.
+// 20/01/2024 Tony                Fixed IMFSourceResolver.
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -1573,7 +1574,7 @@ const
 
 
 type
-  // typedef unsigned __int64 TOPOID; >> WinApi.WinApiTypes.pas
+  // typedef unsigned __Int64 TOPOID; >> WinApi.WinApiTypes.pas
 
   // Forward interface definitions
 
@@ -1615,25 +1616,35 @@ type
     // A normal session-end where all resources, references and queued presentations are cleared,
     // would go like this to make sure no memory leaks will be created.
     //
-    //  1 MySession.Stop()      This method is asynchronous. When the operation completes, the Media Session sends an MESessionStopped event.
+    //  1 MySession.Stop()  This method is asynchronous. When the operation completes, the Media Session sends an MESessionStopped event.
     //  2 MySession.ClearTopologies()  See comments on ClearTopologies.
     //  3 MySession.Shutdown()  See comments on ShutDown.
-    //  4 MySession := Nil or SafeRelease(MySession)  Calls IUnknown._Release.
+    //  4 MySession := nil or SafeRelease(MySession)  Calls IUnknown._Release.
     //
     function ClearTopologies(): HResult; stdcall; // Clears all of the presentations that are queued for playback in the Media Session.
 
     function Start(const pguidTimeFormat: TGUID;
                    const pvarStartPosition: PROPVARIANT): HResult; stdcall;
+    // Starts the Media Session.
+    // When this method is called, the Media Session starts the presentation clock and begins to process media samples.
+    // This method is asynchronous.
+    // When the method completes, the Media Session sends an MESessionStarted event.
 
-    function Pause(): HResult; stdcall;
+    function Pause(): HResult; stdcall;  // Pauses the Media Session.
+                                         // This method pauses the presentation clock.
+                                         // This method is asynchronous.
+                                         // When the operation completes, the Media Session sends an MESessionPaused event.
+                                         // Note: This method fails if the Media Session is stopped!
 
-    function Stop(): HResult; stdcall;
+    function Stop(): HResult; stdcall;   // Stops the mediasession. This method is asynchronous.
+                                         // When the operation completes, the Media Session sends an MESessionStopped event.
 
     function Close(): HResult; stdcall;  // Closes the Media Session and releases all of the resources it is using.
 
     function Shutdown(): HResult; stdcall;  // Shuts down the Media Session and releases all the resources used by the Media Session.
                                             // Call this method when you are done using the Media Session, before the final call to IUnknown._Release.
                                             // Otherwise, your application will leak memory.
+
     function GetClock(out ppClock: IMFClock): HResult; stdcall;
 
     function GetSessionCapabilities(out pdwCaps: DWord): HResult; stdcall;
@@ -1667,20 +1678,20 @@ type
       function CreateObjectFromURL(const pwszURL: LPCWSTR;
                                    dwFlags: DWord;
                                    pProps: IPropertyStore; // can be nil
-                                   pObjectType: MF_OBJECT_TYPE;
+                                   out pObjectType: MF_OBJECT_TYPE;
                                    out ppObject: IUnknown): HResult; stdcall;
 
       function CreateObjectFromByteStream(pByteStream: IMFByteStream;
                                           const pwszURL: LPCWSTR; // can be nil
                                           dwFlags: DWord;
                                           pProps: IPropertyStore; // can be nil
-                                          pObjectType: MF_OBJECT_TYPE;
+                                          out pObjectType: MF_OBJECT_TYPE;
                                           out ppObject: IUnknown): HResult; stdcall;
 
       function BeginCreateObjectFromURL(const pwszURL: LPCWSTR;
                                         dwFlags: DWord;
                                         pProps: IPropertyStore; // can be nil
-                                        ppIUnknownCancelCookie: IUnknown;
+                                        out ppIUnknownCancelCookie: IUnknown;
                                         pCallback: IMFAsyncCallback;
                                         punkState: IUnknown): HResult; stdcall;
 
@@ -3230,6 +3241,8 @@ type
 
 
   // Specifies a new attribute value for a topology node.
+  // This structure is used in IMFTopologyNodeAttributeEditor.UpdateNodeAttributes.
+  // NodeId indicate which node's attributes to update.
   PMFTOPONODE_ATTRIBUTE_UPDATE = ^MFTOPONODE_ATTRIBUTE_UPDATE;
   _MFTOPONODE_ATTRIBUTE_UPDATE = record
       NodeId:           TOPOID;   // The identifier of the topology node to update. To get the identifier of a topology node, call IMFTopologyNode.GetTopoNodeID.
@@ -3237,7 +3250,7 @@ type
       attrType:         MF_ATTRIBUTE_TYPE;  // Attribute type, specified as a member of the MF_ATTRIBUTE_TYPE enumeration.
       case Integer of
         Ord(MF_ATTRIBUTE_UINT32): (u32: UINT32); // Attribute value (unsigned 32-bit integer). This member is used when attrType equals MF_ATTRIBUTE_UINT32.
-        Ord(MF_ATTRIBUTE_UINT64): (u64: UINT64); // Attribute value (unsigned 32-bit integer). This member is used when attrType equals MF_ATTRIBUTE_UINT64. See Remarks.
+        Ord(MF_ATTRIBUTE_UINT64): (u64: UINT64); // Attribute value (unsigned 64-bit integer). This member is used when attrType equals MF_ATTRIBUTE_UINT64. See Remarks.
         Ord(MF_ATTRIBUTE_DOUBLE): (d: Double);   // Attribute value (floating point). This member is used when attrType equals MF_ATTRIBUTE_DOUBLE.
       end;
   {$EXTERNALSYM _MFTOPONODE_ATTRIBUTE_UPDATE}
@@ -4626,7 +4639,7 @@ type
   // The Media Foundation network code uses these client callbacks to implement and enforce cross origin downloads.
   //  * GetCrossOriginPolicy() returns the client's current cross origin policy to apply to the download session.
   //  * GetSourceOrigin() returns the W3C origin of the HTML5 media element.  Use CoTaskMemFree to free the string.
-  //  * IsSameOrigin() returns true when the specified URL has the same origin as the HTML5 media element.
+  //  * IsSameOrigin() returns True when the specified URL has the same origin as the HTML5 media element.
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFNetCrossOriginSupport);'}
   IMFNetCrossOriginSupport = interface(IUnknown)
   ['{bc2b7d44-a72d-49d5-8376-1480dee58b22}']
@@ -4809,6 +4822,7 @@ type
 //endif // (WINVER >= _WIN32_WINNT_WINTHRESHOLD)
 
 // WIN10  April 2018 update
+// __MIDL___MIDL_itf_mfidl_0000_0114_0001
   PSENSORPROFILEID = ^SENSORPROFILEID;
   SENSORPROFILEID = record
     _Type: TGUID;

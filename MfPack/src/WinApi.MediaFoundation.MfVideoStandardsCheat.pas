@@ -461,7 +461,6 @@ begin
   SetRes(rRes, 864, 486, r16_9, 16, 9, s16_9, 'Square Pixels 1.0 HD');
   SetRes(rRes, 720, 486, r16_9, 16, 9, s16_9, 'NTSC DV Widescreen 1.21 Pixel Aspect Ratio HD');
 
-
 end;
 
 
