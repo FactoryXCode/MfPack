@@ -228,7 +228,7 @@ const
 
 begin
   SetLength(aResolutionArray,
-            140);
+            141);
   iCounter := 0;
 
   // 8K
