@@ -172,7 +172,6 @@ contains
   WinApi.MediaFoundationApi.MfSpatialAudio in '..\src\WinApi.MediaFoundationApi.MfSpatialAudio.pas',
   WinApi.MediaFoundationApi.MfTransform in '..\src\WinApi.MediaFoundationApi.MfTransform.pas',
   WinApi.MediaFoundationApi.MfUtils in '..\src\WinApi.MediaFoundationApi.MfUtils.pas',
-  WinApi.MediaFoundation.MfVideoStandardsCheat in '..\src\WinApi.MediaFoundation.MfVideoStandardsCheat.pas',
   WinApi.MediaFoundationApi.MfVirtualCamera in '..\src\WinApi.MediaFoundationApi.MfVirtualCamera.pas',
   WinApi.MediaFoundationApi.OpmApi in '..\src\WinApi.MediaFoundationApi.OpmApi.pas',
   WinApi.MediaFoundationApi.WmCodecDsp in '..\src\WinApi.MediaFoundationApi.WmCodecDsp.pas',
@@ -217,6 +216,8 @@ contains
   WinApi.WinMM.VfW in '..\src\WinApi.WinMM.VfW.pas',
   WinApi.WinMM.VfwExt in '..\src\WinApi.WinMM.VfwExt.pas',
   WinApi.WinMM.VfwMsgs in '..\src\WinApi.WinMM.VfwMsgs.pas',
-  WinApi.Wmistr in '..\src\WinApi.Wmistr.pas';
+  WinApi.Wmistr in '..\src\WinApi.Wmistr.pas',
+  WinApi.StiErr in '..\src\WinApi.StiErr.pas',
+  WinApi.MfPack.VideoStandardsCheat in '..\src\WinApi.MfPack.VideoStandardsCheat.pas';
 
 end.
