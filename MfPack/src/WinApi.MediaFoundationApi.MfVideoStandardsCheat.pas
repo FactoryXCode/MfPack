@@ -5,7 +5,7 @@
 // Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: WinApi.MediaFoundation.MfVideoStandardsCheat.pas
+// Module: WinApi.MediaFoundationApi.MfVideoStandardsCheat.pas
 // Kind: Pascal / Delphi unit
 // Release date: 14-11-2023
 // Language: ENU
@@ -68,7 +68,7 @@
 // their product.
 //
 //==============================================================================
-unit WinApi.MediaFoundation.MfVideoStandardsCheat;
+unit WinApi.MediaFoundationApi.MfVideoStandardsCheat;
 
 
 interface
