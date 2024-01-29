@@ -30,7 +30,7 @@ package MfComponents;
 
 requires
   rtl,
-  MfPackX313;
+  MfPackX315;
 
 contains
   MfAudioEndPoint in 'MfAudioEndPoint.pas',
