@@ -67,6 +67,9 @@ The folllowing API's are included, to support Media Foundation.
  - DirectWrite API
  - DXGI API
  - XAudio2 API
+ - D3D9 API
+ - D3D11 API
+ - D3D12 API
 
 Notes
 ===== 
