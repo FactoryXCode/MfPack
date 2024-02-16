@@ -10,7 +10,7 @@
 // Release date: 04-05-2012
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: IAudioMediaType definition.
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -33,7 +33,7 @@
 //          Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -123,7 +123,7 @@ type
       0: (Set_  : TGUID;
           Id    : ULONG;
           Flags : ULONG);
-      1: (Alignment : int64);
+      1: (Alignment : Int64);
   end;
   {$EXTERNALSYM __MIDL___MIDL_itf_devicetopology_0000_0000_0001}
   KSIDENTIFIER = __MIDL___MIDL_itf_devicetopology_0000_0000_0001

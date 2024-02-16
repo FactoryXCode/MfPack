@@ -10,7 +10,7 @@
 // Release date: 29-07-2012
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Common methods used by Media Foundation,
 //              Core Audio etc..
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -92,6 +92,20 @@ uses
   {$WEAKPACKAGEUNIT ON}
   {$I 'WinApiTypes.inc'}
   {$DEFINE IGNORE_COMPILERVERSION}
+
+  // WinApi.Windows
+  // Used by function CreateEventEx dwFlags.
+  {$IF COMPILERVERSION < 34.0}
+  const
+  CREATE_EVENT_MANUAL_RESET = DWord($0001);  // The initial state of the event object is signaled; otherwise, it is nonsignaled.
+
+  CREATE_EVENT_INITIAL_SET  = DWord($0002);  // The event must be manually reset using the ResetEvent function.
+                                             // Any number of waiting threads, or threads that subsequently begin
+                                             // wait operations for the specified event object,
+                                             // can be released while the object's state is signaled.
+                                             // If this flag is not specified, the system automatically resets
+                                             // the event after releasing a single waiting thread.
+  {$ENDIF}
 
 type
 
@@ -503,6 +517,24 @@ type
                           psz2: LPCWSTR): Integer; stdcall;
   {$ENDIF}
 
+  // WinApi.Windows
+  {$IF COMPILERVERSION < 34.0}
+  function CreateEventEx(lpEventAttributes: PSecurityAttributes;
+                         lpName: LPCWSTR;
+                         dwFlags: DWord;
+                         dwDesiredAccess: DWord): THandle; stdcall;
+
+  function CreateEventExA(lpEventAttributes: PSecurityAttributes;
+                          lpName: LPCSTR;
+                          dwFlags: DWord;
+                          dwDesiredAccess: DWord): THandle; stdcall;
+
+  function CreateEventExW(lpEventAttributes: PSecurityAttributes;
+                          lpName: LPCWSTR;
+                          dwFlags: DWord;
+                          dwDesiredAccess: DWord): THandle; stdcall;
+  {$ENDIF}
+
 
 implementation
 
@@ -537,7 +569,6 @@ const
   VER_MINORVERSION      = $0000001;
   VER_NT_WORKSTATION    = 1;
   VER_PRODUCT_TYPE      = $80;
-
 
 
 // SafeRelease
@@ -578,7 +609,7 @@ end;
 
 
 {$WARN SYMBOL_PLATFORM OFF}
-  // ole2: compare GUID type pointers
+// ole2: compare GUID type pointers
 function IsEqualPGUID;   external Ole32Lib name 'IsEqualGUID' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function IsEqualPIID;    external Ole32Lib name 'IsEqualIID' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function IsEqualPCLSID;  external Ole32Lib name 'IsEqualCLSID' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
@@ -1998,5 +2029,12 @@ function StringCbCatW; external Kernel32Lib name 'StringCbCatW' {$IF COMPILERVER
 function StrCmpLogicalW; external Shlwapi32Lib name 'StrCmpLogicalW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 {$ENDIF}
 {$WARN SYMBOL_PLATFORM ON}
+
+// WinApi.Windows
+{$IF COMPILERVERSION < 34.0}
+function CreateEventEx; external Kernel32Lib name 'CreateEventExW';
+function CreateEventExA; external Kernel32Lib name 'CreateEventExA';
+function CreateEventExW; external Kernel32Lib name 'CreateEventExW';
+{$ENDIF}
 
 end.

@@ -327,7 +327,6 @@ object frmMain: TfrmMain
     Align = alTop
     BevelOuter = bvLowered
     TabOrder = 7
-    ExplicitTop = 322
     object Label1: TLabel
       Left = 22
       Top = 45

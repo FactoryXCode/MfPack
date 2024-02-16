@@ -9,7 +9,7 @@
 // Release date: 09-07-2023
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: The main unit to explore the Windows HResult codes.
 //
 // Organisation: FactoryX
@@ -26,7 +26,7 @@
 // Remarks: Please read the readme.md about how to use this tool.
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

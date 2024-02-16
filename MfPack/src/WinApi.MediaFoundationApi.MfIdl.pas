@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Media Foundation basic control-layer interfaces.
 //
 // Organisation: FactoryX
@@ -21,15 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/08/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
-// 12/09/2023 Tony                Fixed some wrong function parameters.
-// 20/01/2024 Tony                Fixed IMFSourceResolver.
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -1127,24 +1125,28 @@ const
   // can be obtained from the PKEY_PNPX_XAddrs from a KSCATEGORY_NETWORK_CAMERA
   // or Web Services on Devices (WSD) xaddrs parameter, currently only supports ONVIF cameras.
   MF_DEVSOURCE_ATTRIBUTE_SOURCE_XADDRESS : TGUID = '{BCA0BE52-C327-44C7-9B7D-7FA8D9B5BCDA}';
+  {$EXTERNALSYM MF_DEVSOURCE_ATTRIBUTE_SOURCE_XADDRESS}
 
   // MF_DEVSOURCE_ATTRIBUTE_SOURCE_RTSP_URL
   // {9D7B40D2-3617-4043-93E3-8D6DA9BB3492}
   // Data type: STRING
   // Currently only RTSP urls are supported as an initialization parameter.
   MF_DEVSOURCE_ATTRIBUTE_SOURCE_STREAM_URL : TGUID = '{9D7B40D2-3617-4043-93E3-8D6DA9BB3492}';
+  {$EXTERNALSYM MF_DEVSOURCE_ATTRIBUTE_SOURCE_STREAM_URL}
 
   // MF_DEVSOURCE_ATTRIBUTE_SOURCE_USERNAME
   // {05D01ADD-949F-46EB-BC8E-8B0D2B32D79D}
   // Data type: STRING
   // Attribute contains a username to use for authentication.
   MF_DEVSOURCE_ATTRIBUTE_SOURCE_USERNAME :  TGUID = '{05D01ADD-949F-46EB-BC8E-8B0D2B32D79D}';
+  {$EXTERNALSYM MF_DEVSOURCE_ATTRIBUTE_SOURCE_USERNAME}
 
   // MF_DEVSOURCE_ATTRIBUTE_SOURCE_PASSWORD
   // {A0FD7E16-42D9-49DF-84C0-E82C5EAB8874}
   // Data type: STRING
   // Attribute contains a password to use for authentication.
   MF_DEVSOURCE_ATTRIBUTE_SOURCE_PASSWORD :  TGUID = '{A0FD7E16-42D9-49DF-84C0-E82C5EAB8874}';
+  {$EXTERNALSYM MF_DEVSOURCE_ATTRIBUTE_SOURCE_PASSWORD}
 
   // {7A213AA7-866F-414A-8C1A-275C7283A395}
   // CLSID_FrameServerNetworkCameraSource
@@ -1153,6 +1155,7 @@ const
   // CLSID_FrameServerNetworkCameraSource is only supported using the Windows service FrameServer
   // and requires FrameServer for control and media flow, all other uses are not supported.
   CLSID_FrameServerNetworkCameraSource :  TGUID = '{7A213AA7-866F-414A-8C1A-275C7283A395}';
+  {$EXTERNALSYM CLSID_FrameServerNetworkCameraSource}
 
   // CLSID_CameraConfigurationManager
   //
@@ -1161,6 +1164,7 @@ const
   //
   // {6C92B540-5854-4A17-92B6-AC89C96E9683}
   CLSID_CameraConfigurationManager : TGUID = '{6C92B540-5854-4A17-92B6-AC89C96E9683}';
+  {$EXTERNALSYM CLSID_CameraConfigurationManager}
 
 
   MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_AUDCAP_GUID            : TGUID = '{14dd9a1c-7cff-41be-b1b9-ba1ac6ecb571}';
@@ -1803,16 +1807,21 @@ type
 
   // Interface IMFMediaStream
   // ========================
+  // Streams are created when a media source is started.
+  // For each stream, the media source sends an MENewStream event with a pointer to the stream's IMFMediaStream interface.
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFMediaStream);'}
   {$EXTERNALSYM IMFMediaStream}
   IMFMediaStream = interface(IMFMediaEventGenerator)
   ['{D182108F-4EC6-443f-AA42-A71106EC825F}']
 
     function GetMediaSource(out ppMediaSource: IMFMediaSource): HResult; stdcall;
+    // Retrieves a pointer to the media source that created this media stream.
 
     function GetStreamDescriptor(out ppStreamDescriptor: IMFStreamDescriptor): HResult; stdcall;
+    // Retrieves a stream descriptor for this media stream.
 
     function RequestSample(pToken: IUnknown): HResult; stdcall;
+    // Requests a sample from the media source.
 
   end;
   IID_IMFMediaStream = IMFMediaStream;
@@ -3054,27 +3063,35 @@ type
 
   // Interface IMFQualityManager
   // ===========================
+  // Adjusts playback quality.
+  // This interface is exposed by the quality manager.
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFQualityManager);'}
   {$EXTERNALSYM IMFQualityManager}
   IMFQualityManager = interface(IUnknown)
   ['{8D009D86-5B9F-4115-B1FC-9F80D52AB8AB}']
 
     function NotifyTopology(pTopology: IMFTopology): HResult; stdcall;
+    // Called when the Media Session is about to start playing a new topology.
 
     function NotifyPresentationClock(pClock: IMFPresentationClock): HResult; stdcall;
+    // Called when the Media Session selects a presentation clock.
 
     function NotifyProcessInput(pNode: IMFTopologyNode;
                                 lInputIndex: Long;
                                 pSample: IMFSample): HResult; stdcall;
+    // Called when the media processor is about to deliver an input sample to a pipeline component.
 
     function NotifyProcessOutput(pNode: IMFTopologyNode;
                                  lOutputIndex: Long;
                                  pSample: IMFSample): HResult; stdcall;
+    // Called after the media processor gets an output sample from a pipeline component.
 
     function NotifyQualityEvent(pObject: IUnknown;
                                 pEvent: IMFMediaEvent): HResult; stdcall;
+    // Called when a pipeline component sends an MEQualityNotify event.
 
     function Shutdown(): HResult; stdcall;
+    // Called when the Media Session is shutting down.
 
   end;
   IID_IMFQualityManager = IMFQualityManager;
@@ -3135,6 +3152,8 @@ type
 
   // Interface IMFRealTimeClient
   // ===========================
+  // Notifies a pipeline object to register itself with the Multimedia Class Scheduler Service (MMCSS).
+  // Any pipeline object that creates worker threads should implement this interface.
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFRealTimeClient);'}
   {$EXTERNALSYM IMFRealTimeClient}
   IMFRealTimeClient = interface(IUnknown)
@@ -4088,15 +4107,20 @@ type
 
   // Interface IMFRemoteProxy
   // ========================
+  // Exposed by objects that act as a proxy for a remote object.
+  // To obtain a pointer to this interface,
+  // call IMFGetService.GetService with the service identifier MF_REMOTE_PROXY.
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFRemoteProxy);'}
   IMFRemoteProxy = interface(IUnknown)
     ['{994e23ad-1cc2-493c-b9fa-46f1cb040fa4}']
 
       function GetRemoteObject(const riid: REFIID;
                                out ppv: Pointer): HResult; stdcall;
+      // Retrieves a pointer to the remote object for which this object is a proxy.
 
       function GetRemoteHost(const riid: REFIID;
                              out ppv: Pointer): HResult; stdcall;
+      // Retrieves a pointer to the object that is hosting this proxy.
 
   end;
   {$EXTERNALSYM IMFRemoteProxy}
@@ -4220,6 +4244,14 @@ type
 
   // Interface IMFTranscodeProfile
   // =============================
+  // Implemented by the transcode profile object.
+  // The transcode profile stores configuration settings that the
+  // topology builder uses to generate the transcode topology for the output file.
+  // These configuration settings are specified by the caller and include audio and
+  // video stream properties, encoder settings and container settings that are specified by the caller.
+  // To create the transcode profile object, call MFCreateTranscodeProfile.
+  // The configured transcode profile is passed to MFCreateTranscodeTopology,
+  // which creates the transcode topology with the appropriate settings.
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFTranscodeProfile);'}
   IMFTranscodeProfile = interface(IUnknown)
   ['{4ADFDBA3-7AB0-4953-A62B-461E7FF3DA1E}']
@@ -4395,11 +4427,15 @@ type
 
   // Interface IMFPMPClientApp
   // =========================
+  // Provides a mechanism for a media source to implement content protection functionality
+  // in a Windows Store apps.
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFPMPClientApp);'}
   IMFPMPClientApp = interface(IUnknown)
     ['{c004f646-be2c-48f3-93a2-a0983eba1108}']
 
       function SetPMPHost(pPMPHost: IMFPMPHostApp): HResult; stdcall;
+      // Sets a pointer to the IMFPMPHostApp interface allowing a media source to
+      // create objects in the PMP process.
 
   end;
   {$EXTERNALSYM IMFPMPClientApp}
@@ -6481,7 +6517,7 @@ type
     /// result in all the existing control defaults being cleared.
     function SaveDefaults(configurations: IMFCameraControlDefaultsCollection): HResult; stdcall;
 
-    /// Shutdown the configuration manager.  Subsequent calls to
+    /// Shutdown the configuration manager. Subsequent calls to
     /// LoadDefaults/SaveDefaults after the
     /// IMFCameraConfigurationManager is shutdown will result in
     /// MF_E_SHUTDOWN error.
@@ -6666,128 +6702,127 @@ const
 
 ///// INTERNAL FUNCTIONS ///////////////////////////////////////////////////////
 
-  function MAKE_MFPROTECTIONDATA_DISABLE(const Disable: BOOL): DWORD; inline;
-    begin
-      if (Disable = True) then
-        Result:= $00000001
-      else
-        Result:= 0;
-    end;
+function MAKE_MFPROTECTIONDATA_DISABLE(const Disable: BOOL): DWORD; inline;
+begin
+  if (Disable = True) then
+    Result:= $00000001
+  else
+    Result := 0;
+end;
 
 
-  function EXTRACT_MFPROTECTIONDATA_DISABLE_ON(Data: DWORD): BOOL; inline;
-    begin
-      Result:= BOOL((Data and $00000001) <> 0);
-    end;
+function EXTRACT_MFPROTECTIONDATA_DISABLE_ON(Data: DWORD): BOOL; inline;
+begin
+  Result := BOOL((Data and $00000001) <> 0);
+end;
 
 
-  function EXTRACT_MFPROTECTIONDATA_DISABLE_RESERVED(Data: DWORD): DWORD; inline;
-    begin
-      Result:= ((Data and $FFFFFFFE) shr 1);
-    end;
+function EXTRACT_MFPROTECTIONDATA_DISABLE_RESERVED(Data: DWORD): DWORD; inline;
+begin
+  Result := ((Data and $FFFFFFFE) shr 1);
+end;
 
 
-  function MAKE_MFPROTECTIONDATA_CONSTRICTAUDIO(Level: DWORD): DWORD; inline;
-    begin
-      Result:= Level;
-    end;
+function MAKE_MFPROTECTIONDATA_CONSTRICTAUDIO(Level: DWORD): DWORD; inline;
+begin
+  Result := Level;
+end;
 
 
-  function EXTRACT_MFPROTECTIONDATA_CONSTRICTAUDIO_LEVEL(Data: DWORD): DWORD; inline;
-    begin
-      Result:= Data and $000000FF;
-    end;
+function EXTRACT_MFPROTECTIONDATA_CONSTRICTAUDIO_LEVEL(Data: DWORD): DWORD; inline;
+begin
+  Result := Data and $000000FF;
+end;
 
 
-  function EXTRACT_MFPROTECTIONDATA_CONSTRICTAUDIO_RESERVED(Data: DWORD): DWORD; inline;
-    begin
-      Result:= (Data and $FFFFFF00) shr 8;
-    end;
+function EXTRACT_MFPROTECTIONDATA_CONSTRICTAUDIO_RESERVED(Data: DWORD): DWORD; inline;
+begin
+  Result := (Data and $FFFFFF00) shr 8;
+end;
 
 
-  function MAKE_MFPROTECTIONDATA_TRUSTEDAUDIODRIVERS(TestCertificateEnable: BOOL;
+function MAKE_MFPROTECTIONDATA_TRUSTEDAUDIODRIVERS(TestCertificateEnable: BOOL;
                                                      DigitalOutputDisable: BOOL;
                                                      DrmLevel: DWORD): DWORD; inline;
-    begin
-      Result:= 0;   //init
+begin
+  Result := 0;   //init
 
-      if (TestCertificateEnable = True) then
-        Result:= $20000;
+  if (TestCertificateEnable = True) then
+    Result := $20000;
 
-      if (DigitalOutputDisable = True) then
-        Result:= Result or $10000;
-      //final
-      Result:= Result or DrmLevel;
+  if (DigitalOutputDisable = True) then
+    Result := Result or $10000;
+  //final
+  Result := Result or DrmLevel;
+end;
 
-    end;
 
-
-  function MAKE_MFPROTECTIONDATA_TRUSTEDAUDIODRIVERS2(TestCertificateEnable: BOOL;
+function MAKE_MFPROTECTIONDATA_TRUSTEDAUDIODRIVERS2(TestCertificateEnable: BOOL;
                                                       DigitalOutputDisable: BOOL;
                                                       CopyOK: BOOL;
                                                       DrmLevel: DWORD): DWORD; inline;
-    begin
-      Result:= 0; //init
+begin
+  Result := 0; // init
 
-      if (TestCertificateEnable = True) then
-        Result:= $20000;
+  if (TestCertificateEnable = True) then
+    Result:= $20000;
 
-      if (DigitalOutputDisable = True) then
-        Result:= Result or $10000;
+  if (DigitalOutputDisable = True) then
+    Result:= Result or $10000;
 
-      if (CopyOK = True) then
-        Result:= Result or $40000;
+  if (CopyOK = True) then
+    Result:= Result or $40000;
 
-        //final
-      Result:= Result or DrmLevel;
-    end;
-
-
-  function EXTRACT_MFPROTECTIONDATA_TRUSTEDAUDIODRIVERS_DRMLEVEL(Data: DWORD): DWORD; inline;
-    begin
-      Result:= (Data and $0000FFFF);
-    end;
+  // final
+  Result := Result or DrmLevel;
+end;
 
 
-  function EXTRACT_MFPROTECTIONDATA_TRUSTEDAUDIODRIVERS_DIGITALOUTPUTDISABLE(Data: DWORD): BOOL; inline;
-    begin
-      Result:= BOOL(0 <> (Data and $10000));
-    end;
+function EXTRACT_MFPROTECTIONDATA_TRUSTEDAUDIODRIVERS_DRMLEVEL(Data: DWORD): DWORD; inline;
+begin
+  Result := (Data and $0000FFFF);
+end;
 
 
-  function EXTRACT_MFPROTECTIONDATA_TRUSTEDAUDIODRIVERS_TESTCERTIFICATEENABLE(Data: DWORD): BOOL; inline;
-    begin
-      Result:= BOOL(0 <> (Data and $20000));
-    end;
+function EXTRACT_MFPROTECTIONDATA_TRUSTEDAUDIODRIVERS_DIGITALOUTPUTDISABLE(Data: DWORD): BOOL; inline;
+begin
+  Result := BOOL(0 <> (Data and $10000));
+end;
 
 
-  function EXTRACT_MFPROTECTIONDATA_TRUSTEDAUDIODRIVERS_COPYOK(Data: DWORD): BOOL; inline;
-    begin
-      Result:= BOOL(0 <> (Data and $40000));
-    end;
+function EXTRACT_MFPROTECTIONDATA_TRUSTEDAUDIODRIVERS_TESTCERTIFICATEENABLE(Data: DWORD): BOOL; inline;
+begin
+  Result := BOOL(0 <> (Data and $20000));
+end;
 
 
-  function EXTRACT_MFPROTECTIONDATA_TRUSTEDAUDIODRIVERS_RESERVED(Data: DWORD): DWORD; inline;
-    begin
-      Result:= ((Data and $FFF80000) shr 19);
-    end;
+function EXTRACT_MFPROTECTIONDATA_TRUSTEDAUDIODRIVERS_COPYOK(Data: DWORD): BOOL; inline;
+begin
+  Result := BOOL(0 <> (Data and $40000));
+end;
 
-  // Else
 
-  function _EXTRACT_MFPROTECTIONDATA_TRUSTEDAUDIODRIVERS_RESERVED(Data: DWORD): DWORD; inline;
-    begin
-      Result:= ((Data and $FFF80000) shr 18);
-    end;
+function EXTRACT_MFPROTECTIONDATA_TRUSTEDAUDIODRIVERS_RESERVED(Data: DWORD): DWORD; inline;
+begin
+  Result := ((Data and $FFF80000) shr 19);
+end;
+
+// Else
+
+function _EXTRACT_MFPROTECTIONDATA_TRUSTEDAUDIODRIVERS_RESERVED(Data: DWORD): DWORD; inline;
+begin
+  Result := ((Data and $FFF80000) shr 18);
+end;
 
 
 procedure MFCLOCK_PROPERTIES.Copy(out destProps: MFCLOCK_PROPERTIES);
-  begin
-    destProps.qwCorrelationRate := qwCorrelationRate;
-    destProps.guidClockId := guidClockId;
-    destProps.dwClockFlags := dwClockFlags;
-    destProps.qwClockFrequency := qwClockFrequency;
-    destProps.dwClockTolerance := dwClockTolerance;
-    destProps.dwClockJitter := dwClockJitter;
-  end;
+begin
+  destProps.qwCorrelationRate := qwCorrelationRate;
+  destProps.guidClockId := guidClockId;
+  destProps.dwClockFlags := dwClockFlags;
+  destProps.qwClockFrequency := qwClockFrequency;
+  destProps.dwClockTolerance := dwClockTolerance;
+  destProps.dwClockJitter := dwClockJitter;
+end;
 
 end.

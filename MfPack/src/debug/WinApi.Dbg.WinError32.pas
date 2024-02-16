@@ -1,4 +1,3 @@
-// FactoryX
 //
 // Copyright: © FactoryX. All rights reserved.
 //
@@ -10,7 +9,7 @@
 // Release date: 09-07-2023
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Returns code definitions of the WinError32 errors.
 //
 // Organisation: FactoryX
@@ -21,13 +20,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 09/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 31/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -101,7 +100,6 @@ begin
 
   HeaderFile := 'winerror.h';
   Reference[0] := 'https://learn.microsoft.com/en-us/windows/win32/debug/system-error-codes';
-  Reference[1] := 'https://learn.microsoft.com/en-us/windows/win32/api/winerror';
 
   case aHResult of
     LongInt($00000000)  : begin

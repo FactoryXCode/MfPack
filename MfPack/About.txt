@@ -1,4 +1,4 @@
-MfPack X 3.1.5
+MfPack X 3.1.6
 
 /* Recommended project settings */
 
@@ -62,6 +62,10 @@ MFPack is the Delphi version of Microsoft Media Foundation, Core Audio etc. for 
    - DXGI API
    - DXVA API
    - XAudio2 API
+   - D3D9 API
+   - D3D11 API
+   - D3D12 API
+
 
 /* Windows Media The full Windows Media Api. */ 
    This API has been added to MfPack to support the Core Audio API. 

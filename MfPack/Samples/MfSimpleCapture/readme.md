@@ -1,5 +1,5 @@
 # MFSimpleCapture
-Version: X 3.1.5
+Version: X 3.1.6
 
 
 NOTES: 

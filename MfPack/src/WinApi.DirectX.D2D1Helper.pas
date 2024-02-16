@@ -10,7 +10,7 @@
 // Release date: 29-03-2019
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Helper files over the D2D interfaces and APIs.
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Because Delphi does not accept complex types (like functions) as default values,
@@ -32,7 +32,7 @@
 //
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

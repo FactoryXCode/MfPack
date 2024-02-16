@@ -10,7 +10,7 @@
 // Release date: 17-10-2015
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: CodecAPI Definitions.
 //
 // Organisation: FactoryX
@@ -21,14 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //          Maybe we need the Macro's later (see the original headerfile.)
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -1526,20 +1526,20 @@ const
   {$EXTERNALSYM CODECAPI_AVEncMPACodingMode}
 
   // AVEncMPACopyright (BOOL) - default state to encode into the stream (may be overridden by input)
-  // 1 (true)  - copyright protected
-  // 0 (false) - not copyright protected
+  // 1 (True)  - copyright protected
+  // 0 (False) - not copyright protected
   CODECAPI_AVEncMPACopyright :  TGUID = '{a6ae762a-d0a9-4454-b8ef-f2dbeefdd3bd}';
   {$EXTERNALSYM CODECAPI_AVEncMPACopyright}
 
   // AVEncMPAOriginalBitstream (BOOL) - default value to encode into the stream (may be overridden by input)
-  // 1 (true)  - for original bitstream
-  // 0 (false) - for copy bitstream
+  // 1 (True)  - for original bitstream
+  // 0 (False) - for copy bitstream
   CODECAPI_AVEncMPAOriginalBitstream :  TGUID = '{3cfb7855-9cc9-47ff-b829-b36786c92346}';
   {$EXTERNALSYM CODECAPI_AVEncMPAOriginalBitstream}
 
   // AVEncMPAEnableRedundancyProtection (BOOL)
-  // 1 (true)  -  Redundancy should be added to facilitate error detection and concealment (CRC)
-  // 0 (false) -  No redundancy should be added
+  // 1 (True)  -  Redundancy should be added to facilitate error detection and concealment (CRC)
+  // 0 (False) -  No redundancy should be added
   CODECAPI_AVEncMPAEnableRedundancyProtection :  TGUID = '{5e54b09e-b2e7-4973-a89b-0b3650a3beda}';
   {$EXTERNALSYM CODECAPI_AVEncMPAEnableRedundancyProtection}
 

@@ -4,13 +4,6 @@ uses
   {$IFDEF FASTMM}
   FastMM4,
   {$ENDIF}
-  {$IFDEF madExcept}
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
-  {$ENDIF}
   Vcl.Forms,
   frmMain in 'frmMain.pas' {Form1},
   Capture in 'Capture.pas';

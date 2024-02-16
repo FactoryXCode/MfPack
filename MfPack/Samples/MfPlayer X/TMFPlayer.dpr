@@ -4,13 +4,6 @@ uses
   {$IFDEF FASTMM}
   FastMM4,
   {$ENDIF}
-  {$IFDEF madExcept}
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
-  {$ENDIF}
 
   Vcl.Forms,
   frmMfPlayer in 'frmMfPlayer.pas' {frm_MfPlayer},

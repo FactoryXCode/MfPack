@@ -10,7 +10,7 @@
 // Release date: 04-06-2012
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Defines property keys for the Plug and Play Device Property API.
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -36,7 +36,7 @@
 //          Copied Jim's version replaced "DEFINE_DEVPROPKEY(DEVPKEY_" with "PKEY_")
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

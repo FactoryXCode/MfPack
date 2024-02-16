@@ -10,7 +10,7 @@
 // Release date: 01-05-2019
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Error code definitions for the Win32 API functions.
 //
 // Organisation: FactoryX
@@ -21,14 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: When using MfPack, use this unit and not the outdated
 //          Error code definitions from Embarcadero Delphi <= ver 10.4
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -21163,7 +21163,7 @@ const
 //
 // MessageText:
 //
-// The compare response was false.
+// The compare response was False.
 //
   ERROR_DS_COMPARE_FALSE              = 8229;
   {$EXTERNALSYM ERROR_DS_COMPARE_FALSE}
@@ -21173,7 +21173,7 @@ const
 //
 // MessageText:
 //
-// The compare response was true.
+// The compare response was True.
 //
   ERROR_DS_COMPARE_TRUE               = 8230;
   {$EXTERNALSYM ERROR_DS_COMPARE_TRUE}
@@ -39710,7 +39710,7 @@ const
 //
 // MessageText:
 //
-// The system function, AccessCheck, returned false
+// The system function, AccessCheck, returned False
 //
   CO_E_ACCESSCHECKFAILED              = HRESULT($8001012A);
   {$EXTERNALSYM CO_E_ACCESSCHECKFAILED}

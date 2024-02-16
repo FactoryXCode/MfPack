@@ -1,4 +1,4 @@
-MfPack X 3.1.5
+MfPack X 3.1.6
 
 /* Recommended project settings */
 

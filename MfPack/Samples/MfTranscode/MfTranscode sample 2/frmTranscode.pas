@@ -10,24 +10,24 @@
 // Release date: 24-06-2023
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: This is a modified translation of the Microsoft Transcoder example.
 //              The original is a commandline app.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX), Peter (OzShips), Ramyses De Macedo Rodrigues.
+// Intiator(s): Tony (maXcomX), Peter (OzShips).
 // Contributor(s): Tony Kalf (maXcomX)
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -90,9 +90,12 @@ uses
   WinApi.MediaFoundationApi.MfUtils,
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfIdl,
+  {MfPack}
+  WinApi.MfPack.VideoStandardsCheat,
   {Project}
   Transcoder,
   dlgAudioFormats,
+  dlgVideoFormats,
   Common;
 
 type
@@ -129,7 +132,6 @@ type
     procedure butExecuteClick(Sender: TObject);
     procedure butStopClick(Sender: TObject);
     procedure mnuExitClick(Sender: TObject);
-    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormCreate(Sender: TObject);
     procedure butPlayClick(Sender: TObject);
     // We could use the TLinkLabel, but this works as well.
@@ -138,6 +140,7 @@ type
     procedure lblChooseTargetfileMouseMove(Sender: TObject; Shift: TShiftState;
       X, Y: Integer);
     procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    procedure FormDestroy(Sender: TObject);
     //
 
   private
@@ -151,11 +154,15 @@ type
     FStopwatch: TStopWatch;
     bElapsedSet: Boolean;
     iSelectedAudioFormat: Integer;
+    iSelectedVideoResolution: Integer;
+    iSelectedVideoFrameRate: Integer;
     iSelectedContainerFmt: Integer;
 
     procedure Start();
     procedure Reset(const hr: HResult);
     procedure ResetFormats();
+
+    // Message handlers.
     procedure WMProgressEvent(var Msg: TMessage); message WM_PROGRESSNOTIFY;
     procedure WMStatusEvent(var Msg: TMessage); message WM_STATUSNOTIFY;
 
@@ -173,6 +180,9 @@ implementation
 
 procedure TfrmTranscoder.mnuTargetfileClick(Sender: TObject);
 begin
+
+  // Create the transcoder object
+  FTranscoder := TTranscoder.Create(Self.Handle);
 
   dlgTarget.FileName := ExtractFileName(sSourceFile);
   dlgTarget.FilterIndex := 1;
@@ -301,6 +311,24 @@ begin
           Exit;
         end;
 
+      // Pass the sourcefilename to the videoformats dialog, so we can get the media properties.
+      VideoFormatDlg.aFileName := sSourceFile;
+
+      // Show the Video Format dialog to select the output encoding parameters of the choosen format.
+      if (VideoFormatDlg.ShowModal = mrOk) then
+        begin
+          iSelectedVideoResolution := VideoFormatDlg.iSelectedResolution;
+          iSelectedVideoFrameRate := VideoFormatDlg.iSelectedFrameRate;
+        end
+      else
+        begin
+          // User canceled device selection.
+          sSourceFile := '';
+          sTargetFile := '';
+          ResetFormats();
+          Exit;
+        end;
+
       stxtTargetFile.Text := dlgTarget.FileName;
       sTargetFile := PWideChar(dlgTarget.FileName);
       butExecute.Enabled := True;
@@ -326,8 +354,7 @@ var
   hr: HResult;
 
 begin
-  // Create the transcoder object
-  FTranscoder := TTranscoder.Create(Handle);
+
   // Create a stopwatch to calculate the estimated rendering time.
   FStopwatch := TStopWatch.Create();
   bElapsedSet := False;
@@ -364,8 +391,9 @@ begin
   butStop.Enabled := True;
   butExecute.Enabled := False;
 
-  // Start the stopwatch
+  // Start the stopwatch.
   FStopwatch.Start();
+
   lblEstFinish.Caption := 'Calculating estimated time, one moment please...';
 
   // Transcode and generate the output file.
@@ -408,7 +436,6 @@ begin
   gAudioMediaFmt := GUID_NULL;
   gVideoMediaFmt := GUID_NULL;
   gContainerFormat := GUID_NULL;
-  iSelectedAudioFormat := -1;
   butPlay.Enabled := False;
   butExecute.Enabled := False;
   butStop.Enabled := False;
@@ -423,6 +450,10 @@ begin
   lblVideo.Caption := '-';
   lblAudio.Caption := '-';
   ProgressBar.Position := 0;
+  iSelectedAudioFormat := -1;
+  iSelectedVideoResolution := -1;
+  iSelectedVideoFrameRate := -1;
+  iSelectedContainerFmt := -1;
 end;
 
 
@@ -456,25 +487,13 @@ begin
                      nil,
                      nil,
                      SW_SHOWNORMAL);
-      end
+      end;
 end;
 
 
 procedure TfrmTranscoder.mnuExitClick(Sender: TObject);
 begin
   Close();
-end;
-
-
-procedure TfrmTranscoder.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-begin
-  CanClose := False;
-  // Terminate a running Transcode process.
-  if Assigned(FTranscoder) then
-      FTranscoder.Stop();
-  sSourceFile := '';   // Audio source file name
-  sTargetFile := '';
-  CanClose := True;
 end;
 
 
@@ -489,6 +508,17 @@ begin
   dlgSource.Filter := VIDEO_FILE_FILTER + '|' +
                       AUDIO_FILE_FILTER + '|' +
                       ALL_FILE_FILTER;
+end;
+
+
+procedure TfrmTranscoder.FormDestroy(Sender: TObject);
+begin
+  // Terminate a running Transcode process.
+  if Assigned(FTranscoder) then
+    begin
+      FTranscoder.Stop();
+      FreeAndNil(FTranscoder);
+    end;
 end;
 
 
@@ -522,7 +552,7 @@ begin
   butExecute.Enabled := False;
   butStop.Enabled := False;
 
-  if dlgSource.execute then
+  if dlgSource.Execute then
     begin
       if FileExists(dlgSource.Filename) then
         begin
@@ -549,7 +579,7 @@ begin
       CurrPosition := Round((100 * FTranscoder.Position) / FTranscoder.Duration);
 
       // We wait until we reached 1st 1% to calculate the estimated rendering end time
-      if (CurrPosition = 1) and (bElapsedSet = False) then  // calculate 1st 1%
+      if (CurrPosition = 2) and (bElapsedSet = False) then  // calculate 1st 2%
         begin
           bElapsedSet := True;
           FStopwatch.Stop;
@@ -558,6 +588,7 @@ begin
 
       ProgressBar.Position := CurrPosition;
       lblProgress.Caption := Format('Processed: %d%%', [CurrPosition]);
+      HandleMessages(GetCurrentThread());
     end;
 end;
 
@@ -566,6 +597,7 @@ procedure TfrmTranscoder.WMStatusEvent(var Msg: TMessage);
 begin
   if (Msg.WParam = 0) then
     sbMsg.SimpleText := LPCWSTR(Msg.LParam);
+  HandleMessages(GetCurrentThread());
 end;
 
 end.

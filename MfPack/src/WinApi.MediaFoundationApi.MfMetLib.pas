@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: MfPack Methods Library.
 //              This unit contains basic Media Foundation methods needed to play,
 //              record, encode, decode, etc.
@@ -28,15 +28,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 25/08/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
-// 29/09/2023                     Added new video functions.
-// 24/11/2023 Tony                Added function CreateTranscodeProfile.
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -276,7 +274,7 @@ type
     video_FrameRateDenominator: UINT32;   // The lower 32 bits of the MF_MT_FRAME_RATE attribute value
 
     // NOTE:
-    //  To calculate the pixel aspect ratio use this formula: Double(video_PixelAspectRatioNumerator / video_PixelAspectRatioDenominator)
+    //  To calculate the pixel aspect ratio use this formula: video_PixelAspectRatioNumerator / video_PixelAspectRatioDenominator.
     video_PixelAspectRatioNumerator: UINT32;   // The upper 32 bits of the MF_MT_PIXEL_ASPECT_RATIO attribute value
     video_PixelAspectRatioDenominator: UINT32; // The lower 32 bits of the MF_MT_PIXEL_ASPECT_RATIO attribute value
 
@@ -703,7 +701,7 @@ type
                         bAudio: Boolean;
                         var aGuidArray: TClsidArray): Hresult;
 
-  // Create an encoder found with function ListEncoders
+  // Create an encoder found with function ListEncoders.
   function CreateEncoderFromClsid(mftCategory: CLSID;
                                   out pEncoder: IMFTransform): HResult;
 
@@ -5755,8 +5753,8 @@ begin
   if (FAILED(hr)) then
     goto done;
 
-  hr := CopyAttribute(pPhotoMediaType,
-                      mfPhotoMediaType,
+  hr := CopyAttribute(mfPhotoMediaType,
+                      pPhotoMediaType,
                       MF_MT_FRAME_SIZE);
   if (FAILED(hr)) then
     goto done;

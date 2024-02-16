@@ -10,7 +10,7 @@
 // Release date: 29-07-2012
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Generic converted Windows (c/cpp) types for Win32 / Win64 compatibility
 //              used by DirectX, Media Foundation, Core Audio etc.
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -271,7 +271,7 @@ type
     Hyper = System.Int64;  // Signed or...
     {$EXTERNALSYM Hyper}
   {$ELSE}
-    Hyper = System.Uint64; // unsigned 64 bit
+    Hyper = System.UInt64; // unsigned 64 bit
     {$EXTERNALSYM Hyper}
   {$ENDIF}
 {$ENDIF}
@@ -1938,7 +1938,7 @@ const
   {$EXTERNALSYM DECIMAL_NEG}
 {$ENDIF}
 
-  //procedure DECIMAL_SETZERO(var dec: DECIMAL); Moved to MfpUtils.
+  //procedure DECIMAL_SETZERO(var dec: DECIMAL); Moved to MfUtils.
 
 
 type
@@ -2094,7 +2094,7 @@ const
     VT_BSTR = 8;                 // A string.
     VT_DISPATCH = 9;             // An IDispatch pointer.
     VT_ERROR = 10;               // An SCODE value.
-    VT_BOOL = 11;                // A Boolean value. True is -1 and false is 0.
+    VT_BOOL = 11;                // A Boolean value. True is -1 and False is 0.
     VT_VARIANT = 12;             // A variant pointer.
     VT_UNKNOWN = 13;             // An IUnknown pointer.
     VT_DECIMAL = 14;             // A 16-byte fixed-pointer value.
@@ -2396,10 +2396,10 @@ type
 {$IFDEF MFP_ULONG64}
   PULONG64 = ^ULONG64;
   {$IF COMPILERVERSION >= 11.0}
-    ULONG64 = System.Uint64;
+    ULONG64 = System.UInt64;
     {$EXTERNALSYM ULONG64}
   {$ELSE}
-    ULONG64 = System.int64;
+    ULONG64 = System.Int64;
     {$EXTERNALSYM ULONG64}
   {$ENDIF}
 {$ENDIF}
@@ -2447,7 +2447,7 @@ type
 
 {$IFDEF MFP_TOPOID}
   {$IF COMPILERVERSION >= 11.0}
-    TOPOID = System.Uint64;
+    TOPOID = System.UInt64;
     {$EXTERNALSYM TOPOID}
   {$ELSE}
     TOPOID = System.Int64;

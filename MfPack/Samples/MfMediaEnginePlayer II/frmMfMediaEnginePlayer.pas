@@ -9,7 +9,7 @@
 // Release date: 24-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.6
 // Description: This player version is based on the IMFMediaEngine and
 //              the TimedText interfaces for subtitles.
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -198,7 +198,7 @@ uses
 procedure TFeMediaEnginePlayer.CreateSubTitleLayer(bShowCustomText: Boolean);
 begin
   // Create the FloatingForm
-  if (FloatingForm = Nil) then
+  if (FloatingForm = nil) then
     FloatingForm:= TFloatingForm.Create(Self);
 
   // Get it's handle

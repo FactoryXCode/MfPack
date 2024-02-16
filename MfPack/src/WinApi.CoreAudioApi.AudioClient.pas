@@ -10,7 +10,7 @@
 // Release date: 04-05-2012
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: AudioClient API interface definition.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 31/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or later.
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -277,7 +277,7 @@ type
                         hnsBufferDuration: REFERENCE_TIME;
                         hnsPeriodicity: REFERENCE_TIME;
                         pFormat: PWAVEFORMATEX;
-                        {optional, can be Nil or a pointer to GUID_NULL} const AudioSessionGuid: LPCGUID): HResult; stdcall;
+                        {optional, can be nil or a pointer to GUID_NULL} const AudioSessionGuid: LPCGUID): HResult; stdcall;
     // Description:
     //
     //  Initializes the audio stream by creating a connection to the Windows Audio System (WAS)
@@ -385,7 +385,7 @@ type
     //  data in the format returned by IsFormatSupported before calling Initialize. Basically, the
     //  format the application has to support is either the source format or a "closest match" format
     //  returned by IsFormatSupported. The Assumption that the mix format returned by GetMixFormat
-    //  can be streamed is not always true. To stream the closest match to the mix format, call
+    //  can be streamed is not always True. To stream the closest match to the mix format, call
     //  first GetMixFormat followed by IsFormatSupported passing in the mix format. If streaming the
     //  mix format is supported by the system effect, IsFormatSupported will return S_OK.
     //

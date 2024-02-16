@@ -9,24 +9,24 @@
 // Release date: 24-06-2023
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Contains common helpers.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX), Peter (OzShips), Ramyses De Macedo Rodrigues.
+// Intiator(s): Tony (maXcomX), Peter (OzShips).
 // Contributor(s): Tony Kalf (maXcomX)
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -75,7 +75,6 @@ interface
     {$ENDIF}
     System.SysUtils;
 
-
 const
   // File filters                                                   filter index
   VIDEO_FILE_FILTER = 'Audio Video Interleave|*.avi|' +             // 1
@@ -91,6 +90,10 @@ const
 
   ALL_FILE_FILTER   = 'All Files|*.*';                              // 10  Source File Dialog only
 
+// ITEM                                  URL
+// MF Supported Media Formats            https://github.com/MicrosoftDocs/win32/blob/docs/desktop-src/medfound/supported-media-formats-in-media-foundation.md
+//
+
   {$IFDEF SAVE_DEBUG_REPORT}
   var FMediaTypeDebug: TMediaTypeDebug;
   {$ENDIF}
@@ -99,6 +102,7 @@ const
   // shows a messagedialog at runtime.
   procedure DebugMsg(pErrMsg: string;
                      pHr: HResult);
+
 
 implementation
 
@@ -121,21 +125,14 @@ begin
 end;
 
 
-Initialization
+initialization
 
   {$IFDEF SAVE_DEBUG_REPORT}
   FMediaTypeDebug := TMediaTypeDebug.Create();
   {$ENDIF}
 
-Finalization
+finalization
   {$IFDEF SAVE_DEBUG_REPORT}
   FreeAndNil(FMediaTypeDebug);
   {$ENDIF}
-
-// ITEM                                  URL
-// MF Supported Media Formats            https://github.com/MicrosoftDocs/win32/blob/docs/desktop-src/medfound/supported-media-formats-in-media-foundation.md
-//
-
-
-
 end.

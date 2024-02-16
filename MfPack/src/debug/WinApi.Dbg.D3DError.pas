@@ -9,7 +9,7 @@
 // Release date: 09-07-2023
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Returns code definitions of the D3D errors.
 //
 // Organisation: FactoryX
@@ -20,13 +20,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 09/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 31/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -65,6 +65,7 @@ interface
 uses
   {WinApi}
   WinApi.Windows,
+  WinApi.WinError,
   {WinApiDebug}
   WinApi.Dbg.WinHResultTools;
 
@@ -129,6 +130,14 @@ uses
   System.StrUtils,
   System.SysUtils;
 
+const
+  csNoDescriptionFound = 'Unknown HResult description.' + CRLF +
+                         'Try https://learn.microsoft.com/en-us/windows/win32/api/winerror/ to find out.';
+  csInfoHeader1 = 'Source of this result value:' + CRLF +
+                  '======================' + CRLF + CRLF;
+  csInfoHeader2 = 'Returned: ';
+
+
 function GetD3DErrorDescription(const aHResult: HResult;
                                 out hrStr: string;
                                 out hrDescr: string;
@@ -144,7 +153,7 @@ begin
   HeaderFile := 'd3d9.h';
   Reference[0] := 'https://learn.microsoft.com/en-us/windows/win32/direct3d9/d3derr';
   Reference[1] := 'https://learn.microsoft.com/en-us/windows/win32/direct3d9/driver-internal-errors';
-  Reference[2] := 'https://learn.microsoft.com/en-us/windows/win32/api/winerror';
+
 
   case aHResult of
     D3D_OK:                               begin

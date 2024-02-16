@@ -10,7 +10,7 @@
 // Release date: 13-08-2022
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Microsoft DirectX D3D11 used by Media Foundation.
 //              You can use Direct3D 11 graphics to create 3-D graphics for games,
 //              scientific and desktop apps.
@@ -24,14 +24,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
-// 31/08/2022                     Updated to latest D3D11 SDK 10.0.22621.0 version.
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Embarcadero's <= Delphi 10.4 D3D11.pas is outdated!
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

@@ -10,7 +10,7 @@
 // Release date: 27-08-2022
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Media Foundation basic control-layer interfaces.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Embarcadero's <= Delphi 10.4 D3D12 is outdated!
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -2342,7 +2342,7 @@ type
   PD3D12_RENDER_TARGET_BLEND_DESC = ^D3D12_RENDER_TARGET_BLEND_DESC;
   D3D12_RENDER_TARGET_BLEND_DESC = record
     BlendEnable: BOOL;
-    LogicOpEnable: BOOL;  // LogicOpEnable and BlendEnable can't both be true
+    LogicOpEnable: BOOL;  // LogicOpEnable and BlendEnable can't both be True
     SrcBlend: D3D12_BLEND;
     DestBlend: D3D12_BLEND;
     BlendOp: D3D12_BLEND_OP;

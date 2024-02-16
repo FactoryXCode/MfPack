@@ -10,7 +10,7 @@
 // Release date: 16-09-2020
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Definitions for the common structures used in WinApi.Mpeg2Data.pas
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -244,25 +244,25 @@ type
 
   PDSMCC_FILTER_OPTIONS = ^DSMCC_FILTER_OPTIONS;
   DSMCC_FILTER_OPTIONS = record
-    fSpecifyProtocol: BOOL;          // If true, Protocol should be set to desired value
+    fSpecifyProtocol: BOOL;          // If True, Protocol should be set to desired value
     Protocol: Byte;
-    fSpecifyType: BOOL;              // If true, Type should be set to desired value
+    fSpecifyType: BOOL;              // If True, Type should be set to desired value
     _Type: Byte;
-    fSpecifyMessageId: BOOL;         // If true, MessageId should be set to desired value
+    fSpecifyMessageId: BOOL;         // If True, MessageId should be set to desired value
     MessageId: WORD;
-    fSpecifyTransactionId: BOOL;     // If true, TransactionId (or DownloadId for DDB msgs) should be set to desired value
-    fUseTrxIdMessageIdMask: BOOL;    // If false, TransactionId is filtered as is.
-                                     // If true, TransactionId is masked to look
+    fSpecifyTransactionId: BOOL;     // If True, TransactionId (or DownloadId for DDB msgs) should be set to desired value
+    fUseTrxIdMessageIdMask: BOOL;    // If False, TransactionId is filtered as is.
+                                     // If True, TransactionId is masked to look
                                      // for any version of message with associated
                                      // message identifier. See DVB - Data
                                      // Broadcasting Guidlines 4.6.5. (Assignment
                                      // and use of transactionId values).
     TransactionId: DWORD;
-    fSpecifyModuleVersion: BOOL;     // If true, ModuleVersion should be set to the desired value
+    fSpecifyModuleVersion: BOOL;     // If True, ModuleVersion should be set to the desired value
     ModuleVersion: Byte;
-    fSpecifyBlockNumber: BOOL;       // If true, BlockNumber should be set to desired value
+    fSpecifyBlockNumber: BOOL;       // If True, BlockNumber should be set to desired value
     BlockNumber: WORD;
-    fGetModuleCall: BOOL;            // If true, NumberOfBlocksInModule should be set
+    fGetModuleCall: BOOL;            // If True, NumberOfBlocksInModule should be set
     NumberOfBlocksInModule: WORD;
   end; // 45 BYTES
   {$EXTERNALSYM DSMCC_FILTER_OPTIONS}
@@ -276,7 +276,7 @@ type
 
   PATSC_FILTER_OPTIONS = ^ATSC_FILTER_OPTIONS;
   ATSC_FILTER_OPTIONS = record
-    fSpecifyEtmId: BOOL;            // If true, EtmId should be set to desired value
+    fSpecifyEtmId: BOOL;            // If True, EtmId should be set to desired value
     EtmId: DWORD;
   end; // 8 BYTES
   {$EXTERNALSYM ATSC_FILTER_OPTIONS}
@@ -290,7 +290,7 @@ type
 
   PDVB_EIT_FILTER_OPTIONS = ^DVB_EIT_FILTER_OPTIONS;
   DVB_EIT_FILTER_OPTIONS = record
-    fSpecifySegment: BOOL;          // If true, bSegment should be set to desired value
+    fSpecifySegment: BOOL;          // If True, bSegment should be set to desired value
     bSegment: Byte;
   end; // 5 BYTES
   {$EXTERNALSYM DVB_EIT_FILTER_OPTIONS}
@@ -307,22 +307,22 @@ type
   MPEG2_FILTER = record
     bVersionNumber: Byte;             // Must be set to 1 or more to match filter definition
     wFilterSize: WORD;                // Size of total filter structure. Version 1 filter is 73 bytes.
-    fUseRawFilteringBits: BOOL;       // If true, Filter and Mask fields should be set to desired value, all other
+    fUseRawFilteringBits: BOOL;       // If True, Filter and Mask fields should be set to desired value, all other
                                       // fields with be ignored.
     Filter: array[0..15] of Byte;     // Bits with values to compare against for a match.
     Mask: array[0..15] of Byte;       // Bits set to 0 are bits that are compared to those in the filter, those
                                       // bits set to 1 are ignored.
-    fSpecifyTableIdExtension: BOOL;   // If true, TableIdExtension should be set to desired value (false = don't care)
+    fSpecifyTableIdExtension: BOOL;   // If True, TableIdExtension should be set to desired value (False = don't care)
     TableIdExtension: WORD;
-    fSpecifyVersion: BOOL;            // If true, Version should be set to desired value (false = don't care)
+    fSpecifyVersion: BOOL;            // If True, Version should be set to desired value (False = don't care)
     Version: Byte;
-    fSpecifySectionNumber: BOOL;      // If true, SectionNumber should be set to desired value (false = don't care)
+    fSpecifySectionNumber: BOOL;      // If True, SectionNumber should be set to desired value (False = don't care)
     SectionNumber: Byte;
-    fSpecifyCurrentNext: BOOL;        // If true, fNext should be set to desired value (false = don't care)
-    fNext: BOOL;                      // If true, next table is queried. Else, current
-    fSpecifyDsmccOptions: BOOL;       // If true, Dsmcc should be set with desired filter options
+    fSpecifyCurrentNext: BOOL;        // If True, fNext should be set to desired value (False = don't care)
+    fNext: BOOL;                      // If True, next table is queried. Else, current
+    fSpecifyDsmccOptions: BOOL;       // If True, Dsmcc should be set with desired filter options
     Dsmcc: DSMCC_FILTER_OPTIONS;
-    fSpecifyAtscOptions: BOOL;        // If true, Atsc should be set with desired filter options
+    fSpecifyAtscOptions: BOOL;        // If True, Atsc should be set with desired filter options
     Atsc: ATSC_FILTER_OPTIONS;
   end; // 124 BYTES
   {$EXTERNALSYM MPEG2_FILTER}
@@ -353,8 +353,8 @@ type
             fSpecifyAtscOptions: BOOL;
             Atsc: ATSC_FILTER_OPTIONS;
 
-            fSpecifyDvbEitOptions: BOOL;    // Set true for DVB/ISDB EIT. The table is handled segment basis.
-                                            // If true, DvbEit should be set with desired filter options
+            fSpecifyDvbEitOptions: BOOL;    // Set True for DVB/ISDB EIT. The table is handled segment basis.
+                                            // If True, DvbEit should be set with desired filter options
             DvbEit: DVB_EIT_FILTER_OPTIONS
             // Version 2 - 133 bytes
             );

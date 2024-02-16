@@ -1,5 +1,5 @@
 # HResult Lookup Tools (WinApi.Dbg.WinHResultTools.pas)
-Version 3.1.5 
+Version 3.1.6 
 
 The application can be used to determine HResult or Error codes returned by the Windows OS,
 featuring a detailed build in "HResult Lookup tool", the "Windows System Error Code Lookup Tool" and
@@ -12,7 +12,7 @@ located at ../MfPack/Tools.
 The Windows System Error Code Lookup Tool can be downloaded at:
   https://learn.microsoft.com/en-us/windows/win32/debug/system-error-code-lookup-tool.
 When you need a version > 6.4.5, that is allready present, copy this tool 
-to ../MfPack/Tools/MicrosoftErrorLookupTool and adjust the WIN_ERROR_LOOKUP_TOOL constant in
+to ..\MfPack\Tools\MicrosoftErrorLookupTool and adjust the WIN_ERROR_LOOKUP_TOOL constant in
 the WinApi.Dbg.WinHResultTools.pas unit.
 
 To build the tools application, you have to add ..\MfPack\src\dbg to your project's Searchpath.
@@ -28,6 +28,6 @@ Project location: https://github.com/FactoryXCode/MfPack
                   https://sourceforge.net/projects/MFPack
 
 First release date: 09/07/2023
-Final release date: 28/12/2023
+Final release date: 16/02/2024
 
 Copyright © FactoryX. All rights reserved. 

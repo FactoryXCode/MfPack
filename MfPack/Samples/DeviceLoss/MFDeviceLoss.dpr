@@ -1,11 +1,6 @@
 program MFDeviceLoss;
 
 uses
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
   Vcl.Forms,
   DeviceLoss in 'DeviceLoss.pas',
   frmdlgChooseDevice in 'frmdlgChooseDevice.pas' {dlgChooseDevice},

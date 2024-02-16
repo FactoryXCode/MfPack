@@ -10,7 +10,7 @@
 // Release date: 25-11-2022
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Contains an example of how to use the Sink Writer to encode video.
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 // 18/05/2023 Renate              Fixed runtime error on selecting multiple bitmaps.
 //                                Speedup of bitmap resizing using D2D1_1
 // ------------------------------------------------------------------------------
@@ -104,8 +104,8 @@ type
     gdEncodingFormat: TGUID;
     sEncodingFormat: string; // GuidToString(gdEncodingFormat)
     gdInputFormat: TGUID;
-    rtSampleDuration: HNSTIME; // Is same as REFERENCE_TIME;
-    uiLatency: INT64;
+    rtAverageTimePerFrame: HNSTIME; // Is same as REFERENCE_TIME;
+    rtFrameDuration: HNSTIME;
     uiSizeInPixels: UINT32;
     uiFrameCount: INT64;
     dwHeigth: DWORD;
@@ -223,11 +223,11 @@ begin
 
   // Optional save the bitmap to file
   if FSaveResizedBitmap then
-  begin
-    bmSource.SaveToFile(Format('%dx%d_%s', [SinkWriterParams.dwWidth,
-                                            SinkWriterParams.dwHeigth,
-                                            ExtractFileName(aBmpFile)]));
-  end;
+    begin
+      bmSource.SaveToFile(Format('%dx%d_%s', [SinkWriterParams.dwWidth,
+                                              SinkWriterParams.dwHeigth,
+                                              ExtractFileName(aBmpFile)]));
+    end;
 
   FBitmapPixelFormat := bmSource.PixelFormat;
 
@@ -245,7 +245,7 @@ begin
             SinkWriterParams.uiSizeInPixels);
 
   d := 0;
-  // Scan and copy the rgb24bit records to COLORREF values (4 Bytes).
+  // Scan and copy the rgb32bit records to COLORREF values (4 Bytes).
   PRow := ScanLine0;
   for y := (SinkWriterParams.dwHeigth - 1) downto 0 do
     begin
@@ -257,7 +257,6 @@ begin
           CopyRgbQuadToClrRef(PFmtPf32Bit^,
                               dwPxl);
 
-          // Here we decide to store the array in memory or to file
           SinkWriterParams.FrameBufferArray[d] := dwPxl;
           inc(d);
           inc(PFmtPf32Bit);
@@ -281,6 +280,12 @@ end;
 // 6 You don't have to Release the pointer to the sink writer. The compiler is doing that automaticly.
 // 7 Call MFShutdown.
 // 8 Call CoUninitialize.
+//
+// Some notes:
+//   FPS = sec/frames
+//   Number of frames = duration (seconds) * frames per second
+//   Frame duration = 1 second / frames per second
+//
 //
 function TSinkWriter.RunSinkWriter(aBmpFileList: TStringList): HResult;
 var
@@ -310,15 +315,15 @@ begin
           if SUCCEEDED(hr) then
             begin
               // Calculate the average time/frame
-              SinkWriterParams.rtSampleDuration := Round(SinkWriterParams.uiLatency * FRAME_TIME_UNITS / SinkWriterParams.dbFrameRate);
+              SinkWriterParams.rtAverageTimePerFrame := (SinkWriterParams.dwFrameTimeUnits) div Round(SinkWriterParams.dbFrameRate);
               // Or use this method
-              hr := MFFrameRateToAverageTimePerFrame(SinkWriterParams.uiLatency * FRAME_TIME_UNITS,
-                                                     Trunc(SinkWriterParams.dbFrameRate),
-                                                     SinkWriterParams.rtSampleDuration);
+              //hr := MFFrameRateToAverageTimePerFrame(SinkWriterParams.dwFrameTimeUnits,
+              //                                       Round(SinkWriterParams.dbFrameRate),
+              //                                       SinkWriterParams.rtAverageTimePerFrame);
 
               SinkWriterParams.gdInputFormat := MFVideoFormat_RGB32;
-              // aVideoLenght is the given duration of the video in seconds.
-              SinkWriterParams.uiFrameCount := SinkWriterParams.uiLatency * Round(SinkWriterParams.dbFrameRate);
+              // VideoLenght is the given duration of the video in seconds.
+              SinkWriterParams.uiFrameCount := aBmpFileList.Count * Round(SinkWriterParams.dbFrameRate) * SinkWriterParams.rtAverageTimePerFrame;
 
               // Handle the number of bitmaps in the list.
               for i := 0 to aBmpFileList.Count - 1 do
@@ -332,7 +337,7 @@ begin
                   SendMessage(hwndCaller,
                               WM_SINKWRITER_WRITES_BITMAP,
                               WParam(0),
-                              LParam(i));
+                              LParam(i + 1));
 
                  // Send frames to the sink writer.
                  for j := 0 to SinkWriterParams.uiFrameCount - 1 do
@@ -343,7 +348,7 @@ begin
                      if FAILED(hr) then
                        Break;
 
-                     inc(rtStart, SinkWriterParams.rtSampleDuration);
+                     inc(rtStart, SinkWriterParams.rtAverageTimePerFrame);
 
                      MsgWaitForMultipleObjects(0,
                                                nil^,
@@ -568,11 +573,14 @@ begin
   dwBuffer := (lLineWidth * SinkWriterParams.dwHeigth);
 
   // Create a new memory buffer.
-  hr := MFCreateMemoryBuffer(dwBuffer, pBuffer);
+  hr := MFCreateMemoryBuffer(dwBuffer,
+                             pBuffer);
 
   // Lock the buffer and copy the video frame to the buffer.
   if SUCCEEDED(hr) then
-    hr := pBuffer.Lock(pData, nil, nil)
+    hr := pBuffer.Lock(pData,
+                       nil,
+                       nil)
   else
     goto Done;
 
@@ -584,10 +592,7 @@ begin
                         lLineWidth { Source stride. },
                         lLineWidth { Image width in bytes. } ,
                         SinkWriterParams.dwHeigth { Image height in pixels. } );
-    // Aternative
-    // CopyMemory(pData,
-    //            PByte(SinkWriterParams.arFrameBufferArray[bitmapIndex]),
-    //            lLineWidth * SinkWriterParams.dwHeigth);
+
     end;
 
   if Assigned(pBuffer) then
@@ -609,7 +614,7 @@ begin
     hr := pSample.SetSampleTime(rtStart);
 
   if SUCCEEDED(hr) then
-    hr := pSample.SetSampleDuration(SinkWriterParams.rtSampleDuration);
+    hr := pSample.SetSampleDuration(SinkWriterParams.rtAverageTimePerFrame);
 
   // Send the sample to the Sink Writer.
   if SUCCEEDED(hr) then
@@ -628,15 +633,14 @@ begin
   pwcVideoFileExtension := 'mp4';
   gdEncodingFormat := MFVideoFormat_H264;
   gdInputFormat := MFVideoFormat_RGB32;
-  uiLatency := 10;
-  // Initial latency = sample processing time from input to output.
   // The FrameRate expressed in Frames Per Second (FPS) is the number of frames per second.
   dbFrameRate := 30.0; // FPS
   dwFrameTimeUnits := FRAME_TIME_UNITS;
   dwHeigth := 480;
   dwWidth := 640;
   // Duration per sample, also known as Frame Duration, in 100-nanosecond units .
-  rtSampleDuration := Round(uiLatency * FRAME_TIME_UNITS / dbFrameRate);
+  rtFrameDuration := Round((60 * FRAME_TIME_UNITS) / dbFrameRate);
+  rtAverageTimePerFrame := Round(dwFrameTimeUnits / dbFrameRate);
   uiSizeInPixels := dwWidth * dwHeigth;
   uiFrameCount := 20 * Round(dbFrameRate);
   sResolutionDescription := 'SD    480p  (640 x 480)';

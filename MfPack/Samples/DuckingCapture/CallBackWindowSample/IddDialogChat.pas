@@ -10,7 +10,7 @@
 // Release date: 04-10-2020
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.6
 // Description: Ducking Capture dialog that defines the entry point for the application.
 //
 //              WIN32 APPLICATION : Ducking Capture Sample Project Overview
@@ -28,14 +28,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Note that this sample requires Windows 7 or later.
 //          This sample uses the CALLBACK_WINDOW callbacktype as used in the original C++ sample.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

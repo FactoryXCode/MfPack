@@ -10,7 +10,7 @@
 // Release date: 04-01-2016
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Holds compiler definitions for MfPack.
 //
 //
@@ -22,14 +22,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 27/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: All future updates (releases) will be named to an artist except for
 //          the major Windows updates. So, we started with ISÁK.
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 // Compiler version: 23 up to 35
 // SDK version: 10.0.22621.0
@@ -71,7 +71,7 @@ const
 // Value for NTDDI_VERSION              |  Minimum system required
 //--------------------------------------+-----------------------------------------
   
-  MFPACK_NTDDI_WIN10_NI     = $0A00000C; // Windows 11 22621
+  MFPACK_NTDDI_WIN10_NI     = $0A00000C; // Windows 11 22621 - 22631
   MFPACK_NTDDI_WIN10_CO     = $0A00000B; // Windows 11 22000
   MFPACK_NTDDI_WIN10_MN     = $0A000009; // Windows 10 20348
   MFPACK_NTDDI_WIN10_FE     = $0A00000A; // Windows 10 19041
@@ -125,7 +125,7 @@ const
   MFPACK_WIN32_WINNT_WIN10_MN       = $0A000009; // Windows 10
   MFPACK_WIN32_WINNT_WIN10_FE       = $0A00000A; // Windows 10
   MFPACK_WIN32_WINNT_WIN10_CO       = $0A00000B; // Windows 11 22000
-  MFPACK_WIN32_WIN10_WIN10_NI       = $0A00000C; // Windows 11 22621
+  MFPACK_WIN32_WIN10_WIN10_NI       = $0A00000C; // Windows 11 22621 - 22631
 //
 // _WIN32_WINNT version constants from sdkddkver.h
 //
@@ -376,7 +376,8 @@ const
 // {$DEFINE MFPACK_VERSION_312_UP} // Mercury release, Milestone update 17.
 // {$DEFINE MFPACK_VERSION_313_UP} // PiL release, Milestone update 18.
 // {$DEFINE MFPACK_VERSION_314_UP} // PiL release, update 19.
-{$DEFINE MFPACK_VERSION_315_UP}    // Carmel release, update 20.
+// {$DEFINE MFPACK_VERSION_315_UP} // Carmel release, update 20.
+{$DEFINE MFPACK_VERSION_316_UP}    // Morrissey release, update 21.
 
 // WARNINGS
 // enable/disable compiler warnings.
@@ -420,8 +421,8 @@ const
 
 const
 // a global version ID (for internal use only).
-MfpVersion   = '3.1.5'; // Release version.
-{$DEFINE MFP_VERSION_315}
+MfpVersion   = '3.1.6'; // Release version.
+{$DEFINE MFP_VERSION_316}
 
 
 // Definitions WinApiTypes

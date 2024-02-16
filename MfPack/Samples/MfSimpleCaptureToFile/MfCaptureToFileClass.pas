@@ -10,7 +10,7 @@
 // Release date: 09-02-2018
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.6
 //
 // Description: Device capture class based on MFCaptureToFile example
 //
@@ -22,14 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
-// 04/03/2023                     Updated device loss notify.
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

@@ -10,7 +10,7 @@
 // Release date: 14-01-2018
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Direct3D include file.
 //
 // Organisation: FactoryX
@@ -21,14 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //          New apps should use the latest Direct3D API
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -675,7 +675,7 @@ const
   {$EXTERNALSYM D3DRS_STENCILZFAIL}
   D3DRS_STENCILPASS                = D3DRENDERSTATETYPE(55);             // D3DSTENCILOP to do if both stencil and Z tests pass
   {$EXTERNALSYM D3DRS_STENCILPASS}
-  D3DRS_STENCILFUNC                = D3DRENDERSTATETYPE(56);             // D3DCMPFUNC fn.  Stencil Test passes if ((ref  mask) stencilfn (stencil  mask)) is true
+  D3DRS_STENCILFUNC                = D3DRENDERSTATETYPE(56);             // D3DCMPFUNC fn.  Stencil Test passes if ((ref  mask) stencilfn (stencil  mask)) is True
   {$EXTERNALSYM D3DRS_STENCILFUNC}
   D3DRS_STENCILREF                 = D3DRENDERSTATETYPE(57);             // Reference value used in stencil test
   {$EXTERNALSYM D3DRS_STENCILREF}
@@ -791,7 +791,7 @@ const
   {$EXTERNALSYM D3DRS_CCW_STENCILZFAIL}
   D3DRS_CCW_STENCILPASS            = D3DRENDERSTATETYPE(188);            // D3DSTENCILOP to do if both ccw stencil and Z tests pass
   {$EXTERNALSYM D3DRS_CCW_STENCILPASS}
-  D3DRS_CCW_STENCILFUNC            = D3DRENDERSTATETYPE(189);            // D3DCMPFUNC fn.  ccw Stencil Test passes if ((ref  mask) stencilfn (stencil  mask)) is true
+  D3DRS_CCW_STENCILFUNC            = D3DRENDERSTATETYPE(189);            // D3DCMPFUNC fn.  ccw Stencil Test passes if ((ref  mask) stencilfn (stencil  mask)) is True
   {$EXTERNALSYM D3DRS_CCW_STENCILFUNC}
   D3DRS_COLORWRITEENABLE1          = D3DRENDERSTATETYPE(190);            // Additional ColorWriteEnables for the devices that support D3DPMISCCAPS_INDEPENDENTWRITEMASKS
   {$EXTERNALSYM D3DRS_COLORWRITEENABLE1}
@@ -2632,7 +2632,7 @@ const
   // When passed to CheckDeviceFormat, D3DUSAGE_AUTOGENMIPMAP may return
   // D3DOK_NOAUTOGEN if the device doesn't support autogeneration for that format.
   // D3DOK_NOAUTOGEN is a success code, not a failure code... the SUCCEEDED and FAILED macros
-  // will return true and false respectively for this code.
+  // will return True and False respectively for this code.
   D3DUSAGE_AUTOGENMIPMAP              = ($00000400);
   {$EXTERNALSYM D3DUSAGE_AUTOGENMIPMAP}
   D3DUSAGE_DMAP                       = ($00004000);

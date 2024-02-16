@@ -1,7 +1,7 @@
 object frmTranscoder: TfrmTranscoder
   Left = 0
   Top = 0
-  BorderIcons = [biSystemMenu, biMinimize]
+  BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'MfTranscoder Sample'
   ClientHeight = 255
@@ -15,8 +15,8 @@ object frmTranscoder: TfrmTranscoder
   Menu = MainMenu
   OldCreateOrder = False
   Position = poScreenCenter
-  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnMouseMove = FormMouseMove
   PixelsPerInch = 96
   TextHeight = 13
@@ -154,9 +154,6 @@ object frmTranscoder: TfrmTranscoder
     Align = alBottom
     BevelOuter = bvLowered
     TabOrder = 2
-    ExplicitLeft = 7
-    ExplicitTop = 185
-    ExplicitWidth = 513
     object butExecute: TButton
       Left = 6
       Top = 9
@@ -205,11 +202,10 @@ object frmTranscoder: TfrmTranscoder
     Panels = <>
     SimplePanel = True
     SimpleText = 'Please select a sourcefile.'
-    ExplicitTop = 176
   end
   object MainMenu: TMainMenu
-    Left = 468
-    Top = 5
+    Left = 467
+    Top = 6
     object File1: TMenuItem
       Caption = 'File'
       object mnuOpenSourceFile: TMenuItem

@@ -1,6 +1,6 @@
 # MfFrameCapture
 
-Version: X 3.1.4
+Version: X 3.1.6
 
 Description:
 
@@ -10,7 +10,7 @@ NOTES:
  - This release is updated for compiler version 17 up to 34.
  - SDK version 10.0.22621.0 (Win 11)
  - Requires Windows 8 or later.
- - Minimum supported MfPack version: 3.1.1
+ - Minimum supported MfPack version: 3.1.5
 
 Project: Media Foundation - MFPack - Samples
 Project location: https://github.com/FactoryXCode/MfPack

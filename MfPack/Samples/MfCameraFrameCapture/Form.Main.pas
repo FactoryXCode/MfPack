@@ -10,7 +10,7 @@
 // Release date: 29-03-2022
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 //
 // Description:
 //   This unit is the application mainform.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX315/Samples/CameraFrameCapture
+// Related projects: MfPackX316/Samples/CameraFrameCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.22621.0

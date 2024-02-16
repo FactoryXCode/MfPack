@@ -9,7 +9,7 @@
 // Release date: 09-07-2023
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Error codes from Media Foundation.
 //
 // Organisation: FactoryX
@@ -20,13 +20,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 27/08/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 31/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -63,12 +63,9 @@ unit WinApi.Dbg.WinMfError;
 interface
 
 uses
-  {WinApi}
   WinApi.Windows,
   WinApi.WinError,
-  {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfError,
-  {WinApiDebug}
   WinApi.Dbg.WinHResultTools;
 
 
@@ -147,8 +144,6 @@ begin
 
   HeaderFile := 'mferror.h';
   Reference[0] := 'https://learn.microsoft.com/en-us/windows/win32/medfound/media-foundation-programming-reference';
-  Reference[1] := 'https://learn.microsoft.com/en-us/windows/win32/api/winerror';
-  Reference[2] := '';
 
   case aHResult of
 
@@ -184,459 +179,459 @@ begin
                                       HrStr := 'MF_E_UNSUPPORTED_REPRESENTATION';
                                       HrDescr := 'The requested representation is not supported by this object.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36B9)  : begin
+    _HRESULT_TYPEDEF_($C00D36B8)  : begin
                                       HrStr := 'MF_E_NO_MORE_TYPES';
                                       HrDescr := 'An object ran out of media types to suggest therefore the requested chain of streaming objects cannot be completed.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36BA)  : begin
+    _HRESULT_TYPEDEF_($C00D36B9)  : begin
                                       HrStr := 'MF_E_UNSUPPORTED_SERVICE';
                                       HrDescr := 'The object does not support the specified service.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36BB)  : begin
+    _HRESULT_TYPEDEF_($C00D36BA)  : begin
                                       HrStr := 'MF_E_UNEXPECTED';
                                       HrDescr := 'An unexpected error has occurred in the operation requested.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36BC)  : begin
+    _HRESULT_TYPEDEF_($C00D36BB)  : begin
                                       HrStr := 'MF_E_INVALIDNAME';
                                       HrDescr := 'Invalid name.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36BD)  : begin
+    _HRESULT_TYPEDEF_($C00D36BC)  : begin
                                       HrStr := 'MF_E_INVALIDTYPE';
                                       HrDescr := 'Invalid type.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36BE)  : begin
+    _HRESULT_TYPEDEF_($C00D36BD)  : begin
                                       HrStr := 'MF_E_INVALID_FILE_FORMAT';
                                       HrDescr := 'The file does not conform to the relevant file format specification.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36BF)  : begin
+    _HRESULT_TYPEDEF_($C00D36BE)  : begin
                                       HrStr := 'MF_E_INVALIDINDEX';
                                       HrDescr := 'Invalid index.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36C0)  : begin
+    _HRESULT_TYPEDEF_($C00D36BF)  : begin
                                       HrStr := 'MF_E_INVALID_TIMESTAMP';
                                       HrDescr := 'An invalid timestamp was given.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36C3)  : begin
+    _HRESULT_TYPEDEF_($C00D36C0)  : begin
                                       HrStr := 'MF_E_UNSUPPORTED_SCHEME';
                                       HrDescr := 'The scheme of the given URL is unsupported.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36C4)  : begin
+    _HRESULT_TYPEDEF_($C00D36C3)  : begin
                                       HrStr := 'MF_E_UNSUPPORTED_BYTESTREAM_TYPE';
                                       HrDescr := 'The byte stream type of the given URL is unsupported.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36C5)  : begin
+    _HRESULT_TYPEDEF_($C00D36C4)  : begin
                                       HrStr := 'MF_E_UNSUPPORTED_TIME_FORMAT';
                                       HrDescr := 'The given time format is unsupported.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36C8)  : begin
+    _HRESULT_TYPEDEF_($C00D36C5)  : begin
                                       HrStr := 'MF_E_NO_SAMPLE_TIMESTAMP';
                                       HrDescr := 'The Media Sample does not have a timestamp.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36C9)  : begin
+    _HRESULT_TYPEDEF_($C00D36C8)  : begin
                                       HrStr := 'MF_E_NO_SAMPLE_DURATION';
                                       HrDescr := 'The Media Sample does not have a duration.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36CB)  : begin
+    _HRESULT_TYPEDEF_($C00D36C9)  : begin
                                       HrStr := 'MF_E_INVALID_STREAM_DATA';
                                       HrDescr := 'The request failed because the data in the stream is corrupt.\n.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36CF)  : begin
+    _HRESULT_TYPEDEF_($C00D36CB)  : begin
                                       HrStr := 'MF_E_RT_UNAVAILABLE';
                                       HrDescr := 'Real time services are not available.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36D0)  : begin
+    _HRESULT_TYPEDEF_($C00D36CF)  : begin
                                       HrStr := 'MF_E_UNSUPPORTED_RATE';
                                       HrDescr := 'The specified rate is not supported.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36D1)  : begin
+    _HRESULT_TYPEDEF_($C00D36D0)  : begin
                                       HrStr := 'MF_E_THINNING_UNSUPPORTED';
                                       HrDescr := 'This component does not support stream-thinning.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36D2)  : begin
+    _HRESULT_TYPEDEF_($C00D36D1)  : begin
                                       HrStr := 'MF_E_REVERSE_UNSUPPORTED';
                                       HrDescr := 'The call failed because no reverse playback rates are available.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36D3)  : begin
+    _HRESULT_TYPEDEF_($C00D36D2)  : begin
                                       HrStr := 'MF_E_UNSUPPORTED_RATE_TRANSITION';
                                       HrDescr := 'The requested rate transition cannot occur in the current state.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36D4)  : begin
+    _HRESULT_TYPEDEF_($C00D36D3)  : begin
                                       HrStr := 'MF_E_RATE_CHANGE_PREEMPTED';
                                       HrDescr := 'The requested rate change has been pre-empted and will not occur.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36D5)  : begin
+    _HRESULT_TYPEDEF_($C00D36D4)  : begin
                                       HrStr := 'MF_E_NOT_FOUND';
                                       HrDescr := 'The specified object or value does not exist.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36D6)  : begin
+    _HRESULT_TYPEDEF_($C00D36D5)  : begin
                                       HrStr := 'MF_E_NOT_AVAILABLE';
                                       HrDescr := 'The requested value is not available.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36D7)  : begin
+    _HRESULT_TYPEDEF_($C00D36D6)  : begin
                                       HrStr := 'MF_E_NO_CLOCK';
                                       HrDescr := 'The specified operation requires a clock and no clock is available.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36D8)  : begin
+    _HRESULT_TYPEDEF_($C00D36D7)  : begin
                                       HrStr := 'MF_S_MULTIPLE_BEGIN';
                                       HrDescr := 'This callback and state had already been passed in to this event generator earlier.';
                                     end;
-    _HRESULT_TYPEDEF_($000D36D9)  : begin
+    _HRESULT_TYPEDEF_($000D36D8)  : begin
                                       HrStr := 'MF_E_MULTIPLE_BEGIN';
                                       HrDescr := 'This callback has already been passed in to this event generator.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36DA)  : begin
+    _HRESULT_TYPEDEF_($C00D36D9)  : begin
                                       HrStr := 'MF_E_MULTIPLE_SUBSCRIBERS';
                                       HrDescr := 'Some component is already listening to events on this event generator.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36DB)  : begin
+    _HRESULT_TYPEDEF_($C00D36DA)  : begin
                                       HrStr := 'MF_E_TIMER_ORPHANED';
                                       HrDescr := 'This timer was orphaned before its callback time arrived.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36DC)  : begin
+    _HRESULT_TYPEDEF_($C00D36DB)  : begin
                                       HrStr := 'MF_E_STATE_TRANSITION_PENDING';
                                       HrDescr := 'A state transition is already pending.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36DD)  : begin
+    _HRESULT_TYPEDEF_($C00D36DC)  : begin
                                       HrStr := 'MF_E_UNSUPPORTED_STATE_TRANSITION';
                                       HrDescr := 'The requested state transition is unsupported.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36DE)  : begin
+    _HRESULT_TYPEDEF_($C00D36DD)  : begin
                                       HrStr := 'MF_E_UNRECOVERABLE_ERROR_OCCURRED';
                                       HrDescr := 'An unrecoverable error has occurred.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36DF)  : begin
+    _HRESULT_TYPEDEF_($C00D36DE)  : begin
                                       HrStr := 'MF_E_SAMPLE_HAS_TOO_MANY_BUFFERS';
                                       HrDescr := 'The provided sample has too many buffers.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36E0)  : begin
+    _HRESULT_TYPEDEF_($C00D36DF)  : begin
                                       HrStr := 'MF_E_SAMPLE_NOT_WRITABLE';
                                       HrDescr := 'The provided sample is not writable.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36E2)  : begin
+    _HRESULT_TYPEDEF_($C00D36E0)  : begin
                                       HrStr := 'MF_E_INVALID_KEY';
                                       HrDescr := 'The specified key is not valid.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36E3)  : begin
+    _HRESULT_TYPEDEF_($C00D36E2)  : begin
                                       HrStr := 'MF_E_BAD_STARTUP_VERSION';
                                       HrDescr := 'You are calling MFStartup with the wrong MF_VERSION. Mismatched bits?';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36E4)  : begin
+    _HRESULT_TYPEDEF_($C00D36E3)  : begin
                                       HrStr := 'MF_E_UNSUPPORTED_CAPTION';
                                       HrDescr := 'The caption of the given URL is unsupported.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36E5)  : begin
+    _HRESULT_TYPEDEF_($C00D36E4)  : begin
                                       HrStr := 'MF_E_INVALID_POSITION';
                                       HrDescr := 'The operation on the current offset is not permitted.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36E6)  : begin
+    _HRESULT_TYPEDEF_($C00D36E5)  : begin
                                       HrStr := 'MF_E_ATTRIBUTENOTFOUND';
                                       HrDescr := 'The requested attribute was not found.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36E7)  : begin
+    _HRESULT_TYPEDEF_($C00D36E6)  : begin
                                       HrStr := 'MF_E_PROPERTY_TYPE_NOT_ALLOWED';
                                       HrDescr := 'The specified property type is not allowed in this context.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36E8)  : begin
+    _HRESULT_TYPEDEF_($C00D36E7)  : begin
                                       HrStr := 'MF_E_PROPERTY_TYPE_NOT_SUPPORTED';
                                       HrDescr := 'The specified property type is not supported.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36E9)  : begin
+    _HRESULT_TYPEDEF_($C00D36E8)  : begin
                                       HrStr := 'MF_E_PROPERTY_EMPTY';
                                       HrDescr := 'The specified property is empty.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36EA)  : begin
+    _HRESULT_TYPEDEF_($C00D36E9)  : begin
                                       HrStr := 'MF_E_PROPERTY_NOT_EMPTY';
                                       HrDescr := 'The specified property is not empty.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36EB)  : begin
+    _HRESULT_TYPEDEF_($C00D36EA)  : begin
                                       HrStr := 'MF_E_PROPERTY_VECTOR_NOT_ALLOWED';
                                       HrDescr := 'The vector property specified is not allowed in this context.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36EC)  : begin
+    _HRESULT_TYPEDEF_($C00D36EB)  : begin
                                       HrStr := 'MF_E_PROPERTY_VECTOR_REQUIRED';
                                       HrDescr := 'A vector property is required in this context.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36ED)  : begin
+    _HRESULT_TYPEDEF_($C00D36EC)  : begin
                                       HrStr := 'MF_E_OPERATION_CANCELLED';
                                       HrDescr := 'The operation is cancelled.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36EE)  : begin
+    _HRESULT_TYPEDEF_($C00D36ED)  : begin
                                       HrStr := 'MF_E_BYTESTREAM_NOT_SEEKABLE';
                                       HrDescr := 'The provided bytestream was expected to be seekable and it is not.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36EF)  : begin
+    _HRESULT_TYPEDEF_($C00D36EE)  : begin
                                       HrStr := 'MF_E_DISABLED_IN_SAFEMODE';
                                       HrDescr := 'The Media Foundation platform is disabled when the system is running in Safe Mode.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36F0)  : begin
+    _HRESULT_TYPEDEF_($C00D36EF)  : begin
                                       HrStr := 'MF_E_CANNOT_PARSE_BYTESTREAM';
                                       HrDescr := 'The Media Source could not parse the byte stream.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36F1)  : begin
+    _HRESULT_TYPEDEF_($C00D36F0)  : begin
                                       HrStr := 'MF_E_SOURCERESOLVER_MUTUALLY_EXCLUSIVE_FLAGS';
                                       HrDescr := 'Mutually exclusive flags have been specified to source resolver. This flag combination is invalid.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36F2)  : begin
+    _HRESULT_TYPEDEF_($C00D36F1)  : begin
                                       HrStr := 'MF_E_MEDIAPROC_WRONGSTATE';
                                       HrDescr := 'MediaProc is in the wrong state';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36F3)  : begin
+    _HRESULT_TYPEDEF_($C00D36F2)  : begin
                                       HrStr := 'MF_E_RT_THROUGHPUT_NOT_AVAILABLE';
                                       HrDescr := 'Real time I/O service can not provide requested throughput.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36F4)  : begin
+    _HRESULT_TYPEDEF_($C00D36F3)  : begin
                                       HrStr := 'MF_E_RT_TOO_MANY_CLASSES';
                                       HrDescr := 'The workqueue cannot be registered with more classes.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36F5)  : begin
+    _HRESULT_TYPEDEF_($C00D36F4)  : begin
                                       HrStr := 'MF_E_RT_WOULDBLOCK';
                                       HrDescr := 'This operation cannot succeed because another thread owns this object.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36F6)  : begin
+    _HRESULT_TYPEDEF_($C00D36F5)  : begin
                                       HrStr := 'MF_E_NO_BITPUMP';
                                       HrDescr := 'Internal. Bitpump not found.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36F7)  : begin
+    _HRESULT_TYPEDEF_($C00D36F6)  : begin
                                       HrStr := 'MF_E_RT_OUTOFMEMORY';
                                       HrDescr := 'No more RT memory available.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36F8)  : begin
+    _HRESULT_TYPEDEF_($C00D36F7)  : begin
                                       HrStr := 'MF_E_RT_WORKQUEUE_CLASS_NOT_SPECIFIED';
                                       HrDescr := 'An MMCSS class has not been set for this work queue.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D7170)  : begin
+    _HRESULT_TYPEDEF_($C00D36F8)  : begin
                                       HrStr := 'MF_E_INSUFFICIENT_BUFFER';
                                       HrDescr := 'Insufficient memory for response.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36FA)  : begin
+    _HRESULT_TYPEDEF_($C00D7170)  : begin
                                       HrStr := 'MF_E_CANNOT_CREATE_SINK';
                                       HrDescr := 'Activate failed to create mediasink. Call OutputNode.GetUINT32(MF_TOPONODE_MAJORTYPE) for more information. ';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36FB)  : begin
+    _HRESULT_TYPEDEF_($C00D36FA)  : begin
                                       HrStr := 'MF_E_BYTESTREAM_UNKNOWN_LENGTH';
                                       HrDescr := 'The length of the provided bytestream is unknown.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36FC)  : begin
+    _HRESULT_TYPEDEF_($C00D36FB)  : begin
                                       HrStr := 'MF_E_SESSION_PAUSEWHILESTOPPED';
                                       HrDescr := 'The media session cannot pause from a stopped state.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36FD)  : begin
+    _HRESULT_TYPEDEF_($C00D36FC)  : begin
                                       HrStr := 'MF_S_ACTIVATE_REPLACED';
                                       HrDescr := 'The activate could not be created in the remote process for some reason it was replaced with empty one.';
                                     end;
-    _HRESULT_TYPEDEF_($000D36FE)  : begin
+    _HRESULT_TYPEDEF_($000D36FD)  : begin
                                       HrStr := 'MF_E_FORMAT_CHANGE_NOT_SUPPORTED';
                                       HrDescr := 'The data specified for the media type is supported, but would require a format change, which is not supported by this object.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D36FF)  : begin
+    _HRESULT_TYPEDEF_($C00D36FE)  : begin
                                       HrStr := 'MF_E_INVALID_WORKQUEUE';
                                       HrDescr := 'The operation failed because an invalid combination of workqueue ID and flags was specified.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3700)  : begin
+    _HRESULT_TYPEDEF_($C00D36FF)  : begin
                                       HrStr := 'MF_E_DRM_UNSUPPORTED';
                                       HrDescr := 'No DRM support is available.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3701)  : begin
+    _HRESULT_TYPEDEF_($C00D3700)  : begin
                                       HrStr := 'MF_E_UNAUTHORIZED';
                                       HrDescr := 'This operation is not authorized.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3702)  : begin
+    _HRESULT_TYPEDEF_($C00D3701)  : begin
                                       HrStr := 'MF_E_OUT_OF_RANGE';
                                       HrDescr := 'The value is not in the specified or valid range.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3703)  : begin
+    _HRESULT_TYPEDEF_($C00D3702)  : begin
                                       HrStr := 'MF_E_INVALID_CODEC_MERIT';
                                       HrDescr := 'The registered codec merit is not valid.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3704)  : begin
+    _HRESULT_TYPEDEF_($C00D3703)  : begin
                                       HrStr := 'MF_E_HW_MFT_FAILED_START_STREAMING';
                                       HrDescr := 'Hardware MFT failed to start streaming due to lack of hardware resources.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3705)  : begin
+    _HRESULT_TYPEDEF_($C00D3704)  : begin
                                       HrStr := 'MF_E_OPERATION_IN_PROGRESS';
                                       HrDescr := 'The operation is already in progress.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3706)  : begin
+    _HRESULT_TYPEDEF_($C00D3705)  : begin
                                       HrStr := 'MF_E_HARDWARE_DRM_UNSUPPORTED';
                                       HrDescr := 'No Hardware DRM support is available.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3707)  : begin
+    _HRESULT_TYPEDEF_($C00D3706)  : begin
                                       HrStr := 'MF_E_DURATION_TOO_LONG';
                                       HrDescr := 'The specified duration is too long.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3708)  : begin
+    _HRESULT_TYPEDEF_($C00D3707)  : begin
                                       HrStr := 'MF_E_OPERATION_UNSUPPORTED_AT_D3D_FEATURE_LEVEL';
                                       HrDescr := 'The attempted call or command is not supported with the DirectX version used by the component.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3709)  : begin
+    _HRESULT_TYPEDEF_($C00D3708)  : begin
                                       HrStr := 'MF_E_UNSUPPORTED_MEDIATYPE_AT_D3D_FEATURE_LEVEL';
                                       HrDescr := 'The specified media type is not supported with the DirectX version used by the component.';
                                     end;
-    _HRESULT_TYPEDEF_($400D3A98)  : begin
+    _HRESULT_TYPEDEF_($C00D3709)  : begin
                                       HrStr := 'MF_S_ASF_PARSEINPROGRESS';
                                       HrDescr := 'Parsing is still in progress and is not yet complete.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3A98)  : begin
+    _HRESULT_TYPEDEF_($400D3A98)  : begin
                                       HrStr := 'MF_E_ASF_PARSINGINCOMPLETE';
                                       HrDescr := 'Not enough data have been parsed to carry out the requested action.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3A99)  : begin
+    _HRESULT_TYPEDEF_($C00D3A98)  : begin
                                       HrStr := 'MF_E_ASF_MISSINGDATA';
                                       HrDescr := 'There is a gap in the ASF data provided.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3A9A)  : begin
+    _HRESULT_TYPEDEF_($C00D3A99)  : begin
                                       HrStr := 'MF_E_ASF_INVALIDDATA';
                                       HrDescr := 'The data provided are not valid ASF.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3A9B)  : begin
+    _HRESULT_TYPEDEF_($C00D3A9A)  : begin
                                       HrStr := 'MF_E_ASF_OPAQUEPACKET';
                                       HrDescr := 'The packet is opaque, so the requested information cannot be returned.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3A9C)  : begin
+    _HRESULT_TYPEDEF_($C00D3A9B)  : begin
                                       HrStr := 'MF_E_ASF_NOINDEX';
                                       HrDescr := 'The requested operation failed since there is no appropriate ASF index.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3A9D)  : begin
+    _HRESULT_TYPEDEF_($C00D3A9C)  : begin
                                       HrStr := 'MF_E_ASF_OUTOFRANGE';
                                       HrDescr := 'The value supplied is out of range for this operation.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3A9E)  : begin
+    _HRESULT_TYPEDEF_($C00D3A9D)  : begin
                                       HrStr := 'MF_E_ASF_INDEXNOTLOADED';
                                       HrDescr := 'The index entry requested needs to be loaded before it can be available.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3A9F)  : begin
+    _HRESULT_TYPEDEF_($C00D3A9E)  : begin
                                       HrStr := 'MF_E_ASF_TOO_MANY_PAYLOADS';
                                       HrDescr := 'The packet has reached the maximum number of payloads.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3AA0)  : begin
+    _HRESULT_TYPEDEF_($C00D3A9F)  : begin
                                       HrStr := 'MF_E_ASF_UNSUPPORTED_STREAM_TYPE';
                                       HrDescr := 'Stream type is not supported.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3AA1)  : begin
+    _HRESULT_TYPEDEF_($C00D3AA0)  : begin
                                       HrStr := 'MF_E_ASF_DROPPED_PACKET';
                                       HrDescr := 'One or more ASF packets were dropped.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3E80)  : begin
+    _HRESULT_TYPEDEF_($C00D3AA1)  : begin
                                       HrStr := 'MF_E_NO_EVENTS_AVAILABLE';
                                       HrDescr := 'There are no events available in the queue.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3E82)  : begin
+    _HRESULT_TYPEDEF_($C00D3E80)  : begin
                                       HrStr := 'MF_E_INVALID_STATE_TRANSITION';
                                       HrDescr := 'A media source cannot go from the stopped state to the paused state.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3E84)  : begin
+    _HRESULT_TYPEDEF_($C00D3E82)  : begin
                                       HrStr := 'MF_E_END_OF_STREAM';
                                       HrDescr := 'The media stream cannot process any more samples because there are no more samples in the stream.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3E85)  : begin
+    _HRESULT_TYPEDEF_($C00D3E84)  : begin
                                       HrStr := 'MF_E_SHUTDOWN';
                                       HrDescr := 'The request is invalid because Shutdown() has been called.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3E86)  : begin
+    _HRESULT_TYPEDEF_($C00D3E85)  : begin
                                       HrStr := 'MF_E_MP3_NOTFOUND';
                                       HrDescr := 'The MP3 object was not found.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3E87)  : begin
+    _HRESULT_TYPEDEF_($C00D3E86)  : begin
                                       HrStr := 'MF_E_MP3_OUTOFDATA';
                                       HrDescr := 'The MP3 parser ran out of data before finding the MP3 object.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3E88)  : begin
+    _HRESULT_TYPEDEF_($C00D3E87)  : begin
                                       HrStr := 'MF_E_MP3_NOTMP3';
                                       HrDescr := 'The file is not really a MP3 file.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3E89)  : begin
+    _HRESULT_TYPEDEF_($C00D3E88)  : begin
                                       HrStr := 'MF_E_MP3_NOTSUPPORTED';
                                       HrDescr := 'The MP3 file is not supported.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3E8A)  : begin
+    _HRESULT_TYPEDEF_($C00D3E89)  : begin
                                       HrStr := 'MF_E_NO_DURATION';
                                       HrDescr := 'The Media stream has no duration.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3E8C)  : begin
+    _HRESULT_TYPEDEF_($C00D3E8A)  : begin
                                       HrStr := 'MF_E_INVALID_FORMAT';
                                       HrDescr := 'The Media format is recognized but is invalid.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3E8D)  : begin
+    _HRESULT_TYPEDEF_($C00D3E8C)  : begin
                                       HrStr := 'MF_E_PROPERTY_NOT_FOUND';
                                       HrDescr := 'The property requested was not found.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3E8EE)  : begin
+    _HRESULT_TYPEDEF_($C00D3E8D)  : begin
                                       HrStr := 'MF_E_PROPERTY_READ_ONLY';
                                       HrDescr := 'The property is read only.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3E8F)  : begin
+    _HRESULT_TYPEDEF_($C00D3E8E)  : begin
                                       HrStr := 'MF_E_PROPERTY_NOT_ALLOWED';
                                       HrDescr := 'The specified property is not allowed in this context.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3E91)  : begin
+    _HRESULT_TYPEDEF_($C00D3E8F)  : begin
                                       HrStr := 'MF_E_MEDIA_SOURCE_NOT_STARTED';
                                       HrDescr := 'The media source is not started.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3E98)  : begin
+    _HRESULT_TYPEDEF_($C00D3E91)  : begin
                                       HrStr := 'MF_E_UNSUPPORTED_FORMAT';
                                       HrDescr := 'The Media format is recognized but not supported.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3E99)  : begin
+    _HRESULT_TYPEDEF_($C00D3E98)  : begin
                                       HrStr := 'MF_E_MP3_BAD_CRC';
                                       HrDescr := 'The MPEG frame has bad CRC.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3E9A)  : begin
+    _HRESULT_TYPEDEF_($C00D3E99)  : begin
                                       HrStr := 'MF_E_NOT_PROTECTED';
                                       HrDescr := 'The file is not protected.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3E9B)  : begin
+    _HRESULT_TYPEDEF_($C00D3E9A)  : begin
                                       HrStr := 'MF_E_MEDIA_SOURCE_WRONGSTATE';
                                       HrDescr := 'The media source is in the wrong state';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3E9C)  : begin
+    _HRESULT_TYPEDEF_($C00D3E9B)  : begin
                                       HrStr := 'MF_E_MEDIA_SOURCE_NO_STREAMS_SELECTED';
                                       HrDescr := 'No streams are selected in source presentation descriptor.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D3E9D)  : begin
+    _HRESULT_TYPEDEF_($C00D3E9C)  : begin
                                       HrStr := 'MF_E_CANNOT_FIND_KEYFRAME_SAMPLE';
                                       HrDescr := 'No key frame sample was found.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D4268)  : begin
+    _HRESULT_TYPEDEF_($C00D3E9D)  : begin
                                       HrStr := 'MF_E_NETWORK_RESOURCE_FAILURE';
                                       HrDescr := 'An attempt to acquire a network resource failed.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D4269)  : begin
+    _HRESULT_TYPEDEF_($C00D4268)  : begin
                                       HrStr := 'MF_E_NET_WRITE';
                                       HrDescr := 'Error writing to the network.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D426A)  : begin
+    _HRESULT_TYPEDEF_($C00D4269)  : begin
                                       HrStr := 'MF_E_NET_READ';
                                       HrDescr := 'Error reading from the network.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D426B)  : begin
+    _HRESULT_TYPEDEF_($C00D426A)  : begin
                                       HrStr := 'MF_E_NET_REQUIRE_NETWORK';
                                       HrDescr := 'Internal. Entry cannot complete operation without network.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D426C)  : begin
+    _HRESULT_TYPEDEF_($C00D426B)  : begin
                                       HrStr := 'MF_E_NET_REQUIRE_ASYNC';
                                       HrDescr := 'Internal. Async op is required.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D426D)  : begin
+    _HRESULT_TYPEDEF_($C00D426C)  : begin
                                       HrStr := 'MF_E_NET_BWLEVEL_NOT_SUPPORTED';
                                       HrDescr := 'Internal. Bandwidth levels are not supported.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D426E)  : begin
+    _HRESULT_TYPEDEF_($C00D426D)  : begin
                                       HrStr := 'MF_E_NET_STREAMGROUPS_NOT_SUPPORTED';
                                       HrDescr := 'Internal. Stream groups are not supported.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D426F)  : begin
+    _HRESULT_TYPEDEF_($C00D426E)  : begin
                                       HrStr := 'MF_E_NET_MANUALSS_NOT_SUPPORTED';
                                       HrDescr := 'Manual stream selection is not supported.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D4270)  : begin
+    _HRESULT_TYPEDEF_($C00D426F)  : begin
                                       HrStr := 'MF_E_NET_INVALID_PRESENTATION_DESCRIPTOR';
                                       HrDescr := 'Invalid presentation descriptor.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D4271)  : begin
+    _HRESULT_TYPEDEF_($C00D4270)  : begin
                                       HrStr := 'MF_E_NET_CACHESTREAM_NOT_FOUND';
                                       HrDescr := 'Cannot find cache stream.';
                                     end;
-    _HRESULT_TYPEDEF_($C00D4272)  : begin
+    _HRESULT_TYPEDEF_($C00D4271)  : begin
                                       HrStr := 'MF_I_MANUAL_PROXY';
                                       HrDescr := 'The proxy setting is manual.';
                                     end;

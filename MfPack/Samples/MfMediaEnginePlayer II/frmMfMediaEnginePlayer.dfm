@@ -297,7 +297,7 @@ object FeMediaEnginePlayer: TFeMediaEnginePlayer
       OnMouseUp = prbProgressMouseUp
     end
     object butFullScreen: TButton
-      Left = 539
+      Left = 535
       Top = 16
       Width = 25
       Height = 24

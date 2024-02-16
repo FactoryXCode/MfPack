@@ -9,7 +9,7 @@
 // Release date: 24-02-2012
 // Language: ENU
 //
-// Version: 3.1.5
+// Version: 3.1.6
 // Description: Universal threaded timer
 //              This timer can be used for a variety of tasks where you need a
 //              lightweight, precise and threadsave timer.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ---------------------------------------------
-// 13/08/2020 All                 Enigma release.
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 // ----------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: MfSamples
-// Related projects: MfPack301
+// Related projects: MfPack316
 // Known Issues: -
 // Compiler version: 17 up to 21
 // ToDo: -

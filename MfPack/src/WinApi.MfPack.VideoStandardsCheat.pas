@@ -10,14 +10,14 @@
 // Release date: 14-11-2023
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Video standards cheat.
 //              This class contains the latest standardised video resolutions,
 //              aspect ratios and framerates.
 // Usage:
 //      Call Create to create the class.
-//      Call procedure GetResolutions() to get the resolutions and aspectratio's.
-//      Call procedure GetFrameRates() to get the framerates.
+//      The constructor calls GetResolutions() to get the resolutions and aspectratio's and
+//      GetFrameRates() to get the framerates.
 //      When not needed anymore call Free.
 //
 // Organisation: FactoryX
@@ -28,13 +28,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 15/11/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -80,26 +80,25 @@ uses
   System.Classes,
   System.SysUtils;
 
-
 type
 
   TResolution = record
-    Resolution: ShortString;
-    iWidth: Integer;
-    iHeight: Integer;
+    Resolution: string;
+    iWidth: UInt32;
+    iHeight: UInt32;
     AspectRatio: Double;
     AspectRatioNumerator: Double;
-    AspectRatioDenominator: Integer;
-    StrAspectRatio: ShortString;
-    Remarks: ShortString;
+    AspectRatioDenominator: UInt32;
+    StrAspectRatio: string;
+    Remarks: string;
   end;
 
-  TResolutionArray = array of TResolution;
+  TResolutionsArray = array of TResolution;
 
   TFrameRate = record
     FrameRate: Double;
-    sFrameRate: ShortString;
-    sHint: ShortString;
+    sFrameRate: string;
+    sHint: string;
   end;
 
   TFrameRatesArray = array of TFrameRate;
@@ -108,39 +107,59 @@ type
   TVideoStandardsCheat = class
   private
     iCounter: Integer;
-    iCurrentResolution: Integer;
-    iCurrentFrameRate: Integer;
-    aResolutionArray: TResolutionArray;
+
+    aResolutionArray: TResolutionsArray;
     aFrameRatesArray: TFrameRatesArray;
+    rResolution: TResolution;
+    rFrameRate: TFrameRate;
 
-    procedure SetRes(hResolution: ShortString;
-                     hWidth: Integer;
-                     hHeight: Integer;
-                     hAspectRatio: Double;
-                     hAspectRatioNumerator: Double;
-                     hAspectRatioDenominator: Integer;
-                     hStrAspectRatio: ShortString;
-                     hRemarks: ShortString); inline;
-
-    procedure SetFrameRates(iIndex: Integer;
-                            fRate: Double;
-                            sHint: ShortString); inline;
-
-  public
-    /// <summary> run myVideoStandardsCheat := TVideoStandardsCheat.Create. </summary>
-    constructor Create();
-    destructor Destroy(); override;
     /// <summary> Stores all resolutions and aspectratios in a public array (property Resolutions). </summary>
     procedure GetResolutions();
     /// <summary> Stores all framerates in a public array (property FrameRates). </summary>
     procedure GetFrameRates();
 
-    property Resolutions: TResolutionArray read aResolutionArray write aResolutionArray;
-    property CurrentResolution: Integer read iCurrentResolution write iCurrentResolution;
+
+    procedure SetRes(hResolution: string;
+                     hWidth: Integer;
+                     hHeight: Integer;
+                     hAspectRatio: Double;
+                     hAspectRatioNumerator: Double;
+                     hAspectRatioDenominator: Integer;
+                     hStrAspectRatio: string;
+                     hRemarks: string); inline;
+
+    procedure SetFrameRates(iIndex: Integer;
+                            fRate: Double;
+                            sHint: string); inline;
+
+  public
+    /// <summary> run myVideoStandardsCheat := TVideoStandardsCheat.Create. </summary>
+    constructor Create();
+    destructor Destroy(); override;
+
+    /// <summary> Set a resolution by selected array index. </summary>
+    procedure SetResolutionByIndex(index: Integer);
+    /// <summary> Get the resolution type by given height and width. </summary>
+    function GetResolutionType(aWidth: UInt32;
+                               aHeight: UInt32): string;
+    /// <summary> Set a frame rate by selected array index. </summary>
+    procedure SetFrameRateByIndex(index: Integer);
+
+    /// <summary> Holds the array with all common resolutions. </summary>
+    property Resolutions: TResolutionsArray read aResolutionArray write aResolutionArray;
+    /// <summary> Holds the array with all common framerates. </summary>
     property FrameRates: TFrameRatesArray read aFrameRatesArray write aFrameRatesArray;
-    property CurrentFrameRate: Integer read iCurrentFrameRate write iCurrentFrameRate;
+    /// <summary> Holds the selected resolution by index record. </summary>
+    property SelectedResolution: TResolution read rResolution;
+    /// <summary> Holds the selected framerate by index record. </summary>
+    property SelectedFrameRate: TFrameRate read rFrameRate;
 
   end;
+
+  // For global access.
+  // Usage: FVideoStandardsCheat := TVideoStandardsCheat.Create;
+var
+  FVideoStandardsCheat: TVideoStandardsCheat;
 
 
 implementation
@@ -149,7 +168,9 @@ implementation
 constructor TVideoStandardsCheat.Create();
 begin
   inherited Create();
-  CurrentResolution := 0;
+
+  GetResolutions();
+  GetFrameRates();
 end;
 
 
@@ -157,20 +178,22 @@ destructor TVideoStandardsCheat.Destroy();
 begin
   SetLength(aResolutionArray,
             0);
+  aResolutionArray := nil;
   SetLength(aFrameRatesArray,
             0);
+  aFrameRatesArray := nil;
   inherited Destroy();
 end;
 
 
-procedure TVideoStandardsCheat.SetRes(hResolution: ShortString;
+procedure TVideoStandardsCheat.SetRes(hResolution: string;
                                       hWidth: Integer;
                                       hHeight: Integer;
                                       hAspectRatio: Double;
                                       hAspectRatioNumerator: Double;
                                       hAspectRatioDenominator: Integer;
-                                      hStrAspectRatio: ShortString;
-                                      hRemarks: ShortString);
+                                      hStrAspectRatio: string;
+                                      hRemarks: string);
 begin
   aResolutionArray[iCounter].Resolution := hResolution;
   aResolutionArray[iCounter].iWidth := hWidth;
@@ -186,7 +209,7 @@ end;
 
 procedure TVideoStandardsCheat.GetResolutions();
 var
-  rRes: ShortString;
+  rRes: string;
   rWidth: Integer;
 
 const
@@ -300,7 +323,6 @@ begin
   SetRes(rRes, rWidth, 2098, r2_44, r2_44, 1, s2_44, '');
 
 
-
   // Cinema DCP 4K
   rRes := 'Cinema DCP 4K';
 
@@ -377,7 +399,6 @@ begin
   SetRes(rRes, rWidth, 1180, r2_44, r2_44, 1, s2_44, '');
 
 
-
   // Cinema DCP 2K
   rRes := 'Cinema DCP 2K';
 
@@ -409,7 +430,7 @@ begin
 
   SetRes(rRes, rWidth, 1440, r4_3, 4, 3, s4_3, '');
   SetRes(rRes, rWidth, 1152, r5_3, 5, 3, s5_3, '');
-  SetRes(rRes, rWidth, 1080, r16_10, 16, 10, s16_10, '');
+  SetRes(rRes, rWidth, 1200, r16_10, 16, 10, s16_10, '');
   SetRes(rRes, rWidth, 1080, r16_9, 16, 9, s16_9, '');
   SetRes(rRes, rWidth, 1036, r1_85, r1_85, 1, s1_85, Cinema_Flat);
   SetRes(rRes, rWidth, 1010, r1_90, r1_90, 1, s1_90, '');
@@ -469,11 +490,11 @@ end;
 
 procedure TVideoStandardsCheat.SetFrameRates(iIndex: Integer;
                                              fRate: Double;
-                                             sHint: ShortString);
+                                             sHint: string);
 begin
   aFrameRatesArray[iIndex].FrameRate := fRate;
-  aFrameRatesArray[iIndex].sFrameRate := ShortString(Format('%n',
-                                                            [fRate]));
+  aFrameRatesArray[iIndex].sFrameRate := Format('%n',
+                                                [fRate]);
   aFrameRatesArray[iIndex].sHint := sHint;
 end;
 
@@ -484,13 +505,13 @@ var
 begin
   // Standard definitions for format versus framerate:
   // 240p: 18 fps.
-  // 360p: 24 fps.
-  // 480p: 24 fps.
-  // 720p: 24 fps  HD Ready.
-  // 1080p: 30 fps  Full HD.
-  // 4k: 60 fps Ultra HD.
-  // 5k: 60 fps (supported by action camera's like GoPro).
-  // 8k: 60 or 120 fps.
+  // 360p: 23.976 or 24 fps.
+  // 480p: 23.976 or 24 fps.
+  // 720p: 23.976 or 24 fps  HD Ready.
+  // 1080p: 29.97 or 30 fps  Full HD.
+  // 4k: 59.94 or 60 fps Ultra HD.
+  // 5k: 59.94 or 60 fps (supported by action camera's like GoPro).
+  // 8k: 59.94, 60 or 120 fps.
 
   SetLength(aFrameRatesArray,
             19);
@@ -611,6 +632,57 @@ begin
                 300,
                 'Extremely slow motion footage and creating slow motion videos.');
 
+end;
+
+
+function TVideoStandardsCheat.GetResolutionType(aWidth: UInt32;
+                                                aHeight: UInt32): string;
+var
+  i: Integer;
+
+begin
+  if (Length(aResolutionArray) = 0) then
+    begin
+      Result := '';
+      Exit;
+    end;
+
+  for i := 0 to Length(aResolutionArray) - 1 do
+    begin
+      if (aHeight = aResolutionArray[i].iHeight) then
+        begin
+          Result := aResolutionArray[i].Resolution;
+          Break;
+        end
+      else if (aWidth = aResolutionArray[i].iWidth) then
+        begin
+          Result := aResolutionArray[i].Resolution;
+          Break;
+        end
+      else if (aWidth = aResolutionArray[i].iWidth) and (aHeight = aResolutionArray[i].iHeight) then
+        begin
+          Result := aResolutionArray[i].Resolution;
+          Break;
+        end
+      else
+        Result := Format('Width: %d x Height: %d', [aWidth, aHeight]);
+    end;
+end;
+
+
+procedure TVideoStandardsCheat.SetResolutionByIndex(index: Integer);
+begin
+  CopyMemory(@rResolution,
+             @aResolutionArray[index],
+             SizeOf(TResolution));
+end;
+
+
+procedure TVideoStandardsCheat.SetFrameRateByIndex(index: Integer);
+begin
+  CopyMemory(@rFrameRate,
+             @aFrameRatesArray[index],
+             SizeOf(TFrameRate));
 end;
 
 end.

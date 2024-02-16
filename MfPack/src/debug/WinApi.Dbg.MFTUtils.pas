@@ -9,7 +9,7 @@
 // Release date: 09-07-2023
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: This file contains a class that attempts to list the Media
 //              Foundation Transforms (MFTs) available on the system.
 //              See https://learn.microsoft.com/en-us/windows/win32/medfound/registering-and-enumerating-mfts.
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -197,8 +197,6 @@ procedure TListMFTs.ListTansforms(pInput: MFT_REGISTER_TYPE_INFO;
 var
   hr: HResult;
   ppActivate: PIMFActivate;
-
-  pDecoder: IMFTransform;
   category: TGUID;
   mftCount: UINT32;
   i: Integer;
@@ -217,11 +215,15 @@ begin
  // else if .. if you want to get more mft types.
 
   hr := MFTEnumEx(category,
-                  MFT_ENUM_FLAG_SYNCMFT or MFT_ENUM_FLAG_ASYNCMFT or MFT_ENUM_FLAG_HARDWARE or MFT_ENUM_FLAG_SORTANDFILTER,
+                  MFT_ENUM_FLAG_SYNCMFT or
+                  MFT_ENUM_FLAG_ASYNCMFT or
+                  MFT_ENUM_FLAG_HARDWARE or
+                  MFT_ENUM_FLAG_SORTANDFILTER,
                   @pInput,
                   @pOutput,
                   ppActivate,
                   mftCount);
+
   if FAILED(hr) then
     begin
       ShowMessage(Format('MFTEnumEx failed with error: %d.',
@@ -377,8 +379,5 @@ begin
   audioWMA9.guidSubtype     := MFAudioFormat_WMAudioV9;
 
 end;
-
-
-
 
 end.

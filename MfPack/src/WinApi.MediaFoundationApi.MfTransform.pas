@@ -10,7 +10,7 @@
 // Release date: 11-07-2012
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Define the interfaces for Media Foundation Transforms.
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -30,7 +30,7 @@
 //         IUnknown(Pointer), IUnknown(Object), IUnknown(Nil) etc.
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -952,7 +952,7 @@ const
 
   // MFT_DECODER_QUALITY_MANAGEMENT_CUSTOM_CONTROL {A24E30D7-DE25-4558-BBFB-71070A2D332E}
   // Data Type: UINT32 (treat as BOOL)
-  // by default it's false
+  // by default it's False
   // Specifies whether QM in video decoder mft should have the following two features for custom control externally by app or pipeline
   // 1. faster reaction time
   // 2. drop non-reference frames only, don't drop reference frames and let pipeline or app drop decoded/raw reference frames if needed

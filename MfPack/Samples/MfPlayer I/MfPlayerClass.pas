@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Revision Version: 3.1.4
+// Revision Version: 3.1.6
 // Description: This is the basic class of MfPlayer,
 //              containing the necessary methodes to play a mediafile
 //              For indepth information see the included examples (CPlayer)
@@ -25,14 +25,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
 //          This sample shows how to implement the TInterfacedObject.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -1120,8 +1120,8 @@ begin
 try
   // use assertions in debug mode only.
   {$IFDEF DEBUG}
-  Assert(bit <> Nil);
-  {$IFEND}
+  Assert(bit <> nil);
+  {$ENDIF}
   data := Nil;
 
   // Set the biSize member of the structure to sizeof(BITMAPINFOHEADER)
@@ -1138,7 +1138,10 @@ try
                                             bufSize,
                                             timestamp);
       if FAILED(hr) then
-        Exit;
+        begin
+          Result := hr;
+          Exit;
+        end;
 
       data := buffer;
     end;
@@ -1752,7 +1755,7 @@ try
 
   if (m_pSession = nil) then
     begin
-      hr := MF_E_INVALIDREQUEST;
+      Result := MF_E_INVALIDREQUEST;
       Exit;
     end;
 

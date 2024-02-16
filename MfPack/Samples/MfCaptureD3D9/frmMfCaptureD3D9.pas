@@ -21,16 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
-// 29/01/2222 Tony                Changed OnDeviceChange for compatibility with Win 10/11
-// 07/02/2023 Tony                Fixed issues with OnReadSample and bufferlock.
-// 04/03/2023 Tony                Updated Device loss methods.
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX314
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

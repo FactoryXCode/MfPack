@@ -9,7 +9,7 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Declarations for the audio effects included with XAudio2.
 //              Windows 8 XAudio 2.8 or later
 //
@@ -21,14 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
-// 20/12/2021 Jim Hawkins         Removed Single casting.
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: This version of XAudio2 is available only in Windows 8 or later.
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

@@ -10,7 +10,7 @@
 // Release date: 31-08-2022
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 //
 // Description: Contains interface definitions for the D3D11.1 API.
 //              Microsoft DirectX D3D11 used by Media Foundation.
@@ -25,13 +25,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 31/08/2022 All                 Mercury release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks:  Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -130,7 +130,7 @@ type
   PD3D11_RENDER_TARGET_BLEND_DESC1 = ^D3D11_RENDER_TARGET_BLEND_DESC1;
   D3D11_RENDER_TARGET_BLEND_DESC1 = record
     BlendEnable: BOOL;
-    LogicOpEnable: BOOL;            // LogicOpEnable and BlendEnable can't both be true
+    LogicOpEnable: BOOL;            // LogicOpEnable and BlendEnable can't both be True
     SrcBlend: D3D11_BLEND;
     DestBlend: D3D11_BLEND;
     BlendOp: D3D11_BLEND_OP;

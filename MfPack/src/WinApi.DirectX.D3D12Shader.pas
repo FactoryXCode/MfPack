@@ -10,7 +10,7 @@
 // Release date: 13-08-2022
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: D3D12 Shader Types and APIs.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Embarcadero's <= Delphi 10.4 D3D12 is outdated!
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -382,7 +382,7 @@ type
     RequiredFeatureFlags: UINT64;         // Required feature flags
     Name: PAnsiChar;                      // Function name
     FunctionParameterCount: INT;          // Number of logical parameters in the function signature (not including return)
-    HasReturn: BOOL;                      // TRUE, if function returns a value, false - it is a subroutine
+    HasReturn: BOOL;                      // TRUE, if function returns a value, False - it is a subroutine
     Has10Level9VertexShader: BOOL;        // TRUE, if there is a 10L9 VS blob
     Has10Level9PixelShader: BOOL;         // TRUE, if there is a 10L9 PS blob
   end;

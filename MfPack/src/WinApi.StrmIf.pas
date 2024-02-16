@@ -10,7 +10,7 @@
 // Release date: 12/12/2015
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: ActiveMovie interface definitions.
 //              also included with DirectShow.pas.
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 // 
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -975,11 +975,11 @@ type
 
       function SetDiscontinuity(const bDiscontinuity: BOOL): HResult; stdcall;
 
-      function GetMediaTime(out pTimeStart: int64;
-                            out pTimeEnd: int64): HResult; stdcall;
+      function GetMediaTime(out pTimeStart: Int64;
+                            out pTimeEnd: Int64): HResult; stdcall;
 
-      function SetMediaTime(pTimeStart: int64;
-                            pTimeEnd: int64): HResult; stdcall;
+      function SetMediaTime(pTimeStart: Int64;
+                            pTimeEnd: Int64): HResult; stdcall;
 
   end;
   IID_IMediaSample = IMediaSample;
@@ -1834,7 +1834,7 @@ type
                              wStopCookie: WORD): HResult; stdcall;
 
       function AllocCapFile(lpstr: PWCHAR;
-                            dwlSize: int64): HResult; stdcall;
+                            dwlSize: Int64): HResult; stdcall;
 
       function CopyCaptureFile(lpwstrOld: PWCHAR;
                                lpwstrNew: PWCHAR;

@@ -10,7 +10,7 @@
 // Release date: 02-06-2016
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Windows Driver Model/Connection and Streaming Architecture (WDM-CSA)
 // ions.
 //
@@ -22,15 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 13/08/2020 All                 Enigma release. New layout and namespaces
-// 10/12/2020                     Compatibility update.
-// 28/09/2021 All                 Updated to 10.0.20348.0
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8.1 or later.
 // 
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -282,7 +280,7 @@ const
     VT_BSTR = 8;                 // A string.
     VT_DISPATCH = 9;             // An IDispatch pointer.
     VT_ERROR = 10;               // An SCODE value.
-    VT_BOOL = 11;                // A Boolean value. True is -1 and false is 0.
+    VT_BOOL = 11;                // A Boolean value. True is -1 and False is 0.
     VT_VARIANT = 12;             // A variant pointer.
     VT_UNKNOWN = 13;             // An IUnknown pointer.
     VT_DECIMAL = 14;             // A 16-byte fixed-pointer value.
@@ -1037,7 +1035,7 @@ type
         MajorFormat : TGUID;
         SubFormat   : TGUID;
         Specifier   : TGUID);
-    1: (Alignment   : int64);
+    1: (Alignment   : Int64);
   end;
   {$EXTERNALSYM KSDATAFORMAT}
   KSDATARANGE = KSDATAFORMAT;
@@ -1665,7 +1663,7 @@ type
 
   PKSFRAMETIME = ^KSFRAMETIME;
   KSFRAMETIME = record
-    Duration   : int64;
+    Duration   : Int64;
     FrameFlags : ULONG;
     Reserved   : ULONG;
   end;
@@ -1804,7 +1802,7 @@ type
   KSQUALITY = record
     Context    : Pointer;
     Proportion : ULONG;
-    DeltaTime  : int64;
+    DeltaTime  : Int64;
   end;
   {$EXTERNALSYM KSQUALITY}
 

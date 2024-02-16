@@ -10,7 +10,7 @@
 // Release date: 17-05-2020
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Include file for the MCI Digital Video Command Set.
 //              Part of Windows Multimedia
 //              See: https://docs.microsoft.com/en-us/windows/win32/api/_multimedia/
@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Date            Modification
@@ -31,7 +31,7 @@
 //          Aug 19, 1992    Version 1.0 Release
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

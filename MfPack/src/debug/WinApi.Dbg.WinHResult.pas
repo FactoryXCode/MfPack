@@ -9,7 +9,7 @@
 // Release date: 09-07-2023
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Return ccde definitions of the Win32 HResults.
 //
 // Organisation: FactoryX
@@ -20,13 +20,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 09/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 31/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -63,10 +63,8 @@ unit WinApi.Dbg.WinHResult;
 interface
 
 uses
-  {WinApi}
   WinApi.Windows,
   WinApi.WinError,
-  {WinApiDebug}
   WinApi.Dbg.WinHResultTools;
 
 
@@ -102,7 +100,6 @@ begin
   hr := S_OK;
   HeaderFile := 'winerror.h';
   Reference[0] := 'https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-erref/705fb797-2175-4a90-b5a3-3918024b10b8';
-  Reference[1] := 'https://learn.microsoft.com/en-us/windows/win32/api/winerror';
 
   case aHResult of
     LongInt($00030200)          : begin

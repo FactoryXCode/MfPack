@@ -1,3 +1,62 @@
+﻿// FactoryX
+//
+// Copyright © FactoryX. All rights reserved.
+//
+// Project: Media Foundation - MFPack - Samples
+// Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
+// Module: WinApi.MediaFoundationApi.MfTrace.pas
+// Kind: Pascal Unit
+// Release date: 05-01-2016
+// Language: ENU
+//
+// Revision Version: 3.1.6
+// Description: Unit for MFTrace debugging purposes.
+//
+// Organisation: FactoryX
+// Intiator(s): Tony (maXcomX), Peter (OzShips).
+// Contributor(s): 
+//
+// -----------------------------------------------------------------------------
+// CHANGE LOG
+// Date       Person              Reason
+// ---------- ------------------- ----------------------------------------------
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
+// -----------------------------------------------------------------------------
+//
+// Remarks: -
+//
+// Related objects: -
+// Related projects: MfPackX316
+// Known Issues: -
+//
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
+//
+// Todo: -
+//
+// =============================================================================
+// Copyright (c) Microsoft Corporation. All rights reserved.
+//==============================================================================
+//
+// LICENSE
+//
+// The contents of this file are subject to the Mozilla Public License
+// Version 2.0 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at
+// https://www.mozilla.org/en-US/MPL/2.0/
+//
+// Software distributed under the License is distributed on an "AS IS"
+// basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+// License for the specific language governing rights and limitations
+// under the License.
+//
+// Non commercial users may distribute this sourcecode provided that this
+// header is included in full at the top of the file.
+// Commercial users are not allowed to distribute this sourcecode as part of
+// their product.
+//
+//==============================================================================
 unit WinApi.MediaFoundationApi.MfTrace;
 
 interface
@@ -12,7 +71,7 @@ uses
 
 implementation
 
-// IMPORTANT: you should only use these functions for debugging purposes.
+// IMPORTANT: You should only use these functions for debugging purposes.
 
 // Media Foundation event names
 function EventName(met: MediaEventType): string;
@@ -94,7 +153,7 @@ begin
     MEAudioSessionExclusiveModeOverride: Result := 'MEAudioSessionExclusiveModeOverride';
     MEPolicyChanged: Result := 'MEPolicyChanged';
     MEContentProtectionMessage: Result := 'MEContentProtectionMessage';
-    MEPolicySet, METrustV1Anchor: Result := 'MEPolicySet';
+    MEPolicySet {or METrustV1Anchor}: Result := 'MEPolicySet';
     MEWMDRMLicenseBackupCompleted: Result := 'MEWMDRMLicenseBackupCompleted';
     MEWMDRMLicenseBackupProgress: Result := 'MEWMDRMLicenseBackupProgress';
     MEWMDRMLicenseRestoreCompleted: Result := 'MEWMDRMLicenseRestoreCompleted';
@@ -105,7 +164,6 @@ begin
     MEWMDRMProximityCompleted: Result := 'MEWMDRMProximityCompleted';
     MEWMDRMLicenseStoreCleaned: Result := 'MEWMDRMLicenseStoreCleaned';
     MEWMDRMRevocationDownloadCompleted: Result := 'MEWMDRMRevocationDownloadCompleted';
-    MEWMDRMV1Anchor: Result := 'MEWMDRMV1Anchor';
     METransformUnknown: Result := 'METransformUnknown';
     METransformNeedInput: Result := 'METransformNeedInput';
     METransformHaveOutput: Result := 'METransformHaveOutput';
@@ -121,7 +179,7 @@ begin
     MEDeviceThermalStateChanged: Result := 'MEDeviceThermalStateChanged';
     else
       Result := 'Unknown event';
+  end;
 end;
-
 
 end.

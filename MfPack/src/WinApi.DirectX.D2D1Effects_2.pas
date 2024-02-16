@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description:  Image effects parts of the Direct2D API for Windows 8 and later.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -129,7 +129,7 @@ const
 
   // The number of nits that sRGB or scRGB color space uses for SDR white, or
   // floating point values of 1.0f. Note that this value is only constant when the
-  // color space uses scene-referred luminance, which is true for HDR content. If
+  // color space uses scene-referred luminance, which is True for HDR content. If
   // the color space uses display-referred luminance instead, then the SDR white
   // level should be queried from the display.
   D2D1_SCENE_REFERRED_SDR_WHITE_LEVEL = 80.0;

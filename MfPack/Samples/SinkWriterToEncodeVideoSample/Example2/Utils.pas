@@ -10,7 +10,7 @@
 // Release date: 11-12-2012
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Contains bitmap helpers.
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 // 18/05/2023 Renate              Fixed runtime error on selecting multiple bitmaps.
 //                                Speedup of bitmap resizing using D2D1_1
 // ------------------------------------------------------------------------------
@@ -78,6 +78,36 @@ uses
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfUtils;
 
+const
+  // Standard definitions for format versus framerate:
+  // 240p: 18 fps
+  // 360p: 24 fps
+  // 480p: 24 fps
+  // 720p: 24 fps  HD Ready
+  // 1080p: 30 fps  Full HD
+  // 4k: 60 fps Ultra HD
+  // 5k: 60 fps (supported by action camera's like GoPro)
+  // 8k: 60 to 240 fps
+  //                                         fps       Usage
+  //                                         ===       ===================================================================================
+  FrameRateArray: array [0..16] of Single = (8,        // Primitive animations.
+                                             10,       // Primitive animations.
+                                             12,       // Primitive animations.
+                                             15,       // Primitive animations.
+                                             16,       // Animations.
+                                             18,       // Animations.
+                                             23.976,   // Television / movies (intended color).
+                                             24,       // Television / movies (intended b&w).
+                                             25,       // European television standard.
+                                             29.97,    // North American traditional television standard to support b&w TV.
+                                             30,       // North American standard and live TV.
+                                             45,       // Rarely used.
+                                             48,       // Rarely used.
+                                             60,       // Games, sports, action footage and fast movements (limited slow motion purpose).
+                                             90,       // Rarely used. Games, sports, action footage and fast movements (slow motion purpose).
+                                             120,      // Games, sports, action footage and fast movements (slow motion purpose).
+                                             240);     // Extremely slow motion footage and creating slow motion videos.
+
   // Now uses Direct2D for resizing. Better quality and much faster than version 3.1.4
   procedure ResizeBitmap(aBitmap: TBitmap;
                          toWidth: Integer;
@@ -124,7 +154,10 @@ begin
                  NewHeight);
   Source.AlphaFormat := afIgnored;
   CanvasD2D := TDirect2DCanvas.Create(target.Canvas.Handle,
-                                      Rect(0, 0, NewWidth, NewHeight));
+                                      Rect(0,
+                                           0,
+                                           NewWidth,
+                                           NewHeight));
   try
     if Supports(CanvasD2D.RenderTarget,
                 ID2D1DeviceContext,
@@ -137,13 +170,18 @@ begin
         xscale := NewWidth / Source.Width;
         yscale := NewHeight / Source.Height;
         bmBits := Source.ScanLine[0];
-        DeviceContext.SetTransform(D2D_Matrix_3x2_F.Init(xscale, 0, 0,
-                                                         yscale, 0, 0));
+        DeviceContext.SetTransform(D2D_Matrix_3x2_F.Init(xscale,
+                                                         0,
+                                                         0,
+                                                         yscale,
+                                                         0,
+                                                         0));
 {$IFOPT R+}
 {$DEFINE R_Plus}
 {$R-}
 {$ENDIF}
-        DeviceContext.CreateBitmap(D2SizeU(Source.Width, Source.Height),
+        DeviceContext.CreateBitmap(D2SizeU(Source.Width,
+                                           Source.Height),
                                    bmBits,
                                    bmPitch,
                                    @bmProps,
@@ -162,7 +200,10 @@ begin
     else
       begin
         CanvasD2D.BeginDraw;
-        CanvasD2D.StretchDraw(Rect(0, 0, NewWidth, NewHeight),
+        CanvasD2D.StretchDraw(Rect(0,
+                                   0,
+                                   NewWidth,
+                                   NewHeight),
                               Source);
         CanvasD2D.EndDraw;
       end;

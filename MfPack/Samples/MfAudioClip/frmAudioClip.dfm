@@ -1,7 +1,6 @@
 object frmAudioClip: TfrmAudioClip
   Left = 0
   Top = 0
-  Hint = 'In seconds.'
   BorderStyle = bsSingle
   Caption = 'Audio Clip'
   ClientHeight = 152

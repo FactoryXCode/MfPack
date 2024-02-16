@@ -4,13 +4,6 @@ uses
   {$IFDEF FASTMM}
   FastMM4,
   {$ENDIF}
-  {$IFDEF madExcept}
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
-  {$ENDIF}
   Vcl.Forms,
   frmDuckingMediaPlayer in 'frmDuckingMediaPlayer.pas' {Form1},
   MediaPlayer in 'MediaPlayer.pas';

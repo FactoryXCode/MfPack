@@ -10,7 +10,7 @@
 // Release date: 09-10-2015
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,16 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
-// 07/03/2022 Tony                Fixed IMFCaptureEngineClassFactory.CreateInstance
-// 22/04/2022 Tony                Fixed IMFCaptureSource.GetAvailableDeviceMediaType
-// 20/02/2023 Tony                Fixed some issues.
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -711,12 +708,12 @@ type
     function GetMirrorState(out pfMirrorState: BOOL): HResult; stdcall;
     // Method to query for the current preview output's mirroring state
     // <param name = "pfMirrorState">
-    // Receives the boolean flag indicating the current mirror state (true=on, false=off).
+    // Receives the boolean flag indicating the current mirror state (True=on, False=off).
 
     function SetMirrorState(fMirrorState: BOOL): HResult; stdcall;
     // Method to set the current preview output's mirroring state
     // <param name = "fMirrorState">
-    // Boolean flag indicating the current mirror state (true=on, false=off).
+    // Boolean flag indicating the current mirror state (True=on, False=off).
 
     function GetRotation(const dwStreamIndex: DWORD;
                          out pdwRotationValue: DWORD): HResult; stdcall;
@@ -881,13 +878,13 @@ type
                             out pfMirrorState: BOOL): HResult; stdcall;
     // Method to query for the current preview output's mirroring state
     // <param name = "pfMirrorState">
-    // Receives the boolean flag indicating the current mirror state (true=on, false=off).
+    // Receives the boolean flag indicating the current mirror state (True=on, False=off).
 
     function SetMirrorState(const dwStreamIndex: DWORD;
                             fMirrorState: BOOL): HResult; stdcall;
     // Method to set the current preview output's mirroring state
     // <param name = "fMirrorState">
-    // Boolean flag indicating the current mirror state (true=on, false=off).
+    // Boolean flag indicating the current mirror state (True=on, False=off).
 
     function GetStreamIndexFromFriendlyName(const uifriendlyName: UINT32;
                                             out pdwActualStreamIndex: DWORD): HResult; stdcall;
@@ -950,7 +947,7 @@ type
     // App should listen for MF_CAPTURE_ENGINE_RECORD_STOPPED via IMFCaptureEngineOnEventCallback.
     // <param name = "bFinalize">
     // Specifies if the output file should be finalized.
-    // If this is false then the output file wont be able to play back.
+    // If this is False then the output file wont be able to play back.
     // <param name = "bFlushUnprocessedSamples">
     // Specifies if the unprocessed samples waiting to be encoded should be flushed.
 

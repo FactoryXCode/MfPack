@@ -9,24 +9,24 @@
 // Release date: 24-06-2023
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Audio formats dialog.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX), Peter (OzShips), Ramyses De Macedo Rodrigues.
+// Intiator(s): Tony (maXcomX), Peter (OzShips).
 // Contributor(s): Tony Kalf (maXcomX)
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -185,12 +185,9 @@ begin
   if SUCCEEDED(hr) then
     Populate()
   else
-    begin
-      // Show a message
-      DebugMsg(SysErrorMessage(hr),
-               hr);
-      butCancel.Click();
-    end;
+    butCancel.Click();
+
+  Result := hr;
 end;
 
 

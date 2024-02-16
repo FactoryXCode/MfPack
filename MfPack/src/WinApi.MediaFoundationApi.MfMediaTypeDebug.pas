@@ -10,7 +10,7 @@
 // Release date: 13-08-2022
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Code to view the contents of a media type (IMFMediaType) while debugging.
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: How to use:
@@ -42,7 +42,7 @@
 //              {$ENDIF}
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -150,15 +150,16 @@ constructor TMediaTypeDebug.Create();
 begin
   inherited Create();
   slDebug := TStringlist.Create();
-  SetLength(arDebug, 0);
-
+  SetLength(arDebug,
+            0);
 end;
 
 
 destructor TMediaTypeDebug.Destroy();
 begin
-  slDebug.Free();
-  slDebug := nil;
+  SetLength(arDebug, 0);
+  arDebug := nil;
+  FreeAndNil(slDebug);
   inherited Destroy();
 end;
 

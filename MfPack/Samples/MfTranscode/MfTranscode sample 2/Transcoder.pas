@@ -10,24 +10,24 @@
 // Release date: 24-06-2023
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: This is a modified class of the Transcoder sample,
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX), Peter (OzShips), Ramyses De Macedo Rodrigues.
+// Intiator(s): Tony (maXcomX), Peter (OzShips).
 // Contributor(s): Tony Kalf (maXcomX)
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -87,6 +87,8 @@ uses
   WinApi.MediaFoundationApi.MfError,
   WinApi.MediaFoundationApi.MfUtils,
   WinApi.MediaFoundationApi.MfMetLib,
+  {MfPack}
+  WinApi.MfPack.VideoStandardsCheat,
   {Application}
   Common;
 
@@ -145,15 +147,15 @@ type
 implementation
 
 //-------------------------------------------------------------------
-//  CTranscoder constructor
+//  Transcoder constructor
 //-------------------------------------------------------------------
 constructor TTranscoder.Create(clHandle: HWnd);
 begin
   inherited Create();
 
   // A Delphi Forms Application will initialize Com by default.
-  //CoInitializeEx(nil,
-  //               COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE);
+  CoInitializeEx(nil,
+                 COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE);
 
   // Check if the current MF version match user's
   if FAILED(MFStartup(MF_VERSION, 0)) then
@@ -166,16 +168,20 @@ begin
     end;
 
   rcHandle := clHandle;
+  // Create the video cheat.
+  FVideoStandardsCheat := TVideoStandardsCheat.Create();
+  // Initialize the resolutions and framerates.
+
 end;
 
 //-------------------------------------------------------------------
-//  CTranscoder destructor
+//  Transcoder destructor
 //-------------------------------------------------------------------
 destructor TTranscoder.Destroy();
 begin
   // Shutdown the mediasource and session to release all their objects.
   Shutdown();
-  // Shutdown Media Foundation
+  // Shutdown Media Foundation.
   MFShutdown();
   CoUninitialize();
 
@@ -186,8 +192,14 @@ begin
   SafeRelease(m_pSession);
   SafeRelease(m_pAttributes);
 
-  SetLength(pCont, 0);
+  SetLength(pCont,
+            0);
   pCont := nil;
+
+  rcHandle := 0;
+
+  // Destroy the video cheat class.
+  FreeAndNil(FVideoStandardsCheat);
 
   inherited Destroy;
 end;
@@ -378,20 +390,35 @@ begin
   // Set the frame rate.
   // Framerate is calculated by FrameRateNumerator / FrameRateDenominator
   // For example:  5000000 / 208541 = 23.97 frames per second.
+  //if SUCCEEDED(hr) then
+  //  hr := MFSetAttributeRatio(pVideoAttrs,
+  //                            MF_MT_AVG_BITRATE,
+  //                            pCont[arIndex].video_FrameRateNumerator,
+  //                            pCont[arIndex].video_FrameRateDenominator);
+
   if SUCCEEDED(hr) then
-    hr := MFSetAttributeRatio(pVideoAttrs,
-                              MF_MT_AVG_BITRATE,
-                              pCont[arIndex].video_FrameRateNumerator,
-                              pCont[arIndex].video_FrameRateDenominator);
+    hr := pVideoAttrs.SetDouble(MF_MT_AVG_BITRATE,
+                                FVideoStandardsCheat.SelectedFrameRate.FrameRate);
 
   // Set the frame size.
+  // Note that if the custom resolution is larger than the source,
+  // the resolution of the source will be used.
+  // So, when for example the source is 1080p the resolutions have to be within the limits of this format.
+  // In other words: You can't resize a 1080p format to 4k.
   if SUCCEEDED(hr) then
-    hr := MFSetAttributeSize(pVideoAttrs,
-                             MF_MT_FRAME_SIZE,
-                             pCont[arIndex].video_FrameSizeWidth,
-                             pCont[arIndex].video_FrameSizeHeigth);
+   // if (FVideoStandardsCheat.SelectedResolution.iWidth <= pCont[arIndex].video_FrameSizeWidth) and
+   //    (FVideoStandardsCheat.SelectedResolution.iHeight <= pCont[arIndex].video_FrameSizeHeigth) then
+      hr := MFSetAttributeSize(pVideoAttrs,
+                               MF_MT_FRAME_SIZE,
+                               FVideoStandardsCheat.SelectedResolution.iWidth,
+                               FVideoStandardsCheat.SelectedResolution.iHeight);
+   // else
+   //   hr := MFSetAttributeSize(pVideoAttrs,
+   //                            MF_MT_FRAME_SIZE,
+   //                            pCont[arIndex].video_FrameSizeWidth,
+   //                            pCont[arIndex].video_FrameSizeHeigth);
 
-  //Set the pixel aspect ratio
+  // Set the pixel aspect ratio.
   if SUCCEEDED(hr) then
     hr := MFSetAttributeRatio(pVideoAttrs,
                               MF_MT_PIXEL_ASPECT_RATIO,
@@ -483,7 +510,7 @@ begin
       Exit;
     end;
 
-  //Create the transcode topology
+  // Create the transcode topology.
   hr := MFCreateTranscodeTopology(m_pSource,
                                   LPCWSTR(aURL),
                                   m_pProfile,
@@ -550,7 +577,6 @@ begin
                           WParam(1),
                           LParam(0));
             end;
-          HandleMessages(GetCurrentThread());
         end;
 
       // This is a synchronised operation, so we change the flag to immediate response, instead of waiting for an event in the queue.
@@ -647,7 +673,6 @@ begin
 end;
 
 
-
 //-------------------------------------------------------------------
 //  Start
 //
@@ -666,36 +691,38 @@ begin
   {$ENDIF}
 
   if Assigned(m_pClock) then
-    m_pClock := Nil;
+    m_pClock := nil;
 
   // We want the size of the sourcefile
   // Get the presentation descriptor from the topology.
   hr := GetPresentationDescriptorFromTopology(m_pTopology,
                                               pPD);
   // Get the duration from the presentation descriptor.
-  // For this we need the clock
-  if Succeeded(hr) then
+  // For this we need the clock.
+  if SUCCEEDED(hr) then
     begin
-      hr := pPD.GetUINT64(MF_PD_DURATION, UINT64(m_Duration));
+      hr := pPD.GetUINT64(MF_PD_DURATION,
+                          UINT64(m_Duration));
+
       // Get the presentation clock
       if SUCCEEDED(hr) then
         hr := m_pSession.GetClock(pClock);
+
       if SUCCEEDED(hr) then
         hr := pClock.QueryInterface(IID_IMFPresentationClock,
                                     m_pClock);
-      if Failed(hr) then
+      if FAILED(hr) then
         SendStatusNotify(LPCWSTR('Could not find a presentation clock!'));
-
-
      end;
 
   PropVariantInit(varStart);
 
-  hr := m_pSession.Start(GUID_NULL, varStart);
+  // Start the process.
+  hr := m_pSession.Start(GUID_NULL,
+                         varStart);
 
   if FAILED(hr) then
     SendStatusNotify(LPCWSTR('Failed to start the session...'));
-
 
   Result := hr;
 end;

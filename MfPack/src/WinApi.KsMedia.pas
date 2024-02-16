@@ -10,7 +10,7 @@
 // Release date: 02-06-2016
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: WDM-CSA Multimedia Definitions.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 // 
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -2482,7 +2482,7 @@ type
   "pack headers" internally before submission to the codec hardware if AT ALL POSSIBLE.  The
   reason is that mpeg data may need to be processed immediately but there may be no additional
   MPEG data forthcoming to fill up the PES packet OR DVD "pack" in a timely fashion.  This is
-  particularly true of MPEG dialects that utilize "repeat field signally" to reuse the last
+  particularly True of MPEG dialects that utilize "repeat field signally" to reuse the last
   decoded MPEG video field.
   }
 
@@ -3253,7 +3253,7 @@ const
   {$EXTERNALSYM KS_iEGA_COLORS}
   KS_iMASK_COLORS     = 3;   // Maximum three components
   {$EXTERNALSYM KS_iMASK_COLORS}
-  KS_iTRUECOLOR       = 16;  // Minimum true colour device
+  KS_iTRUECOLOR       = 16;  // Minimum True colour device
   {$EXTERNALSYM KS_iTRUECOLOR}
   KS_iRED             = 0;   // Index position for RED mask
   {$EXTERNALSYM KS_iRED}
@@ -3291,7 +3291,7 @@ type
   KS_BITMAPINFOHEADER = tagKS_BITMAPINFOHEADER;
   {$EXTERNALSYM KS_BITMAPINFOHEADER}
 
-  // Used for true colour images that also have a palette
+  // Used for True colour images that also have a palette
   PKS_TRUECOLORINFO = ^KS_TRUECOLORINFO;
   tag_KS_TRUECOLORINFO = record
     dwBitMasks : array[0..KS_iMASK_COLORS - 1] of DWORD;
@@ -4195,7 +4195,7 @@ type
   _CC_HW_FIELD = record
    ScanlinesRequested : VBICODECFILTERING_SCANLINES;
    fieldFlags         : ULONG;    // KS_VBI_FLAG_FIELD1,2
-   PictureNumber      : int64;
+   PictureNumber      : Int64;
    Lines              : array[0..CC_MAX_HW_DECODE_LINES-1] of CC_BYTE_PAIR;
   end;
   {$EXTERNALSYM _CC_HW_FIELD}
@@ -4229,7 +4229,7 @@ type
   PNABTS_BUFFER = ^_NABTS_BUFFER;
   _NABTS_BUFFER = record
     ScanlinesRequested : VBICODECFILTERING_SCANLINES;
-    PictureNumber      : int64;
+    PictureNumber      : Int64;
     NabtsLines         : array[0..MAX_NABTS_VBI_LINES_PER_FIELD - 1] of NABTS_BUFFER_LINE;
   end;
   {$EXTERNALSYM _NABTS_BUFFER}

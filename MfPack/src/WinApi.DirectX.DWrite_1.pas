@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 //
 // Description: DirectX Typography Services public API definitions.
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: - Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -1239,14 +1239,14 @@ type
     property allowResidualCompression: Integer index $1101 read GetBits write SetBits; // 1 bits at offset 17 //$11
 
     // Apply expansion/compression to the leading edge of the glyph. This will
-    // be false for connected scripts, fixed-size characters, and diacritics.
-    // It is generally false within a multi-glyph cluster, unless the script
+    // be False for connected scripts, fixed-size characters, and diacritics.
+    // It is generally False within a multi-glyph cluster, unless the script
     // allows expansion of glyphs within a cluster, like Thai.
     property applyToLeadingEdge: Integer index $1201 read GetBits write SetBits;       // 1 bits at offset 18 //$12
 
     // Apply expansion/compression to the trailing edge of the glyph. This will
-    // be false for connected scripts, fixed-size characters, and diacritics.
-    // It is generally false within a multi-glyph cluster, unless the script
+    // be False for connected scripts, fixed-size characters, and diacritics.
+    // It is generally False within a multi-glyph cluster, unless the script
     // allows expansion of glyphs within a cluster, like Thai.
     property applyToTrailingEdge: Integer index $1301 read GetBits write SetBits;      // 1 bits at offset 19 //$13
 
@@ -1305,7 +1305,7 @@ type
     //
     // Be aware that eudcedit.exe can create placeholder empty glyphs that
     // have zero advance width and no glyph outline. Although they are present
-    // in the font (HasCharacter returns true), you are best to ignore
+    // in the font (HasCharacter returns True), you are best to ignore
     // these and continue on with font fallback in your layout if the metrics
     // for the glyph are zero.
     //
@@ -1401,7 +1401,7 @@ type
                               unicodeRanges: PDWRITE_UNICODE_RANGE;
                               actualRangeCount: UINT32): HResult; stdcall;
 
-    // Returns true if the font is monospaced, meaning its characters are the
+    // Returns True if the font is monospaced, meaning its characters are the
     // same fixed-pitch width (non-proportional).
     function IsMonospacedFont(): BOOL; stdcall;
 
@@ -1536,7 +1536,7 @@ type
 
     // Returns whether or not the font has any vertical glyph variants.
     // Remarks
-    // For OpenType fonts, this will return true if the font contains a 'vert'
+    // For OpenType fonts, this will return True if the font contains a 'vert'
     // feature.
     //
     // True if the font contains vertical glyph variants.
@@ -1591,7 +1591,7 @@ type
                               unicodeRanges: PDWRITE_UNICODE_RANGE; // pointer to array
                               actualRangeCount: UINT32): HResult; stdcall;
 
-    // Returns true if the font is monospaced, meaning its characters are the
+    // Returns True if the font is monospaced, meaning its characters are the
     // same fixed-pitch width (non-proportional).
     function IsMonospacedFont(): BOOL; stdcall;
 
@@ -1666,9 +1666,9 @@ type
     // <param name="exists">Whether the returned baseline exists in the font.</param>
     // Remarks
     // If the baseline does not exist in the font, it is not considered an
-    // error, but the function will return exists = false. You may then use
+    // error, but the function will return exists = False. You may then use
     // heuristics to calculate the missing base, or, if the flag
-    // simulationAllowed is true, the function will compute a reasonable
+    // simulationAllowed is True, the function will compute a reasonable
     // approximation for you.
     //
     // Standard HRESULT error code.
@@ -1727,7 +1727,7 @@ type
     // <param name="textString">The text to check for complexity. This string
     //     may be UTF-16, but any supplementary characters will be considered
     //     complex.</param>
-    // <param name="isTextSimple">If true, the text is simple, and the
+    // <param name="isTextSimple">If True, the text is simple, and the
     //     glyphIndices array will already have the nominal glyphs for you.
     //     Otherwise you need to call GetGlyphs to properly shape complex
     //     scripts and OpenType features.
@@ -1933,7 +1933,7 @@ type
     // <param name="isRightToLeft">Whether the script should be shaped as
     //     right-to-left. For Arabic stacked top-to-bottom, even when the
     //     adjusted bidi level is coerced to an even level, this will still
-    //     be true.</param>
+    //     be True.</param>
     // A successful code or error code to abort analysis.
     function SetGlyphOrientation(textPosition: UINT32;
                                  textLength: UINT32;

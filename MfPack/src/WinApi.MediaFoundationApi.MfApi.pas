@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Requires Windows Vista or later.
 //              MfApi.pas is the unit containing the APIs for using the MF platform.
 //
@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -46,7 +46,7 @@
 //          Fields with a Common Type Specification.
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -2233,7 +2233,7 @@ type
   // These flags are used in the following functions:
   //   MFTEnumEx: These flags control which Media Foundation transforms (MFTs) are enumerated, as well as the enumeration order.
   //   MFTRegister: A subset of these flags are used when registering an MFT.
-  //   MFTranscodeGetAudioOutputAvailableTypes:
+  //   MFTranscodeGetAudioOutputAvailableTypes
 
   PMFT_ENUM_FLAG = ^MFT_ENUM_FLAG;
   _MFT_ENUM_FLAG = UINT32;
@@ -4713,9 +4713,9 @@ const
   {$EXTERNALSYM MFInitMediaTypeFromMPEG2VideoInfo}
 
   function MFCalculateBitmapImageSize({in} pBMIH: PBITMAPINFOHEADER;
-                                      {In} const cbBufSize: UINT32;
-                                      {Out} pcbImageSize: UINT32;
-                                      {Out_opt} pbKnown: PBOOL = Nil): HResult; stdcall;
+                                      const cbBufSize: UINT32;
+                                      out pcbImageSize: UINT32;
+                                      out pbKnown: PBOOL): HResult; stdcall;
   {$EXTERNALSYM MFCalculateBitmapImageSize}
 
   //////////////////////////////////////////////////////////////////////////////
@@ -4735,6 +4735,7 @@ const
   //
   //   For certain common frame rates, the function gets the frame duration from a look-up table:
   //   Frames per second (floating point)     Frames per second (fractional)     Average time per frame
+  //   ==================================     ==============================     ======================
   //   59.94                                  60000/1001                         166833
   //   29.97                                  30000/1001                         333667
   //   23.976                                 24000/1001                         417188
@@ -4743,6 +4744,8 @@ const
   //   50                                     50/1                               200000
   //   25                                     25/1                               400000
   //   24                                     24/1                               416667
+  //
+  // For the complete standard framerate table see: WinApi.MfPack.VideoStandardsCheat.pas.
 
   function MFFrameRateToAverageTimePerFrame(unNumerator: UINT32; // The numerator of the frame rate.
                                             unDenominator: UINT32; // The denominator of the frame rate.
@@ -5139,7 +5142,8 @@ const
   {$EXTERNALSYM MFInitVideoFormat_RGB}
   // [This API is not supported and may be altered or unavailable in the future.
   // Applications should avoid using the MFVIDEOFORMAT structure,
-  // and use media type attributes instead. For more information, see Video Media Types.]
+  // and use media type attributes instead.
+  // For more information, see https://learn.microsoft.com/en-us/windows/win32/medfound/video-media-types
   // Initializes an MFVIDEOFORMAT structure for an uncompressed RGB video format.
   //Parameters
   // pVideoFormat [in]
@@ -5164,12 +5168,12 @@ const
   //    For more information, see Library Changes in Windows 7.
 
 
-  function MFConvertColorInfoToDXVA(var pdwToDXVA: DWORD;
-                                    var pFromFormat: MFVIDEOFORMAT): HResult; stdcall;
+  function MFConvertColorInfoToDXVA(out pdwToDXVA: DWORD;
+                                    pFromFormat: MFVIDEOFORMAT): HResult; stdcall;
   {$EXTERNALSYM MFConvertColorInfoToDXVA}
   // [This API is not supported and may be altered or unavailable in the future.
   // Applications should avoid using the MFVIDEOFORMAT structure, and use media type attributes instead.
-  // For more information, see Extended Color Information.]
+  // For more information, see https://learn.microsoft.com/en-us/windows/win32/medfound/extended-color-information
   // Converts the extended color information from an MFVIDEOFORMAT to the equivalent
   // DirectX Video Acceleration (DXVA) color information.
   // Parameters
@@ -5213,7 +5217,7 @@ const
 
   // Optimized stride copy function
   // ==============================
-
+  // Copies an image or image plane from one buffer to another.
   function MFCopyImage(pDest: PByte;
                        lDestStride: LONG;
                        const pSrc: PByte;
@@ -5253,7 +5257,7 @@ const
   //    For more information, see Library Changes in Windows 7.
 
 
-  function MFConvertFromFP16Array(out pDest: PSingle;
+  function MFConvertFromFP16Array({out} pDest: PSingle;
                                   pSrc: PWORD;
                                   dwCount: DWORD): HRESULT; stdcall;
   {$EXTERNALSYM MFConvertFromFP16Array}
@@ -5944,9 +5948,7 @@ implementation
 uses
   System.SysUtils;
 
-
   // Implement Additional Prototypes here.
-
 
 //
 function HI32(unPacked: UINT64): UINT32;

@@ -1,17 +1,17 @@
 # MfTranscode example 2
-Version: X 3.1.5
+Version: X 3.1.6
 
 NOTES: 
  - This release is updated for compiler version 17 up to 35.
  - SDK version 10.0.22621.0 (Win 11)
  - Requires Windows 7 or later.
- - Minimum supported MfPack version: 3.1.5
+ - Minimum supported MfPack version: 3.1.6
 
 Description:
 Demonstrates using the transcode API to transcode a source file (audio or video) to
 a different format (audio or video) supported by Media Foundation.
 The sample audio can be configured in detail, dependent of the audio codec supported by Media Foundation.
-The video format will be configured according to the source format.
+The video format can be configured within the margins of the resolution format.
 
 Supported, but not limited, formats in this sample are:
 
@@ -34,6 +34,6 @@ Project location: https://github.com/FactoryXCode/MfPack
                   https://sourceforge.net/projects/MFPack
 
 First release date: 24/01/2020
-Final release date: 27/07/2023
+Final release date: 02/02/2024
 
 Copyright © FactoryX. All rights reserved.

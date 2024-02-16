@@ -10,7 +10,7 @@
 // Release date: 24-10-2020
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: This module contains the multimedia class scheduler APIs and any public data
 //              structures needed to call these APIs.
 //              This header is part of the System Services API.
@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Please take notice of ANSI or Unicode versions of the included function.
@@ -32,7 +32,7 @@
 //          For more information, see https://docs.microsoft.com/en-us/windows/win32/intl/conventions-for-function-prototypes.
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 33

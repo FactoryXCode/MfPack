@@ -3,8 +3,8 @@ object AudioFormatDlg: TAudioFormatDlg
   Top = 108
   BorderStyle = bsDialog
   Caption = 'Select Audio Format'
-  ClientHeight = 339
-  ClientWidth = 425
+  ClientHeight = 341
+  ClientWidth = 424
   Color = clBtnFace
   ParentFont = True
   OldCreateOrder = True
@@ -15,7 +15,7 @@ object AudioFormatDlg: TAudioFormatDlg
   object Bevel1: TBevel
     Left = 0
     Top = 0
-    Width = 425
+    Width = 424
     Height = 302
     Align = alTop
     Shape = bsFrame
@@ -37,7 +37,7 @@ object AudioFormatDlg: TAudioFormatDlg
     WordWrap = True
   end
   object butOk: TButton
-    Left = 262
+    Left = 260
     Top = 308
     Width = 75
     Height = 25
@@ -48,7 +48,7 @@ object AudioFormatDlg: TAudioFormatDlg
     OnClick = butOkClick
   end
   object butCancel: TButton
-    Left = 339
+    Left = 340
     Top = 308
     Width = 75
     Height = 25
@@ -130,8 +130,8 @@ object AudioFormatDlg: TAudioFormatDlg
     OnClick = stxtChannelsClick
   end
   object sgAudioFormats: TStringGrid
-    Left = 9
-    Top = 66
+    Left = 8
+    Top = 67
     Width = 405
     Height = 229
     DefaultColWidth = 100

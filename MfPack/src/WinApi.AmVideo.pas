@@ -10,7 +10,7 @@
 // Release date: 05-10-2015
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Video related definitions and interfaces for ActiveMovie. (DirectX Include unit).
 //
 // Organisation: FactoryX
@@ -21,14 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: This unit is also included in Winapi/DsPack.DirectShow9.pas
 //          If you need DirectShow, exclude this file from your project.
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -374,7 +374,7 @@ type
   // supports that mode of operations (there is a working video mixer sample)
 
 const
-  // Used for true colour images that also have a palette
+  // Used for True colour images that also have a palette
 
   iPALETTE_COLORS = 256;          // Maximum colours in palette
   {$EXTERNALSYM iPALETTE_COLORS}
@@ -382,7 +382,7 @@ const
   {$EXTERNALSYM iEGA_COLORS}
   iMASK_COLORS = 3;               // Maximum three components
   {$EXTERNALSYM iMASK_COLORS}
-  iTRUECOLOR = 16;                // Minimum true colour device
+  iTRUECOLOR = 16;                // Minimum True colour device
   {$EXTERNALSYM iTRUECOLOR}
   iRED = 0;                       // Index position for RED mask
   {$EXTERNALSYM iRED}
@@ -406,7 +406,7 @@ type
   {$EXTERNALSYM tag_TRUECOLORINFO}
   TRUECOLORINFO = tag_TRUECOLORINFO;
   {$EXTERNALSYM TRUECOLORINFO}
-  // Used for true colour images that also have a palette
+  // Used for True colour images that also have a palette
 
 
   PVideoInfoHeader = ^VIDEOINFOHEADER;
@@ -472,7 +472,7 @@ type
   // BITMAPINFOHEADER followed by a number of other fields depending on what the
   // BITMAPINFOHEADER contains. If it contains details of a palettised format it
   // will be followed by one or more RGBQUADs defining the palette. If it holds
-  // details of a true colour format then it may be followed by a set of three
+  // details of a True colour format then it may be followed by a set of three
   // DWORD bit masks that specify where the RGB data can be found in the image
   // (For more information regarding BITMAPINFOs see the Win32 documentation)
   //
@@ -680,7 +680,7 @@ implementation
     end;
   // The TRUECOLOR macro returns the TRUECOLORINFO structure from a VIDEOINFO structure.
   // The TRUECOLORINFO structure contains color bitmasks followed by palette information,
-  // and is used for true-color images (16 bit or higher) that contain palettes.
+  // and is used for True-color images (16 bit or higher) that contain palettes.
   // Parameters
   // pbmi
   //    Pointer to a VIDEOINFO structure.

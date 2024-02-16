@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Defines for document package target interfaces.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -191,7 +191,7 @@ type
   IPrintDocumentPackageTarget2 = interface(IUnknown)
   ['{c560298a-535c-48f9-866a-632540660cb4}']
 
-    // This method returns true if the printer is an IppPrinter.
+    // This method returns True if the printer is an IppPrinter.
     function GetIsTargetIppPrinter(out isIppPrinter: BOOL): HResult; stdcall;
 
     // This method returns IppPrinterDevice for the target printer.

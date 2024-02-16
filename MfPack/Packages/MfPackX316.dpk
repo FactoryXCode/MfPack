@@ -1,4 +1,4 @@
-package MfPackX315;
+package MfPackX316;
 
 {$R *.res}
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
@@ -91,7 +91,6 @@ contains
   WinApi.DirectX.D3D11 in '..\src\WinApi.DirectX.D3D11.pas',
   WinApi.DirectX.D3D11_1 in '..\src\WinApi.DirectX.D3D11_1.pas',
   WinApi.DirectX.D3D11_2 in '..\src\WinApi.DirectX.D3D11_2.pas',
-  WinApi.DirectX.D3D11_3 in '..\src\WinApi.DirectX.D3D11_3.pas',
   WinApi.DirectX.D3D11_4 in '..\src\WinApi.DirectX.D3D11_4.pas',
   WinApi.DirectX.D3D11on12 in '..\src\WinApi.DirectX.D3D11on12.pas',
   WinApi.DirectX.D3D11Shader in '..\src\WinApi.DirectX.D3D11Shader.pas',
@@ -218,6 +217,8 @@ contains
   WinApi.WinMM.VfwMsgs in '..\src\WinApi.WinMM.VfwMsgs.pas',
   WinApi.Wmistr in '..\src\WinApi.Wmistr.pas',
   WinApi.StiErr in '..\src\WinApi.StiErr.pas',
-  WinApi.MfPack.VideoStandardsCheat in '..\src\WinApi.MfPack.VideoStandardsCheat.pas';
+  WinApi.MfPack.VideoStandardsCheat in '..\src\WinApi.MfPack.VideoStandardsCheat.pas',
+  WinApi.MediaFoundationApi.MfTrace in '..\src\WinApi.MediaFoundationApi.MfTrace.pas',
+  WinApi.DirectX.D3D11_3 in '..\src\WinApi.DirectX.D3D11_3.pas';
 
 end.

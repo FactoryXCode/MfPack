@@ -38,18 +38,9 @@ object dlgVideoSetttings: TdlgVideoSetttings
   object Label3: TLabel
     Left = 24
     Top = 62
-    Width = 76
+    Width = 50
     Height = 13
-    Caption = 'Video dimension'
-  end
-  object Label4: TLabel
-    Left = 24
-    Top = 147
-    Width = 85
-    Height = 19
-    Hint = 'Buffer latency. By default this is 10 milliseconds.'
-    AutoSize = False
-    Caption = 'Buffer latency'
+    Caption = 'Resolution'
   end
   object Label5: TLabel
     Left = 24
@@ -63,8 +54,8 @@ object dlgVideoSetttings: TdlgVideoSetttings
     ShowHint = True
   end
   object Label6: TLabel
-    Left = 100
-    Top = 107
+    Left = 114
+    Top = 104
     Width = 127
     Height = 19
     Hint = 'Frames Per Second'
@@ -74,13 +65,13 @@ object dlgVideoSetttings: TdlgVideoSetttings
     ShowHint = True
   end
   object Label7: TLabel
-    Left = 100
-    Top = 147
+    Left = 24
+    Top = 151
     Width = 82
-    Height = 21
-    Hint = 'Time in 100 nanoseconds units.'
+    Height = 16
+    Hint = 'Time in 100 nanoseconds units. (minimum is 1 ms (10000 units))'
     AutoSize = False
-    Caption = 'Frame time'
+    Caption = 'Frame duration'
   end
   object OKBtn: TButton
     Left = 8
@@ -104,7 +95,7 @@ object dlgVideoSetttings: TdlgVideoSetttings
   end
   object cbxOutputFormat: TComboBox
     Left = 22
-    Top = 34
+    Top = 35
     Width = 78
     Height = 21
     TabOrder = 2
@@ -126,25 +117,12 @@ object dlgVideoSetttings: TdlgVideoSetttings
       '-')
   end
   object cbxDimensions: TComboBox
-    Left = 24
-    Top = 80
-    Width = 151
+    Left = 22
+    Top = 77
+    Width = 243
     Height = 21
     TabOrder = 4
     OnCloseUp = cbxDimensionsCloseUp
-  end
-  object edLatency: TEdit
-    Left = 24
-    Top = 163
-    Width = 48
-    Height = 21
-    Hint = 'Buffer latency. By default this is 10 milliseconds.'
-    NumbersOnly = True
-    ParentShowHint = False
-    ShowHint = True
-    TabOrder = 5
-    Text = '10'
-    OnChange = edLatencyChange
   end
   object cbSaveResizedBitmap: TCheckBox
     Left = 24
@@ -152,12 +130,12 @@ object dlgVideoSetttings: TdlgVideoSetttings
     Width = 223
     Height = 16
     Caption = 'Save resized source bitmap(s) to file(s).'
-    TabOrder = 6
+    TabOrder = 5
     OnClick = cbSaveResizedBitmapClick
   end
   object edFps: TEdit
-    Left = 24
-    Top = 119
+    Left = 157
+    Top = 157
     Width = 48
     Height = 21
     Hint = 
@@ -166,13 +144,13 @@ object dlgVideoSetttings: TdlgVideoSetttings
     NumbersOnly = True
     ParentShowHint = False
     ShowHint = True
-    TabOrder = 7
+    TabOrder = 6
     Text = '12'
     OnChange = edFpsChange
     OnEnter = edFpsEnter
   end
   object edBitRate: TEdit
-    Left = 100
+    Left = 114
     Top = 119
     Width = 59
     Height = 21
@@ -180,21 +158,31 @@ object dlgVideoSetttings: TdlgVideoSetttings
     NumbersOnly = True
     ParentShowHint = False
     ShowHint = True
-    TabOrder = 8
+    TabOrder = 7
     Text = '8000000'
     OnChange = edBitRateChange
   end
   object edFrameTimeUnits: TEdit
-    Left = 100
-    Top = 163
+    Left = 22
+    Top = 167
     Width = 48
     Height = 21
     Hint = 'Time in 100 nanoseconds units. (minimum is 1 ms (10000 units))'
     NumbersOnly = True
     ParentShowHint = False
     ShowHint = True
-    TabOrder = 9
+    TabOrder = 8
     Text = '10000'
     OnChange = edFrameTimeUnitsChange
+  end
+  object cbxFrameRate: TComboBox
+    Left = 22
+    Top = 119
+    Width = 78
+    Height = 21
+    TabOrder = 9
+    OnCloseUp = cbxOutputFormatCloseUp
+    Items.Strings = (
+      '-')
   end
 end

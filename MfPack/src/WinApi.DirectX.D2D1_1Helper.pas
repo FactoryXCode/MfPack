@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: Helper files over the D2D interfaces and APIs.
 //
 // Organisation: FactoryX
@@ -21,16 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 04/11/2022 Tony                Fixed wrong declarations of some D2D1 matrices.
-// 20/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
-// 20/12/2021 Jim Hawkins         Added system.math in uses clause, removed Single casting.
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Here we use Objects as records in place for records to make inheritance possible.
 //          Note: Objects are placed on the heap instead of stack.
 //
 // Related objects: -
-// Related projects: MfPackX315
+// Related projects: MfPackX316
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

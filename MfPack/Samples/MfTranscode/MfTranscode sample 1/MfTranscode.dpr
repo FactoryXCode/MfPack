@@ -3,8 +3,6 @@ program MfTranscode;
 uses
   {$IFDEF FASTMM}
   FastMM4,
-  {$ENDIF }
-  {$IFDEF MadExcept}
   madExcept,
   madLinkDisAsm,
   madListHardware,

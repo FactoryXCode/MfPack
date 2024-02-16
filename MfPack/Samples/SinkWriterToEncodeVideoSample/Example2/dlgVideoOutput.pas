@@ -10,7 +10,7 @@
 // Release date: 25-11-2022
 // Language: ENU
 //
-// Revision Version: 3.1.5
+// Revision Version: 3.1.6
 // Description: UI for example of how to use the SinkWriter.
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 28/08/2022 All                 PiL release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 // 18/05/2023 Renate              Fixed runtime error on selecting multiple bitmaps.
 //                                Speedup of bitmap resizing using D2D1_1
 //------------------------------------------------------------------------------
@@ -81,7 +81,9 @@ uses
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
   {Application}
-  SinkWriterClass;
+  SinkWriterClass,
+  Utils;
+
 type
   TdlgVideoSetttings = class(TForm)
     OKBtn: TButton;
@@ -100,6 +102,7 @@ type
     edBitRate: TEdit;
     edFrameTimeUnits: TEdit;
     Label7: TLabel;
+    cbxFrameRate: TComboBox;
     procedure cbxOutputFormatCloseUp(Sender: TObject);
     procedure cbxEncodingFormatCloseUp(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -112,6 +115,7 @@ type
   private
     { Private declarations }
     //procedure CalculateAverageFrameRate();
+    procedure PopulateFrameRates(aIndex: Integer);
 
   public
     { Public declarations }
@@ -128,11 +132,12 @@ begin
   if (cbxOutputFormat.ItemIndex > -1) then
     begin
       FSinkWriter.SinkWriterParams.pwcVideoFileExtension := PWideChar(LowerCase(cbxOutputFormat.Items[cbxOutputFormat.ItemIndex]));
-      cbxEncodingFormat.Clear;
+      cbxEncodingFormat.Clear();
       // populate the cbxEncodingFormat with supported formats when ouputformat is selected.
       if FSinkWriter.SinkWriterParams.pwcVideoFileExtension = 'mp4' then
         begin
           cbxEncodingFormat.Items.Append('MFVideoFormat_H264');
+          cbxEncodingFormat.Items.Append('MFVideoFormat_H265');
           cbxEncodingFormat.ItemIndex := 0;
         end
       else if FSinkWriter.SinkWriterParams.pwcVideoFileExtension = 'wmv' then
@@ -177,20 +182,31 @@ end;
 
 
 procedure TdlgVideoSetttings.edFpsEnter(Sender: TObject);
+const
+  sNote = #13 +
+          'Note: The less movement, the less FPS are needed.' + #13 +
+          'Recommended is 8 - 12 for primitive animations and 12 - 18 FPS for animations.';
+
 begin
   edFps.ShowHint := True;
-  // Enter hints per chosen resolution.
+  // Enter hints per choosen resolution.
   case cbxDimensions.ItemIndex of
-    5: begin
-         edFps.Hint := '2K supports 12, 24, 25, 29.97, 30, 48, 50, 59.94 and 60 FPS.';
-       end;
-    7: begin
-         edFps.Hint := '4K supports 24, 25, 29.97, 30, 48, 50, 59.94 and 60 FPS.';
-       end;
+    0, 1, 2:  begin
+                edFps.Hint := 'SD recommended FPS: 23.976, 24, 25, 29.97 or 30.' + sNote;
+              end;
+    6, 7:     begin
+                edFps.Hint := 'WS/2K recommended FPS: 23.976, 24, 25, 29.97, 30 or 48.' + sNote;
+              end;
+    8, 9, 10: begin
+                edFps.Hint := '4K recommended FPS: 12, 23.976, 24, 25, 29.97, 30, 48, 50, 59.94, 60, 100, 119.88 and 120.' + sNote;
+              end;
+    11, 12:   begin
+                edFps.Hint := '8K recommended FPS: 23.976, 24, 25, 29.97, 30, 48, 50, 59.94, 60, 100, 119.88, 120 or 240.' + sNote;
+              end;
     else
-       begin
-         edFps.Hint := 'FrameRate in FPS. The less movement the less FPS are needed. Recommended is 12 FPS for animations.';
-       end;
+      begin
+        edFps.Hint := sNote;
+      end;
   end;
 end;
 
@@ -229,14 +245,19 @@ begin
   cbxEncodingFormat.ItemIndex := cbxEncodingFormat.Items.IndexOf(FSinkWriter.SinkWriterParams.sEncodingFormat);
   cbxDimensions.Clear;
   // Add common used resolutions
-  cbxDimensions.Items.Append('SD    360p  (640 x 360)');
-  cbxDimensions.Items.Append('SD    480p  (640 x 480)');
-  cbxDimensions.Items.Append('SD    480p  (854 x 480)');  // ! YouTube format
-  cbxDimensions.Items.Append('HD    720p  (1280 x 720)');
-  cbxDimensions.Items.Append('FHD  1080p  (1920 x 1080)');
-  cbxDimensions.Items.Append('2K   1080p  (2048 x 1080)');
-  cbxDimensions.Items.Append('QHD  1440p  (2560 x 1440)');
-  cbxDimensions.Items.Append('4K   2160p  (3840 x 2160)');
+  cbxDimensions.Items.Append('SD          360p   (640 x 360)');
+  cbxDimensions.Items.Append('SD          480p   (640 x 480)');
+  cbxDimensions.Items.Append('SD          480p   (854 x 480)');  // ! YouTube format
+  cbxDimensions.Items.Append('HD          720p   (1280 x 720)');
+  cbxDimensions.Items.Append('FHD         1080p  (1920 x 1080)');
+  cbxDimensions.Items.Append('QHD         1440p  (2560 x 1440)');
+  cbxDimensions.Items.Append('WideScreen  1700p  (2560 x 1700)');
+  cbxDimensions.Items.Append('2K          1080p  (2048 x 1080)');
+  cbxDimensions.Items.Append('4K CW       2160p  (3840 x 2160)');
+  cbxDimensions.Items.Append('4K UHD      2160p  (3840 x 2160)');
+  cbxDimensions.Items.Append('4K DCI      2160p  (4096 x 2160)');
+  cbxDimensions.Items.Append('8K UHD      4320p  (7680 x 4320)');
+  cbxDimensions.Items.Append('8K DCI      4320p  (8192 x 4320)');
   cbxDimensions.ItemIndex := cbxDimensions.Items.IndexOf(FSinkWriter.SinkWriterParams.sResolutionDescription);
   cbxDimensionsCloseUp(Self);
   edBitRate.Text := IntToStr(FSinkWriter.SinkWriterParams.dwBitRate);
@@ -247,74 +268,134 @@ end;
 
 procedure TdlgVideoSetttings.cbxDimensionsCloseUp(Sender: TObject);
 begin
-// List of resolutions (Beware that Facebook and Youtube supports their own formats)
+// Shortlist of most used resolutions (Note that Facebook and Youtube supports their own formats)
 //
 // SD (Standard Definition)
 // 640 x 360 (360p) 4:3
 // 640 x 480 (480p) 4:3
 //
-
 // HD (High Definition)
 // 1280 x 720 (720p) 16:9
 //
-// Full HD Resolution
+// Full HD resolution
 // 1920 x 1080 (1080p) 16:9
 //
 // QHD (Quad High Definition)
 // 2560 x 1440 (1440p) 16:9
 //
-// 2K Resolution
-// 2048 x 1080 (1080p) 1:1.77
+// WS (WideScreen laptop format)
+// 2560 × 1700 (1700p) 3:2
+//
+// 2K resolution
+// 2048 x 1080 (1080p) 16:9
 // Note that this resolution must have a minimum framerate of 12 FPS.
 //
-// 4K Resolution (UHD/Ultra High Definition)
-// 3840 x 2160 (2160p) 1:1.9
+// 4K resolution (CW/CinemaWide)
+// 3840 x 2160 (2160p) 21:9
+//
+// 4K resolution (UHD/Ultra High Definition)
+// 3840 x 2160 (2160p) 16:9
 // Note that this resolution must have a minimum framerate of 24 FPS.
 //
+// 4K resolution (DCI/Digital Cinema System Specification)
+// 4096 x 2160 (2160p) 17:9
+//
+// 8K resolution (UHD/Ultra High Definition)
+// 7680 x 4320 (4320p) 16:9
+//
+// 8K (DCI/Digital Cinema System Specification)
+// 8192 x 4320 (4320p) 17:9
+//
+
   case cbxDimensions.ItemIndex of
     0:  begin
           FSinkWriter.SinkWriterParams.dwWidth  := 640;
           FSinkWriter.SinkWriterParams.dwHeigth := 360;
-          FSinkWriter.SinkWriterParams.sResolutionDescription := 'SD    360p  (640 x 360)';
+          FSinkWriter.SinkWriterParams.sResolutionDescription := 'SD        360p  (640 x 360)';
+          edFPS.Text := '30'; // 29.97 or 30 FPS
         end;
     1:  begin
           FSinkWriter.SinkWriterParams.dwWidth  := 640;
           FSinkWriter.SinkWriterParams.dwHeigth := 480;
-          FSinkWriter.SinkWriterParams.sResolutionDescription := 'SD    480p  (640 x 480)';
+          FSinkWriter.SinkWriterParams.sResolutionDescription := 'SD        480p  (640 x 480)';
+          edFPS.Text := '30'; // 29.97 or 30 FPS
         end;
     2:  begin {YouTube}
           FSinkWriter.SinkWriterParams.dwWidth  := 854;
           FSinkWriter.SinkWriterParams.dwHeigth := 480;
-          FSinkWriter.SinkWriterParams.sResolutionDescription := 'SD    480p  (854 x 480)';
+          FSinkWriter.SinkWriterParams.sResolutionDescription := 'SD        480p  (854 x 480)';
+          edFPS.Text := '30'; // 29.97 or 30 FPS
+        end;
+    3:  begin
+          FSinkWriter.SinkWriterParams.dwWidth  := 1280;
+          FSinkWriter.SinkWriterParams.dwHeigth := 962;
+          FSinkWriter.SinkWriterParams.sResolutionDescription := 'HD        962p  (1280 x 962) aspect ratio 4:3';
+          // aspect ratio 4:3
+          edFPS.Text := '24'; // 24 or 48 FPS
         end;
     3:  begin
           FSinkWriter.SinkWriterParams.dwWidth  := 1280;
           FSinkWriter.SinkWriterParams.dwHeigth := 720;
-          FSinkWriter.SinkWriterParams.sResolutionDescription := 'HD    720p  (1280 x 720)';
+          FSinkWriter.SinkWriterParams.sResolutionDescription := 'HD        720p  (1280 x 720) aspect ratio 16:9';
+          // aspect ratio 16:9
+          edFPS.Text := '24'; // 24 or 48 FPS
         end;
     4:  begin
           FSinkWriter.SinkWriterParams.dwWidth  := 1920;
           FSinkWriter.SinkWriterParams.dwHeigth := 1080;
-          FSinkWriter.SinkWriterParams.sResolutionDescription := 'FHD  1080p  (1920 x 1080)';
+          FSinkWriter.SinkWriterParams.sResolutionDescription := 'FHD      1080p  (1920 x 1080) aspect ratio 16:9';
+          edFPS.Text := '24'; // 24 or 48 FPS
         end;
     5:  begin
-          FSinkWriter.SinkWriterParams.dwWidth  := 2048;
-          FSinkWriter.SinkWriterParams.dwHeigth := 1080;
-          FSinkWriter.SinkWriterParams.sResolutionDescription := '2K   1080p  (2048 x 1080)';
-          edFPS.Text := '12';  // 12 or 24 FPS
+          FSinkWriter.SinkWriterParams.dwWidth  := 2560;
+          FSinkWriter.SinkWriterParams.dwHeigth := 1440;
+          FSinkWriter.SinkWriterParams.sResolutionDescription := 'QHD      1440p  (2560 x 1440) aspect ratio 4:3';
+          edFPS.Text := '24'; // 24 or 48 FPS
         end;
     6:  begin
           FSinkWriter.SinkWriterParams.dwWidth  := 2560;
-          FSinkWriter.SinkWriterParams.dwHeigth := 1440;
-          FSinkWriter.SinkWriterParams.sResolutionDescription := 'QHD  1440p  (2560 x 1440)';
+          FSinkWriter.SinkWriterParams.dwHeigth := 1700;
+          FSinkWriter.SinkWriterParams.sResolutionDescription := 'WS       1700p  (2560 x 1700) aspect ratio 4:3';
+          edFPS.Text := '24'; // 24 or 48 FPS
         end;
     7:  begin
+          FSinkWriter.SinkWriterParams.dwWidth  := 2048;
+          FSinkWriter.SinkWriterParams.dwHeigth := 1080;
+          FSinkWriter.SinkWriterParams.sResolutionDescription := '2K       1080p  (2048 x 1080)';
+          edFPS.Text := '24';  // 23.976, 24, 25, 29.97, 30, 45 or 48 FPS.
+        end;
+    8:  begin
           FSinkWriter.SinkWriterParams.dwWidth  := 3840;
           FSinkWriter.SinkWriterParams.dwHeigth := 2160;
-          FSinkWriter.SinkWriterParams.sResolutionDescription := '4K   2160p  (3840 x 2160)';
-          edFPS.Text := '24';  // 24, 25, 29.97, 30, 48, 50, 59.94 and 60 FPS.
+          FSinkWriter.SinkWriterParams.sResolutionDescription := '4K CW    2160p  (3840 x 2160)';
+          edFPS.Text := '24';  // 23.976, 24, 25, 29.97, 30, 45, 48, 50, 59.94, 60, 100, 119.88 or 120 FPS.
         end;
+    9:  begin
+          FSinkWriter.SinkWriterParams.dwWidth  := 3840;
+          FSinkWriter.SinkWriterParams.dwHeigth := 2160;
+          FSinkWriter.SinkWriterParams.sResolutionDescription := '4K UHD   2160p  (3840 x 2160)';
+          edFPS.Text := '24';  // 23.976, 24, 25, 29.97, 30, 45, 48, 50, 59.94, 60, 100, 119.88 or 120 FPS.
+        end;
+    10:  begin
+           FSinkWriter.SinkWriterParams.dwWidth  := 4096;
+           FSinkWriter.SinkWriterParams.dwHeigth := 2160;
+           FSinkWriter.SinkWriterParams.sResolutionDescription := '4K DCI   2160p  (3840 x 2160)';
+           edFPS.Text := '24';  // 23.976, 24, 25, 29.97, 30, 45, 48, 50, 59.94, 60, 100, 119.88 or 120 FPS.
+         end;
+    11:  begin
+           FSinkWriter.SinkWriterParams.dwWidth  := 7680;
+           FSinkWriter.SinkWriterParams.dwHeigth := 4320;
+           FSinkWriter.SinkWriterParams.sResolutionDescription := '8K UHD  4320p  (7680 x 4320)';
+           edFPS.Text := '24';  // 23.976, 24, 25, 29.97, 30, 45, 48, 50, 59.94, 60, 100, 119.88, 120 or 240 FPS.
+         end;
+    12:  begin
+           FSinkWriter.SinkWriterParams.dwWidth  := 8192;
+           FSinkWriter.SinkWriterParams.dwHeigth := 4320;
+           FSinkWriter.SinkWriterParams.sResolutionDescription := '8K DCI  2160p  (8192 x 4320)';
+           edFPS.Text := '24';  // 23.976, 24, 25, 29.97, 30, 45, 48, 50, 59.94, 60, 100, 119.88, 120 or 240 FPS.
+         end;
   end;
+  PopulateFrameRates(cbxDimensions.ItemIndex);
 end;
 
 // Choose the output format
@@ -327,6 +408,8 @@ begin
       FSinkWriter.SinkWriterParams.sEncodingFormat := cbxEncodingFormat.Items[cbxEncodingFormat.ItemIndex];
       if FSinkWriter.SinkWriterParams.sEncodingFormat = 'MFVideoFormat_H264' then
         FSinkWriter.SinkWriterParams.gdEncodingFormat := MFVideoFormat_H264
+      else if FSinkWriter.SinkWriterParams.sEncodingFormat = 'MFVideoFormat_H265' then
+        FSinkWriter.SinkWriterParams.gdEncodingFormat := MFVideoFormat_H265
       else if FSinkWriter.SinkWriterParams.sEncodingFormat = 'MFVideoFormat_WMV3' then
         FSinkWriter.SinkWriterParams.gdEncodingFormat := MFVideoFormat_WMV3
       else if FSinkWriter.SinkWriterParams.sEncodingFormat = 'MFVideoFormat_I420' then
@@ -345,5 +428,30 @@ begin
           FSinkWriter.SinkWriterParams.gdEncodingFormat := MFVideoFormat_H264;
           FSinkWriter.SinkWriterParams.sEncodingFormat := 'MFVideoFormat_H264';
         end;
-    end;end;
+    end;
+end;
+
+procedure TdlgVideoSetttings.PopulateFrameRates(aIndex: Integer);
+var
+  i: Integer;
+
+begin
+  cbxFrameRate.Clear();
+  case aIndex of
+    0..7 :   begin
+               for i := 0 to 12 do
+                 cbxFrameRate.Items.Append(Format('%3.3f', [FrameRateArray[i]]));
+             end;
+    8..10 :  begin
+               for i := 0 to 14 do
+                 cbxFrameRate.Items.Append(Format('%3.3f', [FrameRateArray[i]]));
+             end;
+    11..12 : begin
+               for i := 0 to 16 do
+                 cbxFrameRate.Items.Append(Format('%3.3f', [FrameRateArray[i]]));
+             end;
+  end;
+  cbxFrameRate.ItemIndex := 7;
+end;
+
 end.
