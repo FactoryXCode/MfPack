@@ -4756,10 +4756,10 @@ const
   {$EXTERNALSYM SPEAKER_TOP_BACK_CENTER}
   SPEAKER_TOP_BACK_RIGHT              = $20000;
   {$EXTERNALSYM SPEAKER_TOP_BACK_RIGHT}
-  // Bit mask locations reserved for future use
+  // Bit mask locations reserved for future use.
   SPEAKER_RESERVED                    = $7FFC0000;
   {$EXTERNALSYM SPEAKER_RESERVED}
-  // Used to specify that any possible permutation of speaker configurations
+  // Used to specify that any possible permutation of speaker configurations.
   SPEAKER_ALL                         = $80000000;
   {$EXTERNALSYM SPEAKER_ALL}
 {$DEFINE __SPEAKER_POSITIONS__DEFINED}
@@ -6200,8 +6200,69 @@ const
   {$EXTERNALSYM MIXERCONTROL_CONTROLTYPE_SRS_SYNTHSELECT}
 
 
-
   // Additional Prototypes for ALL interfaces
+
+const
+
+  // Standard speaker geometry configurations, used with X3DAudioInitialize and
+  // MFT's.
+  SPEAKER_MONO             = SPEAKER_FRONT_CENTER;
+
+  SPEAKER_STEREO           = (SPEAKER_FRONT_LEFT or
+                              SPEAKER_FRONT_RIGHT);
+
+  SPEAKER_2POINT1          = (SPEAKER_FRONT_LEFT or
+                              SPEAKER_FRONT_RIGHT or
+                              SPEAKER_LOW_FREQUENCY);
+
+  SPEAKER_SURROUND         = (SPEAKER_FRONT_LEFT or
+                              SPEAKER_FRONT_RIGHT or
+                              SPEAKER_FRONT_CENTER or
+                              SPEAKER_BACK_CENTER);
+
+  SPEAKER_QUAD             = (SPEAKER_FRONT_LEFT or
+                              SPEAKER_FRONT_RIGHT or
+                              SPEAKER_BACK_LEFT or
+                              SPEAKER_BACK_RIGHT);
+
+  SPEAKER_4POINT1          = (SPEAKER_FRONT_LEFT or
+                              SPEAKER_FRONT_RIGHT or
+                              SPEAKER_LOW_FREQUENCY or
+                              SPEAKER_BACK_LEFT or
+                              SPEAKER_BACK_RIGHT);
+
+  SPEAKER_5POINT1          = (SPEAKER_FRONT_LEFT or
+                              SPEAKER_FRONT_RIGHT or
+                              SPEAKER_FRONT_CENTER or
+                              SPEAKER_LOW_FREQUENCY or
+                              SPEAKER_BACK_LEFT or
+                              SPEAKER_BACK_RIGHT);
+
+  SPEAKER_7POINT1          = (SPEAKER_FRONT_LEFT or
+                              SPEAKER_FRONT_RIGHT or
+                              SPEAKER_FRONT_CENTER or
+                              SPEAKER_LOW_FREQUENCY or
+                              SPEAKER_BACK_LEFT or
+                              SPEAKER_BACK_RIGHT or
+                              SPEAKER_FRONT_LEFT_OF_CENTER or
+                              SPEAKER_FRONT_RIGHT_OF_CENTER);
+
+  SPEAKER_5POINT1_SURROUND = (SPEAKER_FRONT_LEFT or
+                              SPEAKER_FRONT_RIGHT or
+                              SPEAKER_FRONT_CENTER or
+                              SPEAKER_LOW_FREQUENCY or
+                              SPEAKER_SIDE_LEFT or
+                              SPEAKER_SIDE_RIGHT);
+
+  SPEAKER_7POINT1_SURROUND = (SPEAKER_FRONT_LEFT or
+                              SPEAKER_FRONT_RIGHT or
+                              SPEAKER_FRONT_CENTER or
+                              SPEAKER_LOW_FREQUENCY or
+                              SPEAKER_BACK_LEFT or
+                              SPEAKER_BACK_RIGHT or
+                              SPEAKER_SIDE_LEFT or
+                              SPEAKER_SIDE_RIGHT);
+
 
   function GETFOURCC(frcc: FOURCC): WideString;
 

@@ -107,6 +107,8 @@ uses
                                              // the event after releasing a single waiting thread.
   {$ENDIF}
 
+
+
 type
 
   TPComObj = array of Pointer;

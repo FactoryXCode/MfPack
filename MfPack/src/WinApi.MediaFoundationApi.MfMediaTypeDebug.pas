@@ -22,10 +22,17 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
+// 26/02/2024 Tony                Updated Remarks How to use.
+// 11/03/2024 Tony                Changed function GetGUIDNameConst, added parameter majortype.
 //------------------------------------------------------------------------------
 //
 // Remarks: How to use:
-//            1 Create the class.
+//            1 Declare & create the class.
+//
+//             {$IFDEF DEBUG}
+//             var FMediaTypeDebug: TMediaTypeDebug;
+//             {$ENDIF}
+
 //             {$IFDEF DEBUG}
 //             FMediaTypeDebug := TMediaTypeDebug.Create();
 //             {$ENDIF}
@@ -33,10 +40,15 @@
 //            2 Check the contents and store to file.
 //              {$IFDEF DEBUG}
 //              FMediaTypeDebug.LogMediaType(pYourMediaType);
-//              FMediaTypeDebug.SafeDebugResultsToFile();
+//
+//              FMediaTypeDebug.SafeAllDebugResultsToOneFile('YourFileName.txt');
+//              or
+//              SFMediaTypeDebug.SafeDebugResultsToFile('Methodname',
+//                                                      'YourFileName',
+//                                                      '.FileExtension');
 //              {$ENDIF}
 //
-//            3 When done destroy the class.
+//            3 When done, destroy the class.
 //              {$IFDEF DEBUG}
 //              FMediaTypeDebug.Free();
 //              {$ENDIF}
@@ -115,6 +127,7 @@ type
   private
 
     slDebug: TStringlist;
+    sDebugDirectory: string;
 
     function LogAttributeValueByIndex(pAttributes: IMFAttributes;
                                       pIndex: DWord): HRESULT;
@@ -128,17 +141,24 @@ type
   public
     arDebug: TStreamContentsArray;
 
+
     constructor Create();
     destructor Destroy(); override;
 
     // Call this method to log
-    function LogMediaType(pType: IMFMediaType): HRESULT;
+    function LogMediaType(pType: IMFMediaType;
+                          pMediaTypeName: string = ''): HRESULT;
+
+    // Call this method to save all logs to one file.
+    procedure SafeAllDebugResultsToOneFile(pFileName: string);
+
     // Call this method to save each log to a separate file.
     procedure SafeDebugResultsToFile(const pMethodName: string = '';
                                      const pFileName: string = 'MFMediaTypeDebug';
                                      const pExt: string = '.txt');
 
     property DebugResults: TStringList read slDebug;
+    property DebugDirectory: string read sDebugDirectory write sDebugDirectory;
   end;
 
 
@@ -152,6 +172,7 @@ begin
   slDebug := TStringlist.Create();
   SetLength(arDebug,
             0);
+  DebugDirectory := ExtractFilePath(Application.ExeName);
 end;
 
 
@@ -164,7 +185,8 @@ begin
 end;
 
 
-function TMediaTypeDebug.LogMediaType(pType: IMFMediaType): HRESULT;
+function TMediaTypeDebug.LogMediaType(pType: IMFMediaType;
+                                      pMediaTypeName: string = ''): HRESULT;
 var
   hr: HResult;
   unCount: UINT32;
@@ -192,7 +214,12 @@ begin
         goto Return;
     end;
 
+  slDebug.BeginUpdate;
+
   slDebug.Append('== BEGIN =====================================================' + #13);
+
+  DebugMsg(Format('IMFMediaType var name: %s',
+                  [pMediaTypeName]));
 
   for i := 0 to unCount -1 do
    begin
@@ -204,8 +231,17 @@ begin
 
   // Add a separatorline when done.
   slDebug.Append('== END =======================================================' + #13);
+
+  slDebug.EndUpdate;
+
 Return:
   Result := hr;
+end;
+
+
+procedure TMediaTypeDebug.SafeAllDebugResultsToOneFile(pFileName: string);
+begin
+  slDebug.SaveToFile(DebugDirectory + pFileName);
 end;
 
 
@@ -282,6 +318,7 @@ var
   pwcValFmtDesc: LPWSTR;
 
   gdGuid: TGUID;
+  majorGuid: TGUID;
   pvVar: PROPVARIANT;
 
 label
@@ -307,7 +344,19 @@ begin
   if FAILED(hr) then
     goto Return;
 
-  hr := GetGUIDNameConst(gdGuid,
+  // MFMediaType_Video or MFMediaType_Audio
+  hr := pAttributes.GetGUID(MF_MT_MAJOR_TYPE,
+                            majorGuid);
+  if FAILED(hr) then
+    begin
+       DebugMsg(Format('Unexpected error in function pAttributes.GetGUID. (HResult = %d)',
+                       [hr]));
+       goto Return;
+    end;
+
+
+  hr := GetGUIDNameConst(majorGuid,
+                         gdGuid,
                          pwcGuidName,
                          pwcFormatTag,
                          pwcFOURCC,
@@ -315,7 +364,7 @@ begin
 
   if FAILED(hr) then
     begin
-       DebugMsg(Format('Unexpected error in function GetGUIDName. (HResult = %d)',
+       DebugMsg(Format('Unexpected error in function GetGUIDNameConst. (HResult = %d)',
                        [hr]));
        goto Return;
     end;
@@ -332,33 +381,41 @@ begin
     begin
       case pvVar.vt of
 
-        VT_UI4: DebugMsg(Format('%d',
+        VT_UI4: DebugMsg(Format('Value: %d',
                                 [pvVar.ulVal]));
 
-        VT_UI8: DebugMsg(Format('%d',
+        VT_UI8: DebugMsg(Format('Value: %d',
                                [pvVar.uhVal.QuadPart]));
 
-        VT_R8:  DebugMsg(Format('%f',
+        VT_R8:  DebugMsg(Format('Value: %f',
                                 [pvVar.dblVal]));
 
         VT_CLSID: begin
-                    hr := GetGUIDNameConst(pvVar.puuid^,
+                    hr := GetGUIDNameConst(majorGuid,
+                                           pvVar.puuid^,
                                            pwcValGuidName,
                                            pwcValFormatTag,
                                            pwcValFOURCC,
                                            pwcValFmtDesc);
                     if SUCCEEDED(hr) then
-                      DebugMsg(Format('GuidName: %s  FormatTag: %s  FOURCC: %d  Desc: %s',
-                                      [pwcValGuidName, pwcValFormatTag, pwcValFOURCC, pwcValFmtDesc]));
-
+                      begin
+                        DebugMsg(Format('GuidName: %s',
+                                        [pwcValGuidName]));
+                        DebugMsg(Format('FormatTag: %s',
+                                        [pwcValFormatTag]));
+                        DebugMsg(Format('FOURCC: %d',
+                                        [pwcValFOURCC]));
+                        DebugMsg(Format('Description: %s',
+                                        [pwcValFmtDesc]));
+                      end;
                   end;
 
-        VT_LPWSTR: DebugMsg(Format('%s',
+        VT_LPWSTR: DebugMsg(Format('Value: %s',
                                    [PChar(@pvVar.pwszVal)]));
 
-        VT_VECTOR or VT_UI1 : DebugMsg('Byte Array');
+        VT_VECTOR or VT_UI1 : DebugMsg('Value: Byte Array');
 
-        VT_UNKNOWN: DebugMsg('IUnknown');
+        VT_UNKNOWN: DebugMsg('Value: IUnknown');
 
 
 
@@ -381,6 +438,7 @@ var
   hr: HResult;
 
 begin
+
   hr := S_OK;
 
   if (isEqualGuid(pGuid,
@@ -463,10 +521,9 @@ begin
   OutputDebugString(StrToPWideChar(Format('%s',
                                           [pFormat])));
 {$ENDIF}
+
   slDebug.Append(Format('%d %s',
-                        [slDebug.Count, pFormat]))
-
+                        [slDebug.Count, pFormat]));
 end;
-
 
 end.

@@ -29,6 +29,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
+// 11/03/2024 Tony                Changed function GetGUIDNameConst, added parameter majortype.
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -795,15 +796,16 @@ type
                                 const pMfSupportedOnly: Boolean = True): HResult;
 
   // Returns the name, name of the formattag and FOURCC value of a guid.
-  function GetGUIDNameConst(guid: TGuid;
+  function GetGUIDNameConst(const majorType: TGuid;
+                            const subType: TGuid;
                             out aGuidName: LPWSTR;
                             out aFormatTag: LPWSTR;
                             out aFOURCC: DWord;
                             out aFmtDesc: LPWSTR): HResult;
 
   // Checks if a given input subtype is supported by Media Foundation MFT.
-  function IsMfSupportedFormat(pSubType: TGuid): Boolean; inline; deprecated 'Use function IsMftSupportedInputFormat';
-  function IsMftSupportedInputFormat(pSubType: TGuid): Boolean; inline;
+  function IsMfSupportedFormat(const pSubType: TGuid): Boolean; inline; deprecated 'Use function IsMftSupportedInputFormat';
+  function IsMftSupportedInputFormat(const pSubType: TGuid): Boolean; inline;
 
   // Returns an array of supported formats.
   function GetSupportedMftOutputFormats(): TArray<TGuid>;
@@ -1079,7 +1081,8 @@ type
   // Gets audio (EndPoint)device capabilities
   function GetAudioFormat(var pMfAudioFormat: TMFAudioFormat): HResult;
 
-  // Gets audio stream info from a media source.
+
+  // Gets audio stream info from a media source V1.
   function GetAudioSubType(mSource: IMFMediaSource;
                            out pSubType: TGUID;
                            out pFormatTag: DWord;
@@ -1090,7 +1093,12 @@ type
                            out pBlockAlignment: UINT32;
                            out pAverageSampleRate: UINT32;
                            out pBitRate: Double;
-                           out pSampleRate: Double): HResult;
+                           out pSampleRate: Double): HResult; overload;
+
+  // Gets audio stream info from a media source V2.
+  function GetAudioSubType(var pAudioFormat: TMFAudioFormat): HResult; overload;
+
+
 
   // Gets the Windows supported audio encoder formats (MFT's).
   function GetWinAudioEncoderFormats(const mfAudioFormat: TGuid;
@@ -1135,7 +1143,6 @@ type
                                index: DWORD): HResult;
 
 
-
 // Media files duration and filesize
 // =================================
 
@@ -1148,6 +1155,10 @@ type
   // Alternatively you might get the duration of a media file by calling the IMFMediaSource.CreatePresentationDescriptor method and
   // request the MF_PD_DURATION attribute.
   function GetFileDuration(pSource: IMFMediaSource;
+                           out pDuration: LONGLONG): HResult; overload;
+
+  // Get fileduration from an URL.
+  function GetFileDuration(const sURL: PCWSTR;
                            out pDuration: LONGLONG): HResult; overload;
 
 
@@ -2801,6 +2812,12 @@ begin
                    pcOutputTypes,
                    mftEnum.pAttributes);
 
+  if FAILED(hr) then
+    begin
+      Result := hr;
+      Exit;
+    end;
+
   SetLength(mftEnum.aInputTypes,
             pcInputTypes);
   SetLength(mftEnum.aOutputTypes,
@@ -2815,12 +2832,14 @@ begin
       // Get the descriptions of the input formats.
       // Get majortype info
       GetGUIDNameConst(mftEnum.aInputTypes[i].RegisterTypeInfo.guidMajorType,
+                       mftEnum.aInputTypes[i].RegisterTypeInfo.guidSubtype,
                        mftEnum.aInputTypes[i].GuidName,
                        mftEnum.aInputTypes[i].FormatTag,
                        mftEnum.aInputTypes[i].FOURCC,
                        mftEnum.aInputTypes[i].majorTypeDescr);
       // Get subtype info
-      GetGUIDNameConst(mftEnum.aInputTypes[i].RegisterTypeInfo.guidSubtype,
+      GetGUIDNameConst(mftEnum.aInputTypes[i].RegisterTypeInfo.guidMajorType,
+                       mftEnum.aInputTypes[i].RegisterTypeInfo.guidSubtype,
                        mftEnum.aInputTypes[i].GuidName,
                        mftEnum.aInputTypes[i].FormatTag,
                        mftEnum.aInputTypes[i].FOURCC,
@@ -2832,14 +2851,8 @@ begin
     begin
       mftEnum.aOutputTypes[i].RegisterTypeInfo := ppOutputTypes[i];
       // Get the descriptions of the output formats.
-      // Get majortype info
       GetGUIDNameConst(mftEnum.aOutputTypes[i].RegisterTypeInfo.guidMajorType,
-                       mftEnum.aOutputTypes[i].GuidName,
-                       mftEnum.aOutputTypes[i].FormatTag,
-                       mftEnum.aOutputTypes[i].FOURCC,
-                       mftEnum.aOutputTypes[i].majorTypeDescr);
-      // Get subtype info
-      GetGUIDNameConst(mftEnum.aOutputTypes[i].RegisterTypeInfo.guidSubtype,
+                       mftEnum.aOutputTypes[i].RegisterTypeInfo.guidSubtype,
                        mftEnum.aOutputTypes[i].GuidName,
                        mftEnum.aOutputTypes[i].FormatTag,
                        mftEnum.aOutputTypes[i].FOURCC,
@@ -3733,7 +3746,8 @@ end;
 
 // Note: RTTI is not used, because it will not work on all Delphi versions.
 //       So, we do it the alternative way.
-function GetGUIDNameConst(guid: TGuid;
+function GetGUIDNameConst(const majorType: TGuid;
+                          const subType: TGuid;
                           out aGuidName: LPWSTR;
                           out aFormatTag: LPWSTR;
                           out aFOURCC: DWord;
@@ -3745,14 +3759,14 @@ var
   sFmtDesc: LPWSTR;
   dwFOURCC: DWord;
 
-  function IfEqualReturnProps(gtype: TGuid;
+  function IfEqualReturnProps(const gtype: TGuid;
                               sgName: LPWSTR;
                               sFmtTag: LPWSTR;
                               dFCC: Dword;
                               sDesc: LPWSTR): Boolean;
     begin
       sGuidName := '';
-      if IsEqualGuid(guid,
+      if IsEqualGuid(subType,
                      gtype) then
         begin
           sGuidName := sgName;
@@ -3777,13 +3791,19 @@ begin
   sFmtDesc := 'Unknown format.';
   hr := ERROR_NOT_FOUND;
 
+  if IsEqualGuid(majorType,
+                MFMediaType_Video) or
+     IsEqualGuid(majorType,
+                MFMediaType_Audio) then
+    begin
+      if IfEqualReturnProps(MF_MT_MAJOR_TYPE,
+                            'MF_MT_MAJOR_TYPE',
+                            '',
+                            0,
+                           'Major type GUID for a media type.') then
+       goto done;
+    end;
 
-  if IfEqualReturnProps(MF_MT_MAJOR_TYPE,
-                        'MF_MT_MAJOR_TYPE',
-                        '',
-                        0,
-                        'Major type GUID for a media type.') then
-    goto done;
   if IfEqualReturnProps(MF_MT_SUBTYPE,
                         'MF_MT_SUBTYPE',
                         '',
@@ -4456,12 +4476,19 @@ begin
                         D3DFMT_L8,
                         '8-bit luminance only. (bpp). (Same memory layout as D3DFMT_L8.)') then
    goto done;
- if IfEqualReturnProps(MFVideoFormat_L16,
-                       'MFVideoFormat_L16',
-                       'D3DFMT_L16',
-                       D3DFMT_L16,
-                        '16-bit luminance only. (Same memory layout as D3DFMT_L16.)') then
-    goto done;
+
+ // Note: MFVideoFormat_L16 and MFAudioFormat_MPEG share the same guidvalue.
+ if IsEqualGuid(majorType,
+                MFMediaType_Video) then
+   begin
+     if IfEqualReturnProps(MFVideoFormat_L16,
+                           'MFVideoFormat_L16',
+                           'D3DFMT_L16',
+                           D3DFMT_L16,
+                           '16-bit luminance only. (Same memory layout as D3DFMT_L16.)') then
+     goto done;
+   end;
+
   if IfEqualReturnProps(MFVideoFormat_D16,
                         'MFVideoFormat_D16',
                         'D3DFMT_D16',
@@ -4711,12 +4738,19 @@ begin
                         WAVE_FORMAT_MPEGLAYER3,
                         'MPEG Audio Layer-3 (MP3).') then
     goto done;
-  if IfEqualReturnProps(MFAudioFormat_MPEG,
-                        'MFAudioFormat_MPEG',
-                        'WAVE_FORMAT_MPEG',
-                        WAVE_FORMAT_MPEG,
-                        'MPEG-1 audio payload.') then
-    goto done;
+
+ // Note: MFVideoFormat_L16 and MFAudioFormat_MPEG share the same guidvalue.
+ if IsEqualGuid(majorType,
+                MFMediaType_Audio) then
+   begin
+     if IfEqualReturnProps(MFAudioFormat_MPEG,
+                           'MFAudioFormat_MPEG',
+                           'WAVE_FORMAT_MPEG',
+                           WAVE_FORMAT_MPEG,
+                           'MPEG-1 audio payload.') then
+     goto done;
+   end;
+
   if IfEqualReturnProps(MFAudioFormat_AAC,
                         'MFAudioFormat_AAC',
                         'WAVE_FORMAT_MPEG_HEAAC',
@@ -4923,14 +4957,15 @@ done:
 end;
 
 
-// Deprecated, renamed to IsMfSupportedInputFormat
-function IsMfSupportedFormat(pSubType: TGuid): Boolean; inline;
+/// <summary>Deprecated, renamed to IsMfSupportedInputFormat</summary>
+function IsMfSupportedFormat(const pSubType: TGuid): Boolean; inline;
 begin
   Result := IsMftSupportedInputFormat(pSubType);
 end;
 
-
-function IsMftSupportedInputFormat(pSubType: TGuid): Boolean; inline;
+/// <summary>Get supported subtype formats for input.</summary>
+/// <seealso href="https://learn.microsoft.com/en-us/windows/win32/medfound/video-processor-mft#input-formats">[Video Processor MFT]</seealso>
+function IsMftSupportedInputFormat(const pSubType: TGuid): Boolean; inline;
 var
   bRes: Boolean;
   arSubTypes: array [0..19] of TGuid;
@@ -4979,11 +5014,13 @@ done:
   Result := bRes;
 end;
 
-
+/// <summary>Get supported subtype formats for ounput.</summary>
+/// <seealso href="https://learn.microsoft.com/en-us/windows/win32/medfound/video-processor-mft#input-formats">[Video Processor MFT]</seealso>
 function GetSupportedMftOutputFormats(): TArray<TGuid>;
 begin
 
-  SetLength(Result, 13);
+  SetLength(Result,
+            13);
   // Supported subtype formats for output.
   // See: https://learn.microsoft.com/en-us/windows/win32/medfound/video-processor-mft#output-formats
   Result[0]  := MFVideoFormat_ARGB32;
@@ -5649,8 +5686,6 @@ begin
 end;
 
 
-
-
 // Creates a compatible video format with a different subtype if param guidSubType <> GUID_NULL else
 // the SubType will be the source subtype.
 function CloneVideoMediaType(pSrcMediaType: IMFMediaType;
@@ -5661,6 +5696,7 @@ var
   rGuid: REFGUID;
   tmpMediaType: IMFMediaType;
 
+ // For debug use.
  // {$IFDEF DEBUG}
  // FMediaTypeDebug: TMediaTypeDebug;
  // {$ENDIF}
@@ -6319,9 +6355,14 @@ try
     begin
       // Count streams
       hr := pspd.GetStreamDescriptorCount(sdCount);
-
-      SetLength(alsCont,
-                sdCount);
+      if SUCCEEDED(hr) then
+        SetLength(alsCont,
+                  sdCount)
+      else
+        begin
+          Result := hr;
+          Exit;
+        end;
 
       for i := 0 to sdCount - 1 do
         begin
@@ -6710,7 +6751,6 @@ begin
 
   i := 0;
 
-  //
   repeat
 
   dwTypes := 0;
@@ -6755,6 +6795,8 @@ begin
       if IsEqualGuid(gMajorType,
                      MFMediaType_Audio) then
         begin
+          pMfAudioFormat.tgMajorFormat := gMajorType;
+          pMfAudioFormat.wcMajorFormat := GetMajorTypeDescr(gMajorType);
           // Get the audio subtype. If not, skip.
           hr := pType.GetGUID(MF_MT_SUBTYPE,
                               pMfAudioFormat.tgSubFormat);
@@ -6762,7 +6804,8 @@ begin
             goto done;
 
           // readable subtype info
-          GetGUIDNameConst(pMfAudioFormat.tgSubFormat,
+          GetGUIDNameConst(pMfAudioFormat.tgMajorFormat,
+                           pMfAudioFormat.tgSubFormat,
                            pMfAudioFormat.wcSubFormat,
                            pMfAudioFormat.wcFormatTag,
                            pMfAudioFormat.dwFormatTag,
@@ -6776,21 +6819,21 @@ begin
           // This attribute corresponds to the nChannels member of the WAVEFORMATEX structure.
           pMfAudioFormat.unChannels := MFGetAttributeUINT32(pType,
                                                             MF_MT_AUDIO_NUM_CHANNELS,
-                                                            0);
+                                                            UINT32(2));
 
           // Number of audio samples per second in an audio media type.
           // This attribute corresponds to the nSamplesPerSec member of the WAVEFORMATEX structure.
           pMfAudioFormat.unSamplesPerSec := MFGetAttributeUINT32(pType,
                                                                  MF_MT_AUDIO_SAMPLES_PER_SECOND,
-                                                                 0);
+                                                                 UINT32(0));
 
           // Average number of bytes per second in an audio media type.
           // This attribute corresponds to the nAvgBytesPerSec member of the WAVEFORMATEX structure.
           pMfAudioFormat.unAvgBytesPerSec := MFGetAttributeUINT32(pType,
                                                                   MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
-                                                                  0);
+                                                                  UINT32(0));
 
-          // Number of audio samples per second in an audio media type.
+          // Number of variable audio samples per second in an audio media type.
           pMfAudioFormat.dblFloatSamplePerSec := MFGetAttributeDouble(pType,
                                                                       MF_MT_AUDIO_FLOAT_SAMPLES_PER_SECOND,
                                                                       0.0);
@@ -6800,13 +6843,19 @@ begin
           // This attribute corresponds to the wSamplesPerBlock member of the WAVEFORMATEXTENSIBLE structure.
           pMfAudioFormat.unSamplesPerBlock := MFGetAttributeUINT32(pType,
                                                                    MF_MT_AUDIO_SAMPLES_PER_BLOCK,
-                                                                   0);
+                                                                   UINT32(0));
 
           // Note: Some encoded audio formats do not contain a value for bits/sample.
-          // In that case, use a default value of 16. Most codecs will accept this value.
-          pMfAudioFormat.unBitsPerSample := MFGetAttributeUINT32(pType,
-                                                                 MF_MT_AUDIO_BITS_PER_SAMPLE,
-                                                                 0);
+          // In that case, use a default value of 16 or 32 incase of variable samples per second.
+          // Most codecs will accept this value.
+          if (pMfAudioFormat.dblFloatSamplePerSec = 0.0) then
+            pMfAudioFormat.unBitsPerSample := MFGetAttributeUINT32(pType,
+                                                                   MF_MT_AUDIO_BITS_PER_SAMPLE,
+                                                                   UINT32(16))
+          else
+            pMfAudioFormat.unBitsPerSample := MFGetAttributeUINT32(pType,
+                                                                   MF_MT_AUDIO_BITS_PER_SAMPLE,
+                                                                   UINT32(32));
 
           // Number of valid bits of audio data in each audio sample.
           // Remarks:
@@ -6822,32 +6871,32 @@ begin
           // This attribute corresponds to the wValidBitsPerSample member of the WAVEFORMATEXTENSIBLE structure.
           pMfAudioFormat.unValidBitsPerSample := MFGetAttributeUINT32(pType,
                                                                       MF_MT_AUDIO_VALID_BITS_PER_SAMPLE,
-                                                                      0);
+                                                                      UINT32(0));
 
           // For PCM audio formats, the block alignment is equal to the number of
           // audio channels multiplied by the number of bytes per audio sample.
           // This attribute corresponds to the nBlockAlign member of the WAVEFORMATEX structure.
           pMfAudioFormat.unBlockAlignment := MFGetAttributeUINT32(pType,
                                                                   MF_MT_AUDIO_BLOCK_ALIGNMENT,
-                                                                  0);
+                                                                  UINT32(0));
 
           // In an audio media type, specifies the assignment of audio channels to speaker positions.
           pMfAudioFormat.unChannelMask := MFGetAttributeUINT32(pType,
                                                                MF_MT_AUDIO_CHANNEL_MASK,
-                                                               (0));
+                                                               UINT32(0));
           // AAC specific
           pMfAudioFormat.unAACPayload := MFGetAttributeUINT32(pType,
                                                               MF_MT_AAC_PAYLOAD_TYPE,
-                                                              0);
+                                                              UINT32(0));
 
           pMfAudioFormat.unAACProfileLevel := MFGetAttributeUINT32(pType,
                                                                    MF_MT_AAC_AUDIO_PROFILE_LEVEL_INDICATION,
-                                                                   0);
+                                                                   UINT32(0));
 
           // FLAC extra data.
           pMfAudioFormat.unFlacMaxBlockSize := MFGetAttributeUINT32(pType,
                                                                     MF_MT_AUDIO_FLAC_MAX_BLOCK_SIZE,
-                                                                    (0));
+                                                                    UINT32(0));
 
           // Do a brief check.
           if (pMfAudioFormat.unChannels = 0) or (pMfAudioFormat.unSamplesPerSec = 0) then
@@ -6865,25 +6914,26 @@ begin
       pType := nil;
       inc(i);
 
-   until (i > dwTypes);  // end repeat
+  until (i >= dwTypes);  // end repeat
+
 
 done:
   Result := hr;
 end;
 
 
-//
+//  V1
 function GetAudioSubType(mSource: IMFMediaSource;
                          out pSubType: TGUID;
                          out pFormatTag: DWord;
-                         out pDescr: Widestring;
+                         out pDescr: WideString;
                          out pChannels: UINT32;
                          out psamplesPerSec: UINT32;
                          out pbitsPerSample: UINT32;
                          out pBlockAlignment: UINT32;
                          out pAverageSampleRate: UINT32;
                          out pBitRate: Double;
-                         out pSampleRate: Double): HResult;
+                         out pSampleRate: Double): HResult; overload;
 
 var
   hr: HResult;
@@ -6898,6 +6948,7 @@ var
   bSelected: BOOL;
   sGuid: string;
   sDescr: Widestring;
+  uAverageSampleRate: UINT32;
 
 label done;
 
@@ -6975,11 +7026,11 @@ begin
 
           pChannels := MFGetAttributeUINT32(mfType,
                                             MF_MT_AUDIO_NUM_CHANNELS,
-                                            0);
+                                            2);
 
           pSamplesPerSec := MFGetAttributeUINT32(mfType,
-                                                MF_MT_AUDIO_SAMPLES_PER_SECOND,
-                                                0);
+                                                 MF_MT_AUDIO_SAMPLES_PER_SECOND,
+                                                 44100);
 
           // Note: Some encoded audio formats do not contain a value for bits/sample.
           // In that case, use a default value of 16. Most codecs will accept this value.
@@ -6987,11 +7038,15 @@ begin
                                                  MF_MT_AUDIO_BITS_PER_SAMPLE,
                                                  16);
 
-          pAverageSampleRate := MFGetAttributeUINT32(mfType,
-                                                     MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
-                                                     0);
           // Bitrate (kbps)
           pBitRate := (pAverageSampleRate * 8) / 1000;
+
+
+          uAverageSampleRate := Round((pChannels * pBitRate) / 8);
+
+          pAverageSampleRate := MFGetAttributeUINT32(mfType,
+                                                     MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
+                                                     uAverageSampleRate);
 
           // Samplerate (khz)
           pSampleRate := pSamplesPerSec / 1000;
@@ -7015,6 +7070,13 @@ begin
 
 done:
   Result := hr;
+end;
+
+
+//  V2
+function GetAudioSubType(var pAudioFormat: TMFAudioFormat): HResult; overload;
+begin
+  Result := GetAudioFormat(pAudioFormat);
 end;
 
 
@@ -7081,7 +7143,8 @@ begin
                                       aAudioFmts[i].tgSubFormat);
 
           // Readable subtype info
-          GetGUIDNameConst(aAudioFmts[i].tgSubFormat,
+          GetGUIDNameConst(aAudioFmts[i].tgMajorFormat,
+                           aAudioFmts[i].tgSubFormat,
                            aAudioFmts[i].wcSubFormat,
                            aAudioFmts[i].wcFormatTag,
                            aAudioFmts[i].dwFormatTag,
@@ -7128,7 +7191,7 @@ begin
                                                                  MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
                                                                  0);
 
-          // unChannelMask
+          // ChannelMask is the same as speaker-layout.
           aAudioFmts[i].unChannelMask := MFGetAttributeUINT32(mfAudioType,
                                                               MF_MT_AUDIO_CHANNEL_MASK,
                                                               0);
@@ -7142,8 +7205,9 @@ begin
           case aAudioFmts[i].unAACPayload of
             0: aAudioFmts[i].wsAACPayloadDescription := 'Contains raw_data_block elements only (Raw AAC).';
             1: aAudioFmts[i].wsAACPayloadDescription := 'Audio Data Transport Stream (ADTS).';
-            2: aAudioFmts[i].wsAACPayloadDescription := 'Audio Data Interchange Format (ADIF).';
-            3: aAudioFmts[i].wsAACPayloadDescription := 'MPEG-4 audio transport stream with a synchronization layer (LOAS) and a multiplex layer (LATM).';
+            // The following payloads are not supported by Windows!
+            2: aAudioFmts[i].wsAACPayloadDescription := 'Audio Data Interchange Format (ADIF). (Not supported)';
+            3: aAudioFmts[i].wsAACPayloadDescription := 'MPEG-4 audio transport stream with a synchronization layer (LOAS) and a multiplex layer (LATM) (Not supported)';
           end;
 
 
@@ -7424,6 +7488,7 @@ done:
 end;
 
 
+
 // Getting the File Duration
 // To get the duration of a media file, call the IMFSourceReader.GetPresentationAttribute method and
 // request the MF_PD_DURATION attribute, as shown in the following code.
@@ -7469,6 +7534,33 @@ begin
 
   Result := hr;
 end;
+
+
+// Get fileduration from an URL.
+function GetFileDuration(const sURL: PCWSTR;
+                         out pDuration: LONGLONG): HResult; overload;
+var
+  hr: HResult;
+  pSource: IMFMediaSource;
+  pPD: IMFPresentationDescriptor;
+
+begin
+  pDuration := 0;
+  // Create a mediasource by given URL.
+  hr := CreateObjectFromUrl(sURL,
+                            pSource);
+
+  // Get the duration of a media file by calling the IMFMediaSource.CreatePresentationDescriptor method
+  if SUCCEEDED(hr) then
+    hr := pSource.CreatePresentationDescriptor(pPD);
+
+  if SUCCEEDED(hr) then
+    hr := pPD.GetUINT64(MF_PD_DURATION,
+                        UINT64(pDuration));
+
+  Result := hr;
+end;
+
 
 
 // Gets de file size
@@ -7976,49 +8068,17 @@ end;
 procedure GetSpeakersLayOut(const ChannelMatrix: UINT32;
                             out aLayout: string;
                             out aChannels: string);
-const
-  SPEAKER_FRONT_LEFT       = $00000001;
-  SPEAKER_FRONT_RIGHT      = $00000002;
-  SPEAKER_FRONT_CENTER     = $00000004;
-  SPEAKER_LOW_FREQUENCY    = $00000008;
-  SPEAKER_BACK_LEFT        = $00000010;
-  SPEAKER_BACK_RIGHT       = $00000020;
-  SPEAKER_FRONT_LEFT_OF_CENTER  = $00000040;
-  SPEAKER_FRONT_RIGHT_OF_CENTER = $00000080;
-  SPEAKER_BACK_CENTER      = $00000100;
-  SPEAKER_SIDE_LEFT        = $00000200;
-  SPEAKER_SIDE_RIGHT       = $00000400;
-  SPEAKER_TOP_CENTER       = $00000800;
-  SPEAKER_TOP_FRONT_LEFT   = $00001000;
-  SPEAKER_TOP_FRONT_CENTER = $00002000;
-  SPEAKER_TOP_FRONT_RIGHT  = $00004000;
-  SPEAKER_TOP_BACK_LEFT    = $00008000;
-  SPEAKER_TOP_BACK_CENTER  = $00010000;
-  SPEAKER_TOP_BACK_RIGHT   = $00020000;
-  SPEAKER_RESERVED         = $7FFC0000;  // bit mask locations reserved for future use
-  SPEAKER_ALL              = $80000000;  // used to specify that any possible permutation of speaker configurations
-
-  // Standard speaker geometry configurations, used with X3DAudioInitialize
-  SPEAKER_MONO             = SPEAKER_FRONT_CENTER;
-  SPEAKER_STEREO           = (SPEAKER_FRONT_LEFT or SPEAKER_FRONT_RIGHT);
-  SPEAKER_2POINT1          = (SPEAKER_FRONT_LEFT or SPEAKER_FRONT_RIGHT or SPEAKER_LOW_FREQUENCY);
-  SPEAKER_SURROUND         = (SPEAKER_FRONT_LEFT or SPEAKER_FRONT_RIGHT or SPEAKER_FRONT_CENTER or SPEAKER_BACK_CENTER);
-  SPEAKER_QUAD             = (SPEAKER_FRONT_LEFT or SPEAKER_FRONT_RIGHT or SPEAKER_BACK_LEFT or SPEAKER_BACK_RIGHT);
-  SPEAKER_4POINT1          = (SPEAKER_FRONT_LEFT or SPEAKER_FRONT_RIGHT or SPEAKER_LOW_FREQUENCY or SPEAKER_BACK_LEFT or SPEAKER_BACK_RIGHT);
-  SPEAKER_5POINT1          = (SPEAKER_FRONT_LEFT or SPEAKER_FRONT_RIGHT or SPEAKER_FRONT_CENTER or SPEAKER_LOW_FREQUENCY or SPEAKER_BACK_LEFT or SPEAKER_BACK_RIGHT);
-  SPEAKER_7POINT1          = (SPEAKER_FRONT_LEFT or SPEAKER_FRONT_RIGHT or SPEAKER_FRONT_CENTER or SPEAKER_LOW_FREQUENCY or SPEAKER_BACK_LEFT or SPEAKER_BACK_RIGHT or SPEAKER_FRONT_LEFT_OF_CENTER or SPEAKER_FRONT_RIGHT_OF_CENTER);
-  SPEAKER_5POINT1_SURROUND = (SPEAKER_FRONT_LEFT or SPEAKER_FRONT_RIGHT or SPEAKER_FRONT_CENTER or SPEAKER_LOW_FREQUENCY or SPEAKER_SIDE_LEFT or SPEAKER_SIDE_RIGHT);
-  SPEAKER_7POINT1_SURROUND = (SPEAKER_FRONT_LEFT or SPEAKER_FRONT_RIGHT or SPEAKER_FRONT_CENTER or SPEAKER_LOW_FREQUENCY or SPEAKER_BACK_LEFT or SPEAKER_BACK_RIGHT or SPEAKER_SIDE_LEFT or SPEAKER_SIDE_RIGHT);
-
-
 begin
 
+  // Note: When ChannelMatrix is zero, assume stereo.
+
   case ChannelMatrix of
+
     SPEAKER_MONO:      begin
                          aLayout := 'Front Center.';
                          aChannels := 'Mono';
                        end;
-    SPEAKER_STEREO:    begin
+    0, SPEAKER_STEREO: begin
                          aLayout := 'Front Left & Front Right.';
                          aChannels := 'Stereo';
                        end;

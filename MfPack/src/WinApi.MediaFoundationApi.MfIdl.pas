@@ -1682,7 +1682,7 @@ type
       function CreateObjectFromURL(const pwszURL: LPCWSTR;
                                    dwFlags: DWord;
                                    pProps: IPropertyStore; // can be nil
-                                   out pObjectType: MF_OBJECT_TYPE;
+                                   {out} var pObjectType: MF_OBJECT_TYPE;
                                    out ppObject: IUnknown): HResult; stdcall;
 
       function CreateObjectFromByteStream(pByteStream: IMFByteStream;

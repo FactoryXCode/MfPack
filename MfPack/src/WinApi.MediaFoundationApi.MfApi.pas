@@ -23,6 +23,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
+// 11/03/2024 Tony                Fixed some issues with some video subtype guids.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -2241,27 +2242,69 @@ type
   MFT_ENUM_FLAG = _MFT_ENUM_FLAG;
   {$EXTERNALSYM MFT_ENUM_FLAG}
 const
-  MFT_ENUM_FLAG_SYNCMFT                         = MFT_ENUM_FLAG($00000001);   // Enumerates V1 MFTs. This is default.
+  MFT_ENUM_FLAG_SYNCMFT                         = MFT_ENUM_FLAG($00000001);   // Enumerates V1 MFTs. This is the default.
+                                                                              // The MFT performs synchronous data processing in software.
+                                                                              // This flag does not apply to hardware transforms.
   {$EXTERNALSYM MFT_ENUM_FLAG_SYNCMFT}
-  MFT_ENUM_FLAG_ASYNCMFT                        = MFT_ENUM_FLAG($00000002);   // Enumerates only software async MFTs also known as V2 MFTs
+
+  MFT_ENUM_FLAG_ASYNCMFT                        = MFT_ENUM_FLAG($00000002);   // Enumerates only software async MFTs also known as V2 MFTs.
+                                                                              // The MFT performs asynchronous data processing in software. See Asynchronous MFTs.
+                                                                              // This flag does not apply to hardware transforms.
   {$EXTERNALSYM MFT_ENUM_FLAG_ASYNCMFT}
-  MFT_ENUM_FLAG_HARDWARE                        = MFT_ENUM_FLAG($00000004);   // Enumerates V2 hardware async MFTs
+
+  MFT_ENUM_FLAG_HARDWARE                        = MFT_ENUM_FLAG($00000004);   // Enumerates V2 hardware async MFTs.
+                                                                              // The MFT performs hardware-based data processing,
+                                                                              // using either the AVStream driver or a GPU-based proxy MFT.
+                                                                              // MFTs in this category always process data asynchronously.
+                                                                              // Note  This flag applies to video codecs and video processors that
+                                                                              // perform their work entirely in hardware.
+                                                                              // It does not apply to software decoders that use
+                                                                              // DirectX Video Acceleration to assist decoding.
   {$EXTERNALSYM MFT_ENUM_FLAG_HARDWARE}
-  MFT_ENUM_FLAG_FIELDOFUSE                      = MFT_ENUM_FLAG($00000008);   // Enumerates MFTs that require unlocking
+
+  MFT_ENUM_FLAG_FIELDOFUSE                      = MFT_ENUM_FLAG($00000008);   // Enumerates MFTs that require unlocking.
+                                                                              // The MFT that must be unlocked by the application before use.
+                                                                              // Unlocking is performed using the IMFFieldOfUseMFTUnlock interface.
+                                                                              // For more information, see Field of Use Restrictions.
+                                                                              // https://learn.microsoft.com/en-us/windows/desktop/medfound/field-of-use-restrictions
+                                                                              // This flag does not apply to hardware transforms.
   {$EXTERNALSYM MFT_ENUM_FLAG_FIELDOFUSE}
-  MFT_ENUM_FLAG_LOCALMFT                        = MFT_ENUM_FLAG($00000010);   // Enumerates Locally (in-process) registered MFTs
+
+  MFT_ENUM_FLAG_LOCALMFT                        = MFT_ENUM_FLAG($00000010);   // Enumerates Locally (in-process) registered MFTs.
+                                                                              // For enumeration, include MFTs that were registered in the
+                                                                              // caller's process.
+                                                                              // To register an MFT in the caller's process,
+                                                                              // call the either the MFTRegisterLocal or
+                                                                              // MFTRegisterLocalByCLSID function.
+                                                                              // This flag does not apply to hardware transforms.
+                                                                              // Do not set this flag in the MFTRegister function.
   {$EXTERNALSYM MFT_ENUM_FLAG_LOCALMFT}
-  MFT_ENUM_FLAG_TRANSCODE_ONLY                  = MFT_ENUM_FLAG($00000020);   // Enumerates decoder MFTs used by transcode only
+
+  MFT_ENUM_FLAG_TRANSCODE_ONLY                  = MFT_ENUM_FLAG($00000020);   // Enumerates decoder MFTs used by transcode only.
+                                                                              // The MFT is optimized for transcoding rather than playback.
   {$EXTERNALSYM MFT_ENUM_FLAG_TRANSCODE_ONLY}
-  MFT_ENUM_FLAG_SORTANDFILTER                   = MFT_ENUM_FLAG($00000040);   // Apply system local, do not use and preferred sorting and filtering
+
+  MFT_ENUM_FLAG_SORTANDFILTER                   = MFT_ENUM_FLAG($00000040);   // Apply system local, do not use and preferred sorting and filtering.
+                                                                              // For enumeration, sort and filter the results.
+                                                                              // For more information, see the Remarks section of MFTEnumEx.
+                                                                              // Do not set this flag in the MFTRegister function.
   {$EXTERNALSYM MFT_ENUM_FLAG_SORTANDFILTER}
-  MFT_ENUM_FLAG_SORTANDFILTER_APPROVED_ONLY     = MFT_ENUM_FLAG($000000C0);   // Similar to MFT_ENUM_FLAG_SORTANDFILTER, but apply a local policy of: MF_PLUGIN_CONTROL_POLICY_USE_APPROVED_PLUGINS
+
+  MFT_ENUM_FLAG_SORTANDFILTER_APPROVED_ONLY     = MFT_ENUM_FLAG($000000C0);   // Similar to MFT_ENUM_FLAG_SORTANDFILTER,
+                                                                              // but apply a local policy of: MF_PLUGIN_CONTROL_POLICY_USE_APPROVED_PLUGINS.
   {$EXTERNALSYM MFT_ENUM_FLAG_SORTANDFILTER_APPROVED_ONLY}
-  MFT_ENUM_FLAG_SORTANDFILTER_WEB_ONLY          = MFT_ENUM_FLAG($00000140);   // Similar to MFT_ENUM_FLAG_SORTANDFILTER, but apply a local policy of: MF_PLUGIN_CONTROL_POLICY_USE_WEB_PLUGINS
+
+  MFT_ENUM_FLAG_SORTANDFILTER_WEB_ONLY          = MFT_ENUM_FLAG($00000140);   // Similar to MFT_ENUM_FLAG_SORTANDFILTER,
+                                                                              // but apply a local policy of: MF_PLUGIN_CONTROL_POLICY_USE_WEB_PLUGINS.
   {$EXTERNALSYM MFT_ENUM_FLAG_SORTANDFILTER_WEB_ONLY}
-  MFT_ENUM_FLAG_SORTANDFILTER_WEB_ONLY_EDGEMODE = MFT_ENUM_FLAG($00000240);   // Similar to MFT_ENUM_FLAG_SORTANDFILTER, but apply a local policy of: MF_PLUGIN_CONTROL_POLICY_USE_WEB_PLUGINS_EDGEMODE
+
+  MFT_ENUM_FLAG_SORTANDFILTER_WEB_ONLY_EDGEMODE = MFT_ENUM_FLAG($00000240);   // Similar to MFT_ENUM_FLAG_SORTANDFILTER,
+                                                                              // but apply a local policy of: MF_PLUGIN_CONTROL_POLICY_USE_WEB_PLUGINS_EDGEMODE.
   {$EXTERNALSYM MFT_ENUM_FLAG_SORTANDFILTER_WEB_ONLY_EDGEMODE}
-  MFT_ENUM_FLAG_ALL                             = MFT_ENUM_FLAG($0000003F);   // Enumerates all MFTs including SW and HW MFTs and applies filtering
+
+  MFT_ENUM_FLAG_ALL                             = MFT_ENUM_FLAG($0000003F);   // Enumerates all MFTs including SW and HW MFTs and applies filtering.
+                                                                              // Bitwise OR of all the flags, excluding MFT_ENUM_FLAG_SORTANDFILTER.
+                                                                              // Do not set this flag in the MFTRegister function.
   {$EXTERNALSYM MFT_ENUM_FLAG_ALL}
 
 
@@ -2448,18 +2491,19 @@ const
 
 //#endif // (WINVER >= _WIN32_WINNT_WIN7)
 
+  // Gets information from the registry about a Media Foundation transform (MFT).
   //
   // results pszName, ppInputTypes, and ppOutputTypes must be freed with CoTaskMemFree.
   // ppAttributes must be released.
   //
 
-  function MFTGetInfo(clsidMFT: CLSID;
-                      var pszName: LPWSTR;
-                      var ppInputTypes: PMFT_REGISTER_TYPE_INFO;
-                      var pcInputTypes: UINT32;
-                      var ppOutputTypes: PMFT_REGISTER_TYPE_INFO;
-                      var pcOutputTypes: UINT32;
-                      var ppAttributes: IMFAttributes): HRESULT; stdcall;
+  function MFTGetInfo({in} const clsidMFT: CLSID;
+                      out pszName: LPWSTR;
+                      out ppInputTypes: PMFT_REGISTER_TYPE_INFO;
+                      out pcInputTypes: UINT32;
+                      out ppOutputTypes: PMFT_REGISTER_TYPE_INFO;
+                      out pcOutputTypes: UINT32;
+                      out ppAttributes: IMFAttributes): HRESULT; stdcall;
   {$EXTERNALSYM MFTGetInfo}
 
 
@@ -2472,8 +2516,8 @@ const
 
 
   function MFGetMFTMerit(var pMFT: IUnknown;
-                         cbVerifier: UINT32;
-                         verifier: Byte;
+                         {in} cbVerifier: UINT32;
+                         {in} verifier: Byte;
                          out merit: DWord): HResult; stdcall;
   {$EXTERNALSYM MFGetPluginControl}
   // Get MFT's merit - checking that is has a valid certificate
@@ -2683,19 +2727,20 @@ const
 
   // Luminance and Depth Formats. //////////////////////////////////////////////
 
-  MFVideoFormat_L8      : TGUID = (D1: $00000050 {D3DFMT_L8};
+  MFVideoFormat_L8      : TGUID = (D1: $00000032 {D3DFMT_L8};
                                    D2: $0000;
                                    D3: $0010;
                                    D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
   {$EXTERNALSYM MFVideoFormat_L8}
 
-  MFVideoFormat_L16     : TGUID = (D1: $00000081 {D3DFMT_L16};
+  MFVideoFormat_L16     : TGUID = (D1: $00000051 {D3DFMT_L16};
                                    D2: $0000;
                                    D3: $0010;
                                    D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
   {$EXTERNALSYM MFVideoFormat_L16}
 
-  MFVideoFormat_D16     : TGUID = (D1: $00000080 {D3DFMT_D16};
+  // Note: MFVideoFormat_D16 has the same guid value as MFAudioFormat_MPEG !
+  MFVideoFormat_D16     : TGUID = (D1: $00000050 {D3DFMT_D16};
                                    D2: $0000;
                                    D3: $0010;
                                    D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
@@ -3220,7 +3265,7 @@ const
                                            D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
   {$EXTERNALSYM MFAudioFormat_MP3}
 
-  MFAudioFormat_MPEG            : TGUID = (D1: WAVE_FORMAT_MPEG;
+  MFAudioFormat_MPEG            : TGUID = (D1: WAVE_FORMAT_MPEG;     // $50
                                            D2: $0000;
                                            D3: $0010;
                                            D4: ($80, $00, $00, $AA, $00, $38, $9B, $71));
@@ -4681,17 +4726,19 @@ const
 
   // Converts a Media Foundation audio media type to a WAVEFORMATEX structure.
   function MFCreateWaveFormatExFromMFMediaType(pMFType: IMFMediaType; // Pointer to the IMFMediaType interface of the media type.
-                                               var ppWF: PWAVEFORMATEX; // Receives a pointer to the WAVEFORMATEX structure. The caller must release the memory allocated for the structure by calling CoTaskMemFree.
+                                               {out} ppWF: PWAVEFORMATEX; // Receives a pointer to the WAVEFORMATEX structure. The caller must release the memory allocated for the structure by calling CoTaskMemFree.
                                                out pcbSize: UINT32; // Receives the size of the WAVEFORMATEX structure.
                                                Flags: UINT32 = 0): HResult; stdcall; // Contains a flag from the MFWaveFormatExConvertFlags enumeration.
   {$EXTERNALSYM MFCreateWaveFormatExFromMFMediaType}
 
+  // Initializes a media type from a DirectShow VIDEOINFOHEADER structure.
   function MFInitMediaTypeFromVideoInfoHeader(pMFType: IMFMediaType;
                                               pVIH: VIDEOINFOHEADER;
                                               const cbBufSize: UINT32;
                                               const pSubtype: TGUID): HResult; stdcall;
   {$EXTERNALSYM MFInitMediaTypeFromVideoInfoHeader}
 
+  // Initializes a media type from a DirectShow VIDEOINFOHEADER2 structure.
   function MFInitMediaTypeFromVideoInfoHeader2(pMFType: IMFMediaType;
                                                pVIH2: VIDEOINFOHEADER2;
                                                const cbBufSize: UINT32;
@@ -4778,14 +4825,16 @@ const
                                           pAMType: AM_MEDIA_TYPE): HRESULT; stdcall;
   {$EXTERNALSYM MFInitMediaTypeFromAMMediaType}
 
+  // Initializes a DirectShow AM_MEDIA_TYPE structure from a Media Foundation media type.
   function MFInitAMMediaTypeFromMFMediaType(pMFType: IMFMediaType;
                                             const guidFormatBlockType: TGUID;
                                             var pAMType: AM_MEDIA_TYPE): HRESULT; stdcall;
   {$EXTERNALSYM MFInitAMMediaTypeFromMFMediaType}
 
+  // Initializes a DirectShow AM_MEDIA_TYPE structure from a Media Foundation media type.
   function MFCreateAMMediaTypeFromMFMediaType(pMFType: IMFMediaType;
-                                              guidFormatBlockType: TGUID;
-                                              ppAMType: PAM_MEDIA_TYPE // delete with DeleteMediaType
+                                              const guidFormatBlockType: TGUID;
+                                              var ppAMType: AM_MEDIA_TYPE // Delete with DeleteMediaType.
                                              ): HRESULT; stdcall;
   {$EXTERNALSYM MFCreateAMMediaTypeFromMFMediaType}
 
@@ -4955,8 +5004,8 @@ const
   //
   // Remarks
   //    This function checks whether Format specifies a YUV format.
-  //    Not every YUV format is recognized by this function. However,
-  //    if a YUV format is not recognized by this function,
+  //    Not every YUV format is recognized by this function.
+  //    However, if a YUV format is not recognized by this function,
   //    it is probably not supported for video rendering or DirectX video acceleration (DXVA).
 
 
@@ -5121,7 +5170,11 @@ const
   {$EXTERNALSYM MFGetUncompressedVideoFormat}
 
 
-
+  // [This API is not supported and may be altered or unavailable in the future.
+  //  Applications should avoid using the MFVIDEOFORMAT structure,
+  //  and use media type attributes instead. For more information,
+  //  see https://learn.microsoft.com/en-us/windows/desktop/medfound/video-media-types.]
+  ///
   function MFInitVideoFormat(var pVideoFormat: MFVIDEOFORMAT;
                              _type: MFStandardVideoFormat): HResult; stdcall;
   {$EXTERNALSYM MFInitVideoFormat}
