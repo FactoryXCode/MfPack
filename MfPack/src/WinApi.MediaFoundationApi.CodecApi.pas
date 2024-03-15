@@ -108,333 +108,817 @@ const
 
   // See: https://docs.microsoft.com/en-us/windows/win32/directshow/codec-api-properties
 
-  STATIC_CODECAPI_AVEncCommonFormatConstraint         :  TGUID = (D1: $57CBB9B8; D2: $116F; D3: $4951; D4: ($B4, $0C, $C2, $A0, $35, $ED, $8F, $17));
+  STATIC_CODECAPI_AVEncCommonFormatConstraint         :  TGUID = (D1: $57CBB9B8;
+                                                                  D2: $116F;
+                                                                  D3: $4951;
+                                                                  D4: ($B4, $0C, $C2, $A0, $35, $ED, $8F, $17));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncCommonFormatConstraint}
-  STATIC_CODECAPI_GUID_AVEncCommonFormatUnSpecified   :  TGUID = (D1: $AF46A35A; D2: $6024; D3: $4525; D4: ($A4, $8A, $09, $4B, $97, $F5, $B3, $C2));
+  STATIC_CODECAPI_GUID_AVEncCommonFormatUnSpecified   :  TGUID = (D1: $AF46A35A;
+                                                                  D2: $6024;
+                                                                  D3: $4525;
+                                                                  D4: ($A4, $8A, $09, $4B, $97, $F5, $B3, $C2));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncCommonFormatUnSpecified}
-  STATIC_CODECAPI_GUID_AVEncCommonFormatDVD_V         :  TGUID = (D1: $cc9598c4; D2: $e7fe; D3: $451d; D4: ($b1, $ca, $76, $1b, $c8, $40, $b7, $f3));
+  STATIC_CODECAPI_GUID_AVEncCommonFormatDVD_V         :  TGUID = (D1: $cc9598c4;
+                                                                  D2: $e7fe;
+                                                                  D3: $451d;
+                                                                  D4: ($b1, $ca, $76, $1b, $c8, $40, $b7, $f3));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncCommonFormatDVD_V}
-  STATIC_CODECAPI_GUID_AVEncCommonFormatDVD_DashVR    :  TGUID = (D1: $e55199d6; D2: $044c; D3: $4dae; D4: ($a4, $88, $53, $1e, $d3, $06, $23, $5b));
+  STATIC_CODECAPI_GUID_AVEncCommonFormatDVD_DashVR    :  TGUID = (D1: $e55199d6;
+                                                                  D2: $044c;
+                                                                  D3: $4dae;
+                                                                  D4: ($a4, $88, $53, $1e, $d3, $06, $23, $5b));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncCommonFormatDVD_DashVR}
-  STATIC_CODECAPI_GUID_AVEncCommonFormatDVD_PlusVR    :  TGUID = (D1: $e74c6f2e; D2: $ec37; D3: $478d; D4: ($9a, $f4, $a5, $e1, $35, $b6, $27, $1c));
+  STATIC_CODECAPI_GUID_AVEncCommonFormatDVD_PlusVR    :  TGUID = (D1: $e74c6f2e;
+                                                                  D2: $ec37;
+                                                                  D3: $478d;
+                                                                  D4: ($9a, $f4, $a5, $e1, $35, $b6, $27, $1c));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncCommonFormatDVD_PlusVR}
-  STATIC_CODECAPI_GUID_AVEncCommonFormatVCD           :  TGUID = (D1: $95035bf7; D2: $9d90; D3: $40ff; D4: ($ad, $5c, $5c, $f8, $cf, $71, $ca, $1d));
+  STATIC_CODECAPI_GUID_AVEncCommonFormatVCD           :  TGUID = (D1: $95035bf7;
+                                                                  D2: $9d90;
+                                                                  D3: $40ff;
+                                                                  D4: ($ad, $5c, $5c, $f8, $cf, $71, $ca, $1d));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncCommonFormatVCD}
-  STATIC_CODECAPI_GUID_AVEncCommonFormatSVCD          :  TGUID = (D1: $51d85818; D2: $8220; D3: $448c; D4: ($80, $66, $d6, $9b, $ed, $16, $c9, $ad));
+  STATIC_CODECAPI_GUID_AVEncCommonFormatSVCD          :  TGUID = (D1: $51d85818;
+                                                                  D2: $8220;
+                                                                  D3: $448c;
+                                                                  D4: ($80, $66, $d6, $9b, $ed, $16, $c9, $ad));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncCommonFormatSVCD}
-  STATIC_CODECAPI_GUID_AVEncCommonFormatATSC          :  TGUID = (D1: $8d7b897c; D2: $a019; D3: $4670; D4: ($aa, $76, $2e, $dc, $ac, $7a, $c2, $96));
+  STATIC_CODECAPI_GUID_AVEncCommonFormatATSC          :  TGUID = (D1: $8d7b897c;
+                                                                  D2: $a019;
+                                                                  D3: $4670;
+                                                                  D4: ($aa, $76, $2e, $dc, $ac, $7a, $c2, $96));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncCommonFormatATSC}
-  STATIC_CODECAPI_GUID_AVEncCommonFormatDVB           :  TGUID = (D1: $71830d8f; D2: $6c33; D3: $430d; D4: ($84, $4b, $c2, $70, $5b, $aa, $e6, $db));
+  STATIC_CODECAPI_GUID_AVEncCommonFormatDVB           :  TGUID = (D1: $71830d8f;
+                                                                  D2: $6c33;
+                                                                  D3: $430d;
+                                                                  D4: ($84, $4b, $c2, $70, $5b, $aa, $e6, $db));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncCommonFormatDVB}
-  STATIC_CODECAPI_GUID_AVEncCommonFormatMP3           :  TGUID = (D1: $349733cd; D2: $eb08; D3: $4dc2; D4: ($81, $97, $e4, $98, $35, $ef, $82, $8b));
+  STATIC_CODECAPI_GUID_AVEncCommonFormatMP3           :  TGUID = (D1: $349733cd;
+                                                                  D2: $eb08;
+                                                                  D3: $4dc2;
+                                                                  D4: ($81, $97, $e4, $98, $35, $ef, $82, $8b));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncCommonFormatMP3}
-  STATIC_CODECAPI_GUID_AVEncCommonFormatHighMAT       :  TGUID = (D1: $1eabe760; D2: $fb2b; D3: $4928; D4: ($90, $d1, $78, $db, $88, $ee, $e8, $89));
+  STATIC_CODECAPI_GUID_AVEncCommonFormatHighMAT       :  TGUID = (D1: $1eabe760;
+                                                                  D2: $fb2b;
+                                                                  D3: $4928;
+                                                                  D4: ($90, $d1, $78, $db, $88, $ee, $e8, $89));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncCommonFormatHighMAT}
-  STATIC_CODECAPI_GUID_AVEncCommonFormatHighMPV       :  TGUID = (D1: $a2d25db8; D2: $b8f9; D3: $42c2; D4: ($8b, $c7, $0b, $93, $cf, $60, $47, $88));
+  STATIC_CODECAPI_GUID_AVEncCommonFormatHighMPV       :  TGUID = (D1: $a2d25db8;
+                                                                  D2: $b8f9;
+                                                                  D3: $42c2;
+                                                                  D4: ($8b, $c7, $0b, $93, $cf, $60, $47, $88));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncCommonFormatHighMPV}
-  STATIC_CODECAPI_AVEncCodecType                      :  TGUID = (D1: $08af4ac1; D2: $f3f2; D3: $4c74; D4: ($9d, $cf, $37, $f2, $ec, $79, $f8, $26));
+  STATIC_CODECAPI_AVEncCodecType                      :  TGUID = (D1: $08af4ac1;
+                                                                  D2: $f3f2;
+                                                                  D3: $4c74;
+                                                                  D4: ($9d, $cf, $37, $f2, $ec, $79, $f8, $26));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncCodecType}
-  STATIC_CODECAPI_GUID_AVEncMPEG1Video                :  TGUID = (D1: $c8dafefe; D2: $da1e; D3: $4774; D4: ($b2, $7d, $11, $83, $0c, $16, $b1, $fe));
+  STATIC_CODECAPI_GUID_AVEncMPEG1Video                :  TGUID = (D1: $c8dafefe;
+                                                                  D2: $da1e;
+                                                                  D3: $4774;
+                                                                  D4: ($b2, $7d, $11, $83, $0c, $16, $b1, $fe));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncMPEG1Video}
-  STATIC_CODECAPI_GUID_AVEncMPEG2Video                :  TGUID = (D1: $046dc19a; D2: $6677; D3: $4aaa; D4: ($a3, $1d, $c1, $ab, $71, $6f, $45, $60));
+  STATIC_CODECAPI_GUID_AVEncMPEG2Video                :  TGUID = (D1: $046dc19a;
+                                                                  D2: $6677;
+                                                                  D3: $4aaa;
+                                                                  D4: ($a3, $1d, $c1, $ab, $71, $6f, $45, $60));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncMPEG2Video}
-  STATIC_CODECAPI_GUID_AVEncMPEG1Audio                :  TGUID = (D1: $d4dd1362; D2: $cd4a; D3: $4cd6; D4: ($81, $38, $b9, $4d, $b4, $54, $2b, $04));
+  STATIC_CODECAPI_GUID_AVEncMPEG1Audio                :  TGUID = (D1: $d4dd1362;
+                                                                  D2: $cd4a;
+                                                                  D3: $4cd6;
+                                                                  D4: ($81, $38, $b9, $4d, $b4, $54, $2b, $04));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncMPEG1Audio}
-  STATIC_CODECAPI_GUID_AVEncMPEG2Audio                :  TGUID = (D1: $ee4cbb1f; D2: $9c3f; D3: $4770; D4: ($92, $b5, $fc, $b7, $c2, $a8, $d3, $81));
+  STATIC_CODECAPI_GUID_AVEncMPEG2Audio                :  TGUID = (D1: $ee4cbb1f;
+                                                                  D2: $9c3f;
+                                                                  D3: $4770;
+                                                                  D4: ($92, $b5, $fc, $b7, $c2, $a8, $d3, $81));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncMPEG2Audio}
-  STATIC_CODECAPI_GUID_AVEncWMV                       :  TGUID = (D1: $4e0fef9b; D2: $1d43; D3: $41bd; D4: ($b8, $bd, $4d, $7b, $f7, $45, $7a, $2a));
+  STATIC_CODECAPI_GUID_AVEncWMV                       :  TGUID = (D1: $4e0fef9b;
+                                                                  D2: $1d43;
+                                                                  D3: $41bd;
+                                                                  D4: ($b8, $bd, $4d, $7b, $f7, $45, $7a, $2a));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncWMV}
-  STATIC_CODECAPI_GUID_AVEndMPEG4Video                :  TGUID = (D1: $dd37b12a; D2: $9503; D3: $4f8b; D4: ($b8, $d0, $32, $4a, $00, $c0, $a1, $cf));
+  STATIC_CODECAPI_GUID_AVEndMPEG4Video                :  TGUID = (D1: $dd37b12a;
+                                                                  D2: $9503;
+                                                                  D3: $4f8b;
+                                                                  D4: ($b8, $d0, $32, $4a, $00, $c0, $a1, $cf));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEndMPEG4Video}
-  STATIC_CODECAPI_GUID_AVEncH264Video                 :  TGUID = (D1: $95044eab; D2: $31b3; D3: $47de; D4: ($8e, $75, $38, $a4, $2b, $b0, $3e, $28));
+  STATIC_CODECAPI_GUID_AVEncH264Video                 :  TGUID = (D1: $95044eab;
+                                                                  D2: $31b3;
+                                                                  D3: $47de;
+                                                                  D4: ($8e, $75, $38, $a4, $2b, $b0, $3e, $28));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncH264Video}
-  STATIC_CODECAPI_GUID_AVEncDV                        :  TGUID = (D1: $09b769c7; D2: $3329; D3: $44fb; D4: ($89, $54, $fa, $30, $93, $7d, $3d, $5a));
+  STATIC_CODECAPI_GUID_AVEncDV                        :  TGUID = (D1: $09b769c7;
+                                                                  D2: $3329;
+                                                                  D3: $44fb;
+                                                                  D4: ($89, $54, $fa, $30, $93, $7d, $3d, $5a));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncDV}
-  STATIC_CODECAPI_GUID_AVEncWMAPro                    :  TGUID = (D1: $1955f90c; D2: $33f7; D3: $4a68; D4: ($ab, $81, $53, $f5, $65, $71, $25, $c4));
+  STATIC_CODECAPI_GUID_AVEncWMAPro                    :  TGUID = (D1: $1955f90c;
+                                                                  D2: $33f7;
+                                                                  D3: $4a68;
+                                                                  D4: ($ab, $81, $53, $f5, $65, $71, $25, $c4));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncWMAPro}
-  STATIC_CODECAPI_GUID_AVEncWMALossless               :  TGUID = (D1: $55ca7265; D2: $23d8; D3: $4761; D4: ($90, $31, $b7, $4f, $be, $12, $f4, $c1));
+  STATIC_CODECAPI_GUID_AVEncWMALossless               :  TGUID = (D1: $55ca7265;
+                                                                  D2: $23d8;
+                                                                  D3: $4761;
+                                                                  D4: ($90, $31, $b7, $4f, $be, $12, $f4, $c1));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncWMALossless}
-  STATIC_CODECAPI_GUID_AVEncWMAVoice                  :  TGUID = (D1: $13ed18cb; D2: $50e8; D3: $4276; D4: ($a2, $88, $a6, $aa, $22, $83, $82, $d9));
+  STATIC_CODECAPI_GUID_AVEncWMAVoice                  :  TGUID = (D1: $13ed18cb;
+                                                                  D2: $50e8;
+                                                                  D3: $4276;
+                                                                  D4: ($a2, $88, $a6, $aa, $22, $83, $82, $d9));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncWMAVoice}
-  STATIC_CODECAPI_GUID_AVEncDolbyDigitalPro           :  TGUID = (D1: $f5be76cc; D2: $0ff8; D3: $40eb; D4: ($9c, $b1, $bb, $a9, $40, $04, $d4, $4f));
+  STATIC_CODECAPI_GUID_AVEncDolbyDigitalPro           :  TGUID = (D1: $f5be76cc;
+                                                                  D2: $0ff8;
+                                                                  D3: $40eb;
+                                                                  D4: ($9c, $b1, $bb, $a9, $40, $04, $d4, $4f));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncDolbyDigitalPro}
-  STATIC_CODECAPI_GUID_AVEncDolbyDigitalConsumer      :  TGUID = (D1: $c1a7bf6c; D2: $0059; D3: $4bfa; D4: ($94, $ef, $ef, $74, $7a, $76, $8d, $52));
+  STATIC_CODECAPI_GUID_AVEncDolbyDigitalConsumer      :  TGUID = (D1: $c1a7bf6c;
+                                                                  D2: $0059;
+                                                                  D3: $4bfa;
+                                                                  D4: ($94, $ef, $ef, $74, $7a, $76, $8d, $52));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncDolbyDigitalConsumer}
-  STATIC_CODECAPI_GUID_AVEncDolbyDigitalPlus          :  TGUID = (D1: $698d1b80; D2: $f7dd; D3: $415c; D4: ($97, $1c, $42, $49, $2a, $20, $56, $c6));
+  STATIC_CODECAPI_GUID_AVEncDolbyDigitalPlus          :  TGUID = (D1: $698d1b80;
+                                                                  D2: $f7dd;
+                                                                  D3: $415c;
+                                                                  D4: ($97, $1c, $42, $49, $2a, $20, $56, $c6));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncDolbyDigitalPlus}
-  STATIC_CODECAPI_GUID_AVEncDTSHD                     :  TGUID = (D1: $2052e630; D2: $469d; D3: $4bfb; D4: ($80, $ca, $1d, $65, $6e, $7e, $91, $8f));
+  STATIC_CODECAPI_GUID_AVEncDTSHD                     :  TGUID = (D1: $2052e630;
+                                                                  D2: $469d;
+                                                                  D3: $4bfb;
+                                                                  D4: ($80, $ca, $1d, $65, $6e, $7e, $91, $8f));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncDTSHD}
-  STATIC_CODECAPI_GUID_AVEncDTS                       :  TGUID = (D1: $45fbcaa2; D2: $5e6e; D3: $4ab0; D4: ($88, $93, $59, $03, $be, $e9, $3a, $cf));
+  STATIC_CODECAPI_GUID_AVEncDTS                       :  TGUID = (D1: $45fbcaa2;
+                                                                  D2: $5e6e;
+                                                                  D3: $4ab0;
+                                                                  D4: ($88, $93, $59, $03, $be, $e9, $3a, $cf));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncDTS}
-  STATIC_CODECAPI_GUID_AVEncMLP                       :  TGUID = (D1: $05f73e29; D2: $f0d1; D3: $431e; D4: ($a4, $1c, $a4, $74, $32, $ec, $5a, $66));
+  STATIC_CODECAPI_GUID_AVEncMLP                       :  TGUID = (D1: $05f73e29;
+                                                                  D2: $f0d1;
+                                                                  D3: $431e;
+                                                                  D4: ($a4, $1c, $a4, $74, $32, $ec, $5a, $66));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncMLP}
-  STATIC_CODECAPI_GUID_AVEncPCM                       :  TGUID = (D1: $844be7f4; D2: $26cf; D3: $4779; D4: ($b3, $86, $cc, $05, $d1, $87, $99, $0c));
+  STATIC_CODECAPI_GUID_AVEncPCM                       :  TGUID = (D1: $844be7f4;
+                                                                  D2: $26cf;
+                                                                  D3: $4779;
+                                                                  D4: ($b3, $86, $cc, $05, $d1, $87, $99, $0c));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncPCM}
-  STATIC_CODECAPI_GUID_AVEncSDDS                      :  TGUID = (D1: $1dc1b82f; D2: $11c8; D3: $4c71; D4: ($b7, $b6, $ee, $3e, $b9, $bc, $2b, $94));
+  STATIC_CODECAPI_GUID_AVEncSDDS                      :  TGUID = (D1: $1dc1b82f;
+                                                                  D2: $11c8;
+                                                                  D3: $4c71;
+                                                                  D4: ($b7, $b6, $ee, $3e, $b9, $bc, $2b, $94));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVEncSDDS}
-  STATIC_CODECAPI_AVEncCommonRateControlMode          :  TGUID = (D1: $1c0608e9; D2: $370c; D3: $4710; D4: ($8a, $58, $cb, $61, $81, $c4, $24, $23));
+  STATIC_CODECAPI_AVEncCommonRateControlMode          :  TGUID = (D1: $1c0608e9;
+                                                                  D2: $370c;
+                                                                  D3: $4710;
+                                                                  D4: ($8a, $58, $cb, $61, $81, $c4, $24, $23));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncCommonRateControlMode}
-  STATIC_CODECAPI_AVEncCommonLowLatency               :  TGUID = (D1: $9d3ecd55; D2: $89e8; D3: $490a; D4: ($97, $0a, $0c, $95, $48, $d5, $a5, $6e));
+  STATIC_CODECAPI_AVEncCommonLowLatency               :  TGUID = (D1: $9d3ecd55;
+                                                                  D2: $89e8;
+                                                                  D3: $490a;
+                                                                  D4: ($97, $0a, $0c, $95, $48, $d5, $a5, $6e));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncCommonLowLatency}
-  STATIC_CODECAPI_AVEncCommonMultipassMode            :  TGUID = (D1: $22533d4c; D2: $47e1; D3: $41b5; D4: ($93, $52, $a2, $b7, $78, $0e, $7a, $c4));
+  STATIC_CODECAPI_AVEncCommonMultipassMode            :  TGUID = (D1: $22533d4c;
+                                                                  D2: $47e1;
+                                                                  D3: $41b5;
+                                                                  D4: ($93, $52, $a2, $b7, $78, $0e, $7a, $c4));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncCommonMultipassMode}
-  STATIC_CODECAPI_AVEncCommonPassStart                :  TGUID = (D1: $6a67739f; D2: $4eb5; D3: $4385; D4: ($99, $28, $f2, $76, $a9, $39, $ef, $95));
+  STATIC_CODECAPI_AVEncCommonPassStart                :  TGUID = (D1: $6a67739f;
+                                                                  D2: $4eb5;
+                                                                  D3: $4385;
+                                                                  D4: ($99, $28, $f2, $76, $a9, $39, $ef, $95));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncCommonPassStart}
-  STATIC_CODECAPI_AVEncCommonPassEnd                  :  TGUID = (D1: $0e3d01bc; D2: $c85c; D3: $467d; D4: ($8b, $60, $c4, $10, $12, $ee, $3b, $f6));
+  STATIC_CODECAPI_AVEncCommonPassEnd                  :  TGUID = (D1: $0e3d01bc;
+                                                                  D2: $c85c;
+                                                                  D3: $467d;
+                                                                  D4: ($8b, $60, $c4, $10, $12, $ee, $3b, $f6));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncCommonPassEnd}
-  STATIC_CODECAPI_AVEncCommonRealTime                 :  TGUID = (D1: $143a0ff6; D2: $a131; D3: $43da; D4: ($b8, $1e, $98, $fb, $b8, $ec, $37, $8e));
+  STATIC_CODECAPI_AVEncCommonRealTime                 :  TGUID = (D1: $143a0ff6;
+                                                                  D2: $a131;
+                                                                  D3: $43da;
+                                                                  D4: ($b8, $1e, $98, $fb, $b8, $ec, $37, $8e));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncCommonRealTime}
-  STATIC_CODECAPI_AVEncCommonQuality                  :  TGUID = (D1: $fcbf57a3; D2: $7ea5; D3: $4b0c; D4: ($96, $44, $69, $b4, $0c, $39, $c3, $91));
+  STATIC_CODECAPI_AVEncCommonQuality                  :  TGUID = (D1: $fcbf57a3;
+                                                                  D2: $7ea5;
+                                                                  D3: $4b0c;
+                                                                  D4: ($96, $44, $69, $b4, $0c, $39, $c3, $91));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncCommonQuality}
-  STATIC_CODECAPI_AVEncCommonQualityVsSpeed           :  TGUID = (D1: $98332df8; D2: $03cd; D3: $476b; D4: ($89, $fa, $3f, $9e, $44, $2d, $ec, $9f));
+  STATIC_CODECAPI_AVEncCommonQualityVsSpeed           :  TGUID = (D1: $98332df8;
+                                                                  D2: $03cd;
+                                                                  D3: $476b;
+                                                                  D4: ($89, $fa, $3f, $9e, $44, $2d, $ec, $9f));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncCommonQualityVsSpeed}
-  STATIC_CODECAPI_AVEncCommonTranscodeEncodingProfile :  TGUID = (D1: $6947787C; D2: $F508; D3: $4EA9; D4: ($B1, $E9, $A1, $FE, $3A, $49, $FB, $C9));
+  STATIC_CODECAPI_AVEncCommonTranscodeEncodingProfile :  TGUID = (D1: $6947787C;
+                                                                  D2: $F508;
+                                                                  D3: $4EA9;
+                                                                  D4: ($B1, $E9, $A1, $FE, $3A, $49, $FB, $C9));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncCommonTranscodeEncodingProfile}
-  STATIC_CODECAPI_AVEncCommonMeanBitRate              :  TGUID = (D1: $f7222374; D2: $2144; D3: $4815; D4: ($b5, $50, $a3, $7f, $8e, $12, $ee, $52));
+  STATIC_CODECAPI_AVEncCommonMeanBitRate              :  TGUID = (D1: $f7222374;
+                                                                  D2: $2144;
+                                                                  D3: $4815;
+                                                                  D4: ($b5, $50, $a3, $7f, $8e, $12, $ee, $52));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncCommonMeanBitRate}
-  STATIC_CODECAPI_AVEncCommonMeanBitRateInterval      :  TGUID = (D1: $bfaa2f0c; D2: $cb82; D3: $4bc0; D4: ($84, $74, $f0, $6a, $8a, $0d, $02, $58));
+  STATIC_CODECAPI_AVEncCommonMeanBitRateInterval      :  TGUID = (D1: $bfaa2f0c;
+                                                                  D2: $cb82;
+                                                                  D3: $4bc0;
+                                                                  D4: ($84, $74, $f0, $6a, $8a, $0d, $02, $58));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncCommonMeanBitRateInterval}
-  STATIC_CODECAPI_AVEncCommonMaxBitRate               :  TGUID = (D1: $9651eae4; D2: $39b9; D3: $4ebf; D4: ($85, $ef, $d7, $f4, $44, $ec, $74, $65));
+  STATIC_CODECAPI_AVEncCommonMaxBitRate               :  TGUID = (D1: $9651eae4;
+                                                                  D2: $39b9;
+                                                                  D3: $4ebf;
+                                                                  D4: ($85, $ef, $d7, $f4, $44, $ec, $74, $65));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncCommonMaxBitRate}
-  STATIC_CODECAPI_AVEncCommonMinBitRate               :  TGUID = (D1: $101405b2; D2: $2083; D3: $4034; D4: ($a8, $06, $ef, $be, $dd, $d7, $c9, $ff));
+  STATIC_CODECAPI_AVEncCommonMinBitRate               :  TGUID = (D1: $101405b2;
+                                                                  D2: $2083;
+                                                                  D3: $4034;
+                                                                  D4: ($a8, $06, $ef, $be, $dd, $d7, $c9, $ff));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncCommonMinBitRate}
-  STATIC_CODECAPI_AVEncCommonBufferSize               :  TGUID = (D1: $0db96574; D2: $b6a4; D3: $4c8b; D4: ($81, $06, $37, $73, $de, $03, $10, $cd));
+  STATIC_CODECAPI_AVEncCommonBufferSize               :  TGUID = (D1: $0db96574;
+                                                                  D2: $b6a4;
+                                                                  D3: $4c8b;
+                                                                  D4: ($81, $06, $37, $73, $de, $03, $10, $cd));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncCommonBufferSize}
-  STATIC_CODECAPI_AVEncCommonBufferInLevel            :  TGUID = (D1: $d9c5c8db; D2: $fc74; D3: $4064; D4: ($94, $e9, $cd, $19, $f9, $47, $ed, $45));
+  STATIC_CODECAPI_AVEncCommonBufferInLevel            :  TGUID = (D1: $d9c5c8db;
+                                                                  D2: $fc74;
+                                                                  D3: $4064;
+                                                                  D4: ($94, $e9, $cd, $19, $f9, $47, $ed, $45));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncCommonBufferInLevel}
-  STATIC_CODECAPI_AVEncCommonBufferOutLevel           :  TGUID = (D1: $ccae7f49; D2: $d0bc; D3: $4e3d; D4: ($a5, $7e, $fb, $57, $40, $14, $00, $69));
+  STATIC_CODECAPI_AVEncCommonBufferOutLevel           :  TGUID = (D1: $ccae7f49;
+                                                                  D2: $d0bc;
+                                                                  D3: $4e3d;
+                                                                  D4: ($a5, $7e, $fb, $57, $40, $14, $00, $69));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncCommonBufferOutLevel}
-  STATIC_CODECAPI_AVEncCommonStreamEndHandling        :  TGUID = (D1: $6aad30af; D2: $6ba8; D3: $4ccc; D4: ($8f, $ca, $18, $d1, $9b, $ea, $eb, $1c));
+  STATIC_CODECAPI_AVEncCommonStreamEndHandling        :  TGUID = (D1: $6aad30af;
+                                                                  D2: $6ba8;
+                                                                  D3: $4ccc;
+                                                                  D4: ($8f, $ca, $18, $d1, $9b, $ea, $eb, $1c));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncCommonStreamEndHandling}
-  STATIC_CODECAPI_AVEncStatCommonCompletedPasses      :  TGUID = (D1: $3e5de533; D2: $9df7; D3: $438c; D4: ($85, $4f, $9f, $7d, $d3, $68, $3d, $34));
+  STATIC_CODECAPI_AVEncStatCommonCompletedPasses      :  TGUID = (D1: $3e5de533;
+                                                                  D2: $9df7;
+                                                                  D3: $438c;
+                                                                  D4: ($85, $4f, $9f, $7d, $d3, $68, $3d, $34));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncStatCommonCompletedPasses}
-  STATIC_CODECAPI_AVEncVideoOutputFrameRate           :  TGUID = (D1: $ea85e7c3; D2: $9567; D3: $4d99; D4: ($87, $c4, $02, $c1, $c2, $78, $ca, $7c));
+  STATIC_CODECAPI_AVEncVideoOutputFrameRate           :  TGUID = (D1: $ea85e7c3;
+                                                                  D2: $9567;
+                                                                  D3: $4d99;
+                                                                  D4: ($87, $c4, $02, $c1, $c2, $78, $ca, $7c));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoOutputFrameRate}
-  STATIC_CODECAPI_AVEncVideoOutputFrameRateConversion :  TGUID = (D1: $8c068bf4; D2: $369a; D3: $4ba3; D4: ($82, $fd, $b2, $51, $8f, $b3, $39, $6e));
+  STATIC_CODECAPI_AVEncVideoOutputFrameRateConversion :  TGUID = (D1: $8c068bf4;
+                                                                  D2: $369a;
+                                                                  D3: $4ba3;
+                                                                  D4: ($82, $fd, $b2, $51, $8f, $b3, $39, $6e));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoOutputFrameRateConversion}
-  STATIC_CODECAPI_AVEncVideoPixelAspectRatio          :  TGUID = (D1: $3cdc718f; D2: $b3e9; D3: $4eb6; D4: ($a5, $7f, $cf, $1f, $1b, $32, $1b, $87));
+  STATIC_CODECAPI_AVEncVideoPixelAspectRatio          :  TGUID = (D1: $3cdc718f;
+                                                                  D2: $b3e9;
+                                                                  D3: $4eb6;
+                                                                  D4: ($a5, $7f, $cf, $1f, $1b, $32, $1b, $87));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoPixelAspectRatio}
-  STATIC_CODECAPI_AVEncVideoForceSourceScanType       :  TGUID = (D1: $1ef2065f; D2: $058a; D3: $4765; D4: ($a4, $fc, $8a, $86, $4c, $10, $30, $12));
+  STATIC_CODECAPI_AVEncVideoForceSourceScanType       :  TGUID = (D1: $1ef2065f;
+                                                                  D2: $058a;
+                                                                  D3: $4765;
+                                                                  D4: ($a4, $fc, $8a, $86, $4c, $10, $30, $12));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoForceSourceScanType}
-  STATIC_CODECAPI_AVEncVideoNoOfFieldsToEncode        :  TGUID = (D1: $61e4bbe2; D2: $4ee0; D3: $40e7; D4: ($80, $ab, $51, $dd, $ee, $be, $62, $91));
+  STATIC_CODECAPI_AVEncVideoNoOfFieldsToEncode        :  TGUID = (D1: $61e4bbe2;
+                                                                  D2: $4ee0;
+                                                                  D3: $40e7;
+                                                                  D4: ($80, $ab, $51, $dd, $ee, $be, $62, $91));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoNoOfFieldsToEncode}
-  STATIC_CODECAPI_AVEncVideoNoOfFieldsToSkip          :  TGUID = (D1: $a97e1240; D2: $1427; D3: $4c16; D4: ($a7, $f7, $3d, $cf, $d8, $ba, $4c, $c5));
+  STATIC_CODECAPI_AVEncVideoNoOfFieldsToSkip          :  TGUID = (D1: $a97e1240;
+                                                                  D2: $1427;
+                                                                  D3: $4c16;
+                                                                  D4: ($a7, $f7, $3d, $cf, $d8, $ba, $4c, $c5));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoNoOfFieldsToSkip}
 
-  STATIC_CODECAPI_AVEncVideoEncodeDimension           :  TGUID = (D1: $1074df28; D2: $7e0f; D3: $47a4; D4: ($a4, $53, $cd, $d7, $38, $70, $f5, $ce));
+  STATIC_CODECAPI_AVEncVideoEncodeDimension           :  TGUID = (D1: $1074df28;
+                                                                  D2: $7e0f;
+                                                                  D3: $47a4;
+                                                                  D4: ($a4, $53, $cd, $d7, $38, $70, $f5, $ce));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoEncodeDimension}
 
-  STATIC_CODECAPI_AVEncVideoEncodeOffsetOrigin        :  TGUID = (D1: $6bc098fe; D2: $a71a; D3: $4454; D4: ($85, $2e, $4d, $2d, $de, $b2, $cd, $24));
+  STATIC_CODECAPI_AVEncVideoEncodeOffsetOrigin        :  TGUID = (D1: $6bc098fe;
+                                                                  D2: $a71a;
+                                                                  D3: $4454;
+                                                                  D4: ($85, $2e, $4d, $2d, $de, $b2, $cd, $24));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoEncodeOffsetOrigin}
-  STATIC_CODECAPI_AVEncVideoDisplayDimension          :  TGUID = (D1: $de053668; D2: $f4ec; D3: $47a9; D4: ($86, $d0, $83, $67, $70, $f0, $c1, $d5));
+  STATIC_CODECAPI_AVEncVideoDisplayDimension          :  TGUID = (D1: $de053668;
+                                                                  D2: $f4ec;
+                                                                  D3: $47a9;
+                                                                  D4: ($86, $d0, $83, $67, $70, $f0, $c1, $d5));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoDisplayDimension}
-  STATIC_CODECAPI_AVEncVideoOutputScanType            :  TGUID = (D1: $460b5576; D2: $842e; D3: $49ab; D4: ($a6, $2d, $b3, $6f, $73, $12, $c9, $db));
+  STATIC_CODECAPI_AVEncVideoOutputScanType            :  TGUID = (D1: $460b5576;
+                                                                  D2: $842e;
+                                                                  D3: $49ab;
+                                                                  D4: ($a6, $2d, $b3, $6f, $73, $12, $c9, $db));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoOutputScanType}
-  STATIC_CODECAPI_AVEncVideoInverseTelecineEnable     :  TGUID = (D1: $2ea9098b; D2: $e76d; D3: $4ccd; D4: ($a0, $30, $d3, $b8, $89, $c1, $b6, $4c));
+  STATIC_CODECAPI_AVEncVideoInverseTelecineEnable     :  TGUID = (D1: $2ea9098b;
+                                                                  D2: $e76d;
+                                                                  D3: $4ccd;
+                                                                  D4: ($a0, $30, $d3, $b8, $89, $c1, $b6, $4c));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoInverseTelecineEnable}
-  STATIC_CODECAPI_AVEncVideoInverseTelecineThreshold  :  TGUID = (D1: $40247d84; D2: $e895; D3: $497f; D4: ($b4, $4c, $b7, $45, $60, $ac, $fe, $27));
+  STATIC_CODECAPI_AVEncVideoInverseTelecineThreshold  :  TGUID = (D1: $40247d84;
+                                                                  D2: $e895;
+                                                                  D3: $497f;
+                                                                  D4: ($b4, $4c, $b7, $45, $60, $ac, $fe, $27));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoInverseTelecineThreshold}
-  STATIC_CODECAPI_AVEncVideoSourceFilmContent         :  TGUID = (D1: $1791c64b; D2: $ccfc; D3: $4827; D4: ($a0, $ed, $25, $57, $79, $3b, $2b, $1c));
+  STATIC_CODECAPI_AVEncVideoSourceFilmContent         :  TGUID = (D1: $1791c64b;
+                                                                  D2: $ccfc;
+                                                                  D3: $4827;
+                                                                  D4: ($a0, $ed, $25, $57, $79, $3b, $2b, $1c));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoSourceFilmContent}
-  STATIC_CODECAPI_AVEncVideoSourceIsBW                :  TGUID = (D1: $42ffc49b; D2: $1812; D3: $4fdc; D4: ($8d, $24, $70, $54, $c5, $21, $e6, $eb));
+  STATIC_CODECAPI_AVEncVideoSourceIsBW                :  TGUID = (D1: $42ffc49b;
+                                                                  D2: $1812;
+                                                                  D3: $4fdc;
+                                                                  D4: ($8d, $24, $70, $54, $c5, $21, $e6, $eb));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoSourceIsBW}
-  STATIC_CODECAPI_AVEncVideoFieldSwap                 :  TGUID = (D1: $fefd7569; D2: $4e0a; D3: $49f2; D4: ($9f, $2b, $36, $0e, $a4, $8c, $19, $a2));
+  STATIC_CODECAPI_AVEncVideoFieldSwap                 :  TGUID = (D1: $fefd7569;
+                                                                  D2: $4e0a;
+                                                                  D3: $49f2;
+                                                                  D4: ($9f, $2b, $36, $0e, $a4, $8c, $19, $a2));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoFieldSwap}
-  STATIC_CODECAPI_AVEncVideoInputChromaResolution     :  TGUID = (D1: $bb0cec33; D2: $16f1; D3: $47b0; D4: ($8a, $88, $37, $81, $5b, $ee, $17, $39));
+  STATIC_CODECAPI_AVEncVideoInputChromaResolution     :  TGUID = (D1: $bb0cec33;
+                                                                  D2: $16f1;
+                                                                  D3: $47b0;
+                                                                  D4: ($8a, $88, $37, $81, $5b, $ee, $17, $39));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoInputChromaResolution}
-  STATIC_CODECAPI_AVEncVideoOutputChromaResolution    :  TGUID = (D1: $6097b4c9; D2: $7c1d; D3: $4e64; D4: ($bf, $cc, $9e, $97, $65, $31, $8a, $e7));
+  STATIC_CODECAPI_AVEncVideoOutputChromaResolution    :  TGUID = (D1: $6097b4c9;
+                                                                  D2: $7c1d;
+                                                                  D3: $4e64;
+                                                                  D4: ($bf, $cc, $9e, $97, $65, $31, $8a, $e7));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoOutputChromaResolution}
-  STATIC_CODECAPI_AVEncVideoInputChromaSubsampling    :  TGUID = (D1: $a8e73a39; D2: $4435; D3: $4ec3; D4: ($a6, $ea, $98, $30, $0f, $4b, $36, $f7));
+  STATIC_CODECAPI_AVEncVideoInputChromaSubsampling    :  TGUID = (D1: $a8e73a39;
+                                                                  D2: $4435;
+                                                                  D3: $4ec3;
+                                                                  D4: ($a6, $ea, $98, $30, $0f, $4b, $36, $f7));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoInputChromaSubsampling}
-  STATIC_CODECAPI_AVEncVideoOutputChromaSubsampling   :  TGUID = (D1: $fa561c6c; D2: $7d17; D3: $44f0; D4: ($83, $c9, $32, $ed, $12, $e9, $63, $43));
+  STATIC_CODECAPI_AVEncVideoOutputChromaSubsampling   :  TGUID = (D1: $fa561c6c;
+                                                                  D2: $7d17;
+                                                                  D3: $44f0;
+                                                                  D4: ($83, $c9, $32, $ed, $12, $e9, $63, $43));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoOutputChromaSubsampling}
-  STATIC_CODECAPI_AVEncVideoInputColorPrimaries       :  TGUID = (D1: $c24d783f; D2: $7ce6; D3: $4278; D4: ($90, $ab, $28, $a4, $f1, $e5, $f8, $6c));
+  STATIC_CODECAPI_AVEncVideoInputColorPrimaries       :  TGUID = (D1: $c24d783f;
+                                                                  D2: $7ce6;
+                                                                  D3: $4278;
+                                                                  D4: ($90, $ab, $28, $a4, $f1, $e5, $f8, $6c));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoInputColorPrimaries}
-  STATIC_CODECAPI_AVEncVideoOutputColorPrimaries      :  TGUID = (D1: $be95907c; D2: $9d04; D3: $4921; D4: ($89, $85, $a6, $d6, $d8, $7d, $1a, $6c));
+  STATIC_CODECAPI_AVEncVideoOutputColorPrimaries      :  TGUID = (D1: $be95907c;
+                                                                  D2: $9d04;
+                                                                  D3: $4921;
+                                                                  D4: ($89, $85, $a6, $d6, $d8, $7d, $1a, $6c));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoOutputColorPrimaries}
-  STATIC_CODECAPI_AVEncVideoInputColorTransferFunction:  TGUID = (D1: $8c056111; D2: $a9c3; D3: $4b08; D4: ($a0, $a0, $ce, $13, $f8, $a2, $7c, $75));
+  STATIC_CODECAPI_AVEncVideoInputColorTransferFunction:  TGUID = (D1: $8c056111;
+                                                                  D2: $a9c3;
+                                                                  D3: $4b08;
+                                                                  D4: ($a0, $a0, $ce, $13, $f8, $a2, $7c, $75));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoInputColorTransferFunction}
-  STATIC_CODECAPI_AVEncVideoOutputColorTransferFunction :  TGUID = (D1: $4a7f884a; D2: $ea11; D3: $460d; D4: ($bf, $57, $b8, $8b, $c7, $59, $00, $de));
+  STATIC_CODECAPI_AVEncVideoOutputColorTransferFunction :  TGUID = (D1: $4a7f884a;
+                                                                  D2: $ea11;
+                                                                  D3: $460d;
+                                                                  D4: ($bf, $57, $b8, $8b, $c7, $59, $00, $de));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoOutputColorTransferFunction}
-  STATIC_CODECAPI_AVEncVideoInputColorTransferMatrix  :  TGUID = (D1: $52ed68b9; D2: $72d5; D3: $4089; D4: ($95, $8d, $f5, $40, $5d, $55, $08, $1c));
+  STATIC_CODECAPI_AVEncVideoInputColorTransferMatrix  :  TGUID = (D1: $52ed68b9;
+                                                                  D2: $72d5;
+                                                                  D3: $4089;
+                                                                  D4: ($95, $8d, $f5, $40, $5d, $55, $08, $1c));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoInputColorTransferMatrix}
-  STATIC_CODECAPI_AVEncVideoOutputColorTransferMatrix :  TGUID = (D1: $a9b90444; D2: $af40; D3: $4310; D4: ($8f, $be, $ed, $6d, $93, $3f, $89, $2b));
+  STATIC_CODECAPI_AVEncVideoOutputColorTransferMatrix :  TGUID = (D1: $a9b90444;
+                                                                  D2: $af40;
+                                                                  D3: $4310;
+                                                                  D4: ($8f, $be, $ed, $6d, $93, $3f, $89, $2b));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoOutputColorTransferMatrix}
-  STATIC_CODECAPI_AVEncVideoInputColorLighting        :  TGUID = (D1: $46a99549; D2: $0015; D3: $4a45; D4: ($9c, $30, $1d, $5c, $fa, $25, $83, $16));
+  STATIC_CODECAPI_AVEncVideoInputColorLighting        :  TGUID = (D1: $46a99549;
+                                                                  D2: $0015;
+                                                                  D3: $4a45;
+                                                                  D4: ($9c, $30, $1d, $5c, $fa, $25, $83, $16));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoInputColorLighting}
-  STATIC_CODECAPI_AVEncVideoOutputColorLighting       :  TGUID = (D1: $0e5aaac6; D2: $ace6; D3: $4c5c; D4: ($99, $8e, $1a, $8c, $9c, $6c, $0f, $89));
+  STATIC_CODECAPI_AVEncVideoOutputColorLighting       :  TGUID = (D1: $0e5aaac6;
+                                                                  D2: $ace6;
+                                                                  D3: $4c5c;
+                                                                  D4: ($99, $8e, $1a, $8c, $9c, $6c, $0f, $89));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoOutputColorLighting}
-  STATIC_CODECAPI_AVEncVideoInputColorNominalRange    :  TGUID = (D1: $16cf25c6; D2: $a2a6; D3: $48e9; D4: ($ae, $80, $21, $ae, $c4, $1d, $42, $7e));
+  STATIC_CODECAPI_AVEncVideoInputColorNominalRange    :  TGUID = (D1: $16cf25c6;
+                                                                  D2: $a2a6;
+                                                                  D3: $48e9;
+                                                                  D4: ($ae, $80, $21, $ae, $c4, $1d, $42, $7e));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoInputColorNominalRange}
-  STATIC_CODECAPI_AVEncVideoOutputColorNominalRange   :  TGUID = (D1: $972835ed; D2: $87b5; D3: $4e95; D4: ($95, $00, $c7, $39, $58, $56, $6e, $54));
+  STATIC_CODECAPI_AVEncVideoOutputColorNominalRange   :  TGUID = (D1: $972835ed;
+                                                                  D2: $87b5;
+                                                                  D3: $4e95;
+                                                                  D4: ($95, $00, $c7, $39, $58, $56, $6e, $54));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoOutputColorNominalRange}
-  STATIC_CODECAPI_AVEncInputVideoSystem               :  TGUID = (D1: $bede146d; D2: $b616; D3: $4dc7; D4: ($92, $b2, $f5, $d9, $fa, $92, $98, $f7));
+  STATIC_CODECAPI_AVEncInputVideoSystem               :  TGUID = (D1: $bede146d;
+                                                                  D2: $b616;
+                                                                  D3: $4dc7;
+                                                                  D4: ($92, $b2, $f5, $d9, $fa, $92, $98, $f7));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncInputVideoSystem}
-  STATIC_CODECAPI_AVEncVideoHeaderDropFrame           :  TGUID = (D1: $6ed9e124; D2: $7925; D3: $43fe; D4: ($97, $1b, $e0, $19, $f6, $22, $22, $b4));
+  STATIC_CODECAPI_AVEncVideoHeaderDropFrame           :  TGUID = (D1: $6ed9e124;
+                                                                  D2: $7925;
+                                                                  D3: $43fe;
+                                                                  D4: ($97, $1b, $e0, $19, $f6, $22, $22, $b4));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoHeaderDropFrame}
-  STATIC_CODECAPI_AVEncVideoHeaderHours               :  TGUID = (D1: $2acc7702; D2: $e2da; D3: $4158; D4: ($bf, $9b, $88, $88, $01, $29, $d7, $40));
+  STATIC_CODECAPI_AVEncVideoHeaderHours               :  TGUID = (D1: $2acc7702;
+                                                                  D2: $e2da;
+                                                                  D3: $4158;
+                                                                  D4: ($bf, $9b, $88, $88, $01, $29, $d7, $40));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoHeaderHours}
-  STATIC_CODECAPI_AVEncVideoHeaderMinutes             :  TGUID = (D1: $dc1a99ce; D2: $0307; D3: $408b; D4: ($88, $0b, $b8, $34, $8e, $e8, $ca, $7f));
+  STATIC_CODECAPI_AVEncVideoHeaderMinutes             :  TGUID = (D1: $dc1a99ce;
+                                                                  D2: $0307;
+                                                                  D3: $408b;
+                                                                  D4: ($88, $0b, $b8, $34, $8e, $e8, $ca, $7f));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoHeaderMinutes}
-  STATIC_CODECAPI_AVEncVideoHeaderSeconds             :  TGUID = (D1: $4a2e1a05; D2: $a780; D3: $4f58; D4: ($81, $20, $9a, $44, $9d, $69, $65, $6b));
+  STATIC_CODECAPI_AVEncVideoHeaderSeconds             :  TGUID = (D1: $4a2e1a05;
+                                                                  D2: $a780;
+                                                                  D3: $4f58;
+                                                                  D4: ($81, $20, $9a, $44, $9d, $69, $65, $6b));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoHeaderSeconds}
-  STATIC_CODECAPI_AVEncVideoHeaderFrames              :  TGUID = (D1: $afd5f567; D2: $5c1b; D3: $4adc; D4: ($bd, $af, $73, $56, $10, $38, $14, $36));
+  STATIC_CODECAPI_AVEncVideoHeaderFrames              :  TGUID = (D1: $afd5f567;
+                                                                  D2: $5c1b;
+                                                                  D3: $4adc;
+                                                                  D4: ($bd, $af, $73, $56, $10, $38, $14, $36));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoHeaderFrames}
-  STATIC_CODECAPI_AVEncVideoDefaultUpperFieldDominant :  TGUID = (D1: $810167c4; D2: $0bc1; D3: $47ca; D4: ($8f, $c2, $57, $05, $5a, $14, $74, $a5));
+  STATIC_CODECAPI_AVEncVideoDefaultUpperFieldDominant :  TGUID = (D1: $810167c4;
+                                                                  D2: $0bc1;
+                                                                  D3: $47ca;
+                                                                  D4: ($8f, $c2, $57, $05, $5a, $14, $74, $a5));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoDefaultUpperFieldDominant}
-  STATIC_CODECAPI_AVEncVideoCBRMotionTradeoff         :  TGUID = (D1: $0d49451e; D2: $18d5; D3: $4367; D4: ($a4, $ef, $32, $40, $df, $16, $93, $c4));
+  STATIC_CODECAPI_AVEncVideoCBRMotionTradeoff         :  TGUID = (D1: $0d49451e;
+                                                                  D2: $18d5;
+                                                                  D3: $4367;
+                                                                  D4: ($a4, $ef, $32, $40, $df, $16, $93, $c4));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoCBRMotionTradeoff}
-  STATIC_CODECAPI_AVEncVideoCodedVideoAccessUnitSize  :  TGUID = (D1: $b4b10c15; D2: $14a7; D3: $4ce8; D4: ($b1, $73, $dc, $90, $a0, $b4, $fc, $db));
+  STATIC_CODECAPI_AVEncVideoCodedVideoAccessUnitSize  :  TGUID = (D1: $b4b10c15;
+                                                                  D2: $14a7;
+                                                                  D3: $4ce8;
+                                                                  D4: ($b1, $73, $dc, $90, $a0, $b4, $fc, $db));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoCodedVideoAccessUnitSize}
-  STATIC_CODECAPI_AVEncVideoMaxKeyframeDistance       :  TGUID = (D1: $2987123a; D2: $ba93; D3: $4704; D4: ($b4, $89, $ec, $1e, $5f, $25, $29, $2c));
+  STATIC_CODECAPI_AVEncVideoMaxKeyframeDistance       :  TGUID = (D1: $2987123a;
+                                                                  D2: $ba93;
+                                                                  D3: $4704;
+                                                                  D4: ($b4, $89, $ec, $1e, $5f, $25, $29, $2c));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoMaxKeyframeDistance}
-  STATIC_CODECAPI_AVEncH264CABACEnable                :  TGUID = (D1: $ee6cad62; D2: $d305; D3: $4248; D4: ($a5, $e, $e1, $b2, $55, $f7, $ca, $f8));
+  STATIC_CODECAPI_AVEncH264CABACEnable                :  TGUID = (D1: $ee6cad62;
+                                                                  D2: $d305;
+                                                                  D3: $4248;
+                                                                  D4: ($a5, $e, $e1, $b2, $55, $f7, $ca, $f8));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncH264CABACEnable}
-  STATIC_CODECAPI_AVEncVideoContentType               :  TGUID = (D1: $66117aca; D2: $eb77; D3: $459d; D4: ($93, $c, $a4, $8d, $9d, $6, $83, $fc));
+  STATIC_CODECAPI_AVEncVideoContentType               :  TGUID = (D1: $66117aca;
+                                                                  D2: $eb77;
+                                                                  D3: $459d;
+                                                                  D4: ($93, $c, $a4, $8d, $9d, $6, $83, $fc));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoContentType}
-  STATIC_CODECAPI_AVEncNumWorkerThreads               :  TGUID = (D1: $b0c8bf60; D2: $16f7; D3: $4951; D4: ($a3, $b, $1d, $b1, $60, $92, $93, $d6));
+  STATIC_CODECAPI_AVEncNumWorkerThreads               :  TGUID = (D1: $b0c8bf60;
+                                                                  D2: $16f7;
+                                                                  D3: $4951;
+                                                                  D4: ($a3, $b, $1d, $b1, $60, $92, $93, $d6));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncNumWorkerThreads}
-  STATIC_CODECAPI_AVEncVideoEncodeQP                  :  TGUID = (D1: $2cb5696b; D2: $23fb; D3: $4ce1; D4: ($a0, $f9, $ef, $5b, $90, $fd, $55, $ca));
+  STATIC_CODECAPI_AVEncVideoEncodeQP                  :  TGUID = (D1: $2cb5696b;
+                                                                  D2: $23fb;
+                                                                  D3: $4ce1;
+                                                                  D4: ($a0, $f9, $ef, $5b, $90, $fd, $55, $ca));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoEncodeQP}
-  STATIC_CODECAPI_AVEncVideoMinQP                     :  TGUID = (D1: $0ee22c6a; D2: $a37c; D3: $4568; D4: ($b5, $f1, $9d, $4c, $2b, $3a, $b8, $86));
+  STATIC_CODECAPI_AVEncVideoMinQP                     :  TGUID = (D1: $0ee22c6a;
+                                                                  D2: $a37c;
+                                                                  D3: $4568;
+                                                                  D4: ($b5, $f1, $9d, $4c, $2b, $3a, $b8, $86));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoMinQP}
-  STATIC_CODECAPI_AVEncVideoForceKeyFrame             :  TGUID = (D1: $398c1b98; D2: $8353; D3: $475a; D4: ($9e, $f2, $8f, $26, $5d, $26, $3, $45));
+  STATIC_CODECAPI_AVEncVideoForceKeyFrame             :  TGUID = (D1: $398c1b98;
+                                                                  D2: $8353;
+                                                                  D3: $475a;
+                                                                  D4: ($9e, $f2, $8f, $26, $5d, $26, $3, $45));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoForceKeyFrame}
-  STATIC_CODECAPI_AVEncH264SPSID                      :  TGUID = (D1: $50f38f51; D2: $2b79; D3: $40e3; D4: ($b3, $9c, $7e, $9f, $a0, $77, $5, $1));
+  STATIC_CODECAPI_AVEncH264SPSID                      :  TGUID = (D1: $50f38f51;
+                                                                  D2: $2b79;
+                                                                  D3: $40e3;
+                                                                  D4: ($b3, $9c, $7e, $9f, $a0, $77, $5, $1));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncH264SPSID}
-  STATIC_CODECAPI_AVEncH264PPSID                      :  TGUID = (D1: $bfe29ec2; D2: $56c; D3: $4d68; D4: ($a3, $8d, $ae, $59, $44, $c8, $58, $2e));
+  STATIC_CODECAPI_AVEncH264PPSID                      :  TGUID = (D1: $bfe29ec2;
+                                                                  D2: $56c;
+                                                                  D3: $4d68;
+                                                                  D4: ($a3, $8d, $ae, $59, $44, $c8, $58, $2e));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncH264PPSID}
-  STATIC_CODECAPI_AVEncAdaptiveMode                   :  TGUID = (D1: $4419b185; D2: $da1f; D3: $4f53; D4: ($bc, $76, $9, $7d, $c, $1e, $fb, $1e));
+  STATIC_CODECAPI_AVEncAdaptiveMode                   :  TGUID = (D1: $4419b185;
+                                                                  D2: $da1f;
+                                                                  D3: $4f53;
+                                                                  D4: ($bc, $76, $9, $7d, $c, $1e, $fb, $1e));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncAdaptiveMode}
-  STATIC_CODECAPI_AVEncVideoTemporalLayerCount        :  TGUID = (D1: $19caebff; D2: $b74d; D3: $4cfd; D4: ($8c, $27, $c2, $f9, $d9, $7d, $5f, $52));
+  STATIC_CODECAPI_AVEncVideoTemporalLayerCount        :  TGUID = (D1: $19caebff;
+                                                                  D2: $b74d;
+                                                                  D3: $4cfd;
+                                                                  D4: ($8c, $27, $c2, $f9, $d9, $7d, $5f, $52));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoTemporalLayerCount}
-  STATIC_CODECAPI_AVEncVideoUsage                     :  TGUID = (D1: $1f636849; D2: $5dc1; D3: $49f1; D4: ($b1, $d8, $ce, $3c, $f6, $2e, $a3, $85));
+  STATIC_CODECAPI_AVEncVideoUsage                     :  TGUID = (D1: $1f636849;
+                                                                  D2: $5dc1;
+                                                                  D3: $49f1;
+                                                                  D4: ($b1, $d8, $ce, $3c, $f6, $2e, $a3, $85));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoUsage}
-  STATIC_CODECAPI_AVEncVideoSelectLayer               :  TGUID = (D1: $eb1084f5; D2: $6aaa; D3: $4914; D4: ($bb, $2f, $61, $47, $22, $7f, $12, $e7));
+  STATIC_CODECAPI_AVEncVideoSelectLayer               :  TGUID = (D1: $eb1084f5;
+                                                                  D2: $6aaa;
+                                                                  D3: $4914;
+                                                                  D4: ($bb, $2f, $61, $47, $22, $7f, $12, $e7));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoSelectLayer}
-  STATIC_CODECAPI_AVEncVideoRateControlParams         :  TGUID = (D1: $87d43767; D2: $7645; D3: $44ec; D4: ($b4, $38, $d3, $32, $2f, $bc, $a2, $9f));
+  STATIC_CODECAPI_AVEncVideoRateControlParams         :  TGUID = (D1: $87d43767;
+                                                                  D2: $7645;
+                                                                  D3: $44ec;
+                                                                  D4: ($b4, $38, $d3, $32, $2f, $bc, $a2, $9f));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoRateControlParams}
-  STATIC_CODECAPI_AVEncVideoSupportedControls         :  TGUID = (D1: $d3f40fdd; D2: $77b9; D3: $473d; D4: ($81, $96, $6, $12, $59, $e6, $9c, $ff));
+  STATIC_CODECAPI_AVEncVideoSupportedControls         :  TGUID = (D1: $d3f40fdd;
+                                                                  D2: $77b9;
+                                                                  D3: $473d;
+                                                                  D4: ($81, $96, $6, $12, $59, $e6, $9c, $ff));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoSupportedControls}
-  STATIC_CODECAPI_AVEncVideoEncodeFrameTypeQP         :  TGUID = (D1: $aa70b610; D2: $e03f; D3: $450c; D4: ($ad, $07, $07, $31, $4e, $63, $9c, $e7));
+  STATIC_CODECAPI_AVEncVideoEncodeFrameTypeQP         :  TGUID = (D1: $aa70b610;
+                                                                  D2: $e03f;
+                                                                  D3: $450c;
+                                                                  D4: ($ad, $07, $07, $31, $4e, $63, $9c, $e7));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoEncodeFrameTypeQP}
-  STATIC_CODECAPI_AVEncSliceControlMode               :  TGUID = (D1: $e9e782ef; D2: $5f18; D3: $44c9; D4: ($a9, $0b, $e9, $c3, $c2, $c1, $7b, $0b));
+  STATIC_CODECAPI_AVEncSliceControlMode               :  TGUID = (D1: $e9e782ef;
+                                                                  D2: $5f18;
+                                                                  D3: $44c9;
+                                                                  D4: ($a9, $0b, $e9, $c3, $c2, $c1, $7b, $0b));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncSliceControlMode}
-  STATIC_CODECAPI_AVEncSliceControlSize               :  TGUID = (D1: $92f51df3; D2: $07a5; D3: $4172; D4: ($ae, $fe, $c6, $9c, $a3, $b6, $0e, $35));
+  STATIC_CODECAPI_AVEncSliceControlSize               :  TGUID = (D1: $92f51df3;
+                                                                  D2: $07a5;
+                                                                  D3: $4172;
+                                                                  D4: ($ae, $fe, $c6, $9c, $a3, $b6, $0e, $35));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncSliceControlSize}
-  STATIC_CODECAPI_AVEncSliceGenerationMode            :  TGUID = (D1: $8a6bc67f; D2: $9497; D3: $4286; D4: ($b4, $6b, $02, $db, $8d, $60, $ed, $bc));
+  STATIC_CODECAPI_AVEncSliceGenerationMode            :  TGUID = (D1: $8a6bc67f;
+                                                                  D2: $9497;
+                                                                  D3: $4286;
+                                                                  D4: ($b4, $6b, $02, $db, $8d, $60, $ed, $bc));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncSliceGenerationMode}
-  STATIC_CODECAPI_AVEncVideoMaxNumRefFrame            :  TGUID = (D1: $964829ed; D2: $94f9; D3: $43b4; D4: ($b7, $4d, $ef, $40, $94, $4b, $69, $a0));
+  STATIC_CODECAPI_AVEncVideoMaxNumRefFrame            :  TGUID = (D1: $964829ed;
+                                                                  D2: $94f9;
+                                                                  D3: $43b4;
+                                                                  D4: ($b7, $4d, $ef, $40, $94, $4b, $69, $a0));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoMaxNumRefFrame}
-  STATIC_CODECAPI_AVEncVideoMeanAbsoluteDifference    :  TGUID = (D1: $e5c0c10f; D2: $81a4; D3: $422d; D4: ($8c, $3f, $b4, $74, $a4, $58, $13, $36));
+  STATIC_CODECAPI_AVEncVideoMeanAbsoluteDifference    :  TGUID = (D1: $e5c0c10f;
+                                                                  D2: $81a4;
+                                                                  D3: $422d;
+                                                                  D4: ($8c, $3f, $b4, $74, $a4, $58, $13, $36));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoMeanAbsoluteDifference}
-  STATIC_CODECAPI_AVEncVideoMaxQP                     :  TGUID = (D1: $3daf6f66; D2: $a6a7; D3: $45e0; D4: ($a8, $e5, $f2, $74, $3f, $46, $a3, $a2));
+  STATIC_CODECAPI_AVEncVideoMaxQP                     :  TGUID = (D1: $3daf6f66;
+                                                                  D2: $a6a7;
+                                                                  D3: $45e0;
+                                                                  D4: ($a8, $e5, $f2, $74, $3f, $46, $a3, $a2));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoMaxQP}
-  STATIC_CODECAPI_AVEncVideoLTRBufferControl          :  TGUID = (D1: $a4a0e93d; D2: $4cbc; D3: $444c; D4: ($89, $f4, $82, $6d, $31, $0e, $92, $a7));
+  STATIC_CODECAPI_AVEncVideoLTRBufferControl          :  TGUID = (D1: $a4a0e93d;
+                                                                  D2: $4cbc;
+                                                                  D3: $444c;
+                                                                  D4: ($89, $f4, $82, $6d, $31, $0e, $92, $a7));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoLTRBufferControl}
-  STATIC_CODECAPI_AVEncVideoMarkLTRFrame              :  TGUID = (D1: $e42f4748; D2: $a06d; D3: $4ef9; D4: ($8c, $ea, $3d, $05, $fd, $e3, $bd, $3b));
+  STATIC_CODECAPI_AVEncVideoMarkLTRFrame              :  TGUID = (D1: $e42f4748;
+                                                                  D2: $a06d;
+                                                                  D3: $4ef9;
+                                                                  D4: ($8c, $ea, $3d, $05, $fd, $e3, $bd, $3b));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoMarkLTRFrame}
-  STATIC_CODECAPI_AVEncVideoUseLTRFrame               :  TGUID = (D1: $00752db8; D2: $55f7; D3: $4f80; D4: ($89, $5b, $27, $63, $91, $95, $f2, $ad));
+  STATIC_CODECAPI_AVEncVideoUseLTRFrame               :  TGUID = (D1: $00752db8;
+                                                                  D2: $55f7;
+                                                                  D3: $4f80;
+                                                                  D4: ($89, $5b, $27, $63, $91, $95, $f2, $ad));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoUseLTRFrame}
-  STATIC_CODECAPI_AVEncVideoROIEnabled                :  TGUID = (D1: $d74f7f18; D2: $44dd; D3: $4b85; D4: ($ab, $a3, $5, $d9, $f4, $2a, $82, $80));
+  STATIC_CODECAPI_AVEncVideoROIEnabled                :  TGUID = (D1: $d74f7f18;
+                                                                  D2: $44dd;
+                                                                  D3: $4b85;
+                                                                  D4: ($ab, $a3, $5, $d9, $f4, $2a, $82, $80));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoROIEnabled}
-  STATIC_CODECAPI_AVEncVideoDirtyRectEnabled          :  TGUID = (D1: $8acb8fdd; D2: $5e0c; D3: $4c66; D4: ($87, $29, $b8, $f6, $29, $ab, $04, $fb));
+  STATIC_CODECAPI_AVEncVideoDirtyRectEnabled          :  TGUID = (D1: $8acb8fdd;
+                                                                  D2: $5e0c;
+                                                                  D3: $4c66;
+                                                                  D4: ($87, $29, $b8, $f6, $29, $ab, $04, $fb));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoDirtyRectEnabled}
-  STATIC_CODECAPI_AVScenarioInfo                      :  TGUID = (D1: $b28a6e64; D2: $3ff9; D3: $446a; D4: ($8a, $4b, $0d, $7a, $53, $41, $32, $36));
+  STATIC_CODECAPI_AVScenarioInfo                      :  TGUID = (D1: $b28a6e64;
+                                                                  D2: $3ff9;
+                                                                  D3: $446a;
+                                                                  D4: ($8a, $4b, $0d, $7a, $53, $41, $32, $36));
   {$EXTERNALSYM STATIC_CODECAPI_AVScenarioInfo}
-  STATIC_CODECAPI_AVEncMPVGOPSizeMin                  :  TGUID = (D1: $7155cf20; D2: $d440; D3: $4852; D4: ($ad, $0f, $9c, $4a, $bf, $e3, $7a, $6a));
+  STATIC_CODECAPI_AVEncMPVGOPSizeMin                  :  TGUID = (D1: $7155cf20;
+                                                                  D2: $d440;
+                                                                  D3: $4852;
+                                                                  D4: ($ad, $0f, $9c, $4a, $bf, $e3, $7a, $6a));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVGOPSizeMin}
-  STATIC_CODECAPI_AVEncMPVGOPSizeMax                  :  TGUID = (D1: $fe7de4c4; D2: $1936; D3: $4fe2; D4: ($bd, $f7, $1f, $18, $ca, $1d, $00, $1f));
+  STATIC_CODECAPI_AVEncMPVGOPSizeMax                  :  TGUID = (D1: $fe7de4c4;
+                                                                  D2: $1936;
+                                                                  D3: $4fe2;
+                                                                  D4: ($bd, $f7, $1f, $18, $ca, $1d, $00, $1f));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVGOPSizeMax}
-  STATIC_CODECAPI_AVEncVideoMaxCTBSize                :  TGUID = (D1: $822363ff; D2: $cec8; D3: $43e5; D4: ($92, $fd, $e0, $97, $48, $84, $85, $e9));
+  STATIC_CODECAPI_AVEncVideoMaxCTBSize                :  TGUID = (D1: $822363ff;
+                                                                  D2: $cec8;
+                                                                  D3: $43e5;
+                                                                  D4: ($92, $fd, $e0, $97, $48, $84, $85, $e9));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoMaxCTBSize}
-  STATIC_CODECAPI_AVEncVideoCTBSize                   :  TGUID = (D1: $d47db8b2; D2: $e73b; D3: $4cb9; D4: ($8c, $3e, $bd, $87, $7d, $06, $d7, $7b));
+  STATIC_CODECAPI_AVEncVideoCTBSize                   :  TGUID = (D1: $d47db8b2;
+                                                                  D2: $e73b;
+                                                                  D3: $4cb9;
+                                                                  D4: ($8c, $3e, $bd, $87, $7d, $06, $d7, $7b));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoCTBSize}
-  STATIC_CODECAPI_VideoEncoderDisplayContentType      :  TGUID = (D1: $79b90b27; D2: $f4b1; D3: $42dc; D4: ($9d, $d7, $cd, $af, $81, $35, $c4, $00));
+  STATIC_CODECAPI_VideoEncoderDisplayContentType      :  TGUID = (D1: $79b90b27;
+                                                                  D2: $f4b1;
+                                                                  D3: $42dc;
+                                                                  D4: ($9d, $d7, $cd, $af, $81, $35, $c4, $00));
   {$EXTERNALSYM STATIC_CODECAPI_VideoEncoderDisplayContentType}
-  STATIC_CODECAPI_AVEncEnableVideoProcessing          :  TGUID = (D1: $006f4bf6; D2: $0ea3; D3: $4d42; D4: ($87, $02, $b5, $d8, $be, $0f, $7a, $92));
+  STATIC_CODECAPI_AVEncEnableVideoProcessing          :  TGUID = (D1: $006f4bf6;
+                                                                  D2: $0ea3;
+                                                                  D3: $4d42;
+                                                                  D4: ($87, $02, $b5, $d8, $be, $0f, $7a, $92));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncEnableVideoProcessing}
-  STATIC_CODECAPI_AVEncVideoGradualIntraRefresh       :  TGUID = (D1: $8f347dee; D2: $cb0d; D3: $49ba; D4: ($b4, $62, $db, $69, $27, $ee, $21, $01));
+  STATIC_CODECAPI_AVEncVideoGradualIntraRefresh       :  TGUID = (D1: $8f347dee;
+                                                                  D2: $cb0d;
+                                                                  D3: $49ba;
+                                                                  D4: ($b4, $62, $db, $69, $27, $ee, $21, $01));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoGradualIntraRefresh}
-  STATIC_CODECAPI_GetOPMContext                       :  TGUID = (D1: $2f036c05; D2: $4c14; D3: $4689; D4: ($88, $39, $29, $4c, $6d, $73, $e0, $53));
+  STATIC_CODECAPI_GetOPMContext                       :  TGUID = (D1: $2f036c05;
+                                                                  D2: $4c14;
+                                                                  D3: $4689;
+                                                                  D4: ($88, $39, $29, $4c, $6d, $73, $e0, $53));
   {$EXTERNALSYM STATIC_CODECAPI_GetOPMContext}
-  STATIC_CODECAPI_SetHDCPManagerContext               :  TGUID = (D1: $6d2d1fc8; D2: $3dc9; D3: $47eb; D4: ($a1, $a2, $47, $1c, $80, $cd, $60, $d0));
+  STATIC_CODECAPI_SetHDCPManagerContext               :  TGUID = (D1: $6d2d1fc8;
+                                                                  D2: $3dc9;
+                                                                  D3: $47eb;
+                                                                  D4: ($a1, $a2, $47, $1c, $80, $cd, $60, $d0));
   {$EXTERNALSYM STATIC_CODECAPI_SetHDCPManagerContext}
-  STATIC_CODECAPI_AVEncVideoMaxTemporalLayers         :  TGUID = (D1: $9c668cfe; D2: $08e1; D3: $424a; D4: ($93, $4e, $b7, $64, $b0, $64, $80, $2a));
+  STATIC_CODECAPI_AVEncVideoMaxTemporalLayers         :  TGUID = (D1: $9c668cfe;
+                                                                  D2: $08e1;
+                                                                  D3: $424a;
+                                                                  D4: ($93, $4e, $b7, $64, $b0, $64, $80, $2a));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoMaxTemporalLayers}
-  STATIC_CODECAPI_AVEncVideoNumGOPsPerIDR             :  TGUID = (D1: $83bc5bdb; D2: $5b89; D3: $4521; D4: ($8f, $66, $33, $15, $1c, $37, $31, $76));
+  STATIC_CODECAPI_AVEncVideoNumGOPsPerIDR             :  TGUID = (D1: $83bc5bdb;
+                                                                  D2: $5b89;
+                                                                  D3: $4521;
+                                                                  D4: ($8f, $66, $33, $15, $1c, $37, $31, $76));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoNumGOPsPerIDR}
-  STATIC_CODECAPI_AVEncCommonAllowFrameDrops          :  TGUID = (D1: $d8477dcb; D2: $9598; D3: $48e3; D4: ($8d, $0c, $75, $2b, $f2, $06, $09, $3e));
+  STATIC_CODECAPI_AVEncCommonAllowFrameDrops          :  TGUID = (D1: $d8477dcb;
+                                                                  D2: $9598;
+                                                                  D3: $48e3;
+                                                                  D4: ($8d, $0c, $75, $2b, $f2, $06, $09, $3e));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncCommonAllowFrameDrops}
-  STATIC_CODECAPI_AVEncVideoIntraLayerPrediction      :  TGUID = (D1: $d3af46b8; D2: $bf47; D3: $44bb; D4: ($a2, $83, $69, $f0, $b0, $22, $8f, $f9));
+  STATIC_CODECAPI_AVEncVideoIntraLayerPrediction      :  TGUID = (D1: $d3af46b8;
+                                                                  D2: $bf47;
+                                                                  D3: $44bb;
+                                                                  D4: ($a2, $83, $69, $f0, $b0, $22, $8f, $f9));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoIntraLayerPrediction}
-  STATIC_CODECAPI_AVEncVideoInstantTemporalUpSwitching  :	TGUID = (D1: $a3308307; D2: $0d96; D3: $4ba4; D4: ($b1, $f0, $b9, $1a, $5e, $49, $df, $10));
+  STATIC_CODECAPI_AVEncVideoInstantTemporalUpSwitching  :	TGUID = (D1: $a3308307;
+                                                                   D2: $0d96;
+                                                                   D3: $4ba4;
+                                                                   D4: ($b1, $f0, $b9, $1a, $5e, $49, $df, $10));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncVideoInstantTemporalUpSwitching}
-  STATIC_CODECAPI_AVEncLowPowerEncoder                :	TGUID = (D1: $b668d582; D2: $8bad; D3: $4f6a; D4: ($91, $41, $37, $5a, $95, $35, $8b, $6d));
+  STATIC_CODECAPI_AVEncLowPowerEncoder                 :	TGUID = (D1: $b668d582;
+                                                                   D2: $8bad;
+                                                                   D3: $4f6a;
+                                                                   D4: ($91, $41, $37, $5a, $95, $35, $8b, $6d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncLowPowerEncoder}
-  STATIC_CODECAPI_AVEnableInLoopDeblockFilter         :	TGUID = (D1: $d2e8e399; D2: $0623; D3: $4bf3; D4: ($92, $a8, $4d, $18, $18, $52, $9d, $ed));
+  STATIC_CODECAPI_AVEnableInLoopDeblockFilter          :	TGUID = (D1: $d2e8e399;
+                                                                   D2: $0623;
+                                                                   D3: $4bf3;
+                                                                   D4: ($92, $a8, $4d, $18, $18, $52, $9d, $ed));
   {$EXTERNALSYM STATIC_CODECAPI_AVEnableInLoopDeblockFilter}
 
-  STATIC_CODECAPI_AVEncMuxOutputStreamType            :  TGUID = (D1: $cedd9e8f; D2: $34d3; D3: $44db; D4: ($a1, $d8, $f8, $15, $20, $25, $4f, $3e));
+  STATIC_CODECAPI_AVEncMuxOutputStreamType            :  TGUID = (D1: $cedd9e8f;
+                                                                  D2: $34d3;
+                                                                  D3: $44db;
+                                                                  D4: ($a1, $d8, $f8, $15, $20, $25, $4f, $3e));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMuxOutputStreamType}
 
-  STATIC_CODECAPI_AVEncStatVideoOutputFrameRate       :  TGUID = (D1: $be747849; D2: $9ab4; D3: $4a63; D4: ($98, $fe, $f1, $43, $f0, $4f, $8e, $e9));
+  STATIC_CODECAPI_AVEncStatVideoOutputFrameRate       :  TGUID = (D1: $be747849;
+                                                                  D2: $9ab4;
+                                                                  D3: $4a63;
+                                                                  D4: ($98, $fe, $f1, $43, $f0, $4f, $8e, $e9));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncStatVideoOutputFrameRate}
-  STATIC_CODECAPI_AVEncStatVideoCodedFrames           :  TGUID = (D1: $d47f8d61; D2: $6f5a; D3: $4a26; D4: ($bb, $9f, $cd, $95, $18, $46, $2b, $cd));
+  STATIC_CODECAPI_AVEncStatVideoCodedFrames           :  TGUID = (D1: $d47f8d61;
+                                                                  D2: $6f5a;
+                                                                  D3: $4a26;
+                                                                  D4: ($bb, $9f, $cd, $95, $18, $46, $2b, $cd));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncStatVideoCodedFrames}
-  STATIC_CODECAPI_AVEncStatVideoTotalFrames           :  TGUID = (D1: $fdaa9916; D2: $119a; D3: $4222; D4: ($9a, $d6, $3f, $7c, $ab, $99, $cc, $8b));
+  STATIC_CODECAPI_AVEncStatVideoTotalFrames           :  TGUID = (D1: $fdaa9916;
+                                                                  D2: $119a;
+                                                                  D3: $4222;
+                                                                  D4: ($9a, $d6, $3f, $7c, $ab, $99, $cc, $8b));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncStatVideoTotalFrames}
-  STATIC_CODECAPI_AVEncAudioIntervalToEncode          :  TGUID = (D1: $866e4b4d; D2: $725a; D3: $467c; D4: ($bb, $01, $b4, $96, $b2, $3b, $25, $f9));
+  STATIC_CODECAPI_AVEncAudioIntervalToEncode          :  TGUID = (D1: $866e4b4d;
+                                                                  D2: $725a;
+                                                                  D3: $467c;
+                                                                  D4: ($bb, $01, $b4, $96, $b2, $3b, $25, $f9));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncAudioIntervalToEncode}
-  STATIC_CODECAPI_AVEncAudioIntervalToSkip            :  TGUID = (D1: $88c15f94; D2: $c38c; D3: $4796; D4: ($a9, $e8, $96, $e9, $67, $98, $3f, $26));
+  STATIC_CODECAPI_AVEncAudioIntervalToSkip            :  TGUID = (D1: $88c15f94;
+                                                                  D2: $c38c;
+                                                                  D3: $4796;
+                                                                  D4: ($a9, $e8, $96, $e9, $67, $98, $3f, $26));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncAudioIntervalToSkip}
-  STATIC_CODECAPI_AVEncAudioDualMono                  :  TGUID = (D1: $3648126b; D2: $a3e8; D3: $4329; D4: ($9b, $3a, $5c, $e5, $66, $a4, $3b, $d3));
+  STATIC_CODECAPI_AVEncAudioDualMono                  :  TGUID = (D1: $3648126b;
+                                                                  D2: $a3e8;
+                                                                  D3: $4329;
+                                                                  D4: ($9b, $3a, $5c, $e5, $66, $a4, $3b, $d3));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncAudioDualMono}
-  STATIC_CODECAPI_AVEncAudioMeanBitRate               :  TGUID = (D1: $921295bb; D2: $4fca; D3: $4679; D4: ($aa, $b8, $9e, $2a, $1d, $75, $33, $84));
+  STATIC_CODECAPI_AVEncAudioMeanBitRate               :  TGUID = (D1: $921295bb;
+                                                                  D2: $4fca;
+                                                                  D3: $4679;
+                                                                  D4: ($aa, $b8, $9e, $2a, $1d, $75, $33, $84));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncAudioMeanBitRate}
 
-  STATIC_CODECAPI_AVEncAudioMapDestChannel0           :  TGUID = (D1: $bc5d0b60; D2: $df6a; D3: $4e16; D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
+  STATIC_CODECAPI_AVEncAudioMapDestChannel0           :  TGUID = (D1: $bc5d0b60;
+                                                                  D2: $df6a;
+                                                                  D3: $4e16;
+                                                                  D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncAudioMapDestChannel0}
-  STATIC_CODECAPI_AVEncAudioMapDestChannel1           :  TGUID = (D1: $bc5d0b61; D2: $df6a; D3: $4e16; D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
+  STATIC_CODECAPI_AVEncAudioMapDestChannel1           :  TGUID = (D1: $bc5d0b61;
+                                                                  D2: $df6a;
+                                                                  D3: $4e16;
+                                                                  D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncAudioMapDestChannel1}
-  STATIC_CODECAPI_AVEncAudioMapDestChannel2           :  TGUID = (D1: $bc5d0b62; D2: $df6a; D3: $4e16; D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
+  STATIC_CODECAPI_AVEncAudioMapDestChannel2           :  TGUID = (D1: $bc5d0b62;
+                                                                  D2: $df6a;
+                                                                  D3: $4e16;
+                                                                  D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncAudioMapDestChannel2}
-  STATIC_CODECAPI_AVEncAudioMapDestChannel3           :  TGUID = (D1: $bc5d0b63; D2: $df6a; D3: $4e16; D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
+  STATIC_CODECAPI_AVEncAudioMapDestChannel3           :  TGUID = (D1: $bc5d0b63;
+                                                                  D2: $df6a;
+                                                                  D3: $4e16;
+                                                                  D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncAudioMapDestChannel3}
-  STATIC_CODECAPI_AVEncAudioMapDestChannel4           :  TGUID = (D1: $bc5d0b64; D2: $df6a; D3: $4e16; D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
+  STATIC_CODECAPI_AVEncAudioMapDestChannel4           :  TGUID = (D1: $bc5d0b64;
+                                                                  D2: $df6a;
+                                                                  D3: $4e16;
+                                                                  D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncAudioMapDestChannel4}
-  STATIC_CODECAPI_AVEncAudioMapDestChannel5           :  TGUID = (D1: $bc5d0b65; D2: $df6a; D3: $4e16; D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
+  STATIC_CODECAPI_AVEncAudioMapDestChannel5           :  TGUID = (D1: $bc5d0b65;
+                                                                  D2: $df6a;
+                                                                  D3: $4e16;
+                                                                  D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncAudioMapDestChannel5}
-  STATIC_CODECAPI_AVEncAudioMapDestChannel6           :  TGUID = (D1: $bc5d0b66; D2: $df6a; D3: $4e16; D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
+  STATIC_CODECAPI_AVEncAudioMapDestChannel6           :  TGUID = (D1: $bc5d0b66;
+                                                                  D2: $df6a;
+                                                                  D3: $4e16;
+                                                                  D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncAudioMapDestChannel6}
-  STATIC_CODECAPI_AVEncAudioMapDestChannel7           :  TGUID = (D1: $bc5d0b67; D2: $df6a; D3: $4e16; D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
+  STATIC_CODECAPI_AVEncAudioMapDestChannel7           :  TGUID = (D1: $bc5d0b67;
+                                                                  D2: $df6a;
+                                                                  D3: $4e16;
+                                                                  D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncAudioMapDestChannel7}
-  STATIC_CODECAPI_AVEncAudioMapDestChannel8           :  TGUID = (D1: $bc5d0b68; D2: $df6a; D3: $4e16; D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
+  STATIC_CODECAPI_AVEncAudioMapDestChannel8           :  TGUID = (D1: $bc5d0b68;
+                                                                  D2: $df6a;
+                                                                  D3: $4e16;
+                                                                  D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncAudioMapDestChannel8}
-  STATIC_CODECAPI_AVEncAudioMapDestChannel9           :  TGUID = (D1: $bc5d0b69; D2: $df6a; D3: $4e16; D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
+  STATIC_CODECAPI_AVEncAudioMapDestChannel9           :  TGUID = (D1: $bc5d0b69;
+                                                                  D2: $df6a;
+                                                                  D3: $4e16;
+                                                                  D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncAudioMapDestChannel9}
-  STATIC_CODECAPI_AVEncAudioMapDestChannel10          :  TGUID = (D1: $bc5d0b6a; D2: $df6a; D3: $4e16; D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
+  STATIC_CODECAPI_AVEncAudioMapDestChannel10          :  TGUID = (D1: $bc5d0b6a;
+                                                                  D2: $df6a;
+                                                                  D3: $4e16;
+                                                                  D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncAudioMapDestChannel10}
-  STATIC_CODECAPI_AVEncAudioMapDestChannel11          :  TGUID = (D1: $bc5d0b6b; D2: $df6a; D3: $4e16; D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
+  STATIC_CODECAPI_AVEncAudioMapDestChannel11          :  TGUID = (D1: $bc5d0b6b;
+                                                                  D2: $df6a;
+                                                                  D3: $4e16;
+                                                                  D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncAudioMapDestChannel11}
-  STATIC_CODECAPI_AVEncAudioMapDestChannel12          :  TGUID = (D1: $bc5d0b6c; D2: $df6a; D3: $4e16; D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
+  STATIC_CODECAPI_AVEncAudioMapDestChannel12          :  TGUID = (D1: $bc5d0b6c;
+                                                                  D2: $df6a;
+                                                                  D3: $4e16;
+                                                                  D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncAudioMapDestChannel12}
-  STATIC_CODECAPI_AVEncAudioMapDestChannel13          :  TGUID = (D1: $bc5d0b6d; D2: $df6a; D3: $4e16; D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
+  STATIC_CODECAPI_AVEncAudioMapDestChannel13          :  TGUID = (D1: $bc5d0b6d;
+                                                                  D2: $df6a;
+                                                                  D3: $4e16;
+                                                                  D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncAudioMapDestChannel13}
-  STATIC_CODECAPI_AVEncAudioMapDestChannel14          :  TGUID = (D1: $bc5d0b6e; D2: $df6a; D3: $4e16; D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
+
+  STATIC_CODECAPI_AVEncAudioMapDestChannel14          :  TGUID = (D1: $bc5d0b6e;
+                                                                  D2: $df6a;
+                                                                  D3: $4e16;
+                                                                  D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncAudioMapDestChannel14}
-  STATIC_CODECAPI_AVEncAudioMapDestChannel15          :  TGUID = (D1: $bc5d0b6f; D2: $df6a; D3: $4e16; D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
+  STATIC_CODECAPI_AVEncAudioMapDestChannel15          :  TGUID = (D1: $bc5d0b6f;
+                                                                  D2: $df6a;
+                                                                  D3: $4e16;
+                                                                  D4: ($98, $03, $b8, $20, $07, $a3, $0c, $8d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncAudioMapDestChannel15}
 
-  STATIC_CODECAPI_AVEncAudioInputContent              :  TGUID = (D1: $3e226c2b; D2: $60b9; D3: $4a39; D4: ($b0, $0b, $a7, $b4, $0f, $70, $d5, $66));
+  STATIC_CODECAPI_AVEncAudioInputContent              :  TGUID = (D1: $3e226c2b;
+                                                                  D2: $60b9;
+                                                                  D3: $4a39;
+                                                                  D4: ($b0, $0b, $a7, $b4, $0f, $70, $d5, $66));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncAudioInputContent}
-  STATIC_CODECAPI_AVEncStatAudioPeakPCMValue          :  TGUID = (D1: $dce7fd34; D2: $dc00; D3: $4c16; D4: ($82, $1b, $35, $d9, $eb, $00, $fb, $1a));
+  STATIC_CODECAPI_AVEncStatAudioPeakPCMValue          :  TGUID = (D1: $dce7fd34;
+                                                                  D2: $dc00;
+                                                                  D3: $4c16;
+                                                                  D4: ($82, $1b, $35, $d9, $eb, $00, $fb, $1a));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncStatAudioPeakPCMValue}
-  STATIC_CODECAPI_AVEncStatAudioAveragePCMValue       :  TGUID = (D1: $979272f8; D2: $d17f; D3: $4e32; D4: ($bb, $73, $4e, $73, $1c, $68, $ba, $2d));
+  STATIC_CODECAPI_AVEncStatAudioAveragePCMValue       :  TGUID = (D1: $979272f8;
+                                                                  D2: $d17f;
+                                                                  D3: $4e32;
+                                                                  D4: ($bb, $73, $4e, $73, $1c, $68, $ba, $2d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncStatAudioAveragePCMValue}
-  STATIC_CODECAPI_AVEncStatAudioAverageBPS            :  TGUID = (D1: $ca6724db; D2: $7059; D3: $4351; D4: ($8b, $43, $f8, $21, $98, $82, $6a, $14));
+  STATIC_CODECAPI_AVEncStatAudioAverageBPS            :  TGUID = (D1: $ca6724db;
+                                                                  D2: $7059;
+                                                                  D3: $4351;
+                                                                  D4: ($8b, $43, $f8, $21, $98, $82, $6a, $14));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncStatAudioAverageBPS}
-  STATIC_CODECAPI_AVEncStatAverageBPS                 :  TGUID = (D1: $ca6724db; D2: $7059; D3: $4351; D4: ($8b, $43, $f8, $21, $98, $82, $6a, $14));
+  STATIC_CODECAPI_AVEncStatAverageBPS                 :  TGUID = (D1: $ca6724db;
+                                                                  D2: $7059;
+                                                                  D3: $4351;
+                                                                  D4: ($8b, $43, $f8, $21, $98, $82, $6a, $14));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncStatAverageBPS}
 
   STATIC_CODECAPI_AVEncStatHardwareProcessorUtilitization :  TGUID = (D1: $995dc027;
@@ -449,308 +933,453 @@ const
                                                                       D4: ($b4, $5f, $18, $ac, $01, $b3, $d5, $a8));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncStatHardwareBandwidthUtilitization}
 
-  STATIC_CODECAPI_AVEncMPVGOPSize                     :  TGUID = (D1: $95f31b26; D2: $95a4; D3: $41aa; D4: ($93, $03, $24, $6a, $7f, $c6, $ee, $f1));
+  STATIC_CODECAPI_AVEncMPVGOPSize                     :  TGUID = (D1: $95f31b26;
+  D2: $95a4; D3: $41aa; D4: ($93, $03, $24, $6a, $7f, $c6, $ee, $f1));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVGOPSize}
-  STATIC_CODECAPI_AVEncMPVGOPOpen                     :  TGUID = (D1: $b1d5d4a6; D2: $3300; D3: $49b1; D4: ($ae, $61, $a0, $99, $37, $ab, $0e, $49));
+  STATIC_CODECAPI_AVEncMPVGOPOpen                     :  TGUID = (D1: $b1d5d4a6;
+  D2: $3300; D3: $49b1; D4: ($ae, $61, $a0, $99, $37, $ab, $0e, $49));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVGOPOpen}
-  STATIC_CODECAPI_AVEncMPVDefaultBPictureCount        :  TGUID = (D1: $8d390aac; D2: $dc5c; D3: $4200; D4: ($b5, $7f, $81, $4d, $04, $ba, $ba, $b2));
+  STATIC_CODECAPI_AVEncMPVDefaultBPictureCount        :  TGUID = (D1: $8d390aac;
+  D2: $dc5c; D3: $4200; D4: ($b5, $7f, $81, $4d, $04, $ba, $ba, $b2));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVDefaultBPictureCount}
-  STATIC_CODECAPI_AVEncMPVProfile                     :  TGUID = (D1: $dabb534a; D2: $1d99; D3: $4284; D4: ($97, $5a, $d9, $0e, $22, $39, $ba, $a1));
+  STATIC_CODECAPI_AVEncMPVProfile                     :  TGUID = (D1: $dabb534a;
+  D2: $1d99; D3: $4284; D4: ($97, $5a, $d9, $0e, $22, $39, $ba, $a1));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVProfile}
-  STATIC_CODECAPI_AVEncMPVLevel                       :  TGUID = (D1: $6ee40c40; D2: $a60c; D3: $41ef; D4: ($8f, $50, $37, $c2, $24, $9e, $2c, $b3));
+  STATIC_CODECAPI_AVEncMPVLevel                       :  TGUID = (D1: $6ee40c40;
+  D2: $a60c; D3: $41ef; D4: ($8f, $50, $37, $c2, $24, $9e, $2c, $b3));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVLevel}
-  STATIC_CODECAPI_AVEncMPVFrameFieldMode              :  TGUID = (D1: $acb5de96; D2: $7b93; D3: $4c2f; D4: ($88, $25, $b0, $29, $5f, $a9, $3b, $f4));
+  STATIC_CODECAPI_AVEncMPVFrameFieldMode              :  TGUID = (D1: $acb5de96;
+  D2: $7b93; D3: $4c2f; D4: ($88, $25, $b0, $29, $5f, $a9, $3b, $f4));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVFrameFieldMode}
-  STATIC_CODECAPI_AVEncMPVAddSeqEndCode               :  TGUID = (D1: $a823178f; D2: $57df; D3: $4c7a; D4: ($b8, $fd, $e5, $ec, $88, $87, $70, $8d));
+  STATIC_CODECAPI_AVEncMPVAddSeqEndCode               :  TGUID = (D1: $a823178f;
+  D2: $57df; D3: $4c7a; D4: ($b8, $fd, $e5, $ec, $88, $87, $70, $8d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVAddSeqEndCode}
-  STATIC_CODECAPI_AVEncMPVGOPSInSeq                   :  TGUID = (D1: $993410d4; D2: $2691; D3: $4192; D4: ($99, $78, $98, $dc, $26, $03, $66, $9f));
+  STATIC_CODECAPI_AVEncMPVGOPSInSeq                   :  TGUID = (D1: $993410d4;
+  D2: $2691; D3: $4192; D4: ($99, $78, $98, $dc, $26, $03, $66, $9f));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVGOPSInSeq}
-  STATIC_CODECAPI_AVEncMPVUseConcealmentMotionVectors :  TGUID = (D1: $ec770cf3; D2: $6908; D3: $4b4b; D4: ($aa, $30, $7f, $b9, $86, $21, $4f, $ea));
+  STATIC_CODECAPI_AVEncMPVUseConcealmentMotionVectors :  TGUID = (D1: $ec770cf3;
+  D2: $6908; D3: $4b4b; D4: ($aa, $30, $7f, $b9, $86, $21, $4f, $ea));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVUseConcealmentMotionVectors}
-  STATIC_CODECAPI_AVEncMPVSceneDetection              :  TGUID = (D1: $552799f1; D2: $db4c; D3: $405b; D4: ($8a, $3a, $c9, $3f, $2d, $06, $74, $dc));
+  STATIC_CODECAPI_AVEncMPVSceneDetection              :  TGUID = (D1: $552799f1;
+  D2: $db4c; D3: $405b; D4: ($8a, $3a, $c9, $3f, $2d, $06, $74, $dc));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVSceneDetection}
-  STATIC_CODECAPI_AVEncMPVGenerateHeaderSeqExt        :  TGUID = (D1: $d5e78611; D2: $082d; D3: $4e6b; D4: ($98, $af, $0f, $51, $ab, $13, $92, $22));
+  STATIC_CODECAPI_AVEncMPVGenerateHeaderSeqExt        :  TGUID = (D1: $d5e78611;
+  D2: $082d; D3: $4e6b; D4: ($98, $af, $0f, $51, $ab, $13, $92, $22));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVGenerateHeaderSeqExt}
-  STATIC_CODECAPI_AVEncMPVGenerateHeaderSeqDispExt    :  TGUID = (D1: $6437aa6f; D2: $5a3c; D3: $4de9; D4: ($8a, $16, $53, $d9, $c4, $ad, $32, $6f));
+  STATIC_CODECAPI_AVEncMPVGenerateHeaderSeqDispExt    :  TGUID = (D1: $6437aa6f;
+  D2: $5a3c; D3: $4de9; D4: ($8a, $16, $53, $d9, $c4, $ad, $32, $6f));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVGenerateHeaderSeqDispExt}
-  STATIC_CODECAPI_AVEncMPVGenerateHeaderPicExt        :  TGUID = (D1: $1b8464ab; D2: $944f; D3: $45f0; D4: ($b7, $4e, $3a, $58, $da, $d1, $1f, $37));
+  STATIC_CODECAPI_AVEncMPVGenerateHeaderPicExt        :  TGUID = (D1: $1b8464ab;
+  D2: $944f; D3: $45f0; D4: ($b7, $4e, $3a, $58, $da, $d1, $1f, $37));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVGenerateHeaderPicExt}
-  STATIC_CODECAPI_AVEncMPVGenerateHeaderPicDispExt    :  TGUID = (D1: $c6412f84; D2: $c03f; D3: $4f40; D4: ($a0, $0c, $42, $93, $df, $83, $95, $bb));
+  STATIC_CODECAPI_AVEncMPVGenerateHeaderPicDispExt    :  TGUID = (D1: $c6412f84;
+  D2: $c03f; D3: $4f40; D4: ($a0, $0c, $42, $93, $df, $83, $95, $bb));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVGenerateHeaderPicDispExt}
-  STATIC_CODECAPI_AVEncMPVGenerateHeaderSeqScaleExt   :  TGUID = (D1: $0722d62f; D2: $dd59; D3: $4a86; D4: ($9c, $d5, $64, $4f, $8e, $26, $53, $d8));
+  STATIC_CODECAPI_AVEncMPVGenerateHeaderSeqScaleExt   :  TGUID = (D1: $0722d62f;
+  D2: $dd59; D3: $4a86; D4: ($9c, $d5, $64, $4f, $8e, $26, $53, $d8));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVGenerateHeaderSeqScaleExt}
-  STATIC_CODECAPI_AVEncMPVScanPattern                 :  TGUID = (D1: $7f8a478e; D2: $7bbb; D3: $4ae2; D4: ($b2, $fc, $96, $d1, $7f, $c4, $a2, $d6));
+  STATIC_CODECAPI_AVEncMPVScanPattern                 :  TGUID = (D1: $7f8a478e;
+  D2: $7bbb; D3: $4ae2; D4: ($b2, $fc, $96, $d1, $7f, $c4, $a2, $d6));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVScanPattern}
-  STATIC_CODECAPI_AVEncMPVIntraDCPrecision            :  TGUID = (D1: $a0116151; D2: $cbc8; D3: $4af3; D4: ($97, $dc, $d0, $0c, $ce, $b8, $2d, $79));
+  STATIC_CODECAPI_AVEncMPVIntraDCPrecision            :  TGUID = (D1: $a0116151;
+  D2: $cbc8; D3: $4af3; D4: ($97, $dc, $d0, $0c, $ce, $b8, $2d, $79));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVIntraDCPrecision}
-  STATIC_CODECAPI_AVEncMPVQScaleType                  :  TGUID = (D1: $2b79ebb7; D2: $f484; D3: $4af7; D4: ($bb, $58, $a2, $a1, $88, $c5, $cb, $be));
+  STATIC_CODECAPI_AVEncMPVQScaleType                  :  TGUID = (D1: $2b79ebb7;
+  D2: $f484; D3: $4af7; D4: ($bb, $58, $a2, $a1, $88, $c5, $cb, $be));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVQScaleType}
-  STATIC_CODECAPI_AVEncMPVIntraVLCTable               :  TGUID = (D1: $a2b83ff5; D2: $1a99; D3: $405a; D4: ($af, $95, $c5, $99, $7d, $55, $8d, $3a));
+  STATIC_CODECAPI_AVEncMPVIntraVLCTable               :  TGUID = (D1: $a2b83ff5;
+  D2: $1a99; D3: $405a; D4: ($af, $95, $c5, $99, $7d, $55, $8d, $3a));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVIntraVLCTable}
-  STATIC_CODECAPI_AVEncMPVQuantMatrixIntra            :  TGUID = (D1: $9bea04f3; D2: $6621; D3: $442c; D4: ($8b, $a1, $3a, $c3, $78, $97, $96, $98));
+  STATIC_CODECAPI_AVEncMPVQuantMatrixIntra            :  TGUID = (D1: $9bea04f3;
+  D2: $6621; D3: $442c; D4: ($8b, $a1, $3a, $c3, $78, $97, $96, $98));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVQuantMatrixIntra}
-  STATIC_CODECAPI_AVEncMPVQuantMatrixNonIntra         :  TGUID = (D1: $87f441d8; D2: $0997; D3: $4beb; D4: ($a0, $8e, $85, $73, $d4, $09, $cf, $75));
+  STATIC_CODECAPI_AVEncMPVQuantMatrixNonIntra         :  TGUID = (D1: $87f441d8;
+  D2: $0997; D3: $4beb; D4: ($a0, $8e, $85, $73, $d4, $09, $cf, $75));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVQuantMatrixNonIntra}
-  STATIC_CODECAPI_AVEncMPVQuantMatrixChromaIntra      :  TGUID = (D1: $9eb9ecd4; D2: $018d; D3: $4ffd; D4: ($8f, $2d, $39, $e4, $9f, $07, $b1, $7a));
+  STATIC_CODECAPI_AVEncMPVQuantMatrixChromaIntra      :  TGUID = (D1: $9eb9ecd4;
+  D2: $018d; D3: $4ffd; D4: ($8f, $2d, $39, $e4, $9f, $07, $b1, $7a));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVQuantMatrixChromaIntra}
-  STATIC_CODECAPI_AVEncMPVQuantMatrixChromaNonIntra   :  TGUID = (D1: $1415b6b1; D2: $362a; D3: $4338; D4: ($ba, $9a, $1e, $f5, $87, $03, $c0, $5b));
+  STATIC_CODECAPI_AVEncMPVQuantMatrixChromaNonIntra   :  TGUID = (D1: $1415b6b1;
+  D2: $362a; D3: $4338; D4: ($ba, $9a, $1e, $f5, $87, $03, $c0, $5b));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPVQuantMatrixChromaNonIntra}
-  STATIC_CODECAPI_AVEncMPALayer                       :  TGUID = (D1: $9d377230; D2: $f91b; D3: $453d; D4: ($9c, $e0, $78, $44, $54, $14, $c2, $2d));
+  STATIC_CODECAPI_AVEncMPALayer                       :  TGUID = (D1: $9d377230;
+  D2: $f91b; D3: $453d; D4: ($9c, $e0, $78, $44, $54, $14, $c2, $2d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPALayer}
-  STATIC_CODECAPI_AVEncMPACodingMode                  :  TGUID = (D1: $b16ade03; D2: $4b93; D3: $43d7; D4: ($a5, $50, $90, $b4, $fe, $22, $45, $37));
+  STATIC_CODECAPI_AVEncMPACodingMode                  :  TGUID = (D1: $b16ade03;
+  D2: $4b93; D3: $43d7; D4: ($a5, $50, $90, $b4, $fe, $22, $45, $37));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPACodingMode}
-  STATIC_CODECAPI_AVEncDDService                      :  TGUID = (D1: $d2e1bec7; D2: $5172; D3: $4d2a; D4: ($a5, $0e, $2f, $3b, $82, $b1, $dd, $f8));
+  STATIC_CODECAPI_AVEncDDService                      :  TGUID = (D1: $d2e1bec7;
+  D2: $5172; D3: $4d2a; D4: ($a5, $0e, $2f, $3b, $82, $b1, $dd, $f8));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDService}
-  STATIC_CODECAPI_AVEncDDDialogNormalization          :  TGUID = (D1: $d7055acf; D2: $f125; D3: $437d; D4: ($a7, $04, $79, $c7, $9f, $04, $04, $a8));
+  STATIC_CODECAPI_AVEncDDDialogNormalization          :  TGUID = (D1: $d7055acf;
+  D2: $f125; D3: $437d; D4: ($a7, $04, $79, $c7, $9f, $04, $04, $a8));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDDialogNormalization}
-  STATIC_CODECAPI_AVEncDDCentreDownMixLevel           :  TGUID = (D1: $e285072c; D2: $c958; D3: $4a81; D4: ($af, $d2, $e5, $e0, $da, $f1, $b1, $48));
+  STATIC_CODECAPI_AVEncDDCentreDownMixLevel           :  TGUID = (D1: $e285072c;
+  D2: $c958; D3: $4a81; D4: ($af, $d2, $e5, $e0, $da, $f1, $b1, $48));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDCentreDownMixLevel}
-  STATIC_CODECAPI_AVEncDDSurroundDownMixLevel         :  TGUID = (D1: $7b20d6e5; D2: $0bcf; D3: $4273; D4: ($a4, $87, $50, $6b, $04, $79, $97, $e9));
+  STATIC_CODECAPI_AVEncDDSurroundDownMixLevel         :  TGUID = (D1: $7b20d6e5;
+  D2: $0bcf; D3: $4273; D4: ($a4, $87, $50, $6b, $04, $79, $97, $e9));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDSurroundDownMixLevel}
-  STATIC_CODECAPI_AVEncDDProductionInfoExists         :  TGUID = (D1: $b0b7fe5f; D2: $b6ab; D3: $4f40; D4: ($96, $4d, $8d, $91, $f1, $7c, $19, $e8));
+  STATIC_CODECAPI_AVEncDDProductionInfoExists         :  TGUID = (D1: $b0b7fe5f;
+  D2: $b6ab; D3: $4f40; D4: ($96, $4d, $8d, $91, $f1, $7c, $19, $e8));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDProductionInfoExists}
-  STATIC_CODECAPI_AVEncDDProductionRoomType           :  TGUID = (D1: $dad7ad60; D2: $23d8; D3: $4ab7; D4: ($a2, $84, $55, $69, $86, $d8, $a6, $fe));
+  STATIC_CODECAPI_AVEncDDProductionRoomType           :  TGUID = (D1: $dad7ad60;
+  D2: $23d8; D3: $4ab7; D4: ($a2, $84, $55, $69, $86, $d8, $a6, $fe));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDProductionRoomType}
-  STATIC_CODECAPI_AVEncDDProductionMixLevel           :  TGUID = (D1: $301d103a; D2: $cbf9; D3: $4776; D4: ($88, $99, $7c, $15, $b4, $61, $ab, $26));
+  STATIC_CODECAPI_AVEncDDProductionMixLevel           :  TGUID = (D1: $301d103a;
+  D2: $cbf9; D3: $4776; D4: ($88, $99, $7c, $15, $b4, $61, $ab, $26));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDProductionMixLevel}
-  STATIC_CODECAPI_AVEncDDCopyright                    :  TGUID = (D1: $8694f076; D2: $cd75; D3: $481d; D4: ($a5, $c6, $a9, $04, $dc, $c8, $28, $f0));
+  STATIC_CODECAPI_AVEncDDCopyright                    :  TGUID = (D1: $8694f076;
+  D2: $cd75; D3: $481d; D4: ($a5, $c6, $a9, $04, $dc, $c8, $28, $f0));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDCopyright}
-  STATIC_CODECAPI_AVEncDDOriginalBitstream            :  TGUID = (D1: $966ae800; D2: $5bd3; D3: $4ff9; D4: ($95, $b9, $d3, $05, $66, $27, $38, $56));
+  STATIC_CODECAPI_AVEncDDOriginalBitstream            :  TGUID = (D1: $966ae800;
+  D2: $5bd3; D3: $4ff9; D4: ($95, $b9, $d3, $05, $66, $27, $38, $56));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDOriginalBitstream}
-  STATIC_CODECAPI_AVEncDDDigitalDeemphasis            :  TGUID = (D1: $e024a2c2; D2: $947c; D3: $45ac; D4: ($87, $d8, $f1, $03, $0c, $5c, $00, $82));
+  STATIC_CODECAPI_AVEncDDDigitalDeemphasis            :  TGUID = (D1: $e024a2c2;
+  D2: $947c; D3: $45ac; D4: ($87, $d8, $f1, $03, $0c, $5c, $00, $82));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDDigitalDeemphasis}
-  STATIC_CODECAPI_AVEncDDDCHighPassFilter             :  TGUID = (D1: $9565239f; D2: $861c; D3: $4ac8; D4: ($bf, $da, $e0, $0c, $b4, $db, $85, $48));
+  STATIC_CODECAPI_AVEncDDDCHighPassFilter             :  TGUID = (D1: $9565239f;
+  D2: $861c; D3: $4ac8; D4: ($bf, $da, $e0, $0c, $b4, $db, $85, $48));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDDCHighPassFilter}
-  STATIC_CODECAPI_AVEncDDChannelBWLowPassFilter       :  TGUID = (D1: $e197821d; D2: $d2e7; D3: $43e2; D4: ($ad, $2c, $00, $58, $2f, $51, $85, $45));
+  STATIC_CODECAPI_AVEncDDChannelBWLowPassFilter       :  TGUID = (D1: $e197821d;
+  D2: $d2e7; D3: $43e2; D4: ($ad, $2c, $00, $58, $2f, $51, $85, $45));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDChannelBWLowPassFilter}
-  STATIC_CODECAPI_AVEncDDLFELowPassFilter             :  TGUID = (D1: $d3b80f6f; D2: $9d15; D3: $45e5; D4: ($91, $be, $01, $9c, $3f, $ab, $1f, $01));
+  STATIC_CODECAPI_AVEncDDLFELowPassFilter             :  TGUID = (D1: $d3b80f6f;
+  D2: $9d15; D3: $45e5; D4: ($91, $be, $01, $9c, $3f, $ab, $1f, $01));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDLFELowPassFilter}
-  STATIC_CODECAPI_AVEncDDSurround90DegreeePhaseShift  :  TGUID = (D1: $25ecec9d; D2: $3553; D3: $42c0; D4: ($bb, $56, $d2, $57, $92, $10, $4f, $80));
+  STATIC_CODECAPI_AVEncDDSurround90DegreeePhaseShift  :  TGUID = (D1: $25ecec9d;
+  D2: $3553; D3: $42c0; D4: ($bb, $56, $d2, $57, $92, $10, $4f, $80));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDSurround90DegreeePhaseShift}
-  STATIC_CODECAPI_AVEncDDSurround3dBAttenuation       :  TGUID = (D1: $4d43b99d; D2: $31e2; D3: $48b9; D4: ($bf, $2e, $5c, $bf, $1a, $57, $27, $84));
+  STATIC_CODECAPI_AVEncDDSurround3dBAttenuation       :  TGUID = (D1: $4d43b99d;
+  D2: $31e2; D3: $48b9; D4: ($bf, $2e, $5c, $bf, $1a, $57, $27, $84));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDSurround3dBAttenuation}
-  STATIC_CODECAPI_AVEncDDDynamicRangeCompressionControl :  TGUID = (D1: $cfc2ff6d; D2: $79b8; D3: $4b8d; D4: ($a8, $aa, $a0, $c9, $bd, $1c, $29, $40));
+  STATIC_CODECAPI_AVEncDDDynamicRangeCompressionControl :  TGUID = (D1: $cfc2ff6d;
+  D2: $79b8; D3: $4b8d; D4: ($a8, $aa, $a0, $c9, $bd, $1c, $29, $40));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDDynamicRangeCompressionControl}
-  STATIC_CODECAPI_AVEncDDRFPreEmphasisFilter          :  TGUID = (D1: $21af44c0; D2: $244e; D3: $4f3d; D4: ($a2, $cc, $3d, $30, $68, $b2, $e7, $3f));
+  STATIC_CODECAPI_AVEncDDRFPreEmphasisFilter          :  TGUID = (D1: $21af44c0;
+  D2: $244e; D3: $4f3d; D4: ($a2, $cc, $3d, $30, $68, $b2, $e7, $3f));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDRFPreEmphasisFilter}
-  STATIC_CODECAPI_AVEncDDSurroundExMode               :  TGUID = (D1: $91607cee; D2: $dbdd; D3: $4eb6; D4: ($bc, $a2, $aa, $df, $af, $a3, $dd, $68));
+  STATIC_CODECAPI_AVEncDDSurroundExMode               :  TGUID = (D1: $91607cee;
+  D2: $dbdd; D3: $4eb6; D4: ($bc, $a2, $aa, $df, $af, $a3, $dd, $68));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDSurroundExMode}
-  STATIC_CODECAPI_AVEncDDPreferredStereoDownMixMode   :  TGUID = (D1: $7f4e6b31; D2: $9185; D3: $403d; D4: ($b0, $a2, $76, $37, $43, $e6, $f0, $63));
+  STATIC_CODECAPI_AVEncDDPreferredStereoDownMixMode   :  TGUID = (D1: $7f4e6b31;
+  D2: $9185; D3: $403d; D4: ($b0, $a2, $76, $37, $43, $e6, $f0, $63));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDPreferredStereoDownMixMode}
-  STATIC_CODECAPI_AVEncDDLtRtCenterMixLvl_x10         :  TGUID = (D1: $dca128a2; D2: $491f; D3: $4600; D4: ($b2, $da, $76, $e3, $34, $4b, $41, $97));
+  STATIC_CODECAPI_AVEncDDLtRtCenterMixLvl_x10         :  TGUID = (D1: $dca128a2;
+  D2: $491f; D3: $4600; D4: ($b2, $da, $76, $e3, $34, $4b, $41, $97));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDLtRtCenterMixLvl_x10}
-  STATIC_CODECAPI_AVEncDDLtRtSurroundMixLvl_x10       :  TGUID = (D1: $212246c7; D2: $3d2c; D3: $4dfa; D4: ($bc, $21, $65, $2a, $90, $98, $69, $0d));
+  STATIC_CODECAPI_AVEncDDLtRtSurroundMixLvl_x10       :  TGUID = (D1: $212246c7;
+  D2: $3d2c; D3: $4dfa; D4: ($bc, $21, $65, $2a, $90, $98, $69, $0d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDLtRtSurroundMixLvl_x10}
-  STATIC_CODECAPI_AVEncDDLoRoCenterMixLvl_x10         :  TGUID = (D1: $1cfba222; D2: $25b3; D3: $4bf4; D4: ($9b, $fd, $e7, $11, $12, $67, $85, $8c));
+  STATIC_CODECAPI_AVEncDDLoRoCenterMixLvl_x10         :  TGUID = (D1: $1cfba222;
+  D2: $25b3; D3: $4bf4; D4: ($9b, $fd, $e7, $11, $12, $67, $85, $8c));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDLoRoCenterMixLvl_x10}
-  STATIC_CODECAPI_AVEncDDLoRoSurroundMixLvl_x10       :  TGUID = (D1: $e725cff6; D2: $eb56; D3: $40c7; D4: ($84, $50, $2b, $93, $67, $e9, $15, $55));
+  STATIC_CODECAPI_AVEncDDLoRoSurroundMixLvl_x10       :  TGUID = (D1: $e725cff6;
+  D2: $eb56; D3: $40c7; D4: ($84, $50, $2b, $93, $67, $e9, $15, $55));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDLoRoSurroundMixLvl_x10}
-  STATIC_CODECAPI_AVEncDDAtoDConverterType            :  TGUID = (D1: $719f9612; D2: $81a1; D3: $47e0; D4: ($9a, $05, $d9, $4a, $d5, $fc, $a9, $48));
+  STATIC_CODECAPI_AVEncDDAtoDConverterType            :  TGUID = (D1: $719f9612;
+  D2: $81a1; D3: $47e0; D4: ($9a, $05, $d9, $4a, $d5, $fc, $a9, $48));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDAtoDConverterType}
-  STATIC_CODECAPI_AVEncDDHeadphoneMode                :  TGUID = (D1: $4052dbec; D2: $52f5; D3: $42f5; D4: ($9b, $00, $d1, $34, $b1, $34, $1b, $9d));
+  STATIC_CODECAPI_AVEncDDHeadphoneMode                :  TGUID = (D1: $4052dbec;
+  D2: $52f5; D3: $42f5; D4: ($9b, $00, $d1, $34, $b1, $34, $1b, $9d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncDDHeadphoneMode}
-  STATIC_CODECAPI_AVEncWMVKeyFrameDistance            :  TGUID = (D1: $5569055e; D2: $e268; D3: $4771; D4: ($b8, $3e, $95, $55, $ea, $28, $ae, $d3));
+  STATIC_CODECAPI_AVEncWMVKeyFrameDistance            :  TGUID = (D1: $5569055e;
+  D2: $e268; D3: $4771; D4: ($b8, $3e, $95, $55, $ea, $28, $ae, $d3));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncWMVKeyFrameDistance}
-  STATIC_CODECAPI_AVEncWMVInterlacedEncoding          :  TGUID = (D1: $e3d00f8a; D2: $c6f5; D3: $4e14; D4: ($a5, $88, $0e, $c8, $7a, $72, $6f, $9b));
+  STATIC_CODECAPI_AVEncWMVInterlacedEncoding          :  TGUID = (D1: $e3d00f8a;
+  D2: $c6f5; D3: $4e14; D4: ($a5, $88, $0e, $c8, $7a, $72, $6f, $9b));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncWMVInterlacedEncoding}
-  STATIC_CODECAPI_AVEncWMVDecoderComplexity           :  TGUID = (D1: $f32c0dab; D2: $f3cb; D3: $4217; D4: ($b7, $9f, $87, $62, $76, $8b, $5f, $67));
+  STATIC_CODECAPI_AVEncWMVDecoderComplexity           :  TGUID = (D1: $f32c0dab;
+  D2: $f3cb; D3: $4217; D4: ($b7, $9f, $87, $62, $76, $8b, $5f, $67));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncWMVDecoderComplexity}
-  STATIC_CODECAPI_AVEncWMVKeyFrameBufferLevelMarker   :  TGUID = (D1: $51ff1115; D2: $33ac; D3: $426c; D4: ($a1, $b1, $09, $32, $1b, $df, $96, $b4));
+  STATIC_CODECAPI_AVEncWMVKeyFrameBufferLevelMarker   :  TGUID = (D1: $51ff1115;
+  D2: $33ac; D3: $426c; D4: ($a1, $b1, $09, $32, $1b, $df, $96, $b4));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncWMVKeyFrameBufferLevelMarker}
-  STATIC_CODECAPI_AVEncWMVProduceDummyFrames          :  TGUID = (D1: $d669d001; D2: $183c; D3: $42e3; D4: ($a3, $ca, $2f, $45, $86, $d2, $39, $6c));
+  STATIC_CODECAPI_AVEncWMVProduceDummyFrames          :  TGUID = (D1: $d669d001;
+  D2: $183c; D3: $42e3; D4: ($a3, $ca, $2f, $45, $86, $d2, $39, $6c));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncWMVProduceDummyFrames}
-  STATIC_CODECAPI_AVEncStatWMVCBAvg                   :  TGUID = (D1: $6aa6229f; D2: $d602; D3: $4b9d; D4: ($b6, $8c, $c1, $ad, $78, $88, $4b, $ef));
+  STATIC_CODECAPI_AVEncStatWMVCBAvg                   :  TGUID = (D1: $6aa6229f;
+  D2: $d602; D3: $4b9d; D4: ($b6, $8c, $c1, $ad, $78, $88, $4b, $ef));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncStatWMVCBAvg}
-  STATIC_CODECAPI_AVEncStatWMVCBMax                   :  TGUID = (D1: $e976bef8; D2: $00fe; D3: $44b4; D4: ($b6, $25, $8f, $23, $8b, $c0, $34, $99));
+  STATIC_CODECAPI_AVEncStatWMVCBMax                   :  TGUID = (D1: $e976bef8;
+  D2: $00fe; D3: $44b4; D4: ($b6, $25, $8f, $23, $8b, $c0, $34, $99));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncStatWMVCBMax}
-  STATIC_CODECAPI_AVEncStatWMVDecoderComplexityProfile:  TGUID = (D1: $89e69fc3; D2: $0f9b; D3: $436c; D4: ($97, $4a, $df, $82, $12, $27, $c9, $0d));
+  STATIC_CODECAPI_AVEncStatWMVDecoderComplexityProfile:  TGUID = (D1: $89e69fc3;
+  D2: $0f9b; D3: $436c; D4: ($97, $4a, $df, $82, $12, $27, $c9, $0d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncStatWMVDecoderComplexityProfile}
-  STATIC_CODECAPI_AVEncStatMPVSkippedEmptyFrames      :  TGUID = (D1: $32195fd3; D2: $590d; D3: $4812; D4: ($a7, $ed, $6d, $63, $9a, $1f, $97, $11));
+  STATIC_CODECAPI_AVEncStatMPVSkippedEmptyFrames      :  TGUID = (D1: $32195fd3;
+  D2: $590d; D3: $4812; D4: ($a7, $ed, $6d, $63, $9a, $1f, $97, $11));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncStatMPVSkippedEmptyFrames}
-  STATIC_CODECAPI_AVEncMP12PktzSTDBuffer              :  TGUID = (D1: $0b751bd0; D2: $819e; D3: $478c; D4: ($94, $35, $75, $20, $89, $26, $b3, $77));
+  STATIC_CODECAPI_AVEncMP12PktzSTDBuffer              :  TGUID = (D1: $0b751bd0;
+  D2: $819e; D3: $478c; D4: ($94, $35, $75, $20, $89, $26, $b3, $77));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMP12PktzSTDBuffer}
-  STATIC_CODECAPI_AVEncMP12PktzStreamID               :  TGUID = (D1: $c834d038; D2: $f5e8; D3: $4408; D4: ($9b, $60, $88, $f3, $64, $93, $fe, $df));
+  STATIC_CODECAPI_AVEncMP12PktzStreamID               :  TGUID = (D1: $c834d038;
+  D2: $f5e8; D3: $4408; D4: ($9b, $60, $88, $f3, $64, $93, $fe, $df));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMP12PktzStreamID}
-  STATIC_CODECAPI_AVEncMP12PktzInitialPTS             :  TGUID = (D1: $2a4f2065; D2: $9a63; D3: $4d20; D4: ($ae, $22, $0a, $1b, $c8, $96, $a3, $15));
+  STATIC_CODECAPI_AVEncMP12PktzInitialPTS             :  TGUID = (D1: $2a4f2065;
+  D2: $9a63; D3: $4d20; D4: ($ae, $22, $0a, $1b, $c8, $96, $a3, $15));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMP12PktzInitialPTS}
-  STATIC_CODECAPI_AVEncMP12PktzPacketSize             :  TGUID = (D1: $ab71347a; D2: $1332; D3: $4dde; D4: ($a0, $e5, $cc, $f7, $da, $8a, $0f, $22));
+  STATIC_CODECAPI_AVEncMP12PktzPacketSize             :  TGUID = (D1: $ab71347a;
+  D2: $1332; D3: $4dde; D4: ($a0, $e5, $cc, $f7, $da, $8a, $0f, $22));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMP12PktzPacketSize}
-  STATIC_CODECAPI_AVEncMP12PktzCopyright              :  TGUID = (D1: $c8f4b0c1; D2: $094c; D3: $43c7; D4: ($8e, $68, $a5, $95, $40, $5a, $6e, $f8));
+  STATIC_CODECAPI_AVEncMP12PktzCopyright              :  TGUID = (D1: $c8f4b0c1;
+  D2: $094c; D3: $43c7; D4: ($8e, $68, $a5, $95, $40, $5a, $6e, $f8));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMP12PktzCopyright}
-  STATIC_CODECAPI_AVEncMP12PktzOriginal               :  TGUID = (D1: $6b178416; D2: $31b9; D3: $4964; D4: ($94, $cb, $6b, $ff, $86, $6c, $df, $83));
+  STATIC_CODECAPI_AVEncMP12PktzOriginal               :  TGUID = (D1: $6b178416;
+  D2: $31b9; D3: $4964; D4: ($94, $cb, $6b, $ff, $86, $6c, $df, $83));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMP12PktzOriginal}
-  STATIC_CODECAPI_AVEncMP12MuxPacketOverhead          :  TGUID = (D1: $e40bd720; D2: $3955; D3: $4453; D4: ($ac, $f9, $b7, $91, $32, $a3, $8f, $a0));
+  STATIC_CODECAPI_AVEncMP12MuxPacketOverhead          :  TGUID = (D1: $e40bd720;
+  D2: $3955; D3: $4453; D4: ($ac, $f9, $b7, $91, $32, $a3, $8f, $a0));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMP12MuxPacketOverhead}
-  STATIC_CODECAPI_AVEncMP12MuxNumStreams              :  TGUID = (D1: $f7164a41; D2: $dced; D3: $4659; D4: ($a8, $f2, $fb, $69, $3f, $2a, $4c, $d0));
+  STATIC_CODECAPI_AVEncMP12MuxNumStreams              :  TGUID = (D1: $f7164a41;
+  D2: $dced; D3: $4659; D4: ($a8, $f2, $fb, $69, $3f, $2a, $4c, $d0));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMP12MuxNumStreams}
-  STATIC_CODECAPI_AVEncMP12MuxEarliestPTS             :  TGUID = (D1: $157232b6; D2: $f809; D3: $474e; D4: ($94, $64, $a7, $f9, $30, $14, $a8, $17));
+  STATIC_CODECAPI_AVEncMP12MuxEarliestPTS             :  TGUID = (D1: $157232b6;
+  D2: $f809; D3: $474e; D4: ($94, $64, $a7, $f9, $30, $14, $a8, $17));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMP12MuxEarliestPTS}
-  STATIC_CODECAPI_AVEncMP12MuxLargestPacketSize       :  TGUID = (D1: $35ceb711; D2: $f461; D3: $4b92; D4: ($a4, $ef, $17, $b6, $84, $1e, $d2, $54));
+  STATIC_CODECAPI_AVEncMP12MuxLargestPacketSize       :  TGUID = (D1: $35ceb711;
+  D2: $f461; D3: $4b92; D4: ($a4, $ef, $17, $b6, $84, $1e, $d2, $54));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMP12MuxLargestPacketSize}
-  STATIC_CODECAPI_AVEncMP12MuxInitialSCR              :  TGUID = (D1: $3433ad21; D2: $1b91; D3: $4a0b; D4: ($b1, $90, $2b, $77, $06, $3b, $63, $a4));
+  STATIC_CODECAPI_AVEncMP12MuxInitialSCR              :  TGUID = (D1: $3433ad21;
+  D2: $1b91; D3: $4a0b; D4: ($b1, $90, $2b, $77, $06, $3b, $63, $a4));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMP12MuxInitialSCR}
-  STATIC_CODECAPI_AVEncMP12MuxMuxRate                 :  TGUID = (D1: $ee047c72; D2: $4bdb; D3: $4a9d; D4: ($8e, $21, $41, $92, $6c, $82, $3d, $a7));
+  STATIC_CODECAPI_AVEncMP12MuxMuxRate                 :  TGUID = (D1: $ee047c72;
+  D2: $4bdb; D3: $4a9d; D4: ($8e, $21, $41, $92, $6c, $82, $3d, $a7));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMP12MuxMuxRate}
-  STATIC_CODECAPI_AVEncMP12MuxPackSize                :  TGUID = (D1: $f916053a; D2: $1ce8; D3: $4faf; D4: ($aa, $0b, $ba, $31, $c8, $00, $34, $b8));
+  STATIC_CODECAPI_AVEncMP12MuxPackSize                :  TGUID = (D1: $f916053a;
+  D2: $1ce8; D3: $4faf; D4: ($aa, $0b, $ba, $31, $c8, $00, $34, $b8));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMP12MuxPackSize}
-  STATIC_CODECAPI_AVEncMP12MuxSysSTDBufferBound       :  TGUID = (D1: $35746903; D2: $b545; D3: $43e7; D4: ($bb, $35, $c5, $e0, $a7, $d5, $09, $3c));
+  STATIC_CODECAPI_AVEncMP12MuxSysSTDBufferBound       :  TGUID = (D1: $35746903;
+  D2: $b545; D3: $43e7; D4: ($bb, $35, $c5, $e0, $a7, $d5, $09, $3c));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMP12MuxSysSTDBufferBound}
-  STATIC_CODECAPI_AVEncMP12MuxSysRateBound            :  TGUID = (D1: $05f0428a; D2: $ee30; D3: $489d; D4: ($ae, $28, $20, $5c, $72, $44, $67, $10));
+  STATIC_CODECAPI_AVEncMP12MuxSysRateBound            :  TGUID = (D1: $05f0428a;
+  D2: $ee30; D3: $489d; D4: ($ae, $28, $20, $5c, $72, $44, $67, $10));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMP12MuxSysRateBound}
-  STATIC_CODECAPI_AVEncMP12MuxTargetPacketizer        :  TGUID = (D1: $d862212a; D2: $2015; D3: $45dd; D4: ($9a, $32, $1b, $3a, $a8, $82, $05, $a0));
+  STATIC_CODECAPI_AVEncMP12MuxTargetPacketizer        :  TGUID = (D1: $d862212a;
+  D2: $2015; D3: $45dd; D4: ($9a, $32, $1b, $3a, $a8, $82, $05, $a0));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMP12MuxTargetPacketizer}
-  STATIC_CODECAPI_AVEncMP12MuxSysFixed                :  TGUID = (D1: $cefb987e; D2: $894f; D3: $452e; D4: ($8f, $89, $a4, $ef, $8c, $ec, $06, $3a));
+  STATIC_CODECAPI_AVEncMP12MuxSysFixed                :  TGUID = (D1: $cefb987e;
+  D2: $894f; D3: $452e; D4: ($8f, $89, $a4, $ef, $8c, $ec, $06, $3a));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMP12MuxSysFixed}
-  STATIC_CODECAPI_AVEncMP12MuxSysCSPS                 :  TGUID = (D1: $7952ff45; D2: $9c0d; D3: $4822; D4: ($bc, $82, $8a, $d7, $72, $e0, $29, $93));
+  STATIC_CODECAPI_AVEncMP12MuxSysCSPS                 :  TGUID = (D1: $7952ff45;
+  D2: $9c0d; D3: $4822; D4: ($bc, $82, $8a, $d7, $72, $e0, $29, $93));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMP12MuxSysCSPS}
-  STATIC_CODECAPI_AVEncMP12MuxSysVideoLock            :  TGUID = (D1: $b8296408; D2: $2430; D3: $4d37; D4: ($a2, $a1, $95, $b3, $e4, $35, $a9, $1d));
+  STATIC_CODECAPI_AVEncMP12MuxSysVideoLock            :  TGUID = (D1: $b8296408;
+  D2: $2430; D3: $4d37; D4: ($a2, $a1, $95, $b3, $e4, $35, $a9, $1d));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMP12MuxSysVideoLock}
-  STATIC_CODECAPI_AVEncMP12MuxSysAudioLock            :  TGUID = (D1: $0fbb5752; D2: $1d43; D3: $47bf; D4: ($bd, $79, $f2, $29, $3d, $8c, $e3, $37));
+  STATIC_CODECAPI_AVEncMP12MuxSysAudioLock            :  TGUID = (D1: $0fbb5752;
+  D2: $1d43; D3: $47bf; D4: ($bd, $79, $f2, $29, $3d, $8c, $e3, $37));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMP12MuxSysAudioLock}
-  STATIC_CODECAPI_AVEncMP12MuxDVDNavPacks             :  TGUID = (D1: $c7607ced; D2: $8cf1; D3: $4a99; D4: ($83, $a1, $ee, $54, $61, $be, $35, $74));
+  STATIC_CODECAPI_AVEncMP12MuxDVDNavPacks             :  TGUID = (D1: $c7607ced;
+  D2: $8cf1; D3: $4a99; D4: ($83, $a1, $ee, $54, $61, $be, $35, $74));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMP12MuxDVDNavPacks}
 
-  STATIC_CODECAPI_AVEncMPACopyright                   :  TGUID = (D1: $a6ae762a; D2: $d0a9; D3: $4454; D4: ($b8, $ef, $f2, $db, $ee, $fd, $d3, $bd));
+  STATIC_CODECAPI_AVEncMPACopyright                   :  TGUID = (D1: $a6ae762a;
+  D2: $d0a9; D3: $4454; D4: ($b8, $ef, $f2, $db, $ee, $fd, $d3, $bd));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPACopyright}
-  STATIC_CODECAPI_AVEncMPAOriginalBitstream           :  TGUID = (D1: $3cfb7855; D2: $9cc9; D3: $47ff; D4: ($b8, $29, $b3, $67, $86, $c9, $23, $46));
+  STATIC_CODECAPI_AVEncMPAOriginalBitstream           :  TGUID = (D1: $3cfb7855;
+  D2: $9cc9; D3: $47ff; D4: ($b8, $29, $b3, $67, $86, $c9, $23, $46));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPAOriginalBitstream}
-  STATIC_CODECAPI_AVEncMPAEnableRedundancyProtection  :  TGUID = (D1: $5e54b09e; D2: $b2e7; D3: $4973; D4: ($a8, $9b, $0b, $36, $50, $a3, $be, $da));
+  STATIC_CODECAPI_AVEncMPAEnableRedundancyProtection  :  TGUID = (D1: $5e54b09e;
+  D2: $b2e7; D3: $4973; D4: ($a8, $9b, $0b, $36, $50, $a3, $be, $da));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPAEnableRedundancyProtection}
-  STATIC_CODECAPI_AVEncMPAPrivateUserBit              :  TGUID = (D1: $afa505ce; D2: $c1e3; D3: $4e3d; D4: ($85, $1b, $61, $b7, $00, $e5, $e6, $cc));
+  STATIC_CODECAPI_AVEncMPAPrivateUserBit              :  TGUID = (D1: $afa505ce;
+  D2: $c1e3; D3: $4e3d; D4: ($85, $1b, $61, $b7, $00, $e5, $e6, $cc));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPAPrivateUserBit}
-  STATIC_CODECAPI_AVEncMPAEmphasisType                :  TGUID = (D1: $2d59fcda; D2: $bf4e; D3: $4ed6; D4: ($b5, $df, $5b, $03, $b3, $6b, $0a, $1f));
+  STATIC_CODECAPI_AVEncMPAEmphasisType                :  TGUID = (D1: $2d59fcda;
+  D2: $bf4e; D3: $4ed6; D4: ($b5, $df, $5b, $03, $b3, $6b, $0a, $1f));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMPAEmphasisType}
 
 
-  STATIC_CODECAPI_AVDecCommonMeanBitRate              :  TGUID = (D1: $59488217; D2: $007a; D3: $4f7a; D4: ($8e, $41, $5c, $48, $b1, $ea, $c5, $c6));
+  STATIC_CODECAPI_AVDecCommonMeanBitRate              :  TGUID = (D1: $59488217;
+  D2: $007a; D3: $4f7a; D4: ($8e, $41, $5c, $48, $b1, $ea, $c5, $c6));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecCommonMeanBitRate}
-  STATIC_CODECAPI_AVDecCommonMeanBitRateInterval      :  TGUID = (D1: $0ee437c6; D2: $38a7; D3: $4c5c; D4: ($94, $4c, $68, $ab, $42, $11, $6b, $85));
+  STATIC_CODECAPI_AVDecCommonMeanBitRateInterval      :  TGUID = (D1: $0ee437c6;
+  D2: $38a7; D3: $4c5c; D4: ($94, $4c, $68, $ab, $42, $11, $6b, $85));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecCommonMeanBitRateInterval}
-  STATIC_CODECAPI_AVDecCommonInputFormat              :  TGUID = (D1: $e5005239; D2: $bd89; D3: $4be3; D4: ($9c, $0f, $5d, $de, $31, $79, $88, $cc));
+  STATIC_CODECAPI_AVDecCommonInputFormat              :  TGUID = (D1: $e5005239;
+  D2: $bd89; D3: $4be3; D4: ($9c, $0f, $5d, $de, $31, $79, $88, $cc));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecCommonInputFormat}
-  STATIC_CODECAPI_AVDecCommonOutputFormat             :  TGUID = (D1: $3c790028; D2: $c0ce; D3: $4256; D4: ($b1, $a2, $1b, $0f, $c8, $b1, $dc, $dc));
+  STATIC_CODECAPI_AVDecCommonOutputFormat             :  TGUID = (D1: $3c790028;
+  D2: $c0ce; D3: $4256; D4: ($b1, $a2, $1b, $0f, $c8, $b1, $dc, $dc));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecCommonOutputFormat}
 
-  STATIC_CODECAPI_GUID_AVDecAudioOutputFormat_PCM_Stereo_MatrixEncoded  :  TGUID = (D1: $696e1d30; D2: $548f; D3: $4036; D4: ($82, $5f, $70, $26, $c6, $00, $11, $bd));
+  STATIC_CODECAPI_GUID_AVDecAudioOutputFormat_PCM_Stereo_MatrixEncoded  :  TGUID = (D1: $696e1d30;
+  D2: $548f; D3: $4036; D4: ($82, $5f, $70, $26, $c6, $00, $11, $bd));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVDecAudioOutputFormat_PCM_Stereo_MatrixEncoded}
-  STATIC_CODECAPI_GUID_AVDecAudioOutputFormat_PCM                       :  TGUID = (D1: $696e1d31; D2: $548f; D3: $4036; D4: ($82, $5f, $70, $26, $c6, $00, $11, $bd));
+  STATIC_CODECAPI_GUID_AVDecAudioOutputFormat_PCM                       :  TGUID = (D1: $696e1d31;
+  D2: $548f; D3: $4036; D4: ($82, $5f, $70, $26, $c6, $00, $11, $bd));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVDecAudioOutputFormat_PCM}
-  STATIC_CODECAPI_GUID_AVDecAudioOutputFormat_SPDIF_PCM                 :  TGUID = (D1: $696e1d32; D2: $548f; D3: $4036; D4: ($82, $5f, $70, $26, $c6, $00, $11, $bd));
+  STATIC_CODECAPI_GUID_AVDecAudioOutputFormat_SPDIF_PCM                 :  TGUID = (D1: $696e1d32;
+  D2: $548f; D3: $4036; D4: ($82, $5f, $70, $26, $c6, $00, $11, $bd));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVDecAudioOutputFormat_SPDIF_PCM}
-  STATIC_CODECAPI_GUID_AVDecAudioOutputFormat_SPDIF_Bitstream           :  TGUID = (D1: $696e1d33; D2: $548f; D3: $4036; D4: ($82, $5f, $70, $26, $c6, $00, $11, $bd));
+  STATIC_CODECAPI_GUID_AVDecAudioOutputFormat_SPDIF_Bitstream           :  TGUID = (D1: $696e1d33;
+  D2: $548f; D3: $4036; D4: ($82, $5f, $70, $26, $c6, $00, $11, $bd));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVDecAudioOutputFormat_SPDIF_Bitstream}
-  STATIC_CODECAPI_GUID_AVDecAudioOutputFormat_PCM_Headphones            :  TGUID = (D1: $696e1d34; D2: $548f; D3: $4036; D4: ($82, $5f, $70, $26, $c6, $00, $11, $bd));
+  STATIC_CODECAPI_GUID_AVDecAudioOutputFormat_PCM_Headphones            :  TGUID = (D1: $696e1d34;
+  D2: $548f; D3: $4036; D4: ($82, $5f, $70, $26, $c6, $00, $11, $bd));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVDecAudioOutputFormat_PCM_Headphones}
-  STATIC_CODECAPI_GUID_AVDecAudioOutputFormat_PCM_Stereo_Auto           :  TGUID = (D1: $696e1d35; D2: $548f; D3: $4036; D4: ($82, $5f, $70, $26, $c6, $00, $11, $bd));
+  STATIC_CODECAPI_GUID_AVDecAudioOutputFormat_PCM_Stereo_Auto           :  TGUID = (D1: $696e1d35;
+  D2: $548f; D3: $4036; D4: ($82, $5f, $70, $26, $c6, $00, $11, $bd));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVDecAudioOutputFormat_PCM_Stereo_Auto}
 
-  STATIC_CODECAPI_AVDecVideoImageSize                                   :  TGUID = (D1: $5ee5747c; D2: $6801; D3: $4cab; D4: ($aa, $f1, $62, $48, $fa, $84, $1b, $a4));
+  STATIC_CODECAPI_AVDecVideoImageSize                                   :  TGUID = (D1: $5ee5747c;
+  D2: $6801; D3: $4cab; D4: ($aa, $f1, $62, $48, $fa, $84, $1b, $a4));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecVideoImageSize}
-  STATIC_CODECAPI_AVDecVideoInputScanType                               :  TGUID = (D1: $38477e1f; D2: $0ea7; D3: $42cd; D4: ($8c, $d1, $13, $0c, $ed, $57, $c5, $80));
+  STATIC_CODECAPI_AVDecVideoInputScanType                               :  TGUID = (D1: $38477e1f;
+  D2: $0ea7; D3: $42cd; D4: ($8c, $d1, $13, $0c, $ed, $57, $c5, $80));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecVideoInputScanType}
-  STATIC_CODECAPI_AVDecVideoPixelAspectRatio                            :  TGUID = (D1: $b0cf8245; D2: $f32d; D3: $41df; D4: ($b0, $2c, $87, $bd, $30, $4d, $12, $ab));
+  STATIC_CODECAPI_AVDecVideoPixelAspectRatio                            :  TGUID = (D1: $b0cf8245;
+  D2: $f32d; D3: $41df; D4: ($b0, $2c, $87, $bd, $30, $4d, $12, $ab));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecVideoPixelAspectRatio}
-  STATIC_CODECAPI_AVDecVideoAcceleration_MPEG2                          :  TGUID = (D1: $f7db8a2e; D2: $4f48; D3: $4ee8; D4: ($ae, $31, $8b, $6e, $be, $55, $8a, $e2));
+  STATIC_CODECAPI_AVDecVideoAcceleration_MPEG2                          :  TGUID = (D1: $f7db8a2e;
+  D2: $4f48; D3: $4ee8; D4: ($ae, $31, $8b, $6e, $be, $55, $8a, $e2));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecVideoAcceleration_MPEG2}
-  STATIC_CODECAPI_AVDecVideoAcceleration_H264                           :  TGUID = (D1: $f7db8a2f; D2: $4f48; D3: $4ee8; D4: ($ae, $31, $8b, $6e, $be, $55, $8a, $e2));
+  STATIC_CODECAPI_AVDecVideoAcceleration_H264                           :  TGUID = (D1: $f7db8a2f;
+  D2: $4f48; D3: $4ee8; D4: ($ae, $31, $8b, $6e, $be, $55, $8a, $e2));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecVideoAcceleration_H264}
-  STATIC_CODECAPI_AVDecVideoAcceleration_VC1                            :  TGUID = (D1: $f7db8a30; D2: $4f48; D3: $4ee8; D4: ($ae, $31, $8b, $6e, $be, $55, $8a, $e2));
+  STATIC_CODECAPI_AVDecVideoAcceleration_VC1                            :  TGUID = (D1: $f7db8a30;
+  D2: $4f48; D3: $4ee8; D4: ($ae, $31, $8b, $6e, $be, $55, $8a, $e2));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecVideoAcceleration_VC1}
-  STATIC_CODECAPI_AVDecVideoProcDeinterlaceCSC                          :  TGUID = (D1: $f7db8a31; D2: $4f48; D3: $4ee8; D4: ($ae, $31, $8b, $6e, $be, $55, $8a, $e2));
+  STATIC_CODECAPI_AVDecVideoProcDeinterlaceCSC                          :  TGUID = (D1: $f7db8a31;
+  D2: $4f48; D3: $4ee8; D4: ($ae, $31, $8b, $6e, $be, $55, $8a, $e2));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecVideoProcDeinterlaceCSC}
 
-  STATIC_CODECAPI_AVDecVideoThumbnailGenerationMode       :  TGUID = (D1: $2efd8eee; D2: $1150; D3: $4328; D4: ($9c, $f5, $66, $dc, $e9, $33, $fc, $f4));
+  STATIC_CODECAPI_AVDecVideoThumbnailGenerationMode       :  TGUID = (D1: $2efd8eee;
+  D2: $1150; D3: $4328; D4: ($9c, $f5, $66, $dc, $e9, $33, $fc, $f4));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecVideoThumbnailGenerationMode}
-  STATIC_CODECAPI_AVDecVideoDropPicWithMissingRef         :  TGUID = (D1: $f8226383; D2: $14c2; D3: $4567; D4: ($97, $34, $50, $04, $e9, $6f, $f8, $87));
+  STATIC_CODECAPI_AVDecVideoDropPicWithMissingRef         :  TGUID = (D1: $f8226383;
+  D2: $14c2; D3: $4567; D4: ($97, $34, $50, $04, $e9, $6f, $f8, $87));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecVideoDropPicWithMissingRef}
-  STATIC_CODECAPI_AVDecVideoSoftwareDeinterlaceMode       :  TGUID = (D1: $0c08d1ce; D2: $9ced; D3: $4540; D4: ($ba, $e3, $ce, $b3, $80, $14, $11, $09));
+  STATIC_CODECAPI_AVDecVideoSoftwareDeinterlaceMode       :  TGUID = (D1: $0c08d1ce;
+  D2: $9ced; D3: $4540; D4: ($ba, $e3, $ce, $b3, $80, $14, $11, $09));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecVideoSoftwareDeinterlaceMode}
-  STATIC_CODECAPI_AVDecVideoFastDecodeMode                :  TGUID = (D1: $6b529f7d; D2: $d3b1; D3: $49c6; D4: ($a9, $99, $9e, $c6, $91, $1b, $ed, $bf));
+  STATIC_CODECAPI_AVDecVideoFastDecodeMode                :  TGUID = (D1: $6b529f7d;
+  D2: $d3b1; D3: $49c6; D4: ($a9, $99, $9e, $c6, $91, $1b, $ed, $bf));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecVideoFastDecodeMode}
-  STATIC_CODECAPI_AVLowLatencyMode                        :  TGUID = (D1: $9c27891a; D2: $ed7a; D3: $40e1; D4: ($88, $e8, $b2, $27, $27, $a0, $24, $ee));
+  STATIC_CODECAPI_AVLowLatencyMode                        :  TGUID = (D1: $9c27891a;
+  D2: $ed7a; D3: $40e1; D4: ($88, $e8, $b2, $27, $27, $a0, $24, $ee));
   {$EXTERNALSYM STATIC_CODECAPI_AVLowLatencyMode}
-  STATIC_CODECAPI_AVDecVideoH264ErrorConcealment          :  TGUID = (D1: $ececace8; D2: $3436; D3: $462c; D4: ($92, $94, $cd, $7b, $ac, $d7, $58, $a9));
+  STATIC_CODECAPI_AVDecVideoH264ErrorConcealment          :  TGUID = (D1: $ececace8;
+  D2: $3436; D3: $462c; D4: ($92, $94, $cd, $7b, $ac, $d7, $58, $a9));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecVideoH264ErrorConcealment}
-  STATIC_CODECAPI_AVDecVideoMPEG2ErrorConcealment         :  TGUID = (D1: $9d2bfe18; D2: $728d; D3: $48d2; D4: ($b3, $58, $bc, $7e, $43, $6c, $66, $74));
+  STATIC_CODECAPI_AVDecVideoMPEG2ErrorConcealment         :  TGUID = (D1: $9d2bfe18;
+  D2: $728d; D3: $48d2; D4: ($b3, $58, $bc, $7e, $43, $6c, $66, $74));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecVideoMPEG2ErrorConcealment}
-  STATIC_CODECAPI_AVDecVideoCodecType                     :  TGUID = (D1: $434528e5; D2: $21f0; D3: $46b6; D4: ($b6, $2c, $9b, $1b, $6b, $65, $8c, $d1));
+  STATIC_CODECAPI_AVDecVideoCodecType                     :  TGUID = (D1: $434528e5;
+  D2: $21f0; D3: $46b6; D4: ($b6, $2c, $9b, $1b, $6b, $65, $8c, $d1));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecVideoCodecType}
-  STATIC_CODECAPI_AVDecVideoDXVAMode                      :  TGUID = (D1: $f758f09e; D2: $7337; D3: $4ae7; D4: ($83, $87, $73, $dc, $2d, $54, $e6, $7d));
+  STATIC_CODECAPI_AVDecVideoDXVAMode                      :  TGUID = (D1: $f758f09e;
+  D2: $7337; D3: $4ae7; D4: ($83, $87, $73, $dc, $2d, $54, $e6, $7d));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecVideoDXVAMode}
-  STATIC_CODECAPI_AVDecVideoDXVABusEncryption             :  TGUID = (D1: $42153c8b; D2: $fd0b; D3: $4765; D4: ($a4, $62, $dd, $d9, $e8, $bc, $c3, $88));
+  STATIC_CODECAPI_AVDecVideoDXVABusEncryption             :  TGUID = (D1: $42153c8b;
+  D2: $fd0b; D3: $4765; D4: ($a4, $62, $dd, $d9, $e8, $bc, $c3, $88));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecVideoDXVABusEncryption}
-  STATIC_CODECAPI_AVDecVideoSWPowerLevel                  :  TGUID = (D1: $fb5d2347; D2: $4dd8; D3: $4509; D4: ($ae, $d0, $db, $5f, $a9, $aa, $93, $f4));
+  STATIC_CODECAPI_AVDecVideoSWPowerLevel                  :  TGUID = (D1: $fb5d2347;
+  D2: $4dd8; D3: $4509; D4: ($ae, $d0, $db, $5f, $a9, $aa, $93, $f4));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecVideoSWPowerLevel}
-  STATIC_CODECAPI_AVDecVideoMaxCodedWidth                 :  TGUID = (D1: $5ae557b8; D2: $77af; D3: $41f5; D4: ($9f, $a6, $4d, $b2, $fe, $1d, $4b, $ca));
+  STATIC_CODECAPI_AVDecVideoMaxCodedWidth                 :  TGUID = (D1: $5ae557b8;
+  D2: $77af; D3: $41f5; D4: ($9f, $a6, $4d, $b2, $fe, $1d, $4b, $ca));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecVideoMaxCodedWidth}
-  STATIC_CODECAPI_AVDecVideoMaxCodedHeight                :  TGUID = (D1: $7262a16a; D2: $d2dc; D3: $4e75; D4: ($9b, $a8, $65, $c0, $c6, $d3, $2b, $13));
+  STATIC_CODECAPI_AVDecVideoMaxCodedHeight                :  TGUID = (D1: $7262a16a;
+  D2: $d2dc; D3: $4e75; D4: ($9b, $a8, $65, $c0, $c6, $d3, $2b, $13));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecVideoMaxCodedHeight}
-  STATIC_CODECAPI_AVDecNumWorkerThreads                   :  TGUID = (D1: $9561c3e8; D2: $ea9e; D3: $4435; D4: ($9b, $1e, $a9, $3e, $69, $18, $94, $d8));
+  STATIC_CODECAPI_AVDecNumWorkerThreads                   :  TGUID = (D1: $9561c3e8;
+  D2: $ea9e; D3: $4435; D4: ($9b, $1e, $a9, $3e, $69, $18, $94, $d8));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecNumWorkerThreads}
-  STATIC_CODECAPI_AVDecSoftwareDynamicFormatChange        :  TGUID = (D1: $862e2f0a; D2: $507b; D3: $47ff; D4: ($af, $47, $01, $e2, $62, $42, $98, $b7));
+  STATIC_CODECAPI_AVDecSoftwareDynamicFormatChange        :  TGUID = (D1: $862e2f0a;
+  D2: $507b; D3: $47ff; D4: ($af, $47, $01, $e2, $62, $42, $98, $b7));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecSoftwareDynamicFormatChange}
-  STATIC_CODECAPI_AVDecDisableVideoPostProcessing         :	 TGUID = (D1: $f8749193; D2: $667a; D3: $4f2c; D4: ($a9, $e8, $5d, $4a, $f9, $24, $f0, $8f));
+  STATIC_CODECAPI_AVDecDisableVideoPostProcessing         :	 TGUID = (D1: $f8749193;
+  D2: $667a; D3: $4f2c; D4: ($a9, $e8, $5d, $4a, $f9, $24, $f0, $8f));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecDisableVideoPostProcessing}
 
-  STATIC_CODECAPI_GUID_AVDecAudioInputWMA                 :  TGUID = (D1: $c95e8dcf; D2: $4058; D3: $4204; D4: ($8c, $42, $cb, $24, $d9, $1e, $4b, $9b));
+  STATIC_CODECAPI_GUID_AVDecAudioInputWMA                 :  TGUID = (D1: $c95e8dcf;
+  D2: $4058; D3: $4204; D4: ($8c, $42, $cb, $24, $d9, $1e, $4b, $9b));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVDecAudioInputWMA}
-  STATIC_CODECAPI_GUID_AVDecAudioInputWMAPro              :  TGUID = (D1: $0128b7c7; D2: $da72; D3: $4fe3; D4: ($be, $f8, $5c, $52, $e3, $55, $77, $04));
+  STATIC_CODECAPI_GUID_AVDecAudioInputWMAPro              :  TGUID = (D1: $0128b7c7;
+  D2: $da72; D3: $4fe3; D4: ($be, $f8, $5c, $52, $e3, $55, $77, $04));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVDecAudioInputWMAPro}
-  STATIC_CODECAPI_GUID_AVDecAudioInputDolby               :  TGUID = (D1: $8e4228a0; D2: $f000; D3: $4e0b; D4: ($8f, $54, $ab, $8d, $24, $ad, $61, $a2));
+  STATIC_CODECAPI_GUID_AVDecAudioInputDolby               :  TGUID = (D1: $8e4228a0;
+  D2: $f000; D3: $4e0b; D4: ($8f, $54, $ab, $8d, $24, $ad, $61, $a2));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVDecAudioInputDolby}
-  STATIC_CODECAPI_GUID_AVDecAudioInputDTS                 :  TGUID = (D1: $600bc0ca; D2: $6a1f; D3: $4e91; D4: ($b2, $41, $1b, $be, $b1, $cb, $19, $e0));
+  STATIC_CODECAPI_GUID_AVDecAudioInputDTS                 :  TGUID = (D1: $600bc0ca;
+  D2: $6a1f; D3: $4e91; D4: ($b2, $41, $1b, $be, $b1, $cb, $19, $e0));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVDecAudioInputDTS}
-  STATIC_CODECAPI_GUID_AVDecAudioInputPCM                 :  TGUID = (D1: $f2421da5; D2: $bbb4; D3: $4cd5; D4: ($a9, $96, $93, $3c, $6b, $5d, $13, $47));
+  STATIC_CODECAPI_GUID_AVDecAudioInputPCM                 :  TGUID = (D1: $f2421da5;
+  D2: $bbb4; D3: $4cd5; D4: ($a9, $96, $93, $3c, $6b, $5d, $13, $47));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVDecAudioInputPCM}
-  STATIC_CODECAPI_GUID_AVDecAudioInputMPEG                :  TGUID = (D1: $91106f36; D2: $02c5; D3: $4f75; D4: ($97, $19, $3b, $7a, $bf, $75, $e1, $f6));
+  STATIC_CODECAPI_GUID_AVDecAudioInputMPEG                :  TGUID = (D1: $91106f36;
+  D2: $02c5; D3: $4f75; D4: ($97, $19, $3b, $7a, $bf, $75, $e1, $f6));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVDecAudioInputMPEG}
-  STATIC_CODECAPI_GUID_AVDecAudioInputAAC                 :  TGUID = (D1: $97df7828; D2: $b94a; D3: $47e2; D4: ($a4, $bc, $51, $19, $4d, $b2, $2a, $4d));
+  STATIC_CODECAPI_GUID_AVDecAudioInputAAC                 :  TGUID = (D1: $97df7828;
+  D2: $b94a; D3: $47e2; D4: ($a4, $bc, $51, $19, $4d, $b2, $2a, $4d));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVDecAudioInputAAC}
-  STATIC_CODECAPI_GUID_AVDecAudioInputHEAAC               :  TGUID = (D1: $16efb4aa; D2: $330e; D3: $4f5c; D4: ($98, $a8, $cf, $6a, $c5, $5c, $be, $60));
+  STATIC_CODECAPI_GUID_AVDecAudioInputHEAAC               :  TGUID = (D1: $16efb4aa;
+  D2: $330e; D3: $4f5c; D4: ($98, $a8, $cf, $6a, $c5, $5c, $be, $60));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVDecAudioInputHEAAC}
-  STATIC_CODECAPI_GUID_AVDecAudioInputDolbyDigitalPlus    :  TGUID = (D1: $0803e185; D2: $8f5d; D3: $47f5; D4: ($99, $08, $19, $a5, $bb, $c9, $fe, $34));
+  STATIC_CODECAPI_GUID_AVDecAudioInputDolbyDigitalPlus    :  TGUID = (D1: $0803e185;
+  D2: $8f5d; D3: $47f5; D4: ($99, $08, $19, $a5, $bb, $c9, $fe, $34));
   {$EXTERNALSYM STATIC_CODECAPI_GUID_AVDecAudioInputDolbyDigitalPlus}
 
-  STATIC_CODECAPI_AVDecAACDownmixMode                     :  TGUID = (D1: $01274475; D2: $f6bb; D3: $4017; D4: ($b0, $84, $81, $a7, $63, $c9, $42, $d4));
+  STATIC_CODECAPI_AVDecAACDownmixMode                     :  TGUID = (D1: $01274475;
+  D2: $f6bb; D3: $4017; D4: ($b0, $84, $81, $a7, $63, $c9, $42, $d4));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecAACDownmixMode}
-  STATIC_CODECAPI_AVDecHEAACDynamicRangeControl           :  TGUID = (D1: $287c8abe; D2: $69a4; D3: $4d39; D4: ($80, $80, $d3, $d9, $71, $21, $78, $a0));
+  STATIC_CODECAPI_AVDecHEAACDynamicRangeControl           :  TGUID = (D1: $287c8abe;
+  D2: $69a4; D3: $4d39; D4: ($80, $80, $d3, $d9, $71, $21, $78, $a0));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecHEAACDynamicRangeControl}
 
-  STATIC_CODECAPI_AVDecAudioDualMono                      :  TGUID = (D1: $4a52cda8; D2: $30f8; D3: $4216; D4: ($be, $0f, $ba, $0b, $20, $25, $92, $1d));
+  STATIC_CODECAPI_AVDecAudioDualMono                      :  TGUID = (D1: $4a52cda8;
+  D2: $30f8; D3: $4216; D4: ($be, $0f, $ba, $0b, $20, $25, $92, $1d));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecAudioDualMono}
-  STATIC_CODECAPI_AVDecAudioDualMonoReproMode             :  TGUID = (D1: $a5106186; D2: $cc94; D3: $4bc9; D4: ($8c, $d9, $aa, $2f, $61, $f6, $80, $7e));
+  STATIC_CODECAPI_AVDecAudioDualMonoReproMode             :  TGUID = (D1: $a5106186;
+  D2: $cc94; D3: $4bc9; D4: ($8c, $d9, $aa, $2f, $61, $f6, $80, $7e));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecAudioDualMonoReproMode}
 
-  STATIC_CODECAPI_AVAudioChannelCount                     :  TGUID = (D1: $1d3583c4; D2: $1583; D3: $474e; D4: ($b7, $1a, $5e, $e4, $63, $c1, $98, $e4));
+  STATIC_CODECAPI_AVAudioChannelCount                     :  TGUID = (D1: $1d3583c4;
+  D2: $1583; D3: $474e; D4: ($b7, $1a, $5e, $e4, $63, $c1, $98, $e4));
   {$EXTERNALSYM STATIC_CODECAPI_AVAudioChannelCount}
-  STATIC_CODECAPI_AVAudioChannelConfig                    :  TGUID = (D1: $17f89cb3; D2: $c38d; D3: $4368; D4: ($9e, $de, $63, $b9, $4d, $17, $7f, $9f));
+  STATIC_CODECAPI_AVAudioChannelConfig                    :  TGUID = (D1: $17f89cb3;
+  D2: $c38d; D3: $4368; D4: ($9e, $de, $63, $b9, $4d, $17, $7f, $9f));
   {$EXTERNALSYM STATIC_CODECAPI_AVAudioChannelConfig}
-  STATIC_CODECAPI_AVAudioSampleRate                       :  TGUID = (D1: $971d2723; D2: $1acb; D3: $42e7; D4: ($85, $5c, $52, $0a, $4b, $70, $a5, $f2));
+  STATIC_CODECAPI_AVAudioSampleRate                       :  TGUID = (D1: $971d2723;
+  D2: $1acb; D3: $42e7; D4: ($85, $5c, $52, $0a, $4b, $70, $a5, $f2));
   {$EXTERNALSYM STATIC_CODECAPI_AVAudioSampleRate}
 
-  STATIC_CODECAPI_AVDDSurroundMode                        :  TGUID = (D1: $99f2f386; D2: $98d1; D3: $4452; D4: ($a1, $63, $ab, $c7, $8a, $6e, $b7, $70));
+  STATIC_CODECAPI_AVDDSurroundMode                        :  TGUID = (D1: $99f2f386;
+  D2: $98d1; D3: $4452; D4: ($a1, $63, $ab, $c7, $8a, $6e, $b7, $70));
   {$EXTERNALSYM STATIC_CODECAPI_AVDDSurroundMode}
-  STATIC_CODECAPI_AVDecDDOperationalMode                  :  TGUID = (D1: $d6d6c6d1; D2: $064e; D3: $4fdd; D4: ($a4, $0e, $3e, $cb, $fc, $b7, $eb, $d0));
+  STATIC_CODECAPI_AVDecDDOperationalMode                  :  TGUID = (D1: $d6d6c6d1;
+  D2: $064e; D3: $4fdd; D4: ($a4, $0e, $3e, $cb, $fc, $b7, $eb, $d0));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecDDOperationalMode}
-  STATIC_CODECAPI_AVDecDDMatrixDecodingMode               :  TGUID = (D1: $ddc811a5; D2: $04ed; D3: $4bf3; D4: ($a0, $ca, $d0, $04, $49, $f9, $35, $5f));
+  STATIC_CODECAPI_AVDecDDMatrixDecodingMode               :  TGUID = (D1: $ddc811a5;
+  D2: $04ed; D3: $4bf3; D4: ($a0, $ca, $d0, $04, $49, $f9, $35, $5f));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecDDMatrixDecodingMode}
-  STATIC_CODECAPI_AVDecDDDynamicRangeScaleHigh            :  TGUID = (D1: $50196c21; D2: $1f33; D3: $4af5; D4: ($b2, $96, $11, $42, $6d, $6c, $87, $89));
+  STATIC_CODECAPI_AVDecDDDynamicRangeScaleHigh            :  TGUID = (D1: $50196c21;
+  D2: $1f33; D3: $4af5; D4: ($b2, $96, $11, $42, $6d, $6c, $87, $89));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecDDDynamicRangeScaleHigh}
-  STATIC_CODECAPI_AVDecDDDynamicRangeScaleLow             :  TGUID = (D1: $044e62e4; D2: $11a5; D3: $42d5; D4: ($a3, $b2, $3b, $b2, $c7, $c2, $d7, $cf));
+  STATIC_CODECAPI_AVDecDDDynamicRangeScaleLow             :  TGUID = (D1: $044e62e4;
+  D2: $11a5; D3: $42d5; D4: ($a3, $b2, $3b, $b2, $c7, $c2, $d7, $cf));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecDDDynamicRangeScaleLow}
-  STATIC_CODECAPI_AVDecDDStereoDownMixMode                :  TGUID = (D1: $6ce4122c; D2: $3ee9; D3: $4182; D4: ($b4, $ae, $c1, $0f, $c0, $88, $64, $9d));
+  STATIC_CODECAPI_AVDecDDStereoDownMixMode                :  TGUID = (D1: $6ce4122c;
+  D2: $3ee9; D3: $4182; D4: ($b4, $ae, $c1, $0f, $c0, $88, $64, $9d));
   {$EXTERNALSYM STATIC_CODECAPI_AVDecDDStereoDownMixMode}
 
-  STATIC_CODECAPI_AVDSPLoudnessEqualization               :  TGUID = (D1: $8afd1a15; D2: $1812; D3: $4cbf; D4: ($93, $19, $43, $3a, $5b, $2a, $3b, $27));
+  STATIC_CODECAPI_AVDSPLoudnessEqualization               :  TGUID = (D1: $8afd1a15;
+  D2: $1812; D3: $4cbf; D4: ($93, $19, $43, $3a, $5b, $2a, $3b, $27));
   {$EXTERNALSYM STATIC_CODECAPI_AVDSPLoudnessEqualization}
-  STATIC_CODECAPI_AVDSPSpeakerFill                        :  TGUID = (D1: $5612bca1; D2: $56da; D3: $4582; D4: ($8d, $a1, $ca, $80, $90, $f9, $27, $68));
+  STATIC_CODECAPI_AVDSPSpeakerFill                        :  TGUID = (D1: $5612bca1;
+  D2: $56da; D3: $4582; D4: ($8d, $a1, $ca, $80, $90, $f9, $27, $68));
   {$EXTERNALSYM STATIC_CODECAPI_AVDSPSpeakerFill}
 
-  STATIC_CODECAPI_AVPriorityControl                       :  TGUID = (D1: $54ba3dc8; D2: $bdde; D3: $4329; D4: ($b1, $87, $20, $18, $bc, $5c, $2b, $a1));
+  STATIC_CODECAPI_AVPriorityControl                       :  TGUID = (D1: $54ba3dc8;
+  D2: $bdde; D3: $4329; D4: ($b1, $87, $20, $18, $bc, $5c, $2b, $a1));
   {$EXTERNALSYM STATIC_CODECAPI_AVPriorityControl}
-  STATIC_CODECAPI_AVRealtimeControl                       :  TGUID = (D1: $6f440632; D2: $c4ad; D3: $4bf7; D4: ($9e, $52, $45, $69, $42, $b4, $54, $b0));
+  STATIC_CODECAPI_AVRealtimeControl                       :  TGUID = (D1: $6f440632;
+  D2: $c4ad; D3: $4bf7; D4: ($9e, $52, $45, $69, $42, $b4, $54, $b0));
   {$EXTERNALSYM STATIC_CODECAPI_AVRealtimeControl}
-  STATIC_CODECAPI_AVEncMaxFrameRate                       :  TGUID = (D1: $b98e1b31; D2: $19fa; D3: $4d4f; D4: ($99, $31, $d6, $a5, $b8, $aa, $b9, $3c));
+  STATIC_CODECAPI_AVEncMaxFrameRate                       :  TGUID = (D1: $b98e1b31;
+  D2: $19fa; D3: $4d4f; D4: ($99, $31, $d6, $a5, $b8, $aa, $b9, $3c));
   {$EXTERNALSYM STATIC_CODECAPI_AVEncMaxFrameRate}
 
   STATIC_CODECAPI_AVEncNoInputCopy                        :  TGUID = (D1: $d2b46a2a;

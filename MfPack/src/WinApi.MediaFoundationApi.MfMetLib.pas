@@ -3792,9 +3792,9 @@ begin
   hr := ERROR_NOT_FOUND;
 
   if IsEqualGuid(majorType,
-                MFMediaType_Video) or
+                 MFMediaType_Video) or
      IsEqualGuid(majorType,
-                MFMediaType_Audio) then
+                 MFMediaType_Audio) then
     begin
       if IfEqualReturnProps(MF_MT_MAJOR_TYPE,
                             'MF_MT_MAJOR_TYPE',
@@ -4475,26 +4475,27 @@ begin
                         'D3DFMT_L8',
                         D3DFMT_L8,
                         '8-bit luminance only. (bpp). (Same memory layout as D3DFMT_L8.)') then
+    goto done;
+
+
+  if IfEqualReturnProps(MFVideoFormat_L16,
+                         'MFVideoFormat_L16',
+                         'D3DFMT_L16',
+                         D3DFMT_L16,
+                         '16-bit luminance only. (Same memory layout as D3DFMT_L16.)') then
    goto done;
 
- // Note: MFVideoFormat_L16 and MFAudioFormat_MPEG share the same guidvalue.
- if IsEqualGuid(majorType,
-                MFMediaType_Video) then
+  // Note: MFVideoFormat_L16 and MFAudioFormat_MPEG share the same guidvalue.
+  if IsEqualGuid(majorType,
+                 MFMediaType_Video) then
    begin
-     if IfEqualReturnProps(MFVideoFormat_L16,
-                           'MFVideoFormat_L16',
-                           'D3DFMT_L16',
-                           D3DFMT_L16,
-                           '16-bit luminance only. (Same memory layout as D3DFMT_L16.)') then
-     goto done;
+     if IfEqualReturnProps(MFVideoFormat_D16,
+                           'MFVideoFormat_D16',
+                           'D3DFMT_D16',
+                           D3DFMT_D16,
+                           '16-bit z-buffer depth. (Same memory layout as D3DFMT_D16.)') then
+       goto done;
    end;
-
-  if IfEqualReturnProps(MFVideoFormat_D16,
-                        'MFVideoFormat_D16',
-                        'D3DFMT_D16',
-                        D3DFMT_D16,
-                        '16-bit z-buffer depth. (Same memory layout as D3DFMT_D16.)') then
-    goto done;
 
   // Encoded Video Types
   if IfEqualReturnProps(MFVideoFormat_DV25,
@@ -5846,10 +5847,10 @@ function GetFrameRate(pType: IMFMediaType;
                       out uiNumerator: UINT32;
                       out uiDenominator: UINT32): HResult; inline;
 begin
-  Result := MFGetAttributeRatio(pType,
-                                MF_MT_FRAME_RATE,
-                                uiNumerator,
-                                uiDenominator);
+  Result := MFGetAttribute2UINT32asUINT64(pType,
+                                          MF_MT_FRAME_RATE,
+                                          uiNumerator,
+                                          uiDenominator);
 end;
 
 
@@ -5858,10 +5859,10 @@ function SetFrameRate(pType: IMFMediaType;
                       uiNumerator: UINT32;
                       uiDenominator: UINT32): HResult; inline;
 begin
-  Result := MFSetAttributeRatio(pType,
-                                MF_MT_FRAME_RATE,
-                                uiNumerator,
-                                uiDenominator);
+  Result := MFSetAttribute2UINT32asUINT64(pType,
+                                          MF_MT_FRAME_RATE,
+                                          uiNumerator,
+                                          uiDenominator);
 end;
 
 
@@ -6803,7 +6804,7 @@ begin
           if (FAILED(hr)) then
             goto done;
 
-          // readable subtype info
+          // Readable subtype info.
           GetGUIDNameConst(pMfAudioFormat.tgMajorFormat,
                            pMfAudioFormat.tgSubFormat,
                            pMfAudioFormat.wcSubFormat,
@@ -6885,18 +6886,31 @@ begin
                                                                MF_MT_AUDIO_CHANNEL_MASK,
                                                                UINT32(0));
           // AAC specific
-          pMfAudioFormat.unAACPayload := MFGetAttributeUINT32(pType,
-                                                              MF_MT_AAC_PAYLOAD_TYPE,
-                                                              UINT32(0));
+          if IsEqualGuid(pMfAudioFormat.tgSubFormat,
+                         MFAudioFormat_AAC) then
+            begin
+              pMfAudioFormat.unAACPayload := MFGetAttributeUINT32(pType,
+                                                                  MF_MT_AAC_PAYLOAD_TYPE,
+                                                                  UINT32(0));
 
-          pMfAudioFormat.unAACProfileLevel := MFGetAttributeUINT32(pType,
-                                                                   MF_MT_AAC_AUDIO_PROFILE_LEVEL_INDICATION,
-                                                                   UINT32(0));
+              pMfAudioFormat.unAACProfileLevel := MFGetAttributeUINT32(pType,
+                                                                       MF_MT_AAC_AUDIO_PROFILE_LEVEL_INDICATION,
+                                                                       UINT32(0));
+            end
+          else
+            begin
+              pMfAudioFormat.unAACPayload := 0;
+              pMfAudioFormat.unAACProfileLevel := 0;
+            end;
 
           // FLAC extra data.
-          pMfAudioFormat.unFlacMaxBlockSize := MFGetAttributeUINT32(pType,
-                                                                    MF_MT_AUDIO_FLAC_MAX_BLOCK_SIZE,
-                                                                    UINT32(0));
+          if IsEqualGuid(pMfAudioFormat.tgSubFormat,
+                         MFAudioFormat_FLAC) then
+            pMfAudioFormat.unFlacMaxBlockSize := MFGetAttributeUINT32(pType,
+                                                                      MF_MT_AUDIO_FLAC_MAX_BLOCK_SIZE,
+                                                                      UINT32(0))
+          else
+            pMfAudioFormat.unFlacMaxBlockSize := 0;
 
           // Do a brief check.
           if (pMfAudioFormat.unChannels = 0) or (pMfAudioFormat.unSamplesPerSec = 0) then

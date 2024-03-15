@@ -1027,7 +1027,7 @@ const
 type
   // This GUID is used in IMFGetService.GetService calls to retrieve
   // interfaces from the buffer. Its value is defined in Evr.pas
-  MR_BUFFER_SERVICE = TGuid;
+  MR_BUFFER_SERVICE = TGUID;
   {$EXTERNALSYM MR_BUFFER_SERVICE}
 
 
@@ -1067,13 +1067,13 @@ type
   // Type: UINT32
 
 const  //updt 090812 replace type
-  MF_EVENT_SESSIONCAPS : TGuid =  '{7e5ebcd0-11b8-4abe-afad-10f6599a7f42}';
+  MF_EVENT_SESSIONCAPS : TGUID =  '{7e5ebcd0-11b8-4abe-afad-10f6599a7f42}';
   {$EXTERNALSYM MF_EVENT_SESSIONCAPS}
 
 
   // MF_EVENT_SESSIONCAPS_DELTA {7E5EBCD1-11B8-4abe-AFAD-10F6599A7F42}
   // Type: UINT32
-  MF_EVENT_SESSIONCAPS_DELTA : TGuid =  '{7e5ebcd1-11b8-4abe-afad-10f6599a7f42}'; //updt 090812 correct guid value
+  MF_EVENT_SESSIONCAPS_DELTA : TGUID =  '{7e5ebcd1-11b8-4abe-afad-10f6599a7f42}'; //updt 090812 correct guid value
   {$EXTERNALSYM MF_EVENT_SESSIONCAPS_DELTA}
 
 
@@ -1146,7 +1146,7 @@ const
 
   // MF_EVENT_TOPOLOGY_STATUS {30C5018D-9A53-454b-AD9E-6D5F8FA7C43B}
   // Type: UINT32 {MF_TOPOLOGY_STATUS}
-  MF_EVENT_TOPOLOGY_STATUS                    : TGuid = '{30c5018d-9a53-454b-ad9e-6d5f8fa7c43b}';
+  MF_EVENT_TOPOLOGY_STATUS                    : TGUID = '{30c5018d-9a53-454b-ad9e-6d5f8fa7c43b}';
   {$EXTERNALSYM MF_EVENT_TOPOLOGY_STATUS}
 
   // MESessionNotifyPresentationTime attributes
@@ -1154,65 +1154,65 @@ const
 
   // MF_EVENT_START_PRESENTATION_TIME {5AD914D0-9B45-4a8d-A2C0-81D1E50BFB07}
   // Type: UINT64
-  MF_EVENT_START_PRESENTATION_TIME            : TGuid = '{5ad914d0-9b45-4a8d-a2c0-81d1e50bfb07}';
+  MF_EVENT_START_PRESENTATION_TIME            : TGUID = '{5ad914d0-9b45-4a8d-a2c0-81d1e50bfb07}';
   {$EXTERNALSYM MF_EVENT_START_PRESENTATION_TIME}
 
   // MF_EVENT_PRESENTATION_TIME_OFFSET {5AD914D1-9B45-4a8d-A2C0-81D1E50BFB07}
   // Type: UINT64
-  MF_EVENT_PRESENTATION_TIME_OFFSET           : TGuid = '{5ad914d1-9b45-4a8d-a2c0-81d1e50bfb07}';
+  MF_EVENT_PRESENTATION_TIME_OFFSET           : TGUID = '{5ad914d1-9b45-4a8d-a2c0-81d1e50bfb07}';
   {$EXTERNALSYM MF_EVENT_PRESENTATION_TIME_OFFSET}
 
   // MF_EVENT_START_PRESENTATION_TIME_AT_OUTPUT {5AD914D2-9B45-4a8d-A2C0-81D1E50BFB07}
   // Type: UINT64
-  MF_EVENT_START_PRESENTATION_TIME_AT_OUTPUT  : TGuid = '{5AD914D2-9B45-4a8d-A2C0-81D1E50BFB07}';
+  MF_EVENT_START_PRESENTATION_TIME_AT_OUTPUT  : TGUID = '{5AD914D2-9B45-4a8d-A2C0-81D1E50BFB07}';
   {$EXTERNALSYM MF_EVENT_START_PRESENTATION_TIME_AT_OUTPUT}
 
 
   // MESourceStarted attributes
   //===========================
 
-  MF_EVENT_SOURCE_FAKE_START                  : TGuid = '{a8cc55a7-6b31-419f-845d-ffb351a2434b}';
+  MF_EVENT_SOURCE_FAKE_START                  : TGUID = '{a8cc55a7-6b31-419f-845d-ffb351a2434b}';
   {$EXTERNALSYM MF_EVENT_SOURCE_FAKE_START}
-  MF_EVENT_SOURCE_PROJECTSTART                : TGuid = '{a8cc55a8-6b31-419f-845d-ffb351a2434b}';
+  MF_EVENT_SOURCE_PROJECTSTART                : TGUID = '{a8cc55a8-6b31-419f-845d-ffb351a2434b}';
   {$EXTERNALSYM MF_EVENT_SOURCE_PROJECTSTART}
-  MF_EVENT_SOURCE_ACTUAL_START                : TGuid = '{a8cc55a9-6b31-419f-845d-ffb351a2434b}';
+  MF_EVENT_SOURCE_ACTUAL_START                : TGUID = '{a8cc55a9-6b31-419f-845d-ffb351a2434b}';
   {$EXTERNALSYM MF_EVENT_SOURCE_ACTUAL_START}
 
 
   // MEEndOfPresentationSegment attributes
   //======================================
 
-  MF_EVENT_SOURCE_TOPOLOGY_CANCELED           : TGuid = '{DB62F650-9A5E-4704-ACF3-563BC6A73364}';
+  MF_EVENT_SOURCE_TOPOLOGY_CANCELED           : TGUID = '{DB62F650-9A5E-4704-ACF3-563BC6A73364}';
   {$EXTERNALSYM MF_EVENT_SOURCE_TOPOLOGY_CANCELED}
 
 
   // MESourceCharacteristicsChanged attributes
   //==========================================
 
-  MF_EVENT_SOURCE_CHARACTERISTICS             : TGuid = '{47DB8490-8B22-4f52-AFDA-9CE1B2D3CFA8}';
+  MF_EVENT_SOURCE_CHARACTERISTICS             : TGUID = '{47DB8490-8B22-4f52-AFDA-9CE1B2D3CFA8}';
   {$EXTERNALSYM MF_EVENT_SOURCE_CHARACTERISTICS}
-  MF_EVENT_SOURCE_CHARACTERISTICS_OLD         : TGuid = '{47DB8491-8B22-4f52-AFDA-9CE1B2D3CFA8}';
+  MF_EVENT_SOURCE_CHARACTERISTICS_OLD         : TGUID = '{47DB8491-8B22-4f52-AFDA-9CE1B2D3CFA8}';
   {$EXTERNALSYM MF_EVENT_SOURCE_CHARACTERISTICS_OLD}
 
 
   // MESourceRateChangeRequested attributes
   //=======================================
 
-  MF_EVENT_DO_THINNING                        : TGuid = '{321EA6FB-DAD9-46e4-B31D-D2EAE7090E30}';
+  MF_EVENT_DO_THINNING                        : TGUID = '{321EA6FB-DAD9-46e4-B31D-D2EAE7090E30}';
   {$EXTERNALSYM MF_EVENT_DO_THINNING}
 
 
   // MEStreamSinkScrubSampleComplete attributes
   //===========================================
 
-  MF_EVENT_SCRUBSAMPLE_TIME                   : TGuid = '{9AC712B3-DCB8-44d5-8D0C-37455A2782E3}';
+  MF_EVENT_SCRUBSAMPLE_TIME                   : TGUID = '{9AC712B3-DCB8-44d5-8D0C-37455A2782E3}';
   {$EXTERNALSYM MF_EVENT_SCRUBSAMPLE_TIME}
 
 
   // MESinkInvalidated and MESessionStreamSinkFormatChanged attributes
   //==================================================================
 
-  MF_EVENT_OUTPUT_NODE                        : TGuid = '{830f1a8b-c060-46dd-a801-1c95dec9b107}';
+  MF_EVENT_OUTPUT_NODE                        : TGUID = '{830f1a8b-c060-46dd-a801-1c95dec9b107}';
   {$EXTERNALSYM MF_EVENT_OUTPUT_NODE}
 
 
@@ -1221,13 +1221,13 @@ const
   // METransformNeedInput attributes
   //================================
 
-  MF_EVENT_MFT_INPUT_STREAM_ID                : TGuid = '{F29C2CCA-7AE6-42d2-B284-BF837CC874E2}';
+  MF_EVENT_MFT_INPUT_STREAM_ID                : TGUID = '{F29C2CCA-7AE6-42d2-B284-BF837CC874E2}';
   {$EXTERNALSYM MF_EVENT_MFT_INPUT_STREAM_ID}
 
   // METransformDrainComplete and METransformMarker attributes
   //==========================================================
 
-  MF_EVENT_MFT_CONTEXT                        : TGuid = '{B7CD31F1-899E-4b41-80C9-26A896D32977}';
+  MF_EVENT_MFT_CONTEXT                        : TGUID = '{B7CD31F1-899E-4b41-80C9-26A896D32977}';
   {$EXTERNALSYM MF_EVENT_MFT_CONTEXT}
 
 // #ENDIF} // (WINVER >= _WIN32_WINNT_WIN7)
@@ -1495,7 +1495,7 @@ const
   // When present, this UINT32 attribute indicates whether the sample is hardware protected.
   // 0 = not hardware protected, nonzero = hardware protected
 
-  MFSampleExtension_CleanPoint              : TGuid = '{9cdf01d8-a0f0-43ba-b077-eaa06cbd728a}';
+  MFSampleExtension_CleanPoint              : TGUID = '{9cdf01d8-a0f0-43ba-b077-eaa06cbd728a}';
   {$EXTERNALSYM MFSampleExtension_CleanPoint}
   // MFSampleExtension_CleanPoint {9cdf01d8-a0f0-43ba-b077-eaa06cbd728a}
   // Type: UINT32
@@ -1503,7 +1503,7 @@ const
   // frame), and decoding can begin at this sample.
   //updt 090812 add
 
-  MFSampleExtension_Discontinuity           : TGuid = '{9cdf01d9-a0f0-43ba-b077-eaa06cbd728a}';
+  MFSampleExtension_Discontinuity           : TGUID = '{9cdf01d9-a0f0-43ba-b077-eaa06cbd728a}';
   {$EXTERNALSYM MFSampleExtension_Discontinuity}
   // MFSampleExtension_Discontinuity {9cdf01d9-a0f0-43ba-b077-eaa06cbd728a}
   // Type: UINT32
@@ -1512,7 +1512,7 @@ const
   // This can happen, for instance, if the previous sample was lost in
   // transmission.
 
-  MFSampleExtension_Token                   : TGuid = '{8294da66-f328-4805-b551-00deb4c57a61}';
+  MFSampleExtension_Token                   : TGUID = '{8294da66-f328-4805-b551-00deb4c57a61}';
   {$EXTERNALSYM MFSampleExtension_Token}
   // MFSampleExtension_Token {8294da66-f328-4805-b551-00deb4c57a61}
   // Type: IUNKNOWN
@@ -1680,27 +1680,27 @@ const
 
   // MFSampleExtension_DescrambleData {43483BE6-4903-4314-B032-2951365936FC}
   // Type: UINT64
-  MFSampleExtension_DescrambleData          : TGuid = '{43483be6-4903-4314-b032-2951365936fc}';
+  MFSampleExtension_DescrambleData          : TGUID = '{43483be6-4903-4314-b032-2951365936fc}';
   {$EXTERNALSYM MFSampleExtension_DescrambleData}
 
   // MFSampleExtension_SampleKeyID {9ED713C8-9B87-4B26-8297-A93B0C5A8ACC}
   // Type: UINT32
-  MFSampleExtension_SampleKeyID             : TGuid = '{9ed713c8-9b87-4b26-8297-a93b0c5a8acc}';
+  MFSampleExtension_SampleKeyID             : TGUID = '{9ed713c8-9b87-4b26-8297-a93b0c5a8acc}';
   {$EXTERNALSYM MFSampleExtension_SampleKeyID}
 
   // MFSampleExtension_GenKeyFunc {441CA1EE-6B1F-4501-903A-DE87DF42F6ED}
   // Type: UINT64
-  MFSampleExtension_GenKeyFunc              : TGuid = '{441ca1ee-6b1f-4501-903a-de87df42f6ed}';
+  MFSampleExtension_GenKeyFunc              : TGUID = '{441ca1ee-6b1f-4501-903a-de87df42f6ed}';
   {$EXTERNALSYM MFSampleExtension_GenKeyFunc}
 
   // MFSampleExtension_GenKeyCtx {188120CB-D7DA-4B59-9B3E-9252FD37301C}
   // Type: UINT64
-  MFSampleExtension_GenKeyCtx               : TGuid = '{188120cb-d7da-4b59-9b3e-9252fd37301c}';
+  MFSampleExtension_GenKeyCtx               : TGUID = '{188120cb-d7da-4b59-9b3e-9252fd37301c}';
   {$EXTERNALSYM MFSampleExtension_GenKeyCtx}
 
   // MFSampleExtension_PacketCrossOffsets {2789671D-389F-40BB-90D9-C282F77F9ABD}
   // Type: BLOB
-  MFSampleExtension_PacketCrossOffsets      : TGuid = '{2789671d-389f-40bb-90d9-c282f77f9abd}';
+  MFSampleExtension_PacketCrossOffsets      : TGUID = '{2789671d-389f-40bb-90d9-c282f77f9abd}';
   {$EXTERNALSYM MFSampleExtension_PacketCrossOffsets}
 
   // MFSampleExtension_Encryption_SampleID {6698B84E-0AFA-4330-AEB2-1C0A98D7A44D}
@@ -1732,28 +1732,28 @@ const
   /////////////////////////////////////////////////////////////////////////////
 
   // {b1d5830a-deb8-40e3-90fa-389943716461}   MFSampleExtension_Interlaced                {UINT32 (BOOL)}
-  MFSampleExtension_Interlaced                  : TGuid = '{b1d5830a-deb8-40e3-90fa-389943716461}';
+  MFSampleExtension_Interlaced                  : TGUID = '{b1d5830a-deb8-40e3-90fa-389943716461}';
   {$EXTERNALSYM MFSampleExtension_Interlaced}
   // {941ce0a3-6ae3-4dda-9a08-a64298340617}   MFSampleExtension_BottomFieldFirst          {UINT32 (BOOL)}
-  MFSampleExtension_BottomFieldFirst            : TGuid = '{941ce0a3-6ae3-4dda-9a08-a64298340617}';
+  MFSampleExtension_BottomFieldFirst            : TGUID = '{941ce0a3-6ae3-4dda-9a08-a64298340617}';
   {$EXTERNALSYM MFSampleExtension_BottomFieldFirst}
   // {304d257c-7493-4fbd-b149-9228de8d9a99}   MFSampleExtension_RepeatFirstField          {UINT32 (BOOL)}
-  MFSampleExtension_RepeatFirstField            : TGuid = '{304d257c-7493-4fbd-b149-9228de8d9a99}';
+  MFSampleExtension_RepeatFirstField            : TGUID = '{304d257c-7493-4fbd-b149-9228de8d9a99}';
   {$EXTERNALSYM MFSampleExtension_RepeatFirstField}
   // {9d85f816-658b-455a-bde0-9fa7e15ab8f9}   MFSampleExtension_SingleField               {UINT32 (BOOL)}
-  MFSampleExtension_SingleField                 : TGuid = '{9d85f816-658b-455a-bde0-9fa7e15ab8f9}';
+  MFSampleExtension_SingleField                 : TGUID = '{9d85f816-658b-455a-bde0-9fa7e15ab8f9}';
   {$EXTERNALSYM MFSampleExtension_SingleField}
   // {6852465a-ae1c-4553-8e9b-c3420fcb1637}   MFSampleExtension_DerivedFromTopField       {UINT32 (BOOL)}
-  MFSampleExtension_DerivedFromTopField         : TGuid = '{6852465a-ae1c-4553-8e9b-c3420fcb1637}';
+  MFSampleExtension_DerivedFromTopField         : TGUID = '{6852465a-ae1c-4553-8e9b-c3420fcb1637}';
   {$EXTERNALSYM MFSampleExtension_DerivedFromTopField}
-  MFSampleExtension_MeanAbsoluteDifference      : TGuid = '{1cdbde11-08b4-4311-a6dd-0f9f371907aa}'; // Type: UINT32
+  MFSampleExtension_MeanAbsoluteDifference      : TGUID = '{1cdbde11-08b4-4311-a6dd-0f9f371907aa}'; // Type: UINT32
   {$EXTERNALSYM MFSampleExtension_MeanAbsoluteDifference}
-  MFSampleExtension_LongTermReferenceFrameInfo  : TGuid = '{9154733f-e1bd-41bf-81d3-fcd918f71332}'; // Type: UINT32
+  MFSampleExtension_LongTermReferenceFrameInfo  : TGUID = '{9154733f-e1bd-41bf-81d3-fcd918f71332}'; // Type: UINT32
   {$EXTERNALSYM MFSampleExtension_LongTermReferenceFrameInfo}
-  MFSampleExtension_ROIRectangle                : TGuid = '{3414a438-4998-4d2c-be82-be3ca0b24d43}'; // Type: BLOB
+  MFSampleExtension_ROIRectangle                : TGUID = '{3414a438-4998-4d2c-be82-be3ca0b24d43}'; // Type: BLOB
   {$EXTERNALSYM MFSampleExtension_ROIRectangle}
   // MFSampleExtension_LastSlice {2b5d5457-5547-4f07-b8c8-b4a3a9a1daac}
-  MFSampleExtension_LastSlice                   : TGuid = '{2b5d5457-5547-4f07-b8c8-b4a3a9a1daac}'; // Type: UINT32
+  MFSampleExtension_LastSlice                   : TGUID = '{2b5d5457-5547-4f07-b8c8-b4a3a9a1daac}'; // Type: UINT32
   {$EXTERNALSYM MFSampleExtension_LastSlice}
 
   // Indicates macroblock is not needed for output and can be skipped
@@ -2182,48 +2182,48 @@ const           // updt 090812 add
   // The following GUIDs define categories for Media Foundation transforms (MFTs).
   // These categories are used to register and enumerate MFTs.
 
-  MFT_CATEGORY_VIDEO_DECODER          : TGuid = '{d6c02d4b-6833-45b4-971a-05a4b04bab91}';
+  MFT_CATEGORY_VIDEO_DECODER          : TGUID = '{d6c02d4b-6833-45b4-971a-05a4b04bab91}';
   {$EXTERNALSYM MFT_CATEGORY_VIDEO_DECODER}
   // {f79eac7d-e545-4387-bdee-d647d7bde42a}   MFT_CATEGORY_VIDEO_ENCODER
-  MFT_CATEGORY_VIDEO_ENCODER          : TGuid = '{f79eac7d-e545-4387-bdee-d647d7bde42a}';
+  MFT_CATEGORY_VIDEO_ENCODER          : TGUID = '{f79eac7d-e545-4387-bdee-d647d7bde42a}';
   {$EXTERNALSYM MFT_CATEGORY_VIDEO_ENCODER}
   // {12e17c21-532c-4a6e-8a1c-40825a736397}   MFT_CATEGORY_VIDEO_EFFECT
-  MFT_CATEGORY_VIDEO_EFFECT           : TGuid = '{12e17c21-532c-4a6e-8a1c-40825a736397}';
+  MFT_CATEGORY_VIDEO_EFFECT           : TGUID = '{12e17c21-532c-4a6e-8a1c-40825a736397}';
   {$EXTERNALSYM MFT_CATEGORY_VIDEO_EFFECT}
   // {059c561e-05ae-4b61-b69d-55b61ee54a7b}   MFT_CATEGORY_MULTIPLEXER
-  MFT_CATEGORY_MULTIPLEXER            : TGuid = '{059c561e-05ae-4b61-b69d-55b61ee54a7b}';
+  MFT_CATEGORY_MULTIPLEXER            : TGUID = '{059c561e-05ae-4b61-b69d-55b61ee54a7b}';
   {$EXTERNALSYM MFT_CATEGORY_MULTIPLEXER}
   // {a8700a7a-939b-44c5-99d7-76226b23b3f1}   MFT_CATEGORY_DEMULTIPLEXER
-  MFT_CATEGORY_DEMULTIPLEXER          : TGuid = '{a8700a7a-939b-44c5-99d7-76226b23b3f1}';
+  MFT_CATEGORY_DEMULTIPLEXER          : TGUID = '{a8700a7a-939b-44c5-99d7-76226b23b3f1}';
   {$EXTERNALSYM MFT_CATEGORY_DEMULTIPLEXER}
   // {9ea73fb4-ef7a-4559-8d5d-719d8f0426c7}   MFT_CATEGORY_AUDIO_DECODER
-  MFT_CATEGORY_AUDIO_DECODER          : TGuid = '{9ea73fb4-ef7a-4559-8d5d-719d8f0426c7}';
+  MFT_CATEGORY_AUDIO_DECODER          : TGUID = '{9ea73fb4-ef7a-4559-8d5d-719d8f0426c7}';
   {$EXTERNALSYM MFT_CATEGORY_AUDIO_DECODER}
   // {91c64bd0-f91e-4d8c-9276-db248279d975}   MFT_CATEGORY_AUDIO_ENCODER
-  MFT_CATEGORY_AUDIO_ENCODER          : TGuid = '{91c64bd0-f91e-4d8c-9276-db248279d975}';
+  MFT_CATEGORY_AUDIO_ENCODER          : TGUID = '{91c64bd0-f91e-4d8c-9276-db248279d975}';
   {$EXTERNALSYM MFT_CATEGORY_AUDIO_ENCODER}
   // {11064c48-3648-4ed0-932e-05ce8ac811b7}   MFT_CATEGORY_AUDIO_EFFECT
-  MFT_CATEGORY_AUDIO_EFFECT           : TGuid = '{11064c48-3648-4ed0-932e-05ce8ac811b7}';
+  MFT_CATEGORY_AUDIO_EFFECT           : TGUID = '{11064c48-3648-4ed0-932e-05ce8ac811b7}';
   {$EXTERNALSYM MFT_CATEGORY_AUDIO_EFFECT}
 
   //#if (WINVER >= _WIN32_WINNT_WIN7)
   // {302ea3fc-aa5f-47f9-9f7a-c2188bb16302}   MFT_CATEGORY_VIDEO_PROCESSOR
-  MFT_CATEGORY_VIDEO_PROCESSOR        : TGuid = '{302ea3fc-aa5f-47f9-9f7a-c2188bb16302}'; //updt 090812 correct GUID
+  MFT_CATEGORY_VIDEO_PROCESSOR        : TGUID = '{302ea3fc-aa5f-47f9-9f7a-c2188bb16302}'; //updt 090812 correct GUID
   {$EXTERNALSYM MFT_CATEGORY_VIDEO_PROCESSOR}
   //#endif // (WINVER >= _WIN32_WINNT_WIN7)
 
   // {90175d57-b7ea-4901-aeb3-933a8747756f}   MFT_CATEGORY_OTHER
-  MFT_CATEGORY_OTHER                  : TGuid = '{90175d57-b7ea-4901-aeb3-933a8747756f}';
+  MFT_CATEGORY_OTHER                  : TGUID = '{90175d57-b7ea-4901-aeb3-933a8747756f}';
   {$EXTERNALSYM MFT_CATEGORY_OTHER}
 
   // #if (WINVER >= _WIN32_WINNT_WIN10_RS1)
-  MFT_CATEGORY_ENCRYPTOR              : TGuid = '{b0c687be-01cd-44b5-b8b2-7c1d7e058b1f}';
+  MFT_CATEGORY_ENCRYPTOR              : TGUID = '{b0c687be-01cd-44b5-b8b2-7c1d7e058b1f}';
   {$EXTERNALSYM MFT_CATEGORY_ENCRYPTOR}
   // #endif
   // TODO: switch to NTDDI_WIN10_RS3 when _NT_TARGET_VERSION is updated to support RS3
   //if NTDDI_VERSION >= NTDDI_WIN10_RS2
   // {145CD8B4-92F4-4b23-8AE7-E0DF06C2DA95}   MFT_CATEGORY_VIDEO_RENDERER_EFFECT
-  MFT_CATEGORY_VIDEO_RENDERER_EFFECT  : TGuid = '{145CD8B4-92F4-4b23-8AE7-E0DF06C2DA95}';
+  MFT_CATEGORY_VIDEO_RENDERER_EFFECT  : TGUID = '{145CD8B4-92F4-4b23-8AE7-E0DF06C2DA95}';
   {$EXTERNALSYM MFT_CATEGORY_VIDEO_RENDERER_EFFECT}
   //endif
 
@@ -2339,7 +2339,7 @@ const
 
 
   function MFTRegister(clsidMFT: CLSID;  // The CLSID of the MFT. The MFT must also be registered as a COM object using the same CLSID.
-                       const guidCategory: TGuid; // GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY .
+                       const guidCategory: TGUID; // GUID that specifies the category of the MFT. For a list of MFT categories, see MFT_CATEGORY .
                        pszName: LPCWSTR;  // Wide-character string that contains the friendly name of the MFT.
                        Flags: UINT32;  // Bitwise OR of zero or more of the following flags from the MFT_ENUM_FLAG enumeration.
                        cInputTypes: UINT32;  // Number of elements in the pInputTypes array.
@@ -2451,7 +2451,7 @@ const
 
   // >= Win 7
 
-  function MFTEnumEx(guidCategory: TGuid;  // A GUID that specifies the category of MFTs to enumerate. For a list of MFT categories, see MFT_CATEGORY.
+  function MFTEnumEx(const guidCategory: TGUID;  // A GUID that specifies the category of MFTs to enumerate. For a list of MFT categories, see MFT_CATEGORY.
                      Flags: UINT32;  // The bitwise OR of zero or more flags from the _MFT_ENUM_FLAG enumeration.
                      pInputType: PMFT_REGISTER_TYPE_INFO; // A pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an input media type to match.
                                                           // This parameter can be nil. If nil, all input types are matched.
@@ -2559,7 +2559,7 @@ const
 
 
 const    // updt 090812 add
-  MFT_SUPPORT_DYNAMIC_FORMAT_CHANGE        : TGuid = '{53476A11-3F13-49fb-AC42-EE2733C96741}';
+  MFT_SUPPORT_DYNAMIC_FORMAT_CHANGE        : TGUID = '{53476A11-3F13-49fb-AC42-EE2733C96741}';
   {$EXTERNALSYM MFT_SUPPORT_DYNAMIC_FORMAT_CHANGE}
   // {53476A11-3F13-49fb-AC42-EE2733C96741} MFT_SUPPORT_DYNAMIC_FORMAT_CHANGE {UINT32 (BOOL)}
 
@@ -2601,10 +2601,10 @@ const    // updt 090812 add
 }
 
 // REMARK#1
-// To use these converted macro's and/or add other TGuid's,
+// To use these converted macro's and/or add other TGUID's,
 // you have to use function DefineMediaTypeGuid defined at the Implementations section of this file.
 // The following steps should be taken:
-// 1 Declare  MFYourAudioOrVideo_Guid as TGuid. (var MFYourAudioOrVideo_Guid : TGuid)
+// 1 Declare  MFYourAudioOrVideo_Guid as TGUID. (var MFYourAudioOrVideo_Guid : TGUID)
 // 2 Assign a valid DWord or FourCC value to get a proper Guid:
 //   MFYourAudioOrVideo_Guid := DefineMediaTypeGuid(FourCC or Dword - NOT BOTH! -)
 //   NOTE: Default values for both are '' (sFcc) or 0 (dwConst)
@@ -2618,7 +2618,7 @@ type
   {$EXTERNALSYM FCC}
 
   // Tony
-  function DEFINE_MEDIATYPE_GUID(const format: DWord): TGuid; inline;
+  function DEFINE_MEDIATYPE_GUID(const format: DWord): TGUID; inline;
   {$EXTERNALSYM DEFINE_MEDIATYPE_GUID}
   // Parameters
   // name
@@ -2626,7 +2626,7 @@ type
   // format
   //    A FOURCC code, D3DFORMAT value, or audio format type.
   // Return value
-  //    This function returns a TGuid.
+  //    This function returns a TGUID.
   // Remarks
   //    Media formats are often identified by a FOURCC code (such as 'AYUV'),
   //    D3DFORMAT value (such as D3DFMT_X8R8G8B8), or audio format type (such as WAVE_FORMAT_PCM).
@@ -3176,9 +3176,9 @@ const
   // some legacy formats that don't fit the common pattern ///////////////////////
 
   // {e06d8026-db46-11cf-b4d1-00805f6cbbea}       MFVideoFormat_MPEG2
-  MFVideoFormat_MPEG2   : TGuid = '{e06d8026-db46-11cf-b4d1-00805f6cbbea}';
+  MFVideoFormat_MPEG2   : TGUID = '{e06d8026-db46-11cf-b4d1-00805f6cbbea}';
   {$EXTERNALSYM MFVideoFormat_MPEG2}
-  MFVideoFormat_MPG2    : TGuid = '{e06d8026-db46-11cf-b4d1-00805f6cbbea}'; // = MFVideoFormat_MPEG2
+  MFVideoFormat_MPG2    : TGUID = '{e06d8026-db46-11cf-b4d1-00805f6cbbea}'; // = MFVideoFormat_MPEG2
   {$EXTERNALSYM MFVideoFormat_MPG2}
 
 
@@ -3424,7 +3424,7 @@ const
   //===================
 
   // {00000000-767a-494d-b478-f29d25dc9037}   MFMPEG4Format_Base
-  MFMPEG4Format_Base              : TGuid = '{00000000-767a-494d-b478-f29d25dc9037}';
+  MFMPEG4Format_Base              : TGUID = '{00000000-767a-494d-b478-f29d25dc9037}';
   {$EXTERNALSYM MFMPEG4Format_Base}
 
 
@@ -3480,32 +3480,32 @@ const
 
 const
   // {48eba18e-f8c9-4687-bf11-0a74c9f96a8f}   MF_MT_MAJOR_TYPE                {GUID}
-  MF_MT_MAJOR_TYPE                            : TGuid = '{48eba18e-f8c9-4687-bf11-0a74c9f96a8f}';
+  MF_MT_MAJOR_TYPE                            : TGUID = '{48eba18e-f8c9-4687-bf11-0a74c9f96a8f}';
   {$EXTERNALSYM MF_MT_MAJOR_TYPE}
 
   // {f7e34c9a-42e8-4714-b74b-cb29d72c35e5}   MF_MT_SUBTYPE                   {GUID}
-  MF_MT_SUBTYPE                               : TGuid = '{f7e34c9a-42e8-4714-b74b-cb29d72c35e5}';
+  MF_MT_SUBTYPE                               : TGUID = '{f7e34c9a-42e8-4714-b74b-cb29d72c35e5}';
   {$EXTERNALSYM MF_MT_SUBTYPE}
 
   // {c9173739-5e56-461c-b713-46fb995cb95f}   MF_MT_ALL_SAMPLES_INDEPENDENT   {UINT32 (BOOL)}
-  MF_MT_ALL_SAMPLES_INDEPENDENT               : TGuid = '{c9173739-5e56-461c-b713-46fb995cb95f}';
+  MF_MT_ALL_SAMPLES_INDEPENDENT               : TGUID = '{c9173739-5e56-461c-b713-46fb995cb95f}';
   {$EXTERNALSYM MF_MT_ALL_SAMPLES_INDEPENDENT}
 
   // {b8ebefaf-b718-4e04-b0a9-116775e3321b}     MF_MT_FIXED_SIZE_SAMPLES        {UINT32 (BOOL)}
-  MF_MT_FIXED_SIZE_SAMPLES                    : TGuid = '{b8ebefaf-b718-4e04-b0a9-116775e3321b}';
+  MF_MT_FIXED_SIZE_SAMPLES                    : TGUID = '{b8ebefaf-b718-4e04-b0a9-116775e3321b}';
   {$EXTERNALSYM MF_MT_FIXED_SIZE_SAMPLES}
 
   // {3afd0cee-18f2-4ba5-a110-8bea502e1f92}     MF_MT_COMPRESSED                {UINT32 (BOOL)}
-  MF_MT_COMPRESSED                            : TGuid = '{3afd0cee-18f2-4ba5-a110-8bea502e1f92}';
+  MF_MT_COMPRESSED                            : TGUID = '{3afd0cee-18f2-4ba5-a110-8bea502e1f92}';
   {$EXTERNALSYM MF_MT_COMPRESSED}
 
   // MF_MT_SAMPLE_SIZE is only valid if MF_MT_FIXED_SIZED_SAMPLES is TRUE
   // {dad3ab78-1990-408b-bce2-eba673dacc10}     MF_MT_SAMPLE_SIZE               {UINT32}
-  MF_MT_SAMPLE_SIZE                           : TGuid = '{dad3ab78-1990-408b-bce2-eba673dacc10}';
+  MF_MT_SAMPLE_SIZE                           : TGUID = '{dad3ab78-1990-408b-bce2-eba673dacc10}';
   {$EXTERNALSYM MF_MT_SAMPLE_SIZE}
 
   // 4d3f7b23-d02f-4e6c-9bee-e4bf2c6c695d       MF_MT_WRAPPED_TYPE              {Blob}
-  MF_MT_WRAPPED_TYPE                          : TGuid = '{4d3f7b23-d02f-4e6c-9bee-e4bf2c6c695d}';
+  MF_MT_WRAPPED_TYPE                          : TGUID = '{4d3f7b23-d02f-4e6c-9bee-e4bf2c6c695d}';
   {$EXTERNALSYM MF_MT_WRAPPED_TYPE}
 
 // #if (WINVER >= _WIN32_WINNT_WIN8)
@@ -3809,39 +3809,39 @@ const
   //===========
 
   // {37e48bf5-645e-4c5b-89de-ada9e29b696a}   MF_MT_AUDIO_NUM_CHANNELS            {UINT32}
-  MF_MT_AUDIO_NUM_CHANNELS                    : TGuid = '{37e48bf5-645e-4c5b-89de-ada9e29b696a}';
+  MF_MT_AUDIO_NUM_CHANNELS                    : TGUID = '{37e48bf5-645e-4c5b-89de-ada9e29b696a}';
   {$EXTERNALSYM MF_MT_AUDIO_NUM_CHANNELS}
 
   // {5faeeae7-0290-4c31-9e8a-c534f68d9dba}   MF_MT_AUDIO_SAMPLES_PER_SECOND      {UINT32}
-  MF_MT_AUDIO_SAMPLES_PER_SECOND              : TGuid = '{5faeeae7-0290-4c31-9e8a-c534f68d9dba}';
+  MF_MT_AUDIO_SAMPLES_PER_SECOND              : TGUID = '{5faeeae7-0290-4c31-9e8a-c534f68d9dba}';
   {$EXTERNALSYM MF_MT_AUDIO_SAMPLES_PER_SECOND}
 
   // {fb3b724a-cfb5-4319-aefe-6e42b2406132}   MF_MT_AUDIO_FLOAT_SAMPLES_PER_SECOND {double}
-  MF_MT_AUDIO_FLOAT_SAMPLES_PER_SECOND        : TGuid = '{fb3b724a-cfb5-4319-aefe-6e42b2406132}';
+  MF_MT_AUDIO_FLOAT_SAMPLES_PER_SECOND        : TGUID = '{fb3b724a-cfb5-4319-aefe-6e42b2406132}';
   {$EXTERNALSYM MF_MT_AUDIO_FLOAT_SAMPLES_PER_SECOND}
 
   // {1aab75c8-cfef-451c-ab95-ac034b8e1731}   MF_MT_AUDIO_AVG_BYTES_PER_SECOND    {UINT32}
-  MF_MT_AUDIO_AVG_BYTES_PER_SECOND            : TGuid = '{1aab75c8-cfef-451c-ab95-ac034b8e1731}';
+  MF_MT_AUDIO_AVG_BYTES_PER_SECOND            : TGUID = '{1aab75c8-cfef-451c-ab95-ac034b8e1731}';
   {$EXTERNALSYM MF_MT_AUDIO_AVG_BYTES_PER_SECOND}
 
   // {322de230-9eeb-43bd-ab7a-ff412251541d}   MF_MT_AUDIO_BLOCK_ALIGNMENT         {UINT32}
-  MF_MT_AUDIO_BLOCK_ALIGNMENT                 : TGuid = '{322de230-9eeb-43bd-ab7a-ff412251541d}';
+  MF_MT_AUDIO_BLOCK_ALIGNMENT                 : TGUID = '{322de230-9eeb-43bd-ab7a-ff412251541d}';
   {$EXTERNALSYM MF_MT_AUDIO_BLOCK_ALIGNMENT}
 
   // {f2deb57f-40fa-4764-aa33-ed4f2d1ff669}   MF_MT_AUDIO_BITS_PER_SAMPLE         {UINT32}
-  MF_MT_AUDIO_BITS_PER_SAMPLE                 : TGuid = '{f2deb57f-40fa-4764-aa33-ed4f2d1ff669}';
+  MF_MT_AUDIO_BITS_PER_SAMPLE                 : TGUID = '{f2deb57f-40fa-4764-aa33-ed4f2d1ff669}';
   {$EXTERNALSYM MF_MT_AUDIO_BITS_PER_SAMPLE}
 
   // {d9bf8d6a-9530-4b7c-9ddf-ff6fd58bbd06}   MF_MT_AUDIO_VALID_BITS_PER_SAMPLE   {UINT32}
-  MF_MT_AUDIO_VALID_BITS_PER_SAMPLE           : TGuid = '{d9bf8d6a-9530-4b7c-9ddf-ff6fd58bbd06}';
+  MF_MT_AUDIO_VALID_BITS_PER_SAMPLE           : TGUID = '{d9bf8d6a-9530-4b7c-9ddf-ff6fd58bbd06}';
   {$EXTERNALSYM MF_MT_AUDIO_VALID_BITS_PER_SAMPLE}
 
   // {aab15aac-e13a-4995-9222-501ea15c6877}   MF_MT_AUDIO_SAMPLES_PER_BLOCK       {UINT32}
-  MF_MT_AUDIO_SAMPLES_PER_BLOCK               : TGuid = '{aab15aac-e13a-4995-9222-501ea15c6877}';
+  MF_MT_AUDIO_SAMPLES_PER_BLOCK               : TGUID = '{aab15aac-e13a-4995-9222-501ea15c6877}';
   {$EXTERNALSYM MF_MT_AUDIO_SAMPLES_PER_BLOCK}
 
   // {55fb5765-644a-4caf-8479-938983bb1588}   MF_MT_AUDIO_CHANNEL_MASK            {UINT32}
-  MF_MT_AUDIO_CHANNEL_MASK                    : TGuid = '{55fb5765-644a-4caf-8479-938983bb1588}';
+  MF_MT_AUDIO_CHANNEL_MASK                    : TGUID = '{55fb5765-644a-4caf-8479-938983bb1588}';
   {$EXTERNALSYM MF_MT_AUDIO_CHANNEL_MASK}
 
 
@@ -3864,23 +3864,23 @@ type
 const
 
   // {9d62927c-36be-4cf2-b5c4-a3926e3e8711}     MF_MT_AUDIO_FOLDDOWN_MATRIX         {BLOB, MFFOLDDOWN_MATRIX}
-  MF_MT_AUDIO_FOLDDOWN_MATRIX                   : TGuid = '{9d62927c-36be-4cf2-b5c4-a3926e3e8711}';
+  MF_MT_AUDIO_FOLDDOWN_MATRIX                   : TGUID = '{9d62927c-36be-4cf2-b5c4-a3926e3e8711}';
   {$EXTERNALSYM MF_MT_AUDIO_FOLDDOWN_MATRIX}
 
   // {9d62927d-36be-4cf2-b5c4-a3926e3e8711}   MF_MT_AUDIO_WMADRC_PEAKREF         {UINT32}
-  MF_MT_AUDIO_WMADRC_PEAKREF                    : TGuid = '{9d62927d-36be-4cf2-b5c4-a3926e3e8711}';
+  MF_MT_AUDIO_WMADRC_PEAKREF                    : TGUID = '{9d62927d-36be-4cf2-b5c4-a3926e3e8711}';
   {$EXTERNALSYM MF_MT_AUDIO_WMADRC_PEAKREF}
 
   // {9d62927e-36be-4cf2-b5c4-a3926e3e8711}   MF_MT_AUDIO_WMADRC_PEAKTARGET        {UINT32}
-  MF_MT_AUDIO_WMADRC_PEAKTARGET                 : TGuid = '{9d62927e-36be-4cf2-b5c4-a3926e3e8711}';
+  MF_MT_AUDIO_WMADRC_PEAKTARGET                 : TGUID = '{9d62927e-36be-4cf2-b5c4-a3926e3e8711}';
   {$EXTERNALSYM MF_MT_AUDIO_WMADRC_PEAKTARGET}
 
   // {9d62927f-36be-4cf2-b5c4-a3926e3e8711}   MF_MT_AUDIO_WMADRC_AVGREF         {UINT32}
-  MF_MT_AUDIO_WMADRC_AVGREF                     : TGuid = '{9d62927f-36be-4cf2-b5c4-a3926e3e8711}';
+  MF_MT_AUDIO_WMADRC_AVGREF                     : TGUID = '{9d62927f-36be-4cf2-b5c4-a3926e3e8711}';
   {$EXTERNALSYM MF_MT_AUDIO_WMADRC_AVGREF}
 
   // {9d629280-36be-4cf2-b5c4-a3926e3e8711}   MF_MT_AUDIO_WMADRC_AVGTARGET      {UINT32}
-  MF_MT_AUDIO_WMADRC_AVGTARGET                  : TGuid = '{9d629280-36be-4cf2-b5c4-a3926e3e8711}';
+  MF_MT_AUDIO_WMADRC_AVGTARGET                  : TGUID = '{9d629280-36be-4cf2-b5c4-a3926e3e8711}';
   {$EXTERNALSYM MF_MT_AUDIO_WMADRC_AVGTARGET}
 
 
@@ -3894,7 +3894,7 @@ const
 
 
   // {a901aaba-e037-458a-bdf6-545be2074042}     MF_MT_AUDIO_PREFER_WAVEFORMATEX     {UINT32 (BOOL)}
-  MF_MT_AUDIO_PREFER_WAVEFORMATEX               : TGuid = '{a901aaba-e037-458a-bdf6-545be2074042}';
+  MF_MT_AUDIO_PREFER_WAVEFORMATEX               : TGUID = '{a901aaba-e037-458a-bdf6-545be2074042}';
   {$EXTERNALSYM MF_MT_AUDIO_PREFER_WAVEFORMATEX}
 
 
@@ -3904,11 +3904,11 @@ const
   //=======================
 
   // {BFBABE79-7434-4d1c-94F0-72A3B9E17188}     MF_MT_AAC_PAYLOAD_TYPE       {UINT32}
-  MF_MT_AAC_PAYLOAD_TYPE                        : TGuid = '{BFBABE79-7434-4d1c-94F0-72A3B9E17188}';
+  MF_MT_AAC_PAYLOAD_TYPE                        : TGUID = '{BFBABE79-7434-4d1c-94F0-72A3B9E17188}';
   {$EXTERNALSYM MF_MT_AAC_PAYLOAD_TYPE}
 
   // {7632F0E6-9538-4d61-ACDA-EA29C8C14456}     MF_MT_AAC_AUDIO_PROFILE_LEVEL_INDICATION       {UINT32}
-  MF_MT_AAC_AUDIO_PROFILE_LEVEL_INDICATION      : TGuid = '{7632F0E6-9538-4d61-ACDA-EA29C8C14456}';
+  MF_MT_AAC_AUDIO_PROFILE_LEVEL_INDICATION      : TGUID = '{7632F0E6-9538-4d61-ACDA-EA29C8C14456}';
   {$EXTERNALSYM MF_MT_AAC_AUDIO_PROFILE_LEVEL_INDICATION}
 
 //#endif // (WINVER >= _WIN32_WINNT_WIN7) Windows 7
@@ -3960,19 +3960,19 @@ const
   //================
 
   // {1652c33d-d6b2-4012-b834-72030849a37d}     MF_MT_FRAME_SIZE                {UINT64 (HI32(Width),LO32(Height))}
-  MF_MT_FRAME_SIZE                              : TGuid = '{1652c33d-d6b2-4012-b834-72030849a37d}';
+  MF_MT_FRAME_SIZE                              : TGUID = '{1652c33d-d6b2-4012-b834-72030849a37d}';
   {$EXTERNALSYM MF_MT_FRAME_SIZE}
 
   // {c459a2e8-3d2c-4e44-b132-fee5156c7bb0}     MF_MT_FRAME_RATE                {UINT64 (HI32(Numerator),LO32(Denominator))}
-  MF_MT_FRAME_RATE                              : TGuid = '{c459a2e8-3d2c-4e44-b132-fee5156c7bb0}';
+  MF_MT_FRAME_RATE                              : TGUID = '{c459a2e8-3d2c-4e44-b132-fee5156c7bb0}';
   {$EXTERNALSYM MF_MT_FRAME_RATE}
 
   // {c6376a1e-8d0a-4027-be45-6d9a0ad39bb6}     MF_MT_PIXEL_ASPECT_RATIO        {UINT64 (HI32(Numerator),LO32(Denominator))}
-  MF_MT_PIXEL_ASPECT_RATIO                      : TGuid = '{c6376a1e-8d0a-4027-be45-6d9a0ad39bb6}';
+  MF_MT_PIXEL_ASPECT_RATIO                      : TGUID = '{c6376a1e-8d0a-4027-be45-6d9a0ad39bb6}';
   {$EXTERNALSYM MF_MT_PIXEL_ASPECT_RATIO}
 
   // {8772f323-355a-4cc7-bb78-6d61a048ae82}     MF_MT_DRM_FLAGS                 {UINT32 (anyof MFVideoDRMFlags)}
-  MF_MT_DRM_FLAGS                               : TGuid = '{8772f323-355a-4cc7-bb78-6d61a048ae82}';
+  MF_MT_DRM_FLAGS                               : TGUID = '{8772f323-355a-4cc7-bb78-6d61a048ae82}';
   {$EXTERNALSYM MF_MT_DRM_FLAGS}
 
 
@@ -4002,7 +4002,7 @@ const
 const
 
   // {4d0e73e5-80ea-4354-a9d0-1176ceb028ea}     MF_MT_PAD_CONTROL_FLAGS         {UINT32 (oneof MFVideoPadFlags)}
-  MF_MT_PAD_CONTROL_FLAGS           : TGuid = '{4d0e73e5-80ea-4354-a9d0-1176ceb028ea}';
+  MF_MT_PAD_CONTROL_FLAGS           : TGUID = '{4d0e73e5-80ea-4354-a9d0-1176ceb028ea}';
   {$EXTERNALSYM MF_MT_PAD_CONTROL_FLAGS}
 
 
@@ -4021,7 +4021,7 @@ const
 const
 
   // {68aca3cc-22d0-44e6-85f8-28167197fa38}     MF_MT_SOURCE_CONTENT_HINT       {UINT32 (oneof MFVideoSrcContentHintFlags)}
-  MF_MT_SOURCE_CONTENT_HINT                     : TGuid = '{68aca3cc-22d0-44e6-85f8-28167197fa38}';
+  MF_MT_SOURCE_CONTENT_HINT                     : TGUID = '{68aca3cc-22d0-44e6-85f8-28167197fa38}';
   {$EXTERNALSYM MF_MT_SOURCE_CONTENT_HINT}
 
 
@@ -4040,19 +4040,19 @@ const
 const
 
   // {65df2370-c773-4c33-aa64-843e068efb0c}     MF_MT_CHROMA_SITING             {UINT32 (anyof MFVideoChromaSubsampling)}
-  MF_MT_VIDEO_CHROMA_SITING                     : TGuid = '{65df2370-c773-4c33-aa64-843e068efb0c}';
+  MF_MT_VIDEO_CHROMA_SITING                     : TGUID = '{65df2370-c773-4c33-aa64-843e068efb0c}';
   {$EXTERNALSYM MF_MT_VIDEO_CHROMA_SITING}
 
   // {e2724bb8-e676-4806-b4b2-a8d6efb44ccd}     MF_MT_INTERLACE_MODE            {UINT32 (oneof MFVideoInterlaceMode)}
-  MF_MT_INTERLACE_MODE                          : TGuid = '{e2724bb8-e676-4806-b4b2-a8d6efb44ccd}';
+  MF_MT_INTERLACE_MODE                          : TGUID = '{e2724bb8-e676-4806-b4b2-a8d6efb44ccd}';
   {$EXTERNALSYM MF_MT_INTERLACE_MODE}
 
   // {5fb0fce9-be5c-4935-a811-ec838f8eed93}     MF_MT_TRANSFER_FUNCTION         {UINT32 (oneof MFVideoTransferFunction)}
-  MF_MT_TRANSFER_FUNCTION                       : TGuid = '{5fb0fce9-be5c-4935-a811-ec838f8eed93}';
+  MF_MT_TRANSFER_FUNCTION                       : TGUID = '{5fb0fce9-be5c-4935-a811-ec838f8eed93}';
   {$EXTERNALSYM MF_MT_TRANSFER_FUNCTION}
 
   // {dbfbe4d7-0740-4ee0-8192-850ab0e21935}     MF_MT_VIDEO_PRIMARIES           {UINT32 (oneof MFVideoPrimaries)}
-  MF_MT_VIDEO_PRIMARIES                         : TGuid = '{dbfbe4d7-0740-4ee0-8192-850ab0e21935}';
+  MF_MT_VIDEO_PRIMARIES                         : TGUID = '{dbfbe4d7-0740-4ee0-8192-850ab0e21935}';
   {$EXTERNALSYM MF_MT_VIDEO_PRIMARIES}
 
   // TODO: switch to RS define once it exists (see: 5312604)
@@ -4062,7 +4062,7 @@ const
   // Has the same semantics as MaxCLL as defined in CEA-861.3
   //
   // {50253128-C110-4de4-98AE-46A324FAE6DA}   MF_MT_MAX_LUMINANCE_LEVEL   {UINT32}
-  MF_MT_MAX_LUMINANCE_LEVEL                     : TGuid = '{50253128-C110-4de4-98AE-46A324FAE6DA}';
+  MF_MT_MAX_LUMINANCE_LEVEL                     : TGUID = '{50253128-C110-4de4-98AE-46A324FAE6DA}';
   {$EXTERNALSYM MF_MT_MAX_LUMINANCE_LEVEL}
 
   //
@@ -4071,7 +4071,7 @@ const
   // Has the same semantics as MaxFALL as defined in CEA-861.3
   //
   // {58D4BF57-6F52-4733-A195-A9E29ECF9E27}   MF_MT_MAX_FRAME_AVERAGE_LUMINANCE_LEVEL  {UINT32}
-  MF_MT_MAX_FRAME_AVERAGE_LUMINANCE_LEVEL       : TGuid = '{58D4BF57-6F52-4733-A195-A9E29ECF9E27}';
+  MF_MT_MAX_FRAME_AVERAGE_LUMINANCE_LEVEL       : TGUID = '{58D4BF57-6F52-4733-A195-A9E29ECF9E27}';
   {$EXTERNALSYM MF_MT_MAX_FRAME_AVERAGE_LUMINANCE_LEVEL}
 
   //
@@ -4080,7 +4080,7 @@ const
   // Has the same semantics as max_display_mastering_luminance as defined in ST.2086
   //
   // {D6C6B997-272F-4ca1-8D00-8042111A0FF6} MF_MT_MAX_MASTERING_LUMINANCE {UINT32}
-  MF_MT_MAX_MASTERING_LUMINANCE                 : TGuid = '{D6C6B997-272F-4ca1-8D00-8042111A0FF6}';
+  MF_MT_MAX_MASTERING_LUMINANCE                 : TGUID = '{D6C6B997-272F-4ca1-8D00-8042111A0FF6}';
   {$EXTERNALSYM MF_MT_MAX_MASTERING_LUMINANCE}
 
   //
@@ -4089,7 +4089,7 @@ const
   // Has the same semantics as min_display_mastering_luminance as defined in ST.2086
   //
   // {839A4460-4E7E-4b4f-AE79-CC08905C7B27} MF_MT_MIN_MASTERING_LUMINANCE {UINT32}
-  MF_MT_MIN_MASTERING_LUMINANCE                 : TGuid = '{839A4460-4E7E-4b4f-AE79-CC08905C7B27}';
+  MF_MT_MIN_MASTERING_LUMINANCE                 : TGUID = '{839A4460-4E7E-4b4f-AE79-CC08905C7B27}';
   {$EXTERNALSYM MF_MT_MIN_MASTERING_LUMINANCE}
 
   //
@@ -4110,7 +4110,7 @@ const
 
 
   // {47537213-8cfb-4722-aa34-fbc9e24d77b8}     MF_MT_CUSTOM_VIDEO_PRIMARIES    {BLOB (MT_CUSTOM_VIDEO_PRIMARIES)}
-  MF_MT_CUSTOM_VIDEO_PRIMARIES                  : TGuid = '{47537213-8cfb-4722-aa34-fbc9e24d77b8}';
+  MF_MT_CUSTOM_VIDEO_PRIMARIES                  : TGUID = '{47537213-8cfb-4722-aa34-fbc9e24d77b8}';
   {$EXTERNALSYM MF_MT_CUSTOM_VIDEO_PRIMARIES}
 
 
@@ -4135,53 +4135,53 @@ type
 const
 
   // {3e23d450-2c75-4d25-a00e-b91670d12327}     MF_MT_YUV_MATRIX                {UINT32 (oneof MFVideoTransferMatrix)}
-  MF_MT_YUV_MATRIX                              : TGuid = '{3e23d450-2c75-4d25-a00e-b91670d12327}';
+  MF_MT_YUV_MATRIX                              : TGUID = '{3e23d450-2c75-4d25-a00e-b91670d12327}';
   {$EXTERNALSYM MF_MT_YUV_MATRIX}
 
   // {53a0529c-890b-4216-8bf9-599367ad6d20}     MF_MT_VIDEO_LIGHTING            {UINT32 (oneof MFVideoLighting)}
-  MF_MT_VIDEO_LIGHTING                          : TGuid = '{53a0529c-890b-4216-8bf9-599367ad6d20}';
+  MF_MT_VIDEO_LIGHTING                          : TGUID = '{53a0529c-890b-4216-8bf9-599367ad6d20}';
   {$EXTERNALSYM MF_MT_VIDEO_LIGHTING}
 
   // {c21b8ee5-b956-4071-8daf-325edf5cab11}     MF_MT_VIDEO_NOMINAL_RANGE       {UINT32 (oneof MFNominalRange)}
-  MF_MT_VIDEO_NOMINAL_RANGE                     : TGuid = '{c21b8ee5-b956-4071-8daf-325edf5cab11}';
+  MF_MT_VIDEO_NOMINAL_RANGE                     : TGUID = '{c21b8ee5-b956-4071-8daf-325edf5cab11}';
   {$EXTERNALSYM MF_MT_VIDEO_NOMINAL_RANGE}
 
   // {66758743-7e5f-400d-980a-aa8596c85696}     MF_MT_GEOMETRIC_APERTURE        {BLOB (MFVideoArea)}
-  MF_MT_GEOMETRIC_APERTURE                      : TGuid = '{66758743-7e5f-400d-980a-aa8596c85696}';
+  MF_MT_GEOMETRIC_APERTURE                      : TGUID = '{66758743-7e5f-400d-980a-aa8596c85696}';
   {$EXTERNALSYM MF_MT_GEOMETRIC_APERTURE}
 
   // {d7388766-18fe-48c6-a177-ee894867c8c4}     MF_MT_MINIMUM_DISPLAY_APERTURE  {BLOB (MFVideoArea)}
-  MF_MT_MINIMUM_DISPLAY_APERTURE                : TGuid = '{d7388766-18fe-48c6-a177-ee894867c8c4}';
+  MF_MT_MINIMUM_DISPLAY_APERTURE                : TGUID = '{d7388766-18fe-48c6-a177-ee894867c8c4}';
   {$EXTERNALSYM MF_MT_MINIMUM_DISPLAY_APERTURE}
 
   // {79614dde-9187-48fb-b8c7-4d52689de649}     MF_MT_PAN_SCAN_APERTURE         {BLOB (MFVideoArea)}
-  MF_MT_PAN_SCAN_APERTURE                       : TGuid = '{79614dde-9187-48fb-b8c7-4d52689de649}';
+  MF_MT_PAN_SCAN_APERTURE                       : TGUID = '{79614dde-9187-48fb-b8c7-4d52689de649}';
   {$EXTERNALSYM MF_MT_PAN_SCAN_APERTURE}
 
   // {4b7f6bc3-8b13-40b2-a993-abf630b8204e}     MF_MT_PAN_SCAN_ENABLED          {UINT32 (BOOL)}
-  MF_MT_PAN_SCAN_ENABLED                        : TGuid = '{4b7f6bc3-8b13-40b2-a993-abf630b8204e}';
+  MF_MT_PAN_SCAN_ENABLED                        : TGUID = '{4b7f6bc3-8b13-40b2-a993-abf630b8204e}';
   {$EXTERNALSYM MF_MT_PAN_SCAN_ENABLED}
 
   // {20332624-fb0d-4d9e-bd0d-cbf6786c102e}     MF_MT_AVG_BITRATE               {UINT32}
-  MF_MT_AVG_BITRATE                             : TGuid = '{20332624-fb0d-4d9e-bd0d-cbf6786c102e}';
+  MF_MT_AVG_BITRATE                             : TGUID = '{20332624-fb0d-4d9e-bd0d-cbf6786c102e}';
   {$EXTERNALSYM MF_MT_AVG_BITRATE}
 
   // {799cabd6-3508-4db4-a3c7-569cd533deb1}     MF_MT_AVG_BIT_ERROR_RATE        {UINT32}
-  MF_MT_AVG_BIT_ERROR_RATE                      : TGuid = '{799cabd6-3508-4db4-a3c7-569cd533deb1}';
+  MF_MT_AVG_BIT_ERROR_RATE                      : TGUID = '{799cabd6-3508-4db4-a3c7-569cd533deb1}';
   {$EXTERNALSYM MF_MT_AVG_BIT_ERROR_RATE}
 
   // {c16eb52b-73a1-476f-8d62-839d6a020652}     MF_MT_MAX_KEYFRAME_SPACING      {UINT32}
-  MF_MT_MAX_KEYFRAME_SPACING                    : TGuid = '{c16eb52b-73a1-476f-8d62-839d6a020652}';
+  MF_MT_MAX_KEYFRAME_SPACING                    : TGUID = '{c16eb52b-73a1-476f-8d62-839d6a020652}';
   {$EXTERNALSYM MF_MT_MAX_KEYFRAME_SPACING}
 
   // {a505d3ac-f930-436e-8ede-93a509ce23b2}     MF_MT_OUTPUT_BUFFER_NUM         {UINT32}
-  MF_MT_OUTPUT_BUFFER_NUM                       : TGuid = '{a505d3ac-f930-436e-8ede-93a509ce23b2}';
+  MF_MT_OUTPUT_BUFFER_NUM                       : TGUID = '{a505d3ac-f930-436e-8ede-93a509ce23b2}';
   {$EXTERNALSYM MF_MT_OUTPUT_BUFFER_NUM}
 
   // TODO: Fix when GovM has the right ifdef check
 //#if (WINVER >= _WIN32_WINNT_WIN10)
   /// {0xbb12d222,0x2bdb,0x425e,0x91,0xec,0x23,0x08,0xe1,0x89,0xa5,0x8f}   MF_MT_REALTIME_CONTENT UINT32 (0 or 1)
-  MF_MT_REALTIME_CONTENT                        :	TGuid = '{bb12d222-2bdb-425e-91ec-2308e189a58f}';
+  MF_MT_REALTIME_CONTENT                        :	TGUID = '{bb12d222-2bdb-425e-91ec-2308e189a58f}';
   {$EXTERNALSYM MF_MT_REALTIME_CONTENT}
 
 //#endif // (WINVER >= _WIN32_WINNT_WIN10
@@ -4190,11 +4190,11 @@ const
   //=================================
 
   // {644b4e48-1e02-4516-b0eb-c01ca9d49ac6}     MF_MT_DEFAULT_STRIDE            {UINT32 (INT32)} // in bytes
-  MF_MT_DEFAULT_STRIDE                          : TGuid = '{644b4e48-1e02-4516-b0eb-c01ca9d49ac6}';
+  MF_MT_DEFAULT_STRIDE                          : TGUID = '{644b4e48-1e02-4516-b0eb-c01ca9d49ac6}';
   {$EXTERNALSYM MF_MT_DEFAULT_STRIDE}
 
   // {6d283f42-9846-4410-afd9-654d503b1a54}     MF_MT_PALETTE                   {BLOB (array of MFPaletteEntry - usually 256)}
-  MF_MT_PALETTE                                 : TGuid = '{6d283f42-9846-4410-afd9-654d503b1a54}';
+  MF_MT_PALETTE                                 : TGUID = '{6d283f42-9846-4410-afd9-654d503b1a54}';
   {$EXTERNALSYM MF_MT_PALETTE}
 
 
@@ -4202,11 +4202,11 @@ const
   // the type was converted from a VIDEOINFOHEADER or VIDEOINFOHEADER2 block in an AM_MEDIA_TYPE.
 
   // {b6bc765f-4c3b-40a4-bd51-2535b66fe09d}     MF_MT_USER_DATA                 {BLOB}
-  MF_MT_USER_DATA                               : TGuid = '{b6bc765f-4c3b-40a4-bd51-2535b66fe09d}';
+  MF_MT_USER_DATA                               : TGUID = '{b6bc765f-4c3b-40a4-bd51-2535b66fe09d}';
   {$EXTERNALSYM MF_MT_USER_DATA}
 
   // {73d1072d-1870-4174-a063-29ff4ff6c11e}     MF_MT_AM_FORMAT_TYPE
-  MF_MT_AM_FORMAT_TYPE                          : TGuid = '{73d1072d-1870-4174-a063-29ff4ff6c11e}';
+  MF_MT_AM_FORMAT_TYPE                          : TGUID = '{73d1072d-1870-4174-a063-29ff4ff6c11e}';
   {$EXTERNALSYM MF_MT_AM_FORMAT_TYPE}
 
 
@@ -4229,23 +4229,23 @@ const
   //===========================
 
   // {91f67885-4333-4280-97cd-bd5a6c03a06e}     MF_MT_MPEG_START_TIME_CODE      {UINT32}
-  MF_MT_MPEG_START_TIME_CODE                    : TGuid = '{91f67885-4333-4280-97cd-bd5a6c03a06e}';
+  MF_MT_MPEG_START_TIME_CODE                    : TGUID = '{91f67885-4333-4280-97cd-bd5a6c03a06e}';
   {$EXTERNALSYM MF_MT_MPEG_START_TIME_CODE}
 
   // {ad76a80b-2d5c-4e0b-b375-64e520137036}     MF_MT_MPEG2_PROFILE             {UINT32 (oneof AM_MPEG2Profile)}
-  MF_MT_MPEG2_PROFILE                           : TGuid = '{ad76a80b-2d5c-4e0b-b375-64e520137036}';
+  MF_MT_MPEG2_PROFILE                           : TGUID = '{ad76a80b-2d5c-4e0b-b375-64e520137036}';
   {$EXTERNALSYM MF_MT_MPEG2_PROFILE}
 
   // {96f66574-11c5-4015-8666-bff516436da7}     MF_MT_MPEG2_LEVEL               {UINT32 (oneof AM_MPEG2Level)}
-  MF_MT_MPEG2_LEVEL                             : TGuid = '{96f66574-11c5-4015-8666-bff516436da7}';
+  MF_MT_MPEG2_LEVEL                             : TGUID = '{96f66574-11c5-4015-8666-bff516436da7}';
   {$EXTERNALSYM MF_MT_MPEG2_LEVEL}
 
   // {31e3991d-f701-4b2f-b426-8ae3bda9e04b}     MF_MT_MPEG2_FLAGS               {UINT32 (anyof AMMPEG2_xxx flags)}
-  MF_MT_MPEG2_FLAGS                             : TGuid = '{31e3991d-f701-4b2f-b426-8ae3bda9e04b}';
+  MF_MT_MPEG2_FLAGS                             : TGUID = '{31e3991d-f701-4b2f-b426-8ae3bda9e04b}';
   {$EXTERNALSYM MF_MT_MPEG2_FLAGS}
 
   // {3c036de7-3ad0-4c9e-9216-ee6d6ac21cb3}     MF_MT_MPEG_SEQUENCE_HEADER      {BLOB}
-  MF_MT_MPEG_SEQUENCE_HEADER                    : TGuid = '{3c036de7-3ad0-4c9e-9216-ee6d6ac21cb3}';
+  MF_MT_MPEG_SEQUENCE_HEADER                    : TGUID = '{3c036de7-3ad0-4c9e-9216-ee6d6ac21cb3}';
   {$EXTERNALSYM MF_MT_MPEG_SEQUENCE_HEADER}
 
   // {A20AF9E8-928A-4B26-AAA9-F05C74CAC47C}   MF_MT_MPEG2_STANDARD            {UINT32 (0 for default MPEG2, 1  to use ATSC standard, 2 to use DVB standard, 3 to use ARIB standard)}
@@ -4351,27 +4351,27 @@ const
   //============================
 
   // {84bd5d88-0fb8-4ac8-be4b-a8848bef98f3}     MF_MT_DV_AAUX_SRC_PACK_0        {UINT32}
-  MF_MT_DV_AAUX_SRC_PACK_0                      : TGuid = '{84bd5d88-0fb8-4ac8-be4b-a8848bef98f3}';
+  MF_MT_DV_AAUX_SRC_PACK_0                      : TGUID = '{84bd5d88-0fb8-4ac8-be4b-a8848bef98f3}';
   {$EXTERNALSYM MF_MT_DV_AAUX_SRC_PACK_0}
 
   // {f731004e-1dd1-4515-aabe-f0c06aa536ac}     MF_MT_DV_AAUX_CTRL_PACK_0       {UINT32}
-  MF_MT_DV_AAUX_CTRL_PACK_0                     : TGuid = '{f731004e-1dd1-4515-aabe-f0c06aa536ac}';
+  MF_MT_DV_AAUX_CTRL_PACK_0                     : TGUID = '{f731004e-1dd1-4515-aabe-f0c06aa536ac}';
   {$EXTERNALSYM MF_MT_DV_AAUX_CTRL_PACK_0}
 
   // {720e6544-0225-4003-a651-0196563a958e}     MF_MT_DV_AAUX_SRC_PACK_1        {UINT32}
-  MF_MT_DV_AAUX_SRC_PACK_1                      : TGuid = '{720e6544-0225-4003-a651-0196563a958e}';
+  MF_MT_DV_AAUX_SRC_PACK_1                      : TGUID = '{720e6544-0225-4003-a651-0196563a958e}';
   {$EXTERNALSYM MF_MT_DV_AAUX_SRC_PACK_1}
 
   // {cd1f470d-1f04-4fe0-bfb9-d07ae0386ad8}     MF_MT_DV_AAUX_CTRL_PACK_1       {UINT32}
-  MF_MT_DV_AAUX_CTRL_PACK_1                     : TGuid = '{cd1f470d-1f04-4fe0-bfb9-d07ae0386ad8}';
+  MF_MT_DV_AAUX_CTRL_PACK_1                     : TGUID = '{cd1f470d-1f04-4fe0-bfb9-d07ae0386ad8}';
   {$EXTERNALSYM MF_MT_DV_AAUX_CTRL_PACK_1}
 
   // {41402d9d-7b57-43c6-b129-2cb997f15009}     MF_MT_DV_VAUX_SRC_PACK          {UINT32}
-  MF_MT_DV_VAUX_SRC_PACK                        : TGuid = '{41402d9d-7b57-43c6-b129-2cb997f15009}';
+  MF_MT_DV_VAUX_SRC_PACK                        : TGUID = '{41402d9d-7b57-43c6-b129-2cb997f15009}';
   {$EXTERNALSYM MF_MT_DV_VAUX_SRC_PACK}
 
   // {2f84e1c4-0da1-4788-938e-0dfbfbb34b48}     MF_MT_DV_VAUX_CTRL_PACK         {UINT32}
-  MF_MT_DV_VAUX_CTRL_PACK                       : TGuid = '{2f84e1c4-0da1-4788-938e-0dfbfbb34b48}';
+  MF_MT_DV_VAUX_CTRL_PACK                       : TGUID = '{2f84e1c4-0da1-4788-938e-0dfbfbb34b48}';
   {$EXTERNALSYM MF_MT_DV_VAUX_CTRL_PACK}
 
   // {9E6BD6F5-0109-4f95-84AC-9309153A19FC}   MF_MT_ARBITRARY_HEADER          {MT_ARBITRARY_HEADER}
@@ -5551,7 +5551,7 @@ const
   // NOTE: This helper function queries the attribute store for the UINT32 value specified by guidKey.
   //       If the value is not present or does not have type UINT32, the function returns unDefault.
   function MFGetAttributeUINT32(pAttributes: IMFAttributes;
-                                guidKey: TGUID;
+                                const guidKey: TGUID;
                                 unDefault: UINT32): UINT32; inline;
   {$EXTERNALSYM MFGetAttributeUINT32}
   // Parameters
@@ -5568,7 +5568,7 @@ const
   // NOTE: This helper function queries the attribute store for the UINT64 value specified by guidKey.
   //       If the value is not present, the function returns unDefault.
   function MFGetAttributeUINT64(pAttributes: IMFAttributes;
-                                guidKey: TGUID;
+                                const guidKey: TGUID;
                                 unDefault: UINT64): UINT64; inline;
   {$EXTERNALSYM MFGetAttributeUINT64}
   // Parameters
@@ -5588,7 +5588,7 @@ const
   //       However, if the attribute in question does not have a meaningful default value,
   //       you should call IMFAttributes.GetDouble and check for MF_E_ATTRIBUTENOTFOUND.
   function MFGetAttributeDouble(pAttributes: IMFAttributes;
-                                guidKey: TGUID;
+                                const guidKey: TGUID;
                                 fDefault: Double ): Double; inline;
   {$EXTERNALSYM MFGetAttributeDouble}
   // Parameters
@@ -5610,7 +5610,7 @@ const
   // NOTE: Internally, this function calls IMFAttributes.GetUINT64 to get the UINT64 value,
   //       and Unpack2UINT32AsUINT64 to unpack the two 32-bit values.
   function MFGetAttribute2UINT32asUINT64(pAttributes: IMFAttributes;
-                                         guidKey: TGUID;
+                                         const guidKey: TGUID;
                                          out punHigh32: UINT32;
                                          out punLow32: UINT32): HResult; inline;
   {$EXTERNALSYM MFGetAttribute2UINT32asUINT64}
@@ -5635,7 +5635,7 @@ const
   // NOTE: Internally, this functions calls Pack2UINT32AsUINT64 to create the 64-bit value,
   //       and IMFAttributes.SetUINT64 to set the attribute.
   function MFSetAttribute2UINT32asUINT64(pAttributes: IMFAttributes;
-                                         guidKey: TGUID;
+                                         const guidKey: TGUID;
                                          unHigh32: UINT32;
                                          unLow32: UINT32): HResult; inline;
   {$EXTERNALSYM MFSetAttribute2UINT32asUINT64}
@@ -5655,7 +5655,7 @@ const
   // NOTE: Some attributes specify a ratio as a packed UINT64 value.
   //       Use this function to get the numerator and denominator as separate 32-bit values.
   function MFGetAttributeRatio(pAttributes: IMFAttributes;
-                               guidKey: TGUID;
+                               const guidKey: TGUID;
                                out punNumerator: UINT32;
                                out punDenominator: UINT32): HResult; inline;
   {$EXTERNALSYM MFGetAttributeRatio}
@@ -5675,7 +5675,7 @@ const
   // NOTE: Some attributes specify a size as a packed UINT64 value.
   //       Use this function to get the numerator and denominator as separate 32-bit values.
   function MFGetAttributeSize(pAttributes: IMFAttributes;
-                              guidKey: TGUID;
+                              const guidKey: TGUID;
                               out punWidth: UINT32;
                               out punHeight: UINT32): HResult; inline;
   {$EXTERNALSYM MFGetAttributeSize}
@@ -5695,7 +5695,7 @@ const
   // NOTE: Some attributes specify a ratio as a packed UINT64 value.
   //       This function packs the numerator and denominator into a single UINT64 value.
   function MFSetAttributeRatio(pAttributes: IMFAttributes;
-                               guidKey: TGUID;
+                               const guidKey: TGUID;
                                unNumerator: UINT32;
                                unDenominator: UINT32): HResult; inline;
   {$EXTERNALSYM MFSetAttributeRatio}
@@ -5713,7 +5713,7 @@ const
 
   // Sets width and height as a single 64-bit attribute value.
   function MFSetAttributeSize(pAttributes: IMFAttributes;
-                              guidKey: TGUID;
+                              const guidKey: TGUID;
                               unWidth: UINT32;
                               unHeight: UINT32): HResult; inline;
   {$EXTERNALSYM MFSetAttributeSize}
@@ -5730,7 +5730,7 @@ const
 
 
   function MFGetAttributeString(pAttributes: IMFAttributes;
-                                guidKey: TGUID;
+                                const guidKey: TGUID;
                                 out ppsz: LPWSTR): HResult; inline;
   {$EXTERNALSYM MFGetAttributeString}
   // Parameters
@@ -5832,7 +5832,7 @@ type
 ////////////////////////////////////////////////////////////////////////////////
 
 const
-  CLSID_MFSourceResolver  : TGuid = '{90eab60f-e43a-4188-bcc4-e47fdf04868c}';
+  CLSID_MFSourceResolver  : TGUID = '{90eab60f-e43a-4188-bcc4-e47fdf04868c}';
   {$EXTERNALSYM CLSID_MFSourceResolver}
 
 //#if (WINVER >= _WIN32_WINNT_WIN7)
@@ -5982,10 +5982,10 @@ const
   //// Delphi Helpers  /////////////////////////////////////////////////////////
 
   //See for usage:  function FCC(ch4: TCh4) and function DEFINE_MEDIATYPE_GUID(format: DWord)
-  function DefineMediaTypeGuidByFourCC(sFcc: TCh4): TGuid; inline;
+  function DefineMediaTypeGuidByFourCC(sFcc: TCh4): TGUID; inline;
 
   //See for usage:  function FCC(ch4: TCh4) and function DEFINE_MEDIATYPE_GUID(format: DWord)
-  function DefineMediaTypeGuidByDWord(dwConst: DWord = 0): TGuid; inline;
+  function DefineMediaTypeGuidByDWord(dwConst: DWord = 0): TGUID; inline;
 
   // MOVE_RECT helper
   function MoveRect(const mR: MOVE_RECT): MFVideoNormalizedRect; inline;
@@ -6066,14 +6066,14 @@ end; // SizeTMult
 
 
 // Helper function to access the macro translations, mentioned under REMARK#1
-function DefineMediaTypeGuidByFourCC(sFcc: TCh4): TGuid;
+function DefineMediaTypeGuidByFourCC(sFcc: TCh4): TGUID;
 begin
   Result := DEFINE_MEDIATYPE_GUID(FCC(sFcc));
 end;
 
 
 // Helper function to access the macro translations, mentioned under REMARK#1
-function DefineMediaTypeGuidByDWord(dwConst: DWord): TGuid;
+function DefineMediaTypeGuidByDWord(dwConst: DWord): TGUID;
 begin
   Result := DEFINE_MEDIATYPE_GUID(dwConst);
 end;
@@ -6107,7 +6107,7 @@ end;
 
 
 //
-function DEFINE_MEDIATYPE_GUID(const format: DWord): TGuid;
+function DEFINE_MEDIATYPE_GUID(const format: DWord): TGUID;
 begin
   Result.D1 := format;
   Result.D2 := $0000;
@@ -6309,7 +6309,7 @@ end;
 
 //
 function MFGetAttributeUINT32(pAttributes: IMFAttributes;
-                              guidKey: TGUID;
+                              const guidKey: TGUID;
                               unDefault: UINT32): UINT32;
 var
   unRet : UINT32;
@@ -6327,7 +6327,7 @@ end;
 
 //
 function MFGetAttributeUINT64(pAttributes: IMFAttributes;
-                              guidKey: TGUID;
+                              const guidKey: TGUID;
                               unDefault: UINT64): UINT64;
 var
   unRet: UINT64;
@@ -6343,7 +6343,7 @@ end;
 
 //
 function MFGetAttributeDouble(pAttributes: IMFAttributes;
-                              guidKey: TGUID;
+                              const guidKey: TGUID;
                               fDefault: Double ): Double;
 var
   fRet: Double;
@@ -6358,7 +6358,7 @@ end;
 
 //
 function MFGetAttribute2UINT32asUINT64(pAttributes: IMFAttributes;
-                                       guidKey: TGUID;
+                                       const guidKey: TGUID;
                                        out punHigh32: UINT32;
                                        out punLow32: UINT32): HResult;
 var
@@ -6382,7 +6382,7 @@ end;
 
 //
 function MFSetAttribute2UINT32asUINT64(pAttributes: IMFAttributes;
-                                       guidKey: TGUID;
+                                       const guidKey: TGUID;
                                        unHigh32: UINT32;
                                        unLow32: UINT32): HResult;
 begin
@@ -6394,7 +6394,7 @@ end;
 
 //
 function MFGetAttributeRatio(pAttributes: IMFAttributes;
-                             guidKey: TGUID;
+                             const guidKey: TGUID;
                              out punNumerator: UINT32;
                              out punDenominator: UINT32): HResult;
 begin
@@ -6407,7 +6407,7 @@ end;
 
 //
 function MFGetAttributeSize(pAttributes: IMFAttributes;
-                            guidKey: TGUID;
+                            const guidKey: TGUID;
                             out punWidth: UINT32;
                             out punHeight: UINT32): HResult;
 begin
@@ -6420,7 +6420,7 @@ end;
 
 //
 function MFSetAttributeRatio(pAttributes: IMFAttributes;
-                             guidKey: TGUID;
+                             const guidKey: TGUID;
                              unNumerator: UINT32;
                              unDenominator: UINT32): HResult;
 begin
@@ -6433,7 +6433,7 @@ end;
 
 //
 function MFSetAttributeSize(pAttributes: IMFAttributes;
-                            guidKey: TGUID;
+                            const guidKey: TGUID;
                             unWidth: UINT32;
                             unHeight: UINT32): HResult;
 begin
@@ -6446,7 +6446,7 @@ end;
 
 //
 function MFGetAttributeString(pAttributes: IMFAttributes;
-                              guidKey: TGUID;
+                              const guidKey: TGUID;
                               out ppsz: LPWSTR): HResult;
 var
   uiLength: UINT32;
@@ -6456,7 +6456,7 @@ var
   pcb: PSIZE_T;
 
 begin
-  psz:= Nil;
+  psz:= nil;
   hr:= NOERROR;  //init
 
 try
