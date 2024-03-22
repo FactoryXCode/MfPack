@@ -164,6 +164,10 @@ SDK version: 10.0.22621.0 (Windows 11)
   
  ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/SinkWriterSample.png)
 
+*Example 3 demonstrates how to use the SinkWriter to create a video from one or more image files including audio.*
+ ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ImageToVideo_3.jpg)
+
+
 **LoopBackCapture Sample 1**
 
 *This sample shows, how to capture sound from your soundcard using WASAPI and save this capture*
