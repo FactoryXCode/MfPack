@@ -106,6 +106,7 @@ uses
   {Parallel bitmap resampler}
   Common,
   Scale,
+  Tools,
   {Transforms video-samples to the input-format of the sinkwriter}
   Transformer;
 
@@ -432,7 +433,7 @@ end;
 
 function TImageRenderer.GetAudioDuration(PCMSamples: DWord): Int64;
 begin
-  result := Round(PCMSamples / fDestAudioFormat.unSamplesPerSec * 1000 * 10000);
+  Result := Round(PCMSamples / fDestAudioFormat.unSamplesPerSec * 1000 * 10000);
 end;
 
 
@@ -825,7 +826,7 @@ begin
 
 
   hr := pAudioTypeOut.SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
-                                Round(fVideoFrameRate * fDestAudioFormat.unAvgBytesPerSec));
+                                fDestAudioFormat.unAvgBytesPerSec);
 
   if FAILED(hr) then
     goto done;
@@ -1480,7 +1481,6 @@ begin
 
          // New end of sample time.
          fAudioTime := AudioTimestamp + AudioSampleDuration;
-         Sleep(0);
        end;
 
     if fAudioDone then
@@ -1600,8 +1600,9 @@ begin
   fWriteStart := TimeStamp + Duration;
   fVideoTime := fWriteStart div 10000;
 
-  // give the encoder-threads a chance to do their work
-  Sleep(0);
+  // Give the encoder-threads a chance to do their work.
+  HandleThreadMessages(GetCurrentThread());
+
   if Assigned(fOnProgress) then
     if (fFrameCount mod 30 = 1) then
       begin
@@ -1764,7 +1765,7 @@ begin
       WriteOneFrame(fWriteStart,
                     fSampleDuration);
       if (fFrameCount mod fBrake) = (fBrake - 1) then
-        Sleep(1);
+        HandleThreadMessages(GetCurrentThread(), 1);
   end;
 end;
 

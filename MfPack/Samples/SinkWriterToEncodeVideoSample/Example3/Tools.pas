@@ -74,6 +74,7 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.Wincodec,
+  WinApi.Messages,
   {$IF COMPILERVERSION >= 29.0}
   Winapi.ShLwApi,
   {$ENDIF}
@@ -84,15 +85,17 @@ uses
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfUtils;
 
-/// <summary> Assigns a TWICImage to a TBitmap without setting its alphaformat to afDefined.
-/// A TWICImage can be used for fast decoding of image formats .jpg, .bmp, .png, .ico, .tif. </summary>
-procedure WICToBmp(const aWic: TWICImage;
-                   const bmp: TBitmap);
+  /// <summary> Assigns a TWICImage to a TBitmap without setting its alphaformat to afDefined.
+  /// A TWICImage can be used for fast decoding of image formats .jpg, .bmp, .png, .ico, .tif. </summary>
+  procedure WICToBmp(const aWic: TWICImage;
+                     const bmp: TBitmap);
 
-function LogicalCompare(List: TStringlist;
-                        Index1: Integer;
-                        Index2: Integer): Integer;
-
+  function LogicalCompare(List: TStringlist;
+                          Index1: Integer;
+                          Index2: Integer): Integer;
+  /// <summary> Usage: HandleThreadMessages(GetCurrentThread()).</summary>
+  procedure HandleThreadMessages(AThread: THandle;
+                                 AWait: Cardinal = INFINITE);
 
 implementation
 
@@ -160,6 +163,34 @@ function LogicalCompare(List: TStringlist;
 begin
   Result := StrCmpLogicalW(PWideChar(List[Index1]),
                            PWideChar(List[Index2]));
+end;
+
+
+procedure HandleThreadMessages(AThread: THandle;
+                               AWait: Cardinal = INFINITE);
+var
+  mMsg: TMsg;
+
+begin
+
+  while (MsgWaitForMultipleObjects(1,
+                                   AThread,
+                                   False,
+                                   AWait,
+                                   QS_ALLINPUT) = WAIT_OBJECT_0 + 1) do
+    begin
+      PeekMessage(mMsg,
+                  0,
+                  0,
+                  0,
+                  PM_REMOVE);
+
+      if (mMsg.Message = WM_QUIT) then
+        Exit;
+
+      TranslateMessage(mMsg);
+      DispatchMessage(mMsg);
+    end;
 end;
 
 end.

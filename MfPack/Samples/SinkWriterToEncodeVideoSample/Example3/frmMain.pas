@@ -611,8 +611,7 @@ begin
                               end);
           while not Done do
             begin
-              Application.ProcessMessages;
-              sleep(100);
+              HandleThreadMessages(GetCurrentThread());
             end;
 
           Task.Wait();
@@ -737,11 +736,13 @@ begin
                       fFileList.Strings[j]) then
             begin
               imgPreview.Picture.LoadFromFile(fFileList.Strings[j]);
-              Application.ProcessMessages;
-              pbPreview.Position := i +1;
-              Application.ProcessMessages;
-              Sleep(spedImageDuration.Value);
-              //Break;
+              //Application.ProcessMessages;
+              pbPreview.Position := i + 1;
+              //Application.ProcessMessages;
+              //Sleep(spedImageDuration.Value);
+              HandleThreadMessages(GetCurrentThread(),
+                                   spedImageDuration.Value);
+              Break;
             end;
         end;
 
