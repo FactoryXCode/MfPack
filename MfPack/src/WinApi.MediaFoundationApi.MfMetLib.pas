@@ -785,6 +785,19 @@ type
   function EnumerateCaptureFormats(pSource: IMFMediaSource;
                                    out ppMediaType: PIMFMediaType): HResult;
 
+  // Enumerates the media types for every stream from a device or mediafile.
+  // The function examines the mediatype format of the data internally for validation.
+  // If the source represents a media file, there is typically only one type per stream.
+  // A webcam might be able to stream video in several different formats.
+  // In that case, an application can select which format to use from the list of media types.
+  function EnumerateMediaTypes(pReader: IMFSourceReader;
+                               pStreamIndex: DWord;
+                               var ppMediaTypes: TArray<IMFMediaType>;
+                               out pCount: DWord): HResult;
+
+  // Returns the number of streams from a IMFSourceReader.
+  function CountSourceReaderStreams(pReader: IMFSourceReader): DWord;
+
   // Counts mediatypes from a device
   // When the list index goes out of bounds, GetNativeMediaType returns MF_E_NO_MORE_TYPES.
   // This is not an error, but indicates the end of the list.
@@ -3671,6 +3684,150 @@ done:
   Result := hr;
 end;
 
+// Helper for EnumerateMediaTypes.
+function EnumerateTypesForStream(pReader: IMFSourceReader;
+                                 const pStreamIndex: DWORD;
+                                 var ppMediaTypes: TArray<IMFMediaType>;
+                                 out pCount: DWord): HResult;
+var
+  hr: HResult;
+  dwMediaTypeIndex: DWORD;
+  pMediaType: IMFMediaType;
+  gSubFormat: TGUID;
+
+begin
+  dwMediaTypeIndex := 0;
+
+  hr := MFCreateMediaType(pMediaType);
+
+  if FAILED(hr) then
+    begin
+      Result := hr;
+      Exit;
+    end;
+
+  while SUCCEEDED(hr) do
+    begin
+      hr := pReader.GetNativeMediaType(pStreamIndex,
+                                       dwMediaTypeIndex,
+                                       pMediaType);
+      if (hr = MF_E_NO_MORE_TYPES) or (hr = MF_E_INVALIDSTREAMNUMBER) then
+        begin
+            hr := S_OK;
+            break;
+        end
+      else if SUCCEEDED(hr) then
+        begin
+          // Examine the media type.
+          // Get the subtype.
+          hr := pMediaType.GetGUID(MF_MT_SUBTYPE,
+                                   gSubFormat);
+            if SUCCEEDED(hr) then
+              begin
+                // Check if format is supported.
+                if IsMftSupportedInputFormat(gSubFormat) then
+                  begin
+
+                    ppMediaTypes[dwMediaTypeIndex] := pMediaType;
+
+                    Inc(pCount);
+                    Break;
+                  end;
+              end;
+          SafeRelease(pMediaType);
+        end;
+      Inc(dwMediaTypeIndex);
+    end;
+
+  Result := hr;
+end;
+
+
+function EnumerateMediaTypes(pReader: IMFSourceReader;
+                             pStreamIndex: DWord;
+                             var ppMediaTypes: TArray<IMFMediaType>;
+                             out pCount: DWord): HResult;
+var
+  hr: HResult;
+  pMediaType: IMFMediaType;
+  gSubFormat: TGUID;
+  dwStreamCount: DWORD;
+  dwMediaTypeIndex: DWORD;
+  i: Integer;
+
+begin
+  dwMediaTypeIndex := 0;
+  dwStreamCount := CountSourceReaderStreams(pReader);
+  SetLength(ppMediaTypes,
+            dwStreamCount);
+
+  hr := MFCreateMediaType(pMediaType);
+
+  for i := 0 to dwStreamCount - 1 do
+    begin
+      //hr := EnumerateTypesForStream(pReader,
+      //                              i,
+      //                              ppMediaTypes,
+      //                              pCount);
+      //Inc(pStreamIndex);
+
+      while SUCCEEDED(hr) do
+        begin
+          hr := pReader.GetNativeMediaType(pStreamIndex,
+                                           dwMediaTypeIndex,
+                                           pMediaType);
+          if (hr = MF_E_NO_MORE_TYPES) or (hr = MF_E_INVALIDSTREAMNUMBER) then
+            begin
+               hr := S_OK;
+               Break;
+           end
+      else if SUCCEEDED(hr) then
+        begin
+          // Examine the media type.
+          // Get the subtype.
+          hr := pMediaType.GetGUID(MF_MT_SUBTYPE,
+                                   gSubFormat);
+            if SUCCEEDED(hr) then
+              begin
+                // Check if format is supported.
+                if IsMftSupportedInputFormat(gSubFormat) then
+                  begin
+                    ppMediaTypes[dwMediaTypeIndex] := pMediaType;
+                    Inc(pCount);
+                    Break;
+                  end;
+              end;
+          SafeRelease(pMediaType);
+        end;
+      Inc(dwMediaTypeIndex);
+    end;
+    end;
+  Result := hr;
+end;
+
+
+function CountSourceReaderStreams(pReader: IMFSourceReader): DWord;
+var
+  hr: HResult;
+  dwStreamCount: DWORD;
+  bSelected: Boolean;
+
+begin
+  hr := S_OK;
+  dwStreamCount := 0;
+  while (SUCCEEDED(hr)) do
+    begin
+      hr := pReader.GetStreamSelection(dwStreamCount,
+                                       bSelected);
+      if (hr = MF_E_INVALIDSTREAMNUMBER) then
+        Break;
+
+      Inc(dwStreamCount);
+    end;
+ Result := dwStreamCount
+end;
+
+
 //
 function CountTypesFromDevice(pReader: IMFSourceReader;
                               const pStreamIndex: DWord;
@@ -3706,8 +3863,8 @@ begin
         begin
           hr := S_OK;
           // We did set both +1. But since we have a hit, decrease by one because we stop processing.
-          dec(dwMfSupportedCount);
-          dec(dwNativeCount);
+          Dec(dwMfSupportedCount);
+          Dec(dwNativeCount);
           Break;
         end;
 
@@ -3722,16 +3879,16 @@ begin
         begin
           if IsMftSupportedInputFormat(fSubType) then
             begin
-              inc(dwMfSupportedCount);
-              inc(dwNativeCount);
+              Inc(dwMfSupportedCount);
+              Inc(dwNativeCount);
             end
           else
-            inc(dwNativeCount);
+            Inc(dwNativeCount);
         end
       else  // Get all native types from the capturedevice.
-        inc(dwNativeCount);
+        Inc(dwNativeCount);
 
-      inc(dwIndex);
+      Inc(dwIndex);
     end;
   until (hr = MF_E_NO_MORE_TYPES);
 
@@ -4969,7 +5126,7 @@ end;
 function IsMftSupportedInputFormat(const pSubType: TGuid): Boolean; inline;
 var
   bRes: Boolean;
-  arSubTypes: array [0..19] of TGuid;
+  arSubTypes: array [0..38] of TGuid;
   i: Integer;
 
 label
@@ -4978,8 +5135,13 @@ label
 begin
   bRes := False;
 
-  // Supported subtype formats for input.
-  // See: https://learn.microsoft.com/en-us/windows/win32/medfound/video-processor-mft#input-formats
+  // Supported video subtype formats for input.
+  // See also: https://learn.microsoft.com/en-us/windows/win32/medfound/video-processor-mft#input-formats
+  // Note:
+  //   Not every combination of input and output formats is supported.
+  //   To test whether a conversion is supported,
+  //   set the input type and then call IMFTransform.GetOutputAvailableType.
+
   arSubTypes[0]  := MFVideoFormat_ARGB32;
   arSubTypes[1]  := MFVideoFormat_RGB24;
   arSubTypes[2]  := MFVideoFormat_RGB32;
@@ -5000,6 +5162,27 @@ begin
   arSubTypes[17] := MFVideoFormat_YUY2;
   arSubTypes[18] := MFVideoFormat_YV12;
   arSubTypes[19] := MFVideoFormat_YVYU;
+  arSubTypes[20] := MFVideoFormat_WMV1;
+  arSubTypes[21] := MFVideoFormat_WMV2;
+  arSubTypes[22] := MFVideoFormat_WMV3;
+  arSubTypes[23] := MFVideoFormat_H263;
+  arSubTypes[24] := MFVideoFormat_H264;
+  arSubTypes[25] := MFVideoFormat_H265;
+  arSubTypes[26] := MFVideoFormat_HEVC;
+  arSubTypes[27] := MFVideoFormat_HEVC_ES;
+
+  // Supported audio subtype codecs for input.
+  arSubTypes[28] := MFAudioFormat_AAC;
+  arSubTypes[29] := MFAudioFormat_MP3;
+  arSubTypes[30] := MFAudioFormat_FLAC;
+  arSubTypes[31] := MFAudioFormat_PCM;
+  arSubTypes[32] := MFAudioFormat_WMAudioV8;
+  arSubTypes[33] := MFAudioFormat_WMAudioV9;
+  arSubTypes[34] := MFAudioFormat_MPEG;
+  arSubTypes[35] := MFAudioFormat_Opus;
+  arSubTypes[36] := MFAudioFormat_Dolby_AC4;
+  arSubTypes[37] := MFAudioFormat_Dolby_AC3;
+  arSubTypes[38] := MFAudioFormat_Vorbis;
 
   for i := 0 to Length(arSubTypes) -1 do
     begin
@@ -5024,6 +5207,10 @@ begin
             13);
   // Supported subtype formats for output.
   // See: https://learn.microsoft.com/en-us/windows/win32/medfound/video-processor-mft#output-formats
+  // Note:
+  //   Not every combination of input and output formats is supported.
+  //   To test whether a conversion is supported,
+  //   set the input type and then call IMFTransform.GetOutputAvailableType.
   Result[0]  := MFVideoFormat_ARGB32;
   Result[1]  := MFVideoFormat_AYUV;
   Result[2]  := MFVideoFormat_I420;

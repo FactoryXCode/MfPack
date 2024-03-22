@@ -131,13 +131,13 @@ const
 
   MF_SOURCE_READER_INVALID_STREAM_INDEX  = MAXDW; // $ffffffff;
   {$EXTERNALSYM MF_SOURCE_READER_INVALID_STREAM_INDEX}
-  MF_SOURCE_READER_ALL_STREAMS           = $fffffffe;
+  MF_SOURCE_READER_ALL_STREAMS           = DWORD($fffffffe);
   {$EXTERNALSYM MF_SOURCE_READER_ALL_STREAMS}
-  MF_SOURCE_READER_ANY_STREAM            = $fffffffe;
+  MF_SOURCE_READER_ANY_STREAM            = DWORD($fffffffe);
   {$EXTERNALSYM MF_SOURCE_READER_ANY_STREAM}
-  MF_SOURCE_READER_FIRST_AUDIO_STREAM    = $fffffffd;
+  MF_SOURCE_READER_FIRST_AUDIO_STREAM    = DWORD($fffffffd);
   {$EXTERNALSYM MF_SOURCE_READER_FIRST_AUDIO_STREAM}
-  MF_SOURCE_READER_FIRST_VIDEO_STREAM    = $fffffffc;
+  MF_SOURCE_READER_FIRST_VIDEO_STREAM    = DWORD($fffffffc);
   {$EXTERNALSYM MF_SOURCE_READER_FIRST_VIDEO_STREAM}
   MF_SOURCE_READER_MEDIASOURCE           = MAXDW; // $ffffffff;
   {$EXTERNALSYM MF_SOURCE_READER_MEDIASOURCE}
@@ -342,19 +342,20 @@ type
   IMFSourceReader = interface(IUnknown)
   ['{70ae66f2-c809-4e4f-8915-bdcb406b7993}']
 
-    function GetStreamSelection(dwStreamIndex: DWORD;
+    function GetStreamSelection(const dwStreamIndex: DWORD;
                                 out pfSelected: Boolean): HResult; stdcall;
 
-    function SetStreamSelection(dwStreamIndex: DWORD;
+    function SetStreamSelection(const dwStreamIndex: DWORD;
                                 const fSelected: Boolean): HResult; stdcall;
 
     // Gets a format that is supported natively by the media source.
-    // Note: To check if a format is supported by Media Foundation see: https://docs.microsoft.com/en-us/windows/win32/medfound/supported-media-formats-in-media-foundation
-    function GetNativeMediaType(dwStreamIndex: DWORD;
+    // Note: To check if a format is supported by Media Foundation see:
+    // https://docs.microsoft.com/en-us/windows/win32/medfound/supported-media-formats-in-media-foundation
+    function GetNativeMediaType(const dwStreamIndex: DWORD;
                                 dwMediaTypeIndex: DWORD;
                                 out ppMediaType: IMFMediaType): HResult; stdcall;
 
-    function GetCurrentMediaType(dwStreamIndex: DWORD;
+    function GetCurrentMediaType(const dwStreamIndex: DWORD;
                                  out ppMediaType: IMFMediaType): HResult; stdcall;
 
     function SetCurrentMediaType(dwStreamIndex: DWORD;
@@ -364,7 +365,7 @@ type
     function SetCurrentPosition(const guidTimeFormat: TGUID;
                                 const varPosition: PROPVARIANT): HResult; stdcall;
 
-    function ReadSample(dwStreamIndex: DWORD;   // The stream to pull data from.
+    function ReadSample(const dwStreamIndex: DWORD;   // The stream to pull data from.
                         dwControlFlags: DWORD;  // A bitwise OR of zero or more flags from the MF_SOURCE_READER_CONTROL_FLAG enumeration.
         {out, optional} pdwActualStreamIndex: PDWORD;  // Receives the zero-based index of the stream.
         {out, optional} pdwStreamFlags: PDWORD;        // Receives a bitwise OR of zero or more flags from the MF_SOURCE_READER_FLAG enumeration.
@@ -411,7 +412,7 @@ type
 
     function Flush(dwStreamIndex: DWord): HResult; stdcall;
 
-    function GetServiceForStream(dwStreamIndex: DWORD;
+    function GetServiceForStream(const dwStreamIndex: DWORD;
                                  const guidService: REFGUID;
                                  const riid: REFIID;
                                  out ppvObject: Pointer {LPVOID}): HResult; stdcall;
@@ -437,16 +438,16 @@ type
   IMFSourceReaderEx = interface(IMFSourceReader)
   ['{7b981cf0-560e-4116-9875-b099895f23d7}']
 
-    function SetNativeMediaType(dwStreamIndex: DWORD;
+    function SetNativeMediaType(const dwStreamIndex: DWORD;
                                 pMediaType: IMFMediaType;
                                 out pdwStreamFlags: DWORD): HResult; stdcall;
 
-    function AddTransformForStream(dwStreamIndex: DWORD;
+    function AddTransformForStream(const dwStreamIndex: DWORD;
                                    pTransformOrActivate: IUnknown): HResult; stdcall;
 
     function RemoveAllTransformsForStream(dwStreamIndex: DWORD): HResult; stdcall;
 
-    function GetTransformForStream(dwStreamIndex: DWORD;
+    function GetTransformForStream(const dwStreamIndex: DWORD;
                                    dwTransformIndex: DWORD;
                                    out pGuidCategory: TGUID;
                                    out ppTransform: IMFTransform): HResult; stdcall;
@@ -541,19 +542,19 @@ type
     function AddStream(pTargetMediaType: IMFMediaType;
                        out pdwStreamIndex: DWord): HResult; stdcall;
 
-    function SetInputMediaType(dwStreamIndex: DWord;
+    function SetInputMediaType(const dwStreamIndex: DWord;
                                pInputMediaType: IMFMediaType;
                                pEncodingParameters: IMFAttributes): HResult; stdcall;
 
     function BeginWriting(): HResult; stdcall;
 
-    function WriteSample(dwStreamIndex: DWord;
+    function WriteSample(const dwStreamIndex: DWord;
                          pSample: IMFSample): HResult; stdcall;
 
-    function SendStreamTick(dwStreamIndex: DWord;
+    function SendStreamTick(const dwStreamIndex: DWord;
                             llTimestamp: LONGLONG): HResult; stdcall;
 
-    function PlaceMarker(dwStreamIndex: DWord;
+    function PlaceMarker(const dwStreamIndex: DWord;
                          pvContex: Pointer): HResult; stdcall;
 
     function NotifyEndOfSegment(dwStreamIndex: DWord): HResult; stdcall;
@@ -562,12 +563,12 @@ type
 
     function Finalize(): HResult; stdcall;
 
-    function GetServiceForStream(dwStreamIndex: DWord;
+    function GetServiceForStream(const dwStreamIndex: DWord;
                                  const guidService: REFGUID;
                                  const riid: REFIID;
                                  out ppvObject: Pointer {LPVOID}): HResult; stdcall;
 
-    function GetStatistics(dwStreamIndex: DWord;
+    function GetStatistics(const dwStreamIndex: DWord;
                            out pStats: MF_SINK_WRITER_STATISTICS): HResult; stdcall;
   end;
   IID_IMFSinkWriter = IMFSinkWriter;
