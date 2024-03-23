@@ -393,7 +393,7 @@ begin
 
   {$IFDEF ConditionalExpressions}
     {$IF CompilerVersion > 31.0}
-       sgResolutions.BeginUpdate();
+       sgAudioFormats.BeginUpdate();
     {$IFEND}
   {$ENDIF}
 
@@ -418,7 +418,7 @@ begin
 
   {$IFDEF ConditionalExpressions}
     {$IF CompilerVersion > 31.0}
-       sgResolutions.EndUpdate();
+       sgAudioFormats.EndUpdate();
     {$IFEND}
   {$ENDIF}
 end;

@@ -3,46 +3,57 @@ object AudioFormatDlg: TAudioFormatDlg
   Top = 108
   BorderStyle = bsDialog
   Caption = 'Select Audio Format'
-  ClientHeight = 408
-  ClientWidth = 424
+  ClientHeight = 712
+  ClientWidth = 751
   Color = clBtnFace
   ParentFont = True
-  OldCreateOrder = True
   Position = poScreenCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
-  PixelsPerInch = 96
-  TextHeight = 13
+  PixelsPerInch = 168
+  TextHeight = 30
   object Bevel1: TBevel
     Left = 0
     Top = 0
-    Width = 424
-    Height = 302
+    Width = 751
+    Height = 529
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Align = alTop
     Shape = bsFrame
-    ExplicitWidth = 422
+    ExplicitWidth = 763
   end
   object lblAudioFmt: TLabel
-    Left = 8
-    Top = 8
-    Width = 406
-    Height = 32
+    Left = 14
+    Top = 14
+    Width = 711
+    Height = 56
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     AutoSize = False
     Caption = 'Audiofmt'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
+    Font.Height = -19
     Font.Name = 'Tahoma'
     Font.Style = [fsBold]
     ParentFont = False
     WordWrap = True
   end
   object butOk: TButton
-    Left = 259
-    Top = 379
-    Width = 75
-    Height = 25
+    Left = 453
+    Top = 663
+    Width = 132
+    Height = 44
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Caption = 'Ok'
     Default = True
     ModalResult = 1
@@ -50,21 +61,29 @@ object AudioFormatDlg: TAudioFormatDlg
     OnClick = butOkClick
   end
   object butCancel: TButton
-    Left = 340
-    Top = 379
-    Width = 75
-    Height = 25
+    Left = 595
+    Top = 663
+    Width = 131
+    Height = 44
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Cancel = True
     Caption = 'Cancel'
     ModalResult = 2
     TabOrder = 1
   end
   object butSaveToFile: TButton
-    Left = 8
-    Top = 379
-    Width = 83
-    Height = 25
+    Left = 14
+    Top = 663
+    Width = 145
+    Height = 44
     Hint = 'Save formats to file (AudioProfiles.txt)'
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Caption = 'Save Formats'
     Default = True
     ParentShowHint = False
@@ -74,10 +93,14 @@ object AudioFormatDlg: TAudioFormatDlg
     OnClick = butSaveToFileClick
   end
   object stxtBitRate: TStaticText
-    Left = 11
-    Top = 46
-    Width = 101
-    Height = 20
+    Left = 19
+    Top = 81
+    Width = 177
+    Height = 35
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Alignment = taCenter
     AutoSize = False
     BevelInner = bvNone
@@ -87,7 +110,7 @@ object AudioFormatDlg: TAudioFormatDlg
     Color = clMenuHighlight
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
+    Font.Height = -19
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentColor = False
@@ -97,10 +120,14 @@ object AudioFormatDlg: TAudioFormatDlg
     OnClick = stxtBitRateClick
   end
   object stxtSampleRate: TStaticText
-    Left = 112
-    Top = 46
-    Width = 101
-    Height = 20
+    Left = 196
+    Top = 81
+    Width = 177
+    Height = 35
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Alignment = taCenter
     AutoSize = False
     BorderStyle = sbsSunken
@@ -108,7 +135,7 @@ object AudioFormatDlg: TAudioFormatDlg
     Color = clMenuHighlight
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
+    Font.Height = -19
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentColor = False
@@ -118,10 +145,14 @@ object AudioFormatDlg: TAudioFormatDlg
     OnClick = stxtSampleRateClick
   end
   object stxtChannels: TStaticText
-    Left = 313
-    Top = 46
-    Width = 101
-    Height = 20
+    Left = 548
+    Top = 81
+    Width = 177
+    Height = 35
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Alignment = taCenter
     AutoSize = False
     BorderStyle = sbsSunken
@@ -133,11 +164,16 @@ object AudioFormatDlg: TAudioFormatDlg
     OnClick = stxtChannelsClick
   end
   object sgAudioFormats: TStringGrid
-    Left = 8
-    Top = 67
-    Width = 405
-    Height = 229
-    DefaultColWidth = 100
+    Left = 14
+    Top = 117
+    Width = 709
+    Height = 401
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
+    DefaultColWidth = 175
+    DefaultRowHeight = 42
     FixedCols = 0
     RowCount = 2
     FixedRows = 0
@@ -148,10 +184,14 @@ object AudioFormatDlg: TAudioFormatDlg
     OnDblClick = sgAudioFormatsDblClick
   end
   object stxtBitsPerSample: TStaticText
-    Left = 213
-    Top = 46
-    Width = 101
-    Height = 20
+    Left = 373
+    Top = 81
+    Width = 177
+    Height = 35
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Alignment = taCenter
     AutoSize = False
     BorderStyle = sbsSunken
@@ -164,19 +204,24 @@ object AudioFormatDlg: TAudioFormatDlg
   end
   object stxtExtraInfo: TStaticText
     AlignWithMargins = True
-    Left = 3
-    Top = 305
-    Width = 418
-    Height = 65
+    Left = 5
+    Top = 534
+    Width = 741
+    Height = 114
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Align = alTop
     AutoSize = False
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
+    Font.Height = -19
     Font.Name = 'Arial'
     Font.Pitch = fpFixed
     Font.Style = []
     ParentFont = False
     TabOrder = 8
+    ExplicitWidth = 753
   end
 end

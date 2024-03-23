@@ -97,9 +97,11 @@ uses
   WinApi.ActiveX.PropIdl,
   WinApi.MediaFoundationApi.MfIdl,
   WinApi.MediaFoundationApi.MfMetLib,
+
   {$IFDEF DEBUG}
   WinApi.MediaFoundationApi.MfMediaTypeDebug,
   {$ENDIF}
+
   {MfPack}
   WinApi.MfPack.VideoStandardsCheat,
   {Application}
@@ -355,8 +357,10 @@ type
   end;
 
 {$IFDEF DEBUG}
-var
-  FMediaTypeDebug: TMediaTypeDebug;
+  {$IFDEF SAVE_DEBUG_REPORT}
+  var
+    FMediaTypeDebug: TMediaTypeDebug;
+  {$ENDIF}
 {$ENDIF}
 
   // List of codecs supported for encoding a file with the given extension.
@@ -713,9 +717,11 @@ begin
     hr := pAudioSourceReader.GetCurrentMediaType(fAudioStreamIndex,
                                                  pAudioTypeIn);
 
-  {$IFDEF SAVE_DEBUG_REPORT}
+  {$IFDEF DEBUG}
+    {$IFDEF SAVE_DEBUG_REPORT}
       FMediaTypeDebug.LogMediaType(pAudioTypeIn, 'pAudioTypeIn');
       FMediaTypeDebug.SafeAllDebugResultsToOneFile('pAudioTypeIn.txt');
+    {$ENDIF}
   {$ENDIF}
 
   Result := hr;
@@ -837,9 +843,11 @@ begin
   if FAILED(hr) then
     goto done;
 
-  {$IFDEF SAVE_DEBUG_REPORT}
-    FMediaTypeDebug.LogMediaType(pAudioTypeOut, 'pAudioTypeOut');
-    FMediaTypeDebug.SafeAllDebugResultsToOneFile('pAudioTypeOut.txt');
+  {$IFDEF DEBUG}
+    {$IFDEF SAVE_DEBUG_REPORT}
+      FMediaTypeDebug.LogMediaType(pAudioTypeOut, 'pAudioTypeOut');
+      FMediaTypeDebug.SafeAllDebugResultsToOneFile('pAudioTypeOut.txt');
+    {$ENDIF}
   {$ENDIF}
 
   hr := pSinkWriter.AddStream(pAudioTypeOut,
@@ -899,7 +907,7 @@ begin
   if FAILED(hr) then
     goto done;
 
-  // Set the amount of time we read ahead of the video-timestamp in the audio-file
+  // Set the amount of time we read ahead of the video-timestamp in the audio-file.
   fReadAhead := fAudioBlockAlign * GetAudioDuration(1024);
 
 done:

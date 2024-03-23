@@ -27,17 +27,18 @@
 //------------------------------------------------------------------------------
 //
 // Remarks: How to use:
-//            1 Declare & create the class.
 //
-//             {$IFDEF DEBUG}
-//             var FMediaTypeDebug: TMediaTypeDebug;
-//             {$ENDIF}
-
+//            1 Add {$IFDEF DEBUG} WinApi.MediaFoundationApi.MfMediaTypeDebug, {$ENDIF}
+//              to your uses clause.
+//
+//            2 Create the class somewhere in your application code.
+//              To get global acces to the class, use the declared FMediaTypeDebug var in this unit
+//
 //             {$IFDEF DEBUG}
 //             FMediaTypeDebug := TMediaTypeDebug.Create();
 //             {$ENDIF}
 //
-//            2 Check the contents and store to file.
+//            3 Check the contents and store to file.
 //              {$IFDEF DEBUG}
 //              FMediaTypeDebug.LogMediaType(pYourMediaType);
 //
@@ -48,7 +49,7 @@
 //                                                      '.FileExtension');
 //              {$ENDIF}
 //
-//            3 When done, destroy the class.
+//            4 When done, destroy the class.
 //              {$IFDEF DEBUG}
 //              FMediaTypeDebug.Free();
 //              {$ENDIF}
@@ -161,6 +162,9 @@ type
     property DebugDirectory: string read sDebugDirectory write sDebugDirectory;
   end;
 
+// Global accessible.
+var
+  FMediaTypeDebug: TMediaTypeDebug;
 
 implementation
 
@@ -172,7 +176,7 @@ begin
   slDebug := TStringlist.Create();
   SetLength(arDebug,
             0);
-  DebugDirectory := ExtractFilePath(Application.ExeName);
+  sDebugDirectory := ExtractFilePath(Application.ExeName);
 end;
 
 
@@ -241,7 +245,7 @@ end;
 
 procedure TMediaTypeDebug.SafeAllDebugResultsToOneFile(pFileName: string);
 begin
-  slDebug.SaveToFile(DebugDirectory + pFileName);
+  slDebug.SaveToFile(sDebugDirectory + pFileName);
 end;
 
 
@@ -255,21 +259,20 @@ var
   i: Integer;
   sFileName: string;
   sMetName: string;
-  sDir: string;
 
   bFileExists: Boolean;
 
 begin
   i := 0;
   bFileExists := True;
-  sDir := ExtractFileDir(Application.ExeName);
+
   if pMethodName = '' then
     sMetName := ''
   else
     sMetName := Format('_%s',[pMethodName]);
 
   sFileName := Format(scFormat,
-                      [sDir,
+                      [sDebugDirectory,
                        pFileName,
                        sMetName,
                        i,
@@ -280,7 +283,7 @@ begin
       if FileExists(sFileName) then
         begin
           sFileName := Format(scFormat,
-                              [sDir,
+                              [sDebugDirectory,
                                pFileName,
                                sMetName,
                                i,

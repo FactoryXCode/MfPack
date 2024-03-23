@@ -149,9 +149,9 @@ object frmMain: TfrmMain
       end
       object lblCodecInfo: TLabel
         Left = 482
-        Top = 54
+        Top = 49
         Width = 431
-        Height = 123
+        Height = 117
         Anchors = []
         AutoSize = False
         Color = clInfoBk
@@ -164,7 +164,6 @@ object frmMain: TfrmMain
         ParentFont = False
         Transparent = False
         WordWrap = True
-        ExplicitTop = 43
       end
       object Label17: TLabel
         Left = 482
@@ -206,8 +205,8 @@ object frmMain: TfrmMain
         ParentFont = False
       end
       object cbxFileFormat: TComboBox
-        Left = 152
-        Top = 34
+        Left = 153
+        Top = 35
         Width = 80
         Height = 22
         Hint = 'Currently MP4 only.'
@@ -243,7 +242,7 @@ object frmMain: TfrmMain
         OnChange = cbxVideoCodecChange
       end
       object cbxResolution: TComboBox
-        Left = 152
+        Left = 153
         Top = 89
         Width = 256
         Height = 22
@@ -269,7 +268,7 @@ object frmMain: TfrmMain
           '4K   2160p  (3840 x 2160)')
       end
       object spedSetQuality: TSpinEdit
-        Left = 152
+        Left = 153
         Top = 143
         Width = 49
         Height = 23
@@ -286,8 +285,8 @@ object frmMain: TfrmMain
         Value = 70
       end
       object cbxFrameRates: TComboBox
-        Left = 152
-        Top = 115
+        Left = 153
+        Top = 116
         Width = 74
         Height = 22
         Hint = 'Framerate in frames per second (fps)'
