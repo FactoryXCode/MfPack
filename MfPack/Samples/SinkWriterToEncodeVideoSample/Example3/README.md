@@ -17,7 +17,8 @@ Audio can be encoded to AAC or FLAC.
 
 Input:  
 Theoretically anything that Windows has a decoder and encoder for should work as input for audio. 
-Exception: Rampling different from the input is not always supported. 
+Exception: Rampling different from the input is not always supported.
+
 
 Usage:
 1- Set the desired video for output (which is currently MP4 only).
@@ -28,7 +29,8 @@ Usage:
 
 Delphi-Versions:
 
-Developed under Delphi XE-7 Supported Delphi versions are XE7 and above. 
+Developed under Delphi XE-7.
+Supported Delphi versions are XE7 and above. 
 Records with methods, anonymous procedures, interposer classes, tasks and TWicImage need to be available.
 
 Runtime Requirement:

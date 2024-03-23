@@ -356,12 +356,6 @@ type
                                                      write fOnProgress;
   end;
 
-{$IFDEF DEBUG}
-  {$IFDEF SAVE_DEBUG_REPORT}
-  var
-    FMediaTypeDebug: TMediaTypeDebug;
-  {$ENDIF}
-{$ENDIF}
 
   // List of codecs supported for encoding a file with the given extension.
   function GetSupportedCodecs(const FileExt: string): TCodecIDArray;
