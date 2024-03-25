@@ -201,7 +201,6 @@ type
     cbxAudioCodec: TComboBox;
 
     procedure FormCreate(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
     procedure WriteSlideshowClick(Sender: TObject);
     procedure FileExtChange(Sender: TObject);
     procedure CodecsChange(Sender: TObject);
@@ -228,6 +227,7 @@ type
     procedure cbxPickWinFolderChange(Sender: TObject);
     procedure butRunPreviewClick(Sender: TObject);
     procedure edLocationClick(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 
   private
     ImageRenderer: TImageRenderer;
@@ -254,6 +254,8 @@ type
     //
     iPicturePresentationTime: Int64;
 
+    //FVideoStandardsCheat: TVideoStandardsCheat;
+
     // Opens selected Windows folder.
     procedure OpenFolder(fldrindex: Integer);
     function GetDesktopFolder(): string;
@@ -264,7 +266,6 @@ type
     procedure MakeSlideshow(aFiles: TStringlist;
                             const aWicImage: TWicImage;
                             const aBitmapImage: TBitmap;
-                            //const aBitmapEncoder: TBitmapEncoder;
                             var aDone: Boolean;
                             aThreaded: Boolean);
 
@@ -485,7 +486,7 @@ begin
       Exit;
     end;
   cbxPickWinFolder.ItemIndex := 0;
-  cbxPickWinFolderChange(Self);
+  cbxPickWinFolderChange(nil);
   AllowChange := True;
 end;
 
@@ -514,7 +515,6 @@ var
   slImageFiles: TStringlist;
   sAudioFileName: TFileName;
   i: Integer;
-
 
 begin
 
@@ -640,7 +640,6 @@ begin
     finally
       WicImage.Free;
       Bitmap.Free;
-      ImageRenderer.Free;
     end;
   finally
     slImageFiles.Free;
@@ -695,6 +694,7 @@ begin
       dlbDir.Directory := mypicturespath;
       dlbDir.Refresh;
     end;
+  path := nil;
 end;
 
 
@@ -716,7 +716,8 @@ end;
 // Run preview
 procedure TfrmMain.butRunPreviewClick(Sender: TObject);
 var
-  i, j: Integer;
+  i: Integer;
+  j: Integer;
 
 begin
   if (lbxRenderingOrder.Count = 0) then
@@ -977,6 +978,27 @@ begin
 end;
 
 
+procedure TfrmMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  CanClose := False;
+  if Assigned(fFileList) then
+    FreeAndNil(fFileList);
+
+  if Assigned(fSelectedFilesList) then
+    FreeAndNil(fSelectedFilesList);
+
+  if Assigned(fFramebm) then
+    fFramebm.Free;
+
+  if Assigned(ImageRenderer) then
+    ImageRenderer.Free;
+
+  if Assigned(fVideoStandardsCheat) then
+    FreeAndNil(fVideoStandardsCheat);
+  CanClose := True;
+end;
+
+
 procedure TfrmMain.FormCreate(Sender: TObject);
 var
   i: integer;
@@ -999,15 +1021,6 @@ begin
   GetResolutions();
   GetFramerates();
   Randomize;
-end;
-
-
-procedure TfrmMain.FormDestroy(Sender: TObject);
-begin
-  fFileList.Free;
-  fSelectedFilesList.Free;
-  fFramebm.Free;
-  fVideoStandardsCheat.Free();
 end;
 
 
@@ -1039,7 +1052,7 @@ end;
 
 procedure TfrmMain.SetResolution();
 begin
-  // store current resolution
+  // Store current resolution.
   fVideoStandardsCheat.SetResolutionByIndex(cbxResolution.ItemIndex);
   iVideoWidth := fVideoStandardsCheat.SelectedResolution.iWidth;
   iVideoHeight := fVideoStandardsCheat.SelectedResolution.iHeight;

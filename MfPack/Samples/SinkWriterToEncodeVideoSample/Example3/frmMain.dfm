@@ -12,8 +12,8 @@ object frmMain: TfrmMain
   Font.Style = []
   OldCreateOrder = True
   Position = poDesktopCenter
+  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
-  OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 15
   object stbStatus: TStatusBar
@@ -773,7 +773,6 @@ object frmMain: TfrmMain
             Font.Style = [fsBold]
             ParentFont = False
             TabOrder = 1
-            StyleElements = []
             OnClick = DriveComboBox1Click
           end
           object cbxPickWinFolder: TComboBox

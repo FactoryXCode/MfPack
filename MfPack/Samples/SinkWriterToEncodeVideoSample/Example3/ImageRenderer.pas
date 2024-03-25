@@ -507,7 +507,7 @@ begin
 
   // Setup the container.
   hr := MFCreateAttributes(pContainerAttributes,
-                           2);
+                           3);
   if FAILED(hr) then
     goto done;
 
@@ -516,7 +516,8 @@ begin
   if FAILED(hr) then
     goto done;
 
-  // Setting MF_SINK_WRITER_DISABLE_THROTTLING to True will affect timing, // especially when using H265 codec.
+  // Setting MF_SINK_WRITER_DISABLE_THROTTLING to True will affect timing,
+  // especially when using the H265 codec.
   // Remarks:
   // By default, the sink writer's IMFSinkWriter.WriteSample method limits the data rate by
   // blocking the calling thread.
@@ -958,13 +959,18 @@ begin
 
       while (not VT.EndOfFile) and fInitialized do
         begin
-          BitmapToRGBA(bm, fBmRGBA, crop);
+          BitmapToRGBA(bm,
+                       fBmRGBA,
+                       crop);
+
           bmRGBAToSampleBuffer(fBmRGBA);
 
           WriteOneFrame(VideoStart + TimeStamp,
                         Duration);
 
-          VT.NextValidSampleToBitmap(bm, TimeStamp, Duration);
+          VT.NextValidSampleToBitmap(bm,
+                                     TimeStamp,
+                                     Duration);
       end;
     finally
       bm.Free;
@@ -1240,8 +1246,12 @@ begin
   if fInitialized then
     Finalize;
   fThreadPool.Finalize;
-  fBmRGBA.Free;
+
+  if Assigned(fBmRGBA) then
+    FreeAndNil(fBmRGBA);
+
   {$IFDEF DEBUG}
+  if Assigned(FMediaTypeDebug) then
     FMediaTypeDebug.Free();
   {$ENDIF}
   inherited;

@@ -134,7 +134,7 @@ type
                             fRate: Double;
                             Numerator: UINT32;
                             Denominator: UINT32;
-                            sHint: string); inline;
+                            sHint: string);
 
   public
     /// <summary> run myVideoStandardsCheat := TVideoStandardsCheat.Create. </summary>

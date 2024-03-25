@@ -146,7 +146,7 @@ type
     constructor Create();
     destructor Destroy(); override;
 
-    // Call this method to log
+    // Call this method to log.
     function LogMediaType(pType: IMFMediaType;
                           pMediaTypeName: string = ''): HRESULT;
 
@@ -182,9 +182,14 @@ end;
 
 destructor TMediaTypeDebug.Destroy();
 begin
-  SetLength(arDebug, 0);
-  arDebug := nil;
-  FreeAndNil(slDebug);
+  if Assigned(arDebug) then
+    begin
+      SetLength(arDebug,
+                0);
+      arDebug := nil;
+    end;
+  if Assigned(slDebug) then
+    FreeAndNil(slDebug);
   inherited Destroy();
 end;
 

@@ -99,6 +99,7 @@ uses
   WinApi.MediaFoundationApi.MfReadWrite,
   WinApi.MediaFoundationApi.Mfobjects,
   WinApi.MediaFoundationApi.CodecApi,
+  {ActiveX}
   WinApi.ActiveX.PropIdl,
   WinApi.ActiveX.PropVarUtil;
 

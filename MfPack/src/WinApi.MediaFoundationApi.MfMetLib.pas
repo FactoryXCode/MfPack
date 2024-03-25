@@ -6547,7 +6547,10 @@ try
         SetLength(alsCont,
                   sdCount)
       else
-        Exit;
+        begin
+          Result := hr;
+          Exit;
+        end;
 
       for i := 0 to sdCount - 1 do
         begin
