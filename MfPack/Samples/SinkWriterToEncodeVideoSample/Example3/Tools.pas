@@ -100,7 +100,8 @@ uses
 implementation
 
 
-procedure WICToBmp(const aWic: TWICImage; const bmp: TBitmap);
+procedure WICToBmp(const aWic: TWICImage;
+                   const bmp: TBitmap);
 var
   LWicBitmap: IWICBitmapSource;
   Stride: Integer;

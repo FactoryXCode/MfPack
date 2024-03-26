@@ -385,6 +385,7 @@ object frmMain: TfrmMain
         ParentShowHint = False
         ShowHint = True
         TabOrder = 0
+        ExplicitTop = 300
         object Bevel2: TBevel
           Left = 1
           Top = 16
@@ -393,41 +394,52 @@ object frmMain: TfrmMain
         end
         object Bevel5: TBevel
           Left = 330
-          Top = 50
+          Top = 51
           Width = 303
           Height = 137
         end
         object Label22: TLabel
-          Left = 364
+          Left = 423
           Top = 72
-          Width = 97
-          Height = 13
+          Width = 61
+          Height = 15
           Margins.Left = 5
           Margins.Top = 5
           Margins.Right = 5
           Margins.Bottom = 5
           Alignment = taRightJustify
-          AutoSize = False
           Caption = 'Effect TIme'
         end
         object Label2: TLabel
-          Left = 363
-          Top = 101
-          Width = 97
-          Height = 17
+          Left = 401
+          Top = 102
+          Width = 83
+          Height = 15
           Margins.Left = 5
           Margins.Top = 5
           Margins.Right = 5
           Margins.Bottom = 5
           Alignment = taRightJustify
-          AutoSize = False
           Caption = 'Image duration'
         end
         object Bevel6: TBevel
           Left = 639
-          Top = 50
+          Top = 51
           Width = 291
           Height = 137
+        end
+        object Label3: TLabel
+          Left = 360
+          Top = 131
+          Width = 124
+          Height = 15
+          Hint = 'Encoder/decoder latency compensation per image  in ns'
+          Margins.Left = 5
+          Margins.Top = 5
+          Margins.Right = 5
+          Margins.Bottom = 5
+          Alignment = taRightJustify
+          Caption = 'Latency compensation'
         end
         object pnlInclAudio: TPanel
           Left = 7
@@ -632,7 +644,7 @@ object frmMain: TfrmMain
           OnClick = ShowVideoClick
         end
         object spedEffectDuration: TSpinEdit
-          Left = 466
+          Left = 489
           Top = 69
           Width = 91
           Height = 24
@@ -648,8 +660,8 @@ object frmMain: TfrmMain
           Value = 2000
         end
         object spedImageDuration: TSpinEdit
-          Left = 466
-          Top = 98
+          Left = 489
+          Top = 99
           Width = 91
           Height = 24
           Hint = 'Imageduration in ms'
@@ -696,6 +708,22 @@ object frmMain: TfrmMain
           Caption = 'Timing Settings'
           TabOrder = 12
           Transparent = False
+        end
+        object spedCompensation: TSpinEdit
+          Left = 489
+          Top = 128
+          Width = 91
+          Height = 24
+          Hint = 'Encoder/decoder latency compensation per image  in ns'
+          Margins.Left = 5
+          Margins.Top = 5
+          Margins.Right = 5
+          Margins.Bottom = 5
+          Increment = 10
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 14
+          Value = 300
         end
       end
       object pnlSelectPics: TPanel
@@ -810,7 +838,7 @@ object frmMain: TfrmMain
           Align = alLeft
           BevelOuter = bvNone
           TabOrder = 1
-          object ImageCount: TLabel
+          object lblImageCount: TLabel
             AlignWithMargins = True
             Left = 5
             Top = 5
@@ -822,7 +850,7 @@ object frmMain: TfrmMain
             Margins.Bottom = 5
             Align = alTop
             AutoSize = False
-            Caption = 'ImageCount'
+            Caption = 'Selected 0 images'
             Layout = tlCenter
             ExplicitTop = 2
           end
@@ -980,15 +1008,15 @@ object frmMain: TfrmMain
     FileTypeIndex = 2
     Options = []
     Title = 'Choose an audio file.'
-    Left = 366
-    Top = 466
+    Left = 598
+    Top = 439
   end
   object OD: TFileOpenDialog
     FavoriteLinks = <>
     FileTypes = <>
     Options = [fdoPickFolders, fdoPathMustExist]
-    Left = 497
-    Top = 465
+    Left = 598
+    Top = 387
   end
   object FODPic: TFileOpenDialog
     FavoriteLinks = <>
@@ -1002,7 +1030,7 @@ object frmMain: TfrmMain
         FileMask = '*.*'
       end>
     Options = []
-    Left = 434
-    Top = 465
+    Left = 597
+    Top = 495
   end
 end

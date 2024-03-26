@@ -169,7 +169,7 @@ type
     DriveComboBox1: TDriveComboBox;
     Splitter1: TSplitter;
     Panel2: TPanel;
-    ImageCount: TLabel;
+    lblImageCount: TLabel;
     lbxFileBox: TCheckListBox;
     Panel3: TPanel;
     lblRenderingOrder: TLabel;
@@ -199,6 +199,8 @@ type
     Bevel2: TBevel;
     Label19: TLabel;
     cbxAudioCodec: TComboBox;
+    spedCompensation: TSpinEdit;
+    Label3: TLabel;
 
     procedure FormCreate(Sender: TObject);
     procedure WriteSlideshowClick(Sender: TObject);
@@ -254,7 +256,6 @@ type
     //
     iPicturePresentationTime: Int64;
 
-    //FVideoStandardsCheat: TVideoStandardsCheat;
 
     // Opens selected Windows folder.
     procedure OpenFolder(fldrindex: Integer);
@@ -515,6 +516,7 @@ var
   slImageFiles: TStringlist;
   sAudioFileName: TFileName;
   i: Integer;
+  Latency: DWord;
 
 begin
 
@@ -562,7 +564,12 @@ begin
       end
     else  // Set presentation of the video to duration of the audio.
       if cbxSetPresentationDuration.Checked then
-        iPicturePresentationTime := Trunc((llAudioDuration / slImageFiles.Count) / 10000) - 1500
+        begin
+          // The video decoder/encoder and the audio codec produces a latency depending on the in and output format.
+          // So, we use an average latency of about 0.030 ms pultiplied by the number of images.
+          Latency := spedCompensation.Value * slImageFiles.Count;
+          iPicturePresentationTime := Trunc((llAudioDuration / slImageFiles.Count) / 10000) - Latency;
+        end
       else  // Default
         iPicturePresentationTime := spedImageDuration.Value; // Default = 4 sec.
 
@@ -573,7 +580,7 @@ begin
     StopWatch := TStopWatch.Create();
 
     try
-      stbStatus.SimpleText := 'Rendering...';
+      stbStatus.SimpleText := 'Preparing the renderer, please wait... ';
       StopWatch.Start;
 
       hr := ImageRenderer.Initialize(OutputFileName,
@@ -640,9 +647,10 @@ begin
     finally
       WicImage.Free;
       Bitmap.Free;
+      ImageRenderer.Free;
     end;
   finally
-    slImageFiles.Free;
+    FreeAndNil(slImageFiles);
     bWriting := False;
   end;
 end;
@@ -737,9 +745,9 @@ begin
                       fFileList.Strings[j]) then
             begin
               imgPreview.Picture.LoadFromFile(fFileList.Strings[j]);
-              //Application.ProcessMessages;
+              Application.ProcessMessages;
               pbPreview.Position := i + 1;
-              //Application.ProcessMessages;
+              Application.ProcessMessages;
               //Sleep(spedImageDuration.Value);
               HandleThreadMessages(GetCurrentThread(),
                                    spedImageDuration.Value);
@@ -990,9 +998,6 @@ begin
   if Assigned(fFramebm) then
     fFramebm.Free;
 
-  if Assigned(ImageRenderer) then
-    ImageRenderer.Free;
-
   if Assigned(fVideoStandardsCheat) then
     FreeAndNil(fVideoStandardsCheat);
   CanClose := True;
@@ -1134,6 +1139,7 @@ procedure TfrmMain.lbxFileBoxClickCheck(Sender: TObject);
 var
   i: Integer;
   n: Integer;
+  selTxt: string;
 
 begin
   n := 0;
@@ -1142,9 +1148,13 @@ begin
     if lbxFileBox.Checked[i] then
       Inc(n);
 
-  ImageCount.Caption := Format('%d %s',
-                               [n,
-                                'images selected (bmp, jpg, png, gif)']);
+  if (n = 1)  then
+    selTxt := 'image'
+  else
+    selTxt := 'images';
+
+  lblImageCount.Caption := Format('Selected %d %s',
+                                  [n, selTxt]);
 
   // Add or remove checked file to rendering order.
   if lbxFileBox.Checked[lbxFileBox.ItemIndex] then

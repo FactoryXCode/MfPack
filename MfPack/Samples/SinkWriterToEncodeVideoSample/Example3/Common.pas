@@ -210,7 +210,7 @@ type
                                        TargetStart: PByte);
   end;
 
-  PResamplingThreadSetup = ^TResamplingThreadSetup;
+  //PResamplingThreadSetup = ^TResamplingThreadSetup;
 
 var
   _DefaultThreadPool: TResamplingThreadPool;
@@ -467,7 +467,7 @@ begin
         dw := PointCountInv * (x2 - x1) *
           (FT(x1) + FT(x2) + PointCountMinus2 * FT(x3));
         // scale float to Integer, Integer=prec corresponds to float=1
-        Weights[j] := round(prec * dw);
+        Weights[j] := Trunc(prec * dw);
         x0 := x0 + delta;
         sum := sum + Weights[j];
       end;
@@ -482,7 +482,7 @@ begin
         x3 := 0.5 * (x1 + x2);
         dw := PointCountInv * (x2 - x1) *
           (FT(x1) + FT(x2) + PointCountMinus2 * FT(x3));
-        ds := round(prec * dw);
+        ds := Trunc(prec * dw);
         Weights[0] := Weights[0] + ds;
         sum := sum + ds;
       end;
@@ -497,7 +497,7 @@ begin
         x3 := 0.5 * (x1 + x2);
         dw := PointCountInv * (x2 - x1) *
           (FT(x1) + FT(x2) + PointCountMinus2 * FT(x3));
-        ds := round(prec * dw);
+        ds := Trunc(prec * dw);
         Weights[High] := Weights[High] + ds;
         sum := sum + ds;
       end;

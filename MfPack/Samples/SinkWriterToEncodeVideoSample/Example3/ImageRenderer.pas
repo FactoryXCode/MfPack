@@ -387,8 +387,9 @@ const
 // Record to divide up the work of a loop into threads.
 type
   TParallelizer = record
-    // array of loopbounds for each thread
-    imin, imax: TIntArray;
+    // Array of loopbounds for each thread.
+    imin: TIntArray;
+    imax: TIntArray;
     // InputCount: length of the loop
     procedure Init(ThreadCount: Integer;
                    InputCount: Integer);
@@ -424,14 +425,14 @@ end;
 
 function TImageRenderer.GetSilenceBufferSize(Duration: Int64): DWord;
 begin
-  Result := Round(fAudioBytesPerSecond / 1000 * Duration / 10000);
+  Result := Trunc(fAudioBytesPerSecond / 1000 * Duration / 10000);
   Result := fAudioBlockAlign * (Result div fAudioBlockAlign);
 end;
 
 
 function TImageRenderer.GetAudioDuration(PCMSamples: DWord): Int64;
 begin
-  Result := Round(PCMSamples / fDestAudioFormat.unSamplesPerSec * 1000 * 10000);
+  Result := Trunc(PCMSamples / fDestAudioFormat.unSamplesPerSec * 1000 * 10000);
 end;
 
 
@@ -485,7 +486,7 @@ begin
   fSrcAudioFileName := AudioFileName;
   fTargetFileName := OutputFilename;
 
-  fBrake := Max(Round(4800 / fVideoHeight),
+  fBrake := Max(Trunc(4800 / fVideoHeight),
                 1);
   fQuality := Quality;
   fFilter := Resampler;
@@ -493,7 +494,7 @@ begin
 
   // Calculate the average time/frame
   // Time is measured in units of 100 nanoseconds. 1 sec = 1000 * 10000 time-units
-  fSampleDuration := Round(1000 * 10000 / fVideoFrameRate);
+  fSampleDuration := Trunc(1000 * 10000 / fVideoFrameRate);
   fAudioStart := AudioStart * 10000;
   fAudioDuration := AudioDuration;
   fPicturePresentationTime := PicturePresentationTime;
@@ -512,7 +513,7 @@ begin
     goto done;
 
   hr := pContainerAttributes.SetUINT32(MF_TRANSCODE_ADJUST_PROFILE,
-                                       DWORD(MF_TRANSCODE_ADJUST_PROFILE_DEFAULT));
+                                       DWORD(MF_TRANSCODE_ADJUST_PROFILE_USE_SOURCE_ATTRIBUTES {MF_TRANSCODE_ADJUST_PROFILE_DEFAULT}));
   if FAILED(hr) then
     goto done;
 
@@ -954,7 +955,7 @@ begin
       // fill gap at beginning of video stream
       if TimeStamp > 0 then
         AddStillImage(bm,
-                      Round(TimeStamp / 10000),
+                      Trunc(TimeStamp / 10000),
                       crop);
 
       while (not VT.EndOfFile) and fInitialized do
@@ -1068,7 +1069,7 @@ begin
                 h := fVideoHeight;
                 w := fVideoWidth;
                 hSource := bmHeight;
-                wSource := Round((hSource * fVideoWidth) / fVideoHeight);
+                wSource := Trunc((hSource * fVideoWidth) / fVideoHeight);
                 SourceRect := RectF((bmWidth - wSource) div 2,
                                     0,
                                     (bmWidth + wSource) div 2,
@@ -1077,7 +1078,7 @@ begin
             else
               begin
                 w := fVideoWidth;
-                h := Round((fVideoWidth * bmHeight) / bmWidth);
+                h := Trunc((fVideoWidth * bmHeight) / bmWidth);
                 SourceRect := RectF(0,
                                     0,
                                     bmWidth,
@@ -1091,7 +1092,7 @@ begin
                 w := fVideoWidth;
                 h := fVideoHeight;
                 wSource := bm.Width;
-                hSource := Round((wSource * fVideoHeight) / fVideoWidth);
+                hSource := Trunc((wSource * fVideoHeight) / fVideoWidth);
                 SourceRect := RectF(0,
                                     (bmHeight - hSource) div 2,
                                     bmWidth,
@@ -1100,7 +1101,7 @@ begin
             else
               begin
                 h := fVideoHeight;
-                w := Round(fVideoHeight * bmWidth / bmHeight);
+                w := Trunc(fVideoHeight * bmWidth / bmHeight);
                 SourceRect := FloatRect(0,
                                         0,
                                         bmWidth,
@@ -1179,7 +1180,9 @@ begin
       bm.Canvas.Brush.Style := bsClear;
       bm.Canvas.Font.Color := clFuchsia;
       bm.Canvas.Font.Size := 32;
-      bm.Canvas.TextOut(10, 10, time);
+      bm.Canvas.TextOut(10,
+                        10,
+                        time);
       bm.Canvas.Unlock;
     end;
 
@@ -1201,12 +1204,12 @@ begin
 
   if SUCCEEDED(hr) then
     begin
-      hr := MFCopyImage(pData, { Destination buffer. }
-                        StrideTarget, { Destination stride. }
-                        pRow, { First row in source image. }
-                        StrideSource, { Source stride. }
-                        StrideTarget, { Image width in bytes. }
-                        fVideoHeight { Image height in pixels. }
+      hr := MFCopyImage(pData,        // Destination buffer.
+                        StrideTarget, // Destination stride.
+                        pRow,         // First row in source image.
+                        StrideSource, // Source stride.
+                        StrideTarget, // Image width in bytes.         f
+                        fVideoHeight  // Image height in pixels.
                        );
 
     if Assigned(pSampleBuffer) then
@@ -1348,7 +1351,7 @@ var
 begin
   AddFrame(Sourcebm,
            cropSource);
-  DurMs := Round(1 / 10000 * fSampleDuration);
+  DurMs := Trunc(1 / 10000 * fSampleDuration);
   CrossFadeTo(Targetbm,
               EffectTime - DurMs,
               cropTarget);
@@ -1399,7 +1402,7 @@ begin
 
     while ((EndTime - fWriteStart)) > 0 do
       begin
-        alpha := Round((fact * (fWriteStart - StartTime)));
+        alpha := Trunc((fact * (fWriteStart - StartTime)));
         for Index := 0 to fThreadPool.ThreadCount - 1 do
           fThreadPool.ResamplingThreads[Index].RunAnonProc(GetCrossFadeProc(CF,
                                                                             Index,
@@ -1411,7 +1414,8 @@ begin
           fThreadPool.ResamplingThreads[Index].Done.WaitFor(INFINITE);
 
         bmRGBAToSampleBuffer(bmTween);
-        WriteOneFrame(fWriteStart, fSampleDuration);
+        WriteOneFrame(fWriteStart,
+                      fSampleDuration);
       end;
 
   finally
@@ -1642,7 +1646,7 @@ var
   DurMs: integer;
 begin
   AddFrame(Sourcebm, cropSource);
-  DurMs := Round(1 / 10000 * fSampleDuration);
+  DurMs := Trunc(1 / 10000 * fSampleDuration);
   ZoomInOutTransitionTo(Targetbm,
                         ZoomSource,
                         ZoomTarget,
@@ -1737,7 +1741,7 @@ begin
         pSourceStart := RGBATweenSource.ScanLine[fVideoHeight - 1];
         pTargetStart := RGBATweenTarget.ScanLine[fVideoHeight - 1];
         pTweenStart := RGBATween.ScanLine[fVideoHeight - 1];
-        alpha := Round(255 * t);
+        alpha := Trunc(255 * t);
 
         for Index := 0 to fThreadPool.ThreadCount - 1 do
           fThreadPool.ResamplingThreads[Index].RunAnonProc (GetCrossFadeProc(ZIO,
@@ -1778,6 +1782,7 @@ begin
                     fSampleDuration);
       if (fFrameCount mod fBrake) = (fBrake - 1) then
         HandleThreadMessages(GetCurrentThread(), 1);
+
   end;
 end;
 

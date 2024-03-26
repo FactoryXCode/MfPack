@@ -101,7 +101,9 @@ uses
   WinApi.MediaFoundationApi.CodecApi,
   {ActiveX}
   WinApi.ActiveX.PropIdl,
-  WinApi.ActiveX.PropVarUtil;
+  WinApi.ActiveX.PropVarUtil,
+  {Application}
+  Tools;
 
 type
 
@@ -489,12 +491,12 @@ begin
   // 2 = progressive.
   hr := MFSetAttributeRatio(pPartialType,
                             MF_MT_FRAME_RATE,
-                            Round(fNewFrameRate * 100),
+                            Trunc(fNewFrameRate * 100),
                             100);
   if FAILED(hr) then
     goto done;
 
-  fNewWidth := Round(fNewHeight * fVideoInfo.VideoWidth / fVideoInfo.VideoHeight * fVideoInfo.PixelAspect);
+  fNewWidth := Trunc(fNewHeight * fVideoInfo.VideoWidth / fVideoInfo.VideoHeight * fVideoInfo.PixelAspect);
 
   hr := MFSetAttributeRatio(pPartialType,
                             MF_MT_PIXEL_ASPECT_RATIO,
@@ -614,7 +616,7 @@ begin
             pSample := nil;
           end;
         Break;
-        Sleep(0);
+        HandleThreadMessages(GetCurrentThread());
       end;
     // Can it happen that we get an infinite loop here?
   until False;
@@ -698,7 +700,7 @@ begin
             goto done;
           SafeRelease(pBuffer);
         end;
-    sleep(0);
+    HandleThreadMessages(GetCurrentThread());
   end;
 
 done:
