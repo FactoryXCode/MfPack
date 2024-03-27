@@ -44,6 +44,10 @@ object frmMain: TfrmMain
     object TabSheet1: TTabSheet
       Caption = 'Render Options'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         947
         536)
@@ -369,6 +373,10 @@ object frmMain: TfrmMain
     object TabSheet2: TTabSheet
       Caption = 'Create Slideshow'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Panel5: TPanel
         Left = 0
         Top = 302

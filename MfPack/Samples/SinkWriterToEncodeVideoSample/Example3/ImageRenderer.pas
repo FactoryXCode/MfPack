@@ -1894,7 +1894,7 @@ begin
   Result := False;
   // AAC
   if IsEqualGuid(codec,
-                  MFAudioFormat_AAC) then
+                 MFAudioFormat_AAC) then
     begin
       SetLength(rArr,
                 Length(aac_SupportedAvgBytesPerSecond));
