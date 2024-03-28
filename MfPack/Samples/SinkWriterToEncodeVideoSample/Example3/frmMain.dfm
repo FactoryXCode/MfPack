@@ -2,8 +2,8 @@ object frmMain: TfrmMain
   Left = 0
   Top = 0
   Caption = 'ImagesToVideo Sample 3'
-  ClientHeight = 589
-  ClientWidth = 955
+  ClientHeight = 600
+  ClientWidth = 944
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,18 +18,20 @@ object frmMain: TfrmMain
   TextHeight = 15
   object stbStatus: TStatusBar
     Left = 0
-    Top = 568
-    Width = 955
+    Top = 579
+    Width = 944
     Height = 21
     Panels = <>
     SimplePanel = True
+    ExplicitTop = 568
+    ExplicitWidth = 955
   end
   object PageControl1: TPageControl
     Left = 0
     Top = 0
-    Width = 955
-    Height = 568
-    ActivePage = TabSheet1
+    Width = 944
+    Height = 579
+    ActivePage = TabSheet2
     Align = alClient
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -43,28 +45,22 @@ object frmMain: TfrmMain
     OnChanging = PageControl1Changing
     object TabSheet1: TTabSheet
       Caption = 'Render Options'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'Arial'
+      Font.Style = [fsBold]
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ParentFont = False
+      ExplicitLeft = 5
+      ExplicitTop = 26
       DesignSize = (
-        947
-        536)
-      object Bevel1: TBevel
-        Left = 5
-        Top = 200
-        Width = 934
-        Height = 332
-        Margins.Left = 5
-        Margins.Top = 5
-        Margins.Right = 5
-        Margins.Bottom = 5
-      end
+        936
+        547)
       object Bevel3: TBevel
         Left = 5
         Top = 20
-        Width = 934
+        Width = 928
         Height = 157
         Margins.Left = 5
         Margins.Top = 5
@@ -72,31 +68,31 @@ object frmMain: TfrmMain
         Margins.Bottom = 5
       end
       object Label1: TLabel
-        Left = 80
+        Left = 94
         Top = 38
-        Width = 66
-        Height = 14
+        Width = 74
+        Height = 15
         Alignment = taRightJustify
         Caption = 'Output format'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
+        Font.Height = -12
         Font.Name = 'Arial'
         Font.Style = []
         ParentFont = False
       end
       object Label9: TLabel
-        Left = 85
+        Left = 99
         Top = 65
-        Width = 62
-        Height = 14
+        Width = 70
+        Height = 15
         Hint = 'Suppoerted codecs.'
         ParentCustomHint = False
         Alignment = taRightJustify
         Caption = 'Video Codec'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
+        Font.Height = -12
         Font.Name = 'Arial'
         Font.Style = []
         ParentFont = False
@@ -104,30 +100,30 @@ object frmMain: TfrmMain
         ShowHint = True
       end
       object Label14: TLabel
-        Left = 19
+        Left = 21
         Top = 92
-        Width = 128
-        Height = 14
+        Width = 148
+        Height = 15
         Alignment = taRightJustify
         Caption = 'Resolution and aspectratio'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
+        Font.Height = -12
         Font.Name = 'Arial'
         Font.Style = []
         ParentFont = False
       end
       object Label15: TLabel
-        Left = 68
+        Left = 78
         Top = 146
-        Width = 78
-        Height = 14
+        Width = 90
+        Height = 15
         Hint = '(recommended: >=60)'
         Alignment = taRightJustify
         Caption = 'Encoding quality'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
+        Font.Height = -12
         Font.Name = 'Arial'
         Font.Style = []
         ParentFont = False
@@ -135,16 +131,16 @@ object frmMain: TfrmMain
         ShowHint = True
       end
       object Label16: TLabel
-        Left = 94
+        Left = 108
         Top = 119
-        Width = 52
-        Height = 14
+        Width = 60
+        Height = 15
         Hint = 'Framerate in frames per second (fps)'
         Alignment = taRightJustify
         Caption = 'Frame rate'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
+        Font.Height = -12
         Font.Name = 'Arial'
         Font.Style = []
         ParentFont = False
@@ -152,16 +148,16 @@ object frmMain: TfrmMain
         ShowHint = True
       end
       object lblCodecInfo: TLabel
-        Left = 482
-        Top = 49
-        Width = 431
-        Height = 117
+        Left = 529
+        Top = 66
+        Width = 381
+        Height = 100
         Anchors = []
         AutoSize = False
         Color = clInfoBk
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
+        Font.Height = -12
         Font.Name = 'Arial'
         Font.Style = []
         ParentColor = False
@@ -170,54 +166,29 @@ object frmMain: TfrmMain
         WordWrap = True
       end
       object Label17: TLabel
-        Left = 482
-        Top = 29
-        Width = 102
-        Height = 14
+        Left = 418
+        Top = 66
+        Width = 101
+        Height = 15
         Alignment = taRightJustify
         Caption = 'Codec Information'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
+        Font.Height = -12
         Font.Name = 'Arial'
-        Font.Style = [fsBold]
-        ParentFont = False
-      end
-      object Label11: TLabel
-        Left = 18
-        Top = 505
-        Width = 911
-        Height = 25
-        AutoSize = False
-        Caption = 
-          'Changing the sample rate from the one of the input-file might no' +
-          't be supported prior to Windows10.'
-        Layout = tlCenter
-        WordWrap = True
-      end
-      object Label21: TLabel
-        Left = 18
-        Top = 216
-        Width = 102
-        Height = 14
-        Caption = 'Codec Information'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Arial'
-        Font.Style = [fsBold]
+        Font.Style = []
         ParentFont = False
       end
       object cbxFileFormat: TComboBox
-        Left = 153
+        Left = 175
         Top = 35
         Width = 80
-        Height = 22
+        Height = 23
         Hint = 'Currently MP4 only.'
         Style = csDropDownList
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
+        Font.Height = -12
         Font.Name = 'Arial'
         Font.Style = []
         ItemIndex = 0
@@ -231,14 +202,14 @@ object frmMain: TfrmMain
           '.mp4')
       end
       object cbxVideoCodec: TComboBox
-        Left = 153
+        Left = 175
         Top = 62
         Width = 193
-        Height = 22
+        Height = 23
         Style = csDropDownList
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
+        Font.Height = -12
         Font.Name = 'Arial'
         Font.Style = []
         ParentFont = False
@@ -246,14 +217,14 @@ object frmMain: TfrmMain
         OnChange = cbxVideoCodecChange
       end
       object cbxResolution: TComboBox
-        Left = 153
+        Left = 175
         Top = 89
         Width = 256
-        Height = 22
+        Height = 23
         Style = csDropDownList
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
+        Font.Height = -12
         Font.Name = 'Arial'
         Font.Style = []
         ItemIndex = 0
@@ -272,14 +243,14 @@ object frmMain: TfrmMain
           '4K   2160p  (3840 x 2160)')
       end
       object spedSetQuality: TSpinEdit
-        Left = 153
+        Left = 175
         Top = 143
         Width = 49
         Height = 23
         Hint = 'Set the encoding quality (10 to 100, recommended: >=60)'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
+        Font.Height = -12
         Font.Name = 'Arial'
         Font.Style = []
         MaxValue = 100
@@ -289,15 +260,15 @@ object frmMain: TfrmMain
         Value = 70
       end
       object cbxFrameRates: TComboBox
-        Left = 153
+        Left = 175
         Top = 116
         Width = 74
-        Height = 22
+        Height = 23
         Hint = 'Framerate in frames per second (fps)'
         Style = csDropDownList
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
+        Font.Height = -12
         Font.Name = 'Arial'
         Font.Style = []
         ParentFont = False
@@ -323,65 +294,172 @@ object frmMain: TfrmMain
         TabOrder = 5
         Transparent = False
       end
-      object StaticText2: TStaticText
-        Left = 18
-        Top = 190
-        Width = 106
-        Height = 21
-        Margins.Left = 5
-        Margins.Top = 5
-        Margins.Right = 5
-        Margins.Bottom = 5
-        Alignment = taCenter
-        AutoSize = False
-        BevelInner = bvNone
-        BevelKind = bkFlat
-        Caption = 'Audio'
+      object pnlInclAudio: TPanel
+        Left = 3
+        Top = 199
+        Width = 930
+        Height = 335
+        BevelOuter = bvLowered
+        Enabled = False
         TabOrder = 6
-        Transparent = False
+        object Label19: TLabel
+          Left = 94
+          Top = 20
+          Width = 70
+          Height = 15
+          Margins.Left = 5
+          Margins.Top = 5
+          Margins.Right = 5
+          Margins.Bottom = 5
+          Alignment = taRightJustify
+          Caption = 'Audio Codec'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -12
+          Font.Name = 'Arial'
+          Font.Style = []
+          ParentFont = False
+        end
+        object Label21: TLabel
+          Left = 355
+          Top = 21
+          Width = 102
+          Height = 14
+          Caption = 'Codec Information'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Arial'
+          Font.Style = [fsBold]
+          ParentFont = False
+        end
+        object lblAudioSource: TLabel
+          Left = 170
+          Top = 308
+          Width = 730
+          Height = 17
+          AutoSize = False
+          Caption = 'No file selected.'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -12
+          Font.Name = 'Arial'
+          Font.Style = []
+          ParentFont = False
+          Layout = tlCenter
+          WordWrap = True
+        end
+        object Label4: TLabel
+          Left = 64
+          Top = 54
+          Width = 101
+          Height = 15
+          Alignment = taRightJustify
+          Caption = 'Codec Information'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -12
+          Font.Name = 'Arial'
+          Font.Style = []
+          ParentFont = False
+        end
+        object Label5: TLabel
+          Left = 88
+          Top = 309
+          Width = 72
+          Height = 15
+          Alignment = taRightJustify
+          Caption = 'Audio source'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -12
+          Font.Name = 'Arial'
+          Font.Style = []
+          ParentFont = False
+        end
+        object cbxAudioCodec: TComboBox
+          Left = 172
+          Top = 17
+          Width = 299
+          Height = 23
+          Hint = 'Choose an audio codec.'
+          Margins.Left = 5
+          Margins.Top = 5
+          Margins.Right = 5
+          Margins.Bottom = 5
+          Style = csDropDownList
+          Font.Charset = ARABIC_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -12
+          Font.Name = 'Arial'
+          Font.Style = []
+          ItemIndex = 0
+          ParentFont = False
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 0
+          Text = 'Not Selected'
+          OnChange = cbxAudioCodecChange
+          Items.Strings = (
+            'Not Selected'
+            'Advanced Audio Coding (AAC)'
+            'Free Lossless Audio Codec (FLAC)'
+            'Dolby AC3 (AC-3)')
+        end
+        object mmoAudioCodecDescr: TMemo
+          Left = 170
+          Top = 50
+          Width = 749
+          Height = 250
+          Hint = 
+            'Codec information will be shown if an audio codec has been choos' +
+            'en.'
+          Margins.Left = 5
+          Margins.Top = 5
+          Margins.Right = 5
+          Margins.Bottom = 5
+          Color = clInfoBk
+          Font.Charset = ARABIC_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -12
+          Font.Name = 'Stencil'
+          Font.Pitch = fpFixed
+          Font.Style = []
+          Lines.Strings = (
+            'No audio codec selected in '
+            'Create Slideshow page.')
+          ParentFont = False
+          ParentShowHint = False
+          ReadOnly = True
+          ScrollBars = ssVertical
+          ShowHint = True
+          TabOrder = 1
+          WantReturns = False
+        end
       end
-      object mmoAudioCodecDescr: TMemo
-        Left = 17
-        Top = 233
-        Width = 915
-        Height = 270
-        Hint = 
-          'Codec information will be shown if an audio codec has been choos' +
-          'en.'
-        Margins.Left = 5
-        Margins.Top = 5
-        Margins.Right = 5
-        Margins.Bottom = 5
-        Color = clInfoBk
-        Font.Charset = ARABIC_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Stencil'
-        Font.Pitch = fpFixed
-        Font.Style = []
-        Lines.Strings = (
-          'No audio codec selected in Create Slideshow page.')
-        ParentFont = False
+      object chbxAddAudio: TCheckBox
+        Left = 15
+        Top = 193
+        Width = 95
+        Height = 14
+        Hint = 'Display dialog to add an audio file'
+        Caption = 'Include Audio'
         ParentShowHint = False
-        ReadOnly = True
-        ScrollBars = ssVertical
         ShowHint = True
         TabOrder = 7
-        WantReturns = False
+        OnClick = chbxAddAudioClick
       end
     end
     object TabSheet2: TTabSheet
-      Caption = 'Create Slideshow'
+      Caption = 'Create SlideShow'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 947
+      ExplicitHeight = 536
       object Panel5: TPanel
         Left = 0
-        Top = 302
-        Width = 947
-        Height = 234
+        Top = 294
+        Width = 936
+        Height = 253
         Hint = 'Audio start position in milliseconds.'
         Align = alBottom
         Font.Charset = DEFAULT_CHARSET
@@ -393,52 +471,22 @@ object frmMain: TfrmMain
         ParentShowHint = False
         ShowHint = True
         TabOrder = 0
-        ExplicitTop = 300
+        ExplicitTop = 297
         object Bevel2: TBevel
           Left = 1
-          Top = 16
-          Width = 935
-          Height = 178
+          Top = 15
+          Width = 933
+          Height = 196
         end
         object Bevel5: TBevel
-          Left = 330
-          Top = 51
-          Width = 303
-          Height = 137
-        end
-        object Label22: TLabel
-          Left = 423
-          Top = 72
-          Width = 61
-          Height = 15
-          Margins.Left = 5
-          Margins.Top = 5
-          Margins.Right = 5
-          Margins.Bottom = 5
-          Alignment = taRightJustify
-          Caption = 'Effect TIme'
-        end
-        object Label2: TLabel
-          Left = 401
-          Top = 102
-          Width = 83
-          Height = 15
-          Margins.Left = 5
-          Margins.Top = 5
-          Margins.Right = 5
-          Margins.Bottom = 5
-          Alignment = taRightJustify
-          Caption = 'Image duration'
-        end
-        object Bevel6: TBevel
-          Left = 639
-          Top = 51
-          Width = 291
-          Height = 137
+          Left = 12
+          Top = 41
+          Width = 340
+          Height = 163
         end
         object Label3: TLabel
-          Left = 360
-          Top = 131
+          Left = 92
+          Top = 174
           Width = 124
           Height = 15
           Hint = 'Encoder/decoder latency compensation per image  in ns'
@@ -449,99 +497,100 @@ object frmMain: TfrmMain
           Alignment = taRightJustify
           Caption = 'Latency compensation'
         end
-        object pnlInclAudio: TPanel
-          Left = 7
-          Top = 51
-          Width = 317
-          Height = 137
-          BevelOuter = bvLowered
-          Enabled = False
-          TabOrder = 13
-          object Label12: TLabel
-            Left = 6
-            Top = 61
-            Width = 111
-            Height = 13
-            Alignment = taRightJustify
-            AutoSize = False
-            Caption = 'Audio Start Position'
-          end
-          object Label19: TLabel
-            Left = 10
-            Top = 20
-            Width = 70
-            Height = 15
-            Margins.Left = 5
-            Margins.Top = 5
-            Margins.Right = 5
-            Margins.Bottom = 5
-            Alignment = taRightJustify
-            Caption = 'Audio Codec'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -12
-            Font.Name = 'Arial'
-            Font.Style = []
-            ParentFont = False
-          end
-          object AudioStartTime: TSpinEdit
-            Left = 10
-            Top = 77
-            Width = 142
-            Height = 24
-            Increment = 1000
-            MaxValue = 0
-            MinValue = 0
-            TabOrder = 0
-            Value = 0
-          end
-          object cbxSetPresentationDuration: TCheckBox
-            Left = 10
-            Top = 112
-            Width = 269
-            Height = 15
-            Hint = 'A dialog will be shown to add an audio file.'
-            Margins.Left = 5
-            Margins.Top = 5
-            Margins.Right = 5
-            Margins.Bottom = 5
-            Caption = 'Set presentation length to audio file duration'
-            ParentShowHint = False
-            ShowHint = True
-            TabOrder = 1
-            OnClick = cbxSetPresentationDurationClick
-          end
-          object cbxAudioCodec: TComboBox
-            Left = 10
-            Top = 38
-            Width = 298
-            Height = 22
-            Hint = 'Choose an audio codec.'
-            Margins.Left = 5
-            Margins.Top = 5
-            Margins.Right = 5
-            Margins.Bottom = 5
-            Style = csDropDownList
-            Font.Charset = ARABIC_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -11
-            Font.Name = 'Arial'
-            Font.Style = []
-            ItemIndex = 0
-            ParentFont = False
-            ParentShowHint = False
-            ShowHint = True
-            TabOrder = 2
-            Text = 'Not Selected'
-            OnChange = cbxAudioCodecChange
-            Items.Strings = (
-              'Not Selected'
-              'Advanced Audio Coding (AAC)'
-              'Free Lossless Audio Codec (FLAC)')
-          end
+        object Label22: TLabel
+          Left = 155
+          Top = 89
+          Width = 61
+          Height = 15
+          Margins.Left = 5
+          Margins.Top = 5
+          Margins.Right = 5
+          Margins.Bottom = 5
+          Alignment = taRightJustify
+          Caption = 'Effect TIme'
+        end
+        object Bevel6: TBevel
+          Left = 358
+          Top = 41
+          Width = 572
+          Height = 163
+        end
+        object Label12: TLabel
+          Left = 89
+          Top = 61
+          Width = 127
+          Height = 16
+          Margins.Left = 5
+          Margins.Top = 5
+          Margins.Right = 5
+          Margins.Bottom = 5
+          Alignment = taRightJustify
+          AutoSize = False
+          Caption = 'Audio Start Position'
+        end
+        object Label2: TLabel
+          Left = 133
+          Top = 140
+          Width = 83
+          Height = 15
+          Margins.Left = 5
+          Margins.Top = 5
+          Margins.Right = 5
+          Margins.Bottom = 5
+          Alignment = taRightJustify
+          Caption = 'Image duration'
+        end
+        object spedCompensation: TSpinEdit
+          Left = 221
+          Top = 171
+          Width = 91
+          Height = 24
+          Hint = 'Encoder/decoder latency compensation per image  in ns'
+          Margins.Left = 5
+          Margins.Top = 5
+          Margins.Right = 5
+          Margins.Bottom = 5
+          Increment = 10
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 11
+          Value = 300
+        end
+        object StaticText5: TStaticText
+          Left = 21
+          Top = 33
+          Width = 133
+          Height = 18
+          Margins.Left = 5
+          Margins.Top = 5
+          Margins.Right = 5
+          Margins.Bottom = 5
+          Alignment = taCenter
+          AutoSize = False
+          BevelInner = bvNone
+          BevelKind = bkFlat
+          Caption = 'Timing'
+          TabOrder = 10
+          Transparent = False
+        end
+        object spedEffectDuration: TSpinEdit
+          Left = 221
+          Top = 86
+          Width = 91
+          Height = 24
+          Hint = 'Effecttime in ms'
+          Margins.Left = 5
+          Margins.Top = 5
+          Margins.Right = 5
+          Margins.Bottom = 5
+          Increment = 1000
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 8
+          Value = 2000
         end
         object StaticText3: TStaticText
-          Left = 21
+          Left = 12
           Top = 7
           Width = 152
           Height = 18
@@ -554,22 +603,28 @@ object frmMain: TfrmMain
           BevelInner = bvNone
           BevelKind = bkFlat
           Caption = 'SlideShow Settings'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -12
+          Font.Name = 'Arial'
+          Font.Style = [fsBold]
+          ParentFont = False
           TabOrder = 5
           Transparent = False
         end
-        object WriteSlideshow: TButton
-          Left = 21
-          Top = 200
+        object butRenderSlideshow: TButton
+          Left = 12
+          Top = 217
           Width = 115
-          Height = 29
-          Caption = 'Create SlideShow'
+          Height = 28
+          Caption = 'Render SlideShow'
           TabOrder = 0
           WordWrap = True
-          OnClick = WriteSlideshowClick
+          OnClick = butRenderSlideshowClick
         end
         object Background: TCheckBox
-          Left = 651
-          Top = 69
+          Left = 370
+          Top = 61
           Width = 222
           Height = 14
           Caption = 'Run in background thread'
@@ -577,16 +632,16 @@ object frmMain: TfrmMain
           WordWrap = True
         end
         object CropLandscape: TCheckBox
-          Left = 651
-          Top = 89
+          Left = 370
+          Top = 81
           Width = 221
           Height = 15
           Caption = 'Crop landscape images to video size'
           TabOrder = 2
         end
         object ZoomInOut: TCheckBox
-          Left = 651
-          Top = 111
+          Left = 370
+          Top = 103
           Width = 196
           Height = 15
           Hint = 'Include Zoom In and Out-transitions slows down rendering.'
@@ -597,8 +652,8 @@ object frmMain: TfrmMain
           WordWrap = True
         end
         object DebugTiming: TCheckBox
-          Left = 651
-          Top = 132
+          Left = 370
+          Top = 124
           Width = 254
           Height = 15
           Hint = 'Debug Timing (Displays encoded timestamp in seconds)'
@@ -608,22 +663,10 @@ object frmMain: TfrmMain
           TabOrder = 4
           WordWrap = True
         end
-        object chbxAddAudio: TCheckBox
-          Left = 17
-          Top = 45
-          Width = 95
-          Height = 14
-          Hint = 'Display dialog to add an audio file'
-          Caption = 'Include Audio'
-          ParentShowHint = False
-          ShowHint = True
-          TabOrder = 6
-          OnClick = chbxAddAudioClick
-        end
         object edLocation: TEdit
-          Left = 142
-          Top = 205
-          Width = 673
+          Left = 133
+          Top = 222
+          Width = 682
           Height = 20
           Cursor = crHandPoint
           Hint = 'Double Click to open the file.'
@@ -639,24 +682,40 @@ object frmMain: TfrmMain
           ParentShowHint = False
           ReadOnly = True
           ShowHint = True
-          TabOrder = 7
+          TabOrder = 6
           OnClick = edLocationClick
         end
         object ShowVideo: TButton
           Left = 821
-          Top = 204
+          Top = 217
           Width = 109
-          Height = 22
+          Height = 28
           Caption = 'Play output video'
-          TabOrder = 8
+          TabOrder = 7
           OnClick = ShowVideoClick
         end
-        object spedEffectDuration: TSpinEdit
-          Left = 489
-          Top = 69
+        object StaticText4: TStaticText
+          Left = 368
+          Top = 33
+          Width = 133
+          Height = 18
+          Margins.Left = 5
+          Margins.Top = 5
+          Margins.Right = 5
+          Margins.Bottom = 5
+          Alignment = taCenter
+          AutoSize = False
+          BevelInner = bvNone
+          BevelKind = bkFlat
+          Caption = 'Rendering'
+          TabOrder = 9
+          Transparent = False
+        end
+        object AudioStartTime: TSpinEdit
+          Left = 221
+          Top = 58
           Width = 91
           Height = 24
-          Hint = 'Effecttime in ms'
           Margins.Left = 5
           Margins.Top = 5
           Margins.Right = 5
@@ -664,12 +723,37 @@ object frmMain: TfrmMain
           Increment = 1000
           MaxValue = 0
           MinValue = 0
-          TabOrder = 9
-          Value = 2000
+          TabOrder = 12
+          Value = 0
+        end
+        object cbxSetPresentationDuration: TCheckBox
+          Left = 47
+          Top = 117
+          Width = 263
+          Height = 18
+          Hint = 'A dialog will be shown to add an audio file.'
+          Margins.Left = 9
+          Margins.Top = 9
+          Margins.Right = 9
+          Margins.Bottom = 9
+          Alignment = taLeftJustify
+          Caption = 'Set presentation length to audio file duration'
+          Color = clBtnFace
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -12
+          Font.Name = 'Arial'
+          Font.Style = []
+          ParentColor = False
+          ParentFont = False
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 13
+          OnClick = cbxSetPresentationDurationClick
         end
         object spedImageDuration: TSpinEdit
-          Left = 489
-          Top = 99
+          Left = 221
+          Top = 137
           Width = 91
           Height = 24
           Hint = 'Imageduration in ms'
@@ -680,84 +764,36 @@ object frmMain: TfrmMain
           Increment = 1000
           MaxValue = 0
           MinValue = 0
-          TabOrder = 10
-          Value = 4000
-        end
-        object StaticText4: TStaticText
-          Left = 651
-          Top = 42
-          Width = 133
-          Height = 18
-          Margins.Left = 5
-          Margins.Top = 5
-          Margins.Right = 5
-          Margins.Bottom = 5
-          Alignment = taCenter
-          AutoSize = False
-          BevelInner = bvNone
-          BevelKind = bkFlat
-          Caption = 'Rendering Settings'
-          TabOrder = 11
-          Transparent = False
-        end
-        object StaticText5: TStaticText
-          Left = 344
-          Top = 43
-          Width = 133
-          Height = 18
-          Margins.Left = 5
-          Margins.Top = 5
-          Margins.Right = 5
-          Margins.Bottom = 5
-          Alignment = taCenter
-          AutoSize = False
-          BevelInner = bvNone
-          BevelKind = bkFlat
-          Caption = 'Timing Settings'
-          TabOrder = 12
-          Transparent = False
-        end
-        object spedCompensation: TSpinEdit
-          Left = 489
-          Top = 128
-          Width = 91
-          Height = 24
-          Hint = 'Encoder/decoder latency compensation per image  in ns'
-          Margins.Left = 5
-          Margins.Top = 5
-          Margins.Right = 5
-          Margins.Bottom = 5
-          Increment = 10
-          MaxValue = 0
-          MinValue = 0
           TabOrder = 14
-          Value = 300
+          Value = 4000
         end
       end
       object pnlSelectPics: TPanel
         Left = 0
         Top = 0
-        Width = 947
-        Height = 302
+        Width = 936
+        Height = 294
         Align = alClient
         TabOrder = 1
+        ExplicitWidth = 947
+        ExplicitHeight = 302
         object Splitter1: TSplitter
           Left = 238
           Top = 1
-          Height = 300
+          Height = 292
           ExplicitHeight = 224
         end
         object Splitter2: TSplitter
           Left = 436
           Top = 1
-          Height = 300
+          Height = 292
           ExplicitHeight = 224
         end
         object Splitter3: TSplitter
           Left = 632
           Top = 1
           Width = 4
-          Height = 300
+          Height = 292
           ExplicitLeft = 641
           ExplicitTop = 8
           ExplicitHeight = 215
@@ -766,10 +802,11 @@ object frmMain: TfrmMain
           Left = 1
           Top = 1
           Width = 237
-          Height = 300
+          Height = 292
           Align = alLeft
           BevelOuter = bvNone
           TabOrder = 0
+          ExplicitHeight = 300
           object Bevel4: TBevel
             Left = 0
             Top = 0
@@ -782,7 +819,7 @@ object frmMain: TfrmMain
             Left = 0
             Top = 58
             Width = 237
-            Height = 242
+            Height = 234
             Align = alClient
             Font.Charset = ANSI_CHARSET
             Font.Color = clWindowText
@@ -791,11 +828,12 @@ object frmMain: TfrmMain
             Font.Style = []
             ParentColor = True
             ParentFont = False
-            TabOrder = 0
+            TabOrder = 2
             OnChange = dlbDirChange
+            ExplicitLeft = -3
           end
           object DriveComboBox1: TDriveComboBox
-            Left = 1
+            Left = 2
             Top = 35
             Width = 230
             Height = 20
@@ -827,7 +865,7 @@ object frmMain: TfrmMain
             ParentFont = False
             ParentShowHint = False
             ShowHint = True
-            TabOrder = 2
+            TabOrder = 0
             Text = 'User Pictures'
             OnChange = cbxPickWinFolderChange
             Items.Strings = (
@@ -842,10 +880,11 @@ object frmMain: TfrmMain
           Left = 241
           Top = 1
           Width = 195
-          Height = 300
+          Height = 292
           Align = alLeft
           BevelOuter = bvNone
           TabOrder = 1
+          ExplicitHeight = 300
           object lblImageCount: TLabel
             AlignWithMargins = True
             Left = 5
@@ -866,7 +905,7 @@ object frmMain: TfrmMain
             Left = 0
             Top = 25
             Width = 195
-            Height = 275
+            Height = 267
             Hint = 'DoublClick to add a duplicate to the Rendering Order.'
             Margins.Left = 5
             Margins.Top = 5
@@ -881,16 +920,18 @@ object frmMain: TfrmMain
             TabOrder = 0
             OnClick = lbxFileBoxClick
             OnDblClick = lbxFileBoxDblClick
+            ExplicitHeight = 275
           end
         end
         object Panel3: TPanel
           Left = 439
           Top = 1
           Width = 193
-          Height = 300
+          Height = 292
           Align = alLeft
           BevelOuter = bvNone
           TabOrder = 2
+          ExplicitHeight = 300
           object lblRenderingOrder: TLabel
             AlignWithMargins = True
             Left = 5
@@ -910,7 +951,7 @@ object frmMain: TfrmMain
             Left = 0
             Top = 25
             Width = 193
-            Height = 275
+            Height = 267
             Hint = 'Use drag and drop to change the rendering order.'
             Margins.Left = 5
             Margins.Top = 5
@@ -927,22 +968,26 @@ object frmMain: TfrmMain
             OnDragDrop = lbxRenderingOrderDragDrop
             OnDragOver = lbxRenderingOrderDragOver
             OnStartDrag = lbxRenderingOrderStartDrag
+            ExplicitHeight = 275
           end
         end
         object Panel4: TPanel
           Left = 636
           Top = 1
-          Width = 310
-          Height = 300
+          Width = 299
+          Height = 292
           Align = alClient
           BevelInner = bvLowered
           TabOrder = 3
+          ExplicitWidth = 310
+          ExplicitHeight = 300
           object Bevel7: TBevel
             Left = 2
             Top = 2
-            Width = 306
+            Width = 295
             Height = 30
             Align = alTop
+            ExplicitWidth = 306
           end
           object Label18: TLabel
             AlignWithMargins = True
@@ -960,17 +1005,16 @@ object frmMain: TfrmMain
           end
           object imgPreview: TImage
             Left = 2
-            Top = 48
-            Width = 306
-            Height = 250
+            Top = 47
+            Width = 295
+            Height = 243
             Align = alClient
             Center = True
             Proportional = True
-            ExplicitTop = 75
-            ExplicitHeight = 222
+            ExplicitTop = 48
           end
           object butRunPreview: TButton
-            Left = 204
+            Left = 195
             Top = 5
             Width = 98
             Height = 23
@@ -984,8 +1028,8 @@ object frmMain: TfrmMain
           object pbPreview: TProgressBar
             Left = 2
             Top = 32
-            Width = 306
-            Height = 16
+            Width = 295
+            Height = 15
             Align = alTop
             DoubleBuffered = True
             ParentDoubleBuffered = False
@@ -993,6 +1037,7 @@ object frmMain: TfrmMain
             MarqueeInterval = 1
             Step = 1
             TabOrder = 1
+            ExplicitTop = 35
           end
         end
       end
@@ -1016,15 +1061,15 @@ object frmMain: TfrmMain
     FileTypeIndex = 2
     Options = []
     Title = 'Choose an audio file.'
-    Left = 598
-    Top = 439
+    Left = 711
+    Top = 8
   end
   object OD: TFileOpenDialog
     FavoriteLinks = <>
     FileTypes = <>
     Options = [fdoPickFolders, fdoPathMustExist]
-    Left = 598
-    Top = 387
+    Left = 588
+    Top = 7
   end
   object FODPic: TFileOpenDialog
     FavoriteLinks = <>
@@ -1038,7 +1083,7 @@ object frmMain: TfrmMain
         FileMask = '*.*'
       end>
     Options = []
-    Left = 597
-    Top = 495
+    Left = 649
+    Top = 7
   end
 end

@@ -1886,7 +1886,7 @@ var
   rArr: array of UInt32;
 
 const
-  // The following values for AvgBytesPerSec are supported by Windows >= ver 10:
+  // The following values for AvgBytesPerSec are supported by Windows 10 and higher.
   aac_SupportedAvgBytesPerSecond : array[0..3] of UInt32 =
     (12000, 16000, 20000, 24000) ;
 
