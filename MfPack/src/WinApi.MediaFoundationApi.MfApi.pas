@@ -4726,7 +4726,7 @@ const
 
   // Converts a Media Foundation audio media type to a WAVEFORMATEX structure.
   function MFCreateWaveFormatExFromMFMediaType(pMFType: IMFMediaType; // Pointer to the IMFMediaType interface of the media type.
-                                               {out} ppWF: PWAVEFORMATEX; // Receives a pointer to the WAVEFORMATEX structure. The caller must release the memory allocated for the structure by calling CoTaskMemFree.
+                                               out ppWF: PWAVEFORMATEX; // Receives a pointer to the WAVEFORMATEX structure. The caller must release the memory allocated for the structure by calling CoTaskMemFree.
                                                out pcbSize: UINT32; // Receives the size of the WAVEFORMATEX structure.
                                                Flags: UINT32 = 0): HResult; stdcall; // Contains a flag from the MFWaveFormatExConvertFlags enumeration.
   {$EXTERNALSYM MFCreateWaveFormatExFromMFMediaType}
