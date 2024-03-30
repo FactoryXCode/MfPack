@@ -198,7 +198,22 @@ It also demonstrates how to get a process by using the tlhelp32 API, to list a s
 The application is provided with a dialog to select a running process from the process tree you want to pick and has
 a button to get the current PID of your application.
 
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopbackCapture2.png) 
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopbackCapture2.png)
+
+
+**XAudio2Player Basic Player**
+
+This sample demonstrates how to use XAudio2 to render different file formats like WAV, FLAC, MP3 etc.
+The samples uses the IMFSourceReader to decode the format suitable for playing in XAudio2.
+XAudio2 is the long-awaited replacement for DirectSound. It addresses several outstanding issues and feature requests, like
+low latency etc.
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio_Basic_Sample.png)
+
+  
+It shows you the basics of using XAudio2 without formating the mediatypes yourself.
+The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
+In your projectsettings you must add ..MfPack\Samples\MfComponents in the project options searchpath. 
 
 **Tools**
 * *
