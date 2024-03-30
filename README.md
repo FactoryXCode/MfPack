@@ -203,10 +203,11 @@ a button to get the current PID of your application.
 
 **XAudio2Player Basic Player**
 
+XAudio2 is the long-awaited replacement for DirectSound.
+It addresses several outstanding issues and feature requests, like low latency etc.
+
 This sample demonstrates how to use XAudio2 to render different file formats like WAV, FLAC, MP3 etc.
-The samples uses the IMFSourceReader to decode the format suitable for playing in XAudio2.
-XAudio2 is the long-awaited replacement for DirectSound. It addresses several outstanding issues and feature requests, like
-low latency etc.
+The sample uses the IMFSourceReader to decode the format suitable for playing in XAudio2.
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio_Basic_Sample.png)
 
