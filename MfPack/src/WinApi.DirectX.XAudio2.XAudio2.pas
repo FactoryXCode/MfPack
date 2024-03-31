@@ -71,6 +71,7 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.WinApiTypes,
+  System.Classes,
   {WinMM}
   WinApi.WinMM.MMReg,
   {CoreAudioApi}
@@ -191,13 +192,13 @@ const
   {$EXTERNALSYM XAUDIO2_VOICE_NOSRC}
   XAUDIO2_VOICE_USEFILTER             = $0008;   // Used in IXAudio2.CreateSource/SubmixVoice
   {$EXTERNALSYM XAUDIO2_VOICE_USEFILTER}
-  XAUDIO2_PLAY_TAILS                  = $0020;   // Used in IXAudio2SourceVoice::Stop
+  XAUDIO2_PLAY_TAILS                  = $0020;   // Used in IXAudio2SourceVoice.Stop
   {$EXTERNALSYM XAUDIO2_PLAY_TAILS}
   XAUDIO2_END_OF_STREAM               = $0040;   // Used in XAUDIO2_BUFFER.Flags
   {$EXTERNALSYM XAUDIO2_END_OF_STREAM}
   XAUDIO2_SEND_USEFILTER              = $0080;   // Used in XAUDIO2_SEND_DESCRIPTOR.Flags
   {$EXTERNALSYM XAUDIO2_SEND_USEFILTER}
-  XAUDIO2_VOICE_NOSAMPLESPLAYED       = $0100;   // Used in IXAudio2SourceVoice::GetState
+  XAUDIO2_VOICE_NOSAMPLESPLAYED       = $0100;   // Used in IXAudio2SourceVoice.GetState
   {$EXTERNALSYM XAUDIO2_VOICE_NOSAMPLESPLAYED}
   XAUDIO2_STOP_ENGINE_WHEN_IDLE       = $2000;   // Used in XAudio2Create to force the engine to Stop when no source voices are Started, and Start when a voice is Started
   {$EXTERNALSYM XAUDIO2_STOP_ENGINE_WHEN_IDLE}
@@ -613,7 +614,7 @@ type
                                Flags: UINT32 = 0;
                                MaxFrequencyRatio: Single = XAUDIO2_DEFAULT_FREQ_RATIO;
                                pCallback: IXAudio2VoiceCallback = nil;
-                               pSendList: PXAUDIO2_VOICE_SENDS = nil;
+                               {in/out} pSendList: PXAUDIO2_VOICE_SENDS = nil;
                                pEffectChain: PXAUDIO2_EFFECT_CHAIN = nil): HRESULT; stdcall;
 
     // NAME: IXAudio2.CreateSubmixVoice
@@ -633,7 +634,7 @@ type
                                InputSampleRate: UINT32;
                                Flags: UINT32 = 0;
                                ProcessingStage: UINT32 = 0;
-                               pSendList: PXAUDIO2_VOICE_SENDS = nil;
+                               {in/out} pSendList: PXAUDIO2_VOICE_SENDS = nil;
                                pEffectChain: PXAUDIO2_EFFECT_CHAIN = nil): HRESULT; stdcall;
 
 

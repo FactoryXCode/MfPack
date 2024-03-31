@@ -208,16 +208,15 @@ It addresses several outstanding issues and feature requests, like low latency e
 
 This sample demonstrates how to use XAudio2 to render different file formats like WAV, FLAC, MP3 etc.
 The sample uses the IMFSourceReader to decode the format suitable for playing in XAudio2.
-
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio_Basic_Sample.png)
-
-  
 It shows you the basics of using XAudio2 without formating the mediatypes yourself.
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
-In your projectsettings you must add ..MfPack\Samples\MfComponents in the project options searchpath. 
+In your projectsettings you must add ..MfPack\Samples\MfComponents in the project options searchpath.
 
-**Tools**
-* *
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio_Basic_Sample.png)
+ 
+
+***Tools***
+
 **HResult Lookup Tool Application**
 
 *This tool can be used to determine HResult or Error codes returned by the Windows OS,*

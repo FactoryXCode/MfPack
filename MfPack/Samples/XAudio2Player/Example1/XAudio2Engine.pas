@@ -106,7 +106,6 @@ type
     pvBytes: TBytes;
     pvFileName: TFileName;
     pvSourceFileDuration: LONGLONG;
-    vpSampleDuration: LONGLONG;
     pvWaveformatex: PWAVEFORMATEX;
     pvwaveformatlength: Cardinal;
     hwndCaller: HWND;
@@ -289,8 +288,6 @@ begin
     SetLength(pvBytes,
               0);
 
-  vpSampleDuration := 0;
-
   while (hr = S_OK) do
     begin
       flags := 0;
@@ -308,11 +305,6 @@ begin
       // If the sample is nil, there is a gap in the data stream that can't be filled: No reason to quit..
       if (sample = nil) then
         Continue;
-
-      //if (vpSampleDuration = 0) then
-        {hr :=} sample.GetSampleDuration(vpSampleDuration);
-         //MF_E_NO_SAMPLE_DURATION
-
 
       // Convert data to contiguous buffer.
       hr := sample.ConvertToContiguousBuffer(buffer);
