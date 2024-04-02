@@ -440,7 +440,7 @@ type
   end;
   {$EXTERNALSYM XAUDIO2_EFFECT_CHAIN}
 
-  // Declared at line 123 !
+  // Declared at line 107 !
   //=======================
   // Used in XAUDIO2_FILTER_PARAMETERS below
 //typedef enum XAUDIO2_FILTER_TYPE
@@ -748,6 +748,8 @@ type
   // Delphi, Note: As you can see, this class is defined as interface in C++ with the DECLARE_INTERFACE macro.
   //               However, this is not the case: This 'interface' is a pure virtual base class rather than an
   //               interface and NOT derived from IUnknown!
+  //               note that this class contains virtual methods.
+  //               The class must be defined as class(TInterfacedObject).
 
   IXAudio2Voice = class(TInterfacedObject)
 
@@ -967,12 +969,17 @@ type
   *
   **************************************************************************)
 
+  // Delphi, Note: As you can see, this class is defined as interface in C++ with the DECLARE_INTERFACE macro.
+  //               However, this is not the case: This 'interface' is a pure virtual base class rather than an
+  //               interface and NOT derived from IUnknown!
+  //               Note that this class contains virtual methods.
+  //               The class must be defined as class(TInterfacedObject).
+
   IXAudio2SourceVoice = class(IXAudio2Voice)
 
     // Methods from IXAudio2Voice base interface
 
     // Declare_IXAudio2Voice_Methods();
-
 
     // NAME: IXAudio2SourceVoice.Start
     // DESCRIPTION: Makes this voice start consuming and processing audio.
@@ -1073,6 +1080,10 @@ type
   * IXAudio2SubmixVoice: Submixing voice management interface.
   *
   **************************************************************************)
+  // Delphi, Note: As you can see, this class is defined as interface in C++ with the DECLARE_INTERFACE macro.
+  //               However, this is not the case: This 'interface' is a pure virtual base class rather than an
+  //               interface and NOT derived from IUnknown!
+  //               Note that this class contains virtual methods.
 
   IXAudio2SubmixVoice = class(IXAudio2Voice)
     // Methods from IXAudio2Voice base interface
@@ -1091,6 +1102,10 @@ type
   * IXAudio2MasteringVoice: Mastering voice management interface.
   *
   **************************************************************************)
+  // Delphi, Note: As you can see, this class is defined as interface in C++ with the DECLARE_INTERFACE macro.
+  //               However, this is not the case: This 'interface' is a pure virtual base class rather than an
+  //               interface and NOT derived from IUnknown!
+  //               Note that this class contains virtual methods.
 
   IXAudio2MasteringVoice = class(IXAudio2Voice)
     // Methods from IXAudio2Voice base interface
@@ -1113,6 +1128,12 @@ type
   (**************************************************************************
   *
   * IXAudio2EngineCallback: Client notification interface for engine events.
+  *
+  * Delphi, Note: As you can see, this class is defined as interface in C++ with the DECLARE_INTERFACE macro.
+  *               However, this is not the case: This 'interface' is a pure virtual base class rather than an
+  *               interface and NOT derived from IUnknown!
+  *               Note that this class contains virtual methods.
+  *               The class must be defined as class(TInterfacedObject).
   *
   * REMARKS: Contains methods to notify the client when certain events happen
   *          in the XAudio2 engine.  This interface should be implemented by
@@ -1142,10 +1163,15 @@ type
   (**************************************************************************
   *
   * IXAudio2VoiceCallback: Client notification interface for voice events.
+  * Delphi, Note: As you can see, this class is defined as interface in C++ with the DECLARE_INTERFACE macro.
+  *               However, this is not the case: This 'interface' is a pure virtual base class rather than an
+  *               interface and NOT derived from IUnknown!
+  *               Note that this class contains virtual methods.
+  *               The class must be defined as class(TInterfacedObject).
   *
   * REMARKS: Contains methods to notify the client when certain events happen
-  *          in an XAudio2 voice.  This interface should be implemented by the
-  *          client.  XAudio2 will call these methods via an interface pointer
+  *          in an XAudio2 voice. This interface should be implemented by the
+  *          client. XAudio2 will call these methods via an interface pointer
   *          provided by the client in the IXAudio2.CreateSourceVoice call.
   *
   **************************************************************************)
@@ -1364,6 +1390,6 @@ end;
 
 // end XAUDIO2_HELPER_FUNCTIONS
 
-//Implement Additional Prototypes here.
+// Implement Additional Prototypes here.
 
 end.
