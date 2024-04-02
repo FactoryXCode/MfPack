@@ -493,10 +493,10 @@ begin
   // Set boundaries to prevent overflow or clipping
   for i := 0 to Length(aVolumes) -1 do
     begin
-      if aVolumes[i] > 1.0 then
-        aVolumes[i] := 1.0;
-      if aVolumes[i] < 0.0 then
-        aVolumes[i] := 0.0;
+      if (aVolumes[i] > 224.0) then
+        aVolumes[i] := 224.0;
+      if (aVolumes[i] < -224.0) then
+        aVolumes[i] := -224.0;
     end;
 
   // Set the volumes.

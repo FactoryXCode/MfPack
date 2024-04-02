@@ -144,11 +144,11 @@ object frmMain: TfrmMain
     Width = 46
     Height = 180
     DoubleBuffered = True
-    Max = 100
+    Max = 224
+    Min = -224
     Orientation = trVertical
     ParentDoubleBuffered = False
     Frequency = 10
-    Position = 70
     TabOrder = 3
     TickMarks = tmBoth
     OnChange = trbVolumeRChange
@@ -159,11 +159,11 @@ object frmMain: TfrmMain
     Width = 39
     Height = 180
     DoubleBuffered = True
-    Max = 100
+    Max = 224
+    Min = -224
     Orientation = trVertical
     ParentDoubleBuffered = False
     Frequency = 10
-    Position = 70
     TabOrder = 4
     TickMarks = tmBoth
     OnChange = trbVolumeLChange
