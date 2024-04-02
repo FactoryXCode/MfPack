@@ -214,7 +214,15 @@ In your projectsettings you must add ..MfPack\Samples\MfComponents in the projec
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio_Basic_Sample.png)
 
-  
+
+**XAudio2Player Player Sample 2**
+
+This sample shows you how to implement the IXAudio2VoiceCallback.
+The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
+In your projectsettings you must add ..MfPack\Samples\MfComponents in the project options searchpath.  
+It also have a pitch control.
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample2.png)  
 
 
 **Tools**
