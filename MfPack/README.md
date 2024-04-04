@@ -224,6 +224,11 @@ It also have a pitch control.
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample2.png)  
 
+**XAudio2Player Sample 3**
+
+This sample shows you how to implement threadsafe events instead of messages from the XaudioEngine.
+
+
 
 **Tools**
 **-----**
