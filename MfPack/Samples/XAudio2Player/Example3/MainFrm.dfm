@@ -3,8 +3,8 @@ object frmMain: TfrmMain
   Top = 0
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
-  Caption = 'XAudio2 Player  Sample 2'
-  ClientHeight = 362
+  Caption = 'XAudio2 Player  Sample 3'
+  ClientHeight = 381
   ClientWidth = 324
   Color = clBtnFace
   DoubleBuffered = True
@@ -18,16 +18,25 @@ object frmMain: TfrmMain
   OldCreateOrder = False
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
+  OnCreate = FormCreate
   OnKeyUp = FormKeyUp
   PixelsPerInch = 96
   TextHeight = 13
+  object Bevel5: TBevel
+    Left = 0
+    Top = 337
+    Width = 324
+    Height = 20
+    Align = alBottom
+    Shape = bsTopLine
+    ExplicitTop = 354
+  end
   object Bevel1: TBevel
     Left = 0
     Top = 0
     Width = 324
-    Height = 298
+    Height = 299
     Align = alTop
-    ExplicitTop = 2
   end
   object Bevel4: TBevel
     Left = 177
@@ -48,7 +57,7 @@ object frmMain: TfrmMain
     Height = 233
   end
   object lblDuration: TLabel
-    Left = 12
+    Left = 11
     Top = 258
     Width = 92
     Height = 13
@@ -64,7 +73,7 @@ object frmMain: TfrmMain
     Caption = 'Samples: 0'
   end
   object lblPlayed: TLabel
-    Left = 21
+    Left = 20
     Top = 277
     Width = 83
     Height = 13
@@ -179,9 +188,17 @@ object frmMain: TfrmMain
     Font.Style = []
     ParentFont = False
   end
+  object lblStatus: TLabel
+    Left = 3
+    Top = 340
+    Width = 298
+    Height = 13
+    AutoSize = False
+    Caption = 'Status: Stopped'
+  end
   object butPlay: TButton
     Left = 8
-    Top = 308
+    Top = 306
     Width = 74
     Height = 24
     Caption = 'Play'
@@ -190,8 +207,8 @@ object frmMain: TfrmMain
     OnClick = butPlayClick
   end
   object butStop: TButton
-    Left = 164
-    Top = 308
+    Left = 166
+    Top = 307
     Width = 74
     Height = 24
     Caption = 'Stop'
@@ -201,7 +218,7 @@ object frmMain: TfrmMain
   end
   object StatusBar: TStatusBar
     Left = 0
-    Top = 338
+    Top = 357
     Width = 324
     Height = 24
     Panels = <>
@@ -256,7 +273,7 @@ object frmMain: TfrmMain
   end
   object butReplay: TButton
     Left = 242
-    Top = 308
+    Top = 306
     Width = 74
     Height = 24
     Caption = 'Replay'
@@ -266,7 +283,7 @@ object frmMain: TfrmMain
   end
   object butPause: TButton
     Left = 86
-    Top = 308
+    Top = 306
     Width = 74
     Height = 24
     Caption = 'Pause'

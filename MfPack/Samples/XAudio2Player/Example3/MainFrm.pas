@@ -75,6 +75,7 @@ uses
   System.SysUtils,
   System.Variants,
   System.Classes,
+  System.SyncObjs,
   {Vcl}
   Vcl.Graphics,
   Vcl.Controls,
@@ -88,6 +89,7 @@ uses
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfUtils,
   WinApi.MediaFoundationApi.MfMetLib,
+  WinApi.DirectX.XAudio2.XAudio2,
   {}
   Tools,
   XAudio2Engine,
@@ -127,6 +129,8 @@ type
     lblLeftVolume: TLabel;
     lblRightVolume: TLabel;
     lblPitch: TLabel;
+    lblStatus: TLabel;
+    Bevel5: TBevel;
     procedure Open1Click(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure butPlayClick(Sender: TObject);
@@ -138,23 +142,37 @@ type
     procedure butPauseClick(Sender: TObject);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure trbPitchChange(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
 
   private
     { Private declarations }
     fXaudio2Engine: TXaudio2Engine;
     fAudioFileName: TFileName;
     llAudioDuration: LONGLONG;
+    iSliderL: FLOAT;
+    iSliderR: FLOAT;
 
     function GetAudioFile(): string;
 
     /// <summary>Set Left and/or Right volume.</summary>
     procedure SetVolumeChannels();
-    /// <summary>Keep track of data been played.</summary>
-    procedure OnAudioDataProcessedEvent(var AMessage: TMessage); message WM_DATA_PROCESSED_NOTIFY;
-    /// <summary>Signals the audio is ready to play.</summary>
-    procedure OnAudioReadyEvent(var AMessage: TMessage); message WM_DATA_READY_NOTIFY;
-    /// <summary>Signals the audio reached end.</summary>
-    procedure OnAudioEndedEvent(var AMessage: TMessage); message WM_DATA_ENDED_NOTIFY;
+
+    // Get the status of the XAudio2 engine.
+    function GetStatus(): string;
+
+    // Xaudi2Engine events
+    procedure HandleOnProcessingData(Sender: TObject);
+    procedure HandleOnAudioReadyEvent(Sender: TObject);
+
+    procedure HandleOnAudioStoppedEvent(Sender: TObject);
+    procedure HandleOnAudioPlayingEvent(Sender: TObject);
+    procedure HandleOnAudioPauzedEvent(Sender: TObject);
+    // XAudio2VoiceCallback events
+    procedure HandleOnVoiceProcessingPassStartEvent(Sender: TObject);
+    procedure HandleOnVoiceProcessingPassEndEvent(Sender: TObject);
+    procedure HandleOnStreamEndEvent(Sender: TObject);
+    procedure HandleOnBufferStartEvent(Sender: TObject);
+    procedure HandleOnBufferEndEvent(Sender: TObject);
 
   public
     { Public declarations }
@@ -163,7 +181,6 @@ type
 
 var
   frmMain: TfrmMain;
-
 
 
 implementation
@@ -175,8 +192,7 @@ procedure TfrmMain.butPauseClick(Sender: TObject);
 begin
   if not Assigned(fXaudio2Engine) then
     Exit;
-  if SUCCEEDED(fXaudio2Engine.Pause) then
-    StatusBar.SimpleText := Format('Paused file: %s.', [fAudioFileName]);
+  fXaudio2Engine.Pause();
 end;
 
 
@@ -191,9 +207,8 @@ begin
 
   // Keep volume on previous volume.
   SetVolumeChannels();
-
-  if SUCCEEDED(fXaudio2Engine.Play()) then
-    StatusBar.SimpleText := Format('Playing file: %s.', [fAudioFileName]);
+  // Play.
+  fXaudio2Engine.Play();
 end;
 
 
@@ -202,26 +217,34 @@ var
   hr: HResult;
 
 begin
+  hr := S_OK;
+
   if not Assigned(fXaudio2Engine) then
     Exit;
 
-  hr := fXaudio2Engine.Stop();
+  // When Stopped a previous audiostream, the SourceVoice is removed from the topology.
+  // I that case fXaudio2Engine.InitializeXAudio2 will build a new one.
+  if not fXaudio2Engine.NeedNewSourceVoice then
+    butStopClick(nil);
+
+  // Keep volume on previous volume.
+  SetVolumeChannels();
 
   if SUCCEEDED(hr) then
     hr := fXaudio2Engine.InitializeXAudio2(True);
 
   if FAILED(hr) then
     StatusBar.SimpleText := Format('Could not initialize XAudio2 Error: %d.', [hr]);
-
 end;
 
 
 procedure TfrmMain.butStopClick(Sender: TObject);
 begin
+
   if not Assigned(fXaudio2Engine) then
     Exit;
-  if SUCCEEDED(fXaudio2Engine.Stop()) then
-    StatusBar.SimpleText := Format('Stopped playing file: %s.', [fAudioFileName]);
+
+  fXaudio2Engine.Stop();
 end;
 
 
@@ -240,6 +263,27 @@ begin
       FreeAndNil(fXaudio2Engine);
     end;
   CanClose := True;
+end;
+
+
+procedure TfrmMain.FormCreate(Sender: TObject);
+begin
+  // Create the engine class.
+  fXaudio2Engine := TXaudio2Engine.Create();
+  //
+  fXaudio2Engine.OnProcessingData := HandleOnProcessingData;
+  fXaudio2Engine.OnAudioReadyEvent := HandleOnAudioReadyEvent;
+
+  fXaudio2Engine.OnAudioStoppedEvent := HandleOnAudioStoppedEvent;
+  fXaudio2Engine.OnAudioPlayingEvent := HandleOnAudioPlayingEvent;
+  fXaudio2Engine.OnAudioPauzedEvent := HandleOnAudioPauzedEvent;
+
+  // Set XAudio2VoiceCallback handlers.
+  fXaudio2Engine.OnVoiceProcessingPassStartEvent := HandleOnVoiceProcessingPassStartEvent;
+  fXaudio2Engine.OnVoiceProcessingPassEndEvent := HandleOnVoiceProcessingPassEndEvent;
+  fXaudio2Engine.OnStreamEndEvent := HandleOnStreamEndEvent;
+  fXaudio2Engine.OnBufferStartEvent := HandleOnBufferStartEvent;
+  fXaudio2Engine.OnBufferEndEvent := HandleOnBufferEndEvent;
 end;
 
 
@@ -315,10 +359,6 @@ end;
 
 
 procedure TfrmMain.SetVolumeChannels();
-var
-  iSliderL: FLOAT;
-  iSliderR: FLOAT;
-
 begin
 
   if not Assigned(fXaudio2Engine) then
@@ -384,10 +424,7 @@ begin
 
   SetVolumeChannels();
 
-  if (trbVolumeL.Position > 0) then
-    lblRightVolume.Caption :=  Format('-%d', [Abs(trbVolumeL.Position)])
-  else
-    lblRightVolume.Caption :=  Format('%d', [Abs(trbVolumeL.Position)]);
+  lblRightVolume.Caption :=  Format('%d', [((trbVolumeL.Max - trbVolumeL.Position) + trbVolumeL.Min)]);
 end;
 
 
@@ -398,10 +435,7 @@ begin
 
   SetVolumeChannels();
 
-  if (trbVolumeR.Position > 0) then
-    lblLeftVolume.Caption :=  Format('-%d', [Abs(trbVolumeR.Position)])
-  else
-    lblLeftVolume.Caption :=  Format('%d', [Abs(trbVolumeR.Position)]);
+  lblLeftVolume.Caption := Format('%d', [((trbVolumeR.Max - trbVolumeR.Position) + trbVolumeR.Min)]);
 end;
 
 
@@ -428,10 +462,6 @@ try
   lblDuration.Caption := Format('Duration: %s',
                                 [HnsTimeToStr(llAudioDuration, False)]);
 
-  // Create the engine
-  if SUCCEEDED(hr) then
-    fXaudio2Engine := TXaudio2Engine.Create();
-
   if not Assigned(fXaudio2Engine) then
     Exit;
 
@@ -446,57 +476,148 @@ try
     SetVolumeChannels();
 
 finally
-
   StatusBar.SimpleText := 'Open an audio file';
 end;
 end;
 
 
-// Event handlers ==============================================================
+// IXAudio2VoiceCallback handlers ==============================================
 
-procedure TfrmMain.OnAudioDataProcessedEvent(var AMessage: TMessage);
+function TfrmMain.GetStatus(): string;
+begin
+  case fXaudio2Engine.PlayStatus of
+    rsStopped: Result := 'Stopped';
+    rsPlaying: Result := 'Playing';
+    rsPauzed: Result := 'Pauzed';
+    rsEndOfBuffer: Result := 'EndOfBuffer';
+    rsEndOfStream: Result := 'EndOfStream';
+    rsInitializing: Result := 'Initializing';
+    rsInitialized: Result := 'Initialized';
+
+    // These are stubs.
+    //rsProcessingPassStart: sStatus := 'ProcessingPassStart';
+    //rsProcessingPassEnd: sStatus := 'ProcessingPassEnd';
+
+    rsDestroying: Result := 'Destroying';
+    else
+      Result := 'Unknown render status';
+    end;
+
+end;
+
+
+procedure TfrmMain.HandleOnProcessingData(Sender: TObject);
 var
-  iProgress: LONGLONG;
-  iSamples: LONGLONG;
-  tstr: string;
+  Xaudio2EventData: TXaudio2EventData;
+
+  sPlayed: string;
+
 begin
 
-  iProgress := AMessage.WParam;
-  iSamples := AMessage.LParam;
-  tstr := HnsTimeToStr(iProgress, False);
+  Xaudio2EventData := fXaudio2Engine.FXaudio2EventData;
 
-  lblProcessed.Caption := Format('Samples: %d',
-                                 [iSamples]);
-  lblPlayed.Caption := Format('Played: %s',
-                              [tstr]);
+
+  TThread.Synchronize(nil,
+                      procedure
+                        begin
+                          sPlayed := HnsTimeToStr(Xaudio2EventData.TimePlayed,
+                                               False);
+
+                          lblProcessed.Caption := Format('Samples: %d',
+                                                         [Xaudio2EventData.SamplesProcessed]);
+                          lblPlayed.Caption := Format('Played: %s',
+                                                      [sPlayed]);
+
+                        {$IFDEF DEBUG}
+                          OutputDebugString(StrToPWideChar(GetStatus()));
+                        {$ENDIF}
+
+                        end);
+
   Application.ProcessMessages;
 end;
 
 
-procedure TfrmMain.OnAudioReadyEvent(var AMessage: TMessage);
+procedure TfrmMain.HandleOnAudioReadyEvent(Sender: TObject);
 begin
-  if (AMessage.WParam = 1) then
-    begin
-      StatusBar.SimpleText := Format('Ready to play: %s', [fAudioFileName]);
-      butPlay.Enabled := True;
-      butPause.Enabled := True;
-      butStop.Enabled := True;
-      butReplay.Enabled := True;
-    end;
+  butPlay.Enabled := True;
+  butPause.Enabled := True;
+  butStop.Enabled := True;
+  butReplay.Enabled := True;
+  StatusBar.SimpleText := Format('Ready to play: %s', [fAudioFileName]);
+  lblStatus.Caption := GetStatus();
 end;
 
 
-procedure TfrmMain.OnAudioEndedEvent(var AMessage: TMessage);
+procedure TfrmMain.HandleOnAudioStoppedEvent(Sender: TObject);
 begin
-  if (AMessage.WParam = 1) then
-    begin
-      StatusBar.SimpleText := Format('Ended playing: %s', [fAudioFileName]);
-      butPlay.Enabled := True;
-      butPause.Enabled := True;
-      butStop.Enabled := True;
-      butReplay.Enabled := True;
-    end;
+  butPlay.Enabled := False;
+  butPause.Enabled := False;
+  butStop.Enabled := False;
+  butReplay.Enabled := True;
+  StatusBar.SimpleText := Format('Stopped playing file: %s.', [fAudioFileName]);
+  lblStatus.Caption := GetStatus();
 end;
+
+
+procedure TfrmMain.HandleOnAudioPlayingEvent(Sender: TObject);
+begin
+  butPlay.Enabled := True;
+  butPause.Enabled := True;
+  butStop.Enabled := True;
+  butReplay.Enabled := True;
+  StatusBar.SimpleText := Format('Playing file: %s.', [fAudioFileName]);
+  lblStatus.Caption := GetStatus();
+end;
+
+
+procedure TfrmMain.HandleOnAudioPauzedEvent(Sender: TObject);
+begin
+  lblStatus.Caption := GetStatus();
+  StatusBar.SimpleText := Format('Paused file: %s.', [fAudioFileName]);
+end;
+
+
+procedure TfrmMain.HandleOnVoiceProcessingPassStartEvent(Sender: TObject);
+begin
+  // Stub.
+end;
+
+
+procedure TfrmMain.HandleOnVoiceProcessingPassEndEvent(Sender: TObject);
+begin
+  // Stub.
+end;
+
+
+procedure TfrmMain.HandleOnStreamEndEvent(Sender: TObject);
+begin
+  StatusBar.SimpleText := Format('Ended playing: %s', [fAudioFileName]);
+  butPlay.Enabled := True;
+  butPause.Enabled := True;
+  butStop.Enabled := True;
+  butReplay.Enabled := True;
+  lblStatus.Caption := GetStatus();
+end;
+
+
+procedure TfrmMain.HandleOnBufferStartEvent(Sender: TObject);
+begin
+  butPlay.Enabled := True;
+  butPause.Enabled := True;
+  butStop.Enabled := True;
+  butReplay.Enabled := True;
+  StatusBar.SimpleText := Format('Ready to play: %s', [fAudioFileName]);
+  lblStatus.Caption := GetStatus();
+end;
+
+
+procedure TfrmMain.HandleOnBufferEndEvent(Sender: TObject);
+begin
+  StatusBar.SimpleText := 'End of playbuffer reached.';
+  lblStatus.Caption := GetStatus();
+end;
+
 
 // initialization and finalization =============================================
 
