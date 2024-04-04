@@ -115,6 +115,7 @@ type
     TimePlayed: MFTIME;
   end;
 
+  // Voice ID's
   TEffectsOnVoices = (afxMasteringVoice,
                       afxSourceVoice);
   
@@ -174,8 +175,6 @@ type
     FOnStreamEndEvent: TNotifyEvent;
     FOnBufferStartEvent: TNotifyEvent;
     FOnBufferEndEvent: TNotifyEvent;
-
-    FEffectsOnVoicesoices: TEffectsOnVoices;
 
     bReverbEffectOnSourceVoice: Boolean;
     bReverbEffectOnMasterVoice: Boolean; 
@@ -578,6 +577,7 @@ end;
 
 function TXaudio2Engine.Play(): HResult;
 begin
+  FLock.Enter;
   if not Assigned(pvSourceVoice) then
     begin
       Result := E_POINTER;
@@ -588,14 +588,11 @@ begin
   if SUCCEEDED(Result) then
     begin
       pvRenderStatus := rsPlaying;
-      FLock.Enter;
-      try
+
         if Assigned(FOnAudioPlayingEvent) then
-          FOnAudioPlayingEvent(Self);
-      finally
-        FLock.Leave;
-      end;
+          FOnAudioPlayingEvent(Self); 
     end;
+  FLock.Leave;
 end;
 
 
@@ -631,7 +628,6 @@ begin
     begin
       pvRenderStatus := rsPauzed;
       FOnAudioPauzedEvent(Self);
-
     end;
 end;
 
@@ -641,7 +637,7 @@ var
   hr: HResult;
 
 begin
-  FLock.Enter;
+    FLock.Enter;
   if Assigned(pvSourceVoice) then
     begin
       hr := pvSourceVoice.SetVolume(aValue,
@@ -651,15 +647,13 @@ begin
                                  [IntToHex(hr, 8) + #13,
                                  SysErrorMessage(hr)]);
     end;
-  FLock.Leave;
+    FLock.Leave();
 end;
 
 
 function TXaudio2Engine.GetVolume(): Single;
 begin
-  FLock.Enter;
   pvSourceVoice.GetVolume(Result);
-  FLock.Leave;
 end;
 
 
@@ -671,9 +665,7 @@ var
   i: Integer;
 
 begin
-
   FLock.Enter;
-
   // Use the following formula to convert the volume level to the decibel (dB) scale:
   // Attenuation (dB) = 20 * log10(Level)
   // For example, a volume level of 0.50 represents 6.02 dB of attenuation.
@@ -700,18 +692,15 @@ begin
                                   [IntToHex(hr, 8) + #13,
                                   SysErrorMessage(hr)]);
     end;
-  FLock.Leave;
+  FLock.Leave();
 end;
 
 
 // Get the volumes for the channels.
 function TXaudio2Engine.GetVolumes(): TFloatArray;
 begin
-  FLock.Enter;
-
   pvSourceVoice.GetChannelVolumes(nChannels,
                                   @Result[0]);
-  FLock.Leave;
 end;
 
 
@@ -724,7 +713,6 @@ begin
   if not Assigned(pvSourceVoice) then
     Exit;
 
-  FLock.Enter;
   flPitch := aValue;
   // To prevent extreme pitching causing buffer underrun.
   if (flPitch > MAX_PITCH) then
@@ -733,40 +721,38 @@ begin
     flPitch := MIN_PITCH;
 
   pvSourceVoice.SetFrequencyRatio(flPitch);
-
-  FLock.Leave;
 end;
 
 
 function TXaudio2Engine.SetReverb(Voice: TEffectsOnVoices;
                                   pEnable: Boolean): HResult;
-var 
-  hr: HResult;
   
 begin
-  //FLock.Enter;
-
+  FLock.Enter;
+  Result := E_FAIL;
+  
   // Add reverb effect to SourceVoice.
-  if (Voice = afxSourceVoice) then
-    begin
-      if not Assigned(pvSourceVoice) then
-        Exit;       
-      hr := CreateReverbEffect(pvSourceVoice,
-                               pEnable);
-      bReverbEffectOnSourceVoice := pEnable;
-    end
-  // Add reverb effect to MasteringVoice.
-  else if (Voice = afxMasteringVoice) then
-    begin
-      if not Assigned(pvMasteringVoice) then
-        Exit;     
-      hr := CreateReverbEffect(pvMasteringVoice,
-                               pEnable);
-      bReverbEffectOnMasterVoice := pEnable;
-    end; 
-       
-  //FLock.Leave;
-  Result := hr  
+    if (Voice = afxSourceVoice) then
+      begin
+        if not Assigned(pvSourceVoice) then
+         Exit;       
+        Result := CreateReverbEffect(pvSourceVoice,
+                                     pEnable);
+        if SUCCEEDED(Result) then      
+          bReverbEffectOnSourceVoice := pEnable;
+      end
+    // Add reverb effect to MasteringVoice.
+    else if (Voice = afxMasteringVoice) then
+      begin
+        if not Assigned(pvMasteringVoice) then
+          Exit;     
+        Result := CreateReverbEffect(pvMasteringVoice,
+                                     pEnable);
+        if SUCCEEDED(Result) then
+          bReverbEffectOnMasterVoice := pEnable;
+      end;
+  HandleThreadMessages(GetCurrentThread());  
+  FLock.Leave;
 end; 
 
 
@@ -776,13 +762,7 @@ procedure TXaudio2Engine.OnVoiceProcessingPassStart(BytesRequired: UINT32);
 begin
   // Not used.
   // pvRenderStatus := rsProcessingPassStart;
-
-  FLock.Enter;
-  try
-    FOnVoiceProcessingPassStartEvent(Self);
-  finally
-    FLock.Leave;
-  end;
+  FOnVoiceProcessingPassStartEvent(Self);
 end;
 
 
@@ -790,13 +770,8 @@ procedure TXaudio2Engine.OnVoiceProcessingPassEnd();
 begin
   // Not used.
   // pvRenderStatus := rsProcessingPassEnd;
+  FOnVoiceProcessingPassEndEvent(Self);
 
-  FLock.Enter;
-  try
-    FOnVoiceProcessingPassEndEvent(Self);
-  finally
-    FLock.Leave;
-  end;
 end;
 
 // OnStreanEnd will be triggered when OnBufferEnd signals and no further buffers are available.
@@ -805,13 +780,7 @@ procedure TXaudio2Engine.OnStreamEnd();
 begin
   // For internal use.
   pvRenderStatus := rsEndOfStream;
-
-  FLock.Enter;
-  try
-    FOnStreamEndEvent(Self);
-  finally
-    FLock.Leave;
-  end;
+  FOnStreamEndEvent(Self);
 end;
 
 
@@ -819,14 +788,8 @@ procedure TXaudio2Engine.OnBufferStart(pBufferContext: Pointer);
 begin
   // For internal use.
   pvRenderStatus := rsPlaying;
-
-  FLock.Enter;
-  try
-    FOnBufferStartEvent(Self);
-  finally
-    FLock.Leave;
-  end;
-end;
+  FOnBufferStartEvent(Self);
+ end;
 
 
 // OnBufferEnd is the first event triggered when a buffer has been finished.
@@ -834,14 +797,8 @@ procedure TXaudio2Engine.OnBufferEnd(pBufferContext: Pointer);
 begin
   // For internal use.
   pvRenderStatus := rsEndOfBuffer;
-
-  FLock.Enter;
-  try
-    FOnBufferEndEvent(Self);
-  finally
-    FLock.Leave;
-  end;
-end;
+  FOnBufferEndEvent(Self);
+ end;
 
 
 procedure TXaudio2Engine.OnLoopEnd(pBufferContext: Pointer);
@@ -871,7 +828,7 @@ var
 label
   done;
 
-begin
+begin      
   hr := XAudio2CreateReverb(pvXAPO);
   if FAILED(hr) then
     goto done;
