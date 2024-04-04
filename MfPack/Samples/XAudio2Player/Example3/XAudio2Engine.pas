@@ -87,8 +87,8 @@ uses
   WinApi.DirectX.XAudio2.XAudio2,
   WinApi.DirectX.XAudio2.XAPO,
   WinApi.DirectX.XAudio2.X3DAudio,
+  WinApi.DirectX.XAudio2.XAudio2Fx,
   {WinMM}
-  // WinApi.WinMM.MMSystem,
   WinApi.WinMM.MMReg,
   Tools;
 
@@ -115,7 +115,9 @@ type
     TimePlayed: MFTIME;
   end;
 
-
+  TEffectsOnVoices = (afxMasteringVoice,
+                      afxSourceVoice);
+  
   TXaudio2Engine = class(IXAudio2VoiceCallback)
 
 {$region 'IXAudio2VoiceCallback implementation'}
@@ -151,8 +153,10 @@ type
     pvwaveformatlength: Cardinal;
     pvRenderStatus: TRenderstatus;
 
-    hwndCaller: HWND;  // Usually the mainform.
+    pvXAPO: IUnknown;  // effects
 
+    hwndCaller: HWND;  // Usually the mainform.
+    FLock: TCriticalSection;
     nChannels: UInt32;            // Holds the number of volumechannels.
     nSamplesPerSecond: UInt32;    // Playtime calculations.
     m_VolumeChannels: TFloatArray;  // Dynamic array that holds the volume per channel.
@@ -171,10 +175,21 @@ type
     FOnBufferStartEvent: TNotifyEvent;
     FOnBufferEndEvent: TNotifyEvent;
 
+    FEffectsOnVoicesoices: TEffectsOnVoices;
+
+    bReverbEffectOnSourceVoice: Boolean;
+    bReverbEffectOnMasterVoice: Boolean; 
+    
+    // Creates a reverb effect
+    // See also: https://learn.microsoft.com/en-us/windows/win32/xaudio2/how-to--create-an-effect-chain
+    function CreateReverbEffect(pVoice: IXAudio2Voice;
+                                pEnable: Boolean = True;
+                                pKeepXAPO: Boolean = True  // Do not destroy the XAPO when needed again.
+                               ): HResult;
+
   public
     // Event extra data.
-    FXaudio2EventData: TXaudio2EventData;
-    FLock: TCriticalSection;
+    FXaudio2EventData: TXaudio2EventData;    
     // This value will be set to True, when user stops rendering.
     // In that case the SourceVoice will be removed from the topology.
     // Replay wil create a new sourcevoice.
@@ -202,12 +217,20 @@ type
     // Volume per channel.
     procedure SetVolumes(Value: TFloatArray);
     function GetVolumes(): TFloatArray;
+    // Pitch.
     procedure SetPitch(aValue: Single);
+    // Reverb
+    function SetReverb(Voice: TEffectsOnVoices;
+                       pEnable: Boolean): HResult;
 
     property PlayStatus: TRenderStatus read pvRenderStatus write pvRenderStatus;
     property SoundChannels: UINT32 read nChannels;
     property VolumeChannels: TFloatArray read m_VolumeChannels write m_VolumeChannels;
 
+    // Reverb effect assignments.
+    property ReverbEffectOnSourceVoice: Boolean read bReverbEffectOnSourceVoice;
+    property ReverbEffectOnMasterVoice: Boolean read bReverbEffectOnMasterVoice;
+    
     // Class events.
     property OnProcessingData: TNotifyEvent read FOnProcessingData write FOnProcessingData;
     property OnAudioReadyEvent: TNotifyEvent read FOnAudioReadyEvent write FOnAudioReadyEvent;
@@ -234,6 +257,8 @@ begin
   inherited;
   FLock := TCriticalSection.Create; // Initialize the critical section object.
   NeedNewSourceVoice := False;
+  bReverbEffectOnSourceVoice := False;
+  bReverbEffectOnMasterVoice := False;
 end;
 
 
@@ -244,7 +269,7 @@ begin
     begin
       pvXAudio2.StopEngine();
 
-      if Assigned(pvSourceVoice) then
+      if Assigned(pvMasteringVoice) then
         begin
           pvMasteringVoice.DestroyVoice();
           pvMasteringVoice := nil;
@@ -256,6 +281,9 @@ begin
           pvSourceVoice := nil
         end;
 
+      if Assigned(pvXAPO) then
+        pvXAPO := nil;
+        
       SafeRelease(pvXAudio2);
     end;
 
@@ -690,6 +718,7 @@ end;
 procedure TXaudio2Engine.SetPitch(aValue: Single);
 var
   flPitch: Single;
+  
 begin
 
   if not Assigned(pvSourceVoice) then
@@ -707,6 +736,38 @@ begin
 
   FLock.Leave;
 end;
+
+
+function TXaudio2Engine.SetReverb(Voice: TEffectsOnVoices;
+                                  pEnable: Boolean): HResult;
+var 
+  hr: HResult;
+  
+begin
+  //FLock.Enter;
+
+  // Add reverb effect to SourceVoice.
+  if (Voice = afxSourceVoice) then
+    begin
+      if not Assigned(pvSourceVoice) then
+        Exit;       
+      hr := CreateReverbEffect(pvSourceVoice,
+                               pEnable);
+      bReverbEffectOnSourceVoice := pEnable;
+    end
+  // Add reverb effect to MasteringVoice.
+  else if (Voice = afxMasteringVoice) then
+    begin
+      if not Assigned(pvMasteringVoice) then
+        Exit;     
+      hr := CreateReverbEffect(pvMasteringVoice,
+                               pEnable);
+      bReverbEffectOnMasterVoice := pEnable;
+    end; 
+       
+  //FLock.Leave;
+  Result := hr  
+end; 
 
 
 // Callback implementation =================================================
@@ -796,6 +857,91 @@ begin
 end;
 
 // =========================================================================
+
+// Effects
+function TXaudio2Engine.CreateReverbEffect(pVoice: IXAudio2Voice;
+                                           pEnable: Boolean = True;
+                                           pKeepXAPO: Boolean = True): HResult;
+var
+  hr: HResult;
+  descriptor: XAUDIO2_EFFECT_DESCRIPTOR;
+  chain: XAUDIO2_EFFECT_CHAIN;
+  reverbParameters: XAUDIO2FX_REVERB_PARAMETERS;
+
+label
+  done;
+
+begin
+  hr := XAudio2CreateReverb(pvXAPO);
+  if FAILED(hr) then
+    goto done;
+    
+  // Populate an XAUDIO2_EFFECT_DESCRIPTOR structure with data.
+  descriptor.InitialState := True;
+  descriptor.OutputChannels := nChannels;
+  descriptor.pEffect := pvXAPO;
+  
+  // Populate an XAUDIO2_EFFECT_CHAIN structure with data.
+  chain.EffectCount := 1;
+  chain.pEffectDescriptors := @descriptor;
+  
+  // Apply the effect chain to a voice with the SetEffectChain function.
+  // Note: You can apply effect chains to master voices, source voices, and submix voices.
+  hr := pVoice.SetEffectChain(@chain);
+  if FAILED(hr) then
+    goto done;
+    
+  if not pKeepXAPO then
+    pvXAPO := nil;
+
+  // Populate the parameter structure, if any, associated with the effect.
+  // The reverb effect uses an XAUDIO2FX_REVERB_PARAMETERS structure.
+  reverbParameters.ReflectionsDelay    := XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_DELAY;
+  reverbParameters.ReverbDelay         := XAUDIO2FX_REVERB_DEFAULT_REVERB_DELAY;
+  reverbParameters.RearDelay           := XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY;
+  reverbParameters.PositionLeft        := XAUDIO2FX_REVERB_DEFAULT_POSITION;
+  reverbParameters.PositionRight       := XAUDIO2FX_REVERB_DEFAULT_POSITION;
+  reverbParameters.PositionMatrixLeft  := XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;
+  reverbParameters.PositionMatrixRight := XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;
+  reverbParameters.EarlyDiffusion      := XAUDIO2FX_REVERB_DEFAULT_EARLY_DIFFUSION;
+  reverbParameters.LateDiffusion       := XAUDIO2FX_REVERB_DEFAULT_LATE_DIFFUSION;
+  reverbParameters.LowEQGain           := XAUDIO2FX_REVERB_DEFAULT_LOW_EQ_GAIN;
+  reverbParameters.LowEQCutoff         := XAUDIO2FX_REVERB_DEFAULT_LOW_EQ_CUTOFF;
+  reverbParameters.HighEQGain          := XAUDIO2FX_REVERB_DEFAULT_HIGH_EQ_GAIN;
+  reverbParameters.HighEQCutoff        := XAUDIO2FX_REVERB_DEFAULT_HIGH_EQ_CUTOFF;
+  reverbParameters.RoomFilterFreq      := XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_FREQ;
+  reverbParameters.RoomFilterMain      := XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_MAIN;
+  reverbParameters.RoomFilterHF        := XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_HF;
+  reverbParameters.ReflectionsGain     := XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_GAIN;
+  reverbParameters.ReverbGain          := XAUDIO2FX_REVERB_DEFAULT_REVERB_GAIN;
+  reverbParameters.DecayTime           := XAUDIO2FX_REVERB_DEFAULT_DECAY_TIME;
+  reverbParameters.Density             := XAUDIO2FX_REVERB_DEFAULT_DENSITY;
+  reverbParameters.RoomSize            := XAUDIO2FX_REVERB_DEFAULT_ROOM_SIZE;
+  reverbParameters.WetDryMix           := XAUDIO2FX_REVERB_DEFAULT_WET_DRY_MIX;
+
+  // Pass the effect parameter structure to the effect by calling the
+  // SetEffectParameters function on the voice to which the effect is attached.
+  hr := pVoice.SetEffectParameters(0,
+                                   @reverbParameters,
+                                   SizeOf(reverbParameters),
+                                   0);
+  if SUCCEEDED(hr) then
+    // Disable or enable the effect, whenever appropriate.
+    // You can use DisableEffect at any time to turn an effect off.
+    // You can turn on an effect again with EnableEffect.
+    // Note: The parameters for DisableEffect and EnableEffect specify which
+    //       effect in the chain to enable or disable.
+    if pEnable then
+      hr := pVoice.EnableEffect(0, 
+                                0)
+    else
+      hr := pVoice.DisableEffect(0,
+                                 0);
+
+  
+done:
+  Result := hr;
+end;
 
 end.
 

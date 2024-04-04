@@ -4,8 +4,8 @@ object frmMain: TfrmMain
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'XAudio2 Player  Sample 3'
-  ClientHeight = 381
-  ClientWidth = 324
+  ClientHeight = 388
+  ClientWidth = 419
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -22,43 +22,50 @@ object frmMain: TfrmMain
   OnKeyUp = FormKeyUp
   PixelsPerInch = 96
   TextHeight = 13
+  object Bevel6: TBevel
+    Left = 238
+    Top = 30
+    Width = 170
+    Height = 233
+  end
   object Bevel5: TBevel
     Left = 0
-    Top = 337
-    Width = 324
+    Top = 344
+    Width = 419
     Height = 20
     Align = alBottom
     Shape = bsTopLine
     ExplicitTop = 354
+    ExplicitWidth = 324
   end
   object Bevel1: TBevel
     Left = 0
     Top = 0
-    Width = 324
-    Height = 299
+    Width = 419
+    Height = 309
     Align = alTop
   end
   object Bevel4: TBevel
     Left = 177
-    Top = 19
+    Top = 30
     Width = 55
     Height = 233
   end
   object Bevel3: TBevel
     Left = 9
-    Top = 19
+    Top = 30
     Width = 78
     Height = 233
   end
   object Bevel2: TBevel
     Left = 93
-    Top = 19
+    Top = 30
     Width = 78
     Height = 233
   end
   object lblDuration: TLabel
     Left = 11
-    Top = 258
+    Top = 270
     Width = 92
     Height = 13
     AutoSize = False
@@ -66,7 +73,7 @@ object frmMain: TfrmMain
   end
   object lblProcessed: TLabel
     Left = 122
-    Top = 277
+    Top = 289
     Width = 154
     Height = 13
     AutoSize = False
@@ -74,7 +81,7 @@ object frmMain: TfrmMain
   end
   object lblPlayed: TLabel
     Left = 20
-    Top = 277
+    Top = 289
     Width = 83
     Height = 13
     AutoSize = False
@@ -82,7 +89,7 @@ object frmMain: TfrmMain
   end
   object pmRight: TMfPeakMeter
     Left = 99
-    Top = 49
+    Top = 60
     Width = 17
     Height = 172
     BackGroundColor = clAppWorkSpace
@@ -94,7 +101,7 @@ object frmMain: TfrmMain
   end
   object pmLeft: TMfPeakMeter
     Left = 63
-    Top = 49
+    Top = 60
     Width = 18
     Height = 172
     BackGroundColor = clAppWorkSpace
@@ -106,7 +113,7 @@ object frmMain: TfrmMain
   end
   object Label1: TLabel
     Left = 39
-    Top = 232
+    Top = 243
     Width = 22
     Height = 14
     Caption = 'Left'
@@ -119,7 +126,7 @@ object frmMain: TfrmMain
   end
   object Label2: TLabel
     Left = 116
-    Top = 232
+    Top = 243
     Width = 28
     Height = 14
     Caption = 'Right'
@@ -132,7 +139,7 @@ object frmMain: TfrmMain
   end
   object Label3: TLabel
     Left = 190
-    Top = 232
+    Top = 243
     Width = 27
     Height = 14
     Caption = 'Pitch'
@@ -145,7 +152,7 @@ object frmMain: TfrmMain
   end
   object lblLeftVolume: TLabel
     Left = 14
-    Top = 27
+    Top = 38
     Width = 67
     Height = 13
     Alignment = taCenter
@@ -160,7 +167,7 @@ object frmMain: TfrmMain
   end
   object lblRightVolume: TLabel
     Left = 99
-    Top = 27
+    Top = 38
     Width = 66
     Height = 13
     Alignment = taCenter
@@ -175,7 +182,7 @@ object frmMain: TfrmMain
   end
   object lblPitch: TLabel
     Left = 180
-    Top = 27
+    Top = 38
     Width = 49
     Height = 13
     Alignment = taCenter
@@ -189,16 +196,41 @@ object frmMain: TfrmMain
     ParentFont = False
   end
   object lblStatus: TLabel
-    Left = 3
-    Top = 340
-    Width = 298
+    Left = 6
+    Top = 347
+    Width = 404
     Height = 13
     AutoSize = False
     Caption = 'Status: Stopped'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clGrayText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+  end
+  object Label4: TLabel
+    Left = 300
+    Top = 243
+    Width = 38
+    Height = 14
+    Caption = 'Effects'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = cl3DDkShadow
+    Font.Height = -12
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+  end
+  object Bevel7: TBevel
+    Left = 9
+    Top = 9
+    Width = 162
+    Height = 23
   end
   object butPlay: TButton
     Left = 8
-    Top = 306
+    Top = 315
     Width = 74
     Height = 24
     Caption = 'Play'
@@ -208,7 +240,7 @@ object frmMain: TfrmMain
   end
   object butStop: TButton
     Left = 166
-    Top = 307
+    Top = 315
     Width = 74
     Height = 24
     Caption = 'Stop'
@@ -218,16 +250,20 @@ object frmMain: TfrmMain
   end
   object StatusBar: TStatusBar
     Left = 0
-    Top = 357
-    Width = 324
+    Top = 364
+    Width = 419
     Height = 24
     Panels = <>
+    ParentShowHint = False
+    ShowHint = True
     SimplePanel = True
     SimpleText = 'Open an audio file'
+    OnMouseMove = StatusBarMouseMove
+    ExplicitTop = 366
   end
   object trbVolumeR: TTrackBar
     Left = 122
-    Top = 46
+    Top = 57
     Width = 35
     Height = 180
     Hint = 'Press and release SHIFT + ESC to set zero position.'
@@ -245,7 +281,7 @@ object frmMain: TfrmMain
   end
   object trbVolumeL: TTrackBar
     Left = 14
-    Top = 46
+    Top = 57
     Width = 39
     Height = 180
     Hint = 'Press and release SHIFT + ESC to set zero position.'
@@ -262,8 +298,8 @@ object frmMain: TfrmMain
     OnChange = trbVolumeLChange
   end
   object cbLockVolumeSliders: TCheckBox
-    Left = 44
-    Top = 2
+    Left = 33
+    Top = 12
     Width = 115
     Height = 15
     Caption = 'Lock Volume Sliders'
@@ -272,8 +308,8 @@ object frmMain: TfrmMain
     TabOrder = 5
   end
   object butReplay: TButton
-    Left = 242
-    Top = 306
+    Left = 241
+    Top = 317
     Width = 74
     Height = 24
     Caption = 'Replay'
@@ -283,7 +319,7 @@ object frmMain: TfrmMain
   end
   object butPause: TButton
     Left = 86
-    Top = 306
+    Top = 315
     Width = 74
     Height = 24
     Caption = 'Pause'
@@ -293,7 +329,7 @@ object frmMain: TfrmMain
   end
   object trbPitch: TTrackBar
     Left = 185
-    Top = 46
+    Top = 57
     Width = 38
     Height = 180
     DoubleBuffered = True
@@ -305,9 +341,27 @@ object frmMain: TfrmMain
     TickMarks = tmBoth
     OnChange = trbPitchChange
   end
+  object cbxReverbMain: TCheckBox
+    Left = 241
+    Top = 39
+    Width = 165
+    Height = 16
+    Caption = 'Set Reverb on Main Voice'
+    TabOrder = 9
+    OnClick = cbxReverbMainClick
+  end
+  object cbxReverbSource: TCheckBox
+    Left = 241
+    Top = 61
+    Width = 165
+    Height = 16
+    Caption = 'Set Reverb on Source Voice'
+    TabOrder = 10
+    OnClick = cbxReverbSourceClick
+  end
   object mnuMain: TMainMenu
-    Left = 351
-    Top = 68
+    Left = 437
+    Top = 75
     object OpenAudioFile1: TMenuItem
       Caption = 'File'
       object Open1: TMenuItem
@@ -327,7 +381,7 @@ object frmMain: TfrmMain
     Filter = 
       'WAV|*.wav|MPEG Audio Layer-3  (MP3)|*.mp3|Free Losless Audio Cod' +
       'er (FLAC)|*.flac|All files|*.*'
-    Left = 350
-    Top = 19
+    Left = 436
+    Top = 27
   end
 end

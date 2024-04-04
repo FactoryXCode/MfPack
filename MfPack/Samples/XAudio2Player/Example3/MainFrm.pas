@@ -131,6 +131,11 @@ type
     lblPitch: TLabel;
     lblStatus: TLabel;
     Bevel5: TBevel;
+    cbxReverbMain: TCheckBox;
+    cbxReverbSource: TCheckBox;
+    Bevel6: TBevel;
+    Label4: TLabel;
+    Bevel7: TBevel;
     procedure Open1Click(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure butPlayClick(Sender: TObject);
@@ -143,6 +148,10 @@ type
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure trbPitchChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure cbxReverbMainClick(Sender: TObject);
+    procedure cbxReverbSourceClick(Sender: TObject);
+    procedure StatusBarMouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
 
   private
     { Private declarations }
@@ -227,11 +236,19 @@ begin
   if not fXaudio2Engine.NeedNewSourceVoice then
     butStopClick(nil);
 
+  // You don't need to command Play, this will be done internally.
+  if SUCCEEDED(hr) then
+    hr := fXaudio2Engine.InitializeXAudio2(True);
+
   // Keep volume on previous volume.
   SetVolumeChannels();
 
-  if SUCCEEDED(hr) then
-    hr := fXaudio2Engine.InitializeXAudio2(True);
+  // Set choosen effects.
+  fXaudio2Engine.SetReverb(afxMasteringVoice,
+                           cbxReverbMain.Checked);
+
+  fXaudio2Engine.SetReverb(afxMasteringVoice,
+                           cbxReverbSource.Checked);
 
   if FAILED(hr) then
     StatusBar.SimpleText := Format('Could not initialize XAudio2 Error: %d.', [hr]);
@@ -245,6 +262,22 @@ begin
     Exit;
 
   fXaudio2Engine.Stop();
+end;
+
+
+procedure TfrmMain.cbxReverbMainClick(Sender: TObject);
+begin
+  if Assigned(fXaudio2Engine) then
+    fXaudio2Engine.SetReverb(afxMasteringVoice,
+                             cbxReverbMain.Checked);
+end;
+
+
+procedure TfrmMain.cbxReverbSourceClick(Sender: TObject);
+begin
+  if Assigned(fXaudio2Engine) then
+    fXaudio2Engine.SetReverb(afxSourceVoice,
+                             cbxReverbSource.Checked);
 end;
 
 
@@ -389,6 +422,14 @@ begin
       fXaudio2Engine.VolumeChannels[1] := iSliderR;
     end;
   fXaudio2Engine.SetVolumes(fXaudio2Engine.VolumeChannels);
+end;
+
+
+procedure TfrmMain.StatusBarMouseMove(Sender: TObject; Shift: TShiftState; X,
+  Y: Integer);
+begin
+  if FileExists(fAudioFileName) then
+    StatusBar.Hint := ExtractFileName(fAudioFileName);
 end;
 
 
