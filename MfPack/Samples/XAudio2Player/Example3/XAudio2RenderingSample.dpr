@@ -4,7 +4,9 @@ uses
   Vcl.Forms,
   MainFrm in 'MainFrm.pas' {frmMain},
   XAudio2Engine in 'XAudio2Engine.pas',
-  Tools in 'Tools.pas';
+  Tools in 'Tools.pas',
+  XAudio2_FXReverb in 'XAudio2_FXReverb.pas',
+  XAudio2_FXMasterLimiter in 'XAudio2_FXMasterLimiter.pas';
 
 {$R *.res}
 

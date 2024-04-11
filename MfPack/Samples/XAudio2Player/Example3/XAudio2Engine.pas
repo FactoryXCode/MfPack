@@ -69,7 +69,7 @@ uses
   WinApi.Windows,
   WinApi.ActiveX,
   WinApi.WinApiTypes,
-  Messages,
+  WinApi.WinError,
   {System}
   System.SysUtils,
   System.Classes,
@@ -88,9 +88,12 @@ uses
   WinApi.DirectX.XAudio2.XAPO,
   WinApi.DirectX.XAudio2.X3DAudio,
   WinApi.DirectX.XAudio2.XAudio2Fx,
+  WinApi.DirectX.XAudio2.XAPOFx,
   {WinMM}
   WinApi.WinMM.MMReg,
-  Tools;
+  Tools,
+  XAudio2_FXReverb,
+  XAudio2_FXMasterLimiter;
 
 const
   // Minimum and maximum pitch values.
@@ -112,13 +115,14 @@ type
 
   TXaudio2EventData = record
     SamplesProcessed: LONGLONG;
+    Position: LONGLONG;
     TimePlayed: MFTIME;
   end;
 
   // Voice ID's
   TEffectsOnVoices = (afxMasteringVoice,
                       afxSourceVoice);
-  
+
   TXaudio2Engine = class(IXAudio2VoiceCallback)
 
 {$region 'IXAudio2VoiceCallback implementation'}
@@ -127,7 +131,7 @@ type
     /// just before XAudio2 reads data from the voice's buffer queue.</summary>
     procedure OnVoiceProcessingPassStart(BytesRequired: UINT32); override; stdcall;
     /// <summary>Called just after the processing pass for the voice ends.</summary>
-    procedure OnVoiceProcessingPassEnd(); override; stdcall; //
+    procedure OnVoiceProcessingPassEnd(); override; stdcall;
     /// <summary>Called when the voice has just finished playing a contiguous audio stream.</summary>
     procedure OnStreamEnd(); override; stdcall;
     /// <summary>Called when the voice is about to start processing a new audio buffer.</summary>
@@ -147,20 +151,34 @@ type
     pvMasteringVoice: IXAudio2MasteringVoice;
     pvSourceVoice: IXAudio2SourceVoice;
     pvXAudioBuffer: XAUDIO2_BUFFER;
-    pvBytes: TBytes;
+
+    // Effects
+    pvFxReverbEffect: TFxReverb;
+    pvFxMasterLimiter: TFxMasterLimiter;
+
+    pvBytes: array of Byte;
     pvFileName: TFileName;
-    pvSourceFileDuration: LONGLONG;
+
+    pvSourceFileDuration: MFTIME;
+    pvBufferStart: UINT32;
+    pvNewBufferPosition: LONGLONG; // See also: TXaudio2EventData.Position
+    pvBufferSize: UINT32; // Length of the audiobuffer (pvBytes).
+    pvBufferPrevPlayed: UINT32;
+
     pvWaveformatex: PWAVEFORMATEX;
     pvwaveformatlength: Cardinal;
     pvRenderStatus: TRenderstatus;
 
-    pvXAPO: IUnknown;  // effects
+    pvChannels: UInt32;              // Holds the number of volumechannels.
+    pvSamplesPerSecond: UInt32;      // Playtime calculations.
+    m_VolumeChannels: TFloatArray;   // Dynamic array that holds the volume per channel.
 
-    hwndCaller: HWND;  // Usually the mainform.
-    FLock: TCriticalSection;
-    nChannels: UInt32;            // Holds the number of volumechannels.
-    nSamplesPerSecond: UInt32;    // Playtime calculations.
-    m_VolumeChannels: TFloatArray;  // Dynamic array that holds the volume per channel.
+    FXaudio2EventData: TXaudio2EventData; // Event extra data structure.
+
+    // This value will be set to True, when user stops rendering.
+    // In that case the SourceVoice will be removed from the topology.
+    // Replay wil create a new sourcevoice.
+    NeedNewSourceVoice: Boolean;
 
     // Class events
     FOnProcessingData: TNotifyEvent;
@@ -176,33 +194,28 @@ type
     FOnBufferStartEvent: TNotifyEvent;
     FOnBufferEndEvent: TNotifyEvent;
 
+    // Reverb
     bReverbEffectOnSourceVoice: Boolean;
-    bReverbEffectOnMasterVoice: Boolean; 
-    
-    // Creates a reverb effect
-    // See also: https://learn.microsoft.com/en-us/windows/win32/xaudio2/how-to--create-an-effect-chain
-    function CreateReverbEffect(pVoice: IXAudio2Voice;
-                                pEnable: Boolean = True;
-                                pKeepXAPO: Boolean = True  // Do not destroy the XAPO when needed again.
-                               ): HResult;
+    pvReverbEffectOnSourceVoiceParams: TReverbParams;
+    bReverbEffectOnMasteringVoice: Boolean;
+    pvReverbEffectOnMasteringVoiceParams: TReverbParams;
+
+    // Initializes a new audiobuffer.
+    function InitAudioBuffer(playStart: UINT32 = 0;
+                             playEnd: UINT32 = 0): HResult;
 
   public
-    // Event extra data.
-    FXaudio2EventData: TXaudio2EventData;    
-    // This value will be set to True, when user stops rendering.
-    // In that case the SourceVoice will be removed from the topology.
-    // Replay wil create a new sourcevoice.
-    NeedNewSourceVoice: Boolean;
 
     constructor Create();
     destructor Destroy(); override;
 
+    // Run this method to load the file and initialize XAudio2.
+    function LoadAndPlay(const audiofile: TFileName): HResult;
 
-    function LoadFile(hHwnd: HWND; // The handle of the caller (like the mainform)
-                      const audiofile: TFileName;
-                      fileDuration: LONGLONG): HResult;
+    // Use this method if you don't want to Initialize XAudio2.
+    function LoadFile(const audiofile: TFileName): HResult;
 
-    // Initialize XAudio2 engine. Call LoadFile first!
+    // Initialize XAudio2 engine. LoadFile must be called first!
     function InitializeXAudio2(replay: Boolean = False): HResult;
 
     function Play(): HResult;
@@ -218,18 +231,30 @@ type
     function GetVolumes(): TFloatArray;
     // Pitch.
     procedure SetPitch(aValue: Single);
-    // Reverb
+    // Reverb.
     function SetReverb(Voice: TEffectsOnVoices;
+                       ReverbParams: TReverbParams;
                        pEnable: Boolean): HResult;
+    // Masterlimiter
+    function SetMasterLimiter(MasterLimiterparams: FXMASTERINGLIMITER_PARAMETERS): HResult;
 
-    property PlayStatus: TRenderStatus read pvRenderStatus write pvRenderStatus;
-    property SoundChannels: UINT32 read nChannels;
-    property VolumeChannels: TFloatArray read m_VolumeChannels write m_VolumeChannels;
+    // Sets the new startposition in the audiobuffer.
+    // Note that position must contains the number of samples!
+    function GotoNewPosition(position: MFTIME): HResult;
+
+    property PlayStatus: TRenderStatus read pvRenderStatus;
+    property SoundChannels: UINT32 read pvChannels;
+    property VolumeChannels: TFloatArray read m_VolumeChannels;
+    property Duration: MFTIME read pvSourceFileDuration;
+    property SamplesPerSec: UINT32 read pvSamplesPerSecond;
+
+    property AudioEventData: TXAudio2EventData read FXaudio2EventData;
+    property AddNewSourceVoice: Boolean read NeedNewSourceVoice;
 
     // Reverb effect assignments.
     property ReverbEffectOnSourceVoice: Boolean read bReverbEffectOnSourceVoice;
-    property ReverbEffectOnMasterVoice: Boolean read bReverbEffectOnMasterVoice;
-    
+    property ReverbEffectOnMasterVoice: Boolean read bReverbEffectOnMasteringVoice;
+
     // Class events.
     property OnProcessingData: TNotifyEvent read FOnProcessingData write FOnProcessingData;
     property OnAudioReadyEvent: TNotifyEvent read FOnAudioReadyEvent write FOnAudioReadyEvent;
@@ -238,7 +263,7 @@ type
     property OnAudioPlayingEvent: TNotifyEvent read FOnAudioPlayingEvent write FOnAudioPlayingEvent;
     property OnAudioPauzedEvent: TNotifyEvent read FOnAudioPauzedEvent write FOnAudioPauzedEvent;
 
-    // Calback events.
+    // IXAudio2VoiceCallback events.
     property OnVoiceProcessingPassStartEvent: TNotifyEvent read FOnVoiceProcessingPassStartEvent write FOnVoiceProcessingPassStartEvent;
     property OnVoiceProcessingPassEndEvent: TNotifyEvent read FOnVoiceProcessingPassEndEvent write FOnVoiceProcessingPassEndEvent;
     property OnStreamEndEvent: TNotifyEvent read FOnStreamEndEvent write FOnStreamEndEvent;
@@ -254,10 +279,10 @@ implementation
 constructor TXaudio2Engine.Create();
 begin
   inherited;
-  FLock := TCriticalSection.Create; // Initialize the critical section object.
+
   NeedNewSourceVoice := False;
   bReverbEffectOnSourceVoice := False;
-  bReverbEffectOnMasterVoice := False;
+  bReverbEffectOnMasteringVoice := False;
 end;
 
 
@@ -267,6 +292,13 @@ begin
   if Assigned(pvXAudio2) then
     begin
       pvXAudio2.StopEngine();
+
+      // Remove effects.
+      if Assigned(pvFxReverbEffect) then
+        FreeAndNil(pvFxReverbEffect);
+
+      if Assigned(pvFxMasterLimiter) then
+        FreeAndNil(pvFxMasterLimiter);
 
       if Assigned(pvMasteringVoice) then
         begin
@@ -280,21 +312,23 @@ begin
           pvSourceVoice := nil
         end;
 
-      if Assigned(pvXAPO) then
-        pvXAPO := nil;
-        
       SafeRelease(pvXAudio2);
     end;
-
-  FLock.Free;
 
   inherited;
 end;
 
 
-function TXaudio2Engine.LoadFile(hHwnd: HWND;
-                                 const audiofile: TFileName;
-                                 fileDuration: LONGLONG): HResult;
+function TXaudio2Engine.LoadAndPlay(const audiofile: TFileName): HResult;
+begin
+  Result := LoadFile(audiofile);
+
+  if SUCCEEDED(Result) then
+    Result := InitializeXAudio2();
+end;
+
+
+function TXaudio2Engine.LoadFile(const audiofile: TFileName): HResult;
 var
   hr: HResult;
   sourceReaderConfiguration: IMFAttributes;
@@ -309,20 +343,28 @@ var
   flags: DWORD;
   buffer: IMFMediaBuffer;
   audioData: PByte;
-  audioDataLength: DWORD;
+  audioValidDataLength: DWORD;
 
 label
   done;
 
 begin
 
-  hwndCaller := hHwnd;
   pvFileName := audiofile;
-  pvSourceFileDuration := fileDuration;
+  if not FileExists(audiofile) then
+    begin
+      hr := ERROR_FILE_NOT_FOUND;
+      goto done;
+    end;
 
-  // Create Attribute Store
-  hr := MFCreateAttributes(sourceReaderConfiguration,
-                           1);
+  // Get the length of the audiofile.
+  hr := GetFileDuration(StrToPWideChar(audiofile),
+                        pvSourceFileDuration);
+
+  if SUCCEEDED(hr) then
+    // Create Attribute Store
+    hr := MFCreateAttributes(sourceReaderConfiguration,
+                             1);
 
   if SUCCEEDED(hr) then
     hr := sourceReaderConfiguration.SetUINT32(MF_LOW_LATENCY,
@@ -373,11 +415,12 @@ begin
         if SUCCEEDED(hr) then
           hr := partialType.SetGUID(MF_MT_MAJOR_TYPE,
                                     MFMediaType_Audio);
+        
 
         // We need uncompressed data
         if SUCCEEDED(hr) then
           hr := partialType.SetGUID(MF_MT_SUBTYPE,
-                                    MFAudioFormat_PCM);
+                                    {MFAudioFormat_Float} MFAudioFormat_PCM);
 
         if SUCCEEDED(hr) then
           hr := sourceReader.SetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
@@ -395,19 +438,19 @@ begin
 
   // Get the number of channels.
   if SUCCEEDED(hr) then
-    nChannels := MFGetAttributeUINT32(uncompressedAudioType,
-                                      MF_MT_AUDIO_NUM_CHANNELS,
-                                      UINT32(2));
+    pvChannels := MFGetAttributeUINT32(uncompressedAudioType,
+                                       MF_MT_AUDIO_NUM_CHANNELS,
+                                       UINT32(2));
   // Set the channel array.
   SetLength(m_VolumeChannels,
-            nChannels);
+            pvChannels);
 
   // Get Samples Per Second for time calculations.
   if SUCCEEDED(hr) then
-    nSamplesPerSecond := MFGetAttributeUINT32(uncompressedAudioType,
-                                              MF_MT_AUDIO_SAMPLES_PER_SECOND,
-                                              UINT32(0));
-  // Createt sample.
+    pvSamplesPerSecond := MFGetAttributeUINT32(uncompressedAudioType,
+                                               MF_MT_AUDIO_SAMPLES_PER_SECOND,
+                                               UINT32(0));
+  // Set sample size to zero.
   if SUCCEEDED(hr) then
     SetLength(pvBytes,
               0);
@@ -438,17 +481,17 @@ begin
       if SUCCEEDED(hr) then
         hr := buffer.Lock(audioData,
                           nil,
-                          @audioDataLength);
+                          @audioValidDataLength);
 
       if SUCCEEDED(hr) then
         try
-
+          // Set sample size.
           SetLength(pvBytes,
-                    Length(pvBytes) + Integer(audioDataLength));
-
+                    Length(pvBytes) + Integer(audioValidDataLength));
+          // Copy data to memory.
           Move(audioData^,
-               pvBytes[Length(pvBytes) - Integer(audioDataLength)],
-               audioDataLength);
+               pvBytes[Length(pvBytes) - Integer(audioValidDataLength)],
+               audioValidDataLength);
 
         finally
           hr := buffer.Unlock();
@@ -456,30 +499,66 @@ begin
       SafeRelease(sample);
     end;
 
-  // Create Xaudio2 and run audio.
-  if SUCCEEDED(hr) then
-    hr := InitializeXAudio2();
-
 done:
   Result := hr;
+end;
+
+
+function TXaudio2Engine.InitAudioBuffer(playStart: UINT32 = 0;
+                                        playEnd: UINT32 = 0): HResult;
+
+begin
+  // Set up XAudio2 buffer.
+  ZeroMemory(@pvXAudioBuffer,
+             SizeOf(XAUDIO2_BUFFER));
+
+  pvBufferSize := Length(pvBytes);
+
+  pvXAudioBuffer.AudioBytes := pvBufferSize;
+  pvXAudioBuffer.pAudioData := @pvBytes[0];
+  pvXAudioBuffer.Flags := XAUDIO2_END_OF_STREAM;
+
+  pvXAudioBuffer.PlayBegin := playStart; // pvBufferStart
+  pvXAudioBuffer.PlayLength := playEnd;  // Zero means to play until the end of the buffer.
+  // Can be extended with loop arguments.
+
+  // Start source voice and submit buffer.
+  Result := pvSourceVoice.SubmitSourceBuffer(@pvXAudioBuffer);
 end;
 
 
 function TXaudio2Engine.InitializeXAudio2(replay: Boolean = False): HResult;
 var
   hr: HResult;
-  voiceState: XAUDIO2_VOICE_STATE;
+  voicestate: XAUDIO2_VOICE_STATE;
 
 label
   done;
 
 begin
+  // Reset to initial values.
+  ZeroMemory(@FXaudio2EventData,
+             SizeOf(TXaudio2EventData));
+  pvBufferPrevPlayed := 0;
+  pvNewBufferPosition := 0;
+
+  // Remove active effects.
+  if Assigned(pvFxReverbEffect) then
+    FreeAndNil(pvFxReverbEffect);
+
+  if Assigned(pvFxMasterLimiter) then
+    FreeAndNil(pvFxMasterLimiter);
+
 
   // Use the XAudio2Create function to create an instance of the XAudio2 engine.
-  // Skip this if user pressed Stop. In that case the SourceVoice is removed from the
-  // topology. The SourceVoice will be added later.
-  if not NeedNewSourceVoice then
+  // Skip this if user pressed Stop and does Replay again.
+  // In that case the SourceVoice is removed from the topology.
+  // The SourceVoice will be added later.
+  if (NeedNewSourceVoice = False) then
     begin
+      pvXAudio2 := nil;
+      pvMasteringVoice := nil;
+
       hr := XAudio2Create(pvXAudio2,
                           0,
                           XAUDIO2_DEFAULT_PROCESSOR);
@@ -493,7 +572,10 @@ begin
       hr := pvXAudio2.CreateMasteringVoice(pvMasteringVoice);
       if FAILED(hr) then
         goto done;
+
     end;
+
+  NeedNewSourceVoice := False;
 
   // Add SourceVoice to the topology.
   hr := pvXAudio2.CreateSourceVoice(pvSourceVoice,
@@ -504,23 +586,14 @@ begin
   if FAILED(hr) then
     goto done;
 
-  NeedNewSourceVoice := False;
+  // Create effects.
+  pvFxReverbEffect := TFxReverb.Create();
+  pvFxMasterLimiter := TFxMasterLimiter.Create();
 
   // Set up XAudio2 buffer.
-  ZeroMemory(@pvXAudioBuffer,
-             SizeOf(XAUDIO2_BUFFER));
-
-  pvXAudioBuffer.AudioBytes := Length(pvBytes);
-  pvXAudioBuffer.pAudioData := @pvBytes[0];
-  pvXAudioBuffer.Flags := XAUDIO2_END_OF_STREAM;
-
-  // Start source voice and submit buffer.
-  hr := pvSourceVoice.SubmitSourceBuffer(@pvXAudioBuffer);
+  hr := InitAudioBuffer();
   if FAILED(hr) then
     goto done;
-
-  //if Assigned(FOnAudioReadyEvent) then
-    OnAudioReadyEvent(Self);
 
   // This flag should be set if we played this track before,
   // so we don't have to reinitialize the sourcereader.
@@ -531,42 +604,56 @@ begin
     goto done;
 
   // Setup is done, set status we are ready to go.
-  pvRenderStatus := rsInitialized;
+  if Assigned(FOnAudioReadyEvent) then
+    begin
+      pvRenderStatus := rsInitialized;
+      pvBufferPrevPlayed := 0;
+      OnAudioReadyEvent(Self);
+    end;
 
   // Now the stream will be rendered in another thread.
   // So, we need to stay in this thread to keep control.
   //
   // Note that, when this audiostream is over,
-  // the endofbuffer will be signaled first, before endofstream.
-  while (pvRenderStatus <> rsEndOfBuffer) do
-    begin
-      // Nothing to do when destroying the class.
-      if (pvRenderStatus = rsDestroying) then
-        Break;
+  // the end of buffer will be signaled first, before endofstream.
+  TThread.Synchronize(nil,
+                      procedure
+                        begin
+                          while (pvRenderStatus <> rsEndOfBuffer) or (pvRenderStatus = rsEndOfBuffer) do
+                            begin
+                              // Nothing to do when destroying the class.
+                              if (pvRenderStatus = rsDestroying) then
+                                Break;
 
-      if (pvRenderStatus = rsStopped) then
-        begin
-          if not Assigned(pvSourceVoice) then
-            Break;
+                              if (pvRenderStatus = rsStopped) then
+                                begin
+                                  if not Assigned(pvSourceVoice) then
+                                    Break;
 
-          pvSourceVoice.DestroyVoice();
-          pvSourceVoice := nil;
-          NeedNewSourceVoice := True;
-          Break;
-        end;
+                                  pvSourceVoice.DestroyVoice();
+                                  pvSourceVoice := nil;
+                                  NeedNewSourceVoice := True;
+                                  Break;
+                                end;
 
-      pvSourceVoice.GetState(voiceState,
-                             0);
+                              // This consumes some cpu load, but saves using a timer.=============================
 
-      FXaudio2EventData.SamplesProcessed := voiceState.SamplesPlayed;
-      // Calculate the samples that have been processed, to milliseconds.
-      // The caller can, for example, calculate the readable time in HH:MM:SS:MS.
-      FXaudio2EventData.TimePlayed := (voiceState.SamplesPlayed div nSamplesPerSecond) * 10000000;
+                              pvSourceVoice.GetState(voiceState,
+                                                     0);
+                              // Calculate the samples processed (Starting after a stop event has taken place).
+                              FXaudio2EventData.SamplesProcessed := voiceState.SamplesPlayed - pvBufferPrevPlayed;
 
-      OnProcessingData(Self);
+                              // Calculate the samples that have been processed, to milliseconds.
+                              // The caller can, for example, calculate the readable time in HH:MM:SS:MS.
+                              FXaudio2EventData.TimePlayed := (((voiceState.SamplesPlayed + pvNewBufferPosition) - pvBufferPrevPlayed) div pvSamplesPerSecond) * 10000000;
 
-      HandleThreadMessages(GetCurrentThread());
-    end;
+                              //===================================================================================
+
+                              OnProcessingData(Self);
+
+                              HandleThreadMessages(GetCurrentThread());
+                            end;
+                          end);
 
 done:
   Result := hr;
@@ -577,7 +664,6 @@ end;
 
 function TXaudio2Engine.Play(): HResult;
 begin
-  FLock.Enter;
   if not Assigned(pvSourceVoice) then
     begin
       Result := E_POINTER;
@@ -589,16 +675,14 @@ begin
     begin
       pvRenderStatus := rsPlaying;
 
-        if Assigned(FOnAudioPlayingEvent) then
-          FOnAudioPlayingEvent(Self); 
+      if Assigned(FOnAudioPlayingEvent) then
+        FOnAudioPlayingEvent(Self);
     end;
-  FLock.Leave;
 end;
 
 
 function TXaudio2Engine.Stop(): HResult;
 begin
-
   if not Assigned(pvSourceVoice) then
     begin
       Result := E_POINTER;
@@ -637,7 +721,6 @@ var
   hr: HResult;
 
 begin
-    FLock.Enter;
   if Assigned(pvSourceVoice) then
     begin
       hr := pvSourceVoice.SetVolume(aValue,
@@ -647,7 +730,6 @@ begin
                                  [IntToHex(hr, 8) + #13,
                                  SysErrorMessage(hr)]);
     end;
-    FLock.Leave();
 end;
 
 
@@ -665,7 +747,6 @@ var
   i: Integer;
 
 begin
-  FLock.Enter;
   // Use the following formula to convert the volume level to the decibel (dB) scale:
   // Attenuation (dB) = 20 * log10(Level)
   // For example, a volume level of 0.50 represents 6.02 dB of attenuation.
@@ -684,7 +765,7 @@ begin
   // Set the volumes.
   if Assigned(pvSourceVoice) then
     begin
-      hr := pvSourceVoice.SetChannelVolumes(nChannels, // The number of channels.
+      hr := pvSourceVoice.SetChannelVolumes(pvChannels, // The number of channels.
                                             @aVolumes[0],
                                             XAUDIO2_COMMIT_NOW);
       if FAILED(hr) then
@@ -692,14 +773,14 @@ begin
                                   [IntToHex(hr, 8) + #13,
                                   SysErrorMessage(hr)]);
     end;
-  FLock.Leave();
+  HandleThreadMessages(GetCurrentThread());
 end;
 
 
 // Get the volumes for the channels.
 function TXaudio2Engine.GetVolumes(): TFloatArray;
 begin
-  pvSourceVoice.GetChannelVolumes(nChannels,
+  pvSourceVoice.GetChannelVolumes(pvChannels,
                                   @Result[0]);
 end;
 
@@ -725,35 +806,129 @@ end;
 
 
 function TXaudio2Engine.SetReverb(Voice: TEffectsOnVoices;
+                                  ReverbParams: TReverbParams;
                                   pEnable: Boolean): HResult;
-  
+
 begin
-  FLock.Enter;
+
   Result := E_FAIL;
-  
+
   // Add reverb effect to SourceVoice.
-    if (Voice = afxSourceVoice) then
-      begin
-        if not Assigned(pvSourceVoice) then
-         Exit;       
-        Result := CreateReverbEffect(pvSourceVoice,
-                                     pEnable);
-        if SUCCEEDED(Result) then      
+  if (Voice = afxSourceVoice) then
+    begin
+      if not Assigned(pvSourceVoice) then
+        Exit;
+
+      if (pvReverbEffectOnSourceVoiceParams <> ReverbParams) then
+        begin
+          bReverbEffectOnSourceVoice := False;
+          XAPOReverbEffect := nil;
+        end;
+
+      Result := pvFxReverbEffect.CreateReverbEffect(@pvSourceVoice,
+                                                    ReverbParams,
+                                                    pvChannels,
+                                                    pEnable);
+
+      if SUCCEEDED(Result) then
+        begin
           bReverbEffectOnSourceVoice := pEnable;
-      end
-    // Add reverb effect to MasteringVoice.
-    else if (Voice = afxMasteringVoice) then
-      begin
-        if not Assigned(pvMasteringVoice) then
-          Exit;     
-        Result := CreateReverbEffect(pvMasteringVoice,
-                                     pEnable);
-        if SUCCEEDED(Result) then
-          bReverbEffectOnMasterVoice := pEnable;
-      end;
-  HandleThreadMessages(GetCurrentThread());  
-  FLock.Leave;
-end; 
+          pvReverbEffectOnSourceVoiceParams := ReverbParams;
+        end;
+
+      // If the effect has been created, skip initialization.
+      if (Result = MF_E_ALREADY_INITIALIZED) then
+        Result := pvFxReverbEffect.EnableReverbEffect(@pvSourceVoice,
+                                                      0,
+                                                      pEnable);
+    end
+
+  // Add reverb effect to MasteringVoice.
+  else if (Voice = afxMasteringVoice) then
+    begin
+      if not Assigned(pvMasteringVoice) then
+        Exit;
+
+      if (pvReverbEffectOnMasteringVoiceParams <> ReverbParams) then
+        begin
+          bReverbEffectOnMasteringVoice := False;
+          XAPOReverbEffect := nil;
+        end;
+
+      Result := pvFxReverbEffect.CreateReverbEffect(@pvMasteringVoice,
+                                                    ReverbParams,
+                                                    pvChannels,
+                                                    pEnable);
+
+      if SUCCEEDED(Result) then
+        begin
+          bReverbEffectOnMasteringVoice := pEnable;
+          pvReverbEffectOnMasteringVoiceParams := ReverbParams;
+        end;
+
+      // If the effect has been created, skip initialization.
+      if (Result = MF_E_ALREADY_INITIALIZED) then
+        Result := pvFxReverbEffect.EnableReverbEffect(@pvSourceVoice,
+                                                      0,
+                                                      pEnable);
+    end;
+  HandleThreadMessages(GetCurrentThread());
+end;
+
+
+function TXaudio2Engine.SetMasterLimiter(MasterLimiterparams: FXMASTERINGLIMITER_PARAMETERS): HResult;
+begin
+
+  if not Assigned(pvFxMasterLimiter) then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
+
+  Result := pvFxMasterLimiter.CreateMasterLimiter(MasterLimiterparams);
+
+end;
+
+
+function TXaudio2Engine.GotoNewPosition(position: MFTIME): HResult;
+var
+  hr: HResult;
+  VoiceState: XAUDIO2_VOICE_STATE;
+
+begin
+
+  pvBufferStart := position;
+
+  hr := pvSourceVoice.Stop(0,
+                           XAUDIO2_COMMIT_NOW);
+
+  if SUCCEEDED(hr) then
+    hr := pvSourceVoice.FlushSourceBuffers();
+
+  if SUCCEEDED(hr) then
+    hr := pvSourceVoice.Discontinuity();
+
+  // We have to poll for the OnBufferEnd returns the rendersatus.
+  while (pvRenderStatus <> rsEndOfBuffer) do
+    HandleThreadMessages(GetCurrentThread());
+
+  if SUCCEEDED(hr) then
+    begin
+      pvSourceVoice.GetState(VoiceState);
+      pvBufferPrevPlayed := VoiceState.SamplesPlayed;
+      pvNewBufferPosition := pvBufferStart;
+      FXaudio2EventData.Position := pvBufferStart;
+
+      // Set up new XAudio2 buffer.
+      hr := InitAudioBuffer(pvBufferStart);
+    end;
+
+  if SUCCEEDED(hr) then
+    pvSourceVoice.Start(0,
+                        XAUDIO2_COMMIT_NOW);
+  HandleThreadMessages(GetCurrentThread());
+  Result := hr;
+end;
 
 
 // Callback implementation =================================================
@@ -771,7 +946,6 @@ begin
   // Not used.
   // pvRenderStatus := rsProcessingPassEnd;
   FOnVoiceProcessingPassEndEvent(Self);
-
 end;
 
 // OnStreanEnd will be triggered when OnBufferEnd signals and no further buffers are available.
@@ -815,90 +989,29 @@ end;
 
 // =========================================================================
 
-// Effects
-function TXaudio2Engine.CreateReverbEffect(pVoice: IXAudio2Voice;
-                                           pEnable: Boolean = True;
-                                           pKeepXAPO: Boolean = True): HResult;
-var
-  hr: HResult;
-  descriptor: XAUDIO2_EFFECT_DESCRIPTOR;
-  chain: XAUDIO2_EFFECT_CHAIN;
-  reverbParameters: XAUDIO2FX_REVERB_PARAMETERS;
 
-label
-  done;
+// initialization and finalization =============================================
 
-begin      
-  hr := XAudio2CreateReverb(pvXAPO);
-  if FAILED(hr) then
-    goto done;
-    
-  // Populate an XAUDIO2_EFFECT_DESCRIPTOR structure with data.
-  descriptor.InitialState := True;
-  descriptor.OutputChannels := nChannels;
-  descriptor.pEffect := pvXAPO;
-  
-  // Populate an XAUDIO2_EFFECT_CHAIN structure with data.
-  chain.EffectCount := 1;
-  chain.pEffectDescriptors := @descriptor;
-  
-  // Apply the effect chain to a voice with the SetEffectChain function.
-  // Note: You can apply effect chains to master voices, source voices, and submix voices.
-  hr := pVoice.SetEffectChain(@chain);
-  if FAILED(hr) then
-    goto done;
-    
-  if not pKeepXAPO then
-    pvXAPO := nil;
 
-  // Populate the parameter structure, if any, associated with the effect.
-  // The reverb effect uses an XAUDIO2FX_REVERB_PARAMETERS structure.
-  reverbParameters.ReflectionsDelay    := XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_DELAY;
-  reverbParameters.ReverbDelay         := XAUDIO2FX_REVERB_DEFAULT_REVERB_DELAY;
-  reverbParameters.RearDelay           := XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY;
-  reverbParameters.PositionLeft        := XAUDIO2FX_REVERB_DEFAULT_POSITION;
-  reverbParameters.PositionRight       := XAUDIO2FX_REVERB_DEFAULT_POSITION;
-  reverbParameters.PositionMatrixLeft  := XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;
-  reverbParameters.PositionMatrixRight := XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;
-  reverbParameters.EarlyDiffusion      := XAUDIO2FX_REVERB_DEFAULT_EARLY_DIFFUSION;
-  reverbParameters.LateDiffusion       := XAUDIO2FX_REVERB_DEFAULT_LATE_DIFFUSION;
-  reverbParameters.LowEQGain           := XAUDIO2FX_REVERB_DEFAULT_LOW_EQ_GAIN;
-  reverbParameters.LowEQCutoff         := XAUDIO2FX_REVERB_DEFAULT_LOW_EQ_CUTOFF;
-  reverbParameters.HighEQGain          := XAUDIO2FX_REVERB_DEFAULT_HIGH_EQ_GAIN;
-  reverbParameters.HighEQCutoff        := XAUDIO2FX_REVERB_DEFAULT_HIGH_EQ_CUTOFF;
-  reverbParameters.RoomFilterFreq      := XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_FREQ;
-  reverbParameters.RoomFilterMain      := XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_MAIN;
-  reverbParameters.RoomFilterHF        := XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_HF;
-  reverbParameters.ReflectionsGain     := XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_GAIN;
-  reverbParameters.ReverbGain          := XAUDIO2FX_REVERB_DEFAULT_REVERB_GAIN;
-  reverbParameters.DecayTime           := XAUDIO2FX_REVERB_DEFAULT_DECAY_TIME;
-  reverbParameters.Density             := XAUDIO2FX_REVERB_DEFAULT_DENSITY;
-  reverbParameters.RoomSize            := XAUDIO2FX_REVERB_DEFAULT_ROOM_SIZE;
-  reverbParameters.WetDryMix           := XAUDIO2FX_REVERB_DEFAULT_WET_DRY_MIX;
+initialization
 
-  // Pass the effect parameter structure to the effect by calling the
-  // SetEffectParameters function on the voice to which the effect is attached.
-  hr := pVoice.SetEffectParameters(0,
-                                   @reverbParameters,
-                                   SizeOf(reverbParameters),
-                                   0);
-  if SUCCEEDED(hr) then
-    // Disable or enable the effect, whenever appropriate.
-    // You can use DisableEffect at any time to turn an effect off.
-    // You can turn on an effect again with EnableEffect.
-    // Note: The parameters for DisableEffect and EnableEffect specify which
-    //       effect in the chain to enable or disable.
-    if pEnable then
-      hr := pVoice.EnableEffect(0, 
-                                0)
-    else
-      hr := pVoice.DisableEffect(0,
-                                 0);
+  CoInitializeEx(nil,
+                 COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE);
 
-  
-done:
-  Result := hr;
-end;
+  if FAILED(MFStartup(MF_VERSION,
+                      MFSTARTUP_FULL)) then
+      begin
+        MessageBox(0,
+                   lpcwstr('Your computer does not support this Media Foundation API version ' +
+                           IntToStr(MF_VERSION) + '.'),
+                   lpcwstr('MFStartup Failure!'),
+                           MB_ICONSTOP);
+      end;
+
+finalization
+
+  MFShutdown();
+  CoUnInitialize();
 
 end.
 

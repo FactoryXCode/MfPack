@@ -227,17 +227,15 @@ It also has a pitch control.
 
 **XAudio2Player Sample 3**
 
-This sample shows you how to implement threadsafe events instead of messages from the XaudioEngine.
+This sample demonstrates how to implement XAudio2 effects and 
+how to go forward or backward during playing with a progressbar.
+
+It shows you how to implement threadsafe events and methods instead of using messages from the XaudioEngine.
+The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
+In your projectsettings you must add ..MfPack\Samples\MfComponents in the project options searchpath.  
+It also have a pitch control. 
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample3.png)
-
-
-**XAudio2Player Sample 4**
-
-This sample shows you how to implement effects and a progressbar to set new play positions in the audiobuffer.
-
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample4.png)
-
 
 
 ***Tools***
