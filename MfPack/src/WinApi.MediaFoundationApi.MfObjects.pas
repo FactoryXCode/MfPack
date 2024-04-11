@@ -81,6 +81,7 @@ uses
   WinApi.Unknwn,
   WinApi.WinMM.MMReg,
   WinApi.MediaObj,
+  System.SysUtils,
   {ActiveX}
   {$IFDEF USE_EMBARCADERO_DEF}
   WinApi.PropSys,

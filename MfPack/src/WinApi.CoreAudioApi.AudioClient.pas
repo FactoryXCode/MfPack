@@ -277,7 +277,8 @@ type
                         hnsBufferDuration: REFERENCE_TIME;
                         hnsPeriodicity: REFERENCE_TIME;
                         pFormat: PWAVEFORMATEX;
-                        {optional, can be nil or a pointer to GUID_NULL} const AudioSessionGuid: LPCGUID): HResult; stdcall;
+                        const AudioSessionGuid: LPCGUID {optional, can be nil or a pointer to GUID_NULL}
+                       ): HResult; stdcall;
     // Description:
     //
     //  Initializes the audio stream by creating a connection to the Windows Audio System (WAS)
@@ -1236,8 +1237,8 @@ type
 
   // Interface IAudioClock
   // =====================
-  //>=Vista
-  //Enables a client to monitor a stream's data rate and the current position in the stream.
+  // >=Vista
+  // Enables a client to monitor a stream's data rate and the current position in the stream.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioClock);'}
   {$EXTERNALSYM IAudioClock}
@@ -1363,7 +1364,7 @@ type
     //  QPCPosition - [out]
     //    If S_OK, returns the QueryPerformanceCounter position corresponding to the
     //    position argument.
-    //    This value may be NULL if a correlated system position isn't needed.
+    //    This value may be nil if a correlated system position isn't needed.
     //
     // Return values:
     //
@@ -2101,15 +2102,19 @@ implementation
   //Implement Additional functions here.
 
 
-  //ERROR HANDLING
-  function AUDCLNT_ERR(n: LongInt): HRESULT;
+//ERROR HANDLING
+function AUDCLNT_ERR(n: LongInt): HRESULT;
   begin
-    Result:= MAKE_HRESULT(SEVERITY_ERROR, FACILITY_AUDCLNT, n);
+    Result:= MAKE_HRESULT(SEVERITY_ERROR,
+                          FACILITY_AUDCLNT,
+                          n);
   end;
 
-  function AUDCLNT_SUCCESS(n: LongInt): HRESULT;
+function AUDCLNT_SUCCESS(n: LongInt): HRESULT;
   begin
-    Result:= MAKE_SCODE(SEVERITY_SUCCESS, FACILITY_AUDCLNT, n);
+    Result:= MAKE_SCODE(SEVERITY_SUCCESS,
+                        FACILITY_AUDCLNT,
+                        n);
   end;
 
 end.

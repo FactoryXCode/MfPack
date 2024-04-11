@@ -1165,6 +1165,10 @@ type
   function GetFileDuration(pSource: IMFSourceReader;
                            out phnsDuration: LONGLONG): HResult; overload;
 
+  // Same as above, but returns MFTIME.
+  function GetFileDuration(pSourceReader: IMFSourceReader;
+                           out mftDuration: MFTIME): HResult; overload;
+
   // Alternatively you might get the duration of a media file by calling the IMFMediaSource.CreatePresentationDescriptor method and
   // request the MF_PD_DURATION attribute.
   function GetFileDuration(pSource: IMFMediaSource;
@@ -1173,6 +1177,10 @@ type
   // Get fileduration from an URL.
   function GetFileDuration(const sURL: PCWSTR;
                            out pDuration: LONGLONG): HResult; overload;
+
+  // Get fileduration in MFTIME units from an URL.
+  function GetFileDuration(const sURL: PCWSTR;
+                           out pDuration: MFTIME): HResult; overload;
 
 
   // Gets the file size.
@@ -7717,6 +7725,31 @@ begin
 end;
 
 
+function GetFileDuration(pSourceReader: IMFSourceReader;
+                         out mftDuration: MFTIME): HResult; overload;
+var
+  hr: HResult;
+  pvVar: PROPVARIANT;
+
+begin
+  PropVariantInit(pvVar);
+
+  // Get file duration
+  // Gets the duration in 100-nanosecond units.
+  // Divide by 10,000,000 to get the duration in seconds.
+  hr := pSourceReader.GetPresentationAttribute(MF_SOURCE_READER_MEDIASOURCE,
+                                               MF_PD_DURATION,
+                                               pvVar);
+  if SUCCEEDED(hr) then
+    hr := PropVariantToUInt64(pvVar,
+                              mftDuration);
+
+  PropVariantClear(pvVar);
+  Result := hr;
+end;
+
+
+
 // Alternatively you might get the duration of a media file by calling the IMFMediaSource.CreatePresentationDescriptor method and
 // request the MF_PD_DURATION attribute, as shown in the following code.
 function GetFileDuration(pSource: IMFMediaSource;
@@ -7758,6 +7791,32 @@ begin
   if SUCCEEDED(hr) then
     hr := pPD.GetUINT64(MF_PD_DURATION,
                         UINT64(pDuration));
+
+  Result := hr;
+end;
+
+
+// Get fileduration in MFTIME units from an URL.
+function GetFileDuration(const sURL: PCWSTR;
+                         out pDuration: MFTIME): HResult; overload;
+var
+  hr: HResult;
+  pSource: IMFMediaSource;
+  pPD: IMFPresentationDescriptor;
+
+begin
+  pDuration := 0;
+  // Create a mediasource by given URL.
+  hr := CreateObjectFromUrl(sURL,
+                            pSource);
+
+  // Get the duration of a media file by calling the IMFMediaSource.CreatePresentationDescriptor method
+  if SUCCEEDED(hr) then
+    hr := pSource.CreatePresentationDescriptor(pPD);
+
+  if SUCCEEDED(hr) then
+    hr := pPD.GetUINT64(MF_PD_DURATION,
+                        pDuration);
 
   Result := hr;
 end;

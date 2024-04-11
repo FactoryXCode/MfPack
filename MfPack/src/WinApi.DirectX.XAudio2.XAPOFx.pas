@@ -69,8 +69,8 @@ interface
 uses
 
   {WinApi}
-  WinApi.Windows;
-
+  WinApi.Windows,
+  System.classes;
   {$WEAKPACKAGEUNIT ON}
 
   {$I 'XAudio2.inc'}
@@ -272,7 +272,7 @@ type
   //  Use IXAudio2.CreateSourceVoice or IXAudio2Voice.SetEffectChain to pass an XAPO to XAudio2.
   function CreateFX(const clsid: TGuid;
                     out pEffect: IUnknown;
-                    pInitData: Pointer = nil;
+                    const pInitData: Pointer = nil;
                     InitDataByteSize: UINT32 = 0): HRESULT; stdcall;
   {$EXTERNALSYM CreateFX}
 

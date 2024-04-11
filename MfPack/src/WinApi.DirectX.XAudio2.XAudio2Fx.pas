@@ -68,6 +68,7 @@ interface
 uses
   {WinApi}
   WinApi.Windows,
+  System.Classes,
   {System}
   System.Math;
 
@@ -137,22 +138,19 @@ const
     pXAudio2: IXAudio2;
     hr: HResult;
 
-    If FAILED(hr:= XAudio2Create(pXAudio2,
-                                 0,
-                                 XAUDIO2_DEFAULT_PROCESSOR)) then
+    If FAILED(hr := XAudio2Create(pXAudio2,
+                                  0,
+                                  XAUDIO2_DEFAULT_PROCESSOR)) then
     ...
     Result:= hr;
 
     ...
     pVolumeMeterAPO: IUnknown;
-    hr:= XAudio2CreateVolumeMeter(pVolumeMeterAPO);
+    hr := XAudio2CreateVolumeMeter(pVolumeMeterAPO);
 
   *)
 
-
-
-
-  // inline functions
+  // Inline functions.
   function XAudio2CreateVolumeMeter(out ppApo: IUnknown;
                                     Flags: UINT32 = 0): HRESULT; inline;
   {$EXTERNALSYM XAudio2CreateVolumeMeter}
@@ -258,6 +256,7 @@ type
   // Maximum, minimum and default values for the parameters above
 const
 
+  // MINIMUM
   XAUDIO2FX_REVERB_MIN_WET_DRY_MIX         : Single = 0.0;
   {$EXTERNALSYM XAUDIO2FX_REVERB_MIN_WET_DRY_MIX}
   XAUDIO2FX_REVERB_MIN_REFLECTIONS_DELAY   = 0;
@@ -299,6 +298,7 @@ const
   XAUDIO2FX_REVERB_MIN_ROOM_SIZE           : Single = 0.0;
   {$EXTERNALSYM XAUDIO2FX_REVERB_MIN_ROOM_SIZE}
 
+  // MAXIMUM
   XAUDIO2FX_REVERB_MAX_WET_DRY_MIX         : Single = 100.0;
   {$EXTERNALSYM XAUDIO2FX_REVERB_MAX_WET_DRY_MIX}
   XAUDIO2FX_REVERB_MAX_REFLECTIONS_DELAY   = 300;
@@ -338,6 +338,7 @@ const
   XAUDIO2FX_REVERB_MAX_ROOM_SIZE           : Single = 100.0;
   {$EXTERNALSYM XAUDIO2FX_REVERB_MAX_ROOM_SIZE}
 
+  // DEFAULT
   XAUDIO2FX_REVERB_DEFAULT_WET_DRY_MIX        : Single = 100.0;
   {$EXTERNALSYM XAUDIO2FX_REVERB_DEFAULT_WET_DRY_MIX}
   XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_DELAY  = 5;
@@ -1030,7 +1031,7 @@ end;
 
 function ClipByteValue(byteval: UINT32): Byte; inline;
 begin
-  if byteval > 255 then
+  if (byteval > 255) then
     Result := 255
   else
     Result := Byte(byteval);

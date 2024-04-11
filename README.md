@@ -232,6 +232,14 @@ This sample shows you how to implement threadsafe events instead of messages fro
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample3.png)
 
 
+**XAudio2Player Sample 4**
+
+This sample shows you how to implement effects and a progressbar to set new play positions in the audiobuffer.
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample4.png)
+
+
+
 ***Tools***
 
 **HResult Lookup Tool Application**

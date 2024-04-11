@@ -14,6 +14,7 @@ This sample has 3 levels.
     In your projectsettings you must add ..MfPack\Samples\MfComponents in the project options searchpath.  
  -  Sample 2 implements the IXAudio2VoiceCallback and has a pitch control.
  -  Sample 3 uses threadsafe events, instead of messages.
+ -  Sample 4 Shows how to implement effects and a progressbar.
 
 NOTES:
  - This release is updated for compiler version 17 up to 34.
@@ -26,7 +27,7 @@ Project location: https://github.com/FactoryXCode/MfPack
                   https://sourceforge.net/projects/MFPack
 
 First release date: 30-03-2024
-Final release date: 04-04-2024
+Final release date: 11-04-2024
 
 Copyright © FactoryX. All rights reserved.
 

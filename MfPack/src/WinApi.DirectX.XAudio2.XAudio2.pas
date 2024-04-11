@@ -509,14 +509,14 @@ type
   {$EXTERNALSYM XAUDIO2_VOICE_STATE}
   XAUDIO2_VOICE_STATE = record
     pCurrentBufferContext: Pointer;  // The pContext value provided in the XAUDIO2_BUFFER
-                                     //  that is currently being processed, or NULL if
+                                     //  that is currently being processed, or nil if
                                      //  there are no buffers in the queue.
     BuffersQueued: UINT32;           // Number of buffers currently queued on the voice
                                      //  (including the one that is being processed).
     SamplesPlayed: UINT64;           // Total number of samples produced by the voice since
                                      //  it began processing the current audio stream.
                                      //  If XAUDIO2_VOICE_NOSAMPLESPLAYED is specified
-                                     //  in the call to IXAudio2SourceVoice::GetState,
+                                     //  in the call to IXAudio2SourceVoice.GetState,
                                      //  this member will not be calculated, saving CPU.
   end;
 
@@ -675,7 +675,7 @@ type
     // ARGUMENTS:
     //  OperationSet - Identifier of the set of operations to be applied.
     //
-    function CommitChanges(OperationSet: UINT32): HRESULT; stdcall;
+    function CommitChanges(OperationSet: UINT32 = XAUDIO2_COMMIT_ALL): HRESULT; stdcall;
 
     // NAME: IXAudio2.GetPerformanceData
     // DESCRIPTION: Returns current resource usage details: memory, CPU, etc.
@@ -782,7 +782,7 @@ type
     //  EffectIndex - Index of an effect within this voice's effect chain.
     //  OperationSet - Used to identify this call as part of a deferred batch.
     function EnableEffect(EffectIndex: UINT32;
-                          OperationSet: UINT32): HRESULT; virtual; stdcall; abstract;
+                          OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT; virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.DisableEffect
     // DESCRIPTION: Disables an effect in this voice's effect chain.
@@ -791,7 +791,7 @@ type
     //  EffectIndex - Index of an effect within this voice's effect chain.
     //  OperationSet - Used to identify this call as part of a deferred batch.
     function DisableEffect(EffectIndex: UINT32;
-                           OperationSet: UINT32): HRESULT; virtual; stdcall; abstract;
+                           OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT; virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.GetEffectState
     // DESCRIPTION: Returns the running state of an effect.
@@ -818,7 +818,7 @@ type
     function SetEffectParameters(EffectIndex: UINT32;
                                  pParameters: Pointer;
                                  ParametersByteSize: UINT32;
-                                 OperationSet: UINT32): HRESULT; virtual; stdcall; abstract;
+                                 OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT; virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.GetEffectParameters
     // DESCRIPTION: Obtains the current effect-specific parameters.
@@ -838,7 +838,7 @@ type
     //  pParameters - Pointer to the filter's parameter structure.
     //  OperationSet - Used to identify this call as part of a deferred batch.
     function SetFilterParameters(pParameters: PXAUDIO2_FILTER_PARAMETERS;
-                                 OperationSet: UINT32): HRESULT; virtual; stdcall; abstract;
+                                 OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT; virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.GetFilterParameters
     // DESCRIPTION: Returns this voice's current filter parameters.
@@ -856,7 +856,7 @@ type
     //  OperationSet - Used to identify this call as part of a deferred batch.
     function SetOutputFilterParameters(pDestinationVoice: IXAudio2Voice;
                                        pParameters: XAUDIO2_FILTER_PARAMETERS;
-                                       OperationSet: UINT32): HRESULT; virtual; stdcall; abstract;
+                                       OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT; virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.GetOutputFilterParameters
     // DESCRIPTION: Returns the filter parameters from one of this voice's sends.
@@ -874,7 +874,7 @@ type
     //  Volume - New overall volume level to be used, as an amplitude factor.
     //  OperationSet - Used to identify this call as part of a deferred batch.
     function SetVolume(Volume: Single;
-                       OperationSet: UINT32): HRESULT; virtual; stdcall; abstract;
+                       OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT; virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.GetVolume
     // DESCRIPTION: Obtains this voice's current overall volume level.
@@ -892,7 +892,7 @@ type
     //  OperationSet - Used to identify this call as part of a deferred batch.
     function SetChannelVolumes(Channels: UINT32;
                                pVolumes: PSingle;
-                               OperationSet: UINT32): HRESULT; virtual; stdcall; abstract;
+                               OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT; virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.GetChannelVolumes
     // DESCRIPTION: Returns this voice's current per-channel volume levels.
@@ -935,7 +935,7 @@ type
                              SourceChannels: UINT32;
                              DestinationChannels: UINT32;
                              pLevelMatrix: PSingle;
-                             OperationSet: UINT32): HRESULT; virtual; stdcall; abstract;
+                             OperationSet: UINT32 = XAUDIO2_COMMIT_NOW): HRESULT; virtual; stdcall; abstract;
 
     // NAME: IXAudio2Voice.GetOutputMatrix
     // DESCRIPTION: Obtains the volume levels used to send each channel of this
@@ -1189,14 +1189,14 @@ type
     procedure OnStreamEnd(); virtual; stdcall; abstract;
 
     // Called when this voice is about to start processing a new buffer.
-    procedure OnBufferStart(pBufferContext: pointer); virtual; stdcall; abstract;
+    procedure OnBufferStart(pBufferContext: Pointer); virtual; stdcall; abstract;
 
     // Called when this voice has just finished processing a buffer.
     // The buffer can now be reused or destroyed.
-    procedure OnBufferEnd(pBufferContext: pointer); virtual; stdcall; abstract;
+    procedure OnBufferEnd(pBufferContext: Pointer); virtual; stdcall; abstract;
 
     // Called when this voice has just reached the end position of a loop.
-    procedure OnLoopEnd(pBufferContext: pointer); virtual; stdcall; abstract;
+    procedure OnLoopEnd(pBufferContext: Pointer); virtual; stdcall; abstract;
 
     // Called in the event of a critical error during voice processing,
     // such as a failing xAPO or an error from the hardware XMA decoder.

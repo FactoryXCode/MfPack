@@ -11,12 +11,12 @@
 # MfPack covers the Delphi translations of:
 
 - Core Audio API's:
-  * Windows Audio Session API (WASAPI, successor of DirectSound) 
+  * Windows Audio Session API (WASAPI) 
   * DeviceTopology API
   * EndpointVolume API
   * Multimedia Device (MMDevice) API
 - Microsoft Media Foundation API (successor of DirectShow).
-- XAudio2 API (XBox game development)
+- XAudio2 API (XBox game development, successor of DirectSound).
 - Microsoft DirectX API's (D2D1, D3D9, D3D11, D3D12, DirectComposition, DXGI, DirectWrite and DXVA) Note that D3D11 and above are part of Media Foundation.
 - Windows Imaging Component (WIC) API.
 - MPEG2 API.
@@ -208,21 +208,22 @@ It addresses several outstanding issues and feature requests, like low latency e
 
 This sample demonstrates how to use XAudio2 to render different file formats like WAV, FLAC, MP3 etc.
 The sample uses the IMFSourceReader to decode the format suitable for playing in XAudio2.
-It shows you the basics of using XAudio2 without formating the mediatypes yourself.
+It shows you the basics of using XAudio2 without formatting the mediatypes yourself.
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
 In your projectsettings you must add ..MfPack\Samples\MfComponents in the project options searchpath.
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio_Basic_Sample.png)
 
-
+ 
 **XAudio2Player Sample 2**
 
 This sample shows you how to implement the IXAudio2VoiceCallback.
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
 In your projectsettings you must add ..MfPack\Samples\MfComponents in the project options searchpath.  
-It also have a pitch control.
+It also has a pitch control.
 
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample2.png)  
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample2.png)
+
 
 **XAudio2Player Sample 3**
 
@@ -231,9 +232,16 @@ This sample shows you how to implement threadsafe events instead of messages fro
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample3.png)
 
 
+**XAudio2Player Sample 4**
 
-**Tools**
-**-----**
+This sample shows you how to implement effects and a progressbar to set new play positions in the audiobuffer.
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample4.png)
+
+
+
+***Tools***
+
 **HResult Lookup Tool Application**
 
 *This tool can be used to determine HResult or Error codes returned by the Windows OS,*
