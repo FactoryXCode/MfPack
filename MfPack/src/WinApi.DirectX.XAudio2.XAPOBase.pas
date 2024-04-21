@@ -208,9 +208,9 @@ type
     // validation against the XAPO's registration properties.
     // Derived XAPOs should call the base implementation first.
     function LockForProcess(InputLockedParameterCount: UINT32;
-                            pInputLockedParameters: XAPO_LOCKFORPROCESS_PARAMETERS;
+                            pInputLockedParameters: PXAPO_LOCKFORPROCESS_PARAMETERS;
                             OutputLockedParameterCount: UINT32;
-                            pOutputLockedParameters: XAPO_LOCKFORPROCESS_PARAMETERS): HRESULT; stdcall;
+                            pOutputLockedParameters: PXAPO_LOCKFORPROCESS_PARAMETERS): HRESULT; stdcall;
 
     // Opposite of LockForProcess.
     // Derived XAPOs should call the base implementation first.
@@ -218,9 +218,9 @@ type
 
     // Needs POINTERMATH turned On!
     procedure Process(InputProcessParameterCount: UINT32;
-                      pInputProcessParameters: XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
+                      pInputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
                       OutputProcessParameterCount: UINT32;
-                      var pOutputProcessParameters: XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
+                      var pOutputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
                       IsEnabled: BOOL); stdcall;
 
     // Returns the number of input frames required to generate the requested number of output frames.
@@ -433,9 +433,9 @@ begin
 end;
 
 function CXAPOBase.LockForProcess(InputLockedParameterCount: UINT32;
-                                  pInputLockedParameters: XAPO_LOCKFORPROCESS_PARAMETERS;
+                                  pInputLockedParameters: PXAPO_LOCKFORPROCESS_PARAMETERS;
                                   OutputLockedParameterCount: UINT32;
-                                  pOutputLockedParameters: XAPO_LOCKFORPROCESS_PARAMETERS): HRESULT; stdcall;
+                                  pOutputLockedParameters: PXAPO_LOCKFORPROCESS_PARAMETERS): HRESULT; stdcall;
 begin
 
   Result := E_NOTIMPL; // Do your implementations here, by replacing this line for your code.
@@ -452,9 +452,9 @@ end;
 
 
 procedure CXAPOBase.Process(InputProcessParameterCount: UINT32;
-                            pInputProcessParameters: XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
+                            pInputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
                             OutputProcessParameterCount: UINT32;
-                            var pOutputProcessParameters: XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
+                            var pOutputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
                             IsEnabled: BOOL);
 begin
 

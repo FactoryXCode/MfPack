@@ -77,14 +77,22 @@ uses
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioSessionTypes;
 
+  // Define this unit to be compiled for Win 10 and 11.
+  // Please check the settings in XAudio2.inc.
+  //
+  // For debug purposes only.
+  // {$DEFINE _WINNT_WIN10}
+  // {$UNDEFINE _WINNT_WIN10}
+
   {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
+ // See below at line 107.
+ // {$IFDEF WIN32}
+ //   {$ALIGN 1}
+ // {$ELSE}
+ //   {$ALIGN 8} // Win64
+ // {$ENDIF}
 
   {$I 'XAudio2.inc'}   // CHECK FOR DLL SPECS HERE!
 
@@ -576,7 +584,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IXAudio2);'}
   {$EXTERNALSYM IXAudio2}
   IXAudio2 = interface(IUnknown)
-{$IFDEF _WINNT_WIN10}
+{$IFDEF _WINNT_WIN10}  // This directive is defined in XAudio2.inc.
     ['{2B02E3CF-2E0B-4ec3-BE45-1B2A3FE7210D}']  // XAudio2 v 2.9
 {$ELSE}
     ['{60d8dac8-5aa1-4e8e-b597-2f5e2883d484}']  // XAudio2 v 2.8
@@ -609,7 +617,7 @@ type
     //  pSendList - Optional list of voices this voice should send audio to.
     //  pEffectChain - Optional list of effects to apply to the audio data.
     //
-    function CreateSourceVoice(out ppSourceVoice: IXAudio2SourceVoice;
+    function CreateSourceVoice({out} ppSourceVoice: PIXAudio2SourceVoice;
                                pSourceFormat: PWAVEFORMATEX;
                                Flags: UINT32 = 0;
                                MaxFrequencyRatio: Single = XAUDIO2_DEFAULT_FREQ_RATIO;
@@ -629,7 +637,7 @@ type
     //  pSendList - Optional list of voices this voice should send audio to.
     //  pEffectChain - Optional list of effects to apply to the audio data.
     //
-    function CreateSubmixVoice(out ppSubmixVoice: IXAudio2SubmixVoice;
+    function CreateSubmixVoice({out} ppSubmixVoice: PIXAudio2SubmixVoice;
                                InputChannels: UINT32;
                                InputSampleRate: UINT32;
                                Flags: UINT32 = 0;
@@ -650,7 +658,7 @@ type
     //  pEffectChain - Optional list of effects to apply to the audio data.
     //  StreamCategory - The audio stream category to use for this mastering voice
     //
-    function CreateMasteringVoice(out ppMasteringVoice: IXAudio2MasteringVoice;
+    function CreateMasteringVoice({out} ppMasteringVoice: PIXAudio2MasteringVoice;
                                   InputChannels: UINT32 = XAUDIO2_DEFAULT_CHANNELS;
                                   InputSampleRate: UINT32 = XAUDIO2_DEFAULT_SAMPLERATE;
                                   Flags: UINT32 = 0;
@@ -1230,9 +1238,9 @@ type
   *
   **************************************************************************)
 
-  function XAudio2Create(out ppXAudio2: IXAudio2;
+  function XAudio2Create({out} ppXAudio2: PIXAudio2;
                          Flags: UINT32 = 0;
-                         XAudio2Processor: XAUDIO2_PROCESSOR = XAUDIO2_DEFAULT_PROCESSOR): HResult; stdcall;
+                         XAudio2Processor: XAUDIO2_PROCESSOR = XAUDIO2_USE_DEFAULT_PROCESSOR): HResult; stdcall;
   {$EXTERNALSYM XAudio2Create}
 
   //#if (NTDDI_VERSION >= NTDDI_WIN10_RS5)

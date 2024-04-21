@@ -59,10 +59,10 @@
 //==============================================================================
 
 
-// By default compile for windows 10 32bit
+// By default compile for windows 10 and higher 32bit.
 {$IFDEF WIN32}
 
-  {$DEFINE _WIN32_WINNT_WIN10}  // <<< Comment this directive if you compile for Windows 8 32bit
+  {$DEFINE _WIN32_WINNT_WIN10}  // <<< Comment this directive out if you compile for Windows 8 32bit.
   {$DEFINE _WINNT_WIN10}
 
   {$IFNDEF _WIN32_WINNT_WIN10}
@@ -75,9 +75,9 @@
 
 
 
-{$IFDEF WIN64}  // 64bit
+{$IFDEF WIN64}  // 64bit.
 
-  {$DEFINE _WIN64_WINNT_WIN10}  // <<< Comment out this directive if you compile for Windows 8 64bit
+  {$DEFINE _WIN64_WINNT_WIN10}  // <<< Comment this directive out if you compile for Windows 8 64bit.
   {$DEFINE _WINNT_WIN10}
 
   {$IFNDEF _WIN64_WINNT_WIN10}
@@ -93,7 +93,7 @@
 const
 
 // Current name of the DLL shipped in the same SDK as this header.
-// The name reflects the current version
+// The name reflects the current version.
 {$IFDEF _WIN32_WINNT_WIN10}
   XAUDIO2_DLL_A                      = 'xaudio2_9.dll';
   XAUDIO2_DLL_W                      = 'xaudio2_9.dll';
@@ -106,13 +106,13 @@ const
   X3DAUDIO_DLL                       = 'x3daudio1_0.dll';
 {$ENDIF}
 
-{$IFDEF _WIN32_WINNT_WIN8}  //Windows 8 32bit
+{$IFDEF _WIN32_WINNT_WIN8}  // Windows 8 32bit.
   XAUDIO2_DLL_A                      = 'xaudio2_8.dll';
   XAUDIO2_DLL_W                      = 'xaudio2_8.dll';
   X3DAUDIO_DLL                       = 'x3daudio.dll';
 {$ENDIF}
 
-{$IFDEF _WIN64_WINNT_WIN8}  //Windows 8 64bit
+{$IFDEF _WIN64_WINNT_WIN8}  // Windows 8 64bit.
   XAUDIO2_DLL_A                      = 'xaudio2_8.dll';
   XAUDIO2_DLL_W                      = 'xaudio2_8.dll';
   X3DAUDIO_DLL                       = 'x3daudio.dll';

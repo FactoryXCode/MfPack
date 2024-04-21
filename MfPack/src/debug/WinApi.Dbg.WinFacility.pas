@@ -20,7 +20,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 31/07/2023 All                 Carmel release  SDK 10.0.22621.0 (Windows 11)
+// 31/07/2023 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -65,7 +65,8 @@ interface
 uses
   WinApi.Windows,
   WinApi.WinError,
-  WinApi.MediaFoundationApi.MfError;
+  WinApi.MediaFoundationApi.MfError,
+  WinApi.DirectX.XAudio2.XAudio2;
 
 
   // Get the facilitycode from a function that returns a HResult.
@@ -667,6 +668,10 @@ begin
     FACILITY_PIX:                  begin
                                      FacilityTag := 'FACILITY_PIX';
                                      FacilityDescr := FACILITYSOURCE + ' the PIX for Windows tool service.';
+                                   end;
+    FACILITY_XAUDIO2:              begin
+                                     FacilityTag := 'FACILITY_XAUDIO2';
+                                     FacilityDescr := FACILITYSOURCE + ' the XAudio2 service.';
                                    end
     else
       begin

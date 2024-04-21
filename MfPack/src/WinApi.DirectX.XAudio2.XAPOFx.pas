@@ -243,7 +243,7 @@ type
   {$EXTERNALSYM FXECHO_INITDATA}
 
 
-  // Echo parameters, used with IXAPOParameters::SetParameters:
+  // Echo parameters, used with IXAPOParameters.SetParameters:
   // The echo supports only FLOAT32 audio formats.
   PFXECHO_PARAMETERS = ^FXECHO_PARAMETERS;
   FXECHO_PARAMETERS = record

@@ -342,7 +342,7 @@ type
   end;
   {$EXTERNALSYM XAPO_PROCESS_BUFFER_PARAMETERS}
 
-//--------------<M-A-C-R-O-S>-----------------------------------------------//
+//-------------- <M-A-C-R-O-S> -----------------------------------------------//
     // Memory allocation macros that allow one module to allocate memory and
     // another to free it, by guaranteeing that the same heap manager is used
     // regardless of differences between build environments of the two modules.
@@ -350,16 +350,27 @@ type
     // Used by IXAPO methods that must allocate arbitrary sized structures
     // such as WAVEFORMATEX that are subsequently returned to the application.
     //
-    // function XAPOAlloc
+    // Remarks:
+    //   XAPOFree and XAPOAlloc are memory allocation macros that allow one module to
+    //   allocate memory and another to free it,
+    //   by guaranteeing that the same heap manager is used regardless of
+    //   differences between the build environments of the two modules.
+
+    // function XAPOAlloc.
+    // Memory allocation macro used by IXAPO methods that must allocate
+    // arbitrary sized structures that are subsequently returned to the application.
     // Size, in bytes, of the memory block to be allocated.
     function XAPOAlloc(size: DWord): Pointer;
     {$EXTERNALSYM XAPOAlloc}
+
+    // Procedure used to free memory allocated with the XAPOAlloc function.
+    // p, Pointer to the memory block to be freed.
     procedure XAPOFree(p: Pointer);
     {$EXTERNALSYM XAPOFree}
 
 
 type
-//--------------<I-N-T-E-R-F-A-C-E-S>---------------------------------------//
+//-------------- <I-N-T-E-R-F-A-C-E-S> ---------------------------------------//
 
 
 
@@ -527,9 +538,9 @@ type
     //  COM error code
     ////
     function LockForProcess(InputLockedParameterCount: UINT32;
-                            pInputLockedParameters: XAPO_LOCKFORPROCESS_PARAMETERS;
+                            pInputLockedParameters: PXAPO_LOCKFORPROCESS_PARAMETERS;
                             OutputLockedParameterCount: UINT32;
-                            pOutputLockedParameters: XAPO_LOCKFORPROCESS_PARAMETERS): HRESULT; stdcall;
+                            pOutputLockedParameters: PXAPO_LOCKFORPROCESS_PARAMETERS): HRESULT; stdcall;
 
     ////
     // DESCRIPTION:
@@ -590,9 +601,9 @@ type
     //  void
     ////
     procedure Process(InputProcessParameterCount: UINT32;
-                      pInputProcessParameters: XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
+                      pInputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
                       OutputProcessParameterCount: UINT32;
-                      var pOutputProcessParameters: XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
+                      var pOutputProcessParameters: PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
                       IsEnabled: BOOL); stdcall;
 
     ////

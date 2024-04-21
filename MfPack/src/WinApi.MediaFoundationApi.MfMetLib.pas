@@ -6553,78 +6553,74 @@ try
       hr := pspd.GetStreamDescriptorCount(sdCount);
       if SUCCEEDED(hr) then
         SetLength(alsCont,
-                  sdCount)
-      else
-        begin
-          Result := hr;
-          Exit;
-        end;
+                  sdCount);
 
-      for i := 0 to sdCount - 1 do
-        begin
-           // Initialize the record
-           alsCont[i].Reset();
+      if SUCCEEDED(hr) then
+        for i := 0 to sdCount - 1 do
+          begin
+             // Initialize the record
+             alsCont[i].Reset();
 
-           // Store the stream index
-           alsCont[i].dwStreamIndex := i;
+             // Store the stream index
+             alsCont[i].dwStreamIndex := i;
 
-          // Get stream descriptor interface
-          hr := pspd.GetStreamDescriptorByIndex(i,                    // Zero-based index of the stream.
-                                                alsCont[i].bSelected, // TRUE if the stream is currently selected, FALSE if the stream is currently deselected.
-                                                pSourceSD);           // Receives a pointer to the stream descriptor's IMFStreamDescriptor interface. The caller must release the interface.
+            // Get stream descriptor interface
+            hr := pspd.GetStreamDescriptorByIndex(i,                    // Zero-based index of the stream.
+                                                  alsCont[i].bSelected, // TRUE if the stream is currently selected, FALSE if the stream is currently deselected.
+                                                  pSourceSD);           // Receives a pointer to the stream descriptor's IMFStreamDescriptor interface. The caller must release the interface.
 
-          // Store the streamID
-          if SUCCEEDED(hr) then
-            pSourceSD.GetStreamIdentifier(alsCont[i].dwStreamId);
+            // Store the streamID
+            if SUCCEEDED(hr) then
+              pSourceSD.GetStreamIdentifier(alsCont[i].dwStreamId);
 
-          // Get the media major type
-          if SUCCEEDED(hr) then
-            hr := GetMediaType(pSourceSD,
-                               alsCont[i].idStreamMajorTypeGuid,
-                               alsCont[i].bCompressed);
+            // Get the media major type
+            if SUCCEEDED(hr) then
+              hr := GetMediaType(pSourceSD,
+                                 alsCont[i].idStreamMajorTypeGuid,
+                                 alsCont[i].bCompressed);
 
 
-          // Figure out what media type we are dealing with
-          if SUCCEEDED(hr) then
-            hr := GetMediaDescription(alsCont[i].idStreamMajorTypeGuid,
-                                      alsCont[i].idStreamMediaType);
+            // Figure out what media type we are dealing with
+            if SUCCEEDED(hr) then
+              hr := GetMediaDescription(alsCont[i].idStreamMajorTypeGuid,
+                                        alsCont[i].idStreamMediaType);
 
 
-          // If audio stream then try to get the language of this stream
-          if SUCCEEDED(hr) and (alsCont[i].idStreamMediaType = mtAudio) then
-            begin
+            // If audio stream then try to get the language of this stream
+            if SUCCEEDED(hr) and (alsCont[i].idStreamMediaType = mtAudio) then
+              begin
 
-              // Get the audio format type and qualities
-              hr := GetAudioSubType(mSource,
-                                    alsCont[i].idStreamSubTypeGuid,
-                                    alsCont[i].audio_dwFormatTag,
-                                    alsCont[i].audio_wsAudioDescr,
-                                    alsCont[i].audio_iAudioChannels,
-                                    alsCont[i].audio_iSamplesPerSec,
-                                    alsCont[i].audio_iBitsPerSample,
-                                    alsCont[i].audio_iblockAlignment,
-                                    alsCont[i].audio_AverageSampleRate,
-                                    alsCont[i].audio_BitRate_kbps,
-                                    alsCont[i].audio_SampleRate_khz);
-
-
-              // Retrieves a wide-character string associated with a key (MF_SD_LANGUAGE).
-              // This method allocates the memory for the string.
-              // A returnvalue of -1072875802 / $C00D36E6
-              // (The requested attribute was not found.) is returned when no language information was found.
-              hr := pSourceSD.GetAllocatedString(MF_SD_LANGUAGE,
-                                                 pwszValue,
-                                                 pcchLength);
+                // Get the audio format type and qualities
+                hr := GetAudioSubType(mSource,
+                                      alsCont[i].idStreamSubTypeGuid,
+                                      alsCont[i].audio_dwFormatTag,
+                                      alsCont[i].audio_wsAudioDescr,
+                                      alsCont[i].audio_iAudioChannels,
+                                      alsCont[i].audio_iSamplesPerSec,
+                                      alsCont[i].audio_iBitsPerSample,
+                                      alsCont[i].audio_iblockAlignment,
+                                      alsCont[i].audio_AverageSampleRate,
+                                      alsCont[i].audio_BitRate_kbps,
+                                      alsCont[i].audio_SampleRate_khz);
 
 
-              if SUCCEEDED(hr) then
-                alsCont[i].audio_lpLangShortName := pwszValue
-              else
-                begin
-                  alsCont[i].audio_lpLangShortName := 'Not available';
-                  hr := S_OK;
-                end;
-            end;
+                // Retrieves a wide-character string associated with a key (MF_SD_LANGUAGE).
+                // This method allocates the memory for the string.
+                // A returnvalue of -1072875802 / $C00D36E6
+                // (The requested attribute was not found.) is returned when no language information was found.
+                hr := pSourceSD.GetAllocatedString(MF_SD_LANGUAGE,
+                                                   pwszValue,
+                                                   pcchLength);
+
+
+                if SUCCEEDED(hr) then
+                  alsCont[i].audio_lpLangShortName := pwszValue
+                else
+                  begin
+                    alsCont[i].audio_lpLangShortName := 'Not available';
+                    hr := S_OK;
+                  end;
+              end;
 
           pwszValue := nil;
           pcchLength := 0;

@@ -132,7 +132,7 @@ type
 const
   MF_SDK_VERSION                      = $0002;
   {$EXTERNALSYM MF_SDK_VERSION}
-  MF_API_VERSION                      = $0070;  // This value is unused in the Win7 release and left at its Vista release value
+  MF_API_VERSION                      = $0070;  // This value is unused in the Win7 release and left at its Vista release value.
   {$EXTERNALSYM MF_API_VERSION}
   MF_VERSION                          = (MF_SDK_VERSION shl 16 or MF_API_VERSION);
   {$EXTERNALSYM MF_VERSION}
