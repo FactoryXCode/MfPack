@@ -4,7 +4,7 @@ object frmMain: TfrmMain
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'LoopBackCapture Sample 2'
-  ClientHeight = 473
+  ClientHeight = 477
   ClientWidth = 462
   Color = clBtnFace
   DoubleBuffered = True
@@ -55,21 +55,29 @@ object frmMain: TfrmMain
     Caption = 'Process Name:'
   end
   object lblMsg: TLabel
-    Left = 0
-    Top = 448
-    Width = 462
+    AlignWithMargins = True
+    Left = 6
+    Top = 450
+    Width = 453
     Height = 24
     Margins.Left = 6
     Align = alBottom
     AutoSize = False
     Caption = 'Start Capture'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
     Layout = tlCenter
-    ExplicitTop = 362
-    ExplicitWidth = 418
+    ExplicitLeft = 0
+    ExplicitTop = 449
+    ExplicitWidth = 462
   end
   object Bevel1: TBevel
     Left = 0
-    Top = 472
+    Top = 446
     Width = 462
     Height = 1
     Align = alBottom
@@ -80,7 +88,7 @@ object frmMain: TfrmMain
   end
   object Bevel3: TBevel
     Left = 0
-    Top = 447
+    Top = 445
     Width = 462
     Height = 1
     Align = alBottom

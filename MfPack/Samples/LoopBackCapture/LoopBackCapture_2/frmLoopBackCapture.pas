@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
+// 25/04/2004 Tony                Updated to a more stable and glitch free version.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -151,8 +152,10 @@ type
     aWavFmt: TWavFormat;
     aDeviceBufferDuration: REFERENCE_TIME;
 
-    procedure OnProgressEvent(var AMessage: TMessage); message WM_PROGRESSNOTIFY;
-    procedure OnRecordingStopped(var AMessage: TMessage); message WM_RECORDINGSTOPPEDNOTYFY;
+    // Event handlers.
+    procedure OnCapturingStoppedEvent(Sender: TObject);
+    procedure OnAudioSinkProgressEvent(Sender: TObject);
+
     function StartCapture(): HResult;
     procedure SetDeviceBufferDuration();
 
@@ -171,6 +174,7 @@ implementation
 
 procedure TfrmMain.butPlayDataClick(Sender: TObject);
 begin
+
   ShellExecute(Handle,
                'open',
                StrToPWideChar(sFileName + lblFileExt.Caption),
@@ -185,6 +189,7 @@ var
   hr: HResult;
 
 begin
+
   // Set to default, if user selected nothing.
   if (aprocessId = 0) then
     begin
@@ -213,6 +218,7 @@ var
   hr: HResult;
 
 begin
+
   hr := oLoopbackCapture.StopCaptureAsync();
 
   butStart.Enabled := SUCCEEDED(hr);
@@ -222,6 +228,7 @@ end;
 
 procedure TfrmMain.Button1Click(Sender: TObject);
 begin
+
   // Create the dialog if it's not allready done.
   if not Assigned(dlgProcessInfo) then
     begin
@@ -246,6 +253,7 @@ end;
 
 procedure TfrmMain.cbxStayOnTopClick(Sender: TObject);
 begin
+
   if cbxStayOnTop.Checked then
     SetWindowPos(Handle,
                  HWND_TOPMOST,
@@ -268,6 +276,7 @@ end;
 procedure TfrmMain.edFileNameKeyUp(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
+
   bEdited := True;
 end;
 
@@ -276,7 +285,9 @@ procedure TfrmMain.edPIDKeyUp(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 var
   i: Integer;
+
 begin
+
   if TryStrToInt(edPID.Text, i) and (i >= 0) then
    aprocessId := i;
 end;
@@ -285,6 +296,7 @@ end;
 // Get the PID from this application
 procedure TfrmMain.butGetPIDClick(Sender: TObject);
 begin
+
   edPID.Text := IntToStr(GetCurrentProcessId());
   edProcName.Text := Application.Title;
 end;
@@ -292,6 +304,7 @@ end;
 
 procedure TfrmMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
+
   CanClose := False;
   FreeAndNil(oLoopbackCapture);
   CanClose := True;
@@ -300,7 +313,12 @@ end;
 
 procedure TfrmMain.FormCreate(Sender: TObject);
 begin
+
   oLoopbackCapture := TLoopbackCapture.Create(Handle);
+  // Set event handlers.
+  oLoopbackCapture.OnProcessingData := OnAudioSinkProgressEvent;
+  oLoopbackCapture.OnStoppedCapturing := OnCapturingStoppedEvent;
+
   butGetPID.OnClick(Self);
   SetDeviceBufferDuration();
   bEdited := False;
@@ -317,6 +335,7 @@ label
   done;
 
 begin
+
   hr := S_OK;
   iProgress := 0;
 
@@ -411,31 +430,120 @@ done:
 end;
 
 
-procedure TfrmMain.OnProgressEvent(var aMessage: TMessage);
+// Helper.
+function BytesToTimeStr(const pBytesWritten: Int64;
+                        const pSampleRate: Integer;
+                        const pChannels: Integer;
+                        const pBitsPerSecond: Integer;
+                        pShowMilliSeconds: Boolean = True): string; inline;
+const
+  Bit32 = 4;
+  Bit16 = 2;
+
+var
+  hns: Int64;
+
 begin
-  iProgress := aMessage.WParam;
-  lblMsg.Caption := Format('Capturing from source: Bytes processed: %d',[iProgress]);
+
+  // Calculate time in 100-nanosecond units.
+  if (pBitsPerSecond = 16) then
+    hns := Trunc((pBytesWritten / (pSampleRate * 2 * pChannels)) * 10000000)  // 16-bit audio.
+  else if (pBitsPerSecond = 24) then
+    hns := Trunc((pBytesWritten / (pSampleRate * 3 * pChannels)) * 10000000)  // 24-bit audio.
+  else if (pBitsPerSecond = 32) then
+    hns := Trunc((pBytesWritten / (pSampleRate * 4 * pChannels)) * 10000000) // 32-bit audio.
+  else // Exotic
+    Exit;
+  // Call HnsTimeToStr function to format the time string
+  Result := HnsTimeToStr(hns,
+                         pShowMilliSeconds);
 end;
 
 
-procedure TfrmMain.OnRecordingStopped(var AMessage: TMessage);
+procedure TfrmMain.OnAudioSinkProgressEvent(Sender: TObject);
+var
+  hnsStr: string;
+  bitsPerSample: Integer;
+  sampleRate: Integer;
+  channels: Integer;
+
 begin
+
+  if not Assigned(oLoopbackCapture) then
+    Exit;
+
+  sampleRate := oLoopbackCapture.CurrentWavFormat.nSamplesPerSec;
+  channels := oLoopbackCapture.CurrentWavFormat.nChannels;
+  bitsPerSample := oLoopbackCapture.CurrentWavFormat.wBitsPerSample;
+
+  Inc(iProgress,
+      oLoopbackCapture.BytesWritten);
+
+  // Sync the thread to prevent overruns.
+  // This is because the LoopbackCapture runs a-sync.
+  TThread.Synchronize(nil,
+                      procedure
+                        begin
+                          // Format to string (00:00:00,000)
+                          hnsStr := BytesToTimeStr(iProgress,
+                                                   sampleRate,
+                                                   channels,
+                                                   bitsPerSample,
+                                                   True);
+
+                          lblMsg.Caption := Format('Capturing from source: %s.', [hnsStr]);
+                        end);
+  Application.ProcessMessages;
+end;
+
+
+procedure TfrmMain.OnCapturingStoppedEvent(Sender: TObject);
+begin
+
+  if not Assigned(oLoopbackCapture) then
+    Exit;
+
   butPlayData.Enabled := True;
-  lblMsg.Caption := Format('Capturing Stopped: %s bytes processed.', [iProgress.ToString()]);
+  lblMsg.Caption := Format('Capturing stopped. Captured %f Mb.', [iProgress / (1000 * 1000)]);
 end;
 
 
 procedure TfrmMain.tbDeviceBufferDurationChange(Sender: TObject);
 begin
+
   SetDeviceBufferDuration();
 end;
 
 
 procedure TfrmMain.SetDeviceBufferDuration();
 begin
+
   lblDeviceBufferDuration.Caption := Format('Device buffer (%d MilliSeconds)', [tbDeviceBufferDuration.Position]);
   aDeviceBufferDuration := tbDeviceBufferDuration.Position * AUDIO_BUFFER_FMT;
 end;
 
+
+// initialization and finalization =============================================
+
+
+initialization
+  // A gui app should always use COINIT_APARTMENTTHREADED in stead of COINIT_MULTITHREADED
+  //CoInitializeEx(nil,
+  //               COINIT_APARTMENTTHREADED);
+
+  if FAILED(MFStartup(MF_VERSION,
+                      MFSTARTUP_LITE)) then
+      begin
+        MessageBox(0,
+                   lpcwstr('Your computer does not support this Media Foundation API version ' +
+                           IntToStr(MF_VERSION) + '.'),
+                   lpcwstr('MFStartup Failure!'),
+                           MB_ICONSTOP);
+      end;
+
+finalization
+
+  MFShutdown();
+  //CoUnInitialize();
 
 end.

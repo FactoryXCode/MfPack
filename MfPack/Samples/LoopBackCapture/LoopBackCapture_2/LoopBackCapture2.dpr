@@ -3,6 +3,11 @@ program LoopBackCapture2;
 uses
   {$IFDEF FASTMM}
   FastMM4,
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
   {$ENDIF}
 
   Vcl.Forms,

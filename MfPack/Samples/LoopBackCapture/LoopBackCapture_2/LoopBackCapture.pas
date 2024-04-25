@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
+// 25/04/2004 Tony                Updated to a more stable and glitch free version.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -95,8 +96,6 @@ uses
 
 const
   BITS_PER_BYTE = 8;
-  WM_PROGRESSNOTIFY = WM_USER + 1001;
-  WM_RECORDINGSTOPPEDNOTYFY = WM_USER + 1002;
 
 var
   oCriticalSection: TrtlCriticalSection;
@@ -150,9 +149,14 @@ type
     m_xSampleReady: TCallbackAsync;
     m_xFinishCapture: TCallbackAsync;
 
+    FOnProcessingData: TNotifyEvent;
+    FOnCapturingStopped: TNotifyEvent;
+
     m_SampleReadyKey: MFWORKITEM_KEY;
     m_CaptureFormat: WAVEFORMATEX;
     m_BufferFrames: UINT32;
+
+    pvBytesWritten: Int64;
 
     m_dwTaskID: DWord;
     m_dwQueueID: DWord;
@@ -205,8 +209,13 @@ type
     function StopCaptureAsync(): HResult;
 
     property WavFormat: TWavFormat read m_WavFormat;
+    property CurrentWavFormat: TWAVEFORMATEX read m_CaptureFormat;
     property AudioClientBufferDuration: REFERENCE_TIME read m_BufferDuration;
+    property BytesWritten: Int64 read pvBytesWritten;
 
+    // Notify events.
+    property OnProcessingData: TNotifyEvent read FOnProcessingData write FOnProcessingData;
+    property OnStoppedCapturing: TNotifyEvent read FOnCapturingStopped write FOnCapturingStopped;
   end;
 
   //   ////////////////////////////////////////////////////////////////////////
@@ -234,6 +243,7 @@ type
 
   end;
 
+
 implementation
 
 
@@ -249,10 +259,17 @@ begin
 
   // Create the callback interfaces
   {StartCapture, StopCapture, SampleReady, FinishCapture}
-  m_xStartCapture := TCallbackAsync.Create(Self, StartCapture);
-  m_xStopCapture := TCallbackAsync.Create(Self, StopCapture);
-  m_xSampleReady := TCallbackAsync.Create(Self, SampleReady);
-  m_xFinishCapture := TCallbackAsync.Create(Self, FinishCapture);
+  m_xStartCapture := TCallbackAsync.Create(Self,
+                                           StartCapture);
+
+  m_xStopCapture := TCallbackAsync.Create(Self,
+                                          StopCapture);
+
+  m_xSampleReady := TCallbackAsync.Create(Self,
+                                          SampleReady);
+
+  m_xFinishCapture := TCallbackAsync.Create(Self,
+                                            FinishCapture);
 
 end;
 
@@ -380,7 +397,7 @@ begin
   if FAILED(hr) then
     goto leave;
 
-  // Tell the system which event handle it should signal when an audio buffer is ready to be processed by the client
+  // Tell the system which event handle it should signal when an audio buffer is ready to be processed by the client.
   hr := m_AudioClient.SetEventHandle(gs_SampleReadyEvent.Handle);
   if FAILED(hr) then
     goto leave;
@@ -492,7 +509,7 @@ var
 
 begin
   m_DeviceState := Stopping;
-  // FixWAVHeader will set the DeviceStateStopped when all async tasks are complete
+  // FixWAVHeader will set the DeviceStateStopped when all async tasks are complete.
   hr := FixWAVHeader();
 
   if SUCCEEDED(hr) then
@@ -506,10 +523,8 @@ begin
             begin
               CloseHandle(m_hPipe);
               m_hPipe := 0;
-              SendMessage(hwOwner,
-                          WM_RECORDINGSTOPPEDNOTYFY,
-                          0,
-                          0);
+
+              FOnCapturingStopped(Self);
             end;
         end;
     end
@@ -537,10 +552,10 @@ begin
   hr := OnAudioSampleRequested();
   if SUCCEEDED(hr) then
     begin
-      // Re-queue work item for next sample
+      // Re-queue work item for next sample.
       if (m_DeviceState = Capturing) then
         begin
-          // Re-queue work item for next sample
+          // Re-queue work item for next sample.
           hr := MFPutWaitingWorkItem(gs_SampleReadyEvent.Handle,
                                      0,
                                      m_SampleReadyAsyncResult,
@@ -565,14 +580,14 @@ begin
   m_dwTaskID := 0;
   Reset();
 
-  // Create events for sample ready or user stop
+  // Create events for sample ready or user stop.
   gs_SampleReadyEvent := TEvent.Create(nil,
                                        False,
                                        False,
                                        '',
                                        True);
 
-  // Register MMCSS work queue
+  // Register MMCSS work queue.
   hr := MFLockSharedWorkQueue(PWideChar('Capture'),
                               MFASYNC_CALLBACK_QUEUE_MULTITHREADED,
                               m_dwTaskID,
@@ -580,17 +595,17 @@ begin
   if FAILED(hr) then
     ErrMsg(Format('MFLockSharedWorkQueue failed. LastError = %d',[GetLastError()]), hr);
 
-  // Set the capture event work queue to use the MMCSS queue
+  // Set the capture event work queue to use the MMCSS queue.
   m_xSampleReady.SetQueueID(m_dwQueueID);
 
-  // Create the completion event as auto-reset
+  // Create the completion event as auto-reset.
   gs_hActivateCompleted := TEvent.Create(nil,
                                          False,
                                          False,
                                          '',
                                          True);
 
-  // Create the capture-stopped event as auto-reset
+  // Create the capture-stopped event as auto-reset.
   gs_hCaptureStopped := TEvent.Create(nil,
                                       False,
                                       False,
@@ -607,7 +622,7 @@ end;
 //
 //  CreateWAVFile()
 //
-//  Creates a WAV file in music folder
+//  Creates a WAV file in music folder.
 //
 function TLoopbackCapture.CreateWAVFile(): HResult;
 var
@@ -635,7 +650,9 @@ begin
     begin
       hr := E_FAIL;
       m_hPipe := 0;
-      ErrMsg(Format('CreateFile(%s) failed. LastError = %d',[WideCharToString(m_outputFileName), GetLastError()]), hr);
+      ErrMsg(Format('CreateFile(%s) failed. LastError = %d',
+                    [WideCharToString(m_outputFileName),
+                    GetLastError()]), hr);
       goto leave;
     end;
 
@@ -643,8 +660,8 @@ begin
   // Create and write the WAV header
 
   // 1. RIFF chunk descriptor
-  header[0] := FCC('RIFF'); // 4 bytes
-  header[1] := 0;           // 4 bytes, total size of WAV (will be filled in later)
+  header[0] := FCC('RIFF'); // 4 bytes.
+  header[1] := 0;           // 4 bytes, total size of WAV (will be filled in later).
   header[2] := FCC('WAVE'); // 4 bytes, WAVE FourCC.
   // Start of 'fmt ' chunk
   header[3] := FCC('fmt '); // 4 bytes, Start of 'fmt ' chunk.
@@ -665,7 +682,7 @@ begin
   inc(m_cbHeaderSize,
       dwBytesWritten);
 
-  // 2. The fmt sub-chunk
+  // 2. The fmt sub-chunk.
   {$IFDEF DEBUG}
   ASSERT(m_CaptureFormat.cbSize = 0);
   {$ENDIF}
@@ -685,8 +702,8 @@ begin
       dwBytesWritten);
 
   // 3. The data sub-chunk
-  data[0] := FCC('data'); // 4 bytes, Start of 'data' chunk
-  data[1] := 0;           // 4 bytes
+  data[0] := FCC('data'); // 4 bytes, Start of 'data' chunk.
+  data[1] := 0;           // 4 bytes.
 
 
   br := WriteFile(m_hPipe,
@@ -723,7 +740,7 @@ label
   leave;
 
 begin
-  // Write the size of the 'data' chunk first
+  // Write the size of the 'data' chunk first.
   dwPtr := SetFilePointer(m_hPipe,
                           m_cbHeaderSize - SizeOf(DWord),
                           nil,
@@ -744,8 +761,8 @@ begin
       ErrMsg(Format('WriteFile failed. LastError = %d',[GetLastError()]), hr);
     end;
 
-  // Write the total file size, minus RIFF chunk and size
-  // SizeOf(DWord) = SizeOf(FOURCC)
+  // Write the total file size, minus RIFF chunk and size.
+  // SizeOf(DWord) = SizeOf(FOURCC).
   dwPtr := SetFilePointer(m_hPipe,
                           SizeOf(DWord),
                           nil,
@@ -780,7 +797,7 @@ end;
 //
 //  OnAudioSampleRequested()
 //
-//  Called when audio device fires m_SampleReadyEvent
+//  Called when audio device fires m_SampleReadyEvent.
 //
 function TLoopbackCapture.OnAudioSampleRequested(): HResult;
 var
@@ -801,12 +818,13 @@ label
 begin
 
   EnterCriticalSection(oCriticalSection);
+
   hr := S_OK;
   NumBytesWritten := 0;
   Data := nil;
 
-  // If this flag is set, we have already queued up the async call to finialize the WAV header
-  // So we don't want to grab or write any more data that would possibly give us an invalid size
+  // If this flag is set, we have already queued up the async call to finialize the WAV header.
+  // So we don't want to grab or write any more data that would possibly give us an invalid size.
   if (m_DeviceState = Stopping) or (m_DeviceState = Stopped) or (m_DeviceState = Error) then
     goto leave;
 
@@ -852,11 +870,11 @@ begin
 
 
       // WAV files have a 4GB (0xFFFFFFFF) size limit, so likely we have hit that limit when we
-      // overflow here.  Time to stop the capture
+      // overflow here. Time to stop the capture.
       if ((m_cbDataSize + cbBytesToCapture) < m_cbDataSize) then
         begin
           StopCaptureAsync();
-          break;
+          Break;
         end;
 
         // Get sample buffer
@@ -868,7 +886,7 @@ begin
         if FAILED(hr) then
           begin
              ErrMsg(Format('m_AudioCaptureClient.GetBuffer failed. LastError = %d',[GetLastError()]), hr);
-             break;
+             Break;
           end;
 
         // Write File
@@ -883,24 +901,30 @@ begin
             if (br = False) then
               begin
                 ErrMsg(Format('%s LastError = %d',[SysErrorMessage(GetLastError), GetLastError()]), E_FAIL);
-                break;
+                Break;
               end;
           end;
 
         // Increase the size of our 'data' chunk. m_cbDataSize needs to be accurate.
-        inc(m_cbDataSize, cbBytesToCapture);
-        inc(NumBytesWritten, dwBytesWritten);
+        Inc(m_cbDataSize,
+            cbBytesToCapture);
+
+        Inc(NumBytesWritten,
+            dwBytesWritten);
+
+        // Store to public.
+        pvBytesWritten := dwBytesWritten;
 
         HandleThreadMessages(GetCurrentThread());
-        // Send score. Don't use PostMessage because it set priority above this thread.
-        SendMessage(hwOwner,
-                    WM_PROGRESSNOTIFY,
-                    NumBytesWritten,
-                    0);
+
+        // Send score.
+        FOnProcessingData(nil);
+
         Data := nil;
 
-        // Release buffer back
-        hr := m_AudioCaptureClient.ReleaseBuffer(FramesAvailable);
+        // Release buffer back.
+        if Assigned(m_AudioCaptureClient) then
+          hr := m_AudioCaptureClient.ReleaseBuffer(FramesAvailable);
     end;
 
 leave:
@@ -969,7 +993,7 @@ var
   hr: HResult;
 
 begin
-  // We should be flushing when this is called
+  // We should be flushing when this is called.
   hr := MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED,
                        0,
                        m_xFinishCapture,
@@ -1085,7 +1109,7 @@ begin
       goto leave;
     end;
 
-  // Activate the audio interface
+  // Activate the audio interface.
   hr := ActivateAudioInterface(processId,
                                includeProcessTree);
   if FAILED(hr) then
@@ -1100,7 +1124,7 @@ begin
       m_DeviceState := Starting;
       hr := MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED,
                            0,
-                           m_xStartCapture,  // the callback interface
+                           m_xStartCapture,  // The callback interface.
                            nil);
       if FAILED(hr) then
         begin
@@ -1203,18 +1227,7 @@ end;
 initialization
   InitializeCriticalSection(oCriticalSection);
 
-  if FAILED(MFStartup(MF_VERSION,
-                      MFSTARTUP_LITE)) then
-      begin
-        MessageBox(0,
-                   lpcwstr('Your computer does not support this Media Foundation API version' +
-                           IntToStr(MF_VERSION) + '.'),
-                   lpcwstr('MFStartup Failure!'),
-                   MB_ICONSTOP);
-      end;
-
 finalization
   DeleteCriticalSection(oCriticalSection);
-  MFShutdown();
 
 end.
