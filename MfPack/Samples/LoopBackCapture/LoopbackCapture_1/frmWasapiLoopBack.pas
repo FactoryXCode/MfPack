@@ -23,6 +23,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
+// 25/04/2004 Tony                Updated to a more stable and crack free version.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -36,7 +37,7 @@
 // Todo: -
 //
 //==============================================================================
-// Source: Rita Han / FactoryX
+// Source: Rita Han / Tony Kalf / FactoryX
 //==============================================================================
 //
 // LICENSE
@@ -67,6 +68,8 @@ uses
   WinApi.Messages,
   Winapi.ShellAPI,
   WinApi.WinApiTypes,
+  {ActiveX}
+  Winapi.ActiveX,
   {System}
   System.SysUtils,
   System.Classes,
@@ -78,7 +81,10 @@ uses
   Vcl.Menus,
   Vcl.ExtCtrls,
   {CoreAudioApi}
+  WinApi.MediaFoundationApi.MfApi,
   WinApi.CoreAudioApi.MMDeviceApi,
+  {CoreAudioApi}
+  WinApi.CoreAudioApi.AudioClient,
   {Application}
   WasapiLoopback,
   Utils,
@@ -107,8 +113,9 @@ type
     lblFileExt: TLabel;
     edFileName: TEdit;
     cbxDontOverWrite: TCheckBox;
-    lblMsg: TLabel;
     Bevel1: TBevel;
+    lblStatus: TLabel;
+    butResetEngine: TButton;
     procedure FormCreate(Sender: TObject);
     procedure butStartClick(Sender: TObject);
     procedure butStopClick(Sender: TObject);
@@ -117,24 +124,36 @@ type
     procedure cbxStayOnTopClick(Sender: TObject);
     procedure butShowdlgDevicesClick(Sender: TObject);
     procedure tbBufferDurationChange(Sender: TObject);
+    procedure rbConsoleMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure butResetEngineClick(Sender: TObject);
 
   private
     { Private declarations }
     oAudioSink: TAudioSink;
-    iProgress: Int64;
+    iTotalBytesProcessed: Int64;
     sFileName: string;
     oDataFlow: EDataFlow;
     oRole: ERole;
     oBufferDuration: REFERENCE_TIME;
 
     procedure EnablePanels(aEnabled: Boolean);
+
+    ///
+    procedure CreateNewAudioSink();
+    procedure RemoveAudioSink();
+
     function StartCapture(): HResult;
-    procedure OnAudioSinkCaptureStopped(var aMessage: TMessage); message WM_CAPTURINGSTOPPED;
-    procedure OnAudioSinkProgressEvent(var AMessage: TMessage); message WM_PROGRESSNOTIFY;
+
+    // Event handlers.
+    procedure OnCapturingStoppedEvent(Sender: TObject);
+    procedure OnAudioSinkProgressEvent(Sender: TObject);
+
     procedure SetBufferDuration();
 
   public
     { Public declarations }
+
 
   end;
 
@@ -159,36 +178,100 @@ begin
 end;
 
 
-procedure TfrmLoopBackCapture.OnAudioSinkCaptureStopped(var aMessage: TMessage);
-begin
-  if (aMessage.WParam = S_OK) then
-    begin
-      lblMsg.Caption := Format('Capturing stopped. Captured %s bytes.', [iProgress.ToString()]);
-      butPlayData.Enabled := True;
+procedure TfrmLoopBackCapture.OnCapturingStoppedEvent(Sender: TObject);
+var
+  errorStatus: HResult;
 
-    end
-  else if (aMessage.WParam <> S_OK) then
+begin
+  if not Assigned(oAudioSink) then
+    Exit;
+
+  errorStatus := oAudioSink.ErrorStatus;
+
+  if (errorStatus = S_OK) or (errorStatus = HResult(AUDCLNT_E_OUT_OF_ORDER)) then
     begin
-      lblMsg.Caption := Format('Capturing stopped because of an error (hr = %d). Captured %s bytes.', [aMessage.WParam, iProgress.ToString()]);
+      lblStatus.Caption := Format('Capturing stopped. Captured %f Mb.', [iTotalBytesProcessed / (1000 * 1000)]);
+      butPlayData.Enabled := True;
+    end
+  else if (errorStatus <> S_OK) then
+    begin
+      lblStatus.Caption := Format('Capturing stopped because of an error (hr = %d). Captured %s bytes.', [errorStatus, iTotalBytesProcessed.ToString()]);
       butPlayData.Enabled := False;
     end;
 
   butStop.Enabled := False;
   butStart.Enabled := True;
   EnablePanels(True);
-
 end;
 
 
-procedure TfrmLoopBackCapture.OnAudioSinkProgressEvent(var aMessage: TMessage);
+procedure TfrmLoopBackCapture.rbConsoleMouseUp(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  lblStatus.Caption := 'Start Capture';
+end;
+
+// Helper.
+function BytesToTimeStr(pBytesWritten: Int64;
+                        pSampleRate: Integer;
+                        pChannels: Integer;
+                        pBitsPerSecond: Integer;
+                        pShowMilliSeconds: Boolean = True): string; inline;
+const
+  Bit32 = 4;
+  Bit16 = 2;
+
 var
-  iLatency: NativeInt;
+  hns: Int64;
 
 begin
-  inc(iProgress,
-      aMessage.WParam);
-  iLatency := NativeInt(aMessage.LParam);
-  lblMsg.Caption := Format('Capturing from source: Bytes processed: %s (Latency: %d)',[iProgress.ToString, iLatency]);
+
+  // Calculate time in 100-nanosecond units.
+  if (pBitsPerSecond = 16) then
+    hns := Trunc((pBytesWritten / (pSampleRate * 2 * pChannels)) * 10000000) // 16-bit audio.
+  else if (pBitsPerSecond = 32) then
+    hns := Trunc((pBytesWritten / (pSampleRate * 4 * pChannels)) * 10000000); // 32-bit audio.
+
+  // Call HnsTimeToStr function to format the time string
+  Result := HnsTimeToStr(hns,
+                         pShowMilliSeconds);
+end;
+
+
+procedure TfrmLoopBackCapture.OnAudioSinkProgressEvent(Sender: TObject);
+var
+  latency: NativeInt;
+  timePlayed: Int64;
+  hnsStr: string;
+  bitsPerSample: Integer;
+  sampleRate: Integer;
+  channels: Integer;
+
+begin
+
+  if not Assigned(oAudioSink) then
+    Exit;
+
+  latency := NativeInt(oAudioSink.Latency);
+  sampleRate := oAudioSink.WaveFmtEx.nSamplesPerSec;
+  channels := oAudioSink.WaveFmtEx.nChannels;
+  bitsPerSample := oAudioSink.WaveFmtEx.wBitsPerSample;
+
+  Inc(iTotalBytesProcessed,
+      oAudioSink.BytesWritten);
+
+  // Format to string (00:00:00,000)
+  hnsStr := BytesToTimeStr(iTotalBytesProcessed,
+                           sampleRate,
+                           channels,
+                           bitsPerSample,
+                           True);
+
+  lblStatus.Caption := Format('Capturing from source: %s (Latency: %d)',
+                              [hnsStr,
+                               latency]);
+
+  Application.ProcessMessages();
 end;
 
 
@@ -203,7 +286,7 @@ label
 
 begin
   hr := S_OK;
-  iProgress := 0;
+  iTotalBytesProcessed := 0;
 
   if not Assigned(oAudioSink) then
     begin
@@ -214,7 +297,9 @@ begin
   if SUCCEEDED(hr) then
     begin
 
-      sFileName := Format('%s%s', [edFileName.Text, lblFileExt.Caption]);
+      sFileName := Format('%s%s',
+                          [edFileName.Text,
+                           lblFileExt.Caption]);
 
       if cbxDontOverWrite.Checked then
         begin
@@ -224,7 +309,10 @@ begin
             begin
               if FileExists(sFileName) then
                 begin
-                  sFileName := Format('%s(%d)%s', [edFileName.Text, i, lblFileExt.Caption]);
+                  sFileName := Format('%s(%d)%s',
+                                      [edFileName.Text,
+                                      i,
+                                      lblFileExt.Caption]);
                   Inc(i);
                 end
               else
@@ -290,6 +378,19 @@ begin
 end;
 
 
+procedure TfrmLoopBackCapture.butResetEngineClick(Sender: TObject);
+begin
+  RemoveAudioSink();
+  CreateNewAudioSink();
+  EnablePanels(True);
+  Self.BorderIcons := [biSystemMenu, biMinimize];
+  butPlayData.Enabled := False;
+  butStop.Enabled := False;
+  butStart.Enabled := True;
+  lblStatus.Caption := 'The engine has been reset.'
+end;
+
+
 procedure TfrmLoopBackCapture.butShowdlgDevicesClick(Sender: TObject);
 begin
   // Create the dialog if it's not allready done.
@@ -306,7 +407,7 @@ begin
       oDataFlow := DevicesDlg.oDataFlow;
       rbRenderingDevice.Checked := (oDataFlow = eRender);
       rbCaptureDevice.Checked := (oDataFlow = eCapture);
-      lblMsg.Caption := Format('Please select a%s.',[Panel2.Caption]);
+      lblStatus.Caption := Format('Please select a%s.',[Panel2.Caption]);
     end
   else
     begin
@@ -314,7 +415,7 @@ begin
       // Set radiobuttons to default.
       rbRenderingDevice.Checked := True;
       rbMultimedia.Checked := True;
-      lblMsg.Caption := 'Start Capture';
+      lblStatus.Caption := 'Start Capture';
     end;
 end;
 
@@ -345,22 +446,44 @@ procedure TfrmLoopBackCapture.FormCloseQuery(Sender: TObject;
   var CanClose: Boolean);
 begin
   CanClose := False;
-  if not oAudioSink.StopRecording then
-    begin
-      oAudioSink.StopRecording := True;
-    end;
-  FreeAndNil(oAudioSink);
+  RemoveAudioSink();
   CanClose := True;
 end;
 
 
 procedure TfrmLoopBackCapture.FormCreate(Sender: TObject);
 begin
-  // Create the AudioSink object.
-  oAudioSink := TAudioSink.Create(Handle);
+  //
+  lblStatus.ControlStyle := lblStatus.ControlStyle + [csOpaque];
+
+  CreateNewAudioSink();
+
   oDataFlow := eDataFlow(-1);
   tbBufferDuration.Position := 10;
   SetBufferDuration();
+end;
+
+
+procedure TfrmLoopBackCapture.CreateNewAudioSink();
+begin
+
+  // Create the AudioSink object.
+  oAudioSink := TAudioSink.Create();
+  // Set event handlers.
+  oAudioSink.OnProcessingData := OnAudioSinkProgressEvent;
+  oAudioSink.OnStoppedCapturing := OnCapturingStoppedEvent;
+end;
+
+
+procedure TfrmLoopBackCapture.RemoveAudioSink();
+begin
+  if Assigned(oAudioSink) then
+    begin
+      if not oAudioSink.StopRecording then
+        oAudioSink.StopRecording := True;
+
+      FreeAndNil(oAudioSink);
+    end;
 end;
 
 
@@ -375,13 +498,38 @@ var
   sms: string;
 
 begin
-  oBufferDuration := (REFTIMES_PER_MILLISEC * 1000) * tbBufferDuration.Position;
-  if (oBufferDuration > 10000000) then
+  oBufferDuration := (REFTIMES_PER_SEC) * tbBufferDuration.Position;
+  if (oBufferDuration > REFTIMES_PER_SEC) then
     sms := 'milliseconds'
   else
     sms := 'millisecond';
-  lblBufferDuration.Caption := Format('Capture Buffer Length(%d %s)', [tbBufferDuration.Position, sms])
+  lblBufferDuration.Caption := Format('Capture Buffer Length(%d %s)',
+                                      [tbBufferDuration.Position,
+                                       sms])
 end;
 
 
+
+// initialization and finalization =============================================
+
+
+initialization
+  // A gui app should always use COINIT_APARTMENTTHREADED in stead of COINIT_MULTITHREADED
+  CoInitializeEx(nil,
+                COINIT_APARTMENTTHREADED);
+
+  if FAILED(MFStartup(MF_VERSION,
+                      MFSTARTUP_FULL)) then
+      begin
+        MessageBox(0,
+                   lpcwstr('Your computer does not support this Media Foundation API version ' +
+                           IntToStr(MF_VERSION) + '.'),
+                   lpcwstr('MFStartup Failure!'),
+                           MB_ICONSTOP);
+      end;
+
+finalization
+
+  MFShutdown();
+  CoUnInitialize();
 end.

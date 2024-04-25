@@ -24,6 +24,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
+// 25/04/2004 Tony                Updated to a more stable and crack free version.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -137,7 +138,7 @@ try
     Result := Format('%2.2d%s%2.2d%s%2.2d', [hours, DelimiterFormat, mins, DelimiterFormat, secs]);
 
 except
-  on exception do Result:= '00:00:00,000';
+  on exception do Result:= Format('00:00:00%s000', [DelimiterFormat]);
 end;
 end;
 

@@ -24,6 +24,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
+// 25/04/2004 Tony                Updated to a more stable and crack free version.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -37,7 +38,7 @@
 // Todo: -
 //
 //==============================================================================
-// Source: Rita Han / FactoryX
+// Source: Rita Han / Tony Kalf / FactoryX
 //==============================================================================
 //
 // LICENSE
@@ -68,9 +69,11 @@ uses
   WinApi.ComBaseApi,
   WinApi.WinApiTypes,
   WinApi.Messages,
+  WinApi.WinError,
   {System}
   System.Classes,
   System.SysUtils,
+  System.SyncObjs,
   {WinMM}
   WinApi.WinMM.MMSysCom,
   WinApi.WinMM.MMiscApi,
@@ -85,24 +88,36 @@ uses
   {Application}
   Utils;
 
-const
-  // REFERENCE_TIME time units per second and per millisecond
-  REFTIMES_PER_SEC                    = 10000000;
-  REFTIMES_PER_MILLISEC               = 10000;   // 1 millisecond = 10,000 100-nanosecond units.
-  WM_BUSYNOTIFY                       = WM_USER + 1001;
-  WM_PROGRESSNOTIFY                   = WM_USER + 1002;
-  WM_CAPTURINGSTOPPED                 = WM_USER + 1011;
 
 type
+
+  TWavFormatEx = record
+    wFormatTag: WORD;               { format type }
+    nChannels: WORD;                { number of channels (i.e. mono, stereo...) }
+    nSamplesPerSec: DWORD;          { sample rate }
+    nAvgBytesPerSec: DWORD;         { for buffer estimation }
+    nBlockAlign: WORD;              { block size of data }
+    wBitsPerSample: WORD;           { number of bits per sample of mono data }
+    cbSize: WORD;
+  end;
+
 
   TAudioSink = class(TObject)
   protected
     hmFile: HMMIO;
 
   private
-    bStopRec: Boolean;
-    bAppIsClosing: Boolean;
-    hwOwner: HWND; // The handle of the caller (usually the mainform).
+    FCriticalSection: TCriticalSection;
+    pvStopRec: Boolean;
+    pvAppIsClosing: Boolean;
+    pvErrorStatus: HResult;
+
+    pvHnsLatency: REFERENCE_TIME;
+    pvBytesWritten: Int64;
+    pvWavFormatEx: TWavFormatEx;
+
+    FOnProcessingData: TNotifyEvent;
+    FOnCapturingStopped: TNotifyEvent;
 
     function CopyData(pData: PByte;
                       NumFrames: UINT32;
@@ -120,7 +135,7 @@ type
 
   public
 
-    constructor Create(hwEvents: HWND); reintroduce;
+    constructor Create();
     destructor Destroy(); override;
 
     function RecordAudioStream(dataFlow: EDataFlow;  // eRender or eCapture
@@ -128,7 +143,19 @@ type
                                bufferDuration: REFERENCE_TIME;
                                ppfileName: LPWSTR): HResult;
 
-    property StopRecording: Boolean read bStopRec write bStopRec;
+    // Used by OnProcessingData
+    property Latency: REFERENCE_TIME read pvHnsLatency;
+    property BytesWritten: Int64 read pvBytesWritten;
+
+    property WaveFmtEx: TWavFormatEx read pvWavFormatEx;
+
+    property ErrorStatus: HResult read pvErrorStatus;
+    // Stops recording immediately.
+    property StopRecording: Boolean read pvStopRec write pvStopRec;
+
+    // Notify events.
+    property OnProcessingData: TNotifyEvent read FOnProcessingData write FOnProcessingData;
+    property OnStoppedCapturing: TNotifyEvent read FOnCapturingStopped write FOnCapturingStopped;
   end;
 
 
@@ -137,31 +164,20 @@ implementation
 
 // TAudioSink //////////////////////////////////////////////////////////////////
 
-constructor TAudioSink.Create(hwEvents: HWND);
+constructor TAudioSink.Create();
 begin
   inherited Create();
 
-  // Check if the current MF version match user's
-  if FAILED(MFStartup(MF_VERSION, 0)) then
-    begin
-      MessageBox(0,
-                 LPCWSTR('Your computer does not support this Media Foundation API version' +
-                          IntToStr(MF_VERSION) + '.'),
-                 LPCWSTR('MFStartup Failure!'),
-                 MB_ICONSTOP);
-      Abort();
-    end;
+  FCriticalSection := TCriticalSection.Create();
 
-  hwOwner := hwEvents;
-  bAppIsClosing := False;
-
+  pvAppIsClosing := False;
 end;
 
 
 destructor TAudioSink.Destroy();
 begin
-  bAppIsClosing := True;
-  MFShutdown();
+  pvAppIsClosing := True;
+  FCriticalSection.Free;
   inherited Destroy();
 end;
 
@@ -179,6 +195,7 @@ label
   done;
 
 begin
+  FCriticalSection.Enter;
   hr := S_OK;
 
   if (NumFrames = 0) then
@@ -192,6 +209,7 @@ begin
   iBytesWritten := mmioWrite(hmFile,
                              PAnsiChar(pData),
                              iBytesToWrite);
+
   if (iBytesToWrite <> iBytesWritten) then
     begin
       ErrMsg(Format('mmioWrite wrote %d bytes : expected %d bytes',[iBytesWritten, iBytesToWrite]), GetLastError());
@@ -199,15 +217,17 @@ begin
       goto done;
     end;
 
+  //
+  pvBytesWritten := iBytesWritten;
+
   // Handle all other messages, like managing controls, moving window etc.
   HandleThreadMessages(GetCurrentThread());
-  // Send score. Don't use PostMessage because it set priority above this thread.
-  SendMessage(hwOwner,
-              WM_PROGRESSNOTIFY,
-              NumFrames,
-              HnsLatency);
+
+  // Send score.
+  FOnProcessingData(Self);
 
 done:
+  FCriticalSection.Leave;
   Result := hr;
 end;
 
@@ -402,7 +422,7 @@ label
   done;
 
 begin
-  bStopRec := False;
+  pvStopRec := False;
   pu64DevicePosition := 0;
   pu64QPCPosition := 0;
   ppwfx := nil;
@@ -445,6 +465,10 @@ begin
   if FAILED(hr) then
     goto done;
 
+  // Needed for timeformat.
+  CopyMemory(@pvWavFormatEx,
+             ppwfx,
+             SizeOf(WAVEFORMATEX));
 
   // The original sample creates a "gues what" bufferDuration,
   // that will cause sound disturbtion when capture sound from a streameservice like YouTube or other high latency services.
@@ -508,20 +532,25 @@ begin
   if FAILED(hr) then
     goto done;
 
+  FCriticalSection.Enter;
+
   // Each loop fills about half of the shared buffer.
-  while (bStopRec = FALSE) do
+  while (pvStopRec = False) do
     begin
       // Sleep for half the buffer duration.
-     // Sleep(hnsActualDuration div REFTIMES_PER_MILLISEC div 2);
-      HandleThreadMessages(GetCurrentThread(),
-                           hnsActualDuration div REFTIMES_PER_MILLISEC div 2);
+      Sleep(hnsActualDuration div REFTIMES_PER_MILLISEC div 2);
 
       hr := pCaptureClient.GetNextPacketSize(packetLength);
       if FAILED(hr) then
         Break;
 
+      HandleThreadMessages(GetCurrentThread());
+
       while (packetLength <> 0) do
         begin
+          if pvStopRec then
+            Break;
+
           // Get the available data in the shared buffer.
           hr := pCaptureClient.GetBuffer(pData,
                                          numFramesAvailable,
@@ -555,14 +584,19 @@ begin
          // For safety on 32bit platforms we have to limit the wav size to < 4 gb or 16 hours.
          // That is (3600 * 16) seconds
          if cycle >= (3600 * 16) then
-           bStopRec := True;
+           pvStopRec := True;
 
          Inc(cycle,
              1);
       end;
     end;
 
+    // Wait for last data in buffer to play before stopping.
+    Sleep(hnsActualDuration div REFTIMES_PER_MILLISEC div 2);
+
 done:
+
+  FCriticalSection.Leave;
 
   if SUCCEEDED(hr) then
     begin
@@ -581,12 +615,10 @@ done:
     end;
 
   // Send capturing stopped.
-  SendMessage(hwOwner,
-              WM_CAPTURINGSTOPPED,
-              hr,
-              0);
+  FOnCapturingStopped(Self);
 
   pData := nil;
+  pvErrorStatus := hr;
   Result := hr;
 end;
 

@@ -23,6 +23,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
+// 25/04/2004 Tony                Updated to a more stable and crack free version.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -36,7 +37,7 @@
 // Todo: -
 //
 //==============================================================================
-// Source: Rita Han / FactoryX
+// Source: Rita Han / Tony Kalf / FactoryX
 //==============================================================================
 //
 // LICENSE
@@ -96,6 +97,8 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
+    RenderDevices: TEndPointDeviceArray;
+    CaptureDevices: TEndPointDeviceArray;
     AllDevices: TEndPointDeviceArray;
     procedure InitDeviceList();
 
@@ -121,9 +124,9 @@ end;
 
 procedure TDevicesDlg.butOkClick(Sender: TObject);
 begin
-  if (Length(AllDevices) > 0) and (sgRenderingDevices.Row > 0) then
+  if (Length(RenderDevices) > 0) and (sgRenderingDevices.Row > 0) then
     begin
-      oDataFlow := AllDevices[sgRenderingDevices.Row - 1].DataFlow;
+      oDataFlow := RenderDevices[sgRenderingDevices.Row - 1].DataFlow;
       ModalResult := mrOk;
     end
   else
@@ -137,24 +140,24 @@ end;
 procedure TDevicesDlg.butRefreshClick(Sender: TObject);
 
   procedure DoList(aDevices: TEndPointDevice; idx: Integer);
-  begin
-    sgRenderingDevices.Cells[0, idx] := aDevices.DevInterfaceName;
-    sgRenderingDevices.Cells[1, idx] := aDevices.DeviceName;
-    sgRenderingDevices.Cells[2, idx] := aDevices.DeviceDesc;
-    sgRenderingDevices.Cells[3, idx] := aDevices.sState;
-    sgRenderingDevices.Cells[4, idx] := aDevices.pwszID;
-    sgRenderingDevices.Cells[5, idx] := aDevices.iID.ToString();
-  end;
+    begin
+      sgRenderingDevices.Cells[0, idx] := aDevices.DevInterfaceName;
+      sgRenderingDevices.Cells[1, idx] := aDevices.DeviceName;
+      sgRenderingDevices.Cells[2, idx] := aDevices.DeviceDesc;
+      sgRenderingDevices.Cells[3, idx] := aDevices.sState;
+      sgRenderingDevices.Cells[4, idx] := aDevices.pwszID;
+      sgRenderingDevices.Cells[5, idx] := aDevices.iID.ToString();
+    end;
 
   procedure populate(devices: TEndPointDeviceArray; StartAt: Integer);
   var
     i: Integer;
   begin
   i := StartAt; // Start at at row 1
-  while i <= Length(devices) do
+  while (i <= Length(devices)) do
     begin
       // Write to new row
-      DoList(devices[i-1], i);
+      DoList(devices[i -1], i);
       // Add new row
       sgRenderingDevices.RowCount := sgRenderingDevices.RowCount + 1;
       inc(i);
@@ -163,9 +166,10 @@ procedure TDevicesDlg.butRefreshClick(Sender: TObject);
 
 var
   hr: HResult;
-  CaptureDevices: TEndPointDeviceArray;
   dwCount1,
   dwCount2: DWord;
+  ptr: Integer;
+
   i: Integer;
 
 begin
@@ -180,7 +184,7 @@ begin
   // Get rendering devices first
   hr := GetEndpointDevices(eRender,
                            DEVICE_STATE_ACTIVE or DEVICE_STATE_DISABLED,
-                           AllDevices,
+                           RenderDevices,
                            dwCount1);
   if FAILED(hr) then
     begin
@@ -203,10 +207,22 @@ begin
       SetLength(AllDevices,
                 Integer(dwCount1) + Integer(dwCount2));
 
-      for i := 0 to dwCount2 -1 do
-        AllDevices[Length(AllDevices)-1 + i] := CaptureDevices[i];
+      ptr := 0;
 
-      Populate(AllDevices, 1);
+      for i := 0 to Length(RenderDevices) - 1 do    // Add RenderDevices.
+        begin
+          AllDevices[ptr] := RenderDevices[i];
+          Inc(ptr);
+        end;
+
+      for i := 0 to Length(CaptureDevices) - 1 do    // Add CaptureDevices.
+        begin
+          AllDevices[ptr] := CaptureDevices[i];
+          Inc(ptr);
+        end;
+
+      Populate(AllDevices,
+               1);
     end
   else
     InitDeviceList();
@@ -237,8 +253,8 @@ begin
   SetLength(AllDevices,
             0);
 
-  sgRenderingDevices.ColCount := 6;
   sgRenderingDevices.RowCount := 1;
+  sgRenderingDevices.ColCount := 6;
 
   // For some reason, the methods to dimension TStringGrid changed?
   {$IF CompilerVersion < 31.0}
