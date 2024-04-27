@@ -138,8 +138,6 @@ uses
   {WinApi}
   WinApi.WinApiTypes;
 
-  {$WEAKPACKAGEUNIT ON}
-
 
 //_MFERROR_H                            = True;
 

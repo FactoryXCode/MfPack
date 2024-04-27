@@ -109,6 +109,14 @@ uses
   WinApi.CoreAudioApi.DeviceTopology,
   WinApi.CoreAudioApi.FunctionDiscoveryKeys_devpkey;
 
+  {$MINENUMSIZE 4}
+
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
+
   {$I 'WinApiTypes.inc'}
 
 const

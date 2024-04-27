@@ -74,7 +74,13 @@ uses
   WinApi.DirectX.DXGI1_2,
   WinApi.DirectX.DXGI1_3;
 
-  {$WEAKPACKAGEUNIT ON}
+  {$MINENUMSIZE 4}
+
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
 
 
 // Enums =======================================================================

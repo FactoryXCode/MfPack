@@ -89,7 +89,6 @@ uses
   {CoreAudioApi}
   WinApi.CoreAudioApi.DeviceTopology;
 
-  {$WEAKPACKAGEUNIT ON}
   {$ALIGN ON}
   {$MINENUMSIZE 4}
 
@@ -107,9 +106,9 @@ const
   {$EXTERNALSYM CLSID_MMDeviceEnumerator}
 
   // Error types
-  E_NOTFOUND                          = HRESULT(ERROR_NOT_FOUND);
+  E_NOTFOUND                          = HResult(ERROR_NOT_FOUND);
   {$EXTERNALSYM E_NOTFOUND}
-  E_UNSUPPORTED_TYPE                  = HRESULT(ERROR_UNSUPPORTED_TYPE);
+  E_UNSUPPORTED_TYPE                  = HResult(ERROR_UNSUPPORTED_TYPE);
   {$EXTERNALSYM E_UNSUPPORTED_TYPE}
 
   // The DEVICE_STATE_XXX constants indicate the current state of an audio endpoint device.
@@ -410,7 +409,7 @@ type
   ['{7991EEC9-7E89-4D85-8390-6C703CEC60C0}']
 
      function OnDeviceStateChanged(pwstrDeviceId: LPCWSTR;
-                                  dwNewState: DWord): HRESULT; stdcall;
+                                   dwNewState: DWord): HResult; stdcall;
     // Parameters
     // pwstrDeviceId [in]
     //  Pointer to the endpoint ID string that identifies the audio endpoint device.
@@ -424,7 +423,7 @@ type
     //    DEVICE_STATE_NOTPRESENT
     //    DEVICE_STATE_UNPLUGGED
 
-    function OnDeviceAdded(pwstrDeviceId: LPCWSTR): HRESULT; stdcall;
+    function OnDeviceAdded(pwstrDeviceId: LPCWSTR): HResult; stdcall;
     // The OnDeviceAdded method indicates that a new audio endpoint device has been added.
     // Parameters
     //   pwstrDeviceId [in]
@@ -432,7 +431,7 @@ type
     //   This parameter points to a null-terminated, wide-character string containing
     //   the endpoint ID. The string remains valid for the duration of the call.
 
-    function OnDeviceRemoved(pwstrDeviceId: LPCWSTR): HRESULT; stdcall;
+    function OnDeviceRemoved(pwstrDeviceId: LPCWSTR): HResult; stdcall;
     // Parameters
     // flow [in]
     //  The data-flow direction of the endpoint device.
@@ -469,7 +468,7 @@ type
     //   ignored
 
     function OnPropertyValueChanged(pwstrDeviceId: LPCWSTR;
-                                    key: PROPERTYKEY): HRESULT; stdcall;
+                                    const key: PROPERTYKEY): HResult; stdcall;
     // The OnPropertyValueChanged method indicates that the value of a property belonging to an audio endpoint device has changed.
     // Parameters
     //  pwstrDeviceId [in]
@@ -513,10 +512,10 @@ type
     function Activate(const iid: REFIID;
                       dwClsCtx: DWORD;
                       {In_opt} pActivationParams: PPROPVARIANT;
-                      out ppInterface: Pointer): HRESULT; stdcall;  // Replaced IUNKOWN pointer to a pointer, as described on ms-docs:
+                      out ppInterface: Pointer): HResult; stdcall;  // Replaced IUNKOWN pointer to a pointer, as described on ms-docs:
                                                                     // https://docs.microsoft.com/us-en/windows/win32/api/mmdeviceapi/nf-mmdeviceapi-immdevice-activate
     function OpenPropertyStore(stgmAccess: DWORD;
-                               out ppProperties: IPropertyStore): HRESULT; stdcall;
+                               out ppProperties: IPropertyStore): HResult; stdcall;
     // Parameter stgmAccess declares the storage-access mode.
     // This parameter specifies whether to open the property store in read mode, write mode, or read/write mode.
     // Set this parameter to one of the following STGM constants:
@@ -527,9 +526,9 @@ type
     // A client that is not running as an administrator is restricted to read-only access.
     // For more information about STGM constants, see the Windows SDK documentation.
 
-    function GetId(out ppstrId: PWideChar): HRESULT; stdcall;    //250815a, modified; issue reported by mbergstrand
+    function GetId(out ppstrId: PWideChar): HResult; stdcall;    //250815a, modified; issue reported by mbergstrand
 
-    function GetState(out pdwState: DWord): HRESULT; stdcall;
+    function GetState(out pdwState: DWord): HResult; stdcall;
     // Parameters
     // pdwState [out]
     //  Pointer to a DWORD variable into which the method writes the current state of the device.
@@ -561,10 +560,10 @@ type
   IMMDeviceCollection = interface(IUnknown)
   ['{0BD7A1BE-7A1A-44DB-8397-CC5392387B5E}']
 
-    function GetCount(out pcDevices: UINT): HRESULT; stdcall;
+    function GetCount(out pcDevices: UINT): HResult; stdcall;
 
     function Item(nDevice: UINT;
-                  out ppDevice: IMMDevice): HRESULT; stdcall;
+                  out ppDevice: IMMDevice): HResult; stdcall;
 
   end;
   IID_IMMDeviceCollection = IMMDeviceCollection;
@@ -585,7 +584,7 @@ type
   IMMEndpoint = interface(IUnknown)
   ['{1BE09788-6894-4089-8586-9A2A6C265AC5}']
 
-    function GetDataFlow(out pDataFlow: eDataFlow): HRESULT; stdcall;
+    function GetDataFlow(out pDataFlow: eDataFlow): HResult; stdcall;
 
   end;
   IID_IMMEndpoint = IMMEndpoint;
@@ -602,7 +601,7 @@ type
   ['{20049D40-56D5-400E-A2EF-385599FEED49}']
 
     function OnPropertyChanged(_type: AUDIO_SYSTEMEFFECTS_PROPERTYSTORE_TYPE;
-                               const key: PROPERTYKEY): HRESULT; stdcall;
+                               const key: PROPERTYKEY): HResult; stdcall;
 
   end;
   IID_IAudioSystemEffectsPropertyChangeNotificationClient = IAudioSystemEffectsPropertyChangeNotificationClient;
@@ -618,21 +617,21 @@ type
   IAudioSystemEffectsPropertyStore = interface(IUnknown)
   ['{302AE7F9-D7E0-43E4-971B-1F8293613D2A}']
     function OpenDefaultPropertyStore(stgmAccess: DWORD;
-                                      out propStore: IPropertyStore): HRESULT; stdcall;
+                                      out propStore: IPropertyStore): HResult; stdcall;
 
     function OpenUserPropertyStore(stgmAccess: DWORD;
-                                   out propStore: IPropertyStore): HRESULT; stdcall;
+                                   out propStore: IPropertyStore): HResult; stdcall;
 
     function OpenVolatilePropertyStore(stgmAccess: DWORD;
-                                       out propStore: IPropertyStore): HRESULT; stdcall;
+                                       out propStore: IPropertyStore): HResult; stdcall;
 
-    function ResetUserPropertyStore(): HRESULT; stdcall;
+    function ResetUserPropertyStore(): HResult; stdcall;
 
-    function ResetVolatilePropertyStore(): HRESULT; stdcall;
+    function ResetVolatilePropertyStore(): HResult; stdcall;
 
-    function RegisterPropertyChangeNotification(callback: IAudioSystemEffectsPropertyChangeNotificationClient): HRESULT; stdcall;
+    function RegisterPropertyChangeNotification(callback: IAudioSystemEffectsPropertyChangeNotificationClient): HResult; stdcall;
 
-    function UnregisterPropertyChangeNotification(callback: IAudioSystemEffectsPropertyChangeNotificationClient): HRESULT; stdcall;
+    function UnregisterPropertyChangeNotification(callback: IAudioSystemEffectsPropertyChangeNotificationClient): HResult; stdcall;
 
   end;
   IID_IAudioSystemEffectsPropertyStore = IAudioSystemEffectsPropertyStore;
@@ -664,20 +663,20 @@ type
 
     function EnumAudioEndpoints(dataFlow: EDataFlow;
                                 const dwStateMask: DWORD;   // DEVICE_STATE_XXX constants
-                                out ppDevices: IMMDeviceCollection): HRESULT; stdcall;
+                                out ppDevices: IMMDeviceCollection): HResult; stdcall;
 
     function GetDefaultAudioEndpoint(dataFlow: EDataFlow;
                                      role: eRole;
-                                     out ppEndpoint: IMMDevice): HRESULT; stdcall;
+                                     out ppEndpoint: IMMDevice): HResult; stdcall;
 
     function GetDevice(pwstrId: LPCWSTR;  // Pointer to a string containing the endpoint ID.
                                           // The caller typically obtains this string from the IMMDevice.GetId method or
                                           // from one of the methods in the IMMNotificationClient interface.
-                       out ppDevice: IMMDevice): HRESULT; stdcall;
+                       out ppDevice: IMMDevice): HResult; stdcall;
 
-    function RegisterEndpointNotificationCallback(pClient: IMMNotificationClient): HRESULT; stdcall;
+    function RegisterEndpointNotificationCallback(pClient: IMMNotificationClient): HResult; stdcall;
 
-    function UnregisterEndpointNotificationCallback(pClient: IMMNotificationClient): HRESULT; stdcall;
+    function UnregisterEndpointNotificationCallback(pClient: IMMNotificationClient): HResult; stdcall;
 
   end;
   IID_IMMDeviceEnumerator = IMMDeviceEnumerator;
@@ -697,7 +696,7 @@ type
     function Activate(const iid: REFIID;
                       pDevice: IMMDevice;
                       pActivationParams: PROPVARIANT;
-                      out ppInterface: Pointer): HRESULT; stdcall;
+                      out ppInterface: Pointer): HResult; stdcall;
     // Parameters:
     //      iid               - [in] The specified interface
     //      pDevice           - [in] The specified device
@@ -723,7 +722,7 @@ type
   IActivateAudioInterfaceCompletionHandler = interface(IUnknown)
   ['{41D949AB-9862-444A-80F6-C261334DA5EB}']
 
-    function ActivateCompleted(activateOperation: IActivateAudioInterfaceAsyncOperation): HRESULT; stdcall;
+    function ActivateCompleted(activateOperation: IActivateAudioInterfaceAsyncOperation): HResult; stdcall;
 
   end;
   IID_IActivateAudioInterfaceCompletionHandler = IActivateAudioInterfaceCompletionHandler;
@@ -761,7 +760,7 @@ type
                                        const riid: TGUID;
                                        const activationParams: {P}PROPVARIANT;
                                        completionDelegate: IActivateAudioInterfaceCompletionHandler;
-                                       out activationOperation: IActivateAudioInterfaceAsyncOperation): HRESULT; stdcall;
+                                       out activationOperation: IActivateAudioInterfaceAsyncOperation): HResult; stdcall;
   {$EXTERNALSYM ActivateAudioInterfaceAsync}
 
 type

@@ -73,6 +73,13 @@ uses
   {MfPack}
   WinApi.DirectX.D3D9Types;
 
+  {$MINENUMSIZE 4}
+
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
 
   {$I 'WinApiTypes.inc'}
 

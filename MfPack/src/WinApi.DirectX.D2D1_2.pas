@@ -75,8 +75,13 @@ uses
   WinApi.DirectX.D2D1Effects_1,
   WinApi.DirectX.DXGI;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
+
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
 
 
 type

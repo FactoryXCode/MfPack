@@ -71,7 +71,6 @@ unit WinApi.CoreAudioApi.AudioSessionTypes;
 
 interface
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

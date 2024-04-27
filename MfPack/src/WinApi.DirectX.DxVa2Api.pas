@@ -82,7 +82,6 @@ uses
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfObjects;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

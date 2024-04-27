@@ -76,7 +76,6 @@ uses
   {System}
   System.SysUtils;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

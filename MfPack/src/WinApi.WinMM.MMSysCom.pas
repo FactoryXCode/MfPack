@@ -73,7 +73,7 @@ uses
   WinApi.WinApiTypes;
 
   {$MINENUMSIZE 4}
-  {$WEAKPACKAGEUNIT}
+
   {$IFDEF WIN32}
     {$ALIGN 1}
   {$ELSE}

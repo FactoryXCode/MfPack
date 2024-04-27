@@ -69,7 +69,6 @@ uses
   WinApi.WinError;
 
 
-
 //
 // Error codes are constructed as compound COM status codes
 //

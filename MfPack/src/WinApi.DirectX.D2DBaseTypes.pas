@@ -74,7 +74,13 @@ uses
   WinApi.DirectX.DXGIType;
   {or use Dx.DxTypes; // contains DxGiType;}
 
-  {$WEAKPACKAGEUNIT ON}
+  {$MINENUMSIZE 4}
+
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
 
 type
 

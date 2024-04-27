@@ -85,8 +85,6 @@ uses
   WinApi.MediaFoundationApi.MfIdl,
   WinApi.MediaFoundationApi.MfTransform;
 
-
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

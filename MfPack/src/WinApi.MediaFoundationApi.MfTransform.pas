@@ -76,8 +76,6 @@ uses
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfObjects;
 
-
-  {$WEAKPACKAGEUNIT ON}
   {$ALIGN ON}
   {$MINENUMSIZE 4}
 

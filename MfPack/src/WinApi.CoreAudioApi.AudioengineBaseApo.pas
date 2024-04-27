@@ -110,8 +110,6 @@ uses
   WinApi.CoreAudioApi.AudioMediaType,
   WinApi.CoreAudioApi.MmDeviceApi;
 
-
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

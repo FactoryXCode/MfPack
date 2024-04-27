@@ -76,7 +76,6 @@ uses
   WinApi.DirectX.DWrite_1,
   WinApi.DirectX.DWrite_2;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}
@@ -84,6 +83,7 @@ uses
   {$ELSE}
     {$ALIGN 8} // Win64
   {$ENDIF}
+
   {$I 'WinApiTypes.inc'}
 
 

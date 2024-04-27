@@ -94,7 +94,6 @@ uses
   WinApi.CoreAudioApi.AudioClient {WASAPI},
   WinApi.CoreAudioApi.Functiondiscoverykeys_devpkey;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

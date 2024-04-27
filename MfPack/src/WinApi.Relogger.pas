@@ -71,7 +71,6 @@ uses
   WinApi.WinApiTypes,
   WinApi.Evntrace;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

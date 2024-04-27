@@ -89,7 +89,6 @@ uses
   WinApi.MediaFoundationApi.Evr,
   WinApi.MediaFoundationApi.MfError;
 
-  {$WEAKPACKAGEUNIT ON}
   {$I 'WinApiTypes.inc'}
   {$DEFINE IGNORE_COMPILERVERSION}
 
@@ -229,6 +228,12 @@ type
                            fps: Double;
                            ShowMilliSeconds: boolean = True ): string; inline;
 
+  // Converts the number of bytes, samplerate, channels and bits per second to hnstime and returns the timeformat.
+  function BytesToTimeStr(const pBytesWritten: Int64;
+                          const pSampleRate: Integer;
+                          const pChannels: Integer;
+                          const pBitsPerSecond: Integer;
+                          pShowMilliSeconds: Boolean = True): string; inline;
 
   // Operating system
   function GetOSArchitecture(): string;
@@ -484,9 +489,26 @@ type
   function BoolToStrYesNo(const aBoolean: Boolean;
                           sYes: string = 'Yes';
                           sNo: string = 'No'): string; inline;
-  // = BoolToStr, For backward compatibility
+  // = BoolToStr, for backward compatibility.
   function MfpBoolToStr(const aBoolean: Boolean): string; inline;
   function BoolToStr(const aBoolean: Boolean): string; inline;
+
+  // Constrain function, checks the high- and lowband limits of a value.
+  function ConstrainValue(const Value: Integer;
+                          Min: Integer;
+                          Max: Integer): Integer; inline; overload;
+
+  function ConstrainValue(const Value: Int64;
+                          Min: Int64;
+                          Max: Int64): Int64; inline; overload;
+
+  function ConstrainValue(const Value: Float;
+                          Min: Float;
+                          Max: Float): Float; inline; overload;
+
+  function ConstrainValue(const Value: byte;
+                          Min: byte;
+                          Max: byte): byte; inline; overload;
 
 
   // Since Win 10, use this function to create a file.
@@ -1219,7 +1241,35 @@ begin
                       ShowMilliSeconds);
 end;
 
+// Converts the number of bytes samplerate, channels and bitspersecond to hnstime and retunrs the timeformat.
+function BytesToTimeStr(const pBytesWritten: Int64;
+                        const pSampleRate: Integer;
+                        const pChannels: Integer;
+                        const pBitsPerSecond: Integer;
+                        pShowMilliSeconds: Boolean = True): string; inline;
+const
+  Bit32 = 4;
+  Bit24 = 3;
+  Bit16 = 2;
 
+var
+  hns: Int64;
+
+begin
+
+  // Calculate time in 100-nanosecond units.
+  if (pBitsPerSecond = 16) then
+    hns := Trunc((pBytesWritten / (pSampleRate * Bit32 * pChannels)) * 10000000) // 16-bit audio.
+  else if (pBitsPerSecond = 24) then
+    hns := Trunc((pBytesWritten / (pSampleRate * Bit24 * pChannels)) * 10000000) // 24-bit audio.
+  else if (pBitsPerSecond = 32) then
+    hns := Trunc((pBytesWritten / (pSampleRate * Bit32 * pChannels)) * 10000000) // 32-bit audio.
+  else // Exotic
+    Exit;
+  // Call HnsTimeToStr function to format the time string
+  Result := HnsTimeToStr(hns,
+                         pShowMilliSeconds);
+end;
 
 // OS
 
@@ -2002,6 +2052,55 @@ begin
   else
     Result := 'False';
 end;
+
+
+function ConstrainValue(const Value: Integer;
+                        Min: Integer;
+                        Max: Integer): Integer; inline; overload;
+begin
+  Result := Value;
+  if (Result < Min) then
+    Result := Min
+  else if (Result > Max) then
+    Result := Max
+end;
+
+
+function ConstrainValue(const Value: Int64;
+                        Min: Int64;
+                        Max: Int64): Int64; inline; overload;
+begin
+  Result := Value;
+  if (Result < Min) then
+    Result := Min
+  else if (Result > Max) then
+    Result := Max
+end;
+
+
+function ConstrainValue(const Value: Float;
+                        Min: Float;
+                        Max: Float): Float; inline; overload;
+begin
+  Result := Value;
+  if (Result < Min) then
+    Result := Min
+  else if (Result > Max) then
+    Result := Max;
+end;
+
+
+function ConstrainValue(const Value: byte;
+                        Min: byte;
+                        Max: byte): byte; inline; overload;
+begin
+  Result := Value;
+  if (Result < Min) then
+    Result := Min
+  else if (Result > Max) then
+    Result := Max;
+end;
+
 
 // Strings
 function StringCbCat(pszDest: PChar;

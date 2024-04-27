@@ -88,6 +88,7 @@ uses
   WinApi.AmVideo,
   WinApi.Dvdmedia,
   WinApi.ComBaseApi,
+  WinApi.DevpKey,
   {ActiveX}
   {$IFDEF USE_EMBARCADERO_DEF}
   WinApi.PropSys,
@@ -859,6 +860,9 @@ type
   function GetDeviceName(pActivate: IMFActivate;
                          out g_pwszDeviceName: PWideChar;
                          out g_cchDeviceName: UINT32): HResult;
+
+  function GetDeviceNameFromCollection(DeviceCollection: IMMDeviceCollection;
+                                       DeviceIndex: UINT): LPWSTR;
 
 
   // Enable Video Acceleration
@@ -5328,11 +5332,82 @@ end;
 //
 function GetDeviceName(pActivate: IMFActivate;
                        out g_pwszDeviceName: PWideChar;
-                       out g_cchDeviceName: UINT32): HResult;
+                       out g_cchDeviceName: UINT32): HResult; overload;
 begin
   Result := (pActivate as IMFAttributes).GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME,
                                                                 g_pwszDeviceName,
                                                                 g_cchDeviceName);
+end;
+
+//
+function GetDeviceNameFromCollection(DeviceCollection: IMMDeviceCollection;
+                                     DeviceIndex: UINT): LPWSTR;
+var
+  device: IMMDevice;
+  deviceId: PWideChar;
+  hr: HResult;
+  propertyStore: IPropertyStore;
+  friendlyName: PROPVARIANT;
+  deviceName: PWideChar;
+  returnValue: PWideChar;
+
+label
+  done;
+
+begin
+  hr := DeviceCollection.Item(DeviceIndex,
+                                device);
+  if FAILED(hr) then
+    begin
+      Result := nil;
+      goto done;
+    end;
+
+  hr := device.GetId(deviceId);
+  if FAILED(hr) then
+    begin
+      Result := nil;
+      goto done;
+    end;
+
+  hr := device.OpenPropertyStore($00000000, // STGM_READ
+                                 propertyStore);
+  SafeRelease(device);
+
+  if FAILED(hr) then
+    begin
+      Result := nil;
+      goto done;
+    end;
+
+  PropVariantInit(friendlyName);
+
+  hr := propertyStore.GetValue(DEVPKEY_Device_FriendlyName,
+                               friendlyName);
+
+  SafeRelease(propertyStore);
+
+  if FAILED(hr) then
+    begin
+      Result := nil;
+      goto done;
+    end;
+
+  if (friendlyName.vt <> VT_LPWSTR) then
+    deviceName := 'Unknown'
+  else
+    deviceName := friendlyName.pwszVal;
+
+  PropVariantClear(friendlyName);
+  CoTaskMemFree(deviceId);
+
+  returnValue := StrNew(deviceName);
+
+done:
+  Result := returnValue;
+
+  if Assigned(returnValue) then
+    StrDispose(returnValue);
 end;
 
 

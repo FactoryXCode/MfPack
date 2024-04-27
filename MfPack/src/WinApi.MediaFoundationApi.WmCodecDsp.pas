@@ -80,7 +80,6 @@ uses
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfError;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

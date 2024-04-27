@@ -74,7 +74,6 @@ uses
   WinApi.DirectX.DXVA2Api,
   WinApi.DirectX.D3D9;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

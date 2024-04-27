@@ -97,7 +97,6 @@ uses
   WinApi.MediaFoundationApi.MfTransform,
   WinApi.MediaFoundationApi.MfObjects;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

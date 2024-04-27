@@ -78,7 +78,6 @@ uses
   WinApi.WinApiTypes,
   WinApi.Ks;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

@@ -62,12 +62,13 @@
 unit WinApi.WinMM.MCIApi;
 
   {$MINENUMSIZE 4}
+
   {$IFDEF WIN32}
     {$ALIGN 1}
   {$ELSE}
     {$ALIGN 8} // Win64
   {$ENDIF}
-  {$WEAKPACKAGEUNIT}
+
 
 interface
 

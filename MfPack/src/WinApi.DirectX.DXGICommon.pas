@@ -71,7 +71,13 @@ uses
   {WinApi}
   WinApi.Windows;
 
-  {$WEAKPACKAGEUNIT ON}
+  {$MINENUMSIZE 4}
+
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
 
 const
   // The following values are used with DXGI_SAMPLE_DESC.Quality:

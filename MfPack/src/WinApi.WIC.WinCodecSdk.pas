@@ -87,6 +87,12 @@ uses
 
   {$MINENUMSIZE 4}
 
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
+
 const
 
   GUID_MetadataFormatUnknown            : TGUID = '{A45E592F-9078-4A7C-ADB5-4EDC4FD61B1F}';

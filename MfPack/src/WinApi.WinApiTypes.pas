@@ -677,6 +677,7 @@ type
   CLSCTX = tagCLSCTX;
   {$EXTERNALSYM CLSCTX}
 
+// WinTypesBase.h
 const
   CLSCTX_INPROC_SERVER          = CLSCTX($1);
   {$EXTERNALSYM CLSCTX_INPROC_SERVER}
@@ -2476,25 +2477,18 @@ type
 
 {$IFDEF MFP_MFTIME}
   {$IF COMPILERVERSION >= 11.0}
-    {$IFDEF WIN64}
-      MFTIME = System.UInt64; // Time in 100 nanosecond slices
-      {$EXTERNALSYM MFTIME}
-    {$ENDIF}
-
-    {$IFDEF WIN32}
-      MFTIME = System.UInt64;
-      {$EXTERNALSYM MFTIME}
-    {$ENDIF}
-  {$ELSE}
-    {$IFDEF WIN64}
-      MFTIME = System.UInt64;
-      {$EXTERNALSYM MFTIME}
-    {$ENDIF}
-
-    {$IFDEF WIN32}
-      MFTIME = System.Int64;
-      {$EXTERNALSYM MFTIME}
-    {$ENDIF}
+    MFTIME = System.UInt64; // Time in 100 nanosecond slices
+    {$EXTERNALSYM MFTIME}
+  {$ENDIF}
+{$ELSE}
+  {$IFDEF WIN32}
+    MFTIME = System.Int64;
+    {$EXTERNALSYM MFTIME}
+  {$ENDIF}
+{$ELSE}
+  {$IFDEF WIN64}
+    MFTIME = System.UInt64;
+    {$EXTERNALSYM MFTIME}
   {$ENDIF}
 {$ENDIF}
 
@@ -2549,6 +2543,7 @@ type
 
 {$IFDEF MFP_PIDispatch}
   PIDispatch = ^IDispatch;
+  {$EXTERNALSYM PIDispatch}
 {$ENDIF}
 
 

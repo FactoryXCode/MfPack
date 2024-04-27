@@ -83,7 +83,6 @@ uses
   WinApi.CoreAudioApi.AudioClient,
   WinApi.CoreAudioApi.Audiosessiontypes;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

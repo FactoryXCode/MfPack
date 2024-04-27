@@ -72,7 +72,6 @@ uses
   {DirectX}
   WinApi.DirectX.D3D9Types;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

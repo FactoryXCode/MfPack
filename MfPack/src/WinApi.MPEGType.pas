@@ -70,6 +70,14 @@ uses
   {WinMM}
   WinApi.WinMM.MMReg;
 
+  {$MINENUMSIZE 4}
+
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
+
 //
 //  AM_MPEGSYSTEMTYPE defines the format block contents for
 //  data of type MEDIATYPE_MPEG1System when the format

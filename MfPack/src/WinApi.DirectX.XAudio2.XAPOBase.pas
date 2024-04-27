@@ -73,7 +73,6 @@ uses
   {DirectX}
   WinApi.DirectX.XAudio2.XApo;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

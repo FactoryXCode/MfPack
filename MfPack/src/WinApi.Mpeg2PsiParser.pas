@@ -69,6 +69,13 @@ uses
   WinApi.mpeg2structs,
   WinApi.mpeg2data;
 
+  {$MINENUMSIZE 4}
+
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
 
   // Interfaces.
 

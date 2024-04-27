@@ -77,7 +77,6 @@ uses
   WinApi.CoreAudioApi.AudioSessionTypes,
   WinApi.CoreAudioApi.MMDeviceApi;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

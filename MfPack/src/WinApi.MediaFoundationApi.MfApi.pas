@@ -113,7 +113,6 @@ uses
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfObjects;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

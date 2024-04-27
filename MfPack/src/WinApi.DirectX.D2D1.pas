@@ -85,7 +85,6 @@ uses
   WinApi.DirectX.DXGI,
   WinApi.DirectX.DXGIFormat;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

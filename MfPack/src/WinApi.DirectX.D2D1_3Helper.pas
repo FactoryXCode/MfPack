@@ -73,8 +73,13 @@ uses
   WinApi.DirectX.D2D1_3,
   WinApi.DirectX.D2DBaseTypes;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
+
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
 
 
   // D2D1_GRADIENT_MESH_PATCH

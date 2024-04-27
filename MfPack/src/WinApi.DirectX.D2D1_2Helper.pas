@@ -65,8 +65,13 @@ unit WinApi.DirectX.D2D1_2Helper;
 
 interface
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
+
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
 
 //#if NTDDI_VERSION >= NTDDI_WINBLUE
 

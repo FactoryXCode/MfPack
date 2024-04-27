@@ -81,7 +81,6 @@ uses
   WinApi.DirectX.DXGIFormat,
   WinApi.DirectX.DXGI1_3;
 
-  {$WEAKPACKAGEUNIT ON}
   {$ALIGN ON}
   {$MINENUMSIZE 4}
 

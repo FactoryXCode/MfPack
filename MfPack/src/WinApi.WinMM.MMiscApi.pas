@@ -64,7 +64,7 @@
 unit WinApi.WinMM.MMiscApi;
 
   {$MINENUMSIZE 4}
-  {$WEAKPACKAGEUNIT}
+
   {$IFDEF WIN32}
     {$ALIGN 1}
   {$ELSE}

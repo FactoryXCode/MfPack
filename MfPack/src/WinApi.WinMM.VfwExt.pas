@@ -72,7 +72,7 @@ uses
   Winapi.CommCtrl;
 
   {$MINENUMSIZE 4}
-  {$WEAKPACKAGEUNIT}
+
   {$IFDEF WIN32}
     {$ALIGN 1}
   {$ELSE}

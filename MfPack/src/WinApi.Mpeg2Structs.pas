@@ -68,6 +68,7 @@ uses
   WinApi.Mpeg2Bits;
 
   {$MINENUMSIZE 4}
+
   {$IFDEF WIN32}
     {$ALIGN 1}
   {$ELSE}

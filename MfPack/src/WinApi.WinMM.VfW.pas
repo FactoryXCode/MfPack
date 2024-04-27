@@ -117,7 +117,7 @@ uses
   WinApi.WinMM.MMeApi;
 
   {$MINENUMSIZE 4}
-  {$WEAKPACKAGEUNIT}
+
   {$IFDEF WIN32}
     {$ALIGN 1}
   {$ELSE}

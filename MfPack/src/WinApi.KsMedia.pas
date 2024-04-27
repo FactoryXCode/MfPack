@@ -78,7 +78,6 @@ uses
   {WinMM}
   WinApi.WinMM.MMReg;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

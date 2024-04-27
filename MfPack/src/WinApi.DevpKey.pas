@@ -72,7 +72,8 @@ uses
   WinApi.WinApiTypes,
   WinApi.DevPropDef,
   {ActiveX}
-  WinApi.ActiveX;
+  //WinApi.ActiveX; // Do not use when using WinApi.MediaFoundation.MfMetLib
+  WinApi.ActiveX.PropSys;
 
   {$MINENUMSIZE 4}
 

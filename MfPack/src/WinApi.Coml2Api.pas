@@ -80,8 +80,6 @@ uses
   WinApi.ActiveX.PropIdl;
   {$ENDIF}
 
-
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

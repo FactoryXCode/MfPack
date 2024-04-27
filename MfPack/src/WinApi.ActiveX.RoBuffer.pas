@@ -71,9 +71,6 @@ uses
   WinApi.ActiveX.ObjIdl;
 
 
-  {$WEAKPACKAGEUNIT ON}
-
-
   // Provides a standard IBuffer marshaler to implement the semantics
   // associated with the IBuffer interface when it is marshaled.
   function RoGetBufferMarshaler(bufferMarshaler: IMarshal): HRESULT; stdcall;

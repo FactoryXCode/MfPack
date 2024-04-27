@@ -75,6 +75,13 @@ uses
   WinApi.DirectX.D3D9Types,
   WinApi.DirectX.D3D9Caps;
 
+  {$MINENUMSIZE 4}
+
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
 
 {$IFNDEF DIRECT3D_VERSION}
 const

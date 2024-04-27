@@ -87,7 +87,6 @@ uses
   WinApi.ActiveX.PropSys;
   {$ENDIF}
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

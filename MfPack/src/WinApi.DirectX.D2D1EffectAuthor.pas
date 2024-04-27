@@ -78,8 +78,13 @@ uses
   WinApi.DirectX.D2D1_1,
   WinApi.DirectX.DXGIFormat;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
+
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
 
 
 const

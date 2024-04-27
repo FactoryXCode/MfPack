@@ -75,6 +75,13 @@ uses
   WinApi.DirectX.D3DCommon,
   WinApi.DirectX.D3D12;
 
+  {$MINENUMSIZE 4}
+
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
 
 type
   PD3D12_SHADER_VERSION_TYPE = ^D3D12_SHADER_VERSION_TYPE;

@@ -75,7 +75,6 @@ uses
   {ActiveX}
   WinApi.ActiveX;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

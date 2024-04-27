@@ -72,7 +72,13 @@ uses
   WinApi.DirectX.DXGIType,
   WinApi.DirectX.DXGICommon;
 
-  {$WEAKPACKAGEUNIT ON}
+  {$MINENUMSIZE 4}
+
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
 
 
 // #if (NTDDI_VERSION >= NTDDI_WIN8)

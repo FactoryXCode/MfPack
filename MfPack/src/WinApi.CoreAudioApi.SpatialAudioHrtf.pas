@@ -75,8 +75,6 @@ uses
   WinApi.CoreAudioApi.AudioSessionTypes,
   WinApi.CoreAudioApi.SpatialAudioClient;
 
-
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

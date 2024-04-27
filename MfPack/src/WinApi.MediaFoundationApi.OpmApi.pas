@@ -73,7 +73,6 @@ uses
   WinApi.DirectX.D3D9, {Use WinApi, MfPack or Clootie Dx}
   WinApi.DirectX.DxVa2Api;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

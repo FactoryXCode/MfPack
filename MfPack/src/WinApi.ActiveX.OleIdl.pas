@@ -75,8 +75,6 @@ uses
   WinApi.ActiveX.ObjIdlBase,
   WinApi.ActiveX.ObjIdl;
 
-
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

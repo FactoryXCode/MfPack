@@ -71,7 +71,6 @@ uses
   Winapi.Windows,
   WinApi.WinApiTypes;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

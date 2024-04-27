@@ -74,7 +74,6 @@ uses
   {Use WinApi, Clootie Dx or MfPack}
   WinApi.DirectX.D3D9;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

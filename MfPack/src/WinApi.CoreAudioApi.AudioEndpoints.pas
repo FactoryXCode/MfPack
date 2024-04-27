@@ -69,7 +69,6 @@ interface
 uses
   WinApi.Windows;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
 

@@ -75,7 +75,6 @@ uses
   WinApi.DirectX.DXGI1_3,
   WinApi.DirectX.DXGI1_4;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

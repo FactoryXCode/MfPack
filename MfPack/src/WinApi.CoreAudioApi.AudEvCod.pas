@@ -65,7 +65,6 @@ unit WinApi.CoreAudioApi.AudEvCod;
 
 interface
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

@@ -63,7 +63,6 @@
 //==============================================================================
 unit WinApi.WinMM.MMeApi;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

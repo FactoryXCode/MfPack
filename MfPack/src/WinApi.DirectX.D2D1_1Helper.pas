@@ -79,8 +79,13 @@ uses
   WinApi.DirectX.DCommon,
   WinApi.DirectX.DXGIFormat;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
+
+  {$IFDEF WIN32}
+    {$ALIGN 1}
+  {$ELSE}
+    {$ALIGN 8} // Win64
+  {$ENDIF}
 
 type
 

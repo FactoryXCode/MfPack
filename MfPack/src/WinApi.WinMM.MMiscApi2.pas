@@ -61,7 +61,7 @@
 //==============================================================================
 unit WinApi.WinMM.MMiscApi2;
 
-  {$WEAKPACKAGEUNIT ON}
+
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}

@@ -81,7 +81,6 @@ uses
   {CoreAudioApi}
   WinApi.CoreAudioApi.DeviceTopology;
 
-  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
 
   {$IFDEF WIN32}
