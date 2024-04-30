@@ -296,9 +296,9 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       ShowHint = True
     end
     object lblFileExt: TLabel
-      Left = 274
+      Left = 405
       Top = 51
-      Width = 50
+      Width = 44
       Height = 21
       Hint = 'Enter a file name without extension.'
       AutoSize = False
@@ -314,9 +314,9 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       Transparent = False
     end
     object edFileName: TEdit
-      Left = 10
+      Left = 9
       Top = 51
-      Width = 265
+      Width = 395
       Height = 21
       Alignment = taRightJustify
       AutoSize = False
@@ -347,7 +347,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     end
   end
   object butResetEngine: TButton
-    Left = 381
+    Left = 384
     Top = 382
     Width = 80
     Height = 27

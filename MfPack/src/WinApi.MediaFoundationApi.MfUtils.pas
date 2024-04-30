@@ -232,7 +232,7 @@ type
   function BytesToTimeStr(const pBytesWritten: Int64;
                           const pSampleRate: Integer;
                           const pChannels: Integer;
-                          const pBitsPerSecond: Integer;
+                          const pBitsPerSample: Integer;
                           pShowMilliSeconds: Boolean = True): string; inline;
 
   // Operating system
@@ -1245,7 +1245,7 @@ end;
 function BytesToTimeStr(const pBytesWritten: Int64;
                         const pSampleRate: Integer;
                         const pChannels: Integer;
-                        const pBitsPerSecond: Integer;
+                        const pBitsPerSample: Integer;
                         pShowMilliSeconds: Boolean = True): string; inline;
 const
   Bit32 = 4;
@@ -1258,11 +1258,11 @@ var
 begin
 
   // Calculate time in 100-nanosecond units.
-  if (pBitsPerSecond = 16) then
-    hns := Trunc((pBytesWritten / (pSampleRate * Bit32 * pChannels)) * 10000000) // 16-bit audio.
-  else if (pBitsPerSecond = 24) then
+  if (pBitsPerSample = 16) then
+    hns := Trunc((pBytesWritten / (pSampleRate * Bit16 * pChannels)) * 10000000) // 16-bit audio.
+  else if (pBitsPerSample = 24) then
     hns := Trunc((pBytesWritten / (pSampleRate * Bit24 * pChannels)) * 10000000) // 24-bit audio.
-  else if (pBitsPerSecond = 32) then
+  else if (pBitsPerSample = 32) then
     hns := Trunc((pBytesWritten / (pSampleRate * Bit32 * pChannels)) * 10000000) // 32-bit audio.
   else // Exotic
     Exit;

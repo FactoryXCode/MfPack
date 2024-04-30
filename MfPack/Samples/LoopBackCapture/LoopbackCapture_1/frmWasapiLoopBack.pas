@@ -83,6 +83,7 @@ uses
   {CoreAudioApi}
   WinApi.MediaFoundationApi.MfApi,
   WinApi.CoreAudioApi.MMDeviceApi,
+  WinApi.MediaFoundationApi.MfUtils,
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioClient,
   {Application}
@@ -165,12 +166,10 @@ implementation
 
 {$R *.dfm}
 
-uses
-  WinApi.MediaFoundationApi.MfUtils;
-
 
 procedure TfrmLoopBackCapture.EnablePanels(aEnabled: Boolean);
 begin
+
   Panel1.Enabled := aEnabled;
   Panel2.Enabled := aEnabled;
   Panel3.Enabled := aEnabled;
@@ -208,14 +207,15 @@ end;
 procedure TfrmLoopBackCapture.rbConsoleMouseUp(Sender: TObject;
   Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
+
   lblStatus.Caption := 'Start Capture';
 end;
 
 // Helper.
-function BytesToTimeStr(pBytesWritten: Int64;
-                        pSampleRate: Integer;
-                        pChannels: Integer;
-                        pBitsPerSecond: Integer;
+function BytesToTimeStr(const pBytesWritten: Int64;
+                        const pSampleRate: Integer;
+                        const pChannels: Integer;
+                        const pBitsPerSecond: Integer;
                         pShowMilliSeconds: Boolean = True): string; inline;
 const
   Bit32 = 4;
@@ -228,10 +228,13 @@ begin
 
   // Calculate time in 100-nanosecond units.
   if (pBitsPerSecond = 16) then
-    hns := Trunc((pBytesWritten / (pSampleRate * 2 * pChannels)) * 10000000) // 16-bit audio.
+    hns := Trunc((pBytesWritten / (pSampleRate * 2 * pChannels)) * 10000000)  // 16-bit audio.
+  else if (pBitsPerSecond = 24) then
+    hns := Trunc((pBytesWritten / (pSampleRate * 3 * pChannels)) * 10000000)  // 24-bit audio.
   else if (pBitsPerSecond = 32) then
-    hns := Trunc((pBytesWritten / (pSampleRate * 4 * pChannels)) * 10000000); // 32-bit audio.
-
+    hns := Trunc((pBytesWritten / (pSampleRate * 4 * pChannels)) * 10000000) // 32-bit audio.
+  else // Exotic
+    Exit;
   // Call HnsTimeToStr function to format the time string
   Result := HnsTimeToStr(hns,
                          pShowMilliSeconds);
@@ -241,7 +244,6 @@ end;
 procedure TfrmLoopBackCapture.OnAudioSinkProgressEvent(Sender: TObject);
 var
   latency: NativeInt;
-  timePlayed: Int64;
   hnsStr: string;
   bitsPerSample: Integer;
   sampleRate: Integer;
@@ -285,6 +287,7 @@ label
   done;
 
 begin
+
   hr := S_OK;
   iTotalBytesProcessed := 0;
 
@@ -355,6 +358,7 @@ end;
 
 procedure TfrmLoopBackCapture.butPlayDataClick(Sender: TObject);
 begin
+
   ShellExecute(Handle,
                'open',
                LPWSTR(sFileName),
@@ -366,12 +370,14 @@ end;
 
 procedure TfrmLoopBackCapture.butStartClick(Sender: TObject);
 begin
+
   StartCapture();
 end;
 
 
 procedure TfrmLoopBackCapture.butStopClick(Sender: TObject);
 begin
+
   oAudioSink.StopRecording := True;
   EnablePanels(True);
   Self.BorderIcons := [biSystemMenu, biMinimize];
@@ -380,6 +386,7 @@ end;
 
 procedure TfrmLoopBackCapture.butResetEngineClick(Sender: TObject);
 begin
+
   RemoveAudioSink();
   CreateNewAudioSink();
   EnablePanels(True);
@@ -393,6 +400,7 @@ end;
 
 procedure TfrmLoopBackCapture.butShowdlgDevicesClick(Sender: TObject);
 begin
+
   // Create the dialog if it's not allready done.
   if not Assigned(DevicesDlg) then
     begin
@@ -422,6 +430,7 @@ end;
 
 procedure TfrmLoopBackCapture.cbxStayOnTopClick(Sender: TObject);
 begin
+
   if cbxStayOnTop.Checked then
     SetWindowPos(Handle,
                  HWND_TOPMOST,
@@ -438,13 +447,13 @@ begin
                  0,
                  0,
                  SWP_NoMove or SWP_NoSize);
-
 end;
 
 
 procedure TfrmLoopBackCapture.FormCloseQuery(Sender: TObject;
   var CanClose: Boolean);
 begin
+
   CanClose := False;
   RemoveAudioSink();
   CanClose := True;
@@ -457,10 +466,6 @@ begin
   lblStatus.ControlStyle := lblStatus.ControlStyle + [csOpaque];
 
   CreateNewAudioSink();
-
-  oDataFlow := eDataFlow(-1);
-  tbBufferDuration.Position := 10;
-  SetBufferDuration();
 end;
 
 
@@ -472,6 +477,9 @@ begin
   // Set event handlers.
   oAudioSink.OnProcessingData := OnAudioSinkProgressEvent;
   oAudioSink.OnStoppedCapturing := OnCapturingStoppedEvent;
+  oDataFlow := eDataFlow(-1);
+  tbBufferDuration.Position := 10;
+  SetBufferDuration();
 end;
 
 

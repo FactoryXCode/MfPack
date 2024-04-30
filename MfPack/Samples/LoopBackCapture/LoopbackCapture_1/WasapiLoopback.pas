@@ -88,6 +88,8 @@ uses
   {Application}
   Utils;
 
+const
+  MAX_FILE_SIZE = 3900000000;
 
 type
 
@@ -167,9 +169,7 @@ implementation
 constructor TAudioSink.Create();
 begin
   inherited Create();
-
   FCriticalSection := TCriticalSection.Create();
-
   pvAppIsClosing := False;
 end;
 
@@ -219,6 +219,10 @@ begin
 
   //
   pvBytesWritten := iBytesWritten;
+  // For safety on 32bit platforms we have to limit the wav size to < 4 gb.
+  // So, we limit the size to 3.9 GB.
+  if (pvBytesWritten > MAX_FILE_SIZE) then
+    pvStopRec := True;  // Stop recording and close file.
 
   // Handle all other messages, like managing controls, moving window etc.
   HandleThreadMessages(GetCurrentThread());
@@ -412,19 +416,12 @@ var
   ckRIFF: MMCKINFO;
   ckData: MMCKINFO;
   ppwfx: PWAVEFORMATEX;
-  //
-  cycle: Int64;
-  pu64DevicePosition: UINT64;
-  pu64QPCPosition: UINT64;
-  //
 
 label
   done;
 
 begin
   pvStopRec := False;
-  pu64DevicePosition := 0;
-  pu64QPCPosition := 0;
   ppwfx := nil;
 
   // Create the initial audio file
@@ -525,8 +522,6 @@ begin
   if FAILED(hr) then
     goto done;
 
-  cycle := 0;
-
   // Get the stream latency (normally this should be 0)
   hr := pAudioClient.GetStreamLatency(pHnsLatency);
   if FAILED(hr) then
@@ -555,8 +550,8 @@ begin
           hr := pCaptureClient.GetBuffer(pData,
                                          numFramesAvailable,
                                          flags,
-                                         @pu64DevicePosition,
-                                         @pu64QPCPosition);
+                                         nil,
+                                         nil);
           if FAILED(hr) then
             Break;
 
@@ -580,14 +575,6 @@ begin
           hr := pCaptureClient.GetNextPacketSize(packetLength);
           if FAILED(hr) then
             Break;
-
-         // For safety on 32bit platforms we have to limit the wav size to < 4 gb or 16 hours.
-         // That is (3600 * 16) seconds
-         if cycle >= (3600 * 16) then
-           pvStopRec := True;
-
-         Inc(cycle,
-             1);
       end;
     end;
 
