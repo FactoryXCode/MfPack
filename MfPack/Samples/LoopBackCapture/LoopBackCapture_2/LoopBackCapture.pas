@@ -250,6 +250,7 @@ implementation
 constructor TLoopbackCapture.Create(hMF: HWND);
 begin
   inherited Create();
+
   hwOwner := hMF;
   m_activateResult := E_UNEXPECTED;
   m_DeviceState := Uninitialized;
@@ -281,6 +282,7 @@ begin
   FreeAndNil(m_xStopCapture);
   FreeAndNil(m_xSampleReady);
   FreeAndNil(m_xFinishCapture);
+
   inherited Destroy();
 end;
 
@@ -615,7 +617,6 @@ begin
 leave:
 
   Result :=  hr;
-
 end;
 
 
@@ -698,7 +699,7 @@ begin
       goto leave;
     end;
 
-  inc(m_cbHeaderSize,
+  Inc(m_cbHeaderSize,
       dwBytesWritten);
 
   // 3. The data sub-chunk
@@ -707,7 +708,8 @@ begin
 
 
   br := WriteFile(m_hPipe,
-                  data, sizeof(data),
+                  data,
+                  SizeOf(data),
                   dwBytesWritten,
                   nil);
   if (br = False) then
@@ -716,7 +718,7 @@ begin
       goto leave;
     end;
 
-  inc(m_cbHeaderSize,
+  Inc(m_cbHeaderSize,
       dwBytesWritten);
 
 leave:
@@ -1227,7 +1229,13 @@ end;
 initialization
   InitializeCriticalSection(oCriticalSection);
 
+  // A gui app will automaticly set COINIT_APARTMENTTHREADED, so there is no need to call CoInitializeEx unless
+  // we use the class, for instance, in a service.
+  //CoInitializeEx(nil,
+  //               COINIT_MULTITHREADED);
 finalization
+
   DeleteCriticalSection(oCriticalSection);
 
+  // CoUninitialize();
 end.

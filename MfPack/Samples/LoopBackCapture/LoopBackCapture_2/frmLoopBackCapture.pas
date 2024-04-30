@@ -166,6 +166,7 @@ type
 
 var
   frmMain: TfrmMain;
+  CoInitialized: HResult;
 
 implementation
 
@@ -527,9 +528,6 @@ end;
 
 
 initialization
-  // A gui app should always use COINIT_APARTMENTTHREADED in stead of COINIT_MULTITHREADED
-  //CoInitializeEx(nil,
-  //               COINIT_APARTMENTTHREADED);
 
   if FAILED(MFStartup(MF_VERSION,
                       MFSTARTUP_LITE)) then
@@ -544,6 +542,5 @@ initialization
 finalization
 
   MFShutdown();
-  //CoUnInitialize();
 
 end.

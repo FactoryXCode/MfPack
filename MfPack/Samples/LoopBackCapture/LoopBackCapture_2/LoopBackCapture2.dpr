@@ -3,11 +3,6 @@ program LoopBackCapture2;
 uses
   {$IFDEF FASTMM}
   FastMM4,
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
   {$ENDIF}
 
   Vcl.Forms,
@@ -19,6 +14,7 @@ uses
 {$R *.res}
 
 begin
+
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TfrmMain, frmMain);

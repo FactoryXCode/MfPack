@@ -5,7 +5,7 @@ object frmMain: TfrmMain
   BorderStyle = bsSingle
   Caption = 'LoopBackCapture Sample 2'
   ClientHeight = 477
-  ClientWidth = 462
+  ClientWidth = 459
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -22,7 +22,7 @@ object frmMain: TfrmMain
   object Bevel2: TBevel
     Left = 0
     Top = 0
-    Width = 462
+    Width = 459
     Height = 175
     Align = alTop
     ExplicitTop = 2
@@ -58,7 +58,7 @@ object frmMain: TfrmMain
     AlignWithMargins = True
     Left = 6
     Top = 450
-    Width = 453
+    Width = 450
     Height = 24
     Margins.Left = 6
     Align = alBottom
@@ -71,35 +71,32 @@ object frmMain: TfrmMain
     Font.Style = [fsBold]
     ParentFont = False
     Layout = tlCenter
-    ExplicitLeft = 0
-    ExplicitTop = 449
-    ExplicitWidth = 462
+    ExplicitTop = 452
+    ExplicitWidth = 453
   end
   object Bevel1: TBevel
     Left = 0
-    Top = 446
-    Width = 462
+    Top = 445
+    Width = 459
     Height = 1
     Align = alBottom
     Shape = bsTopLine
-    ExplicitLeft = -54
-    ExplicitTop = 387
-    ExplicitWidth = 472
+    ExplicitWidth = 462
   end
   object Bevel3: TBevel
     Left = 0
-    Top = 445
-    Width = 462
+    Top = 446
+    Width = 459
     Height = 1
     Align = alBottom
     Shape = bsTopLine
-    ExplicitTop = 359
-    ExplicitWidth = 418
+    ExplicitTop = 442
+    ExplicitWidth = 462
   end
   object Panel3: TPanel
     Left = 0
     Top = 175
-    Width = 462
+    Width = 459
     Height = 148
     Hint = 
       'The capture buffersize depending on the audiodevice specs and so' +
@@ -116,6 +113,7 @@ object frmMain: TfrmMain
     ParentFont = False
     TabOrder = 11
     VerticalAlignment = taAlignTop
+    ExplicitWidth = 462
     object lblDeviceBufferDuration: TLabel
       Left = 6
       Top = 26
@@ -330,11 +328,13 @@ object frmMain: TfrmMain
   object Panel1: TPanel
     Left = 0
     Top = 323
-    Width = 462
+    Width = 459
     Height = 76
     Align = alTop
     BevelOuter = bvLowered
     TabOrder = 7
+    ExplicitTop = 322
+    ExplicitWidth = 462
     object Label1: TLabel
       Left = 22
       Top = 45
@@ -347,10 +347,10 @@ object frmMain: TfrmMain
       ShowHint = True
     end
     object lblFileExt: TLabel
-      Left = 278
-      Top = 42
+      Left = 423
+      Top = 43
       Width = 27
-      Height = 16
+      Height = 19
       Hint = 'Enter a file name without extension.'
       Caption = '.wav'
       Color = clBtnFace
@@ -366,9 +366,9 @@ object frmMain: TfrmMain
       Transparent = False
     end
     object edFileName: TEdit
-      Left = 72
-      Top = 42
-      Width = 205
+      Left = 74
+      Top = 43
+      Width = 349
       Height = 21
       Alignment = taRightJustify
       AutoSize = False
