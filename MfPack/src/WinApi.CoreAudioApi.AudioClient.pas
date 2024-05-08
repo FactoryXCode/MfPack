@@ -25,6 +25,11 @@
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or later.
+//          Note that IAudioClients are directly accessing the WAS.
+//          So, if a vendor did not implement one or more of these interfaces or one or more owned methods,
+//          we get error E_NOINTERFACE when the interface is not supported or
+//          E_NOT_IMPLEMENTED when accessing a not implemented method.
+//          Try to get the latest audiodrivers to solve these issues.
 //
 // Related objects: -
 // Related projects: MfPackX316
@@ -71,8 +76,8 @@ uses
   WinApi.WinApiTypes,
   WinApi.WinError,
   {WinMM}
-  //WinApi.WinMM.MMReg,
-  WinApi.WinMM.MMeApi,
+  WinApi.WinMM.MMReg,
+  //WinApi.WinMM.MMeApi,
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioMediaType,
   WinApi.CoreAudioApi.AudioSessionTypes;
@@ -498,8 +503,8 @@ type
     //
 
     function IsFormatSupported(ShareMode: AUDCLNT_SHAREMODE;
-                               const pFormat: PWaveFormatEx;
-                               [ref] const ppClosestMatch: PWaveFormatEx // Exclusive mode can't suggest a "closest match", you have to set this param to Nil.
+                               pFormat: PWaveFormatEx;
+                               [ref] const ppClosestMatch: PWaveFormatEx // Exclusive mode can't suggest a "closest match", you have to set this param to nil.
                               ): HResult; stdcall;
     // Description:
     //
@@ -558,7 +563,7 @@ type
     //    The method writes the address of a WAVEFORMATEX (or WAVEFORMATEXTENSIBLE) structure to this variable.
     //    The method allocates the storage for the structure.
     //    The caller is responsible for freeing the storage, when it is no longer needed, by calling the CoTaskMemFree function.
-    //    If the GetMixFormat call fails, *ppDeviceFormat is Nil.
+    //    If the GetMixFormat call fails, *ppDeviceFormat is nil.
     //    For information about WAVEFORMATEX, WAVEFORMATEXTENSIBLE, and CoTaskMemFree, see the Windows SDK documentation.
     //
     // Return Values:
@@ -601,8 +606,8 @@ type
     //   For more information about WAVEFORMATEX and WAVEFORMATEXTENSIBLE, see the Windows DDK documentation.
     //
 
-    function GetDevicePeriod(out phnsDefaultDevicePeriod: REFERENCE_TIME;
-                             out phnsMinimumDevicePeriod: REFERENCE_TIME): HResult; stdcall;
+    function GetDevicePeriod({out} phnsDefaultDevicePeriod: PREFERENCE_TIME;
+                             {out} phnsMinimumDevicePeriod: PREFERENCE_TIME): HResult; stdcall;
     // Description:
     //
     //  Returns the periodicity of the WAS engine, in 100-nanosecond units.
@@ -844,10 +849,10 @@ type
     // the AudioClientProperties to TRUE, you must specify the AUDCLNT_STREAMFLAGS_EVENTCALLBACK flag in
     // the StreamFlags parameter to IAudioClient.Initialize.
 
-    function GetBufferSizeLimits(pFormat: PWAVEFORMATEX;
+    function GetBufferSizeLimits([ref] const pFormat: PWAVEFORMATEX;
                                  bEventDriven: BOOL;
-                                 out phnsMinBufferDuration: REFERENCE_TIME;
-                                 out phnsMaxBufferDuration: REFERENCE_TIME): HResult; stdcall;
+                                 {out} phnsMinBufferDuration: REFERENCE_TIME;
+                                 {out} phnsMaxBufferDuration: REFERENCE_TIME): HResult; stdcall;
     // Description:
     //
     //  Returns the buffer size limits of the hardware audio engine, in 100-nanosecond units.
@@ -958,10 +963,10 @@ type
     //  Note that this is an instantaneous value that may be outdated as soon as this call returns.
     //
 
-    function InitializeSharedAudioStream(StreamFlags: DWORD;
+    function InitializeSharedAudioStream(const StreamFlags: DWORD;
                                          PeriodInFrames: UINT32;
-                                         pFormat: PWAVEFORMATEX;
-                                         {optional} AudioSessionGuid: LPCGUID): HResult; stdcall;
+                                         const pFormat: PWAVEFORMATEX;
+                                         {optional} const AudioSessionGuid: LPCGUID): HResult; stdcall;
     // Description:
     //
     //  Initializes a shared stream with the specified periodicity.
@@ -1207,7 +1212,8 @@ type
     function GetNextPacketSize(out pNumFramesInNextPacket: UINT32): HResult; stdcall;
     // Description:
     //
-    //  Returns the number of frames in the next capture buffer packet. Capture applications must read in frames on a packet-by-packet basis.
+    //  Returns the number of frames in the next capture buffer packet.
+    //  Capture applications must read in frames on a packet-by-packet basis.
     //
     // Parameters:
     //

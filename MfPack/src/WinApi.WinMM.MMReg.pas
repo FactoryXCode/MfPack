@@ -4614,7 +4614,7 @@ const WAVE_FORMAT_PCM = 1;
 {$IFNDEF _WAVEFORMATEX_}
 {$DEFINE _WAVEFORMATEX_}
 type
-
+  // Note: This structure is also defined in WinApi.WinMM.MMeApi !
   PWAVEFORMATEX = ^tWAVEFORMATEX;
   {$EXTERNALSYM PWAVEFORMATEX}
   tWAVEFORMATEX = record

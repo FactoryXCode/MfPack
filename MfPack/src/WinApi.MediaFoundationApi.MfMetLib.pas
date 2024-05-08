@@ -5355,30 +5355,24 @@ label
   done;
 
 begin
+
+  returnValue := nil;
+
   hr := DeviceCollection.Item(DeviceIndex,
                                 device);
   if FAILED(hr) then
-    begin
-      Result := nil;
-      goto done;
-    end;
+    goto done;
 
   hr := device.GetId(deviceId);
   if FAILED(hr) then
-    begin
-      Result := nil;
-      goto done;
-    end;
+    goto done;
 
   hr := device.OpenPropertyStore($00000000, // STGM_READ
                                  propertyStore);
   SafeRelease(device);
 
   if FAILED(hr) then
-    begin
-      Result := nil;
-      goto done;
-    end;
+    goto done;
 
   PropVariantInit(friendlyName);
 
@@ -5388,10 +5382,7 @@ begin
   SafeRelease(propertyStore);
 
   if FAILED(hr) then
-    begin
-      Result := nil;
-      goto done;
-    end;
+    goto done;
 
   if (friendlyName.vt <> VT_LPWSTR) then
     deviceName := 'Unknown'
