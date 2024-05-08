@@ -549,7 +549,7 @@ type
     //  This method does not require that the Initialize method be called first.
     //
 
-    function GetMixFormat([ref] const ppDeviceFormat: PWAVEFORMATEX): HResult; stdcall;
+    function GetMixFormat({out} ppDeviceFormat: PWAVEFORMATEX): HResult; stdcall;
     // Description:
     //
     //  The GetMixFormat method retrieves the stream format that the audio engine uses for its
@@ -606,8 +606,8 @@ type
     //   For more information about WAVEFORMATEX and WAVEFORMATEXTENSIBLE, see the Windows DDK documentation.
     //
 
-    function GetDevicePeriod({out} phnsDefaultDevicePeriod: PREFERENCE_TIME;
-                             {out} phnsMinimumDevicePeriod: PREFERENCE_TIME): HResult; stdcall;
+    function GetDevicePeriod(out phnsDefaultDevicePeriod: REFERENCE_TIME;
+                             out phnsMinimumDevicePeriod: REFERENCE_TIME): HResult; stdcall;
     // Description:
     //
     //  Returns the periodicity of the WAS engine, in 100-nanosecond units.
