@@ -80,7 +80,7 @@ uses
   {$DEFINE SHOW_IN_MESSAGES_IDE}
 
 const
-  AUDIO_BUFFER_FMT = 10000;
+  AUDIO_BUFFER_FMT = 10000000;
 
   // Simple error message handler that reports by default in the IDE Messages screen or
   // shows a messagedialog at runtime.

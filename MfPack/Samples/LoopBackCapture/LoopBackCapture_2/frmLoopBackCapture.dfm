@@ -4,7 +4,7 @@ object frmMain: TfrmMain
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'LoopBackCapture Sample 2'
-  ClientHeight = 477
+  ClientHeight = 478
   ClientWidth = 459
   Color = clBtnFace
   DoubleBuffered = True
@@ -23,15 +23,13 @@ object frmMain: TfrmMain
     Left = 0
     Top = 0
     Width = 459
-    Height = 175
+    Height = 163
     Align = alTop
-    ExplicitTop = 2
-    ExplicitWidth = 418
   end
   object Label3: TLabel
     AlignWithMargins = True
     Left = 15
-    Top = 44
+    Top = 35
     Width = 92
     Height = 17
     Hint = 
@@ -44,7 +42,7 @@ object frmMain: TfrmMain
   object Label2: TLabel
     AlignWithMargins = True
     Left = 15
-    Top = 68
+    Top = 58
     Width = 92
     Height = 17
     Hint = 
@@ -57,7 +55,7 @@ object frmMain: TfrmMain
   object lblMsg: TLabel
     AlignWithMargins = True
     Left = 6
-    Top = 450
+    Top = 451
     Width = 450
     Height = 24
     Margins.Left = 6
@@ -76,16 +74,17 @@ object frmMain: TfrmMain
   end
   object Bevel1: TBevel
     Left = 0
-    Top = 445
+    Top = 446
     Width = 459
     Height = 1
     Align = alBottom
     Shape = bsTopLine
+    ExplicitTop = 445
     ExplicitWidth = 462
   end
   object Bevel3: TBevel
     Left = 0
-    Top = 446
+    Top = 447
     Width = 459
     Height = 1
     Align = alBottom
@@ -95,16 +94,16 @@ object frmMain: TfrmMain
   end
   object Panel3: TPanel
     Left = 0
-    Top = 175
+    Top = 163
     Width = 459
-    Height = 148
+    Height = 167
     Hint = 
       'The capture buffersize depending on the audiodevice specs and so' +
       'urce latency '
     Align = alTop
     Alignment = taLeftJustify
     BevelOuter = bvLowered
-    Caption = '  Buffer'
+    Caption = '  Buffers'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
@@ -113,13 +112,14 @@ object frmMain: TfrmMain
     ParentFont = False
     TabOrder = 11
     VerticalAlignment = taAlignTop
-    ExplicitWidth = 462
+    ExplicitTop = 180
     object lblDeviceBufferDuration: TLabel
-      Left = 6
-      Top = 26
-      Width = 198
+      Left = 10
+      Top = 36
+      Width = 269
       Height = 13
-      Caption = 'Device Buffer Duration (10 ms resolution)'
+      AutoSize = False
+      Caption = 'Device Buffer Duration (30 ms resolution)'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -130,7 +130,7 @@ object frmMain: TfrmMain
     object Label4: TLabel
       AlignWithMargins = True
       Left = 6
-      Top = 73
+      Top = 87
       Width = 44
       Height = 17
       Hint = 
@@ -147,19 +147,33 @@ object frmMain: TfrmMain
       ParentShowHint = False
       ShowHint = True
     end
+    object lblCaptureBufferDuration: TLabel
+      Left = 10
+      Top = 20
+      Width = 269
+      Height = 13
+      AutoSize = False
+      Caption = 'Capture Buffer Duration: 0 ms.'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+    end
     object tbDeviceBufferDuration: TTrackBar
-      Left = 0
-      Top = 42
+      Left = 1
+      Top = 50
       Width = 455
       Height = 25
-      Max = 100
-      Position = 10
+      Max = 60
+      Position = 30
       TabOrder = 0
       OnChange = tbDeviceBufferDurationChange
     end
     object rb441b16: TRadioButton
       Left = 4
-      Top = 90
+      Top = 104
       Width = 100
       Height = 13
       Hint = '44.100 kHz at 16 bits'
@@ -178,7 +192,7 @@ object frmMain: TfrmMain
     end
     object rb48b24: TRadioButton
       Left = 4
-      Top = 109
+      Top = 123
       Width = 100
       Height = 13
       Hint = '48.000 kHz at 24 bits'
@@ -195,7 +209,7 @@ object frmMain: TfrmMain
     end
     object rb48b32: TRadioButton
       Left = 110
-      Top = 109
+      Top = 123
       Width = 100
       Height = 13
       Hint = '48.000 kHz at 32 bits'
@@ -212,7 +226,7 @@ object frmMain: TfrmMain
     end
     object rb96b24: TRadioButton
       Left = 4
-      Top = 128
+      Top = 142
       Width = 100
       Height = 13
       Hint = '96.000 kHz at 24 bits'
@@ -229,7 +243,7 @@ object frmMain: TfrmMain
     end
     object rb96b32: TRadioButton
       Left = 110
-      Top = 128
+      Top = 142
       Width = 100
       Height = 13
       Hint = '96.000 kHz at 32 bits'
@@ -247,7 +261,7 @@ object frmMain: TfrmMain
   end
   object edPID: TEdit
     Left = 113
-    Top = 41
+    Top = 31
     Width = 106
     Height = 21
     Hint = 'Enter a numeric value!'
@@ -260,7 +274,7 @@ object frmMain: TfrmMain
   end
   object rb2: TRadioButton
     Left = 22
-    Top = 127
+    Top = 118
     Width = 291
     Height = 17
     Caption = 'Capture audio from process ID (PID)  and its children'
@@ -268,7 +282,7 @@ object frmMain: TfrmMain
   end
   object rb1: TRadioButton
     Left = 22
-    Top = 148
+    Top = 137
     Width = 385
     Height = 17
     Caption = 
@@ -279,32 +293,32 @@ object frmMain: TfrmMain
     TabStop = True
   end
   object butGetPID: TButton
-    Left = 22
-    Top = 92
+    Left = 20
+    Top = 84
     Width = 97
-    Height = 22
+    Height = 24
     Hint = 'Get the Program ID of this application.'
-    Caption = 'Get PID'
+    Caption = 'Get this PID'
     ParentShowHint = False
     ShowHint = True
     TabOrder = 3
     OnClick = butGetPIDClick
   end
-  object Button1: TButton
-    Left = 124
-    Top = 92
+  object butShowProcesses: TButton
+    Left = 122
+    Top = 84
     Width = 97
-    Height = 22
+    Height = 24
     Hint = 'Pick a Program ID from a running process.'
-    Caption = 'Show Processes'
+    Caption = 'Choose a process'
     ParentShowHint = False
     ShowHint = True
     TabOrder = 4
-    OnClick = Button1Click
+    OnClick = butShowProcessesClick
   end
   object edProcName: TEdit
     Left = 113
-    Top = 65
+    Top = 55
     Width = 286
     Height = 21
     ParentShowHint = False
@@ -315,11 +329,17 @@ object frmMain: TfrmMain
     OnKeyUp = edPIDKeyUp
   end
   object cbxStayOnTop: TCheckBox
-    Left = 22
-    Top = 15
-    Width = 79
+    Left = 20
+    Top = 8
+    Width = 96
     Height = 15
     Caption = 'Stay On Top'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
     ParentShowHint = False
     ShowHint = False
     TabOrder = 6
@@ -327,14 +347,13 @@ object frmMain: TfrmMain
   end
   object Panel1: TPanel
     Left = 0
-    Top = 323
+    Top = 330
     Width = 459
-    Height = 76
+    Height = 75
     Align = alTop
     BevelOuter = bvLowered
     TabOrder = 7
-    ExplicitTop = 322
-    ExplicitWidth = 462
+    ExplicitTop = 323
     object Label1: TLabel
       Left = 22
       Top = 45
@@ -350,7 +369,7 @@ object frmMain: TfrmMain
       Left = 423
       Top = 43
       Width = 27
-      Height = 19
+      Height = 16
       Hint = 'Enter a file name without extension.'
       Caption = '.wav'
       Color = clBtnFace
@@ -400,8 +419,8 @@ object frmMain: TfrmMain
     end
   end
   object butStart: TButton
-    Left = 6
-    Top = 409
+    Left = 8
+    Top = 412
     Width = 85
     Height = 27
     Caption = 'Start Capture'
@@ -410,7 +429,7 @@ object frmMain: TfrmMain
   end
   object butStop: TButton
     Left = 97
-    Top = 409
+    Top = 412
     Width = 85
     Height = 27
     Caption = 'Stop Capture'
@@ -420,7 +439,7 @@ object frmMain: TfrmMain
   end
   object butPlayData: TButton
     Left = 187
-    Top = 409
+    Top = 412
     Width = 80
     Height = 27
     Hint = 'Play recorded data.'

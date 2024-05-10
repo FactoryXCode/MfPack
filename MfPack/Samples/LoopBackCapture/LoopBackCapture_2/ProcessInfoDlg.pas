@@ -69,6 +69,7 @@ uses
   Winapi.Windows,
   Winapi.Messages,
   WinApi.TlHelp32,
+  WinApi.Psapi,
   {System}
   System.SysUtils,
   System.Variants,
@@ -95,6 +96,9 @@ type
     cbxSort: TCheckBox;
     butSort: TButton;
     cbxSortOnColumn: TCheckBox;
+    StaticText1: TStaticText;
+    StaticText2: TStaticText;
+    StaticText3: TStaticText;
     procedure butOkClick(Sender: TObject);
     procedure butCancelClick(Sender: TObject);
     procedure butRefreshClick(Sender: TObject);
@@ -104,12 +108,16 @@ type
     { Private declarations }
 
     procedure InitProcList();
+    function MainProcExcists(pProcFileName: string;
+                             pMainProcPID: Integer): Boolean;
 
   public
     { Public declarations }
 
     SelectedPID: Integer;
+    SelectedMainPID: Integer;
     SelectedProcName: string;
+
   end;
 
 var
@@ -127,6 +135,8 @@ end;
 
 procedure TdlgProcessInfo.butOkClick(Sender: TObject);
 begin
+  SelectedMainPID := StrToInt(sgProcesses.Cells[2,
+                                                sgProcesses.Row]);
   SelectedPID := StrToInt(sgProcesses.Cells[1,
                                             sgProcesses.Row]);
   SelectedProcName := sgProcesses.Cells[0,
@@ -137,15 +147,19 @@ end;
 
 procedure TdlgProcessInfo.butRefreshClick(Sender: TObject);
 
-  // helper
+  // Helper.
   procedure PopulateCells(iIndex: Integer;
                           sName: string;
-                          iPid: Integer);
+                          iPid: DWord;
+                          iParentProcessID: DWord);
   begin
-    {Process name}
-    sgProcesses.Cells[0, iIndex] := sName;
-    {Process ID}
-    sgProcesses.Cells[1, iIndex] := IntToStr(iPid);
+
+   {Process name}
+   sgProcesses.Cells[0, iIndex] := sName;
+   {Process ID}
+   sgProcesses.Cells[1, iIndex] := IntToStr(iPid);
+   {Main Process ID}
+   sgProcesses.Cells[2, iIndex] := IntToStr(iParentProcessID);
   end;
 
 var
@@ -156,12 +170,14 @@ var
 begin
 
   i := 0;
+  sgProcesses.RowCount := 1;
 
   hHandle := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,
                                       0);
 
   if (hHandle <> 0) then
     begin
+
       // Set the record to default values.
       lppe := Default(TProcessEntry32);
       // We must set the dwSize parameter first!
@@ -177,18 +193,27 @@ begin
                         lppe) then
         begin
 
-          PopulateCells(i,
-                        lppe.szExeFile,
-                        lppe.th32ProcessID);
+           // Store first process first.
+           PopulateCells(i,
+                         lppe.szExeFile,
+                         lppe.th32ProcessID,
+                         lppe.th32ParentProcessID);
 
+          // Continue to store the rest after the first.
           while Process32Next(hHandle,
                               lppe) do
             begin
-              inc(i);
-              sgProcesses.RowCount := i;
-              PopulateCells(i,
-                            lppe.szExeFile,
-                            lppe.th32ProcessID);
+
+              if not MainProcExcists(lppe.szExeFile,
+                                     lppe.th32ParentProcessID) then
+                begin
+                  inc(i);
+                  sgProcesses.RowCount := i;
+                  PopulateCells(i,
+                                lppe.szExeFile,
+                                lppe.th32ProcessID,
+                                lppe.th32ParentProcessID);
+                end;
             end;
         end;
 
@@ -207,7 +232,7 @@ var
   aCol: Integer;
 
 begin
-  if (sgProcesses.ColCount < 2) then
+  if (sgProcesses.ColCount < 3) then
     Exit;
 
   if cbxSortOnColumn.Checked then
@@ -241,15 +266,38 @@ begin
   {$IF CompilerVersion < 31.0}
   sgProcesses.ColWidths[0] := 200;
   sgProcesses.ColWidths[1] := 100;
+  sgProcesses.ColWidths[2] := 100;
   {$ELSE}
   sgProcesses.ColWidths[0] := 390;
   sgProcesses.ColWidths[1] := 190;
+  sgProcesses.ColWidths[2] := 190;
   {$ENDIF}
 
   sgProcesses.Width := sgProcesses.ColWidths[0] +
                        sgProcesses.ColWidths[1] +
-                       (sgProcesses.BevelWidth * 2);
+                       sgProcesses.ColWidths[2] +
+                       (sgProcesses.BevelWidth * 2 + 3);
 
 end;
+
+function TdlgProcessInfo.MainProcExcists(pProcFileName: string;
+                                         pMainProcPID: Integer): Boolean;
+var
+  i: Integer;
+
+begin
+
+  Result := False;
+  for i := 0 to sgProcesses.RowCount - 1 do
+    begin
+      if (pProcFileName = sgProcesses.Cells[0, i]) and
+         (IntToStr(pMainProcPID) = sgProcesses.Cells[2, i]) then
+        begin
+          Result := True;
+          Break;
+        end;
+    end;
+end;
+
 
 end.

@@ -1,15 +1,17 @@
 program LoopBackCapture2;
 
 uses
-  {$IFDEF FASTMM}
-  FastMM4,
-  {$ENDIF}
-
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
   Vcl.Forms,
   frmLoopBackCapture in 'frmLoopBackCapture.pas' {frmMain},
   Common in 'Common.pas',
+  ProcessInfoDlg in 'ProcessInfoDlg.pas' {dlgProcessInfo},
   LoopBackCapture in 'LoopBackCapture.pas',
-  ProcessInfoDlg in 'ProcessInfoDlg.pas' {dlgProcessInfo};
+  UniThreadTimer in 'UniThreadTimer.pas';
 
 {$R *.res}
 

@@ -23,6 +23,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 // 25/04/2004 Tony                Updated to a more stable and glitch free version.
+// 10/05/2024 Tony                Improved performance.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -108,7 +109,7 @@ type
   TDeviceState = (Uninitialized,
                   Error,       // Implemented to prevent calls to IAudioCaptureClient.GetNextPacketSize.
                                // See: OnAudioSampleRequested() and error handling.
-
+                  MaxFileSizeReached,
                   // All states >= Initialized will allow some methods
                   // to be called successfully on the Audio Client.
                   Initialized, // < from this one..
@@ -140,7 +141,7 @@ type
 
   private
 
-    m_AudioClient: IAudioClient3;
+    m_AudioClient: IAudioClient;
     m_AudioCaptureClient: IAudioCaptureClient;
     m_SampleReadyAsyncResult: IMFAsyncResult;
 
@@ -149,14 +150,13 @@ type
     m_xSampleReady: TCallbackAsync;
     m_xFinishCapture: TCallbackAsync;
 
-    FOnProcessingData: TNotifyEvent;
     FOnCapturingStopped: TNotifyEvent;
 
     m_SampleReadyKey: MFWORKITEM_KEY;
     m_CaptureFormat: WAVEFORMATEX;
     m_BufferFrames: UINT32;
 
-    pvBytesWritten: Int64;
+    m_BytesWritten: Int64;
 
     m_dwTaskID: DWord;
     m_dwQueueID: DWord;
@@ -211,10 +211,10 @@ type
     property WavFormat: TWavFormat read m_WavFormat;
     property CurrentWavFormat: TWAVEFORMATEX read m_CaptureFormat;
     property AudioClientBufferDuration: REFERENCE_TIME read m_BufferDuration;
-    property BytesWritten: Int64 read pvBytesWritten;
+    property BytesWritten: Int64 read m_BytesWritten;
+    property CaptureBufferLength: UINT32 read m_BufferFrames;
 
     // Notify events.
-    property OnProcessingData: TNotifyEvent read FOnProcessingData write FOnProcessingData;
     property OnStoppedCapturing: TNotifyEvent read FOnCapturingStopped write FOnCapturingStopped;
   end;
 
@@ -317,60 +317,54 @@ begin
       goto leave;
     end;
 
-  // The app can call m_AudioClient.GetMixFormat to get the capture format if such is implemented.
-  hr := m_AudioClient.GetMixFormat(@m_CaptureFormat);
+  // set the formats: fmt44100b16, fmt48000b24, fmt48000b32, fmt96000b24, fmt96000b32
+  m_CaptureFormat.wFormatTag := WAVE_FORMAT_PCM;
+  m_CaptureFormat.nChannels := 2;
 
-
-  // Set 16 - bit PCM format manualy when we get an E_NOTIMPL result from GetMixFormat.
-  if (hr = E_NOTIMPL) then
+  // set the formats: fmt44100b16, fmt48000b24, fmt48000b32, fmt96000b24, fmt96000b32
+  if (m_WavFormat = fmt44100b16) then
     begin
-      m_CaptureFormat.wFormatTag := WAVE_FORMAT_PCM;
-      m_CaptureFormat.nChannels := 2;
-
-      // set the formats: fmt44100b16, fmt48000b24, fmt48000b32, fmt96000b24, fmt96000b32
-      if (m_WavFormat = fmt44100b16) then
-        begin
-          m_CaptureFormat.nSamplesPerSec := 44100;
-          m_CaptureFormat.wBitsPerSample := 16;
-        end
-      else if (m_WavFormat = fmt48000b24) then
-        begin
-          m_CaptureFormat.nSamplesPerSec := 48000;
-          m_CaptureFormat.wBitsPerSample := 24;
-        end
-      else if (m_WavFormat = fmt48000b24) then
-        begin
-          m_CaptureFormat.nSamplesPerSec := 48000;
-          m_CaptureFormat.wBitsPerSample := 32;
-        end
-      else if (m_WavFormat = fmt96000b24) then
-        begin
-          m_CaptureFormat.nSamplesPerSec := 96000;
-          m_CaptureFormat.wBitsPerSample := 24;
-        end
-      else if (m_WavFormat = fmt96000b32) then
-        begin
-          m_CaptureFormat.nSamplesPerSec := 96000;
-          m_CaptureFormat.wBitsPerSample := 32;
-        end
-      else
-        begin
-          m_CaptureFormat.nSamplesPerSec := 44100;
-          m_CaptureFormat.wBitsPerSample := 16;
-        end;
-
-      m_CaptureFormat.nBlockAlign := (m_CaptureFormat.nChannels * m_CaptureFormat.wBitsPerSample) div BITS_PER_BYTE;
-      m_CaptureFormat.nAvgBytesPerSec := (m_CaptureFormat.nSamplesPerSec * m_CaptureFormat.nBlockAlign);
+      m_CaptureFormat.nSamplesPerSec := 44100;
+      m_CaptureFormat.wBitsPerSample := 16;
     end
-  else if FAILED(hr) then
-    goto leave;
+  else if (m_WavFormat = fmt48000b24) then
+    begin
+      m_CaptureFormat.nSamplesPerSec := 48000;
+      m_CaptureFormat.wBitsPerSample := 24;
+    end
+  else if (m_WavFormat = fmt48000b24) then
+    begin
+      m_CaptureFormat.nSamplesPerSec := 48000;
+      m_CaptureFormat.wBitsPerSample := 32;
+    end
+  else if (m_WavFormat = fmt96000b24) then
+    begin
+      m_CaptureFormat.nSamplesPerSec := 96000;
+      m_CaptureFormat.wBitsPerSample := 24;
+    end
+  else if (m_WavFormat = fmt96000b32) then
+    begin
+      m_CaptureFormat.nSamplesPerSec := 96000;
+      m_CaptureFormat.wBitsPerSample := 32;
+    end
+  else
+    begin
+      m_CaptureFormat.nSamplesPerSec := 44100;
+      m_CaptureFormat.wBitsPerSample := 16;
+    end;
 
+  m_CaptureFormat.nBlockAlign := (m_CaptureFormat.nChannels * m_CaptureFormat.wBitsPerSample) div BITS_PER_BYTE;
+  m_CaptureFormat.nAvgBytesPerSec := (m_CaptureFormat.nSamplesPerSec * m_CaptureFormat.nBlockAlign);
+
+  //
   // Initialize the AudioClient in Shared Mode with the user specified buffer.
   // Note: - Shared Mode is needed when rendering from an audio application or process.
   //       - Exclusive Mode is used when rendering from a hardware endpoint.
   //       - Interface methods that are reffering to audioendpoints, will not work and returns E_NOTIMPL,
   //         for example: GetBufferSize(), IsFormatSupported(), GetDevicePeriod() and GetMixFormat() methods.
+  // See: https://learn.microsoft.com/en-us/answers/questions/1125409/loopbackcapture-(-activateaudiointerfaceasync-with?page=1&orderby=Helpful#answers
   //
+
   hr := m_AudioClient.Initialize(AUDCLNT_SHAREMODE_SHARED,
                                  AUDCLNT_STREAMFLAGS_LOOPBACK or AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
                                  m_BufferDuration, // Safe values should be inbetween 10.000 and 50.000 (10 - 50ms/sec) including latency.
@@ -647,6 +641,7 @@ begin
                         CREATE_ALWAYS,
                         FILE_ATTRIBUTE_NORMAL,
                         0);
+
   if (m_hPipe = Int(INVALID_HANDLE_VALUE)) then
     begin
       hr := E_FAIL;
@@ -806,13 +801,11 @@ var
   hr: HResult;
   br: BOOL;
   FramesAvailable: UINT32;
-  Data: Pointer;
+  pData: PByte;
   dwCaptureFlags: DWord;
-  u64DevicePosition: UINT64;
-  u64QPCPosition: UINT64;
   cbBytesToCapture: DWord;
   dwBytesWritten: DWord;
-  NumBytesWritten: INT64;
+
 
 label
   leave;
@@ -822,12 +815,12 @@ begin
   EnterCriticalSection(oCriticalSection);
 
   hr := S_OK;
-  NumBytesWritten := 0;
-  Data := nil;
+  pData := nil;
+  m_BufferFrames := 0;
 
   // If this flag is set, we have already queued up the async call to finialize the WAV header.
   // So we don't want to grab or write any more data that would possibly give us an invalid size.
-  if (m_DeviceState = Stopping) or (m_DeviceState = Stopped) or (m_DeviceState = Error) then
+  if (m_DeviceState <> Capturing) or not Assigned(m_AudioCaptureClient) then
     goto leave;
 
   // A word on why we have a loop here;
@@ -855,81 +848,91 @@ begin
 
   // We check the device state first and then call IAudioCaptureClient.GetNextPacketSize.
   // This way we handle the internal async calls that could interfere first.
-  while (m_DeviceState <> Stopping) or (m_DeviceState <> Stopped) or (m_DeviceState <> Error) do
+  while (m_DeviceState = Capturing) do
     begin
-
-      if not Assigned(m_AudioCaptureClient) then
-        Break;
 
       hr := m_AudioCaptureClient.GetNextPacketSize(FramesAvailable);
       if FAILED(hr) then
         begin
           StopCaptureAsync();
+          m_DeviceState := Error;
           break;
         end;
 
       cbBytesToCapture := FramesAvailable * m_CaptureFormat.nBlockAlign;
-
 
       // WAV files have a 4GB (0xFFFFFFFF) size limit, so likely we have hit that limit when we
       // overflow here. Time to stop the capture.
       if ((m_cbDataSize + cbBytesToCapture) < m_cbDataSize) then
         begin
           StopCaptureAsync();
+          m_DeviceState := MaxFileSizeReached;
           Break;
         end;
 
-        // Get sample buffer
-        hr := m_AudioCaptureClient.GetBuffer(PByte(Data),
-                                             FramesAvailable,
-                                             dwCaptureFlags,
-                                             @u64DevicePosition,
-                                             @u64QPCPosition);
-        if FAILED(hr) then
-          begin
-             ErrMsg(Format('m_AudioCaptureClient.GetBuffer failed. LastError = %d',[GetLastError()]), hr);
-             Break;
-          end;
+      // Get sample buffer
+      hr := m_AudioCaptureClient.GetBuffer(pData,
+                                           FramesAvailable,
+                                           dwCaptureFlags,
+                                           nil,
+                                           nil);
+      if FAILED(hr) then
+        begin
+          StopCaptureAsync();
+          ErrMsg(Format('m_AudioCaptureClient.GetBuffer failed. LastError = %d',[GetLastError()]), hr);
+          m_DeviceState := Error;
+          Break;
+        end;
 
-        // Write File
-        if (m_DeviceState <> Stopping) or (m_DeviceState <> Stopped) or (m_DeviceState <> Error) then
-          begin
-            dwBytesWritten := 0;
-            br := WriteFile(m_hPipe,
-                            Data^,
-                            cbBytesToCapture,
-                            dwBytesWritten,
-                            nil);
-            if (br = False) then
-              begin
-                ErrMsg(Format('%s LastError = %d',[SysErrorMessage(GetLastError), GetLastError()]), E_FAIL);
-                Break;
-              end;
-          end;
+      if (dwCaptureFlags = AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) then
+        begin
+          m_AudioCaptureClient.ReleaseBuffer(FramesAvailable);
+          pData := nil;
+          Continue;
+        end;
 
-        // Increase the size of our 'data' chunk. m_cbDataSize needs to be accurate.
-        Inc(m_cbDataSize,
-            cbBytesToCapture);
+      // Store the actual buffersize once.
+      if (m_BufferFrames = 0) and (FramesAvailable >0) then
+        m_BufferFrames := FramesAvailable;
 
-        Inc(NumBytesWritten,
-            dwBytesWritten);
+      // Write to file.
+      dwBytesWritten := 0;
+      br := WriteFile(m_hPipe,
+                      pData^,
+                      cbBytesToCapture,
+                      dwBytesWritten,
+                      nil);
 
-        // Store to public.
-        pvBytesWritten := dwBytesWritten;
+      if (br = False) then
+        begin
+          StopCaptureAsync();
+          ErrMsg(Format('%s LastError = %d',[SysErrorMessage(GetLastError), GetLastError()]), E_FAIL);
+          m_DeviceState := Error;
+          Break;
+        end;
 
-        HandleThreadMessages(GetCurrentThread());
+      // Release buffer.
+      hr := m_AudioCaptureClient.ReleaseBuffer(FramesAvailable);
+      if FAILED(hr) then
+        begin
+          StopCaptureAsync();
+          m_DeviceState := Error;
+          Break;
+        end;
 
-        // Send score.
-        FOnProcessingData(nil);
+      // Increase the size of our 'data' chunk. m_cbDataSize needs to be accurate.
+      Inc(m_cbDataSize,
+          cbBytesToCapture);
 
-        Data := nil;
+      // Store to public.
+      Inc(m_BytesWritten,
+          dwBytesWritten);
 
-        // Release buffer back.
-        if Assigned(m_AudioCaptureClient) then
-          hr := m_AudioCaptureClient.ReleaseBuffer(FramesAvailable);
+      pData := nil;
     end;
 
 leave:
+  pData := nil;
   LeaveCriticalSection(oCriticalSection);
   Result := hr;
 end;
@@ -1231,8 +1234,9 @@ initialization
 
   // A gui app will automaticly set COINIT_APARTMENTTHREADED, so there is no need to call CoInitializeEx unless
   // we use the class, for instance, in a service.
-  //CoInitializeEx(nil,
-  //               COINIT_MULTITHREADED);
+  // CoInitializeEx(nil,
+  //                COINIT_MULTITHREADED);
+
 finalization
 
   DeleteCriticalSection(oCriticalSection);

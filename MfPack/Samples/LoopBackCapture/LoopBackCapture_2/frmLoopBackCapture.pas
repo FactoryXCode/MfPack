@@ -23,6 +23,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 // 25/04/2004 Tony                Updated to a more stable and glitch free version.
+// 10/05/2024 Tony                Improved performance.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -75,6 +76,7 @@ uses
   System.SysUtils,
   System.Variants,
   System.Classes,
+  System.Diagnostics,
   {Vcl}
   Vcl.Graphics,
   Vcl.Controls,
@@ -91,7 +93,8 @@ uses
   {Application}
   Common,
   LoopbackCapture,
-  ProcessInfoDlg;
+  ProcessInfoDlg,
+  UniThreadTimer;
 
 type
   TfrmMain = class(TForm)
@@ -100,7 +103,7 @@ type
     rb2: TRadioButton;
     rb1: TRadioButton;
     butGetPID: TButton;
-    Button1: TButton;
+    butShowProcesses: TButton;
     Bevel2: TBevel;
     Label2: TLabel;
     edProcName: TEdit;
@@ -125,6 +128,7 @@ type
     rb48b32: TRadioButton;
     rb96b24: TRadioButton;
     rb96b32: TRadioButton;
+    lblCaptureBufferDuration: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject;
                              var CanClose: Boolean);
@@ -135,29 +139,34 @@ type
     procedure edFileNameKeyUp(Sender: TObject;
                               var Key: Word;
                               Shift: TShiftState);
-    procedure Button1Click(Sender: TObject);
+    procedure butShowProcessesClick(Sender: TObject);
     procedure edPIDKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure cbxStayOnTopClick(Sender: TObject);
     procedure tbDeviceBufferDurationChange(Sender: TObject);
+
 
   private
     { Private declarations }
     sFileName: string;
     sOrgFileName: string;
     bEdited: Boolean;
-    iProgress: Int64;
+    iTotalBytesWritten: Int64;
     bIncludeProcessTree: Boolean;
     oLoopbackCapture: TLoopbackCapture;
-    aprocessId: Integer;
+    aMainProcessId: Integer;
     aWavFmt: TWavFormat;
     aDeviceBufferDuration: REFERENCE_TIME;
+    // We use timers here, to prevent distortions when quering the capturethread for timing and processed data.
+    // The timer must be set to 1 millisecond resolution.
+    thrTimer: TUniThreadedTimer;
+    aStopWatch: TStopwatch;
 
     // Event handlers.
     procedure OnCapturingStoppedEvent(Sender: TObject);
-    procedure OnAudioSinkProgressEvent(Sender: TObject);
 
     function StartCapture(): HResult;
     procedure SetDeviceBufferDuration();
+    procedure TimerTimer(sender: TObject);
 
   public
     { Public declarations }
@@ -166,7 +175,6 @@ type
 
 var
   frmMain: TfrmMain;
-  CoInitialized: HResult;
 
 implementation
 
@@ -192,7 +200,7 @@ var
 begin
 
   // Set to default, if user selected nothing.
-  if (aprocessId = 0) then
+  if (aMainProcessId = 0) then
     begin
       butGetPIDClick(Self);
       rb1.Checked := true;
@@ -203,14 +211,15 @@ begin
   if FAILED(hr) then
     begin
       MessageBox(0,
-                 LPCWSTR('Your computer does not support this Media Foundation API version' +
-                         IntToStr(MF_VERSION) + '.'),
-                 LPCWSTR('MFStartup Failure!'),
+                 LPCWSTR('Start Capture failed with result ' + IntToStr(hr)),
+                 LPCWSTR('Start Capture Failure!'),
                  MB_ICONSTOP);
+      Exit;
     end;
 
-  butStart.Enabled := not SUCCEEDED(hr);
+  butStart.Enabled := FAILED(hr);
   butStop.Enabled := SUCCEEDED(hr);
+  tbDeviceBufferDuration.Enabled := FAILED(hr);
 end;
 
 
@@ -221,13 +230,17 @@ var
 begin
 
   hr := oLoopbackCapture.StopCaptureAsync();
-
+  // Stop the timer and stopwatch.
+  thrTimer.Enabled := False;
+  aStopWatch.Stop;
+  aStopWatch.Reset;
   butStart.Enabled := SUCCEEDED(hr);
   butStop.Enabled := not SUCCEEDED(hr);
+  tbDeviceBufferDuration.Enabled := SUCCEEDED(hr);
 end;
 
 
-procedure TfrmMain.Button1Click(Sender: TObject);
+procedure TfrmMain.butShowProcessesClick(Sender: TObject);
 begin
 
   // Create the dialog if it's not allready done.
@@ -241,13 +254,15 @@ begin
   // Ask the user to select one.
   if (dlgProcessInfo.ShowModal = mrOk) then
     begin
-      aprocessId := dlgProcessInfo.SelectedPID;
-      edPID.Text := IntToStr(aprocessId);
+      aMainProcessId := dlgProcessInfo.SelectedMainPID; //dlgProcessInfo.SelectedPID;
+      edPID.Text := IntToStr(aMainProcessId);
       edProcName.Text := dlgProcessInfo.SelectedProcName;
+      rb2.Checked := True;
     end
   else
     begin
       // User canceled.
+      rb1.Checked := True;
     end;
 end;
 
@@ -290,7 +305,7 @@ var
 begin
 
   if TryStrToInt(edPID.Text, i) and (i >= 0) then
-   aprocessId := i;
+   aMainProcessId := i;
 end;
 
 
@@ -307,7 +322,11 @@ procedure TfrmMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
 
   CanClose := False;
+  aStopWatch.Stop;
+  thrTimer.Enabled := False;
+
   FreeAndNil(oLoopbackCapture);
+  FreeAndNil(thrTimer);
   CanClose := True;
 end;
 
@@ -315,9 +334,15 @@ end;
 procedure TfrmMain.FormCreate(Sender: TObject);
 begin
 
+  aStopWatch := TStopwatch.Create;
+  thrTimer := TUniThreadedTimer.Create(nil);
+  thrTimer.Period := 1;  // One millisecond resolution.
+  thrTimer.Enabled := False;
+  thrTimer.OnTimerEvent := TimerTimer;
+
   oLoopbackCapture := TLoopbackCapture.Create(Handle);
+
   // Set event handlers.
-  oLoopbackCapture.OnProcessingData := OnAudioSinkProgressEvent;
   oLoopbackCapture.OnStoppedCapturing := OnCapturingStoppedEvent;
 
   butGetPID.OnClick(Self);
@@ -338,7 +363,7 @@ label
 begin
 
   hr := S_OK;
-  iProgress := 0;
+  iTotalBytesWritten := 0;
 
   if not Assigned(oLoopbackCapture) then
     begin
@@ -347,11 +372,11 @@ begin
     end;
 
   // Check for valid inputs
-  aprocessId := StrToInt(edPID.Text);
-  if (aprocessId <= 0) then
+  aMainProcessId := StrToInt(edPID.Text);
+  if (aMainProcessId <= 0) then
     begin
-      aprocessId := 0;
-      edPID.Text := IntToStr(aprocessId);
+      aMainProcessId := 0;
+      edPID.Text := IntToStr(aMainProcessId);
     end;
 
   if rb1.Checked then
@@ -359,7 +384,7 @@ begin
   else if rb2.Checked then
     bIncludeProcessTree := True;
 
-  // Buffersize depends on latency and bitrate
+  // Buffersize depends on latency and bitrate.
   SetDeviceBufferDuration();
 
   // Bitrate and resolution.
@@ -411,10 +436,11 @@ begin
       butStop.Enabled := True;
       butStart.Enabled := False;
       butPlayData.Enabled := False;
+      tbDeviceBufferDuration.Enabled := False;
 
       // Capture the audio stream from the default rendering device.
       hr := oLoopbackCapture.StartCaptureAsync(Handle,
-                                               aprocessId,
+                                               aMainProcessId,
                                                bIncludeProcessTree,
                                                aWavFmt,
                                                aDeviceBufferDuration,
@@ -423,78 +449,16 @@ begin
         begin
           butStop.Enabled := False;
           butStart.Enabled := True;
+          tbDeviceBufferDuration.Enabled := True;
           goto done;
         end;
+
+      thrTimer.Enabled := True;
+      aStopWatch.Start;
+      aStopWatch.StartNew;
     end;
 done:
   Result := hr;
-end;
-
-
-// Helper.
-function BytesToTimeStr(const pBytesWritten: Int64;
-                        const pSampleRate: Integer;
-                        const pChannels: Integer;
-                        const pBitsPerSecond: Integer;
-                        pShowMilliSeconds: Boolean = True): string; inline;
-const
-  Bit32 = 4;
-  Bit16 = 2;
-
-var
-  hns: Int64;
-
-begin
-
-  // Calculate time in 100-nanosecond units.
-  if (pBitsPerSecond = 16) then
-    hns := Trunc((pBytesWritten / (pSampleRate * 2 * pChannels)) * 10000000)  // 16-bit audio.
-  else if (pBitsPerSecond = 24) then
-    hns := Trunc((pBytesWritten / (pSampleRate * 3 * pChannels)) * 10000000)  // 24-bit audio.
-  else if (pBitsPerSecond = 32) then
-    hns := Trunc((pBytesWritten / (pSampleRate * 4 * pChannels)) * 10000000) // 32-bit audio.
-  else // Exotic
-    Exit;
-  // Call HnsTimeToStr function to format the time string
-  Result := HnsTimeToStr(hns,
-                         pShowMilliSeconds);
-end;
-
-
-procedure TfrmMain.OnAudioSinkProgressEvent(Sender: TObject);
-var
-  hnsStr: string;
-  bitsPerSample: Integer;
-  sampleRate: Integer;
-  channels: Integer;
-
-begin
-
-  if not Assigned(oLoopbackCapture) then
-    Exit;
-
-  sampleRate := oLoopbackCapture.CurrentWavFormat.nSamplesPerSec;
-  channels := oLoopbackCapture.CurrentWavFormat.nChannels;
-  bitsPerSample := oLoopbackCapture.CurrentWavFormat.wBitsPerSample;
-
-  Inc(iProgress,
-      oLoopbackCapture.BytesWritten);
-
-  // Sync the thread to prevent overruns.
-  // This is because the LoopbackCapture runs a-sync.
-  TThread.Synchronize(nil,
-                      procedure
-                        begin
-                          // Format to string (00:00:00,000)
-                          hnsStr := BytesToTimeStr(iProgress,
-                                                   sampleRate,
-                                                   channels,
-                                                   bitsPerSample,
-                                                   True);
-
-                          lblMsg.Caption := Format('Capturing from source: %s.', [hnsStr]);
-                        end);
-  Application.ProcessMessages;
 end;
 
 
@@ -505,7 +469,8 @@ begin
     Exit;
 
   butPlayData.Enabled := True;
-  lblMsg.Caption := Format('Capturing stopped. Captured %f Mb.', [iProgress / (1000 * 1000)]);
+  lblMsg.Caption := Format('Capturing stopped. Captured %f Mb.',
+                           [oLoopbackCapture.BytesWritten / (1000 * 1000)]);
 end;
 
 
@@ -519,9 +484,33 @@ end;
 procedure TfrmMain.SetDeviceBufferDuration();
 begin
 
-  lblDeviceBufferDuration.Caption := Format('Device buffer (%d MilliSeconds)', [tbDeviceBufferDuration.Position]);
+  lblDeviceBufferDuration.Caption := Format('Device buffer (%d MilliSeconds)',
+                                            [tbDeviceBufferDuration.Position]);
   aDeviceBufferDuration := tbDeviceBufferDuration.Position * AUDIO_BUFFER_FMT;
 end;
+
+
+procedure TfrmMain.TimerTimer(sender: TObject);
+var
+  hnsPeriod: REFERENCE_TIME;
+
+begin
+  hnsPeriod := 0;
+
+  if not Assigned(oLoopbackCapture) then
+    Exit;
+
+  if (hnsPeriod = 0) then
+    begin
+      hnsPeriod := Round(1000 * (oLoopbackCapture.CaptureBufferLength / oLoopbackCapture.CurrentWavFormat.nSamplesPerSec));
+      lblCaptureBufferDuration.Caption := Format('Capture Buffer Duration: %d ms.', [hnsPeriod]);
+    end;
+
+  lblMsg.Caption := 'Capturing from source: ' + FormatDateTime('hh:nn:ss:zzz',
+                                                               aStopWatch.ElapsedMilliseconds / MSecsPerDay);
+  Application.ProcessMessages;
+end;
+
 
 
 // initialization and finalization =============================================

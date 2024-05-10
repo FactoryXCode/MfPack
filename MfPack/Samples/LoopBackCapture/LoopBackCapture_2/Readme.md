@@ -14,14 +14,13 @@ With the new structure, only audio from the specified process, and its children,
 other processes will not be captured. A flag is also provided to reverse the behavior, capturing all system
 audio *except* those from the the specified process (and its children). Furthermore, the capture is not tied to a 
 specific audio endpoint, eliminating the need to create a separate IAudioClient to capture from each physical 
-audio endpoint. 
-
-If the processes whose audio will be captured does not have any audio rendering streams, then the capturing 
-process receives silence.
+audio endpoint.
 
 It also demonstrates how to get a processes by using the tlhelp32 API, to list a snapshot of running processes and be able to pick one.
-The application is provided with a dialog to select a running process from the process tree you want to pick and has
+The application is provided with a dialog to select a running process from the process tree you want to pick, and has
 a button to get the current PID of your application.
+It's preffered to select one process and select to record from this process only to get as less possible sound interruptions or distortions. 
+Also try to minimize open applications that uses lots of memory and/or processor load when capturing.
 
 NOTES: 
  - This release is updated for compiler version 17 up to 34.
@@ -34,6 +33,6 @@ Project location: https://github.com/FactoryXCode/MfPack
                   https://sourceforge.net/projects/MFPack
 
 First release date: 02-04-2023
-Final release date: 30/04/2024
+Final release date: 10/05/2024
 
 Copyright © FactoryX. All rights reserved.

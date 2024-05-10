@@ -5,7 +5,7 @@ object dlgProcessInfo: TdlgProcessInfo
   BorderStyle = bsDialog
   Caption = 'Choose a process'
   ClientHeight = 369
-  ClientWidth = 328
+  ClientWidth = 430
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,8 +18,8 @@ object dlgProcessInfo: TdlgProcessInfo
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
-    Left = 13
-    Top = 13
+    Left = 8
+    Top = 5
     Width = 90
     Height = 13
     Caption = 'Running processes'
@@ -27,13 +27,14 @@ object dlgProcessInfo: TdlgProcessInfo
   object Bevel1: TBevel
     Left = 0
     Top = 330
-    Width = 328
+    Width = 430
     Height = 39
     Align = alBottom
     Shape = bsTopLine
+    ExplicitWidth = 328
   end
   object butOk: TButton
-    Left = 118
+    Left = 8
     Top = 337
     Width = 95
     Height = 27
@@ -42,7 +43,7 @@ object dlgProcessInfo: TdlgProcessInfo
     OnClick = butOkClick
   end
   object butCancel: TButton
-    Left = 219
+    Left = 109
     Top = 337
     Width = 95
     Height = 27
@@ -62,10 +63,11 @@ object dlgProcessInfo: TdlgProcessInfo
   end
   object sgProcesses: TStringGrid
     Left = 8
-    Top = 32
-    Width = 308
-    Height = 243
-    ColCount = 2
+    Top = 47
+    Width = 414
+    Height = 228
+    ColCount = 3
+    DefaultColWidth = 100
     DefaultRowHeight = 18
     DrawingStyle = gdsClassic
     FixedColor = clSilver
@@ -75,9 +77,6 @@ object dlgProcessInfo: TdlgProcessInfo
     Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goRowSelect]
     ScrollBars = ssVertical
     TabOrder = 2
-    ColWidths = (
-      83
-      108)
   end
   object cbxSort: TCheckBox
     Left = 216
@@ -107,5 +106,62 @@ object dlgProcessInfo: TdlgProcessInfo
     Checked = True
     State = cbChecked
     TabOrder = 6
+  end
+  object StaticText1: TStaticText
+    Left = 8
+    Top = 29
+    Width = 203
+    Height = 18
+    AutoSize = False
+    BevelKind = bkSoft
+    Caption = 'Process name'
+    Color = clHotLight
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clHighlightText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+    TabOrder = 7
+    Transparent = False
+  end
+  object StaticText2: TStaticText
+    Left = 209
+    Top = 29
+    Width = 104
+    Height = 18
+    AutoSize = False
+    BevelKind = bkSoft
+    Caption = 'Process ID'
+    Color = clHotLight
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clHighlightText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+    TabOrder = 8
+    Transparent = False
+  end
+  object StaticText3: TStaticText
+    Left = 311
+    Top = 29
+    Width = 102
+    Height = 18
+    AutoSize = False
+    BevelKind = bkSoft
+    Caption = 'Main Process ID'
+    Color = clHotLight
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clHighlightText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+    TabOrder = 9
+    Transparent = False
   end
 end
