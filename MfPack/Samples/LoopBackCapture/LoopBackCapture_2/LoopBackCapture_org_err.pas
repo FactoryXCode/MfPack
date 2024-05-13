@@ -23,7 +23,6 @@
 // ---------- ------------------- ----------------------------------------------
 // 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 // 25/04/2004 Tony                Updated to a more stable and glitch free version.
-// 10/05/2024 Tony                Improved performance.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -60,7 +59,7 @@
 // their product.
 //
 //==============================================================================
-unit LoopBackCapture;
+unit LoopBackCapture_org_err;
 
 interface
 
@@ -71,8 +70,6 @@ uses
   WinApi.WinApiTypes,
   WinApi.ComBaseApi,
   WinApi.Messages,
-  {WinMM}
-  WinApi.WinMM.MMeApi,
   {System}
   System.SysUtils,
   System.Classes,
@@ -81,6 +78,8 @@ uses
   WinApi.ActiveX.PropIdl,
   WinApi.ActiveX.ObjBase,
   WinApi.ActiveX.ObjIdl,
+  {WinMM}
+  WinApi.WinMM.MMReg,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfObjects,
@@ -104,12 +103,13 @@ var
   gs_SampleReadyEvent: TEvent;
   gs_hActivateCompleted: TEvent;
   gs_hCaptureStopped: TEvent;
+  gs_hProcessing: TEvent;
 
 type
   TDeviceState = (Uninitialized,
                   Error,       // Implemented to prevent calls to IAudioCaptureClient.GetNextPacketSize.
                                // See: OnAudioSampleRequested() and error handling.
-                  MaxFileSizeReached,
+
                   // All states >= Initialized will allow some methods
                   // to be called successfully on the Audio Client.
                   Initialized, // < from this one..
@@ -129,9 +129,13 @@ type
                 fmt96000b24,
                 fmt96000b32);
 
+  TSupportedAudioClients = (sacAudioClient1,
+                            sacAudioClient2,
+                            sacAudioClient3);
+
 type
 
-  // Forwarded class
+  // Forwarded class.
   TCallbackAsync = class;
 
 
@@ -150,19 +154,22 @@ type
     m_xSampleReady: TCallbackAsync;
     m_xFinishCapture: TCallbackAsync;
 
+    FOnProcessingData: TNotifyEvent;
     FOnCapturingStopped: TNotifyEvent;
 
     m_SampleReadyKey: MFWORKITEM_KEY;
     m_CaptureFormat: WAVEFORMATEX;
     m_BufferFrames: UINT32;
 
-    m_BytesWritten: Int64;
+    pvBytesWritten: Int64;
 
     m_dwTaskID: DWord;
     m_dwQueueID: DWord;
     m_cbHeaderSize: DWord;
     m_cbDataSize: DWord;
     m_WavFormat: TWavFormat;
+    m_BufferDuration: REFERENCE_TIME;
+    m_PCPosition: UINT64;
 
     // These two members are used to communicate between the main thread
     // and the ActivateCompleted callback.
@@ -170,6 +177,8 @@ type
     m_activateResult: HResult;
 
     m_DeviceState: TDeviceState;
+
+    m_SupportedAudioClient: TSupportedAudioClients;
 
     function OnStartCapture(pResult: IMFAsyncResult): HResult;
     function OnStopCapture(pResult: IMFAsyncResult): HResult;
@@ -183,33 +192,41 @@ type
 
     function ActivateAudioInterface(const processId: DWord;
                                     includeProcessTree: Boolean): HResult;
+
     function FinishCaptureAsync(): HResult;
     procedure Reset();
     procedure SetDeviceStateErrorIfFailed(hr: HResult);
 
   public
 
-    constructor Create();
+    constructor Create(hMF: HWND);
     destructor Destroy(); override;
 
   {$region IActivateAudioInterfaceCompletionHandler implementation}
+
     function ActivateCompleted(activateOperation: IActivateAudioInterfaceAsyncOperation): HResult; stdcall;
+
   {$endregion}
 
     function StartCaptureAsync(const hWindow: HWND;
                                const processId: DWord;
                                includeProcessTree: Boolean;
                                const wavFormat: TWavFormat;
+                               const aBufferDuration: REFERENCE_TIME;
                                const outputFileName: LPCWSTR): HResult;
 
     function StopCaptureAsync(): HResult;
 
+
+    property SupportedAudioClient: TSupportedAudioClients read m_SupportedAudioClient;
     property WavFormat: TWavFormat read m_WavFormat;
-    property CurrentWavFormat: TWAVEFORMATEX read m_CaptureFormat;
-    property BytesWritten: Int64 read m_BytesWritten;
-    property CaptureBufferLength: UINT32 read m_BufferFrames;
+    property CurrentWavFormat: WAVEFORMATEX read m_CaptureFormat;
+    property AudioClientBufferDuration: REFERENCE_TIME read m_BufferDuration;
+    property BytesWritten: Int64 read pvBytesWritten;
+    property Position: UINT64 read m_PCPosition;
 
     // Notify events.
+    property OnProcessingData: TNotifyEvent read FOnProcessingData write FOnProcessingData;
     property OnStoppedCapturing: TNotifyEvent read FOnCapturingStopped write FOnCapturingStopped;
   end;
 
@@ -225,26 +242,29 @@ type
 
     constructor Create(AParent: TLoopbackCapture;
                        ASyncCmd: TAsyncCmd;
-                       AQueueID: DWord = MFASYNC_CALLBACK_QUEUE_MULTITHREADED);
+                       AQueueID: DWord = MFASYNC_CALLBACK_QUEUE_MULTITHREADED); reintroduce;
     destructor Destroy(); override;
 
   {$region IActivateAudioInterfaceCompletionHandler implementation}
+
     function GetParameters(out pdwFlags: DWord;
                            out pdwQueue: DWord): HResult; stdcall;
     function Invoke(pResult: IMFAsyncResult): HResult; stdcall;
+
   {$endregion}
 
     procedure SetQueueID(dwQueueID: DWord);
-
   end;
 
 
 implementation
 
 
-constructor TLoopbackCapture.Create();
+constructor TLoopbackCapture.Create(hMF: HWND);
 begin
+  inherited Create();
 
+  //hwOwner := hMF;
   m_activateResult := E_UNEXPECTED;
   m_DeviceState := Uninitialized;
   m_dwQueueID := 0;
@@ -264,7 +284,6 @@ begin
 
   m_xFinishCapture := TCallbackAsync.Create(Self,
                                             FinishCapture);
-
 end;
 
 
@@ -291,18 +310,24 @@ function TLoopbackCapture.ActivateCompleted(activateOperation: IActivateAudioInt
 var
   hr: HResult;
   hrActivateResult: HResult;
-
+  unknownInterface: IUnknown;
+  //
+  // we get result E_NOINTERFACE while trying to load interface AudioClient2 or AudioClient3 and
+  // E_NOT_IMPLEMENTED when accessing not implemented methods (AudioClient, AudioClient2 and AudioClient3).
+  // See: https://learn.microsoft.com/en-us/answers/questions/1125409/loopbackcapture-(-activateaudiointerfaceasync-with?page=1&orderby=Helpful#answers
+  //
 label
   leave;
 
 begin
+
   m_CaptureFormat := Default(WAVEFORMATEX);
 
   // Check for a successful activation result
   hrActivateResult := E_UNEXPECTED;
 
   hr := activateOperation.GetActivateResult(hrActivateResult,
-                                            IUnknown(m_AudioClient));
+                                            unknownInterface);
   if FAILED(hrActivateResult) or FAILED(hr) then
     begin
       hr := hrActivateResult;
@@ -310,38 +335,49 @@ begin
       goto leave;
     end;
 
-  // set the formats: fmt44100b16, fmt48000b24, fmt48000b32, fmt96000b24, fmt96000b32
-  m_CaptureFormat.wFormatTag := WAVE_FORMAT_PCM;
+  hr := unknownInterface.QueryInterface(IID_IAudioClient,
+                                        m_AudioClient);
+  if FAILED(hr) then
+    goto leave;
+
+  // Set 16 - bit PCM format.
+
   m_CaptureFormat.nChannels := 2;
 
-  // set the formats: fmt44100b16, fmt48000b24, fmt48000b32, fmt96000b24, fmt96000b32
+  // Set the format (fmt44100b16, fmt48000b24, fmt48000b32, fmt96000b24, fmt96000b32)
   if (m_WavFormat = fmt44100b16) then
     begin
+      m_CaptureFormat.wFormatTag := WAVE_FORMAT_PCM;
       m_CaptureFormat.nSamplesPerSec := 44100;
       m_CaptureFormat.wBitsPerSample := 16;
     end
   else if (m_WavFormat = fmt48000b24) then
     begin
+      m_CaptureFormat.wFormatTag := WAVE_FORMAT_PCM;
       m_CaptureFormat.nSamplesPerSec := 48000;
       m_CaptureFormat.wBitsPerSample := 24;
-    end
-  else if (m_WavFormat = fmt48000b24) then
-    begin
-      m_CaptureFormat.nSamplesPerSec := 48000;
-      m_CaptureFormat.wBitsPerSample := 32;
     end
   else if (m_WavFormat = fmt96000b24) then
     begin
+      m_CaptureFormat.wFormatTag := WAVE_FORMAT_PCM;
       m_CaptureFormat.nSamplesPerSec := 96000;
       m_CaptureFormat.wBitsPerSample := 24;
     end
+  else if (m_WavFormat = fmt48000b32) then
+    begin
+      m_CaptureFormat.wFormatTag := WAVE_FORMAT_IEEE_FLOAT;
+      m_CaptureFormat.nSamplesPerSec := 48000;
+      m_CaptureFormat.wBitsPerSample := 32;
+    end
   else if (m_WavFormat = fmt96000b32) then
     begin
+      m_CaptureFormat.wFormatTag := WAVE_FORMAT_IEEE_FLOAT;
       m_CaptureFormat.nSamplesPerSec := 96000;
       m_CaptureFormat.wBitsPerSample := 32;
     end
   else
     begin
+      m_CaptureFormat.wFormatTag := WAVE_FORMAT_PCM;
       m_CaptureFormat.nSamplesPerSec := 44100;
       m_CaptureFormat.wBitsPerSample := 16;
     end;
@@ -349,23 +385,26 @@ begin
   m_CaptureFormat.nBlockAlign := (m_CaptureFormat.nChannels * m_CaptureFormat.wBitsPerSample) div BITS_PER_BYTE;
   m_CaptureFormat.nAvgBytesPerSec := (m_CaptureFormat.nSamplesPerSec * m_CaptureFormat.nBlockAlign);
 
+
   //
   // Initialize the AudioClient in Shared Mode with the user specified buffer.
   // Note: - Shared Mode is needed when rendering from an audio application or process.
   //       - Exclusive Mode is used when rendering from a hardware endpoint.
-  //       - Interface methods that are reffering to audioendpoints, will not work and returns E_NOTIMPL,
+  //       - Interface methods that are reffering (see link above) to audioendpoints, will not work and returns E_NOTIMPL,
   //         for example: GetBufferSize(), IsFormatSupported(), GetDevicePeriod() and GetMixFormat() methods.
-  // See: https://learn.microsoft.com/en-us/answers/questions/1125409/loopbackcapture-(-activateaudiointerfaceasync-with?page=1&orderby=Helpful#answers
   //
 
-  hr := m_AudioClient.Initialize(AUDCLNT_SHAREMODE_SHARED,
-                                 AUDCLNT_STREAMFLAGS_LOOPBACK or AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
-                                 0, // Must be zero in shared mode!
-                                 0, // Must be zero in shared mode!
-                                 @m_CaptureFormat,
-                                 @GUID_NULL);
-  if FAILED(hr) then
-    goto leave;
+  if (m_SupportedAudioClient = sacAudioClient1) then
+    begin
+      hr := m_AudioClient.Initialize(AUDCLNT_SHAREMODE_SHARED,
+                                     AUDCLNT_STREAMFLAGS_LOOPBACK or AUDCLNT_STREAMFLAGS_EVENTCALLBACK or AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM,
+                                     m_BufferDuration, // Safe values should be inbetween 10.000.000 and 50.000.000 (10 - 50ms/sec) including latency.
+                                     0, // Must be zero in shared mode!
+                                     @m_CaptureFormat,
+                                     @GUID_NULL);
+     if FAILED(hr) then
+       goto leave;
+    end;
 
   // Get the maximum size of the AudioClient Buffer
   hr := m_AudioClient.GetBufferSize(m_BufferFrames);
@@ -378,7 +417,7 @@ begin
   if FAILED(hr) then
     goto leave;
 
-  // Create Async callback for sample events
+  // Create Async callback for sample events.
   hr := MFCreateAsyncResult(nil,
                             m_xSampleReady,
                             nil,
@@ -454,6 +493,7 @@ var
   hr: HResult;
 
 begin
+
   m_DeviceState := Stopping;
   // Stop capture by cancelling Work Item
   // Cancel the queued work item (if any)
@@ -497,6 +537,7 @@ var
   hr: HResult;
 
 begin
+
   m_DeviceState := Stopping;
   // FixWAVHeader will set the DeviceStateStopped when all async tasks are complete.
   hr := FixWAVHeader();
@@ -538,6 +579,7 @@ var
   hr: HResult;
 
 begin
+
   hr := OnAudioSampleRequested();
   if SUCCEEDED(hr) then
     begin
@@ -574,7 +616,7 @@ begin
                                        False,
                                        False,
                                        '',
-                                       True);
+                                       False);
 
   // Register MMCSS work queue.
   hr := MFLockSharedWorkQueue(PWideChar('Capture'),
@@ -592,15 +634,20 @@ begin
                                          False,
                                          False,
                                          '',
-                                         True);
+                                         False);
 
   // Create the capture-stopped event as auto-reset.
   gs_hCaptureStopped := TEvent.Create(nil,
                                       False,
                                       False,
                                       '',
-                                      True);
+                                      False);
 
+  gs_hProcessing := TEvent.Create(nil,
+                                 False,
+                                 False,
+                                 '',
+                                 False);
 leave:
 
   Result :=  hr;
@@ -610,7 +657,7 @@ end;
 //
 //  CreateWAVFile()
 //
-//  Creates a WAV file in music folder.
+//  Creates a WAV file in the default folder.
 //
 function TLoopbackCapture.CreateWAVFile(): HResult;
 var
@@ -624,6 +671,7 @@ label
   leave;
 
 begin
+
   hr := S_OK;
   dwBytesWritten := 0;
 
@@ -730,6 +778,7 @@ label
   leave;
 
 begin
+
   // Write the size of the 'data' chunk first.
   dwPtr := SetFilePointer(m_hPipe,
                           m_cbHeaderSize - SizeOf(DWord),
@@ -757,6 +806,7 @@ begin
                           SizeOf(DWord),
                           nil,
                           FILE_BEGIN);
+
   if (dwPtr = INVALID_SET_FILE_POINTER) then
     begin
       hr := E_FAIL;
@@ -793,27 +843,32 @@ function TLoopbackCapture.OnAudioSampleRequested(): HResult;
 var
   hr: HResult;
   br: BOOL;
-  packetSize: UINT32;
-  framesAvailable: UINT32;
+  FramesAvailable: UINT32;
   pData: PByte;
+  pBufferData: PByte;
   dwCaptureFlags: DWord;
   cbBytesToCapture: DWord;
   dwBytesWritten: DWord;
+  u64QPCPosition: UINT64;
 
 label
   leave;
 
 begin
 
-  //EnterCriticalSection(oCriticalSection);
+  EnterCriticalSection(oCriticalSection);
 
   hr := S_OK;
+  FramesAvailable := 0;
+  dwCaptureFlags := 0;
   pData := nil;
-  m_BufferFrames := 0;
+
+  if not Assigned(m_AudioCaptureClient) then
+    goto leave;
 
   // If this flag is set, we have already queued up the async call to finialize the WAV header.
   // So we don't want to grab or write any more data that would possibly give us an invalid size.
-  if (m_DeviceState <> Capturing) or not Assigned(m_AudioCaptureClient) then
+  if (m_DeviceState <> Capturing) then
     goto leave;
 
   // A word on why we have a loop here;
@@ -841,84 +896,80 @@ begin
 
   // We check the device state first and then call IAudioCaptureClient.GetNextPacketSize.
   // This way we handle the internal async calls that could interfere first.
-  while SUCCEEDED(m_AudioCaptureClient.GetNextPacketSize(packetSize)) and (packetSize > 0) do
+  while SUCCEEDED(m_AudioCaptureClient.GetNextPacketSize(FramesAvailable)) and (FramesAvailable > 0) do
     begin
 
-      hr := m_AudioCaptureClient.GetBuffer(pData,
-                                           FramesAvailable,
-                                           dwCaptureFlags,
-                                           nil,
-                                           nil);
-      if FAILED(hr) then
-        begin
-          StopCaptureAsync();
-          ErrMsg(Format('m_AudioCaptureClient.GetBuffer failed. LastError = %d',[GetLastError()]), hr);
-          m_DeviceState := Error;
-          Break;
-        end;
+      if (m_DeviceState <> Capturing) then
+        Break;
 
-      if (dwCaptureFlags = AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) then
-        begin
-          m_AudioCaptureClient.ReleaseBuffer(FramesAvailable);
-          pData := nil;
-          Continue;
-        end;
-
-      // Store the actual buffersize once.
-      if (m_BufferFrames = 0) and (FramesAvailable > 0) then
-        m_BufferFrames := FramesAvailable;
-
-      // Set sample buffer to the right size.
       cbBytesToCapture := FramesAvailable * m_CaptureFormat.nBlockAlign;
-
-      // Write to file.
-      dwBytesWritten := 0;
-      br := WriteFile(m_hPipe,
-                      pData^,
-                      cbBytesToCapture,
-                      dwBytesWritten,
-                      nil);
-
-      if (br = False) then
-        begin
-          StopCaptureAsync();
-          ErrMsg(Format('%s LastError = %d',[SysErrorMessage(GetLastError), GetLastError()]), E_FAIL);
-          m_DeviceState := Error;
-          Break;
-        end;
-
-      // Release buffer.
-      hr := m_AudioCaptureClient.ReleaseBuffer(FramesAvailable);
-      if FAILED(hr) then
-        begin
-          StopCaptureAsync();
-          m_DeviceState := Error;
-          Break;
-        end;
-
-      // Increase the size of our 'data' chunk. m_cbDataSize needs to be accurate.
-      Inc(m_cbDataSize,
-          cbBytesToCapture);
 
       // WAV files have a 4GB (0xFFFFFFFF) size limit, so likely we have hit that limit when we
       // overflow here. Time to stop the capture.
       if ((m_cbDataSize + cbBytesToCapture) < m_cbDataSize) then
         begin
           StopCaptureAsync();
-          m_DeviceState := MaxFileSizeReached;
           Break;
         end;
 
+      // Create a new buffer.
+      pBufferData := AllocMem(FramesAvailable);
+
+      // Get sample buffer
+      hr := m_AudioCaptureClient.GetBuffer(pData,
+                                           FramesAvailable,
+                                           dwCaptureFlags,
+                                           nil,
+                                           @m_PCPosition);
+      if FAILED(hr) then
+        begin
+           ErrMsg(Format('m_AudioCaptureClient.GetBuffer failed. LastError = %d',[GetLastError()]), hr);
+           Break;
+        end;
+
+      // Copy data to a new buffer.
+      // Clients should avoid delays between the GetBuffer call that acquires a buffer and the ReleaseBuffer call that releases the buffer.
+      //
+      Move(pData^,
+           pBufferData^,
+           cbBytesToCapture);
+
+      // Release buffer back.
+      hr := m_AudioCaptureClient.ReleaseBuffer(FramesAvailable);
+
+      // Write File
+
+      dwBytesWritten := 0;
+      br := WriteFile(m_hPipe,
+                      pData^,
+                      cbBytesToCapture,
+                      dwBytesWritten,
+                      nil);
+      if (br = False) then
+        begin
+          FreeMem(pBufferData);
+          ErrMsg(Format('%s LastError = %d',[SysErrorMessage(GetLastError), GetLastError()]), E_FAIL);
+          Break;
+        end;
+
+      FreeMem(pBufferData);
+
+      // Increase the size of our 'data' chunk. m_cbDataSize needs to be accurate.
+      Inc(m_cbDataSize,
+          cbBytesToCapture);
+
       // Store to public.
-      Inc(m_BytesWritten,
+      Inc(pvBytesWritten,
           dwBytesWritten);
+
+      // Send score.
+      //FOnProcessingData(nil);
 
       pData := nil;
     end;
 
 leave:
-  pData := nil;
-  //LeaveCriticalSection(oCriticalSection);
+  LeaveCriticalSection(oCriticalSection);
   Result := hr;
 end;
 
@@ -983,6 +1034,7 @@ var
   hr: HResult;
 
 begin
+
   // We should be flushing when this is called.
   hr := MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED,
                        0,
@@ -1066,6 +1118,7 @@ function TLoopbackCapture.StartCaptureAsync(const hWindow: HWND;
                                             const processId: DWord;
                                             includeProcessTree: Boolean;
                                             const wavFormat: TWavFormat;
+                                            const aBufferDuration: REFERENCE_TIME;
                                             const outputFileName: LPCWSTR): HResult;
 var
   hr: HResult;
@@ -1086,7 +1139,9 @@ begin
       goto leave;
     end;
 
+  //hwOwner := hWindow;
   m_outputFileName := outputFileName;
+  m_BufferDuration := aBufferDuration;
   m_WavFormat := wavFormat;
 
   hr := InitializeLoopbackCapture();
@@ -1135,6 +1190,7 @@ var
   hr: HResult;
 
 begin
+
   hr := S_OK;
   if (m_DeviceState <> Capturing) and
      (m_DeviceState <> Error) then
@@ -1164,6 +1220,7 @@ constructor TCallbackAsync.Create(AParent: TLoopbackCapture;
                                   ASyncCmd: TAsyncCmd;
                                   AQueueID: DWord);
 begin
+
   inherited Create();
   _parent := AParent;
   _AsyncCmd := ASyncCmd;
@@ -1173,6 +1230,7 @@ end;
 
 destructor TCallbackAsync.Destroy();
 begin
+
   //
   inherited Destroy();
 end;
@@ -1181,6 +1239,7 @@ end;
 function TCallbackAsync.GetParameters(out pdwFlags: DWord;
                                       out pdwQueue: DWord): HResult;
 begin
+
   pdwFlags := 0;
   pdwQueue := _dwQueueID;
   Result := S_OK;
@@ -1193,13 +1252,14 @@ var
   hr: HResult;
 
 begin
+
   case _AsyncCmd of
     StartCapture:  hr := _parent.OnStartCapture(pResult);
     StopCapture:   hr := _parent.OnStopCapture(pResult);
     SampleReady:   hr := _parent.OnSampleReady(pResult);
     FinishCapture: hr := _parent.OnFinishCapture(pResult);
-    else
-      hr := S_FALSE;  // No error, but wrong command.
+  else
+    hr := S_FALSE;  // No error, but unknown command.
   end;
   Result := hr;
 end;
@@ -1207,6 +1267,7 @@ end;
 
 procedure TCallbackAsync.SetQueueID(dwQueueID: DWord);
 begin
+
   _dwQueueID := dwQueueID;
 end;
 
@@ -1214,11 +1275,10 @@ end;
 initialization
   InitializeCriticalSection(oCriticalSection);
 
-  // A gui app will automaticly set COINIT_APARTMENTTHREADED, so there is no need to call CoInitializeEx unless
+  // A Delphi gui app will automaticly set COINIT_APARTMENTTHREADED, so there is no need to call CoInitializeEx unless
   // we use the class, for instance, in a service.
   // CoInitializeEx(nil,
   //                COINIT_MULTITHREADED);
-
 finalization
 
   DeleteCriticalSection(oCriticalSection);

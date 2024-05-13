@@ -120,8 +120,6 @@ type
     Bevel1: TBevel;
     Bevel3: TBevel;
     Panel3: TPanel;
-    lblDeviceBufferDuration: TLabel;
-    tbDeviceBufferDuration: TTrackBar;
     Label4: TLabel;
     rb441b16: TRadioButton;
     rb48b24: TRadioButton;
@@ -142,8 +140,6 @@ type
     procedure butShowProcessesClick(Sender: TObject);
     procedure edPIDKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure cbxStayOnTopClick(Sender: TObject);
-    procedure tbDeviceBufferDurationChange(Sender: TObject);
-
 
   private
     { Private declarations }
@@ -155,7 +151,6 @@ type
     oLoopbackCapture: TLoopbackCapture;
     aMainProcessId: Integer;
     aWavFmt: TWavFormat;
-    aDeviceBufferDuration: REFERENCE_TIME;
     // We use timers here, to prevent distortions when quering the capturethread for timing and processed data.
     // The timer must be set to 1 millisecond resolution.
     thrTimer: TUniThreadedTimer;
@@ -165,7 +160,6 @@ type
     procedure OnCapturingStoppedEvent(Sender: TObject);
 
     function StartCapture(): HResult;
-    procedure SetDeviceBufferDuration();
     procedure TimerTimer(sender: TObject);
 
   public
@@ -219,7 +213,6 @@ begin
 
   butStart.Enabled := FAILED(hr);
   butStop.Enabled := SUCCEEDED(hr);
-  tbDeviceBufferDuration.Enabled := FAILED(hr);
 end;
 
 
@@ -236,7 +229,6 @@ begin
   aStopWatch.Reset;
   butStart.Enabled := SUCCEEDED(hr);
   butStop.Enabled := not SUCCEEDED(hr);
-  tbDeviceBufferDuration.Enabled := SUCCEEDED(hr);
 end;
 
 
@@ -340,13 +332,12 @@ begin
   thrTimer.Enabled := False;
   thrTimer.OnTimerEvent := TimerTimer;
 
-  oLoopbackCapture := TLoopbackCapture.Create(Handle);
+  oLoopbackCapture := TLoopbackCapture.Create();
 
   // Set event handlers.
   oLoopbackCapture.OnStoppedCapturing := OnCapturingStoppedEvent;
 
   butGetPID.OnClick(Self);
-  SetDeviceBufferDuration();
   bEdited := False;
 end;
 
@@ -383,9 +374,6 @@ begin
     bIncludeProcessTree := False
   else if rb2.Checked then
     bIncludeProcessTree := True;
-
-  // Buffersize depends on latency and bitrate.
-  SetDeviceBufferDuration();
 
   // Bitrate and resolution.
   if rb441b16.Checked then
@@ -436,20 +424,17 @@ begin
       butStop.Enabled := True;
       butStart.Enabled := False;
       butPlayData.Enabled := False;
-      tbDeviceBufferDuration.Enabled := False;
 
       // Capture the audio stream from the default rendering device.
       hr := oLoopbackCapture.StartCaptureAsync(Handle,
                                                aMainProcessId,
                                                bIncludeProcessTree,
                                                aWavFmt,
-                                               aDeviceBufferDuration,
                                                LPCWSTR(sFileName + lblFileExt.Caption));
       if FAILED(hr) then
         begin
           butStop.Enabled := False;
           butStart.Enabled := True;
-          tbDeviceBufferDuration.Enabled := True;
           goto done;
         end;
 
@@ -471,22 +456,6 @@ begin
   butPlayData.Enabled := True;
   lblMsg.Caption := Format('Capturing stopped. Captured %f Mb.',
                            [oLoopbackCapture.BytesWritten / (1000 * 1000)]);
-end;
-
-
-procedure TfrmMain.tbDeviceBufferDurationChange(Sender: TObject);
-begin
-
-  SetDeviceBufferDuration();
-end;
-
-
-procedure TfrmMain.SetDeviceBufferDuration();
-begin
-
-  lblDeviceBufferDuration.Caption := Format('Device buffer (%d MilliSeconds)',
-                                            [tbDeviceBufferDuration.Position]);
-  aDeviceBufferDuration := tbDeviceBufferDuration.Position * AUDIO_BUFFER_FMT;
 end;
 
 

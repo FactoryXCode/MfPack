@@ -4,7 +4,7 @@ object frmMain: TfrmMain
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'LoopBackCapture Sample 2'
-  ClientHeight = 478
+  ClientHeight = 427
   ClientWidth = 459
   Color = clBtnFace
   DoubleBuffered = True
@@ -25,6 +25,7 @@ object frmMain: TfrmMain
     Width = 459
     Height = 163
     Align = alTop
+    ExplicitTop = -1
   end
   object Label3: TLabel
     AlignWithMargins = True
@@ -55,7 +56,7 @@ object frmMain: TfrmMain
   object lblMsg: TLabel
     AlignWithMargins = True
     Left = 6
-    Top = 451
+    Top = 400
     Width = 450
     Height = 24
     Margins.Left = 6
@@ -74,7 +75,7 @@ object frmMain: TfrmMain
   end
   object Bevel1: TBevel
     Left = 0
-    Top = 446
+    Top = 395
     Width = 459
     Height = 1
     Align = alBottom
@@ -84,7 +85,7 @@ object frmMain: TfrmMain
   end
   object Bevel3: TBevel
     Left = 0
-    Top = 447
+    Top = 396
     Width = 459
     Height = 1
     Align = alBottom
@@ -96,7 +97,7 @@ object frmMain: TfrmMain
     Left = 0
     Top = 163
     Width = 459
-    Height = 167
+    Height = 117
     Hint = 
       'The capture buffersize depending on the audiodevice specs and so' +
       'urce latency '
@@ -112,25 +113,10 @@ object frmMain: TfrmMain
     ParentFont = False
     TabOrder = 11
     VerticalAlignment = taAlignTop
-    ExplicitTop = 180
-    object lblDeviceBufferDuration: TLabel
-      Left = 10
-      Top = 36
-      Width = 269
-      Height = 13
-      AutoSize = False
-      Caption = 'Device Buffer Duration (30 ms resolution)'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-    end
     object Label4: TLabel
       AlignWithMargins = True
       Left = 6
-      Top = 87
+      Top = 42
       Width = 44
       Height = 17
       Hint = 
@@ -161,19 +147,9 @@ object frmMain: TfrmMain
       Font.Style = []
       ParentFont = False
     end
-    object tbDeviceBufferDuration: TTrackBar
-      Left = 1
-      Top = 50
-      Width = 455
-      Height = 25
-      Max = 60
-      Position = 30
-      TabOrder = 0
-      OnChange = tbDeviceBufferDurationChange
-    end
     object rb441b16: TRadioButton
       Left = 4
-      Top = 104
+      Top = 58
       Width = 100
       Height = 13
       Hint = '44.100 kHz at 16 bits'
@@ -187,12 +163,12 @@ object frmMain: TfrmMain
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 1
+      TabOrder = 0
       TabStop = True
     end
     object rb48b24: TRadioButton
       Left = 4
-      Top = 123
+      Top = 77
       Width = 100
       Height = 13
       Hint = '48.000 kHz at 24 bits'
@@ -205,11 +181,11 @@ object frmMain: TfrmMain
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 2
+      TabOrder = 1
     end
     object rb48b32: TRadioButton
       Left = 110
-      Top = 123
+      Top = 77
       Width = 100
       Height = 13
       Hint = '48.000 kHz at 32 bits'
@@ -222,11 +198,11 @@ object frmMain: TfrmMain
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 3
+      TabOrder = 2
     end
     object rb96b24: TRadioButton
       Left = 4
-      Top = 142
+      Top = 96
       Width = 100
       Height = 13
       Hint = '96.000 kHz at 24 bits'
@@ -239,11 +215,11 @@ object frmMain: TfrmMain
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 4
+      TabOrder = 3
     end
     object rb96b32: TRadioButton
       Left = 110
-      Top = 142
+      Top = 96
       Width = 100
       Height = 13
       Hint = '96.000 kHz at 32 bits'
@@ -256,7 +232,7 @@ object frmMain: TfrmMain
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 5
+      TabOrder = 4
     end
   end
   object edPID: TEdit
@@ -347,7 +323,7 @@ object frmMain: TfrmMain
   end
   object Panel1: TPanel
     Left = 0
-    Top = 330
+    Top = 280
     Width = 459
     Height = 75
     Align = alTop
@@ -420,7 +396,7 @@ object frmMain: TfrmMain
   end
   object butStart: TButton
     Left = 8
-    Top = 412
+    Top = 361
     Width = 85
     Height = 27
     Caption = 'Start Capture'
@@ -429,7 +405,7 @@ object frmMain: TfrmMain
   end
   object butStop: TButton
     Left = 97
-    Top = 412
+    Top = 361
     Width = 85
     Height = 27
     Caption = 'Stop Capture'
@@ -439,7 +415,7 @@ object frmMain: TfrmMain
   end
   object butPlayData: TButton
     Left = 187
-    Top = 412
+    Top = 361
     Width = 80
     Height = 27
     Hint = 'Play recorded data.'
