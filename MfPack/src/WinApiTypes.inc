@@ -1102,6 +1102,8 @@ MfpVersion   = '3.1.6'; // Release version.
  {$DEFINE MFP_MemoryAllocator}
 // {$UNDEF MFP_MemoryAllocator}
 
+{$DEFINE MFP_WFT}
+// {$UNDEF MFP_WFT}
 
 
 //Other files

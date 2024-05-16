@@ -8,7 +8,8 @@ uses
   frmWasapiLoopBack in 'frmWasapiLoopBack.pas' {frmLoopBackCapture},
   WasapiLoopback in 'WasapiLoopback.pas',
   Utils in 'Utils.pas',
-  dlgDevices in 'dlgDevices.pas' {DevicesDlg};
+  dlgDevices in 'dlgDevices.pas' {DevicesDlg},
+  UniThreadTimer in 'UniThreadTimer.pas';
 
 {$R *.res}
 

@@ -78,6 +78,7 @@ uses
   WinApi.WinMM.MMSysCom,
   WinApi.WinMM.MMiscApi,
   WinApi.WinMM.MMeApi,
+  WinApi.WinMM.MMReg,
   {CoreAudioApi}
   WinApi.CoreAudioApi.MMDeviceApi,
   WinApi.CoreAudioApi.AudioClient,
@@ -93,17 +94,6 @@ const
 
 type
 
-  TWavFormatEx = record
-    wFormatTag: WORD;               { format type }
-    nChannels: WORD;                { number of channels (i.e. mono, stereo...) }
-    nSamplesPerSec: DWORD;          { sample rate }
-    nAvgBytesPerSec: DWORD;         { for buffer estimation }
-    nBlockAlign: WORD;              { block size of data }
-    wBitsPerSample: WORD;           { number of bits per sample of mono data }
-    cbSize: WORD;
-  end;
-
-
   TAudioSink = class(TObject)
   protected
     hmFile: HMMIO;
@@ -115,16 +105,16 @@ type
     pvErrorStatus: HResult;
 
     pvHnsLatency: REFERENCE_TIME;
+    pvBufferHns: REFERENCE_TIME; // Buffer period in milliseconds.
     pvBytesWritten: Int64;
-    pvWavFormatEx: TWavFormatEx;
+    pvBufferFrames: UInt32;
+    pvWavFormatEx: WAVEFORMATEX;
 
-    FOnProcessingData: TNotifyEvent;
     FOnCapturingStopped: TNotifyEvent;
 
     function CopyData(pData: PByte;
                       NumFrames: UINT32;
-                      pwfx: PWAVEFORMATEX;
-                      HnsLatency: REFERENCE_TIME): HResult;
+                      pwfx: PWAVEFORMATEX): HResult;
 
     function WriteWaveHeader(ppwfx: PWAVEFORMATEX;
                              var pckRIFF: MMCKINFO;
@@ -147,16 +137,15 @@ type
 
     // Used by OnProcessingData
     property Latency: REFERENCE_TIME read pvHnsLatency;
+    property BufferDuration: REFERENCE_TIME read pvBufferHns;
     property BytesWritten: Int64 read pvBytesWritten;
-
-    property WaveFmtEx: TWavFormatEx read pvWavFormatEx;
-
+    property CaptureBufferLength: UInt32 read pvBufferFrames;
+    property CurrentWavFormat: WAVEFORMATEX read pvWavFormatEx;
     property ErrorStatus: HResult read pvErrorStatus;
     // Stops recording immediately.
     property StopRecording: Boolean read pvStopRec write pvStopRec;
 
     // Notify events.
-    property OnProcessingData: TNotifyEvent read FOnProcessingData write FOnProcessingData;
     property OnStoppedCapturing: TNotifyEvent read FOnCapturingStopped write FOnCapturingStopped;
   end;
 
@@ -184,8 +173,7 @@ end;
 
 function TAudioSink.CopyData(pData: PByte;
                              NumFrames: UINT32;
-                             pwfx: PWAVEFORMATEX;
-                             HnsLatency: REFERENCE_TIME): HResult;
+                             pwfx: PWAVEFORMATEX): HResult;
 var
   hr: HResult;
   iBytesToWrite: Integer;
@@ -200,7 +188,10 @@ begin
 
   if (NumFrames = 0) then
     begin
-      ErrMsg(Format('IAudioCaptureClient.GetBuffer returned %d frames.',[0]), GetLastError());
+      ErrMsg(Format('IAudioCaptureClient.GetBuffer returned %d frames.',
+                    [0]),
+             GetLastError());
+
       hr := E_UNEXPECTED;
       goto done;
     end;
@@ -212,23 +203,21 @@ begin
 
   if (iBytesToWrite <> iBytesWritten) then
     begin
-      ErrMsg(Format('mmioWrite wrote %d bytes : expected %d bytes',[iBytesWritten, iBytesToWrite]), GetLastError());
+      ErrMsg(Format('mmioWrite wrote %d bytes : expected %d bytes',
+                    [iBytesWritten, iBytesToWrite]),
+             GetLastError());
       hr := E_UNEXPECTED;
       goto done;
     end;
 
-  //
-  pvBytesWritten := iBytesWritten;
+  // Keep score of written bytes to file.
+  Inc(pvBytesWritten,
+      iBytesWritten);
+
   // For safety on 32bit platforms we have to limit the wav size to < 4 gb.
   // So, we limit the size to 3.9 GB.
   if (pvBytesWritten > MAX_FILE_SIZE) then
     pvStopRec := True;  // Stop recording and close file.
-
-  // Handle all other messages, like managing controls, moving window etc.
-  HandleThreadMessages(GetCurrentThread());
-
-  // Send score.
-  FOnProcessingData(Self);
 
 done:
   FCriticalSection.Leave;
@@ -259,7 +248,9 @@ begin
                              MMIO_CREATERIFF);
   if (MMSYSERR_NOERROR <> mResult) then
     begin
-      ErrMsg(Format('mmioCreateChunk("RIFF/WAVE") failed: MMRESULT = %',[mResult]), GetLastError());
+      ErrMsg(Format('mmioCreateChunk("RIFF/WAVE") failed: MMRESULT = %',
+                    [mResult]),
+             GetLastError());
       Result := mResult;
       Exit;
     end;
@@ -271,7 +262,9 @@ begin
                              0);
   if (MMSYSERR_NOERROR <> mResult) then
     begin
-      ErrMsg(Format('mmioCreateChunk("fmt") failed: MMRESULT = %',[mResult]), GetLastError());
+      ErrMsg(Format('mmioCreateChunk("fmt") failed: MMRESULT = %',
+                    [mResult]),
+             GetLastError());
       Result := mResult;
       Exit;
     end;
@@ -284,7 +277,9 @@ begin
 
   if (iBytesWritten <> iBytesInWfx) then
     begin
-      ErrMsg(Format('mmioWrite(fmt data) wrote %d bytes; expected %d bytes',[iBytesWritten, iBytesInWfx]), GetLastError());
+      ErrMsg(Format('mmioWrite(fmt data) wrote %d bytes; expected %d bytes',
+                    [iBytesWritten, iBytesInWfx]),
+             GetLastError());
       Result := mResult;
       Exit;
     end;
@@ -295,7 +290,9 @@ begin
                         0);
   if (MMSYSERR_NOERROR <> mResult) then
     begin
-      ErrMsg(Format('mmioAscend("fmt") failed: MMRESULT = %d',[mResult]), GetLastError());
+      ErrMsg(Format('mmioAscend("fmt") failed: MMRESULT = %d',
+                    [mResult]),
+             GetLastError());
       Result := mResult;
       Exit;
     end;
@@ -307,7 +304,9 @@ begin
                              0);
   if (MMSYSERR_NOERROR <> mResult) then
     begin
-      ErrMsg(Format('mmioCreateChunk("fmt") failed: MMRESULT = %d',[mResult]), GetLastError());
+      ErrMsg(Format('mmioCreateChunk("fmt") failed: MMRESULT = %d',
+                    [mResult]),
+             GetLastError());
       Result := mResult;
       Exit;
     end;
@@ -320,7 +319,9 @@ begin
                              sizeof(dwFrames));
   if (iBytesWritten <> sizeof(dwFrames)) then
     begin
-      ErrMsg(Format('mmioWrite(fact data) wrote %d bytes; expected %d bytes"',[iBytesWritten, SizeOf(dwFrames)]), GetLastError());
+      ErrMsg(Format('mmioWrite(fact data) wrote %d bytes; expected %d bytes"',
+                    [iBytesWritten, SizeOf(dwFrames)]),
+             GetLastError());
       Result := mResult;
       Exit;
     end;
@@ -332,7 +333,9 @@ begin
 
   if (MMSYSERR_NOERROR <> mResult) then
     begin
-      ErrMsg(Format('mmioAscend("fact") failed: MMRESULT = %d',[mResult]), GetLastError());
+      ErrMsg(Format('mmioAscend("fact") failed: MMRESULT = %d',
+                    [mResult]),
+             GetLastError());
       Result := mResult;
       Exit;
     end;
@@ -345,7 +348,9 @@ begin
                              0);
   if (MMSYSERR_NOERROR <> mResult) then
     begin
-      ErrMsg(Format('mmioCreateChunk("data") failed: MMRESULT = %d',[mResult]), GetLastError());
+      ErrMsg(Format('mmioCreateChunk("data") failed: MMRESULT = %d',
+                    [mResult]),
+             GetLastError());
       Result := mResult;
       Exit;
     end;
@@ -368,7 +373,9 @@ begin
                         0);
   if (mResult <> MMSYSERR_NOERROR) then
     begin
-      ErrMsg(Format('mmioAscend("pckData (MMCKINFO)") failed: MMRESULT = %d',[mResult]), GetLastError());
+      ErrMsg(Format('mmioAscend("pckData (MMCKINFO)") failed: MMRESULT = %d',
+                    [mResult]),
+             GetLastError());
       goto done;
     end;
 
@@ -377,7 +384,9 @@ begin
                         0);
   if (MMSYSERR_NOERROR <> mResult) then
     begin
-      ErrMsg(Format('mmioAscend("pckRIFF (MMCKINFO") failed: MMRESULT = %d',[mResult]), GetLastError());
+      ErrMsg(Format('mmioAscend("pckRIFF (MMCKINFO") failed: MMRESULT = %d',
+                    [mResult]),
+             GetLastError());
       goto done;
     end;
 
@@ -402,13 +411,12 @@ var
   mr: MMResult;
   hnsDefaultDevicePeriod: REFERENCE_TIME;
   hnsMinimumDevicePeriod: REFERENCE_TIME;
-  pHnsLatency: REFERENCE_TIME;
   hnsActualDuration: REFERENCE_TIME;
   bufferFrameCount: UINT32;
   numFramesAvailable: UINT32;
   pEnumerator: IMMDeviceEnumerator;
   pDevice: IMMDevice;
-  pAudioClient: IAudioClient3;
+  pAudioClient: IAudioClient;
   pCaptureClient: IAudioCaptureClient;
   packetLength: UINT32;
   pData: PByte;
@@ -467,8 +475,9 @@ begin
              ppwfx,
              SizeOf(WAVEFORMATEX));
 
-  // The original sample creates a "gues what" bufferDuration,
-  // that will cause sound disturbtion when capture sound from a streameservice like YouTube or other high latency services.
+  // The original sample creates a bufferDuration of 2 seconds,
+  // that will cause sound disturbtion when capture sound from a streameservice like
+  // YouTube or other high latency services.
   // To prevent this, we use as a minimum the value of hnsDefaultDevicePeriod.
   hr := pAudioClient.GetDevicePeriod(hnsDefaultDevicePeriod,
                                      hnsMinimumDevicePeriod);
@@ -482,7 +491,7 @@ begin
   // Initialize low-latency client.
   hr := pAudioClient.Initialize(AUDCLNT_SHAREMODE_SHARED,
                                 AUDCLNT_STREAMFLAGS_LOOPBACK,
-                                bufferDuration,
+                                bufferDuration, // Note: When bufferDuration = 0, the audioclient will automaticly decise the bufferduration.
                                 0, // Must be zero when using shared mode!
                                 ppwfx,
                                 @GUID_NULL);
@@ -515,15 +524,21 @@ begin
     end;
 
   // Calculate the actual duration of the allocated buffer.
-  hnsActualDuration := (REFTIMES_PER_SEC *
-                        bufferFrameCount div ppwfx.nSamplesPerSec);
+  if (bufferFrameCount > 0) then
+    hnsActualDuration := (REFTIMES_PER_SEC *
+                          bufferFrameCount div ppwfx.nSamplesPerSec)
+  else
+    hnsActualDuration := 0;
+
+  // Store for user information.
+  pvBufferHns := hnsActualDuration;
 
   hr := pAudioClient.Start();  // Start recording.
   if FAILED(hr) then
     goto done;
 
-  // Get the stream latency (normally this should be 0)
-  hr := pAudioClient.GetStreamLatency(pHnsLatency);
+  // Get the stream latency (normally this should be inbetween 0 and 15 ms on Windows 11)
+  hr := pAudioClient.GetStreamLatency(pvHnsLatency);
   if FAILED(hr) then
     goto done;
 
@@ -532,8 +547,12 @@ begin
   // Each loop fills about half of the shared buffer.
   while (pvStopRec = False) do
     begin
-      // Sleep for half the buffer duration.
-      Sleep(hnsActualDuration div REFTIMES_PER_MILLISEC div 2);
+
+      // Sleep for half the buffer duration if the size > 0.
+      if (bufferDuration > 0) then
+        Sleep((hnsActualDuration div REFTIMES_PER_MILLISEC) div (bufferDuration div 2))
+      else
+        Sleep(0);
 
       hr := pCaptureClient.GetNextPacketSize(packetLength);
       if FAILED(hr) then
@@ -560,11 +579,14 @@ begin
           if (flags = AUDCLNT_BUFFERFLAGS_SILENT) then
             pData := nil;
 
+         // Store the buffersize.
+         if (pvBufferFrames = 0) and (numFramesAvailable > 0) then
+           pvBufferFrames := numFramesAvailable;
+
           // Copy the available capture data to the audio sink.
           hr := CopyData(pData,
                          numFramesAvailable,
-                         ppwfx,
-                         pHnsLatency);
+                         ppwfx);
           if FAILED(hr) then
             Break;
 
@@ -579,7 +601,10 @@ begin
     end;
 
     // Wait for last data in buffer to play before stopping.
-    Sleep(hnsActualDuration div REFTIMES_PER_MILLISEC div 2);
+    if (bufferDuration > 0) then
+      Sleep((hnsActualDuration div REFTIMES_PER_MILLISEC) div (bufferDuration div 2))
+    else
+      Sleep(0);
 
 done:
 
@@ -636,4 +661,16 @@ begin
 end;
 
 
+// initialization and finalization =============================================
+
+
+initialization
+  // A gui app should always use COINIT_APARTMENTTHREADED (which is automaticly done by the compiler) in stead of COINIT_MULTITHREADED.
+  // COINIT_MULTITHREADED should be used for console or service apps
+  //CoInitializeEx(nil,
+  //              COINIT_MULTITHREADED);
+
+finalization
+
+  //CoUnInitialize();
 end.

@@ -76,8 +76,8 @@ uses
   WinApi.WinApiTypes,
   WinApi.WinError,
   {WinMM}
+  WinApi.WinMM.MMeApi,
   WinApi.WinMM.MMReg,
-  //WinApi.WinMM.MMeApi,
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioMediaType,
   WinApi.CoreAudioApi.AudioSessionTypes;
@@ -504,7 +504,7 @@ type
 
     function IsFormatSupported(ShareMode: AUDCLNT_SHAREMODE;
                                pFormat: PWaveFormatEx;
-                               [ref] const ppClosestMatch: PWaveFormatEx // Exclusive mode can't suggest a "closest match", you have to set this param to nil.
+                               {out} ppClosestMatch: PWaveFormatEx // Exclusive mode can't suggest a "closest match", you have to set this param to nil.
                               ): HResult; stdcall;
     // Description:
     //
@@ -549,7 +549,7 @@ type
     //  This method does not require that the Initialize method be called first.
     //
 
-    function GetMixFormat({out} ppDeviceFormat: PWAVEFORMATEX): HResult; stdcall;
+    function GetMixFormat(out ppDeviceFormat: PWAVEFORMATEX): HResult; stdcall;
     // Description:
     //
     //  The GetMixFormat method retrieves the stream format that the audio engine uses for its
@@ -851,8 +851,8 @@ type
 
     function GetBufferSizeLimits([ref] const pFormat: PWAVEFORMATEX;
                                  bEventDriven: BOOL;
-                                 {out} phnsMinBufferDuration: REFERENCE_TIME;
-                                 {out} phnsMaxBufferDuration: REFERENCE_TIME): HResult; stdcall;
+                                 out phnsMinBufferDuration: REFERENCE_TIME;
+                                 out phnsMaxBufferDuration: REFERENCE_TIME): HResult; stdcall;
     // Description:
     //
     //  Returns the buffer size limits of the hardware audio engine, in 100-nanosecond units.
@@ -880,7 +880,7 @@ type
     //
     // Remarks:
     //
-    //  This method may be called at any time but depending on the resource usage situation, it  might not return the same value
+    //  This method may be called at any time but depending on the resource usage situation, it  might not return the same value.
     //
 
   end;

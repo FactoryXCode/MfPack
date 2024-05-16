@@ -104,7 +104,7 @@ type
 
   public
     { Public declarations }
-    oDataFlow: EDataFlow;
+    puDataFlow: EDataFlow;
   end;
 
 var
@@ -117,7 +117,7 @@ implementation
 
 procedure TDevicesDlg.butCancelClick(Sender: TObject);
 begin
-  oDataFlow := eDataFlow(-1);
+  puDataFlow := eDataFlow(-1);
   ModalResult := mrCancel;
 end;
 
@@ -126,13 +126,13 @@ procedure TDevicesDlg.butOkClick(Sender: TObject);
 begin
   if (Length(RenderDevices) > 0) and (sgRenderingDevices.Row > 0) then
     begin
-      oDataFlow := RenderDevices[sgRenderingDevices.Row - 1].DataFlow;
+      puDataFlow := RenderDevices[sgRenderingDevices.Row - 1].DataFlow;
       ModalResult := mrOk;
     end
   else
     begin
       ShowMessage('No device selected!');
-      oDataFlow := eDataFlow(-1);
+      puDataFlow := eDataFlow(-1);
     end;
 end;
 

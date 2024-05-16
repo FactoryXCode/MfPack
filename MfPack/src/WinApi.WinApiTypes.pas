@@ -170,6 +170,14 @@ const
 //#define MFP_OLEGUID(name, l, w1, w2) MFP_GUID(name, l, w1, w2, 0xC0,0,0,0,0,0,0,0x46)
 //***********************************************************************************************
 
+{$IFDEF MFP_WFT}
+
+  // Wave Format.
+type WaveFormatType = (wftPCM,
+                       wftFLOAT);
+{$ENDIF}
+
+
 type
 
 {$IFDEF MFP_DWORD}
