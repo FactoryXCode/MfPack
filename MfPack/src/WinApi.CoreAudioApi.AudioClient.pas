@@ -76,7 +76,6 @@ uses
   WinApi.WinApiTypes,
   WinApi.WinError,
   {WinMM}
-  WinApi.WinMM.MMeApi,
   WinApi.WinMM.MMReg,
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioMediaType,
@@ -549,7 +548,7 @@ type
     //  This method does not require that the Initialize method be called first.
     //
 
-    function GetMixFormat(out ppDeviceFormat: PWAVEFORMATEX): HResult; stdcall;
+    function GetMixFormat({out} [ref] const ppDeviceFormat: PWAVEFORMATEX): HResult; stdcall;
     // Description:
     //
     //  The GetMixFormat method retrieves the stream format that the audio engine uses for its

@@ -4611,33 +4611,13 @@ const WAVE_FORMAT_PCM = 1;
   // Use this for all NON PCM formats
   // (information common to all formats)
 
-{$IFNDEF _WAVEFORMATEX_}
-{$DEFINE _WAVEFORMATEX_}
 type
-  // Note: This structure is also defined in WinApi.WinMM.MMeApi !
+  // Note: The WAVEFORMATEX structure is defined in WinApi.WinMM.MMeApi.
   PWAVEFORMATEX = ^tWAVEFORMATEX;
-  {$EXTERNALSYM PWAVEFORMATEX}
-  tWAVEFORMATEX = record
-    wFormatTag: WORD;               { format type }
-    nChannels: WORD;                { number of channels (i.e. mono, stereo...) }
-    nSamplesPerSec: DWORD;          { sample rate }
-    nAvgBytesPerSec: DWORD;         { for buffer estimation }
-    nBlockAlign: WORD;              { block size of data }
-    wBitsPerSample: WORD;           { number of bits per sample of mono data }
-    cbSize: WORD;                   { the count in bytes of the size of }
-                                    { extra information (after cbSize) }
-  end;
-  {$EXTERNALSYM tWAVEFORMATEX}
   WAVEFORMATEX = tWAVEFORMATEX;
-  {$EXTERNALSYM WAVEFORMATEX}
   NPWAVEFORMATEX = ^WAVEFORMATEX;
-  {$EXTERNALSYM NPWAVEFORMATEX}
   LPWAVEFORMATEX = ^WAVEFORMATEX;
-  {$EXTERNALSYM LPWAVEFORMATEX}
   LPCWAVEFORMATEX = ^WAVEFORMATEX;
-  {$EXTERNALSYM LPCWAVEFORMATEX}
-
-{$ENDIF} // _WAVEFORMATEX_
 
 const
 

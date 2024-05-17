@@ -537,8 +537,6 @@ type
  // NOTE: This structure is also defined in MMReg
  }
 
-{$IFNDEF _WAVEFORMATEX_}
-{$DEFINE _WAVEFORMATEX_}
 type
 
   PWAVEFORMATEX = ^tWAVEFORMATEX;
@@ -562,7 +560,6 @@ type
   LPCWAVEFORMATEX = ^WAVEFORMATEX;
   {$EXTERNALSYM LPCWAVEFORMATEX}
 
-{$ENDIF} // _WAVEFORMATEX_
 
 
   { waveform audio function prototypes }
