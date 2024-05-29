@@ -29,7 +29,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
-// 11/03/2024 Tony                Changed function GetGUIDNameConst, added parameter majortype.
+// 29/05/2024
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -406,7 +406,7 @@ type
                                   out ppAggSource: IMFMediaSource): HResult;
 
   // Create a media source for the given device ID.
-  // Note: The application have to enumerate the device first.
+  // Note: The application has to enumerate the devices first.
   function CreateVideoDeviceSource(DeviceIndex: DWord;
                                    out pSource: IMFMediaSource): HResult;
 
@@ -417,7 +417,7 @@ type
 
   // Creates a sourcereader or sinkwriter depending on the given CLSID.
   function CreateReaderWriter(const clsidObject: TGUID;   // CLSID_MFSinkWriter or CLSID_MFSourceReader
-                              initSource: IMFMediaSource; // Must be the the initial MediaSource!
+                              initSource: IMFMediaSource; // Must be the initial MediaSource!
                               attributes: IMFAttributes;  // Attributes must be set before using this method!
                               out iunkObject: IUnknown): HResult;
 
@@ -513,14 +513,14 @@ type
                           out ppNode: IMFTopologyNode): HResult;  // Receives the node pointer.
 
   // Creates and initializes an output node from a stream sink.
-  function AddOutputNodeS(pTopology: IMFTopology;                   // Topology.
-                          pStreamSink: IMFStreamSink;               // Stream sink.
-                          out ppNode: IMFTopologyNode): HResult;    // Receives the node pointer.
+  function AddOutputNodeS(pTopology: IMFTopology;                 // Topology.
+                          pStreamSink: IMFStreamSink;             // Stream sink.
+                          out ppNode: IMFTopologyNode): HResult;  // Receives the node pointer.
 
-  // Creates an uotput node from a stream descriptor.
-  function CreateOutputNode(pSourceSD: IMFStreamDescriptor;
-                            hwndVideo: HWND;
-                            out ppNode: IMFTopologyNode): HResult;
+  // Creates an output node from a stream descriptor.
+  function CreateOutputNode(pSourceSD: IMFStreamDescriptor;        // Stream descriptor
+                            hwndVideo: HWND;                       // The handle of an (visual) object.
+                            out ppNode: IMFTopologyNode): HResult; // Receives the node pointer.
 
 
 

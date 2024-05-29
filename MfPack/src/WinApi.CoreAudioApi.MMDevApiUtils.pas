@@ -139,9 +139,9 @@ type
     DeviceDesc: LPWSTR;        // The device description of the endpoint device (for example, "Speakers").
     DeviceName: LPWSTR;        // The friendly name of the endpoint device (for example, "Speakers (XYZ Audio Adapter)").
     pwszID: LPWSTR;            // Internal ID.
-    dwState: DWord;            // State of the device (disconnected, active, unplugged or not present)
-    sState: string;            // State of the device in readable string
-    iID: Integer;              // Device index ID, starting with 0
+    dwState: DWord;            // State of the device (disconnected, active, unplugged or not present).
+    sState: string;            // State of the device in readable string.
+    iID: Integer;              // Device index ID, starting with 0.
     DataFlow: EDataFlow;       // eRender or eCapture.
     Device: IMMDevice;         // Device interface.
   end;
@@ -149,18 +149,6 @@ type
   TEndPointDevice = _EndPointDevice;
 
   TEndPointDeviceArray = array of TEndPointDevice;
-
-
-  // The following enum is stripped, to prevent users select not allowed members of
-  // EDataFlow when querying or setting endpoint-devices.
-  // When EDataFlow parameters are clashing with the stripped enum,
-  // you have to cast those like: EDataFlow(eRender) etc.
-
-  // Stripped EDataFlow
-  EDataFlowEx = (
-    eRender              = 0,
-    eCapture             = (eRender + 1)
-                );
 
 type
  //-----------------------------------------------------------
@@ -195,7 +183,7 @@ type
   //-----------------------------------------------------------
   // Get endpoint devices
   //
-  // This function enumerates all audio rendering endpoint devices.
+  // This function enumerates all audio rendering or capture endpoint devices.
   // It returns an array of TEndPointDevice.
   // Params:
   //   {in}     flow: eRender or eCapture
@@ -203,7 +191,7 @@ type
   //   {out}    endpointdevices: Returns an array of TEndPointDevices.
   //   {out}    Number of endpoints returned.
   //-----------------------------------------------------------
-  function GetEndpointDevices(const flow: EDataFlowEx;
+  function GetEndpointDevices(const flow: EDataFlow;
                               state: DWord;
                               out endpointdevices: TEndPointDeviceArray;
                               out devicesCount: DWord): HRESULT;
@@ -216,7 +204,7 @@ type
 
   function GetDefaultEndPointAudioDevice(out audioEndPoint: IMMDevice;
                                          Role: eRole = eMultimedia;
-                                         dataFlow: EDataFlowEx = eRender): HRESULT;
+                                         dataFlow: EDataFlow = eRender): HRESULT;
 
   // Get the device descriptions of a device
   function GetDeviceDescriptions(DefaultDevice: IMMDevice; // the zero based index, where 0 is the default (active) endpoint.
@@ -441,7 +429,7 @@ end;
 //                                                         DEVICE_STATE_UNPLUGGED
 // endpointdevices: Dynamic array that holds EndPointDevice properties.
 // devicesCount: Number of specified devices found
-function GetEndpointDevices(const flow: EDataFlowEx;
+function GetEndpointDevices(const flow: EDataFlow;
                             state: DWord;
                             out endpointdevices: TEndPointDeviceArray;
                             out devicesCount: DWord): HRESULT;
@@ -484,7 +472,7 @@ begin
                            IID_IMMDeviceEnumerator,
                            pEnumerator));
 
-  CheckHr(pEnumerator.EnumAudioEndpoints(EDataFlow(flow),
+  CheckHr(pEnumerator.EnumAudioEndpoints(flow,
                                          state,
                                          pCollection));
 
@@ -559,7 +547,7 @@ end;
 // rendering an audio stream.
 function GetDefaultEndPointAudioDevice(out audioEndPoint: IMMDevice;
                                        Role: eRole = eMultimedia;
-                                       dataFlow: EDataFlowEx = eRender): HRESULT;
+                                       dataFlow: EDataFlow = eRender): HRESULT;
 var
   pdeviceEnumerator: IMMDeviceEnumerator;
   hr: HRESULT;
@@ -578,8 +566,8 @@ try
 
   if (dataFlow = eRender) or (dataFlow = eCapture) then  // Can only be eRender or eCapture
     begin
-      hr := pdeviceEnumerator.GetDefaultAudioEndpoint(EDataFlow(dataFlow),
-                                                      ERole(Role),
+      hr := pdeviceEnumerator.GetDefaultAudioEndpoint(dataFlow,
+                                                      Role,
                                                       audioEndPoint);
       if Failed(hr) then
         Abort;
@@ -815,11 +803,11 @@ label
 
 begin
 
-  pstrEndpointIdKey := Nil;
+  pstrEndpointIdKey := nil;
   pstrEndpointId := Nil;
   cbEndpointId := 0;
 
-  if (pWaveOutId = Nil) then
+  if (pWaveOutId = nil) then
     begin
       Result:= E_POINTER;
       Exit;
@@ -827,7 +815,7 @@ begin
 
   // Create an audio endpoint device enumerator.
   hr := CoCreateInstance(IID_IMMDeviceEnumerator,
-                         Nil,
+                         nil,
                          CLSCTX_INPROC_SERVER,
                          IID_IMMDeviceEnumerator,
                          pEnumerator);
@@ -837,7 +825,7 @@ begin
   // Get the audio endpoint device that the user has
   // assigned to the specified device role.
   hr := pEnumerator.GetDefaultAudioEndpoint(EDataFlow(eRender),
-                                            ERole(role),
+                                            role,
                                             pDevice);
   if Failed(hr) then
     goto leave;
@@ -855,7 +843,7 @@ begin
 
   // Allocate a buffer for a second string of the same size.
   pstrEndpointId := CoTaskMemAlloc(cbEndpointIdKey);
-  if (pstrEndpointId = Nil) then
+  if (pstrEndpointId = nil) then
     begin
       hr := E_OUTOFMEMORY;
       goto leave;
