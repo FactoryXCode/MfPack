@@ -514,6 +514,7 @@ type
                       {In_opt} pActivationParams: PPROPVARIANT;
                       out ppInterface: Pointer): HResult; stdcall;  // Replaced IUNKOWN pointer to a pointer, as described on ms-docs:
                                                                     // https://learn.microsoft.com/en-us/windows/win32/api/mmdeviceapi/nf-mmdeviceapi-immdevice-activate
+                                                                    // So, you have to cast the result like this: Pointer(YourInterface).
     function OpenPropertyStore(stgmAccess: DWORD;
                                out ppProperties: IPropertyStore): HResult; stdcall;
     // Parameter stgmAccess declares the storage-access mode.

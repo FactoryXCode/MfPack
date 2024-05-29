@@ -2611,7 +2611,7 @@ const    // updt 090812 add
 
   // Peter
 type
-  // This function is an alias for function MAKEFOURCC defined in WinApi.MmReg.pas and WinApi.MediaFoundationApi.MfMetLib.pas
+  // This function is an alias for function MAKEFOURCC defined in WinApi.MmReg.pas
   tCh4 = array [0..3] of AnsiChar;
   function FCC(ch4: TCh4): DWord; inline;
   {$EXTERNALSYM FCC}

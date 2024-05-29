@@ -5395,10 +5395,10 @@ begin
   else
     deviceName := friendlyName.pwszVal;
 
+  returnValue := StrNew(deviceName);
+
   PropVariantClear(friendlyName);
   CoTaskMemFree(deviceId);
-
-  returnValue := StrNew(deviceName);
 
 done:
   Result := returnValue;

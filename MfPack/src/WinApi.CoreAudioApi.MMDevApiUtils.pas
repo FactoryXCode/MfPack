@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
+// 28/05/2024 Tony                Added funtion GetDeviceDataFlow.
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -41,7 +42,7 @@
 // Todo: -
 //
 //==============================================================================
-// Source: https://docs.microsoft.com/en-us/windows/win32/coreaudio/device-roles-for-directsound-applications
+// Source: https://learn.microsoft.com/en-us/windows/win32/coreaudio/interoperability-with-legacy-audio-apis
 //
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //==============================================================================
@@ -134,14 +135,15 @@ type
   {$NODEFINE PEndPointDevice}
   _EndPointDevice = record
    {Device Properties}
-   DevInterfaceName: LPWSTR;  // The friendly name of the audio adapter to which the endpoint device is attached (for example, "XYZ Audio Adapter").
-   DeviceDesc: LPWSTR;        // The device description of the endpoint device (for example, "Speakers").
-   DeviceName: LPWSTR;        // The friendly name of the endpoint device (for example, "Speakers (XYZ Audio Adapter)").
-   pwszID: LPWSTR;            // Internal ID.
-   dwState: DWord;            // State of the device (disconnected, active, unplugged or not present)
-   sState: string;            // State of the device in readable string
-   iID: Integer;              // Device index ID, starting with 0
-   DataFlow: EDataFlow;       // eRender or eCapture.
+    DevInterfaceName: LPWSTR;  // The friendly name of the audio adapter to which the endpoint device is attached (for example, "XYZ Audio Adapter").
+    DeviceDesc: LPWSTR;        // The device description of the endpoint device (for example, "Speakers").
+    DeviceName: LPWSTR;        // The friendly name of the endpoint device (for example, "Speakers (XYZ Audio Adapter)").
+    pwszID: LPWSTR;            // Internal ID.
+    dwState: DWord;            // State of the device (disconnected, active, unplugged or not present)
+    sState: string;            // State of the device in readable string
+    iID: Integer;              // Device index ID, starting with 0
+    DataFlow: EDataFlow;       // eRender or eCapture.
+    Device: IMMDevice;         // Device interface.
   end;
   EndPointDevice = _EndPointDevice;
   TEndPointDevice = _EndPointDevice;
@@ -171,7 +173,7 @@ type
  //   https://docs.microsoft.com/en-us/windows/win32/coreaudio/audio-events-for-legacy-audio-applications
  //-----------------------------------------------------------
 
-TAudioVolumeEvents = class(TObject)
+  TAudioVolumeEvents = class(TObject)
   private
     hrStatus: HRESULT;
     pManager: IAudioSessionManager;
@@ -294,6 +296,12 @@ TAudioVolumeEvents = class(TObject)
   //-----------------------------------------------------------
   function GetJackInfo(pDevice: IMMDevice;
                        out ppJackDesc: IKsJackDescription): HResult;
+
+  //-----------------------------------------------------------
+  // Get the dataflow direction of an endpoint device.
+  //-----------------------------------------------------------
+  function GetDeviceDataFlow(pDevice: IMMDevice;
+                             out pDataFlow: eDataFlow): HResult;
 
 
 implementation
@@ -533,7 +541,7 @@ begin
       endpointdevices[i].sState := GetDeviceStateAsString(dwState);
       endpointdevices[i].iID := i;
       endpointdevices[i].DataFlow := EDataFlow(flow);
-
+      endpointdevices[i].Device := pEndpoint;
       SafeRelease(pProps);
       SafeRelease(pEndpoint);
     end;
@@ -973,6 +981,25 @@ begin
   ppJackDesc := pJackDesc;
 
 leave:
+  Result := hr;
+end;
+
+
+function GetDeviceDataFlow(pDevice: IMMDevice;
+                           out pDataFlow: eDataFlow): HResult;
+var
+  hr: HResult;
+  endPoint: IMMEndpoint;
+
+begin
+
+  // Query for IMMEndpoint.
+  hr := pDevice.QueryInterface(IID_IMMEndpoint,
+                               IUnknown(endPoint));
+
+  if SUCCEEDED(hr) then
+    hr := endPoint.GetDataFlow(pDataFlow);
+
   Result := hr;
 end;
 
