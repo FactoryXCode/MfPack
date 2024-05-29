@@ -350,7 +350,7 @@ begin
   bReady := False;
 
   // Use the XAudio2Create function to create an instance of the XAudio2 engine.
-  hr := XAudio2Create(pvXAudio2,
+  hr := XAudio2Create(@pvXAudio2,
                       0,
                       XAUDIO2_DEFAULT_PROCESSOR);
   if FAILED(hr) then
@@ -360,11 +360,11 @@ begin
   //
   // The mastering voices encapsulates an audio device.
   // It is the ultimate destination for all audio that passes through an audio graph.
-  hr := pvXAudio2.CreateMasteringVoice(pvMasteringVoice);
+  hr := pvXAudio2.CreateMasteringVoice(@pvMasteringVoice);
   if FAILED(hr) then
     goto done;
 
-  hr := pvXAudio2.CreateSourceVoice(pvSourceVoice,
+  hr := pvXAudio2.CreateSourceVoice(@pvSourceVoice,
                                     pvWaveformatex);
   if FAILED(hr) then
     goto done;

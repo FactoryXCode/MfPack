@@ -135,7 +135,7 @@ type
     gTimerID: TGuid;
 
     { Protected methods }
-    procedure QueueTimerHandler; virtual; // called every elTime milliseconds
+    procedure QueueTimerHandler(); virtual; // called every elTime milliseconds
 
   public
     { Public declarations }
@@ -206,13 +206,15 @@ begin
   uiPeriod := 100;
 
   // Create the contextID, in this case a unique guid during runtime
-  if Succeeded( CreateGuid(gTimerID) ) then
+  if SUCCEEDED(CreateGuid(gTimerID)) then
     stmp := GuidToString(gTimerID)
   else // this should not happen!
     stmp := '{4C68E633-53BF-4609-B7DC-0E4FDBCC585E}';
 
   // Create a unique msgId by the given name of the qtimer object
-  MsgId := RegisterWindowMessage( StringToWideChar(stmp, wcmp, Length(wcmp)) );
+  MsgId := RegisterWindowMessage(StringToWideChar(stmp,
+                                                  wcmp,
+                                                  Length(wcmp)));
 end;
 
 
@@ -247,7 +249,7 @@ begin
           // Removes a timer from the timer queue and optionally waits
           // for currently running timer callback functions to
           // complete before deleting the timer.
-          // See: https://docs.microsoft.com/en-us/windows/win32/sync/using-timer-queues
+          // See: https://learn.microsoft.com/en-us/windows/win32/sync/using-timer-queues
           //      about how and when to use timer queues.
 	        if DeleteTimerQueueTimer(0,
                                    hTimerHandle,
@@ -285,7 +287,7 @@ begin
 end;
 
 
-procedure TQTimer.QueueTimerHandler;
+procedure TQTimer.QueueTimerHandler();
 begin
 try
   // Check if the timer is enabled in the primary thread

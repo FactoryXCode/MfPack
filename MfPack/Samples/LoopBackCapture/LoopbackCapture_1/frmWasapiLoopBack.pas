@@ -1,5 +1,5 @@
-//
-// Copyright: � FactoryX. All rights reserved.
+﻿//
+// Copyright: © FactoryX. All rights reserved.
 //
 // Project: MfPack - MediaFoundation
 // Project location: https://sourceforge.net/projects/MFPack
@@ -139,7 +139,8 @@ type
   private
     { Private declarations }
     prAudioSink: TAudioSink;
-    prFileName: string;
+    prFileName: TFileName;
+    prOrgFileName: TFileName;
     prEdited: Boolean;
     prDataFlow: EDataFlow;
     prRole: ERole;
@@ -257,7 +258,6 @@ var
   hr: HResult;
   i: Integer;
   bFileExists: Boolean;
-  sOrgFileName: TFileName;
 
 label
   done;
@@ -276,9 +276,9 @@ begin
     begin
 
       prFileName := Format('%s', [edFileName.Text]);
-      if (sOrgFileName = '') or prEdited then
+      if (prOrgFileName = '') or prEdited then
         begin
-          sOrgFileName := prFileName;
+          prOrgFileName := prFileName;
           prEdited := False;
         end;
 
@@ -290,14 +290,14 @@ begin
             begin
               if FileExists(prFileName + lblFileExt.Caption) then
                 begin
-                  if (sOrgFileName = prFileName) then
+                  if (prOrgFileName = prFileName) then
                     prFileName := Format('%s(%d)',
                                          [edFileName.Text,
                                           i])
                   else
                     begin
                       prFileName := Format('%s(%d)',
-                                           [sOrgFileName,
+                                           [prOrgFileName,
                                             i]);
                       edFileName.Text := prFileName;
                     end;

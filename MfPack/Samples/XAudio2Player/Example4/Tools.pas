@@ -75,10 +75,10 @@ uses
   WinApi.Windows,
   WinApi.Messages;
 
-  /// <summary> Usage: HandleThreadMessages(GetCurrentThread()) or HandleThreadMessages(TThread.CurrentThread.Handle). </summary>
+  /// <summary> Usage: HandleThreadMessages(GetCurrentThread()).</summary>
   procedure HandleThreadMessages(AThread: THandle;
                                  AWait: Cardinal = INFINITE);
-  /// <summary> This function maps ranges inbetween minimum and maximum values. </summary>
+
   function MapRange(Value: Single;
                     InMin: Single;
                     InMax: Single;
@@ -122,7 +122,7 @@ function MapRange(Value: Single;
                   OutMin: Single;
                   OutMax: Single): Single;
 begin
-  Result := Round(OutMin + (Value - InMin) * (OutMax - OutMin) / (InMax - InMin));
+  Result := OutMin + (Value - InMin) * (OutMax - OutMin) / (InMax - InMin);
 end;
 
 end.

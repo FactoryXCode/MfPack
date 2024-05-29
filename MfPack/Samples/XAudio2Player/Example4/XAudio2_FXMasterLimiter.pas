@@ -78,25 +78,7 @@ uses
 
 type
 
-{
-  // Define a custom XAPO effect class
-  TMyCustomEffect = class(TInterfacedObject, IXAPOParameters)
-  public
-    // Implement methods of the IXAPOParameters interface
-    procedure SetParameters(pParameters: Pointer;
-                            ParameterByteSize: UINT32); stdcall;
-
-    procedure GetParameters(out pParameters: Pointer;
-                            ParameterByteSize: UINT32); stdcall;
-
-    procedure OnSetParameters(pParameters: Pointer;
-                              ParameterByteSize: UINT32); stdcall;
-
-  end;
-}
-
-
-  TFxMasterLimiter = class(TInterfacedObject, IXAPOParameters)
+  TFxMasterLimiter = class(TObject)
   private
     pvMasterLimiterparams: FXMASTERINGLIMITER_PARAMETERS;
 
@@ -104,17 +86,6 @@ type
 
     constructor Create();
     destructor Destroy(); override;
-
-    // Implement methods of the IXAPOParameters interface
-    procedure SetParameters(pParameters: Pointer;
-                            ParameterByteSize: UINT32); stdcall;
-
-    procedure GetParameters(out pParameters: Pointer;
-                            ParameterByteSize: UINT32); stdcall;
-
-    procedure OnSetParameters(pParameters: Pointer;
-                              ParameterByteSize: UINT32); stdcall;
-
 
     function CreateMasterLimiter(const pMasterLimiterParams: FXMASTERINGLIMITER_PARAMETERS): HResult;
 
@@ -160,25 +131,5 @@ begin
   Result := hr;
 end;
 
-
-procedure TFxMasterLimiter.SetParameters(pParameters: Pointer;
-                                         ParameterByteSize: UINT32);
-begin
-//
-end;
-
-
-procedure TFxMasterLimiter.GetParameters(out pParameters: Pointer;
-                                         ParameterByteSize: UINT32);
-begin
-//
-end;
-
-
-procedure TFxMasterLimiter.OnSetParameters(pParameters: Pointer;
-                                           ParameterByteSize: UINT32);
-begin
-//
-end;
 
 end.

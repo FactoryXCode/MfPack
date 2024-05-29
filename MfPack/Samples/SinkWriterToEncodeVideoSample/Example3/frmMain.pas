@@ -127,9 +127,6 @@ const
 type
 
   TfrmMain = class(TForm)
-    fodSelectAudio: TFileOpenDialog;
-    OD: TFileOpenDialog;
-    FODPic: TFileOpenDialog;
     stbStatus: TStatusBar;
     PageControl1: TPageControl;
     TabSheet2: TTabSheet;
@@ -201,6 +198,7 @@ type
     spedImageDuration: TSpinEdit;
     Label4: TLabel;
     Label5: TLabel;
+    fodSelectAudio: TFileOpenDialog;
 
     procedure FormCreate(Sender: TObject);
     procedure butRenderSlideshowClick(Sender: TObject);

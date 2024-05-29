@@ -116,7 +116,7 @@ type
 
   TReverbI3DL2ParamArray = array [0..29] of TReverbI3DL2Params;
 
-  TFxReverb = class(TObject)
+  TFxReverb = class(TObject {TInterfacedPersistent, IInterface})
   private
 
     pvFxParameters: XAUDIO2FX_REVERB_PARAMETERS;
@@ -137,7 +137,7 @@ type
     /// <summary>Be careful disabling an effect while the voice that hosts it is running.
     /// This can result in an audible artifact if the effect significantly changes the audio's pitch or volume.</summary>
     function RemoveReverbEffect(ppVoice: PIXAudio2Voice;
-                                pEffectIndex: UINT32): HResult;
+                                pEffectIndex: UINT32 = 0): HResult;
 
     function EnableReverbEffect(ppVoice: PIXAudio2Voice;
                                 pEnable: Boolean;
@@ -149,7 +149,7 @@ type
 
   end;
 
-  /// <summary>Get all predifined effects for I3DL and Native</summary>
+  /// <summary>Get all predefined effects for I3DL and Native</summary>
   function GetReverbParams(): TReverbI3DL2ParamArray;
 
 
@@ -301,16 +301,18 @@ label
 
 begin
 
-  if Assigned(XAPOReverbEffect) then
-    begin
-      //hr := MF_E_ALREADY_INITIALIZED;
-      //goto done;
-      XAPOReverbEffect := nil;
-    end;
+  //if not Assigned(XAPOReverbEffect) then
+    hr := XAudio2CreateReverb(XAPOReverbEffect);
 
-  hr := XAudio2CreateReverb(XAPOReverbEffect);
   if FAILED(hr) then
     goto done;
+
+  //if not pEnableEffect and pvReverbEffectEnabled then
+  //  begin
+  //    hr := EnableReverbEffect(ppVoice,
+  //                             pEnableEffect);
+  //   goto done;
+  //  end;
 
   // Populate an XAUDIO2_EFFECT_DESCRIPTOR structure with data.
   descriptor.InitialState := True;
@@ -334,14 +336,15 @@ begin
                                     SizeOf(XAUDIO2FX_REVERB_PARAMETERS),
                                     XAUDIO2_COMMIT_NOW);
 
-  if SUCCEEDED(hr) then
+  //if SUCCEEDED(hr) then
     // Disable or enable the effect, whenever appropriate.
     // You can use yourvoice.DisableEffect at any time to turn an effect off.
     // You can turn on an effect again with yourvoice.EnableEffect.
     // Note: The parameters for yourvoice.DisableEffect and yourvoice.EnableEffect specify which
     //       effect in the chain to enable or disable.
-    hr := EnableReverbEffect(ppVoice,
-                             pEnableEffect);
+
+    //hr := EnableReverbEffect(ppVoice,
+    //                         pEnableEffect);
 
 done:
   Result := hr;
@@ -349,9 +352,9 @@ end;
 
 
 function TFxReverb.RemoveReverbEffect(ppVoice: PIXAudio2Voice;
-                                      pEffectIndex: UINT32): HResult;
+                                      pEffectIndex: UINT32 = 0): HResult;
 begin
-  Result := ppVoice.DisableEffect(0,
+  Result := ppVoice.DisableEffect(pEffectIndex,
                                   XAUDIO2_COMMIT_NOW);
 end;
 
@@ -366,10 +369,10 @@ begin
   // Note: The parameters for DisableEffect and EnableEffect specify which
   //       effect in the chain to enable or disable.
   if pEnable then
-    Result := ppVoice.EnableEffect(0, //pEffectIndex,
+    Result := ppVoice.EnableEffect(pEffectIndex,
                                    XAUDIO2_COMMIT_NOW)
   else
-    Result := ppVoice.DisableEffect(0, //pEffectIndex,
+    Result := ppVoice.DisableEffect(pEffectIndex,
                                     XAUDIO2_COMMIT_NOW);
   pvReverbEffectEnabled := SUCCEEDED(Result);
 end;

@@ -26,7 +26,7 @@ object Form1: TForm1
   end
   object Bevel1: TBevel
     Left = 8
-    Top = 70
+    Top = 73
     Width = 555
     Height = 145
   end
@@ -56,7 +56,7 @@ object Form1: TForm1
   end
   object Bevel3: TBevel
     Left = 310
-    Top = 165
+    Top = 167
     Width = 185
     Height = 33
     ParentCustomHint = False
@@ -65,14 +65,14 @@ object Form1: TForm1
   end
   object Label4: TLabel
     Left = 318
-    Top = 198
+    Top = 201
     Width = 6
     Height = 13
     Caption = '0'
   end
   object Label5: TLabel
     Left = 471
-    Top = 198
+    Top = 201
     Width = 18
     Height = 13
     Caption = '100'
@@ -154,7 +154,7 @@ object Form1: TForm1
   end
   object tbVolumeSlider: TTrackBar
     Left = 310
-    Top = 169
+    Top = 173
     Width = 185
     Height = 23
     Max = 100
@@ -165,8 +165,8 @@ object Form1: TForm1
     OnChange = tbVolumeSliderChange
   end
   object butOK: TButton
-    Left = 406
-    Top = 226
+    Left = 405
+    Top = 229
     Width = 78
     Height = 23
     Caption = 'Ok'
@@ -181,7 +181,7 @@ object Form1: TForm1
   end
   object butCancel: TButton
     Left = 485
-    Top = 226
+    Top = 229
     Width = 78
     Height = 23
     Caption = 'Cancel'
@@ -206,6 +206,6 @@ object Form1: TForm1
     Interval = 40
     OnTimer = tmrProgressTimer
     Left = 82
-    Top = 216
+    Top = 217
   end
 end

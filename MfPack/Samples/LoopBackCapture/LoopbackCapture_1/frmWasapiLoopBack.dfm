@@ -13,11 +13,9 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
-  PixelsPerInch = 96
   TextHeight = 13
   object Bevel1: TBevel
     Left = 0
@@ -26,7 +24,6 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     Height = 1
     Align = alBottom
     Shape = bsTopLine
-    ExplicitTop = 434
   end
   object lblStatus: TLabel
     AlignWithMargins = True
@@ -44,7 +41,6 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     Font.Style = [fsBold]
     ParentFont = False
     Layout = tlCenter
-    ExplicitTop = 424
   end
   object Panel3: TPanel
     Left = 10
@@ -101,7 +97,6 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       Position = 5
       TabOrder = 0
       OnChange = tbBufferDurationChange
-      ExplicitTop = 64
     end
     object cbxAutoBufferSize: TCheckBox
       Left = 8

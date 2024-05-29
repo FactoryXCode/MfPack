@@ -200,7 +200,7 @@ object frm_MfPlayer: Tfrm_MfPlayer
       OnMouseUp = prbProgressMouseUp
     end
     object butFullScreen: TButton
-      Left = 440
+      Left = 436
       Top = 16
       Width = 25
       Height = 24
@@ -356,7 +356,7 @@ object frm_MfPlayer: Tfrm_MfPlayer
   end
   object QTimer1: TQTimer
     Period = 0
-    Left = 172
-    Top = 10
+    Left = 173
+    Top = 11
   end
 end

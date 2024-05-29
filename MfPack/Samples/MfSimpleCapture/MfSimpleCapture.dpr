@@ -4,6 +4,7 @@ uses
   {$IFDEF FASTMM}
   FastMM4,
   {$ENDIF }
+
   Vcl.Forms,
   MfDeviceCaptureClass in 'MfDeviceCaptureClass.pas',
   frmSimpleCapture in 'frmSimpleCapture.pas' {Frm_SimpleCapture},

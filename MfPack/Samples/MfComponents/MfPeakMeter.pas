@@ -82,8 +82,6 @@ uses
   VCL.ExtCtrls,
   {ActiveX}
   WinApi.ActiveX.ObjBase,
-  {MediaFoundationApi}
-  WinApi.MediaFoundationApi.MfUtils,
   {CoreAudioApi}
   WinApi.CoreAudioApi.MMDeviceApi,
   WinApi.CoreAudioApi.EndPointVolume;
@@ -197,8 +195,8 @@ begin
   // Create the handle for this component
   fHWnd := AllocateHWnd(WindProc);
 
-  CoInitializeEx(Nil,
-                 COINIT_APARTMENTTHREADED);
+  //CoInitializeEx(nil,
+  //               COINIT_APARTMENTTHREADED);
 
   // Single instance
   hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
@@ -220,7 +218,7 @@ begin
 
   hr := pDevice.Activate(IID_IAudioMeterInformation,
                          CLSCTX_ALL,
-                         Nil,
+                         nil,
                          Pointer(pMeterInfo));
   if FAILED(hr) then
     goto done;
@@ -249,13 +247,14 @@ destructor TMfPeakMeter.Destroy();
 begin
   KillTimer(fHwnd,
             ID_TIMER);
-  fPeakMeterBmp.Free;
-  fPeakMeterBmp := Nil;
-  pEnumerator := Nil;
-  pDevice := Nil;
-  pMeterInfo := Nil;
 
-  CoUninitialize();
+  FreeAndNil(fPeakMeterBmp);
+
+  pEnumerator := nil;
+  pDevice := nil;
+  pMeterInfo := nil;
+
+  //CoUninitialize();
 
   // Destroy handle
   DeallocateHWnd(fHWnd);
@@ -411,7 +410,7 @@ begin
     WM_TIMER   :  case Msg.WParam of
                     ID_TIMER :  begin
                                   // Update the peak meter.
-                                  // Set the length of the array to retrieve the samples
+                                  // Set the length of the array to retrieve the samples.
                                   SetLength(afPeakValues,
                                             fChannelCount);
                                   hr := pMeterInfo.GetChannelsPeakValues(fChannelCount,

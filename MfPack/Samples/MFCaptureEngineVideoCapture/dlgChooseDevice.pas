@@ -240,7 +240,8 @@ function TChooseDeviceDlg.PopulateFormats(bSupportedFormatsOnly: Boolean): HResu
      sFmtDesc: LPWSTR;
 
      begin
-       GetGUIDNameConst(FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].fSubType,
+       GetGUIDNameConst(FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].fMajorType,
+                        FDeviceExplorer.DeviceProperties[iDev].aVideoFormats[iForm].fSubType,
                         sGuidName,
                         sFormatTag,
                         dwFOURCC,

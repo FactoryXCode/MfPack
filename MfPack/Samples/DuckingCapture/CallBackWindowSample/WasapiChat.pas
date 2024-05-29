@@ -211,7 +211,7 @@ constructor CWasapiChat.Create(AppWindow: HWND);
 begin
   _AppWindow := AppWindow;
   //hwndWasApiChat := AllocateHWnd(MessageHandler);  // Not thread safe, you could use a unit as published here:
-                                                   // https://stackoverflow.com/questions/8820294/how-can-i-make-allocatehwnd-threadsafe
+                                                     // https://stackoverflow.com/questions/8820294/how-can-i-make-allocatehwnd-threadsafe
 end;
 
 function CWasapiChat.Initialize(const UseInputDevice: Boolean): Boolean;

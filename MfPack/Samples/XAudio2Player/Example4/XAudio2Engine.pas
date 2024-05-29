@@ -68,7 +68,6 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.ActiveX,
-  WinApi.Messages,
   WinApi.WinApiTypes,
   WinApi.WinError,
   {System}
@@ -115,7 +114,6 @@ type
                   rsProcessingPassEnd,
                   rsDestroying);
 
-  PXaudio2EventData = ^TXaudio2EventData;
   TXaudio2EventData = record
     SamplesProcessed: LONGLONG;
     Position: LONGLONG;
@@ -149,17 +147,20 @@ type
 {$endregion}
 
   private
-    pvHwndCaller: THandle;
     FCriticalSection: TCriticalSection;
     pvXAudio2: IXAudio2;
     pvMasteringVoice: IXAudio2MasteringVoice;
     pvSourceVoice: IXAudio2SourceVoice;
+    pvXAudioBuffer: XAUDIO2_BUFFER;
 
     // Effects
     pvFxReverbEffect: TFxReverb;
     pvFxMasterLimiter: TFxMasterLimiter;
 
     // Audio buffer.
+    //pvBytes: array of Byte;
+
+    pvAudioData: PByte;
     pvMemoryStream: TMemoryStream;
 
 
@@ -168,6 +169,7 @@ type
     pvSourceFileDuration: MFTIME;
     pvBufferStart: UINT32;
     pvNewBufferPosition: LONGLONG; // See also: TXaudio2EventData.Position
+    pvBufferSize: UINT32; // Length of the audiobuffer (pvBytes).
     pvBufferPrevPlayed: UINT32;
 
     pvWaveformatex: PWAVEFORMATEX;
@@ -181,11 +183,6 @@ type
     pvReverbI3DL2ParamArray: TReverbI3DL2ParamArray;
 
     FXaudio2EventData: TXaudio2EventData; // Event extra data structure.
-
-    // buffer initialization members.
-    pvAudioData: PByte;  // Audio buffer.
-    pvBufferSize: UINT32; // Length of the audiobuffer (pvBytes).
-    pvXAudioBuffer: XAUDIO2_BUFFER;
 
     // This value will be set to True, when user stops rendering.
     // In that case the SourceVoice will be removed from the topology.
@@ -211,8 +208,8 @@ type
     bReverbEffectOnMasteringVoice: Boolean;
 
     // Initializes a new audiobuffer.
-    function InitAudioBuffer(pPlayStart: UINT32 = 0;
-                             pPlayEnd: UINT32 = 0): HResult;
+    function InitAudioBuffer(playStart: UINT32 = 0;
+                             playEnd: UINT32 = 0): HResult;
 
   public
 
@@ -220,12 +217,10 @@ type
     destructor Destroy(); override;
 
     // Run this method to load the file and initialize XAudio2.
-    function LoadAndPlay(const pHwndCaller: THandle;
-                         const audiofile: TFileName): HResult;
+    function LoadAndPlay(const audiofile: TFileName): HResult;
 
     // Use this method if you don't want to Initialize XAudio2.
-    function LoadFile(const pHwndCaller: THandle;
-                      const audiofile: TFileName): HResult;
+    function LoadFile(const audiofile: TFileName): HResult;
 
     // Initialize XAudio2 engine. LoadFile must be called first!
     function InitializeXAudio2(replay: Boolean = False): HResult;
@@ -297,12 +292,6 @@ begin
   bReverbEffectOnSourceVoice := False;
   bReverbEffectOnMasteringVoice := False;
   pvReverbI3DL2ParamArray := GetReverbParams();
-
-  // Create effects.
-  //if not Assigned(pvFxReverbEffect) then
-    pvFxReverbEffect := TFxReverb.Create();
- // if not Assigned(pvFxMasterLimiter) then
-    pvFxMasterLimiter := TFxMasterLimiter.Create();
 end;
 
 
@@ -310,62 +299,57 @@ destructor TXaudio2Engine.Destroy();
 begin
   pvRenderStatus := rsDestroying;
   if Assigned(pvXAudio2) then
-    pvXAudio2.StopEngine();
-
-  // Remove effects.
-  if Assigned(pvFxReverbEffect) then
-    FreeAndNil(pvFxReverbEffect);
-
-  if Assigned(pvFxMasterLimiter) then
-    FreeAndNil(pvFxMasterLimiter);
-
-  if Assigned(pvMasteringVoice) then
     begin
-      pvMasteringVoice.DestroyVoice();
-      pvMasteringVoice := nil;
+      pvXAudio2.StopEngine();
+
+      // Remove effects.
+      if Assigned(pvFxReverbEffect) then
+        FreeAndNil(pvFxReverbEffect);
+
+      if Assigned(pvFxMasterLimiter) then
+        FreeAndNil(pvFxMasterLimiter);
+
+      if Assigned(pvMasteringVoice) then
+        begin
+          pvMasteringVoice.DestroyVoice();
+          pvMasteringVoice := nil;
+        end;
+
+      if Assigned(pvSourceVoice) then
+        begin
+          pvSourceVoice.DestroyVoice();
+          pvSourceVoice := nil;
+        end;
+
+      ZeroMemory(@pvXAudioBuffer,
+                 SizeOf(XAUDIO2_BUFFER));
+
+      if Assigned(pvWaveformatex) then
+        CoTaskMemFree(pvWaveformatex);
+
+      if Assigned(pvMemoryStream) then
+        FreeAndNil(pvMemoryStream);
+
+      FreeMem(pvAudioData);
+
+      SafeRelease(pvXAudio2);
+      FCriticalSection.Free;
     end;
-
-  if Assigned(pvSourceVoice) then
-    begin
-      pvSourceVoice.DestroyVoice();
-      pvSourceVoice := nil;
-    end;
-
-  ZeroMemory(@pvXAudioBuffer,
-             SizeOf(XAUDIO2_BUFFER));
-
-  if Assigned(pvWaveformatex) then
-    CoTaskMemFree(pvWaveformatex);
-
-  if Assigned(pvMemoryStream) then
-    FreeAndNil(pvMemoryStream);
-
-  if Assigned(pvAudioData) then
-    FreeMem(pvAudioData);
-
-  if Assigned(pvXAudio2) then
-    SafeRelease(pvXAudio2);
-
-  FCriticalSection.Free;
 
   inherited;
 end;
 
 
-function TXaudio2Engine.LoadAndPlay(const pHwndCaller: THandle;
-                                    const audiofile: TFileName): HResult;
+function TXaudio2Engine.LoadAndPlay(const audiofile: TFileName): HResult;
 begin
-  pvHwndCaller := pHwndCaller;
-  Result := LoadFile(pHwndCaller,
-                     audiofile);
+  Result := LoadFile(audiofile);
 
   if SUCCEEDED(Result) then
     Result := InitializeXAudio2();
 end;
 
 
-function TXaudio2Engine.LoadFile(const pHwndCaller: THandle;
-                                 const audiofile: TFileName): HResult;
+function TXaudio2Engine.LoadFile(const audiofile: TFileName): HResult;
 var
   hr: HResult;
   sourceReaderConfiguration: IMFAttributes;
@@ -386,7 +370,7 @@ label
   done;
 
 begin
-  pvHwndCaller := pHwndCaller;
+
   pvFileName := audiofile;
   if not FileExists(audiofile) then
     begin
@@ -515,7 +499,9 @@ begin
       else
         begin
           // Get the media buffer from the sample.
-          hr := mfSample.ConvertToContiguousBuffer(mfMediaBuffer);
+          hr := mfSample.GetBufferByIndex(0,
+                                          mfMediaBuffer);
+
           // Get the audio data from the media buffer.
           if SUCCEEDED(hr) then
             begin
@@ -525,10 +511,6 @@ begin
                                        @audioValidDataLength);
               if SUCCEEDED(hr) then
                 try
-                  // Prevent crack at beginnning of silence.
-                  PByteArray(audioData)[1] := $03;
-
-                  // Write data to stream.
                   pvMemoryStream.Write(audioData^,
                                        audioValidDataLength);
 
@@ -548,23 +530,17 @@ done:
 end;
 
 
-function TXaudio2Engine.InitAudioBuffer(pPlayStart: UINT32 = 0;
-                                        pPlayEnd: UINT32 = 0): HResult;
+function TXaudio2Engine.InitAudioBuffer(playStart: UINT32 = 0;
+                                        playEnd: UINT32 = 0): HResult;
 begin
-  FCriticalSection.Enter;
-
   pvMemoryStream.Position := 0;
-
-  if Assigned(pvAudioData) then
-    FreeMem(pvAudioData);
-
   // Allocate memory for pvAudioData
   GetMem(pvAudioData,
          pvMemoryStream.Size);
 
-  // Copy the contents of pvMemoryStream to pvAudioData.
-  pvMemoryStream.ReadBuffer(pvAudioData^,
-                            pvMemoryStream.Size);
+   // Copy the contents of pvMemoryStream to pvAudioData.
+   pvMemoryStream.ReadBuffer(pvAudioData^,
+                             pvMemoryStream.Size);
 
   // Set up a new XAudio2 buffer.
   ZeroMemory(@pvXAudioBuffer,
@@ -576,13 +552,12 @@ begin
   pvXAudioBuffer.pAudioData := pvAudioData;
   pvXAudioBuffer.Flags := XAUDIO2_END_OF_STREAM;
 
-  pvXAudioBuffer.PlayBegin := pPlayStart; // pvBufferStart
-  pvXAudioBuffer.PlayLength := pPlayEnd;  // Zero means to play until the end of the buffer.
-  // Can be extended with loop parameters.
+  pvXAudioBuffer.PlayBegin := playStart; // pvBufferStart
+  pvXAudioBuffer.PlayLength := playEnd;  // Zero means to play until the end of the buffer.
+  // Can be extended with loop arguments.
 
   // Start source voice and submit buffer.
   Result := pvSourceVoice.SubmitSourceBuffer(@pvXAudioBuffer);
-  FCriticalSection.Leave;
 end;
 
 
@@ -595,10 +570,16 @@ label
   done;
 
 begin
-  FCriticalSection.Enter;
 
   pvBufferPrevPlayed := 0;
   pvNewBufferPosition := 0;
+
+  // Remove active effects.
+  if Assigned(pvFxReverbEffect) then
+    FreeAndNil(pvFxReverbEffect);
+
+  if Assigned(pvFxMasterLimiter) then
+    FreeAndNil(pvFxMasterLimiter);
 
 
   // Use the XAudio2Create function to create an instance of the XAudio2 engine.
@@ -631,17 +612,20 @@ begin
   // Add SourceVoice to the topology.
   hr := pvXAudio2.CreateSourceVoice(@pvSourceVoice,
                                     pvWaveformatex,
-                                    0 {XAUDIO2_VOICE_NOSRC},
+                                    0,
                                     XAUDIO2_DEFAULT_FREQ_RATIO,
                                     Self); // register Audio2VoiceCallback
   if FAILED(hr) then
     goto done;
 
+  // Create effects.
+  pvFxReverbEffect := TFxReverb.Create();
+  pvFxMasterLimiter := TFxMasterLimiter.Create();
+
   // Set up XAudio2 buffer.
   hr := InitAudioBuffer();
   if FAILED(hr) then
     goto done;
-
 
   // This flag should be set if we played this track before,
   // so we don't have to reinitialize the sourcereader.
@@ -652,14 +636,15 @@ begin
     goto done;
 
   // Setup is done, set status we are ready to go.
-  pvRenderStatus := rsInitialized;
-  pvBufferPrevPlayed := 0;
+  if Assigned(FOnAudioReadyEvent) then
+    begin
+      pvRenderStatus := rsInitialized;
+      pvBufferPrevPlayed := 0;
+      OnAudioReadyEvent(Self);
+    end;
 
-  // We are ready.
-  OnAudioReadyEvent(Self);
-
-  //if Assigned(pvWaveformatex) then
-  //  CoTaskMemFree(pvWaveformatex);
+  if Assigned(pvWaveformatex) then
+    CoTaskMemFree(pvWaveformatex);
 
   // Now the stream will be rendered in another thread.
   // So, we need to stay in this thread to keep control.
@@ -667,11 +652,11 @@ begin
   // Note that, when this audiostream is over,
   // the end of buffer will be signaled first, before endofstream.
 
-  while (pvRenderStatus <> rsEndOfBuffer) or (pvRenderStatus = rsEndOfBuffer) do
-    begin
-      // Nothing to do when destroying the class.
-      if (pvRenderStatus = rsDestroying) then
-        Break;
+                          while (pvRenderStatus <> rsEndOfBuffer) or (pvRenderStatus = rsEndOfBuffer) do
+                            begin
+                              // Nothing to do when destroying the class.
+                              if (pvRenderStatus = rsDestroying) then
+                                Break;
 
       if (pvRenderStatus = rsStopped) then
         begin
@@ -684,31 +669,25 @@ begin
           Break;
         end;
 
-      if (pvRenderStatus = rsPlaying) then
-        begin
-          // This consumes some cpu load, but saves using a timer.==================
-          pvSourceVoice.GetState(voiceState,
-                                 0);
-          // Calculate the samples processed (Starting after a stop event has taken place).
-          FXaudio2EventData.SamplesProcessed := voiceState.SamplesPlayed - pvBufferPrevPlayed;
+      // This consumes some cpu load, but saves using a timer.==================
+      pvSourceVoice.GetState(voiceState,
+                             0);
+      // Calculate the samples processed (Starting after a stop event has taken place).
+      FXaudio2EventData.SamplesProcessed := voiceState.SamplesPlayed - pvBufferPrevPlayed;
 
-          // Calculate the samples that have been processed, to milliseconds.
-          // The caller can, for example, calculate the readable time in HH:MM:SS:MS.
-          FXaudio2EventData.TimePlayed := (((voiceState.SamplesPlayed + pvNewBufferPosition) - pvBufferPrevPlayed) div pvSamplesPerSecond) * 10000000;
-          FXaudio2EventData.Position := pvBufferStart;
-        end;
+      // Calculate the samples that have been processed, to milliseconds.
+      // The caller can, for example, calculate the readable time in HH:MM:SS:MS.
+      FXaudio2EventData.TimePlayed := (((voiceState.SamplesPlayed + pvNewBufferPosition) - pvBufferPrevPlayed) div pvSamplesPerSecond) * 10000000;
 
       //========================================================================
 
-      // Send score event.
-      OnProcessingData(nil);
-      HandleThreadMessages(GetCurrentThread(), 10);
-      //Sleep(10);
+      OnProcessingData(Self);
+
+      HandleThreadMessages(TThread.CurrentThread.Handle);
 
     end;
 
 done:
-  FCriticalSection.Leave;
   Result := hr;
 end;
 
@@ -728,7 +707,9 @@ begin
   if SUCCEEDED(Result) then
     begin
       pvRenderStatus := rsPlaying;
-      FOnAudioPlayingEvent(Self);
+
+      if Assigned(FOnAudioPlayingEvent) then
+        FOnAudioPlayingEvent(Self);
     end;
 end;
 
@@ -801,6 +782,7 @@ var
 
 begin
   FCriticalSection.Enter;
+
   // Use the following formula to convert the volume level to the decibel (dB) scale:
   // Attenuation (dB) = 20 * log10(Level)
   // For example, a volume level of 0.50 represents 6.02 dB of attenuation.
@@ -827,9 +809,8 @@ begin
                                   [IntToHex(hr, 8) + #13,
                                   SysErrorMessage(hr)]);
     end;
-
   FCriticalSection.Leave;
-  //HandleThreadMessages(GetCurrentThread());
+  HandleThreadMessages(TThread.CurrentThread.Handle);
 end;
 
 
@@ -846,10 +827,10 @@ var
   flPitch: Single;
   
 begin
+  FCriticalSection.Enter;
   if not Assigned(pvSourceVoice) then
     Exit;
 
-  FCriticalSection.Enter;
   flPitch := aValue;
   // To prevent extreme pitching causing buffer underrun.
   if (flPitch > MAX_PITCH) then
@@ -869,12 +850,11 @@ var
   ppVoice: PIXAudio2Voice;
 
 begin
+  FCriticalSection.Enter;
   Result := E_FAIL;
 
   if not Assigned(pvSourceVoice) or not Assigned(pvMasteringVoice) then
     Exit;
-
-  FCriticalSection.Enter;
 
   // == Add reverb effect. ======================================
   if (Voice = afxSourceVoice) then
@@ -888,15 +868,19 @@ begin
                                                       pEnable);
 
   if SUCCEEDED(Result) then
-    begin
-      if pEnable then
-        Result := ppVoice.EnableEffect(0,
-                                       XAUDIO2_COMMIT_NOW)
-      else
-        Result := ppVoice.DisableEffect(0,
-                                        XAUDIO2_COMMIT_NOW);
-        pvFxReverbEffect.FxReverbEffectEnabled := SUCCEEDED(Result);
-    end;
+    // If the effect has been created, skip initialization.
+    //if (Result = MF_E_ALREADY_INITIALIZED) then
+      //Result := pvFxReverbEffect.EnableReverbEffect(ppVoice,
+      //                                              pEnable);
+      begin
+        if pEnable then
+          Result := ppVoice.EnableEffect(0,
+                                         XAUDIO2_COMMIT_NOW)
+        else
+          Result := ppVoice.DisableEffect(0,
+                                          XAUDIO2_COMMIT_NOW);
+          pvFxReverbEffect.FxReverbEffectEnabled := SUCCEEDED(Result);
+      end;
 
   if SUCCEEDED(Result) then
     begin
@@ -905,9 +889,8 @@ begin
       else
         bReverbEffectOnMasteringVoice := pEnable;
     end;
-
   FCriticalSection.Leave;
-//  HandleThreadMessages(GetCurrentThread());
+  //HandleThreadMessages(TThread.CurrentThread.Handle);
 end;
 
 
@@ -921,6 +904,7 @@ begin
     end;
 
   Result := pvFxMasterLimiter.CreateMasterLimiter(MasterLimiterparams);
+
 end;
 
 
@@ -942,9 +926,9 @@ begin
   if SUCCEEDED(hr) then
     hr := pvSourceVoice.Discontinuity();
 
-  // We have to poll for the OnBufferEnd returns the render status.
+  // We have to poll for the OnBufferEnd returns the rendersatus.
   while (pvRenderStatus <> rsEndOfBuffer) do
-    HandleThreadMessages(GetCurrentThread());
+    HandleThreadMessages(TThread.CurrentThread.Handle);
 
   if SUCCEEDED(hr) then
     begin
@@ -960,7 +944,7 @@ begin
   if SUCCEEDED(hr) then
     pvSourceVoice.Start(0,
                         XAUDIO2_COMMIT_NOW);
-  HandleThreadMessages(GetCurrentThread());
+  HandleThreadMessages(TThread.CurrentThread.Handle);
   Result := hr;
 end;
 
@@ -1006,7 +990,7 @@ begin
   // For internal use.
   pvRenderStatus := rsEndOfBuffer;
   FOnBufferEndEvent(Self);
-end;
+ end;
 
 
 procedure TXaudio2Engine.OnLoopEnd(pBufferContext: Pointer);

@@ -1,8 +1,7 @@
 program MFCaptureEngineVideoCapture;
 
 uses
-  {$IFDEF MadExcept}
-  {$ENDIF }
+
   Vcl.Forms,
   frmMain in 'frmMain.pas' {MainWindow},
   dlgChooseDevice in 'dlgChooseDevice.pas' {ChooseDeviceDlg},

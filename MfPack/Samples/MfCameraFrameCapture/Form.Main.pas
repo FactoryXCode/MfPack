@@ -856,7 +856,8 @@ begin
           ltInfo);
       for oFormat in FCapture.VideoFormats  do
         begin
-          hr := GetGUIDNameConst(oFormat.oSubType,
+          hr := GetGUIDNameConst(oFormat.oMajorType,
+                                 oFormat.oSubType,
                                  sGuidName,
                                  sFormatTag,
                                  dwFOURCC,

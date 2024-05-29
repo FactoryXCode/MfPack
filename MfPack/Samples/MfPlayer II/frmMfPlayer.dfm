@@ -195,6 +195,8 @@ object frm_MfPlayer: Tfrm_MfPlayer
     ParentFont = False
     TabOrder = 1
     StyleElements = []
+    ExplicitLeft = 1
+    ExplicitTop = 1
     object stxtSubs: TStaticText
       AlignWithMargins = True
       Left = 4

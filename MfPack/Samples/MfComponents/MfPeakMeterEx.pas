@@ -299,9 +299,9 @@ begin
   fStyle := dsVertical;
   fDirection := ddLeftUp;
 
-  pEnumerator := Nil;
-  pDevice := Nil;
-  pMeterInfo := Nil;
+  pEnumerator := nil;
+  pDevice := nil;
+  pMeterInfo := nil;
 
   sPeakValue := 0.0;
   iPeakValue := 0;
@@ -331,7 +331,7 @@ done:
                            'Error: ' + IntToStr(hr) + #13 +
                            Self.ClassName + ' will be disabled.') ,
                    LPCWSTR('Error'),
-                   MB_OK Or MB_ICONSTOP);
+                   MB_OK or MB_ICONSTOP);
       end;
 end;
 
@@ -352,7 +352,7 @@ begin
       SafeRelease(pEnumerator);
       SafeRelease(pDevice);
       SafeRelease(pMeterInfo);
-      CoUninitialize();
+      //CoUninitialize();
     end;
   // Destroy handle
   DeallocateHWnd(fHWnd);
@@ -368,12 +368,12 @@ label
   done;
 
 begin
-  CoInitializeEx(Nil,
-                 COINIT_APARTMENTTHREADED);
+  //CoInitializeEx(nil,
+  //               COINIT_APARTMENTTHREADED);
 
   // Single instance
   hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
-                         Nil,
+                         nil,
                          CLSCTX_ALL,
                          IID_IMMDeviceEnumerator,
                          pEnumerator);
@@ -391,7 +391,7 @@ begin
 
   hr := pDevice.Activate(IID_IAudioMeterInformation,
                          CLSCTX_ALL,
-                         Nil,
+                         nil,
                          Pointer(pMeterInfo));
   if FAILED(hr) then
     goto done;
@@ -417,7 +417,7 @@ done:
 end;
 
 
-// Using a regular TTimer is less precise, but can do as well
+// Using a regular TTimer is less precise, but can do as well.
 procedure TMfPeakMeterEx.TimerTimer(sender: TObject);
 begin
   if (fSampleAllChannels = True) then
@@ -435,10 +435,10 @@ begin
       // the second = rightchannel.
       if (fMeterChannel = mcLeft) then
         sPeakValue := afPeakValues[0]
-      else if (fMeterChannel = mcRight) And (fChannelCount = 2) then
+      else if (fMeterChannel = mcRight) and (fChannelCount = 2) then
         sPeakValue := afPeakValues[1]
       else
-        sPeakValue := afPeakValues[0]; // fall back to default (mono = always left channel)
+        sPeakValue := afPeakValues[0]; // Fall back to default (mono = always left channel).
     end;
     Paint;
 end;
@@ -451,7 +451,7 @@ begin
     Exit;
 
   if (value < 10) or (value > 10000) then
-    value := 10; //reset to default
+    value := 10; // Reset to default.
   fSafeTimerInterval := value;
   FTimer.Period := fSafeTimerInterval;
 end;
@@ -460,7 +460,7 @@ end;
 procedure TMfPeakMeterEx.SetGraphicsOnly(value: Boolean);
 begin
   // If running, user can't change this value
-  if (fGraphicsOnly <> value) And (fPeakMeterRunning = False) then
+  if (fGraphicsOnly <> value) and (fPeakMeterRunning = False) then
     fGraphicsOnly := value;
 end;
 
@@ -531,9 +531,11 @@ end;
 
 procedure TMfPeakMeterEx.SetGreenColorOn(value: TColor);
 begin
-  if (value <> fColors[1, True]) then
+  if (value <> fColors[1,
+                       True]) then
     begin
-      fColors[1, True] := value;
+      fColors[1,
+              True] := value;
       Paint;
     end;
 end;
@@ -561,9 +563,11 @@ end;
 
 procedure TMfPeakMeterEx.SetGreenColorOff(value: TColor);
 begin
-  if (value <> fColors[1, False]) then
+  if (value <> fColors[1,
+                       False]) then
     begin
-      fColors[1, False] := value;
+      fColors[1,
+              False] := value;
       Paint;
     end;
 end;
@@ -573,7 +577,8 @@ procedure TMfPeakMeterEx.SetYellowColorOn(value: TColor);
 begin
   if (value <> fColors[2, True]) then
     begin
-      fColors[2, True] := value;
+      fColors[2,
+              True] := value;
       Paint;
     end;
 end;
@@ -601,9 +606,11 @@ end;
 
 procedure TMfPeakMeterEx.SetYellowColorOff(value: TColor);
 begin
-  if value <> fColors[2, False] then
+  if value <> fColors[2,
+                      False] then
     begin
-      fColors[2, False] := value;
+      fColors[2,
+              False] := value;
       Paint;
     end;
 end;
@@ -611,9 +618,11 @@ end;
 
 procedure TMfPeakMeterEx.SetRedColorOn(value: TColor);
 begin
-  if (value <> fColors[3, True]) then
+  if (value <> fColors[3,
+                       True]) then
     begin
-      fColors[3, True] := value;
+      fColors[3,
+              True] := value;
       Paint;
     end;
 end;
@@ -646,9 +655,11 @@ end;
 procedure TMfPeakMeterEx.SetRedColorOff(value: TColor);
 begin
 try
-  if (value <> fcolors[3, False]) then
+  if (value <> fcolors[3,
+                       False]) then
     begin
-        fColors[3, False] := value;
+        fColors[3,
+                False] := value;
         Paint;
     end;
 except
@@ -864,8 +875,8 @@ var
   inum : Integer;
   bactivate : Boolean;
   bcolor: Byte;
-  ax: Array [0..3] of Integer;
-  ay: Array [0..3] of Integer;
+  ax: array [0..3] of Integer;
+  ay: array [0..3] of Integer;
   i: Integer;
 
 begin
@@ -1029,18 +1040,24 @@ try
           Pen.Color := tcBottom;
           for lp := 0 to bw - 1 do
             begin
-              moveto(CalculateX(Width), CalculateY(lp));
-              lineto(CalculateX(lp), CalculateY(lp));
-              lineto(CalculateX(lp), CalculateY(Height));
+              MoveTo(CalculateX(Width),
+                     CalculateY(lp));
+              LineTo(CalculateX(lp),
+                     CalculateY(lp));
+              LineTo(CalculateX(lp),
+                     CalculateY(Height));
             end;
 
           // Top left
           Pen.Color := tcTop;
           for lp  := 0 to bw - 1 do
             begin
-              MoveTo(Width, lp);
-              LineTo(lp, lp);
-              LineTo(lp, Height - bw);
+              MoveTo(Width,
+                     lp);
+              LineTo(lp,
+                     lp);
+              LineTo(lp,
+                     Height - bw);
             end;
         end;
     end;

@@ -187,19 +187,16 @@ type
     iSliderL: FLOAT;
     iSliderR: FLOAT;
 
-
-    function OpenAudioFile(): string;
+    function GetAudioFile(): string;
 
     /// <summary>Set Left and/or Right volume.</summary>
     procedure SetVolumeChannels();
 
-    /// <summary>Get the status of the XAudio2 engine.</summary>
+    // Get the status of the XAudio2 engine.
     function GetStatus(): string;
-
     // Helper for Reverb calls
     //function GetReverbParams(index: Integer): TReverbParams;
 
-    // Event handlers ==========================================================
 
     // Xaudi2Engine events
     procedure HandleOnProcessingData(Sender: TObject);
@@ -209,10 +206,8 @@ type
     procedure HandleOnAudioPlayingEvent(Sender: TObject);
     procedure HandleOnAudioPauzedEvent(Sender: TObject);
     // XAudio2VoiceCallback events
-
     procedure HandleOnVoiceProcessingPassStartEvent(Sender: TObject);
     procedure HandleOnVoiceProcessingPassEndEvent(Sender: TObject);
-
     procedure HandleOnStreamEndEvent(Sender: TObject);
     procedure HandleOnBufferStartEvent(Sender: TObject);
     procedure HandleOnBufferEndEvent(Sender: TObject);
@@ -241,7 +236,7 @@ begin
       // Play.
       fXaudio2Engine.Play();
       // Keep volume on previous volume.
-      //SetVolumeChannels();
+      SetVolumeChannels();
       butPlayPause.Tag := 1;
     end
   else // Pause.
@@ -269,14 +264,14 @@ begin
   // You don't need to command Play, this will be done internally.
   hr := fXaudio2Engine.InitializeXAudio2(True);
 
-  // Keep volume on previous volume.
-  SetVolumeChannels();
-
   // Set choosen effects.
   ckbReverbMainCloseUp(nil);
   ckbReverbSourceCloseUp(nil);
 
   // ===========================================================================
+
+  // Keep volume on previous volume.
+  SetVolumeChannels();
 
   if FAILED(hr) then
     StatusBar.SimpleText := Format('Could not initialize XAudio2 Error: %d.', [hr]);
@@ -372,17 +367,9 @@ var
   {$ENDIF}
 
 begin
-
-  // Create the engine and set handlers.
+  // Create the engine class.
   fXaudio2Engine := TXaudio2Engine.Create();
-
-  if not Assigned(fXaudio2Engine) then
-    begin
-      ShowMessage('Error. The audio2Engine could not be created.');
-      Exit;
-    end;
-
-
+  //
   fXaudio2Engine.OnProcessingData := HandleOnProcessingData;
   fXaudio2Engine.OnAudioReadyEvent := HandleOnAudioReadyEvent;
 
@@ -396,10 +383,6 @@ begin
   fXaudio2Engine.OnStreamEndEvent := HandleOnStreamEndEvent;
   fXaudio2Engine.OnBufferStartEvent := HandleOnBufferStartEvent;
   fXaudio2Engine.OnBufferEndEvent := HandleOnBufferEndEvent;
-
-  // Enable peakmeters.
-  pmLeft.Enabled := True;
-  pmRight.Enabled := True;
 
   dlgOpen.Filter := AUDIO_FILE_FILTER;
   dlgOpen.FilterIndex := 1;
@@ -521,7 +504,7 @@ begin
 end;
 
 
-function TfrmMain.OpenAudioFile(): string;
+function TfrmMain.GetAudioFile(): string;
 begin
   Result := 'No audiofile selected.';
   dlgOpen.FileName := '';
@@ -632,7 +615,7 @@ var
 begin
 try
   // Select an audiofile.
-  fAudioFileFullPath := OpenAudioFile();
+  fAudioFileFullPath := GetAudioFile();
 
   if (fAudioFileName = 'No audiofile selected.') then
     Exit;
@@ -640,8 +623,7 @@ try
   fAudioFileName := ExtractFileName(fAudioFileFullPath);
 
   // Load and play the audiofile.
-  hr := fXaudio2Engine.LoadAndPlay(Handle,
-                                   fAudioFileFullPath);
+  hr := fXaudio2Engine.LoadAndPlay(fAudioFileFullPath);
 
   if SUCCEEDED(hr) then
     SetVolumeChannels();
@@ -655,7 +637,7 @@ end;
 procedure TfrmMain.pbProgressMouseMove(Sender: TObject; Shift: TShiftState; X,
   Y: Integer);
 var
-  fSamplePos: UINT64;
+  fSamplePos: LONGLONG;
   fTimePos: string;
 
 begin
@@ -698,53 +680,49 @@ end;
 
 function TfrmMain.GetStatus(): string;
 begin
-  if not Assigned(fXaudio2Engine) then
-    Exit;
-
   case fXaudio2Engine.PlayStatus of
-    rsStopped:      Result := 'Stopped';
-    rsPlaying:      Result := 'Playing';
-    rsPauzed:       Result := 'Paused';
-    rsEndOfBuffer:  Result := 'EndOfBuffer';
-    rsEndOfStream:  Result := 'EndOfStream';
+    rsStopped: Result := 'Stopped';
+    rsPlaying: Result := 'Playing';
+    rsPauzed: Result := 'Paused';
+    rsEndOfBuffer: Result := 'EndOfBuffer';
+    rsEndOfStream: Result := 'EndOfStream';
     rsInitializing: Result := 'Initializing';
-    rsInitialized:  Result := 'Initialized';
+    rsInitialized: Result := 'Initialized';
 
-    // These are stubs (eg not implemented).
-    //rsProcessingPassStart: Result := 'ProcessingPassStart';
-    //rsProcessingPassEnd:   Result := 'ProcessingPassEnd';
+    // These are stubs.
+    //rsProcessingPassStart: sStatus := 'ProcessingPassStart';
+    //rsProcessingPassEnd: sStatus := 'ProcessingPassEnd';
 
-    rsDestroying:   Result := 'Destroying';
+    rsDestroying: Result := 'Destroying';
     else
-      Result               := 'Unknown render status';
+      Result := 'Unknown render status';
     end;
+
 end;
 
 
 procedure TfrmMain.HandleOnProcessingData(Sender: TObject);
 var
   Xaudio2EventData: TXaudio2EventData;
+  sPlayed: string;
 
 begin
-  if (fXaudio2Engine.PlayStatus = rsPlaying) then
-    begin
-      Xaudio2EventData := fXaudio2Engine.AudioEventData;
 
-      TThread.Synchronize(nil,
-                          procedure
-                            begin
-                              lblPlayed.Caption := Format('Played: %s',
-                                                          [HnsTimeToStr(Xaudio2EventData.TimePlayed,
-                                                                        False)]);
+  TThread.Synchronize(nil,
+                      procedure
+                        begin
+                          Xaudio2EventData := fXaudio2Engine.AudioEventData;
+                          sPlayed := HnsTimeToStr(Xaudio2EventData.TimePlayed,
+                                                  False);
 
-                              lblProcessed.Caption := Format('Samples: %d',
-                                                             [Xaudio2EventData.Position + Xaudio2EventData.SamplesProcessed]);
+                          lblProcessed.Caption := Format('Samples: %d',
+                                                         [Xaudio2EventData.Position + Xaudio2EventData.SamplesProcessed]);
 
-                              pbProgress.Position := Xaudio2EventData.Position + Xaudio2EventData.SamplesProcessed;
-                              HandleThreadMessages(GetCurrentThread());
-                            end);
-    end;
+                          lblPlayed.Caption := Format('Played: %s',
+                                                      [sPlayed]);
 
+                          pbProgress.Position := Xaudio2EventData.Position + Xaudio2EventData.SamplesProcessed;
+                        end);
   Application.ProcessMessages;
 end;
 
@@ -783,7 +761,6 @@ begin
   butPlayPause.Enabled := False;
   butPlayPause.Caption := 'Play';
   lblPlayed.Caption := 'Played: 00:00:00';
-  lblProcessed.Caption := 'Samples: 0';
   pbProgress.Position := 0;
   butStop.Enabled := False;
   butReplay.Enabled := True;
@@ -797,14 +774,12 @@ procedure TfrmMain.HandleOnAudioPlayingEvent(Sender: TObject);
 begin
   butPlayPause.Enabled := True;
   butPlayPause.Caption := 'Pause';
-  butPlayPause.Tag := 1;
   butStop.Enabled := True;
-  butReplay.Enabled := True;
-  StatusBar.SimpleText := Format('Loaded file: %s', [fAudioFileName]);
-  stxtStatus.Caption := GetStatus();;
+  StatusBar.SimpleText := Format('Loaded file: %s.', [fAudioFileName]);
+  stxtStatus.Caption := GetStatus();
 end;
 
-// Called when pauzed.
+// Called when paused.
 procedure TfrmMain.HandleOnAudioPauzedEvent(Sender: TObject);
 begin
   butPlayPause.Caption := 'Play';
@@ -813,17 +788,18 @@ begin
   stxtStatus.Caption := GetStatus();
 end;
 
-// Not used.
+
 procedure TfrmMain.HandleOnVoiceProcessingPassStartEvent(Sender: TObject);
 begin
   // Stub.
 end;
 
-// Not used.
+
 procedure TfrmMain.HandleOnVoiceProcessingPassEndEvent(Sender: TObject);
 begin
   // Stub.
 end;
+
 
 // Called when all buffers have been played.
 procedure TfrmMain.HandleOnStreamEndEvent(Sender: TObject);
@@ -860,13 +836,12 @@ begin
   stxtStatus.Caption := GetStatus();
 end;
 
-
 // initialization and finalization =============================================
 
 initialization
 
-  //CoInitializeEx(nil,
-  //               COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE);
+  CoInitializeEx(nil,
+                 COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE);
 
   if FAILED(MFStartup(MF_VERSION,
                       MFSTARTUP_LITE)) then
@@ -881,6 +856,6 @@ initialization
 finalization
 
   MFShutdown();
-  //CoUnInitialize();
+  CoUnInitialize();
 
 end.

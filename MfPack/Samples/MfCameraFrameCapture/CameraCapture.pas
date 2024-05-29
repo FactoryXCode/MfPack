@@ -91,8 +91,10 @@ type
     iFrameHeigth: Integer;
     iFrameWidth: Integer;
     iFramesPerSecond: Integer;
+    oMajorType: TGUID;
     oSubType: TGUID;
   end;
+
   TVideoFormats = TArray<TVideoFormat>;
 
   TOnCalculateComplete = reference to procedure(const AFramesPerSecond: Integer);

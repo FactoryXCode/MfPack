@@ -329,7 +329,7 @@ begin
     nSamplesPerSecond := MFGetAttributeUINT32(uncompressedAudioType,
                                               MF_MT_AUDIO_SAMPLES_PER_SECOND,
                                               UINT32(0));
-  // Createt sample.
+  // Create sample.
   if SUCCEEDED(hr) then
     SetLength(pvBytes,
               0);
@@ -345,13 +345,24 @@ begin
                                     nil,
                                     @sample);
 
-      // Check for eof
-      if ((flags and MF_SOURCE_READERF_ENDOFSTREAM) <> 0) then
+      // To be on the safe side we check all flags for which
+      // further reading would not make any sense
+      // and set EndOfFile to True
+      if ((flags and MF_SOURCE_READERF_ENDOFSTREAM) <> 0) or
+         ((flags and MF_SOURCE_READERF_ERROR) <> 0) or
+         ((flags and MF_SOURCE_READERF_NEWSTREAM) <> 0) or
+         ((flags and MF_SOURCE_READERF_NATIVEMEDIATYPECHANGED) <> 0) or
+         ((flags and MF_SOURCE_READERF_ALLEFFECTSREMOVED) <> 0) then
+      begin
         Break;
+      end;
 
       // If the sample is nil, there is a gap in the data stream that can't be filled: No reason to quit..
-      if (sample = nil) then
-        Continue;
+      //if (sample = nil) then
+      //  Continue;
+
+     if (flags = MF_SOURCE_READERF_STREAMTICK) then
+       Continue;
 
       // Convert data to contiguous buffer.
       hr := sample.ConvertToContiguousBuffer(buffer);
@@ -402,7 +413,7 @@ begin
   bReady := False;
 
   // Use the XAudio2Create function to create an instance of the XAudio2 engine.
-  hr := XAudio2Create(pvXAudio2,
+  hr := XAudio2Create(@pvXAudio2,
                       0,
                       XAUDIO2_DEFAULT_PROCESSOR);
   if FAILED(hr) then
@@ -412,18 +423,17 @@ begin
   //
   // The mastering voices encapsulates an audio device.
   // It is the ultimate destination for all audio that passes through an audio graph.
-  hr := pvXAudio2.CreateMasteringVoice(pvMasteringVoice);
+  hr := pvXAudio2.CreateMasteringVoice(@pvMasteringVoice);
   if FAILED(hr) then
     goto done;
 
-  hr := pvXAudio2.CreateSourceVoice(pvSourceVoice,
+  hr := pvXAudio2.CreateSourceVoice(@pvSourceVoice,
                                     pvWaveformatex,
                                     0,
                                     XAUDIO2_DEFAULT_FREQ_RATIO,
                                     Self); // register Audio2VoiceCallback
   if FAILED(hr) then
     goto done;
-
 
   // Set up XAudio2 buffer.
   ZeroMemory(@pvXAudioBuffer,

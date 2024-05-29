@@ -333,62 +333,62 @@ begin
           // aspect ratio 4:3
           edFPS.Text := '24'; // 24 or 48 FPS
         end;
-    3:  begin
+    4:  begin
           FSinkWriter.SinkWriterParams.dwWidth  := 1280;
           FSinkWriter.SinkWriterParams.dwHeigth := 720;
           FSinkWriter.SinkWriterParams.sResolutionDescription := 'HD        720p  (1280 x 720) aspect ratio 16:9';
           // aspect ratio 16:9
           edFPS.Text := '24'; // 24 or 48 FPS
         end;
-    4:  begin
+    5:  begin
           FSinkWriter.SinkWriterParams.dwWidth  := 1920;
           FSinkWriter.SinkWriterParams.dwHeigth := 1080;
           FSinkWriter.SinkWriterParams.sResolutionDescription := 'FHD      1080p  (1920 x 1080) aspect ratio 16:9';
           edFPS.Text := '24'; // 24 or 48 FPS
         end;
-    5:  begin
+    6:  begin
           FSinkWriter.SinkWriterParams.dwWidth  := 2560;
           FSinkWriter.SinkWriterParams.dwHeigth := 1440;
           FSinkWriter.SinkWriterParams.sResolutionDescription := 'QHD      1440p  (2560 x 1440) aspect ratio 4:3';
           edFPS.Text := '24'; // 24 or 48 FPS
         end;
-    6:  begin
+    7:  begin
           FSinkWriter.SinkWriterParams.dwWidth  := 2560;
           FSinkWriter.SinkWriterParams.dwHeigth := 1700;
           FSinkWriter.SinkWriterParams.sResolutionDescription := 'WS       1700p  (2560 x 1700) aspect ratio 4:3';
           edFPS.Text := '24'; // 24 or 48 FPS
         end;
-    7:  begin
+    8:  begin
           FSinkWriter.SinkWriterParams.dwWidth  := 2048;
           FSinkWriter.SinkWriterParams.dwHeigth := 1080;
           FSinkWriter.SinkWriterParams.sResolutionDescription := '2K       1080p  (2048 x 1080)';
           edFPS.Text := '24';  // 23.976, 24, 25, 29.97, 30, 45 or 48 FPS.
         end;
-    8:  begin
+    9:  begin
           FSinkWriter.SinkWriterParams.dwWidth  := 3840;
           FSinkWriter.SinkWriterParams.dwHeigth := 2160;
           FSinkWriter.SinkWriterParams.sResolutionDescription := '4K CW    2160p  (3840 x 2160)';
           edFPS.Text := '24';  // 23.976, 24, 25, 29.97, 30, 45, 48, 50, 59.94, 60, 100, 119.88 or 120 FPS.
         end;
-    9:  begin
+    10:  begin
           FSinkWriter.SinkWriterParams.dwWidth  := 3840;
           FSinkWriter.SinkWriterParams.dwHeigth := 2160;
           FSinkWriter.SinkWriterParams.sResolutionDescription := '4K UHD   2160p  (3840 x 2160)';
           edFPS.Text := '24';  // 23.976, 24, 25, 29.97, 30, 45, 48, 50, 59.94, 60, 100, 119.88 or 120 FPS.
         end;
-    10:  begin
+    11:  begin
            FSinkWriter.SinkWriterParams.dwWidth  := 4096;
            FSinkWriter.SinkWriterParams.dwHeigth := 2160;
            FSinkWriter.SinkWriterParams.sResolutionDescription := '4K DCI   2160p  (3840 x 2160)';
            edFPS.Text := '24';  // 23.976, 24, 25, 29.97, 30, 45, 48, 50, 59.94, 60, 100, 119.88 or 120 FPS.
          end;
-    11:  begin
+    12:  begin
            FSinkWriter.SinkWriterParams.dwWidth  := 7680;
            FSinkWriter.SinkWriterParams.dwHeigth := 4320;
            FSinkWriter.SinkWriterParams.sResolutionDescription := '8K UHD  4320p  (7680 x 4320)';
            edFPS.Text := '24';  // 23.976, 24, 25, 29.97, 30, 45, 48, 50, 59.94, 60, 100, 119.88, 120 or 240 FPS.
          end;
-    12:  begin
+    13:  begin
            FSinkWriter.SinkWriterParams.dwWidth  := 8192;
            FSinkWriter.SinkWriterParams.dwHeigth := 4320;
            FSinkWriter.SinkWriterParams.sResolutionDescription := '8K DCI  2160p  (8192 x 4320)';

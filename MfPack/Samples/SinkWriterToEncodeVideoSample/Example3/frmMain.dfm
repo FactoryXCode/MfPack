@@ -23,15 +23,13 @@ object frmMain: TfrmMain
     Height = 21
     Panels = <>
     SimplePanel = True
-    ExplicitTop = 568
-    ExplicitWidth = 955
   end
   object PageControl1: TPageControl
     Left = 0
     Top = 0
     Width = 944
     Height = 579
-    ActivePage = TabSheet2
+    ActivePage = TabSheet1
     Align = alClient
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -52,8 +50,6 @@ object frmMain: TfrmMain
       Font.Style = [fsBold]
       ImageIndex = 1
       ParentFont = False
-      ExplicitLeft = 5
-      ExplicitTop = 26
       DesignSize = (
         936
         547)
@@ -246,7 +242,7 @@ object frmMain: TfrmMain
         Left = 175
         Top = 143
         Width = 49
-        Height = 23
+        Height = 24
         Hint = 'Set the encoding quality (10 to 100, recommended: >=60)'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -378,7 +374,7 @@ object frmMain: TfrmMain
           ParentFont = False
         end
         object cbxAudioCodec: TComboBox
-          Left = 172
+          Left = 174
           Top = 17
           Width = 299
           Height = 23
@@ -453,8 +449,6 @@ object frmMain: TfrmMain
     object TabSheet2: TTabSheet
       Caption = 'Create SlideShow'
       ImageIndex = 1
-      ExplicitWidth = 947
-      ExplicitHeight = 536
       object Panel5: TPanel
         Left = 0
         Top = 294
@@ -471,7 +465,6 @@ object frmMain: TfrmMain
         ParentShowHint = False
         ShowHint = True
         TabOrder = 0
-        ExplicitTop = 297
         object Bevel2: TBevel
           Left = 1
           Top = 15
@@ -775,8 +768,6 @@ object frmMain: TfrmMain
         Height = 294
         Align = alClient
         TabOrder = 1
-        ExplicitWidth = 947
-        ExplicitHeight = 302
         object Splitter1: TSplitter
           Left = 238
           Top = 1
@@ -806,7 +797,6 @@ object frmMain: TfrmMain
           Align = alLeft
           BevelOuter = bvNone
           TabOrder = 0
-          ExplicitHeight = 300
           object Bevel4: TBevel
             Left = 0
             Top = 0
@@ -830,7 +820,6 @@ object frmMain: TfrmMain
             ParentFont = False
             TabOrder = 2
             OnChange = dlbDirChange
-            ExplicitLeft = -3
           end
           object DriveComboBox1: TDriveComboBox
             Left = 2
@@ -884,7 +873,6 @@ object frmMain: TfrmMain
           Align = alLeft
           BevelOuter = bvNone
           TabOrder = 1
-          ExplicitHeight = 300
           object lblImageCount: TLabel
             AlignWithMargins = True
             Left = 5
@@ -920,7 +908,6 @@ object frmMain: TfrmMain
             TabOrder = 0
             OnClick = lbxFileBoxClick
             OnDblClick = lbxFileBoxDblClick
-            ExplicitHeight = 275
           end
         end
         object Panel3: TPanel
@@ -931,7 +918,6 @@ object frmMain: TfrmMain
           Align = alLeft
           BevelOuter = bvNone
           TabOrder = 2
-          ExplicitHeight = 300
           object lblRenderingOrder: TLabel
             AlignWithMargins = True
             Left = 5
@@ -968,7 +954,6 @@ object frmMain: TfrmMain
             OnDragDrop = lbxRenderingOrderDragDrop
             OnDragOver = lbxRenderingOrderDragOver
             OnStartDrag = lbxRenderingOrderStartDrag
-            ExplicitHeight = 275
           end
         end
         object Panel4: TPanel
@@ -979,8 +964,6 @@ object frmMain: TfrmMain
           Align = alClient
           BevelInner = bvLowered
           TabOrder = 3
-          ExplicitWidth = 310
-          ExplicitHeight = 300
           object Bevel7: TBevel
             Left = 2
             Top = 2
@@ -1037,7 +1020,6 @@ object frmMain: TfrmMain
             MarqueeInterval = 1
             Step = 1
             TabOrder = 1
-            ExplicitTop = 35
           end
         end
       end
@@ -1063,27 +1045,5 @@ object frmMain: TfrmMain
     Title = 'Choose an audio file.'
     Left = 711
     Top = 8
-  end
-  object OD: TFileOpenDialog
-    FavoriteLinks = <>
-    FileTypes = <>
-    Options = [fdoPickFolders, fdoPathMustExist]
-    Left = 588
-    Top = 7
-  end
-  object FODPic: TFileOpenDialog
-    FavoriteLinks = <>
-    FileTypes = <
-      item
-        DisplayName = 'All supported'
-        FileMask = '*.bmp;*.jpg;*.png;*.gif'
-      end
-      item
-        DisplayName = 'All'
-        FileMask = '*.*'
-      end>
-    Options = []
-    Left = 649
-    Top = 7
   end
 end

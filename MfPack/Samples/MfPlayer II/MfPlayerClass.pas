@@ -146,13 +146,13 @@ type
 
 type
 
-  // Note: We don't use the TInterfacedObject, because we don't want areference counting mechanism.
+  // Note: We don't use the TInterfacedObject, because we don't want a reference counting mechanism.
   // TInterfacedPersistence does not have a reference counting mechanism.
   // It delegates it to it's owner and that is what we want.
   // You may read some more about this issue here:
   // https://www.codeproject.com/Articles/1252175/Fixing-Delphis-Interface-Limitations
-  // We always free and Nil  TInterfacedPersistent when closing the app or otherwise.
-  // for this you call FInterfacedPersistent := Free and  FInterfacedPersistent := Nil or
+  // We always free and nil TInterfacedPersistent when closing the app or otherwise.
+  // for this you call FInterfacedPersistent := Free and  FInterfacedPersistent := nil or
   // use FreeAndNil(FInterfacedPersistent);
   TMfPlayer = class(TInterfacedPersistent, IMFAsyncCallback)
   private
