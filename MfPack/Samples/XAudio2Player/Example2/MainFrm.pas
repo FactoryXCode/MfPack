@@ -142,7 +142,8 @@ type
   private
     { Private declarations }
     fXaudio2Engine: TXaudio2Engine;
-    fAudioFileName: TFileName;
+    fAudioFileUrl: TFileName;
+    fFileName: string; // Filename without path.
     llAudioDuration: LONGLONG;
 
     function GetAudioFile(): string;
@@ -173,15 +174,17 @@ implementation
 
 procedure TfrmMain.butPauseClick(Sender: TObject);
 begin
+
   if not Assigned(fXaudio2Engine) then
     Exit;
   if SUCCEEDED(fXaudio2Engine.Pause) then
-    StatusBar.SimpleText := Format('Paused file: %s.', [fAudioFileName]);
+    StatusBar.SimpleText := Format('Paused file: %s.', [fFileName]);
 end;
 
 
 procedure TfrmMain.butPlayClick(Sender: TObject);
 begin
+
   if not Assigned(fXaudio2Engine) then
     Exit;
 
@@ -193,7 +196,7 @@ begin
   SetVolumeChannels();
 
   if SUCCEEDED(fXaudio2Engine.Play()) then
-    StatusBar.SimpleText := Format('Playing file: %s.', [fAudioFileName]);
+    StatusBar.SimpleText := Format('Playing file: %s.', [fFileName]);
 end;
 
 
@@ -202,6 +205,7 @@ var
   hr: HResult;
 
 begin
+
   if not Assigned(fXaudio2Engine) then
     Exit;
 
@@ -218,22 +222,29 @@ end;
 
 procedure TfrmMain.butStopClick(Sender: TObject);
 begin
+
   if not Assigned(fXaudio2Engine) then
     Exit;
   if SUCCEEDED(fXaudio2Engine.Stop()) then
-    StatusBar.SimpleText := Format('Stopped playing file: %s.', [fAudioFileName]);
+    if SUCCEEDED(fXaudio2Engine.InitializeXAudio2(False)) then
+       StatusBar.SimpleText := Format('Stopped playing file: %s.', [fFileName]);
 end;
 
 
 procedure TfrmMain.Exit1Click(Sender: TObject);
 begin
+
   Close();
 end;
 
 
 procedure TfrmMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
+
   CanClose := False;
+  // Deactivate the peakmeters.
+  pmLeft.Enabled := False;
+  pmRight.Enabled := False;
   if Assigned(fXaudio2Engine) then
     begin
       fXaudio2Engine.Stop;
@@ -305,6 +316,7 @@ end;
 
 function TfrmMain.GetAudioFile(): string;
 begin
+
   Result := 'No audiofile selected.';
   dlgOpen.FileName := '';
   if not dlgOpen.Execute(Handle) then
@@ -315,38 +327,23 @@ end;
 
 
 procedure TfrmMain.SetVolumeChannels();
-var
-  iSliderL: FLOAT;
-  iSliderR: FLOAT;
-
 begin
 
   if not Assigned(fXaudio2Engine) then
     Exit;
 
-  // trHorizontal or trVertical use
-  if (trbVolumeL.Orientation = trVertical) then
-    iSliderL := ((trbVolumeL.Max - trbVolumeL.Position) + trbVolumeL.Min) * 0.01
-  else
-    iSliderL := (trbVolumeL.Position * 0.01);
-
-  if (trbVolumeR.Orientation = trVertical) then
-    iSliderR := ((trbVolumeR.Max - trbVolumeR.Position) + trbVolumeR.Min) * 0.01
-  else
-    iSliderR := (trbVolumeR.Position * 0.01);
-
   // Mono
   // This is a very rare case, because mono is played on the leftchannel only or
   // on both channels without stereo effect.
   if (fXaudio2Engine.SoundChannels = 1) then
-    fXaudio2Engine.VolumeChannels[0] := iSliderL;
+    fXaudio2Engine.VolumeChannels[0] := (Abs(trbVolumeL.Position) * 0.01);
 
   // Stereo
   // The first stereo channel (0) is always the LEFT one!
   if (fXaudio2Engine.SoundChannels = 2) then
     begin
-      fXaudio2Engine.VolumeChannels[0] := iSliderL;
-      fXaudio2Engine.VolumeChannels[1] := iSliderR;
+      fXaudio2Engine.VolumeChannels[0] := (Abs(trbVolumeL.Position) * 0.01);
+      fXaudio2Engine.VolumeChannels[1] := (Abs(trbVolumeR.Position) * 0.01);
     end;
   fXaudio2Engine.SetVolumes(fXaudio2Engine.VolumeChannels);
 end;
@@ -357,19 +354,20 @@ var
   freq: Single;
 
 begin
+
   if not Assigned(fXaudio2Engine) then
     Exit;
 
   freq := MapRange((trbPitch.Position + 10) * 0.1,
                    trbPitch.Max * 0.1,
-                   trbPitch.Min* 0.1,
+                   trbPitch.Min * 0.1,
                    MIN_PITCH,
                    MAX_PITCH);
 
   fXaudio2Engine.SetPitch(freq);
 
   if (trbPitch.Position > 0) then
-    lblPitch.Caption :=  Format('-%d',
+    lblPitch.Caption :=  Format('%d',
                                 [Abs(trbPitch.Position)])
   else
     lblPitch.Caption :=  Format('%d',
@@ -378,30 +376,44 @@ end;
 
 
 procedure TfrmMain.trbVolumeLChange(Sender: TObject);
+var
+  vol: Single;
+
 begin
+
   if (cbLockVolumeSliders.Checked = True) then
     trbVolumeR.Position := trbVolumeL.Position;
 
   SetVolumeChannels();
 
-  if (trbVolumeL.Position > 0) then
-    lblRightVolume.Caption :=  Format('-%d', [Abs(trbVolumeL.Position)])
-  else
-    lblRightVolume.Caption :=  Format('%d', [Abs(trbVolumeL.Position)]);
+  vol := MapRange((trbVolumeL.Position),
+                   trbVolumeL.Max,
+                   trbVolumeL.Min,
+                   MIN_VOLUME,
+                   MAX_VOLUME);
+
+  lblLeftVolume.Caption := Format('%d', [Trunc(vol)]) + '%';
 end;
 
 
 procedure TfrmMain.trbVolumeRChange(Sender: TObject);
+var
+  vol: Single;
+
 begin
+
   if (cbLockVolumeSliders.Checked = True) then
     trbVolumeL.Position := trbVolumeR.Position;
 
   SetVolumeChannels();
 
-  if (trbVolumeR.Position > 0) then
-    lblLeftVolume.Caption :=  Format('-%d', [Abs(trbVolumeR.Position)])
-  else
-    lblLeftVolume.Caption :=  Format('%d', [Abs(trbVolumeR.Position)]);
+  vol := MapRange((trbVolumeR.Position),
+                   trbVolumeR.Max,
+                   trbVolumeR.Min,
+                   MIN_VOLUME,
+                   MAX_VOLUME);
+
+  lblRightVolume.Caption := Format('%d', [Trunc(vol)]) + '%';
 end;
 
 
@@ -410,14 +422,17 @@ var
   hr: HResult;
 
 begin
+
 try
   // Select an audiofile.
-  fAudioFileName := GetAudioFile();
-  if (fAudioFileName = 'No audiofile selected.') then
+  fAudioFileUrl := GetAudioFile();
+  if (fAudioFileUrl = 'No audiofile selected.') then
     Exit;
 
+  fFileName := ExtractFileName(fAudioFileUrl);
+
   // Get the length of the audiofile.
- hr := GetFileDuration(StrToPWideChar(fAudioFileName),
+ hr := GetFileDuration(StrToPWideChar(fAudioFileUrl),
                        llAudioDuration);
  if FAILED(hr) then
     begin
@@ -436,17 +451,16 @@ try
     Exit;
 
   StatusBar.SimpleText := Format('Selected file: %s.',
-                                 [fAudioFileName]);
+                                 [fFileName]);
 
   // Initialize the engine.
   hr := fXaudio2Engine.LoadFile(Handle,
-                                fAudioFileName,
+                                fAudioFileUrl,
                                 llAudioDuration);
   if SUCCEEDED(hr) then
     SetVolumeChannels();
 
 finally
-
   StatusBar.SimpleText := 'Open an audio file';
 end;
 end;
@@ -459,6 +473,7 @@ var
   iProgress: LONGLONG;
   iSamples: LONGLONG;
   tstr: string;
+
 begin
 
   iProgress := AMessage.WParam;
@@ -475,9 +490,10 @@ end;
 
 procedure TfrmMain.OnAudioReadyEvent(var AMessage: TMessage);
 begin
+
   if (AMessage.WParam = 1) then
     begin
-      StatusBar.SimpleText := Format('Ready to play: %s', [fAudioFileName]);
+      StatusBar.SimpleText := Format('Ready to play: %s', [fFileName]);
       butPlay.Enabled := True;
       butPause.Enabled := True;
       butStop.Enabled := True;
@@ -488,9 +504,10 @@ end;
 
 procedure TfrmMain.OnAudioEndedEvent(var AMessage: TMessage);
 begin
+
   if (AMessage.WParam = 1) then
     begin
-      StatusBar.SimpleText := Format('Ended playing: %s', [fAudioFileName]);
+      StatusBar.SimpleText := Format('Ended playing: %s', [fFileName]);
       butPlay.Enabled := True;
       butPause.Enabled := True;
       butStop.Enabled := True;
@@ -498,13 +515,11 @@ begin
     end;
 end;
 
+
 // initialization and finalization =============================================
 
 
 initialization
-  // A gui app should always use COINIT_APARTMENTTHREADED in stead of COINIT_MULTITHREADED
-  CoInitializeEx(nil,
-                COINIT_APARTMENTTHREADED);
 
   if FAILED(MFStartup(MF_VERSION,
                       MFSTARTUP_FULL)) then
@@ -519,6 +534,5 @@ initialization
 finalization
 
   MFShutdown();
-  CoUnInitialize();
 
 end.

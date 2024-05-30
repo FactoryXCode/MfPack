@@ -100,6 +100,9 @@ const
   // Minimum and maximum pitch values.
   MIN_PITCH = 0.4;
   MAX_PITCH = 2.0;
+  // Minimum and maximum volume values.
+  MIN_VOLUME = 0.0;
+  MAX_VOLUME = 100.0;
 
 type
 
@@ -204,7 +207,9 @@ begin
     begin
       pvXAudio2.StopEngine();
       pvMasteringVoice.DestroyVoice();
-      pvMasteringVoice.DestroyVoice();
+      pvSourceVoice.DestroyVoice();
+      pvSourceVoice := nil;
+      pvMasteringVoice := nil;
       SafeRelease(pvXAudio2);
     end;
   FLock.Free; // Free the critical section object.
@@ -222,7 +227,7 @@ var
   nativeMediaType: IMFMediaType;
   majorType: TGUID;
   subType: TGUID;
-  partialType,
+  partialType: IMFMediaType;
   uncompressedAudioType: IMFMediaType;
 
   sample: IMFSample;
@@ -334,10 +339,11 @@ begin
     SetLength(pvBytes,
               0);
 
-
   while (hr = S_OK) do
     begin
+      Sleep(0);
       flags := 0;
+
       hr := sourceReader.ReadSample(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
                                     0,
                                     nil,
@@ -358,14 +364,14 @@ begin
       end;
 
       // If the sample is nil, there is a gap in the data stream that can't be filled: No reason to quit..
-      //if (sample = nil) then
-      //  Continue;
+      if (sample = nil) then
+        Continue;
 
      if (flags = MF_SOURCE_READERF_STREAMTICK) then
        Continue;
 
       // Convert data to contiguous buffer.
-      hr := sample.ConvertToContiguousBuffer(buffer);
+      hr := sample.ConvertToContiguousBuffer(@buffer);
 
       // Lock Buffer and copy to local memory
       if SUCCEEDED(hr) then
@@ -379,7 +385,6 @@ begin
           SetLength(pvBytes,
                     Length(pvBytes) + Integer(audioDataLength));
 
-
           Move(audioData^,
                pvBytes[Length(pvBytes) - Integer(audioDataLength)],
                audioDataLength);
@@ -387,7 +392,7 @@ begin
         finally
           hr := buffer.Unlock();
         end;
-      SafeRelease(sample);
+      sample := nil;
     end;
 
   // Create Xaudio2 and run audio.
@@ -396,7 +401,6 @@ begin
 
 done:
   Result := hr;
-
 end;
 
 
@@ -572,8 +576,8 @@ begin
   // Set boundaries to prevent overflow or clipping
   for i := 0 to Length(aVolumes) - 1 do
     begin
-      if aVolumes[i] > 1.0 then
-        aVolumes[i] := 1.0;
+      if aVolumes[i] > XAUDIO2_MAX_VOLUME_LEVEL then
+        aVolumes[i] := XAUDIO2_MAX_VOLUME_LEVEL;
       if aVolumes[i] < 0.0 then
         aVolumes[i] := 0.0;
     end;
@@ -607,6 +611,7 @@ end;
 procedure TXaudio2Engine.SetPitch(aValue: Single);
 var
   flPitch: Single;
+
 begin
   FLock.Enter;
   flPitch := aValue;

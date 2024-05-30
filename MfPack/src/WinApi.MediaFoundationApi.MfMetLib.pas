@@ -6465,7 +6465,7 @@ label
 begin
   strres := 0;
 
-  hr := pSample.ConvertToContiguousBuffer(MediaBuffer);
+  hr := pSample.ConvertToContiguousBuffer(@MediaBuffer);
 
   if SUCCEEDED(hr) then
     hr := MediaBuffer.GetCurrentLength(BufferLength);
