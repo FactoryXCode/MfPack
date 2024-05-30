@@ -141,10 +141,10 @@ object frmMain: TfrmMain
   object trbVolumeR: TTrackBar
     Left = 159
     Top = 23
-    Width = 46
+    Width = 39
     Height = 180
     DoubleBuffered = True
-    Max = 224
+    Max = 0
     Min = -224
     Orientation = trVertical
     ParentDoubleBuffered = False
@@ -159,7 +159,7 @@ object frmMain: TfrmMain
     Width = 39
     Height = 180
     DoubleBuffered = True
-    Max = 224
+    Max = 0
     Min = -224
     Orientation = trVertical
     ParentDoubleBuffered = False
@@ -198,8 +198,8 @@ object frmMain: TfrmMain
     OnClick = butPauseClick
   end
   object mnuMain: TMainMenu
-    Left = 232
-    Top = 130
+    Left = 231
+    Top = 131
     object OpenAudioFile1: TMenuItem
       Caption = 'File'
       object Open1: TMenuItem

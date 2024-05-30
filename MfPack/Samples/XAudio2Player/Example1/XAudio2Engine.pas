@@ -138,7 +138,6 @@ type
 
     property SoundChannels: UINT32 read nChannels;
     property Volumes: TFloatArray read m_VolumeChannels write SetVolumes;
-
   end;
 
 
@@ -154,12 +153,15 @@ end;
 
 destructor TXaudio2Engine.Destroy();
 begin
+
   bPlaying := False;
   if Assigned(pvXAudio2) then
     begin
       pvXAudio2.StopEngine();
       pvMasteringVoice.DestroyVoice();
-      pvMasteringVoice.DestroyVoice();
+      pvSourceVoice.DestroyVoice();
+      pvMasteringVoice := nil;
+      pvSourceVoice := nil;
       SafeRelease(pvXAudio2);
     end;
 
@@ -190,6 +192,7 @@ label
   done;
 
 begin
+
   hwndCaller := hHwnd;
   pvFileName := audiofile;
   pvSourceFileDuration := fileDuration;
@@ -347,6 +350,7 @@ label
   done;
 
 begin
+
   bReady := False;
 
   // Use the XAudio2Create function to create an instance of the XAudio2 engine.
@@ -413,6 +417,7 @@ begin
 
       HandleThreadMessages(GetCurrentThread());
     end;
+
 done:
   if SUCCEEDED(hr) then
     // Signal we are done playing.
@@ -429,6 +434,7 @@ end;
 
 function TXaudio2Engine.Start(): HResult;
 begin
+
   if not Assigned(pvSourceVoice) then
     begin
       Result := E_POINTER;
@@ -441,6 +447,7 @@ end;
 
 function TXaudio2Engine.Stop(): HResult;
 begin
+
   if not Assigned(pvSourceVoice) then
     begin
       Result := E_POINTER;
@@ -448,12 +455,12 @@ begin
     end;
   Result := pvSourceVoice.Stop();
   bPlaying := False;
-
 end;
 
 
 function TXaudio2Engine.Pause(): HResult;
 begin
+
   if not Assigned(pvSourceVoice) then
     begin
       Result := E_POINTER;
@@ -465,6 +472,7 @@ end;
 
 function TXaudio2Engine.SetVolume(volume: Single): HResult;
 begin
+
   if not Assigned(pvSourceVoice) then
     begin
       Result := E_POINTER;
@@ -505,7 +513,6 @@ begin
                                         XAUDIO2_COMMIT_NOW);
   if FAILED(hr) then
     ShowMessage('Setting channelvolumes failed.');
-
 end;
 
 
