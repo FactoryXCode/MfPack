@@ -12,12 +12,10 @@ object Form1: TForm1
   Font.Name = 'Tahoma'
   Font.Style = []
   Menu = MainMenu
-  OldCreateOrder = False
-  Position = poDesktopCenter
+  Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
   OnMouseDown = FormMouseDown
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object dlgOpen: TOpenDialog
     Filter = 

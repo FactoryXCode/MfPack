@@ -602,10 +602,10 @@ begin
       begin
         SafeRelease(pSample);
         pSample := pSampleLoc;
-        hr := pSample.GetSampleTime(Timestamp);
+        hr := pSample.GetSampleTime(@Timestamp);
 
         if SUCCEEDED(hr) then
-          hr := pSample.GetSampleDuration(Duration);
+          hr := pSample.GetSampleDuration(@Duration);
 
         // fVideoInfo.Duration can return the wrong value!
         // if Timestamp + Duration >= fVideoInfo.Duration then
@@ -663,7 +663,7 @@ begin
   // an invalid sample is nil
   if Assigned(pSample) then
     begin
-      hr := pSample.ConvertToContiguousBuffer(pBuffer);
+      hr := pSample.ConvertToContiguousBuffer(@pBuffer);
       if FAILED(hr) then
         goto done;
 

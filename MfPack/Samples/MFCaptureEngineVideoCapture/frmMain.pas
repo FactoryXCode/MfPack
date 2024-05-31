@@ -338,7 +338,7 @@ begin
           bmCapturedFrame.LoadFromStream(FMemoryStream);
           if not bmCapturedFrame.Empty then
             begin
-              hr := aSample.GetSampleTime(lSampleTime);
+              hr := aSample.GetSampleTime(@lSampleTime);
               if FAILED(hr) then
                 goto done;
 

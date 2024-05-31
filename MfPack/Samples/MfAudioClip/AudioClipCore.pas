@@ -545,7 +545,7 @@ begin
         Continue;
 
       // Get a pointer to the audio data in the sample.
-      hr := pSample.ConvertToContiguousBuffer(pBuffer);
+      hr := pSample.ConvertToContiguousBuffer(@pBuffer);
 
       if FAILED(hr) then
         Break;

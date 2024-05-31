@@ -1477,7 +1477,7 @@ begin
      if (pAudioSample <> nil) then
        begin
 
-         hr := pAudioSample.GetSampleDuration(AudioSampleDuration);
+         hr := pAudioSample.GetSampleDuration(@AudioSampleDuration);
          if FAILED(hr) then
            Break;
 

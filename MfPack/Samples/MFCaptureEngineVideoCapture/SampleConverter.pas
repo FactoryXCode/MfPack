@@ -223,8 +223,7 @@ begin
       if SUCCEEDED(hr) then
         begin
           // Converts a sample with multiple buffers into a sample with a single buffer.
-          hr := pConvertedSample.ConvertToContiguousBuffer(pBuffer);
-
+          hr := pConvertedSample.ConvertToContiguousBuffer(@pBuffer);
         end;
     end
   else

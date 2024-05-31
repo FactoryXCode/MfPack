@@ -24,6 +24,6 @@ Project: Media Foundation - MFPack - Samples
 Project location: http://sourceforge.net/projects/MFPack
 
 First release date: 05-07-2020
-Final release date: 30-01-2023
+Final release date: 30-05-2024
 
 Copyright © FactoryX. All rights reserved.

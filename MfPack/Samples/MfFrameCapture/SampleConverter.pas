@@ -184,7 +184,7 @@ begin
   AError := '';
 
   // Converts a sample with multiple buffers into a sample with a single buffer.
-  Result := SUCCEEDED(ASample.ConvertToContiguousBuffer(pBuffer));
+  Result := SUCCEEDED(ASample.ConvertToContiguousBuffer(@pBuffer));
 
   try
 

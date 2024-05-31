@@ -22,7 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
-// 30/05/2024 Tony                Corrected volume.
+// 30/05/2024 Tony                Corrected volume calculation.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.

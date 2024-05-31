@@ -1300,7 +1300,7 @@ type
     function GetBufferCount({out} pdwBufferCount: PDWord): HResult; stdcall;
 
     function GetBufferByIndex(dwIndex: DWord;
-                              out ppBuffer: IMFMediaBuffer): HResult; stdcall;
+                              {out} ppBuffer: PIMFMediaBuffer): HResult; stdcall;
 
     function ConvertToContiguousBuffer({out} ppBuffer: PIMFMediaBuffer): HResult; stdcall;
 

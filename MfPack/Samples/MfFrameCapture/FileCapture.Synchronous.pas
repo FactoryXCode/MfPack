@@ -131,7 +131,7 @@ begin
             ltInfo);
         HandleMediaFormatChanged;
       end
-    else if Assigned(pSample) and SUCCEEDED(pSample.GetSampleTime(dSampleTimeStamp)) then
+    else if Assigned(pSample) and SUCCEEDED(pSample.GetSampleTime(@dSampleTimeStamp)) then
       begin
         tsSampleTime := TTimeSpan.FromTicks(dSampleTimeStamp);
         bFound := bEndOfStream or SampleWithinTolerance(APosition, tsSampleTime);

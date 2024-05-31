@@ -101,6 +101,9 @@ const
   // Minimum and maximum pitch values.
   MIN_PITCH = 0.4;
   MAX_PITCH = 2.0;
+  // Minimum and maximum volume values.
+  MIN_VOLUME = 0.0;
+  MAX_VOLUME = 100.0;
 
 type
 
@@ -515,7 +518,7 @@ begin
       else
         begin
           // Get the media buffer from the sample.
-          hr := mfSample.ConvertToContiguousBuffer(mfMediaBuffer);
+          hr := mfSample.ConvertToContiguousBuffer(@mfMediaBuffer);
           // Get the audio data from the media buffer.
           if SUCCEEDED(hr) then
             begin
@@ -807,11 +810,13 @@ begin
 
   aVolumes := Value;
 
-  // Set boundaries to prevent overflow or clipping
+  // Set boundaries to prevent overflow or clipping.
+  // Note: We don't use negative values that inverts the audio's phase.
+  //       See: https://learn.microsoft.com/en-us/windows/win32/xaudio2/xaudio2-volume-and-pitch-control
   for i := 0 to Length(aVolumes) - 1 do
     begin
-      if (aVolumes[i] > 1.0) then
-        aVolumes[i] := 1.0;
+      if (aVolumes[i] > XAUDIO2_MAX_VOLUME_LEVEL) then
+        aVolumes[i] := XAUDIO2_MAX_VOLUME_LEVEL;
       if (aVolumes[i] < 0.0) then
         aVolumes[i] := 0.0;
     end;
@@ -821,7 +826,7 @@ begin
     begin
       hr := pvSourceVoice.SetChannelVolumes(pvChannels, // The number of channels.
                                             @aVolumes[0],
-                                            XAUDIO2_COMMIT_NOW);
+                                            XAUDIO2_COMMIT_ALL{XAUDIO2_COMMIT_NOW});
       if FAILED(hr) then
         raise Exception.CreateFmt('TXaudio2Engine.SetVolumes failed with result %s.',
                                   [IntToHex(hr, 8) + #13,
@@ -907,7 +912,6 @@ begin
     end;
 
   FCriticalSection.Leave;
-//  HandleThreadMessages(GetCurrentThread());
 end;
 
 

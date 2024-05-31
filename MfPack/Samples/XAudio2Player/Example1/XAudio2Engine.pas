@@ -310,7 +310,7 @@ begin
         Continue;
 
       // Convert data to contiguous buffer.
-      hr := sample.ConvertToContiguousBuffer(buffer);
+      hr := sample.ConvertToContiguousBuffer(@buffer);
 
       // Lock Buffer and copy to local memory
       if SUCCEEDED(hr) then

@@ -220,7 +220,7 @@ begin
       Result := ConvertSampleToRGB(ASample, pConvertedSample);
       if Result then
         // Converts a sample with multiple buffers into a sample with a single buffer.
-        Result := SUCCEEDED(pConvertedSample.ConvertToContiguousBuffer(pBuffer));
+        Result := SUCCEEDED(pConvertedSample.ConvertToContiguousBuffer(@pBuffer));
     end
   else
     Result := ConvertSampleToRGB(ASample,

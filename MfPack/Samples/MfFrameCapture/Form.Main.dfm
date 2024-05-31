@@ -14,7 +14,7 @@ object FrmMain: TFrmMain
   KeyPreview = True
   Menu = MainMenu1
   OldCreateOrder = True
-  Position = poDesktopCenter
+  Position = poScreenCenter
   OnCreate = HandleFormCreate
   OnDestroy = HandleFormDestroy
   PixelsPerInch = 96

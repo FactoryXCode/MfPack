@@ -390,7 +390,7 @@ try
 
       if (dwStreamFlags = MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED) then
         NotifyMediaFormatChanged
-      else if Assigned(pSample) and SUCCEEDED(pSample.GetSampleTime(dSampleTimeStamp)) then
+      else if Assigned(pSample) and SUCCEEDED(pSample.GetSampleTime(@dSampleTimeStamp)) then
         begin
           bReachedMaxFrames := (FramesSkipped >= MaxFramesToSkip);
 

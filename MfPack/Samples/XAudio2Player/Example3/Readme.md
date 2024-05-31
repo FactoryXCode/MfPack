@@ -1,4 +1,4 @@
-# XAudio2Player Sample 4
+# XAudio2Player Sample 3
 
 Version: X 3.1.6
 
@@ -9,7 +9,6 @@ Description:
 This sample shows you how to implement threadsafe events and methods instead of using messages from the XaudioEngine.
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
 In your projectsettings you must add ..MfPack\Samples\MfComponents in the project options searchpath.  
-It also have a pitch control. 
 
 NOTES:
  - This release is updated for compiler version 17 up to 34.
@@ -22,6 +21,6 @@ Project location: https://github.com/FactoryXCode/MfPack
                   https://sourceforge.net/projects/MFPack
 
 First release date: 06-04-2024
-Final release date: 11-04-2024
+Final release date: 30-05-2024
 
 Copyright © FactoryX. All rights reserved.
