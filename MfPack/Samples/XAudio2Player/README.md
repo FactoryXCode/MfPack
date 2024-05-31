@@ -15,6 +15,8 @@ This sample has 3 levels.
  -  Sample 2 implements the IXAudio2VoiceCallback and has a pitch control.
  -  Sample 3 uses threadsafe events, instead of messages.
  -  Sample 4 Shows how to implement effects and a progressbar.
+           It also uses a TMemoryStream instead of a byte array to store the audio buffers.
+           The rendering loop will be processed in a separate thread to avoid sound disturbtion.   
 
 NOTES:
  - This release is updated for compiler version 17 up to 34.
@@ -27,7 +29,7 @@ Project location: https://github.com/FactoryXCode/MfPack
                   https://sourceforge.net/projects/MFPack
 
 First release date: 30-03-2024
-Final release date: 11-04-2024
+Final release date: 31-05-2024
 
 Copyright © FactoryX. All rights reserved.
 
