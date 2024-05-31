@@ -279,18 +279,17 @@ type
 
   // The thread we render after Start.
   TXAudio2RenderThread = class(TThread)
-
   private
     FEngine: TXaudio2Engine;
 
   protected
+    // Run the while loop called within method InitializeXAudio2.
     procedure Execute; override;
 
   public
     constructor Create(AEngine: TXaudio2Engine); reintroduce;
 
   end;
-
 
 
 implementation
@@ -349,8 +348,8 @@ end;
 
 constructor TXaudio2Engine.Create();
 begin
-
   inherited;
+
   FCriticalSection := TCriticalSection.Create;
   NeedNewSourceVoice := False;
   bReverbEffectOnSourceVoice := False;
@@ -626,6 +625,9 @@ begin
   pvXAudioBuffer.PlayLength := playEnd;  // Zero means to play until the end of the buffer.
   // Can be extended with loop arguments.
 
+  // Free the MemoryStream.
+  FreeAndNil(pvMemoryStream);
+
   // Start source voice and submit buffer.
   Result := pvSourceVoice.SubmitSourceBuffer(@pvXAudioBuffer);
 end;
@@ -756,8 +758,10 @@ begin
 
 done:
   Result := hr;
-end;}
+end;
+}
 
+// New code running the loop in a separate thread.
 function TXaudio2Engine.InitializeXAudio2(replay: Boolean = False): HResult;
 var
   hr: HResult;
@@ -841,7 +845,7 @@ begin
   // So, we need to create another thread to keep control.
   //
   // Note that, when this audiostream is over,
-  // the end of buffer will be signaled first, before endofstream.
+  // the end of buffer will be signaled first, before signal endofstream.
 
   // Start the rendering loop in the separate thread.
   TXAudio2RenderThread.Create(Self);
