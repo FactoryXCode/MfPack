@@ -116,7 +116,7 @@ type
 
   TReverbI3DL2ParamArray = array [0..29] of TReverbI3DL2Params;
 
-  TFxReverb = class(TObject {TInterfacedPersistent, IInterface})
+  TFxReverb = class(TObject)
   private
 
     pvFxParameters: XAUDIO2FX_REVERB_PARAMETERS;
@@ -307,12 +307,12 @@ begin
   if FAILED(hr) then
     goto done;
 
-  //if not pEnableEffect and pvReverbEffectEnabled then
-  //  begin
-  //    hr := EnableReverbEffect(ppVoice,
-  //                             pEnableEffect);
-  //   goto done;
-  //  end;
+  if not pEnableEffect and pvReverbEffectEnabled then
+    begin
+      hr := EnableReverbEffect(ppVoice,
+                               pEnableEffect);
+      goto done;
+    end;
 
   // Populate an XAUDIO2_EFFECT_DESCRIPTOR structure with data.
   descriptor.InitialState := True;
@@ -336,15 +336,15 @@ begin
                                     SizeOf(XAUDIO2FX_REVERB_PARAMETERS),
                                     XAUDIO2_COMMIT_NOW);
 
-  //if SUCCEEDED(hr) then
+  if SUCCEEDED(hr) then
     // Disable or enable the effect, whenever appropriate.
     // You can use yourvoice.DisableEffect at any time to turn an effect off.
     // You can turn on an effect again with yourvoice.EnableEffect.
     // Note: The parameters for yourvoice.DisableEffect and yourvoice.EnableEffect specify which
     //       effect in the chain to enable or disable.
 
-    //hr := EnableReverbEffect(ppVoice,
-    //                         pEnableEffect);
+    hr := EnableReverbEffect(ppVoice,
+                             pEnableEffect);
 
 done:
   Result := hr;

@@ -569,7 +569,7 @@ object frmMain: TfrmMain
   end
   object mnuMain: TMainMenu
     Left = 332
-    Top = 349
+    Top = 348
     object OpenAudioFile1: TMenuItem
       Caption = 'File'
       object Open1: TMenuItem

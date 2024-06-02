@@ -1,11 +1,6 @@
 program XAudio2RenderingSample;
 
 uses
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
   Vcl.Forms,
   MainFrm in 'MainFrm.pas' {frmMain},
   XAudio2Engine in 'XAudio2Engine.pas',
@@ -19,7 +14,7 @@ begin
 
   {$IFDEF DEBUG}
   {$WARN SYMBOL_PLATFORM OFF}
-  //ReportMemoryLeaksOnShutdown := True;
+  ReportMemoryLeaksOnShutdown := True;
   {$ENDIF}
 
   Application.Initialize;

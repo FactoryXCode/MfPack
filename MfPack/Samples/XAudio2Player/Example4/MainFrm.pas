@@ -257,25 +257,26 @@ begin
   if not Assigned(fXaudio2Engine) then
     Exit;
 
-  // When Stopped a previous audiostream, the SourceVoice is removed from the topology.
-  // I that case fXaudio2Engine.InitializeXAudio2 will build a new one.
-  if not fXaudio2Engine.AddNewSourceVoice then
-    butStopClick(nil);
+  butStopClick(Self);
 
   // You don't need to command Play, this will be done internally.
   hr := fXaudio2Engine.InitializeXAudio2(True);
+  if FAILED(hr) then
+    begin
+      StatusBar.SimpleText := Format('Could not initialize XAudio2 Error: %d.', [hr]);
+      Exit;
+    end;
+
+  Sleep(100);
 
   // Set choosen effects.
-  ckbReverbMainCloseUp(nil);
-  ckbReverbSourceCloseUp(nil);
-
-  // ===========================================================================
+  if (ckbReverbMain.ItemIndex > 0) then
+    ckbReverbMainCloseUp(Self);
+  if (ckbReverbSource.ItemIndex > 0) then
+    ckbReverbSourceCloseUp(Self);
 
   // Keep volume on previous volume.
   SetVolumeChannels();
-
-  if FAILED(hr) then
-    StatusBar.SimpleText := Format('Could not initialize XAudio2 Error: %d.', [hr]);
 end;
 
 
@@ -782,6 +783,7 @@ begin
   butPlayPause.Enabled := False;
   butPlayPause.Caption := 'Play';
   lblPlayed.Caption := 'Played: 00:00:00';
+  lblProcessed.Caption := 'Samples: 0';
   pbProgress.Position := 0;
   butStop.Enabled := False;
   butReplay.Enabled := True;
@@ -828,8 +830,6 @@ end;
 procedure TfrmMain.HandleOnStreamEndEvent(Sender: TObject);
 begin
 
-  pnlControls.Enabled := False;
-  pbProgress.Enabled := False;
   butPlayPause.Enabled := False;
   butPlayPause.Caption := 'Play';
   pbProgress.Position := 0;
