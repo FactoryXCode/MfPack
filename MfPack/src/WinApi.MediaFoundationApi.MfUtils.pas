@@ -77,6 +77,7 @@ uses
   {$ENDIF}
   {System}
   System.SysUtils,
+  System.WideStrUtils,
   System.UITypes,
   System.Types,
   System.SyncObjs,
@@ -1853,28 +1854,12 @@ end;
 {$WARN SYMBOL_PLATFORM ON}
 
 
-// Simplified helper of StringToWideChar function
+// Keep for previous versions;
 function StrToPWideChar(source: string): PWideChar;// inline;
-var
-  pwResult: PWideChar;
-
 begin
-  // Important note to string to PWideChar conversions
-  //==================================================
-  // To prevent error $80070002 (The system cannot find the file specified.), you
-  // should use this function instead of using typecast PWideChar(stringvalue)!!!
-  GetMem(pwResult,
-         (Length(source) +1) * SizeOf(PWideChar));
-  try
-    StringToWideChar(source,
-                     pwResult,
-                     Length(source) +1); // +1 because a pending 0 is added
-  finally
-    //
-    Result := pwResult;
-    FreeMem(pwResult);
-  end;
+  Result := PWideChar(source);
 end;
+
 
 // FOURCC functions
 

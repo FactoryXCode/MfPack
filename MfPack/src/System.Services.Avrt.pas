@@ -113,32 +113,32 @@ const
   // The following functions returns a handle if succeeded and 0 if failed
 
   function AvSetMmThreadCharacteristicsA({_In_} TaskName: PAnsiChar;
-                                         {_Inout_} var TaskIndex: DWORD): THandle; stdcall;
+                                         {_Inout_} TaskIndex: LPDWORD): THandle; stdcall;
   {$EXTERNALSYM AvSetMmThreadCharacteristicsA}
 
 
   function AvSetMmThreadCharacteristicsW({_In_} TaskName: PWideChar;
-                                         {_Inout_} var TaskIndex: DWORD): THandle; stdcall;
+                                         {_Inout_} TaskIndex: LPDWORD): THandle; stdcall;
   {$EXTERNALSYM AvSetMmThreadCharacteristicsW}
 
   function AvSetMmThreadCharacteristics({_In_} TaskName: PWideChar;
-                                        {_Inout_} var TaskIndex: DWORD): THandle; stdcall;
+                                        {_Inout_} TaskIndex: LPDWORD): THandle; stdcall;
   {$EXTERNALSYM AvSetMmThreadCharacteristics}
 
 
   function AvSetMmMaxThreadCharacteristicsA({_In_} FirstTask: PAnsiChar;
                                             {_In_} SecondTask: PAnsiChar;
-                                            {_Inout_} var TaskIndex: DWORD): THandle; stdcall;
+                                            {_Inout_} TaskIndex: LPDWORD): THandle; stdcall;
   {$EXTERNALSYM AvSetMmMaxThreadCharacteristicsA}
 
   function AvSetMmMaxThreadCharacteristicsW({_In_} FirstTask: PWideChar;
                                             {_In_} SecondTask: PWideChar;
-                                            {_Inout_} var TaskIndex: DWORD): THandle; stdcall;
+                                            {_Inout_} TaskIndex: LPDWORD): THandle; stdcall;
   {$EXTERNALSYM AvSetMmMaxThreadCharacteristicsW}
 
   function AvSetMmMaxThreadCharacteristics({_In_} FirstTask: PWideChar;
                                            {_In_} SecondTask: PWideChar;
-                                           {_Inout_} var TaskIndex: DWORD): THandle; stdcall;
+                                           {_Inout_} TaskIndex: LPDWORD): THandle; stdcall;
   {$EXTERNALSYM AvSetMmMaxThreadCharacteristics}
 
 
@@ -154,22 +154,22 @@ const
   // Returns False if failed
   function AvRtCreateThreadOrderingGroup({_Out_} out Context: PHandle;
                                          {_In_} Period: LARGE_INTEGER;
-                                         {_Inout_} var ThreadOrderingGuid: TGUID;
-                                         {_In_opt_} Timeout: LARGE_INTEGER): Bool; stdcall;
+                                         {_Inout_} ThreadOrderingGuid: PGUID;
+                                         {_In_opt_} Timeout: PLargeInteger ): Bool; stdcall;
   {$EXTERNALSYM AvRtCreateThreadOrderingGroup}
 
   // Returns False if failed
   function AvRtCreateThreadOrderingGroupExA({_Out_} out Context: PHandle;
                                             {_In_} Period: LARGE_INTEGER;
-                                            {_Inout_} var ThreadOrderingGuid: TGUID;
-                                            {_In_opt_} Timeout: LARGE_INTEGER;
+                                            {_Inout_} ThreadOrderingGuid: PGUID;
+                                            {_In_opt_} Timeout: PLargeInteger;
                                             {_In_} TaskName: PAnsiChar): Bool; stdcall;
   {$EXTERNALSYM AvRtCreateThreadOrderingGroupExA}
 
   // Returns False if failed
   function AvRtCreateThreadOrderingGroupExW({_Out_} out Context: PHandle;
                                             {_In_} Period: LARGE_INTEGER;
-                                            {_Inout_} var ThreadOrderingGuid: TGUID;
+                                            {_Inout_} ThreadOrderingGuid: PGUID;
                                             {_In_opt_} Timeout: LARGE_INTEGER;
                                             {_In_} TaskName: PWideChar): Bool; stdcall;
   {$EXTERNALSYM AvRtCreateThreadOrderingGroupExW}
@@ -177,7 +177,7 @@ const
   // Returns False if failed
   function AvRtCreateThreadOrderingGroupEx({_Out_} out Context: PHandle;
                                            {_In_} Period: LARGE_INTEGER;
-                                           {_Inout_} var ThreadOrderingGuid: TGUID;
+                                           {_Inout_} ThreadOrderingGuid: PGUID;
                                            {_In_opt_} Timeout: LARGE_INTEGER;
                                            {_In_} TaskName: PWideChar): Bool; stdcall;
   {$EXTERNALSYM AvRtCreateThreadOrderingGroupEx}

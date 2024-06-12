@@ -548,16 +548,16 @@ const
 
   { standard four character codes }
 
-  FOURCC_RIFF = ord('R') or ord('I') shl 8 or (ord('F') shl 16) or (ord('F') shl 24);
+  FOURCC_RIFF = FOURCC(ord('R') or ord('I') shl 8 or (ord('F') shl 16) or (ord('F') shl 24));
   {$EXTERNALSYM FOURCC_RIFF}
-  FOURCC_LIST = ord('L') or ord('I') shl 8 or (ord('S') shl 16) or (ord('T') shl 24);
+  FOURCC_LIST = FOURCC(ord('L') or ord('I') shl 8 or (ord('S') shl 16) or (ord('T') shl 24));
   {$EXTERNALSYM FOURCC_LIST}
 
   { four character codes used to identify standard built-in I/O procedures }
 
-  FOURCC_DOS  =  ord('D') or ord('O') shl 8 or (ord('S') shl 16) or (ord(' ') shl 24);
+  FOURCC_DOS  =  FOURCC(ord('D') or ord('O') shl 8 or (ord('S') shl 16) or (ord(' ') shl 24));
   {$EXTERNALSYM FOURCC_DOS}
-  FOURCC_MEM  = ord('M') or ord('E') shl 8 or (ord('M') shl 16) or (ord(' ') shl 24);
+  FOURCC_MEM  = FOURCC(ord('M') or ord('E') shl 8 or (ord('M') shl 16) or (ord(' ') shl 24));
   {$EXTERNALSYM FOURCC_MEM}
 
 

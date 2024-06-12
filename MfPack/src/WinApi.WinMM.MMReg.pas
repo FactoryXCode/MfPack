@@ -4018,6 +4018,12 @@ const
 
   WAVE_FORMAT_UNKNOWN                 = $0000;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_UNKNOWN}
+
+  // Declared afer the declaration of waveformat_tag. (See below)
+  //WAVE_FORMAT_PCM                     = $0001;  { Microsoft Corporation }
+  //{$EXTERNALSYM WAVE_FORMAT_PCM}
+
+
   WAVE_FORMAT_ADPCM                   = $0002;  { Microsoft Corporation }
   {$EXTERNALSYM WAVE_FORMAT_ADPCM}
   WAVE_FORMAT_IEEE_FLOAT              = $0003;  { Microsoft Corporation }
@@ -4602,7 +4608,9 @@ type
 
 
 {$DEFINE _WAVE_FORMAT_PCM_DEFINED}
-const WAVE_FORMAT_PCM = 1;
+const
+  WAVE_FORMAT_PCM = $0001;   { Microsoft Corporation }
+  {$EXTERNALSYM WAVE_FORMAT_PCM}
 {$ENDIF} // WAVE_FORMAT_PCM
 
 

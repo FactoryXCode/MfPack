@@ -24,6 +24,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
+// 12/06/2024 Tony                Removed EDataFlowEx.
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -128,7 +129,7 @@ type
     fAudioEndpoint: IAudioEndpointVolumeEx;
     fOnEndPointNotify: TOnEndPointNotify;
 
-    fDataFlow: EDataFlowEx; // The data-flow direction for the endpoint device.
+    fDataFlow: EDataFlow; // The data-flow direction for the endpoint device.
 
     fRole: ERole;       // The role of the endpoint device.
                         // The IMMDeviceEnumerator.GetDefaultAudioEndpoint and
@@ -160,7 +161,7 @@ type
     function GetMasterDbVolume(): Single;
     procedure SetMasterDbVolume(aValue: Single);
 
-    procedure SetDataFlow(aValue: EDataFlowEx);
+    procedure SetDataFlow(aValue: EDataFlow);
     procedure SetDeviceState(aValue: string);
 
     procedure SetEndPointDevice(aValue: DWord);
@@ -203,7 +204,7 @@ type
                                         out deviceDesc: WideString): HResult;
 
     // Get EndpointDevices
-    function GetAudioEndPoints(const flow: EDataFlowEx;
+    function GetAudioEndPoints(const flow: EDataFlow;
                                state: eState;
                                out endpointdevices: TEndPointDeviceArray): HResult;
 
@@ -230,7 +231,7 @@ type
 
     // read/write properties
     property DeviceID: DWord read dwDeviceID write SetEndPointDevice default 0;
-    property DeviceDataFlow: EDataFlowEx read fDataFlow write SetDataFlow default eRender;
+    property DeviceDataFlow: EDataFlow read fDataFlow write SetDataFlow default eRender;
     property DeviceState: string read GetStateAsString write SetDeviceState;
     property MasterScalarVolume: Single read GetMasterScalarVolume write SetMasterScalarVolume;
     property MasterDbVolume: Single read GetMasterDbVolume write SetMasterDbVolume;
@@ -537,15 +538,15 @@ begin
   OleCheck(hr);
 end;
 
-procedure TMfAudioEndPoint.SetDataFlow(aValue: EDataFlowEx);
+procedure TMfAudioEndPoint.SetDataFlow(aValue: EDataFlow);
 begin
-  // only these 2 members of the eDataFlow struct are alowed!
+  // Only these 2 members of the eDataFlow struct are alowed!
   if aValue in [eRender, eCapture] then
     begin
       fDataFlow := aValue;
-      OleCheck( GetAudioEndPoints(aValue,
-                                  fState,
-                                  FEndPointDevices) );
+      OleCheck(GetAudioEndPoints(aValue,
+                                 fState,
+                                 FEndPointDevices));
       dwDeviceID := 0;
     end;
 end;
@@ -735,7 +736,7 @@ end;
 
 
 // Get GetEndpointDevices
-function TMfAudioEndPoint.GetAudioEndPoints(const flow: EDataFlowEx;
+function TMfAudioEndPoint.GetAudioEndPoints(const flow: EDataFlow;
                                             state: eState;
                                             out endpointdevices: TEndPointDeviceArray): HResult;
 begin
