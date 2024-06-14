@@ -1242,7 +1242,7 @@ const
 // Misc
 // ====
 procedure CopyWaveFormatEx(const SourceFmt: WAVEFORMATEX;
-                           out DestFmt: PWAVEFORMATEX); inline;
+                           out DestFmt: PWAVEFORMATEX); //inline;
 
 // Returns 16 - bit PCM format.
 function GetDefaultWaveFmtEx(): WAVEFORMATEX; inline;
@@ -8376,30 +8376,39 @@ end;
 
 
 procedure CopyWaveFormatEx(const SourceFmt: WAVEFORMATEX;
-                           out DestFmt: PWAVEFORMATEX); inline;
+                           out DestFmt: PWAVEFORMATEX); //inline;
+var
+  dFmt: PWAVEFORMATEX;
+
 begin
   // Allocate memory for DestFormat
-  GetMem(DestFmt,
+  GetMem(dFmt,
          SizeOf(WAVEFORMATEX));
 
   // Copy SourceFormat to DestFormat
   Move(SourceFmt,
-       DestFmt^,
+       dFmt^,
        SizeOf(WAVEFORMATEX));
 
-  // User is responsible to free the memory occupied by the result.
-  // Like: FreeMem(DestFmt);
+  // User is responsible to free the memory occupied by parameter DestFmt.
+  DestFmt := dFmt;
+  FreeMem(dFmt);
 end;
 
 
 function GetDefaultWaveFmtEx(): WAVEFORMATEX;
+var
+  wavFmtEx: WAVEFORMATEX;
+
 begin
-  Result.wFormatTag      := WAVE_FORMAT_PCM;
-  Result.nChannels       := 2;
-  Result.nSamplesPerSec  := 44100;
-  Result.wBitsPerSample  := 16;
-  Result.nBlockAlign     := (Result.nChannels * Result.wBitsPerSample) div 8;
-  Result.nAvgBytesPerSec := Result.nBlockAlign * Result.nSamplesPerSec;
+  wavFmtEx.wFormatTag      := WAVE_FORMAT_PCM;
+  wavFmtEx.nChannels       := 2;
+  wavFmtEx.nSamplesPerSec  := 44100;
+  wavFmtEx.wBitsPerSample  := 16;
+  wavFmtEx.nBlockAlign     := (wavFmtEx.nChannels * wavFmtEx.wBitsPerSample) div 8;
+  wavFmtEx.nAvgBytesPerSec := wavFmtEx.nBlockAlign * wavFmtEx.nSamplesPerSec;
+
+  Result := wavFmtEx;
 end;
 
 
