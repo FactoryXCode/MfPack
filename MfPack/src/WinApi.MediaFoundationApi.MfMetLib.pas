@@ -1342,10 +1342,11 @@ begin
 
   for i := 0 to Length(aVideoFormats) - 1 do
     aVideoFormats[i].Reset;
-  CoTaskMemFree(aVideoFormats);
+  aVideoFormats := nil;
+
   for i := 0 to Length(aAudioFormats) - 1 do
     aAudioFormats[i].Reset;
-  CoTaskMemFree(aAudioFormats);
+  aAudioFormats := nil;
 
 end;
 
@@ -8338,13 +8339,11 @@ begin
 
   // Copy the the mft guids to array.
   SetLength(aGuidArray, iCount);
-
+  {$POINTERMATH ON}
   if SUCCEEDED(hr) then
     begin
-      {$POINTERMATH ON}
       for i := 0 to iCount -1 do
         aGuidArray[i] := ppCLSIDs[i];
-      {$POINTERMATH OFF}
     end;
 
   // Note:

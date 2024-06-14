@@ -273,8 +273,9 @@ var
 begin
   for i := 0 to Length(FDeviceProperties) -1 do
     FDeviceProperties[i].Reset;
+  // Dynamic array's are managed types, but just to be sure, assign nil to it.
+  FDeviceProperties := nil;
 
-  CoTaskMemFree(FDeviceProperties);
   FVideoFormatInfo.Reset();
 
   // Clear class properties
