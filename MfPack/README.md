@@ -201,6 +201,24 @@ a button to get the current PID of your application.
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopbackCapture2.png)
 
 
+**Threaded Loopback Capture Sample**
+
+Demonstrates how to capture sound from a rendering or capture device (one of the soundcard's endpoints)
+using WASAPI in combination with mmio to write wav-files.
+This sample lets you to choose between different latency's and 
+buffersize for better sound to eliminate buffer related gliches.
+ 
+It has some more advanced features like: 
+   - The rendering part is running in a separate thread to eliminate glitches.
+   - Able to use MMCSS (Multimedia Class Scheduler service).
+   - Stream switch detection.
+   - possibility to write wav data in native format 44.1 kHz/ 16 bit PCM or 
+     the soundcard's audio format (including Uncompressed IEEE floating-point audio).
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ThreadedLoopbackCapture.png)
+
+
+
 **XAudio2Player Basic Player**
 
 XAudio2 is the long-awaited replacement for DirectSound.
