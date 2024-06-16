@@ -110,12 +110,12 @@ object MainForm: TMainForm
       ShowHint = True
     end
     object tbBufferDuration: TTrackBar
-      Left = 0
-      Top = 62
+      Left = 1
+      Top = 64
       Width = 374
       Height = 25
-      Max = 30
-      Position = 5
+      Max = 100
+      Position = 10
       TabOrder = 0
       OnChange = tbBufferDurationChange
     end

@@ -81,6 +81,7 @@ uses
   Vcl.ComCtrls,
   Vcl.Menus,
   Vcl.ExtCtrls,
+  Vcl.Samples.Spin,
   {CoreAudioApi}
   WinApi.MediaFoundationApi.MfApi,
   WinApi.CoreAudioApi.MMDeviceApi,
@@ -91,7 +92,7 @@ uses
   ThreadedWASLoopbackCapture,
   Common,
   dlgDevices,
-  UniThreadTimer, Vcl.Samples.Spin;
+  UniThreadTimer;
 
 
 type
@@ -151,8 +152,6 @@ type
     prOrgFileName: TFileName;
     prEdited: Boolean;
 
-
-    //prEndPoint: IMMDevice;
     prEndPointDataFlow: EDataFlow;
     prEndPointRole: ERole;
 
@@ -161,12 +160,16 @@ type
 
     pvBufferDuration: REFERENCE_TIME;
     pvTargetLatency: REFERENCE_TIME;
+    BufferDurationCaptionSet: Boolean;
 
     // We use timers here, to prevent distortions when quering the capturethread for timing and processed data.
     // The timer must be set to 1 millisecond resolution.
     thrTimer: TUniThreadedTimer;
     aStopWatch: TStopwatch;
-    BufferDurationCaptionSet: Boolean;
+    prTimerDestroyed: Boolean;
+
+    procedure CreateTimer();
+    procedure KillTimer(Sender: TObject);
 
     procedure EnablePanels(aEnabled: Boolean);
 
@@ -202,6 +205,31 @@ begin
 end;
 
 
+procedure TMainForm.CreateTimer();
+begin
+
+  if(thrTimer <> nil) then
+    KillTimer(Self);
+
+  thrTimer := TUniThreadedTimer.Create(Self);
+  thrTimer.Period := 100;  // 100 millisecond resolution.
+  thrTimer.Enabled := False;
+  thrTimer.OnTimerEvent := OnTimer;
+  prTimerDestroyed := False;
+end;
+
+
+procedure TMainForm.KillTimer(Sender: TObject);
+begin
+  if (thrTimer <> nil) then
+    begin
+      thrTimer.Enabled := False;
+      FreeAndNil(thrTimer);
+      prTimerDestroyed := True;
+    end;
+end;
+
+
 procedure TMainForm.OnCapturingStoppedEvent(Sender: TObject);
 var
   Status: TDeviceState;
@@ -211,7 +239,7 @@ begin
     Exit;
 
   // Stop the timer and stopwatch.
-  thrTimer.Enabled := False;
+  KillTimer(Self);
   aStopWatch.Stop;
   aStopWatch.Reset;
 
@@ -242,7 +270,7 @@ begin
 end;
 
 
-procedure TMainForm.OnTimer(sender: TObject);
+procedure TMainForm.OnTimer(Sender: TObject);
 begin
 
   if Assigned(prWASCapture) then
@@ -259,9 +287,8 @@ begin
 
         lblStatus.Caption := 'Capturing from source: ' + FormatDateTime('hh:nn:ss.zzz',
                                                                         aStopWatch.ElapsedMilliseconds / MSecsPerDay);
-      end
-    else
-      lblStatus.Caption := 'Capturing from source: 00:00:00.000';
+      end;
+
   Application.ProcessMessages;
 end;
 
@@ -291,8 +318,9 @@ begin
      // Stop capture
      prWASCapture.Stop();
      // Stop the timer.
-     if (prWASCapture.DeviceState = Stopped) then
-       thrTimer.Enabled := False;
+     //if prWASCapture.DeviceState in [Stopping, Stopped] then
+     //  KillTimer(Self);
+
      // Destroy the engine
      prWASCapture.Shutdown();
 
@@ -377,6 +405,7 @@ begin
          begin
            // Enable the timer.
            BufferDurationCaptionSet := False;
+           CreateTimer();
            thrTimer.Enabled := True;
            aStopWatch.Start;
            aStopWatch.StartNew;
@@ -479,10 +508,15 @@ begin
 
   CanClose := False;
   aStopWatch.Stop;
-  thrTimer.Enabled := False;
-  FreeAndNil(thrTimer);
-  RemoveEngine();
 
+  KillTimer(Self);
+  // Wait until the timer signals destroyed.
+  while not prTimerDestroyed do
+    begin
+      Sleep(1);
+    end;
+
+  RemoveEngine();
   CanClose := True;
 end;
 
@@ -492,10 +526,6 @@ begin
   // Prevents flickering.
   lblStatus.ControlStyle := lblStatus.ControlStyle + [csOpaque];
   aStopWatch := TStopwatch.Create;
-  thrTimer := TUniThreadedTimer.Create(nil);
-  thrTimer.Period := 1;  // One millisecond resolution.
-  thrTimer.Enabled := False;
-  thrTimer.OnTimerEvent := OnTimer;
   prEdited := False;
   cbxUseDeviceAudioFmt.Hint := 'Use the default audio format (44.1 khz/ 16 bit/ PCM).' + #13 +
                                'If you disable this option, the endpoint''s audio format will be used.';
