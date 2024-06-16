@@ -9,7 +9,7 @@
 // Release date: 24-02-2012
 // Language: ENU
 //
-// Version: 3.1.6
+// Revision Version: 3.1.6
 // Description: Universal threaded timer
 //              This timer can be used for a variety of tasks where you need a
 //              lightweight, precise and threadsave timer.
@@ -18,22 +18,24 @@
 // Intiator(s): Tony (maXcomX), Peter (OzShips), Ramyses De Macedo Rodrigues
 // Contributor(s): Tony Kalf (maXcomX), Ramyses De Macedo Rodrigues.
 //
-//
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
-// ---------- ------------------- ---------------------------------------------
+// ---------- ------------------- ----------------------------------------------
 // 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
-// ----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //
-// Remarks: -
+// Remarks: Requires Windows 7 or higher.
 //
-// Related objects: MfSamples
-// Related projects: MfPack316
+// Related objects: -
+// Related projects: MfPackX316
 // Known Issues: -
-// Compiler version: 17 up to 21
-// ToDo: -
-// SDK version: 10.0.18362.0 (19H1)
+//
+// Compiler version: 23 up to 35
+// SDK version: 10.0.22621.0
+//
+// Todo: -
+//
 // =============================================================================
 // Source: -
 // =============================================================================
@@ -61,11 +63,14 @@ unit UniThreadTimer;
 interface
 
 uses
-  Windows,
+  {WinApi}
+  WinApi.Windows,
+  {System}
   System.Classes,
   System.SysUtils;
 
 type
+
   // Forwarded class
   TUniThreadedTimer = class;
 
@@ -80,6 +85,8 @@ type
 
   public
     { Public declarations }
+    isDestroying: Boolean;
+
     constructor Create(ATimer: TUniThreadedTimer);
     destructor Destroy(); override;
     procedure Execute(); override;
@@ -112,8 +119,8 @@ type
     property Enabled: Boolean read bEnabled write SetEnabled;
     property Period: DWord read dwPeriod write SetTimerPeriod;
     property OnTimerEvent: TNotifyEvent read neOnTimer write neOnTimer;
-
   end;
+
 
 implementation
 
@@ -124,12 +131,14 @@ constructor TTimerThread.Create(ATimer: TUniThreadedTimer);
 begin
   inherited Create(True);
   FreeOnTerminate := True;
+  isDestroying := False;
   FTimer := ATimer;
 end;
 
 
 destructor TTimerThread.Destroy();
 begin
+  isDestroying := True;
   inherited Destroy();
 end;
 
@@ -144,15 +153,15 @@ end;
 procedure TTimerThread.Execute();
 begin
   while (not Self.Terminated) and (FTimer.Enabled) do
-  begin
-    WaitForSingleObject(Self.Handle,
-                        FTimer.Period);
-    Synchronize(DoTimer);
-  end;
+    begin
+      WaitForSingleObject(Self.Handle,
+                          FTimer.Period);
+      Synchronize(DoTimer);
+    end;
 end;
 
 
-// TgtTimer ////////////////////////////////////////////////////////////////////
+// TUniThreadedTimer ///////////////////////////////////////////////////////////
 
 constructor TUniThreadedTimer.Create(AOwner: TComponent);
 begin
@@ -164,6 +173,7 @@ end;
 
 destructor TUniThreadedTimer.Destroy();
 begin
+
   inherited Destroy();
 end;
 
@@ -179,14 +189,14 @@ begin
   if (Enabled = True) then
     begin
       thTimerThread := TTimerThread.Create(Self);
-      // thTimerThread.Resume;  // Deprecated;  Use TThread.Start instead.
-      thTimerThread.Start();
+      thTimerThread.Start; // Resume = deprecated, start should be used instead.
     end;
 end;
 
 
 procedure TUniThreadedTimer.SetEnabled(Value: Boolean);
 begin
+
   bEnabled := Value;
   UpdateTimer();
 end;
@@ -194,11 +204,12 @@ end;
 
 procedure TUniThreadedTimer.SetTimerPeriod(Value: DWord);
 begin
-  if (Value <> dwPeriod) then
-  begin
-    dwPeriod := Value;
-    UpdateTimer();
-  end;
+  if Assigned(thTimerThread) and (thTimerThread.isDestroying = False) then
+    if (Value <> dwPeriod) then
+      begin
+        dwPeriod := Value;
+        UpdateTimer();
+     end;
 end;
 
 end.
