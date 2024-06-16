@@ -269,7 +269,7 @@ type
     constructor Create(hwndVideo: HWND;
                        hwndSub: HWND;
                        hwndEvent: HWND;
-                       hwndMainForm: HWND);
+                       hwndMainForm: HWND); reintroduce;
     // Handle stuff before reaching Destroy
     procedure BeforeDestruction(); override;
     destructor Destroy(); override;
