@@ -77,6 +77,7 @@ uses
   WinApi.WinError,
   {WinMM}
   WinApi.WinMM.MMReg,
+  WinApi.WinMM.MMeApi,
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioMediaType,
   WinApi.CoreAudioApi.AudioSessionTypes;
