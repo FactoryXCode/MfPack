@@ -6,7 +6,8 @@ uses
   Common in 'Common.pas',
   ProcessInfoDlg in 'ProcessInfoDlg.pas' {dlgProcessInfo},
   LoopBackCapture in 'LoopBackCapture.pas',
-  UniThreadTimer in 'UniThreadTimer.pas';
+  UniThreadTimer in 'UniThreadTimer.pas',
+  Writer in 'Writer.pas';
 
 {$R *.res}
 

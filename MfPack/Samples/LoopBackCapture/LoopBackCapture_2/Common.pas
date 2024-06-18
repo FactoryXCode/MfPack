@@ -79,9 +79,6 @@ uses
   // Undefine this when not needed!
   {$DEFINE SHOW_IN_MESSAGES_IDE}
 
-const
-  AUDIO_BUFFER_FMT = 10000000;
-
   // Simple error message handler that reports by default in the IDE Messages screen or
   // shows a messagedialog at runtime.
   procedure ErrMsg(pErrMsg: string;
@@ -97,7 +94,6 @@ const
   procedure SortStringgrid(Grid: TStringGrid;
                            byColumn: LongInt;
                            ascending: Boolean );
-
 
 
 implementation

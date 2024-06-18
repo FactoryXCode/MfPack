@@ -86,8 +86,8 @@ uses
   WinApi.DirectX.XAudio2.XAPO,
   WinApi.DirectX.XAudio2.X3DAudio,
   {WinMM}
-  // WinApi.WinMM.MMSystem,
-  WinApi.WinMM.MMReg,
+  WinApi.WinMM.MMeApi,
+  {Application}
   Tools;
 
 const

@@ -70,6 +70,7 @@ uses
   WinApi.WinApiTypes,
   {WinMM}
   WinApi.WinMM.MMReg,
+  WinApi.WinMM.MMeApi,
   {DirectX}
   WinApi.DirectX.XAudio2.XApo;
 

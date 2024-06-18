@@ -70,7 +70,6 @@ uses
   System.SysUtils;
 
 type
-
   // Forwarded class
   TUniThreadedTimer = class;
 
@@ -85,8 +84,6 @@ type
 
   public
     { Public declarations }
-    isDestroying: Boolean;
-
     constructor Create(ATimer: TUniThreadedTimer);
     destructor Destroy(); override;
     procedure Execute(); override;
@@ -119,8 +116,8 @@ type
     property Enabled: Boolean read bEnabled write SetEnabled;
     property Period: DWord read dwPeriod write SetTimerPeriod;
     property OnTimerEvent: TNotifyEvent read neOnTimer write neOnTimer;
-  end;
 
+  end;
 
 implementation
 
@@ -131,14 +128,12 @@ constructor TTimerThread.Create(ATimer: TUniThreadedTimer);
 begin
   inherited Create(True);
   FreeOnTerminate := True;
-  isDestroying := False;
   FTimer := ATimer;
 end;
 
 
 destructor TTimerThread.Destroy();
 begin
-  isDestroying := True;
   inherited Destroy();
 end;
 
@@ -153,15 +148,15 @@ end;
 procedure TTimerThread.Execute();
 begin
   while (not Self.Terminated) and (FTimer.Enabled) do
-    begin
-      WaitForSingleObject(Self.Handle,
-                          FTimer.Period);
-      Synchronize(DoTimer);
-    end;
+  begin
+    WaitForSingleObject(Self.Handle,
+                        FTimer.Period);
+    Synchronize(DoTimer);
+  end;
 end;
 
 
-// TUniThreadedTimer ///////////////////////////////////////////////////////////
+// TgtTimer ////////////////////////////////////////////////////////////////////
 
 constructor TUniThreadedTimer.Create(AOwner: TComponent);
 begin
@@ -173,7 +168,6 @@ end;
 
 destructor TUniThreadedTimer.Destroy();
 begin
-
   inherited Destroy();
 end;
 
@@ -183,7 +177,7 @@ begin
   if Assigned(thTimerThread) then
     begin
       thTimerThread.Terminate;
-      thTimerThread := nil;
+      thTimerThread := Nil;
     end;
 
   if (Enabled = True) then
@@ -196,7 +190,6 @@ end;
 
 procedure TUniThreadedTimer.SetEnabled(Value: Boolean);
 begin
-
   bEnabled := Value;
   UpdateTimer();
 end;
@@ -204,12 +197,11 @@ end;
 
 procedure TUniThreadedTimer.SetTimerPeriod(Value: DWord);
 begin
-  if Assigned(thTimerThread) and (thTimerThread.isDestroying = False) then
-    if (Value <> dwPeriod) then
-      begin
-        dwPeriod := Value;
-        UpdateTimer();
-     end;
+  if (Value <> dwPeriod) then
+  begin
+    dwPeriod := Value;
+    UpdateTimer();
+  end;
 end;
 
 end.

@@ -91,7 +91,6 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.WinApiTypes,
-  WinApi.WinMM.MMReg,
   WinApi.MediaObj,
   WinApi.AmVideo,
   WinApi.DvdMedia,
@@ -110,6 +109,9 @@ uses
   {DirectX or use rtl, Clootie Dx}
   WinApi.DirectX.DXGIFormat,
   WinApi.DirectX.D3D9Types,
+  {WinMM}
+  WinApi.WinMM.MMReg,
+  WinApi.WinMM.MMeApi,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfObjects;
 

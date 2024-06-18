@@ -73,7 +73,7 @@ uses
   WinApi.WinApiTypes,
   System.Classes,
   {WinMM}
-  WinApi.WinMM.MMReg,
+  WinApi.WinMM.MMeApi,
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioSessionTypes;
 

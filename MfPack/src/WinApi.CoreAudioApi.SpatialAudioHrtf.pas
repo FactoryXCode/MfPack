@@ -70,7 +70,7 @@ uses
   {WinApi}
   WinApi.WinApiTypes,
   {WinMM}
-  WinApi.WinMM.MMReg,
+  WinApi.WinMM.MMeApi,
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioSessionTypes,
   WinApi.CoreAudioApi.SpatialAudioClient;

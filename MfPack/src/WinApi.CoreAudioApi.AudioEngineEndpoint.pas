@@ -78,7 +78,7 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.WinApiTypes,
-  WinApi.WinMM.MMReg,
+  WinApi.WinMM.MMeApi,
   {ActiveX}
   {$IFDEF USE_EMBARCADERO_DEF}
   WinApi.ActiveX,

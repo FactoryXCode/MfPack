@@ -144,7 +144,7 @@ uses
   WinApi.WinApiTypes,
   WinApi.ComBaseApi,
   {WinMM}
-  WinApi.WinMM.MMReg;
+  WinApi.WinMM.MMeApi;
 
   {$MINENUMSIZE 4}
 
@@ -280,7 +280,7 @@ type
 
   PXAPO_LOCKFORPROCESS_BUFFER_PARAMETERS = ^XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS;
   XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS = record
-    pFormat: PWAVEFORMATEX;     // buffer audio format
+    pFormat: PWAVEFORMATEX;   // buffer audio format
     MaxFrameCount: UINT32;    // maximum number of frames in respective buffer that IXAPO::Process would have to handle, irrespective of dynamic variable settings, can be 0
   end;
   {$EXTERNALSYM XAPO_LOCKFORPROCESS_BUFFER_PARAMETERS}

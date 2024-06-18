@@ -76,7 +76,8 @@ uses
   {ActiveX}
   WinApi.ActiveX,
   {WinMM}
-  WinApi.WinMM.MMReg;
+  WinApi.WinMM.MMReg,
+  WinApi.WinMM.MMeApi;
 
   {$MINENUMSIZE 4}
 

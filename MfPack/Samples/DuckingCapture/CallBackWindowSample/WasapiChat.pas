@@ -69,11 +69,14 @@ uses
   WinApi.Messages,
   WinApi.WinApiTypes,
   WinApi.ComBaseApi,
-  WinApi.WinMM.MMReg,
+  {WinMM}
+  WinApi.WinMM.MMeApi,
   WinApi.WinMM.MMSysCom,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfUtils,
+  {CoreAudioApi}
   WinApi.CoreAudioApi.MMDeviceAPI,
   WinApi.CoreAudioApi.AudioClient,
-  WinApi.MediaFoundationApi.MfUtils,
   WinApi.CoreAudioApi.AudioSessionTypes,
   {System}
   System.Classes,

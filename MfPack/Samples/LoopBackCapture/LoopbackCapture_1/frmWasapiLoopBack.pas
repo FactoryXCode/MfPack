@@ -535,6 +535,7 @@ var
   sms: string;
 
 begin
+
   prBufferDuration := (REFTIMES_PER_SEC) * tbBufferDuration.Position;
   if (prBufferDuration > REFTIMES_PER_SEC) then
     sms := 'milliseconds'

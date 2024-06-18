@@ -3092,6 +3092,7 @@ const ONE_MSEC_SECOND  = 1000;                  // One second = 1,000 ms
 const ONE_MHZ          = 1000000;               // One MegaHertz = 1,000,000 Hertz
 const ONE_GHZ          = ONE_MHZ * 1000;        // One GigaHertz = 1,000 MegaHertz
 
+const BITS_PER_BYTE = 8;
 
 type
   _HTMLColors = record

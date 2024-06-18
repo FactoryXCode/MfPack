@@ -75,7 +75,7 @@ uses
   {MfPack}
   WinApi.WinApiTypes,
   {WinMM}
-  WinApi.WinMM.MMReg,
+  WinApi.WinMM.MMeApi,
   {ActiveX}
   {$IFDEF USE_EMBARCADERO_DEF}
   WinApi.ActiveX,

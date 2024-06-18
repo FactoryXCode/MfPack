@@ -71,6 +71,7 @@ uses
   {WinMM}
   WinApi.WinMM.MsAcm,
   WinApi.WinMM.MMiscApi,
+  WinApi.WinMM.MMeApi,
   WinApi.WinMM.MMReg;
 
   {$MINENUMSIZE 4}

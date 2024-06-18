@@ -70,6 +70,7 @@ contains
   WinApi.CoreAudioApi.SpatialAudioClient in '..\src\WinApi.CoreAudioApi.SpatialAudioClient.pas',
   WinApi.CoreAudioApi.SpatialAudioHrtf in '..\src\WinApi.CoreAudioApi.SpatialAudioHrtf.pas',
   WinApi.CoreAudioApi.SpatialAudioMetadata in '..\src\WinApi.CoreAudioApi.SpatialAudioMetadata.pas',
+  WinApi.CoreAudioApi.AudioProfileUtils in '..\src\WinApi.CoreAudioApi.AudioProfileUtils.pas',
   WinApi.DevpKey in '..\src\WinApi.DevpKey.pas',
   WinApi.DevPropDef in '..\src\WinApi.DevPropDef.pas',
   WinApi.DirectX.D2D1 in '..\src\WinApi.DirectX.D2D1.pas',
@@ -122,7 +123,7 @@ contains
   WinApi.DirectX.DXGIFormat in '..\src\WinApi.DirectX.DXGIFormat.pas',
   WinApi.DirectX.DXGIMessages in '..\src\WinApi.DirectX.DXGIMessages.pas',
   WinApi.DirectX.DXGIType in '..\src\WinApi.DirectX.DXGIType.pas',
-  WinApi.DirectX.DxVa in '..\src\WinApi.DirectX.DxVa.pas',
+  WinApi.DirectX.DXVA in '..\src\WinApi.DirectX.DXVA.pas',
   WinApi.DirectX.DXVA2Api in '..\src\WinApi.DirectX.DXVA2Api.pas',
   WinApi.DirectX.DXVA2SWDev in '..\src\WinApi.DirectX.DXVA2SWDev.pas',
   WinApi.DirectX.DXVA2Trace in '..\src\WinApi.DirectX.DXVA2Trace.pas',
@@ -137,6 +138,7 @@ contains
   WinApi.DirectX.XAudio2.XAudio2 in '..\src\WinApi.DirectX.XAudio2.XAudio2.pas',
   WinApi.DirectX.XAudio2.XAudio2Fx in '..\src\WinApi.DirectX.XAudio2.XAudio2Fx.pas',
   WinApi.DirectX.XInput in '..\src\WinApi.DirectX.XInput.pas',
+  WinApi.DirectX.D3D11_3 in '..\src\WinApi.DirectX.D3D11_3.pas',
   WinApi.DvdMedia in '..\src\WinApi.DvdMedia.pas',
   WinApi.Evntcons in '..\src\WinApi.Evntcons.pas',
   WinApi.Evntprov in '..\src\WinApi.Evntprov.pas',
@@ -218,7 +220,6 @@ contains
   WinApi.Wmistr in '..\src\WinApi.Wmistr.pas',
   WinApi.StiErr in '..\src\WinApi.StiErr.pas',
   WinApi.MfPack.VideoStandardsCheat in '..\src\WinApi.MfPack.VideoStandardsCheat.pas',
-  WinApi.MediaFoundationApi.MfTrace in '..\src\WinApi.MediaFoundationApi.MfTrace.pas',
-  WinApi.DirectX.D3D11_3 in '..\src\WinApi.DirectX.D3D11_3.pas';
+  WinApi.MediaFoundationApi.MfTrace in '..\src\WinApi.MediaFoundationApi.MfTrace.pas';
 
 end.

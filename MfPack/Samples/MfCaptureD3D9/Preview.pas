@@ -460,7 +460,7 @@ begin
           // Like this
           if SUCCEEDED(hr) then
             hr := pSample.GetBufferByIndex(0,
-                                           pBuffer);
+                                           @pBuffer);
           // or like this (both are permitted)
           //   hr := pSample.ConvertToContiguousBuffer(pBuffer);
 

@@ -147,6 +147,7 @@ type
 
 implementation
 
+
 function AddH264Profile(H264Profile: TH264ProfileInfo;
                         IncludePredefinedProfiles: Boolean = True): Integer;
 begin

@@ -13,11 +13,9 @@ object MainForm: TMainForm
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = True
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
-  PixelsPerInch = 96
   TextHeight = 13
   object Bevel1: TBevel
     Left = 0
@@ -278,7 +276,7 @@ object MainForm: TMainForm
     object cbxDisableMmcss: TCheckBox
       Left = 16
       Top = 169
-      Width = 194
+      Width = 169
       Height = 14
       Caption = 'Disable the use of MMCSS.'
       Font.Charset = DEFAULT_CHARSET

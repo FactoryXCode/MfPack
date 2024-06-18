@@ -534,7 +534,7 @@ type
  {
  *  extended waveform format structure used for all non-PCM formats. this
  *  structure is common to all non-PCM formats.
- // NOTE: This structure is also defined in MMReg
+ // NOTE: This structure is also defined in MMReg.h but removed from there to prevent clashes.
  }
 
 type

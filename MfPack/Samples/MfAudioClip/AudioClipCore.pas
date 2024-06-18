@@ -79,7 +79,8 @@ uses
   WinApi.WinError,
   WinApi.WinApiTypes,
   WinApi.ComBaseApi,
-  WinApi.WinMM.MMReg,
+  {WinMM}
+  WinApi.WinMM.MMeApi,
   {System}
   System.SysUtils,
   System.Math,

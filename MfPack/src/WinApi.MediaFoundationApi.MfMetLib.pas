@@ -8405,7 +8405,7 @@ begin
   wavFmtEx.nChannels       := 2;
   wavFmtEx.nSamplesPerSec  := 44100;
   wavFmtEx.wBitsPerSample  := 16;
-  wavFmtEx.nBlockAlign     := (wavFmtEx.nChannels * wavFmtEx.wBitsPerSample) div 8;
+  wavFmtEx.nBlockAlign     := (wavFmtEx.nChannels * wavFmtEx.wBitsPerSample) div BITS_PER_BYTE;
   wavFmtEx.nAvgBytesPerSec := wavFmtEx.nBlockAlign * wavFmtEx.nSamplesPerSec;
   wavFmtEx.cbSize          := 0;
   Result := wavFmtEx;

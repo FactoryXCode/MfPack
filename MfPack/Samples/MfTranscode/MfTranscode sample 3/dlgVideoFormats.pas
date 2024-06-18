@@ -51,7 +51,6 @@ type
   private
     { Private declarations }
     gVideoMediaFmt: TGuid;
-    gAudioMediaFmt: TGuid;
     gContainerFormat: TGuid;
 
     procedure SetFormat(aVal: TGuid);

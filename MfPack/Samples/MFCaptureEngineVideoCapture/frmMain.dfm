@@ -13,13 +13,11 @@ object MainWindow: TMainWindow
   Font.Name = 'Tahoma'
   Font.Style = []
   Menu = MainMenu
-  OldCreateOrder = False
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   DesignSize = (
     1091
     654)
-  PixelsPerInch = 96
   TextHeight = 13
   object pnlSnapShot: TPanel
     Left = 780
@@ -32,7 +30,7 @@ object MainWindow: TMainWindow
     ParentBackground = False
     ShowCaption = False
     TabOrder = 0
-    ExplicitLeft = 773
+    ExplicitLeft = 776
     object pbCapture: TPaintBox
       Left = 0
       Top = 0
@@ -53,7 +51,6 @@ object MainWindow: TMainWindow
       ParentBackground = False
       ShowCaption = False
       TabOrder = 0
-      ExplicitLeft = 2
       object butSaveToFile: TButton
         Left = 91
         Top = 1
@@ -105,8 +102,8 @@ object MainWindow: TMainWindow
     ParentShowHint = False
     ShowHint = False
     TabOrder = 1
-    ExplicitTop = 646
-    ExplicitWidth = 1079
+    ExplicitTop = 626
+    ExplicitWidth = 1095
   end
   object MainMenu: TMainMenu
     Left = 32

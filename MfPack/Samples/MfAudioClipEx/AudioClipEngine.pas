@@ -82,7 +82,8 @@ uses
   WinApi.WinApiTypes,
   WinApi.WinError,
   WinApi.ComBaseApi,
-  WinApi.WinMM.MMReg,
+  {WinMM}
+  WinApi.WinMM.MMeApi,
   {Vcl}
   Vcl.Dialogs,
   {System}

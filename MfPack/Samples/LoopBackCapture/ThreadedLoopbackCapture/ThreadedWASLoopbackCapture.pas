@@ -70,8 +70,6 @@ uses
   WinApi.WinApiTypes,
   WinApi.ComBaseApi,
   WinApi.Messages,
-  {WinMM}
-  WinApi.WinMM.MMReg,
   {System}
   System.SysUtils,
   System.Classes,
@@ -99,6 +97,7 @@ uses
   WinApi.WinMM.MMiscApi,
   WinApi.WinMM.MMSysCom,
   WinApi.WinMM.MMeApi,
+  WinApi.WinMM.MMReg,
   {Application}
   Common,
   Writer;
@@ -182,7 +181,7 @@ type
     // Thread functions.
     //
     function CaptureThreadFunc(): HRESULT;
-    procedure CreatetRenderThread();
+    procedure CreateRenderThread();
     procedure TerminateRenderThread();
 
     //
@@ -267,7 +266,8 @@ type
   end;
 
   // This event type is used to pass back a HResult.
-  TCallbackEvent = procedure(Sender: TObject; const Hres: HRESULT) of object;
+  TCallbackEvent = procedure(Sender: TObject;
+                             const Hres: HRESULT) of object;
 
   // The thread we render after Start.
   TRenderThread = class(TThread)
@@ -335,7 +335,7 @@ end;
 
 // =============================================================================
 
-procedure TWASCapture.CreatetRenderThread;
+procedure TWASCapture.CreateRenderThread;
 begin
 
   if not Assigned(pvRenderThread) then
@@ -1140,7 +1140,7 @@ begin
   else
     begin
       // Start the rendering loop in the separate thread.
-      CreatetRenderThread();
+      CreateRenderThread();
     end;
 
   // We're ready to go, start capturing!
@@ -1251,7 +1251,7 @@ begin
   waitArray[1] := pvStreamSwitchEvent;
   waitArray[2] := pvAudioSamplesReadyEvent;
 
-  //When successfully reached to here, set the status to 'Capturing'
+  // When successfully reached to here, set the status to 'Capturing'.
   pvDeviceState := Capturing;
 
       while (pvDeviceState = Capturing) do
@@ -1294,11 +1294,6 @@ begin
 
                     if (flags = AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) then
                       begin
-
-                        //hr := pvCaptureClient.ReleaseBuffer(NumFramesToRead);
-                        //if FAILED(hr) then
-                        //  pvDeviceState := Error;
-
                         pData := nil;
                         Continue;
                       end;
@@ -1308,16 +1303,11 @@ begin
                     if (flags = AUDCLNT_BUFFERFLAGS_SILENT) then
                       pData := nil;
 
-                    // Set sample buffer to the right size.
-                    //cbBytesCaptured := NumFramesToRead div 2;
-                    //cbBytesCaptured := Min(NumFramesToRead,
-                    //                       (pvBufferSize div FrameSize));
-
                     // Write the available capture data to the audio sink.
-                     mr := pvWavWriter.WriteData(pData,
-                                                 NumFramesToRead,
-                                                 pvMixFormat.nBlockAlign,
-                                                 dwBytesWritten);
+                    mr := pvWavWriter.WriteData(pData,
+                                                NumFramesToRead,
+                                                pvMixFormat.nBlockAlign,
+                                                dwBytesWritten);
                     // Note: The writer will automaticly closes the file when a HResult <> S_OK.
                     if (mr <> MMSYSERR_NOERROR) then
                       if (mr = MMIOERR_CANNOTEXPAND) then
@@ -1338,7 +1328,7 @@ begin
                 if FAILED(hr) then
                   pvDeviceState := Error;
               end;
-          end; //case
+          end; // clase
         end; // while
 
   if not pvDisableMMCSS then

@@ -79,7 +79,7 @@ uses
   Winapi.Windows,
   WinApi.WinApiTypes,
   WinApi.Unknwn,
-  WinApi.WinMM.MMReg,
+  WinApi.WinMM.MMeApi,
   WinApi.MediaObj,
   System.SysUtils,
   {ActiveX}

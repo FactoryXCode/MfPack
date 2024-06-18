@@ -4614,18 +4614,12 @@ const
 {$ENDIF} // WAVE_FORMAT_PCM
 
 
-
-  // General extended waveform format structure
-  // Use this for all NON PCM formats
-  // (information common to all formats)
-
-type
-  // Note: The WAVEFORMATEX structure is defined in WinApi.WinMM.MMeApi.
-  PWAVEFORMATEX = ^tWAVEFORMATEX;
-  WAVEFORMATEX = tWAVEFORMATEX;
-  NPWAVEFORMATEX = ^WAVEFORMATEX;
-  LPWAVEFORMATEX = ^WAVEFORMATEX;
-  LPCWAVEFORMATEX = ^WAVEFORMATEX;
+// Note: The WAVEFORMATEX structure is defined in WinApi.WinMM.MMeApi.
+//  PWAVEFORMATEX = ^tWAVEFORMATEX;
+//  WAVEFORMATEX = tWAVEFORMATEX;
+//  NPWAVEFORMATEX = ^WAVEFORMATEX;
+//  LPWAVEFORMATEX = ^WAVEFORMATEX;
+//  LPCWAVEFORMATEX = ^WAVEFORMATEX;
 
 const
 

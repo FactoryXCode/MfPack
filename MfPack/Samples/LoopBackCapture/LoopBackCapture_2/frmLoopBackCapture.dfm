@@ -4,8 +4,8 @@ object frmMain: TfrmMain
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'LoopBackCapture Sample 2'
-  ClientHeight = 427
-  ClientWidth = 459
+  ClientHeight = 432
+  ClientWidth = 482
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -22,10 +22,11 @@ object frmMain: TfrmMain
   object Bevel2: TBevel
     Left = 0
     Top = 0
-    Width = 459
+    Width = 482
     Height = 163
     Align = alTop
     ExplicitTop = -1
+    ExplicitWidth = 459
   end
   object Label3: TLabel
     AlignWithMargins = True
@@ -56,8 +57,8 @@ object frmMain: TfrmMain
   object lblMsg: TLabel
     AlignWithMargins = True
     Left = 6
-    Top = 400
-    Width = 450
+    Top = 405
+    Width = 473
     Height = 24
     Margins.Left = 6
     Align = alBottom
@@ -75,8 +76,8 @@ object frmMain: TfrmMain
   end
   object Bevel1: TBevel
     Left = 0
-    Top = 395
-    Width = 459
+    Top = 400
+    Width = 482
     Height = 1
     Align = alBottom
     Shape = bsTopLine
@@ -85,8 +86,8 @@ object frmMain: TfrmMain
   end
   object Bevel3: TBevel
     Left = 0
-    Top = 396
-    Width = 459
+    Top = 401
+    Width = 482
     Height = 1
     Align = alBottom
     Shape = bsTopLine
@@ -96,15 +97,15 @@ object frmMain: TfrmMain
   object Panel3: TPanel
     Left = 0
     Top = 163
-    Width = 459
-    Height = 117
+    Width = 482
+    Height = 123
     Hint = 
       'The capture buffersize depending on the audiodevice specs and so' +
       'urce latency '
     Align = alTop
     Alignment = taLeftJustify
     BevelOuter = bvLowered
-    Caption = '  Buffers'
+    Caption = '  Capture Buffer'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
@@ -116,13 +117,12 @@ object frmMain: TfrmMain
     object Label4: TLabel
       AlignWithMargins = True
       Left = 6
-      Top = 42
-      Width = 44
-      Height = 17
+      Top = 77
+      Width = 39
+      Height = 13
       Hint = 
         'The bitrate is determinated by the hardware. Otherwise the bitra' +
         'te will be the one choosen.'
-      AutoSize = False
       Caption = 'Bitrate'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -133,13 +133,42 @@ object frmMain: TfrmMain
       ParentShowHint = False
       ShowHint = True
     end
-    object lblCaptureBufferDuration: TLabel
-      Left = 10
-      Top = 20
-      Width = 269
+    object Label5: TLabel
+      Left = 7
+      Top = 51
+      Width = 102
       Height = 13
-      AutoSize = False
-      Caption = 'Capture Buffer Duration: 0 ms.'
+      Hint = 'Enter a file name without extension.'
+      Alignment = taRightJustify
+      Caption = 'Buffer Duration (ms):'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object lblCaptureBufferDuration: TLabel
+      Left = 109
+      Top = 24
+      Width = 216
+      Height = 13
+      Caption = 'Auto capture buffer duration: 10 milliseconds'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clGrayText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsItalic]
+      ParentFont = False
+    end
+    object lblBufferDuration: TLabel
+      Left = 178
+      Top = 52
+      Width = 195
+      Height = 13
+      Caption = 'Capture buffer duration : 10 milliseconds'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -147,13 +176,37 @@ object frmMain: TfrmMain
       Font.Style = []
       ParentFont = False
     end
-    object rb441b16: TRadioButton
-      Left = 4
-      Top = 58
+    object sedBufferSize: TSpinEdit
+      Left = 115
+      Top = 48
+      Width = 52
+      Height = 22
+      MaxValue = 1000
+      MinValue = 0
+      TabOrder = 0
+      Value = 10
+    end
+    object cbxAutoBufferSize: TCheckBox
+      Left = 7
+      Top = 23
       Width = 100
-      Height = 13
-      Hint = '44.100 kHz at 16 bits'
-      Caption = '44.1 kHz 16 bit'
+      Height = 16
+      Caption = 'Auto buffer size.'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 1
+    end
+    object cbxUseDeviceAudioFmt: TCheckBox
+      Left = 7
+      Top = 100
+      Width = 177
+      Height = 14
+      Hint = 'Use PCM format 44.1 kHz 16 bit.'
+      Caption = 'Use PCM audio output format.'
       Checked = True
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -163,76 +216,8 @@ object frmMain: TfrmMain
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 0
-      TabStop = True
-    end
-    object rb48b24: TRadioButton
-      Left = 4
-      Top = 77
-      Width = 100
-      Height = 13
-      Hint = '48.000 kHz at 24 bits'
-      Caption = '48 kHz 24 bit'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 1
-    end
-    object rb48b32: TRadioButton
-      Left = 110
-      Top = 77
-      Width = 100
-      Height = 13
-      Hint = '48.000 kHz at 32 bits'
-      Caption = '48 kHz 32 bit'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
+      State = cbChecked
       TabOrder = 2
-    end
-    object rb96b24: TRadioButton
-      Left = 4
-      Top = 96
-      Width = 100
-      Height = 13
-      Hint = '96.000 kHz at 24 bits'
-      Caption = '96 kHz 24 bit'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 3
-    end
-    object rb96b32: TRadioButton
-      Left = 110
-      Top = 96
-      Width = 100
-      Height = 13
-      Hint = '96.000 kHz at 32 bits'
-      Caption = '96 kHz 32 bit'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 4
     end
   end
   object edPID: TEdit
@@ -323,13 +308,13 @@ object frmMain: TfrmMain
   end
   object Panel1: TPanel
     Left = 0
-    Top = 280
-    Width = 459
+    Top = 286
+    Width = 482
     Height = 75
     Align = alTop
     BevelOuter = bvLowered
     TabOrder = 7
-    ExplicitTop = 323
+    ExplicitTop = 281
     object Label1: TLabel
       Left = 22
       Top = 45
@@ -395,8 +380,8 @@ object frmMain: TfrmMain
     end
   end
   object butStart: TButton
-    Left = 8
-    Top = 361
+    Left = 7
+    Top = 367
     Width = 85
     Height = 27
     Caption = 'Start Capture'
@@ -404,8 +389,8 @@ object frmMain: TfrmMain
     OnClick = butStartClick
   end
   object butStop: TButton
-    Left = 97
-    Top = 361
+    Left = 96
+    Top = 367
     Width = 85
     Height = 27
     Caption = 'Stop Capture'
@@ -414,8 +399,8 @@ object frmMain: TfrmMain
     OnClick = butStopClick
   end
   object butPlayData: TButton
-    Left = 187
-    Top = 361
+    Left = 185
+    Top = 367
     Width = 80
     Height = 27
     Hint = 'Play recorded data.'

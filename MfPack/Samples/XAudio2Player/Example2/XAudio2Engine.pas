@@ -88,8 +88,7 @@ uses
   WinApi.DirectX.XAudio2.XAPO,
   WinApi.DirectX.XAudio2.X3DAudio,
   {WinMM}
-  // WinApi.WinMM.MMSystem,
-  WinApi.WinMM.MMReg,
+  WinApi.WinMM.MMeApi,
   Tools;
 
 const
@@ -102,7 +101,7 @@ const
   MAX_PITCH = 2.0;
   // Minimum and maximum volume values.
   MIN_VOLUME = 0.0;
-  MAX_VOLUME = 100.0;
+  MAX_VOLUME = 244.0;
 
 type
 
