@@ -1,4 +1,4 @@
-MfPack X 3.1.6
+MfPack X 3.1.7
 LICENSE
 
  The contents of this file are subject to the Mozilla Public License
