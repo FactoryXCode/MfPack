@@ -1,5 +1,5 @@
 # Audio latency measuring tool for Windows
-Version: X 3.1.6
+Version: X 3.1.7
 
 Description:
    This unit is designed to measure minimum, maximum and average execution times of a routine in MICROSECONDS.

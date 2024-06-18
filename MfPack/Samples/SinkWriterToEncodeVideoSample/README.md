@@ -1,6 +1,6 @@
 # SinkWriterToEncodeVideoSamples
 
-Version: X 3.1.6
+Version: X 3.1.7
 
 Description:
   These samples demonstrates how to use the SinkWriter to encode a video file from a bitmap.

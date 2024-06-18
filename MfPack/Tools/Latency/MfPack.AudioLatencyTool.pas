@@ -9,7 +9,7 @@
 // Release date: 29-05-2024
 // Language: ENU
 //
-// Revision Version: 3.1.6
+// Revision Version: 3.1.7
 //
 // Description:
 //   Audio latency measuring tool for Windows.

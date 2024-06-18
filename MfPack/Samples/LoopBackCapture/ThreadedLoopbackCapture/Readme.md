@@ -1,6 +1,6 @@
 # Threaded Loopback Capture Sample
 
-Version: X 3.1.6
+Version: X 3.1.7
 
 Description:
 

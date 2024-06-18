@@ -1,6 +1,6 @@
 # LoopbackCapture Sample 2
 
-Version: X 3.1.6
+Version: X 3.1.7
 
 Description:
 Demonstrates how to capture system audio either from a specific process tree or for all process except a process tree and

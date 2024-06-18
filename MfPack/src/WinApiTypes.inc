@@ -10,7 +10,7 @@
 // Release date: 04-01-2016
 // Language: ENU
 //
-// Revision Version: 3.1.6
+// Revision Version: 3.1.7
 // Description: Holds compiler definitions for MfPack.
 //
 //
@@ -22,14 +22,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
+// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: All future updates (releases) will be named to an artist except for
 //          the major Windows updates. So, we started with ISÁK.
 //
 // Related objects: -
-// Related projects: MfPackX316
+// Related projects: MfPackX317
 // Known Issues: -
 // Compiler version: 23 up to 35
 // SDK version: 10.0.22621.0
@@ -377,7 +377,8 @@ const
 // {$DEFINE MFPACK_VERSION_313_UP} // PiL release, Milestone update 18.
 // {$DEFINE MFPACK_VERSION_314_UP} // PiL release, update 19.
 // {$DEFINE MFPACK_VERSION_315_UP} // Carmel release, update 20.
-{$DEFINE MFPACK_VERSION_316_UP}    // Morrissey release, update 21.
+// {$DEFINE MFPACK_VERSION_316_UP} // Morrissey release, update 21.
+{$DEFINE MFPACK_VERSION_317_UP}    // RammStein release, update 22.
 
 // WARNINGS
 // enable/disable compiler warnings.

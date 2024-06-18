@@ -1,6 +1,6 @@
 # SinkWriterToEncodeVideoSample
 
-Version: X 3.1.6
+Version: X 3.1.7
 
 Description:
   This sample demonstrates how to use the SinkWriter to encode a video file with a simple green 480x640 green bitmap.

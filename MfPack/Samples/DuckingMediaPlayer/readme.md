@@ -1,5 +1,5 @@
 # Ducking Media Player
-Version: X 3.1.6
+Version: X 3.1.7
 
 Description:
   This sample implements a simple media player that responds to 

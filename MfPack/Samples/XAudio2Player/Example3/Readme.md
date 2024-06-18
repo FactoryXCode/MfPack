@@ -1,6 +1,6 @@
 # XAudio2Player Sample 3
 
-Version: X 3.1.6
+Version: X 3.1.7
 
 Description:
   This sample demonstrates how to implement XAudio2 effects and

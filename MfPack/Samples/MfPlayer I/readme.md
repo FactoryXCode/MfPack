@@ -1,5 +1,5 @@
 # MfPlayer I
-Version: X 3.1.6
+Version: X 3.1.7
 
 NOTES: 
  - This release is updated for compiler version 17 up to 34.

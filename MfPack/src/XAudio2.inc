@@ -10,7 +10,7 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 3.1.6
+// Revision Version: 3.1.7
 // Description: Version control unit for XAudio2
 //              Requires Windows 8, XAudio2.8 or later
 //
@@ -20,14 +20,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
+// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 // Remarks: Delphi specific include file, to determine which DLL's are needed to load.
 //          XAudio2 version 2.9 ships as part of Windows 10, XAUDIO2_9.DLL,
 //          alongside XAudio2.8 to support older applications, and does not require redistribution.
 //
 // Related objects: -
-// Related projects: MfPackX316
+// Related projects: MfPackX317
 // Known Issues: -
 // Compiler version: 23 up to 35
 // SDK version: 10.0.22000.0
