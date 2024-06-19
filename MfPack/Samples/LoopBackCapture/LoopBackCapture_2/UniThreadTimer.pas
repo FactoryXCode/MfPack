@@ -78,6 +78,7 @@ type
   private
     { Private declarations }
     FTimer: TUniThreadedTimer;
+    isActive: Boolean;
 
   protected
     { Protected declarations }
@@ -117,6 +118,7 @@ type
   published
     { Published declarations}
     property Enabled: Boolean read bEnabled write SetEnabled;
+
     property Period: DWord read dwPeriod write SetTimerPeriod;
     property OnTimerEvent: TNotifyEvent read neOnTimer write neOnTimer;
   end;
@@ -129,9 +131,11 @@ implementation
 
 constructor TTimerThread.Create(ATimer: TUniThreadedTimer);
 begin
-  inherited Create(True);
+  inherited
+  Create(True);
   FreeOnTerminate := True;
   isDestroying := False;
+  isActive := False;
   FTimer := ATimer;
 end;
 
@@ -146,7 +150,10 @@ end;
 procedure TTimerThread.DoTimer();
 begin
   if Assigned(FTimer.OnTimerEvent) then
-    FTimer.OnTimerEvent(FTimer);
+    begin
+      FTimer.OnTimerEvent(FTimer);
+      isActive := True;
+    end;
 end;
 
 
@@ -166,7 +173,7 @@ end;
 constructor TUniThreadedTimer.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  bEnabled := True;
+  bEnabled := False;
   Period := 100;
 end;
 
@@ -196,6 +203,8 @@ end;
 
 procedure TUniThreadedTimer.SetEnabled(Value: Boolean);
 begin
+  if Assigned(thTimerThread) then
+    thTimerThread.isActive := Value;
 
   bEnabled := Value;
   UpdateTimer();

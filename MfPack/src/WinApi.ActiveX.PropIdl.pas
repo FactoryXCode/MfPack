@@ -927,7 +927,7 @@ type
 
   // Not included in Ole32.dll or defined in this unit,
   // This function (and PropVariantClear) are defined in PropSys.pas
-  //procedure PropVariantInit(out pv: TMfPPROPVARIANT);
+  // procedure PropVariantInit(out pvar: PROPVARIANT);
 
 
   function StgCreatePropStg(pUnk: IUnknown;
@@ -978,7 +978,7 @@ type
   // Additional Prototypes for ALL interfaces
 
   // Forward functions
-  procedure PropVariantInit(var pv: PROPVARIANT); inline;
+  procedure PropVariantInit(out pvar: PROPVARIANT); inline;
   procedure PropVariantClearSafe(var pv: PROPVARIANT); inline;
   //procedure PropVariantClear(var pv: TMfPROPVARIANT);
 
@@ -1006,18 +1006,19 @@ const
   end;
 
 
+procedure PropVariantInit(out pvar: PROPVARIANT);
+begin
+  FillChar(pvar, SizeOf(PROPVARIANT), 0);
+end;
+
+
+procedure PropVariantClearSafe(var pv: PROPVARIANT);
+begin
+  ZeroMemory(@pv, SizeOf(pv));
+end;
+
 
   //--------------------- External definitions ---------------------------------
-  
-  procedure PropVariantInit(var pv: PROPVARIANT);
-    begin
-      FillChar(pv, sizeof(PROPVARIANT), 0);
-    end;
-
-  procedure PropVariantClearSafe(var pv: PROPVARIANT);
-    begin
-      ZeroMemory(@pv, SizeOf(pv));
-    end;
     
 {$WARN SYMBOL_PLATFORM OFF}
   function PropVariantCopy;             external PropIdlLib name 'PropVariantCopy' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};

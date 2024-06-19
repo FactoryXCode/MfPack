@@ -79,6 +79,7 @@ uses
   System.Classes,
   System.SyncObjs,
   {activeX}
+  //WinApi.ActiveX,
   WinApi.ActiveX.PropIdl,
   WinApi.ActiveX.ObjBase,
   WinApi.ActiveX.ObjIdl,
@@ -436,13 +437,13 @@ begin
       Exit(hr);
     end;
 
-  // Set the WAV format to use. This can be either the PCm default format (44.1 kHz 16 bit) or
-  // the format the audiodevice nativly use.
+  // Set the WAV format to use.
   GetMixFormat(pvMixFormat,
                pvWavFormat);
 
   //
   // Initialize the AudioClient in Shared Mode with the user specified buffer.
+  //
   // Note: - Shared Mode is needed when rendering from an audio application or process.
   //       - Exclusive Mode is used when rendering from a hardware endpoint.
   //       - Interface methods that are reffering to audioendpoints, will not work and returns E_NOTIMPL,
@@ -945,6 +946,7 @@ label
   leave;
 
 begin
+  audioclientActivationParams := Default(AUDIOCLIENT_ACTIVATION_PARAMS);
 
   audioclientActivationParams.ActivationType := AUDIOCLIENT_ACTIVATION_TYPE_PROCESS_LOOPBACK;
 
@@ -978,7 +980,8 @@ begin
       pvDeviceState := Initialized;
 
 leave:
-  PropVariantClear(activateParams);
+  //PropVariantClear(activateParams);
+  PropVariantClearSafe(activateParams);
   SetDeviceStateErrorIfFailed(hr);
 
   Result := hr;

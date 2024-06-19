@@ -13,11 +13,9 @@ object frmMain: TfrmMain
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
-  PixelsPerInch = 96
   TextHeight = 13
   object Bevel2: TBevel
     Left = 0
@@ -114,6 +112,7 @@ object frmMain: TfrmMain
     ParentFont = False
     TabOrder = 11
     VerticalAlignment = taAlignTop
+    ExplicitWidth = 478
     object Label4: TLabel
       AlignWithMargins = True
       Left = 6
@@ -310,7 +309,7 @@ object frmMain: TfrmMain
     Align = alTop
     BevelOuter = bvLowered
     TabOrder = 7
-    ExplicitTop = 282
+    ExplicitWidth = 478
     object Label1: TLabel
       Left = 22
       Top = 45
