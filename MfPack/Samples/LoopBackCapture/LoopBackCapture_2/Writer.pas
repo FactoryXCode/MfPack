@@ -80,7 +80,6 @@ uses
   WinApi.MediaFoundationApi.MfUtils;
 
 const
-  // Maximum filesize in 32bit environments.
   MAX_FILE_SIZE = 3900000000;
 
   // WAV fileheader identifiers.
@@ -294,7 +293,7 @@ begin
   if (MMSYSERR_NOERROR <> mResult) then
     Exit(mResult);
 
-  // Close the file.
+  // Close the file handle.
   mResult := mmioClose(hmFile,
                        0);
   if (MMSYSERR_NOERROR <> mResult) then
