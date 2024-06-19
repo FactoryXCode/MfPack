@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -298,13 +298,6 @@ begin
                        0);
   if (MMSYSERR_NOERROR <> mResult) then
     Exit(mResult);
-
-  // Close the file handle.
-  if (hmFile <> 0) then
-    begin
-      CloseHandle(hmFile);
-      hmFile := 0;
-    end;
 
   Result := MMSYSERR_NOERROR;
 end;
