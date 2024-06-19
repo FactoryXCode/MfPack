@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 // 25/04/2004 Tony                Updated to a more stable and glitch free version.
 // 10/05/2024 Tony                Improved performance.
 //------------------------------------------------------------------------------
@@ -112,7 +112,6 @@ type
     cbxStayOnTop: TCheckBox;
     Panel1: TPanel;
     Label1: TLabel;
-    lblFileExt: TLabel;
     edFileName: TEdit;
     cbxDontOverWrite: TCheckBox;
     butStart: TButton;
@@ -128,7 +127,8 @@ type
     cbxAutoBufferSize: TCheckBox;
     lblCaptureBufferDuration: TLabel;
     lblBufferDuration: TLabel;
-    cbxUseDeviceAudioFmt: TCheckBox;
+    cbxWavFormats: TComboBox;
+    lblFileExt: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject;
                              var CanClose: Boolean);
@@ -153,7 +153,7 @@ type
     bIncludeProcessTree: Boolean;
     oLoopbackCapture: TLoopbackCapture;
     aMainProcessId: Integer;
-
+    aWavFmt: TWavFormat;
     // We use timers here, to prevent distortions when quering the capturethread for timing and processed data.
     // The timer must be set to 1 millisecond resolution.
     thrTimer: TUniThreadedTimer;
@@ -418,12 +418,21 @@ begin
       butPlayData.Enabled := False;
       SetBufferDuration();
 
+      // Bitrate and resolution.
+      case cbxWavFormats.ItemIndex of
+        0: aWavFmt := fmt44100b16;
+        1: aWavFmt := fmt48000b24;
+        2: aWavFmt := fmt48000b32;
+        3: aWavFmt := fmt96000b24;
+        4: aWavFmt := fmt96000b32;
+      end;
+
       // Capture the audio stream from the default rendering device.
       hr := oLoopbackCapture.StartCaptureAsync(Handle,
                                                aMainProcessId,
                                                bIncludeProcessTree,
-                                               cbxUseDeviceAudioFmt.Checked,
                                                LPCWSTR(sFileName + lblFileExt.Caption),
+                                               aWavFmt,
                                                pvBufferDuration);
       if FAILED(hr) then
         begin
@@ -450,9 +459,9 @@ begin
   if cbxAutoBufferSize.Checked then
     pvBufferDuration := 0
   else
-    pvBufferDuration := (REFTIMES_PER_SEC) * sedBufferSize.Value;
+    pvBufferDuration := (REFTIMES_PER_MILLISEC) * sedBufferSize.Value;
 
-  if (pvBufferDuration > REFTIMES_PER_SEC) then
+  if (pvBufferDuration > REFTIMES_PER_MILLISEC) then
     sms := 'milliseconds'
   else
     sms := 'millisecond';

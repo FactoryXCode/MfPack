@@ -19,20 +19,23 @@ audio endpoint.
 It also demonstrates how to get a processes by using the tlhelp32 API, to list a snapshot of running processes and be able to pick one.
 The application is provided with a dialog to select a running process from the process tree you want to pick, and has
 a button to get the current PID of your application.
-It's preffered to select one process and select to record from this process only to get as less possible sound interruptions or distortions. 
+It's preferred to select one process and select to record from this process only to get as less possible sound interruptions or distortions. 
 Also try to minimize open applications that uses lots of memory and/or processor load when capturing.
 
-NOTES: 
+The application is using MMCSS and runs the rendering in a separate thread.
+
+NOTES:
+ - When capturing from high latency sources, like Internet, use a low buffersize ~10 milliseconds or lower.
  - This release is updated for compiler version 17 up to 34.
  - SDK version 10.0.22621.0 (Win 11)
  - Requires Windows 10 build 20348 or later.
- - Minimum supported MfPack version: 3.1.5
+ - Minimum supported MfPack version: 3.1.6
 
 Project: Media Foundation - MFPack - Samples
 Project location: https://github.com/FactoryXCode/MfPack
                   https://sourceforge.net/projects/MFPack
 
 First release date: 02-04-2023
-Final release date: 30-05-2024
+Final release date: 18-06-2024
 
 Copyright © FactoryX. All rights reserved.

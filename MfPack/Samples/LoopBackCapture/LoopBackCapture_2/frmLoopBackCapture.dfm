@@ -4,7 +4,7 @@ object frmMain: TfrmMain
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'LoopBackCapture Sample 2'
-  ClientHeight = 432
+  ClientHeight = 428
   ClientWidth = 482
   Color = clBtnFace
   DoubleBuffered = True
@@ -57,7 +57,7 @@ object frmMain: TfrmMain
   object lblMsg: TLabel
     AlignWithMargins = True
     Left = 6
-    Top = 405
+    Top = 401
     Width = 473
     Height = 24
     Margins.Left = 6
@@ -76,7 +76,7 @@ object frmMain: TfrmMain
   end
   object Bevel1: TBevel
     Left = 0
-    Top = 400
+    Top = 396
     Width = 482
     Height = 1
     Align = alBottom
@@ -86,7 +86,7 @@ object frmMain: TfrmMain
   end
   object Bevel3: TBevel
     Left = 0
-    Top = 401
+    Top = 397
     Width = 482
     Height = 1
     Align = alBottom
@@ -98,7 +98,7 @@ object frmMain: TfrmMain
     Left = 0
     Top = 163
     Width = 482
-    Height = 123
+    Height = 120
     Hint = 
       'The capture buffersize depending on the audiodevice specs and so' +
       'urce latency '
@@ -200,24 +200,20 @@ object frmMain: TfrmMain
       ParentFont = False
       TabOrder = 1
     end
-    object cbxUseDeviceAudioFmt: TCheckBox
-      Left = 7
-      Top = 100
-      Width = 177
-      Height = 14
-      Hint = 'Use PCM format 44.1 kHz 16 bit.'
-      Caption = 'Use PCM audio output format.'
-      Checked = True
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-      State = cbChecked
+    object cbxWavFormats: TComboBox
+      Left = 6
+      Top = 93
+      Width = 144
+      Height = 21
+      ItemIndex = 0
       TabOrder = 2
+      Text = '44.1 kHz 16 bit'
+      Items.Strings = (
+        '44.1 kHz 16 bit'
+        '48 kHz 24 bit'
+        '48 kHz 32 bit'
+        '96 kHz 24 bit'
+        '96 kHz 32 bit')
     end
   end
   object edPID: TEdit
@@ -308,13 +304,13 @@ object frmMain: TfrmMain
   end
   object Panel1: TPanel
     Left = 0
-    Top = 286
+    Top = 283
     Width = 482
     Height = 75
     Align = alTop
     BevelOuter = bvLowered
     TabOrder = 7
-    ExplicitTop = 281
+    ExplicitTop = 282
     object Label1: TLabel
       Left = 22
       Top = 45
@@ -327,8 +323,8 @@ object frmMain: TfrmMain
       ShowHint = True
     end
     object lblFileExt: TLabel
-      Left = 423
-      Top = 43
+      Left = 422
+      Top = 40
       Width = 27
       Height = 16
       Hint = 'Enter a file name without extension.'
@@ -346,8 +342,8 @@ object frmMain: TfrmMain
       Transparent = False
     end
     object edFileName: TEdit
-      Left = 74
-      Top = 43
+      Left = 71
+      Top = 40
       Width = 349
       Height = 21
       Alignment = taRightJustify
@@ -380,8 +376,8 @@ object frmMain: TfrmMain
     end
   end
   object butStart: TButton
-    Left = 7
-    Top = 367
+    Left = 4
+    Top = 363
     Width = 85
     Height = 27
     Caption = 'Start Capture'
@@ -389,8 +385,8 @@ object frmMain: TfrmMain
     OnClick = butStartClick
   end
   object butStop: TButton
-    Left = 96
-    Top = 367
+    Left = 95
+    Top = 363
     Width = 85
     Height = 27
     Caption = 'Stop Capture'
@@ -400,7 +396,7 @@ object frmMain: TfrmMain
   end
   object butPlayData: TButton
     Left = 185
-    Top = 367
+    Top = 363
     Width = 80
     Height = 27
     Hint = 'Play recorded data.'

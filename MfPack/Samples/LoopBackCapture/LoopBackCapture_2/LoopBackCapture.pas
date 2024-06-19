@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -121,6 +121,12 @@ type
                SampleReady,
                FinishCapture);
 
+  TWavFormat = (fmt44100b16,
+                fmt48000b24,
+                fmt48000b32,
+                fmt96000b24,
+                fmt96000b32);
+
 type
 
   // Forwarded classes.
@@ -150,10 +156,10 @@ type
 
     pvSampleReadyKey: MFWORKITEM_KEY;
     pvMixFormat: WAVEFORMATEX;
-    pvUseDeviceAudioFmt: Boolean;
+    pvWavFormat: TWavFormat;
+
     pvBufferFrames: UINT32;
     pvBufferDuration: REFERENCE_TIME;
-    pvEngineLatency: REFERENCE_TIME;
     pvBytesWritten: Int64;
 
     pvdwTaskID: DWord;
@@ -176,8 +182,8 @@ type
     function OnSampleReady(pResult: IMFAsyncResult): HResult;
 
     function InitializeLoopbackCapture(): HResult;
-    function GetMixFormat(out pMixFmt: WAVEFORMATEX;
-                          pGetDefault: Boolean = True): HResult;
+    procedure GetMixFormat(out pMixFmt: WAVEFORMATEX;
+                           WavFormat: TWavFormat = fmt44100b16);
     function CreateWAVFile(): HResult;
 
     function OnAudioSampleRequested(): HResult;
@@ -208,8 +214,8 @@ type
     function StartCaptureAsync(const hWindow: HWND;
                                const processId: DWord;
                                includeProcessTree: Boolean;
-                               UseDeviceAudioFmt: Boolean;
                                const outputFileName: LPCWSTR;
+                               WavFormat: TWavFormat = fmt44100b16;
                                initialBufferSize: REFERENCE_TIME = 0): HResult;
 
     function StopCaptureAsync(): HResult;
@@ -415,12 +421,8 @@ function TLoopbackCapture.ActivateCompleted(activateOperation: IActivateAudioInt
 var
   hr: HResult;
   hrActivateResult: HResult;
-  hnsLatency: REFERENCE_TIME;
-  hnsDefaultDevicePeriod: REFERENCE_TIME;
-  hnsMinimumDevicePeriod: REFERENCE_TIME;
 
 begin
-  pvMixFormat := Default(WAVEFORMATEX);
 
   // Check for a successful activation result
   hrActivateResult := E_UNEXPECTED;
@@ -434,44 +436,23 @@ begin
       Exit(hr);
     end;
 
-  // Returns the buffer size limits of the hardware audio engine, in 100-nanosecond units.
-  hr := pvAudioClient.GetDevicePeriod(hnsDefaultDevicePeriod,
-                                      hnsMinimumDevicePeriod);
-  if FAILED(hr) then
-    begin
-      ErrMsg(Format('Unable to retrieve buffersize limits for new audio client: %d.',[GetLastError()]), hr);
-      // We use the user given size.
-    end
-  else
-    begin
-      if (pvBufferDuration < hnsMinimumDevicePeriod) then
-        pvBufferDuration := hnsMinimumDevicePeriod;
-    end;
-
   // Set the WAV format to use. This can be either the PCm default format (44.1 kHz 16 bit) or
   // the format the audiodevice nativly use.
-  hr := GetMixFormat(pvMixFormat,
-                     pvUseDeviceAudioFmt);
-  if FAILED(hr) then
-    begin
-      ErrMsg(Format('Unable to retrieve mix format for new audio client: %d.',[GetLastError()]), hr);
-      Exit(hr);
-    end;
-
+  GetMixFormat(pvMixFormat,
+               pvWavFormat);
 
   //
   // Initialize the AudioClient in Shared Mode with the user specified buffer.
   // Note: - Shared Mode is needed when rendering from an audio application or process.
   //       - Exclusive Mode is used when rendering from a hardware endpoint.
   //       - Interface methods that are reffering to audioendpoints, will not work and returns E_NOTIMPL,
-  //         for example: GetBufferSize(), IsFormatSupported(), GetDevicePeriod() and GetMixFormat() methods.
+  //         for example: GetBufferSize(), IsFormatSupported(), GetDevicePeriod(), GetStreamLatency() and GetMixFormat() methods.
   // See: https://learn.microsoft.com/en-us/answers/questions/1125409/loopbackcapture-(-activateaudiointerfaceasync-with?page=1&orderby=Helpful#answers
   //
 
   hr := pvAudioClient.Initialize(AUDCLNT_SHAREMODE_SHARED,
                                  AUDCLNT_STREAMFLAGS_LOOPBACK or
-                                 AUDCLNT_STREAMFLAGS_EVENTCALLBACK or
-                                 AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM,
+                                 AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
                                  pvBufferDuration, // Note: When bufferDuration = 0, the audioclient will automaticly decise the bufferduration.
                                  0, // Must be zero in shared mode!
                                  @pvMixFormat,
@@ -483,20 +464,6 @@ begin
   hr := pvAudioClient.GetBufferSize(pvBufferFrames);
   if FAILED(hr) then
      Exit(hr);
-
-
-
-  // Get the stream latency (normally this should be inbetween 0 and 15 ms on Windows 11)
-  // See: https://learn.microsoft.com/en-us/windows-hardware/drivers/audio/low-latency-audio
-  hr := pvAudioClient.GetStreamLatency(hnsLatency);
-  if SUCCEEDED(hr) then
-    begin
-      // We don't want to get below the stream latency.
-      if (pvEngineLatency < hnsLatency) then
-        pvEngineLatency := hnsLatency;
-    end;
-  // Note: On Windows 11, latest update june 2024, this function will return E_NOT-IMPLEMENTED.
-  // We ignore this error to go on with the latency we could calculate with the MfPack.AudioLatencyTool.pas, if implemented.
 
   // Get the capture client
   hr := pvAudioClient.GetService(IID_IAudioCaptureClient,
@@ -732,33 +699,52 @@ begin
 end;
 
 
-//  Retrieve the format we'll use to capture samples.
-//  Tis can be PCM 44.1 16 bit or the stream format that the
-//  audio engine uses for its internal processing of shared-mode streams.
+//  Set the format we'll use to capture samples.
+//  This can be PCM 44.1 16 bit or other user defined.
 //
-function TLoopbackCapture.GetMixFormat(out pMixFmt: WAVEFORMATEX;
-                                       pGetDefault: Boolean = True): HResult;
-var
-  hr: HResult;
-
+procedure TLoopbackCapture.GetMixFormat(out pMixFmt: WAVEFORMATEX;
+                                        WavFormat: TWavFormat = fmt44100b16);
 begin
+  pMixFmt := Default(WAVEFORMATEX);
 
-  if pGetDefault then
+  // We only support PCM formats in stereo.
+  pMixFmt.wFormatTag := WAVE_FORMAT_PCM;
+  pMixFmt.nChannels := 2;
+
+  // set the formats: fmt44100b16, fmt48000b24, fmt48000b32, fmt96000b24, fmt96000b32
+  if (WavFormat = fmt44100b16) then
     begin
-      pMixFmt := GetDefaultWaveFmtEx();
-      hr := S_OK;
+      pMixFmt.nSamplesPerSec := 44100;
+      pMixFmt.wBitsPerSample := 16;
     end
-  else
+  else if (WavFormat = fmt48000b24) then
     begin
-      hr := (pvAudioClient as IAudioClient2).GetMixFormat(@pMixFmt);
-      if FAILED(hr) then
-        begin
-          ErrMsg(Format('Unable to get mix format on audio client: %d.',[GetLastError()]), hr);
-          Exit(hr);
-        end;
+      pMixFmt.nSamplesPerSec := 48000;
+      pMixFmt.wBitsPerSample := 24;
+    end
+  else if (WavFormat = fmt48000b24) then
+    begin
+      pMixFmt.nSamplesPerSec := 48000;
+      pMixFmt.wBitsPerSample := 32;
+    end
+  else if (WavFormat = fmt96000b24) then
+    begin
+      pMixFmt.nSamplesPerSec := 96000;
+      pMixFmt.wBitsPerSample := 24;
+    end
+  else if (WavFormat = fmt96000b32) then
+    begin
+      pMixFmt.nSamplesPerSec := 96000;
+      pMixFmt.wBitsPerSample := 32;
+    end
+  else // Default
+    begin
+      pMixFmt.nSamplesPerSec := 44100;
+      pMixFmt.wBitsPerSample := 16;
     end;
 
-  Result := hr;
+  pMixFmt.nBlockAlign := (pMixFmt.nChannels * pMixFmt.wBitsPerSample) div BITS_PER_BYTE;
+  pMixFmt.nAvgBytesPerSec := (pMixFmt.nSamplesPerSec * pMixFmt.nBlockAlign);
 end;
 
 
@@ -1092,8 +1078,8 @@ end;
 function TLoopbackCapture.StartCaptureAsync(const hWindow: HWND;
                                             const processId: DWord;
                                             includeProcessTree: Boolean;
-                                            UseDeviceAudioFmt: Boolean;
                                             const outputFileName: LPCWSTR;
+                                            WavFormat: TWavFormat = fmt44100b16;
                                             initialBufferSize: REFERENCE_TIME = 0): HResult;
 var
   hr: HResult;
@@ -1115,7 +1101,7 @@ begin
     end;
 
   pvoutputFileName := outputFileName;
-  pvUseDeviceAudioFmt := UseDeviceAudioFmt;
+  pvWavFormat := WavFormat;
 
   hr := InitializeLoopbackCapture();
   if FAILED(hr) then
