@@ -4,8 +4,8 @@ object MainForm: TMainForm
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'WAS Loopback Capture Sample 3'
-  ClientHeight = 479
-  ClientWidth = 471
+  ClientHeight = 433
+  ClientWidth = 450
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -13,14 +13,16 @@ object MainForm: TMainForm
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  OldCreateOrder = True
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
+  PixelsPerInch = 96
   TextHeight = 13
   object Bevel1: TBevel
     Left = 0
-    Top = 454
-    Width = 471
+    Top = 408
+    Width = 450
     Height = 1
     Align = alBottom
     Shape = bsTopLine
@@ -30,8 +32,8 @@ object MainForm: TMainForm
   object lblStatus: TLabel
     AlignWithMargins = True
     Left = 3
-    Top = 458
-    Width = 465
+    Top = 412
+    Width = 444
     Height = 18
     Align = alBottom
     AutoSize = False
@@ -43,17 +45,19 @@ object MainForm: TMainForm
     Font.Style = [fsBold]
     ParentFont = False
     Layout = tlCenter
+    ExplicitLeft = 8
     ExplicitTop = 443
-    ExplicitWidth = 466
+    ExplicitWidth = 465
   end
   object Panel3: TPanel
-    Left = 8
-    Top = 241
-    Width = 454
-    Height = 91
+    Left = 0
+    Top = 213
+    Width = 450
+    Height = 76
     Hint = 
       'The capture buffersize depending on the audiodevice specs and so' +
       'urce latency '
+    Align = alTop
     Alignment = taLeftJustify
     BevelOuter = bvLowered
     Caption = '  Capture Buffer'
@@ -63,11 +67,13 @@ object MainForm: TMainForm
     Font.Name = 'Tahoma'
     Font.Style = [fsBold]
     ParentFont = False
-    TabOrder = 2
+    TabOrder = 1
     VerticalAlignment = taAlignTop
+    ExplicitTop = 224
+    ExplicitWidth = 471
     object lblBufferDuration: TLabel
-      Left = 8
-      Top = 46
+      Left = 69
+      Top = 50
       Width = 195
       Height = 13
       Caption = 'Capture buffer duration : 10 milliseconds'
@@ -92,8 +98,8 @@ object MainForm: TMainForm
       ParentFont = False
     end
     object Label2: TLabel
-      Left = 384
-      Top = 47
+      Left = 326
+      Top = 50
       Width = 38
       Height = 13
       Hint = 'Latency in milliseconds.'
@@ -107,16 +113,6 @@ object MainForm: TMainForm
       ParentShowHint = False
       ShowHint = True
     end
-    object tbBufferDuration: TTrackBar
-      Left = 1
-      Top = 64
-      Width = 374
-      Height = 25
-      Max = 100
-      Position = 10
-      TabOrder = 0
-      OnChange = tbBufferDurationChange
-    end
     object cbxAutoBufferSize: TCheckBox
       Left = 8
       Top = 24
@@ -129,12 +125,12 @@ object MainForm: TMainForm
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
-      TabOrder = 1
+      TabOrder = 0
       OnClick = cbxAutoBufferSizeClick
     end
     object spedLatency: TSpinEdit
-      Left = 384
-      Top = 63
+      Left = 370
+      Top = 47
       Width = 51
       Height = 22
       Hint = 'Latency in milliseconds.'
@@ -142,43 +138,32 @@ object MainForm: TMainForm
       Font.Color = clWindowText
       Font.Height = -11
       Font.Name = 'Tahoma'
-      Font.Style = []
+      Font.Style = [fsBold]
       MaxValue = 1000
       MinValue = 0
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
+      TabOrder = 1
+      Value = 10
+    end
+    object sedBufferSize: TSpinEdit
+      Left = 8
+      Top = 47
+      Width = 52
+      Height = 22
+      MaxValue = 1000
+      MinValue = 0
       TabOrder = 2
       Value = 10
     end
   end
-  object butStartStop: TButton
-    Left = 6
-    Top = 422
-    Width = 85
-    Height = 27
-    Caption = 'Start capture'
-    TabOrder = 4
-    OnClick = butStartStopClick
-  end
-  object butPlayData: TButton
-    Left = 97
-    Top = 422
-    Width = 80
-    Height = 27
-    Hint = 'Play recorded data.'
-    Caption = 'Play data'
-    Enabled = False
-    ParentShowHint = False
-    ShowHint = True
-    TabOrder = 5
-    OnClick = butPlayDataClick
-  end
   object Panel1: TPanel
-    Left = 9
-    Top = 29
-    Width = 454
-    Height = 209
+    Left = 0
+    Top = 0
+    Width = 450
+    Height = 213
+    Align = alTop
     Alignment = taLeftJustify
     BevelOuter = bvLowered
     Caption = '  AudioEndpoint'
@@ -188,8 +173,10 @@ object MainForm: TMainForm
     Font.Name = 'Tahoma'
     Font.Style = [fsBold]
     ParentFont = False
-    TabOrder = 1
+    TabOrder = 0
     VerticalAlignment = taAlignTop
+    ExplicitTop = 1
+    ExplicitWidth = 471
     object Label4: TLabel
       Left = 7
       Top = 68
@@ -296,8 +283,8 @@ object MainForm: TMainForm
       BevelOuter = bvNone
       TabOrder = 4
       object Label3: TLabel
-        Left = 4
-        Top = 2
+        Left = 3
+        Top = 0
         Width = 53
         Height = 13
         Caption = 'Data flow'
@@ -357,7 +344,7 @@ object MainForm: TMainForm
       end
     end
     object cbxEnableStreamSwitch: TCheckBox
-      Left = 202
+      Left = 234
       Top = 169
       Width = 194
       Height = 14
@@ -391,25 +378,27 @@ object MainForm: TMainForm
       State = cbChecked
       TabOrder = 6
     end
-  end
-  object cbxStayOnTop: TCheckBox
-    Left = 16
-    Top = 8
-    Width = 140
-    Height = 15
-    Caption = 'Stay On Top'
-    ParentShowHint = False
-    ShowHint = False
-    TabOrder = 0
-    OnClick = cbxStayOnTopClick
+    object cbxStayOnTop: TCheckBox
+      Left = 234
+      Top = 189
+      Width = 95
+      Height = 15
+      Caption = 'Stay On Top'
+      ParentShowHint = False
+      ShowHint = False
+      TabOrder = 7
+      OnClick = cbxStayOnTopClick
+    end
   end
   object Panel4: TPanel
-    Left = 8
-    Top = 336
-    Width = 454
-    Height = 81
+    Left = 0
+    Top = 289
+    Width = 450
+    Height = 117
+    Align = alTop
     BevelOuter = bvLowered
-    TabOrder = 3
+    TabOrder = 2
+    ExplicitWidth = 471
     object Label1: TLabel
       Left = 10
       Top = 32
@@ -478,17 +467,39 @@ object MainForm: TMainForm
       State = cbChecked
       TabOrder = 0
     end
-  end
-  object butResetEngine: TButton
-    Left = 382
-    Top = 422
-    Width = 80
-    Height = 27
-    Hint = 'Reset the engine when having issues.'
-    Caption = 'Reset engine'
-    ParentShowHint = False
-    ShowHint = True
-    TabOrder = 6
-    OnClick = butResetEngineClick
+    object butStartStop: TButton
+      Left = 7
+      Top = 82
+      Width = 85
+      Height = 27
+      Caption = 'Start capture'
+      TabOrder = 2
+      OnClick = butStartStopClick
+    end
+    object butPlayData: TButton
+      Left = 98
+      Top = 82
+      Width = 80
+      Height = 27
+      Hint = 'Play recorded data.'
+      Caption = 'Play data'
+      Enabled = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 3
+      OnClick = butPlayDataClick
+    end
+    object butResetEngine: TButton
+      Left = 362
+      Top = 83
+      Width = 80
+      Height = 27
+      Hint = 'Reset the engine when having issues.'
+      Caption = 'Reset engine'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 4
+      OnClick = butResetEngineClick
+    end
   end
 end

@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 // 12/06/2024 Tony                Updated to render in a separate thread.
 //------------------------------------------------------------------------------
 //
@@ -97,12 +97,8 @@ uses
 
 type
   TMainForm = class(TForm)
-    butStartStop: TButton;
-    butPlayData: TButton;
     Panel1: TPanel;
-    cbxStayOnTop: TCheckBox;
     Panel3: TPanel;
-    tbBufferDuration: TTrackBar;
     lblBufferDuration: TLabel;
     Panel4: TPanel;
     Label1: TLabel;
@@ -111,7 +107,6 @@ type
     cbxDontOverWrite: TCheckBox;
     Bevel1: TBevel;
     lblStatus: TLabel;
-    butResetEngine: TButton;
     lblCaptureBufferDuration: TLabel;
     cbxAutoBufferSize: TCheckBox;
     Label2: TLabel;
@@ -129,6 +124,11 @@ type
     cbxUseDeviceAudioFmt: TCheckBox;
     Label5: TLabel;
     spedLatency: TSpinEdit;
+    sedBufferSize: TSpinEdit;
+    cbxStayOnTop: TCheckBox;
+    butStartStop: TButton;
+    butPlayData: TButton;
+    butResetEngine: TButton;
     procedure FormCreate(Sender: TObject);
     procedure butStartStopClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -169,7 +169,7 @@ type
     prTimerDestroyed: Boolean;
 
     procedure CreateTimer();
-    procedure KillTimer(Sender: TObject);
+    procedure KillTimer();
 
     procedure EnablePanels(aEnabled: Boolean);
 
@@ -209,9 +209,9 @@ procedure TMainForm.CreateTimer();
 begin
 
   if(thrTimer <> nil) then
-    KillTimer(Self);
+    KillTimer();
 
-  thrTimer := TUniThreadedTimer.Create(Self);
+  thrTimer := TUniThreadedTimer.Create(nil);
   thrTimer.Period := 100;  // 100 millisecond resolution.
   thrTimer.Enabled := False;
   thrTimer.OnTimerEvent := OnTimer;
@@ -219,14 +219,14 @@ begin
 end;
 
 
-procedure TMainForm.KillTimer(Sender: TObject);
+procedure TMainForm.KillTimer();
 begin
   if (thrTimer <> nil) then
     begin
       thrTimer.Enabled := False;
       FreeAndNil(thrTimer);
-      prTimerDestroyed := True;
     end;
+  prTimerDestroyed := True;
 end;
 
 
@@ -239,7 +239,7 @@ begin
     Exit;
 
   // Stop the timer and stopwatch.
-  KillTimer(Self);
+  KillTimer();
   aStopWatch.Stop;
   aStopWatch.Reset;
 
@@ -471,11 +471,11 @@ begin
 
   if cbxAutoBufferSize.Checked then
     begin
-      tbBufferDuration.Position := 0;
-      tbBufferDuration.Enabled := False;
+      sedBufferSize.Value := 0;
+      sedBufferSize.Enabled := False;
     end
   else
-    tbBufferDuration.Enabled := True;
+    sedBufferSize.Enabled := True;
   SetBufferDuration();
 end;
 
@@ -509,10 +509,12 @@ begin
   CanClose := False;
   aStopWatch.Stop;
 
-  KillTimer(Self);
+  KillTimer();
   // Wait until the timer signals destroyed.
-  while not prTimerDestroyed do
+  while True do
     begin
+      if prTimerDestroyed then
+        Break;
       Sleep(1);
     end;
 
@@ -628,9 +630,9 @@ begin
   if cbxAutoBufferSize.Checked then
     pvBufferDuration := 0
   else
-    pvBufferDuration := (REFTIMES_PER_SEC) * tbBufferDuration.Position;
+    pvBufferDuration := (REFTIMES_PER_MILLISEC) * sedBufferSize.Value;
 
-  if (pvBufferDuration > REFTIMES_PER_SEC) then
+  if (pvBufferDuration > REFTIMES_PER_MILLISEC) then
     sms := 'milliseconds'
   else
     sms := 'millisecond';
@@ -639,10 +641,9 @@ begin
     lblBufferDuration.Caption := 'The audioclient will automaticly adjust the buffer duration.'
   else
     lblBufferDuration.Caption := Format('Capture buffer duration(%d %s)',
-                                        [tbBufferDuration.Position,
+                                        [sedBufferSize.Value,
                                          sms])
 end;
-
 
 
 // initialization and finalization =============================================
