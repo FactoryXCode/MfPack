@@ -4,7 +4,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'Loopback Capture Sample 1'
-  ClientHeight = 464
+  ClientHeight = 399
   ClientWidth = 472
   Color = clBtnFace
   DoubleBuffered = True
@@ -13,22 +13,25 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  OldCreateOrder = True
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
+  PixelsPerInch = 96
   TextHeight = 13
   object Bevel1: TBevel
     Left = 0
-    Top = 439
+    Top = 374
     Width = 472
     Height = 1
     Align = alBottom
     Shape = bsTopLine
+    ExplicitTop = 439
   end
   object lblStatus: TLabel
     AlignWithMargins = True
     Left = 3
-    Top = 443
+    Top = 378
     Width = 466
     Height = 18
     Align = alBottom
@@ -41,15 +44,17 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     Font.Style = [fsBold]
     ParentFont = False
     Layout = tlCenter
+    ExplicitTop = 443
   end
   object Panel3: TPanel
-    Left = 10
-    Top = 219
-    Width = 454
-    Height = 91
+    Left = 0
+    Top = 170
+    Width = 472
+    Height = 82
     Hint = 
       'The capture buffersize depending on the audiodevice specs and so' +
       'urce latency '
+    Align = alTop
     Alignment = taLeftJustify
     BevelOuter = bvLowered
     Caption = '  Capture Buffer'
@@ -59,11 +64,14 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     Font.Name = 'Tahoma'
     Font.Style = [fsBold]
     ParentFont = False
-    TabOrder = 4
+    TabOrder = 2
     VerticalAlignment = taAlignTop
+    ExplicitLeft = 8
+    ExplicitTop = 222
+    ExplicitWidth = 454
     object lblBufferDuration: TLabel
-      Left = 8
-      Top = 46
+      Left = 65
+      Top = 51
       Width = 195
       Height = 13
       Caption = 'Capture buffer duration : 10 milliseconds'
@@ -87,17 +95,6 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       Font.Style = [fsItalic]
       ParentFont = False
     end
-    object tbBufferDuration: TTrackBar
-      Left = 1
-      Top = 65
-      Width = 452
-      Height = 25
-      Align = alBottom
-      Max = 30
-      Position = 5
-      TabOrder = 0
-      OnChange = tbBufferDurationChange
-    end
     object cbxAutoBufferSize: TCheckBox
       Left = 8
       Top = 24
@@ -110,32 +107,42 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
-      TabOrder = 1
+      TabOrder = 0
       OnClick = cbxAutoBufferSizeClick
+    end
+    object sedBufferSize: TSpinEdit
+      Left = 7
+      Top = 48
+      Width = 52
+      Height = 22
+      MaxValue = 1000
+      MinValue = 0
+      TabOrder = 1
+      Value = 10
     end
   end
   object butStart: TButton
     Left = 8
-    Top = 406
+    Top = 340
     Width = 85
     Height = 27
     Caption = 'Start capture'
-    TabOrder = 6
+    TabOrder = 4
     OnClick = butStartClick
   end
   object butStop: TButton
     Left = 99
-    Top = 406
+    Top = 340
     Width = 85
     Height = 27
     Caption = 'Stop capture'
     Enabled = False
-    TabOrder = 7
+    TabOrder = 5
     OnClick = butStopClick
   end
   object butPlayData: TButton
     Left = 190
-    Top = 406
+    Top = 340
     Width = 80
     Height = 27
     Hint = 'Play recorded data.'
@@ -143,14 +150,15 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     Enabled = False
     ParentShowHint = False
     ShowHint = True
-    TabOrder = 8
+    TabOrder = 6
     OnClick = butPlayDataClick
   end
   object Panel1: TPanel
-    Left = 10
-    Top = 34
-    Width = 454
+    Left = 0
+    Top = 0
+    Width = 472
     Height = 72
+    Align = alTop
     Alignment = taLeftJustify
     BevelOuter = bvLowered
     Caption = '   AudioEndpoint'
@@ -160,15 +168,18 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     Font.Name = 'Tahoma'
     Font.Style = [fsBold]
     ParentFont = False
-    TabOrder = 2
+    TabOrder = 0
     VerticalAlignment = taAlignTop
+    ExplicitLeft = 10
+    ExplicitTop = 34
+    ExplicitWidth = 454
     object rbRenderingDevice: TRadioButton
       Left = 6
       Top = 22
       Width = 145
       Height = 17
       Hint = 'Render'
-      Caption = 'Audio rendering stream.'
+      Caption = 'Audio rendering EndPoint.'
       Checked = True
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -187,7 +198,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       Width = 145
       Height = 17
       Hint = 'Capture'
-      Caption = 'Audio capture stream.'
+      Caption = 'Audio capture EndPoint.'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -198,12 +209,24 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       ShowHint = True
       TabOrder = 1
     end
+    object butShowdlgDevices: TButton
+      Left = 367
+      Top = 7
+      Width = 97
+      Height = 25
+      Caption = 'Select Device'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 2
+      OnClick = butShowdlgDevicesClick
+    end
   end
   object Panel2: TPanel
-    Left = 8
-    Top = 111
-    Width = 455
+    Left = 0
+    Top = 72
+    Width = 472
     Height = 98
+    Align = alTop
     Alignment = taLeftJustify
     BevelOuter = bvLowered
     Caption = '  Data-flow Direction'
@@ -213,8 +236,11 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     Font.Name = 'Tahoma'
     Font.Style = [fsBold]
     ParentFont = False
-    TabOrder = 3
+    TabOrder = 1
     VerticalAlignment = taAlignTop
+    ExplicitLeft = 8
+    ExplicitTop = 111
+    ExplicitWidth = 455
     object rbConsole: TRadioButton
       Left = 8
       Top = 24
@@ -235,7 +261,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       OnMouseUp = rbConsoleMouseUp
     end
     object rbMultimedia: TRadioButton
-      Left = 9
+      Left = 8
       Top = 47
       Width = 315
       Height = 17
@@ -273,35 +299,17 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       OnMouseUp = rbConsoleMouseUp
     end
   end
-  object cbxStayOnTop: TCheckBox
-    Left = 17
-    Top = 8
-    Width = 189
-    Height = 15
-    Caption = 'Stay On Top'
-    ParentShowHint = False
-    ShowHint = False
-    TabOrder = 0
-    OnClick = cbxStayOnTopClick
-  end
-  object butShowdlgDevices: TButton
-    Left = 364
-    Top = 3
-    Width = 97
-    Height = 25
-    Caption = 'Show Devices'
-    ParentShowHint = False
-    ShowHint = True
-    TabOrder = 1
-    OnClick = butShowdlgDevicesClick
-  end
   object Panel4: TPanel
-    Left = 8
-    Top = 319
-    Width = 454
+    Left = 0
+    Top = 252
+    Width = 472
     Height = 81
+    Align = alTop
     BevelOuter = bvLowered
-    TabOrder = 5
+    TabOrder = 3
+    ExplicitLeft = 8
+    ExplicitTop = 319
+    ExplicitWidth = 454
     object Label1: TLabel
       Left = 10
       Top = 32
@@ -370,17 +378,28 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       State = cbChecked
       TabOrder = 0
     end
+    object cbxStayOnTop: TCheckBox
+      Left = 186
+      Top = 11
+      Width = 106
+      Height = 15
+      Caption = 'Stay On Top'
+      ParentShowHint = False
+      ShowHint = False
+      TabOrder = 2
+      OnClick = cbxStayOnTopClick
+    end
   end
   object butResetEngine: TButton
     Left = 384
-    Top = 406
+    Top = 340
     Width = 80
     Height = 27
     Hint = 'Reset the engine when having issues.'
     Caption = 'Reset engine'
     ParentShowHint = False
     ShowHint = True
-    TabOrder = 9
+    TabOrder = 7
     OnClick = butResetEngineClick
   end
 end

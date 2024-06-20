@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 30/01/2024 All                 Morrissey release  SDK 10.0.22621.0 (Windows 11)
 // 25/04/2004 Tony                Updated to a more stable and crack free version.
 //------------------------------------------------------------------------------
 //
@@ -81,6 +81,7 @@ uses
   Vcl.ComCtrls,
   Vcl.Menus,
   Vcl.ExtCtrls,
+  Vcl.Samples.Spin,
   {CoreAudioApi}
   WinApi.MediaFoundationApi.MfApi,
   WinApi.CoreAudioApi.MMDeviceApi,
@@ -106,10 +107,7 @@ type
     rbConsole: TRadioButton;
     rbMultimedia: TRadioButton;
     rbCommunications: TRadioButton;
-    cbxStayOnTop: TCheckBox;
-    butShowdlgDevices: TButton;
     Panel3: TPanel;
-    tbBufferDuration: TTrackBar;
     lblBufferDuration: TLabel;
     Panel4: TPanel;
     Label1: TLabel;
@@ -121,6 +119,9 @@ type
     butResetEngine: TButton;
     lblCaptureBufferDuration: TLabel;
     cbxAutoBufferSize: TCheckBox;
+    sedBufferSize: TSpinEdit;
+    butShowdlgDevices: TButton;
+    cbxStayOnTop: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure butStartClick(Sender: TObject);
     procedure butStopClick(Sender: TObject);
@@ -432,12 +433,12 @@ begin
   if cbxAutoBufferSize.Checked then
     begin
       prBufferDuration := 0;
-      tbBufferDuration.Position := 0;
-      tbBufferDuration.Enabled := False;
+      sedBufferSize.Value := 0;
+      sedBufferSize.Enabled := False;
       SetBufferDuration();
     end
   else
-    tbBufferDuration.Enabled := True;
+    sedBufferSize.Enabled := True;
 end;
 
 
@@ -483,7 +484,7 @@ begin
   lblStatus.ControlStyle := lblStatus.ControlStyle + [csOpaque];
   aStopWatch := TStopwatch.Create;
   thrTimer := TUniThreadedTimer.Create(nil);
-  thrTimer.Period := 1;  // One millisecond resolution.
+  thrTimer.Period := 10;  // Ten millisecond resolution.
   thrTimer.Enabled := False;
   thrTimer.OnTimerEvent := OnTimer;
   CreateNewAudioSink();
@@ -499,7 +500,7 @@ begin
   // Set event handlers.
   prAudioSink.OnStoppedCapturing := OnCapturingStoppedEvent;
   prDataFlow := eDataFlow(-1);
-  tbBufferDuration.Position := 10;
+  sedBufferSize.Value := 10;
   SetBufferDuration();
 end;
 
@@ -536,8 +537,8 @@ var
 
 begin
 
-  prBufferDuration := (REFTIMES_PER_SEC) * tbBufferDuration.Position;
-  if (prBufferDuration > REFTIMES_PER_SEC) then
+  prBufferDuration := (REFTIMES_PER_MILLISEC) * sedBufferSize.Value;
+  if (prBufferDuration > REFTIMES_PER_MILLISEC) then
     sms := 'milliseconds'
   else
     sms := 'millisecond';
@@ -546,7 +547,7 @@ begin
     lblBufferDuration.Caption := 'The audioclient will automaticly adjust the buffer duration.'
   else
     lblBufferDuration.Caption := Format('Capture buffer duration(%d %s)',
-                                        [tbBufferDuration.Position,
+                                        [sedBufferSize.Value,
                                          sms])
 end;
 
