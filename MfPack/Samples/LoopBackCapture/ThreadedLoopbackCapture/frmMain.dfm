@@ -394,11 +394,10 @@ object MainForm: TMainForm
     Left = 0
     Top = 289
     Width = 450
-    Height = 117
+    Height = 79
     Align = alTop
     BevelOuter = bvLowered
     TabOrder = 2
-    ExplicitWidth = 471
     object Label1: TLabel
       Left = 10
       Top = 32
@@ -467,39 +466,39 @@ object MainForm: TMainForm
       State = cbChecked
       TabOrder = 0
     end
-    object butStartStop: TButton
-      Left = 7
-      Top = 82
-      Width = 85
-      Height = 27
-      Caption = 'Start capture'
-      TabOrder = 2
-      OnClick = butStartStopClick
-    end
-    object butPlayData: TButton
-      Left = 98
-      Top = 82
-      Width = 80
-      Height = 27
-      Hint = 'Play recorded data.'
-      Caption = 'Play data'
-      Enabled = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 3
-      OnClick = butPlayDataClick
-    end
-    object butResetEngine: TButton
-      Left = 362
-      Top = 83
-      Width = 80
-      Height = 27
-      Hint = 'Reset the engine when having issues.'
-      Caption = 'Reset engine'
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 4
-      OnClick = butResetEngineClick
-    end
+  end
+  object butStartStop: TButton
+    Left = 7
+    Top = 375
+    Width = 85
+    Height = 27
+    Caption = 'Start capture'
+    TabOrder = 3
+    OnClick = butStartStopClick
+  end
+  object butPlayData: TButton
+    Left = 98
+    Top = 375
+    Width = 80
+    Height = 27
+    Hint = 'Play recorded data.'
+    Caption = 'Play data'
+    Enabled = False
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 4
+    OnClick = butPlayDataClick
+  end
+  object butResetEngine: TButton
+    Left = 362
+    Top = 375
+    Width = 80
+    Height = 27
+    Hint = 'Reset the engine when having issues.'
+    Caption = 'Reset engine'
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 5
+    OnClick = butResetEngineClick
   end
 end
