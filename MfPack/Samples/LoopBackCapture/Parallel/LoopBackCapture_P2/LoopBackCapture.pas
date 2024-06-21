@@ -825,7 +825,6 @@ begin
   Task := TTask.Create(procedure
                        var
                          hr: HResult;
-
                        begin
                          hr := CaptureThreadFunc();
                          if FAILED(hr) then
@@ -839,7 +838,6 @@ begin
                        end);
   // Let's go!
   Task.Start;
-
   Result := S_OK;
 end;
 

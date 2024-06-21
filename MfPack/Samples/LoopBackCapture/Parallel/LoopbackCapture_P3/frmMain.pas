@@ -23,6 +23,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 19/06/2024 All                 Rammstein release  SDK 10.0.22621.0 (Windows 11)
+// 12/06/2024 Tony                Updated to render in a separate thread.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -120,7 +121,7 @@ type
     rbCaptureDevice: TRadioButton;
     butShowdlgDevices: TButton;
     cbxEnableStreamSwitch: TCheckBox;
-    cbxUseDeviceAudioFmt: TCheckBox;
+    cbxUsePCMAudioFmt: TCheckBox;
     Label5: TLabel;
     spedLatency: TSpinEdit;
     sedBufferSize: TSpinEdit;
@@ -162,7 +163,7 @@ type
     BufferDurationCaptionSet: Boolean;
 
     // We use timers here, to prevent distortions when quering the capturethread for timing and processed data.
-    // The timer is set to 100 millisecond resolution.
+    // The timer must be set to 1 millisecond resolution.
     thrTimer: TUniThreadedTimer;
     aStopWatch: TStopwatch;
     prTimerDestroyed: Boolean;
@@ -178,8 +179,8 @@ type
     procedure SetBufferDuration();
 
     // Event handlers.
-    procedure OnCapturingStartEvent(Sender: TObject);
     procedure OnCapturingStoppedEvent(Sender: TObject);
+    procedure OnCapturingStartEvent(Sender: TObject);
     procedure OnTimer(Sender: TObject);
 
   public
@@ -230,15 +231,6 @@ begin
 end;
 
 
-procedure TMainForm.OnCapturingStartEvent(Sender: TObject);
-begin
-  CreateTimer();
-  thrTimer.Enabled := True;
-  aStopWatch.Start;
-  aStopWatch.StartNew;
-end;
-
-
 procedure TMainForm.OnCapturingStoppedEvent(Sender: TObject);
 var
   Status: TDeviceState;
@@ -271,6 +263,17 @@ begin
 end;
 
 
+procedure TMainForm.OnCapturingStartEvent(Sender: TObject);
+begin
+  // The engine sends the event capturing has been started.
+  // Start timer.
+  CreateTimer();
+  thrTimer.Enabled := True;
+  aStopWatch.Start;
+  aStopWatch.StartNew;
+end;
+
+
 procedure TMainForm.rbConsoleMouseUp(Sender: TObject;
   Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
@@ -282,12 +285,10 @@ end;
 procedure TMainForm.OnTimer(Sender: TObject);
 begin
 
-  if Assigned(prWASCapture) then
-    if (prWASCapture.DeviceState = Capturing) then
-     lblStatus.Caption := 'Capturing from source: ' + FormatDateTime('hh:nn:ss.zzz',
-                                                                     aStopWatch.ElapsedMilliseconds / MSecsPerDay);
+  lblStatus.Caption := 'Capturing from source: ' + FormatDateTime('hh:nn:ss.zzz',
+                                                                  aStopWatch.ElapsedMilliseconds / MSecsPerDay);
 
-  Application.ProcessMessages;
+  HandleThreadMessages(GetCurrentThread());
 end;
 
 
@@ -315,6 +316,8 @@ begin
 
      // Stop capture
      prWASCapture.Stop();
+
+     // The timer will be deactivated in OnCapturingStoppedEvent.
 
      // Destroy the engine
      prWASCapture.Shutdown();
@@ -369,7 +372,6 @@ begin
 
      // Show new filename to user.
      edFileName.Text := prFileName;
-
      butStartStop.Enabled := False;
      butPlayData.Enabled := False;
      EnablePanels(False);
@@ -377,10 +379,12 @@ begin
      // Initialize.
      bSuccess := prWASCapture.Initialize(pvBufferDuration,
                                          pvTargetLatency,
-                                         cbxUseDeviceAudioFmt.Checked);
+                                         cbxUsePCMAudioFmt.Checked);
 
      if bSuccess then
        begin
+
+         // We only probe this once.
          if not BufferDurationCaptionSet then
            begin
              lblCaptureBufferDuration.Caption := Format('Capture buffer duration: %d ms.',
@@ -406,6 +410,7 @@ begin
          begin
            // Enable the timer.
            BufferDurationCaptionSet := False;
+           // Timer will be activated in OnCaptureingStartEvent.
            butStartStop.Enabled := True;
            butStartStop.Caption := 'Stop capture';
            tag := 1;
@@ -526,8 +531,8 @@ begin
   lblStatus.ControlStyle := lblStatus.ControlStyle + [csOpaque];
   aStopWatch := TStopwatch.Create;
   prEdited := False;
-  cbxUseDeviceAudioFmt.Hint := 'Use the default audio format (44.1 khz/ 16 bit/ PCM).' + #13 +
-                               'If you disable this option, the endpoint''s audio format will be used.';
+  cbxUsePCMAudioFmt.Hint := 'Use the default audio format (44.1 khz/ 16 bit/ PCM).' + #13 +
+                            'If you disable this option, the endpoint''s audio format will be used.';
 end;
 
 
@@ -578,9 +583,9 @@ begin
     end
   else
     begin
-      // Set event handler.
-      prWASCapture.OnStartCapturing := OnCapturingStartEvent;
+      // Set event handlers.
       prWASCapture.OnStoppedCapturing := OnCapturingStoppedEvent;
+      prWASCapture.OnStartCapturing := OnCapturingStartEvent;
 
       InfoMsg(optIDE,
               Format('The WASCapture engine "%s" successfully initialized.', [WideCharToString(prDeviceName)]),
@@ -630,9 +635,9 @@ begin
   if cbxAutoBufferSize.Checked then
     pvBufferDuration := 0
   else
-    pvBufferDuration := (REFTIMES_PER_MILLISEC) * sedBufferSize.Value;
+    pvBufferDuration := (REFTIMES_PER_SEC) * sedBufferSize.Value;
 
-  if (pvBufferDuration > REFTIMES_PER_MILLISEC) then
+  if (pvBufferDuration > REFTIMES_PER_SEC) then
     sms := 'milliseconds'
   else
     sms := 'millisecond';
@@ -650,6 +655,9 @@ end;
 
 
 initialization
+  // Initialize the COM library.
+  //CoInitializeEx(nil,
+  //               COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE);
 
   if FAILED(MFStartup(MF_VERSION,
                       MFSTARTUP_LITE)) then
@@ -664,5 +672,5 @@ initialization
 finalization
 
   MFShutdown();
-
+  //CoUnInitialize;
 end.

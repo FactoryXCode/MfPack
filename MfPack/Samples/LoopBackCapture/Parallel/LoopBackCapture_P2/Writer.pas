@@ -81,7 +81,7 @@ uses
 
 const
   // Maximum filesize in 32bit environments.
-  MAX_FILE_SIZE = 3900000000;
+  MAX_FILE_SIZE = 4294960000; // 4294967296 - 7296 keep some overhead.
 
   // WAV fileheader identifiers.
   // FOURCC_RIFF is declared in WinApi.WinMM.MMiscApi.

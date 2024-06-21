@@ -22,7 +22,7 @@ a button to get the current PID of your application.
 It's preferred to select one process and select to record from this process only to get as less possible sound interruptions or distortions. 
 Also try to minimize open applications that uses lots of memory and/or processor load when capturing.
 
-The application is using MMCSS and runs the rendering in a separate thread.
+The application is using MMCSS and runs the rendering part in a separate thread.
 
 NOTES:
  - When capturing from high latency sources, like Internet, use a low buffersize ~10 milliseconds or lower.

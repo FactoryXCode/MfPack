@@ -13,9 +13,11 @@ object frmMain: TfrmMain
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  OldCreateOrder = True
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
+  PixelsPerInch = 96
   TextHeight = 13
   object Bevel2: TBevel
     Left = 0
@@ -132,23 +134,6 @@ object frmMain: TfrmMain
       ParentShowHint = False
       ShowHint = True
     end
-    object Label5: TLabel
-      Left = 7
-      Top = 51
-      Width = 102
-      Height = 13
-      Hint = 'Enter a file name without extension.'
-      Alignment = taRightJustify
-      Caption = 'Buffer Duration (ms):'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-      ParentShowHint = False
-      ShowHint = True
-    end
     object lblCaptureBufferDuration: TLabel
       Left = 109
       Top = 24
@@ -163,7 +148,7 @@ object frmMain: TfrmMain
       ParentFont = False
     end
     object lblBufferDuration: TLabel
-      Left = 178
+      Left = 70
       Top = 52
       Width = 195
       Height = 13
@@ -176,7 +161,7 @@ object frmMain: TfrmMain
       ParentFont = False
     end
     object sedBufferSize: TSpinEdit
-      Left = 115
+      Left = 7
       Top = 48
       Width = 52
       Height = 22

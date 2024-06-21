@@ -22,8 +22,6 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 19/06/2024 All                 Rammstein release  SDK 10.0.22621.0 (Windows 11)
-// 25/04/2004 Tony                Updated to a more stable and glitch free version.
-// 10/05/2024 Tony                Improved performance.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -123,7 +121,6 @@ type
     Panel3: TPanel;
     Label4: TLabel;
     sedBufferSize: TSpinEdit;
-    Label5: TLabel;
     cbxAutoBufferSize: TCheckBox;
     lblCaptureBufferDuration: TLabel;
     lblBufferDuration: TLabel;
@@ -162,6 +159,7 @@ type
     procedure SetBufferDuration();
 
     // Event handlers.
+    procedure OnCapturingStartEvent(Sender: TObject);
     procedure OnCapturingStoppedEvent(Sender: TObject);
 
     function StartCapture(): HResult;
@@ -228,10 +226,6 @@ var
 begin
 
   hr := oLoopbackCapture.StopCaptureAsync();
-  // Stop the timer and stopwatch.
-  thrTimer.Enabled := False;
-  aStopWatch.Stop;
-  aStopWatch.Reset;
   butStart.Enabled := SUCCEEDED(hr);
   butStop.Enabled := not SUCCEEDED(hr);
 end;
@@ -341,7 +335,7 @@ begin
 
   // Set event handlers.
   oLoopbackCapture.OnStoppedCapturing := OnCapturingStoppedEvent;
-
+  oLoopbackCapture.OnStartCapturing := OnCapturingStartEvent;
   butGetPID.OnClick(Self);
   bEdited := False;
 end;
@@ -352,6 +346,7 @@ var
   hr: HResult;
   i: Integer;
   bFileExists: Boolean;
+  hnsPeriod: REFERENCE_TIME;
 
 begin
 
@@ -441,9 +436,8 @@ begin
           Exit(hr);
         end;
 
-      thrTimer.Enabled := True;
-      aStopWatch.Start;
-      aStopWatch.StartNew;
+      hnsPeriod := Round(1000 * (oLoopbackCapture.CaptureBufferLength / oLoopbackCapture.CurrentWavFormat.nSamplesPerSec));
+      lblCaptureBufferDuration.Caption := Format('Capture Buffer Duration: %d ms.', [hnsPeriod]);
     end;
 
   Result := hr;
@@ -459,9 +453,9 @@ begin
   if cbxAutoBufferSize.Checked then
     pvBufferDuration := 0
   else
-    pvBufferDuration := (REFTIMES_PER_MILLISEC) * sedBufferSize.Value;
+    pvBufferDuration := (REFTIMES_PER_SEC) * sedBufferSize.Value;
 
-  if (pvBufferDuration > REFTIMES_PER_MILLISEC) then
+  if (pvBufferDuration > REFTIMES_PER_SEC) then
     sms := 'milliseconds'
   else
     sms := 'millisecond';
@@ -475,8 +469,21 @@ begin
 end;
 
 
+procedure TfrmMain.OnCapturingStartEvent(Sender: TObject);
+begin
+  thrTimer.Enabled := True;
+  aStopWatch.Start;
+  aStopWatch.StartNew;
+end;
+
+
 procedure TfrmMain.OnCapturingStoppedEvent(Sender: TObject);
 begin
+
+  // Stop the timer and stopwatch.
+  thrTimer.Enabled := False;
+  aStopWatch.Stop;
+  aStopWatch.Reset;
 
   if not Assigned(oLoopbackCapture) then
     Exit;
@@ -488,24 +495,11 @@ end;
 
 
 procedure TfrmMain.TimerTimer(sender: TObject);
-var
-  hnsPeriod: REFERENCE_TIME;
-
 begin
-  hnsPeriod := 0;
-
-  if not Assigned(oLoopbackCapture) then
-    Exit;
-
-  if (hnsPeriod = 0) then
-    begin
-      hnsPeriod := Round(1000 * (oLoopbackCapture.CaptureBufferLength / oLoopbackCapture.CurrentWavFormat.nSamplesPerSec));
-      lblCaptureBufferDuration.Caption := Format('Capture Buffer Duration: %d ms.', [hnsPeriod]);
-    end;
 
   lblMsg.Caption := 'Capturing from source: ' + FormatDateTime('hh:nn:ss:zzz',
                                                                aStopWatch.ElapsedMilliseconds / MSecsPerDay);
-  Application.ProcessMessages;
+  HandleThreadMessages(GetCurrentThread());
 end;
 
 

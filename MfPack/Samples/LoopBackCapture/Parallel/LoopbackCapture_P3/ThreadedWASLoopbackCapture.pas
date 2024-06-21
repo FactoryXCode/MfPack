@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 19/06/2024 All                 Rammstein release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -73,7 +73,7 @@ uses
   {System}
   System.SysUtils,
   System.Classes,
-  System.SyncObjs,
+  System.Threading,
   {activeX}
   WinApi.ActiveX.PropIdl,
   WinApi.ActiveX.ObjBase,
@@ -115,24 +115,18 @@ type
                   Stopping,
                   Stopped); // < ..until here
 
-  TRenderThread = class;
-
   //
   //  WASAPI Capture class.
   //
   TWASCapture = class(TInterfacedPersistent,
                       IAudioSessionEvents,
                       IMMNotificationClient)
-  protected
-    pvRenderThread: TRenderThread;
-
   private
-    pvRenderThreadClosedEvent: THandle;
     pvShutdownEvent: THandle;
     pvAudioSamplesReadyEvent: THandle;
-
-    pvOnCapturingStart: TNotifyEvent;
+    // Events for the mainform.
     pvOnCapturingStopped: TNotifyEvent;
+    pvOnCapturingStart: TNotifyEvent;
 
     //
     //  Core Audio Capture member variables.
@@ -143,7 +137,7 @@ type
 
     // WAV-Filewriter.
     pvWavWriter: TWavWriter;
-    pvUseDeviceAudioFmt: Boolean;
+    pvpUsePCMAudioFmt: Boolean;
     pvMixFormat: WAVEFORMATEX;
 
     pvFrameSize: NativeUint;
@@ -182,9 +176,9 @@ type
     //
     // Thread functions.
     //
-    function CaptureThreadFunc(): HRESULT;
-    procedure CreateRenderThread();
-    procedure TerminateRenderThread();
+    procedure StartCapture();
+    function RenderData(): HResult;
+
 
     //
     // Utility functions.
@@ -241,7 +235,7 @@ type
     //
     function Initialize(pBufferDuration: REFERENCE_TIME;
                         pEngineLatency: UINT32;
-                        pUseDeviceAudioFmt: Boolean = True): Boolean;
+                        pUsePCMAudioFmt: Boolean = True): Boolean;
 
     procedure Shutdown();
 
@@ -263,113 +257,21 @@ type
 
     property DeviceState: TDeviceState read pvDeviceState;
 
-    // Notify events.
-    property OnStartCapturing: TNotifyEvent read pvOnCapturingStart write pvOnCapturingStart;
+    // Notify event.
     property OnStoppedCapturing: TNotifyEvent read pvOnCapturingStopped write pvOnCapturingStopped;
+    property OnStartCapturing: TNotifyEvent read pvOnCapturingStart write pvOnCapturingStart;
   end;
 
   // This event type is used to pass back a HResult.
   TCallbackEvent = procedure(Sender: TObject;
                              const Hres: HRESULT) of object;
 
-  // The thread we render after Start.
-  TRenderThread = class(TThread)
-  protected
-
-    procedure Execute; override;
-    procedure SetEvent;
-
-  private
-
-    FEngine: TWASCapture;
-    FSuccess: HResult; // Used internally when synchronizing the HRESULT for handling.
-    FOnEvent: TCallbackEvent;
-
-  public
-
-    constructor Create(AEngine: TWASCapture);
-    property OnEvent: TCallbackEvent read FOnEvent write FOnEvent; // Triggered when a status changed.
-  end;
-
-
 implementation
 
 
 uses
-  System.Math,
   System.Services.Avrt;
 
-
-constructor TRenderThread.Create(AEngine: TWASCapture);
-begin
-  inherited Create(True);
-  FEngine := AEngine;
-  FreeOnTerminate := False;
-end;
-
-
-procedure TRenderThread.Execute;
-begin
-  // Initialize COM concurrency model multithreaded.
-  CoInitializeEx(nil,
-                 COINIT_MULTITHREADED);
-  // The function where we render the audio data and
-  // (de)activate the MMCSS feature.
-  // See: https://learn.microsoft.com/en-us/windows/win32/procthread/multimedia-class-scheduler-service
-  // To get the best performance, it's recomended to set "Best Performance" in Windows energy settings.
-  FSuccess := FEngine.CaptureThreadFunc;
-  Synchronize(SetEvent);
-  CoUnInitialize;
-end;
-
-
-procedure TRenderThread.SetEvent;
-begin
-  // Called from 'Synchronize'.
-  // All code run from "Synchronize()"
-  //   runs in the context of the Main VCL UI Thread, NOT from this thread.
-  //   This simply triggers the event which was assigned by the calling thread
-  //   to inform it that the download has completed.
-
-  if Assigned(FOnEvent) then
-    FOnEvent(Self,
-             FSuccess);
-end;
-
-// =============================================================================
-
-procedure TWASCapture.CreateRenderThread;
-begin
-
-  if not Assigned(pvRenderThread) then
-    begin
-      pvRenderThread := TRenderThread.Create(Self);
-      pvRenderThreadClosedEvent := CreateEventEx(nil,
-                                                 nil,
-                                                 0,
-                                                 EVENT_MODIFY_STATE or SYNCHRONIZE);
-      pvRenderThread.Start;
-    end;
-end;
-
-
-procedure TWASCapture.TerminateRenderThread();
-begin
-
-  if Assigned(pvRenderThread) then
-    begin
-      pvRenderThread.SetFreeOnTerminate(True);
-      pvRenderThread.Terminate;
-      // Give thread time to terminate itself.
-      Sleep(200);
-      pvRenderThread := nil;
-      // Signal the thread is closed.
-      if (pvRenderThreadClosedEvent <> 0) then
-        SetEvent(pvRenderThreadClosedEvent);
-    end;
-end;
-
-// =============================================================================
 
 constructor TWASCapture.Create(phObj: HWND;
                                pEndpoint: IMMDevice;
@@ -408,8 +310,8 @@ begin
   pvDisableMMCSS := pDisableMmcss;
   pvEndpointRole := pEndpointRole;
 
+  // Set event ID's.
   pvShutdownEvent := 0;
-  pvRenderThreadClosedEvent := 0;
   pvAudioSamplesReadyEvent := 0;
   pvStreamSwitchEvent := 0;
   pvStreamSwitchCompleteEvent := 0;
@@ -621,7 +523,7 @@ begin
   // Step 6 - Retrieve the new mix format.
 
   hr := GetMixFormat(wfxNew,
-                     pvUseDeviceAudioFmt);
+                     pvpUsePCMAudioFmt);
   if FAILED(hr) then
     begin
       InfoMsg(optIDE, Format('Unable to retrieve mix format for new audio client: %d.',[GetLastError()]), hr);
@@ -700,7 +602,6 @@ var
   hr: HResult;
   hnsDefaultDevicePeriod: REFERENCE_TIME;
   hnsMinimumDevicePeriod: REFERENCE_TIME;
-  //hnsActualDuration: REFERENCE_TIME;
   hnsLatency: REFERENCE_TIME;
 
 begin
@@ -715,7 +616,7 @@ begin
 
   // Retrieve the correct wav format to write to files.
   hr := GetMixFormat(pvMixFormat,
-                     pvUseDeviceAudioFmt);
+                     pvpUsePCMAudioFmt);
   if FAILED(hr) then
     Exit(False);
 
@@ -1006,7 +907,7 @@ end;
 //
 function TWASCapture.Initialize(pBufferDuration: REFERENCE_TIME;
                                 pEngineLatency: UINT32;
-                                pUseDeviceAudioFmt: Boolean = True): Boolean;
+                                pUsePCMAudioFmt: Boolean = True): Boolean;
 begin
 
   //  Create our shutdown and samples ready events- we want auto reset events that
@@ -1051,7 +952,7 @@ begin
   // Remember our configured latency in case we'll need it for a stream switch later.
   pvEngineLatency := pEngineLatency;
   pvBufferDuration := pBufferDuration;
-  pvUseDeviceAudioFmt := pUseDeviceAudioFmt;
+  pvpUsePCMAudioFmt := pUsePCMAudioFmt;
 
   // After setting the events, we initialize the audioclient aand captureclient.
   if not InitializeAudioEngine() then
@@ -1071,14 +972,6 @@ end;
 //
 procedure TWASCapture.Shutdown();
 begin
-  if (pvRenderThreadClosedEvent <> 0) then
-    begin
-      SetEvent(pvShutdownEvent);
-      WaitForSingleObject(pvRenderThreadClosedEvent,
-                          INFINITE);
-      CloseHandle(pvRenderThreadClosedEvent);
-      pvRenderThreadClosedEvent := 0;
-    end;
 
     if (pvShutdownEvent <> 0) then
       begin
@@ -1128,23 +1021,9 @@ begin
   //
   // Note that, when this audiostream is over,
   // the end of buffer will be signaled first, before signal endofstream.
-  if Assigned(pvRenderThread) then
-    begin
-      TerminateRenderThread();
-      if (pvRenderThreadClosedEvent <> 0) then
-        begin
-          WaitForSingleObject(pvRenderThreadClosedEvent,
-                              INFINITE);
 
-          CloseHandle(pvRenderThreadClosedEvent);
-          pvRenderThreadClosedEvent := 0;
-        end;
-    end
-  else
-    begin
-      // Start the rendering loop in the separate thread.
-      CreateRenderThread();
-    end;
+  // Start. The rendering loop will be done in a separate task.
+  StartCapture();
 
   // We're ready to go, start capturing!
   hr := pvAudioClient.Start();
@@ -1154,8 +1033,6 @@ begin
       Exit(False);
     end;
 
-  // Notify the mainform to start it's timer.
-  pvOnCapturingStart(Self);
   Result := True;
 end;
 
@@ -1173,8 +1050,6 @@ begin
   // Tell the capture thread to shut down, wait for the thread to complete then clean up all the stuff we
   // allocated in Start().
 
-  TerminateRenderThread();
-
   if (pvShutdownEvent <> 0) then
     SetEvent(pvShutdownEvent);
 
@@ -1185,18 +1060,9 @@ begin
         InfoMsg(optIDE, Format('Unable to stop audio client: %d',[GetLastError()]), hr);
     end;
 
-  if (pvRenderThreadClosedEvent <> 0) then
+  if SUCCEEDED(hr) then
     begin
-      WaitForSingleObject(pvRenderThreadClosedEvent,
-                          INFINITE);
-
-      CloseHandle(pvRenderThreadClosedEvent);
-      pvRenderThreadClosedEvent := 0;
-    end;
-
-  if SUCCEEDED(hr) and (pvRenderThreadClosedEvent = 0) then
-    begin
-      // Signal the mainform capuring has been stopped.
+      // Signal the mainform capturing has been stopped.
       pvOnCapturingStopped(Self);
       Sleep(1); // Sleep to prevent a mainform timer would stop before the notify event has been processed.
       pvDeviceState := Stopped;
@@ -1204,27 +1070,40 @@ begin
 end;
 
 
-function TWASCapture.CaptureThreadFunc(): HRESULT;
+function TWASCapture.RenderData(): HResult;
 var
   hr: HResult;
-  waitArray: array[0..2] of THandle;
-  mmcssHandle: THandle;
-  mmcssTaskIndex: DWord;
+  mr: MMRESULT;
   waitResult: DWord;
   packetSize: UINT32;
   pData: PByte;
   NumFramesToRead: UINT32;
   flags: DWord;
   dwBytesWritten: LongInt;
-  // Writer stuff.
-  mr: MMRESULT;
-  ckRIFF: MMCKINFO;
-  ckData: MMCKINFO;
+  MmcssHandle: THandle;
+  MmcssTaskIndex: DWord;
+  WaitArray: array[0..2] of THandle;
+  CkRIFF: MMCKINFO;
+  CkData: MMCKINFO;
 
 begin
+  hr := S_OK;
+  mr := MMSYSERR_NOERROR;
+  MmcssHandle := 0;
+  MmcssTaskIndex := 0;
+  WaitArray[0] := pvShutdownEvent;
+  WaitArray[1] := pvStreamSwitchEvent;
+  WaitArray[2] := pvAudioSamplesReadyEvent;
 
-  mmcssHandle := 0;
-  mmcssTaskIndex := 0;
+try
+  // Initialize COM concurrency model multithreaded.
+  hr := CoInitializeEx(nil,
+                       COINIT_MULTITHREADED);
+  if FAILED(hr) then
+    begin
+      pvDeviceState := Error;
+      InfoMsg(optIDE, Format('Unable to initialize COM: %d',[GetLastError()]), E_FAIL);
+    end;
 
   mr := pvWavWriter.CreateFile(StrToPWidechar(pvFileName));
   // If a previous method report a failure, we handle that here.
@@ -1236,8 +1115,8 @@ begin
 
   // Write the wavfile header
   mr := pvWavWriter.WriteWaveHeader(@pvMixFormat,
-                                    ckRIFF,
-                                    ckData);
+                                    CkRIFF,
+                                    CkData);
   if (mr <> MMSYSERR_NOERROR) then
     begin
       InfoMsg(optIDE, Format('Unable to write the wavfile header: %d',[GetLastError()]), E_FAIL);
@@ -1246,31 +1125,35 @@ begin
 
   if not (pvDisableMMCSS) then
     begin
-      mmcssHandle := AvSetMmThreadCharacteristics('Audio',
-                                                  @mmcssTaskIndex);
-      if (mmcssHandle = 0) then
+      MmcssHandle := AvSetMmThreadCharacteristics('Audio',
+                                                  @MmcssTaskIndex);
+      if (MmcssHandle = 0) then
         InfoMsg(optIDE, Format('Unable to enable MMCSS on capture thread: %d',[GetLastError()]), E_FAIL);
     end;
 
-  waitArray[0] := pvShutdownEvent;
-  waitArray[1] := pvStreamSwitchEvent;
-  waitArray[2] := pvAudioSamplesReadyEvent;
+  hr := pvCaptureClient.GetNextPacketSize(packetSize);
+  if FAILED(hr) then
+    begin
+      pvDeviceState := Error;
+      InfoMsg(optIDE, Format('Unable to get first packetsize: %d',[GetLastError()]), E_FAIL);
+    end;
+
 
   // When successfully reached to here, set the status to 'Capturing'.
   pvDeviceState := Capturing;
 
-      while (pvDeviceState = Capturing) do
-        begin
-          waitResult := WaitForMultipleObjects(3,
-                                               @waitArray,
-                                               False,
-                                               INFINITE);
+  while (pvDeviceState = Capturing) do
+    begin
+      waitResult := WaitForMultipleObjects(3,
+                                           @WaitArray,
+                                           False,
+                                           INFINITE);
 
           case waitResult of
             // pvShutdownEvent
             WAIT_OBJECT_0 + 0:
-
-            pvDeviceState := Stopping;  // We're done, exit the loop.
+              // We're done, exit the loop.
+              pvDeviceState := Stopping;
 
             // pvStreamSwitchEvent
             WAIT_OBJECT_0 + 1:
@@ -1306,7 +1189,10 @@ begin
                     // Tell WriteData to write silence.
                     // When a sound is detected, the app will act and process data.
                     if (flags = AUDCLNT_BUFFERFLAGS_SILENT) then
-                      pData := nil;
+                      begin
+                        pData := nil;
+                        Continue;
+                      end;
 
                     // Write the available capture data to the audio sink.
                     mr := pvWavWriter.WriteData(pData,
@@ -1333,18 +1219,62 @@ begin
                 if FAILED(hr) then
                   pvDeviceState := Error;
               end;
-          end; // clase
+          end; // case
         end; // while
 
-  if not pvDisableMMCSS then
-    AvRevertMmThreadCharacteristics(mmcssHandle);
+  pvDeviceState := Stopped;
+
+finally
+
+  pData := nil;
+  if (MmcssHandle > 0) then
+    AvRevertMmThreadCharacteristics(MmcssHandle);
+
   // Close the file when succeeded.
   // Note that when an error or other HResult value occurs, the writefile method will automatcly closes the file.
   if SUCCEEDED(mr) then
-    pvWavWriter.CloseFile(ckRIFF,
-                          ckData);
-  pvDeviceState := Stopped;
-  Result := S_OK;
+    pvWavWriter.CloseFile(CkRIFF,
+                          CkData);
+
+  CoUnInitialize;
+  Result := hr;
+end;
+end;
+
+
+procedure TWASCapture.StartCapture();
+var
+  Task: ITask;
+
+begin
+
+  Task := TTask.Create(procedure
+                       var
+                         hr: HResult;
+
+                       begin
+
+                         // The function where we render the audio data and
+                         // (de)activate the MMCSS feature.
+                         // See: https://learn.microsoft.com/en-us/windows/win32/procthread/multimedia-class-scheduler-service
+                         // To get the best performance, it's recomended to set "Best Performance" in Windows energy settings.
+                         hr := RenderData();
+                         if FAILED(hr) then
+                           begin
+                             TThread.Queue(nil,
+                                           procedure
+                                           begin
+                                             pvDeviceState := Error; // Update the status in the main thread if the function fails.
+                                           end);
+                           end;
+                       end);
+  //
+  // Send message to mainform the capturing started, enable the timer.
+  //
+  pvOnCapturingStart(Self);
+
+  // Let's go!
+  Task.Start;
 end;
 
 end.

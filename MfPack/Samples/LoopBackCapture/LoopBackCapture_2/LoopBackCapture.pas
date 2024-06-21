@@ -153,6 +153,7 @@ type
     pvxSampleReady: TCallbackAsync;
     pvxFinishCapture: TCallbackAsync;
 
+    FOnCapturingStart: TNotifyEvent;
     FOnCapturingStopped: TNotifyEvent;
 
     pvSampleReadyKey: MFWORKITEM_KEY;
@@ -226,6 +227,7 @@ type
     property CaptureBufferLength: UINT32 read pvBufferFrames;
 
     // Notify events.
+    property OnStartCapturing: TNotifyEvent read FOnCapturingStart write FOnCapturingStart;
     property OnStoppedCapturing: TNotifyEvent read FOnCapturingStopped write FOnCapturingStopped;
   end;
 
@@ -588,7 +590,7 @@ end;
 //  OnFinishCapture()
 //
 //  Because of the asynchronous nature of the MF Work Queues and the DataWriter, there could still be
-//  a sample processing.  So this will get called to finalize the WAV header.
+//  a sample processing. So this will get called to finalize the WAV header.
 //
 function TLoopbackCapture.OnFinishCapture(pResult: IMFAsyncResult): HResult;
 var
@@ -1211,7 +1213,11 @@ var
 
 begin
   case _AsyncCmd of
-    StartCapture:  hr := _parent.OnStartCapture(pResult);
+    StartCapture:  begin
+                     hr := _parent.OnStartCapture(pResult);
+                     if SUCCEEDED(hr) then
+                       _parent.FOnCapturingStart(Self);
+                   end;
     StopCapture:   hr := _parent.OnStopCapture(pResult);
     SampleReady:   hr := _parent.OnSampleReady(pResult);
     FinishCapture: hr := _parent.OnFinishCapture(pResult);

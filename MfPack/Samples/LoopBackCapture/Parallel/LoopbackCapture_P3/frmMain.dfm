@@ -355,10 +355,10 @@ object MainForm: TMainForm
       State = cbChecked
       TabOrder = 5
     end
-    object cbxUseDeviceAudioFmt: TCheckBox
+    object cbxUsePCMAudioFmt: TCheckBox
       Left = 16
       Top = 189
-      Width = 229
+      Width = 177
       Height = 14
       Hint = 'Will be set in Create.'
       Caption = 'Use PCM audio output format.'
