@@ -74,6 +74,8 @@ uses
   System.Classes,
   System.SysUtils,
   System.SyncObjs,
+  {ActiveX}
+  WinApi.ActiveX.ObjBase,
   {WinMM}
   WinApi.WinMM.MMSysCom,
   WinApi.WinMM.MMiscApi,
@@ -90,16 +92,23 @@ uses
   Utils;
 
 const
-  MAX_FILE_SIZE = 3900000000;
+  MAX_FILE_SIZE = 4294960000; // 4294967296 - 7296 keep some overhead.
 
 type
+
+  TRenderThread = class;
 
   TAudioSink = class(TObject)
   protected
     hmFile: HMMIO;
+    pvRenderThread: TRenderThread;
 
   private
-    FCriticalSection: TCriticalSection;
+
+    pvAudioClient: IAudioClient;
+    pvCaptureClient: IAudioCaptureClient;
+
+
     pvStopRec: Boolean;
     pvAppIsClosing: Boolean;
     pvErrorStatus: HResult;
@@ -109,9 +118,17 @@ type
     pvBytesWritten: Int64;
     pvBufferFrames: UInt32;
     pvWavFormatEx: WAVEFORMATEX;
+    pvPwfx: PWAVEFORMATEX;
 
+
+    pvCkRIFF: MMCKINFO;
+    pvCkData: MMCKINFO;
+
+    pvHnsActualDuration: REFERENCE_TIME;
+
+    FOnCapturingStart: TNotifyEvent;
     FOnCapturingStopped: TNotifyEvent;
-
+    pvRenderThreadClosedEvent: THandle;
 
     function CopyData(pData: PByte;
                       NumFrames: UINT32;
@@ -126,6 +143,14 @@ type
     function FinishWaveFile(var pckRIFF: MMCKINFO;
                             var pckData: MMCKINFO): UINT;
 
+    // Here the rendering takes place in a thread.
+    function RenderData(): HResult;
+
+    //
+    // Thread methods.
+    //
+    procedure CreatedRenderThread();
+    procedure TerminateRenderThread();
 
   public
 
@@ -136,6 +161,8 @@ type
                                role: ERole;          // eConsole, eMultimedia or eCommunications
                                bufferDuration: REFERENCE_TIME;
                                ppfileName: LPWSTR): HResult;
+
+    procedure Stop();
 
     // Used by OnProcessingData
     property Latency: REFERENCE_TIME read pvHnsLatency;
@@ -148,19 +175,126 @@ type
     property StopRecording: Boolean read pvStopRec write pvStopRec;
 
     // Notify events.
+    property OnStartCapturing: TNotifyEvent read FOnCapturingStart write FOnCapturingStart;
     property OnStoppedCapturing: TNotifyEvent read FOnCapturingStopped write FOnCapturingStopped;
   end;
 
+  // This event type is used to pass back a HResult.
+  TCallbackEvent = procedure(Sender: TObject;
+                             const Hres: HRESULT) of object;
+
+  // The thread we render after Start.
+  TRenderThread = class(TThread)
+  protected
+
+    procedure Execute; override;
+    procedure SetEvent;
+
+  private
+
+    FEngine: TAudioSink;
+    FSuccess: HResult; // Used internally when synchronizing the HRESULT for handling.
+    FOnEvent: TCallbackEvent;
+
+  public
+
+    constructor Create(AEngine: TAudioSink);
+    destructor Destroy; override;
+
+    property OnEvent: TCallbackEvent read FOnEvent write FOnEvent; // Triggered when a status changed.
+  end;
 
 
 implementation
+
+
+// Thread ======================================================================
+constructor TRenderThread.Create(AEngine: TAudioSink);
+begin
+  inherited Create(True);
+  FEngine := AEngine;
+  // Set termination when the thread is done.
+  FreeOnTerminate := False;
+
+end;
+
+
+destructor TRenderThread.Destroy();
+begin
+
+  inherited;
+end;
+
+
+procedure TRenderThread.Execute;
+begin
+  // Initialize COM concurrency model multithreaded.
+  CoInitializeEx(nil,
+                 COINIT_MULTITHREADED);
+  // The function where we render the audio data and
+  // (de)activate the MMCSS feature.
+  // See: https://learn.microsoft.com/en-us/windows/win32/procthread/multimedia-class-scheduler-service
+  // To get the best performance, it's recomended to set "Best Performance" in Windows energy settings.
+  FSuccess := FEngine.RenderData();
+  Synchronize(SetEvent);
+  CoUnInitialize;
+end;
+
+
+procedure TRenderThread.SetEvent;
+begin
+  // Called from 'Synchronize'.
+  // All code run from "Synchronize()"
+  //   runs in the context of the Main VCL UI Thread, NOT from this thread.
+  //   This simply triggers the event which was assigned by the calling thread
+  //   to inform it that the download has completed.
+
+  if Assigned(FOnEvent) then
+    FOnEvent(Self,
+             FSuccess);
+end;
+
+// =============================================================================
+// Thread control methods ======================================================
+
+procedure TAudioSink.CreatedRenderThread;
+begin
+  TerminateRenderThread();
+  pvRenderThread := TRenderThread.Create(Self);
+  pvRenderThreadClosedEvent := CreateEventEx(nil,
+                                             nil,
+                                             0,
+                                             EVENT_MODIFY_STATE or SYNCHRONIZE);
+
+  pvRenderThread.Start;
+end;
+
+
+procedure TAudioSink.TerminateRenderThread();
+begin
+
+  if Assigned(pvRenderThread) then
+    begin
+      pvRenderThread.Terminate;
+      pvRenderThread.WaitFor;
+      // Close threadhandle.
+      if (pvRenderThreadClosedEvent <> 0) then
+        begin
+          SetEvent(pvRenderThreadClosedEvent);
+          WaitForSingleObject(pvRenderThreadClosedEvent,
+                              INFINITE);
+          CloseHandle(pvRenderThreadClosedEvent);
+          pvRenderThreadClosedEvent := 0;
+        end;
+      FreeAndNil(pvRenderThread);
+    end;
+end;
 
 // TAudioSink //////////////////////////////////////////////////////////////////
 
 constructor TAudioSink.Create();
 begin
   inherited Create();
-  FCriticalSection := TCriticalSection.Create();
   pvAppIsClosing := False;
 end;
 
@@ -168,7 +302,8 @@ end;
 destructor TAudioSink.Destroy();
 begin
   pvAppIsClosing := True;
-  FCriticalSection.Free;
+  pvStopRec := True;
+  TerminateRenderThread();
   inherited Destroy();
 end;
 
@@ -185,7 +320,7 @@ label
   done;
 
 begin
-  FCriticalSection.Enter;
+
   hr := S_OK;
 
   if (NumFrames = 0) then
@@ -222,7 +357,6 @@ begin
     pvStopRec := True;  // Stop recording and close file.
 
 done:
-  FCriticalSection.Leave;
   Result := hr;
 end;
 
@@ -422,6 +556,121 @@ done:
 end;
 
 
+// Stop, destroy thread.
+procedure TAudioSink.Stop();
+begin
+  // Signal the threadfuntion to stop.
+  StopRecording := True;
+  // Terminate the thread where the threadfunction is running in.
+  TerminateRenderThread();
+end;
+
+
+//
+// Render the audiodata in a parallel task.
+//
+function TAudioSink.RenderData(): HResult;
+var
+  hr: HResult;
+
+  pData: PByte;
+  flags: DWORD;
+  numFramesAvailable: UINT32;
+  packetLength: UINT32;
+
+begin
+  hr := S_OK;
+  packetLength := 0;
+
+try
+  // Each loop fills about half of the shared buffer.
+  while (pvStopRec = False) do
+    begin
+
+      // Sleep for half the buffer duration if the size > 0.
+      if (bufferDuration > 0) then
+        Sleep((pvHnsActualDuration div REFTIMES_PER_MILLISEC) div (bufferDuration div 2))
+      else
+        Sleep(0);
+
+      hr := pvCaptureClient.GetNextPacketSize(packetLength);
+      if FAILED(hr) then
+        Break;
+
+      HandleThreadMessages(GetCurrentThread());
+
+      while (packetLength <> 0) do
+        begin
+          if pvStopRec then
+            Break;
+
+          // Get the available data in the shared buffer.
+          hr := pvCaptureClient.GetBuffer(pData,
+                                          numFramesAvailable,
+                                          flags,
+                                          nil,
+                                          nil);
+          if FAILED(hr) then
+            Break;
+
+          // Tell CopyData to write silence.
+          // When a sound is detected, the app will act and process data.
+          if (flags = AUDCLNT_BUFFERFLAGS_SILENT) then
+            pData := nil;
+
+         // Store the buffersize.
+         if (pvBufferFrames = 0) and (numFramesAvailable > 0) then
+           pvBufferFrames := numFramesAvailable;
+
+          // Copy the available capture data to the audio sink.
+          hr := CopyData(pData,
+                         numFramesAvailable,
+                         pvPwfx);
+          if FAILED(hr) then
+            Break;
+
+          hr := pvCaptureClient.ReleaseBuffer(numFramesAvailable);
+          if FAILED(hr) then
+            Break;
+
+          hr := pvCaptureClient.GetNextPacketSize(packetLength);
+          if FAILED(hr) then
+            Break;
+      end;
+    end;
+
+    // Wait for last data in buffer to play before stopping.
+    if (bufferDuration > 0) then
+      Sleep((pvHnsActualDuration div REFTIMES_PER_MILLISEC) div (bufferDuration div 2))
+    else
+      Sleep(0);
+
+finally
+
+  if SUCCEEDED(hr) then
+    begin
+      hr := pvAudioClient.Stop();  // Stop recording.
+        if SUCCEEDED(hr) then
+      hr := FinishWaveFile(pvCkData,
+                           pvCkRIFF);
+      mmioClose(hmFile,
+                0);
+    end
+  else
+    begin
+      mmioClose(hmFile,
+                0);
+      //{void}DeleteFile(ppfileName);
+    end;
+
+  // Send capturing stopped.
+  FOnCapturingStopped(Self);
+  pData := nil;
+  Result := hr;
+end;
+end;
+
+
 //-----------------------------------------------------------
 // Record an audio stream from the default audio capture
 // device. The RecordAudioStream function allocates a shared
@@ -438,33 +687,22 @@ var
   mr: MMResult;
   hnsDefaultDevicePeriod: REFERENCE_TIME;
   hnsMinimumDevicePeriod: REFERENCE_TIME;
-  hnsActualDuration: REFERENCE_TIME;
   bufferFrameCount: UINT32;
-  numFramesAvailable: UINT32;
+  hnsActualDuration: REFERENCE_TIME;
   pEnumerator: IMMDeviceEnumerator;
   pDevice: IMMDevice;
-  pAudioClient: IAudioClient;
-  pCaptureClient: IAudioCaptureClient;
-  packetLength: UINT32;
-  pData: PByte;
-  flags: DWORD;
-  ckRIFF: MMCKINFO;
-  ckData: MMCKINFO;
-  ppwfx: PWAVEFORMATEX;
 
 label
   done;
 
 begin
   pvStopRec := False;
-  ppwfx := nil;
+  pvPwfx := nil;
 
   // Create the initial audio file
   hr := OpenFile(ppFileName);
   if FAILED(hr) then
     goto done;
-
-  packetLength := 0;
 
   // Enumerate on capture and render devices
   hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
@@ -486,28 +724,28 @@ begin
   hr := pDevice.Activate(IID_IAudioClient,
                          CLSCTX_ALL,
                          nil,
-                         Pointer(pAudioClient));
+                         Pointer(pvAudioClient));
   if FAILED(hr) then
     goto done;
 
   // Get the mixformat from the WAS
   // See the comments on IAudioClient.GetMixFormat.
   //
-  hr := pAudioClient.GetMixFormat(ppwfx);
+  hr := pvAudioClient.GetMixFormat(pvPwfx);
   if FAILED(hr) then
     goto done;
 
   // Needed for timeformat.
   CopyMemory(@pvWavFormatEx,
-             ppwfx,
+             pvPwfx,
              SizeOf(WAVEFORMATEX));
 
   // The original sample creates a bufferDuration of 2 seconds,
   // that will cause sound disturbtion when capture sound from a streameservice like
   // YouTube or other high latency services.
   // To prevent this, we use as a minimum the value of hnsDefaultDevicePeriod.
-  hr := pAudioClient.GetDevicePeriod(hnsDefaultDevicePeriod,
-                                     hnsMinimumDevicePeriod);
+  hr := pvAudioClient.GetDevicePeriod(hnsDefaultDevicePeriod,
+                                      hnsMinimumDevicePeriod);
   if FAILED(hr) then
     goto done;
 
@@ -519,12 +757,12 @@ begin
     end;
 
   // Initialize low-latency client.
-  hr := pAudioClient.Initialize(AUDCLNT_SHAREMODE_SHARED,
-                                AUDCLNT_STREAMFLAGS_LOOPBACK,
-                                bufferDuration, // Note: When bufferDuration = 0, the audioclient will automaticly decise the bufferduration.
-                                0, // Must be zero when using shared mode!
-                                ppwfx,
-                                @GUID_NULL);
+  hr := pvAudioClient.Initialize(AUDCLNT_SHAREMODE_SHARED,
+                                 AUDCLNT_STREAMFLAGS_LOOPBACK,
+                                 bufferDuration, // Note: When bufferDuration = 0, the audioclient will automaticly decise the bufferduration.
+                                 0, // Must be zero when using shared mode!
+                                 pvPwfx,
+                                 @GUID_NULL);
   if FAILED(hr) then
     goto done;
 
@@ -534,18 +772,18 @@ begin
   // 960 with 2 ms buffer
   // 1440 with 3 ms buffer
   // 1920 with 4 ms buffer etc.
-  hr := pAudioClient.GetBufferSize(bufferFrameCount);
+  hr := pvAudioClient.GetBufferSize(bufferFrameCount);
   if FAILED(hr) then
     goto done;
 
-  hr := pAudioClient.GetService(IID_IAudioCaptureClient,
-                                pCaptureClient);
+  hr := pvAudioClient.GetService(IID_IAudioCaptureClient,
+                                 pvCaptureClient);
   if FAILED(hr) then
     goto done;
 
-  mr := WriteWaveHeader(ppwfx,
-                        ckRIFF,
-                        ckData);
+  mr := WriteWaveHeader(pvPwfx,
+                        pvCkRIFF,
+                        pvCkData);
 
   if (mr <> 0) then
     begin
@@ -556,125 +794,31 @@ begin
   // Calculate the actual duration of the allocated buffer.
   if (bufferFrameCount > 0) then
     hnsActualDuration := (REFTIMES_PER_SEC *
-                          bufferFrameCount div ppwfx.nSamplesPerSec)
+                          bufferFrameCount div pvPwfx.nSamplesPerSec)
   else
     hnsActualDuration := 0;
 
   // Store for user information.
   pvBufferHns := hnsActualDuration;
 
-  hr := pAudioClient.Start();  // Start recording.
-  if FAILED(hr) then
-    goto done;
-
   // Get the stream latency (normally this should be inbetween 0 and 15 ms on Windows 11)
-  hr := pAudioClient.GetStreamLatency(pvHnsLatency);
+  hr := pvAudioClient.GetStreamLatency(pvHnsLatency);
   if FAILED(hr) then
     goto done;
 
-  FCriticalSection.Enter;
+  hr := pvAudioClient.Start();  // Start recording.
+  if FAILED(hr) then
+    goto done;
 
-  // Each loop fills about half of the shared buffer.
-  while (pvStopRec = False) do
-    begin
+  // Signal the mainform caturing started.
+  FOnCapturingStart(Self);
 
-      // Sleep for half the buffer duration if the size > 0.
-      if (bufferDuration > 0) then
-        Sleep((hnsActualDuration div REFTIMES_PER_MILLISEC) div (bufferDuration div 2))
-      else
-        Sleep(0);
-
-      hr := pCaptureClient.GetNextPacketSize(packetLength);
-      if FAILED(hr) then
-        Break;
-
-      HandleThreadMessages(GetCurrentThread());
-
-      while (packetLength <> 0) do
-        begin
-          if pvStopRec then
-            Break;
-
-          // Get the available data in the shared buffer.
-          hr := pCaptureClient.GetBuffer(pData,
-                                         numFramesAvailable,
-                                         flags,
-                                         nil,
-                                         nil);
-          if FAILED(hr) then
-            Break;
-
-          // Tell CopyData to write silence.
-          // When a sound is detected, the app will act and process data.
-          if (flags = AUDCLNT_BUFFERFLAGS_SILENT) then
-            pData := nil;
-
-         // Store the buffersize.
-         if (pvBufferFrames = 0) and (numFramesAvailable > 0) then
-           pvBufferFrames := numFramesAvailable;
-
-          // Copy the available capture data to the audio sink.
-          hr := CopyData(pData,
-                         numFramesAvailable,
-                         ppwfx);
-          if FAILED(hr) then
-            Break;
-
-          hr := pCaptureClient.ReleaseBuffer(numFramesAvailable);
-          if FAILED(hr) then
-            goto done;
-
-          hr := pCaptureClient.GetNextPacketSize(packetLength);
-          if FAILED(hr) then
-            Break;
-      end;
-    end;
-
-    // Wait for last data in buffer to play before stopping.
-    if (bufferDuration > 0) then
-      Sleep((hnsActualDuration div REFTIMES_PER_MILLISEC) div (bufferDuration div 2))
-    else
-      Sleep(0);
+  // Render the audiodata.
+  CreatedRenderThread;
 
 done:
-
-  FCriticalSection.Leave;
-
-  if SUCCEEDED(hr) then
-    begin
-      hr := pAudioClient.Stop();  // Stop recording.
-        if SUCCEEDED(hr) then
-      hr := FinishWaveFile(ckData,
-                           ckRIFF);
-      mmioClose(hmFile,
-                0);
-    end
-  else
-    begin
-      mmioClose(hmFile,
-                0);
-      {void}DeleteFile(ppfileName);
-    end;
-
-  // Send capturing stopped.
-  FOnCapturingStopped(Self);
-
-  pData := nil;
   pvErrorStatus := hr;
   Result := hr;
 end;
 
-
-// initialization and finalization =============================================
-
-
-initialization
-  // A gui app should always use COINIT_APARTMENTTHREADED (which is automaticly done by the compiler) in stead of COINIT_MULTITHREADED.
-  // COINIT_MULTITHREADED should be used for console or service apps
-  //CoInitializeEx(nil,
-  //              COINIT_MULTITHREADED);
-
-finalization
-
-  //CoUnInitialize();
 end.

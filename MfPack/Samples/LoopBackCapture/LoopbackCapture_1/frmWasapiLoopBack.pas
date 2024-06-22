@@ -160,6 +160,7 @@ type
     function StartCapture(): HResult;
 
     // Event handlers.
+    procedure OnCapturingStartEvent(Sender: TObject);
     procedure OnCapturingStoppedEvent(Sender: TObject);
     procedure OnTimer(Sender: TObject);
 
@@ -186,6 +187,15 @@ begin
   Panel2.Enabled := aEnabled;
   Panel3.Enabled := aEnabled;
   Panel4.Enabled := aEnabled;
+end;
+
+
+procedure TfrmLoopBackCapture.OnCapturingStartEvent(Sender: TObject);
+begin
+
+  thrTimer.Enabled := True;
+  aStopWatch.Start;
+  aStopWatch.StartNew;
 end;
 
 
@@ -232,20 +242,6 @@ end;
 
 procedure TfrmLoopBackCapture.OnTimer(sender: TObject);
 begin
-
-  if not Assigned(prAudioSink) then
-    Exit;
-
-  if prAudioSink.StopRecording then
-    Exit;
-
-  // We only probe this once.
-  if not BufferDurationCaptionSet then
-    begin
-      lblCaptureBufferDuration.Caption := Format('Capture buffer duration: %d ms.',
-                                                 [prAudioSink.BufferDuration div 10000]);
-      BufferDurationCaptionSet := True;
-    end;
 
   lblStatus.Caption := 'Capturing from source: ' + FormatDateTime('hh:nn:ss:zzz',
                                                                   aStopWatch.ElapsedMilliseconds / MSecsPerDay);
@@ -329,9 +325,6 @@ begin
 
       // Enable the timer.
       BufferDurationCaptionSet := False;
-      thrTimer.Enabled := True;
-      aStopWatch.Start;
-      aStopWatch.StartNew;
 
       // Capture the audio stream from the default rendering device.
       hr := prAudioSink.RecordAudioStream(prDataFlow,
@@ -346,6 +339,14 @@ begin
           thrTimer.Enabled := False;
           aStopWatch.Reset;
           goto done;
+        end;
+
+      // We only probe this once.
+      if not BufferDurationCaptionSet then
+        begin
+          lblCaptureBufferDuration.Caption := Format('Capture buffer duration: %d ms.',
+                                                     [prAudioSink.BufferDuration div 10000]);
+          BufferDurationCaptionSet := True;
         end;
     end;
 
@@ -375,9 +376,8 @@ end;
 
 procedure TfrmLoopBackCapture.butStopClick(Sender: TObject);
 begin
-
-  prAudioSink.StopRecording := True;
-
+  // Stop the engine with whatever it's doing.
+  prAudioSink.Stop();
   EnablePanels(True);
   Self.BorderIcons := [biSystemMenu, biMinimize];
 end;
@@ -497,8 +497,11 @@ begin
 
   // Create the AudioSink object.
   prAudioSink := TAudioSink.Create();
+
   // Set event handlers.
+  prAudioSink.OnStartCapturing := OnCapturingStartEvent;
   prAudioSink.OnStoppedCapturing := OnCapturingStoppedEvent;
+
   prDataFlow := eDataFlow(-1);
   sedBufferSize.Value := 10;
   SetBufferDuration();

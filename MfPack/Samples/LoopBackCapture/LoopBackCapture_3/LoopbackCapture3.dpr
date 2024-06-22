@@ -1,4 +1,4 @@
-program ThreadedLoopbackCapture;
+program LoopbackCapture3;
 
 uses
   Vcl.Forms,
@@ -6,7 +6,7 @@ uses
   Writer in 'Writer.pas',
   UniThreadTimer in 'UniThreadTimer.pas',
   frmMain in 'frmMain.pas' {MainForm},
-  ThreadedWASLoopbackCapture in 'ThreadedWASLoopbackCapture.pas',
+  LoopbackCapture in 'LoopbackCapture.pas',
   dlgDevices in 'dlgDevices.pas' {DevicesDlg};
 
 {$R *.res}

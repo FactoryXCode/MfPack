@@ -5,7 +5,7 @@
 // Project: MfPack - CoreAudio - Shared
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: WASCapture_v3.pas
+// Module: LoopBackCapture.pas
 // Kind: Pascal / Delphi unit
 // Release date: 15-06-2024
 // Language: ENU
@@ -59,7 +59,7 @@
 // their product.
 //
 //==============================================================================
-unit ThreadedWASLoopbackCapture;
+unit LoopbackCapture;
 
 interface
 

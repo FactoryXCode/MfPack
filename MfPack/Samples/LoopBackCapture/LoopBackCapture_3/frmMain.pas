@@ -88,7 +88,7 @@ uses
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioClient,
   {Application}
-  ThreadedWASLoopbackCapture,
+  LoopbackCapture,
   Common,
   dlgDevices,
   UniThreadTimer;

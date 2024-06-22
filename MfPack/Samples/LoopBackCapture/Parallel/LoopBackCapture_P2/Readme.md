@@ -1,4 +1,4 @@
-# LoopbackCapture Sample 2
+# LoopbackCapture Sample P2
 
 Version: X 3.1.7
 
@@ -29,6 +29,7 @@ NOTES:
  - This release is updated for compiler version 17 up to 34.
  - SDK version 10.0.22621.0 (Win 11)
  - Requires Windows 10 build 20348 or later.
+ - Requires Delphi XE7 or later.
  - Minimum supported MfPack version: 3.1.7
 
 Project: Media Foundation - MFPack - Samples

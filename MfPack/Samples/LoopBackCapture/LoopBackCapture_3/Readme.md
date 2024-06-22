@@ -1,4 +1,4 @@
-# Threaded Loopback Capture Sample
+# LoopbackCapture Sample 3
 
 Version: X 3.1.7
 
@@ -12,8 +12,6 @@ Description:
   This sample lets you to choose between different latency's and buffersize for better sound to eliminate buffer related gliches.
   It has some more advanced features like: 
     - The rendering part is running in a separate thread.
-    - Able to use MMCSS (Multimedia Class Scheduler service).
-    - Stream switch detection.
     - possibility to write wav data in native format 44.1 kHz/ 16 bit PCM or the soundcard's audio format (including Uncompressed IEEE floating-point audio). 
 
 NOTES:
@@ -23,13 +21,13 @@ NOTES:
  - This release is updated for compiler version 17 up to 34.
  - SDK version 10.0.22621.0 (Win 11)
  - Requires Windows 10 version 22H2 or later.
- - Minimum supported MfPack version: 3.1.6
+ - Minimum supported MfPack version: 3.1.7
 
 Project: Media Foundation - MFPack - Samples
 Project location: https://github.com/FactoryXCode/MfPack
                   https://sourceforge.net/projects/MFPack
 
 First release date: 12/06/2024
-Final release date: 15/06/2024
+Final release date: 22/06/2024
 
 Copyright © FactoryX. All rights reserved.

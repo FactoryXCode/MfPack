@@ -4,7 +4,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'Loopback Capture Sample 1'
-  ClientHeight = 399
+  ClientHeight = 376
   ClientWidth = 472
   Color = clBtnFace
   DoubleBuffered = True
@@ -21,7 +21,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   TextHeight = 13
   object Bevel1: TBevel
     Left = 0
-    Top = 374
+    Top = 351
     Width = 472
     Height = 1
     Align = alBottom
@@ -31,7 +31,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   object lblStatus: TLabel
     AlignWithMargins = True
     Left = 3
-    Top = 378
+    Top = 355
     Width = 466
     Height = 18
     Align = alBottom
@@ -48,7 +48,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   end
   object Panel3: TPanel
     Left = 0
-    Top = 170
+    Top = 149
     Width = 472
     Height = 82
     Hint = 
@@ -66,9 +66,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     ParentFont = False
     TabOrder = 2
     VerticalAlignment = taAlignTop
-    ExplicitLeft = 8
-    ExplicitTop = 222
-    ExplicitWidth = 454
+    ExplicitTop = 170
     object lblBufferDuration: TLabel
       Left = 65
       Top = 51
@@ -123,7 +121,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   end
   object butStart: TButton
     Left = 8
-    Top = 340
+    Top = 318
     Width = 85
     Height = 27
     Caption = 'Start capture'
@@ -132,7 +130,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   end
   object butStop: TButton
     Left = 99
-    Top = 340
+    Top = 318
     Width = 85
     Height = 27
     Caption = 'Stop capture'
@@ -142,7 +140,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   end
   object butPlayData: TButton
     Left = 190
-    Top = 340
+    Top = 318
     Width = 80
     Height = 27
     Hint = 'Play recorded data.'
@@ -157,7 +155,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     Left = 0
     Top = 0
     Width = 472
-    Height = 72
+    Height = 51
     Align = alTop
     Alignment = taLeftJustify
     BevelOuter = bvLowered
@@ -170,9 +168,6 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     ParentFont = False
     TabOrder = 0
     VerticalAlignment = taAlignTop
-    ExplicitLeft = 10
-    ExplicitTop = 34
-    ExplicitWidth = 454
     object rbRenderingDevice: TRadioButton
       Left = 6
       Top = 22
@@ -193,8 +188,8 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       TabStop = True
     end
     object rbCaptureDevice: TRadioButton
-      Left = 6
-      Top = 45
+      Left = 168
+      Top = 22
       Width = 145
       Height = 17
       Hint = 'Capture'
@@ -211,7 +206,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     end
     object butShowdlgDevices: TButton
       Left = 367
-      Top = 7
+      Top = 18
       Width = 97
       Height = 25
       Caption = 'Select Device'
@@ -223,7 +218,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   end
   object Panel2: TPanel
     Left = 0
-    Top = 72
+    Top = 51
     Width = 472
     Height = 98
     Align = alTop
@@ -238,9 +233,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     ParentFont = False
     TabOrder = 1
     VerticalAlignment = taAlignTop
-    ExplicitLeft = 8
-    ExplicitTop = 111
-    ExplicitWidth = 455
+    ExplicitTop = 72
     object rbConsole: TRadioButton
       Left = 8
       Top = 24
@@ -301,15 +294,13 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   end
   object Panel4: TPanel
     Left = 0
-    Top = 252
+    Top = 231
     Width = 472
     Height = 81
     Align = alTop
     BevelOuter = bvLowered
     TabOrder = 3
-    ExplicitLeft = 8
-    ExplicitTop = 319
-    ExplicitWidth = 454
+    ExplicitTop = 252
     object Label1: TLabel
       Left = 10
       Top = 32
@@ -392,7 +383,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   end
   object butResetEngine: TButton
     Left = 384
-    Top = 340
+    Top = 318
     Width = 80
     Height = 27
     Hint = 'Reset the engine when having issues.'
