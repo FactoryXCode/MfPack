@@ -1,10 +1,7 @@
 program SinkWriterSample;
 
 uses
-  {$IFDEF FASTMM}
-  FastMM4,
-  {$ENDIF }
-  
+
   Vcl.Forms,
   frmMain in 'frmMain.pas' {MainForm},
   SinkWriterClass in 'SinkWriterClass.pas';

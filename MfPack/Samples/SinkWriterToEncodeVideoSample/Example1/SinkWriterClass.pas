@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 19/06/2024 All                 Rammstein release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -117,9 +117,6 @@ type
 
   end;
 
-  var
-    FSampleSinkWriter: TSampleSinkWriter;
-
 
 implementation
 
@@ -133,21 +130,19 @@ end;
 
 destructor TSampleSinkWriter.Destroy();
 begin
-
+  videoFrameBuffer := nil;
   inherited Destroy();
 end;
 
 
 // Inside this function, the following steps will be performed.
 //
-// 1 Call CoInitializeEx to initialize the COM library.
-// 2 Call MFStartup to initialize Microsoft Media Foundation.
-// 3 Create the sink writer.
-// 4 Send video frames to the sink writer.
-// 5 Call IMFSinkWriter.Finalize to finalize the output file.
-// 6 You don't have to Release the pointer to the sink writer. The compiler is doing that automaticly.
-// 7 Call MFShutdown.
-// 8 Call CoUninitialize.
+// 1 Call MFStartup to initialize Microsoft Media Foundation.
+// 2 Create the sink writer.
+// 3 Send video frames to the sink writer.
+// 4 Call IMFSinkWriter.Finalize to finalize the output file.
+// 5 You don't have to Release the pointer to the sink writer. The compiler is doing that automaticly.
+// 6 Call MFShutdown.
 //
 function TSampleSinkWriter.RunSinkWriter(sExt: string;
                                          sEncFormat: string;
@@ -176,39 +171,37 @@ begin
   for i := 0 to VIDEO_PELS -1 do
     videoFrameBuffer[i] := $0000FF00;
 
-  hr := CoInitializeEx(nil,
-                       COINIT_APARTMENTTHREADED);
-
   if SUCCEEDED(hr) then
     begin
-      hr := MFStartup(MF_VERSION);
+      hr := InitializeSinkWriter(sExt,
+                                 sEncFormat,
+                                 pSinkWriter,
+                                 stream);
       if SUCCEEDED(hr) then
         begin
-          hr := InitializeSinkWriter(sExt,
-                                     sEncFormat,
-                                     pSinkWriter,
-                                     stream);
-          if SUCCEEDED(hr) then
+          // Send frames to the sink writer.
+          for i := 0 to VIDEO_FRAME_COUNT -1 do
             begin
-                // Send frames to the sink writer.
-                for i := 0 to VIDEO_FRAME_COUNT -1 do
-                  begin
-                    hr := WriteFrame(pSinkWriter,
-                                     stream,
-                                     rtStart);
-                    if FAILED(hr) then
-                      Break;
+              hr := WriteFrame(pSinkWriter,
+                               stream,
+                               rtStart);
+              if FAILED(hr) then
+                Break;
 
-                    inc(rtStart,
-                        VIDEO_FRAME_DURATION);
-                  end;
+              Inc(rtStart,
+                  VIDEO_FRAME_DURATION);
             end;
+        end;
+
+      if SUCCEEDED(hr) then
+        begin
+          hr := pSinkWriter.Flush(stream);
           if SUCCEEDED(hr) then
             hr := pSinkWriter.Finalize();
         end;
-      MFShutdown();
-      CoUninitialize();
     end;
+  videoFrameBuffer := nil;
+
   Result := hr;
 end;
 
@@ -435,6 +428,9 @@ begin
     hr := pWriter.WriteSample(streamIndex,
                               pSample);
 
+  pBuffer := nil;
+  pSample := nil;
+  pData := nil;
   Result := hr;
 end;
 
