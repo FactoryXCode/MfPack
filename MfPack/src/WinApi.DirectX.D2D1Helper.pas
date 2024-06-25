@@ -84,13 +84,8 @@ uses
   WinApi.DirectX.DCommon,
   WinApi.DirectX.DXGIFormat;
 
+  {$WEAKPACKAGEUNIT ON}
   {$MINENUMSIZE 4}
-
-  {$IFDEF WIN32}
-    {$ALIGN 1}
-  {$ELSE}
-    {$ALIGN 8} // Win64
-  {$ENDIF}
 
 
   //
@@ -673,7 +668,7 @@ type
 
     //
     // Functions for convertion from the base D2D1_MATRIX_3X2_F to this type
-    // without making a copy
+    // without making a copy.
     //
 
     class function ReinterpretBaseType(const pMatrix: PD2D1_MATRIX_3X2_F): D2D1_MATRIX_3X2_F; overload; static;
@@ -1076,7 +1071,7 @@ begin
     pf := _pixelFormat;
 
 
-  Result._pixelFormat := _pixelFormat;
+  Result._pixelFormat := pf;
   Result.dpiX := dpiX;
   Result.dpiY := dpiY;
 end;
@@ -1101,7 +1096,7 @@ begin
     pf := _pixelFormat;
 
   Result._type := _type;
-  Result._pixelFormat := _pixelFormat;
+  Result._pixelFormat := pf;
   Result.dpiX := dpiX;
   Result.dpiY := dpiY;
   Result.usage := usage;
