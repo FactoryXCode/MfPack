@@ -17,13 +17,13 @@
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX)
-// Contributor(s): Tony (maXcomX)
+// Contributor(s): Ciaran, Tony (maXcomX)
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 19/06/2024 All                 Rammstein release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.

@@ -23,7 +23,8 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 19/06/2024 All                 Rammstein release  SDK 10.0.22621.0 (Windows 11)
+// 25/06/2024 All                 Solved some issues when replaying with same format.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -107,13 +108,16 @@ uses
   Utils;
 
 type
+  TStartMode = (smVirgin,
+                smReUse);
+
   TMainWindow = class(TForm)
     MainMenu: TMainMenu;
     Capture1: TMenuItem;
     mnuStartPreview: TMenuItem;
     mnuChooseDevice: TMenuItem;
     mnuStartRecording: TMenuItem;
-    SaveFileDlg: TSaveDialog;
+    dlgSaveSnapShot: TSaveDialog;
     N1: TMenuItem;
     Exit1: TMenuItem;
     pnlSnapShot: TPanel;
@@ -123,6 +127,9 @@ type
     butTakePhoto: TButton;
     chkNoPreview: TCheckBox;
     pnlInfo: TPanel;
+    dlgSaveVideo: TSaveDialog;
+    Options1: TMenuItem;
+    mnuSetVideoOutputFormat: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure mnuChooseDeviceClick(Sender: TObject);
     procedure mnuStartPreviewClick(Sender: TObject);
@@ -131,14 +138,20 @@ type
     procedure butSaveToFileClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure Exit1Click(Sender: TObject);
+    procedure mnuSetVideoOutputFormatClick(Sender: TObject);
 
   private
     { Private declarations }
     hPreview: HWND;
     ptrDevNotify: HDEVNOTIFY; // Devicenotify pointer.
+    pvStartMode: TStartMode;
     bRecording: Boolean;
     bPreviewing: Boolean;
     bImageCleared: Boolean;
+    bPhotoPending: Boolean;
+    bPhotoMade: Boolean;
+    bCaptureManInitialized: Boolean;
+
     bDeviceLost: Bool;
     bmCapturedFrame: TMfpBitmap;
     iSelectedDevice: Integer;
@@ -146,12 +159,13 @@ type
     pSelectedDevice: IMFActivate;
     lSampleTime: LongLong;
     FSampleConverter: TSampleConverter;
+    pvVideoFile: TFileName;
 
     procedure DestroyCaptureObjects();
     function CreateDeviceExplorer(): HResult;
 
-    // Update menuitems and status
-    procedure UpdateUI();
+    // Update menu items and status.
+    procedure UpdateUI(pGuidType: TGUID);
 
     // Process sample in main thread
     function ProcessSample(aSample: IMFSample): HResult;
@@ -161,6 +175,8 @@ type
                            var AHeight: Integer;
                            var ATop: Integer;
                            var ALeft: Integer);
+
+    function CreateNewFileName(ext: string): TFileName;
 
     // Messages
     procedure OnSize(var message: TWMSize); message WM_SIZE;
@@ -223,21 +239,27 @@ end;
 procedure TMainWindow.OnCaptureEvent(var AMessage: TMessage);
 var
   hr: HResult;
+
 begin
   hr := FCaptureManager.OnCaptureEvent(AMessage.WParam,
                                        AMessage.LParam);
   if FAILED(hr) then
     begin
-      ErrMsg('Capturemanager.OnCaptureEvent reported an error',
+      ErrMsg(Format('Capturemanager.OnCaptureEvent reported error: %d', [hr]),
              hr);
     end;
 end;
 
 
 procedure TMainWindow.OnCaptureEventHandled(var AMessage: TMessage);
+var
+  amsg: TGUID;
+
 begin
+  amsg := PGUID(AMessage.LParam)^;
+
   if SUCCEEDED(HResult(AMessage.WParam)) then
-    UpdateUI()
+    UpdateUI(amsg)
   else
     ErrMsg('CaptureManager reported a failure.',
            HResult(AMessage.WParam));
@@ -295,7 +317,6 @@ begin
                            0);
                 iSelectedDevice := -1;
                 iSelectedFormat := -1;
-                UpdateUI();
               end;
           end;
     end;
@@ -443,16 +464,15 @@ end;
 procedure TMainWindow.butSaveToFileClick(Sender: TObject);
 begin
 
-  SaveFileDlg.FileName := Format('Capture_%s', [HnsTimeToStr(lSampleTime,
-                                                             '_',
-                                                             False)]);
-  if SaveFileDlg.Execute then
+  dlgSaveSnapShot.FileName := Format('Capture_%s', [HnsTimeToStr(lSampleTime,
+                                                    '_',
+                                                    False)]);
+  if dlgSaveSnapShot.Execute then
     begin
       SaveImage(bmCapturedFrame,
-                SaveFileDlg.FileName,
-                TImageType(Ord(SaveFileDlg.FilterIndex - 1)));
+                dlgSaveSnapShot.FileName,
+                TImageType(Ord(dlgSaveSnapShot.FilterIndex - 1)));
     end;
-
 end;
 
 
@@ -496,7 +516,6 @@ begin
     end;
 
   FChooseDeviceParam.Reset();
-
 end;
 
 
@@ -518,8 +537,6 @@ begin
   UnRegisterForDeviceNotification(ptrDevNotify);
   ptrDevNotify := nil;
 
-  MFShutdown();
-  CoUnInitialize();
   CanClose := True;
 end;
 
@@ -531,22 +548,6 @@ label
   done;
 
 begin
-
-  // Initialize COM
-  CoInitializeEx(nil,
-                 COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE);
-  // Startup Media Foundation
-  hr := MFStartup(MF_VERSION,
-                  MFSTARTUP_FULL);
-
-  if FAILED(hr) then
-    begin
-      MessageBox(0,
-                 lpcwstr('Your computer does not support this Media Foundation API version' + IntToStr(MF_VERSION) + '.'),
-                 lpcwstr('MFStartup Failure!'),
-                 MB_ICONSTOP);
-      goto Done;
-    end;
 
   iSelectedDevice := -1;
   iSelectedFormat := -1;
@@ -587,7 +588,8 @@ begin
 
   hr := FCaptureManager.InitializeCaptureManager(hPreview,
                                                  Handle,
-                                                 pSelectedDevice);
+                                                 pSelectedDevice,
+                                                 False);
   if SUCCEEDED(hr) then
     // Create the sampleconverter
     FSampleConverter := TSampleConverter.Create()
@@ -598,6 +600,14 @@ begin
   if not RegisterForDeviceNotification(Handle,
                                        ptrDevNotify) then
     hr := E_FAIL;
+
+  //
+  bRecording := False;
+  bPreviewing := False;
+  bImageCleared := False;
+  bPhotoPending := False;
+  bPhotoMade := False;
+  bCaptureManInitialized := False;
 
 done:
   if FAILED(hr) then
@@ -651,11 +661,12 @@ begin
   // Stop the current manager
   if Assigned(FCaptureManager) then
     begin
-      if FCaptureManager.IsPreviewing then
-        FCaptureManager.StopPreview();
-      if FCaptureManager.IsRecording then
+      if bRecording then
         FCaptureManager.StopRecording();
+      if bPreviewing then
+        FCaptureManager.StopPreview();
     end;
+
 
   hr := MFCreateAttributes(pAttributes,
                            1);
@@ -688,19 +699,20 @@ begin
       iSelectedFormat := FChooseDeviceParam.SelectedFormat;
       hPreview := Handle;
 
-      // Set DeviceExplorer properties
+      // Set DeviceExplorer properties.
       hr := FDeviceExplorer.SetCurrentDeviceProperties(iSelectedDevice,
                                                        iSelectedFormat);
       if FAILED(hr) then
         goto Done;
 
-      {$POINTERMATH ON}
-
       hr := FCaptureManager.InitializeCaptureManager(hPreview,
                                                      Handle,
-                                                     IUnknown(pSelectedDevice));
+                                                     IUnknown(pSelectedDevice),
+                                                     True);
       if FAILED(hr) then
         goto Done;
+
+      pvStartMode := smVirgin;
     end
   else
     begin
@@ -719,94 +731,107 @@ done:
              hr);
       Application.Terminate();
     end;
-
-  UpdateUI();
 end;
 
 
 // UpdateUI
-procedure TMainWindow.UpdateUI();
-var
-  bEnableRecording: Boolean;
-  bEnablePhoto: Boolean;
-  bEnablePreview: Boolean;
-
+procedure TMainWindow.UpdateUI(pGuidType: TGUID);
 begin
 
-  bEnablePhoto := False;
-  bEnableRecording := False;
-  bEnablePreview := ((iSelectedDevice > -1) and (iSelectedFormat > -1));
+  if (pGuidType = MF_CAPTURE_ENGINE_INITIALIZED) then
+    begin
+      bCaptureManInitialized := True;
+      pnlInfo.Caption := 'Please select ''Choose Device '' or ''Start Preview''';
+      mnuStartPreview.Caption := 'Start Preview';
+      mnuStartRecording.Caption := 'Start Recording';
+      mnuStartPreview.Tag := 0;
+      mnuStartRecording.Tag := 0;
+      pnlControls.Enabled := False;
+    end
+  else if (pGuidType = MF_CAPTURE_ENGINE_PREVIEW_STARTED) then
+    begin
+      mnuStartPreview.Caption := 'Stop Preview';
+      pnlInfo.Caption := 'Previewing.';
+      bPreviewing := True;
+      mnuStartPreview.Enabled := True;
+      mnuStartRecording.Enabled := True;
+      mnuChooseDevice.Enabled := False;
+      pnlControls.Enabled := True;
+
+    end
+  else if (pGuidType = MF_CAPTURE_ENGINE_PREVIEW_STOPPED) then
+    begin
+      mnuStartPreview.Caption := 'Start Preview';
+      pnlInfo.Caption := 'Stopped Previewing.';
+      bPreviewing := False;
+      mnuStartPreview.Enabled := True;
+      mnuStartRecording.Enabled := True;
+      mnuChooseDevice.Enabled := True;
+      pnlControls.Enabled := False;
+    end
+  else if (pGuidType = MF_CAPTURE_ENGINE_RECORD_STARTED) then
+    begin
+      mnuStartRecording.Caption := 'Stop Recording';
+      pnlInfo.Caption := 'Recording.';
+      bRecording := True;
+      pnlControls.Enabled := True;
+      mnuStartRecording.Enabled := True;
+      pnlControls.Enabled := True;
+    end
+  else if (pGuidType = MF_CAPTURE_ENGINE_RECORD_STOPPED) then
+    begin
+      mnuStartRecording.Caption := 'Start Recording';
+      pnlInfo.Caption := 'Previewing.';
+      bRecording := False;
+      mnuStartRecording.Enabled := True;
+      pnlControls.Enabled := bPreviewing;
+    end
+  else if (pGuidType = MF_CAPTURE_ENGINE_PHOTO_TAKEN) then
+    begin
+      pnlInfo.Caption := 'Photo has been made.';
+      bPhotoMade := True;
+      pnlControls.Enabled := True;
+    end
+  else if (pGuidType = MF_CAPTURE_SINK_PREPARED) then
+    begin
+      // Stub.
+      // pnlInfo.Caption := 'The capture sink has been initialized.';
+    end
+  else if (pGuidType = MF_CAPTURE_ENGINE_ERROR) then
+    begin
+      // The capture engine will be destroyed.
+      // So, at this point we have to reinitialize the capture engine again.
+      Exit;
+    end
+  else
+    begin
+      // We got an unknown message from the captureEngine.
+    end;
 
   if bDeviceLost then
     begin
-      if FCaptureManager.IsRecording then
+      if bRecording then
         FCaptureManager.StopRecording()
-      else if FCaptureManager.IsPreviewing then
+      else if bPreviewing then
         FCaptureManager.StopPreview;
 
       mnuStartRecording.Caption := 'Start Recording';
       mnuStartPreview.Tag := 0;
-      mnuStartRecording.Enabled := bEnableRecording;
+      mnuStartRecording.Enabled := False;
       mnuStartPreview.Enabled := False;
       pnlInfo.Caption := 'Please select a device.';
       pnlControls.Enabled := False;
       bDeviceLost := False;
       Exit;
     end;
+end;
 
-  if not Assigned(FCaptureManager) then
-    begin
-      pnlInfo.Caption := 'Please select a device.';
-      Exit;
-    end;
 
-  if not FCaptureManager.IsInitialized or (iSelectedDevice = -1) then
-    pnlInfo.Caption := 'Please select a device.'
-  else
-    begin
-      pnlInfo.Caption := 'Please select ''Start Preview'' or ''Choose Device ''';
-      mnuStartPreview.Caption := 'Start Preview';
-      mnuStartPreview.Tag := 0;
-    end;
-
-  if not FCaptureManager.IsRecording then
-    begin
-      bRecording := FCaptureManager.IsRecording;
-
-      if bRecording then
-        mnuStartRecording.Caption := 'Stop Recording'
-      else
-        mnuStartRecording.Caption := 'Start Recording';
-    end;
-
-  if FCaptureManager.IsPreviewing then
-    begin
-      bPreviewing := FCaptureManager.IsPreviewing;
-      mnuStartPreview.Caption := 'Stop Preview';
-      mnuStartPreview.Tag := 1;
-      bEnableRecording := True;
-      bEnablePhoto := True;
-    end
-  else if FCaptureManager.IsPhotoPending then
-    bEnablePhoto := False
-  else
-    begin
-      mnuStartPreview.Caption := 'Start Preview';
-      mnuStartPreview.Tag := 0;
-    end;
-
-  if bRecording then
-    pnlInfo.Caption := 'Recording'
-  else if FCaptureManager.IsPreviewing then
-    pnlInfo.Caption := 'Previewing'
-  else
-    begin
-      bEnableRecording := False;
-    end;
-
-  mnuStartRecording.Enabled := bEnableRecording;
-  mnuStartPreview.Enabled := bEnablePreview;
-  pnlControls.Enabled := bEnablePhoto;
+procedure TMainWindow.mnuSetVideoOutputFormatClick(Sender: TObject);
+begin
+  dlgSaveVideo.FileName := CreateNewFileName('.mp4');
+  if dlgSaveVideo.Execute then
+    pvVideoFile := dlgSaveVideo.FileName;
 end;
 
 
@@ -822,17 +847,34 @@ begin
     begin
       if (mnuStartPreview.Tag = 0) then
         begin
-          hr := FCaptureManager.StartPreview();
-          if FAILED(hr) then
+          if (pvStartMode = smVirgin) then
             begin
-              butTakePhoto.Enabled := False;
-              ErrMsg('mnuStartPreviewClick ' + ERR_PREVIEW,
-                     hr);
-              Exit;
+              hr := FCaptureManager.StartPreview(True);
+              if FAILED(hr) then
+                begin
+                  butTakePhoto.Enabled := False;
+                  ErrMsg('mnuStartPreviewClick ' + ERR_PREVIEW,
+                         hr);
+                  Exit;
+                end;
+              pvStartMode := smReUse;
+            end
+          else
+            begin
+              hr := FCaptureManager.StartPreview(False);
+              if FAILED(hr) then
+                begin
+                  butTakePhoto.Enabled := False;
+                  ErrMsg('mnuStartPreviewClick ' + ERR_PREVIEW,
+                         hr);
+                  Exit;
+                end;
             end;
-          butSaveToFile.Enabled := False;
-          butTakePhoto.Enabled := True;
-          mnuStartPreview.Tag := 1;
+
+            butSaveToFile.Enabled := False;
+            butTakePhoto.Enabled := True;
+            mnuStartPreview.Tag := 1;
+
         end
       else
         begin
@@ -848,8 +890,55 @@ end;
 
 // mnuStartRecordingClick
 procedure TMainWindow.mnuStartRecordingClick(Sender: TObject);
+var
+  hr: HResult;
+
 begin
-  FCaptureManager.StartRecording(nil);
+
+  if Assigned(FCaptureManager) then
+    if FCaptureManager.IsRecording then
+      begin
+        FCaptureManager.StopRecording();
+        bRecording := False;
+      end
+    else
+      begin
+        if (pvVideoFile = '') or FileExists(pvVideoFile) then
+          pvVideoFile := CreateNewFileName('.mp4');
+
+        hr := FCaptureManager.StartRecording(StrToPWideChar(pvVideoFile));
+        if FAILED(hr) then
+          begin
+            ErrMsg('mnuStartRecordingClick ' + ERR_RECORD,
+                   hr);
+            Exit;
+          end;
+        bRecording := True;
+      end;
+end;
+
+
+function TMainWindow.CreateNewFileName(ext: string): TFileName;
+var
+  i: Integer;
+  sfileName: string;
+
+begin
+  i := 0;
+  sfileName := 'VideoCapture' + ext;
+
+  if not FileExists(sFileName) then
+    begin
+      Result := sfileName;
+      Exit;
+    end
+  else
+    while FileExists(sFileName) do
+      begin
+        sFileName := Format('VideoCapture(%d)%s', [i, ext]);
+        Inc(i);
+      end;
+  Result := sFileName;
 end;
 
 
@@ -857,5 +946,25 @@ procedure TMainWindow.Exit1Click(Sender: TObject);
 begin
   Close();
 end;
+
+
+// Initialization and finalization =============================================
+
+
+initialization
+
+  if FAILED(MFStartup(MF_VERSION,
+                      MFSTARTUP_LITE)) then
+      begin
+        MessageBox(0,
+                   lpcwstr('Your computer does not support this Media Foundation API version ' +
+                           IntToStr(MF_VERSION) + '.'),
+                   lpcwstr('MFStartup Failure!'),
+                           MB_ICONSTOP);
+      end;
+
+finalization
+
+  MFShutdown();
 
 end.

@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 19/06/2024 All                 Rammstein release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -191,8 +191,8 @@ end;
 function TSampleConverter.IndexOf(const AInput: TGUID;
                                   const AValues: array of TGUID): Integer;
 begin
-  Result := high(AValues);
-  while (Result >= low(AValues)) and
+  Result := High(AValues);
+  while (Result >= Low(AValues)) and
         (AInput <> AValues[Result]) do
     Dec(Result);
 end;
@@ -236,7 +236,7 @@ begin
                          nil,
                          @cbBitmapData);
       if FAILED(hr) then
-        goto done;  // No need to unlock
+        goto done;  // No need to unlock.
 
 
       // For full frame capture, use the buffer dimensions for the data size check
@@ -269,16 +269,14 @@ done:
 end;
 
 
-
 function TSampleConverter.GetBMPFileHeader(): BITMAPFILEHEADER;
 begin
   Result.bfType := Ord('B') or (Ord('M') shl 8); // Type is "BM" for BitMap
-  Result.bfSize := sizeof(Result.bfOffBits) + sizeof(RGBTRIPLE);
+  Result.bfSize := SizeOf(Result.bfOffBits) + sizeof(RGBTRIPLE);
   Result.bfReserved1 := 0;
   Result.bfReserved2 := 0;
   Result.bfOffBits := sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
 end;
-
 
 
 function TSampleConverter.GetBMPFileInfo(const AVideoInfo: TVideoFormatInfo): BITMAPINFOHEADER;

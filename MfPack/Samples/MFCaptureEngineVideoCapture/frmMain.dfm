@@ -13,11 +13,13 @@ object MainWindow: TMainWindow
   Font.Name = 'Tahoma'
   Font.Style = []
   Menu = MainMenu
+  OldCreateOrder = True
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   DesignSize = (
     1091
     654)
+  PixelsPerInch = 96
   TextHeight = 13
   object pnlSnapShot: TPanel
     Left = 780
@@ -30,7 +32,6 @@ object MainWindow: TMainWindow
     ParentBackground = False
     ShowCaption = False
     TabOrder = 0
-    ExplicitLeft = 776
     object pbCapture: TPaintBox
       Left = 0
       Top = 0
@@ -78,7 +79,7 @@ object MainWindow: TMainWindow
         OnClick = butTakePhotoClick
       end
       object chkNoPreview: TCheckBox
-        Left = 176
+        Left = 175
         Top = 6
         Width = 97
         Height = 15
@@ -102,12 +103,10 @@ object MainWindow: TMainWindow
     ParentShowHint = False
     ShowHint = False
     TabOrder = 1
-    ExplicitTop = 626
-    ExplicitWidth = 1095
   end
   object MainMenu: TMainMenu
-    Left = 32
-    Top = 38
+    Left = 33
+    Top = 40
     object Capture1: TMenuItem
       Caption = 'Capture'
       object mnuChooseDevice: TMenuItem
@@ -131,14 +130,30 @@ object MainWindow: TMainWindow
         OnClick = Exit1Click
       end
     end
+    object Options1: TMenuItem
+      Caption = 'Options'
+      object mnuSetVideoOutputFormat: TMenuItem
+        Caption = 'Set Video Output Format'
+        OnClick = mnuSetVideoOutputFormatClick
+      end
+    end
   end
-  object SaveFileDlg: TSaveDialog
-    DefaultExt = '.mp4'
+  object dlgSaveSnapShot: TSaveDialog
+    DefaultExt = '.bmp'
     FileName = 'MyPhoto.bmp'
     Filter = 
       'BMP image (*.bmp)|*.bmp|PNG image (*.png)|*.png|JPEG image (*.jp' +
       'g, *.jpeg)|*.jpg'
-    Left = 96
-    Top = 38
+    Left = 115
+    Top = 39
+  end
+  object dlgSaveVideo: TSaveDialog
+    DefaultExt = '.mp4'
+    FileName = 'MyVideo.mp4'
+    Filter = 
+      'MPEG-4 (MP4)|.mp4|Windows Media Video (WMV)|.wmv|Audio Video Int' +
+      'erleave (AVI)|.avi'
+    Left = 196
+    Top = 39
   end
 end

@@ -13,7 +13,7 @@
 // Revision Version: 3.1.7
 //
 // Description:
-//   Helpers for the MFCaptureEngineVideoCapture
+//   Helpers for the MFCaptureEngineVideoCapture.
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX)
@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 19/06/2024 All                 Rammstein release  SDK 10.0.22621.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -161,8 +161,8 @@ type
 
 
   function CloneVideoMediaType(pSrcMediaType: IMFMediaType;
-                             const guidSubType: REFGUID;
-                             out ppNewMediaType: IMFMediaType): HResult;
+                               const guidSubType: REFGUID;
+                               out ppNewMediaType: IMFMediaType): HResult;
 
   function CopyAttribute(pSrc: IMFAttributes;
                          pDest: IMFAttributes;
@@ -338,12 +338,23 @@ try
 
 
   if ShowMilliSeconds then
-    Result := Format('%2.2d%s%2.2d%s%2.2d,%3.3d', [hours, DelimiterFormat, mins, DelimiterFormat, secs, DelimiterFormat, millisec])
+    Result := Format('%2.2d%s%2.2d%s%2.2d,%3.3d', [hours,
+                                                   DelimiterFormat,
+                                                   mins,
+                                                   DelimiterFormat,
+                                                   secs,
+                                                   DelimiterFormat,
+                                                   millisec])
   else
-    Result := Format('%2.2d%s%2.2d%s%2.2d', [hours, DelimiterFormat, mins, DelimiterFormat, secs]);
+    Result := Format('%2.2d%s%2.2d%s%2.2d', [hours,
+                                             DelimiterFormat,
+                                             mins,
+                                             DelimiterFormat,
+                                             secs]);
 
 except
-  on exception do Result:= '00:00:00,000';
+  on exception do
+    Result:= '00:00:00,000';
 end;
 end;
 
