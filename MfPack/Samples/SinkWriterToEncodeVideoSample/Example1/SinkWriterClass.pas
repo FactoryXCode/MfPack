@@ -193,9 +193,7 @@ begin
 
   if SUCCEEDED(hr) then
     begin
-      hr := pSinkWriter.Flush(stream);
-      if SUCCEEDED(hr) then
-        hr := pSinkWriter.Finalize();
+      hr := pSinkWriter.Finalize();
     end;
 
   videoFrameBuffer := nil;
