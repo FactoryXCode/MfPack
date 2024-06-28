@@ -24,7 +24,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 19/06/2024 All                 Rammstein release  SDK 10.0.22621.0 (Windows 11)
-// 25/06/2024 All                 Solved some issues when replaying with same format.
+// 28/06/2024 Tony                Solved some issues when recapturing with same formats.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -158,6 +158,9 @@ type
 type
 
   TCaptureManager = class(TObject)
+  protected
+    FhEvent: THandle;
+
   private
     FCaptureEngine: IMFCaptureEngine;
     FCapturePreviewSink: IMFCapturePreviewSink;
@@ -198,7 +201,7 @@ type
     procedure WaitForResult();
 
   public
-    FhEvent: THandle;
+
 
     constructor Create(hEvent: HWND); reintroduce;
     destructor Destroy(); override;
@@ -220,7 +223,8 @@ type
 
     function StartPreview(pNewPeviewSink: Boolean): HResult;
     function StopPreview(): HResult;
-    function StartRecording(pszDestinationFile: PCWSTR): HResult;
+    function StartRecording(pszDestinationFile: PCWSTR;
+                            pSinkWriterConfigSet: Boolean): HResult;
     function StopRecording(): HResult;
     function TakePhoto(pSnapShotOption: TSnapShotOptions;
                        pMediaType: IMFMediaType): HResult;
@@ -232,6 +236,7 @@ type
     property SnapShotOption: TSnapShotOptions read FSnapShotOptions write FSnapShotOptions;
     property PreviewHandle: HWND read hwndPreviewWindow write hwndPreviewWindow;
     property MainFormEventHandle: HWND read hwndMainForm;
+    property HandlerEvent: THandle read FhEvent;
 
   end;
 
@@ -630,7 +635,7 @@ begin
       else if (FAILED(hrStatus)) then
         begin
           ErrMsg('OnCaptureEvent: Unexpected error',
-                 hr);
+                 hrStatus);
           DestroyCaptureEngine();
         end;
       SetEvent(FhEvent);
@@ -892,7 +897,8 @@ end;
 
 // StartRecord
 // Start recording to file
-function TCaptureManager.StartRecording(pszDestinationFile: PCWSTR): HResult;
+function TCaptureManager.StartRecording(pszDestinationFile: PCWSTR;
+                                        pSinkWriterConfigSet: Boolean): HResult;
 var
   pszExt: string;
   guidVideoEncoding: TGUID;
@@ -921,70 +927,74 @@ begin
 
   pszExt := ExtractFileExt(pszDestinationFile);
 
-  // Check extension to match the proper formats.
-  if LowerCase(pszExt) = '.mp4' then
-    begin
-      guidVideoEncoding := MFVideoFormat_H264;
-      guidAudioEncoding := MFAudioFormat_AAC;
-    end
-  else if LowerCase(pszExt) = '.wmv' then
-    begin
-      guidVideoEncoding := MFVideoFormat_WMV3;
-      guidAudioEncoding := MFAudioFormat_WMAudioV9;
-    end
-  else if LowerCase(pszExt) = '.avi' then
-    begin
-      guidVideoEncoding := MFVideoFormat_H264;
-      guidAudioEncoding := MFAudioFormat_AAC;
-    end
-  else
-    begin
-      hr := MF_E_INVALIDMEDIATYPE;
-      goto Done;
-    end;
 
-  hr := FCaptureEngine.GetSink(MF_CAPTURE_ENGINE_SINK_TYPE_RECORD,
-                               pSink);
-  if FAILED(hr) then
-    goto Done;
 
-  hr := pSink.QueryInterface(IID_IMFCaptureRecordSink,
-                             pRecord);
-  if FAILED(hr) then
-    goto Done;
+      // Check extension to match the proper formats.
+      if LowerCase(pszExt) = '.mp4' then
+        begin
+          guidVideoEncoding := MFVideoFormat_H264;
+          guidAudioEncoding := MFAudioFormat_AAC;
+        end
+      else if LowerCase(pszExt) = '.wmv' then
+        begin
+          guidVideoEncoding := MFVideoFormat_WMV3;
+          guidAudioEncoding := MFAudioFormat_WMAudioV9;
+        end
+      else if LowerCase(pszExt) = '.avi' then
+        begin
+          guidVideoEncoding := MFVideoFormat_H264;
+          guidAudioEncoding := MFAudioFormat_AAC;
+        end
+      else
+        begin
+          hr := MF_E_INVALIDMEDIATYPE;
+          goto Done;
+        end;
 
-  hr := FCaptureEngine.GetSource(pSource);
-  if FAILED(hr) then
-    goto Done;
-
-  hr := pRecord.SetOutputFileName(pszDestinationFile);
-  if FAILED(hr) then
-    goto Done;
-
-  // Configure the video and/or audio streams.
-  if (guidVideoEncoding <> GUID_NULL) then
-    begin
-      hr := ConfigureVideoEncoding(pSource,
-                                   pRecord,
-                                   guidVideoEncoding);
+      hr := FCaptureEngine.GetSink(MF_CAPTURE_ENGINE_SINK_TYPE_RECORD,
+                                   pSink);
       if FAILED(hr) then
         goto Done;
-    end;
 
-  if (guidAudioEncoding <> GUID_NULL) then
-    begin
-      hr := ConfigureAudioEncoding(pSource,
-                                   pRecord,
-                                   guidAudioEncoding);
+      hr := pSink.QueryInterface(IID_IMFCaptureRecordSink,
+                                 pRecord);
       if FAILED(hr) then
         goto Done;
+
+      hr := FCaptureEngine.GetSource(pSource);
+      if FAILED(hr) then
+        goto Done;
+
+      hr := pRecord.SetOutputFileName(pszDestinationFile);
+      if FAILED(hr) then
+        goto Done;
+
+  // When we run the same video device over and over again, we skip the configuration.
+  if not pSinkWriterConfigSet then
+    begin
+      // Configure the video and/or audio streams.
+      if not IsEqualGuid(guidVideoEncoding, GUID_NULL) then
+        begin
+          hr := ConfigureVideoEncoding(pSource,
+                                       pRecord,
+                                       guidVideoEncoding);
+          if FAILED(hr) then
+            goto Done;
+        end;
+
+      if not IsEqualGuid(guidAudioEncoding, GUID_NULL) then
+        begin
+          hr := ConfigureAudioEncoding(pSource,
+                                       pRecord,
+                                       guidAudioEncoding);
+          if FAILED(hr) then
+            goto Done;
+        end;
     end;
 
   hr := FCaptureEngine.StartRecord();
   if FAILED(hr) then
     goto Done;
-
-  bRecording := True;
 
 done:
   if FAILED(hr) then

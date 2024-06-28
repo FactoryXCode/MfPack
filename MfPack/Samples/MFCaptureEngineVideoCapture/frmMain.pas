@@ -24,7 +24,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 19/06/2024 All                 Rammstein release  SDK 10.0.22621.0 (Windows 11)
-// 25/06/2024 All                 Solved some issues when replaying with same format.
+// 28/06/2024 Tony                Solved some issues when recapturing with same formats.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -144,7 +144,8 @@ type
     { Private declarations }
     hPreview: HWND;
     ptrDevNotify: HDEVNOTIFY; // Devicenotify pointer.
-    pvStartMode: TStartMode;
+    pvPreviewMode: TStartMode;
+    pvStartRecordMode: TStartMode;
     bRecording: Boolean;
     bPreviewing: Boolean;
     bImageCleared: Boolean;
@@ -712,7 +713,8 @@ begin
       if FAILED(hr) then
         goto Done;
 
-      pvStartMode := smVirgin;
+      pvPreviewMode := smVirgin;
+      pvStartRecordMode := smVirgin;
     end
   else
     begin
@@ -765,14 +767,14 @@ begin
       pnlInfo.Caption := 'Stopped Previewing.';
       bPreviewing := False;
       mnuStartPreview.Enabled := True;
-      mnuStartRecording.Enabled := True;
+      mnuStartRecording.Enabled := False;
       mnuChooseDevice.Enabled := True;
       pnlControls.Enabled := False;
     end
   else if (pGuidType = MF_CAPTURE_ENGINE_RECORD_STARTED) then
     begin
       mnuStartRecording.Caption := 'Stop Recording';
-      pnlInfo.Caption := 'Recording.';
+      pnlInfo.Caption := Format('Recording to file %s', [pvVideoFile]);
       bRecording := True;
       pnlControls.Enabled := True;
       mnuStartRecording.Enabled := True;
@@ -781,6 +783,8 @@ begin
   else if (pGuidType = MF_CAPTURE_ENGINE_RECORD_STOPPED) then
     begin
       mnuStartRecording.Caption := 'Start Recording';
+      pnlInfo.Caption := Format('Stopped recording to file %s', [pvVideoFile]);
+      Sleep(1000);
       pnlInfo.Caption := 'Previewing.';
       bRecording := False;
       mnuStartRecording.Enabled := True;
@@ -822,6 +826,8 @@ begin
       pnlInfo.Caption := 'Please select a device.';
       pnlControls.Enabled := False;
       bDeviceLost := False;
+      pvStartRecordMode := smVirgin;
+      pvPreviewMode := smVirgin;
       Exit;
     end;
 end;
@@ -847,7 +853,7 @@ begin
     begin
       if (mnuStartPreview.Tag = 0) then
         begin
-          if (pvStartMode = smVirgin) then
+          if (pvPreviewMode = smVirgin) then
             begin
               hr := FCaptureManager.StartPreview(True);
               if FAILED(hr) then
@@ -857,7 +863,7 @@ begin
                          hr);
                   Exit;
                 end;
-              pvStartMode := smReUse;
+              pvPreviewMode := smReUse;
             end
           else
             begin
@@ -878,7 +884,13 @@ begin
         end
       else
         begin
-          hr := FCaptureManager.StopPreview();
+          hr := S_OK;
+          // Stop recording if recording is active.
+          if FCaptureManager.IsRecording then
+            hr := FCaptureManager.StopRecording();
+
+          if SUCCEEDED(hr) then
+            hr := FCaptureManager.StopPreview();
           mnuStartPreview.Tag := 0;
           if FAILED(hr) then
             ErrMsg('mnuStartPreviewClick ' + ERR_STOP_PREVIEW,
@@ -906,7 +918,15 @@ begin
         if (pvVideoFile = '') or FileExists(pvVideoFile) then
           pvVideoFile := CreateNewFileName('.mp4');
 
-        hr := FCaptureManager.StartRecording(StrToPWideChar(pvVideoFile));
+        if (pvStartRecordMode = smVirgin) then
+          begin
+            hr := FCaptureManager.StartRecording(StrToPWideChar(pvVideoFile),
+                                                 False);  // Sinkwriter needs to be initialized.
+            pvStartRecordMode := smReUse;
+          end
+        else
+          hr := FCaptureManager.StartRecording(StrToPWideChar(pvVideoFile),
+                                               True); // Sinkwriter is reusing its configuration.
         if FAILED(hr) then
           begin
             ErrMsg('mnuStartRecordingClick ' + ERR_RECORD,
