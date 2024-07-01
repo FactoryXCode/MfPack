@@ -22,17 +22,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 30/06/2024 All                 RammStein release, May 2024 update, 10.0.26100.0
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
 // Related projects: MfPackX317
-// Known Issues: -
+// Known Issues: -                                                                                    readDXVA_Cr_11oflow
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.22621.0
+// SDK version: 10.0.26100.0
 //
 // Todo: -
 //
@@ -69,6 +69,9 @@ interface
 uses
   {WinApi}
   WinApi.Windows,
+  WinApi.WinApiTypes,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfUtils,
   {DirectX}
   WinApi.DirectX.D3d9Types,
   WinApi.DirectX.D3D9;
@@ -182,10 +185,169 @@ const
   DXVA_ModeMPEG4pt2_VLD_AdvSimple_GMC     : TGUID = (D1 : $ab998b5b; D2 : $4258; D3 : $44a9; D4:($9f, $eb, $94, $e5, $97, $a6, $ba, $ae));
   {$EXTERNALSYM DXVA_ModeMPEG4pt2_VLD_AdvSimple_GMC}
 
-  DXVA_ModeHEVC_VLD_Main                  : TGUID = (D1 : $5b11d51b; D2 : $2f4c; D3 : $4452; D4:($bc, $c3, $09, $f2, $a1, $16, $0c, $c0));
+
+  DXVA_ModeHEVC_VLD_Main           : TGUID = (D1: $5b11d51b;
+                                              D2: $2f4c;
+                                              D3: $4452;
+                                              D4: ($bc, $c3, $09, $f2, $a1, $16, $0c, $c0));
   {$EXTERNALSYM DXVA_ModeHEVC_VLD_Main}
-  DXVA_ModeHEVC_VLD_Main10                : TGUID = (D1 : $107af0e0; D2 : $ef1a; D3 : $4d19; D4:($ab, $a8, $67, $a1, $63, $07, $3d, $13));
+
+  DXVA_ModeHEVC_VLD_Main10        : TGUID = (D1: $107af0e0;
+                                             D2: $ef1a;
+                                             D3: $4d19;
+                                             D4: ($ab, $a8, $67, $a1, $63, $07, $3d, $13));
   {$EXTERNALSYM DXVA_ModeHEVC_VLD_Main10}
+
+  DXVA_ModeHEVC_VLD_Monochrome    : TGUID = (D1: $0685b993;
+                                             D2: $3d8c;
+                                             D3: $43a0;
+                                             D4: ($8b, $28, $d7, $4c, $2d, $68, $99, $a4));
+  {$EXTERNALSYM DXVA_ModeHEVC_VLD_Monochrome}
+
+  DXVA_ModeHEVC_VLD_Monochrome10  : TGUID = (D1: $142a1d0f;
+                                             D2: $69dd;
+                                             D3: $4ec9;
+                                             D4: ($85, $91, $b1, $2f, $fc, $b9, $1a, $29));
+  {$EXTERNALSYM DXVA_ModeHEVC_VLD_Monochrome10}
+
+  DXVA_ModeHEVC_VLD_Main12        : TGUID = (D1: $1a72925f;
+                                             D2: $0c2c;
+                                             D3: $4f15;
+                                             D4: ($96, $fb, $b1, $7d, $14, $73, $60, $3f));
+  {$EXTERNALSYM DXVA_ModeHEVC_VLD_Main12}
+
+  DXVA_ModeHEVC_VLD_Main10_422    : TGUID = (D1: $0bac4fe5;
+                                             D2: $1532;
+                                             D3: $4429;
+                                             D4: ($a8, $54, $f8, $4d, $e0, $49, $53, $db));
+  {$EXTERNALSYM DXVA_ModeHEVC_VLD_Main10_422}
+
+  DXVA_ModeHEVC_VLD_Main12_422    : TGUID = (D1: $55bcac81;
+                                             D2: $f311;
+                                             D3: $4093;
+                                             D4: ($a7, $d0, $1c, $bc, $0b, $84, $9b, $ee));
+  {$EXTERNALSYM DXVA_ModeHEVC_VLD_Main12_422}
+
+  DXVA_ModeHEVC_VLD_Main_444      : TGUID = (D1: $4008018f;
+                                             D2: $f537;
+                                             D3: $4b36;
+                                             D4: ($98, $cf, $61, $af, $8a, $2c, $1a, $33));
+  {$EXTERNALSYM DXVA_ModeHEVC_VLD_Main_444}
+
+  DXVA_ModeHEVC_VLD_Main10_Ext    : TGUID = (D1: $9cc55490;
+                                             D2: $e37c;
+                                             D3: $4932;
+                                             D4: ($86, $84, $49, $20, $f9, $f6, $40, $9c));
+  {$EXTERNALSYM DXVA_ModeHEVC_VLD_Main10_Ext}
+
+  DXVA_ModeHEVC_VLD_Main10_444    : TGUID = (D1: $0dabeffa;
+                                             D2: $4458;
+                                             D3: $4602;
+                                             D4: ($bc, $03, $07, $95, $65, $9d, $61, $7c));
+  {$EXTERNALSYM DXVA_ModeHEVC_VLD_Main10_444}
+
+  DXVA_ModeHEVC_VLD_Main12_444    : TGUID = (D1: $9798634d;
+                                             D2: $fe9d;
+                                             D3: $48e5;
+                                             D4: ($b4, $da, $db, $ec, $45, $b3, $df, $01));
+  {$EXTERNALSYM DXVA_ModeHEVC_VLD_Main12_444}
+
+  DXVA_ModeHEVC_VLD_Main16        : TGUID = (D1: $a4fbdbb0;
+                                             D2: $a113;
+                                             D3: $482b;
+                                             D4: ($a2, $32, $63, $5c, $c0, $69, $7f, $6d));
+  {$EXTERNALSYM DXVA_ModeHEVC_VLD_Main16}
+
+
+  DXVA_ModeVP9_VLD_Profile0       : TGUID = (D1: $463707f8;
+                                             D2: $a1d0;
+                                             D3: $4585;
+                                             D4: ($87, $6d, $83, $aa, $6d, $60, $b8, $9e));
+  {$EXTERNALSYM DXVA_ModeVP9_VLD_Profile0}
+
+  DXVA_ModeVP9_VLD_10bit_Profile2 : TGUID = (D1: $a4c749ef;
+                                             D2: $6ecf;
+                                             D3: $48aa;
+                                             D4: ($84, $48, $50, $a7, $a1, $16, $5f, $f7));
+  {$EXTERNALSYM DXVA_ModeVP9_VLD_10bit_Profile2}
+
+  DXVA_ModeVP8_VLD                : TGUID = (D1: $90b899ea;
+                                             D2: $3a62;
+                                             D3: $4705;
+                                             D4: ($88, $b3, $8d, $f0, $4b, $27, $44, $e7));
+  {$EXTERNALSYM DXVA_ModeVP8_VLD}
+
+  DXVA_ModeAV1_VLD_Profile0       : TGUID = (D1: $b8be4ccb;
+                                             D2: $cf53;
+                                             D3: $46ba;
+                                             D4: ($8d, $59, $d6, $b8, $a6, $da, $5d, $2a));
+  {$EXTERNALSYM DXVA_ModeAV1_VLD_Profile0}
+
+  DXVA_ModeAV1_VLD_Profile1       : TGUID = (D1: $6936ff0f;
+                                             D2: $45b1;
+                                             D3: $4163;
+                                             D4: ($9c, $c1, $64, $6e, $f6, $94, $61, $08));
+  {$EXTERNALSYM DXVA_ModeAV1_VLD_Profile1}
+
+  DXVA_ModeAV1_VLD_Profile2       : TGUID = (D1: $0c5f2aa1;
+                                             D2: $e541;
+                                             D3: $4089;
+                                             D4: ($bb, $7b, $98, $11, $0a, $19, $d7, $c8));
+  {$EXTERNALSYM DXVA_ModeAV1_VLD_Profile2}
+
+  DXVA_ModeAV1_VLD_12bit_Profile2 : TGUID = (D1: $17127009;
+                                             D2: $a00f;
+                                             D3: $4ce1;
+                                             D4: ($99, $4e, $bf, $40, $81, $f6, $f3, $f0));
+  {$EXTERNALSYM DXVA_ModeAV1_VLD_12bit_Profile2}
+
+  DXVA_ModeAV1_VLD_12bit_Profile2_420 : TGUID = (D1: $2d80bed6;
+                                                 D2: $9cac;
+                                                 D3: $4835;
+                                                 D4: ($9e, $91, $32, $7b, $bc, $4f, $9e, $e8));
+  {$EXTERNALSYM DXVA_ModeAV1_VLD_12bit_Profile2_420}
+
+  DXVA_ModeMJPEG_VLD_420          : TGUID = (D1: $725cb506;
+                                             D2: $0c29;
+                                             D3: $43c4;
+                                             D4: ($94, $40, $8e, $93, $97, $90, $3a, $04));
+  {$EXTERNALSYM DXVA_ModeMJPEG_VLD_420}
+
+  DXVA_ModeMJPEG_VLD_422          : TGUID = (D1: $5b77b9cd;
+                                             D2: $1a35;
+                                             D3: $4c30;
+                                             D4: ($9f, $d8, $ef, $4b, $60, $c0, $35, $dd));
+  {$EXTERNALSYM DXVA_ModeMJPEG_VLD_422}
+
+  DXVA_ModeMJPEG_VLD_444          : TGUID = (D1: $d95161f9;
+                                             D2: $0d44;
+                                             D3: $47e6;
+                                             D4: ($bc, $f5, $1b, $fb, $fb, $26, $8f, $97));
+  {$EXTERNALSYM DXVA_ModeMJPEG_VLD_444}
+
+  DXVA_ModeMJPEG_VLD_4444         : TGUID = (D1: $c91748d5;
+                                             D2: $fd18;
+                                             D3: $4aca;
+                                             D4: ($9d, $b3, $3a, $66, $34, $ab, $54, $7d));
+  {$EXTERNALSYM DXVA_ModeMJPEG_VLD_4444}
+
+  DXVA_ModeJPEG_VLD_420           : TGUID = (D1: $cf782c83;
+                                             D2: $bef5;
+                                             D3: $4a2c;
+                                             D4: ($87, $cb, $60, $19, $e7, $b1, $75, $ac));
+  {$EXTERNALSYM DXVA_ModeJPEG_VLD_420}
+
+  DXVA_ModeJPEG_VLD_422           : TGUID = (D1: $f04df417;
+                                             D2: $eee2;
+                                             D3: $4067;
+                                             D4: ($a7, $78, $f3, $5c, $15, $ab, $97, $21));
+  {$EXTERNALSYM DXVA_ModeJPEG_VLD_422}
+
+  DXVA_ModeJPEG_VLD_444           : TGUID = (D1: $4cd00e17;
+                                             D2: $89ba;
+                                             D3: $48ef;
+                                             D4: ($b9, $f9, $ed, $cb, $82, $71, $3f, $65));
+  {$EXTERNALSYM DXVA_ModeJPEG_VLD_444}
 
   DXVA_NoEncrypt                          : TGUID = (D1 : $1b81beD0; D2 : $a0c7; D3 : $11d3; D4:($b9, $84, $00, $c0, $4f, $2e, $73, $c5));
   {$EXTERNALSYM DXVA_NoEncrypt}
@@ -1051,37 +1213,39 @@ type
   {$EXTERNALSYM DXVA_PicEntry_H264}
 
 
-
-  (* H.264/AVC picture parameters structure *)
-  LPDXVA_PicParams_H264 = ^_DXVA_PicParams_H264;
+  //
+  // H.264/AVC picture parameters structure.
+  //
+  PDXVA_PicParams_H264 = ^_DXVA_PicParams_H264;
   _DXVA_PicParams_H264 = record
+  public
     wFrameWidthInMbsMinus1: USHORT;
     wFrameHeightInMbsMinus1: USHORT;
     CurrPic: DXVA_PicEntry_H264;  // flag is bot field flag
     num_ref_frames: UCHAR;
 
-    union : record
-      case wBitFields: USHORT of                     // USHORT = Unsigned 16-bit integer
+  private
+    wBitFields: USHORT; // USHORT = Unsigned 16-bit integer
+    function GetBits(const aIndex: Integer): USHORT;
+    procedure SetBits(const aIndex: Integer; const aValue: USHORT);
 
-        0: (field_pic_flag: USHORT);                 // 1
-        1: (MbaffFrameFlag: USHORT);                 // 1
-        2: (residual_colour_transform_flag: USHORT); // 1
-        3: (sp_for_switch_flag: USHORT);             // 1
-        4: (chroma_format_idc: USHORT);              // 2
-        5: (RefPicFlag: USHORT);                     // 1
-        6: (constrained_intra_pred_flag: USHORT);    // 1
-
-        7: (weighted_pred_flag: USHORT);             // 1
-        8: (weighted_bipred_idc: USHORT);            // 2
-        9: (MbsConsecutiveFlag: USHORT);             // 1
-        10: (frame_mbs_only_flag: USHORT);           // 1
-        11: (transform_8x8_mode_flag: USHORT);       // 1
-        12: (MinLumaBipredSize8x8Flag: USHORT);      // 1
-        13: (IntraPicFlag: USHORT);                  // 1
-      end;                                           // = 16 bits
-  {$EXTERNALSYM _DXVA_PicParams_H264}
-
-
+  public
+     property field_pic_flag: USHORT index $0001 read GetBits write SetBits;                 // 1 bit at offset 0 $0
+     property MbaffFrameFlag: USHORT index $0101 read GetBits write SetBits;                 // 1 bit at offset 1 $01
+     property residual_colour_transform_flag: USHORT index $0201 read GetBits write SetBits; // 1 bit at offset 2 $02
+     property sp_for_switch_flag: USHORT index $0301 read GetBits write SetBits;             // 1 bit at offset 3 $03
+     property chroma_format_idc: USHORT index $0401 read GetBits write SetBits;              // 1 bit at offset 4 $04
+     property RefPicFlag: USHORT index $0502 read GetBits write SetBits;                     // 2 bits at offset 5 $05
+     property constrained_intra_pred_flag: USHORT index $0701 read GetBits write SetBits;    // 1 bit at offset 7 $07
+     property weighted_pred_flag: USHORT index $0801 read GetBits write SetBits;             // 1 bit at offset 8 $08
+     property weighted_bipred_idc: USHORT index $0902 read GetBits write SetBits;            // 2 bits at offset 9 $09
+     property MbsConsecutiveFlag: USHORT index $0B01 read GetBits write SetBits;             // 1 bit at offset 11 $0B
+     property frame_mbs_only_flag: USHORT index $0C01 read GetBits write SetBits;            // 1 bit at offset 12 $0C
+     property transform_8x8_mode_flag: USHORT index $0D01 read GetBits write SetBits;        // 1 bit at offset 13 $0D
+     property MinLumaBipredSize8x8Flag: USHORT index $0E01 read GetBits write SetBits;       // 1 bit at offset 14 $0E
+     property IntraPicFlag: USHORT index $0F01 read GetBits write SetBits;                   // 1 bit at offset 15 $0F
+                                                                                              // = 16 bits
+   public
       bit_depth_luma_minus8: UCHAR;
       bit_depth_chroma_minus8: UCHAR;
 
@@ -1128,12 +1292,683 @@ type
       SliceGroupMap: array [0..809] of UCHAR;  // 4b/sgmu, Size BT.601
 
   end;
+  {$EXTERNALSYM _DXVA_PicParams_H264}
   DXVA_PicParams_H264 = _DXVA_PicParams_H264;
   {$EXTERNALSYM DXVA_PicParams_H264}
+  LPDXVA_PicParams_H264 = ^DXVA_PicParams_H264;
+  {$EXTERNALSYM LPDXVA_PicParams_H264}
+
+ ///
+ ///
+ //* H.264/AVC quantization weighting matrix data structure */
+  PDXVAQmatrixH264 = ^DXVA_Qmatrix_H264;
+  _DXVA_Qmatrix_H264 = record
+    bScalingLists4x4: array[0..5, 0..15] of UCHAR;
+    bScalingLists8x8: array[0..1, 0..63] of UCHAR;
+  end;
+  {$EXTERNALSYM _DXVA_Qmatrix_H264}
+  DXVA_Qmatrix_H264 = _DXVA_Qmatrix_H264;
+  {$EXTERNALSYM LPDXVA_Qmatrix_H264}
+  LPDXVA_Qmatrix_H264 = ^_DXVA_Qmatrix_H264;
+  {$EXTERNALSYM DXVA_Qmatrix_H264}
+
+  //* H.264/AVC slice control data structure - short form */
+  PDXVASliceH264Short = ^DXVA_Slice_H264_Short;
+  _DXVA_Slice_H264_Short = record
+    BSNALunitDataLocation: UINT;     { type 1..5 }
+    SliceBytesInBuffer: UINT;        { for off-host parse }
+    wBadSliceChopping: USHORT;       { for off-host parse }
+  end;
+  {$EXTERNALSYM _DXVA_Slice_H264_Short}
+  DXVA_Slice_H264_Short = _DXVA_Slice_H264_Short;
+  {$EXTERNALSYM DXVA_Slice_H264_Short}
+  LPDXVA_Slice_H264_Short = ^_DXVA_Slice_H264_Short;
+  {$EXTERNALSYM LPDXVA_Slice_H264_Short}
+
+  //* H.264/AVC picture entry data structure - long form */
+  PDXVASliceH264Long = ^DXVA_Slice_H264_Long;
+  _DXVA_Slice_H264_Long = record
+    BSNALunitDataLocation: UINT;                            { type 1..5 }
+    SliceBytesInBuffer: UINT;                               { for off-host parse }
+    wBadSliceChopping: USHORT;                              { for off-host parse }
+    first_mb_in_slice: USHORT;
+    NumMbsForSlice: USHORT;
+    BitOffsetToSliceData: USHORT;                           { after CABAC alignment }
+    slice_type: UCHAR;
+    luma_log2_weight_denom: UCHAR;
+    chroma_log2_weight_denom: UCHAR;
+    num_ref_idx_l0_active_minus1: UCHAR;
+    num_ref_idx_l1_active_minus1: UCHAR;
+    slice_alpha_c0_offset_div2: AnsiChar;
+    slice_beta_offset_div2: AnsiChar;
+    Reserved8Bits: UCHAR;
+    RefPicList: array[0..1, 0..31] of DXVA_PicEntry_H264;   { L0  L1 }
+    Weights: array[0..1, 0..31, 0..2, 0..1] of SHORT;       { L0  L1; Y, Cb, Cr }
+    slice_qs_delta: AnsiChar;
+                                                            { rest off-host parse }
+    slice_qp_delta: AnsiChar;
+    redundant_pic_cnt: UCHAR;
+    direct_spatial_mv_pred_flag: UCHAR;
+    cabac_init_idc: UCHAR;
+    disable_deblocking_filter_idc: UCHAR;
+    slice_id: USHORT;
+  end;
+  {$EXTERNALSYM _DXVA_Slice_H264_Long}
+  DXVA_Slice_H264_Long = _DXVA_Slice_H264_Long;
+  {$EXTERNALSYM DXVA_Slice_H264_Long}
+  LPDXVA_Slice_H264_Long = ^_DXVA_Slice_H264_Long;
+  {$EXTERNALSYM LPDXVA_Slice_H264_Long}
+
+  //
+  // H.264/AVC macroblock control command data structure.
+  //
+
+  // Record for bitfields in the main record
+  TDXVA_MBctrl_H264_BitFields = packed record
+  private
+    dwMBtype: UINT;
+    function GetBits(const aIndex: Integer): UINT8;
+    procedure SetBits(const aIndex: Integer; const aValue: UINT8);
+
+  public
+    property bSliceID: UINT8 index $0008 read GetBits write SetBits;                // 8 bits at offset 0
+    property MbType5Bits: UINT8 index $0805 read GetBits write SetBits;             // 5 bits at offset 8
+    property IntraMbFlag: UINT8 index $0D01 read GetBits write SetBits;             // 1 bit  at offset 13
+    property mb_field_decoding_flag: UINT8 index $0E01 read GetBits write SetBits;  // 1 bit  at offset 14
+    property transform_size_8x8_flag: UINT8 index $0F01 read GetBits write SetBits; // 1 bit  at offset 15
+    property HostResidDiff: UINT8 index $1001 read GetBits write SetBits;           // 1 bit  at offset 16
+    property DcBlockCodedCrFlag: UINT8 index $1101 read GetBits write SetBits;      // 1 bit  at offset 17
+    property DcBlockCodedCbFlag: UINT8 index $1201 read GetBits write SetBits;      // 1 bit  at offset 18
+    property DcBlockCodedYFlag: UINT8 index $1301 read GetBits write SetBits;       // 1 bit  at offset 19
+    property FilterInternalEdgesFlag: UINT8 index $1401 read GetBits write SetBits; // 1 bit  at offset 20
+    property FilterLeftMbEdgeFlag: UINT8 index $1501 read GetBits write SetBits;    // 1 bit  at offset 21
+    property FilterTopMbEdgeFlag: UINT8 index $1601 read GetBits write SetBits;     // 1 bit  at offset 22
+    property ReservedBit: UINT8 index $1701 read GetBits write SetBits;             // 1 bit  at offset 23
+    property bMvQuantity: UINT8 index $1808 read GetBits write SetBits;             // 8 bits at offset 24
+  end;
+
+  // Record for Intra MB.
+  TDXVA_MBctrl_H264_IntraMB = packed record
+    LumaIntraPredModes: array[0..3] of USHORT; // 16 blocks, 4 bits each = 16 bits
+    bMbIntraStruct: record
+      case Integer of
+        0: (intra_chroma_pred_mode: UINT8);    // 2 bits
+        1: (IntraPredAvailFlags: UINT8);       // 5 bits
+        2: (ReservedIntraBit: UINT8);          // 1 bit
+    end;
+    ReservedIntra24Bits: array[0..2] of UCHAR; // 3 bytes
+  end;
+
+  // Record for Non-Intra MB.
+  TDXVA_MBctrl_H264_NonIntraMB = packed record
+    bSubMbShapes: UCHAR;                       // 4 subMbs, 2 bits each = 1 byte
+    bSubMbPredModes: UCHAR;                    // 4 subMBs, 2 bits each = 1 byte
+    wMvBuffOffset: USHORT;                     // 2 bytes
+    bRefPicSelect: array[0..1, 0..3] of UCHAR; // 2 * 4 bytes = 8 bytes
+  end;
+
+  //
+  // H.264/AVC macroblock control command data structure.
+  //
+  PDXVA_MBctrl_H264 = ^_DXVA_MBctrl_H264;
+  _DXVA_MBctrl_H264 = packed record
+    BitFields: TDXVA_MBctrl_H264_BitFields;
+    CurrMbAddr: USHORT;                  // 6 bytes so far
+    wPatternCode: array[0..2] of USHORT; // 12 bytes so far
+    bQpPrime: array[0..2] of UCHAR;      // 15 bytes so far
+    bMBresidDataQuantity: UCHAR;         // 16 bytes so far
+    dwMBdataLocation: ULONG;             // 20 bytes so far
+
+    case Integer of
+      0: (IntraMB: TDXVA_MBctrl_H264_IntraMB);       // Intra MB's (9 useful bytes in branch)
+      1: (NonIntraMB: TDXVA_MBctrl_H264_NonIntraMB); // Non-Intra MB's (12 bytes in branch)
+  end;
+  {$EXTERNALSYM _DXVA_MBctrl_H264}
+  DXVA_MBctrl_H264 = _DXVA_MBctrl_H264;
+  {$EXTERNALSYM DXVA_MBctrl_H264}
+  LPDXVA_MBctrl_H264 = ^DXVA_MBctrl_H264;
+  {$EXTERNALSYM LPDXVA_MBctrl_H264}
 
 
+  //
+  // H.264/AVC IndexA and IndexB data structure.
+  // 10 bytes in struct.
+  //
+  PDXVADeblockIndexABH264 = ^DXVA_DeblockIndexAB_H264;
+  _DXVA_DeblockIndexAB_H264 = record
+    bIndexAinternal: UCHAR;          { 6b - could get from MB CC }
+    bIndexBinternal: UCHAR;          { 6b - could get from MB CC }
+    bIndexAleft0: UCHAR;
+    bIndexBleft0: UCHAR;
+    bIndexAleft1: UCHAR;
+    bIndexBleft1: UCHAR;
+    bIndexAtop0: UCHAR;
+    bIndexBtop0: UCHAR;
+    bIndexAtop1: UCHAR;
+    bIndexBtop1: UCHAR;
+  end;
+  {$EXTERNALSYM _DXVA_DeblockIndexAB_H264}
+  DXVA_DeblockIndexAB_H264 = _DXVA_DeblockIndexAB_H264;
+  {$EXTERNALSYM DXVA_DeblockIndexAB_H264}
+  LPDXVA_DeblockIndexAB_H264 = ^_DXVA_DeblockIndexAB_H264;
+  {$EXTERNALSYM LPDXVA_DeblockIndexAB_H264}
 
-  //#pragma pack(push, 16)
+  // Record for DXVA_Deblock_H264.
+  TDXVA_Deblock_H264_BitFields = packed record
+  private
+    FirstByte: UCHAR;
+    function GetBits(const aIndex: Integer): UINT8;
+    procedure SetBits(const aIndex: Integer; const aValue: UINT8);
+  public
+    property ReservedBit: UINT8 index $0001 read GetBits write SetBits;                // 1 bit at offset 0
+    property FieldModeCurrentMbFlag: UINT8 index $0101 read GetBits write SetBits;     // 1 bit at offset 1
+    property FieldModeLeftMbFlag: UINT8 index $0201 read GetBits write SetBits;        // 1 bit at offset 2
+    property FieldModeAboveMbFlag: UINT8 index $0301 read GetBits write SetBits;       // 1 bit at offset 3
+    property FilterInternal8x8EdgesFlag: UINT8 index $0401 read GetBits write SetBits; // 1 bit at offset 4
+    property FilterInternal4x4EdgesFlag: UINT8 index $0501 read GetBits write SetBits; // 1 bit at offset 5
+    property FilterLeftMbEdgeFlag: UINT8 index $0601 read GetBits write SetBits;       // 1 bit at offset 6
+    property FilterTopMbEdgeFlag: UINT8 index $0701 read GetBits write SetBits;        // 1 bit at offset 7
+  end;
+
+  //
+  // H.264/AVC deblocking filter control data structure.
+  // NOTE: We use packed record here, to keep the same allignment as the C++ struct.
+  PDXVA_Deblock_H264 = ^DXVA_Deblock_H264;
+  _DXVA_Deblock_H264 = packed record
+    CurrMbAddr: USHORT;         // 2 bytes
+    BitFields: TDXVA_Deblock_H264_BitFields;
+    Reserved8Bits: UCHAR;       // 1 byte
+    bbSinternalLeftVert: UCHAR;
+    bbSinternalMidVert: UCHAR;
+    bbSinternalRightVert: UCHAR;
+    bbSinternalTopHorz: UCHAR;  // 8 bytes so far
+    bbSinternalMidHorz: UCHAR;
+    bbSinternalBotHorz: UCHAR;  // 10 bytes so far
+    wbSLeft0: USHORT;           // 2 bytes
+    wbSLeft1: USHORT;           // 2 bytes
+    wbSTop0: USHORT;            // 2 bytes
+    wbSTop1: USHORT;            // 2 bytes
+    IndexAB: array[0..2] of DXVA_DeblockIndexAB_H264;  // 48 bytes total
+  end;
+  {$EXTERNALSYM _DXVA_Deblock_H264}
+  DXVA_Deblock_H264 = _DXVA_Deblock_H264;
+  {$EXTERNALSYM DXVA_Deblock_H264}
+  LPDXVA_Deblock_H264 = ^DXVA_Deblock_H264;
+  {$EXTERNALSYM LPDXVA_Deblock_H264}
+
+  //
+  // H.264/AVC film grain characteristics data structure.
+  //
+  PDXVA_FilmGrainChar_H264 = ^DXVA_FilmGrainChar_H264;
+  _DXVA_FilmGrainChar_H264 = record
+    wFrameWidthInMbsMinus1: USHORT;
+    wFrameHeightInMbsMinus1: USHORT;
+    InPic: DXVA_PicEntry_H264;
+    OutPic: DXVA_PicEntry_H264;
+    PicOrderCnt_offset: USHORT;
+    CurrPicOrderCnt: Integer;
+    StatusReportFeedbackNumber: UINT;
+    model_id: UCHAR;
+    separate_colour_description_present_flag: UCHAR;
+    film_grain_bit_depth_luma_minus8: UCHAR;
+    film_grain_bit_depth_chroma_minus8: UCHAR;
+    film_grain_full_range_flag: UCHAR;
+    film_grain_colour_primaries: UCHAR;
+    film_grain_transfer_characteristics: UCHAR;
+    film_grain_matrix_coefficients: UCHAR;
+    blending_mode_id: UCHAR;
+    log2_scale_factor: UCHAR;
+    comp_model_present_flag: array[0..3] of UCHAR;
+    num_intensity_intervals_minus1: array[0..3] of UCHAR;
+    num_model_values_minus1: array[0..3] of UCHAR;
+    intensity_interval_lower_bound: array[0..2, 0..15] of UCHAR;
+    intensity_interval_upper_bound: array[0..2, 0..15] of UCHAR;
+    comp_model_value: array[0..2, 0..15, 0..7] of SmallInt;
+  end;
+  {$EXTERNALSYM DXVA_FilmGrainChar_H264}
+  DXVA_FilmGrainChar_H264 = _DXVA_FilmGrainChar_H264;
+  {$EXTERNALSYM DXVA_FilmGrainChar_H264}
+  LPDXVA_FilmGrainChar_H264 = ^DXVA_FilmGrainChar_H264;
+  {$EXTERNALSYM LPDXVA_FilmGrainChar_H264}
+
+  //
+  // H.264/AVC status reporting data structure.
+  //
+  PDXVAStatusH264 = ^DXVA_Status_H264;
+  _DXVA_Status_H264 = record
+    StatusReportFeedbackNumber: UINT;
+    CurrPic: DXVA_PicEntry_H264;    { flag is bot field flag }
+    field_pic_flag: UCHAR;
+    bDXVA_Func: UCHAR;
+    bBufType: UCHAR;
+    bStatus: UCHAR;
+    bReserved8Bits: UCHAR;
+    wNumMbsAffected: USHORT;
+  end;
+  {$EXTERNALSYM _DXVA_Status_H264}
+  DXVA_Status_H264 = _DXVA_Status_H264;
+  {$EXTERNALSYM DXVA_Status_H264}
+  LPDXVA_Status_H264 = ^_DXVA_Status_H264;
+  {$EXTERNALSYM LPDXVA_Status_H264}
+
+  //
+  // Helper record for bitfields in the main record.
+  //
+  TDXVA_PicParams_H264_MVC_BitFields = packed record
+  private
+    wBitFields: USHORT;
+    function GetBits(const aIndex: Integer): USHORT;
+    procedure SetBits(const aIndex: Integer;
+                      const aValue: USHORT);
+
+  public
+    property field_pic_flag: USHORT index $0001 read GetBits write SetBits;                 // 1 bit at offset 0
+    property MbaffFrameFlag: USHORT index $0101 read GetBits write SetBits;                 // 1 bit at offset 1
+    property residual_colour_transform_flag: USHORT index $0201 read GetBits write SetBits; // 1 bit at offset 2
+    property sp_for_switch_flag: USHORT index $0301 read GetBits write SetBits;             // 1 bit at offset 3
+    property chroma_format_idc: USHORT index $0402 read GetBits write SetBits;              // 2 bits at offset 4
+    property RefPicFlag: USHORT index $0601 read GetBits write SetBits;                     // 1 bit at offset 6
+    property constrained_intra_pred_flag: USHORT index $0701 read GetBits write SetBits;    // 1 bit at offset 7
+    property weighted_pred_flag: USHORT index $0801 read GetBits write SetBits;             // 1 bit at offset 8
+    property weighted_bipred_idc: USHORT index $0902 read GetBits write SetBits;            // 2 bits at offset 9
+    property MbsConsecutiveFlag: USHORT index $0B01 read GetBits write SetBits;             // 1 bit at offset 11
+    property frame_mbs_only_flag: USHORT index $0C01 read GetBits write SetBits;            // 1 bit at offset 12
+    property transform_8x8_mode_flag: USHORT index $0D01 read GetBits write SetBits;        // 1 bit at offset 13
+    property MinLumaBipredSize8x8Flag: USHORT index $0E01 read GetBits write SetBits;       // 1 bit at offset 14
+    property IntraPicFlag: USHORT index $0F01 read GetBits write SetBits;                   // 1 bit at offset 15
+  end;
+
+  //
+  // H.264 MVC picture parameters structure.
+  //
+  PDXVA_PicParams_H264_MVC = ^_DXVA_PicParams_H264_MVC;
+  _DXVA_PicParams_H264_MVC = packed record
+    wFrameWidthInMbsMinus1: USHORT;
+    wFrameHeightInMbsMinus1: USHORT;
+    CurrPic: DXVA_PicEntry_H264;
+    num_ref_frames: UCHAR;
+    BitFields: TDXVA_PicParams_H264_MVC_BitFields;
+    bit_depth_luma_minus8: UCHAR;
+    bit_depth_chroma_minus8: UCHAR;
+    Reserved16Bits: USHORT;
+    StatusReportFeedbackNumber: UINT;
+    RefFrameList: array[0..15] of DXVA_PicEntry_H264;
+    CurrFieldOrderCnt: array[0..1] of INT;
+    FieldOrderCntList: array[0..15, 0..1] of INT;
+
+    // Remainder for parsing.
+    pic_init_qs_minus26: CHAR;
+    chroma_qp_index_offset: CHAR;
+    second_chroma_qp_index_offset: CHAR;
+    ContinuationFlag: UCHAR;
+    pic_init_qp_minus26: CHAR;
+    num_ref_idx_l0_active_minus1: UCHAR;
+    num_ref_idx_l1_active_minus1: UCHAR;
+    Reserved8BitsA: UCHAR;
+    FrameNumList: array[0..15] of USHORT;
+    UsedForReferenceFlags: UINT;
+    NonExistingFrameFlags: USHORT;
+    frame_num: USHORT;
+    log2_max_frame_num_minus4: UCHAR;
+    pic_order_cnt_type: UCHAR;
+    log2_max_pic_order_cnt_lsb_minus4: UCHAR;
+    delta_pic_order_always_zero_flag: UCHAR;
+    direct_8x8_inference_flag: UCHAR;
+    entropy_coding_mode_flag: UCHAR;
+    pic_order_present_flag: UCHAR;
+    num_slice_groups_minus1: UCHAR;
+    slice_group_map_type: UCHAR;
+    deblocking_filter_control_present_flag: UCHAR;
+    redundant_pic_cnt_present_flag: UCHAR;
+    Reserved8BitsB: UCHAR;
+    slice_group_change_rate_minus1: USHORT;
+    // SliceGroupMap is not needed for MVC, as MVC is for high profile only.
+
+    // Following are H.264 MVC specific parameters.
+    num_views_minus1: UCHAR;
+    view_id: array[0..15] of USHORT;
+    num_anchor_refs_l0: array[0..15] of UCHAR;
+    anchor_ref_l0: array[0..15, 0..15] of USHORT;
+    num_anchor_refs_l1: array[0..15] of UCHAR;
+    anchor_ref_l1: array[0..15, 0..15] of USHORT;
+    num_non_anchor_refs_l0: array[0..15] of UCHAR;
+    non_anchor_ref_l0: array[0..15, 0..15] of USHORT;
+    num_non_anchor_refs_l1: array[0..15] of UCHAR;
+    non_anchor_ref_l1: array[0..15, 0..15] of USHORT;
+    curr_view_id: USHORT;
+    anchor_pic_flag: UCHAR;
+    inter_view_flag: UCHAR;
+    ViewIDList: array[0..15] of USHORT;
+  end;
+  {$EXTERNALSYM _DXVA_PicParams_H264_MVC}
+  DXVA_PicParams_H264_MVC = _DXVA_PicParams_H264_MVC;
+  {$EXTERNALSYM DXVA_PicParams_H264_MVC}
+  LPDXVA_PicParams_H264_MVC = ^DXVA_PicParams_H264_MVC;
+  {$EXTERNALSYM LPDXVA_PicParams_H264_MVC}
+
+  //
+  // VC-1 status reporting data structure.
+  //
+  PDXVAStatusVC1 = ^DXVA_Status_VC1;
+  _DXVA_Status_VC1 = record
+    StatusReportFeedbackNumber: USHORT;
+    wDecodedPictureIndex: WORD;
+    wDeblockedPictureIndex: WORD;
+    bPicStructure: UCHAR;
+    bBufType: UCHAR;
+    bStatus: UCHAR;
+    bReserved8Bits: UCHAR;
+    wNumMbsAffected: USHORT;
+  end;
+  {$EXTERNALSYM _DXVA_Status_VC1}
+  DXVA_Status_VC1 = _DXVA_Status_VC1;
+  {$EXTERNALSYM DXVA_Status_VC1}
+  LPDXVA_Status_VC1 = ^_DXVA_Status_VC1;
+  {$EXTERNALSYM LPDXVA_Status_VC1}
+
+
+  // Bitfield handling for wPicFlagBitFields.
+  TDXVA_PicParams_MPEG4_PART2_PicFlagBitFields = packed record
+  private
+    wPicFlagBitFields: USHORT;
+    function GetBits(const aIndex: Integer): USHORT;
+    procedure SetBits(const aIndex: Integer;
+                      const aValue: USHORT);
+
+  public
+    property unPicPostProc: USHORT index $0002 read GetBits write SetBits;                 // 2 bits at offset 0
+    property interlaced: USHORT index $0201 read GetBits write SetBits;                    // 1 bit at offset 2
+    property quant_type: USHORT index $0301 read GetBits write SetBits;                    // 1 bit at offset 3
+    property quarter_sample: USHORT index $0401 read GetBits write SetBits;                // 1 bit at offset 4
+    property resync_marker_disable: USHORT index $0501 read GetBits write SetBits;         // 1 bit at offset 5
+    property data_partitioned: USHORT index $0601 read GetBits write SetBits;              // 1 bit at offset 6
+    property reversible_vlc: USHORT index $0701 read GetBits write SetBits;                // 1 bit at offset 7
+    property reduced_resolution_vop_enable: USHORT index $0801 read GetBits write SetBits; // 1 bit at offset 8
+    property vop_coded: USHORT index $0901 read GetBits write SetBits;                     // 1 bit at offset 9
+    property vop_rounding_type: USHORT index $0A01 read GetBits write SetBits;             // 1 bit at offset 10
+    property intra_dc_vlc_thr: USHORT index $0B03 read GetBits write SetBits;              // 3 bits at offset 11
+    property top_field_first: USHORT index $0E01 read GetBits write SetBits;               // 1 bit at offset 14
+    property alternate_vertical_scan_flag: USHORT index $0F01 read GetBits write SetBits;  // 1 bit at offset 15
+  end;
+
+  // Bitfield handling for wSpriteBitFields.
+  TDXVA_PicParams_MPEG4_PART2_SpriteBitFields = packed record
+  private
+    wSpriteBitFields: USHORT;
+    function GetBits(const aIndex: Integer): USHORT;
+    procedure SetBits(const aIndex: Integer;
+                      const aValue: USHORT);
+
+  public
+    property sprite_enable: USHORT index $0002 read GetBits write SetBits;                // 2 bits at offset 0
+    property no_of_sprite_warping_points: USHORT index $0206 read GetBits write SetBits;  // 6 bits at offset 2
+    property sprite_warping_accuracy: USHORT index $0802 read GetBits write SetBits;      // 2 bits at offset 8
+  end;
+
+  // Bitfield handling for wFcodeBitFields.
+  TDXVA_PicParams_MPEG4_PART2_FcodeBitFields = packed record
+  private
+    wFcodeBitFields: UCHAR;
+    function GetBits(const aIndex: Integer): UCHAR;
+    procedure SetBits(const aIndex: Integer;
+                      const aValue: UCHAR);
+
+  public
+    property vop_fcode_forward: UCHAR index $0003 read GetBits write SetBits;            // 3 bits at offset 0
+    property vop_fcode_backward: UCHAR index $0303 read GetBits write SetBits;           // 3 bits at offset 3
+  end;
+
+  //
+  // MPEG4PT2 Picture Parameter structure.
+  //
+  PDXVA_PicParams_MPEG4_PART2 = ^DXVA_PicParams_MPEG4_PART2;
+  _DXVA_PicParams_MPEG4_PART2 = packed record
+    short_video_header: UCHAR;
+    vop_coding_type: UCHAR;
+    vop_quant: UCHAR;
+    wDecodedPictureIndex: WORD;
+    wDeblockedPictureIndex: WORD;
+    wForwardRefPictureIndex: WORD;
+    wBackwardRefPictureIndex: WORD;
+    vop_time_increment_resolution: USHORT;
+    TRB: array[0..1] of UINT;
+    TRD: array[0..1] of UINT;
+    PicFlagBitFields: TDXVA_PicParams_MPEG4_PART2_PicFlagBitFields;
+    profile_and_level_indication: UCHAR;
+    video_object_layer_verid: UCHAR;
+    vop_width: WORD;
+    vop_height: WORD;
+    SpriteBitFields: TDXVA_PicParams_MPEG4_PART2_SpriteBitFields;
+    warping_mv: array[0..3, 0..1] of SHORT;
+    FcodeBitFields: TDXVA_PicParams_MPEG4_PART2_FcodeBitFields;
+    StatusReportFeedbackNumber: USHORT;
+    Reserved16BitsA: USHORT;
+    Reserved16BitsB: USHORT;
+  end;
+  {$EXTERNALSYM _DXVA_PicParams_MPEG4_PART2}
+  DXVA_PicParams_MPEG4_PART2 = _DXVA_PicParams_MPEG4_PART2;
+  {$EXTERNALSYM DXVA_PicParams_MPEG4_PART2}
+  LPDXVA_PicParams_MPEG4_PART2 = ^DXVA_PicParams_MPEG4_PART2;
+  {$EXTERNALSYM LPDXVA_PicParams_MPEG4_PART2}
+
+
+  //
+  // HEVC Picture Entry structure.
+  //
+  PDXVA_PicEntry_HEVC = ^DXVA_PicEntry_HEVC;
+  _DXVA_PicEntry_HEVC = packed record
+  private
+    bPicEntry: UCHAR;
+    function GetIndex7Bits: UCHAR;
+    function GetAssociatedFlag: UCHAR;
+    procedure SetIndex7Bits(const Value: UCHAR);
+    procedure SetAssociatedFlag(const Value: UCHAR);
+
+  public
+    property Index7Bits: UCHAR read GetIndex7Bits write SetIndex7Bits;
+    property AssociatedFlag: UCHAR read GetAssociatedFlag write SetAssociatedFlag;
+  end;
+  {$EXTERNALSYM _DXVA_PicEntry_HEVC}
+  DXVA_PicEntry_HEVC = _DXVA_PicEntry_HEVC;
+  {$EXTERNALSYM DXVA_PicEntry_HEVC}
+  LPDXVA_PicEntry_HEVC = ^DXVA_PicEntry_HEVC;
+  {$EXTERNALSYM LPDXVA_PicEntry_HEVC}
+
+
+  //
+  // HEVC Picture Parameter structure.
+  //
+
+  // Record for Format and Sequence Info Flags.
+  TFormatAndSequenceInfoFlags = packed record
+  private
+    FFlags: USHORT;
+    function GetBits(const Index: Integer): USHORT;
+    procedure SetBits(const Index: Integer;
+                      const Value: USHORT);
+
+  public
+    property ChromaFormatIDC: USHORT index $0002 read GetBits write SetBits;              // 2 bits at offset 0
+    property SeparateColourPlaneFlag: USHORT index $0201 read GetBits write SetBits;      // 1 bit at offset 2
+    property BitDepthLumaMinus8: USHORT index $0303 read GetBits write SetBits;           // 3 bits at offset 3
+    property BitDepthChromaMinus8: USHORT index $0603 read GetBits write SetBits;         // 3 bits at offset 6
+    property Log2MaxPicOrderCntLsbMinus4: USHORT index $0904 read GetBits write SetBits;  // 4 bits at offset 9
+    property NoPicReorderingFlag: USHORT index $0D01 read GetBits write SetBits;          // 1 bit at offset 13
+    property NoBiPredFlag: USHORT index $0E01 read GetBits write SetBits;                 // 1 bit at offset 14
+    property ReservedBits1: USHORT index $0F01 read GetBits write SetBits;                // 1 bit at offset 15
+                                                                                          // total 16 bits
+    property Flags: USHORT read FFlags write FFlags;
+  end;
+
+  // Record for Coding Param Tool Flags.
+  TCodingParamToolFlags = packed record
+  private
+    FFlags: UINT32;
+    function GetBits(const Index: Integer): UINT32;
+    procedure SetBits(const Index: Integer;
+                      const Value: UINT32);
+
+  public
+    property ScalingListEnabledFlag: UINT32 index $0001 read GetBits write SetBits;               // 1 bit at offset 0
+    property AmpEnabledFlag: UINT32 index $0101 read GetBits write SetBits;                       // 1 bit at offset 1
+    property SampleAdaptiveOffsetEnabledFlag: UINT32 index $0201 read GetBits write SetBits;      // 1 bit at offset 2
+    property PcmEnabledFlag: UINT32 index $0301 read GetBits write SetBits;                       // 1 bit at offset 3
+    property PcmSampleBitDepthLumaMinus1: UINT32 index $0404 read GetBits write SetBits;          // 4 bits at offset 4
+    property PcmSampleBitDepthChromaMinus1: UINT32 index $0804 read GetBits write SetBits;        // 4 bits at offset 8
+    property Log2MinPcmLumaCodingBlockSizeMinus3: UINT32 index $0C02 read GetBits write SetBits;  // 2 bits at offset 12
+    property Log2DiffMaxMinPcmLumaCodingBlockSize: UINT32 index $0E02 read GetBits write SetBits; // 2 bits at offset 14
+    property PcmLoopFilterDisabledFlag: UINT32 index $1001 read GetBits write SetBits;            // 1 bit at offset 16
+    property LongTermRefPicsPresentFlag: UINT32 index $1101 read GetBits write SetBits;           // 1 bit at offset 17
+    property SpsTemporalMvpEnabledFlag: UINT32 index $1201 read GetBits write SetBits;            // 1 bit at offset 18
+    property StrongIntraSmoothingEnabledFlag: UINT32 index $1301 read GetBits write SetBits;      // 1 bit at offset 19
+    property DependentSliceSegmentsEnabledFlag: UINT32 index $1401 read GetBits write SetBits;    // 1 bit at offset 20
+    property OutputFlagPresentFlag: UINT32 index $1501 read GetBits write SetBits;                // 1 bit at offset 21
+    property NumExtraSliceHeaderBits: UINT32 index $1603 read GetBits write SetBits;              // 3 bits at offset 22
+    property SignDataHidingEnabledFlag: UINT32 index $1901 read GetBits write SetBits;            // 1 bit at offset 25
+    property CabacInitPresentFlag: UINT32 index $1A01 read GetBits write SetBits;                 // 1 bit at offset 26
+    property ReservedBits3: UINT32 index $1B05 read GetBits write SetBits;                        // 5 bits at offset 27
+                                                                                                  // Total 32 bits
+
+    property Flags: UINT32 read FFlags write FFlags;
+  end;
+
+  // Record for Coding Setting Picture Property Flags
+  TCodingSettingPicturePropertyFlags = packed record
+  private
+    FFlags: UINT32;
+    function GetBits(const Index: Integer): UINT32;
+    procedure SetBits(const Index: Integer;
+                      const Value: UINT32);
+
+  public
+    property ConstrainedIntraPredFlag: UINT32 index $0001 read GetBits write SetBits;               // 1 bit at offset 0
+    property TransformSkipEnabledFlag: UINT32 index $0101 read GetBits write SetBits;               // 1 bit at offset 1
+    property CuQpDeltaEnabledFlag: UINT32 index $0201 read GetBits write SetBits;                   // 1 bit at offset 2
+    property PpsSliceChromaQpOffsetsPresentFlag: UINT32 index $0301 read GetBits write SetBits;     // 1 bit at offset 3
+    property WeightedPredFlag: UINT32 index $0401 read GetBits write SetBits;                       // 1 bit at offset 4
+    property WeightedBipredFlag: UINT32 index $0501 read GetBits write SetBits;                     // 1 bit at offset 5
+    property TransquantBypassEnabledFlag: UINT32 index $0601 read GetBits write SetBits;            // 1 bit at offset 6
+    property TilesEnabledFlag: UINT32 index $0701 read GetBits write SetBits;                       // 1 bit at offset 7
+    property EntropyCodingSyncEnabledFlag: UINT32 index $0801 read GetBits write SetBits;           // 1 bit at offset 8
+    property UniformSpacingFlag: UINT32 index $0901 read GetBits write SetBits;                     // 1 bit at offset 9
+    property LoopFilterAcrossTilesEnabledFlag: UINT32 index $0A01 read GetBits write SetBits;       // 1 bit at offset 10
+    property PpsLoopFilterAcrossSlicesEnabledFlag: UINT32 index $0B01 read GetBits write SetBits;   // 1 bit at offset 11
+    property DeblockingFilterOverrideEnabledFlag: UINT32 index $0C01 read GetBits write SetBits;    // 1 bit at offset 12
+    property PpsDeblockingFilterDisabledFlag: UINT32 index $0D01 read GetBits write SetBits;        // 1 bit at offset 13
+    property ListsModificationPresentFlag: UINT32 index $0E01 read GetBits write SetBits;           // 1 bit at offset 14
+    property SliceSegmentHeaderExtensionPresentFlag: UINT32 index $0F01 read GetBits write SetBits; // 1 bit at offset 15
+    property IrapPicFlag: UINT32 index $1001 read GetBits write SetBits;                            // 1 bit at offset 16
+    property IdrPicFlag: UINT32 index $1101 read GetBits write SetBits;                             // 1 bit at offset 17
+    property IntraPicFlag: UINT32 index $1201 read GetBits write SetBits;                           // 1 bit at offset 18
+    property ReservedBits4: UINT32 index $130D read GetBits write SetBits;                          // 13 s at offset 19
+                                                                                                    // Total 32 bits
+    property Flags: UINT32 read FFlags write FFlags;
+  end;
+
+
+  //
+  // HEVC Picture Parameter structure.
+  //
+  PDXVA_PicParams_HEVC = ^DXVA_PicParams_HEVC;
+  _DXVA_PicParams_HEVC = packed record
+    PicWidthInMinCbsY: USHORT;
+    PicHeightInMinCbsY: USHORT;
+    FormatAndSequenceInfoFlags: TFormatAndSequenceInfoFlags;
+    CurrPic: DXVA_PicEntry_HEVC;
+    SpsMaxDecPicBufferingMinus1: UCHAR;
+    Log2MinLumaCodingBlockSizeMinus3: UCHAR;
+    Log2DiffMaxMinLumaCodingBlockSize: UCHAR;
+    Log2MinTransformBlockSizeMinus2: UCHAR;
+    Log2DiffMaxMinTransformBlockSize: UCHAR;
+    MaxTransformHierarchyDepthInter: UCHAR;
+    MaxTransformHierarchyDepthIntra: UCHAR;
+    NumShortTermRefPicSets: UCHAR;
+    NumLongTermRefPicsSps: UCHAR;
+    NumRefIdxL0DefaultActiveMinus1: UCHAR;
+    NumRefIdxL1DefaultActiveMinus1: UCHAR;
+    InitQpMinus26: CHAR;
+    UcNumDeltaPocsOfRefRpsIdx: UCHAR;
+    WNumBitsForShortTermRPSInSlice: USHORT;
+    ReservedBits2: USHORT;
+    CodingParamToolFlags: TCodingParamToolFlags;
+    CodingSettingPicturePropertyFlags: TCodingSettingPicturePropertyFlags;
+    PpsCbQpOffset: CHAR;
+    PpsCrQpOffset: CHAR;
+    NumTileColumnsMinus1: UCHAR;
+    NumTileRowsMinus1: UCHAR;
+    ColumnWidthMinus1: array[0..18] of USHORT;
+    RowHeightMinus1: array[0..20] of USHORT;
+    DiffCuQpDeltaDepth: UCHAR;
+    PpsBetaOffsetDiv2: CHAR;
+    PpsTcOffsetDiv2: CHAR;
+    Log2ParallelMergeLevelMinus2: UCHAR;
+    CurrPicOrderCntVal: INT;
+    RefPicList: array[0..14] of DXVA_PicEntry_HEVC;
+    ReservedBits5: UCHAR;
+    PicOrderCntValList: array[0..14] of INT;
+    RefPicSetStCurrBefore: array[0..7] of UCHAR;
+    RefPicSetStCurrAfter: array[0..7] of UCHAR;
+    RefPicSetLtCurr: array[0..7] of UCHAR;
+    ReservedBits6: USHORT;
+    ReservedBits7: USHORT;
+    StatusReportFeedbackNumber: UINT;
+  end;
+  {$EXTERNALSYM _DXVA_PicParams_HEVC}
+  DXVA_PicParams_HEVC = _DXVA_PicParams_HEVC;
+  {$EXTERNALSYM DXVA_PicParams_HEVC}
+  LPDXVA_PicParams_HEVC = ^DXVA_PicParams_HEVC;
+  {$EXTERNALSYM LPDXVA_PicParams_HEVC}
+
+
+  // Record for Range Extension Flags.
+  TRangeExtensionFlags = packed record
+  private
+    FFlags: USHORT;
+    function GetBits(const Index: Integer): USHORT;
+    procedure SetBits(const Index: Integer;
+                      const Value: USHORT);
+
+  public
+    property TransformSkipRotationEnabledFlag: USHORT index $0001 read GetBits write SetBits;    // 1 bit at offset 0
+    property TransformSkipContextEnabledFlag: USHORT index $0101 read GetBits write SetBits;     // 1 bit at offset 1
+    property ImplicitRdpcmEnabledFlag: USHORT index $0201 read GetBits write SetBits;            // 1 bit at offset 2
+    property ExplicitRdpcmEnabledFlag: USHORT index $0301 read GetBits write SetBits;            // 1 bit at offset 3
+    property ExtendedPrecisionProcessingFlag: USHORT index $0401 read GetBits write SetBits;     // 1 bit at offset 4
+    property IntraSmoothingDisabledFlag: USHORT index $0501 read GetBits write SetBits;          // 1 bit at offset 5
+    property PersistentRiceAdaptationEnabledFlag: USHORT index $0601 read GetBits write SetBits; // 1 bit at offset 6
+    property HighPrecisionOffsetsEnabledFlag: USHORT index $0701 read GetBits write SetBits;     // 1 bit at offset 7
+    property CabacBypassAlignmentEnabledFlag: USHORT index $0801 read GetBits write SetBits;     // 1 bit at offset 8
+    property CrossComponentPredictionEnabledFlag: USHORT index $0901 read GetBits write SetBits; // 1 bit at offset 9
+    property ChromaQpOffsetListEnabledFlag: USHORT index $0A01 read GetBits write SetBits;       // 1 bit at offset 10
+    property ReservedBits8: USHORT index $0B05 read GetBits write SetBits;                       // 5 bit at offset 11
+                                                                                                 // Total 16 bits
+    property Flags: USHORT read FFlags write FFlags;
+  end;
+
+  //
+  // HEVC Picture Parameter structure for Range Extensions.
+  //
+  PDXVA_PicParams_HEVC_RangeExt = ^_DXVA_PicParams_HEVC_RangeExt;
+  _DXVA_PicParams_HEVC_RangeExt = packed record
+    Params: DXVA_PicParams_HEVC;
+    RangeExtensionFlags: TRangeExtensionFlags;
+    DiffCuChromaQpOffsetDepth: UCHAR;
+    Log2SaoOffsetScaleLuma: UCHAR;
+    Log2SaoOffsetScaleChroma: UCHAR;
+    Log2MaxTransformSkipBlockSizeMinus2: UCHAR;
+    CbQpOffsetList: array[0..5] of CHAR;
+    CrQpOffsetList: array[0..5] of CHAR;
+    ChromaQpOffsetListLenMinus1: UCHAR;
+    ReservedBits9: USHORT;
+  end;
+  {$EXTERNALSYM _DXVA_PicParams_HEVC_RangeExt}
+  DXVA_PicParams_HEVC_RangeExt = _DXVA_PicParams_HEVC_RangeExt;
+  {$EXTERNALSYM DXVA_PicParams_HEVC_RangeExt}
+  LPDXVA_PicParams_HEVC_RangeExt = ^DXVA_PicParams_HEVC_RangeExt;
+  {$EXTERNALSYM LPDXVA_PicParams_HEVC_RangeExt}
+
+
+  // #pragma pack(push, 16)
   {$ALIGN 16}
 
   LPDXVA_MBctrl_I_HostResidDiff_1 = ^DXVA_MBctrl_I_HostResidDiff_1;
@@ -1147,7 +1982,65 @@ type
 
 
   //#pragma pack(pop)
-  {$ALIGN 8}  //Set back to default
+  {$ALIGN 8}  // Set back to default
+
+
+  // MJPEG specific structures.
+
+  //#ifndef _DIRECTX_MJPEG_VA_
+  //#define _DIRECTX_MJPEG_VA_
+
+  // MJPEG picture parameters structure.
+  PDXVA_PicParams_MJPEG = ^_DXVA_PicParams_MJPEG;
+  _DXVA_PicParams_MJPEG = record
+    width: UINT;
+    height: UINT;
+    numComponents: UCHAR;
+    bitDepth: UCHAR;
+    reserved16Bits: USHORT;
+    quantizationTableSelector: array[0..3] of UCHAR;
+    scanOffset: array[0..3] of UINT;
+    scanSize: array[0..3] of UINT;
+    componentIdentifier: array[0..3] of UCHAR;
+    restartInterval: USHORT;
+    reserved16Bits2: USHORT;
+    reserved32Bits: UINT;
+    statusReportFeedbackNumber: UINT;
+  end;
+   {$EXTERNALSYM _DXVA_PicParams_MJPEG}
+  DXVA_PicParams_MJPEG = _DXVA_PicParams_MJPEG;
+  {$EXTERNALSYM DXVA_PicParams_MJPEG}
+  LPDXVA_PicParams_MJPEG = ^_DXVA_PicParams_MJPEG;
+  {$EXTERNALSYM LPDXVA_PicParams_MJPEG}
+
+
+  // MJPEG quantization table structure.
+  PDXVA_QMatrix_MJPEG = ^_DXVA_QMatrix_MJPEG;
+  _DXVA_QMatrix_MJPEG = record
+    quantvals: array[0..3, 0..63] of UINT16;
+  end;
+  {$EXTERNALSYM _DXVA_QMatrix_MJPEG}
+  DXVA_QMatrix_MJPEG = _DXVA_QMatrix_MJPEG;
+  {$EXTERNALSYM DXVA_QMatrix_MJPEG}
+  LPDXVA_QMatrix_MJPEG = ^_DXVA_QMatrix_MJPEG;
+  {$EXTERNALSYM LPDXVA_QMatrix_MJPEG}
+
+
+  // MJPEG quantization table structure.
+  PDXVA_HuffmanTable_MJPEG = ^_DXVA_HuffmanTable_MJPEG;
+  _DXVA_HuffmanTable_MJPEG = record
+    bits_ac: array[0..3, 0..15] of UINT8;
+    table_ac: array[0..3, 0..255] of UINT8;
+    bits_dc: array[0..3, 0..15] of UINT8;
+    table_dc: array[0..3, 0..255] of UINT8;
+  end;
+  {$EXTERNALSYM _DXVA_HuffmanTable_MJPEG}
+  DXVA_HuffmanTable_MJPEG = _DXVA_HuffmanTable_MJPEG;
+  {$EXTERNALSYM DXVA_HuffmanTable_MJPEG}
+  LPDXVA_HuffmanTable_MJPEG = ^_DXVA_HuffmanTable_MJPEG;
+  {$EXTERNALSYM LPDXVA_HuffmanTable_MJPEG}
+
+  //#endif // _DIRECTX_MJPEG_VA_
 
 //
 // Other forms of pictures are constructed in the obvious way
@@ -1155,20 +2048,23 @@ type
 // blocks, the number of motion vectors per macroblock, etc.
 //
 
-
 function readDXVA_MBskipsFollowing(dwMB_SNL: DWord): DWORD; inline;
 {$EXTERNALSYM readDXVA_MBskipsFollowing}
 
 function readDXVA_MBdataLocation(dwMB_SNL: DWord): DWORD; inline;
 {$EXTERNALSYM readDXVA_MBdataLocation}
 
-function writeDXVA_MB_SNL(dwMB_SNL: DWord ; skips: DWord; dloc: DWord): DWORD; inline;
+function writeDXVA_MB_SNL(dwMB_SNL: DWord;
+                          skips: DWord;
+                          dloc: DWord): DWORD; inline;
 {$EXTERNALSYM writeDXVA_MB_SNL}
 
-function setDXVA_MBskipsFollowing(dwMB_SNL: DWord; skips: DWord): DWORD; inline;
+function setDXVA_MBskipsFollowing(dwMB_SNL: DWord;
+                                  skips: DWord): DWORD; inline;
 {$EXTERNALSYM setDXVA_MBskipsFollowing}
 
-function setDXVA_MBdataLocation(dwMB_SNL: DWord; dloc: Dword): DWORD; inline;
+function setDXVA_MBdataLocation(dwMB_SNL: DWord;
+                                dloc: Dword): DWORD; inline;
 {$EXTERNALSYM setDXVA_MBdataLocation}
 
 function readDXVA_MvertFieldSel_3(wMBtype: DWord): DWORD; inline;
@@ -1231,10 +2127,12 @@ function setDXVA_ReservedBits(wMBtype: DWord): DWORD; inline;
 function setDXVA_HostResidDiff(wMBtype: DWord): DWORD; inline;
 {$EXTERNALSYM setDXVA_HostResidDiff}
 
-function setDXVA_MotionType(wMBtype: DWord; value: DWord ): DWORD; inline;
+function setDXVA_MotionType(wMBtype: DWord;
+                            value: DWord ): DWORD; inline;
 {$EXTERNALSYM setDXVA_MotionType}
 
-function setDXVA_MBscanMethod(wMBtype: DWord; value: DWord ): DWORD; inline;
+function setDXVA_MBscanMethod(wMBtype: DWord;
+                              value: DWord ): DWORD; inline;
 {$EXTERNALSYM setDXVA_MBscanMethod}
 
 function setDXVA_FieldResidual(wMBtype: DWord): DWORD; inline;
@@ -1333,26 +2231,27 @@ function readDXVA_Cr_11oflow(wPC_Overflow: DWord): DWORD; inline;
 // D3DFORMAT describes a pixel memory layout, DXVA sample format contains
 // additional information that describes how the pixels should be interpreted.
 //
+// DXVA Extended color data - occupies the SampleFormat DWORD
+// data fields.
 // -------------------------------------------------------------------------
 
-const
-
-  DXVA_SampleFormatMask = $FF;   // 8 bits used for DXVA Sample format
-  {$EXTERNALSYM DXVA_SampleFormatMask}
-
+//const
+  //DXVA_SampleFormatMask = $FF;   // 8 bits used for DXVA Sample format
+  //{$EXTERNALSYM DXVA_SampleFormatMask}
 
 type
 
   PDXVA_SampleFormat = ^DXVA_SampleFormat;
   DXVA_SampleFormat = (
-    DXVA_SampleUnknown,
-    DXVA_SamplePreviousFrame,
-    DXVA_SampleProgressiveFrame,
-    DXVA_SampleFieldInterleavedEvenFirst,
-    DXVA_SampleFieldInterleavedOddFirst,
-    DXVA_SampleFieldSingleEven,
-    DXVA_SampleFieldSingleOdd,
-    DXVA_SampleSubStream
+    DXVA_SampleFormatMask = $FF,   // 8 bits used for DXVA Sample format.
+    DXVA_SampleUnknown = 0,
+    DXVA_SamplePreviousFrame = 1,
+    DXVA_SampleProgressiveFrame = 2,
+    DXVA_SampleFieldInterleavedEvenFirst = 3,
+    DXVA_SampleFieldInterleavedOddFirst = 4,
+    DXVA_SampleFieldSingleEven = 5,
+    DXVA_SampleFieldSingleOdd = 6,
+    DXVA_SampleSubStream = 7
   );
   {$EXTERNALSYM DXVA_SampleFormat}
 
@@ -1365,7 +2264,6 @@ const
   {$EXTERNALSYM DXVA_VideoTransFuncShift}
   DXVA_VideoTransFuncMask = (not((not 0) shl 5)) shl ( DXVA_VideoTransFuncShift - DXVA_ExtColorData_ShiftBase);
   {$EXTERNALSYM DXVA_VideoTransFuncMask}
-
 
 type
 
@@ -1415,7 +2313,6 @@ const
   // DXVA_VideoLightingMask = DXVAColorMask(4, DXVA_VideoLightingShift),
   DXVA_VideoLightingMask = (not((not 0) shl 4)) shl ( DXVA_VideoLightingShift - DXVA_ExtColorData_ShiftBase);
   {$EXTERNALSYM DXVA_VideoLightingMask}
-
 
 type
 
@@ -1507,9 +2404,12 @@ type
   _DXVA_ExtendedFormat = record
     public
       Value: Integer;
+
     private
       function ReadBits(const iIndex: Integer): Integer;
-      procedure WriteBits(const iIndex: Integer; const iValue: Integer);
+      procedure WriteBits(const iIndex: Integer;
+                          const iValue: Integer);
+
     public
       property SampleFormat: Integer index $0008 read ReadBits write WriteBits;           // 8 bits at offset 0
       property VideoChromaSubsampling: Integer index $0804 read ReadBits write WriteBits; // 4 bits at offset 8
@@ -2524,11 +3424,25 @@ type
   DXVA_COPPStatusSignalingCmdData = _DXVA_COPPStatusSignalingCmdData;
   {$EXTERNALSYM DXVA_COPPStatusSignalingCmdData}
 
+
+
+
+
+
+
+
+
   // Additional Prototypes for ALL interfaces
 
   // End of Additional Prototypes
 
+
+
+
 implementation
+
+
+
 
   // Implement Additional functions here.
 
@@ -2627,17 +3541,21 @@ begin
   Result := (dwMB_SNL and $00FFFFFF);
 end;
 
-function writeDXVA_MB_SNL(dwMB_SNL: DWord ; skips: DWord; dloc: DWord): DWORD;
+function writeDXVA_MB_SNL(dwMB_SNL: DWord;
+                          skips: DWord;
+                          dloc: DWord): DWORD;
 begin
   Result := (dwMB_SNL or (skips shl 24) or dloc);
 end;
 
-function setDXVA_MBskipsFollowing(dwMB_SNL: DWord; skips: DWord): DWORD;
+function setDXVA_MBskipsFollowing(dwMB_SNL: DWord;
+                                  skips: DWord): DWORD;
 begin
   Result := dwMB_SNL or (skips shl 24);
 end;
 
-function setDXVA_MBdataLocation(dwMB_SNL: DWord; dloc: Dword): DWORD;
+function setDXVA_MBdataLocation(dwMB_SNL: DWord;
+                                dloc: Dword): DWORD;
 begin
   Result := (dwMB_SNL or dloc);
 end;
@@ -2742,12 +3660,14 @@ begin
   Result := (wMBtype or $0400);
 end;
 
-function setDXVA_MotionType(wMBtype: DWord; value: DWord ): DWORD;
+function setDXVA_MotionType(wMBtype: DWord;
+                            value: DWord ): DWORD;
 begin
   Result := wMBtype or (value shl 8);
 end;
 
-function setDXVA_MBscanMethod(wMBtype: DWord; value: DWord ): DWORD;
+function setDXVA_MBscanMethod(wMBtype: DWord;
+                              value: DWord ): DWORD;
 begin
   Result := wMBtype or (value shl 6);
 end;
@@ -2902,5 +3822,256 @@ function readDXVA_Cr_11oflow(wPC_Overflow: DWord): DWORD;
 begin
   Result := wPC_Overflow and $0001;
 end;
+
+
+// General helpers for bitfield calculations ///////////////////////////////////
+
+
+// DXVA_PicParams_H264 helpers /////////////////////////////////////////////////
+
+function _DXVA_PicParams_H264.GetBits(const aIndex: Integer): USHORT;
+begin
+  Result := GetDWordBits(wBitFields,
+                         aIndex);
+end;
+
+
+procedure _DXVA_PicParams_H264.SetBits(const aIndex: Integer;
+                                       const aValue: USHORT);
+begin
+  SetWordBits(wBitFields,
+              aIndex,
+              aValue);
+end;
+
+
+// DXVA_MBctrl_H264 helpers ////////////////////////////////////////////////////
+
+function TDXVA_MBctrl_H264_BitFields.GetBits(const aIndex: Integer): UINT8;
+begin
+  Result := GetDWordBits(dwMBtype,
+                         aIndex);
+end;
+
+
+procedure TDXVA_MBctrl_H264_BitFields.SetBits(const aIndex: Integer;
+                                              const aValue: UINT8);
+begin
+  SetDWordBits(dwMBtype,
+               aIndex,
+               aValue);
+end;
+
+
+// DXVA_Deblock_H264 helpers ///////////////////////////////////////////////////
+
+function TDXVA_Deblock_H264_BitFields.GetBits(const aIndex: Integer): UINT8;
+begin
+  Result := GetDWordBits(FirstByte, aIndex);
+end;
+
+
+procedure TDXVA_Deblock_H264_BitFields.SetBits(const aIndex: Integer;
+                                               const aValue: UINT8);
+begin
+  SetByteBits(FirstByte,
+              aIndex,
+              aValue);
+end;
+
+
+/// DXVA_PicParams_H264_MVC helpers ////////////////////////////////////////////
+
+// Function to get bits from the bitfield.
+function TDXVA_PicParams_H264_MVC_BitFields.GetBits(const aIndex: Integer): USHORT;
+begin
+  Result := (wBitFields shr (aIndex shr 8)) and ((1 shl Byte(aIndex)) - 1);
+end;
+
+
+// Procedure to set bits in the bitfield.
+procedure TDXVA_PicParams_H264_MVC_BitFields.SetBits(const aIndex: Integer;
+                                                     const aValue: USHORT);
+var
+  Offset: Byte;
+  Mask: USHORT;
+
+begin
+  Mask := ((1 shl Byte(aIndex)) - 1);
+
+  {$IFDEF DEBUG}
+  Assert(aValue <= Mask);
+  {$ENDIF}
+
+  Offset := aIndex shr 8;
+  wBitFields := (wBitFields and (not (Mask shl Offset))) or (aValue shl Offset);
+end;
+
+
+// TDXVA_PicParams_MPEG4_PART2_PicFlagBitFields helpers ////////////////////////
+
+function TDXVA_PicParams_MPEG4_PART2_PicFlagBitFields.GetBits(const aIndex: Integer): USHORT;
+begin
+  Result := (wPicFlagBitFields shr (aIndex shr 8)) and ((1 shl Byte(aIndex)) - 1);
+end;
+
+procedure TDXVA_PicParams_MPEG4_PART2_PicFlagBitFields.SetBits(const aIndex: Integer;
+                                                               const aValue: USHORT);
+var
+  Offset: Byte;
+  Mask: USHORT;
+
+begin
+  Mask := ((1 shl Byte(aIndex)) - 1);
+
+  {$IFDEF DEBUG}
+  Assert(aValue <= Mask);
+  {$ENDIF}
+
+  Offset := aIndex shr 8;
+  wPicFlagBitFields := (wPicFlagBitFields and (not (Mask shl Offset))) or (aValue shl Offset);
+end;
+
+
+// TDXVA_PicParams_MPEG4_PART2_SpriteBitFields helpers /////////////////////////
+
+function TDXVA_PicParams_MPEG4_PART2_SpriteBitFields.GetBits(const aIndex: Integer): USHORT;
+begin
+  Result := (wSpriteBitFields shr (aIndex shr 8)) and ((1 shl Byte(aIndex)) - 1);
+end;
+
+
+procedure TDXVA_PicParams_MPEG4_PART2_SpriteBitFields.SetBits(const aIndex: Integer;
+                                                              const aValue: USHORT);
+var
+  Offset: Byte;
+  Mask: USHORT;
+
+begin
+  Mask := ((1 shl Byte(aIndex)) - 1);
+
+  {$IFDEF DEBUG}
+  Assert(aValue <= Mask);
+  {$ENDIF}
+
+  Offset := aIndex shr 8;
+  wSpriteBitFields := (wSpriteBitFields and (not (Mask shl Offset))) or (aValue shl Offset);
+end;
+
+// TDXVA_PicParams_MPEG4_PART2_FcodeBitFields helpers //////////////////////////
+
+function TDXVA_PicParams_MPEG4_PART2_FcodeBitFields.GetBits(const aIndex: Integer): UCHAR;
+begin
+  Result := (wFcodeBitFields shr (aIndex shr 8)) and ((1 shl Byte(aIndex)) - 1);
+end;
+
+
+procedure TDXVA_PicParams_MPEG4_PART2_FcodeBitFields.SetBits(const aIndex: Integer;
+                                                             const aValue: UCHAR);
+var
+  Offset: Byte;
+  Mask: USHORT;
+
+begin
+  Mask := ((1 shl Byte(aIndex)) - 1);
+
+  {$IFDEF DEBUG}
+  Assert(aValue <= Mask);
+  {$ENDIF}
+
+  Offset := aIndex shr 8;
+  wFcodeBitFields := (wFcodeBitFields and (not (Mask shl Offset))) or (aValue shl Offset);
+end;
+
+
+// DXVA_PicEntry_HEVC helpers //////////////////////////////////////////////////
+
+function _DXVA_PicEntry_HEVC.GetIndex7Bits: UCHAR;
+begin
+  Result := bPicEntry and $7F;  // Mask to get the lower 7 bits
+end;
+
+function _DXVA_PicEntry_HEVC.GetAssociatedFlag: UCHAR;
+begin
+  Result := (bPicEntry shr 7) and $01;  // Shift right to get the highest bit
+end;
+
+procedure _DXVA_PicEntry_HEVC.SetIndex7Bits(const Value: UCHAR);
+begin
+  bPicEntry := (bPicEntry and $80) or (Value and $7F);  // Preserve the highest bit and set the lower 7 bits
+end;
+
+procedure _DXVA_PicEntry_HEVC.SetAssociatedFlag(const Value: UCHAR);
+begin
+  bPicEntry := (bPicEntry and $7F) or ((Value and $01) shl 7);  // Preserve the lower 7 bits and set the highest bit
+end;
+
+
+// DXVA_PicEntry_HEVC helpers //////////////////////////////////////////////////
+
+function TFormatAndSequenceInfoFlags.GetBits(const Index: Integer): USHORT;
+begin
+  Result := GetWordBits(FFlags,
+                        Index);
+end;
+
+
+procedure TFormatAndSequenceInfoFlags.SetBits(const Index: Integer;
+                                              const Value: USHORT);
+begin
+  SetWordBits(FFlags,
+              Index,
+              Value);
+end;
+
+
+function TCodingParamToolFlags.GetBits(const Index: Integer): UINT32;
+begin
+  Result := GetDWordBits(FFlags,
+                         Index);
+end;
+
+
+procedure TCodingParamToolFlags.SetBits(const Index: Integer;
+                                        const Value: UINT32);
+begin
+  SetDWordBits(FFlags,
+               Index,
+               Value);
+end;
+
+
+function TCodingSettingPicturePropertyFlags.GetBits(const Index: Integer): UINT32;
+begin
+  Result := GetDWordBits(FFlags,
+                         Index);
+end;
+
+
+procedure TCodingSettingPicturePropertyFlags.SetBits(const Index: Integer;
+                                                     const Value: UINT32);
+begin
+  SetDWordBits(FFlags,
+               Index,
+               Value);
+end;
+
+// DXVA_PicParams_HEVC_RangeExt helpers ////////////////////////////////////////
+
+function TRangeExtensionFlags.GetBits(const Index: Integer): USHORT;
+begin
+  Result := GetWordBits(FFlags,
+                        Index);
+end;
+
+
+procedure TRangeExtensionFlags.SetBits(const Index: Integer;
+                                       const Value: USHORT);
+begin
+  SetWordBits(FFlags,
+              Index,
+              Value);
+end;
+
 
 end.

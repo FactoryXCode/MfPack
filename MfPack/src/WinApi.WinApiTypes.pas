@@ -2973,7 +2973,7 @@ const
 
  {MfApi}
  // Keep this name convention for backward compatibilly.
- INTSAFE_E_ARITHMETIC_OVERFLOW : HRESULT = integer($80070216);
+ INTSAFE_E_ARITHMETIC_OVERFLOW : HRESULT = Integer($80070216);
 
 // wingdi.h
 

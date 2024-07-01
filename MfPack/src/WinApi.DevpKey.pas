@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -31,7 +31,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.22621.0
+// SDK version: 10.0.26100.0
 //
 // Todo: -
 //
@@ -338,6 +338,8 @@ const
                                                                  D4: ($80, $20, $67, $d1, $46, $a8, $50, $e0));
                                                                  pid: 38);      // DEVPROP_TYPE_GUID
   {$EXTERNALSYM DEVPKEY_Device_BaseContainerId}
+
+
 
   // Device and Device Interface property
   // ====================================
@@ -728,6 +730,12 @@ const
                                                                  Pid: 25);    // DEVPROP_TYPE_UINT32
   {$EXTERNALSYM DEVPKEY_Device_CreatorProcessId}
 
+  DEVPKEY_Device_FirmwareVendor        :  PROPERTYKEY = (fmtid: (D1: $540b947e;
+                                                                 D2: $8b40;
+                                                                 D3: $45bc;
+                                                                 D4: ($a8, $a2, $6a, $0b, $89, $4c, $bd, $a2));
+                                                                 Pid: 26);    // DEVPROP_TYPE_STRING
+  {$EXTERNALSYM DEVPKEY_Device_FirmwareVendor}
 
 
   DEVPKEY_Device_SessionId              : PROPERTYKEY = (fmtid: (D1: $83da6326;

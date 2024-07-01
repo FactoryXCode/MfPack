@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -31,7 +31,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.22621.0
+// SDK version: 10.0.26100.0
 //
 // Todo: -
 //
@@ -1476,6 +1476,37 @@ const
   MF_QUALITY_CANNOT_KEEP_UP = MF_QUALITY_ADVISE_FLAGS($1);
   {$EXTERNALSYM MF_QUALITY_CANNOT_KEEP_UP}
 //#endif // (WINVER >= _WIN32_WINNT_WIN7)
+
+
+/// <summary>
+///     ID for topology node.
+/// </summary>
+type
+  TOPOID = UInt64;
+  {$EXTERNALSYM TOPOID}
+
+  // #if (NTDDI_VERSION >= NTDDI_WIN11_ZN)
+  /// <summary>
+  /// Use this service GUID to retrieve the IAcousticEchoCancellationControl interface through the capture MFMediaSource's
+  /// IMFGetService::GetService
+  /// </summary>
+const
+  MF_ACOUSTIC_ECHO_CANCELLATION_CONTROL_SERVICE : TGUID = (D1: $7f6c3b29;
+                                                           D2: $2d12;
+                                                           D3: $4f6f;
+                                                           D4: ($ac, $05, $c1, $a8, $9b, $8d, $52, $88));
+  {$EXTERNALSYM MF_ACOUSTIC_ECHO_CANCELLATION_CONTROL_SERVICE}
+
+  /// <summary>
+  /// Use this service GUID to retrieve the IAudioEffectsManager interface through the capture MFMediaSource's
+  /// IMFGetService.GetService
+  /// </summary>
+const
+  MF_AUDIO_EFFECTS_MANAGER_SERVICE : TGUID = (D1: $1f541943;
+                                              D2: $d5df;
+                                              D3: $455e;
+                                              D4: ($a2, $e5, $7d, $64, $d3, $bb, $bd, $b5));
+  {$EXTERNALSYM MF_AUDIO_EFFECTS_MANAGER_SERVICE}
 
 
 type
@@ -6527,6 +6558,129 @@ type
   {$EXTERNALSYM IMFCameraConfigurationManager}
   IID_IMFCameraConfigurationManager = IMFCameraConfigurationManager;
   {$EXTERNALSYM IID_IMFCameraConfigurationManager}
+
+
+
+  // #if (NTDDI_VERSION >= NTDDI_WIN11_ZN)
+
+  PDetectedFaceBound = ^DetectedFaceBound;
+  DetectedFaceBound = record
+    sizeInBytes: DWORD;              // Size in bytes to next DetectedFaceBound
+    normalizedXPosition: Single;     // Normalized between 0.0 - 1.0
+    normalizedYPosition: Single;     // Normalized between 0.0 - 1.0
+    normalizedWidth: Single;         // Normalized between 0.0 - 1.0
+    normalizedHeight: Single;        // Normalized between 0.0 - 1.0
+    confidenceValue: LONG;           // Normalized between 0 - 100
+    flags: ULONGLONG;
+  end;
+  {$EXTERNALSYM DetectedFaceBound}
+
+
+  // Interface IMFFaceDetectionTransformCallback
+  //============================================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFFaceDetectionTransformCallback);'}
+  IMFFaceDetectionTransformCallback = interface(IUnknown)
+    ['{0BFD1ADE-0421-4909-ACB7-7A7125416881}']
+
+    procedure OnFaceDetectionResult(countOfBounds: ULONG;
+                                    detectedFaceBounds: PDetectedFaceBound);
+
+  end;
+  {$EXTERNALSYM IMFFaceDetectionTransformCallback}
+  IID_IMFFaceDetectionTransformCallback = IMFFaceDetectionTransformCallback;
+  {$EXTERNALSYM IID_IMFFaceDetectionTransformCallback}
+
+
+  // Interface IMFFaceDetectionTransform
+  //====================================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFFaceDetectionTransform);'}
+  IMFFaceDetectionTransform = interface(IUnknown)
+    ['{DDD59578-D0E7-46E2-BE8C-1CE76AD147C0}']
+
+    function SetDetectionCallback(callback: IMFFaceDetectionTransformCallback;
+                                  out callbackToken: Pointer): HResult; stdcall;
+
+    function ClearDetectionCallback(callbackToken: Pointer): HResult; stdcall;
+
+  end;
+  {$EXTERNALSYM IMFFaceDetectionTransform}
+  IID_IMFFaceDetectionTransform = IMFFaceDetectionTransform;
+  {$EXTERNALSYM IID_IMFFaceDetectionTransform}
+
+
+const
+  /// CLSID_FaceDetectionMFT
+  ///
+  /// Data type: GUID CLSID for creating Face Detection
+  /// IMFTransform.  Also implements the IMFFaceDetectionTransform
+  /// interface.
+  ///
+  /// {C1E565E2-F2DE-4537-9612-2F30A160EB5C}
+  CLSID_FaceDetectionMFT : TGUID = '{c1e565e2-f2de-4537-9612-2f30a160eb5c}';
+  {$EXTERNALSYM CLSID_FaceDetectionMFT}
+
+  /// CLSID_FrameServerClassFactory
+  ///
+  /// Data type: GUID CLSID for creating the
+  /// IMFActivate from the Frame Server.
+  ///
+  /// NOTE:  This CLSID may only be CoCreated from
+  /// Frame Server service process.  Any attempts to
+  /// instantiate this CLSID from a non-Frame Server
+  /// service process will fail with access denied.
+  ///
+  /// It is recommended that applications use
+  /// MFCreateDeviceSource or MFEnumDeviceSources to
+  /// create an IMFMediaSource for the camera.
+  ///
+  /// {9A93092C-9CDC-49B8-8349-CBCF3145FE0A}
+  CLSID_FrameServerClassFactory : TGUID = '{9A93092C-9CDC-49B8-8349-CBCF3145FE0A}';
+  {$EXTERNALSYM CLSID_FrameServerClassFactory}
+
+  /// MF_CAMERASOURCE_PROVIDE_SELECTED_PROFILE_ON_START
+  ///
+  /// Data type: UINT32 - Set to non-zero to have pipeline provide
+  /// the selected camera profile on the first stream start
+  /// on the source. Setting the value to 0 will be treatd as if
+  /// the attribute was not set: the selected profile is sent during
+  /// client initialization.  Multiple clients may initialize the
+  /// same source so the selected profile may be issued independent
+  /// of the start operation.
+  ///
+  /// Setting this attribute enables an optimization
+  /// (reducing the number of profile changes), but the KsEvent
+  /// and KsProperty methods handling  still need to handle the case where
+  /// the optimization is not available. If the new
+  /// PROFILE_ON_START property is honored, then the KsEvent and
+  /// KsProperty methods are called less often, avoiding
+  /// unnecessary profile changes.
+  ///
+  /// {A9B46058-82F2-4E5C-BF6E-25B4B09F22ED}
+  MF_CAMERASOURCE_PROVIDE_SELECTED_PROFILE_ON_START : TGUID = '{A9B46058-82F2-4E5C-BF6E-25B4B09F22ED}';
+  {$EXTERNALSYM MF_CAMERASOURCE_PROVIDE_SELECTED_PROFILE_ON_START}
+
+  /// MF_DEVSOURCE_ATTRIBUTE_FRAMESERVER_SHARE_MODE
+  ///
+  /// Attribute used during MFCreateDeviceSource or
+  /// IMFActivate::ActivateObject to create an instance of
+  /// IMFMediaSource in shared mode.
+  ///
+  /// Shared mode allows multiple shared mode applications to
+  /// stream from the same camera without the ability to change
+  /// the extended camera controls nor change media types.
+  ///
+  /// Data type: UINT32
+  ///
+  /// 0 or not set - Default non-shared mdoe instance.
+  ///
+  /// 1 - Shared mode instance.
+  ///
+  /// {44d1a9bc-2999-4238-ae43-0730ceb2ab1b}
+  MF_DEVSOURCE_ATTRIBUTE_FRAMESERVER_SHARE_MODE : TGUID = '{44d1a9bc-2999-4238-ae43-0730ceb2ab1b}';
+  {$EXTERNALSYM MF_DEVSOURCE_ATTRIBUTE_FRAMESERVER_SHARE_MODE}
+
 
 // if NTDDI_VERSION >= NTDDI_WIN10_NI
 

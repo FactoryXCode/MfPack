@@ -22,8 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
-// 11/03/2024 Tony                Fixed some issues with some video subtype guids.
+// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -51,7 +50,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.22621.0
+// SDK version: 10.0.26100.0
 //
 // Todo: -
 //
@@ -924,6 +923,19 @@ type
   // Return value
   //    If this function succeeds, it returns S_OK. Otherwise, it returns an HRESULT error code.
 
+
+  // (NTDDI_VERSION >= NTDDI_WIN11_GE)
+
+  function MFCreateDXGICrossAdapterBuffer(const riid: REFIID;
+                                          punkDevice: IUnknown;
+                                          pMediaType: IMFMediaType;
+                                          uSubresource: UINT;
+                                          out ppBuffer: IMFMediaBuffer): HResult; stdcall;
+  {$EXTERNALSYM MFCreateDXGICrossAdapterBuffer}
+
+  // endif /*(NTDDI_VERSION >= NTDDI_WIN11_GE)
+
+
   function MFCreateVideoSampleAllocatorEx(const riid: REFIID;
                                           out ppSampleAllocator {Expected IUnknown pointer} ): HResult; stdcall;
   {$EXTERNALSYM MFCreateVideoSampleAllocatorEx}
@@ -956,6 +968,17 @@ type
   // ppDXVAManager [out]
   //    Receives a pointer to the IMFDXGIDeviceManager interface. The caller must release the interface.
   //
+
+  // (NTDDI_VERSION >= NTDDI_WIN11_GE)
+
+  //
+  // Get the D3D Device version in DXGIDeviceManager
+  //
+  function MFGetDXGIDeviceManageMode(pDeviceManager: IUnknown;
+                                     out mode: MF_DXGI_DEVICE_MANAGER_MODE): HResult; stdcall;
+  // end (NTDDI_VERSION >= NTDDI_WIN11_GE)
+  {$EXTERNALSYM MFGetDXGIDeviceManageMode}
+
 
 const
 
@@ -1807,8 +1830,20 @@ const
   MFSampleExtension_ChromaOnly :  TGUID = '{1eb9179c-a01f-4845-8c04-0e65a26eb04f}';
   {$EXTERNALSYM MFSampleExtension_ChromaOnly}
 
-type
+  // MFSampleExtension_SpatialLayerId {B7AABC7B-2396-457a-879E-623BFAB6E0AC}
+  // Type: UINT32
+  // The exact spatial layer id of a sample emitted by a decoder
+  MFSampleExtension_SpatialLayerId : TGUID = '{b7aabc7b-2396-457a-879e-623bfab6e0ac}';
+  {$EXTERNALSYM MFSampleExtension_SpatialLayerId}
 
+  // MFSampleExtension_TemporalLayerId {B3C1FCD2-B331-4376-B974-AD647769B2B0}
+  // Type: UINT32
+  // The exact temporal layer id of a sample emitted by a decoder
+  MFSampleExtension_TemporalLayerId : TGUID = '{b3c1fcd2-b331-4376-b974-ad647769b2b0}';
+  {$EXTERNALSYM MFSampleExtension_TemporalLayerId}
+
+
+type
   PROI_AREA = ^ROI_AREA;
   _ROI_AREA = record
     rect: TRect;
@@ -3351,13 +3386,23 @@ const
 
   // This format is used for AC-4 streams that use ac4_syncframe and the optional crc
   // at the end of each frame. The frames might not be aligned with IMFSample boundaries.
-  MFAudioFormat_Dolby_AC4_V1_ES:  TGUID = '{36b7927c-3d87-4a2a-9196-a21ad9e935e6}';
+  MFAudioFormat_Dolby_AC4_V1_ES :  TGUID = '{36b7927c-3d87-4a2a-9196-a21ad9e935e6}';
 
   // {7e58c9f9-b070-45f4-8ccd-a99a0417c1ac}
   // This format is used for AC-4 version 2 bit streams (may include Immersive Stereo) that use ac4_syncframe
   // and the optional crc at the end of each frame. The frames might not be aligned with IMFSample boundaries.
-  MFAudioFormat_Dolby_AC4_V2_ES:  TGUID = '{7e58c9f9-b070-45f4-8ccd-a99a0417c1ac}';
+  MFAudioFormat_Dolby_AC4_V2_ES :  TGUID = '{7e58c9f9-b070-45f4-8ccd-a99a0417c1ac}';
 
+  // {7c13c441-ebf8-4931-b678-800b19242236}
+  // This format is used for MPEG-H MHAS bitstreams where each IMFSample is aligned with the start of a MHAS packet.
+  MFAudioFormat_MPEGH :            TGUID = '{7c13c441-ebf8-4931-b678-800b19242236}';
+  {$EXTERNALSYM MFAudioFormat_MPEGH}
+
+  // {19ee97fe-1be0-4255-a876-e99f53a42ae3}
+  // This format is used for MPEG-H MHAS elementary bitstreams where each IMFSample may not be aligned with the start of a
+  // MHAS packet.
+  MFAudioFormat_MPEGH_ES :         TGUID = '{19ee97fe-1be0-4255-a876-e99f53a42ae3}';
+  {$EXTERNALSYM MFAudioFormat_MPEGH_ES}
 
   MFAudioFormat_Vorbis          :  TGUID = '{8D2FD10B-5841-4a6b-8905-588FEC1ADED9}';
   {$EXTERNALSYM MFAudioFormat_Vorbis}
@@ -3955,6 +4000,14 @@ const
   {$EXTERNALSYM MF_MT_SPATIAL_AUDIO_DATA_PRESENT}
 
 //#endif // (NTDDI_VERSION >= NTDDI_WIN10_RS2)
+
+  // {4EACAB51-FFE5-421A-A2A7-8B7409A1CAC4} MF_MT_SPATIAL_AUDIO_IS_PREVIRTUALIZED {UINT32 (BOOL)}
+  MF_MT_SPATIAL_AUDIO_IS_PREVIRTUALIZED  : TGUID = '{4eacab51-ffe5-421a-a2a7-8b7409a1cac4}';
+  {$EXTERNALSYM MF_MT_SPATIAL_AUDIO_IS_PREVIRTUALIZED}
+
+  // {51267a39-dd0c-4bb9-a7bd-9173ad4b131c}
+  MF_MT_MPEGH_AUDIO_PROFILE_LEVEL_INDICATION  : TGUID = '{51267a39-dd0c-4bb9-a7bd-9173ad4b131c}';
+  {$EXTERNALSYM MF_MT_MPEGH_AUDIO_PROFILE_LEVEL_INDICATION}
 
 
   // VIDEO core data
@@ -4867,7 +4920,35 @@ const
                              out ppOrig: IMFMediaType): HRESULT; stdcall;
   {$EXTERNALSYM MFUnwrapMediaType}
 
-
+  function MFGetStrideForBitmapInfoHeader(format: DWORD;
+                                          dwWidth: DWORD;
+                                          out pStride: LONG): HRESULT; stdcall;
+  {$EXTERNALSYM MFGetStrideForBitmapInfoHeader}
+  // Calculates the minimum surface stride for a video format.
+  // Parameters
+  // format [in]
+  //    FOURCC code or D3DFORMAT value that specifies the video format. If you have a video subtype GUID, you can use the first DWORD of the subtype.
+  // dwWidth [in]
+  //    Width of the image, in pixels.
+  // pStride [out]
+  //    Receives the minimum surface stride, in pixels.
+  //
+  // Return value
+  // If this function succeeds, it returns S_OK. Otherwise, it returns an HRESULT error code.
+  //
+  // Remarks
+  //    This function calculates the minimum stride needed to hold the image in memory.
+  //    Use this function if you are allocating buffers in system memory.
+  //    Surfaces allocated in video memory might require a larger stride, depending on the graphics card.
+  //    If you are working with a DirectX surface buffer, use the IMF2DBuffer.Lock2D method to find the surface stride.
+  //    For planar YUV formats, this function returns the stride for the Y plane.
+  //    Depending on the format, the chroma planes might have a different stride.
+  //
+  // Note
+  //    Prior to Windows 7, this function was exported from evr.dll.
+  //    Starting in Windows 7, this function is exported from mfplat.dll,
+  //    and evr.dll exports a stub function that calls into mfplat.dll.
+  //    For more information, see Library Changes in Windows 7.
 
   // MFCreateVideoMediaType
   //=======================
@@ -5053,35 +5134,6 @@ const
   //    and evr.dll exports a stub function that calls into mfplat.dll.
   //    For more information, see Library Changes in Windows 7.
 
-  function MFGetStrideForBitmapInfoHeader(Format: DWORD;
-                                          dwWidth: DWORD;
-                                          out pStride: LONG): HRESULT; stdcall;
-  {$EXTERNALSYM MFGetStrideForBitmapInfoHeader}
-  // Calculates the minimum surface stride for a video format.
-  // Parameters
-  // format [in]
-  //    FOURCC code or D3DFORMAT value that specifies the video format. If you have a video subtype GUID, you can use the first DWORD of the subtype.
-  // dwWidth [in]
-  //    Width of the image, in pixels.
-  // pStride [out]
-  //    Receives the minimum surface stride, in pixels.
-  //
-  // Return value
-  // If this function succeeds, it returns S_OK. Otherwise, it returns an HRESULT error code.
-  //
-  // Remarks
-  //    This function calculates the minimum stride needed to hold the image in memory.
-  //    Use this function if you are allocating buffers in system memory.
-  //    Surfaces allocated in video memory might require a larger stride, depending on the graphics card.
-  //    If you are working with a DirectX surface buffer, use the IMF2DBuffer.Lock2D method to find the surface stride.
-  //    For planar YUV formats, this function returns the stride for the Y plane.
-  //    Depending on the format, the chroma planes might have a different stride.
-  //
-  // Note
-  //    Prior to Windows 7, this function was exported from evr.dll.
-  //    Starting in Windows 7, this function is exported from mfplat.dll,
-  //    and evr.dll exports a stub function that calls into mfplat.dll.
-  //    For more information, see Library Changes in Windows 7.
 
   function MFGetPlaneSize(Format: DWORD;
                           dwWidth: DWORD;
@@ -6181,8 +6233,10 @@ const
 
   function MFCreateWICBitmapBuffer;     external MfApiLibA name 'MFCreateWICBitmapBuffer' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFCreateDXGISurfaceBuffer;   external MfApiLibA name 'MFCreateDXGISurfaceBuffer' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateDXGICrossAdapterBuffer; external MfApiLibA name 'MFCreateDXGICrossAdapterBuffer' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFCreateVideoSampleAllocatorEx; external MfApiLibA name 'MFCreateVideoSampleAllocatorEx' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFCreateDXGIDeviceManager;   external MfApiLibA name 'MFCreateDXGIDeviceManager' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFGetDXGIDeviceManageMode;   external MfApiLibA name 'MFGetDXGIDeviceManageMode' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
   function MFCreateAlignedMemoryBuffer; external MfApiLibA name 'MFCreateAlignedMemoryBuffer' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFCreateMediaEvent;          external MfApiLibA name 'MFCreateMediaEvent' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};

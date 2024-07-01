@@ -21,18 +21,18 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: When using MfPack, use this unit and not the outdated
-//          Error code definitions from Embarcadero Delphi <= ver 10.4
+//          Errors code definitions from Embarcadero Delphi <= ver 10.4
 //
 // Related objects: -
 // Related projects: MfPackX317
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.22621.0
+// SDK version: 10.0.26100.0
 //
 // Todo: -
 //
@@ -407,6 +407,12 @@ const
   {$EXTERNALSYM FACILITY_GAME}
   FACILITY_XBOX                       = 2339;
   {$EXTERNALSYM FACILITY_XBOX}
+  FACILITY_USERMODE_UNIONFS           = 2341;
+  {$EXTERNALSYM FACILITY_USERMODE_UNIONFS}
+  FACILITY_USERMODE_PRM               = 2342;
+  {$EXTERNALSYM FACILITY_USERMODE_PRM}
+  FACILITY_USERMODE_WIN_ACCEL         = 2343;
+  {$EXTERNALSYM FACILITY_USERMODE_WIN_ACCEL}
   FACILITY_PIX                        = 2748;
   {$EXTERNALSYM FACILITY_PIX}
 
@@ -3558,7 +3564,9 @@ const
 //
 // MessageText:
 //
-// The Windows Subsystem for Linux has not been enabled.
+// The Windows Subsystem for Linux is not installed.
+// You can install by running 'wsl.exe --install'.
+// For more information please visit https://aka.ms/wslinstall
 //
   ERROR_LINUX_SUBSYSTEM_NOT_PRESENT   = 414;
   {$EXTERNALSYM ERROR_LINUX_SUBSYSTEM_NOT_PRESENT}
@@ -3868,9 +3876,11 @@ const
 //
 // MessageText:
 //
-// WSL 2 requires an update to its kernel component. For information please visit https://aka.ms/wsl2kernel
+// Windows Subsystem for Linux must be updated to the latest version to proceed.
+// You can update by running 'wsl.exe --update'.
+// For more information please visit https://aka.ms/wslinstall
 //
-  ERROR_LINUX_SUBSYSTEM_UPDATE_REQUIRED= 444;
+  ERROR_LINUX_SUBSYSTEM_UPDATE_REQUIRED = 444;
   {$EXTERNALSYM ERROR_LINUX_SUBSYSTEM_UPDATE_REQUIRED}
 
 //
@@ -3878,9 +3888,10 @@ const
 //
 // MessageText:
 //
-// This action is blocked, but you can choose to allow it. Please refer to the data loss prevention notification for further information.
+// This action is blocked, but you can choose to allow it.
+// Please refer to the data loss prevention notification for further information.
 //
-  ERROR_DLP_POLICY_WARNS_AGAINST_OPERATION= 445;
+  ERROR_DLP_POLICY_WARNS_AGAINST_OPERATION = 445;
   {$EXTERNALSYM ERROR_DLP_POLICY_WARNS_AGAINST_OPERATION}
 
 //
@@ -4106,6 +4117,45 @@ const
   ERROR_CLOUD_FILE_US_MESSAGE_TIMEOUT = 475;
   {$EXTERNALSYM ERROR_CLOUD_FILE_US_MESSAGE_TIMEOUT}
 
+//
+// MessageId: ERROR_NOT_A_DEV_VOLUME
+//
+// MessageText:
+//
+// This operation requires a developer volume.
+//
+  ERROR_NOT_A_DEV_VOLUME              = 476;
+  {$EXTERNALSYM ERROR_NOT_A_DEV_VOLUME}
+
+//
+// MessageId: ERROR_FS_GUID_MISMATCH
+//
+// MessageText:
+//
+// The file system GUID in the per machine state did not match the one on disk.
+//
+  ERROR_FS_GUID_MISMATCH              = 477;
+  {$EXTERNALSYM ERROR_FS_GUID_MISMATCH}
+
+//
+// MessageId: ERROR_CANT_ATTACH_TO_DEV_VOLUME
+//
+// MessageText:
+//
+// The file system minifilter cannot attach to the developer volume.
+//
+  ERROR_CANT_ATTACH_TO_DEV_VOLUME     = 478;
+  {$EXTERNALSYM ERROR_CANT_ATTACH_TO_DEV_VOLUME}
+
+//
+// MessageId: ERROR_MEMORY_DECOMPRESSION_FAILURE
+//
+// MessageText:
+//
+// The data stored in compressed memory falied to be decompressed.
+//
+  ERROR_MEMORY_DECOMPRESSION_FAILURE  = 479;
+  {$EXTERNALSYM ERROR_MEMORY_DECOMPRESSION_FAILURE}
 
 //
 // **** Available SYSTEM error codes ****
@@ -4445,6 +4495,76 @@ const
 //
   ERROR_BLOCK_SHARED = 514;
   {$EXTERNALSYM ERROR_BLOCK_SHARED}
+
+//
+// MessageId: ERROR_VOLUME_UPGRADE_NOT_NEEDED
+//
+// MessageText:
+//
+// Volume format is up to date already.
+//
+  ERROR_VOLUME_UPGRADE_NOT_NEEDED     = 515;
+  {$EXTERNALSYM ERROR_VOLUME_UPGRADE_NOT_NEEDED}
+
+//
+// MessageId: ERROR_VOLUME_UPGRADE_PENDING
+//
+// MessageText:
+//
+// Volume upgrade is pending.  A reboot or re-mount of the volume is required.
+//
+  ERROR_VOLUME_UPGRADE_PENDING        = 516;
+  {$EXTERNALSYM ERROR_VOLUME_UPGRADE_PENDING}
+
+//
+// MessageId: ERROR_VOLUME_UPGRADE_DISABLED
+//
+// MessageText:
+//
+// Volume upgrade is disabled.
+//
+  ERROR_VOLUME_UPGRADE_DISABLED       = 517;
+  {$EXTERNALSYM ERROR_VOLUME_UPGRADE_DISABLED}
+
+//
+// MessageId: ERROR_VOLUME_UPGRADE_DISABLED_TILL_OS_DOWNGRADE_EXPIRED
+//
+// MessageText:
+//
+// Volume upgrade is disabled until Windows OS downgrade period has expired.
+//
+  ERROR_VOLUME_UPGRADE_DISABLED_TILL_OS_DOWNGRADE_EXPIRED = 518;
+  {$EXTERNALSYM ERROR_VOLUME_UPGRADE_DISABLED_TILL_OS_DOWNGRADE_EXPIRED}
+
+//
+// MessageId: ERROR_INVALID_CONFIG_VALUE
+//
+// MessageText:
+//
+// The configured value is not valid.
+//
+  ERROR_INVALID_CONFIG_VALUE          = 519;
+  {$EXTERNALSYM ERROR_INVALID_CONFIG_VALUE}
+
+//
+// MessageId: ERROR_MEMORY_DECOMPRESSION_HW_ERROR
+//
+// MessageText:
+//
+// The data stored in compressed memory falied to be decompressed due to encountering an uncorrectable hardware memory error.
+//
+  ERROR_MEMORY_DECOMPRESSION_HW_ERROR = 520;
+  {$EXTERNALSYM ERROR_MEMORY_DECOMPRESSION_HW_ERROR}
+
+//
+// MessageId: ERROR_VOLUME_ROLLBACK_DETECTED
+//
+// MessageText:
+//
+// The operation was aborted because the observed volume identity or current state was not expected.
+//
+  ERROR_VOLUME_ROLLBACK_DETECTED      = 521;
+  {$EXTERNALSYM ERROR_VOLUME_ROLLBACK_DETECTED}
 
 //
 // **** Available SYSTEM error codes ****
@@ -9894,8 +10014,11 @@ const
 //
 // MessageText:
 //
-// Unable to update the password. The value provided for the new password does not meet the length,
-// complexity, or history requirements of the domain.
+// Unable to update the password.
+// The value provided for the new password does not meet the length, complexity,
+// or history requirements of the machine or domain.
+// Try increasing the length of your password,
+// along with including upper and lowercase characters, numbers, and symbols.
 //
   ERROR_PASSWORD_RESTRICTION          = 1325;
   {$EXTERNALSYM ERROR_PASSWORD_RESTRICTION}
@@ -14399,6 +14522,17 @@ const
   ERROR_NETWORK_AUTHENTICATION_PROMPT_CANCELED = 3024;
   {$EXTERNALSYM ERROR_NETWORK_AUTHENTICATION_PROMPT_CANCELED}
 
+//
+// MessageId: ERROR_REMOTE_MAILSLOTS_DEPRECATED
+//
+// MessageText:
+//
+// The requested operation failed. Remote mailslots have been deprecated.
+//
+  ERROR_REMOTE_MAILSLOTS_DEPRECATED   = 3025;
+  {$EXTERNALSYM ERROR_REMOTE_MAILSLOTS_DEPRECATED}
+
+
 
 ///////////////////////////////////////////////////
 //                                               //
@@ -14639,8 +14773,49 @@ const
 //
 // Volatile verification settings cannot be changed when verification is enabled from boot or DIF volatile verification is enabled.
 //
-  ERROR_VRF_VOLATILE_SETTINGS_CONFLICT = 3087;
   {$EXTERNALSYM ERROR_VRF_VOLATILE_SETTINGS_CONFLICT}
+  ERROR_VRF_VOLATILE_SETTINGS_CONFLICT = 3087;
+
+//
+// MessageId: ERROR_CAR_LKD_IN_PROGRESS
+//
+// MessageText:
+//
+// Live memory dump generation is in progress.
+//
+  ERROR_CAR_LKD_IN_PROGRESS           = 3088;
+  {$EXTERNALSYM ERROR_CAR_LKD_IN_PROGRESS}
+
+//
+// MessageId: ERROR_DIF_ZERO_SIZE_INFORMATION
+//
+// MessageText:
+//
+// There is no captured information.
+//
+  ERROR_DIF_ZERO_SIZE_INFORMATION     = 3187;
+  {$EXTERNALSYM ERROR_DIF_ZERO_SIZE_INFORMATION}
+
+//
+// MessageId: ERROR_DIF_DRIVER_PLUGIN_MISMATCH
+//
+// MessageText:
+//
+// The given rule class ID is not registered by the caller.
+//
+  ERROR_DIF_DRIVER_PLUGIN_MISMATCH    = 3188;
+  {$EXTERNALSYM ERROR_DIF_DRIVER_PLUGIN_MISMATCH}
+
+//
+// MessageId: ERROR_DIF_DRIVER_THUNKS_NOT_ALLOWED
+//
+// MessageText:
+//
+// Driver thunks are not added when kernel verification is in effect.
+//
+  ERROR_DIF_DRIVER_THUNKS_NOT_ALLOWED = 3189;
+  {$EXTERNALSYM ERROR_DIF_DRIVER_THUNKS_NOT_ALLOWED}
+
 
 // MessageId: ERROR_DIF_IOCALLBACK_NOT_REPLACED
 //
@@ -14650,8 +14825,6 @@ const
 //
   ERROR_DIF_IOCALLBACK_NOT_REPLACED   = 3190;
   {$EXTERNALSYM ERROR_DIF_IOCALLBACK_NOT_REPLACED}
-
-
 
 //
 // MessageId: ERROR_DIF_LIVEDUMP_LIMIT_EXCEEDED
@@ -16170,7 +16343,7 @@ const
 //
 // MessageText:
 //
-// System Integrity detected that policy rollback has been attempted.
+// Application Control detected that policy rollback has been attempted.
 //
   ERROR_SYSTEM_INTEGRITY_ROLLBACK_DETECTED = 4550;
   {$EXTERNALSYM ERROR_SYSTEM_INTEGRITY_ROLLBACK_DETECTED}
@@ -16180,7 +16353,7 @@ const
 //
 // MessageText:
 //
-// Your organization used Device Guard to block this app. Contact your support person for more info.
+// An Application Control policy has blocked this file.
 //
   ERROR_SYSTEM_INTEGRITY_POLICY_VIOLATION = 4551;
   {$EXTERNALSYM ERROR_SYSTEM_INTEGRITY_POLICY_VIOLATION}
@@ -16190,7 +16363,7 @@ const
 //
 // MessageText:
 //
-// The System Integrity policy is invalid.
+// The Application Control policy is invalid.
 //
   ERROR_SYSTEM_INTEGRITY_INVALID_POLICY = 4552;
   {$EXTERNALSYM ERROR_SYSTEM_INTEGRITY_INVALID_POLICY}
@@ -16200,7 +16373,7 @@ const
 //
 // MessageText:
 //
-// The System Integrity policy is either not signed or is signed by a non-trusted signer.
+// The Application Control policy is either not signed or is signed by a non-trusted signer.
 //
   ERROR_SYSTEM_INTEGRITY_POLICY_NOT_SIGNED = 4553;
   {$EXTERNALSYM ERROR_SYSTEM_INTEGRITY_POLICY_NOT_SIGNED}
@@ -16220,7 +16393,7 @@ const
 //
 // MessageText:
 //
-// The Code Integrity supplemental policy is not authorized by a Code Integrity base policy.
+// The Application Control supplemental policy is not authorized by an Application Control base policy.
 //
   ERROR_SYSTEM_INTEGRITY_SUPPLEMENTAL_POLICY_NOT_AUTHORIZED = 4555;
   {$EXTERNALSYM ERROR_SYSTEM_INTEGRITY_SUPPLEMENTAL_POLICY_NOT_AUTHORIZED}
@@ -16230,7 +16403,7 @@ const
 //
 // MessageText:
 //
-// System Integrity policy has been violated.  Malicious binary reputation.
+// An Application Control policy has blocked this file. Malicious binary reputation.
 //
   ERROR_SYSTEM_INTEGRITY_REPUTATION_MALICIOUS = 4556;
   {$EXTERNALSYM ERROR_SYSTEM_INTEGRITY_REPUTATION_MALICIOUS}
@@ -16240,7 +16413,7 @@ const
 //
 // MessageText:
 //
-// System Integrity policy has been violated.  Potentially unwanted application.
+// An Application Control policy has blocked this file. Potentially unwanted application.
 //
   ERROR_SYSTEM_INTEGRITY_REPUTATION_PUA = 4557;
   {$EXTERNALSYM ERROR_SYSTEM_INTEGRITY_REPUTATION_PUA}
@@ -16250,7 +16423,7 @@ const
 //
 // MessageText:
 //
-// System Integrity policy has been violated.  Dangerous file extension from the web.
+// An Application Control policy has blocked this file. Dangerous file extension from the web.
 //
   ERROR_SYSTEM_INTEGRITY_REPUTATION_DANGEROUS_EXT = 4558;
   {$EXTERNALSYM ERROR_SYSTEM_INTEGRITY_REPUTATION_DANGEROUS_EXT}
@@ -16260,11 +16433,11 @@ const
 //
 // MessageText:
 //
-// System Integrity policy has been violated.  Unable to contact reputation service for unknown file.
+// An Application Control policy has blocked this file.
+// Unable to contact reputation service for unknown file.
 //
   ERROR_SYSTEM_INTEGRITY_REPUTATION_OFFLINE = 4559;
   {$EXTERNALSYM ERROR_SYSTEM_INTEGRITY_REPUTATION_OFFLINE}
-
 
 
 
@@ -16394,10 +16567,31 @@ const
 //
 // MessageText:
 //
-// System Integrity policy has been violated.  Failed to obtain file reputation because an infrastructure issue occurred. Try again later.
+// An Application Control policy has blocked this file. Unfriendly file.
 //
   ERROR_SYSTEM_INTEGRITY_REPUTATION_UNATTAINABLE = 4581;
   {$EXTERNALSYM ERROR_SYSTEM_INTEGRITY_REPUTATION_UNATTAINABLE}
+
+//
+// MessageId: ERROR_SYSTEM_INTEGRITY_REPUTATION_EXPLICIT_DENY_FILE
+//
+// MessageText:
+//
+// An Application Control policy has blocked this file.  Explicit denied file.
+//
+  ERROR_SYSTEM_INTEGRITY_REPUTATION_EXPLICIT_DENY_FILE = 4582;
+  {$EXTERNALSYM ERROR_SYSTEM_INTEGRITY_REPUTATION_EXPLICIT_DENY_FILE}
+
+//
+// MessageId: ERROR_SYSTEM_INTEGRITY_WHQL_NOT_SATISFIED
+//
+// MessageText:
+//
+// An Application Control policy has blocked this file.  File did not pass WHQL-only requirements.
+//
+  ERROR_SYSTEM_INTEGRITY_WHQL_NOT_SATISFIED = 4583;
+  {$EXTERNALSYM ERROR_SYSTEM_INTEGRITY_WHQL_NOT_SATISFIED}
+
 
 ///////////////////////////////////////////////////
 //                                               //
@@ -18704,6 +18898,46 @@ const
   ERROR_ENCRYPTION_POLICY_DENIES_OPERATION = 6022;
   {$EXTERNALSYM ERROR_ENCRYPTION_POLICY_DENIES_OPERATION}
 
+//
+// MessageId: ERROR_WIP_ENCRYPTION_FAILED
+//
+// MessageText:
+//
+// The specified file could not be encrypted with Windows Information Protection.
+//
+  ERROR_WIP_ENCRYPTION_FAILED         = 6023;
+  {$EXTERNALSYM ERROR_WIP_ENCRYPTION_FAILED}
+
+//
+// MessageId: ERROR_PDE_ENCRYPTION_UNAVAILABLE_FAILURE
+//
+// MessageText:
+//
+// Personal Data Encryption keys to encrypt data are currently unavailable due to a failure.
+//
+  ERROR_PDE_ENCRYPTION_UNAVAILABLE_FAILURE= 6024;
+  {$EXTERNALSYM ERROR_PDE_ENCRYPTION_UNAVAILABLE_FAILURE}
+
+//
+// MessageId: ERROR_PDE_DECRYPTION_UNAVAILABLE_FAILURE
+//
+// MessageText:
+//
+// Personal Data Encryption keys to decrypt data are currently unavailable due to a failure.
+//
+  ERROR_PDE_DECRYPTION_UNAVAILABLE_FAILURE= 6025;
+  {$EXTERNALSYM ERROR_PDE_DECRYPTION_UNAVAILABLE_FAILURE}
+
+//
+// MessageId: ERROR_PDE_DECRYPTION_UNAVAILABLE
+//
+// MessageText:
+//
+// Personal Data Encryption keys to decrypt data are currently unavailable as the user's session is locked.
+//
+  ERROR_PDE_DECRYPTION_UNAVAILABLE    = 6026;
+  {$EXTERNALSYM ERROR_PDE_DECRYPTION_UNAVAILABLE}
+
 
 ///////////////////////////////////////////////////
 //                                               //
@@ -18743,6 +18977,84 @@ const
   SCHED_E_SERVICE_NOT_LOCALSYSTEM     = 6200;
   {$EXTERNALSYM SCHED_E_SERVICE_NOT_LOCALSYSTEM}
 
+///////////////////////////////////////////////////
+//                                               //
+//             Cluster Error codes               //
+//                                               //
+//                 6250 to 6349                  //
+///////////////////////////////////////////////////
+
+//
+// MessageId: ERROR_CLUSTER_OBJECT_IS_CLUSTER_SET_VM
+//
+// MessageText:
+//
+//
+// The object cannot be deleted from the local cluster because it is registered with the cluster set.
+//
+  {$EXTERNALSYM ERROR_CLUSTER_OBJECT_IS_CLUSTER_SET_VM}
+  ERROR_CLUSTER_OBJECT_IS_CLUSTER_SET_VM= 6250;
+
+// Cluster native update specific error codes
+//
+// MessageId: ERROR_CNU_TEMPLATE_ALREADY_EXISTS
+//
+// MessageText:
+//
+// A cluster native update template with that name already exists.
+//
+  {$EXTERNALSYM ERROR_CNU_TEMPLATE_ALREADY_EXISTS}
+  ERROR_CNU_TEMPLATE_ALREADY_EXISTS   = 6251;
+
+//
+// MessageId: ERROR_CNU_TEMPLATE_NAME_NOT_FOUND
+//
+// MessageText:
+//
+// A cluster native update template with that name was not found.
+//
+  {$EXTERNALSYM ERROR_CNU_TEMPLATE_NAME_NOT_FOUND}
+  ERROR_CNU_TEMPLATE_NAME_NOT_FOUND   = 6252;
+
+//
+// MessageId: ERROR_CNU_RUN_NAME_NOT_FOUND
+//
+// MessageText:
+//
+// A cluster native update run with the specified name was not found.
+//
+  ERROR_CNU_RUN_NAME_NOT_FOUND        = 6253;
+  {$EXTERNALSYM ERROR_CNU_RUN_NAME_NOT_FOUND}
+
+//
+// MessageId: ERROR_CNU_RUN_ALREADY_IN_PROGRESS
+//
+// MessageText:
+//
+// A cluster native update run is already in progress on the cluster.
+//
+  ERROR_CNU_RUN_ALREADY_IN_PROGRESS   = 6254;
+  {$EXTERNALSYM ERROR_CNU_RUN_ALREADY_IN_PROGRESS}
+
+//
+// MessageId: ERROR_CNU_RUN_NOT_IN_PROGRESS
+//
+// MessageText:
+//
+// There is currently no ongoing cluster native update run on the cluster.
+//
+  ERROR_CNU_RUN_NOT_IN_PROGRESS       = 6255;
+  {$EXTERNALSYM ERROR_CNU_RUN_NOT_IN_PROGRESS}
+
+//
+// MessageId: ERROR_CNU_NOT_READY
+//
+// MessageText:
+//
+// Cluster native update not ready - run Enable-ClusterNativeUpdate to load.
+//
+  ERROR_CNU_NOT_READY                 = 6256;
+  {$EXTERNALSYM ERROR_CNU_NOT_READY}
 
 ///////////////////////////////////////////////////
 //                                               //
@@ -24907,7 +25219,7 @@ const
 //
 // MessageText:
 //
-// The functional level of the domain (or forest) cannot be lowered to the requested value.
+// The functional level of the domain (or forest) cannot be set to the requested value.
 //
   ERROR_DS_HIGH_DSA_VERSION           = 8642;
   {$EXTERNALSYM ERROR_DS_HIGH_DSA_VERSION}
@@ -25022,6 +25334,75 @@ const
   ERROR_LOCAL_POLICY_MODIFICATION_NOT_SUPPORTED = 8653;
   {$EXTERNALSYM ERROR_LOCAL_POLICY_MODIFICATION_NOT_SUPPORTED}
 
+//
+// MessageId: ERROR_POLICY_CONTROLLED_ACCOUNT
+//
+// MessageText:
+//
+// The account is controlled by external policy and cannot be modified.
+//
+  ERROR_POLICY_CONTROLLED_ACCOUNT     = 8654;
+  {$EXTERNALSYM ERROR_POLICY_CONTROLLED_ACCOUNT}
+
+//
+// MessageId: ERROR_LAPS_LEGACY_SCHEMA_MISSING
+//
+// MessageText:
+//
+// The Local Administrator Password Solution password update operation failed because the legacy LAPS schema needs to be added to Active Directory.
+//
+  ERROR_LAPS_LEGACY_SCHEMA_MISSING    = 8655;
+  {$EXTERNALSYM ERROR_LAPS_LEGACY_SCHEMA_MISSING}
+
+//
+// MessageId: ERROR_LAPS_SCHEMA_MISSING
+//
+// MessageText:
+//
+// The Local Administrator Password Solution password update operation failed because the Windows LAPS schema needs to be added to Active Directory.
+//
+  ERROR_LAPS_SCHEMA_MISSING           = 8656;
+  {$EXTERNALSYM ERROR_LAPS_SCHEMA_MISSING}
+
+//
+// MessageId: ERROR_LAPS_ENCRYPTION_REQUIRES_2016_DFL
+//
+// MessageText:
+//
+// The Local Administrator Password Solution encrypted password update operation failed because Active Directory is not yet running at the minimum required domain functional level (2016).
+//
+  ERROR_LAPS_ENCRYPTION_REQUIRES_2016_DFL= 8657;
+  {$EXTERNALSYM ERROR_LAPS_ENCRYPTION_REQUIRES_2016_DFL}
+
+//
+// MessageId: ERROR_LAPS_PROCESS_TERMINATED
+//
+// MessageText:
+//
+// The process was terminated by Windows Local Administrator Password Solution per the configured post-authentication-action policy.
+//
+  ERROR_LAPS_PROCESS_TERMINATED       = 8658;
+  {$EXTERNALSYM ERROR_LAPS_PROCESS_TERMINATED}
+
+//
+// MessageId: ERROR_DS_JET_RECORD_TOO_BIG
+//
+// MessageText:
+//
+// The Active Directory JET database page size limit for this request was exceeded.
+//
+  ERROR_DS_JET_RECORD_TOO_BIG         = 8659;
+  {$EXTERNALSYM ERROR_DS_JET_RECORD_TOO_BIG}
+
+//
+// MessageId: ERROR_DS_REPLICA_PAGE_SIZE_MISMATCH
+//
+// MessageText:
+//
+// The Active Directory JET database page size does not match on all Domain Controllers in this forest.
+//
+  ERROR_DS_REPLICA_PAGE_SIZE_MISMATCH = 8660;
+  {$EXTERNALSYM ERROR_DS_REPLICA_PAGE_SIZE_MISMATCH}
 
 ///////////////////////////////////////////////////
 //                                                /
@@ -32807,6 +33188,25 @@ const
   ERROR_APPINSTALLER_IS_MANAGED_BY_SYSTEM = 15672;
   {$EXTERNALSYM ERROR_APPINSTALLER_IS_MANAGED_BY_SYSTEM}
 
+//
+// MessageId: ERROR_SERVICE_BLOCKED_BY_SYSPREP_IN_PROGRESS
+//
+// MessageText:
+//
+// Service is not available while sysprep is running.
+//
+  ERROR_SERVICE_BLOCKED_BY_SYSPREP_IN_PROGRESS= 15673;
+  {$EXTERNALSYM ERROR_SERVICE_BLOCKED_BY_SYSPREP_IN_PROGRESS}
+
+//
+// MessageId: ERROR_UNSUPPORTED_ARM32_PACKAGE_REQUIRES_REMEDIAITON
+//
+// MessageText:
+//
+// The activation failed because the package targets the arm32 architecture, which is no longer supported. Try repairing or reinstalling the application to fix the problem.
+//
+  ERROR_UNSUPPORTED_ARM32_PACKAGE_REQUIRES_REMEDIAITON= 15674;
+  {$EXTERNALSYM ERROR_UNSUPPORTED_ARM32_PACKAGE_REQUIRES_REMEDIAITON}
 
 
 //////////////////////////
@@ -35085,6 +35485,17 @@ const
 //
   CONVERT10_E_STG_DIB_TO_BITMAP       = HRESULT($800401C6);
   {$EXTERNALSYM CONVERT10_E_STG_DIB_TO_BITMAP}
+
+//
+// MessageId: CONVERT10_E_OLELINK_DISABLED
+//
+// MessageText:
+//
+// OLE Links in OLESTREAM are disabled while converting the OLESTREAM to IStorage
+//
+  {$EXTERNALSYM CONVERT10_E_OLELINK_DISABLED}
+  CONVERT10_E_OLELINK_DISABLED        = HRESULT($800401C7);
+
 
   CLIPBRD_E_FIRST                     = HRESULT($800401D0);
   {$EXTERNALSYM CLIPBRD_E_FIRST}
@@ -38047,6 +38458,16 @@ const
   {$EXTERNALSYM APPX_E_INVALID_PUBLISHER_BRIDGING}
 
 //
+// MessageId: APPX_E_DIGEST_MISMATCH
+//
+// MessageText:
+//
+// The expected digest value did not match the actual digest value of the content.
+//
+  APPX_E_DIGEST_MISMATCH              = HRESULT($80080219);
+  {$EXTERNALSYM APPX_E_DIGEST_MISMATCH}
+
+//
 //
 // Codes $0300-$030f are reserved for background task error codes.
 //
@@ -40553,6 +40974,26 @@ const
   {$EXTERNALSYM NTE_NOT_ACTIVE_CONSOLE}
 
 //
+// MessageId: NTE_VBS_UNAVAILABLE
+//
+// MessageText:
+//
+// VBS key isolation is not available.
+//
+  NTE_VBS_UNAVAILABLE                 = HRESULT ($80090039);
+  {$EXTERNALSYM NTE_VBS_UNAVAILABLE}
+
+//
+// MessageId: NTE_VBS_CANNOT_DECRYPT_KEY
+//
+// MessageText:
+//
+// Cannot decrypt a VBS-isolated key.
+//
+  NTE_VBS_CANNOT_DECRYPT_KEY          = HRESULT ($8009003A);
+  {$EXTERNALSYM NTE_VBS_CANNOT_DECRYPT_KEY}
+
+//
 // MessageId: SEC_E_INSUFFICIENT_MEMORY
 //
 // MessageText:
@@ -41485,6 +41926,16 @@ const
 //
   SEC_E_INSUFFICIENT_BUFFERS          = HRESULT($8009036B);
   {$EXTERNALSYM SEC_E_INSUFFICIENT_BUFFERS}
+
+//
+// MessageId: SEC_I_INVALID_SESSION_STATE
+//
+// MessageText:
+//
+// The TLS session cannot be resumed.
+//
+  SEC_I_INVALID_SESSION_STATE         = HRESULT($8009036C);
+  {$EXTERNALSYM SEC_I_INVALID_SESSION_STATE}
 
 
 //
@@ -47105,6 +47556,15 @@ const
   MENROLL_E_MDM_NOT_CONFIGURED        = HRESULT($80180031);
   {$EXTERNALSYM MENROLL_E_MDM_NOT_CONFIGURED}
 
+//
+// MessageId: MENROLL_E_CUSTOMSERVERERROR
+//
+// MessageText:
+//
+// The server responded with a custom error string, see DeviceManagement-Enterprise-Diagnostics for details.
+//
+  MENROLL_E_CUSTOMSERVERERROR         = HRESULT($80180032);
+  {$EXTERNALSYM MENROLL_E_CUSTOMSERVERERROR}
 
 //
 // FACILITY_WER
@@ -48124,6 +48584,16 @@ const
 //
   ERROR_GRAPHICS_MPO_ALLOCATION_UNPINNED = HRESULT($C0262018);
   {$EXTERNALSYM ERROR_GRAPHICS_MPO_ALLOCATION_UNPINNED}
+
+//
+// MessageId: ERROR_GRAPHICS_SETDISPLAYMODE_REQUIRED
+//
+// MessageText:
+//
+// SetDisplayMode is required before present can succeed.
+//
+  ERROR_GRAPHICS_SETDISPLAYMODE_REQUIRED = HRESULT($C0262019);
+  {$EXTERNALSYM ERROR_GRAPHICS_SETDISPLAYMODE_REQUIRED}
 
 //
 // Video Memory Manager (VidMM) subsystem errors {$2100..$21ff}
@@ -49918,7 +50388,7 @@ const
 //
 // An array passed to the function cannot hold all of the data that the function must copy into the array.
 //
-  ERROR_GRAPHICS_PARAMETER_ARRAY_TOO_SMALL= HRESULT($C02625E6);
+  ERROR_GRAPHICS_PARAMETER_ARRAY_TOO_SMALL = HRESULT($C02625E6);
 
 //
 // MessageId: ERROR_GRAPHICS_INTERNAL_ERROR
@@ -49939,6 +50409,29 @@ const
 //
   ERROR_GRAPHICS_SESSION_TYPE_CHANGE_IN_PROGRESS = HRESULT($C02605E8);
   {$EXTERNALSYM ERROR_GRAPHICS_SESSION_TYPE_CHANGE_IN_PROGRESS}
+
+//
+//   Basic Display Driver shared error codes {0x2600..0x26DF}
+//
+//
+// MessageId: ERROR_GRAPHICS_UNKNOWN_BIOS_FRAME_BUFFER_NOT_FOUND
+//
+// MessageText:
+//
+// The Basic Display Driver cannot start because there is no frame buffer found, and the system cannot determine if the system is BIOS-compatible.
+//
+  ERROR_GRAPHICS_UNKNOWN_BIOS_FRAME_BUFFER_NOT_FOUND = HRESULT($C0262600);
+  {$EXTERNALSYM ERROR_GRAPHICS_UNKNOWN_BIOS_FRAME_BUFFER_NOT_FOUND}
+
+//
+// MessageId: ERROR_GRAPHICS_UEFI_FRAME_BUFFER_NOT_FOUND
+//
+// MessageText:
+//
+// The Basic Display Driver cannot start because there is no frame buffer found from UEFI or from a previously running graphics driver.
+//
+  ERROR_GRAPHICS_UEFI_FRAME_BUFFER_NOT_FOUND = HRESULT($C0262601);
+  {$EXTERNALSYM ERROR_GRAPHICS_UEFI_FRAME_BUFFER_NOT_FOUND}
 
 
 // FACILITY_NAP
@@ -52774,6 +53267,55 @@ const
   TPMAPI_E_INVALID_POLICYAUTH_BLOB_TYPE = HRESULT($8029012E);
   {$EXTERNALSYM TPMAPI_E_INVALID_POLICYAUTH_BLOB_TYPE}
 
+//
+// MessageId: TPMAPI_E_INVALID_TAG
+//
+// MessageText:
+//
+// The structure tag is invalid.
+//
+  {$EXTERNALSYM TPMAPI_E_INVALID_TAG}
+  TPMAPI_E_INVALID_TAG                = HRESULT($80290130);
+
+//
+// MessageId: TPMAPI_E_INVALID_STRUCT_SIZE
+//
+// MessageText:
+//
+// The structure size parameter is invalid.
+//
+  TPMAPI_E_INVALID_STRUCT_SIZE        = HRESULT($80290131);
+  {$EXTERNALSYM TPMAPI_E_INVALID_STRUCT_SIZE}
+
+//
+// MessageId: TPMAPI_E_AUTH_CHAIN_ERROR
+//
+// MessageText:
+//
+// The authorization chain is malformed.
+//
+  TPMAPI_E_AUTH_CHAIN_ERROR           = HRESULT($80290132);
+  {$EXTERNALSYM TPMAPI_E_AUTH_CHAIN_ERROR}
+
+//
+// MessageId: TPMAPI_E_COUNTER_CORRUPTED
+//
+// MessageText:
+//
+// The counter is corrupted. The TPM may have gone into Failure Mode.
+//
+  TPMAPI_E_COUNTER_CORRUPTED          = HRESULT($80290133);
+  {$EXTERNALSYM TPMAPI_E_COUNTER_CORRUPTED}
+
+//
+// MessageId: TPMAPI_E_INVALID_ALGORITHM
+//
+// MessageText:
+//
+// The specified algorithm is not supported.
+//
+  TPMAPI_E_INVALID_ALGORITHM          = HRESULT($80290134);
+   {$EXTERNALSYM TPMAPI_E_INVALID_ALGORITHM}
 
 //
 // TBS implementation error codes {$0200..$02ff}
@@ -53476,6 +54018,26 @@ const
 //
   TPM_E_ZERO_EXHAUST_ENABLED          = HRESULT($80290500);
   {$EXTERNALSYM TPM_E_ZERO_EXHAUST_ENABLED}
+
+//
+// MessageId: DRTM_E_ENVIRONMENT_UNSAFE
+//
+// MessageText:
+//
+// The current environment is unsafe for DRTM to run in.
+//
+  DRTM_E_ENVIRONMENT_UNSAFE           = HRESULT($80290501);
+  {$EXTERNALSYM DRTM_E_ENVIRONMENT_UNSAFE}
+
+//
+// MessageId: DRTM_E_NO_DIRECT_AUTH_FOR_CURRENT_MLE
+//
+// MessageText:
+//
+// There are no authorizations for the current running MLE. The current state is not authorized.
+//
+  DRTM_E_NO_DIRECT_AUTH_FOR_CURRENT_MLE = HRESULT($80290502);
+  {$EXTERNALSYM DRTM_E_NO_DIRECT_AUTH_FOR_CURRENT_MLE}
 
 //
 // Error codes in TPM task and core provisioning code {$0600..$06ff}
@@ -56128,9 +56690,228 @@ const
 //
 // This operation cannot be completed because BitLocker Drive Encryption metadata area is full. Consider removing unnecessary key protectors for this drive.
 //
-  FVE_E_METADATA_FULL                 = HRESULT($803100EC);
   {$EXTERNALSYM FVE_E_METADATA_FULL}
+  FVE_E_METADATA_FULL                 = HRESULT($803100EC);
 
+//
+// MessageId: FVE_E_DISCOVERY_VOLUME_NOT_SUPPORTED
+//
+// MessageText:
+//
+// BitLocker Drive Encryption no longer supports discovery volumes.
+//
+  FVE_E_DISCOVERY_VOLUME_NOT_SUPPORTED= HRESULT($803100ED);
+  {$EXTERNALSYM FVE_E_DISCOVERY_VOLUME_NOT_SUPPORTED}
+
+//
+// MessageId: FVE_E_EXCEED_LIMIT_RP
+//
+// MessageText:
+//
+// BitLocker Drive Encryption cannot add another recovery password because the maximum number of recovery passwords for this volume has been reached. Consider removing unnecessary recovery passwords for this volume.
+//
+  FVE_E_EXCEED_LIMIT_RP               = HRESULT($803100EE);
+  {$EXTERNALSYM FVE_E_EXCEED_LIMIT_RP}
+
+//
+// MessageId: FVE_E_NO_BACKUP_ACCOUNT
+//
+// MessageText:
+//
+// There is no backup account information available for the specified recovery password.
+//
+  FVE_E_NO_BACKUP_ACCOUNT             = HRESULT($803100EF);
+  {$EXTERNALSYM FVE_E_NO_BACKUP_ACCOUNT}
+
+//
+// MessageId: FVE_E_SUSPEND_PROTECTION_NOT_ALLOWED
+//
+// MessageText:
+//
+// The operation failed because BitLocker Drive Encryption cannot suspend protection due to policy.
+//
+  FVE_E_SUSPEND_PROTECTION_NOT_ALLOWED = HRESULT($803100F0);
+  {$EXTERNALSYM FVE_E_SUSPEND_PROTECTION_NOT_ALLOWED}
+
+//
+// MessageId: FVE_E_CANNOT_PREDICT_PCR7
+//
+// MessageText:
+//
+// BitLocker Drive Encryption cannot predictively seal TPM protector to PCR7.
+//
+  FVE_E_CANNOT_PREDICT_PCR7           = HRESULT($803100F1);
+  {$EXTERNALSYM FVE_E_CANNOT_PREDICT_PCR7}
+
+//
+// MessageId: FVE_E_ENTRY_ALREADY_EXISTS
+//
+// MessageText:
+//
+// The operation failed because an entry with the given ID already exists.
+//
+  FVE_E_ENTRY_ALREADY_EXISTS          = ($803100F2);
+  {$EXTERNALSYM FVE_E_ENTRY_ALREADY_EXISTS}
+
+//
+// MessageId: FVE_E_ENTRY_NOT_FOUND
+//
+// MessageText:
+//
+// The operation failed because an entry with the given ID was not found.
+//
+  FVE_E_ENTRY_NOT_FOUND               = HRESULT($803100F3);
+  {$EXTERNALSYM FVE_E_ENTRY_NOT_FOUND}
+
+//
+// MessageId: FVE_E_DATUM_PARTIALLY_INVALID
+//
+// MessageText:
+//
+// The datum is invalid in its current state, but may be fixed so that it is valid.
+//
+  FVE_E_DATUM_PARTIALLY_INVALID       = HRESULT($803100F4);
+  {$EXTERNALSYM FVE_E_DATUM_PARTIALLY_INVALID}
+
+//
+// MessageId: FVE_E_DATASET_TPM_DATUMS_INCONSISTENT
+//
+// MessageText:
+//
+// The dataset contains TPM datums that are inconsistent.
+//
+  FVE_E_DATASET_TPM_DATUMS_INCONSISTENT = HRESULT($803100F5);
+  {$EXTERNALSYM FVE_E_DATASET_TPM_DATUMS_INCONSISTENT}
+
+//
+// MessageId: FVE_E_SECURE_BOOT_BINDINGS_OUT_OF_SYNC
+//
+// MessageText:
+//
+// The TPM protector contains conflicting information about whether the binding is a Secure Boot binding.
+//
+  FVE_E_SECURE_BOOT_BINDINGS_OUT_OF_SYNC = HRESULT($803100F6);
+  {$EXTERNALSYM FVE_E_SECURE_BOOT_BINDINGS_OUT_OF_SYNC}
+
+//
+// MessageId: FVE_E_SECURE_BOOT_BINDING_DATA_OUT_OF_SYNC
+//
+// MessageText:
+//
+// The dataset contains conflicting information about whether the TPM protector binding is a Secure Boot binding.
+//
+  FVE_E_SECURE_BOOT_BINDING_DATA_OUT_OF_SYNC = HRESULT($803100F7);
+  {$EXTERNALSYM FVE_E_SECURE_BOOT_BINDING_DATA_OUT_OF_SYNC}
+
+//
+// MessageId: FVE_E_ORPHANED_TPM_BINDING_DATUM
+//
+// MessageText:
+//
+// The dataset contains a TPM binding without associated binding information. Try removing and re-adding the TPM protector.
+//
+  FVE_E_ORPHANED_TPM_BINDING_DATUM    = HRESULT($803100F8);
+  {$EXTERNALSYM FVE_E_ORPHANED_TPM_BINDING_DATUM}
+
+//
+// MessageId: FVE_E_BAD_TPM_DATUM_ASSOCIATION
+//
+// MessageText:
+//
+// The dataset contains TPM binding information incorrectly associated to multiple TPM bindings. Try re-enabling BitLocker.
+//
+  FVE_E_BAD_TPM_DATUM_ASSOCIATION     = HRESULT($803100F9);
+  {$EXTERNALSYM FVE_E_BAD_TPM_DATUM_ASSOCIATION}
+
+//
+// MessageId: FVE_E_FINAL_TPM_PCR_VALUES_MATCH
+//
+// MessageText:
+//
+// The compared final TPM PCR values match.
+//
+  FVE_E_FINAL_TPM_PCR_VALUES_MATCH    = HRESULT($803100FA);
+  {$EXTERNALSYM FVE_E_FINAL_TPM_PCR_VALUES_MATCH}
+
+//
+// MessageId: FVE_E_MATCHING_PCRS_TPM_FAILURE
+//
+// MessageText:
+//
+// BitLocker failed to obtain the key from the TPM due to an unforseen TPM failure.
+//
+  FVE_E_MATCHING_PCRS_TPM_FAILURE     = HRESULT($803100FB);
+  {$EXTERNALSYM FVE_E_MATCHING_PCRS_TPM_FAILURE}
+
+//
+// MessageId: FVE_E_BACKUP_CACHE_NOT_ALLOCATED
+//
+// MessageText:
+//
+// No backup cache was allocated for Device Encryption. At least one backup cache needs to be allocated.
+//
+  FVE_E_BACKUP_CACHE_NOT_ALLOCATED    = HRESULT($803100FC);
+  {$EXTERNALSYM FVE_E_BACKUP_CACHE_NOT_ALLOCATED}
+
+//
+// MessageId: FVE_E_MSA_BACKUP_CACHE_NOT_ALLOCATED
+//
+// MessageText:
+//
+// MSA backup cache is not allocated for Device Encryption.
+//
+  FVE_E_MSA_BACKUP_CACHE_NOT_ALLOCATED = HRESULT($803100FD);
+  {$EXTERNALSYM FVE_E_MSA_BACKUP_CACHE_NOT_ALLOCATED}
+
+//
+// MessageId: FVE_E_AD_BACKUP_CACHE_NOT_ALLOCATED
+//
+// MessageText:
+//
+// AD backup cache is not allocated for Device Encryption.
+//
+  FVE_E_AD_BACKUP_CACHE_NOT_ALLOCATED = HRESULT($803100FE);
+  {$EXTERNALSYM FVE_E_AD_BACKUP_CACHE_NOT_ALLOCATED}
+
+//
+// MessageId: FVE_E_GENERAL_TPM_FAILURE
+//
+// MessageText:
+//
+// BitLocker encountered a problem communicating with the TPM at boot.
+//
+  FVE_E_GENERAL_TPM_FAILURE           = HRESULT($803100FF);
+   {$EXTERNALSYM FVE_E_GENERAL_TPM_FAILURE}
+
+//
+// MessageId: FVE_E_TPM_NONEXISTENT
+//
+// MessageText:
+//
+// A TPM was not available for BitLocker at boot.
+//
+  FVE_E_TPM_NONEXISTENT               = HRESULT($80310100);
+  {$EXTERNALSYM FVE_E_TPM_NONEXISTENT}
+
+//
+// MessageId: FVE_E_NO_PCR_BOOT_LOCK_BOUNDARY
+//
+// MessageText:
+//
+// BitLocker could not enforce the PCR 11 cap event boundary.
+//
+  FVE_E_NO_PCR_BOOT_LOCK_BOUNDARY     = HRESULT($C0310101);
+  {$EXTERNALSYM FVE_E_NO_PCR_BOOT_LOCK_BOUNDARY}
+
+//
+// MessageId: FVE_E_PCR_BOOT_LOCK_BOUNDARY
+//
+// MessageText:
+//
+// BitLocker prevented an attempt to create a TPM binding for a PCR that contains events extended into the TPM after the BitLocker boot lock event.
+//
+  FVE_E_PCR_BOOT_LOCK_BOUNDARY        = HRESULT($C0310102);
+  {$EXTERNALSYM FVE_E_PCR_BOOT_LOCK_BOUNDARY}
 
 
 //
@@ -57680,6 +58461,17 @@ const
   {$EXTERNALSYM ERROR_NDIS_DOT11_AP_BAND_NOT_ALLOWED}
 
 //
+// MessageId: ERROR_NDIS_DOT11_AP_RADIO_RESTRICTION
+//
+// MessageText:
+//
+// The wireless local area network interface cannot start an AP because the minimum radio hardware required for this operation is not present.
+//
+  ERROR_NDIS_DOT11_AP_RADIO_RESTRICTION = _NDIS_ERROR_TYPEDEF_($80342009);
+  {$EXTERNALSYM ERROR_NDIS_DOT11_AP_RADIO_RESTRICTION}
+
+
+//
 // NDIS informational code (ndis.sys)
 //
 
@@ -58290,6 +59082,26 @@ const
 //
   ERROR_HV_INSUFFICIENT_CONTIGUOUS_ROOT_MEMORY_MIRRORING = _NDIS_ERROR_TYPEDEF_($C0350085);
   {$EXTERNALSYM ERROR_HV_INSUFFICIENT_CONTIGUOUS_ROOT_MEMORY_MIRRORING}
+
+//
+// MessageId: ERROR_HV_VTL_ALREADY_ENABLED
+//
+// MessageText:
+//
+// The VTL specified for the operation is already in an enabled state.
+//
+  ERROR_HV_VTL_ALREADY_ENABLED        = _NDIS_ERROR_TYPEDEF_($C0350086);
+  {$EXTERNALSYM ERROR_HV_VTL_ALREADY_ENABLED}
+
+//
+// MessageId: ERROR_HV_SPDM_REQUEST
+//
+// MessageText:
+//
+// The device security operation was interrupted due to a required SPDM request.
+//
+  ERROR_HV_SPDM_REQUEST               = _NDIS_ERROR_TYPEDEF_($C0350088);
+  {$EXTERNALSYM ERROR_HV_SPDM_REQUEST}
 
 //
 // MessageId: ERROR_HV_NOT_PRESENT
@@ -59607,6 +60419,156 @@ const
 //
   ERROR_DM_OPERATION_LIMIT_EXCEEDED = HRESULT($C0370600);
   {$EXTERNALSYM ERROR_DM_OPERATION_LIMIT_EXCEEDED}
+
+//
+// VMMS related error code (0x0700-0x07ff)
+//
+
+//
+// MessageId: VM_E_CLIENT_NAME_REQUIRED
+//
+// MessageText:
+//
+// Required WMI metadata 'ClientName' was not provided.
+//
+  VM_E_CLIENT_NAME_REQUIRED           = HRESULT($C0370700);
+  {$EXTERNALSYM VM_E_CLIENT_NAME_REQUIRED}
+
+//
+// MessageId: VM_E_MODIFY_VTL2_SETTINGS_CONFLICT
+//
+// MessageText:
+//
+// VTL2 settings were not modified because another client modified them. Requery the settings and try again.
+//
+  VM_E_MODIFY_VTL2_SETTINGS_CONFLICT  = HRESULT($C0370701);
+  {$EXTERNALSYM VM_E_MODIFY_VTL2_SETTINGS_CONFLICT}
+
+//
+// MessageId: VM_E_VTL2_NOT_AVAILABLE
+//
+// MessageText:
+//
+// Management VTL settings are not available because the virtual machine does not have the correct GuestStateIsolationType.
+//
+  VM_E_VTL2_NOT_AVAILABLE             = HRESULT($C0370702);
+  {$EXTERNALSYM VM_E_VTL2_NOT_AVAILABLE}
+
+
+ //
+ // Management VTL related error codes (0x0800 - 0x08ff)
+ //
+
+//
+// MessageId: VM_E_MANAGEMENT_VTL_RELOAD_IN_PROGRESS
+//
+// MessageText:
+//
+// Reload of the management VTL was already in progress.
+//
+  VM_E_MANAGEMENT_VTL_RELOAD_IN_PROGRESS = HRESULT($C0370800);
+  {$EXTERNALSYM VM_E_MANAGEMENT_VTL_RELOAD_IN_PROGRESS}
+
+//
+// MessageId: VM_E_MANAGEMENT_VTL_RELOAD_INVALID_PROTOCOL_RESPONSE
+//
+// MessageText:
+//
+// Received an invalid protocol response.
+//
+  VM_E_MANAGEMENT_VTL_RELOAD_INVALID_PROTOCOL_RESPONSE = HRESULT($C0370801);
+  {$EXTERNALSYM VM_E_MANAGEMENT_VTL_RELOAD_INVALID_PROTOCOL_RESPONSE}
+
+//
+// MessageId: VM_E_MANAGEMENT_VTL_RELOAD_SAVE_FAILURE
+//
+// MessageText:
+//
+// Management VTL failed to save itself.
+//
+  VM_E_MANAGEMENT_VTL_RELOAD_SAVE_FAILURE = HRESULT($C0370802);
+  {$EXTERNALSYM VM_E_MANAGEMENT_VTL_RELOAD_SAVE_FAILURE}
+
+//
+// MessageId: VM_E_MANAGEMENT_VTL_RELOAD_RESTORE_FAILURE
+//
+// MessageText:
+//
+// Management VTL failed to restore itself.
+//
+  VM_E_MANAGEMENT_VTL_RELOAD_RESTORE_FAILURE = HRESULT($C0370803);
+  {$EXTERNALSYM VM_E_MANAGEMENT_VTL_RELOAD_RESTORE_FAILURE}
+
+//
+// MessageId: VM_E_MANAGEMENT_VTL_RELOAD_NO_SAVED_STATE
+//
+// MessageText:
+//
+// There is no saved state for the management VTL.
+//
+  VM_E_MANAGEMENT_VTL_RELOAD_NO_SAVED_STATE = HRESULT($C0370804);
+  {$EXTERNALSYM VM_E_MANAGEMENT_VTL_RELOAD_NO_SAVED_STATE}
+
+//
+// MessageId: VM_E_MANAGEMENT_VTL_RELOAD_INVALID_SAVE_NOTIFICATION_RECEIVED
+//
+// MessageText:
+//
+// Received an invalid or unexpected management VTL save notification.
+//
+//
+  VM_E_MANAGEMENT_VTL_RELOAD_INVALID_SAVE_NOTIFICATION_RECEIVED = HRESULT($C0370805);
+   {$EXTERNALSYM VM_E_MANAGEMENT_VTL_RELOAD_INVALID_SAVE_NOTIFICATION_RECEIVED}
+
+//
+// MessageId: VM_E_MANAGEMENT_VTL_RELOAD_INVALID_RESTORE_REQUEST_RECEIVED
+//
+// MessageText:
+//
+// Received an invalid or unexpected request to restore management VTL.
+//
+  VM_E_MANAGEMENT_VTL_RELOAD_INVALID_RESTORE_REQUEST_RECEIVED = HRESULT($C0370806);
+  {$EXTERNALSYM VM_E_MANAGEMENT_VTL_RELOAD_INVALID_RESTORE_REQUEST_RECEIVED}
+
+//
+// MessageId: VM_E_MANAGEMENT_VTL_RELOAD_INVALID_RESTORE_NOTIFICATION_RECEIVED
+//
+// MessageText:
+//
+// Received an invalid or unexpected notification to restore management VTL.
+//
+  VM_E_MANAGEMENT_VTL_RELOAD_INVALID_RESTORE_NOTIFICATION_RECEIVED = HRESULT($C0370807);
+  {$EXTERNALSYM VM_E_MANAGEMENT_VTL_RELOAD_INVALID_RESTORE_NOTIFICATION_RECEIVED}
+
+//
+// MessageId: VM_E_MANAGEMENT_VTL_RELOAD_NO_IGVM_FILE
+//
+// MessageText:
+//
+// The virtual machine was not booted from an IGVM file. There is no management VTL.
+//
+  VM_E_MANAGEMENT_VTL_RELOAD_NO_IGVM_FILE = HRESULT($C0370808);
+  {$EXTERNALSYM VM_E_MANAGEMENT_VTL_RELOAD_NO_IGVM_FILE}
+
+//
+// MessageId: VM_E_MANAGEMENT_VTL_RELOAD_UNSUPPORTED
+//
+// MessageText:
+//
+// Reloading the management VTL environment is not supported for this VM.
+//
+  VM_E_MANAGEMENT_VTL_RELOAD_UNSUPPORTED = HRESULT($C0370809);
+  {$EXTERNALSYM VM_E_MANAGEMENT_VTL_RELOAD_UNSUPPORTED}
+
+//
+// MessageId: VM_E_MANAGEMENT_VTL_PROTOCOL_ESTABLISHMENT_TIMEOUT
+//
+// MessageText:
+//
+// The management VTL environment failed to negotiate protocol with the host within the allowed time limit.
+//
+  VM_E_MANAGEMENT_VTL_PROTOCOL_ESTABLISHMENT_TIMEOUT = HRESULT($C037080A);
+  {$EXTERNALSYM VM_E_MANAGEMENT_VTL_PROTOCOL_ESTABLISHMENT_TIMEOUT}
 
 
 //
@@ -61028,6 +61990,17 @@ const
 //
   ERROR_VHD_MISSING_CHANGE_TRACKING_INFORMATION = _NDIS_ERROR_TYPEDEF_($C03A0030);
   {$EXTERNALSYM ERROR_VHD_MISSING_CHANGE_TRACKING_INFORMATION}
+
+//
+// MessageId: ERROR_VHD_UNEXPECTED_ID
+//
+// MessageText:
+//
+// The specified VHD has an unexpected virtual disk identifier.
+//
+  ERROR_VHD_UNEXPECTED_ID             = _NDIS_ERROR_TYPEDEF_($C03A0034);
+  {$EXTERNALSYM ERROR_VHD_UNEXPECTED_ID}
+
 
 //
 // Warnings:
@@ -63766,6 +64739,37 @@ const
   {$EXTERNALSYM E_HDAUDIO_NULL_LINKED_LIST_ENTRY}
 
 //
+// MessageId: E_SOUNDWIRE_COMMAND_ABORTED
+//
+// MessageText:
+//
+// SoundWire command aborted.
+//
+  E_SOUNDWIRE_COMMAND_ABORTED         = HRESULT($80660006);
+  {$EXTERNALSYM E_SOUNDWIRE_COMMAND_ABORTED}
+
+//
+// MessageId: E_SOUNDWIRE_COMMAND_IGNORED
+//
+// MessageText:
+//
+// SoundWire command ignored.
+//
+  E_SOUNDWIRE_COMMAND_IGNORED         = HRESULT($80660007);
+  {$EXTERNALSYM E_SOUNDWIRE_COMMAND_IGNORED}
+
+//
+// MessageId: E_SOUNDWIRE_COMMAND_FAILED
+//
+// MessageText:
+//
+// SoundWire command failed.
+//
+  E_SOUNDWIRE_COMMAND_FAILED          = HRESULT($80660008);
+  {$EXTERNALSYM E_SOUNDWIRE_COMMAND_FAILED}
+
+
+//
 // StateRepository errors
 //
 //
@@ -65100,6 +66104,15 @@ const
   DXGI_ERROR_MPO_UNPINNED = HRESULT($887A0064);
   {$EXTERNALSYM DXGI_ERROR_MPO_UNPINNED}
 
+//
+// MessageId: DXGI_ERROR_SETDISPLAYMODE_REQUIRED
+//
+// MessageText:
+//
+// SetDisplayMode is required before present can succeed.
+//
+  DXGI_ERROR_SETDISPLAYMODE_REQUIRED  = HRESULT($887A0065);
+  {$EXTERNALSYM DXGI_ERROR_SETDISPLAYMODE_REQUIRED}
 
 
 //
@@ -69553,6 +70566,57 @@ const
   {$EXTERNALSYM ERROR_SMB_NO_SIGNING_ALGORITHM_OVERLAP}
 
 //
+// MessageId: ERROR_SMB_GUEST_LOGON_BLOCKED_SIGNING_REQUIRED
+//
+// MessageText:
+//
+// You can't access this shared folder because your computer is configured to require SMB signing. These policies help protect your PC from unsafe or malicious devices on the network.
+//
+  ERROR_SMB_GUEST_LOGON_BLOCKED_SIGNING_REQUIRED = HRESULT($C05D0003);
+  {$EXTERNALSYM ERROR_SMB_GUEST_LOGON_BLOCKED_SIGNING_REQUIRED}
+
+//
+// MessageId: ERROR_SMB_GUEST_ENCRYPTION_NOT_SUPPORTED
+//
+// MessageText:
+//
+// The requested operation failed. Encryption is not supported for guest access.
+//
+  ERROR_SMB_GUEST_ENCRYPTION_NOT_SUPPORTED = HRESULT($C05D0004);
+  {$EXTERNALSYM ERROR_SMB_GUEST_ENCRYPTION_NOT_SUPPORTED}
+
+//
+// MessageId: ERROR_SMB_ENCRYPTION_NOT_SUPPORTED_BY_PEER
+//
+// MessageText:
+//
+// The requested operation failed. Encryption is not supported on SMB server.
+//
+  ERROR_SMB_ENCRYPTION_NOT_SUPPORTED_BY_PEER = HRESULT($C05D0005);
+  {$EXTERNALSYM ERROR_SMB_ENCRYPTION_NOT_SUPPORTED_BY_PEER}
+
+//
+// MessageId: ERROR_SMB_CERT_NO_PRIVATE_KEY
+//
+// MessageText:
+//
+// The certificate does not have a private key.
+//
+  ERROR_SMB_CERT_NO_PRIVATE_KEY       = HRESULT($C05D0006);
+  {$EXTERNALSYM ERROR_SMB_CERT_NO_PRIVATE_KEY}
+
+//
+// MessageId: ERROR_SMB_TLS_ACCESS_DENIED
+//
+// MessageText:
+//
+// The SMB client was denied access to the SMB server during mutual authentication.
+//
+  ERROR_SMB_TLS_ACCESS_DENIED         = HRESULT($C05D0007);
+  {$EXTERNALSYM ERROR_SMB_TLS_ACCESS_DENIED}
+
+
+//
 // WININET.DLL errors - propagated as HRESULT's using FACILITY=WIN32
 //
 //
@@ -72171,6 +73235,161 @@ const
   ERROR_QUIC_ALPN_NEG_FAILURE         = HRESULT($80410007);
   {$EXTERNALSYM ERROR_QUIC_ALPN_NEG_FAILURE}
 
+//
+// MessageId: ERROR_QUIC_STREAM_LIMIT_REACHED
+//
+// MessageText:
+//
+// The QUIC connection failed because there are not enough streams available.
+//
+  ERROR_QUIC_STREAM_LIMIT_REACHED     = HRESULT($80410008);
+  {$EXTERNALSYM ERROR_QUIC_STREAM_LIMIT_REACHED}
+
+//
+// MessageId: ERROR_QUIC_ALPN_IN_USE
+//
+// MessageText:
+//
+// The QUIC connection failed because the ALPN is in use.
+//
+  ERROR_QUIC_ALPN_IN_USE              = HRESULT($80410009);
+  {$EXTERNALSYM ERROR_QUIC_ALPN_IN_USE}
+
+
+//
+// QUIC TLS
+//
+
+//
+// MessageId: ERROR_QUIC_TLS_UNEXPECTED_MESSAGE
+//
+// MessageText:
+//
+// The QUIC connection encountered an unexpected message during TLS.
+//
+  ERROR_QUIC_TLS_UNEXPECTED_MESSAGE   = HRESULT($8041010A);
+  {$EXTERNALSYM ERROR_QUIC_TLS_UNEXPECTED_MESSAGE}
+
+//
+// MessageId: ERROR_QUIC_TLS_BAD_CERTIFICATE
+//
+// MessageText:
+//
+// The QUIC connection encountered a bad certificate during TLS.
+//
+  ERROR_QUIC_TLS_BAD_CERTIFICATE      = HRESULT($8041012A);
+  {$EXTERNALSYM ERROR_QUIC_TLS_BAD_CERTIFICATE}
+
+//
+// MessageId: ERROR_QUIC_TLS_UNSUPPORTED_CERTIFICATE
+//
+// MessageText:
+//
+// The QUIC connection encountered an unsupported certificate during TLS.
+//
+  ERROR_QUIC_TLS_UNSUPPORTED_CERTIFICATE = HRESULT($8041012B);
+  {$EXTERNALSYM ERROR_QUIC_TLS_UNSUPPORTED_CERTIFICATE}
+
+//
+// MessageId: ERROR_QUIC_TLS_CERTIFICATE_REVOKED
+//
+// MessageText:
+//
+// The QUIC connection encountered a revoked certificate during TLS.
+//
+  ERROR_QUIC_TLS_CERTIFICATE_REVOKED  = HRESULT($8041012C);
+  {$EXTERNALSYM ERROR_QUIC_TLS_CERTIFICATE_REVOKED}
+
+//
+// MessageId: ERROR_QUIC_TLS_CERTIFICATE_EXPIRED
+//
+// MessageText:
+//
+// The QUIC connection encountered an expired certificate during TLS.
+//
+  ERROR_QUIC_TLS_CERTIFICATE_EXPIRED  = HRESULT($8041012D);
+  {$EXTERNALSYM ERROR_QUIC_TLS_CERTIFICATE_EXPIRED}
+
+//
+// MessageId: ERROR_QUIC_TLS_CERTIFICATE_UNKNOWN
+//
+// MessageText:
+//
+// The QUIC connection encountered an unknown certificate during TLS.
+//
+  ERROR_QUIC_TLS_CERTIFICATE_UNKNOWN  = HRESULT($8041012E);
+  {$EXTERNALSYM ERROR_QUIC_TLS_CERTIFICATE_UNKNOWN}
+
+//
+// MessageId: ERROR_QUIC_TLS_ILLEGAL_PARAMETER
+//
+// MessageText:
+//
+// The QUIC connection encountered an illegal parameter during TLS.
+//
+  ERROR_QUIC_TLS_ILLEGAL_PARAMETER    = HRESULT($8041012F);
+  {$EXTERNALSYM ERROR_QUIC_TLS_ILLEGAL_PARAMETER}
+
+//
+// MessageId: ERROR_QUIC_TLS_UNKNOWN_CA
+//
+// MessageText:
+//
+// The QUIC connection encountered a certificate with an unkown certificate authority during TLS.
+//
+  ERROR_QUIC_TLS_UNKNOWN_CA           = HRESULT($80410130);
+  {$EXTERNALSYM ERROR_QUIC_TLS_UNKNOWN_CA}
+
+//
+// MessageId: ERROR_QUIC_TLS_ACCESS_DENIED
+//
+// MessageText:
+//
+// The QUIC connection attempt was denied by the peer during TLS.
+//
+  ERROR_QUIC_TLS_ACCESS_DENIED        = HRESULT($80410131);
+  {$EXTERNALSYM ERROR_QUIC_TLS_ACCESS_DENIED}
+
+//
+// MessageId: ERROR_QUIC_TLS_INSUFFICIENT_SECURITY
+//
+// MessageText:
+//
+// The QUIC connection security was insufficient during TLS.
+//
+  ERROR_QUIC_TLS_INSUFFICIENT_SECURITY = HRESULT($80410147);
+  {$EXTERNALSYM ERROR_QUIC_TLS_INSUFFICIENT_SECURITY}
+
+//
+// MessageId: ERROR_QUIC_TLS_INTERNAL_ERROR
+//
+// MessageText:
+//
+// The QUIC connection encountered an internal error during TLS.
+//
+  ERROR_QUIC_TLS_INTERNAL_ERROR       = HRESULT($80410150);
+  {$EXTERNALSYM ERROR_QUIC_TLS_INTERNAL_ERROR}
+
+//
+// MessageId: ERROR_QUIC_TLS_USER_CANCELED
+//
+// MessageText:
+//
+// The QUIC connection was canceled by the user during TLS.
+//
+  ERROR_QUIC_TLS_USER_CANCELED        = HRESULT($8041015A);
+  {$EXTERNALSYM ERROR_QUIC_TLS_USER_CANCELED}
+
+//
+// MessageId: ERROR_QUIC_TLS_CERTIFICATE_REQUIRED
+//
+// MessageText:
+//
+// The QUIC connection required a certificate during TLS.
+//
+  ERROR_QUIC_TLS_CERTIFICATE_REQUIRED = HRESULT($80410174);
+  {$EXTERNALSYM ERROR_QUIC_TLS_CERTIFICATE_REQUIRED}
+
 
 //
 // IORING Error codes
@@ -72255,6 +73474,281 @@ const
 //
   IORING_E_COMPLETION_QUEUE_TOO_FULL = HRESULT($80460008);
   {$EXTERNALSYM IORING_E_COMPLETION_QUEUE_TOO_FULL}
+
+//
+// UnionFS Error codes
+//
+
+//
+// MessageId: UNIONFS_E_CANNOT_CROSS_UNION
+//
+// MessageText:
+//
+// This operation is not allowed across unions.
+//
+  UNIONFS_E_CANNOT_CROSS_UNION        = HRESULT($89250001);
+  {$EXTERNALSYM UNIONFS_E_CANNOT_CROSS_UNION}
+
+//
+// MessageId: UNIONFS_E_CANNOT_EXIT_UNION
+//
+// MessageText:
+//
+// This operation is not allowed to have a destination outside of a union.
+//
+  UNIONFS_E_CANNOT_EXIT_UNION         = HRESULT($89250002);
+  {$EXTERNALSYM UNIONFS_E_CANNOT_EXIT_UNION}
+
+//
+// MessageId: UNIONFS_E_CANNOT_PRESERVE_LINK
+//
+// MessageText:
+//
+// This file has one or more hard links in the scratch layer.
+//
+  UNIONFS_E_CANNOT_PRESERVE_LINK      = HRESULT($89250003);
+  {$EXTERNALSYM UNIONFS_E_CANNOT_PRESERVE_LINK}
+
+//
+// MessageId: UNIONFS_E_INVALID_TOMBSTONE_STATE
+//
+// MessageText:
+//
+// The tombstone cannot be created in or transitioned to the given state.
+//
+  UNIONFS_E_INVALID_TOMBSTONE_STATE   = HRESULT($89250004);
+  {$EXTERNALSYM UNIONFS_E_INVALID_TOMBSTONE_STATE}
+
+//
+// MessageId: UNIONFS_E_LAYERS_PRESENT
+//
+// MessageText:
+//
+// This union has attached layers preventing this operation.
+//
+  UNIONFS_E_LAYERS_PRESENT            = HRESULT($89250005);
+  {$EXTERNALSYM UNIONFS_E_LAYERS_PRESENT}
+
+//
+// MessageId: UNIONFS_E_NESTED_LAYER
+//
+// MessageText:
+//
+// A union layer root cannot be a descendant of another layer root.
+//
+  UNIONFS_E_NESTED_LAYER              = HRESULT($89250006);
+  {$EXTERNALSYM UNIONFS_E_NESTED_LAYER}
+
+//
+// MessageId: UNIONFS_E_UNION_DUPLICATE_ID
+//
+// MessageText:
+//
+// A union with this union ID already exists.
+//
+  UNIONFS_E_UNION_DUPLICATE_ID        = HRESULT($89250007);
+  {$EXTERNALSYM UNIONFS_E_UNION_DUPLICATE_ID}
+
+//
+// MessageId: UNIONFS_E_INACTIVE_UNION
+//
+// MessageText:
+//
+// The union this operation is being performed on is inactive.
+//
+  UNIONFS_E_INACTIVE_UNION            = HRESULT($89250008);
+  {$EXTERNALSYM UNIONFS_E_INACTIVE_UNION}
+
+//
+// MessageId: UNIONFS_E_TOO_MANY_LAYERS
+//
+// MessageText:
+//
+// There are too many layers to construct this union.
+//
+  UNIONFS_E_TOO_MANY_LAYERS           = HRESULT($89250009);
+  {$EXTERNALSYM UNIONFS_E_TOO_MANY_LAYERS}
+
+//
+// MessageId: UNIONFS_E_TOO_LATE
+//
+// MessageText:
+//
+// The UnionFS service is not available.
+//
+  UNIONFS_E_TOO_LATE                  = HRESULT($8925000A);
+  {$EXTERNALSYM UNIONFS_E_TOO_LATE}
+
+//
+// MessageId: UNIONFS_E_NESTED_UNION
+//
+// MessageText:
+//
+// The operation cannot be supported because of a nested union.
+//
+  UNIONFS_E_NESTED_UNION              = HRESULT($8925000B);
+  {$EXTERNALSYM UNIONFS_E_NESTED_UNION}
+
+//
+// MessageId: UNIONFS_E_NESTED_UNION_NOT_ALLOWED
+//
+// MessageText:
+//
+// An attempt was made to create a new union root as an ancestor or descendant of an existing union root, but the new union is not configured to allow nesting.
+//
+  UNIONFS_E_NESTED_UNION_NOT_ALLOWED  = HRESULT($8925000C);
+  {$EXTERNALSYM UNIONFS_E_NESTED_UNION_NOT_ALLOWED}
+
+
+//
+// PRM Error codes
+//
+
+//
+// MessageId: ERROR_PRM_HANDLER_NOT_FOUND
+//
+// MessageText:
+//
+// The specified PRM handler was not found.
+//
+  ERROR_PRM_HANDLER_NOT_FOUND         = HRESULT($C9260200);
+  {$EXTERNALSYM ERROR_PRM_HANDLER_NOT_FOUND}
+
+//
+// MessageId: ERROR_PRM_CONCURRENT_OPERATION
+//
+// MessageText:
+//
+// The PRM call cannot be serviced due to a concurrent PRM operation.
+//
+  ERROR_PRM_CONCURRENT_OPERATION      = HRESULT($C9260202);
+  {$EXTERNALSYM ERROR_PRM_CONCURRENT_OPERATION}
+
+//
+// MessageId: ERROR_PRM_MODULE_UPDATE_PENDING
+//
+// MessageText:
+//
+// The PRM call failed due to a pending module update.
+//
+  ERROR_PRM_MODULE_UPDATE_PENDING     = HRESULT($C9260203);
+  {$EXTERNALSYM ERROR_PRM_MODULE_UPDATE_PENDING}
+
+//
+// MessageId: ERROR_PRM_MODULE_LOCKED
+//
+// MessageText:
+//
+// The PRM lock operation failed because the module is already locked.
+//
+  ERROR_PRM_MODULE_LOCKED             = HRESULT($C9260204);
+  {$EXTERNALSYM ERROR_PRM_MODULE_LOCKED}
+
+//
+// MessageId: ERROR_PRM_UPDATE_INCOMPATIBLE_VERSION
+//
+// MessageText:
+//
+// The PRM update module version number is too small to be applied.
+//
+  ERROR_PRM_UPDATE_INCOMPATIBLE_VERSION = HRESULT($C9260205);
+  {$EXTERNALSYM ERROR_PRM_UPDATE_INCOMPATIBLE_VERSION}
+
+//
+// MessageId: ERROR_PRM_UPDATE_MODULE_MISMATCH
+//
+// MessageText:
+//
+// The PRM update module does not match the current version.
+//
+  ERROR_PRM_UPDATE_MODULE_MISMATCH    = HRESULT($C9260206);
+  {$EXTERNALSYM ERROR_PRM_UPDATE_MODULE_MISMATCH}
+
+//
+// MessageId: ERROR_PRM_UPDATE_MODULE_NOT_FOUND
+//
+// MessageText:
+//
+// The PRM update is not applicable to the base PRM implementation.
+//
+  ERROR_PRM_UPDATE_MODULE_NOT_FOUND   = HRESULT($C9260207);
+  {$EXTERNALSYM ERROR_PRM_UPDATE_MODULE_NOT_FOUND}
+
+//
+// MessageId: ERROR_PRM_UPDATE_MISSING_EXPORT
+//
+// MessageText:
+//
+// A handler export from the PRM update module cannot be found.
+//
+  ERROR_PRM_UPDATE_MISSING_EXPORT     = HRESULT($C9260208);
+  {$EXTERNALSYM ERROR_PRM_UPDATE_MISSING_EXPORT}
+
+//
+// MessageId: ERROR_PRM_UPDATE_MODULE_LOCKED
+//
+// MessageText:
+//
+// The PRM update cannot be applied due to an outstanding PRM transaction.
+//
+  ERROR_PRM_UPDATE_MODULE_LOCKED      = HRESULT($C9260209);
+  {$EXTERNALSYM ERROR_PRM_UPDATE_MODULE_LOCKED}
+
+//
+// MessageId: ERROR_PRM_UPDATE_BAD_SIGNATURE
+//
+// MessageText:
+//
+// The PRM update cannot be applied due to a bad PRM module signature.
+//
+  ERROR_PRM_UPDATE_BAD_SIGNATURE      = HRESULT($C926020A);
+  {$EXTERNALSYM ERROR_PRM_UPDATE_BAD_SIGNATURE}
+
+//
+// MessageId: ERROR_PRM_UPDATE_VERSION_MISMATCH
+//
+// MessageText:
+//
+// The PRM update service provided module version does not match that present in the actual update module header.
+//
+  ERROR_PRM_UPDATE_VERSION_MISMATCH   = HRESULT($C926020B);
+  {$EXTERNALSYM ERROR_PRM_UPDATE_VERSION_MISMATCH}
+
+//
+// MessageId: ERROR_PRM_MODULE_UNLOCKED
+//
+// MessageText:
+//
+// The PRM unlock operation failed because the module is already unlocked.
+//
+  ERROR_PRM_MODULE_UNLOCKED           = HRESULT($C926020C);
+  {$EXTERNALSYM ERROR_PRM_MODULE_UNLOCKED}
+
+//
+// MessageId: ERROR_PRM_INTERFACE_INACCESSIBLE
+//
+// MessageText:
+//
+// The PRM driver interface is currently not accessible.
+//
+  ERROR_PRM_INTERFACE_INACCESSIBLE    = HRESULT($C926020D);
+  {$EXTERNALSYM ERROR_PRM_INTERFACE_INACCESSIBLE}
+
+
+//
+// WinAccel Error codes
+//
+
+//
+// MessageId: ERROR_ACCELERATOR_SUBMISSION_QUEUE_FULL
+//
+// MessageText:
+//
+// The accelerator submission queue is full.
+//
+  ERROR_ACCELERATOR_SUBMISSION_QUEUE_FULL = HRESULT($C9270000);
+  {$EXTERNALSYM ERROR_ACCELERATOR_SUBMISSION_QUEUE_FULL}
+
 
 
   // Additional Prototypes for ALL interfaces

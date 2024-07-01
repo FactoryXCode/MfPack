@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 19/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -32,7 +32,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.22621.0
+// SDK version: 10.0.26100.0
 //
 // Todo: -
 //
@@ -312,6 +312,15 @@ const
                                                                  D3: $4738;
                                                                  D4: ($9d, $20, $98, $11, $37, $34, $10, $5a));
 
+  // MF_MT_D3D12_RESOURCE_DIMENSION
+  // Data type: UINT32 (treat as enum of D3D12_RESOURCE_DIMENSION)
+  // This attribute is set on mediatype to advertise D3D12_RESOURCE_DIMENSION
+  // {5F772624-16CA-4B89-9651-5DDF769F8AB8}
+  MF_MT_D3D12_RESOURCE_DIMENSION :                      TGUID = (D1: $5f772624;
+                                                                 D2: $16ca;
+                                                                 D3: $4b89;
+                                                                 D4: ($96, $51, $5d, $df, $76, $9f, $8a, $b8));
+
   // MF_SA_D3D12_HEAP_FLAGS
   // Data type: UINT32
   // This attribute contains the value with the heap options used for the D3D12 resources in the stream.  The attribute
@@ -341,6 +350,15 @@ const
                                                                  D2: $0526;
                                                                  D3: $495d;
                                                                  D4: ($9a, $b5, $54, $ec, $9f, $ad, $6f, $c3));
+
+  // MF_SA_D3D12_AWARE
+  // Data type: UINT32 (treat as Boolean)
+  // This attribute indicates whether the media source, media foundation transform supports Dx12 resource.
+  // {77f0bacb-17a8-4a50-9a7d-a5-cc-09-d3-9d-44}
+  MF_SA_D3D12_AWARE                                   : TGUID = (D1: $77f0bacb;
+                                                                 D2: $17a8;
+                                                                 D3: $4a50;
+                                                                 D4: ($9a, $7d, $a5, $cc, $09, $d3, $9d, $44));
 
 
   // Additional Prototypes for ALL interfaces

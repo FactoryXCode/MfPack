@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 19/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -31,7 +31,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.22621.0
+// SDK version: 10.0.26100.0
 //
 // Todo: -
 //
@@ -872,6 +872,7 @@ type
   // This object supplies the values for context-fill, context-stroke, and
   // context-value that are used when rendering SVG glyphs.
   //
+  PID2D1SvgGlyphStyle = ^ID2D1SvgGlyphStyle;
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID2D1SvgGlyphStyle);'}
   {$EXTERNALSYM ID2D1SvgGlyphStyle}
   ID2D1SvgGlyphStyle = interface(ID2D1Resource)
@@ -1288,6 +1289,90 @@ type
   {$EXTERNALSYM IID_ID2D1Factory7}
 
 
+// May 2024 update  NTDDI_VERSION >= NTDDI_WIN10_CU ////////////////////////////
+
+
+  DWRITE_PAINT_FEATURE_LEVEL = INT32;
+
+  /// <summary>
+  /// Get the maximum paint feature level supported by DrawPaintGlyphRun.
+  /// </summary>
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID2D1DeviceContext7);'}
+  {$EXTERNALSYM ID2D1DeviceContext7}
+  ID2D1DeviceContext7 = interface(ID2D1DeviceContext6)
+  ['{ec891cf7-9b69-4851-9def-4e0915771e62}']
+
+    /// <summary>
+    /// Get the maximum paint feature level supported by DrawPaintGlyphRun.
+    /// </summary>
+    function GetPaintFeatureLevel(): DWRITE_PAINT_FEATURE_LEVEL; stdcall;
+
+    /// <summary>
+    /// Draws a color glyph run that has the format of
+    /// DWRITE_GLYPH_IMAGE_FORMATS_COLR_PAINT_TREE.
+    /// </summary>
+    /// <param name="colorPaletteIndex">The index used to select a color palette within
+    /// a color font. Note that this not the same as the paletteIndex in the
+    /// DWRITE_COLOR_GLYPH_RUN struct, which is not relevant for paint glyphs.</param>
+    procedure DrawPaintGlyphRun(baselineOrigin: D2D1_POINT_2F;
+                                glyphRun: DWRITE_GLYPH_RUN;
+                                {_In_opt_} defaultFillBrush: PID2D1Brush = nil;
+                                colorPaletteIndex: UINT32 = 0;
+                                measuringMode: DWRITE_MEASURING_MODE = DWRITE_MEASURING_MODE_NATURAL); stdcall;
+
+    /// <summary>
+    /// Draws a glyph run, using color representations of glyphs if available.
+    /// </summary>
+    procedure DrawGlyphRunWithColorSupport(baselineOrigin: D2D1_POINT_2F;
+                                           glyphRun: PDWRITE_GLYPH_RUN;
+                                           {_In_opt_} glyphRunDescription: PDWRITE_GLYPH_RUN_DESCRIPTION;
+                                           {_In_opt_} foregroundBrush: PID2D1Brush;
+                                           {_In_opt_} svgGlyphStyle: ID2D1SvgGlyphStyle;
+                                           colorPaletteIndex: UINT32 = 0;
+                                           measuringMode: DWRITE_MEASURING_MODE = DWRITE_MEASURING_MODE_NATURAL;
+                                           bitmapSnapOption: D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION = D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION_DEFAULT); stdcall;
+
+  end;
+  IID_ID2D1DeviceContext7 = ID2D1DeviceContext7;
+  {$EXTERNALSYM IID_ID2D1DeviceContext7}
+
+
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID2D1Device7);'}
+  {$EXTERNALSYM ID2D1Device7}
+  ID2D1Device7 = interface(ID2D1Device6)
+  ['{f07c8968-dd4e-4ba6-9cbd-eb6d3752dcbb}']
+
+    /// <summary>
+    /// Creates a new device context with no initially assigned target.
+    /// </summary>
+    function CreateDeviceContext(options: D2D1_DEVICE_CONTEXT_OPTIONS;
+                                {Out} deviceContext: ID2D1DeviceContext7): HResult; stdcall;
+
+  end;
+  IID_ID2D1Device7 = ID2D1Device7;
+  {$EXTERNALSYM IID_ID2D1Device7}
+
+
+  /// <summary>
+  /// Creates Direct2D resources. This interface also enables the creation of
+  /// ID2D1Device7 objects.
+  /// </summary>
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID2D1Device7);'}
+  {$EXTERNALSYM ID2D1Device7}
+  ID2D1Factory8 = interface(ID2D1Factory7)
+  ['{677c9311-f36d-4b1f-ae86-86d1223ffd3a}']
+
+    /// <summary>
+    /// This creates a new Direct2D device from the given IDXGIDevice.
+    /// </summary>
+    function CreateDevice(dxgiDevice: IDXGIDevice;
+                          {Out} d2dDevice6: ID2D1Device7): HResult; stdcall;
+
+  end;
+  IID_ID2D1Factory8 = ID2D1Factory8;
+  {$EXTERNALSYM IID_ID2D1Factory8}
+
+// End NTDDI_VERSION >= NTDDI_WIN10_CU /////////////////////////////////////////
 
 // #if NTDDI_VERSION >= NTDDI_WINTHRESHOLD
 

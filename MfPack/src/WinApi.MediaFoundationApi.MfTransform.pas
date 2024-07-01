@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -34,7 +34,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.22621.0
+// SDK version: 10.0.26100.0
 //
 // Todo: -
 //
@@ -708,6 +708,21 @@ type
   {$EXTERNALSYM IID_IMFDeviceTransform}
 
 
+  // Interface IMFDeviceTransform2
+  // =============================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFDeviceTransform2);'}
+  IMFDeviceTransform2 = interface(IMFDeviceTransform)
+    ['{F5980FED-B521-488F-909F-1A5FCECEDB14}']
+
+    function GetTransformAttributes(out ppAttributes: IMFAttributes): HResult; stdcall;
+
+  end;
+  {$EXTERNALSYM IMFDeviceTransform2}
+  IID_IMFDeviceTransform2 = IMFDeviceTransform2;
+  {$EXTERNALSYM IID_IMFDeviceTransform2}
+
+
   // Interface IMFDeviceTransformCallback
   // ====================================
   //
@@ -841,9 +856,30 @@ const
                                                          D4: ($92, $5f, $8e, $93, $9a, $7c, $0a, $f7));
   {$EXTERNALSYM MFT_AUDIO_DECODER_SPATIAL_METADATA_CLIENT}
 
-// #endif //(NTDDI_VERSION >= NTDDI_WIN10_RS2)
+  // #endif //(NTDDI_VERSION >= NTDDI_WIN10_RS2)
 
 
+  // MFT_AUDIO_DECODER_AUDIO_ENDPOINT_FORMFACTOR
+  // Data Type: UINT32 (treat as a value from the EndpointFormFactor enumeration in mmdeviceapi.h.)
+  // This attribute is set on components via the attribute store obtained from IMFTransform::GetAttributes
+  // The default value is UnknownFormFactor (10)
+  MFT_AUDIO_DECODER_AUDIO_ENDPOINT_FORMFACTOR  : TGUID = (D1: $8d574310;
+                                                          D2: $909a;
+                                                          D3: $433a;
+                                                          D4: ($ac, $e7, $ee, $e7, $47, $19, $f9, $01));
+  {$EXTERNALSYM MFT_AUDIO_DECODER_AUDIO_ENDPOINT_FORMFACTOR}
+
+  // MFT_AUDIO_DECODER_AUDIO_ENDPOINT_IS_DIGITAL_STEREO_ONLY
+  // Data type: UINT32 (treat as BOOL)
+  // This attribute is set on components via the attribute store obtained from IMFTransform::GetAttributes
+  // When the value is TRUE, it indicates that the audio renderer endpoint is a digital audio display device that only supports
+  // uncompressed stereo signals.
+  // The default value is FALSE.
+  MFT_AUDIO_DECODER_AUDIO_ENDPOINT_IS_DIGITAL_STEREO_ONLY : TGUID = (D1: $26e5a90d;
+                                                                     D2: $4ad1;
+                                                                     D3: $4f8c;
+                                                                     D4: ($b8, $af, $ad, $f1, $4d, $21, $78, $f1));
+  {$EXTERNALSYM MFT_AUDIO_DECODER_AUDIO_ENDPOINT_IS_DIGITAL_STEREO_ONLY}
 
   // MF_SA_REQUIRED_SAMPLE_COUNT_PROGRESSIVE
   // Data type: UINT32
@@ -963,6 +999,26 @@ const
   // or should have slower recovery from quality management without any corruptions/artifacts (the attribute value equal to TRUE)
   MFT_DECODER_QUALITY_MANAGEMENT_RECOVERY_WITHOUT_ARTIFACTS : TGuid = '{d8980deb-0a48-425f-8623-611db41d3810}';
   {$EXTERNALSYM MFT_DECODER_QUALITY_MANAGEMENT_RECOVERY_WITHOUT_ARTIFACTS}
+
+  // MFT_DECODER_OPERATING_POINT
+  // Data Type: UINT32
+  // Specifies the operating point (spatial or temporal layer) that the decoder should emit frames up to.
+  //  All lower operating points are included.
+  MFT_DECODER_OPERATING_POINT : TGUID = (D1: $26e5a90d;
+                                         D2: $4ad1;
+                                         D3: $4f8c;
+                                         D4: ($b8, $af, $ad, $f1, $4d, $21, $78, $f1));
+  {$EXTERNALSYM MFT_DECODER_OPERATING_POINT}
+
+  // MFT_DECODER_AUTOMATIC_SOFTWARE_FALLBACK
+  // Data Type: UINT32 (treat as BOOL)
+  // Specifies weather the decoder mft should automatically switch to software decoding when
+  //  hardware does not support the input bitstream.
+  MFT_DECODER_AUTOMATIC_SOFTWARE_FALLBACK : TGUID = (D1: $41f34f53;
+                                                     D2: $1bf6;
+                                                     D3: $49ed;
+                                                     D4: ($b9, $5d, $2, $d2, $a1, $d7, $11, $5a));
+  {$EXTERNALSYM MFT_DECODER_AUTOMATIC_SOFTWARE_FALLBACK}
 
   // MFT_REMUX_MARK_I_PICTURE_AS_CLEAN_POINT  {364e8f85-3f2e-436c-b2a2-4440a012a9e8}
   // Data Type: UINT32 (treat as BOOL)
@@ -1091,7 +1147,7 @@ const
   // Data type: UINT32 (treat as BOOL)
   // If nonzero, indicates that this IMFTransform wants to receive MEPolicySet completion notifications
   // {5A633B19-CC39-4FA8-8CA5-59981B7A0018}
-  MFT_POLICY_SET_AWARE    : TGuid =  '{5A633B19-CC39-4FA8-8CA5-59981B7A0018}';
+  MFT_POLICY_SET_AWARE : TGuid =  '{5A633B19-CC39-4FA8-8CA5-59981B7A0018}';
   {$EXTERNALSYM MFT_POLICY_SET_AWARE}
 
   // MFT_USING_HARDWARE_DRM
@@ -1100,7 +1156,7 @@ const
   // If an MFT decrypter specifies this attribute set to 0, then it is not using HARDWARE DRM.
   // If an MFT decrypter does not specify this attribute or specifies it with a different value,
   // then it does not (or is unable to) indicate whether it is using HARDWARE DRM or not.
-  MFT_USING_HARDWARE_DRM  : TGUID = '{34faa77d-d79e-4957-b8ce-362b2684996c}';
+  MFT_USING_HARDWARE_DRM : TGUID = '{34faa77d-d79e-4957-b8ce-362b2684996c}';
   {$EXTERNALSYM MFT_USING_HARDWARE_DRM}
 
 // endif  NTDDI_VERSION >= NTDDI_WIN10_VB

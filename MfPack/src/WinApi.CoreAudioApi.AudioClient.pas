@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 19/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or later.
@@ -36,7 +36,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.22621.0
+// SDK version: 10.0.26100.0
 //
 // Todo: -
 //
@@ -146,6 +146,9 @@ type
   //     AUDCLNT_STREAMOPTIONS_AMBISONICS - The client is requesting the audio client to insert  
   //                                  Ambisonics renderer and configure the pipeline to match Ambisonics format types 
   //
+  //     AUDCLNT_STREAMOPTIONS_POST_VOLUME_LOOPBACK - The client is requesting that the loopback stream capture
+  //                                  the audio data after volume and/or mute processing has been applied.
+
 
   PAudclntStreamoptions = ^AUDCLNT_STREAMOPTIONS;
   PAUDCLNT_STREAMOPTIONS = ^AUDCLNT_STREAMOPTIONS;
@@ -153,7 +156,11 @@ type
     AUDCLNT_STREAMOPTIONS_NONE         = $00,
     AUDCLNT_STREAMOPTIONS_RAW          = $01,
     AUDCLNT_STREAMOPTIONS_MATCH_FORMAT = $02, // Supported in Windows 10 and later.
-    AUDCLNT_STREAMOPTIONS_AMBISONICS   = $04
+    AUDCLNT_STREAMOPTIONS_AMBISONICS   = $04,
+    // #if(NTDDI_VERSION > NTDDI_WIN11_ZN)
+    AUDCLNT_STREAMOPTIONS_POST_VOLUME_LOOPBACK = $08
+    //#endif
+
   );
   {$EXTERNALSYM AUDCLNT_STREAMOPTIONS}
 
@@ -2079,6 +2086,9 @@ const
   {$EXTERNALSYM AUDCLNT_E_EFFECT_NOT_AVAILABLE}
   AUDCLNT_E_EFFECT_STATE_READ_ONLY        = $88890042;  //AUDCLNT_ERR($042)
   {$EXTERNALSYM AUDCLNT_E_EFFECT_STATE_READ_ONLY}
+  AUDCLNT_E_POST_VOLUME_LOOPBACK_UNSUPPORTED = $88890043; //AUDCLNT_ERR($043)
+  {$EXTERNALSYM AUDCLNT_E_POST_VOLUME_LOOPBACK_UNSUPPORTED}
+
 
   AUDCLNT_S_BUFFER_EMPTY                  = $88890001;  //AUDCLNT_SUCCESS($001)
   {$EXTERNALSYM AUDCLNT_S_BUFFER_EMPTY}

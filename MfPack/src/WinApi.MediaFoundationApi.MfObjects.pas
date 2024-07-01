@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or higher.
@@ -38,7 +38,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 33
-// SDK version: 10.0.22621.0
+// SDK version: 10.0.26100.0
 //
 // Todo: -
 //
@@ -688,6 +688,9 @@ const
   MFVideoTransFunc_10_rel      = MFVideoTransferFunction(17); // No gamma, display referred (relative)
   {$EXTERNALSYM MFVideoTransFunc_10_rel}
 
+  MFVideoTransFunc_BT1361_ECG  = MFVideoTransferFunction(18); // BT.1361 Extended Color Gamut
+  MFVideoTransFunc_SMPTE428    = MFVideoTransferFunction(19); // SMPTE ST 428-1
+
   FVideoTransFunc_Last         = MFVideoTransFunc_HLG + 1;    // Reserved.
   {$EXTERNALSYM FVideoTransFunc_Last}
   // MFVideoTransFunc_ForceMFVideoTransferFunction = FORCEMFVideoTransferFunction;
@@ -710,7 +713,7 @@ const
   {$EXTERNALSYM MFVideoPrimaries_BT470_2_SysM}
   MFVideoPrimaries_BT470_2_SysBG = MFVideoPrimaries(4);
   {$EXTERNALSYM MFVideoPrimaries_BT470_2_SysBG}
-  MFVideoPrimaries_SMPTE170M     = MFVideoPrimaries(5);
+  MFVideoPrimaries_SMPTE170M     = MFVideoPrimaries(5); // includes BT.601-5
   {$EXTERNALSYM MFVideoPrimaries_SMPTE170M}
   MFVideoPrimaries_SMPTE240M     = MFVideoPrimaries(6);
   {$EXTERNALSYM MFVideoPrimaries_SMPTE240M}
@@ -726,6 +729,8 @@ const
   {$EXTERNALSYM MFVideoPrimaries_DCI_P3}
   MFVideoPrimaries_ACES          = MFVideoPrimaries(12);
   {$EXTERNALSYM MFVideoPrimaries_ACES}
+  MFVideoPrimaries_Display_P3    = MFVideoPrimaries(13); // SMPTE EG 432-1
+  {$EXTERNALSYM MFVideoPrimaries_Display_P3}
   MFVideoPrimaries_Last          = MFVideoPrimaries_ACES + 1;
   {$EXTERNALSYM MFVideoPrimaries_Last}
   //MFVideoPrimaries_ForceMFVideoPrimaries    = FORCEMFVideoPrimaries);
@@ -770,6 +775,20 @@ const
   {$EXTERNALSYM MFVideoTransferMatrix_BT2020_10}
   MFVideoTransferMatrix_BT2020_12  = MFVideoTransferMatrix(5);
   {$EXTERNALSYM MFVideoTransferMatrix_BT2020_12}
+  MFVideoTransferMatrix_Identity = MFVideoTransferMatrix(6);
+  {$EXTERNALSYM MFVideoTransferMatrix_Identity}
+  MFVideoTransferMatrix_FCC47 = MFVideoTransferMatrix(7); // FCC Title 47
+  {$EXTERNALSYM MFVideoTransferMatrix_FCC47}
+  MFVideoTransferMatrix_YCgCo = MFVideoTransferMatrix(8); // IEC 23091-2
+  {$EXTERNALSYM MFVideoTransferMatrix_YCgCo}
+  MFVideoTransferMatrix_SMPTE2085 = MFVideoTransferMatrix(9); // SMPTE ST 2085
+  {$EXTERNALSYM MFVideoTransferMatrix_SMPTE2085}
+  MFVideoTransferMatrix_Chroma = MFVideoTransferMatrix(10); // Chromacity-derived, non-constant luminance, IEC 23091-2
+  {$EXTERNALSYM MFVideoTransferMatrix_Chroma}
+  MFVideoTransferMatrix_Chroma_const = MFVideoTransferMatrix(11); // Chromacity-derived, constant luminance, IEC 23091-2
+  {$EXTERNALSYM MFVideoTransferMatrix_Chroma_const}
+  MFVideoTransferMatrix_ICtCp = MFVideoTransferMatrix(12); // BT.2100 ICtCp
+  {$EXTERNALSYM MFVideoTransferMatrix_ICtCp}
   MFVideoTransferMatrix_Last       = MFVideoTransferMatrix_BT2020_12 + 1;
   {$EXTERNALSYM MFVideoTransferMatrix_Last}
   //MFVideoTransferMatrix_ForceDWORD = FORCEDWORD);
@@ -1431,6 +1450,36 @@ type
   IID_IMFDXGIBuffer = IMFDXGIBuffer;
   {$EXTERNALSYM IID_IMFDXGIBuffer}
 
+  // Interface IMFDXGIBuffer
+  // ========================
+  //
+  /// <summary>
+  ///     The IMFMediaBufferInternal is used by MF's circular sample allocator to set the parent sample on the buffer. This is needed for properly determining when a
+  ///     sample can be returned to the allocator (since the application can take reference to the buffers and release the sample, we need to avoid returning the sample
+  ///     to the allocator while there are external references to the buffer.
+  /// </summary>
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFDXGICrossAdapterBuffer);'}
+  {$EXTERNALSYM IMFDXGICrossAdapterBuffer}
+  IMFDXGICrossAdapterBuffer = interface(IUnknown)
+    ['{B25D03FB-D148-45EF-BFED-F778B7566C07}']
+
+    function GetResourceForDevice(const pUnkDevice: IUnknown;
+                                  const riid: REFIID;
+                                  out ppvObject: Pointer): HResult; stdcall;
+
+    function GetSubresourceIndexForDevice(const pUnkDevice: IUnknown;
+                                          out puSubresource: UINT): HResult; stdcall;
+
+    function GetUnknownForDevice(const pUnkDevice: IUnknown;
+                                 const guid: REFIID;
+                                 const riid: REFIID;
+                                 out ppvObject: Pointer): HResult; stdcall;
+
+    function SetUnknownForDevice(const pUnkDevice: IUnknown;
+                                 const guid: REFIID;
+                                 {_In_opt_} pUnkData: IUnknown {GUID_NULL when not used}): HResult; stdcall;
+  end;
+
 
   // Interface IMFMediaType
   // ======================
@@ -1996,6 +2045,14 @@ type
   IID_IMFDXGIDeviceManager = IMFDXGIDeviceManager;
   {$EXTERNALSYM IID_IMFDXGIDeviceManager}
 
+
+  PMF_DXGI_DEVICE_MANAGER_MODE = ^MF_DXGI_DEVICE_MANAGER_MODE;
+  MF_DXGI_DEVICE_MANAGER_MODE           = (
+    MF_DXGI_DEVICE_MANAGER_MODE_INVALID = 0,
+    MF_DXGI_DEVICE_MANAGER_MODE_D3D11,
+    MF_DXGI_DEVICE_MANAGER_MODE_D3D12
+  );
+  {$EXTERNALSYM MF_DXGI_DEVICE_MANAGER_MODE}
 
   PMfStreamState = ^MF_STREAM_STATE;
   _MF_STREAM_STATE          = (

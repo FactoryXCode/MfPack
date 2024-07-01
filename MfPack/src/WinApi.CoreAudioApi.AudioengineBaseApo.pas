@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 19/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -50,7 +50,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.22621.0
+// SDK version: 10.0.26100.0
 //
 // Todo: -
 //
@@ -653,6 +653,37 @@ const
                                                                                 Pid: 33);
   {$EXTERNALSYM PKEY_FX_ApplyToCapture}
 
+  // PKEY_FX_RequestSetAsDefault:
+  // vartype = VT_I4
+  // {D04E05A6-594B-4FB6-A80D-01AF5EED7D1D},34
+  PKEY_FX_RequestSetAsDefault                         :  PROPERTYKEY = (fmtid: (D1: $D04E05A6;
+                                                                                D2: $594B;
+                                                                                D3: $4fb6;
+                                                                                D4: ($A8, $0D, $01, $AF, $5E, $ED, $7D, $1D));
+                                                                                Pid: 34);
+  {$EXTERNALSYM PKEY_FX_RequestSetAsDefault}
+
+  // PKEY_FX_RequestSetAsDefaultPriority:
+  // vartype = VT_I4
+  // {D04E05A6-594B-4FB6-A80D-01AF5EED7D1D},35
+  PKEY_FX_RequestSetAsDefaultPriority                 :  PROPERTYKEY = (fmtid: (D1: $D04E05A6;
+                                                                                D2: $594B;
+                                                                                D3: $4fb6;
+                                                                                D4: ($A8, $0D, $01, $AF, $5E, $ED, $7D, $1D));
+                                                                                Pid: 35);
+  {$EXTERNALSYM PKEY_FX_RequestSetAsDefaultPriority}
+
+  // PKEY_FX_OEM_Preferred_EffectPack_Id:
+  // vartype = VT_I4
+  // {D04E05A6-594B-4FB6-A80D-01AF5EED7D1D},36
+  PKEY_FX_OEM_Preferred_EffectPack_Id                 :  PROPERTYKEY = (fmtid: (D1: $D04E05A6;
+                                                                                D2: $594B;
+                                                                                D3: $4fb6;
+                                                                                D4: ($A8, $0D, $01, $AF, $5E, $ED, $7D, $1D));
+                                                                                Pid: 36);
+  {$EXTERNALSYM PKEY_FX_OEM_Preferred_EffectPack_Id}
+
+
 
   // PKEY_SFX_ProcessingModes_Supported_For_Streaming:
   // Lists the signal processing modes supported by the stream effect APO.
@@ -685,8 +716,8 @@ const
   {$EXTERNALSYM PKEY_EFX_ProcessingModes_Supported_For_Streaming}
 
   PKEY_SFX_KeywordDetector_ProcessingModes_Supported_For_Streaming : PROPERTYKEY = (fmtid: (D1: $d3993a3f; D2: $99c2; D3: $4402;
-                                                                                             D4: ($b5, $ec, $a9, $2a, $3, $67, $66, $4b));
-                                                                                             pid: 8);
+                                                                                            D4: ($b5, $ec, $a9, $2a, $3, $67, $66, $4b));
+                                                                                            pid: 8);
   {$EXTERNALSYM PKEY_SFX_KeywordDetector_ProcessingModes_Supported_For_Streaming}
 
   PKEY_MFX_KeywordDetector_ProcessingModes_Supported_For_Streaming :  PROPERTYKEY = (fmtid: (D1: $d3993a3f; D2: $99c2; D3: $4402;
@@ -1641,6 +1672,37 @@ type
   IID_IApoAcousticEchoCancellation = IApoAcousticEchoCancellation;
   {$EXTERNALSYM IID_IApoAcousticEchoCancellation}
 
+  //-------------------------------------------------------------------------
+  // Description: Flags describing the desired characteristics of a refrence
+  //              stream.
+  //
+  //    APO_REFERENCE_STREAM_PROPERTIES_POST_VOLUME_LOOPBACK -
+  //         If the device endpoint supports it, use the post volume tap point
+  //         for the loopback stream.
+  PAPO_REFERENCE_STREAM_PROPERTIES = ^APO_REFERENCE_STREAM_PROPERTIES;
+  APO_REFERENCE_STREAM_PROPERTIES = (
+    APO_REFERENCE_STREAM_PROPERTIES_NONE                  = $00,
+    APO_REFERENCE_STREAM_PROPERTIES_POST_VOLUME_LOOPBACK  = $01
+  );
+  {$EXTERNALSYM APO_REFERENCE_STREAM_PROPERTIES}
+
+
+  // DEFINE_ENUM_FLAG_OPERATORS(APO_REFERENCE_STREAM_PROPERTIES);
+
+  // Interface IApoAcousticEchoCancellation2
+  // =======================================
+  // This interface is used to identify APOs that implement Acoustic Echo Cancellation
+  // and wish to use post-volume processing loopback streams.
+  {$HPPEMIT '  DECLARE_DINTERFACE_TYPE(IApoAcousticEchoCancellation);'}
+  {$EXTERNALSYM IApoAcousticEchoCancellation2}
+  IApoAcousticEchoCancellation2 = interface(IUnknown)
+    ['{F235855F-F06D-45B3-A63F-EE4B71509DC2}']
+
+    function GetDesiredReferenceStreamProperties(out pProperties: APO_REFERENCE_STREAM_PROPERTIES): HRESULT; stdcall;
+
+  end;
+  IID_IApoAcousticEchoCancellation2 = IApoAcousticEchoCancellation2;
+  {$EXTERNALSYM IID_IApoAcousticEchoCancellation2}
 
 
 type

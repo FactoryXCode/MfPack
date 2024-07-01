@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -31,7 +31,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.22621.0
+// SDK version: 10.0.26100.0
 //
 // Todo: -
 //
@@ -131,6 +131,8 @@ interface
 //  45000 - 45999 = MF Media Timeline Controller errors
 //
 //  46000 - 46999 = MediaExtensions via AppService errors
+//
+//  47000 - 47999 = Frameserver errors
 //
 // **************************** READ ME ****************************************
 
@@ -3675,7 +3677,7 @@ const
 //
 // Package integrity check for app failed.%0
 //
-  MF_E_MEDIA_EXTENSION_PACKAGE_INTEGRITY_CHECK_FAILED = _HRESULT_TYPEDEF_($C00DB3B2);
+  MF_E_MEDIA_EXTENSION_PACKAGE_INTEGRITY_CHECK_FAILED  = _HRESULT_TYPEDEF_($C00DB3B2);
   {$EXTERNALSYM MF_E_MEDIA_EXTENSION_PACKAGE_INTEGRITY_CHECK_FAILED}
 
 //
@@ -3685,8 +3687,35 @@ const
 //
 // License check for app failed.%0
 //
-  MF_E_MEDIA_EXTENSION_PACKAGE_LICENSE_INVALID = _HRESULT_TYPEDEF_($C00DB3B3);
+  MF_E_MEDIA_EXTENSION_PACKAGE_LICENSE_INVALID  = _HRESULT_TYPEDEF_($C00DB3B3);
   {$EXTERNALSYM MF_E_MEDIA_EXTENSION_PACKAGE_LICENSE_INVALID}
+
+//
+// MessageId: MF_E_MEDIA_EXTENSION_PACKAGE_BAD_STATUS
+//
+// MessageText:
+//
+// Package status for app not ok.%0
+//
+  MF_E_MEDIA_EXTENSION_PACKAGE_BAD_STATUS  = _HRESULT_TYPEDEF_($C00DB3B4);
+  {$EXTERNALSYM MF_E_MEDIA_EXTENSION_PACKAGE_BAD_STATUS}
+
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// Frameserver errors
+//
+//////////////////////////////////////////////////////////////////////////////
+
+//
+// MessageId: MF_E_CAMERA_PRIVACY_NOT_ALLOWED
+//
+// MessageText:
+//
+// Camera access is not allowed by Privacy Settings.%0
+//
+  MF_E_CAMERA_PRIVACY_NOT_ALLOWED = _HRESULT_TYPEDEF_($C00DB798);
+  {$EXTERNALSYM MF_E_CAMERA_PRIVACY_NOT_ALLOWED}
 
 
 //////////////////////////////////////////////////////////////////////////////

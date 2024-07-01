@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -39,7 +39,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.22621.0
+// SDK version: 10.0.26100.0
 //
 // Todo: -
 //
@@ -89,7 +89,8 @@ uses
   {CoreAudioApi}
   WinApi.CoreAudioApi.MMDeviceApi,
   WinApi.CoreAudioApi.AudioEngineBaseApo,
-  WinApi.CoreAudioApi.EndPointVolume;
+  WinApi.CoreAudioApi.EndPointVolume,
+  WinApi.CoreAudioApi.AudioMediaType;
 
   {$MINENUMSIZE 4}
 
@@ -103,7 +104,9 @@ uses
 
 const
   SID_AudioProcessingObjectRTQueue         : TGUID = '{458c1a1f-6899-4c12-99ac-e2e6ac253104}';
+  {$EXTERNALSYM SID_AudioProcessingObjectRTQueue}
   SID_AudioProcessingObjectLoggingService  : TGUID = '{8B8008AF-09F9-456E-A173-BDB58499BCE7}';
+  {$EXTERNALSYM SID_AudioProcessingObjectLoggingService}
 
 
 type
@@ -159,6 +162,18 @@ type
     InitializeForDiscoveryOnly: BOOL;
   end;
   {$EXTERNALSYM APOInitSystemEffects3}
+
+
+  //-----------------------------------------------------------------------------
+  // Description: This structure contains expanded information pertaining to the
+  // configuration of the loopback provided to the AEC.
+  //
+  PAcousticEchoCancellerReferenceInput = ^AcousticEchoCanceller_Reference_Input;
+  AcousticEchoCanceller_Reference_Input = record
+    apoInitSystemEffects: APOInitSystemEffects3;
+    streamProperties: APO_REFERENCE_STREAM_PROPERTIES;
+  end;
+  {$EXTERNALSYM AcousticEchoCanceller_Reference_Input}
 
 
   // Interface IAudioProcessingObjectRTQueueService
@@ -224,10 +239,11 @@ type
     // Orientation notifications for the device.
     APO_NOTIFICATION_TYPE_DEVICE_ORIENTATION             = 5,
     // Microphone boost notifications
-    APO_NOTIFICATION_TYPE_MICROPHONE_BOOST               = 6
+    APO_NOTIFICATION_TYPE_MICROPHONE_BOOST               = 6,
+    // Audio environement state changed
+    APO_NOTIFICATION_TYPE_AUDIO_ENVIRONMENT_STATE_CHANGE = 7
   );
   {$EXTERNALSYM APO_NOTIFICATION_TYPE}
-
 
 
   // When an endpoint volume changes, the OS will send an object with the following structure to the APOs that are interested in volume change notifications.
@@ -239,7 +255,6 @@ type
     volume: PAUDIO_VOLUME_NOTIFICATION_DATA;
   end;
   {$EXTERNALSYM AUDIO_ENDPOINT_VOLUME_CHANGE_NOTIFICATION}
-
 
 
   // When an endpoint property is changed, the OS will send an object with the following structure to
@@ -254,7 +269,6 @@ type
     propertyKey: PROPERTYKEY;
   end;
   {$EXTERNALSYM AUDIO_ENDPOINT_PROPERTY_CHANGE_NOTIFICATION}
-
 
 
   // When an audio system effects property is changed, the OS will send an object with the
@@ -273,7 +287,6 @@ type
     propertyKey: PROPERTYKEY;
   end;
   {$EXTERNALSYM AUDIO_SYSTEMEFFECTS_PROPERTY_CHANGE_NOTIFICATION}
-
 
 
   PAUDIO_VOLUME_NOTIFICATION_DATA2 = ^AUDIO_VOLUME_NOTIFICATION_DATA2;
@@ -307,14 +320,12 @@ type
   {$EXTERNALSYM AUDIO_VOLUME_NOTIFICATION_DATA2}
 
 
-
   PAUDIO_ENDPOINT_VOLUME_CHANGE_NOTIFICATION2 = ^AUDIO_ENDPOINT_VOLUME_CHANGE_NOTIFICATION2;
   AUDIO_ENDPOINT_VOLUME_CHANGE_NOTIFICATION2 = record
     endpoint: IMMDevice;
     volume: AUDIO_VOLUME_NOTIFICATION_DATA2;
   end;
   {$EXTERNALSYM AUDIO_ENDPOINT_VOLUME_CHANGE_NOTIFICATION2}
-
 
 
   PDEVICE_ORIENTATION_TYPE = ^DEVICE_ORIENTATION_TYPE;
@@ -325,7 +336,6 @@ type
     DEVICE_ROTATED_270_DEGREES_CLOCKWISE
   );
   {$EXTERNALSYM DEVICE_ORIENTATION_TYPE}
-
 
 
   PAUDIO_MICROPHONE_BOOST_NOTIFICATION = ^AUDIO_MICROPHONE_BOOST_NOTIFICATION;
@@ -356,6 +366,27 @@ type
   end;
   {$EXTERNALSYM AUDIO_MICROPHONE_BOOST_NOTIFICATION}
 
+  // PKEY_AudioEnvironment_xxx
+  // GUID for PKEY_AudioEnvironment_XXX (public): 4AFB7B88-A653-44A5-99DB-687FD74AF0BB
+
+  // PKEY_AudioEnvironment_SpatialStreams_Active: Boolean that when TRUE indicates that spatial audio is in use, FALSE otherwise.
+  // vartype = VT_BOOL
+const
+  PKEY_AudioEnvironment_SpatialAudioActive  :  PROPERTYKEY = (fmtid: (D1: $4AFB7B88;
+                                                                      D2: $A653;
+                                                                      D3: $44A5;
+                                                                      D4: ($99, $DB, $68, $7F, $D7, $4A, $F0, $BB));
+                                                                      Pid: 2);
+
+type
+  PAUDIO_ENVIRONMENT_STATE_CHANGE_NOTIFICATION = ^AUDIO_ENVIRONMENT_STATE_CHANGE_NOTIFICATION;
+  AUDIO_ENVIRONMENT_STATE_CHANGE_NOTIFICATION = record
+    // The property store that the change occurred on. Use this to query the new value of propertyKey below.
+    propertyStore: IPropertyStore;
+    // The PROPERTYKEY that has a new value.
+    propertyKey: PROPERTYKEY;
+  end;
+  {$EXTERNALSYM AUDIO_ENVIRONMENT_STATE_CHANGE_NOTIFICATION}
 
 
   // This structure is used to describe the type of notification that is sent from the
@@ -367,7 +398,7 @@ type
 
     DUMMYUNIONNAME: record
 
-    case integer of
+    case Integer of
 
          // Used when type is APO_NOTIFICATION_TYPE_ENDPOINT_VOLUME.
       0: (audioEndpointVolumeChange: PAUDIO_ENDPOINT_VOLUME_CHANGE_NOTIFICATION);
@@ -382,10 +413,13 @@ type
       4: (audioEndpointVolumeChange2: PAUDIO_ENDPOINT_VOLUME_CHANGE_NOTIFICATION2);
 
          // Used when type is APO_NOTIFICATION_TYPE_DEVICE_ORIENTATION.
-      5: (deviceOrientation: DEVICE_ORIENTATION_TYPE;);
+      5: (deviceOrientation: PDEVICE_ORIENTATION_TYPE;);
 
          // Used when type is APO_NOTIFICATION_TYPE_MICROPHONE_BOOST.
       6: (audioMicrophoneBoostChange: PAUDIO_MICROPHONE_BOOST_NOTIFICATION);
+
+         // Used when type is APO_NOTIFICATION_TYPE_AUDIO_ENVIRONMENT_STATE_CHANGE.
+      7: (audioEnvironmentChange: PAUDIO_ENVIRONMENT_STATE_CHANGE_NOTIFICATION);
 
     end;
 
@@ -456,12 +490,34 @@ type
   {$EXTERNALSYM APO_NOTIFICATION_DESCRIPTOR}
 
 
+  // Interface IAudioProcessingObjectPreferredFormatSupport
+  // ======================================================
+  //
+  // Interface to be implemented by an APO that wishes to report its preferred audio input format
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioProcessingObjectPreferredFormatSupport);'}
+  IAudioProcessingObjectPreferredFormatSupport = interface(IUnknown)
+    ['{51CBD3C4-F1F3-4D2F-A0E1-7E9C4DD0FEB3}']
+
+    function GetPreferredInputFormat(outputFormat: IAudioMediaType;
+                                     out preferredFormat: IAudioMediaType): HResult; stdcall;
+
+
+    function GetPreferredOutputFormat(inputFormat: IAudioMediaType;
+                                      out preferredFormat: IAudioMediaType): HResult; stdcall;
+
+  end;
+  {$EXTERNALSYM IAudioProcessingObjectPreferredFormatSupport}
+  IID_IAudioProcessingObjectPreferredFormatSupport = IAudioProcessingObjectPreferredFormatSupport;
+  {$EXTERNALSYM IID_IAudioProcessingObjectPreferredFormatSupport}
+
 
   // Interface IAudioProcessingObjectNotifications
   // =============================================
   //
   // Interface to be implemented by an APO that wishes to use the notification service provided by the OS.
   //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioProcessingObjectNotifications);'}
   IAudioProcessingObjectNotifications = interface(IUnknown)
   ['{56B0C76F-02FD-4B21-A52E-9F8219FC86E4}']
 
@@ -473,20 +529,26 @@ type
     procedure HandleNotification(apoNotification: APO_NOTIFICATION); stdcall;
 
   end;
+  {$EXTERNALSYM IAudioProcessingObjectNotifications}
+  IID_IAudioProcessingObjectNotifications = IAudioProcessingObjectNotifications;
+  {$EXTERNALSYM IID_IAudioProcessingObjectNotifications}
 
 
   // Interface IAudioProcessingObjectNotifications2
   // ==============================================
   //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioProcessingObjectNotifications2);'}
   IAudioProcessingObjectNotifications2 = interface(IAudioProcessingObjectNotifications)
   ['{ca2cfbde-a9d6-4eb0-bc95-c4d026b380f0}']
 
-    function GetApoNotificationRegistrationInfo2(
-        maxApoNotificationTypeSupported: APO_NOTIFICATION_TYPE;
-        out apoNotifications: PAPO_NOTIFICATION_DESCRIPTOR;
-        out count: DWORD): HResult; stdcall;
+    function GetApoNotificationRegistrationInfo2(maxApoNotificationTypeSupported: APO_NOTIFICATION_TYPE;
+                                                 out apoNotifications: PAPO_NOTIFICATION_DESCRIPTOR;
+                                                 out count: DWORD): HResult; stdcall;
 
   end;
+  {$EXTERNALSYM IAudioProcessingObjectNotifications2}
+  IID_IAudioProcessingObjectNotifications2 = IAudioProcessingObjectNotifications2;
+  {$EXTERNALSYM IID_IAudioProcessingObjectNotifications2}
 
 
 
