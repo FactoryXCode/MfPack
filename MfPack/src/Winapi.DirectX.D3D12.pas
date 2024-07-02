@@ -21,17 +21,19 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 19/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Embarcadero's <= Delphi 10.4 D3D12 is outdated!
+// Remarks: Embarcadero's <= Delphi 10.4 D3D12 is way outdated!
+//          Search "Update May 2024", to find updates since May 2024.
+
 //
 // Related objects: -
 // Related projects: MfPackX317
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.22621.0
+// SDK version: 10.0.26100.0
 //
 // Todo: -
 //
@@ -646,7 +648,7 @@ const
   {$EXTERNALSYM D3D12_PACKED_TILE}
   D3D12_PIXEL_ADDRESS_RANGE_BIT_COUNT                                      = 15;
   {$EXTERNALSYM D3D12_PIXEL_ADDRESS_RANGE_BIT_COUNT}
-  D3D12_PREVIEW_SDK_VERSION                                                = 702;
+  D3D12_PREVIEW_SDK_VERSION                                                = 713;   // Update May 2024
   {$EXTERNALSYM D3D12_PREVIEW_SDK_VERSION}
   D3D12_PRE_SCISSOR_PIXEL_ADDRESS_RANGE_BIT_COUNT                          = 16;
   {$EXTERNALSYM D3D12_PRE_SCISSOR_PIXEL_ADDRESS_RANGE_BIT_COUNT}
@@ -782,7 +784,7 @@ const
   {$EXTERNALSYM D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES}
   D3D12_RS_SET_SHADING_RATE_COMBINER_COUNT                                 = 2;
   {$EXTERNALSYM D3D12_RS_SET_SHADING_RATE_COMBINER_COUNT}
-  D3D12_SDK_VERSION                                                        = 602;
+  D3D12_SDK_VERSION                                                        = 612; // Update May 2024
   {$EXTERNALSYM D3D12_SDK_VERSION}
   D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES                                    = 32;
   {$EXTERNALSYM D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES}
@@ -908,6 +910,20 @@ const
   {$EXTERNALSYM D3D12_VIDEO_DECODE_MIN_HISTOGRAM_OFFSET_ALIGNMENT}
   D3D12_VIDEO_DECODE_STATUS_MACROBLOCKS_AFFECTED_UNKNOWN                   = $FFFFFFFF;
   {$EXTERNALSYM D3D12_VIDEO_DECODE_STATUS_MACROBLOCKS_AFFECTED_UNKNOWN}
+
+  // Update May 2024
+  D3D12_VIDEO_ENCODER_AV1_INVALID_DPB_RESOURCE_INDEX                       = $FF;
+  {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_INVALID_DPB_RESOURCE_INDEX}
+  D3D12_VIDEO_ENCODER_AV1_MAX_TILE_COLS                                    = 64;
+  {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_MAX_TILE_COLS}
+  D3D12_VIDEO_ENCODER_AV1_MAX_TILE_ROWS                                    = 64;
+  {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_MAX_TILE_ROWS}
+  D3D12_VIDEO_ENCODER_AV1_SUPERRES_DENOM_MIN                               = 9;
+  {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_SUPERRES_DENOM_MIN}
+  D3D12_VIDEO_ENCODER_AV1_SUPERRES_NUM                                     = 8;
+  {$EXTERNALSYM D3D12_VIDEO_ENCODER_AV1_SUPERRES_NUM}
+  // ==
+
   D3D12_VIDEO_PROCESS_MAX_FILTERS                                          = 32;
   {$EXTERNALSYM D3D12_VIDEO_PROCESS_MAX_FILTERS}
   D3D12_VIDEO_PROCESS_STEREO_VIEWS                                         = 2;
@@ -942,6 +958,8 @@ const
   {$EXTERNALSYM D3D12_WHQL_DRAWINDEXED_INDEX_COUNT_2_TO_EXP}
   D3D12_WHQL_DRAW_VERTEX_COUNT_2_TO_EXP                                    = 25;
   {$EXTERNALSYM D3D12_WHQL_DRAW_VERTEX_COUNT_2_TO_EXP}
+  D3D12_WORK_GRAPHS_MAX_NODE_DEPTH                                         = 32; // Update May 2024
+  {$EXTERNALSYM D3D12_WORK_GRAPHS_MAX_NODE_DEPTH}
 
   // Moved to here.
   D3D12_SHADER_COMPONENT_MAPPING_MASK                                      = $7;
@@ -992,7 +1010,12 @@ const
     {$EXTERNALSYM D3D12_PIPELINE_STATE_FLAG_NONE}
     D3D12_PIPELINE_STATE_FLAG_TOOL_DEBUG = D3D12_PIPELINE_STATE_FLAGS($1);
     {$EXTERNALSYM D3D12_PIPELINE_STATE_FLAG_TOOL_DEBUG}
-
+    // Update May 2024
+    D3D12_PIPELINE_STATE_FLAG_DYNAMIC_DEPTH_BIAS = D3D12_PIPELINE_STATE_FLAGS($4);
+    {$EXTERNALSYM D3D12_PIPELINE_STATE_FLAG_DYNAMIC_DEPTH_BIAS}
+    D3D12_PIPELINE_STATE_FLAG_DYNAMIC_INDEX_BUFFER_STRIP_CUT = D3D12_PIPELINE_STATE_FLAGS($8);
+    {$EXTERNALSYM D3D12_PIPELINE_STATE_FLAG_DYNAMIC_INDEX_BUFFER_STRIP_CUT}
+    // ==
 
 type
   PD3D12_SHADER_CACHE_SUPPORT_FLAGS = ^D3D12_SHADER_CACHE_SUPPORT_FLAGS;
@@ -1068,6 +1091,8 @@ const
     {$EXTERNALSYM D3D12_HEAP_FLAG_CREATE_NOT_RESIDENT}
     D3D12_HEAP_FLAG_CREATE_NOT_ZEROED              = D3D12_HEAP_FLAGS($1000);
     {$EXTERNALSYM D3D12_HEAP_FLAG_CREATE_NOT_ZEROED}
+    D3D12_HEAP_FLAG_TOOLS_USE_MANUAL_WRITE_TRACKING = D3D12_HEAP_FLAGS($2000);  // Update May 2024
+     {$EXTERNALSYM D3D12_HEAP_FLAG_TOOLS_USE_MANUAL_WRITE_TRACKING}
 
     // These are convenience aliases to manage resource heap tier restrictions. They cannot be bitwise OR'ed together cleanly.
     D3D12_HEAP_FLAG_ALLOW_ALL_BUFFERS_AND_TEXTURES = D3D12_HEAP_FLAGS($0);
@@ -1173,6 +1198,15 @@ const
     {$EXTERNALSYM D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE}
     D3D12_RESOURCE_STATE_SHADING_RATE_SOURCE               = D3D12_RESOURCE_STATES($1000000);
     {$EXTERNALSYM D3D12_RESOURCE_STATE_SHADING_RATE_SOURCE}
+
+    // Update May 2024
+    D3D12_RESOURCE_STATE_RESERVED_INTERNAL_8000            = D3D12_RESOURCE_STATES($8000);
+    D3D12_RESOURCE_STATE_RESERVED_INTERNAL_4000            = D3D12_RESOURCE_STATES($4000);
+    D3D12_RESOURCE_STATE_RESERVED_INTERNAL_100000          = D3D12_RESOURCE_STATES($100000);
+    D3D12_RESOURCE_STATE_RESERVED_INTERNAL_40000000        = D3D12_RESOURCE_STATES($40000000);
+    D3D12_RESOURCE_STATE_RESERVED_INTERNAL_80000000        = D3D12_RESOURCE_STATES($80000000);
+    // ==
+
     D3D12_RESOURCE_STATE_GENERIC_READ                      = (D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER or
                                                               D3D12_RESOURCE_STATE_INDEX_BUFFER or
                                                               D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE or
@@ -1719,6 +1753,10 @@ const
     {$EXTERNALSYM D3D12_RENDER_PASS_FLAG_SUSPENDING_PASS}
     D3D12_RENDER_PASS_FLAG_RESUMING_PASS    = D3D12_RENDER_PASS_FLAGS($4);
     {$EXTERNALSYM D3D12_RENDER_PASS_FLAG_RESUMING_PASS}
+    D3D12_RENDER_PASS_FLAG_BIND_READ_ONLY_DEPTH   = D3D12_RENDER_PASS_FLAGS(8);
+    {$EXTERNALSYM D3D12_RENDER_PASS_FLAG_BIND_READ_ONLY_DEPTH}
+    D3D12_RENDER_PASS_FLAG_BIND_READ_ONLY_STENCIL = D3D12_RENDER_PASS_FLAGS(10);
+    {$EXTERNALSYM D3D12_RENDER_PASS_FLAG_BIND_READ_ONLY_STENCIL}
 
 
 type
@@ -1818,8 +1856,8 @@ const
     {$EXTERNALSYM D3D12_BARRIER_SYNC_ALL}
     D3D12_BARRIER_SYNC_DRAW                                                  = D3D12_BARRIER_SYNC($2);
     {$EXTERNALSYM D3D12_BARRIER_SYNC_DRAW}
-    D3D12_BARRIER_SYNC_INPUT_ASSEMBLER                                       = D3D12_BARRIER_SYNC($4);
-    {$EXTERNALSYM D3D12_BARRIER_SYNC_INPUT_ASSEMBLER}
+    D3D12_BARRIER_SYNC_INDEX_INPUT                                           = D3D12_BARRIER_SYNC($4); // Update May 2014
+    {$EXTERNALSYM D3D12_BARRIER_SYNC_INDEX_INPUT}
     D3D12_BARRIER_SYNC_VERTEX_SHADING                                        = D3D12_BARRIER_SYNC($8);
     {$EXTERNALSYM D3D12_BARRIER_SYNC_VERTEX_SHADING}
     D3D12_BARRIER_SYNC_PIXEL_SHADING                                         = D3D12_BARRIER_SYNC($10);
@@ -1846,6 +1884,8 @@ const
     {$EXTERNALSYM D3D12_BARRIER_SYNC_NON_PIXEL_SHADING}
     D3D12_BARRIER_SYNC_EMIT_RAYTRACING_ACCELERATION_STRUCTURE_POSTBUILD_INFO = D3D12_BARRIER_SYNC($4000);
     {$EXTERNALSYM D3D12_BARRIER_SYNC_EMIT_RAYTRACING_ACCELERATION_STRUCTURE_POSTBUILD_INFO}
+    D3D12_BARRIER_SYNC_CLEAR_UNORDERED_ACCESS_VIEW                           = D3D12_BARRIER_SYNC($8000);  // Update May 2014
+    {$EXTERNALSYM D3D12_BARRIER_SYNC_CLEAR_UNORDERED_ACCESS_VIEW}
     D3D12_BARRIER_SYNC_VIDEO_DECODE                                          = D3D12_BARRIER_SYNC($100000);
     {$EXTERNALSYM D3D12_BARRIER_SYNC_VIDEO_DECODE}
     D3D12_BARRIER_SYNC_VIDEO_PROCESS                                         = D3D12_BARRIER_SYNC($200000);
@@ -1961,35 +2001,6 @@ const
                                            D3: $40f5;
                                            D4: ($b2, $97, $81, $ce, $9e, $18, $93, $3f));
   {$EXTERNALSYM D3D12ExperimentalShaderModels}
-  // --------------------------------------------------------------------------------------------------------------------------------
-  // Experimental Feature: D3D12TiledResourceTier4
-  //
-  // Use with D3D12EnableExperimentalFeatures to enable tiled resource tier 4 support,
-  // meaning texture tile data-inheritance is allowed.
-  //
-  // Enabling D3D12TiledResourceTier4 needs no configuration struct, pass NULL in the pConfigurationStructs array.
-  //
-  // --------------------------------------------------------------------------------------------------------------------------------
- (* a81a-4f56-8c5b-c51039d694fb *)
- D3D12TiledResourceTier4 : TGUID = (D1: $c9c4725f;
-                                    D2: $a81a;
-                                    D3: $4f56;
-                                    D4: ($8c, $5b, $c5, $10, $39, $d6, $94, $fb));
- {$EXTERNALSYM D3D12TiledResourceTier4}
-  // --------------------------------------------------------------------------------------------------------------------------------
-  // Experimental Feature: D3D12MetaCommand
-  //
-  // Use with D3D12EnableExperimentalFeatures to enable the D3D12 Meta Command.
-  //
-  // Enabling D3D12MetaCommand needs no configuration struct, pass NULL in the pConfigurationStructs array.
-  //
-  // --------------------------------------------------------------------------------------------------------------------------------
-  (* C734C97E-8077-48C8-9FDC-D9D1DD31DD77 *)
-  D3D12MetaCommand  : TGUID = (D1: $c734c97e;
-                               D2: $8077;
-                               D3: $48c8;
-                               D4: ($9f, $dc, $d9, $d1, $dd, $31, $dd, $77));
-  {$EXTERNALSYM D3D12MetaCommand}
 
 
   // --------------------------------------------------------------------------------------------------------------------------------
@@ -2051,7 +2062,9 @@ type
     D3D12_COMMAND_LIST_TYPE_COPY          = 3,
     D3D12_COMMAND_LIST_TYPE_VIDEO_DECODE  = 4,
     D3D12_COMMAND_LIST_TYPE_VIDEO_PROCESS = 5,
-    D3D12_COMMAND_LIST_TYPE_VIDEO_ENCODE  = 6
+    D3D12_COMMAND_LIST_TYPE_VIDEO_ENCODE  = 6,
+
+    D3D12_COMMAND_LIST_TYPE_NONE          = -1   // Update May 2024
     );
   {$EXTERNALSYM D3D12_COMMAND_LIST_TYPE}
 
@@ -2181,6 +2194,7 @@ type
  // Keep COMPARISON_FUNC values in sync with earlier DX versions (HW consumes values directly).
   PD3D12_COMPARISON_FUNC = ^D3D12_COMPARISON_FUNC;
   D3D12_COMPARISON_FUNC = (
+    D3D12_COMPARISON_FUNC_NONE           = 0,  // Update May 2024
     D3D12_COMPARISON_FUNC_NEVER          = 1,
     D3D12_COMPARISON_FUNC_LESS           = 2,
     D3D12_COMPARISON_FUNC_EQUAL          = 3,
@@ -2254,6 +2268,34 @@ type
   end;
   {$EXTERNALSYM D3D12_DEPTH_STENCIL_DESC1}
 
+  // Update May 2024
+
+  // Front/back face independent stencil masks
+  PD3D12_DEPTH_STENCILOP_DESC1 = ^D3D12_DEPTH_STENCILOP_DESC1;
+  D3D12_DEPTH_STENCILOP_DESC1 = record
+    StencilFailOp: D3D12_STENCIL_OP;
+    StencilDepthFailOp: D3D12_STENCIL_OP;
+    StencilPassOp: D3D12_STENCIL_OP;
+    StencilFunc: D3D12_COMPARISON_FUNC;
+    StencilReadMask: UINT8;
+    StencilWriteMask: UINT8;
+  end;
+  {$EXTERNALSYM D3D12_DEPTH_STENCILOP_DESC1}
+
+
+  PD3D12_DEPTH_STENCIL_DESC2 = ^D3D12_DEPTH_STENCIL_DESC2;
+  D3D12_DEPTH_STENCIL_DESC2 = record
+    DepthEnable: BOOL;
+    DepthWriteMask: D3D12_DEPTH_WRITE_MASK;
+    DepthFunc: D3D12_COMPARISON_FUNC;
+    StencilEnable: BOOL;
+    FrontFace: D3D12_DEPTH_STENCILOP_DESC1;
+    BackFace: D3D12_DEPTH_STENCILOP_DESC1;
+    DepthBoundsTestEnable: BOOL;
+  end;
+  {$EXTERNALSYM D3D12_DEPTH_STENCIL_DESC2}
+
+  // ==
 
   //////////////////////////////////////////////////////////////////////////////
   //
@@ -2395,6 +2437,53 @@ type
     ConservativeRaster: D3D12_CONSERVATIVE_RASTERIZATION_MODE;
   end;
   {$EXTERNALSYM D3D12_RASTERIZER_DESC}
+
+
+  // Update May 2024
+
+  PD3D12_RASTERIZER_DESC1 = ^D3D12_RASTERIZER_DESC1;
+  D3D12_RASTERIZER_DESC1 = record
+    FillMode: D3D12_FILL_MODE;
+    CullMode: D3D12_CULL_MODE;
+    FrontCounterClockwise: BOOL;
+    DepthBias: FLOAT;
+    DepthBiasClamp: FLOAT;
+    SlopeScaledDepthBias: FLOAT;
+    DepthClipEnable: BOOL;
+    MultisampleEnable: BOOL;
+    AntialiasedLineEnable: BOOL;
+    ForcedSampleCount: UINT;
+    ConservativeRaster: D3D12_CONSERVATIVE_RASTERIZATION_MODE;
+  end;
+  {$EXTERNALSYM D3D12_RASTERIZER_DESC1}
+
+
+  PD3D12_LINE_RASTERIZATION_MODE = ^D3D12_LINE_RASTERIZATION_MODE;
+  D3D12_LINE_RASTERIZATION_MODE = (
+    D3D12_LINE_RASTERIZATION_MODE_ALIASED,
+    D3D12_LINE_RASTERIZATION_MODE_ALPHA_ANTIALIASED,
+    D3D12_LINE_RASTERIZATION_MODE_QUADRILATERAL_WIDE,
+    D3D12_LINE_RASTERIZATION_MODE_QUADRILATERAL_NARROW
+  );
+  {$EXTERNALSYM D3D12_LINE_RASTERIZATION_MODE}
+
+
+  PD3D12_RASTERIZER_DESC2 = ^D3D12_RASTERIZER_DESC2;
+  D3D12_RASTERIZER_DESC2 = record
+    FillMode: D3D12_FILL_MODE;
+    CullMode: D3D12_CULL_MODE;
+    FrontCounterClockwise: BOOL;
+    DepthBias: FLOAT;
+    DepthBiasClamp: FLOAT;
+    SlopeScaledDepthBias: FLOAT;
+    DepthClipEnable: BOOL;
+    LineRasterizationMode: D3D12_LINE_RASTERIZATION_MODE;
+    ForcedSampleCount: UINT;
+    ConservativeRaster: D3D12_CONSERVATIVE_RASTERIZATION_MODE;
+  end;
+  {$EXTERNALSYM D3D12_RASTERIZER_DESC2}
+
+  // ==
 
 
   // Interface ID3D12Object
@@ -2595,6 +2684,11 @@ type
     D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_VIEW_INSTANCING,        // D3D12_VIEW_INSTANCING_DESC
     D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_AS = 24,                // D3D12_SHADER_BYTECODE
     D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_MS = 25,                // D3D12_SHADER_BYTECODE
+    // Update May 2024
+    D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL2 = 26,    // D3D12_DEPTH_STENCIL_DESC2
+    D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RASTERIZER1    = 27,    // D3D12_RASTERIZER_DESC1
+    D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_RASTERIZER2    = 28,    // D3D12_RASTERIZER_DESC2
+    // ==
     D3D12_PIPELINE_STATE_SUBOBJECT_TYPE_MAX_VALID
   );
   {$EXTERNALSYM D3D12_PIPELINE_STATE_SUBOBJECT_TYPE}
@@ -2641,7 +2735,22 @@ type
     D3D12_FEATURE_D3D12_OPTIONS10                       = 39,
     D3D12_FEATURE_D3D12_OPTIONS11                       = 40,
     D3D12_FEATURE_D3D12_OPTIONS12                       = 41,
-    D3D12_FEATURE_D3D12_OPTIONS13                       = 42
+    D3D12_FEATURE_D3D12_OPTIONS13                       = 42,
+    // Update May 2024
+    D3D12_FEATURE_D3D12_OPTIONS14                       = 43,
+    D3D12_FEATURE_D3D12_OPTIONS15                       = 44,
+    D3D12_FEATURE_D3D12_OPTIONS16                       = 45,
+    D3D12_FEATURE_D3D12_OPTIONS17                       = 46,
+    D3D12_FEATURE_D3D12_OPTIONS18                       = 47,
+    // ==
+    D3D12_FEATURE_D3D12_OPTIONS19                       = 48,
+    D3D12_FEATURE_D3D12_OPTIONS20                       = 49,
+    // Update May 2024
+    D3D12_FEATURE_PREDICATION                           = 50,
+    D3D12_FEATURE_PLACED_RESOURCE_SUPPORT_INFO          = 51,
+    D3D12_FEATURE_HARDWARE_COPY                         = 52,
+    D3D12_FEATURE_D3D12_OPTIONS21                       = 53
+    // ==
   );
   {$EXTERNALSYM D3D12_FEATURE}
 
@@ -2783,6 +2892,15 @@ type
   );
   {$EXTERNALSYM D3D12_VIEW_INSTANCING_TIER}
 
+  // Update May 2024
+  PD3D12_WORK_GRAPHS_TIER = ^D3D12_WORK_GRAPHS_TIER;
+  D3D12_WORK_GRAPHS_TIER                 = (
+    D3D12_WORK_GRAPHS_TIER_NOT_SUPPORTED = 0,
+    D3D12_WORK_GRAPHS_TIER_1_0           = 10
+  );
+  {$EXTERNALSYM D3D12_WORK_GRAPHS_TIER}
+  // ==
+
 
   PD3D12_FEATURE_DATA_D3D12_OPTIONS = ^D3D12_FEATURE_DATA_D3D12_OPTIONS;
   D3D12_FEATURE_DATA_D3D12_OPTIONS = record
@@ -2829,7 +2947,13 @@ type
 
   PD3D_ROOT_SIGNATURE_VERSION = ^D3D_ROOT_SIGNATURE_VERSION;
   D3D_ROOT_SIGNATURE_VERSION = (
-    D3D_ROOT_SIGNATURE_VERSION_1  = $1);
+    D3D_ROOT_SIGNATURE_VERSION_1   = $1,
+    D3D_ROOT_SIGNATURE_VERSION_1_0 = $1,
+    // Update May 2024
+    D3D_ROOT_SIGNATURE_VERSION_1_1 = $2,
+    D3D_ROOT_SIGNATURE_VERSION_1_2 = $3
+    // ==
+    );
   {$EXTERNALSYM D3D_ROOT_SIGNATURE_VERSION}
 
 
@@ -2874,6 +2998,7 @@ type
   // D3D_SHADER_MODEL
   PD3D_SHADER_MODEL = ^D3D_SHADER_MODEL;
   D3D_SHADER_MODEL = (
+    D3D_SHADER_MODEL_NONE    = $0, // e.g MCDM Generic devices  // Update May 2024
     D3D_SHADER_MODEL_5_1     = $51,
     D3D_SHADER_MODEL_6_0     = $60,
     D3D_SHADER_MODEL_6_1     = $61,
@@ -2883,7 +3008,11 @@ type
     D3D_SHADER_MODEL_6_5     = $65,
     D3D_SHADER_MODEL_6_6     = $66,
     D3D_SHADER_MODEL_6_7     = $67,
-    D3D_HIGHEST_SHADER_MODEL = D3D_SHADER_MODEL_6_7
+    // Update May 2024
+    D3D_SHADER_MODEL_6_8     = $68,
+    D3D_SHADER_MODEL_6_9     = $69,
+    D3D_HIGHEST_SHADER_MODEL = D3D_SHADER_MODEL_6_9
+    // ==
   );
   {$EXTERNALSYM D3D_SHADER_MODEL}
 
@@ -3186,6 +3315,127 @@ type
   end;
   {$EXTERNALSYM D3D12_FEATURE_DATA_D3D12_OPTIONS13}
 
+  // Update May 2024
+
+  // D3D12_FEATURE_D3D12_OPTIONS14
+  PD3D12_FEATURE_DATA_D3D12_OPTIONS14 = ^D3D12_FEATURE_DATA_D3D12_OPTIONS14;
+  D3D12_FEATURE_DATA_D3D12_OPTIONS14 = record
+    {_Out_} AdvancedTextureOpsSupported: BOOL;
+    {_Out_} WriteableMSAATexturesSupported: BOOL;
+    {_Out_} IndependentFrontAndBackStencilRefMaskSupported: BOOL;
+  end;
+  {$EXTERNALSYM D3D12_FEATURE_DATA_D3D12_OPTIONS14}
+
+
+  // D3D12_FEATURE_D3D12_OPTIONS15
+  PD3D12_FEATURE_DATA_D3D12_OPTIONS15 = ^D3D12_FEATURE_DATA_D3D12_OPTIONS15;
+  D3D12_FEATURE_DATA_D3D12_OPTIONS15 = record
+    {_Out_} TriangleFanSupported: BOOL;
+    {_Out_} DynamicIndexBufferStripCutSupported: BOOL;
+  end;
+  {$EXTERNALSYM D3D12_FEATURE_DATA_D3D12_OPTIONS15}
+
+
+  // D3D12_FEATURE_D3D12_OPTIONS16
+  PD3D12_FEATURE_DATA_D3D12_OPTIONS16 = ^D3D12_FEATURE_DATA_D3D12_OPTIONS16;
+  D3D12_FEATURE_DATA_D3D12_OPTIONS16 = record
+    {_Out_} DynamicDepthBiasSupported: BOOL;
+    {_Out_} GPUUploadHeapSupported: BOOL;
+  end;
+  {$EXTERNALSYM D3D12_FEATURE_DATA_D3D12_OPTIONS16}
+
+
+  // D3D12_FEATURE_D3D12_OPTIONS17
+  PD3D12_FEATURE_DATA_D3D12_OPTIONS17 = ^D3D12_FEATURE_DATA_D3D12_OPTIONS17;
+  D3D12_FEATURE_DATA_D3D12_OPTIONS17 = record
+    {_Out_} NonNormalizedCoordinateSamplersSupported: BOOL;
+    {_Out_} ManualWriteTrackingResourceSupported: BOOL;
+  end;
+  {$EXTERNALSYM D3D12_FEATURE_DATA_D3D12_OPTIONS17}
+
+
+  // D3D12_FEATURE_D3D12_OPTIONS18
+  PD3D12_FEATURE_DATA_D3D12_OPTIONS18 = ^D3D12_FEATURE_DATA_D3D12_OPTIONS18;
+  D3D12_FEATURE_DATA_D3D12_OPTIONS18 = record
+    {_Out_} RenderPassesValid: BOOL;
+  end;
+  {$EXTERNALSYM D3D12_FEATURE_DATA_D3D12_OPTIONS18}
+
+  // ==
+
+  // D3D12_FEATURE_D3D12_OPTIONS19
+  PD3D12_FEATURE_DATA_D3D12_OPTIONS19 = ^D3D12_FEATURE_DATA_D3D12_OPTIONS19;
+  D3D12_FEATURE_DATA_D3D12_OPTIONS19 = record
+    MismatchingOutputDimensionsSupported: BOOL;
+    SupportedSampleCountsWithNoOutputs: UINT;
+    PointSamplingAddressesNeverRoundUp: BOOL;
+    RasterizerDesc2Supported: BOOL;
+    NarrowQuadrilateralLinesSupported: BOOL;
+    AnisoFilterWithPointMipSupported: BOOL;
+    MaxSamplerDescriptorHeapSize: UINT;
+    MaxSamplerDescriptorHeapSizeWithStaticSamplers: UINT;
+    MaxViewDescriptorHeapSize: UINT;
+    {_Out_} ComputeOnlyCustomHeapSupported: BOOL;
+  end;
+  {$EXTERNALSYM D3D12_FEATURE_DATA_D3D12_OPTIONS19}
+
+
+  PD3D12_RECREATE_AT_TIER = ^D3D12_RECREATE_AT_TIER;
+  D3D12_RECREATE_AT_TIER                 = (
+    D3D12_RECREATE_AT_TIER_NOT_SUPPORTED = 0,
+    // * Supports retrieving resource and heap allocation information
+    //   with ID3D12PageableTools::GetAllocationInfo
+    // * Supports setting resource and heap virtual addresses with
+    //   ID3D12DeviceTools::SetNextAllocation
+    D3D12_RECREATE_AT_TIER_1             = 1
+  );
+  {$EXTERNALSYM D3D12_RECREATE_AT_TIER}
+
+
+  // D3D12_FEATURE_D3D12_OPTIONS20
+  PD3d12FeatureDataD3d12Options20 = ^TD3d12FeatureDataD3d12Options20;
+  {$EXTERNALSYM D3D12_FEATURE_DATA_D3D12_OPTIONS20}
+  D3D12_FEATURE_DATA_D3D12_OPTIONS20 = record
+    {_Out_} ComputeOnlyWriteWatchSupported: BOOL;
+    RecreateAtTier: D3D12_RECREATE_AT_TIER;
+  end;
+  TD3d12FeatureDataD3d12Options20 = D3D12_FEATURE_DATA_D3D12_OPTIONS20;
+
+
+  PD3D12_EXECUTE_INDIRECT_TIER = ^D3D12_EXECUTE_INDIRECT_TIER;
+  D3D12_EXECUTE_INDIRECT_TIER       = (
+    D3D12_EXECUTE_INDIRECT_TIER_1_0 = 10,
+    D3D12_EXECUTE_INDIRECT_TIER_1_1 = 11
+  );
+  {$EXTERNALSYM D3D12_EXECUTE_INDIRECT_TIER}
+
+  // Update MAy 2024
+
+  PD3D12_FEATURE_DATA_D3D12_OPTIONS21 = ^D3D12_FEATURE_DATA_D3D12_OPTIONS21;
+  D3D12_FEATURE_DATA_D3D12_OPTIONS21 = record
+    {_Out_} WorkGraphsTier: D3D12_WORK_GRAPHS_TIER;
+    {_Out_} ExecuteIndirectTier: D3D12_EXECUTE_INDIRECT_TIER;
+    {_Out_} SampleCmpGradientAndBiasSupported: BOOL;
+    {_Out_} ExtendedCommandInfoSupported: BOOL;
+  end;
+  {$EXTERNALSYM D3D12_FEATURE_DATA_D3D12_OPTIONS21}
+
+
+  PD3D12_FEATURE_DATA_PREDICATION = ^D3D12_FEATURE_DATA_PREDICATION;
+  D3D12_FEATURE_DATA_PREDICATION = record
+    Supported: BOOL;
+  end;
+  {$EXTERNALSYM D3D12_FEATURE_DATA_PREDICATION}
+
+
+  PD3D12_FEATURE_DATA_HARDWARE_COPY = ^D3D12_FEATURE_DATA_HARDWARE_COPY;
+  D3D12_FEATURE_DATA_HARDWARE_COPY = record
+    Supported: BOOL;
+  end;
+  {$EXTERNALSYM D3D12_FEATURE_DATA_HARDWARE_COPY}
+
+  // ==
+
 
   PD3D12_RESOURCE_ALLOCATION_INFO = ^D3D12_RESOURCE_ALLOCATION_INFO;
   D3D12_RESOURCE_ALLOCATION_INFO = record
@@ -3206,10 +3456,11 @@ type
 
   PD3D12_HEAP_TYPE = ^D3D12_HEAP_TYPE;
   D3D12_HEAP_TYPE = (
-    D3D12_HEAP_TYPE_DEFAULT   = 1,
-    D3D12_HEAP_TYPE_UPLOAD    = 2,
-    D3D12_HEAP_TYPE_READBACK  = 3,
-    D3D12_HEAP_TYPE_CUSTOM    = 4
+    D3D12_HEAP_TYPE_DEFAULT    = 1,
+    D3D12_HEAP_TYPE_UPLOAD     = 2,
+    D3D12_HEAP_TYPE_READBACK   = 3,
+    D3D12_HEAP_TYPE_CUSTOM     = 4,
+    D3D12_HEAP_TYPE_GPU_UPLOAD = 5 // Update May 2024
     );
   {$EXTERNALSYM D3D12_HEAP_TYPE}
 
@@ -3262,6 +3513,17 @@ type
     D3D12_RESOURCE_DIMENSION_TEXTURE3D  = 4
     );
   {$EXTERNALSYM D3D12_RESOURCE_DIMENSION}
+
+  // Update May 2024
+  PD3D12_FEATURE_DATA_PLACED_RESOURCE_SUPPORT_INFO = ^D3D12_FEATURE_DATA_PLACED_RESOURCE_SUPPORT_INFO;
+  D3D12_FEATURE_DATA_PLACED_RESOURCE_SUPPORT_INFO = record
+    {_In_} Format: DXGI_FORMAT;
+    {_In_} Dimension: D3D12_RESOURCE_DIMENSION;
+    {_Out_} DestHeapProperties: D3D12_HEAP_PROPERTIES;
+    {_Out_} Supported: BOOL;
+  end;
+  {$EXTERNALSYM D3D12_FEATURE_DATA_PLACED_RESOURCE_SUPPORT_INFO}
+  // ==
 
 
   PD3D12_TEXTURE_LAYOUT = ^D3D12_TEXTURE_LAYOUT;
@@ -3769,6 +4031,7 @@ type
     D3D12_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR            = $11,
     D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT                   = $14,
     D3D12_FILTER_MIN_MAG_MIP_LINEAR                         = $15,
+    D3D12_FILTER_MIN_MAG_ANISOTROPIC_MIP_POINT              = $00000054,  // Update May 2024
     D3D12_FILTER_ANISOTROPIC                                = $55,
     D3D12_FILTER_COMPARISON_MIN_MAG_MIP_POINT               = $80,
     D3D12_FILTER_COMPARISON_MIN_MAG_POINT_MIP_LINEAR        = $81,
@@ -3778,6 +4041,7 @@ type
     D3D12_FILTER_COMPARISON_MIN_LINEAR_MAG_POINT_MIP_LINEAR = $91,
     D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT        = $94,
     D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR              = $95,
+    D3D12_FILTER_COMPARISON_MIN_MAG_ANISOTROPIC_MIP_POINT   = $000000d4,  // Update May 2024
     D3D12_FILTER_COMPARISON_ANISOTROPIC                     = $d5,
     D3D12_FILTER_MINIMUM_MIN_MAG_MIP_POINT                  = $100,
     D3D12_FILTER_MINIMUM_MIN_MAG_POINT_MIP_LINEAR           = $101,
@@ -3787,6 +4051,7 @@ type
     D3D12_FILTER_MINIMUM_MIN_LINEAR_MAG_POINT_MIP_LINEAR    = $111,
     D3D12_FILTER_MINIMUM_MIN_MAG_LINEAR_MIP_POINT           = $114,
     D3D12_FILTER_MINIMUM_MIN_MAG_MIP_LINEAR                 = $115,
+    D3D12_FILTER_MINIMUM_MIN_MAG_ANISOTROPIC_MIP_POINT      = $00000154,  // Update May 2024
     D3D12_FILTER_MINIMUM_ANISOTROPIC                        = $155,
     D3D12_FILTER_MAXIMUM_MIN_MAG_MIP_POINT                  = $180,
     D3D12_FILTER_MAXIMUM_MIN_MAG_POINT_MIP_LINEAR           = $181,
@@ -3796,6 +4061,7 @@ type
     D3D12_FILTER_MAXIMUM_MIN_LINEAR_MAG_POINT_MIP_LINEAR    = $191,
     D3D12_FILTER_MAXIMUM_MIN_MAG_LINEAR_MIP_POINT           = $194,
     D3D12_FILTER_MAXIMUM_MIN_MAG_MIP_LINEAR                 = $195,
+    D3D12_FILTER_MAXIMUM_MIN_MAG_ANISOTROPIC_MIP_POINT      = $000001d4,  // Update May 2024
     D3D12_FILTER_MAXIMUM_ANISOTROPIC                        = $1d5
     );
   {$EXTERNALSYM D3D12_FILTER}
@@ -3825,6 +4091,8 @@ type
   // See: Converted Macro's
   // encode enum entry for anisotropic filtering (with or without comparison filtering)
   // D3D12_ENCODE_ANISOTROPIC_FILTER
+  // See: Converted Macro's
+  // D3D12_ENCODE_MIN_MAG_ANISOTROPIC_MIP_POINT_FILTER // Update May 2024
   // See: Converted Macro's
   // D3D12_DECODE_MIN_FILTER
   // See: Converted Macro's
@@ -3865,6 +4133,37 @@ type
   end;
   {$EXTERNALSYM D3D12_SAMPLER_DESC}
 
+  // Update May 2024
+
+  PD3D12_SAMPLER_FLAGS = ^D3D12_SAMPLER_FLAGS;
+  D3D12_SAMPLER_FLAGS                             = (
+    D3D12_SAMPLER_FLAG_NONE                       = $0,
+    D3D12_SAMPLER_FLAG_UINT_BORDER_COLOR          = $01,
+    D3D12_SAMPLER_FLAG_NON_NORMALIZED_COORDINATES = $02
+  );
+  {$EXTERNALSYM D3D12_SAMPLER_FLAGS}
+
+  // DEFINE_ENUM_FLAG_OPERATORS( D3D12_SAMPLER_FLAGS )
+
+  PD3D12_SAMPLER_DESC2 = ^D3D12_SAMPLER_DESC2;
+  D3D12_SAMPLER_DESC2 = record
+    Filter: D3D12_FILTER;
+    AddressU: D3D12_TEXTURE_ADDRESS_MODE;
+    AddressV: D3D12_TEXTURE_ADDRESS_MODE;
+    AddressW: D3D12_TEXTURE_ADDRESS_MODE;
+    MipLODBias: FLOAT;
+    MaxAnisotropy: UINT;
+    ComparisonFunc: D3D12_COMPARISON_FUNC;
+    MinLOD: FLOAT;
+    MaxLOD: FLOAT;
+    Flags: D3D12_SAMPLER_FLAGS;
+    case Integer of
+      0: (FloatBorderColor: array [0..3] of FLOAT);  // RGBA
+      1: (UintBorderColor: array [0..3] of UINT);
+   end;
+  {$EXTERNALSYM D3D12_SAMPLER_DESC2}
+
+  // ==
 
   PD3D12_BUFFER_UAV = ^D3D12_BUFFER_UAV;
   D3D12_BUFFER_UAV = record
@@ -3910,6 +4209,24 @@ type
   end;
   {$EXTERNALSYM D3D12_TEX2D_ARRAY_UAV}
 
+  // Update May 2024
+
+  PD3D12_TEX2DMS_UAV = ^D3D12_TEX2DMS_UAV;
+  D3D12_TEX2DMS_UAV = record
+    // don't need to define anything specific for this view dimension
+    UnusedField_NothingToDefine: UINT;
+  end;
+  {$EXTERNALSYM D3D12_TEX2DMS_UAV}
+
+
+  PD3D12_TEX2DMS_ARRAY_UAV = ^D3D12_TEX2DMS_ARRAY_UAV;
+  D3D12_TEX2DMS_ARRAY_UAV = record
+    FirstArraySlice: UINT;
+    ArraySize: UINT;
+  end;
+  {$EXTERNALSYM D3D12_TEX2DMS_ARRAY_UAV}
+
+  // ==
 
   PD3D12_TEX3D_UAV = ^D3D12_TEX3D_UAV;
   D3D12_TEX3D_UAV = record
@@ -3922,13 +4239,17 @@ type
 
   PD3D12_UAV_DIMENSION = ^D3D12_UAV_DIMENSION;
   D3D12_UAV_DIMENSION = (
-    D3D12_UAV_DIMENSION_UNKNOWN        = 0,
-    D3D12_UAV_DIMENSION_BUFFER         = 1,
-    D3D12_UAV_DIMENSION_TEXTURE1D      = 2,
-    D3D12_UAV_DIMENSION_TEXTURE1DARRAY = 3,
-    D3D12_UAV_DIMENSION_TEXTURE2D      = 4,
-    D3D12_UAV_DIMENSION_TEXTURE2DARRAY = 5,
-    D3D12_UAV_DIMENSION_TEXTURE3D      = 8
+    D3D12_UAV_DIMENSION_UNKNOWN          = 0,
+    D3D12_UAV_DIMENSION_BUFFER           = 1,
+    D3D12_UAV_DIMENSION_TEXTURE1D        = 2,
+    D3D12_UAV_DIMENSION_TEXTURE1DARRAY   = 3,
+    D3D12_UAV_DIMENSION_TEXTURE2D        = 4,
+    D3D12_UAV_DIMENSION_TEXTURE2DARRAY   = 5,
+    // Update May 2024
+    D3D12_UAV_DIMENSION_TEXTURE2DMS      = 6,
+    D3D12_UAV_DIMENSION_TEXTURE2DMSARRAY = 7,
+    // ==
+    D3D12_UAV_DIMENSION_TEXTURE3D        = 8
     );
   {$EXTERNALSYM D3D12_UAV_DIMENSION}
 
@@ -3943,7 +4264,11 @@ type
       2: (Texture1DArray: D3D12_TEX1D_ARRAY_UAV);
       3: (Texture2D: D3D12_TEX2D_UAV);
       4: (Texture2DArray: D3D12_TEX2D_ARRAY_UAV);
-      5: (Texture3D: D3D12_TEX3D_UAV);
+      // Update May 2024
+      5: (Texture2DMS: D3D12_TEX2DMS_UAV);
+      6: (Texture2DMSArray: D3D12_TEX2DMS_ARRAY_UAV);
+      // ==
+      7: (Texture3D: D3D12_TEX3D_UAV);
   end;
   {$EXTERNALSYM D3D12_UNORDERED_ACCESS_VIEW_DESC}
 
@@ -4231,9 +4556,13 @@ type
 
   PD3D12_STATIC_BORDER_COLOR = ^D3D12_STATIC_BORDER_COLOR;
   D3D12_STATIC_BORDER_COLOR = (
-    D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK = 0, // 0.0 ,0.0 ,0.0 ,0.0
-    D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK      = 1, // 0.0 ,0.0 ,0.0 ,1.0
-    D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE      = 2  // 1.0 ,1.0 ,1.0 ,1.0
+    D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK = 0, // 0.0, 0.0, 0.0, 0.0
+    D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK      = 1, // 0.0, 0.0, 0.0, 1.0
+    D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE      = 2, // 1.0, 1.0, 1.0, 1.0
+    // Update May 2024
+    D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK_UINT = 3, // 0, 0, 0, 1
+    D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE_UINT = 4  // 1, 1, 1, 1
+    // ==
     );
   {$EXTERNALSYM D3D12_STATIC_BORDER_COLOR}
 
@@ -4256,6 +4585,28 @@ type
   end;
   {$EXTERNALSYM D3D12_STATIC_SAMPLER_DESC}
 
+  // Update May 2024
+
+  PD3D12_STATIC_SAMPLER_DESC1 = ^D3D12_STATIC_SAMPLER_DESC1;
+  D3D12_STATIC_SAMPLER_DESC1 = record
+    Filter: D3D12_FILTER;
+    AddressU: D3D12_TEXTURE_ADDRESS_MODE;
+    AddressV: D3D12_TEXTURE_ADDRESS_MODE;
+    AddressW: D3D12_TEXTURE_ADDRESS_MODE;
+    MipLODBias: FLOAT;
+    MaxAnisotropy: UINT;
+    ComparisonFunc: D3D12_COMPARISON_FUNC;
+    BorderColor: D3D12_STATIC_BORDER_COLOR;
+    MinLOD: FLOAT;
+    MaxLOD: FLOAT;
+    ShaderRegister: UINT;
+    RegisterSpace: UINT;
+    ShaderVisibility: D3D12_SHADER_VISIBILITY;
+    Flags: D3D12_SAMPLER_FLAGS;
+  end;
+  {$EXTERNALSYM D3D12_STATIC_SAMPLER_DESC1}
+
+  // ==
 
   PD3D12_ROOT_SIGNATURE_DESC = ^D3D12_ROOT_SIGNATURE_DESC;
   D3D12_ROOT_SIGNATURE_DESC = record
@@ -4317,6 +4668,18 @@ type
   end;
   {$EXTERNALSYM D3D12_ROOT_SIGNATURE_DESC1}
 
+  // Update May 2024
+  PD3D12_ROOT_SIGNATURE_DESC2 = ^D3D12_ROOT_SIGNATURE_DESC2;
+  D3D12_ROOT_SIGNATURE_DESC2 = record
+    NumParameters: UINT;
+    pParameters: PD3D12_ROOT_PARAMETER1;
+    NumStaticSamplers: UINT;
+    pStaticSamplers: PD3D12_STATIC_SAMPLER_DESC1;
+    Flags: D3D12_ROOT_SIGNATURE_FLAGS;
+  end;
+  {$EXTERNALSYM D3D12_ROOT_SIGNATURE_DESC2}
+  // ==
+
 
   PD3D12_VERSIONED_ROOT_SIGNATURE_DESC = ^D3D12_VERSIONED_ROOT_SIGNATURE_DESC;
   D3D12_VERSIONED_ROOT_SIGNATURE_DESC = record
@@ -4324,6 +4687,7 @@ type
     case Integer of
       0: (Desc_1_0: D3D12_ROOT_SIGNATURE_DESC);
       1: (Desc_1_1: D3D12_ROOT_SIGNATURE_DESC1);
+      2: (Desc_1_2: D3D12_ROOT_SIGNATURE_DESC2);
     end;
 
 
@@ -4545,7 +4909,8 @@ type
     D3D12_INDIRECT_ARGUMENT_TYPE_SHADER_RESOURCE_VIEW,
     D3D12_INDIRECT_ARGUMENT_TYPE_UNORDERED_ACCESS_VIEW,
     D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH_RAYS,
-    D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH_MESH
+    D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH_MESH,
+    D3D12_INDIRECT_ARGUMENT_TYPE_INCREMENTING_CONSTANT  // Update May 2024
   );
   {$EXTERNALSYM D3D12_INDIRECT_ARGUMENT_TYPE}
 
@@ -4611,6 +4976,14 @@ type
     RootParameterIndex: UINT;
   end;
 
+  // Update May 2024
+  // Tier 1.1 support
+  IncrementingConstant = record
+    RootParameterIndex: UINT;
+    DestOffsetIn32BitValues: UINT;
+   end;
+  // ==
+
   // Finally we create the whole variant record
   PD3D12_INDIRECT_ARGUMENT_DESC = ^D3D12_INDIRECT_ARGUMENT_DESC;
   D3D12_INDIRECT_ARGUMENT_DESC = record
@@ -4621,6 +4994,7 @@ type
       2: (ConstantBufferView: ConstantBufferView);
       3: (ShaderResourceView: ShaderResourceView);
       4: (UnorderedAccessView: UnorderedAccessView);
+      5: (IncrementingConstant: IncrementingConstant); // Update May 2024
   end;
   {$EXTERNALSYM D3D12_INDIRECT_ARGUMENT_DESC}
 
@@ -5776,6 +6150,90 @@ type
   {$EXTERNALSYM IID_ID3D12StateObjectProperties}
 
 
+  // Update May 2024
+
+  PD3D12_PROGRAM_IDENTIFIER = ^D3D12_PROGRAM_IDENTIFIER;
+  D3D12_PROGRAM_IDENTIFIER = record
+    OpaqueData: array[0..3] of UINT64;
+  end;
+  {$EXTERNALSYM D3D12_PROGRAM_IDENTIFIER}
+
+
+  // Interface ID3D12StateObjectProperties1
+  // ======================================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12StateObjectProperties1);'}
+  ID3D12StateObjectProperties1 = interface(ID3D12StateObjectProperties)
+    ['{460caac7-1d24-446a-a184-ca67db494138}']
+
+    function GetProgramIdentifier(pProgramName: PWideChar): D3D12_PROGRAM_IDENTIFIER; stdcall;
+
+  end;
+  {$EXTERNALSYM ID3D12StateObjectProperties1}
+  IID_ID3D12StateObjectProperties1 = ID3D12StateObjectProperties1;
+  {$EXTERNALSYM IID_ID3D12StateObjectProperties1}
+
+
+  PD3D12_NODE_ID = ^D3D12_NODE_ID;
+  D3D12_NODE_ID = record
+    Name: PWideChar;
+    ArrayIndex: UINT;
+  end;
+  {$EXTERNALSYM D3D12_NODE_ID}
+
+
+  PD3D12_WORK_GRAPH_MEMORY_REQUIREMENTS = ^D3D12_WORK_GRAPH_MEMORY_REQUIREMENTS;
+  D3D12_WORK_GRAPH_MEMORY_REQUIREMENTS = record
+    MinSizeInBytes: UINT64;
+    MaxSizeInBytes: UINT64;
+    SizeGranularityInBytes: UINT;
+  end;
+  {$EXTERNALSYM D3D12_WORK_GRAPH_MEMORY_REQUIREMENTS}
+
+
+  // Interface ID3D12StateObjectProperties1
+  // ======================================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12WorkGraphProperties);'}
+  ID3D12WorkGraphProperties = interface(IUnknown)
+    ['{065acf71-f863-4b89-82f4-02e4d5886757}']
+
+    function GetNumWorkGraphs(): UINT; stdcall;
+    function GetProgramName(WorkGraphIndex: UINT): LPCWSTR; stdcall;
+    function GetWorkGraphIndex(pProgramName: PWideChar): UINT; stdcall;
+
+    function GetNumNodes(WorkGraphIndex: UINT): UINT; stdcall;
+
+    function GetNodeID(WorkGraphIndex: UINT;
+                       NodeIndex: UINT): D3D12_NODE_ID; stdcall;
+
+    function GetNodeIndex(WorkGraphIndex: UINT;
+                          NodeID: D3D12_NODE_ID): UINT; stdcall;
+
+    function GetNodeLocalRootArgumentsTableIndex(WorkGraphIndex: UINT;
+                                                 NodeIndex: UINT): UINT; stdcall;
+
+    function GetNumEntrypoints(WorkGraphIndex: UINT): UINT; stdcall;
+
+    function GetEntrypointID(WorkGraphIndex: UINT;
+                             EntrypointIndex: UINT): D3D12_NODE_ID; stdcall;
+
+    function GetEntrypointIndex(WorkGraphIndex: UINT;
+                                NodeID: D3D12_NODE_ID): UINT; stdcall;
+
+    function GetEntrypointRecordSizeInBytes(WorkGraphIndex: UINT;
+                                            EntrypointIndex: UINT): UINT; stdcall;
+
+    procedure GetWorkGraphMemoryRequirements(WorkGraphIndex: UINT;
+                                             out pWorkGraphMemoryRequirements: D3D12_WORK_GRAPH_MEMORY_REQUIREMENTS); stdcall;
+
+  end;
+  {$EXTERNALSYM ID3D12WorkGraphProperties}
+  IID_ID3D12WorkGraphProperties = ID3D12WorkGraphProperties;
+  {$EXTERNALSYM IID_ID3D12WorkGraphProperties}
+
+  // ==
+
   PD3D12_STATE_SUBOBJECT_TYPE = ^D3D12_STATE_SUBOBJECT_TYPE;
   D3D12_STATE_SUBOBJECT_TYPE = (
     D3D12_STATE_SUBOBJECT_TYPE_STATE_OBJECT_CONFIG                   = 0,   // D3D12_STATE_OBJECT_CONFIG
@@ -5791,7 +6249,27 @@ type
     D3D12_STATE_SUBOBJECT_TYPE_RAYTRACING_PIPELINE_CONFIG            = 10,  // D3D12_RAYTRACING_PIPELINE_CONFIG
     D3D12_STATE_SUBOBJECT_TYPE_HIT_GROUP                             = 11,  // D3D12_HIT_GROUP_DESC
     D3D12_STATE_SUBOBJECT_TYPE_RAYTRACING_PIPELINE_CONFIG1           = 12,  // D3D12_RAYTRACING_PIPELINE_CONFIG1
-    D3D12_STATE_SUBOBJECT_TYPE_MAX_VALID                             = 13
+    // Update May 2024
+    D3D12_STATE_SUBOBJECT_TYPE_WORK_GRAPH                            = 13, // D3D12_WORK_GRAPH_DESC
+    D3D12_STATE_SUBOBJECT_TYPE_STREAM_OUTPUT                         = 14,  // D3D12_STREAM_OUTPUT_DESC
+    D3D12_STATE_SUBOBJECT_TYPE_BLEND                                 = 15,  // D3D12_BLEND_DESC
+    D3D12_STATE_SUBOBJECT_TYPE_SAMPLE_MASK                           = 16,  // UINT
+    D3D12_STATE_SUBOBJECT_TYPE_RASTERIZER                            = 17,  // D3D12_RASTERIZER_DESC
+    D3D12_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL                         = 18,  // D3D12_DEPTH_STENCIL_DESC
+    D3D12_STATE_SUBOBJECT_TYPE_INPUT_LAYOUT                          = 19,  // D3D12_INPUT_LAYOUT_DESC
+    D3D12_STATE_SUBOBJECT_TYPE_IB_STRIP_CUT_VALUE                    = 20,  // D3D12_INDEX_BUFFER_STRIP_CUT_VALUE
+    D3D12_STATE_SUBOBJECT_TYPE_PRIMITIVE_TOPOLOGY                    = 21,  // D3D12_PRIMITIVE_TOPOLOGY_TYPE
+    D3D12_STATE_SUBOBJECT_TYPE_RENDER_TARGET_FORMATS                 = 22,  // D3D12_RT_FORMAT_ARRAY
+    D3D12_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL_FORMAT                  = 23,  // DXGI_FORMAT
+    D3D12_STATE_SUBOBJECT_TYPE_SAMPLE_DESC                           = 24,  // DXGI_SAMPLE_DESC
+    // 25 is unused
+    D3D12_STATE_SUBOBJECT_TYPE_FLAGS                                 = 26,  // D3D12_PIPELINE_STATE_FLAGS
+    D3D12_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL1                        = 27, // D3D12_DEPTH_STENCIL_DESC1
+    D3D12_STATE_SUBOBJECT_TYPE_VIEW_INSTANCING                       = 28, // D3D12_VIEW_INSTANCING_DESC
+    D3D12_STATE_SUBOBJECT_TYPE_GENERIC_PROGRAM                       = 29, // D3D12_GENERIC_PROGRAM_DESC
+    D3D12_STATE_SUBOBJECT_TYPE_DEPTH_STENCIL2                        = 30, // D3D12_DEPTH_STENCIL_DESC2
+    // ==
+    D3D12_STATE_SUBOBJECT_TYPE_MAX_VALID                             = 31
   );
   {$EXTERNALSYM D3D12_STATE_SUBOBJECT_TYPE}
 
@@ -5831,6 +6309,36 @@ type
   end;
   {$EXTERNALSYM D3D12_NODE_MASK}
 
+  // Update MAy 2024
+
+  PD3D12_SAMPLE_MASK = ^D3D12_SAMPLE_MASK;
+  D3D12_SAMPLE_MASK = record
+    SampleMask: UINT;
+  end;
+  {$EXTERNALSYM D3D12_SAMPLE_MASK}
+
+
+  PD3D12_IB_STRIP_CUT_VALUE = ^D3D12_IB_STRIP_CUT_VALUE;
+  D3D12_IB_STRIP_CUT_VALUE = record
+    IndexBufferStripCutValue: D3D12_INDEX_BUFFER_STRIP_CUT_VALUE;
+  end;
+  {$EXTERNALSYM D3D12_IB_STRIP_CUT_VALUE}
+
+
+  PD3D12_PRIMITIVE_TOPOLOGY_DESC = ^D3D12_PRIMITIVE_TOPOLOGY_DESC;
+  D3D12_PRIMITIVE_TOPOLOGY_DESC = record
+    PrimitiveTopology: D3D12_PRIMITIVE_TOPOLOGY_TYPE;
+  end;
+  {$EXTERNALSYM D3D12_PRIMITIVE_TOPOLOGY_DESC}
+
+
+  PD3D12_DEPTH_STENCIL_FORMAT = ^D3D12_DEPTH_STENCIL_FORMAT;
+  D3D12_DEPTH_STENCIL_FORMAT = record
+    DepthStencilFormat: DXGI_FORMAT;
+  end;
+  {$EXTERNALSYM D3D12_DEPTH_STENCIL_FORMAT}
+
+  // ==
 
   PD3D12_EXPORT_DESC = ^D3D12_EXPORT_DESC;
   D3D12_EXPORT_DESC = record
@@ -5918,13 +6426,147 @@ type
   end;
   {$EXTERNALSYM D3D12_RAYTRACING_PIPELINE_CONFIG1}
 
+  // Update May 2024
+
+  PD3D12_NODE_OUTPUT_OVERRIDES = ^D3D12_NODE_OUTPUT_OVERRIDES;
+  D3D12_NODE_OUTPUT_OVERRIDES = record
+    OutputIndex: UINT;
+    pNewName: D3D12_NODE_ID;
+    pAllowSparseNodes: BOOL;
+    pMaxRecords: UINT;
+    pMaxRecordsSharedWithOutputIndex: UINT;
+  end;
+  {$EXTERNALSYM D3D12_NODE_OUTPUT_OVERRIDES}
+
+
+  PD3D12_BROADCASTING_LAUNCH_OVERRIDES = ^D3D12_BROADCASTING_LAUNCH_OVERRIDES;
+  D3D12_BROADCASTING_LAUNCH_OVERRIDES = record
+    pLocalRootArgumentsTableIndex: UINT;
+    pProgramEntry: BOOL;
+    pNewName: D3D12_NODE_ID;
+    pShareInputOf: D3D12_NODE_ID;
+    pDispatchGrid: UINT;
+    pMaxDispatchGrid: UINT;
+    NumOutputOverrides: UINT;
+    pOutputOverrides: D3D12_NODE_OUTPUT_OVERRIDES;
+  end;
+  {$EXTERNALSYM D3D12_BROADCASTING_LAUNCH_OVERRIDES}
+
+
+  PD3D12_COALESCING_LAUNCH_OVERRIDES = ^D3D12_COALESCING_LAUNCH_OVERRIDES;
+  D3D12_COALESCING_LAUNCH_OVERRIDES = record
+    pLocalRootArgumentsTableIndex: UINT;
+    pProgramEntry: BOOL;
+    pNewName: D3D12_NODE_ID;
+    pShareInputOf: D3D12_NODE_ID;
+    NumOutputOverrides: UINT;
+    pOutputOverrides: D3D12_NODE_OUTPUT_OVERRIDES;
+  end;
+  {$EXTERNALSYM D3D12_COALESCING_LAUNCH_OVERRIDES}
+
+
+  PD3D12_THREAD_LAUNCH_OVERRIDES = ^D3D12_THREAD_LAUNCH_OVERRIDES;
+  D3D12_THREAD_LAUNCH_OVERRIDES = record
+    pLocalRootArgumentsTableIndex: UINT;
+    pProgramEntry: BOOL;
+    pNewName: D3D12_NODE_ID;
+    pShareInputOf: D3D12_NODE_ID;
+    NumOutputOverrides: UINT;
+    pOutputOverrides: D3D12_NODE_OUTPUT_OVERRIDES;
+  end;
+  {$EXTERNALSYM D3D12_THREAD_LAUNCH_OVERRIDES}
+
+
+  PD3D12_COMMON_COMPUTE_NODE_OVERRIDES = ^D3D12_COMMON_COMPUTE_NODE_OVERRIDES;
+  D3D12_COMMON_COMPUTE_NODE_OVERRIDES = record
+    pLocalRootArgumentsTableIndex: UINT;
+    pProgramEntry: BOOL;
+    pNewName: D3D12_NODE_ID;
+    pShareInputOf: D3D12_NODE_ID;
+    NumOutputOverrides: UINT;
+    pOutputOverrides: D3D12_NODE_OUTPUT_OVERRIDES;
+  end;
+  {$EXTERNALSYM D3D12_COMMON_COMPUTE_NODE_OVERRIDES}
+
+
+  PD3D12_NODE_OVERRIDES_TYPE = ^D3D12_NODE_OVERRIDES_TYPE;
+  D3D12_NODE_OVERRIDES_TYPE                       = (
+    D3D12_NODE_OVERRIDES_TYPE_NONE                = 0,
+    D3D12_NODE_OVERRIDES_TYPE_BROADCASTING_LAUNCH = 1,
+    D3D12_NODE_OVERRIDES_TYPE_COALESCING_LAUNCH   = 2,
+    D3D12_NODE_OVERRIDES_TYPE_THREAD_LAUNCH       = 3,
+    D3D12_NODE_OVERRIDES_TYPE_COMMON_COMPUTE      = 4
+  );
+  {$EXTERNALSYM D3D12_NODE_OVERRIDES_TYPE}
+
+  PD3D12_SHADER_NODE = ^D3D12_SHADER_NODE;
+  D3D12_SHADER_NODE = record
+    Shader: PWideChar;
+    OverridesType: D3D12_NODE_OVERRIDES_TYPE;
+    case Integer of
+      0:  (pBroadcastingLaunchOverrides: D3D12_BROADCASTING_LAUNCH_OVERRIDES);
+      1:  (pCoalescingLaunchOverrides: D3D12_COALESCING_LAUNCH_OVERRIDES);
+      2:  (pThreadLaunchOverrides: D3D12_THREAD_LAUNCH_OVERRIDES);
+      3:  (pCommonComputeNodeOverrides: D3D12_COMMON_COMPUTE_NODE_OVERRIDES);
+   end;
+  {$EXTERNALSYM D3D12_SHADER_NODE}
+
+
+  PD3D12_NODE_TYPE = ^D3D12_NODE_TYPE;
+  D3D12_NODE_TYPE          = (
+    D3D12_NODE_TYPE_SHADER = $0
+  );
+  {$EXTERNALSYM D3D12_NODE_TYPE}
+
+
+  PD3D12_NODE = ^D3D12_NODE;
+  D3D12_NODE = record
+    NodeType: D3D12_NODE_TYPE;
+    case Integer of
+      0: (Shader: D3D12_SHADER_NODE); // D3D12_NODE_TYPE_SHADER
+  end;
+  {$EXTERNALSYM D3D12_NODE}
+
+
+
+  PD3D12_WORK_GRAPH_FLAGS = ^D3D12_WORK_GRAPH_FLAGS;
+  D3D12_WORK_GRAPH_FLAGS                              = (
+    D3D12_WORK_GRAPH_FLAG_NONE                        = $0,
+    D3D12_WORK_GRAPH_FLAG_INCLUDE_ALL_AVAILABLE_NODES = $1
+  );
+  {$EXTERNALSYM D3D12_WORK_GRAPH_FLAGS}
+
+  // DEFINE_ENUM_FLAG_OPERATORS( D3D12_WORK_GRAPH_FLAGS )
+
+  PD3D12_WORK_GRAPH_DESC = ^D3D12_WORK_GRAPH_DESC;
+  D3D12_WORK_GRAPH_DESC = record
+    ProgramName: PWideChar;
+    Flags: D3D12_WORK_GRAPH_FLAGS;
+    NumEntrypoints: UINT;
+    pEntrypoints: PD3D12_NODE_ID;
+    NumExplicitlyDefinedNodes: UINT;
+    pExplicitlyDefinedNodes: PD3D12_NODE;
+  end;
+  {$EXTERNALSYM D3D12_WORK_GRAPH_DESC}
+
+
+  PD3D12_GENERIC_PROGRAM_DESC = ^D3D12_GENERIC_PROGRAM_DESC;
+  D3D12_GENERIC_PROGRAM_DESC = record
+    ProgramName: PWideChar;
+    NumExports: UINT;
+    pExports: PPWideChar;
+    NumSubobjects: UINT;
+    ppSubobjects: PD3D12_STATE_SUBOBJECT;
+  end;
+  {$EXTERNALSYM D3D12_GENERIC_PROGRAM_DESC}
+
+  // ==
 
   PD3D12_STATE_OBJECT_TYPE = ^D3D12_STATE_OBJECT_TYPE;
   D3D12_STATE_OBJECT_TYPE = (
     D3D12_STATE_OBJECT_TYPE_COLLECTION              = 0,
-    //    D3D12_STATE_OBJECT_TYPE_COMPUTE_PIPELINE  = 1,
-    //    D3D12_STATE_OBJECT_TYPE_GRAPHICS_PIPELINE = 2,
-    D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE     = 3
+    D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE     = 3,
+    D3D12_STATE_OBJECT_TYPE_EXECUTABLE              = 4
   );
   {$EXTERNALSYM D3D12_STATE_OBJECT_TYPE}
 
@@ -6282,7 +6924,13 @@ type
     D3D12_AUTO_BREADCRUMB_OP_EXECUTEEXTENSIONCOMMAND                          = 41,
     D3D12_AUTO_BREADCRUMB_OP_DISPATCHMESH                                     = 42,
     D3D12_AUTO_BREADCRUMB_OP_ENCODEFRAME                                      = 43,
-    D3D12_AUTO_BREADCRUMB_OP_RESOLVEENCODEROUTPUTMETADATA                     = 44
+    // Update May 2024
+    D3D12_AUTO_BREADCRUMB_OP_RESOLVEENCODEROUTPUTMETADATA                     = 44,
+    D3D12_AUTO_BREADCRUMB_OP_BARRIER                                          = 45,
+    D3D12_AUTO_BREADCRUMB_OP_BEGIN_COMMAND_LIST                               = 46,
+    D3D12_AUTO_BREADCRUMB_OP_DISPATCHGRAPH                                    = 47,
+    D3D12_AUTO_BREADCRUMB_OP_SETPROGRAM                                       = 48
+    // ==
   );
   {$EXTERNALSYM D3D12_AUTO_BREADCRUMB_OP}
 
@@ -6512,6 +7160,24 @@ type
   IID_ID3D12DeviceRemovedExtendedDataSettings1 = ID3D12DeviceRemovedExtendedDataSettings1;
   {$EXTERNALSYM IID_ID3D12DeviceRemovedExtendedDataSettings1}
 
+
+  // Update May 2024
+
+  // Interface ID3D12DeviceRemovedExtendedDataSettings2
+  // ==================================================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DeviceRemovedExtendedDataSettings2);'}
+  {$EXTERNALSYM ID3D12DeviceRemovedExtendedDataSettings2}
+  ID3D12DeviceRemovedExtendedDataSettings2 = interface(ID3D12DeviceRemovedExtendedDataSettings1)
+    ['{61552388-01ab-4008-a436-83db189566ea}']
+
+    procedure UseMarkersOnlyAutoBreadcrumbs(MarkersOnly: BOOL);
+
+  end;
+  IID_ID3D12DeviceRemovedExtendedDataSettings2 = ID3D12DeviceRemovedExtendedDataSettings2;
+  {$EXTERNALSYM IID_ID3D12DeviceRemovedExtendedDataSettings2}
+
+  // ==
 
   // Interface ID3D12DeviceRemovedExtendedData
   // =========================================
@@ -6783,7 +7449,12 @@ type
     D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_DISCARD,
     D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_PRESERVE,
     D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_CLEAR,
-    D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_NO_ACCESS
+    D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_NO_ACCESS,
+    // Update May 2024
+    D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_PRESERVE_LOCAL_RENDER,
+    D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_PRESERVE_LOCAL_SRV,
+    D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_PRESERVE_LOCAL_UAV
+    // ==
   );
   {$EXTERNALSYM D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE}
 
@@ -6794,11 +7465,22 @@ type
   end;
   {$EXTERNALSYM D3D12_RENDER_PASS_BEGINNING_ACCESS_CLEAR_PARAMETERS}
 
+  // Update May 2024
+
+  PD3D12_RENDER_PASS_BEGINNING_ACCESS_PRESERVE_LOCAL_PARAMETERS = ^D3D12_RENDER_PASS_BEGINNING_ACCESS_PRESERVE_LOCAL_PARAMETERS;
+  D3D12_RENDER_PASS_BEGINNING_ACCESS_PRESERVE_LOCAL_PARAMETERS = record
+    AdditionalWidth: UINT;
+    AdditionalHeight: UINT;
+  end;
+  {$EXTERNALSYM D3D12_RENDER_PASS_BEGINNING_ACCESS_PRESERVE_LOCAL_PARAMETERS}
+
+  // ==
 
   D3D12_RENDER_PASS_BEGINNING_ACCESS = record
     Type_: D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE;
     case Integer of
       0:  (Clear: D3D12_RENDER_PASS_BEGINNING_ACCESS_CLEAR_PARAMETERS);
+      1:  (PreserveLocal: D3D12_RENDER_PASS_BEGINNING_ACCESS_PRESERVE_LOCAL_PARAMETERS); // Update May 2024
   end;
 
   // Ending Access
@@ -6807,7 +7489,12 @@ type
     D3D12_RENDER_PASS_ENDING_ACCESS_TYPE_DISCARD,
     D3D12_RENDER_PASS_ENDING_ACCESS_TYPE_PRESERVE,
     D3D12_RENDER_PASS_ENDING_ACCESS_TYPE_RESOLVE,
-    D3D12_RENDER_PASS_ENDING_ACCESS_TYPE_NO_ACCESS
+    D3D12_RENDER_PASS_ENDING_ACCESS_TYPE_NO_ACCESS,
+    // Update May 2024
+    D3D12_RENDER_PASS_ENDING_ACCESS_TYPE_PRESERVE_LOCAL_RENDER,
+    D3D12_RENDER_PASS_ENDING_ACCESS_TYPE_PRESERVE_LOCAL_SRV,
+    D3D12_RENDER_PASS_ENDING_ACCESS_TYPE_PRESERVE_LOCAL_UAV
+    // ==
   );
   {$EXTERNALSYM D3D12_RENDER_PASS_ENDING_ACCESS_TYPE}
 
@@ -6837,11 +7524,22 @@ type
   end;
   {$EXTERNALSYM D3D12_RENDER_PASS_ENDING_ACCESS_RESOLVE_PARAMETERS}
 
+  // Update May 2024
+
+  PD3D12_RENDER_PASS_ENDING_ACCESS_PRESERVE_LOCAL_PARAMETERS = ^D3D12_RENDER_PASS_ENDING_ACCESS_PRESERVE_LOCAL_PARAMETERS;
+  D3D12_RENDER_PASS_ENDING_ACCESS_PRESERVE_LOCAL_PARAMETERS = record
+    AdditionalWidth: UINT;
+    AdditionalHeight: UINT;
+  end;
+  {$EXTERNALSYM D3D12_RENDER_PASS_ENDING_ACCESS_PRESERVE_LOCAL_PARAMETERS}
+
+ // ==
 
   D3D12_RENDER_PASS_ENDING_ACCESS = record
     Type_: D3D12_RENDER_PASS_ENDING_ACCESS_TYPE;
     case Integer of
       0: (Resolve: D3D12_RENDER_PASS_ENDING_ACCESS_RESOLVE_PARAMETERS);
+      1: (PreserveLocal: D3D12_RENDER_PASS_ENDING_ACCESS_PRESERVE_LOCAL_PARAMETERS);
   end;
 
 
@@ -6866,6 +7564,18 @@ type
   end;
   {$EXTERNALSYM D3D12_RENDER_PASS_DEPTH_STENCIL_DESC}
 
+ // Moved UP
+ {PD3D12_RENDER_PASS_FLAGS = ^D3D12_RENDER_PASS_FLAGS;
+  D3D12_RENDER_PASS_FLAGS                         = (
+    D3D12_RENDER_PASS_FLAG_NONE                   = $0,
+    D3D12_RENDER_PASS_FLAG_ALLOW_UAV_WRITES       = $1,
+    D3D12_RENDER_PASS_FLAG_SUSPENDING_PASS        = $2,
+    D3D12_RENDER_PASS_FLAG_RESUMING_PASS          = $4,
+    D3D12_RENDER_PASS_FLAG_BIND_READ_ONLY_DEPTH   = $8,
+    D3D12_RENDER_PASS_FLAG_BIND_READ_ONLY_STENCIL = $10
+  );}
+
+  // DEFINE_ENUM_FLAG_OPERATORS( D3D12_RENDER_PASS_FLAGS )
 
   // Interface ID3D12MetaCommand
   // ============================
@@ -6896,6 +7606,120 @@ type
   end;
   {$EXTERNALSYM D3D12_DISPATCH_RAYS_DESC}
 
+  // Update May 2024
+
+  PD3D12_SET_WORK_GRAPH_FLAGS = ^D3D12_SET_WORK_GRAPH_FLAGS;
+  D3D12_SET_WORK_GRAPH_FLAGS             = (
+    D3D12_SET_WORK_GRAPH_FLAG_NONE       = $0,
+    D3D12_SET_WORK_GRAPH_FLAG_INITIALIZE = $1
+  );
+  {$EXTERNALSYM D3D12_SET_WORK_GRAPH_FLAGS}
+
+
+  // DEFINE_ENUM_FLAG_OPERATORS( D3D12_SET_WORK_GRAPH_FLAGS )
+
+  PD3D12_SET_WORK_GRAPH_DESC = ^D3D12_SET_WORK_GRAPH_DESC;
+  D3D12_SET_WORK_GRAPH_DESC = record
+    ProgramIdentifier: D3D12_PROGRAM_IDENTIFIER;
+    Flags: D3D12_SET_WORK_GRAPH_FLAGS;
+    BackingMemory: D3D12_GPU_VIRTUAL_ADDRESS_RANGE;
+    NodeLocalRootArgumentsTable: D3D12_GPU_VIRTUAL_ADDRESS_RANGE_AND_STRIDE;
+  end;
+  {$EXTERNALSYM D3D12_SET_WORK_GRAPH_DESC}
+
+
+  PD3D12_SET_RAYTRACING_PIPELINE_DESC = ^D3D12_SET_RAYTRACING_PIPELINE_DESC;
+  D3D12_SET_RAYTRACING_PIPELINE_DESC = record
+    ProgramIdentifier: D3D12_PROGRAM_IDENTIFIER;
+  end;
+  {$EXTERNALSYM D3D12_SET_RAYTRACING_PIPELINE_DESC}
+
+
+  PD3D12_SET_GENERIC_PIPELINE_DESC = ^D3D12_SET_GENERIC_PIPELINE_DESC;
+  D3D12_SET_GENERIC_PIPELINE_DESC = record
+    ProgramIdentifier: D3D12_PROGRAM_IDENTIFIER;
+  end;
+  {$EXTERNALSYM D3D12_SET_GENERIC_PIPELINE_DESC}
+
+
+  PD3D12_PROGRAM_TYPE = ^D3D12_PROGRAM_TYPE;
+  D3D12_PROGRAM_TYPE                       = (
+    D3D12_PROGRAM_TYPE_GENERIC_PIPELINE    = 1,
+    D3D12_PROGRAM_TYPE_RAYTRACING_PIPELINE = 4,
+    D3D12_PROGRAM_TYPE_WORK_GRAPH          = 5
+  );
+  {$EXTERNALSYM D3D12_PROGRAM_TYPE}
+
+
+  PD3D12_SET_PROGRAM_DESC = ^D3D12_SET_PROGRAM_DESC;
+  {$EXTERNALSYM D3D12_SET_PROGRAM_DESC}
+  D3D12_SET_PROGRAM_DESC = record
+    _Type: D3D12_PROGRAM_TYPE;
+    case Integer of
+      0: (GenericPipeline: D3D12_SET_GENERIC_PIPELINE_DESC);
+      1: (RaytracingPipeline: D3D12_SET_RAYTRACING_PIPELINE_DESC);
+      2: (WorkGraph: D3D12_SET_WORK_GRAPH_DESC);
+    end;
+
+
+  PD3D12_DISPATCH_MODE = ^D3D12_DISPATCH_MODE;
+  D3D12_DISPATCH_MODE                        = (
+    D3D12_DISPATCH_MODE_NODE_CPU_INPUT       = 0,  // D3D12_NODE_CPU_INPUT
+    D3D12_DISPATCH_MODE_NODE_GPU_INPUT       = 1,  // D3D12_NODE_GPU_INPUT in GPU memory
+    D3D12_DISPATCH_MODE_MULTI_NODE_CPU_INPUT = 2,  // D3D12_MULTI_NODE_CPU_INPUT
+    D3D12_DISPATCH_MODE_MULTI_NODE_GPU_INPUT = 3   // D3D12_MULTI_NODE_GPU_INPUT in GPU memory
+  );
+  {$EXTERNALSYM D3D12_DISPATCH_MODE}
+
+
+  PD3D12_NODE_CPU_INPUT = ^D3D12_NODE_CPU_INPUT;
+  D3D12_NODE_CPU_INPUT = record
+    EntrypointIndex: UINT;
+    NumRecords: UINT;
+    pRecords: Pointer;
+    RecordStrideInBytes: UINT64;
+  end;
+  {$EXTERNALSYM D3D12_NODE_CPU_INPUT}
+
+
+  PD3D12_NODE_GPU_INPUT = ^D3D12_NODE_GPU_INPUT;
+  D3D12_NODE_GPU_INPUT = record
+    EntrypointIndex: UINT;
+    NumRecords: UINT;
+    Records: D3D12_GPU_VIRTUAL_ADDRESS_AND_STRIDE;
+  end;
+  {$EXTERNALSYM D3D12_NODE_GPU_INPUT}
+
+
+  PD3D12_MULTI_NODE_CPU_INPUT = ^D3D12_MULTI_NODE_CPU_INPUT;
+  D3D12_MULTI_NODE_CPU_INPUT = record
+    NumNodeInputs: UINT;
+    pNodeInputs: PD3D12_NODE_CPU_INPUT;
+    NodeInputStrideInBytes: UINT64;
+  end;
+  {$EXTERNALSYM D3D12_MULTI_NODE_CPU_INPUT}
+
+
+  PD3D12_MULTI_NODE_GPU_INPUT = ^D3D12_MULTI_NODE_GPU_INPUT;
+  D3D12_MULTI_NODE_GPU_INPUT = record
+    NumNodeInputs: UINT;
+    NodeInputs: D3D12_GPU_VIRTUAL_ADDRESS_AND_STRIDE;  // D3D12_GPU_NODE_INPUT array
+  end;
+  {$EXTERNALSYM D3D12_MULTI_NODE_GPU_INPUT}
+
+
+  PD3D12_DISPATCH_GRAPH_DESC = ^D3D12_DISPATCH_GRAPH_DESC;
+  D3D12_DISPATCH_GRAPH_DESC = record
+    Mode: D3D12_DISPATCH_MODE;
+    case Integer of
+      0: (NodeCPUInput: D3D12_NODE_CPU_INPUT);
+      1: (NodeGPUInput: D3D12_GPU_VIRTUAL_ADDRESS);
+      2: (MultiNodeCPUInput: D3D12_MULTI_NODE_CPU_INPUT);
+      3: (MultiNodeGPUInput: D3D12_GPU_VIRTUAL_ADDRESS);
+  end;
+  {$EXTERNALSYM D3D12_DISPATCH_GRAPH_DESC}
+
+  // ==
 
   // Interface ID3D12GraphicsCommandList4
   // =====================================
@@ -7136,6 +7960,82 @@ type
   {$EXTERNALSYM IID_ID3D12Device10}
 
 
+  // Update May 2024
+
+  // Interface ID3D12Device11
+  // ========================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12Device11);'}
+  {$EXTERNALSYM ID3D12Device11}
+  ID3D12Device11 = Interface(ID3D12Device10)
+    ['{5405c344-d457-444e-b4dd-2366e45aee39}']
+
+    procedure CreateSampler2(pDesc: PD3D12_SAMPLER_DESC2;
+                             DestDescriptor: D3D12_CPU_DESCRIPTOR_HANDLE); stdcall;
+  end;
+  IID_ID3D12Device11 = ID3D12Device11;
+  {$EXTERNALSYM IID_ID3D12Device11}
+
+
+  // Interface ID3D12Device12
+  // ========================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12Device12);'}
+  {$EXTERNALSYM ID3D12Device12}
+  ID3D12Device12 = Interface(ID3D12Device11)
+    ['{5af5c532-4c91-4cd0-b541-15a405395fc5}']
+
+    function GetResourceAllocationInfo3(visibleMask: UINT;
+                                        numResourceDescs: UINT;
+                                        pResourceDescs: PD3D12_RESOURCE_DESC1;
+                                        pNumCastableFormats: PUINT32;
+                                        ppCastableFormats: PDXGI_FORMAT;
+                                        out pResourceAllocationInfo1: D3D12_RESOURCE_ALLOCATION_INFO1): D3D12_RESOURCE_ALLOCATION_INFO;
+  end;
+  IID_ID3D12Device12 = ID3D12Device12;
+  {$EXTERNALSYM IID_ID3D12Device12}
+
+
+  // Interface ID3D12Device13
+  // ========================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12Device13);'}
+  {$EXTERNALSYM ID3D12Device13}
+  ID3D12Device13 = Interface(ID3D12Device12)
+    ['{14eecffc-4df8-40f7-a118-5c816f45695e}']
+
+    function OpenExistingHeapFromAddress1(pAddress: Pointer;
+                                          size: SIZE_T;
+                                          const riid: REFIID;  // Expected: ID3D12Heap
+                                          out ppvHeap: Pointer): HResult; stdcall;
+  end;
+  IID_ID3D12Device13 = ID3D12Device13;
+  {$EXTERNALSYM IID_ID3D12Device13}
+
+
+  // Interface ID3D12Device14
+  // ========================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12Device14);'}
+  {$EXTERNALSYM ID3D12Device14}
+  ID3D12Device14 = Interface(ID3D12Device13)
+    ['{5f6e592d-d895-44c2-8e4a-88ad4926d323}']
+
+    function CreateRootSignatureFromSubobjectInLibrary(nodeMask: UINT;
+                                                       pLibraryBlob: Pointer;
+                                                       blobLengthInBytes: SIZE_T;
+                                                       {opt} subobjectName: PWideChar;
+                                                       const riid: REFIID;  // Expected ID3D12RootSignature
+                                                       out ppvRootSignature: Pointer): HResult; stdcall;
+
+  end;
+  IID_ID3D12Device14 = ID3D12Device14;
+  {$EXTERNALSYM IID_ID3D12Device14}
+
+
+
+
+
   // Interface ID3D12VirtualizationGuestDevice
   // ==========================================
   //
@@ -7280,7 +8180,7 @@ type
 type
 
   // Interface ID3D12SDKConfiguration
-  // =================================
+  // ================================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12SDKConfiguration);'}
   {$EXTERNALSYM ID3D12SDKConfiguration}
@@ -7295,6 +8195,149 @@ type
   IID_ID3D12SDKConfiguration = ID3D12SDKConfiguration;
   {$EXTERNALSYM IID_ID3D12SDKConfiguration}
 
+
+  // Interface ID3D12SDKConfiguration1
+  // =================================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12SDKConfiguration1);'}
+  {$EXTERNALSYM ID3D12SDKConfiguration1}
+  ID3D12SDKConfiguration1 = Interface(ID3D12SDKConfiguration)
+    ['{8aaf9303-ad25-48b9-9a57-d9c37e009d9f}']
+
+    function CreateDeviceFactory(SDKVersion: UINT;
+                                 SDKPath: PAnsiChar;
+                                 const riid: REFIID;  // Expected: ID3D12DeviceFactory
+                                 out ppvFactory: Pointer): HResult; stdcall;
+
+    procedure FreeUnusedSDKs();
+
+  end;
+  IID_ID3D12SDKConfiguration1 = ID3D12SDKConfiguration1;
+  {$EXTERNALSYM IID_ID3D12SDKConfiguration1}
+
+
+  PD3D12_DEVICE_FACTORY_FLAGS = ^D3D12_DEVICE_FACTORY_FLAGS;
+  D3D12_DEVICE_FACTORY_FLAGS                                               = (
+    D3D12_DEVICE_FACTORY_FLAG_NONE                                         = 0,
+    D3D12_DEVICE_FACTORY_FLAG_ALLOW_RETURNING_EXISTING_DEVICE              = $1,
+    D3D12_DEVICE_FACTORY_FLAG_ALLOW_RETURNING_INCOMPATIBLE_EXISTING_DEVICE = $2,
+    D3D12_DEVICE_FACTORY_FLAG_DISALLOW_STORING_NEW_DEVICE_AS_SINGLETON     = $4
+  );
+  {$EXTERNALSYM D3D12_DEVICE_FACTORY_FLAGS}
+
+  // DEFINE_ENUM_FLAG_OPERATORS( D3D12_DEVICE_FACTORY_FLAGS )
+
+
+  // Interface ID3D12SDKConfiguration1
+  // =================================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DeviceFactory);'}
+  ID3D12DeviceFactory = Interface(IUnknown)
+    ['{61f307d3-d34e-4e7c-8374-3ba4de23cccb}']
+
+    function InitializeFromGlobalState(): HResult; stdcall;
+    function ApplyToGlobalState(): HResult; stdcall;
+
+    function SetFlags(flags: D3D12_DEVICE_FACTORY_FLAGS): HResult; stdcall;
+
+    function GetFlags(): D3D12_DEVICE_FACTORY_FLAGS; stdcall;
+
+    function GetConfigurationInterface(const clsid: REFCLSID;
+                                       const iid: REFIID;
+                                       out ppv: Pointer): HResult; stdcall;
+
+    function EnableExperimentalFeatures(NumFeatures: UINT;
+                                        const pIIDs: PIID;
+                                        pConfigurationStructs: Pointer;
+                                        pConfigurationStructSizes: UINT): HResult; stdcall;
+
+    function CreateDevice({opt} adapter: PIUnknown;
+                          FeatureLevel: D3D_FEATURE_LEVEL;
+                          const riid: REFIID;
+                          out ppvDevice: Pointer): HResult; stdcall;
+
+  end;
+  {$EXTERNALSYM ID3D12DeviceFactory}
+  IID_ID3D12DeviceFactory = ID3D12DeviceFactory;
+  {$EXTERNALSYM IID_ID3D12DeviceFactory}
+
+
+  PD3D12_DEVICE_FLAGS = ^D3D12_DEVICE_FLAGS;
+  D3D12_DEVICE_FLAGS                                                 = (
+    D3D12_DEVICE_FLAG_NONE                                           = 0,
+    D3D12_DEVICE_FLAG_DEBUG_LAYER_ENABLED                            = $1,
+    D3D12_DEVICE_FLAG_GPU_BASED_VALIDATION_ENABLED                   = $2,
+    D3D12_DEVICE_FLAG_SYNCHRONIZED_COMMAND_QUEUE_VALIDATION_DISABLED = $4,
+    D3D12_DEVICE_FLAG_DRED_AUTO_BREADCRUMBS_ENABLED                  = $8,
+    D3D12_DEVICE_FLAG_DRED_PAGE_FAULT_REPORTING_ENABLED              = $10,
+    D3D12_DEVICE_FLAG_DRED_WATSON_REPORTING_ENABLED                  = $20,
+    D3D12_DEVICE_FLAG_DRED_BREADCRUMB_CONTEXT_ENABLED                = $40,
+    D3D12_DEVICE_FLAG_DRED_USE_MARKERS_ONLY_BREADCRUMBS              = $80,
+    D3D12_DEVICE_FLAG_SHADER_INSTRUMENTATION_ENABLED                 = $100,
+    D3D12_DEVICE_FLAG_AUTO_DEBUG_NAME_ENABLED                        = $200,
+    D3D12_DEVICE_FLAG_FORCE_LEGACY_STATE_VALIDATION                  = $400
+  );
+  {$EXTERNALSYM D3D12_DEVICE_FLAGS}
+
+  // DEFINE_ENUM_FLAG_OPERATORS( D3D12_DEVICE_FLAGS )
+
+  PD3D12_DEVICE_CONFIGURATION_DESC = ^D3D12_DEVICE_CONFIGURATION_DESC;
+  D3D12_DEVICE_CONFIGURATION_DESC = record
+    Flags: D3D12_DEVICE_FLAGS;
+    GpuBasedValidationFlags: UINT;  // D3D12_GPU_BASED_VALIDATION_FLAGS from d3d12sdklayers.h
+    SDKVersion: UINT;
+    NumEnabledExperimentalFeatures: UINT;
+  end;
+  {$EXTERNALSYM D3D12_DEVICE_CONFIGURATION_DESC}
+
+
+  // Interface ID3D12DeviceConfiguration
+  // ===================================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DeviceConfiguration);'}
+  ID3D12DeviceConfiguration = Interface(IUnknown)
+    ['{78dbf87b-f766-422b-a61c-c8c446bdb9ad}']
+
+    function GetDesc(): D3D12_DEVICE_CONFIGURATION_DESC; stdcall;
+
+    function GetEnabledExperimentalFeatures(out pGuids: PGUID;
+                                            NumGuids: UINT): HResult; stdcall;
+
+    function SerializeVersionedRootSignature(pDesc: PD3D12_VERSIONED_ROOT_SIGNATURE_DESC;
+                                             out ppResult: PID3DBlob;
+                                             ppError: PID3DBlob): HResult; stdcall;
+
+    function CreateVersionedRootSignatureDeserializer(pBlob: Pointer;
+                                                      Size: SIZE_T;
+                                                      const riid: REFIID;
+                                                      out ppvDeserializer: Pointer): HResult; stdcall;
+
+  end;
+  {$EXTERNALSYM ID3D12DeviceConfiguration}
+  IID_ID3D12DeviceConfiguration = ID3D12DeviceConfiguration;
+  {$EXTERNALSYM IID_ID3D12DeviceConfiguration}
+
+  // Update May 2024
+
+  // Interface ID3D12DeviceConfiguration1
+  // ====================================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DeviceConfiguration1);'}
+  ID3D12DeviceConfiguration1 = Interface(ID3D12DeviceConfiguration)
+    ['{ed342442-6343-4e16-bb82-a3a577874e56}']
+
+    function CreateVersionedRootSignatureDeserializerFromSubobjectInLibrary(pLibraryBlob: Pointer;
+                                                                            Size: SIZE_T;
+                                                                            RootSignatureSubobjectName: PWideChar;
+                                                                            const riid: REFIID;
+                                                                            out ppvDeserializer: Pointer): HResult; stdcall;
+
+  end;
+  {$EXTERNALSYM ID3D12DeviceConfiguration1}
+  IID_ID3D12DeviceConfiguration1 = ID3D12DeviceConfiguration1;
+  {$EXTERNALSYM IID_ID3D12DeviceConfiguration1}
+
+  // ==
 
   PD3D12_AXIS_SHADING_RATE = ^D3D12_AXIS_SHADING_RATE;
   D3D12_AXIS_SHADING_RATE = (
@@ -7403,6 +8446,61 @@ type
   IID_ID3D12GraphicsCommandList7 = ID3D12GraphicsCommandList7;
   {$EXTERNALSYM IID_ID3D12GraphicsCommandList7}
 
+  // Update May 2024
+
+  // Interface ID3D12GraphicsCommandList8
+  // ====================================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12GraphicsCommandList8);'}
+  {$EXTERNALSYM ID3D12GraphicsCommandList8}
+  ID3D12GraphicsCommandList8 = Interface(ID3D12GraphicsCommandList7)
+    ['{ee936ef9-599d-4d28-938e-23c4ad05ce51}']
+
+    procedure OMSetFrontAndBackStencilRef(FrontStencilRef: UINT;
+                                          BackStencilRef: UINT); stdcall;
+
+  end;
+  IID_ID3D12GraphicsCommandList8 = ID3D12GraphicsCommandList8;
+  {$EXTERNALSYM IID_ID3D12GraphicsCommandList8}
+
+
+  // Interface ID3D12GraphicsCommandList9
+  // ====================================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12GraphicsCommandList9);'}
+  {$EXTERNALSYM ID3D12GraphicsCommandList9}
+  ID3D12GraphicsCommandList9 = Interface(ID3D12GraphicsCommandList8)
+    ['{34ed2808-ffe6-4c2b-b11a-cabd2b0c59e1}']
+
+    procedure RSSetDepthBias(DepthBias: FLOAT;
+                             DepthBiasClamp: FLOAT;
+                             SlopeScaledDepthBias: FLOAT); stdcall;
+
+    procedure IASetIndexBufferStripCutValue(IBStripCutValue: D3D12_INDEX_BUFFER_STRIP_CUT_VALUE); stdcall;
+
+  end;
+  IID_ID3D12GraphicsCommandList9 = ID3D12GraphicsCommandList9;
+  {$EXTERNALSYM IID_ID3D12GraphicsCommandList9}
+
+
+  // Interface ID3D12GraphicsCommandList10
+  // =====================================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12GraphicsCommandList10);'}
+  {$EXTERNALSYM ID3D12GraphicsCommandList10}
+  ID3D12GraphicsCommandList10 = Interface(ID3D12GraphicsCommandList9)
+    ['{7013c015-d161-4b63-a08c-238552dd8acc}']
+
+    procedure SetProgram(pDesc: D3D12_SET_PROGRAM_DESC); stdcall;
+
+    procedure DispatchGraph(pDesc: D3D12_DISPATCH_GRAPH_DESC); stdcall;
+
+  end;
+  IID_ID3D12GraphicsCommandList10 = ID3D12GraphicsCommandList10;
+  {$EXTERNALSYM IID_ID3D12GraphicsCommandList10}
+
+  // ==
+
 
  // Converted MACRO'S /////////////////////////////////////////////////////////
 
@@ -7428,6 +8526,11 @@ type
   function D3D12_ENCODE_ANISOTROPIC_FILTER(reduction: UINT): D3D12_FILTER; inline;
   {$EXTERNALSYM D3D12_ENCODE_ANISOTROPIC_FILTER}
 
+  // Update May 2024
+  function D3D12_ENCODE_MIN_MAG_ANISOTROPIC_MIP_POINT_FILTER(reduction: UINT): D3D12_FILTER; inline
+  {$EXTERNALSYM D3D12_ENCODE_MIN_MAG_ANISOTROPIC_MIP_POINT_FILTER}
+  // ==
+
   function D3D12_DECODE_MIN_FILTER(D3D12Filter: UINT): D3D12_FILTER_TYPE; inline;
   {$EXTERNALSYM D3D12_DECODE_MIN_FILTER}
 
@@ -7443,7 +8546,7 @@ type
   function D3D12_DECODE_IS_COMPARISON_FILTER(D3D12Filter: UINT): Boolean; inline;
   {$EXTERNALSYM D3D12_DECODE_IS_COMPARISON_FILTER}
 
-  function D3D12_DECODE_IS_ANISOTROPIC_FILTER(D3D12Filter: UINT): Boolean;
+  function D3D12_DECODE_IS_ANISOTROPIC_FILTER(D3D12Filter: UINT): Boolean; inline;
   {$EXTERNALSYM D3D12_DECODE_IS_ANISOTROPIC_FILTER}
 
 // =============================================================================
@@ -7546,9 +8649,23 @@ var
 
 begin
   Ltmp := D3D12_ENCODE_BASIC_FILTER(UINT(D3D12_FILTER_TYPE_LINEAR),
-                                         UINT(D3D12_FILTER_TYPE_LINEAR),
-                                         UINT(D3D12_FILTER_TYPE_LINEAR),
-                                         reduction);
+                                    UINT(D3D12_FILTER_TYPE_LINEAR),
+                                    UINT(D3D12_FILTER_TYPE_LINEAR),
+                                    reduction);
+
+  Result := D3D12_FILTER(D3D12_ANISOTROPIC_FILTERING_BIT or UINT(Ltmp));
+end;
+
+
+function D3D12_ENCODE_MIN_MAG_ANISOTROPIC_MIP_POINT_FILTER(reduction: UINT): D3D12_FILTER;
+var
+  LTmp: D3D12_FILTER;
+
+begin
+  Ltmp :=  D3D12_ENCODE_BASIC_FILTER(UINT(D3D12_FILTER_TYPE_LINEAR),
+                                     UINT(D3D12_FILTER_TYPE_LINEAR),
+                                     UINT(D3D12_FILTER_TYPE_POINT),
+                                     reduction);
 
   Result := D3D12_FILTER(D3D12_ANISOTROPIC_FILTERING_BIT or UINT(Ltmp));
 end;
@@ -7588,12 +8705,12 @@ begin
 end;
 
 
-function D3D12_DECODE_IS_ANISOTROPIC_FILTER(D3D12Filter: UINT): Boolean;
+function D3D12_DECODE_IS_ANISOTROPIC_FILTER(D3D12Filter: UINT): Boolean; inline;
 begin
+  // Update May 2024
   Result := (Boolean(D3D12Filter and D3D12_ANISOTROPIC_FILTERING_BIT) and
             (D3D12_FILTER_TYPE_LINEAR = D3D12_DECODE_MIN_FILTER(D3D12Filter)) and
-            (D3D12_FILTER_TYPE_LINEAR = D3D12_DECODE_MAG_FILTER(D3D12Filter)) and
-            (D3D12_FILTER_TYPE_LINEAR = D3D12_DECODE_MIP_FILTER(D3D12Filter)));
+            (D3D12_FILTER_TYPE_LINEAR = D3D12_DECODE_MAG_FILTER(D3D12Filter)));
 end;
 
 
