@@ -24,7 +24,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 19/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or later.
@@ -34,7 +34,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.22621.0
+// SDK version: 10.0.26100.0
 //
 // Todo: -
 //
@@ -78,6 +78,7 @@ uses
   WinApi.DirectX.DXGI,
   WinApi.DirectX.DXGI1_2,
   WinApi.DirectX.DXGIFormat,
+  WinApi.DirectX.DXGICommon, // Update May 2024
   WinApi.DirectX.DCommon,
   WinApi.DirectX.D3D9Types,
   WinApi.DirectX.DCompTypes,
@@ -2254,6 +2255,71 @@ type
   end;
   IID_IDCompositionInkTrailDevice = IDCompositionInkTrailDevice;
   {$EXTERNALSYM IID_IDCompositionInkTrailDevice}
+
+  // Update May 2024
+
+ // if (NTDDI_VERSION >= NTDDI_WIN10_NI)
+
+  //+-----------------------------------------------------------------------------
+  //
+  //  Interface:
+  //      IDCompositionTexture
+  //
+  //  Synopsis:
+  //      An interface representing a raw D3D texture that can be bound to a
+  //      dcomp visual as content.
+  //
+  //------------------------------------------------------------------------------
+  PIDCompositionTexture = ^IDCompositionTexture;
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IDCompositionTexture);'}
+  IDCompositionTexture = interface(IUnknown)
+  ['{929BB1AA-725F-433B-ABD7-273075A835F2}']
+
+    function SetSourceRect(sourceRect: D2D_RECT_U): HResult; stdcall;
+
+    function SetColorSpace(colorSpace: DXGI_COLOR_SPACE_TYPE): HResult; stdcall;
+
+    function SetAlphaMode(alphaMode: DXGI_ALPHA_MODE): HResult; stdcall;
+
+    function GetAvailableFence(out fenceValue: UINT64;
+                               const iid: REFIID;
+                               {out} availableFence: Pointer): HResult; stdcall;
+
+  end;
+  {$EXTERNALSYM IDCompositionTexture}
+  IID_IDCompositionTexture = IDCompositionTexture;
+  {$EXTERNALSYM IID_IDCompositionTexture}
+
+
+  //+---------------------------------------------------------------------------
+  //
+  //  Interface:
+  //      IDCompositionDevice4
+  //
+  //  Synopsis:
+  //      Serves as the root factory for composition textures.
+  //
+  //----------------------------------------------------------------------------
+
+  PIDCompositionDevice4 = ^IDCompositionDevice4;
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IDCompositionTexture);'}
+  IDCompositionDevice4 = interface(IDCompositionDevice3)
+  ['{85FC5CCA-2DA6-494C-86B6-4A775C049B8A}']
+
+    // Determine whether or not the backing D3D device Supports composition textures.
+    function CheckCompositionTextureSupport(renderingDevice: IUnknown;
+                                            out supportsCompositionTextures: BOOL): HResult; stdcall;
+
+    // Call to create a composition texture referencing the passed D3D texture.
+    function CreateCompositionTexture(d3dTexture: IUnknown;
+                                      {out} compositionTexture: PIDCompositionTexture): HResult; stdcall;
+
+  end;
+  {$EXTERNALSYM IDCompositionDevice4}
+  IID_IDCompositionDevice4 = IDCompositionDevice4;
+  {$EXTERNALSYM IID_IDCompositionDevice4}
+
+  // ==
 
 
   // Additional Prototypes for ALL interfaces
