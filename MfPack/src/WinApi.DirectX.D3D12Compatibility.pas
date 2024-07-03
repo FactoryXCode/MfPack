@@ -21,17 +21,18 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 19/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Embarcadero's <= Delphi 10.4 D3D12 is outdated!
+// Remarks: Embarcadero's <= Delphi 10.4 D3D12Compatibility is outdated!
+//          Search "Update May 2024", to find updates until May 2024.
 //
 // Related objects: -
 // Related projects: MfPackX317
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.22621.0
+// SDK version: 10.0.26100.0
 //
 // Todo: -
 //
@@ -194,7 +195,21 @@ type
   IID_OpenCLOn12CreatorID = OpenCLOn12CreatorID;
   {$EXTERNALSYM IID_OpenCLOn12CreatorID}
 
+  // Update May 2024
 
+  // Interface VulkanOn12CreatorID
+  // ==============================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(VulkanOn12CreatorID);'}
+  {$EXTERNALSYM VulkanOn12CreatorID}
+  VulkanOn12CreatorID = Interface(IUnknown)
+    ['{bc806e01-3052-406c-a3e8-9fc07f048f98}']
+
+  end;
+  IID_VulkanOn12CreatorID = VulkanOn12CreatorID;
+  {$EXTERNALSYM IID_VulkanOn12CreatorID}
+
+  // ==
 
   // Interface DirectMLTensorFlowCreatorID
   // ======================================

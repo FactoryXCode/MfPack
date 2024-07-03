@@ -22,17 +22,18 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 19/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Embarcadero's <= Delphi 10.4 D3D12 is outdated!
+//          Search "Update May 2024", to find updates until May 2024.
 //
 // Related objects: -
 // Related projects: MfPackX317
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.22621.0
+// SDK version: 10.0.26100.0
 //
 // Todo: -
 //
@@ -380,7 +381,6 @@ type
   // ==================================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DebugCommandQueue);'}
-  {$EXTERNALSYM ID3D12DebugCommandQueue}
   ID3D12DebugCommandQueue = Interface(IUnknown)
     ['{09e0bf36-54ac-484f-8847-4baeeab6053a}']
 
@@ -391,9 +391,33 @@ type
     //  TODO: Stale  BOOL AssertResourceStateThroughView( [annotation("_In_")] ID3D12View* pView, UINT State );
 
   end;
+  {$EXTERNALSYM ID3D12DebugCommandQueue}
   IID_ID3D12DebugCommandQueue = ID3D12DebugCommandQueue;
   {$EXTERNALSYM IID_ID3D12DebugCommandQueue}
 
+
+  // Update May 2024
+
+  // Interface ID3D12DebugCommandQueue1
+  // ==================================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DebugCommandQueue1);'}
+  ID3D12DebugCommandQueue1 = Interface(ID3D12DebugCommandQueue)
+    ['{16be35a2-bfd6-49f2-bcae-eaae4aff862d}']
+
+    procedure AssertResourceAccess(pResource: ID3D12Resource;
+                                   Subresource: UINT;
+                                   Access: D3D12_BARRIER_ACCESS); stdcall;
+
+    procedure AssertTextureLayout(pResource: ID3D12Resource;
+                                  Subresource: UINT;
+                                  Layout: D3D12_BARRIER_LAYOUT); stdcall;
+  end;
+  {$EXTERNALSYM ID3D12DebugCommandQueue1}
+  IID_ID3D12DebugCommandQueue1 = ID3D12DebugCommandQueue1;
+  {$EXTERNALSYM IID_ID3D12DebugCommandQueue1}
+
+  // ==
 
   PD3D12_DEBUG_COMMAND_LIST_PARAMETER_TYPE = ^D3D12_DEBUG_COMMAND_LIST_PARAMETER_TYPE;
   D3D12_DEBUG_COMMAND_LIST_PARAMETER_TYPE = (
@@ -410,7 +434,7 @@ type
 
 
   // Interface ID3D12DebugCommandList1
-  // ==================================
+  // =================================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DebugCommandList1);'}
   {$EXTERNALSYM ID3D12DebugCommandList1}
@@ -435,7 +459,7 @@ type
 
 
   // Interface ID3D12DebugCommandList
-  // =================================
+  // ================================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DebugCommandList);'}
   {$EXTERNALSYM ID3D12DebugCommandList}
@@ -455,12 +479,35 @@ type
   {$EXTERNALSYM IID_ID3D12DebugCommandList}
 
 
+  // Update May 2024
+
   // Interface ID3D12DebugCommandList2
-  // ==================================
+  // =================================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DebugCommandList2);'}
   {$EXTERNALSYM ID3D12DebugCommandList2}
   ID3D12DebugCommandList2 = Interface(ID3D12DebugCommandList)
+    ['{197d5e15-4d37-4d34-af78-724cd70fdb1f}']
+
+    procedure AssertResourceAccess(pResource: ID3D12Resource;
+                                   Subresource: UINT;
+                                   Access: D3D12_BARRIER_ACCESS); stdcall;
+
+    procedure AssertTextureLayout(pResource: ID3D12Resource;
+                                  Subresource: UINT;
+                                  Layout: D3D12_BARRIER_LAYOUT); stdcall;
+
+  end;
+  IID_ID3D12DebugCommandList2 = ID3D12DebugCommandList2;
+  {$EXTERNALSYM IID_ID3D12DebugCommandList2}
+
+
+  // Interface ID3D12DebugCommandList3
+  // =================================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DebugCommandList3);'}
+  {$EXTERNALSYM ID3D12DebugCommandList3}
+  ID3D12DebugCommandList3 = Interface(ID3D12DebugCommandList2)
     ['{aeb575cf-4e06-48be-ba3b-c450fc96652e}']
 
     function SetDebugParameter(Type_: D3D12_DEBUG_COMMAND_LIST_PARAMETER_TYPE;
@@ -472,8 +519,10 @@ type
                                DataSize: UINT): HRESULT; stdcall;
 
   end;
-  IID_ID3D12DebugCommandList2 = ID3D12DebugCommandList2;
-  {$EXTERNALSYM IID_ID3D12DebugCommandList2}
+  IID_ID3D12DebugCommandList3 = ID3D12DebugCommandList3;
+  {$EXTERNALSYM IID_ID3D12DebugCommandList3}
+
+  // ==
 
 
   // Interface ID3D12SharingContract
@@ -499,6 +548,23 @@ type
   IID_ID3D12SharingContract = ID3D12SharingContract;
   {$EXTERNALSYM IID_ID3D12SharingContract}
 
+
+  // Update May 2024
+
+  // Interface ID3D12ManualWriteTrackingResource
+  // ============================================
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12ManualWriteTrackingResource);'}
+  {$EXTERNALSYM ID3D12ManualWriteTrackingResource}
+  ID3D12ManualWriteTrackingResource = Interface(IUnknown)
+    ['{86ca3b85-49ad-4b6e-aed5-eddb18540f41}']
+
+    procedure TrackWrite(Subresource: UINT;
+                         {opt} pWrittenRange: PD3D12_RANGE);
+
+  end;
+
+  // ==
 
   //============================================================================
   //
@@ -653,7 +719,15 @@ type
     D3D12_MESSAGE_ID_CREATEBLENDSTATE_INVALIDDESTBLENDALPHA                                                        = 115,
     D3D12_MESSAGE_ID_CREATEBLENDSTATE_INVALIDBLENDOPALPHA                                                          = 116,
     D3D12_MESSAGE_ID_CREATEBLENDSTATE_INVALIDRENDERTARGETWRITEMASK                                                 = 117,
+
+    // Update May 2024
+    D3D12_MESSAGE_ID_GET_PROGRAM_IDENTIFIER_ERROR                                                                  = 118,
+    D3D12_MESSAGE_ID_GET_WORK_GRAPH_PROPERTIES_ERROR                                                               = 119,
+    D3D12_MESSAGE_ID_SET_PROGRAM_ERROR                                                                             = 120,
+    // ==
+
     D3D12_MESSAGE_ID_CLEARDEPTHSTENCILVIEW_INVALID                                                                 = 135,
+
     D3D12_MESSAGE_ID_COMMAND_LIST_DRAW_ROOT_SIGNATURE_NOT_SET                                                      = 200,
     D3D12_MESSAGE_ID_COMMAND_LIST_DRAW_ROOT_SIGNATURE_MISMATCH                                                     = 201,
     D3D12_MESSAGE_ID_COMMAND_LIST_DRAW_VERTEX_BUFFER_NOT_SET                                                       = 202,
@@ -1463,12 +1537,74 @@ type
     D3D12_MESSAGE_ID_UNSUPPORTED_BARRIER_LAYOUT                                                                    = 1341,
     D3D12_MESSAGE_ID_CREATERESOURCEANDHEAP_INVALID_PARAMETERS                                                      = 1342,
     D3D12_MESSAGE_ID_ENHANCED_BARRIERS_NOT_SUPPORTED                                                               = 1343,
-    D3D12_MESSAGE_ID_CAST_TARGET_TEXEL_SIZE_MISMATCH                                                               = 1344,
-    D3D12_MESSAGE_ID_CAST_TO_PLANAR_NOT_SUPORTED                                                                   = 1345,
+    // Update May 2024
+    // D3D12_MESSAGE_ID_CAST_TARGET_TEXEL_SIZE_MISMATCH                                                            = 1344,
+    // D3D12_MESSAGE_ID_CAST_TO_PLANAR_NOT_SUPORTED                                                                = 1345,
+    // ==
     D3D12_MESSAGE_ID_LEGACY_BARRIER_VALIDATION_FORCED_ON                                                           = 1346,
     D3D12_MESSAGE_ID_EMPTY_ROOT_DESCRIPTOR_TABLE                                                                   = 1347,
     D3D12_MESSAGE_ID_COMMAND_LIST_DRAW_ELEMENT_OFFSET_UNALIGNED                                                    = 1348,
     D3D12_MESSAGE_ID_ALPHA_BLEND_FACTOR_NOT_SUPPORTED                                                              = 1349,
+    // Update May 2024
+    D3D12_MESSAGE_ID_BARRIER_INTEROP_INVALID_LAYOUT                                                                = 1350,
+    D3D12_MESSAGE_ID_BARRIER_INTEROP_INVALID_STATE                                                                 = 1351,
+
+    D3D12_MESSAGE_ID_GRAPHICS_PIPELINE_STATE_DESC_ZERO_SAMPLE_MASK                                                 = 1352,
+
+    D3D12_MESSAGE_ID_INDEPENDENT_STENCIL_REF_NOT_SUPPORTED                                                         = 1353,
+    D3D12_MESSAGE_ID_CREATEDEPTHSTENCILSTATE_INDEPENDENT_MASKS_UNSUPPORTED                                         = 1354,
+
+    D3D12_MESSAGE_ID_TEXTURE_BARRIER_SUBRESOURCES_OUT_OF_BOUNDS                                                    = 1355,
+
+    D3D12_MESSAGE_ID_NON_OPTIMAL_BARRIER_ONLY_EXECUTE_COMMAND_LISTS                                                = 1356,
+
+    D3D12_MESSAGE_ID_EXECUTE_INDIRECT_ZERO_COMMAND_COUNT                                                           = 1357,
+
+    D3D12_MESSAGE_ID_GPU_BASED_VALIDATION_INCOMPATIBLE_TEXTURE_LAYOUT                                              = 1358,
+
+    D3D12_MESSAGE_ID_DYNAMIC_INDEX_BUFFER_STRIP_CUT_NOT_SUPPORTED                                                  = 1359,
+    D3D12_MESSAGE_ID_PRIMITIVE_TOPOLOGY_TRIANGLE_FANS_NOT_SUPPORTED                                                = 1360,
+
+    D3D12_MESSAGE_ID_CREATE_SAMPLER_COMPARISON_FUNC_IGNORED                                                        = 1361,
+
+    D3D12_MESSAGE_ID_CREATEHEAP_INVALIDHEAPTYPE                                                                    = 1362,
+    D3D12_MESSAGE_ID_CREATERESOURCEANDHEAP_INVALIDHEAPTYPE                                                         = 1363,
+    D3D12_MESSAGE_ID_DYNAMIC_DEPTH_BIAS_NOT_SUPPORTED                                                              = 1364,
+    D3D12_MESSAGE_ID_CREATERASTERIZERSTATE_NON_WHOLE_DYNAMIC_DEPTH_BIAS                                            = 1365,
+
+    D3D12_MESSAGE_ID_DYNAMIC_DEPTH_BIAS_FLAG_MISSING                                                               = 1366,
+    D3D12_MESSAGE_ID_DYNAMIC_DEPTH_BIAS_NO_PIPELINE                                                                = 1367,
+    D3D12_MESSAGE_ID_DYNAMIC_INDEX_BUFFER_STRIP_CUT_FLAG_MISSING                                                   = 1368,
+    D3D12_MESSAGE_ID_DYNAMIC_INDEX_BUFFER_STRIP_CUT_NO_PIPELINE                                                    = 1369,
+
+    D3D12_MESSAGE_ID_NONNORMALIZED_COORDINATE_SAMPLING_NOT_SUPPORTED                                               = 1370,
+
+    D3D12_MESSAGE_ID_INVALID_CAST_TARGET                                                                           = 1371,
+
+    D3D12_MESSAGE_ID_RENDER_PASS_COMMANDLIST_INVALID_END_STATE                                                     = 1372,
+    D3D12_MESSAGE_ID_RENDER_PASS_COMMANDLIST_INVALID_START_STATE                                                   = 1373,
+    D3D12_MESSAGE_ID_RENDER_PASS_MISMATCHING_ACCESS                                                                = 1374,
+    D3D12_MESSAGE_ID_RENDER_PASS_MISMATCHING_LOCAL_PRESERVE_PARAMETERS                                             = 1375,
+    D3D12_MESSAGE_ID_RENDER_PASS_LOCAL_PRESERVE_RENDER_PARAMETERS_ERROR                                            = 1376,
+    D3D12_MESSAGE_ID_RENDER_PASS_LOCAL_DEPTH_STENCIL_ERROR                                                         = 1377,
+
+    D3D12_MESSAGE_ID_DRAW_POTENTIALLY_OUTSIDE_OF_VALID_RENDER_AREA                                                 = 1378,
+    D3D12_MESSAGE_ID_CREATERASTERIZERSTATE_INVALID_LINERASTERIZATIONMODE                                           = 1379,
+
+    D3D12_MESSAGE_ID_CREATERESOURCE_INVALIDALIGNMENT_SMALLRESOURCE                                                 = 1380,
+    D3D12_MESSAGE_ID_GENERIC_DEVICE_OPERATION_UNSUPPORTED                                                          = 1381,
+
+    D3D12_MESSAGE_ID_CREATEGRAPHICSPIPELINESTATE_RENDER_TARGET_WRONG_WRITE_MASK                                    = 1382,
+
+    D3D12_MESSAGE_ID_PROBABLE_PIX_EVENT_LEAK                                                                       = 1383,
+    D3D12_MESSAGE_ID_PIX_EVENT_UNDERFLOW                                                                           = 1384,
+
+    D3D12_MESSAGE_ID_RECREATEAT_INVALID_TARGET                                                                     = 1385,
+    D3D12_MESSAGE_ID_RECREATEAT_INSUFFICIENT_SUPPORT                                                               = 1386,
+
+    D3D12_MESSAGE_ID_GPU_BASED_VALIDATION_STRUCTURED_BUFFER_STRIDE_MISMATCH                                        = 1387,
+    // ==
+
     D3D12_MESSAGE_ID_D3D12_MESSAGES_END
   );
   {$EXTERNALSYM D3D12_MESSAGE_ID}
@@ -1806,8 +1942,8 @@ type
 
     function RegisterMessageCallback(CallbackFunc: D3D12MessageFunc;
                                      CallbackFilterFlags: D3D12_MESSAGE_CALLBACK_FLAGS;
-                                     pContext: Pointer;
-                                     var pCallbackCookie: PDWORD): HRESULT; stdcall;
+                                     {InOut} pContext: Pointer;  // Update MAy 2024
+                                     {InOut} pCallbackCookie: PDWORD): HRESULT; stdcall;
 
     function UnregisterMessageCallback(CallbackCookie: DWORD): HRESULT; stdcall;
 

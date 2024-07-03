@@ -21,17 +21,18 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 19/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Embarcadero's <= Delphi 10.4 D3D12 is outdated!
+//          Search "Update May 2024", to find updates until May 2024.
 //
 // Related objects: -
 // Related projects: MfPackX317
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.22621.0
+// SDK version: 10.0.26100.0
 //
 // Todo: -
 //
@@ -343,6 +344,19 @@ const
   {$EXTERNALSYM D3D_SHADER_REQUIRES_WAVE_MMA}
   D3D_SHADER_REQUIRES_ATOMIC_INT64_ON_DESCRIPTOR_HEAP_RESOURCE      = $10000000;
   {$EXTERNALSYM D3D_SHADER_REQUIRES_ATOMIC_INT64_ON_DESCRIPTOR_HEAP_RESOURCE}
+
+  // Update May 2024
+  D3D_SHADER_REQUIRES_ADVANCED_TEXTURE_OPS                          = $20000000;
+  {$EXTERNALSYM D3D_SHADER_REQUIRES_ADVANCED_TEXTURE_OPS}
+  D3D_SHADER_REQUIRES_WRITEABLE_MSAA_TEXTURES                       = $40000000;
+  {$EXTERNALSYM D3D_SHADER_REQUIRES_WRITEABLE_MSAA_TEXTURES}
+  D3D_SHADER_REQUIRES_SAMPLE_CMP_GRADIENT_OR_BIAS                   = $80000000;
+  {$EXTERNALSYM D3D_SHADER_REQUIRES_SAMPLE_CMP_GRADIENT_OR_BIAS}
+  D3D_SHADER_REQUIRES_EXTENDED_COMMAND_INFO                         = $100000000;
+  {$EXTERNALSYM D3D_SHADER_REQUIRES_EXTENDED_COMMAND_INFO}
+
+  // ==
+
 
 type
 

@@ -25,8 +25,8 @@
 //------------------------------------------------------------------------------
 //
 // Remarks: Embarcadero's <= Delphi 10.4 D3D12 is way outdated!
-//          Search "Update May 2024", to find updates since May 2024.
-
+//          Search "Update May 2024", to find updates until May 2024.
+//
 //
 // Related objects: -
 // Related projects: MfPackX317
