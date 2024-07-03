@@ -15,7 +15,7 @@ It also have a pitch control.
 
 NOTES:
  - This release is updated for compiler version 17 up to 34.
- - SDK version 10.0.22621.0 (Win 11)
+ - SDK version: 10.0.26100.0 (Win 11)
  - Requires Windows 10 or later.
  - Minimum supported MfPack version: 3.1.6
 

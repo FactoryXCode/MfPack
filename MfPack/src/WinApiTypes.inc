@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: All future updates (releases) will be named to an artist except for
@@ -32,7 +32,7 @@
 // Related projects: MfPackX317
 // Known Issues: -
 // Compiler version: 23 up to 35
-// SDK version: 10.0.22621.0
+// SDK version: 10.0.26100.0
 // Todo: -
 // =============================================================================
 // Source: -
@@ -378,7 +378,7 @@ const
 // {$DEFINE MFPACK_VERSION_314_UP} // PiL release, update 19.
 // {$DEFINE MFPACK_VERSION_315_UP} // Carmel release, update 20.
 // {$DEFINE MFPACK_VERSION_316_UP} // Morrissey release, update 21.
-{$DEFINE MFPACK_VERSION_317_UP}    // RammStein release, update 22.
+{$DEFINE MFPACK_VERSION_317_UP}    // RammStein release, Milestone update 22.
 
 // WARNINGS
 // enable/disable compiler warnings.

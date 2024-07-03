@@ -12,8 +12,8 @@ uses
   WinApi.Dbg.WinMfError in '..\src\debug\WinApi.Dbg.WinMfError.pas',
   WinApi.Dbg.MFTUtils in '..\src\debug\WinApi.Dbg.MFTUtils.pas',
   MediaTransformToolDlg in 'MediaTransformToolDlg.pas' {dlgMediaTransformTool},
-  WinApi.StiErr in '..\src\WinApi.StiErr.pas',
-  WinApi.dbg.StiErr in '..\src\debug\WinApi.dbg.StiErr.pas';
+  WinApi.dbg.StiErr in '..\src\debug\WinApi.Dbg.StiErr.pas',
+  WinApi.Dbg.XAudio2Err in '..\src\debug\WinApi.Dbg.XAudio2Err.pas';
 
 {$R *.res}
 

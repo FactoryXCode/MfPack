@@ -10,9 +10,9 @@ Usage:
   1) Add .."/MfPack/Tools/Latency" to your application search path.
   2) Add "MfPack.AudioLatencyTool" in the uses clause.
   3) Create the class in your application.
-  4) Call Initialize within the method where measurment is needed.
+  4) Call Initialize within the method where measurement is needed.
   5) Call Start() just before the code to be measured.
-  6) Call Stop() immediatly after the code been measured.
+  6) Call Stop() immediately after the code been measured.
   7) Call FreeAndNil() when not needed anymore.
 
 

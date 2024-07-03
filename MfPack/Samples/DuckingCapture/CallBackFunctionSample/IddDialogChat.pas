@@ -28,7 +28,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Note that this sample requires Windows 7 or later.
@@ -38,7 +38,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.22621.0
+// SDK version: 10.0.26100.0
 //
 // Todo: -
 //

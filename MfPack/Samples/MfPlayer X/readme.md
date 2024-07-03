@@ -7,7 +7,7 @@ Requires Windows 7 or later.
 
 NOTES: 
  - This release is updated for compiler version 23 up to 34.
- - SDK version 10.0.22621.0 (Win 11)
+ - SDK version: 10.0.26100.0 (Win 11)
  - Minimum supported MfPack version: 3.1.5
 
 This is an example that shows how to use the IMFTimer, language tags,  

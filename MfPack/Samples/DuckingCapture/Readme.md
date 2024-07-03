@@ -16,7 +16,7 @@ NOTES:
  - There are 2 versions of the sample. One that uses the function callback and 
    one that uses the window-callback (as used in the original CPP sample).
  - This release is updated for compiler version 17 up to 35.
- - SDK version 10.0.22621.0 (Win 11)
+ - SDK version: 10.0.26100.0 (Win 11)
  - Requires Windows 7 or later.
  - Minimum supported MfPack version: 3.1.2
 

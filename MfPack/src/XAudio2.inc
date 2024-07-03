@@ -20,7 +20,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 // Remarks: Delphi specific include file, to determine which DLL's are needed to load.
 //          XAudio2 version 2.9 ships as part of Windows 10, XAUDIO2_9.DLL,

@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.22621.0 (Windows 11)
+// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).

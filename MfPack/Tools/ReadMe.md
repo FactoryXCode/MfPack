@@ -1,5 +1,5 @@
 # HResult Lookup Tools (WinApi.Dbg.WinHResultTools.pas)
-Version 3.1.6 
+Version 3.1.7 
 
 The application can be used to determine HResult or Error codes returned by the Windows OS,
 featuring a detailed build in "HResult Lookup tool", the "Windows System Error Code Lookup Tool" and
@@ -28,6 +28,6 @@ Project location: https://github.com/FactoryXCode/MfPack
                   https://sourceforge.net/projects/MFPack
 
 First release date: 09/07/2023
-Final release date: 16/02/2024
+Final release date: 30/06/2024
 
 Copyright © FactoryX. All rights reserved. 

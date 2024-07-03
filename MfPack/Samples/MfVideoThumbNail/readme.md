@@ -11,7 +11,7 @@ documentation. (https://docs.microsoft.com/en-us/windows/desktop/medfound/videot
 
 NOTES: 
  - This release is updated for compiler version 17 up to 35.
- - SDK version 10.0.22621.0 (Win 11)
+ - SDK version: 10.0.26100.0 (Win 11)
  - Requires Windows 7 or later.
  - Minimum supported MfPack version: 3.1.5 
 
