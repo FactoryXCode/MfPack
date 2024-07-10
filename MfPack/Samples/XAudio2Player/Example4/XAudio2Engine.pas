@@ -94,7 +94,8 @@ uses
   WinApi.DirectX.XAudio2.XAudio2Fx,
   WinApi.DirectX.XAudio2.XAPOFx,
   {WinMM}
-  WinApi.WinMM.MMReg,
+  WinApi.WinMM.MMeApi,
+  {Application}
   Tools,
   XAudio2_FXReverb,
   XAudio2_FXMasterLimiter;
@@ -151,9 +152,10 @@ type
 
 {$endregion}
 
-  private
-
+  protected
     pvRenderThread: TXAudio2RenderThread;
+
+  private
 
     pvXAudio2: IXAudio2;
     pvMasteringVoice: IXAudio2MasteringVoice;
@@ -223,8 +225,9 @@ type
     constructor Create();
     destructor Destroy(); override;
 
-    // Run this method to load the file and initialize XAudio2.
-    function LoadAndPlay(const audiofile: TFileName): HResult;
+    // Run this method to load the file and initialize XAudio2,
+    // after this the audio is ready to play.
+    function LoadAndInitialize(const audiofile: TFileName): HResult;
 
     // Use this method if you don't want to Initialize XAudio2.
     function LoadFile(const audiofile: TFileName): HResult;
@@ -293,15 +296,10 @@ type
   // The thread we render after Start.
   TXAudio2RenderThread = class(TThread)
   private
-
     FEngine: TXaudio2Engine;
-
   protected
-
     procedure Execute; override;
-
   public
-
     constructor Create(AEngine: TXaudio2Engine);
   end;
 
@@ -311,12 +309,10 @@ implementation
 
 constructor TXAudio2RenderThread.Create(AEngine: TXaudio2Engine);
 begin
-
   inherited Create(True);
   FEngine := AEngine;
   FreeOnTerminate := False;
 end;
-
 
 procedure TXAudio2RenderThread.Execute;
 begin
@@ -334,7 +330,6 @@ end;
 
 procedure TXaudio2Engine.InitializeXAudio2Thread;
 begin
-
   if not Assigned(pvRenderThread) then
     begin
       pvRenderThread := TXAudio2RenderThread.Create(Self);
@@ -342,10 +337,8 @@ begin
     end;
 end;
 
-
 procedure TXaudio2Engine.TerminateRenderThread();
 begin
-
   if Assigned(pvRenderThread) then
     begin
       pvRenderThread.SetFreeOnTerminate(True);
@@ -421,7 +414,7 @@ begin
 end;
 
 
-function TXaudio2Engine.LoadAndPlay(const audiofile: TFileName): HResult;
+function TXaudio2Engine.LoadAndInitialize(const audiofile: TFileName): HResult;
 begin
 
   Result := LoadFile(audiofile);
@@ -669,7 +662,12 @@ label
 
 begin
   pvBufferPrevPlayed := 0;
+  pvBufferStart := 0;
   pvNewBufferPosition := 0;
+
+  FXaudio2EventData.SamplesProcessed := 0;
+  FXaudio2EventData.Position := 0;
+  FXaudio2EventData.TimePlayed := 0;
 
   // Remove active effects.
   if Assigned(pvFxReverbEffect) then
@@ -765,26 +763,16 @@ var
 
 begin
 
-  while (pvRenderStatus <> rsEndOfBuffer) or (pvRenderStatus = rsEndOfBuffer) do
+  while  pvRenderStatus in [rsPlaying, rsPauzed] do
     begin
-      // Check for termination
-      if (pvRenderStatus = rsDestroying) then
-        Break;
-
-      if (pvRenderStatus = rsStopped) then
-        Break;
-
       // This consumes some CPU load, but saves using a timer.
       pvSourceVoice.GetState(voiceState,
                              0);
-
       // Calculate the samples processed (Starting after a stop event has taken place).
       FXaudio2EventData.SamplesProcessed := voiceState.SamplesPlayed - pvBufferPrevPlayed;
-
       // Calculate the samples that have been processed, to milliseconds.
       // The caller can, for example, calculate the readable time in HH:MM:SS:MS.
-      FXaudio2EventData.TimePlayed := (((voiceState.SamplesPlayed + pvNewBufferPosition) - pvBufferPrevPlayed) div pvSamplesPerSecond) * 10000000;
-
+      FXaudio2EventData.TimePlayed := (((INT64(voiceState.SamplesPlayed) + pvNewBufferPosition) - pvBufferPrevPlayed) div pvSamplesPerSecond) * 10000000;
       // Notify the main thread about the processing data.
       OnProcessingData(Self);
   end;

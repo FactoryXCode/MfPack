@@ -4,8 +4,8 @@ object frmMain: TfrmMain
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'XAudio2 Player  Sample 4'
-  ClientHeight = 438
-  ClientWidth = 390
+  ClientHeight = 442
+  ClientWidth = 398
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -126,8 +126,8 @@ object frmMain: TfrmMain
   end
   object StatusBar: TStatusBar
     Left = 0
-    Top = 407
-    Width = 390
+    Top = 411
+    Width = 398
     Height = 31
     Panels = <>
     ParentShowHint = False
@@ -135,6 +135,7 @@ object frmMain: TfrmMain
     SimplePanel = True
     SimpleText = 'Open an audio file'
     OnMouseMove = StatusBarMouseMove
+    ExplicitTop = 446
   end
   object butReplay: TButton
     Left = 165
@@ -153,8 +154,8 @@ object frmMain: TfrmMain
     OnClick = butReplayClick
   end
   object pbProgress: TProgressBar
-    Left = 7
-    Top = 330
+    Left = 8
+    Top = 329
     Width = 377
     Height = 14
     Enabled = False
@@ -169,7 +170,7 @@ object frmMain: TfrmMain
   object pnlControls: TPanel
     Left = 0
     Top = 0
-    Width = 390
+    Width = 398
     Height = 266
     Align = alTop
     Enabled = False
@@ -551,8 +552,8 @@ object frmMain: TfrmMain
   end
   object stxtStatus: TStaticText
     Left = 0
-    Top = 390
-    Width = 390
+    Top = 394
+    Width = 398
     Height = 17
     Align = alBottom
     AutoSize = False
@@ -566,6 +567,7 @@ object frmMain: TfrmMain
     ParentFont = False
     TabOrder = 6
     Transparent = False
+    ExplicitTop = 429
   end
   object mnuMain: TMainMenu
     Left = 332

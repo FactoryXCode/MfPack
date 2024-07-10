@@ -134,7 +134,7 @@ type
                                       pOutputChannels: DWord;
                                       pEnableEffect: Boolean): HResult;
 
-    /// <summary>Be careful disabling an effect while the voice that hosts it is running.
+    /// <summary>Be careful disabling an effect while the voice that hosts it, is running.
     /// This can result in an audible artifact if the effect significantly changes the audio's pitch or volume.</summary>
     function RemoveReverbEffect(ppVoice: PIXAudio2Voice;
                                 pEffectIndex: UINT32 = 0): HResult;

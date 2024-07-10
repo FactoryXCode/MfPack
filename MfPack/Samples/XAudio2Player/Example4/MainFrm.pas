@@ -194,9 +194,9 @@ type
 
     // Get the status of the XAudio2 engine.
     function GetStatus(): string;
+
     // Helper for Reverb calls
     //function GetReverbParams(index: Integer): TReverbParams;
-
 
     // Xaudi2Engine events
     procedure HandleOnProcessingData(Sender: TObject);
@@ -205,6 +205,7 @@ type
     procedure HandleOnAudioStoppedEvent(Sender: TObject);
     procedure HandleOnAudioPlayingEvent(Sender: TObject);
     procedure HandleOnAudioPauzedEvent(Sender: TObject);
+
     // XAudio2VoiceCallback events
     procedure HandleOnVoiceProcessingPassStartEvent(Sender: TObject);
     procedure HandleOnVoiceProcessingPassEndEvent(Sender: TObject);
@@ -277,6 +278,7 @@ begin
 
   // Keep volume on previous volume.
   SetVolumeChannels();
+  pbProgress.Position := 0;
 end;
 
 
@@ -398,6 +400,7 @@ begin
   // Load reverb parameters in the list.
   ckbReverbMain.Clear;
   ckbReverbSource.Clear;
+
   // Load effect parameters.
   //fReverbI3DL2ParamArray := GetReverbParams();
 
@@ -645,7 +648,7 @@ begin
   SetVolumeChannels();
 
   // Load and play the audiofile.
-  hr := fXaudio2Engine.LoadAndPlay(fAudioFileFullPath);
+  hr := fXaudio2Engine.LoadAndInitialize(fAudioFileFullPath);
   if FAILED(hr) then
     StatusBar.SimpleText := Format('Could not load and play XAudio2: Error %d.', [hr]);
 end;
@@ -746,6 +749,7 @@ begin
   Application.ProcessMessages;
 end;
 
+
 // Audio is ready to play.
 procedure TfrmMain.HandleOnAudioReadyEvent(Sender: TObject);
 begin
@@ -789,7 +793,6 @@ begin
   butReplay.Enabled := True;
   StatusBar.SimpleText := Format('Loaded file: %s.', [fAudioFileName]);
   stxtStatus.Caption := GetStatus();
-  pbProgress.Position := 0;
 end;
 
 // Called when playing starts.
@@ -841,6 +844,7 @@ begin
   pbProgress.Position := 0;
 end;
 
+
 // Start playing engine buffer.
 procedure TfrmMain.HandleOnBufferStartEvent(Sender: TObject);
 begin
@@ -861,6 +865,7 @@ begin
   StatusBar.SimpleText := 'End of playbuffer reached.';
   stxtStatus.Caption := GetStatus();
 end;
+
 
 // initialization and finalization =============================================
 

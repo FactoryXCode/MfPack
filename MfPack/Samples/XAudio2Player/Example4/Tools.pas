@@ -79,13 +79,8 @@ uses
   procedure HandleThreadMessages(AThread: THandle;
                                  AWait: Cardinal = INFINITE);
 
-  function MapRange(Value: Single;
-                    InMin: Single;
-                    InMax: Single;
-                    OutMin: Single;
-                    OutMax: Single): Single;
 
-implementation
+                                 implementation
 
 
 procedure HandleThreadMessages(AThread: THandle;
@@ -113,16 +108,6 @@ begin
       TranslateMessage(mMsg);
       DispatchMessage(mMsg);
     end;
-end;
-
-
-function MapRange(Value: Single;
-                  InMin: Single;
-                  InMax: Single;
-                  OutMin: Single;
-                  OutMax: Single): Single;
-begin
-  Result := OutMin + (Value - InMin) * (OutMax - OutMin) / (InMax - InMin);
 end;
 
 end.
