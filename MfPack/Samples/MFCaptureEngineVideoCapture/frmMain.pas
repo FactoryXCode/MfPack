@@ -25,6 +25,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 // 28/06/2024 Tony                Solved some issues when recapturing with same formats.
+// 27/07/2024 Tony                Solved issue with incorrect videocapture format.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -166,7 +167,7 @@ type
     function CreateDeviceExplorer(): HResult;
 
     // Update menu items and status.
-    procedure UpdateUI(pGuidType: TGUID);
+    procedure UpdateUI(const pGuidType: TGUID);
 
     // Process sample in main thread
     function ProcessSample(aSample: IMFSample): HResult;
@@ -177,7 +178,7 @@ type
                            var ATop: Integer;
                            var ALeft: Integer);
 
-    function CreateNewFileName(ext: string): TFileName;
+    function CreateNewFileName(const ext: string): TFileName;
 
     // Messages
     procedure OnSize(var message: TWMSize); message WM_SIZE;
@@ -349,7 +350,7 @@ begin
     begin
       if Assigned(bmCapturedFrame) then
         FreeAndNil(bmCapturedFrame);
-      // stream returned, let's assign to preview
+      // stream returned, let's assign to preview.
       bmCapturedFrame := TMfpBitmap.Create;
       bmCapturedFrame.PixelFormat := pf32bit;
       // Set streampointer to start.
@@ -737,7 +738,7 @@ end;
 
 
 // UpdateUI
-procedure TMainWindow.UpdateUI(pGuidType: TGUID);
+procedure TMainWindow.UpdateUI(const pGuidType: TGUID);
 begin
 
   if (pGuidType = MF_CAPTURE_ENGINE_INITIALIZED) then
@@ -851,6 +852,17 @@ var
 begin
   if Assigned(FCaptureManager) then
     begin
+
+      if (pvPreviewMode = smVirgin) then
+        // Set video preview and recording formats.
+        hr := FCaptureManager.SetVideoFormat();
+        if FAILED(hr) then
+          begin
+            ErrMsg('mnuStartPreviewClick ' + ERR_OUTPUT_MEDIATYPE_SET,
+                   hr);
+            Exit;
+          end;
+
       if (mnuStartPreview.Tag = 0) then
         begin
           if (pvPreviewMode = smVirgin) then
@@ -938,7 +950,7 @@ begin
 end;
 
 
-function TMainWindow.CreateNewFileName(ext: string): TFileName;
+function TMainWindow.CreateNewFileName(const ext: string): TFileName;
 var
   i: Integer;
   sfileName: string;

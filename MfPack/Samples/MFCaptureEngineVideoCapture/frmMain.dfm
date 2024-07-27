@@ -3,61 +3,75 @@ object MainWindow: TMainWindow
   Top = 0
   BorderWidth = 1
   Caption = 'Capture Engine Application Sample'
-  ClientHeight = 654
-  ClientWidth = 1091
+  ClientHeight = 1145
+  ClientWidth = 1909
   Color = 5197615
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -19
   Font.Name = 'Tahoma'
   Font.Style = []
   Menu = MainMenu
-  OldCreateOrder = True
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
+  PixelsPerInch = 168
   DesignSize = (
-    1091
-    654)
-  PixelsPerInch = 96
-  TextHeight = 13
+    1909
+    1145)
+  TextHeight = 23
   object pnlSnapShot: TPanel
-    Left = 780
+    Left = 1365
     Top = 0
-    Width = 310
-    Height = 234
+    Width = 543
+    Height = 410
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Anchors = [akTop, akRight]
     BevelOuter = bvNone
     Color = clBackground
     ParentBackground = False
     ShowCaption = False
     TabOrder = 0
+    ExplicitLeft = 1353
     object pbCapture: TPaintBox
       Left = 0
       Top = 0
-      Width = 310
-      Height = 206
+      Width = 543
+      Height = 361
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Align = alClient
       Color = clBackground
       ParentColor = False
-      ExplicitLeft = 2
-      ExplicitHeight = 201
     end
     object pnlControls: TPanel
       Left = 0
-      Top = 206
-      Width = 310
-      Height = 28
+      Top = 361
+      Width = 543
+      Height = 49
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Align = alBottom
       ParentBackground = False
       ShowCaption = False
       TabOrder = 0
       object butSaveToFile: TButton
-        Left = 91
-        Top = 1
-        Width = 73
-        Height = 25
+        Left = 159
+        Top = 2
+        Width = 128
+        Height = 44
         Hint = 'Save photo to file'
+        Margins.Left = 5
+        Margins.Top = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
         Caption = '&Save To File'
         Enabled = False
         ParentShowHint = False
@@ -66,11 +80,15 @@ object MainWindow: TMainWindow
         OnClick = butSaveToFileClick
       end
       object butTakePhoto: TButton
-        Left = 12
-        Top = 1
-        Width = 73
-        Height = 25
+        Left = 21
+        Top = 2
+        Width = 128
+        Height = 44
         Hint = 'Save photo to file'
+        Margins.Left = 5
+        Margins.Top = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
         Caption = '&Take Photo'
         Enabled = False
         ParentShowHint = False
@@ -79,20 +97,28 @@ object MainWindow: TMainWindow
         OnClick = butTakePhotoClick
       end
       object chkNoPreview: TCheckBox
-        Left = 175
-        Top = 6
-        Width = 97
-        Height = 15
+        Left = 306
+        Top = 11
+        Width = 170
+        Height = 26
+        Margins.Left = 5
+        Margins.Top = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
         Caption = 'Auto Save'
         TabOrder = 2
       end
     end
   end
   object pnlInfo: TPanel
-    Left = -2
-    Top = 627
-    Width = 1099
-    Height = 28
+    Left = -4
+    Top = 1097
+    Width = 1924
+    Height = 49
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Align = alCustom
     Anchors = [akLeft, akRight]
     AutoSize = True
@@ -103,10 +129,12 @@ object MainWindow: TMainWindow
     ParentShowHint = False
     ShowHint = False
     TabOrder = 1
+    ExplicitTop = 1095
+    ExplicitWidth = 1912
   end
   object MainMenu: TMainMenu
-    Left = 33
-    Top = 40
+    Left = 58
+    Top = 69
     object Capture1: TMenuItem
       Caption = 'Capture'
       object mnuChooseDevice: TMenuItem
@@ -144,8 +172,8 @@ object MainWindow: TMainWindow
     Filter = 
       'BMP image (*.bmp)|*.bmp|PNG image (*.png)|*.png|JPEG image (*.jp' +
       'g, *.jpeg)|*.jpg'
-    Left = 115
-    Top = 39
+    Left = 222
+    Top = 69
   end
   object dlgSaveVideo: TSaveDialog
     DefaultExt = '.mp4'
@@ -153,7 +181,7 @@ object MainWindow: TMainWindow
     Filter = 
       'MPEG-4 (MP4)|.mp4|Windows Media Video (WMV)|.wmv|Audio Video Int' +
       'erleave (AVI)|.avi'
-    Left = 196
-    Top = 39
+    Left = 387
+    Top = 69
   end
 end

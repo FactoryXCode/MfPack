@@ -29,7 +29,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
-// 29/05/2024
+// 27/07/2024 Tony                Added overloaded method ConfigureVideoEncoding
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -173,21 +173,20 @@ type
   // Used by TDeviceProperties, holding capabillities of a video capture device.
   TVideoFormatInfo = {$IFDEF UNICODE} record {$ELSE} object {$ENDIF} // Compatible with all Delphi versions.
   public
-    // The index of the native format found on a device
-    FormatsIndex: Integer;
+    FormatsIndex: Integer;     // The index of the native format found on a device.
     mfMediaType: IMFMediaType; // MediaType interface.
 
     // Major & Subtypes
     fMajorType: TGuid;
-    wcMajorFormat: string; // readable guid of majorformat
+    wcMajorFormat: string; // Readable guid of majorformat.
     fSubType: TGuid;
-    wcSubFormat: string; // readable guid of subformat
+    wcSubFormat: string;   // Readable guid of subformat.
 
-    // FOURCC and codec description
-    unFormatTag: UINT32; // FormatTag (FOURCC)
-    wcFormatTag: string; // Readable formattag
-    wsDescr: string;     // Description about the format or codec see: function GetVideoDescr
-    wsGuid: string;      // See: function GetVideoDescr
+    // FOURCC and codec description.
+    unFormatTag: UINT32; // FormatTag (FOURCC).
+    wcFormatTag: string; // Readable formattag.
+    wsDescr: string;     // Description about the format or codec see: function GetVideoDescr.
+    wsGuid: string;      // See: function GetVideoDescr.
 
     // Dimensions
     iVideoWidth: UINT32;
@@ -669,10 +668,18 @@ type
                                   const mfTranscodeContainerType: TGUID; // For example: MFTranscodeContainerType_ASF
                                   out ppProfile: IMFTranscodeProfile): HResult;
 
-  // Configures the recordsink for video.
+
+  // Configures the recordsink for encoding video using default media type.
   function ConfigureVideoEncoding(pSource: IMFCaptureSource;
                                   pRecord: IMFCaptureRecordSink;
-                                  const guidEncodingType: REFGUID): HResult;
+                                  const guidEncodingType: REFGUID): HResult; overload;
+
+  // Configures the recordsink for encoding video using a given media type.
+  function ConfigureVideoEncoding(pSource: IMFCaptureSource;
+                                  pRecord: IMFCaptureRecordSink;
+                                  const guidEncodingType: REFGUID;
+                                  pMediaType: IMFMediaType): HResult; overload;
+
 
   // Configures the recordsink for audio (if an audiostream is present).
   function ConfigureAudioEncoding(pSource: IMFCaptureSource;
@@ -8058,9 +8065,8 @@ done:
 end;
 
 
-// Configuration for Encoding video & audio
-//========================================
-
+// Configures the recordsink for encoding video using default media type.
+//=======================================================================
 function ConfigureVideoEncoding(pSource: IMFCaptureSource;
                                 pRecord: IMFCaptureRecordSink;
                                 const guidEncodingType: REFGUID): HResult;
@@ -8072,9 +8078,6 @@ var
   dwSinkStreamIndex: DWORD;
   hr: HResult;
 
-label
-  done;
-
 begin
   guidSubType := GUID_NULL;
 
@@ -8082,19 +8085,19 @@ begin
   hr := pSource.GetCurrentDeviceMediaType(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD,
                                           pMediaType);
   if FAILED(hr) then
-    goto done;
+    Exit(hr);
 
   hr := CloneVideoMediaType(pMediaType,
                             guidEncodingType,
                             pMediaType2);
   if FAILED(hr) then
-    goto done;
+    Exit(hr);
 
 
   hr := pMediaType.GetGUID(MF_MT_SUBTYPE,
                            guidSubType);
   if FAILED(hr) then
-    goto done;
+    Exit(hr);
 
   if IsEqualGUID(guidSubType,
                  MFVideoFormat_H264_ES) or
@@ -8111,23 +8114,81 @@ begin
       hr := GetEncodingBitrate(pMediaType2,
                                uiEncodingBitrate);
       if FAILED(hr) then
-        goto done;
+        Exit(hr);
 
       hr := pMediaType2.SetUINT32(MF_MT_AVG_BITRATE,
                                   uiEncodingBitrate);
     end;
 
   if FAILED(hr) then
-    goto done;
+    Exit(hr);
 
   // Connect the video stream to the recording sink.
-  hr := pRecord.AddStream(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD,
-                          pMediaType2,
-                          nil,
-                          dwSinkStreamIndex);
+  Result := pRecord.AddStream(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD,
+                              pMediaType2,
+                              nil,
+                              dwSinkStreamIndex);
 
-done:
-  Result := hr;
+end;
+
+
+// Configuration for Encoding video using a given media type.
+//===========================================================
+function ConfigureVideoEncoding(pSource: IMFCaptureSource;
+                                pRecord: IMFCaptureRecordSink;
+                                const guidEncodingType: REFGUID;
+                                pMediaType: IMFMediaType): HResult;
+var
+  pMediaType2: IMFMediaType;
+  guidSubType: TGUID;
+  uiEncodingBitrate: UINT32;
+  dwSinkStreamIndex: DWORD;
+  hr: HResult;
+
+begin
+  guidSubType := GUID_NULL;
+
+  hr := CloneVideoMediaType(pMediaType,
+                            guidEncodingType,
+                            pMediaType2);
+  if FAILED(hr) then
+    Exit(hr);
+
+
+  hr := pMediaType.GetGUID(MF_MT_SUBTYPE,
+                           guidSubType);
+  if FAILED(hr) then
+    Exit(hr);
+
+  if IsEqualGUID(guidSubType,
+                 MFVideoFormat_H264_ES) or
+     IsEqualGUID(guidSubType,
+                 MFVideoFormat_H264) then
+    begin
+      // When the webcam supports H264_ES or H264, we just bypass the stream.
+      // The output from the capture engine will be the same as the native type supported by the webcam.
+      hr := pMediaType2.SetGUID(MF_MT_SUBTYPE,
+                                MFVideoFormat_H264);
+    end
+  else
+    begin
+      hr := GetEncodingBitrate(pMediaType2,
+                               uiEncodingBitrate);
+      if FAILED(hr) then
+        Exit(hr);
+
+      hr := pMediaType2.SetUINT32(MF_MT_AVG_BITRATE,
+                                  uiEncodingBitrate);
+    end;
+
+  if FAILED(hr) then
+    Exit(hr);
+
+  // Connect the video stream to the recording sink.
+  Result := pRecord.AddStream(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD,
+                              pMediaType2,
+                              nil,
+                              dwSinkStreamIndex);
 end;
 
 

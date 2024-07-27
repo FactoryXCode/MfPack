@@ -384,19 +384,27 @@ begin
   if FAILED(hr) then
     goto done;
 
-  hr := CopyAttribute(pSrcMediaType, pNewMediaType, MF_MT_FRAME_SIZE);
+  hr := CopyAttribute(pSrcMediaType,
+                      pNewMediaType,
+                      MF_MT_FRAME_SIZE);
   if FAILED(hr) then
     goto done;
 
-  hr := CopyAttribute(pSrcMediaType, pNewMediaType, MF_MT_FRAME_RATE);
+  hr := CopyAttribute(pSrcMediaType,
+                      pNewMediaType,
+                      MF_MT_FRAME_RATE);
   if FAILED(hr) then
     goto done;
 
-  hr := CopyAttribute(pSrcMediaType, pNewMediaType, MF_MT_PIXEL_ASPECT_RATIO);
+  hr := CopyAttribute(pSrcMediaType,
+                      pNewMediaType,
+                      MF_MT_PIXEL_ASPECT_RATIO);
   if FAILED(hr) then
     goto done;
 
-  hr := CopyAttribute(pSrcMediaType, pNewMediaType, MF_MT_INTERLACE_MODE);
+  hr := CopyAttribute(pSrcMediaType,
+                      pNewMediaType,
+                      MF_MT_INTERLACE_MODE);
   if FAILED(hr) then
     goto done;
 

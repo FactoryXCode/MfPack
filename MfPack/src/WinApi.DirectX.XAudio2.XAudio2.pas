@@ -261,82 +261,84 @@ type
   {$EXTERNALSYM XAUDIO2_PROCESSOR}
 
 const
-  Processor1                          = $00000001;
+  Processor1                          = XAUDIO2_PROCESSOR($00000001);
   {$EXTERNALSYM Processor1}
-  Processor2                          = $00000002;
+  Processor2                          = XAUDIO2_PROCESSOR($00000002);
   {$EXTERNALSYM Processor2}
-  Processor3                          = $00000004;
+  Processor3                          = XAUDIO2_PROCESSOR($00000004);
   {$EXTERNALSYM Processor3}
-  Processor4                          = $00000008;
+  Processor4                          = XAUDIO2_PROCESSOR($00000008);
   {$EXTERNALSYM Processor4}
-  Processor5                          = $00000010;
+  Processor5                          = XAUDIO2_PROCESSOR($00000010);
   {$EXTERNALSYM Processor5}
-  Processor6                          = $00000020;
+  Processor6                          = XAUDIO2_PROCESSOR($00000020);
   {$EXTERNALSYM Processor6}
-  Processor7                          = $00000040;
+  Processor7                          = XAUDIO2_PROCESSOR($00000040);
   {$EXTERNALSYM Processor7}
-  Processor8                          = $00000080;
+  Processor8                          = XAUDIO2_PROCESSOR($00000080);
   {$EXTERNALSYM Processor8}
-  Processor9                          = $00000100;
+  Processor9                          = XAUDIO2_PROCESSOR($00000100);
   {$EXTERNALSYM Processor9}
-  Processor10                         = $00000200;
+  Processor10                         = XAUDIO2_PROCESSOR($00000200);
   {$EXTERNALSYM Processor10}
-  Processor11                         = $00000400;
+  Processor11                         = XAUDIO2_PROCESSOR($00000400);
   {$EXTERNALSYM Processor11}
-  Processor12                         = $00000800;
+  Processor12                         = XAUDIO2_PROCESSOR($00000800);
   {$EXTERNALSYM Processor12}
-  Processor13                         = $00001000;
+  Processor13                         = XAUDIO2_PROCESSOR($00001000);
   {$EXTERNALSYM Processor13}
-  Processor14                         = $00002000;
+  Processor14                         = XAUDIO2_PROCESSOR($00002000);
   {$EXTERNALSYM Processor14}
-  Processor15                         = $00004000;
+  Processor15                         = XAUDIO2_PROCESSOR($00004000);
   {$EXTERNALSYM Processor15}
-  Processor16                         = $00008000;
+  Processor16                         = XAUDIO2_PROCESSOR($00008000);
   {$EXTERNALSYM Processor16}
-  Processor17                         = $00010000;
+  Processor17                         = XAUDIO2_PROCESSOR($00010000);
   {$EXTERNALSYM Processor17}
-  Processor18                         = $00020000;
+  Processor18                         = XAUDIO2_PROCESSOR($00020000);
   {$EXTERNALSYM Processor18}
-  Processor19                         = $00040000;
+  Processor19                         = XAUDIO2_PROCESSOR($00040000);
   {$EXTERNALSYM Processor19}
-  Processor20                         = $00080000;
+  Processor20                         = XAUDIO2_PROCESSOR($00080000);
   {$EXTERNALSYM Processor20}
-  Processor21                         = $00100000;
+  Processor21                         = XAUDIO2_PROCESSOR($00100000);
   {$EXTERNALSYM Processor21}
-  Processor22                         = $00200000;
+  Processor22                         = XAUDIO2_PROCESSOR($00200000);
   {$EXTERNALSYM Processor22}
-  Processor23                         = $00400000;
+  Processor23                         = XAUDIO2_PROCESSOR($00400000);
   {$EXTERNALSYM Processor23}
-  Processor24                         = $00800000;
+  Processor24                         = XAUDIO2_PROCESSOR($00800000);
   {$EXTERNALSYM Processor24}
-  Processor25                         = $01000000;
+  Processor25                         = XAUDIO2_PROCESSOR($01000000);
   {$EXTERNALSYM Processor25}
-  Processor26                         = $02000000;
+  Processor26                         = XAUDIO2_PROCESSOR($02000000);
   {$EXTERNALSYM Processor26}
-  Processor27                         = $04000000;
+  Processor27                         = XAUDIO2_PROCESSOR($04000000);
   {$EXTERNALSYM Processor27}
-  Processor28                         = $08000000;
+  Processor28                         = XAUDIO2_PROCESSOR($08000000);
   {$EXTERNALSYM Processor28}
-  Processor29                         = $10000000;
+  Processor29                         = XAUDIO2_PROCESSOR($10000000);
   {$EXTERNALSYM Processor29}
-  Processor30                         = $20000000;
+  Processor30                         = XAUDIO2_PROCESSOR($20000000);
   {$EXTERNALSYM Processor30}
-  Processor31                         = $40000000;
+  Processor31                         = XAUDIO2_PROCESSOR($40000000);
   {$EXTERNALSYM Processor31}
-  Processor32                         = $80000000;
+  Processor32                         = XAUDIO2_PROCESSOR($80000000);
   {$EXTERNALSYM Processor32}
-  XAUDIO2_ANY_PROCESSOR               = UINT($FFFFFFFF);
+  XAUDIO2_ANY_PROCESSOR               = XAUDIO2_PROCESSOR($FFFFFFFF);
   {$EXTERNALSYM XAUDIO2_ANY_PROCESSOR}
 
-// #if (NTDDI_VERSION >= NTDDI_WIN10_19H1)
-// This value indicates that XAudio2 will choose the default processor by itself.
-// The actual value chosen may vary depending on the hardware platform.
-  XAUDIO2_USE_DEFAULT_PROCESSOR       = $00000000;
-//#endif
+  // #if (NTDDI_VERSION >= NTDDI_WIN10_19H1)
+  // This value indicates that XAudio2 will choose the default processor by itself.
+  // The actual value chosen may vary depending on the hardware platform.
+  XAUDIO2_USE_DEFAULT_PROCESSOR       = XAUDIO2_PROCESSOR($00000000);
+  //#endif
   {$EXTERNALSYM XAUDIO2_USE_DEFAULT_PROCESSOR}
 
-// This definition is included for backwards compatibilty. Implementations targeting Games and WIN10_19H1 and later, should use
-// XAUDIO2_USE_DEFAULT_PROCESSOR instead to let XAudio2 select the appropriate default processor for the hardware platform.
+  // This definition is included for backwards compatibilty.
+  // Implementations targeting Games and WIN10_19H1 and later, should use
+  // XAUDIO2_USE_DEFAULT_PROCESSOR instead to let XAudio2 select the
+  // appropriate default processor for the hardware platform.
   XAUDIO2_DEFAULT_PROCESSOR           = Processor1;
   {$EXTERNALSYM XAUDIO2_DEFAULT_PROCESSOR}
 
@@ -448,19 +450,6 @@ type
   end;
   {$EXTERNALSYM XAUDIO2_EFFECT_CHAIN}
 
-  // Declared at line 107 !
-  //=======================
-  // Used in XAUDIO2_FILTER_PARAMETERS below
-//typedef enum XAUDIO2_FILTER_TYPE
-//{
-//    LowPassFilter,                      // Attenuates frequencies above the cutoff frequency (state-variable filter).
-//    BandPassFilter,                     // Attenuates frequencies outside a given range      (state-variable filter).
-//    HighPassFilter,                     // Attenuates frequencies below the cutoff frequency (state-variable filter).
-//    NotchFilter,                        // Attenuates frequencies inside a given range       (state-variable filter).
-//    LowPassOnePoleFilter,               // Attenuates frequencies above the cutoff frequency (one-pole filter, XAUDIO2_FILTER_PARAMETERS.OneOverQ has no effect)
-//    HighPassOnePoleFilter               // Attenuates frequencies below the cutoff frequency (one-pole filter, XAUDIO2_FILTER_PARAMETERS.OneOverQ has no effect)
-//} XAUDIO2_FILTER_TYPE;
-//=========================
 
   // Used in IXAudio2Voice.Set/GetFilterParameters and Set/GetOutputFilterParameters
   PXAUDIO2_FILTER_PARAMETERS = ^XAUDIO2_FILTER_PARAMETERS;
@@ -484,13 +473,16 @@ type
     pAudioData: PByte;               // Pointer to the audio data buffer.
     PlayBegin: UINT32;               // First sample in this buffer to be played.
     PlayLength: UINT32;              // Length of the region to be played in samples,
-                                     //  or 0 to play the whole buffer.
+                                     // or 0 to play the whole buffer.
     LoopBegin: UINT32;               // First sample of the region to be looped.
     LoopLength: UINT32;              // Length of the desired loop region in samples,
-                                     //  or 0 to loop the entire buffer.
+                                     // or 0 to loop the entire buffer.
     LoopCount: UINT32;               // Number of times to repeat the loop region,
-                                     //  or XAUDIO2_LOOP_INFINITE to loop forever.
+                                     // or XAUDIO2_LOOP_INFINITE to loop forever.
     pContext: Pointer;               // Context value to be passed back in callbacks.
+
+  public
+    procedure Default();             // Sets the recordfields to their default values.
   end;
   {$EXTERNALSYM XAUDIO2_BUFFER}
 
@@ -612,6 +604,7 @@ type
     //  ppSourceVoice - Returns the new object's IXAudio2SourceVoice interface.
     //  pSourceFormat - Format of the audio that will be fed to the voice.
     //  Flags - XAUDIO2_VOICE flags specifying the source voice's behavior.
+    //          Note: This flag can be 0 (zero), if none of the other options are required.
     //  MaxFrequencyRatio - Maximum SetFrequencyRatio argument to be allowed.
     //  pCallback - Optional pointer to a client-provided callback interface.
     //  pSendList - Optional list of voices this voice should send audio to.
@@ -619,7 +612,7 @@ type
     //
     function CreateSourceVoice({out} ppSourceVoice: PIXAudio2SourceVoice;
                                pSourceFormat: PWAVEFORMATEX;
-                               Flags: UINT32 = 0;
+                               Flags: UINT32;
                                MaxFrequencyRatio: Single = XAUDIO2_DEFAULT_FREQ_RATIO;
                                pCallback: IXAudio2VoiceCallback = nil;
                                {in/out} pSendList: PXAUDIO2_VOICE_SENDS = nil;
@@ -770,7 +763,7 @@ type
 
     // NAME: IXAudio2Voice.SetOutputVoices
     // DESCRIPTION: Replaces the set of submix/mastering voices that receive
-    //              this voice's output.                 fv
+    //              this voice's output.
     //
     // ARGUMENTS:
     //  pSendList - Optional list of voices this voice should send audio to.
@@ -1132,7 +1125,6 @@ type
   {$EXTERNALSYM IXAudio2MasteringVoice}
 
 
-
   (**************************************************************************
   *
   * IXAudio2EngineCallback: Client notification interface for engine events.
@@ -1244,12 +1236,13 @@ type
   {$EXTERNALSYM XAudio2Create}
 
   //#if (NTDDI_VERSION >= NTDDI_WIN10_RS5)
+  {$IF MFPACK_NTDDI_VERSION >= NTDDI_WIN10_RS5}  // See: WinApiTypes.inc
   function XAudio2CreateWithVersionInfo(ppXAudio2: PIXAudio2;
                                         Flags: UINT32;
-                                        XAudio2Processor: XAUDIO2_PROCESSOR;
-                                        ntddiVersion: DWORD): HResult; stdcall;
+                                        XAudio2Processor: XAUDIO2_PROCESSOR = XAUDIO2_USE_DEFAULT_PROCESSOR;
+                                        ntddiVersion: DWORD = MFPACK_NTDDI_VERSION): HResult; stdcall;
   {$EXTERNALSYM XAudio2CreateWithVersionInfo}
-
+  {$ENDIF}
 
   (**************************************************************************
   *
@@ -1322,7 +1315,7 @@ uses
 // Calculate the argument to SetVolume from a decibel value
 function XAudio2DecibelsToAmplitudeRatio(Decibels: Single): Single; inline;
 begin
-  Result := power(10.0, Decibels / 20.0);
+  Result := Power(10.0, Decibels / 20.0);
 end;
 
 
@@ -1399,5 +1392,20 @@ end;
 // end XAUDIO2_HELPER_FUNCTIONS
 
 // Implement Additional Prototypes here.
+
+procedure XAUDIO2_BUFFER.Default();
+begin
+
+  Flags := 0;
+  AudioBytes := 0;
+  pAudioData := nil;
+  PlayBegin := 0;
+  PlayLength := 0;
+  LoopBegin := 0;
+  LoopLength := 0;
+  LoopCount := 0;
+  pContext := nil;
+end;
+
 
 end.

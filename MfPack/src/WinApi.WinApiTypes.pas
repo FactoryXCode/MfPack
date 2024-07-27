@@ -172,7 +172,7 @@ const
 
 {$IFDEF MFP_WFT}
 
-  // Wave Format.
+// Wave Format.
 type WaveFormatType = (wftPCM,
                        wftFLOAT);
 {$ENDIF}
@@ -733,7 +733,7 @@ const
   {$EXTERNALSYM CLSCTX_APPCONTAINER}
   CLSCTX_ACTIVATE_AAA_AS_IU     = CLSCTX($800000);
   {$EXTERNALSYM CLSCTX_ACTIVATE_AAA_AS_IU}
-  CLSCTX_PS_DLL                 = integer($80000000);
+  CLSCTX_PS_DLL                 = Integer($80000000);
   {$EXTERNALSYM CLSCTX_PS_DLL}
 {$ENDIF}
 
@@ -952,8 +952,8 @@ type
   PBLOB = ^BLOB;
   LPBLOB = ^tagBLOB;
   tagBLOB = record
-    cbSize: ULONG; // In delphi up to ver 10.4 this is defined as Longint.
-    pBlobData: Pointer {PByte}; // In delphi up to ver 10.4 this is defined as Pointer.
+    cbSize: ULONG; // In delphi up to ver 10.4, this is defined as Longint.
+    pBlobData: Pointer {PByte}; // In delphi up to ver 10.4, this is defined as Pointer.
   end;
   {$EXTERNALSYM tagBLOB}
   BLOB = tagBLOB;
@@ -1605,7 +1605,7 @@ type
   wireCLIPFORMAT = ^userCLIPFORMAT;
   _userCLIPFORMAT = record
   fContext: LongInt;
-    case integer of
+    case Integer of
       0: (dwValue: DWORD;);
       1: (pwszName: PWideChar;);
     end;
@@ -1625,7 +1625,7 @@ type
 {$IFDEF MFP_GDI_NONREMOTE}
   _GDI_NONREMOTE = record
     fContext: LongInt;
-    case integer of
+    case Integer of
       0: (hInproc: LongInt;);
       1: (hRemote: PDWORD_BLOB;);
     end;
@@ -1654,7 +1654,7 @@ type
   PuserHMETAFILE = ^userHMETAFILE;
   _userHMETAFILE = record
     fContext: LongInt;
-    case integer of
+    case Integer of
       0: (hInproc: LongInt;);
       1: (hRemote: PBYTE_BLOB;);
       2: (hInproc64: Int64;);
@@ -1696,7 +1696,7 @@ type
 {$IFDEF MFP_userHENHMETAFILE}
   _userHENHMETAFILE = record
     fContext: LongInt;
-    case integer of
+    case Integer of
       0: (hInproc: LongInt; );
       1: (hRemote: PBYTE_BLOB; );
       2: (hInproc64: Int64; );
@@ -1729,7 +1729,7 @@ type
   PuserHBITMAP = ^userHBITMAP;
   _userHBITMAP = record
   fContext: LongInt;
-    case integer of
+    case Integer of
       0: (hInproc: LongInt;);
       1: (hRemote: PuserBITMAP;);
       2: (hInproc64: Int64;);
@@ -1744,7 +1744,7 @@ type
   PuserHPALETTE = ^userHPALETTE;
   _userHPALETTE = record
   fContext: LongInt;
-    case integer of
+    case Integer of
       0: (hInproc: LongInt; );
       1: (hRemote: PLOGPALETTE; );
       2: (hInproc64: Int64; );
@@ -2252,7 +2252,7 @@ type
   PuCLSSPEC = ^uCLSSPEC;
   uCLSSPEC = record
     tyspec: DWORD;
-    case {DUMMYNAME} integer of
+    case {DUMMYNAME} Integer of
       0: (clsid: CLSID);
       1: (pFileExt: PWideChar);
       2: (pMimeType: PWideChar);
@@ -2557,14 +2557,20 @@ type
 
 {$IFDEF MFP_MEDIATYPE_NULL}
 const
-  MEDIATYPE_NULL : TGUID = (D1:$00000000;D2:$0000;D3:$0000;D4:($00,$00,$00,$00,$00,$00,$00,$00));
+  MEDIATYPE_NULL : TGUID = (D1:$00000000;
+                            D2:$0000;
+                            D3:$0000;
+                            D4:($00,$00,$00,$00,$00,$00,$00,$00));
   {$EXTERNALSYM MEDIATYPE_NULL}
 {$ENDIF}
 
 
 {$IFDEF MFP_MEDIASUBTYPE_NULL}
 const
-  MEDIASUBTYPE_NULL : TGUID = (D1:$00000000;D2:$0000;D3:$0000;D4:($00,$00,$00,$00,$00,$00,$00,$00));
+  MEDIASUBTYPE_NULL : TGUID = (D1:$00000000;
+                               D2:$0000;
+                               D3:$0000;
+                               D4:($00,$00,$00,$00,$00,$00,$00,$00));
   {$EXTERNALSYM MEDIASUBTYPE_NULL}
 {$ENDIF}
 
@@ -2861,7 +2867,7 @@ const
   {$ENDIF}
 
   {$IFDEF MFP_SSIZE_MAX}
-  SSIZE_MAX      = LONG_MAX; // max value for a ssize_t
+  SSIZE_MAX      = LONG_MAX; // Max value for a ssize_t.
   {$EXTERNALSYM SSIZE_MAX}
   {$ENDIF}
   {$IFDEF MFP_WORD_BIT}
@@ -2869,7 +2875,7 @@ const
   {$EXTERNALSYM WORD_BIT}
   {$ENDIF}
   {$IFDEF MFP_SIZE_T_MAX}
-  SIZE_T_MAX     = ULONG_MAX; // max value for a size_t
+  SIZE_T_MAX     = ULONG_MAX; // Max value for a size_t.
   {$EXTERNALSYM SIZE_T_MAX}
   {$ENDIF}
   {$IFDEF MFP_UQUAD_MAX}
@@ -3103,7 +3109,7 @@ type
   THTMLColors = _HTMLColors;
 
 const
-  // We don't use the delphi colornames, because of version compatibility
+  // We don't use the Delphi colornames, because of version compatibility
   HTMLColorNames: array [0..142] of _HTMLColors = (
     (ClrName: 'ALICEBLUE'; DelphiClr: TColor($FFF8F0)),
     (ClrName: 'ANTIQUEWHITE'; DelphiClr: TColor($D7EBFA)),
@@ -3280,4 +3286,3 @@ implementation
   // Implement Additional Prototypes here.
 
 end.
-

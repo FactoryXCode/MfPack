@@ -166,6 +166,7 @@ type
     FCapturePreviewSink: IMFCapturePreviewSink;
     m_pEventCallback: CaptureEngineCB;
     m_pOnSampleCallBack: CaptureEngineSCB;
+    FRecordingMediaType: IMFMediaType;
 
     {$IFDEF SAVE_DEBUG_REPORT}
       FMediaTypeDebug: TMediaTypeDebug;
@@ -927,62 +928,68 @@ begin
 
   pszExt := ExtractFileExt(pszDestinationFile);
 
-
-
-      // Check extension to match the proper formats.
-      if LowerCase(pszExt) = '.mp4' then
-        begin
-          guidVideoEncoding := MFVideoFormat_H264;
-          guidAudioEncoding := MFAudioFormat_AAC;
-        end
-      else if LowerCase(pszExt) = '.wmv' then
-        begin
-          guidVideoEncoding := MFVideoFormat_WMV3;
-          guidAudioEncoding := MFAudioFormat_WMAudioV9;
-        end
-      else if LowerCase(pszExt) = '.avi' then
-        begin
-          guidVideoEncoding := MFVideoFormat_H264;
-          guidAudioEncoding := MFAudioFormat_AAC;
-        end
-      else
-        begin
-          hr := MF_E_INVALIDMEDIATYPE;
-          goto Done;
-        end;
-
-      hr := FCaptureEngine.GetSink(MF_CAPTURE_ENGINE_SINK_TYPE_RECORD,
-                                   pSink);
-      if FAILED(hr) then
+  // Check extension to match the proper formats.
+  if LowerCase(pszExt) = '.mp4' then
+    begin
+      guidVideoEncoding := MFVideoFormat_H264;
+      guidAudioEncoding := MFAudioFormat_AAC;
+    end
+  else if LowerCase(pszExt) = '.wmv' then
+    begin
+      guidVideoEncoding := MFVideoFormat_WMV3;
+      guidAudioEncoding := MFAudioFormat_WMAudioV9;
+    end
+  else if LowerCase(pszExt) = '.avi' then
+    begin
+      guidVideoEncoding := MFVideoFormat_H264;
+      guidAudioEncoding := MFAudioFormat_AAC;
+    end
+  else
+    begin
+      hr := MF_E_INVALIDMEDIATYPE;
         goto Done;
+    end;
 
-      hr := pSink.QueryInterface(IID_IMFCaptureRecordSink,
-                                 pRecord);
-      if FAILED(hr) then
-        goto Done;
+  hr := FCaptureEngine.GetSink(MF_CAPTURE_ENGINE_SINK_TYPE_RECORD,
+                               pSink);
+  if FAILED(hr) then
+    goto Done;
 
-      hr := FCaptureEngine.GetSource(pSource);
-      if FAILED(hr) then
-        goto Done;
+  hr := pSink.QueryInterface(IID_IMFCaptureRecordSink,
+                             pRecord);
+  if FAILED(hr) then
+    goto Done;
 
-      hr := pRecord.SetOutputFileName(pszDestinationFile);
-      if FAILED(hr) then
-        goto Done;
+  hr := FCaptureEngine.GetSource(pSource);
+    if FAILED(hr) then
+      goto Done;
+
+  hr := pRecord.SetOutputFileName(pszDestinationFile);
+    if FAILED(hr) then
+      goto Done;
 
   // When we run the same video device over and over again, we skip the configuration.
   if not pSinkWriterConfigSet then
     begin
+
       // Configure the video and/or audio streams.
-      if not IsEqualGuid(guidVideoEncoding, GUID_NULL) then
+
+      // Video
+      if not IsEqualGuid(guidVideoEncoding,
+                         GUID_NULL) then
         begin
+          // Note: ConfigureVideoEncoding can be using the default of the camera or the one we picked.
           hr := ConfigureVideoEncoding(pSource,
                                        pRecord,
-                                       guidVideoEncoding);
+                                       guidVideoEncoding,
+                                       FRecordingMediaType);
           if FAILED(hr) then
             goto Done;
         end;
 
-      if not IsEqualGuid(guidAudioEncoding, GUID_NULL) then
+      // Audio
+      if not IsEqualGuid(guidAudioEncoding,
+                         GUID_NULL) then
         begin
           hr := ConfigureAudioEncoding(pSource,
                                        pRecord,
@@ -1182,7 +1189,7 @@ begin
 end;
 
 
-// SetMediaType
+// SetMediaType for preview and recording
 function TCaptureManager.SetMediaType(pMediaType: IMFMediaType): HResult;
 var
   mfCaptureSource: IMFCaptureSource;
@@ -1196,11 +1203,19 @@ begin
   {$ENDIF}
 
   hr := FCaptureEngine.GetSource(mfCaptureSource);
-  if SUCCEEDED(hr) then
-    hr := mfCaptureSource.SetCurrentDeviceMediaType(DWord(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW),
-                                                    pMediaType);
-  Result := hr;
 
+  if SUCCEEDED(hr) then
+    // Preview
+    hr := mfCaptureSource.SetCurrentDeviceMediaType(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW,
+                                                      pMediaType);
+
+  // Recording
+  if SUCCEEDED(hr) then
+    hr := CloneVideoMediaType(pMediaType,
+                              MFVideoFormat_RGB32,
+                              FRecordingMediaType);
+
+  Result := hr;
 end;
 
 
