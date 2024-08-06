@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 06/08/2024                     Fixed threading issues.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
@@ -117,7 +118,6 @@ type
     trbVolumeR: TTrackBar;
     trbVolumeL: TTrackBar;
     cbLockVolumeSliders: TCheckBox;
-    butReplay: TButton;
     Bevel2: TBevel;
     Bevel3: TBevel;
     butPause: TButton;
@@ -134,7 +134,6 @@ type
     procedure Exit1Click(Sender: TObject);
     procedure trbVolumeLChange(Sender: TObject);
     procedure trbVolumeRChange(Sender: TObject);
-    procedure butReplayClick(Sender: TObject);
     procedure butPauseClick(Sender: TObject);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure trbPitchChange(Sender: TObject);
@@ -200,26 +199,6 @@ begin
 end;
 
 
-procedure TfrmMain.butReplayClick(Sender: TObject);
-var
-  hr: HResult;
-
-begin
-
-  if not Assigned(fXaudio2Engine) then
-    Exit;
-
-  hr := fXaudio2Engine.Stop();
-
-  if SUCCEEDED(hr) then
-    hr := fXaudio2Engine.InitializeXAudio2(True);
-
-  if FAILED(hr) then
-    StatusBar.SimpleText := Format('Could not initialize XAudio2 Error: %d.', [hr]);
-
-end;
-
-
 procedure TfrmMain.butStopClick(Sender: TObject);
 begin
 
@@ -242,14 +221,11 @@ procedure TfrmMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
 
   CanClose := False;
-  // Deactivate the peakmeters.
-  pmLeft.Enabled := False;
-  pmRight.Enabled := False;
+  FreeAndNil(pmLeft);
+  FreeAndNil(pmRight);
+
   if Assigned(fXaudio2Engine) then
-    begin
-      fXaudio2Engine.Stop;
-      FreeAndNil(fXaudio2Engine);
-    end;
+    FreeAndNil(fXaudio2Engine);
   CanClose := True;
 end;
 
@@ -293,13 +269,6 @@ begin
                   begin
                     butPauseClick(nil);
                   end;
-
-    VK_F11:     begin
-                  if Assigned(fXaudio2Engine) then
-                    begin
-                      butReplayClick(nil);
-                    end;
-                end;
 
     VK_F12:     begin
                   Open1Click(nil);
@@ -358,9 +327,9 @@ begin
   if not Assigned(fXaudio2Engine) then
     Exit;
 
-  freq := MapRange((trbPitch.Position + 10) * 0.1,
-                   trbPitch.Max * 0.1,
-                   trbPitch.Min * 0.1,
+  freq := MapRange(trbPitch.Position + 10, // * 0.01
+                   trbPitch.Max,  // * 0.01
+                   trbPitch.Min,  // * 0.01
                    MIN_PITCH,
                    MAX_PITCH);
 
@@ -386,11 +355,11 @@ begin
 
   SetVolumeChannels();
 
-  vol := MapRange((trbVolumeL.Position),
-                   trbVolumeL.Max,
-                   trbVolumeL.Min,
-                   MIN_VOLUME,
-                   MAX_VOLUME);
+  vol := (MapRange((trbVolumeL.Position),
+                    trbVolumeL.Max,
+                    trbVolumeL.Min,
+                    MIN_VOLUME,
+                    MAX_VOLUME) / (MAX_VOLUME / 100));
 
   lblLeftVolume.Caption := Format('%d', [Trunc(vol)]) + '%';
 end;
@@ -407,11 +376,11 @@ begin
 
   SetVolumeChannels();
 
-  vol := MapRange((trbVolumeR.Position),
-                   trbVolumeR.Max,
-                   trbVolumeR.Min,
-                   MIN_VOLUME,
-                   MAX_VOLUME);
+  vol := (MapRange((trbVolumeR.Position),
+                    trbVolumeR.Max,
+                    trbVolumeR.Min,
+                    MIN_VOLUME,
+                    MAX_VOLUME) / (MAX_VOLUME / 100));
 
   lblRightVolume.Caption := Format('%d', [Trunc(vol)]) + '%';
 end;
@@ -423,7 +392,6 @@ var
 
 begin
 
-try
   // Select an audiofile.
   fAudioFileUrl := GetAudioFile();
   if (fAudioFileUrl = 'No audiofile selected.') then
@@ -459,10 +427,6 @@ try
                                 llAudioDuration);
   if SUCCEEDED(hr) then
     SetVolumeChannels();
-
-finally
-  StatusBar.SimpleText := 'Open an audio file';
-end;
 end;
 
 
@@ -475,10 +439,11 @@ var
   tstr: string;
 
 begin
-
   iProgress := AMessage.WParam;
   iSamples := AMessage.LParam;
-  tstr := HnsTimeToStr(iProgress, False);
+
+  tstr := HnsTimeToStr(iProgress,
+                       False);
 
   lblProcessed.Caption := Format('Samples: %d',
                                  [iSamples]);
@@ -497,7 +462,6 @@ begin
       butPlay.Enabled := True;
       butPause.Enabled := True;
       butStop.Enabled := True;
-      butReplay.Enabled := True;
     end;
 end;
 
@@ -507,11 +471,12 @@ begin
 
   if (AMessage.WParam = 1) then
     begin
-      StatusBar.SimpleText := Format('Ended playing: %s', [fFileName]);
+      StatusBar.SimpleText := Format('Stopped playing: %s', [fFileName]);
       butPlay.Enabled := True;
       butPause.Enabled := True;
       butStop.Enabled := True;
-      butReplay.Enabled := True;
+      if Assigned(fXaudio2Engine) then
+        fXaudio2Engine.PlayStatus := rsStopped;
     end;
 end;
 
@@ -522,7 +487,7 @@ end;
 initialization
 
   if FAILED(MFStartup(MF_VERSION,
-                      MFSTARTUP_FULL)) then
+                      MFSTARTUP_LITE)) then
       begin
         MessageBox(0,
                    lpcwstr('Your computer does not support this Media Foundation API version ' +

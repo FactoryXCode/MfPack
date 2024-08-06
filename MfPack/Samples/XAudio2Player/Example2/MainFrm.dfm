@@ -15,7 +15,7 @@ object frmMain: TfrmMain
   Font.Style = []
   KeyPreview = True
   Menu = mnuMain
-  OldCreateOrder = False
+  OldCreateOrder = True
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
   OnKeyUp = FormKeyUp
@@ -216,7 +216,7 @@ object frmMain: TfrmMain
     Hint = 'Press and release SHIFT + ESC to set zero position.'
     DoubleBuffered = True
     Max = 0
-    Min = -224
+    Min = -100
     Orientation = trVertical
     ParentDoubleBuffered = False
     ParentShowHint = False
@@ -235,7 +235,7 @@ object frmMain: TfrmMain
     Hint = 'Press and release SHIFT + ESC to set zero position.'
     DoubleBuffered = True
     Max = 0
-    Min = -224
+    Min = -100
     Orientation = trVertical
     ParentDoubleBuffered = False
     ParentShowHint = False
@@ -256,16 +256,6 @@ object frmMain: TfrmMain
     State = cbChecked
     TabOrder = 5
   end
-  object butReplay: TButton
-    Left = 242
-    Top = 308
-    Width = 74
-    Height = 24
-    Caption = 'Replay'
-    Enabled = False
-    TabOrder = 6
-    OnClick = butReplayClick
-  end
   object butPause: TButton
     Left = 86
     Top = 308
@@ -273,7 +263,7 @@ object frmMain: TfrmMain
     Height = 24
     Caption = 'Pause'
     Enabled = False
-    TabOrder = 7
+    TabOrder = 6
     OnClick = butPauseClick
   end
   object trbPitch: TTrackBar
@@ -286,7 +276,7 @@ object frmMain: TfrmMain
     Min = -50
     Orientation = trVertical
     ParentDoubleBuffered = False
-    TabOrder = 8
+    TabOrder = 7
     TickMarks = tmBoth
     OnChange = trbPitchChange
   end

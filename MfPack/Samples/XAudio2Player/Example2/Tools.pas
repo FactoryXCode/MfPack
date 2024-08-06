@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/03/2024 Tony                Morrissey release  SDK 10.0.22621.0 (Windows 11)
+// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
@@ -36,16 +36,7 @@
 // Todo: -
 //
 // =============================================================================
-// Source: FactoryX.Code Sinkwriter and Transcode Examples.
-//         Bitmaps2Video for Media Foundation.
-//         https://github.com/rmesch/Bitmaps2Video-for-Media-Foundation
-//
-// Copyright © 2003-2024 Renate Schaaf
-// Requires MFPack at https://github.com/FactoryXCode/MfPack
-// Download the repository and add the folder "src" to your library path.
-//
-// The sinkwriter sample in this repository got me started on this project.
-// Thanks for the great work!
+// Source: FactoryX.Code
 //==============================================================================
 //
 // LICENSE
@@ -79,11 +70,6 @@ uses
   procedure HandleThreadMessages(AThread: THandle;
                                  AWait: Cardinal = INFINITE);
 
-  function MapRange(Value: Single;
-                    InMin: Single;
-                    InMax: Single;
-                    OutMin: Single;
-                    OutMax: Single): Single;
 
 implementation
 
@@ -113,16 +99,6 @@ begin
       TranslateMessage(mMsg);
       DispatchMessage(mMsg);
     end;
-end;
-
-
-function MapRange(Value: Single;
-                  InMin: Single;
-                  InMax: Single;
-                  OutMin: Single;
-                  OutMax: Single): Single;
-begin
-  Result := OutMin + (Value - InMin) * (OutMax - OutMin) / (InMax - InMin);
 end;
 
 end.
