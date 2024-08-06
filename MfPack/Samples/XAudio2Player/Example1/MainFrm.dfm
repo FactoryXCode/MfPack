@@ -4,7 +4,7 @@ object frmMain: TfrmMain
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'XAudio2 Player (Basic Sample)'
-  ClientHeight = 291
+  ClientHeight = 293
   ClientWidth = 391
   Color = clBtnFace
   DoubleBuffered = True
@@ -60,8 +60,8 @@ object frmMain: TfrmMain
     Caption = 'Played: 00:00:00'
   end
   object pmRight: TMfPeakMeter
-    Left = 133
-    Top = 26
+    Left = 136
+    Top = 27
     Width = 17
     Height = 172
     BackGroundColor = clAppWorkSpace
@@ -73,7 +73,7 @@ object frmMain: TfrmMain
   end
   object pmLeft: TMfPeakMeter
     Left = 103
-    Top = 26
+    Top = 27
     Width = 18
     Height = 172
     BackGroundColor = clAppWorkSpace
@@ -109,7 +109,7 @@ object frmMain: TfrmMain
     Font.Style = []
     ParentFont = False
   end
-  object butPlay: TButton
+  object butPlayPause: TButton
     Left = 11
     Top = 240
     Width = 74
@@ -117,10 +117,10 @@ object frmMain: TfrmMain
     Caption = 'Play'
     Enabled = False
     TabOrder = 0
-    OnClick = butPlayClick
+    OnClick = butPlayPauseClick
   end
   object butStop: TButton
-    Left = 171
+    Left = 91
     Top = 240
     Width = 74
     Height = 24
@@ -131,12 +131,13 @@ object frmMain: TfrmMain
   end
   object StatusBar: TStatusBar
     Left = 0
-    Top = 267
+    Top = 269
     Width = 391
     Height = 24
     Panels = <>
     SimplePanel = True
     SimpleText = 'Open an audio file'
+    ExplicitTop = 267
   end
   object trbVolumeR: TTrackBar
     Left = 159
@@ -179,23 +180,14 @@ object frmMain: TfrmMain
     TabOrder = 5
   end
   object butReplay: TButton
-    Left = 309
+    Left = 171
     Top = 240
     Width = 74
     Height = 24
     Caption = 'Replay'
+    Enabled = False
     TabOrder = 6
     OnClick = butReplayClick
-  end
-  object butPause: TButton
-    Left = 91
-    Top = 240
-    Width = 74
-    Height = 24
-    Caption = 'Pause'
-    Enabled = False
-    TabOrder = 7
-    OnClick = butPauseClick
   end
   object mnuMain: TMainMenu
     Left = 231

@@ -36,17 +36,8 @@
 // Todo: -
 //
 // =============================================================================
-// Source: FactoryX.Code Sinkwriter and Transcode Examples.
-//         Bitmaps2Video for Media Foundation.
-//         https://github.com/rmesch/Bitmaps2Video-for-Media-Foundation
-//
-// Copyright © 2003-2024 Renate Schaaf
-// Requires MFPack at https://github.com/FactoryXCode/MfPack
-// Download the repository and add the folder "src" to your library path.
-//
-// The sinkwriter sample in this repository got me started on this project.
-// Thanks for the great work!
-//==============================================================================
+// Source: FactoryX.Code.
+// =============================================================================
 //
 // LICENSE
 //

@@ -23,9 +23,10 @@
 // ---------- ------------------- ----------------------------------------------
 // 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 // 30/05/2024 Tony                Corrected volume calculation.
+// 06/08/2024                     Added threading and solved some close issues.
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 8 or higher.
 //
 // Related objects: -
 // Related projects: MfPackX317
@@ -90,6 +91,7 @@ uses
   WinApi.MediaFoundationApi.MfUtils,
   WinApi.MediaFoundationApi.MfMetLib,
   {}
+  Tools,
   XAudio2Engine,
   MfPeakMeter;  // Don't forget to add the Mfpeakmeter location in your project settings.
 
@@ -97,7 +99,7 @@ uses
 type
 
   TfrmMain = class(TForm)
-    butPlay: TButton;
+    butPlayPause: TButton;
     butStop: TButton;
     mnuMain: TMainMenu;
     OpenAudioFile1: TMenuItem;
@@ -120,21 +122,21 @@ type
     butReplay: TButton;
     Bevel2: TBevel;
     Bevel3: TBevel;
-    butPause: TButton;
     procedure Open1Click(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-    procedure butPlayClick(Sender: TObject);
+    procedure butPlayPauseClick(Sender: TObject);
     procedure butStopClick(Sender: TObject);
     procedure Exit1Click(Sender: TObject);
     procedure trbVolumeLChange(Sender: TObject);
     procedure trbVolumeRChange(Sender: TObject);
     procedure butReplayClick(Sender: TObject);
-    procedure butPauseClick(Sender: TObject);
 
   private
     { Private declarations }
     fXaudio2Engine: TXaudio2Engine;
-    fAudioFileName: TFileName;
+    fAudioFile: TFileName;
+    fAudioFileName: string;
+
     llAudioDuration: LONGLONG;
 
     function GetAudioFile(): string;
@@ -163,23 +165,32 @@ implementation
 {$R *.dfm}
 
 
-procedure TfrmMain.butPauseClick(Sender: TObject);
-begin
-
-  if SUCCEEDED(fXaudio2Engine.Pause) then
-    StatusBar.SimpleText := Format('Paused file: %s.', [fAudioFileName]);
-end;
-
-
-procedure TfrmMain.butPlayClick(Sender: TObject);
+procedure TfrmMain.butPlayPauseClick(Sender: TObject);
 begin
 
   // Activate the peakmeters.
   pmLeft.Enabled := True;
   pmRight.Enabled := True;
+  butStop.Enabled := True;
 
-  if SUCCEEDED(fXaudio2Engine.Start()) then
-    StatusBar.SimpleText := Format('Playing file: %s.', [fAudioFileName]);
+  if (butPlayPause.Tag = 0) then
+    begin
+      if SUCCEEDED(fXaudio2Engine.Start()) then
+        begin
+          StatusBar.SimpleText := Format('Playing file: %s.', [fAudioFileName]);
+          butPlayPause.Tag := 1;
+          butPlayPause.Caption := 'Pause';
+        end;
+    end
+  else
+    begin
+      if SUCCEEDED(fXaudio2Engine.Pause) then
+        begin
+          StatusBar.SimpleText := Format('Paused file: %s.', [fAudioFileName]);
+          butPlayPause.Tag := 0;
+          butPlayPause.Caption := 'Play';
+        end;
+    end;
 end;
 
 
@@ -191,11 +202,18 @@ begin
 
   hr := fXaudio2Engine.Stop();
 
-  if SUCCEEDED(hr) then
-    hr := fXaudio2Engine.InitializeXAudio2(True);
+  if FAILED(hr) then
+    StatusBar.SimpleText := Format('Could not initialize XAudio2 Error: %d.', [hr])
+  else
+    begin
+      StatusBar.SimpleText := Format('Playing file: %s.', [fAudioFileName]);
+      butPlayPause.Caption := 'Pause';
+      butStop.Enabled := True;
+      hr := fXaudio2Engine.InitializeXAudio2(True);
+    end;
 
   if FAILED(hr) then
-    StatusBar.SimpleText := Format('Could not initialize XAudio2 Error: %d.', [hr]);
+    StatusBar.SimpleText := Format('Failed to replay %s (Error %d)', [fAudioFileName, hr]);
 end;
 
 
@@ -218,6 +236,8 @@ procedure TfrmMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
 
   CanClose := False;
+  FreeAndNil(pmLeft);
+  FreeAndNil(pmRight);
   if Assigned(fXaudio2Engine) then
     FreeAndNil(fXaudio2Engine);
   CanClose := True;
@@ -295,16 +315,15 @@ var
 
 begin
 
-try
   // Select an audiofile.
-  fAudioFileName := GetAudioFile();
-  if (fAudioFileName = 'No audiofile selected.') then
+  fAudioFile := GetAudioFile();
+  if (fAudioFile = 'No audiofile selected.') then
     Exit;
 
   // Get the length of the audiofile.
- hr := GetFileDuration(StrToPWideChar(fAudioFileName),
-                       llAudioDuration);
- if FAILED(hr) then
+  hr := GetFileDuration(StrToPWideChar(fAudioFile),
+                        llAudioDuration);
+  if FAILED(hr) then
     begin
       ShowMessage('Could not retrieve the duration of the audio file.');
       llAudioDuration := 0;
@@ -320,16 +339,20 @@ try
   if not Assigned(fXaudio2Engine) then
     Exit;
 
+  if SUCCEEDED(hr) then
+    begin
+      fAudioFileName := ExtractFileName(fAudioFile);
+      butReplay.Enabled := True;
+      StatusBar.SimpleText := Format('Ready to play: %s', [fAudioFileName])
+    end;
+
   // Initialize the engine.
   hr := fXaudio2Engine.LoadFile(Handle,
-                                fAudioFileName,
+                                fAudioFile,
                                 llAudioDuration);
-  if SUCCEEDED(hr) then
-    SetVolumeChannels();
 
-finally
-  StatusBar.SimpleText := 'Open an audio file';
-end;
+  if FAILED(hr) then
+    StatusBar.SimpleText := Format('Failed to load %s (Error %d)', [fAudioFileName, hr])
 end;
 
 
@@ -345,7 +368,8 @@ begin
 
   iProgress := AMessage.WParam;
   iSamples := AMessage.LParam;
-  tstr := HnsTimeToStr(iProgress, False);
+  tstr := HnsTimeToStr(iProgress,
+                       False);
 
   lblProcessed.Caption := Format('Samples: %d',
                                  [iSamples]);
@@ -360,10 +384,8 @@ begin
 
   if (AMessage.WParam = 1) then
     begin
-      StatusBar.SimpleText := Format('Ready to play: %s', [ExtractFileName(fAudioFileName)]);
-      butPlay.Enabled := True;
-      butPause.Enabled := True;
-      butStop.Enabled := True;
+      butPlayPause.Enabled := True;
+      SetVolumeChannels();
     end;
 end;
 
@@ -373,12 +395,13 @@ begin
 
   if (AMessage.WParam = 1) then
     begin
-      StatusBar.SimpleText := Format('Ended playing: %s', [ExtractFileName(fAudioFileName)]);
-      butPlay.Enabled := True;
-      butPause.Enabled := True;
-      butStop.Enabled := True;
+      StatusBar.SimpleText := Format('Ended playing: %s', [fAudioFileName]);
+      butPlayPause.Enabled := False;
+      butPlayPause.Caption := 'Play';
+      butReplay.Enabled := True;
     end;
 end;
+
 
 // initialization and finalization =============================================
 
@@ -386,7 +409,7 @@ end;
 initialization
 
   if FAILED(MFStartup(MF_VERSION,
-                      MFSTARTUP_FULL)) then
+                      MFSTARTUP_LITE)) then
       begin
         MessageBox(0,
                    lpcwstr('Your computer does not support this Media Foundation API version ' +
