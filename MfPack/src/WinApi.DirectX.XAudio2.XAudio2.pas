@@ -581,6 +581,7 @@ type
 {$ELSE}
     ['{60d8dac8-5aa1-4e8e-b597-2f5e2883d484}']  // XAudio2 v 2.8
 {$ENDIF}
+
     // NAME: IXAudio2.RegisterForCallbacks
     // DESCRIPTION: Adds a new client to receive XAudio2's engine callbacks.
     //

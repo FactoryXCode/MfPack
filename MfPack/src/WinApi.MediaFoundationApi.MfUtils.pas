@@ -512,6 +512,19 @@ type
                           Max: byte): byte; inline; overload;
 
 
+  // Maps a value in between minimum and maximum valueranges.
+  function MapRange(const aValue: Single;
+                    InMin: Single;
+                    InMax: Single;
+                    OutMin: Single;
+                    OutMax: Single): Single; inline; overload;
+
+  function MapRange(const aValue: Integer;
+                    InMin: Single;
+                    InMax: Single;
+                    OutMin: Single;
+                    OutMax: Single): Single; inline; overload;
+
   // Since Win 10, use this function to create a file.
   function CreateFile2(lpFileName: PWideChar;
       {[in]}           dwDesiredAccess: DWORD;
@@ -2086,6 +2099,29 @@ begin
     Result := Max;
 end;
 
+
+function MapRange(const aValue: Single;
+                  InMin: Single;
+                  InMax: Single;
+                  OutMin: Single;
+                  OutMax: Single): Single; inline; overload;
+begin
+  Result := (OutMin + (aValue - InMin) * (OutMax - OutMin) / (InMax - InMin));
+end;
+
+
+function MapRange(const aValue: Integer;
+                  InMin: Single;
+                  InMax: Single;
+                  OutMin: Single;
+                  OutMax: Single): Single; inline; overload;
+var
+  ival: Single;
+
+begin
+  ival := aValue;
+  Result := (OutMin + (ival - InMin) * (OutMax - OutMin) / (InMax - InMin));
+end;
 
 // Strings
 function StringCbCat(pszDest: PChar;
