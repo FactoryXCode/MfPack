@@ -703,9 +703,9 @@ var
 
 begin
 
-  TThread.Synchronize(nil,
-                      procedure
-                        begin
+  //TThread.Synchronize(nil,
+  //                   procedure
+  //                      begin
                           Xaudio2EventData := fXaudio2Engine.AudioEventData;
                           sPlayed := HnsTimeToStr(Xaudio2EventData.TimePlayed,
                                                   False);
@@ -717,7 +717,7 @@ begin
                                                       [sPlayed]);
 
                           pbProgress.Position := Xaudio2EventData.Position + Xaudio2EventData.SamplesProcessed;
-                        end);
+  //                      end);
 
   Application.ProcessMessages;
 end;
@@ -837,11 +837,10 @@ begin
 end;
 
 // Called when playing an audio buffer reached the end.
+// Note: Don't take any actions on this event, because there's a big chanche the renderr will hang.
 procedure TfrmMain.HandleOnBufferEndEvent(Sender: TObject);
 begin
-
-  StatusBar.Caption := 'End of playbuffer reached.';
-  stxtStatus.Caption := GetStatus();
+  // Stub.
 end;
 
 

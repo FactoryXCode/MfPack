@@ -119,6 +119,7 @@ type
                   rsProcessingPassStart,
                   rsProcessingPassEnd,
                   rsDestroying,
+                  rsLoopLeft,
                   rsError);
 
   PXaudio2EventData = ^TXaudio2EventData;
@@ -168,7 +169,6 @@ type
 
     // Audio buffer.
     pvMemoryStream: TMemoryStream;
-
 
     pvFileName: TFileName;
 
@@ -559,9 +559,11 @@ begin
   pvMemoryStream.ReadBuffer(pvAudioData^,
                             pvMemoryStream.Size);
 
-  // Set up a new XAudio2 buffer.
   ZeroMemory(@pvXAudioBuffer,
              SizeOf(XAUDIO2_BUFFER));
+
+  // Set up a new XAudio2 buffer.
+ // pvXAudioBuffer.Default();
 
   pvBufferSize := pvMemoryStream.Size;
 
@@ -645,7 +647,7 @@ begin
   TThread.Synchronize(nil,
                       procedure
                         begin
-                          while not bBuffersQueued and ((pvRenderStatus = rsPlaying) or (pvRenderStatus = rsPauzed) or (pvRenderStatus = rsInitialized)) and (pvSourceVoice <> nil) do
+                          while not bBuffersQueued and (pvSourceVoice <> nil) do
                             begin
                               if (pvRenderStatus = rsPlaying) then
                                 begin
@@ -668,6 +670,7 @@ begin
                         end);
   // Client have to handle this event, for instance to check if the XAusio engine has left it's loop.
   FOnAudioDataLoopLeft(Self);
+  pvRenderStatus := rsLoopLeft;
   Result := hr;
 end;
 
@@ -892,10 +895,7 @@ var
 
 begin
 
-  pvBufferStart := position;
-
-  hr := pvSourceVoice.Stop(0,
-                           XAUDIO2_COMMIT_NOW);
+  hr := pvSourceVoice.Stop();
 
   if SUCCEEDED(hr) then
     hr := pvSourceVoice.FlushSourceBuffers();
@@ -903,12 +903,10 @@ begin
   if SUCCEEDED(hr) then
     hr := pvSourceVoice.Discontinuity();
 
-  // We have to poll for the OnBufferEnd returns the render status.
-  while (pvRenderStatus <> rsEndOfBuffer) do
-    HandleThreadMessages(GetCurrentThread());
-
   if SUCCEEDED(hr) then
     begin
+      pvBufferStart := position;
+
       pvSourceVoice.GetState(VoiceState);
       pvBufferPrevPlayed := VoiceState.SamplesPlayed;
       pvNewBufferPosition := pvBufferStart;
@@ -916,11 +914,10 @@ begin
 
       // Set up new XAudio2 buffer.
       hr := InitAudioBuffer(pvBufferStart);
-    end;
 
-  if SUCCEEDED(hr) then
-    pvSourceVoice.Start(0,
-                        XAUDIO2_COMMIT_NOW);
+      if SUCCEEDED(hr) then
+        hr := pvSourceVoice.Start();
+    end;
   HandleThreadMessages(GetCurrentThread());
   Result := hr;
 end;
@@ -964,9 +961,7 @@ begin
 // OnBufferEnd is the first event triggered when a buffer has been finished.
 procedure TXaudio2Engine.OnBufferEnd(pBufferContext: Pointer);
 begin
-  // For internal use.
-  pvRenderStatus := rsEndOfBuffer;
-  FOnBufferEndEvent(Self);
+  // Stub.
 end;
 
 
