@@ -244,7 +244,7 @@ It also has a pitch control.
 This sample demonstrates how to implement XAudio2 effects and 
 how to go forward or backward during playing with a progressbar and keeping up progress.
 
-It shows you how to implement threadsafe events and methods instead of using messages from the XaudioEngine.
+It shows you how to implement events and methods instead of using messages from the XaudioEngine.
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
 In your projectsettings you must add ..MfPack\Samples\MfComponents in the project options searchpath.  
 
