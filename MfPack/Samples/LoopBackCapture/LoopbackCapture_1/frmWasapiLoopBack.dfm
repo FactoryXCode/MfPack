@@ -66,7 +66,6 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     ParentFont = False
     TabOrder = 2
     VerticalAlignment = taAlignTop
-    ExplicitTop = 170
     object lblBufferDuration: TLabel
       Left = 65
       Top = 51
@@ -169,7 +168,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     TabOrder = 0
     VerticalAlignment = taAlignTop
     object rbRenderingDevice: TRadioButton
-      Left = 6
+      Left = 7
       Top = 22
       Width = 145
       Height = 17
@@ -206,7 +205,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     end
     object butShowdlgDevices: TButton
       Left = 367
-      Top = 18
+      Top = 20
       Width = 97
       Height = 25
       Caption = 'Select Device'
@@ -233,7 +232,6 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     ParentFont = False
     TabOrder = 1
     VerticalAlignment = taAlignTop
-    ExplicitTop = 72
     object rbConsole: TRadioButton
       Left = 8
       Top = 24
@@ -300,7 +298,6 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     Align = alTop
     BevelOuter = bvLowered
     TabOrder = 3
-    ExplicitTop = 252
     object Label1: TLabel
       Left = 10
       Top = 32

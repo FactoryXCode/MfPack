@@ -442,6 +442,12 @@ begin
       DevicesDlg.Visible := False;
     end;
 
+  // Which flow should be presented.
+  if rbRenderingDevice.Checked then
+    DevicesDlg.DataFlow := eRender
+  else
+    DevicesDlg.DataFlow := eCapture;
+
   // Ask the user to select one.
   if (DevicesDlg.ShowModal = mrOk) then
     begin

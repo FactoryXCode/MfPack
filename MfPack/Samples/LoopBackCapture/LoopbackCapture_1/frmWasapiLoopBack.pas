@@ -143,8 +143,10 @@ type
     prFileName: TFileName;
     prOrgFileName: TFileName;
     prEdited: Boolean;
-    prDataFlow: EDataFlow;
-    prRole: ERole;
+
+    prEndPointDataFlow: EDataFlow;
+    prEndPointRole: ERole;
+
     prBufferDuration: REFERENCE_TIME;
 
     // We use timers here, to prevent distortions when quering the capturethread for timing and processed data.
@@ -314,10 +316,10 @@ begin
       EnablePanels(False);
 
       // User did not choose settings from dlg
-      if prDataFlow = eDataFlow(-1) then
+      if prEndPointDataFlow = eDataFlow(-1) then
         begin
-          prDataFlow := eRender;
-          prRole := eMultimedia;
+          prEndPointDataFlow := eRender;
+          prEndPointRole := eMultimedia;
         end;
 
       // Buffersize depends on latency and bitrate
@@ -327,8 +329,8 @@ begin
       BufferDurationCaptionSet := False;
 
       // Capture the audio stream from the default rendering device.
-      hr := prAudioSink.RecordAudioStream(prDataFlow,
-                                          prRole,
+      hr := prAudioSink.RecordAudioStream(prEndPointDataFlow,
+                                          prEndPointRole,
                                           prBufferDuration,
                                           StrToPWideChar(prFileName + lblFileExt.Caption));
       if FAILED(hr) then
@@ -409,13 +411,19 @@ begin
       DevicesDlg.Visible := False;
     end;
 
+  // Which flow should be presented.
+  if rbRenderingDevice.Checked then
+    DevicesDlg.DataFlow := eRender
+  else
+    DevicesDlg.DataFlow := eCapture;
+
   // Ask the user to select one.
   if (DevicesDlg.ShowModal = mrOk) then
     begin
-      prDataFlow := DevicesDlg.puDataFlow;
-      rbRenderingDevice.Checked := (prDataFlow = eRender);
-      rbCaptureDevice.Checked := (prDataFlow = eCapture);
-      lblStatus.Caption := Format('Please select a%s.',[Panel2.Caption]);
+      prEndPointDataFlow := DevicesDlg.DataFlow;
+      rbRenderingDevice.Checked := (prEndPointDataFlow = eRender);
+      rbCaptureDevice.Checked := (prEndPointDataFlow = eCapture);
+      lblStatus.Caption := 'Please select a device role.';
     end
   else
     begin
@@ -502,7 +510,7 @@ begin
   prAudioSink.OnStartCapturing := OnCapturingStartEvent;
   prAudioSink.OnStoppedCapturing := OnCapturingStoppedEvent;
 
-  prDataFlow := eDataFlow(-1);
+  prEndPointDataFlow := eDataFlow(-1);
   sedBufferSize.Value := 10;
   SetBufferDuration();
 end;

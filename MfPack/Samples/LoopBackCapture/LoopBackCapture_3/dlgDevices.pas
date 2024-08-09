@@ -87,7 +87,7 @@ type
     butOk: TButton;
     butCancel: TButton;
     butRefresh: TButton;
-    sgRenderingDevices: TStringGrid;
+    sgDevices: TStringGrid;
     Bevel1: TBevel;
     procedure butCancelClick(Sender: TObject);
     procedure butOkClick(Sender: TObject);
@@ -95,16 +95,17 @@ type
     procedure FormShow(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCreate(Sender: TObject);
+    procedure sgDevicesSelectCell(Sender: TObject; ACol, ARow: Integer;
+      var CanSelect: Boolean);
 
   private
     { Private declarations }
 
-    RenderDevices: TEndPointDeviceArray;
-    CaptureDevices: TEndPointDeviceArray;
-    AllDevices: TEndPointDeviceArray;
+    prDevices: TEndPointDeviceArray;
     prEndPointDevice: IMMDevice;
     prDataFlow: EDataFlow;
     prDeviceName: LPWSTR;
+    prSelectedDeviceRow: Integer;
 
     procedure InitDeviceList();
 
@@ -112,8 +113,10 @@ type
     { Public declarations }
 
     property EndPointDevice: IMMDevice read prEndPointDevice;
-    property DataFlow: EDataFlow read prDataFlow;
+    property DataFlow: EDataFlow read prDataFlow write prDataFlow;
     property DeviceName: LPWSTR read prDeviceName;
+    property SelectedDevIndex: Integer read prSelectedDeviceRow;
+
   end;
 
 var
@@ -127,6 +130,7 @@ implementation
 
 procedure TDevicesDlg.butCancelClick(Sender: TObject);
 begin
+
   prDataFlow := eDataFlow(-1);
   prEndPointDevice := nil;
   prDeviceName := nil;
@@ -136,11 +140,12 @@ end;
 
 procedure TDevicesDlg.butOkClick(Sender: TObject);
 begin
-  if (Length(RenderDevices) > 0) and (sgRenderingDevices.Row > 0) then
+
+  if (Length(prDevices) > 0) and (sgDevices.Row > 0) then
     begin
-      prDataFlow := RenderDevices[sgRenderingDevices.Row - 1].DataFlow;
-      prEndPointDevice := RenderDevices[sgRenderingDevices.Row - 1].Device;
-      prDeviceName := RenderDevices[sgRenderingDevices.Row - 1].DeviceName;
+      prDataFlow := prDevices[sgDevices.Row - 1].DataFlow;
+      prEndPointDevice := prDevices[sgDevices.Row - 1].Device;
+      prDeviceName := prDevices[sgDevices.Row - 1].DeviceName;
       ModalResult := mrOk;
     end
   else
@@ -157,12 +162,12 @@ procedure TDevicesDlg.butRefreshClick(Sender: TObject);
 
   procedure DoList(aDevices: TEndPointDevice; idx: Integer);
     begin
-      sgRenderingDevices.Cells[0, idx] := aDevices.DevInterfaceName;
-      sgRenderingDevices.Cells[1, idx] := aDevices.DeviceName;
-      sgRenderingDevices.Cells[2, idx] := aDevices.DeviceDesc;
-      sgRenderingDevices.Cells[3, idx] := aDevices.sState;
-      sgRenderingDevices.Cells[4, idx] := aDevices.pwszID;
-      sgRenderingDevices.Cells[5, idx] := aDevices.iID.ToString();
+      sgDevices.Cells[0, idx] := aDevices.DevInterfaceName;
+      sgDevices.Cells[1, idx] := aDevices.DeviceName;
+      sgDevices.Cells[2, idx] := aDevices.DeviceDesc;
+      sgDevices.Cells[3, idx] := aDevices.sState;
+      sgDevices.Cells[4, idx] := aDevices.pwszID;
+      sgDevices.Cells[5, idx] := aDevices.iID.ToString();
     end;
 
   procedure populate(devices: TEndPointDeviceArray; StartAt: Integer);
@@ -175,17 +180,14 @@ procedure TDevicesDlg.butRefreshClick(Sender: TObject);
       // Write to new row
       DoList(devices[i -1], i);
       // Add new row
-      sgRenderingDevices.RowCount := sgRenderingDevices.RowCount + 1;
-      inc(i);
+      sgDevices.RowCount := sgDevices.RowCount + 1;
+      Inc(i);
     end;
   end;
 
 var
   hr: HResult;
-  dwCount1,
-  dwCount2: DWord;
-  ptr: Integer;
-  i: Integer;
+  dwCount: DWord;
 
 begin
 
@@ -193,58 +195,28 @@ begin
 
   {$IFDEF ConditionalExpressions}
     {$IF CompilerVersion > 31.0}
-      sgRenderingDevices.BeginUpdate();
+      sgDevices.BeginUpdate();
     {$IFEND}
   {$ENDIF}
-  // Get rendering devices first
-  hr := GetEndpointDevices(eRender,
+
+  hr := GetEndpointDevices(prDataFlow,
                            DEVICE_STATE_ACTIVE or DEVICE_STATE_DISABLED,
-                           RenderDevices,
-                           dwCount1);
+                           prDevices,
+                           dwCount);
   if FAILED(hr) then
     begin
       ShowMessage(Format('Finding Rendering devices failed with code %d !',[hr]));
     end;
 
-  // Get capture devices
-  hr := GetEndpointDevices(eCapture,
-                           DEVICE_STATE_ACTIVE or DEVICE_STATE_DISABLED,
-                           CaptureDevices,
-                           dwCount2);
-  if FAILED(hr) then
-    begin
-      ShowMessage(Format('Finding Capture devices failed with code %d !',[hr]));
-    end;
-
-  if (dwCount1 + dwCount2 > 0) then
-    begin
-      // Come Together {Beatles}
-      SetLength(AllDevices,
-                Integer(dwCount1) + Integer(dwCount2));
-
-      ptr := 0;
-
-      for i := 0 to Length(RenderDevices) - 1 do    // Add RenderDevices.
-        begin
-          AllDevices[ptr] := RenderDevices[i];
-          Inc(ptr);
-        end;
-
-      for i := 0 to Length(CaptureDevices) - 1 do    // Add CaptureDevices.
-        begin
-          AllDevices[ptr] := CaptureDevices[i];
-          Inc(ptr);
-        end;
-
-      Populate(AllDevices,
-               1);
-    end
+  if (dwCount = 0) then
+    InitDeviceList()
   else
-    InitDeviceList();
+    Populate(prDevices,
+             1);
 
   {$IFDEF ConditionalExpressions}
     {$IF CompilerVersion > 31.0}
-      sgRenderingDevices.EndUpdate();
+      sgDevices.EndUpdate();
     {$IFEND}
   {$ENDIF}
 end;
@@ -252,67 +224,77 @@ end;
 
 procedure TDevicesDlg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  SetLength(AllDevices,
+
+  SetLength(prDevices,
             0);
 end;
 
 
 procedure TDevicesDlg.FormCreate(Sender: TObject);
 begin
-  prEndPointDevice := nil;
-  prDataFlow := ERender;
 
+  prEndPointDevice := nil;
 end;
 
 
 procedure TDevicesDlg.FormShow(Sender: TObject);
 begin
+
   butRefreshClick(Self);
 end;
 
 
 procedure TDevicesDlg.InitDeviceList();
 begin
-  SetLength(AllDevices,
+
+  SetLength(prDevices,
             0);
 
-  sgRenderingDevices.RowCount := 1;
-  sgRenderingDevices.ColCount := 6;
+  sgDevices.RowCount := 1;
+  sgDevices.ColCount := 6;
 
   // For some reason, the methods to dimension TStringGrid changed?
   {$IF CompilerVersion < 31.0}
-  sgRenderingDevices.ColWidths[0] := 200;
-  sgRenderingDevices.ColWidths[1] := 200;
-  sgRenderingDevices.ColWidths[2] := 180;
-  sgRenderingDevices.ColWidths[3] := 50;
-  sgRenderingDevices.ColWidths[4] := 340;
-  sgRenderingDevices.ColWidths[5] := 80;
+  sgDevices.ColWidths[0] := 200;
+  sgDevices.ColWidths[1] := 200;
+  sgDevices.ColWidths[2] := 180;
+  sgDevices.ColWidths[3] := 50;
+  sgDevices.ColWidths[4] := 340;
+  sgDevices.ColWidths[5] := 80;
   {$ELSE}
-  sgRenderingDevices.ColWidths[0] := 290;
-  sgRenderingDevices.ColWidths[1] := 290;
-  sgRenderingDevices.ColWidths[2] := 260;
-  sgRenderingDevices.ColWidths[3] := 90;
-  sgRenderingDevices.ColWidths[4] := 390;
-  sgRenderingDevices.ColWidths[5] := 100;
+  sgDevices.ColWidths[0] := 290;
+  sgDevices.ColWidths[1] := 290;
+  sgDevices.ColWidths[2] := 260;
+  sgDevices.ColWidths[3] := 90;
+  sgDevices.ColWidths[4] := 390;
+  sgDevices.ColWidths[5] := 100;
   {$ENDIF}
 
   // Calculate width of the stringgrid and dialog
-  sgRenderingDevices.Width := sgRenderingDevices.ColWidths[0] +
-                              sgRenderingDevices.ColWidths[1] +
-                              sgRenderingDevices.ColWidths[2] +
-                              sgRenderingDevices.ColWidths[3] +
-                              sgRenderingDevices.ColWidths[4] +
-                              sgRenderingDevices.ColWidths[5] +
-                              (sgRenderingDevices.BevelWidth * 2) + 10 {scrollbar};
-  Width := sgRenderingDevices.Width + 60;
+  sgDevices.Width := sgDevices.ColWidths[0] +
+                              sgDevices.ColWidths[1] +
+                              sgDevices.ColWidths[2] +
+                              sgDevices.ColWidths[3] +
+                              sgDevices.ColWidths[4] +
+                              sgDevices.ColWidths[5] +
+                              (sgDevices.BevelWidth * 2) + 10 {scrollbar};
+  Width := sgDevices.Width + 60;
 
-  // The header
-  sgRenderingDevices.Cells[0, 0] := 'Device Interface Name';
-  sgRenderingDevices.Cells[1, 0] := 'Device Name';
-  sgRenderingDevices.Cells[2, 0] := 'Device Description';
-  sgRenderingDevices.Cells[3, 0] := 'State';
-  sgRenderingDevices.Cells[4, 0] := 'Internal ID';
-  sgRenderingDevices.Cells[5, 0] := 'Device Index';
+  // The header.
+  sgDevices.Cells[0, 0] := 'Device Interface Name';
+  sgDevices.Cells[1, 0] := 'Device Name';
+  sgDevices.Cells[2, 0] := 'Device Description';
+  sgDevices.Cells[3, 0] := 'State';
+  sgDevices.Cells[4, 0] := 'Internal ID';
+  sgDevices.Cells[5, 0] := 'Device Index';
+end;
+
+
+procedure TDevicesDlg.sgDevicesSelectCell(Sender: TObject; ACol, ARow: Integer;
+  var CanSelect: Boolean);
+begin
+
+  prSelectedDeviceRow := ARow;
 end;
 
 end.

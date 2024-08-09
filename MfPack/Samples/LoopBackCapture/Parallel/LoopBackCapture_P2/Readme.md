@@ -1,4 +1,4 @@
-# LoopbackCapture Sample P2
+# LoopbackCapture Sample 2
 
 Version: X 3.1.7
 
@@ -27,9 +27,8 @@ The application is using MMCSS and runs the rendering part in a parallel task, w
 NOTES:
  - When capturing from high latency sources, like Internet, use a low buffersize ~10 milliseconds or lower.
  - This release is updated for compiler version 17 up to 34.
- - SDK version: 10.0.26100.0 (Win 11)
+ - SDK version 10.0.22621.0 (Win 11)
  - Requires Windows 10 build 20348 or later.
- - Requires Delphi XE7 or later.
  - Minimum supported MfPack version: 3.1.7
 
 Project: Media Foundation - MFPack - Samples
@@ -37,6 +36,6 @@ Project location: https://github.com/FactoryXCode/MfPack
                   https://sourceforge.net/projects/MFPack
 
 First release date: 02-04-2023
-Final release date: 19-06-2024
+Final release date: 09/08/2024
 
 Copyright © FactoryX. All rights reserved.

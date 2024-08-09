@@ -72,7 +72,7 @@ object DevicesDlg: TDevicesDlg
     TabOrder = 1
     OnClick = butRefreshClick
   end
-  object sgRenderingDevices: TStringGrid
+  object sgDevices: TStringGrid
     Left = 0
     Top = 25
     Width = 419
@@ -86,5 +86,6 @@ object DevicesDlg: TDevicesDlg
     RowCount = 2
     Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goRowSelect]
     TabOrder = 0
+    OnSelectCell = sgDevicesSelectCell
   end
 end

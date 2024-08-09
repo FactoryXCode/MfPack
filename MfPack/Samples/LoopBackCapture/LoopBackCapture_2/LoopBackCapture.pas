@@ -314,7 +314,7 @@ begin
   // The function where we render the audio data and
   // (de)activate the MMCSS feature.
   // See: https://learn.microsoft.com/en-us/windows/win32/procthread/multimedia-class-scheduler-service
-  // To get the best performance, it's recomended to set "Best Performance" in Windows energy settings.
+  // To get the best performance, it's recommended to set "Best Performance" in Windows energy settings.
   FSuccess := FEngine.CaptureThreadFunc;
   Synchronize(SetEvent);
 end;
@@ -925,8 +925,9 @@ begin
   // Now the stream will be rendered in another thread.
   // So, we need to create another thread to keep control.
   //
-  // Note that, when this audiostream is over,
-  // the end of buffer will be called first, thus before signal endofstream (when all buffers have been processed).
+  // Note: When this audiostream is over,
+  //       the end of buffer will be called first,
+  //       thus before signal endofstream (when all buffers have been processed).
   if not Assigned(pvRenderThread) then
     CreatedRenderThread()
   else
@@ -982,7 +983,7 @@ begin
       pvDeviceState := Initialized;
 
 leave:
-  //PropVariantClear(activateParams);
+  //PropVariantClear(activateParams);  // Works in Delphi XE7, but not in 10.3, where raises an exception.
   PropVariantClearSafe(activateParams);
   SetDeviceStateErrorIfFailed(hr);
 

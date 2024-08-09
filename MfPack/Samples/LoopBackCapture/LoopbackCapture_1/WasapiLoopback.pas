@@ -108,7 +108,6 @@ type
     pvAudioClient: IAudioClient;
     pvCaptureClient: IAudioCaptureClient;
 
-
     pvStopRec: Boolean;
     pvAppIsClosing: Boolean;
     pvErrorStatus: HResult;
@@ -119,7 +118,6 @@ type
     pvBufferFrames: UInt32;
     pvWavFormatEx: WAVEFORMATEX;
     pvPwfx: PWAVEFORMATEX;
-
 
     pvCkRIFF: MMCKINFO;
     pvCkData: MMCKINFO;

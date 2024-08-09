@@ -934,7 +934,7 @@ try
     begin
       SetEvent(pvShutdownEvent);
       WaitForSingleObject(pvRenderThreadClosedEvent,
-                          INFINITE);
+                          1000);
       CloseHandle(pvRenderThreadClosedEvent);
       pvRenderThreadClosedEvent := 0;
     end;
@@ -1134,12 +1134,5 @@ procedure TCallbackAsync.SetQueueID(dwQueueID: DWord);
 begin
   _dwQueueID := dwQueueID;
 end;
-
-
-initialization
-  //InitializeCriticalSection(oCriticalSection);
-
-finalization
-  //DeleteCriticalSection(oCriticalSection);
 
 end.

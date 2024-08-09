@@ -113,7 +113,7 @@ object MainForm: TMainForm
     end
     object cbxAutoBufferSize: TCheckBox
       Left = 8
-      Top = 24
+      Top = 25
       Width = 100
       Height = 16
       Caption = 'Auto buffer size.'
@@ -128,7 +128,7 @@ object MainForm: TMainForm
     end
     object spedLatency: TSpinEdit
       Left = 370
-      Top = 47
+      Top = 48
       Width = 51
       Height = 22
       Hint = 'Latency in milliseconds.'
@@ -293,7 +293,7 @@ object MainForm: TMainForm
       end
       object rbRenderingDevice: TRadioButton
         Left = 12
-        Top = 18
+        Top = 19
         Width = 145
         Height = 17
         Hint = 'Render'
@@ -329,7 +329,7 @@ object MainForm: TMainForm
       end
       object butShowdlgDevices: TButton
         Left = 341
-        Top = 14
+        Top = 16
         Width = 97
         Height = 25
         Caption = 'Show Devices'

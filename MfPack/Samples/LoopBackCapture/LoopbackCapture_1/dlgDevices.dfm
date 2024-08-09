@@ -69,7 +69,7 @@ object DevicesDlg: TDevicesDlg
     TabOrder = 1
     OnClick = butRefreshClick
   end
-  object sgRenderingDevices: TStringGrid
+  object sgDevices: TStringGrid
     Left = 0
     Top = 25
     Width = 419

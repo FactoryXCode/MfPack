@@ -326,10 +326,10 @@ end;
 procedure TRenderThread.SetEvent;
 begin
   // Called from 'Synchronize'.
-  // All code run from "Synchronize()"
-  //   runs in the context of the Main VCL UI Thread, NOT from this thread.
-  //   This simply triggers the event which was assigned by the calling thread
-  //   to inform it that the download has completed.
+  // All code run from "Synchronize()" runs in the context of the
+  // Main VCL UI Thread, NOT from this thread.
+  // This triggers the event which was assigned by the calling thread
+  // to inform it that rendering has been completed.
 
   if Assigned(FOnEvent) then
     FOnEvent(Self,
@@ -1339,7 +1339,8 @@ begin
   if not pvDisableMMCSS then
     AvRevertMmThreadCharacteristics(mmcssHandle);
   // Close the file when succeeded.
-  // Note that when an error or other HResult value occurs, the writefile method will automatcly closes the file.
+  // Note: When an error or other HResult value occurs,
+  //       the writefile method will automaticly closes the file.
   if SUCCEEDED(mr) then
     pvWavWriter.CloseFile(ckRIFF,
                           ckData);

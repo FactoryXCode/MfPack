@@ -427,11 +427,22 @@ begin
 
   CreateEngine();
 
+  // Set controls to default values, except Filename and StayOnTop.
   EnablePanels(True);
   Self.BorderIcons := [biSystemMenu,
                        biMinimize];
   butPlayData.Enabled := False;
   butStartStop.Enabled := True;
+  rbRenderingDevice.Checked := True;
+  rbMultimedia.Checked := True;
+  cbxDisableMmcss.Checked := False;
+  cbxUsePCMAudioFmt.Checked := True;
+  cbxEnableStreamSwitch.Checked := True;
+  cbxAutoBufferSize.Checked := False;
+  sedBufferSize.Value := 10;
+  spedLatency.Value := 10;
+  cbxDontOverWrite.Checked := True;
+
   lblStatus.Caption := 'The engine has been reset.'
 end;
 
@@ -446,6 +457,12 @@ begin
                              DevicesDlg);
       DevicesDlg.Visible := False;
     end;
+
+  // Which flow should be presented.
+  if rbRenderingDevice.Checked then
+    DevicesDlg.DataFlow := eRender
+  else
+    DevicesDlg.DataFlow := eCapture;
 
   // Ask the user to select one.
   if (DevicesDlg.ShowModal = mrOk) then
@@ -573,6 +590,7 @@ begin
                                      prEnableStreamSwitch,
                                      prDisableMmcss,
                                      prEndPointRole);
+
   if not Assigned(prWASCapture) then
     begin
       InfoMsg(optIDE,
@@ -614,6 +632,7 @@ begin
     begin
       prWASCapture.Stop();
       prWASCapture.OnStoppedCapturing := nil;
+      prWASCapture.OnStartCapturing := nil;
       FreeAndNil(prWASCapture);
     end;
 end;
