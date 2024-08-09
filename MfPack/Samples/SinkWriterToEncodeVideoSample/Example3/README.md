@@ -1,7 +1,7 @@
 # SinkWriterToEncodeVideoSample Sample 3.
 Version: X 3.1.7
 
-A VCL-based Delphi-application to encode a series of bitmaps with an audio file to 
+A VCL-based Delphi-application to encode a series of images with an audio file to 
 video using the Windows Media Foundation API.
 
 The sample shows how to select, arrange and preview bitmap, gif, png or jpeg files and
