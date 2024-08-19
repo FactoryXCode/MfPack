@@ -102,12 +102,11 @@ const
   //    The clock exposed by this object runs at a fixed frequency.
   //
 
-type
-
-  //Private
-  PReferenceTime = ^REFERENCE_TIME;
-  REFERENCE_TIME = LONGLONG;
-  {$EXTERNALSYM REFERENCE_TIME}
+//type
+  //Private  Defined in WinApi.WinApiTypes.pas
+  //PReferenceTime = ^REFERENCE_TIME;
+  //REFERENCE_TIME = LONGLONG;
+  //{$EXTERNALSYM REFERENCE_TIME}
 
 type
   //-------------------------------------------------------------------------
@@ -511,7 +510,7 @@ type
 
     function IsFormatSupported(ShareMode: AUDCLNT_SHAREMODE;
                                pFormat: PWaveFormatEx;
-                               {out} ppClosestMatch: PWaveFormatEx // Exclusive mode can't suggest a "closest match", you have to set this param to nil.
+                               {out}var  ppClosestMatch: PWaveFormatEx // Exclusive mode can't suggest a "closest match", you have to set this param to nil.
                               ): HResult; stdcall;
     // Description:
     //

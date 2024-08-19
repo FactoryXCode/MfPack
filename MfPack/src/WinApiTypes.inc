@@ -422,8 +422,8 @@ const
 
 const
 // a global version ID (for internal use only).
-MfpVersion   = '3.1.6'; // Release version.
-{$DEFINE MFP_VERSION_316}
+MfpVersion   = '3.1.7'; // Release version.
+{$DEFINE MFP_VERSION_317}
 
 
 // Definitions WinApiTypes
@@ -577,7 +577,7 @@ MfpVersion   = '3.1.6'; // Release version.
 // {$UNDEF MFP_SCODE}
 
 // {$DEFINE MFP_HRESULT}
-// {$UNDEF MFP_HRESULT}
+{$UNDEF MFP_HRESULT}
 
  {$DEFINE MFP__OBJECTID}
 // {$UNDEF MFP__OBJECTID}

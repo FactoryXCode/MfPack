@@ -371,12 +371,6 @@ var
   partialType: IMFMediaType;
   uncompressedAudioType: IMFMediaType;
 
-  mfSample: IMFSample;
-  uFlags: UINT32;
-  mfMediaBuffer: IMFMediaBuffer;
-  audioData: PByte;
-  audioValidDataLength: DWord;
-
 begin
 
   pvFileName := audiofile;
@@ -491,16 +485,26 @@ begin
   // Fill the buffers.
   TThread.Synchronize(nil,
                       procedure
+                      var
+                        hres: HResult;
+                        mfSample: IMFSample;
+                        uFlags: UINT32;
+                        mfMediaBuffer: IMFMediaBuffer;
+                        audioData: PByte;
+                        audioValidDataLength: DWord;
+
                         begin
+                          hres := S_OK;
+
                           while (hr = S_OK) do
                             begin
                               uFlags := 0;
-                              hr := sourceReader.ReadSample(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
-                                                            0,
-                                                            nil,
-                                                            @uFlags,
-                                                            nil,
-                                                            @mfSample);
+                              hres := sourceReader.ReadSample(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
+                                                              0,
+                                                              nil,
+                                                              @uFlags,
+                                                              nil,
+                                                              @mfSample);
 
                               // Check for eof.
                               if ((uFlags and MF_SOURCE_READERF_ENDOFSTREAM) <> 0) then
@@ -512,32 +516,27 @@ begin
                               else
                                 begin
                                   // Get the media buffer from the sample.
-                                  hr := mfSample.ConvertToContiguousBuffer(@mfMediaBuffer);
-                                  // Get the audio data from the media buffer.
-                                  if SUCCEEDED(hr) then
-                                    begin
-                                      // Lock Buffer & copy to memory stream
-                                      hr := mfMediaBuffer.Lock(audioData,
-                                                               nil,
-                                                               @audioValidDataLength);
-                                      if SUCCEEDED(hr) then
-                                        try
-                                          // Write data to stream.
-                                          pvMemoryStream.Write(audioData^,
-                                                               audioValidDataLength);
+                                  hres := mfSample.ConvertToContiguousBuffer(@mfMediaBuffer);
 
-                                        finally
-                                          // Unlock Buffer
-                                          hr := mfMediaBuffer.Unlock;
-                                        end;
-                                      end;
-                                  mfSample := nil;
+                                  // Get the audio data from the media buffer.
+                                  // Lock Buffer & copy to memory stream
+                                  hres := mfMediaBuffer.Lock(audioData,
+                                                             nil,
+                                                             @audioValidDataLength);
+                                  try
+                                    // Write data to stream.
+                                    pvMemoryStream.Write(audioData^,
+                                                         audioValidDataLength);
+
+                                  finally
+                                    // Unlock Buffer
+                                    hres := mfMediaBuffer.Unlock;
+                                  end;
                                 end;
+                              mfSample := nil;
                             end; // while
                         end);  // proc
 
-  if Assigned(mfSample) then
-    SafeRelease(mfSample);
   Result := hr;
 end;
 
@@ -583,12 +582,9 @@ end;
 function TXaudio2Engine.InitializeXAudio2(replay: Boolean = False): HResult;
 var
   hr: HResult;
-  voicestate: XAUDIO2_VOICE_STATE;
-  bBuffersQueued : Boolean;
 
 begin
 
-  bBuffersQueued := False;
   pvBufferPrevPlayed := 0;
   pvNewBufferPosition := 0;
   pvXaudio2EventData.Reset();
@@ -646,7 +642,13 @@ begin
 
   TThread.Synchronize(nil,
                       procedure
+                      var
+                        bBuffersQueued: Boolean;
+                        voicestate: XAUDIO2_VOICE_STATE;
+
                         begin
+                          bBuffersQueued := False;
+
                           while not bBuffersQueued and (pvSourceVoice <> nil) do
                             begin
                               if (pvRenderStatus = rsPlaying) then
@@ -660,7 +662,7 @@ begin
 
                                   // Calculate the samples that have been processed, to milliseconds.
                                   // The caller can, for example, calculate the readable time in HH:MM:SS:MS.
-                                  pvXaudio2EventData.TimePlayed := (((voiceState.SamplesPlayed + pvNewBufferPosition) - pvBufferPrevPlayed) div pvSamplesPerSecond) * 10000000;
+                                  pvXaudio2EventData.TimePlayed := (((voiceState.SamplesPlayed + UINT64(pvNewBufferPosition)) - pvBufferPrevPlayed) div pvSamplesPerSecond) * 10000000;
                                   pvXaudio2EventData.Position := pvBufferStart;
                                 end;
 

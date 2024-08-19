@@ -345,22 +345,27 @@ begin
   // Create sample.
   if SUCCEEDED(hr) then
     SetLength(pvBytes,
-              0);
+              0)
+  else
+    goto done;
 
   // Fill the buffer. We use a thread for this, to speedup things.
   TThread.Synchronize(nil,
                       procedure
+                      var
+                        hres: HResult;
                         begin
-                          while (hr = S_OK) do
+                          hres := S_OK;
+                          while (hres = S_OK) do
                             begin
                               flags := 0;
 
-                              hr := sourceReader.ReadSample(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
-                                                            0,
-                                                            nil,
-                                                            @flags,
-                                                            nil,
-                                                            @sample);
+                              hres := sourceReader.ReadSample(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
+                                                              0,
+                                                              nil,
+                                                              @flags,
+                                                              nil,
+                                                              @sample);
 
                               // To be on the safe side we check all flags for which
                               // further reading would not make any sense
@@ -382,25 +387,23 @@ begin
                                 Continue;
 
                               // Convert data to contiguous buffer.
-                              hr := sample.ConvertToContiguousBuffer(@buffer);
+                              hres := sample.ConvertToContiguousBuffer(@buffer);
 
                               // Lock Buffer and copy to local memory
-                              if SUCCEEDED(hr) then
-                                hr := buffer.Lock(audioData,
+                              hres := buffer.Lock(audioData,
                                                   nil,
                                                   @audioDataLength);
 
-                              if SUCCEEDED(hr) then
-                                try
-                                  SetLength(pvBytes,
-                                            Length(pvBytes) + Integer(audioDataLength));
+                              try
+                                SetLength(pvBytes,
+                                          Length(pvBytes) + Integer(audioDataLength));
 
-                                  Move(audioData^,
-                                       pvBytes[Length(pvBytes) - Integer(audioDataLength)],
-                                       audioDataLength);
-                                finally
-                                  hr := buffer.Unlock();
-                                end;
+                                Move(audioData^,
+                                     pvBytes[Length(pvBytes) - Integer(audioDataLength)],
+                                     audioDataLength);
+                              finally
+                                hres := buffer.Unlock();
+                              end;
                               sample := nil;
                             end;
                         end);
@@ -417,15 +420,11 @@ end;
 function TXaudio2Engine.InitializeXAudio2(replay: Boolean = False): HResult;
 var
   hr: HResult;
-  voiceState: XAUDIO2_VOICE_STATE;
-  bReady: Boolean;
 
 label
   done;
 
 begin
-
-  bReady := False;
 
   // Use the XAudio2Create function to create an instance of the XAudio2 engine.
   hr := XAudio2Create(@pvXAudio2,
@@ -483,7 +482,12 @@ begin
 
   TThread.Synchronize(nil,
                       procedure
+                      var
+                        bReady: Boolean;
+                        voiceState: XAUDIO2_VOICE_STATE;
+
                         begin
+                          bReady := False;
                           while not bReady and ((pvRenderStatus = rsPlaying) or (pvRenderStatus = rsPauzed)) and (pvSourceVoice <> nil) do
                             begin
                               pvSourceVoice.GetState(voiceState,

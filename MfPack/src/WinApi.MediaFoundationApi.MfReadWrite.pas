@@ -234,6 +234,8 @@ type
   MF_SOURCE_READER_CONTROL_FLAG   = cwMF_SOURCE_READER_CONTROL_FLAG;
   {$EXTERNALSYM MF_SOURCE_READER_CONTROL_FLAG}
 const
+  // Retrieve any pending samples, but do not request any more samples from the media source.
+  // To get all of the pending samples, call ReadSample with this flag until the method returns a nil media sample pointer.
   MF_SOURCE_READER_CONTROLF_DRAIN = MF_SOURCE_READER_CONTROL_FLAG($00000001);
   {$EXTERNALSYM MF_SOURCE_READER_CONTROLF_DRAIN}
 
