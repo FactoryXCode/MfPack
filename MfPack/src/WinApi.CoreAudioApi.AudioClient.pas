@@ -510,7 +510,7 @@ type
 
     function IsFormatSupported(ShareMode: AUDCLNT_SHAREMODE;
                                pFormat: PWaveFormatEx;
-                               {out}var  ppClosestMatch: PWaveFormatEx // Exclusive mode can't suggest a "closest match", you have to set this param to nil.
+                               {out} var ppClosestMatch: PWaveFormatEx // Exclusive mode can't suggest a "closest match", you have to set this param to nil.
                               ): HResult; stdcall;
     // Description:
     //
@@ -1257,7 +1257,7 @@ type
   {$EXTERNALSYM IAudioClock}
   IAudioClock = interface(IUnknown)
   ['{CD63314F-3FBA-4a1b-812C-EF96358728E7}']
-    function GetFrequency(out pu64Frequency: Int64): HResult; stdcall;
+    function GetFrequency(out pu64Frequency: UINT64): HResult; stdcall;  // upd 1/9/2024 Tony.
     // Description:
     //
     //  Returns the frequency for the clock
@@ -1274,7 +1274,7 @@ type
     // Return values:
     //
     //     S_OK        Successful completion.
-    //     E_POINTER, if pu64Frequency is NULL.
+    //     E_POINTER, if pu64Frequency is nil.
     //
     // Remarks:
     //
@@ -1285,8 +1285,8 @@ type
     //  use this value to compute the clock position in seconds.
     //
 
-    function GetPosition(out pu64Position: Int64;
-                         out pu64QPCPosition: Int64): HResult; stdcall;
+    function GetPosition({out} pu64Position: PUINT64;
+                         {out} pu64QPCPosition: PUINT64): HResult; stdcall;   // upd 1/9/2024 Tony.
     // Description:
     //
     //  Returns the current clock position
@@ -1308,7 +1308,7 @@ type
     //
     //  pu64QPCPosition - [out]
     //    If S_OK, returns the QueryPerformanceCounter position corresponding to the
-    //    position argument. This value may be NULL if a correlated system position isn't needed.
+    //    position argument. This value may be nil if a correlated system position isn't needed.
     //
     // See Also:
     //
@@ -1339,7 +1339,7 @@ type
     // Return values:
     //
     //     S_OK        Successful completion.
-    //     E_POINTER, if pdwCharacteristics is NULL.
+    //     E_POINTER, if pdwCharacteristics is nil.
     //
     // Remarks:
     //

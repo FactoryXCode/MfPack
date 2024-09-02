@@ -8436,7 +8436,7 @@ begin
 end;
 
 
-procedure CopyWaveFormatEx(const SourceFmt: WAVEFORMATEX;
+{procedure CopyWaveFormatEx(const SourceFmt: WAVEFORMATEX;
                            out DestFmt: PWAVEFORMATEX); //inline;
 var
   dFmt: PWAVEFORMATEX;
@@ -8454,6 +8454,27 @@ begin
   // User is responsible to free the memory occupied by parameter DestFmt.
   DestFmt := dFmt;
   FreeMem(dFmt);
+end;}
+
+
+procedure CopyWaveFormatEx(const SourceFmt: WAVEFORMATEX;
+                           out DestFmt: PWAVEFORMATEX); //inline;
+//var
+  //dFmt: PWAVEFORMATEX;
+
+begin
+  // Allocate memory for DestFormat
+  GetMem(DestFmt,
+         SizeOf(WAVEFORMATEX));
+
+  // Copy SourceFormat to DestFormat
+  Move(SourceFmt,
+       DestFmt^,
+       SizeOf(WAVEFORMATEX));
+
+  // User is responsible to free the memory occupied by parameter DestFmt.
+  //DestFmt := dFmt;
+  //FreeMem(dFmt);
 end;
 
 

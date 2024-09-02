@@ -1,9 +1,3 @@
-### Before going on, some policy:
-- If you have a request, question, idea or need help, please commit to [Discussions](https://github.com/FactoryXCode/MfPack/discussions).
-
-- If you encounter a bug then [Issues](https://github.com/FactoryXCode/MfPack/issues) is the one and only place to be.
-
-
 # About MfPack
 
  Delphi translations for Microsoft Media Foundation and related API's.
@@ -198,7 +192,7 @@ It also demonstrates how to get a process by using the tlhelp32 API, to list a s
 The application is provided with a dialog to select a running process from the process tree you want to pick and has
 a button to get the current PID of your application.
 
-The application is using MMCSS and runs the rendering part in a separate thread.  
+The application is using MMCSS and runs the rendering part in a separate thread.
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopbackCapture2.png)
 
@@ -255,6 +249,20 @@ The sample uses the MfPeakMeter component. This requires that you install the Mf
 In your projectsettings you must add ..MfPack\Samples\MfComponents in the project options searchpath.  
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample3.png)
+
+
+**WASAPI Player Sample 1**
+
+This sample demonstrates how to use the IAudioClient to render different audio formats like WAV, FLAC, MP3 etc.
+The sample uses the IMFSourceReader to decode the format suitable for playing in WASAPI's IAudioClient and renderer.
+    
+This sample plays formats like WAV (pcm or floatingpoint), MP3 and FLAC.
+It shows you the basics of using the IAudioClient, iAudioRenderer, IAudioClock and IAudioStreamVolume interfaces.
+The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
+In your projectsettings you must add ..MfPack\Samples\MfComponents in the project options searchpath.
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer1.png)
+
 
 
 ***Tools***

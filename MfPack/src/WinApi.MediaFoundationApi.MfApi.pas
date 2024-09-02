@@ -4771,9 +4771,9 @@ type
   MFWaveFormatExConvertFlags = _MFWaveFormatExConvertFlags;
   {$EXTERNALSYM MFWaveFormatExConvertFlags}
 const
-  MFWaveFormatExConvertFlag_Normal          = UINT32(0);
+  MFWaveFormatExConvertFlag_Normal          = _MFWaveFormatExConvertFlags(0);
   {$EXTERNALSYM MFWaveFormatExConvertFlag_Normal}
-  MFWaveFormatExConvertFlag_ForceExtensible = UINT32(1);
+  MFWaveFormatExConvertFlag_ForceExtensible = _MFWaveFormatExConvertFlags(1);
   {$EXTERNALSYM MFWaveFormatExConvertFlag_ForceExtensible}
 
 

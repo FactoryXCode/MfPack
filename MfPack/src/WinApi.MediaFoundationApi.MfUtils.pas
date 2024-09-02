@@ -573,6 +573,10 @@ type
                           dwDesiredAccess: DWord): THandle; stdcall;
   {$ENDIF}
 
+  // See: https://learn.microsoft.com/nl-nl/windows/win32/api/processthreadsapi/nf-processthreadsapi-openthread
+  function OpenThread(dwDesiredAccess: DWORD;
+                      bInheritHandle: BOOL;
+                      dwThreadId: DWORD): THandle; stdcall;
 
 implementation
 
@@ -2158,5 +2162,7 @@ function CreateEventEx; external Kernel32Lib name 'CreateEventExW';
 function CreateEventExA; external Kernel32Lib name 'CreateEventExA';
 function CreateEventExW; external Kernel32Lib name 'CreateEventExW';
 {$ENDIF}
+
+function OpenThread; external Kernel32Lib name 'OpenThread';
 
 end.
