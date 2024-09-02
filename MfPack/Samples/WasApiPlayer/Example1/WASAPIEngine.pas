@@ -211,13 +211,6 @@ begin
       pvRenderThreadClosedEvent := 0;
     end;
 
-  if (pvShutdownEvent <> 0) then
-    begin
-
-      CloseHandle(pvShutdownEvent);
-      pvShutdownEvent := 0;
-    end;
-
   HandleThreadMessages(GetCurrentThread());
 
   ResetAudioData(True);
