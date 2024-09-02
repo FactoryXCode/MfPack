@@ -224,7 +224,7 @@ This sample demonstrates how to use XAudio2 to render different file formats lik
 The sample uses the IMFSourceReader to decode the format suitable for playing in XAudio2.
 It shows you the basics of using XAudio2 without formatting the mediatypes yourself.
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
-In your projectsettings you must add ..MfPack\Samples\MfComponents in the project options searchpath.
+In your projectsettings you have to add ..MfPack\Samples\MfComponents in the project options searchpath.
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio_Basic_Sample.png)
 
@@ -246,7 +246,7 @@ how to go forward or backward during playing with a progressbar and keeping up p
 
 It shows you how to implement events and methods instead of using messages from the XaudioEngine.
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
-In your projectsettings you must add ..MfPack\Samples\MfComponents in the project options searchpath.  
+In your projectsettings you have to add ..MfPack\Samples\MfComponents in the project options searchpath.  
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample3.png)
 
@@ -254,12 +254,12 @@ In your projectsettings you must add ..MfPack\Samples\MfComponents in the projec
 **WASAPI Player Sample 1**
 
 This sample demonstrates how to use the IAudioClient to render different audio formats like WAV, FLAC, MP3 etc.
-The sample uses the IMFSourceReader to decode the format suitable for playing in WASAPI's IAudioClient and renderer.
+using the IMFSourceReader to decode the format suitable for playing in WASAPI's IAudioClient and renderer.
     
-This sample plays formats like WAV (pcm or floatingpoint), MP3 and FLAC.
+This sample plays formats like WAV (pcm and floatingpoint), MP3 and FLAC.
 It shows you the basics of using the IAudioClient, iAudioRenderer, IAudioClock and IAudioStreamVolume interfaces.
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
-In your projectsettings you must add ..MfPack\Samples\MfComponents in the project options searchpath.
+In your projectsettings you have to add ..MfPack\Samples\MfComponents in the project options searchpath.
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer1.png)
 
