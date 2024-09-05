@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 05/09/2024 Tony                Enforged the release of all interfaces for older Delphi versions < 12.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or higher.
@@ -37,7 +38,7 @@
 //
 // =============================================================================
 // Source:  https://learn.microsoft.com/en-us/windows/win32/coreaudio/rendering-a-stream
-//          https://matthewvaneerde.wordpress.com/2008/12/10/sample-playing-silence-via-wasapi-event-driven-pull-mode/
+//          https://matthewvaneerde.wordpress.com/2008/12/10/sample-playing-silence-via-wasapi-event-driven-pull-mode
 //          FactoryX
 //
 // Copyright (c) FactoryX All rights reserved.
@@ -186,14 +187,13 @@ constructor TWasApiEngine.Create();
 begin
 
   inherited;
-
   Initialize();
 end;
 
 
 destructor TWasApiEngine.Destroy();
 begin
-
+  // ..
   inherited;
 end;
 
@@ -201,6 +201,7 @@ end;
 procedure TWasApiEngine.BeforeDestruction();
 begin
 
+  // If the renderer is stil running, signal it to stop.
   if (pvRenderThreadClosedEvent <> 0) then
     begin
 
@@ -217,8 +218,18 @@ begin
 
   CoTaskMemFree(pvSourceWfx);
 
+  // Release the interfaces.
   if Assigned(pvAudioClient) then
     SafeRelease(pvAudioClient);
+
+  if Assigned(pvRenderClient) then
+    SafeRelease(pvRenderClient);
+
+  if Assigned(pvAudioStreamVolume) then
+    SafeRelease(pvAudioStreamVolume);
+
+  if Assigned(pvAudioClock) then
+    SafeRelease(pvAudioClock);
 
   if (pvAudioSamplesReadyEvent > 0) then
     begin
@@ -431,8 +442,9 @@ begin
                                        (pvBytes + pvBytesLength)^,
                                        audioDataLength);
 
-                                       Inc(pvBytesLength,
-                                           audioDataLength);
+                                  Inc(pvBytesLength,
+                                      audioDataLength);
+
                                   finally
 
                                     hres := buffer.Unlock();
@@ -462,9 +474,8 @@ var
   pDevice: IMMDevice;
 
   {$IFDEF DEBUG}
-  // Use this to find out to debug.
+  // Use this to read out the last error in AvSetMmThreadCharacteristics.
   //nLastError: DWord;
-
   {$ENDIF}
 
 begin
@@ -586,6 +597,7 @@ begin
   if not (pvDeviceState = dsPause) then
     FOffset := 0;
 
+  // Create shared buffer.
   ReallocMem(pBufferData,
              pvBufferFrameCount * pvSourceWfx.nBlockAlign);
 
@@ -595,7 +607,7 @@ begin
   if FAILED(hr) then
     Exit(hr);
 
-  // We defined the size of pData, the renderer will take of care of it, so, we can free the data pointer and it's size.
+  // We defined the size of pData, the renderer will take of care of it, so, we can free the data pointer.
   // Note: Freeing it on the end of this method will result in a memoryleak,
   //       because the engine will internally use the data pointer until it stops and releasing it.
 
@@ -643,12 +655,14 @@ begin
       WAIT_OBJECT_0 + 1:
         begin
 
+          // Get available bufferspace.
           hr := pvAudioClient.GetCurrentPadding(numFramesPadding);
           if FAILED(hr) then
             Break;
 
           numFramesAvailable := pvBufferFrameCount - numFramesPadding;
 
+          // Get available space in shared buffer.
           hr := pvRenderClient.GetBuffer(numFramesAvailable,
                                          pBufferData);
           if FAILED(hr) then
@@ -685,7 +699,7 @@ begin
           // When using this code, we don't need the IAudioClock interface to get the amount of samples payed.
           // Global var.
           //   pvTotalFramesRendered: UINT64;
-          //
+
           //Inc(pvTotalFramesRendered,
           //    numFramesAvailable);
           //

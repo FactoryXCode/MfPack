@@ -161,6 +161,7 @@ object frmMain: TfrmMain
     Width = 74
     Height = 24
     Caption = 'Play'
+    Enabled = False
     TabOrder = 0
     OnClick = butPlayClick
   end
@@ -170,6 +171,7 @@ object frmMain: TfrmMain
     Width = 74
     Height = 24
     Caption = 'Stop'
+    Enabled = False
     TabOrder = 1
     OnClick = butStopClick
   end
@@ -189,6 +191,7 @@ object frmMain: TfrmMain
     Width = 74
     Height = 24
     Caption = 'Pause'
+    Enabled = False
     TabOrder = 5
     OnClick = butPauseClick
   end
