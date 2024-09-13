@@ -2691,10 +2691,10 @@ type
 
     function GetRange(Property_: LONG { CameraControlProperty };
                       out pMin: LONG;
-                      pMax: LONG;
-                      pSteppingDelta: LONG;
-                      pDefault: LONG;
-                      pCapsFlags: LONG): HResult; stdcall;
+                      out pMax: LONG;
+                      out pSteppingDelta: LONG;
+                      out pDefault: LONG;
+                      out pCapsFlags: LONG): HResult; stdcall;
 
     function Set_(Property_: LONG { CameraControlProperty };
                   lValue: LONG;

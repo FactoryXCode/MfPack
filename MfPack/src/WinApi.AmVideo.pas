@@ -3,7 +3,7 @@
 // Copyright: © FactoryX. All rights reserved.
 //
 // Project: MfPack - Shared
-// Project location: http://sourceforge.net/projects/MFPack
+// Project location: https://sourceforge.net/projects/mfpack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: WinApi.AMVideo.pas
 // Kind: Pascal / Delphi unit
