@@ -2636,7 +2636,7 @@ type
   IAMVideoProcAmp = interface(IUnknown)
     ['{C6E13360-30AC-11d0-A18C-00A0C9118956}']
 
-    function GetRange(Property_: VideoProcAmpProperty; { VideoProcAmpProperty }
+    function GetRange(Property_: LONG { VideoProcAmpProperty };
                       out pMin: LONG;
                       out pMax: LONG;
                       out pSteppingDelta: LONG;
@@ -2700,9 +2700,9 @@ type
                   lValue: LONG;
                   Flags: LONG { CameraControlFlags} ): HResult; stdcall;
 
-    function Get( Property_: LONG { CameraControlProperty };
-                  out lValue: LONG;
-                  out Flags: LONG { CameraControlFlags }): HResult; stdcall;
+    function Get(Property_: LONG { CameraControlProperty };
+                 out lValue: LONG;
+                 out Flags: LONG { CameraControlFlags }): HResult; stdcall;
 
   end;
   IID_IAMCameraControl = IAMCameraControl;
