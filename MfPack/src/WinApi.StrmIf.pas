@@ -2643,11 +2643,11 @@ type
                       out pDefault: LONG;
                       out pCapsFlags: LONG { VideoProcAmpFlags }): HResult; stdcall;
 
-    function Set_(Property_: VideoProcAmpProperty;
+    function Set_(Property_: LONG; { VideoProcAmpProperty }
                   lValue: LONG;
                   Flags: LONG { VideoProcAmpFlags }): HResult; stdcall;
 
-    function Get(Property_: VideoProcAmpProperty { VideoProcAmpProperty };
+    function Get(Property_: LONG; { VideoProcAmpProperty }
                  out lValue: LONG;
                  out Flags: LONG { VideoProcAmpFlags }): HResult; stdcall;
 
@@ -2673,8 +2673,8 @@ type
 
   PCameraControlFlags = ^CameraControlFlags;
   tagCameraControlFlags = (
-    CameraControl_Flags_Manual = 1,
-    CameraControl_Flags_Auto   = 2
+    CameraControl_Flags_Manual = $1,
+    CameraControl_Flags_Auto   = $2
   );
   {$EXTERNALSYM tagCameraControlFlags}
   CameraControlFlags = tagCameraControlFlags;
@@ -2696,7 +2696,7 @@ type
                       out pDefault: LONG;
                       out pCapsFlags: LONG): HResult; stdcall;
 
-    function Set_(Property_: LONG { CameraControlProperty };
+    function Set_(Property_: LONG; { CameraControlProperty }
                   lValue: LONG;
                   Flags: LONG { CameraControlFlags} ): HResult; stdcall;
 
