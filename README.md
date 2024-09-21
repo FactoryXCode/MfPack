@@ -83,6 +83,15 @@ SDK version: 10.0.26100.0 (Windows 11)
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleCapture.png)
 
+**Sample 2**
+
+*This sample shows how to implement camera and video controls using*
+
+*IAMCameraControl and IAMVideoProcAmp.*
+
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleCapture_2.png)
+
 **MfPeakMeter and MfPeakMeterEx component sample**
 
 *An example about how to create a MfPeakMeter control. This sample is part of the Samples/MfComponents package.*
