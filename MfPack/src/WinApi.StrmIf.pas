@@ -23,10 +23,11 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 21/09/2024 Tony                Changed properties for IAMCameraControl and IAMVideoProcAmp.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
-// 
+//
 // Related objects: -
 // Related projects: MfPackX317
 // Known Issues: -
