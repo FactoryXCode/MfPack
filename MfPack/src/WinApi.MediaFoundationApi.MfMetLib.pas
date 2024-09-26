@@ -713,7 +713,7 @@ type
 
   // Create an encoder found with function ListEncoders.
   function CreateEncoderFromClsid(mftCategory: CLSID;
-                                  out pEncoder: IMFTransform): HResult;
+                                  out pEncoder: IMFTransform): HResult; inline;
 
 
   // The following functions might be useful when creating a video media type.
@@ -914,7 +914,7 @@ type
                                     out pSource: IMFMediaSource): HResult;
   // Lists the devicenames from an IMFActivate array.
   procedure ListDeviceNames(ppDevices: PIMFActivate; // Pointer to array of IMFActivate
-                            out iList: TStringList); // output
+                            out pList: TStringList); // output
 
   // Sets the maximum frame rate on the media source.
   function SetMaxFrameRate(pSource: IMFMediaSource;
@@ -1249,7 +1249,7 @@ const
 // Misc
 // ====
 procedure CopyWaveFormatEx(const SourceFmt: WAVEFORMATEX;
-                           out DestFmt: PWAVEFORMATEX); //inline;
+                           out DestFmt: PWAVEFORMATEX);
 
 // Returns 16 - bit PCM format.
 function GetDefaultWaveFmtEx(): WAVEFORMATEX; inline;
@@ -1568,16 +1568,20 @@ function CreateVideoDeviceSource(DeviceIndex: DWord;
                                  out pSource: IMFMediaSource): HResult;
 var
   hr: HResult;
-  icount: UINT32;
+  iCount: UINT32;
   i: Integer;
   MediaSource: IMFMediaSource;
   pAttributes: IMFAttributes;
-  ppDevices: PIMFActivate;
+  ppDevices: PIMFActivate;  // Pointer to the array of IMFActivate.
+  pDevice: IMFActivate;
+  pOriginalDevices: PIMFActivate;  // Save the original pointer for memory release.
 
 label
   done;
 
 begin
+
+  pOriginalDevices := nil;
 
   // Create an attribute store to specify the enumeration parameters.
   hr := MFCreateAttributes(pAttributes,
@@ -1591,39 +1595,60 @@ begin
   if FAILED(hr) then
     goto done;
 
-  // Enumerate devices first.
+  // Enumerate devices.
   hr := MFEnumDeviceSources(pAttributes,
                             ppDevices,
                             iCount);
   if FAILED(hr) then
     goto done;
 
-  if (DeviceIndex > DWORD(icount)) or
-     (icount = 0) then
-    begin
-      hr := MF_E_NO_CAPTURE_DEVICES_AVAILABLE;
-      goto done;
-    end;
-
-{$POINTERMATH ON}
-  // Create the media source object.
-
-  hr := ppDevices[DeviceIndex].ActivateObject(IID_IMFMediaSource,
-                                              Pointer(MediaSource));
-
-  if FAILED(hr) then
+  if (DeviceIndex >= DWORD(iCount)) or (iCount = 0) then
+  begin
+    hr := MF_E_NO_CAPTURE_DEVICES_AVAILABLE;
     goto done;
+  end;
 
-  pSource := MediaSource;
+  // Save the original pointer for later cleanup
+  pOriginalDevices := ppDevices;
+
+  // Create the media source object by finding the device at the given index.
+  for i := 0 to iCount - 1 do
+    begin
+      pDevice := ppDevices^;  // Dereference the current device pointer.
+
+      // If this is the selected device index, activate the media source.
+      if (DWORD(i) = DeviceIndex) then
+        begin
+          hr := pDevice.ActivateObject(IID_IMFMediaSource,
+                                       Pointer(MediaSource));
+          if FAILED(hr) then
+            goto done;
+
+          pSource := MediaSource;
+          Break;
+        end;
+
+    // Move to the next device in the list.
+    Inc(ppDevices);
+  end;
 
 done:
 
-  for i := 0 to iCount -1 do
-   SafeRelease(ppDevices[i]);
-  CoTaskMemFree(ppDevices);
+  // Release the devices and free memory.
+  if Assigned(pOriginalDevices) then
+    begin
+      for i := 0 to iCount - 1 do
+        begin
+          SafeRelease(pOriginalDevices^);
+          Inc(pOriginalDevices);
+        end;
+
+      // Free the original memory for the devices array.
+      CoTaskMemFree(pOriginalDevices);  // Use the original pointer to free memory.
+    end;
+
   Result := hr;
 end;
-
 
 
 // SINKS AND SOURCEREADERS
@@ -2837,8 +2862,11 @@ var
   i: Integer;
   ppInputTypes: PMFT_REGISTER_TYPE_INFO;
   pcInputTypes: UINT32;
+  pInputTypes: MFT_REGISTER_TYPE_INFO;
   ppOutputTypes: PMFT_REGISTER_TYPE_INFO;
+  pOutputTypes: MFT_REGISTER_TYPE_INFO;
   pcOutputTypes: UINT32;
+
 
 begin
   // check for valid enum ID
@@ -2859,15 +2887,18 @@ begin
 
   SetLength(mftEnum.aInputTypes,
             pcInputTypes);
+
   SetLength(mftEnum.aOutputTypes,
             pcOutputTypes);
-
-{$POINTERMATH ON}
 
   // Get the supported input types.
   for i := 0 to pcInputTypes -1 do
     begin
-      mftEnum.aInputTypes[i].RegisterTypeInfo := ppInputTypes[i];
+
+      pInputTypes := ppInputTypes^; // Dereference the current pointer to get the element
+      mftEnum.aInputTypes[i].RegisterTypeInfo := pInputTypes;
+
+
       // Get the descriptions of the input formats.
       // Get majortype info
       GetGUIDNameConst(mftEnum.aInputTypes[i].RegisterTypeInfo.guidMajorType,
@@ -2876,6 +2907,7 @@ begin
                        mftEnum.aInputTypes[i].FormatTag,
                        mftEnum.aInputTypes[i].FOURCC,
                        mftEnum.aInputTypes[i].majorTypeDescr);
+
       // Get subtype info
       GetGUIDNameConst(mftEnum.aInputTypes[i].RegisterTypeInfo.guidMajorType,
                        mftEnum.aInputTypes[i].RegisterTypeInfo.guidSubtype,
@@ -2883,12 +2915,17 @@ begin
                        mftEnum.aInputTypes[i].FormatTag,
                        mftEnum.aInputTypes[i].FOURCC,
                        mftEnum.aInputTypes[i].subTypeDescr);
+
+      Inc(ppInputTypes);  // Move the pointer to the next element
     end;
 
   // Get the supported output types.
   for i := 0 to pcOutputTypes -1 do
     begin
-      mftEnum.aOutputTypes[i].RegisterTypeInfo := ppOutputTypes[i];
+
+      pOutputTypes := ppOutputTypes^; // Dereference the current pointer to get the element.
+
+      mftEnum.aOutputTypes[i].RegisterTypeInfo := pOutputTypes;
       // Get the descriptions of the output formats.
       GetGUIDNameConst(mftEnum.aOutputTypes[i].RegisterTypeInfo.guidMajorType,
                        mftEnum.aOutputTypes[i].RegisterTypeInfo.guidSubtype,
@@ -2896,6 +2933,8 @@ begin
                        mftEnum.aOutputTypes[i].FormatTag,
                        mftEnum.aOutputTypes[i].FOURCC,
                        mftEnum.aOutputTypes[i].subTypeDescr);
+
+      Inc(ppOutputTypes);  // Move the pointer to the next element.
     end;
 
   CoTaskMemFree(ppInputTypes);
@@ -2916,40 +2955,70 @@ var
   hr: HResult;
   count: UINT32;
   ppActivate: PIMFActivate;
+  pOriginalActivate: PIMFActivate;  // Save the original pointer for cleanup.
   attr: IMFAttributes;
+  i: Integer;
 
 begin
-  hr := S_OK;
-try
 
+  ppActivate := nil;
+
+  // Enumerate MFTs.
   hr := MFTEnumEx(mftCategory,
-                  flags,  // default = MFT_ENUM_FLAG_ALL
-                  mftRegisterTypeInput,  // Input type
-                  mftRegisterTypeOutput, // Output type
-                  ppActivate,  // Array of IMFActivate pointers
-                  count);      // number of pointers returned.
+                    flags,                   // default = MFT_ENUM_FLAG_ALL
+                    mftRegisterTypeInput,     // Input type
+                    mftRegisterTypeOutput,    // Output type
+                    ppActivate,               // Array of IMFActivate pointers
+                    count);                   // Number of pointers returned
 
   if (SUCCEEDED(hr) and (count = 0)) then
+    Exit(MF_E_TOPO_CODEC_NOT_FOUND);
+
+  // Save the original pointer for later cleanup.
+  pOriginalActivate := ppActivate;
+
+  if SUCCEEDED(hr) then
     begin
-      hr := MF_E_TOPO_CODEC_NOT_FOUND;
+      // Move to the desired decoder based on selIndex.
+      for i := 0 to count - 1 do
+        begin
+            if (i = selIndex) then
+              begin
+                hr := ppActivate^.ActivateObject(IID_IMFTransform, Pointer(mftCodec));
+
+                if SUCCEEDED(hr) then
+                  begin
+                    hr := mftCodec.GetAttributes(attr);
+                    if SUCCEEDED(hr) then
+                      begin
+                        // Process the attributes as needed, e.g., attr.GetString()...
+
+                      end;
+                  end;
+                Break;
+              end;
+
+            // Move the pointer to the next IMFActivate object.
+            Inc(ppActivate);
+        end;
     end;
 
-{$POINTERMATH ON}
-  // Create the first decoder in the list.
-  // Note: call function EnumMft to get the number of mft's, so you may select one from the index.
-  if (SUCCEEDED(hr)) then
+  // Release and free memory for IMFActivate objects.
+  if Assigned(pOriginalActivate) then
     begin
-      hr := ppActivate[selIndex].ActivateObject(IID_IMFTransform,
-                                                Pointer(mftCodec));
-      mftCodec.GetAttributes(attr);
-      //attr.GetString()
+      for i := 0 to count - 1 do
+        begin
+          SafeRelease(pOriginalActivate^);
+          Inc(pOriginalActivate);
+        end;
+
+      // Free the original memory for the array
+      CoTaskMemFree(pOriginalActivate);  // Use the original pointer without modification.
     end;
 
-finally
-  CoTaskMemFree(ppActivate);
   Result := hr;
 end;
-end;
+
 
 
 // This function is deprecated. Only here for backward compatibility.
@@ -3195,26 +3264,23 @@ function EnumCaptureDeviceSources(const pAttributeSourceType: TGuid;
                                   var pDeviceProperties: TDevicePropertiesArray): HResult;
 
   {$REGION Helper for function EnumCaptureDeviceSources}
-  // Helper for function EnumCaptureDeviceSources
   function DeviceExists(pDeviceProperties: TDevicePropertiesArray;
                         const pName: PWideChar;
                         out pIndex: Integer): Boolean; inline;
   var
     i: Integer;
-
   begin
     pIndex := -1;
     i := Length(pDeviceProperties) - 1;
-    // Find the last item in the array, with the same name
+    // Find the last item in the array with the same name
     while (pIndex = -1) and (i > -1) do
-      begin
-        // Note: SameText() is not case sensitive, like CompareStr() is.
-        Result := SameText(WideCharToString(pName),
-                           WideCharToString(pDeviceProperties[i].lpFriendlyName));
-        if Result then
-          pIndex := i;
-        dec(i);
-      end;
+    begin
+      Result := SameText(WideCharToString(pName),
+                         WideCharToString(pDeviceProperties[i].lpFriendlyName));
+      if Result then
+        pIndex := i;
+      Dec(i);
+    end;
     Result := (pIndex >= 0);
   end;
   {$ENDREGION}
@@ -3224,19 +3290,22 @@ var
   pAttributes: IMFAttributes;
   pMediaSource: IMFMediaSource;
   pSourceReader: IMFSourceReader;
-  ppDevices: PIMFActivate; // Pointer to array of IMFActivate
+  ppDevices: PIMFActivate;  // Pointer to array of IMFActivate
+  pOriginalDevices: PIMFActivate;  // Save the original pointer for cleanup
   iCount: UINT32;
   uiNameLen: UINT32;
   iIndex: Integer;
-  szName,
+  szName: LPWSTR;
   szSymLink: LPWSTR;
-  i,
-  j: integer;
+  i: Integer;
+  j: Integer;
 
 label
   done;
 
 begin
+
+  pOriginalDevices := nil;
 
   if (pAttributeSourceType <> MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID) and
      (pAttributeSourceType <> MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_AUDCAP_GUID) then
@@ -3247,119 +3316,88 @@ begin
 
   uiNameLen := 0;
   iIndex := 0;
-
   SetLength(pDeviceProperties,
             0);
 
   // Create an attribute store to specify the enumeration parameters.
-  hr := MFCreateAttributes(pAttributes,
-                           1);
-  if (FAILED(hr)) then
-    begin
-      goto done;
-    end;
-
-  hr := pAttributes.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
-                            pAttributeSourceType); // Source type: video or audio capture device
-
-  if (FAILED(hr)) then
+  hr := MFCreateAttributes(pAttributes, 1);
+  if FAILED(hr) then
     goto done;
 
+  hr := pAttributes.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE, pAttributeSourceType);  // Source type: video or audio capture device
+  if FAILED(hr) then
+    goto done;
 
   // Enumerate devices.
-  hr := MFEnumDeviceSources(pAttributes,
-                            ppDevices,   // pointer to array of IMFActivate interfaces.
-                            iCount);    // Number of elements (ppDevices)
-
-  if (FAILED(hr)) then
+  hr := MFEnumDeviceSources(pAttributes, ppDevices, iCount);  // pointer to array of IMFActivate interfaces.
+  if FAILED(hr) then
     begin
       GetLastError();
       goto done;
     end;
 
-  if (iCount = 0) then
+  if iCount = 0 then
     begin
-      // Nothing found
       hr := MF_E_NOT_FOUND;
       goto done;
     end;
 
-  //Set the new length
   SetLength(pDeviceProperties,
             iCount);
 
-{$POINTERMATH ON}
+  // Save the original pointer for cleanup.
+  pOriginalDevices := ppDevices;
 
-  for i := 0 to iCount -1 do
+  for i := 0 to iCount - 1 do
     begin
-
-      // Try to get the readable name.
-      hr := ppDevices[i].GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME,
-                                            szName,
-                                            uiNameLen);
+      // Try to get the friendly name.
+      hr := ppDevices^.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME,
+                                          szName,
+                                          uiNameLen);
       if FAILED(hr) then
         goto done;
 
-      // Add the fiendlyname to the list.
       pDeviceProperties[i].iDeviceIndex := i;
       pDeviceProperties[i].lpFriendlyName := szName;
-
-      // Add the Interface identifier (IID) of the requested interface.
       pDeviceProperties[i].riid := pAttributeSourceType;
 
       // Try to get the SymbolicLink name.
-      if IsEqualGuid(pAttributeSourceType,
-                     MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID) then
+      if IsEqualGuid(pAttributeSourceType, MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID) then
         begin
-          // Video
-          hr := ppDevices[i].GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
-                                                szSymLink,
-                                                uiNameLen);
+          hr := ppDevices^.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK, szSymLink, uiNameLen);
         end
       else
         begin
-          // Audio
-          hr := ppDevices[i].GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_AUDCAP_SYMBOLIC_LINK,
-                                                szSymLink,
-                                                uiNameLen);
+          hr := ppDevices^.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_AUDCAP_SYMBOLIC_LINK, szSymLink, uiNameLen);
         end;
 
       if SUCCEEDED(hr) then
         begin
           pDeviceProperties[i].lpSymbolicLink := szSymLink;
 
-          //====================================================================
-
-          // Update video formats
-          if IsEqualGuid(pAttributeSourceType,
-                 MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID) then
-          begin
-            // Get the MediaSource interface.
-            hr := ppDevices[i].ActivateObject(IID_IMFMediaSource,
+          // Handle video formats.
+          if IsEqualGuid(pAttributeSourceType, MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID) then
+            begin
+              hr := ppDevices^.ActivateObject(IID_IMFMediaSource,
                                               Pointer(pMediaSource));
-            if SUCCEEDED(hr) then
-              // Create the SourceReader from the MediaSource
-              hr := MFCreateSourceReaderFromMediaSource(pMediaSource,
-                                                        ppDevices[i],
-                                                        pSourceReader);
-            if SUCCEEDED(hr) then
-              // Get the device capabillities.
-              hr := GetCaptureDeviceCaps(pSourceReader,
-                                         pDeviceProperties,
-                                         i,
-                                         MF_SOURCE_READER_FIRST_VIDEO_STREAM);
-
-            SafeRelease(pSourceReader);
-            SafeRelease(pMediaSource);
-          end
-        else  // update audio format     TODO: Get all audio formats
-          begin
-           for j := 0 to Length(pDeviceProperties) -1 do
+              if SUCCEEDED(hr) then
+                hr := MFCreateSourceReaderFromMediaSource(pMediaSource,
+                                                          ppDevices^,
+                                                          pSourceReader);
+              if SUCCEEDED(hr) then
+                hr := GetCaptureDeviceCaps(pSourceReader,
+                                           pDeviceProperties,
+                                           i,
+                                           MF_SOURCE_READER_FIRST_VIDEO_STREAM);
+              SafeRelease(pSourceReader);
+              SafeRelease(pMediaSource);
+            end
+      else  // Handle audio formats
+        begin
+          for j := 0 to Length(pDeviceProperties) - 1 do
              begin
-               // Get the MediaSource
-               hr := ppDevices[i].ActivateObject(IID_IMFMediaSource,
-                                                 Pointer(pMediaSource));
 
+               hr := ppDevices^.ActivateObject(IID_IMFMediaSource, Pointer(pMediaSource));
                if SUCCEEDED(hr) then
                  SetLength(pDeviceProperties[iIndex].aAudioFormats,
                            1);
@@ -3368,22 +3406,15 @@ begin
                if SUCCEEDED(hr) then
                  pDeviceProperties[iIndex].aAudioFormats[0].tgMajorFormat := MFMediaType_Audio;
              end;
-          end;
-
-          //====================================================================
-
-        end;
-
-      szName := nil;
-
-      if (FAILED(hr)) then
-        goto done;
+         end;
     end;
 
-{$POINTERMATH OFF}
+    szName := nil;
+    Inc(ppDevices);
+  end;
 
-  // Update display name for devices with the same name.
-  for i := 0 to Length(pDeviceProperties) -1 do
+  // Update display name for devices with the same name
+  for i := 0 to Length(pDeviceProperties) - 1 do
     begin
       if DeviceExists(pDeviceProperties,
                       pDeviceProperties[i].lpFriendlyName,
@@ -3392,11 +3423,9 @@ begin
           iCount := pDeviceProperties[iIndex].iCount + 1;
           if (iCount >= 2) then
             begin
-              // Update the first device to include '(1)'
               pDeviceProperties[iIndex].lpDisplayName := StrToPWideChar(Format('%s (%d)',
-                                                                               [pDeviceProperties[iIndex].lpFriendlyName,
-                                                                                pDeviceProperties[iIndex].iCount]));
-
+                                                                        [pDeviceProperties[iIndex].lpFriendlyName,
+                                                                         pDeviceProperties[iIndex].iCount]));
               pDeviceProperties[iIndex].iCount := iCount;
             end
           else
@@ -3411,9 +3440,18 @@ begin
 
 done:
 
+  if Assigned(pOriginalDevices) then
+    begin
+      for i := 0 to iCount - 1 do
+        begin
+          SafeRelease(pOriginalDevices^);
+          Inc(pOriginalDevices);
+        end;
+      CoTaskMemFree(pOriginalDevices);
+    end;
+
   Result := hr;
 end;
-
 
 //
 function GetCaptureDeviceCaps(pSourceReader: IMFSourceReader;
@@ -3605,14 +3643,18 @@ function CreateCaptureDeviceInstance(pDeviceProperties: TDeviceProperties;
 var
   count: UINT32;
   pConfig: IMFAttributes;
-  ppDevices: PIMFActivate;  // Pointer to array of IMFActivate
+  ppDevices: PIMFActivate;  // Pointer to array of IMFActivate.
+  pOriginalDevices: PIMFActivate;  // Store the original pointer.
   hr: HResult;
 
 label
   done;
 
 begin
+
   count := 0;
+  ppDevices := nil;  // Initialize pointer.
+  pOriginalDevices:= nil;
 
   // Create an attribute store to hold the search criteria.
   hr := MFCreateAttributes(pConfig,
@@ -3626,33 +3668,38 @@ begin
   if FAILED(hr) then
     goto done;
 
-  // Enumerate the devices again, because in the mean while a device could be
-  // disconnected.
+  // Enumerate the devices again.
   hr := MFEnumDeviceSources(pConfig,
                             ppDevices,
                             count);
   if FAILED(hr) then
     goto done;
 
-{$POINTERMATH ON}
+  // Save the original pointer for freeing memory later.
+  pOriginalDevices := ppDevices;
 
   // Create a media source from the selected device.
-  if (count > 0) then
+  if (count > 0) and (pDeviceProperties.iDeviceIndex < Integer(count)) then
     begin
-      hr := ppDevices[pDeviceProperties.iDeviceIndex].ActivateObject(IID_IMFMediaSource,
-                                                                      Pointer(ppSource));
+      // Dereference the selected device.
+      hr := ppDevices^.ActivateObject(IID_IMFMediaSource,
+                                      Pointer(ppSource));
       if FAILED(hr) then
         goto done;
 
-      ppActivate := ppDevices[pDeviceProperties.iDeviceIndex];
+      ppActivate := ppDevices^;  // Store the IMFActivate.
     end
   else
     hr := MF_E_NOT_FOUND;
 
 done:
-  CoTaskMemFree(ppDevices);
+  // Free memory for the devices array.
+  if Assigned(pOriginalDevices) then
+    CoTaskMemFree(pOriginalDevices);
+
   Result := hr;
 end;
+
 
 
 //
@@ -3667,6 +3714,7 @@ var
   fSelected: BOOL;
   cTypes: DWORD;
   i: Integer;
+  pOriginalMediaType: PIMFMediaType;
 
 label
   done;
@@ -3674,6 +3722,7 @@ label
 begin
 
   cTypes := 0;
+  pOriginalMediaType := ppMediaType; // Save the original pointer for now.
 
   hr := pSource.CreatePresentationDescriptor(pPD);
   if FAILED(hr) then
@@ -3699,16 +3748,23 @@ begin
                                          pType);
       if FAILED(hr) then
         goto done;
-{$POINTERMATH ON}
-      // store the mediatypes in the array
-      ppMediaType[i] := pType;
-{$POINTERMATH OFF}
+
+      // Assign the media type to the current position in the array.
+      ppMediaType^ := pType;
+
+      // Move the ppMediaType pointer to the next element.
+      Inc(ppMediaType);
+
       SafeRelease(pType);
     end;
 
 done:
+  // Restore the original pointer.
+  ppMediaType := pOriginalMediaType;
+
   Result := hr;
 end;
+
 
 // Helper for EnumerateMediaTypes.
 function EnumerateTypesForStream(pReader: IMFSourceReader;
@@ -5508,6 +5564,7 @@ end;
 //    one of the activation objects.
 //
 
+
 // The following fuction creates a media source for the given video capture device (iDeviceIndex) in
 // the enumeration list:
 //
@@ -5517,11 +5574,11 @@ var
   count: UINT32;
   i: Integer;
   pConfig: IMFAttributes;
-  ppDevices: PIMFActivate; // Pointer to array of IMFActivate interfaces
+  ppDevices: PIMFActivate;
+  pCurrentDevice: PIMFActivate;
   hr: HResult;
 
 begin
-
   count := 0;
 
   // Create an attribute store to hold the search criteria.
@@ -5530,42 +5587,47 @@ begin
 
   // Request video capture devices.
   if SUCCEEDED(hr) then
-    begin
-      hr := pConfig.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
-                            MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
-    end;
+    hr := pConfig.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
+                          MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
 
   // Enumerate the devices,
   if SUCCEEDED(hr) then
-    begin
-      hr := MFEnumDeviceSources(pConfig,
-                                ppDevices,
-                                count);
-    end;
+    hr := MFEnumDeviceSources(pConfig,
+                              ppDevices,
+                              count);
 
-{$POINTERMATH ON}
 
-  // Create a media source for the first device in the list.
+  // Create a media source for the device at iDeviceIndex.
   if SUCCEEDED(hr) then
     begin
-      if (count > 0) and (iDeviceIndex <= count) then
+      if (count > 0) and (iDeviceIndex < count) then
         begin
-          hr := ppDevices[iDeviceIndex].ActivateObject(IID_IMFMediaSource,
-                                                       Pointer(pSource));
+          // Get the device from the list
+          pCurrentDevice := ppDevices;
+          Inc(pCurrentDevice,
+              iDeviceIndex);
+
+          hr := pCurrentDevice^.ActivateObject(IID_IMFMediaSource, Pointer(pSource));
         end
-      else
+    else
+      hr := MF_E_NOT_FOUND;
+  end;
+
+  // Release the devices and free memory
+  if Assigned(ppDevices) then
+    begin
+      pCurrentDevice := ppDevices;
+      for i := 0 to count - 1 do
         begin
-          hr := MF_E_NOT_FOUND;
+          SafeRelease(pCurrentDevice^);
+          Inc(pCurrentDevice);
         end;
-    end;
+    CoTaskMemFree(ppDevices);
+  end;
 
-  for i := 0 to count - 1 do
-    SafeRelease(ppDevices[i]);
-  CoTaskMemFree(ppDevices);
-
-{$POINTERMATH OFF}
   Result := hr;
 end;
+
 
 
 //
@@ -5603,6 +5665,7 @@ begin
 
   Result := hr;
 end;
+
 
 // Equivalent way to create an audio device from the audio endpoint ID:
 // 1 Call MFCreateAttributes to create an attribute store.
@@ -5660,39 +5723,44 @@ end;
 // the name of each device to the stringlist:
 //
 procedure ListDeviceNames(ppDevices: PIMFActivate;
-                          out iList: TStringList);
+                          out pList: TStringList);
 var
   i: Integer;
   hr: HResult;
   szFriendlyName: LPWSTR;
   cchName: UINT32;
   iCount: UINT32;
+  pCurrentDevice: PIMFActivate;  // Pointer for device iteration
 
 begin
   cchName := 0;
-  iList.Clear;
+  pList.Clear;
 
-{$POINTERMATH ON}
-
-  hr := ppDevices[0].GetCount(iCount);
+  // Get the count of devices.
+  hr := ppDevices.GetCount(iCount);
 
   if SUCCEEDED(hr) then
-    for i := 0 to iCount - 1 do
-      begin
-        szFriendlyName := '';
+    begin
+      pCurrentDevice := ppDevices;  // Start with the first device
 
-        // Try to get the display name.
-        hr := (ppDevices[i] as IMFAttributes).GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME,
-                                                                 szFriendlyName,
-                                                                 cchName);
-        // Add the fiendlyname to the stringlist.
-        if SUCCEEDED(hr) then
-          iList.Append(szFriendlyName);
+      for i := 0 to iCount - 1 do
+        begin
+          szFriendlyName := '';
 
-        szFriendlyName := nil;
+          // Try to get the display name.
+          hr := (pCurrentDevice^ as IMFAttributes).GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME,
+                                                                      szFriendlyName,
+                                                                      cchName);
+          // Add the friendly name to the string list.
+          if SUCCEEDED(hr) then
+            pList.Append(szFriendlyName);
 
+          szFriendlyName := nil;
+
+          // Move to the next device in the array
+          Inc(pCurrentDevice);
+        end;
     end;
-{$POINTERMATH OFF}
 end;
 
 
@@ -7726,12 +7794,14 @@ var
   cStyles: DWORD;
   varStyles: PPROPVARIANT;
   i: Integer;
+  pCurrentStyle: PPROPVARIANT;  // Pointer for iterating over styles.
 
 label
   done;
 
 begin
-  // Get the SAMIstyle interface
+
+  // Get the SAMIStyle interface
   hr := MFGetService(pSource,
                      MF_SAMI_SERVICE,
                      IID_IMFSAMIStyle,
@@ -7741,16 +7811,24 @@ begin
     goto done;
 
   hr := pSami.GetStyleCount(cStyles);
-
-  // When using a dynamic array
-  //SetLength(varStyles, cStyles);
-
-{$POINTERMATH ON}
-  for i := 0 to cStyles -1 do
-    PropVariantInit(varStyles[i]);
-
   if FAILED(hr) then
     goto done;
+
+  // Allocate memory for the PROPVARIANT array.
+  varStyles := CoTaskMemAlloc(cStyles * SizeOf(PROPVARIANT));
+  if (varStyles = nil) then
+    begin
+      hr := E_OUTOFMEMORY;
+      goto done;
+    end;
+
+  // Initialize the PROPVARIANT array.
+  pCurrentStyle := varStyles;
+  for i := 0 to cStyles - 1 do
+    begin
+      PropVariantInit(pCurrentStyle^);
+      Inc(pCurrentStyle);
+    end;
 
   if (index >= cStyles) then
     begin
@@ -7759,19 +7837,28 @@ begin
     end;
 
   hr := pSami.GetStyles(varStyles);
-
   if FAILED(hr) then
     goto done;
 
-  hr := pSami.SetSelectedStyle(varStyles[index].calpwstr.pElems);
+  // Set the selected style by index.
+  pCurrentStyle := varStyles;
+  Inc(pCurrentStyle,
+      index);  // Move to the selected style.
+  hr := pSami.SetSelectedStyle(pCurrentStyle^.calpwstr.pElems);
 
 done:
-  for i := 0 to cStyles-1 do
-    PropVariantClear(varStyles[i]);
-{$POINTERMATH OFF}
+
+  // Clear the PROPVARIANT array.
+  pCurrentStyle := varStyles;
+  for i := 0 to cStyles - 1 do
+  begin
+    PropVariantClear(pCurrentStyle^);
+    Inc(pCurrentStyle);
+  end;
+
+  CoTaskMemFree(varStyles);  // Free the memory
   Result := hr;
 end;
-
 
 
 // Getting the File Duration
@@ -8079,6 +8166,7 @@ var
   hr: HResult;
 
 begin
+
   guidSubType := GUID_NULL;
 
   // Configure the video format for the recording sink.
@@ -8128,7 +8216,6 @@ begin
                               pMediaType2,
                               nil,
                               dwSinkStreamIndex);
-
 end;
 
 
@@ -8146,6 +8233,7 @@ var
   hr: HResult;
 
 begin
+
   guidSubType := GUID_NULL;
 
   hr := CloneVideoMediaType(pMediaType,
@@ -8359,7 +8447,7 @@ done:
 end;
 
 
-//
+// List audio or video encoders on the current system.
 function ListEncoders(const subtype: TGUID;
                       bAudio: Boolean;
                       var aGuidArray: TClsidArray): Hresult;
@@ -8396,15 +8484,19 @@ begin
                 iCount);
 
   if SUCCEEDED(hr) and (iCount = 0) then
-    hr := MF_E_TOPO_CODEC_NOT_FOUND;
-
-  // Copy the the mft guids to array.
-  SetLength(aGuidArray, iCount);
-  {$POINTERMATH ON}
-  if SUCCEEDED(hr) then
+    hr := MF_E_TOPO_CODEC_NOT_FOUND
+  else
     begin
-      for i := 0 to iCount -1 do
-        aGuidArray[i] := ppCLSIDs[i];
+      // Copy the MFT GUIDs to the array.
+      SetLength(aGuidArray,
+                iCount);
+
+      // Manually handle pointer arithmetic.
+      for i := 0 to iCount - 1 do
+        aGuidArray[i] := ppCLSIDs^;
+
+      // Move to the next pointer.
+      Inc(ppCLSIDs);
     end;
 
   // Note:
@@ -8419,14 +8511,15 @@ begin
   //                  pEncoder);  {pEncoder: IMFTransform;}
   //
   // or just call CreateEncoder(guid, pEncoder);
-  CoTaskMemFree(ppCLSIDs);
+  CoTaskMemFree(ppCLSIDs);  // Free the allocated memory
   Result := hr;
 end;
 
 
+
 //
 function CreateEncoderFromClsid(mftCategory: CLSID;
-                                out pEncoder: IMFTransform): HResult;
+                                out pEncoder: IMFTransform): HResult; inline;
 begin
   Result := CoCreateInstance(mftCategory,
                              nil,
@@ -8436,32 +8529,8 @@ begin
 end;
 
 
-{procedure CopyWaveFormatEx(const SourceFmt: WAVEFORMATEX;
-                           out DestFmt: PWAVEFORMATEX); //inline;
-var
-  dFmt: PWAVEFORMATEX;
-
-begin
-  // Allocate memory for DestFormat
-  GetMem(dFmt,
-         SizeOf(WAVEFORMATEX));
-
-  // Copy SourceFormat to DestFormat
-  Move(SourceFmt,
-       dFmt^,
-       SizeOf(WAVEFORMATEX));
-
-  // User is responsible to free the memory occupied by parameter DestFmt.
-  DestFmt := dFmt;
-  FreeMem(dFmt);
-end;}
-
-
 procedure CopyWaveFormatEx(const SourceFmt: WAVEFORMATEX;
-                           out DestFmt: PWAVEFORMATEX); //inline;
-//var
-  //dFmt: PWAVEFORMATEX;
-
+                           out DestFmt: PWAVEFORMATEX);
 begin
   // Allocate memory for DestFormat
   GetMem(DestFmt,

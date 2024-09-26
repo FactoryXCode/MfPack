@@ -492,8 +492,7 @@ var
 
 begin
 
-  hr := E_FAIL;
-
+  // Quit previous session.
   if Assigned(MfDeviceCapture) then
     QuitSession();
 
@@ -501,9 +500,13 @@ begin
   hr := TMfCaptureEngine.CreateInstance(pnlVideo.Handle,   // The clipping window / control.
                                         Frm_SimpleCapture.Handle,  // The handle of the form that handle messages,
                                         MfDeviceCapture);          // must be main form or parent window !!!
+  if FAILED(hr) then
+    Exit(hr);
 
   // If you want to switch to a different clipping surface while the session is active:
   // MfDeviceCapture.SetVideoSurface := myFormOrControl.Handle;
+
+  Result := hr;
 end;
 
 
