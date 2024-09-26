@@ -308,7 +308,7 @@ begin
       Exit;
     end;
 
-  hr := SetVideoProperties(0); // Brightness
+  hr := SetVideoProperties(0); // Brightness.
   if FAILED(hr) then
     begin
       MessageBox(0,
@@ -446,7 +446,7 @@ begin
 
   bAppIsClosing := False;
   bFullScreenMode := False;
-  // Get the capture engine
+  // Get the capture engine.
   hr := GetFmCapture();
   if FAILED(hr) then
     begin
@@ -454,7 +454,7 @@ begin
                  lpcwstr('Initialization failed with error code: ' + IntToStr(hr) + ''),
                  lpcwstr('Initialization Failure!'),
                          MB_ICONSTOP);
-      // Nothing todo, terminate the app.
+      // Nothing to do, terminate the app.
       Application.Terminate();
     end;
 end;
@@ -826,7 +826,7 @@ begin
 end;
 
 
-// Message listener
+// Message listener.
 // Listen for WM_DEVICECHANGE messages. The lParam message parameter is a pointer to a DEV_BROADCAST_HDR structure.
 procedure TFrm_SimpleCapture.WMDeviceChange(var Msg: TMessage);
 var
@@ -866,7 +866,7 @@ var
 
 begin
 
-  // Set video size
+  // Set video size.
   if Assigned(MfDeviceCapture) then
     begin
       crD.left := 0;

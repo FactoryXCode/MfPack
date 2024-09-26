@@ -438,11 +438,11 @@ begin
 
   hr := S_OK;
 
-  // release the video display object
+  // Release the video display object.
   if Assigned(m_pVideoDisplay) then
     SafeRelease(m_pVideoDisplay);
 
-  // First close the media session.
+  // Now close the media session.
   if not Assigned(m_pSession) then
     begin
       goto Done;
@@ -454,12 +454,13 @@ begin
   if FAILED(hr) then
     goto Done;
 
-  hr:= m_pSession.Close;
+  hr:= m_pSession.Close();
   if FAILED(hr) then
     goto Done;
 
-  // Wait for the close operation to complete
-  dwWaitResult := WaitForSingleObject(THandle(hCloseEvent), 1000);
+  // Wait for the close operation to complete.
+  dwWaitResult := WaitForSingleObject(THandle(hCloseEvent),
+                                      1000);
 
   if (dwWaitResult <> STATUS_WAIT_0) {Wait abandoned} then
     m_dWaitResult := dwWaitResult;
@@ -478,7 +479,7 @@ begin
 
   Clear();
 
-  // Release the global interfaces
+  // Release the global interfaces.
   SafeRelease(m_pSession);
   SafeRelease(m_pSource);
   SafeRelease(m_pActivate);
@@ -497,6 +498,7 @@ var
 begin
 
   hr:= S_OK;
+
   // The application must call Shutdown because the media session holds a
   // reference count on the capture engine object. (This happens when capture engine calls
   // IMediaEventGenerator.BeginGetEvent on the media session.) As a result,
@@ -526,6 +528,7 @@ try
     end;
 
   Result := hr;
+
 except
   // Do nothing
   Result := hr;
@@ -641,7 +644,7 @@ begin
 
   Clear();
 
-  // Unregister existing device
+  // Unregister existing device.
   UnregisterForDeviceNotification(p_hdevnotify);
   p_hdevnotify := nil;
 
@@ -649,14 +652,14 @@ begin
 end;
 
 
-// The destructor
+// The destructor.
 destructor TMfCaptureEngine.Destroy;
 begin
   inherited Destroy;
 end;
 
 
-// Start & stop
+// Start & stop.
 //
 function TMfCaptureEngine.StartRecording(): HRESULT;
 var
@@ -711,7 +714,7 @@ try
             hr := FVideoProcessor.GetBackgroundColor(FBGColor);
         end
       else
-        hr:= E_NOTIMPL;  // better is to implement a custom E_VIDEO_NOT_PRESENT or something like that.
+        hr:= E_NOTIMPL;  // Better is to implement a custom E_VIDEO_NOT_PRESENT or something like that.
     end;
 
 finally
@@ -801,7 +804,7 @@ begin
   // SESSION EVENTS
   //===============
   case meType of
-    // In this order when opening
+    // In this order when opening.
     MESessionTopologiesCleared      : hr := OnSessionTopologiesCleared(pEvent);
     MESessionTopologySet            : hr := OnSessionTopologySet(pEvent);
     // Raised by the Media Session when a new presentation starts.
@@ -815,14 +818,14 @@ begin
 
     MESessionTopologyStatus: hr:= OnTopologyStatus(pEvent);
 
-    // From here the event sequences are mandatory
+    // From here the event sequences are mandatory.
     MENewPresentation      : hr := OnNewPresentation(pEvent);
     MESessionStopped       : hr := OnSessionStop(pEvent);
     MESessionStarted       : hr := OnSessionStart(pEvent);
     MESessionClosed        : hr := S_OK;
     MESessionEnded         : hr := S_OK;
 
-  else  // Undefined event, handle this by OnSessionEvent handler
+  else  // Undefined event, handle this by OnSessionEvent handler.
     hr := OnSessionEvent(pEvent, DWord(meType));
   end;
 
@@ -833,7 +836,7 @@ end;
 
 //--------------------------------------------------------------------------
 
-// Handler for MESessionTopologyStatus event
+// Handler for MESessionTopologyStatus event.
 function TMfCaptureEngine.OnTopologyStatus(pEvent: IMFMediaEvent): HRESULT;
 var
   status: MF_TOPOSTATUS;
@@ -880,13 +883,13 @@ var
 
 begin
 
-  // Do here what you want, after the topology is cleared
+  // Do here what you want, after the topology is cleared.
   hr := S_OK;
   Result := hr;
 end;
 
 
-// Handler for MESessionTopologySet event
+// Handler for MESessionTopologySet event.
 function TMfCaptureEngine.OnTopologyReady(pEvent: IMFMediaEvent): HRESULT;
 var
   hr: HRESULT;
@@ -896,7 +899,7 @@ label
 
 begin
 
-  // release any previous instance of the m_pVideoDisplay interface
+  // release any previous instance of the m_pVideoDisplay interface.
   SafeRelease(m_pVideoDisplay);
 
   // Ask the session for the IMFVideoDisplayControl interface. This interface is
@@ -955,8 +958,8 @@ end;
 function TMfCaptureEngine.OnSessionEvent(pEvent: IMFMediaEvent; meType: DWord): HRESULT;
 begin
 
-  //this is more or less a dummy for now
-  //but feel free to add your own sessionevent handlers here
+  // This is more or less a dummy for now
+  // but feel free to add your own sessionevent handlers here.
   Result := S_OK;
 end;
 
@@ -1007,7 +1010,7 @@ end;
 //
 // Session handlers
 //
-// request for Start event
+// Request for Start event.
 function TMfCaptureEngine.OnSessionStart(pEvent: IMFMediaEvent): HRESULT;
 begin
 
@@ -1015,7 +1018,7 @@ begin
   Result := S_OK;
 end;
 
-// request for Stop event
+// Request for Stop event.
 function TMfCaptureEngine.OnSessionStop(pEvent: IMFMediaEvent): HRESULT;
 begin
 
@@ -1123,7 +1126,7 @@ begin
 
   if (State <> Closing) then
     begin
-      // Send event message
+      // Send event message.
       HandleEvent(UINT_PTR(pEvent));
     end;
 
@@ -1145,7 +1148,7 @@ end;
 //-------------------------------------------------------------------
 //  SetDevice
 //
-//  Sets the capture device source
+//  Sets the capture device source.
 //
 //  pActivate: The activation object for the device source.
 //-------------------------------------------------------------------
@@ -1154,8 +1157,8 @@ var
   hr: HRESULT;
   pSource: IMFMediaSource;
   pConfig: IMFAttributes;
-  ppDevices: PIMFActivate;  // Pointer to array of IMFActivate (PIMFActivate is equivalent to IMFActivate*)
-  pDevice: IMFActivate;     // Temporary variable for IMFActivate interface
+  ppDevices: PIMFActivate;  // Pointer to array of IMFActivate (PIMFActivate is equivalent to IMFActivate*).
+  pDevice: IMFActivate;     // Temporary variable for IMFActivate interface.
   count: UINT32;
   i: Integer;
 
@@ -1250,7 +1253,7 @@ begin
 end;
 
 
-// Prepares the recording session
+// Prepares the recording session.
 function TMfCaptureEngine.PrepareSession(): HRESULT;
 var
   pTopology: IMFTopology;
@@ -1274,7 +1277,7 @@ try
   // 2. Create the presentation descriptor.
   // 3. Create the (partial) source topology.
   // 4. Set the topology on the media session.
-  // 5. Start request [asynchronous - does not happen in this method, but in OnTopologySet]
+  // 5. Start request [asynchronous - does not happen in this method, but in OnTopologySet].
   //
 
   // Create a new topology.
@@ -1340,7 +1343,7 @@ try
 
       // Set state to "open pending"
       State := OpenPending;
-      // Send a request to start capturing (this is fired in OnTopologyReady)
+      // Send a request to start capturing (this is fired in OnTopologyReady).
       Request := reqStartRecording;
     end;
 
@@ -1448,7 +1451,7 @@ function TMfCaptureEngine.ResizeVideo(dRect: LPRECT): HRESULT;
 var
   rcpdest: LPRECT;
   rc: TRect;
-  hr: HResult;  //debug purpose
+  hr: HResult;  // Debug purpose.
 
 begin
 
@@ -1456,10 +1459,10 @@ begin
 
   if Assigned(m_pVideoDisplay) then
     begin
-      // Stop repaint
+      // Stop repaint.
       SetRedraw();
       // Set the destination rectangle.
-      // If dRect is empty; use the GetClientRect function
+      // If dRect is empty; use the GetClientRect function.
       if (dRect = Nil) then
         begin
           WinApi.Windows.GetClientRect(m_hwndVideo, rc);
@@ -1471,10 +1474,10 @@ begin
       hr := m_pVideoDisplay.SetVideoPosition(Nil, rcpdest);
 
       if SUCCEEDED(hr) then
-        // Set aspect ratio in conjunction with SetVideoPosition
+        // Set aspect ratio in conjunction with SetVideoPosition.
         hr := m_pVideoDisplay.SetAspectRatioMode(DWORD(MFVideoARMode_PreservePicture));
 
-      // Start repaint again
+      // Start repaint again.
       SetRedraw();
     end;
   Result := hr;
@@ -1830,7 +1833,7 @@ begin
 end;
 
 
-// Sets the desired clipping window/control
+// Sets the desired clipping window/control.
 procedure TMfCaptureEngine.SetVideoScreen(val: HWND);
 begin
 
