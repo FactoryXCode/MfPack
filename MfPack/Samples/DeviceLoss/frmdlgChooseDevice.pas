@@ -17,7 +17,8 @@
 // Company: FactoryX
 // Intiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX),
-//                 Peter Larson (ozships)
+//                 Peter Larson (ozships),
+//                 Ciaran (Ciaran3)
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
@@ -84,8 +85,7 @@ uses
   WinApi.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MfMetLib,
   {Application}
-  MfDeviceCaptureClass,
-  DeviceLoss;
+  MfDeviceCaptureClass;
 
 type
   TdlgChooseDevice = class(TForm)
@@ -93,9 +93,9 @@ type
     butCancel: TButton;
     Bevel1: TBevel;
     cbxCaptureDevices: TComboBox;
-    procedure FormShow(Sender: TObject);
     procedure butOkClick(Sender: TObject);
     procedure butCancelClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     { Private declarations }
 
@@ -111,24 +111,18 @@ implementation
 
 {$R *.dfm}
 
-uses
-  frmSimpleCapture;
-
-
 procedure TdlgChooseDevice.butCancelClick(Sender: TObject);
 begin
-  ModalResult := 0;
   Close();
 end;
 
 procedure TdlgChooseDevice.butOkClick(Sender: TObject);
 var
   i: Integer;
-
 begin
-  for i := 0 to Length(dpa) -1 do
+  for i := 0 to Length(FDevicePropertiesArray) -1 do
     begin
-      if (dpa[i].lpFriendlyName = cbxCaptureDevices.Text) then
+      if (FDevicePropertiesArray[i].lpFriendlyName = cbxCaptureDevices.Text) then
         begin
           iSelectedDevice := i;
           Break;
@@ -140,30 +134,24 @@ end;
 
 procedure TdlgChooseDevice.FormShow(Sender: TObject);
 var
-  hr: HRESULT;
-  _i: Integer;
-
+  i: Integer;
 begin
-  cbxCaptureDevices.Clear;
-  butOk.Enabled:= False;
-  iSelectedDevice := -1;
+  cbxCaptureDevices.Clear();
+  butOk.Enabled := False;
 
-  hr := EnumCaptureDeviceSources(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID,
-                                 dpa);
-
-  if SUCCEEDED(hr) then
+  if Length(FDevicePropertiesArray) = 0 then
     begin
-      for _i:= 0 to Length(dpa) -1 do
-        cbxCaptureDevices.Items.Add(dpa[_i].lpFriendlyName);
+      cbxCaptureDevices.Items.Append('COULD NOT FIND A DEVICE');
+      cbxCaptureDevices.ItemIndex := 0;
+    end
+  else
+    begin
+      for i:= 0 to Length(FDevicePropertiesArray) -1 do
+        cbxCaptureDevices.Items.Add(FDevicePropertiesArray[i].lpFriendlyName);
 
       cbxCaptureDevices.ItemIndex := 0;
       butOk.Enabled := True;
-    end
-  else
-   begin
-     cbxCaptureDevices.Items.Append('COULD NOT FIND A DEVICE');
-     cbxCaptureDevices.ItemIndex := 0;
-   end;
+    end;
 end;
 
 end.

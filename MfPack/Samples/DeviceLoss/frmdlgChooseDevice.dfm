@@ -3,25 +3,24 @@ object dlgChooseDevice: TdlgChooseDevice
   Top = 108
   BorderStyle = bsDialog
   Caption = 'Select Caption Device'
-  ClientHeight = 80
+  ClientHeight = 94
   ClientWidth = 291
   Color = clBtnFace
   ParentFont = True
-  OldCreateOrder = True
   Position = poScreenCenter
   OnShow = FormShow
-  PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object Bevel1: TBevel
-    Left = 8
-    Top = 8
-    Width = 275
-    Height = 31
+    Left = 0
+    Top = 0
+    Width = 291
+    Height = 45
+    Align = alTop
     Shape = bsFrame
   end
   object butOk: TButton
-    Left = 8
-    Top = 48
+    Left = 121
+    Top = 57
     Width = 75
     Height = 25
     Caption = 'OK'
@@ -31,8 +30,8 @@ object dlgChooseDevice: TdlgChooseDevice
     OnClick = butOkClick
   end
   object butCancel: TButton
-    Left = 89
-    Top = 48
+    Left = 202
+    Top = 57
     Width = 75
     Height = 25
     Cancel = True
@@ -45,7 +44,7 @@ object dlgChooseDevice: TdlgChooseDevice
     Left = 12
     Top = 12
     Width = 265
-    Height = 21
+    Height = 23
     TabOrder = 2
     Text = 'cbxCaptureDevices'
   end
