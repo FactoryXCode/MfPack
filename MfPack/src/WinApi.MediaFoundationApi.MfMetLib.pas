@@ -3447,7 +3447,8 @@ done:
           SafeRelease(pOriginalDevices^);
           Inc(pOriginalDevices);
         end;
-      CoTaskMemFree(pOriginalDevices);
+      //CoTaskMemFree(pOriginalDevices);
+      pOriginalDevices := nil;
     end;
 
   Result := hr;
@@ -3695,7 +3696,7 @@ begin
 done:
   // Free memory for the devices array.
   if Assigned(pOriginalDevices) then
-    CoTaskMemFree(pOriginalDevices);
+    pOriginalDevices := nil;
 
   Result := hr;
 end;
@@ -5622,7 +5623,7 @@ begin
           SafeRelease(pCurrentDevice^);
           Inc(pCurrentDevice);
         end;
-    CoTaskMemFree(ppDevices);
+    ppDevices := nil;
   end;
 
   Result := hr;
