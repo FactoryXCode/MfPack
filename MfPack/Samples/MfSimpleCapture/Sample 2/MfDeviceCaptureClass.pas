@@ -187,9 +187,6 @@ type
 
 type
 
-  // Note:
-  // Applications should use the Media Session for playback.
-
   TMfCaptureEngine = class(TInterfacedPersistent, IMFAsyncCallback)
   private
 
@@ -353,7 +350,7 @@ type
     function PrepareSession(): HRESULT;  // Prepares the session for recording
     function VideoDetected(): Boolean;   // returns m_bHasVideo;
 
-    // Get some camera settings (sample)
+    // Get camera settings.
     function GetCameraSettings(): HRESULT;
     // Set the camera properties.
     function SetCameraProps(pProps: TCameraPropSet): HRESULT;
@@ -395,6 +392,7 @@ label
   Done;
 
 begin
+
   // Close the old session, if any.
   hr := CloseSession();
   if FAILED(hr) then
@@ -431,13 +429,14 @@ label
   Done;
 
 begin
+
   // The IMFMediaSession.Close method is asynchronous, but the
   // MfPlayer.CloseSession method waits on the MESessionClosed event.
   //
   // MESessionClosed is guaranteed to be the last event that the
   // media session fires.
 
-  hr := s_ok;
+  hr := S_OK;
 
   // release the video display object
   if Assigned(m_pVideoDisplay) then
@@ -539,6 +538,7 @@ var
   h: THandle;
 
 begin
+
   if (hCloseEvent <> 0) then
     begin
       Result := MF_E_ALREADY_INITIALIZED;
@@ -564,6 +564,7 @@ end;
 // Resets all vars and releases all interfaces
 procedure TMfCaptureEngine.Clear();
 begin
+
   // reset vars
   m_bHasVideo := False;
   m_pwszSymbolicLink := nil;
@@ -572,7 +573,6 @@ begin
   m_Request := reqNone;
   dwSessionCaps := 0;
   m_dWaitResult := 0;
-
 end;
 
 
@@ -587,6 +587,7 @@ var
   hr: HRESULT;
 
 begin
+
   inherited Create();
 
   m_hwndVideo := hVideo;
@@ -617,6 +618,7 @@ var
   pCaptureEngine: TMfCaptureEngine;
 
 begin
+
   pCaptureEngine := TMfCaptureEngine.Create(hVideo,
                                             hMainForm);
 
@@ -636,6 +638,7 @@ end;
 //
 procedure TMfCaptureEngine.BeforeDestruction();
 begin
+
   Clear();
 
   // Unregister existing device
@@ -662,9 +665,10 @@ var
   FVideoProcessor: IMFVideoProcessor;
 
 begin
+
   hr:= S_OK;
 
-  if Not Assigned(m_pSession) then
+  if not Assigned(m_pSession) then
     begin
       Result := E_POINTER;
       Exit;
@@ -680,8 +684,9 @@ try
   else
     begin
       PropVariantInit(varStart);
-      varStart.vt := Word(VT_EMPTY);  //Slow when returning from pause!
-      hr := m_pSession.Start(GUID_NULL, varStart);
+      varStart.vt := Word(VT_EMPTY);  // Slow when returning from pause!
+      hr := m_pSession.Start(GUID_NULL,
+                             varStart);
       m_bPending := True;
       hr := PropVariantClear(varStart);
     end;
@@ -697,7 +702,7 @@ try
       State := Started;
 
       // check if there is video present
-      if (HasVideo = true) then
+      if (HasVideo = True) then
         begin
           hr := (m_pSession as IMFGetService).GetService(MR_VIDEO_MIXER_SERVICE,
                                                          IID_IMFVideoProcessor,
@@ -872,7 +877,9 @@ end;
 function TMfCaptureEngine.OnSessionTopologiesCleared(pEvent: IMFMediaEvent): HRESULT;
 var
   hr: HRESULT;
+
 begin
+
   // Do here what you want, after the topology is cleared
   hr := S_OK;
   Result := hr;
@@ -888,8 +895,9 @@ label
   done;
 
 begin
+
   // release any previous instance of the m_pVideoDisplay interface
-  m_pVideoDisplay := Nil;
+  SafeRelease(m_pVideoDisplay);
 
   // Ask the session for the IMFVideoDisplayControl interface. This interface is
   // implemented by the EVR (Enhanced Video Renderer) and is exposed by the media
@@ -911,7 +919,7 @@ begin
 
   // Set the target window (or control), at this point this is not really
   // nescesarry, because the previous -MfGetService- did that allready.
-  //{void} m_pVideoDisplay.SetVideoWindow(m_hwndVideo);
+  // {void} m_pVideoDisplay.SetVideoWindow(m_hwndVideo);
 
   // Adjust aspect ratio
   if Assigned(m_pVideoDisplay) then
@@ -946,6 +954,7 @@ end;
 // Override to handle additional session events.
 function TMfCaptureEngine.OnSessionEvent(pEvent: IMFMediaEvent; meType: DWord): HRESULT;
 begin
+
   //this is more or less a dummy for now
   //but feel free to add your own sessionevent handlers here
   Result := S_OK;
@@ -966,6 +975,7 @@ label
   done;
 
 begin
+
   dwSourceStreams := 0;
 
   // Get the presentation descriptor from the event.
@@ -1000,6 +1010,7 @@ end;
 // request for Start event
 function TMfCaptureEngine.OnSessionStart(pEvent: IMFMediaEvent): HRESULT;
 begin
+
   UpdatePendingCommands(reqStartRecording);
   Result := S_OK;
 end;
@@ -1007,6 +1018,7 @@ end;
 // request for Stop event
 function TMfCaptureEngine.OnSessionStop(pEvent: IMFMediaEvent): HRESULT;
 begin
+
   UpdatePendingCommands(reqStopRecording);
   Result := S_OK;
 end;
@@ -1069,7 +1081,8 @@ begin
     end;
 
   // Get the event from the event queue.
-  hr := m_pSession.EndGetEvent(pAsyncResult, pEvent);
+  hr := m_pSession.EndGetEvent(pAsyncResult,
+                               pEvent);
   if FAILED(hr) then
     goto done;
 
@@ -1078,7 +1091,7 @@ begin
   if FAILED(hr) then
     goto done;
 
-  if meType = MESessionClosed then
+  if (meType = MESessionClosed) then
     begin
       // If the session is closed, the application is waiting on the event
       // handle. Also, do not request any more events from the session.
@@ -1088,7 +1101,8 @@ begin
     begin
       // For all other events, ask the media session for the
       // next event in the queue.
-      hr := m_pSession.BeginGetEvent(IMFAsyncCallback(Self), Nil);
+      hr := m_pSession.BeginGetEvent(IMFAsyncCallback(Self),
+                                     nil);
       if FAILED(hr) then
         goto done;
     end;
@@ -1117,9 +1131,11 @@ done:
   Result := hr;
 end;
 
+
 function TMfCaptureEngine.GetParameters(out pdwFlags: DWord;
                                         out pdwQueue: DWord): HResult;
 begin
+
   Result := E_NOTIMPL;
 end;
 
@@ -1138,8 +1154,10 @@ var
   hr: HRESULT;
   pSource: IMFMediaSource;
   pConfig: IMFAttributes;
-  ppDevices: PIMFActivate;  // Pointer to array of IMFActivate
+  ppDevices: PIMFActivate;  // Pointer to array of IMFActivate (PIMFActivate is equivalent to IMFActivate*)
+  pDevice: IMFActivate;     // Temporary variable for IMFActivate interface
   count: UINT32;
+  i: Integer;
 
 begin
 
@@ -1147,7 +1165,6 @@ begin
 
   // Release the current instance of the player (if any).
   //Clear();
-  // Close session and release interfaces
   //CloseSession();
 
   // Prepare the device
@@ -1161,7 +1178,6 @@ begin
   // 7. Prepare session for recording.
   // 8. Get the device properties.
 
-
   // Create a new session for the player.
   hr := CreateSession();
 
@@ -1172,62 +1188,57 @@ begin
 
   // Request video capture devices.
   if SUCCEEDED(hr) then
-    begin
-      hr := pConfig.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
-                            DeviceProperty.riid);
-    end;
+    hr := pConfig.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
+                          DeviceProperty.riid);
 
   // Enumerate the devices again, because in the mean while a device could be
   // disconnected.
   if SUCCEEDED(hr) then
-    begin
-      hr := MFEnumDeviceSources(pConfig,
-                                ppDevices,
-                                count);
-    end;
+    hr := MFEnumDeviceSources(pConfig,
+                              ppDevices,
+                              count);
 
-{$POINTERMATH ON}
-
-   // Create a media source from the selected device.
-  if SUCCEEDED(hr) then
+  if SUCCEEDED(hr) and (count > 0) then
     begin
-      if (count > 0) then
+      // Loop through the devices and find the selected one.
+      for i := 0 to count - 1 do
         begin
-          hr := ppDevices[DeviceProperty.iDeviceIndex].ActivateObject(IID_IMFMediaSource,
-                                                                      Pointer(pSource));
-          if SUCCEEDED(hr) then
+          // Dereference the device at index i using the pointer offset.
+          pDevice := ppDevices^;  // Get the current device
+
+          // Check if this is the device we want based on the index.
+          if (i = DeviceProperty.iDeviceIndex) then
             begin
-              m_pActivate := ppDevices[DeviceProperty.iDeviceIndex];
+              // Create a media source from the selected device.
+              hr := pDevice.ActivateObject(IID_IMFMediaSource,
+                                           Pointer(pSource));
+
+              if SUCCEEDED(hr) then
+                m_pActivate := pDevice;
+
+              Break;  // Exit loop since we found the desired device.
             end;
-        end
-      else
-        begin
-          hr := MF_E_NOT_FOUND;
+
+          // Move the pointer to the next device.
+          Inc(ppDevices);  // Increment the pointer to the next device in the array
         end;
-    end;
+    end
+  else
+    hr := MF_E_NOT_FOUND;
 
-  // Get the symbolic link. This is needed to handle device-
-  // loss notifications. (See CheckCaptureDeviceLost.)
-  //
-  // Create a new media item for this media source, lookup by symboliclink.
+  // Get the symbolic link and continue with the session preparation...
   if SUCCEEDED(hr) then
-    hr := CreateVideoCaptureDeviceBySymolicLink(DeviceProperty.lpSymbolicLink,
-                                                pSource);
+    hr := CreateVideoCaptureDeviceBySymolicLink(DeviceProperty.lpSymbolicLink, pSource);
+
   if SUCCEEDED(hr) then
-    begin
-      if not RegisterForDeviceNotification(m_hwnd_MainForm,
-                                           p_hdevnotify) then
-        hr := GetLastError();
-    end;
+  begin
+    if not RegisterForDeviceNotification(m_hwnd_MainForm, p_hdevnotify) then
+      hr := GetLastError();
+  end;
 
-{$POINTERMATH OFF}
-
-  // Prepare the recording session
   if SUCCEEDED(hr) then
     begin
       m_pSource := pSource;
-
-      // Get the camera properties.
       hr := GetCameraSettings();
       if FAILED(hr) then
         Exit(hr);
@@ -1307,7 +1318,9 @@ try
   if FAILED(hr) then
     dwSessionCaps := $0001;
 
-  SetStreamRotation(m_pSource, 0, FRotation);
+  hr := SetStreamRotation(m_pSource,
+                          0,
+                          FRotation);
 
   if SUCCEEDED(hr) then
     begin
@@ -1431,7 +1444,6 @@ begin
 end;
 
 
-
 function TMfCaptureEngine.ResizeVideo(dRect: LPRECT): HRESULT;
 var
   rcpdest: LPRECT;
@@ -1467,6 +1479,7 @@ begin
     end;
   Result := hr;
 end;
+
 
 // Reduces flickering
 procedure TMfCaptureEngine.SetRedraw();
@@ -1542,7 +1555,7 @@ begin
                                        FCameraProps.CameraCtl_Exposure.prMax,
                                        FCameraProps.CameraCtl_Exposure.prDelta,
                                        FCameraProps.CameraCtl_Exposure.prDefault,
-                                       LONG(FCameraProps.CameraCtl_Exposure.prFlags)); // Note that values > $2 means we should use the flags defined in KsMedia.pas
+                                       FCameraProps.CameraCtl_Exposure.prFlags); // Note that values > $2 means we should use the flags defined in KsMedia.pas
         if (hr = E_PROP_ID_UNSUPPORTED) then
           FCameraProps.CameraCtl_Exposure.IsSupported := False
         else if (hr <> S_OK) then
@@ -1554,7 +1567,7 @@ begin
                                        FCameraProps.CameraCtl_Zoom.prMax,
                                        FCameraProps.CameraCtl_Zoom.prDelta,
                                        FCameraProps.CameraCtl_Zoom.prDefault,
-                                       LONG(FCameraProps.CameraCtl_Zoom.prFlags));
+                                       FCameraProps.CameraCtl_Zoom.prFlags);
         if (hr = E_PROP_ID_UNSUPPORTED) then
           FCameraProps.CameraCtl_Zoom.IsSupported := False
         else if (hr <> S_OK) then
@@ -1566,7 +1579,7 @@ begin
                                        FCameraProps.CameraCtl_Pan.prMax,
                                        FCameraProps.CameraCtl_Pan.prDelta,
                                        FCameraProps.CameraCtl_Pan.prDefault,
-                                       LONG(FCameraProps.CameraCtl_Pan.prFlags));
+                                       FCameraProps.CameraCtl_Pan.prFlags);
         if (hr = E_PROP_ID_UNSUPPORTED) then
           FCameraProps.CameraCtl_Pan.IsSupported := False
         else if (hr <> S_OK) then
@@ -1578,7 +1591,7 @@ begin
                                        FCameraProps.CameraCtl_Tilt.prMax,
                                        FCameraProps.CameraCtl_Tilt.prDelta,
                                        FCameraProps.CameraCtl_Tilt.prDefault,
-                                       LONG(FCameraProps.CameraCtl_Tilt.prFlags));
+                                       FCameraProps.CameraCtl_Tilt.prFlags);
         if (hr = E_PROP_ID_UNSUPPORTED) then
           FCameraProps.CameraCtl_Tilt.IsSupported := False
         else if (hr <> S_OK) then
@@ -1590,7 +1603,7 @@ begin
                                        FCameraProps.CameraCtl_Roll.prMax,
                                        FCameraProps.CameraCtl_Roll.prDelta,
                                        FCameraProps.CameraCtl_Roll.prDefault,
-                                       LONG(FCameraProps.CameraCtl_Roll.prFlags));
+                                       FCameraProps.CameraCtl_Roll.prFlags);
         if (hr = E_PROP_ID_UNSUPPORTED) then
           FCameraProps.CameraCtl_Roll.IsSupported := False
         else if (hr <> S_OK) then
@@ -1602,7 +1615,7 @@ begin
                                        FCameraProps.CameraCtl_Iris.prMax,
                                        FCameraProps.CameraCtl_Iris.prDelta,
                                        FCameraProps.CameraCtl_Iris.prDefault,
-                                       LONG(FCameraProps.CameraCtl_Iris.prFlags));
+                                       FCameraProps.CameraCtl_Iris.prFlags);
         if (hr = E_PROP_ID_UNSUPPORTED) then
           FCameraProps.CameraCtl_Iris.IsSupported := False
         else if (hr <> S_OK) then
@@ -1614,7 +1627,7 @@ begin
                                        FCameraProps.CameraCtl_Focus.prMax,
                                        FCameraProps.CameraCtl_Focus.prDelta,
                                        FCameraProps.CameraCtl_Focus.prDefault,
-                                       LONG(FCameraProps.CameraCtl_Focus.prFlags));
+                                       FCameraProps.CameraCtl_Focus.prFlags);
         if (hr = E_PROP_ID_UNSUPPORTED) then
           FCameraProps.CameraCtl_Focus.IsSupported := False
         else if (hr <> S_OK) then
@@ -1639,7 +1652,7 @@ begin
                                       FVideoProps.VideoCtl_Brightness.prMax,
                                       FVideoProps.VideoCtl_Brightness.prDelta,
                                       FVideoProps.VideoCtl_Brightness.prDefault,
-                                      LONG(FVideoProps.VideoCtl_Brightness.prFlags));
+                                      FVideoProps.VideoCtl_Brightness.prFlags);
         if (hr = E_PROP_ID_UNSUPPORTED) then
           FVideoProps.VideoCtl_Brightness.IsSupported := False
         else if (hr <> S_OK) then
@@ -1651,7 +1664,7 @@ begin
                                       FVideoProps.VideoCtl_Contrast.prMax,
                                       FVideoProps.VideoCtl_Contrast.prDelta,
                                       FVideoProps.VideoCtl_Contrast.prDefault,
-                                      LONG(FVideoProps.VideoCtl_Contrast.prFlags));
+                                      FVideoProps.VideoCtl_Contrast.prFlags);
         if (hr = E_PROP_ID_UNSUPPORTED) then
           FVideoProps.VideoCtl_Contrast.IsSupported := False
         else if (hr <> S_OK) then
@@ -1663,7 +1676,7 @@ begin
                                       FVideoProps.VideoCtl_Hue.prMax,
                                       FVideoProps.VideoCtl_Hue.prDelta,
                                       FVideoProps.VideoCtl_Hue.prDefault,
-                                      LONG(FVideoProps.VideoCtl_Hue.prFlags));
+                                      FVideoProps.VideoCtl_Hue.prFlags);
         if (hr = E_PROP_ID_UNSUPPORTED) then
           FVideoProps.VideoCtl_Hue.IsSupported := False
         else if (hr <> S_OK) then
@@ -1675,7 +1688,7 @@ begin
                                       FVideoProps.VideoCtl_Saturation.prMax,
                                       FVideoProps.VideoCtl_Saturation.prDelta,
                                       FVideoProps.VideoCtl_Saturation.prDefault,
-                                      LONG(FVideoProps.VideoCtl_Saturation.prFlags));
+                                      FVideoProps.VideoCtl_Saturation.prFlags);
         if (hr = E_PROP_ID_UNSUPPORTED) then
           FVideoProps.VideoCtl_Saturation.IsSupported := False
         else if (hr <> S_OK) then
@@ -1687,7 +1700,7 @@ begin
                                       FVideoProps.VideoCtl_Sharpness.prMax,
                                       FVideoProps.VideoCtl_Sharpness.prDelta,
                                       FVideoProps.VideoCtl_Sharpness.prDefault,
-                                      LONG(FVideoProps.VideoCtl_Sharpness.prFlags));
+                                      FVideoProps.VideoCtl_Sharpness.prFlags);
         if (hr = E_PROP_ID_UNSUPPORTED) then
           FVideoProps.VideoCtl_Sharpness.IsSupported := False
         else if (hr <> S_OK) then
@@ -1699,7 +1712,7 @@ begin
                                       FVideoProps.VideoCtl_Gamma.prMax,
                                       FVideoProps.VideoCtl_Gamma.prDelta,
                                       FVideoProps.VideoCtl_Gamma.prDefault,
-                                      LONG(FVideoProps.VideoCtl_Gamma.prFlags));
+                                      FVideoProps.VideoCtl_Gamma.prFlags);
         if (hr = E_PROP_ID_UNSUPPORTED) then
           FVideoProps.VideoCtl_Gamma.IsSupported := False
         else if (hr <> S_OK) then
@@ -1711,7 +1724,7 @@ begin
                                       FVideoProps.VideoCtl_ColorEnable.prMax,
                                       FVideoProps.VideoCtl_ColorEnable.prDelta,
                                       FVideoProps.VideoCtl_ColorEnable.prDefault,
-                                      LONG(FVideoProps.VideoCtl_ColorEnable.prFlags));
+                                      FVideoProps.VideoCtl_ColorEnable.prFlags);
         if (hr = E_PROP_ID_UNSUPPORTED) then
           FVideoProps.VideoCtl_ColorEnable.IsSupported := False
         else if (hr <> S_OK) then
@@ -1723,7 +1736,7 @@ begin
                                       FVideoProps.VideoCtl_WhiteBalance.prMax,
                                       FVideoProps.VideoCtl_WhiteBalance.prDelta,
                                       FVideoProps.VideoCtl_WhiteBalance.prDefault,
-                                      LONG(FVideoProps.VideoCtl_WhiteBalance.prFlags));
+                                      FVideoProps.VideoCtl_WhiteBalance.prFlags);
         if (hr = E_PROP_ID_UNSUPPORTED) then
           FVideoProps.VideoCtl_WhiteBalance.IsSupported := False
         else if (hr <> S_OK) then
@@ -1735,7 +1748,7 @@ begin
                                       FVideoProps.VideoCtl_BacklightCompensation.prMax,
                                       FVideoProps.VideoCtl_BacklightCompensation.prDelta,
                                       FVideoProps.VideoCtl_BacklightCompensation.prDefault,
-                                      LONG(FVideoProps.VideoCtl_BacklightCompensation.prFlags));
+                                      FVideoProps.VideoCtl_BacklightCompensation.prFlags);
         if (hr = E_PROP_ID_UNSUPPORTED) then
           FVideoProps.VideoCtl_BacklightCompensation.IsSupported := False
         else if (hr <> S_OK) then
@@ -1747,7 +1760,7 @@ begin
                                       FVideoProps.VideoCtl_Gain.prMax,
                                       FVideoProps.VideoCtl_Gain.prDelta,
                                       FVideoProps.VideoCtl_Gain.prDefault,
-                                      LONG(FVideoProps.VideoCtl_Gain.prFlags));
+                                      FVideoProps.VideoCtl_Gain.prFlags);
         if (hr = E_PROP_ID_UNSUPPORTED) then
           FVideoProps.VideoCtl_Gain.IsSupported := False
         else if (hr <> S_OK) then
@@ -1820,6 +1833,7 @@ end;
 // Sets the desired clipping window/control
 procedure TMfCaptureEngine.SetVideoScreen(val: HWND);
 begin
+
   if Assigned(m_pVideoDisplay) then
     m_pVideoDisplay.SetVideoWindow(val);
 end;
@@ -1827,6 +1841,7 @@ end;
 
 function TMfCaptureEngine.GetVideoScreen(): HWND;
 begin
+
   if Assigned(m_pVideoDisplay) then
     m_pVideoDisplay.GetVideoWindow(Result);
 end;
@@ -1838,6 +1853,7 @@ var
   nrc: MFVideoNormalizedRect;
 
 begin
+
   // we don't need the normalized rect.
   m_pVideoDisplay.GetVideoPosition(nrc, rc);
   CopyTRectToTRect(rc, Result);
