@@ -30,6 +30,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 // 27/07/2024 Tony                Added overloaded method ConfigureVideoEncoding
+// 27/09/2024 Tony                Removed use of POINTERMATH for Delphi versions < 2009.
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -1574,14 +1575,11 @@ var
   pAttributes: IMFAttributes;
   ppDevices: PIMFActivate;  // Pointer to the array of IMFActivate.
   pDevice: IMFActivate;
-  pOriginalDevices: PIMFActivate;  // Save the original pointer for memory release.
 
 label
   done;
 
 begin
-
-  pOriginalDevices := nil;
 
   // Create an attribute store to specify the enumeration parameters.
   hr := MFCreateAttributes(pAttributes,
@@ -1608,9 +1606,6 @@ begin
     goto done;
   end;
 
-  // Save the original pointer for later cleanup
-  pOriginalDevices := ppDevices;
-
   // Create the media source object by finding the device at the given index.
   for i := 0 to iCount - 1 do
     begin
@@ -1633,19 +1628,6 @@ begin
   end;
 
 done:
-
-  // Release the devices and free memory.
-  if Assigned(pOriginalDevices) then
-    begin
-      for i := 0 to iCount - 1 do
-        begin
-          SafeRelease(pOriginalDevices^);
-          Inc(pOriginalDevices);
-        end;
-
-      // Free the original memory for the devices array.
-      CoTaskMemFree(pOriginalDevices);  // Use the original pointer to free memory.
-    end;
 
   Result := hr;
 end;
@@ -3291,7 +3273,6 @@ var
   pMediaSource: IMFMediaSource;
   pSourceReader: IMFSourceReader;
   ppDevices: PIMFActivate;  // Pointer to array of IMFActivate
-  pOriginalDevices: PIMFActivate;  // Save the original pointer for cleanup
   iCount: UINT32;
   uiNameLen: UINT32;
   iIndex: Integer;
@@ -3304,8 +3285,6 @@ label
   done;
 
 begin
-
-  pOriginalDevices := nil;
 
   if (pAttributeSourceType <> MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID) and
      (pAttributeSourceType <> MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_AUDCAP_GUID) then
@@ -3320,16 +3299,20 @@ begin
             0);
 
   // Create an attribute store to specify the enumeration parameters.
-  hr := MFCreateAttributes(pAttributes, 1);
+  hr := MFCreateAttributes(pAttributes,
+                           1);
   if FAILED(hr) then
     goto done;
 
-  hr := pAttributes.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE, pAttributeSourceType);  // Source type: video or audio capture device
+  hr := pAttributes.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
+                            pAttributeSourceType);  // Source type: video or audio capture device
   if FAILED(hr) then
     goto done;
 
   // Enumerate devices.
-  hr := MFEnumDeviceSources(pAttributes, ppDevices, iCount);  // pointer to array of IMFActivate interfaces.
+  hr := MFEnumDeviceSources(pAttributes,
+                            ppDevices,
+                            iCount);  // pointer to array of IMFActivate interfaces.
   if FAILED(hr) then
     begin
       GetLastError();
@@ -3345,9 +3328,6 @@ begin
   SetLength(pDeviceProperties,
             iCount);
 
-  // Save the original pointer for cleanup.
-  pOriginalDevices := ppDevices;
-
   for i := 0 to iCount - 1 do
     begin
       // Try to get the friendly name.
@@ -3362,13 +3342,18 @@ begin
       pDeviceProperties[i].riid := pAttributeSourceType;
 
       // Try to get the SymbolicLink name.
-      if IsEqualGuid(pAttributeSourceType, MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID) then
+      if IsEqualGuid(pAttributeSourceType,
+                     MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID) then
         begin
-          hr := ppDevices^.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK, szSymLink, uiNameLen);
+          hr := ppDevices^.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
+                                              szSymLink,
+                                              uiNameLen);
         end
       else
         begin
-          hr := ppDevices^.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_AUDCAP_SYMBOLIC_LINK, szSymLink, uiNameLen);
+          hr := ppDevices^.GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_AUDCAP_SYMBOLIC_LINK,
+                                              szSymLink,
+                                              uiNameLen);
         end;
 
       if SUCCEEDED(hr) then
@@ -3376,7 +3361,8 @@ begin
           pDeviceProperties[i].lpSymbolicLink := szSymLink;
 
           // Handle video formats.
-          if IsEqualGuid(pAttributeSourceType, MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID) then
+          if IsEqualGuid(pAttributeSourceType,
+                         MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID) then
             begin
               hr := ppDevices^.ActivateObject(IID_IMFMediaSource,
                                               Pointer(pMediaSource));
@@ -3397,7 +3383,8 @@ begin
           for j := 0 to Length(pDeviceProperties) - 1 do
              begin
 
-               hr := ppDevices^.ActivateObject(IID_IMFMediaSource, Pointer(pMediaSource));
+               hr := ppDevices^.ActivateObject(IID_IMFMediaSource,
+                                               Pointer(pMediaSource));
                if SUCCEEDED(hr) then
                  SetLength(pDeviceProperties[iIndex].aAudioFormats,
                            1);
@@ -3439,17 +3426,6 @@ begin
     end;
 
 done:
-
-  if Assigned(pOriginalDevices) then
-    begin
-      for i := 0 to iCount - 1 do
-        begin
-          SafeRelease(pOriginalDevices^);
-          Inc(pOriginalDevices);
-        end;
-      //CoTaskMemFree(pOriginalDevices);
-      pOriginalDevices := nil;
-    end;
 
   Result := hr;
 end;
@@ -3620,7 +3596,8 @@ end;
 
 function GetSupportedVideoFormats(CurrentArray: TDevicePropertiesArray): TDevicePropertiesArray;
 var
-  i, j: Integer;
+  i,
+  j: Integer;
 
 begin
 
@@ -3645,7 +3622,6 @@ var
   count: UINT32;
   pConfig: IMFAttributes;
   ppDevices: PIMFActivate;  // Pointer to array of IMFActivate.
-  pOriginalDevices: PIMFActivate;  // Store the original pointer.
   hr: HResult;
 
 label
@@ -3655,7 +3631,6 @@ begin
 
   count := 0;
   ppDevices := nil;  // Initialize pointer.
-  pOriginalDevices:= nil;
 
   // Create an attribute store to hold the search criteria.
   hr := MFCreateAttributes(pConfig,
@@ -3676,9 +3651,6 @@ begin
   if FAILED(hr) then
     goto done;
 
-  // Save the original pointer for freeing memory later.
-  pOriginalDevices := ppDevices;
-
   // Create a media source from the selected device.
   if (count > 0) and (pDeviceProperties.iDeviceIndex < Integer(count)) then
     begin
@@ -3694,9 +3666,6 @@ begin
     hr := MF_E_NOT_FOUND;
 
 done:
-  // Free memory for the devices array.
-  if Assigned(pOriginalDevices) then
-    pOriginalDevices := nil;
 
   Result := hr;
 end;

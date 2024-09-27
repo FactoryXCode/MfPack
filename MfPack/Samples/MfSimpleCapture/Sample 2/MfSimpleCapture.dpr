@@ -2,12 +2,6 @@ program MfSimpleCapture;
 
 uses
 
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
-
   Vcl.Forms,
   MfDeviceCaptureClass in 'MfDeviceCaptureClass.pas',
   frmSimpleCapture in 'frmSimpleCapture.pas' {Frm_SimpleCapture},
