@@ -1115,21 +1115,17 @@ var
   hr: HRESULT;
 
 begin
-  hr := S_OK;
 
-try
-  // use assertions in debug mode only.
+  // Use assertions in debug mode only.
   {$IFDEF DEBUG}
   Assert(bit <> nil);
   {$ENDIF}
-  data := Nil;
 
   // Set the biSize member of the structure to sizeof(BITMAPINFOHEADER)
   ZeroMemory(@bmi, sizeof(BITMAPINFOHEADER));
   bmi.biSize := sizeof(BITMAPINFOHEADER);
 
   bufsize := $0000;
-  hr := E_FAIL;
 
   if Assigned(m_pVideoDisplay) then
     begin
@@ -1138,13 +1134,12 @@ try
                                             bufSize,
                                             timestamp);
       if FAILED(hr) then
-        begin
-          Result := hr;
-          Exit;
-        end;
+        Exit(hr);
 
       data := buffer;
-    end;
+    end
+  else
+    Exit(E_POINTER);
 
   if (bmi.biSizeImage > 0) and (data <> nil) then
     begin
@@ -1161,9 +1156,7 @@ try
       hr := S_OK;
     end;
 
-finally
   Result := hr;
-end;
 end;
 
 
@@ -1747,9 +1740,6 @@ var
   hr: HRESULT;
 
 begin
-  hr := S_OK;
-
-try
 
   PropVariantInit(varStart);
 
@@ -1772,12 +1762,12 @@ try
       m_State.Command := CmdStart;
       m_bPending := True;
       UpdateCaption();
-    end;
+    end
+  else
+    Exit(hr);
 
-finally
   PropVariantClear(varStart);
   Result := hr;
-end;
 end;
 
 {$HINTS OFF}

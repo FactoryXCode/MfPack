@@ -346,21 +346,16 @@ begin
   bFound := False;
   I := 0;
 
-try
   // check if Url has filename
   if (sUrl = '') then
     begin
-      hr := ERROR_INVALID_PARAMETER;
-      Result := hr;
-      Exit;
+      Exit(ERROR_INVALID_PARAMETER);
     end;
 
   // Check if the file exists
   if not FileExists(sUrl) then
     begin
-      hr := ERROR_FILE_NOT_FOUND;
-      Result := hr;
-      Exit;
+      Exit(ERROR_FILE_NOT_FOUND);
     end;
 
   UrlFileName := ExtractFilename(sUrl);
@@ -404,9 +399,7 @@ try
 
   if (Length(pc_LanguageTags.TimedTxtPropsArray) = 0) then
     begin
-      hr := ERROR_FILE_NOT_FOUND;
-      Result := hr;
-      Exit;
+      Exit(ERROR_FILE_NOT_FOUND);
     end;
 
 // from here we try to get the language of the .srt (SubRip) file
@@ -440,11 +433,7 @@ srt:
             end;
         end;
     end;
-  begin
-    hr := S_OK;
-    Result := hr;
-    Exit;
-  end;
+
 
 // from here we try to get the language of the .vtt (WEBVTT) file
 vtt:
@@ -477,11 +466,6 @@ vtt:
             end;
         end;
     end;
-  begin
-    hr := S_OK;
-    Result := hr;
-    Exit;
-  end;
 
 
 // from here we try to get the language of the .sub (MicroDvd) file
@@ -515,13 +499,7 @@ sub:
             end;
         end;
     end;
-  begin
-    hr := S_OK;
-    Result := hr;
-    Exit;
-  end;
 
-finally
   // store
   if bFound then
     begin
@@ -530,7 +508,6 @@ finally
       sp_FriendlyLangName := pc_LanguageTags.TimedTxtPropsArray[I].sFriendlyLanguageName
     end;
   Result := hr;
-end;
 end;
 
 

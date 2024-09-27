@@ -1246,7 +1246,7 @@ begin
       if FAILED(hr) then
         Exit(hr);
 
-      PrepareSession();
+      hr := PrepareSession();
     end;
 
   Result := hr;
@@ -1782,6 +1782,9 @@ begin
       end;
   end;
 
+  // If no support, just ignore this exept for other errors.
+  if (hr = E_PROP_ID_UNSUPPORTED) then
+    hr := S_OK;
   Result := hr;
 end;
 
