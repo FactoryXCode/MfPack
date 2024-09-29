@@ -925,7 +925,7 @@ type
     // <param name ="pAudioSource">
     // A pointer to IMFMediaSource or IMFActivate interface that represents an audio device.
     // <param name ="pVideoSource">
-    // A pointer to IMFAttributes or IMFActivate interface that represetns a video device.
+    // A pointer to IMFAttributes or IMFActivate interface that represents a video device.
 
     function StartPreview(): HResult; stdcall;
     // Asynchronous method to start preview.

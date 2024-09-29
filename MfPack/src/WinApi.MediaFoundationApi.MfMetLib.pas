@@ -229,7 +229,7 @@ type
     lpDisplayName: LPWSTR;   // Displayname of the FriendlyName when doubles are found.
     lpSymbolicLink: LPWSTR;  // Device symlink.
     aVideoFormats: TVideoFormatInfoArray; // Video capabilities of the device supported by Media Foundation.
-    aAudioFormats: TMFAudioFormatArray; // Audio capabilities of the device supported by Media Foundation.
+    aAudioFormats: TMFAudioFormatArray;   // Audio capabilities of the device supported by Media Foundation.
     dwSupportedFormats: DWord; // Number of mediatype formats of the capturedevice supported by Media Foundation.
     dwNativeFormats: DWord;    // Number of native mediatype formats of the capturedevice.
     pActivate: IMFActivate;    // The activation object of the device.
@@ -362,12 +362,6 @@ type
 
   function GetEventObject(pEvent: IMFMediaEvent;
                           out ppObject): HResult;
-
-  // Alternative for ProcessMessages
-  // Example usage: HandleMessages(GetCurrentThread());
-  procedure HandleMessages(AThread: THandle;
-                           AWait: Cardinal = INFINITE);
-
 
 // Media Samples
 // =============
@@ -1356,6 +1350,7 @@ begin
     aAudioFormats[i].Reset;
   aAudioFormats := nil;
 
+  SafeRelease(pActivate);
 end;
 
 
@@ -1382,34 +1377,6 @@ begin
     end;
 
   Result := hr;
-end;
-
-
-procedure HandleMessages(AThread: THandle;
-                         AWait: Cardinal = INFINITE);
-var
-  pMsg: TMsg;
-
-begin
-
-  while (MsgWaitForMultipleObjects(1,
-                                   AThread,
-                                   False,
-                                   AWait,
-                                   QS_ALLINPUT) = WAIT_OBJECT_0 + 1) do
-    begin
-      PeekMessage(pMsg,
-                  0,
-                  0,
-                  0,
-                  PM_REMOVE);  // Messages are not removed from the queue after processing by PeekMessage.
-
-      if pMsg.Message = WM_QUIT then
-        Exit;
-
-      TranslateMessage(pMsg);
-      DispatchMessage(pMsg);
-    end;
 end;
 
 
@@ -3251,6 +3218,7 @@ function EnumCaptureDeviceSources(const pAttributeSourceType: TGuid;
                         out pIndex: Integer): Boolean; inline;
   var
     i: Integer;
+
   begin
     pIndex := -1;
     i := Length(pDeviceProperties) - 1;
@@ -3272,7 +3240,7 @@ var
   pAttributes: IMFAttributes;
   pMediaSource: IMFMediaSource;
   pSourceReader: IMFSourceReader;
-  ppDevices: PIMFActivate;  // Pointer to array of IMFActivate
+  ppDevices: PIMFActivate;  // Pointer to array of IMFActivate.
   iCount: UINT32;
   uiNameLen: UINT32;
   iIndex: Integer;
@@ -3295,6 +3263,7 @@ begin
 
   uiNameLen := 0;
   iIndex := 0;
+
   SetLength(pDeviceProperties,
             0);
 
@@ -3340,6 +3309,7 @@ begin
       pDeviceProperties[i].iDeviceIndex := i;
       pDeviceProperties[i].lpFriendlyName := szName;
       pDeviceProperties[i].riid := pAttributeSourceType;
+      pDeviceProperties[i].pActivate := ppDevices^;
 
       // Try to get the SymbolicLink name.
       if IsEqualGuid(pAttributeSourceType,
@@ -3378,27 +3348,30 @@ begin
               SafeRelease(pSourceReader);
               SafeRelease(pMediaSource);
             end
-      else  // Handle audio formats
-        begin
-          for j := 0 to Length(pDeviceProperties) - 1 do
-             begin
+          else  // Handle audio formats
+            begin
+              for j := 0 to Length(pDeviceProperties) - 1 do
+                begin
 
-               hr := ppDevices^.ActivateObject(IID_IMFMediaSource,
-                                               Pointer(pMediaSource));
-               if SUCCEEDED(hr) then
-                 SetLength(pDeviceProperties[iIndex].aAudioFormats,
-                           1);
+                  hr := ppDevices^.ActivateObject(IID_IMFMediaSource,
+                                                  Pointer(pMediaSource));
+                  if SUCCEEDED(hr) then
+                    SetLength(pDeviceProperties[iIndex].aAudioFormats,
+                              1);
 
-               hr := GetAudioFormat(pDeviceProperties[iIndex].aAudioFormats[0]);
-               if SUCCEEDED(hr) then
-                 pDeviceProperties[iIndex].aAudioFormats[0].tgMajorFormat := MFMediaType_Audio;
-             end;
-         end;
+                  hr := GetAudioFormat(pDeviceProperties[iIndex].aAudioFormats[0]);
+
+                  if SUCCEEDED(hr) then
+                    pDeviceProperties[iIndex].aAudioFormats[0].tgMajorFormat := MFMediaType_Audio;
+
+                  SafeRelease(pMediaSource);
+                end;
+            end;
+        end;
+
+      szName := nil;
+      Inc(ppDevices);
     end;
-
-    szName := nil;
-    Inc(ppDevices);
-  end;
 
   // Update display name for devices with the same name
   for i := 0 to Length(pDeviceProperties) - 1 do

@@ -594,7 +594,8 @@ type
 
   // IAudioSystemEffectsPropertyChangeNotificationClient
   // ===================================================
-  // Description:
+  // Description: A callback interface implemented by clients to
+  // receive notifications when audio system effect properties change.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioSystemEffectsPropertyChangeNotificationClient);'}
   {$EXTERNALSYM IAudioSystemEffectsPropertyChangeNotificationClient}
@@ -611,12 +612,14 @@ type
 
   // IAudioSystemEffectsPropertyStore
   // ================================
-  // Description:
+  // Provides access to manage audio system effects audio stores and
+  // to register for notifications when audio system effect properties change.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioSystemEffectsPropertyStore);'}
   {$EXTERNALSYM IAudioSystemEffectsPropertyStore}
   IAudioSystemEffectsPropertyStore = interface(IUnknown)
   ['{302AE7F9-D7E0-43E4-971B-1F8293613D2A}']
+
     function OpenDefaultPropertyStore(stgmAccess: DWORD;
                                       out propStore: IPropertyStore): HResult; stdcall;
 
@@ -706,7 +709,7 @@ type
     //      ppInterface       - [out] Address of a pointer that will receive the specified interface
     //
     // Remarks:
-    //      The caller is responsible for releasing ppInterface using IUnknown.Release()
+    //      The caller is responsible for releasing ppInterface.
     //
   end;
   IID_IMMDeviceActivator = IMMDeviceActivator;

@@ -105,8 +105,8 @@ uses
   WinApi.CoreAudioApi.MMDeviceApi,
   WinApi.CoreAudioApi.AudioPolicy,
   WinApi.CoreAudioApi.AudioClient,
-  WinApi.CoreAudioApi.Audiosessiontypes,
-  WinApi.CoreAudioApi.Endpointvolume,
+  WinApi.CoreAudioApi.AudioSessionTypes,
+  WinApi.CoreAudioApi.EndPointVolume,
   WinApi.CoreAudioApi.DeviceTopology,
   WinApi.CoreAudioApi.FunctionDiscoveryKeys_devpkey;
 

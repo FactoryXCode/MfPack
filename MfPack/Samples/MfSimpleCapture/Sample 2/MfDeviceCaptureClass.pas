@@ -1231,11 +1231,13 @@ begin
 
   // Get the symbolic link and continue with the session preparation...
   if SUCCEEDED(hr) then
-    hr := CreateVideoCaptureDeviceBySymolicLink(DeviceProperty.lpSymbolicLink, pSource);
+    hr := CreateVideoCaptureDeviceBySymolicLink(DeviceProperty.lpSymbolicLink,
+                                                pSource);
 
   if SUCCEEDED(hr) then
   begin
-    if not RegisterForDeviceNotification(m_hwnd_MainForm, p_hdevnotify) then
+    if not RegisterForDeviceNotification(m_hwnd_MainForm,
+                                         p_hdevnotify) then
       hr := GetLastError();
   end;
 
@@ -1316,7 +1318,7 @@ try
   // When the method completes, MFPlay will call OnMediaPlayerEvent
   // with the MFP_EVENT_TYPE_MEDIAITEM_CREATED event.
 
-  // obtain capabilities of the current session
+  // Obtain capabilities of the current session.
   hr := m_pSession.GetSessionCapabilities(dwSessionCaps);
   if FAILED(hr) then
     dwSessionCaps := $0001;

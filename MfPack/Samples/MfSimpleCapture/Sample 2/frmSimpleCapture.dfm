@@ -23,8 +23,6 @@ object Frm_SimpleCapture: TFrm_SimpleCapture
     Align = alBottom
     BevelInner = bvLowered
     TabOrder = 0
-    ExplicitTop = 344
-    ExplicitWidth = 823
     object Button1: TButton
       Left = 10
       Top = 13
@@ -71,8 +69,6 @@ object Frm_SimpleCapture: TFrm_SimpleCapture
     ShowCaption = False
     TabOrder = 1
     OnResize = pnlVideoResize
-    ExplicitWidth = 475
-    ExplicitHeight = 344
   end
   object pnlCameraAndVideoControl: TPanel
     Left = 481
@@ -82,8 +78,6 @@ object Frm_SimpleCapture: TFrm_SimpleCapture
     Align = alRight
     TabOrder = 2
     Visible = False
-    ExplicitLeft = 475
-    ExplicitHeight = 344
     object Label1: TLabel
       Left = 14
       Top = 10
