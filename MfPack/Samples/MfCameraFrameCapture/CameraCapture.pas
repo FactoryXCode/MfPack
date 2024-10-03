@@ -495,7 +495,7 @@ begin
 
   if Result then
     begin
-      Result := SUCCEEDED(FVideoAmp.GetRange(VideoProcAmp_Brightness,
+      Result := SUCCEEDED(FVideoAmp.GetRange(Long(VideoProcAmp_Brightness),
                           FCameraBrightness.FMin,
                           FCameraBrightness.FMax,
                           FCameraBrightness.FStep,
@@ -515,7 +515,7 @@ var
 begin
   oFlags := 0;
   if Assigned(FVideoAmp) then
-    FVideoAmp.Set_(VideoProcAmp_Brightness,
+    FVideoAmp.Set_(Long(VideoProcAmp_Brightness),
                    AValue,
                    oFlags);
 end;
@@ -528,7 +528,7 @@ var
   oFlags: Integer;
 begin
   oFlags := 0;
-  if Assigned(FVideoAmp) and SUCCEEDED(FVideoAmp.Get(VideoProcAmp_Brightness, iValue, oFlags)) then
+  if Assigned(FVideoAmp) and SUCCEEDED(FVideoAmp.Get(Long(VideoProcAmp_Brightness), iValue, oFlags)) then
     Result := iValue
   else
     Result := 0;

@@ -11,27 +11,22 @@ object FrmMain: TFrmMain
   Font.Name = 'Segoe UI'
   Font.Style = []
   Font.Quality = fqClearTypeNatural
-  OldCreateOrder = True
-  Position = poDesktopCenter
+  Position = poScreenCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = HandlFormShow
-  PixelsPerInch = 96
   TextHeight = 15
   object pcSetup: TPageControl
     Left = 0
     Top = 0
     Width = 1214
     Height = 233
-    ActivePage = tsSetup
+    ActivePage = tsAdvanced
     Align = alTop
     TabOrder = 0
+    ExplicitWidth = 1208
     object tsSetup: TTabSheet
       Caption = 'Setup'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         1206
         203)
@@ -144,6 +139,7 @@ object FrmMain: TFrmMain
         ReadOnly = True
         ScrollBars = ssVertical
         TabOrder = 5
+        ExplicitWidth = 1094
       end
       object btnStartBurstCapture: TButton
         Left = 216
@@ -246,10 +242,6 @@ object FrmMain: TFrmMain
     object tsAdvanced: TTabSheet
       Caption = 'Advanced'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object lblBrightness: TLabel
         Left = 16
         Top = 48
@@ -301,10 +293,6 @@ object FrmMain: TFrmMain
     object tsDiagnostics: TTabSheet
       Caption = 'Diagnostics'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object lblMaxDesc2: TLabel
         Left = 16
         Top = 80
@@ -343,12 +331,10 @@ object FrmMain: TFrmMain
     ActivePage = tsFrame
     Align = alClient
     TabOrder = 1
+    ExplicitWidth = 1208
+    ExplicitHeight = 587
     object tsFrame: TTabSheet
       Caption = 'Frame'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object pbCapture: TPaintBox
         Left = 0
         Top = 0
