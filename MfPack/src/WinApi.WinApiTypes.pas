@@ -2824,6 +2824,7 @@ const
 
   MAXDW = MAXDWORD;
   MAXUINT32 = High(UINT32);
+  MAXUINT64 = High(UINT64);
 
   {$IFDEF MFP_INT_MAX}
   INT_MAX        = 2147483647; // max value for an int
