@@ -1080,7 +1080,9 @@ begin
   else
     begin
       params.RearDelay := ConstrainValue(params.RearDelay, 0, 5);
+      {$IFDEF _WIN32_WINNT_WIN10}
       params.SideDelay := ConstrainValue(params.SideDelay, 0, 0);
+      {$ENDIF}
     end;
 
   // Indexed parameters

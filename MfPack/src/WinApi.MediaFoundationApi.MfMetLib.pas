@@ -1259,9 +1259,8 @@ procedure GetSpeakersLayOut(const ChannelMatrix: UINT32;
 
 implementation
 
-
-uses
   {$IFDEF DEBUG}
+uses
   WinApi.MediaFoundationApi.MfMediaTypeDebug;
   {$ENDIF}
 
@@ -5550,7 +5549,8 @@ begin
           Inc(pCurrentDevice,
               iDeviceIndex);
 
-          hr := pCurrentDevice^.ActivateObject(IID_IMFMediaSource, Pointer(pSource));
+          hr := pCurrentDevice^.ActivateObject(IID_IMFMediaSource,
+                                               Pointer(pSource));
         end
     else
       hr := MF_E_NOT_FOUND;
