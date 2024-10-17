@@ -250,16 +250,21 @@ implementation
 
 procedure Register;
 begin
+
   RegisterComponents('MfPack Core Audio Samples', [TMfAudioEndPoint]);
 end;
+
 
 // Constructor
 constructor TMfAudioEndPoint.Create(AOwner: TComponent);
 var
   hr: HResult;
+
 label
   done;
+
 begin
+
   inherited Create(AOwner);
   CoInitialize(Nil);
 
@@ -308,9 +313,11 @@ done:
       end;
 end;
 
+
 // Destructor
 destructor TMfAudioEndPoint.Destroy;
 begin
+
   // Unregister callback interface
   if (FDeviceEnumerator <> Nil) then
     OleCheck(FAudioEndpoint.UnregisterControlChangeNotify(FOnEndPointNotify));
@@ -380,7 +387,9 @@ procedure TMfAudioEndPoint.GetVolumeRange(out pflVolumeMindB: Single;
                                           out pflVolumeIncrementdB: Single);
 var
   hr: HResult;
+
 begin
+
   hr := FAudioEndpoint.GetVolumeRange(pflVolumeMindB,
                                       pflVolumeMaxdB,
                                       pflVolumeIncrementdB);
@@ -396,6 +405,7 @@ end;
 
 function TMfAudioEndPoint.GetGuidContextAsString(): string;
 begin
+
   Result := GuidToString(g_guidEventContext);
 end;
 
@@ -404,7 +414,9 @@ function TMfAudioEndPoint.GetChannels(): UINT;
 var
   hr: HResult;
   channels: UINT;
+
 begin
+
   hr := FAudioEndpoint.GetChannelCount(channels);
   if SUCCEEDED(hr) then
     Result := channels
@@ -420,7 +432,9 @@ function TMfAudioEndPoint.GetMute(): BOOL;
 var
   hr: HResult;
   Res: BOOL;
+
 begin
+
   hr := FAudioEndpoint.GetMute(INT(Res));
   if FAILED(hr) then
     OleCheck(hr);
@@ -431,7 +445,9 @@ end;
 procedure TMfAudioEndPoint.SetMute(aValue: BOOL);
 var
   hr: HResult;
+
 begin
+
   // This is a workaround on the BOOL issue.
   // See comment at DCBOOL in WinApi.WinApiTypes.pas
   hr := FAudioEndpoint.SetMute(INT(aValue),
@@ -445,7 +461,9 @@ function TMfAudioEndPoint.GetMasterScalarVolume(): Single;
 var
   hr: HResult;
   sVolLevel: Single;
+
 begin
+
   hr := FAudioEndpoint.GetMasterVolumeLevelScalar(sVolLevel);
   if FAILED(hr) then
     begin
@@ -455,6 +473,7 @@ begin
   else
     Result := sVolLevel;
 end;
+
 
 procedure TMfAudioEndPoint.SetMasterScalarVolume(aValue: Single);
 var
@@ -474,7 +493,9 @@ function TMfAudioEndPoint.GetChannelScalarVolume(Index: UINT): Single;
 var
   hr: HResult;
   fLevelDB: Single;
+
 begin
+
   hr := FAudioEndpoint.GetChannelVolumeLevel(Index,
                                              fLevelDB);
   if SUCCEEDED(hr) then
@@ -486,11 +507,14 @@ begin
     end;
 end;
 
+
 procedure TMfAudioEndPoint.SetChannelScalarVolume(Index: UINT;
                                                   chVolume: Single);
 var
   hr: HResult;
+
 begin
+
   hr := FAudioEndpoint.SetChannelVolumeLevel(Index,
                                              chVolume,
                                              @g_GuidEventContext);
@@ -500,6 +524,7 @@ end;
 
 function TMfAudioEndPoint.GetStateAsString(): string;
 begin
+
   case fState of
     DEVICE_STATE_ACTIVE:     Result := DEV_STATE_ACTIVE;
     DEVICE_STATE_DISABLED:   Result := DEV_STATE_DISABLED;
@@ -509,12 +534,14 @@ begin
   end;
 end;
 
+
 function TMfAudioEndPoint.GetMasterDbVolume(): Single;
 var
   hr: HResult;
   sVolLevel: Single;
 
 begin
+
   hr := FAudioEndpoint.GetMasterVolumeLevel(sVolLevel);
   if FAILED(hr) then
     begin
@@ -525,10 +552,13 @@ begin
     Result := sVolLevel;
 end;
 
+
 procedure TMfAudioEndPoint.SetMasterDbVolume(aValue: Single);
 var
   hr: HResult;
+
 begin
+
   if (aValue < MIN_INPUT_VALUE) then
     aValue := MIN_INPUT_VALUE;
   if (aValue > MAX_INPUT_VALUE) then
@@ -538,8 +568,10 @@ begin
   OleCheck(hr);
 end;
 
+
 procedure TMfAudioEndPoint.SetDataFlow(aValue: EDataFlow);
 begin
+
   // Only these 2 members of the eDataFlow struct are alowed!
   if aValue in [eRender, eCapture] then
     begin
@@ -551,8 +583,10 @@ begin
     end;
 end;
 
+
 procedure TMfAudioEndPoint.SetDeviceState(aValue: string);
 begin
+
   if (aValue = DEV_STATE_ACTIVE) then
     fState := DEVICE_STATE_ACTIVE
   else if (aValue = DEV_STATE_DISABLED) then
@@ -573,7 +607,9 @@ end;
 procedure TMfAudioEndPoint.SetEndPointDevice(aValue: DWord);
 var
   hr: HResult;
+
 begin
+
   if not Assigned(FEndPointDevices) then
     Exit;
 
@@ -645,9 +681,10 @@ end;
 function TMfAudioEndPoint.SupportsHardware(HardwareSupportMask: DWord = 0): Boolean;
 var
   hr: HResult;
+
 begin
 
-  if Not Assigned(FAudioEndpoint) then
+  if not Assigned(FAudioEndpoint) then
     begin
       Result := False;
       Exit;
@@ -675,7 +712,9 @@ end;
 function TMfAudioEndPoint.VolumeStepUp(const GuidEventContext: TGuid): HResult;
 var
   hr: HResult;
+
 begin
+
   if Assigned(FAudioEndpoint) then
     hr := FAudioEndpoint.VolumeStepUp(@GuidEventContext)
   else
@@ -687,7 +726,9 @@ end;
 function TMfAudioEndPoint.VolumeStepDown(const GuidEventContext: TGuid): HResult;
 var
   hr: HResult;
+
 begin
+
   if Assigned(FAudioEndpoint) then
     hr := FAudioEndpoint.VolumeStepDown(@GuidEventContext)
   else
@@ -696,11 +737,12 @@ begin
 end;
 
 
-
 function TMfAudioEndPoint.RegisterAudioEndpointVolumeCallback(pNotify: IAudioEndpointVolumeCallback): HResult;
 var
   hr: HResult;
+
 begin
+
   // The RegisterControlChangeNotify method registers a client's notification callback interface.
   if Assigned(FAudioEndpoint) then
     hr := FAudioEndpoint.RegisterControlChangeNotify(pNotify)
@@ -712,7 +754,9 @@ end;
 function TMfAudioEndPoint.UnregisterAudioEndpointVolumeCallback(pNotify: IAudioEndpointVolumeCallback): HResult;
 var
   hr: HResult;
+
 begin
+
   if Assigned(FAudioEndpoint) then
     hr := FAudioEndpoint.UnregisterControlChangeNotify(pNotify)
   else
@@ -728,6 +772,7 @@ function TMfAudioEndPoint.GetAudioDeviceDescriptions(DefaultDevice: IMMDevice;  
                                                      const DevicePkey: PROPERTYKEY; // Possible values are: PKEY_Device_FriendlyName, PKEY_Device_DeviceDesc or PKEY_DeviceInterface_FriendlyName.
                                                      out deviceDesc: WideString): HResult;
 begin
+
   // MMDevApiUtils.GetDeviceDescriptions
   Result := GetDeviceDescriptions(DefaultDevice,
                                   DevicePkey,
@@ -740,6 +785,7 @@ function TMfAudioEndPoint.GetAudioEndPoints(const flow: EDataFlow;
                                             state: eState;
                                             out endpointdevices: TEndPointDeviceArray): HResult;
 begin
+
   // MMDevApiUtils.GetEndpointDevices
   Result := GetEndpointDevices(Flow,
                                DWord(State),
@@ -752,10 +798,10 @@ end;
 // rendering an audio stream.
 function TMfAudioEndPoint.GetDefaultAudioEndPointDevice(out audioEndPoint: IMMDevice): HResult;
 begin
+
   // MMDevApiUtils.GetDefaultEndPointAudioDevice
   Result := GetDefaultEndPointAudioDevice(audioEndPoint);
 end;
-
 
 
 //
@@ -764,7 +810,9 @@ end;
 function TOnEndPointNotify.OnNotify(pNotify: PAUDIO_VOLUME_NOTIFICATION_DATA): HRESULT;
 var
   hr: HResult;
+
 begin
+
   hr := S_OK;
 
   //TMfAudioEndPoint

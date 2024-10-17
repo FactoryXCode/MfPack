@@ -13,8 +13,8 @@ package MfComponents;
 {$LONGSTRINGS ON}
 {$OPENSTRINGS ON}
 {$OPTIMIZATION OFF}
-{$OVERFLOWCHECKS OFF}
-{$RANGECHECKS OFF}
+{$OVERFLOWCHECKS ON}
+{$RANGECHECKS ON}
 {$REFERENCEINFO ON}
 {$SAFEDIVIDE OFF}
 {$STACKFRAMES ON}
@@ -30,7 +30,7 @@ package MfComponents;
 
 requires
   rtl,
-  MfPackX316;
+  MfPackX317;
 
 contains
   MfAudioEndPoint in 'MfAudioEndPoint.pas',

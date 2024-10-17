@@ -107,6 +107,8 @@ type
 
     fHwnd: HWnd; // Handle to this meter.
 
+    fCoInit: Integer;
+
     Fbevelstyle: Tpanelbevel;
     Fbevelwidth: Byte;
 
@@ -275,6 +277,8 @@ begin
   inherited Create(aOwner);
 
   hr := S_OK;
+  fCoInit := CoInitializeEx(nil,
+                            COINIT_APARTMENTTHREADED);
 
   fEnabled := False;
   Width := 12;
@@ -352,7 +356,8 @@ begin
       SafeRelease(pEnumerator);
       SafeRelease(pDevice);
       SafeRelease(pMeterInfo);
-      //CoUninitialize();
+      if (fCoInit = 0) then
+        CoUninitialize();
     end;
   // Destroy handle
   DeallocateHWnd(fHWnd);

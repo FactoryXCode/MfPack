@@ -112,6 +112,8 @@ type
     fDataFlow: EDataFlow; // The data-flow direction for the endpoint device.
     fRole: ERole;         // The role of the endpoint device.
 
+    fCoInit: Integer;
+
     { private methods }
     procedure DrawPeakMeter;
     procedure SetBackGroundColor(value: TColor);
@@ -195,8 +197,8 @@ begin
   // Create the handle for this component
   fHWnd := AllocateHWnd(WindProc);
 
-  //CoInitializeEx(nil,
-  //               COINIT_APARTMENTTHREADED);
+  fCoInit := CoInitializeEx(nil,
+                            COINIT_APARTMENTTHREADED);
 
   // Single instance
   hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
@@ -254,7 +256,8 @@ begin
   pDevice := nil;
   pMeterInfo := nil;
 
-  //CoUninitialize();
+  if (fCoInit = 0) then
+    CoUninitialize();
 
   // Destroy handle
   DeallocateHWnd(fHWnd);
