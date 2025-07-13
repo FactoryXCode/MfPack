@@ -30,7 +30,7 @@
 // 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
 // Related projects: MfPackX317
@@ -381,7 +381,13 @@ begin
                                      0,
                                      pMediaTypeIn);
     if FAILED(hr) then
+    //don't raise exception if AudioStreamNo doesn't exist!
+    //this is the condition to break out of the loop
+    //with the correct result.
+    begin
+      hr := S_OK;
       goto done;
+    end;
 
     hr := pMediaTypeIn.GetMajorType(GUID);
     if FAILED(hr) then

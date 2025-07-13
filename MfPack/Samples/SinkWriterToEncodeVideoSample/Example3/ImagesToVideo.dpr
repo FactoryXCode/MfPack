@@ -1,7 +1,6 @@
 program ImagesToVideo;
 
 uses
-
   Vcl.Forms,
   ImageRenderer in 'ImageRenderer.pas',
   frmMain in 'frmMain.pas' {FfrmMain},
@@ -9,7 +8,8 @@ uses
   Scale in 'Scale.pas',
   Tools in 'Tools.pas',
   Transformer in 'Transformer.pas',
-  dlgAudioFormats in 'dlgAudioFormats.pas' {AudioFormatDlg};
+  dlgAudioFormats in 'dlgAudioFormats.pas' {AudioFormatDlg},
+  frmAdvanced in 'frmAdvanced.pas' {FfrmAdvanced};
 
 {$R *.res}
 
@@ -22,5 +22,6 @@ begin
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TfrmMain, FfrmMain);
   Application.CreateForm(TAudioFormatDlg, AudioFormatDlg);
+  Application.CreateForm(TFfrmAdvanced, FfrmAdvanced);
   Application.Run;
 end.

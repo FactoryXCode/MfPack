@@ -7,13 +7,11 @@ object AudioFormatDlg: TAudioFormatDlg
   ClientWidth = 424
   Color = clBtnFace
   ParentFont = True
-  OldCreateOrder = True
   Position = poScreenCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
-  PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object Bevel1: TBevel
     Left = 0
     Top = 0
@@ -178,6 +176,6 @@ object AudioFormatDlg: TAudioFormatDlg
     Font.Style = []
     ParentFont = False
     TabOrder = 8
+    ExplicitWidth = 412
   end
 end
-

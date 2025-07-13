@@ -24,7 +24,7 @@
 // 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
 // Related projects: MfPackX317

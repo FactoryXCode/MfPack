@@ -2,7 +2,7 @@ object frmMain: TfrmMain
   Left = 0
   Top = 0
   Caption = 'ImagesToVideo Sample 3'
-  ClientHeight = 600
+  ClientHeight = 617
   ClientWidth = 944
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -10,25 +10,25 @@ object frmMain: TfrmMain
   Font.Height = -12
   Font.Name = 'Arial'
   Font.Style = []
-  OldCreateOrder = True
   Position = poDesktopCenter
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
-  PixelsPerInch = 96
   TextHeight = 15
   object stbStatus: TStatusBar
     Left = 0
-    Top = 579
+    Top = 596
     Width = 944
     Height = 21
     Panels = <>
     SimplePanel = True
+    ExplicitTop = 579
+    ExplicitWidth = 938
   end
   object PageControl1: TPageControl
     Left = 0
     Top = 0
     Width = 944
-    Height = 579
+    Height = 596
     ActivePage = TabSheet1
     Align = alClient
     Font.Charset = DEFAULT_CHARSET
@@ -41,6 +41,8 @@ object frmMain: TfrmMain
     Style = tsButtons
     TabOrder = 1
     OnChanging = PageControl1Changing
+    ExplicitWidth = 938
+    ExplicitHeight = 579
     object TabSheet1: TTabSheet
       Caption = 'Render Options'
       Font.Charset = DEFAULT_CHARSET
@@ -52,12 +54,12 @@ object frmMain: TfrmMain
       ParentFont = False
       DesignSize = (
         936
-        547)
+        564)
       object Bevel3: TBevel
         Left = 5
-        Top = 20
+        Top = 26
         Width = 928
-        Height = 157
+        Height = 185
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
@@ -111,7 +113,7 @@ object frmMain: TfrmMain
       end
       object Label15: TLabel
         Left = 78
-        Top = 146
+        Top = 148
         Width = 90
         Height = 15
         Hint = '(recommended: >=60)'
@@ -144,8 +146,8 @@ object frmMain: TfrmMain
         ShowHint = True
       end
       object lblCodecInfo: TLabel
-        Left = 529
-        Top = 66
+        Left = 530
+        Top = 71
         Width = 381
         Height = 100
         Anchors = []
@@ -160,6 +162,8 @@ object frmMain: TfrmMain
         ParentFont = False
         Transparent = False
         WordWrap = True
+        ExplicitLeft = 529
+        ExplicitTop = 66
       end
       object Label17: TLabel
         Left = 418
@@ -174,6 +178,22 @@ object frmMain: TfrmMain
         Font.Name = 'Arial'
         Font.Style = []
         ParentFont = False
+      end
+      object Label7: TLabel
+        Left = 77
+        Top = 178
+        Width = 91
+        Height = 15
+        Hint = 'Decrease for speed, increase if video stutters'
+        Caption = 'Encoding priority'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Arial'
+        Font.Style = []
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
       end
       object cbxFileFormat: TComboBox
         Left = 175
@@ -239,8 +259,8 @@ object frmMain: TfrmMain
           '4K   2160p  (3840 x 2160)')
       end
       object spedSetQuality: TSpinEdit
-        Left = 175
-        Top = 143
+        Left = 174
+        Top = 145
         Width = 49
         Height = 24
         Hint = 'Set the encoding quality (10 to 100, recommended: >=60)'
@@ -253,7 +273,7 @@ object frmMain: TfrmMain
         MinValue = 10
         ParentFont = False
         TabOrder = 3
-        Value = 70
+        Value = 80
       end
       object cbxFrameRates: TComboBox
         Left = 175
@@ -292,9 +312,9 @@ object frmMain: TfrmMain
       end
       object pnlInclAudio: TPanel
         Left = 3
-        Top = 199
+        Top = 226
         Width = 930
-        Height = 335
+        Height = 333
         BevelOuter = bvLowered
         Enabled = False
         TabOrder = 6
@@ -373,8 +393,23 @@ object frmMain: TfrmMain
           Font.Style = []
           ParentFont = False
         end
+        object Label6: TLabel
+          Left = 476
+          Top = 20
+          Width = 454
+          Height = 15
+          Caption = 
+            'Only seems to work with input .wav and AAC, FLAC fails in pSinkw' +
+            'riter.WriteSample.'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -12
+          Font.Name = 'Arial'
+          Font.Style = []
+          ParentFont = False
+        end
         object cbxAudioCodec: TComboBox
-          Left = 174
+          Left = 169
           Top = 17
           Width = 299
           Height = 23
@@ -434,8 +469,8 @@ object frmMain: TfrmMain
         end
       end
       object chbxAddAudio: TCheckBox
-        Left = 15
-        Top = 193
+        Left = 21
+        Top = 219
         Width = 95
         Height = 14
         Hint = 'Display dialog to add an audio file'
@@ -445,13 +480,41 @@ object frmMain: TfrmMain
         TabOrder = 7
         OnClick = chbxAddAudioClick
       end
+      object spedSetEncodePriority: TSpinEdit
+        Left = 174
+        Top = 175
+        Width = 43
+        Height = 24
+        Hint = 'Decrease for speed, increase if video stutters'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Arial'
+        Font.Style = []
+        MaxValue = 20
+        MinValue = 0
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 8
+        Value = 2
+      end
+      object btnAdvancedOptions: TButton
+        Left = 290
+        Top = 174
+        Width = 129
+        Height = 25
+        Caption = 'Advanced options'
+        TabOrder = 9
+        OnClick = btnAdvancedOptionsClick
+      end
     end
     object TabSheet2: TTabSheet
       Caption = 'Create SlideShow'
       ImageIndex = 1
       object Panel5: TPanel
         Left = 0
-        Top = 294
+        Top = 311
         Width = 936
         Height = 253
         Hint = 'Audio start position in milliseconds.'
@@ -505,7 +568,7 @@ object frmMain: TfrmMain
         object Bevel6: TBevel
           Left = 358
           Top = 41
-          Width = 572
+          Width = 295
           Height = 163
         end
         object Label12: TLabel
@@ -532,6 +595,12 @@ object frmMain: TfrmMain
           Margins.Bottom = 5
           Alignment = taRightJustify
           Caption = 'Image duration'
+        end
+        object Bevel1: TBevel
+          Left = 659
+          Top = 42
+          Width = 272
+          Height = 161
         end
         object spedCompensation: TSpinEdit
           Left = 221
@@ -617,7 +686,7 @@ object frmMain: TfrmMain
         end
         object Background: TCheckBox
           Left = 370
-          Top = 61
+          Top = 63
           Width = 222
           Height = 14
           Caption = 'Run in background thread'
@@ -626,7 +695,7 @@ object frmMain: TfrmMain
         end
         object CropLandscape: TCheckBox
           Left = 370
-          Top = 81
+          Top = 86
           Width = 221
           Height = 15
           Caption = 'Crop landscape images to video size'
@@ -634,7 +703,7 @@ object frmMain: TfrmMain
         end
         object ZoomInOut: TCheckBox
           Left = 370
-          Top = 103
+          Top = 109
           Width = 196
           Height = 15
           Hint = 'Include Zoom In and Out-transitions slows down rendering.'
@@ -646,7 +715,7 @@ object frmMain: TfrmMain
         end
         object DebugTiming: TCheckBox
           Left = 370
-          Top = 124
+          Top = 132
           Width = 254
           Height = 15
           Hint = 'Debug Timing (Displays encoded timestamp in seconds)'
@@ -760,31 +829,54 @@ object frmMain: TfrmMain
           TabOrder = 14
           Value = 4000
         end
+        object StaticText2: TStaticText
+          Left = 676
+          Top = 34
+          Width = 127
+          Height = 19
+          Alignment = taCenter
+          AutoSize = False
+          BevelInner = bvNone
+          BevelKind = bkFlat
+          Caption = 'Statistics'
+          TabOrder = 15
+          Transparent = False
+        end
+        object Stats: TMemo
+          Left = 668
+          Top = 62
+          Width = 253
+          Height = 137
+          Lines.Strings = (
+            'Stats')
+          ScrollBars = ssVertical
+          TabOrder = 16
+        end
       end
       object pnlSelectPics: TPanel
         Left = 0
         Top = 0
         Width = 936
-        Height = 294
+        Height = 311
         Align = alClient
         TabOrder = 1
         object Splitter1: TSplitter
           Left = 238
           Top = 1
-          Height = 292
+          Height = 309
           ExplicitHeight = 224
         end
         object Splitter2: TSplitter
           Left = 436
           Top = 1
-          Height = 292
+          Height = 309
           ExplicitHeight = 224
         end
         object Splitter3: TSplitter
           Left = 632
           Top = 1
           Width = 4
-          Height = 292
+          Height = 309
           ExplicitLeft = 641
           ExplicitTop = 8
           ExplicitHeight = 215
@@ -793,7 +885,7 @@ object frmMain: TfrmMain
           Left = 1
           Top = 1
           Width = 237
-          Height = 292
+          Height = 309
           Align = alLeft
           BevelOuter = bvNone
           TabOrder = 0
@@ -809,7 +901,7 @@ object frmMain: TfrmMain
             Left = 0
             Top = 58
             Width = 237
-            Height = 234
+            Height = 251
             Align = alClient
             Font.Charset = ANSI_CHARSET
             Font.Color = clWindowText
@@ -869,7 +961,7 @@ object frmMain: TfrmMain
           Left = 241
           Top = 1
           Width = 195
-          Height = 292
+          Height = 309
           Align = alLeft
           BevelOuter = bvNone
           TabOrder = 1
@@ -893,20 +985,20 @@ object frmMain: TfrmMain
             Left = 0
             Top = 25
             Width = 195
-            Height = 267
+            Height = 284
             Hint = 'DoublClick to add a duplicate to the Rendering Order.'
             Margins.Left = 5
             Margins.Top = 5
             Margins.Right = 5
             Margins.Bottom = 5
-            OnClickCheck = lbxFileBoxClickCheck
             Align = alClient
             Flat = False
-            ItemHeight = 14
+            ItemHeight = 17
             ParentShowHint = False
             ShowHint = True
             TabOrder = 0
             OnClick = lbxFileBoxClick
+            OnClickCheck = lbxFileBoxClickCheck
             OnDblClick = lbxFileBoxDblClick
           end
         end
@@ -914,7 +1006,7 @@ object frmMain: TfrmMain
           Left = 439
           Top = 1
           Width = 193
-          Height = 292
+          Height = 309
           Align = alLeft
           BevelOuter = bvNone
           TabOrder = 2
@@ -937,7 +1029,7 @@ object frmMain: TfrmMain
             Left = 0
             Top = 25
             Width = 193
-            Height = 267
+            Height = 284
             Hint = 'Use drag and drop to change the rendering order.'
             Margins.Left = 5
             Margins.Top = 5
@@ -960,7 +1052,7 @@ object frmMain: TfrmMain
           Left = 636
           Top = 1
           Width = 299
-          Height = 292
+          Height = 309
           Align = alClient
           BevelInner = bvLowered
           TabOrder = 3
@@ -990,11 +1082,12 @@ object frmMain: TfrmMain
             Left = 2
             Top = 47
             Width = 295
-            Height = 243
+            Height = 260
             Align = alClient
             Center = True
             Proportional = True
             ExplicitTop = 48
+            ExplicitHeight = 243
           end
           object butRunPreview: TButton
             Left = 195

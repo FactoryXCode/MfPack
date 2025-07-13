@@ -24,7 +24,7 @@
 // 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
 // Related projects: MfPackX317
@@ -81,6 +81,7 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.ActiveX,
+  WinApi.MMSystem,
   {VCL}
   VCL.Graphics,
   {System}
@@ -169,6 +170,25 @@ type
                                                        VideoTime: Int64;
                                                        var DoAbort: Boolean);
 
+  TEncoderAdvancedOptions = record
+    DisableHardwareEncoding: boolean;
+    DisableThrottling: boolean;
+    DisableQualityBasedEncoding: boolean;
+    DisableGOPSize: boolean;
+    ResamplingThreadsLimit: integer;
+  end;
+
+const
+  _DefaultAdvancedOptions: TEncoderAdvancedOptions =
+    (
+    DisableHardwareEncoding: false;
+    DisableThrottling: false;
+    DisableQualityBasedEncoding: false;
+    DisableGOPSize: false;
+    ResamplingThreadsLimit: 4
+    );
+
+
 type
 
   TImageRenderer = class
@@ -180,8 +200,11 @@ type
     fFrameRateNumerator: UINT32;
     fFrameRateDenominator: UINT32;
     fQuality: DWord;
+    fEncodePriority: Word;
+    fAdvancedOptions: TEncoderAdvancedOptions;
 
     fSampleDuration: DWord;
+    fExactSampleDuration: double;
     fInputFormat: TGUID;
     pSinkWriter: IMFSinkWriter;
     fAudioSinkWriterStreamIndex: DWord; // Used by sinkwriter.
@@ -263,7 +286,8 @@ type
     /// <param name="Quality">Quality of the video encoding on a scale of 1 to 100</param>
     /// <param name="FrameRate">Frame rate in frames per second. Value >= 30 recommended. </param>
     /// <param name="VideoCodec">Video codec enum for encoding. Presently ciH264 or ciH265 </param>
-    /// <param name="Resampler">Enum defining the quality of resizing. cfBox, cfBilinear, cfBicubic or cfLanczos</param>
+    /// <param name="EncodePriority">Value by which to slow down frame generation to grant more time to the encoder. 2 or 3 prevents stuttering</param>
+    /// <param name="VideoCodec">Video codec enum for encoding. Presently H264 or H265 </param>
     /// param name="PicturePresentationTime">Defines the duration of the image in the video.</param>
     /// <param name="AudioFileName">Optional audio or video file (.wav, .mp3, .aac, .mp4 etc.), audio stream encoded as AAC. Default ''</param>
     /// <param name="AudioBitRate"> in kb/sec (96, 128, 160, 192 accepted). Default 128 </param>
@@ -274,6 +298,7 @@ type
                         VideoCodec: TCodecID;
                         DestAudioFormat: TMFAudioFormat;
                         Resampler: TFilter = cfBicubic;
+                        EncodePriority: word = 2;
                         PicturePresentationTime: Int64 = 4000;  // Default 4000 milliseconds = 4 seconds.
                         AudioDuration: Int64 = 0;
                         const AudioFileName: string = '';
@@ -347,13 +372,17 @@ type
     /// Timing could be very irregular at the beginning of development with high frame rates and large video sizes.
     /// I had to artificially slow down the generation of some frames to (hopefully) fix it,
     /// and read ahead in the audio file.
-    /// See Freeze and WriteAudio.</summary>
+    /// See Freeze and WriteAudio and fEncodePriority.</summary>
     property TimingDebug: Boolean read fTimingDebug
                                   write fTimingDebug;
 
     // Event which fires every 30 frames. Use to indicate progress or abort encoding.
     property OnProgress: TImageRendererProgressEvent read fOnProgress
                                                      write fOnProgress;
+
+    //AdvancedOptions need to be set after Create and before Initialize
+    property AdvancedOptions: TEncoderAdvancedOptions read fAdvancedOptions
+                                                      write fAdvancedOptions;
   end;
 
 
@@ -441,6 +470,7 @@ function TImageRenderer.Initialize(const OutputFilename: string;
                                    VideoCodec: TCodecID;
                                    DestAudioFormat: TMFAudioFormat;
                                    Resampler: TFilter = cfBicubic;
+                                   EncodePriority: word = 2;
                                    PicturePresentationTime: Int64 = 4000;  // Default 4000 milliseconds = 4 seconds.
                                    AudioDuration: Int64 = 0;
                                    const AudioFileName: string = '';
@@ -451,6 +481,7 @@ var
   pMediaTypeIn: IMFMediaType;
   dwVideoStreamIndex: DWORD;
   pContainerAttributes: IMFAttributes;
+  pMediaTypeAttributes: IMFAttributes;
   pExt: string;
   pStride: DWord;
 
@@ -477,6 +508,17 @@ begin
 
   // Set initial parameters
   fInitialized := False;
+
+  if fAdvancedOptions.ResamplingThreadsLimit <> _DefaultAdvancedOptions.ResamplingThreadsLimit
+  then
+  begin
+    fThreadPool.Finalize;
+    fThreadPool.Initialize(
+      min(fAdvancedOptions.ResamplingThreadsLimit,
+      TThread.ProcessorCount div 2),
+      tpNormal);
+  end;
+
   fVideoWidth := FVideoStandardsCheat.SelectedResolution.iWidth;
   fVideoHeight := FVideoStandardsCheat.SelectedResolution.iHeight;
   fVideoFrameRate := FVideoStandardsCheat.SelectedFrameRate.FrameRate;
@@ -486,15 +528,17 @@ begin
   fSrcAudioFileName := AudioFileName;
   fTargetFileName := OutputFilename;
 
-  fBrake := Max(Trunc(4800 / fVideoHeight),
+  fBrake := Max(Trunc(2400 / fVideoHeight),
                 1);
   fQuality := Quality;
   fFilter := Resampler;
   fCodec := VideoCodec;
+  fEncodePriority := EncodePriority;
 
   // Calculate the average time/frame
   // Time is measured in units of 100 nanoseconds. 1 sec = 1000 * 10000 time-units
-  fSampleDuration := Trunc(1000 * 10000 / fVideoFrameRate);
+  fExactSampleDuration := 1000 * 10000 / fVideoFrameRate; //Now used in WriteOneFrame
+  fSampleDuration := Trunc(fExactSampleDuration);
   fAudioStart := AudioStart * 10000;
   fAudioDuration := AudioDuration;
   fPicturePresentationTime := PicturePresentationTime;
@@ -508,12 +552,19 @@ begin
 
   // Setup the container.
   hr := MFCreateAttributes(pContainerAttributes,
-                           3);
+                           4);
   if FAILED(hr) then
     goto done;
 
   hr := pContainerAttributes.SetUINT32(MF_TRANSCODE_ADJUST_PROFILE,
                                        DWORD(MF_TRANSCODE_ADJUST_PROFILE_USE_SOURCE_ATTRIBUTES {MF_TRANSCODE_ADJUST_PROFILE_DEFAULT}));
+  if FAILED(hr) then
+    goto done;
+
+  // per default endable hardware encoding, if the GPU supports it
+  hr := pContainerAttributes.SetUINT32(MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS,
+    Uint32(not fAdvancedOptions.DisableHardwareEncoding));
+
   if FAILED(hr) then
     goto done;
 
@@ -525,8 +576,10 @@ begin
   // This prevents the application from delivering samples too quickly.
   // To disable this behavior, set the MF_SINK_WRITER_DISABLE_THROTTLING attribute
   // to TRUE when you create the sink writer.
+  // The value of fEncodePriority futher slows down sample generation.
+  // Without it stuttering of video can still happen.
   hr := pContainerAttributes.SetUInt32(MF_SINK_WRITER_DISABLE_THROTTLING,
-                                       UInt32(0));
+                                       UInt32(fAdvancedOptions.DisableThrottling));
   if FAILED(hr) then
     goto done;
 
@@ -585,9 +638,14 @@ begin
                               1);
 
   if SUCCEEDED(hr) then
+    if VideoCodec = H264 then
+    // looks better to me
+      hr := pMediaTypeOut.SetUINT32(MF_MT_VIDEO_PROFILE,
+                                    eAVEncH264VProfile_ConstrainedHigh);
+
+  if SUCCEEDED(hr) then
     hr := pSinkWriter.AddStream(pMediaTypeOut,
                                 dwVideoStreamIndex);
-
 
   // Set the input media type.
   if SUCCEEDED(hr) then
@@ -623,15 +681,56 @@ begin
                               1,
                               1);
 
+  //Define optional attributes for the input type
+
+  pMediaTypeAttributes := nil;
+
+  // Per default quality based VBR-encoding is enabled. Gives high quality
+  // with small average bitrate/file size.
+  // You can disable this in EncoderAdvancedOptions
+  // Encoder attributes must be passed to the input media type.
+  // (Not supported prior to Windows 8)
+
+  if SUCCEEDED(hr) then
+    if not(fAdvancedOptions.DisableQualityBasedEncoding or
+    fAdvancedOptions.DisableGOPSize) then
+      hr := MFCreateAttributes(pMediaTypeAttributes, 4)
+    else
+      if not(fAdvancedOptions.DisableQualityBasedEncoding and
+      fAdvancedOptions.DisableGOPSize) then
+        hr := (MFCreateAttributes(pMediaTypeAttributes, 2));
+
+  if SUCCEEDED(hr) then
+    if not fAdvancedOptions.DisableQualityBasedEncoding then
+    begin
+      hr := pMediaTypeAttributes.SetUINT32(CODECAPI_AVEncCommonRateControlMode,
+                                           3);
+      if SUCCEEDED(hr) then
+        hr := pMediaTypeAttributes.SetUINT32(CODECAPI_AVEncCommonQuality,
+                                             fQuality);
+  end;
+
+  if SUCCEEDED(hr) then
+    if not fAdvancedOptions.DisableGOPSize then
+    begin
+    // This improves things a lot:
+      hr := pMediaTypeAttributes.SetUINT32(CODECAPI_AVEncMPVGOPSize,
+                                           round(3 * fVideoFrameRate));
+      if SUCCEEDED(hr) then
+        hr := pMediaTypeAttributes.SetUINT32(CODECAPI_AVEncNumWorkerThreads,
+                                             Max(TThread.ProcessorCount - fThreadPool.ThreadCount, 2));
+  end;
+
   if SUCCEEDED(hr) then
     hr := pSinkWriter.SetInputMediaType(dwVideoStreamIndex,
                                         pMediaTypeIn,
-                                        nil);
+                                        pMediaTypeAttributes);
 
   // Audio =====================================================================
-  if (fSrcAudioFileName <> '') then
-    if FileExists(fSrcAudioFileName) then
-      begin
+  if SUCCEEDED(hr) then
+    if (fSrcAudioFileName <> '') then
+      if FileExists(fSrcAudioFileName) then
+        begin
         // Copy given audio format struct.
         CopyMemory(@fDestAudioFormat,
                    @DestAudioFormat,
@@ -649,7 +748,7 @@ begin
             // Ensure the stream is selected.
             hr := pAudioSourceReader.SetStreamSelection(fAudioStreamIndex,
                                                         True);
-      end;
+        end;
 
   fBmRGBA.PixelFormat := pf32bit;
   fBmRGBA.SetSize(fVideoWidth,
@@ -1015,6 +1114,12 @@ begin
         while (fWriteStart < (iStartTime + aImageDuration * 10000)) do
           begin
             bmBuf.Assign(fBmRGBA);
+            if (fFrameCount mod fBrake) = (fBrake - 1) then
+            begin
+              //Same slowdown as in Freeze
+              HandleThreadMessages(GetCurrentThread(), 1);
+              Sleep(fEncodePriority);
+            end;
             bmRGBAToSampleBuffer(bmBuf);
             WriteOneFrame(fWriteStart,
                           fSampleDuration);
@@ -1232,7 +1337,9 @@ constructor TImageRenderer.Create();
 begin
   inherited Create();
   // Leave enough processors for the encoding threads.
-  fThreadPool.Initialize(Min(16,
+  fAdvancedOptions:=_DefaultAdvancedOptions;
+
+  fThreadPool.Initialize(Min(fAdvancedOptions.ResamplingThreadsLimit,
                              TThread.ProcessorCount div 2),
                          tpNormal);
 
@@ -1254,8 +1361,8 @@ begin
     FreeAndNil(fBmRGBA);
 
   {$IFDEF DEBUG}
-  if Assigned(FMediaTypeDebug) then
-    FMediaTypeDebug.Free();
+    if Assigned(FMediaTypeDebug) then
+      FMediaTypeDebug.Free();
   {$ENDIF}
   inherited;
 end;
@@ -1613,11 +1720,14 @@ begin
 
   Inc(fFrameCount);
   // Timestamp for the next frame
-  fWriteStart := TimeStamp + Duration;
+  //fWriteStart := TimeStamp + Duration;
+  // Adjust fWriteStart to "exact" frame-time boundaries. Improves timing.
+  fWriteStart := Trunc(fFrameCount * fExactSampleDuration);
   fVideoTime := fWriteStart div 10000;
 
   // Give the encoder-threads a chance to do their work.
   HandleThreadMessages(GetCurrentThread());
+  Sleep(fEncodePriority);
 
   if Assigned(fOnProgress) then
     if (fFrameCount mod 30 = 1) then
@@ -1781,7 +1891,10 @@ begin
       WriteOneFrame(fWriteStart,
                     fSampleDuration);
       if (fFrameCount mod fBrake) = (fBrake - 1) then
+      begin
         HandleThreadMessages(GetCurrentThread(), 1);
+        Sleep(fEncodePriority);
+      end;
 
   end;
 end;
@@ -1898,7 +2011,7 @@ begin
     begin
       SetLength(rArr,
                 Length(aac_SupportedAvgBytesPerSecond));
-      for i := 0 to Length(aac_SupportedAvgBytesPerSecond) do
+      for i := 0 to Length(aac_SupportedAvgBytesPerSecond) - 1 do
         rArr[i] := aac_SupportedAvgBytesPerSecond[i];
     end;
   
@@ -1911,9 +2024,18 @@ begin
       end;
 end;
 
+var
+  _TimerResolution: UInt32;
+  _hSetTimer: HResult;
 
 initialization
 
+  _hSetTimer:=SetTimerResolution(1,_TimerResolution);
+
+finalization
+
+  if Succeeded(_hSetTimer) then
+    TimeEndPeriod(_TimerResolution);
 {$IFDEF O_PLUS}
 {$O+}
 {$UNDEF O_PLUS}

@@ -1,3 +1,51 @@
+// FactoryX
+//
+// Copyright: © FactoryX. All rights reserved.
+//
+// Project: Media Foundation - MFPack - Samples
+// Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
+// Module: Common.pas
+// Kind: Pascal Unit
+// Release date: 24-06-2023
+// Language: ENU
+//
+// Revision Version: 3.1.7
+// Description: Common helpers and thread class.
+//
+// Company: FactoryX
+// Intiator(s): Renate Schaaf, Tony (maXcomX).
+// Contributor(s): Renate Schaaf, Tony Kalf (maXcomX)
+//
+//------------------------------------------------------------------------------
+// CHANGE LOG
+// Date       Person              Reason
+// ---------- ------------------- ----------------------------------------------
+// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+//------------------------------------------------------------------------------
+//
+// Remarks: Requires Windows 10 or higher.
+//
+// Related objects: -
+// Related projects: MfPackX317
+// Known Issues: -
+//
+// Compiler version: 23 up to 35
+// SDK version: 10.0.26100.0
+//
+// Todo: -
+// =============================================================================
+// Source: FactoryX.Code Sinkwriter and Transcode Examples.
+//         Bitmaps2Video for Media Foundation.
+//         https://github.com/rmesch/Bitmaps2Video-for-Media-Foundation
+//
+// Copyright © 2003-2024 Renate Schaaf
+// Requires MFPack at https://github.com/FactoryXCode/MfPack
+// Download the repository and add the folder "src" to your library path.
+//
+// The sinkwriter sample in this repository got me started on this project.
+// Thanks for the great work!
+//==============================================================================
 //==============================================================================
 //
 // LICENSE

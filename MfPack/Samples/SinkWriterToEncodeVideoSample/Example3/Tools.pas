@@ -24,7 +24,7 @@
 // 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
 // Related projects: MfPackX317
@@ -75,6 +75,7 @@ uses
   WinApi.Windows,
   WinApi.Wincodec,
   WinApi.Messages,
+  WinApi.MMSystem,
   {$IF COMPILERVERSION >= 29.0}
   Winapi.ShLwApi,
   {$ENDIF}
@@ -82,6 +83,8 @@ uses
   VCL.Graphics,
   {System}
   System.Classes,
+  System.Math,
+  System.SysUtils,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfUtils;
 
@@ -93,11 +96,49 @@ uses
   function LogicalCompare(List: TStringlist;
                           Index1: Integer;
                           Index2: Integer): Integer;
+
   /// <summary> Usage: HandleThreadMessages(GetCurrentThread()).</summary>
   procedure HandleThreadMessages(AThread: THandle;
                                  AWait: Cardinal = INFINITE);
 
+//Procedure to change system timer resolution for precise waits. In later versions
+//of Windows10 and in Windows11 this change is no longer system-wide
+
+/// <summary> Changes system timer resolution [ms]. Must be matched with TimeEndPeriod(SetResolution). </summary>
+/// <param name = "TargetResolution">Desired timer resolution in ms </param>
+/// <param name = "SetResolution"> Resolution actually set </param>
+function SetTimerResolution(TargetResolution:  UInt32;
+                            var SetResolution: UInt32): HResult;
+
+function GetFileSize(const fileName: String): int64;
+
 implementation
+
+function GetFileSize(const fileName: String)
+  : int64;
+var
+  info: TWin32FileAttributeData;
+begin
+  if not GetFileAttributesEx(PWideChar(fileName), GetFileExInfoStandard, @info)
+  then
+    RaiseLastOSError;
+  Result := int64(info.nFileSizeLow) or int64(info.nFileSizeHigh shl 32);
+end;
+
+function SetTimerResolution(TargetResolution:  UInt32;
+                            var SetResolution: UInt32): HResult;
+var
+  tc: TimeCaps;
+begin
+  Result := E_Fail;
+  if TimeGetDevCaps(@tc, SizeOF(TimeCaps)) <> TIMERR_NOERROR then
+    exit;
+  SetResolution := min(
+    max(tc.wPeriodMin, TargetResolution),
+    tc.wPeriodMax);
+  if TimeBeginPeriod(SetResolution) = TIMERR_NOERROR then
+    Result := S_OK;
+end;
 
 
 procedure WICToBmp(const aWic: TWICImage;

@@ -24,7 +24,7 @@
 // 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
 // Related projects: MfPackX317
@@ -40,7 +40,7 @@
 //         Bitmaps2Video for Media Foundation.
 //         https://github.com/rmesch/Bitmaps2Video-for-Media-Foundation
 //
-// Copyright © 2003-2024 Renate Schaaf
+// Copyright © 2003-2025 Renate Schaaf
 //==============================================================================
 //
 // LICENSE
@@ -101,6 +101,7 @@ uses
   System.Diagnostics,
   System.IOUtils,
   System.Threading,
+  System.UITypes,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfUtils,
@@ -199,6 +200,13 @@ type
     Label4: TLabel;
     Label5: TLabel;
     fodSelectAudio: TFileOpenDialog;
+    Label6: TLabel;
+    Label7: TLabel;
+    spedSetEncodePriority: TSpinEdit;
+    btnAdvancedOptions: TButton;
+    Bevel1: TBevel;
+    StaticText2: TStaticText;
+    Stats: TMemo;
 
     procedure FormCreate(Sender: TObject);
     procedure butRenderSlideshowClick(Sender: TObject);
@@ -228,6 +236,7 @@ type
     procedure butRunPreviewClick(Sender: TObject);
     procedure edLocationClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure btnAdvancedOptionsClick(Sender: TObject);
 
   private
     ImageRenderer: TImageRenderer;
@@ -262,7 +271,7 @@ type
 
     function CalculatePicturePresentationTime(): Int64;
 
-    // Procedure showing the use of TBitmapEncoder
+    // Procedure showing the use of TImageRenderer
     procedure MakeSlideshow(aFiles: TStringlist;
                             const aWicImage: TWicImage;
                             const aBitmapImage: TBitmap;
@@ -274,6 +283,9 @@ type
     function GetDoZoomInOut: Boolean;
     function GetAudioFile: string;
     function GetQuality: Integer;
+
+    function GetEncodePriority: Word;
+    function GetAdvancedOptions: TEncoderAdvancedOptions;
 
     function GetAudioStart: Int64;
     function GetAudioDialog: Boolean;
@@ -296,8 +308,11 @@ type
 
     property VideoFrameRate: Double read dSelectedVideoFrameRate;
     property Quality: Integer read GetQuality;
+    property EncodePriority: Word read GetEncodePriority;
     property DoCrop: Boolean read GetDoCrop;
     property DoZoomInOut: Boolean read GetDoZoomInOut;
+
+    property AdvancedOptions: TEncoderAdvancedOptions read GetAdvancedOptions;
 
     property CurrentAudioCodec: TGUID read gAudioCodec;
     property AudioFile: string read GetAudioFile;
@@ -315,7 +330,8 @@ implementation
 {$R *.dfm}
 
 uses
-  dlgAudioFormats;
+  dlgAudioFormats,
+  frmAdvanced;
 
 function TfrmMain.PIDLToPath(IdList: PItemIDList): string;
 begin
@@ -450,7 +466,7 @@ begin
           ImageRenderer.ZoomInOutTransitionTo(aBitmapImage,
                                               zZooms,
                                               zZoom,
-                                              spedEffectDuration.Value + 500,  // 2500
+                                              spedEffectDuration.Value,  // 2000
                                               bCrop);
         end;
 
@@ -485,8 +501,9 @@ begin
       ShowMessage('You did not complete the output settings.' + #13 + 'Please check.');
       Exit;
     end;
-  cbxPickWinFolder.ItemIndex := 0;
-  cbxPickWinFolderChange(nil);
+//  Moved to OnCreate, so the picked folder isn't lost each time you change back to tabsheet1
+//  cbxPickWinFolder.ItemIndex := 0;
+//  cbxPickWinFolderChange(nil);
   AllowChange := True;
 end;
 
@@ -506,15 +523,10 @@ end;
 
 function TfrmMain.CalculatePicturePresentationTime(): Int64;
 var
-  i: Integer;
+  //i: Integer;
   //slImageFiles: TStringlist;
   Latency: DWord;
 begin
-  fImageFiles := TStringlist.Create;
-
-    for i := 0 to fSelectedFilesList.Count - 1 do
-      fImageFiles.Add(fSelectedFilesList.Strings[i]);
-
     if (fImageFiles.Count = 0) then
       begin
         ShowMessage('No image files selected!');
@@ -525,10 +537,18 @@ begin
   // The video decoder/encoder and the audio codec produces a latency depending on the in and output format.
   // So, we use an average latency of about 0.030 ms pultiplied by the number of images.
   Latency := spedCompensation.Value * fImageFiles.Count;
-  Result := Trunc((llAudioDuration / fImageFiles.Count) / 10000) - Latency;
+  //c: image count  i: image time  e: effect time a: audio time (in timestamp units)
+  //c*i + (c-1)*e = a   solve for i:  i = (a - (c-1)*e)/c (not sure about Latency)
+  Result := Trunc((llAudioDuration - (fImageFiles.Count - 1)*spedEffectDuration.Value*10000 - Latency)/fImageFiles.Count/10000);
+  //Result := Trunc((llAudioDuration / fImageFiles.Count) / 10000) - Latency;
 
 end;
 
+
+procedure TfrmMain.btnAdvancedOptionsClick(Sender: TObject);
+begin
+  FfrmAdvanced.ShowModal;
+end;
 
 procedure TfrmMain.butRenderSlideshowClick(Sender: TObject);
 var
@@ -538,7 +558,8 @@ var
   StopWatch: TStopWatch;
   Task: ITask;
   bDone: Boolean;
-
+  i: integer;
+  VideoInfo: TVideoInfo;
 begin
 
   if bWriting then
@@ -555,11 +576,21 @@ begin
 
   bWriting := True;
 
+  fImageFiles := TStringlist.Create;
+
   try
+    for i := 0 to fSelectedFilesList.Count - 1 do
+      fImageFiles.Add(fSelectedFilesList.Strings[i]);
     // Set presentation of the video to duration of the audio.
       if cbxSetPresentationDuration.Checked then
         begin
           iPicturePresentationTime := CalculatePicturePresentationTime();
+          if MessageDlg('Image time calculated: '+IntToStr(iPicturePresentationTime) + ' ms' + #13 + 'Continue?',
+                        mtConfirmation,
+                        [mbYes, mbNo],
+                        0,
+                        mbYes) = mrNo  then
+            exit;
         end
       else  // Default
         iPicturePresentationTime := spedImageDuration.Value; // Default = 4 sec.
@@ -571,6 +602,8 @@ begin
     StopWatch := TStopWatch.Create();
 
     try
+      ImageRenderer.AdvancedOptions := Self.AdvancedOptions;
+
       stbStatus.SimpleText := 'Preparing the renderer, please wait... ';
       StopWatch.Start;
 
@@ -579,6 +612,7 @@ begin
                                      fCodecList[cbxVideoCodec.ItemIndex],
                                      fSelectedAudioFormat,
                                      cfBicubic,
+                                     EncodePriority,
                                      iPicturePresentationTime,
                                      llAudioDuration,
                                      fAudioFileName,
@@ -633,6 +667,15 @@ begin
                                                   5,
                                                   2)]);
       stbStatus.Repaint;
+
+      Stats.Clear;
+      Stats.Lines.Add('Slideshow time: ' +
+        IntToStr(fImageFiles.Count * iPicturePresentationTime + (fImageFiles.Count-1)*spedEffectDuration.Value) + ' ms');
+      VideoInfo:=GetVideoInfo(OutputFileName);
+      Stats.Lines.Add('Output video duration: ' +
+        IntToStr(VideoInfo.Duration div 10000) + ' ms');
+      Stats.Lines.Add('File size: ' + FloatToStrF(round(100 * GetFileSize(OutputFileName) /
+        1024 / 1024) / 100, ffFixed, 5, 2) + ' MB');
 
     finally
       WicImage.Free;
@@ -1054,9 +1097,22 @@ begin
   fVideoStandardsCheat := TVideoStandardsCheat.Create();
   GetResolutions();
   GetFramerates();
+  //Moved here from PageControl1Changing
+  cbxPickWinFolder.ItemIndex := 0;
+  cbxPickWinFolderChange(nil);
+
   Randomize;
 end;
 
+
+function TfrmMain.GetAdvancedOptions: TEncoderAdvancedOptions;
+begin
+  Result.DisableHardwareEncoding := FfrmAdvanced.cbxDisableHardwareTransforms.Checked;
+  Result.DisableThrottling := FfrmAdvanced.cbxDisableThrottling.Checked;
+  Result.DisableQualityBasedEncoding := FfrmAdvanced.cbxDisableQualityBasedEncoding.Checked;
+  Result.DisableGOPSize := FfrmAdvanced.cbxDisableGOPSize.Checked;
+  Result.ResamplingThreadsLimit := FfrmAdvanced.spedThreadLimit.Value;
+end;
 
 function TfrmMain.GetAudioDialog: Boolean;
 begin
@@ -1144,6 +1200,11 @@ begin
 end;
 
 
+function TfrmMain.GetEncodePriority: Word;
+begin
+  Result:=spedSetEncodePriority.Value;
+end;
+
 function TfrmMain.GetOutputFileName: string;
 begin
   Result := fOutputFile + '_' + CodecShortNames[fCodecList[cbxVideoCodec.ItemIndex]] +
@@ -1155,6 +1216,8 @@ function TfrmMain.GetQuality: integer;
 begin
   Result := spedSetQuality.Value;
 end;
+
+
 
 
 procedure TfrmMain.lbxFileBoxClick(Sender: TObject);
