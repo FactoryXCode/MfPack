@@ -22,7 +22,8 @@
 // Contributor(s): Tony Kalf (maXcomX),
 //                 Peter Larson (ozships),
 //                 Ramyses De Macedo Rodrigues,
-//                 (TopPlay)
+//                 (TopPlay),
+//                 Harald (Banalskander)
 //
 // -----------------------------------------------------------------------------
 // CHANGE LOG
@@ -31,6 +32,7 @@
 // 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 // 27/07/2024 Tony                Added overloaded method ConfigureVideoEncoding
 // 27/09/2024 Tony                Removed use of POINTERMATH for Delphi versions < 2009.
+// 15/07/2025 Harald              Fixed enum issue in function CountTypesFromDevice.
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -3886,9 +3888,6 @@ begin
       if (hr = MF_E_NO_MORE_TYPES) then
         begin
           hr := S_OK;
-          // We did set both +1. But since we have a hit, decrease by one because we stop processing.
-          Dec(dwMfSupportedCount);
-          Dec(dwNativeCount);
           Break;
         end;
 
