@@ -23,7 +23,7 @@
 //                 Peter Larson (ozships),
 //                 Ramyses De Macedo Rodrigues,
 //                 (TopPlay),
-//                 Harald (Banalskander)
+//                 (Banalskander)
 //
 // -----------------------------------------------------------------------------
 // CHANGE LOG
@@ -32,7 +32,7 @@
 // 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
 // 27/07/2024 Tony                Added overloaded method ConfigureVideoEncoding
 // 27/09/2024 Tony                Removed use of POINTERMATH for Delphi versions < 2009.
-// 15/07/2025 Harald              Fixed enum issue in function CountTypesFromDevice.
+// 15/07/2025 Tony                Fixed enum issue in function CountTypesFromDevice.
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
