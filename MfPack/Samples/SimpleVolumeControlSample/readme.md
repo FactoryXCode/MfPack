@@ -1,0 +1,31 @@
+# SimpleVolumeControlSample
+
+Version: X 3.1.7
+
+NOTES:
+
+* This release is updated for compiler version 17 up to 34.
+* SDK version 10.0.22621.0 (Win 11)
+* Requires Windows 7 or later.
+* Minimum supported MfPack version: 3.1.5
+
+This example is shows how to use the MfAudioEndPoint component.
+
+
+For indepth information see [how to use the IAudioEndpointVolumes interface](https://learn.microsoft.com/en-us/windows/win32/api/endpointvolume/nn-endpointvolume-iaudioendpointvolume)
+
+
+
+Project: Media Foundation - MFPack - Samples
+Project location: https://github.com/FactoryXCode/MfPack
+https://sourceforge.net/projects/MFPack
+
+
+
+First release date: 11-07-2025
+Final release date: 16-07-2025
+
+
+
+Copyright © FactoryX. All rights reserved.
+

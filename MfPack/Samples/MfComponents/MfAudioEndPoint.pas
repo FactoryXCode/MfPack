@@ -23,8 +23,9 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 30/06/2024 All                 RammStein release SDK 10.0.26100.0 (Windows 11)
 // 12/06/2024 Tony                Removed EDataFlowEx.
+// 16/07/2025 Tony                updated some code and fixed some issues.
 //------------------------------------------------------------------------------
 //
 // Remarks: -
@@ -86,12 +87,21 @@ uses
   WinApi.CoreAudioApi.MMDevApiUtils,
   WinApi.CoreAudioApi.Endpointvolume;
 
+  // Comment out if you don't want to see debug messages.
+  //{$DEFINE CONT_DEBUG}
+
 const
-  // Defines the maximum and minimum in- and output values
-  MAX_INPUT_VALUE  : Single = 1.0;
-  MIN_INPUT_VALUE  : Single = 0.0;
-  MAX_OUTPUT_VALUE : Single = 1.0;
-  MIN_OUTPUT_VALUE : Single = 0.0;
+  // Defines the maximum and minimum in- and output scalar values.
+  MAX_INPUT_SCALAR_VALUE  : Single = 1.0;
+  MIN_INPUT_SCALAR_VALUE  : Single = 0.0;
+  MAX_OUTPUT_SCALAR_VALUE : Single = 1.0;
+  MIN_OUTPUT_SCALAR_VALUE : Single = 0.0;
+
+  // Defines the maximum and minimum in- and output DB values.
+  MAX_INPUT_DB_VALUE  : Single = -6.0;  // arbitrary value!
+  MIN_INPUT_DB_VALUE  : Single = 0.0;
+  MAX_OUTPUT_DB_VALUE : Single = -6.0;  // arbitrary value!
+  MIN_OUTPUT_DB_VALUE : Single = 0.0;
 
   // Message ID's
   WM_MIXERNOTIFY            = WM_APP + 200;
@@ -109,7 +119,7 @@ type
   TOnNotify = procedure (Sender: TObject; pNotify: PAUDIO_VOLUME_NOTIFICATION_DATA) of object;
 
   // Callback COM interface
-  TOnEndPointNotify = class(TInterfacedObject, IAudioEndpointVolumeCallback)
+  TOnEndPointNotify = class(TInterfacedPersistent, IAudioEndpointVolumeCallback)
     function OnNotify(pNotify: PAUDIO_VOLUME_NOTIFICATION_DATA): HRESULT; stdcall;
   end;
 
@@ -266,7 +276,6 @@ label
 begin
 
   inherited Create(AOwner);
-  CoInitialize(Nil);
 
   // Get handle for this mixer
   fHwnd := AllocateHWnd(WindProc);
@@ -279,7 +288,7 @@ begin
 
   // We want to know what the current default endpoint device is.
   hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
-                         Nil,
+                         nil,
                          INT(CLSCTX_INPROC_SERVER),
                          IID_IMMDeviceEnumerator,
                          FDeviceEnumerator);
@@ -326,10 +335,11 @@ begin
   SafeRelease(FDeviceEnumerator);
   SafeRelease(fSelectedIMMDevice);
   SafeRelease(FAudioEndpoint);
+  fOnEndPointNotify := Nil;
   // Free the Handle
   DeallocateHWnd(fHwnd);
   SetLength(fEndPointDevices, 0);
-  CoUninitialize;
+
   inherited Destroy;
 end;
 
@@ -347,7 +357,7 @@ begin
         begin
           msg_lp := PAUDIO_VOLUME_NOTIFICATION_DATA(Msg.LParam);
 
-{$IFDEF DEBUG}
+{$IFDEF CONT_DEBUG}
           // Show the output in messages window
           OutputDebugString(pChar('==> OnEndPointNotify.OnNotify messages:'));
           OutputDebugString(pChar(''));
@@ -364,7 +374,8 @@ begin
 
           // Send received struct to TControl's OnNotify eventhandler.
           if Assigned(FOnNotify) then
-            FOnNotify(Self, msg_lp);
+            FOnNotify(Self,
+                      msg_lp);
 
           // Set properties
           uiChannels := msg_lp^.nChannels;
@@ -479,10 +490,10 @@ procedure TMfAudioEndPoint.SetMasterScalarVolume(aValue: Single);
 var
   hr: HResult;
 begin
-  if (aValue < MIN_INPUT_VALUE) then
-    aValue := MIN_INPUT_VALUE;
-  if (aValue > MAX_INPUT_VALUE) then
-    aValue := MAX_INPUT_VALUE;
+  if (aValue < MIN_INPUT_SCALAR_VALUE) then
+    aValue := MIN_INPUT_SCALAR_VALUE;
+  if (aValue > MAX_INPUT_SCALAR_VALUE) then
+    aValue := MAX_INPUT_SCALAR_VALUE;
   hr := FAudioEndpoint.SetMasterVolumeLevelScalar(aValue,
                                                   @g_guidEventContext);
   OleCheck(hr);
@@ -559,10 +570,10 @@ var
 
 begin
 
-  if (aValue < MIN_INPUT_VALUE) then
-    aValue := MIN_INPUT_VALUE;
-  if (aValue > MAX_INPUT_VALUE) then
-    aValue := MAX_INPUT_VALUE;
+  if (aValue > MIN_INPUT_DB_VALUE) then
+    aValue := MIN_INPUT_DB_VALUE;
+  if (aValue < MAX_INPUT_DB_VALUE) then
+    aValue := MAX_INPUT_DB_VALUE;
   hr := FAudioEndpoint.SetMasterVolumeLevel(aValue,
                                             @g_GuidEventContext);
   OleCheck(hr);
@@ -637,13 +648,13 @@ begin
 
           // Remember: After unregister the callback the refcount will be decreased!
           //           See the documentation about Un/RegisterAudioEndpointVolumeCallback.
-          //           So, there is no need to relase the interface, this will be done automaticly
+          //           So, there is no need to release the interface, this will be done automaticly
 
           if Succeeded(hr) then
             begin
               hr := fSelectedIMMDevice.Activate(IID_IAudioEndpointVolume,
                                                 INT(CLSCTX_INPROC_SERVER),
-                                                Nil,
+                                                nil,
                                                 Pointer(FAudioEndpoint));
 
               if Succeeded(hr) then
@@ -768,7 +779,7 @@ end;
 // HELPERS /////////////////////////////////////////////////////////////////////
 
 // Get deviceproperty descriptions
-function TMfAudioEndPoint.GetAudioDeviceDescriptions(DefaultDevice: IMMDevice;      // index starts with 0, which is always the default endpoit device.
+function TMfAudioEndPoint.GetAudioDeviceDescriptions(DefaultDevice: IMMDevice;      // index starts with 0, which is always the default endpoint device.
                                                      const DevicePkey: PROPERTYKEY; // Possible values are: PKEY_Device_FriendlyName, PKEY_Device_DeviceDesc or PKEY_DeviceInterface_FriendlyName.
                                                      out deviceDesc: WideString): HResult;
 begin
