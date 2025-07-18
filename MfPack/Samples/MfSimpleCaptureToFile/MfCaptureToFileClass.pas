@@ -23,6 +23,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 17/07/2025 Tony                Added videostatistics property.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
@@ -147,7 +148,7 @@ type
 type
 
   TCaptureToFile = class(TInterfacedPersistent, IMFSourceReaderCallback)
-  protected
+  private
     m_State: TState;
     m_hwndEvent: HWND;         // Application window to receive events.
 
@@ -159,6 +160,8 @@ type
 
     m_strSymbolicLink: string;
     m_strName: string;
+
+    m_VideoStats: MF_SINK_WRITER_STATISTICS;
 
     function ConfigureCapture(var param: EncodingParameters): HResult;
     function EndCaptureInternal(): HResult;
@@ -199,6 +202,8 @@ type
     property State: TState read m_State write m_State;
     property DeviceName: string read m_strName;
     property DeviceSymbolicLink: string read m_strSymbolicLink;
+    property VideoStatistics: MF_SINK_WRITER_STATISTICS read m_VideoStats;
+
 end;
 
 var
@@ -261,7 +266,6 @@ begin
   MfDeviceList := nil;
 
   MFShutdown();
-  CoUninitialize;
 
   inherited;
 end;
@@ -275,8 +279,6 @@ begin
 end;
 
 // End Constructor & destructor section ////////////////////////////////////////
-
-
 
 
 // Event methods ///////////////////////////////////////////////////////////////
@@ -327,19 +329,27 @@ begin
 
       hr := pSample.SetSampleTime(llTimeStamp);
 
-      if (FAILED(hr)) then { goto done; }
+      if (FAILED(hr)) then
         goto Done;
 
       hr := pSample.SetUINT32(MFSampleExtension_Discontinuity,
                               0);
 
-      if (FAILED(hr)) then { goto done; }
+      if (FAILED(hr)) then
        goto Done;
 
       hr := m_pWriter.WriteSample(0,
                                   pSample);
 
-      if FAILED(hr) then { goto done; }
+      if FAILED(hr) then
+        goto Done;
+
+      // When a sample has been written, you may get the statistics.
+
+      m_VideoStats := InitializeStatistics();
+      hr := m_pWriter.GetStatistics(0,
+                                    m_VideoStats);
+      if FAILED(hr) then
         goto Done;
 
       pSample := nil;  // Must do!
@@ -380,9 +390,11 @@ begin
                                                            being used because they cannot handle the new media type.
                                                            } end;
         else
-          // Set text in Mainwindow caption
-          SetWindowText(m_hwndEvent,
-                        'Capturing: ' + HnsTimeToStr((llTimeStamp), true));
+          begin
+            // Set text in Mainwindow caption
+            SetWindowText(m_hwndEvent,
+                          'Capturing: ' + HnsTimeToStr((llTimeStamp), True));
+          end;
         end;
       end;
 
@@ -1008,15 +1020,12 @@ end;
 
 initialization
 
-  // Initialize the COM library
-  CoInitializeEx(nil,
-                 COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE);
-
   // Possible values are: MfStarted, MfStopped
-  MfStatus:= MfStopped;
+  MfStatus := MfStopped;
 
   // Initialize Media Foundation
-  if FAILED(MFStartup(MF_VERSION, MFSTARTUP_FULL)) then
+  if FAILED(MFStartup(MF_VERSION,
+                      MFSTARTUP_FULL)) then
     begin
       MessageBox(0,
                  lpcwstr('Your computer does not support this Media Foundation API version' +
@@ -1026,7 +1035,7 @@ initialization
       Abort;
     end;
 
-  MfStatus:= MfStarted;
+  MfStatus := MfStarted;
 
 finalization
   // See BeforeDestruction.
