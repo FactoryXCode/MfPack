@@ -256,14 +256,15 @@ In your projectsettings you have to add ..MfPack\Samples\MfComponents in the pro
 This sample demonstrates how to use the IAudioClient to render different audio formats like WAV, FLAC, MP3 etc.
 using the IMFSourceReader to decode the format suitable for playing in WASAPI's IAudioClient and renderer.
     
-This sample plays formats like WAV (pcm and floatingpoint), MP3 and FLAC.
+The sample plays formats like WAV (pcm and floatingpoint), MP3 and FLAC.
 It shows you the basics of using the IAudioClient, iAudioRenderer, IAudioClock and IAudioStreamVolume interfaces.
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
 In your projectsettings you have to add ..MfPack\Samples\MfComponents in the project options searchpath.
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer1.png)
 
-
+**SimpleVolumeControlSample**
+This example shows how to use the basics of the MfAudioEndPoint component.
 
 ***Tools***
 

@@ -9,7 +9,10 @@ NOTES:
 * Requires Windows 7 or later.
 * Minimum supported MfPack version: 3.1.5
 
-This example is shows how to use the MfAudioEndPoint component.
+
+
+This example shows how to use the MfAudioEndPoint component.
+
 
 
 For indepth information see [how to use the IAudioEndpointVolumes interface](https://learn.microsoft.com/en-us/windows/win32/api/endpointvolume/nn-endpointvolume-iaudioendpointvolume)
