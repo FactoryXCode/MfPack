@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 //
 // Description: Windows Imaging Component (WIC) API.
 //              This module contains the public data structures and API definitions
@@ -24,7 +24,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -32,11 +32,11 @@
 //          It is not recommended to use the rtl versions <= Delphi 10.4
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -66,6 +66,8 @@
 //==============================================================================
 unit WinApi.WIC.WinCodec;
 
+  {$HPPEMIT '#include "wincodec.h"'}
+
 interface
 
 // {$DEFINE USE_EMBARCADERO_DEF}
@@ -75,6 +77,7 @@ uses
   {WinApi}
   WinApi.Windows,
   WinApi.WinError,
+  WinApi.WinApiTypes,
   {ActiveX}
   {$IFDEF USE_EMBARCADERO_DEF}
   WinApi.ActiveX,
@@ -122,12 +125,23 @@ var  CLSID_WICImagingFactory      : TGUID absolute CLSID_WICImagingFactory2;
 // const WINCODEC_SDK_VERSION                = WINCODEC_SDK_VERSION1;
 //#endif
 
+
+
 const
+
+  //*=========================================================================*\
+  //  GUID Identifiers for the vendors
+  //*=========================================================================*/
 
   GUID_VendorMicrosoft         : TGUID = '{f0e749ca-edef-4589-a73a-ee0e626a2a2b}';
   {$EXTERNALSYM GUID_VendorMicrosoft}
   GUID_VendorMicrosoftBuiltIn  : TGUID = '{257a30fd-06b6-462b-aea4-63f70b86e533}';
   {$EXTERNALSYM GUID_VendorMicrosoftBuiltIn}
+
+
+  //*=========================================================================*\
+  //  GUID Identifiers for the codecs
+  //*=========================================================================*/
 
   CLSID_WICPngDecoder1         : TGUID = '{389ea17b-5078-4cde-b6ef-25c15175c751}';
   {$EXTERNALSYM CLSID_WICPngDecoder1}
@@ -181,8 +195,16 @@ const
   {$EXTERNALSYM CLSID_WICWebpDecoder}
   CLSID_WICRAWDecoder          : TGUID = '{41945702-8302-44A6-9445-AC98E8AFA086}';
   {$EXTERNALSYM CLSID_WICRAWDecoder}
+  CLSID_WICJpegXLDecoder       : TGUID = '{fc6ceece-aef5-4a23-96ec-5984ffb486d9}';
+  {$EXTERNALSYM CLSID_WICJpegXLDecoder}
+  CLSID_WICJpegXLEncoder       : TGUID = '{0e4ecd3b-1ba6-4636-8198-56c73040964a}';
+  {$EXTERNALSYM CLSID_WICJpegXLDecoder}
 
-  {Container formats}
+
+  //*=========================================================================*\
+  //  GUID Identifiers for the image container formats
+  //*=========================================================================*/
+
   GUID_ContainerFormatBmp      : TGUID = '{0af1d87e-fcfe-4188-bdeb-a7906471cbe3}';
   {$EXTERNALSYM GUID_ContainerFormatBmp}
   GUID_ContainerFormatPng      : TGUID = '{1b7cfaf4-713f-473c-bbcd-6137425faeaf}';
@@ -207,10 +229,16 @@ const
   {$EXTERNALSYM GUID_ContainerFormatWebp}
   GUID_ContainerFormatRaw      : TGUID = '{fe99ce60-f19c-433c-a3ae-00acefa9ca21}';
   {$EXTERNALSYM GUID_ContainerFormatRaw}
+  GUID_ContainerFormatJpegXL   : TGUID = '{fec14e3f-427a-4736-aae6-27ed84f69322}';
+  {$EXTERNALSYM GUID_ContainerFormatJpegXL}
+
+
+  //*=========================================================================*\
+  //  Category Identifiers
+  //*=========================================================================*/
 
   CLSID_WICImagingCategories   : TGUID = '{fae3d380-fea4-4623-8c75-c6b61110b681}';
   {$EXTERNALSYM CLSID_WICImagingCategories}
-
   CATID_WICBitmapDecoders      : TGUID = '{7ed96837-96f0-4812-b211-f13c24117ed3}';
   {$EXTERNALSYM CATID_WICBitmapDecoders}
   CATID_WICBitmapEncoders      : TGUID = '{ac757296-3522-4e11-9862-c17be5a1767e}';
@@ -224,6 +252,11 @@ const
   CATID_WICMetadataWriter      : TGUID = '{abe3b9a4-257d-4b97-bd1a-294af496222e}';
   {$EXTERNALSYM CATID_WICMetadataWriter}
 
+
+  //*=========================================================================*\
+  //  Format converters
+  //*=========================================================================*/
+
   CLSID_WICDefaultFormatConverter    : TGUID = '{1a3f11dc-b514-4b17-8c5f-2154513852f1}';
   {$EXTERNALSYM CLSID_WICDefaultFormatConverter}
   CLSID_WICFormatConverterHighColor  : TGUID = '{ac75d454-9f37-48f8-b972-4e19bc856011}';
@@ -234,6 +267,7 @@ const
   {$EXTERNALSYM CLSID_WICFormatConverterWMPhoto}
   CLSID_WICPlanarFormatConverter     : TGUID = '{184132b8-32f8-4784-9131-dd7224b23438}';
   {$EXTERNALSYM CLSID_WICPlanarFormatConverter}
+
 
   WIC_JPEG_MAX_COMPONENT_COUNT        = 4;
   {$EXTERNALSYM WIC_JPEG_MAX_COMPONENT_COUNT}
@@ -261,7 +295,7 @@ const
   WIC_JPEG_HUFFMAN_BASELINE_THREE     = $111100;
   {$EXTERNALSYM WIC_JPEG_HUFFMAN_BASELINE_THREE}
 
-
+  // Undefined formats
   GUID_WICPixelFormatDontCare         : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc900}';
   {$EXTERNALSYM GUID_WICPixelFormatDontCare}
 var GUID_WICPixelFormatUndefined      : TGUID absolute GUID_WICPixelFormatDontCare;
@@ -269,6 +303,7 @@ var GUID_WICPixelFormatUndefined      : TGUID absolute GUID_WICPixelFormatDontCa
 
 const
 
+  // Indexed formats
   GUID_WICPixelFormat1bppIndexed    : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc901}';
   {$EXTERNALSYM GUID_WICPixelFormat1bppIndexed}
   GUID_WICPixelFormat2bppIndexed    : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc902}';
@@ -277,6 +312,8 @@ const
   {$EXTERNALSYM GUID_WICPixelFormat4bppIndexed}
   GUID_WICPixelFormat8bppIndexed    : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc904}';
   {$EXTERNALSYM GUID_WICPixelFormat8bppIndexed}
+
+  // Grayscale formats
   GUID_WICPixelFormatBlackWhite     : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc905}';
   {$EXTERNALSYM GUID_WICPixelFormatBlackWhite}
   GUID_WICPixelFormat2bppGray       : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc906}';
@@ -285,8 +322,27 @@ const
   {$EXTERNALSYM GUID_WICPixelFormat4bppGray}
   GUID_WICPixelFormat8bppGray       : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc908}';
   {$EXTERNALSYM GUID_WICPixelFormat8bppGray}
+
+  // Alpha only format
   GUID_WICPixelFormat8bppAlpha      : TGUID = '{e6cd0116-eeba-4161-aa85-27dd9fb3a895}';
   {$EXTERNALSYM GUID_WICPixelFormat8bppAlpha}
+
+  // Depth only format
+  GUID_WICPixelFormat8bppDepth      : TGUID = '{4c9c9f45-1d89-4e31-9bc7-69343a0dca69}';
+  {$EXTERNALSYM GUID_WICPixelFormat8bppDepth}
+
+  // Gain only format
+  GUID_WICPixelFormat8bppGain       : TGUID = '{a884022a-af13-4c16-b746-619bf618b878}';
+  {$EXTERNALSYM GUID_WICPixelFormat8bppGain}
+  GUID_WICPixelFormat24bppRGBGain   : TGUID = '{a5022b24-7109-443b-9948-25b6ed8f39fd}';
+  {$EXTERNALSYM GUID_WICPixelFormat24bppRGBGain}
+  GUID_WICPixelFormat32bppBGRGain   : TGUID = '{837d6738-208a-43e0-8995-79ab74407402}';
+  {$EXTERNALSYM GUID_WICPixelFormat32bppBGRGain}
+
+  // sRGB formats (gamma is approx. 2.2)
+  // For a full definition, see the sRGB spec
+
+  // 16bpp formats
   GUID_WICPixelFormat16bppBGR555    : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc909}';
   {$EXTERNALSYM GUID_WICPixelFormat16bppBGR555}
   GUID_WICPixelFormat16bppBGR565    : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc90a}';
@@ -295,10 +351,14 @@ const
   {$EXTERNALSYM GUID_WICPixelFormat16bppBGRA5551}
   GUID_WICPixelFormat16bppGray      : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc90b}';
   {$EXTERNALSYM GUID_WICPixelFormat16bppGray}
+
+  // 24bpp formats
   GUID_WICPixelFormat24bppBGR       : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc90c}';
   {$EXTERNALSYM GUID_WICPixelFormat24bppBGR}
   GUID_WICPixelFormat24bppRGB       : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc90d}';
   {$EXTERNALSYM GUID_WICPixelFormat24bppRGB}
+
+  // 32bpp formats
   GUID_WICPixelFormat32bppBGR       : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc90e}';
   {$EXTERNALSYM GUID_WICPixelFormat32bppBGR}
   GUID_WICPixelFormat32bppBGRA      : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc90f}';
@@ -315,14 +375,18 @@ const
   {$EXTERNALSYM GUID_WICPixelFormat32bppRGBA}
   GUID_WICPixelFormat32bppPRGBA     : TGUID = '{3cc4a650-a527-4d37-a916-3142c7ebedba}';
   {$EXTERNALSYM GUID_WICPixelFormat32bppPRGBA}
+
+  // 48bpp formats
   GUID_WICPixelFormat48bppRGB       : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc915}';
   {$EXTERNALSYM GUID_WICPixelFormat48bppRGB}
   GUID_WICPixelFormat48bppBGR       : TGUID = '{e605a384-b468-46ce-bb2e-36f180e64313}';
   {$EXTERNALSYM GUID_WICPixelFormat48bppBGR}
-//#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8) || defined(_WIN7_PLATFORM_UPDATE)
+
+  // 64bpp formats
+  //#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8) || defined(_WIN7_PLATFORM_UPDATE)
   GUID_WICPixelFormat64bppRGB       : TGUID = '{a1182111-186d-4d42-bc6a-9c8303a8dff9}';
   {$EXTERNALSYM GUID_WICPixelFormat64bppRGB}
-//#endif
+  //#endif
   GUID_WICPixelFormat64bppRGBA      : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc916}';
   {$EXTERNALSYM GUID_WICPixelFormat64bppRGBA}
   GUID_WICPixelFormat64bppBGRA      : TGUID = '{1562ff7c-d352-46f9-979e-42976b792246}';
@@ -331,28 +395,45 @@ const
   {$EXTERNALSYM GUID_WICPixelFormat64bppPRGBA}
   GUID_WICPixelFormat64bppPBGRA     : TGUID = '{8c518e8e-a4ec-468b-ae70-c9a35a9c5530}';
   {$EXTERNALSYM GUID_WICPixelFormat64bppPBGRA}
+
+  // scRGB formats. Gamma is 1.0
+  // For a full definition, see the scRGB specs
+
+  // 16bpp format
   GUID_WICPixelFormat16bppGrayFixedPoint  : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc913}';
   {$EXTERNALSYM GUID_WICPixelFormat16bppGrayFixedPoint}
+
+  // 32bpp format
   GUID_WICPixelFormat32bppBGR101010       : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc914}';
   {$EXTERNALSYM GUID_WICPixelFormat32bppBGR101010}
+
+  // 48bpp formats
   GUID_WICPixelFormat48bppRGBFixedPoint   : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc912}';
   {$EXTERNALSYM GUID_WICPixelFormat48bppRGBFixedPoint}
   GUID_WICPixelFormat48bppBGRFixedPoint   : TGUID = '{49ca140e-cab6-493b-9ddf-60187c37532a}';
   {$EXTERNALSYM GUID_WICPixelFormat48bppBGRFixedPoint}
+
+  // 96bpp formats
   GUID_WICPixelFormat96bppRGBFixedPoint   : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc918}';
   {$EXTERNALSYM GUID_WICPixelFormat96bppRGBFixedPoint}
 //#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8) || defined(_WIN7_PLATFORM_UPDATE)
   GUID_WICPixelFormat96bppRGBFloat        : TGUID = '{e3fed78f-e8db-4acf-84c1-e97f6136b327}';
   {$EXTERNALSYM GUID_WICPixelFormat96bppRGBFloat}
 //#endif
+
+  // Floating point scRGB formats
   GUID_WICPixelFormat128bppRGBAFloat       : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc919}';
   {$EXTERNALSYM GUID_WICPixelFormat128bppRGBAFloat}
   GUID_WICPixelFormat128bppPRGBAFloat      : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc91a}';
   {$EXTERNALSYM GUID_WICPixelFormat128bppPRGBAFloat}
   GUID_WICPixelFormat128bppRGBFloat        : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc91b}';
   {$EXTERNALSYM GUID_WICPixelFormat128bppRGBFloat}
+
+  // CMYK format
   GUID_WICPixelFormat32bppCMYK             : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc91c}';
   {$EXTERNALSYM GUID_WICPixelFormat32bppCMYK}
+
+  // Extended formats
   GUID_WICPixelFormat64bppRGBAFixedPoint   : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc91d}';
   {$EXTERNALSYM GUID_WICPixelFormat64bppRGBAFixedPoint}
   GUID_WICPixelFormat64bppBGRAFixedPoint   : TGUID = '{356de33c-54d2-4a23-bb04-9b7bf9b1d42d}';
@@ -363,6 +444,8 @@ const
   {$EXTERNALSYM GUID_WICPixelFormat128bppRGBAFixedPoint}
   GUID_WICPixelFormat128bppRGBFixedPoint   : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc941}';
   {$EXTERNALSYM GUID_WICPixelFormat128bppRGBFixedPoint}
+
+
   GUID_WICPixelFormat64bppRGBAHalf         : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc93a}';
   {$EXTERNALSYM GUID_WICPixelFormat64bppRGBAHalf}
 //#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8) || defined(_WIN7_PLATFORM_UPDATE)
@@ -382,10 +465,21 @@ const
   {$EXTERNALSYM GUID_WICPixelFormat32bppRGBA1010102}
   GUID_WICPixelFormat32bppRGBA1010102XR    : TGUID = '{00DE6B9A-C101-434b-b502-d0165ee1122c}';
   {$EXTERNALSYM GUID_WICPixelFormat32bppRGBA1010102XR}
+
+  // Note that for both BGR101010 and RGBA1010102, the red channel is stored in the least significant bits.  This format is different,
+  //  with the red channel in the most significant bits.  The memory layout of R10G10B10A2 is RRRRRRRR RRGGGGGG GGGGBBBB BBBBBBAA when
+  //  interpreted as a unit, and BBBBBBAA GGGGBBBB RRGGGGG RRRRRRRR when stored in memory on a little-endian device.
+
   GUID_WICPixelFormat32bppR10G10B10A2      : TGUID = '{604e1bb5-8a3c-4b65-b11c-bc0b8dd75b7f}';
   {$EXTERNALSYM GUID_WICPixelFormat32bppR10G10B10A2}
+
+  // This is a 10 bit pixel format for HDR10(i.e., BT.2020 color space and SMPTE ST.2084 EOTF.)
+  // The pixel format uses the same channel layout as GUID_WICPixelFormat32bppR10G10B10A2.
+  // This layout is the same as DXGI_FORMAT_R10G10B10A2_UNORM.
   GUID_WICPixelFormat32bppR10G10B10A2HDR10 : TGUID = '{9c215c5d-1acc-4f0e-a4bc-70fb3ae8fd28}';
   {$EXTERNALSYM GUID_WICPixelFormat32bppR10G10B10A2HDR10}
+
+  // More CMYK formats and n-Channel formats
   GUID_WICPixelFormat64bppCMYK             : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc91f}';
   {$EXTERNALSYM GUID_WICPixelFormat64bppCMYK}
   GUID_WICPixelFormat24bpp3Channels  : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc920}';
@@ -440,6 +534,8 @@ const
   {$EXTERNALSYM GUID_WICPixelFormat128bpp7ChannelsAlpha}
   GUID_WICPixelFormat144bpp8ChannelsAlpha : TGUID = '{6fddc324-4e03-4bfe-b185-3d77768dc939}';
   {$EXTERNALSYM GUID_WICPixelFormat144bpp8ChannelsAlpha}
+
+  // Planar formats
   GUID_WICPixelFormat8bppY             : TGUID = '{91B4DB54-2DF9-42F0-B449-2909BB3DF88E}';
   {$EXTERNALSYM GUID_WICPixelFormat8bppY}
   GUID_WICPixelFormat8bppCb            : TGUID = '{1339F224-6BFE-4C3E-9302-E4F3A6D0CA2A}';
@@ -448,6 +544,8 @@ const
   {$EXTERNALSYM GUID_WICPixelFormat8bppCr}
   GUID_WICPixelFormat16bppCbCr         : TGUID = '{FF95BA6E-11E0-4263-BB45-01721F3460A4}';
   {$EXTERNALSYM GUID_WICPixelFormat16bppCbCr}
+
+  // Jpeg Quantized DCT coefficients
   GUID_WICPixelFormat16bppYQuantizedDctCoefficients  : TGUID = '{A355F433-48E8-4A42-84D8-E2AA26CA80A4}';
   {$EXTERNALSYM GUID_WICPixelFormat16bppYQuantizedDctCoefficients}
   GUID_WICPixelFormat16bppCbQuantizedDctCoefficients : TGUID = '{D2C4FF61-56A5-49C2-8B5C-4C1925964837}';
@@ -455,10 +553,10 @@ const
   GUID_WICPixelFormat16bppCrQuantizedDctCoefficients : TGUID = '{2FE354F0-1680-42D8-9231-E73C0565BFC1}';
   {$EXTERNALSYM GUID_WICPixelFormat16bppCrQuantizedDctCoefficients}
 
- // From intsafe.h
- // Do not re-introduce, to prevent clashes in later versions where intsafe.h will be included
- // INTSAFE_E_ARITHMETIC_OVERFLOW       = HResult($80070216);  // $216 = 534 = ERROR_ARITHMETIC_OVERFLOW
- // end
+  // From intsafe.h
+  // Do not re-introduce, to prevent clashes in later versions where intsafe.h will be included
+  // INTSAFE_E_ARITHMETIC_OVERFLOW       = HResult($80070216);  // $216 = 534 = ERROR_ARITHMETIC_OVERFLOW
+  // end
 
   WINCODEC_ERR_GENERIC_ERROR          = E_FAIL;
   {$EXTERNALSYM WINCODEC_ERR_GENERIC_ERROR}
@@ -481,35 +579,6 @@ const
   {$EXTERNALSYM FACILITY_WINCODEC_ERR}
   WINCODEC_ERR_BASE                   = $2000;
   {$EXTERNALSYM WINCODEC_ERR_BASE}
-
-  WICRawChangeNotification_ExposureCompensation    = $00000001;
-  {$EXTERNALSYM WICRawChangeNotification_ExposureCompensation}
-  WICRawChangeNotification_NamedWhitePoint         = $00000002;
-  {$EXTERNALSYM WICRawChangeNotification_NamedWhitePoint}
-  WICRawChangeNotification_KelvinWhitePoint        = $00000004;
-  {$EXTERNALSYM WICRawChangeNotification_KelvinWhitePoint}
-  WICRawChangeNotification_RGBWhitePoint           = $00000008;
-  {$EXTERNALSYM WICRawChangeNotification_RGBWhitePoint}
-  WICRawChangeNotification_Contrast                = $00000010;
-  {$EXTERNALSYM WICRawChangeNotification_Contrast}
-  WICRawChangeNotification_Gamma                   = $00000020;
-  {$EXTERNALSYM WICRawChangeNotification_Gamma}
-  WICRawChangeNotification_Sharpness               = $00000040;
-  {$EXTERNALSYM WICRawChangeNotification_Sharpness}
-  WICRawChangeNotification_Saturation              = $00000080;
-  {$EXTERNALSYM WICRawChangeNotification_Saturation}
-  WICRawChangeNotification_Tint                    = $00000100;
-  {$EXTERNALSYM WICRawChangeNotification_Tint}
-  WICRawChangeNotification_NoiseReduction          = $00000200;
-  {$EXTERNALSYM WICRawChangeNotification_NoiseReduction}
-  WICRawChangeNotification_DestinationColorContext = $00000400;
-  {$EXTERNALSYM WICRawChangeNotification_DestinationColorContext}
-  WICRawChangeNotification_ToneCurve               = $00000800;
-  {$EXTERNALSYM WICRawChangeNotification_ToneCurve}
-  WICRawChangeNotification_Rotation                = $00001000;
-  {$EXTERNALSYM WICRawChangeNotification_Rotation}
-  WICRawChangeNotification_RenderMode              = $00002000;
-  {$EXTERNALSYM WICRawChangeNotification_RenderMode}
 
 
 // Enums =======================================================================
@@ -538,7 +607,6 @@ const
   {$EXTERNALSYM WICBitmapCacheOnDemand}
   WICBitmapCacheOnLoad                   = WICBitmapCreateCacheOption($2);
   {$EXTERNALSYM WICBitmapCacheOnLoad}
-  //WICBITMAPCREATECACHEOPTION_FORCE_DWORD = FORCEDWORD;
 
 type
   PWICDecodeOptions = ^WICDecodeOptions;
@@ -549,7 +617,6 @@ const
   {$EXTERNALSYM WICDecodeMetadataCacheOnDemand}
   WICDecodeMetadataCacheOnLoad       = WICDecodeOptions($1);
   {$EXTERNALSYM WICDecodeMetadataCacheOnLoad}
-  //WICMETADATACACHEOPTION_FORCE_DWORD = FORCEDWORD;
 
 type
   PWICBitmapEncoderCacheOption = ^WICBitmapEncoderCacheOption;
@@ -562,7 +629,6 @@ const
   {$EXTERNALSYM WICBitmapEncoderCacheTempFile}
   WICBitmapEncoderNoCache                 = WICBitmapEncoderCacheOption($2);
   {$EXTERNALSYM WICBitmapEncoderNoCache}
-  //WICBITMAPENCODERCACHEOPTION_FORCE_DWORD = FORCEDWORD;
 
 type
   PWICComponentType = ^WICComponentType;
@@ -583,7 +649,6 @@ const
   {$EXTERNALSYM WICPixelFormat}
   WICAllComponents             = WICComponentType($3F);
   {$EXTERNALSYM WICAllComponents}
-  //WICCOMPONENTTYPE_FORCE_DWORD = FORCEDWORD;
 
 type
   PWICComponentEnumerateOptions = ^WICComponentEnumerateOptions;
@@ -600,7 +665,6 @@ const
   {$EXTERNALSYM WICComponentEnumerateUnsigned}
   WICComponentEnumerateBuiltInOnly     = WICComponentEnumerateOptions($20000000);
   {$EXTERNALSYM WICComponentEnumerateBuiltInOnly}
-  //WICCOMPONENTENUMERATEOPTIONS_FORCE_DWORD = $7FFFFFFF;
 
 type
   PWICBitmapInterpolationMode = ^WICBitmapInterpolationMode;
@@ -617,7 +681,6 @@ const
   {$EXTERNALSYM WICBitmapInterpolationModeFant}
   WICBitmapInterpolationModeHighQualityCubic = WICBitmapInterpolationMode($4);
   {$EXTERNALSYM WICBitmapInterpolationModeHighQualityCubic}
-  //WICBITMAPINTERPOLATIONMODE_FORCE_DWORD   = $7FFFFFFF;
 
 type
   PWICBitmapPaletteType = ^WICBitmapPaletteType;
@@ -652,7 +715,7 @@ const
   {$EXTERNALSYM WICBitmapPaletteTypeFixedGray16}
   WICBitmapPaletteTypeFixedGray256     = WICBitmapPaletteType($C);
   {$EXTERNALSYM WICBitmapPaletteTypeFixedGray256}
-  //WICBITMAPPALETTETYPE_FORCE_DWORD   = FORCEDWORD
+
 
 type
   PWICBitmapDitherType = ^WICBitmapDitherType;
@@ -679,7 +742,7 @@ const
   {$EXTERNALSYM WICBitmapDitherTypeDualSpiral8x8}
   WICBitmapDitherTypeErrorDiffusion = WICBitmapDitherType($8);
   {$EXTERNALSYM WICBitmapDitherTypeErrorDiffusion}
-  //WICBITMAPDITHERTYPE_FORCE_DWORD   = FORCEDWORD;
+
 
 type
   PWICBitmapAlphaChannelOption = ^WICBitmapAlphaChannelOption;
@@ -692,7 +755,7 @@ const
   {$EXTERNALSYM WICBitmapUsePremultipliedAlpha}
   WICBitmapIgnoreAlpha           = WICBitmapAlphaChannelOption($2);
   {$EXTERNALSYM WICBitmapIgnoreAlpha}
-  //WICBITMAPALPHACHANNELOPTIONS_FORCE_DWORD = FORCEDWORD;
+
 
 type
   PWICBitmapTransformOptions = ^WICBitmapTransformOptions;
@@ -711,7 +774,7 @@ const
   {$EXTERNALSYM WICBitmapTransformFlipHorizontal}
   WICBitmapTransformFlipVertical    = WICBitmapTransformOptions($10);
   {$EXTERNALSYM WICBitmapTransformFlipVertical}
-  //WICBITMAPTRANSFORMOPTIONS_FORCE_DWORD = FORCEDWORD;
+
 
 type
   PWICBitmapLockFlags = ^WICBitmapLockFlags;
@@ -722,7 +785,7 @@ const
   {$EXTERNALSYM WICBitmapLockRead}
   WICBitmapLockWrite       = WICBitmapLockFlags($2);
   {$EXTERNALSYM WICBitmapLockWrite}
-  //WICBITMAPLOCKFLAGS_FORCE_DWORD = FORCEDWORD;
+
 
 type
   PWICBitmapDecoderCapabilities = ^WICBitmapDecoderCapabilities;
@@ -739,7 +802,7 @@ const
   {$EXTERNALSYM WICBitmapDecoderCapabilityCanEnumerateMetadata}
   WICBitmapDecoderCapabilityCanDecodeThumbnail   = WICBitmapDecoderCapabilities($10);
   {$EXTERNALSYM WICBitmapDecoderCapabilityCanDecodeThumbnail}
-  //WICBITMAPDECODERCAPABILITIES_FORCE_DWORD     = FORCEDWORD;
+
 
 type
   PWICProgressOperation = ^WICProgressOperation;
@@ -752,7 +815,7 @@ const
   {$EXTERNALSYM WICProgressOperationWritePixels}
   WICProgressOperationAll          = WICProgressOperation($FFFF);
   {$EXTERNALSYM WICProgressOperationAll}
-  //WICPROGRESSOPERATION_FORCE_DWORD = FORCEDWORD;
+
 
 type
   PWICProgressNotification = ^WICProgressNotification;
@@ -767,7 +830,7 @@ const
   {$EXTERNALSYM WICProgressNotificationFrequent}
   WICProgressNotificationAll      = WICProgressNotification($FFFF0000);
   {$EXTERNALSYM WICProgressNotificationAll}
-  //WICPROGRESSNOTIFICATION_FORCE_DWORD = FORCEDWORD;
+
 
 type
   PWICComponentSigning = ^WICComponentSigning;
@@ -782,8 +845,53 @@ const
   {$EXTERNALSYM WICComponentSafe}
   WICComponentDisabled      = WICComponentSigning($80000000);
   {$EXTERNALSYM WICComponentDisabled}
-  //WICCOMPONENTSIGNING_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICBitmapToneMappingModes
+  //=========================================================================*/
+type
+  PWICBitmapToneMappingMode = ^WICBitmapToneMappingMode;
+  WICBitmapToneMappingMode = DWord;
+  {$EXTERNALSYM WICBitmapToneMappingMode}
+const
+    WICBitmapToneMappingMode_None           = WICBitmapToneMappingMode(0);
+    {$EXTERNALSYM WICBitmapToneMappingMode_None}
+    WICBitmapToneMappingMode_Default        = WICBitmapToneMappingMode($1);
+    {$EXTERNALSYM WICBitmapToneMappingMode_Default}
+    WICBitmapToneMappingMode_D2D            = WICBitmapToneMappingMode($2);
+    {$EXTERNALSYM WICBitmapToneMappingMode_D2D}
+    WICBitmapToneMappingMode_GainMap        = WICBitmapToneMappingMode($3);
+    {$EXTERNALSYM WICBitmapToneMappingMode_GainMap}
+
+
+  //=========================================================================*\
+  //  WICBitmapChainType
+  //=========================================================================*/
+type
+  PWICBitmapChainType = ^WICBitmapChainType;
+  WICBitmapChainType = DWord;
+  {$EXTERNALSYM WICBitmapChainType}
+const
+    WICBitmapChainType_Alternate            = WICBitmapChainType($1);
+    {$EXTERNALSYM WICBitmapChainType_Alternate}
+    WICBitmapChainType_Layer                = WICBitmapChainType($2);
+    {$EXTERNALSYM WICBitmapChainType_Layer}
+    WICBitmapChainType_Preview              = WICBitmapChainType($3);
+    {$EXTERNALSYM WICBitmapChainType_Preview}
+    WICBitmapChainType_Thumbnail            = WICBitmapChainType($4);
+    {$EXTERNALSYM WICBitmapChainType_Thumbnail}
+    WICBitmapChainType_AlphaMap             = WICBitmapChainType($5);
+    {$EXTERNALSYM WICBitmapChainType_AlphaMap}
+    WICBitmapChainType_DepthMap             = WICBitmapChainType($6);
+    {$EXTERNALSYM WICBitmapChainType_DepthMap}
+    WICBitmapChainType_GainMap              = WICBitmapChainType($7);
+    {$EXTERNALSYM WICBitmapChainType_GainMap}
+
+
+  //=========================================================================*\
+  //  WICGifLogicalScreenDescriptorProperties
+  //=========================================================================*/
 type
   PWICGifLogicalScreenDescriptorProperties = ^WICGifLogicalScreenDescriptorProperties;
   WICGifLogicalScreenDescriptorProperties = DWord;
@@ -807,8 +915,11 @@ const
   {$EXTERNALSYM WICGifLogicalScreenDescriptorBackgroundColorIndex}
   WICGifLogicalScreenDescriptorPixelAspectRatio     = WICGifLogicalScreenDescriptorProperties($9);
   {$EXTERNALSYM WICGifLogicalScreenDescriptorPixelAspectRatio}
-  //WICGifLogicalScreenDescriptorProperties_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICGifImageDescriptorProperties
+  //=========================================================================*/
 type
   PWICGifImageDescriptorProperties = ^WICGifImageDescriptorProperties;
   WICGifImageDescriptorProperties = DWord;
@@ -830,8 +941,11 @@ const
   {$EXTERNALSYM WICGifImageDescriptorSortFlag}
   WICGifImageDescriptorLocalColorTableSize  = WICGifImageDescriptorProperties($8);
   {$EXTERNALSYM WICGifImageDescriptorLocalColorTableSize}
-  //WICGifImageDescriptorProperties_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICGifGraphicControlExtensionProperties
+  //=========================================================================*/
 type
   PWICGifGraphicControlExtensionProperties = ^WICGifGraphicControlExtensionProperties;
   WICGifGraphicControlExtensionProperties = DWord;
@@ -847,8 +961,11 @@ const
   {$EXTERNALSYM WICGifGraphicControlExtensionDelay}
   WICGifGraphicControlExtensionTransparentColorIndex  = WICGifGraphicControlExtensionProperties($5);
   {$EXTERNALSYM WICGifGraphicControlExtensionTransparentColorIndex}
-  //WICGifGraphicControlExtensionProperties_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICGifApplicationExtensionProperties
+  //=========================================================================*/
 type
   PWICGifApplicationExtensionProperties = ^WICGifApplicationExtensionProperties;
   WICGifApplicationExtensionProperties = DWord;
@@ -858,8 +975,12 @@ const
   {$EXTERNALSYM WICGifApplicationExtensionApplication}
   WICGifApplicationExtensionData             = WICGifApplicationExtensionProperties($2);
   {$EXTERNALSYM WICGifApplicationExtensionData}
-  //WICGifApplicationExtensionProperties_FORCE_DWORD = FORCEDWORD;
 
+
+
+  //=========================================================================*\
+  //  WICGifCommentExtensionProperties
+  //=========================================================================*/
 type
   PWICGifCommentExtensionProperties = ^WICGifCommentExtensionProperties;
   WICGifCommentExtensionProperties = DWord;
@@ -869,6 +990,10 @@ const
   {$EXTERNALSYM WICGifCommentExtensionText}
   //WICGifCommentExtensionProperties_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICJpegCommentProperties
+  //=========================================================================*/
 type
   PWICJpegCommentProperties = ^WICJpegCommentProperties;
   WICJpegCommentProperties = DWord;
@@ -876,8 +1001,11 @@ type
 const
   WICJpegCommentText           = WICJpegCommentProperties($1);
   {$EXTERNALSYM WICJpegCommentText}
-  //WICJpegCommentProperties_FORCE_DWORD = FORCEDWORD;;
 
+
+  //=========================================================================*\
+  //  WICJpegLuminanceProperties
+  //=========================================================================*/
 type
   PWICJpegLuminanceProperties = ^WICJpegLuminanceProperties;
   WICJpegLuminanceProperties = DWord;
@@ -885,8 +1013,11 @@ type
 const
   WICJpegLuminanceTable = WICJpegLuminanceProperties($1);
   {$EXTERNALSYM WICJpegLuminanceTable}
-  //WICJpegLuminanceProperties_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICJpegChrominanceProperties
+  //=========================================================================*/
 type
   PWICJpegChrominanceProperties = ^WICJpegChrominanceProperties;
   WICJpegChrominanceProperties = DWord;
@@ -894,8 +1025,11 @@ type
 const
   WICJpegChrominanceTable = WICJpegChrominanceProperties($1);
   {$EXTERNALSYM WICJpegChrominanceTable}
-  //WICJpegChrominanceProperties_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WIC8BIMIptcProperties
+  //=========================================================================*/
 type
   PWIC8BIMIptcProperties = ^WIC8BIMIptcProperties;
   WIC8BIMIptcProperties = DWord;
@@ -905,8 +1039,11 @@ const
   {$EXTERNALSYM WIC8BIMIptcPString}
   WIC8BIMIptcEmbeddedIPTC       = WIC8BIMIptcProperties($1);
   {$EXTERNALSYM WIC8BIMIptcEmbeddedIPTC}
-  //WIC8BIMIptcProperties_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WIC8BIMResolutionInfoProperties
+  //=========================================================================*/
 type
   PWIC8BIMResolutionInfoProperties = ^WIC8BIMResolutionInfoProperties;
   WIC8BIMResolutionInfoProperties = DWord;
@@ -926,8 +1063,11 @@ const
   {$EXTERNALSYM WIC8BIMResolutionInfoVResolutionUnit}
   WIC8BIMResolutionInfoHeightUnit       = WIC8BIMResolutionInfoProperties($7);
   {$EXTERNALSYM WIC8BIMResolutionInfoHeightUnit}
-  //WIC8BIMResolutionInfoProperties_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WIC8BIMIptcDigestProperties
+  //=========================================================================*/
 type
   PWIC8BIMIptcDigestProperties = ^WIC8BIMIptcDigestProperties;
   WIC8BIMIptcDigestProperties = DWord;
@@ -937,8 +1077,11 @@ const
   {$EXTERNALSYM WIC8BIMIptcDigestPString}
   WIC8BIMIptcDigestIptcDigest       = WIC8BIMIptcDigestProperties($2);
   {$EXTERNALSYM WIC8BIMIptcDigestIptcDigest}
-  //WIC8BIMIptcDigestProperties_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICPngGamaProperties
+  //=========================================================================*/
 type
   PWICPngGamaProperties = ^WICPngGamaProperties;
   WICPngGamaProperties = DWord;
@@ -946,8 +1089,11 @@ type
 const
   WICPngGamaGamma          = WICPngGamaProperties($1);
   {$EXTERNALSYM WICPngGamaGamma}
-  //WICPngGamaProperties_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICPngBkgdProperties
+  //=========================================================================*/
 type
   PWICPngBkgdProperties = ^WICPngBkgdProperties;
   WICPngBkgdProperties = DWord;
@@ -955,8 +1101,11 @@ type
 const
   WICPngBkgdBackgroundColor    = WICPngBkgdProperties($1);
   {$EXTERNALSYM WICPngBkgdBackgroundColor}
-  //WICPngBkgdProperties_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICPngItxtProperties
+  //=========================================================================*/
 type
   PWICPngItxtProperties = ^WICPngItxtProperties;
   WICPngItxtProperties = DWord;
@@ -972,8 +1121,11 @@ const
   {$EXTERNALSYM WICPngItxtTranslatedKeyword}
   WICPngItxtText              = WICPngItxtProperties($5);
   {$EXTERNALSYM WICPngItxtText}
-  //WICPngItxtProperties_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICPngChrmProperties
+  //=========================================================================*/
 type
   PWICPngChrmProperties = ^WICPngChrmProperties;
   WICPngChrmProperties         = DWord;
@@ -995,8 +1147,11 @@ const
   {$EXTERNALSYM WICPngChrmBlueX}
   WICPngChrmBlueY          = WICPngChrmProperties($8);
   {$EXTERNALSYM WICPngChrmBlueY}
-  //WICPngChrmProperties_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICPngHistProperties
+  //=========================================================================*/
 type
   PWICPngHistProperties = ^WICPngHistProperties;
   WICPngHistProperties = DWord;
@@ -1004,8 +1159,11 @@ type
 const
   WICPngHistFrequencies      = WICPngHistProperties($1);
   {$EXTERNALSYM WICPngHistFrequencies}
-  //WICPngHistProperties_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICPngIccpProperties
+  //=========================================================================*/
 type
   PWICPngIccpProperties = ^WICPngIccpProperties;
   WICPngIccpProperties = DWord;
@@ -1015,8 +1173,11 @@ const
   {$EXTERNALSYM WICPngIccpProfileName}
   WICPngIccpProfileData      = WICPngIccpProperties($2);
   {$EXTERNALSYM WICPngIccpProfileData}
-  //WICPngIccpProperties_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICPngSrgbProperties
+  //=========================================================================*/
 type
   PWICPngSrgbProperties = ^WICPngSrgbProperties;
   WICPngSrgbProperties = DWord;
@@ -1024,8 +1185,11 @@ type
 const
   WICPngSrgbRenderingIntent    = WICPngSrgbProperties($1);
   {$EXTERNALSYM WICPngSrgbRenderingIntent}
-  //WICPngSrgbProperties_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICPngTimeProperties
+  //=========================================================================*/
 type
   PWICPngTimeProperties = ^WICPngTimeProperties;
   WICPngTimeProperties = DWord;
@@ -1035,7 +1199,7 @@ const
   {$EXTERNALSYM WICPngTimeYear}
   WICPngTimeMonth          = WICPngTimeProperties($2);
   {$EXTERNALSYM WICPngTimeMonth}
-  WICPngTimeDay          = WICPngTimeProperties($3);
+  WICPngTimeDay            = WICPngTimeProperties($3);
   {$EXTERNALSYM WICPngTimeDay}
   WICPngTimeHour           = WICPngTimeProperties($4);
   {$EXTERNALSYM WICPngTimeHour}
@@ -1043,17 +1207,30 @@ const
   {$EXTERNALSYM WICPngTimeMinute}
   WICPngTimeSecond         = WICPngTimeProperties($6);
   {$EXTERNALSYM WICPngTimeSecond}
-  //WICPngTimeProperties_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICHeifProperties
+  //=========================================================================*/
 type
   PWICHeifProperties = ^WICHeifProperties;
   WICHeifProperties = DWord;
   {$EXTERNALSYM WICHeifProperties}
 const
-  WICHeifOrientation      = WICHeifProperties($1);
+  WICHeifOrientation                = WICHeifProperties($1);
   {$EXTERNALSYM WICHeifOrientation}
-  //WICHeifProperties_FORCE_DWORD = FORCEDWORD;
+  // WICColor (VT_UI4).
+  // The image is an layered image if this property is present and not VT_EMPTY.
+  WICHeifLayeredImageCanvasColor    = WICHeifProperties($2);
 
+  // Array of POINT structures, specifying the coordinates of each layer image
+  // in the canvas (VT_VECTOR | VT_UI8)
+  WICHeifLayeredImageLayerPositions = WICHeifProperties($3);
+
+
+  //=========================================================================*\
+  //  WICHeifHdrProperties
+  //=========================================================================*/
 type
   PWICHeifHdrProperties = ^WICHeifHdrProperties;
   WICHeifHdrProperties = DWord;
@@ -1069,8 +1246,11 @@ const
   {$EXTERNALSYM WICHeifHdrMaximumMasteringDisplayLuminanceLevel}
   WICHeifHdrCustomVideoPrimaries                  = WICHeifHdrProperties($5);
   {$EXTERNALSYM WICHeifHdrCustomVideoPrimaries}
-  //WICHeifHdrProperties_FORCE_DWORD        = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICWebpAnimProperties
+  //=========================================================================*/
 type
   PWICWebpAnimProperties = ^WICWebpAnimProperties;
   WICWebpAnimProperties = DWord;
@@ -1078,8 +1258,11 @@ type
 const
   WICWebpAnimLoopCount        = WICWebpAnimProperties($1);
   {$EXTERNALSYM WICWebpAnimLoopCount}
-  //WICWebpAnimProperties_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICWebpAnmfProperties
+  //=========================================================================*/
 type
   PWICWebpAnmfProperties = ^WICWebpAnmfProperties;
   WICWebpAnmfProperties = DWord;
@@ -1087,8 +1270,51 @@ type
 const
   WICWebpAnmfFrameDuration      = WICWebpAnmfProperties($1);
   {$EXTERNALSYM WICWebpAnmfFrameDuration}
-  //WICWebpAnmfProperties_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICWebpAnmfProperties
+  //=========================================================================*/
+type
+  PWICJpegXLAnimProperties = ^WICJpegXLAnimProperties;
+  {$EXTERNALSYM WICJpegXLAnimProperties}
+  WICJpegXLAnimProperties = DWord;
+const
+  {$EXTERNALSYM WICJpegXLAnimLoopCount}
+  WICJpegXLAnimLoopCount                       = WICJpegXLAnimProperties($1);
+  {$EXTERNALSYM WICJpegXLAnimFrameTicksPerSecondNumerator}
+  WICJpegXLAnimFrameTicksPerSecondNumerator    = WICJpegXLAnimProperties($2);
+  {$EXTERNALSYM WICJpegXLAnimFrameTicksPerSecondDenominator}
+  WICJpegXLAnimFrameTicksPerSecondDenominator  = WICJpegXLAnimProperties($3);
+
+
+  //=========================================================================*\
+  //  WICJpegXLAnimFrameProperties
+  //=========================================================================*/
+type
+  WICJpegXLAnimFrameProperties = DWord;
+  {$EXTERNALSYM WICJpegXLAnimFrameProperties}
+const
+  WICJpegXLAnimFrameDurationInTicks            = WICJpegXLAnimFrameProperties($1);
+  {$EXTERNALSYM WICJpegXLAnimFrameDurationInTicks}
+  WICJpegXLAnimFrameName                       = WICJpegXLAnimFrameProperties($2);
+  {$EXTERNALSYM WICJpegXLAnimFrameName}
+
+
+  //=========================================================================*\
+  //  WICGainMapProperties
+  //=========================================================================*/
+type
+  WICGainMapProperties = DWord;
+  {$EXTERNALSYM WICGainMapProperties}
+const
+  WICGainMapMetadata = WICGainMapProperties($1);  // In ISO 21496-1 format
+  {$EXTERNALSYM WICGainMapMetadata}
+
+
+  //=========================================================================*\
+  //  WICSectionAccessLevel
+  //=========================================================================*/
 type
   PWICSectionAccessLevel = ^WICSectionAccessLevel;
   WICSectionAccessLevel         = DWord;
@@ -1098,8 +1324,11 @@ const
   {$EXTERNALSYM WICSectionAccessLevelRead}
   WICSectionAccessLevelReadWrite  = WICSectionAccessLevel($3);
   {$EXTERNALSYM WICSectionAccessLevelReadWrite}
-  //WICSectionAccessLevel_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICPixelFormatNumericRepresentation
+  //=========================================================================*/
 type
   PWICPixelFormatNumericRepresentation = ^WICPixelFormatNumericRepresentation;
   WICPixelFormatNumericRepresentation = DWord;
@@ -1117,8 +1346,11 @@ const
   {$EXTERNALSYM WICPixelFormatNumericRepresentationFixed}
   WICPixelFormatNumericRepresentationFloat           = WICPixelFormatNumericRepresentation($5);
   {$EXTERNALSYM WICPixelFormatNumericRepresentationFloat}
-  //WICPixelFormatNumericRepresentation_FORCE_DWORD  = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICPlanarOptions
+  //=========================================================================*/
 type
   PWICPlanarOptions = ^WICPlanarOptions;
   WICPlanarOptions = DWord;
@@ -1128,8 +1360,11 @@ const
   {$EXTERNALSYM WICPlanarOptionsDefault}
   WICPlanarOptionsPreserveSubsampling = WICPlanarOptions($1);
   {$EXTERNALSYM WICPlanarOptionsPreserveSubsampling}
-  //WICPLANAROPTIONS_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICJpegIndexingOptions
+  //=========================================================================*/
 type
   PWICJpegIndexingOptions = ^WICJpegIndexingOptions;
   WICJpegIndexingOptions = DWord;
@@ -1139,8 +1374,11 @@ const
   {$EXTERNALSYM WICJpegIndexingOptionsGenerateOnDemand}
   WICJpegIndexingOptionsGenerateOnLoad   = WICJpegIndexingOptions($1);
   {$EXTERNALSYM WICJpegIndexingOptionsGenerateOnLoad}
-  //WICJpegIndexingOptions_FORCE_DWORD     = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICJpegTransferMatrix
+  //=========================================================================*/
 type
   PWICJpegTransferMatrix = ^WICJpegTransferMatrix;
   WICJpegTransferMatrix = DWord;
@@ -1150,8 +1388,11 @@ const
   {$EXTERNALSYM WICJpegTransferMatrixIdentity}
   WICJpegTransferMatrixBT601    = WICJpegTransferMatrix($1);
   {$EXTERNALSYM WICJpegTransferMatrixBT601}
-  //WICJpegTransferMatrix_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICJpegScanType
+  //=========================================================================*/
 type
   PWICJpegScanType = ^WICJpegScanType;
   WICJpegScanType = DWord;
@@ -1163,8 +1404,11 @@ const
   {$EXTERNALSYM WICJpegScanTypePlanarComponents}
   WICJpegScanTypeProgressive      = WICJpegScanType($2);
   {$EXTERNALSYM WICJpegScanTypeProgressive}
-  //WICJpegScanType_FORCE_DWORD   = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICTiffCompressionOption
+  //=========================================================================*/
 type
   PWICTiffCompressionOption = ^WICTiffCompressionOption;
   WICTiffCompressionOption = DWord;
@@ -1186,8 +1430,11 @@ const
   {$EXTERNALSYM WICTiffCompressionZIP}
   WICTiffCompressionLZWHDifferencing = WICTiffCompressionOption($7);
   {$EXTERNALSYM WICTiffCompressionLZWHDifferencing}
-  //WICTIFFCOMPRESSIONOPTION_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICJpegYCrCbSubsamplingOption
+  //=========================================================================*/
 type
   PWICJpegYCrCbSubsamplingOption = ^WICJpegYCrCbSubsamplingOption;
   WICJpegYCrCbSubsamplingOption = DWord;
@@ -1203,8 +1450,11 @@ const
   {$EXTERNALSYM WICJpegYCrCbSubsampling444}
   WICJpegYCrCbSubsampling440      = WICJpegYCrCbSubsamplingOption($4);
   {$EXTERNALSYM WICJpegYCrCbSubsampling440}
-  //WICJPEGYCRCBSUBSAMPLING_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICPngFilterOption
+  //=========================================================================*/
 type
   PWICPngFilterOption = ^WICPngFilterOption;
   WICPngFilterOption = DWord;
@@ -1224,8 +1474,36 @@ const
   {$EXTERNALSYM WICPngFilterPaeth}
   WICPngFilterAdaptive       = WICPngFilterOption($6);
   {$EXTERNALSYM WICPngFilterAdaptive}
-  //WICPNGFILTEROPTION_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICHeifCompressionOption
+  //=========================================================================*/
+type
+  PWICHeifCompressionOption = ^WICHeifCompressionOption;
+  WICHeifCompressionOption = DWord;
+  {$EXTERNALSYM WICHeifCompressionOption}
+const
+
+    WICHeifCompressionDontCare      = WICHeifCompressionOption(0);
+    {$EXTERNALSYM WICHeifCompressionDontCare}
+    WICHeifCompressionNone          = WICHeifCompressionOption($1);
+    {$EXTERNALSYM WICHeifCompressionNone}
+    WICHeifCompressionHEVC          = WICHeifCompressionOption($2);
+    {$EXTERNALSYM WICHeifCompressionHEVC}
+    WICHeifCompressionAV1           = WICHeifCompressionOption($3);
+    {$EXTERNALSYM WICHeifCompressionAV1}
+    WICHeifCompressionJpegXL        = WICHeifCompressionOption($4);
+    {$EXTERNALSYM WICHeifCompressionJpegXL}
+    WICHeifCompressionBrotli        = WICHeifCompressionOption($5);
+    {$EXTERNALSYM WICHeifCompressionBrotli}
+    WICHeifCompressionDeflate       = WICHeifCompressionOption($6);
+    {$EXTERNALSYM WICHeifCompressionDeflate}
+
+
+  //=========================================================================*\
+  //  WICNamedWhitePoint
+  //=========================================================================*/
 type
   PWICNamedWhitePoint = ^WICNamedWhitePoint;
   WICNamedWhitePoint = DWord;
@@ -1247,14 +1525,17 @@ const
   {$EXTERNALSYM WICWhitePointFlash}
   WICWhitePointUnderwater        = WICNamedWhitePoint($80);
   {$EXTERNALSYM WICWhitePointUnderwater}
-  WICWhitePointCustom            = WICNamedWhitePoint($100);
+  WICWhitePointCustom            = WICNamedWhitePoint($100);  // when using a picture (grey-card) as white-balance
   {$EXTERNALSYM WICWhitePointCustom}
   WICWhitePointAutoWhiteBalance  = WICNamedWhitePoint($200);
   {$EXTERNALSYM WICWhitePointAutoWhiteBalance}
   WICWhitePointAsShot            = WICWhitePointDefault;
   {$EXTERNALSYM WICWhitePointAsShot}
-  //WICNAMEDWHITEPOINT_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICRawCapabilities
+  //=========================================================================*/
 type
   PWICRawCapabilities = ^WICRawCapabilities;
   WICRawCapabilities = DWord;
@@ -1266,8 +1547,11 @@ const
   {$EXTERNALSYM WICRawCapabilityGetSupported}
   WICRawCapabilityFullySupported = WICRawCapabilities($2);
   {$EXTERNALSYM WICRawCapabilityFullySupported}
-  //WICRAWCAPABILITIES_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICRawRotationCapabilities
+  //=========================================================================*/
 type
   PWICRawRotationCapabilities = ^WICRawRotationCapabilities;
   WICRawRotationCapabilities = DWord;
@@ -1281,8 +1565,39 @@ const
   {$EXTERNALSYM WICRawRotationCapabilityNinetyDegreesSupported}
   WICRawRotationCapabilityFullySupported         = WICRawRotationCapabilities($3);
   {$EXTERNALSYM WICRawRotationCapabilityFullySupported}
-  //WICRAWROTATIONCAPABILITIES_FORCE_DWORD     = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICRawCapabilitesInfo
+  //=========================================================================*/
+type
+  PWICRawCapabilitiesInfo = ^WICRawCapabilitiesInfo;
+  WICRawCapabilitiesInfo = record
+    cbSize: UINT;
+    CodecMajorVersion: UINT;
+    CodecMinorVersion: UINT;
+    ExposureCompensationSupport: WICRawCapabilities;
+    ContrastSupport: WICRawCapabilities;
+    RGBWhitePointSupport: WICRawCapabilities;
+    NamedWhitePointSupport: WICRawCapabilities;
+    NamedWhitePointSupportMask: UINT;
+    KelvinWhitePointSupport: WICRawCapabilities;
+    GammaSupport: WICRawCapabilities;
+    TintSupport: WICRawCapabilities;
+    SaturationSupport: WICRawCapabilities;
+    SharpnessSupport: WICRawCapabilities;
+    NoiseReductionSupport: WICRawCapabilities;
+    DestinationColorProfileSupport: WICRawCapabilities;
+    ToneCurveSupport: WICRawCapabilities;
+    RotationSupport: WICRawRotationCapabilities;
+    RenderModeSupport: WICRawCapabilities;
+  end;
+  {$EXTERNALSYM WICRawCapabilitiesInfo}
+
+
+  //=========================================================================*\
+  //  WICRawParameterSet
+  //=========================================================================*/
 type
   PWICRawParameterSet = ^WICRawParameterSet;
   WICRawParameterSet = DWord;
@@ -1294,8 +1609,11 @@ const
   {$EXTERNALSYM WICUserAdjustedParameterSet}
   WICAutoAdjustedParameterSet    = WICRawParameterSet($3);
   {$EXTERNALSYM WICAutoAdjustedParameterSet}
-  //WICRAWPARAMETERSET_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICRawRenderMode
+  //=========================================================================*/
 type
   PWICRawRenderMode = ^WICRawRenderMode;
   WICRawRenderMode = DWord;
@@ -1307,9 +1625,68 @@ const
   {$EXTERNALSYM WICRawRenderModeNormal}
   WICRawRenderModeBestQuality  = WICRawRenderMode($3);
   {$EXTERNALSYM WICRawRenderModeBestQuality}
-  //WICRAWRENDERMODE_FORCE_DWORD = FORCEDWORD;
 
 
+  //=========================================================================*\
+  //  WICRawToneCurvePoint
+  //=========================================================================*/
+type
+  PWICRawToneCurvePoint = ^WICRawToneCurvePoint;
+  WICRawToneCurvePoint = record
+    Input: Double;
+    Output: Double;
+  end;
+  {$EXTERNALSYM WICRawToneCurvePoint}
+
+
+  //=========================================================================*\
+  //  WICRawToneCurve
+  //=========================================================================*/
+  PWICRawToneCurve = ^WICRawToneCurve;
+  WICRawToneCurve = record
+    cPoints: UINT;
+    aPoints: array[0..0] of WICRawToneCurvePoint;
+  end;
+  {$EXTERNALSYM WICRawToneCurve}
+
+
+  //=========================================================================*\
+  //  IWICDevelopRawNotificationCallback
+  //=========================================================================*/
+const
+  WICRawChangeNotification_ExposureCompensation    = $00000001;
+  {$EXTERNALSYM WICRawChangeNotification_ExposureCompensation}
+  WICRawChangeNotification_NamedWhitePoint         = $00000002;
+  {$EXTERNALSYM WICRawChangeNotification_NamedWhitePoint}
+  WICRawChangeNotification_KelvinWhitePoint        = $00000004;
+  {$EXTERNALSYM WICRawChangeNotification_KelvinWhitePoint}
+  WICRawChangeNotification_RGBWhitePoint           = $00000008;
+  {$EXTERNALSYM WICRawChangeNotification_RGBWhitePoint}
+  WICRawChangeNotification_Contrast                = $00000010;
+  {$EXTERNALSYM WICRawChangeNotification_Contrast}
+  WICRawChangeNotification_Gamma                   = $00000020;
+  {$EXTERNALSYM WICRawChangeNotification_Gamma}
+  WICRawChangeNotification_Sharpness               = $00000040;
+  {$EXTERNALSYM WICRawChangeNotification_Sharpness}
+  WICRawChangeNotification_Saturation              = $00000080;
+  {$EXTERNALSYM WICRawChangeNotification_Saturation}
+  WICRawChangeNotification_Tint                    = $00000100;
+  {$EXTERNALSYM WICRawChangeNotification_Tint}
+  WICRawChangeNotification_NoiseReduction          = $00000200;
+  {$EXTERNALSYM WICRawChangeNotification_NoiseReduction}
+  WICRawChangeNotification_DestinationColorContext = $00000400;
+  {$EXTERNALSYM WICRawChangeNotification_DestinationColorContext}
+  WICRawChangeNotification_ToneCurve               = $00000800;
+  {$EXTERNALSYM WICRawChangeNotification_ToneCurve}
+  WICRawChangeNotification_Rotation                = $00001000;
+  {$EXTERNALSYM WICRawChangeNotification_Rotation}
+  WICRawChangeNotification_RenderMode              = $00002000;
+  {$EXTERNALSYM WICRawChangeNotification_RenderMode}
+
+
+  //=========================================================================*\
+  //  WICDdsDimension
+  //=========================================================================*/
 type
   PWICDdsDimension = ^WICDdsDimension;
   WICDdsDimension = DWord;
@@ -1323,8 +1700,11 @@ const
   {$EXTERNALSYM WICDdsTexture3D}
   WICDdsTextureCube         = WICDdsDimension($3);
   {$EXTERNALSYM WICDdsTextureCube}
-  //WICDDSTEXTURE_FORCE_DWORD = FORCEDWORD;
 
+
+  //=========================================================================*\
+  //  WICDdsAlphaMode
+  //=========================================================================*/
 type
   PWICDdsAlphaMode = ^WICDdsAlphaMode;
   WICDdsAlphaMode = DWord;
@@ -1340,7 +1720,6 @@ const
   {$EXTERNALSYM WICDdsAlphaModeOpaque}
   WICDdsAlphaModeCustom        = WICDdsAlphaMode($4);
   {$EXTERNALSYM WICDdsAlphaModeCustom}
-  //WICDDSALPHAMODE_FORCE_DWORD  = FORCEDWORD;
 
 
 // =============================================================================
@@ -1433,6 +1812,12 @@ type
 
   PIWICProgressiveLevelControl = ^IWICProgressiveLevelControl;
   IWICProgressiveLevelControl = interface;
+
+  PIWICDisplayAdaptationControl = ^IWICDisplayAdaptationControl;
+  IWICDisplayAdaptationControl = interface;
+
+  PIWICDisplayAdaptationControl2 = ^IWICDisplayAdaptationControl2;
+  IWICDisplayAdaptationControl2 = interface;
 
   PIWICProgressCallback = ^IWICProgressCallback;
   IWICProgressCallback = interface;
@@ -1759,7 +2144,7 @@ type
   IWICBitmap = interface(IWICBitmapSource)
   ['{00000121-a8f2-4877-ba0a-fd2b6645fb94}']
     function Lock(const prcLock: WICRect;
-                  flags: DWORD;
+                  flags: DWORD; // WICBitmapLockFlags.
                   out ppILock: IWICBitmapLock): HResult; stdcall;
 
     function SetPalette(pIPalette: IWICPalette): HResult; stdcall;
@@ -2157,6 +2542,44 @@ type
   {$EXTERNALSYM IID_IWICBitmapFrameDecode}
 
 
+  // Interface IWICBitmapFrameChainReader
+  // ====================================
+  // Provides access to frames that are linked
+  // to the current frame through chains of different types.
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IWICBitmapFrameChainReader);'}
+  {$EXTERNALSYM IWICBitmapFrameChainReader}
+  IWICBitmapFrameChainReader = interface(IUnknown)
+  ['{0c599495-a120-4222-9130-a8c29410bd0b}']
+    function GetChainedFrameCount(chainType: WICBitmapChainType;
+                                  out pCount: UINT): HResult; stdcall;
+
+    function GetChainedFrame(chainType: WICBitmapChainType;
+                             const index: UINT;
+                             out ppIBitmapFrame: PIWICBitmapFrameDecode): HResult; stdcall;
+  end;
+  IID_IWICBitmapFrameChainReader = IWICBitmapFrameChainReader;
+  {$EXTERNALSYM IID_IWICBitmapFrameChainReader}
+
+
+  // Interface IWICBitmapFrameChainWriter
+  // ====================================
+  // Link frames together in chains of different types.
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IWICBitmapFrameChainWriter);'}
+  {$EXTERNALSYM IWICBitmapFrameChainWriter}
+  IWICBitmapFrameChainWriter = interface(IUnknown)
+  ['{40d9ea28-4768-47b3-8c12-558a48e98e38}']
+    function AppendFrameToChain(chainType: WICBitmapChainType;
+                                out ppIFrameEncode: PIWICBitmapFrameEncode;
+                                var ppIEncoderOptions: PIPropertyBag2): HResult; stdcall;
+
+    function DoesSupportChainType(chainType: WICBitmapChainType;
+                                  out pfIsSupported: BOOL): HResult; stdcall;
+  end;
+  IID_IWICBitmapFrameChainWriter = IWICBitmapFrameChainWriter;
+  {$EXTERNALSYM IID_IWICBitmapFrameChainWriter}
+
 
   // Interface IWICProgressiveLevelControl
   // =====================================
@@ -2176,6 +2599,51 @@ type
 
 
 
+  // Interface IWICDisplayAdaptationControl
+  // ======================================
+  // For adapting decoding to capabilities of the display.
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IWICDisplayAdaptationControl);'}
+  {$EXTERNALSYM IWICDisplayAdaptationControl}
+  IWICDisplayAdaptationControl = interface(IUnknown)
+  ['{de9d91d2-70b4-4f41-836c-25fcd39626d3}']
+    function DoesSupportChangingMaxLuminance(const pguidDstFormat: PWICPixelFormatGUID;
+                                             out pfIsSupported: BOOL): HResult; stdcall;
+
+    function SetDisplayMaxLuminance(fLuminanceInNits: FLOAT): HResult; stdcall;
+
+    function GetDisplayMaxLuminance(out pfLuminanceInNits: FLOAT): HResult; stdcall;
+
+  end;
+  IID_IWICDisplayAdaptationControl = IWICDisplayAdaptationControl;
+  {$EXTERNALSYM IID_IWICDisplayAdaptationControl}
+
+
+  // Interface IWICProgressiveLevelControl2
+  // ======================================
+  // For adapting decoding to capabilities of the display.
+  // Extends IWICDisplayAdaptationControl with additional methods.
+  //
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IWICDisplayAdaptationControl2);'}
+  {$EXTERNALSYM IWICDisplayAdaptationControl2}
+  IWICDisplayAdaptationControl2 = interface(IWICDisplayAdaptationControl)
+  ['{d7508d29-3ab7-447e-a676-4d80d7de726b}']
+    function SetSdrWhiteLevel(fWhiteLevelInNits: FLOAT): HResult; stdcall;
+
+    function GetSdrWhiteLevel(out pfWhiteLevelInNits: PFLOAT): HResult; stdcall;
+
+    function SetToneMappingMode(mode: WICBitmapToneMappingMode): HResult; stdcall;
+
+    function GetToneMappingMode(out mode: WICBitmapToneMappingMode): HResult; stdcall;
+
+    function DoesSupportToneMappingMode(mode: WICBitmapToneMappingMode;
+                                        out pfIsSupported: PBOOL): HResult; stdcall;
+  end;
+  IID_IWICDisplayAdaptationControl2 = IWICDisplayAdaptationControl2;
+  {$EXTERNALSYM IID_IWICDisplayAdaptationControl2}
+
+
+
   // Interface IWICProgressCallback
   // ==============================
   //
@@ -2191,7 +2659,7 @@ type
   {$EXTERNALSYM IID_IWICProgressCallback}
 
 
-  // belongs to interface IWICBitmapCodecProgressNotification
+  // Belongs to interface IWICBitmapCodecProgressNotification
   // Application defined callback function called when codec component progress is made.
   FNProgressNotification = function(pvData: Pointer;
                                     uFrameNum: ULONG;
@@ -2562,44 +3030,6 @@ type
   {$EXTERNALSYM WICMapSchemaToName}
 
 type
-  PWICRawCapabilitiesInfo = ^WICRawCapabilitiesInfo;
-  WICRawCapabilitiesInfo = record
-    cbSize: UINT;
-    CodecMajorVersion: UINT;
-    CodecMinorVersion: UINT;
-    ExposureCompensationSupport: WICRawCapabilities;
-    ContrastSupport: WICRawCapabilities;
-    RGBWhitePointSupport: WICRawCapabilities;
-    NamedWhitePointSupport: WICRawCapabilities;
-    NamedWhitePointSupportMask: UINT;
-    KelvinWhitePointSupport: WICRawCapabilities;
-    GammaSupport: WICRawCapabilities;
-    TintSupport: WICRawCapabilities;
-    SaturationSupport: WICRawCapabilities;
-    SharpnessSupport: WICRawCapabilities;
-    NoiseReductionSupport: WICRawCapabilities;
-    DestinationColorProfileSupport: WICRawCapabilities;
-    ToneCurveSupport: WICRawCapabilities;
-    RotationSupport: WICRawRotationCapabilities;
-    RenderModeSupport: WICRawCapabilities;
-  end;
-  {$EXTERNALSYM WICRawCapabilitiesInfo}
-
-
-  PWICRawToneCurvePoint = ^WICRawToneCurvePoint;
-  WICRawToneCurvePoint = record
-    Input: Double;
-    Output: Double;
-  end;
-  {$EXTERNALSYM WICRawToneCurvePoint}
-
-  PWICRawToneCurve = ^WICRawToneCurve;
-  WICRawToneCurve = record
-    cPoints: UINT;
-    aPoints: array[0..0] of WICRawToneCurvePoint;
-  end;
-  {$EXTERNALSYM WICRawToneCurve}
-
 
   PIWICDevelopRawNotificationCallback = ^IWICDevelopRawNotificationCallback;
   IWICDevelopRawNotificationCallback = interface;

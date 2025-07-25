@@ -10,7 +10,7 @@
 // Release date: 27-06-2012
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: Requires Windows Vista or later.
 //              MfApi.pas is the unit containing the APIs for using the MF platform.
 //
@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -46,11 +46,11 @@
 //          Fields with a Common Type Specification.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -1774,6 +1774,20 @@ const
   {$EXTERNALSYM MFSampleExtension_MeanAbsoluteDifference}
   MFSampleExtension_LongTermReferenceFrameInfo  : TGUID = '{9154733f-e1bd-41bf-81d3-fcd918f71332}'; // Type: UINT32
   {$EXTERNALSYM MFSampleExtension_LongTermReferenceFrameInfo}
+
+type
+
+  PROI_AREA = ^ROI_AREA;
+  _ROI_AREA = record
+    rect: TRect;
+    QPDelta: INT32;
+  end;
+  {$EXTERNALSYM _ROI_AREA}
+  ROI_AREA = _ROI_AREA;
+  {$EXTERNALSYM ROI_AREA}
+
+const
+
   MFSampleExtension_ROIRectangle                : TGUID = '{3414a438-4998-4d2c-be82-be3ca0b24d43}'; // Type: BLOB
   {$EXTERNALSYM MFSampleExtension_ROIRectangle}
   // MFSampleExtension_LastSlice {2b5d5457-5547-4f07-b8c8-b4a3a9a1daac}
@@ -1844,14 +1858,33 @@ const
 
 
 type
-  PROI_AREA = ^ROI_AREA;
-  _ROI_AREA = record
-    rect: TRect;
-    QPDelta: INT32;
+
+  PMFSampleExtensionPsnrYuv = ^MFSampleExtensionPsnrYuv;
+  _MFSampleExtensionPsnrYuv = record
+    psnrY: FLOAT;  // PSNR for Y plane
+    psnrU: FLOAT;  // PSNR for U plane
+    psnrV: FLOAT;  // PSNR for V plane
   end;
-  {$EXTERNALSYM _ROI_AREA}
-  ROI_AREA = _ROI_AREA;
-  {$EXTERNALSYM ROI_AREA}
+  {$EXTERNALSYM _MFSampleExtensionPsnrYuv}
+  MFSampleExtensionPsnrYuv = _MFSampleExtensionPsnrYuv;
+  {$EXTERNALSYM MFSampleExtensionPsnrYuv}
+
+const
+
+// MFSampleExtension_FramePsnrYuv {1C633A3D-566F-4752-833B-2907DF5415E1}
+// Type: IMFMediaBuffer
+// A MFSampleExtensionPsnrYuv structure that specifies the PSNR data of YUV planes of an encoded video frame.
+  MFSampleExtension_FramePsnrYuv : TGUID = '{1c633a3d-566f-4752-833b-2907df5415e1}';
+
+// MFSampleExtension_VideoEncodeQPMap {2C68A331-B712-49CA-860A-3A1D58237D88}
+// Type: IMFMediaBuffer
+// The QP map of an encoded video frame.
+  MFSampleExtension_VideoEncodeQPMap        : TGUID = '{2c68a331-b712-49ca-860a-3a1d58237d88}';
+
+// MFSampleExtension_VideoEncodeBitsUsedMap {6894263D-E6E2-4BCC-849D-8570365F5114}
+// Type: IMFMediaBuffer
+// The bits used map of an encoded video frame.
+  MFSampleExtension_VideoEncodeBitsUsedMap  : TGUID = '{6894263d-e6e2-4bcc-849d-8570365f5114}';
 
 
 const

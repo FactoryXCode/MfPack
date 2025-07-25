@@ -10,7 +10,7 @@
 // Release date: 27-08-2022
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: Media Foundation basic control-layer interfaces.
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Embarcadero's <= Delphi 10.4 D3D12 is way outdated!
@@ -29,11 +29,11 @@
 //
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -2185,6 +2185,17 @@ type
   {$EXTERNALSYM D3D12_BOX}
 
 
+  PLUID = ^__LUID;
+  {$EXTERNALSYM PLUID}
+  __LUID = record
+    LowPart: DWORD;
+    HighPart: LONG;
+  end;
+  {$EXTERNALSYM __LUID}
+  LUID = __LUID;
+  {$EXTERNALSYM LUID}
+
+
  ///////////////////////////////////////////////////////////////////////////////
  //
  // Depth-Stencil State
@@ -2843,7 +2854,9 @@ type
     D3D12_FORMAT_SUPPORT2_UAV_TYPED_STORE                               = $80,
     D3D12_FORMAT_SUPPORT2_OUTPUT_MERGER_LOGIC_OP                        = $100,
     D3D12_FORMAT_SUPPORT2_TILED                                         = $200,
-    D3D12_FORMAT_SUPPORT2_MULTIPLANE_OVERLAY                            = $4000
+    D3D12_FORMAT_SUPPORT2_MULTIPLANE_OVERLAY                            = $4000,
+    D3D12_FORMAT_SUPPORT2_SAMPLER_FEEDBACK                              = $8000,
+    D3D12_FORMAT_SUPPORT2_DISPLAYABLE                                   = $10000
     );
   {$EXTERNALSYM D3D12_FORMAT_SUPPORT2}
 

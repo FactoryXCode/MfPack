@@ -10,7 +10,7 @@
 // Release date: 17-02-2016
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: This header is used by Automation.
 //              For more information, see: https://docs.microsoft.com/en-us/windows/desktop/api/_automat
 //
@@ -22,17 +22,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -1696,6 +1696,10 @@ type
   end;
   IID_IPropertyBag = IPropertyBag;
   {$EXTERNALSYM IID_IPropertyBag}
+
+
+  // Interface IPropertyBag2 is declared in WinApi.ActiveX.OCIdl
+  // ===========================================================
 
 
   // Interface ITypeLibRegistrationReader
