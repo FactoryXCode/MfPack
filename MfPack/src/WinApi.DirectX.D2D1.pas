@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 //
 // Description: Direct2D: Hardware-accelerated, immediate-mode, 2-D graphics API that
 //              provides high performance and high-quality rendering for 2-D geometry,
@@ -24,17 +24,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -72,7 +72,7 @@ uses
 
   {WinApi}
   WinApi.Windows,
-  WinApi.WinCodec, {or use MfPack.WinCodec, if your included Delphi version is not up to date}
+  WinApi.WinCodec, {or use MfPack.WIC.WinCodec, if your included Delphi version is not up to date}
   {System}
   System.Types,
   {WinApi.DirectX}
@@ -235,18 +235,18 @@ type
   {$EXTERNALSYM D2D1_DRAW_TEXT_OPTIONS}
 const
   // Do not snap the baseline of the text vertically.
-  D2D1_DRAW_TEXT_OPTIONS_NO_SNAP                       = D2D1_DRAW_TEXT_OPTIONS($00000001);
+  D2D1_DRAW_TEXT_OPTIONS_NO_SNAP                       = D2D1_DRAW_TEXT_OPTIONS($1);
   {$EXTERNALSYM D2D1_DRAW_TEXT_OPTIONS_NO_SNAP}
   // Clip the text to the content bounds.
-  D2D1_DRAW_TEXT_OPTIONS_CLIP                          = D2D1_DRAW_TEXT_OPTIONS($00000002);
+  D2D1_DRAW_TEXT_OPTIONS_CLIP                          = D2D1_DRAW_TEXT_OPTIONS($2);
   {$EXTERNALSYM D2D1_DRAW_TEXT_OPTIONS_CLIP}
   // Render color versions of glyphs if defined by the font.
-  D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT             = D2D1_DRAW_TEXT_OPTIONS($00000004);
+  D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT             = D2D1_DRAW_TEXT_OPTIONS($4);
   {$EXTERNALSYM D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT}
   // Bitmap origins of color glyph bitmaps are not snapped.
-  D2D1_DRAW_TEXT_OPTIONS_DISABLE_COLOR_BITMAP_SNAPPING = D2D1_DRAW_TEXT_OPTIONS($00000008);
+  D2D1_DRAW_TEXT_OPTIONS_DISABLE_COLOR_BITMAP_SNAPPING = D2D1_DRAW_TEXT_OPTIONS($8);
   {$EXTERNALSYM D2D1_DRAW_TEXT_OPTIONS_DISABLE_COLOR_BITMAP_SNAPPING}
-  D2D1_DRAW_TEXT_OPTIONS_NONE                          = D2D1_DRAW_TEXT_OPTIONS($00000000);
+  D2D1_DRAW_TEXT_OPTIONS_NONE                          = D2D1_DRAW_TEXT_OPTIONS($0);
   {$EXTERNALSYM D2D1_DRAW_TEXT_OPTIONS_NONE}
   //D2D1_DRAW_TEXT_OPTIONS_FORCE_DWORD                   = FORCEDWORD;
 
@@ -417,11 +417,11 @@ type
   {$EXTERNALSYM D2D1_PATH_SEGMENT}
 const
   {$EXTERNALSYM D2D1_PATH_SEGMENT_NONE}
-  D2D1_PATH_SEGMENT_NONE                  = D2D1_PATH_SEGMENT($00000000);
+  D2D1_PATH_SEGMENT_NONE                  = D2D1_PATH_SEGMENT($0);
   {$EXTERNALSYM D2D1_PATH_SEGMENT_FORCE_UNSTROKED}
-  D2D1_PATH_SEGMENT_FORCE_UNSTROKED       = D2D1_PATH_SEGMENT($00000001);
+  D2D1_PATH_SEGMENT_FORCE_UNSTROKED       = D2D1_PATH_SEGMENT($1);
   {$EXTERNALSYM D2D1_PATH_SEGMENT_FORCE_ROUND_LINE_JOIN}
-  D2D1_PATH_SEGMENT_FORCE_ROUND_LINE_JOIN = D2D1_PATH_SEGMENT($00000002);
+  D2D1_PATH_SEGMENT_FORCE_ROUND_LINE_JOIN = D2D1_PATH_SEGMENT($2);
   //D2D1_PATH_SEGMENT_FORCE_DWORD           = FORCEDWORD;
 
 type
@@ -1517,7 +1517,7 @@ type
     procedure SetTextRenderingParams(textRenderingParams: IDWriteRenderingParams); stdcall;
 
     // Retrieves the text rendering parameters contained within this state block
-    // resource. If a Nil text rendering parameter was specified, Nil will be
+    // resource. If a nil text rendering parameter was specified, nil will be
     // returned.
     procedure GetTextRenderingParams(out textRenderingParams: IDWriteRenderingParams); stdcall;
 
@@ -1635,12 +1635,12 @@ type
                        point1: D2D1_POINT_2F;
                        brush: ID2D1Brush;
                        strokeWidth: Single = 1.0;
-                       strokeStyle: ID2D1StrokeStyle = Nil); stdcall;
+                       strokeStyle: ID2D1StrokeStyle = nil); stdcall;
 
     procedure DrawRectangle(const rect: D2D1_RECT_F;
                             brush: ID2D1Brush;
                             strokeWidth: Single = 1.0;
-                            strokeStyle: ID2D1StrokeStyle = Nil); stdcall;
+                            strokeStyle: ID2D1StrokeStyle = nil); stdcall;
 
     procedure FillRectangle(const rect: D2D1_RECT_F;
                             brush: ID2D1Brush); stdcall;
@@ -1648,7 +1648,7 @@ type
     procedure DrawRoundedRectangle(const roundedRect: D2D1_ROUNDED_RECT;
                                    brush: ID2D1Brush;
                                    const strokeWidth: Single = 1.0;
-                                   const strokeStyle: ID2D1StrokeStyle = Nil); stdcall;
+                                   const strokeStyle: ID2D1StrokeStyle = nil); stdcall;
 
     procedure FillRoundedRectangle(const roundedRect: D2D1_ROUNDED_RECT;
                                    const brush: ID2D1Brush); stdcall;
@@ -1656,7 +1656,7 @@ type
     procedure DrawEllipse(const ellipse: D2D1_ELLIPSE;
                           brush: ID2D1Brush;
                           const strokeWidth: Single = 1.0;
-                          const strokeStyle: ID2D1StrokeStyle = Nil); stdcall;
+                          const strokeStyle: ID2D1StrokeStyle = nil); stdcall;
 
     procedure FillEllipse(const ellipse: D2D1_ELLIPSE;
                           brush: ID2D1Brush);
@@ -1664,7 +1664,7 @@ type
     procedure DrawGeometry(const geometry: ID2D1Geometry;
                            brush: ID2D1Brush;
                            const strokeWidth: Single = 1.0;
-                           strokeStyle: ID2D1StrokeStyle = Nil); stdcall;
+                           strokeStyle: ID2D1StrokeStyle = nil); stdcall;
 
     // <param name="opacityBrush">An optionally specified opacity brush. Only the alpha
     // channel of the corresponding brush will be sampled and will be applied to the
@@ -1672,7 +1672,7 @@ type
     // a bitmap brush with an extend mode of D2D1_EXTEND_MODE_CLAMP.</param>
     procedure FillGeometry(geometry: ID2D1Geometry;
                            brush: ID2D1Brush;
-                           const opacityBrush: ID2D1Brush = Nil); stdcall;
+                           const opacityBrush: ID2D1Brush = nil); stdcall;
 
     // Fill a mesh. Since meshes can only render aliased content, the render target
     // antialiasing mode must be set to aliased.
@@ -1685,14 +1685,14 @@ type
     procedure FillOpacityMask(opacityMask: ID2D1Bitmap;
                               brush: ID2D1Brush;
                               content: D2D1_OPACITY_MASK_CONTENT;
-                              destinationRectangle: PD2D1_RECT_F = Nil;
-                              sourceRectangle: PD2D1_RECT_F = Nil); stdcall;
+                              destinationRectangle: PD2D1_RECT_F = nil;
+                              sourceRectangle: PD2D1_RECT_F = nil); stdcall;
 
     procedure DrawBitmap(bitmap: ID2D1Bitmap;
-                         destinationRectangle: PD2D1_RECT_F = Nil;
+                         destinationRectangle: PD2D1_RECT_F = nil;
                          opacity: Single = 1.0;
                          interpolationMode: D2D1_BITMAP_INTERPOLATION_MODE = D2D1_BITMAP_INTERPOLATION_MODE_LINEAR;
-                         sourceRectangle: PD2D1_RECT_F = Nil); stdcall;
+                         sourceRectangle: PD2D1_RECT_F = nil); stdcall;
 
     // Draws the text within the given layout rectangle and by default also performs
     // baseline snapping.
@@ -1733,10 +1733,10 @@ type
 
     function GetTextAntialiasMode(): D2D1_TEXT_ANTIALIAS_MODE; stdcall;
 
-    procedure SetTextRenderingParams(textRenderingParams: IDWriteRenderingParams = Nil); stdcall;
+    procedure SetTextRenderingParams(textRenderingParams: IDWriteRenderingParams = nil); stdcall;
 
-    // Retrieve the text render parameters. NOTE: If Nil is specified to
-    // SetTextRenderingParameters, Nil will be returned.
+    // Retrieve the text render parameters. NOTE: If nil is specified to
+    // SetTextRenderingParameters, nil will be returned.
     procedure GetTextRenderingParams(out textRenderingParams: IDWriteRenderingParams); stdcall;
 
     // Set a tag to correspond to the succeeding primitives. If an error occurs
@@ -1746,8 +1746,8 @@ type
 
     // Retrieves the currently set tags. This does not retrieve the tags corresponding
     // to any primitive that is in error.
-    procedure GetTags(tag1: PD2D1_TAG = Nil;
-                      tag2: PD2D1_TAG = Nil); stdcall;
+    procedure GetTags(tag1: PD2D1_TAG = nil;
+                      tag2: PD2D1_TAG = nil); stdcall;
 
     // Start a layer of drawing calls. The way in which the layer must be resolved is
     // specified first as well as the logical resource that stores the layer
@@ -1760,8 +1760,8 @@ type
     // Ends a layer that was defined with particular layer resources.
     procedure PopLayer(); stdcall;
 
-    function Flush(tag1: PD2D1_TAG = Nil;
-                   tag2: PD2D1_TAG = Nil): HResult; stdcall;
+    function Flush(tag1: PD2D1_TAG = nil;
+                   tag2: PD2D1_TAG = nil): HResult; stdcall;
 
     // Gets the current drawing state and saves it into the supplied
     // IDrawingStatckBlock.
@@ -1787,8 +1787,8 @@ type
 
     // Ends drawing on the render target, error results can be retrieved at this time,
     // or when calling flush.
-    function EndDraw(tag1: PD2D1_TAG = Nil;
-                     tag2: PD2D1_TAG = Nil): HResult; stdcall;
+    function EndDraw(tag1: PD2D1_TAG = nil;
+                     tag2: PD2D1_TAG = nil): HResult; stdcall;
 
     procedure GetPixelFormat(out pixelFormat: D2D1_PIXEL_FORMAT); stdcall;
 

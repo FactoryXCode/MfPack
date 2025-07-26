@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 //
 // Description: Used by Windows Imaging Component (WIC) API.
 //              This module contains interfaces used by codec and metadata handler authors.
@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -31,11 +31,11 @@
 //          It is not recommended to use the rtl versions <= Delphi 10.4
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -179,168 +179,186 @@ const
   {$EXTERNALSYM GUID_MetadataFormatWebpANIM}
   GUID_MetadataFormatWebpANMF           : TGUID = '{43c105ee-b93b-4abb-b003-a08c0d870471}';
   {$EXTERNALSYM GUID_MetadataFormatWebpANMF}
-  CLSID_WICUnknownMetadataReader        : TGUID = '{699745c2-5066-4b82-a8e3-d40478dbec8c}';
+  GUID_MetadataFormatJpegXLAnim         : TGUID = '{501c2e24-7a7d-42b2-93c7-b4f45bcc92f7}';
+  {$EXTERNALSYM GUID_MetadataFormatJpegXLAnim}
+  GUID_MetadataFormatJpegXLAnimFrame    : TGUID = '{958ecc2c-36cb-4af9-9ea8-0b74baccfd3e}';
+  {$EXTERNALSYM GUID_MetadataFormatJpegXLAnimFrame}
+  GUID_MetadataFormatGainMap            : TGUID = '{568d3138-c446-4ec2-a7a8-59abb16d21e3}';
+  {$EXTERNALSYM GUID_MetadataFormatGainMap}
+
+  //=========================================================================*\
+  //  GUID Identifiers for the built in metadata handlers
+  //=========================================================================*/
+
+  CLSID_WICUnknownMetadataReader         : TGUID = '{699745c2-5066-4b82-a8e3-d40478dbec8c}';
   {$EXTERNALSYM CLSID_WICUnknownMetadataReader}
-  CLSID_WICUnknownMetadataWriter        : TGUID = '{a09cca86-27ba-4f39-9053-121fa4dc08fc}';
+  CLSID_WICUnknownMetadataWriter         : TGUID = '{a09cca86-27ba-4f39-9053-121fa4dc08fc}';
   {$EXTERNALSYM CLSID_WICUnknownMetadataWriter}
-  CLSID_WICApp0MetadataWriter           : TGUID = '{F3C633A2-46C8-498e-8FBB-CC6F721BBCDE}';
+  CLSID_WICApp0MetadataWriter            : TGUID = '{F3C633A2-46C8-498e-8FBB-CC6F721BBCDE}';
   {$EXTERNALSYM CLSID_WICApp0MetadataWriter}
-  CLSID_WICApp0MetadataReader           : TGUID = '{43324B33-A78F-480f-9111-9638AACCC832}';
+  CLSID_WICApp0MetadataReader            : TGUID = '{43324B33-A78F-480f-9111-9638AACCC832}';
   {$EXTERNALSYM CLSID_WICApp0MetadataReader}
-  CLSID_WICApp1MetadataWriter           : TGUID = '{ee366069-1832-420f-b381-0479ad066f19}';
+  CLSID_WICApp1MetadataWriter            : TGUID = '{ee366069-1832-420f-b381-0479ad066f19}';
   {$EXTERNALSYM CLSID_WICApp1MetadataWriter}
-  CLSID_WICApp1MetadataReader           : TGUID = '{dde33513-774e-4bcd-ae79-02f4adfe62fc}';
+  CLSID_WICApp1MetadataReader            : TGUID = '{dde33513-774e-4bcd-ae79-02f4adfe62fc}';
   {$EXTERNALSYM CLSID_WICApp1MetadataReader}
-  CLSID_WICApp13MetadataWriter          : TGUID = '{7B19A919-A9D6-49E5-BD45-02C34E4E4CD5}';
+  CLSID_WICApp13MetadataWriter           : TGUID = '{7B19A919-A9D6-49E5-BD45-02C34E4E4CD5}';
   {$EXTERNALSYM CLSID_WICApp13MetadataWriter}
-  CLSID_WICApp13MetadataReader          : TGUID = '{AA7E3C50-864C-4604-BC04-8B0B76E637F6}';
+  CLSID_WICApp13MetadataReader           : TGUID = '{AA7E3C50-864C-4604-BC04-8B0B76E637F6}';
   {$EXTERNALSYM CLSID_WICApp13MetadataReader}
-  CLSID_WICIfdMetadataReader            : TGUID = '{8f914656-9d0a-4eb2-9019-0bf96d8a9ee6}';
+  CLSID_WICIfdMetadataReader             : TGUID = '{8f914656-9d0a-4eb2-9019-0bf96d8a9ee6}';
   {$EXTERNALSYM CLSID_WICIfdMetadataReader}
-  CLSID_WICIfdMetadataWriter            : TGUID = '{b1ebfc28-c9bd-47a2-8d33-b948769777a7}';
+  CLSID_WICIfdMetadataWriter             : TGUID = '{b1ebfc28-c9bd-47a2-8d33-b948769777a7}';
   {$EXTERNALSYM CLSID_WICIfdMetadataWriter}
-  CLSID_WICSubIfdMetadataReader         : TGUID = '{50D42F09-ECD1-4B41-B65D-DA1FDAA75663}';
+  CLSID_WICSubIfdMetadataReader          : TGUID = '{50D42F09-ECD1-4B41-B65D-DA1FDAA75663}';
   {$EXTERNALSYM CLSID_WICSubIfdMetadataReader}
-  CLSID_WICSubIfdMetadataWriter         : TGUID = '{8ADE5386-8E9B-4F4C-ACF2-F0008706B238}';
+  CLSID_WICSubIfdMetadataWriter          : TGUID = '{8ADE5386-8E9B-4F4C-ACF2-F0008706B238}';
   {$EXTERNALSYM CLSID_WICSubIfdMetadataWriter}
-  CLSID_WICExifMetadataReader           : TGUID = '{d9403860-297f-4a49-bf9b-77898150a442}';
+  CLSID_WICExifMetadataReader            : TGUID = '{d9403860-297f-4a49-bf9b-77898150a442}';
   {$EXTERNALSYM CLSID_WICExifMetadataReader}
-  CLSID_WICExifMetadataWriter           : TGUID = '{c9a14cda-c339-460b-9078-d4debcfabe91}';
+  CLSID_WICExifMetadataWriter            : TGUID = '{c9a14cda-c339-460b-9078-d4debcfabe91}';
   {$EXTERNALSYM CLSID_WICExifMetadataWriter}
-  CLSID_WICGpsMetadataReader            : TGUID = '{3697790B-223B-484E-9925-C4869218F17A}';
+  CLSID_WICGpsMetadataReader             : TGUID = '{3697790B-223B-484E-9925-C4869218F17A}';
   {$EXTERNALSYM CLSID_WICGpsMetadataReader}
-  CLSID_WICGpsMetadataWriter            : TGUID = '{CB8C13E4-62B5-4C96-A48B-6BA6ACE39C76}';
+  CLSID_WICGpsMetadataWriter             : TGUID = '{CB8C13E4-62B5-4C96-A48B-6BA6ACE39C76}';
   {$EXTERNALSYM CLSID_WICGpsMetadataWriter}
-  CLSID_WICInteropMetadataReader        : TGUID = '{B5C8B898-0074-459F-B700-860D4651EA14}';
+  CLSID_WICInteropMetadataReader         : TGUID = '{B5C8B898-0074-459F-B700-860D4651EA14}';
   {$EXTERNALSYM CLSID_WICInteropMetadataReader}
-  CLSID_WICInteropMetadataWriter        : TGUID = '{122EC645-CD7E-44D8-B186-2C8C20C3B50F}';
+  CLSID_WICInteropMetadataWriter         : TGUID = '{122EC645-CD7E-44D8-B186-2C8C20C3B50F}';
   {$EXTERNALSYM CLSID_WICInteropMetadataWriter}
-  CLSID_WICThumbnailMetadataReader      : TGUID = '{fb012959-f4f6-44d7-9d09-daa087a9db57}';
+  CLSID_WICThumbnailMetadataReader       : TGUID = '{fb012959-f4f6-44d7-9d09-daa087a9db57}';
   {$EXTERNALSYM CLSID_WICThumbnailMetadataReader}
-  CLSID_WICThumbnailMetadataWriter      : TGUID = '{d049b20c-5dd0-44fe-b0b3-8f92c8e6d080}';
+  CLSID_WICThumbnailMetadataWriter       : TGUID = '{d049b20c-5dd0-44fe-b0b3-8f92c8e6d080}';
   {$EXTERNALSYM CLSID_WICThumbnailMetadataWriter}
-  CLSID_WICIPTCMetadataReader           : TGUID = '{03012959-f4f6-44d7-9d09-daa087a9db57}';
+  CLSID_WICIPTCMetadataReader            : TGUID = '{03012959-f4f6-44d7-9d09-daa087a9db57}';
   {$EXTERNALSYM CLSID_WICIPTCMetadataReader}
-  CLSID_WICIPTCMetadataWriter           : TGUID = '{1249b20c-5dd0-44fe-b0b3-8f92c8e6d080}';
+  CLSID_WICIPTCMetadataWriter            : TGUID = '{1249b20c-5dd0-44fe-b0b3-8f92c8e6d080}';
   {$EXTERNALSYM CLSID_WICIPTCMetadataWriter}
-  CLSID_WICIRBMetadataReader            : TGUID = '{D4DCD3D7-B4C2-47D9-A6BF-B89BA396A4A3}';
+  CLSID_WICIRBMetadataReader             : TGUID = '{D4DCD3D7-B4C2-47D9-A6BF-B89BA396A4A3}';
   {$EXTERNALSYM CLSID_WICIRBMetadataReader}
-  CLSID_WICIRBMetadataWriter            : TGUID = '{5C5C1935-0235-4434-80BC-251BC1EC39C6}';
+  CLSID_WICIRBMetadataWriter             : TGUID = '{5C5C1935-0235-4434-80BC-251BC1EC39C6}';
   {$EXTERNALSYM CLSID_WICIRBMetadataWriter}
-  CLSID_WIC8BIMIPTCMetadataReader       : TGUID = '{0010668c-0801-4da6-a4a4-826522b6d28f}';
+  CLSID_WIC8BIMIPTCMetadataReader        : TGUID = '{0010668c-0801-4da6-a4a4-826522b6d28f}';
   {$EXTERNALSYM CLSID_WIC8BIMIPTCMetadataReader}
-  CLSID_WIC8BIMIPTCMetadataWriter       : TGUID = '{00108226-ee41-44a2-9e9c-4be4d5b1d2cd}';
+  CLSID_WIC8BIMIPTCMetadataWriter        : TGUID = '{00108226-ee41-44a2-9e9c-4be4d5b1d2cd}';
   {$EXTERNALSYM CLSID_WIC8BIMIPTCMetadataWriter}
   CLSID_WIC8BIMResolutionInfoMetadataReader : TGUID = '{5805137A-E348-4F7C-B3CC-6DB9965A0599}';
   {$EXTERNALSYM CLSID_WIC8BIMResolutionInfoMetadataReader}
   CLSID_WIC8BIMResolutionInfoMetadataWriter : TGUID = '{4ff2fe0e-e74a-4b71-98c4-ab7dc16707ba}';
   {$EXTERNALSYM CLSID_WIC8BIMResolutionInfoMetadataWriter}
-  CLSID_WIC8BIMIPTCDigestMetadataReader : TGUID = '{02805F1E-D5AA-415b-82C5-61C033A988A6}';
+  CLSID_WIC8BIMIPTCDigestMetadataReader  : TGUID = '{02805F1E-D5AA-415b-82C5-61C033A988A6}';
   {$EXTERNALSYM CLSID_WIC8BIMIPTCDigestMetadataReader}
-  CLSID_WIC8BIMIPTCDigestMetadataWriter : TGUID = '{2DB5E62B-0D67-495f-8F9D-C2F0188647AC}';
+  CLSID_WIC8BIMIPTCDigestMetadataWriter  : TGUID = '{2DB5E62B-0D67-495f-8F9D-C2F0188647AC}';
   {$EXTERNALSYM CLSID_WIC8BIMIPTCDigestMetadataWriter}
-  CLSID_WICPngTextMetadataReader        : TGUID = '{4b59afcc-b8c3-408a-b670-89e5fab6fda7}';
+  CLSID_WICPngTextMetadataReader         : TGUID = '{4b59afcc-b8c3-408a-b670-89e5fab6fda7}';
   {$EXTERNALSYM CLSID_WICPngTextMetadataReader}
-  CLSID_WICPngTextMetadataWriter        : TGUID = '{b5ebafb9-253e-4a72-a744-0762d2685683}';
+  CLSID_WICPngTextMetadataWriter         : TGUID = '{b5ebafb9-253e-4a72-a744-0762d2685683}';
   {$EXTERNALSYM CLSID_WICPngTextMetadataWriter}
-  CLSID_WICXMPMetadataReader            : TGUID = '{72B624DF-AE11-4948-A65C-351EB0829419}';
+  CLSID_WICXMPMetadataReader             : TGUID = '{72B624DF-AE11-4948-A65C-351EB0829419}';
   {$EXTERNALSYM CLSID_WICXMPMetadataReader}
-  CLSID_WICXMPMetadataWriter            : TGUID = '{1765E14E-1BD4-462E-B6B1-590BF1262AC6}';
+  CLSID_WICXMPMetadataWriter             : TGUID = '{1765E14E-1BD4-462E-B6B1-590BF1262AC6}';
   {$EXTERNALSYM CLSID_WICXMPMetadataWriter}
-  CLSID_WICXMPStructMetadataReader      : TGUID = '{01B90D9A-8209-47F7-9C52-E1244BF50CED}';
+  CLSID_WICXMPStructMetadataReader       : TGUID = '{01B90D9A-8209-47F7-9C52-E1244BF50CED}';
   {$EXTERNALSYM CLSID_WICXMPStructMetadataReader}
-  CLSID_WICXMPStructMetadataWriter      : TGUID = '{22C21F93-7DDB-411C-9B17-C5B7BD064ABC}';
+  CLSID_WICXMPStructMetadataWriter       : TGUID = '{22C21F93-7DDB-411C-9B17-C5B7BD064ABC}';
   {$EXTERNALSYM CLSID_WICXMPStructMetadataWriter}
-  CLSID_WICXMPBagMetadataReader         : TGUID = '{E7E79A30-4F2C-4FAB-8D00-394F2D6BBEBE}';
+  CLSID_WICXMPBagMetadataReader          : TGUID = '{E7E79A30-4F2C-4FAB-8D00-394F2D6BBEBE}';
   {$EXTERNALSYM CLSID_WICXMPBagMetadataReader}
-  CLSID_WICXMPBagMetadataWriter         : TGUID = '{ED822C8C-D6BE-4301-A631-0E1416BAD28F}';
+  CLSID_WICXMPBagMetadataWriter          : TGUID = '{ED822C8C-D6BE-4301-A631-0E1416BAD28F}';
   {$EXTERNALSYM CLSID_WICXMPBagMetadataWriter}
-  CLSID_WICXMPSeqMetadataReader         : TGUID = '{7F12E753-FC71-43D7-A51D-92F35977ABB5}';
+  CLSID_WICXMPSeqMetadataReader          : TGUID = '{7F12E753-FC71-43D7-A51D-92F35977ABB5}';
   {$EXTERNALSYM CLSID_WICXMPSeqMetadataReader}
-  CLSID_WICXMPSeqMetadataWriter         : TGUID = '{6D68D1DE-D432-4B0F-923A-091183A9BDA7}';
+  CLSID_WICXMPSeqMetadataWriter          : TGUID = '{6D68D1DE-D432-4B0F-923A-091183A9BDA7}';
   {$EXTERNALSYM CLSID_WICXMPSeqMetadataWriter}
-  CLSID_WICXMPAltMetadataReader         : TGUID = '{AA94DCC2-B8B0-4898-B835-000AABD74393}';
+  CLSID_WICXMPAltMetadataReader          : TGUID = '{AA94DCC2-B8B0-4898-B835-000AABD74393}';
   {$EXTERNALSYM CLSID_WICXMPAltMetadataReader}
-  CLSID_WICXMPAltMetadataWriter         : TGUID = '{076C2A6C-F78F-4C46-A723-3583E70876EA}';
+  CLSID_WICXMPAltMetadataWriter          : TGUID = '{076C2A6C-F78F-4C46-A723-3583E70876EA}';
   {$EXTERNALSYM CLSID_WICXMPAltMetadataWriter}
-  CLSID_WICLSDMetadataReader            : TGUID = '{41070793-59E4-479A-A1F7-954ADC2EF5FC}';
+  CLSID_WICLSDMetadataReader             : TGUID = '{41070793-59E4-479A-A1F7-954ADC2EF5FC}';
   {$EXTERNALSYM CLSID_WICLSDMetadataReader}
-  CLSID_WICLSDMetadataWriter            : TGUID = '{73C037E7-E5D9-4954-876A-6DA81D6E5768}';
+  CLSID_WICLSDMetadataWriter             : TGUID = '{73C037E7-E5D9-4954-876A-6DA81D6E5768}';
   {$EXTERNALSYM CLSID_WICLSDMetadataWriter}
-  CLSID_WICGCEMetadataReader            : TGUID = '{B92E345D-F52D-41F3-B562-081BC772E3B9}';
+  CLSID_WICGCEMetadataReader             : TGUID = '{B92E345D-F52D-41F3-B562-081BC772E3B9}';
   {$EXTERNALSYM CLSID_WICGCEMetadataReader}
-  CLSID_WICGCEMetadataWriter            : TGUID = '{AF95DC76-16B2-47F4-B3EA-3C31796693E7}';
+  CLSID_WICGCEMetadataWriter             : TGUID = '{AF95DC76-16B2-47F4-B3EA-3C31796693E7}';
   {$EXTERNALSYM CLSID_WICGCEMetadataWriter}
-  CLSID_WICIMDMetadataReader            : TGUID = '{7447A267-0015-42C8-A8F1-FB3B94C68361}';
+  CLSID_WICIMDMetadataReader             : TGUID = '{7447A267-0015-42C8-A8F1-FB3B94C68361}';
   {$EXTERNALSYM CLSID_WICIMDMetadataReader}
-  CLSID_WICIMDMetadataWriter            : TGUID = '{8C89071F-452E-4E95-9682-9D1024627172}';
+  CLSID_WICIMDMetadataWriter             : TGUID = '{8C89071F-452E-4E95-9682-9D1024627172}';
   {$EXTERNALSYM CLSID_WICIMDMetadataWriter}
-  CLSID_WICAPEMetadataReader            : TGUID = '{1767B93A-B021-44EA-920F-863C11F4F768}';
+  CLSID_WICAPEMetadataReader             : TGUID = '{1767B93A-B021-44EA-920F-863C11F4F768}';
   {$EXTERNALSYM CLSID_WICAPEMetadataReader}
-  CLSID_WICAPEMetadataWriter            : TGUID = '{BD6EDFCA-2890-482F-B233-8D7339A1CF8D}';
+  CLSID_WICAPEMetadataWriter             : TGUID = '{BD6EDFCA-2890-482F-B233-8D7339A1CF8D}';
   {$EXTERNALSYM CLSID_WICAPEMetadataWriter}
-  CLSID_WICJpegChrominanceMetadataReader: TGUID = '{50B1904B-F28F-4574-93F4-0BADE82C69E9}';
+  CLSID_WICJpegChrominanceMetadataReader : TGUID = '{50B1904B-F28F-4574-93F4-0BADE82C69E9}';
   {$EXTERNALSYM CLSID_WICJpegChrominanceMetadataReader}
-  CLSID_WICJpegChrominanceMetadataWriter: TGUID = '{3FF566F0-6E6B-49D4-96E6-B78886692C62}';
+  CLSID_WICJpegChrominanceMetadataWriter : TGUID = '{3FF566F0-6E6B-49D4-96E6-B78886692C62}';
   {$EXTERNALSYM CLSID_WICJpegChrominanceMetadataWriter}
-  CLSID_WICJpegLuminanceMetadataReader  : TGUID = '{356F2F88-05A6-4728-B9A4-1BFBCE04D838}';
+  CLSID_WICJpegLuminanceMetadataReader   : TGUID = '{356F2F88-05A6-4728-B9A4-1BFBCE04D838}';
   {$EXTERNALSYM CLSID_WICJpegLuminanceMetadataReader}
-  CLSID_WICJpegLuminanceMetadataWriter  : TGUID = '{1D583ABC-8A0E-4657-9982-A380CA58FB4B}';
+  CLSID_WICJpegLuminanceMetadataWriter   : TGUID = '{1D583ABC-8A0E-4657-9982-A380CA58FB4B}';
   {$EXTERNALSYM CLSID_WICJpegLuminanceMetadataWriter}
-  CLSID_WICJpegCommentMetadataReader    : TGUID = '{9f66347C-60C4-4C4D-AB58-D2358685f607}';
+  CLSID_WICJpegCommentMetadataReader     : TGUID = '{9f66347C-60C4-4C4D-AB58-D2358685f607}';
   {$EXTERNALSYM CLSID_WICJpegCommentMetadataReader}
-  CLSID_WICJpegCommentMetadataWriter    : TGUID = '{E573236F-55B1-4EDA-81EA-9F65DB0290D3}';
+  CLSID_WICJpegCommentMetadataWriter     : TGUID = '{E573236F-55B1-4EDA-81EA-9F65DB0290D3}';
   {$EXTERNALSYM CLSID_WICJpegCommentMetadataWriter}
-  CLSID_WICGifCommentMetadataReader     : TGUID = '{32557D3B-69DC-4F95-836E-F5972B2F6159}';
+  CLSID_WICGifCommentMetadataReader      : TGUID = '{32557D3B-69DC-4F95-836E-F5972B2F6159}';
   {$EXTERNALSYM CLSID_WICGifCommentMetadataReader}
-  CLSID_WICGifCommentMetadataWriter     : TGUID = '{A02797fC-C4AE-418C-AF95-E637C7EAD2A1}';
+  CLSID_WICGifCommentMetadataWriter      : TGUID = '{A02797fC-C4AE-418C-AF95-E637C7EAD2A1}';
   {$EXTERNALSYM CLSID_WICGifCommentMetadataWriter}
-  CLSID_WICPngGamaMetadataReader        : TGUID = '{3692CA39-E082-4350-9E1F-3704CB083CD5}';
+  CLSID_WICPngGamaMetadataReader         : TGUID = '{3692CA39-E082-4350-9E1F-3704CB083CD5}';
   {$EXTERNALSYM CLSID_WICPngGamaMetadataReader}
-  CLSID_WICPngGamaMetadataWriter        : TGUID = '{FF036D13-5D4B-46DD-B10F-106693D9FE4F}';
+  CLSID_WICPngGamaMetadataWriter         : TGUID = '{FF036D13-5D4B-46DD-B10F-106693D9FE4F}';
   {$EXTERNALSYM CLSID_WICPngGamaMetadataWriter}
-  CLSID_WICPngBkgdMetadataReader        : TGUID = '{0CE7A4A6-03E8-4A60-9D15-282EF32EE7DA}';
+  CLSID_WICPngBkgdMetadataReader         : TGUID = '{0CE7A4A6-03E8-4A60-9D15-282EF32EE7DA}';
   {$EXTERNALSYM CLSID_WICPngBkgdMetadataReader}
-  CLSID_WICPngBkgdMetadataWriter        : TGUID = '{68E3F2FD-31AE-4441-BB6A-FD7047525F90}';
+  CLSID_WICPngBkgdMetadataWriter         : TGUID = '{68E3F2FD-31AE-4441-BB6A-FD7047525F90}';
   {$EXTERNALSYM CLSID_WICPngBkgdMetadataWriter}
-  CLSID_WICPngItxtMetadataReader        : TGUID = '{AABFB2FA-3E1E-4A8F-8977-5556FB94EA23}';
+  CLSID_WICPngItxtMetadataReader         : TGUID = '{AABFB2FA-3E1E-4A8F-8977-5556FB94EA23}';
   {$EXTERNALSYM CLSID_WICPngItxtMetadataReader}
-  CLSID_WICPngItxtMetadataWriter        : TGUID = '{31879719-E751-4DF8-981D-68DFF67704ED}';
+  CLSID_WICPngItxtMetadataWriter         : TGUID = '{31879719-E751-4DF8-981D-68DFF67704ED}';
   {$EXTERNALSYM CLSID_WICPngItxtMetadataWriter}
-  CLSID_WICPngChrmMetadataReader        : TGUID = '{F90B5F36-367B-402A-9DD1-BC0FD59D8F62}';
+  CLSID_WICPngChrmMetadataReader         : TGUID = '{F90B5F36-367B-402A-9DD1-BC0FD59D8F62}';
   {$EXTERNALSYM CLSID_WICPngChrmMetadataReader}
-  CLSID_WICPngChrmMetadataWriter        : TGUID = '{E23CE3EB-5608-4E83-BCEF-27B1987E51D7}';
+  CLSID_WICPngChrmMetadataWriter         : TGUID = '{E23CE3EB-5608-4E83-BCEF-27B1987E51D7}';
   {$EXTERNALSYM CLSID_WICPngChrmMetadataWriter}
-  CLSID_WICPngHistMetadataReader        : TGUID = '{877A0BB7-A313-4491-87B5-2E6D0594F520}';
+  CLSID_WICPngHistMetadataReader         : TGUID = '{877A0BB7-A313-4491-87B5-2E6D0594F520}';
   {$EXTERNALSYM CLSID_WICPngHistMetadataReader}
-  CLSID_WICPngHistMetadataWriter        : TGUID = '{8A03E749-672E-446E-BF1F-2C11D233B6FF}';
+  CLSID_WICPngHistMetadataWriter         : TGUID = '{8A03E749-672E-446E-BF1F-2C11D233B6FF}';
   {$EXTERNALSYM CLSID_WICPngHistMetadataWriter}
-  CLSID_WICPngIccpMetadataReader        : TGUID = '{F5D3E63B-CB0F-4628-A478-6D8244BE36B1}';
+  CLSID_WICPngIccpMetadataReader         : TGUID = '{F5D3E63B-CB0F-4628-A478-6D8244BE36B1}';
   {$EXTERNALSYM CLSID_WICPngIccpMetadataReader}
-  CLSID_WICPngIccpMetadataWriter        : TGUID = '{16671E5F-0CE6-4CC4-9768-E89FE5018ADE}';
+  CLSID_WICPngIccpMetadataWriter         : TGUID = '{16671E5F-0CE6-4CC4-9768-E89FE5018ADE}';
   {$EXTERNALSYM CLSID_WICPngIccpMetadataWriter}
-  CLSID_WICPngSrgbMetadataReader        : TGUID = '{FB40360C-547E-4956-A3B9-D4418859BA66}';
+  CLSID_WICPngSrgbMetadataReader         : TGUID = '{FB40360C-547E-4956-A3B9-D4418859BA66}';
   {$EXTERNALSYM CLSID_WICPngSrgbMetadataReader}
-  CLSID_WICPngSrgbMetadataWriter        : TGUID = '{A6EE35C6-87EC-47DF-9F22-1D5AAD840C82}';
+  CLSID_WICPngSrgbMetadataWriter         : TGUID = '{A6EE35C6-87EC-47DF-9F22-1D5AAD840C82}';
   {$EXTERNALSYM CLSID_WICPngSrgbMetadataWriter}
-  CLSID_WICPngTimeMetadataReader        : TGUID = '{D94EDF02-EFE5-4F0D-85C8-F5A68B3000B1}';
+  CLSID_WICPngTimeMetadataReader         : TGUID = '{D94EDF02-EFE5-4F0D-85C8-F5A68B3000B1}';
   {$EXTERNALSYM CLSID_WICPngTimeMetadataReader}
-  CLSID_WICPngTimeMetadataWriter        : TGUID = '{1AB78400-B5A3-4D91-8ACE-33FCD1499BE6}';
+  CLSID_WICPngTimeMetadataWriter         : TGUID = '{1AB78400-B5A3-4D91-8ACE-33FCD1499BE6}';
   {$EXTERNALSYM CLSID_WICPngTimeMetadataWriter}
-  CLSID_WICDdsMetadataReader            : TGUID = '{276c88ca-7533-4a86-b676-66b36080d484}';
+  CLSID_WICDdsMetadataReader             : TGUID = '{276c88ca-7533-4a86-b676-66b36080d484}';
   {$EXTERNALSYM CLSID_WICDdsMetadataReader}
-  CLSID_WICDdsMetadataWriter            : TGUID = '{fd688bbd-31ed-4db7-a723-934927d38367}';
+  CLSID_WICDdsMetadataWriter             : TGUID = '{fd688bbd-31ed-4db7-a723-934927d38367}';
   {$EXTERNALSYM CLSID_WICDdsMetadataWriter}
-  CLSID_WICHeifMetadataReader           : TGUID = '{ACDDFC3F-85EC-41BC-BDEF-1BC262E4DB05}';
+  CLSID_WICHeifMetadataReader            : TGUID = '{ACDDFC3F-85EC-41BC-BDEF-1BC262E4DB05}';
   {$EXTERNALSYM CLSID_WICHeifMetadataReader}
-  CLSID_WICHeifMetadataWriter           : TGUID = '{3AE45E79-40BC-4401-ACE5-DD3CB16E6AFE}';
+  CLSID_WICHeifMetadataWriter            : TGUID = '{3AE45E79-40BC-4401-ACE5-DD3CB16E6AFE}';
   {$EXTERNALSYM CLSID_WICHeifMetadataWriter}
-  CLSID_WICHeifHDRMetadataReader        : TGUID = '{2438de3d-94d9-4be8-84a8-4de95a575e75}';
+  CLSID_WICHeifHDRMetadataReader         : TGUID = '{2438de3d-94d9-4be8-84a8-4de95a575e75}';
   {$EXTERNALSYM CLSID_WICHeifHDRMetadataReader}
-  CLSID_WICWebpAnimMetadataReader       : TGUID = '{076f9911-a348-465c-a807-a252f3f2d3de}';
+  CLSID_WICWebpAnimMetadataReader        : TGUID = '{076f9911-a348-465c-a807-a252f3f2d3de}';
   {$EXTERNALSYM CLSID_WICWebpAnimMetadataReader}
-  CLSID_WICWebpAnmfMetadataReader       : TGUID = '{85a10b03-c9f6-439f-be5e-c0fbef67807c}';
+  CLSID_WICWebpAnmfMetadataReader        : TGUID = '{85a10b03-c9f6-439f-be5e-c0fbef67807c}';
   {$EXTERNALSYM CLSID_WICWebpAnmfMetadataReader}
+  CLSID_WICJpegXLAnimFrameMetadataWriter : TGUID = '{d1ce58a8-06e0-4b6f-8fc1-577560bd5ad9}';
+  {$EXTERNALSYM CLSID_WICJpegXLAnimFrameMetadataWriter}
+  CLSID_WICGainMapMetadataReader         : TGUID = '{3ac32daf-27b9-4af5-b0ab-d1189dcf34b3}';
+  {$EXTERNALSYM CLSID_WICGainMapMetadataReader}
+  CLSID_WICGainMapMetadataWriter         : TGUID = '{6f845268-a92e-4a02-b002-a67c362800b2}';
+  {$EXTERNALSYM CLSID_WICGainMapMetadataWriter}
+
 
 // Enums =======================================================================
 
@@ -391,6 +409,7 @@ type
 
   PIWICMetadataHandlerInfo = ^IWICMetadataHandlerInfo;
   IWICMetadataHandlerInfo = interface;
+
 
 
   // Interface IWICMetadataBlockReader
