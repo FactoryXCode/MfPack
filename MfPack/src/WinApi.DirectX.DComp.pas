@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 //
 // Description: Enables high-performance bitmap composition with transforms,
 //              effects, and animations.
@@ -24,17 +24,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or later.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -2319,7 +2319,65 @@ type
   IID_IDCompositionDevice4 = IDCompositionDevice4;
   {$EXTERNALSYM IID_IDCompositionDevice4}
 
-  // ==
+  //#if (NTDDI_VERSION >= NTDDI_WIN11_GE)
+
+  //+---------------------------------------------------------------------------
+  //
+  //  Interface:
+  //      IDCompositionDynamicTexture
+  //
+  //  Synopsis:
+  //      An interface representing a dynamically changing texture that can be
+  //      bound to a dcomp visual as content.
+  //
+  //----------------------------------------------------------------------------
+  PIDCompositionDynamicTexture = ^IDCompositionDynamicTexture;
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IDCompositionDynamicTexture);'}
+  IDCompositionDynamicTexture = interface(IUnknown)
+  ['{A1DE1D3F-6405-447F-8E95-1383A34B0277}']
+    // Set current texture, assuming that every pixel has changed.
+    function SetTexture(pTexture: IDCompositionTexture): HResult; stdcall;
+
+    // Set current texture, assuming that only pixels inside the provided rects have changed.
+    //
+    // DWM will use the provided rects to optimize the redrawing of the texture on the screen,
+    // but it can't check the correctness of the provided rects, so the caller is responsible for
+    // including every pixel that changed in at least one rect. There are no guarantees about
+    // what will be redrawn outside of the provided dirty rects. It means that DWM may choose to draw
+    // any set of additional pixels outside of provided dirty rects if it needs to.
+    //
+    // If provided with an empty array or empty rects, this method will treat the texture as identical
+    // to the previous one so that DWM may choose not to redraw it.
+    function _SetTexture(pTexture: IDCompositionTexture;
+                         const pRects: PD2D_RECT_L;
+                         rectCount: size_t): HResult; stdcall;
+  end;
+  {$EXTERNALSYM IDCompositionDynamicTexture}
+  IID_IDCompositionDynamicTexture = IDCompositionDynamicTexture;
+  {$EXTERNALSYM IID_IDCompositionDynamicTexture}
+
+
+  //+---------------------------------------------------------------------------
+  //
+  //  Interface:
+  //      IDCompositionDevice5
+  //
+  //  Synopsis:
+  //      Servers as the root factory for composition dynamic textures
+  //
+  //----------------------------------------------------------------------------
+   PIDCompositionDevice5 = ^IDCompositionDevice5;
+  {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IDCompositionDevice5);'}
+  IDCompositionDevice5 = interface(IDCompositionDevice4)
+  ['{2C6BEBFE-A603-472F-AF34-D2443356E61B}']
+    {$EXTERNALSYM IDCompositionDynamicTexture}
+    function CreateDynamicTexture(out compositionDynamicTexture: PIDCompositionDynamicTexture): HResult; stdcall;
+
+  end;
+  {$EXTERNALSYM IDCompositionDevice5}
+  IID_IDCompositionDevice5 = IDCompositionDevice5;
+  {$EXTERNALSYM IID_IDCompositionDevice5}
+//#endif // #if (NTDDI_VERSION >= NTDDI_WIN11_GE)
 
 
   // Additional Prototypes for ALL interfaces
