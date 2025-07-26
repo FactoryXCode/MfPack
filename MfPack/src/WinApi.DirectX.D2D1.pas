@@ -1381,8 +1381,8 @@ type
     procedure AddLines(points: PD2D1_POINT_2F; // pointer to array of points
                        pointsCount: UINT32); stdcall;
 
-    procedure AddBeziers(beziers: PD2D1_BEZIER_SEGMENT; stdcall; // pointer to array of beziers
-                         beziersCount: UINT32);
+    procedure AddBeziers(beziers: PD2D1_BEZIER_SEGMENT; // pointer to array of beziers
+                         beziersCount: UINT32); stdcall;
 
     procedure EndFigure(figureEnd: D2D1_FIGURE_END); stdcall;
 
