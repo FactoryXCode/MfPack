@@ -1125,7 +1125,7 @@ type
 
     function GetCenter(): D2D1_POINT_2F; stdcall;
 
-    function GetGradientOriginOffset(): D2D1_POINT_2F;
+    function GetGradientOriginOffset(): D2D1_POINT_2F; stdcall;
 
     function GetRadiusX(): Single; stdcall;
 
@@ -1147,26 +1147,26 @@ type
   ID2D1StrokeStyle = interface(ID2D1Resource)
   ['{2cd9069d-12e2-11dc-9fed-001143a055f9}']
 
-    function GetStartCap(): D2D1_CAP_STYLE;
+    function GetStartCap(): D2D1_CAP_STYLE; stdcall;
 
-    function GetEndCap(): D2D1_CAP_STYLE;
+    function GetEndCap(): D2D1_CAP_STYLE; stdcall;
 
-    function GetDashCap(): D2D1_CAP_STYLE;
+    function GetDashCap(): D2D1_CAP_STYLE; stdcall;
 
-    function GetMiterLimit(): Single;
+    function GetMiterLimit(): Single; stdcall;
 
-    function GetLineJoin(): D2D1_LINE_JOIN;
+    function GetLineJoin(): D2D1_LINE_JOIN; stdcall;
 
-    function GetDashOffset(): Single;
+    function GetDashOffset(): Single; stdcall;
 
-    function GetDashStyle(): D2D1_DASH_STYLE;
+    function GetDashStyle(): D2D1_DASH_STYLE; stdcall;
 
-    function GetDashesCount(): UINT32;
+    function GetDashesCount(): UINT32; stdcall;
 
     // Returns the dashes from the object into a user allocated array. The user must
     // call GetDashesCount to retrieve the required size.
     procedure GetDashes(out dashes: Single;
-                        dashesCount: UINT32);
+                        dashesCount: UINT32); stdcall;
 
   end;
   IID_ID2D1StrokeStyle = ID2D1StrokeStyle;
@@ -1371,20 +1371,20 @@ type
   ID2D1SimplifiedGeometrySink = interface(IUnknown)
   ['{2cd9069e-12e2-11dc-9fed-001143a055f9}']
 
-    procedure SetFillMode(fillMode: D2D1_FILL_MODE);
+    procedure SetFillMode(fillMode: D2D1_FILL_MODE); stdcall;
 
-    procedure SetSegmentFlags(vertexFlags: D2D1_PATH_SEGMENT);
+    procedure SetSegmentFlags(vertexFlags: D2D1_PATH_SEGMENT); stdcall;
 
     procedure BeginFigure(startPoint: D2D1_POINT_2F;
-                          figureBegin: D2D1_FIGURE_BEGIN);
+                          figureBegin: D2D1_FIGURE_BEGIN); stdcall;
 
     procedure AddLines(points: PD2D1_POINT_2F; // pointer to array of points
-                       pointsCount: UINT32);
+                       pointsCount: UINT32); stdcall;
 
-    procedure AddBeziers(beziers: PD2D1_BEZIER_SEGMENT; // pointer to array of beziers
+    procedure AddBeziers(beziers: PD2D1_BEZIER_SEGMENT; stdcall; // pointer to array of beziers
                          beziersCount: UINT32);
 
-    procedure EndFigure(figureEnd: D2D1_FIGURE_END);
+    procedure EndFigure(figureEnd: D2D1_FIGURE_END); stdcall;
 
     function Close(): HResult; stdcall;
 
