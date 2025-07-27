@@ -1,12 +1,7 @@
 program XAudio2RenderingSample;
 
 uses
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
-
+  
   Vcl.Forms,
   MainFrm in 'MainFrm.pas' {frmMain},
   Tools in 'Tools.pas',
