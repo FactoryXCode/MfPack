@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: -
 //
 // Organisation: FactoryX
@@ -24,17 +24,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -753,7 +753,7 @@ type
 
     function SetTextAntialiasMode(textAntialiasMode: D2D1_TEXT_ANTIALIAS_MODE): HResult; stdcall;
     // The text rendering options to be applied to all subsequent text and glyph
-    // drawing operations; IUnknown(Nil) to clear current text rendering options.
+    // drawing operations; IUnknown(nil) to clear current text rendering options.
     function SetTextRenderingParams(textRenderingParams: IDWriteRenderingParams): HResult; stdcall;
 
     function SetTransform(transform: D2D1_MATRIX_3X2_F): HResult; stdcall;
@@ -864,8 +864,8 @@ type
     function AddPage(commandList: ID2D1CommandList;
                      pageSize: D2D_SIZE_F;
                      pagePrintTicketStream: IStream;
-                     {out_opt} tag1: PD2D1_TAG = Nil;
-                     {out_opt} tag2: PD2D1_TAG = Nil): HResult; stdcall;
+                     {out_opt} tag1: PD2D1_TAG = nil;
+                     {out_opt} tag2: PD2D1_TAG = nil): HResult; stdcall;
 
     function Close(): HResult; stdcall;
 
@@ -1048,7 +1048,7 @@ type
     // Sets the input to the given effect. The input can be a concrete bitmap or the
     // output of another effect.
     procedure SetInput(index: UINT32;
-                       input: ID2D1Image = Nil;
+                       input: ID2D1Image = nil;
                        invalidate: BOOL = TRUE); stdcall;
 
     // If the effect supports a variable number of inputs, this sets the number of
@@ -1342,21 +1342,21 @@ type
     // Draw an image to the device context. The image represents either a concrete
     // bitmap or the output of an effect graph.
     procedure DrawImage(image: ID2D1Image;
-                        targetOffset: PD2D1_POINT_2F = Nil;
-                        imageRectangle: PD2D1_RECT_F = Nil;
+                        targetOffset: PD2D1_POINT_2F = nil;
+                        imageRectangle: PD2D1_RECT_F = nil;
                         interpolationMode: D2D1_INTERPOLATION_MODE = D2D1_INTERPOLATION_MODE_LINEAR;
                         compositeMode: D2D1_COMPOSITE_MODE = D2D1_COMPOSITE_MODE_SOURCE_OVER); stdcall;
 
     // Draw a metafile to the device context.
     procedure DrawGdiMetafile(gdiMetafile: ID2D1GdiMetafile;
-                              targetOffset: PD2D1_POINT_2F = Nil); stdcall;
+                              targetOffset: PD2D1_POINT_2F = nil); stdcall;
 
     procedure DrawBitmap(bitmap: ID2D1Bitmap;
                          destinationRectangle: D2D1_RECT_F;
                          opacity: Single;
                          interpolationMode: D2D1_INTERPOLATION_MODE;
-                         sourceRectangle: PD2D1_RECT_F = Nil;
-                         perspectiveTransform: PD2D1_MATRIX_4X4_F = Nil); stdcall;
+                         sourceRectangle: PD2D1_RECT_F = nil;
+                         perspectiveTransform: PD2D1_MATRIX_4X4_F = nil); stdcall;
 
     // Push a layer on the device context.
     procedure PushLayer(layerParameters: D2D1_LAYER_PARAMETERS1;
@@ -1391,8 +1391,8 @@ type
     // be set to aliased.
     procedure FillOpacityMask(opacityMask: ID2D1Bitmap;
                               brush: ID2D1Brush;
-                              destinationRectangle: PD2D1_RECT_F = Nil;
-                              sourceRectangle: PD2D1_RECT_F = Nil); stdcall;
+                              destinationRectangle: PD2D1_RECT_F = nil;
+                              sourceRectangle: PD2D1_RECT_F = nil); stdcall;
 
   end;
   IID_ID2D1DeviceContext = ID2D1DeviceContext;
@@ -1495,7 +1495,7 @@ type
     // effects array.</param>
     // <param name="effectsRegistered">The number of effects currently registered in
     // the system.</param>
-    function GetRegisteredEffects({out} effects: PGuid; // When this method returns, contains an array of effects. Nil if no effects are retrieved.
+    function GetRegisteredEffects({out} effects: PGuid; // When this method returns, contains an array of effects. nils if no effects are retrieved.
                                   effectsCount: UINT32;
                                   {out_opt} out effectsReturned: UINT32;
                                   {out_opt} out effectsRegistered: UINT32): HResult; stdcall;

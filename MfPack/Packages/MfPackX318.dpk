@@ -1,4 +1,4 @@
-package MfPackX317;
+package MfPackX318;
 
 {$R *.res}
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
@@ -220,6 +220,7 @@ contains
   WinApi.Wmistr in '..\src\WinApi.Wmistr.pas',
   WinApi.StiErr in '..\src\WinApi.StiErr.pas',
   WinApi.MfPack.VideoStandardsCheat in '..\src\WinApi.MfPack.VideoStandardsCheat.pas',
-  WinApi.MediaFoundationApi.MfTrace in '..\src\WinApi.MediaFoundationApi.MfTrace.pas';
+  WinApi.MediaFoundationApi.MfTrace in '..\src\WinApi.MediaFoundationApi.MfTrace.pas',
+  WinApi.ShErrors in '..\src\WinApi.ShErrors.pas';
 
 end.

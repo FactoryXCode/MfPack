@@ -7,11 +7,9 @@ object dlgVideoSetttings: TdlgVideoSetttings
   ClientWidth = 297
   Color = clBtnFace
   ParentFont = True
-  OldCreateOrder = True
   Position = poScreenCenter
   OnCreate = FormCreate
-  PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object Bevel1: TBevel
     Left = 3
     Top = 8
@@ -24,22 +22,22 @@ object dlgVideoSetttings: TdlgVideoSetttings
   object Label1: TLabel
     Left = 22
     Top = 18
-    Width = 71
-    Height = 13
+    Width = 79
+    Height = 15
     Caption = 'Output Format'
   end
   object Label2: TLabel
     Left = 114
     Top = 18
-    Width = 68
-    Height = 13
+    Width = 76
+    Height = 15
     Caption = 'Encoding type'
   end
   object Label3: TLabel
     Left = 24
     Top = 62
-    Width = 50
-    Height = 13
+    Width = 56
+    Height = 15
     Caption = 'Resolution'
   end
   object Label5: TLabel
@@ -97,7 +95,7 @@ object dlgVideoSetttings: TdlgVideoSetttings
     Left = 22
     Top = 35
     Width = 78
-    Height = 21
+    Height = 23
     TabOrder = 2
     Text = 'MP4'
     OnCloseUp = cbxOutputFormatCloseUp
@@ -110,7 +108,7 @@ object dlgVideoSetttings: TdlgVideoSetttings
     Left = 114
     Top = 34
     Width = 151
-    Height = 21
+    Height = 23
     TabOrder = 3
     OnCloseUp = cbxEncodingFormatCloseUp
     Items.Strings = (
@@ -179,7 +177,7 @@ object dlgVideoSetttings: TdlgVideoSetttings
     Left = 22
     Top = 119
     Width = 78
-    Height = 21
+    Height = 23
     TabOrder = 9
     OnCloseUp = cbxOutputFormatCloseUp
     Items.Strings = (

@@ -10,7 +10,7 @@
 // Release date: 15-06-2024
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: WAS Loopback Capture Engine using TThread to render data.
 //
 // Organisation: FactoryX
@@ -21,17 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -1096,9 +1096,7 @@ begin
   WaitArray[2] := pvAudioSamplesReadyEvent;
 
 try
-  // Initialize COM concurrency model multithreaded.
-  hr := CoInitializeEx(nil,
-                       COINIT_MULTITHREADED);
+
   if FAILED(hr) then
     begin
       pvDeviceState := Error;
@@ -1236,7 +1234,6 @@ finally
     pvWavWriter.CloseFile(CkRIFF,
                           CkData);
 
-  CoUnInitialize;
   Result := hr;
 end;
 end;

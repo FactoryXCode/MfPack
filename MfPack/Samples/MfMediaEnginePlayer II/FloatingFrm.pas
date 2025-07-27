@@ -9,7 +9,7 @@
 // Release date: 24-04-2019
 // Language: ENU
 //
-// Version: 3.1.3
+// Version: 3.1.7
 // Description: Floating form for subtitles.
 //
 // Company: FactoryX
@@ -21,17 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -55,7 +55,8 @@
 //
 //
 // Non commercial users may distribute this source code provided that this header is included this source code provided that this header is included
-// in full at the top of the file. Commercial users are not allowed to include this API as part of their product without implicit permission.
+// in full at the top of the file.
+// Commercial users are not allowed to include this API as part of their product without implicit permission.
 //
 //==============================================================================
 unit FloatingFrm;
@@ -219,7 +220,7 @@ procedure TFloatingForm.SetSubTitleText(aValue: string);
 begin
   sSubTitleTxt := aValue;
   GetTextLines(aValue);
-  if Not Assigned(fLayerFont) then
+  if not Assigned(fLayerFont) then
     begin
       lblSubTitle.Font.Size  := 12;
       lblSubTitle.Font.Style := [fsBold];
@@ -244,7 +245,7 @@ begin
   iTextLines := 1; // default value
   // Get the textlines
   for i := 1 to Length(aValue)-1 do
-    if aValue[i] = #13 then
+    if (aValue[i] = #13) then
       inc(iTextLines);
 end;
 
@@ -291,7 +292,8 @@ begin
                                      LOGPIXELSX);
   Result.LogPixelsY := GetDeviceCaps(dc,
                                      LOGPIXELSY);
-  ReleaseDC(Self.Handle, dc);
+  ReleaseDC(Self.Handle,
+            dc);
 end;
 
 

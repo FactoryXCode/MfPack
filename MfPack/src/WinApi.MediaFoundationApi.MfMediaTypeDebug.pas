@@ -10,7 +10,7 @@
 // Release date: 13-08-2022
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: Code to view the contents of a media type (IMFMediaType) while debugging.
 //
 // Organisation: FactoryX
@@ -21,9 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
-// 26/02/2024 Tony                Updated Remarks How to use.
-// 11/03/2024 Tony                Changed function GetGUIDNameConst, added parameter majortype.
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: How to use:
@@ -55,11 +53,11 @@
 //              {$ENDIF}
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //

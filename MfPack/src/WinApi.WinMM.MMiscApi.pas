@@ -10,7 +10,7 @@
 // Release date: 15-09-2020
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: ApiSet Contract for api-ms-win-mm-misc-l1-1
 //              This header is used by Windows Multimedia.
 //              For more information, see: https://docs.microsoft.com/en-us/windows/win32/api/mmiscapi/
@@ -29,11 +29,11 @@
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //

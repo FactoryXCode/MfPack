@@ -10,7 +10,7 @@
 // Release date: 30-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: Helper files over the D2D interfaces and APIs.
 //
 // Organisation: FactoryX
@@ -21,17 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Minimum supported client: Windows 8.1
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -93,7 +93,7 @@ uses
 
   // Computes the maximum factor by which a given transform can stretch any vector.
   // See: https://docs.microsoft.com/en-us/windows/desktop/api/d2d1_2/nf-d2d1_2-d2d1computemaximumscalefactor
-  // Delphi Note: This function has been moved from D2D1_2.pas to prevent circular reference error.
+  // Delphi Note: This function has been moved to D2D1_2.pas to prevent circular reference error.
   //function D2D1ComputeMaximumScaleFactor(matrix: D2D1_MATRIX_3X2_F): Single; stdcall;
 
 //#endif // #if NTDDI_VERSION >= NTDDI_WINBLUE

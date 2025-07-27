@@ -10,7 +10,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: MfPack Methods Library.
 //              This unit contains basic Media Foundation methods needed to play,
 //              record, encode, decode, etc.
@@ -29,20 +29,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
-// 27/07/2024 Tony                Added overloaded method ConfigureVideoEncoding
-// 27/09/2024 Tony                Removed use of POINTERMATH for Delphi versions < 2009.
-// 15/07/2025 Tony                Fixed enum issue in function CountTypesFromDevice.
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //

@@ -15,12 +15,10 @@ object frmMain: TfrmMain
   Font.Style = []
   KeyPreview = True
   Menu = mnuMain
-  OldCreateOrder = True
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnKeyUp = FormKeyUp
-  PixelsPerInch = 96
   TextHeight = 13
   object lblDuration: TLabel
     Left = 7
@@ -146,6 +144,7 @@ object frmMain: TfrmMain
     Align = alTop
     Enabled = False
     TabOrder = 3
+    ExplicitWidth = 384
     object Bevel5: TBevel
       Left = 194
       Top = 30
@@ -538,6 +537,8 @@ object frmMain: TfrmMain
     ParentFont = False
     TabOrder = 4
     Transparent = False
+    ExplicitTop = 363
+    ExplicitWidth = 384
   end
   object StatusBar: TStaticText
     Left = 0
@@ -556,6 +557,8 @@ object frmMain: TfrmMain
     ParentFont = False
     TabOrder = 5
     Transparent = False
+    ExplicitTop = 381
+    ExplicitWidth = 384
   end
   object mnuMain: TMainMenu
     Left = 577

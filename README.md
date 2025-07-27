@@ -29,9 +29,9 @@
 
 # MfPack 
 
-Version X 3.1.7
+Version X 3.1.8
 Delphi XE2 up to and including Delphi 12 
-SDK version: 10.0.26100.0 (Windows 11)
+SDK version: 10.0.26100.4654 (Windows 11)
 
 
 # Samples

@@ -10,7 +10,7 @@
 // Release date: 29-03-2022
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 //
 // Description:
 //   This unit returns a BMP memory stream from an IMFSample.
@@ -23,16 +23,16 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX317/Samples/CameraFrameCapture
+// Related projects: MfPackX318/Samples/CameraFrameCapture
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -217,7 +217,8 @@ begin
 
   if (AVideoInfo.oSubType <> MFVideoFormat_RGB32) then
     begin
-      Result := ConvertSampleToRGB(ASample, pConvertedSample);
+      Result := ConvertSampleToRGB(ASample,
+                                   pConvertedSample);
       if Result then
         // Converts a sample with multiple buffers into a sample with a single buffer.
         Result := SUCCEEDED(pConvertedSample.ConvertToContiguousBuffer(@pBuffer));
@@ -228,27 +229,39 @@ begin
 
   if Result then
     begin
-      Result := SUCCEEDED(pBuffer.Lock(pBitmapData, Nil, @cbBitmapData));
+
+      Result := SUCCEEDED(pBuffer.Lock(pBitmapData,
+                                       nil,
+                                       @cbBitmapData));
+
       try
         if Result then
           begin
+
             // For full frame capture, use the buffer dimensions for the data size check
             iExpectedDataSize := (AVideoInfo.iBufferWidth * 4) * AVideoInfo.iBufferHeight;
             iActualDataSize := Integer(cbBitmapData);
 
             if Result then
               Result := (iActualDataSize = iExpectedDataSize);
+
             if not Result then
               begin
                 AError := Format('Sample size does not match expected size. Current: %d. Expected: %d',
                                  [iActualDataSize, iExpectedDataSize]);
               end;
+
             AMemoryStream := TMemoryStream.Create;
+
             oFileHeader := GetBMPFileHeader;
             oFileInfo := GetBMPFileInfo(AVideoInfo);
-            AMemoryStream.Write(oFileHeader, SizeOf(oFileHeader));
-            AMemoryStream.Write(oFileInfo, SizeOf(oFileInfo));
-            AMemoryStream.Write(pBitmapData[0], iActualDataSize);
+
+            AMemoryStream.Write(oFileHeader,
+                                SizeOf(oFileHeader));
+            AMemoryStream.Write(oFileInfo,
+                                SizeOf(oFileInfo));
+            AMemoryStream.Write(pBitmapData[0],
+                                iActualDataSize);
           end;
       finally
         pBuffer.Unlock();
@@ -262,6 +275,7 @@ end;
 
 function TSampleConverter.GetBMPFileHeader(): BITMAPFILEHEADER;
 begin
+
   Result.bfType := Ord('B') or (Ord('M') shl 8); // Type is "BM" for BitMap
   Result.bfSize := sizeof(Result.bfOffBits) + sizeof(RGBTRIPLE);
   Result.bfReserved1 := 0;
@@ -272,6 +286,7 @@ end;
 
 function TSampleConverter.GetBMPFileInfo(const AVideoInfo: TVideoFormatInfo): BITMAPINFOHEADER;
 begin
+
   // See: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapinfoheader
   Result.biSize := sizeof(BITMAPINFOHEADER);
   Result.biWidth := AVideoInfo.iVideoWidth;
@@ -291,6 +306,7 @@ end;
 
 procedure TSampleConverter.FreeConverter();
 begin
+
   if Assigned(FTransform) then
     SafeRelease(FTransform);
   FOutputType := nil;
@@ -331,7 +347,9 @@ begin
     begin
       // Set the input type for the transform
       if Result then
-        Result := SUCCEEDED(FTransform.SetInputType(0, AInputType, 0));
+        Result := SUCCEEDED(FTransform.SetInputType(0,
+                                                    AInputType,
+                                                    0));
 
       // Create the output type
       if Result then
@@ -362,11 +380,13 @@ end;
 
 procedure TSampleConverter.NotifyBeginStreaming();
 begin
+
   // This should speed up the first frame request.
   // See: https://docs.microsoft.com/en-us/windows/win32/medfound/mft-message-notify-begin-streaming
   FTransform.ProcessMessage(MFT_MESSAGE_NOTIFY_BEGIN_STREAMING,
                             0);
 end;
+
 
 function TSampleConverter.ConvertSampleToRGB(const AInputSample: IMFSample;
                                              out AConvertedSample: IMFSample): Boolean;
@@ -380,6 +400,7 @@ var
   iConvertEnd: int64;
 
 begin
+
   QueryPerformanceCounter(iConvertStart);
 
   Result := CheckSucceeded(FTransform.ProcessInput(0,

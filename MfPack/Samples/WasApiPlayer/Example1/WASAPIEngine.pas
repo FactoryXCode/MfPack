@@ -10,7 +10,7 @@
 // Release date: 24-08-2024
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: The WASAPI renderer class.
 //
 // Company: FactoryX
@@ -21,18 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
-// 05/09/2024 Tony                Enforged the release of all interfaces for older Delphi versions < 12.
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -651,7 +650,7 @@ begin
           Break;
         end;
 
-      // Audio Samples Ready Event
+      // Audio Samples Ready Event.
       WAIT_OBJECT_0 + 1:
         begin
 
@@ -696,7 +695,7 @@ begin
                       WPARAM((u64Position div u64Frequency) * REFTIMES_PER_SEC),
                       LPARAM(u64Position));
 
-          // When using this code, we don't need the IAudioClock interface to get the amount of samples payed.
+          // When using this code, we don't need the IAudioClock interface to get the amount of samples played.
           // Global var.
           //   pvTotalFramesRendered: UINT64;
 

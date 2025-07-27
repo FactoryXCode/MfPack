@@ -10,12 +10,10 @@ object Frm_SimpleCapture: TFrm_SimpleCapture
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = True
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnPaint = FormPaint
-  PixelsPerInch = 96
   TextHeight = 13
   object pnlControls: TPanel
     Left = 0
@@ -25,6 +23,8 @@ object Frm_SimpleCapture: TFrm_SimpleCapture
     Align = alBottom
     BevelInner = bvLowered
     TabOrder = 0
+    ExplicitTop = 277
+    ExplicitWidth = 396
     object lblRotation: TLabel
       Left = 216
       Top = 20
@@ -84,5 +84,7 @@ object Frm_SimpleCapture: TFrm_SimpleCapture
     ShowCaption = False
     TabOrder = 1
     OnResize = pnlVideoResize
+    ExplicitWidth = 396
+    ExplicitHeight = 277
   end
 end

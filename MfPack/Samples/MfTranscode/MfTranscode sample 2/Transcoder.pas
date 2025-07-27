@@ -10,7 +10,7 @@
 // Release date: 24-06-2023
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: This is a modified class of the Transcoder sample,
 //
 // Company: FactoryX
@@ -21,17 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -154,8 +154,6 @@ begin
   inherited Create();
 
   // A Delphi Forms Application will initialize Com by default.
-  CoInitializeEx(nil,
-                 COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE);
 
   // Check if the current MF version match user's
   if FAILED(MFStartup(MF_VERSION, 0)) then
@@ -183,7 +181,6 @@ begin
   Shutdown();
   // Shutdown Media Foundation.
   MFShutdown();
-  CoUninitialize();
 
   SafeRelease(m_pClock);
   SafeRelease(m_pProfile);

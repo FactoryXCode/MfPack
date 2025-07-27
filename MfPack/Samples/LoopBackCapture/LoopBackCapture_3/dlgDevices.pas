@@ -9,7 +9,7 @@
 // Release date: 23-04-2023
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 //
 // Description:
 //   Dialog to choose an rendering or capture device.
@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -31,7 +31,7 @@
 // Related projects: MfPack/Samples/LoopbackCapture
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //

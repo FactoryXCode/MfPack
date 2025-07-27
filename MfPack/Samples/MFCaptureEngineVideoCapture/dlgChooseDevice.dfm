@@ -8,11 +8,9 @@ object ChooseDeviceDlg: TChooseDeviceDlg
   ClientWidth = 709
   Color = clBtnFace
   ParentFont = True
-  OldCreateOrder = True
   Position = poMainFormCenter
   OnShow = FormShow
-  PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object Label1: TLabel
     Left = 8
     Top = 15
@@ -53,7 +51,7 @@ object ChooseDeviceDlg: TChooseDeviceDlg
     Width = 261
     Height = 201
     Hint = 'Select a camera device'
-    ItemHeight = 13
+    ItemHeight = 15
     ParentShowHint = False
     ShowHint = True
     TabOrder = 2

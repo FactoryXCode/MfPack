@@ -10,7 +10,7 @@
 // Release date: 25-11-2022
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: Contains an example of how to use the Sink Writer to encode video.
 //
 // Organisation: FactoryX
@@ -21,9 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
-// 18/05/2023 Renate              Fixed runtime error on selecting multiple bitmaps.
-//                                Speedup of bitmap resizing using D2D1_1
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 // ------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -33,7 +31,7 @@
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -272,14 +270,12 @@ end;
 
 // Inside this function, the following steps will be performed.
 //
-// 1 Call CoInitializeEx to initialize the COM library.
-// 2 Call MFStartup to initialize Microsoft Media Foundation.
-// 3 Create the sink writer.
-// 4 Send video frames to the sink writer.
-// 5 Call IMFSinkWriter.Finalize to finalize the output file.
-// 6 You don't have to Release the pointer to the sink writer. The compiler is doing that automaticly.
-// 7 Call MFShutdown.
-// 8 Call CoUninitialize.
+// 1 Call MFStartup to initialize Microsoft Media Foundation.
+// 2 Create the sink writer.
+// 3 Send video frames to the sink writer.
+// 4 Call IMFSinkWriter.Finalize to finalize the output file.
+// 5 You don't have to Release the pointer to the sink writer. The compiler is doing that automaticly.
+// 6 Call MFShutdown.
 //
 // Some notes:
 //   FPS = sec/frames
@@ -301,75 +297,68 @@ label
 begin
   rtStart := 0;
 
-  hr := CoInitializeEx(nil,
-                       COINIT_APARTMENTTHREADED);
+  hr := MFStartup(MF_VERSION);
 
   if SUCCEEDED(hr) then
     begin
-      hr := MFStartup(MF_VERSION);
+      hr := InitializeSinkWriter(pSinkWriter,
+                                 stream);
       if SUCCEEDED(hr) then
         begin
-          hr := InitializeSinkWriter(pSinkWriter,
-                                     stream);
+          // Calculate the average time/frame
+          SinkWriterParams.rtAverageTimePerFrame := (SinkWriterParams.dwFrameTimeUnits) div Round(SinkWriterParams.dbFrameRate);
+          // Or use this method
+          //hr := MFFrameRateToAverageTimePerFrame(SinkWriterParams.dwFrameTimeUnits,
+          //                                       Round(SinkWriterParams.dbFrameRate),
+          //                                       SinkWriterParams.rtAverageTimePerFrame);
 
-          if SUCCEEDED(hr) then
-            begin
-              // Calculate the average time/frame
-              SinkWriterParams.rtAverageTimePerFrame := (SinkWriterParams.dwFrameTimeUnits) div Round(SinkWriterParams.dbFrameRate);
-              // Or use this method
-              //hr := MFFrameRateToAverageTimePerFrame(SinkWriterParams.dwFrameTimeUnits,
-              //                                       Round(SinkWriterParams.dbFrameRate),
-              //                                       SinkWriterParams.rtAverageTimePerFrame);
+          SinkWriterParams.gdInputFormat := MFVideoFormat_RGB32;
+          // VideoLenght is the given duration of the video in seconds.
+          SinkWriterParams.uiFrameCount := aBmpFileList.Count * Round(SinkWriterParams.dbFrameRate) * SinkWriterParams.rtAverageTimePerFrame;
 
-              SinkWriterParams.gdInputFormat := MFVideoFormat_RGB32;
-              // VideoLenght is the given duration of the video in seconds.
-              SinkWriterParams.uiFrameCount := aBmpFileList.Count * Round(SinkWriterParams.dbFrameRate) * SinkWriterParams.rtAverageTimePerFrame;
+           // Handle the number of bitmaps in the list.
+            for i := 0 to aBmpFileList.Count - 1 do
+              begin
+                // Resize and store to FrameBufferArray
+                hr := SetBitmapToVideoFormat(aBmpFileList.Strings[i]);
+                if FAILED(hr) then
+                  goto done;
 
-              // Handle the number of bitmaps in the list.
-              for i := 0 to aBmpFileList.Count - 1 do
-                begin
-                  // Resize and store to FrameBufferArray
-                  hr := SetBitmapToVideoFormat(aBmpFileList.Strings[i]);
-                  if FAILED(hr) then
-                    goto done;
+                // Send message to UI.
+                SendMessage(hwndCaller,
+                            WM_SINKWRITER_WRITES_BITMAP,
+                            WParam(0),
+                            LParam(i + 1));
 
-                  // Send message to UI.
-                  SendMessage(hwndCaller,
-                              WM_SINKWRITER_WRITES_BITMAP,
-                              WParam(0),
-                              LParam(i + 1));
+                // Send frames to the sink writer.
+                for j := 0 to SinkWriterParams.uiFrameCount - 1 do
+                  begin
+                    hr := WriteFrame(pSinkWriter,
+                                     stream,
+                                     rtStart);
+                    if FAILED(hr) then
+                      Break;
 
-                 // Send frames to the sink writer.
-                 for j := 0 to SinkWriterParams.uiFrameCount - 1 do
-                   begin
-                     hr := WriteFrame(pSinkWriter,
-                                      stream,
-                                      rtStart);
-                     if FAILED(hr) then
-                       Break;
+                    inc(rtStart, SinkWriterParams.rtAverageTimePerFrame);
 
-                     inc(rtStart, SinkWriterParams.rtAverageTimePerFrame);
-
-                     MsgWaitForMultipleObjects(0,
-                                               nil^,
-                                               False, // do NOT set this to true!
-                                               0,
-                                               QS_ALLINPUT);
-                   end;
-                end;
-            end;
-          // You must call IMFSinkWriter.BeginWriting before calling this method.
-          // Otherwise, the method returns MF_E_INVALIDREQUEST.
-          if SUCCEEDED(hr) then
-            begin
-              hr := pSinkWriter.Finalize();
-            end;
+                    MsgWaitForMultipleObjects(0,
+                                              nil^,
+                                              False, // do NOT set this to true!
+                                              0,
+                                              QS_ALLINPUT);
+                 end;
+              end;
+           // You must call IMFSinkWriter.BeginWriting before calling this method.
+           // Otherwise, the method returns MF_E_INVALIDREQUEST.
+           if SUCCEEDED(hr) then
+             begin
+               hr := pSinkWriter.Finalize();
+             end;
+        end;
     end;
-    MFShutdown();
-    CoUninitialize();
-  end;
 
 done:
+  MFShutdown();
   Result := hr;
 end;
 

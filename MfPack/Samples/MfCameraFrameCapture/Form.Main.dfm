@@ -21,7 +21,7 @@ object FrmMain: TFrmMain
     Top = 0
     Width = 1214
     Height = 233
-    ActivePage = tsAdvanced
+    ActivePage = tsSetup
     Align = alTop
     TabOrder = 0
     ExplicitWidth = 1208

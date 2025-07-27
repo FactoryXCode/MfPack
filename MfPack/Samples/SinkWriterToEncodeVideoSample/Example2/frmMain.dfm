@@ -2,8 +2,8 @@ object MainForm: TMainForm
   Left = 0
   Top = 0
   Caption = 'Using sinkwriter to encode video Sample2'
-  ClientHeight = 334
-  ClientWidth = 667
+  ClientHeight = 317
+  ClientWidth = 661
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -11,15 +11,13 @@ object MainForm: TMainForm
   Font.Name = 'Tahoma'
   Font.Style = []
   Menu = MainMenu
-  OldCreateOrder = True
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
-  PixelsPerInch = 96
   TextHeight = 13
   object lblInfo: TLabel
     Left = 0
-    Top = 310
-    Width = 667
+    Top = 293
+    Width = 661
     Height = 24
     Align = alBottom
     Alignment = taCenter
@@ -31,13 +29,16 @@ object MainForm: TMainForm
     Font.Name = 'Tahoma'
     Font.Style = [fsBold]
     ParentFont = False
+    ExplicitTop = 310
+    ExplicitWidth = 667
   end
   object imgBitmap: TImage
     Left = 0
     Top = 0
-    Width = 667
+    Width = 661
     Height = 287
     Align = alTop
+    ExplicitWidth = 667
   end
   object MainMenu: TMainMenu
     Left = 46

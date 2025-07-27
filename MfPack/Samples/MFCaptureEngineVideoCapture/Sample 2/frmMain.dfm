@@ -94,7 +94,7 @@ object MainWindow: TMainWindow
   end
   object pnlInfo: TPanel
     Left = -2
-    Top = 648
+    Top = 649
     Width = 1101
     Height = 28
     Align = alCustom
@@ -107,7 +107,7 @@ object MainWindow: TMainWindow
     ParentShowHint = False
     ShowHint = False
     TabOrder = 1
-    ExplicitTop = 631
+    ExplicitTop = 632
     ExplicitWidth = 1095
   end
   object pnlCameraAndVideoControl: TPanel

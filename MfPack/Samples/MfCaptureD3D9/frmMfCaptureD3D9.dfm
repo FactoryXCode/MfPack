@@ -147,12 +147,10 @@ object frmMain: TfrmMain
     000000000000000000000000000000000000000000000000000000000000}
   KeyPreview = True
   Menu = MainMenu1
-  OldCreateOrder = False
   Position = poScreenCenter
   Visible = True
   OnCloseQuery = FormCloseQuery
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object MainMenu1: TMainMenu
     Left = 38

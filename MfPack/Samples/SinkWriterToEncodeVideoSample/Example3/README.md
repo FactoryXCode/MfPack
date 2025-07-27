@@ -1,6 +1,6 @@
-# SinkWriterToEncodeVideoSample Sample 3.
+# SinkWriterToEncodeVideo Sample 3.
 
-Version: X 3.1.7
+Version: X 3.1.8
 
 A VCL-based Delphi-application to encode a series of images with an audio file to
 video using the Windows Media Foundation API.
@@ -23,7 +23,8 @@ Audio can be encoded to AAC, FLAC or Dolby AC-3.
 Input:  
 Theoretically anything that Windows has a decoder and encoder for should work as input for audio.
 Exceptions: - Resampling different from the input is not always supported.
-- The AAC coder needs 44.1 or 48 kHz bitrates as input.
+
+* The AAC coder needs 44.1 or 48 kHz bitrates as input.
 
 
 
@@ -40,16 +41,13 @@ NOTE: With Windows 11 24H2 Dolby AC-3 support will be discontinued.
 
 
 
-Delphi-Versions:
+NOTES:
 
-Developed under Delphi XE-7 Supported Delphi versions are XE7 and above.
-Records with methods, anonymous procedures, interposer classes, tasks and TWicImage need to be available.
+* This release is updated for compiler version 17 up to 34.
+* SDK version 10.0.22621.4654 (Win 11)
+* Requires Windows 10H2 or later.
 
-
-
-Runtime Requirement:
-
-To be able to use all encoding features, Windows 10 20H2 or higher is required.
+Minimum supported MfPack version: 3.1.7
 
 
 
@@ -60,7 +58,7 @@ https://sourceforge.net/projects/MFPack
 
 
 First release date: 24-02-2024
-Final release date: 11-07-2025
+Final release date: 25-07-2025
 
 
 

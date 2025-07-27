@@ -1,9 +1,9 @@
 object frmTranscoder: TfrmTranscoder
-  Left = 0
-  Top = 0
+  Left = 27
+  Top = 137
   BorderIcons = []
   BorderStyle = bsSingle
-  Caption = 'MfTranscoder Sample'
+  Caption = 'MfTranscode Sample 2'
   ClientHeight = 255
   ClientWidth = 528
   Color = clBtnFace
@@ -13,12 +13,10 @@ object frmTranscoder: TfrmTranscoder
   Font.Name = 'Tahoma'
   Font.Style = []
   Menu = MainMenu
-  OldCreateOrder = False
-  Position = poScreenCenter
+  Position = poDesigned
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnMouseMove = FormMouseMove
-  PixelsPerInch = 96
   TextHeight = 13
   object Bevel1: TBevel
     Left = 8
@@ -90,7 +88,7 @@ object frmTranscoder: TfrmTranscoder
     Caption = 'New video format : '
   end
   object Label2: TLabel
-    Left = 12
+    Left = 9
     Top = 111
     Width = 119
     Height = 13
@@ -154,6 +152,8 @@ object frmTranscoder: TfrmTranscoder
     Align = alBottom
     BevelOuter = bvLowered
     TabOrder = 2
+    ExplicitTop = 174
+    ExplicitWidth = 522
     object butExecute: TButton
       Left = 6
       Top = 9
@@ -202,6 +202,8 @@ object frmTranscoder: TfrmTranscoder
     Panels = <>
     SimplePanel = True
     SimpleText = 'Please select a sourcefile.'
+    ExplicitTop = 213
+    ExplicitWidth = 522
   end
   object MainMenu: TMainMenu
     Left = 467

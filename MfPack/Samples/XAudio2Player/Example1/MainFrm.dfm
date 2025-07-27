@@ -14,10 +14,8 @@ object frmMain: TfrmMain
   Font.Name = 'Tahoma'
   Font.Style = []
   Menu = mnuMain
-  OldCreateOrder = False
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
-  PixelsPerInch = 96
   TextHeight = 13
   object Bevel1: TBevel
     Left = 0

@@ -1,5 +1,5 @@
 # MFCaptureToFile Sample
-Version: X 3.1.7
+Version: X 3.1.8
 
 Description:
   ========================================================================
@@ -12,7 +12,7 @@ Description:
 
 NOTES: 
  - This release is updated for compiler version 17 up to 35.
- - SDK version: 10.0.26100.0 (Win 11)
+ - SDK version 10.0.22621.4654 (Win 11)
  - Requires Windows 10 or later.
  - Minimum supported MfPack version: 3.1.5
 
@@ -20,7 +20,7 @@ Project: Media Foundation - MFPack - Samples
 Project location: http://sourceforge.net/projects/MFPack
 
 First release date: 01-02-2022
-Final release date: 30-05-2024
+Final release date: 25-07-2025
 
 
 Copyright © FactoryX. All rights reserved.

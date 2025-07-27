@@ -10,7 +10,7 @@
 // Release date: 30-03-2024
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: The XAudio2 renderer class.
 //
 // Company: FactoryX
@@ -21,18 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
-// 06/08/2024                     Fixed some thread and initialization issues.
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -494,7 +493,6 @@ begin
                         audioValidDataLength: DWord;
 
                         begin
-                          hres := S_OK;
 
                           while (hr = S_OK) do
                             begin
@@ -505,6 +503,9 @@ begin
                                                               @uFlags,
                                                               nil,
                                                               @mfSample);
+
+                              if FAILED(hres) then
+                                Break;
 
                               // Check for eof.
                               if ((uFlags and MF_SOURCE_READERF_ENDOFSTREAM) <> 0) then
@@ -518,22 +519,27 @@ begin
                                   // Get the media buffer from the sample.
                                   hres := mfSample.ConvertToContiguousBuffer(@mfMediaBuffer);
 
-                                  // Get the audio data from the media buffer.
-                                  // Lock Buffer & copy to memory stream
-                                  hres := mfMediaBuffer.Lock(audioData,
-                                                             nil,
-                                                             @audioValidDataLength);
-                                  try
-                                    // Write data to stream.
-                                    pvMemoryStream.Write(audioData^,
-                                                         audioValidDataLength);
+                                  if SUCCEEDED(hres) then
+                                    // Get the audio data from the media buffer.
+                                    // Lock Buffer & copy to memory stream
+                                    hres := mfMediaBuffer.Lock(audioData,
+                                                               nil,
+                                                               @audioValidDataLength);
 
-                                  finally
-                                    // Unlock Buffer
-                                    hres := mfMediaBuffer.Unlock;
-                                  end;
+                                  if SUCCEEDED(hres) then
+                                    try
+                                      // Write data to stream.
+                                      pvMemoryStream.Write(audioData^,
+                                                           audioValidDataLength);
+
+                                    finally
+                                      // Unlock Buffer
+                                      hres := mfMediaBuffer.Unlock;
+                                    end;
                                 end;
                               mfSample := nil;
+                              if FAILED(hres) then
+                                Exit;
                             end; // while
                         end);  // proc
 

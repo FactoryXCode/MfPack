@@ -8,10 +8,8 @@ object dlgSelectDevice: TdlgSelectDevice
   ClientWidth = 377
   Color = clBtnFace
   ParentFont = True
-  OldCreateOrder = True
   Position = poScreenCenter
-  PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object Bevel1: TBevel
     Left = 0
     Top = 0

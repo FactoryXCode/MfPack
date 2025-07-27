@@ -21,18 +21,18 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: To install the visual components, choose Install in the Project Manager.
 //          Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35               q
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -106,8 +106,6 @@ type
     { private fields }
 
     fHwnd: HWnd; // Handle to this meter.
-
-    fCoInit: Integer;
 
     Fbevelstyle: Tpanelbevel;
     Fbevelwidth: Byte;
@@ -277,8 +275,6 @@ begin
   inherited Create(aOwner);
 
   hr := S_OK;
-  fCoInit := CoInitializeEx(nil,
-                            COINIT_APARTMENTTHREADED);
 
   fEnabled := False;
   Width := 12;
@@ -356,8 +352,6 @@ begin
       SafeRelease(pEnumerator);
       SafeRelease(pDevice);
       SafeRelease(pMeterInfo);
-      if (fCoInit = 0) then
-        CoUninitialize();
     end;
   // Destroy handle
   DeallocateHWnd(fHWnd);
@@ -373,8 +367,6 @@ label
   done;
 
 begin
-  //CoInitializeEx(nil,
-  //               COINIT_APARTMENTTHREADED);
 
   // Single instance
   hr := CoCreateInstance(CLSID_MMDeviceEnumerator,

@@ -2,9 +2,9 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'Video Thumbnail Sample'
-  ClientHeight = 640
-  ClientWidth = 1224
-  Color = 5197615
+  ClientHeight = 623
+  ClientWidth = 1218
+  Color = clDarkslategray
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

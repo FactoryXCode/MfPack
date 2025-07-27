@@ -9,7 +9,7 @@
 // Release date: 21/09/2024
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 //
 // Description: This is sample 2 of SimpleCapture that shows you how to implement
 //              IAMCameraControl and IAMVideoProcAmp to control camera and video.
@@ -24,17 +24,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 21/09/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -152,6 +152,7 @@ type
       CameraCtl_Exposure: TCVPropRecord;
       CameraCtl_Iris: TCVPropRecord;
       CameraCtl_Focus: TCVPropRecord;
+      IsSupported: Boolean;
       public
       procedure Initialize();
     end;
@@ -168,6 +169,7 @@ type
     VideoCtl_WhiteBalance: TCVPropRecord;
     VideoCtl_BacklightCompensation: TCVPropRecord;
     VideoCtl_Gain: TCVPropRecord;
+    IsSupported: Boolean;
     public
     procedure Initialize();
     end;
@@ -926,7 +928,7 @@ begin
 
   // Adjust aspect ratio
   if Assigned(m_pVideoDisplay) then
-    ResizeVideo(Nil);
+    ResizeVideo(nil);
 
 // Since the topology is ready, you might start capturing, do calculations etc.
 //
@@ -1155,7 +1157,6 @@ end;
 function TMfCaptureEngine.SetDevice(DeviceProperty: TDeviceProperties): HRESULT;
 var
   hr: HRESULT;
-  pSource: IMFMediaSource;
   pConfig: IMFAttributes;
   ppDevices: PIMFActivate;  // Pointer to array of IMFActivate (PIMFActivate is equivalent to IMFActivate*).
   pDevice: IMFActivate;     // Temporary variable for IMFActivate interface.
@@ -1214,7 +1215,7 @@ begin
             begin
               // Create a media source from the selected device.
               hr := pDevice.ActivateObject(IID_IMFMediaSource,
-                                           Pointer(pSource));
+                                           Pointer(m_pSource));
 
               if SUCCEEDED(hr) then
                 m_pActivate := pDevice;
@@ -1232,18 +1233,17 @@ begin
   // Get the symbolic link and continue with the session preparation...
   if SUCCEEDED(hr) then
     hr := CreateVideoCaptureDeviceBySymolicLink(DeviceProperty.lpSymbolicLink,
-                                                pSource);
-
-  if SUCCEEDED(hr) then
-  begin
-    if not RegisterForDeviceNotification(m_hwnd_MainForm,
-                                         p_hdevnotify) then
-      hr := GetLastError();
-  end;
+                                                m_pSource);
 
   if SUCCEEDED(hr) then
     begin
-      m_pSource := pSource;
+      if not RegisterForDeviceNotification(m_hwnd_MainForm,
+                                           p_hdevnotify) then
+        hr := GetLastError();
+    end;
+
+  if SUCCEEDED(hr) then
+    begin
       hr := GetCameraSettings();
       if FAILED(hr) then
         Exit(hr);
@@ -1529,139 +1529,149 @@ begin
 end;
 
 
-// Add WinApi.StrmIf to uses clause.
+// Camera and video settings.
 function TMfCaptureEngine.GetCameraSettings(): HRESULT;
 var
   hr: HRESULT;
 
+label
+  done;
+
 begin
 
-  hr := S_OK;
-
   if not Assigned(m_pSource) then
-    Exit(E_POINTER);
+    begin
+      hr := E_POINTER;
+      goto done;
+    end;
 
-  try
+  // Control the 'camera'.
+  // When there is no support, this would raise an exception.
+  // dsCameraControl := m_pSource as IAMCameraControl;
+  // This way, we get a resultcode, so you have to handle the error yourself.
+  hr := m_pSource.QueryInterface(IID_IAMCameraControl,
+                                 dsCameraControl);
 
-    // Control the 'camera'.
-    dsCameraControl := m_pSource as IAMCameraControl;
+  if SUCCEEDED(hr) then
+    begin
 
-    if Assigned(dsCameraControl) then
-      begin
+      // Clean up earlier property values.
+      FCameraProps.Initialize();
 
-        // Clean up earlier property values.
-        FCameraProps.Initialize();
+      // Get all camera properties when possible.
 
-        // Get all camera properties when possible.
+      // Exposure.
+      hr := dsCameraControl.GetRange(LONG(CameraControl_Exposure),
+                                     FCameraProps.CameraCtl_Exposure.prMin,
+                                     FCameraProps.CameraCtl_Exposure.prMax,
+                                     FCameraProps.CameraCtl_Exposure.prDelta,
+                                     FCameraProps.CameraCtl_Exposure.prDefault,
+                                     FCameraProps.CameraCtl_Exposure.prFlags); // Note that values > $2 means we should use the flags defined in KsMedia.pas
+      if (hr = E_PROP_ID_UNSUPPORTED) then
+        FCameraProps.CameraCtl_Exposure.IsSupported := False
+      else if (hr <> S_OK) then
+        goto done;
 
-        // Exposure.
-        hr := dsCameraControl.GetRange(LONG(CameraControl_Exposure),
-                                       FCameraProps.CameraCtl_Exposure.prMin,
-                                       FCameraProps.CameraCtl_Exposure.prMax,
-                                       FCameraProps.CameraCtl_Exposure.prDelta,
-                                       FCameraProps.CameraCtl_Exposure.prDefault,
-                                       FCameraProps.CameraCtl_Exposure.prFlags); // Note that values > $2 means we should use the flags defined in KsMedia.pas
-        if (hr = E_PROP_ID_UNSUPPORTED) then
-          FCameraProps.CameraCtl_Exposure.IsSupported := False
-        else if (hr <> S_OK) then
-          Exit(hr);
+      // Zoom.
+      hr := dsCameraControl.GetRange(LONG(CameraControl_Zoom),
+                                     FCameraProps.CameraCtl_Zoom.prMin,
+                                     FCameraProps.CameraCtl_Zoom.prMax,
+                                     FCameraProps.CameraCtl_Zoom.prDelta,
+                                     FCameraProps.CameraCtl_Zoom.prDefault,
+                                     FCameraProps.CameraCtl_Zoom.prFlags);
+      if (hr = E_PROP_ID_UNSUPPORTED) then
+        FCameraProps.CameraCtl_Zoom.IsSupported := False
+      else if (hr <> S_OK) then
+        goto done;
 
-        // Zoom.
-        hr := dsCameraControl.GetRange(LONG(CameraControl_Zoom),
-                                       FCameraProps.CameraCtl_Zoom.prMin,
-                                       FCameraProps.CameraCtl_Zoom.prMax,
-                                       FCameraProps.CameraCtl_Zoom.prDelta,
-                                       FCameraProps.CameraCtl_Zoom.prDefault,
-                                       FCameraProps.CameraCtl_Zoom.prFlags);
-        if (hr = E_PROP_ID_UNSUPPORTED) then
-          FCameraProps.CameraCtl_Zoom.IsSupported := False
-        else if (hr <> S_OK) then
-          Exit(hr);
+      // Pan.
+      hr := dsCameraControl.GetRange(LONG(CameraControl_Pan),
+                                     FCameraProps.CameraCtl_Pan.prMin,
+                                     FCameraProps.CameraCtl_Pan.prMax,
+                                     FCameraProps.CameraCtl_Pan.prDelta,
+                                     FCameraProps.CameraCtl_Pan.prDefault,
+                                     FCameraProps.CameraCtl_Pan.prFlags);
+      if (hr = E_PROP_ID_UNSUPPORTED) then
+        FCameraProps.CameraCtl_Pan.IsSupported := False
+      else if (hr <> S_OK) then
+        goto done;
 
-        // Pan.
-        hr := dsCameraControl.GetRange(LONG(CameraControl_Pan),
-                                       FCameraProps.CameraCtl_Pan.prMin,
-                                       FCameraProps.CameraCtl_Pan.prMax,
-                                       FCameraProps.CameraCtl_Pan.prDelta,
-                                       FCameraProps.CameraCtl_Pan.prDefault,
-                                       FCameraProps.CameraCtl_Pan.prFlags);
-        if (hr = E_PROP_ID_UNSUPPORTED) then
-          FCameraProps.CameraCtl_Pan.IsSupported := False
-        else if (hr <> S_OK) then
-          Exit(hr);
+      // Tilt.
+      hr := dsCameraControl.GetRange(LONG(CameraControl_Tilt),
+                                     FCameraProps.CameraCtl_Tilt.prMin,
+                                     FCameraProps.CameraCtl_Tilt.prMax,
+                                     FCameraProps.CameraCtl_Tilt.prDelta,
+                                     FCameraProps.CameraCtl_Tilt.prDefault,
+                                     FCameraProps.CameraCtl_Tilt.prFlags);
+      if (hr = E_PROP_ID_UNSUPPORTED) then
+        FCameraProps.CameraCtl_Tilt.IsSupported := False
+      else if (hr <> S_OK) then
+        goto done;
 
-        // Tilt.
-        hr := dsCameraControl.GetRange(LONG(CameraControl_Tilt),
-                                       FCameraProps.CameraCtl_Tilt.prMin,
-                                       FCameraProps.CameraCtl_Tilt.prMax,
-                                       FCameraProps.CameraCtl_Tilt.prDelta,
-                                       FCameraProps.CameraCtl_Tilt.prDefault,
-                                       FCameraProps.CameraCtl_Tilt.prFlags);
-        if (hr = E_PROP_ID_UNSUPPORTED) then
-          FCameraProps.CameraCtl_Tilt.IsSupported := False
-        else if (hr <> S_OK) then
-          Exit(hr);
+      // Roll.
+      hr := dsCameraControl.GetRange(LONG(CameraControl_Roll),
+                                     FCameraProps.CameraCtl_Roll.prMin,
+                                     FCameraProps.CameraCtl_Roll.prMax,
+                                     FCameraProps.CameraCtl_Roll.prDelta,
+                                     FCameraProps.CameraCtl_Roll.prDefault,
+                                     FCameraProps.CameraCtl_Roll.prFlags);
+      if (hr = E_PROP_ID_UNSUPPORTED) then
+        FCameraProps.CameraCtl_Roll.IsSupported := False
+      else if (hr <> S_OK) then
+        Exit(hr);
 
-        // Roll.
-        hr := dsCameraControl.GetRange(LONG(CameraControl_Roll),
-                                       FCameraProps.CameraCtl_Roll.prMin,
-                                       FCameraProps.CameraCtl_Roll.prMax,
-                                       FCameraProps.CameraCtl_Roll.prDelta,
-                                       FCameraProps.CameraCtl_Roll.prDefault,
-                                       FCameraProps.CameraCtl_Roll.prFlags);
-        if (hr = E_PROP_ID_UNSUPPORTED) then
-          FCameraProps.CameraCtl_Roll.IsSupported := False
-        else if (hr <> S_OK) then
-          Exit(hr);
+      // Iris.
+      hr := dsCameraControl.GetRange(LONG(CameraControl_Iris),
+                                     FCameraProps.CameraCtl_Iris.prMin,
+                                     FCameraProps.CameraCtl_Iris.prMax,
+                                     FCameraProps.CameraCtl_Iris.prDelta,
+                                     FCameraProps.CameraCtl_Iris.prDefault,
+                                     FCameraProps.CameraCtl_Iris.prFlags);
+      if (hr = E_PROP_ID_UNSUPPORTED) then
+        FCameraProps.CameraCtl_Iris.IsSupported := False
+      else if (hr <> S_OK) then
+        goto done;
 
-        // Iris.
-        hr := dsCameraControl.GetRange(LONG(CameraControl_Iris),
-                                       FCameraProps.CameraCtl_Iris.prMin,
-                                       FCameraProps.CameraCtl_Iris.prMax,
-                                       FCameraProps.CameraCtl_Iris.prDelta,
-                                       FCameraProps.CameraCtl_Iris.prDefault,
-                                       FCameraProps.CameraCtl_Iris.prFlags);
-        if (hr = E_PROP_ID_UNSUPPORTED) then
-          FCameraProps.CameraCtl_Iris.IsSupported := False
-        else if (hr <> S_OK) then
-          Exit(hr);
+      // Focus.
+      hr := dsCameraControl.GetRange(LONG(CameraControl_Focus),
+                                     FCameraProps.CameraCtl_Focus.prMin,
+                                     FCameraProps.CameraCtl_Focus.prMax,
+                                     FCameraProps.CameraCtl_Focus.prDelta,
+                                     FCameraProps.CameraCtl_Focus.prDefault,
+                                     FCameraProps.CameraCtl_Focus.prFlags);
+      if (hr = E_PROP_ID_UNSUPPORTED) then
+        FCameraProps.CameraCtl_Focus.IsSupported := False
+      else if (hr <> S_OK) then
+        goto done;
+    end
+  else if (hr = E_NOINTERFACE) then
+    FCameraProps.IsSupported := False
+  else  // Any other error.
+    goto done;
 
-        // Focus.
-        hr := dsCameraControl.GetRange(LONG(CameraControl_Focus),
-                                       FCameraProps.CameraCtl_Focus.prMin,
-                                       FCameraProps.CameraCtl_Focus.prMax,
-                                       FCameraProps.CameraCtl_Focus.prDelta,
-                                       FCameraProps.CameraCtl_Focus.prDefault,
-                                       FCameraProps.CameraCtl_Focus.prFlags);
-        if (hr = E_PROP_ID_UNSUPPORTED) then
-          FCameraProps.CameraCtl_Focus.IsSupported := False
-        else if (hr <> S_OK) then
-          Exit(hr);
-      end
-    else
-      Exit(E_POINTER);
 
-    // Control the 'video'.
-    dsVideoControl := m_pSource as IAMVideoProcAmp;
+  // Control the 'video'.
+  hr := m_pSource.QueryInterface(IID_IAMVideoProcAmp,
+                                   dsVideoControl);
 
-    if Assigned(dsVideoControl) then
-      begin
+  if SUCCEEDED(hr) then
+    begin
 
-        // Clean up.
-        FVideoProps.Initialize();
+      // Clean up.
+      FVideoProps.Initialize();
 
-        // Get all video properties when possible.
-        // Brightness.
-        hr := dsVideoControl.GetRange(LONG(VideoProcAmp_Brightness),
-                                      FVideoProps.VideoCtl_Brightness.prMin,
-                                      FVideoProps.VideoCtl_Brightness.prMax,
-                                      FVideoProps.VideoCtl_Brightness.prDelta,
-                                      FVideoProps.VideoCtl_Brightness.prDefault,
-                                      FVideoProps.VideoCtl_Brightness.prFlags);
-        if (hr = E_PROP_ID_UNSUPPORTED) then
-          FVideoProps.VideoCtl_Brightness.IsSupported := False
-        else if (hr <> S_OK) then
-          Exit(hr);
+      // Get all video properties when possible.
+      // Brightness.
+      hr := dsVideoControl.GetRange(LONG(VideoProcAmp_Brightness),
+                                    FVideoProps.VideoCtl_Brightness.prMin,
+                                    FVideoProps.VideoCtl_Brightness.prMax,
+                                    FVideoProps.VideoCtl_Brightness.prDelta,
+                                    FVideoProps.VideoCtl_Brightness.prDefault,
+                                    FVideoProps.VideoCtl_Brightness.prFlags);
+      if (hr = E_PROP_ID_UNSUPPORTED) then
+        FVideoProps.VideoCtl_Brightness.IsSupported := False
+      else if (hr <> S_OK) then
+        goto done;
 
         // Contrast.
         hr := dsVideoControl.GetRange(LONG(VideoProcAmp_Contrast),
@@ -1670,123 +1680,124 @@ begin
                                       FVideoProps.VideoCtl_Contrast.prDelta,
                                       FVideoProps.VideoCtl_Contrast.prDefault,
                                       FVideoProps.VideoCtl_Contrast.prFlags);
-        if (hr = E_PROP_ID_UNSUPPORTED) then
+      if (hr = E_PROP_ID_UNSUPPORTED) then
           FVideoProps.VideoCtl_Contrast.IsSupported := False
-        else if (hr <> S_OK) then
-          Exit(hr);
+      else if (hr <> S_OK) then
+          goto done;
 
-        // Hue.
-        hr := dsVideoControl.GetRange(LONG(VideoProcAmp_Hue),
-                                      FVideoProps.VideoCtl_Hue.prMin,
-                                      FVideoProps.VideoCtl_Hue.prMax,
-                                      FVideoProps.VideoCtl_Hue.prDelta,
-                                      FVideoProps.VideoCtl_Hue.prDefault,
-                                      FVideoProps.VideoCtl_Hue.prFlags);
-        if (hr = E_PROP_ID_UNSUPPORTED) then
-          FVideoProps.VideoCtl_Hue.IsSupported := False
-        else if (hr <> S_OK) then
-          Exit(hr);
+      // Hue.
+      hr := dsVideoControl.GetRange(LONG(VideoProcAmp_Hue),
+                                    FVideoProps.VideoCtl_Hue.prMin,
+                                    FVideoProps.VideoCtl_Hue.prMax,
+                                    FVideoProps.VideoCtl_Hue.prDelta,
+                                    FVideoProps.VideoCtl_Hue.prDefault,
+                                    FVideoProps.VideoCtl_Hue.prFlags);
+      if (hr = E_PROP_ID_UNSUPPORTED) then
+        FVideoProps.VideoCtl_Hue.IsSupported := False
+      else if (hr <> S_OK) then
+        goto done;
 
-        // Saturation.
-        hr := dsVideoControl.GetRange(LONG(VideoProcAmp_Saturation),
-                                      FVideoProps.VideoCtl_Saturation.prMin,
-                                      FVideoProps.VideoCtl_Saturation.prMax,
-                                      FVideoProps.VideoCtl_Saturation.prDelta,
-                                      FVideoProps.VideoCtl_Saturation.prDefault,
-                                      FVideoProps.VideoCtl_Saturation.prFlags);
-        if (hr = E_PROP_ID_UNSUPPORTED) then
-          FVideoProps.VideoCtl_Saturation.IsSupported := False
-        else if (hr <> S_OK) then
-          Exit(hr);
+      // Saturation.
+      hr := dsVideoControl.GetRange(LONG(VideoProcAmp_Saturation),
+                                    FVideoProps.VideoCtl_Saturation.prMin,
+                                    FVideoProps.VideoCtl_Saturation.prMax,
+                                    FVideoProps.VideoCtl_Saturation.prDelta,
+                                    FVideoProps.VideoCtl_Saturation.prDefault,
+                                    FVideoProps.VideoCtl_Saturation.prFlags);
+      if (hr = E_PROP_ID_UNSUPPORTED) then
+        FVideoProps.VideoCtl_Saturation.IsSupported := False
+      else if (hr <> S_OK) then
+        goto done;
 
-        // Sharpness.
-        hr := dsVideoControl.GetRange(LONG(VideoProcAmp_Sharpness),
-                                      FVideoProps.VideoCtl_Sharpness.prMin,
-                                      FVideoProps.VideoCtl_Sharpness.prMax,
-                                      FVideoProps.VideoCtl_Sharpness.prDelta,
-                                      FVideoProps.VideoCtl_Sharpness.prDefault,
-                                      FVideoProps.VideoCtl_Sharpness.prFlags);
-        if (hr = E_PROP_ID_UNSUPPORTED) then
-          FVideoProps.VideoCtl_Sharpness.IsSupported := False
-        else if (hr <> S_OK) then
-          Exit(hr);
+      // Sharpness.
+      hr := dsVideoControl.GetRange(LONG(VideoProcAmp_Sharpness),
+                                    FVideoProps.VideoCtl_Sharpness.prMin,
+                                    FVideoProps.VideoCtl_Sharpness.prMax,
+                                    FVideoProps.VideoCtl_Sharpness.prDelta,
+                                    FVideoProps.VideoCtl_Sharpness.prDefault,
+                                    FVideoProps.VideoCtl_Sharpness.prFlags);
+      if (hr = E_PROP_ID_UNSUPPORTED) then
+        FVideoProps.VideoCtl_Sharpness.IsSupported := False
+      else if (hr <> S_OK) then
+        goto done;
 
-        // Gamma.
-        hr := dsVideoControl.GetRange(LONG(VideoProcAmp_Gamma),
-                                      FVideoProps.VideoCtl_Gamma.prMin,
-                                      FVideoProps.VideoCtl_Gamma.prMax,
-                                      FVideoProps.VideoCtl_Gamma.prDelta,
-                                      FVideoProps.VideoCtl_Gamma.prDefault,
-                                      FVideoProps.VideoCtl_Gamma.prFlags);
-        if (hr = E_PROP_ID_UNSUPPORTED) then
-          FVideoProps.VideoCtl_Gamma.IsSupported := False
-        else if (hr <> S_OK) then
-          Exit(hr);
+      // Gamma.
+      hr := dsVideoControl.GetRange(LONG(VideoProcAmp_Gamma),
+                                    FVideoProps.VideoCtl_Gamma.prMin,
+                                    FVideoProps.VideoCtl_Gamma.prMax,
+                                    FVideoProps.VideoCtl_Gamma.prDelta,
+                                    FVideoProps.VideoCtl_Gamma.prDefault,
+                                    FVideoProps.VideoCtl_Gamma.prFlags);
+      if (hr = E_PROP_ID_UNSUPPORTED) then
+        FVideoProps.VideoCtl_Gamma.IsSupported := False
+      else if (hr <> S_OK) then
+        goto done;
 
-        // ColorEnable.
-        hr := dsVideoControl.GetRange(LONG(VideoProcAmp_ColorEnable),
-                                      FVideoProps.VideoCtl_ColorEnable.prMin,
-                                      FVideoProps.VideoCtl_ColorEnable.prMax,
-                                      FVideoProps.VideoCtl_ColorEnable.prDelta,
-                                      FVideoProps.VideoCtl_ColorEnable.prDefault,
-                                      FVideoProps.VideoCtl_ColorEnable.prFlags);
-        if (hr = E_PROP_ID_UNSUPPORTED) then
-          FVideoProps.VideoCtl_ColorEnable.IsSupported := False
-        else if (hr <> S_OK) then
-          Exit(hr);
+      // ColorEnable.
+      hr := dsVideoControl.GetRange(LONG(VideoProcAmp_ColorEnable),
+                                    FVideoProps.VideoCtl_ColorEnable.prMin,
+                                    FVideoProps.VideoCtl_ColorEnable.prMax,
+                                    FVideoProps.VideoCtl_ColorEnable.prDelta,
+                                    FVideoProps.VideoCtl_ColorEnable.prDefault,
+                                    FVideoProps.VideoCtl_ColorEnable.prFlags);
+      if (hr = E_PROP_ID_UNSUPPORTED) then
+        FVideoProps.VideoCtl_ColorEnable.IsSupported := False
+      else if (hr <> S_OK) then
+        goto done;
 
-        // WhiteBalance.
-        hr := dsVideoControl.GetRange(LONG(VideoProcAmp_WhiteBalance),
-                                      FVideoProps.VideoCtl_WhiteBalance.prMin,
-                                      FVideoProps.VideoCtl_WhiteBalance.prMax,
-                                      FVideoProps.VideoCtl_WhiteBalance.prDelta,
-                                      FVideoProps.VideoCtl_WhiteBalance.prDefault,
-                                      FVideoProps.VideoCtl_WhiteBalance.prFlags);
-        if (hr = E_PROP_ID_UNSUPPORTED) then
-          FVideoProps.VideoCtl_WhiteBalance.IsSupported := False
-        else if (hr <> S_OK) then
-          Exit(hr);
+      // WhiteBalance.
+      hr := dsVideoControl.GetRange(LONG(VideoProcAmp_WhiteBalance),
+                                    FVideoProps.VideoCtl_WhiteBalance.prMin,
+                                    FVideoProps.VideoCtl_WhiteBalance.prMax,
+                                    FVideoProps.VideoCtl_WhiteBalance.prDelta,
+                                    FVideoProps.VideoCtl_WhiteBalance.prDefault,
+                                    FVideoProps.VideoCtl_WhiteBalance.prFlags);
+      if (hr = E_PROP_ID_UNSUPPORTED) then
+        FVideoProps.VideoCtl_WhiteBalance.IsSupported := False
+      else if (hr <> S_OK) then
+        goto done;
 
-        // BacklightCompensation.
-        hr := dsVideoControl.GetRange(LONG(VideoProcAmp_BacklightCompensation),
-                                      FVideoProps.VideoCtl_BacklightCompensation.prMin,
-                                      FVideoProps.VideoCtl_BacklightCompensation.prMax,
-                                      FVideoProps.VideoCtl_BacklightCompensation.prDelta,
-                                      FVideoProps.VideoCtl_BacklightCompensation.prDefault,
-                                      FVideoProps.VideoCtl_BacklightCompensation.prFlags);
-        if (hr = E_PROP_ID_UNSUPPORTED) then
-          FVideoProps.VideoCtl_BacklightCompensation.IsSupported := False
-        else if (hr <> S_OK) then
-          Exit(hr);
+      // BacklightCompensation.
+      hr := dsVideoControl.GetRange(LONG(VideoProcAmp_BacklightCompensation),
+                                    FVideoProps.VideoCtl_BacklightCompensation.prMin,
+                                    FVideoProps.VideoCtl_BacklightCompensation.prMax,
+                                    FVideoProps.VideoCtl_BacklightCompensation.prDelta,
+                                    FVideoProps.VideoCtl_BacklightCompensation.prDefault,
+                                    FVideoProps.VideoCtl_BacklightCompensation.prFlags);
+      if (hr = E_PROP_ID_UNSUPPORTED) then
+        FVideoProps.VideoCtl_BacklightCompensation.IsSupported := False
+      else if (hr <> S_OK) then
+        goto done;
 
-        // Gain.
-        hr := dsVideoControl.GetRange(LONG(VideoProcAmp_Gain),
-                                      FVideoProps.VideoCtl_Gain.prMin,
-                                      FVideoProps.VideoCtl_Gain.prMax,
-                                      FVideoProps.VideoCtl_Gain.prDelta,
-                                      FVideoProps.VideoCtl_Gain.prDefault,
-                                      FVideoProps.VideoCtl_Gain.prFlags);
-        if (hr = E_PROP_ID_UNSUPPORTED) then
-          FVideoProps.VideoCtl_Gain.IsSupported := False
-        else if (hr <> S_OK) then
-          Exit(hr);
-      end
-    else
-      Exit(E_POINTER);
+      // Gain.
+      hr := dsVideoControl.GetRange(LONG(VideoProcAmp_Gain),
+                                    FVideoProps.VideoCtl_Gain.prMin,
+                                    FVideoProps.VideoCtl_Gain.prMax,
+                                    FVideoProps.VideoCtl_Gain.prDelta,
+                                    FVideoProps.VideoCtl_Gain.prDefault,
+                                    FVideoProps.VideoCtl_Gain.prFlags);
+      if (hr = E_PROP_ID_UNSUPPORTED) then
+        FVideoProps.VideoCtl_Gain.IsSupported := False
+      else if (hr <> S_OK) then
+        goto done;
+    end
+  else if (hr = E_NOINTERFACE) then
+    begin
+      hr := S_OK;
+      FVideoProps.IsSupported := False;
+    end;
 
-  except
-    on E: Exception do
-      begin
-        // Let user know an error has been occured.
-        ShowErrorMessage(m_hwnd_MainForm,
-                         'An error occured in function TMfCaptureEngine.GetCameraSettings',
-                         hr);
-      end;
-  end;
+done:
 
   // If no support, just ignore this exept for other errors.
-  if (hr = E_PROP_ID_UNSUPPORTED) then
-    hr := S_OK;
+  if (hr = E_PROP_ID_UNSUPPORTED) or (hr = E_NOINTERFACE) then
+    hr := S_OK
+  else if FAILED(hr) then
+    // Let user know an error has been occured.
+    ShowErrorMessage(m_hwnd_MainForm,
+                     'An error occured in function TMfCaptureEngine.GetCameraSettings',
+                     hr);
+
   Result := hr;
 end;
 
@@ -1955,6 +1966,7 @@ begin
   CameraCtl_Exposure.Initialize();
   CameraCtl_Iris.Initialize();
   CameraCtl_Focus.Initialize();
+  IsSupported := True;
 end;
 
 
@@ -1971,6 +1983,7 @@ begin
   VideoCtl_WhiteBalance.Initialize();
   VideoCtl_BacklightCompensation.Initialize();
   VideoCtl_Gain.Initialize();
+  IsSupported := True;
 end;
 
 end.

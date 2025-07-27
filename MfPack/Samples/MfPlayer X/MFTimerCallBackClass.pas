@@ -10,7 +10,7 @@
 // Release date: 13-08-2019
 // Language: ENU
 //
-// Version: 3.1.6
+// Revision Version: 3.1.8
 // Description: A Timercallback class for the IMFTimer interface.
 //
 // Company: FactoryX
@@ -21,17 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -195,21 +195,18 @@ var
 begin
   hr := S_OK;
 
-try
+
   if not Assigned(MFPresentationClock) then
     begin
-      hr := MF_E_NO_CLOCK;
-      Result := hr;
-      Exit;
+      Exit(MF_E_NO_CLOCK);
     end;
 
   if not Assigned(MfTimer) then
     begin
-      hr := E_POINTER;
-      Result := hr;
-      Exit;
+      Exit(E_POINTER);
     end;
 
+try
   hr := MfTimer.SetTimer(m_TimerFlags, // Absolute or Relative
                          TimerResolution,
                          IMFAsyncCallback(Self),
@@ -236,7 +233,7 @@ try
 
   if (hr = MF_S_CLOCK_STOPPED) then
     begin
-
+      //
     end;
 
  if (hr = MF_E_SHUTDOWN) then

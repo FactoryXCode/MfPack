@@ -10,7 +10,7 @@
 // Release date: 24-06-2023
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description:
 //   Transforms video samples to uncompressed RGB32-samples with pixel-aspect
 //   1x1, optionally changing the frame height (width by aspect), and the frame rate.
@@ -27,17 +27,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -125,7 +125,6 @@ type
   TVideoTransformer = class
   private
     pReader: IMFSourceReader;
-    hrCoInit: HResult;
     fVideoInfo: TVideoInfo;
     pMediaTypeOut: IMFMediaType;
     fNewWidth, fNewHeight: DWord;
@@ -172,7 +171,6 @@ var
   pPartialType: IMFMediaType;
   mfArea: MFVideoArea;
   attribs: IMFAttributes;
-  hrCoInit: HResult;
   hrStartup: HResult;
   pb: PByte;
   FourCC: DWord;
@@ -190,13 +188,6 @@ label
 begin
 
   pReader := nil;
-  hrStartup := E_FAIL;
-
-  hrCoInit := CoInitializeEx(nil,
-                             COINIT_APARTMENTTHREADED);
-  hr := hrCoInit;
-  if FAILED(hr) then
-    goto done;
 
   hrStartup := MFStartup(MF_VERSION);
   hr := hrStartup;
@@ -404,9 +395,6 @@ done:
   if SUCCEEDED(hrStartup) then
     MFShutdown();
 
-  if SUCCEEDED(hrCoInit) then
-    CoUninitialize();
-
   if FAILED(hr) then
     begin
       raise Exception.CreateFmt('%s %s Result: %s. Change your choosen audio settings.',
@@ -435,7 +423,7 @@ label
   done;
 
 begin
-  hr := S_OK;
+
   fInputFile := InputFile;
   fNewHeight := NewHeight;
 
@@ -445,13 +433,17 @@ begin
   else
     fNewFrameRate := NewFrameRate;
 
-  hrCoInit := CoInitializeEx(nil,
-                             COINIT_APARTMENTTHREADED);
 
-  if FAILED(hrCoInit) then
-    goto done;
-
-  MFStartup(MF_VERSION);
+  hr := MFStartup(MF_VERSION);
+  if FAILED(hr) then
+    begin
+      MessageBox(0,
+                 LPCWSTR('Your computer does not support this Media Foundation API version' +
+                         IntToStr(MF_VERSION) + '.'),
+                 LPCWSTR('MFStartup Failure!'),
+                 MB_ICONSTOP);
+      Abort();
+    end;
 
   hr := MFCreateAttributes(attribs,
                            1);
@@ -553,8 +545,6 @@ end;
 destructor TVideoTransformer.Destroy();
 begin
   MFShutdown();
-  if SUCCEEDED(hrCoInit) then
-    CoUninitialize();
   inherited;
 end;
 

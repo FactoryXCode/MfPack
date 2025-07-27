@@ -9,7 +9,7 @@
 // Release date: 21-11-2019
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description:
 //   This application demonstrates using the Media Foundation
 //   source reader to extract decoded audio from an audio/video file.
@@ -31,17 +31,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -173,13 +173,17 @@ begin
   bFlush := False;
   hFile := INVALID_HANDLE_VALUE;
 
-  // Initialize the COM library.
-  hr := CoInitializeEx(nil,
-                       COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE);
-
   // Intialize the Media Foundation platform.
-  if SUCCEEDED(hr) then
-    hr := MFStartup(MF_VERSION);
+  hr := MFStartup(MF_VERSION);
+  if FAILED(hr) then
+    begin
+      MessageBox(0,
+                 LPCWSTR('Your computer does not support this Media Foundation API version' +
+                         IntToStr(MF_VERSION) + '.'),
+                 LPCWSTR('MFStartup Failure!'),
+                 MB_ICONSTOP);
+      Exit(hr);
+    end;
 
   // Create the source reader to read the input file.
   if SUCCEEDED(hr) then

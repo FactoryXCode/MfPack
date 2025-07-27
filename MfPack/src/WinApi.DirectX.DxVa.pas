@@ -10,7 +10,7 @@
 // Release date: 02-10-2015
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: DirectX Video Acceleration (DXVA 2.0) header file.
 //              https://docs.microsoft.com/en-us/windows/win32/medfound/directx-video-acceleration-2-0
 //
@@ -22,17 +22,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release, May 2024 update, 10.0.26100.0
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX317
-// Known Issues: -                                                                                    readDXVA_Cr_11oflow
+// Related projects: MfPackX318
+// Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //

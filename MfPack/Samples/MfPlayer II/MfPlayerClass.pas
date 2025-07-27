@@ -9,7 +9,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: This is the basic class of MfPlayer,
 //              containing the necessary methodes to play a mediafile
 //              For indepth information see the included examples (CPlayer)
@@ -24,17 +24,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -555,10 +555,6 @@ var
 
 begin
   inherited Create();
-  // Get the OS architecture (32 or 64 bit)
-  //ThisOSArchitecture := GetOSArchitecture();
-
-  CoInitializeEx(Nil, COINIT_APARTMENTTHREADED);
 
   if FAILED(MFStartup(MF_VERSION, 0)) then
     begin
@@ -608,7 +604,6 @@ destructor TMfPlayer.Destroy();
 begin
   // Shutdown the Media Foundation platform
   MFShutdown();
-  CoUnInitialize();
   inherited Destroy();
 end;
 
@@ -1001,13 +996,12 @@ try
   if (FAILED(hr)) then
     Abort; //silent exception
 
-  // Set the target window (or control), at this point this is not really
-  // nescesarry, because the previous -MfGetService- did that allready.
-  m_pVideoDisplay.SetVideoWindow(m_hwndVideo);
-
-  // Adjust aspect ratio
   if Assigned(m_pVideoDisplay) then
     begin
+      // Set the target window (or control), at this point this is not really
+      // nescesarry, because the previous -MfGetService- did that allready.
+      m_pVideoDisplay.SetVideoWindow(m_hwndVideo);
+      // Adjust aspect ratio
       ResizeVideo(nil);
     end;
 

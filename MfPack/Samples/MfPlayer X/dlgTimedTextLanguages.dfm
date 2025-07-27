@@ -7,11 +7,9 @@ object DlgTimedTextLanguages: TDlgTimedTextLanguages
   ClientWidth = 287
   Color = clBtnFace
   ParentFont = True
-  OldCreateOrder = True
   Position = poScreenCenter
   OnShow = FormShow
-  PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object butOk: TButton
     Left = 4
     Top = 190

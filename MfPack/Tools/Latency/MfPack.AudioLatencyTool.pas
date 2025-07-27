@@ -9,7 +9,7 @@
 // Release date: 29-05-2024
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 //
 // Description:
 //   Audio latency measuring tool for Windows.
@@ -24,7 +24,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (22H2) or later.
@@ -41,7 +41,7 @@
 // Related projects: MfPack/Tools
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //

@@ -3,7 +3,7 @@ object frmTranscoder: TfrmTranscoder
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
-  Caption = 'MfTranscoder'
+  Caption = 'MfTranscode Sample 1'
   ClientHeight = 151
   ClientWidth = 528
   Color = clBtnFace
@@ -13,10 +13,8 @@ object frmTranscoder: TfrmTranscoder
   Font.Name = 'Tahoma'
   Font.Style = []
   Menu = MainMenu1
-  OldCreateOrder = False
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
-  PixelsPerInch = 96
   TextHeight = 13
   object lblSourceFile: TLabel
     Left = 0
@@ -75,6 +73,8 @@ object frmTranscoder: TfrmTranscoder
     Align = alBottom
     BevelInner = bvLowered
     TabOrder = 2
+    ExplicitTop = 95
+    ExplicitWidth = 522
     object butExecute: TButton
       Left = 6
       Top = 9

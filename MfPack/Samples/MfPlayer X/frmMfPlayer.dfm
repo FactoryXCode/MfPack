@@ -19,14 +19,12 @@ object frm_MfPlayer: Tfrm_MfPlayer
   Font.Style = []
   KeyPreview = True
   Menu = MainMenu1
-  OldCreateOrder = False
   Position = poDesktopCenter
   SnapBuffer = 0
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnKeyUp = FormKeyUp
   OnResize = pnlVideoResize
-  PixelsPerInch = 96
   TextHeight = 13
   object pnlVideo: TPanel
     Left = 0
@@ -198,6 +196,7 @@ object frm_MfPlayer: Tfrm_MfPlayer
       ShowHint = False
       TabOrder = 4
       OnMouseUp = prbProgressMouseUp
+      ExplicitWidth = 721
     end
     object butFullScreen: TButton
       Left = 436

@@ -9,7 +9,7 @@
 // Release date: 08-03-2018
 // Language: ENU
 //
-// Version: 3.1.4
+// Revision Version: 3.1.8
 //
 // Description: Preview window.
 //
@@ -21,17 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -512,24 +512,20 @@ end;
 
 initialization
   // Initialize the COM library
-  if SUCCEEDED(CoInitializeEx(nil,
-                              COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE)) then
 
-    if FAILED(MFStartup(MF_VERSION,
-                        MFSTARTUP_FULL)) then
-      begin
-        MessageBox(0,
-                   lpcwstr('Your computer does not support this Media Foundation API version' +
-                           IntToStr(MF_VERSION) + '.'),
-                   lpcwstr('MFStartup Failure!'),
-                   MB_ICONSTOP);
-      end;
+  if FAILED(MFStartup(MF_VERSION,
+                      MFSTARTUP_FULL)) then
+    begin
+      MessageBox(0,
+                 lpcwstr('Your computer does not support this Media Foundation API version' +
+                         IntToStr(MF_VERSION) + '.'),
+                 lpcwstr('MFStartup Failure!'),
+                 MB_ICONSTOP);
+    end;
 
 
 finalization
   //
   MFShutdown();
-  CoUninitialize();
-
 end.
 

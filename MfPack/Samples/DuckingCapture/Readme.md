@@ -1,5 +1,5 @@
 # DuckingCapture Sample
-Version: X 3.1.7
+Version: X 3.1.8
 
 Description:
   ========================================================================
@@ -16,7 +16,7 @@ NOTES:
  - There are 2 versions of the sample. One that uses the function callback and 
    one that uses the window-callback (as used in the original CPP sample).
  - This release is updated for compiler version 17 up to 35.
- - SDK version: 10.0.26100.0 (Win 11)
+ - SDK version 10.0.22621.4654 (Win 11)
  - Requires Windows 7 or later.
  - Minimum supported MfPack version: 3.1.2
 
@@ -24,6 +24,6 @@ Project: Media Foundation - MFPack - Samples
 Project location: http://sourceforge.net/projects/MFPack
 
 First release date: 05-07-2020
-Final release date: 30-05-2024
+Final release date: 25-07-2025
 
 Copyright © FactoryX. All rights reserved.

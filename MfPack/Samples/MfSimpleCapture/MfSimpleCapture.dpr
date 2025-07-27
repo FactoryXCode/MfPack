@@ -1,6 +1,9 @@
 program MfSimpleCapture;
 
 uses
+  {$IFDEF FASTMM}
+  FastMM4,
+  {$ENDIF }
 
   Vcl.Forms,
   MfDeviceCaptureClass in 'MfDeviceCaptureClass.pas',
@@ -12,7 +15,7 @@ uses
 begin
 
   // Check for memoryleaks (debug mode (F9) only!)
-{$IFDEF DEBUG}
+{$IFNDEF madExcept}
   {$WARN SYMBOL_PLATFORM OFF}
   ReportMemoryLeaksOnShutdown := (DebugHook <> 0);
   {$WARN SYMBOL_PLATFORM ON}

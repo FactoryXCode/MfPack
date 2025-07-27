@@ -8,7 +8,7 @@ object FeMediaEnginePlayer: TFeMediaEnginePlayer
   Caption = 'MePlayer II'
   ClientHeight = 350
   ClientWidth = 674
-  Color = 5197615
+  Color = clDarkslategray
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -151,13 +151,11 @@ object FeMediaEnginePlayer: TFeMediaEnginePlayer
     000000000000000000000000000000000000000000000000000000000000}
   KeyPreview = True
   Menu = MainMenu1
-  OldCreateOrder = False
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnKeyUp = FormKeyUp
   OnResize = FormResize
-  PixelsPerInch = 96
   TextHeight = 13
   object pnlControls: TPanel
     Left = 0
@@ -194,6 +192,8 @@ object FeMediaEnginePlayer: TFeMediaEnginePlayer
     TabOrder = 0
     TabStop = True
     VerticalAlignment = taAlignBottom
+    ExplicitTop = 286
+    ExplicitWidth = 668
     DesignSize = (
       670
       43)
@@ -295,6 +295,7 @@ object FeMediaEnginePlayer: TFeMediaEnginePlayer
       ShowHint = False
       TabOrder = 4
       OnMouseUp = prbProgressMouseUp
+      ExplicitWidth = 662
     end
     object butFullScreen: TButton
       Left = 535
@@ -315,6 +316,7 @@ object FeMediaEnginePlayer: TFeMediaEnginePlayer
       ShowHint = True
       TabOrder = 5
       OnClick = butFullScreenClick
+      ExplicitLeft = 529
     end
     object trbBalance: TTrackBar
       Left = 309
@@ -364,7 +366,7 @@ object FeMediaEnginePlayer: TFeMediaEnginePlayer
     AutoSize = True
     BevelOuter = bvNone
     Caption = 'MePlayer II'
-    Color = 5197615
+    Color = clDarkslategray
     Ctl3D = False
     UseDockManager = False
     DoubleBuffered = True
@@ -382,6 +384,8 @@ object FeMediaEnginePlayer: TFeMediaEnginePlayer
     ShowHint = False
     TabOrder = 1
     TabStop = True
+    ExplicitWidth = 668
+    ExplicitHeight = 286
   end
   object MainMenu1: TMainMenu
     Left = 32

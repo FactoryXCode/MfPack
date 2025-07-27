@@ -18,11 +18,9 @@ object FloatingForm: TFloatingForm
   Font.Height = -16
   Font.Name = 'Arial'
   Font.Style = [fsBold]
-  OldCreateOrder = True
   Position = poDefault
   SnapBuffer = 0
   OnDestroy = FormDestroy
-  PixelsPerInch = 96
   TextHeight = 19
   object lblSubTitle: TLabel
     Left = 0

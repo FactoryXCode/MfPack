@@ -11,10 +11,8 @@ object dlgSelectStreams: TdlgSelectStreams
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = True
   Position = poMainFormCenter
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object butClose: TButton
     Left = 8

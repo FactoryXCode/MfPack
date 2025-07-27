@@ -10,7 +10,7 @@
 // Release date: 01-05-2019
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: Error code definitions for the Win32 API functions.
 //
 // Organisation: FactoryX
@@ -21,18 +21,18 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: When using MfPack, use this unit and not the outdated
 //          Errors code definitions from Embarcadero Delphi <= ver 10.4
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -4567,6 +4567,16 @@ const
   {$EXTERNALSYM ERROR_VOLUME_ROLLBACK_DETECTED}
 
 //
+// MessageId: ERROR_CLOUD_FILE_HYDRATION_NOT_AVAILABLE
+//
+// MessageText:
+//
+// Cloud file cannot be retrieved from your cloud provider. Try again after responding to your cloud provider's request for action.
+//
+  ERROR_CLOUD_FILE_HYDRATION_NOT_AVAILABLE = 523;
+  {$EXTERNALSYM ERROR_CLOUD_FILE_HYDRATION_NOT_AVAILABLE}
+
+//
 // **** Available SYSTEM error codes ****
 //
 //
@@ -4784,7 +4794,7 @@ const
 //
 // MessageText:
 //
-// Indicates that a thread attempted to terminate itself by default (called NtTerminateThread with Nil) and it was the last thread in the current process.
+// Indicates that a thread attempted to terminate itself by default (called NtTerminateThread with Ni); and it was the last thread in the current process.
 //
   ERROR_CANT_TERMINATE_SELF           = 555;
   {$EXTERNALSYM ERROR_CANT_TERMINATE_SELF}
@@ -5968,7 +5978,7 @@ const
 // MessageText:
 //
 // {Too Much Information}
-// The specified access control list (ACL) contained more information than was expected.
+// The specified access control list (AC); contained more information than was expected.
 //
   ERROR_EXTRANEOUS_INFORMATION        = 677;
   {$EXTERNALSYM ERROR_EXTRANEOUS_INFORMATION}
@@ -8225,7 +8235,7 @@ const
 //
 // MessageText:
 //
-// A dynamic link library (DLL) initialization routine failed.
+// A dynamic link library (DL); initialization routine failed.
 //
   ERROR_DLL_INIT_FAILED               = 1114;
   {$EXTERNALSYM ERROR_DLL_INIT_FAILED}
@@ -9504,7 +9514,7 @@ const
 //
 // MessageText:
 //
-// A dynamic link library (DLL) referenced a module that was neither a DLL nor the process's executable image.
+// A dynamic link library (DL); referenced a module that was neither a DLL nor the process's executable image.
 //
   ERROR_INVALID_IMPORT_OF_NON_DLL     = 1276;
   {$EXTERNALSYM ERROR_INVALID_IMPORT_OF_NON_DLL}
@@ -10129,7 +10139,7 @@ const
 //
 // MessageText:
 //
-// The access control list (ACL) structure is invalid.
+// The access control list (AC); structure is invalid.
 //
   ERROR_INVALID_ACL                   = 1336;
   {$EXTERNALSYM ERROR_INVALID_ACL}
@@ -10159,7 +10169,7 @@ const
 //
 // MessageText:
 //
-// The inherited access control list (ACL) or access control entry (ACE) could not be built.
+// The inherited access control list (AC); or access control entry (ACE) could not be built.
 //
   ERROR_BAD_INHERITANCE_ACL           = 1340;
   {$EXTERNALSYM ERROR_BAD_INHERITANCE_ACL}
@@ -16468,6 +16478,16 @@ const
   ERROR_VSM_DMA_PROTECTION_NOT_IN_USE = 4561;
   {$EXTERNALSYM ERROR_VSM_DMA_PROTECTION_NOT_IN_USE}
 
+//
+// MessageId: ERROR_VSM_KEY_CI_POLICY_ROLLBACK_DETECTED
+//
+// MessageText:
+//
+// The Virtual Secure Mode (VSM) master encryption key was not provisioned due to an inadequate CI policy.
+//
+  ERROR_VSM_KEY_CI_POLICY_ROLLBACK_DETECTED = 4562;
+  {$EXTERNALSYM ERROR_VSM_KEY_CI_POLICY_ROLLBACK_DETECTED}
+
 ///////////////////////////////////////////////////
 //                                               //
 //         Platform Manifest Error Codes         //
@@ -19056,6 +19076,43 @@ const
   ERROR_CNU_NOT_READY                 = 6256;
   {$EXTERNALSYM ERROR_CNU_NOT_READY}
 
+
+///////////////////////////////////////////////////
+//                                               //
+//             Camera Error codes                //
+//                                               //
+//                 6350 to 6399                  //
+///////////////////////////////////////////////////
+
+  E_CAMERA_ERROR_MIN = HRESULT($000018CE);
+  {$EXTERNALSYM E_CAMERA_ERROR_MIN}
+
+  E_CAMERA_ERROR_MAX = HRESULT($000018FF);
+  {$EXTERNALSYM E_CAMERA_ERROR_MAX}
+
+
+// IS_CAMERA_ERROR_CODE(xhr)  ((xhr) >= E_CAMERA_ERROR_MIN && (xhr) <= E_CAMERA_ERROR_MAX)
+//
+// MessageId: ERROR_CAMERA_INVALID_CONFIGURATION
+//
+// MessageText:
+//
+// A camera's configuration contains some invalid settings.
+//
+  ERROR_CAMERA_INVALID_CONFIGURATION = 6350;
+  {$EXTERNALSYM ERROR_CAMERA_INVALID_CONFIGURATION}
+
+//
+// MessageId: ERROR_CAMERA_INSUFFICIENT_BANDWIDTH
+//
+// MessageText:
+//
+// A camera interface doesn't have the desired bandwidth for data transfer.
+//
+  ERROR_CAMERA_INSUFFICIENT_BANDWIDTH = 6351;
+  {$EXTERNALSYM ERROR_CAMERA_INSUFFICIENT_BANDWIDTH}
+
+
 ///////////////////////////////////////////////////
 //                                               //
 //                  Available                    //
@@ -20457,6 +20514,16 @@ const
   ERROR_TRANSACTION_NOT_ENLISTED      = 6855;
   {$EXTERNALSYM ERROR_TRANSACTION_NOT_ENLISTED}
 
+//
+// MessageId: ERROR_ENLISTMENT_NOT_INITIALIZED
+//
+// MessageText:
+//
+// The transaction is linked to an enlistment that is not fully initialized yet.
+//
+  ERROR_ENLISTMENT_NOT_INITIALIZED    = 6856;
+  {$EXTERNALSYM ERROR_ENLISTMENT_NOT_INITIALIZED}
+
 
 ///////////////////////////////////////////////////
 //                                               //
@@ -20464,6 +20531,7 @@ const
 //                                               //
 //                 6900 to 6999                  //
 ///////////////////////////////////////////////////
+///
 
 ///////////////////////////////////////////////////
 //                                               //
@@ -26063,7 +26131,7 @@ const
 //
 // MessageText:
 //
-// DNS name is dotted (multi-label).
+// DNS name is dotted (multi-labe);.
 //
   DNS_STATUS_DOTTED_NAME              = 9558;
   {$EXTERNALSYM DNS_STATUS_DOTTED_NAME}
@@ -27254,7 +27322,7 @@ const
 //
 // MessageText:
 //
-// A policy with the same name already exists on this level (server level or zone level) on the DNS server.
+// A policy with the same name already exists on this level (server level or zone leve); on the DNS server.
 //
   DNS_ERROR_POLICY_ALREADY_EXISTS     = 9971;
   {$EXTERNALSYM DNS_ERROR_POLICY_ALREADY_EXISTS}
@@ -27265,7 +27333,7 @@ const
 //
 // MessageText:
 //
-// No policy with this name exists on this level (server level or zone level) on the DNS server.
+// No policy with this name exists on this level (server level or zone leve); on the DNS server.
 //
   DNS_ERROR_POLICY_DOES_NOT_EXIST     = 9972;
   {$EXTERNALSYM DNS_ERROR_POLICY_DOES_NOT_EXIST}
@@ -27844,7 +27912,7 @@ const
 //
 // MessageText:
 //
-// A request to send or receive data was disallowed because the socket is not connected and (when sending on a datagram socket using a sendto call) no address was supplied.
+// A request to send or receive data was disallowed because the socket is not connected and (when sending on a datagram socket using a sendto cal); no address was supplied.
 //
   WSAENOTCONN                         = 10057;
   {$EXTERNALSYM WSAENOTCONN}
@@ -33195,7 +33263,7 @@ const
 //
 // Service is not available while sysprep is running.
 //
-  ERROR_SERVICE_BLOCKED_BY_SYSPREP_IN_PROGRESS= 15673;
+  ERROR_SERVICE_BLOCKED_BY_SYSPREP_IN_PROGRESS = 15673;
   {$EXTERNALSYM ERROR_SERVICE_BLOCKED_BY_SYSPREP_IN_PROGRESS}
 
 //
@@ -33205,8 +33273,48 @@ const
 //
 // The activation failed because the package targets the arm32 architecture, which is no longer supported. Try repairing or reinstalling the application to fix the problem.
 //
-  ERROR_UNSUPPORTED_ARM32_PACKAGE_REQUIRES_REMEDIAITON= 15674;
+  ERROR_UNSUPPORTED_ARM32_PACKAGE_REQUIRES_REMEDIAITON = 15674;
   {$EXTERNALSYM ERROR_UNSUPPORTED_ARM32_PACKAGE_REQUIRES_REMEDIAITON}
+
+//
+// MessageId: ERROR_UUP_PRODUCT_NOT_APPLICABLE
+//
+// MessageText:
+//
+// The product is not applicable or cannot be found.
+//
+  ERROR_UUP_PRODUCT_NOT_APPLICABLE = 15675;
+  {$EXTERNALSYM ERROR_UUP_PRODUCT_NOT_APPLICABLE}
+
+//
+// MessageId: ERROR_BLOCKED_BY_PENDING_PACKAGE_REMOVAL
+//
+// MessageText:
+//
+// The deployment operation on this package is blocked because it or a package in the same family is pending removal. Please log off and log on again to finish the deferred package removal and try again.
+//
+  ERROR_BLOCKED_BY_PENDING_PACKAGE_REMOVAL = 15676;
+  {$EXTERNALSYM ERROR_BLOCKED_BY_PENDING_PACKAGE_REMOVAL}
+
+//
+// MessageId: ERROR_PACKAGE_REPOSITORY_ROOT_CORRUPTED
+//
+// MessageText:
+//
+// The package repository root is corrupted.
+//
+  ERROR_PACKAGE_REPOSITORY_ROOT_CORRUPTED = 15677;
+  {$EXTERNALSYM ERROR_PACKAGE_REPOSITORY_ROOT_CORRUPTED}
+
+//
+// MessageId: ERROR_PACKAGE_MANIFEST_NOT_FOUND
+//
+// MessageText:
+//
+// The package manifest is not found.
+//
+  ERROR_PACKAGE_MANIFEST_NOT_FOUND = 15678;
+  {$EXTERNALSYM ERROR_PACKAGE_MANIFEST_NOT_FOUND}
 
 
 //////////////////////////
@@ -42432,7 +42540,7 @@ const
 //
 // MessageText:
 //
-// The subject was not found in a Certificate Trust List (CTL).
+// The subject was not found in a Certificate Trust List (CT);.
 //
   CRYPT_E_NOT_IN_CTL                  = HRESULT($8009202A);
   {$EXTERNALSYM CRYPT_E_NOT_IN_CTL}
@@ -47567,6 +47675,16 @@ const
   {$EXTERNALSYM MENROLL_E_CUSTOMSERVERERROR}
 
 //
+// MessageId: MENROLL_E_SERVER429
+//
+// MessageText:
+//
+// The server requested that the device try again later.
+//
+  MENROLL_E_SERVER429                 = HRESULT($80180033);
+  {$EXTERNALSYM MENROLL_E_SERVER429}
+
+//
 // FACILITY_WER
 //
 //
@@ -48859,7 +48977,7 @@ const
 //
 // MessageText:
 //
-// Specified VidPN modality is not supported (e.g. at least two of the pinned modes are not cofunctional).
+// Specified VidPN modality is not supported (e.g. at least two of the pinned modes are not cofunctiona);.
 //
   ERROR_GRAPHICS_VIDPN_MODALITY_NOT_SUPPORTED = HRESULT($C0262306);
   {$EXTERNALSYM ERROR_GRAPHICS_VIDPN_MODALITY_NOT_SUPPORTED}
@@ -50642,7 +50760,7 @@ const
 // The TBS errors are slotted into the TCG error namespace at the TBS layer.
 //
 // $0000 - $08ff     TPM hardware errors
-// $4000 - $40ff     TPM Base Services errors (tbssvc.dll)
+// $4000 - $40ff     TPM Base Services errors (tbssvc.dl);
 //
 // The following are the subranges within the TPM Software facility. The TBS
 // has two classes of errors - those that can be returned (the public errors,
@@ -50652,7 +50770,7 @@ const
 //
 // $0000 - $00ff     TPM device driver errors (tpm.sys)
 // $0100 - $01ff     TPM API errors (tpmapi.lib)
-// $0200 - $02ff     TBS internal errors (tbssvc.dll)
+// $0200 - $02ff     TBS internal errors (tbssvc.dl);
 // $0300 - $03ff     TPM Physical Presence errors
 // $0400 - $04ff     TPM vendor specific hardware errors
 // $0500 - $05ff     Misc TPM error codes
@@ -52794,6 +52912,26 @@ const
 //
   TBS_E_PROVISIONING_INCOMPLETE       = HRESULT($80284016);
   {$EXTERNALSYM TBS_E_PROVISIONING_INCOMPLETE}
+
+//
+// MessageId: TBS_E_TPM_IN_EXCLUSIVE_MODE
+//
+// MessageText:
+//
+// The caller is trying to request an operation while the TPM driver has an exclusive context open.
+//
+  TBS_E_TPM_IN_EXCLUSIVE_MODE         = HRESULT($80284017);
+  {$EXTERNALSYM TBS_E_TPM_IN_EXCLUSIVE_MODE}
+
+//
+// MessageId: TBS_E_TPM_REBOOT_REQUIRED
+//
+// MessageText:
+//
+// The TPM driver was previously in exclusive mode and now requires a reboot to resume normal functionality.
+//
+  TBS_E_TPM_REBOOT_REQUIRED           = HRESULT($80284018);
+  {$EXTERNALSYM TBS_E_TPM_REBOOT_REQUIRED}
 
 //
 // TPM API error codes {$0100..$01ff}
@@ -56564,14 +56702,14 @@ const
   {$EXTERNALSYM FVE_E_KEY_ROTATION_NOT_ENABLED}
 
 //
-// MessageId: FVE_E_DEVICE_NOT_JOINED
+// MessageId: FVE_E_DEVICE_NOT_JOINED_AAD
 //
 // MessageText:
 //
 // BitLocker recovery password key rotation could not be performed because the device is neither Azure AD joined nor Hybrid Azure AD joined.
 //
-  FVE_E_DEVICE_NOT_JOINED             = HRESULT($803100E0);
-  {$EXTERNALSYM FVE_E_DEVICE_NOT_JOINED}
+  FVE_E_DEVICE_NOT_JOINED_AAD             = HRESULT($803100E0);
+  {$EXTERNALSYM FVE_E_DEVICE_NOT_JOINED_AAD}
 
 //
 // MessageId: FVE_E_AAD_ENDPOINT_BUSY
@@ -56640,7 +56778,7 @@ const
 //
 // Creating new TPM context is not supported.
 //
-  FVE_E_TPM_CONTEXT_SETUP_NOT_SUPPORTED = HRESULT($803100E7);
+  FVE_E_TPM_CONTEXT_SETUP_NOT_SUPPORTED  = HRESULT($803100E7);
   {$EXTERNALSYM FVE_E_TPM_CONTEXT_SETUP_NOT_SUPPORTED}
 
 //
@@ -56650,28 +56788,28 @@ const
 //
 // The Secure Boot update was not applied due to a known incompatibility with the current BitLocker configuration.
 //
-  FVE_E_UPDATE_INVALID_CONFIG         = HRESULT($803100E8);
+  FVE_E_UPDATE_INVALID_CONFIG            = HRESULT($803100E8);
   {$EXTERNALSYM FVE_E_UPDATE_INVALID_CONFIG}
 
 //
-// MessageId: FVE_E_AAD_SERVER_FAIL_RETRY_AFTER
+// MessageId: FVE_E_AAD_SERVER_FAIL_RETRY_AFTER_AAD
 //
 // MessageText:
 //
 // The AAD request has failed and it has been advised to backoff to prevent throttling. Device will retry soon.
 //
-  FVE_E_AAD_SERVER_FAIL_RETRY_AFTER   = HRESULT($803100E9);
-  {$EXTERNALSYM FVE_E_AAD_SERVER_FAIL_RETRY_AFTER}
+  FVE_E_AAD_SERVER_FAIL_RETRY_AFTER_AAD   = HRESULT($803100E9);
+  {$EXTERNALSYM FVE_E_AAD_SERVER_FAIL_RETRY_AFTER_AAD}
 
 //
-// MessageId: FVE_E_AAD_SERVER_FAIL_BACKOFF
+// MessageId: FVE_E_AAD_SERVER_FAIL_BACKOFF_AAD
 //
 // MessageText:
 //
 // The AAD request has failed due to server issues and it has been advised to backoff to prevent throttling. Device will retry soon.
 //
-  FVE_E_AAD_SERVER_FAIL_BACKOFF       = HRESULT($803100EA);
-  {$EXTERNALSYM FVE_E_AAD_SERVER_FAIL_BACKOFF}
+  FVE_E_AAD_SERVER_FAIL_BACKOFF_AAD       = HRESULT($803100EA);
+  {$EXTERNALSYM FVE_E_AAD_SERVER_FAIL_BACKOFF_AAD}
 
 //
 // MessageId: FVE_E_DATASET_FULL
@@ -56913,6 +57051,85 @@ const
   FVE_E_PCR_BOOT_LOCK_BOUNDARY        = HRESULT($C0310102);
   {$EXTERNALSYM FVE_E_PCR_BOOT_LOCK_BOUNDARY}
 
+//
+// MessageId: FVE_E_EXCEED_MAX_LIMIT_RP_IN_MEID
+//
+// MessageText:
+//
+// We couldn't save your BitLocker recovery information to your Microsoft Entra ID because the maximum number of recovery passwords have already been saved for this device. Please try again later.
+//
+  FVE_E_EXCEED_MAX_LIMIT_RP_IN_MEID  = HRESULT($C0310104);
+  {$EXTERNALSYM FVE_E_EXCEED_MAX_LIMIT_RP_IN_MEID}
+
+//
+// MessageId: FVE_E_HW_ACCELERATED_ENCRYPTION_NOT_ALLOWED
+//
+// MessageText:
+//
+// BitLocker is prevented from using hardware accelerated encryption.
+//
+  FVE_E_HW_ACCELERATED_ENCRYPTION_NOT_ALLOWED = HRESULT($C0310109);
+  {$EXTERNALSYM FVE_E_HW_ACCELERATED_ENCRYPTION_NOT_ALLOWED}
+
+//
+// MessageId: FVE_E_DEVICE_NOT_JOINED
+//
+// MessageText:
+//
+// BitLocker recovery password key rotation could not be performed because the device is neither Entra ID joined nor Hybrid Entra ID joined.
+//
+  FVE_E_DEVICE_NOT_JOINED            = HRESULT($80310110);
+  {$EXTERNALSYM FVE_E_DEVICE_NOT_JOINED}
+
+//
+// MessageId: FVE_E_AAD_SERVER_FAIL_RETRY_AFTER
+//
+// MessageText:
+//
+// The Entra ID request has failed and it has been advised to backoff to prevent throttling. Device will retry soon.
+//
+  FVE_E_AAD_SERVER_FAIL_RETRY_AFTER  = HRESULT($80310111);
+  {$EXTERNALSYM FVE_E_AAD_SERVER_FAIL_RETRY_AFTER}
+
+//
+// MessageId: FVE_E_AAD_SERVER_FAIL_BACKOFF
+//
+// MessageText:
+//
+// The Entra ID request has failed due to server issues and it has been advised to backoff to prevent throttling. Device will retry soon.
+//
+  FVE_E_AAD_SERVER_FAIL_BACKOFF     = HRESULT($80310112);
+  {$EXTERNALSYM FVE_E_AAD_SERVER_FAIL_BACKOFF}
+
+//
+// MessageId: FVE_E_FAILED_TO_UNWRAP_HW_WRAPPED_KEY
+//
+// MessageText:
+//
+// The hardware crypto key manager failed to unwrap a hardware wrapped key.
+//
+  FVE_E_FAILED_TO_UNWRAP_HW_WRAPPED_KEY                = HRESULT($C0310113);
+  {$EXTERNALSYM FVE_E_FAILED_TO_UNWRAP_HW_WRAPPED_KEY}
+
+//
+// MessageId: FVE_E_HARDWARE_CRYPTO_ACCELERATOR_NOT_FIPS_COMPLIANT
+//
+// MessageText:
+//
+// FIPS compliance is required, but the hardware crypto accelerator does not report compliance with this standard.
+//
+  FVE_E_HARDWARE_CRYPTO_ACCELERATOR_NOT_FIPS_COMPLIANT = HRESULT($C0310114);
+  {$EXTERNALSYM FVE_E_HARDWARE_CRYPTO_ACCELERATOR_NOT_FIPS_COMPLIANT}
+
+//
+// MessageId: FVE_E_HARDWARE_CRYPTO_KEY_MANAGER_NOT_FIPS_COMPLIANT
+//
+// MessageText:
+//
+// FIPS compliance is required, but the hardware crypto key manager does not report compliance with this standard.
+//
+  FVE_E_HARDWARE_CRYPTO_KEY_MANAGER_NOT_FIPS_COMPLIANT = HRESULT($C0310115);
+  {$EXTERNALSYM FVE_E_HARDWARE_CRYPTO_KEY_MANAGER_NOT_FIPS_COMPLIANT}
 
 //
 // =======================================================
@@ -65651,7 +65868,7 @@ const
 //
 // MessageText:
 //
-// The Present operation was not visible because the Windows session has switched to another desktop (for example, ctrl-alt-del).
+// The Present operation was not visible because the Windows session has switched to another desktop (for example, ctrl-alt-de);.
 //
   DXGI_STATUS_NO_DESKTOP_ACCESS       = HRESULT($087A0005);
   {$EXTERNALSYM DXGI_STATUS_NO_DESKTOP_ACCESS}
@@ -67311,6 +67528,16 @@ const
   WINCODEC_ERR_INVALIDJPEGSCANINDEX   = HRESULT($88982F96);
   {$EXTERNALSYM WINCODEC_ERR_INVALIDJPEGSCANINDEX}
 
+//
+// MessageId: WINCODEC_ERR_UNSUPPORTEDTONEMAPPING
+//
+// MessageText:
+//
+// The tone mapping mode is not supported.
+//
+  WINCODEC_ERR_UNSUPPORTEDTONEMAPPING = HRESULT($88982F97);
+  {$EXTERNALSYM WINCODEC_ERR_UNSUPPORTEDTONEMAPPING}
+
 
 //
 // MIL/DWM
@@ -67716,6 +67943,176 @@ const
 //
   MILERR_DISPLAYID_ACCESS_DENIED      = HRESULT($889800A1);
   {$EXTERNALSYM MILERR_DISPLAYID_ACCESS_DENIED}
+
+//
+// MessageId: MILERR_DEVICE_CREATION_FAILURE
+//
+// MessageText:
+//
+// DWM failed to create a graphics device.
+//
+  MILERR_DEVICE_CREATION_FAILURE   = HRESULT($889800B0);
+  {$EXTERNALSYM MILERR_DEVICE_CREATION_FAILURE}
+
+//
+// MessageId: MILERR_INTEL_DEVICE_CREATION_FAILURE
+//
+// MessageText:
+//
+// DWM failed to create an Intel graphics device.
+//
+  MILERR_INTEL_DEVICE_CREATION_FAILURE = HRESULT($889800B1);
+  {$EXTERNALSYM MILERR_INTEL_DEVICE_CREATION_FAILURE}
+
+//
+// MessageId: MILERR_AMD_DEVICE_CREATION_FAILURE
+//
+// MessageText:
+//
+// DWM failed to create an AMD graphics device.
+//
+  MILERR_AMD_DEVICE_CREATION_FAILURE = HRESULT($889800B2);
+  {$EXTERNALSYM MILERR_AMD_DEVICE_CREATION_FAILURE}
+
+//
+// MessageId: MILERR_NVIDIA_DEVICE_CREATION_FAILURE
+//
+// MessageText:
+//
+// DWM failed to create an nVidia graphics device.
+//
+  MILERR_NVIDIA_DEVICE_CREATION_FAILURE = HRESULT($889800B3);
+  {$EXTERNALSYM MILERR_NVIDIA_DEVICE_CREATION_FAILURE}
+
+//
+// MessageId: MILERR_QC_DEVICE_CREATION_FAILURE
+//
+// MessageText:
+//
+// DWM failed to create an Qualcomm graphics device.
+//
+  MILERR_QC_DEVICE_CREATION_FAILURE = HRESULT($889800B4);
+  {$EXTERNALSYM MILERR_QC_DEVICE_CREATION_FAILURE}
+
+//
+// MessageId: MILERR_SWAPCHAIN_CREATION_FAILURE
+//
+// MessageText:
+//
+// DWM failed to create a display swap chain.
+//
+  MILERR_SWAPCHAIN_CREATION_FAILURE = HRESULT($889800C0);
+  {$EXTERNALSYM MILERR_SWAPCHAIN_CREATION_FAILURE}
+
+//
+// MessageId: MILERR_INTEL_SWAPCHAIN_CREATION_FAILURE
+//
+// MessageText:
+//
+// DWM failed to create an Intel display swap chain.
+//
+  MILERR_INTEL_SWAPCHAIN_CREATION_FAILURE = HRESULT($889800C1);
+  {$EXTERNALSYM MILERR_INTEL_SWAPCHAIN_CREATION_FAILURE}
+
+//
+// MessageId: MILERR_AMD_SWAPCHAIN_CREATION_FAILURE
+//
+// MessageText:
+//
+// DWM failed to create an AMD display swap chain.
+//
+  MILERR_AMD_SWAPCHAIN_CREATION_FAILURE = HRESULT($889800C2);
+  {$EXTERNALSYM MILERR_AMD_SWAPCHAIN_CREATION_FAILURE}
+
+//
+// MessageId: MILERR_NVIDIA_SWAPCHAIN_CREATION_FAILURE
+//
+// MessageText:
+//
+// DWM failed to create an nVidia display swap chain.
+//
+  MILERR_NVIDIA_SWAPCHAIN_CREATION_FAILURE = HRESULT($889800C3);
+  {$EXTERNALSYM MILERR_NVIDIA_SWAPCHAIN_CREATION_FAILURE}
+
+//
+// MessageId: MILERR_QC_SWAPCHAIN_CREATION_FAILURE
+//
+// MessageText:
+//
+// DWM failed to create a Qualcomm display swap chain.
+//
+  MILERR_QC_SWAPCHAIN_CREATION_FAILURE = HRESULT($889800C4);
+  {$EXTERNALSYM MILERR_QC_SWAPCHAIN_CREATION_FAILURE}
+
+//
+// MessageId: MILERR_IDD_SWAPCHAIN_CREATION_FAILURE
+//
+// MessageText:
+//
+// DWM failed to create an indirect display swap chain.
+//
+  MILERR_IDD_SWAPCHAIN_CREATION_FAILURE = HRESULT($889800C5);
+  {$EXTERNALSYM MILERR_IDD_SWAPCHAIN_CREATION_FAILURE}
+
+//
+// MessageId: MILERR_PRESENT_FAILURE
+//
+// MessageText:
+//
+// DWM failed during present.
+//
+  MILERR_PRESENT_FAILURE           = HRESULT($889800D0);
+  {$EXTERNALSYM MILERR_PRESENT_FAILURE}
+
+//
+// MessageId: MILERR_INTEL_PRESENT_FAILURE
+//
+// MessageText:
+//
+// DWM failed an Intel present.
+//
+  MILERR_INTEL_PRESENT_FAILURE     = HRESULT($889800D1);
+  {$EXTERNALSYM MILERR_INTEL_PRESENT_FAILURE}
+
+//
+// MessageId: MILERR_AMD_PRESENT_FAILURE
+//
+// MessageText:
+//
+// DWM failed an AMD present.
+//
+  MILERR_AMD_PRESENT_FAILURE       = HRESULT($889800D2);
+  {$EXTERNALSYM MILERR_AMD_PRESENT_FAILURE}
+
+//
+// MessageId: MILERR_NVIDIA_PRESENT_FAILURE
+//
+// MessageText:
+//
+// DWM failed an nVidia present.
+//
+  MILERR_NVIDIA_PRESENT_FAILURE    = HRESULT($889800D3);
+  {$EXTERNALSYM MILERR_NVIDIA_PRESENT_FAILURE}
+
+//
+// MessageId: MILERR_QC_PRESENT_FAILURE
+//
+// MessageText:
+//
+// DWM failed a Qualcomm present.
+//
+  MILERR_QC_PRESENT_FAILURE        = HRESULT($889800D4);
+  {$EXTERNALSYM MILERR_QC_PRESENT_FAILURE}
+
+//
+// MessageId: MILERR_IDD_PRESENT_FAILURE
+//
+// MessageText:
+//
+// DWM failed an indirect display present.
+//
+  MILERR_IDD_PRESENT_FAILURE       = HRESULT($889800D5);
+  {$EXTERNALSYM MILERR_IDD_PRESENT_FAILURE}
 
 // Composition engine errors
 //
@@ -70015,8 +70412,8 @@ const
 // The following are subranges within the HSP Software facility.
 //
 // $0000 - $00ff     HSP driver errors (hsp.sys)
-// $0100 - $01ff     HSP base class errors (hspbase.dll)
-// $0200 - $02ff     HSP Key Storage Provider errors (hspksp.dll)
+// $0100 - $01ff     HSP base class errors (hspbase.dll);
+// $0200 - $02ff     HSP Key Storage Provider errors (hspksp.dll);
 //
 // HSP driver errors {$0000..$000ff}
 //
@@ -71971,7 +72368,7 @@ const
 //
 // SQLITE_IOERR_VNODE
 //
-  SQLITE_E_IOERR_VNODE                = HRESULT($87AF1A02);
+  SQLITE_E_IOERR_VNODE                = HRESULT($87AF1B0A);
   {$EXTERNALSYM SQLITE_E_IOERR_VNODE}
 
 //
@@ -71981,8 +72378,68 @@ const
 //
 // SQLITE_IOERR_AUTH
 //
-  SQLITE_E_IOERR_AUTH                 = HRESULT($87AF1A03);
+  SQLITE_E_IOERR_AUTH                 = HRESULT($87AF1C0A);
   {$EXTERNALSYM SQLITE_E_IOERR_AUTH}
+
+//
+// MessageId: SQLITE_E_IOERR_BEGIN_ATOMIC
+//
+// MessageText:
+//
+// SQLITE_IOERR_BEGIN_ATOMIC
+//
+  SQLITE_E_IOERR_BEGIN_ATOMIC         = HRESULT($87AF1D0A);
+  {$EXTERNALSYM SQLITE_E_IOERR_BEGIN_ATOMIC}
+
+//
+// MessageId: SQLITE_E_IOERR_COMMIT_ATOMIC
+//
+// MessageText:
+//
+// SQLITE_IOERR_COMMIT_ATOMIC
+//
+  SQLITE_E_IOERR_COMMIT_ATOMIC        = HRESULT($87AF1E0A);
+  {$EXTERNALSYM SQLITE_E_IOERR_COMMIT_ATOMIC}
+
+//
+// MessageId: SQLITE_E_IOERR_ROLLBACK_ATOMIC
+//
+// MessageText:
+//
+// SQLITE_IOERR_ROLLBACK_ATOMIC
+//
+  SQLITE_E_IOERR_ROLLBACK_ATOMIC      = HRESULT($87AF1F0A);
+  {$EXTERNALSYM SQLITE_E_IOERR_ROLLBACK_ATOMIC}
+
+//
+// MessageId: SQLITE_E_IOERR_DATA
+//
+// MessageText:
+//
+// SQLITE_IOERR_DATA
+//
+  SQLITE_E_IOERR_DATA                 = HRESULT($87AF200A);
+  {$EXTERNALSYM SQLITE_E_IOERR_DATA}
+
+//
+// MessageId: SQLITE_E_IOERR_CORRUPTFS
+//
+// MessageText:
+//
+// SQLITE_IOERR_CORRUPTFS
+//
+  SQLITE_E_IOERR_CORRUPTFS            = HRESULT($87AF210A);
+  {$EXTERNALSYM SQLITE_E_IOERR_CORRUPTFS}
+
+//
+// MessageId: SQLITE_E_IOERR_IN_PAGE
+//
+// MessageText:
+//
+// SQLITE_IOERR_IN_PAGE
+//
+  SQLITE_E_IOERR_IN_PAGE              = HRESULT($87AF220A);
+  {$EXTERNALSYM SQLITE_E_IOERR_IN_PAGE}
 
 //
 // MessageId: SQLITE_E_LOCKED_SHAREDCACHE
@@ -71993,6 +72450,16 @@ const
 //
   SQLITE_E_LOCKED_SHAREDCACHE         = HRESULT($87AF0106);
   {$EXTERNALSYM SQLITE_E_LOCKED_SHAREDCACHE}
+
+//
+// MessageId: SQLITE_E_LOCKED_VTAB
+//
+// MessageText:
+//
+// SQLITE_LOCKED_VTAB
+//
+  SQLITE_E_LOCKED_VTAB                = HRESULT($87AF0206);
+  {$EXTERNALSYM SQLITE_E_LOCKED_VTAB}
 
 //
 // MessageId: SQLITE_E_BUSY_RECOVERY
@@ -72013,6 +72480,16 @@ const
 //
   SQLITE_E_BUSY_SNAPSHOT              = HRESULT($87AF0205);
   {$EXTERNALSYM SQLITE_E_BUSY_SNAPSHOT}
+
+//
+// MessageId: SQLITE_E_BUSY_TIMEOUT
+//
+// MessageText:
+//
+// SQLITE_BUSY_TIMEOUT
+//
+  SQLITE_E_BUSY_TIMEOUT               = HRESULT($87AF0305);
+  {$EXTERNALSYM SQLITE_E_BUSY_TIMEOUT}
 
 //
 // MessageId: SQLITE_E_CANTOPEN_NOTEMPDIR
@@ -72055,6 +72532,26 @@ const
   {$EXTERNALSYM SQLITE_E_CANTOPEN_CONVPATH}
 
 //
+// MessageId: SQLITE_E_CANTOPEN_DIRTYWAL
+//
+// MessageText:
+//
+// SQLITE_E_CANTOPEN_DIRTYWAL
+//
+  SQLITE_E_CANTOPEN_DIRTYWAL          = HRESULT($87AF050E);
+  {$EXTERNALSYM SQLITE_E_CANTOPEN_DIRTYWAL}
+
+//
+// MessageId: SQLITE_E_CANTOPEN_SYMLINK
+//
+// MessageText:
+//
+// SQLITE_E_CANTOPEN_SYMLINK
+//
+  SQLITE_E_CANTOPEN_SYMLINK           = HRESULT($87AF060E);
+  {$EXTERNALSYM SQLITE_E_CANTOPEN_SYMLINK}
+
+//
 // MessageId: SQLITE_E_CORRUPT_VTAB
 //
 // MessageText:
@@ -72063,6 +72560,26 @@ const
 //
   SQLITE_E_CORRUPT_VTAB               = HRESULT($87AF010B);
   {$EXTERNALSYM SQLITE_E_CORRUPT_VTAB}
+
+//
+// MessageId: SQLITE_E_CORRUPT_SEQUENCE
+//
+// MessageText:
+//
+// SQLITE_E_CORRUPT_SEQUENCE
+//
+  SQLITE_E_CORRUPT_SEQUENCE           = HRESULT($87AF020B);
+  {$EXTERNALSYM SQLITE_E_CORRUPT_SEQUENCE}
+
+//
+// MessageId: SQLITE_E_CORRUPT_INDEX
+//
+// MessageText:
+//
+// SQLITE_E_CORRUPT_INDEX
+//
+  SQLITE_E_CORRUPT_INDEX             = HRESULT($87AF030B);
+  {$EXTERNALSYM SQLITE_E_CORRUPT_INDEX}
 
 //
 // MessageId: SQLITE_E_READONLY_RECOVERY
@@ -72103,6 +72620,26 @@ const
 //
   SQLITE_E_READONLY_DBMOVED           = HRESULT($87AF0408);
   {$EXTERNALSYM SQLITE_E_READONLY_DBMOVED}
+
+//
+// MessageId: SQLITE_E_READONLY_CANTINIT
+//
+// MessageText:
+//
+// SQLITE_E_READONLY_CANTINIT
+//
+  SQLITE_E_READONLY_CANTINIT          = HRESULT($87AF0508);
+  {$EXTERNALSYM SQLITE_E_READONLY_CANTINIT}
+
+//
+// MessageId: SQLITE_E_READONLY_DIRECTORY
+//
+// MessageText:
+//
+// SQLITE_E_READONLY_DIRECTORY
+//
+  SQLITE_E_READONLY_DIRECTORY         = HRESULT($87AF0608);
+  {$EXTERNALSYM SQLITE_E_READONLY_DIRECTORY}
 
 //
 // MessageId: SQLITE_E_ABORT_ROLLBACK
@@ -72215,6 +72752,26 @@ const
   {$EXTERNALSYM SQLITE_E_CONSTRAINT_ROWID}
 
 //
+// MessageId: SQLITE_E_CONSTRAINT_PINNED
+//
+// MessageText:
+//
+// SQLITE_CONSTRAINT_PINNED
+//
+  SQLITE_E_CONSTRAINT_PINNED          = HRESULT($87AF0B13);
+  {$EXTERNALSYM SQLITE_E_CONSTRAINT_PINNED}
+
+//
+// MessageId: SQLITE_E_CONSTRAINT_DATATYPE
+//
+// MessageText:
+//
+// SQLITE_CONSTRAINT_DATATYPE
+//
+  SQLITE_E_CONSTRAINT_DATATYPE        = HRESULT($87AF0C13);
+  {$EXTERNALSYM SQLITE_E_CONSTRAINT_DATATYPE}
+
+//
 // MessageId: SQLITE_E_NOTICE_RECOVER_WAL
 //
 // MessageText:
@@ -72235,6 +72792,16 @@ const
   {$EXTERNALSYM SQLITE_E_NOTICE_RECOVER_ROLLBACK}
 
 //
+// MessageId: SQLITE_E_NOTICE_RECOVER_RBU
+//
+// MessageText:
+//
+// SQLITE_NOTICE_RECOVER_RBU
+//
+  SQLITE_E_NOTICE_RECOVER_RBU         = HRESULT($87AF031B);
+  {$EXTERNALSYM SQLITE_E_NOTICE_RECOVER_RBU}
+
+//
 // MessageId: SQLITE_E_WARNING_AUTOINDEX
 //
 // MessageText:
@@ -72243,6 +72810,16 @@ const
 //
   SQLITE_E_WARNING_AUTOINDEX          = HRESULT($87AF011C);
   {$EXTERNALSYM SQLITE_E_WARNING_AUTOINDEX}
+
+//
+// MessageId: SQLITE_E_AUTH_USER
+//
+// MessageText:
+//
+// SQLITE_AUTH_USER
+//
+  SQLITE_E_AUTH_USER                  = HRESULT($87AF0117);
+  {$EXTERNALSYM SQLITE_E_AUTH_USER}
 
 //
 // FACILITY_UTC
@@ -72344,7 +72921,7 @@ const
 //
 // <diagrules> node contains a schemaversion which is not compatible with this client
 //
-  UTC_E_DIAGRULES_SCHEMAVERSION_MISMATCH= HRESULT($87C5100A);
+  UTC_E_DIAGRULES_SCHEMAVERSION_MISMATCH = HRESULT($87C5100A);
 
 //
 // MessageId: UTC_E_SCRIPT_TERMINATED

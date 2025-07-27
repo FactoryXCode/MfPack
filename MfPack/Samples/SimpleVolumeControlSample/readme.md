@@ -1,6 +1,6 @@
 # SimpleVolumeControlSample
 
-Version: X 3.1.7
+Version: X 3.1.8
 
 NOTES:
 
@@ -12,6 +12,8 @@ NOTES:
 
 
 This example shows how to use the MfAudioEndPoint component.
+
+Note that the maximum value of the maximum static DB values () are arbitrary!
 
 
 
@@ -26,7 +28,7 @@ https://sourceforge.net/projects/MFPack
 
 
 First release date: 11-07-2025
-Final release date: 16-07-2025
+Final release date: 25-07-2025
 
 
 

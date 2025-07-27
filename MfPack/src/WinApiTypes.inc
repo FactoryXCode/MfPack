@@ -10,7 +10,7 @@
 // Release date: 04-01-2016
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: Holds compiler definitions for MfPack.
 //
 //
@@ -22,17 +22,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: All future updates (releases) will be named to an artist except for
 //          the major Windows updates. So, we started with ISÁK.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 // Todo: -
 // =============================================================================
 // Source: -
@@ -275,11 +275,6 @@ const
 
 {$DEFINE MFPACK_INC}
 
-// Since Delphi version 2010 DirectShow9 is included
-{$IF CompilerVersion >= 21.0}
-  {$DEFINE DELPHI_DSHOW9_INCLUDED}
-{$ENDIF}
-
 // Since Delphi 2009 POINTERMATH has been introduced.
 // Pointer math is simply treating any given typed pointer in some narrow instances as a
 // scaled ordinal where you can perform simple arithmetic operations directly on the pointer variable.
@@ -378,7 +373,8 @@ const
 // {$DEFINE MFPACK_VERSION_314_UP} // PiL release, update 19.
 // {$DEFINE MFPACK_VERSION_315_UP} // Carmel release, update 20.
 // {$DEFINE MFPACK_VERSION_316_UP} // Morrissey release, update 21.
-{$DEFINE MFPACK_VERSION_317_UP}    // RammStein release, Milestone update 22.
+// {$DEFINE MFPACK_VERSION_317_UP} // RammStein release, Milestone update 22.
+{$DEFINE MFPACK_VERSION_318_UP}    // Ozzy Osbourne release, Milestone update 23.
 
 // WARNINGS
 // enable/disable compiler warnings.

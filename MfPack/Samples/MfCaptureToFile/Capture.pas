@@ -10,7 +10,7 @@
 // Release date: 01-02-2022
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: Manages video capture.
 //              This sample demonstrates how to capture video from camera to a file.
 //
@@ -22,17 +22,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -81,7 +81,8 @@ uses
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfIdl,
   WinApi.MediaFoundationApi.MfObjects,
-  WinApi.MediaFoundationApi.MfReadWrite;
+  WinApi.MediaFoundationApi.MfReadWrite,
+  WinApi.MediaFoundationApi.Evr;
 
 //////////////////////////////////////////////////////////////////////////
 //
@@ -145,6 +146,7 @@ type
     m_hwndEvent: HWND;         // Application window to receive events.
     m_pReader: IMFSourceReader;
     m_pWriter: IMFSinkWriter;
+    m_pVideoDisplay: IMFVideoDisplayControl;    // Video control.
     m_bFirstSample: Boolean;
     m_llBaseTime: LONGLONG;
     m_DeviceFriendlyName: PWideChar;
@@ -373,6 +375,7 @@ end;
 // Sends a message to the owner with corresponding hwnd
 procedure TMfCaptureEngine.NotifyError(hr: HResult);
 begin
+
   PostMessage(m_hwndEvent,
               WM_APP_PREVIEW_ERROR,
               WPARAM(hr),
@@ -386,6 +389,7 @@ var
   pAttributes: IMFAttributes;
 
 begin
+
   hr := MFCreateAttributes(pAttributes,
                            1);
 
@@ -397,6 +401,8 @@ begin
     hr := MFCreateSourceReaderFromMediaSource(pSource,
                                               pAttributes,
                                               m_pReader);
+
+  //
 
   Result := hr;
 end;
@@ -536,6 +542,7 @@ function TMfCaptureEngine.OnFlush(dwStreamIndex: DWORD): HResult; stdcall;
 begin
   Result := S_OK;
 end;
+
 
 function TMfCaptureEngine.OnEvent(dwStreamIndex: DWORD;
                                   pEvent: IMFMediaEvent): HResult; stdcall;

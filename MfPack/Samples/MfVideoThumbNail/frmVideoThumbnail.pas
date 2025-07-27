@@ -10,28 +10,28 @@
 // Release date: 08-07-2012
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: Videothumbnail Mainform
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Renate Schaap.
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.20348.0
+// SDK version: 10.0.20348.4654
 //
 // Todo: -
 //
@@ -260,7 +260,7 @@ begin
       {void} g_pRT.Resize(d2d1su);
 
       InvalidateRect(Form1.Handle,
-                     nil,
+                     Nil,
                      FALSE);
     end;
 end;
@@ -298,15 +298,21 @@ begin
 
   bTerminate := False;
 
-  // We don't need to initialize COM, Delphi Forms Applications will do this by default.
-  //hr := CoInitializeEx(nil,
-  //                     COINIT_APARTMENTTHREADED OR COINIT_DISABLE_OLE1DDE);
 
-  //if (SUCCEEDED(hr)) then
-    // Initialize Media Foundation.
-    hr := MFStartup(MF_VERSION{,
-                    MFSTARTUP_FULL}); // The default is MFSTARTUP_FULL (0), so there is no need to add this parameter.
+  // Initialize Media Foundation.
+  hr := MFStartup(MF_VERSION{,
+                  MFSTARTUP_FULL}); // The default is MFSTARTUP_FULL (0), so there is no need to add this parameter.
 
+  if FAILED(hr) then
+    begin
+      MessageBox(0,
+                 lpcwstr('Your computer does not support this Media Foundation API version' +
+                       IntToStr(MF_VERSION) + '.'),
+                 lpcwstr('MFStartup Failure!'),
+                 MB_ICONSTOP);
+      Abort;
+    end;
+    
   // Set the background color
   BACKGROUND_COLOR := D2D1TColorF($2F4F4F);
 
@@ -345,12 +351,12 @@ begin
 
   if assigned(g_ThumbnailGen) then
     begin
-      FreeAndnil(g_ThumbnailGen);
+      FreeAndNil(g_ThumbnailGen);
     end;
 
   if assigned(g_Timer) then
     begin
-      FreeAndnil(g_Timer);
+      FreeAndNil(g_Timer);
     end;
 
   SafeRelease(g_pRT);
@@ -358,7 +364,7 @@ begin
   for i := 0 to MAX_SPRITES do
     begin
       g_pSprites[i].Clear();
-      FreeAndnil(g_pSprites[i]);
+      FreeAndNil(g_pSprites[i]);
     end;
 
 end;
@@ -390,7 +396,7 @@ begin
               g_pSprites[i].Clear();
             end;
 
-          if (g_pRT = nil) then
+          if (g_pRT = Nil) then
             begin
               // Create the Direct2D resources.
               hr := CreateDrawingResources(Form1.Handle);
@@ -496,18 +502,15 @@ begin
             dchdc);
 end;
 
-
 function DPIScaleX(iValue: Integer): Integer;
 begin
   Result := round(iValue / g_fDPIScaleX);
 end;
 
-
 function DPIScaleY(iValue: Integer): Integer;
 begin
   Result := round(iValue / g_fDPIScaleY);
 end;
-
 
 //-------------------------------------------------------------------
 // UnselectAllSprites: Unselects all sprites.
@@ -564,7 +567,6 @@ begin
   g_Selection := iSelection;
 end;
 
-
 //-------------------------------------------------------------------
 // CreateDrawingResources: Creates Direct2D resources.
 //-------------------------------------------------------------------
@@ -579,8 +581,8 @@ begin
 
   rcClient:= TRect.Empty();
 
-  pFactory := nil;
-  pRenderTarget := nil;
+  pFactory := Nil;
+  pRenderTarget := Nil;
 
   if Not GetClientRect(hw,
                        rcClient) then
@@ -591,7 +593,7 @@ begin
 
   hr := D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED,
                           IID_ID2D1Factory,
-                          nil,
+                          Nil,
                           pFactory);
 
   if (SUCCEEDED(hr)) then
@@ -642,8 +644,8 @@ begin
   if (SUCCEEDED(hr)) then
     begin
 
-      //fTime := round(g_Timer.GetFrameNumber()) / 30;
-      fTime := g_Timer.GetFrameNumber() div 30;
+      fTime := Round(g_Timer.GetFrameNumber()) / 30;
+      //fTime := g_Timer.GetFrameNumber() div 30;
 
       g_pRT.BeginDraw();
 
@@ -652,9 +654,9 @@ begin
       // Update and draw each sprite.
       for i := 0 to MAX_SPRITES do
         begin
-          //pSprite:= nil;
+          //pSprite:= Nil;
           pSprite := g_pSprites[i];
-          if (pSprite <> nil) then
+          if (pSprite <> Nil) then
             begin
                 pSprite.Update(g_pRT,
                                fTime);
@@ -668,7 +670,6 @@ begin
 
   Result := hr;
 end;
-
 
 // Small & big thunmbrects initialization methods
 procedure InitSmallRects();

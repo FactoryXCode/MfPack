@@ -10,7 +10,7 @@
 // Release date: 30-03-2024
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: The XAudio2 renderer class.
 //
 // Company: FactoryX
@@ -21,18 +21,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
-// 06/08/2024                     Added threading and solved some close issues.
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -332,22 +331,27 @@ begin
                               // Convert data to contiguous buffer.
                               hres := sample.ConvertToContiguousBuffer(@buffer);
 
-                              // Lock Buffer and copy to local memory
-                              hres := buffer.Lock(audioData,
-                                                  nil,
-                                                  @audioDataLength);
+                              if SUCCEEDED(hres) then
+                                // Lock Buffer and copy to local memory
+                                hres := buffer.Lock(audioData,
+                                                    nil,
+                                                    @audioDataLength);
 
-                              try
-                                SetLength(pvBytes,
-                                          Length(pvBytes) + Integer(audioDataLength));
+                              if SUCCEEDED(hres) then
+                                try
+                                  SetLength(pvBytes,
+                                            Length(pvBytes) + Integer(audioDataLength));
 
-                                Move(audioData^,
-                                     pvBytes[Length(pvBytes) - Integer(audioDataLength)],
-                                     audioDataLength);
-                              finally
-                                hres := buffer.Unlock();
-                              end;
+                                  Move(audioData^,
+                                       pvBytes[Length(pvBytes) - Integer(audioDataLength)],
+                                       audioDataLength);
+                                finally
+                                  hres := buffer.Unlock();
+                                end;
+
                               SafeRelease(sample);
+                              if FAILED(hres) then
+                                exit;
                             end;
                         end);
 

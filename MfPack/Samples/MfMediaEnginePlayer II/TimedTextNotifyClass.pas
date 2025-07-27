@@ -9,7 +9,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: TimedText callback implementation.
 //
 // Company: FactoryX
@@ -21,18 +21,18 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires WinApi.MediaFoundationApi.MfMetLib.pas version 2.6.4 (or higher) and MfComponents to be installed!
 //          All TimedText interfaces require Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -88,7 +88,7 @@ const
   // SubtitleFileExtensions
    EXT_WEBVTT    = '.vtt';   // See: https://www.w3.org/TR/webvtt1/
    EXT_SUBRIP    = '.srt';
-   EXT_SUBVIEWER = '.sub';   // > not i`mplemented
+   EXT_SUBVIEWER = '.sub';   // > not implemented
    EXT_YOUTUBE   = '.sbv';   // > not implemented
    EXT_SAMI      = '.smi';
 
@@ -106,7 +106,7 @@ type
   TcTimedTextNotify = class(TInterfacedObject, IMFTimedTextNotify)
   private
 
-    gv_url: String;
+    gv_url: string;
     gv_label: PWideChar;
     gv_lang: PWideChar;
     gv_Handle: THandle;  // handle to caller
@@ -175,7 +175,7 @@ type
   public
 
     // Constructor
-    constructor Create(const url: String;
+    constructor Create(const url: string;
                        pclabel: PWideChar;
                        pclang: PWideChar;
                        CallerHandle: HWND); overload;
@@ -201,7 +201,7 @@ type
 implementation
 
 // CONSTRUCTOR
-constructor TcTimedTextNotify.Create(const url: String;
+constructor TcTimedTextNotify.Create(const url: string;
                                      pclabel: PWideChar;
                                      pclang: PWideChar;
                                      CallerHandle: HWND);
@@ -361,7 +361,7 @@ try
                                               dwLength,
                                               fstyle);
 
-                // If fstyle <> Nil or hr <> 0, there are no fontstyle definitions
+                // If fstyle <> nil or hr <> 0, there are no fontstyle definitions
                 if SUCCEEDED(hr) then
                   SetFontProperties(fstyle); // set font properties
                end;
@@ -425,7 +425,7 @@ begin
 
   // Color
   hr := fstyle.GetColor(argb);
-  if Succeeded(hr) then
+  if SUCCEEDED(hr) then
     begin
       CopyMFARGBToTColor(argb, fgColor);
       ttnmsg_Font.Color := fgColor;
@@ -435,7 +435,7 @@ begin
 
   // Bold
   hr := fstyle.GetBold(bbold);
-  if Succeeded(hr) then
+  if SUCCEEDED(hr) then
     begin
       if bbold then
         ttnmsg_Font.Style := ttnmsg_Font.Style + [fsBold]
@@ -447,7 +447,7 @@ begin
 
   // Size
   hr := fstyle.GetFontSize(fSize, fSizeType);
-  if Succeeded(hr) then
+  if SUCCEEDED(hr) then
     begin
       if (fSizeType = MF_TIMED_TEXT_UNIT_TYPE_PIXELS) then
         ttnmsg_Font.Size := Trunc(fSize)
@@ -460,7 +460,7 @@ begin
 
   // Style
   hr := fstyle.GetFontStyle(fttStyle);
-  if Succeeded(hr) then
+  if SUCCEEDED(hr) then
     begin
       if (fttStyle = MF_TIMED_TEXT_FONT_STYLE_NORMAL) then
         ttnmsg_Font.Style := ttnmsg_Font.Style - []
@@ -475,8 +475,8 @@ begin
 
   // Name
   hr := fstyle.GetName(fFontName);
-  if Succeeded(hr) then
-    ttnmsg_Font.Name := String(fFontName)
+  if SUCCEEDED(hr) then
+    ttnmsg_Font.Name := string(fFontName)
   else
     ttnmsg_Font.Name := 'Default';
 
@@ -487,7 +487,7 @@ end;
 // Getters and setters /////////////////////////////////////////////////////////
 function TcTimedTextNotify.GetLiveText(): string;
 begin
-  Result := String(ttLiveText);
+  Result := string(ttLiveText);
 end;
 
 procedure TcTimedTextNotify.SetLiveText(value: string);

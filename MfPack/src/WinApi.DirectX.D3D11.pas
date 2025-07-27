@@ -10,7 +10,7 @@
 // Release date: 13-08-2022
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: Microsoft DirectX D3D11 used by Media Foundation.
 //              You can use Direct3D 11 graphics to create 3-D graphics for games,
 //              scientific and desktop apps.
@@ -23,17 +23,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 19/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Embarcadero's <= Delphi 10.4 D3D11 is outdated!
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -1367,24 +1367,245 @@ type
   {$EXTERNALSYM D3D11_UAV_DIMENSION}
 
   D3D11_USAGE = (
-    D3D11_USAGE_DEFAULT = 0,
+    D3D11_USAGE_DEFAULT   = 0,
     D3D11_USAGE_IMMUTABLE = 1,
-    D3D11_USAGE_DYNAMIC = 2,
-    D3D11_USAGE_STAGING = 3
+    D3D11_USAGE_DYNAMIC   = 2,
+    D3D11_USAGE_STAGING   = 3
     );
   {$EXTERNALSYM D3D11_USAGE}
 
   D3D11_RESOURCE_MISC_FLAG = (
-    D3D11_RESOURCE_MISC_GENERATE_MIPS = UINT($1),
-    D3D11_RESOURCE_MISC_SHARED = UINT($2),
-    D3D11_RESOURCE_MISC_TEXTURECUBE = UINT($4),
-    D3D11_RESOURCE_MISC_DRAWINDIRECT_ARGS = UINT($10),
-    D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS = UINT($20),
-    D3D11_RESOURCE_MISC_BUFFER_STRUCTURED = UINT($40),
-    D3D11_RESOURCE_MISC_RESOURCE_CLAMP = UINT($80),
-    D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX = UINT($100),
-    D3D11_RESOURCE_MISC_GDI_COMPATIBLE = UINT($200));
+    D3D11_RESOURCE_MISC_GENERATE_MIPS                   = UINT($1),
+    D3D11_RESOURCE_MISC_SHARED                          = UINT($2),
+    D3D11_RESOURCE_MISC_TEXTURECUBE                     = UINT($4),
+    D3D11_RESOURCE_MISC_DRAWINDIRECT_ARGS               = UINT($10),
+    D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS          = UINT($20),
+    D3D11_RESOURCE_MISC_BUFFER_STRUCTURED               = UINT($40),
+    D3D11_RESOURCE_MISC_RESOURCE_CLAMP                  = UINT($80),
+    D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX               = UINT($100),
+    D3D11_RESOURCE_MISC_GDI_COMPATIBLE                  = UINT($200),
+    D3D11_RESOURCE_MISC_SHARED_NTHANDLE                 = UINT($800),
+    D3D11_RESOURCE_MISC_RESTRICTED_CONTENT              = UINT($1000),
+    D3D11_RESOURCE_MISC_RESTRICT_SHARED_RESOURCE        = UINT($2000),
+    D3D11_RESOURCE_MISC_RESTRICT_SHARED_RESOURCE_DRIVER = UINT($4000),
+    D3D11_RESOURCE_MISC_GUARDED                         = UINT($8000),
+    D3D11_RESOURCE_MISC_TILE_POOL                       = UINT($20000),
+    D3D11_RESOURCE_MISC_TILED                           = UINT($40000),
+    D3D11_RESOURCE_MISC_HW_PROTECTED                    = UINT($80000),
+    D3D11_RESOURCE_MISC_SHARED_DISPLAYABLE              = UINT($100000),
+    D3D11_RESOURCE_MISC_SHARED_EXCLUSIVE_WRITER         = UINT($200000),
+    D3D11_RESOURCE_MISC_NO_SHADER_ACCESS                = UINT($400000)
+    );
   {$EXTERNALSYM D3D11_RESOURCE_MISC_FLAG}
+
+
+  // =============================================================================" )
+  // In the D3D11_FEATURE_DATA_D3D11_OPTIONS struct below,
+  // the following groupings of capabilities will always be set identically.
+  // That is, all the BOOLs in a grouping will be TRUE or FALSE together.
+  //
+  // Group: DiscardAPIsSeenByDriver, FlagsForUpdateAndCopySeenByDriver
+  //
+  // Group: ClearView, CopyWithOverlap, ConstantBufferPartialUpdate
+  //        ConstantBufferOffsetting, MapNoOverwriteOnDynamicConstantBuffer
+  //
+  // Group: MapNoOverwriteOnDynamicBufferSRV,
+  //        MultisampleRTVWithForcedSampleCountOne
+
+  PD3d11FeatureDataD3d11Options = ^D3D11_FEATURE_DATA_D3D11_OPTIONS;
+  D3D11_FEATURE_DATA_D3D11_OPTIONS = record
+    OutputMergerLogicOp: BOOL;
+    UAVOnlyRenderingForcedSampleCount: BOOL;
+    DiscardAPIsSeenByDriver: BOOL;
+    FlagsForUpdateAndCopySeenByDriver: BOOL;
+    ClearView: BOOL;
+    CopyWithOverlap: BOOL;
+    ConstantBufferPartialUpdate: BOOL;
+    ConstantBufferOffsetting: BOOL;
+    MapNoOverwriteOnDynamicConstantBuffer: BOOL;
+    MapNoOverwriteOnDynamicBufferSRV: BOOL;
+    MultisampleRTVWithForcedSampleCountOne: BOOL;
+    SAD4ShaderInstructions: BOOL;
+    ExtendedDoublesShaderInstructions: BOOL;
+    ExtendedResourceSharing: BOOL;
+  end;
+  {$EXTERNALSYM D3D11_FEATURE_DATA_D3D11_OPTIONS}
+
+  PD3D11_FEATURE_DATA_ARCHITECTURE_INFO = ^D3D11_FEATURE_DATA_ARCHITECTURE_INFO;
+  D3D11_FEATURE_DATA_ARCHITECTURE_INFO = record
+    TileBasedDeferredRenderer: BOOL;
+  end;
+  {$EXTERNALSYM D3D11_FEATURE_DATA_ARCHITECTURE_INFO}
+
+  PD3D11_FEATURE_DATA_D3D9_OPTIONS = ^D3D11_FEATURE_DATA_D3D9_OPTIONS;
+  D3D11_FEATURE_DATA_D3D9_OPTIONS = record
+    FullNonPow2TextureSupport: BOOL;
+  end;
+  {$EXTERNALSYM D3D11_FEATURE_DATA_D3D9_OPTIONS}
+
+
+  PD3D11_FEATURE_DATA_D3D9_SHADOW_SUPPORT = ^D3D11_FEATURE_DATA_D3D9_SHADOW_SUPPORT;
+  D3D11_FEATURE_DATA_D3D9_SHADOW_SUPPORT = record
+    SupportsDepthAsTextureWithLessEqualComparisonFilter: BOOL;
+  end;
+  {$EXTERNALSYM D3D11_FEATURE_DATA_D3D9_SHADOW_SUPPORT}
+
+
+  PD3D11_SHADER_MIN_PRECISION_SUPPORT = ^D3D11_SHADER_MIN_PRECISION_SUPPORT;
+  D3D11_SHADER_MIN_PRECISION_SUPPORT  = (
+    D3D11_SHADER_MIN_PRECISION_10_BIT = $1,
+    D3D11_SHADER_MIN_PRECISION_16_BIT = $2
+  );
+  {$EXTERNALSYM D3D11_SHADER_MIN_PRECISION_SUPPORT}
+
+
+  PD3D11_FEATURE_DATA_SHADER_MIN_PRECISION_SUPPORT = ^D3D11_FEATURE_DATA_SHADER_MIN_PRECISION_SUPPORT;
+  D3D11_FEATURE_DATA_SHADER_MIN_PRECISION_SUPPORT = record
+    PixelShaderMinPrecision: UINT;            // D3D11_SHADER_MIN_PRECISION_SUPPORT flags for PS
+    AllOtherShaderStagesMinPrecision: UINT;   // D3D11_SHADER_MIN_PRECISION_SUPPORT flags for other stages
+  end;
+  {$EXTERNALSYM D3D11_FEATURE_DATA_SHADER_MIN_PRECISION_SUPPORT}
+
+
+  PD3D11_TILED_RESOURCES_TIER = ^D3D11_TILED_RESOURCES_TIER;
+  D3D11_TILED_RESOURCES_TIER            = (
+    D3D11_TILED_RESOURCES_NOT_SUPPORTED = 0,
+    D3D11_TILED_RESOURCES_TIER_1        = 1,
+    D3D11_TILED_RESOURCES_TIER_2        = 2,
+    D3D11_TILED_RESOURCES_TIER_3        = 3
+  );
+  {$EXTERNALSYM D3D11_TILED_RESOURCES_TIER}
+
+
+  PD3D11_FEATURE_DATA_D3D11_OPTIONS1 = ^D3D11_FEATURE_DATA_D3D11_OPTIONS1;
+  D3D11_FEATURE_DATA_D3D11_OPTIONS1 = record
+    TiledResourcesTier: D3D11_TILED_RESOURCES_TIER;
+    MinMaxFiltering: BOOL;
+    ClearViewAlsoSupportsDepthOnlyFormats: BOOL;
+    MapOnDefaultBuffers: BOOL;
+  end;
+  {$EXTERNALSYM D3D11_FEATURE_DATA_D3D11_OPTIONS1}
+
+
+  PD3D11_FEATURE_DATA_D3D9_SIMPLE_INSTANCING_SUPPORT = ^D3D11_FEATURE_DATA_D3D9_SIMPLE_INSTANCING_SUPPORT;
+  D3D11_FEATURE_DATA_D3D9_SIMPLE_INSTANCING_SUPPORT = record
+    SimpleInstancingSupported: BOOL;
+  end;
+  {$EXTERNALSYM D3D11_FEATURE_DATA_D3D9_SIMPLE_INSTANCING_SUPPORT}
+
+
+  PD3D11_FEATURE_DATA_MARKER_SUPPORT = ^D3D11_FEATURE_DATA_MARKER_SUPPORT;
+  D3D11_FEATURE_DATA_MARKER_SUPPORT = record
+    Profile: BOOL;
+  end;
+  {$EXTERNALSYM D3D11_FEATURE_DATA_MARKER_SUPPORT}
+
+
+  PD3D11_FEATURE_DATA_D3D9_OPTIONS1 = ^D3D11_FEATURE_DATA_D3D9_OPTIONS1;
+  D3D11_FEATURE_DATA_D3D9_OPTIONS1 = record
+    FullNonPow2TextureSupported: BOOL;
+    DepthAsTextureWithLessEqualComparisonFilterSupported: BOOL;
+    SimpleInstancingSupported: BOOL;
+    TextureCubeFaceRenderTargetWithNonCubeDepthStencilSupported: BOOL;
+  end;
+  {$EXTERNALSYM D3D11_FEATURE_DATA_D3D9_OPTIONS1}
+
+
+  PD3D11_CONSERVATIVE_RASTERIZATION_TIER = ^D3D11_CONSERVATIVE_RASTERIZATION_TIER;
+  D3D11_CONSERVATIVE_RASTERIZATION_TIER            = (
+    D3D11_CONSERVATIVE_RASTERIZATION_NOT_SUPPORTED = 0,
+    D3D11_CONSERVATIVE_RASTERIZATION_TIER_1        = 1,
+    D3D11_CONSERVATIVE_RASTERIZATION_TIER_2        = 2,
+    D3D11_CONSERVATIVE_RASTERIZATION_TIER_3        = 3
+  );
+  {$EXTERNALSYM D3D11_CONSERVATIVE_RASTERIZATION_TIER}
+
+
+  PD3D11_FEATURE_DATA_D3D11_OPTIONS2 = ^D3D11_FEATURE_DATA_D3D11_OPTIONS2;
+  D3D11_FEATURE_DATA_D3D11_OPTIONS2 = record
+    PSSpecifiedStencilRefSupported: BOOL;
+    TypedUAVLoadAdditionalFormats: BOOL;
+    ROVsSupported: BOOL;
+    ConservativeRasterizationTier: D3D11_CONSERVATIVE_RASTERIZATION_TIER;
+    TiledResourcesTier: D3D11_TILED_RESOURCES_TIER;
+    MapOnDefaultTextures: BOOL;
+    StandardSwizzle: BOOL;
+    UnifiedMemoryArchitecture: BOOL;
+  end;
+  {$EXTERNALSYM D3D11_FEATURE_DATA_D3D11_OPTIONS2}
+
+
+  PD3D11_FEATURE_DATA_D3D11_OPTIONS3 = ^D3D11_FEATURE_DATA_D3D11_OPTIONS3;
+  D3D11_FEATURE_DATA_D3D11_OPTIONS3 = record
+    VPAndRTArrayIndexFromAnyShaderFeedingRasterizer: BOOL;
+  end;
+  {$EXTERNALSYM D3D11_FEATURE_DATA_D3D11_OPTIONS3}
+
+
+  PD3D11_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT = ^D3D11_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT;
+  D3D11_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT = record
+    MaxGPUVirtualAddressBitsPerResource: UINT;
+    MaxGPUVirtualAddressBitsPerProcess: UINT;
+  end;
+  {$EXTERNALSYM D3D11_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT}
+
+
+  PD3D11_SHADER_CACHE_SUPPORT_FLAGS = ^D3D11_SHADER_CACHE_SUPPORT_FLAGS;
+  D3D11_SHADER_CACHE_SUPPORT_FLAGS                    = (
+    D3D11_SHADER_CACHE_SUPPORT_NONE                   = $0,
+    D3D11_SHADER_CACHE_SUPPORT_AUTOMATIC_INPROC_CACHE = $1,
+    D3D11_SHADER_CACHE_SUPPORT_AUTOMATIC_DISK_CACHE   = $2
+  );
+  {$EXTERNALSYM D3D11_SHADER_CACHE_SUPPORT_FLAGS}
+
+
+  PD3D11_FEATURE_DATA_SHADER_CACHE = ^D3D11_FEATURE_DATA_SHADER_CACHE;
+  D3D11_FEATURE_DATA_SHADER_CACHE = record
+    SupportFlags: UINT;
+  end;
+  {$EXTERNALSYM D3D11_FEATURE_DATA_SHADER_CACHE}
+
+
+  PD3D11_SHARED_RESOURCE_TIER = ^D3D11_SHARED_RESOURCE_TIER;
+  D3D11_SHARED_RESOURCE_TIER = (
+    D3D11_SHARED_RESOURCE_TIER_0,
+    D3D11_SHARED_RESOURCE_TIER_1,
+    D3D11_SHARED_RESOURCE_TIER_2,
+    D3D11_SHARED_RESOURCE_TIER_3
+  );
+  {$EXTERNALSYM D3D11_SHARED_RESOURCE_TIER}
+
+
+  PD3D11_FEATURE_DATA_DISPLAYABLE = ^D3D11_FEATURE_DATA_DISPLAYABLE;
+  D3D11_FEATURE_DATA_DISPLAYABLE = record
+    DisplayableTexture: BOOL;
+    SharedResourceTier: D3D11_SHARED_RESOURCE_TIER;
+  end;
+  {$EXTERNALSYM D3D11_FEATURE_DATA_DISPLAYABLE}
+
+
+  {$EXTERNALSYM D3D11_FEATURE_DATA_D3D11_OPTIONS5}
+  D3D11_FEATURE_DATA_D3D11_OPTIONS5 = record
+    SharedResourceTier: D3D11_SHARED_RESOURCE_TIER;
+  end;
+  PD3D11_FEATURE_DATA_D3D11_OPTIONS5 = ^D3D11_FEATURE_DATA_D3D11_OPTIONS5;
+
+
+  PD3D11_SHADER_ACCESS_RESTRICTED_RESOURCE_TIER = ^D3D11_SHADER_ACCESS_RESTRICTED_RESOURCE_TIER;
+  D3D11_SHADER_ACCESS_RESTRICTED_RESOURCE_TIER     = (
+    D3D11_SHADER_ACCESS_RESTRICTED_RESOURCE_TIER_0 = 0,
+    D3D11_SHADER_ACCESS_RESTRICTED_RESOURCE_TIER_1 = 1
+  );
+  {$EXTERNALSYM D3D11_SHADER_ACCESS_RESTRICTED_RESOURCE_TIER}
+
+
+  PD3D11_FEATURE_DATA_D3D11_OPTIONS6 = ^D3D11_FEATURE_DATA_D3D11_OPTIONS6;
+  D3D11_FEATURE_DATA_D3D11_OPTIONS6 = record
+    ShaderAccessRestrictedResourceTier: D3D11_SHADER_ACCESS_RESTRICTED_RESOURCE_TIER;
+  end;
+  {$EXTERNALSYM D3D11_FEATURE_DATA_D3D11_OPTIONS6}
+  TD3d11FeatureDataD3d11Options6 = D3D11_FEATURE_DATA_D3D11_OPTIONS6;
+
 
   D3D11_MAP_FLAG = (
     D3D11_MAP_FLAG_DO_NOT_WAIT = UINT($100000));
@@ -2833,14 +3054,14 @@ type
   ['{DDF57CBA-9543-46E4-A12B-F207A0FE7FED}']
     function GetClassInstance(const pClassInstanceName: LPCSTR;
                               const InstanceIndex: UINT;
-                              out ppInstance: ID3D11ClassInstance): HRESULT; stdcall;
+                              out ppInstance: PID3D11ClassInstance): HRESULT; stdcall;
 
     function CreateClassInstance(const pClassTypeName: LPCSTR;
                                  const ConstantBufferOffset: UINT;
                                  const ConstantVectorOffset: UINT;
                                  const TextureOffset: UINT;
                                  const SamplerOffset: UINT;
-                                 out ppInstance: ID3D11ClassInstance): HRESULT; stdcall;
+                                 out ppInstance: PID3D11ClassInstance): HRESULT; stdcall;
   end;
   IID_ID3D11ClassLinkage = ID3D11ClassLinkage;
   {$EXTERNALSYM IID_ID3D11ClassLinkage}
@@ -2857,13 +3078,32 @@ type
   IID_ID3D11CommandList = ID3D11CommandList;
   {$EXTERNALSYM IID_ID3D11CommandList}
 
+
   D3D11_FEATURE = (
-    D3D11_FEATURE_THREADING = 0,
-    D3D11_FEATURE_DOUBLES = (D3D11_FEATURE_THREADING + 1),
-    D3D11_FEATURE_FORMAT_SUPPORT = (D3D11_FEATURE_DOUBLES + 1),
-    D3D11_FEATURE_FORMAT_SUPPORT2 = (D3D11_FEATURE_FORMAT_SUPPORT + 1),
-    D3D11_FEATURE_D3D10_X_HARDWARE_OPTIONS = (D3D11_FEATURE_FORMAT_SUPPORT2 + 1));
+    D3D11_FEATURE_THREADING                      = 0,
+    D3D11_FEATURE_DOUBLES                        = (D3D11_FEATURE_THREADING + 1),
+    D3D11_FEATURE_FORMAT_SUPPORT                 = (D3D11_FEATURE_DOUBLES + 1),
+    D3D11_FEATURE_FORMAT_SUPPORT2                = (D3D11_FEATURE_FORMAT_SUPPORT + 1),
+    D3D11_FEATURE_D3D10_X_HARDWARE_OPTIONS       = (D3D11_FEATURE_FORMAT_SUPPORT2 + 1),
+    D3D11_FEATURE_ARCHITECTURE_INFO              = (D3D11_FEATURE_D3D10_X_HARDWARE_OPTIONS + 1),
+    D3D11_FEATURE_D3D9_OPTIONS                   = (D3D11_FEATURE_ARCHITECTURE_INFO + 1),
+    D3D11_FEATURE_SHADER_MIN_PRECISION_SUPPORT   = (D3D11_FEATURE_D3D9_OPTIONS + 1),
+    D3D11_FEATURE_D3D9_SHADOW_SUPPORT            = (D3D11_FEATURE_SHADER_MIN_PRECISION_SUPPORT + 1),
+    D3D11_FEATURE_D3D11_OPTIONS1                 = (D3D11_FEATURE_D3D9_SHADOW_SUPPORT + 1),
+    D3D11_FEATURE_D3D9_SIMPLE_INSTANCING_SUPPORT = (D3D11_FEATURE_D3D11_OPTIONS1 + 1),
+    D3D11_FEATURE_MARKER_SUPPORT                 = (D3D11_FEATURE_D3D9_SIMPLE_INSTANCING_SUPPORT + 1),
+    D3D11_FEATURE_D3D9_OPTIONS1                  = (D3D11_FEATURE_MARKER_SUPPORT + 1),
+    D3D11_FEATURE_D3D11_OPTIONS2                 = (D3D11_FEATURE_D3D9_OPTIONS1 + 1),
+    D3D11_FEATURE_D3D11_OPTIONS3                 = (D3D11_FEATURE_D3D11_OPTIONS2 + 1),
+    D3D11_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT    = (D3D11_FEATURE_D3D11_OPTIONS3 + 1),
+    D3D11_FEATURE_D3D11_OPTIONS4                 = (D3D11_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT + 1),
+    D3D11_FEATURE_SHADER_CACHE                   = (D3D11_FEATURE_D3D11_OPTIONS4 + 1),
+    D3D11_FEATURE_D3D11_OPTIONS5                 = (D3D11_FEATURE_SHADER_CACHE + 1),
+    D3D11_FEATURE_DISPLAYABLE                    = (D3D11_FEATURE_D3D11_OPTIONS5 + 1),
+    D3D11_FEATURE_D3D11_OPTIONS6                 = (D3D11_FEATURE_DISPLAYABLE + 1)
+    );
   {$EXTERNALSYM D3D11_FEATURE}
+
 
   D3D11_FEATURE_DATA_THREADING = record
     DriverConcurrentCreates: Bool;
@@ -2906,6 +3146,10 @@ type
   {$EXTERNALSYM ID3D11DeviceContext}
   ID3D11DeviceContext = interface(ID3D11DeviceChild)
   ['{C0BFA96C-E089-44FB-8EAF-26F8796190DA}']
+
+    // !!! Order of functions is in decreasing order of priority ( as far as performance is concerned ) !!!
+    // !!! BEGIN HIGH-FREQUENCY !!!
+
     procedure VSSetConstantBuffers(const StartSlot: UINT;
                                    const NumBuffers: UINT;
                                    [ref] const ppConstantBuffers: PID3D11Buffer); stdcall;
@@ -2915,10 +3159,10 @@ type
                                    [ref] const ppShaderResourceViews: ID3D11ShaderResourceView); stdcall;
 
     procedure PSSetShader(pPixelShader: ID3D11PixelShader;
-                          [ref] const ppClassInstances: PID3D11ClassInstance {A pointer to an array of class-instance interfaces (see ID3D11ClassInstance).
-                                                                              Each interface used by a shader must have a corresponding class instance or the
-                                                                              shader will get disabled.
-                                                                              Set ppClassInstances to nil if the shader does not use any interfaces.};
+                          [ref] const ppClassInstances: PID3D11ClassInstance; // A pointer to an array of class-instance interfaces (see ID3D11ClassInstance).
+                                                                              // Each interface used by a shader must have a corresponding class instance or the
+                                                                              // shader will get disabled.
+                                                                              // Set ppClassInstances to nil if the shader does not use any interfaces.
                           NumClassInstances: UINT); stdcall;
 
     procedure PSSetSamplers(StartSlot: UINT;

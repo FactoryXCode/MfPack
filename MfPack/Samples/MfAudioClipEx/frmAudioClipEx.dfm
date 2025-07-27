@@ -14,12 +14,10 @@ object AudioClipExFrm: TAudioClipExFrm
   Font.Name = 'Tahoma'
   Font.Style = []
   Menu = MainMenu1
-  OldCreateOrder = False
   Position = poDesktopCenter
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnMouseMove = FormMouseMove
-  PixelsPerInch = 96
   TextHeight = 13
   object lblGetSourceFile: TLabel
     Left = 17

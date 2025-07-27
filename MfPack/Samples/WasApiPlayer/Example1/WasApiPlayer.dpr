@@ -4,10 +4,7 @@ uses
   Vcl.Forms,
   MainFrm in 'MainFrm.pas' {MainForm},
   Tools in 'Tools.pas',
-  Vcl.Themes,
-  Vcl.Styles,
-  WASAPIEngine in 'WASAPIEngine.pas',
-  UniThreadTimer in 'UniThreadTimer.pas';
+  WASAPIEngine in 'WASAPIEngine.pas';
 
 {$R *.res}
 

@@ -13,11 +13,9 @@ object FrmMain: TFrmMain
   Font.Style = []
   KeyPreview = True
   Menu = MainMenu1
-  OldCreateOrder = True
   Position = poScreenCenter
   OnCreate = HandleFormCreate
   OnDestroy = HandleFormDestroy
-  PixelsPerInch = 96
   TextHeight = 13
   object pnlTop: TPanel
     Left = 0
@@ -26,6 +24,7 @@ object FrmMain: TFrmMain
     Height = 265
     Align = alTop
     TabOrder = 0
+    ExplicitWidth = 988
     DesignSize = (
       994
       265)
@@ -88,13 +87,14 @@ object FrmMain: TFrmMain
     object edtVideoFile: TEdit
       Left = 73
       Top = 24
-      Width = 650
+      Width = 656
       Height = 21
       Anchors = [akLeft, akTop, akRight]
       TabOrder = 0
+      ExplicitWidth = 650
     end
     object btnBrowse: TButton
-      Left = 729
+      Left = 735
       Top = 20
       Width = 75
       Height = 25
@@ -102,19 +102,21 @@ object FrmMain: TFrmMain
       Caption = 'Browse...'
       TabOrder = 1
       OnClick = HandleBrowseClick
+      ExplicitLeft = 729
     end
     object memLog: TMemo
       Left = 73
       Top = 51
-      Width = 899
+      Width = 905
       Height = 102
       Anchors = [akLeft, akTop, akRight]
       ReadOnly = True
       ScrollBars = ssVertical
       TabOrder = 2
+      ExplicitWidth = 899
     end
     object btnClearLog: TButton
-      Left = 897
+      Left = 903
       Top = 159
       Width = 75
       Height = 25
@@ -122,20 +124,22 @@ object FrmMain: TFrmMain
       Caption = 'Clear Log'
       TabOrder = 3
       OnClick = HandleClearLogClick
+      ExplicitLeft = 897
     end
     object tbVideoPosition: TTrackBar
       Left = 63
       Top = 214
-      Width = 909
+      Width = 915
       Height = 45
       Anchors = [akLeft, akTop, akRight]
       Max = 1000000
       PageSize = 1
       TabOrder = 4
       OnChange = HandleTrackbarChange
+      ExplicitWidth = 909
     end
     object btnClose: TButton
-      Left = 895
+      Left = 901
       Top = 20
       Width = 77
       Height = 25
@@ -143,9 +147,10 @@ object FrmMain: TFrmMain
       Caption = 'Close Video'
       TabOrder = 5
       OnClick = HandleCloseVideoClick
+      ExplicitLeft = 895
     end
     object btnOpen: TButton
-      Left = 814
+      Left = 820
       Top = 20
       Width = 75
       Height = 25
@@ -153,6 +158,7 @@ object FrmMain: TFrmMain
       Caption = 'Open Video'
       TabOrder = 6
       OnClick = HandleOpenClick
+      ExplicitLeft = 814
     end
     object spAccuracy: TSpinEdit
       Left = 249
@@ -189,7 +195,7 @@ object FrmMain: TFrmMain
         'Asynchronous')
     end
     object btnSaveImage: TButton
-      Left = 800
+      Left = 806
       Top = 159
       Width = 75
       Height = 25
@@ -197,27 +203,31 @@ object FrmMain: TFrmMain
       Caption = 'Save Image'
       TabOrder = 10
       OnClick = HandleSaveImageClick
+      ExplicitLeft = 800
     end
   end
   object pnlFrameCapture: TPanel
     Left = 0
     Top = 265
     Width = 994
-    Height = 475
+    Height = 465
     Align = alClient
     Caption = 'No Image. Waiting frame capture...'
     TabOrder = 1
+    ExplicitWidth = 988
+    ExplicitHeight = 448
     object picFrame: TImage
       Left = 1
       Top = 1
       Width = 992
-      Height = 473
+      Height = 463
       Align = alClient
       AutoSize = True
       Center = True
       Proportional = True
       ExplicitLeft = 2
       ExplicitTop = 0
+      ExplicitHeight = 473
     end
   end
   object fdOpenVideo: TOpenDialog

@@ -9,7 +9,7 @@
 // Release date: 24-04-2019
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: This player version is based on the IMFMediaEngine and
 //              the TimedText interfaces for subtitles.
 //
@@ -22,17 +22,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -199,17 +199,17 @@ procedure TFeMediaEnginePlayer.CreateSubTitleLayer(bShowCustomText: Boolean);
 begin
   // Create the FloatingForm
   if (FloatingForm = nil) then
-    FloatingForm:= TFloatingForm.Create(Self);
+    FloatingForm := TFloatingForm.Create(Self);
 
   // Get it's handle
-  ph_FloatingForm:= FloatingForm.Handle;
+  ph_FloatingForm := FloatingForm.Handle;
 
   // Initial size and position
   SetParentRect();
 
   // Initial text before subtitling starts (Optional)
   // This can be any message
-  if (bShowCustomText = true) then
+  if (bShowCustomText = True) then
     begin
       // Text
       FloatingForm.SubtitleText := 'Mediafile ' +
@@ -339,7 +339,7 @@ var
   crD: TRect;
 
 begin
-  if (prbProgress <> Nil) then
+  if (prbProgress <> nil) then
     prbProgress.Max:= prbProgress.Width;
 
   // Set video size
@@ -362,7 +362,7 @@ begin
       // you need to call this function first!
       gi_MediaEngine.FlushPlayer();
       gi_MediaEngine.Free;
-      gi_MediaEngine := Nil;
+      gi_MediaEngine := nil;
       Result := S_OK;
     end
   else
@@ -468,6 +468,7 @@ begin
   Close();
 end;
 
+
 procedure TFeMediaEnginePlayer.muOpenClick(Sender: TObject);
 var
   hr: HResult;
@@ -491,7 +492,7 @@ begin
     begin
 
       hr := gi_MediaEngine.OpenURL(PWideChar(dlgOpenUrl.Filename));
-      if Succeeded(hr) then
+      if SUCCEEDED(hr) then
         CreateSubTitleLayer(True);
     end
   else // User pressed cancel
@@ -508,9 +509,9 @@ var
 begin
 
   if (X <= 0) then
-    fPos:= 0.0
+    fPos := 0.0
   else
-    fPos:= ((X / prbProgress.Width) * gi_MediaEngine.pu_Duration);
+    fPos := ((X / prbProgress.Width) * gi_MediaEngine.pu_Duration);
 
   hr := gi_MediaEngine.SetPosition(fPos); // set new StartPosition
 
@@ -618,8 +619,8 @@ begin
   //       So, if hitting Play, the file will start at position 0.0
   //       See explanation at method gi_MediaEngine.Stop()
   {void} gi_MediaEngine.Stop();
-  mnuTakeScreenshot.Enabled:= False;
-  prbProgress.Position:= 0;
+  mnuTakeScreenshot.Enabled := False;
+  prbProgress.Position := 0;
 end;
 
 
@@ -630,9 +631,9 @@ var
 begin
   if Assigned(gi_MediaEngine) then
     begin
-      bchecked:= cbMute.Checked;
-      if Succeeded(gi_MediaEngine.Mute(bchecked)) then
-        cbMute.Checked:= bchecked;
+      bchecked := cbMute.Checked;
+      if SUCCEEDED(gi_MediaEngine.Mute(bchecked)) then
+        cbMute.Checked := bchecked;
     end;
 end;
 
@@ -642,13 +643,13 @@ begin
   CanClose := False;
   if Assigned(gi_MediaEngine) then
     begin
-      if Succeeded(ReleaseEngine()) then
+      if SUCCEEDED(ReleaseEngine()) then
         CanClose := True
       else
         MessageBox(0,
-                 LPCWSTR('Unable to release the MediaEngine.'),
-                 LPCWSTR('Error!'),
-                 MB_ICONEXCLAMATION);
+                   LPCWSTR('Unable to release the MediaEngine.'),
+                   LPCWSTR('Error!'),
+                   MB_ICONEXCLAMATION);
     end;
 
   CanClose := True;
@@ -657,9 +658,9 @@ end;
 
 procedure TFeMediaEnginePlayer.OnMeTimerUpdate(var message: TMessage);
 begin
-  if Not Assigned(gi_MediaEngine) then
+  if not Assigned(gi_MediaEngine) then
     Exit;
-  if gi_MediaEngine.pu_Duration > 0 then
+  if (gi_MediaEngine.pu_Duration > 0) then
     begin
       prbProgress.Position := Trunc((prbProgress.Width / gi_MediaEngine.pu_Duration) *
                                     gi_MediaEngine.pu_CurrPosition);
@@ -671,7 +672,7 @@ procedure TFeMediaEnginePlayer.FormCreate(Sender: TObject);
 begin
   pb_IsFullScreen := False;
   // Initial aspectratio is 16:9
-  smSixteenByNineClick(Nil);
+  smSixteenByNineClick(nil);
   ForceResize();
 end;
 

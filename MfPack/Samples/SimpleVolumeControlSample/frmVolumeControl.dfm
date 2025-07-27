@@ -90,8 +90,9 @@ object VolumeControl: TVolumeControl
   end
   object MfAudioEndPoint1: TMfAudioEndPoint
     DeviceState = 'Active'
-    MasterScalarVolume = 0.680000007152557400
+    MasterScalarVolume = 0.683802247047424300
     MasterDbVolume = -5.764730453491211000
+    Mute = True
     OnNotify = MfAudioEndPoint1Notify
     Left = 446
     Top = 142

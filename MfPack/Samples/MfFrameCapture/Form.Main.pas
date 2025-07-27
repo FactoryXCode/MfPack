@@ -10,7 +10,7 @@
 // Release date: 22-09-2021
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 //
 // Description:
 //   This unit is the application mainform.
@@ -23,16 +23,16 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX317/Samples/MFFrameCapture
+// Related projects: MfPackX318/Samples/MFFrameCapture
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -195,8 +195,6 @@ uses
 
 procedure TFrmMain.HandleFormCreate(Sender: TObject);
 begin
-  CoInitializeEx(Nil,
-                 COINIT_APARTMENTTHREADED);
 
   FFrequency := 0;
   FCaptureStart := 0;
@@ -230,7 +228,6 @@ begin
   CloseSource;
   DestroyCapture;
   MFShutdown();
-  CoUnInitialize();
 end;
 
 
@@ -429,6 +426,7 @@ end;
 procedure TFrmMain.GetVideoFrame;
 var
   oRequestedFramePosition: TTimeSpan;
+
 begin
   if FCapture.SourceOpen then
     begin
@@ -484,13 +482,13 @@ end;
 
 procedure TFrmMain.BeginBusy;
 begin
-  if FCaptureMethod = cmSync then
+  if (FCaptureMethod = cmSync) then
     Screen.Cursor := crHourGlass;
 end;
 
 procedure TFrmMain.EndBusy;
 begin
-  if FCaptureMethod = cmSync then
+  if (FCaptureMethod = cmSync) then
     Screen.Cursor := crDefault;
 end;
 
@@ -573,7 +571,7 @@ end;
 procedure TFrmMain.ClearImage;
 begin
   pnlFrameCapture.Caption := 'No Image. Waiting frame capture...';
-  picFrame.Picture := Nil;
+  picFrame.Picture := nil;
 end;
 
 end.

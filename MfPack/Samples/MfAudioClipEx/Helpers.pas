@@ -10,7 +10,7 @@
 // Release date: 21-12-2019
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 //
 // Description:
 //   Common helper methods.
@@ -23,17 +23,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -137,20 +137,6 @@ var
   hr: HResult;
 
 begin
-  // Initialize the COM library.
-  hr := CoInitializeEx(Nil,
-                       COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE);
-
-
-  if FAILED(hr) then
-    begin
-      MessageBox(0,
-                 LPCWSTR('COM library initialisation failure.'),
-                 LPCWSTR('COM Failure!'),
-                 MB_ICONSTOP);
-      Abort();
-    end;
-
 
   // Intialize the Media Foundation platform and
   // check if the current MF version match user's version
@@ -173,8 +159,6 @@ function CloseMF(): HResult;
 begin
   // Shutdown MF
   Result := MFShutdown();
-  // Shutdown COM
-  CoUninitialize();
 end;
 
 

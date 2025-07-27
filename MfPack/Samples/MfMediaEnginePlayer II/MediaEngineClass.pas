@@ -9,7 +9,7 @@
 // Release date: 05-01-2016
 // Language: ENU
 //
-// Revision Version: 3.1.7
+// Revision Version: 3.1.8
 // Description: This class uses the IMFMediaEngine based on HTML 5 and
 //              the TimedText interfaces for subtitles.
 //
@@ -22,17 +22,17 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release  SDK 10.0.26100.0 (Windows 11)
+// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX317
+// Related projects: MfPackX318
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
-// SDK version: 10.0.26100.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //
@@ -182,7 +182,7 @@ type
     pr_MediaEngine: IMFMEdiaEngineEx;
 
     // Creates an instance of the Media Engine.
-    // Note: Before using this interface, CoInitializeEx and MFStartup should be initialized.
+    // Note: Before using this interface, MFStartup should be initialized.
     // On Delphi visual (VCL Forms Application) applications, CoInitialize(Ex) is called by default,
     // so, there is no need to call this function.
     // To get a pointer to this interface, call CoCreateInstance.
@@ -251,7 +251,9 @@ type
 
     // Queries the Media Engine to find out whether a new video frame is ready.
     function GetVideoStreamTick(out lstrtick: LongLong): HResult;
-    function GetVideoFrame(SourceRect: TRectF; DestRecr: TRect; var wicbmp: IWICBitmap): HResult;
+    function GetVideoFrame(SourceRect: TRectF;
+                           DestRecr: TRect;
+                           var wicbmp: IWICBitmap): HResult;
 
     function GetTimedTextInterface(url: string;
                                    fExt: string;
@@ -311,7 +313,7 @@ try
 
   // IMFMediaEngineClassFactory
   // Creates an instance of the Media Engine.
-  // Note: Before using this interface, CoInitializeEx and MFStartup should be initialized.
+  // Note: Before using this interface, MFStartup should be initialized.
   // To get a pointer to this interface, call CoCreateInstance.
   // The class identifier is CLSID_MFMediaEngineClassFactory.
   //
@@ -565,7 +567,7 @@ begin
     Exit;
 
   // Request handlers
-  if pt_RequestMsg <> rMsgNone then
+  if (pt_RequestMsg <> rMsgNone) then
 
   case pt_RequestMsg of
     rMsgSetVolume:       begin
@@ -575,10 +577,10 @@ begin
                            hr := pr_MediaEngine.SetBalance(pr_Balance);
                          end;
     rMsgUpdateVideoStream: begin
-                           hr := pr_MediaEngine.UpdateVideoStream(Nil,
-                                                                  @pt_rcpdest,
-                                                                  Nil);
-                         end;
+                             hr := pr_MediaEngine.UpdateVideoStream(nil,
+                                                                    @pt_rcpdest,
+                                                                    nil);
+                           end;
     rMsgFlush:           begin
                            hr := pr_MediaEngine.Shutdown();
                            goto doexit;
@@ -780,8 +782,8 @@ var
   eEvent: MfMediaEngineEvent;
 
 begin
-  hr:= S_OK;
-  eEvent:= MfMediaEngineEvent(event);
+  hr := S_OK;
+  eEvent := MfMediaEngineEvent(event);
 
   case eEvent of
     // The Media Engine has started to load the source. See: IMFMediaEngine.Load.
@@ -965,7 +967,7 @@ begin
     begin
       hr := pr_MediaEngine.OnVideoStreamTick(llstrtick);
 
-      if Succeeded(hr) then
+      if SUCCEEDED(hr) then
         lstrtick := llstrtick
       else
         lstrtick := -1;
@@ -979,7 +981,9 @@ begin
 end;
 
 
-function TcMediaEngine.GetVideoFrame(SourceRect: TRectF; DestRecr: TRect; var wicbmp: IWICBitmap): HResult;
+function TcMediaEngine.GetVideoFrame(SourceRect: TRectF;
+                                     DestRecr: TRect;
+                                     var wicbmp: IWICBitmap): HResult;
 var
   lrStrTick: LongLong;
   vMFARGB: MFARGB;
@@ -993,7 +997,7 @@ begin
       hr := pr_MediaEngine.OnVideoStreamTick(lrStrTick);
    // end;
 
-  if Succeeded(hr) then
+  if SUCCEEDED(hr) then
     begin
       vMFARGB.rgbBlue  := 0;
       vMFARGB.rgbGreen := 0;
@@ -1007,7 +1011,7 @@ begin
                                               vMFARGB);
     end;
 
-  if Succeeded(hr) then
+  if SUCCEEDED(hr) then
     begin
 
     end;
@@ -1060,8 +1064,8 @@ begin
 
      // Create the TimedText callback interface
      pr_TimedTextNotify := TcTimedTextNotify.Create(pwstxtUrl,
-                                                    Nil,
-                                                    Nil,
+                                                    nil,
+                                                    nil,
                                                     pt_hwndCaller);
 
      if not Assigned(pr_TimedTextNotify) then
@@ -1151,11 +1155,14 @@ begin
   // Get the subtitles, if no file exists, continue.
   if (sSubtitleExt = '')  then
     begin
-      if FileExists(ChangeFileExt(pwURL, EXT_WEBVTT)) then
+      if FileExists(ChangeFileExt(pwURL,
+                                  EXT_WEBVTT)) then
         sSubtitleExt := EXT_WEBVTT
-      else if FileExists(ChangeFileExt(pwURL, EXT_SUBRIP)) then
+      else if FileExists(ChangeFileExt(pwURL,
+                                       EXT_SUBRIP)) then
         sSubtitleExt := EXT_SUBRIP
-      else if FileExists(ChangeFileExt(pwURL, EXT_SUBRIP)) then
+      else if FileExists(ChangeFileExt(pwURL,
+                                       EXT_SUBRIP)) then
         sSubtitleExt := EXT_SUBRIP
       else
         sSubtitleExt := '';
@@ -1349,7 +1356,7 @@ var
   hr: HResult;  //debug purpose
 
 begin
-  hr:= E_NOINTERFACE;
+  hr := E_NOINTERFACE;
 try
 
   pt_CritSec.Enter;
@@ -1371,10 +1378,11 @@ try
 
       // Start repaint again
       SetRedraw();
+      hr := S_OK;
     end;
 finally
   pt_CritSec.Leave;
-  Result:= hr;
+  Result := hr;
 end;
 end;
 
@@ -1384,12 +1392,8 @@ var
   hr: HResult;
 
 begin
-  // Initialize the COM library.
-  // Note: Delphi Form Applications initialize com by default.
-  //hr := CoInitializeEx(Nil,
-  //                     COINIT_APARTMENTTHREADED or COINIT_DISABLE_OLE1DDE);
 
-  // Intialize the Media Foundation platform and
+  // Initialize the Media Foundation platform and
   // check if the current MF version match user's version
   hr := MFStartup(MF_VERSION);
 
