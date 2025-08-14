@@ -21,8 +21,6 @@ object frmMain: TfrmMain
     Height = 21
     Panels = <>
     SimplePanel = True
-    ExplicitTop = 579
-    ExplicitWidth = 938
   end
   object PageControl1: TPageControl
     Left = 0
@@ -41,8 +39,6 @@ object frmMain: TfrmMain
     Style = tsButtons
     TabOrder = 1
     OnChanging = PageControl1Changing
-    ExplicitWidth = 938
-    ExplicitHeight = 579
     object TabSheet1: TTabSheet
       Caption = 'Render Options'
       Font.Charset = DEFAULT_CHARSET
@@ -147,7 +143,7 @@ object frmMain: TfrmMain
       end
       object lblCodecInfo: TLabel
         Left = 530
-        Top = 71
+        Top = 69
         Width = 381
         Height = 100
         Anchors = []
@@ -162,8 +158,6 @@ object frmMain: TfrmMain
         ParentFont = False
         Transparent = False
         WordWrap = True
-        ExplicitLeft = 529
-        ExplicitTop = 66
       end
       object Label17: TLabel
         Left = 418
@@ -178,22 +172,6 @@ object frmMain: TfrmMain
         Font.Name = 'Arial'
         Font.Style = []
         ParentFont = False
-      end
-      object Label7: TLabel
-        Left = 77
-        Top = 178
-        Width = 91
-        Height = 15
-        Hint = 'Decrease for speed, increase if video stutters'
-        Caption = 'Encoding priority'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -12
-        Font.Name = 'Arial'
-        Font.Style = []
-        ParentFont = False
-        ParentShowHint = False
-        ShowHint = True
       end
       object cbxFileFormat: TComboBox
         Left = 175
@@ -393,21 +371,6 @@ object frmMain: TfrmMain
           Font.Style = []
           ParentFont = False
         end
-        object Label6: TLabel
-          Left = 476
-          Top = 20
-          Width = 454
-          Height = 15
-          Caption = 
-            'Only seems to work with input .wav and AAC, FLAC fails in pSinkw' +
-            'riter.WriteSample.'
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -12
-          Font.Name = 'Arial'
-          Font.Style = []
-          ParentFont = False
-        end
         object cbxAudioCodec: TComboBox
           Left = 169
           Top = 17
@@ -480,32 +443,13 @@ object frmMain: TfrmMain
         TabOrder = 7
         OnClick = chbxAddAudioClick
       end
-      object spedSetEncodePriority: TSpinEdit
-        Left = 174
-        Top = 175
-        Width = 43
-        Height = 24
-        Hint = 'Decrease for speed, increase if video stutters'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -12
-        Font.Name = 'Arial'
-        Font.Style = []
-        MaxValue = 20
-        MinValue = 0
-        ParentFont = False
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 8
-        Value = 2
-      end
       object btnAdvancedOptions: TButton
         Left = 290
-        Top = 174
+        Top = 144
         Width = 129
         Height = 25
         Caption = 'Advanced options'
-        TabOrder = 9
+        TabOrder = 8
         OnClick = btnAdvancedOptionsClick
       end
     end
@@ -993,7 +937,7 @@ object frmMain: TfrmMain
             Margins.Bottom = 5
             Align = alClient
             Flat = False
-            ItemHeight = 17
+            ItemHeight = 14
             ParentShowHint = False
             ShowHint = True
             TabOrder = 0

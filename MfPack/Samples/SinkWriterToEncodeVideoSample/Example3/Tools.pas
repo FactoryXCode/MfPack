@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 13/08/2025 Renate              Fixed some threading and timing issues.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.

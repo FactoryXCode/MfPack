@@ -383,10 +383,10 @@ begin
   sgAudioFormats.ColCount := 5;
   sgAudioFormats.RowCount := 1;
 
-  sgAudioFormats.ColWidths[0] := 100; // kbps
-  sgAudioFormats.ColWidths[1] := 100; // Khz
-  sgAudioFormats.ColWidths[2] := 100; // Bits per sample
-  sgAudioFormats.ColWidths[3] := 100; // Channels
+  // sgAudioFormats.ColWidths[0] := 100; // kbps
+  // sgAudioFormats.ColWidths[1] := 100; // Khz
+  // sgAudioFormats.ColWidths[2] := 100; // Bits per sample
+  // sgAudioFormats.ColWidths[3] := 100; // Channels
   sgAudioFormats.ColWidths[4] := -1;  // Hide last column
 
   // List compression formats.

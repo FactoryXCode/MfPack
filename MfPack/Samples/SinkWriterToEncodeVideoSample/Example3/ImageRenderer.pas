@@ -22,13 +22,14 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 08/08/2025 Renate Schaaf       Got rid of global media-buffer variables. Timing, speed and quality improvement.
+// 09/08/2025 Renate Schaaf       Audio fixes: Compressed audio-input now works, no more crashes on repeated rendering
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
 // Related projects: MfPackX318
-// Known Issues: -
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.26100.4654
@@ -185,7 +186,7 @@ const
     DisableThrottling: false;
     DisableQualityBasedEncoding: false;
     DisableGOPSize: false;
-    ResamplingThreadsLimit: 4
+    ResamplingThreadsLimit: 16
     );
 
 
@@ -200,7 +201,6 @@ type
     fFrameRateNumerator: UINT32;
     fFrameRateDenominator: UINT32;
     fQuality: DWord;
-    fEncodePriority: Word;
     fAdvancedOptions: TEncoderAdvancedOptions;
 
     fSampleDuration: DWord;
@@ -213,8 +213,6 @@ type
     pAudioTypeIn: IMFMediaType;
     pAudioTypeOut: IMFMediaType;
 
-    pSampleBuffer: IMFMediaBuffer;
-    pSampleBufferAudio: IMFMediaBuffer;
     fBufferSizeVideo: DWord;
     fBufferSizeAudio: DWord;
     fstreamIndex: DWord;
@@ -235,7 +233,6 @@ type
     { /fields needed to set up the MF-Sinkwriter }
 
     fWriteStart: Int64;
-    fReadAhead: Int64;
     fInitialized: Boolean;
     fWriteAudio: Boolean;
     fAudioStart: int64;
@@ -259,7 +256,7 @@ type
                            crop: Boolean);
 
     // Move the RGBA-pixels into an MF sample buffer
-    procedure bmRGBAToSampleBuffer(const bm: TBitmap);
+    procedure bmRGBAToSampleBuffer(const bm: TBitmap; aMediaBuffer: IMFMediaBuffer);
 
     // Encode one frame to video stream and the corresponding audio samples to audio stream
     function WriteOneFrame(TimeStamp: Int64;
@@ -273,8 +270,6 @@ type
 
     function GetSilenceBufferSize(Duration: Int64): DWord;
 
-    function GetAudioDuration(PCMSamples: DWord): int64;
-
   public
     constructor Create();
     destructor Destroy(); override;
@@ -286,7 +281,6 @@ type
     /// <param name="Quality">Quality of the video encoding on a scale of 1 to 100</param>
     /// <param name="FrameRate">Frame rate in frames per second. Value >= 30 recommended. </param>
     /// <param name="VideoCodec">Video codec enum for encoding. Presently ciH264 or ciH265 </param>
-    /// <param name="EncodePriority">Value by which to slow down frame generation to grant more time to the encoder. 2 or 3 prevents stuttering</param>
     /// <param name="VideoCodec">Video codec enum for encoding. Presently H264 or H265 </param>
     /// param name="PicturePresentationTime">Defines the duration of the image in the video.</param>
     /// <param name="AudioFileName">Optional audio or video file (.wav, .mp3, .aac, .mp4 etc.), audio stream encoded as AAC. Default ''</param>
@@ -298,7 +292,6 @@ type
                         VideoCodec: TCodecID;
                         DestAudioFormat: TMFAudioFormat;
                         Resampler: TFilter = cfBicubic;
-                        EncodePriority: word = 2;
                         PicturePresentationTime: Int64 = 4000;  // Default 4000 milliseconds = 4 seconds.
                         AudioDuration: Int64 = 0;
                         const AudioFileName: string = '';
@@ -459,18 +452,12 @@ begin
 end;
 
 
-function TImageRenderer.GetAudioDuration(PCMSamples: DWord): Int64;
-begin
-  Result := Trunc(PCMSamples / fDestAudioFormat.unSamplesPerSec * 1000 * 10000);
-end;
-
 
 function TImageRenderer.Initialize(const OutputFilename: string;
                                    Quality: UInt32;
                                    VideoCodec: TCodecID;
                                    DestAudioFormat: TMFAudioFormat;
                                    Resampler: TFilter = cfBicubic;
-                                   EncodePriority: word = 2;
                                    PicturePresentationTime: Int64 = 4000;  // Default 4000 milliseconds = 4 seconds.
                                    AudioDuration: Int64 = 0;
                                    const AudioFileName: string = '';
@@ -533,7 +520,6 @@ begin
   fQuality := Quality;
   fFilter := Resampler;
   fCodec := VideoCodec;
-  fEncodePriority := EncodePriority;
 
   // Calculate the average time/frame
   // Time is measured in units of 100 nanoseconds. 1 sec = 1000 * 10000 time-units
@@ -574,10 +560,7 @@ begin
   // By default, the sink writer's IMFSinkWriter.WriteSample method limits the data rate by
   // blocking the calling thread.
   // This prevents the application from delivering samples too quickly.
-  // To disable this behavior, set the MF_SINK_WRITER_DISABLE_THROTTLING attribute
-  // to TRUE when you create the sink writer.
-  // The value of fEncodePriority futher slows down sample generation.
-  // Without it stuttering of video can still happen.
+  // Disabling is not recommended, it can lead to memory corruption.
   hr := pContainerAttributes.SetUInt32(MF_SINK_WRITER_DISABLE_THROTTLING,
                                        UInt32(fAdvancedOptions.DisableThrottling));
   if FAILED(hr) then
@@ -732,10 +715,10 @@ begin
       if FileExists(fSrcAudioFileName) then
         begin
         // Copy given audio format struct.
-        CopyMemory(@fDestAudioFormat,
-                   @DestAudioFormat,
-                   SizeOf(TMFAudioFormat));
-
+//        CopyMemory(@fDestAudioFormat,
+//                   @DestAudioFormat,
+//                   SizeOf(TMFAudioFormat));
+        fDestAudioFormat:=DestAudioFormat; //addref seems to be better
         hr := InitAudio();
         if FAILED(hr) then
           goto done;
@@ -762,8 +745,7 @@ begin
     goto done;
 
   fBufferSizeVideo := pStride * fVideoHeight;
-  hr := MFCreateMemoryBuffer(fBufferSizeVideo,
-                             pSampleBuffer);
+
   if FAILED(hr) then
     goto done;
 
@@ -773,12 +755,12 @@ done:
   Result := hr;
 end;
 
-
 function TImageRenderer.InitAudioSourceReader(): HResult;
 var
   hr: HResult;
-  pSrcTypes: TArray<IMFMediaType>;
-  dwCount: DWORD;
+  //pSrcTypes: TArray<IMFMediaType>;
+  //dwCount: DWORD;
+  pPartialType: IMFMediaType;
 
 begin
   // Create a source-reader to read the audio file.
@@ -794,17 +776,38 @@ begin
     // Ensure the audio stream is selected.
     hr := pAudioSourceReader.SetStreamSelection(fAudioStreamIndex,
                                                 True);
+// not needed anymore
+//  if SUCCEEDED(hr) then
+//    // Enumerate and check vsupported mediatype(s)
+//    hr := EnumerateMediaTypes(pAudioSourceReader,
+//                              fAudioStreamIndex,
+//                              pSrcTypes,
+//                              dwCount);
+
+    // Create a partial uncompressed media type with the specs the reader should decode to
   if SUCCEEDED(hr) then
-    // Enumerate and check vsupported mediatype(s)
-    hr := EnumerateMediaTypes(pAudioSourceReader,
-                              fAudioStreamIndex,
-                              pSrcTypes,
-                              dwCount);
+    hr := MFCreateMediaType(pPartialType);
+  if SUCCEEDED(hr) then
+    hr := pPartialType.SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
+  if SUCCEEDED(hr) then
+    hr := pPartialType.SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
+  if SUCCEEDED(hr) then
+    hr := pPartialType.SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE, fDestAudioFormat.unBitsPerSample);
+  if SUCCEEDED(hr) then
+    hr := pPartialType.SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
+    fDestAudioFormat.unSamplesPerSec);
+  if SUCCEEDED(hr) then
+    hr := pPartialType.SetUINT32(MF_MT_AUDIO_NUM_CHANNELS, fDestAudioFormat.unChannels);
+  if SUCCEEDED(hr) then
+    hr := pPartialType.SetUINT32(MF_MT_ALL_SAMPLES_INDEPENDENT,
+    Uint32(true));
+
+
 
   if SUCCEEDED(hr) then
     hr := pAudioSourceReader.SetCurrentMediaType(fAudioStreamIndex,
                                                  0,
-                                                 pSrcTypes[0]);
+                                                 pPartialType);
 
   if SUCCEEDED(hr) then
     // Read the full uncompressed input type from the reader.
@@ -823,10 +826,61 @@ begin
 end;
 
 
+
+//function TImageRenderer.InitAudioSourceReaderOriginal(): HResult;
+//var
+//  hr: HResult;
+//  pSrcTypes: TArray<IMFMediaType>;
+//  dwCount: DWORD;
+//
+//begin
+//  // Create a source-reader to read the audio file.
+//  hr := MFCreateSourceReaderFromURL(StrToPWideChar(fSrcAudioFileName),
+//                                    nil,
+//                                    pAudioSourceReader);
+//  if SUCCEEDED(hr) then
+//    // Prevent memory leak if the the audiofile contains more than 1 stream.
+//    hr := pAudioSourceReader.SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS,
+//                                                False);
+//
+//  if SUCCEEDED(hr) then
+//    // Ensure the audio stream is selected.
+//    hr := pAudioSourceReader.SetStreamSelection(fAudioStreamIndex,
+//                                                True);
+//  if SUCCEEDED(hr) then
+//    // Enumerate and check vsupported mediatype(s)
+//    hr := EnumerateMediaTypes(pAudioSourceReader,
+//                              fAudioStreamIndex,
+//                              pSrcTypes,
+//                              dwCount);
+//
+//  //!RS This does not seem to set an uncompressed media type
+//
+//  if SUCCEEDED(hr) then
+//    hr := pAudioSourceReader.SetCurrentMediaType(fAudioStreamIndex,
+//                                                 0,
+//                                                 pSrcTypes[0]);
+//
+//  if SUCCEEDED(hr) then
+//    // Read the full uncompressed input type from the reader.
+//    // pAudioTypeIn is the returned media type.
+//    hr := pAudioSourceReader.GetCurrentMediaType(fAudioStreamIndex,
+//                                                 pAudioTypeIn);
+//
+//  {$IFDEF DEBUG}
+//    {$IFDEF SAVE_DEBUG_REPORT}
+//      FMediaTypeDebug.LogMediaType(pAudioTypeIn, 'pAudioTypeIn');
+//      FMediaTypeDebug.SafeAllDebugResultsToOneFile('pAudioTypeIn.txt');
+//    {$ENDIF}
+//  {$ENDIF}
+//
+//  Result := hr;
+//end;
+
+
 function TImageRenderer.InitAudio(): HResult;
 var
   hr: HResult;
-  pData: PByte;
 
 const
   ProcName = 'TImageRenderer.InitAudio';
@@ -855,11 +909,7 @@ begin
   if FAILED(hr) then
     goto done;
 
-  // Create the encoded media type (AAC stereo with the specified sample- and bit-rates)
-  // We set it up independent of the input type. In a future version we want to
-  // add more than one audio file, so the input type should be allowed to change,
-  // but not the output type.
-  // So far it seems to work OK with one audio file.
+
   hr := MFCreateMediaType(pAudioTypeOut);
   if FAILED(hr) then
     goto done;
@@ -887,7 +937,6 @@ begin
   if FAILED(hr) then
     goto done;
 
-  // Set the number of audio channels. Hardwired to stereo, can be different from input format.
   hr := pAudioTypeOut.SetUINT32(MF_MT_AUDIO_NUM_CHANNELS,
                                 fDestAudioFormat.unChannels);
   if FAILED(hr) then
@@ -959,7 +1008,7 @@ begin
                                     pAudioTypeIn,
                                     nil);
 
-  // Set up an audio buffer holding silence which we can add to the audio stream as necessary
+  // Set up the buffer size for a buffer to add silence to the audio stream
   hr := pAudioTypeIn.GetUInt32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
                                fAudioBytesPerSecond);
   if FAILED(hr) then
@@ -971,39 +1020,12 @@ begin
     goto done;
 
 
-  // Create an audio-buffer that holds silence.
   // The buffer should hold audio for the video frame time.
   fBufferSizeAudio := GetSilenceBufferSize(fSampleDuration);
 
-  hr := MFCreateMemoryBuffer(fBufferSizeAudio,  // Amount of memory to allocate, in bytes.
-                             pSampleBufferAudio);
   if FAILED(hr) then
     goto done;
 
-  hr := pSampleBufferAudio.Lock(pData,
-                                nil,
-                                nil);
-  if FAILED(hr) then
-    goto done;
-
-  FillChar(pData^,
-           fBufferSizeAudio,
-           0);
-
-  // Prevent crack at beginnning of silence.
-  PByteArray(pData)[2] := $06;
-
-  // Update the current length.
-  hr := pSampleBufferAudio.SetCurrentLength(fBufferSizeAudio);
-  if FAILED(hr) then
-    goto done;
-
-  hr := pSampleBufferAudio.Unlock();
-  if FAILED(hr) then
-    goto done;
-
-  // Set the amount of time we read ahead of the video-timestamp in the audio-file.
-  fReadAhead := fAudioBlockAlign * GetAudioDuration(1024);
 
 done:
   Result := hr;
@@ -1020,6 +1042,9 @@ begin
     end;
   if Assigned(pAudioSourceReader) then
     SafeRelease(pAudioSourceReader);
+
+  pSinkWriter:=nil;
+  pAudioSourceReader:=nil;
 
   fInitialized := false;
 end;
@@ -1063,7 +1088,6 @@ begin
                        fBmRGBA,
                        crop);
 
-          bmRGBAToSampleBuffer(fBmRGBA);
 
           WriteOneFrame(VideoStart + TimeStamp,
                         Duration);
@@ -1086,7 +1110,6 @@ begin
   BitmapToRGBA(bm,
                fBmRGBA,
                crop);
-  bmRGBAToSampleBuffer(fBmRGBA);
 
   WriteOneFrame(fWriteStart,
                 fSampleDuration);
@@ -1114,15 +1137,10 @@ begin
         while (fWriteStart < (iStartTime + aImageDuration * 10000)) do
           begin
             bmBuf.Assign(fBmRGBA);
-            if (fFrameCount mod fBrake) = (fBrake - 1) then
-            begin
-              //Same slowdown as in Freeze
-              HandleThreadMessages(GetCurrentThread(), 1);
-              Sleep(fEncodePriority);
-            end;
-            bmRGBAToSampleBuffer(bmBuf);
+
             WriteOneFrame(fWriteStart,
                           fSampleDuration);
+            fbmRGBA.Assign(bmBuf);
           end;
       finally
         bmBuf.Free;
@@ -1130,7 +1148,6 @@ begin
     end
   else
     begin
-      bmRGBAToSampleBuffer(fBmRGBA);
       Freeze(aImageDuration);
     end;
 end;
@@ -1268,7 +1285,7 @@ begin
 end;
 
 
-procedure TImageRenderer.bmRGBAToSampleBuffer(const bm: TBitmap);
+procedure TImageRenderer.bmRGBAToSampleBuffer(const bm: TBitmap; aMediaBuffer: IMFMediaBuffer);
 var
   hr: HResult;
   pRow: PByte;
@@ -1303,7 +1320,7 @@ begin
     end;
 
   StrideTarget := 4 * fVideoWidth;
-  hr := pSampleBuffer.Lock(pData,
+  hr := aMediaBuffer.Lock(pData,
                            nil,
                            nil);
 
@@ -1317,12 +1334,11 @@ begin
                         fVideoHeight  // Image height in pixels.
                        );
 
-    if Assigned(pSampleBuffer) then
-      pSampleBuffer.Unlock();
+      aMediaBuffer.Unlock();
 
     if SUCCEEDED(hr) then
       // Set the data length of the buffer.
-      hr := pSampleBuffer.SetCurrentLength(fBufferSizeVideo);
+      hr := aMediaBuffer.SetCurrentLength(fBufferSizeVideo);
   end;
 
   if not SUCCEEDED(hr) then
@@ -1336,11 +1352,11 @@ end;
 constructor TImageRenderer.Create();
 begin
   inherited Create();
-  // Leave enough processors for the encoding threads.
+  // Leave at least 2 processors for the encoding threads.
   fAdvancedOptions:=_DefaultAdvancedOptions;
 
   fThreadPool.Initialize(Min(fAdvancedOptions.ResamplingThreadsLimit,
-                             TThread.ProcessorCount div 2),
+                             TThread.ProcessorCount -2),
                          tpNormal);
 
   fBmRGBA := TBitmap.Create;
@@ -1520,7 +1536,7 @@ begin
         for Index := 0 to fThreadPool.ThreadCount - 1 do
           fThreadPool.ResamplingThreads[Index].Done.WaitFor(INFINITE);
 
-        bmRGBAToSampleBuffer(bmTween);
+        fbmRGBA.Assign(bmTween);
         WriteOneFrame(fWriteStart,
                       fSampleDuration);
       end;
@@ -1550,7 +1566,7 @@ const
 begin
   hr := S_OK;
   // If audio is present write audio samples up to the Video-timestamp + fReadAhead.
-  while ((fAudioTime + fAudioStart) < (TimeStamp + fReadAhead)) and (not fAudioDone) do
+  while ((fAudioTime + fAudioStart) < (TimeStamp)) and (not fAudioDone) do
 
     begin
       // pull a sample out of the audio source reader
@@ -1631,10 +1647,10 @@ var
   hr: HResult;
   pSample: IMFSample;
   pSampleAudio: IMFSample;
-  i: DWord;
-  imax: DWord;
   DoAbort: Boolean;
-
+  pSampleBufferLoc: IMFMediaBuffer;
+  pSampleBufferAudio: IMFMediaBuffer;
+  pData: pByte;
 const
   ProcName = 'TImageRenderer.WriteOneFrame';
 
@@ -1654,54 +1670,81 @@ begin
     begin
 
       if (TimeStamp < fAudioStart) then
-        // write silence to the audio stream
+        // write silence to the audio stream at TimeStamp
+        // We no longer use global memory buffers.
+        // they are created and filled locally for thread-safety
         begin
-          if (TimeStamp = 0) then
-            imax := 2
-          else
-            imax := 0;
+          hr := MFCreateSample(pSampleAudio);
+          if FAILED(hr) then
+          goto done;
 
-          for i := 0 to imax do
-            begin
-              hr := MFCreateSample(pSampleAudio);
-              if FAILED(hr) then
-                goto done;
+          hr:= MFCreateMemoryBuffer(fBufferSizeAudio,pSampleBufferAudio);
+          if FAILED(hr) then
+            goto done;
 
-              hr := pSampleAudio.AddBuffer(pSampleBufferAudio);
-              if FAILED(hr) then
-                goto done;
+          hr:=pSampleBufferAudio.Lock(pData,
+                                           nil,
+                                           nil);
+          if FAILED(hr) then
+            goto done;
 
-              // Write silence to the sinkwriter for 2 video frame durations ahead.
-              hr := pSampleAudio.SetSampleTime(TimeStamp + (2 - imax + i) * Duration);
-              if FAILED(hr) then
-                goto done;
+          FillChar(pData^,
+                   fBufferSizeAudio,
+                   0);
+              // prevent crack at beginnning of silence
+          PByteArray(pData)[2] := $06;
 
-              hr := pSampleAudio.SetSampleDuration(Duration);
-              if FAILED(hr) then
-                goto done;
+          hr := pSampleBufferAudio.Unlock;
+          if FAILED(hr) then
+            goto done;
+          hr := pSampleBufferAudio.SetCurrentLength(fBufferSizeAudio);
+          if FAILED(hr) then
+            goto done;
 
-              hr := pSinkWriter.WriteSample(fAudioSinkWriterStreamIndex,
+          hr := pSampleAudio.AddBuffer(pSampleBufferAudio);
+          if FAILED(hr) then
+            goto done;
+
+              // Write silence to the sinkwriter for 1 video frame duration.
+          hr := pSampleAudio.SetSampleTime(TimeStamp);
+          if FAILED(hr) then
+           goto done;
+
+          hr := pSampleAudio.SetSampleDuration(Duration);
+          if FAILED(hr) then
+            goto done;
+
+          hr := pSinkWriter.WriteSample(fAudioSinkWriterStreamIndex,
                                             pSampleAudio);
-              if FAILED(hr) then
-                goto done;
-
-              hr := pSampleBufferAudio.SetCurrentLength(fBufferSizeAudio);
-              if FAILED(hr) then
-                goto done;
-
-              SafeRelease(pSampleAudio);
-            end;
+          if FAILED(hr) then
+            goto done;
+          SafeRelease(pSampleBufferAudio);
+          SafeRelease(pSampleAudio);
         end
-      else if (TimeStamp >= fAudioTime + fAudioStart - fReadAhead) and (not fAudioDone) then
+      else if (TimeStamp >= fAudioTime + fAudioStart) and (not fAudioDone) then
         WriteAudio(TimeStamp);
-  end;
+    end;
 
-  // Create a media sample and add the buffer to the sample.
+  // Create a media sample and add a buffer to the sample
+  // which holds the current video frame stored in fbmRGBA
+  // The buffer used to be a global variable.
+  // Now we create and fill the buffer for every video frame,
+  // which solves a lot of timing problems.
   hr := MFCreateSample(pSample);
   if FAILED(hr) then
     goto done;
 
-  hr := pSample.AddBuffer(pSampleBuffer);
+  hr := MFCreateMemoryBuffer(
+    fBufferSizeVideo,
+    pSampleBufferLoc);
+  if FAILED(hr) then
+    goto done;
+
+  bmRGBAToSampleBuffer(
+      fBmRGBA,
+      pSampleBufferLoc);
+
+  hr := pSample.AddBuffer(pSampleBufferLoc);
   if FAILED(hr) then
     goto done;
 
@@ -1727,7 +1770,7 @@ begin
 
   // Give the encoder-threads a chance to do their work.
   HandleThreadMessages(GetCurrentThread());
-  Sleep(fEncodePriority);
+  Sleep(0);
 
   if Assigned(fOnProgress) then
     if (fFrameCount mod 30 = 1) then
@@ -1863,8 +1906,7 @@ begin
 
         for Index := 0 to fThreadPool.ThreadCount - 1 do
          fThreadPool.ResamplingThreads[Index].Done.WaitFor(INFINITE);
-
-        bmRGBAToSampleBuffer(RGBATween);
+        fbmRGBA.Assign(RGBATween);
         WriteOneFrame(fWriteStart, fSampleDuration);
       end;
 
@@ -1890,12 +1932,6 @@ begin
     begin
       WriteOneFrame(fWriteStart,
                     fSampleDuration);
-      if (fFrameCount mod fBrake) = (fBrake - 1) then
-      begin
-        HandleThreadMessages(GetCurrentThread(), 1);
-        Sleep(fEncodePriority);
-      end;
-
   end;
 end;
 
@@ -2024,18 +2060,13 @@ begin
       end;
 end;
 
-var
-  _TimerResolution: UInt32;
-  _hSetTimer: HResult;
 
 initialization
 
-  _hSetTimer:=SetTimerResolution(1,_TimerResolution);
 
 finalization
 
-  if Succeeded(_hSetTimer) then
-    TimeEndPeriod(_TimerResolution);
+ 
 {$IFDEF O_PLUS}
 {$O+}
 {$UNDEF O_PLUS}

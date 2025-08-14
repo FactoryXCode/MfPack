@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 13/08/2025 Renate              Fixed some threading and timing issues.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -200,9 +201,6 @@ type
     Label4: TLabel;
     Label5: TLabel;
     fodSelectAudio: TFileOpenDialog;
-    Label6: TLabel;
-    Label7: TLabel;
-    spedSetEncodePriority: TSpinEdit;
     btnAdvancedOptions: TButton;
     Bevel1: TBevel;
     StaticText2: TStaticText;
@@ -284,7 +282,6 @@ type
     function GetAudioFile: string;
     function GetQuality: Integer;
 
-    function GetEncodePriority: Word;
     function GetAdvancedOptions: TEncoderAdvancedOptions;
 
     function GetAudioStart: Int64;
@@ -308,7 +305,6 @@ type
 
     property VideoFrameRate: Double read dSelectedVideoFrameRate;
     property Quality: Integer read GetQuality;
-    property EncodePriority: Word read GetEncodePriority;
     property DoCrop: Boolean read GetDoCrop;
     property DoZoomInOut: Boolean read GetDoZoomInOut;
 
@@ -612,7 +608,6 @@ begin
                                      fCodecList[cbxVideoCodec.ItemIndex],
                                      fSelectedAudioFormat,
                                      cfBicubic,
-                                     EncodePriority,
                                      iPicturePresentationTime,
                                      llAudioDuration,
                                      fAudioFileName,
@@ -1199,11 +1194,6 @@ begin
   Result := ZoomInOut.Checked;
 end;
 
-
-function TfrmMain.GetEncodePriority: Word;
-begin
-  Result:=spedSetEncodePriority.Value;
-end;
 
 function TfrmMain.GetOutputFileName: string;
 begin
