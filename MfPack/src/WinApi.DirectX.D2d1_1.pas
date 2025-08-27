@@ -1352,9 +1352,9 @@ type
                               targetOffset: PD2D1_POINT_2F = nil); stdcall;
 
     procedure DrawBitmap(bitmap: ID2D1Bitmap;
-                         destinationRectangle: D2D1_RECT_F;
-                         opacity: Single;
-                         interpolationMode: D2D1_INTERPOLATION_MODE;
+                         destinationRectangle: PD2D1_RECT_F = nil;
+                         opacity: Single = 1.0;
+                         interpolationMode: D2D1_INTERPOLATION_MODE = D2D1_BITMAP_INTERPOLATION_MODE_LINEAR;
                          sourceRectangle: PD2D1_RECT_F = nil;
                          perspectiveTransform: PD2D1_MATRIX_4X4_F = nil); stdcall;
 
