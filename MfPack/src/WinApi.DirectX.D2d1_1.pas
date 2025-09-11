@@ -19,12 +19,14 @@
 //                 Peter Larson (ozships),
 //                 Tilo Güldner (TiloGueldner),
 //                 (wsandor)
-//                                                                                                 f
+//                 Frank Siek (Cypheros-de)
+//
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 09/09/2025 Frank Siek          Fixed wrong parameter definition of procedure DrawBitmap.
 //------------------------------------------------------------------------------
 //
 // Remarks: -
