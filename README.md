@@ -1,10 +1,3 @@
-### Before going on, some policy:
-- If you have a request, question, idea or need help, please commit to [Discussions](https://github.com/FactoryXCode/MfPack/discussions).
-
-- If you encounter a bug then [Issues](https://github.com/FactoryXCode/MfPack/issues) is the one and only place to be.
-
-
-
 # About MfPack
 
  Delphi translations for Microsoft Media Foundation and related API's.
@@ -83,15 +76,6 @@ SDK version: 10.0.26100.4654 (Windows 11)
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleCapture.png)
 
-**Sample 2**
-
-*This sample shows how to implement camera and video controls using*
-
-*IAMCameraControl and IAMVideoProcAmp.*
-
-
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleCapture_2.png)
-
 **MfPeakMeter and MfPeakMeterEx component sample**
 
 *An example about how to create a MfPeakMeter control. This sample is part of the Samples/MfComponents package.*
@@ -104,7 +88,9 @@ SDK version: 10.0.26100.4654 (Windows 11)
 
 *Demonstrates using the IMFSourceReader API to extract uncompressed media data from a media file. This sample application reads audio data from a media file and writes the uncompressed audio to a WAVE file.*
 
-*The AudioClipEx sample demonstrates using the IMFSourceReader and IMFSourceReaderCallback API to extract uncompressed mediadata from a media file.*
+*The AudioClipEx sample demonstrates using the IMFSourceReader and IMFSourceReaderCallback API to extract uncompressed audiodata from a media file.*
+
+*The AudioClipEx2 sample demonstrates using the IMFSourceReader, IMFSourceReaderCallback and IMFSinkWriter API to extract uncompressed audiodata from a media file and write the audio to a wav. It also uses threads for better responsiveness*
 
 
 
@@ -272,14 +258,15 @@ In your projectsettings you have to add ..MfPack\Samples\MfComponents in the pro
 This sample demonstrates how to use the IAudioClient to render different audio formats like WAV, FLAC, MP3 etc.
 using the IMFSourceReader to decode the format suitable for playing in WASAPI's IAudioClient and renderer.
     
-This sample plays formats like WAV (pcm and floatingpoint), MP3 and FLAC.
+The sample plays formats like WAV (pcm and floatingpoint), MP3 and FLAC.
 It shows you the basics of using the IAudioClient, iAudioRenderer, IAudioClock and IAudioStreamVolume interfaces.
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
 In your projectsettings you have to add ..MfPack\Samples\MfComponents in the project options searchpath.
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer1.png)
 
-
+**SimpleVolumeControlSample**
+This example shows how to use the basics of the MfAudioEndPoint component.
 
 ***Tools***
 
