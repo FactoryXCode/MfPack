@@ -84,11 +84,13 @@ SDK version: 10.0.26100.4654 (Windows 11)
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfPeakmeter.jfif)
 
-**AudioClip and AudioClipEx sample**
+**AudioClip, AudioClipEx and AudioClipEx2 samples**
 
 *Demonstrates using the IMFSourceReader API to extract uncompressed media data from a media file. This sample application reads audio data from a media file and writes the uncompressed audio to a WAVE file.*
 
-*The AudioClipEx sample demonstrates using the IMFSourceReader and IMFSourceReaderCallback API to extract uncompressed mediadata from a media file.*
+*The AudioClipEx sample demonstrates using the IMFSourceReader and IMFSourceReaderCallback API to extract uncompressed audiodata from a media file.*
+
+*The AudioClipEx2 sample demonstrates using the IMFSourceReader, IMFSourceReaderCallback and IMFSinkWriter API to extract uncompressed audiodata from a media file and write the audio to a wav. It also uses threads for better responsiveness*
 
 
 
