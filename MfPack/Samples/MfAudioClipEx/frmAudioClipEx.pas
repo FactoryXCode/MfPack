@@ -38,8 +38,7 @@
 //
 // Related objects: -
 // Related projects: MfPackX318
-// Known Issues: The IMFSourceReader.ReadSample method eats a lot of CPU cycles and
-//               power on low latency file reading.
+// Known Issues: -
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.26100.4654

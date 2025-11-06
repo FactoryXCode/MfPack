@@ -39,8 +39,7 @@
 //
 // Related objects: -
 // Related projects: >= MfPackX300
-// Known Issues: High use of CPU and power consumption due to IMFSourceReader.OnReadSample.
-//               Please read the comments about this issue.
+// Known Issues: -
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.26100.4654
