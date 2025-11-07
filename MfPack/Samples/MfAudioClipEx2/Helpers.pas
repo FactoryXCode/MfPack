@@ -99,7 +99,6 @@ type
   function CloseMF(): HResult;
 
 
-
 implementation
 
 

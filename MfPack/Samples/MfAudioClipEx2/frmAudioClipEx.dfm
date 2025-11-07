@@ -7,7 +7,7 @@ object AudioClipExfrm: TAudioClipExfrm
   Margins.Bottom = 5
   BorderStyle = bsSingle
   Caption = 'AudioClipEx2 Sample'
-  ClientHeight = 362
+  ClientHeight = 328
   ClientWidth = 718
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -22,7 +22,7 @@ object AudioClipExfrm: TAudioClipExfrm
   PixelsPerInch = 144
   TextHeight = 25
   object lblStatus: TLabel
-    Left = 25
+    Left = 39
     Top = 198
     Width = 57
     Height = 25
@@ -39,7 +39,7 @@ object AudioClipExfrm: TAudioClipExfrm
     ParentFont = False
   end
   object lblGetSourceFile: TLabel
-    Left = 26
+    Left = 65
     Top = 12
     Width = 94
     Height = 32
@@ -61,7 +61,7 @@ object AudioClipExfrm: TAudioClipExfrm
     OnClick = lblGetSourceFileClick
   end
   object lblSourceFile: TLabel
-    Left = 129
+    Left = 168
     Top = 14
     Width = 7
     Height = 25
@@ -72,7 +72,7 @@ object AudioClipExfrm: TAudioClipExfrm
     Caption = '-'
   end
   object lblTargetFile: TLabel
-    Left = 129
+    Left = 168
     Top = 59
     Width = 7
     Height = 25
@@ -83,7 +83,7 @@ object AudioClipExfrm: TAudioClipExfrm
     Caption = '-'
   end
   object lblSetTartgetFile: TLabel
-    Left = 23
+    Left = 62
     Top = 53
     Width = 95
     Height = 31
@@ -105,7 +105,7 @@ object AudioClipExfrm: TAudioClipExfrm
     OnClick = lblSetTartgetFileClick
   end
   object Label2: TLabel
-    Left = 0
+    Left = 39
     Top = 144
     Width = 120
     Height = 32
@@ -122,9 +122,9 @@ object AudioClipExfrm: TAudioClipExfrm
     Layout = tlCenter
   end
   object Label1: TLabel
-    Left = 25
+    Left = 0
     Top = 98
-    Width = 95
+    Width = 159
     Height = 31
     Margins.Left = 5
     Margins.Top = 5
@@ -132,11 +132,11 @@ object AudioClipExfrm: TAudioClipExfrm
     Margins.Bottom = 5
     Alignment = taRightJustify
     AutoSize = False
-    Caption = 'Clip length:'
+    Caption = 'Sourcefile duration:'
     Layout = tlCenter
   end
   object lblTime: TLabel
-    Left = 133
+    Left = 172
     Top = 101
     Width = 68
     Height = 25
@@ -148,11 +148,11 @@ object AudioClipExfrm: TAudioClipExfrm
     ParentShowHint = False
     ShowHint = False
   end
-  object ProgressBar: TProgressBar
-    Left = 25
-    Top = 240
+  object pbProgress: TProgressBar
+    Left = 39
+    Top = 232
     Width = 672
-    Height = 30
+    Height = 29
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
@@ -161,7 +161,7 @@ object AudioClipExfrm: TAudioClipExfrm
   end
   object butStart: TButton
     Left = 25
-    Top = 300
+    Top = 278
     Width = 113
     Height = 38
     Margins.Left = 5
@@ -174,7 +174,7 @@ object AudioClipExfrm: TAudioClipExfrm
   end
   object butCancel: TButton
     Left = 148
-    Top = 300
+    Top = 278
     Width = 113
     Height = 38
     Margins.Left = 5
@@ -186,7 +186,7 @@ object AudioClipExfrm: TAudioClipExfrm
     OnClick = butCancelClick
   end
   object tbPriority: TTrackBar
-    Left = 119
+    Left = 158
     Top = 144
     Width = 178
     Height = 53
@@ -201,5 +201,11 @@ object AudioClipExfrm: TAudioClipExfrm
     TabOrder = 3
     ThumbLength = 30
     OnChange = tbPriorityChange
+  end
+  object Timer1: TTimer
+    Interval = 100
+    OnTimer = Timer1Timer
+    Left = 378
+    Top = 26
   end
 end

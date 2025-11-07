@@ -78,6 +78,7 @@ uses
   {Winapi}
   Winapi.Windows,
   Winapi.Messages,
+  WinApi.WinApiTypes,
   {System}
   System.SysUtils,
   System.Classes,
@@ -92,14 +93,15 @@ uses
   Vcl.ComCtrls,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.MfMetLib,
   {Project}
-  AudioClipEngine;
+  AudioClipEngine, Vcl.ExtCtrls;
 
 type
   TAudioClipExfrm = class(TForm)
     butStart: TButton;
     butCancel: TButton;
-    ProgressBar: TProgressBar;
+    pbProgress: TProgressBar;
     lblStatus: TLabel;
     lblGetSourceFile: TLabel;
     lblSourceFile: TLabel;
@@ -109,6 +111,7 @@ type
     Label1: TLabel;
     lblTime: TLabel;
     tbPriority: TTrackBar;
+    Timer1: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     
@@ -118,18 +121,20 @@ type
     procedure lblSetTartgetFileClick(Sender: TObject);
     procedure tbPriorityChange(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure Timer1Timer(Sender: TObject);
 
   private
     FEngine: TAudioClipClass;
     FCancelEvent: TEvent;
     FThrottle: Integer;
+    FDuration: LONGLONG;
 
     procedure UpdateUIBusy(ABusy: Boolean);
-    procedure WorkerProgress(Sender: TObject;
-                             Percent: Integer);
+
     procedure WorkerComplete(Sender: TObject;
                              Success: Boolean;
                              HResultCode: HResult);
+    procedure Reset();
 
   end;
 
@@ -166,9 +171,7 @@ begin
                                 True,
                                 False,
                                 '');
-  lblStatus.Caption := 'Ready.';
-  ProgressBar.Position := 0;
-  UpdateUIBusy(False);
+  Reset();
 end;
 
 
@@ -184,6 +187,7 @@ var
   dlg: TOpenDialog;
 
 begin
+
   dlg := TOpenDialog.Create(Self);
   try
     dlg.Filter := 'Video/Audio files|*.mp4;*.avi;*.mkv;*.mov;*.mp3;*.wav|All files|*.*';
@@ -200,6 +204,7 @@ var
   dlg: TSaveDialog;
 
 begin
+
   dlg := TSaveDialog.Create(Self);
   try
     dlg.Filter := 'WAV files|*.wav';
@@ -223,6 +228,16 @@ begin
 end;
 
 
+procedure TAudioClipExfrm.Timer1Timer(Sender: TObject);
+begin
+  if Assigned(FEngine) then
+    begin
+      pbProgress.Position := FEngine.ProgressPercent;
+      lblStatus.Caption := Format('Processing... %d%% (%d KB)', [FEngine.ProgressPercent, FEngine.ProgressBytes div 1024]);
+    end;
+end;
+
+
 procedure TAudioClipExfrm.UpdateUIBusy(ABusy: Boolean);
 begin
   butStart.Enabled := not ABusy;
@@ -232,8 +247,10 @@ begin
 end;
 
 
-
 procedure TAudioClipExfrm.butStartClick(Sender: TObject);
+var
+  hr: HResult;
+
 begin
   if (Trim(lblSourceFile.Caption) = '') or (Trim(lblTargetFile.Caption) = '') then
     begin
@@ -241,7 +258,7 @@ begin
       Exit;
     end;
 
-  ProgressBar.Position := 0;
+  pbProgress.Position := 0;
   lblStatus.Caption := 'Starting extraction...';
   UpdateUIBusy(True);
 
@@ -263,8 +280,8 @@ begin
             begin
               FEngine.SamplingPriority := FThrottle;
               hr := FEngine.ExtractSoundClip_Threaded(FCancelEvent.Handle,
-                                                      WorkerProgress,
                                                       WorkerComplete);  // Sample priority in ms (small delay to reduce CPU)
+
 
               if Failed(hr) then
                 TThread.Queue(nil,
@@ -273,7 +290,17 @@ begin
                                                  lblStatus.Caption := Format('Failed to start extraction (0x%x)', [hr]);
                                                  UpdateUIBusy(False);
                                                end));
+
     end);
+
+    // Get the size of the sourcefile.
+  hr := GetFileDuration(PCWSTR(FEngine.SourceFile),
+                        FDuration);
+  if SUCCEEDED(hr) then
+    lblTime.Caption := MSecToStr(FDuration div 10000,
+                                 False)
+  else
+    lblTime.Caption := '00:00:00';
 end;
 
 
@@ -284,17 +311,6 @@ begin
       FCancelEvent.SetEvent;
       lblStatus.Caption := 'Cancelling...';
     end;
-end;
-
-
-procedure TAudioClipExfrm.WorkerProgress(Sender: TObject; Percent: Integer);
-begin
-  TThread.Queue(nil,
-    procedure
-    begin
-      ProgressBar.Position := Percent;
-      lblStatus.Caption := Format('Processing... %d%%', [Percent]);
-    end);
 end;
 
 
@@ -312,6 +328,15 @@ begin
                                    UpdateUIBusy(False);
                                    FreeAndNil(FEngine);
                                  end));
+end;
+
+
+procedure TAudioClipExfrm.Reset();
+begin
+  lblTime.Caption := '00:00:00';
+  lblStatus.Caption := 'Ready.';
+  pbProgress.Position := 0;
+  UpdateUIBusy(False);
 end;
 
 end.
