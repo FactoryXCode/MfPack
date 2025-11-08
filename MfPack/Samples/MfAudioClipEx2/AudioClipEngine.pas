@@ -20,9 +20,9 @@
 //   uncompressed PCM audio to a WAVE file.
 //
 //   The input file must be a media format supported by Media Foundation,
-//   and must have  an audio stream. The audio stream can be an encoded
+//   and must have an audio stream. The audio stream can be an encoded
 //   format, such as Windows Media Audio.
-//   Note: The original application was a console app. running in synchrone mode.
+//   Note: The original application was a console app. running in synchronous mode.
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -41,7 +41,7 @@
 // Related projects: >= MfPackX318
 // Known Issues: -
 //
-// Compiler version: 23 up to 35
+// Compiler version: 28 up to 36
 // SDK version: 10.0.26100.4654
 //
 // Todo: -
@@ -136,8 +136,8 @@ type
     constructor Create();
     destructor Destroy; override;
 
-    function ExtractSoundClip_Threaded(CancelHandle: THandle;
-                                       OnComplete: TAudioClipCompleteEvent): HResult;
+    function ExtractSoundClip(CancelHandle: THandle;
+                              OnComplete: TAudioClipCompleteEvent): HResult;
 
     property SourceFile: string read FSourceFile write FSourceFile;
     property OutputFile: string read FOutputFile write FOutputFile;
@@ -220,9 +220,7 @@ begin
                             FDuration100ns);
 end;
 
-// Write sample to sink writer AND update byte counters.
-// We compute sample length by converting sample to a contiguous buffer and reading GetCurrentLength.
-// This avoids manual WriteFile and keeps sink writer usage correct.
+// Write sample to sink writer.
 function TAudioClipClass.WriteSampleToSink(pSample: IMFSample): HRESULT;
 var
   hr: HRESULT;
@@ -244,7 +242,9 @@ begin
 end;
 
 
-
+// Updates progress and written data (in bytes).
+// Note: These properties should be called from the main thread to prevent a
+// non responsive user interface.
 procedure TAudioClipClass.ReportProgressFromSample(pSample: IMFSample);
 var
   hr : HResult;
@@ -252,6 +252,7 @@ var
   stats: MF_SINK_WRITER_STATISTICS;
 
 begin
+
   if (FDuration100ns = 0) or (not Assigned(pSample)) then
     Exit;
 
@@ -280,8 +281,8 @@ begin
 end;
 
 
-function TAudioClipClass.ExtractSoundClip_Threaded(CancelHandle: THandle;
-                                                   OnComplete: TAudioClipCompleteEvent): HResult;
+function TAudioClipClass.ExtractSoundClip(CancelHandle: THandle;
+                                          OnComplete: TAudioClipCompleteEvent): HResult;
 var
   hr: HResult;
   pAttr: IMFAttributes;
@@ -336,7 +337,7 @@ begin
   if Failed(hr) then
     Exit(hr);
 
-  // Create sink writer
+  // Release previous sinkwriter and create a new one.
   SafeRelease(FSinkWriter);
 
   hr := MFCreateSinkWriterFromURL(PWideChar(WideString(FOutputFile)),

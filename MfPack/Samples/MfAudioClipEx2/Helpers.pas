@@ -32,7 +32,7 @@
 // Related projects: MfPackX318
 // Known Issues: -
 //
-// Compiler version: 23 up to 35
+// Compiler version: 28 up to 36
 // SDK version: 10.0.26100.4654
 //
 // Todo: -

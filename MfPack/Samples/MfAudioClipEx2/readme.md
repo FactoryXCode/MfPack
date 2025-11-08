@@ -4,9 +4,9 @@ Version: X 3.1.8
 
 NOTES:
 
-* This release is updated for compiler version 17 up to 34.
+* This release is updated for compiler version 28 up to 36.
 * SDK version 10.0.22621.4654
-* Requires Windows 7 or later.
+* Requires Windows 8 or later.
 * Minimum supported MfPack version: 3.1.5
 
 
@@ -27,6 +27,10 @@ writes the uncompressed audio to a WAVE file using the IMFSinkWriter interface.
 The input file must be a media format supported by Media Foundation,
 and must have  an audio stream. The audio stream can be an encoded
 format, such as Windows Media Audio.
+
+Supported input files are: mp4, avi, mkv, mov,mp3, wav, wma and flac.
+
+
 
 This sample uses the TInterfacedPersistent/IMFSourceReaderCallback class.
 

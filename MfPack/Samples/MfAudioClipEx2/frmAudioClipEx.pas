@@ -33,6 +33,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 06/11/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 07/11/2025 Tony                Addded support for WMA and FLAC.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -41,7 +42,7 @@
 // Related projects: >= MfPackX318
 // Known Issues: -
 //
-// Compiler version: 23 up to 35
+// Compiler version: 28 up to 36
 // SDK version: 10.0.26100.4654
 //
 // Todo: -
@@ -91,11 +92,12 @@ uses
   Vcl.Dialogs,
   Vcl.StdCtrls,
   Vcl.ComCtrls,
+  Vcl.ExtCtrls,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfUtils,
   WinApi.MediaFoundationApi.MfMetLib,
   {Project}
-  AudioClipEngine, Vcl.ExtCtrls;
+  AudioClipEngine;
 
 type
   TAudioClipExfrm = class(TForm)
@@ -190,7 +192,7 @@ begin
 
   dlg := TOpenDialog.Create(Self);
   try
-    dlg.Filter := 'Video/Audio files|*.mp4;*.avi;*.mkv;*.mov;*.mp3;*.wav|All files|*.*';
+    dlg.Filter := 'Video/Audio files|*.mp4;*.avi;*.mkv;*.mov;*.mp3;*.wav;*.wma;*.flac;|All files|*.*';
     if dlg.Execute then
       lblSourceFile.Caption := dlg.FileName;
   finally
@@ -279,8 +281,8 @@ begin
 
             begin
               FEngine.SamplingPriority := FThrottle;
-              hr := FEngine.ExtractSoundClip_Threaded(FCancelEvent.Handle,
-                                                      WorkerComplete);  // Sample priority in ms (small delay to reduce CPU)
+              hr := FEngine.ExtractSoundClip(FCancelEvent.Handle,
+                                             WorkerComplete);
 
 
               if Failed(hr) then
