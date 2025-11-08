@@ -30,6 +30,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 07/11/2025 Tony                Added function SetSafeStream
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -423,6 +424,16 @@ type
   // This method returns an audio activation object for a renderer.
   function CreateAudioMediaSinkActivate(pSourceSD: IMFStreamDescriptor;
                                         out mfActivate: IMFActivate): HResult;
+
+
+  //
+  // IMPORTANT NOTE:
+  // Before selecting a stream, make sure you deselected all streams in the sourcereader first!
+  // If the stream is selected, the media source might hold onto a queue of unread data,
+  // and the queue might grow indefinitely, consuming memory what will result in Error $8007000E (E_OUT_OF_MEMORY).
+  //
+  function SetSafeStream(aSourceReader: IMFSourceReader;
+                         const aStream: DWord): HResult;
 
 
 // Topologies
@@ -1722,6 +1733,28 @@ begin
   mfActivate := pActivate;
 
 done:
+  Result := hr;
+end;
+
+// Before selecting a stream, make sure you deselected all streams in the sourcereader first!
+// If the stream is selected, the media source might hold onto a queue of unread data,
+// and the queue might grow indefinitely, consuming memory what will result in Error $8007000E.
+function SetSafeStream(aSourceReader: IMFSourceReader;
+                       const aStream: DWord): HResult;
+var
+  hr: HResult;
+
+begin
+
+  // First deselect all streams.
+  hr := aSourceReader.SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS,
+                                         False);
+
+  // Second, selected the desired stream.
+  if SUCCEEDED(hr) then
+    hr := aSourceReader.SetStreamSelection(aStream,
+                                           True);
+
   Result := hr;
 end;
 
