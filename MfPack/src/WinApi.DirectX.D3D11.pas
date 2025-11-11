@@ -4637,6 +4637,7 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D11VideoDecoderOutputView);'}
   {$EXTERNALSYM ID3D11VideoDecoderOutputView}
+  PID3D11VideoDecoderOutputView = ^ID3D11VideoDecoderOutputView;
   ID3D11VideoDecoderOutputView = interface(ID3D11View)
   ['{C2931AEA-2A85-4f20-860F-FBA1FD256E18}']
 
@@ -4660,10 +4661,12 @@ type
   end;
   {$EXTERNALSYM D3D11_TEX2D_VPIV}
 
+  PD3D11_VIDEO_PROCESSOR_INPUT_VIEW_DESC = ^D3D11_VIDEO_PROCESSOR_INPUT_VIEW_DESC;
   D3D11_VIDEO_PROCESSOR_INPUT_VIEW_DESC = record
-    case FourCC: UINT of
-      0: (ViewDimension: D3D11_VPIV_DIMENSION);
-      1: (Texture2D: D3D11_TEX2D_VPIV);
+    FourCC: UINT;
+    ViewDimension: D3D11_VPIV_DIMENSION;
+    case Integer of
+      0: (Texture2D: D3D11_TEX2D_VPIV);
   end;
   {$EXTERNALSYM D3D11_VIDEO_PROCESSOR_INPUT_VIEW_DESC}
 
@@ -4717,12 +4720,14 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D11VideoProcessorOutputView);'}
   {$EXTERNALSYM ID3D11VideoProcessorOutputView}
+  PID3D11VideoProcessorOutputView = ^ID3D11VideoProcessorOutputView;
   ID3D11VideoProcessorOutputView = interface(ID3D11View)
   ['{A048285E-25A9-4527-BD93-D68B68C44254}']
 
     procedure GetDesc(out pDesc: D3D11_VIDEO_PROCESSOR_OUTPUT_VIEW_DESC); stdcall;
 
   end;
+
   IID_ID3D11VideoProcessorOutputView = ID3D11VideoProcessorOutputView;
   {$EXTERNALSYM IID_ID3D11VideoProcessorOutputView}
 
@@ -5043,11 +5048,11 @@ type
     // Create
     function CreateVideoDecoder(pVideoDesc: D3D11_VIDEO_DECODER_DESC;
                                 pConfig: D3D11_VIDEO_DECODER_CONFIG;
-                                [ref] const ppDecoder: ID3D11VideoDecoder): HRESULT; stdcall;
+                                out ppDecoder: ID3D11VideoDecoder): HRESULT; stdcall;
 
-    function CreateVideoProcessor(const pEnum: ID3D11VideoProcessorEnumerator;
+    function CreateVideoProcessor(pEnum: ID3D11VideoProcessorEnumerator;
                                   RateConversionIndex: UINT;
-                                  [ref] const ppVideoProcessor: ID3D11VideoProcessor): HRESULT; stdcall;
+                                  out ppVideoProcessor: ID3D11VideoProcessor): HRESULT; stdcall;
 
     function CreateAuthenticatedChannel(ChannelType: D3D11_AUTHENTICATED_CHANNEL_TYPE;
                                         [ref] const ppAuthenticatedChannel: ID3D11AuthenticatedChannel): HRESULT; stdcall;
@@ -5055,38 +5060,53 @@ type
     function CreateCryptoSession(const pCryptoType: TGUID;
                                  const pDecoderProfile: TGUID;
                                  const pKeyExchangeType: TGUID;
-                                 [ref] const ppCryptoSession: ID3D11CryptoSession): HRESULT; stdcall;
+                                 out ppCryptoSession: ID3D11CryptoSession): HRESULT; stdcall;
 
-    function CreateVideoDecoderOutputView(const pResource: ID3D11Resource;
+    function CreateVideoDecoderOutputView(pResource: ID3D11Resource;
                                           pDesc: PD3D11_VIDEO_DECODER_OUTPUT_VIEW_DESC;
-                                          [ref] const ppVDOVView: ID3D11VideoDecoderOutputView): HRESULT; stdcall;
+                                          out ppVDOVView: ID3D11VideoDecoderOutputView): HRESULT; stdcall;
 
-    function CreateVideoProcessorInputView(const pResource: ID3D11Resource;
-                                           const pEnum: ID3D11VideoProcessorEnumerator;
-                                           pDesc: D3D11_VIDEO_PROCESSOR_INPUT_VIEW_DESC;
-                                           [ref] const ppVPIView: ID3D11VideoProcessorInputView): HRESULT; stdcall;
 
-    function CreateVideoProcessorOutputView(const pResource: ID3D11Resource;
-                                            const pEnum: ID3D11VideoProcessorEnumerator;
-                                            pDesc: D3D11_VIDEO_PROCESSOR_OUTPUT_VIEW_DESC;
-                                            [ref] const ppVPOView: ID3D11VideoProcessorOutputView): HRESULT; stdcall;
+    //    NOTE:
+    //  - The ppVPIView parameter is declared as a pointer (PID3D11VideoProcessorInputView)
+    //    instead of 'out' so that callers can pass nil.
+    //  - Passing nil allows you to query whether the combination of resource,
+    //    enumerator, and descriptor is supported without actually creating a view.
+    //  - This matches the behavior documented by Microsoft:
+    //    https://learn.microsoft.com/en-us/windows/win32/api/d3d11video/nf-d3d11video-id3d11videodevice-createvideoprocessorinputview
+    function CreateVideoProcessorInputView(pResource: ID3D11Resource;
+                                           pEnum: ID3D11VideoProcessorEnumerator;
+                                           const pDesc: D3D11_VIDEO_PROCESSOR_INPUT_VIEW_DESC;
+                                           {out} ppVPIView: PID3D11VideoProcessorInputView): HRESULT; stdcall;
 
-    function CreateVideoProcessorEnumerator(pDesc: D3D11_VIDEO_PROCESSOR_CONTENT_DESC;
-                                            [ref] const ppEnum: ID3D11VideoProcessorEnumerator): HRESULT; stdcall;
+    //    NOTE:
+    //  - The ppVPOView parameter is declared as a pointer (PID3D11VideoProcessorOutputView)
+    //    instead of 'out' so that callers can pass nil.
+    //  - Passing nil allows you to query whether the combination of resource,
+    //    enumerator, and descriptor is supported without actually creating a view.
+    //  - This matches the behavior documented by Microsoft:
+    //    https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11videodevice-createvideoprocessoroutputview
+    function CreateVideoProcessorOutputView(pResource: ID3D11Resource;
+                                            pEnum: ID3D11VideoProcessorEnumerator;
+                                            const pDesc: D3D11_VIDEO_PROCESSOR_OUTPUT_VIEW_DESC;
+                                            {out} ppVPOView: PID3D11VideoProcessorOutputView): HRESULT; stdcall;
+
+    function CreateVideoProcessorEnumerator(const pDesc: D3D11_VIDEO_PROCESSOR_CONTENT_DESC;
+                                            out ppEnum: ID3D11VideoProcessorEnumerator): HRESULT; stdcall;
 
     function GetVideoDecoderProfileCount(): UINT; stdcall;
 
-    function GetVideoDecoderProfile(Index: UINT;
+    function GetVideoDecoderProfile(const Index: UINT;
                                     out pDecoderProfile: TGUID): HRESULT; stdcall;
 
     function CheckVideoDecoderFormat(const pDecoderProfile: TGUID;
                                      Format: DXGI_FORMAT;
                                      out pSupported: BOOL): HRESULT; stdcall;
 
-    function GetVideoDecoderConfigCount(pDesc: D3D11_VIDEO_DECODER_DESC;
+    function GetVideoDecoderConfigCount(const pDesc: D3D11_VIDEO_DECODER_DESC;
                                         out pCount: UINT): HRESULT; stdcall;
 
-    function GetVideoDecoderConfig(pDesc: D3D11_VIDEO_DECODER_DESC;
+    function GetVideoDecoderConfig(const pDesc: D3D11_VIDEO_DECODER_DESC;
                                    Index: UINT;
                                    out pConfig: D3D11_VIDEO_DECODER_CONFIG): HRESULT; stdcall;
 
@@ -5104,7 +5124,7 @@ type
                             pData: Pointer): HRESULT; stdcall;
 
     function SetPrivateDataInterface(const guid: REFGUID;
-                                     const pData: IUnknown): HRESULT; stdcall;
+                                     pData: IUnknown): HRESULT; stdcall;
 
   end;
   IID_ID3D11VideoDevice = ID3D11VideoDevice;
@@ -5282,12 +5302,13 @@ type
                              DriverType: D3D_DRIVER_TYPE;
                              Software: HMODULE;
                              Flags: UINT;
-                             const pFeatureLevels: PD3D_FEATURE_LEVEL;
+                             pFeatureLevels: PD3D_FEATURE_LEVEL;
                              FeatureLevels: UINT;
                              SDKVersion: UINT;
                              out ppDevice: ID3D11Device;
                              out pFeatureLevel: D3D_FEATURE_LEVEL;
                              out ppImmediateContext: ID3D11DeviceContext): HRESULT; stdcall;
+
 
   function D3D11CreateDeviceAndSwapChain(pAdapter: IDXGIAdapter;
                                          DriverType: D3D_DRIVER_TYPE;
