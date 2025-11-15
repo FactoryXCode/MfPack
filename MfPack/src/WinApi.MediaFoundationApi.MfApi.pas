@@ -895,11 +895,11 @@ type
   //    Receives a pointer to the IMFMediaBuffer interface. The caller must release the interface.
   //
 
-  function MFCreateDXGISurfaceBuffer(const riid: REFIID;
+  function MFCreateDXGISurfaceBuffer(const riid: TGUID;
                                      punkSurface: IUnknown;
                                      uSubresourceIndex: UINT;
                                      fBottomUpWhenLinear: BOOL;
-                                     out ppBuffer: IMFMediaBuffer): HResult; stdcall;
+                                     out ppBuffer: IMFMediaBuffer): HRESULT; stdcall;
   {$EXTERNALSYM MFCreateDXGISurfaceBuffer}
   // Creates a media buffer to manage a Microsoft DirectX Graphics Infrastructure (DXGI) surface.
   // Parameters

@@ -557,7 +557,7 @@ type
 
     function BeginWriting(): HResult; stdcall;
 
-    function WriteSample(const dwStreamIndex: DWord;
+    function WriteSample(dwStreamIndex: DWord;
                          pSample: IMFSample): HResult; stdcall;
 
     function SendStreamTick(const dwStreamIndex: DWord;

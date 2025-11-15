@@ -1042,6 +1042,14 @@ type
   function GetVideoDisplayArea(pType: IMFMediaType;
                                out pArea: MFVideoArea): HResult;
 
+  // Tests if a given resolution is supported by encoder (like CLSID_CMSH265EncoderMFT, CLSID_CMSH264EncoderMFT.264 etc.)
+  // MFVideoFormat should be the same MFVideoFormat codec related to the CLSID of the encoder.
+  function IsResolutionSupported(const CLSIDEncoder: TGUID;  // CLSID of the encoder, like CLSID_CMSH265EncoderMFT
+                                 const MFVideoFormat: TGUID; // MFVideoFormat, like MFVideoFormat_HEVC
+                                 const InputType: TGUID;     // The input type sub format, like MFVideoFormat_NV12
+                                 Width: Dword;
+                                 Height: Dword): Boolean;
+
   // Convert a rectangle from one pixel aspect ratio (PAR) to another,
   // while preserving the picture aspect ratio.
   function CorrectAspectRatio(const src: TRect;
@@ -6372,6 +6380,75 @@ begin
         end;
     end;
   Result := hr;
+end;
+
+// Tests if a given resolution is supported by encoder (like CLSID_CMSH265EncoderMFT, CLSID_CMSH264EncoderMFT.264 etc.)
+// MFVideoFormat should be the same MFVideoFormat codec related to the CLSID of the encoder.
+function IsResolutionSupported(const CLSIDEncoder: TGUID;  // CLSID of the encoder, like CLSID_CMSH265EncoderMFT
+                               const MFVideoFormat: TGUID; // MFVideoFormat, like MFVideoFormat_HEVC
+                               const InputType: TGUID;     // The input type sub format, like MFVideoFormat_NV12
+                               Width: Dword;
+                               Height: Dword): Boolean;
+var
+  hr: HRESULT;
+  Encoder: IMFTransform;
+  InType: IMFMediaType;
+  OutType: IMFMediaType;
+
+begin
+
+  Result := False;
+
+  // Create encoder
+  hr := CoCreateInstance(CLSIDEncoder,
+                         nil,
+                         CLSCTX_INPROC_SERVER,
+                         IMFTransform,
+                         Encoder);
+  if Failed(hr) then
+    Exit;
+
+  // Check output type (e.g. HEVC)
+  hr := MFCreateMediaType(OutType);
+  if FAILED(hr) then
+    Exit;
+
+  OutType.SetGUID(MF_MT_MAJOR_TYPE,
+                  MFMediaType_Video);
+
+  OutType.SetGUID(MF_MT_SUBTYPE,
+                  MFVideoFormat);
+
+  hr := Encoder.SetOutputType(0,
+                              OutType,
+                              0);
+  if FAILED(hr) then
+    Exit;
+
+  // Check input type
+  hr := MFCreateMediaType(InType);
+  if FAILED(hr) then
+    Exit;
+
+  InType.SetGUID(MF_MT_MAJOR_TYPE,
+                 MFMediaType_Video);
+
+  InType.SetGUID(MF_MT_SUBTYPE,
+                 InputType);
+
+  InType.SetUINT32(MF_MT_INTERLACE_MODE,
+                   MFVideoInterlace_Progressive);
+
+  MFSetAttributeSize(InType,
+                     MF_MT_FRAME_SIZE,
+                     Width,
+                     Height);
+
+  hr := Encoder.SetInputType(0,
+                             InType,
+                             0);
+
+  Result := Succeeded(hr);
 end;
 
 
