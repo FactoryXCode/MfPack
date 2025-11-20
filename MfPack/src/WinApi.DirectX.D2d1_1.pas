@@ -742,93 +742,90 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID2D1CommandSink);'}
   {$EXTERNALSYM ID2D1CommandSink}
   ID2D1CommandSink = interface(IUnknown)
-  ['{54d7898a-a061-40a7-bec7-e465bcba2c4f}']
+  ['{54D7898A-A061-40A7-BEC7-E465BCBA2C4F}']
 
-    function BeginDraw(): HResult; stdcall;
+    function BeginDraw(): HRESULT; stdcall;
+    function EndDraw(): HRESULT; stdcall;
 
-    function EndDraw(): HResult; stdcall;
-
-    function SetAntialiasMode(antialiasMode: D2D1_ANTIALIAS_MODE): HResult; stdcall;
+    function SetAntialiasMode(antialiasMode: D2D1_ANTIALIAS_MODE): HRESULT; stdcall;
 
     function SetTags(tag1: D2D1_TAG;
-                     tag2: D2D1_TAG): HResult; stdcall;
+                     tag2: D2D1_TAG): HRESULT; stdcall;
 
-    function SetTextAntialiasMode(textAntialiasMode: D2D1_TEXT_ANTIALIAS_MODE): HResult; stdcall;
-    // The text rendering options to be applied to all subsequent text and glyph
-    // drawing operations; IUnknown(nil) to clear current text rendering options.
-    function SetTextRenderingParams(textRenderingParams: IDWriteRenderingParams): HResult; stdcall;
+    function SetTextAntialiasMode(textAntialiasMode: D2D1_TEXT_ANTIALIAS_MODE): HRESULT; stdcall;
 
-    function SetTransform(transform: D2D1_MATRIX_3X2_F): HResult; stdcall;
+    function SetTextRenderingParams(textRenderingParams: IDWriteRenderingParams): HRESULT; stdcall;
 
-    function SetPrimitiveBlend(primitiveBlend: D2D1_PRIMITIVE_BLEND): HResult; stdcall;
+    function SetTransform(const transform: D2D1_MATRIX_3X2_F): HRESULT; stdcall;
 
-    function SetUnitMode(unitMode: D2D1_UNIT_MODE): HResult; stdcall;
+    function SetPrimitiveBlend(primitiveBlend: D2D1_PRIMITIVE_BLEND): HRESULT; stdcall;
 
-    function Clear(color: D2D1_COLOR_F): HResult; stdcall;
+    function SetUnitMode(unitMode: D2D1_UNIT_MODE): HRESULT; stdcall;
+
+    function Clear(const color: D2D1_COLOR_F): HRESULT; stdcall;
 
     function DrawGlyphRun(baselineOrigin: D2D1_POINT_2F;
-                          glyphRun: DWRITE_GLYPH_RUN;
-                          glyphRunDescription: DWRITE_GLYPH_RUN_DESCRIPTION;
+                          const glyphRun: DWRITE_GLYPH_RUN;
+                          const glyphRunDescription: DWRITE_GLYPH_RUN_DESCRIPTION;
                           foregroundBrush: ID2D1Brush;
-                          measuringMode: DWRITE_MEASURING_MODE): HResult; stdcall;
+                          measuringMode: DWRITE_MEASURING_MODE): HRESULT; stdcall;
 
     function DrawLine(point0: D2D1_POINT_2F;
                       point1: D2D1_POINT_2F;
                       brush: ID2D1Brush;
                       strokeWidth: Single;
-                      strokeStyle: ID2D1StrokeStyle): HResult; stdcall;
+                      strokeStyle: ID2D1StrokeStyle): HRESULT; stdcall;
 
     function DrawGeometry(geometry: ID2D1Geometry;
                           brush: ID2D1Brush;
                           strokeWidth: Single;
-                          strokeStyle: ID2D1StrokeStyle): HResult; stdcall;
+                          strokeStyle: ID2D1StrokeStyle): HRESULT; stdcall;
 
-    function DrawRectangle(rect: D2D1_RECT_F;
+    function DrawRectangle(const rect: D2D1_RECT_F;
                            brush: ID2D1Brush;
                            strokeWidth: Single;
-                           strokeStyle: ID2D1StrokeStyle): HResult; stdcall;
+                           strokeStyle: ID2D1StrokeStyle): HRESULT; stdcall;
 
     function DrawBitmap(bitmap: ID2D1Bitmap;
                         destinationRectangle: PD2D1_RECT_F;
                         opacity: Single;
                         interpolationMode: D2D1_INTERPOLATION_MODE;
                         sourceRectangle: PD2D1_RECT_F;
-                        perspectiveTransform: PD2D1_MATRIX_4X4_F): HResult; stdcall;
+                        perspectiveTransform: PD2D1_MATRIX_4X4_F): HRESULT; stdcall;
 
     function DrawImage(image: ID2D1Image;
                        targetOffset: D2D1_POINT_2F;
-                       imageRectangle: D2D1_RECT_F;
+                       const imageRectangle: D2D1_RECT_F;
                        interpolationMode: D2D1_INTERPOLATION_MODE;
-                       compositeMode: D2D1_COMPOSITE_MODE): HResult; stdcall;
+                       compositeMode: D2D1_COMPOSITE_MODE): HRESULT; stdcall;
 
     function DrawGdiMetafile(gdiMetafile: ID2D1GdiMetafile;
-                             targetOffset: D2D1_POINT_2F): HResult; stdcall;
+                             targetOffset: D2D1_POINT_2F): HRESULT; stdcall;
 
     function FillMesh(mesh: ID2D1Mesh;
-                      brush: ID2D1Brush): HResult; stdcall;
+                      brush: ID2D1Brush): HRESULT; stdcall;
 
     function FillOpacityMask(opacityMask: ID2D1Bitmap;
                              brush: ID2D1Brush;
-                             destinationRectangle: D2D1_RECT_F;
-                             sourceRectangle: D2D1_RECT_F): HResult; stdcall;
+                             const destinationRectangle: D2D1_RECT_F;
+                             const sourceRectangle: D2D1_RECT_F): HRESULT; stdcall;
 
     function FillGeometry(geometry: ID2D1Geometry;
                           brush: ID2D1Brush;
-                          opacityBrush: ID2D1Brush): HResult; stdcall;
+                          opacityBrush: ID2D1Brush): HRESULT; stdcall;
 
-    function FillRectangle(rect: D2D1_RECT_F;
-                           brush: ID2D1Brush): HResult; stdcall;
+    function FillRectangle(const rect: D2D1_RECT_F;
+                           brush: ID2D1Brush): HRESULT; stdcall;
 
-    function PushAxisAlignedClip(clipRect: D2D1_RECT_F;
-                                 antialiasMode: D2D1_ANTIALIAS_MODE): HResult; stdcall;
+    function PushAxisAlignedClip(const clipRect: D2D1_RECT_F;
+                                 antialiasMode: D2D1_ANTIALIAS_MODE): HRESULT; stdcall;
 
-    function PushLayer(layerParameters1: D2D1_LAYER_PARAMETERS1;
-                       layer: ID2D1Layer): HResult; stdcall;
+    function PushLayer(const layerParameters1: D2D1_LAYER_PARAMETERS1;
+                       layer: ID2D1Layer): HRESULT; stdcall;
 
-    function PopAxisAlignedClip(): HResult; stdcall;
+    function PopAxisAlignedClip(): HRESULT; stdcall;
 
-    function PopLayer(): HResult; stdcall;
-
+    function PopLayer(): HRESULT; stdcall;
   end;
   IID_ID2D1CommandSink = ID2D1CommandSink;
   {$EXTERNALSYM IID_ID2D1CommandSink}
@@ -864,10 +861,10 @@ type
   ['{2c1d867d-c290-41c8-ae7e-34a98702e9a5}']
 
     function AddPage(commandList: ID2D1CommandList;
-                     pageSize: D2D_SIZE_F;
+                     const pageSize: D2D_SIZE_F;
                      pagePrintTicketStream: IStream;
-                     {out_opt} tag1: PD2D1_TAG = nil;
-                     {out_opt} tag2: PD2D1_TAG = nil): HResult; stdcall;
+           {out_opt} tag1: PD2D1_TAG = nil;
+           {out_opt} tag2: PD2D1_TAG = nil): HResult; stdcall;
 
     function Close(): HResult; stdcall;
 
@@ -994,11 +991,10 @@ type
     function GetType(index: UINT32): D2D1_PROPERTY_TYPE; stdcall;
 
     // Retrieves the property index for the given property name.
-    function GetPropertyIndex(name: PWidechar): UINT32; stdcall;
-
+    function GetPropertyIndex(name: PWideChar): UINT32; stdcall;
 
     // Sets the value of the given property using its name.
-    function SetValueByName(name: PWidechar;
+    function SetValueByName(name: PWideChar;
                             _type: D2D1_PROPERTY_TYPE;
                             data: PByte;
                             dataSize: UINT32): HResult; stdcall;
@@ -1011,11 +1007,10 @@ type
 
     // Retrieves the given property or sub-property by name. '.' is the delimiter for
     // sub-properties.
-    function GetValueByName(name: PWidechar;
+    function GetValueByName(name: PWideChar;
                             _type: D2D1_PROPERTY_TYPE;
                             data: PByte;
                             dataSize: UINT32): HResult; stdcall;
-
 
     // Retrieves the given value by index.
     function GetValue(index: UINT32;
@@ -1023,10 +1018,8 @@ type
                       data: PByte;
                       dataSize: UINT32): HResult; stdcall;
 
-
     // Returns the value size for the given property index.
     function GetValueSize(index: UINT32): UINT32; stdcall;
-
 
     // Retrieves the sub-properties of the given property by index.
     function GetSubProperties(index: UINT32;
@@ -1205,59 +1198,35 @@ type
   ID2D1DeviceContext = interface(ID2D1RenderTarget)
   ['{e8f7fe7a-191c-466d-ad95-975678bda998}']
 
-    // Creates a bitmap with extended bitmap properties, potentially from a block of
-    // memory.
     function CreateBitmap(size: D2D1_SIZE_U;
                           sourceData: Pointer;
                           pitch: UINT32;
                           bitmapProperties: PD2D1_BITMAP_PROPERTIES1;
                           out bitmap: ID2D1Bitmap1): HResult; stdcall;
 
-    // Create a D2D bitmap by copying a WIC bitmap.
     function CreateBitmapFromWicBitmap(wicBitmapSource: IWICBitmapSource;
                                        bitmapProperties: PD2D1_BITMAP_PROPERTIES1;
                                        out bitmap: ID2D1Bitmap1): HResult; stdcall;
 
-    // Creates a color context from a color space.  If the space is Custom, the context
-    // is initialized from the profile/profileSize arguments.  Otherwise the context is
-    // initialized with the profile bytes associated with the space and
-    // profile/profileSize are ignored.
     function CreateColorContext(space: D2D1_COLOR_SPACE;
                                 profile: PByte;
                                 profileSize: UINT32;
                                 out colorContext: ID2D1ColorContext): HResult; stdcall;
 
-    function CreateColorContextFromFilename(filename: PWidechar;
+    function CreateColorContextFromFilename(filename: PWideChar;
                                             out colorContext: ID2D1ColorContext): HResult; stdcall;
 
     function CreateColorContextFromWicColorContext(wicColorContext: IWICColorContext;
                                                    out colorContext: ID2D1ColorContext): HResult; stdcall;
 
-    // Creates a bitmap from a DXGI surface with a set of extended properties.
     function CreateBitmapFromDxgiSurface(surface: IDXGISurface;
-                                         {opt} bitmapProperties: PD2D1_BITMAP_PROPERTIES1;
+                                         bitmapProperties: PD2D1_BITMAP_PROPERTIES1;
                                          out bitmap: ID2D1Bitmap1): HResult; stdcall;
 
-    // Create a new effect, the effect must either be built in or previously registered
-    // through ID2D1Factory1.RegisterEffectFromStream or
-    // ID2D1Factory1.RegisterEffectFromString.
     function CreateEffect(const effectId: TGuid;
                           out effect: ID2D1Effect): HResult; stdcall;
 
-    // A gradient stop collection represents a set of stops in an ideal unit length.
-    // This is the source resource for a linear gradient and radial gradient brush.
-
-    // <param name="preInterpolationSpace">Specifies both the input color space and the
-    // space in which the color interpolation occurs.</param>
-    // <param name="postInterpolationSpace">Specifies the color space colors will be
-    // converted to after interpolation occurs.</param>
-    // <param name="bufferPrecision">Specifies the precision in which the gradient
-    // buffer will be held.</param>
-    // <param name="extendMode">Specifies how the gradient will be extended outside of
-    // the unit length.</param>
-    // <param name="colorInterpolationMode">Determines if colors will be interpolated
-    // in straight alpha or premultiplied alpha space.</param>
-    function CreateGradientStopCollection(straightAlphaGradientStops: D2D1_GRADIENT_STOP;
+    function CreateGradientStopCollection(straightAlphaGradientStops: PD2D1_GRADIENT_STOP;
                                           straightAlphaGradientStopsCount: UINT32;
                                           preInterpolationSpace: D2D1_COLOR_SPACE;
                                           postInterpolationSpace: D2D1_COLOR_SPACE;
@@ -1266,8 +1235,6 @@ type
                                           colorInterpolationMode: D2D1_COLOR_INTERPOLATION_MODE;
                                           out gradientStopCollection1: ID2D1GradientStopCollection1): HResult; stdcall;
 
-    // Creates an image brush, the input image can be any type of image, including a
-    // bitmap, effect and a command list.
     function CreateImageBrush(image: ID2D1Image;
                               imageBrushProperties: D2D1_IMAGE_BRUSH_PROPERTIES;
                               brushProperties: D2D1_BRUSH_PROPERTIES;
@@ -1278,78 +1245,53 @@ type
                                brushProperties: D2D1_BRUSH_PROPERTIES;
                                out bitmapBrush: ID2D1BitmapBrush1): HResult; stdcall;
 
-    // Creates a new command list.
     function CreateCommandList(out commandList: ID2D1CommandList): HResult; stdcall;
 
-    // Indicates whether the format is supported by D2D.
     function IsDxgiFormatSupported(format: DXGI_FORMAT): BOOL; stdcall;
 
-    // Indicates whether the buffer precision is supported by D2D.
     function IsBufferPrecisionSupported(bufferPrecision: D2D1_BUFFER_PRECISION): BOOL; stdcall;
 
-    // This retrieves the local-space bounds in DIPs of the current image using the
-    // device context DPI.
     function GetImageLocalBounds(image: ID2D1Image;
                                  out localBounds: D2D1_RECT_F): HResult; stdcall;
 
-    // This retrieves the world-space bounds in DIPs of the current image using the
-    // device context DPI.
     function GetImageWorldBounds(image: ID2D1Image;
                                  out worldBounds: D2D1_RECT_F): HResult; stdcall;
 
-    // Retrieves the world-space bounds in DIPs of the glyph run using the device
-    // context DPI.
     function GetGlyphRunWorldBounds(baselineOrigin: D2D1_POINT_2F;
                                     glyphRun: DWRITE_GLYPH_RUN;
                                     measuringMode: DWRITE_MEASURING_MODE;
                                     out bounds: D2D1_RECT_F): HResult; stdcall;
 
-    // Retrieves the device associated with this device context.
     procedure GetDevice(out device: ID2D1Device); stdcall;
 
-    // Sets the target for this device context to point to the given image. The image
-    // can be a command list or a bitmap created with the D2D1_BITMAP_OPTIONS_TARGET
-    // flag.
     procedure SetTarget(image: ID2D1Image); stdcall;
 
-    // Gets the target that this device context is currently pointing to.
     procedure GetTarget(out image: ID2D1Image); stdcall;
 
-    // Sets tuning parameters for internal rendering inside the device context.
     procedure SetRenderingControls(renderingControls: D2D1_RENDERING_CONTROLS); stdcall;
 
-    // This retrieves the rendering controls currently selected into the device
-    // context.
     procedure GetRenderingControls(out renderingControls: D2D1_RENDERING_CONTROLS); stdcall;
 
-    // Changes the primitive blending mode for all of the rendering operations.
     procedure SetPrimitiveBlend(primitiveBlend: D2D1_PRIMITIVE_BLEND); stdcall;
 
-    // Returns the primitive blend currently selected into the device context.
     function GetPrimitiveBlend(): D2D1_PRIMITIVE_BLEND; stdcall;
 
-    // Changes the units used for all of the rendering operations.
     procedure SetUnitMode(unitMode: D2D1_UNIT_MODE); stdcall;
 
-    // Returns the unit mode currently set on the device context.
     function GetUnitMode(): D2D1_UNIT_MODE; stdcall;
 
-    // Draws the glyph run with an extended description to describe the glyphs.
     procedure DrawGlyphRun(baselineOrigin: D2D1_POINT_2F;
                            glyphRun: DWRITE_GLYPH_RUN;
                            glyphRunDescription: DWRITE_GLYPH_RUN_DESCRIPTION;
                            foregroundBrush: ID2D1Brush;
                            measuringMode: DWRITE_MEASURING_MODE = DWRITE_MEASURING_MODE_NATURAL); stdcall;
 
-    // Draw an image to the device context. The image represents either a concrete
-    // bitmap or the output of an effect graph.
     procedure DrawImage(image: ID2D1Image;
                         targetOffset: PD2D1_POINT_2F = nil;
                         imageRectangle: PD2D1_RECT_F = nil;
                         interpolationMode: D2D1_INTERPOLATION_MODE = D2D1_INTERPOLATION_MODE_LINEAR;
                         compositeMode: D2D1_COMPOSITE_MODE = D2D1_COMPOSITE_MODE_SOURCE_OVER); stdcall;
 
-    // Draw a metafile to the device context.
     procedure DrawGdiMetafile(gdiMetafile: ID2D1GdiMetafile;
                               targetOffset: PD2D1_POINT_2F = nil); stdcall;
 
@@ -1360,37 +1302,26 @@ type
                          sourceRectangle: PD2D1_RECT_F = nil;
                          perspectiveTransform: PD2D1_MATRIX_4X4_F = nil); stdcall;
 
-    // Push a layer on the device context.
     procedure PushLayer(layerParameters: D2D1_LAYER_PARAMETERS1;
                         layer: ID2D1Layer); stdcall;
 
-    // This indicates that a portion of an effect's input is invalid. This method can
-    // be called many times.
     function InvalidateEffectInputRectangle(effect: ID2D1Effect;
                                             input: UINT32;
                                             inputRectangle: D2D1_RECT_F): HResult; stdcall;
 
-    // Gets the number of invalid ouptut rectangles that have accumulated at the
-    // effect.
     function GetEffectInvalidRectangleCount(effect: ID2D1Effect;
                                             out rectangleCount: UINT32): HResult; stdcall;
 
-    // Gets the invalid rectangles that are at the output of the effect.
     function GetEffectInvalidRectangles(effect: ID2D1Effect;
-                                        out rectangles: PD2D1_RECT_F; // pointer to array of D2D1_RECT_F
+                                        rectangles: PD2D1_RECT_F;
                                         rectanglesCount: UINT32): HResult; stdcall;
 
-    // Gets the maximum region of each specified input which would be used during a
-    // subsequent rendering operation
     function GetEffectRequiredInputRectangles(renderEffect: ID2D1Effect;
                                               renderImageRectangle: D2D1_RECT_F;
                                               inputDescriptions: PD2D1_EFFECT_INPUT_DESCRIPTION;
-                                              out requiredInputRects: PD2D1_RECT_F; // pointer to array of D2D1_RECT_F
+                                              requiredInputRects: PD2D1_RECT_F;
                                               inputCount: UINT32): HResult; stdcall;
 
-    // Fill using the alpha channel of the supplied opacity mask bitmap. The brush
-    // opacity will be modulated by the mask. The render target antialiasing mode must
-    // be set to aliased.
     procedure FillOpacityMask(opacityMask: ID2D1Bitmap;
                               brush: ID2D1Brush;
                               destinationRectangle: PD2D1_RECT_F = nil;
@@ -1451,7 +1382,7 @@ type
 
     // This creates a stroke style with the ability to preserve stroke width in various
     // ways.
-    function CreateStrokeStyle(strokeStyleProperties: D2D1_STROKE_STYLE_PROPERTIES1;
+    function CreateStrokeStyle(const strokeStyleProperties: D2D1_STROKE_STYLE_PROPERTIES1;
                                dashes: Single;
                                dashesCount: UINT32;
                                out strokeStyle: ID2D1StrokeStyle1): HResult; stdcall;

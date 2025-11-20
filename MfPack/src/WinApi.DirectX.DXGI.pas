@@ -593,6 +593,7 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IDXGISwapChain);'}
   {$EXTERNALSYM IDXGISwapChain}
+  PIDXGISwapChain = ^IDXGISwapChain;
   IDXGISwapChain = interface(IDXGIDeviceSubObject)
   ['{310d36a0-d2e7-4c0a-aa04-6a9d23b8886a}']
 

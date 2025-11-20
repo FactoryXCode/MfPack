@@ -6600,8 +6600,8 @@ begin
       BufferMaxLength := 0;
       BufferCurrLength := 0;
       hr := MediaBuffer.Lock(ByteBuffer,
-                             @BufferMaxLength,
-                             @BufferCurrLength);
+                             BufferMaxLength,
+                             BufferCurrLength);
     end;
   if SUCCEEDED(hr) then
     strres := pStream.Write(ByteBuffer,
