@@ -357,11 +357,11 @@ type
     BufferDesc: DXGI_MODE_DESC;
     SampleDesc: DXGI_SAMPLE_DESC;
     BufferUsage: DXGI_USAGE;
-    BufferCount: UINT;
+    BufferCount: UINT;  // Note: Must be between 2 and DXGI_MAX_SWAP_CHAIN_BUFFERS
     OutputWindow: HWND;
     Windowed: BOOL;
-    SwapEffect: DXGI_SWAP_EFFECT;
-    Flags: UINT;                    // DXGI_SWAP_CHAIN_FLAG
+    SwapEffect: DXGI_SWAP_EFFECT;  // DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL or DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL
+    Flags: UINT;                   // DXGI_SWAP_CHAIN_FLAG
   end;
   {$EXTERNALSYM DXGI_SWAP_CHAIN_DESC}
 

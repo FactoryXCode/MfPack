@@ -745,7 +745,7 @@ type
                                        par: MFRatio;
                                        out ppType: IMFMediaType): HResult;
 
-  // This funtion takes an encoded video format as input, and creates a matching uncompressed video type.
+  // This function takes an encoded video format as input, and creates a matching uncompressed video type.
   // This type would be suitable to set on an encoder or decoder.
   function ConvertVideoTypeToUncompressedType(pType: IMFMediaType;       // Pointer to an encoded video type.
                                               const subtype: TGUID;      // Uncompressed subtype (eg, RGB-32, AYUV)

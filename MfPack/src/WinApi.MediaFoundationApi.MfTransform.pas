@@ -518,18 +518,18 @@ type
                           dwOutputIDArraySize: DWORD;
                           pdwOutputIDs: PDWORD): HResult; stdcall;
 
-    function GetInputStreamInfo(dwInputStreamID: DWORD;
+    function GetInputStreamInfo(const dwInputStreamID: DWORD;
                                 out pStreamInfo: MFT_INPUT_STREAM_INFO): HResult; stdcall;
 
-    function GetOutputStreamInfo(dwOutputStreamID: DWORD;
+    function GetOutputStreamInfo(const dwOutputStreamID: DWORD;
                                  out pStreamInfo: MFT_OUTPUT_STREAM_INFO): HResult; stdcall;
 
     function GetAttributes(out pAttributes: IMFAttributes): HResult; stdcall;
 
-    function GetInputStreamAttributes(dwInputStreamID: DWORD;
+    function GetInputStreamAttributes(const dwInputStreamID: DWORD;
                                       out pAttributes: IMFAttributes): HResult; stdcall;
 
-    function GetOutputStreamAttributes(dwOutputStreamID: DWORD;
+    function GetOutputStreamAttributes(const dwOutputStreamID: DWORD;
                                        out pAttributes: IMFAttributes): HResult; stdcall;
 
     function DeleteInputStream(dwStreamID: DWORD): HResult; stdcall;
@@ -544,11 +544,11 @@ type
     //
     // GetxxxAvailableType - iterate through media types supported by a stream.
     //
-    function GetInputAvailableType(dwInputStreamID: DWORD;
+    function GetInputAvailableType(const dwInputStreamID: DWORD;
                                    dwTypeIndex: DWORD; // 0-based
                                    out ppType: IMFMediaType): HResult; stdcall;
 
-    function GetOutputAvailableType(dwOutputStreamID: DWORD;
+    function GetOutputAvailableType(const dwOutputStreamID: DWORD;
                                     dwTypeIndex: DWORD; // 0-based
                                     out ppType: IMFMediaType): HResult; stdcall;
 
@@ -556,7 +556,7 @@ type
     // SetxxxType - tell the object the type of data it will work with.
     //
 
-    function SetInputType(dwInputStreamID: DWORD;
+    function SetInputType(const dwInputStreamID: DWORD;
                           pType: IMFMediaType;
                           dwFlags: DWORD): HResult; stdcall;
 
@@ -568,10 +568,10 @@ type
     // GetxxxCurrentType - get the current type set for the given stream index.
     //
 
-    function GetInputCurrentType(dwInputStreamID: DWORD;
+    function GetInputCurrentType(const dwInputStreamID: DWORD;
                                  out ppType: IMFMediaType): HResult; stdcall;
 
-    function GetOutputCurrentType(dwOutputStreamID: DWORD;
+    function GetOutputCurrentType(const dwOutputStreamID: DWORD;
                                   out ppType: IMFMediaType): HResult; stdcall;
 
     //
@@ -579,7 +579,7 @@ type
     //
 
     // GetInputStatus - the only flag defined right now is MFT_INPUT_STATUS_ACCEPT_DATA.
-    function GetInputStatus(dwInputStreamID: DWORD;
+    function GetInputStatus(const dwInputStreamID: DWORD;
                             out pdwFlags: DWORD {MFT_INPUT_STATUS_ACCEPT_DATA}): HResult; stdcall;
 
     // GetOutputStatus - the only flag defined right now is MFT_OUTPUT_STATUS_SAMPLE_READY.
@@ -592,7 +592,7 @@ type
     function SetOutputBounds(hnsLowerBound: LONGLONG;
                              hnsUpperBound: LONGLONG): HResult; stdcall;
 
-    function ProcessEvent(dwInputStreamID: DWORD;
+    function ProcessEvent(const dwInputStreamID: DWORD;
                           pEvent: IMFMediaEvent): HResult; stdcall;
 
     //

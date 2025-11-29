@@ -87,8 +87,12 @@ uses
   WinApi.MediaFoundationApi.MfUtils;
 
 
+  {$WEAKPACKAGEUNIT}
+  {$WARN SYMBOL_PLATFORM OFF}
+
   {$MINENUMSIZE 4}
 
+  {$ALIGN ON}
   {$IFDEF WIN32}
     {$ALIGN 1}
   {$ELSE}
@@ -3243,8 +3247,9 @@ type
                    StartIndexLocation: UINT;
                    BaseVertexLocation: Integer); stdcall;
 
-    procedure DrawIndexed(VertexCount: UINT;
-                          StartVertexLocation: UINT); stdcall;
+    procedure DrawIndexed(IndexCount: UINT;
+                          StartIndexLocation: UINT;
+                          BaseVertexLocation: Integer); stdcall;
 
     function Map(pResource: ID3D11Resource;
                  Subresource: UINT;
@@ -3259,7 +3264,7 @@ type
                                    NumBuffers: UINT;
                         {_in_opt_} const ppConstantBuffers: PID3D11Buffer); stdcall;
 
-    procedure IASetInputLayout(pInputLayout: ID3D11InputLayout); stdcall;
+    procedure IASetInputLayout({_In_opt_} pInputLayout: ID3D11InputLayout); stdcall;
 
     procedure IASetVertexBuffers(StartSlot: UINT;
                                  NumBuffers: UINT;
@@ -3672,7 +3677,7 @@ type
                            {in_opt} pDesc: PD3D11_DEPTH_STENCIL_VIEW_DESC;
                           {out_opt} ppDepthStencilView: PID3D11DepthStencilView): HRESULT; stdcall;
 
-    function CreateInputLayout(const pInputElementDescs: PD3D11_INPUT_ELEMENT_DESC;
+    function CreateInputLayout(pInputElementDescs: PD3D11_INPUT_ELEMENT_DESC;
                                NumElements: UINT;
                       {in_opt} pShaderBytecodeWithInputSignature: Pointer;
                                BytecodeLength: SIZE_T;

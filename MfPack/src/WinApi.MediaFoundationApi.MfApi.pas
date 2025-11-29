@@ -937,7 +937,7 @@ type
 
 
   function MFCreateVideoSampleAllocatorEx(const riid: REFIID;
-                                          out ppSampleAllocator {Expected IUnknown pointer} ): HResult; stdcall;
+                                          out ppSampleAllocator: Pointer): HResult; stdcall;
   {$EXTERNALSYM MFCreateVideoSampleAllocatorEx}
   // Creates an object that allocates video samples that are compatible with Microsoft DirectX Graphics Infrastructure (DXGI).
   // Parameters

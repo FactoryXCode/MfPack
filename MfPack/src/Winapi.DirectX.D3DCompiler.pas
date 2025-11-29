@@ -69,11 +69,18 @@ interface
   {$HPPEMIT '#include "D3DCompiler.h"'}
 
 uses
+  {Winapi}
   Winapi.Windows,
+  {D3D10}
   Winapi.D3D10,
-  Winapi.DirectX.D3DCommon,
+  {D3D11}
+  Winapi.D3D11,
   Winapi.DirectX.D3D11Shader,
-  Winapi.DirectX.D3D12Shader;
+  {D3D12}
+  Winapi.D3D12,
+  Winapi.DirectX.D3D12Shader,
+  {DirectX}
+  Winapi.DirectX.D3DCommon;
 
 
   {$ALIGN ON}
@@ -302,7 +309,7 @@ const
                       Flags1: UINT;
                       Flags2: UINT;
                       out ppCode: ID3DBlob;
-                      out ppErrorMsgs: ID3DBlob): HRESULT; stdcall;
+      {out, optional} ppErrorMsgs: PID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM D3DCompile}
 
 
@@ -318,7 +325,7 @@ type
                           Flags1: UINT;
                           Flags2: UINT;
                           out ppCode: ID3DBlob;
-                          out ppErrorMsgs: ID3DBlob): HRESULT; stdcall;
+          {out, optional} ppErrorMsgs: PID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM pD3DCompile}
 
 const
@@ -344,7 +351,7 @@ const
                        pSecondaryData: LPCVOID;
                        SecondaryDataSize: SIZE_T;
                        out ppCode: ID3DBlob;
-                       out ppErrorMsgs: ID3DBlob):HRESULT; stdcall;
+       {out, optional} ppErrorMsgs: PID3DBlob):HRESULT; stdcall;
   {$EXTERNALSYM D3DCompile2}
 
   function D3DCompileFromFile(pFileName: LPCWSTR;
@@ -371,7 +378,7 @@ const
                 {in_opt} pDefines: LPD3D_SHADER_MACRO;
                 {in_opt} pInclude: ID3DInclude;
                          out ppCodeText: ID3DBlob;
-                         out ppErrorMsgs: ID3DBlob): HRESULT; stdcall;
+         {out, optional} ppErrorMsgs: PID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM D3DPreprocess}
 
 type
@@ -382,7 +389,7 @@ type
                             pDefines: LPD3D_SHADER_MACRO;
                             pInclude: ID3DInclude;
                             out ppCodeText: ID3DBlob;
-                            out ppErrorMsgs: ID3DBlob): HRESULT; stdcall;
+            {out, optional} ppErrorMsgs: PID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM pD3DPreprocess}
 
   //----------------------------------------------------------------------------
@@ -394,7 +401,7 @@ type
 
   function D3DGetDebugInfo(pSrcData: LPCVOID;
                            SrcDataSize: SIZE_T;
-                           out ppDebugInfo: ID3DBlob): HRESULT; stdcall;
+                           out ppDebugInfo: PID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM D3DGetDebugInfo}
 
   //----------------------------------------------------------------------------
@@ -420,7 +427,7 @@ type
   function D3DReflectLibrary(pSrcData: LPCVOID;
                              SrcDataSize: SIZE_T;
                              const riid: TGUID;
-                             out ppReflector:LPVOID): HRESULT; stdcall;
+                             out ppReflector: LPVOID): HRESULT; stdcall;
   {$EXTERNALSYM D3DReflectLibrary}
 
   //----------------------------------------------------------------------------
