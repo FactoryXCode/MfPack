@@ -272,7 +272,7 @@ This example shows how to use the basics of the MfAudioEndPoint component.
 **MFCaptureVideoFromGPU**
 
 This sample demostrates how to capture from screen using the GPU of your video card.
-It safes the captured screen frames to a mp4 file and shows you a preview when recording.
+It saves the captured screen frames to a mp4 file using IMFSinkWriter and shows you a preview when recording.
 The output resolutions are defined as (but not limited):
 - Preview window size
 - 720p (1280 x 720) size
