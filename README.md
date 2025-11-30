@@ -268,7 +268,9 @@ In your projectsettings you have to add ..MfPack\Samples\MfComponents in the pro
 **SimpleVolumeControlSample**
 This example shows how to use the basics of the MfAudioEndPoint component.
 
+
 **MFCaptureVideoFromGPU**
+
 This sample demostrates how to capture from screen using the GPU of your video card.
 It safes the captured screen frames to a mp4 file and shows you a preview when recording.
 The output resolutions are defined as (but not limited):
@@ -281,6 +283,7 @@ The output resolutions are defined as (but not limited):
 You can choose framerates at 30 or 60 fps, depending on your system. You may change those either if your GPU and CPU are fast enough.
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/CaptureVideoFromGPUSample.png)
+
 
 ***Tools***
 
