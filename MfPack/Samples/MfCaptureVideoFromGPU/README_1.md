@@ -26,35 +26,35 @@ This is how it in global works:
 
 
 
-&nbsp; - Creates a \*\*D3D11\*\* device + immediate context.
+  - Creates a \*\*D3D11\*\* device + immediate context.
 
 
 
-&nbsp; - Sets up Desktop Duplication on output 0.
+  - Sets up Desktop Duplication on output 0 (the main screen).
 
 
 
-&nbsp; - Each frame:
+  - Each frame:
 
 
 
-&nbsp;   - AcquireNextFrame → \*\*ID3D11Texture2D\*\* (BGRA desktop).
+    - AcquireNextFrame → \*\*ID3D11Texture2D\*\* (BGRA desktop).
 
 
 
-&nbsp;   - Shows it via TPreviewRenderer.
+    - Shows it via TPreviewRenderer.
 
 
 
-&nbsp;   - Maps a \*\*DXGI\_FORMAT\_NV12\*\* staging texture for CPU write.
+    - Maps a \*\*DXGI\_FORMAT\_NV12\*\* staging texture for CPU write.
 
 
 
-&nbsp;   - Calls TGpuNV12Converter.Convert(BGRA, mappedNV12).
+    - Calls TGpuNV12Converter.Convert(BGRA, mappedNV12).
 
 
 
-&nbsp;   - Packs NV12 into an MF buffer and feeds it into an H.264 sinkwriter.
+    - Packs NV12 into an MF buffer and feeds it into an H.264 sinkwriter.
 
 
 
@@ -62,19 +62,19 @@ This is how it in global works:
 
 
 
-&nbsp; - Has its own Y (R8\_UNORM) and UV (R8G8\_UNORM @ half res) render targets + staging textures.
+  - Has its own Y (R8\_UNORM) and UV (R8G8\_UNORM @ half res) render targets + staging textures.
 
 
 
-&nbsp; - Draws a fullscreen quad:
+  - Draws a fullscreen quad:
 
-&nbsp;     - Pass 1: BGRA → Y.
+      - Pass 1: BGRA → Y.
 
-&nbsp;     - Pass 2: BGRA → UV (half res).
+      - Pass 2: BGRA → UV (half res).
 
 
 
-&nbsp; - Maps the Y/UV staging textures and copies them into the mapped NV12 buffer (Y full res, UV interleaved).
+  - Maps the Y/UV staging textures and copies them into the mapped NV12 buffer (Y full res, UV interleaved).
 
 
 
@@ -82,9 +82,9 @@ This is how it in global works:
 
 
 
-&nbsp; - Keeps a DXGI swap chain bound to your panel handle.
+  - Keeps a DXGI swap chain bound to your panel handle.
 
-&nbsp; - For each frame, CopyResource the desktop texture into the backbuffer and Present.
+  - For each frame, CopyResource the desktop texture into the backbuffer and Present.
 
 
 
@@ -92,9 +92,9 @@ This is how it in global works:
 
 
 
-&nbsp; - Creates the engine in FormCreate, hardcoded 1920x1080 @ 60fps.
+  - Creates the engine in FormCreate, hardcoded 1920x1080 @ 60fps.
 
-&nbsp; - Starts/stops capture, logs progress/errors on the UI thread via TThread.Queue.
+  - Starts/stops capture, logs progress/errors on the UI thread via TThread.Queue.
 
 
 
