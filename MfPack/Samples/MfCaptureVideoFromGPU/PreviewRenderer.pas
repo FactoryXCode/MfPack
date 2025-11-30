@@ -86,15 +86,17 @@ type
     FContext: ID3D11DeviceContext;
     FSwapChain: IDXGISwapChain;
     FRenderTargetView: ID3D11RenderTargetView;
+
     FWidth: UINT;
     FHeight: UINT;
+    FSampleRate: UINT32;
 
     procedure ReleaseSwapChain();
     procedure CreateSwapChainInternal(hWnd: HWND;
                                       Width,
                                       Height: UINT;
                                       SampleRate: UINT32);
-    procedure CreateRenderTarget;
+    procedure CreateRenderTarget();
 
   public
 
@@ -125,7 +127,7 @@ begin
 end;
 
 
-destructor TPreviewRenderer.Destroy;
+destructor TPreviewRenderer.Destroy();
 begin
   ReleaseSwapChain;
   FContext := nil;
@@ -134,14 +136,14 @@ begin
 end;
 
 
-procedure TPreviewRenderer.ReleaseSwapChain;
+procedure TPreviewRenderer.ReleaseSwapChain();
 begin
   FRenderTargetView := nil;
   FSwapChain := nil;
 end;
 
 
-procedure TPreviewRenderer.CreateRenderTarget;
+procedure TPreviewRenderer.CreateRenderTarget();
 var
   hr    : HResult;
   back  : ID3D11Texture2D;
@@ -179,6 +181,7 @@ begin
 
   FWidth  := Width;
   FHeight := Height;
+  FSampleRate := SampleRate;
 
   hr := FDevice.QueryInterface(IDXGIDevice,
                                dxgiDev);
@@ -198,7 +201,7 @@ begin
   sd.BufferDesc.Width := FWidth;
   sd.BufferDesc.Height := FHeight;
   sd.BufferDesc.Format := DXGI_FORMAT_B8G8R8A8_UNORM;
-  sd.BufferDesc.RefreshRate.Numerator := SampleRate;
+  sd.BufferDesc.RefreshRate.Numerator := FSampleRate;
   sd.BufferDesc.RefreshRate.Denominator := 1;
   sd.BufferUsage := DXGI_USAGE_RENDER_TARGET_OUTPUT;
   sd.OutputWindow := hWnd;

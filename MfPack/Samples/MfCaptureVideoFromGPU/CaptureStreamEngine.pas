@@ -693,7 +693,11 @@ begin
   if FRunning then
     Exit;
 
-  // (Re)initialize everything for the current output
+  SetFrameWidth := FWidth;
+  SetFrameHeight := FHeight;
+  SetFrameRate := FFRameRate;
+
+  // (Re)initialize everything for the current output.
   InitDesktopDuplication();
   CreateNV12Staging();
 

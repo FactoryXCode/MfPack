@@ -14,7 +14,7 @@ NOTES:
 
 
 
-* This sample demonstrates how to capture from screen using the GPU of your video card*
+\*\*This sample demonstrates how to capture from screen using the GPU of your video card\*\*
 
 
 
@@ -22,7 +22,7 @@ This is how it in global works:
 
 
 
-**1. TCaptureStreamEngine**
+\*\*1. TCaptureStreamEngine\*\*
 
 
 
@@ -35,41 +35,72 @@ This is how it in global works:
 
 
 &nbsp; - Each frame:
-   - AcquireNextFrame → \*\*ID3D11Texture2D\*\* (BGRA desktop).
-   - Shows it via TPreviewRenderer.
 
 
 
-   - Maps a *DXGI\_FORMAT\_NV12* staging texture for CPU write.
-
-   - Calls TGpuNV12Converter.Convert(BGRA, mappedNV12).
-
-   - Packs NV12 into an MF buffer and feeds it into an H.264 sinkwriter.
-
-**2. TGpuNV12Converter**
-
-  - Has its own Y (R8\_UNORM) and UV (R8G8\_UNORM @ half res) render targets + staging textures.
-  - Draws a fullscreen quad:
-    - Pass 1: BGRA → Y.
-    - Pass 2: BGRA → UV (half res).
-
-  - Maps the Y/UV staging textures and copies them into the mapped NV12 buffer (Y full res, UV interleaved).
+&nbsp;   - AcquireNextFrame → \*\*ID3D11Texture2D\*\* (BGRA desktop).
 
 
-**3. TPreviewRenderer**
 
-  - Keeps a DXGI swap chain bound to your panel handle.
-  - For each frame, CopyResource the desktop texture into the backbuffer and Present.
+&nbsp;   - Shows it via TPreviewRenderer.
 
-**4. Form**
 
-  - Creates the engine in FormCreate, 1920x1080 at 60fps by default, unless you chooche another option like HD      etc..
-  - Starts/stops capture, logs progress/errors on the UI thread via TThread.Queue.
 
-*NOTE:*
-  The application is kept as simple as possible to show you the workflow and concepts of screen capturing to a    MP4 file and preview screen.
+&nbsp;   - Maps a \*\*DXGI\_FORMAT\_NV12\*\* staging texture for CPU write.
 
-**Note that sound and choosing another video output or screen will be included in the 2th sample of this project.** 
+
+
+&nbsp;   - Calls TGpuNV12Converter.Convert(BGRA, mappedNV12).
+
+
+
+&nbsp;   - Packs NV12 into an MF buffer and feeds it into an H.264 sinkwriter.
+
+
+
+\*\*2. TGpuNV12Converter\*\*
+
+
+
+&nbsp; - Has its own Y (R8\_UNORM) and UV (R8G8\_UNORM @ half res) render targets + staging textures.
+
+
+
+&nbsp; - Draws a fullscreen quad:
+
+&nbsp;     - Pass 1: BGRA → Y.
+
+&nbsp;     - Pass 2: BGRA → UV (half res).
+
+
+
+&nbsp; - Maps the Y/UV staging textures and copies them into the mapped NV12 buffer (Y full res, UV interleaved).
+
+
+
+\*\*3. TPreviewRenderer\*\*
+
+
+
+&nbsp; - Keeps a DXGI swap chain bound to your panel handle.
+
+&nbsp; - For each frame, CopyResource the desktop texture into the backbuffer and Present.
+
+
+
+\*\*4. Form\*\*
+
+
+
+&nbsp; - Creates the engine in FormCreate, hardcoded 1920x1080 @ 60fps.
+
+&nbsp; - Starts/stops capture, logs progress/errors on the UI thread via TThread.Queue.
+
+
+
+The application is kept as simple as possible to show you the workflow and concepts of screen capturing to a MP4 file and preview screen.
+
+
 
 Project: Media Foundation - MFPack - Samples
 Project location: https://github.com/FactoryXCode/MfPack
