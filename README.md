@@ -278,7 +278,9 @@ The output resolutions are defined as (but not limited):
 - 2K (2560 x 1440) size
 - 4K (3840 x 2160) size
 
-You can choose framerates at 30 or 60 fps, depending on your system. You may change those either if your GPU and CPU are fast enough. 
+You can choose framerates at 30 or 60 fps, depending on your system. You may change those either if your GPU and CPU are fast enough.
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/CaptureVideoFromGPUSample.png)
 
 ***Tools***
 
