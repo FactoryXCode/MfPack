@@ -117,19 +117,20 @@ type
 
   TDXGIOutputInfo = record
     OutputIndex: UINT;
-    DeviceName : string;
+    DeviceName: string;
   end;
 
   TCaptureStreamEngine = class
   private
-    // D3D / DXGI
-    FDevice   : ID3D11Device;
-    FContext  : ID3D11DeviceContext;
-    FPreview  : TPreviewRenderer;
 
-    FDXGIDevice : IDXGIDevice;
+    // D3D / DXGI
+    FDevice: ID3D11Device;
+    FContext: ID3D11DeviceContext;
+    FPreview: TPreviewRenderer;
+
+    FDXGIDevice: IDXGIDevice;
     FDXGIOutput1: IDXGIOutput1;
-    FDeskDupl   : IDXGIOutputDuplication;
+    FDeskDupl: IDXGIOutputDuplication;
     FOutputIndex: UINT; // selected monitor
 
     // NV12 staging
@@ -139,39 +140,42 @@ type
     FConverter: TGpuNV12Converter;
 
     // MF sink writer
-    FSinkWriter      : IMFSinkWriter;
+    FSinkWriter: IMFSinkWriter;
     FVideoStreamIndex: DWORD;
 
     // Geometry / preview
-    FWidth, FHeight : UINT;
-    FFrameRate      : UINT32;
-    FPreviewHandle  : HWND;
+    FWidth,
+    FHeight: UINT;
+    FFrameRate: UINT32;
+    FPreviewHandle: HWND;
 
     // State
-    FRunning     : Boolean;  // “engine is active”
+    FRunning: Boolean;  // “engine is active”
     FVideoRunning: Boolean;  // “worker loop should keep running”
-    FVideoThread : TThread;  // dedicated worker thread
+    FVideoThread: TThread;  // dedicated worker thread
 
     // Timing
     FFrameDuration100ns: Int64;
-    FFrameIndex        : Int64;
-    FMilliSeconds      : Double;
-    FQpcStart          : Int64;
-    FPerfFreq          : Int64;
+    FFrameIndex: Int64;
+    FMilliSeconds: Double;
+    FQpcStart: Int64;
+    FPerfFreq: Int64;
 
     // Events
     FOnProgress: TCaptureProgressEvent;
-    FOnError   : TCaptureErrorEvent;
+    FOnError: TCaptureErrorEvent;
 
   protected
-    procedure CreateD3DDevice;
-    procedure InitDesktopDuplication;
-    procedure CreateNV12Staging;
+
+    procedure CreateD3DDevice();
+    procedure InitDesktopDuplication();
+    procedure CreateNV12Staging();
     procedure CreateSinkWriter(const OutputFile: string);
     procedure SubmitVideoSampleToSinkWriter(const mappedNV12: D3D11_MAPPED_SUBRESOURCE);
-    procedure VideoLoop;
+    procedure VideoLoop();
 
   public
+
     constructor Create(aHwnd: HWND;
                        aWidth,
                        aHeight: UINT;
@@ -180,7 +184,7 @@ type
 
     procedure StartCapture(const OutputFile: string); overload;
     procedure StartCapture(const OutputFile: string; aOutputIndex: UINT); overload;
-    procedure StopCapture;
+    procedure StopCapture();
 
     function EnumerateOutputs: TArray<TDXGIOutputInfo>;
 
@@ -192,7 +196,7 @@ type
 
 
     property OnProgress: TCaptureProgressEvent read FOnProgress write FOnProgress;
-    property OnError   : TCaptureErrorEvent   read FOnError    write FOnError;
+    property OnError: TCaptureErrorEvent   read FOnError    write FOnError;
   end;
 
 
@@ -203,11 +207,9 @@ implementation
 
 procedure TCaptureStreamEngine.CreateD3DDevice;
 const
-  FeatureLevels: array[0..4] of D3D_FEATURE_LEVEL = (D3D_FEATURE_LEVEL_11_1,
+  FeatureLevels: array[0..2] of D3D_FEATURE_LEVEL = (D3D_FEATURE_LEVEL_11_1,
                                                      D3D_FEATURE_LEVEL_11_0,
-                                                     D3D_FEATURE_LEVEL_10_0,
-                                                     D3D_FEATURE_LEVEL_9_3,
-                                                     D3D_FEATURE_LEVEL_9_1);
+                                                     D3D_FEATURE_LEVEL_10_0);
 var
   hr: HResult;
 
@@ -215,12 +217,12 @@ begin
   hr := D3D11CreateDevice(nil,
                           D3D_DRIVER_TYPE_HARDWARE,
                           0,
-                          D3D11_CREATE_DEVICE_BGRA_SUPPORT or D3D11_CREATE_DEVICE_DEBUG,
-                          @FeatureLevels[0],
+                          D3D11_CREATE_DEVICE_BGRA_SUPPORT or D3D11_CREATE_DEVICE_DEBUG,  // For the best performance, shut the D3D11 debugger down on your final release! Remove "or D3D11_CREATE_DEVICE_DEBUG"
+                          @FeatureLevels,
                           Length(FeatureLevels),
                           D3D11_SDK_VERSION,
                           @FDevice,
-                          nil,
+                          nil,  // Leave this alone, use it when you know exactly which feature level you want to use!
                           @FContext);
   CheckHR(hr, 'D3D11CreateDevice');
 
@@ -240,9 +242,9 @@ var
 
 begin
 
-  FDXGIDevice  := nil;
+  FDXGIDevice := nil;
   FDXGIOutput1 := nil;
-  FDeskDupl    := nil;
+  FDeskDupl := nil;
 
   hr := FDevice.QueryInterface(IDXGIDevice,
                                dxgiDev);
@@ -731,14 +733,15 @@ begin
 end;
 
 
-procedure TCaptureStreamEngine.StartCapture(const OutputFile: string; aOutputIndex: UINT);
+procedure TCaptureStreamEngine.StartCapture(const OutputFile: string;
+                                            aOutputIndex: UINT);
 begin
   FOutputIndex := aOutputIndex;
   StartCapture(OutputFile);
 end;
 
 
-procedure TCaptureStreamEngine.StopCapture;
+procedure TCaptureStreamEngine.StopCapture();
 begin
 
   if not FRunning then
