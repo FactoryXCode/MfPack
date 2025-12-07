@@ -3225,22 +3225,22 @@ type
 
     procedure VSSetConstantBuffers(StartSlot: UINT;
                                    NumBuffers: UINT;
-                       {_in_opt_} const ppConstantBuffers: PID3D11Buffer); stdcall;
+                        {_in_opt_} ppConstantBuffers: PID3D11Buffer); stdcall;
 
     procedure PSSetShaderResources(StartSlot: UINT;
                                    NumViews: UINT;
-                       {_in_opt_} const ppShaderResourceViews: PID3D11ShaderResourceView); stdcall;
+                       {_in_opt_}  ppShaderResourceViews: PID3D11ShaderResourceView); stdcall;
 
     procedure PSSetShader(pPixelShader: ID3D11PixelShader;
-               {_in_opt_} const ppClassInstances: PID3D11ClassInstance;
+               {_in_opt_} ppClassInstances: PID3D11ClassInstance;
                           NumClassInstances: UINT); stdcall;
 
     procedure PSSetSamplers(StartSlot: UINT;
                             NumSamplers: UINT;
-                 {_in_opt_} const ppSamplers: PID3D11SamplerState); stdcall;
+                 {_in_opt_} ppSamplers: PID3D11SamplerState); stdcall;
 
     procedure VSSetShader(pVertexShader: ID3D11VertexShader;
-               {_in_opt_} const ppClassInstances: PID3D11ClassInstance;
+               {_in_opt_}  ppClassInstances: PID3D11ClassInstance;
                           NumClassInstances: UINT); stdcall;
 
     procedure Draw(IndexCount: UINT;
@@ -3262,15 +3262,15 @@ type
 
     procedure PSSetConstantBuffers(StartSlot: UINT;
                                    NumBuffers: UINT;
-                        {_in_opt_} const ppConstantBuffers: PID3D11Buffer); stdcall;
+                        {_in_opt_} ppConstantBuffers: PID3D11Buffer); stdcall;
 
     procedure IASetInputLayout({_In_opt_} pInputLayout: ID3D11InputLayout); stdcall;
 
     procedure IASetVertexBuffers(StartSlot: UINT;
                                  NumBuffers: UINT;
-                      {_in_opt_} const ppVertexBuffers: PID3D11Buffer;
-                      {_in_opt_} const pStrides: PUINT;
-                      {_in_opt_} const pOffsets: PUINT); stdcall;
+                      {_in_opt_} ppVertexBuffers: PID3D11Buffer;
+                      {_in_opt_} pStrides: PUINT;
+                      {_in_opt_} pOffsets: PUINT); stdcall;
 
     procedure IASetIndexBuffer(pIndexBuffer: ID3D11Buffer;
                                Format_: DXGI_FORMAT;
@@ -3289,21 +3289,21 @@ type
 
     procedure GSSetConstantBuffers(StartSlot: UINT;
                                    NumBuffers: UINT;
-                        {_in_opt_} const ppConstantBuffers: PID3D11Buffer); stdcall;
+                        {_in_opt_} ppConstantBuffers: PID3D11Buffer); stdcall;
 
     procedure GSSetShader(pShader: ID3D11GeometryShader;
-               {_in_opt_} const ppClassInstances: PID3D11ClassInstance;
+               {_in_opt_} ppClassInstances: PID3D11ClassInstance;
                           NumClassInstances: UINT); stdcall;
 
     procedure IASetPrimitiveTopology(Topology: D3D11_PRIMITIVE_TOPOLOGY); stdcall;
 
     procedure VSSetShaderResources(StartSlot: UINT;
                                    NumViews: UINT;
-                       {_in_opt_} const ppShaderResourceViews: PID3D11ShaderResourceView); stdcall;
+                        {_in_opt_} ppShaderResourceViews: PID3D11ShaderResourceView); stdcall;
 
     procedure VSSetSamplers(StartSlot: UINT;
                             NumSamplers: UINT;
-                 {_in_opt_} const ppSamplers: PID3D11SamplerState); stdcall;
+                 {_in_opt_} ppSamplers: PID3D11SamplerState); stdcall;
 
     procedure Begin_(pAsync: ID3D11Asynchronous); stdcall;
 
@@ -3319,22 +3319,22 @@ type
 
     procedure GSSetShaderResources(StartSlot: UINT;
                                    NumViews: UINT;
-                        {_in_opt_} const ppShaderResourceViews: PID3D11ShaderResourceView); stdcall;
+                        {_in_opt_} ppShaderResourceViews: PID3D11ShaderResourceView); stdcall;
 
    procedure GSSetSamplers(StartSlot: UINT;
                            NumSamplers: UINT;
                 {_in_opt_} const ppSamplers: PID3D11SamplerState); stdcall;
 
     procedure OMSetRenderTargets(NumViews: UINT;
-                      {_in_opt_} const ppRenderTargetViews: PID3D11RenderTargetView;
+                      {_in_opt_} ppRenderTargetViews: PID3D11RenderTargetView;
                       {_in_opt_} pDepthStencilView: ID3D11DepthStencilView); stdcall;
 
     procedure OMSetRenderTargetsAndUnorderedAccessViews(NumRTVs: UINT;
-                                             {_in_opt_} const ppRenderTargetViews: PID3D11RenderTargetView;
+                                             {_in_opt_} ppRenderTargetViews: PID3D11RenderTargetView;
                                                         pDepthStencilView: ID3D11DepthStencilView;
                                                         UAVStartSlot: UINT;
                                                         NumUAVs: UINT;
-                                             {_in_opt_} const ppUnorderedAccessViews: PID3D11UnorderedAccessView;
+                                             {_in_opt_} ppUnorderedAccessViews: PID3D11UnorderedAccessView;
                                                         const pUAVInitialCounts: PUINT); stdcall;
 
     procedure OMSetBlendState(pBlendState: ID3D11BlendState;
@@ -3345,7 +3345,7 @@ type
                                      StencilRef: UINT); stdcall;
 
     procedure SOSetTargets(NumBuffers: UINT;
-                {_in_opt_} const ppSOTargets: PID3D11Buffer;
+                {_in_opt_} ppSOTargets: PID3D11Buffer;
                            const pOffsets: PUINT); stdcall;
 
     procedure DrawAuto(); stdcall;
@@ -3366,7 +3366,7 @@ type
     procedure RSSetState(pRasterizerState: ID3D11RasterizerState); stdcall;
 
     procedure RSSetViewports(NumViewports: UINT;
-                  {_in_opt_} const pViewports: PD3D11_VIEWPORT); stdcall;
+                  {_in_opt_} pViewports: PD3D11_VIEWPORT); stdcall;
 
     procedure RSSetScissorRects(NumRects: UINT;
                                 const pRects: PD3D11_RECT); stdcall;
@@ -3378,7 +3378,7 @@ type
                                     DstZ: UINT;
                                     pSrcResource: ID3D11Resource;
                                     SrcSubresource: UINT;
-                         {_in_opt_} const pSrcBox: D3D11_BOX); stdcall;
+                         {_in_opt_} pSrcBox: D3D11_BOX); stdcall;
 
     procedure CopyResource(pDstResource: ID3D11Resource;
                            pSrcResource: ID3D11Resource); stdcall;
@@ -3426,47 +3426,47 @@ type
 
    procedure HSSetShaderResources(StartSlot: UINT;
                                   NumViews: UINT;
-                       {_in_opt_} const ppShaderResourceViews: PID3D11ShaderResourceView); stdcall;
+                       {_in_opt_} ppShaderResourceViews: PID3D11ShaderResourceView); stdcall;
 
     procedure HSSetShader(pHullShader: ID3D11HullShader;
-               {_in_opt_} const ppClassInstances: PID3D11ClassInstance;
+               {_in_opt_} ppClassInstances: PID3D11ClassInstance;
                           NumClassInstances: UINT); stdcall;
 
     procedure HSSetSamplers(StartSlot: UINT;
                             NumSamplers: UINT;
-                 {_in_opt_} const ppSamplers: PID3D11SamplerState); stdcall;
+                 {_in_opt_} ppSamplers: PID3D11SamplerState); stdcall;
 
     procedure HSSetConstantBuffers(StartSlot: UINT;
                                    NumBuffers: UINT;
-                        {_in_opt_} const ppConstantBuffers: PID3D11Buffer); stdcall;
+                        {_in_opt_} ppConstantBuffers: PID3D11Buffer); stdcall;
 
     procedure DSSetShaderResources(StartSlot: UINT;
                                    NumViews: UINT;
-                        {_in_opt_} const ppShaderResourceViews: PID3D11ShaderResourceView); stdcall;
+                        {_in_opt_} ppShaderResourceViews: PID3D11ShaderResourceView); stdcall;
 
     procedure DSSetShader(pDomainShader: ID3D11DomainShader;
-               {_in_opt_} const ppClassInstances: PID3D11ClassInstance;
+               {_in_opt_} ppClassInstances: PID3D11ClassInstance;
                           NumClassInstances: UINT); stdcall;
 
     procedure DSSetSamplers(StartSlot: UINT;
                             NumSamplers: UINT;
-                 {_in_opt_} const ppSamplers: PID3D11SamplerState); stdcall;
+                 {_in_opt_} ppSamplers: PID3D11SamplerState); stdcall;
 
     procedure DSSetConstantBuffers(StartSlot: UINT;
                                    NumBuffers: UINT;
-                        {_in_opt_} const ppConstantBuffers: PID3D11Buffer); stdcall;
+                        {_in_opt_} ppConstantBuffers: PID3D11Buffer); stdcall;
 
     procedure CSSetShaderResources(StartSlot: UINT;
                                    NumViews: UINT;
-                        {_in_opt_} const ppShaderResourceViews: PID3D11ShaderResourceView); stdcall;
+                        {_in_opt_} ppShaderResourceViews: PID3D11ShaderResourceView); stdcall;
 
     procedure CSSetUnorderedAccessViews(StartSlot: UINT;
                                         NumUAVs: UINT;
-                             {_in_opt_} const ppUnorderedAccessViews: PID3D11UnorderedAccessView;
+                             {_in_opt_} ppUnorderedAccessViews: PID3D11UnorderedAccessView;
                                         const pUAVInitialCounts: PUINT); stdcall;
 
     procedure CSSetShader(pComputeShader: ID3D11ComputeShader;
-               {_in_opt_} const ppClassInstances: PID3D11ClassInstance;
+               {_in_opt_} ppClassInstances: PID3D11ClassInstance;
                           NumClassInstances: UINT); stdcall;
 
     procedure CSSetSamplers(StartSlot: UINT;
@@ -3475,7 +3475,7 @@ type
 
     procedure CSSetConstantBuffers(StartSlot: UINT;
                                    NumBuffers: UINT;
-                        {_in_opt_} const ppConstantBuffers: PID3D11Buffer); stdcall;
+                        {_in_opt_} ppConstantBuffers: PID3D11Buffer); stdcall;
 
     procedure VSGetConstantBuffers(StartSlot: UINT;
                                    NumBuffers: UINT;
@@ -3645,7 +3645,7 @@ type
   {$EXTERNALSYM ID3D11Device}
   ID3D11Device = interface(IUnknown)
   ['{DB6F6DDB-AC77-4E88-8253-819DF9BBF140}']
-    function CreateBuffer([ref] const pDesc: D3D11_BUFFER_DESC;
+    function CreateBuffer(const pDesc: D3D11_BUFFER_DESC;
                  {in_opt} pInitialData: PD3D11_SUBRESOURCE_DATA;
                 {out_opt} ppBuffer: PID3D11Buffer): HRESULT; stdcall;
 
