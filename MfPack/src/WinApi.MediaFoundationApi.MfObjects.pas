@@ -1267,8 +1267,8 @@ type
   ['{045FA593-8799-42b8-BC8D-8968C6453507}']
 
     function Lock(out ppbBuffer: PByte;      // Receives a pointer to the start of the buffer.
-                  out pcbMaxLength: DWord;     // Receives the maximum amount of data that can be written to the buffer. This parameter can be nil.
-                  out pcbCurrentLength: DWord  // Receives the length of the valid data in the buffer, in bytes. This parameter can be nil.
+                  {out} pcbMaxLength: PDWord;     // Receives the maximum amount of data that can be written to the buffer. This parameter can be nil.
+                  {out} pcbCurrentLength: PDWord  // Receives the length of the valid data in the buffer, in bytes. This parameter can be nil.
                   ): HResult; stdcall;
 
     function Unlock(): HResult; stdcall;

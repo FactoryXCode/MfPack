@@ -5352,31 +5352,31 @@ type
   {$EXTERNALSYM CD3D11_COUNTER_DESC}
 
 
-  function D3D11CreateDevice(pAdapter: IDXGIAdapter;
+  function D3D11CreateDevice({In_opt} pAdapter: IDXGIAdapter;
                              DriverType: D3D_DRIVER_TYPE;
                              Software: HMODULE;
                              Flags: UINT;
-                             pFeatureLevels: PD3D_FEATURE_LEVEL;
+                             const pFeatureLevels: PD3D_FEATURE_LEVEL;
                              FeatureLevels: UINT;
                              SDKVersion: UINT;
-                             ppDevice: PID3D11Device;
-                             pFeatureLevel: PD3D_FEATURE_LEVEL;
-                             ppImmediateContext: PID3D11DeviceContext): HRESULT; stdcall;
+                   {Out_opt} ppDevice: PID3D11Device;
+                   {Out_opt} pFeatureLevel: PD3D_FEATURE_LEVEL;
+                   {Out_opt} ppImmediateContext: PID3D11DeviceContext): HRESULT; stdcall;
   {$EXTERNALSYM D3D11CreateDevice}
 
 
-  function D3D11CreateDeviceAndSwapChain(pAdapter: IDXGIAdapter;
+  function D3D11CreateDeviceAndSwapChain({In_opt} pAdapter: IDXGIAdapter;
                                          DriverType: D3D_DRIVER_TYPE;
                                          Software: HMODULE;
                                          Flags: UINT;
                                          const pFeatureLevels: PD3D_FEATURE_LEVEL;
                                          FeatureLevels: UINT;
                                          SDKVersion: UINT;
-                                         const pSwapChainDesc: PDXGI_SWAP_CHAIN_DESC;
-                                         ppSwapChain: PIDXGISwapChain;
-                                         ppDevice: PID3D11Device;
-                                         pFeatureLevel: PD3D_FEATURE_LEVEL;
-                                         ppImmediateContext: PID3D11DeviceContext): HRESULT; stdcall;
+                                {In_opt} const pSwapChainDesc: PDXGISwapChainDesc;
+                               {Out_opt} ppSwapChain: PIDXGISwapChain;
+                               {Out_opt} ppDevice: PID3D11Device;
+                               {Out_opt} pFeatureLevel: PD3D_FEATURE_LEVEL;
+                               {Out_opt} ppImmediateContext: PID3D11DeviceContext): HRESULT; stdcall;
   {$EXTERNALSYM D3D11CreateDeviceAndSwapChain}
 
 

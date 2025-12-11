@@ -207,11 +207,16 @@ implementation
 
 procedure TCaptureStreamEngine.CreateD3DDevice;
 const
-  FeatureLevels: array[0..2] of D3D_FEATURE_LEVEL = (D3D_FEATURE_LEVEL_11_1,
+  FeatureLevels: array[0..6] of D3D_FEATURE_LEVEL = (D3D_FEATURE_LEVEL_11_1,
                                                      D3D_FEATURE_LEVEL_11_0,
-                                                     D3D_FEATURE_LEVEL_10_0);
+                                                     D3D_FEATURE_LEVEL_10_1,
+                                                     D3D_FEATURE_LEVEL_10_0,
+                                                     D3D_FEATURE_LEVEL_9_3,
+                                                     D3D_FEATURE_LEVEL_9_2,
+                                                     D3D_FEATURE_LEVEL_9_1);
 var
   hr: HResult;
+  rUsedFeatureLevel: D3D_FEATURE_LEVEL;
 
 begin
   hr := D3D11CreateDevice(nil,
@@ -222,12 +227,13 @@ begin
                           Length(FeatureLevels),
                           D3D11_SDK_VERSION,
                           @FDevice,
-                          nil,  // Leave this alone, use it when you know exactly which feature level you want to use!
+                          @rUsedFeatureLevel,  // Returns the feature level the device is using depending on your system's Direct3D runtime version.
                           @FContext);
   CheckHR(hr, 'D3D11CreateDevice');
 
   FPreview := TPreviewRenderer.Create(FDevice, FContext);
 end;
+
 
 procedure TCaptureStreamEngine.InitDesktopDuplication;
 var
@@ -499,8 +505,8 @@ begin
   CheckHR(hr, 'MFCreateMemoryBuffer');
 
   hr := buffer.Lock(pData,
-                    maxLen,
-                    curLen);
+                    @maxLen,
+                    @curLen);
   CheckHR(hr, 'IMFMediaBuffer.Lock');
 
   try
