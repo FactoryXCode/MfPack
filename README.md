@@ -265,24 +265,24 @@ In your projectsettings you have to add ..MfPack\Samples\MfComponents in the pro
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer1.png)
 
-**SimpleVolumeControlSample**
+**SimpleVolumeControlSample 1**
 This example shows how to use the basics of the MfAudioEndPoint component.
 
+**MfCaptureVideoFromGPU Sample 1**
+This sample demonstrates how to capture from screen using your videocard GPU.
 
-**MFCaptureVideoFromGPU**
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/CaptureVideoFromGPUSample.png
 
-This sample demostrates how to capture from screen using the GPU of your video card.
-It saves the captured screen frames to a mp4 file using IMFSinkWriter and shows you a preview when recording.
-The output resolutions are defined as (but not limited):
-- Preview window size
-- 720p (1280 x 720) size
-- Full HD (1920 x 1080) size
-- 2K (2560 x 1440) size
-- 4K (3840 x 2160) size
+**MfCaptureVideoFromGPU Sample 2**
+This sample demonstrates how to Capture a selected monitor using DXGI Desktop Duplication,
+optionally captures system audio via WASAPI loopback, shows a live preview, 
+and writes the result to a file (typically MP4 with H.264 videoand AAC or FLAC audio).
+Audio-only recording can be done separately to WAV or FLAC using the
+dedicated recorder unit.
+Note: You have to know the principles of Media Foundation and DirectX.
 
-You can choose framerates at 30 or 60 fps, depending on your system. You may change those either if your GPU and CPU are fast enough.
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCaptureVideoFromScreen2s.png
 
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/CaptureVideoFromGPUSample.png)
 
 
 ***Tools***
@@ -293,7 +293,6 @@ You can choose framerates at 30 or 60 fps, depending on your system. You may cha
 *featuring a detailed build in "HResult Lookup tool", the "Windows System Error Code Lookup Tool" and*
 *the "System.SysUtils.SysErrorMessage" function, that provides the localized translation (language of your OS) of the HResult.*
 
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/HResultLookUpToolApp.png) 
- 
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/HResultLookUpToolApp.png)  
   
 **© FactoryX. All rights reserved.**
