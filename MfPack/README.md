@@ -219,59 +219,58 @@ It has some more advanced features like:
 
 **XAudio2Player Basic Player**
 
-XAudio2 is the long-awaited replacement for DirectSound.
+*XAudio2 is the long-awaited replacement for DirectSound.
 It addresses several outstanding issues and feature requests, like low latency etc.
 
 This sample demonstrates how to use XAudio2 to render different file formats like WAV, FLAC, MP3 etc.
 The sample uses the IMFSourceReader to decode the format suitable for playing in XAudio2.
 It shows you the basics of using XAudio2 without formatting the mediatypes yourself.
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
-In your projectsettings you have to add ..MfPack\Samples\MfComponents in the project options searchpath.
+In your projectsettings you have to add ..MfPack\Samples\MfComponents in the project options searchpath.*
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio_Basic_Sample.png)
 
  
 **XAudio2Player Sample 2**
 
-This sample shows you how to implement the IXAudio2VoiceCallback.
+*This sample shows you how to implement the IXAudio2VoiceCallback.
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
 In your projectsettings you must add ..MfPack\Samples\MfComponents in the project options searchpath.  
-It also has a pitch control.
+It also has a pitch control.*
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample2.png)
 
 
 **XAudio2Player Sample 3**
 
-This sample demonstrates how to implement XAudio2 effects and 
-how to go forward or backward during playing with a progressbar and keeping up progress.
+*This sample demonstrates how to implement XAudio2 effects and 
+how to go forward or backward during playing with a progressbar and keeping up progress.*
 
-It shows you how to implement events and methods instead of using messages from the XaudioEngine.
+*It shows you how to implement events and methods instead of using messages from the XaudioEngine.
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
-In your projectsettings you have to add ..MfPack\Samples\MfComponents in the project options searchpath.  
+In your projectsettings you have to add ..MfPack\Samples\MfComponents in the project options searchpath.*  
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample3.png)
 
 
 **WASAPI Player Sample 1**
 
-This sample demonstrates how to use the IAudioClient to render different audio formats like WAV, FLAC, MP3 etc.
-using the IMFSourceReader to decode the format suitable for playing in WASAPI's IAudioClient and renderer.
+*This sample demonstrates how to use the IAudioClient to render different audio formats like WAV, FLAC, MP3 etc.
+using the IMFSourceReader to decode the format suitable for playing in WASAPI's IAudioClient and renderer.*
     
-The sample plays formats like WAV (pcm and floatingpoint), MP3 and FLAC.
+*The sample plays formats like WAV (pcm and floatingpoint), MP3 and FLAC.
 It shows you the basics of using the IAudioClient, iAudioRenderer, IAudioClock and IAudioStreamVolume interfaces.
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
-In your projectsettings you have to add ..MfPack\Samples\MfComponents in the project options searchpath.
+In your projectsettings you have to add ..MfPack\Samples\MfComponents in the project options searchpath.*
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer1.png)
 
 **SimpleVolumeControlSample 1**
-
-This example shows how to use the basics of the MfAudioEndPoint component.
+*This example shows how to use the basics of the MfAudioEndPoint component.*
 
 **MfCaptureVideoFromGPU Sample 1**
-
 *This sample demonstrates how to capture from screen using your videocard GPU.*
+
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/CaptureVideoFromGPUSample.png)
 
@@ -279,11 +278,13 @@ This example shows how to use the basics of the MfAudioEndPoint component.
 
 *This sample demonstrates how to Capture a selected monitor using DXGI Desktop Duplication,
 optionally captures system audio via WASAPI loopback, shows a live preview, 
-and writes the result to a file (typically MP4 with H.264 videoand AAC or FLAC audio).
-Audio-only recording can be done separately to WAV or FLAC using the
+and writes the result to a file (typically MP4 with H.264 videoand AAC or FLAC audio).*
+
+*Audio-only recording can be done separately to WAV or FLAC using the
 dedicated recorder unit.*
 
 *Note: You have to know the principles of Media Foundation and DirectX.*
+
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCaptureVideoFromScreen2s.png)
 
