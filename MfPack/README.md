@@ -271,7 +271,7 @@ This example shows how to use the basics of the MfAudioEndPoint component.
 **MfCaptureVideoFromGPU Sample 1**
 This sample demonstrates how to capture from screen using your videocard GPU.
 
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/CaptureVideoFromGPUSample.pn
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/CaptureVideoFromGPUSample.png
 
 
 **MfCaptureVideoFromGPU Sample 2**
@@ -283,7 +283,6 @@ dedicated recorder unit.
 Note: You have to know the principles of Media Foundation and DirectX!
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCaptureVideoFromScreen2s.png
-
 
 
 
