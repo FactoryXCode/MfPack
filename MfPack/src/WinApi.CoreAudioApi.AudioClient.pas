@@ -510,7 +510,7 @@ type
 
     function IsFormatSupported(ShareMode: AUDCLNT_SHAREMODE;
                                pFormat: PWaveFormatEx;
-                               {out} var ppClosestMatch: PWaveFormatEx // Exclusive mode can't suggest a "closest match", you have to set this param to nil.
+                               {out} ppClosestMatch: PWaveFormatEx // Exclusive mode can't suggest a "closest match", you have to set this param to nil.
                               ): HResult; stdcall;
     // Description:
     //

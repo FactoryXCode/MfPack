@@ -585,6 +585,16 @@ type
                       bInheritHandle: BOOL;
                       dwThreadId: DWORD): THandle; stdcall;
 
+  // Math & replacements.
+
+  // NOTE: MulDiv replacement for Int64 types.
+  // MulDiv is 32-bit (Integer in/out). With range checking on, Delphi throws "Range check error".
+  // If working with Int64, use this method, instead of MulDiv.
+  function MulDiv64(const aNumber,
+                          aNumerator,
+                          aDenominator: Int64): Int64; inline;
+
+
 implementation
 
 uses
@@ -2189,6 +2199,22 @@ begin
       TranslateMessage(pMsg);
       DispatchMessage(pMsg);
     end;
+end;
+
+
+// NOTE:
+// MulDiv is 32-bit (Integer in/out). With range checking on, Delphi throws Range check error.
+// If working with Int64, use this method, instead of MulDiv.
+// All parameters must be of type Int64!
+function MulDiv64(const aNumber,
+                        aNumerator,
+                        aDenominator: Int64): Int64;
+begin
+  if aDenominator <= 0 then
+    Exit(0);
+
+  // Avoid Int64 overflow: (QpcDelta * 10_000_000) div PerfFreq
+  Result := (aNumber div aDenominator) * aNumerator + (aNumber mod aDenominator) * aNumerator div aDenominator;
 end;
 
 

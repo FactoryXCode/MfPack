@@ -5706,8 +5706,8 @@ begin
       DepthWriteMask := D3D11_DEPTH_WRITE_MASK_ALL;
       DepthFunc := D3D11_COMPARISON_LESS;
       StencilEnable := False;
-      StencilReadMask := D3D11_DEFAULT_STENCIL_READ_MASK;
-      StencilWriteMask := D3D11_DEFAULT_STENCIL_WRITE_MASK;
+      StencilReadMask := {UINT8} Byte(D3D11_DEFAULT_STENCIL_READ_MASK);
+      StencilWriteMask := {UINT8} Byte(D3D11_DEFAULT_STENCIL_WRITE_MASK);
       FrontFace := defaultStencilOp;
       BackFace := defaultStencilOp;
     end;

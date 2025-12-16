@@ -1863,6 +1863,7 @@ type
   // ======================
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IMFMediaSink);'}
   {$EXTERNALSYM IMFMediaSink}
+  PIMFMediaSink = ^IMFMediaSink;
   IMFMediaSink = interface(IUnknown)
   ['{6ef2a660-47c0-4666-b13d-cbb717f2fa2c}']
 
@@ -5866,7 +5867,7 @@ type
   function MFCreateMPEG4MediaSink(pIByteStream: IMFByteStream;
                                   pVideoMediaType: IMFMediaType;
                                   pAudioMediaType: IMFMediaType;
-                                  out ppIMediaSink: IMFMediaSink): HResult; stdcall;
+                                  {out} ppIMediaSink: PIMFMediaSink): HResult; stdcall;
   {$EXTERNALSYM MFCreateMPEG4MediaSink}
 
   function MFCreate3GPMediaSink(pIByteStream: IMFByteStream;
@@ -5876,7 +5877,7 @@ type
   {$EXTERNALSYM MFCreate3GPMediaSink}
 
   function MFCreateMP3MediaSink(pTargetByteStream: IMFByteStream;
-                                out ppMediaSink: IMFMediaSink): HResult; stdcall;
+                                {out} ppMediaSink: PIMFMediaSink): HResult; stdcall;
   {$EXTERNALSYM MFCreateMP3MediaSink}
 
 //#endif // (WINVER >= _WIN32_WINNT_WIN7
@@ -5885,24 +5886,24 @@ type
 
   function MFCreateAC3MediaSink(pTargetByteStream: IMFByteStream;
                                 pAudioMediaType: IMFMediaType;
-                                out ppMediaSink: IMFMediaSink): HResult; stdcall;
+                                {out} ppMediaSink: PIMFMediaSink): HResult; stdcall;
   {$EXTERNALSYM MFCreateAC3MediaSink}
 
   function MFCreateADTSMediaSink(pTargetByteStream: IMFByteStream;
                                  pAudioMediaType: IMFMediaType;
-                                 out ppMediaSink: IMFMediaSink): HResult; stdcall;
+                                 {out} ppMediaSink: PIMFMediaSink): HResult; stdcall;
   {$EXTERNALSYM MFCreateADTSMediaSink}
 
   function MFCreateMuxSink(const guidOutputSubType: TGUID;
                            pOutputAttributes: IMFAttributes;
                            pOutputByteStream: IMFByteStream;
-                           out ppMuxSink: IMFMediaSink): HResult; stdcall;
+                           {out} ppMuxSink: PIMFMediaSink): HResult; stdcall;
   {$EXTERNALSYM MFCreateMuxSink}
 
   function MFCreateFMPEG4MediaSink(pIByteStream: IMFByteStream;
                                    pVideoMediaType: IMFMediaType;
                                    pAudioMediaType: IMFMediaType;
-                                   out ppIMediaSink: IMFMediaSink): HResult; stdcall;
+                                   {out} ppIMediaSink: PIMFMediaSink): HResult; stdcall;
   {$EXTERNALSYM MFCreateFMPEG4MediaSink}
 
 //#endif // (WINVER >= _WIN32_WINNT_WIN8)
@@ -5912,12 +5913,12 @@ type
   function MFCreateAVIMediaSink(pIByteStream: IMFByteStream;
                                 pVideoMediaType: IMFMediaType;
                                 pAudioMediaType: IMFMediaType;
-                                out ppIMediaSink: IMFMediaSink): HResult; stdcall;
+                                {out} ppIMediaSink: PIMFMediaSink): HResult; stdcall;
   {$EXTERNALSYM MFCreateAVIMediaSink}
 
   function MFCreateWAVEMediaSink(pTargetByteStream: IMFByteStream;
                                  pAudioMediaType: IMFMediaType;
-                                 out ppMediaSink: IMFMediaSink): HResult; stdcall;
+                                 {out} ppMediaSink: PIMFMediaSink): HResult; stdcall;
   {$EXTERNALSYM MFCreateWAVEMediaSink}
 
 //#endif // (WINVER >= _WIN32_WINNT_WINBLUE)
@@ -6742,6 +6743,10 @@ const
   MfIdlLib3 = 'mfsensorgroup.dll';
   MfIdlLib4 = 'mfcore.dll';
 
+  // NOTE:  You have to use this library if you get an external error.
+  //        The Microsoft documents suggest Mf.dll, but that is false.
+  MfIdlLib5 = 'mfsrcsnk.dll';
+
 {$WARN SYMBOL_PLATFORM OFF}
   function MFCreateSensorGroup;            external MfIdlLib3 name 'MFCreateSensorGroup' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFCreateSensorStream;           external MfIdlLib3 name 'MFCreateSensorStream' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
@@ -6786,15 +6791,15 @@ const
 
   function MFCreateSimpleTypeHandler;           external MfIdlLib1 name 'MFCreateSimpleTypeHandler' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
-  function MFCreateMPEG4MediaSink;        external MfIdlLib1 name 'MFCreateMPEG4MediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function MFCreate3GPMediaSink;          external MfIdlLib1 name 'MFCreate3GPMediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function MFCreateMP3MediaSink;          external MfIdlLib1 name 'MFCreateMP3MediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function MFCreateAC3MediaSink;          external MfIdlLib1 name 'MFCreateAC3MediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function MFCreateADTSMediaSink;         external MfIdlLib1 name 'MFCreateADTSMediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function MFCreateMuxSink;               external MfIdlLib1 name 'MFCreateMuxSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function MFCreateFMPEG4MediaSink;       external MfIdlLib1 name 'MFCreateFMPEG4MediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function MFCreateAVIMediaSink;          external MfIdlLib1 name 'MFCreateAVIMediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function MFCreateWAVEMediaSink;         external MfIdlLib1 name 'MFCreateWAVEMediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateMPEG4MediaSink;        external MfIdlLib5 name 'MFCreateMPEG4MediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreate3GPMediaSink;          external MfIdlLib5 name 'MFCreate3GPMediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateMP3MediaSink;          external MfIdlLib5 name 'MFCreateMP3MediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateAC3MediaSink;          external MfIdlLib5 name 'MFCreateAC3MediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateADTSMediaSink;         external MfIdlLib5 name 'MFCreateADTSMediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateMuxSink;               external MfIdlLib5 name 'MFCreateMuxSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateFMPEG4MediaSink;       external MfIdlLib5 name 'MFCreateFMPEG4MediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateAVIMediaSink;          external MfIdlLib5 name 'MFCreateAVIMediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateWAVEMediaSink;         external MfIdlLib5 name 'MFCreateWAVEMediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
   function MFCreateSampleGrabberSinkActivate; external MfIdlLib1 name 'MFCreateSampleGrabberSinkActivate' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFCreateStandardQualityManager;    external MfIdlLib1 name 'MFCreateSampleGrabberSinkActivate' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};

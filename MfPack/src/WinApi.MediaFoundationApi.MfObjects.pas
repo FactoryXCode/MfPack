@@ -1230,7 +1230,7 @@ type
                        wszValue: LPCWSTR): HResult; stdcall;
 
     function SetBlob(const guidKey: TGUID;
-                     pBuf: UINT8;
+                     pBuf: PUINT8;  // Pointer to a byte array to associate with this key. The method stores a copy of the array.
                      cbBufSize: UINT32): HResult; stdcall;
 
     function SetUnknown(const constguidKey: TGUID;
