@@ -273,7 +273,6 @@ This sample demonstrates how to capture from screen using your videocard GPU.
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/CaptureVideoFromGPUSample.png
 
-
 **MfCaptureVideoFromGPU Sample 2**
 This sample demonstrates how to Capture a selected monitor using DXGI Desktop Duplication,
 optionally captures system audio via WASAPI loopback, shows a live preview, 
