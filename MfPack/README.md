@@ -285,6 +285,8 @@ Note: You have to know the principles of Media Foundation and DirectX!
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCaptureVideoFromScreen2s.png
 
 
+
+
 ***Tools***
 
 **HResult Lookup Tool Application**
