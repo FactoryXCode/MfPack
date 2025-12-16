@@ -266,20 +266,24 @@ In your projectsettings you have to add ..MfPack\Samples\MfComponents in the pro
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer1.png)
 
 **SimpleVolumeControlSample 1**
+
 This example shows how to use the basics of the MfAudioEndPoint component.
 
 **MfCaptureVideoFromGPU Sample 1**
-This sample demonstrates how to capture from screen using your videocard GPU.
+
+*This sample demonstrates how to capture from screen using your videocard GPU.*
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/CaptureVideoFromGPUSample.png)
 
 **MfCaptureVideoFromGPU Sample 2**
-This sample demonstrates how to Capture a selected monitor using DXGI Desktop Duplication,
+
+*This sample demonstrates how to Capture a selected monitor using DXGI Desktop Duplication,
 optionally captures system audio via WASAPI loopback, shows a live preview, 
 and writes the result to a file (typically MP4 with H.264 videoand AAC or FLAC audio).
 Audio-only recording can be done separately to WAV or FLAC using the
-dedicated recorder unit.
-Note: You have to know the principles of Media Foundation and DirectX.
+dedicated recorder unit.*
+
+*Note: You have to know the principles of Media Foundation and DirectX.*
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCaptureVideoFromScreen2s.png)
 
