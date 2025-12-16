@@ -278,8 +278,10 @@ This sample demonstrates how to capture from screen using your videocard GPU.
 This sample demonstrates how to Capture a selected monitor using DXGI Desktop Duplication,
 optionally captures system audio via WASAPI loopback, shows a live preview, 
 and writes the result to a file (typically MP4 with H.264 videoand AAC or FLAC audio).
+
 Audio-only recording can be done separately to WAV or FLAC using the
 dedicated recorder unit.
+
 Note: You have to know the principles of Media Foundation and DirectX.
 
 
