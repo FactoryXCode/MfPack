@@ -265,7 +265,7 @@ In your projectsettings you have to add ..MfPack\Samples\MfComponents in the pro
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer1.png)
 
-**SimpleVolumeControlSample**
+**SimpleVolumeControlSample 1**
 This example shows how to use the basics of the MfAudioEndPoint component.
 
 **MfCaptureVideoFromGPU Sample 1**
@@ -279,7 +279,7 @@ optionally captures system audio via WASAPI loopback, shows a live preview,
 and writes the result to a file (typically MP4 with H.264 videoand AAC or FLAC audio).
 Audio-only recording can be done separately to WAV or FLAC using the
 dedicated recorder unit.
-Note: You have to know the principles of Media Foundation and DirectX!
+Note: You have to know the principles of Media Foundation and DirectX.
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCaptureVideoFromScreen2s.png
 
