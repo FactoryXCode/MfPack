@@ -318,7 +318,7 @@ type
   // Support for older Delphi versions (<= XE2)
 
   // Set MFVideoNormalizedRect values
-  //  example rcSrc:= SetTRect(0, 0, 10, 20);
+  //  example rcSrc:= SetVNTRect(0, 0, 10, 20);
   function SetVNRect(const nrLeft: FLOAT = 0.0;
                      const nrTop: FLOAT = 0.0;
                      const nrRight: FLOAT = 0.0;

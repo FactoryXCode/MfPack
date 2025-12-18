@@ -1659,7 +1659,7 @@ type
                          out ppEvent: IMFMediaEvent): HResult; stdcall;
 
     function QueueEvent(met: MediaEventType;
-                        guidExtendedType: REFGUID;
+                        const guidExtendedType: REFGUID;
                         hrStatus: HRESULT;
                         pvValue: PROPVARIANT): HResult; stdcall;
   end;

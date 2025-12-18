@@ -2526,10 +2526,10 @@ const
                                                           // This parameter can be nil. If nil, all input types are matched.
                      pOutputType: PMFT_REGISTER_TYPE_INFO;  // A pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an output media type to match.
                                                             // This parameter can be nil. If nil, all output types are matched.
-                     out pppMFTActivate: PIMFActivate;  // Receives an array of IMFActivate interface pointers.
-                                                        // Each pointer represents an activation object for an MFT that matches the search criteria.
-                                                        // The function allocates the memory for the array. The caller must release the pointers and call the
-                                                        // CoTaskMemFree function to free the memory used by the array.
+                     {out} pppMFTActivate: PIMFActivate;  // Receives an array of IMFActivate interface pointers.
+                                                          // Each pointer represents an activation object for an MFT that matches the search criteria.
+                                                          // The function allocates the memory for the array. The caller must release the pointers and call the
+                                                          // CoTaskMemFree function to free the memory used by the array.
 
 
 

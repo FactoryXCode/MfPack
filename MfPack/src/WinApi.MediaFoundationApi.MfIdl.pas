@@ -1761,7 +1761,7 @@ type
   IMFMediaSource = interface(IMFMediaEventGenerator)
     ['{279A808D-AEC7-40C8-9C6B-A6B492C78A66}']
 
-      function GetCharacteristics(out pdwCharacteristics: PDWord): HResult; stdcall;
+      function GetCharacteristics({out} pdwCharacteristics: PDWord): HResult; stdcall;
       // Receives a bitwise OR of zero or more flags from the MFMEDIASOURCE_CHARACTERISTICS enumeration.
 
       function CreatePresentationDescriptor(out ppPresentationDescriptor: IMFPresentationDescriptor): HResult; stdcall;
