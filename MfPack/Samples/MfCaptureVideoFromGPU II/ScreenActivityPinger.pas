@@ -65,6 +65,7 @@ var
   pHdc: HDC;
 
 begin
+
   case aMsg of
     WM_PAINT:
       begin
@@ -143,6 +144,7 @@ var
   y: Integer;
 
 begin
+
   // register class once per process
   ZeroMemory(@pWndClass,
              SizeOf(pWndClass));
@@ -205,16 +207,12 @@ begin
   try
 
     pBrush := CreateSolidBrush(ColorToRGB(Color));
-
     GetClientRect(FPingWnd,
                   pRectangle);
-
     FillRect(pHdc,
              pRectangle,
              pBrush);
-
     DeleteObject(pBrush);
-
   finally
 
     ReleaseDC(FPingWnd,

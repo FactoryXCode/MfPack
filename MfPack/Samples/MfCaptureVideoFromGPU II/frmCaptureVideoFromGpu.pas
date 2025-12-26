@@ -225,8 +225,11 @@ var
   dlg: TSaveDialog;
 
 begin
+
   dlg := TSaveDialog.Create(Self);
+
   try
+
     dlg.Filter := 'MP4 Files|*.mp4';
     dlg.DefaultExt := 'mp4';
     dlg.FileName := edtOutput.Text;
@@ -310,8 +313,6 @@ begin
 
 
     ////////////////////////////////////////////////////////////////////////////
-
-
 
     lblStatus.Caption := 'Recording (audio only)...';
     lblStatus.Font.Color := clLime;

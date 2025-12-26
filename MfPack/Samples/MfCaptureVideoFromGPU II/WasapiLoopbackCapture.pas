@@ -89,6 +89,7 @@ type
 
   TWasapiLoopbackCapture = class
   private
+
     FOnData: TWasapiDataEvent;
 
     FThread: TThread;
@@ -108,6 +109,7 @@ type
     procedure FreeClient;
 
   public
+
     constructor Create(const aDeviceId: string = '');
     destructor Destroy; override;
 
@@ -120,6 +122,7 @@ type
 
 
 implementation
+
 
 uses
   Vcl.Dialogs;
@@ -135,13 +138,17 @@ begin
   FWaveFormat := nil;
 end;
 
+
 destructor TWasapiLoopbackCapture.Destroy;
 begin
+
   Stop;
   FreeClient;
   FreeAndNil(FStopEvent);
+
   inherited;
 end;
+
 
 procedure TWasapiLoopbackCapture.InitClient;
 var
@@ -153,23 +160,32 @@ var
 begin
 
   // Default render device (loopback)
-  hr := CoCreateInstance(CLSID_MMDeviceEnumerator, nil, CLSCTX_INPROC_SERVER,
-                         IID_IMMDeviceEnumerator, enum);
+  hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
+                         nil,
+                         CLSCTX_INPROC_SERVER,
+                         IID_IMMDeviceEnumerator,
+                         enum);
   CheckHR(hr, 'CoCreateInstance(IMMDeviceEnumerator)');
 
   // Select the audio device to capture from.
   if (FAudioDeviceId = '') then
     begin
-      hr := enum.GetDefaultAudioEndpoint(eRender, eMultimedia, FDevice);
+      hr := enum.GetDefaultAudioEndpoint(eRender,
+                                         eMultimedia,
+                                         FDevice);
       CheckHR(hr, 'GetDefaultAudioEndpoint');
     end
   else
     begin
-      hr := enum.GetDevice(PWideChar(FAudioDeviceId), FDevice);
+      hr := enum.GetDevice(PWideChar(FAudioDeviceId),
+                           FDevice);
       CheckHR(hr, 'IMMDeviceEnumerator.GetDevice')
     end;
 
-  hr := FDevice.Activate(IID_IAudioClient, CLSCTX_INPROC_SERVER, nil, Pointer(FAudioClient));
+  hr := FDevice.Activate(IID_IAudioClient,
+                         CLSCTX_INPROC_SERVER,
+                         nil,
+                         Pointer(FAudioClient));
   CheckHR(hr, 'IMMDevice.Activate(IAudioClient)');
 
   hr := FAudioClient.GetMixFormat(FWaveFormat);
@@ -184,17 +200,18 @@ begin
     RaiseLastOSError;
 
   hr := FAudioClient.Initialize(AUDCLNT_SHAREMODE_SHARED,
-                               AUDCLNT_STREAMFLAGS_LOOPBACK or AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
-                               bufferDur,
-                               0,
-                               FWaveFormat,
-                               nil);
+                                AUDCLNT_STREAMFLAGS_LOOPBACK or AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
+                                bufferDur,
+                                0,
+                                FWaveFormat,
+                                nil);
   CheckHR(hr, 'IAudioClient.Initialize');
 
   hr := FAudioClient.SetEventHandle(FEventHandle);
   CheckHR(hr, 'IAudioClient.SetEventHandle');
 
-  hr := FAudioClient.GetService(IID_IAudioCaptureClient, FCaptureClient);
+  hr := FAudioClient.GetService(IID_IAudioCaptureClient,
+                                FCaptureClient);
   CheckHR(hr, 'IAudioClient.GetService(IAudioCaptureClient)');
 end;
 
@@ -284,7 +301,8 @@ begin
     while (FStopEvent.WaitFor(0) = wrTimeout) do
       begin
 
-        waitRes := WaitForSingleObject(FEventHandle, 50);
+        waitRes := WaitForSingleObject(FEventHandle,
+                                       50);
         if (waitRes = WAIT_TIMEOUT) then
           Continue;
 
@@ -334,6 +352,7 @@ begin
                             FWaveFormat);
                 end;
             finally
+
               hr := FCaptureClient.ReleaseBuffer(numFrames);
               CheckHR(hr, 'IAudioCaptureClient.ReleaseBuffer');
             end;
@@ -344,12 +363,15 @@ begin
     end;
 
     try
+
       FAudioClient.Stop();
     except
+      // Do nothing.
     end;
 
     FreeClient();
   finally
+
     CoUninitialize();
   end;
 end;

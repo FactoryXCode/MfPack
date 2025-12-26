@@ -149,6 +149,7 @@ type
                       const DestNV12: D3D11_MAPPED_SUBRESOURCE);
   end;
 
+
 implementation
 
 uses
@@ -546,6 +547,7 @@ begin
   CheckHR(hr, 'GpuNV12: CreateBuffer IB');
 end;
 
+
 // Do the GPU passes: BGRA -> Y & UV render targets
 procedure TGpuNV12Converter.RenderToYUV(const SrcBGRA: ID3D11Texture2D);
 var
@@ -674,6 +676,7 @@ begin
   srv := nil;
 end;
 
+
 // Read back Y/UV from staging textures and pack into NV12 layout
 procedure TGpuNV12Converter.DownloadYUVAndPackNV12(const NV12: D3D11_MAPPED_SUBRESOURCE);
 var
@@ -784,9 +787,11 @@ begin
   end;
 end;
 
+
 procedure TGpuNV12Converter.Convert(const SrcBGRA: ID3D11Texture2D;
-  const DestNV12: D3D11_MAPPED_SUBRESOURCE);
+                                    const DestNV12: D3D11_MAPPED_SUBRESOURCE);
 begin
+
   if (FDevice = nil) or
      (SrcBGRA = nil) then
     Exit;

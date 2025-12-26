@@ -178,16 +178,16 @@ end;
 // NOTE:
 // MulDiv is 32-bit (Integer in/out). With range checking on, Delphi throws Range check error.
 // If working with Int64, use this method, instead of MulDiv.
+// Note: In later MfPack versions (> version 3.18), this method will be declared in WinApi.MediaFoundationApi.MfUtils.
 function _MulDiv64(const aNumber,
                          aNumerator,
                          aDenominator: Int64): Int64;
 begin
-  if aDenominator <= 0 then
+  if (aDenominator <= 0) then
     Exit(0);
 
   // Avoid Int64 overflow: (QpcDelta * 10_000_000) div PerfFreq
-  Result :=
-    (aNumber div aDenominator) * aNumerator + (aNumber mod aDenominator) * aNumerator div aDenominator;
+  Result := (aNumber div aDenominator) * aNumerator + (aNumber mod aDenominator) * aNumerator div aDenominator;
 end;
 
 end.

@@ -23,7 +23,6 @@ object frmCapture: TfrmCapture
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitWidth = 1458
     object Bevel3: TBevel
       Left = 913
       Top = 12
@@ -306,9 +305,6 @@ object frmCapture: TfrmCapture
     Color = 6656
     ParentBackground = False
     TabOrder = 1
-    ExplicitTop = 155
-    ExplicitWidth = 1656
-    ExplicitHeight = 678
   end
   object pnlBottom: TPanel
     Left = 0
@@ -361,8 +357,6 @@ object frmCapture: TfrmCapture
       ParentFont = False
       ScrollBars = ssVertical
       TabOrder = 0
-      ExplicitTop = 36
-      ExplicitWidth = 1656
     end
     object btnStart: TButton
       Left = 4

@@ -168,7 +168,9 @@ type
     FVideoStreamIndex: DWORD;
     FAudioStreamIndex: DWORD;
 
-    FOutputExt: string; // cached lowercase extension of output file
+    // cached lowercase extension of output file
+    FOutputExt: string;
+
     // Single writer thread (mux-style)
     FWriterRunning: Boolean;
     FWriterThread: TThread;
@@ -188,6 +190,7 @@ type
     FAudioHoldOnMs: Integer;
     FAudioHoldOffMs: Integer;
     FAudioPreRollMs: Integer;
+
     // Pre-roll buffer (PCM chunks). Flushed when sound becomes active.
     FAudioPreRoll: TList<TAudioChunk>;
     FAudioAboveMs: Integer;
@@ -243,11 +246,13 @@ type
 
     // Monitor selection
     FSelectedDisplayName: string; // "\\.\DISPLAYx"
+
     FDisplayOutputIndex: UINT;  // Selected monitor
 
     // Capture mode flags
     FCaptureMode : TCaptureMode;
     FRecordVideo : Boolean;
+
     FRecordAudio : Boolean;
 
     // Events
@@ -293,12 +298,12 @@ type
     procedure EnableLoopbackAudioFlacMp4(const Mp4SampleDescription: TBytes; const ChannelMask: Cardinal);
     procedure EnableLoopbackAudioAacMp4(const ChannelMask: Cardinal; const TargetAvgBytesPerSec: Cardinal = 20000);
 
-    procedure DisableAudio;
+    procedure DisableAudio();
     procedure SetAudioDeviceID(const Value: string);
 
 
-    function EnumerateOutputs: TArray<TDXGIOutputInfo>;
-    function GetSelectedOutputRect: TRect;
+    function EnumerateOutputs(): TArray<TDXGIOutputInfo>;
+    function GetSelectedOutputRect(): TRect;
 
     property AudioCodec: TAudioCodec read FAudioCodec write FAudioCodec;
     property AudioThresholdOnDb: Single read FAudioThresholdOnDb write FAudioThresholdOnDb;
@@ -344,12 +349,14 @@ begin
                           Length(FeatureLevels),
                           D3D11_SDK_VERSION,
                           @FDevice,
-                          nil,  // Leave this alone, use it when you know exactly which feature level you want to use!
+                          nil,  // Feature level the application wil use, can be nil when not needed.
                           @FContext);
   CheckHR(hr, 'D3D11CreateDevice');
 
-  FPreview := TPreviewRenderer.Create(FDevice, FContext);
+  FPreview := TPreviewRenderer.Create(FDevice,
+                                      FContext);
 end;
+
 
 procedure TCaptureStreamEngine.InitDesktopDuplication;
 var
@@ -413,7 +420,7 @@ begin
 end;
 
 
-function TCaptureStreamEngine.EnumerateOutputs: TArray<TDXGIOutputInfo>;
+function TCaptureStreamEngine.EnumerateOutputs(): TArray<TDXGIOutputInfo>;
 var
   hr: HResult;
   dxgiDev: IDXGIDevice;
@@ -440,78 +447,94 @@ begin
 
   outIdx := 0;
 
-  while adapter.EnumOutputs(outIdx, output) <> DXGI_ERROR_NOT_FOUND do
+  while adapter.EnumOutputs(outIdx,
+                            output) <> DXGI_ERROR_NOT_FOUND do
     begin
       ZeroMemory(@outDesc,
                  SizeOf(outDesc));
 
-    hr := output.GetDesc(outDesc);
-    CheckHR(hr, 'EnumerateOutputs: GetDesc');
+      hr := output.GetDesc(outDesc);
+      CheckHR(hr, 'EnumerateOutputs: GetDesc');
 
-    SetLength(list,
-              Length(list) + 1);
+      SetLength(list,
+                Length(list) + 1);
 
-    list[High(list)].OutputIndex := outIdx;
-    list[High(list)].DeviceName := outDesc.DeviceName;
+      list[High(list)].OutputIndex := outIdx;
+      list[High(list)].DeviceName := outDesc.DeviceName;
 
-    output := nil;
-    Inc(outIdx);
-  end;
+      output := nil;
+      Inc(outIdx);
+    end;
 
   Result := list;
 end;
 
 
-function TCaptureStreamEngine.GetSelectedOutputRect: TRect;
+function TCaptureStreamEngine.GetSelectedOutputRect(): TRect;
 var
-  dxgiDev : IDXGIDevice;
-  adapter : IDXGIAdapter;
-  output  : IDXGIOutput;
-  desc    : DXGI_OUTPUT_DESC;
-  hr      : HRESULT;
-  idx     : UINT;
-  wanted  : string;
+
+  hr: HResult;
+  dxgiDev: IDXGIDevice;
+  adapter: IDXGIAdapter;
+  output: IDXGIOutput;
+  desc: DXGI_OUTPUT_DESC;
+  idx: UINT;
+  wanted : string;
 
 begin
-  Result := Rect(0, 0, 0, 0);
 
-  if FDevice = nil then
+  Result := Rect(0,
+                 0,
+                 0,
+                 0);
+
+  if (FDevice = nil) then
     Exit;
 
   wanted := FSelectedDisplayName;
-  if wanted = '' then
+
+  if (wanted = '') then
     wanted := '\\.\DISPLAY1';
 
-  CheckHR(FDevice.QueryInterface(IDXGIDevice,
-                                 dxgiDev),
-          'GetSelectedOutputRect: QI IDXGIDevice');
+  hr := FDevice.QueryInterface(IDXGIDevice,
+                               dxgiDev);
+  CheckHR(hr, 'GetSelectedOutputRect: QI IDXGIDevice');
 
-  CheckHR(dxgiDev.GetAdapter(adapter),
-          'GetSelectedOutputRect: GetAdapter');
+  hr := dxgiDev.GetAdapter(adapter);
+  CheckHR(hr, 'GetSelectedOutputRect: GetAdapter');
 
   idx := 0;
-  while adapter.EnumOutputs(idx, output) <> DXGI_ERROR_NOT_FOUND do
-  begin
-    ZeroMemory(@desc, SizeOf(desc));
-    hr := output.GetDesc(desc);
-    if Succeeded(hr) then
+
+  while (adapter.EnumOutputs(idx, output) <> DXGI_ERROR_NOT_FOUND) do
     begin
-      if SameText(desc.DeviceName, wanted) or (idx = FDisplayOutputIndex) then
-      begin
-        Result.Left   := desc.DesktopCoordinates.Left;
-        Result.Top    := desc.DesktopCoordinates.Top;
-        Result.Right  := desc.DesktopCoordinates.Right;
-        Result.Bottom := desc.DesktopCoordinates.Bottom;
-        Exit;
-      end;
-    end;
+
+      ZeroMemory(@desc,
+                 SizeOf(desc));
+
+       hr := output.GetDesc(desc);
+
+       if Succeeded(hr) then
+         begin
+
+          if SameText(desc.DeviceName, wanted) or (idx = FDisplayOutputIndex) then
+            begin
+
+              Result.Left := desc.DesktopCoordinates.Left;
+              Result.Top := desc.DesktopCoordinates.Top;
+              Result.Right := desc.DesktopCoordinates.Right;
+              Result.Bottom := desc.DesktopCoordinates.Bottom;
+              Exit;
+            end;
+
+         end;
+
     output := nil;
     Inc(idx);
   end;
 end;
 
 
-procedure TCaptureStreamEngine.CreateNV12Staging;
+procedure TCaptureStreamEngine.CreateNV12Staging();
 var
   hr: HResult;
   desc: D3D11_TEXTURE2D_DESC;
@@ -675,9 +698,6 @@ end;
 
 
 procedure TCaptureStreamEngine.PrepareAudioFormatFromLoopbackMix;
-type
-  PWAVEFORMATEXTENSIBLE = ^WAVEFORMATEXTENSIBLE;
-
 var
   hr: HRESULT;
   enum: IMMDeviceEnumerator;
@@ -688,7 +708,9 @@ var
   chMask: Cardinal;
   isFloat: Boolean;
   chunkMs: Cardinal;
+
 begin
+
   if not FAudioEnabled then
     Exit;
 
@@ -697,21 +719,31 @@ begin
   dev := nil;
   ac := nil;
 
-  hr := CoCreateInstance(CLSID_MMDeviceEnumerator, nil, CLSCTX_INPROC_SERVER,
-                         IID_IMMDeviceEnumerator, enum);
+  hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
+                         nil,
+                         CLSCTX_INPROC_SERVER,
+                         IID_IMMDeviceEnumerator,
+                         enum);
   CheckHR(hr, 'CoCreateInstance(IMMDeviceEnumerator)');
 
-  hr := enum.GetDefaultAudioEndpoint(eRender, eConsole, dev);
+  hr := enum.GetDefaultAudioEndpoint(eRender,
+                                     eConsole,
+                                     dev);
   CheckHR(hr, 'GetDefaultAudioEndpoint');
 
-  hr := dev.Activate(IID_IAudioClient, CLSCTX_INPROC_SERVER, nil, Pointer(ac));
+  hr := dev.Activate(IID_IAudioClient,
+                     CLSCTX_INPROC_SERVER,
+                     nil,
+                     Pointer(ac));
   CheckHR(hr, 'IMMDevice.Activate(IAudioClient)');
 
   hr := ac.GetMixFormat(wf);
   CheckHR(hr, 'IAudioClient.GetMixFormat');
 
   try
-    if (wf = nil) or (wf.nSamplesPerSec = 0) or (wf.nChannels = 0) then
+    if (wf = nil) or
+       (wf.nSamplesPerSec = 0) or
+       (wf.nChannels = 0) then
       raise Exception.Create('Invalid WASAPI mix format');
 
     // Determine source format
@@ -719,20 +751,24 @@ begin
     chMask := 0;
 
     if wf.wFormatTag = WAVE_FORMAT_EXTENSIBLE then
-    begin
-      pExt := PWAVEFORMATEXTENSIBLE(wf);
-      chMask := pExt^.dwChannelMask;
-      isFloat := IsEqualGUID(pExt^.SubFormat, KSDATAFORMAT_SUBTYPE_IEEE_FLOAT);
-    end;
+      begin
+
+        pExt := PWAVEFORMATEXTENSIBLE(wf);
+        chMask := pExt^.dwChannelMask;
+        isFloat := IsEqualGUID(pExt^.SubFormat,
+                               KSDATAFORMAT_SUBTYPE_IEEE_FLOAT);
+      end;
 
     // Fall back to typical channel masks if not provided
-    if chMask = 0 then
-    begin
-      if wf.nChannels = 1 then
-        chMask := $4
-      else if wf.nChannels = 2 then
-        chMask := $3;
-    end;
+    if (chMask = 0) then
+      begin
+
+        if (wf.nChannels = 1) then
+          chMask := $4
+        else
+          if (wf.nChannels = 2) then
+          chMask := $3;
+      end;
 
     // We write s16 PCM into the sink writer input (convert from float if needed).
     FAudioSampleRate := wf.nSamplesPerSec;
@@ -744,60 +780,66 @@ begin
     
     // Output target: for FLAC we keep it equal to PCM; for AAC we use the configured bitrate.
     if (FAudioCodec = acAac) then
-    begin
-      if FAudioOutAvgBytesPerSec = 0 then
-        FAudioOutAvgBytesPerSec := 20000;
-    end
+      begin
+        if (FAudioOutAvgBytesPerSec = 0) then
+          FAudioOutAvgBytesPerSec := 20000;
+      end
     else
-    begin
-      if FAudioOutAvgBytesPerSec = 0 then
-        FAudioOutAvgBytesPerSec := FAudioAvgBytesPerSec;
-    end;
-FAudioChannelMask := chMask;
+      begin
+        if (FAudioOutAvgBytesPerSec = 0) then
+          FAudioOutAvgBytesPerSec := FAudioAvgBytesPerSec;
+      end;
+
+    FAudioChannelMask := chMask;
     FAudioSourceIsFloat := isFloat;
 
     // Chunk size: ~40ms to reduce WriteSample overhead (esp. if encoding)
     chunkMs := 40;
     FAudioChunkFramesTarget := (FAudioSampleRate * chunkMs + 999) div 1000;
-    if FAudioChunkFramesTarget < 256 then
+    if (FAudioChunkFramesTarget < 256) then
       FAudioChunkFramesTarget := 256;
 
     // Reset accumulator
     SetLength(FAudioAccum, 0);
     FAudioAccumOffset := 0;
     FAudioAccumFrames := 0;
+
   finally
+
     if Assigned(wf) then
       CoTaskMemFree(wf);
   end;
 end;
 
 
-
-
-procedure TCaptureStreamEngine.AddAudioStreamToSinkWriter;
+procedure TCaptureStreamEngine.AddAudioStreamToSinkWriter();
 var
   hr: HRESULT;
-  outType, inType: IMFMediaType;
+  outType,
+  inType: IMFMediaType;
 
 begin
-  if FSinkWriter = nil then
+
+  if (FSinkWriter = nil) then
     Exit;
 
   // Infer audio format from loopback later; for now we set a safe default.
   // If loopback provides different format, SetInputMediaType will accept as long as MFT can convert.
   if FAudioSampleRate = 0 then
-  begin
-    FAudioSampleRate := 48000;
-    FAudioChannels := 2;
-    FAudioBitsPerSample := 16;
-    FAudioBlockAlign := FAudioChannels * (FAudioBitsPerSample div 8);
-    FAudioAvgBytesPerSec := FAudioSampleRate * FAudioBlockAlign;
-    if FAudioOutAvgBytesPerSec = 0 then
-      FAudioOutAvgBytesPerSec := FAudioAvgBytesPerSec;
-    if FAudioChannelMask = 0 then
-      FAudioChannelMask := $3;
-  end;
+    begin
+
+      FAudioSampleRate := 48000;
+      FAudioChannels := 2;
+      FAudioBitsPerSample := 16;
+      FAudioBlockAlign := FAudioChannels * (FAudioBitsPerSample div 8);
+      FAudioAvgBytesPerSec := FAudioSampleRate * FAudioBlockAlign;
+
+      if (FAudioOutAvgBytesPerSec = 0) then
+        FAudioOutAvgBytesPerSec := FAudioAvgBytesPerSec;
+
+      if (FAudioChannelMask = 0) then
+        FAudioChannelMask := $3; // Stereo.
+    end;
 
   hr := MFCreateMediaType(outType);
   CheckHR(hr, 'MFCreateMediaType(audio out)');
@@ -807,74 +849,91 @@ begin
 
   // Output subtype: FLAC (requires MP4 sample description) or standard AAC.
   if (FAudioCodec = acAac) then
-  begin
-    hr := outType.SetGUID(MF_MT_SUBTYPE, MFAudioFormat_AAC);
-    CheckHR(hr, 'SetGUID(MF_MT_SUBTYPE AAC out)');
-  end
+    begin
+      hr := outType.SetGUID(MF_MT_SUBTYPE, MFAudioFormat_AAC);
+      CheckHR(hr, 'SetGUID(MF_MT_SUBTYPE AAC out)');
+    end
   else // FLAC
-  begin
+    begin
 
-    hr := outType.SetGUID(MF_MT_SUBTYPE, MFAudioFormat_FLAC);
-    CheckHR(hr, 'SetGUID(MF_MT_SUBTYPE FLAC out)');
+      hr := outType.SetGUID(MF_MT_SUBTYPE,
+                            MFAudioFormat_FLAC);
+      CheckHR(hr, 'SetGUID(MF_MT_SUBTYPE FLAC out)');
 
-    // For MP4+FLAC, Media Foundation may require MF_MT_MPEG4_SAMPLE_DESCRIPTION (track sample entry).
-    // If the caller provided one, attach it; otherwise we try without it.
-    if (FOutputExt = '.mp4') and (Length(FAudioMp4SampleDescription) > 0) then
-      begin
-        hr := outType.SetBlob(MF_MT_MPEG4_SAMPLE_DESCRIPTION,
-                              @FAudioMp4SampleDescription[0],
-                              Length(FAudioMp4SampleDescription));
-        CheckHR(hr, 'SetBlob(MF_MT_MPEG4_SAMPLE_DESCRIPTION)');
-      end;
-  end;
+      // For MP4+FLAC, Media Foundation may require MF_MT_MPEG4_SAMPLE_DESCRIPTION (track sample entry).
+      // If the caller provided one, attach it; otherwise we try without it.
+      if (FOutputExt = '.mp4') and (Length(FAudioMp4SampleDescription) > 0) then
+        begin
+          hr := outType.SetBlob(MF_MT_MPEG4_SAMPLE_DESCRIPTION,
+                                @FAudioMp4SampleDescription[0],
+                                Length(FAudioMp4SampleDescription));
+          CheckHR(hr, 'SetBlob(MF_MT_MPEG4_SAMPLE_DESCRIPTION)');
+        end;
+    end;
 
-  hr := outType.SetUINT32(MF_MT_AUDIO_NUM_CHANNELS, FAudioChannels);
+  hr := outType.SetUINT32(MF_MT_AUDIO_NUM_CHANNELS,
+                          FAudioChannels);
   CheckHR(hr, 'SetUINT32(NUM_CHANNELS out)');
 
-  hr := outType.SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND, FAudioSampleRate);
+  hr := outType.SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
+                          FAudioSampleRate);
   CheckHR(hr, 'SetUINT32(SAMPLES_PER_SECOND out)');
 
-  hr := outType.SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE, FAudioBitsPerSample);
+  hr := outType.SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE,
+                          FAudioBitsPerSample);
   CheckHR(hr, 'SetUINT32(BITS_PER_SAMPLE out)');
 
-  hr := outType.SetUINT32(MF_MT_AUDIO_BLOCK_ALIGNMENT, FAudioBlockAlign);
+  hr := outType.SetUINT32(MF_MT_AUDIO_BLOCK_ALIGNMENT,
+                          FAudioBlockAlign);
   CheckHR(hr, 'SetUINT32(BLOCK_ALIGNMENT out)');
 
-  hr := outType.SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND, FAudioOutAvgBytesPerSec);
+  hr := outType.SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
+                          FAudioOutAvgBytesPerSec);
   CheckHR(hr, 'SetUINT32(AVG_BYTES_PER_SECOND out)');
 
-  hr := FSinkWriter.AddStream(outType, FAudioStreamIndex);
+  hr := FSinkWriter.AddStream(outType,
+                              FAudioStreamIndex);
   CheckHR(hr, 'FSinkWriter.AddStream(audio)');
 
   // Input: PCM (what WASAPI typically delivers). If your loopback is float, update this later.
   hr := MFCreateMediaType(inType);
   CheckHR(hr, 'MFCreateMediaType(audio in)');
 
-  hr := inType.SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
+  hr := inType.SetGUID(MF_MT_MAJOR_TYPE,
+                       MFMediaType_Audio);
   CheckHR(hr, 'SetGUID(MF_MT_MAJOR_TYPE audio in)');
 
-  hr := inType.SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
+  hr := inType.SetGUID(MF_MT_SUBTYPE,
+                       MFAudioFormat_PCM);
   CheckHR(hr, 'SetGUID(MF_MT_SUBTYPE PCM in)');
 
-  hr := inType.SetUINT32(MF_MT_AUDIO_NUM_CHANNELS, FAudioChannels);
+  hr := inType.SetUINT32(MF_MT_AUDIO_NUM_CHANNELS,
+                         FAudioChannels);
   CheckHR(hr, 'SetUINT32(NUM_CHANNELS in)');
 
-  hr := inType.SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND, FAudioSampleRate);
+  hr := inType.SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
+                         FAudioSampleRate);
   CheckHR(hr, 'SetUINT32(SAMPLES_PER_SECOND in)');
 
-  hr := inType.SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE, FAudioBitsPerSample);
+  hr := inType.SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE,
+                         FAudioBitsPerSample);
   CheckHR(hr, 'SetUINT32(BITS_PER_SAMPLE in)');
 
-  hr := inType.SetUINT32(MF_MT_AUDIO_BLOCK_ALIGNMENT, FAudioBlockAlign);
+  hr := inType.SetUINT32(MF_MT_AUDIO_BLOCK_ALIGNMENT,
+                         FAudioBlockAlign);
   CheckHR(hr, 'SetUINT32(BLOCK_ALIGNMENT in)');
 
-  hr := inType.SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND, FAudioAvgBytesPerSec);
+  hr := inType.SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
+                         FAudioAvgBytesPerSec);
   CheckHR(hr, 'SetUINT32(AVG_BYTES_PER_SECOND in)');
 
-  hr := inType.SetUINT32(MF_MT_AUDIO_CHANNEL_MASK, FAudioChannelMask);
+  hr := inType.SetUINT32(MF_MT_AUDIO_CHANNEL_MASK,
+                         FAudioChannelMask);
   CheckHR(hr, 'SetUINT32(CHANNEL_MASK in)');
 
-  hr := FSinkWriter.SetInputMediaType(FAudioStreamIndex, inType, nil);
+  hr := FSinkWriter.SetInputMediaType(FAudioStreamIndex,
+                                      inType,
+                                      nil);
   CheckHR(hr, 'FSinkWriter.SetInputMediaType(audio)');
 end;
 
@@ -1024,9 +1083,11 @@ begin
         CheckHR(hr, 'Map(NV12 staging)');
 
         try
+
           FConverter.Convert(desktopTex,
                              mappedNV12);
         finally
+
           ctx.Unmap(FNV12StagingTexture, 0);
         end;
 
@@ -1115,6 +1176,7 @@ begin
 
   FCaptureMode := cmVideoOnly;
   FRecordVideo := True;
+
   FRecordAudio := False;
 end;
 
@@ -1185,7 +1247,7 @@ begin
   if FAudioEnabled then
   begin
     FreeAndNil(FWasapiCapture);
-  FreeAndNil(FAudioPreRoll);
+    FreeAndNil(FAudioPreRoll);
     FWasapiCapture := TWasapiLoopbackCapture.Create;
     FWasapiCapture.OnData := OnWasapiData;
     FWasapiCapture.Start;
@@ -1210,6 +1272,7 @@ end;
 procedure TCaptureStreamEngine.StartCapture(const OutputFile: string;
                                             aDisplayOutput: TDXGIOutputInfo);
 begin
+
   FDisplayOutputIndex := aDisplayOutput.OutputIndex;
   FSelectedDisplayName := aDisplayOutput.DeviceName;
   StartCapture(OutputFile);
@@ -1273,6 +1336,7 @@ end;
 
 procedure TCaptureStreamEngine.EnableLoopbackAudioFlacMp4(const Mp4SampleDescription: TBytes; const ChannelMask: Cardinal);
 begin
+
   // Must be called before StartCapture. We create the audio stream at CreateSinkWriter.
   FAudioEnabled := True;
   FAudioMp4SampleDescription := Copy(Mp4SampleDescription);
@@ -1294,8 +1358,10 @@ begin
     FAudioPreRollMs := 400;
 end;
 
+
 procedure TCaptureStreamEngine.EnableLoopbackAudioAacMp4(const ChannelMask: Cardinal; const TargetAvgBytesPerSec: Cardinal);
 begin
+
   // Must be called before StartCapture. We create the audio stream at CreateSinkWriter.
   FAudioEnabled := True;
   FAudioMp4SampleDescription := nil; // not used for standard MP4+AAC
@@ -1325,6 +1391,7 @@ end;
 
 procedure TCaptureStreamEngine.DisableAudio;
 begin
+
   FAudioEnabled := False;
   FAudioMp4SampleDescription := nil;
   FAudioCodec := acNone;
@@ -1334,36 +1401,39 @@ end;
 
 procedure TCaptureStreamEngine.SetCaptureMode(AMode: TCaptureMode);
 begin
-
   FCaptureMode := AMode;
-
   FRecordVideo := False;
   FRecordAudio := False;
 
   // Destroy / recreate WASAPI capture when needed
+
   if Assigned(FWasapiCapture) then
     FreeAndNil(FWasapiCapture);
 
   case FCaptureMode of
     cmVideoOnly: begin
+
                    FRecordVideo := True;
                    FRecordAudio := False;
                  end;
 
+
+
     cmAudioVideo: begin
+
                     FRecordVideo := True;
                     FRecordAudio := True;
                     FWasapiCapture := TWasapiLoopbackCapture.Create(FAudioDeviceId);
                     FWasapiCapture.OnData := OnWasapiData;
                   end;
-
   end; // Case
 end;
 
 
 procedure TCaptureStreamEngine.SetAudioDeviceID(const Value: string);
 begin
-  if FAudioDeviceId = Value then
+
+  if (FAudioDeviceId = Value) then
     Exit;
 
   FAudioDeviceId := Value;
@@ -1687,12 +1757,13 @@ begin
     Exit(True);
 
   if (wf.wFormatTag = WAVE_FORMAT_EXTENSIBLE) then
-  begin
-    // WAVEFORMATEXTENSIBLE: SubFormat GUID
-    // Avoid GUID compare complexity here; treat 32-bit as float if so tagged.
-    // Many loopback devices deliver IEEE float via extensible.
-    Result := (wf.wBitsPerSample = 32);
-  end;
+    begin
+
+      // WAVEFORMATEXTENSIBLE: SubFormat GUID
+      // Avoid GUID compare complexity here; treat 32-bit as float if so tagged.
+      // Many loopback devices deliver IEEE float via extensible.
+      Result := (wf.wBitsPerSample = 32);
+    end;
 end;
 
 
@@ -1700,7 +1771,8 @@ function _CalcRmsDb(const Buf: Pointer;
                     const NumFrames: Cardinal;
                     const wf: PWAVEFORMATEX): Single;
 var
-  i, n: Integer;
+  i,
+  n: Integer;
   sumSq: Double;
   s16: PSmallInt;
   sf: PSingle;
@@ -1873,7 +1945,7 @@ begin
   //                   10000000,
   //                   FPerfFreq);
 
-  // MulDiv replacement for Int64 types.
+  // MulDiv replacement for Int64 types. Note; In later MfPack versions (> 3.18), this method will be declared in WinApi.MediaFoundationApi.MfUtils.
   now100ns := _MulDiv64(qpcNow - FQpcStart,
                         10000000,
                         FPerfFreq);

@@ -745,25 +745,32 @@ begin
   hr := MFCreateMediaType(inType);
   CheckHR(hr, 'MFCreateMediaType(inType)');
 
-  hr := inType.SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
+  hr := inType.SetGUID(MF_MT_MAJOR_TYPE,
+                       MFMediaType_Audio);
   CheckHR(hr, 'PCM inType MAJOR');
 
-  hr := inType.SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
+  hr := inType.SetGUID(MF_MT_SUBTYPE,
+                       MFAudioFormat_PCM);
   CheckHR(hr, 'PCM inType SUBTYPE');
 
-  hr := inType.SetUINT32(MF_MT_AUDIO_NUM_CHANNELS, Wf.nChannels);
+  hr := inType.SetUINT32(MF_MT_AUDIO_NUM_CHANNELS,
+                         Wf.nChannels);
   CheckHR(hr, 'PCM inType channels');
 
-  hr := inType.SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND, Wf.nSamplesPerSec);
+  hr := inType.SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
+                         Wf.nSamplesPerSec);
   CheckHR(hr, 'PCM inType rate');
 
-  hr := inType.SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE, 16);
+  hr := inType.SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE,
+                         16);
   CheckHR(hr, 'PCM inType bps');
 
-  hr := inType.SetUINT32(MF_MT_AUDIO_BLOCK_ALIGNMENT, Wf.nChannels * 2);
+  hr := inType.SetUINT32(MF_MT_AUDIO_BLOCK_ALIGNMENT,
+                         Wf.nChannels * 2);
   CheckHR(hr, 'PCM inType blockalign');
 
-  hr := inType.SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND, Wf.nSamplesPerSec * Wf.nChannels * 2);
+  hr := inType.SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
+                         Wf.nSamplesPerSec * Wf.nChannels * 2);
   CheckHR(hr, 'PCM inType avgBps');
 
 
@@ -774,7 +781,8 @@ begin
   if (chMask <> 0) then
     begin
 
-      hr := inType.SetUINT32(MF_MT_AUDIO_CHANNEL_MASK, chMask);
+      hr := inType.SetUINT32(MF_MT_AUDIO_CHANNEL_MASK,
+                             chMask);
       CheckHR(hr, 'PCM inType channel mask');
     end;
 

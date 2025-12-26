@@ -121,7 +121,9 @@ implementation
 constructor TPreviewRenderer.Create(const ADevice: ID3D11Device;
                                     const AContext: ID3D11DeviceContext);
 begin
+
   inherited Create;
+
   FDevice := ADevice;
   FContext := AContext;
 end;
@@ -129,15 +131,18 @@ end;
 
 destructor TPreviewRenderer.Destroy();
 begin
+
   ReleaseSwapChain;
   FContext := nil;
   FDevice := nil;
+
   inherited;
 end;
 
 
 procedure TPreviewRenderer.ReleaseSwapChain();
 begin
+
   FRenderTargetView := nil;
   FSwapChain := nil;
 end;
