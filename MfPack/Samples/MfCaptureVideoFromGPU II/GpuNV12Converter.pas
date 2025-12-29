@@ -551,6 +551,7 @@ end;
 // Do the GPU passes: BGRA -> Y & UV render targets
 procedure TGpuNV12Converter.RenderToYUV(const SrcBGRA: ID3D11Texture2D);
 var
+  hr: HResult;
   ctx: ID3D11DeviceContext;
   srv: ID3D11ShaderResourceView;
   srvDesc: D3D11_SHADER_RESOURCE_VIEW_DESC;
@@ -577,10 +578,10 @@ begin
   srvDesc.Texture2D.MostDetailedMip := 0;
   srvDesc.Texture2D.MipLevels := 1;
 
-  CheckHR(FDevice.CreateShaderResourceView(SrcBGRA,
-                                           @srvDesc,
-                                           @srv),
-          'GpuNV12: CreateShaderResourceView');
+  hr := FDevice.CreateShaderResourceView(SrcBGRA,
+                                         @srvDesc,
+                                         @srv);
+  CheckHr(hr, 'GpuNV12: CreateShaderResourceView');  //$80070057 =  E_INVALIDARG
 
   // Common IA setup
   stride := SizeOf(TVertex);

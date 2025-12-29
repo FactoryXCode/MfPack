@@ -68,8 +68,6 @@ uses
 
   {WinApi}
   WinApi.Windows,
-  //WinApi.ActiveX,
-  //System.SysUtils,
   {D3D11}
   WinApi.DirectX.D3D11,
   {DXGI}
@@ -86,6 +84,8 @@ type
     FContext: ID3D11DeviceContext;
     FSwapChain: IDXGISwapChain;
     FRenderTargetView: ID3D11RenderTargetView;
+
+    FHWND: HWND;
 
     FWidth: UINT;
     FHeight: UINT;
@@ -115,7 +115,6 @@ type
 
 implementation
 
-
 { TPreviewRenderer }
 
 constructor TPreviewRenderer.Create(const ADevice: ID3D11Device;
@@ -126,6 +125,14 @@ begin
 
   FDevice := ADevice;
   FContext := AContext;
+
+  FSwapChain := nil;
+  FRenderTargetView := nil;
+
+  FHWND := 0;
+  FWidth := 0;
+  FHeight := 0;
+  FSampleRate := 0;
 end;
 
 
@@ -150,8 +157,8 @@ end;
 
 procedure TPreviewRenderer.CreateRenderTarget();
 var
-  hr    : HResult;
-  back  : ID3D11Texture2D;
+  hr   : HResult;
+  back : ID3D11Texture2D;
 
 begin
 
@@ -184,7 +191,8 @@ begin
 
   ReleaseSwapChain();
 
-  FWidth  := Width;
+  FHWND := hWnd;
+  FWidth := Width;
   FHeight := Height;
   FSampleRate := SampleRate;
 
@@ -230,6 +238,7 @@ procedure TPreviewRenderer.CreateSwapChainForHWND(hWnd: HWND;
                                                   Height: UINT;
                                                   SampleRate: UINT32);
 begin
+
   CreateSwapChainInternal(hWnd,
                           Width,
                           Height,
@@ -242,29 +251,48 @@ var
   ctx: ID3D11DeviceContext;
   backBuf: ID3D11Texture2D;
   hr: HResult;
+  d: D3D11_TEXTURE2D_DESC;
 
 begin
 
   if (FDevice = nil) or
      (FContext = nil) or
-     (FSwapChain = nil) then
+     (SrcTex = nil) then
+    Exit;
+
+  SrcTex.GetDesc(d);
+
+  // Auto-create / auto-resize swapchain to match the real capture texture size.
+  if (FSwapChain = nil) or
+     (FHWND = 0) or
+     (d.Width <> FWidth) or
+     (d.Height <> FHeight) then
+    begin
+      if (FHWND <> 0) then
+        CreateSwapChainInternal(FHWND,
+                                d.Width,
+                                d.Height,
+                                FSampleRate);
+    end;
+
+  if (FSwapChain = nil) then
     Exit;
 
   FDevice.GetImmediateContext(ctx);
 
-  // Copy source BGRA into swapchain backbuffer
   hr := FSwapChain.GetBuffer(0,
                              ID3D11Texture2D,
                              backBuf);
   CheckHR(hr, 'Preview: GetBuffer');
 
+  // Requires matching size+format (now guaranteed by auto-resize)
   ctx.CopyResource(backBuf,
                    SrcTex);
 
-  // Present
   hr := FSwapChain.Present(1,
                            0);
   CheckHR(hr, 'Preview: Present');
 end;
 
 end.
+

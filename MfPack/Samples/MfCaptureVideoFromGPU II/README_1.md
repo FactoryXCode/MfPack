@@ -30,7 +30,7 @@ dedicated recorder unit.
 
 
 
-The application is kept as simple as possible to show you the workflow and concepts of screen capturing and catching sound from an audiodevice, to a MP4 file and preview screen. 
+The application is kept as simple as possible to show you the workflow and concepts of screen capturing and catching sound from an audiodevice, to a MP4 file and preview screen.
 
 
 
@@ -43,7 +43,7 @@ Project location: https://github.com/FactoryXCode/MfPack
 https://sourceforge.net/projects/MFPack
 
 First release date: 13/08/2025
-Final release date: 16/12/2025
+Final release date: 29/12/2025
 
 Copyright © FactoryX. All rights reserved.
 
