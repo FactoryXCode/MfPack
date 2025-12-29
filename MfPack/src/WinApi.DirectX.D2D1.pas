@@ -1659,7 +1659,7 @@ type
                           const strokeStyle: ID2D1StrokeStyle = nil); stdcall;
 
     procedure FillEllipse(const ellipse: D2D1_ELLIPSE;
-                          brush: ID2D1Brush);
+                          brush: ID2D1Brush); stdcall;
 
     procedure DrawGeometry(const geometry: ID2D1Geometry;
                            brush: ID2D1Brush;
