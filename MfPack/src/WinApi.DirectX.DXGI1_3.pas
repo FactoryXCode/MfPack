@@ -87,12 +87,12 @@ const
   DXGI_CREATE_FACTORY_DEBUG           = $1;
 
   function CreateDXGIFactory2(Flags: UINT;
-                              riid: TGuid;
+                              const riid: TGuid;
                               var ppFactory: pointer): HResult; stdcall;
   {$EXTERNALSYM CreateDXGIFactory2}
 
   function DXGIGetDebugInterface1(Flags: UINT;
-                                  riid: TGuid;
+                                  const riid: TGuid;
                                   var pDebug: pointer): HResult; stdcall;
   {$EXTERNALSYM DXGIGetDebugInterface1}
 

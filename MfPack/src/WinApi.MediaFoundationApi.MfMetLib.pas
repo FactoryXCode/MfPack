@@ -3386,6 +3386,9 @@ begin
                                            MF_SOURCE_READER_FIRST_VIDEO_STREAM);
               SafeRelease(pSourceReader);
               SafeRelease(pMediaSource);
+
+              //Make device usable at next ActivateObject
+              hr := ppDevices^.ShutdownObject;
             end
           else  // Handle audio formats
             begin
@@ -3404,6 +3407,9 @@ begin
                     pDeviceProperties[iIndex].aAudioFormats[0].tgMajorFormat := MFMediaType_Audio;
 
                   SafeRelease(pMediaSource);
+
+                  //Make device usable at next ActivateObject
+                  hr := ppDevices^.ShutdownObject;
                 end;
             end;
         end;
@@ -3411,6 +3417,8 @@ begin
       szName := nil;
       Inc(ppDevices);
     end;
+
+  //kxMaxx: Bugs here: iCount mismatch; lpDisplayName broken (if iCount>=2)
 
   // Update display name for devices with the same name
   for i := 0 to Length(pDeviceProperties) - 1 do
