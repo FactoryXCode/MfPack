@@ -95,6 +95,10 @@ const
 
   OUTPUT_FILENAME: string = 'capture_output.mp4';
 
+  HOTKEY_START = 1;
+  HOTKEY_STOP = 2;
+  HOTKEY_TOGGLE_UI = 3;
+
 type
 
   TfrmCapture = class(TForm)
@@ -128,18 +132,25 @@ type
     lblAudioCodec: TLabel;
     cbxAudioCodec: TComboBox;
     cbxAudioFormat: TComboBox;
+    Bevel4: TBevel;
+    cbxKeepOnTop: TCheckBox;
+    cbxHotKeys: TCheckBox;
+    Label1: TLabel;
 
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
 
     procedure btnStartClick(Sender: TObject);
     procedure btnStopClick(Sender: TObject);
+
     procedure btnBrowseClick(Sender: TObject);
     procedure rbRecVideoAndAudioClick(Sender: TObject);
     procedure rbRecVideoClick(Sender: TObject);
     procedure rbRecAudioClick(Sender: TObject);
     procedure cbxAudioCodecChange(Sender: TObject);
     procedure cbxAudioFormatChange(Sender: TObject);
+    procedure cbxHotKeysClick(Sender: TObject);
+    procedure cbxKeepOnTopClick(Sender: TObject);
 
   private
 
@@ -157,6 +168,8 @@ type
     FCaptureWidth,
     FCaptureHeigth: UINT;
     FFrameRate: UINT32;
+    // Hotkey
+    FHotkeysActive: Boolean;
 
     procedure CheckChecks();
     procedure InitMonitors();
@@ -174,6 +187,16 @@ type
     function GetSelectedAudioDeviceId(): string;
 
     procedure GetRenderSettings();
+
+    // Hotkey use.
+    procedure WMHotKey(var Msg: TMessage); message WM_HOTKEY;
+    procedure EnableGlobalHotkeys();
+    procedure DisableGlobalHotkeys();
+    procedure ApplyHotkeyOption();
+
+    procedure HideUI();
+    procedure ShowUI();
+    procedure ToggleUI();
   end;
 
 var
@@ -209,12 +232,16 @@ begin
 
   // Default recording modes
   rbRecVideoAndAudio.Checked := True;
+
+  if Assigned(cbxHotkeys) then
+    cbxHotkeys.Checked := False; // default.
 end;
 
 
 procedure TfrmCapture.FormDestroy(Sender: TObject);
 begin
 
+  DisableGlobalHotkeys;
   FreeAndNil(FAudioDeviceIds);
   FreeAndNil(FEngine);
 end;
@@ -524,6 +551,7 @@ begin
 
     cbxAudioDevice.ItemIndex := 0;
   finally
+
     cbxAudioDevice.Items.EndUpdate;
   end;
 end;
@@ -540,12 +568,37 @@ begin
 
   if (idx <= 0) then
     begin
+
       Result := '';  // Default device, WASAPI will use the default device on your machine.
       Exit;
     end;
 
   if (idx - 1 < FAudioDeviceIds.Count) then
     Result := FAudioDeviceIds[idx - 1];
+end;
+
+
+procedure TfrmCapture.cbxKeepOnTopClick(Sender: TObject);
+begin
+
+  // Keep on top.
+  if cbxKeepOnTop.Checked then
+
+    SetWindowPos(Handle,
+                 HWND_TOPMOST,
+                 0,
+                 0,
+                 0,
+                 0,
+                 SWP_NoMove or SWP_NoSize)
+  else
+    SetWindowPos(Handle,
+                 HWND_NOTOPMOST,
+                 0,
+                 0,
+                 0,
+                 0,
+                 SWP_NoMove or SWP_NoSize);
 end;
 
 
@@ -741,6 +794,13 @@ begin
 end;
 
 
+procedure TfrmCapture.cbxHotKeysClick(Sender: TObject);
+begin
+
+  ApplyHotkeyOption();
+end;
+
+
 procedure TfrmCapture.CaptureError(Sender: TObject;
                                    const Msg: string);
 begin
@@ -752,6 +812,140 @@ begin
                     lblStatus.Caption := 'Error';
                     lblStatus.Font.Color := clRed;
                    end);
+end;
+
+
+// HOTKEYS ---------------------------------------------------------------------
+
+procedure TfrmCapture.EnableGlobalHotkeys;
+var
+  ok1,
+  ok2,
+  ok3: BOOL;
+
+begin
+
+  if FHotkeysActive then
+    Exit;
+
+  ok1 := RegisterHotKey(Handle,
+                        HOTKEY_START,
+                        MOD_NOREPEAT,
+                        VK_F9);
+
+  ok2 := RegisterHotKey(Handle,
+                        HOTKEY_STOP,
+                        MOD_NOREPEAT,
+                        VK_F10);
+
+  // Optional: toggle UI hotkey (F10)
+  ok3 := RegisterHotKey(Handle,
+                        HOTKEY_TOGGLE_UI,
+                         MOD_NOREPEAT,
+                         VK_F11);
+
+  FHotkeysActive := ok1 and ok2 and ok3;
+
+  if not FHotkeysActive then
+    begin
+
+      UnregisterHotKey(Handle,
+                       HOTKEY_START);
+
+      UnregisterHotKey(Handle,
+                       HOTKEY_STOP);
+
+      UnregisterHotKey(Handle,
+                       HOTKEY_TOGGLE_UI);
+
+      ShowMessage('Hotkeys could not be registered (already in use?)');
+  end;
+end;
+
+
+procedure TfrmCapture.DisableGlobalHotkeys();
+begin
+
+  if not FHotkeysActive then
+    Exit;
+
+  UnregisterHotKey(Handle,
+                   HOTKEY_START);
+  UnregisterHotKey(Handle,
+                   HOTKEY_STOP);
+
+  UnregisterHotKey(Handle,
+                   HOTKEY_TOGGLE_UI);
+
+  FHotkeysActive := False;
+end;
+
+
+// Call this whenever the checkbox changes and during FormCreate.
+procedure TfrmCapture.ApplyHotkeyOption;
+begin
+
+  if Assigned(cbxHotKeys) and cbxHotKeys.Checked then
+    EnableGlobalHotkeys()
+  else
+    DisableGlobalHotkeys();
+end;
+
+
+procedure TfrmCapture.HideUI();
+begin
+
+  // Keep capture running; only hide window
+  Application.Minimize;
+  Hide();
+end;
+
+
+procedure TfrmCapture.ShowUI();
+begin
+
+  Show();
+  Application.Restore();
+  frmCapture.WindowState := wsNormal;
+  Application.BringToFront;
+end;
+
+
+procedure TfrmCapture.ToggleUI();
+begin
+
+  if Visible or (frmCapture.WindowState = wsNormal) then
+    HideUI()
+  else
+    begin
+      ShowUI();
+    end;
+end;
+
+
+// Message handler.
+procedure TfrmCapture.WMHotKey(var Msg: TMessage);
+begin
+
+  inherited;
+
+  case Msg.WParam of
+    HOTKEY_START: if btnStart.Enabled then
+                    begin
+                      btnStartClick(nil);
+                      Beep;
+                    end;
+
+    HOTKEY_STOP: if btnStop.Enabled then
+                   begin
+                     btnStopClick(nil);
+                     Beep;
+                     Sleep(2000);
+                     Beep;
+                   end;
+
+    HOTKEY_TOGGLE_UI: ToggleUI();
+  end;
 end;
 
 end.

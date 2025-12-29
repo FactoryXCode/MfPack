@@ -2,7 +2,7 @@ object frmCapture: TfrmCapture
   Left = 0
   Top = 0
   Caption = 'GPU Desktop Capture Sample 2'
-  ClientHeight = 1119
+  ClientHeight = 1179
   ClientWidth = 1459
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -299,7 +299,7 @@ object frmCapture: TfrmCapture
     Left = 0
     Top = 157
     Width = 1459
-    Height = 689
+    Height = 728
     Align = alClient
     BevelOuter = bvNone
     Color = 6656
@@ -308,15 +308,25 @@ object frmCapture: TfrmCapture
   end
   object pnlBottom: TPanel
     Left = 0
-    Top = 846
+    Top = 885
     Width = 1459
-    Height = 273
+    Height = 294
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 2
+    object Bevel4: TBevel
+      Left = 654
+      Top = 12
+      Width = 545
+      Height = 74
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
+    end
     object lblFPS: TLabel
-      Left = 450
-      Top = 24
+      Left = 665
+      Top = 54
       Width = 49
       Height = 23
       Caption = 'FPS: 0'
@@ -328,7 +338,7 @@ object frmCapture: TfrmCapture
       ParentFont = False
     end
     object lblStatus: TLabel
-      Left = 252
+      Left = 724
       Top = 25
       Width = 30
       Height = 23
@@ -340,9 +350,24 @@ object frmCapture: TfrmCapture
       Font.Style = [fsBold]
       ParentFont = False
     end
+    object Label1: TLabel
+      Left = 665
+      Top = 25
+      Width = 55
+      Height = 23
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Status:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -17
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
     object mmoLog: TMemo
       Left = 0
-      Top = 69
+      Top = 90
       Width = 1459
       Height = 204
       Align = alBottom
@@ -360,7 +385,7 @@ object frmCapture: TfrmCapture
     end
     object btnStart: TButton
       Left = 4
-      Top = 19
+      Top = 28
       Width = 113
       Height = 37
       Caption = 'Start'
@@ -369,13 +394,58 @@ object frmCapture: TfrmCapture
     end
     object btnStop: TButton
       Left = 123
-      Top = 18
+      Top = 27
       Width = 113
       Height = 37
       Caption = 'Stop'
       Enabled = False
       TabOrder = 2
       OnClick = btnStopClick
+    end
+    object cbxKeepOnTop: TCheckBox
+      Left = 300
+      Top = 41
+      Width = 218
+      Height = 41
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
+      Caption = 'Keep on top'
+      Checked = True
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -17
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentFont = False
+      State = cbChecked
+      TabOrder = 3
+      OnClick = cbxKeepOnTopClick
+    end
+    object cbxHotKeys: TCheckBox
+      Left = 300
+      Top = 5
+      Width = 218
+      Height = 41
+      Hint = 
+        'F9  - Start recording'#13#10'F10 - Stop recording'#13#10'F11 - Show/Hide win' +
+        'dow'
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
+      Caption = 'Enable Hotkeys'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -17
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 4
+      OnClick = cbxHotKeysClick
     end
   end
 end

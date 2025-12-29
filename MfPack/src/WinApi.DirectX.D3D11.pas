@@ -3378,7 +3378,7 @@ type
                                     DstZ: UINT;
                                     pSrcResource: ID3D11Resource;
                                     SrcSubresource: UINT;
-                         {_in_opt_} pSrcBox: D3D11_BOX); stdcall;
+                         {_in_opt_} pSrcBox: PD3D11_BOX); stdcall;
 
     procedure CopyResource(pDstResource: ID3D11Resource;
                            pSrcResource: ID3D11Resource); stdcall;
