@@ -65,9 +65,11 @@ unit frmCaptureVideoFromGpu;
 interface
 
 uses
-  {Winapi}
-  Winapi.Windows,
-  Winapi.Messages,
+
+  {WinApi}
+  WinApi.Windows,
+  WinApi.Messages,
+  WinApi.ShellAPI,
   {System}
   System.SysUtils,
   System.Classes,
@@ -79,6 +81,8 @@ uses
   Vcl.ExtCtrls,
   Vcl.Dialogs,
   Vcl.Graphics,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfUtils,
   {CoreAudioApi}
   WinApi.CoreAudioApi.MMDeviceApi,
   WinApi.CoreAudioApi.FunctionDiscoveryKeys_devpkey,
@@ -123,8 +127,8 @@ type
     rbRecVideoAndAudio: TRadioButton;
     rbRecVideo: TRadioButton;
     rbRecAudio: TRadioButton;
-    btnStart: TButton;
-    btnStop: TButton;
+    butStart: TButton;
+    butStop: TButton;
     lblStatus: TLabel;
     Bevel3: TBevel;
     lblAudioBitrate: TLabel;
@@ -136,12 +140,23 @@ type
     cbxKeepOnTop: TCheckBox;
     cbxHotKeys: TCheckBox;
     Label1: TLabel;
+    lblModeCaption: TLabel;
+    lblMode: TLabel;
+    lblRecTimeCaption: TLabel;
+    lblRecTime: TLabel;
+    lblAudioStateCaption: TLabel;
+    lblAudioState: TLabel;
+    tmrUi: TTimer;
+    Bevel5: TBevel;
+    Bevel6: TBevel;
+    butPlayOutput: TButton;
 
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
 
-    procedure btnStartClick(Sender: TObject);
-    procedure btnStopClick(Sender: TObject);
+    procedure butStartClick(Sender: TObject);
+    procedure butStopClick(Sender: TObject);
+    procedure butPlayOutputClick(Sender: TObject);
 
     procedure btnBrowseClick(Sender: TObject);
     procedure rbRecVideoAndAudioClick(Sender: TObject);
@@ -152,15 +167,23 @@ type
     procedure cbxHotKeysClick(Sender: TObject);
     procedure cbxKeepOnTopClick(Sender: TObject);
 
+    procedure tmrUiTimer(Sender: TObject);
+    procedure AnyUiChanged(Sender: TObject);
+
   private
 
     FEngine: TCaptureStreamEngine;
     FOutputs: TArray<TDXGIOutputInfo>;
     FLastFrameTime: Double;
+    // FPS smoothing (UI only)
+    FFpsAvg: Double;
+    FFpsAvgCount: Integer;
     FAudioDeviceIds: TStringList;
     FCaptureMode: TCaptureMode;
     FAudioCodec: TAudioCodec;
     FAudioFileFormat: TAudioFileFormat;
+    FIsRecording: Boolean;
+    FRecordingStartTick: UInt64;
     FAudioOnly: TLoopbackAudioOnlyRecorder;
     FActivityPinger: TScreenActivityPinger;
 
@@ -174,6 +197,11 @@ type
     procedure CheckChecks();
     procedure InitMonitors();
     procedure InitAudioDevices();
+
+    procedure ApplyUiGuardrails();
+
+    procedure UpdateUiIndicators();
+    function FormatElapsed(const ElapsedMs: UInt64): string;
 
     function SelectedAacAvgBytesPerSec: Cardinal;
 
@@ -215,6 +243,12 @@ begin
   lblStatus.Caption := 'Idle';
   lblStatus.Font.Color := clGray;
 
+  FIsRecording := False;
+  FRecordingStartTick := 0;
+  FFpsAvg := 0.0;
+  FFpsAvgCount := 0;
+  if Assigned(tmrUi) then
+    tmrUi.Enabled := False;
   // Initial Create engine with default values. 1080p+ or also named FHD+ (16:10)
   // NOTE: All other settings will be handled in btnStartClick.
   FEngine := TCaptureStreamEngine.Create(pnlPreview.Handle,
@@ -235,6 +269,21 @@ begin
 
   if Assigned(cbxHotkeys) then
     cbxHotkeys.Checked := False; // default.
+
+  // Enable hints (tooltips) for UI guardrails
+  Application.ShowHint := True;
+  Self.ShowHint := True;
+
+  // Wire generic UI-change handler (guardrails + indicators) without changing behavior
+  if Assigned(cbxMonitor) then cbxMonitor.OnChange := AnyUiChanged;
+  if Assigned(edtOutput) then edtOutput.OnChange := AnyUiChanged;
+  if Assigned(cbxAudioDevice) then cbxAudioDevice.OnChange := AnyUiChanged;
+  if Assigned(cbxAudioBitrate) then cbxAudioBitrate.OnChange := AnyUiChanged;
+  if Assigned(cbxResolutions) then cbxResolutions.OnChange := AnyUiChanged;
+  if Assigned(cbxFrameRate) then cbxFrameRate.OnChange := AnyUiChanged;
+
+  ApplyUiGuardrails();
+  UpdateUiIndicators();
 end;
 
 
@@ -257,8 +306,14 @@ begin
 
   try
 
-    dlg.Filter := 'MP4 Files|*.mp4';
-    dlg.DefaultExt := 'mp4';
+    if rbRecAudio.Checked then
+      dlg.Filter := 'Audio Files|*.wav;*.flac|WAV Files|*.wav|FLAC Files|*.flac'
+    else
+      dlg.Filter := 'MP4 Files|*.mp4';
+    if rbRecAudio.Checked then
+      dlg.DefaultExt := LowerCase(cbxAudioFormat.Text)
+    else
+      dlg.DefaultExt := 'mp4';
     dlg.FileName := edtOutput.Text;
 
     if dlg.Execute then
@@ -269,7 +324,7 @@ begin
 end;
 
 
-procedure TfrmCapture.btnStartClick(Sender: TObject);
+procedure TfrmCapture.butStartClick(Sender: TObject);
 var
   sFileName: string;
   rOutputRect: TRect;
@@ -290,8 +345,14 @@ begin
 
   CheckChecks();
 
-  btnStart.Enabled := False;
-  btnStop.Enabled := True;
+
+  // Reset FPS smoothing (UI only)
+  FFpsAvg := 0.0;
+  FFpsAvgCount := 0;
+
+  butStart.Enabled := False;
+  butStop.Enabled := True;
+  butPlayOutput.Enabled := False;
 
   // The file to write to
   sFileName := edtOutput.Text;
@@ -320,38 +381,47 @@ begin
   // AUDIO ONLY: use separate recorder unit, do NOT start FEngine
   // ---------------------------------------------------------------------------
   if (FEngine.CaptureMode = cmAudioOnly) then
-  begin
+    begin
 
-    // Stop activity pinger (audio-only should not use it)
-    FreeAndNil(FActivityPinger);
+      // Stop activity pinger (audio-only should not use it)
+      FreeAndNil(FActivityPinger);
 
-    // Create recorder if needed
-    if not Assigned(FAudioOnly) then
-      FAudioOnly := TLoopbackAudioOnlyRecorder.Create(Self);
+      // Create recorder if needed
+      if not Assigned(FAudioOnly) then
+        FAudioOnly := TLoopbackAudioOnlyRecorder.Create(Self);
 
-    mmoLog.Lines.Add('Starting AUDIO-ONLY recording: ' + sFileName);
+      mmoLog.Lines.Add('Starting AUDIO-ONLY recording: ' + sFileName);
 
-    // Start recorder //////////////////////////////////////////////////////////
+      // Start recorder //////////////////////////////////////////////////////////
 
-    FAudioOnly.StartToFile(sFileName,
-                           FAudioFileFormat,
-                           0,
-                           FEngine.AudioDeviceID);
+      FAudioOnly.StartToFile(sFileName,
+                             FAudioFileFormat,
+                             0,
+                             FEngine.AudioDeviceID);
 
 
-    ////////////////////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////////////////////////
 
-    lblStatus.Caption := 'Recording (audio only)...';
-    lblStatus.Font.Color := clLime;
+      lblStatus.Caption := 'Recording (audio only)...';
+      lblStatus.Font.Color := clLime;
 
-    mmoLog.Lines.Add('--- Audio-Only Capture Started ---');
-    mmoLog.Lines.Add('Output file: ' + sFileName);
+      FIsRecording := True;
+      FRecordingStartTick := GetTickCount64;
 
-    // debug check full path.
-    mmoLog.Lines.Add('Audio-only file (absolute): ' + ExpandFileName(FAudioOnly.OutputFileName));
+      if Assigned(tmrUi) then
+        tmrUi.Enabled := True;
 
-    Exit; // IMPORTANT: Don't start video pipeline and ActivityPinger.
-   end;
+      ApplyUiGuardrails();
+      UpdateUiIndicators();
+
+      mmoLog.Lines.Add('--- Audio-Only Capture Started ---');
+      mmoLog.Lines.Add('Output file: ' + sFileName);
+
+      // debug check full path.
+      mmoLog.Lines.Add('Audio-only file (absolute): ' + ExpandFileName(FAudioOnly.OutputFileName));
+
+      Exit; // IMPORTANT: Don't start video pipeline and ActivityPinger.
+    end;
 
 
   // Audio&Video and Video only. ///////////////////////////////////////////////
@@ -380,7 +450,7 @@ begin
   // The pinger is used to keep the capturing alive especially when
   // using 2 screens on separate video outputs.
   // The pinger unit is ScreenActivityPinger.pas
-  rOutputRect := FEngine.GetSelectedOutputRect;
+  rOutputRect := FEngine.GetSelectedOutputRect();
 
   FreeAndNil(FActivityPinger);
   FActivityPinger := TScreenActivityPinger.Create(rOutputRect,
@@ -393,12 +463,20 @@ begin
   lblStatus.Caption := 'Recording...';
   lblStatus.Font.Color := clLime;
 
+  FIsRecording := True;
+  FRecordingStartTick := GetTickCount64;
+
+  if Assigned(tmrUi) then
+    tmrUi.Enabled := True;
+
+  UpdateUiIndicators();
+
   mmoLog.Lines.Add('--- Capture Started ---');
   mmoLog.Lines.Add('Output file: ' + sFileName);
 end;
 
 
-procedure TfrmCapture.btnStopClick(Sender: TObject);
+procedure TfrmCapture.butStopClick(Sender: TObject);
 begin
 
   if Assigned(FAudioOnly) then
@@ -412,8 +490,42 @@ begin
 
   mmoLog.Lines.Add('--- Capture Stopped ---');
 
-  btnStart.Enabled := True;
-  btnStop.Enabled := False;
+  FIsRecording := False;
+  FFpsAvg := 0.0;
+  FFpsAvgCount := 0;
+  if Assigned(tmrUi) then
+    tmrUi.Enabled := False;
+  ApplyUiGuardrails();
+  UpdateUiIndicators();
+
+  butStart.Enabled := True;
+  butStop.Enabled := False;
+  butPlayOutput.Enabled := True;
+
+  // UI only
+  if Assigned(lblFPS) then
+    lblFPS.Caption := 'FPS: 0.0';
+end;
+
+
+procedure TfrmCapture.butPlayOutputClick(Sender: TObject);
+var
+  path: string;
+
+begin
+
+  if (butStart.Enabled = True) and (butStop.Enabled = False) then
+    begin
+
+      path := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
+      // Play file with the default player.
+      ShellExecute(Handle,
+                   'open',
+                   StrToPWideChar(path + edtOutput.Text),
+                   nil,
+                   nil,
+                   SW_SHOWNORMAL);
+    end;
 end;
 
 
@@ -680,6 +792,281 @@ begin
         1: FAudioFileFormat := aoFlac;
       end;
     end;
+
+  ApplyUiGuardrails();
+  UpdateUiIndicators();
+end;
+
+
+function TfrmCapture.FormatElapsed(const ElapsedMs: UInt64): string;
+var
+  TotalSec,
+  H,
+  M,
+  S: UInt64;
+
+begin
+
+  TotalSec := ElapsedMs div 1000;
+
+  H := TotalSec div 3600;
+  M := (TotalSec div 60) mod 60;
+  S := TotalSec mod 60;
+  Result := Format('%.2d:%.2d:%.2d', [H, M, S]);
+end;
+
+
+procedure TfrmCapture.UpdateUiIndicators;
+var
+  ModeText: string;
+  AudioText: string;
+  Ext: string;
+
+begin
+
+  // Mode (UI only: reflects selected radio buttons)
+  if rbRecAudio.Checked then
+    ModeText := 'Audio only'
+  else if rbRecVideo.Checked then
+    ModeText := 'Video only'
+  else
+    ModeText := 'Video + Audio';
+
+  // Add container hint from output filename when available
+  Ext := LowerCase(ExtractFileExt(Trim(edtOutput.Text)));
+  if (Ext <> '') then
+    ModeText := ModeText + ' (' + Ext + ')';
+
+  if Assigned(lblMode) then
+    lblMode.Caption := ModeText;
+
+  // Audio state (UI only)
+  if rbRecVideo.Checked then
+    AudioText := 'Disabled'
+  else if rbRecAudio.Checked then
+    begin
+      // Audio-only: depends on selected format
+      if Assigned(cbxAudioFormat) and (cbxAudioFormat.ItemIndex >= 0) then
+        AudioText := cbxAudioFormat.Text
+      else
+        AudioText := 'Enabled';
+    end
+  else
+    begin
+      // Video + Audio
+      if Assigned(cbxAudioCodec) and (cbxAudioCodec.ItemIndex >= 0) then
+        AudioText := cbxAudioCodec.Text
+      else
+        AudioText := 'Enabled';
+    end;
+
+  if Assigned(cbxAudioDevice) and (not rbRecVideo.Checked) then
+    begin
+      if (cbxAudioDevice.ItemIndex < 0) then
+        AudioText := AudioText + ' (no device)'
+      else
+        AudioText := AudioText + ' (' + cbxAudioDevice.Text + ')';
+    end;
+
+  if Assigned(lblAudioState) then
+    lblAudioState.Caption := AudioText;
+
+  // Recording time label (set here so changes to UI state reset it)
+  if (not FIsRecording) and Assigned(lblRecTime) then
+    lblRecTime.Caption := '00:00:00';
+
+  // Make the live status color consistent
+  if Assigned(lblStatus) then
+    begin
+      if FIsRecording then
+        lblStatus.Font.Color := clLime
+      else
+        lblStatus.Font.Color := clGray;
+    end;
+end;
+
+
+procedure TfrmCapture.tmrUiTimer(Sender: TObject);
+var
+  Elapsed: UInt64;
+begin
+
+  // Lightweight UI refresher. Does not affect capture behavior.
+  if FIsRecording then
+    begin
+      Elapsed := GetTickCount64 - FRecordingStartTick;
+      if Assigned(lblRecTime) then
+        lblRecTime.Caption := FormatElapsed(Elapsed);
+    end;
+
+  UpdateUiIndicators();
+end;
+
+
+procedure TfrmCapture.AnyUiChanged(Sender: TObject);
+begin
+  // UI-only guardrails: do not change capture behavior, only enable/disable and show hints
+  ApplyUiGuardrails();
+  UpdateUiIndicators();
+end;
+
+
+procedure TfrmCapture.ApplyUiGuardrails;
+var
+  IsVideo: Boolean;
+  IsAudio: Boolean;
+  IsAudioOnly: Boolean;
+  OutExt: string;
+  NeedsMonitor: Boolean;
+  CanStart: Boolean;
+  IsAac: Boolean;
+  IsFlac: Boolean;
+  HasOutput: Boolean;
+
+begin
+
+  if not Assigned(butStart) or not Assigned(butStop) then
+    Exit;
+
+  IsAudioOnly := rbRecAudio.Checked;
+  IsVideo := rbRecVideo.Checked or rbRecVideoAndAudio.Checked;
+  IsAudio := rbRecAudio.Checked or rbRecVideoAndAudio.Checked;
+
+  OutExt := LowerCase(ExtractFileExt(Trim(edtOutput.Text)));
+  HasOutput := Trim(edtOutput.Text) <> '';
+
+  // Determine selected codec (only meaningful in Video+Audio mode)
+  IsAac := (Assigned(cbxAudioCodec) and (cbxAudioCodec.ItemIndex = 0));
+  IsFlac := (Assigned(cbxAudioCodec) and (cbxAudioCodec.ItemIndex = 1));
+
+  // ---------------------------------------------------------------------------
+  // Tooltips / hints (show "why", not "what")
+  // ---------------------------------------------------------------------------
+  if Assigned(edtOutput) then
+    begin
+
+      edtOutput.ShowHint := True;
+      if IsAudioOnly then
+        edtOutput.Hint := 'Audio-only output. Recommended extensions: .wav or .flac'
+      else
+        edtOutput.Hint := 'Video output. Recommended extension: .mp4';
+    end;
+
+  if Assigned(cbxAudioCodec) then
+    begin
+
+      cbxAudioCodec.ShowHint := True;
+      cbxAudioCodec.Hint := 'Audio codec used for MP4 when recording video+audio.';
+    end;
+
+  if Assigned(cbxAudioBitrate) then
+    begin
+
+      cbxAudioBitrate.ShowHint := True;
+      if IsFlac then
+        cbxAudioBitrate.Hint := 'Bitrate selection applies to AAC only. FLAC is lossless and ignores bitrate.'
+      else
+        cbxAudioBitrate.Hint := 'AAC target bitrate (approx). Higher values increase quality and file size.';
+    end;
+
+  if Assigned(cbxAudioFormat) then
+    begin
+
+      cbxAudioFormat.ShowHint := True;
+      cbxAudioFormat.Hint := 'Audio-only file format.';
+    end;
+
+  if Assigned(cbxAudioDevice) then
+    begin
+
+    cbxAudioDevice.ShowHint := True;
+    cbxAudioDevice.Hint := 'Select the Windows render endpoint used for loopback capture.';
+    end;
+
+  if Assigned(cbxMonitor) then
+    begin
+
+      cbxMonitor.ShowHint := True;
+      cbxMonitor.Hint := 'Select the display to capture.';
+    end;
+
+  if Assigned(btnBrowse) then
+    begin
+
+      btnBrowse.ShowHint := True;
+      btnBrowse.Hint := 'Choose output file name and location.';
+    end;
+
+  // ---------------------------------------------------------------------------
+  // Enable/disable controls (UI guardrails only)
+  // ---------------------------------------------------------------------------
+  // Audio codec/bitrate are relevant only for Video+Audio.
+  if Assigned(cbxAudioCodec) then
+    cbxAudioCodec.Enabled := rbRecVideoAndAudio.Checked;
+
+  if Assigned(cbxAudioBitrate) then
+    cbxAudioBitrate.Enabled := rbRecVideoAndAudio.Checked and IsAac;
+
+  if Assigned(lblAudioBitrate) then
+    lblAudioBitrate.Enabled := Assigned(cbxAudioBitrate) and cbxAudioBitrate.Enabled;
+
+  // Audio-only format selector is relevant only for Audio-only.
+  if Assigned(cbxAudioFormat) then
+    cbxAudioFormat.Enabled := IsAudioOnly;
+
+  // Audio device selection for Audio-only and Video+Audio.
+  if Assigned(cbxAudioDevice) then
+    cbxAudioDevice.Enabled := IsAudio;
+
+  if Assigned(lblAudio) then
+    lblAudio.Enabled := Assigned(cbxAudioDevice) and cbxAudioDevice.Enabled;
+
+  // Monitor selection for Video-only and Video+Audio.
+  if Assigned(cbxMonitor) then
+    cbxMonitor.Enabled := IsVideo;
+
+  if Assigned(lblMonitor) then
+    lblMonitor.Enabled := Assigned(cbxMonitor) and cbxMonitor.Enabled;
+
+  // Resolution / FPS only for video modes.
+  if Assigned(cbxResolutions) then
+    cbxResolutions.Enabled := IsVideo;
+
+  if Assigned(cbxFrameRate) then
+    cbxFrameRate.Enabled := IsVideo;
+
+  if Assigned(lblResolution) then
+    lblResolution.Enabled := Assigned(cbxResolutions) and cbxResolutions.Enabled;
+
+  if Assigned(lblFrameRate) then
+    lblFrameRate.Enabled := Assigned(cbxFrameRate) and cbxFrameRate.Enabled;
+
+  // ---------------------------------------------------------------------------
+  // Start/Stop availability (reflect state; do not enforce beyond UI)
+  // ---------------------------------------------------------------------------
+  NeedsMonitor := not IsAudioOnly;
+  CanStart := (not FIsRecording) and HasOutput;
+
+  if NeedsMonitor then
+    CanStart := CanStart and
+                (Assigned(cbxMonitor) and
+                (cbxMonitor.ItemIndex >= 0));
+
+  // Soft warning via hint if extension does not match expected container
+  if (not IsAudioOnly) and
+     (OutExt <> '') and
+     (OutExt <> '.mp4') then
+    edtOutput.Hint := edtOutput.Hint + sLineBreak + 'Note: Video capture expects .mp4 output.'
+  else
+    if IsAudioOnly and
+       (OutExt <> '') and
+       (OutExt <> '.wav') and
+       (OutExt <> '.flac') then
+      edtOutput.Hint := edtOutput.Hint + sLineBreak + 'Note: Audio-only expects .wav or .flac output.';
+
+  butStart.Enabled := CanStart;
+  butStop.Enabled := FIsRecording;
+  butPlayOutput.Enabled := CanStart;
 end;
 
 
@@ -751,18 +1138,49 @@ end;
 procedure TfrmCapture.CaptureProgress(Sender: TObject;
                                       FrameIndex: Int64;
                                       Msec: Double);
+const
+  // Window size for FPS smoothing. UI-only; does not affect capture.
+  FPS_AVG_WINDOW = 60;
+
+var
+  InstFps: Double;
+  W: Double;
+
 begin
 
   FLastFrameTime := Msec;
 
+  // Compute instantaneous FPS. Note: Msec is in seconds (see log: Msec * 1000).
+  if (Msec > 0) then
+    InstFps := 1 / Msec
+  else
+    InstFps := 0.0;
+
+  // Smooth it into an average (simple sliding/EMA hybrid).
+  if FFpsAvgCount < FPS_AVG_WINDOW then
+    Inc(FFpsAvgCount);
+
+  if FFpsAvgCount > 0 then
+    W := 1.0 / FFpsAvgCount
+  else
+    W := 1.0;
+
+  // After the window is filled, keep a constant smoothing factor.
+  if FFpsAvgCount >= FPS_AVG_WINDOW then
+    W := 1.0 / FPS_AVG_WINDOW;
+
+  FFpsAvg := FFpsAvg + (InstFps - FFpsAvg) * W;
+
   TThread.Queue(nil,
                 procedure
                   begin
-                    if (Msec > 0) then
-                      lblFPS.Caption := Format('FPS: %.1f',
-                                               [1 / Msec])
-                    else
-                      lblFPS.Caption := 'FPS: 0.0';
+                    // Show averaged FPS to avoid jitter.
+                    lblFPS.Caption := Format('FPS: %.1f', [FFpsAvg]);
+
+                    // Keep the instantaneous value available as a tooltip.
+                    lblFPS.ShowHint := True;
+                    lblFPS.Hint := Format('Instant: %.1f FPS, Avg(%.0d): %.1f FPS',
+                                          [InstFps, FPS_AVG_WINDOW, FFpsAvg]);
 
                     if ((FrameIndex mod 30) = 0) then
                       mmoLog.Lines.Add(Format('Frame %d Elapsed time: %.3f ms',
@@ -780,6 +1198,9 @@ begin
     else
       FAudioCodec := acAac;
   end;
+
+  ApplyUiGuardrails();
+  UpdateUiIndicators();
 end;
 
 
@@ -791,6 +1212,8 @@ begin
     1: edtOutput.Text := ChangeFileExt(OUTPUT_FILENAME,
                                        '.flac');
   end;
+
+  CheckChecks();
 end;
 
 
@@ -930,15 +1353,15 @@ begin
   inherited;
 
   case Msg.WParam of
-    HOTKEY_START: if btnStart.Enabled then
+    HOTKEY_START: if butStart.Enabled then
                     begin
-                      btnStartClick(nil);
+                      butStartClick(nil);
                       Beep;
                     end;
 
-    HOTKEY_STOP: if btnStop.Enabled then
+    HOTKEY_STOP: if butStop.Enabled then
                    begin
-                     btnStopClick(nil);
+                     butStopClick(nil);
                      Beep;
                      Sleep(2000);
                      Beep;

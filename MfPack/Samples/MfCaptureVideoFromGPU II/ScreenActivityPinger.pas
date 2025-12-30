@@ -107,6 +107,13 @@ begin
   else
     FTargetFps := AFps;
 
+  // 1 pixel is the minimum.
+  if (aVertSize < 1) then
+    aVertSize := 1;
+  // 1 pixel is the minimum.
+  if (aHorSize < 1) then
+    aHorSize := 1;
+
   FPingWnd := 0;
   FHorSize := aHorSize;
   FVertSize := aVertSize;

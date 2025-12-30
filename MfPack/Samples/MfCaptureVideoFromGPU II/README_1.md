@@ -36,6 +36,8 @@ The application is kept as simple as possible to show you the workflow and conce
 
 Note: This project is not suitable for absolute beginners using the Media Foundation and DirectX frameworks!
 
+&nbsp;     Please read the pdf's explaining the working and culprits while testing.
+
 
 
 Project: Media Foundation - MFPack - Samples

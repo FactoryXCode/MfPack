@@ -299,34 +299,77 @@ object frmCapture: TfrmCapture
     Left = 0
     Top = 157
     Width = 1459
-    Height = 728
+    Height = 731
     Align = alClient
     BevelOuter = bvNone
     Color = 6656
     ParentBackground = False
     TabOrder = 1
+    ExplicitHeight = 725
   end
   object pnlBottom: TPanel
     Left = 0
-    Top = 885
+    Top = 888
     Width = 1459
-    Height = 294
+    Height = 291
     Align = alBottom
     BevelOuter = bvNone
+    Color = clGray
+    DoubleBuffered = True
+    ParentBackground = False
+    ParentDoubleBuffered = False
     TabOrder = 2
-    object Bevel4: TBevel
-      Left = 654
-      Top = 12
-      Width = 545
-      Height = 74
+    object Bevel5: TBevel
+      Left = 9
+      Top = 3
+      Width = 499
+      Height = 82
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
       Margins.Bottom = 5
     end
+    object Bevel4: TBevel
+      Left = 1371
+      Top = 3
+      Width = 79
+      Height = 82
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
+    end
+    object lblAudioStateCaption: TLabel
+      Left = 1218
+      Top = 13
+      Width = 55
+      Height = 23
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Audio:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -17
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object lblAudioState: TLabel
+      Left = 1276
+      Top = 13
+      Width = 70
+      Height = 23
+      Caption = 'Disabled'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clMoneyGreen
+      Font.Height = -17
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
     object lblFPS: TLabel
-      Left = 665
-      Top = 54
+      Left = 772
+      Top = 51
       Width = 49
       Height = 23
       Caption = 'FPS: 0'
@@ -338,21 +381,77 @@ object frmCapture: TfrmCapture
       ParentFont = False
     end
     object lblStatus: TLabel
-      Left = 724
-      Top = 25
+      Left = 831
+      Top = 13
       Width = 30
       Height = 23
       Caption = 'Idle'
       Font.Charset = DEFAULT_CHARSET
-      Font.Color = clGray
+      Font.Color = clMoneyGreen
+      Font.Height = -17
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object lblModeCaption: TLabel
+      Left = 962
+      Top = 13
+      Width = 55
+      Height = 23
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Mode:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -17
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object lblMode: TLabel
+      Left = 1021
+      Top = 13
+      Width = 116
+      Height = 23
+      Caption = 'Video + Audio'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clMoneyGreen
+      Font.Height = -17
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object lblRecTimeCaption: TLabel
+      Left = 962
+      Top = 51
+      Width = 55
+      Height = 23
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Time:'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -17
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object lblRecTime: TLabel
+      Left = 1021
+      Top = 51
+      Width = 70
+      Height = 23
+      Caption = '00:00:00'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clMoneyGreen
       Font.Height = -17
       Font.Name = 'Segoe UI'
       Font.Style = [fsBold]
       ParentFont = False
     end
     object Label1: TLabel
-      Left = 665
-      Top = 25
+      Left = 772
+      Top = 13
       Width = 55
       Height = 23
       Alignment = taRightJustify
@@ -365,9 +464,19 @@ object frmCapture: TfrmCapture
       Font.Style = [fsBold]
       ParentFont = False
     end
+    object Bevel6: TBevel
+      Left = 513
+      Top = 3
+      Width = 230
+      Height = 82
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
+    end
     object mmoLog: TMemo
       Left = 0
-      Top = 90
+      Top = 87
       Width = 1459
       Height = 204
       Align = alBottom
@@ -382,30 +491,31 @@ object frmCapture: TfrmCapture
       ParentFont = False
       ScrollBars = ssVertical
       TabOrder = 0
+      ExplicitTop = 192
     end
-    object btnStart: TButton
-      Left = 4
-      Top = 28
+    object butStart: TButton
+      Left = 27
+      Top = 29
       Width = 113
       Height = 37
       Caption = 'Start'
       TabOrder = 1
-      OnClick = btnStartClick
+      OnClick = butStartClick
     end
-    object btnStop: TButton
-      Left = 123
-      Top = 27
+    object butStop: TButton
+      Left = 146
+      Top = 28
       Width = 113
       Height = 37
       Caption = 'Stop'
       Enabled = False
       TabOrder = 2
-      OnClick = btnStopClick
+      OnClick = butStopClick
     end
     object cbxKeepOnTop: TCheckBox
-      Left = 300
-      Top = 41
-      Width = 218
+      Left = 533
+      Top = 44
+      Width = 187
       Height = 41
       Margins.Left = 5
       Margins.Top = 5
@@ -424,9 +534,9 @@ object frmCapture: TfrmCapture
       OnClick = cbxKeepOnTopClick
     end
     object cbxHotKeys: TCheckBox
-      Left = 300
+      Left = 533
       Top = 5
-      Width = 218
+      Width = 174
       Height = 41
       Hint = 
         'F9  - Start recording'#13#10'F10 - Stop recording'#13#10'F11 - Show/Hide win' +
@@ -447,5 +557,22 @@ object frmCapture: TfrmCapture
       TabOrder = 4
       OnClick = cbxHotKeysClick
     end
+    object butPlayOutput: TButton
+      Left = 265
+      Top = 28
+      Width = 113
+      Height = 37
+      Caption = 'Play output'
+      Enabled = False
+      TabOrder = 5
+      OnClick = butPlayOutputClick
+    end
+  end
+  object tmrUi: TTimer
+    Enabled = False
+    Interval = 250
+    OnTimer = tmrUiTimer
+    Left = 1389
+    Top = 897
   end
 end
