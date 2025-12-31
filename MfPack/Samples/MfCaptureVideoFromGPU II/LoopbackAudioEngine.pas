@@ -698,7 +698,8 @@ end;
 procedure TLoopbackAudioOnlyRecorder.EnsureFlacWriter(const Wf: PWAVEFORMATEX);
 var
   hr: HRESULT;
-  outType, inType: IMFMediaType;
+  outType,
+  inType: IMFMediaType;
   chMask: Cardinal;
 
 begin
@@ -715,26 +716,34 @@ begin
                   MFSTARTUP_FULL);
   CheckHR(hr, 'MFStartup');
 
-  hr := MFCreateSinkWriterFromURL(PWideChar(WideString(FFileName)), nil, nil, FFlacWriter);
+  hr := MFCreateSinkWriterFromURL(PWideChar(WideString(FFileName)),
+                                  nil,
+                                  nil,
+                                  FFlacWriter);
   CheckHR(hr, 'MFCreateSinkWriterFromURL(.flac)');
 
   // Output type: FLAC (declare 24-bit; encoder will store correct bits-per-sample)
   hr := MFCreateMediaType(outType);
   CheckHR(hr, 'MFCreateMediaType(outType)');
 
-  hr := outType.SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
+  hr := outType.SetGUID(MF_MT_MAJOR_TYPE,
+                        MFMediaType_Audio);
   CheckHR(hr, 'FLAC outType MAJOR');
 
-  hr := outType.SetGUID(MF_MT_SUBTYPE, MFAudioFormat_FLAC);
+  hr := outType.SetGUID(MF_MT_SUBTYPE,
+                        MFAudioFormat_FLAC);
   CheckHR(hr, 'FLAC outType SUBTYPE');
 
-  hr := outType.SetUINT32(MF_MT_AUDIO_NUM_CHANNELS, Wf.nChannels);
+  hr := outType.SetUINT32(MF_MT_AUDIO_NUM_CHANNELS,
+                          Wf.nChannels);
   CheckHR(hr, 'FLAC outType channels');
 
-  hr := outType.SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND, Wf.nSamplesPerSec);
+  hr := outType.SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
+                          Wf.nSamplesPerSec);
   CheckHR(hr, 'FLAC outType rate');
 
-  hr := outType.SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE, 16);
+  hr := outType.SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE,
+                          16);
   CheckHR(hr, 'FLAC outType bps');
 
   hr := FFlacWriter.AddStream(outType,

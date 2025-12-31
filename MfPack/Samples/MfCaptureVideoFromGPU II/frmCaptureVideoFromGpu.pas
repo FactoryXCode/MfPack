@@ -97,7 +97,7 @@ uses
 
 const
 
-  OUTPUT_FILENAME: string = 'capture_output.mp4';
+  DEFAULT_OUTPUT_FILENAME: string = 'capture_output.mp4';
 
   HOTKEY_START = 1;
   HOTKEY_STOP = 2;
@@ -146,7 +146,7 @@ type
     lblRecTime: TLabel;
     lblAudioStateCaption: TLabel;
     lblAudioState: TLabel;
-    tmrUi: TTimer;
+    tmrGUI: TTimer;
     Bevel5: TBevel;
     Bevel6: TBevel;
     butPlayOutput: TButton;
@@ -163,12 +163,12 @@ type
     procedure rbRecVideoClick(Sender: TObject);
     procedure rbRecAudioClick(Sender: TObject);
     procedure cbxAudioCodecChange(Sender: TObject);
-    procedure cbxAudioFormatChange(Sender: TObject);
     procedure cbxHotKeysClick(Sender: TObject);
     procedure cbxKeepOnTopClick(Sender: TObject);
 
-    procedure tmrUiTimer(Sender: TObject);
+    procedure tmrGUITimer(Sender: TObject);
     procedure AnyUiChanged(Sender: TObject);
+    procedure cbxAudioCodecCloseUp(Sender: TObject);
 
   private
 
@@ -186,7 +186,6 @@ type
     FRecordingStartTick: UInt64;
     FAudioOnly: TLoopbackAudioOnlyRecorder;
     FActivityPinger: TScreenActivityPinger;
-
     // Resolution and frame rate.
     FCaptureWidth,
     FCaptureHeigth: UINT;
@@ -247,8 +246,10 @@ begin
   FRecordingStartTick := 0;
   FFpsAvg := 0.0;
   FFpsAvgCount := 0;
-  if Assigned(tmrUi) then
-    tmrUi.Enabled := False;
+
+  if Assigned(tmrGUI) then
+    tmrGUI.Enabled := False;
+
   // Initial Create engine with default values. 1080p+ or also named FHD+ (16:10)
   // NOTE: All other settings will be handled in btnStartClick.
   FEngine := TCaptureStreamEngine.Create(pnlPreview.Handle,
@@ -290,7 +291,14 @@ end;
 procedure TfrmCapture.FormDestroy(Sender: TObject);
 begin
 
-  DisableGlobalHotkeys;
+  DisableGlobalHotkeys();
+
+  if Assigned(FActivityPinger) then
+    begin
+      FActivityPinger.Stop();
+      FreeAndNil(FActivityPinger);
+    end;
+
   FreeAndNil(FAudioDeviceIds);
   FreeAndNil(FEngine);
 end;
@@ -392,7 +400,7 @@ begin
 
       mmoLog.Lines.Add('Starting AUDIO-ONLY recording: ' + sFileName);
 
-      // Start recorder //////////////////////////////////////////////////////////
+      // Start recorder ////////////////////////////////////////////////////////
 
       FAudioOnly.StartToFile(sFileName,
                              FAudioFileFormat,
@@ -400,16 +408,15 @@ begin
                              FEngine.AudioDeviceID);
 
 
-      ////////////////////////////////////////////////////////////////////////////
-
+      //////////////////////////////////////////////////////////////////////////
       lblStatus.Caption := 'Recording (audio only)...';
       lblStatus.Font.Color := clLime;
 
       FIsRecording := True;
       FRecordingStartTick := GetTickCount64;
 
-      if Assigned(tmrUi) then
-        tmrUi.Enabled := True;
+      if Assigned(tmrGUI) then
+        tmrGUI.Enabled := True;
 
       ApplyUiGuardrails();
       UpdateUiIndicators();
@@ -452,11 +459,16 @@ begin
   // The pinger unit is ScreenActivityPinger.pas
   rOutputRect := FEngine.GetSelectedOutputRect();
 
-  FreeAndNil(FActivityPinger);
+  if Assigned(FActivityPinger) then
+    begin
+      FActivityPinger.Stop();
+      FreeAndNil(FActivityPinger);
+    end;
+
   FActivityPinger := TScreenActivityPinger.Create(rOutputRect,
                                                   FFrameRate,
-                                                  4, // pixels, width
-                                                  4, // pixels, height
+                                                  3, // pixels, width
+                                                  1, // pixels, height
                                                   clLime); // pixel color
 
   FActivityPinger.Start();
@@ -466,8 +478,8 @@ begin
   FIsRecording := True;
   FRecordingStartTick := GetTickCount64;
 
-  if Assigned(tmrUi) then
-    tmrUi.Enabled := True;
+  if Assigned(tmrGUI) then
+    tmrGUI.Enabled := True;
 
   UpdateUiIndicators();
 
@@ -485,6 +497,12 @@ begin
   if Assigned(FEngine) then
     FEngine.StopCapture();
 
+  if Assigned(FActivityPinger) then
+    begin
+      FActivityPinger.Stop();
+      FreeAndNil(FActivityPinger);
+    end;
+
   lblStatus.Caption := 'Idle';
   lblStatus.Font.Color := clGray;
 
@@ -493,8 +511,9 @@ begin
   FIsRecording := False;
   FFpsAvg := 0.0;
   FFpsAvgCount := 0;
-  if Assigned(tmrUi) then
-    tmrUi.Enabled := False;
+  if Assigned(tmrGUI) then
+    tmrGUI.Enabled := False;
+
   ApplyUiGuardrails();
   UpdateUiIndicators();
 
@@ -722,7 +741,9 @@ begin
 
   if (Length(edtOutput.Text) < 5) then
     begin
-      edtOutput.Text := OUTPUT_FILENAME;
+
+      // Set to default.
+      edtOutput.Text := DEFAULT_OUTPUT_FILENAME;
       rbRecVideoAndAudio.Checked := True;
     end;
 
@@ -773,7 +794,6 @@ begin
       cbxResolutions.Enabled := True;
       FCaptureMode := cmVideoOnly;
     end;
-
 
   if rbRecAudio.Checked then
     begin
@@ -886,7 +906,7 @@ begin
 end;
 
 
-procedure TfrmCapture.tmrUiTimer(Sender: TObject);
+procedure TfrmCapture.tmrGUITimer(Sender: TObject);
 var
   Elapsed: UInt64;
 begin
@@ -911,7 +931,7 @@ begin
 end;
 
 
-procedure TfrmCapture.ApplyUiGuardrails;
+procedure TfrmCapture.ApplyUiGuardrails();
 var
   IsVideo: Boolean;
   IsAudio: Boolean;
@@ -1066,7 +1086,7 @@ begin
 
   butStart.Enabled := CanStart;
   butStop.Enabled := FIsRecording;
-  butPlayOutput.Enabled := CanStart;
+  butPlayOutput.Enabled := not FIsRecording and not CanStart;
 end;
 
 
@@ -1204,14 +1224,8 @@ begin
 end;
 
 
-procedure TfrmCapture.cbxAudioFormatChange(Sender: TObject);
+procedure TfrmCapture.cbxAudioCodecCloseUp(Sender: TObject);
 begin
-  case cbxAudioFormat.ItemIndex of
-    0: edtOutput.Text := ChangeFileExt(OUTPUT_FILENAME,
-                                       '.wav');
-    1: edtOutput.Text := ChangeFileExt(OUTPUT_FILENAME,
-                                       '.flac');
-  end;
 
   CheckChecks();
 end;

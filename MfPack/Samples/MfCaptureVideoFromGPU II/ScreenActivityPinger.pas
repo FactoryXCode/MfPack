@@ -1,4 +1,70 @@
-﻿unit ScreenActivityPinger;
+﻿// FactoryX
+//
+// Copyright: © FactoryX. All rights reserved.
+//
+// Project: WinApi.DirectX - D3D11
+// Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
+// Module:  ScreenActivityPinger.pas
+// Kind: Pascal / Delphi unit
+// Release date: 13-08-2025
+// Language: ENU
+//
+// Revision Version: 3.1.8
+// Description: This unit creates a small window that blinks at a rate of ~30 in on
+//              the screen that's being captured. This is necessary in cases where
+//              two separate video outputs (like most laptops) are being used.
+//              When a screen is not used with motion, it kind of freezes to save energie.
+//              In that case the capturer would be taking "snapshots" in a manner of speaking.
+//
+//
+// Organisation: FactoryX
+// Initiator(s): Tony (maXcomX), Peter (OzShips)
+// Contributor(s): Tony Kalf (maXcomX)
+//
+//------------------------------------------------------------------------------
+// CHANGE LOG
+// Date       Person              Reason
+// ---------- ------------------- ----------------------------------------------
+// 24/11/2025 Tony                Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+//------------------------------------------------------------------------------
+//
+// Remarks: -
+//
+// Related objects: -
+// Related projects: MfPackX318
+// Known Issues: -
+//
+// Compiler version: 23 up to 35
+// SDK version: 10.0.26100.4654
+//
+// Todo: -
+//
+//==============================================================================
+// Source: -
+//
+// Copyright (c) FactoryX. All rights reserved.
+//==============================================================================
+//
+// LICENSE
+//
+// The contents of this file are subject to the Mozilla Public License
+// Version 2.0 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at
+// https://www.mozilla.org/en-US/MPL/2.0/
+//
+// Software distributed under the License is distributed on an "AS IS"
+// basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+// License for the specific language governing rights and limitations
+// under the License.
+//
+// Non commercial users may distribute this sourcecode provided that this
+// header is included in full at the top of the file.
+// Commercial users are not allowed to distribute this sourcecode as part of
+// their product.
+//
+//==============================================================================
+unit ScreenActivityPinger;
 
 interface
 
@@ -51,9 +117,9 @@ type
 
 implementation
 
-{-------------------------------------------------------------------------------
-  Window Procedure (static callback)
--------------------------------------------------------------------------------}
+//------------------------------------------------------------------------------
+//  Window Procedure (static callback)
+//------------------------------------------------------------------------------
 
 function PingerWndProc(aHwnd: HWND;
                        aMsg: UINT;
@@ -87,9 +153,9 @@ begin
                           alParam);
 end;
 
-{-------------------------------------------------------------------------------
-  TScreenActivityPinger
--------------------------------------------------------------------------------}
+//------------------------------------------------------------------------------
+//  TScreenActivityPinger
+//------------------------------------------------------------------------------
 
 constructor TScreenActivityPinger.Create(const aDesktopRect: TRect;
                                          aFps: Integer;
@@ -98,7 +164,7 @@ constructor TScreenActivityPinger.Create(const aDesktopRect: TRect;
                                          aColor: TColor);
 begin
 
-  inherited Create;
+  inherited Create();
 
   FDesktopRect := ADesktopRect;
 
@@ -140,9 +206,9 @@ begin
 end;
 
 
-{-------------------------------------------------------------------------------
-  Create a true independent top-level popup window
--------------------------------------------------------------------------------}
+//------------------------------------------------------------------------------
+//  Create a true independent top-level popup window
+//------------------------------------------------------------------------------
 
 procedure TScreenActivityPinger.CreatePingWindow;
 var
@@ -187,19 +253,20 @@ begin
 end;
 
 
-procedure TScreenActivityPinger.DestroyPingWindow;
+procedure TScreenActivityPinger.DestroyPingWindow();
 begin
 
   if (FPingWnd <> 0) then
     begin
+
       DestroyWindow(FPingWnd);
       FPingWnd := 0;
     end;
 end;
 
-{-------------------------------------------------------------------------------
-  Drawing the blinking pixel
--------------------------------------------------------------------------------}
+//------------------------------------------------------------------------------
+//  Drawing the blinking pixel
+//------------------------------------------------------------------------------
 
 procedure TScreenActivityPinger.PaintPingWindow(Color: TColor);
 var
@@ -228,9 +295,9 @@ begin
 end;
 
 
-{-------------------------------------------------------------------------------
-  Start / Stop
--------------------------------------------------------------------------------}
+//------------------------------------------------------------------------------
+//  Start / Stop
+//------------------------------------------------------------------------------
 
 procedure TScreenActivityPinger.Start();
 begin
@@ -257,9 +324,9 @@ begin
 end;
 
 
-{-------------------------------------------------------------------------------
-  Timer Tick: toggle pixel color
--------------------------------------------------------------------------------}
+//------------------------------------------------------------------------------
+//  Timer Tick: toggle pixel color
+//------------------------------------------------------------------------------
 
 procedure TScreenActivityPinger.TimerTick(Sender: TObject);
 var
@@ -268,6 +335,7 @@ var
 begin
 
   if FOn then
+
     pColor := clBlack
   else
     pColor := FColor;

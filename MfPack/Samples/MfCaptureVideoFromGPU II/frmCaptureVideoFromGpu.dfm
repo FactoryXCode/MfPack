@@ -3,7 +3,7 @@ object frmCapture: TfrmCapture
   Top = 0
   Caption = 'GPU Desktop Capture Sample 2'
   ClientHeight = 1179
-  ClientWidth = 1459
+  ClientWidth = 1486
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,11 +18,12 @@ object frmCapture: TfrmCapture
   object pnlTop: TPanel
     Left = 0
     Top = 0
-    Width = 1459
+    Width = 1486
     Height = 157
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitWidth = 1459
     object Bevel3: TBevel
       Left = 913
       Top = 12
@@ -272,6 +273,7 @@ object frmCapture: TfrmCapture
       TabOrder = 10
       Text = 'AAC'
       OnChange = cbxAudioCodecChange
+      OnCloseUp = cbxAudioCodecCloseUp
       Items.Strings = (
         'AAC'
         'FLAC')
@@ -289,7 +291,6 @@ object frmCapture: TfrmCapture
       ItemIndex = 0
       TabOrder = 11
       Text = 'WAV'
-      OnChange = cbxAudioFormatChange
       Items.Strings = (
         'WAV'
         'FLAC')
@@ -298,19 +299,20 @@ object frmCapture: TfrmCapture
   object pnlPreview: TPanel
     Left = 0
     Top = 157
-    Width = 1459
+    Width = 1486
     Height = 731
     Align = alClient
     BevelOuter = bvNone
     Color = 6656
     ParentBackground = False
     TabOrder = 1
+    ExplicitWidth = 1459
     ExplicitHeight = 725
   end
   object pnlBottom: TPanel
     Left = 0
     Top = 888
-    Width = 1459
+    Width = 1486
     Height = 291
     Align = alBottom
     BevelOuter = bvNone
@@ -319,6 +321,7 @@ object frmCapture: TfrmCapture
     ParentBackground = False
     ParentDoubleBuffered = False
     TabOrder = 2
+    ExplicitWidth = 1459
     object Bevel5: TBevel
       Left = 9
       Top = 3
@@ -330,9 +333,9 @@ object frmCapture: TfrmCapture
       Margins.Bottom = 5
     end
     object Bevel4: TBevel
-      Left = 1371
+      Left = 748
       Top = 3
-      Width = 79
+      Width = 732
       Height = 82
       Margins.Left = 5
       Margins.Top = 5
@@ -477,7 +480,7 @@ object frmCapture: TfrmCapture
     object mmoLog: TMemo
       Left = 0
       Top = 87
-      Width = 1459
+      Width = 1486
       Height = 204
       Align = alBottom
       Color = 6656
@@ -492,10 +495,11 @@ object frmCapture: TfrmCapture
       ScrollBars = ssVertical
       TabOrder = 0
       ExplicitTop = 192
+      ExplicitWidth = 1459
     end
     object butStart: TButton
       Left = 27
-      Top = 29
+      Top = 26
       Width = 113
       Height = 37
       Caption = 'Start'
@@ -504,7 +508,7 @@ object frmCapture: TfrmCapture
     end
     object butStop: TButton
       Left = 146
-      Top = 28
+      Top = 25
       Width = 113
       Height = 37
       Caption = 'Stop'
@@ -559,7 +563,7 @@ object frmCapture: TfrmCapture
     end
     object butPlayOutput: TButton
       Left = 265
-      Top = 28
+      Top = 25
       Width = 113
       Height = 37
       Caption = 'Play output'
@@ -568,11 +572,11 @@ object frmCapture: TfrmCapture
       OnClick = butPlayOutputClick
     end
   end
-  object tmrUi: TTimer
+  object tmrGUI: TTimer
     Enabled = False
     Interval = 250
-    OnTimer = tmrUiTimer
-    Left = 1389
-    Top = 897
+    OnTimer = tmrGUITimer
+    Left = 1386
+    Top = 180
   end
 end

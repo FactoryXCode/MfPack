@@ -65,18 +65,24 @@ unit WasapiLoopbackCapture;
 interface
 
 uses
+
+  {WinApi}
   WinApi.Windows,
   WinApi.ActiveX,
   WinApi.WinError,
   WinApi.ksmedia,
+  {System}
   System.Classes,
   System.SysUtils,
   System.SyncObjs,
+  {CoreAudioApi}
   WinApi.CoreAudioApi.MMDeviceApi,
   WinApi.CoreAudioApi.AudioClient,
   WinApi.CoreAudioApi.AudioSessionTypes,
   WinApi.CoreAudioApi.AudioPolicy,
+  {WinMM}
   WinApi.WinMM.MMeApi,
+  {Application}
   Helpers;
 
 type
@@ -104,17 +110,17 @@ type
     // Device
     FAudioDeviceId : string;
 
-    procedure CaptureThreadProc;
-    procedure InitClient;
-    procedure FreeClient;
+    procedure CaptureThreadProc();
+    procedure InitClient();
+    procedure FreeClient();
 
   public
 
     constructor Create(const aDeviceId: string = '');
     destructor Destroy; override;
 
-    procedure Start;
-    procedure Stop;
+    procedure Start();
+    procedure Stop();
 
     property AudioDeviceId: string read FAudioDeviceId write FAudioDeviceId;
     property OnData: TWasapiDataEvent read FOnData write FOnData;
@@ -130,16 +136,19 @@ uses
 constructor TWasapiLoopbackCapture.Create(const aDeviceId: string);
 begin
 
-  inherited Create;
+  inherited Create();
 
   FAudioDeviceId := ADeviceId;
-  FStopEvent := TEvent.Create(nil, True, False, '');
+  FStopEvent := TEvent.Create(nil,
+                              True,
+                              False,
+                              '');
   FEventHandle := 0;
   FWaveFormat := nil;
 end;
 
 
-destructor TWasapiLoopbackCapture.Destroy;
+destructor TWasapiLoopbackCapture.Destroy();
 begin
 
   Stop;
@@ -150,11 +159,10 @@ begin
 end;
 
 
-procedure TWasapiLoopbackCapture.InitClient;
+procedure TWasapiLoopbackCapture.InitClient();
 var
   hr: HRESULT;
   enum: IMMDeviceEnumerator;
-  //taskName: string;
   bufferDur: Int64;
 
 begin
@@ -216,7 +224,7 @@ begin
 end;
 
 
-procedure TWasapiLoopbackCapture.FreeClient;
+procedure TWasapiLoopbackCapture.FreeClient();
 var
   hr: HResult;
 
@@ -248,7 +256,7 @@ begin
 end;
 
 
-procedure TWasapiLoopbackCapture.Start;
+procedure TWasapiLoopbackCapture.Start();
 begin
   if Assigned(FThread) then
     Exit;

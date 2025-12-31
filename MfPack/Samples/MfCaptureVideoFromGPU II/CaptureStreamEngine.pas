@@ -267,13 +267,18 @@ type
     procedure CreateSinkWriter(const OutputFile: string);
     procedure PrepareAudioFormatFromLoopbackMix;
     procedure AddAudioStreamToSinkWriter;
-    procedure EnqueueSample(const StreamIndex: DWORD; const Sample: IMFSample; const Time100ns: Int64);
+    procedure EnqueueSample(const StreamIndex: DWORD;
+                            const Sample: IMFSample;
+                            const Time100ns: Int64);
     function  PopNextSample(out Item: TQueuedSample): Boolean;
     procedure SinkWriterLoop;
     procedure GenerateSilenceToTime(const TargetTime100ns: Int64);
     procedure ResetAudioGating;
 
-    procedure OnWasapiData(Sender: TObject; const Buffer: Pointer; NumFrames: Cardinal; const WaveFormat: PWAVEFORMATEX);
+    procedure OnWasapiData(Sender: TObject;
+                           const Buffer: Pointer;
+                           NumFrames: Cardinal;
+                           const WaveFormat: PWAVEFORMATEX);
 
     procedure SubmitAudioChunk(const Chunk: TAudioChunk);
     procedure SubmitVideoSampleToSinkWriter(const mappedNV12: D3D11_MAPPED_SUBRESOURCE);
@@ -295,8 +300,10 @@ type
     procedure StopCapture();
 
     // Audio: Create audio stream at start, but only write samples when sound is detected.
-    procedure EnableLoopbackAudioFlacMp4(const Mp4SampleDescription: TBytes; const ChannelMask: Cardinal);
-    procedure EnableLoopbackAudioAacMp4(const ChannelMask: Cardinal; const TargetAvgBytesPerSec: Cardinal = 20000);
+    procedure EnableLoopbackAudioFlacMp4(const Mp4SampleDescription: TBytes;
+                                         const ChannelMask: Cardinal);
+    procedure EnableLoopbackAudioAacMp4(const ChannelMask: Cardinal;
+                                        const TargetAvgBytesPerSec: Cardinal = 20000);
 
     procedure DisableAudio();
     procedure SetAudioDeviceID(const Value: string);
@@ -781,11 +788,13 @@ begin
     // Output target: for FLAC we keep it equal to PCM; for AAC we use the configured bitrate.
     if (FAudioCodec = acAac) then
       begin
+
         if (FAudioOutAvgBytesPerSec = 0) then
           FAudioOutAvgBytesPerSec := 20000;
       end
     else
       begin
+
         if (FAudioOutAvgBytesPerSec = 0) then
           FAudioOutAvgBytesPerSec := FAudioAvgBytesPerSec;
       end;
@@ -1148,10 +1157,11 @@ begin
   FWriterThread := nil;
   FWriterRunning := False;
 
-  // Audio defaults (Option A)
-  FAudioEnabled := False;
+  // Audio defaults
+  FAudioEnabled := True;
   FAudioCodec := acAac;
-  ResetAudioGating;
+  ResetAudioGating();
+
   FAudioThresholdOnDb := -45.0;
   FAudioThresholdOffDb := -55.0;
   FAudioHoldOnMs := 100;
@@ -1174,10 +1184,9 @@ begin
 
   FFrameDuration100ns := 10000000 div FFrameRate;
 
-  FCaptureMode := cmVideoOnly;
+  FCaptureMode := cmAudioVideo;
   FRecordVideo := True;
-
-  FRecordAudio := False;
+  FRecordAudio := True;
 end;
 
 
@@ -1334,7 +1343,8 @@ end;
 
 { ==== Audio enable/disable (Option A) =================================== }
 
-procedure TCaptureStreamEngine.EnableLoopbackAudioFlacMp4(const Mp4SampleDescription: TBytes; const ChannelMask: Cardinal);
+procedure TCaptureStreamEngine.EnableLoopbackAudioFlacMp4(const Mp4SampleDescription: TBytes;
+                                                          const ChannelMask: Cardinal);
 begin
 
   // Must be called before StartCapture. We create the audio stream at CreateSinkWriter.
@@ -1342,7 +1352,7 @@ begin
   FAudioMp4SampleDescription := Copy(Mp4SampleDescription);
   FAudioChannelMask := ChannelMask;
 
-  FAudioCodec := acAac;
+  FAudioCodec := acFlac;
   FAudioOutAvgBytesPerSec := 0; // use PCM rate unless explicitly set elsewhere
 
   // Sensible defaults (you can tune via properties)
@@ -1359,7 +1369,8 @@ begin
 end;
 
 
-procedure TCaptureStreamEngine.EnableLoopbackAudioAacMp4(const ChannelMask: Cardinal; const TargetAvgBytesPerSec: Cardinal);
+procedure TCaptureStreamEngine.EnableLoopbackAudioAacMp4(const ChannelMask: Cardinal;
+                                                         const TargetAvgBytesPerSec: Cardinal);
 begin
 
   // Must be called before StartCapture. We create the audio stream at CreateSinkWriter.
@@ -1443,7 +1454,7 @@ begin
 end;
 
 
-procedure TCaptureStreamEngine.ResetAudioGating;
+procedure TCaptureStreamEngine.ResetAudioGating();
 begin
 
   if Assigned(FAudioPreRoll) then
@@ -1460,7 +1471,7 @@ begin
   FAudioNextTime100ns := -1;
 end;
 
-{ ==== Queue / writer thread ============================================= }
+{ ==== Queue / writer thread ================================================= }
 
 procedure TCaptureStreamEngine.EnqueueSample(const StreamIndex: DWORD;
                                              const Sample: IMFSample;
@@ -1945,7 +1956,8 @@ begin
   //                   10000000,
   //                   FPerfFreq);
 
-  // MulDiv replacement for Int64 types. Note; In later MfPack versions (> 3.18), this method will be declared in WinApi.MediaFoundationApi.MfUtils.
+  // MulDiv replacement for Int64 types.
+  // Note: In later MfPack versions (>= 3.18), this method will be declared in WinApi.MediaFoundationApi.MfUtils.
   now100ns := _MulDiv64(qpcNow - FQpcStart,
                         10000000,
                         FPerfFreq);

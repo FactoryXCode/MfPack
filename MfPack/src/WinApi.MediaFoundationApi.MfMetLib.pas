@@ -23,7 +23,8 @@
 //                 Peter Larson (ozships),
 //                 Ramyses De Macedo Rodrigues,
 //                 (TopPlay),
-//                 (Banalskander)
+//                 (Banalskander),
+//                 (kxMAXX)
 //
 // -----------------------------------------------------------------------------
 // CHANGE LOG
