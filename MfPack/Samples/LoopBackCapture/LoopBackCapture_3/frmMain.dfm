@@ -60,7 +60,7 @@ object MainForm: TMainForm
   end
   object Panel3: TPanel
     Left = 0
-    Top = 320
+    Top = 328
     Width = 675
     Height = 114
     Hint = 
@@ -82,6 +82,7 @@ object MainForm: TMainForm
     ParentFont = False
     TabOrder = 1
     VerticalAlignment = taAlignTop
+    ExplicitTop = 320
     object lblBufferDuration: TLabel
       Left = 104
       Top = 75
@@ -197,7 +198,7 @@ object MainForm: TMainForm
     Left = 0
     Top = 0
     Width = 675
-    Height = 320
+    Height = 328
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
@@ -321,7 +322,7 @@ object MainForm: TMainForm
       Left = 24
       Top = 254
       Width = 280
-      Height = 21
+      Height = 26
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -428,12 +429,12 @@ object MainForm: TMainForm
       Left = 351
       Top = 254
       Width = 291
-      Height = 21
+      Height = 26
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
       Margins.Bottom = 5
-      Caption = 'Enable stream switch.'
+      Caption = 'Enable stream switch detection.'
       Checked = True
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -448,14 +449,13 @@ object MainForm: TMainForm
       Left = 24
       Top = 284
       Width = 280
-      Height = 21
+      Height = 22
       Hint = 'This hint will be set in form create'
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
       Margins.Bottom = 5
       Caption = 'Use PCM audio output format.'
-      Checked = True
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -17
@@ -464,7 +464,6 @@ object MainForm: TMainForm
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      State = cbChecked
       TabOrder = 6
     end
     object cbxStayOnTop: TCheckBox
@@ -485,7 +484,7 @@ object MainForm: TMainForm
   end
   object Panel4: TPanel
     Left = 0
-    Top = 434
+    Top = 442
     Width = 675
     Height = 152
     Margins.Left = 5
@@ -495,6 +494,7 @@ object MainForm: TMainForm
     Align = alTop
     BevelOuter = bvLowered
     TabOrder = 2
+    ExplicitTop = 434
     object Label1: TLabel
       Left = 15
       Top = 76
