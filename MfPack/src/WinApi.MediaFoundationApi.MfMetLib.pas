@@ -23,7 +23,7 @@
 //                 Peter Larson (ozships),
 //                 Ramyses De Macedo Rodrigues,
 //                 (TopPlay),
-//                 (Banalskander),
+//                 (Banalskander), 
 //                 (kxMAXX)
 //
 // -----------------------------------------------------------------------------
@@ -1266,7 +1266,7 @@ procedure CopyWaveFormatEx(const SourceFmt: WAVEFORMATEX;
                            out DestFmt: PWAVEFORMATEX);
 
 // Returns 16 - bit PCM format.
-function GetDefaultWaveFmtEx(): WAVEFORMATEX; inline;
+function GetDefaultWaveFmtEx(): PWAVEFORMATEX; inline;
 
 
 
@@ -3388,8 +3388,10 @@ begin
               SafeRelease(pSourceReader);
               SafeRelease(pMediaSource);
 
-              //Make device usable at next ActivateObject
-              hr := ppDevices^.ShutdownObject;
+
+              //Make device usable at next ActivateObject.
+              if SUCCEEDED(hr) then
+                hr := ppDevices^.ShutdownObject;
             end
           else  // Handle audio formats
             begin
@@ -8605,19 +8607,26 @@ begin
 end;
 
 
-function GetDefaultWaveFmtEx(): WAVEFORMATEX;
+function GetDefaultWaveFmtEx(): PWAVEFORMATEX;
 var
-  wavFmtEx: WAVEFORMATEX;
+  pWFEx: PWAVEFORMATEX;
 
 begin
-  wavFmtEx.wFormatTag      := WAVE_FORMAT_PCM;
-  wavFmtEx.nChannels       := 2;
-  wavFmtEx.nSamplesPerSec  := 44100;
-  wavFmtEx.wBitsPerSample  := 16;
-  wavFmtEx.nBlockAlign     := (wavFmtEx.nChannels * wavFmtEx.wBitsPerSample) div BITS_PER_BYTE;
-  wavFmtEx.nAvgBytesPerSec := wavFmtEx.nBlockAlign * wavFmtEx.nSamplesPerSec;
-  wavFmtEx.cbSize          := 0;
-  Result := wavFmtEx;
+
+  pWFEx := CoTaskMemAlloc(SizeOf(WAVEFORMATEX));
+
+  if (pWFEx = nil) then
+    Exit(nil);
+
+  pWFEx.wFormatTag := WAVE_FORMAT_PCM;
+  pWFEx.nChannels := 2;
+  pWFEx.nSamplesPerSec := 44100;
+  pWFEx.wBitsPerSample := 16;
+  pWFEx.nBlockAlign := (pWFEx.nChannels * pWFEx.wBitsPerSample) div 8;
+  pWFEx.nAvgBytesPerSec := pWFEx.nBlockAlign * pWFEx.nSamplesPerSec;
+  pWFEx.cbSize := 0;
+
+  Result := pWFEx;
 end;
 
 

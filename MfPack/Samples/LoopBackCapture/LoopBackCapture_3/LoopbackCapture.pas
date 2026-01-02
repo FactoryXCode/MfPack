@@ -100,9 +100,11 @@ uses
   WinApi.WinMM.MMReg,
   {Application}
   Common,
+  MfAudioWriter,
   Writer;
 
 type
+
   TDeviceState = (Uninitialized,
                   Error,       // Implemented to prevent calls to IAudioCaptureClient.GetNextPacketSize.
                                // See: OnAudioSampleRequested() and error handling.
@@ -124,9 +126,11 @@ type
                       IAudioSessionEvents,
                       IMMNotificationClient)
   protected
+
     pvRenderThread: TRenderThread;
 
   private
+
     pvRenderThreadClosedEvent: THandle;
     pvShutdownEvent: THandle;
     pvAudioSamplesReadyEvent: THandle;
@@ -143,8 +147,9 @@ type
 
     // WAV-Filewriter.
     pvWavWriter: TWavWriter;
-    pvUseDeviceAudioFmt: Boolean;
-    pvMixFormat: WAVEFORMATEX;
+    pvUseDefaultAudioFmt: Boolean;
+    pvMixFormat: {PWAVEFORMATEX} WAVEFORMATEXTENSIBLE;
+
 
     pvFrameSize: NativeUint;
     pvBufferSize: UINT32;
@@ -190,7 +195,7 @@ type
     // Utility functions.
     //
     function InitializeAudioEngine(): Boolean;
-    function GetMixFormat(out pMixFmt: WAVEFORMATEX;
+    function GetMixFormat(out pMixFmt: PWAVEFORMATEX;
                           pGetDefault: Boolean = False): HResult;
 
     function GetCannelCount(): Word;
@@ -241,7 +246,7 @@ type
     //
     function Initialize(pBufferDuration: REFERENCE_TIME;
                         pEngineLatency: UINT32;
-                        pUseDeviceAudioFmt: Boolean = True): Boolean;
+                        pUseDefaultAudioFmt: Boolean = True): Boolean;
 
     procedure Shutdown();
 
@@ -253,7 +258,8 @@ type
     // Properties.
     //
     property EndPoint: IMMDevice read pvEndpoint write pvEndpoint;
-    property MixFormat: WAVEFORMATEX read pvMixFormat;
+    //property MixFormat: PWAVEFORMATEX read pvMixFormat;
+    property MixFormat: WAVEFORMATEXTENSIBLE read pvMixFormat;
     property ChannelCount: Word read GetCannelCount;
     property SamplesPerSecond: DWord read GetSamplesPerSecond;
     property BytesPerSample: Word read GetBytesPerSample;
@@ -442,6 +448,7 @@ begin
                                  pvAudioSessionControl);
   if FAILED(hr) then
     begin
+
       InfoMsg(optIDE, Format('Unable to retrieve session control: %d.',[GetLastError()]), hr);
       Exit(False);
     end;
@@ -453,6 +460,7 @@ begin
                                                EVENT_MODIFY_STATE or SYNCHRONIZE);
   if (pvStreamSwitchCompleteEvent = 0) then
     begin
+
       InfoMsg(optIDE, Format('Unable to create stream switch event: %d.',[GetLastError()]), hr);
       Exit(False);
     end;
@@ -465,6 +473,7 @@ begin
   hr := pvAudioSessionControl.RegisterAudioSessionNotification(Self);
   if FAILED(hr) then
     begin
+
       InfoMsg(optIDE, Format('Unable to register for stream switch notifications: %d.',[GetLastError()]), hr);
       Exit(False);
     end;
@@ -472,6 +481,7 @@ begin
   hr := pvDeviceEnumerator.RegisterEndpointNotificationCallback(Self);
   if FAILED(hr) then
     begin
+
       InfoMsg(optIDE, Format('Unable to register for stream switch notifications: %d.',[GetLastError()]), hr);
       Exit(False);
     end;
@@ -489,17 +499,20 @@ begin
   hr := pvAudioSessionControl.UnregisterAudioSessionNotification(Self);
   if FAILED(hr) then
     begin
+
       InfoMsg(optIDE, Format('Unable to unregister for session notifications: %d.',[GetLastError()]), hr);
     end;
 
   pvDeviceEnumerator.UnregisterEndpointNotificationCallback(Self);
   if FAILED(hr) then
     begin
+
       InfoMsg(optIDE, Format('Unable to unregister for endpoint notifications: %d.',[GetLastError()]), hr);
     end;
 
   if (pvStreamSwitchCompleteEvent <> 0) then
     begin
+
       CloseHandle(pvStreamSwitchCompleteEvent);
       pvStreamSwitchCompleteEvent := 0;
     end;
@@ -532,7 +545,7 @@ var
   hr: HResult;
   bRes: Boolean;
   waitResult: DWord;
-  wfxNew: WAVEFORMATEX;
+  wfxNew: PWAVEFORMATEX;
 
 label
   ErrorExit;
@@ -586,6 +599,7 @@ begin
                                     500);
   if (waitResult = WAIT_TIMEOUT) then
     begin
+
       InfoMsg(optIDE, Format('Stream switch timeout - aborting...: %d.',[waitResult]), E_FAIL);
       goto ErrorExit;
     end;
@@ -611,19 +625,44 @@ begin
                             Pointer(pvAudioClient));
   if FAILED(hr) then
     begin
+
       InfoMsg(optIDE, Format('Unable to activate audio client on the new endpoint: %d.',[GetLastError()]), hr);
       goto ErrorExit;
     end;
 
   // Step 6 - Retrieve the new mix format.
 
+  // pvUseDeviceAudioFmt = True  => use device mix format (GetMixFormat)
+  // pvUseDeviceAudioFmt = False => use plain default PCM 44.1/16 (GetDefaultWaveFmtEx)
   hr := GetMixFormat(wfxNew,
-                     pvUseDeviceAudioFmt);
+                     pvUseDefaultAudioFmt);
   if FAILED(hr) then
     begin
+
       InfoMsg(optIDE, Format('Unable to retrieve mix format for new audio client: %d.',[GetLastError()]), hr);
       goto ErrorExit;
     end;
+
+  try
+
+    // Copy only the base WAVEFORMATEX header into our stored record.
+    // (Most devices return WAVEFORMATEXTENSIBLE; we ignore extra fields here.)
+    Move(wfxNew^,
+         pvMixFormat,
+         SizeOf(WAVEFORMATEX));
+
+    // Prefer correct frame size based on nBlockAlign
+    pvFrameSize := pvMixFormat.Format.nBlockAlign;
+  finally
+
+    CoTaskMemFree(wfxNew);
+  end;
+
+  InfoMsg(optIDE,
+          Format('MixFmt: tag=%d ch=%d sr=%d bps=%d align=%d avg=%d cb=%d',
+                 [pvMixFormat.Format.wFormatTag, pvMixFormat.Format.nChannels, pvMixFormat.Format.nSamplesPerSec,
+                  pvMixFormat.Format.wBitsPerSample, pvMixFormat.Format.nBlockAlign, pvMixFormat.Format.nAvgBytesPerSec, pvMixFormat.Format.cbSize]),
+          S_OK);
 
   // Note that this is an intentionally naive comparison.
   // A more sophisticated comparison would compare the sample rate,
@@ -633,6 +672,7 @@ begin
                     @wfxNew,
                     SizeOf(WAVEFORMATEX) + wfxNew.cbSize) then
     begin
+
       InfoMsg(optIDE, Format('New mix format doesn''t match old mix format.  Aborting... : %d.',[E_FAIL]), E_FAIL);
       // CoTaskMemFree(wfxNew);
       goto ErrorExit;
@@ -653,6 +693,7 @@ begin
                                  pvAudioSessionControl);
   if FAILED(hr) then
     begin
+
       InfoMsg(optIDE, Format('Unable to retrieve session control on new audio client: %d.',[GetLastError()]), hr);
       goto ErrorExit;
     end;
@@ -660,6 +701,7 @@ begin
   hr := pvAudioSessionControl.RegisterAudioSessionNotification(Self);
   if FAILED(hr) then
     begin
+
       InfoMsg(optIDE, Format('Unable to retrieve session control on new audio client: %d.',[GetLastError()]), hr);
       goto ErrorExit;
     end;
@@ -672,6 +714,7 @@ begin
   hr := pvAudioClient.Start();
   if FAILED(hr) then
     begin
+
       InfoMsg(optIDE, Format('Unable to start the new audio client: %d.',[GetLastError()]), hr);
       goto ErrorExit;
     end;
@@ -697,10 +740,13 @@ var
   hr: HResult;
   hnsDefaultDevicePeriod: REFERENCE_TIME;
   hnsMinimumDevicePeriod: REFERENCE_TIME;
-  //hnsActualDuration: REFERENCE_TIME;
   hnsLatency: REFERENCE_TIME;
+  pWfx: PWAVEFORMATEX;
 
 begin
+
+  pWfx := nil;
+
   // Let the endpoint we selected - when not the default - creates the audioclient.
   hr := pvEndpoint.Activate(IID_IAudioClient,
                             CLSCTX_ALL,
@@ -710,11 +756,69 @@ begin
   if FAILED(hr) then
     Exit(SUCCEEDED(hr));
 
-  // Retrieve the correct wav format to write to files.
-  hr := GetMixFormat(pvMixFormat,
-                     pvUseDeviceAudioFmt);
+  hr := GetMixFormat(pWfx,
+                     pvUseDefaultAudioFmt);
   if FAILED(hr) then
     Exit(False);
+
+  try
+
+    ZeroMemory(@pvMixFormat,
+               SizeOf(pvMixFormat));
+
+        // Always copy the WAVEFORMATEX header first
+    Move(pWfx^,
+         pvMixFormat.Format,
+         SizeOf(WAVEFORMATEX));
+
+    // If the returned format is extensible, copy only the extension fields safely
+    if (pWfx.wFormatTag = WAVE_FORMAT_EXTENSIBLE) and
+       (pWfx.cbSize >= (SizeOf(WAVEFORMATEXTENSIBLE) - SizeOf(WAVEFORMATEX))) then
+      begin
+
+        pvMixFormat.Samples.wValidBitsPerSample := PWAVEFORMATEXTENSIBLE(pWfx).Samples.wValidBitsPerSample;
+        pvMixFormat.dwChannelMask := PWAVEFORMATEXTENSIBLE(pWfx).dwChannelMask;
+        pvMixFormat.SubFormat := PWAVEFORMATEXTENSIBLE(pWfx).SubFormat;
+
+        pvMixFormat.Format.wFormatTag := WAVE_FORMAT_EXTENSIBLE;
+        pvMixFormat.Format.cbSize := SizeOf(WAVEFORMATEXTENSIBLE) - SizeOf(WAVEFORMATEX);
+      end
+    else
+      begin
+        // Not extensible -> synthesize extensible wrapper fields
+        pvMixFormat.Format.wFormatTag := WAVE_FORMAT_EXTENSIBLE;
+        pvMixFormat.Format.cbSize := SizeOf(WAVEFORMATEXTENSIBLE) - SizeOf(WAVEFORMATEX);
+
+        pvMixFormat.Samples.wValidBitsPerSample := pvMixFormat.Format.wBitsPerSample;
+
+        case pvMixFormat.Format.nChannels of
+          1: pvMixFormat.dwChannelMask := $00000004; // FRONT_CENTER
+          2: pvMixFormat.dwChannelMask := $00000003; // FRONT_LEFT|FRONT_RIGHT
+        else
+          pvMixFormat.dwChannelMask := 0;
+        end;
+
+        if pWfx.wFormatTag = WAVE_FORMAT_IEEE_FLOAT then
+          pvMixFormat.SubFormat := KSDATAFORMAT_SUBTYPE_IEEE_FLOAT
+        else
+          pvMixFormat.SubFormat := KSDATAFORMAT_SUBTYPE_PCM;
+      end;
+
+
+    // Validate before using
+    if (pvMixFormat.Format.nChannels = 0) or
+       (pvMixFormat.Format.nSamplesPerSec = 0) or
+       (pvMixFormat.Format.nBlockAlign = 0) then
+      Exit(False);
+
+    // Correct frame size (safe now)
+    pvFrameSize := pvMixFormat.Format.nBlockAlign;
+
+  finally
+
+    CoTaskMemFree(pWfx);
+  end;
+
 
   // The original sample creates a bufferDuration of 2 seconds,
   // that will cause sound disturbtion when capture sound from a streameservice like
@@ -741,10 +845,11 @@ begin
                                  AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM,
                                  pvBufferDuration, // Note: When bufferDuration = 0, the audioclient will automaticly decise the bufferduration.
                                  0, // Must be zero in shared mode!
-                                 @pvMixFormat,
+                                 @pvMixFormat.Format,
                                  @GUID_NULL);
   if FAILED(hr) then
     begin
+
       InfoMsg(optIDE, Format('Unable to initialize the audio client: %d.',[GetLastError()]), hr);
       Exit(SUCCEEDED(hr));
     end;
@@ -753,6 +858,7 @@ begin
   hr := pvAudioClient.GetBufferSize(pvBufferSize);
   if FAILED(hr) then
     begin
+
       InfoMsg(optIDE, Format('Unable to get audio client buffer: %d.',[GetLastError()]), hr);
       Exit(SUCCEEDED(hr));
     end;
@@ -771,6 +877,7 @@ begin
   hr := pvAudioClient.SetEventHandle(pvAudioSamplesReadyEvent);
   if FAILED(hr) then
     begin
+
       InfoMsg(optIDE, Format('Unable to set ready event: %d.',[GetLastError()]), hr);
       Exit(SUCCEEDED(hr));
     end;
@@ -780,6 +887,7 @@ begin
                                  IUnknown(pvCaptureClient));
   if FAILED(hr) then
     begin
+
       InfoMsg(optIDE, Format('Unable to get new capture client: %d.',[GetLastError()]), hr);
       Exit(SUCCEEDED(hr));
     end;
@@ -792,33 +900,37 @@ end;
 //
 //  We use the Mix format since we're capturing in shared mode.
 //
-function TWASCapture.GetMixFormat(out pMixFmt: WAVEFORMATEX;
+function TWASCapture.GetMixFormat(out pMixFmt: PWAVEFORMATEX;
                                   pGetDefault: Boolean = False): HResult;
-var
-  hr: HResult;
-
 begin
+
+  pMixFmt := nil;
+  pvFrameSize := 0;
 
   if pGetDefault then
     begin
+
       pMixFmt := GetDefaultWaveFmtEx();
-      hr := S_OK;
-    end
-  else
-    begin
-      hr := pvAudioClient.GetMixFormat(@pMixFmt);
-      if FAILED(hr) then
-        begin
-          InfoMsg(optIDE, Format('Unable to get mix format on audio client: %d.',[GetLastError()]), hr);
-          pvFrameSize := 0;
-          Exit(hr);
-        end;
+      if (pMixFmt = nil) then
+        Exit(E_OUTOFMEMORY);
+
+      pvFrameSize := pMixFmt.nBlockAlign;
+      Exit(S_OK);
     end;
 
-  // Calculate the framesize.
-  pvFrameSize := (pMixFmt.wBitsPerSample div 8) * pMixFmt.nChannels;
-  Result := hr;
+  Result := pvAudioClient.GetMixFormat(pMixFmt);
+
+  if FAILED(Result) then
+    begin
+
+      InfoMsg(optIDE, Format('Unable to get mix format on audio client: %d.', [GetLastError()]), Result);
+      pvFrameSize := 0;
+      Exit(Result);
+    end;
+
+  pvFrameSize := pMixFmt.nBlockAlign;
 end;
+
 
 
 // Property read function.
@@ -826,21 +938,21 @@ end;
 function TWASCapture.GetCannelCount(): Word;
 begin
 
-  Result := pvMixFormat.nChannels;
+  Result := pvMixFormat.Format.nChannels;
 end;
 
 
 function TWASCapture.GetSamplesPerSecond(): DWord;
 begin
 
-  Result := pvMixFormat.nSamplesPerSec;
+  Result := pvMixFormat.Format.nSamplesPerSec;
 end;
 
 
 function TWASCapture.GetBytesPerSample(): Word;
 begin
 
-  Result := pvMixFormat.wBitsPerSample div 8;
+  Result := pvMixFormat.Format.wBitsPerSample div 8;
 end;
 
 
@@ -1003,7 +1115,7 @@ end;
 //
 function TWASCapture.Initialize(pBufferDuration: REFERENCE_TIME;
                                 pEngineLatency: UINT32;
-                                pUseDeviceAudioFmt: Boolean = True): Boolean;
+                                pUseDefaultAudioFmt: Boolean = True): Boolean;
 begin
 
   //  Create our shutdown and samples ready events- we want auto reset events that
@@ -1048,7 +1160,7 @@ begin
   // Remember our configured latency in case we'll need it for a stream switch later.
   pvEngineLatency := pEngineLatency;
   pvBufferDuration := pBufferDuration;
-  pvUseDeviceAudioFmt := pUseDeviceAudioFmt;
+  pvUseDefaultAudioFmt := pUseDefaultAudioFmt;
 
   // After setting the events, we initialize the audioclient aand captureclient.
   if not InitializeAudioEngine() then
@@ -1070,6 +1182,7 @@ procedure TWASCapture.Shutdown();
 begin
   if (pvRenderThreadClosedEvent <> 0) then
     begin
+
       SetEvent(pvShutdownEvent);
       WaitForSingleObject(pvRenderThreadClosedEvent,
                           INFINITE);
@@ -1079,18 +1192,21 @@ begin
 
     if (pvShutdownEvent <> 0) then
       begin
+
         CloseHandle(pvShutdownEvent);
         pvShutdownEvent := 0;
       end;
 
     if (pvAudioSamplesReadyEvent <> 0) then
       begin
+
         CloseHandle(pvAudioSamplesReadyEvent);
         pvAudioSamplesReadyEvent := 0;
       end;
 
     if (pvStreamSwitchEvent <> 0) then
       begin
+
         CloseHandle(pvStreamSwitchEvent);
         pvStreamSwitchEvent := 0;
       end;
@@ -1127,9 +1243,12 @@ begin
   // the end of buffer will be signaled first, before signal endofstream.
   if Assigned(pvRenderThread) then
     begin
+
       TerminateRenderThread();
+
       if (pvRenderThreadClosedEvent <> 0) then
         begin
+
           WaitForSingleObject(pvRenderThreadClosedEvent,
                               INFINITE);
 
@@ -1147,6 +1266,7 @@ begin
   hr := pvAudioClient.Start();
   if FAILED(hr) then
     begin
+
       InfoMsg(optIDE, Format('Unable to start capture client: %d.',[GetLastError()]), hr);
       Exit(False);
     end;
@@ -1177,6 +1297,7 @@ begin
 
   if Assigned(pvAudioClient) then
     begin
+
       hr := pvAudioClient.Stop();
       if FAILED(hr) then
         InfoMsg(optIDE, Format('Unable to stop audio client: %d',[GetLastError()]), hr);
@@ -1184,6 +1305,7 @@ begin
 
   if (pvRenderThreadClosedEvent <> 0) then
     begin
+
       WaitForSingleObject(pvRenderThreadClosedEvent,
                           INFINITE);
 
@@ -1193,7 +1315,8 @@ begin
 
   if SUCCEEDED(hr) and (pvRenderThreadClosedEvent = 0) then
     begin
-      // Signal the mainform capuring has been stopped.
+
+      // Signal the mainform capturing has been stopped.
       pvOnCapturingStopped(Self);
       Sleep(1); // Sleep to prevent a mainform timer would stop before the notify event has been processed.
       pvDeviceState := Stopped;
@@ -1208,141 +1331,189 @@ var
   mmcssHandle: THandle;
   mmcssTaskIndex: DWord;
   waitResult: DWord;
+
   packetSize: UINT32;
   pData: PByte;
   NumFramesToRead: UINT32;
   flags: DWord;
+
   dwBytesWritten: LongInt;
+  bytesToWrite: Integer;
+
   // Writer stuff.
-  mr: MMRESULT;
-  ckRIFF: MMCKINFO;
-  ckData: MMCKINFO;
+  audioWriter: IAudioWriter;
+  time100ns: Int64;
+  bytesWrittenMF: UINT32;
+
+  // For SILENT packets (never pass nil to mmioWrite)
+  silenceBuf: TBytes;
 
 begin
 
   mmcssHandle := 0;
   mmcssTaskIndex := 0;
 
-  mr := pvWavWriter.CreateFile(StrToPWidechar(pvFileName));
-  // If a previous method report a failure, we handle that here.
-  if (mr <> MMSYSERR_NOERROR) then
+  SetLength(silenceBuf, 0);
+
+  // Create and open file.
+  audioWriter := CreateAudioWriterFromFileName(pvFileName);
+  time100ns := 0;
+
+  hr := audioWriter.Open(pvFileName,
+                         pvMixFormat.Format);
+  if FAILED(hr) then
     begin
-      InfoMsg(optIDE, Format('Unable to create wav-file ''%s'': %d.',[pvFileName, GetLastError()]), E_FAIL);
-      Exit(E_FAIL);
+
+      InfoMsg(optIDE, Format('Unable to open MF sink writer ''%s'': %d.', [pvFileName, GetLastError()]), hr);
+      Exit(hr);
     end;
 
-  // Write the wavfile header
-  mr := pvWavWriter.WriteWaveHeader(@pvMixFormat,
-                                    ckRIFF,
-                                    ckData);
-  if (mr <> MMSYSERR_NOERROR) then
-    begin
-      InfoMsg(optIDE, Format('Unable to write the wavfile header: %d',[GetLastError()]), E_FAIL);
-      Exit(E_FAIL);
-    end;
 
-  if not (pvDisableMMCSS) then
+  // Enable MMCSS.
+  if not pvDisableMMCSS then
     begin
+
       mmcssHandle := AvSetMmThreadCharacteristics('Audio',
                                                   @mmcssTaskIndex);
-      if (mmcssHandle = 0) then
-        InfoMsg(optIDE, Format('Unable to enable MMCSS on capture thread: %d',[GetLastError()]), E_FAIL);
+      // If it fails, we continue anyway.
     end;
 
   waitArray[0] := pvShutdownEvent;
   waitArray[1] := pvStreamSwitchEvent;
   waitArray[2] := pvAudioSamplesReadyEvent;
 
-  // When successfully reached to here, set the status to 'Capturing'.
   pvDeviceState := Capturing;
 
-      while (pvDeviceState = Capturing) do
-        begin
-          waitResult := WaitForMultipleObjects(3,
-                                               @waitArray,
-                                               False,
-                                               INFINITE);
+  try
+    while (pvDeviceState = Capturing) do
+      begin
 
-          case waitResult of
-            // pvShutdownEvent
-            WAIT_OBJECT_0 + 0:
+        waitResult := WaitForMultipleObjects(3,
+                                             @waitArray,
+                                             False,
+                                             INFINITE);
 
-            pvDeviceState := Stopping;  // We're done, exit the loop.
+        case waitResult of
+          // pvShutdownEvent
+          WAIT_OBJECT_0 + 0: pvDeviceState := Stopping;
 
-            // pvStreamSwitchEvent
-            WAIT_OBJECT_0 + 1:
+        // pvStreamSwitchEvent
+        WAIT_OBJECT_0 + 1: begin
 
-              // We need to stop the capturer,
-              // tear down the pvAudioClient and pvCaptureClient objects and
-              // re-create them on the new endpoint if possible.
-              // If this fails, abort the thread.
-              if not HandleStreamSwitchEvent() then
-                pvDeviceState := Error;
+                             if not HandleStreamSwitchEvent() then
+                             pvDeviceState := Error;
+                           end;
 
-            // pvAudioSamplesReadyEvent
-            WAIT_OBJECT_0 + 2:
-              begin
-                //
-                //  Find out how much capture data is available.  We need to make sure we don't run over the length
-                //  of our capture buffer.  We'll discard any samples that don't fit in the buffer.
-                //
-                hr := pvCaptureClient.GetBuffer(pData,
-                                                NumFramesToRead,
-                                                flags,
-                                                nil,
-                                                nil);
-                if SUCCEEDED(hr) then
-                  begin
+        // pvAudioSamplesReadyEvent
+        WAIT_OBJECT_0 + 2: begin
 
-                    if (flags = AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) then
-                      begin
-                        pData := nil;
-                        Continue;
-                      end;
+                             hr := pvCaptureClient.GetNextPacketSize(packetSize);
+                             if FAILED(hr) then
+                               begin
 
-                    // Tell WriteData to write silence.
-                    // When a sound is detected, the app will act and process data.
-                    if (flags = AUDCLNT_BUFFERFLAGS_SILENT) then
-                      pData := nil;
+                                 pvDeviceState := Error;
+                                 Continue;
+                                end;
 
-                    // Write the available capture data to the audio sink.
-                    mr := pvWavWriter.WriteData(pData,
-                                                NumFramesToRead,
-                                                pvMixFormat.nBlockAlign,
-                                                dwBytesWritten);
-                    // Note: The writer will automaticly closes the file when a HResult <> S_OK.
-                    if (mr <> MMSYSERR_NOERROR) then
-                      if (mr = MMIOERR_CANNOTEXPAND) then
-                        pvDeviceState := MaxFileSizeReached
-                      else
-                        pvDeviceState := Error;
-                  end;
+                             // Drain all packets for this event.
+                             while (packetSize > 0) and (pvDeviceState = Capturing) do
+                               begin
 
-                hr := pvCaptureClient.ReleaseBuffer(NumFramesToRead);
-                if FAILED(hr) then
-                  pvDeviceState := Error;
+                                 dwBytesWritten := 0;
 
-                // `Keep score.
-                Inc(pvBytesCaptured,
-                    dwBytesWritten);
+                                 hr := pvCaptureClient.GetBuffer(pData,
+                                                                 NumFramesToRead,
+                                                                 flags,
+                                                                 nil,
+                                                                 nil);
+                                 if FAILED(hr) then
+                                   begin
 
-                hr := pvCaptureClient.GetNextPacketSize(packetSize);
-                if FAILED(hr) then
-                  pvDeviceState := Error;
-              end;
-          end; // clase
-        end; // while
+                                     pvDeviceState := Error;
+                                     Break;
+                                    end;
 
-  if not pvDisableMMCSS then
-    AvRevertMmThreadCharacteristics(mmcssHandle);
-  // Close the file when succeeded.
-  // Note: When an error or other HResult value occurs,
-  //       the writefile method will automaticly closes the file.
-  if SUCCEEDED(mr) then
-    pvWavWriter.CloseFile(ckRIFF,
-                          ckData);
-  pvDeviceState := Stopped;
-  Result := S_OK;
+                                 try
+
+                                   // It is valid (and happens) that NumFramesToRead can be 0.
+                                   // If so: just release and continue.
+                                   if (NumFramesToRead = 0) then
+                                     begin
+
+                                       // no write, dwBytesWritten stays 0
+                                     end
+                                   else
+                                     begin
+
+                                       bytesToWrite := Integer(NumFramesToRead) * Integer(pvMixFormat.Format.nBlockAlign);
+
+                                       // SILENT is a bitmask, the writer cannot accept nil pointers.
+                                       if ((flags and AUDCLNT_BUFFERFLAGS_SILENT) <> 0) then
+                                         begin
+
+                                           if (Length(silenceBuf) < bytesToWrite) then
+                                             SetLength(silenceBuf,
+                                                       bytesToWrite);
+
+                                           FillChar(silenceBuf[0],
+                                                    bytesToWrite,
+                                                    0);
+                                           pData := @silenceBuf[0];
+                                         end;
+
+                                       // DO NOT "continue" on DATA_DISCONTINUITY; just optionally log it.
+                                       // if ((flags and AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) <>) 0 then
+                                       //   InfoMsg(optIDE, 'DATA_DISCONTINUITY', S_OK);
+
+                                       hr := audioWriter.WriteFrames(pData,
+                                                                     NumFramesToRead,
+                                                                     pvMixFormat.Format,
+                                                                     time100ns,
+                                                                     bytesWrittenMF);
+                                       if FAILED(hr) then
+                                         begin
+
+                                           pvDeviceState := Error;
+                                           Break;
+                                         end;
+
+                                       Inc(pvBytesCaptured,
+                                           bytesWrittenMF);
+                                     end;
+
+                                 finally
+
+                                   hr := pvCaptureClient.ReleaseBuffer(NumFramesToRead);
+                                   if FAILED(hr) then
+                                     pvDeviceState := Error;
+                                 end;
+
+                                 hr := pvCaptureClient.GetNextPacketSize(packetSize);
+                                 if FAILED(hr) then
+                                   begin
+
+                                     pvDeviceState := Error;
+                                     Break;
+                                   end;
+                               end;
+                           end;
+        end; // case
+    end; // while
+
+    if (pvDeviceState = Error) then
+      Result := hr
+    else
+      Result := S_OK;
+
+  finally
+
+    if not pvDisableMMCSS then
+      AvRevertMmThreadCharacteristics(mmcssHandle);
+
+    pvDeviceState := Stopped;
+    if (audioWriter <> nil) then
+      audioWriter.Close();
+  end;
 end;
 
 end.

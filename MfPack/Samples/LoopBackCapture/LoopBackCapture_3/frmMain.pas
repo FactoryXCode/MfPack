@@ -91,10 +91,14 @@ uses
   LoopbackCapture,
   Common,
   dlgDevices,
-  UniThreadTimer;
+  UniThreadTimer, Vcl.Dialogs;
 
 
 type
+
+  TOutputFormat = (ofWav,
+                   ofFlac);
+
   TMainForm = class(TForm)
     Panel1: TPanel;
     Panel3: TPanel;
@@ -120,7 +124,7 @@ type
     rbCaptureDevice: TRadioButton;
     butShowdlgDevices: TButton;
     cbxEnableStreamSwitch: TCheckBox;
-    cbxUseDeviceAudioFmt: TCheckBox;
+    cbxUseDefaultAudioFmt: TCheckBox;
     Label5: TLabel;
     spedLatency: TSpinEdit;
     sedBufferSize: TSpinEdit;
@@ -128,7 +132,12 @@ type
     butStartStop: TButton;
     butPlayData: TButton;
     butResetEngine: TButton;
+    cbxOutputFormat: TComboBox;
+    lblOutputFmt: TLabel;
+    dlgSave: TSaveDialog;
+
     procedure FormCreate(Sender: TObject);
+
     procedure butStartStopClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure butPlayDataClick(Sender: TObject);
@@ -141,6 +150,7 @@ type
     procedure cbxAutoBufferSizeClick(Sender: TObject);
     procedure edFileNameKeyUp(Sender: TObject; var Key: Word;
       Shift: TShiftState);
+    procedure cbxOutputFormatChange(Sender: TObject);
 
   private
     { Private declarations }
@@ -176,6 +186,9 @@ type
     function CreateEngine(): Boolean;
     procedure RemoveEngine();
     procedure SetBufferDuration();
+
+    // Helper
+    function OutputFormatFromCombo(cb: TComboBox): TOutputFormat;
 
     // Event handlers.
     procedure OnCapturingStartEvent(Sender: TObject);
@@ -221,6 +234,7 @@ end;
 
 procedure TMainForm.KillTimer();
 begin
+
   if (thrTimer <> nil) then
     begin
       thrTimer.Enabled := False;
@@ -232,6 +246,7 @@ end;
 
 procedure TMainForm.OnCapturingStartEvent(Sender: TObject);
 begin
+
   CreateTimer();
   thrTimer.Enabled := True;
   aStopWatch.Start;
@@ -244,6 +259,7 @@ var
   Status: TDeviceState;
 
 begin
+
   if not Assigned(prWASCapture) then
     Exit;
 
@@ -256,12 +272,14 @@ begin
 
   if (Status = Stopped) or (Status = Error) then
     begin
+
       lblStatus.Caption := Format('Capturing stopped. Captured %f Mb.',
                                   [prWASCapture.BytesCaptured / (1000 * 1000)]);
       butPlayData.Enabled := True;
     end
   else if (Status = Error) then
     begin
+
       lblStatus.Caption := Format('Capturing stopped because of an error (hr = %d).', [E_FAIL]);
       butPlayData.Enabled := False;
     end;
@@ -310,6 +328,7 @@ var
   bSuccess: Boolean;
 
 begin
+
  if (tag = 1) then
    begin
 
@@ -326,7 +345,11 @@ begin
    end
  else
    begin
+
      pvTargetLatency := spedLatency.Value * REFTIMES_PER_MILLISEC;
+
+     // Set output format/extension from UI (WAV/FLAC)
+     cbxOutputFormatChange(nil);
 
      // Create the engine with setup-parameters
      if not CreateEngine() then
@@ -337,16 +360,20 @@ begin
 
      if (prOrgFileName = '') or prEdited then
        begin
+
          prOrgFileName := prFileName;
          prEdited := False;
        end;
 
      if cbxDontOverWrite.Checked then
        begin
+
          bFileExists := True;
          i := 0;
+
          while (bFileExists = True) do
            begin
+
              if FileExists(prFileName + lblFileExt.Caption) then
                begin
                  if (prOrgFileName = prFileName) then
@@ -377,7 +404,7 @@ begin
      // Initialize.
      bSuccess := prWASCapture.Initialize(pvBufferDuration,
                                          pvTargetLatency,
-                                         cbxUseDeviceAudioFmt.Checked);
+                                         cbxUseDefaultAudioFmt.Checked);
 
      if bSuccess then
        begin
@@ -483,6 +510,25 @@ begin
 end;
 
 
+procedure TMainForm.cbxOutputFormatChange(Sender: TObject);
+begin
+
+  // Optional: update filter and default extension dynamically
+  if OutputFormatFromCombo(cbxOutputFormat) = ofFlac then
+    begin
+      dlgSave.Filter := 'FLAC audio (*.flac)|*.flac';
+      dlgSave.DefaultExt := 'flac';
+      lblFileExt.Caption := '.flac';
+    end
+  else
+    begin
+      dlgSave.Filter := 'WAV audio (*.wav)|*.wav';
+      dlgSave.DefaultExt := 'wav';
+      lblFileExt.Caption := '.wav';
+    end;
+end;
+
+
 procedure TMainForm.cbxStayOnTopClick(Sender: TObject);
 begin
 
@@ -506,16 +552,17 @@ end;
 
 
 procedure TMainForm.FormCloseQuery(Sender: TObject;
-  var CanClose: Boolean);
+                                   var CanClose: Boolean);
 begin
 
   CanClose := False;
   aStopWatch.Stop;
 
   KillTimer();
-  // Wait until the timer signals destroyed.
+  // Wait until the timer signals are stopped.
   while True do
     begin
+
       if prTimerDestroyed then
         Break;
       Sleep(1);
@@ -528,12 +575,13 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
+
   // Prevents flickering.
   lblStatus.ControlStyle := lblStatus.ControlStyle + [csOpaque];
-  aStopWatch := TStopwatch.Create;
+  aStopWatch := TStopwatch.Create();
   prEdited := False;
-  cbxUseDeviceAudioFmt.Hint := 'Use the default audio format (44.1 khz/ 16 bit/ PCM).' + #13 +
-                               'If you disable this option, the endpoint''s audio format will be used.';
+  cbxUseDefaultAudioFmt.Hint := 'Use the default audio format (44.1 khz/ 16 bit/ 2 channels/ PCM).' + #13 +
+                                'If you disable this option, the endpoint''s audio format will be used.';
 end;
 
 
@@ -576,6 +624,7 @@ begin
                                      prEndPointRole);
   if not Assigned(prWASCapture) then
     begin
+
       InfoMsg(optIDE,
               'Unable create the WASCapture engine.',
               E_POINTER,
@@ -584,6 +633,7 @@ begin
     end
   else
     begin
+
       // Set event handler.
       prWASCapture.OnStartCapturing := OnCapturingStartEvent;
       prWASCapture.OnStoppedCapturing := OnCapturingStoppedEvent;
@@ -613,6 +663,7 @@ begin
 
   if Assigned(prWASCapture) then
     begin
+
       prWASCapture.Stop();
       prWASCapture.OnStoppedCapturing := nil;
       FreeAndNil(prWASCapture);
@@ -649,6 +700,16 @@ begin
     lblBufferDuration.Caption := Format('Capture buffer duration(%d %s)',
                                         [sedBufferSize.Value,
                                          sms])
+end;
+
+
+function TMainForm.OutputFormatFromCombo(cb: TComboBox): TOutputFormat;
+begin
+
+  if (cb.ItemIndex = 1) then
+    Result := ofFlac
+  else
+    Result := ofWav;
 end;
 
 
