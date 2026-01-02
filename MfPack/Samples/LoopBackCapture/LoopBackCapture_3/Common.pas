@@ -63,6 +63,8 @@ unit Common;
 interface
 
 uses
+
+  {WinApi}
   WinApi.Windows,
   WinAPI.Messages,
   {System}
