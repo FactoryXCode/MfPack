@@ -7,16 +7,17 @@ Description:
 Demonstrates how to capture sound from a rendering or capture device (one of the soundcard's endpoints)
 using WASAPI in combination with IMFSinkWriter to write wav and FLAC files.
 
-Note that the earlier version used MMIO to write files. But since we added FLAC as output format that's a noop.
+Note that the earlier version used the MMIO Api to write wav files only. But since we added FLAC as output format that's a noop.
 
 The sample difference from the original sample where the audioclient buffersize is fixed that leads to an oversized buffer on modern audio devices.
 This sample lets you to choose between different latency's and buffersize for better sound to eliminate buffer related gliches.
 
 
+
 It has some more advanced features like:
 
 * The rendering part is running in a separate thread.
-* possibility to write wav data in native format 44.1 kHz/ 16 bit/ 2 channels/ PCM or the soundcard's native audio format (including Uncompressed IEEE floating-point audio). 
+* Possibility to write wav data in native format 44.1 kHz/ 16 bit/ 2 channels/ PCM or the soundcard's native audio format (including Uncompressed IEEE floating-point audio).
 
 
 
@@ -29,6 +30,8 @@ NOTES:
 * SDK version 10.0.22621.4654 (Win 11)
 * Requires Windows 10 version 22H2 or later.
 * Minimum supported MfPack version: 3.1.8
+
+
 
 Project: Media Foundation - MFPack - Samples
 Project location: https://github.com/FactoryXCode/MfPack

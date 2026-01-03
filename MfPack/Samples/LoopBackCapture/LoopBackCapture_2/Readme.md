@@ -6,6 +6,7 @@ Description:
 Demonstrates how to capture system audio either from a specific process tree or for all process except a process tree and the use of ActivateAudioInterfaceAsync Win32 API with a new initialization structure.
 
 
+
 The new data structure makes it possible to restrict captured audio data to that rendered by a specific
 process and any of its child processes. Windows 10 has always supported capturing all audio that is played on
 an audio endpoint (referred to as "system" loopback capture), which captures all audio from all apps that
@@ -31,11 +32,11 @@ The application is using MMCSS and runs the rendering part in a separate thread.
 
 
 
-What has changed with the previous sample:
+What has changed since the previous sample:
 
-The previous sample used MMIO API to write WAV files. Because of FLAC has been introduced, the MMIO API does not provide implementation for FLAC.
+The previous sample used the MMIO API to write WAV files. With the option to write FLAC files, 
 
-Instead the MfSinkWriter to write FLAC files is being used in this sample. 
+the MMIO API has been replaced by the IMfSinkWriter to write FLAC and WAV files.
 
 
 
