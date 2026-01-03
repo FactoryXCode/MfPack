@@ -110,6 +110,7 @@ uses
   Utils;
 
 type
+
   TStartMode = (smVirgin,
                 smReUse);
 
@@ -165,8 +166,10 @@ type
     procedure cbxVideoControlFlagsSelect(Sender: TObject);
     procedure cbxVideoValuesSelect(Sender: TObject);
     procedure cbxCameraValuesSelect(Sender: TObject);
+    procedure cboRotationChange(Sender: TObject);
 
   private
+
     { Private declarations }
     hPreview: HWND;
     ptrDevNotify: HDEVNOTIFY; // Devicenotify pointer.
@@ -1438,6 +1441,25 @@ begin
            end;
        end;
   end;
+end;
+
+
+procedure TMainWindow.cboRotationChange(Sender: TObject);
+var
+  dwDegrees: DWord;
+
+begin
+
+  case cboRotation.ItemIndex of
+    0: dwDegrees := 0;
+    1: dwDegrees := 90;
+    2: dwDegrees := 180;
+    3: dwDegrees := 270;
+    else
+      dwDegrees := 0;
+  end;
+
+  FCaptureManager.SetRotationDegrees(dwDegrees);
 end;
 
 

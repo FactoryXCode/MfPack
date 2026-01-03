@@ -91,6 +91,7 @@ uses
 
 
 const
+
   IDTIMEOUT      = 'Unable to set the capture device.';
   ERR_INITIALIZE = 'Unable to initialize the capture engine.';
   ERR_PREVIEW    = 'An error occurred during preview.';

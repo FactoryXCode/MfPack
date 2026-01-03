@@ -678,19 +678,22 @@ type
   // Configures the recordsink for encoding video using default media type.
   function ConfigureVideoEncoding(pSource: IMFCaptureSource;
                                   pRecord: IMFCaptureRecordSink;
-                                  const guidEncodingType: REFGUID): HResult; overload;
+                                  const guidEncodingType: REFGUID;
+                                  out aStreamIndex: DWord): HResult; overload;
 
   // Configures the recordsink for encoding video using a given media type.
   function ConfigureVideoEncoding(pSource: IMFCaptureSource;
                                   pRecord: IMFCaptureRecordSink;
                                   const guidEncodingType: REFGUID;
-                                  pMediaType: IMFMediaType): HResult; overload;
+                                  pMediaType: IMFMediaType;
+                                  out aStreamIndex: DWord): HResult; overload;
 
 
   // Configures the recordsink for audio (if an audiostream is present).
   function ConfigureAudioEncoding(pSource: IMFCaptureSource;
                                   pRecord: IMFCaptureRecordSink;
-                                  const guidEncodingType: REFGUID): HResult;
+                                  const guidEncodingType: REFGUID;
+                                  out aStreamIndex: DWord): HResult;
 
 
   // Sets the Video Capture Format for a capture device
@@ -8216,13 +8219,13 @@ end;
 //=======================================================================
 function ConfigureVideoEncoding(pSource: IMFCaptureSource;
                                 pRecord: IMFCaptureRecordSink;
-                                const guidEncodingType: REFGUID): HResult;
+                                const guidEncodingType: REFGUID;
+                                out aStreamIndex: DWord): HResult;
 var
   pMediaType: IMFMediaType;
   pMediaType2: IMFMediaType;
   guidSubType: TGUID;
   uiEncodingBitrate: UINT32;
-  dwSinkStreamIndex: DWORD;
   hr: HResult;
 
 begin
@@ -8275,7 +8278,7 @@ begin
   Result := pRecord.AddStream(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD,
                               pMediaType2,
                               nil,
-                              dwSinkStreamIndex);
+                              aStreamIndex);
 end;
 
 
@@ -8284,12 +8287,12 @@ end;
 function ConfigureVideoEncoding(pSource: IMFCaptureSource;
                                 pRecord: IMFCaptureRecordSink;
                                 const guidEncodingType: REFGUID;
-                                pMediaType: IMFMediaType): HResult;
+                                pMediaType: IMFMediaType;
+                                out aStreamIndex: DWord): HResult;
 var
   pMediaType2: IMFMediaType;
   guidSubType: TGUID;
   uiEncodingBitrate: UINT32;
-  dwSinkStreamIndex: DWORD;
   hr: HResult;
 
 begin
@@ -8336,19 +8339,20 @@ begin
   Result := pRecord.AddStream(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_RECORD,
                               pMediaType2,
                               nil,
-                              dwSinkStreamIndex);
+                              aStreamIndex);
+
 end;
 
 
 //
 function ConfigureAudioEncoding(pSource: IMFCaptureSource;
                                 pRecord: IMFCaptureRecordSink;
-                                const guidEncodingType: REFGUID): HResult;
+                                const guidEncodingType: REFGUID;
+                                out aStreamIndex: DWord): HResult;
 var
   pAvailableTypes: IMFCollection;
   pMediaType: IMFMediaType;
   pAttributes: IMFAttributes;
-  dwSinkStreamIndex: DWORD;
   hr: HResult;
 
 label
@@ -8394,13 +8398,15 @@ begin
   hr := pRecord.AddStream(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_AUDIO,
                           pMediaType,
                           nil,
-                          dwSinkStreamIndex);
+                          aStreamIndex);
 
   if (hr = MF_E_INVALIDSTREAMNUMBER) then
     begin
       // If an audio device is not present, allow video only recording
       hr := S_OK;
     end;
+
+
 
 done:
   Result := hr;

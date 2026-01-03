@@ -1,67 +1,77 @@
 object MainWindow: TMainWindow
   Left = 0
   Top = 0
-  Margins.Left = 2
-  Margins.Top = 2
-  Margins.Right = 2
-  Margins.Bottom = 2
   Anchors = [akTop]
   BorderWidth = 1
   Caption = 'Capture Engine Application Sample 2'
-  ClientHeight = 674
-  ClientWidth = 1093
+  ClientHeight = 1011
+  ClientWidth = 1640
   Color = clDarkslategray
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -17
   Font.Name = 'Tahoma'
   Font.Style = []
   Menu = MainMenu
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
+  PixelsPerInch = 144
   DesignSize = (
-    1093
-    674)
-  TextHeight = 13
+    1640
+    1011)
+  TextHeight = 21
   object pnlSnapShot: TPanel
-    Left = 754
+    Left = 1131
     Top = 0
-    Width = 338
-    Height = 234
+    Width = 507
+    Height = 351
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Anchors = [akTop, akRight]
     BevelOuter = bvNone
     Color = clBackground
     ParentBackground = False
     ShowCaption = False
     TabOrder = 0
-    ExplicitLeft = 748
     object pbCapture: TPaintBox
       Left = 0
       Top = 0
-      Width = 338
-      Height = 206
+      Width = 507
+      Height = 309
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Align = alClient
       Color = clBackground
       ParentColor = False
-      ExplicitLeft = 60
-      ExplicitWidth = 250
     end
     object pnlControls: TPanel
       Left = 0
-      Top = 206
-      Width = 338
-      Height = 28
+      Top = 309
+      Width = 507
+      Height = 42
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Align = alBottom
       ParentBackground = False
       ShowCaption = False
       TabOrder = 0
       object butSaveToFile: TButton
-        Left = 91
-        Top = 1
-        Width = 73
-        Height = 25
+        Left = 137
+        Top = 2
+        Width = 109
+        Height = 37
         Hint = 'Save photo to file'
+        Margins.Left = 5
+        Margins.Top = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
         Caption = '&Save To File'
         Enabled = False
         ParentShowHint = False
@@ -70,11 +80,15 @@ object MainWindow: TMainWindow
         OnClick = butSaveToFileClick
       end
       object butTakePhoto: TButton
-        Left = 12
-        Top = 1
-        Width = 73
-        Height = 25
+        Left = 18
+        Top = 2
+        Width = 110
+        Height = 37
         Hint = 'Save photo to file'
+        Margins.Left = 5
+        Margins.Top = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
         Caption = '&Take Photo'
         Enabled = False
         ParentShowHint = False
@@ -83,20 +97,28 @@ object MainWindow: TMainWindow
         OnClick = butTakePhotoClick
       end
       object chkNoPreview: TCheckBox
-        Left = 175
-        Top = 6
-        Width = 97
-        Height = 15
+        Left = 263
+        Top = 9
+        Width = 145
+        Height = 23
+        Margins.Left = 5
+        Margins.Top = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
         Caption = 'Auto Save'
         TabOrder = 2
       end
     end
   end
   object pnlInfo: TPanel
-    Left = -2
-    Top = 649
-    Width = 1101
-    Height = 28
+    Left = -3
+    Top = 974
+    Width = 1652
+    Height = 42
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Align = alCustom
     Anchors = [akLeft, akRight]
     AutoSize = True
@@ -107,145 +129,186 @@ object MainWindow: TMainWindow
     ParentShowHint = False
     ShowHint = False
     TabOrder = 1
-    ExplicitTop = 632
-    ExplicitWidth = 1095
   end
   object pnlCameraAndVideoControl: TPanel
-    Left = 754
-    Top = 235
-    Width = 338
-    Height = 222
+    Left = 1131
+    Top = 353
+    Width = 507
+    Height = 333
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Align = alCustom
     Anchors = [akTop, akRight]
     ParentBackground = False
     ShowCaption = False
     TabOrder = 2
     Visible = False
-    ExplicitLeft = 748
     object Label1: TLabel
-      Left = 14
-      Top = 10
-      Width = 95
-      Height = 14
+      Left = 21
+      Top = 15
+      Width = 143
+      Height = 21
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       AutoSize = False
       Caption = 'Camera Settings'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentFont = False
     end
     object Label2: TLabel
-      Left = 14
-      Top = 87
-      Width = 95
-      Height = 14
+      Left = 21
+      Top = 131
+      Width = 143
+      Height = 21
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       AutoSize = False
       Caption = 'Video Settings'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentFont = False
     end
     object Label3: TLabel
-      Left = 14
-      Top = 32
-      Width = 95
-      Height = 13
+      Left = 21
+      Top = 48
+      Width = 143
+      Height = 20
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       AutoSize = False
       Caption = 'Control Property'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
     end
     object Label4: TLabel
-      Left = 14
-      Top = 107
-      Width = 95
-      Height = 19
+      Left = 21
+      Top = 161
+      Width = 143
+      Height = 28
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       AutoSize = False
       Caption = 'Control Property'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
     end
     object Label5: TLabel
-      Left = 188
-      Top = 32
-      Width = 95
-      Height = 13
+      Left = 282
+      Top = 48
+      Width = 143
+      Height = 20
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       AutoSize = False
       Caption = 'Value'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
     end
     object Label6: TLabel
-      Left = 188
-      Top = 115
-      Width = 53
-      Height = 14
+      Left = 282
+      Top = 173
+      Width = 80
+      Height = 21
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       AutoSize = False
       Caption = 'Value'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
     end
     object Label7: TLabel
-      Left = 258
-      Top = 32
-      Width = 95
-      Height = 13
+      Left = 387
+      Top = 48
+      Width = 143
+      Height = 20
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       AutoSize = False
       Caption = 'Control'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
     end
     object Label8: TLabel
-      Left = 258
-      Top = 115
-      Width = 95
-      Height = 16
+      Left = 387
+      Top = 173
+      Width = 143
+      Height = 24
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       AutoSize = False
       Caption = 'Control'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
     end
     object lblRotation: TLabel
-      Left = 18
-      Top = 159
-      Width = 48
-      Height = 13
+      Left = 27
+      Top = 239
+      Width = 74
+      Height = 21
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Caption = 'Rotation: '
     end
     object cbxCameraControlProperty: TComboBox
-      Left = 14
-      Top = 48
-      Width = 163
-      Height = 21
+      Left = 21
+      Top = 72
+      Width = 245
+      Height = 29
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       ItemIndex = 0
       TabOrder = 0
       Text = 'Pan'
@@ -260,10 +323,14 @@ object MainWindow: TMainWindow
         'Focus')
     end
     object cbxVideoControlProperty: TComboBox
-      Left = 14
-      Top = 128
-      Width = 163
-      Height = 21
+      Left = 21
+      Top = 192
+      Width = 245
+      Height = 29
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       TabOrder = 1
       Text = 'Brightness '
       Items.Strings = (
@@ -279,10 +346,14 @@ object MainWindow: TMainWindow
         'Gain')
     end
     object cbxCameraControlFlags: TComboBox
-      Left = 258
-      Top = 48
-      Width = 73
-      Height = 21
+      Left = 387
+      Top = 72
+      Width = 110
+      Height = 29
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       TabOrder = 2
       Text = 'Manual'
       OnSelect = cbxCameraControlFlagsSelect
@@ -294,10 +365,14 @@ object MainWindow: TMainWindow
         'Relative')
     end
     object cbxVideoControlFlags: TComboBox
-      Left = 258
-      Top = 129
-      Width = 73
-      Height = 21
+      Left = 387
+      Top = 194
+      Width = 110
+      Height = 29
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       ItemIndex = 0
       TabOrder = 3
       Text = 'Manual'
@@ -307,14 +382,19 @@ object MainWindow: TMainWindow
         'Automatic')
     end
     object cboRotation: TComboBox
-      Left = 16
-      Top = 179
-      Width = 97
-      Height = 21
+      Left = 24
+      Top = 269
+      Width = 146
+      Height = 29
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Style = csDropDownList
       ItemIndex = 0
       TabOrder = 4
       Text = '0'
+      OnChange = cboRotationChange
       Items.Strings = (
         '0'
         '90'
@@ -322,10 +402,14 @@ object MainWindow: TMainWindow
         '270')
     end
     object cbxCameraValues: TComboBox
-      Left = 188
-      Top = 48
-      Width = 59
-      Height = 21
+      Left = 282
+      Top = 72
+      Width = 89
+      Height = 29
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       ItemIndex = 0
       TabOrder = 5
       Text = '0'
@@ -334,10 +418,14 @@ object MainWindow: TMainWindow
         '0')
     end
     object cbxVideoValues: TComboBox
-      Left = 188
-      Top = 128
-      Width = 59
-      Height = 21
+      Left = 282
+      Top = 192
+      Width = 89
+      Height = 29
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       ItemIndex = 0
       TabOrder = 6
       Text = '0'

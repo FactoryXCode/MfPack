@@ -94,7 +94,7 @@ uses
   {$IFDEF SAVE_DEBUG_REPORT}
   WinApi.MediaFoundationApi.MfMediaTypeDebug,
   {$ENDIF}
-  {DirectX Note: Do not use winapi.d3d11 <= Delphi 10.4 bcause it lacks updates}
+  {DirectX Note: Do not use winapi.d3d11 <= Delphi 10.4 because it lacks updates}
   Winapi.DirectX.D3DCommon,
   WinApi.DirectX.D3D11,
   {Application}
@@ -105,6 +105,7 @@ uses
 
 
 const
+
   WM_APP_CAPTURE_EVENT = WM_APP + 1001;
   WM_RECIEVED_SAMPLE_FROM_CALLBACK = WM_APP + 1002;
   WM_APP_CAPTURE_EVENT_HANDLED = WM_APP + 1003;
@@ -132,8 +133,11 @@ type
 
     CaptureEngineCB = class(TInterfacedPersistent, IMFCaptureEngineOnEventCallback)
     private
-      m_hwnd: HWND;
+
+     m_hwnd: HWND;
+
     public
+
       // Implementation of IMFCaptureEngineOnEventCallback
       function OnEvent(pEvent: IMFMediaEvent): HResult; stdcall;
 
@@ -143,8 +147,11 @@ type
 
     CaptureEngineSCB = class(TInterfacedPersistent, IMFCaptureEngineOnSampleCallback)
     private
+
       m_hwnd: HWND;
+
     public
+
       // Implementation of IMFCaptureEngineOnSampleCallback
       function OnSample(pSample: IMFSample): HResult; stdcall;
 
@@ -158,9 +165,11 @@ type
 
   TCaptureManager = class(TObject)
   protected
+
     FhEvent: THandle;
 
   private
+
     FCaptureEngine: IMFCaptureEngine;
     FCapturePreviewSink: IMFCapturePreviewSink;
     m_pEventCallback: CaptureEngineCB;
@@ -201,7 +210,6 @@ type
     procedure WaitForResult();
 
   public
-
 
     constructor Create(hEvent: HWND); reintroduce;
     destructor Destroy(); override;
@@ -284,9 +292,9 @@ begin
                           @aFeatureLevels,
                           Length(aFeatureLevels),
                           D3D11_SDK_VERSION,
-                          ppDevice,
-                          pFeatureLevel,
-                          ppDeviceContext
+                          @ppDevice,
+                          @pFeatureLevel,  // This is the feature level your system's Direct3D runtime uses. It maybe nil though.
+                          @ppDeviceContext
                          );
 
   if SUCCEEDED(hr) then
@@ -782,7 +790,7 @@ begin
     begin
 
       hr := FCaptureEngine.GetSink(MF_CAPTURE_ENGINE_SINK_TYPE_PREVIEW,
-                                   pCaptureSink);
+                                   @pCaptureSink);
       if FAILED(hr) then
         goto Done;
 
@@ -796,7 +804,7 @@ begin
       if FAILED(hr) then
         goto Done;
 
-      hr := FCaptureEngine.GetSource(pCaptureSource);
+      hr := FCaptureEngine.GetSource(@pCaptureSource);
       if FAILED(hr) then
         goto Done;
 
@@ -900,13 +908,15 @@ end;
 function TCaptureManager.StartRecording(pszDestinationFile: PCWSTR;
                                         pSinkWriterConfigSet: Boolean): HResult;
 var
+  hr: HResult;
   pszExt: string;
   guidVideoEncoding: TGUID;
   guidAudioEncoding: TGUID;
   pSink: IMFCaptureSink;
   pRecord: IMFCaptureRecordSink;
   pSource: IMFCaptureSource;
-  hr: HResult;
+  dwVideoIndex,
+  dwAudioIndex: DWord;
 
 label
   Done;
@@ -950,7 +960,7 @@ begin
     end;
 
   hr := FCaptureEngine.GetSink(MF_CAPTURE_ENGINE_SINK_TYPE_RECORD,
-                               pSink);
+                               @pSink);
   if FAILED(hr) then
     goto Done;
 
@@ -959,7 +969,7 @@ begin
   if FAILED(hr) then
     goto Done;
 
-  hr := FCaptureEngine.GetSource(pSource);
+  hr := FCaptureEngine.GetSource(@pSource);
     if FAILED(hr) then
       goto Done;
 
@@ -981,7 +991,8 @@ begin
           hr := ConfigureVideoEncoding(pSource,
                                        pRecord,
                                        guidVideoEncoding,
-                                       FRecordingMediaType);
+                                       FRecordingMediaType,
+                                       dwVideoIndex);
           if FAILED(hr) then
             goto Done;
         end;
@@ -992,7 +1003,8 @@ begin
         begin
           hr := ConfigureAudioEncoding(pSource,
                                        pRecord,
-                                       guidAudioEncoding);
+                                       guidAudioEncoding,
+                                       dwAudioIndex);
           if FAILED(hr) then
             goto Done;
         end;
@@ -1056,7 +1068,7 @@ begin
 
 
   hr := FCaptureEngine.GetSink(MF_CAPTURE_ENGINE_SINK_TYPE_PHOTO,
-                               pCaptureSink);
+                               @pCaptureSink);
   if FAILED(hr) then
     goto done;
 
@@ -1070,7 +1082,7 @@ begin
 
   if (SnapShotOption = ssoFile) then  // Snapshot will be saved directly to file without preview first.
     begin
-      hr := FCaptureEngine.GetSource(pSource);
+      hr := FCaptureEngine.GetSource(@pSource);
       if FAILED(hr) then
        goto done;
 
@@ -1201,7 +1213,7 @@ begin
   FMediaTypeDebug.SafeDebugResultsToFile('SetMediaType');
   {$ENDIF}
 
-  hr := FCaptureEngine.GetSource(mfCaptureSource);
+  hr := FCaptureEngine.GetSource(@mfCaptureSource);
 
   if SUCCEEDED(hr) then
     // Preview
@@ -1240,6 +1252,7 @@ label
   Done;
 
 begin
+
   hr := S_OK;
   // Decide where the snapshot should be send through
   case SnapShotOption of

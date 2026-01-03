@@ -954,14 +954,14 @@ type
     // App should listen for MF_CAPTURE_ENGINE_PHOTO_TAKEN via IMFCaptureEngineOnEventCallback.
 
     function GetSink(mfCaptureEngineSinkType: MF_CAPTURE_ENGINE_SINK_TYPE;
-                     out ppSink: IMFCaptureSink): HResult; stdcall;
+                     {out} ppSink: PIMFCaptureSink): HResult; stdcall;
     // Method to obtain access to an IMFCaptureSink.
     // <param name = "mfCaptureEngineSinkType">
     // Specifies the capture sink type from the MF_CAPTURE_ENGINE_SINK_TYPE enumeration.
     // <param name = "ppSink">
     // Receives a pointer to IMFCaptureSink interface.
 
-    function GetSource(out ppSource: IMFCaptureSource): HResult; stdcall;
+    function GetSource({out} ppSource: PIMFCaptureSource): HResult; stdcall;
     // Method to obtain access to IMFCaptureSource.
     // <param name = "ppSource">
     // Receives a pointer to IMFCaptureSource interface.

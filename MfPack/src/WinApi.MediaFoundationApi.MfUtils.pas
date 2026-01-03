@@ -182,6 +182,10 @@ type
                             wMinorVersion: Word;
                             wServicePackMajor: Word): Boolean;
 
+  // Utility to check HRESULT
+  procedure CheckHR(hr: HRESULT;
+                    const aContext: string = '');
+
 
   // C++ translations
   //=================
@@ -978,6 +982,15 @@ begin
   end;
 end; // SizeTMult
 
+
+// Utility to check HRESULT
+procedure CheckHR(hr: HRESULT;
+                  const aContext: string = '');
+begin
+  if Failed(hr) then
+    raise Exception.CreateFmt('HRESULT 0x%x - %s', [hr,
+                                                    aContext]);
+end;
 
   // Adds two values of type UINT.
   // Parameters
@@ -2210,11 +2223,13 @@ function MulDiv64(const aNumber,
                         aNumerator,
                         aDenominator: Int64): Int64;
 begin
-  if aDenominator <= 0 then
+
+  if (aDenominator <= 0) then
     Exit(0);
 
   // Avoid Int64 overflow: (QpcDelta * 10_000_000) div PerfFreq
-  Result := (aNumber div aDenominator) * aNumerator + (aNumber mod aDenominator) * aNumerator div aDenominator;
+  Result := (aNumber div aDenominator) * aNumerator +
+            (aNumber mod aDenominator) * aNumerator div aDenominator;
 end;
 
 

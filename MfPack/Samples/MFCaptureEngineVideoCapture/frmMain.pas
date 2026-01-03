@@ -848,18 +848,21 @@ var
   hr: HResult;
 
 begin
+
   if Assigned(FCaptureManager) then
     begin
 
       if (pvPreviewMode = smVirgin) then
-        // Set video preview and recording formats.
-        hr := FCaptureManager.SetVideoFormat();
-        if FAILED(hr) then
-          begin
-            ErrMsg('mnuStartPreviewClick ' + ERR_OUTPUT_MEDIATYPE_SET,
-                   hr);
-            Exit;
-          end;
+        begin
+          // Set video preview and recording formats.
+          hr := FCaptureManager.SetVideoFormat();
+          if FAILED(hr) then
+            begin
+              ErrMsg('mnuStartPreviewClick ' + ERR_OUTPUT_MEDIATYPE_SET,
+                     hr);
+              Exit;
+            end;
+        end;
 
       if (mnuStartPreview.Tag = 0) then
         begin
