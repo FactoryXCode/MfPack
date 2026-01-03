@@ -1,13 +1,13 @@
-// FactoryX
+﻿// FactoryX
 //
-// Copyright: � FactoryX. All rights reserved.
+// Copyright: © FactoryX. All rights reserved.
 //
 // Project: MfPack - CoreAudio - WASAPI
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: frmLoopBackCapture.pas
 // Kind: Pascal / Delphi unit
-// Release date: 02-04-2023
+// Release date: 13-08-2025
 // Language: ENU
 //
 // Revision Version: 3.1.8
@@ -126,12 +126,20 @@ type
     lblBufferDuration: TLabel;
     cbxWavFormats: TComboBox;
     lblFileExt: TLabel;
+    cbxOutputFormat: TComboBox;
+    lblOutputFmt: TLabel;
+    dlgSave: TSaveDialog;
+    Label5: TLabel;
+    spedLatency: TSpinEdit;
+
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject;
                              var CanClose: Boolean);
+
     procedure butPlayDataClick(Sender: TObject);
     procedure butStartClick(Sender: TObject);
     procedure butStopClick(Sender: TObject);
+
     procedure butGetPIDClick(Sender: TObject);
     procedure edFileNameKeyUp(Sender: TObject;
                               var Key: Word;
@@ -139,23 +147,30 @@ type
     procedure butShowProcessesClick(Sender: TObject);
     procedure edPIDKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure cbxStayOnTopClick(Sender: TObject);
+    procedure cbxOutputFormatChange(Sender: TObject);
 
   private
+
     { Private declarations }
-    sFileName: string;
-    sOrgFileName: string;
+
+    FFileName: string;
+    FOrgFileName: string;
     bEdited: Boolean;
     iTotalBytesWritten: Int64;
     pvBufferDuration: REFERENCE_TIME;
+    pvTargetLatency: REFERENCE_TIME;
     bIncludeProcessTree: Boolean;
-    oLoopbackCapture: TLoopbackCapture;
+    FLoopbackCapture: TLoopbackCapture;
     aMainProcessId: Integer;
     aWavFmt: TWavFormat;
+
     // We use timers here, to prevent distortions when quering the capturethread for timing and processed data.
     // The timer must be set to 1 millisecond resolution.
     thrTimer: TUniThreadedTimer;
     aStopWatch: TStopwatch;
 
+    function CreateEngine(): Boolean;
+    procedure RemoveEngine();
     procedure SetBufferDuration();
 
     // Event handlers.
@@ -173,7 +188,9 @@ type
 var
   frmMain: TfrmMain;
 
+
 implementation
+
 
 {$R *.dfm}
 
@@ -183,7 +200,7 @@ begin
 
   ShellExecute(Handle,
                'open',
-               StrToPWideChar(sFileName + lblFileExt.Caption),
+               StrToPWideChar(FFileName),
                nil,
                nil,
                SW_SHOWNORMAL) ;
@@ -199,7 +216,7 @@ begin
   // Set to default, if user selected nothing.
   if (aMainProcessId = 0) then
     begin
-      butGetPIDClick(Self);
+      butGetPIDClick(nil);
       rb1.Checked := true;
     end;
 
@@ -225,7 +242,7 @@ var
 
 begin
 
-  hr := oLoopbackCapture.StopCaptureAsync();
+  hr := FLoopbackCapture.StopCaptureAsync();
   butStart.Enabled := SUCCEEDED(hr);
   butStop.Enabled := not SUCCEEDED(hr);
 end;
@@ -255,6 +272,33 @@ begin
       // User canceled.
       rb1.Checked := True;
     end;
+end;
+
+
+procedure TfrmMain.cbxOutputFormatChange(Sender: TObject);
+begin
+
+  case cbxOutputFormat.ItemIndex of
+    0: begin
+
+          dlgSave.Filter := 'WAV audio (*.wav)|*.wav';
+          dlgSave.DefaultExt := 'wav';
+          lblFileExt.Caption := '.wav';
+        end;
+
+    1:  begin
+          dlgSave.Filter := 'FLAC audio (*.flac)|*.flac';
+          dlgSave.DefaultExt := 'flac';
+          lblFileExt.Caption := '.flac';
+        end
+    else
+      begin
+
+        dlgSave.Filter := 'WAV audio (*.wav)|*.wav';
+        dlgSave.DefaultExt := 'wav';
+        lblFileExt.Caption := '.wav';
+      end;
+  end;
 end;
 
 
@@ -316,7 +360,7 @@ begin
   aStopWatch.Stop;
   thrTimer.Enabled := False;
 
-  FreeAndNil(oLoopbackCapture);
+  FreeAndNil(FLoopbackCapture);
   FreeAndNil(thrTimer);
   CanClose := True;
 end;
@@ -331,11 +375,7 @@ begin
   thrTimer.Enabled := False;
   thrTimer.OnTimerEvent := TimerTimer;
 
-  oLoopbackCapture := TLoopbackCapture.Create();
-
-  // Set event handlers.
-  oLoopbackCapture.OnStoppedCapturing := OnCapturingStoppedEvent;
-  oLoopbackCapture.OnStartCapturing := OnCapturingStartEvent;
+  CreateEngine();
   butGetPID.OnClick(Self);
   bEdited := False;
 end;
@@ -350,14 +390,10 @@ var
 
 begin
 
-  hr := S_OK;
   iTotalBytesWritten := 0;
 
-  if not Assigned(oLoopbackCapture) then
-    begin
-      hr := E_POINTER;
-      Exit(hr);
-    end;
+  if not Assigned(FLoopbackCapture) then
+    CreateEngine();
 
   // Check for valid inputs
   aMainProcessId := StrToInt(edPID.Text);
@@ -372,75 +408,141 @@ begin
   else if rb2.Checked then
     bIncludeProcessTree := True;
 
-  // Check filename.
+  // Check filename format.
 
-  if SUCCEEDED(hr) then
+  // Don't use the extension yet, because we want to check if user edited a different name.
+  FFileName := Format('%s', [edFileName.Text]);
+
+  if (FOrgFileName = '') or bEdited then
     begin
-      sFileName := Format('%s', [edFileName.Text]);
-      if (sOrgFileName = '') or bEdited then
-        begin
-          sOrgFileName := sFileName;
-          bEdited := False;
-        end;
 
-      if cbxDontOverWrite.Checked then
-        begin
-          bFileExists := True;
-          i := 0;
-          while (bFileExists = True) do
-            begin
-              if FileExists(sFileName + lblFileExt.Caption) then
-                begin
-                  if (sOrgFileName = sFileName) then
-                    sFileName := Format('%s(%d)', [edFileName.Text, i])
-                  else
-                    begin
-                      sFileName := Format('%s(%d)', [sOrgFileName, i]);
-                      edFileName.Text := sFileName;
-                    end;
-                  Inc(i);
-                end
-              else
-                bFileExists := False;
-            end;
-        end;
-
-      // Show new filename to user.
-      edFileName.Text := sFileName;
-
-      butStop.Enabled := True;
-      butStart.Enabled := False;
-      butPlayData.Enabled := False;
-      SetBufferDuration();
-
-      // Bitrate and resolution.
-      case cbxWavFormats.ItemIndex of
-        0: aWavFmt := fmt44100b16;
-        1: aWavFmt := fmt48000b24;
-        2: aWavFmt := fmt48000b32;
-        3: aWavFmt := fmt96000b24;
-        4: aWavFmt := fmt96000b32;
-      end;
-
-      // Capture the audio stream from the default rendering device.
-      hr := oLoopbackCapture.StartCaptureAsync(Handle,
-                                               aMainProcessId,
-                                               bIncludeProcessTree,
-                                               LPCWSTR(sFileName + lblFileExt.Caption),
-                                               aWavFmt,
-                                               pvBufferDuration);
-      if FAILED(hr) then
-        begin
-          butStop.Enabled := False;
-          butStart.Enabled := True;
-          Exit(hr);
-        end;
-
-      hnsPeriod := Round(1000 * (oLoopbackCapture.CaptureBufferLength / oLoopbackCapture.CurrentWavFormat.nSamplesPerSec));
-      lblCaptureBufferDuration.Caption := Format('Capture Buffer Duration: %d ms.', [hnsPeriod]);
+      FOrgFileName := FFileName;
+      bEdited := False;
     end;
 
+  if cbxDontOverWrite.Checked then
+    begin
+
+      bFileExists := True;
+      i := 0;
+
+      while (bFileExists = True) do
+        begin
+
+          if FileExists(FFileName + lblFileExt.Caption) then
+            begin
+
+              if (FOrgFileName = FFileName) then
+                FFileName := Format('%s(%d)',
+                                     [edFileName.Text, i])
+              else
+                begin
+
+                  FFileName := Format('%s(%d)',
+                                      [FOrgFileName, i]);
+                  edFileName.Text := FFileName;
+                end;
+                 Inc(i);
+            end
+             else
+               bFileExists := False;
+        end;
+    end;
+
+  // Set output format/extension from UI (WAV/FLAC)
+  cbxOutputFormatChange(nil);
+
+  // Show new filename to user and make the filename complete incl. extension.
+  edFileName.Text := FFileName;
+  FFileName := Format('%s%s',
+                      [edFileName.Text, lblFileExt.Caption]);
+
+  butPlayData.Enabled := False;
+
+  pvTargetLatency := spedLatency.Value * REFTIMES_PER_MILLISEC;
+
+  butStop.Enabled := True;
+  butStart.Enabled := False;
+  butPlayData.Enabled := False;
+  SetBufferDuration();
+
+  // Bitrate and resolution.
+  case cbxWavFormats.ItemIndex of
+    0: aWavFmt := fmt44100b16;
+    1: aWavFmt := fmt48000b24;
+    2: aWavFmt := fmt48000b32;
+    3: aWavFmt := fmt96000b24;
+    4: aWavFmt := fmt96000b32;
+  end;
+
+  // Capture the audio stream from the default rendering device.
+  hr := FLoopbackCapture.StartCaptureAsync(Handle,
+                                           aMainProcessId,
+                                           bIncludeProcessTree,
+                                           LPCWSTR(FFileName),
+                                           aWavFmt,
+                                           pvBufferDuration);
+  if FAILED(hr) then
+    begin
+
+      butStop.Enabled := False;
+      butStart.Enabled := True;
+      Exit(hr);
+    end;
+
+  hnsPeriod := Round(1000 * (FLoopbackCapture.CaptureBufferLength / FLoopbackCapture.CurrentWavFormat.nSamplesPerSec));
+  lblCaptureBufferDuration.Caption := Format('Capture Buffer Duration: %d ms.', [hnsPeriod]);
+
+
   Result := hr;
+end;
+
+
+function TFrmMain.CreateEngine(): Boolean;
+begin
+
+  // Destroy an existing capture engine.
+  if Assigned(FLoopbackCapture) then
+    RemoveEngine();
+
+  // Create capture engine.
+  FLoopbackCapture := TLoopbackCapture.Create();
+
+  if not Assigned(FLoopbackCapture) then
+    begin
+
+      ErrMsg('Unable create the WASCapture engine.',
+              E_POINTER);
+      Exit(False);
+    end
+  else
+    begin
+
+      // Set event handlers.
+      FLoopbackCapture.OnStoppedCapturing := OnCapturingStoppedEvent;
+      FLoopbackCapture.OnStartCapturing := OnCapturingStartEvent;
+
+      ErrMsg('The Loopback Capture engine is successfully initialized.',
+              S_OK);
+
+      SetBufferDuration();
+      Result := True;
+    end;
+end;
+
+
+procedure TFrmMain.RemoveEngine();
+begin
+
+  if Assigned(FLoopbackCapture) then
+    begin
+
+      FLoopbackCapture.StopCaptureAsync();
+      FLoopbackCapture.OnStoppedCapturing := nil;
+      FLoopbackCapture.OnStartCapturing := nil;
+
+      FreeAndNil(FLoopbackCapture);
+    end;
 end;
 
 
@@ -471,6 +573,7 @@ end;
 
 procedure TfrmMain.OnCapturingStartEvent(Sender: TObject);
 begin
+
   thrTimer.Enabled := True;
   aStopWatch.Start;
   aStopWatch.StartNew;
@@ -482,15 +585,15 @@ begin
 
   // Stop the timer and stopwatch.
   thrTimer.Enabled := False;
-  aStopWatch.Stop;
-  aStopWatch.Reset;
+  aStopWatch.Stop();
+  aStopWatch.Reset();
 
-  if not Assigned(oLoopbackCapture) then
+  if not Assigned(FLoopbackCapture) then
     Exit;
 
   butPlayData.Enabled := True;
   lblMsg.Caption := Format('Capturing stopped. Captured %f Mb.',
-                           [oLoopbackCapture.BytesWritten / (1000 * 1000)]);
+                           [FLoopbackCapture.BytesWritten / (1000 * 1000)]);
 end;
 
 

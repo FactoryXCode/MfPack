@@ -1,17 +1,17 @@
-// FactoryX
+﻿// FactoryX
 //
-// Copyright: � FactoryX. All rights reserved.
+// Copyright: © FactoryX. All rights reserved.
 //
 // Project: MfPack - CoreAudio - WASAPI
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: ThreadedLoopBackCapture.pas
+// Module: LoopBackCapture.pas
 // Kind: Pascal / Delphi unit
-// Release date: 16-06-2024
+// Release date: 13-08-2025
 // Language: ENU
 //
 // Revision Version: 3.1.8
-// Description: The threaded audio loopbackcapture engine.
+// Description: The audio loopback capture engine.
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
@@ -95,7 +95,7 @@ uses
   WinApi.CoreAudioApi.AudioClientActivationParams,
   WinApi.CoreAudioApi.AudioSessionTypes,
   {Application}
-  Writer,
+  MfAudioWriter,
   Common;
 
 var
@@ -105,6 +105,7 @@ var
   gs_hCaptureStopped: TEvent;
 
 type
+
   TDeviceState = (Uninitialized,
                   Error,       // Implemented to prevent calls to IAudioCaptureClient.GetNextPacketSize.
                                // See: OnAudioSampleRequested() and error handling.
@@ -163,14 +164,8 @@ type
     pvBufferFrames: UINT32;
     pvBufferDuration: REFERENCE_TIME;
     pvBytesWritten: Int64;
-
     pvdwTaskID: DWord;
     pvdwQueueID: DWord;
-    pvcbHeaderSize: DWord;
-    pvWAVWriter: TWavWriter;
-    ckRIFF: MMCKINFO;
-    ckData: MMCKINFO;
-
     // These two members are used to communicate between the main thread
     // and the ActivateCompleted callback.
     pvoutputFileName: LPCWSTR;
@@ -186,9 +181,7 @@ type
     function InitializeLoopbackCapture(): HResult;
     procedure GetMixFormat(out pMixFmt: WAVEFORMATEX;
                            WavFormat: TWavFormat = fmt44100b16);
-    function CreateWAVFile(): HResult;
-
-    function OnAudioSampleRequested(): HResult;
+    function CreateAudioFile(): HResult;
 
     function ActivateAudioInterface(const processId: DWord;
                                     includeProcessTree: Boolean): HResult;
@@ -319,6 +312,7 @@ end;
 
 procedure TRenderThread.SetEvent;
 begin
+
   // Called from 'Synchronize'.
   // All code run from "Synchronize()"
   //   runs in the context of the Main VCL UI Thread, NOT from this thread.
@@ -354,18 +348,17 @@ begin
 
   if Assigned(pvRenderThread) then
     begin
-      pvRenderThread.SetFreeOnTerminate(True);
+
       pvRenderThread.Terminate;
+      pvRenderThread.WaitFor; // Ensure capture thread finishes (and closes writer) before cleanup.
       FreeAndNil(pvRenderThread);
-      // Signal the thread is terminated.
-      if (pvRenderThreadClosedEvent <> 0) then
-        begin
-          SetEvent(pvRenderThreadClosedEvent);
-          WaitForSingleObject(pvRenderThreadClosedEvent,
-                              INFINITE);
-          CloseHandle(pvRenderThreadClosedEvent);
-          pvRenderThreadClosedEvent := 0;
-        end;
+    end;
+
+  if (pvRenderThreadClosedEvent <> 0) then
+    begin
+
+      CloseHandle(pvRenderThreadClosedEvent);
+      pvRenderThreadClosedEvent := 0;
     end;
 end;
 
@@ -377,7 +370,6 @@ begin
   pvactivateResult := E_UNEXPECTED;
   pvDeviceState := Uninitialized;
   pvdwQueueID := 0;
-  pvcbHeaderSize := 0;
 
   // Create the callback interfaces
   {StartCapture, StopCapture, SampleReady, FinishCapture}
@@ -392,8 +384,7 @@ begin
 
   pvxFinishCapture := TCallbackAsync.Create(Self,
                                             FinishCapture);
-  // Create the WAV-filewriter.
-  pvWAVWriter := TWavWriter.Create;
+  // Create the audio writer (created/opened inside capture thread).
 end;
 
 
@@ -404,11 +395,11 @@ begin
   FreeAndNil(pvxStartCapture);
   FreeAndNil(pvxStopCapture);
   FreeAndNil(pvxSampleReady);
+
   FreeAndNil(pvxFinishCapture);
-  if Assigned(pvWavWriter) then
-    FreeAndNil(pvWavWriter);
   inherited Destroy();
 end;
+
 
 // IActivateAudioInterfaceCompletionHandler ////////////////////////////////////
 //
@@ -447,7 +438,7 @@ begin
   //       - Exclusive Mode is used when rendering from a hardware endpoint.
   //       - Interface methods that are reffering to audioendpoints, will not work and returns E_NOTIMPL,
   //         for example: GetBufferSize(), IsFormatSupported(), GetDevicePeriod(), GetStreamLatency() and GetMixFormat() methods.
-  // See: https://learn.microsoft.com/en-us/answers/questions/1125409/loopbackcapture-(-activateaudiointerfaceasync-with?page=1&orderby=Helpful#answers
+  //         See: https://learn.microsoft.com/en-us/answers/questions/1125409/loopbackcapture-(-activateaudiointerfaceasync-with?page=1&orderby=Helpful#answers
   //
 
   hr := pvAudioClient.Initialize(AUDCLNT_SHAREMODE_SHARED,
@@ -465,19 +456,13 @@ begin
   if FAILED(hr) then
      Exit(hr);
 
-  // Get the capture client
-  hr := pvAudioClient.GetService(IID_IAudioCaptureClient,
-                                 pvAudioCaptureClient);
-  if FAILED(hr) then
-     Exit(hr);
+  // v3-style threaded capture:
+  // Acquire IAudioCaptureClient in the capture thread (CaptureThreadFunc) to avoid cross-thread COM issues.
+  pvAudioCaptureClient := nil;
 
-  // Create Async callback for sample events.
-  hr := MFCreateAsyncResult(nil,
-                            pvxSampleReady,
-                            nil,
-                            pvSampleReadyAsyncResult);
-  if FAILED(hr) then
-     Exit(hr);
+  // v3-style threaded capture:
+  // No MF waiting work item chain is used for sample-ready notifications.
+  pvSampleReadyAsyncResult := nil;
 
   // Tell the system which event handle it should signal when an audio buffer is ready to be processed by the client.
   hr := pvAudioClient.SetEventHandle(gs_SampleReadyEvent.Handle);
@@ -485,7 +470,7 @@ begin
      Exit(hr);
 
   // Creates the WAV file.
-  hr := CreateWAVFile();
+  hr := CreateAudioFile();
   if FAILED(hr) then
      Exit(hr);
 
@@ -497,6 +482,7 @@ begin
 
   Result := hr;
 end;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -513,24 +499,27 @@ var
 
 begin
 
-  if Assigned(pvAudioClient) then
+  if not Assigned(pvAudioClient) then
+    hr := E_POINTER
+  else
     begin
-      // Start the capture
+
+      // Reset shutdown signal (if reusing the object for multiple runs).
+      if (pvShutdownEvent <> 0) then
+        ResetEvent(pvShutdownEvent);
+
+      // Start the capture (owned by v2 lifecycle: StartCapture work item).
       hr := pvAudioClient.Start();
 
       if SUCCEEDED(hr) then
         begin
+
           pvDeviceState := Capturing;
 
-          // We have an issue here. hr  = -2147467261
-          hr := MFPutWaitingWorkItem(gs_SampleReadyEvent.Handle,
-                                     0,
-                                     pvSampleReadyAsyncResult,
-                                     pvSampleReadyKey);
+         // The render thread waits directly on gs_SampleReadyEvent.
+         CreatedRenderThread();
         end;
-    end
-  else
-    hr := E_POINTER;
+    end;
 
   SetDeviceStateErrorIfFailed(hr);
   Result := hr;
@@ -547,24 +536,26 @@ var
   hr: HResult;
 
 begin
+
   pvDeviceState := Stopping;
-  // Stop capture by cancelling Work Item
-  // Cancel the queued work item (if any)
-  if (pvSampleReadyKey <> 0) then
-    begin
-        hr := MFCancelWorkItem(pvSampleReadyKey);
-        if FAILED(hr) then
-          ErrMsg(Format('MFCancelWorkItem failed. LastError = %d',[GetLastError()]), hr);
-        pvSampleReadyKey := 0;
-    end;
 
-  hr := pvAudioClient.Stop();
+  // Signal the capture thread to exit.
+  if (pvShutdownEvent <> 0) then
+    SetEvent(pvShutdownEvent);
 
-  // Tell the capture thread to shut down, wait for the thread to complete then clean up all the stuff we
-  // allocated in OnAudioSampleRequested().
+  // Stop the audio engine (best effort).
+  if Assigned(pvAudioClient) then
+    hr := pvAudioClient.Stop()
+  else
+    hr := E_POINTER;
+
+  // Ensure capture thread exits (writer is finalized in-thread).
   TerminateRenderThread();
 
+  // Sample-ready MF work items are not used in the v3-style capture loop.
+  pvSampleReadyKey := 0;
   SafeRelease(pvSampleReadyAsyncResult);
+  pvAudioCaptureClient := nil;
 
   if SUCCEEDED(hr) then
     begin
@@ -587,36 +578,22 @@ end;
 //  OnFinishCapture()
 //
 //  Because of the asynchronous nature of the MF Work Queues and the DataWriter, there could still be
-//  a sample processing. So this will get called to finalize the WAV header.
+//  a sample processing. So this will get called to finalize the audio file.
 //
 function TLoopbackCapture.OnFinishCapture(pResult: IMFAsyncResult): HResult;
 var
   hr: HResult;
-  mmRes: MMRESULT;
 
 begin
-  pvDeviceState := Stopping;
 
-  // Close the WAV-File.
-  mmRes := pvWavWriter.CloseFile(ckRIFF,
-                                 ckData);
+  // Writer finalization happens inside the capture thread.
+  hr := S_OK;
 
-  if (mmRes = MMSYSERR_NOERROR) then
-    begin
-      gs_hCaptureStopped.SetEvent();
-      hr := EventWait(gs_hCaptureStopped);
-      if SUCCEEDED(hr) then
-        begin
-          pvDeviceState := Stopped;
-          FOnCapturingStopped(Self);
-        end;
-    end
-  else
-    begin
-      pvDeviceState := Error;
-      gs_hCaptureStopped.SetEvent();
-      hr := EventWait(gs_hCaptureStopped);
-    end;
+  gs_hCaptureStopped.SetEvent();
+
+  pvDeviceState := Stopped;
+  if Assigned(FOnCapturingStopped) then
+    FOnCapturingStopped(Self);
 
   Result := hr;
 end;
@@ -632,22 +609,9 @@ var
   hr: HResult;
 
 begin
-  hr := OnAudioSampleRequested();
-  if SUCCEEDED(hr) then
-    begin
-      // Re-queue work item for next sample.
-      if (pvDeviceState = Capturing) then
-        begin
-          // Re-queue work item for next sample.
-          hr := MFPutWaitingWorkItem(gs_SampleReadyEvent.Handle,
-                                     0,
-                                     pvSampleReadyAsyncResult,
-                                     pvSampleReadyKey);
-        end;
-    end
-  else
-    pvDeviceState := Error;
-
+  // v3 model: no MF waiting work items.
+  // Sample processing happens in CaptureThreadFunc(), which waits on gs_SampleReadyEvent.
+  hr := S_OK;
   Result := hr;
 end;
 
@@ -695,6 +659,13 @@ begin
                                       False,
                                       '',
                                       True);
+
+  // Shutdown event for the capture thread (manual reset not required here; we reset on start).
+  if (pvShutdownEvent = 0) then
+    pvShutdownEvent := CreateEventEx(nil, nil, 0, EVENT_MODIFY_STATE or SYNCHRONIZE)
+  else
+    ResetEvent(pvShutdownEvent);
+
   Result := hr;
 end;
 
@@ -705,6 +676,7 @@ end;
 procedure TLoopbackCapture.GetMixFormat(out pMixFmt: WAVEFORMATEX;
                                         WavFormat: TWavFormat = fmt44100b16);
 begin
+
   pMixFmt := Default(WAVEFORMATEX);
 
   // We only support PCM formats in stereo.
@@ -722,7 +694,7 @@ begin
       pMixFmt.nSamplesPerSec := 48000;
       pMixFmt.wBitsPerSample := 24;
     end
-  else if (WavFormat = fmt48000b24) then
+  else if (WavFormat = fmt48000b32) then
     begin
       pMixFmt.nSamplesPerSec := 48000;
       pMixFmt.wBitsPerSample := 32;
@@ -749,188 +721,231 @@ end;
 
 
 //
-//  CreateWAVFile()
+//  CreateAudioFile()
 //
 //  Creates a WAV file in music folder.
 //
-function TLoopbackCapture.CreateWAVFile(): HResult;
+function TLoopbackCapture.CreateAudioFile(): HResult;
 var
-  mmRes: MMRESULT;
   hr: HResult;
+  fn: string;
+  w: IAudioWriter;
 
 begin
+
   hr := S_OK;
+
   pvBytesWritten := 0;
+  // Validate output format early (writer is created/opened in the capture thread).
+  fn := WideCharToString(pvoutputFileName);
+  w := CreateAudioWriterFromFileName(fn);
+  if (w = nil) then
+    Exit(E_FAIL);
 
-  mmRes := pvWavWriter.CreateFile(pvoutputFileName);
-  if (mmRes <> MMSYSERR_NOERROR) then
-    begin
-      hr := E_FAIL;
-      ErrMsg(Format('CreateFile(%s) failed. LastError = %d',
-                    [WideCharToString(pvoutputFileName),
-                    GetLastError()]), hr);
-      Exit(hr);
-    end;
-
-  // Write the wavfile header.
-  mmRes := pvWavWriter.WriteWaveHeader(@pvMixFormat,
-                                       ckRIFF,
-                                       ckData);
-  if (mmRes <> MMSYSERR_NOERROR) then
-    begin
-      ErrMsg(Format('Unable to write the wavfile header: %d',[GetLastError()]), E_FAIL);
-      Exit(E_FAIL);
-    end;
-
-  Inc(pvBytesWritten,
-      pvWavWriter.TotalBytesWritten);
   Result := hr;
 end;
 
 
 function TLoopbackCapture.CaptureThreadFunc(): HRESULT;
 var
-  hr: HResult;
-  mmRes: MMRESULT;
+  hr: HRESULT;
+  coHr: HRESULT;
+
+  waitArray: array[0..1] of THandle;
+  waitResult: DWORD;
+
+  mmcssHandle: THandle;
+  mmcssTaskIndex: DWORD;
+
   packetSize: UINT32;
   framesAvailable: UINT32;
   pData: PByte;
-  dwCaptureFlags: DWord;
-  dwBytesWritten: LongInt;
+  dwCaptureFlags: DWORD;
+  dwBytesWritten: UINT32;
+
+  fn: string;
+  audioWriter: IAudioWriter;
+  audioTime100ns: Int64;
 
 begin
 
-  hr := S_OK;
   pData := nil;
-  pvBufferFrames := 0;
+  packetSize := 0;
+  framesAvailable := 0;
+  dwCaptureFlags := 0;
+  dwBytesWritten := 0;
 
-  // A word on why we have a loop here;
-  // Suppose it has been 10 milliseconds or so since the last time
-  // this routine was invoked, and that we're capturing 48000 samples per second.
-  //
-  // The audio engine can be reasonably expected to have accumulated about that much
-  // audio data - that is, about 480 samples.
-  //
-  // However, the audio engine is free to accumulate this in various ways:
-  // a. as a single packet of 480 samples, OR
-  // b. as a packet of 80 samples plus a packet of 400 samples, OR
-  // c. as 48 packets of 10 samples each.
-  //
-  // In particular, there is no guarantee that this routine will be
-  // run once for each packet.
-  //
-  // So every time this routine runs, we need to read ALL the packets
-  // that are now available;
-  //
-  // We do this by calling IAudioCaptureClient.GetNextPacketSize
-  // over and over again until it indicates there are no more packets remaining.
+  audioWriter := nil;
+  audioTime100ns := 0;
 
-  // The original code: while SUCCEEDED(pvAudioCaptureClient.GetNextPacketSize(FramesAvailable)) and (FramesAvailable > 0) do
+  mmcssHandle := 0;
+  mmcssTaskIndex := 0;
 
-  // We check the device state first and then call IAudioCaptureClient.GetNextPacketSize.
-  // This way we handle the internal async calls that could interfere first.
+  // Ensure COM is initialized in this thread. This is important because we acquire
+  // IAudioCaptureClient and call WASAPI methods from this thread (v3 model).
+  coHr := CoInitializeEx(nil,
+                         COINIT_MULTITHREADED);
 
-try
+  try
 
-  while SUCCEEDED(pvAudioCaptureClient.GetNextPacketSize(packetSize)) and (packetSize > 0) do
-    begin
+    // Thread-local writer (v3 rule).
+    fn := WideCharToString(pvoutputFileName);
+    audioWriter := CreateAudioWriterFromFileName(fn);
 
-      hr := pvAudioCaptureClient.GetBuffer(pData,
-                                           FramesAvailable,
-                                           dwCaptureFlags,
-                                           nil,
-                                           nil);
+    if (audioWriter = nil) then
+      begin
 
-      if SUCCEEDED(hr) then
-        begin
+        pvDeviceState := Error;
+        Exit(E_FAIL);
+      end;
 
-          if (dwCaptureFlags = AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) then
-            begin
-              pData := nil;
-              Continue;
-            end;
+    hr := audioWriter.Open(fn,
+                           pvMixFormat);
+    if FAILED(hr) then
+      begin
 
-          // Tell WriteData to write silence.
-          // When a sound is detected, the app will act and process data.
-          if (dwCaptureFlags = AUDCLNT_BUFFERFLAGS_SILENT) then
-            pData := nil;
+        pvDeviceState := Error;
+        Exit(hr);
+      end;
 
-          // Write the available capture data to the audio sink.
-          mmRes := pvWavWriter.WriteData(pData,
-                                         FramesAvailable,
-                                         pvMixFormat.nBlockAlign,
-                                         dwBytesWritten);
+    // Acquire IAudioCaptureClient in THIS thread (v3 rule).
+    if (pvAudioClient = nil) then
+      begin
 
-          // Note: The writer will automaticly closes the file when a HResult <> S_OK.
-          if (mmRes <> MMSYSERR_NOERROR) then
-            if (mmRes = MMIOERR_CANNOTEXPAND) then
+        pvDeviceState := Error;
+        Exit(E_POINTER);
+      end;
+
+    pvAudioCaptureClient := nil;
+
+    hr := pvAudioClient.GetService(IID_IAudioCaptureClient,
+                                   pvAudioCaptureClient);
+    if FAILED(hr) or (pvAudioCaptureClient = nil) then
+      begin
+
+        pvDeviceState := Error;
+        Exit(hr);
+      end;
+
+    // MMCSS (best effort).
+    mmcssHandle := AvSetMmThreadCharacteristics('Audio',
+                                                @mmcssTaskIndex);
+
+    // Wait for shutdown or sample-ready.
+    waitArray[0] := pvShutdownEvent;
+    waitArray[1] := gs_SampleReadyEvent.Handle;
+
+    while (pvDeviceState = Capturing) do
+      begin
+
+        waitResult := WaitForMultipleObjects(2,
+                                             @waitArray[0],
+                                             False,
+                                             INFINITE);
+
+        if (waitResult = WAIT_OBJECT_0) then
+          Break; // shutdown
+
+        if (waitResult <> (WAIT_OBJECT_0 + 1)) then
+          begin
+
+            pvDeviceState := Error;
+            hr := HRESULT_FROM_WIN32(GetLastError());
+            Break;
+          end;
+
+        // Drain ALL pending packets (v3 rule).
+        while (pvDeviceState = Capturing) do
+          begin
+
+            hr := pvAudioCaptureClient.GetNextPacketSize(packetSize);
+            if FAILED(hr) then
               begin
-                pvDeviceState := MaxFileSizeReached;
-                hr := ERROR_FILE_TOO_LARGE;
-                Break;
-              end
-            else
-              begin
+
                 pvDeviceState := Error;
-                hr := E_FAIL;
                 Break;
               end;
-        end
-      else
-        begin
-          StopCaptureAsync();
-          ErrMsg(Format('pvAudioCaptureClient.GetBuffer failed. LastError = %d',[GetLastError()]), hr);
-          pvDeviceState := Error;
-          Break;
-        end;
 
-      // Release buffer.
-      hr := pvAudioCaptureClient.ReleaseBuffer(FramesAvailable);
-      if FAILED(hr) then
-        begin
-          StopCaptureAsync();
-          pvDeviceState := Error;
-          Break;
-        end;
+            if (packetSize = 0) then
+              Break;
 
-      // Keep score. Store to public.
-      Inc(pvBytesWritten,
-          dwBytesWritten);
+            hr := pvAudioCaptureClient.GetBuffer(pData,
+                                                 framesAvailable,
+                                                 dwCaptureFlags,
+                                                 nil,
+                                                 nil);
+            if FAILED(hr) then
+              begin
 
-      pData := nil;
-    end;
+                pvDeviceState := Error;
+                Break;
+              end;
 
-finally
-  pData := nil;
+            try
+
+              // DATA_DISCONTINUITY: skip packet but still release the buffer.
+              if ((dwCaptureFlags and AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) <> 0) then
+                begin
+
+                 // skip
+                end
+              else
+                begin
+
+                  // SILENT: write zeros.
+                  if ((dwCaptureFlags and AUDCLNT_BUFFERFLAGS_SILENT) <> 0) then
+                    pData := nil;
+
+                  hr := audioWriter.WriteFrames(pData,
+                                                framesAvailable,
+                                                pvMixFormat,
+                                                audioTime100ns,
+                                                dwBytesWritten);
+                  if FAILED(hr) then
+                    begin
+
+                      pvDeviceState := Error;
+                      Break;
+                    end;
+
+                  Inc(pvBytesWritten,
+                      dwBytesWritten);
+                end;
+
+            finally
+
+              pvAudioCaptureClient.ReleaseBuffer(framesAvailable);
+              pData := nil;
+            end;
+
+            if (pvDeviceState <> Capturing) then
+              Break;
+          end;
+      end;
+
+  finally
+
+    // Finalize writer in this thread (v3 rule).
+    if (audioWriter <> nil) then
+      try
+        audioWriter.Close();
+      except
+        // ignore shutdown errors.
+      end;
+    audioWriter := nil;
+
+    if (mmcssHandle <> 0) then
+      AvRevertMmThreadCharacteristics(mmcssHandle);
+
+    if SUCCEEDED(coHr) then
+      CoUninitialize();
+
+    // Signal thread exit (legacy event used by Reset/Stop paths).
+    if (pvRenderThreadClosedEvent <> 0) then
+      SetEvent(pvRenderThreadClosedEvent);
+  end;
+
   Result := hr;
-end;
-end;
-
-//
-//  OnAudioSampleRequested()
-//
-//  Called when audio device fires pvSampleReadyEvent.
-//
-function TLoopbackCapture.OnAudioSampleRequested(): HResult;
-begin
-
-  // If this flag is set, we have already queued up the async call to finialize the WAV header.
-  // So we don't want to grab or write any more data that would possibly give us an invalid size.
-  if (pvDeviceState <> Capturing) or not Assigned(pvAudioCaptureClient) then
-    Exit(E_POINTER);
-
-  // Now the stream will be rendered in another thread.
-  // So, we need to create another thread to keep control.
-  //
-  // Note: When this audiostream is over,
-  //       the end of buffer will be called first,
-  //       thus before signal endofstream (when all buffers have been processed).
-  if not Assigned(pvRenderThread) then
-    CreatedRenderThread()
-  else
-    pvRenderThread.Execute; // Continue when we are rendering a new buffer.
-
-  Result := S_OK;
 end;
 
 
@@ -946,6 +961,7 @@ label
   leave;
 
 begin
+
   audioclientActivationParams := Default(AUDIOCLIENT_ACTIVATION_PARAMS);
 
   audioclientActivationParams.ActivationType := AUDIOCLIENT_ACTIVATION_TYPE_PROCESS_LOOPBACK;
@@ -980,6 +996,7 @@ begin
       pvDeviceState := Initialized;
 
 leave:
+
   //PropVariantClear(activateParams);  // Works in Delphi XE7, but not in 10.3, where raises an exception.
   PropVariantClearSafe(activateParams);
   SetDeviceStateErrorIfFailed(hr);
@@ -998,6 +1015,7 @@ var
   hr: HResult;
 
 begin
+
   // We should be flushing when this is called.
   hr := MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED,
                        0,
@@ -1022,19 +1040,22 @@ begin
 
 try
 
-  if (pvRenderThreadClosedEvent <> 0) then
+  // Stop and destroy the capture thread (if still running).
+  if (pvShutdownEvent <> 0) then
+    SetEvent(pvShutdownEvent);
+
+  TerminateRenderThread();
+
+  // Shutdown event is created per capture session.
+  if (pvShutdownEvent <> 0) then
     begin
-      SetEvent(pvShutdownEvent);
-      WaitForSingleObject(pvRenderThreadClosedEvent,
-                          INFINITE);
-      CloseHandle(pvRenderThreadClosedEvent);
-      pvRenderThreadClosedEvent := 0;
+
+      CloseHandle(pvShutdownEvent);
+      pvShutdownEvent := 0;
     end;
 
   pvactivateResult := E_UNEXPECTED;
   pvDeviceState := Uninitialized;
-  pvcbHeaderSize := 0;
-
   if (pvdwQueueID <> 0) then
     MFUnlockWorkQueue(pvdwQueueID);
 
@@ -1071,6 +1092,7 @@ end;
 
 procedure TLoopbackCapture.SetDeviceStateErrorIfFailed(hr: HResult);
 begin
+
   if FAILED(hr) then
     pvDeviceState := Error;
 end;
@@ -1086,6 +1108,7 @@ function TLoopbackCapture.StartCaptureAsync(const hWindow: HWND;
                                             initialBufferSize: REFERENCE_TIME = 0): HResult;
 var
   hr: HResult;
+
 label
   leave;
 
@@ -1181,7 +1204,9 @@ constructor TCallbackAsync.Create(AParent: TLoopbackCapture;
                                   ASyncCmd: TAsyncCmd;
                                   AQueueID: DWord);
 begin
+
   inherited Create();
+
   _parent := AParent;
   _AsyncCmd := ASyncCmd;
   _dwQueueID := AQueueID;
@@ -1190,6 +1215,7 @@ end;
 
 destructor TCallbackAsync.Destroy();
 begin
+
   //
   inherited Destroy();
 end;
@@ -1198,6 +1224,7 @@ end;
 function TCallbackAsync.GetParameters(out pdwFlags: DWord;
                                       out pdwQueue: DWord): HResult;
 begin
+
   pdwFlags := 0;
   pdwQueue := _dwQueueID;
   Result := S_OK;
@@ -1210,6 +1237,7 @@ var
   hr: HResult;
 
 begin
+
   case _AsyncCmd of
     StartCapture:  begin
                      hr := _parent.OnStartCapture(pResult);
@@ -1228,14 +1256,8 @@ end;
 
 procedure TCallbackAsync.SetQueueID(dwQueueID: DWord);
 begin
+
   _dwQueueID := dwQueueID;
 end;
-
-
-initialization
-  //InitializeCriticalSection(oCriticalSection);
-
-finalization
-  //DeleteCriticalSection(oCriticalSection);
 
 end.

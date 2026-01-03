@@ -261,16 +261,9 @@ begin
   sgProcesses.ColCount := 3;
   sgProcesses.RowCount := 1;
 
-  // For some reason, the methods to dimension TStringGrid changed?
-  {$IF CompilerVersion < 31.0}
   sgProcesses.ColWidths[0] := 200;
   sgProcesses.ColWidths[1] := 100;
   sgProcesses.ColWidths[2] := 100;
-  {$ELSE}
-  sgProcesses.ColWidths[0] := 390;
-  sgProcesses.ColWidths[1] := 190;
-  sgProcesses.ColWidths[2] := 190;
-  {$ENDIF}
 
   sgProcesses.Width := sgProcesses.ColWidths[0] +
                        sgProcesses.ColWidths[1] +
