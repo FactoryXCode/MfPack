@@ -9,7 +9,7 @@
 // Release date: 12-03-2023
 // Language: ENU
 //
-// Revision Version: 3.1.8
+// Revision Version: 3.1.9
 //
 // Description:
 //   Mainform of the app.
@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -153,6 +153,7 @@ type
     procedure cbxOutputFormatChange(Sender: TObject);
 
   private
+
     { Private declarations }
     prWASCapture: TWASCapture;
     prEndPoint: IMMDevice;
@@ -346,6 +347,8 @@ begin
  else
    begin
 
+     // Start capture
+
      pvTargetLatency := spedLatency.Value * REFTIMES_PER_MILLISEC;
 
      // Set output format/extension from UI (WAV/FLAC)
@@ -410,6 +413,7 @@ begin
        begin
          if not BufferDurationCaptionSet then
            begin
+
              lblCaptureBufferDuration.Caption := Format('Capture buffer duration: %d ms.',
                                                         [prWASCapture.FrameSize div 10000]);
              BufferDurationCaptionSet := True;
@@ -420,6 +424,7 @@ begin
 
      if not bSuccess then
          begin
+
            InfoMsg(optIDE,
                    'Unable to start capture.',
                    E_FAIL,
@@ -431,6 +436,7 @@ begin
          end
        else
          begin
+
            // Enable the timer.
            BufferDurationCaptionSet := False;
            butStartStop.Enabled := True;

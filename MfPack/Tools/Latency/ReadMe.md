@@ -1,6 +1,6 @@
-# Audio latency measuring tool for Windows
+# Latency measuring tool for Windows
 
-Version: X 3.1.8
+Version: X 3.1.9
 
 Description:
 This unit is designed to measure minimum, maximum and average execution times of a routine in MICROSECONDS.
@@ -12,7 +12,7 @@ Running the code in the debugger will NOT give accurate results.
 Usage:
 
 1. Add .."/MfPack/Tools/Latency" to your application search path.
-2. Add "MfPack.AudioLatencyTool" in the uses clause.
+2. Add "MfPack.LatencyTool" in the uses clause.
 3. Create the class in your application.
 4. Call Initialize within the method where measurement is needed.
 5. Call Start() just before the code to be measured.
@@ -26,7 +26,7 @@ NOTES:
 * This release is updated for compiler version 17 up to 35.
 * SDK version 10.0.26100.4654 (Win 11)
 * Requires Windows 10 22H2 or later.
-* Minimum supported MfPack version: 3.1.6
+* Minimum supported MfPack version: 3.1.8
 
 
 
@@ -34,7 +34,7 @@ Project: Media Foundation - MFPack - Tools
 Project location: http://sourceforge.net/projects/MFPack
 
 First release date: 29/05/2024
-Final release date: 25/07/2025
+Final release date: 22/11/2025
 
 
 

@@ -10,7 +10,7 @@
 // Release date: 04-01-2016
 // Language: ENU
 //
-// Revision Version: 3.1.8
+// Revision Version: 3.1.9
 // Description: Holds compiler definitions for MfPack.
 //
 //
@@ -22,14 +22,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: All future updates (releases) will be named to an artist except for
 //          the major Windows updates. So, we started with ISÁK.
 //
 // Related objects: -
-// Related projects: MfPackX318
+// Related projects: MfPackX319
 // Known Issues: -
 // Compiler version: 23 up to 35
 // SDK version: 10.0.26100.4654
@@ -374,7 +374,8 @@ const
 // {$DEFINE MFPACK_VERSION_315_UP} // Carmel release, update 20.
 // {$DEFINE MFPACK_VERSION_316_UP} // Morrissey release, update 21.
 // {$DEFINE MFPACK_VERSION_317_UP} // RammStein release, Milestone update 22.
-{$DEFINE MFPACK_VERSION_318_UP}    // Ozzy Osbourne release, Milestone update 23.
+// {$DEFINE MFPACK_VERSION_318_UP}    // Ozzy Osbourne release, Milestone update 23.
+{$DEFINE MFPACK_VERSION_319_UP}    // Sineead O'Connor release, Milestone update 24.
 
 // WARNINGS
 // enable/disable compiler warnings.

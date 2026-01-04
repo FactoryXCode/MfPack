@@ -1,6 +1,6 @@
 # SinkWriterToEncodeVideo Sample 3.
 
-Version: X 3.1.8
+Version: X 3.1.9
 
 A VCL-based Delphi-application to encode a series of images with an audio file to
 video using the Windows Media Foundation API.

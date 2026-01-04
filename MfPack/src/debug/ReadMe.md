@@ -1,6 +1,6 @@
 # HResult Lookup Tools (WinApi.Dbg.WinHResultTools.pas)
 
-Version 3.1.8
+Version 3.1.9
 
 The application can be used to determine HResult or Error codes returned by the Windows OS,
 featuring a detailed build in "HResult Lookup tool", the "Windows System Error Code Lookup Tool" and

@@ -10,7 +10,7 @@
 // Release date: 13-08-2020
 // Language: ENU
 //
-// Version: 3.1.6
+// Version: 3.1.9
 //
 // Description: Component to manage capture or render endpoints and properties.
 //              It also provides an audio endpoint callback.
@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 30/06/2024 All                 RammStein release SDK 10.0.26100.0 (Windows 11)
+// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 // 12/06/2024 Tony                Removed EDataFlowEx.
 // 16/07/2025 Tony                updated some code and fixed some issues.
 //------------------------------------------------------------------------------
@@ -31,7 +31,7 @@
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX318
+// Related projects: MfPackX319
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

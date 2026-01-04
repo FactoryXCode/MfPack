@@ -10,7 +10,7 @@
 // Release date: 12-03-2023
 // Language: ENU
 //
-// Revision Version: 3.1.8
+// Revision Version: 3.1.9
 //
 // Description:
 //   This unit contains the WASAPI loopback class.
@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -252,6 +252,7 @@ end;
 
 procedure TAudioSink.CreatedRenderThread;
 begin
+
   TerminateRenderThread();
   pvRenderThread := TRenderThread.Create(Self);
   pvRenderThreadClosedEvent := CreateEventEx(nil,
@@ -268,11 +269,14 @@ begin
 
   if Assigned(pvRenderThread) then
     begin
+
       pvRenderThread.Terminate;
       pvRenderThread.WaitFor;
+
       // Close threadhandle.
       if (pvRenderThreadClosedEvent <> 0) then
         begin
+
           SetEvent(pvRenderThreadClosedEvent);
           WaitForSingleObject(pvRenderThreadClosedEvent,
                               INFINITE);
@@ -287,16 +291,20 @@ end;
 
 constructor TAudioSink.Create();
 begin
+
   inherited Create();
+
   pvAppIsClosing := False;
 end;
 
 
 destructor TAudioSink.Destroy();
 begin
+
   pvAppIsClosing := True;
   pvStopRec := True;
   TerminateRenderThread();
+
   inherited Destroy();
 end;
 

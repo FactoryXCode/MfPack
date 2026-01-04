@@ -1,6 +1,6 @@
 # MfCaptureEngineVideoCapture Sample 2
 
-Version: X 3.1.8
+Version: X 3.1.9
 
 Description:
 Demonstrates how to capture a snapshot or a recording (A-synchronous) from a capture device, such as a webcam using the IMFCaptureEngine and IMFCapturePreviewSink.

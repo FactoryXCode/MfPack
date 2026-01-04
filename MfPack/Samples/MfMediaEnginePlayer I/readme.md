@@ -1,6 +1,6 @@
-# MfPlayer I
+# mfMediaPlayer I
 
-Version: X 3.1.8
+Version: X 3.1.9
 
 NOTES:
 
@@ -9,11 +9,11 @@ NOTES:
 * Requires Windows 7 or later.
 * Minimum supported MfPack version: 3.1.5
 
-This MfPlayer example is based on the TInterfacedObject class
+This is the basic class of MfMediaEnginePlayer,
 containing the necessary methodes to play a mediafile.
 
-For indepth information see the CPlayer examples and
-documentation, containing the complete information about MfPlayer.
+For indepth information see the Microsoft MediaEnginePlayer example and
+documentation, containing the complete information about MfMediaEnginePlayer.
 
 Project: Media Foundation - MFPack - Samples
 Project location: https://github.com/FactoryXCode/MfPack
@@ -22,5 +22,5 @@ https://sourceforge.net/projects/MFPack
 First release date: 05-02-2016
 Final release date: 25-07-2025
 
-Copyright © FactoryX. All rights reserved.
+Copyright Â© FactoryX. All rights reserved.
 

@@ -10,7 +10,7 @@
 // Release date: 13-08-2025
 // Language: ENU
 //
-// Revision Version: 3.1.8
+// Revision Version: 3.1.9
 // Description: D3D Compilation Types and APIs.
 //              This header is used by HLSL. For more information, see:
 //              https://learn.microsoft.com/en-us/windows/win32/api/_direct3dhlsl/
@@ -30,7 +30,7 @@
 // Remarks: Embarcadero's <= Delphi 10.4 D3D11 and this file are outdated!
 //
 // Related objects: -
-// Related projects: MfPackX318
+// Related projects: MfPackX319
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

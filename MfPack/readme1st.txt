@@ -1,4 +1,4 @@
-MfPack X 3.1.8
+MfPack X 3.1.9
 
 NOTES: 
  - This release is updated for compiler version 17 up to 35.
@@ -6,7 +6,7 @@ NOTES:
  - Requires Windows 10 or later.
 
 First release date: 04/06/2012
-Final release date: 25/07/2025
+Final release date: 01/04/2026
 
 Copyright © FactoryX. All rights reserved.
 

@@ -1,6 +1,6 @@
 # MfCaptureVideoFromGPU II
 
-Version: X 3.1.8
+Version: X 3.1.9
 
 Description:
 Demonstrates how to capture from screen using your videocard GPU and sound
@@ -36,7 +36,7 @@ The application is kept as simple as possible to show you the workflow and conce
 
 Note: This project is not suitable for absolute beginners using the Media Foundation and DirectX frameworks!
 
-&nbsp;     Please read the pdf's explaining the working and culprits while testing.
+      Please read the pdf's explaining the working and culprits while testing.
 
 
 

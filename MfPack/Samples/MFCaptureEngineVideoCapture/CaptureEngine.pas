@@ -10,7 +10,7 @@
 // Release date: 18-11-2022
 // Language: ENU
 //
-// Revision Version: 3.1.8
+// Revision Version: 3.1.9
 //
 // Description:
 //   This unit contains the captureengine.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX318/Samples/MFCaptureEngineVideoCapture
+// Related projects: MfPackX319/Samples/MFCaptureEngineVideoCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.26100.4654
@@ -1257,8 +1257,8 @@ begin
   // Decide where the snapshot should be send through
   case SnapShotOption of
     ssoFile:     begin
-                   // Set the desired pictureformat.
 
+                   // Set the desired pictureformat.
 
                    // get the My Pictures Folder path use fPath.GetSharedPicturesPath for the shared folder
                    pszPicPath := StrToPWideChar(TPath.GetPicturesPath);
@@ -1276,6 +1276,7 @@ begin
                  end;
 
     ssoCallBack: begin
+
                    // Note:
                    //   Calling this method overrides any previous call to IMFCapturePhotoSink.SetOutputByteStream or
                    //   IMFCapturePhotoSink.SetOutputFileName.
@@ -1308,6 +1309,7 @@ end;
 
 procedure TCaptureManager.WaitForResult();
 begin
+
   WaitForSingleObject(FhEvent,
                       INFINITE);
 end;

@@ -10,7 +10,7 @@
 // Release date: 24-02-2024
 // Language: ENU
 //
-// Revision Version: 3.1.8
+// Revision Version: 3.1.9
 // Description: Audio formats dialog.
 //
 // Company: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 // 08/08/2025 Renate Schaaf       Got rid of global media-buffer variables. Timing, speed and quality improvement.
 // 09/08/2025 Renate Schaaf       Audio fixes: Compressed audio-input now works, no more crashes on repeated rendering
 //------------------------------------------------------------------------------
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX318
+// Related projects: MfPackX319
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.26100.4654

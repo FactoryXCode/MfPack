@@ -1,5 +1,5 @@
 # MFCaptureToFile Sample
-Version: X 3.1.8
+Version: X 3.1.9
 
 Description:
   ========================================================================
