@@ -253,6 +253,31 @@ In your projectsettings you have to add ..MfPack\Samples\MfComponents in the pro
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample3.png)
 
 
+**XAudio2Player Sample 4**
+
+This sample demonstrates:
+
+This sample demonstrates a Media Foundation–based streaming audio player built on top of XAudio2.
+
+Audio files (WAV, MP3, FLAC, AAC, etc.) are decoded on-the-fly using the Media Foundation Source Reader and rendered through XAudio2 using a multi-buffer streaming model.
+Playback control (Play, Pause, Stop, Replay, Seek) is fully thread-safe and handled by a dedicated worker thread, avoiding UI blocking and audio glitches.
+
+The sample also shows how to:
+
+⦁	Apply XAudio2 effects (reverb, mastering limiter).
+
+⦁	Perform sample-accurate seeking during playback.
+
+⦁	Update a progress bar and timing UI based on streamed audio.
+
+⦁	Implement thread-safe callbacks and events instead of message-based signaling.
+
+⦁	Track real-time audio levels using the MfPeakMeter component.
+
+Unlike earlier samples, this version does not load the entire audio file into memory.
+It uses Media Foundation streaming decode + multiple XAudio2 buffers, making it suitable for large audio files (e.g. FLAC > 100 MB).
+
+
 **WASAPI Player Sample 1**
 
 This sample demonstrates how to use the IAudioClient to render different audio formats like WAV, FLAC, MP3 etc.
