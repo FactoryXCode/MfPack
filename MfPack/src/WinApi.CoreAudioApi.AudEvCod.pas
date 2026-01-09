@@ -10,7 +10,7 @@
 // Release date: 07-07-2012
 // Language: ENU
 //
-// Revision Version: 3.1.8
+// Revision Version: 3.1.9
 // Description: List of Audio device error event codes and the expected params.
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.

@@ -10,7 +10,7 @@
 // Release date: 13-08-2025
 // Language: ENU
 //
-// Revision Version: 3.1.8
+// Revision Version: 3.1.9
 // Description: The capture engine that takes care of writing to a
 //              preview object (TPanel) and output file (MP4).
 //
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/11/2025 Tony                Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX318
+// Related projects: MfPackX319
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

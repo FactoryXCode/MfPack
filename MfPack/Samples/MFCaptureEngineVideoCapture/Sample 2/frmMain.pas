@@ -10,7 +10,7 @@
 // Release date: 18-11-2022
 // Language: ENU
 //
-// Revision Version: 3.1.8
+// Revision Version: 3.1.9
 //
 // Description:
 //   Main form.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 01/04/2026 All                 Sinéad O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX318/Samples/MFCaptureEngineVideoCapture
+// Related projects: MfPackX319/Samples/MFCaptureEngineVideoCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.26100.4654
@@ -110,6 +110,7 @@ uses
   Utils;
 
 type
+
   TStartMode = (smVirgin,
                 smReUse);
 
@@ -165,8 +166,10 @@ type
     procedure cbxVideoControlFlagsSelect(Sender: TObject);
     procedure cbxVideoValuesSelect(Sender: TObject);
     procedure cbxCameraValuesSelect(Sender: TObject);
+    procedure cboRotationChange(Sender: TObject);
 
   private
+
     { Private declarations }
     hPreview: HWND;
     ptrDevNotify: HDEVNOTIFY; // Devicenotify pointer.
@@ -1438,6 +1441,25 @@ begin
            end;
        end;
   end;
+end;
+
+
+procedure TMainWindow.cboRotationChange(Sender: TObject);
+var
+  dwDegrees: DWord;
+
+begin
+
+  case cboRotation.ItemIndex of
+    0: dwDegrees := 0;
+    1: dwDegrees := 90;
+    2: dwDegrees := 180;
+    3: dwDegrees := 270;
+    else
+      dwDegrees := 0;
+  end;
+
+  FCaptureManager.SetRotationDegrees(dwDegrees);
 end;
 
 

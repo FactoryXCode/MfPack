@@ -24,7 +24,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 01/04/2026 All                 Sinéad O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -32,7 +32,7 @@
 //          use the ThreadedQueueTimer instead.
 //
 // Related objects: -
-// Related projects: MfPackX318
+// Related projects: MfPackX319
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

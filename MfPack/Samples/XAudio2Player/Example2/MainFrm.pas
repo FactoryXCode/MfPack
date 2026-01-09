@@ -10,7 +10,7 @@
 // Release date: 28-03-2024
 // Language: ENU
 //
-// Revision Version: 3.1.8
+// Revision Version: 3.1.9
 // Description: Main window.
 //
 // Company: FactoryX
@@ -21,14 +21,14 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 // 06/08/2024                     Fixed threading issues.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX318
+// Related projects: MfPackX319
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

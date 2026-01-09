@@ -10,7 +10,7 @@
 // Release date: 30-05-2018
 // Language: ENU
 //
-// Revision Version: 3.1.8
+// Revision Version: 3.1.9
 // Description: Provides functionality required for all Windows Runtime classes.
 //
 // Organisation: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 8 or later.
@@ -38,7 +38,7 @@
 //          All Windows Runtime classes must implement the IInspectable sinterface.
 // 
 // Related objects: -
-// Related projects: MfPackX318
+// Related projects: MfPackX319
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

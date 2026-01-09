@@ -1,6 +1,6 @@
 # WASAPI Player Sample 1
 
-Version: X 3.1.8
+Version: X 3.1.9
 
 Description:
 These samples demonstrates how to use the IAudioClient to render different audio formats like WAV, FLAC, MP3 etc.

@@ -1,6 +1,6 @@
 # XAudio2Player Sample 2
 
-Version: X 3.1.8
+Version: X 3.1.9
 
 Description:
 This sample demonstrates how to use XAudio2 to render different file formats like WAV, FLAC, MP3 etc.

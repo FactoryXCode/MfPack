@@ -10,7 +10,7 @@
 // Release date: 18-11-2022
 // Language: ENU
 //
-// Revision Version: 3.1.8
+// Revision Version: 3.1.9
 //
 // Description:
 //   Main form.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX318/Samples/MFCaptureEngineVideoCapture
+// Related projects: MfPackX319/Samples/MFCaptureEngineVideoCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.26100.4654
@@ -848,18 +848,21 @@ var
   hr: HResult;
 
 begin
+
   if Assigned(FCaptureManager) then
     begin
 
       if (pvPreviewMode = smVirgin) then
-        // Set video preview and recording formats.
-        hr := FCaptureManager.SetVideoFormat();
-        if FAILED(hr) then
-          begin
-            ErrMsg('mnuStartPreviewClick ' + ERR_OUTPUT_MEDIATYPE_SET,
-                   hr);
-            Exit;
-          end;
+        begin
+          // Set video preview and recording formats.
+          hr := FCaptureManager.SetVideoFormat();
+          if FAILED(hr) then
+            begin
+              ErrMsg('mnuStartPreviewClick ' + ERR_OUTPUT_MEDIATYPE_SET,
+                     hr);
+              Exit;
+            end;
+        end;
 
       if (mnuStartPreview.Tag = 0) then
         begin

@@ -10,7 +10,7 @@
 // Release date: 02-04-2023
 // Language: ENU
 //
-// Revision Version: 3.1.8
+// Revision Version: 3.1.9
 // Description: Process Info Dialog lists a snapshot of running processes so
 //              a user can pick a process.
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX318
+// Related projects: MfPackX319
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -261,16 +261,9 @@ begin
   sgProcesses.ColCount := 3;
   sgProcesses.RowCount := 1;
 
-  // For some reason, the methods to dimension TStringGrid changed?
-  {$IF CompilerVersion < 31.0}
   sgProcesses.ColWidths[0] := 200;
   sgProcesses.ColWidths[1] := 100;
   sgProcesses.ColWidths[2] := 100;
-  {$ELSE}
-  sgProcesses.ColWidths[0] := 390;
-  sgProcesses.ColWidths[1] := 190;
-  sgProcesses.ColWidths[2] := 190;
-  {$ENDIF}
 
   sgProcesses.Width := sgProcesses.ColWidths[0] +
                        sgProcesses.ColWidths[1] +

@@ -10,7 +10,7 @@
 // Release date: 29-03-2022
 // Language: ENU
 //
-// Revision Version: 3.1.8
+// Revision Version: 3.1.9
 //
 // Description:
 //   This unit contains the TCameraCapture class for project CameraFrameCapture.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX318/Samples/CameraFrameCapture
+// Related projects: MfPackX319/Samples/CameraFrameCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.26100.4654
@@ -542,7 +542,8 @@ var
   oFeatureLevels: array[0..6] of D3D_FEATURE_LEVEL;
 
 const
-   // This should be in the D3D11_CREATE_DEVICE_FLAG enumeration of WinApi.D3D11.pas
+   // This should be in the D3D11_CREATE_DEVICE_FLAG enumeration of Embarcadero's translation WinApi.D3D11.pas
+   // Note that Embarcadero's translation WinApi.D3D11.pas is not up to date with the latest Windows API, if you encounter issues, switch to  WinApi.DirectX.D3D11.pas.
    D3D11_CREATE_DEVICE_VIDEO_SUPPORT = $800;
 
 begin
@@ -563,9 +564,9 @@ begin
                                              @oFeatureLevels,
                                              Length(oFeatureLevels),
                                              D3D11_SDK_VERSION,
-                                             FDirectXDevice,
-                                             FFeatureLevel,
-                                             FContext),
+                                             @FDirectXDevice,
+                                             @FFeatureLevel,   // This level is the Direct3D runtime the device use.
+                                             @FContext),
                                              'Create D3D11 device');
 
   if Result then

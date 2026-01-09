@@ -1,4 +1,4 @@
-package MfPackX318;
+package MfPackX319;
 
 {$R *.res}
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
@@ -221,6 +221,7 @@ contains
   WinApi.StiErr in '..\src\WinApi.StiErr.pas',
   WinApi.MfPack.VideoStandardsCheat in '..\src\WinApi.MfPack.VideoStandardsCheat.pas',
   WinApi.MediaFoundationApi.MfTrace in '..\src\WinApi.MediaFoundationApi.MfTrace.pas',
-  WinApi.ShErrors in '..\src\WinApi.ShErrors.pas';
+  WinApi.ShErrors in '..\src\WinApi.ShErrors.pas',
+  Winapi.DirectX.D3DCompiler in '..\src\Winapi.DirectX.D3DCompiler.pas';
 
 end.

@@ -10,7 +10,7 @@
 // Release date: 29-07-2012
 // Language: ENU
 //
-// Revision Version: 3.1.8
+// Revision Version: 3.1.9
 // Description: Common methods used by Media Foundation,
 //              Core Audio etc..
 //
@@ -22,13 +22,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX318
+// Related projects: MfPackX319
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -181,6 +181,10 @@ type
   function IsWinVerOrHigher(wMajorVersion: Word;
                             wMinorVersion: Word;
                             wServicePackMajor: Word): Boolean;
+
+  // Utility to check HRESULT
+  procedure CheckHR(hr: HRESULT;
+                    const aContext: string = '');
 
 
   // C++ translations
@@ -978,6 +982,15 @@ begin
   end;
 end; // SizeTMult
 
+
+// Utility to check HRESULT
+procedure CheckHR(hr: HRESULT;
+                  const aContext: string = '');
+begin
+  if Failed(hr) then
+    raise Exception.CreateFmt('HRESULT 0x%x - %s', [hr,
+                                                    aContext]);
+end;
 
   // Adds two values of type UINT.
   // Parameters
@@ -2210,11 +2223,13 @@ function MulDiv64(const aNumber,
                         aNumerator,
                         aDenominator: Int64): Int64;
 begin
-  if aDenominator <= 0 then
+
+  if (aDenominator <= 0) then
     Exit(0);
 
   // Avoid Int64 overflow: (QpcDelta * 10_000_000) div PerfFreq
-  Result := (aNumber div aDenominator) * aNumerator + (aNumber mod aDenominator) * aNumerator div aDenominator;
+  Result := (aNumber div aDenominator) * aNumerator +
+            (aNumber mod aDenominator) * aNumerator div aDenominator;
 end;
 
 

@@ -10,7 +10,7 @@
 // Release date: 18-11-2022
 // Language: ENU
 //
-// Revision Version: 3.1.8
+// Revision Version: 3.1.9
 //
 // Description:
 //   This unit contains the captureengine.
@@ -23,13 +23,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 01/04/2026 All                 Sin√©ad O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX318/Samples/MFCaptureEngineVideoCapture
+// Related projects: MfPackX319/Samples/MFCaptureEngineVideoCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.26100.4654
@@ -203,8 +203,10 @@ type
 
   CaptureEngineCB = class(TInterfacedPersistent, IMFCaptureEngineOnEventCallback)
   private
+
     m_hwnd: HWND;
   public
+
     // Implementation of IMFCaptureEngineOnEventCallback
     function OnEvent(pEvent: IMFMediaEvent): HResult; stdcall;
 
@@ -233,6 +235,7 @@ type
     FhEvent: THandle;
 
   private
+
     FCaptureEngine: IMFCaptureEngine;
     FCapturePreviewSink: IMFCapturePreviewSink;
     m_pEventCallback: CaptureEngineCB;
@@ -265,6 +268,12 @@ type
     // Camera and video properties.
     FCameraProps: TCameraProps;
     FVideoProps: TVideoProps;
+
+    //
+    FPreviewSinkStreamIndex: DWORD;
+    FRecordVideoSinkStreamIndex: DWORD;
+    FRecordAudioSinkStreamIndex: DWORD;
+    FRotationDegrees: DWORD; // keep the ìcurrent UI selectionî
 
     procedure DestroyCaptureEngine();
 
@@ -319,6 +328,8 @@ type
     function SetCameraProps(pProps: TCameraPropSet): HRESULT;
     // Set the video properties.
     function SetVideoProps(pProps: TVideoPropSet): HRESULT;
+    // Set rotation.
+    procedure SetRotationDegrees(const Degrees: DWORD);
 
     property IsPreviewing: Boolean read bPreviewing;
     property IsRecording: Boolean read bRecording;
@@ -374,9 +385,9 @@ begin
                           @aFeatureLevels,
                           Length(aFeatureLevels),
                           D3D11_SDK_VERSION,
-                          ppDevice,
-                          pFeatureLevel,
-                          ppDeviceContext
+                          @ppDevice,
+                          @pFeatureLevel,
+                          @ppDeviceContext
                          );
 
   if SUCCEEDED(hr) then
@@ -851,7 +862,7 @@ end;
 //       set pNewPeviewSink to True.
 function TCaptureManager.StartPreview(pNewPeviewSink: Boolean): HResult;
 var
-  pCaptureSink: IMFCaptureSink;
+  pCaptureSink: IMFCapturePreviewSink;
   pMediaType: IMFMediaType;
   pMediaType2: IMFMediaType;
   pCaptureSource: IMFCaptureSource;
@@ -880,7 +891,7 @@ begin
     begin
 
       hr := FCaptureEngine.GetSink(MF_CAPTURE_ENGINE_SINK_TYPE_PREVIEW,
-                                   pCaptureSink);
+                                   @pCaptureSink);
       if FAILED(hr) then
         goto Done;
 
@@ -894,7 +905,7 @@ begin
       if FAILED(hr) then
         goto Done;
 
-      hr := FCaptureEngine.GetSource(pCaptureSource);
+      hr := FCaptureEngine.GetSource(@pCaptureSource);
       if FAILED(hr) then
         goto Done;
 
@@ -942,6 +953,12 @@ begin
                                           dwSinkStreamIndex);
       if FAILED(hr) then
         goto Done;
+
+      FPreviewSinkStreamIndex := dwSinkStreamIndex;
+
+      // Apply current rotation to preview too:
+      FCapturePreviewSink.SetRotation(FPreviewSinkStreamIndex,
+                                      FRotationDegrees);
     end;
 
   // We are done, start preview.
@@ -1003,6 +1020,7 @@ var
   guidAudioEncoding: TGUID;
   pSink: IMFCaptureSink;
   pRecord: IMFCaptureRecordSink;
+  dwSinkStreamIndex: DWORD;
   pSource: IMFCaptureSource;
   hr: HResult;
 
@@ -1048,7 +1066,7 @@ begin
     end;
 
   hr := FCaptureEngine.GetSink(MF_CAPTURE_ENGINE_SINK_TYPE_RECORD,
-                               pSink);
+                               @pSink);
   if FAILED(hr) then
     goto Done;
 
@@ -1057,7 +1075,7 @@ begin
   if FAILED(hr) then
     goto Done;
 
-  hr := FCaptureEngine.GetSource(pSource);
+  hr := FCaptureEngine.GetSource(@pSource);
     if FAILED(hr) then
       goto Done;
 
@@ -1075,13 +1093,19 @@ begin
       if not IsEqualGuid(guidVideoEncoding,
                          GUID_NULL) then
         begin
+
           // Note: ConfigureVideoEncoding can be using the default of the camera or the one we picked.
           hr := ConfigureVideoEncoding(pSource,
                                        pRecord,
                                        guidVideoEncoding,
-                                       FRecordingMediaType);
+                                       FRecordingMediaType,
+                                       FRecordVideoSinkStreamIndex);
           if FAILED(hr) then
             goto Done;
+
+          // THIS is what makes ìpreview rotation == recorded rotationî
+          pRecord.SetRotation(FRecordVideoSinkStreamIndex,
+                              FRotationDegrees);
         end;
 
       // Audio
@@ -1090,7 +1114,8 @@ begin
         begin
           hr := ConfigureAudioEncoding(pSource,
                                        pRecord,
-                                       guidAudioEncoding);
+                                       guidAudioEncoding,
+                                       FRecordAudioSinkStreamIndex);
           if FAILED(hr) then
             goto Done;
         end;
@@ -1155,7 +1180,7 @@ begin
 
 
   hr := FCaptureEngine.GetSink(MF_CAPTURE_ENGINE_SINK_TYPE_PHOTO,
-                               pCaptureSink);
+                               @pCaptureSink);
   if FAILED(hr) then
     goto done;
 
@@ -1169,7 +1194,7 @@ begin
 
   if (SnapShotOption = ssoFile) then  // Snapshot will be saved directly to file without preview first.
     begin
-      hr := FCaptureEngine.GetSource(pSource);
+      hr := FCaptureEngine.GetSource(@pSource);
       if FAILED(hr) then
        goto done;
 
@@ -1300,12 +1325,12 @@ begin
   FMediaTypeDebug.SafeDebugResultsToFile('SetMediaType');
   {$ENDIF}
 
-  hr := FCaptureEngine.GetSource(mfCaptureSource);
+  hr := FCaptureEngine.GetSource(@mfCaptureSource);
 
   if SUCCEEDED(hr) then
     // Preview
     hr := mfCaptureSource.SetCurrentDeviceMediaType(MF_CAPTURE_ENGINE_PREFERRED_SOURCE_STREAM_FOR_VIDEO_PREVIEW,
-                                                      pMediaType);
+                                                    pMediaType);
 
   // Recording
   if SUCCEEDED(hr) then
@@ -1701,6 +1726,41 @@ begin
                             LONG(pProps.cpFlags));
 
   Result := hr;
+end;
+
+
+procedure TCaptureManager.SetRotationDegrees(const Degrees: DWORD);
+var
+  hr: HResult;
+  PreviewSink: IMFCapturePreviewSink;
+  RecordSink: IMFCaptureRecordSink;
+  Sink: IMFCaptureSink;
+
+begin
+
+  FRotationDegrees := Degrees;
+
+  // Preview
+  hr := FCaptureEngine.GetSink(MF_CAPTURE_ENGINE_SINK_TYPE_PREVIEW,
+                               @Sink);
+  if SUCCEEDED(hr) then
+    hr := Sink.QueryInterface(IID_IMFCapturePreviewSink,
+                              PreviewSink);
+  if SUCCEEDED(hr) then
+     if (FPreviewSinkStreamIndex <> DWORD($FFFFFFFF)) then
+        PreviewSink.SetRotation(FPreviewSinkStreamIndex,
+                                Degrees);
+
+  // Record
+  hr := FCaptureEngine.GetSink(MF_CAPTURE_ENGINE_SINK_TYPE_RECORD,
+                               @Sink);
+  if SUCCEEDED(hr) then
+    hr := Sink.QueryInterface(IID_IMFCaptureRecordSink,
+                              RecordSink);
+  if SUCCEEDED(hr) then
+    if (FRecordVideoSinkStreamIndex <> DWORD($FFFFFFFF)) then
+      RecordSink.SetRotation(FRecordVideoSinkStreamIndex,
+                             Degrees);
 end;
 
 

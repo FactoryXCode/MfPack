@@ -12,7 +12,7 @@ uses
   ProcessInfoDlg in 'ProcessInfoDlg.pas' {dlgProcessInfo},
   LoopBackCapture in 'LoopBackCapture.pas',
   UniThreadTimer in 'UniThreadTimer.pas',
-  Writer in 'Writer.pas';
+  MfAudioWriter in 'MfAudioWriter.pas';
 
 {$R *.res}
 

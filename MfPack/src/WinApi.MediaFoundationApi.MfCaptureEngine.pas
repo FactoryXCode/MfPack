@@ -10,7 +10,7 @@
 // Release date: 09-10-2015
 // Language: ENU
 //
-// Revision Version: 3.1.8
+// Revision Version: 3.1.9
 // Description: -
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX318
+// Related projects: MfPackX319
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -954,14 +954,14 @@ type
     // App should listen for MF_CAPTURE_ENGINE_PHOTO_TAKEN via IMFCaptureEngineOnEventCallback.
 
     function GetSink(mfCaptureEngineSinkType: MF_CAPTURE_ENGINE_SINK_TYPE;
-                     out ppSink: IMFCaptureSink): HResult; stdcall;
+                     {out} ppSink: PIMFCaptureSink): HResult; stdcall;
     // Method to obtain access to an IMFCaptureSink.
     // <param name = "mfCaptureEngineSinkType">
     // Specifies the capture sink type from the MF_CAPTURE_ENGINE_SINK_TYPE enumeration.
     // <param name = "ppSink">
     // Receives a pointer to IMFCaptureSink interface.
 
-    function GetSource(out ppSource: IMFCaptureSource): HResult; stdcall;
+    function GetSource({out} ppSource: PIMFCaptureSource): HResult; stdcall;
     // Method to obtain access to IMFCaptureSource.
     // <param name = "ppSource">
     // Receives a pointer to IMFCaptureSource interface.

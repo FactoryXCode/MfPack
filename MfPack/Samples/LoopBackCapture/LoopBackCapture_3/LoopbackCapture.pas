@@ -7,10 +7,10 @@
 //                   https://github.com/FactoryXCode/MfPack
 // Module: LoopBackCapture.pas
 // Kind: Pascal / Delphi unit
-// Release date: 15-06-2024
+// Release date: 13-08-2025
 // Language: ENU
 //
-// Revision Version: 3.1.8
+// Revision Version: 3.1.9
 // Description: WAS Loopback Capture Engine using TThread to render data.
 //
 // Organisation: FactoryX
@@ -21,13 +21,13 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 24/07/2025 All                 Ozzy Osbourne release  SDK 10.0.26100.4654 (Windows 11)
+// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX318
+// Related projects: MfPackX319
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -64,6 +64,7 @@ unit LoopbackCapture;
 interface
 
 uses
+
   {WinApi}
   WinApi.Windows,
   WinApi.WinError,
@@ -100,8 +101,7 @@ uses
   WinApi.WinMM.MMReg,
   {Application}
   Common,
-  MfAudioWriter,
-  Writer;
+  MfAudioWriter;
 
 type
 
@@ -146,9 +146,8 @@ type
     pvCaptureClient: IAudioCaptureClient;
 
     // WAV-Filewriter.
-    pvWavWriter: TWavWriter;
     pvUseDefaultAudioFmt: Boolean;
-    pvMixFormat: {PWAVEFORMATEX} WAVEFORMATEXTENSIBLE;
+    pvMixFormat: WAVEFORMATEXTENSIBLE;
 
 
     pvFrameSize: NativeUint;
@@ -328,6 +327,7 @@ end;
 
 procedure TRenderThread.SetEvent;
 begin
+
   // Called from 'Synchronize'.
   // All code run from "Synchronize()" runs in the context of the
   // Main VCL UI Thread, NOT from this thread.
@@ -422,8 +422,7 @@ begin
   pvCaptureBuffer := nil;
   pvCaptureBufferSize := 0;
   pvEnableStreamSwitch := False;
-  // Create the WAV-filewriter.
-  pvWavWriter := TWavWriter.Create();
+
 end;
 
 
@@ -1219,9 +1218,6 @@ begin
 
     if (pvEnableStreamSwitch = True) then
       TerminateStreamSwitch();
-
-    if Assigned(pvWavWriter) then
-      FreeAndNil(pvWavWriter);
 end;
 
 
@@ -1336,8 +1332,6 @@ var
   pData: PByte;
   NumFramesToRead: UINT32;
   flags: DWord;
-
-  dwBytesWritten: LongInt;
   bytesToWrite: Integer;
 
   // Writer stuff.
@@ -1418,8 +1412,6 @@ begin
                              // Drain all packets for this event.
                              while (packetSize > 0) and (pvDeviceState = Capturing) do
                                begin
-
-                                 dwBytesWritten := 0;
 
                                  hr := pvCaptureClient.GetBuffer(pData,
                                                                  NumFramesToRead,
