@@ -77,6 +77,7 @@ uses
   {System}
   System.SysUtils,
   System.Types,
+  System.UITypes,
   {Vcl}
   Vcl.Graphics,
   {WinApi.DirectX}
@@ -593,6 +594,18 @@ type
     // is never used.
     //
 
+    class function Create(const knownColor: TColor;
+                  const alpha: FLOAT = 1.0): D2D1_COLOR_F; overload; static; inline;
+
+    class function Create(const C: TAlphaColor): D2D1_COLOR_F; overload; static;
+
+    class function Create(const C: TAlphaColorF): D2D1_COLOR_F; overload; static;
+
+    class function Create(const red: FLOAT;
+                  const green: FLOAT;
+                  const blue: FLOAT;
+                  const alpha: FLOAT = 1.0): D2D1_COLOR_F; overload; static; inline;
+
     function Init(const rgb: UINT32;
                   const alpha: FLOAT = 1.0): D2D1_COLOR_F; overload;
 
@@ -698,11 +711,12 @@ type
   end;
   {$EXTERNALSYM Matrix3x2FHelper}
 
-
   // Additional Prototypes
 
   function D2D1PointF(const x: FLOAT;
                       const y: FLOAT) : D2D1_POINT_2F;
+
+
   {$EXTERNALSYM D2D1SizeF}
 
   function D2D1SizeF(const width: FLOAT;
@@ -1194,6 +1208,50 @@ end;
 //
 // ColorF / D2D1ColorFHelper
 //
+
+class function D2D1ColorFHelper.Create(const knownColor: TColor;
+                  const alpha: FLOAT = 1.0): D2D1_COLOR_F;
+begin
+    result:=result.Init(knownColor, alpha);
+end;
+
+class function D2D1ColorFHelper.Create(const C: TAlphaColor): D2D1_COLOR_F;
+begin
+  with Result do
+    begin
+      A := Byte((C shr 24) and $FF);
+      R := Byte((C shr 16) and $FF);
+      G := Byte((C shr 8)  and $FF);
+      B := Byte(C and $FF);
+    end;
+end;
+
+class function D2D1ColorFHelper.Create(const C: TAlphaColorF): D2D1_COLOR_F;
+begin
+  with Result do
+    begin
+      r := C.R;
+      g := C.G;
+      b := C.B;
+      a := C.A;
+    end;
+end;
+
+
+class function D2D1ColorFHelper.Create(const red: FLOAT;
+                  const green: FLOAT;
+                  const blue: FLOAT;
+                  const alpha: FLOAT = 1.0): D2D1_COLOR_F;
+begin
+  with Result do
+    begin
+      r := red;
+      g := green;
+      b := blue;
+      a := alpha;
+    end;
+end;
+
 function D2D1ColorFHelper.Init(const rgb: UINT32;
                                const alpha: FLOAT = 1.0): D2D1_COLOR_F;
 const
@@ -1220,7 +1278,7 @@ end;
 function D2D1ColorFHelper.Init(const knownColor: TColor;
                                const alpha: FLOAT = 1.0): D2D1_COLOR_F;
 begin
-  Result := Init(knownColor,
+  Result := Init(UINT32(ColorToRGB(knownColor)),
                  alpha);
 end;
 
@@ -1263,6 +1321,7 @@ begin
       a:= fval * Byte(val shr 24);
     end;
 end;
+
 
 class function D2D1ColorFHelper.Implicit(const val: D2D1_COLOR_F): DWORD;
 var

@@ -192,10 +192,12 @@ type
   D2D_POINT_2F = record
     x: FLOAT;
     y: FLOAT;
-
     // Delphi Note: Translations to/from Delphi TPoint
-    class operator Implicit(AValue: TPoint): D2D_POINT_2F;
-    class operator Explicit(AValue: D2D_POINT_2F): TPoint;
+    class function Create(const aX, aY: FLOAT): D2D_POINT_2F; static; inline;
+    class operator Implicit(aValue: TPoint): D2D_POINT_2F; overload;
+    class operator Implicit(aValue: TPointF): D2D_POINT_2F; overload;
+    class operator Explicit(aValue: D2D_POINT_2F): TPoint; overload;
+    class operator Explicit(aValue: D2D_POINT_2F): TPointF; overload;
   end;
   {$EXTERNALSYM D2D_POINT_2F}
 
@@ -244,8 +246,11 @@ type
     right: FLOAT;
     bottom: FLOAT;
     // Delphi Note:  TRect conversion methods
-    class operator Implicit(aValue: TRect): D2D_RECT_F;
-    class operator Explicit(aValue: D2D_RECT_F): TRect;
+    class function Create(const aLeft, aTop, aRight, aBottom: FLOAT): D2D_RECT_F; static; inline;
+    class operator Implicit(aValue: TRect): D2D_RECT_F; overload;
+    class operator Implicit(aValue: TRectF): D2D_RECT_F; overload;
+    class operator Explicit(aValue: D2D_RECT_F): TRect; overload;
+    class operator Explicit(aValue: D2D_RECT_F): TRectF; overload;
   end;
   {$EXTERNALSYM D2D_RECT_F}
 
@@ -557,7 +562,19 @@ end;
 
 
 // D2D_POINT_2F
+class function D2D_POINT_2F.Create(const aX, aY: FLOAT): D2D_POINT_2F;
+begin
+  Result.x := aX;
+  Result.y := aY;
+end;
+
 class operator D2D_POINT_2F.Implicit(aValue: TPoint): D2D_POINT_2F;
+begin
+  Result.x := aValue.X;
+  Result.y := aValue.Y;
+end;
+
+class operator D2D_POINT_2F.Implicit(aValue: TPointF): D2D_POINT_2F;
 begin
   Result.x := aValue.X;
   Result.y := aValue.Y;
@@ -569,9 +586,32 @@ begin
   Result.y := Trunc(aValue.Y);
 end;
 
+class operator D2D_POINT_2F.Explicit(aValue: D2D_POINT_2F): TPointF;
+begin
+  Result.x := Trunc(aValue.X);
+  Result.y := Trunc(aValue.Y);
+end;
+
 
 // D2D_RECT_F
+
+class function D2D_RECT_F.Create(const aLeft, aTop, aRight, aBottom: FLOAT): D2D_RECT_F;
+begin
+  Result.top := aTop;
+  Result.left := aLeft;
+  Result.bottom := aBottom;
+  Result.right := aRight;
+end;
+
 class operator D2D_RECT_F.Implicit(aValue: TRect): D2D_RECT_F;
+begin
+  Result.top := aValue.Top;
+  Result.left := aValue.Left;
+  Result.bottom := aValue.Bottom;
+  Result.right := aValue.Right;
+end;
+
+class operator D2D_RECT_F.Implicit(aValue: TRectF): D2D_RECT_F;
 begin
   Result.top := aValue.Top;
   Result.left := aValue.Left;
@@ -585,6 +625,14 @@ begin
   Result.left := Trunc(aValue.Left);
   Result.bottom := Trunc(aValue.Bottom);
   Result.right := Trunc(aValue.Right);
+end;
+
+class operator D2D_RECT_F.Explicit(aValue: D2D_RECT_F): TRectF;
+begin
+  Result.top := aValue.Top;
+  Result.left := aValue.Left;
+  Result.bottom := aValue.Bottom;
+  Result.right := aValue.Right;
 end;
 
 
