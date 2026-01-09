@@ -195,7 +195,8 @@ type
     // Delphi Note: Translations to/from Delphi TPoint
     class function Create(const aX, aY: FLOAT): D2D_POINT_2F; static; inline;
     class operator Implicit(aValue: TPoint): D2D_POINT_2F; overload;
-    class operator Implicit(aValue: TPointF): D2D_POINT_2F; overload;
+    class operator Implicit(const aValue: TPointF): D2D_POINT_2F; overload;
+    class operator Implicit(const aValue: D2D_POINT_2F): TPointF; overload;
     class operator Explicit(aValue: D2D_POINT_2F): TPoint; overload;
     class operator Explicit(aValue: D2D_POINT_2F): TPointF; overload;
   end;
@@ -574,7 +575,13 @@ begin
   Result.y := aValue.Y;
 end;
 
-class operator D2D_POINT_2F.Implicit(aValue: TPointF): D2D_POINT_2F;
+class operator D2D_POINT_2F.Implicit(const aValue: TPointF): D2D_POINT_2F;
+begin
+  Result.x := aValue.X;
+  Result.y := aValue.Y;
+end;
+
+class operator D2D_POINT_2F.Implicit(const aValue: D2D_POINT_2F): TPointF;
 begin
   Result.x := aValue.X;
   Result.y := aValue.Y;
