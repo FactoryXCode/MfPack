@@ -1068,7 +1068,7 @@ type
   ID2D1SolidColorBrush = interface(ID2D1Brush)
   ['{2cd906a9-12e2-11dc-9fed-001143a055f9}']
 
-    procedure SetColor(color: D2D1_COLOR_F); stdcall;
+    procedure SetColor(const color: D2D1_COLOR_F); stdcall;
 
     function  GetColor(): D2D1_COLOR_F; stdcall;
 
@@ -1406,14 +1406,14 @@ type
 
     procedure AddLine(point: D2D1_POINT_2F); stdcall;
 
-    procedure AddBezier(bezier: D2D1_BEZIER_SEGMENT); stdcall;
+    procedure AddBezier(const bezier: D2D1_BEZIER_SEGMENT); stdcall;
 
-    procedure AddQuadraticBezier(bezier: D2D1_QUADRATIC_BEZIER_SEGMENT); stdcall;
+    procedure AddQuadraticBezier(const bezier: D2D1_QUADRATIC_BEZIER_SEGMENT); stdcall;
 
-    procedure AddQuadraticBeziers(beziers: PD2D1_QUADRATIC_BEZIER_SEGMENT; // pointer to array of beziers
+    procedure AddQuadraticBeziers(const beziers: D2D1_QUADRATIC_BEZIER_SEGMENT; // pointer to array of beziers
                                   beziersCount: UINT32); stdcall;
 
-    procedure AddArc(arc: D2D1_ARC_SEGMENT); stdcall;
+    procedure AddArc(const arc: D2D1_ARC_SEGMENT); stdcall;
 
   end;
   IID_ID2D1GeometrySink = ID2D1GeometrySink;

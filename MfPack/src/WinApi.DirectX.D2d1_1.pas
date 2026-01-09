@@ -1383,7 +1383,7 @@ type
     // This creates a stroke style with the ability to preserve stroke width in various
     // ways.
     function CreateStrokeStyle(const strokeStyleProperties: D2D1_STROKE_STYLE_PROPERTIES1;
-                               dashes: Single;
+                               dashes: PSingle;
                                dashesCount: UINT32;
                                out strokeStyle: ID2D1StrokeStyle1): HResult; stdcall;
 
