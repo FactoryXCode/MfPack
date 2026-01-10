@@ -1425,17 +1425,20 @@ end;
 
 class function Matrix3x2FHelper.Scale(const size: D2D1_SIZE_F;
                                       const center: D2D1_POINT_2F): D2D1_MATRIX_3X2_F;
-var
-  ct: D2D1_POINT_2F;
+//var
+//  ct: D2D1_POINT_2F;
 
 begin
-  // Check if a record has a default value or not.
-  if CompareMem(@ct,
-                @center,
-                SizeOf(ct)) = True then
-    ct := Point2F()
-  else
-    ct := center;
+
+//kxMaxx unclear, why we need this?
+//  // Check if a record has a default value or not.
+//  ct := Point2F();  //kxMaxx: ct needs an init; error at 64bit because of random values
+//  if CompareMem(@ct,
+//                @center,
+//                SizeOf(ct)) = True then
+//    ct := Point2F()
+//  else
+//    ct := center;
 
   with Result do
     begin
@@ -1443,8 +1446,10 @@ begin
       _12 := 0.0;
       _21 := 0.0;
       _22 := size.height;
-      _31 := ct.x - size.width * ct.x;
-      _32 := ct.y - size.height * ct.y;
+//      _31 := ct.x - size.width * ct.x;
+      _31 := center.x - size.width * center.x;
+//      _32 := ct.y - size.height * ct.y;
+      _32 := center.y - size.height * center.y;
     end;
 
 end;
@@ -1453,41 +1458,19 @@ end;
 class function Matrix3x2FHelper.Scale(const x: FLOAT;
                                       const y: FLOAT;
                                       const center: D2D1_POINT_2F): D2D1_MATRIX_3X2_F;
-var
-  cnt: D2D1_POINT_2F;
-
 begin
-  // Check if a record has a default value or not.
-  if CompareMem(@cnt,
-                @center,
-                SizeOf(cnt)) = True then
-    cnt := Point2F()
-  else
-    cnt := center;
-
-  Result := D2D1_MATRIX_3X2_F.Scale(SizeF(x,
-                                          y),
-                                    cnt);
+  Result := D2D1_MATRIX_3X2_F.Scale(SizeF(x,y), center);
 end;
 
 
 class function Matrix3x2FHelper.Rotation(const angle: FLOAT;
                                          const center: D2D1_POINT_2F): D2D1_MATRIX_3X2_F;
 var
-  cnt: D2D1_POINT_2F;
   rotation: D2D1_MATRIX_3X2_F;
 
 begin
-  // Check if a record has a default value or not.
-  if CompareMem(@cnt,
-                @center,
-                SizeOf(cnt)) = True then
-    cnt := Point2F()
-  else
-    cnt := center;
-
   D2D1MakeRotateMatrix(angle,
-                       cnt,
+                       center,
                        rotation);
   Result := rotation;
 end;
@@ -1497,21 +1480,12 @@ class function Matrix3x2FHelper.Skew(const angleX: FLOAT;
                                      const angleY: FLOAT;
                                      const center: D2D1_POINT_2F): D2D1_MATRIX_3X2_F;
 var
-  cnt: D2D1_POINT_2F;
   skew: D2D1_MATRIX_3X2_F;
 
 begin
-  // Check if a record has a default value or not.
-  if CompareMem(@cnt,
-                @center,
-                SizeOf(cnt)) = True then
-    cnt := Point2F()
-  else
-    cnt := center;
-
   D2D1MakeSkewMatrix(angleX,
                      angleY,
-                     cnt,
+                     center,
                      skew);
   Result := skew;
 end;

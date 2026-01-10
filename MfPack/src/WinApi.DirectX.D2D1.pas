@@ -1410,7 +1410,7 @@ type
 
     procedure AddQuadraticBezier(const bezier: D2D1_QUADRATIC_BEZIER_SEGMENT); stdcall;
 
-    procedure AddQuadraticBeziers(const beziers: D2D1_QUADRATIC_BEZIER_SEGMENT; // pointer to array of beziers
+    procedure AddQuadraticBeziers(beziers: PD2D1_QUADRATIC_BEZIER_SEGMENT; // pointer to array of beziers
                                   beziersCount: UINT32); stdcall;
 
     procedure AddArc(const arc: D2D1_ARC_SEGMENT); stdcall;
