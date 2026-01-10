@@ -953,7 +953,7 @@ type
     procedure GetPixelFormat(out pixelFormat: D2D1_PIXEL_FORMAT); stdcall;
 
     // Return the DPI of the bitmap.
-    procedure GetDpi(out dpiX;
+    procedure GetDpi(out dpiX: Single;
                      out dpiY: Single); stdcall;
 
     function CopyFromBitmap(var destPoint: D2D1_POINT_2U;
@@ -1012,7 +1012,7 @@ type
     procedure SetOpacity(opacity: Single); stdcall;
 
     // Sets the transform that applies to everything drawn by the brush.
-    procedure SetTransform(transform: D2D1_MATRIX_3X2_F); stdcall;
+    procedure SetTransform(const transform: D2D1_MATRIX_3X2_F); stdcall;
 
     function GetOpacity(): Single; stdcall;
 
@@ -1185,14 +1185,14 @@ type
   ['{2cd906a1-12e2-11dc-9fed-001143a055f9}']
 
     // Retrieve the bounds of the geometry, with an optional applied transform.
-    function GetBounds(worldTransform: D2D1_MATRIX_3X2_F;
+    function GetBounds(const worldTransform: PD2D1_MATRIX_3X2_F;
                        out bounds: D2D1_RECT_F): HResult; stdcall;
 
     // Get the bounds of the corresponding geometry after it has been widened or have
     // an optional pen style applied.
     function GetWidenedBounds(strokeWidth: Single;
                               strokeStyle: ID2D1StrokeStyle;
-                              worldTransform: D2D1_MATRIX_3X2_F;
+                              const worldTransform: PD2D1_MATRIX_3X2_F;
                               flatteningTolerance: Single;
                               out bounds: D2D1_RECT_F): HResult; stdcall;
 
@@ -1201,31 +1201,31 @@ type
     function StrokeContainsPoint(point: D2D1_POINT_2F;
                                  strokeWidth: Single;
                                  strokeStyle: ID2D1StrokeStyle;
-                                 worldTransform: D2D1_MATRIX_3X2_F;
+                                 const worldTransform: PD2D1_MATRIX_3X2_F;
                                  flatteningTolerance: Single;
                                  out contains: BOOL): HResult; stdcall;
 
     // Test whether the given fill of this geometry would contain this point.
     function FillContainsPoint(point: D2D1_POINT_2F;
-                               worldTransform: D2D1_MATRIX_3X2_F;
+                               const worldTransform: PD2D1_MATRIX_3X2_F;
                                flatteningTolerance: Single;
                                out contains: BOOL): HResult; stdcall;
 
     // Compare how one geometry intersects or contains another geometry.
     function CompareWithGeometry(inputGeometry: ID2D1Geometry;
-                                 inputGeometryTransform: D2D1_MATRIX_3X2_F;
+                                 const inputGeometryTransform: PD2D1_MATRIX_3X2_F;
                                  flatteningTolerance: Single;
                                  out relation: D2D1_GEOMETRY_RELATION): HResult; stdcall;
 
     // Converts a geometry to a simplified geometry that has arcs and quadratic beziers
     // removed.
     function Simplify(simplificationOption: D2D1_GEOMETRY_SIMPLIFICATION_OPTION;
-                      worldTransform: D2D1_MATRIX_3X2_F;
+                      const worldTransform: PD2D1_MATRIX_3X2_F;
                       flatteningTolerance: Single;
                       geometrySink: ID2D1SimplifiedGeometrySink): HResult; stdcall;
 
     // Tessellates a geometry into triangles.
-    function Tessellate(worldTransform: D2D1_MATRIX_3X2_F;
+    function Tessellate(const worldTransform: PD2D1_MATRIX_3X2_F;
                         flatteningTolerance: Single;
                         tessellationSink: ID2D1TessellationSink): HResult; stdcall;
 
@@ -1233,29 +1233,29 @@ type
     // geometry.
     function CombineWithGeometry(inputGeometry: ID2D1Geometry;
                                  combineMode: D2D1_COMBINE_MODE;
-                                 inputGeometryTransform: D2D1_MATRIX_3X2_F;
+                                 const inputGeometryTransform: PD2D1_MATRIX_3X2_F;
                                  flatteningTolerance: Single;
                                  geometrySink: ID2D1SimplifiedGeometrySink): HResult; stdcall;
 
     // Computes the outline of the geometry. The result is written back into a
     // simplified geometry sink.
-    function Outline(worldTransform: D2D1_MATRIX_3X2_F;
+    function Outline(const worldTransform: PD2D1_MATRIX_3X2_F;
                      flatteningTolerance: Single;
                      geometrySink: ID2D1SimplifiedGeometrySink): HResult; stdcall;
 
     // Computes the area of the geometry.
-    function ComputeArea(worldTransform: D2D1_MATRIX_3X2_F;
+    function ComputeArea(const worldTransform: PD2D1_MATRIX_3X2_F;
                          flatteningTolerance: Single;
                          out area: Single): HResult; stdcall;
 
     // Computes the length of the geometry.
-    function ComputeLength(worldTransform: D2D1_MATRIX_3X2_F;
+    function ComputeLength(const worldTransform: PD2D1_MATRIX_3X2_F;
                            flatteningTolerance: Single;
                            out length: Single): HResult; stdcall;
 
     // Computes the point and tangent a given distance along the path.
     function ComputePointAtLength(length: Single;
-                                  worldTransform: D2D1_MATRIX_3X2_F;
+                                  const worldTransform: PD2D1_MATRIX_3X2_F;
                                   flatteningTolerance: Single;
                                   out point: D2D1_POINT_2F;
                                   out unitTangentVector: D2D1_POINT_2F): HResult; stdcall;
@@ -1263,7 +1263,7 @@ type
     // Get the geometry and widen it as well as apply an optional pen style.
     function Widen(strokeWidth: Single;
                    strokeStyle: ID2D1StrokeStyle;
-                   worldTransform: D2D1_MATRIX_3X2_F;
+                   const worldTransform: PD2D1_MATRIX_3X2_F;
                    flatteningTolerance: Single;
                    geometrySink: ID2D1SimplifiedGeometrySink): HResult; stdcall;
 
@@ -1833,7 +1833,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID2D1BitmapRenderTarget);'}
   {$EXTERNALSYM ID2D1BitmapRenderTarget}
   ID2D1BitmapRenderTarget = interface(ID2D1RenderTarget)
-  ['{2cd90694-12e2-11dc-9fed-001143a055f9}']
+  ['{2cd90695-12e2-11dc-9fed-001143a055f9}']
 
     function GetBitmap(out bitmap: ID2D1Bitmap): HResult; stdcall;
 
@@ -1937,7 +1937,7 @@ type
                                  out geometryGroup: ID2D1GeometryGroup): HResult; stdcall;
 
     function CreateTransformedGeometry(const sourceGeometry: ID2D1Geometry;
-                                       transform: D2D1_MATRIX_3X2_F;
+                                       const transform: D2D1_MATRIX_3X2_F;
                                        out transformedGeometry: ID2D1TransformedGeometry): HResult; stdcall;
 
     // Returns an initially empty path geometry interface. A geometry sink is created
