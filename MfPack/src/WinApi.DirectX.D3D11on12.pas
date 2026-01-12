@@ -178,10 +178,10 @@ type
                                    const riid: TGUID;
                                    ppResource11: PPointer): HRESULT; stdcall;
 
-    procedure ReleaseWrappedResources([Ref] const ppResources: ID3D11Resource;
+    procedure ReleaseWrappedResources(ppResources: PID3D11Resource;
                                       NumResources: UINT); stdcall;
 
-    procedure AcquireWrappedResources([Ref] const ppResources: ID3D11Resource;
+    procedure AcquireWrappedResources(ppResources: PID3D11Resource;
                                       NumResources: UINT); stdcall;
 
   end;

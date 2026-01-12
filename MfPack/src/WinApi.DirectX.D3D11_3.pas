@@ -729,34 +729,34 @@ type
 
     function CreateTexture2D1(pDesc1: D3D11_TEXTURE2D_DESC1;
                              pInitialData: D3D11_SUBRESOURCE_DATA;
-                             [ref] const ppTexture2D: ID3D11Texture2D1): HRESULT; stdcall;
+                             ppTexture2D: PID3D11Texture2D1): HRESULT; stdcall;
 
     function CreateTexture3D1(pDesc1: D3D11_TEXTURE3D_DESC1;
                               pInitialData: PD3D11_SUBRESOURCE_DATA;
-                              [ref] const ppTexture3D: ID3D11Texture3D1): HRESULT; stdcall;
+                              ppTexture3D: PID3D11Texture3D1): HRESULT; stdcall;
 
     function CreateRasterizerState2(pRasterizerDesc: D3D11_RASTERIZER_DESC2;
-                                    [ref] const ppRasterizerState: ID3D11RasterizerState2): HRESULT; stdcall;
+                                    ppRasterizerState: PID3D11RasterizerState2): HRESULT; stdcall;
 
     function CreateShaderResourceView1(pResource: ID3D11Resource;
                                        pDesc1: D3D11_SHADER_RESOURCE_VIEW_DESC1;
-                                       [ref] const ppSRView1: ID3D11ShaderResourceView1): HRESULT; stdcall;
+                                       ppSRView1: PID3D11ShaderResourceView1): HRESULT; stdcall;
 
     function CreateUnorderedAccessView1(pResource: ID3D11Resource;
                                         pDesc1: D3D11_UNORDERED_ACCESS_VIEW_DESC1;
-                                        [ref] const ppUAView1: ID3D11UnorderedAccessView1): HRESULT; stdcall;
+                                        ppUAView1: PID3D11UnorderedAccessView1): HRESULT; stdcall;
 
     function CreateRenderTargetView1(pResource: ID3D11Resource;
                                      pDesc1: D3D11_RENDER_TARGET_VIEW_DESC1;
-                                     [ref] const ppRTView1: ID3D11RenderTargetView1): HRESULT; stdcall;
+                                     ppRTView1: PID3D11RenderTargetView1): HRESULT; stdcall;
 
     function CreateQuery1(pQueryDesc1: D3D11_QUERY_DESC1;
-                         [ref] const ppQuery1: ID3D11Query1): HRESULT; stdcall;
+                          ppQuery1: PID3D11Query1): HRESULT; stdcall;
 
-    procedure GetImmediateContext3([ref] const ppImmediateContext: ID3D11DeviceContext3); stdcall;
+    procedure GetImmediateContext3(ppImmediateContext: PID3D11DeviceContext3); stdcall;
 
     function CreateDeferredContext3(ContextFlags: UINT;
-                                   [ref] const ppDeferredContext: ID3D11DeviceContext3): HRESULT; stdcall;
+                                    ppDeferredContext: PID3D11DeviceContext3): HRESULT; stdcall;
 
     procedure WriteToSubresource(const pDstResource: ID3D11Resource;
                                  DstSubresource: UINT;
@@ -798,7 +798,7 @@ constructor D3D11_TEXTURE2D_DESC1.Create(aFormat: DXGI_FORMAT;
                                          aHeight: UINT;
                                          aArraySize: UINT = 1;
                                          aMipLevels: UINT = 0;
-                                         aBindFlags: UINT = D3D11_BIND_SHADER_RESOURCE;
+                                         aBindFlags: UINT = D3D11_BIND_SHADEAcquireWrappedResourcesR_RESOURCE;
                                          aUsage: D3D11_USAGE = D3D11_USAGE_DEFAULT;
                                          acpuaccessFlags: UINT = 0;
                                          aSampleCount: UINT = 1;

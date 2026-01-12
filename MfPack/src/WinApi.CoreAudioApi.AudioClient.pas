@@ -856,7 +856,7 @@ type
     // the AudioClientProperties to TRUE, you must specify the AUDCLNT_STREAMFLAGS_EVENTCALLBACK flag in
     // the StreamFlags parameter to IAudioClient.Initialize.
 
-    function GetBufferSizeLimits({[ref] const} pFormat: PWAVEFORMATEX;
+    function GetBufferSizeLimits(pFormat: PWAVEFORMATEX;
                                  const bEventDriven: BOOL;
                                  out phnsMinBufferDuration: REFERENCE_TIME;
                                  out phnsMaxBufferDuration: REFERENCE_TIME): HResult; stdcall;

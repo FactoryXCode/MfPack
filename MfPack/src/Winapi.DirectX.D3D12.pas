@@ -4728,7 +4728,7 @@ type
     ['{7F91CE67-090C-4BB7-B78E-ED8FF2E31DA0}']
 
     function GetRootSignatureDescAtVersion(convertToVersion: D3D_ROOT_SIGNATURE_VERSION;
-                                          [ref] const ppDesc: PD3D12_VERSIONED_ROOT_SIGNATURE_DESC): HRESULT; stdcall;
+                                           ppDesc: PD3D12_VERSIONED_ROOT_SIGNATURE_DESC): HRESULT; stdcall;
 
     function GetUnconvertedRootSignatureDesc(): D3D12_VERSIONED_ROOT_SIGNATURE_DESC; stdcall;
 
@@ -5583,7 +5583,7 @@ type
                                Flags: D3D12_TILE_MAPPING_FLAGS); stdcall;
 
     procedure ExecuteCommandLists(NumCommandLists: UINT;
-                                  [ref] const ppCommandLists: ID3D12CommandList); stdcall;
+                                  ppCommandLists: PID3D12CommandList); stdcall;
 
     procedure SetMarker(Metadata: UINT;
                         const pData: Pointer;
@@ -5866,7 +5866,7 @@ type
 
     function SetResidencyPriority(NumObjects: UINT;
                                   ppObjects: PID3D12Pageable;
-                                  [ref] const pPriorities: PD3D12_RESIDENCY_PRIORITY): HRESULT; stdcall;
+                                  pPriorities: PD3D12_RESIDENCY_PRIORITY): HRESULT; stdcall;
 
   end;
   IID_ID3D12Device1 = ID3D12Device1;
@@ -5908,7 +5908,7 @@ type
 
     function EnqueueMakeResident(Flags: D3D12_RESIDENCY_FLAGS;
                                  NumObjects: UINT;
-                                 [ref] const ppObjects: PID3D12Pageable;
+                                 ppObjects: PID3D12Pageable;
                                  pFenceToSignal: ID3D12Fence;
                                  FenceValueToSignal: UINT64): HRESULT; stdcall;
 
@@ -6015,7 +6015,7 @@ type
 
     function GetResourceAllocationInfo1(visibleMask: UINT;
                                         numResourceDescs: UINT;
-                                        [ref] const pResourceDescs: PD3D12_RESOURCE_DESC;
+                                        pResourceDescs: PD3D12_RESOURCE_DESC;
                                         pResourceAllocationInfo1: PD3D12_RESOURCE_ALLOCATION_INFO1): D3D12_RESOURCE_ALLOCATION_INFO; stdcall;
 
 
@@ -7356,7 +7356,7 @@ type
 
     function GetResourceAllocationInfo2(visibleMask: UINT;
                                         numResourceDescs: UINT;
-                                        [ref] const pResourceDescs: PD3D12_RESOURCE_DESC1;
+                                        pResourceDescs: PD3D12_RESOURCE_DESC1;
                                         pResourceAllocationInfo1: PD3D12_RESOURCE_ALLOCATION_INFO1): D3D12_RESOURCE_ALLOCATION_INFO; stdcall;
 
     function CreateCommittedResource2(pHeapProperties: D3D12_HEAP_PROPERTIES;
@@ -7743,14 +7743,14 @@ type
     ['{8754318e-d3a9-4541-98cf-645b50dc4874}']
 
     procedure BeginRenderPass(NumRenderTargets: UINT;
-                              [ref] const pRenderTargets: PD3D12_RENDER_PASS_RENDER_TARGET_DESC;
+                              pRenderTargets: PD3D12_RENDER_PASS_RENDER_TARGET_DESC;
                               pDepthStencil: D3D12_RENDER_PASS_DEPTH_STENCIL_DESC;
                               Flags: D3D12_RENDER_PASS_FLAGS); stdcall;
 
     procedure EndRenderPass(); stdcall;
 
     procedure InitializeMetaCommand(pMetaCommand: ID3D12MetaCommand;
-                                    [ref] const pInitializationParametersData: Pointer;
+                                    pInitializationParametersData: Pointer;
                                     InitializationParametersDataSizeInBytes: SIZE_T); stdcall;
 
     procedure ExecuteMetaCommand(pMetaCommand: ID3D12MetaCommand;
@@ -7759,11 +7759,11 @@ type
 
     procedure BuildRaytracingAccelerationStructure(pDesc: PD3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC;
                                                    NumPostbuildInfoDescs: UINT;
-                                                   [ref] const pPostbuildInfoDescs: PD3D12_RAYTRACING_ACCELERATION_STRUCTURE_POSTBUILD_INFO_DESC); stdcall;
+                                                   pPostbuildInfoDescs: PD3D12_RAYTRACING_ACCELERATION_STRUCTURE_POSTBUILD_INFO_DESC); stdcall;
 
     procedure EmitRaytracingAccelerationStructurePostbuildInfo(pDesc: D3D12_RAYTRACING_ACCELERATION_STRUCTURE_POSTBUILD_INFO_DESC;
                                                                NumSourceAccelerationStructures: UINT;
-                                                               [ref] const pSourceAccelerationStructureData: PD3D12_GPU_VIRTUAL_ADDRESS); stdcall;
+                                                               pSourceAccelerationStructureData: PD3D12_GPU_VIRTUAL_ADDRESS); stdcall;
 
     procedure CopyRaytracingAccelerationStructure(DestAccelerationStructureData: D3D12_GPU_VIRTUAL_ADDRESS;
                                                   SourceAccelerationStructureData: D3D12_GPU_VIRTUAL_ADDRESS;
@@ -8162,9 +8162,9 @@ type
   //
   // ---------------------------------------------------------------------------
   function D3D12EnableExperimentalFeatures(NumFeatures: UINT;
-                                           [ref] const pIIDs: PIID;
-                                           [ref] const pConfigurationStructs: Pointer;
-                                           [ref] const pConfigurationStructSizes: PUINT): HRESULT; stdcall;
+                                           pIIDs: PIID;
+                                           pConfigurationStructs: Pointer;
+                                           pConfigurationStructSizes: PUINT): HRESULT; stdcall;
   {$EXTERNALSYM D3D12EnableExperimentalFeatures}
 
   // --------------------------------------------------------------------------------------------------------------------------------
@@ -8409,7 +8409,7 @@ type
     ['{55050859-4024-474c-87f5-6472eaee44ea}']
 
     procedure RSSetShadingRate(baseShadingRate: D3D12_SHADING_RATE;
-                               [ref] const combiners: PD3D12_SHADING_RATE_COMBINER); stdcall;
+                               combiners: PD3D12_SHADING_RATE_COMBINER); stdcall;
 
     procedure RSSetShadingRateImage(shadingRateImage: ID3D12Resource); stdcall;
 
@@ -8453,7 +8453,7 @@ type
     ['{dd171223-8b61-4769-90e3-160ccde4e2c1}']
 
     procedure Barrier(NumBarrierGroups: UINT32;
-                      [ref] const pBarrierGroups: PD3D12_BARRIER_GROUP); stdcall;
+                      pBarrierGroups: PD3D12_BARRIER_GROUP); stdcall;
 
   end;
   IID_ID3D12GraphicsCommandList7 = ID3D12GraphicsCommandList7;

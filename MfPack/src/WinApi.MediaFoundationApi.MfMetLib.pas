@@ -1156,6 +1156,9 @@ type
                               const guid: TGuid;
                               out pwcStr: PWideChar): HResult; overload;
 
+  // Get a reference to the IAudioSessionManager2 interface of the audio device.
+  function CreateAudioSessionManager2({out} ppSessionManager: PIAudioSessionManager2): HResult;
+
 // Ducking
 // =======
 
@@ -7752,6 +7755,41 @@ begin
   if Assigned(pString) then
     FreeMem(pString);
 
+  Result := hr;
+end;
+
+
+function CreateAudioSessionManager2({out} ppSessionManager: PIAudioSessionManager2): HResult;
+var
+  hr: HResult;
+  pDevice: IMMDevice;
+  pEnumerator: IMMDeviceEnumerator;
+  pSessionManager: IAudioSessionManager2;
+
+begin
+
+  // Create the device enumerator.
+  hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
+                         nil,
+                         CLSCTX_ALL,
+                         IID_IMMDeviceEnumerator,
+                         IUnknown(pEnumerator));
+
+  // Get the default audio device.
+  if Succeeded(hr) then
+    hr := pEnumerator.GetDefaultAudioEndpoint(eRender,
+                                              eMultiMedia,
+                                              pDevice);
+
+  // Get the session manager.
+  if Succeeded(hr) then
+    hr := pDevice.Activate(IID_IAudioSessionManager,
+                           CLSCTX_ALL,
+                           nil,
+                           Pointer(pSessionManager));
+
+  // Return the pointer to the caller.
+  ppSessionManager^ := pSessionManager;
   Result := hr;
 end;
 

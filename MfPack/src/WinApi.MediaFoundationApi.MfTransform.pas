@@ -514,7 +514,7 @@ type
                             out pcOutputStreams: DWORD): HResult; stdcall;
 
     function GetStreamIDs(dwInputIDArraySize: DWORD;
-                          out pdwInputIDs: PDWORD;
+                          {out} pdwInputIDs: PDWORD;
                           dwOutputIDArraySize: DWORD;
                           pdwOutputIDs: PDWORD): HResult; stdcall;
 
@@ -616,7 +616,7 @@ type
     //
     function ProcessOutput(dwFlags: MFT_PROCESS_OUTPUT_FLAGS; // MFT_PROCESS_OUTPUT_FLAGS
                            cOutputBufferCount: DWORD; // # returned by GetStreamCount()
-                           pOutputSamples: PMFT_OUTPUT_DATA_BUFFER;  // one per stream
+                           {in-out} pOutputSamples: PMFT_OUTPUT_DATA_BUFFER;  // one per stream
                            out pdwStatus: DWORD): HResult; stdcall;
 
   end;

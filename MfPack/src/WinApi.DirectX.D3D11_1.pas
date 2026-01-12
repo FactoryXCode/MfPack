@@ -645,16 +645,16 @@ type
   ID3D11Device1 = interface(ID3D11Device)
   ['{a04bfb29-08ef-43d6-a49c-a9bdbdcbe686}']
 
-    procedure GetImmediateContext1([ref] const ppImmediateContext: ID3D11DeviceContext1); stdcall;
+    procedure GetImmediateContext1(ppImmediateContext: PID3D11DeviceContext1); stdcall;
 
     function CreateDeferredContext1(ContextFlags: UINT;  // Reserved parameter; must be 0
-                                   [ref] const ppDeferredContext: ID3D11DeviceContext1): HResult; stdcall;
+                                    ppDeferredContext: PID3D11DeviceContext1): HResult; stdcall;
 
     function CreateBlendState1(pBlendStateDesc: D3D11_BLEND_DESC1;
-                               [ref] const ppBlendState: ID3D11BlendState1): HResult; stdcall;
+                               ppBlendState: PID3D11BlendState1): HResult; stdcall;
 
     function CreateRasterizerState1(pRasterizerDesc: D3D11_RASTERIZER_DESC1;
-                                    [ref] const ppRasterizerState: ID3D11RasterizerState1): HResult; stdcall;
+                                    ppRasterizerState: PID3D11RasterizerState1): HResult; stdcall;
 
     function CreateDeviceContextState(Flags: UINT;
                                       pFeatureLevels: D3D_FEATURE_LEVEL;
@@ -662,16 +662,16 @@ type
                                       SDKVersion: UINT;
                                       const EmulatedInterface: REFIID;
                                       out pChosenFeatureLevel: D3D_FEATURE_LEVEL;
-                                      [ref] const ppContextState: ID3DDeviceContextState): HResult; stdcall;
+                                      ppContextState: PID3DDeviceContextState): HResult; stdcall;
 
     function OpenSharedResource1(const hResource: THandle;
                                  const returnedInterface: REFIID;
-                                 [ref] const ppResource: Pointer): HResult; stdcall;
+                                 ppResource: Pointer): HResult; stdcall;
 
     function OpenSharedResourceByName(lpName: PWideChar;
                                       dwDesiredAccess: DWORD;
                                       const returnedInterface: REFIID;
-                                      [ref] const ppResource: Pointer): HResult; stdcall;
+                                      ppResource: Pointer): HResult; stdcall;
   end;
   IID_ID3D11Device1 = ID3D11Device1;
   {$EXTERNALSYM IID_ID3D11Device1}

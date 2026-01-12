@@ -1230,7 +1230,7 @@ type
     function FreePrivateData(const refguid: TGUID): HResult; stdcall;
 
     function GetContainer(const riid: TGUID;
-                          [ref] const ppContainer: Pointer): HResult; stdcall;
+                          ppContainer: Pointer): HResult; stdcall;
 
     function GetDesc(out pDesc: D3DVolume_Desc): HResult; stdcall;
 

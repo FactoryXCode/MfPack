@@ -678,7 +678,7 @@ type
 
     // Create an instance of a module for resource re-binding.
     function CreateInstance(pNamespace: LPCSTR;
-                            [ref] const ppModuleInstance: ID3D11ModuleInstance): HRESULT; stdcall;
+                            ppModuleInstance: PID3D11ModuleInstance): HRESULT; stdcall;
 
   end;
   IID_ID3D11Module = ID3D11Module;
@@ -698,7 +698,7 @@ type
                   pEntryName: LPCSTR;
                   pTargetName: LPCSTR;
                   uFlags: UINT;
-                  [ref] const ppShaderBlob: ID3DBlob;
+                  ppShaderBlob: PID3DBlob;
                   out ppErrorBuffer: ID3DBlob): HRESULT; stdcall;
 
     // Add an instance of a library module to be used for linking.
@@ -735,21 +735,21 @@ type
   ID3D11FunctionLinkingGraph = interface(IUnknown)
     ['{54133220-1CE8-43D3-8236-9855C5CEECFF}']
 
-    function CreateModuleInstance([ref] const ppModuleInstance: ID3D11ModuleInstance;
+    function CreateModuleInstance(ppModuleInstance: PID3D11ModuleInstance;
                                   out ppErrorBuffer: PID3DBlob): HRESULT; stdcall;
 
     function SetInputSignature(pInputParameters: D3D11_PARAMETER_DESC;
                                cInputParameters: UINT;
-                               [ref] const ppInputNode: ID3D11LinkingNode): HRESULT; stdcall;
+                               ppInputNode: PID3D11LinkingNode): HRESULT; stdcall;
 
     function SetOutputSignature(pOutputParameters: D3D11_PARAMETER_DESC;
                                 cOutputParameters: UINT;
-                                [ref] const ppOutputNode: ID3D11LinkingNode): HRESULT; stdcall;
+                                ppOutputNode: PID3D11LinkingNode): HRESULT; stdcall;
 
     function CallFunction(pModuleInstanceNamespace: LPCSTR;
                           pModuleWithFunctionPrototype: ID3D11Module;
                           pFunctionName: LPCSTR;
-                          [ref] const ppCallNode: ID3D11LinkingNode): HRESULT; stdcall;
+                          ppCallNode: PID3D11LinkingNode): HRESULT; stdcall;
 
     function PassValue(pSrcNode: ID3D11LinkingNode;
                        SrcParameterIndex: INT;
@@ -766,7 +766,7 @@ type
     function GetLastError(out ppErrorBuffer: PID3DBlob): HRESULT; stdcall;
 
     function GenerateHlsl(uFlags: UINT; // uFlags is reserved for future use.
-                         [ref] const ppBuffer: ID3DBlob): HRESULT; stdcall;
+                          ppBuffer: PID3DBlob): HRESULT; stdcall;
 
 
   end;
