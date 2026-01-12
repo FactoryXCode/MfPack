@@ -402,7 +402,7 @@ type
     function CreateVideoProcessor(NodeMask: UINT;
                                   pOutputStreamDesc: PD3D12_VIDEO_PROCESS_OUTPUT_STREAM_DESC;
                                   NumInputStreamDescs: UINT;
-                                  [ref] const pInputStreamDescs: PD3D12_VIDEO_PROCESS_INPUT_STREAM_DESC;
+                                  pInputStreamDescs: PD3D12_VIDEO_PROCESS_INPUT_STREAM_DESC;
                                   const riid: REFIID;  // Expected: IID_ID3D12VideoProcessor,
                                   {out} ppVideoProcessor: PPointer): HRESULT; stdcall;
 
@@ -1059,8 +1059,8 @@ type
                           pInputArguments: D3D12_VIDEO_DECODE_INPUT_STREAM_ARGUMENTS);
 
     procedure WriteBufferImmediate(Count: UINT;
-                                   [ref] const pParams: D3D12_WRITEBUFFERIMMEDIATE_PARAMETER;
-                                   [ref] const pModes: PD3D12_WRITEBUFFERIMMEDIATE_MODE);
+                                   pParams: PD3D12_WRITEBUFFERIMMEDIATE_PARAMETER;
+                                   pModes: PD3D12_WRITEBUFFERIMMEDIATE_MODE);
 
   end;
   IID_ID3D12VideoDecodeCommandList = ID3D12VideoDecodeCommandList;
@@ -1119,11 +1119,11 @@ type
     procedure ProcessFrames(pVideoProcessor: ID3D12VideoProcessor;
                             pOutputArguments: D3D12_VIDEO_PROCESS_OUTPUT_STREAM_ARGUMENTS;
                             NumInputStreams: UINT;
-                            [ref] const pInputArguments: D3D12_VIDEO_PROCESS_INPUT_STREAM_ARGUMENTS); stdcall;
+                            pInputArguments: D3D12_VIDEO_PROCESS_INPUT_STREAM_ARGUMENTS); stdcall;
 
     procedure WriteBufferImmediate(Count: UINT;
-                                   [ref] const pParams: PD3D12_WRITEBUFFERIMMEDIATE_PARAMETER;
-                                   [ref] const pModes: PD3D12_WRITEBUFFERIMMEDIATE_MODE); stdcall;
+                                   pParams: PD3D12_WRITEBUFFERIMMEDIATE_PARAMETER;
+                                   pModes: PD3D12_WRITEBUFFERIMMEDIATE_MODE); stdcall;
 
   end;
   IID_ID3D12VideoProcessCommandList = ID3D12VideoProcessCommandList;
@@ -1203,7 +1203,7 @@ type
     procedure ProcessFrames1(pVideoProcessor: ID3D12VideoProcessor;
                              pOutputArguments: D3D12_VIDEO_PROCESS_OUTPUT_STREAM_ARGUMENTS;
                              NumInputStreams: UINT;
-                             [ref] const pInputArguments: PD3D12_VIDEO_PROCESS_INPUT_STREAM_ARGUMENTS1); stdcall;
+                             pInputArguments: PD3D12_VIDEO_PROCESS_INPUT_STREAM_ARGUMENTS1); stdcall;
 
   end;
   IID_ID3D12VideoProcessCommandList1 = ID3D12VideoProcessCommandList1;
@@ -1460,7 +1460,7 @@ type
     procedure ClearState(); stdcall;
 
     procedure ResourceBarrier(NumBarriers: UINT;
-                             [ref] const pBarriers: PD3D12_RESOURCE_BARRIER); stdcall;
+                              pBarriers: PD3D12_RESOURCE_BARRIER); stdcall;
 
     procedure DiscardResource(pResource: ID3D12Resource;
                               pRegion: PD3D12_DISCARD_REGION); stdcall;
@@ -1485,11 +1485,11 @@ type
                              Operation: D3D12_PREDICATION_OP); stdcall;
 
     procedure SetMarker(Metadata: UINT;
-                        [ref] const pData: Pointer;
+                        pData: Pointer;
                         Size: UINT); stdcall;
 
     procedure BeginEvent(Metadata: UINT;
-                         [ref] const pData: Pointer;
+                         pData: Pointer;
                          Size: UINT); stdcall;
 
     procedure EndEvent(); stdcall;
@@ -1503,7 +1503,7 @@ type
 
     procedure WriteBufferImmediate(Count: UINT;
                                    pParams: PD3D12_WRITEBUFFERIMMEDIATE_PARAMETER;
-                                   [ref] const pModes: PD3D12_WRITEBUFFERIMMEDIATE_MODE); stdcall;
+                                   pModes: PD3D12_WRITEBUFFERIMMEDIATE_MODE); stdcall;
 
     procedure SetProtectedResourceSession(pProtectedResourceSession: ID3D12ProtectedResourceSession); stdcall;
 
@@ -1808,22 +1808,22 @@ type
     function CreateVideoProcessor1(NodeMask: UINT;
                                    pOutputStreamDesc: D3D12_VIDEO_PROCESS_OUTPUT_STREAM_DESC;
                                    NumInputStreamDescs: UINT;
-                                   [ref] const pInputStreamDescs: PD3D12_VIDEO_PROCESS_INPUT_STREAM_DESC;
+                                   pInputStreamDescs: PD3D12_VIDEO_PROCESS_INPUT_STREAM_DESC;
                                    pProtectedResourceSession: ID3D12ProtectedResourceSession;
                                    const riid: REFIID; // Expected: IID_ID3D12VideoProcessor1,
                                    out ppVideoProcessor): HRESULT; stdcall;
 
     function CreateVideoExtensionCommand(pDesc: D3D12_VIDEO_EXTENSION_COMMAND_DESC;
-                                        [ref] const pCreationParameters: Pointer;
-                                        CreationParametersDataSizeInBytes: SIZE_T;
-                                        pProtectedResourceSession: ID3D12ProtectedResourceSession;
-                                        const riid: REFIID; // Expected: IID_ID3D12VideoExtensionCommand,
-                                        out ppVideoExtensionCommand): HRESULT; stdcall;
+                                         pCreationParameters: Pointer;
+                                         CreationParametersDataSizeInBytes: SIZE_T;
+                                         pProtectedResourceSession: ID3D12ProtectedResourceSession;
+                                         const riid: REFIID; // Expected: IID_ID3D12VideoExtensionCommand,
+                                         out ppVideoExtensionCommand): HRESULT; stdcall;
 
     function ExecuteExtensionCommand(pExtensionCommand: ID3D12VideoExtensionCommand;
-                                     [ref] const pExecutionParameters: Pointer;
+                                     pExecutionParameters: Pointer;
                                      ExecutionParametersSizeInBytes: SIZE_T;
-                                     [ref] const pOutputData: Pointer;
+                                     pOutputData: Pointer;
                                      OutputDataSizeInBytes: SIZE_T): HRESULT; stdcall;
 
   end;
@@ -1842,11 +1842,11 @@ type
     procedure SetProtectedResourceSession(pProtectedResourceSession: ID3D12ProtectedResourceSession); stdcall;
 
     procedure InitializeExtensionCommand(pExtensionCommand: ID3D12VideoExtensionCommand;
-                                         [ref] const pInitializationParameters: Pointer;
+                                         pInitializationParameters: Pointer;
                                          InitializationParametersSizeInBytes: SIZE_T); stdcall;
 
     procedure ExecuteExtensionCommand(pExtensionCommand: ID3D12VideoExtensionCommand;
-                                      [ref] const pExecutionParameters: Pointer;
+                                      pExecutionParameters: Pointer;
                                       ExecutionParametersSizeInBytes: SIZE_T); stdcall;
 
   end;
@@ -1863,7 +1863,7 @@ type
     ['{2aee8c37-9562-42da-8abf-61efeb2e4513}']
 
     procedure Barrier(NumBarrierGroups: UINT32;
-                      [ref] const pBarrierGroups: PD3D12_BARRIER_GROUP); stdcall;
+                      pBarrierGroups: PD3D12_BARRIER_GROUP); stdcall;
 
   end;
   IID_ID3D12VideoDecodeCommandList3 = ID3D12VideoDecodeCommandList3;
@@ -1881,11 +1881,11 @@ type
     procedure SetProtectedResourceSession(pProtectedResourceSession: ID3D12ProtectedResourceSession); stdcall;
 
     procedure InitializeExtensionCommand(pExtensionCommand: ID3D12VideoExtensionCommand;
-                                         [ref] const pInitializationParameters: Pointer;
+                                         pInitializationParameters: Pointer;
                                          InitializationParametersSizeInBytes: SIZE_T); stdcall;
 
     procedure ExecuteExtensionCommand(pExtensionCommand: ID3D12VideoExtensionCommand;
-                                      [ref] const pExecutionParameters: Pointer;
+                                      pExecutionParameters: Pointer;
                                       ExecutionParametersSizeInBytes: SIZE_T); stdcall;
 
   end;
@@ -1902,7 +1902,7 @@ type
     ['{1a0a4ca4-9f08-40ce-9558-b411fd2666ff}']
 
     procedure Barrier(NumBarrierGroups: UINT32;
-                      [ref] const pBarrierGroups: PD3D12_BARRIER_GROUP); stdcall;
+                      pBarrierGroups: PD3D12_BARRIER_GROUP); stdcall;
 
   end;
   IID_ID3D12VideoProcessCommandList3 = ID3D12VideoProcessCommandList3;
@@ -1918,11 +1918,11 @@ type
     ['{94971eca-2bdb-4769-88cf-3675ea757ebc}']
 
     procedure InitializeExtensionCommand(pExtensionCommand: ID3D12VideoExtensionCommand;
-                                         [ref] const pInitializationParameters: Pointer;
+                                         pInitializationParameters: Pointer;
                                          InitializationParametersSizeInBytes: SIZE_T); stdcall;
 
     procedure ExecuteExtensionCommand(pExtensionCommand: ID3D12VideoExtensionCommand;
-                                      [ref] const pExecutionParameters: Pointer;
+                                      pExecutionParameters: Pointer;
                                       ExecutionParametersSizeInBytes: SIZE_T); stdcall;
 
   end;
@@ -3626,7 +3626,7 @@ type
     function  GetResolutionListCount(): UINT; stdcall;
 
     function  GetResolutionList(const ResolutionsListCount: UINT;
-                                [ref] const pResolutionList: PD3D12_VIDEO_ENCODER_PICTURE_RESOLUTION_DESC): HRESULT; stdcall;
+                                pResolutionList: PD3D12_VIDEO_ENCODER_PICTURE_RESOLUTION_DESC): HRESULT; stdcall;
 
   end;
   IID_ID3D12VideoEncoderHeap = ID3D12VideoEncoderHeap;
@@ -4041,7 +4041,7 @@ type
     ['{7f027b22-1515-4e85-aa0d-026486580576}']
 
     procedure Barrier(NumBarrierGroups: UINT32;
-                     [ref] const pBarrierGroups: PD3D12_BARRIER_GROUP); stdcall;
+                      pBarrierGroups: PD3D12_BARRIER_GROUP); stdcall;
 
   end;
   IID_ID3D12VideoEncodeCommandList3 = ID3D12VideoEncodeCommandList3;

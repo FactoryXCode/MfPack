@@ -730,6 +730,8 @@ type
   // Also provides support for ducking notifications.
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IAudioSessionManager2);'}
+  {$EXTERNALSYM PIAudioSessionManager2}
+  PIAudioSessionManager2 = ^IAudioSessionManager2;
   {$EXTERNALSYM IAudioSessionManager2}
   IAudioSessionManager2 = interface(IAudioSessionManager)
   ['{77AA99A0-1BD6-484F-8BC7-2C654C9A9B6F}']

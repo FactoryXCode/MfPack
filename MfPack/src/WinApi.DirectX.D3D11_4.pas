@@ -293,7 +293,7 @@ type
     function NegotiateCryptoSessionKeyExchangeMT(pCryptoSession: ID3D11CryptoSession;
                                                  flags: D3D11_CRYPTO_SESSION_KEY_EXCHANGE_FLAGS;
                                                  DataSize: UINT;
-                                                 [ref] const pData: Pointer): HRESULT; stdcall;
+                                                 pData: Pointer): HRESULT; stdcall;
 
   end;
   IID_ID3D11VideoDevice2 = ID3D11VideoDevice2;

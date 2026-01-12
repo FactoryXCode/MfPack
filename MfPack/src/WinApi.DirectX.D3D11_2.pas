@@ -246,12 +246,12 @@ type
   ID3D11Device2 = interface(ID3D11Device1)
     ['{9d06dffa-d1e5-4d07-83a8-1bb123f2f841}']
 
-    procedure GetImmediateContext2([ref] const ppImmediateContext: ID3D11DeviceContext2); stdcall;
+    procedure GetImmediateContext2(ppImmediateContext: PID3D11DeviceContext2); stdcall;
 
     function CreateDeferredContext2(ContextFlags: UINT;
-                                   [ref] const ppDeferredContext: ID3D11DeviceContext2): HResult; stdcall;
+                                    ppDeferredContext: PID3D11DeviceContext2): HResult; stdcall;
 
-    procedure GetResourceTiling(const pTiledResource: ID3D11Resource;
+    procedure GetResourceTiling(pTiledResource: ID3D11Resource;
                                 out pNumTilesForEntireResource: UINT;
                                 out pPackedMipDesc: D3D11_PACKED_MIP_DESC;
                                 out pStandardTileShapeForNonPackedMips: D3D11_TILE_SHAPE;

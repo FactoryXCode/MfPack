@@ -84,6 +84,10 @@ unit WinApi.MediaFoundationApi.MfApi;
 
 interface
 
+// Uncomment this if you want to use the Embarcadero definitions.
+// Warning: This could lead to name and/or type clashes, adjust those in WinApiTypes.inc.
+//          Also keep in mind that Embarcadero does not regulair updates the Windows API's, when Windows API's change!
+//
 // {$DEFINE USE_EMBARCADERO_DEF}
 
 uses

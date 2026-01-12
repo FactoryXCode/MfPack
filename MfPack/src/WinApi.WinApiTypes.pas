@@ -183,8 +183,8 @@ type
 {$IFDEF MFP_DWORD}
    DWORD = System.Types.DWORD;
    {$EXTERNALSYM DWORD}
-   {$IF COMPILERVERSION < 30.0}
-     PDWORD = ^LongWord; // Override wrong implementation in pre-delphi 10 versions
+   {$IF COMPILERVERSION < 20.0}
+     PDWORD = ^LongWord; // Override wrong implementation in up to 12 versions.
    {$ELSE}
      PDWORD = ^DWORD;
    {$ENDIF}
