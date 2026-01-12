@@ -1774,7 +1774,7 @@ type
     // the current world transform is not axis preserving, then the bounding box of the
     // transformed clip rect will be used. The clip will remain in effect until a
     // PopAxisAligned clip call is made.
-    procedure PushAxisAlignedClip(clipRect: D2D1_RECT_F;
+    procedure PushAxisAlignedClip(const clipRect: D2D1_RECT_F;
                                   antialiasMode: D2D1_ANTIALIAS_MODE); stdcall;
 
     procedure PopAxisAlignedClip(); stdcall;
