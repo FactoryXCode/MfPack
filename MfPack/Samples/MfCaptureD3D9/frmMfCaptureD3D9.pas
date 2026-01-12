@@ -313,7 +313,7 @@ begin
           // Clear the combobox
           dlgSelectDevice.ComboBox1.Clear;
           // Fill the combobox with found capture devices
-          for i := 0 to param.count - 1 do
+          for i := 0 to Integer(param.count) - 1 do
             begin
 
               // Try to get the display-friendly-name.
