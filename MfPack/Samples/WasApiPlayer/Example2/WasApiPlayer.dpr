@@ -1,11 +1,6 @@
 program WasApiPlayer;
 
 uses
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
   Vcl.Forms,
   MainFrm in 'MainFrm.pas' {MainForm},
   Tools in 'Tools.pas',
@@ -19,7 +14,7 @@ begin
 
   {$IFDEF DEBUG}
   {$WARN SYMBOL_PLATFORM OFF}
-  //ReportMemoryLeaksOnShutdown := True;
+  ReportMemoryLeaksOnShutdown := True;
   {$ENDIF}
 
   Application.Initialize;
