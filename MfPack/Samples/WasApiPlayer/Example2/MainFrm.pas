@@ -92,7 +92,6 @@ uses
   WinApi.MediaFoundationApi.MfUtils,
   WinApi.MediaFoundationApi.MfMetLib,
   {Application}
-  Tools,
   WASAPIEngine,
   // MFT
   MfAudioBassTrebleTypes,

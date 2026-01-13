@@ -518,11 +518,11 @@ begin
   try
 
    vv := Ms;
-   if (vv < 0) then
-     vv := 0
-   else
-     if (vv > 2000) then
-       vv := 2000;
+
+   // We have don't have to check for values <0 because UINT32 can't be < 0.
+   if (vv > 2000) then
+     vv := 2000;
+
     FRampTimeMs := vv;
   finally
 

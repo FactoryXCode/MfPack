@@ -94,13 +94,16 @@ uses
   WinApi.WinMM.MMReg,
   {Application}
   MfAudioBassTrebleMFT,
-  MfAudioBassTrebleTypes,
-  Tools;
+  MfAudioBassTrebleTypes;
 
 
 const
 
   REFTIMES_PER_SEC = 10000000;
+
+  MIN_VOLUME = 0.0;
+  MAX_VOLUME = 100.0;
+
 
 type
 
@@ -253,7 +256,7 @@ type
     FBassTrebleMFT: IMFTransform;
     FBassTrebleCtrl: IMfBassTrebleControl;
     FEQEnabled: Boolean;
-    FEQTypeSet: Boolean;   // media types applied to MFT
+    FEQTypeSet: Boolean;   // Media types applied to MFT.
 
     pvBufferFrameCount: UINT32;
 
@@ -284,8 +287,6 @@ type
 
     procedure ProcessControlCommand(const Cmd: TEngineCommand);
 
-    procedure DoSeekLocked(const Pos100ns: Int64);
-
   public
 
     constructor Create();
@@ -304,14 +305,14 @@ type
 
     // EQ bass/ treble MFT implementation --------------------------------------
 
-    procedure SetEQTransform(const AMFT: IMFTransform); // plug/unplug MFT
-    procedure EnableEQ(const AEnabled: Boolean);        // runtime on/off
+    procedure SetEQTransform(const AMFT: IMFTransform); // Plug/unplug MFT.
+    procedure EnableEQ(const AEnabled: Boolean);        // Rruntime on/off.
 
     procedure SetBassDb(const ABassDb: Integer);     // -24..+24
     procedure SetTrebleDb(const ATrebleDb: Integer); // -24..+24
 
-    procedure SetRampMode(const Mode: TMfRampMode); // Off/Fast/Smooth/Manual
-    procedure SetRampTimeMs(const Ms: Integer);     // only for Manual
+    procedure SetRampMode(const Mode: TMfRampMode); // Off/Fast/Smooth/Manual.
+    procedure SetRampTimeMs(const Ms: Integer);     // Only for Manual.
 
     // -------------------------------------------------------------------------
 
@@ -746,118 +747,12 @@ begin
   end;
 end;
 
-{
-procedure TWasApiEngine.ProcessControlCommand(const Cmd: TEngineCommand);
-var
-  hr: HRESULT;
-  pos100ns,
-  newOffset: Int64;
-
-begin
-
-  case Cmd.Kind of
-    ckLoadFile:
-      begin
-
-        hr := LoadFileInternal(Cmd.FileName,
-                               Cmd.FileDuration);
-
-        if SUCCEEDED(hr) then
-          begin
-
-            SetState(dsReady);
-            RaiseReady();
-          end
-        else
-          begin
-
-            SetState(dsError);
-            RaiseError('LoadFile failed', hr);
-          end;
-      end;
-
-    ckPause:
-      begin
-
-        // Signal play loop to pause quickly
-        FRequestPause := True;
-      end;
-
-    ckStop:
-      begin
-
-        // Signal play loop to stop quickly
-        FRequestStop := True;
-        FRequestPause := False;
-      end;
-
-    ckSeek:
-      begin
-
-        if (pvRenderWfx <> nil) and
-           (pvBytes <> nil) and
-           (pvBytesLength > 0) and
-           (pvRenderWfx.nAvgBytesPerSec <> 0) then
-         begin
-
-           pos100ns := Cmd.SeekPos100ns;
-
-           if (pos100ns < 0) then
-             pos100ns := 0;
-
-           if (FDuration100ns > 0) and (pos100ns > FDuration100ns) then
-             pos100ns := FDuration100ns;
-
-           // 100ns -> bytes (render format rate)
-           newOffset := (UInt64(pos100ns) * UInt64(pvRenderWfx.nAvgBytesPerSec)) div UInt64(REFTIMES_PER_SEC);
-
-           // align to block
-           if (pvRenderWfx.nBlockAlign <> 0) then
-             newOffset := (newOffset div UInt64(pvRenderWfx.nBlockAlign)) * UInt64(pvRenderWfx.nBlockAlign);
-
-           if (newOffset > UInt64(pvBytesLength)) then
-             newOffset := UInt64(pvBytesLength);
-
-           // THIS is what makes FBasePos100ns meaningful:
-           FBasePos100ns := pos100ns;
-           FOffset := UInt32(newOffset);
-
-           // restart clock position from zero at the new base
-           if Assigned(pvAudioClient) then
-             begin
-
-               pvAudioClient.Stop();
-               pvAudioClient.Reset();
-             end;
-
-        if (pvDeviceState = dsPlay) and Assigned(pvAudioClient) then
-          pvAudioClient.Start;
-         end;
-      end;
-
-
-    ckSetVolume:
-      begin
-
-        if Assigned(pvAudioStreamVolume) then
-          begin
-
-            // channel volumes applied in play thread too; safe here on engine thread
-            SetVolumes(Cmd.VolL,
-                       Cmd.VolR);
-          end;
-      end;
-  end;
-end;
-}
-
 
 procedure TWasApiEngine.ProcessControlCommand(const Cmd: TEngineCommand);
 var
   hr: HRESULT;
   pos100ns,
   newOffset: Int64;
-  v: Integer;
 
 begin
 
@@ -1009,101 +904,10 @@ begin
         if Assigned(FBassTrebleCtrl) then
           begin
 
-            v := Cmd.EqRampTimeMs;
-            if (v < 0) then
-              v := 0
-            else
-              if (v > 2000) then
-                v := 2000;
-
             FBassTrebleCtrl.SetRampTimeMs(Cmd.EqRampTimeMs);
           end;
       end;
   end;
-end;
-
-
-procedure TWasApiEngine.DoSeekLocked(const Pos100ns: Int64);
-var
-  pos: Int64;
-  newOffset: UInt64;
-  wasPlaying: Boolean;
-  bytesPerSec: UInt32;
-  blockAlign: UInt32;
-
-begin
-
-  if (pvSourceWfx = nil) or
-     (pvBytes = nil) or
-     (pvBytesLength = 0) then
-    Exit;
-
-  bytesPerSec := pvSourceWfx.nAvgBytesPerSec;
-  blockAlign := pvSourceWfx.nBlockAlign;
-
-  if (bytesPerSec = 0) or
-     (blockAlign = 0) then
-    Exit;
-
-  pos := Pos100ns;
-
-  if (pos < 0) then
-    pos := 0;
-
-  if (FDuration100ns > 0) and
-     (pos > FDuration100ns) then
-    pos := FDuration100ns;
-
-  // Convert 100ns -> bytes
-  newOffset := (UInt64(pos) * UInt64(bytesPerSec)) div UInt64(REFTIMES_PER_SEC);
-
-  // Align to block
-  newOffset := (newOffset div UInt64(blockAlign)) * UInt64(blockAlign);
-
-  if (newOffset > UInt64(pvBytesLength)) then
-    newOffset := UInt64(pvBytesLength);
-
-  // IMPORTANT: this makes your progress absolute after seek
-  FBasePos100ns := pos;
-
-  // Update byte offset
-  if (newOffset > High(UInt32)) then
-    FOffset := High(UInt32)
-  else
-    FOffset := UInt32(newOffset);
-
-  wasPlaying := (pvDeviceState = dsPlay);
-
-  // Reset the audio client so its clock restarts cleanly from 0 at the new base position.
-  if Assigned(pvAudioClient) then
-    begin
-      pvAudioClient.Stop;
-      pvAudioClient.Reset;
-    end;
-
-  // TODO: implement & wiring
-  // Flush EQ MFT so it doesn't keep history across seeks (optional but recommended).
-  //if Assigned(FBassTrebleMFT) then
-  //  begin
-  //    FBassTrebleMFT.ProcessMessage(MFT_MESSAGE_COMMAND_FLUSH, 0);
-  //    // If your MFT needs these after flush, keep them:
-  //    FBassTrebleMFT.ProcessMessage(MFT_MESSAGE_NOTIFY_BEGIN_STREAMING, 0);
-  //    FBassTrebleMFT.ProcessMessage(MFT_MESSAGE_NOTIFY_START_OF_STREAM, 0);
-  //  end;
-
-  // Force UI to jump immediately
-  RaiseProcessed(FBasePos100ns, 0);
-
-  if wasPlaying and Assigned(pvAudioClient) then
-    begin
-      pvAudioClient.Start;
-      SetState(dsPlay);
-    end
-  else
-    begin
-      // If we were paused, stay paused but with new base position.
-      SetState(dsPause);
-    end;
 end;
 
 

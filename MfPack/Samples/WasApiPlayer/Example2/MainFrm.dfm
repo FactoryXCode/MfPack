@@ -460,12 +460,15 @@ object frmMain: TfrmMain
       Top = 183
       Width = 176
       Height = 29
+      Hint = 'Enables or by-passes the MFT'
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
       Margins.Bottom = 5
-      Caption = 'cbEnableEq'
+      Caption = 'Enable MFT'
       Checked = True
+      ParentShowHint = False
+      ShowHint = True
       State = cbChecked
       TabOrder = 8
     end
