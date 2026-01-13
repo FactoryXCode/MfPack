@@ -7140,13 +7140,11 @@ function GetAudioFormat(var pMfAudioFormat: TMFAudioFormat): HResult;
 var
   hr: HResult;
   gMajorType: TGUID;
-  gSubType: TGUID;
   pPD: IMFPresentationDescriptor;
   pSD: IMFStreamDescriptor;
   pHandler: IMFMediaTypeHandler;
   pType: IMFMediaType;
   dwTypes: DWORD;
-  unFormatTag: UINT32;
   i, j: DWORD;
   bSelected: LongBool;
 

@@ -3880,7 +3880,7 @@ function D3DCOLOR_ARGB(a: Int32;
                        g: Int32;
                        b: Int32): D3DCOLOR; inline;
 begin
-  Result := ((a AND $FF) shl 24) OR ((r AND $FF) shl 16) OR ((g AND $FF) shl 8) OR (b AND $FF);
+  Result := D3DCOLOR(((a AND $FF) shl 24) OR ((r AND $FF) shl 16) OR ((g AND $FF) shl 8) OR (b AND $FF));
 end;
 
 

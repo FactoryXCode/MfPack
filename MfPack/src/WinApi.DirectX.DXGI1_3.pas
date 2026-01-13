@@ -194,7 +194,7 @@ type
 
     function GetFrameLatencyWaitableObject(): THandle; stdcall;
 
-    function SetMatrixTransform(pMatrix: DXGI_MATRIX_3X2_F): HResult; stdcall;
+    function SetMatrixTransform(const pMatrix: DXGI_MATRIX_3X2_F): HResult; stdcall;
 
     function GetMatrixTransform(out pMatrix: DXGI_MATRIX_3X2_F): HResult; stdcall;
 
