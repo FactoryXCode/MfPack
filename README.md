@@ -288,7 +288,11 @@ It shows you the basics of using the IAudioClient, iAudioRenderer, IAudioClock a
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
 In your projectsettings you have to add ..MfPack\Samples\MfComponents in the project options searchpath.
 
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer1.png)
+**WASAPI Player Sample 2**
+This sample is based on Sample 1, but includes full threaded code, 
+using threadsafe events and also uses a custom MFT for bass and treble control.
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer2.png)
 
 **SimpleVolumeControlSample 1**
 *This example shows how to use the basics of the MfAudioEndPoint component.*
