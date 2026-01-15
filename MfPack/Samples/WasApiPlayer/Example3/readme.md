@@ -1,4 +1,4 @@
-#WASAPI Player Sample 3
+***WASAPI Player Sample 3***
  WASAPI High / Mid / Low EQ Sample (Delphi)
 Version: X 3.1.9
 
@@ -12,7 +12,7 @@ This sample demonstrates a real-time audio playback engine on Windows using:
 ⦁ Thread-safe GUI → engine command routing.
 ⦁ Persistent EQ settings via INI file.
 
-## Features
+**Features**
 
 - Glitch-free real-time playback.
 - Low / Mid / High EQ with live control.
@@ -21,18 +21,19 @@ This sample demonstrates a real-time audio playback engine on Windows using:
 - Settings dialog with persistent storage.
 - Clean separation between GUI, engine, and DSP.
 
-## Architecture
+**Architecture**
 
 GUI → Engine Thread → EQ MFT → WASAPI Render
 
 The engine owns all real-time resources.
 The GUI never touches audio objects directly.
 
-##NOTES:
-⦁ This release is updated for compiler version 17 up to 34.
-⦁ SDK version 10.0.22621.4654 (Win 11)
-⦁ Requires Windows 10 or later.
-⦁ Minimum supported MfPack version: 3.1.7
+***NOTES:***
+
+- This release is updated for compiler version 17 up to 34.
+- SDK version 10.0.22621.4654 (Win 11)
+- Requires Windows 10 or later.
+- Minimum supported MfPack version: 3.1.7
 
 Project: Media Foundation - MFPack - Samples
 Project location: https://github.com/FactoryXCode/MfPack
