@@ -295,21 +295,24 @@ using threadsafe events and also uses a custom MFT for bass and treble control.
 
 **WASAPI Player Sample 3**
 
-This sample is based on Sample 2, instead of a bass/treble MFT, this one is equiped with
-a 3 band High, Mid(Peaking or Notch) and Low EQ MFT.
-It also stores and read back settings for the MFT. 
+*This sample is based on Sample 2, instead of a bass/treble MFT, this one is equiped with*
+*a 3 band High, Mid(Peaking or Notch) and Low EQ MFT.*
+*It also stores and read back settings for the MFT.* 
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer3.png)
 
 
 
 **SimpleVolumeControlSample 1**
-This example shows how to use the basics of the MfAudioEndPoint component.
+
+*This example shows how to use the basics of the MfAudioEndPoint component.*
 
 
 
 **MfCaptureVideoFromGPU Sample 1**
-*This sample demonstrates how to capture from screen using your videocard GPU.*
+
+This sample demonstrates how to capture from screen using your videocard GPU.
+
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/CaptureVideoFromGPUSample.png)
 
 **MfCaptureVideoFromGPU Sample 2**
@@ -318,8 +321,8 @@ This example shows how to use the basics of the MfAudioEndPoint component.
 optionally captures system audio via WASAPI loopback, shows a live preview, 
 and writes the result to a file (typically MP4 with H.264 video and AAC or FLAC audio).*
 
-*Audio-only recording can be done separately to WAV or FLAC using the
-dedicated recorder unit.*
+Audio-only recording can be done separately to WAV or FLAC using the
+dedicated recorder unit.
 
 *Note: You have to know the principles of Media Foundation and DirectX.*
 
