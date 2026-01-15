@@ -90,7 +90,7 @@ uses
   MfAudioHighMidLowTypes,
   WASAPIEngine,
   MfPeakMeter,
-  EqSettingsFrm;
+  EqSettingsFrm, Vcl.Menus;
 
 type
 
@@ -132,6 +132,9 @@ type
     lblDuration: TLabel;
     lblPlayed: TLabel;
     lblProcessed: TLabel;
+    MainMenu1: TMainMenu;
+    Application1: TMenuItem;
+    Settings1: TMenuItem;
 
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -151,6 +154,7 @@ type
       Y: Integer);
     procedure pbProgressMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure Settings1Click(Sender: TObject);
 
     private
 
@@ -159,6 +163,7 @@ type
     FWasApiEngine: TWasApiEngine;
     FFileName: string;
     llAudioDuration: LONGLONG;
+    FfrmEqSettings: TfrmEqSettings;
 
     function IniFileName: string;
     procedure LoadEqFromIni;
@@ -642,6 +647,26 @@ begin
     FWasApiEngine.SetMidDb(tbMid.Position);
 
   SaveEqLiveToIni();
+end;
+
+
+procedure TfrmMain.Settings1Click(Sender: TObject);
+begin
+
+  if not assigned(FfrmEqSettings) then
+    FfrmEqSettings := TfrmEqSettings.Create(Self);
+
+  if (FfrmEqSettings.ShowModal = mrOk) then
+    begin
+
+      // Do something.
+    end
+  else
+    begin
+
+      // User canceled.
+      // Do something.
+    end;
 end;
 
 

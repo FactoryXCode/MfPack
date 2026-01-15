@@ -5,7 +5,8 @@ object frmMain: TfrmMain
   Margins.Top = 5
   Margins.Right = 5
   Margins.Bottom = 5
-  Caption = 'WASAPI Player - High/Mid/Low EQ'
+  BorderStyle = bsSingle
+  Caption = 'WASAPI Player Sample 3 - High/Mid/Low EQ MFT'
   ClientHeight = 630
   ClientWidth = 834
   Color = clBtnFace
@@ -15,6 +16,7 @@ object frmMain: TfrmMain
   Font.Name = 'Segoe UI'
   Font.Style = []
   KeyPreview = True
+  Menu = MainMenu1
   Position = poScreenCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -538,7 +540,18 @@ object frmMain: TfrmMain
   end
   object OpenDialog1: TOpenDialog
     Filter = 'Audio files|*.wav;*.mp3;*.aac;*.wma;*.flac;*.m4a|All files|*.*'
-    Left = 660
-    Top = 286
+    Left = 603
+    Top = 250
+  end
+  object MainMenu1: TMainMenu
+    Left = 728
+    Top = 251
+    object Application1: TMenuItem
+      Caption = 'Application'
+      object Settings1: TMenuItem
+        Caption = '&Settings'
+        OnClick = Settings1Click
+      end
+    end
   end
 end
