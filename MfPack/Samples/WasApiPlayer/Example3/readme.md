@@ -6,11 +6,11 @@ Description:
 
 This sample demonstrates a real-time audio playback engine on Windows using:
 
-⦁ WASAPI (event-driven, shared mode).
-⦁ Media Foundation SourceReader.
-⦁ A custom 3-band EQ implemented as an IMFTransform (MFT).
-⦁ Thread-safe GUI → engine command routing.
-⦁ Persistent EQ settings via INI file.
+- WASAPI (event-driven, shared mode).
+- Media Foundation SourceReader.
+- A custom 3-band EQ implemented as an IMFTransform (MFT).
+- Thread-safe GUI → engine command routing.
+- Persistent EQ settings via INI file.
 
 **Features**
 
