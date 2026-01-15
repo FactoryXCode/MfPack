@@ -1,0 +1,20 @@
+program WasApiPlayer3;
+
+uses
+  Vcl.Forms,
+  MainFrm in 'MainFrm.pas' {frmMain},
+  EqSettingsFrm in 'EqSettingsFrm.pas' {frmEqSettings},
+  MfAudioEqBaseMFT in 'MfAudioEqBaseMFT.pas',
+  MfAudioHighMidLowMFT in 'MfAudioHighMidLowMFT.pas',
+  MfAudioHighMidLowTypes in 'MfAudioHighMidLowTypes.pas',
+  WASAPIEngine in 'WASAPIEngine.pas';
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TfrmMain, frmMain);
+  Application.CreateForm(TfrmEqSettings, frmEqSettings);
+  Application.Run;
+end.

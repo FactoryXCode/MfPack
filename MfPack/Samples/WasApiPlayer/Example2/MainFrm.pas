@@ -220,6 +220,7 @@ begin
   butPlayPauseClick(Sender);
 end;
 
+
 procedure TfrmMain.butPlayPauseClick(Sender: TObject);
 var
   hr: HResult;
@@ -550,32 +551,45 @@ begin
       llAudioDuration := 0;
     end;
 
-  lblDuration.Caption := Format('Duration: %s',
-                                [HnsTimeToStr(llAudioDuration, False)]);
-
-  // Set progressbar max
-  pbProgress.Max := llAudioDuration div 1000000;
-
-  // Create the engine
   if SUCCEEDED(hr) then
-    fWasApiEngine := TWasApiEngine.Create();
+    begin
 
-  // Wire engine events (Sample 4 principle: callbacks/events only)
-  fWasApiEngine.OnReady := OnAudioReady;
-  fWasApiEngine.OnProcessed := OnAudioDataProcessed;
-  fWasApiEngine.OnEnded := OnAudioEnded;
-  fWasApiEngine.OnError := OnEngineError;
-  fWasApiEngine.OnStateChanged := OnEngineState;
+      lblDuration.Caption := Format('Duration: %s',
+                                    [HnsTimeToStr(llAudioDuration, False)]);
 
-  if not Assigned(fWasApiEngine) then
-    Exit;
+      // Set progressbar max
+      pbProgress.Max := llAudioDuration div 1000000;
 
-  stxtStatus.Caption := Format('Selected file: %s.',
-                               [fFileName]);
+      // Create the engine
+      fWasApiEngine := TWasApiEngine.Create();
+
+      if not Assigned(fWasApiEngine) then
+        begin
+
+          hr := E_POINTER;
+          stxtStatus.Caption := Format('Creating WasApiEngine failed: Error: %d.',
+                                       [hr]);
+        end;
+    end;
+
+  if SUCCEEDED(hr) then
+    begin
+
+      // Wire engine events (Sample 4 principle: callbacks/events only)
+      fWasApiEngine.OnReady := OnAudioReady;
+      fWasApiEngine.OnProcessed := OnAudioDataProcessed;
+      fWasApiEngine.OnEnded := OnAudioEnded;
+      fWasApiEngine.OnError := OnEngineError;
+      fWasApiEngine.OnStateChanged := OnEngineState;
+
+      stxtStatus.Caption := Format('Selected file: %s.',
+                                   [fFileName]);
+    end;
 
   // Initialize the engine.
-  hr := fWasApiEngine.OpenFile(fAudioFileUrl,
-                               llAudioDuration);
+  if SUCCEEDED(hr) then
+    hr := fWasApiEngine.OpenFile(fAudioFileUrl,
+                                 llAudioDuration);
   if FAILED(hr) then
     stxtStatus.Caption := Format('Selected file: %s open file failed with error: %d.',
                                 [fFileName, hr]);
