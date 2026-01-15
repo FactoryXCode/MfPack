@@ -294,6 +294,13 @@ using threadsafe events and also uses a custom MFT for bass and treble control.
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer2.png)
 
+**WASAPI Player Sample 3**
+This sample is based on Sample 2, instead of a bass/treble MFT, this one is equiped with
+a 3 band High, Mid(Peaking or Notch) and Low EQ MFT.
+It also stores and read back settings for the MFT. 
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer3.png)
+
 **SimpleVolumeControlSample 1**
 *This example shows how to use the basics of the MfAudioEndPoint component.*
 
