@@ -2511,10 +2511,10 @@ type
 
     function SetPrivateData(const guid: TGUID;
                             DataSize: UINT;
-                            const pData: Pointer): HRESULT; stdcall;
+                            pData: Pointer): HRESULT; stdcall;
 
     function SetPrivateDataInterface(const guid: TGUID;
-                                     const pdata: IUnknown): HRESULT; stdcall;
+                                     pdata: IUnknown): HRESULT; stdcall;
 
     function SetName(Name: LPCWSTR): HRESULT; stdcall;
 
@@ -3722,7 +3722,7 @@ type
     FStateAfter: D3D12_RESOURCE_STATES;
 
     function GetpResource: ID3D12Resource;
-    procedure SetpResource(const Value: ID3D12Resource);
+    procedure SetpResource(Value: ID3D12Resource);
 
   public
     property pResource: ID3D12Resource read GetpResource write SetpResource;
@@ -3741,8 +3741,8 @@ type
 
     function GetpResourceAfter: ID3D12Resource;
     function GetpResourceBefore: ID3D12Resource;
-    procedure SetpResourceAfter(const Value: ID3D12Resource);
-    procedure SetpResourceBefore(const Value: ID3D12Resource);
+    procedure SetpResourceAfter(Value: ID3D12Resource);
+    procedure SetpResourceBefore(Value: ID3D12Resource);
 
   public
     property pResourceBefore: ID3D12Resource read GetpResourceBefore write SetpResourceBefore;
@@ -3757,7 +3757,7 @@ type
     FResource: Pointer;
 
     function GetpResource: ID3D12Resource;
-    procedure SetpResource(const Value: ID3D12Resource);
+    procedure SetpResource(Value: ID3D12Resource);
 
   public
     property pResource: ID3D12Resource read GetpResource write SetpResource;
@@ -5038,10 +5038,10 @@ type
 
 //    function SetPrivateData(const guid: TGUID;
 //                            DataSize: UINT;
-//                            const pData: Pointer): HRESULT; stdcall;
+//                            pData: Pointer): HRESULT; stdcall;
 
 //    function SetPrivateDataInterface(const guid: TGUID;
-//                                     const pdata: IUnknown): HRESULT; stdcall;
+//                                     pdata: IUnknown): HRESULT; stdcall;
 
 //    function SetName(Name: LPCWSTR): HRESULT; stdcall;
 
@@ -5107,19 +5107,19 @@ type
     ['{696442BE-A72E-4059-BC79-5B5C98040FAD}']
 
     function Map(Subresource: UINT;
-                 const pReadRange: PD3D12_RANGE;
+                 pReadRange: PD3D12_RANGE;
                  out ppData): HRESULT; stdcall;
 
     procedure Unmap(Subresource: UINT;
-                    const pWrittenRange: PD3D12_RANGE); stdcall;
+                    pWrittenRange: PD3D12_RANGE); stdcall;
 
     procedure GetDesc(out ResourceDesc: D3D12_RESOURCE_DESC); stdcall;
 
     function GetGPUVirtualAddress: D3D12_GPU_VIRTUAL_ADDRESS; stdcall;
 
     function WriteToSubresource(DstSubresource: UINT;
-                                const pDstBox: PD3D12_BOX;
-                                const pSrcData: Pointer;
+                                pDstBox: PD3D12_BOX;
+                                pSrcData: Pointer;
                                 SrcRowPitch: UINT;
                                 SrcDepthPitch: UINT): HRESULT; stdcall;
 
@@ -5127,7 +5127,7 @@ type
                                  DstRowPitch: UINT;
                                  DstDepthPitch: UINT;
                                  SrcSubresource: UINT;
-                                 const pSrcBox: PD3D12_BOX): HRESULT; stdcall;
+                                 pSrcBox: PD3D12_BOX): HRESULT; stdcall;
 
     function GetHeapProperties(pHeapProperties: PD3D12_HEAP_PROPERTIES;
                                pHeapFlags: PD3D12_HEAP_FLAGS): HRESULT; stdcall;
@@ -5194,7 +5194,7 @@ type
   ID3D12PipelineState = interface(ID3D12Pageable)
     ['{765A30F3-F624-4C6F-A828-ACE948622445}']
 
-    function GetCachedBlob([Ref] ppBlob: ID3DBlob): HRESULT; stdcall;
+    function GetCachedBlob(ppBlob: PID3DBlob): HRESULT; stdcall;
 
   end;
   IID_ID3D12PipelineState = ID3D12PipelineState;
@@ -5205,6 +5205,8 @@ type
   // ==============================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DescriptorHeap);'}
+  {$EXTERNALSYM PID3D12DescriptorHeap}
+  PID3D12DescriptorHeap = ^ID3D12DescriptorHeap;
   {$EXTERNALSYM ID3D12DescriptorHeap}
   ID3D12DescriptorHeap = interface(ID3D12Pageable)
     ['{8EFB471D-616C-4F49-90F7-127BB763FA51}']
@@ -5303,7 +5305,7 @@ type
                                 DstY: UINT;
                                 DstZ: UINT;
                                 const pSrc: D3D12_TEXTURE_COPY_LOCATION;
-                                const pSrcBox: PD3D12_BOX); stdcall;
+                                pSrcBox: PD3D12_BOX); stdcall;
 
     procedure CopyResource(pDstResource: ID3D12Resource;
                            pSrcResource: ID3D12Resource); stdcall;
@@ -5341,7 +5343,7 @@ type
     procedure ExecuteBundle(pCommandList: ID3D12GraphicsCommandList); stdcall;
 
     procedure SetDescriptorHeaps(NumDescriptorHeaps: UINT;
-                                 [Ref] ppDescriptorHeaps: ID3D12DescriptorHeap); stdcall;
+                                 ppDescriptorHeaps: PID3D12DescriptorHeap); stdcall;
 
     procedure SetComputeRootSignature(pRootSignature: ID3D12RootSignature); stdcall;
 
@@ -5363,12 +5365,12 @@ type
 
     procedure SetComputeRoot32BitConstants(RootParameterIndex: UINT;
                                            Num32BitValuesToSet: UINT;
-                                           const pSrcData: Pointer;
+                                           pSrcData: Pointer;
                                            DestOffsetIn32BitValues: UINT); stdcall;
 
     procedure SetGraphicsRoot32BitConstants(RootParameterIndex: UINT;
                                             Num32BitValuesToSet: UINT;
-                                            const pSrcData: Pointer;
+                                            pSrcData: Pointer;
                                             DestOffsetIn32BitValues: UINT); stdcall;
 
     procedure SetComputeRootConstantBufferView(RootParameterIndex: UINT;
@@ -5389,27 +5391,27 @@ type
     procedure SetGraphicsRootUnorderedAccessView(RootParameterIndex: UINT;
                                                  BufferLocation: D3D12_GPU_VIRTUAL_ADDRESS); stdcall;
 
-    procedure IASetIndexBuffer(const pView: PD3D12_INDEX_BUFFER_VIEW); stdcall;
+    procedure IASetIndexBuffer(pView: PD3D12_INDEX_BUFFER_VIEW); stdcall;
 
     procedure IASetVertexBuffers(StartSlot: UINT;
                                  NumViews: UINT;
-                                 const pViews: PD3D12_VERTEX_BUFFER_VIEW {array of D3D12_VERTEX_BUFFER_VIEW}); stdcall;
+                                 pViews: PD3D12_VERTEX_BUFFER_VIEW {array of D3D12_VERTEX_BUFFER_VIEW}); stdcall;
 
     procedure SOSetTargets(StartSlot: UINT;
                            NumViews: UINT;
-                           const pViews: PD3D12_STREAM_OUTPUT_BUFFER_VIEW {array of D3D12_STREAM_OUTPUT_BUFFER_VIEW}); stdcall;
+                           pViews: PD3D12_STREAM_OUTPUT_BUFFER_VIEW {array of D3D12_STREAM_OUTPUT_BUFFER_VIEW}); stdcall;
 
     procedure OMSetRenderTargets(NumRenderTargetDescriptors: UINT;
-                                 const pRenderTargetDescriptors: PD3D12_CPU_DESCRIPTOR_HANDLE {array of D3D12_CPU_DESCRIPTOR_HANDLE};
+                                 pRenderTargetDescriptors: PD3D12_CPU_DESCRIPTOR_HANDLE {array of D3D12_CPU_DESCRIPTOR_HANDLE};
                                  RTsSingleHandleToDescriptorRange: BOOL;
-                                 const pDepthStencilDescriptor: PD3D12_CPU_DESCRIPTOR_HANDLE); stdcall;
+                                 pDepthStencilDescriptor: PD3D12_CPU_DESCRIPTOR_HANDLE); stdcall;
 
     procedure ClearDepthStencilView(DepthStencilView: D3D12_CPU_DESCRIPTOR_HANDLE;
                                     ClearFlags: D3D12_CLEAR_FLAGS;
                                     Depth: Single;
                                     Stencil: UINT8;
                                     NumRects: UINT;
-                                    const pRects: PD3D12_RECT {array of D3D12_RECT}); stdcall;
+                                    pRects: PD3D12_RECT {array of D3D12_RECT}); stdcall;
 
     procedure ClearRenderTargetView(RenderTargetView: D3D12_CPU_DESCRIPTOR_HANDLE;
                                     const ColorRGBA: Fixed3FLOATArray;
@@ -5419,19 +5421,19 @@ type
     procedure ClearUnorderedAccessViewUint(ViewGPUHandleInCurrentHeap: D3D12_CPU_DESCRIPTOR_HANDLE;
                                            ViewCPUHandle: D3D12_CPU_DESCRIPTOR_HANDLE;
                                            pResource: ID3D12Resource;
-                                           const Values: Fixed3UINTArray;
+                                           Values: Fixed3UINTArray;
                                            NumRects: UINT;
-                                           const pRects: PD3D12_RECT); stdcall;
+                                           pRects: PD3D12_RECT); stdcall;
 
     procedure ClearUnorderedAccessViewSingle(ViewGPUHandleInCurrentHeap: D3D12_CPU_DESCRIPTOR_HANDLE;
                                              ViewCPUHandle: D3D12_CPU_DESCRIPTOR_HANDLE;
                                              pResource: ID3D12Resource;
                                              Values: Fixed3FLOATArray;
                                              NumRects: UINT;
-                                             const pRects: PD3D12_RECT {array of D3D12_RECT}); stdcall;
+                                             pRects: PD3D12_RECT {array of D3D12_RECT}); stdcall;
 
     procedure DiscardResource(pResource: ID3D12Resource;
-                              const pRegion: PD3D12_DISCARD_REGION); stdcall;
+                              pRegion: PD3D12_DISCARD_REGION); stdcall;
 
     procedure BeginQuery(pQueryHeap: ID3D12QueryHeap;
                          Type_: D3D12_QUERY_TYPE;
@@ -5453,11 +5455,11 @@ type
                              Operation: D3D12_PREDICATION_OP); stdcall;
 
     procedure SetMarker(Metadata: UINT;
-                        const pData: Pointer;
+                        pData: Pointer;
                         Size: UINT); stdcall;
 
     procedure BeginEvent(Metadata: UINT;
-                         const pData: Pointer;
+                         pData: Pointer;
                          Size: UINT); stdcall;
 
     procedure EndEvent(); stdcall;
@@ -5486,8 +5488,8 @@ type
                                    pSrcBuffer: ID3D12Resource;
                                    SrcOffset: UINT64;
                                    Dependencies: UINT;  // 0 Dependencies means only the dst buffer offset is synchronized
-                                   const ppDependentResources: PID3D12Resource;
-                                   const pDependentSubresourceRanges: PD3D12_SUBRESOURCE_RANGE_UINT64); stdcall;
+                                   ppDependentResources: PID3D12Resource;
+                                   pDependentSubresourceRanges: PD3D12_SUBRESOURCE_RANGE_UINT64); stdcall;
 
     // UINT64 is only valid on UMA architectures
     procedure AtomicCopyBufferUINT64(pDstBuffer: ID3D12Resource;
@@ -5495,15 +5497,15 @@ type
                                      pSrcBuffer: ID3D12Resource;
                                      SrcOffset: UINT64;
                                      Dependencies: UINT;  // 0 Dependencies means only the dst buffer offset is synchronized
-                                     const ppDependentResources: PID3D12Resource;
-                                     const pDependentSubresourceRanges: PD3D12_SUBRESOURCE_RANGE_UINT64); stdcall;
+                                     ppDependentResources: PID3D12Resource;
+                                     pDependentSubresourceRanges: PD3D12_SUBRESOURCE_RANGE_UINT64); stdcall;
 
     procedure OMSetDepthBounds(Min: FLOAT;
                                Max: FLOAT); stdcall;
 
     procedure SetSamplePositions(NumSamplesPerPixel: UINT;
                                  NumPixels: UINT;
-                                 const pSamplePositions: PD3D12_SAMPLE_POSITION); stdcall;
+                                 pSamplePositions: PD3D12_SAMPLE_POSITION); stdcall;
 
     procedure ResolveSubresourceRegion(pDstResource: ID3D12Resource;
                                        DstSubresource: UINT;
@@ -5548,8 +5550,8 @@ type
     ['{38C3E585-FF17-412C-9150-4FC6F9D72A28}']
 
     procedure WriteBufferImmediate(Count: UINT;
-                                   const pParams: PD3D12_WRITEBUFFERIMMEDIATE_PARAMETER;
-                                   const pModes: PD3D12_WRITEBUFFERIMMEDIATE_MODE);
+                                   pParams: PD3D12_WRITEBUFFERIMMEDIATE_PARAMETER;
+                    {in, optional} pModes: PD3D12_WRITEBUFFERIMMEDIATE_MODE);
 
   end;
   IID_ID3D12GraphicsCommandList2 = ID3D12GraphicsCommandList2;
@@ -5566,31 +5568,31 @@ type
 
     procedure UpdateTileMappings(pResource: ID3D12Resource;
                                  NumResourceRegions: UINT;
-                                 const pResourceRegionStartCoordinates: PD3D12_TILED_RESOURCE_COORDINATE;
-                                 const pResourceRegionSizes: PD3D12_TILE_REGION_SIZE;
+                                 pResourceRegionStartCoordinates: PD3D12_TILED_RESOURCE_COORDINATE;
+                                 pResourceRegionSizes: PD3D12_TILE_REGION_SIZE;
                                  pHeap: ID3D12Heap;
                                  NumRanges: UINT;
-                                 const pRangeFlags: PD3D12_TILE_RANGE_FLAGS;
-                                 const pHeapRangeStartOffsets: PUINT;
-                                 const pRangeTileCounts: PUINT;
+                                 pRangeFlags: PD3D12_TILE_RANGE_FLAGS;
+                                 pHeapRangeStartOffsets: PUINT;
+                                 pRangeTileCounts: PUINT;
                                  Flags: D3D12_TILE_MAPPING_FLAGS); stdcall;
 
     procedure CopyTileMappings(pDstResource: ID3D12Resource;
-                               const pDstRegionStartCoordinate: PD3D12_TILED_RESOURCE_COORDINATE;
+                               pDstRegionStartCoordinate: PD3D12_TILED_RESOURCE_COORDINATE;
                                pSrcResource: ID3D12Resource;
-                               const pSrcRegionStartCoordinate: PD3D12_TILED_RESOURCE_COORDINATE;
-                               const pRegionSize: PD3D12_TILE_REGION_SIZE;
+                               pSrcRegionStartCoordinate: PD3D12_TILED_RESOURCE_COORDINATE;
+                               pRegionSize: PD3D12_TILE_REGION_SIZE;
                                Flags: D3D12_TILE_MAPPING_FLAGS); stdcall;
 
     procedure ExecuteCommandLists(NumCommandLists: UINT;
                                   ppCommandLists: PID3D12CommandList); stdcall;
 
     procedure SetMarker(Metadata: UINT;
-                        const pData: Pointer;
+                        pData: Pointer;
                         Size: UINT); stdcall;
 
     procedure BeginEvent(Metadata: UINT;
-                         const pData: Pointer;
+                         pData: Pointer;
                          Size: UINT); stdcall;
 
     procedure EndEvent; stdcall;
@@ -5656,7 +5658,7 @@ type
     function GetDescriptorHandleIncrementSize(DescriptorHeapType: D3D12_DESCRIPTOR_HEAP_TYPE): UINT; stdcall;
 
     function CreateRootSignature(nodeMask: UINT;
-                                 const pBlobWithRootSignature: Pointer;
+                                 pBlobWithRootSignature: Pointer;
                                  const riid: TGUID;
                                  out ppvRootSignature): HRESULT; stdcall;
 
@@ -5664,12 +5666,12 @@ type
                                        DestDescriptor: D3D12_CPU_DESCRIPTOR_HANDLE); stdcall;
 
     procedure CreateShaderResourceView(pResource: ID3D12Resource;
-                                       const pDesc: PD3D12_SHADER_RESOURCE_VIEW_DESC;
+                                       pDesc: PD3D12_SHADER_RESOURCE_VIEW_DESC;
                                        DestDescriptor: D3D12_CPU_DESCRIPTOR_HANDLE); stdcall;
 
     procedure CreateUnorderedAccessView(pResource: ID3D12Resource;
                                         pCounterResource: ID3D12Resource;
-                                        const pDesc: PD3D12_UNORDERED_ACCESS_VIEW_DESC;
+                                        pDesc: PD3D12_UNORDERED_ACCESS_VIEW_DESC;
                                         DestDescriptor: D3D12_CPU_DESCRIPTOR_HANDLE); stdcall;
 
     procedure CreateRenderTargetView(pResource: Pointer;
@@ -5677,18 +5679,18 @@ type
                                      DestDescriptor: D3D12_CPU_DESCRIPTOR_HANDLE); stdcall;
 
     procedure CreateDepthStencilView(pResource: ID3D12Resource;
-                                     const pDesc: PD3D12_DEPTH_STENCIL_VIEW_DESC;
+                                     pDesc: PD3D12_DEPTH_STENCIL_VIEW_DESC;
                                      DestDescriptor: D3D12_CPU_DESCRIPTOR_HANDLE); stdcall;
 
     procedure CreateSampler(const pDesc: PD3D12_Sampler_Desc;
                             DestDescriptor: D3D12_CPU_DESCRIPTOR_HANDLE); stdcall;
 
     procedure CopyDescriptors(NumDestDescriptorRanges: UINT;
-                              const pDestDescriptorRangeStarts: PD3D12_CPU_DESCRIPTOR_HANDLE;
-                              const pDestDescriptorRangeSizes: PUINT;
+                              pDestDescriptorRangeStarts: PD3D12_CPU_DESCRIPTOR_HANDLE;
+                              pDestDescriptorRangeSizes: PUINT;
                               NumSrcDescriptorRanges: UINT;
                               const pSrcDescriptorRangeStarts: D3D12_CPU_DESCRIPTOR_HANDLE;
-                              const pSrcDescriptorRangeSizes: PUINT;
+                              pSrcDescriptorRangeSizes: PUINT;
                               DescriptorHeapsType: D3D12_DESCRIPTOR_HEAP_TYPE); stdcall;
 
     procedure CopyDescriptorsSimple(NumDescriptors: UINT;
@@ -5698,36 +5700,36 @@ type
 
     function GetResourceAllocationInfo(visibleMask: UINT;
                                        numResourceDescs: UINT;
-                                       const pResourceDescs: PD3D12_RESOURCE_DESC): D3D12_RESOURCE_ALLOCATION_INFO; stdcall;
+                                       pResourceDescs: PD3D12_RESOURCE_DESC): D3D12_RESOURCE_ALLOCATION_INFO; stdcall;
 
     function GetCustomHeapProperties(nodeMask: UINT;
                                      heapType: D3D12_HEAP_TYPE): D3D12_HEAP_PROPERTIES; stdcall;
 
     function CreateCommittedResource(const pHeapProperties: D3D12_HEAP_PROPERTIES;
                                      HeapFlags: D3D12_HEAP_FLAGS;
-                                     const pResourceDesc: PD3D12_RESOURCE_DESC;
+                                     pResourceDesc: PD3D12_RESOURCE_DESC;
                                      InitialResourceState: D3D12_RESOURCE_STATES;
-                                     const pOptimizedClearValue: PD3D12_CLEAR_VALUE;
+                                     pOptimizedClearValue: PD3D12_CLEAR_VALUE;
                                      const riidResource: TGUID;
                                      out ppvResource): HRESULT; stdcall;
 
-    function CreateHeap(const pDesc: PD3D12_HEAP_DESC;
+    function CreateHeap(pDesc: PD3D12_HEAP_DESC;
                         const riid: TGUID;
                         ppvHeap: PPointer): HRESULT; stdcall;
 
     function CreatePlacedResource(pHeap: ID3D12Heap;
                                   HeapOffset: UINT64;
-                                  const pDesc: PD3D12_RESOURCE_DESC;
+                                  pDesc: PD3D12_RESOURCE_DESC;
                                   InitialState: D3D12_RESOURCE_STATES;
-                                  const pOptimizedClearValue: PD3D12_CLEAR_VALUE;
+                                  pOptimizedClearValue: PD3D12_CLEAR_VALUE;
                                   const riid: TGUID;
                                   ppvResource: PPointer): HRESULT; stdcall;
 
     function CreateReservedResource(const pDesc: D3D12_RESOURCE_DESC;
                                     InitialState: D3D12_RESOURCE_STATES;
-                                    const pOptimizedClearValue: PD3D12_CLEAR_VALUE;
+                                    pOptimizedClearValue: PD3D12_CLEAR_VALUE;
                                     const riid: TGUID;
-                                   {out, optional} ppvResource: PPointer): HRESULT; stdcall;
+                    {out, optional} ppvResource: PPointer): HRESULT; stdcall;
 
     function CreateSharedHandle(pObject: ID3D12DeviceChild;
                                 pAttributes: PSecurityAttributes;
@@ -5744,10 +5746,10 @@ type
                                     out pNTHandle: THandle): HRESULT; stdcall;
 
     function MakeResident(NumObjects: UINT;
-                          const [Ref] ppObjects: ID3D12Pageable): HRESULT; stdcall;
+                          ppObjects: PID3D12Pageable): HRESULT; stdcall;
 
     function Evict(NumObjects: UINT;
-                   const [Ref] ppObjects: ID3D12Pageable): HRESULT; stdcall;
+                   ppObjects: PID3D12Pageable): HRESULT; stdcall;
 
     function CreateFence(InitialValue: UINT64;
                          Flags: D3D12_FENCE_FLAGS;
@@ -5765,7 +5767,7 @@ type
                                     pRowSizeInBytes: PUINT64;
                                     pTotalBytes: PUINT64); stdcall;
 
-    function CreateQueryHeap(const pDesc: PD3D12_QUERY_HEAP_DESC;
+    function CreateQueryHeap(pDesc: PD3D12_QUERY_HEAP_DESC;
                              const riid: TGUID;
                              ppvHeap: PPointer): HRESULT; stdcall;
 
@@ -5853,7 +5855,7 @@ type
   ID3D12Device1 = interface(ID3D12Device)
     ['{77acce80-638e-4e65-8895-c1f23386863e}']
 
-    function CreatePipelineLibrary(const pLibraryBlob: Pointer;
+    function CreatePipelineLibrary(pLibraryBlob: Pointer;
                                    BlobLength: SIZE_T;
                                    const riid: REFIID;  // Expected: ID3D12PipelineLibrary
                                    out ppPipelineLibrary): HRESULT; stdcall;
@@ -6871,7 +6873,7 @@ type
 
     function CreateMetaCommand(const CommandId: REFGUID;
                                NodeMask: UINT;
-                               const pCreationParametersData: Pointer;
+                               pCreationParametersData: Pointer;
                                CreationParametersDataSizeInBytes: SIZE_T;
                                const riid: REFIID;
                                out ppMetaCommand): HRESULT; stdcall;
@@ -8567,7 +8569,7 @@ type
   function D3D12SerializeRootSignature(pRootSignature: PD3D12_ROOT_SIGNATURE_DESC;
                                        Version: D3D_ROOT_SIGNATURE_VERSION;
                                        out ppBlob: ID3DBlob;
-                                       {out} ppErrorBlob: PPointer): HRESULT; stdcall;
+                                 {out} ppErrorBlob: PPointer): HRESULT; stdcall;
   {$EXTERNALSYM D3D12SerializeRootSignature}
 
 
@@ -8579,8 +8581,8 @@ type
 
 
   function D3D12SerializeVersionedRootSignature(pRootSignature: D3D12_VERSIONED_ROOT_SIGNATURE_DESC;
-                                               {_Out_} ppBlob: PID3DBlob;
-                                               out ppErrorBlob: PID3DBlob): HRESULT; stdcall;
+                                        {_Out_} ppBlob: PID3DBlob;
+                                                out ppErrorBlob: PID3DBlob): HRESULT; stdcall;
   {$EXTERNALSYM D3D12SerializeVersionedRootSignature}
 
 
@@ -8735,7 +8737,7 @@ begin
 end;
 
 
-procedure D3D12_RESOURCE_UAV_BARRIER.SetpResource(const Value: ID3D12Resource);
+procedure D3D12_RESOURCE_UAV_BARRIER.SetpResource(Value: ID3D12Resource);
 begin
   ID3D12Resource(FResource) := Value;
 end;
@@ -8755,13 +8757,13 @@ begin
 end;
 
 
-procedure D3D12_RESOURCE_ALIASING_BARRIER.SetpResourceAfter(const Value: ID3D12Resource);
+procedure D3D12_RESOURCE_ALIASING_BARRIER.SetpResourceAfter(Value: ID3D12Resource);
 begin
   ID3D12Resource(FResourceAfter) := Value;
 end;
 
 
-procedure D3D12_RESOURCE_ALIASING_BARRIER.SetpResourceBefore(const Value: ID3D12Resource);
+procedure D3D12_RESOURCE_ALIASING_BARRIER.SetpResourceBefore(Value: ID3D12Resource);
 begin
   ID3D12Resource(FResourceBefore) := Value;
 end;
@@ -8775,7 +8777,7 @@ begin
 end;
 
 
-procedure D3D12_RESOURCE_TRANSITION_BARRIER.SetpResource(const Value: ID3D12Resource);
+procedure D3D12_RESOURCE_TRANSITION_BARRIER.SetpResource(Value: ID3D12Resource);
 begin
   ID3D12Resource(FResource) := Value;
 end;
