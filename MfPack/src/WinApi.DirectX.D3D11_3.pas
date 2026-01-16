@@ -161,6 +161,8 @@ type
   // ==========================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D11Texture2D1);'}
+  {$EXTERNALSYM PID3D11Texture2D1}
+  PID3D11Texture2D1 =^ID3D11Texture2D1;
   {$EXTERNALSYM ID3D11Texture2D1}
   ID3D11Texture2D1 = interface(ID3D11Texture2D)
     ['{51218251-1E33-4617-9CCB-4D3A4367E7BB}']
@@ -218,6 +220,8 @@ type
   // ==========================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D11Texture3D1);'}
+  {$EXTERNALSYM PID3D11Texture3D1}
+  PID3D11Texture3D1 = ^ID3D11Texture3D1;
   {$EXTERNALSYM ID3D11Texture3D1}
   ID3D11Texture3D1 = interface(ID3D11Texture3D)
     ['{0C711683-2853-4846-9BB0-F3E60639E46A}']
@@ -283,6 +287,8 @@ type
   // ================================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D11RasterizerState2);'}
+  {$EXTERNALSYM PID3D11RasterizerState2}
+  PID3D11RasterizerState2 = ^ID3D11RasterizerState2;
   {$EXTERNALSYM ID3D11RasterizerState2}
   ID3D11RasterizerState2 = interface(ID3D11RasterizerState1)
     ['{6fbd02fb-209f-46c4-b059-2ed15586a6ac}']
@@ -382,6 +388,8 @@ type
   // ================================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D11ShaderResourceView1);'}
+  {$EXTERNALSYM PID3D11ShaderResourceView1}
+  PID3D11ShaderResourceView1 = ^ID3D11ShaderResourceView1;
   {$EXTERNALSYM ID3D11ShaderResourceView1}
   ID3D11ShaderResourceView1 = interface(ID3D11ShaderResourceView)
     ['{91308b87-9040-411d-8c67-c39253ce3802}']
@@ -605,6 +613,8 @@ type
   // ======================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D11Query1);'}
+  {$EXTERNALSYM PID3D11Query1}
+  PID3D11Query1 = ^ID3D11Query1;
   {$EXTERNALSYM ID3D11Query1}
   ID3D11Query1 = interface(ID3D11Query)
   ['{631b4766-36dc-461d-8db6-c47e13e60916}']
@@ -640,6 +650,8 @@ type
   // ==============================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D11DeviceContext3);'}
+  {$EXTERNALSYM PID3D11DeviceContext3}
+  PID3D11DeviceContext3 = ^ID3D11DeviceContext3;
   {$EXTERNALSYM ID3D11DeviceContext3}
   ID3D11DeviceContext3 = interface(ID3D11DeviceContext2)
   ['{b4e3c01d-e79e-4637-91b2-510e9f4c9b8f}']
@@ -789,6 +801,7 @@ implementation
 
 constructor D3D11_TEXTURE2D_DESC1.Create(const o: D3D11_TEXTURE2D_DESC1);
 begin
+
   Self := o;
 end;
 
@@ -798,7 +811,7 @@ constructor D3D11_TEXTURE2D_DESC1.Create(aFormat: DXGI_FORMAT;
                                          aHeight: UINT;
                                          aArraySize: UINT = 1;
                                          aMipLevels: UINT = 0;
-                                         aBindFlags: UINT = D3D11_BIND_SHADEAcquireWrappedResourcesR_RESOURCE;
+                                         aBindFlags: UINT = D3D11_BIND_SHADER_RESOURCE;
                                          aUsage: D3D11_USAGE = D3D11_USAGE_DEFAULT;
                                          acpuaccessFlags: UINT = 0;
                                          aSampleCount: UINT = 1;
@@ -806,6 +819,7 @@ constructor D3D11_TEXTURE2D_DESC1.Create(aFormat: DXGI_FORMAT;
                                          aMiscFlags: UINT = 0;
                                          aTextureLayout: D3D11_TEXTURE_LAYOUT = D3D11_TEXTURE_LAYOUT_UNDEFINED);
 begin
+
   Width := aWidth;
   Height := aHeight;
   MipLevels := aMipLevels;
@@ -824,6 +838,7 @@ end;
 constructor D3D11_TEXTURE2D_DESC1.Create(aDesc: D3D11_TEXTURE2D_DESC;
                                          aTextureLayout: D3D11_TEXTURE_LAYOUT = D3D11_TEXTURE_LAYOUT_UNDEFINED);
 begin
+
   Width := aDesc.Width;
   Height := aDesc.Height;
   MipLevels := aDesc.MipLevels;
@@ -843,6 +858,7 @@ end;
 
 constructor D3D11_TEXTURE3D_DESC1.Create(const o: D3D11_TEXTURE3D_DESC1);
 begin
+
   Self := o;
 end;
 
@@ -858,6 +874,7 @@ constructor D3D11_TEXTURE3D_DESC1.Create(aFormat: DXGI_FORMAT;
                                          aMiscFlags: UINT = 0;
                                          aTextureLayout: D3D11_TEXTURE_LAYOUT = D3D11_TEXTURE_LAYOUT_UNDEFINED);
 begin
+
  Width := aWidth;
  Height := aHeight;
  Depth := aDepth;
@@ -874,6 +891,7 @@ end;
 constructor D3D11_TEXTURE3D_DESC1.Create(aDesc: D3D11_TEXTURE3D_DESC;
                                          aTextureLayout: D3D11_TEXTURE_LAYOUT = D3D11_TEXTURE_LAYOUT_UNDEFINED);
 begin
+
   Width := aDesc.Width;
   Height := aDesc.Height;
   Depth := aDesc.Depth;
@@ -897,6 +915,7 @@ end;
 
 constructor D3D11_RASTERIZER_DESC2.Create(Default: Boolean);
 begin
+
   FillMode := D3D11_FILL_SOLID;
   CullMode := D3D11_CULL_BACK;
   FrontCounterClockwise := FALSE;
@@ -925,6 +944,7 @@ constructor D3D11_RASTERIZER_DESC2.Create(aFillMode: D3D11_FILL_MODE;
                                           aForcedSampleCount: UINT;
                                           aConservativeRaster: D3D11_CONSERVATIVE_RASTERIZATION_MODE);
 begin
+
   FillMode := aFillMode;
   CullMode := aCullMode;
   FrontCounterClockwise := aFrontCounterClockwise;
@@ -944,6 +964,7 @@ end;
 
 constructor D3D11_SHADER_RESOURCE_VIEW_DESC1.Create(const o: D3D11_SHADER_RESOURCE_VIEW_DESC1);
 begin
+
   Self := o;
 end;
 
@@ -957,6 +978,7 @@ constructor D3D11_SHADER_RESOURCE_VIEW_DESC1.Create(aViewDimension: D3D11_SRV_DI
                                                     aFlags: UINT = 0; // BUFFEREX only
                                                     aPlaneSlice: UINT = 0 {Texture2D and Texture2DArray only});
 begin
+
   Format := aFormat;
   ViewDimension := aViewDimension;
 
@@ -1035,6 +1057,7 @@ constructor D3D11_SHADER_RESOURCE_VIEW_DESC1.Create(const aBuffer: ID3D11Buffer;
                                                     aNumElements: UINT;
                                                     aFlags: UINT = 0);
 begin
+
   Format := aFormat;
   ViewDimension := D3D11_SRV_DIMENSION_BUFFEREX;
   BufferEx.FirstElement := aFirstElement;
@@ -1054,6 +1077,7 @@ var
   TexDesc: D3D11_TEXTURE1D_DESC;
 
 begin
+
   ViewDimension := viewDimension;
 
   if ( (DXGI_FORMAT_UNKNOWN = aFormat) or (aMipLevels = UINT(-1)) or
@@ -1101,6 +1125,7 @@ var
   TexDesc: D3D11_TEXTURE2D_DESC;
 
 begin
+
   ViewDimension := aViewDimension;
   if (DXGI_FORMAT_UNKNOWN = aFormat) or
             ((aMipLevels = Uint(-1)) and
@@ -1175,6 +1200,7 @@ var
   TexDesc: D3D11_TEXTURE3D_DESC;
 
 begin
+
   ViewDimension := D3D11_SRV_DIMENSION_TEXTURE3D;
   if (DXGI_FORMAT_UNKNOWN = aFormat) or (aMipLevels = UINT(-1)) then
     begin
@@ -1194,6 +1220,7 @@ end;
 
 constructor D3D11_RENDER_TARGET_VIEW_DESC1.Create(const o: D3D11_RENDER_TARGET_VIEW_DESC1);
 begin
+
   Self := o;
 end;
 
@@ -1205,6 +1232,7 @@ constructor D3D11_RENDER_TARGET_VIEW_DESC1.Create(aViewDimension: D3D11_RTV_DIME
                                                   aArraySize: UINT = UINT(-1); // WSize for TEXTURE3D
                                                   aPlaneSlice: UINT = 0 {PlaneSlice for TEXTURE2D and TEXTURE2DARRAY});
 begin
+
   Format := aFormat;
   ViewDimension := aViewDimension;
 
@@ -1260,6 +1288,7 @@ constructor D3D11_RENDER_TARGET_VIEW_DESC1.Create(const aBuffer: ID3D11Buffer;
                                                   aFirstElement: UINT;
                                                   aNumElements: UINT);
 begin
+
   Format := aFormat;
   ViewDimension := D3D11_RTV_DIMENSION_BUFFER;
   Buffer.FirstElement := aFirstElement;
@@ -1277,6 +1306,7 @@ var
   TexDesc: D3D11_TEXTURE1D_DESC;
 
 begin
+
   ViewDimension := viewDimension;
   if ( (DXGI_FORMAT_UNKNOWN = aFormat) or
             ( (aArraySize = UINT(-1)) and (DWORD(D3D11_RTV_DIMENSION_TEXTURE1DARRAY) = aViewDimension) )) then
@@ -1315,6 +1345,7 @@ var
   TexDesc: D3D11_TEXTURE2D_DESC;
 
 begin
+
   ViewDimension := aViewDimension;
 
   if ( (DXGI_FORMAT_UNKNOWN = format) or
@@ -1365,7 +1396,9 @@ var
   TexDesc: D3D11_TEXTURE3D_DESC;
 
 begin
+
   ViewDimension := D3D11_RTV_DIMENSION_TEXTURE3D;
+
   if ( (DXGI_FORMAT_UNKNOWN = aFormat) or (aWSize = UINT(-1)) ) then
     begin
       pTex3D.GetDesc(TexDesc);
@@ -1397,6 +1430,7 @@ constructor D3D11_UNORDERED_ACCESS_VIEW_DESC1.Create(aViewDimension: D3D11_RTV_D
                                                      aArraySize: UINT = UINT(-1); // WSize for TEXTURE3D
                                                      APlaneSlice: UINT = 0 {PlaneSlice for TEXTURE2D and TEXTURE2DARRAY});
 begin
+
   Format := aFormat;
   DWORD(ViewDimension) := DWORD(aViewDimension);
 
@@ -1450,6 +1484,7 @@ constructor D3D11_UNORDERED_ACCESS_VIEW_DESC1.Create(const aBuffer: ID3D11Buffer
                                                      aFirstElement: UINT;
                                                      aNumElements: UINT);
 begin
+
   Format := aFormat;
   DWORD(ViewDimension) := DWORD(D3D11_RTV_DIMENSION_BUFFER);
   Buffer.FirstElement := aFirstElement;
@@ -1467,7 +1502,9 @@ var
   TexDesc: D3D11_TEXTURE1D_DESC;
 
 begin
+
   ViewDimension := viewDimension;
+
   if (DXGI_FORMAT_UNKNOWN = format) or
     ((aArraySize = UINT(-1)) and (D3D11_RTV_DIMENSION_TEXTURE1DARRAY = aViewDimension)) then
     begin
@@ -1506,6 +1543,7 @@ var
   TexDesc: D3D11_TEXTURE2D_DESC;
 
 begin
+
   ViewDimension := aViewDimension;
 
   if (DXGI_FORMAT_UNKNOWN = aFormat) or
@@ -1545,7 +1583,9 @@ var
   TexDesc: D3D11_TEXTURE3D_DESC;
 
 begin
+
   ViewDimension := D3D11_UAV_DIMENSION_TEXTURE3D;
+
   if (DXGI_FORMAT_UNKNOWN = aFormat) or (aWSize = UINT(-1)) then
     begin
       pTex3D.GetDesc(TexDesc);
@@ -1566,6 +1606,7 @@ end;
 
 constructor D3D11_QUERY_DESC1.Create(const o: D3D11_QUERY_DESC1);
 begin
+
   Self := o;
 end;
 
@@ -1574,6 +1615,7 @@ constructor D3D11_QUERY_DESC1.Create(aQuery: D3D11_QUERY;
                                      aMiscFlags: UINT = 0;
                                      aContextType: D3D11_CONTEXT_TYPE = D3D11_CONTEXT_TYPE_ALL);
 begin
+
   Query := aQuery;
   MiscFlags := aMiscFlags;
   ContextType := aContextType;

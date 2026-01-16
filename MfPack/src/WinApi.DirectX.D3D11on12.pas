@@ -139,12 +139,12 @@ uses
   function D3D11On12CreateDevice(pDevice: IUnknown;
                                  Flags: UINT;
                                  const pFeatureLevels: PD3D_FEATURE_LEVEL;
-                                 FeatureLevels: UINT;
-                                 const [Ref] ppCommandQueues: IUnknown;
+                                 FeatureLevels: PUINT;
+                                 ppCommandQueues: IUnknown;
                                  NumQueues: UINT;
                                  NodeMask: UINT;
-                                 [Ref] ppDevice: ID3D11Device;
-                                 [Ref] ppImmediateContext: ID3D11DeviceContext;
+                                 ppDevice: PID3D11Device;
+                                 ppImmediateContext: PID3D11DeviceContext;
                                  out pChosenFeatureLevel: D3D_FEATURE_LEVEL): HRESULT; stdcall;
   {$EXTERNALSYM D3D11On12CreateDevice}
 

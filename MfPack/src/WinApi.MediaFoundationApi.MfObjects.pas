@@ -1224,7 +1224,7 @@ type
                        fValue: Double): HResult; stdcall;
 
     function SetGUID(const guidKey: TGUID;
-                     const [ref] guidValue: REFGUID): HResult; stdcall;
+                     const guidValue: REFGUID): HResult; stdcall;
 
     function SetString(const guidKey: TGUID;
                        wszValue: LPCWSTR): HResult; stdcall;
@@ -1916,7 +1916,7 @@ type
     //     Will contain the requested interface
     // </param>
     function ActivateObject(const riid: REFIID;
-                            out ppv): HResult; stdcall;  {const [ref]}
+                            out ppv): HResult; stdcall;
 
     // <summary>
     //     Shuts down the internal represented object

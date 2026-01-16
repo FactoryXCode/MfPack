@@ -160,7 +160,8 @@ SDK version: 10.0.26100.4654 (Windows 11)
   
  ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/SinkWriterSample.png)
 
-*Example 3 demonstrates how to use the SinkWriter to create a video from one or more image files including audio.*
+*Example 3 
+demonstrates how to use the SinkWriter to create a video from one or more image files including audio.*
  ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ImageToVideo_3.jpg)
 
 
@@ -265,13 +266,9 @@ Playback control (Play, Pause, Stop, Replay, Seek) is fully thread-safe and hand
 The sample also shows how to:
 
 ⦁	Apply XAudio2 effects (reverb, mastering limiter).
-
 ⦁	Perform sample-accurate seeking during playback.
-
 ⦁	Update a progress bar and timing UI based on streamed audio.
-
 ⦁	Implement thread-safe callbacks and events instead of message-based signaling.
-
 ⦁	Track real-time audio levels using the MfPeakMeter component.
 
 Unlike earlier samples, this version does not load the entire audio file into memory.
@@ -288,14 +285,33 @@ It shows you the basics of using the IAudioClient, iAudioRenderer, IAudioClock a
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
 In your projectsettings you have to add ..MfPack\Samples\MfComponents in the project options searchpath.
 
-![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer1.png)
+
+**WASAPI Player Sample 2**
+
+This sample is based on Sample 1, but includes full threaded code, 
+using threadsafe events and also uses a custom MFT for bass and treble control.
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer2.png)
+
+**WASAPI Player Sample 3**
+
+*This sample is based on Sample 2, instead of a bass/treble MFT, this one is equiped with*
+*a 3 band High, Mid(Peaking or Notch) and Low EQ MFT.*
+*It also stores and read back settings for the MFT.* 
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer3.png)
+
+
 
 **SimpleVolumeControlSample 1**
+
 *This example shows how to use the basics of the MfAudioEndPoint component.*
 
-**MfCaptureVideoFromGPU Sample 1**
-*This sample demonstrates how to capture from screen using your videocard GPU.*
 
+
+**MfCaptureVideoFromGPU Sample 1**
+
+This sample demonstrates how to capture from screen using your videocard GPU.
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/CaptureVideoFromGPUSample.png)
 
@@ -305,8 +321,8 @@ In your projectsettings you have to add ..MfPack\Samples\MfComponents in the pro
 optionally captures system audio via WASAPI loopback, shows a live preview, 
 and writes the result to a file (typically MP4 with H.264 video and AAC or FLAC audio).*
 
-*Audio-only recording can be done separately to WAV or FLAC using the
-dedicated recorder unit.*
+Audio-only recording can be done separately to WAV or FLAC using the
+dedicated recorder unit.
 
 *Note: You have to know the principles of Media Foundation and DirectX.*
 

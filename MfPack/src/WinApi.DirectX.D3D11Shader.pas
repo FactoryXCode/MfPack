@@ -616,6 +616,8 @@ type
   // ==============================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D11ModuleInstance);'}
+  {$EXTERNALSYM PID3D11ModuleInstance}
+  PID3D11ModuleInstance = ^ID3D11ModuleInstance;
   {$EXTERNALSYM ID3D11ModuleInstance}
   ID3D11ModuleInstance = interface(IUnknown)
     ['{469E07F7-045A-48D5-AA12-68A478CDF75D}']
@@ -717,6 +719,8 @@ type
   // ===========================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D11LinkingNode);'}
+  {$EXTERNALSYM PID3D11LinkingNode}
+  PID3D11LinkingNode =^ID3D11LinkingNode;
   {$EXTERNALSYM ID3D11LinkingNode}
   ID3D11LinkingNode = interface(IUnknown)
     ['{D80DD70C-8D2F-4751-94A1-03C79B3556DB}']

@@ -182,6 +182,8 @@ type
   // ==============================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D11DeviceContext2);'}
+  {$EXTERNALSYM PID3D11DeviceContext2}
+  PID3D11DeviceContext2 = ^ID3D11DeviceContext2;
   {$EXTERNALSYM ID3D11DeviceContext2}
   ID3D11DeviceContext2 = interface(ID3D11DeviceContext1)
     ['{420d5b32-b90c-4da4-bef0-359f6a24a83a}']

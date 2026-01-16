@@ -158,6 +158,8 @@ type
   // ===========================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D11BlendState1);'}
+  {$EXTERNALSYM PID3D11BlendState1}
+  PID3D11BlendState1 = ^ID3D11BlendState1;
   {$EXTERNALSYM ID3D11BlendState1}
   ID3D11BlendState1 = interface(ID3D11BlendState)
     ['{cc86fabe-da55-401d-85e7-e3c9de2877e9}']
@@ -238,6 +240,8 @@ type
   // ==============================
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D11DeviceContext1);'}
+  {$EXTERNALSYM PID3D11DeviceContext1}
+  PID3D11DeviceContext1 = ^ID3D11DeviceContext1;
   {$EXTERNALSYM ID3D11DeviceContext1}
   ID3D11DeviceContext1 = interface(ID3D11DeviceContext)
     ['{bb2c6faa-b5fb-4082-8e6b-388b8cfa90e1}']
@@ -249,12 +253,12 @@ type
                                      DstZ: UINT;
                                      pSrcResource: ID3D11Resource;
                                      SrcSubresource: UINT;
-                                     {in_opt }pSrcBox: PD3D11_BOX;
+                            {in_opt }pSrcBox: PD3D11_BOX;
                                      CopyFlags: UINT); stdcall;
 
     procedure UpdateSubresource1(pDstResource: ID3D11Resource;
                                  DstSubresource: UINT;
-                                 {opt} pDstBox: PD3D11_BOX;
+                           {opt} pDstBox: PD3D11_BOX;
                                  pSrcData: Pointer;
                                  SrcRowPitch: UINT;
                                  SrcDepthPitch: UINT;
