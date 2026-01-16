@@ -166,8 +166,8 @@ type
     FfrmEqSettings: TfrmEqSettings;
 
     function IniFileName: string;
-    procedure LoadEqFromIni;
-    procedure SaveEqLiveToIni;
+    procedure LoadEqFromIni();
+    procedure SaveEqLiveToIni();
     procedure ApplyEqTuning(const T: TEqTuning);
     procedure ApplyEqLiveControls(const Enabled: Boolean;
                                   const LowDb,
@@ -177,7 +177,7 @@ type
                                   const RampMs: Integer);
 
     procedure SetVolumeChannels();
-    function RampModeFromCombo: TMfRampMode;
+    function RampModeFromCombo(): TMfRampMode;
 
     /// <summary>Keep track of data been played.</summary>
     procedure OnAudioDataProcessed(Sender: TObject;
@@ -196,7 +196,24 @@ type
     /// <summary>Signals the rendering engine state.</summary>
     procedure OnEngineState(Sender: TObject;
                             const NewState: TDeviceState);
+
+    // Hot keys
+    procedure WMHotKey(var Msg: TWMHotKey); message WM_HOTKEY;
   end;
+
+const
+
+  // Global hotkey's.
+  HK_TOGGLE_PLAY   = 1;
+  HK_TOGGLE_PAUSE  = 2;
+  HK_TOGGLE_STOP   = 3;
+
+  HK_VOL_UP        = 4;
+  HK_VOL_DOWN      = 5;
+
+  HK_GUI_SHOW      = 6;
+  HK_GUI_HIDE      = 7;
+
 
 var
   frmMain: TfrmMain;
@@ -448,6 +465,42 @@ begin
   fWasApiEngine.OnError := OnEngineError;
   fWasApiEngine.OnStateChanged := OnEngineState;
 
+  // Register global hotkey's.
+  RegisterHotKey(Handle,
+                 HK_TOGGLE_PLAY,
+                 MOD_CONTROL or MOD_ALT,
+                 VK_RIGHT);
+
+  RegisterHotKey(Handle,
+                 HK_TOGGLE_PAUSE,
+                 MOD_CONTROL or MOD_ALT,
+                 VK_LEFT);
+
+  RegisterHotKey(Handle,
+                 HK_TOGGLE_STOP,
+                 MOD_CONTROL or MOD_ALT,
+                 VK_SPACE);
+
+  RegisterHotKey(Handle,
+                 HK_VOL_UP,
+                 MOD_CONTROL or MOD_ALT,
+                 VK_UP);
+
+  RegisterHotKey(Handle,
+                 HK_VOL_DOWN,
+                 MOD_CONTROL or MOD_ALT,
+                 VK_DOWN);
+
+  RegisterHotKey(Handle,
+                 HK_GUI_SHOW,
+                 MOD_CONTROL or MOD_ALT,
+                 VK_ESCAPE);
+
+  RegisterHotKey(Handle,
+                 HK_GUI_HIDE,
+                 MOD_CONTROL or MOD_ALT,
+                 VK_F1);
+
   tbLow.Min := -24;
   tbLow.Max := 24;
   tbLow.Position := 0;
@@ -472,12 +525,29 @@ begin
   chkEQ.Checked := True;
   FWasApiEngine.EnableEQ(True);
   FWasApiEngine.SetRampMode(RampModeFromCombo);
-  FWasApiEngine.SetRampTimeMs(StrToIntDef(edtRampMs.Text, 30));
+  FWasApiEngine.SetRampTimeMs(StrToIntDef(edtRampMs.Text,
+                                          30));
 end;
 
 
 procedure TfrmMain.FormDestroy(Sender: TObject);
 begin
+
+  // Unregister the global hotkey's
+  UnregisterHotKey(Handle,
+                   HK_TOGGLE_PLAY);
+  UnregisterHotKey(Handle,
+                   HK_TOGGLE_PAUSE);
+  UnregisterHotKey(Handle,
+                   HK_TOGGLE_STOP);
+  UnregisterHotKey(Handle,
+                   HK_VOL_UP);
+  UnregisterHotKey(Handle,
+                   HK_VOL_DOWN);
+  UnregisterHotKey(Handle,
+                   HK_GUI_SHOW);
+  UnregisterHotKey(Handle,
+                   HK_GUI_HIDE);
 
   FreeAndNil(FWasApiEngine);
 end;
@@ -490,6 +560,8 @@ var
 
 begin
 
+  // Life operations with focus on visible GUI.
+
   // Set volume slider positions to 0.
   if (Shift = [ssShift]) and (Key = VK_ESCAPE) then
     begin
@@ -501,26 +573,17 @@ begin
     end;
 
   case Key of
-    VK_SPACE:   if Assigned(fWasApiEngine) then
-                  begin
-                    butPlayPauseClick(nil);
-                  end;
-
-    VK_END:     if Assigned(fWasApiEngine) then
-                  begin
-                    butStopClick(nil);
-                  end;
-
     VK_F12:     begin
                   btnLoadClick(nil);
                 end;
 
-    VK_F8:      begin
+    VK_F11:     begin
 
                   iPos := trbVolumeL.Position + trbVolumeR.Position div 2;
                   trbVolumeL.Position := iPos;
                   trbVolumeR.Position := iPos;
                 end;
+
   end;
 end;
 
@@ -615,6 +678,7 @@ end;
 
 procedure TfrmMain.chkEQClick(Sender: TObject);
 begin
+
   if FUpdatingUi then
     Exit;
 
@@ -636,6 +700,7 @@ begin
 
   SaveEqLiveToIni();
 end;
+
 
 procedure TfrmMain.tbMidChange(Sender: TObject);
 begin
@@ -752,6 +817,7 @@ begin
   SaveEqLiveToIni();
 end;
 
+
 procedure TfrmMain.cbxRampChange(Sender: TObject);
 begin
 
@@ -763,6 +829,7 @@ begin
 
   SaveEqLiveToIni();
 end;
+
 
 procedure TfrmMain.edtRampMsChange(Sender: TObject);
 begin
@@ -1014,6 +1081,72 @@ begin
     stxtStatus.Caption := Format('SeekTo failed. (hr=%d)',
                                  [hr]);
 end;
+
+
+procedure TfrmMain.WMHotKey(var Msg: TWMHotKey);
+begin
+  inherited;
+
+  // Global hotkey values.
+  // HK_TOGGLE_PLAY   = 1
+  // HK_TOGGLE_PAUSE  = 2
+  // HK_TOGGLE_STOP   = 3
+  // HK_VOL_UP        = 4
+  // HK_VOL_DOWN      = 5
+  // HK_GUI_SHOW      = 6
+  // HK_GUI_HIDE      = 7
+
+  case Msg.HotKey of
+    HK_TOGGLE_PLAY,
+    HK_TOGGLE_PAUSE:
+      begin
+
+        butPlayPauseClick(nil);
+      end;
+
+    HK_TOGGLE_STOP:
+      begin
+
+        butStopClick(nil)
+      end;
+
+
+    HK_VOL_UP:
+      begin
+
+        trbVolumeL.Position :=  trbVolumeL.Position - 1;
+
+        trbVolumeRChange(trbVolumeL);
+
+        trbVolumeR.Position := trbVolumeR.Position - 1;
+
+        trbVolumeRChange(trbVolumeR);
+      end;
+
+    HK_VOL_DOWN:
+      begin
+
+        trbVolumeL.Position := trbVolumeL.Position + 1;
+        trbVolumeLChange(trbVolumeL);
+
+        trbVolumeR.Position := trbVolumeR.Position + 1;
+        trbVolumeRChange(trbVolumeR);
+      end;
+
+    HK_GUI_SHOW:
+      begin
+
+        Self.Show;
+      end;
+
+    HK_GUI_HIDE:
+      begin
+
+        Self.Hide;
+      end;
+  end;
+end;
+
 
 
 // initialization and finalization =============================================

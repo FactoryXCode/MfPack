@@ -1,6 +1,9 @@
 object frmMain: TfrmMain
   Left = 0
   Top = 0
+  Hint = 
+    'Press Press CTRL + ALT + F1 to hide the GUI.'#13#10'Press Press CTRL +' +
+    ' ALT + ESC to show the GUI.'
   Margins.Left = 5
   Margins.Top = 5
   Margins.Right = 5
@@ -52,11 +55,14 @@ object frmMain: TfrmMain
     Top = 545
     Width = 135
     Height = 38
+    Hint = 'CTRL + ALT + RIGHT'
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
     Margins.Bottom = 5
     Caption = 'Play'
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 1
     OnClick = butPlayPauseClick
   end
@@ -65,11 +71,14 @@ object frmMain: TfrmMain
     Top = 545
     Width = 135
     Height = 38
+    Hint = 'CTRL + ALT + SPACE'
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
     Margins.Bottom = 5
     Caption = 'Stop'
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 2
     OnClick = butStopClick
   end
@@ -149,6 +158,8 @@ object frmMain: TfrmMain
     Margins.Right = 5
     Margins.Bottom = 5
     Align = alTop
+    DoubleBuffered = True
+    ParentDoubleBuffered = False
     TabOrder = 5
     object lblLow: TLabel
       Left = 495
@@ -494,7 +505,9 @@ object frmMain: TfrmMain
       Top = 83
       Width = 59
       Height = 270
-      Hint = 'Press and release SHIFT + ESC to set zero position.'
+      Hint = 
+        'Press and release SHIFT + ESC to set zero position.'#13#10'Press CTRL ' +
+        '+ ALT + DOWN for volume down.'
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -518,7 +531,9 @@ object frmMain: TfrmMain
       Top = 83
       Width = 53
       Height = 270
-      Hint = 'Press and release SHIFT + ESC to set zero position.'
+      Hint = 
+        'Press and release SHIFT + ESC to set zero position.'#13#10'Press CTRL ' +
+        '+ ALT + UP for volume up.'
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
