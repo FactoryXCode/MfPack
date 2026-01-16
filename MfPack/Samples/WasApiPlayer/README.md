@@ -13,9 +13,8 @@ This sample has 2 levels yet.
   The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
   In your projectsettings you must add ..MfPack\\Samples\\MfComponents in the project options searchpath.
 * Example 2 is based on Sample 1, but includes full threaded code, using threadsafe events and also uses a 
-
-&nbsp;  custom MFT for bass and treble control.
-
+  custom MFT for bass and treble control.
+* Example 3 is based on Sample 2, but has a GUI + settings dialog with persistent configuration has a 3 band (high, Mid (Peaking / Notch) and Low EQ MFT.
 
 
 NOTES:
