@@ -3243,13 +3243,12 @@ type
                {_in_opt_}  ppClassInstances: PID3D11ClassInstance;
                           NumClassInstances: UINT); stdcall;
 
-    procedure Draw(IndexCount: UINT;
+    procedure DrawIndexed(IndexCount: UINT;
                    StartIndexLocation: UINT;
                    BaseVertexLocation: Integer); stdcall;
 
-    procedure DrawIndexed(IndexCount: UINT;
-                          StartIndexLocation: UINT;
-                          BaseVertexLocation: Integer); stdcall;
+    procedure Draw(VertexCount: UINT;
+                   StartVertexLocation: UINT); stdcall;
 
     function Map(pResource: ID3D11Resource;
                  Subresource: UINT;
@@ -3703,7 +3702,7 @@ type
                                          {in_opt} pClassLinkage: ID3D11ClassLinkage;
                                         {out_opt} ppGeometryShader: PID3D11GeometryShader): HRESULT; stdcall;
 
-    function CreatePixelShader(const pShaderBytecode: Pointer;
+    function CreatePixelShader(pShaderBytecode: Pointer;
                                BytecodeLength: SIZE_T;
                       {in_opt} pClassLinkage: ID3D11ClassLinkage;
                      {out_opt} ppPixelShader: PID3D11PixelShader): HRESULT; stdcall;
