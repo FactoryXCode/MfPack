@@ -18,7 +18,6 @@ object frmEqSettings: TfrmEqSettings
   Font.Style = []
   Position = poOwnerFormCenter
   OnCreate = FormCreate
-  OnShow = FormShow
   PixelsPerInch = 144
   TextHeight = 23
   object grpLow: TGroupBox
@@ -31,11 +30,17 @@ object frmEqSettings: TfrmEqSettings
     Margins.Right = 5
     Margins.Bottom = 5
     Caption = 'Low shelf'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -17
+    Font.Name = 'Segoe UI'
+    Font.Style = [fsBold]
+    ParentFont = False
     TabOrder = 0
-    object lblLowHz: TLabel
+    object lblLowFreqHz: TLabel
       Left = 18
       Top = 36
-      Width = 68
+      Width = 74
       Height = 23
       Margins.Left = 5
       Margins.Top = 5
@@ -46,7 +51,7 @@ object frmEqSettings: TfrmEqSettings
     object lblLowSlope: TLabel
       Left = 18
       Top = 90
-      Width = 110
+      Width = 122
       Height = 23
       Margins.Left = 5
       Margins.Top = 5
@@ -54,7 +59,7 @@ object frmEqSettings: TfrmEqSettings
       Margins.Bottom = 5
       Caption = 'Slope S (0.1..4)'
     end
-    object edtLowHz: TEdit
+    object edtLowFreqHz: TEdit
       Left = 135
       Top = 30
       Width = 90
@@ -66,7 +71,7 @@ object frmEqSettings: TfrmEqSettings
       TabOrder = 0
       Text = '100'
     end
-    object udLowHz: TUpDown
+    object udLowFreqHz: TUpDown
       Left = 225
       Top = 30
       Width = 24
@@ -75,7 +80,7 @@ object frmEqSettings: TfrmEqSettings
       Margins.Top = 5
       Margins.Right = 5
       Margins.Bottom = 5
-      Associate = edtLowHz
+      Associate = edtLowFreqHz
       Min = 20
       Max = 400
       Position = 100
@@ -113,17 +118,23 @@ object frmEqSettings: TfrmEqSettings
     Left = 402
     Top = 18
     Width = 360
-    Height = 300
+    Height = 318
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
     Margins.Bottom = 5
     Caption = 'Mid band'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -17
+    Font.Name = 'Segoe UI'
+    Font.Style = [fsBold]
+    ParentFont = False
     TabOrder = 1
-    object lblMidHz: TLabel
+    object lblMidFreqHz: TLabel
       Left = 18
       Top = 36
-      Width = 68
+      Width = 74
       Height = 23
       Margins.Left = 5
       Margins.Top = 5
@@ -134,7 +145,7 @@ object frmEqSettings: TfrmEqSettings
     object lblMidQ: TLabel
       Left = 18
       Top = 90
-      Width = 99
+      Width = 106
       Height = 23
       Margins.Left = 5
       Margins.Top = 5
@@ -142,7 +153,7 @@ object frmEqSettings: TfrmEqSettings
       Margins.Bottom = 5
       Caption = 'Bandwidth Q'
     end
-    object edtMidHz: TEdit
+    object edtMidFreqHz: TEdit
       Left = 135
       Top = 30
       Width = 90
@@ -152,9 +163,9 @@ object frmEqSettings: TfrmEqSettings
       Margins.Right = 5
       Margins.Bottom = 5
       TabOrder = 0
-      Text = '1000'
+      Text = '1.000'
     end
-    object udMidHz: TUpDown
+    object udMidFreqHz: TUpDown
       Left = 225
       Top = 30
       Width = 24
@@ -163,7 +174,7 @@ object frmEqSettings: TfrmEqSettings
       Margins.Top = 5
       Margins.Right = 5
       Margins.Bottom = 5
-      Associate = edtMidHz
+      Associate = edtMidFreqHz
       Min = 200
       Max = 6000
       Position = 1000
@@ -223,11 +234,17 @@ object frmEqSettings: TfrmEqSettings
     Margins.Right = 5
     Margins.Bottom = 5
     Caption = 'High shelf'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -17
+    Font.Name = 'Segoe UI'
+    Font.Style = [fsBold]
+    ParentFont = False
     TabOrder = 2
-    object lblHighHz: TLabel
+    object lblHighFreqHz: TLabel
       Left = 18
       Top = 36
-      Width = 68
+      Width = 74
       Height = 23
       Margins.Left = 5
       Margins.Top = 5
@@ -238,7 +255,7 @@ object frmEqSettings: TfrmEqSettings
     object lblHighSlope: TLabel
       Left = 18
       Top = 90
-      Width = 110
+      Width = 122
       Height = 23
       Margins.Left = 5
       Margins.Top = 5
@@ -246,7 +263,7 @@ object frmEqSettings: TfrmEqSettings
       Margins.Bottom = 5
       Caption = 'Slope S (0.1..4)'
     end
-    object edtHighHz: TEdit
+    object edtHighFreqHz: TEdit
       Left = 135
       Top = 30
       Width = 90
@@ -256,9 +273,9 @@ object frmEqSettings: TfrmEqSettings
       Margins.Right = 5
       Margins.Bottom = 5
       TabOrder = 0
-      Text = '10000'
+      Text = '10.000'
     end
-    object udHighHz: TUpDown
+    object udHighFreqHz: TUpDown
       Left = 225
       Top = 30
       Width = 24
@@ -267,7 +284,7 @@ object frmEqSettings: TfrmEqSettings
       Margins.Top = 5
       Margins.Right = 5
       Margins.Bottom = 5
-      Associate = edtHighHz
+      Associate = edtHighFreqHz
       Min = 2000
       Max = 20000
       Position = 10000

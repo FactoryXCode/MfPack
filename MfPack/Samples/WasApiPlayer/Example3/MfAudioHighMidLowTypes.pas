@@ -80,6 +80,42 @@ type
   TMfMidMode = (mmPeaking,
                 mmNotch);
 
+  TBiquadCoeffs = record
+    a0,
+    a1,
+    a2: Double;
+    b1,
+    b2: Double;
+  end;
+
+  TEqTuning = record
+    // enable
+    Enabled: Boolean;
+
+    // Gain (dB)
+    LowDb: Integer;     // e.g. -24 .. +24
+    MidDb: Integer;     // e.g. -24 .. +24
+    HighDb: Integer;    // e.g. -24 .. +24
+
+    // Frequencies (Hz)
+    LowFreqHz: Single;   // e.g. 60
+    MidFreqHz: Single;   // e.g. 1000
+    HighFreqHz: Single;  // e.g. 8000
+
+    // Mid band shape
+    MidMode: TMfMidMode; // mmPeaking / mmNotch
+    MidQ: Single;        // bandwidth / Q
+
+    // Shelf slopes
+    LowShelfSlope: Single;
+    HighShelfSlope: Single;
+
+    // Smoothing
+    RampMode: TMfRampMode;
+    RampTimeMs: Integer;
+  end;
+
+
   // Control interface for a classic 3-band mixer EQ (Low / Mid / High).
   // NOTE: Values are interpreted in the MFT and clamped there.
   IMfHighMidLowControl = interface(IUnknown)
@@ -110,9 +146,53 @@ type
     // Optional: smoothing of changes to avoid zipper noise.
     function SetRampMode(const Mode: TMfRampMode): HRESULT; stdcall;
     function SetRampTimeMs(const Ms: Integer): HRESULT; stdcall;
+
+    function GetBiquadCoeffs(out Low,
+                             Mid,
+                             High: TBiquadCoeffs;
+                             out SampleRate: Double): HRESULT;
   end;
 
 
+  function GetDefaultEqTuning(): TEqTuning;
+
+
 implementation
+
+uses
+  MfAudioHighMidLowMFT;
+
+
+function GetDefaultEqTuning(): TEqTuning;
+begin
+
+  FillChar(Result,
+           SizeOf(Result),
+           0);
+
+  Result.Enabled := True;
+
+  // Gains (dB)
+  Result.LowDb := 0;
+  Result.MidDb := 0;
+  Result.HighDb := 0;
+
+  // Frequencies (Hz) - mixer-ish defaults.
+  Result.LowFreqHz := 80.0;
+  Result.MidFreqHz := 1000.0;
+  Result.HighFreqHz := 8000.0;
+
+  // Mid band shape.
+  Result.MidMode := mmPeaking;
+  Result.MidQ := 1.0;
+
+  // Shelf slopes.
+  Result.LowShelfSlope := 1.0;
+  Result.HighShelfSlope := 1.0;
+
+  // Smoothing.
+  Result.RampMode := rmSmooth;
+  Result.RampTimeMs := 200;
+end;
 
 end.

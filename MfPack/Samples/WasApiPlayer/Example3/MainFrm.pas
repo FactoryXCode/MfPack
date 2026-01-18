@@ -1,6 +1,6 @@
-// FactoryX
+﻿// FactoryX
 //
-// Copyright: � FactoryX. All rights reserved.
+// Copyright: © FactoryX. All rights reserved.
 //
 // Project: MfPack - MediaFoundation
 // Project location: https://sourceforge.net/projects/MFPack
@@ -82,6 +82,7 @@ uses
   Vcl.StdCtrls,
   Vcl.ComCtrls,
   Vcl.ExtCtrls,
+  Vcl.Menus,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfUtils,
@@ -90,7 +91,9 @@ uses
   MfAudioHighMidLowTypes,
   WASAPIEngine,
   MfPeakMeter,
-  EqSettingsFrm, Vcl.Menus;
+  EqSettingsFrm,
+  EqPlotUtils;
+
 
 type
 
@@ -104,7 +107,7 @@ type
     lblBarPositionInSTime: TLabel;
     lblBarPositionInSamples: TLabel;
     pbProgress: TProgressBar;
-    Panel1: TPanel;
+    pnlControls: TPanel;
     lblLow: TLabel;
     lblMid: TLabel;
     lblHigh: TLabel;
@@ -131,10 +134,15 @@ type
     Bevel1: TBevel;
     lblDuration: TLabel;
     lblPlayed: TLabel;
-    lblProcessed: TLabel;
     MainMenu1: TMainMenu;
     Application1: TMenuItem;
     Settings1: TMenuItem;
+    pnlEq: TPanel;
+    imgSpectrumAnalizer: TImage;
+    stxtHighIndex: TStaticText;
+    stxtMidIndex: TStaticText;
+    stxtLowIndex: TStaticText;
+    stxtProcessed: TStaticText;
 
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -163,10 +171,12 @@ type
     FWasApiEngine: TWasApiEngine;
     FFileName: string;
     llAudioDuration: LONGLONG;
+    FSamplesThrottle: Word;
     FfrmEqSettings: TfrmEqSettings;
 
     function IniFileName: string;
-    procedure LoadEqFromIni();
+
+    procedure LoadEqFromIni(); // Loads the values for the MFT.
     procedure SaveEqLiveToIni();
     procedure ApplyEqTuning(const T: TEqTuning);
     procedure ApplyEqLiveControls(const Enabled: Boolean;
@@ -178,6 +188,7 @@ type
 
     procedure SetVolumeChannels();
     function RampModeFromCombo(): TMfRampMode;
+    procedure UpdateSpectrumPlot();
 
     /// <summary>Keep track of data been played.</summary>
     procedure OnAudioDataProcessed(Sender: TObject;
@@ -214,6 +225,13 @@ const
   HK_GUI_SHOW      = 6;
   HK_GUI_HIDE      = 7;
 
+  {     // Set initial plot.
+      LoadEqFromIni();          // If we do INI-based tuning.
+      LoadEqTuningFromIni();
+      ApplyEqTuning(FEqTuning); // Sends params to engine/MFT.
+      FWasApiEngine.ApplyEqTuningImmediate(FEqTuning);
+      UpdateSpectrumPlot();     // Coefficients reflect the tuning.}
+
 
 var
   frmMain: TfrmMain;
@@ -222,6 +240,14 @@ var
 implementation
 
 {$R *.dfm}
+
+
+// Slider helper to invert slider values.
+function InvertDb(const V: Integer): Integer;
+begin
+
+  Result := -V;
+end;
 
 
 function TfrmMain.IniFileName: string;
@@ -242,9 +268,9 @@ begin
     Exit;
 
   // Fine tuning (frequency bands / filter shapes)
-  FWasApiEngine.SetLowFreqHz(FEqTuning.LowHz);
-  FWasApiEngine.SetMidFreqHz(FEqTuning.MidHz);
-  FWasApiEngine.SetHighFreqHz(FEqTuning.HighHz);
+  FWasApiEngine.SetLowFreqHz(FEqTuning.LowFreqHz);
+  FWasApiEngine.SetMidFreqHz(FEqTuning.MidFreqHz);
+  FWasApiEngine.SetHighFreqHz(FEqTuning.HighFreqHz);
 
   FWasApiEngine.SetMidMode(FEqTuning.MidMode);
   FWasApiEngine.SetMidQ(FEqTuning.MidQ);
@@ -296,11 +322,12 @@ begin
   // Apply to engine (threaded; enqueued commands)
   if Assigned(FWasApiEngine) then
     begin
+
       FWasApiEngine.EnableEQ(chkEQ.Checked);
 
-      FWasApiEngine.SetLowDb(tbLow.Position);
-      FWasApiEngine.SetMidDb(tbMid.Position);
-      FWasApiEngine.SetHighDb(tbHigh.Position);
+      FWasApiEngine.SetLowDb(InvertDb(tbLow.Position));
+      FWasApiEngine.SetMidDb(InvertDb(tbMid.Position));
+      FWasApiEngine.SetHighDb(InvertDb(tbHigh.Position));
 
       FWasApiEngine.SetRampMode(RampModeFromCombo);
       FWasApiEngine.SetRampTimeMs(StrToIntDef(edtRampMs.Text,
@@ -329,17 +356,17 @@ begin
     // -------------------------------------------------------------------------
     // 1) Fine tuning (saved by settings dialog) - section [EQ]
     // -------------------------------------------------------------------------
-    T.LowHz := Ini.ReadFloat('EQ',
-                             'LowHz',
-                             100.0);
+    T.LowFreqHz := Ini.ReadFloat('EQ',
+                                 'LowHz',
+                                 100.0);
 
-    T.MidHz := Ini.ReadFloat('EQ',
-                             'MidHz',
-                             1000.0);
+    T.MidFreqHz := Ini.ReadFloat('EQ',
+                                 'MidHz',
+                                 1000.0);
 
-    T.HighHz := Ini.ReadFloat('EQ',
-                              'HighHz',
-                              10000.0);
+    T.HighFreqHz := Ini.ReadFloat('EQ',
+                                  'HighHz',
+                                  10000.0);
 
     T.MidQ := Ini.ReadFloat('EQ',
                             'MidQ',
@@ -527,6 +554,8 @@ begin
   FWasApiEngine.SetRampMode(RampModeFromCombo);
   FWasApiEngine.SetRampTimeMs(StrToIntDef(edtRampMs.Text,
                                           30));
+  FSamplesThrottle := 0;
+  UpdateSpectrumPlot();
 end;
 
 
@@ -614,10 +643,8 @@ begin
                                     [HnsTimeToStr(llAudioDuration, False)]);
 
       // Set progressbar max
-      pbProgress.Max := llAudioDuration div 1000000;      LoadEqFromIni;
-
-
-
+      pbProgress.Max := llAudioDuration div 1000000;
+      LoadEqFromIni();
       FWasApiEngine.OpenFile(FFileName,
                              llAudioDuration);
     end;
@@ -685,7 +712,7 @@ begin
   if Assigned(FWasApiEngine) then
     FWasApiEngine.EnableEQ(chkEQ.Checked);
 
-  SaveEqLiveToIni;
+  SaveEqLiveToIni();
 end;
 
 
@@ -696,9 +723,15 @@ begin
     Exit;
 
   if Assigned(FWasApiEngine) then
-    FWasApiEngine.SetLowDb(tbLow.Position);
+    begin
 
-  SaveEqLiveToIni();
+      FWasApiEngine.SetLowDb(InvertDb(tbLow.Position));
+      stxtLowIndex.Caption := IntToStr(InvertDb(tbLow.Position));
+
+      UpdateSpectrumPlot();
+      SaveEqLiveToIni();
+    end;
+
 end;
 
 
@@ -709,9 +742,30 @@ begin
     Exit;
 
   if Assigned(FWasApiEngine) then
-    FWasApiEngine.SetMidDb(tbMid.Position);
+    begin
 
-  SaveEqLiveToIni();
+      FWasApiEngine.SetMidDb(InvertDb(tbMid.Position));
+      stxtMidIndex.Caption := IntToStr(InvertDb(tbMid.Position));
+      UpdateSpectrumPlot();
+      SaveEqLiveToIni();
+    end;
+end;
+
+
+procedure TfrmMain.tbHighChange(Sender: TObject);
+begin
+
+  if FUpdatingUi then
+    Exit;
+
+  if Assigned(FWasApiEngine) then
+    begin
+
+      FWasApiEngine.SetHighDb(InvertDb(tbHigh.Position));
+      stxtHighIndex.Caption := IntToStr(InvertDb(tbHigh.Position));
+      UpdateSpectrumPlot();
+      SaveEqLiveToIni();
+    end;
 end;
 
 
@@ -804,20 +858,6 @@ begin
 end;
 
 
-
-procedure TfrmMain.tbHighChange(Sender: TObject);
-begin
-
-  if FUpdatingUi then
-    Exit;
-
-  if Assigned(FWasApiEngine) then
-    FWasApiEngine.SetHighDb(tbHigh.Position);
-
-  SaveEqLiveToIni();
-end;
-
-
 procedure TfrmMain.cbxRampChange(Sender: TObject);
 begin
 
@@ -826,7 +866,7 @@ begin
 
   if Assigned(FWasApiEngine) then
     FWasApiEngine.SetRampMode(RampModeFromCombo);
-
+  UpdateSpectrumPlot();
   SaveEqLiveToIni();
 end;
 
@@ -840,9 +880,50 @@ begin
   if Assigned(FWasApiEngine) then
     FWasApiEngine.SetRampTimeMs(StrToIntDef(edtRampMs.Text,
                                             30));
-
-  SaveEqLiveToIni;
+  UpdateSpectrumPlot();
+  SaveEqLiveToIni();
 end;
+
+
+procedure TfrmMain.UpdateSpectrumPlot();
+var
+  R: TRect;
+  Low,
+  Mid,
+  High: TBiquadCoeffs;
+  Fs: Double;
+
+begin
+
+  R := Rect(0,
+            0,
+            imgSpectrumAnalizer.Width,
+            imgSpectrumAnalizer.Height);
+
+  if (R.Right <= 0) or (R.Bottom <= 0) then
+    Exit;
+
+  imgSpectrumAnalizer.Picture.Bitmap.SetSize(R.Right,
+                                             R.Bottom);
+
+  imgSpectrumAnalizer.Picture.Bitmap.Canvas.Brush.Color := $00001A00;
+  imgSpectrumAnalizer.Picture.Bitmap.Canvas.FillRect(R);
+
+  if Assigned(FWasApiEngine) and
+     FWasApiEngine.GetEqBiquadCoeffs(Low,
+                                     Mid,
+                                     High,
+                                     Fs) then
+    PlotEqResponse(imgSpectrumAnalizer.Picture.Bitmap.Canvas,
+                   R,
+                   Fs,
+                   Low,
+                   Mid,
+                   High);
+
+  //imgSpectrumAnalizer.Invalidate;
+end;
+
 
 
 // Event handlers ==============================================================
@@ -877,10 +958,18 @@ begin
   tstr := HnsTimeToStr(iProgress,
                        False);
 
-  lblProcessed.Caption := Format('Samples: %d',
-                                 [iSamples]);
+
   lblPlayed.Caption := Format('Played: %s',
                               [tstr]);
+
+  inc(FSamplesThrottle);
+  if (FSamplesThrottle >= 60) and (iSamples > 1024) then
+    begin
+
+      stxtProcessed.Caption := Format('Samples: %d kb',
+                                      [iSamples div 1024]);
+      FSamplesThrottle := 0;
+    end;
 end;
 
 
@@ -903,6 +992,7 @@ begin
   else
     pbProgress.Max := Integer(durSec);
 
+  FSamplesThrottle := 0;
   pbProgress.Position := 0;
   pbProgress.Enabled := (pbProgress.Max > 0);
   butPlayPause.Enabled := True;
@@ -916,12 +1006,11 @@ begin
     begin
 
       // re-apply current UI values to engine (important after plugging a new MFT or new file)
-      fWasApiEngine.SetLowDb(tbLow.Position);
-      fWasApiEngine.SetMidDb(tbMid.Position);
-      fWasApiEngine.SetHighDb(tbHigh.Position);
+      fWasApiEngine.SetLowDb(InvertDb(tbLow.Position));
+      fWasApiEngine.SetMidDb(InvertDb(tbMid.Position));
+      fWasApiEngine.SetHighDb(InvertDb(tbHigh.Position));
       cbxRampChange(nil);
     end;
-  // ===========================================================================
 end;
 
 
@@ -933,7 +1022,10 @@ begin
 
   butPlayPause.Enabled := True;
   butPlayPause.Caption := 'Play';
+  // Resets controls, engine.stop has allready being called in the engine loop.
+  butStop.OnClick(nil);
   butStop.Enabled := False;
+
 end;
 
 
@@ -961,7 +1053,7 @@ begin
 
         pbProgress.Position := 0;
         lblPlayed.Caption := 'Played: 00:00:00';
-        lblProcessed.Caption := 'Samples: 0';
+        stxtProcessed.Caption := 'Samples: 0';
       end;
 
     dsPlay:
@@ -1004,6 +1096,8 @@ begin
 
   end;
 end;
+
+  // ===========================================================================
 
 
 procedure TfrmMain.pbProgressMouseMove(Sender: TObject; Shift: TShiftState; X,
@@ -1081,6 +1175,7 @@ begin
     stxtStatus.Caption := Format('SeekTo failed. (hr=%d)',
                                  [hr]);
 end;
+
 
 
 procedure TfrmMain.WMHotKey(var Msg: TWMHotKey);

@@ -165,6 +165,11 @@ type
 
     function CurrentSampleRate(): Double;
 
+    function GetBiquadCoeffs(out Low,
+                             Mid,
+                             High: TBiquadCoeffs;
+                             out SampleRate: Double): HRESULT;
+
   protected
 
     procedure ClearStateLocked(); override;
@@ -198,6 +203,8 @@ type
 
     function SetRampMode(const Mode: TMfRampMode): HRESULT; stdcall;
     function SetRampTimeMs(const Ms: Integer): HRESULT; stdcall;
+
+
   end;
 
 function CreateHighMidLowMFT(out pMft: IMFTransform): HRESULT;
@@ -303,6 +310,45 @@ begin
 end;
 
 
+function THighMidLowMFT.GetBiquadCoeffs(out Low,
+                                        Mid,
+                                        High: TBiquadCoeffs;
+                                        out SampleRate: Double): HRESULT;
+begin
+
+  FLock.Enter();
+
+  try
+
+    Low.a0 := FLowL.a0;
+    Low.a1 := FLowL.a1;
+    Low.a2 := FLowL.a2;
+    Low.b1 := FLowL.b1;
+    Low.b2 := FLowL.b2;
+
+    Mid.a0 := FMidL.a0;
+    Mid.a1 := FMidL.a1;
+    Mid.a2 := FMidL.a2;
+    Mid.b1 := FMidL.b1;
+    Mid.b2 := FMidL.b2;
+
+    High.a0 := FHighL.a0;
+    High.a1 := FHighL.a1;
+    High.a2 := FHighL.a2;
+    High.b1 := FHighL.b1;
+    High.b2 := FHighL.b2;
+
+    SampleRate := FSampleRate;
+
+    Result := S_OK;
+
+  finally
+
+    FLock.Leave();
+  end;
+end;
+
+
 procedure THighMidLowMFT.ClearStateLocked();
 begin
 
@@ -360,16 +406,18 @@ begin
   sr := Round(CurrentSampleRate);
 
   if (FRampSamplesLeft <= 0) then
-    FRampSamplesLeft := Max(1, (rampMs * sr) div 1000);
+    FRampSamplesLeft := Max(1,
+                            (rampMs * sr) div 1000);
 
   step := Min(1.0,
               Frames / Single(FRampSamplesLeft));
 
-  FLowDbCur  := FLowDbCur  + (FLowDbTarget  - FLowDbCur)  * step;
-  FMidDbCur  := FMidDbCur  + (FMidDbTarget  - FMidDbCur)  * step;
+  FLowDbCur  := FLowDbCur + (FLowDbTarget - FLowDbCur) * step;
+  FMidDbCur  := FMidDbCur + (FMidDbTarget - FMidDbCur) * step;
   FHighDbCur := FHighDbCur + (FHighDbTarget - FHighDbCur) * step;
 
-  FRampSamplesLeft := Max(0, FRampSamplesLeft - Frames);
+  FRampSamplesLeft := Max(0,
+                          FRampSamplesLeft - Frames);
 
   UpdateCoeffsLocked();
 end;
@@ -390,6 +438,11 @@ begin
                  FMidFreqHz,
                  FMidQ,
                  FMidL);
+
+  //{$IFDEF DEBUG}
+  //OutputDebugString(PWideChar(Format('UpdateCoeffs: MidHz=%.1f MidDb=%.1f Q=%.2f',
+  //                                   [FMidFreqHz, FMidDbCur, FMidQ])));
+  //{$ENDIF}
 
   ComputePeaking(FMidDbCur,
                  FMidFreqHz,
@@ -431,7 +484,7 @@ begin
   cosw0 := Cos(w0);
   sinw0 := Sin(w0);
 
-  // S = 1.0 shelving slope
+  // S = 1.0 shelving slope.
   alpha := sinw0 / 2 * Sqrt((A + 1 / A) * 1.0 - 2.0);
   sqrtA := Sqrt(A);
 
@@ -743,6 +796,7 @@ begin
 
     FLock.Leave();
   end;
+
   Result := S_OK;
 end;
 
@@ -762,6 +816,7 @@ begin
 
     FLock.Leave();
   end;
+
   Result := S_OK;
 end;
 
@@ -777,6 +832,7 @@ begin
   finally
     FLock.Leave();
   end;
+
   Result := S_OK;
 end;
 
@@ -796,6 +852,7 @@ begin
 
     FLock.Leave();
   end;
+
   Result := S_OK;
 end;
 
@@ -816,6 +873,7 @@ begin
 
     FLock.Leave();
   end;
+
   Result := S_OK;
 end;
 
@@ -835,6 +893,7 @@ begin
 
     FLock.Leave();
   end;
+
   Result := S_OK;
 end;
 
@@ -855,6 +914,7 @@ begin
 
     FLock.Leave();
   end;
+
   Result := S_OK;
 end;
 
@@ -873,6 +933,7 @@ begin
 
     FLock.Leave();
   end;
+
   Result := S_OK;
 end;
 
@@ -892,6 +953,7 @@ begin
 
     FLock.Leave();
   end;
+
   Result := S_OK;
 end;
 
@@ -900,6 +962,7 @@ function CreateHighMidLowMFT(out pMft: IMFTransform): HRESULT;
 begin
 
   pMft := THighMidLowMFT.Create as IMFTransform;
+
   Result := S_OK;
 end;
 

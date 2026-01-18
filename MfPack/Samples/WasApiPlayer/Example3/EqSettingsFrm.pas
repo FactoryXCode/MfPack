@@ -1,125 +1,48 @@
-// FactoryX
-//
-// Copyright: © FactoryX. All rights reserved.
-//
-// Project: MfPack - MediaFoundation
-// Project location: https://sourceforge.net/projects/MFPack
-//                   https://github.com/FactoryXCode/MfPack
-// Module: EqSettingsFrm.pas
-// Kind: Pascal Unit
-// Release date: 13-08-2025
-// Language: ENU
-//
-// Revision Version: 3.1.9
-//
-// Description: This dialog is used for tuning all MFT parameters and
-//              store the values to an ini file.
-//
-//
-// Organisation: FactoryX
-// Initiator(s): Tony (maXcomX)
-// Contributor(s): Tony (maXcomX)
-//
-//------------------------------------------------------------------------------
-// CHANGE LOG
-// Date       Person              Reason
-// ---------- ------------------- ----------------------------------------------
-// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
-//------------------------------------------------------------------------------
-//
-// Remarks: Requires Windows 10 (2H20) or later.
-//          Recommended minimum Delphi version: XE7.
-//
-// Related objects: -
-// Related projects: MfPackX319/Samples/WasApiPlayer/Example3
-//
-// Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
-//
-// Todo: -
-//
-//==============================================================================
-// Source: -
-//==============================================================================
-//
-// LICENSE
-//
-// The contents of this file are subject to the Mozilla Public License
-// Version 2.0 (the "License"); you may not use this file except in
-// compliance with the License. You may obtain a copy of the License at
-// https://www.mozilla.org/en-US/MPL/2.0/
-//
-// Software distributed under the License is distributed on an "AS IS"
-// basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-// License for the specific language governing rights and limitations
-// under the License.
-//
-// Non commercial users may distribute this sourcecode provided that this
-// header is included in full at the top of the file.
-// Commercial users are not allowed to distribute this sourcecode as part of
-// their product.
-//
-//==============================================================================
 unit EqSettingsFrm;
 
 interface
 
 uses
-
-  {WinApi}
-  WinApi.Windows,
-  WinApi.Messages,
-  WinApi.WinError,
-  {System}
+  Winapi.Windows,
+  Winapi.Messages,
   System.SysUtils,
   System.Classes,
   System.IniFiles,
-  {Vcl}
+
   Vcl.Controls,
   Vcl.Forms,
   Vcl.StdCtrls,
   Vcl.ExtCtrls,
   Vcl.ComCtrls,
-  {Application}
   MfAudioHighMidLowTypes;
 
 type
-
-  TEqTuning = record
-    LowHz: Single;
-    MidHz: Single;
-    HighHz: Single;
-    MidQ: Single;
-    LowShelfSlope: Single;
-    HighShelfSlope: Single;
-    MidMode: TMfMidMode;
-  end;
 
   TEqApplyEvent = procedure(Sender: TObject;
                             const Tuning: TEqTuning) of object;
 
   TfrmEqSettings = class(TForm)
     grpLow: TGroupBox;
-    lblLowHz: TLabel;
-    edtLowHz: TEdit;
-    udLowHz: TUpDown;
+    lblLowFreqHz: TLabel;
+    edtLowFreqHz: TEdit;
+    udLowFreqHz: TUpDown;
     lblLowSlope: TLabel;
     edtLowSlope: TEdit;
     udLowSlope: TUpDown;
 
     grpMid: TGroupBox;
-    lblMidHz: TLabel;
-    edtMidHz: TEdit;
-    udMidHz: TUpDown;
+    lblMidFreqHz: TLabel;
+    edtMidFreqHz: TEdit;
+    udMidFreqHz: TUpDown;
     lblMidQ: TLabel;
     edtMidQ: TEdit;
     udMidQ: TUpDown;
     rgMidMode: TRadioGroup;
 
     grpHigh: TGroupBox;
-    lblHighHz: TLabel;
-    edtHighHz: TEdit;
-    udHighHz: TUpDown;
+    lblHighFreqHz: TLabel;
+    edtHighFreqHz: TEdit;
+    udHighFreqHz: TUpDown;
     lblHighSlope: TLabel;
     edtHighSlope: TEdit;
     udHighSlope: TUpDown;
@@ -130,24 +53,24 @@ type
     btnDefaults: TButton;
 
     procedure FormCreate(Sender: TObject);
-    procedure FormShow(Sender: TObject);
     procedure btnApplyClick(Sender: TObject);
     procedure btnDefaultsClick(Sender: TObject);
     procedure btnOKClick(Sender: TObject);
 
   private
 
-    FLoading: Boolean;
+    FOnApply: TEqApplyEvent;
+    FDefaults: TEqTuning;
+    FTuning: TEqTuning;
     FIniFileName: string;
     FIniSection: string;
-    FDefaults: TEqTuning;
 
-    FOnApply: TEqApplyEvent;
-    function ReadTuningFromUi: TEqTuning;
+    function ReadTuningFromUi(): TEqTuning;
     procedure WriteTuningToUi(const T: TEqTuning);
 
   public
 
+    // Optional: if configured, Apply/OK can auto-save to ini.
     procedure ConfigureStorage(const IniFileName: string;
                                const Section: string;
                                const Defaults: TEqTuning);
@@ -160,9 +83,8 @@ type
                         const Section: string;
                         const T: TEqTuning);
 
-    procedure SetInitialTuning(const T: TEqTuning);
-
     property OnApply: TEqApplyEvent read FOnApply write FOnApply;
+    procedure SetInitialTuning(const T: TEqTuning);
   end;
 
 var
@@ -176,6 +98,33 @@ implementation
 uses
   System.Math;
 
+
+// Helpers ---------------------------------------------------------------------
+
+function TryReadSingle(const S: string; out V: Single): Boolean;
+var
+  fs: TFormatSettings;
+  tmp: string;
+  d: Double;
+
+begin
+
+  // Accept both "," and "." as decimal separator.
+  tmp := StringReplace(S,
+                       ',',
+                       '.',
+                       [rfReplaceAll]);
+
+  fs := TFormatSettings.Create();
+  fs.DecimalSeparator := '.';
+  Result := TryStrToFloat(tmp,
+                          d,
+                          fs);
+  if Result then
+    V := Single(d);
+end;
+
+
 function StrToFloatDefUS(const S: string;
                          const Def: Single): Single;
 var
@@ -183,8 +132,10 @@ var
 
 begin
 
-  fs := TFormatSettings.Create();
+  fs := TFormatSettings.Create;
   fs.DecimalSeparator := '.';
+
+  // Accept both "," and "." as decimal separator.
   Result := StrToFloatDef(StringReplace(S,
                                         ',',
                                         '.',
@@ -200,100 +151,56 @@ var
 
 begin
 
-  fs := TFormatSettings.Create;
+  fs := TFormatSettings.Create();
   fs.DecimalSeparator := '.';
-  Result := FloatToStr(V,
-                       fs);
+  Result := FloatToStr(V, fs);
 end;
+
+// -----------------------------------------------------------------------------
 
 
 procedure TfrmEqSettings.FormCreate(Sender: TObject);
 begin
 
   // UpDowns are integer-only; we store scaled ints for slope/Q (x100).
-  udLowHz.Min := 10;
-  udLowHz.Max := 400;
-  udMidHz.Min := 200;
-  udMidHz.Max := 6000;
-  udHighHz.Min := 2000;
-  udHighHz.Max := 22000;
+  udLowFreqHz.Min := 10;
+  udLowFreqHz.Max := 400;
+  udMidFreqHz.Min := 200;
+  udMidFreqHz.Max := 6000;
+  udHighFreqHz.Min := 2000;
+  udHighFreqHz.Max := 22000;
 
   udMidQ.Min := 30;
-  udMidQ.Max := 600;   // 0.30 .. 6.00
-  udLowSlope.Min := 10; udLowSlope.Max := 400; // 0.10 .. 4.00
+  udMidQ.Max := 600; // 0.30 .. 6.00
+  udLowSlope.Min := 10;
+  udLowSlope.Max := 400; // 0.10 .. 4.00
   udHighSlope.Min := 10;
   udHighSlope.Max := 400;
 
-
-  rgMidMode.Items.Clear();
+  rgMidMode.Items.Clear;
   rgMidMode.Items.Add('Peaking (Bell)');
   rgMidMode.Items.Add('Notch (Band-stop)');
   rgMidMode.ItemIndex := 0;
-end;
 
+  // Reasonable built-in defaults (can be overridden by ConfigureStorage)
+  FillChar(FDefaults, SizeOf(FDefaults), 0);
+  FDefaults.LowFreqHz := 100.0;
+  FDefaults.MidFreqHz := 1000.0;
+  FDefaults.HighFreqHz := 10000.0;
+  FDefaults.MidQ := 1.0;
+  FDefaults.LowShelfSlope := 1.0;
+  FDefaults.HighShelfSlope := 1.0;
+  FDefaults.MidMode := mmPeaking;
 
-
-procedure TfrmEqSettings.FormShow(Sender: TObject);
-begin
-
-  // Lazy defaults for standalone usage.
-  if (FIniSection = '') then
-    FIniSection := 'EQ';
-
-  if (FIniFileName = '') then
-    FIniFileName := ChangeFileExt(Application.ExeName,
-                                  '.ini');
-
-  // If caller never provided defaults, use sensible teaching defaults
-  if (FDefaults.LowHz = 0) and
-     (FDefaults.MidHz = 0) and
-     (FDefaults.HighHz = 0) then
-    begin
-
-      FDefaults.LowHz := 100.0;
-      FDefaults.MidHz := 1000.0;
-      FDefaults.HighHz := 10000.0;
-      FDefaults.MidQ := 1.0;
-      FDefaults.LowShelfSlope := 1.0;
-      FDefaults.HighShelfSlope := 1.0;
-      FDefaults.MidMode := mmPeaking;
-    end;
-
-  // Load persisted values into the UI.
-  FLoading := True;
-
-  try
-    LoadFromIni(FIniFileName,
-                FIniSection,
-                FDefaults);
-  finally
-
-    FLoading := False;
-  end;
+  FTuning := FDefaults;
 end;
 
 
 procedure TfrmEqSettings.SetInitialTuning(const T: TEqTuning);
 begin
 
-  // Used by the main form to seed the dialog with current tuning.
-  // We also store this as defaults (for "Defaults" button) if defaults were not set yet.
-  if (FDefaults.LowHz = 0) and
-     (FDefaults.MidHz = 0) and
-     (FDefaults.HighHz = 0) then
-    FDefaults := T;
-
-  WriteTuningToUi(T);
-end;
-
-
-
-procedure TfrmEqSettings.ConfigureStorage(const IniFileName: string; const Section: string; const Defaults: TEqTuning);
-begin
-
-  FIniFileName := IniFileName;
-  FIniSection := Section;
-  FDefaults := Defaults;
+  FTuning := T;
+  WriteTuningToUi(FTuning);
 end;
 
 
@@ -303,69 +210,75 @@ var
 
 begin
 
-  if FLoading then
-    Exit;
-
-  T := ReadTuningFromUi();
-
-  // Persist immediately
-  if FIniFileName = '' then
-    FIniFileName := ChangeFileExt(Application.ExeName, '.ini');
-  if FIniSection = '' then
-    FIniSection := 'EQ';
-
-  SaveToIni(FIniFileName,
-            FIniSection,
-            T);
+  T := ReadTuningFromUi;
+  FTuning := T;
+  // Normalize UI to clamped values (but do NOT revert unrelated fields).
+  WriteTuningToUi(FTuning);
 
   if Assigned(FOnApply) then
     FOnApply(Self, T);
+
+  // If storage is configured, save what we just applied.
+  if (FIniFileName <> '') and (FIniSection <> '') then
+    SaveToIni(FIniFileName, FIniSection, FTuning);
 end;
 
 
 procedure TfrmEqSettings.btnDefaultsClick(Sender: TObject);
 begin
 
-  // Restore dialog defaults (does not apply until user clicks Apply/OK)
-  WriteTuningToUi(FDefaults);
+  FTuning := FDefaults;
+  WriteTuningToUi(FTuning);
+
+  if Assigned(FOnApply) then
+    FOnApply(Self, FTuning);
+
+  if (FIniFileName <> '') and (FIniSection <> '') then
+    SaveToIni(FIniFileName, FIniSection, FTuning);
 end;
 
 
 procedure TfrmEqSettings.btnOKClick(Sender: TObject);
 begin
-
   // Apply once on OK for convenience
   btnApplyClick(Sender);
   ModalResult := mrOk;
 end;
 
 
-function TfrmEqSettings.ReadTuningFromUi: TEqTuning;
+function TfrmEqSettings.ReadTuningFromUi(): TEqTuning;
 var
-  q100,
-  sLow100,
-  sHigh100: Integer;
+  v: Single;
 
 begin
 
-  FillChar(Result,
-           SizeOf(Result),
-           0);
+  // Start from current tuning so a single invalid/empty field doesn't
+  // reset everything back to defaults.
+  Result := FTuning;
 
-  Result.LowHz := StrToFloatDef(edtLowHz.Text,
-                                100.0);
-  Result.MidHz := StrToFloatDef(edtMidHz.Text,
-                                1000.0);
-  Result.HighHz := StrToFloatDef(edtHighHz.Text,
-                                 10000.0);
+  if TryReadSingle(Trim(edtLowFreqHz.Text),
+                        v) then
+    Result.LowFreqHz := v;
 
-  // Q and slopes as decimal; we also mirror UpDown (x100)
-  Result.MidQ := StrToFloatDefUS(edtMidQ.Text,
-                                 1.0);
-  Result.LowShelfSlope := StrToFloatDefUS(edtLowSlope.Text,
-                                          1.0);
-  Result.HighShelfSlope := StrToFloatDefUS(edtHighSlope.Text,
-                                           1.0);
+  if TryReadSingle(Trim(edtMidFreqHz.Text),
+                        v) then
+    Result.MidFreqHz := v;
+
+  if TryReadSingle(Trim(edtHighFreqHz.Text),
+                        v) then
+    Result.HighFreqHz := v;
+
+  if TryReadSingle(Trim(edtMidQ.Text),
+                        v) then
+    Result.MidQ := v;
+
+  if TryReadSingle(Trim(edtLowSlope.Text),
+                        v) then
+    Result.LowShelfSlope := v;
+
+  if TryReadSingle(Trim(edtHighSlope.Text),
+                        v) then
+    Result.HighShelfSlope := v;
 
   // Notch or Bell
   if (rgMidMode.ItemIndex = 1) then
@@ -374,13 +287,13 @@ begin
     Result.MidMode := mmPeaking;
 
   // Clamp UI values (engine also clamps, but keep UI sane)
-  Result.LowHz := EnsureRange(Result.LowHz,
+  Result.LowFreqHz := EnsureRange(Result.LowFreqHz,
                               10.0,
                               400.0);
-  Result.MidHz := EnsureRange(Result.MidHz,
+  Result.MidFreqHz := EnsureRange(Result.MidFreqHz,
                               200.0,
                               6000.0);
-  Result.HighHz := EnsureRange(Result.HighHz,
+  Result.HighFreqHz := EnsureRange(Result.HighFreqHz,
                                2000.0,
                                22000.0);
 
@@ -395,52 +308,39 @@ begin
   Result.HighShelfSlope := EnsureRange(Result.HighShelfSlope,
                                        0.10,
                                        4.00);
+end;
 
-  // keep UpDowns in sync (integers)
-  if not FLoading then
-    begin
-      udLowHz.Position := Round(Result.LowHz);
-  udMidHz.Position := Round(Result.MidHz);
-  udHighHz.Position := Round(Result.HighHz);
 
-  q100 := Round(Result.MidQ * 100);
-  sLow100 := Round(Result.LowShelfSlope * 100);
-  sHigh100 := Round(Result.HighShelfSlope * 100);
+procedure TfrmEqSettings.ConfigureStorage(const IniFileName: string;
+                                          const Section: string;
+                                          const Defaults: TEqTuning);
+begin
 
-  udMidQ.Position := EnsureRange(q100,
-                                 udMidQ.Min,
-                                 udMidQ.Max);
-
-  udLowSlope.Position := EnsureRange(sLow100,
-                                     udLowSlope.Min,
-                                     udLowSlope.Max);
-
-  udHighSlope.Position := EnsureRange(sHigh100,
-                                      udHighSlope.Min,
-                                      udHighSlope.Max);
-
-  // normalize text (dot decimal)
-  edtMidQ.Text := FloatToStrUS(Result.MidQ);
-  edtLowSlope.Text := FloatToStrUS(Result.LowShelfSlope);
-      edtHighSlope.Text := FloatToStrUS(Result.HighShelfSlope);
-    end;
+  FIniFileName := IniFileName;
+  FIniSection := Section;
+  FDefaults := Defaults;
+  // Keep a sane base.
+  if (FTuning.LowFreqHz = 0) and
+     (FTuning.MidFreqHz = 0) and
+     (FTuning.HighFreqHz = 0) then
+    FTuning := FDefaults;
 end;
 
 
 procedure TfrmEqSettings.WriteTuningToUi(const T: TEqTuning);
 begin
 
-  edtLowHz.Text := IntToStr(Round(EnsureRange(T.LowHz,
-                                  10.0,
-                                  400.0)));
+  edtLowFreqHz.Text := IntToStr(Round(EnsureRange(T.LowFreqHz,
+                                                  10.0,
+                                                  400.0)));
 
-  edtMidHz.Text := IntToStr(Round(EnsureRange(T.MidHz,
-                                              200.0,
-                                              6000.0)));
+  edtMidFreqHz.Text := IntToStr(Round(EnsureRange(T.MidFreqHz,
+                                                  200.0,
+                                                  6000.0)));
 
-  edtHighHz.Text := IntToStr(Round(EnsureRange(T.HighHz,
-                                               2000.0,
-                                               22000.0)));
+  edtHighFreqHz.Text := IntToStr(Round(EnsureRange(T.HighFreqHz,
+                                                   2000.0,
+                                                   22000.0)));
 
   edtMidQ.Text := FloatToStrUS(EnsureRange(T.MidQ,
                                            0.30,
@@ -454,14 +354,14 @@ begin
                                                 0.10,
                                                 4.00));
 
-  udLowHz.Position := StrToIntDef(edtLowHz.Text,
-                                  100);
+  udLowFreqHz.Position := StrToIntDef(edtLowFreqHz.Text,
+                                      100);
 
-  udMidHz.Position := StrToIntDef(edtMidHz.Text,
-                                  1000);
+  udMidFreqHz.Position := StrToIntDef(edtMidFreqHz.Text,
+                                      1000);
 
-  udHighHz.Position := StrToIntDef(edtHighHz.Text,
-                                   10000);
+  udHighFreqHz.Position := StrToIntDef(edtHighFreqHz.Text,
+                                       10000);
 
   udMidQ.Position := Round(StrToFloatDefUS(edtMidQ.Text,
                                            1.0) * 100);
@@ -493,24 +393,24 @@ begin
   if not FileExists(IniFileName) then
     begin
       WriteTuningToUi(t);
-      Exit;    //ERROR_FILE_NOT_FOUND
+      Exit;
     end;
 
   ini := TIniFile.Create(IniFileName);
 
   try
 
-    t.LowHz := ini.ReadFloat(Section,
-                             'LowHz',
-                             t.LowHz);
+    t.LowFreqHz := ini.ReadFloat(Section,
+                                 'LowFreqHz',
+                                 t.LowFreqHz);
 
-    t.MidHz := ini.ReadFloat(Section,
-                             'MidHz',
-                             t.MidHz);
+    t.MidFreqHz := ini.ReadFloat(Section,
+                                 'MidFreqHz',
+                                 t.MidFreqHz);
 
-    t.HighHz := ini.ReadFloat(Section,
-                              'HighHz',
-                              t.HighHz);
+    t.HighFreqHz := ini.ReadFloat(Section,
+                                  'HighFreqHz',
+                                  t.HighFreqHz);
 
     t.MidQ := ini.ReadFloat(Section,
                             'MidQ',
@@ -533,8 +433,13 @@ begin
   end;
 
   WriteTuningToUi(t);
-end;
 
+  // Remember as current
+  FTuning := t;
+  FDefaults := Defaults;
+  FIniFileName := IniFileName;
+  FIniSection := Section;
+end;
 
 procedure TfrmEqSettings.SaveToIni(const IniFileName: string; const Section: string; const T: TEqTuning);
 var
@@ -545,33 +450,13 @@ begin
   ini := TIniFile.Create(IniFileName);
 
   try
-
-    ini.WriteFloat(Section,
-                   'LowHz',
-                   T.LowHz);
-
-    ini.WriteFloat(Section,
-                   'MidHz',
-                   T.MidHz);
-
-    ini.WriteFloat(Section,
-                   'HighHz',
-                   T.HighHz);
-
-    ini.WriteFloat(Section,
-                   'MidQ',
-                   T.MidQ);
-
-    ini.WriteFloat(Section,
-                   'LowShelfSlope',
-                   T.LowShelfSlope);
-    ini.WriteFloat(Section,
-                   'HighShelfSlope',
-                   T.HighShelfSlope);
-
-    ini.WriteInteger(Section,
-                     'MidMode',
-                     Ord(T.MidMode));
+    ini.WriteFloat(Section, 'LowFreqHz', T.LowFreqHz);
+    ini.WriteFloat(Section, 'MidFreqHz', T.MidFreqHz);
+    ini.WriteFloat(Section, 'HighFreqHz', T.HighFreqHz);
+    ini.WriteFloat(Section, 'MidQ', T.MidQ);
+    ini.WriteFloat(Section, 'LowShelfSlope', T.LowShelfSlope);
+    ini.WriteFloat(Section, 'HighShelfSlope', T.HighShelfSlope);
+    ini.WriteInteger(Section, 'MidMode', Ord(T.MidMode));
   finally
 
     ini.Free();
