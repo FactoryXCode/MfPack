@@ -222,6 +222,7 @@ contains
   WinApi.MfPack.VideoStandardsCheat in '..\src\WinApi.MfPack.VideoStandardsCheat.pas',
   WinApi.MediaFoundationApi.MfTrace in '..\src\WinApi.MediaFoundationApi.MfTrace.pas',
   WinApi.ShErrors in '..\src\WinApi.ShErrors.pas',
-  Winapi.DirectX.D3DCompiler in '..\src\Winapi.DirectX.D3DCompiler.pas';
+  Winapi.DirectX.D3DCompiler in '..\src\Winapi.DirectX.D3DCompiler.pas',
+  WinApi.DirectX.D3D11SdkLayers in '..\src\WinApi.DirectX.D3D11SdkLayers.pas';
 
 end.
