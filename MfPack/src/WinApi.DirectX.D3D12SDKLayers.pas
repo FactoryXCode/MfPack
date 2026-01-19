@@ -1753,7 +1753,7 @@ type
     // AddStorageFilterEntries()
     // Adds to the existing entries at top of stack
     // Returns: S_OK, E_INVALIDARG or E_OUTOFMEMORY.
-    function AddStorageFilterEntries(pFilter: D3D12_INFO_QUEUE_FILTER): HRESULT; stdcall;
+    function AddStorageFilterEntries(pFilter: PD3D12_INFO_QUEUE_FILTER): HRESULT; stdcall;
 
     // GetStorageFilter()
     // Gets all entries at top of stack.
