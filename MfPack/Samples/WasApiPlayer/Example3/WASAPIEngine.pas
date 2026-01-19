@@ -1,4 +1,4 @@
-// FactoryX
+﻿// FactoryX
 //
 // Copyright:  FactoryX. All rights reserved.
 //
@@ -100,7 +100,6 @@ uses
 const
 
   REFTIMES_PER_SEC = 10000000;
-
   MIN_VOLUME = 0.0;
   MAX_VOLUME = 100.0;
 
@@ -161,7 +160,7 @@ type
     FileDuration: Int64;
     VolL: Single;
     VolR: Single;
-    SeekPos100ns: Int64;  // <<< added (used to set FBasePos100ns and compute FOffset)
+    SeekPos100ns: Int64;  // Used to set FBasePos100ns and compute FOffset.
 
     // EQ MFT (High/Mid/Low)
     EqEnabled: Boolean;
@@ -203,7 +202,6 @@ type
     class function EQSetLowShelfSlope(const S: Single): TEngineCommand; static;
     class function EQSetHighShelfSlope(const S: Single): TEngineCommand; static;
 
-
     class function Shutdown(): TEngineCommand; static;
   end;
 
@@ -211,6 +209,7 @@ type
   // Forwarded
   TWasApiEngine = class;
 
+  // TWasApiEngine thread definition.
   TWasApiEngineThread = class(TThread)
   private
 
@@ -222,6 +221,7 @@ type
 
     constructor Create(AEngine: TWasApiEngine);
   end;
+
 
   TWasApiEngine = class(TObject)
   private
@@ -330,7 +330,7 @@ type
 
     // EQ High / Mid / Low MFT implementation -----------------------------------
 
-    procedure EnableEQ(const AEnabled: Boolean);        // runtime on/off
+    procedure EnableEQ(const AEnabled: Boolean);   // Runtime on/off.
 
     procedure SetLowDb(const ALowDb: Integer);     // -24..+24
     procedure SetMidDb(const AMidDb: Integer);     // -24..+24
@@ -346,8 +346,15 @@ type
     procedure SetLowShelfSlope(const S: Single);
     procedure SetHighShelfSlope(const S: Single);
 
-    procedure SetRampMode(const Mode: TMfRampMode); // Off/Fast/Smooth/Manual
-    procedure SetRampTimeMs(const Ms: Integer);     // only for Manual
+    procedure SetRampMode(const Mode: TMfRampMode); // Off/Fast/Smooth/Manual.
+    procedure SetRampTimeMs(const Ms: Integer);     // only for Manual.
+
+    function GetEqBiquadCoeffs(out Low,
+                               Mid,
+                               High: TBiquadCoeffs;
+                               out SampleRate: Double): Boolean;
+
+    procedure ApplyEqTuningImmediate(const T: TEqTuning);
 
     // -------------------------------------------------------------------------
 
@@ -373,9 +380,9 @@ class function TEngineCommand.LoadFile(const AFileName: string;
                                        aDuration: Int64): TEngineCommand;
 begin
 
-  // IMPORTANT: Delphi does not guarantee record return values are zeroed.
-  // If we only set Kind, other fields can contain garbage/stale values.
-  // Always zero-initialize factory results.
+  // NOTE: Delphi does not guarantee record return values are zeroed.
+  // If we only set kind, other fields can contain garbage/stale values.
+  // So, we always zero-initialize factory results.
   FillChar(Result,
            SizeOf(Result),
            0);
@@ -447,14 +454,13 @@ begin
 end;
 
 
-// EQ methods
+// EQ methods ------------------------------------------------------------------
 class function TEngineCommand.EQEnable(const AEnabled: Boolean): TEngineCommand;
 begin
 
   FillChar(Result,
            SizeOf(Result),
            0);
-
   Result.Kind := ckEQEnable;
   Result.EqEnabled := AEnabled;
 end;
@@ -466,7 +472,6 @@ begin
   FillChar(Result,
            SizeOf(Result),
            0);
-
   Result.Kind := ckEQSetLowDb;
   Result.EqLowDb := ALowDb;
 end;
@@ -478,9 +483,8 @@ begin
   FillChar(Result,
            SizeOf(Result),
            0);
-
   Result.Kind := ckEQSetMidDb;
-  Result.EqLowDb := AMidDb;
+  Result.EqMidDb := AMidDb;
 end;
 
 
@@ -490,7 +494,6 @@ begin
   FillChar(Result,
            SizeOf(Result),
            0);
-
   Result.Kind := ckEQSetHighDb;
   Result.EqHighDb := AHighDb;
 end;
@@ -502,7 +505,6 @@ begin
   FillChar(Result,
            SizeOf(Result),
            0);
-
   Result.Kind := ckEQSetMidMode;
   Result.EqMidMode := AMidMode;
 end;
@@ -514,7 +516,6 @@ begin
   FillChar(Result,
            SizeOf(Result),
            0);
-
   Result.Kind := ckEQSetMidQ;
   Result.EqMidQ := AMidQ;
 end;
@@ -526,7 +527,6 @@ begin
   FillChar(Result,
            SizeOf(Result),
            0);
-
   Result.Kind := ckEQSetLowFreqHz;
   Result.EqLowFreqHz := Hz;
 end;
@@ -538,7 +538,6 @@ begin
   FillChar(Result,
            SizeOf(Result),
            0);
-
   Result.Kind := ckEQSetMidFreqHz;
   Result.EqMidFreqHz := Hz;
 end;
@@ -550,7 +549,6 @@ begin
   FillChar(Result,
            SizeOf(Result),
            0);
-
   Result.Kind := ckEQSetHighFreqHz;
   Result.EqHighFreqHz := Hz;
 end;
@@ -562,7 +560,6 @@ begin
   FillChar(Result,
            SizeOf(Result),
            0);
-
   Result.Kind := ckEQSetLowShelfSlope;
   Result.EqLowShelfSlope := S;
 end;
@@ -574,7 +571,6 @@ begin
   FillChar(Result,
            SizeOf(Result),
            0);
-
   Result.Kind := ckEQSetHighShelfSlope;
   Result.EqHighShelfSlope := S;
 end;
@@ -586,7 +582,6 @@ begin
   FillChar(Result,
            SizeOf(Result),
            0);
-
   Result.Kind := ckEQSetRampMode;
   Result.EqRampMode := ARampMode;
 end;
@@ -598,12 +593,12 @@ begin
   FillChar(Result,
            SizeOf(Result),
            0);
-
   Result.Kind := ckEQSetRampTimeMs;
   Result.EqRampTimeMs := AMs;
 end;
 
 
+// -----------------------------------------------------------------------------
 
 class function TEngineCommand.Shutdown(): TEngineCommand;
 begin
@@ -1036,6 +1031,16 @@ begin
           end;
       end;
 
+    ckEQSetMidDb:
+      begin
+
+        if Assigned(FHighMidLowCtrl) then
+          begin
+
+            FHighMidLowCtrl.SetMidDb(Cmd.EqMidDb);
+          end;
+      end;
+
     ckEQSetHighDb:
       begin
 
@@ -1272,6 +1277,62 @@ procedure TWasApiEngine.SetRampTimeMs(const Ms: Integer);
 begin
 
   EnqueueCommand(TEngineCommand.EQSetRampTimeMs(Ms));
+end;
+
+
+function TWasApiEngine.GetEqBiquadCoeffs(out Low,
+                                         Mid,
+                                         High: TBiquadCoeffs;
+                                         out SampleRate: Double): Boolean;
+var
+  hr: HRESULT;
+
+begin
+
+  SampleRate := 0;
+
+  FillChar(Low,
+           SizeOf(Low),
+           0);
+
+  FillChar(Mid,
+           SizeOf(Mid),
+           0);
+
+  FillChar(High,
+           SizeOf(High),
+           0);
+
+  if not Assigned(FHighMidLowCtrl) then
+    Exit(False);
+
+  hr := FHighMidLowCtrl.GetBiquadCoeffs(Low,
+                                        Mid,
+                                        High,
+                                        SampleRate);
+  Result := SUCCEEDED(hr) and (SampleRate > 0);
+end;
+
+
+procedure TWasApiEngine.ApplyEqTuningImmediate(const T: TEqTuning);
+begin
+
+  if Assigned(FHighMidLowCtrl) then
+    begin
+
+      FHighMidLowCtrl.SetLowDb(T.LowDb);
+      FHighMidLowCtrl.SetMidDb(T.MidDb);
+      FHighMidLowCtrl.SetHighDb(T.HighDb);
+
+      FHighMidLowCtrl.SetLowFreqHz(T.LowFreqHz);
+      FHighMidLowCtrl.SetMidFreqHz(T.MidFreqHz);
+      FHighMidLowCtrl.SetHighFreqHz(T.HighFreqHz);
+
+      FHighMidLowCtrl.SetMidQ(T.MidQ);
+      FHighMidLowCtrl.SetMidMode(T.MidMode);
+      FHighMidLowCtrl.SetLowShelfSlope(T.LowShelfSlope);
+      FHighMidLowCtrl.SetHighShelfSlope(T.HighShelfSlope);
+    end;
 end;
 
 
@@ -1863,13 +1924,6 @@ begin
        RaiseError('IAudioClock.GetFrequency failed', hr);
        Exit(hr);
     end;
-
-  {$IFDEF DEBUG}
-  hr := pvAudioClock.GetCharacteristics(dwCharacteristics);
-  if SUCCEEDED(hr) then
-    if (dwCharacteristics <> AUDIOCLOCK_CHARACTERISTIC_FIXED_FREQ) then
-      OutputDebugString(PWideChar(Format('>>>> AudioClock dwCharacteristics = %d', [dwCharacteristics])));
-  {$ENDIF}
 
   while (pvDeviceState = dsPlay) and (pvAudioClient <> nil) do
     begin

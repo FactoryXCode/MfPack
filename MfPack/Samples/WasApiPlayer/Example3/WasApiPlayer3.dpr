@@ -7,7 +7,8 @@ uses
   MfAudioEqBaseMFT in 'MfAudioEqBaseMFT.pas',
   MfAudioHighMidLowMFT in 'MfAudioHighMidLowMFT.pas',
   MfAudioHighMidLowTypes in 'MfAudioHighMidLowTypes.pas',
-  WASAPIEngine in 'WASAPIEngine.pas';
+  WASAPIEngine in 'WASAPIEngine.pas',
+  EqPlotUtils in 'EqPlotUtils.pas';
 
 {$R *.res}
 

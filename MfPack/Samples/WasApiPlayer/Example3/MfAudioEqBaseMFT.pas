@@ -205,17 +205,18 @@ type
     function ReadAudioFormatFromType(const pType: IMFMediaType): HRESULT;
 
   public
-    constructor Create;
-    destructor Destroy; override;
+
+    constructor Create();
+    destructor Destroy(); override;
   end;
 
 
 implementation
 
 
-constructor TMfAudioEqBaseMFT.Create;
+constructor TMfAudioEqBaseMFT.Create();
 begin
-  inherited Create;
+  inherited Create();
 
   FLock := TCriticalSection.Create();
 end;
