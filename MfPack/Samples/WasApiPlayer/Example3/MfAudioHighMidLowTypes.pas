@@ -92,25 +92,25 @@ type
     // enable
     Enabled: Boolean;
 
-    // Gain (dB)
+    // Gain (dB).
     LowDb: Integer;     // e.g. -24 .. +24
     MidDb: Integer;     // e.g. -24 .. +24
     HighDb: Integer;    // e.g. -24 .. +24
 
-    // Frequencies (Hz)
+    // Frequencies (Hz).
     LowFreqHz: Single;   // e.g. 60
     MidFreqHz: Single;   // e.g. 1000
     HighFreqHz: Single;  // e.g. 8000
 
-    // Mid band shape
+    // Mid band shape.
     MidMode: TMfMidMode; // mmPeaking / mmNotch
     MidQ: Single;        // bandwidth / Q
 
-    // Shelf slopes
+    // Shelf slopes.
     LowShelfSlope: Single;
     HighShelfSlope: Single;
 
-    // Smoothing
+    // Smoothing.
     RampMode: TMfRampMode;
     RampTimeMs: Integer;
   end;
@@ -193,6 +193,7 @@ begin
   // Smoothing.
   Result.RampMode := rmSmooth;
   Result.RampTimeMs := 200;
+
 end;
 
 end.

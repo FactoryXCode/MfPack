@@ -7,8 +7,8 @@ object frmEqSettings: TfrmEqSettings
   Margins.Bottom = 5
   BorderStyle = bsDialog
   Caption = 'EQ Settings'
-  ClientHeight = 540
-  ClientWidth = 789
+  ClientHeight = 358
+  ClientWidth = 725
   Color = clBtnFace
   DefaultMonitor = dmMainForm
   Font.Charset = DEFAULT_CHARSET
@@ -23,8 +23,8 @@ object frmEqSettings: TfrmEqSettings
   object grpLow: TGroupBox
     Left = 18
     Top = 18
-    Width = 360
-    Height = 150
+    Width = 307
+    Height = 115
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
@@ -38,30 +38,34 @@ object frmEqSettings: TfrmEqSettings
     ParentFont = False
     TabOrder = 0
     object lblLowFreqHz: TLabel
-      Left = 18
-      Top = 36
-      Width = 74
+      Left = 29
+      Top = 30
+      Width = 133
       Height = 23
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
       Margins.Bottom = 5
+      Alignment = taRightJustify
+      AutoSize = False
       Caption = 'Freq (Hz)'
     end
     object lblLowSlope: TLabel
-      Left = 18
-      Top = 90
-      Width = 122
+      Left = 29
+      Top = 66
+      Width = 133
       Height = 23
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
       Margins.Bottom = 5
+      Alignment = taRightJustify
+      AutoSize = False
       Caption = 'Slope S (0.1..4)'
     end
     object edtLowFreqHz: TEdit
-      Left = 135
-      Top = 30
+      Left = 180
+      Top = 27
       Width = 90
       Height = 31
       Margins.Left = 5
@@ -72,8 +76,8 @@ object frmEqSettings: TfrmEqSettings
       Text = '100'
     end
     object udLowFreqHz: TUpDown
-      Left = 225
-      Top = 30
+      Left = 270
+      Top = 33
       Width = 24
       Height = 31
       Margins.Left = 5
@@ -88,7 +92,7 @@ object frmEqSettings: TfrmEqSettings
     end
     object edtLowSlope: TEdit
       Left = 180
-      Top = 84
+      Top = 63
       Width = 90
       Height = 31
       Margins.Left = 5
@@ -100,7 +104,7 @@ object frmEqSettings: TfrmEqSettings
     end
     object udLowSlope: TUpDown
       Left = 270
-      Top = 84
+      Top = 69
       Width = 24
       Height = 31
       Margins.Left = 5
@@ -115,10 +119,10 @@ object frmEqSettings: TfrmEqSettings
     end
   end
   object grpMid: TGroupBox
-    Left = 402
+    Left = 342
     Top = 18
     Width = 360
-    Height = 318
+    Height = 240
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
@@ -132,29 +136,33 @@ object frmEqSettings: TfrmEqSettings
     ParentFont = False
     TabOrder = 1
     object lblMidFreqHz: TLabel
-      Left = 18
-      Top = 36
-      Width = 74
+      Left = 34
+      Top = 33
+      Width = 115
       Height = 23
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
       Margins.Bottom = 5
+      Alignment = taRightJustify
+      AutoSize = False
       Caption = 'Freq (Hz)'
     end
     object lblMidQ: TLabel
-      Left = 18
-      Top = 90
-      Width = 106
+      Left = 34
+      Top = 69
+      Width = 115
       Height = 23
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
       Margins.Bottom = 5
+      Alignment = taRightJustify
+      AutoSize = False
       Caption = 'Bandwidth Q'
     end
     object edtMidFreqHz: TEdit
-      Left = 135
+      Left = 163
       Top = 30
       Width = 90
       Height = 31
@@ -166,7 +174,7 @@ object frmEqSettings: TfrmEqSettings
       Text = '1.000'
     end
     object udMidFreqHz: TUpDown
-      Left = 225
+      Left = 253
       Top = 30
       Width = 24
       Height = 31
@@ -181,8 +189,8 @@ object frmEqSettings: TfrmEqSettings
       TabOrder = 1
     end
     object edtMidQ: TEdit
-      Left = 135
-      Top = 84
+      Left = 163
+      Top = 66
       Width = 90
       Height = 31
       Margins.Left = 5
@@ -193,7 +201,7 @@ object frmEqSettings: TfrmEqSettings
       Text = '100'
     end
     object udMidQ: TUpDown
-      Left = 225
+      Left = 253
       Top = 84
       Width = 24
       Height = 31
@@ -208,10 +216,10 @@ object frmEqSettings: TfrmEqSettings
       TabOrder = 3
     end
     object rgMidMode: TRadioGroup
-      Left = 18
-      Top = 144
+      Left = 12
+      Top = 115
       Width = 324
-      Height = 132
+      Height = 104
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -226,9 +234,9 @@ object frmEqSettings: TfrmEqSettings
   end
   object grpHigh: TGroupBox
     Left = 18
-    Top = 186
-    Width = 360
-    Height = 150
+    Top = 143
+    Width = 307
+    Height = 115
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
@@ -242,30 +250,32 @@ object frmEqSettings: TfrmEqSettings
     ParentFont = False
     TabOrder = 2
     object lblHighFreqHz: TLabel
-      Left = 18
-      Top = 36
-      Width = 74
+      Left = 29
+      Top = 30
+      Width = 133
       Height = 23
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
       Margins.Bottom = 5
+      Alignment = taRightJustify
       Caption = 'Freq (Hz)'
     end
     object lblHighSlope: TLabel
-      Left = 18
-      Top = 90
-      Width = 122
+      Left = 29
+      Top = 66
+      Width = 133
       Height = 23
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
       Margins.Bottom = 5
+      Alignment = taRightJustify
       Caption = 'Slope S (0.1..4)'
     end
     object edtHighFreqHz: TEdit
-      Left = 135
-      Top = 30
+      Left = 180
+      Top = 27
       Width = 90
       Height = 31
       Margins.Left = 5
@@ -276,7 +286,7 @@ object frmEqSettings: TfrmEqSettings
       Text = '10.000'
     end
     object udHighFreqHz: TUpDown
-      Left = 225
+      Left = 270
       Top = 30
       Width = 24
       Height = 31
@@ -292,7 +302,7 @@ object frmEqSettings: TfrmEqSettings
     end
     object edtHighSlope: TEdit
       Left = 180
-      Top = 84
+      Top = 63
       Width = 90
       Height = 31
       Margins.Left = 5
@@ -319,8 +329,8 @@ object frmEqSettings: TfrmEqSettings
     end
   end
   object btnOK: TButton
-    Left = 378
-    Top = 474
+    Left = 337
+    Top = 291
     Width = 113
     Height = 38
     Margins.Left = 5
@@ -333,8 +343,8 @@ object frmEqSettings: TfrmEqSettings
     OnClick = btnOKClick
   end
   object btnCancel: TButton
-    Left = 504
-    Top = 474
+    Left = 463
+    Top = 291
     Width = 113
     Height = 38
     Margins.Left = 5
@@ -347,8 +357,8 @@ object frmEqSettings: TfrmEqSettings
     TabOrder = 4
   end
   object btnApply: TButton
-    Left = 630
-    Top = 474
+    Left = 589
+    Top = 291
     Width = 113
     Height = 38
     Margins.Left = 5
@@ -361,7 +371,7 @@ object frmEqSettings: TfrmEqSettings
   end
   object btnDefaults: TButton
     Left = 18
-    Top = 474
+    Top = 291
     Width = 180
     Height = 38
     Margins.Left = 5

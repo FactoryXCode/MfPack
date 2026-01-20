@@ -148,8 +148,6 @@ type
     procedure StepRampLocked(const Frames: Integer);
     procedure UpdateCoeffsLocked();
 
-
-
     procedure ComputeLowShelf(const GainDb,
                               FcHz: Double;
                               out Bq: TBiquad);

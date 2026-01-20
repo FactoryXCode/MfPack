@@ -3,17 +3,21 @@ unit EqSettingsFrm;
 interface
 
 uses
-  Winapi.Windows,
-  Winapi.Messages,
+
+  {WinApi}
+  WinApi.Windows,
+  WinApi.Messages,
+  {System}
   System.SysUtils,
   System.Classes,
   System.IniFiles,
-
+  {Vcl}
   Vcl.Controls,
   Vcl.Forms,
   Vcl.StdCtrls,
   Vcl.ExtCtrls,
   Vcl.ComCtrls,
+  {Application}
   MfAudioHighMidLowTypes;
 
 type
@@ -441,7 +445,10 @@ begin
   FIniSection := Section;
 end;
 
-procedure TfrmEqSettings.SaveToIni(const IniFileName: string; const Section: string; const T: TEqTuning);
+
+procedure TfrmEqSettings.SaveToIni(const IniFileName: string;
+                                   const Section: string;
+                                   const T: TEqTuning);
 var
   ini: TIniFile;
 
