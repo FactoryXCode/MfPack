@@ -178,7 +178,7 @@ type
 
     procedure LoadEqFromIni(); // Loads the values for the MFT.
     procedure SaveEqLiveToIni();
-    procedure ApplyEqTuning(const T: TEqTuning);
+
     procedure ApplyEqLiveControls(const Enabled: Boolean;
                                   const LowDb,
                                   MidDb,
@@ -225,14 +225,6 @@ const
   HK_GUI_SHOW      = 6;
   HK_GUI_HIDE      = 7;
 
-  {     // Set initial plot.
-      LoadEqFromIni();          // If we do INI-based tuning.
-      LoadEqTuningFromIni();
-      ApplyEqTuning(FEqTuning); // Sends params to engine/MFT.
-      FWasApiEngine.ApplyEqTuningImmediate(FEqTuning);
-      UpdateSpectrumPlot();     // Coefficients reflect the tuning.}
-
-
 var
   frmMain: TfrmMain;
 
@@ -256,27 +248,6 @@ begin
   // Keep it simple: same folder, same base name as exe.
   Result := ChangeFileExt(Application.ExeName,
                           '.ini');
-end;
-
-
-procedure TfrmMain.ApplyEqTuning(const T: TEqTuning);
-begin
-
-  FEqTuning := T;
-
-  if not Assigned(FWasApiEngine) then
-    Exit;
-
-  // Fine tuning (frequency bands / filter shapes)
-  FWasApiEngine.SetLowFreqHz(FEqTuning.LowFreqHz);
-  FWasApiEngine.SetMidFreqHz(FEqTuning.MidFreqHz);
-  FWasApiEngine.SetHighFreqHz(FEqTuning.HighFreqHz);
-
-  FWasApiEngine.SetMidMode(FEqTuning.MidMode);
-  FWasApiEngine.SetMidQ(FEqTuning.MidQ);
-
-  FWasApiEngine.SetLowShelfSlope(FEqTuning.LowShelfSlope);
-  FWasApiEngine.SetHighShelfSlope(FEqTuning.HighShelfSlope);
 end;
 
 
@@ -384,7 +355,7 @@ begin
                                             'MidMode',
                                             Ord(mmPeaking)));
 
-    ApplyEqTuning(T);
+    FWasApiEngine.ApplyEqTuningImmediate(T);
 
     // -------------------------------------------------------------------------
     // 2) Live controls (main form) - section [EQLive]
@@ -466,7 +437,7 @@ begin
 end;
 
 
-function TfrmMain.RampModeFromCombo: TMfRampMode;
+function TfrmMain.RampModeFromCombo(): TMfRampMode;
 begin
 
   case cbxRamp.ItemIndex of
@@ -555,7 +526,11 @@ begin
   FWasApiEngine.SetRampTimeMs(StrToIntDef(edtRampMs.Text,
                                           30));
   FSamplesThrottle := 0;
-  UpdateSpectrumPlot();
+
+  // Set initial plot.
+  LoadEqFromIni();  // INI-based tuning.
+  FWasApiEngine.ApplyEqTuningImmediate(FEqTuning);
+  UpdateSpectrumPlot();  // Coefficients reflect the tuning.
 end;
 
 
@@ -726,7 +701,8 @@ begin
     begin
 
       FWasApiEngine.SetLowDb(InvertDb(tbLow.Position));
-      stxtLowIndex.Caption := IntToStr(InvertDb(tbLow.Position));
+      stxtLowIndex.Caption := Format('%d dB',
+                                     [InvertDb(tbLow.Position)]);
 
       UpdateSpectrumPlot();
       SaveEqLiveToIni();
@@ -745,7 +721,8 @@ begin
     begin
 
       FWasApiEngine.SetMidDb(InvertDb(tbMid.Position));
-      stxtMidIndex.Caption := IntToStr(InvertDb(tbMid.Position));
+      stxtMidIndex.Caption := Format('%d dB',
+                                     [InvertDb(tbMid.Position)]);
       UpdateSpectrumPlot();
       SaveEqLiveToIni();
     end;
@@ -762,7 +739,8 @@ begin
     begin
 
       FWasApiEngine.SetHighDb(InvertDb(tbHigh.Position));
-      stxtHighIndex.Caption := IntToStr(InvertDb(tbHigh.Position));
+      stxtHighIndex.Caption := Format('%d dB',
+                                     [InvertDb(tbHigh.Position)]);
       UpdateSpectrumPlot();
       SaveEqLiveToIni();
     end;
@@ -778,7 +756,7 @@ begin
   if (FfrmEqSettings.ShowModal = mrOk) then
     begin
 
-      // Do something.
+      LoadEqFromIni();
     end
   else
     begin
@@ -866,6 +844,7 @@ begin
 
   if Assigned(FWasApiEngine) then
     FWasApiEngine.SetRampMode(RampModeFromCombo);
+
   UpdateSpectrumPlot();
   SaveEqLiveToIni();
 end;
@@ -909,19 +888,25 @@ begin
   imgSpectrumAnalizer.Picture.Bitmap.Canvas.Brush.Color := $00001A00;
   imgSpectrumAnalizer.Picture.Bitmap.Canvas.FillRect(R);
 
-  if Assigned(FWasApiEngine) and
-     FWasApiEngine.GetEqBiquadCoeffs(Low,
-                                     Mid,
-                                     High,
-                                     Fs) then
-    PlotEqResponse(imgSpectrumAnalizer.Picture.Bitmap.Canvas,
-                   R,
-                   Fs,
-                   Low,
-                   Mid,
-                   High);
+  if Assigned(FWasApiEngine) then
+    begin
 
-  //imgSpectrumAnalizer.Invalidate;
+       FWasApiEngine.GetEqBiquadCoeffs(Low,
+                                       Mid,
+                                       High,
+                                       Fs);
+
+       PlotEqResponse(imgSpectrumAnalizer.Picture.Bitmap.Canvas,
+                      R,
+                      Fs,
+                      Low,
+                      Mid,
+                      High);
+
+       //OutputDebugString(PWideChar(Format('Fs = %d  Low = %', [Fs])));
+
+       // imgSpectrumAnalizer.Invalidate;
+    end;
 end;
 
 
@@ -1004,6 +989,12 @@ begin
 
   if chkEQ.Checked then
     begin
+
+      // Set initial plot.
+      //LoadEqFromIni();          // If we do INI-based tuning.
+      //ApplyEqTuning(FEqTuning); // Sends params to engine/MFT.
+      //FWasApiEngine.ApplyEqTuningImmediate(FEqTuning);
+      UpdateSpectrumPlot();     // Coefficients reflect the tuning.
 
       // re-apply current UI values to engine (important after plugging a new MFT or new file)
       fWasApiEngine.SetLowDb(InvertDb(tbLow.Position));
