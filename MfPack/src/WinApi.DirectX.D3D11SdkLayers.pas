@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: Â© FactoryX. All rights reserved.
 //
 // Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
@@ -18,7 +18,7 @@
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
+// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), (kxMaxx)
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
