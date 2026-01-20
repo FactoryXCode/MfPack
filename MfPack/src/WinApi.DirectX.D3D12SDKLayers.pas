@@ -16,7 +16,7 @@
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony (maXcomX).
+// Contributor(s): Tony (maXcomX), (kxMaxx)
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
@@ -102,7 +102,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12Debug);'}
   {$EXTERNALSYM ID3D12Debug}
   ID3D12Debug = Interface(IUnknown)
-    ['{344488b7-6846-474b-b989-f027448245e0}']
+  ['{344488b7-6846-474b-b989-f027448245e0}']
 
     procedure EnableDebugLayer(); stdcall;
 
@@ -129,7 +129,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12Debug1);'}
   {$EXTERNALSYM ID3D12Debug1}
   ID3D12Debug1 = Interface(IUnknown)
-    ['{affaa4ca-63fe-4d8e-b8ad-159000af4304}']
+  ['{affaa4ca-63fe-4d8e-b8ad-159000af4304}']
 
     procedure EnableDebugLayer(); stdcall;
 
@@ -148,7 +148,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12Debug2);'}
   {$EXTERNALSYM ID3D12Debug2}
   ID3D12Debug2 = Interface(IUnknown)
-    ['{93a665c4-a3b2-4e5d-b692-a26ae14e3374}']
+  ['{93a665c4-a3b2-4e5d-b692-a26ae14e3374}']
 
     procedure SetGPUBasedValidationFlags(Flags: D3D12_GPU_BASED_VALIDATION_FLAGS);
 
@@ -163,7 +163,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12Debug3);'}
   {$EXTERNALSYM ID3D12Debug3}
   ID3D12Debug3 = Interface(ID3D12Debug)
-    ['{5cf4e58f-f671-4ff1-a542-3686e3d153d1}']
+  ['{5cf4e58f-f671-4ff1-a542-3686e3d153d1}']
 
     procedure SetEnableGPUBasedValidation(Enable: BOOL);
 
@@ -182,7 +182,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12Debug4);'}
   {$EXTERNALSYM ID3D12Debug4}
   ID3D12Debug4 = Interface(ID3D12Debug3)
-    ['{014b816e-9ec5-4a2f-a845-ffbe441ce13a}']
+  ['{014b816e-9ec5-4a2f-a845-ffbe441ce13a}']
 
     procedure DisableDebugLayer();
 
@@ -197,7 +197,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12Debug5);'}
   {$EXTERNALSYM ID3D12Debug5}
   ID3D12Debug5 = Interface(ID3D12Debug4)
-    ['{548d6b12-09fa-40e0-9069-5dcd589a52c9}']
+  ['{548d6b12-09fa-40e0-9069-5dcd589a52c9}']
 
     procedure SetEnableAutoName(Enable: BOOL);
 
@@ -212,7 +212,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12Debug6);'}
   {$EXTERNALSYM ID3D12Debug6}
   ID3D12Debug6 = Interface(ID3D12Debug5)
-    ['{82a816d6-5d01-4157-97d0-4975463fd1ed}']
+  ['{82a816d6-5d01-4157-97d0-4975463fd1ed}']
 
     procedure SetForceLegacyBarrierValidation(Enable: BOOL);
 
@@ -311,7 +311,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DebugDevice1);'}
   {$EXTERNALSYM ID3D12DebugDevice1}
   ID3D12DebugDevice1 = Interface(IUnknown)
-    ['{a9b71770-d099-4a65-a698-3dee10020f88}']
+  ['{a9b71770-d099-4a65-a698-3dee10020f88}']
 
     function SetDebugParameter(Type_: D3D12_DEBUG_DEVICE_PARAMETER_TYPE;
                                pData: Pointer;
@@ -334,7 +334,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DebugDevice);'}
   {$EXTERNALSYM ID3D12DebugDevice}
   ID3D12DebugDevice = Interface(IUnknown)
-    ['{3febd6dd-4973-4787-8194-e45f9e28923e}']
+  ['{3febd6dd-4973-4787-8194-e45f9e28923e}']
 
     function SetFeatureMask(Mask: D3D12_DEBUG_FEATURE): HRESULT; stdcall;
 
@@ -353,7 +353,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DebugDevice2);'}
   {$EXTERNALSYM ID3D12DebugDevice2}
   ID3D12DebugDevice2 = Interface(ID3D12DebugDevice)
-    ['{60eccbc1-378d-4df1-894c-f8ac5ce4d7dd}']
+  ['{60eccbc1-378d-4df1-894c-f8ac5ce4d7dd}']
 
     function SetDebugParameter(Type_: D3D12_DEBUG_DEVICE_PARAMETER_TYPE;
                                pData: Pointer;
@@ -382,7 +382,7 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DebugCommandQueue);'}
   ID3D12DebugCommandQueue = Interface(IUnknown)
-    ['{09e0bf36-54ac-484f-8847-4baeeab6053a}']
+  ['{09e0bf36-54ac-484f-8847-4baeeab6053a}']
 
     function AssertResourceState(pResource: ID3D12Resource;
                                  SubResource: UINT;
@@ -403,7 +403,7 @@ type
   //
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DebugCommandQueue1);'}
   ID3D12DebugCommandQueue1 = Interface(ID3D12DebugCommandQueue)
-    ['{16be35a2-bfd6-49f2-bcae-eaae4aff862d}']
+  ['{16be35a2-bfd6-49f2-bcae-eaae4aff862d}']
 
     procedure AssertResourceAccess(pResource: ID3D12Resource;
                                    Subresource: UINT;
@@ -439,7 +439,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DebugCommandList1);'}
   {$EXTERNALSYM ID3D12DebugCommandList1}
   ID3D12DebugCommandList1 = Interface(IUnknown)
-    ['{102ca951-311b-4b01-b11f-ecb83e061b37}']
+  ['{102ca951-311b-4b01-b11f-ecb83e061b37}']
 
     function AssertResourceState(pResource: ID3D12Resource;
                                  Subresource: UINT;
@@ -464,7 +464,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DebugCommandList);'}
   {$EXTERNALSYM ID3D12DebugCommandList}
   ID3D12DebugCommandList = Interface(IUnknown)
-    ['{09e0bf36-54ac-484f-8847-4baeeab6053f}']
+  ['{09e0bf36-54ac-484f-8847-4baeeab6053f}']
 
     function AssertResourceState(pResource: ID3D12Resource;
                                  Subresource: UINT;
@@ -487,7 +487,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DebugCommandList2);'}
   {$EXTERNALSYM ID3D12DebugCommandList2}
   ID3D12DebugCommandList2 = Interface(ID3D12DebugCommandList)
-    ['{197d5e15-4d37-4d34-af78-724cd70fdb1f}']
+  ['{197d5e15-4d37-4d34-af78-724cd70fdb1f}']
 
     procedure AssertResourceAccess(pResource: ID3D12Resource;
                                    Subresource: UINT;
@@ -508,7 +508,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12DebugCommandList3);'}
   {$EXTERNALSYM ID3D12DebugCommandList3}
   ID3D12DebugCommandList3 = Interface(ID3D12DebugCommandList2)
-    ['{aeb575cf-4e06-48be-ba3b-c450fc96652e}']
+  ['{aeb575cf-4e06-48be-ba3b-c450fc96652e}']
 
     function SetDebugParameter(Type_: D3D12_DEBUG_COMMAND_LIST_PARAMETER_TYPE;
                                pData: Pointer;
@@ -531,7 +531,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12SharingContract);'}
   {$EXTERNALSYM ID3D12SharingContract}
   ID3D12SharingContract = Interface(IUnknown)
-    ['{0adf7d52-929c-4e61-addb-ffed30de66ef}']
+  ['{0adf7d52-929c-4e61-addb-ffed30de66ef}']
 
     procedure Present(pResource: ID3D12Resource;
                       Subresource: UINT;
@@ -557,7 +557,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12ManualWriteTrackingResource);'}
   {$EXTERNALSYM ID3D12ManualWriteTrackingResource}
   ID3D12ManualWriteTrackingResource = Interface(IUnknown)
-    ['{86ca3b85-49ad-4b6e-aed5-eddb18540f41}']
+  ['{86ca3b85-49ad-4b6e-aed5-eddb18540f41}']
 
     procedure TrackWrite(Subresource: UINT;
                          {opt} pWrittenRange: PD3D12_RANGE);
@@ -1662,7 +1662,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12InfoQueue);'}
   {$EXTERNALSYM ID3D12InfoQueue}
   ID3D12InfoQueue = Interface(IUnknown)
-    ['{0742a90b-c387-483f-b946-30a7e4e61458}']
+  ['{0742a90b-c387-483f-b946-30a7e4e61458}']
 
     //=========================================================================
     // Methods for configuring how much data is stored in the queue.
@@ -1753,7 +1753,7 @@ type
     // AddStorageFilterEntries()
     // Adds to the existing entries at top of stack
     // Returns: S_OK, E_INVALIDARG or E_OUTOFMEMORY.
-    function AddStorageFilterEntries(pFilter: D3D12_INFO_QUEUE_FILTER): HRESULT; stdcall;
+    function AddStorageFilterEntries(pFilter: PD3D12_INFO_QUEUE_FILTER): HRESULT; stdcall;
 
     // GetStorageFilter()
     // Gets all entries at top of stack.
@@ -1856,7 +1856,7 @@ type
     //  Methods for adding entries to the queue.
 
     // AddMessage()
-    // This is used by D3D12 components to log messages.  Nothing stops
+    // This is used by D3D12 components to log messages. Nothing stops
     // applications from calling this, but it isn’t particularly useful.
     // If an application wishes to insert custom strings into the queue,
     // AddApplicationMessage() below is suggested.  See below.
@@ -1938,7 +1938,7 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D12InfoQueue1);'}
   {$EXTERNALSYM ID3D12InfoQueue1}
   ID3D12InfoQueue1 = Interface(ID3D12InfoQueue)
-    ['{2852dd88-b484-4c0c-b6b1-67168500e600}']
+  ['{2852dd88-b484-4c0c-b6b1-67168500e600}']
 
     function RegisterMessageCallback(CallbackFunc: D3D12MessageFunc;
                                      CallbackFilterFlags: D3D12_MESSAGE_CALLBACK_FLAGS;

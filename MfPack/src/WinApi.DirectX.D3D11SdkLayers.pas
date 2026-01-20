@@ -1755,8 +1755,10 @@ type
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(ID3D11RefDefaultTrackingOptions);'}
   {$EXTERNALSYM ID3D11RefDefaultTrackingOptions}
   ID3D11RefDefaultTrackingOptions = interface(IUnknown)
-    ['{03916615-C644-418C-9BF4-75DB5BE63CA0}']
-    function SetTrackingOptions(ResourceTypeFlags: UINT; Options: UINT): HResult; stdcall;
+  ['{03916615-C644-418C-9BF4-75DB5BE63CA0}']
+    
+    function SetTrackingOptions(ResourceTypeFlags: UINT; 
+                                Options: UINT): HResult; stdcall;
   end;
   IID_ID3D11RefDefaultTrackingOptions = ID3D11RefDefaultTrackingOptions;
   {$EXTERNALSYM IID_ID3D11RefDefaultTrackingOptions}
@@ -1792,7 +1794,7 @@ type
 
     function GetNumStoredMessages(): UINT64; stdcall;
 
-    function GetNumStoredMessagesAllowedByRetrievalFilter: UINT64; stdcall;
+    function GetNumStoredMessagesAllowedByRetrievalFilter(): UINT64; stdcall;
 
     function GetNumMessagesDiscardedByMessageCountLimit(): UINT64; stdcall;
 
@@ -1813,7 +1815,7 @@ type
 
     procedure PopStorageFilter(); stdcall;
 
-    function GetStorageFilterStackSize: UINT; stdcall;
+    function GetStorageFilterStackSize(): UINT; stdcall;
 
     function AddRetrievalFilterEntries(pFilter: PD3D11_INFO_QUEUE_FILTER): HResult; stdcall;
 
