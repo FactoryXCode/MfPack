@@ -56,7 +56,7 @@ implementation
 
 procedure Int16ToFloat(const InBytes: PByte;
                        OutF: PSingle;
-                       Samples: Integer); //inline;
+                       Samples: Integer); inline;
 var
   i: Integer;
   pIn: PSmallInt;
