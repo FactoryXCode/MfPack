@@ -1158,7 +1158,7 @@ begin
 
   hr := sourceReader.GetNativeMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
                                         0,
-                                        nativeMediaType);
+                                        @nativeMediaType);
   if FAILED(hr) then
     Exit(hr);
 
@@ -1200,7 +1200,7 @@ begin
     end;
 
   hr := sourceReader.GetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
-                                         currentMediaType);
+                                         @currentMediaType);
   if FAILED(hr) then
     Exit(hr);
 

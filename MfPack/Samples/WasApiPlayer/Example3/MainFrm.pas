@@ -95,6 +95,19 @@ uses
   EqPlotUtils;
 
 
+const
+
+  // Global hotkey's.
+  HK_TOGGLE_PLAY   = 1;
+  HK_TOGGLE_PAUSE  = 2;
+  HK_TOGGLE_STOP   = 3;
+
+  HK_VOLUME_UP     = 4;
+  HK_VOLUME_DOWN   = 5;
+
+  HK_GUI_SHOW      = 6;
+  HK_GUI_HIDE      = 7;
+
 type
 
   TfrmMain = class(TForm)
@@ -105,7 +118,7 @@ type
     stxtStatus: TStaticText;
     Panel2: TPanel;
     lblBarPositionInSTime: TLabel;
-    lblBarPositionInSamples: TLabel;
+    lblBarPosition: TLabel;
     pbProgress: TProgressBar;
     pnlControls: TPanel;
     lblLow: TLabel;
@@ -212,18 +225,6 @@ type
     procedure WMHotKey(var Msg: TWMHotKey); message WM_HOTKEY;
   end;
 
-const
-
-  // Global hotkey's.
-  HK_TOGGLE_PLAY   = 1;
-  HK_TOGGLE_PAUSE  = 2;
-  HK_TOGGLE_STOP   = 3;
-
-  HK_VOL_UP        = 4;
-  HK_VOL_DOWN      = 5;
-
-  HK_GUI_SHOW      = 6;
-  HK_GUI_HIDE      = 7;
 
 var
   frmMain: TfrmMain;
@@ -480,12 +481,12 @@ begin
                  VK_SPACE);
 
   RegisterHotKey(Handle,
-                 HK_VOL_UP,
+                 HK_VOLUME_UP,
                  MOD_CONTROL or MOD_ALT,
                  VK_UP);
 
   RegisterHotKey(Handle,
-                 HK_VOL_DOWN,
+                 HK_VOLUME_DOWN,
                  MOD_CONTROL or MOD_ALT,
                  VK_DOWN);
 
@@ -545,9 +546,9 @@ begin
   UnregisterHotKey(Handle,
                    HK_TOGGLE_STOP);
   UnregisterHotKey(Handle,
-                   HK_VOL_UP);
+                   HK_VOLUME_UP);
   UnregisterHotKey(Handle,
-                   HK_VOL_DOWN);
+                   HK_VOLUME_DOWN);
   UnregisterHotKey(Handle,
                    HK_GUI_SHOW);
   UnregisterHotKey(Handle,
@@ -618,7 +619,7 @@ begin
                                     [HnsTimeToStr(llAudioDuration, False)]);
 
       // Set progressbar max
-      pbProgress.Max := llAudioDuration div 1000000;
+      pbProgress.Max := Integer(llAudioDuration div MS100_PER_SEC);
       LoadEqFromIni();
       FWasApiEngine.OpenFile(FFileName,
                              llAudioDuration);
@@ -924,13 +925,19 @@ var
 
 begin
 
-  iProgress := Position100ns;
-  iSamples := RawPosition;
+  if not Assigned(fWasApiEngine) then
+    Exit;
+
+  if (fWasApiEngine.DeviceState <> dsPlay) then
+    Exit;
 
   if (pbProgress.Max <= 0) then
     Exit;
 
-  secPos := Integer(Position100ns div 10000000);
+  iProgress := Position100ns;
+  iSamples := RawPosition;
+
+  secPos := Integer(Position100ns div MS100_PER_SEC);
 
   if (secPos < 0) then
     secPos := 0;
@@ -968,7 +975,7 @@ begin
     Exit;
 
   if (llAudioDuration > 0) then
-    durSec := llAudioDuration div 10000000
+    durSec := llAudioDuration div MS100_PER_SEC
   else
     durSec := 0;
 
@@ -984,6 +991,9 @@ begin
   butPlayPause.Caption := 'Play';
   butStop.Enabled := False;
   SetVolumeChannels();
+  // Activate the peakmeters.
+  pmLeft.Enabled := True;
+  pmRight.Enabled := True;
 
   // EQ Bass/treble ============================================================
 
@@ -1014,9 +1024,11 @@ begin
   butPlayPause.Enabled := True;
   butPlayPause.Caption := 'Play';
   // Resets controls, engine.stop has allready being called in the engine loop.
-  butStop.OnClick(nil);
+  butStopClick(nil);
   butStop.Enabled := False;
-
+  // Deactivate the peakmeters.
+  pmLeft.Enabled := False;
+  pmRight.Enabled := False;
 end;
 
 
@@ -1045,6 +1057,9 @@ begin
         pbProgress.Position := 0;
         lblPlayed.Caption := 'Played: 00:00:00';
         stxtProcessed.Caption := 'Samples: 0';
+        // Deactivate the peakmeters.
+        pmLeft.Enabled := False;
+        pmRight.Enabled := False;
       end;
 
     dsPlay:
@@ -1055,6 +1070,9 @@ begin
         butStop.Enabled := True;
         stxtStatus.Caption := Format('Playing: %s',
                                      [fFileName]);
+        // Activate the peakmeters.
+        pmLeft.Enabled := True;
+        pmRight.Enabled := True;
       end;
 
     dsPause:
@@ -1074,6 +1092,9 @@ begin
         butPlayPause.Enabled := False;
         butPlayPause.Caption := 'Play';
         butStop.Enabled := False;
+        // Deactivate the peakmeters.
+        pmLeft.Enabled := False;
+        pmRight.Enabled := False;
       end;
 
     dsError:
@@ -1083,6 +1104,9 @@ begin
         butPlayPause.Caption := 'Play';
         butStop.Enabled := False;
         stxtStatus.Caption := Format('Yoo! we have an error: %d', [GetLastError()]);
+        // Deactivate the peakmeters.
+        pmLeft.Enabled := False;
+        pmRight.Enabled := False;
       end;
 
   end;
@@ -1102,7 +1126,7 @@ begin
   if (pbProgress.Max <= 0) or (llAudioDuration <= 0) then
     Exit;
 
-  // Show only when playing/pause
+  // Show only when playing/pause.
   if fWasApiEngine.DeviceState in [dsPlay, dsPause] then
     begin
 
@@ -1115,22 +1139,27 @@ begin
           secPos := pbProgress.Max;
 
       pbProgress.ShowHint := True;
-      pbProgress.Hint := Format('Position: %d s', [secPos]);
+      pbProgress.Hint := Format('Position: %d s',
+                                [secPos]);
 
-      lblBarPositionInSamples.Caption := Format('Position: %d s', [secPos]);
+      lblBarPositionInSamples.Caption := Format('Position: %d',
+                                                [secPos]);
 
-      hnsPos := Int64(secPos) * 10000000;
-      lblBarPositionInSTime.Caption := Format('Position: %s', [HnsTimeToStr(hnsPos, False)]);
+      hnsPos := Int64(secPos) * MS100_PER_SEC;
+
+      lblBarPositionInSTime.Caption := Format('Position: %s',
+                                              [HnsTimeToStr(hnsPos,
+                                                            False)]);
     end;
 end;
 
 
 procedure TfrmMain.pbProgressMouseUp(Sender: TObject; Button: TMouseButton;
-  Shift: TShiftState; X, Y: Integer);
+                                     Shift: TShiftState; X, Y: Integer);
 var
   hr: HResult;
-  secPos: Int64;
-  posHns: Int64;
+  posHns: Int64;  // 100ns units
+  tickPos: Int64; // 100ms ticks
 
 begin
 
@@ -1144,41 +1173,67 @@ begin
     Exit;
 
   if (X <= 0) then
-    secPos := 0
+    tickPos := 0
   else
     if (X >= pbProgress.Width) then
-      secPos := pbProgress.Max
+      begin
+
+        // Avoid exact end tick (can map to EOF); use last playable tick
+        if (pbProgress.Max > 0) then
+          tickPos := pbProgress.Max - 1
+        else
+          tickPos := 0;
+      end
   else
-    secPos := Trunc((X / pbProgress.Width) * pbProgress.Max); // seconds
+    begin
 
-  // Seconds -> 100ns
-  posHns := secPos * 10000000;
+      tickPos := Trunc((X / pbProgress.Width) * pbProgress.Max);
+      if (tickPos < 0) then
+        tickPos := 0;
+      if (tickPos > pbProgress.Max) then
+        tickPos := pbProgress.Max;
+    end;
 
-  // clamp to duration (optional safety)
-  if (llAudioDuration > 0) and (posHns > llAudioDuration) then
-    posHns := llAudioDuration;
+  // 100ms tick -> 100ns
+  posHns := tickPos * MS100_PER_SEC;
+
+  // Safety clamp
+  if (posHns < 0) then
+    posHns := 0;
+
+  // Clamp to duration (keep 100ms precision).
+  if (llAudioDuration > 0) and (posHns >= llAudioDuration) then
+    begin
+
+      posHns := llAudioDuration - MS100_PER_SEC; // minus 100ms
+      if (posHns < 0) then
+        posHns := 0;
+
+      tickPos := posHns div MS100_PER_SEC;
+    end;
 
   hr := fWasApiEngine.SeekTo(posHns);
 
   if SUCCEEDED(hr) then
-    pbProgress.Position := Integer(secPos)
+    pbProgress.Position := Integer(tickPos)
   else
     stxtStatus.Caption := Format('SeekTo failed. (hr=%d)',
                                  [hr]);
+  Exit;
 end;
-
 
 
 procedure TfrmMain.WMHotKey(var Msg: TWMHotKey);
 begin
+
   inherited;
 
   // Global hotkey values.
   // HK_TOGGLE_PLAY   = 1
   // HK_TOGGLE_PAUSE  = 2
   // HK_TOGGLE_STOP   = 3
-  // HK_VOL_UP        = 4
-  // HK_VOL_DOWN      = 5
+  // HK_VOLUME_UP     = 4
+  // HK_VOLUME_DOWN   = 5
   // HK_GUI_SHOW      = 6
   // HK_GUI_HIDE      = 7
 
@@ -1197,7 +1252,7 @@ begin
       end;
 
 
-    HK_VOL_UP:
+    HK_VOLUME_UP:
       begin
 
         trbVolumeL.Position :=  trbVolumeL.Position - 1;
@@ -1209,7 +1264,7 @@ begin
         trbVolumeRChange(trbVolumeR);
       end;
 
-    HK_VOL_DOWN:
+    HK_VOLUME_DOWN:
       begin
 
         trbVolumeL.Position := trbVolumeL.Position + 1;

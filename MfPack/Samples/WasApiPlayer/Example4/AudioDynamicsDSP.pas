@@ -458,235 +458,465 @@ end;
 
 procedure TAudioDynamicsDSP.ProcessFloat32Interleaved(Buffer: PSingle;
                                                       Frames: Integer);
+
 var
+
   i,
+
   ch: Integer;
+
   x,
+
   y,
+
   xd: Single;
+
   peakIn: Single;
+
   peakComp: Single;
+
   det: Single;
+
   compTarget: Single;
+
   limTarget: Single;
+
   overDb,
+
   overSoftDb: Single;
+
   os: Integer;
+
   UseDelay: Boolean;
+
   DelayIndex: Integer;
 
+
+
   // Pointers for this frame.
+
   pFrame: PSingle;
+
   pS: PSingle;
 
+
+
   // Precomputed comp applied gain for this sample (linked).
+
   compApplied: Single;
+
+
 
 begin
 
+
+
   if (Buffer = nil) then
+
     Exit;
+
+
 
   if (Frames <= 0) then
+
     Exit;
+
+
 
   if (FSampleRate <= 0) or (FChannels <= 0) then
+
     Exit;
 
+
+
   os := 1;
+
   if FSettings.LimEnabled and FSettings.LimTruePeak then
+
     os := Max(1,
+
               FSettings.LimOversample);
 
+
+
   UseDelay := FSettings.LimEnabled and
+
               (FDelaySamples > 0) and
+
               (Length(FDelayBuf) > 0);
 
+
+
   for i := 0 to Frames - 1 do
+
     begin
 
+
+
       // Pointer to first sample of this frame (interleaved).
+
       pFrame := Buffer;
+
       Inc(pFrame,
+
           i * FChannels);
 
+
+
     // ---------------------------------------------------------
+
     // Input peak (linked)
+
     // ---------------------------------------------------------
+
     peakIn := 0.0;
+
     pS := pFrame;
 
+
+
     for ch := 0 to FChannels - 1 do
+
       begin
 
+
+
         x := pS^;
+
         if (x < 0) then
+
           x := -x;
+
         if (x > peakIn) then
+
           peakIn := x;
+
         Inc(pS);
+
       end;
 
+
+
     // ---------------------------------------------------------
+
     // Compressor (feed-forward, linked peak)
+
     // ---------------------------------------------------------
+
     compTarget := 1.0;
+
     if (FSettings.CompEnabled and (peakIn > FCompThrLin)) then
+
       compTarget := DbToLin(-(LinToDb(peakIn) - FSettings.CompThresholdDb) * (1.0 - 1.0 / FRatio));
 
+
+
     if (compTarget < FCompGain) then
+
       FCompGain := FCompAtkCoeff * FCompGain + (1.0 - FCompAtkCoeff) * compTarget
+
     else
+
       FCompGain := FCompRelCoeff * FCompGain + (1.0 - FCompRelCoeff) * compTarget;
+
+
 
     InterlockedExchange(FCompGRmDb, Round((-LinToDb(FCompGain)) * 1000.0));
 
+
+
     compApplied := (FCompGain * FCompMakeupLin);
 
+
+
     // ---------------------------------------------------------
+
     // Post-compressor peak for limiter detector
+
     // ---------------------------------------------------------
+
     peakComp := 0.0;
+
     pS := pFrame;
+
     for ch := 0 to FChannels - 1 do
+
       begin
+
+
 
         x := pS^ * compApplied;
+
         y := x;
+
         if( y < 0) then
+
           y := -y;
+
         if (y > peakComp) then
+
           peakComp := y;
+
         Inc(pS);
+
       end;
 
+
+
     // ---------------------------------------------------------
+
     // Limiter detector (peak or RMS)
+
     // ---------------------------------------------------------
+
     if (FSettings.LimDetector = ldRms) then
+
       begin
+
+
 
         FRmsEnv := FRmsCoeff * FRmsEnv + (1.0 - FRmsCoeff) * (peakComp * peakComp);
+
         det := Sqrt(FRmsEnv);
+
       end
+
     else
+
       det := peakComp;
 
+
+
     // ---------------------------------------------------------
+
     // True-peak refine (Catmull-Rom interpolation)
+
     // Uses history per channel: FHist0/FHist1/FHist2 + current x
+
     // ---------------------------------------------------------
+
     if FSettings.LimEnabled and
+
        FSettings.LimTruePeak and
+
        (os > 1) then
+
       begin
+
+
 
         pS := pFrame;
+
         for ch := 0 to FChannels - 1 do
+
         begin
+
+
 
           x := pS^ * compApplied;
+
           y := TruePeakAbs(FHist0[ch],
+
                            FHist1[ch],
+
                            FHist2[ch],
+
                            x,
+
                            os);
+
           if (y > det) then
+
             det := y;
+
           Inc(pS);
+
         end;
+
     end;
 
+
+
     // ---------------------------------------------------------
+
     // Limiter gain (soft knee in dB domain)
+
     // ---------------------------------------------------------
+
     limTarget := 1.0;
+
     if FSettings.LimEnabled and (det > 0.0) then
+
       begin
 
+
+
         overDb := LinToDb(det) - FSettings.LimCeilingDb;
+
         overSoftDb := SoftKneeOverDb(overDb,
+
                                      FSettings.LimKneeDb);
 
+
+
         if (overSoftDb > 0.0) then
+
           limTarget := DbToLin(-overSoftDb)
+
         else
+
           limTarget := 1.0;
 
+
+
         if ((det * limTarget) > FLimCeilLin) then
+
           limTarget := FLimCeilLin / det;
+
       end;
 
+
+
       if not FSettings.LimEnabled then
+
         FLimGain := 1.0
+
       else
+
         if (limTarget < FLimGain) then
+
           FLimGain := limTarget
+
       else
+
         FLimGain := FLimRelCoeff * FLimGain + (1.0 - FLimRelCoeff) * limTarget;
 
+
+
       InterlockedExchange(FLimGRmDb,
+
                           Round((-LinToDb(FLimGain)) * 1000.0));
 
+
+
       // ---------------------------------------------------------
+
       // Apply with optional lookahead delay
+
       // ---------------------------------------------------------
+
       if UseDelay then
+
         begin
+
+
 
           DelayIndex := FDelayPos * FChannels;
 
+
+
           pS := pFrame;
+
           for ch := 0 to FChannels - 1 do
+
             begin
+
+
 
               // delayed (already post-comp)
+
               xd := FDelayBuf[DelayIndex + ch];
 
+
+
               // current post-comp into delay
+
               x := pS^ * compApplied;
+
               FDelayBuf[DelayIndex + ch] := x;
 
+
+
               // output delayed with limiter
+
               pS^ := xd * FLimGain;
 
+
+
               // Update history with current post-comp sample
+
               FHist0[ch] := FHist1[ch];
+
               FHist1[ch] := FHist2[ch];
+
               FHist2[ch] := x;
 
+
+
               Inc(pS);
+
             end;
 
+
+
          Inc(FDelayPos);
+
          if (FDelayPos >= FDelaySamples) then
+
            FDelayPos := 0;
+
         end
+
       else
+
         begin
 
+
+
           pS := pFrame;
+
           for ch := 0 to FChannels - 1 do
+
             begin
 
+
+
               x := pS^ * compApplied;
+
               y := x;
 
+
+
               if FSettings.LimEnabled then
+
                 y := y * FLimGain;
+
+
 
               pS^ := y;
 
+
+
               // Update history with current post-comp sample
+
               FHist0[ch] := FHist1[ch];
+
               FHist1[ch] := FHist2[ch];
+
               FHist2[ch] := x;
 
+
+
               Inc(pS);
+
             end;
+
         end;
+
     end;
+
 end;
+
 
 
 procedure TAudioDynamicsDSP.ProcessInterleaved(Buffer: Pointer;

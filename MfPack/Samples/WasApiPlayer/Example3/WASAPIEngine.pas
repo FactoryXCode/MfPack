@@ -65,9 +65,11 @@ uses
 
   {WinApi}
   WinApi.Windows,
-  WinApi.ActiveX,
+  WinApi.ComBaseApi,
   WinApi.WinApiTypes,
   WinApi.WinError,
+  {ActiveX}
+  WinApi.ActiveX.ObjBase,
   {System}
   System.SysUtils,
   System.Classes,
@@ -93,27 +95,28 @@ uses
   WinApi.WinMM.MMeApi,
   WinApi.WinMM.MMReg,
   {Application}
-  MfAudioHighMidLowMFT,
-  MfAudioHighMidLowTypes;
+  MfAudioHighMidLowTypes,
+  MfAudioHighMidLowMFT;
 
 
 const
 
   REFTIMES_PER_SEC = 10000000;
+  MS100_PER_SEC = 1000000;
   MIN_VOLUME = 0.0;
   MAX_VOLUME = 100.0;
 
 type
 
-  TSampleType = (stInt16,
-                 stInt24,
-                 stInt32,
-                 stFloat32);
+  TSampleFormat = (sfInt16,
+                   sfInt24,
+                   sfInt32,
+                   sfFloat32);
 
   TDeviceState = (dsUninitialized,
                   dsError,
                   dsInitialized,
-                  dsReady,      // file decoded and engine initialized
+                  dsReady, // File decoded and engine initialized.
                   dsPlay,
                   dsPause,
                   dsStop);
@@ -121,15 +124,19 @@ type
   // Event callbacks (always raised on the main/UI thread via TThread.Queue).
   TWasApiStateEvent = procedure(Sender: TObject;
                                 const NewState: TDeviceState) of object;
+
   TWasApiErrorEvent = procedure(Sender: TObject;
                                 const Msg: string;
                                 const Hr: HRESULT) of object;
+
   TWasApiReadyEvent = procedure(Sender: TObject) of object;
+
   // Position100ns: time position (100ns units), RawPosition: raw audio clock position.
   TWasApiProcessedEvent = procedure(Sender: TObject;
                                     const Position100ns: Int64;
                                     const RawPosition: UInt64) of object;
   TWasApiEndedEvent = procedure(Sender: TObject) of object;
+
 
   TEngineCmdKind = (ckLoadFile,
                     ckPlay,
@@ -167,7 +174,7 @@ type
     EqLowDb: Integer;
     EqMidDb: Integer;
     EqHighDb: Integer;
-    EqMidMode: Integer;   // Ord(TMfMidMode)
+    EqMidMode: Integer;  // Ord(TMfMidMode)
     EqMidQ: Single;
     EqLowFreqHz: Single;
     EqMidFreqHz: Single;
@@ -236,18 +243,25 @@ type
 
     // Decoded PCM bytes
     pvBytes: PByte;
-    pvBytesLength: Cardinal;
-    pvwaveformatlength: Cardinal;
+    pvBytesLength: UINT32;
+    pvwaveformatlength: UINT32;
 
     pvSourceWfx: PWAVEFORMATEX;
+    FSourceBytesPerSec: UInt32;
+    FSourceBlockAlign:  UInt32;
+
     pvRenderWfx: PWAVEFORMATEX;
     FClientBlockAlign: Word;
+    // PCM converter.
+    FDynFloatBuf: PSingle; // Scratch float interleaved.
+    FDynFloatBufSamples: Integer; // Number of float samples allocated.
 
     // Playback
     FOffset: UINT32;
-    FSampleType: TSampleType;
+    FSampleFormat: TSampleFormat;
     FBytesPerSample: Integer;
     pvSoundChannels: WORD;
+
     // Seek
     FBasePos100ns: Int64;
     FDuration100ns: Int64;
@@ -809,7 +823,8 @@ begin
 end;
 
 
-procedure TWasApiEngine.RaiseError(const Msg: string; const Hr: HRESULT);
+procedure TWasApiEngine.RaiseError(const Msg: string;
+                                   const Hr: HRESULT);
 begin
 
   pvErrStatus := Hr;
@@ -819,12 +834,14 @@ begin
                   begin
 
                     if Assigned(FOnError) then
-                      FOnError(Self, Msg, Hr);
+                      FOnError(Self,
+                               Msg,
+                               Hr);
                   end);
 end;
 
 
-procedure TWasApiEngine.RaiseReady;
+procedure TWasApiEngine.RaiseReady();
 begin
 
   if Assigned(FOnReady) then
@@ -853,7 +870,7 @@ begin
 end;
 
 
-procedure TWasApiEngine.RaiseEnded;
+procedure TWasApiEngine.RaiseEnded();
 begin
   if Assigned(FOnEnded) then
     TThread.Queue(nil,
@@ -946,53 +963,91 @@ begin
         FRequestPause := False;
       end;
 
-    ckSeek:
+ckSeek:
+  begin
+    if (pvSourceWfx <> nil) and
+       (pvBytes <> nil) and
+       (pvBytesLength > 0) and
+       (pvSourceWfx.nAvgBytesPerSec <> 0) and
+       (pvSourceWfx.nBlockAlign <> 0) then
+    begin
+
+      // DEBUG:
+      //OutputDebugString(PChar(Format('ckSeek: Cmd.SeekPos100ns=%d  Dur=%d',
+      //                               [Cmd.SeekPos100ns, FDuration100ns])));
+
+      pos100ns := Cmd.SeekPos100ns;
+
+      if (pos100ns < 0) then
+        pos100ns := 0;
+
+      if (FDuration100ns > 0) and (pos100ns > FDuration100ns) then
+        pos100ns := FDuration100ns;
+
+      // IMPORTANT: 100ns -> bytes using SOURCE buffer format (pvBytes layout)
+      // Use source bytes/sec to avoid mismatch with WASAPI mix/render format.
+      newOffset := (UInt64(pos100ns) * UInt64(pvSourceWfx.nAvgBytesPerSec)) div UInt64(REFTIMES_PER_SEC);
+
+      // align to SOURCE block
+      newOffset := (newOffset div Int64(pvSourceWfx.nBlockAlign)) * Int64(pvSourceWfx.nBlockAlign);
+
+      // never seek to exact EOF (must be < pvBytesLength)
+      if (pvBytesLength > 0) and (newOffset >= UInt64(pvBytesLength)) then
       begin
-
-        if (pvRenderWfx <> nil) and
-           (pvBytes <> nil) and
-           (pvBytesLength > 0) and
-           (pvRenderWfx.nAvgBytesPerSec <> 0) then
-         begin
-
-           pos100ns := Cmd.SeekPos100ns;
-
-           if (pos100ns < 0) then
-             pos100ns := 0;
-
-           if (FDuration100ns > 0) and (pos100ns > FDuration100ns) then
-             pos100ns := FDuration100ns;
-
-           // 100ns -> bytes (render format rate)
-           newOffset := (UInt64(pos100ns) * UInt64(pvRenderWfx.nAvgBytesPerSec)) div UInt64(REFTIMES_PER_SEC);
-
-           // align to block
-           if (pvRenderWfx.nBlockAlign <> 0) then
-             newOffset := (newOffset div Int64(pvRenderWfx.nBlockAlign)) * Int64(pvRenderWfx.nBlockAlign);
-
-           if (newOffset > UInt64(pvBytesLength)) then
-             newOffset := UInt64(pvBytesLength);
-
-           // THIS is what makes FBasePos100ns meaningful:
-           FBasePos100ns := pos100ns;
-           FOffset := UInt32(newOffset);
-
-           // restart clock position from zero at the new base
-           if Assigned(pvAudioClient) then
-             begin
-
-               pvAudioClient.Stop();
-               pvAudioClient.Reset();
-             end;
-
-           // Flush EQ state on seek (recommended; avoids ringing/history)
-           if Assigned(FHighMidLowMFT) then
-             FHighMidLowMFT.ProcessMessage(MFT_MESSAGE_COMMAND_FLUSH, 0);
-
-           if (pvDeviceState = dsPlay) and Assigned(pvAudioClient) then
-             pvAudioClient.Start;
-         end;
+        if (pvBytesLength > UInt32(pvSourceWfx.nBlockAlign)) then
+          newOffset := UInt64(pvBytesLength) - UInt64(pvSourceWfx.nBlockAlign)
+        else
+          newOffset := 0;
       end;
+
+      // THIS is what makes FBasePos100ns meaningful:
+      FBasePos100ns := pos100ns;
+      FOffset := UInt32(newOffset);
+
+      // Restart clock position from zero at the new base.
+      if Assigned(pvAudioClient) then
+      begin
+        hr := pvAudioClient.Stop();
+        if SUCCEEDED(hr) then
+          hr := pvAudioClient.Reset();
+
+        if FAILED(hr) then
+        begin
+          Self.SetState(dsError);
+          Self.RaiseError('AudioClient Stop/Reset failed', hr);
+          Exit;
+        end;
+      end;
+
+      // Flush EQ state on seek (recommended; avoids ringing/history)
+      if Assigned(FHighMidLowMFT) then
+      begin
+        hr := FHighMidLowMFT.ProcessMessage(MFT_MESSAGE_COMMAND_FLUSH, 0);
+        if FAILED(hr) then
+        begin
+          Self.SetState(dsError);
+          Self.RaiseError('ProcessMessage MFT_MESSAGE_COMMAND_FLUSH failed', hr);
+          Exit;
+        end;
+      end;
+
+      // Seek should resume playback unless you explicitly want a "scrub while paused" mode.
+      if Assigned(pvAudioClient) then
+      begin
+        if (pvDeviceState <> dsPlay) then
+          SetState(dsPlay);
+
+        hr := pvAudioClient.Start();
+        if FAILED(hr) then
+        begin
+          Self.SetState(dsError);
+          Self.RaiseError('AudioClient Start failed after seek', hr);
+          Exit;
+        end;
+      end;
+    end;
+  end;
+
 
     ckSetVolume:
       begin
@@ -1114,6 +1169,7 @@ begin
           end;
       end;
   end;
+
 end;
 
 
@@ -1310,6 +1366,7 @@ begin
                                         Mid,
                                         High,
                                         SampleRate);
+
   Result := SUCCEEDED(hr) and (SampleRate > 0);
 end;
 
@@ -1339,6 +1396,7 @@ end;
 // End EQ bass/ treble MFT implementation --------------------------------------
 
 
+
 procedure TWasApiEngine.ResetAudioData(pFreeSourceStream: Boolean);
 begin
 
@@ -1350,6 +1408,14 @@ begin
       pvBytesLength := 0;
       FOffset := 0;
     end;
+
+  if Assigned(FDynFloatBuf) then
+    begin
+
+      FreeMem(FDynFloatBuf);
+      FDynFloatBuf := nil;
+      FDynFloatBufSamples := 0;
+    end;
 end;
 
 
@@ -1357,9 +1423,10 @@ function TWasApiEngine.LoadData(bufferFrameCount: UINT32;
                                 pData: PByte;
                                 var flags: DWORD): HRESULT;
 var
-  bytesToCopy: UINT32;
-  bytesRequested: UINT32;
-  remain: UINT32;
+  bytesToCopy: UInt32;
+  bytesRequested64: UInt64;
+  bytesRequested: UInt32;
+  remainBytes: UInt32;
 
 begin
 
@@ -1374,21 +1441,33 @@ begin
   if (FClientBlockAlign = 0) then
     Exit(E_FAIL);
 
-  bytesRequested := bufferFrameCount * UINT32(FClientBlockAlign);
+  // Harden against overflow: compute requested bytes in 64-bit.
+  bytesRequested64 := UInt64(bufferFrameCount) * UInt64(FClientBlockAlign);
+
+  // Clamp to 32-bit addressable buffer size (pData points to WASAPI buffer of that size).
+  if (bytesRequested64 > High(UInt32)) then
+    bytesRequested := High(UInt32)
+  else
+    bytesRequested := UInt32(bytesRequested64);
+
   bytesToCopy := bytesRequested;
 
+  // Already at EOF: produce silence but DO NOT change FOffset.
   if (FOffset >= pvBytesLength) then
     begin
+
       flags := AUDCLNT_BUFFERFLAGS_SILENT;
       ZeroMemory(pData,
                  bytesRequested);
       Exit(S_OK);
     end;
 
-  if (FOffset + bytesToCopy) > pvBytesLength then
+  // Partial tail: copy remaining bytes, zero-fill rest.
+  if (UInt64(FOffset) + UInt64(bytesToCopy)) > UInt64(pvBytesLength) then
     begin
+
       bytesToCopy := pvBytesLength - FOffset;
-      flags := AUDCLNT_BUFFERFLAGS_SILENT;
+      flags := flags or AUDCLNT_BUFFERFLAGS_SILENT;
     end;
 
   if (bytesToCopy > 0) then
@@ -1399,13 +1478,19 @@ begin
   // If partial, zero the rest of the buffer for safety.
   if (bytesToCopy < bytesRequested) then
     begin
-      remain := bytesRequested - bytesToCopy;
+      remainBytes := bytesRequested - bytesToCopy;
       ZeroMemory(PByte(NativeUInt(pData) + NativeUInt(bytesToCopy)),
-                 remain);
+                 remainBytes);
     end;
 
   Inc(FOffset,
       bytesToCopy);
+
+  // DEBUG: print bufferFrameCount, not uninitialized 'remain'
+  //OutputDebugString(PChar(Format(
+  //  'After LoadData: flags=%x FOffset=%d bytesLen=%d frames=%u reqBytes=%u copyBytes=%u',
+  //  [Cardinal(flags), FOffset, pvBytesLength, bufferFrameCount, bytesRequested, bytesToCopy]
+  //)));
 
   Result := S_OK;
 end;
@@ -1418,8 +1503,7 @@ var
   eqHr: HRESULT;
   sourceReaderConfiguration: IMFAttributes;
   sourceReader: IMFSourceReader;
-  nativeMediaType,
-  partialType: IMFMediaType;
+  nativeMediaType: IMFMediaType;
   majorType,
   subType: TGUID;
   currentMediaType: IMFMediaType;
@@ -1429,6 +1513,72 @@ var
   hres: HRESULT;
   audioData: PByte;
   audioDataLength: DWORD;
+
+  nChannels,
+  nSampleRate,
+  nBits: UINT32;
+  wantSubType: TGUID;
+
+  function GetU32Attr(const mt: IMFMediaType;
+                      const key: TGUID;
+                      def: UINT32): UINT32;
+  var
+    r: HRESULT;
+    v: UINT32;
+
+  begin
+
+    v := def;
+    if (mt <> nil) then
+      begin
+        r := mt.GetUINT32(key, v);
+        if FAILED(r) then
+          v := def;
+      end;
+    Result := v;
+  end;
+
+  function TrySetReaderType(const aSubType: TGUID;
+                            aBits: UINT32;
+                            aSR: UINT32;
+                            aCh: UINT32): HRESULT;
+  var
+    r: HRESULT;
+    t: IMFMediaType;
+
+  begin
+
+    t := nil;
+    r := MFCreateMediaType(t);
+
+    if SUCCEEDED(r) then
+      r := t.SetGUID(MF_MT_MAJOR_TYPE,
+                     MFMediaType_Audio);
+
+    if SUCCEEDED(r) then
+      r := t.SetGUID(MF_MT_SUBTYPE,
+                     aSubType);
+
+    // These are optional for SourceReader, but help it match the input format.
+    if SUCCEEDED(r) and (aCh <> 0) then
+      t.SetUINT32(MF_MT_AUDIO_NUM_CHANNELS,
+                  aCh);
+
+    if SUCCEEDED(r) and (aSR <> 0) then
+      t.SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
+                  aSR);
+
+    if SUCCEEDED(r) and (aBits <> 0) then
+      t.SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE,
+                  aBits);
+
+    if SUCCEEDED(r) then
+      r := sourceReader.SetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
+                                            0,
+                                            t);
+
+    Result := r;
+  end;
 
 begin
 
@@ -1456,7 +1606,7 @@ begin
 
   hr := sourceReader.GetNativeMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
                                         0,
-                                        nativeMediaType);
+                                        @nativeMediaType);
   if FAILED(hr) then
     Exit(hr);
 
@@ -1472,37 +1622,68 @@ begin
   if FAILED(hr) then
     Exit(hr);
 
-  // Force uncompressed PCM if needed.
+  // Read native attributes (may be missing for some containers; defaults used then).
+  nChannels := GetU32Attr(nativeMediaType,
+                          MF_MT_AUDIO_NUM_CHANNELS,
+                          0);
+
+  nSampleRate := GetU32Attr(nativeMediaType,
+                            MF_MT_AUDIO_SAMPLES_PER_SECOND,
+                            0);
+
+  nBits := GetU32Attr(nativeMediaType,
+                      MF_MT_AUDIO_BITS_PER_SAMPLE,
+                      0);
+
+  // ---------------------------------------------------------------------------
+  // Request SourceReader output to match input format as closely as possible.
+  // - If input is already PCM or Float: try to keep same subtype + bits + SR + CH.
+  // - If compressed: decode to PCM with same SR/CH/BPS (if known), else fallback.
+  // ---------------------------------------------------------------------------
+
+  wantSubType := subType;
+
   if not (IsEqualGUID(MFAudioFormat_Float,
-                      subType) or
+                      wantSubType) or
           IsEqualGUID(MFAudioFormat_PCM,
-                      subType)) then
+                      wantSubType)) then
     begin
 
-      hr := MFCreateMediaType(partialType);
-
-      if SUCCEEDED(hr) then
-        hr := partialType.SetGUID(MF_MT_MAJOR_TYPE,
-                                  MFMediaType_Audio);
-
-      if SUCCEEDED(hr) then
-        hr := partialType.SetGUID(MF_MT_SUBTYPE,
-                                  MFAudioFormat_PCM);
-
-      if SUCCEEDED(hr) then
-        hr := sourceReader.SetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
-                                               0,
-                                               partialType);
-      if FAILED(hr) then
-        Exit(hr);
+      // Compressed -> decode to PCM
+      wantSubType := MFAudioFormat_PCM;
+      // If bits unknown, let MF decide; otherwise request the native bits
     end;
 
-  hr := sourceReader.GetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
-                                         currentMediaType);
+  // 1) Try "same as input" (or decoded PCM with native SR/CH/BPS if present)
+  hr := TrySetReaderType(wantSubType,
+                         nBits,
+                         nSampleRate,
+                         nChannels);
+
+  // 2) If that fails, try Float32 (best for DSP)
+  if FAILED(hr) then
+    hr := TrySetReaderType(MFAudioFormat_Float,
+                           32,
+                           nSampleRate,
+                           nChannels);
+
+  // 3) If that fails, fall back to PCM16
+  if FAILED(hr) then
+    hr := TrySetReaderType(MFAudioFormat_PCM,
+                           16,
+                           nSampleRate,
+                           nChannels);
+
   if FAILED(hr) then
     Exit(hr);
 
-  // Convert MF media type to WAVEFORMATEX (this defines our decoded PCM bytes layout).
+  // Get the actual current type the SourceReader will output
+  hr := sourceReader.GetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
+                                         @currentMediaType);
+  if FAILED(hr) then
+    Exit(hr);
+
+  // Convert MF media type to WAVEFORMATEX (this defines our decoded bytes layout)
   hr := MFCreateWaveFormatExFromMFMediaType(currentMediaType,
                                             pvSourceWfx,
                                             pvwaveformatlength,
@@ -1510,38 +1691,42 @@ begin
   if FAILED(hr) then
     Exit(hr);
 
+  // Source layout for pvBytes and seeking math (MUST match pvSourceWfx)
+  FSourceBytesPerSec := 0;
+  FSourceBlockAlign := 0;
+
+  if (pvSourceWfx <> nil) then
+    begin
+      FSourceBytesPerSec := pvSourceWfx.nAvgBytesPerSec;
+      FSourceBlockAlign := pvSourceWfx.nBlockAlign;
+    end;
+
   // Create device + audio client (Initialize occurs in SetFormat).
   hr := InitializeAudioEngine();
   if FAILED(hr) then
     Exit(hr);
 
-  // Mix format is not used for rendering bytes, but can be useful for diagnostics/UI.
+  // Mix format (diagnostics only)
   if Assigned(pvRenderWfx) then
-    begin
-
-      CoTaskMemFree(pvRenderWfx);
-      pvRenderWfx := nil;
-    end;
+  begin
+    CoTaskMemFree(pvRenderWfx);
+    pvRenderWfx := nil;
+  end;
 
   hr := pvAudioClient.GetMixFormat(pvRenderWfx);
   if FAILED(hr) then
     Exit(hr);
 
-  // Configure and init WASAPI for decoded PCM format.
-  // NOTE: MUST match LoadData/byte layout -> pvSourceWfx.
+  // Configure WASAPI for decoded format (pvSourceWfx).
   hr := SetFormat(pvSourceWfx);
   if FAILED(hr) then
     Exit(hr);
 
   // ---------------------------------------------------------------------------
-  // Create + configure EQ MFT (optional / pluggable)
+  // EQ MFT (optional)
   // ---------------------------------------------------------------------------
-
-  // Do not hard-fail file load if EQ cannot be created/configured.
-  // Engine must work with or without EQ.
   eqHr := S_OK;
 
-  // If GUI plugged a custom MFT via SetEQTransform, FHighMidLowMFT may already be set.
   if not Assigned(FHighMidLowMFT) then
     eqHr := CreateHighMidLowMFT(FHighMidLowMFT);
 
@@ -1554,13 +1739,11 @@ begin
       FHighMidLowMFT.QueryInterface(IMfHighMidLowControl,
                                     FHighMidLowCtrl);
 
-      // Configure media types (same in/out).
       eqHr := FHighMidLowMFT.SetInputType(0,
                                           currentMediaType,
                                           0);
-
       if SUCCEEDED(eqHr) then
-        eqHr := FHighMidLowMFT.SetOutputType(0,
+         eqHr := FHighMidLowMFT.SetOutputType(0,
                                              currentMediaType,
                                              0);
 
@@ -1569,26 +1752,26 @@ begin
 
           FHighMidLowMFT.ProcessMessage(MFT_MESSAGE_COMMAND_FLUSH,
                                         0);
+
           FHighMidLowMFT.ProcessMessage(MFT_MESSAGE_NOTIFY_BEGIN_STREAMING,
                                         0);
+
           FHighMidLowMFT.ProcessMessage(MFT_MESSAGE_NOTIFY_START_OF_STREAM,
                                         0);
 
           FEQTypeSet := True;
-          // Default on; GUI may disable at runtime.
-          // (If you want default off, set FEQEnabled := False here.)
           FEQEnabled := True;
         end
       else
         begin
-          // Disable EQ on failure (optional component).
+
           FEQEnabled := False;
           FEQTypeSet := False;
         end;
     end
   else
     begin
-      // No EQ available -> pure bypass.
+
       FEQEnabled := False;
       FEQTypeSet := False;
     end;
@@ -1596,7 +1779,6 @@ begin
   // ---------------------------------------------------------------------------
   // Read all samples into pvBytes (decoded PCM bytes in pvSourceWfx layout)
   // ---------------------------------------------------------------------------
-
   pvBytesLength := 0;
   pvBytes := nil;
   FOffset := 0;
@@ -1645,10 +1827,8 @@ begin
       try
         if (audioDataLength > 0) then
           begin
-
             ReallocMem(pvBytes,
-                       pvBytesLength +
-                       audioDataLength);
+                       pvBytesLength + audioDataLength);
 
             Move(audioData^,
                  (pvBytes + pvBytesLength)^,
@@ -1661,9 +1841,9 @@ begin
 
         buffer.Unlock();
       end;
-    end;
+  end;
 
-  // Duration (100ns) based on decoded PCM byte rate.
+  // Duration (100ns) based on decoded byte rate.
   FDuration100ns := 0;
   if (pvSourceWfx <> nil) and (pvSourceWfx.nAvgBytesPerSec <> 0) then
     FDuration100ns := Int64((UInt64(pvBytesLength) * UInt64(REFTIMES_PER_SEC)) div UInt64(pvSourceWfx.nAvgBytesPerSec));
@@ -1743,7 +1923,6 @@ var
   hr: HRESULT;
   hnsRequestedDuration: REFERENCE_TIME;
   bufferFrameCount: UINT32;
-  isFloat: Boolean;
   ch: Integer;
 
 begin
@@ -1806,47 +1985,31 @@ begin
                                              1.0);
     end;
 
-  // Float detection: handle WAVE_FORMAT_IEEE_FLOAT and WAVE_FORMAT_EXTENSIBLE/SubFormat.
-  isFloat := False;
+  case pwfx.wBitsPerSample of
+    16: begin
 
-  if (pwfx.wFormatTag = WAVE_FORMAT_IEEE_FLOAT) then
-    isFloat := True
-  else
-    if (pwfx.wFormatTag = WAVE_FORMAT_EXTENSIBLE) then
-      begin
-        isFloat := IsEqualGUID(PWaveFormatExtensible(pwfx)^.SubFormat,
-                               KSDATAFORMAT_SUBTYPE_IEEE_FLOAT);
-      end;
-
-  if isFloat then
-    begin
-      FSampleType := stFloat32;
-      FBytesPerSample := 4;
-    end
-  else
-    begin
-      case pwfx.wBitsPerSample of
-        16: begin
-              FSampleType := stInt16;
-              FBytesPerSample := 2;
-            end;
-
-        24: begin
-              FSampleType := stInt24;
-              FBytesPerSample := 3;
-            end;
-
-        32: begin
-              FSampleType := stInt32;
-              FBytesPerSample := 4;
-            end;
-      else
-        begin
-          FSampleType := stInt16;
+          FSampleFormat := sfInt16;
           FBytesPerSample := 2;
         end;
-      end;
-    end;
+
+    24: begin
+
+          FSampleFormat := sfInt24;
+          FBytesPerSample := 3;
+        end;
+
+    32: begin
+
+          FSampleFormat := sfInt32;
+          FBytesPerSample := 4;
+        end;
+      else
+        begin
+
+          FSampleFormat := sfInt16;
+          FBytesPerSample := 2;
+        end;
+  end;
 
   Result := S_OK;
 end;
@@ -1861,9 +2024,6 @@ var
   u64Position: UINT64;
   u64QPCPosition: UINT64;
   u64Frequency: UINT64;
-  {$IFDEF DEBUG}
-  dwCharacteristics: DWord;
-  {$ENDIF}
   numFramesAvailable: UINT32;
   numFramesPadding: UINT32;
   pBufferData: PByte;
@@ -1893,6 +2053,7 @@ begin
   // Otherwise start from the beginning.
   if (pvDeviceState <> dsPause) then
     begin
+
       FOffset := 0;
       FBasePos100ns := 0;
     end;
@@ -1921,7 +2082,8 @@ begin
 
        pvAudioClient.Stop();
        SetState(dsStop);
-       RaiseError('IAudioClock.GetFrequency failed', hr);
+       RaiseError('IAudioClock.GetFrequency failed',
+                  hr);
        Exit(hr);
     end;
 
@@ -1935,10 +2097,10 @@ begin
 
       case waitResult of
 
-        WAIT_OBJECT_0: // terminate
+        WAIT_OBJECT_0: // Terminate
           Break;
 
-        WAIT_OBJECT_0 + 1: // command event
+        WAIT_OBJECT_0 + 1: // Command event.
           begin
             // Drain all pending commands.
             while DequeueCommand(Cmd) do
@@ -1986,70 +2148,65 @@ begin
               end;
           end;
 
-        WAIT_OBJECT_0 + 2: // audio ready
+        WAIT_OBJECT_0 + 2: // Audio ready.
           begin
 
             hr := pvAudioClient.GetCurrentPadding(numFramesPadding);
             if FAILED(hr) then
               Break;
 
-            hr := pvAudioClient.GetBufferSize(numFramesAvailable);
+            // Use cached total buffer frames (set in SetFormat via GetBufferSize)
+            if (pvBufferFrameCount > numFramesPadding) then
+              numFramesAvailable := pvBufferFrameCount - numFramesPadding
+            else
+              numFramesAvailable := 0;
+
+            if (numFramesAvailable = 0) then
+              Continue;
+
+            hr := pvRenderClient.GetBuffer(numFramesAvailable,
+                                           pBufferData);
             if FAILED(hr) then
               Break;
 
-            numFramesAvailable := numFramesAvailable - numFramesPadding;
+            flags := 0;
 
-            if (numFramesAvailable > 0) then
+            hr := LoadData(numFramesAvailable,
+                           pBufferData,
+                           flags);
+
+            if FAILED(hr) then
+            begin
+              pvRenderClient.ReleaseBuffer(numFramesAvailable,
+                                           AUDCLNT_BUFFERFLAGS_SILENT);
+              Break;
+            end;
+
+            // Only process when buffer has real audio
+            if ((flags and AUDCLNT_BUFFERFLAGS_SILENT) = 0) then
               begin
 
-                hr := pvRenderClient.GetBuffer(numFramesAvailable,
-                                               pBufferData);
-                if FAILED(hr) then
-                  Break;
-
-                flags := 0;
-
-                hr := LoadData(numFramesAvailable,
-                               pBufferData,
-                               flags);
-
-                // After GetBuffer succeeds, ReleaseBuffer MUST be called with the same frame count.
-                // If LoadData failed, release as SILENT for safety.
-                if FAILED(hr) then
+                // --- EQ (optional) ---
+                if FEQEnabled and Assigned(FHighMidLowMFT) and FEQTypeSet then
                   begin
 
-                    pvRenderClient.ReleaseBuffer(numFramesAvailable,
-                                                 AUDCLNT_BUFFERFLAGS_SILENT);
-                    Break;
-                  end;
+                    bytesThisBuffer := DWORD(numFramesAvailable) * DWORD(FClientBlockAlign);
+                    hr := ProcessEQBuffer(pBufferData,
+                                          bytesThisBuffer);
 
-                // Apply EQ only when we are actually outputting audio (not silent).
-                if ((flags and AUDCLNT_BUFFERFLAGS_SILENT) = 0) then
-                  begin
-
-                    if FEQEnabled and Assigned(FHighMidLowMFT) and FEQTypeSet then
+                    if FAILED(hr) then
                       begin
 
-                        // bytes in this render buffer:
-                        // MUST use the block align of the format used by IAudioClient.Initialize.
-                        bytesThisBuffer := DWORD(numFramesAvailable) * DWORD(FClientBlockAlign);
-
-                        hr := ProcessEQBuffer(pBufferData,
-                                              bytesThisBuffer);
-
-                        // EQ failure must NEVER stop audio.
-                        if FAILED(hr) then
-                          begin
-                            // Optional: RaiseError('EQ failed', hr);
-                          end;
+                        // EQ failure must never stop audio.
                       end;
-                  end;
 
-                hr := pvRenderClient.ReleaseBuffer(numFramesAvailable,
-                                                   flags);
-                if FAILED(hr) then
-                  Break;
+                  end;
               end;
+
+            hr := pvRenderClient.ReleaseBuffer(numFramesAvailable,
+                                               flags);
+            if FAILED(hr) then
+              Break;
 
             // Progress
             if (u64Frequency <> 0) then
@@ -2071,17 +2228,30 @@ begin
                 Break;
               end;
           end;
-
-      else
+      else  // case
         begin
+
           hr := E_FAIL;
           Break;
         end;
 
-      end; // case waitResult.
+      end; // Case waitResult.
     end;
 
+  // Stop the client and reset its clock/buffer. -------------------------------
   pvAudioClient.Stop();
+  pvAudioClient.Reset();
+
+  // Reset playback position.
+  FOffset := 0;
+  FBasePos100ns := 0;
+
+  // Tell GUI immediately.
+  RaiseProcessed(0,
+                 0);
+
+  SetState(dsStop);
+  // ---------------------------------------------------------------------------
 
   if (pvMmcssHandle <> 0) then
     begin
@@ -2090,7 +2260,6 @@ begin
       pvMmcssHandle := 0;
       pvMmcssTaskIndex := 0;
     end;
-
 
   Result := hr;
 end;

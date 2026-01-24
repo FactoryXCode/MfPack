@@ -97,7 +97,6 @@ object frmMain: TfrmMain
     BorderStyle = sbsSingle
     Caption = 'Open an audio file'
     TabOrder = 3
-    ExplicitWidth = 834
   end
   object Panel2: TPanel
     Left = 0
@@ -112,7 +111,6 @@ object frmMain: TfrmMain
     Color = clAppWorkSpace
     ParentBackground = False
     TabOrder = 4
-    ExplicitWidth = 834
     object lblBarPositionInSTime: TLabel
       Left = 15
       Top = 30
@@ -125,17 +123,17 @@ object frmMain: TfrmMain
       AutoSize = False
       Caption = 'Time: 00:00:00'
     end
-    object lblBarPositionInSamples: TLabel
+    object lblBarPosition: TLabel
       Left = 182
       Top = 30
-      Width = 173
+      Width = 248
       Height = 27
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
       Margins.Bottom = 5
       AutoSize = False
-      Caption = 'Samples: 0'
+      Caption = 'Position: 0'
     end
     object pbProgress: TProgressBar
       Left = 1
@@ -150,7 +148,6 @@ object frmMain: TfrmMain
       TabOrder = 0
       OnMouseMove = pbProgressMouseMove
       OnMouseUp = pbProgressMouseUp
-      ExplicitWidth = 832
     end
   end
   object pnlControls: TPanel
@@ -168,7 +165,6 @@ object frmMain: TfrmMain
     ParentDoubleBuffered = False
     ShowCaption = False
     TabOrder = 5
-    ExplicitWidth = 834
     object Bevel1: TBevel
       Left = 242
       Top = 43
