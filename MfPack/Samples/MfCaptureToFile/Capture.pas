@@ -428,7 +428,7 @@ begin
 
   if SUCCEEDED(hr) then
     hr := m_pReader.GetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                        pType);
+                                        @pType);
 
   if SUCCEEDED(hr) then
     hr := ConfigureEncoder(param,
@@ -717,7 +717,7 @@ begin
 
   hr := pReader.GetNativeMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
                                    0,  // Type index
-                                   pType);
+                                   @pType);
 
   if FAILED(hr) then
     goto done;

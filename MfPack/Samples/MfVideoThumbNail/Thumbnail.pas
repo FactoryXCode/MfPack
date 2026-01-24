@@ -445,7 +445,7 @@ begin
 
   // Get the media type from the stream.
   hr := m_pReader.GetCurrentMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
-                                      pType);
+                                      @pType);
 
   if (FAILED(hr)) then
     begin

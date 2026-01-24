@@ -813,7 +813,7 @@ begin
     // Read the full uncompressed input type from the reader.
     // pAudioTypeIn is the returned media type.
     hr := pAudioSourceReader.GetCurrentMediaType(fAudioStreamIndex,
-                                                 pAudioTypeIn);
+                                                 @pAudioTypeIn);
 
   {$IFDEF DEBUG}
     {$IFDEF SAVE_DEBUG_REPORT}

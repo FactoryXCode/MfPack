@@ -773,7 +773,7 @@ begin
   // Get the complete uncompressed format.
   if SUCCEEDED(hr) then
     hr := pReader.GetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
-                                      pUncompressedAudioType);
+                                      @pUncompressedAudioType);
 
   // IMPORTANT NOTE:
   // Before selecting a stream, make sure you deselected all streams first!

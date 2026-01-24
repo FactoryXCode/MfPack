@@ -3508,7 +3508,7 @@ begin
 
       hr := pSourcereader.GetNativeMediaType(pStreamIndex,
                                              dwIndex,
-                                             pMediaType);
+                                             @pMediaType);
       if FAILED(hr) then
         Break;
 
@@ -3791,7 +3791,7 @@ begin
     begin
       hr := pReader.GetNativeMediaType(pStreamIndex,
                                        dwMediaTypeIndex,
-                                       pMediaType);
+                                       @pMediaType);
       if (hr = MF_E_NO_MORE_TYPES) or (hr = MF_E_INVALIDSTREAMNUMBER) then
         begin
             hr := S_OK;
@@ -3856,7 +3856,7 @@ begin
         begin
           hr := pReader.GetNativeMediaType(pStreamIndex,
                                            dwMediaTypeIndex,
-                                           pMediaType);
+                                           @pMediaType);
           if (hr = MF_E_NO_MORE_TYPES) or (hr = MF_E_INVALIDSTREAMNUMBER) then
             begin
                hr := S_OK;
@@ -3938,7 +3938,7 @@ begin
 
       hr := pReader.GetNativeMediaType(pStreamIndex,
                                        dwIndex,
-                                       mfType);
+                                       @mfType);
 
       if (hr = MF_E_NO_MORE_TYPES) then
         begin
