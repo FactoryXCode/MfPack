@@ -220,7 +220,7 @@ type
     FEngine: TWasApiEngine;
   protected
 
-    procedure Execute; override;
+    procedure Execute(); override;
   public
 
     constructor Create(AEngine: TWasApiEngine);
@@ -319,11 +319,13 @@ type
 
     function LoadFileInternal(const audiofile: TFileName;
                               fileDuration: LONGLONG): HResult;
+
     function LoadData(bufferFrameCount: UINT32;
                       pData: PByte;
                       var flags: DWORD): HRESULT;
 
     function PlayAudioStreamInternal(): HRESULT;
+
     // Helper for PlayAudioStreamInternal.
     function ProcessEQBuffer(pData: PByte;
                              const ByteCount: DWORD): HRESULT;
@@ -725,6 +727,7 @@ end;
 
 constructor TWasApiEngine.Create();
 begin
+
   inherited Create;
 
   pvAudioClient := nil;
@@ -829,7 +832,8 @@ begin
                   begin
 
                     if Assigned(FOnStateChanged) then
-                      FOnStateChanged(Self, NewState);
+                      FOnStateChanged(Self,
+                                      NewState);
                   end);
 end;
 
@@ -876,7 +880,9 @@ begin
                   begin
 
                     if Assigned(FOnProcessed) then
-                      FOnProcessed(Self, Position100ns, RawPosition);
+                      FOnProcessed(Self,
+                                   Position100ns,
+                                   RawPosition);
                   end);
 end;
 
@@ -976,16 +982,13 @@ begin
 
 ckSeek:
   begin
+
     if (pvSourceWfx <> nil) and
        (pvBytes <> nil) and
        (pvBytesLength > 0) and
        (pvSourceWfx.nAvgBytesPerSec <> 0) and
        (pvSourceWfx.nBlockAlign <> 0) then
     begin
-
-      // DEBUG:
-      //OutputDebugString(PChar(Format('ckSeek: Cmd.SeekPos100ns=%d  Dur=%d',
-      //                               [Cmd.SeekPos100ns, FDuration100ns])));
 
       pos100ns := Cmd.SeekPos100ns;
 
@@ -1004,12 +1007,13 @@ ckSeek:
 
       // never seek to exact EOF (must be < pvBytesLength)
       if (pvBytesLength > 0) and (newOffset >= UInt64(pvBytesLength)) then
-      begin
-        if (pvBytesLength > UInt32(pvSourceWfx.nBlockAlign)) then
-          newOffset := UInt64(pvBytesLength) - UInt64(pvSourceWfx.nBlockAlign)
-        else
-          newOffset := 0;
-      end;
+        begin
+
+          if (pvBytesLength > UInt32(pvSourceWfx.nBlockAlign)) then
+            newOffset := UInt64(pvBytesLength) - UInt64(pvSourceWfx.nBlockAlign)
+          else
+            newOffset := 0;
+          end;
 
       // THIS is what makes FBasePos100ns meaningful:
       FBasePos100ns := pos100ns;
@@ -1017,33 +1021,40 @@ ckSeek:
 
       // Restart clock position from zero at the new base.
       if Assigned(pvAudioClient) then
-      begin
-        hr := pvAudioClient.Stop();
-        if SUCCEEDED(hr) then
-          hr := pvAudioClient.Reset();
-
-        if FAILED(hr) then
         begin
-          Self.SetState(dsError);
-          Self.RaiseError('AudioClient Stop/Reset failed', hr);
-          Exit;
-        end;
 
-        if Assigned(FDynamics) then
-          FDynamics.Reset();
-      end;
+          hr := pvAudioClient.Stop();
+          if SUCCEEDED(hr) then
+            hr := pvAudioClient.Reset();
+
+          if FAILED(hr) then
+            begin
+
+              Self.SetState(dsError);
+              Self.RaiseError('AudioClient Stop/Reset failed',
+                              hr);
+              Exit;
+            end;
+
+          if Assigned(FDynamics) then
+            FDynamics.Reset();
+        end;
 
       // Flush EQ state on seek (recommended; avoids ringing/history)
       if Assigned(FHighMidLowMFT) then
-      begin
-        hr := FHighMidLowMFT.ProcessMessage(MFT_MESSAGE_COMMAND_FLUSH, 0);
-        if FAILED(hr) then
         begin
-          Self.SetState(dsError);
-          Self.RaiseError('ProcessMessage MFT_MESSAGE_COMMAND_FLUSH failed', hr);
-          Exit;
+
+          hr := FHighMidLowMFT.ProcessMessage(MFT_MESSAGE_COMMAND_FLUSH,
+                                              0);
+          if FAILED(hr) then
+            begin
+
+              Self.SetState(dsError);
+              Self.RaiseError('ProcessMessage MFT_MESSAGE_COMMAND_FLUSH failed',
+                              hr);
+              Exit;
+            end;
         end;
-      end;
 
       // Seek should resume playback unless you explicitly want a "scrub while paused" mode.
       if Assigned(pvAudioClient) then
@@ -1053,11 +1064,13 @@ ckSeek:
 
         hr := pvAudioClient.Start();
         if FAILED(hr) then
-        begin
-          Self.SetState(dsError);
-          Self.RaiseError('AudioClient Start failed after seek', hr);
-          Exit;
-        end;
+          begin
+
+            Self.SetState(dsError);
+            Self.RaiseError('AudioClient Start failed after seek',
+                            hr);
+            Exit;
+          end;
       end;
     end;
   end;
@@ -1122,30 +1135,35 @@ ckSeek:
 
     ckEQSetMidMode:
       begin
+
         if Assigned(FHighMidLowCtrl) then
           FHighMidLowCtrl.SetMidMode(TMfMidMode(Cmd.EqMidMode));
       end;
 
     ckEQSetMidQ:
       begin
+
         if Assigned(FHighMidLowCtrl) then
           FHighMidLowCtrl.SetMidQ(Cmd.EqMidQ);
       end;
 
     ckEQSetLowFreqHz:
       begin
+
         if Assigned(FHighMidLowCtrl) then
           FHighMidLowCtrl.SetLowFreqHz(Cmd.EqLowFreqHz);
       end;
 
     ckEQSetMidFreqHz:
       begin
+
         if Assigned(FHighMidLowCtrl) then
           FHighMidLowCtrl.SetMidFreqHz(Cmd.EqMidFreqHz);
       end;
 
     ckEQSetHighFreqHz:
       begin
+
         if Assigned(FHighMidLowCtrl) then
           FHighMidLowCtrl.SetHighFreqHz(Cmd.EqHighFreqHz);
       end;
@@ -1158,6 +1176,7 @@ ckSeek:
 
     ckEQSetHighShelfSlope:
       begin
+
         if Assigned(FHighMidLowCtrl) then
           FHighMidLowCtrl.SetHighShelfSlope(Cmd.EqHighShelfSlope);
       end;
@@ -1510,12 +1529,6 @@ begin
 
   Inc(FOffset,
       bytesToCopy);
-
-  // DEBUG: print bufferFrameCount, not uninitialized 'remain'
-  //OutputDebugString(PChar(Format(
-  //  'After LoadData: flags=%x FOffset=%d bytesLen=%d frames=%u reqBytes=%u copyBytes=%u',
-  //  [Cardinal(flags), FOffset, pvBytesLength, bufferFrameCount, bytesRequested, bytesToCopy]
-  //)));
 
   Result := S_OK;
 end;
@@ -2326,51 +2339,75 @@ function TWasApiEngine.ProcessEQBuffer(pData: PByte;
                                        const ByteCount: DWORD): HRESULT;
 var
   hr: HRESULT;
-  inSample, outSample: IMFSample;
-  inBuf, outBuf: IMFMediaBuffer;
+  inSample,
+  outSample: IMFSample;
+  inBuf,
+  outBuf: IMFMediaBuffer;
   outData: MFT_OUTPUT_DATA_BUFFER;
   status: DWORD;
-  pIn, pOut: PByte;
+  pIn,
+  pOut: PByte;
   cbOut: DWORD;
 
 begin
 
-  if (not FEQEnabled) or (FHighMidLowMFT = nil) or (ByteCount = 0) then
+  if (not FEQEnabled) or
+    (FHighMidLowMFT = nil) or
+    (ByteCount = 0) then
     Exit(S_OK);
 
   // --- Create input sample ---
   hr := MFCreateSample(inSample);
-  if FAILED(hr) then Exit(hr);
+  if FAILED(hr) then
+    Exit(hr);
 
-  hr := MFCreateMemoryBuffer(ByteCount, inBuf);
-  if FAILED(hr) then Exit(hr);
+  hr := MFCreateMemoryBuffer(ByteCount,
+                             inBuf);
+  if FAILED(hr) then
+    Exit(hr);
 
-  hr := inBuf.Lock(pIn, nil, nil);
-  if FAILED(hr) then Exit(hr);
+  hr := inBuf.Lock(pIn,
+                   nil,
+                   nil);
+  if FAILED(hr) then
+    Exit(hr);
+
   try
-    Move(pData^, pIn^, ByteCount);
+
+    Move(pData^,
+         pIn^,
+         ByteCount);
   finally
-    inBuf.Unlock;
+
+    inBuf.Unlock();
   end;
 
   hr := inBuf.SetCurrentLength(ByteCount);
-  if FAILED(hr) then Exit(hr);
+  if FAILED(hr) then
+    Exit(hr);
 
   hr := inSample.AddBuffer(inBuf);
-  if FAILED(hr) then Exit(hr);
+  if FAILED(hr) then
+    Exit(hr);
 
   // --- Create output sample (MUST be provided!) ---
   hr := MFCreateSample(outSample);
-  if FAILED(hr) then Exit(hr);
+  if FAILED(hr) then
+    Exit(hr);
 
-  hr := MFCreateMemoryBuffer(ByteCount, outBuf);
-  if FAILED(hr) then Exit(hr);
+  hr := MFCreateMemoryBuffer(ByteCount,
+                             outBuf);
+  if FAILED(hr) then
+    Exit(hr);
 
   hr := outSample.AddBuffer(outBuf);
-  if FAILED(hr) then Exit(hr);
+  if FAILED(hr) then
+    Exit(hr);
 
   // --- Feed MFT ---
-  hr := FHighMidLowMFT.ProcessInput(0, inSample, 0);
+  hr := FHighMidLowMFT.ProcessInput(0,
+                                    inSample,
+                                    0);
 
   // If MFT is full (has pending input), drain once and retry.
   if (hr = MF_E_NOTACCEPTING) then

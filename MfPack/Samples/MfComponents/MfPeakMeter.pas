@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright:  FactoryX. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -22,6 +22,7 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 24/01/2026 ChatGPT             Thread-safe snapshot + code polishing
 //------------------------------------------------------------------------------
 //
 // Remarks: To install the visual components, choose Install in the Project Manager.
@@ -75,6 +76,7 @@ uses
   System.SysUtils,
   System.Classes,
   System.Win.ComObj,
+  System.SyncObjs,
   {VCL}
   VCL.Graphics,
   VCL.Controls,
@@ -86,12 +88,16 @@ uses
   WinApi.CoreAudioApi.MMDeviceApi,
   WinApi.CoreAudioApi.EndPointVolume;
 
-const
-  ID_TIMER = 1;
-
 type
-  TPeakDirection = (pdVertical, pdHorizontal);
-  TPeakMeterChannel = (mcLeft, mcRight);
+
+  TPeakDirection = (pdVertical,
+                    pdHorizontal);
+
+  TPeakMeterChannel = (mcLeft,
+                       mcRight);
+
+  TMfPeakMeterErrorEvent = procedure(Sender: TObject;
+                                     const Hr: HRESULT) of object;
 
   TMfPeakMeter = class(TGraphicControl)
   private
@@ -99,11 +105,14 @@ type
     fPeakMeterBmp: TBitmap;
     fBackGroundColor: TColor;
     fBarColor: TColor;
-    afPeakValues: array of Float;
+
     fChannelCount: UINT;
     fPeakDirection: TPeakDirection;
     fMeterChannel: TPeakMeterChannel;
+
     lwTimerPeriod: LongWord; // Timer period (in milliseconds)
+    fEnabled: Boolean;
+
     // Interfaces
     pEnumerator: IMMDeviceEnumerator;
     pDevice: IMMDevice;
@@ -112,8 +121,20 @@ type
     fDataFlow: EDataFlow; // The data-flow direction for the endpoint device.
     fRole: ERole;         // The role of the endpoint device.
 
+    // Timer (runs in the VCL thread message loop)
+    fTimer: TTimer;
+
+    // Thread-safe peak snapshot (Single stored as atomic Int32 bit-pattern)
+    fPeakLeftBits: Integer;
+    fPeakRightBits: Integer;
+
+    // Reusable buffer for GetChannelsPeakValues
+    fPeakValues: TArray<Single>;
+
+    fOnError: TMfPeakMeterErrorEvent;
+
     { private methods }
-    procedure DrawPeakMeter;
+    procedure DrawPeakMeter();
     procedure SetBackGroundColor(value: TColor);
     procedure SetBarColor(value: TColor);
     procedure SetDirection(value: TPeakDirection);
@@ -121,27 +142,33 @@ type
     procedure SetDeviceDataFlow(value: EDataFlow);
     procedure SetDeviceRole(value: ERole);
     procedure SetTimerPeriod(value: LongWord);
+    procedure TimerTick(Sender: TObject);
+    function  EnsureMeterReady: Boolean;
+    procedure ReleaseMeter();
+    procedure DoError(const Hr: HRESULT);
+
+    class function SingleToBits(const V: Single): Integer; static;
+    class function BitsToSingle(const B: Integer): Single; static;
+    class function Clamp_(const V: Single): Single; static;
+
+    function GetPeakValueThreadSafe(): Single;
 
   protected
-    { protected fields }
-    fHwnd: HWnd; // Handle to this meter.
-    fEnabled: Boolean;
 
-    { protected methods }
-    procedure WindProc(var Msg: TMessage); virtual;
     procedure SetEnabled(value: Boolean); override;
-    procedure Paint; override;
+    procedure Paint(); override;
+    procedure Resize(); override;
 
   public
-    { public fields }
 
-
-    { public methods }
     constructor Create(aOwner: Tcomponent); override;
     destructor Destroy(); override;
 
+    // Thread-safe accessor for the currently selected channel (0..1)
+    property PeakValue: Single read GetPeakValueThreadSafe;
+
   published
-    { published methods }
+
     property DragCursor;
     property DragMode;
     property OnDragDrop;
@@ -157,9 +184,12 @@ type
     property BarColor: TColor read fBarColor write SetBarColor;
     property Direction: TPeakDirection read fPeakDirection write SetDirection;
     property SampleChannel: TPeakMeterChannel read fMeterChannel write SetPeakMeterChannel;
+
     property DeviceDataFlow: EDataFlow read fDataFlow write SetDeviceDataFlow default eRender;
     property DeviceRole: ERole read fRole write SetDeviceRole default eMultimedia;
     property Precision: LongWord read lwTimerPeriod write SetTimerPeriod default 100;
+
+    property OnError: TMfPeakMeterErrorEvent read fOnError write fOnError;
   end;
 
 procedure Register;
@@ -168,9 +198,11 @@ implementation
 
 procedure Register;
 begin
+
   RegisterComponents('MfPack Core Audio Samples', [TMfPeakMeter]);
 end;
 
+{ TMfPeakMeter }
 
 //-----------------------------------------------------------
 // constructor -- creates a bitmap that contains a peak meter.
@@ -178,297 +210,497 @@ end;
 //   through the default rendering device.
 //-----------------------------------------------------------
 constructor TMfPeakMeter.Create(aOwner: Tcomponent);
-var
-  hr: HResult;
-
-label
-  done;
-
 begin
+
   inherited Create(aOwner);
 
-  // Create the bitmap
-  fPeakMeterBmp := TBitmap.Create();
+  // We paint our entire bounds; this reduces flicker for windowless controls.
+  ControlStyle := ControlStyle + [csOpaque];
+
+  // Defaults (important: these were previously uninitialized before first use)
+  fEnabled := False;
   fBackGroundColor := clDkGray;
   fBarColor := clSkyBlue;
+  fPeakDirection := pdVertical;
+  fMeterChannel := mcLeft;
+  fDataFlow := eRender;
+  fRole := eMultimedia;
+  lwTimerPeriod := 100;
 
-  // Create the handle for this component
-  fHWnd := AllocateHWnd(WindProc);
+  // Create the bitmap.
+  fPeakMeterBmp := TBitmap.Create;
 
-  // Single instance
-  hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
-                         Nil,
-                         CLSCTX_ALL,
-                         IID_IMMDeviceEnumerator,
-                         pEnumerator);
-  if FAILED(hr) then
-    goto done;
+  // Use a VCL timer so we don't need our own hidden window proc/handle.
+  // This keeps all COM calls on the VCL thread (same thread that paints).
+  fTimer := TTimer.Create(Self);
+  fTimer.Enabled := False;
+  fTimer.Interval := lwTimerPeriod;
+  fTimer.OnTimer := TimerTick;
 
-  // Get peak meter for default audio-rendering device.
-  // You can easily modify for the default capture device.
-  // Change the value of the first parameter in the call to the from eRender to eCapture.
-  hr := pEnumerator.GetDefaultAudioEndpoint(fDataFlow,
-                                            fRole,
-                                            pDevice);
-  if FAILED(hr) then
-    goto done;
+  // Start with 0 peak
+  fPeakLeftBits := SingleToBits(0.0);
+  fPeakRightBits := SingleToBits(0.0);
 
-  hr := pDevice.Activate(IID_IAudioMeterInformation,
-                         CLSCTX_ALL,
-                         nil,
-                         Pointer(pMeterInfo));
-  if FAILED(hr) then
-    goto done;
-
-  // Get the number of channels
-  hr := pMeterInfo.GetMeteringChannelCount(fChannelCount);
-  if FAILED(hr) then
-    goto done;
-
-  Paint;
-
-done:
-  if ((csDesigning in ComponentState) = False) then
-    if (FAILED(hr)) then
-      begin
-        MessageBox(0,
-                   LPCWSTR('An error occured.  Error: ' + IntToStr(hr)) ,
-                   LPCWSTR('Error termination'),
-                   MB_OK And MB_ICONSTOP);
-      end;
-
+  // No need to connect to endpoint at design-time.
+  if not (csDesigning in ComponentState) then
+    Invalidate;
 end;
 
 
 destructor TMfPeakMeter.Destroy();
 begin
-  KillTimer(fHwnd,
-            ID_TIMER);
+
+  if Assigned(fTimer) then
+    fTimer.Enabled := False;
+
+  ReleaseMeter();
 
   FreeAndNil(fPeakMeterBmp);
 
-  pEnumerator := nil;
-  pDevice := nil;
-  pMeterInfo := nil;
-
-  // Destroy handle
-  DeallocateHWnd(fHWnd);
-  inherited Destroy;
+  inherited Destroy();
 end;
 
 
+procedure TMfPeakMeter.ReleaseMeter();
+begin
 
-//-----------------------------------------------------------
-// DrawPeakMeter -- Draws the peakmeter on the bitmap.
-//-----------------------------------------------------------
-procedure TMfPeakMeter.DrawPeakMeter;
+  // Release COM interfaces
+  pMeterInfo := nil;
+  pDevice := nil;
+  pEnumerator := nil;
+
+  fChannelCount := 0;
+  SetLength(fPeakValues, 0);
+
+  // Reset snapshot
+  InterlockedExchange(fPeakLeftBits,
+                      SingleToBits(0.0));
+
+  InterlockedExchange(fPeakRightBits,
+                      SingleToBits(0.0));
+end;
+
+
+procedure TMfPeakMeter.DoError(const Hr: HRESULT);
+begin
+
+  // Disable metering on fatal errors and let the application decide what to do.
+  if Assigned(fTimer) then
+    fTimer.Enabled := False;
+
+  // Keep COM objects around? safer to release and allow re-init later
+  ReleaseMeter;
+
+  if Assigned(fOnError) then
+    fOnError(Self, Hr);
+end;
+
+
+class function TMfPeakMeter.SingleToBits(const V: Single): Integer;
+begin
+
+  Result := PInteger(@V)^;
+end;
+
+
+class function TMfPeakMeter.BitsToSingle(const B: Integer): Single;
+begin
+
+  Result := PSingle(@B)^;
+end;
+
+
+class function TMfPeakMeter.Clamp_(const V: Single): Single;
+begin
+
+  if (V < 0) then
+    Exit(0.0);
+  if (V > 1) then
+    Exit(1.0);
+  Result := V;
+end;
+
+
+function TMfPeakMeter.EnsureMeterReady: Boolean;
 var
-  bmrect: TRect;
-  sPeakValue: Single;
+  Hr: HRESULT;
 
 begin
-  sPeakValue := 0.0;
 
-  if (Length(afPeakValues) > 0) then
+  Result := Assigned(pMeterInfo);
+  if Result then
+    Exit;
+
+  // Create MMDeviceEnumerator
+  Hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
+                         nil,
+                         CLSCTX_ALL,
+                         IID_IMMDeviceEnumerator,
+                         pEnumerator);
+  if Failed(Hr) then
     begin
-      // If there's only one channel, the default would always be the leftchannel (also in mono)
-      if (fChannelCount = 1) then
-        fMeterChannel := mcLeft;
 
-      // Now split the array: The first array member = leftchannel,
-      // the second = rightchannel.
-      if (fMeterChannel = mcLeft) then
-        sPeakValue := afPeakValues[0]
-      else if (fMeterChannel = mcRight) And (fChannelCount = 2) then
-        sPeakValue := afPeakValues[1]
-      else
-        sPeakValue := afPeakValues[0]; // fall back to default (mono = always left channel)
+      DoError(Hr);
+      Exit(False);
     end;
 
-  fPeakMeterBmp.Width := Width;
-  fPeakMeterBmp.Height := Height;
-
-  bmrect.left := 0;
-  bmrect.top := 0;
-  bmrect.right := Width;
-  bmrect.bottom := Height;
-
-  with fPeakMeterBmp.Canvas do
+  // Default endpoint (render/capture + role)
+  Hr := pEnumerator.GetDefaultAudioEndpoint(fDataFlow,
+                                            fRole,
+                                            pDevice);
+  if Failed(Hr) then
     begin
-      Pen.Color := fBackGroundColor;
-      Pen.Width := 0;
-      Pen.Style := psSolid;
-      Brush.Color := fBackGroundColor;
-      Brush.Style := bsSolid;
-      Rectangle(0,
-                0,
-                Width,
-                Height);
 
-     end;
+      DoError(Hr);
+      Exit(False);
+    end;
 
-  canvas.draw(0,
-              0,
-              fPeakMeterBmp);
-
-  bmrect.left := 0;
-  bmrect.top := 0;
-  bmrect.bottom := Height;
-
-  if (Length(afPeakValues) > 0) then
+  // Activate IAudioMeterInformation
+  Hr := pDevice.Activate(IID_IAudioMeterInformation,
+                         CLSCTX_ALL,
+                         nil,
+                         Pointer(pMeterInfo));
+  if Failed(Hr) then
     begin
-      if (fPeakDirection = pdHorizontal) then
-        bmrect.right := bmrect.left + Trunc(sPeakValue * (bmrect.right - bmrect.left) - 1.5)
-      else
-        bmrect.Top := bmrect.Bottom + Trunc(sPeakValue * (bmrect.Top - bmrect.Bottom) - 1.5);
 
-      fPeakMeterBmp.Canvas.Brush.Color := fBarColor;
-      fPeakMeterBmp.Canvas.FillRect(bmrect);
+      DoError(Hr);
+      Exit(False);
+    end;
+
+  // Channel count
+  Hr := pMeterInfo.GetMeteringChannelCount(fChannelCount);
+  if Failed(Hr) then
+    begin
+
+      DoError(Hr);
+      Exit(False);
+    end;
+
+  if (fChannelCount = 0) then
+    begin
+
+      DoError(E_FAIL);
+      Exit(False);
+    end;
+
+  // Prepare reusable buffer once
+  SetLength(fPeakValues,
+            fChannelCount);
+  Result := True;
+end;
+
+
+procedure TMfPeakMeter.TimerTick(Sender: TObject);
+var
+  Hr: HRESULT;
+  PeakL,
+  PeakR: Single;
+  ChBitsL,
+  ChBitsR: Integer;
+
+begin
+
+  if (csDesigning in ComponentState) then
+    Exit;
+
+  if not fEnabled then
+    Exit;
+
+  if not EnsureMeterReady then
+    Exit;
+
+  // Query peaks
+  Hr := pMeterInfo.GetChannelsPeakValues(fChannelCount,
+                                         @fPeakValues[0]);
+  if Failed(Hr) then
+    begin
+
+      DoError(Hr);
+      Exit;
+    end;
+
+  // Note: Default mapping: [0] = Left, [1] = Right.
+  // Mono devices always expose a single channel at index 0 ("Left" by convention).
+  if (fChannelCount = 1) then
+    begin
+      PeakL := Clamp_(fPeakValues[0]);
+
+      // Publish snapshot atomically (bitwise).
+      ChBitsL := SingleToBits(PeakL);
+      InterlockedExchange(fPeakLeftBits, ChBitsL);
+
+      // Mono: mirror into "Right" so SampleChannel=mcRight still shows the same signal.
+      InterlockedExchange(fPeakRightBits, ChBitsL);
     end
   else
-    bmrect.right := Width;
+    begin
+      // Only publish the channel currently requested by SampleChannel to minimize work.
+      if (fMeterChannel = mcLeft) then
+        begin
+          PeakL := Clamp_(fPeakValues[0]);
+          ChBitsL := SingleToBits(PeakL);
+          InterlockedExchange(fPeakLeftBits, ChBitsL);
+        end
+      else
+        begin
+          PeakR := Clamp_(fPeakValues[1]);
+          ChBitsR := SingleToBits(PeakR);
+          InterlockedExchange(fPeakRightBits, ChBitsR);
+       end;
+    end;
 
-  canvas.draw(0,
+  // Trigger repaint (async). Do NOT call Invalidate from inside Paint/DrawPeakMeter.
+  Invalidate;
+
+      if (fMeterChannel = mcRight) then
+        begin
+
+          PeakR := Clamp_(fPeakValues[1]);
+          // Publish snapshot atomically (bitwise).
+          ChBitsR := SingleToBits(PeakR);
+          InterlockedExchange(fPeakRightBits,
+                      ChBitsR);
+        end;
+end;
+
+
+procedure TMfPeakMeter.DrawPeakMeter();
+var
+  R: TRect;
+  Peak: Single;
+  B: Integer;
+
+begin
+
+  // Read snapshot atomically.
+  if (fMeterChannel = mcRight) then
+    B := InterlockedCompareExchange(fPeakRightBits,
+                                    0,
+                                    0)
+  else
+    B := InterlockedCompareExchange(fPeakLeftBits,
+                                    0,
+                                    0);
+
+  Peak := Clamp_(BitsToSingle(B));
+  // Resize backing bitmap only when needed (avoid realloc/flicker)
+  if (fPeakMeterBmp.Width <> Width) or (fPeakMeterBmp.Height <> Height) then
+    fPeakMeterBmp.SetSize(Width, Height);
+
+  // Background
+  R := Rect(0,
+            0,
+            Width,
+            Height);
+
+  fPeakMeterBmp.Canvas.Pen.Style := psClear;
+  fPeakMeterBmp.Canvas.Brush.Style := bsSolid;
+  fPeakMeterBmp.Canvas.Brush.Color := fBackGroundColor;
+  fPeakMeterBmp.Canvas.FillRect(R);
+
+  // Bar
+  if (Width > 0) and (Height > 0) then
+    begin
+
+      if (fPeakDirection = pdHorizontal) then
+        begin
+
+          R.Right := R.Left + Round(Peak * Width);
+        end
+      else
+        begin
+
+          // vertical: fill from bottom
+          R.Top := R.Bottom - Round(Peak * Height);
+        end;
+
+      fPeakMeterBmp.Canvas.Brush.Color := fBarColor;
+      fPeakMeterBmp.Canvas.FillRect(R);
+  end;
+
+  // Blit once
+  Canvas.Draw(0,
               0,
               fPeakMeterBmp);
+
+  // No Invalidate here: repaint is driven by the timer / property changes.
+end;
+
+
+procedure TMfPeakMeter.Paint();
+begin
+
+  DrawPeakMeter();
+
+  inherited;
+end;
+
+
+procedure TMfPeakMeter.Resize();
+begin
+
+  inherited;
+
+  Invalidate();
 end;
 
 
 procedure TMfPeakMeter.SetBackGroundColor(value: TColor);
 begin
+
   if (fBackGroundColor <> value) then
     begin
+
       fBackGroundColor := value;
-      Paint;
+      Invalidate();
     end;
 end;
 
 
 procedure TMfPeakMeter.SetBarColor(value: TColor);
 begin
+
   if (fBarColor <> value) then
     begin
+
       fBarColor := value;
-      Paint;
+      Invalidate();
     end;
 end;
 
 
 procedure TMfPeakMeter.SetDirection(value: TPeakDirection);
 begin
+
   if (fPeakDirection <> value) then
     begin
+
       fPeakDirection := value;
-      Paint;
+      Invalidate();
     end;
 end;
 
 
 procedure TMfPeakMeter.SetPeakMeterChannel(value: TPeakMeterChannel);
 begin
+
   if (fMeterChannel <> value) then
-    fMeterChannel := value;
+    begin
+
+      fMeterChannel := value;
+      Invalidate;
+    end;
 end;
 
 
 procedure TMfPeakMeter.SetDeviceDataFlow(value: EDataFlow);
 begin
-  if (fDataFlow <> value) then
-    fDataFlow := value;
+
+  if fDataFlow <> value then
+    begin
+
+      fDataFlow := value;
+
+      // Re-init if running
+      if fEnabled and not (csDesigning in ComponentState) then
+        begin
+
+          ReleaseMeter();
+          EnsureMeterReady();
+        end;
+    end;
 end;
 
 
 procedure TMfPeakMeter.SetDeviceRole(value: ERole);
 begin
+
   if (fRole <> value) then
-    fRole := value;
+    begin
+
+      fRole := value;
+
+      // Re-init if running
+      if fEnabled and not (csDesigning in ComponentState) then
+        begin
+
+          ReleaseMeter();
+          EnsureMeterReady;
+        end;
+  end;
 end;
 
 
 procedure TMfPeakMeter.SetTimerPeriod(value: LongWord);
 begin
-  if (lwTimerPeriod <> value) then
-    lwTimerPeriod := value;
-end;
 
+  if lwTimerPeriod <> value then
+    begin
 
-procedure TMfPeakMeter.WindProc(var Msg: TMessage);
-var
-  hr: HResult;
-  Handled: Boolean;
-
-begin
-
-  Handled := True;
-
-  case Msg.Msg of
-    WM_TIMER   :  case Msg.WParam of
-                    ID_TIMER :  begin
-                                  // Update the peak meter.
-                                  // Set the length of the array to retrieve the samples.
-                                  SetLength(afPeakValues,
-                                            fChannelCount);
-                                  hr := pMeterInfo.GetChannelsPeakValues(fChannelCount,
-                                                                         @afPeakValues[0]);
-                                  if (FAILED(hr)) then
-                                    begin
-                                      MessageBox(fHwnd,
-                                                 LPCWSTR('The peakmeter will stop.'),
-                                                 LPCWSTR('Fatal error'),
-                                                 MB_OK);
-                                      KillTimer(fHwnd,
-                                                ID_TIMER);
-                                    end
-                                  else
-                                    begin
-                                      Paint;
-                                    end;
-                                end;
-                  end;
-
-    WM_PAINT   :  begin
-                    DrawPeakMeter;
-                  end;
-  else
-    Handled := False;
-  end;
-
-  if Handled then
-    Msg.Result := 0
-  else
-    Msg.Result := DefWindowProc(fHWnd,
-                                Msg.Msg,
-                                Msg.WParam,
-                                Msg.LParam);
+      lwTimerPeriod := value;
+      if Assigned(fTimer) then
+      fTimer.Interval := lwTimerPeriod;
+    end;
 end;
 
 
 procedure TMfPeakMeter.SetEnabled(value: Boolean);
 begin
-  if (fEnabled <> value) then
-    fEnabled := value;
 
-  if (fEnabled = True) then
+  if (fEnabled = value) then
+    Exit;
+
+  fEnabled := value;
+
+  if (csDesigning in ComponentState) then
+    Exit;
+
+  if fEnabled then
     begin
-      SetTimer(fHwnd,
-               ID_TIMER,
-               lwTimerPeriod,
-               Nil);
+
+      if EnsureMeterReady() then
+        begin
+
+          fTimer.Interval := lwTimerPeriod;
+          fTimer.Enabled := True;
+        end;
     end
   else
     begin
-      KillTimer(fHwnd,
-                ID_TIMER);
+
+      if Assigned(fTimer) then
+        fTimer.Enabled := False;
+
+      // Reset peaks
+      InterlockedExchange(fPeakLeftBits,
+                          SingleToBits(0.0));
+
+      InterlockedExchange(fPeakRightBits,
+                          SingleToBits(0.0));
+
+      Invalidate();
     end;
 
-  inherited
+  inherited;
 end;
 
 
-procedure TMfPeakMeter.Paint;
+function TMfPeakMeter.GetPeakValueThreadSafe(): Single;
+var
+  B: Integer;
+
 begin
-  DrawPeakMeter;
-  inherited
+
+  if (fMeterChannel = mcRight) then
+    B := InterlockedCompareExchange(fPeakRightBits,
+                                    0,
+                                    0)
+  else
+    B := InterlockedCompareExchange(fPeakLeftBits,
+                                    0,
+                                    0);
+
+  Result := Clamp_(BitsToSingle(B));
 end;
 
 end.

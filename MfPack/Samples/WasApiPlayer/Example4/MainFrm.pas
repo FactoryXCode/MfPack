@@ -1125,7 +1125,7 @@ begin
         butPlayPause.Caption := 'Pause';
         butStop.Enabled := True;
         stxtStatus.Caption := Format('Playing: %s',
-                                     [fFileName]);
+                                     [ExtractFileName(fFileName)]);
         // Activate the peakmeters.
         pmLeft.Enabled := True;
         pmRight.Enabled := True;
@@ -1138,7 +1138,7 @@ begin
         butPlayPause.Caption := 'Play';
         butStop.Enabled := True;
         stxtStatus.Caption := Format('Pauzed: %s',
-                                     [fFileName]);
+                                     [ExtractFileName(fFileName)]);
       end;
 
     dsUninitialized,
@@ -1159,7 +1159,8 @@ begin
         butPlayPause.Enabled := False;
         butPlayPause.Caption := 'Play';
         butStop.Enabled := False;
-        stxtStatus.Caption := Format('Yoo! we have an error: %d', [GetLastError()]);
+        stxtStatus.Caption := Format('Yo! We have an error: %d',
+                                     [GetLastError()]);
         // Deactivate the peakmeters.
         pmLeft.Enabled := False;
         pmRight.Enabled := False;
@@ -1207,145 +1208,73 @@ end;
 
 procedure TfrmMain.pbProgressMouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
-
 var
-
   hr: HResult;
-
   tickPos: Int64;  // 100ms ticks
-
   posHns: Int64;   // 100ns units
-
-
 
 begin
 
-
-
   if (fWasApiEngine = nil) then
-
     Exit;
-
-
 
   if (pbProgress.Width <= 0) then
-
-    Exit;
-
-
+      Exit;
 
   if (pbProgress.Max <= 0) then
-
     Exit;
 
-
-
   if (X <= 0) then
-
     tickPos := 0
-
   else
-
     if (X >= pbProgress.Width) then
-
       begin
 
-
-
-        // Avoid exact end tick (can map to EOF); use last playable tick
-
+        // Avoid exact end tick (can map to EOF); use last playable tick.
         if (pbProgress.Max > 0) then
-
           tickPos := pbProgress.Max - 1
-
         else
+          tickPos := 0;
+      end
+    else
+      begin
 
+        tickPos := Trunc((X / pbProgress.Width) * pbProgress.Max);
+
+        if (tickPos < 0) then
           tickPos := 0;
 
-      end
-
-  else
-
-    begin
-
-
-
-      tickPos := Trunc((X / pbProgress.Width) * pbProgress.Max);
-
-      if (tickPos < 0) then
-
-        tickPos := 0;
-
-      if (tickPos > pbProgress.Max) then
-
-        tickPos := pbProgress.Max;
-
+        if (tickPos > pbProgress.Max) then
+          tickPos := pbProgress.Max;
     end;
-
-
 
   // 100ms tick -> 100ns
-
   posHns := tickPos * MS100_PER_SEC;
 
-
-
-  // Safety clamp
-
+  // Safety clamp.
   if (posHns < 0) then
-
     posHns := 0;
 
-
-
   // Clamp to duration (keep 100ms precision)
-
   if (llAudioDuration > 0) and (posHns >= llAudioDuration) then
-
     begin
 
-
-
       posHns := llAudioDuration - MS100_PER_SEC; // minus 100ms
-
       if (posHns < 0) then
-
         posHns := 0;
 
-
-
       tickPos := posHns div MS100_PER_SEC;
-
     end;
-
-
 
   hr := fWasApiEngine.SeekTo(posHns);
 
-
-
   if SUCCEEDED(hr) then
-
     pbProgress.Position := Integer(tickPos)
-
   else
-
     stxtStatus.Caption := Format('SeekTo failed. (hr=%d)', [hr]);
 
-
-
-  // DEBUG:
-
-  //OutputDebugString(PWChar(Format('DurHns=%d  trackbar.Max=%d trackbar.position=%d Seek posHns=%d',
-
-  //                                [llAudioDuration div MS100_PER_SEC, pbProgress.Max, pbProgress.Position, posHns])));
-
-
-
   Exit;
-
 end;
-
 
 
 procedure TfrmMain.WMHotKey(var Msg: TWMHotKey);
