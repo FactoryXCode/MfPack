@@ -27,7 +27,6 @@ This sample demonstrates a **real-time audio playback engine on Windows** using:
 - Settings dialog with persistent storage
 - Compressor / Limiter DSP with live control from the settings menu
 - Clean separation between **GUI**, **engine**, **EQ**, and **DSP**
-- Steam switch detection when outputdevice changes (See WASAPI Stream Switch Detection.md)
 
 ---
 
@@ -63,7 +62,7 @@ GUI → Engine Thread → EQ MFT → DSP → WASAPI Render
 ## Release Information
 
 - **First release:** 13/08/2025  
-- **Final release:** 25/01/2026  
+- **Final release:** 23/01/2026  
 
 ---
 

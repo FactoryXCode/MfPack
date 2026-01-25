@@ -29,7 +29,7 @@ object frmEqSettings: TfrmEqSettings
     Margins.Top = 5
     Margins.Right = 5
     Margins.Bottom = 5
-    ActivePage = tsEQ
+    ActivePage = tsDynamics
     TabOrder = 0
     object tsEQ: TTabSheet
       Caption = 'EQ'

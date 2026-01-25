@@ -31,7 +31,7 @@
 //          Recommended minimum Delphi version: XE7.
 //
 // Related objects: -
-// Related projects: MfPackX319/Samples/WasApiPlayer/Example3
+// Related projects: MfPackX319/Samples/WasApiPlayer/Example4
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.26100.4654

@@ -1,11 +1,6 @@
 program WasApiPlayer4;
 
 uses
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
   Vcl.Forms,
   MainFrm in 'MainFrm.pas' {frmMain},
   EqSettingsFrm in 'EqSettingsFrm.pas' {frmEqSettings},

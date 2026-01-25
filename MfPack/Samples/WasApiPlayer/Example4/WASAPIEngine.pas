@@ -27,7 +27,7 @@
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX319/Samples/WasApiPlayer/Example4
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -1485,6 +1485,9 @@ end;
 // DSP
 procedure TWasApiEngine.SetDynamicsSettings(const S: TDynamicsSettings);
 begin
+
+  // DEBUG:
+  //OutputDebugString(PChar(Format('TWasApiEngine.SetDynamicsSettings: LimOversample=%d', [S.LimOversample])));
 
   // Safe for modeless live updates:
   // SetSettings now only publishes; audio thread applies at block boundary.

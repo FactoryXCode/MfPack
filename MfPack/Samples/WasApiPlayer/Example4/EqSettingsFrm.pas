@@ -11,7 +11,8 @@
 // Language: ENU
 //
 // Revision Version: 3.1.9
-// Description: Set, stores and reads EQ and Compressor/limiter settings.
+// Description: Set, stores and reads EQ and Compressor/limiter settings and
+//              directly feed them to the engine when running.
 //
 // Company: FactoryX
 // Intiator(s): Tony (maXcomX).
@@ -27,7 +28,7 @@
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX319/Samples/WasApiPlayer/Example4
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -744,12 +745,12 @@ begin
   // Sanity: TP only meaningful with limiter
   if not Result.LimEnabled then
     Result.LimTruePeak := False;
-
 end;
 
 
 procedure TfrmEqSettings.WriteDynamicsToUi(const S: TDynamicsSettings);
 begin
+
   chkCompEnabled.Checked := S.CompEnabled;
   chkCompAutoMakeup.Checked := S.CompAutoMakeup;
 
@@ -1167,6 +1168,7 @@ begin
   FApplyDynPending := True;
   if Assigned(FApplyDynTimer) then
     begin
+
       FApplyDynTimer.Enabled := False;
       FApplyDynTimer.Interval := 75; // ms
       FApplyDynTimer.Enabled := True;
@@ -1186,7 +1188,10 @@ begin
   WriteDynamicsToUi(FDynSettings);
 
   if Assigned(FOnApplyDynamics) then
-    FOnApplyDynamics(Self, S);
+    FOnApplyDynamics(Self,
+                     S);
+  // DEBUG:
+  //OutputDebugString(PChar(Format('UI Apply: LimOversample=%d', [S.LimOversample])));
 
   if SaveToIni and
      (FIniFileName <> '') and
@@ -1203,7 +1208,7 @@ begin
   // Only live-apply when the Dynamics tab is visible (prevents EQ edits from spamming dynamics)
   // If you prefer always-live, remove this guard.
   if Assigned(pcMain) and (pcMain.ActivePage = tsDynamics) then
-    ScheduleApplyDynamics;
+    ScheduleApplyDynamics();
 end;
 
 
