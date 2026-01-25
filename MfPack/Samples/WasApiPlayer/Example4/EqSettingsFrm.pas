@@ -157,11 +157,15 @@ type
     btnCancel: TButton;
     btnApply: TButton;
     btnDefaults: TButton;
+    GroupBox1: TGroupBox;
+    Label1: TLabel;
+    edPeakMeterFreq: TEdit;
 
     procedure FormCreate(Sender: TObject);
     procedure btnApplyClick(Sender: TObject);
     procedure btnDefaultsClick(Sender: TObject);
     procedure btnOKClick(Sender: TObject);
+    procedure edPeakMeterFreqExit(Sender: TObject);
 
   private
 
@@ -423,6 +427,8 @@ begin
   edtLimKnee.OnChange := DynUiChanged;
   edtLimRmsWindow.OnChange := DynUiChanged;
 
+
+
   // Modeless default behavior: hide on close
   OnClose := FormClose;
 
@@ -501,15 +507,23 @@ begin
   WriteDynamicsToUi(FDynSettings);
 
   if Assigned(FOnApply) then
-    FOnApply(Self, FTuning);
+    FOnApply(Self,
+             FTuning);
 
   if Assigned(FOnApplyDynamics) then
-    FOnApplyDynamics(Self, FDynSettings);
+    FOnApplyDynamics(Self,
+                     FDynSettings);
 
   if (FIniFileName <> '') and (FIniSection <> '') then
   begin
-    SaveToIni(FIniFileName, FIniSection, FTuning);
-    SaveDynamicsToIni(FIniFileName, FIniSection, FDynSettings);
+
+    SaveToIni(FIniFileName,
+              FIniSection,
+              FTuning);
+
+    SaveDynamicsToIni(FIniFileName,
+                      FIniSection,
+                      FDynSettings);
   end;
 end;
 
@@ -652,43 +666,73 @@ begin
   Result.CompEnabled := chkCompEnabled.Checked;
   Result.CompAutoMakeup := chkCompAutoMakeup.Checked;
 
-  v := StrToIntDef(Trim(edtCompThreshold.Text), Result.CompThresholdDb);
-  Result.CompThresholdDb := ClampInt(v, -60, 0);
+  v := StrToIntDef(Trim(edtCompThreshold.Text),
+                        Result.CompThresholdDb);
+  Result.CompThresholdDb := ClampInt(v,
+                                     -60,
+                                     0);
 
-  v := StrToIntDef(Trim(edtCompRatio.Text), Result.CompRatioX10);
-  Result.CompRatioX10 := ClampInt(v, 10, 200);
+  v := StrToIntDef(Trim(edtCompRatio.Text),
+                        Result.CompRatioX10);
+  Result.CompRatioX10 := ClampInt(v,
+                                  10,
+                                  200);
 
-  v := StrToIntDef(Trim(edtCompAttack.Text), Result.CompAttackMs);
-  Result.CompAttackMs := ClampInt(v, 1, 200);
+  v := StrToIntDef(Trim(edtCompAttack.Text),
+                        Result.CompAttackMs);
+  Result.CompAttackMs := ClampInt(v,
+                                  1,
+                                  200);
 
-  v := StrToIntDef(Trim(edtCompRelease.Text), Result.CompReleaseMs);
-  Result.CompReleaseMs := ClampInt(v, 10, 2000);
+  v := StrToIntDef(Trim(edtCompRelease.Text),
+                        Result.CompReleaseMs);
+  Result.CompReleaseMs := ClampInt(v,
+                                   10,
+                                   2000);
 
-  v := StrToIntDef(Trim(edtCompMakeup.Text), Result.CompMakeupDb);
-  Result.CompMakeupDb := ClampInt(v, -24, 24);
+  v := StrToIntDef(Trim(edtCompMakeup.Text),
+                        Result.CompMakeupDb);
+  Result.CompMakeupDb := ClampInt(v,
+                                  -24,
+                                  24);
 
   Result.LimEnabled := chkLimEnabled.Checked;
   Result.LimTruePeak := chkLimTruePeak.Checked;
 
-  v := StrToIntDef(Trim(edtLimCeiling.Text), Result.LimCeilingDb);
-  Result.LimCeilingDb := ClampInt(v, -24, 0);
+  v := StrToIntDef(Trim(edtLimCeiling.Text),
+                        Result.LimCeilingDb);
+  Result.LimCeilingDb := ClampInt(v,
+                                  -24,
+                                  0);
 
-  v := StrToIntDef(Trim(edtLimRelease.Text), Result.LimReleaseMs);
-  Result.LimReleaseMs := ClampInt(v, 10, 2000);
+  v := StrToIntDef(Trim(edtLimRelease.Text),
+                        Result.LimReleaseMs);
+  Result.LimReleaseMs := ClampInt(v,
+                                  10,
+                                  2000);
 
-  v := StrToIntDef(Trim(edtLimLookahead.Text), Result.LimLookaheadMs);
-  Result.LimLookaheadMs := ClampInt(v, 0, 50);
+  v := StrToIntDef(Trim(edtLimLookahead.Text),
+                        Result.LimLookaheadMs);
+  Result.LimLookaheadMs := ClampInt(v,
+                                    0,
+                                    50);
 
-  v := StrToIntDef(Trim(edtLimKnee.Text), Result.LimKneeDb);
-  Result.LimKneeDb := ClampInt(v, 0, 24);
+  v := StrToIntDef(Trim(edtLimKnee.Text),
+                        Result.LimKneeDb);
+  Result.LimKneeDb := ClampInt(v,
+                               0,
+                               24);
 
-  if cbLimDetector.ItemIndex = 1 then
+  if (cbLimDetector.ItemIndex = 1) then
     Result.LimDetector := ldRms
   else
     Result.LimDetector := ldPeak;
 
-  v := StrToIntDef(Trim(edtLimRmsWindow.Text), Result.LimRmsWindowMs);
-  Result.LimRmsWindowMs := ClampInt(v, 1, 200);
+  v := StrToIntDef(Trim(edtLimRmsWindow.Text),
+                        Result.LimRmsWindowMs);
+  Result.LimRmsWindowMs := ClampInt(v,
+                                    1,
+                                     200);
 
   case cbLimOversample.ItemIndex of
     1: Result.LimOversample := 2;
@@ -709,43 +753,73 @@ begin
   chkCompEnabled.Checked := S.CompEnabled;
   chkCompAutoMakeup.Checked := S.CompAutoMakeup;
 
-  edtCompThreshold.Text := IntToStr(ClampInt(S.CompThresholdDb, -60, 0));
-  udCompThreshold.Position := StrToIntDef(edtCompThreshold.Text, -18);
+  edtCompThreshold.Text := IntToStr(ClampInt(S.CompThresholdDb,
+                                             -60,
+                                             0));
+  udCompThreshold.Position := StrToIntDef(edtCompThreshold.Text,
+                                          -18);
 
-  edtCompRatio.Text := IntToStr(ClampInt(S.CompRatioX10, 10, 200));
-  udCompRatio.Position := StrToIntDef(edtCompRatio.Text, 40);
+  edtCompRatio.Text := IntToStr(ClampInt(S.CompRatioX10,
+                                         10,
+                                         200));
+  udCompRatio.Position := StrToIntDef(edtCompRatio.Text,
+                                      40);
 
-  edtCompAttack.Text := IntToStr(ClampInt(S.CompAttackMs, 1, 200));
-  udCompAttack.Position := StrToIntDef(edtCompAttack.Text, 10);
+  edtCompAttack.Text := IntToStr(ClampInt(S.CompAttackMs,
+                                          1,
+                                          200));
+  udCompAttack.Position := StrToIntDef(edtCompAttack.Text,
+                                       10);
 
-  edtCompRelease.Text := IntToStr(ClampInt(S.CompReleaseMs, 10, 2000));
-  udCompRelease.Position := StrToIntDef(edtCompRelease.Text, 150);
+  edtCompRelease.Text := IntToStr(ClampInt(S.CompReleaseMs,
+                                           10,
+                                           2000));
+  udCompRelease.Position := StrToIntDef(edtCompRelease.Text,
+                                        150);
 
-  edtCompMakeup.Text := IntToStr(ClampInt(S.CompMakeupDb, -24, 24));
-  udCompMakeup.Position := StrToIntDef(edtCompMakeup.Text, 0);
+  edtCompMakeup.Text := IntToStr(ClampInt(S.CompMakeupDb,
+                                          -24,
+                                          24));
+  udCompMakeup.Position := StrToIntDef(edtCompMakeup.Text,
+                                       0);
 
   chkLimEnabled.Checked := S.LimEnabled;
   chkLimTruePeak.Checked := S.LimTruePeak;
 
-  edtLimCeiling.Text := IntToStr(ClampInt(S.LimCeilingDb, -24, 0));
-  udLimCeiling.Position := StrToIntDef(edtLimCeiling.Text, -1);
+  edtLimCeiling.Text := IntToStr(ClampInt(S.LimCeilingDb,
+                                          -24,
+                                          0));
+  udLimCeiling.Position := StrToIntDef(edtLimCeiling.Text,
+                                       -1);
 
-  edtLimRelease.Text := IntToStr(ClampInt(S.LimReleaseMs, 10, 2000));
-  udLimRelease.Position := StrToIntDef(edtLimRelease.Text, 120);
+  edtLimRelease.Text := IntToStr(ClampInt(S.LimReleaseMs,
+                                          10,
+                                          2000));
+  udLimRelease.Position := StrToIntDef(edtLimRelease.Text,
+                                       120);
 
-  edtLimLookahead.Text := IntToStr(ClampInt(S.LimLookaheadMs, 0, 50));
-  udLimLookahead.Position := StrToIntDef(edtLimLookahead.Text, 5);
+  edtLimLookahead.Text := IntToStr(ClampInt(S.LimLookaheadMs,
+                                            0,
+                                            50));
+  udLimLookahead.Position := StrToIntDef(edtLimLookahead.Text,
+                                         5);
 
-  edtLimKnee.Text := IntToStr(ClampInt(S.LimKneeDb, 0, 24));
-  udLimKnee.Position := StrToIntDef(edtLimKnee.Text, 0);
+  edtLimKnee.Text := IntToStr(ClampInt(S.LimKneeDb,
+                                       0,
+                                       24));
+  udLimKnee.Position := StrToIntDef(edtLimKnee.Text,
+                                    0);
 
   if S.LimDetector = ldRms then
     cbLimDetector.ItemIndex := 1
   else
     cbLimDetector.ItemIndex := 0;
 
-  edtLimRmsWindow.Text := IntToStr(ClampInt(S.LimRmsWindowMs, 1, 200));
-  udLimRmsWindow.Position := StrToIntDef(edtLimRmsWindow.Text, 50);
+  edtLimRmsWindow.Text := IntToStr(ClampInt(S.LimRmsWindowMs,
+                                            1,
+                                            200));
+  udLimRmsWindow.Position := StrToIntDef(edtLimRmsWindow.Text,
+                                         50);
 
   case S.LimOversample of
     2: cbLimOversample.ItemIndex := 1;
@@ -776,6 +850,7 @@ procedure TfrmEqSettings.ConfigureDynamicsStorage(const IniFileName: string;
                                                   const Section: string;
                                                   const Defaults: TDynamicsSettings);
 begin
+
   FIniFileName := IniFileName;
   FIniSection := Section;
   FDynDefaults := Defaults;
@@ -832,6 +907,11 @@ begin
     t.MidMode := TMfMidMode(ini.ReadInteger(Section,
                                             'MidMode',
                                             Ord(t.MidMode)));
+
+    // Peakmeters frequency.
+    edPeakMeterFreq.Text := IntToStr(ini.ReadInteger('PeakMeters',
+                                                     'Freq',
+                                                     100));
   finally
 
     ini.Free();
@@ -957,13 +1037,40 @@ begin
   ini := TIniFile.Create(IniFileName);
 
   try
-    ini.WriteFloat(Section, 'LowFreqHz', T.LowFreqHz);
-    ini.WriteFloat(Section, 'MidFreqHz', T.MidFreqHz);
-    ini.WriteFloat(Section, 'HighFreqHz', T.HighFreqHz);
-    ini.WriteFloat(Section, 'MidQ', T.MidQ);
-    ini.WriteFloat(Section, 'LowShelfSlope', T.LowShelfSlope);
-    ini.WriteFloat(Section, 'HighShelfSlope', T.HighShelfSlope);
-    ini.WriteInteger(Section, 'MidMode', Ord(T.MidMode));
+
+    ini.WriteFloat(Section,
+                   'LowFreqHz',
+                   T.LowFreqHz);
+
+    ini.WriteFloat(Section,
+                   'MidFreqHz',
+                   T.MidFreqHz);
+
+    ini.WriteFloat(Section,
+                   'HighFreqHz',
+                   T.HighFreqHz);
+
+    ini.WriteFloat(Section,
+                   'MidQ',
+                   T.MidQ);
+
+    ini.WriteFloat(Section,
+                   'LowShelfSlope',
+                   T.LowShelfSlope);
+
+    ini.WriteFloat(Section,
+                   'HighShelfSlope',
+                   T.HighShelfSlope);
+
+    ini.WriteInteger(Section,
+                     'MidMode',
+                     Ord(T.MidMode));
+
+    // Peakmeters frequency.
+    ini.WriteInteger('PeakMeters',
+                     'Freq',
+                     StrToIntDef(edPeakMeterFreq.Text,
+                                 100));
   finally
 
     ini.Free();
@@ -984,8 +1091,8 @@ begin
   try
 
     ini.WriteBool(Section,
-                 'Dyn_CompEnabled',
-                 S.CompEnabled);
+                  'Dyn_CompEnabled',
+                  S.CompEnabled);
 
     ini.WriteInteger(Section,
                      'Dyn_CompThresholdDb',
@@ -1097,6 +1204,23 @@ begin
   // If you prefer always-live, remove this guard.
   if Assigned(pcMain) and (pcMain.ActivePage = tsDynamics) then
     ScheduleApplyDynamics;
+end;
+
+
+procedure TfrmEqSettings.edPeakMeterFreqExit(Sender: TObject);
+var
+  V: Integer;
+
+begin
+
+  V := StrToIntDef(edPeakMeterFreq.Text,
+                   100);
+  if (V < 10) then
+    V := 10
+  else
+    if (V > 150) then
+      V := 150;
+  edPeakMeterFreq.Text := IntToStr(V);
 end;
 
 

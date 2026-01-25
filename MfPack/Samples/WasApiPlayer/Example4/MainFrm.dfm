@@ -123,17 +123,17 @@ object frmMain: TfrmMain
       AutoSize = False
       Caption = 'Time: 00:00:00'
     end
-    object lblBarPositionInSamples: TLabel
+    object lblBarPosition: TLabel
       Left = 182
       Top = 30
-      Width = 173
+      Width = 257
       Height = 27
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
       Margins.Bottom = 5
       AutoSize = False
-      Caption = 'Samples: 0'
+      Caption = 'Position: 0'
     end
     object pbProgress: TProgressBar
       Left = 1

@@ -1,6 +1,11 @@
 program WasApiPlayer4;
 
 uses
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
   Vcl.Forms,
   MainFrm in 'MainFrm.pas' {frmMain},
   EqSettingsFrm in 'EqSettingsFrm.pas' {frmEqSettings},
@@ -10,7 +15,8 @@ uses
   WASAPIEngine in 'WASAPIEngine.pas',
   EqPlotUtils in 'EqPlotUtils.pas',
   AudioDynamicsDSP in 'AudioDynamicsDSP.pas',
-  PcmLib in 'PcmLib.pas';
+  PcmLib in 'PcmLib.pas',
+  WASAPINotifications in 'WASAPINotifications.pas';
 
 {$R *.res}
 

@@ -99,15 +99,15 @@ uses
 const
 
   // Global hotkey's.
-  HK_TOGGLE_PLAY   = 1;
-  HK_TOGGLE_PAUSE  = 2;
-  HK_TOGGLE_STOP   = 3;
+  HK_TOGGLE_PLAY = 1;
+  HK_TOGGLE_PAUSE = 2;
+  HK_TOGGLE_STOP = 3;
 
-  HK_VOLUME_UP     = 4;
-  HK_VOLUME_DOWN   = 5;
+  HK_VOLUME_UP = 4;
+  HK_VOLUME_DOWN = 5;
 
-  HK_GUI_SHOW      = 6;
-  HK_GUI_HIDE      = 7;
+  HK_GUI_SHOW = 6;
+  HK_GUI_HIDE = 7;
 
 type
 
@@ -119,7 +119,7 @@ type
     stxtStatus: TStaticText;
     Panel2: TPanel;
     lblBarPositionInSTime: TLabel;
-    lblBarPositionInSamples: TLabel;
+    lblBarPosition: TLabel;
     pbProgress: TProgressBar;
     pnlControls: TPanel;
     lblLow: TLabel;
@@ -401,6 +401,14 @@ begin
                         highDb,
                         rampModeIdx,
                         rampMs);
+
+
+    // Peakmeters frequency.
+    pmLeft.Precision :=  Ini.ReadInteger('PeakMeters',
+                                         'Freq',
+                                         100);
+
+    pmRight.Precision :=  pmLeft.Precision;
   finally
     Ini.Free;
   end;
@@ -541,6 +549,8 @@ begin
   LoadEqFromIni();  // INI-based tuning.
   FWasApiEngine.ApplyEqTuningImmediate(FEqTuning);
   UpdateSpectrumPlot();  // Coefficients reflect the tuning.
+  pmLeft.Precision := 30;
+  pmRight.Precision := 30;
 end;
 
 
@@ -959,9 +969,6 @@ begin
                       Mid,
                       High);
 
-       //OutputDebugString(PWideChar(Format('Fs = %d  Low = %', [Fs])));
-
-       // imgSpectrumAnalizer.Invalidate;
     end;
 end;
 
@@ -1017,6 +1024,7 @@ begin
                                       [iSamples div 1024]);
       FSamplesThrottle := 0;
     end;
+  //UpdateSpectrumPlot();     // Coefficients reflect the tuning.
 end;
 
 
@@ -1059,13 +1067,14 @@ begin
       //LoadEqFromIni();          // If we do INI-based tuning.
       //ApplyEqTuning(FEqTuning); // Sends params to engine/MFT.
       //FWasApiEngine.ApplyEqTuningImmediate(FEqTuning);
-      UpdateSpectrumPlot();     // Coefficients reflect the tuning.
+
 
       // re-apply current UI values to engine (important after plugging a new MFT or new file)
       fWasApiEngine.SetLowDb(InvertDb(tbLow.Position));
       fWasApiEngine.SetMidDb(InvertDb(tbMid.Position));
       fWasApiEngine.SetHighDb(InvertDb(tbHigh.Position));
       cbxRampChange(nil);
+
     end;
 end;
 
@@ -1113,6 +1122,7 @@ begin
         pbProgress.Position := 0;
         lblPlayed.Caption := 'Played: 00:00:00';
         stxtProcessed.Caption := 'Samples: 0';
+        lblBarPosition.Caption := 'Position: 0';
         // Deactivate the peakmeters.
         pmLeft.Enabled := False;
         pmRight.Enabled := False;
@@ -1129,6 +1139,7 @@ begin
         // Activate the peakmeters.
         pmLeft.Enabled := True;
         pmRight.Enabled := True;
+        UpdateSpectrumPlot();     // Coefficients reflect the tuning.
       end;
 
     dsPause:
@@ -1148,6 +1159,10 @@ begin
         butPlayPause.Enabled := False;
         butPlayPause.Caption := 'Play';
         butStop.Enabled := False;
+        lblPlayed.Caption := 'Played: 00:00:00';
+        stxtProcessed.Caption := 'Samples: 0';
+        pbProgress.Position := 0;
+        lblBarPosition.Caption := 'Position: 0';
         // Dectivate the peakmeters.
         pmLeft.Enabled := False;
         pmRight.Enabled := False;
@@ -1196,12 +1211,15 @@ begin
           secPos := pbProgress.Max;
 
       pbProgress.ShowHint := True;
-      pbProgress.Hint := Format('Position: %d s', [secPos]);
+      pbProgress.Hint := Format('Position: %d',
+                                [secPos]);
 
-      lblBarPositionInSamples.Caption := Format('Position: %d s', [secPos]);
+      lblBarPosition.Caption := Format('Position: %d',
+                                       [secPos]);
 
       hnsPos := Int64(secPos) * MS100_PER_SEC;
-      lblBarPositionInSTime.Caption := Format('Position: %s', [HnsTimeToStr(hnsPos, False)]);
+      lblBarPositionInSTime.Caption := Format('Position: %s',
+                                              [HnsTimeToStr(hnsPos, False)]);
     end;
 end;
 
@@ -1285,8 +1303,8 @@ begin
   // HK_TOGGLE_PLAY   = 1
   // HK_TOGGLE_PAUSE  = 2
   // HK_TOGGLE_STOP   = 3
-  // HK_VOL_UP        = 4
-  // HK_VOL_DOWN      = 5
+  // HK_VOLUME_UP     = 4
+  // HK_VOLUME_DOWN   = 5
   // HK_GUI_SHOW      = 6
   // HK_GUI_HIDE      = 7
 
