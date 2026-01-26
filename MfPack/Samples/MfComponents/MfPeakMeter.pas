@@ -22,7 +22,6 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
-// 24/01/2026 ChatGPT             Thread-safe snapshot + code polishing
 //------------------------------------------------------------------------------
 //
 // Remarks: To install the visual components, choose Install in the Project Manager.
@@ -61,7 +60,6 @@
 // their product.
 //
 //==============================================================================
-
 unit MfPeakMeter;
 
 interface
@@ -199,7 +197,8 @@ implementation
 procedure Register;
 begin
 
-  RegisterComponents('MfPack Core Audio Samples', [TMfPeakMeter]);
+  RegisterComponents('MfPack Core Audio Samples',
+                     [TMfPeakMeter]);
 end;
 
 { TMfPeakMeter }
@@ -292,7 +291,8 @@ begin
   ReleaseMeter;
 
   if Assigned(fOnError) then
-    fOnError(Self, Hr);
+    fOnError(Self,
+             Hr);
 end;
 
 
@@ -321,7 +321,7 @@ begin
 end;
 
 
-function TMfPeakMeter.EnsureMeterReady: Boolean;
+function TMfPeakMeter.EnsureMeterReady(): Boolean;
 var
   Hr: HRESULT;
 
@@ -423,14 +423,14 @@ begin
   // Mono devices always expose a single channel at index 0 ("Left" by convention).
   if (fChannelCount = 1) then
     begin
-      PeakL := Clamp_(fPeakValues[0]);
+    PeakL := Clamp_(fPeakValues[0]);
 
-      // Publish snapshot atomically (bitwise).
-      ChBitsL := SingleToBits(PeakL);
-      InterlockedExchange(fPeakLeftBits, ChBitsL);
+    // Publish snapshot atomically (bitwise).
+    ChBitsL := SingleToBits(PeakL);
+    InterlockedExchange(fPeakLeftBits, ChBitsL);
 
-      // Mono: mirror into "Right" so SampleChannel=mcRight still shows the same signal.
-      InterlockedExchange(fPeakRightBits, ChBitsL);
+    // Mono: mirror into "Right" so SampleChannel=mcRight still shows the same signal.
+    InterlockedExchange(fPeakRightBits, ChBitsL);
     end
   else
     begin
@@ -446,21 +446,11 @@ begin
           PeakR := Clamp_(fPeakValues[1]);
           ChBitsR := SingleToBits(PeakR);
           InterlockedExchange(fPeakRightBits, ChBitsR);
-       end;
+        end;
     end;
 
   // Trigger repaint (async). Do NOT call Invalidate from inside Paint/DrawPeakMeter.
   Invalidate;
-
-      if (fMeterChannel = mcRight) then
-        begin
-
-          PeakR := Clamp_(fPeakValues[1]);
-          // Publish snapshot atomically (bitwise).
-          ChBitsR := SingleToBits(PeakR);
-          InterlockedExchange(fPeakRightBits,
-                      ChBitsR);
-        end;
 end;
 
 
@@ -596,39 +586,67 @@ end;
 procedure TMfPeakMeter.SetDeviceDataFlow(value: EDataFlow);
 begin
 
-  if fDataFlow <> value then
+  if (fDataFlow = value) then
+    Exit;
+
+  fDataFlow := value;
+
+  // Live rebind if running (switch default endpoint immediately).
+  if fEnabled and not (csDesigning in ComponentState) then
     begin
 
-      fDataFlow := value;
+      if Assigned(fTimer) then
+        fTimer.Enabled := False;
 
-      // Re-init if running
-      if fEnabled and not (csDesigning in ComponentState) then
+      ReleaseMeter();
+
+      if EnsureMeterReady() then
         begin
 
-          ReleaseMeter();
-          EnsureMeterReady();
+          if Assigned(fTimer) then
+            begin
+              fTimer.Interval := lwTimerPeriod;
+              fTimer.Enabled := True;
+            end;
+
+          Invalidate;
         end;
     end;
 end;
 
 
+
 procedure TMfPeakMeter.SetDeviceRole(value: ERole);
 begin
 
-  if (fRole <> value) then
+  if (fRole = value) then
+    Exit;
+
+  fRole := value;
+
+  // Live rebind if running (switch default endpoint immediately).
+  if fEnabled and not (csDesigning in ComponentState) then
     begin
 
-      fRole := value;
+      if Assigned(fTimer) then
+        fTimer.Enabled := False;
 
-      // Re-init if running
-      if fEnabled and not (csDesigning in ComponentState) then
+      ReleaseMeter();
+
+      if EnsureMeterReady() then
         begin
 
-          ReleaseMeter();
-          EnsureMeterReady;
+          if Assigned(fTimer) then
+            begin
+              fTimer.Interval := lwTimerPeriod;
+              fTimer.Enabled := True;
+            end;
+
+          Invalidate;
         end;
-  end;
+    end;
 end;
+
 
 
 procedure TMfPeakMeter.SetTimerPeriod(value: LongWord);

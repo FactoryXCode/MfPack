@@ -24,9 +24,11 @@ This package contains the following -installable- components:
 * TQTimer - Queue Timer component. For precise timing.
 * MfPeakMeter - Simple PeakMeter control.
 * MfPeakMeterEx - Enhanged PeakMeter control.
+* MfPeakMeterMmcs - Derived from MfPeakMeterEx with MMCS support.
 * MfAudioEndPoint - Audio EndPoint component that responds to volume changes.
   Uses: IAudioEndpointVolumeEx, IAudioEndpointVolumeCallback and IMMDeviceEnumerator.
 * TThreadedQTimer - A threaded queue timer (experimental)
+* MfAudioVisualizer - A visual component that uses WASAPI loopback, Peak/RMS, optional spectrum bars or VU.
 
 
 
@@ -41,7 +43,7 @@ https://sourceforge.net/projects/MFPack
 ```
 
 First release date: 05-02-2016
-Final release date: 24-01-2026
+Final release date: 26-01-2026
 
 Copyright © FactoryX. All rights reserved.
 
