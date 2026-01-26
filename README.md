@@ -1,247 +1,264 @@
-# MfPack
+# About MfPack
 
-Delphi translations for Microsoft Media Foundation and related Windows multimedia APIs.
+ Delphi translations for Microsoft Media Foundation and related API's.
 
----
+# MfPack covers the Delphi translations of:
 
-## About MfPack
+- Core Audio API's:
+  * Windows Audio Session API (WASAPI) 
+  * DeviceTopology API
+  * EndpointVolume API
+  * Multimedia Device (MMDevice) API
+- Microsoft Media Foundation API (successor of DirectShow).
+- XAudio2 API (XBox game development, successor of DirectSound).
+- Microsoft DirectX API's (D2D1, D3D9, D3D11, D3D12, DirectComposition, DXGI, DirectWrite and DXVA) Note that D3D11 and above are part of Media Foundation.
+- Windows Imaging Component (WIC) API.
+- MPEG2 API.
+- The COMPLETE Windows Media (WinMM) API.
+- Media Foundation samples.
 
-MfPack provides Delphi translations, helpers, and samples for modern Windows multimedia development, including audio, video, graphics, and GPU-accelerated capture.
+# <u>Latest release:</u> 
 
----
+# MfPack 
 
-## APIs Covered
+Version X 3.1.9  
+Delphi XE2 (recommended Delphi XE7) up to and including Delphi 12  
+SDK version: 10.0.26100.4654 (Windows 11)
 
-### Core Audio APIs
-- Windows Audio Session API (WASAPI)
-- DeviceTopology API
-- EndpointVolume API
-- Multimedia Device (MMDevice) API
+# Samples
 
-### Media & Graphics APIs
-- Microsoft Media Foundation (successor of DirectShow)
-- XAudio2 (successor of DirectSound)
-- Microsoft DirectX APIs  
-  *(D2D1, D3D9, D3D11, D3D12, DirectComposition, DXGI, DirectWrite, DXVA)*  
-  > Note: D3D11 and later are part of Media Foundation
+**MfVideoThumbNails sample**
 
-### Additional APIs
-- Windows Imaging Component (WIC)
-- MPEG-2 API
-- Complete Windows Media (WinMM) API
+*This sample app needs the D2D1 Api. If your Delphi version doesn't have the latest D2D1 Api (May 2019 update), use the D2D1 MfPack version.*
 
----
-
-## Latest Release
-
-**Version:** X 3.1.9  
-**Delphi:** XE2 (recommended XE7) up to Delphi 12  
-**Windows SDK:** 10.0.26100.4654 (Windows 11)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/VideoThumbNailsSample.jpg)
 
 ---
 
-## Samples
+**MediaEngine Player 2 & IMFTimedText sample**
 
-### MfVideoThumbNails
+*MediaEngine player (IMFMediaEngine(Ex)) with support for subtitles (closed captions) using the IMFTimedTextNotify interface.*
 
-This sample demonstrates generating video thumbnails using Media Foundation and Direct2D.
-
-> Requires the May 2019 D2D1 API.  
-> Older Delphi versions should use the D2D1 version included with MfPack.
-
-![MfVideoThumbNails](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/VideoThumbNailsSample.jpg)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MediaEnginePlayer2.jfif)
 
 ---
 
-### MediaEngine Player 2 & IMFTimedText
+**MfTranscode sample**
 
-MediaEngine player (IMFMediaEngine/Ex) with subtitle support using the IMFTimedTextNotify interface.
+*Demonstrates using the transcode API to transcode a source file (audio or video) to*
+*a different format (audio or video) supported by Media Foundation.* 
 
-![MediaEngine Player 2](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MediaEnginePlayer2.jfif)
+*Supported, but not limited, formats in this sample are:*
 
----
+- Audio
+   * Waveform Audio File Format (wav)
+   * MPEG Audio Layer III (mp3)
+   * Free Lossless Audio Codec (flac)
+   * MPEG-4 Audio (m4a)
+   * Windows Media Audio (wma)
 
-### MfTranscode
+- Video
+   * Audio Video Interleave (avi)
+   * MPEG-4 Video with AAC Audio (mp4)
+   * MPEG-4 Video with Dolby AC-3 Audio (mp4)
+   * Windows Media Video (wmv)
 
-Demonstrates using the Media Foundation Transcode API to convert audio or video files to different formats.
-
-Supported formats include:
-
-**Audio**
-- WAV
-- MP3
-- FLAC
-- M4A
-- WMA
-
-**Video**
-- AVI
-- MP4 (AAC or AC-3)
-- WMV
-
-![MfTranscode](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfTranscode%20Sample%202.png)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfTranscode%20Sample%202.png)
 
 ---
 
-### MfSimpleCapture
+**MfSimpleCapture sample**
 
-Shows how to implement capturing within a Media Foundation session.
+*This example shows, how you have to implement capturing within a session.*
 
-> Note: The old Microsoft sample used the deprecated `IMFPlayer` interface.
+*Note: The old MS sample used the deprecated IMFplayer interface.*
 
-![MfSimpleCapture](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleCapture.png)
-
----
-
-### MfPeakMeter & MfAudioVisualizer Components
-
-Examples demonstrating custom audio visualization components.
-
-- MfPeakMeter / MfPeakMeterEx / MfPeakMeterMmcs
-- MfAudioVisualizer (WASAPI loopback, Peak/RMS, Spectrum, VU)
-
-![MfPeakMeter](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfPeakmeter.jfif)
-
-![MfAudioVisualizer](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfAudioVisualizer.png)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleCapture.png)
 
 ---
 
-### AudioClip Samples
+**MfPeakMeter, MfPeakMeterEx MfPeakMeterMmcs component samples**
 
-Demonstrates extracting uncompressed audio from media files using IMFSourceReader and IMFSinkWriter.
+*An example about how to create a MfPeakMeter control. This sample is part of the Samples/MfComponents package.*
 
-- **AudioClip** – synchronous extraction
-- **AudioClipEx** – callback-based extraction
-- **AudioClipEx2** – threaded extraction with SinkWriter
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfPeakmeter.jfif)
 
-![AudioClip Sample](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/AudioClipExSample.jpg)
+*An example about how to create a MfAudioVisualizer control - A visual component that uses WASAPI loopback, Peak/RMS, optional spectrum bars or VU. This sample is part of the Samples/MfComponents package.*
 
----
-
-### MfPlayer Series
-
-Media Foundation player samples with increasing feature complexity.
-
-- **MfPlayer I** – basic player
-- **MfPlayer II** – extended player
-- **MfPlayer X** – subtitles, language tags, regex, metadata, IMFTimer
-
-![MfPlayer X](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfMediaPlayer_X.jfif)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfAudioVisualizer.png)
 
 ---
 
-### Ducking Media Player
+**AudioClip, AudioClipEx and AudioClipEx2 samples**
 
-Demonstrates a media player that responds to Windows audio ducking and tracks the system volume mixer.
+*Demonstrates using the IMFSourceReader API to extract uncompressed media data from a media file. This sample application reads audio data from a media file and writes the uncompressed audio to a WAVE file.*
 
-![Ducking Media Player](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/DuckingMediaPlayerSample.jpg)
+*The AudioClipEx sample demonstrates using the IMFSourceReader and IMFSourceReaderCallback API to extract uncompressed audiodata from a media file.*
 
----
+*The AudioClipEx2 sample demonstrates using the IMFSourceReader, IMFSourceReaderCallback and IMFSinkWriter API to extract uncompressed audiodata from a media file and write the audio to a wav. It also uses threads for better responsiveness*
 
-### Ducking Capture Sample
-
-Demonstrates audio ducking by capturing and discarding audio samples.
-
-![Ducking Capture](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ChatDemo.jfif)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/AudioClipExSample.jpg)
 
 ---
 
-### MFFrameCapture
+**MfPlayer**
 
-Demonstrates synchronous and asynchronous frame capture using IMFSourceReader.
+*Player samples, based on the CPlayer sample.*
 
-![MFFrameCapture](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfFrameCapture.png)
+*There are 3 samples in 3 project degrees.*
 
----
+- *MfPlayer I : The basic player sample.*
+- *MfPlayer II : The extended version I sample.*
+- *MfPlayer X : This is an example that shows how to use the IMFTimer, language tags,*  
+  *subtitles (SubRip, MicroDvd and WebVTT), RegEx (Regular Expressions) and how to get media properties.*
 
-### CameraFrameCapture
-
-Demonstrates capturing still images from webcams and cameras.
-
-![CameraFrameCapture](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/CameraFrameCaptureSample.png)
-
----
-
-### CaptureEngineVideoCapture
-
-Demonstrates recording and previewing video using IMFCaptureEngine and IMFCapturePreviewSink.
-
-![CaptureEngineVideoCapture](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MFCaptureEngineVideoCapture.jpg)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfMediaPlayer_X.jfif)
 
 ---
 
-### SinkWriter Samples
+**Ducking Media Player**
 
-Demonstrates video creation using the SinkWriter API.
+*This sample implements a simple media player that responds to the "ducking"*  
+*feature in Windows 7 and later. It also implements a volume control which tracks*  
+*to the volume control in the volume mixer.* 
 
-- Bitmap-to-video
-- Image sequence-to-video
-- Image + audio-to-video
-
-![SinkWriter Sample](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/SinkWriterSample.png)
-
-![Image to Video](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ImageToVideo_3.jpg)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/DuckingMediaPlayerSample.jpg)
 
 ---
 
-### LoopBackCapture Samples
+**Ducking Capture Sample**
 
-Demonstrates capturing system audio using WASAPI loopback.
+*This sample implements a simple "Chat" that demonstrates to the "ducking"*  
+*feature in Windows 7 and later. It simply captures samples from the sound card and*  
+*discards them.*
 
-![LoopBackCapture](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopBackCapture.png)
-
-![LoopBackCapture 2](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopbackCapture2.png)
-
----
-
-### Threaded Loopback Capture
-
-Low-latency, MMCSS-aware loopback capture with stream-switch detection.
-
-![Threaded Loopback Capture](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ThreadedLoopbackCapture.png)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ChatDemo.jfif)
 
 ---
 
-### XAudio2 Player Samples
+**MFFrameCapture sample**
 
-Streaming audio playback using Media Foundation decoding and XAudio2 rendering.
+*Demonstrates how to capture an image (synchronous or A-synchronous) using the IMFSourceReader.*
 
-![XAudio Basic Player](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio_Basic_Sample.png)
-
-![XAudio Sample 2](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample2.png)
-
-![XAudio Sample 3](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample3.png)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfFrameCapture.png)
 
 ---
 
-### WASAPI Player Samples
+**CameraFrameCapture sample**
 
-Threaded WASAPI playback with custom MFT-based EQ and spectrum analyzer.
+*Demonstrates how to capture a still image or so called snapshot (A-synchronous) from a*  
+*capture device such as a webcam or camera using the IMFSourceReader.*
 
-![WASAPI Player 2](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer2.png)
-
-![WASAPI Player 3](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer3.png)
-
----
-
-### MfCaptureVideoFromGPU
-
-GPU-based desktop capture using DXGI Desktop Duplication and Media Foundation encoding.
-
-![GPU Capture](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/CaptureVideoFromGPUSample.png)
-
-![GPU Capture 2](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCaptureVideoFromScreen2s.png)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/CameraFrameCaptureSample.png)
 
 ---
 
-## Tools
+**CaptureEngineVideoCapture sample**
 
-### HResult Lookup Tool
+*Demonstrates how to capture a snapshot or a recording (A-synchronous) from a capture device,*  
+*such as a webcam using the IMFCaptureEngine and IMFCapturePreviewSink.*  
+*This sample also demonstrates how to use the MfMediaTypeDebug API.*
 
-Utility for decoding Windows HRESULT and system error codes.
-
-![HResult Lookup Tool](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/HResultLookUpToolApp.png)
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MFCaptureEngineVideoCapture.jpg)
 
 ---
 
-© FactoryX — All rights reserved.
+**SinkWriterToEncodeVideo Sample**
+
+*Example 1 creates a simple green bitmap (640x480) and store it to a file with a length of 20 seconds.*  
+*Example 2 demonstrates how to use the SinkWriter to create a video from one or more bitmap files.*
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/SinkWriterSample.png)
+
+*Example 3  
+demonstrates how to use the SinkWriter to create a video from one or more image files including audio.*
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ImageToVideo_3.jpg)
+
+---
+
+**LoopBackCapture Sample 1**
+
+*This sample shows, how to capture sound from your soundcard using WASAPI and save this capture*  
+*with the quality that is supported by your soundcard.*
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopBackCapture.png)
+
+---
+
+**LoopBackCapture Sample 2**
+
+This sample demonstrates how to capture system audio either from a specific process tree or for all process except
+a process tree and the use of ActivateAudioInterfaceAsync Win32 API with a new initialization structure.  
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/LoopbackCapture2.png)
+
+---
+
+**Threaded Loopback Capture Sample**
+
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/ThreadedLoopbackCapture.png)
+
+---
+
+**XAudio2Player Basic Player**
+
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio_Basic_Sample.png)
+
+---
+
+**XAudio2Player Sample 2**
+
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample2.png)
+
+---
+
+**XAudio2Player Sample 3**
+
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/XAudio2_Sample3.png)
+
+---
+
+**WASAPI Player Sample 2**
+
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer2.png)
+
+---
+
+**WASAPI Player Sample 3**
+
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/WasApiPlayer3.png)
+
+---
+
+**MfCaptureVideoFromGPU Sample 1**
+
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/CaptureVideoFromGPUSample.png)
+
+---
+
+**MfCaptureVideoFromGPU Sample 2**
+
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCaptureVideoFromScreen2s.png)
+
+---
+
+***Tools***
+
+**HResult Lookup Tool Application**
+
+*This tool can be used to determine HResult or Error codes returned by the Windows OS,*  
+*featuring a detailed build in "HResult Lookup tool", the "Windows System Error Code Lookup Tool" and*  
+*the "System.SysUtils.SysErrorMessage" function, that provides the localized translation (language of your OS) of the HResult.*
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/HResultLookUpToolApp.png)
+
+**© FactoryX. All rights reserved.**
