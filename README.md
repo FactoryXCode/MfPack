@@ -76,13 +76,14 @@ SDK version: 10.0.26100.4654 (Windows 11)
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleCapture.png)
 
-**MfPeakMeter and MfPeakMeterEx component sample**
+**MfPeakMeter, MfPeakMeterEx MfPeakMeterMmcs component samples**
 
 *An example about how to create a MfPeakMeter control. This sample is part of the Samples/MfComponents package.*
-
-
-
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfPeakmeter.jfif)
+
+*An example about how to create a MfAudioVisualizer control - A visual component that uses WASAPI loopback, Peak/RMS, optional spectrum bars or VU. This sample is part of the Samples/MfComponents package.*
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfAudioVisualizer.png)
+
 
 **AudioClip, AudioClipEx and AudioClipEx2 samples**
 
