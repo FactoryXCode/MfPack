@@ -275,18 +275,30 @@ The application is using MMCSS and runs the rendering part in a separate thread.
 
 *This sample demonstrates:*
 
+<<<<<<< HEAD
 *This sample demonstrates a Media Foundationâ€“based streaming audio player built on top of XAudio2.*
+=======
+*This sample demonstrates a Media Foundation–based streaming audio player built on top of XAudio2.*
+>>>>>>> 3cfaed24ca04a563c840f5981305a418e232dc25
 
 *Audio files (WAV, MP3, FLAC, AAC, etc.) are decoded on-the-fly using the Media Foundation Source Reader and rendered through XAudio2 using a multi-buffer* *streaming model.*
 *Playback control (Play, Pause, Stop, Replay, Seek) is fully thread-safe and handled by a dedicated worker thread, avoiding UI blocking and audio glitches.*
 
 *The sample also shows how to:*
 
+<<<<<<< HEAD
 â¦	*Apply XAudio2 effects (reverb, mastering limiter).*
 â¦	*Perform sample-accurate seeking during playback.*
 â¦	*Update a progress bar and timing UI based on streamed audio.*
 â¦	*Implement thread-safe callbacks and events instead of message-based signaling.*
 â¦	*Track real-time audio levels using the MfPeakMeter component.*
+=======
+⦁	*Apply XAudio2 effects (reverb, mastering limiter).*
+⦁	*Perform sample-accurate seeking during playback.*
+⦁	*Update a progress bar and timing UI based on streamed audio.*
+⦁	*Implement thread-safe callbacks and events instead of message-based signaling.*
+⦁	*Track real-time audio levels using the MfPeakMeter component.*
+>>>>>>> 3cfaed24ca04a563c840f5981305a418e232dc25
 
 *Unlike earlier samples, this version does not load the entire audio file into memory.*
 *It uses Media Foundation streaming decode + multiple XAudio2 buffers, making it suitable for large audio files (e.g. FLAC > 100 MB).*
@@ -338,7 +350,11 @@ This sample demonstrates a **real-time audio playback engine on Windows** using:
 - **Media Foundation SourceReader**
 - A custom **3-band EQ** implemented as an **IMFTransform (MFT)**
 - A **Compressor / Limiter DSP**
+<<<<<<< HEAD
 - Thread-safe **GUI â†’ engine** command routing
+=======
+- Thread-safe **GUI → engine** command routing
+>>>>>>> 3cfaed24ca04a563c840f5981305a418e232dc25
 - Persistent EQ settings stored via **INI file**
 
 ## Features
@@ -391,4 +407,8 @@ dedicated recorder unit.
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/HResultLookUpToolApp.png)
 
+<<<<<<< HEAD
 **Â© FactoryX. All rights reserved.**
+=======
+**© FactoryX. All rights reserved.**
+>>>>>>> 3cfaed24ca04a563c840f5981305a418e232dc25
