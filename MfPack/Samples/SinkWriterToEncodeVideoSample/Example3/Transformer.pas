@@ -214,7 +214,7 @@ begin
   // Configure the sourcereader to decode to RGB32
   hr := pReader.GetNativeMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
                                    0,
-                                   pMediaTypeIn);
+                                   @pMediaTypeIn);
   if FAILED(hr) then
     goto done;
 
@@ -239,7 +239,7 @@ begin
     goto done;
 
   hr := pReader.GetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                    pMediaTypeOut);
+                                    @pMediaTypeOut);
   if FAILED(hr) then
     goto done;
 
@@ -370,7 +370,7 @@ begin
   repeat
     hr := pReader.GetNativeMediaType(AudioStreamNo,
                                      0,
-                                     pMediaTypeIn);
+                                     @pMediaTypeIn);
     if FAILED(hr) then
     //don't raise exception if AudioStreamNo doesn't exist!
     //this is the condition to break out of the loop
@@ -517,7 +517,7 @@ begin
     goto done;
 
   hr := pReader.GetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                    pMediaTypeOut);
+                                    @pMediaTypeOut);
   if FAILED(hr) then
     goto done;
 

@@ -65,9 +65,9 @@ unit WinApi.DirectX.D3D11;
 
 interface
 
-{$HPPEMIT '#include "D3D11.h"'}
-{$HPPEMIT '#include "D3DCommon.h"'}
-{$HPPEMIT '#include "dxgiommon.h"'}
+{$HPPEMIT '#include "d3d11.h"'}
+{$HPPEMIT '#include "d3dcommon.h"'}
+{$HPPEMIT '#include "dxgicommon.h"'}
 {$HPPEMIT '#include "dxgiformat.h"'}
 {$HPPEMIT '#include "dxgi.h"'}
 

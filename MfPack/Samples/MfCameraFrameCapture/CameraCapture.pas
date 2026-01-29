@@ -404,7 +404,7 @@ begin
   try
     Result := (SUCCEEDED(SourceReader.GetNativeMediaType(DWORD(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
                                                         iMediaIndex,
-                                                        pMediaType)) and
+                                                        @pMediaType)) and
                SetMediaType(pMediaType));
   finally
     SafeRelease(pMediaType);
@@ -448,7 +448,7 @@ begin
     begin
       try
         Result := (SUCCEEDED(SourceReader.GetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                                              pCurrentType)) and
+                                                              @pCurrentType)) and
                    PopulateFormatDetails(pCurrentType,
                                          AFormat));
       finally
@@ -708,7 +708,7 @@ begin
         begin
           bTypeFound := SUCCEEDED(SourceReader.GetNativeMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
                                                                   iMediaTypeIndex,
-                                                                  pMediaType));
+                                                                  @pMediaType));
           try
             if bTypeFound and IsFormatAvailable(pMediaType) then
               begin
@@ -852,7 +852,7 @@ var
 
 begin
   Result := SUCCEEDED(FSourceReader.GetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                                        pInputType));
+                                                        @pInputType));
 
   if (Result and SUCCEEDED(pInputType.GetGUID(MF_MT_SUBTYPE,
                                              oSubType))) then

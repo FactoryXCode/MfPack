@@ -37,7 +37,9 @@ contains
   QueueTimer in 'QueueTimer.pas',
   ThreadedQueueTimer in 'ThreadedQueueTimer.pas',
   MfPeakMeterEx in 'MfPeakMeterEx.pas',
-  MfPeakMeter in 'MfPeakMeter.pas';
+  MfPeakMeter in 'MfPeakMeter.pas',
+  MfPeakMeterMmcs in 'MfPeakMeterMmcs.pas',
+  MfAudioVisualizer in 'MfAudioVisualizer.pas';
 
 end.
 

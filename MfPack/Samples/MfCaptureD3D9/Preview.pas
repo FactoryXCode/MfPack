@@ -623,7 +623,7 @@ begin
     begin
       hr := m_pReader.GetNativeMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
                                          i,
-                                         pType);
+                                         @pType);
 
       if FAILED(hr) then
         Break;

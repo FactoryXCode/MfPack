@@ -271,7 +271,7 @@ begin
   if SUCCEEDED(hr) then
     hr := sourceReader.GetNativeMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
                                           0,
-                                          nativeMediaType);
+                                          @nativeMediaType);
 
   // Check if media file is indeed an audio file.
   if SUCCEEDED(hr) then
@@ -321,7 +321,7 @@ begin
 
   if SUCCEEDED(hr) then
     hr := sourceReader.GetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
-                                           uncompressedAudioType);
+                                           @uncompressedAudioType);
   if SUCCEEDED(hr) then
     hr := MFCreateWaveFormatExFromMFMediaType(uncompressedAudioType,
                                               pvWaveformatex,

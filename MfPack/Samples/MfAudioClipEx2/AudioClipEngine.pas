@@ -379,7 +379,7 @@ begin
   pAudioNative := nil;
   if Succeeded(FReader.GetNativeMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
                                           0,
-                                          pAudioNative)) then
+                                          @pAudioNative)) then
     begin
       pReaderReqType := nil;
 

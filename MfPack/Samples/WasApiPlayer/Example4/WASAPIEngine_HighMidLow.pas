@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright:  FactoryX. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -93,17 +93,14 @@ uses
   WinApi.WinMM.MMeApi,
   WinApi.WinMM.MMReg,
   {Application}
-  MfAudioBassTrebleMFT,
-  MfAudioBassTrebleTypes;
+  MfAudioHighMidLowMFT,
+  MfAudioHighMidLowTypes,
+  Tools;
 
 
 const
 
   REFTIMES_PER_SEC = 10000000;
-
-  MIN_VOLUME = 0.0;
-  MAX_VOLUME = 100.0;
-
 
 type
 
@@ -141,10 +138,11 @@ type
                     ckSeek,
                     ckShutdown,
 
-                    // MFT bass / treble.
+                    // MFT High / Mid / Low.
                     ckEQEnable,
-                    ckEQSetBassDb,
-                    ckEQSetTrebleDb,
+                    ckEQSetLowDb,
+                    ckEQSetMidDb,
+                    ckEQSetHighDb,
                     ckEQSetRampMode,
                     ckEQSetRampTimeMs);
 
@@ -156,10 +154,11 @@ type
     VolR: Single;
     SeekPos100ns: Int64;  // <<< added (used to set FBasePos100ns and compute FOffset)
 
-    // EQ MFT (bass & treble)
+    // EQ MFT (High/Mid/Low)
     EqEnabled: Boolean;
-    EqBassDb: Integer;
-    EqTrebleDb: Integer;
+    EqLowDb: Integer;
+    EqMidDb: Integer;
+    EqHighDb: Integer;
     EqRampMode: Integer; // Ord(TRampMode)
     EqRampTimeMs: Integer;
 
@@ -174,8 +173,9 @@ type
 
     // EQ commands
     class function EQEnable(const AEnabled: Boolean): TEngineCommand; static;
-    class function EQSetBassDb(const ABassDb: Integer): TEngineCommand; static;
-    class function EQSetTrebleDb(const ATrebleDb: Integer): TEngineCommand; static;
+    class function EQSetLowDb(const ALowDb: Integer): TEngineCommand; static;
+    class function EQSetMidDb(const AMidDb: Integer): TEngineCommand; static;
+    class function EQSetHighDb(const AHighDb: Integer): TEngineCommand; static;
     class function EQSetRampMode(const ARampMode: Integer): TEngineCommand; static; // Ord(TRampMode)
     class function EQSetRampTimeMs(const AMs: Integer): TEngineCommand; static;
 
@@ -253,10 +253,10 @@ type
     FOnEnded: TWasApiEndedEvent;
 
     // EQ MFT
-    FBassTrebleMFT: IMFTransform;
-    FBassTrebleCtrl: IMfBassTrebleControl;
+    FHighMidLowMFT: IMFTransform;
+    FHighMidLowCtrl: IMfHighMidLowControl;
     FEQEnabled: Boolean;
-    FEQTypeSet: Boolean;   // Media types applied to MFT.
+    FEQTypeSet: Boolean;   // media types applied to MFT
 
     pvBufferFrameCount: UINT32;
 
@@ -287,6 +287,8 @@ type
 
     procedure ProcessControlCommand(const Cmd: TEngineCommand);
 
+    procedure DoSeekLocked(const Pos100ns: Int64);
+
   public
 
     constructor Create();
@@ -303,16 +305,17 @@ type
     function SetVolumes(pVolLeft: Single;
                         pVolRight: Single): HResult;
 
-    // EQ bass/ treble MFT implementation --------------------------------------
+    // EQ High / Mid / Low MFT implementation -----------------------------------
 
-    procedure SetEQTransform(const AMFT: IMFTransform); // Plug/unplug MFT.
-    procedure EnableEQ(const AEnabled: Boolean);        // Rruntime on/off.
+    procedure SetEQTransform(const AMFT: IMFTransform); // plug/unplug MFT
+    procedure EnableEQ(const AEnabled: Boolean);        // runtime on/off
 
-    procedure SetBassDb(const ABassDb: Integer);     // -24..+24
-    procedure SetTrebleDb(const ATrebleDb: Integer); // -24..+24
+    procedure SetLowDb(const ALowDb: Integer);     // -24..+24
+    procedure SetMidDb(const AMidDb: Integer);     // -24..+24 (homework band)
+    procedure SetHighDb(const AHighDb: Integer);   // -24..+24
 
-    procedure SetRampMode(const Mode: TMfRampMode); // Off/Fast/Smooth/Manual.
-    procedure SetRampTimeMs(const Ms: Integer);     // Only for Manual.
+    procedure SetRampMode(const Mode: TMfRampMode); // Off/Fast/Smooth/Manual
+    procedure SetRampTimeMs(const Ms: Integer);     // only for Manual
 
     // -------------------------------------------------------------------------
 
@@ -415,18 +418,25 @@ begin
   Result.EqEnabled := AEnabled;
 end;
 
-class function TEngineCommand.EQSetBassDb(const ABassDb: Integer): TEngineCommand;
+class function TEngineCommand.EQSetLowDb(const ABassDb: Integer): TEngineCommand;
 begin
   FillChar(Result, SizeOf(Result), 0);
-  Result.Kind := ckEQSetBassDb;
-  Result.EqBassDb := ABassDb;
+  Result.Kind := ckEQSetLowDb;
+  Result.EqLowDb := ABassDb;
 end;
 
-class function TEngineCommand.EQSetTrebleDb(const ATrebleDb: Integer): TEngineCommand;
+class function TEngineCommand.EQSetMidDb(const ABassDb: Integer): TEngineCommand;
 begin
   FillChar(Result, SizeOf(Result), 0);
-  Result.Kind := ckEQSetTrebleDb;
-  Result.EqTrebleDb := ATrebleDb;
+  Result.Kind := AMidDb;
+  Result.EqLowDb := ABassDb;
+end;
+
+class function TEngineCommand.EQSetHighDb(const ATrebleDb: Integer): TEngineCommand;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+  Result.Kind := ckEQSetHighDb;
+  Result.EqHighDb := ATrebleDb;
 end;
 
 class function TEngineCommand.EQSetRampMode(const ARampMode: Integer): TEngineCommand;
@@ -747,12 +757,118 @@ begin
   end;
 end;
 
+{
+procedure TWasApiEngine.ProcessControlCommand(const Cmd: TEngineCommand);
+var
+  hr: HRESULT;
+  pos100ns,
+  newOffset: Int64;
+
+begin
+
+  case Cmd.Kind of
+    ckLoadFile:
+      begin
+
+        hr := LoadFileInternal(Cmd.FileName,
+                               Cmd.FileDuration);
+
+        if SUCCEEDED(hr) then
+          begin
+
+            SetState(dsReady);
+            RaiseReady();
+          end
+        else
+          begin
+
+            SetState(dsError);
+            RaiseError('LoadFile failed', hr);
+          end;
+      end;
+
+    ckPause:
+      begin
+
+        // Signal play loop to pause quickly
+        FRequestPause := True;
+      end;
+
+    ckStop:
+      begin
+
+        // Signal play loop to stop quickly
+        FRequestStop := True;
+        FRequestPause := False;
+      end;
+
+    ckSeek:
+      begin
+
+        if (pvRenderWfx <> nil) and
+           (pvBytes <> nil) and
+           (pvBytesLength > 0) and
+           (pvRenderWfx.nAvgBytesPerSec <> 0) then
+         begin
+
+           pos100ns := Cmd.SeekPos100ns;
+
+           if (pos100ns < 0) then
+             pos100ns := 0;
+
+           if (FDuration100ns > 0) and (pos100ns > FDuration100ns) then
+             pos100ns := FDuration100ns;
+
+           // 100ns -> bytes (render format rate)
+           newOffset := (UInt64(pos100ns) * UInt64(pvRenderWfx.nAvgBytesPerSec)) div UInt64(REFTIMES_PER_SEC);
+
+           // align to block
+           if (pvRenderWfx.nBlockAlign <> 0) then
+             newOffset := (newOffset div UInt64(pvRenderWfx.nBlockAlign)) * UInt64(pvRenderWfx.nBlockAlign);
+
+           if (newOffset > UInt64(pvBytesLength)) then
+             newOffset := UInt64(pvBytesLength);
+
+           // THIS is what makes FBasePos100ns meaningful:
+           FBasePos100ns := pos100ns;
+           FOffset := UInt32(newOffset);
+
+           // restart clock position from zero at the new base
+           if Assigned(pvAudioClient) then
+             begin
+
+               pvAudioClient.Stop();
+               pvAudioClient.Reset();
+             end;
+
+        if (pvDeviceState = dsPlay) and Assigned(pvAudioClient) then
+          pvAudioClient.Start;
+         end;
+      end;
+
+
+    ckSetVolume:
+      begin
+
+        if Assigned(pvAudioStreamVolume) then
+          begin
+
+            // channel volumes applied in play thread too; safe here on engine thread
+            SetVolumes(Cmd.VolL,
+                       Cmd.VolR);
+          end;
+      end;
+  end;
+end;
+}
+
 
 procedure TWasApiEngine.ProcessControlCommand(const Cmd: TEngineCommand);
 var
   hr: HRESULT;
   pos100ns,
   newOffset: Int64;
+  v: Integer;
 
 begin
 
@@ -832,8 +948,8 @@ begin
              end;
 
            // Flush EQ state on seek (recommended; avoids ringing/history)
-           if Assigned(FBassTrebleMFT) then
-             FBassTrebleMFT.ProcessMessage(MFT_MESSAGE_COMMAND_FLUSH, 0);
+           if Assigned(FHighMidLowMFT) then
+             FHighMidLowMFT.ProcessMessage(MFT_MESSAGE_COMMAND_FLUSH, 0);
 
            if (pvDeviceState = dsPlay) and Assigned(pvAudioClient) then
              pvAudioClient.Start;
@@ -862,52 +978,143 @@ begin
         FEQEnabled := Cmd.EqEnabled;
 
         // When disabling EQ while playing, flush to drop history.
-        if (not FEQEnabled) and Assigned(FBassTrebleMFT) then
-          FBassTrebleMFT.ProcessMessage(MFT_MESSAGE_COMMAND_FLUSH,
+        if (not FEQEnabled) and Assigned(FHighMidLowMFT) then
+          FHighMidLowMFT.ProcessMessage(MFT_MESSAGE_COMMAND_FLUSH,
                                         0);
       end;
 
-    ckEQSetBassDb:
+    ckEQSetLowDb:
       begin
 
-        if Assigned(FBassTrebleCtrl) then
+        if Assigned(FHighMidLowCtrl) then
           begin
 
-            FBassTrebleCtrl.SetBassDb(Cmd.EqBassDb);
+            FHighMidLowCtrl.SetLowDb(Cmd.EqLowDb);
           end;
       end;
 
-    ckEQSetTrebleDb:
+    ckEQSetHighDb:
       begin
 
-        if Assigned(FBassTrebleCtrl) then
+        if Assigned(FHighMidLowCtrl) then
           begin
 
-            FBassTrebleCtrl.SetTrebleDb(Cmd.EqTrebleDb);
+            FHighMidLowCtrl.SetHighDb(Cmd.EqHighDb);
           end;
       end;
 
     ckEQSetRampMode:
       begin
 
-        if Assigned(FBassTrebleCtrl) then
+        if Assigned(FHighMidLowCtrl) then
           begin
 
             // EqRampMode is Ord(TMfRampMode)
-            FBassTrebleCtrl.SetRampMode(TMfRampMode(Cmd.EqRampMode));
+            FHighMidLowCtrl.SetRampMode(TMfRampMode(Cmd.EqRampMode));
           end;
       end;
 
     ckEQSetRampTimeMs:
       begin
 
-        if Assigned(FBassTrebleCtrl) then
+        if Assigned(FHighMidLowCtrl) then
           begin
 
-            FBassTrebleCtrl.SetRampTimeMs(Cmd.EqRampTimeMs);
+            v := Cmd.EqRampTimeMs;
+            if (v < 0) then
+              v := 0
+            else
+              if (v > 2000) then
+                v := 2000;
+
+            FHighMidLowCtrl.SetRampTimeMs(Cmd.EqRampTimeMs);
           end;
       end;
   end;
+end;
+
+
+procedure TWasApiEngine.DoSeekLocked(const Pos100ns: Int64);
+var
+  pos: Int64;
+  newOffset: UInt64;
+  wasPlaying: Boolean;
+  bytesPerSec: UInt32;
+  blockAlign: UInt32;
+
+begin
+
+  if (pvSourceWfx = nil) or
+     (pvBytes = nil) or
+     (pvBytesLength = 0) then
+    Exit;
+
+  bytesPerSec := pvSourceWfx.nAvgBytesPerSec;
+  blockAlign := pvSourceWfx.nBlockAlign;
+
+  if (bytesPerSec = 0) or
+     (blockAlign = 0) then
+    Exit;
+
+  pos := Pos100ns;
+
+  if (pos < 0) then
+    pos := 0;
+
+  if (FDuration100ns > 0) and
+     (pos > FDuration100ns) then
+    pos := FDuration100ns;
+
+  // Convert 100ns -> bytes
+  newOffset := (UInt64(pos) * UInt64(bytesPerSec)) div UInt64(REFTIMES_PER_SEC);
+
+  // Align to block
+  newOffset := (newOffset div UInt64(blockAlign)) * UInt64(blockAlign);
+
+  if (newOffset > UInt64(pvBytesLength)) then
+    newOffset := UInt64(pvBytesLength);
+
+  // IMPORTANT: this makes your progress absolute after seek
+  FBasePos100ns := pos;
+
+  // Update byte offset
+  if (newOffset > High(UInt32)) then
+    FOffset := High(UInt32)
+  else
+    FOffset := UInt32(newOffset);
+
+  wasPlaying := (pvDeviceState = dsPlay);
+
+  // Reset the audio client so its clock restarts cleanly from 0 at the new base position.
+  if Assigned(pvAudioClient) then
+    begin
+      pvAudioClient.Stop;
+      pvAudioClient.Reset;
+    end;
+
+  // TODO: implement & wiring
+  // Flush EQ MFT so it doesn't keep history across seeks (optional but recommended).
+  //if Assigned(FHighMidLowMFT) then
+  //  begin
+  //    FHighMidLowMFT.ProcessMessage(MFT_MESSAGE_COMMAND_FLUSH, 0);
+  //    // If your MFT needs these after flush, keep them:
+  //    FHighMidLowMFT.ProcessMessage(MFT_MESSAGE_NOTIFY_BEGIN_STREAMING, 0);
+  //    FHighMidLowMFT.ProcessMessage(MFT_MESSAGE_NOTIFY_START_OF_STREAM, 0);
+  //  end;
+
+  // Force UI to jump immediately
+  RaiseProcessed(FBasePos100ns, 0);
+
+  if wasPlaying and Assigned(pvAudioClient) then
+    begin
+      pvAudioClient.Start;
+      SetState(dsPlay);
+    end
+  else
+    begin
+      // If we were paused, stay paused but with new base position.
+      SetState(dsPause);
+    end;
 end;
 
 
@@ -987,16 +1194,16 @@ var
 
 begin
 
-  FBassTrebleMFT := AMFT;
-  FBassTrebleCtrl := nil;
+  FHighMidLowMFT := AMFT;
+  FHighMidLowCtrl := nil;
   FEQTypeSet := False;
 
-  if Assigned(FBassTrebleMFT) then
+  if Assigned(FHighMidLowMFT) then
     begin
-      hr := FBassTrebleMFT.QueryInterface(IMfBassTrebleControl,
-                                          FBassTrebleCtrl);
+      hr := FHighMidLowMFT.QueryInterface(IMfHighMidLowControl,
+                                          FHighMidLowCtrl);
       if FAILED(hr) then
-        RaiseError('BassTrebleMFT.QueryInterface failed',
+        RaiseError('HighMidLowMFT.QueryInterface failed',
                    hr);
     end;
 end;
@@ -1009,24 +1216,30 @@ begin
 end;
 
 
-procedure TWasApiEngine.SetBassDb(const ABassDb: Integer);
+procedure TWasApiEngine.SetLowDb(const ABassDb: Integer);
 begin
 
-  EnqueueCommand(TEngineCommand.EQSetBassDb(ABassDb));
+  EnqueueCommand(TEngineCommand.EQSetLowDb(ABassDb));
+end;
+
+procedure TWasApiEngine.SetMidDb(const ABassDb: Integer);
+begin
+
+  EnqueueCommand(TEngineCommand.EQSetMidDb(ABassDb));
 end;
 
 
-procedure TWasApiEngine.SetTrebleDb(const ATrebleDb: Integer);
+procedure TWasApiEngine.SetHighDb(const ATrebleDb: Integer);
 begin
 
-  EnqueueCommand(TEngineCommand.EQSetTrebleDb(ATrebleDb));
+  EnqueueCommand(TEngineCommand.EQSetHighDb(ATrebleDb));
 end;
 
 
 procedure TWasApiEngine.SetRampMode(const Mode: TMfRampMode);
 begin
 
-  // Mode is our MfAudioBassTrebleTypes ramp enum (Off/Fast/Smooth/Manual)
+  // Mode is our MfAudioHighMidLowTypes ramp enum (Off/Fast/Smooth/Manual)
   EnqueueCommand(TEngineCommand.EQSetRampMode(Ord(Mode)));
 end;
 
@@ -1158,7 +1371,7 @@ begin
 
   hr := sourceReader.GetNativeMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
                                         0,
-                                        @nativeMediaType);
+                                        nativeMediaType);
   if FAILED(hr) then
     Exit(hr);
 
@@ -1200,7 +1413,7 @@ begin
     end;
 
   hr := sourceReader.GetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
-                                         @currentMediaType);
+                                         currentMediaType);
   if FAILED(hr) then
     Exit(hr);
 
@@ -1243,36 +1456,36 @@ begin
   // Engine must work with or without EQ.
   eqHr := S_OK;
 
-  // If GUI plugged a custom MFT via SetEQTransform, FBassTrebleMFT may already be set.
-  if not Assigned(FBassTrebleMFT) then
-    eqHr := CreateBassTrebleMFT(FBassTrebleMFT);
+  // If GUI plugged a custom MFT via SetEQTransform, FHighMidLowMFT may already be set.
+  if not Assigned(FHighMidLowMFT) then
+    eqHr := CreateHighMidLowMFT(FHighMidLowMFT);
 
-  FBassTrebleCtrl := nil;
+  FHighMidLowCtrl := nil;
   FEQTypeSet := False;
 
-  if SUCCEEDED(eqHr) and Assigned(FBassTrebleMFT) then
+  if SUCCEEDED(eqHr) and Assigned(FHighMidLowMFT) then
     begin
 
-      FBassTrebleMFT.QueryInterface(IMfBassTrebleControl,
-                                    FBassTrebleCtrl);
+      FHighMidLowMFT.QueryInterface(IMfHighMidLowControl,
+                                    FHighMidLowCtrl);
 
       // Configure media types (same in/out).
-      eqHr := FBassTrebleMFT.SetInputType(0,
+      eqHr := FHighMidLowMFT.SetInputType(0,
                                           currentMediaType,
                                           0);
       if SUCCEEDED(eqHr) then
-        eqHr := FBassTrebleMFT.SetOutputType(0,
+        eqHr := FHighMidLowMFT.SetOutputType(0,
                                              currentMediaType,
                                              0);
 
       if SUCCEEDED(eqHr) then
         begin
 
-          FBassTrebleMFT.ProcessMessage(MFT_MESSAGE_COMMAND_FLUSH,
+          FHighMidLowMFT.ProcessMessage(MFT_MESSAGE_COMMAND_FLUSH,
                                         0);
-          FBassTrebleMFT.ProcessMessage(MFT_MESSAGE_NOTIFY_BEGIN_STREAMING,
+          FHighMidLowMFT.ProcessMessage(MFT_MESSAGE_NOTIFY_BEGIN_STREAMING,
                                         0);
-          FBassTrebleMFT.ProcessMessage(MFT_MESSAGE_NOTIFY_START_OF_STREAM,
+          FHighMidLowMFT.ProcessMessage(MFT_MESSAGE_NOTIFY_START_OF_STREAM,
                                         0);
 
           FEQTypeSet := True;
@@ -1677,7 +1890,7 @@ begin
                 // Route *all* supported commands through the single implementation
                 ProcessControlCommand(Cmd);
 
-                // Keep the hard “shutdown now” shortcut if you want
+                // Keep the hard shutdown now shortcut if you want
                 if (Cmd.Kind = ckShutdown) then
                   begin
 
@@ -1757,7 +1970,7 @@ begin
                 if ((flags and AUDCLNT_BUFFERFLAGS_SILENT) = 0) then
                   begin
 
-                    if FEQEnabled and Assigned(FBassTrebleMFT) and FEQTypeSet then
+                    if FEQEnabled and Assigned(FHighMidLowMFT) and FEQTypeSet then
                       begin
 
                         // bytes in this render buffer:
@@ -1842,7 +2055,7 @@ var
 begin
 
   if (not FEQEnabled) or
-     (FBassTrebleMFT = nil) or
+     (FHighMidLowMFT = nil) or
      (ByteCount = 0) then
     Exit(S_OK);
 
@@ -1877,7 +2090,7 @@ begin
   inSample.AddBuffer(inBuf);
 
   // --- Feed MFT ---
-  hr := FBassTrebleMFT.ProcessInput(0,
+  hr := FHighMidLowMFT.ProcessInput(0,
                                     inSample,
                                     0);
   if FAILED(hr) then
@@ -1888,7 +2101,7 @@ begin
              SizeOf(outData));
   outData.pSample := nil;
 
-  hr := FBassTrebleMFT.ProcessOutput(0,
+  hr := FHighMidLowMFT.ProcessOutput(0,
                                      1,
                                      @outData,
                                      status);

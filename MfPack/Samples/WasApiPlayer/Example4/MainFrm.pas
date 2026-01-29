@@ -31,7 +31,7 @@
 //          Recommended minimum Delphi version: XE7.
 //
 // Related objects: -
-// Related projects: MfPackX319/Samples/WasApiPlayer/Example3
+// Related projects: MfPackX319/Samples/WasApiPlayer/Example4
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.26100.4654
@@ -92,21 +92,22 @@ uses
   WASAPIEngine,
   MfPeakMeter,
   EqSettingsFrm,
-  EqPlotUtils;
+  EqPlotUtils,
+  AudioDynamicsDSP;
 
 
 const
 
   // Global hotkey's.
-  HK_TOGGLE_PLAY   = 1;
-  HK_TOGGLE_PAUSE  = 2;
-  HK_TOGGLE_STOP   = 3;
+  HK_TOGGLE_PLAY = 1;
+  HK_TOGGLE_PAUSE = 2;
+  HK_TOGGLE_STOP = 3;
 
-  HK_VOLUME_UP     = 4;
-  HK_VOLUME_DOWN   = 5;
+  HK_VOLUME_UP = 4;
+  HK_VOLUME_DOWN = 5;
 
-  HK_GUI_SHOW      = 6;
-  HK_GUI_HIDE      = 7;
+  HK_GUI_SHOW = 6;
+  HK_GUI_HIDE = 7;
 
 type
 
@@ -187,6 +188,15 @@ type
     FSamplesThrottle: Word;
     FfrmEqSettings: TfrmEqSettings;
 
+    procedure EqSettingsApply(Sender: TObject;
+                              const Tuning: TEqTuning);
+
+    procedure DynamicsSettingsApply(Sender: TObject;
+                                    const Settings: TDynamicsSettings);
+
+    procedure EqSettingsFormClose(Sender: TObject;
+                                  var Action: TCloseAction);
+
     function IniFileName: string;
 
     procedure LoadEqFromIni(); // Loads the values for the MFT.
@@ -224,7 +234,6 @@ type
     // Hot keys
     procedure WMHotKey(var Msg: TWMHotKey); message WM_HOTKEY;
   end;
-
 
 var
   frmMain: TfrmMain;
@@ -392,6 +401,14 @@ begin
                         highDb,
                         rampModeIdx,
                         rampMs);
+
+
+    // Peakmeters frequency.
+    pmLeft.Precision :=  Ini.ReadInteger('PeakMeters',
+                                         'Freq',
+                                         100);
+
+    pmRight.Precision :=  pmLeft.Precision;
   finally
     Ini.Free;
   end;
@@ -532,6 +549,8 @@ begin
   LoadEqFromIni();  // INI-based tuning.
   FWasApiEngine.ApplyEqTuningImmediate(FEqTuning);
   UpdateSpectrumPlot();  // Coefficients reflect the tuning.
+  pmLeft.Precision := 30;
+  pmRight.Precision := 30;
 end;
 
 
@@ -554,7 +573,34 @@ begin
   UnregisterHotKey(Handle,
                    HK_GUI_HIDE);
 
+  FreeAndNil(FfrmEqSettings);
   FreeAndNil(FWasApiEngine);
+end;
+
+
+procedure TfrmMain.EqSettingsApply(Sender: TObject;
+                                  const Tuning: TEqTuning);
+begin
+  // Settings dialog applied EQ tuning (and may have persisted it to INI).
+  // Re-load INI so engine + live controls reflect the new tuning.
+  LoadEqFromIni();
+end;
+
+
+procedure TfrmMain.DynamicsSettingsApply(Sender: TObject;
+                                        const Settings: TDynamicsSettings);
+begin
+  // Live updates are safe: DSP publishes settings; audio thread applies at block boundary.
+  if Assigned(FWasApiEngine) then
+    FWasApiEngine.SetDynamicsSettings(Settings);
+end;
+
+
+procedure TfrmMain.EqSettingsFormClose(Sender: TObject;
+                                      var Action: TCloseAction);
+begin
+  // Modeless: keep instance alive for realtime tweaking.
+  Action := caHide;
 end;
 
 
@@ -618,8 +664,9 @@ begin
       lblDuration.Caption := Format('Duration: %s',
                                     [HnsTimeToStr(llAudioDuration, False)]);
 
-      // Set progressbar max
+      // Set progressbar max.
       pbProgress.Max := Integer(llAudioDuration div MS100_PER_SEC);
+
       LoadEqFromIni();
       FWasApiEngine.OpenFile(FFileName,
                              llAudioDuration);
@@ -749,22 +796,40 @@ end;
 
 
 procedure TfrmMain.Settings1Click(Sender: TObject);
+var
+  D: TEqTuning;
 begin
 
-  if not assigned(FfrmEqSettings) then
-    FfrmEqSettings := TfrmEqSettings.Create(Self);
-
-  if (FfrmEqSettings.ShowModal = mrOk) then
+  if not Assigned(FfrmEqSettings) then
     begin
 
-      LoadEqFromIni();
-    end
-  else
-    begin
-
-      // User canceled.
-      // Do something.
+      FfrmEqSettings := TfrmEqSettings.Create(Self);
+      FfrmEqSettings.OnApply := EqSettingsApply;
+      FfrmEqSettings.OnApplyDynamics := DynamicsSettingsApply;
+      FfrmEqSettings.OnClose := EqSettingsFormClose;
     end;
+
+  // Keep EQ settings in sync with INI on each open.
+  FillChar(D, SizeOf(D), 0);
+  D.LowFreqHz := 100.0;
+  D.MidFreqHz := 1000.0;
+  D.HighFreqHz := 10000.0;
+  D.MidQ := 1.0;
+  D.LowShelfSlope := 1.0;
+  D.HighShelfSlope := 1.0;
+  D.MidMode := mmPeaking;
+
+  FfrmEqSettings.LoadFromIni(IniFileName,
+                             'EQ',
+                             D);
+
+  // Load dynamics settings (stored in INI) into the settings form.
+  FfrmEqSettings.LoadDynamicsFromIni(IniFileName,
+                                     'Dynamics',
+                                     TDynamicsSettings.Defaults);
+
+  FfrmEqSettings.Show;
+  FfrmEqSettings.BringToFront;
 end;
 
 
@@ -904,9 +969,6 @@ begin
                       Mid,
                       High);
 
-       //OutputDebugString(PWideChar(Format('Fs = %d  Low = %', [Fs])));
-
-       // imgSpectrumAnalizer.Invalidate;
     end;
 end;
 
@@ -962,6 +1024,7 @@ begin
                                       [iSamples div 1024]);
       FSamplesThrottle := 0;
     end;
+  //UpdateSpectrumPlot();     // Coefficients reflect the tuning.
 end;
 
 
@@ -1004,13 +1067,14 @@ begin
       //LoadEqFromIni();          // If we do INI-based tuning.
       //ApplyEqTuning(FEqTuning); // Sends params to engine/MFT.
       //FWasApiEngine.ApplyEqTuningImmediate(FEqTuning);
-      UpdateSpectrumPlot();     // Coefficients reflect the tuning.
+
 
       // re-apply current UI values to engine (important after plugging a new MFT or new file)
       fWasApiEngine.SetLowDb(InvertDb(tbLow.Position));
       fWasApiEngine.SetMidDb(InvertDb(tbMid.Position));
       fWasApiEngine.SetHighDb(InvertDb(tbHigh.Position));
       cbxRampChange(nil);
+
     end;
 end;
 
@@ -1023,6 +1087,7 @@ begin
 
   butPlayPause.Enabled := True;
   butPlayPause.Caption := 'Play';
+
   // Resets controls, engine.stop has allready being called in the engine loop.
   butStopClick(nil);
   butStop.Enabled := False;
@@ -1057,6 +1122,7 @@ begin
         pbProgress.Position := 0;
         lblPlayed.Caption := 'Played: 00:00:00';
         stxtProcessed.Caption := 'Samples: 0';
+        lblBarPosition.Caption := 'Position: 0';
         // Deactivate the peakmeters.
         pmLeft.Enabled := False;
         pmRight.Enabled := False;
@@ -1069,10 +1135,11 @@ begin
         butPlayPause.Caption := 'Pause';
         butStop.Enabled := True;
         stxtStatus.Caption := Format('Playing: %s',
-                                     [fFileName]);
+                                     [ExtractFileName(fFileName)]);
         // Activate the peakmeters.
         pmLeft.Enabled := True;
         pmRight.Enabled := True;
+        UpdateSpectrumPlot();     // Coefficients reflect the tuning.
       end;
 
     dsPause:
@@ -1082,7 +1149,7 @@ begin
         butPlayPause.Caption := 'Play';
         butStop.Enabled := True;
         stxtStatus.Caption := Format('Pauzed: %s',
-                                     [fFileName]);
+                                     [ExtractFileName(fFileName)]);
       end;
 
     dsUninitialized,
@@ -1092,7 +1159,11 @@ begin
         butPlayPause.Enabled := False;
         butPlayPause.Caption := 'Play';
         butStop.Enabled := False;
-        // Deactivate the peakmeters.
+        lblPlayed.Caption := 'Played: 00:00:00';
+        stxtProcessed.Caption := 'Samples: 0';
+        pbProgress.Position := 0;
+        lblBarPosition.Caption := 'Position: 0';
+        // Dectivate the peakmeters.
         pmLeft.Enabled := False;
         pmRight.Enabled := False;
       end;
@@ -1103,7 +1174,8 @@ begin
         butPlayPause.Enabled := False;
         butPlayPause.Caption := 'Play';
         butStop.Enabled := False;
-        stxtStatus.Caption := Format('Yoo! we have an error: %d', [GetLastError()]);
+        stxtStatus.Caption := Format('Yo! We have an error: %d',
+                                     [GetLastError()]);
         // Deactivate the peakmeters.
         pmLeft.Enabled := False;
         pmRight.Enabled := False;
@@ -1139,27 +1211,25 @@ begin
           secPos := pbProgress.Max;
 
       pbProgress.ShowHint := True;
-      pbProgress.Hint := Format('Position: %d s',
+      pbProgress.Hint := Format('Position: %d',
                                 [secPos]);
 
-      lblBarPositionInSamples.Caption := Format('Position: %d',
-                                                [secPos]);
+      lblBarPosition.Caption := Format('Position: %d',
+                                       [secPos]);
 
       hnsPos := Int64(secPos) * MS100_PER_SEC;
-
       lblBarPositionInSTime.Caption := Format('Position: %s',
-                                              [HnsTimeToStr(hnsPos,
-                                                            False)]);
+                                              [HnsTimeToStr(hnsPos, False)]);
     end;
 end;
 
 
 procedure TfrmMain.pbProgressMouseUp(Sender: TObject; Button: TMouseButton;
-                                     Shift: TShiftState; X, Y: Integer);
+  Shift: TShiftState; X, Y: Integer);
 var
   hr: HResult;
-  posHns: Int64;  // 100ns units
-  tickPos: Int64; // 100ms ticks
+  tickPos: Int64;  // 100ms ticks
+  posHns: Int64;   // 100ns units
 
 begin
 
@@ -1167,7 +1237,7 @@ begin
     Exit;
 
   if (pbProgress.Width <= 0) then
-    Exit;
+      Exit;
 
   if (pbProgress.Max <= 0) then
     Exit;
@@ -1178,30 +1248,32 @@ begin
     if (X >= pbProgress.Width) then
       begin
 
-        // Avoid exact end tick (can map to EOF); use last playable tick
+        // Avoid exact end tick (can map to EOF); use last playable tick.
         if (pbProgress.Max > 0) then
           tickPos := pbProgress.Max - 1
         else
           tickPos := 0;
       end
-  else
-    begin
+    else
+      begin
 
-      tickPos := Trunc((X / pbProgress.Width) * pbProgress.Max);
-      if (tickPos < 0) then
-        tickPos := 0;
-      if (tickPos > pbProgress.Max) then
-        tickPos := pbProgress.Max;
+        tickPos := Trunc((X / pbProgress.Width) * pbProgress.Max);
+
+        if (tickPos < 0) then
+          tickPos := 0;
+
+        if (tickPos > pbProgress.Max) then
+          tickPos := pbProgress.Max;
     end;
 
   // 100ms tick -> 100ns
   posHns := tickPos * MS100_PER_SEC;
 
-  // Safety clamp
+  // Safety clamp.
   if (posHns < 0) then
     posHns := 0;
 
-  // Clamp to duration (keep 100ms precision).
+  // Clamp to duration (keep 100ms precision)
   if (llAudioDuration > 0) and (posHns >= llAudioDuration) then
     begin
 
@@ -1217,15 +1289,14 @@ begin
   if SUCCEEDED(hr) then
     pbProgress.Position := Integer(tickPos)
   else
-    stxtStatus.Caption := Format('SeekTo failed. (hr=%d)',
-                                 [hr]);
+    stxtStatus.Caption := Format('SeekTo failed. (hr=%d)', [hr]);
+
   Exit;
 end;
 
 
 procedure TfrmMain.WMHotKey(var Msg: TWMHotKey);
 begin
-
   inherited;
 
   // Global hotkey values.
@@ -1256,11 +1327,8 @@ begin
       begin
 
         trbVolumeL.Position :=  trbVolumeL.Position - 1;
-
         trbVolumeRChange(trbVolumeL);
-
         trbVolumeR.Position := trbVolumeR.Position - 1;
-
         trbVolumeRChange(trbVolumeR);
       end;
 
@@ -1269,7 +1337,6 @@ begin
 
         trbVolumeL.Position := trbVolumeL.Position + 1;
         trbVolumeLChange(trbVolumeL);
-
         trbVolumeR.Position := trbVolumeR.Position + 1;
         trbVolumeRChange(trbVolumeR);
       end;

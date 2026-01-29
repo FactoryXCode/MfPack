@@ -10,7 +10,7 @@ object frmMain: TfrmMain
   Margins.Bottom = 5
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
-  Caption = 'WASAPI Player Sample 3 - High/Mid/Low EQ MFT'
+  Caption = 'WASAPI Player Sample 4 - EQ MFT and DSP'
   ClientHeight = 630
   ClientWidth = 648
   Color = clBtnFace
@@ -108,7 +108,7 @@ object frmMain: TfrmMain
     Margins.Right = 5
     Margins.Bottom = 5
     Align = alTop
-    Color = clAppWorkSpace
+    Color = clMoneyGreen
     ParentBackground = False
     TabOrder = 4
     object lblBarPositionInSTime: TLabel
@@ -126,7 +126,7 @@ object frmMain: TfrmMain
     object lblBarPosition: TLabel
       Left = 182
       Top = 30
-      Width = 248
+      Width = 257
       Height = 27
       Margins.Left = 5
       Margins.Top = 5
@@ -167,7 +167,7 @@ object frmMain: TfrmMain
     TabOrder = 5
     object Bevel1: TBevel
       Left = 242
-      Top = 43
+      Top = 42
       Width = 383
       Height = 350
       Margins.Left = 5

@@ -27,7 +27,7 @@
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX319/Samples/WasApiPlayer/Example4
 // Known Issues: -
 //
 // Compiler version: 23 up to 35
@@ -95,8 +95,11 @@ uses
   WinApi.WinMM.MMeApi,
   WinApi.WinMM.MMReg,
   {Application}
+  WASAPINotifications,
+  PcmLib,
   MfAudioHighMidLowTypes,
-  MfAudioHighMidLowMFT;
+  MfAudioHighMidLowMFT,
+  AudioDynamicsDSP;
 
 
 const
@@ -107,11 +110,6 @@ const
   MAX_VOLUME = 100.0;
 
 type
-
-  TSampleFormat = (sfInt16,
-                   sfInt24,
-                   sfInt32,
-                   sfFloat32);
 
   TDeviceState = (dsUninitialized,
                   dsError,
@@ -135,6 +133,7 @@ type
   TWasApiProcessedEvent = procedure(Sender: TObject;
                                     const Position100ns: Int64;
                                     const RawPosition: UInt64) of object;
+
   TWasApiEndedEvent = procedure(Sender: TObject) of object;
 
 
@@ -145,6 +144,8 @@ type
                     ckSetVolume,
                     ckSeek,
                     ckShutdown,
+
+                    ckStreamSwitch,
 
                     // MFT High / Mid / Low.
                     ckEQEnable,
@@ -223,14 +224,20 @@ type
     FEngine: TWasApiEngine;
   protected
 
-    procedure Execute; override;
+    procedure Execute(); override;
   public
 
     constructor Create(AEngine: TWasApiEngine);
   end;
 
 
-  TWasApiEngine = class(TObject)
+  TWasApiEngine = class(TInterfacedPersistent, IWasApiDeviceNotifySink)
+
+    // IWasApiDeviceNotifySink implementation
+    procedure OnWasApiDefaultDeviceChanged(Flow: EDataFlow; Role: ERole; const DeviceId: UnicodeString);
+    procedure OnWasApiDeviceStateChanged(const DeviceId: UnicodeString; NewState: DWORD);
+    procedure OnWasApiDeviceRemoved(const DeviceId: UnicodeString);
+
   private
 
     // WASAPI
@@ -238,6 +245,16 @@ type
     pvAudioStreamVolume: IAudioStreamVolume;
     pvRenderClient: IAudioRenderClient;
     pvAudioClock: IAudioClock;
+
+    // Device notifications (stream switching).
+    FDeviceEnumerator: IMMDeviceEnumerator;
+    FRole: ERole;
+    FPendingSwitchDeviceId: UnicodeString;
+    FNotifyClient: IMMNotificationClient;
+    FActiveDeviceId: string;
+    FPendingDeviceId: string;
+    FDeviceIdCS: TCriticalSection;
+    FStreamSwitchRequested: LongInt;
 
     pvDeviceState: TDeviceState;
 
@@ -258,7 +275,9 @@ type
 
     // Playback
     FOffset: UINT32;
-    FSampleFormat: TSampleFormat;
+
+    FSampleFormat: TSampleFormat; // Declared in AudioDynamicsDSP!
+
     FBytesPerSample: Integer;
     pvSoundChannels: WORD;
 
@@ -299,6 +318,11 @@ type
 
     pvBufferFrameCount: UINT32;
 
+    // DSP Compressor/Limiter
+    FDynamics: TAudioDynamicsDSP;
+    FDynamicsFmtSR: Integer;
+    FDynamicsFmtCh: Integer;
+
     procedure SetState(const NewState: TDeviceState);
     procedure RaiseError(const Msg: string; const Hr: HRESULT);
     procedure RaiseReady();
@@ -315,16 +339,31 @@ type
 
     function LoadFileInternal(const audiofile: TFileName;
                               fileDuration: LONGLONG): HResult;
+
     function LoadData(bufferFrameCount: UINT32;
                       pData: PByte;
                       var flags: DWORD): HRESULT;
 
     function PlayAudioStreamInternal(): HRESULT;
+
     // Helper for PlayAudioStreamInternal.
     function ProcessEQBuffer(pData: PByte;
                              const ByteCount: DWORD): HRESULT;
 
     procedure ProcessControlCommand(const Cmd: TEngineCommand);
+
+    // Stream switch handling (default device changes / device invalidation)
+    procedure SetupDeviceNotifications();
+    procedure TeardownDeviceNotifications();
+    procedure RequestStreamSwitch(const NewDeviceId: string);
+    function HandleStreamSwitch(): HRESULT;
+    procedure ReleaseAudioClientInterfaces();
+    function GetDeviceIdString(const ADevice: IMMDevice): string;
+    function IsStreamSwitchRequested(): Boolean;
+    procedure ClearStreamSwitchRequested();
+    function GetCurrentPosition100nsApprox(): Int64;
+
+    procedure SetDeviceRole(Value: ERole);
 
   public
 
@@ -370,6 +409,10 @@ type
 
     procedure ApplyEqTuningImmediate(const T: TEqTuning);
 
+    // DSP
+    procedure SetDynamicsSettings(const S: TDynamicsSettings);
+
+
     // -------------------------------------------------------------------------
 
     property DeviceState: TDeviceState read pvDeviceState;
@@ -379,6 +422,8 @@ type
     property OnReady: TWasApiReadyEvent read FOnReady write FOnReady;
     property OnProcessed: TWasApiProcessedEvent read FOnProcessed write FOnProcessed;
     property OnEnded: TWasApiEndedEvent read FOnEnded write FOnEnded;
+    property DeviceRole: ERole read FRole write SetDeviceRole;
+
   end;
 
 
@@ -656,6 +701,9 @@ begin
     //
     // mfStarted := SUCCEEDED(hr);
 
+    // Stream switch handling.
+    FEngine.SetupDeviceNotifications();
+
     waitArray[0] := FEngine.FTerminateEvent;
     waitArray[1] := FEngine.FCmdEvent;
 
@@ -707,6 +755,8 @@ begin
   finally
 
     //if mfStarted then  << See MainFrm finalization section.
+    FEngine.TeardownDeviceNotifications();
+    //if mfStarted then  << See MainFrm finalization section.
     //  MFShutdown;
     CoUninitialize();
   end;
@@ -717,6 +767,7 @@ end;
 
 constructor TWasApiEngine.Create();
 begin
+
   inherited Create;
 
   pvAudioClient := nil;
@@ -743,20 +794,30 @@ begin
   pvSoundChannels := 0;
 
   FCmdCS := TCriticalSection.Create;
-  FCmdQueue := TQueue<TEngineCommand>.Create;
+  FCmdQueue := TQueue<TEngineCommand>.Create();
 
-  // auto-reset for commands
+  // Stream switch handling.
+  FDeviceIdCS := TCriticalSection.Create();
+  FDeviceEnumerator := nil;
+  FNotifyClient := nil;
+  FActiveDeviceId := '';
+  FPendingDeviceId := '';
+  FStreamSwitchRequested := 0;
+
+  FRole := eMultimedia; // default Windows behavior.
+
+  // auto-reset for commands.
   FCmdEvent := CreateEvent(nil,
                            False,
                            False,
                            nil);
-  // manual-reset terminate
+  // Manual-reset terminate.
   FTerminateEvent := CreateEvent(nil,
                                  True,
                                  False,
                                  nil);
 
-  // Start worker thread immediately (engine owner)
+  // Start worker thread immediately (engine owner).
   FThread := TWasApiEngineThread.Create(Self);
   SetState(dsInitialized);
 end;
@@ -765,7 +826,7 @@ end;
 destructor TWasApiEngine.Destroy();
 begin
 
-  // Request thread shutdown
+  // Request thread shutdown.
   EnqueueCommand(TEngineCommand.Shutdown);
   SetEvent(FCmdEvent);
   SetEvent(FTerminateEvent);
@@ -773,7 +834,7 @@ begin
   if Assigned(FThread) then
     begin
 
-      FThread.WaitFor;
+      FThread.WaitFor();
       FreeAndNil(FThread);
     end;
 
@@ -795,6 +856,9 @@ begin
   FreeAndNil(FCmdQueue);
   FreeAndNil(FCmdCS);
 
+  // Stream switch handling.
+  FreeAndNil(FDeviceIdCS);
+
   if Assigned(pvSourceWfx) then
     CoTaskMemFree(pvSourceWfx);
 
@@ -803,6 +867,9 @@ begin
       CoTaskMemFree(pvRenderWfx);
       pvRenderWfx := nil;
     end;
+
+  // Nil the DSP class.
+  FreeAndNil(FDynamics);
 
   inherited;
 end;
@@ -818,7 +885,8 @@ begin
                   begin
 
                     if Assigned(FOnStateChanged) then
-                      FOnStateChanged(Self, NewState);
+                      FOnStateChanged(Self,
+                                      NewState);
                   end);
 end;
 
@@ -865,7 +933,9 @@ begin
                   begin
 
                     if Assigned(FOnProcessed) then
-                      FOnProcessed(Self, Position100ns, RawPosition);
+                      FOnProcessed(Self,
+                                   Position100ns,
+                                   RawPosition);
                   end);
 end;
 
@@ -965,16 +1035,13 @@ begin
 
 ckSeek:
   begin
+
     if (pvSourceWfx <> nil) and
        (pvBytes <> nil) and
        (pvBytesLength > 0) and
        (pvSourceWfx.nAvgBytesPerSec <> 0) and
        (pvSourceWfx.nBlockAlign <> 0) then
     begin
-
-      // DEBUG:
-      //OutputDebugString(PChar(Format('ckSeek: Cmd.SeekPos100ns=%d  Dur=%d',
-      //                               [Cmd.SeekPos100ns, FDuration100ns])));
 
       pos100ns := Cmd.SeekPos100ns;
 
@@ -993,12 +1060,13 @@ ckSeek:
 
       // never seek to exact EOF (must be < pvBytesLength)
       if (pvBytesLength > 0) and (newOffset >= UInt64(pvBytesLength)) then
-      begin
-        if (pvBytesLength > UInt32(pvSourceWfx.nBlockAlign)) then
-          newOffset := UInt64(pvBytesLength) - UInt64(pvSourceWfx.nBlockAlign)
-        else
-          newOffset := 0;
-      end;
+        begin
+
+          if (pvBytesLength > UInt32(pvSourceWfx.nBlockAlign)) then
+            newOffset := UInt64(pvBytesLength) - UInt64(pvSourceWfx.nBlockAlign)
+          else
+            newOffset := 0;
+          end;
 
       // THIS is what makes FBasePos100ns meaningful:
       FBasePos100ns := pos100ns;
@@ -1006,30 +1074,40 @@ ckSeek:
 
       // Restart clock position from zero at the new base.
       if Assigned(pvAudioClient) then
-      begin
-        hr := pvAudioClient.Stop();
-        if SUCCEEDED(hr) then
-          hr := pvAudioClient.Reset();
-
-        if FAILED(hr) then
         begin
-          Self.SetState(dsError);
-          Self.RaiseError('AudioClient Stop/Reset failed', hr);
-          Exit;
+
+          hr := pvAudioClient.Stop();
+          if SUCCEEDED(hr) then
+            hr := pvAudioClient.Reset();
+
+          if FAILED(hr) then
+            begin
+
+              Self.SetState(dsError);
+              Self.RaiseError('AudioClient Stop/Reset failed',
+                              hr);
+              Exit;
+            end;
+
+          if Assigned(FDynamics) then
+            FDynamics.Reset();
         end;
-      end;
 
       // Flush EQ state on seek (recommended; avoids ringing/history)
       if Assigned(FHighMidLowMFT) then
-      begin
-        hr := FHighMidLowMFT.ProcessMessage(MFT_MESSAGE_COMMAND_FLUSH, 0);
-        if FAILED(hr) then
         begin
-          Self.SetState(dsError);
-          Self.RaiseError('ProcessMessage MFT_MESSAGE_COMMAND_FLUSH failed', hr);
-          Exit;
+
+          hr := FHighMidLowMFT.ProcessMessage(MFT_MESSAGE_COMMAND_FLUSH,
+                                              0);
+          if FAILED(hr) then
+            begin
+
+              Self.SetState(dsError);
+              Self.RaiseError('ProcessMessage MFT_MESSAGE_COMMAND_FLUSH failed',
+                              hr);
+              Exit;
+            end;
         end;
-      end;
 
       // Seek should resume playback unless you explicitly want a "scrub while paused" mode.
       if Assigned(pvAudioClient) then
@@ -1039,11 +1117,13 @@ ckSeek:
 
         hr := pvAudioClient.Start();
         if FAILED(hr) then
-        begin
-          Self.SetState(dsError);
-          Self.RaiseError('AudioClient Start failed after seek', hr);
-          Exit;
-        end;
+          begin
+
+            Self.SetState(dsError);
+            Self.RaiseError('AudioClient Start failed after seek',
+                            hr);
+            Exit;
+          end;
       end;
     end;
   end;
@@ -1108,30 +1188,35 @@ ckSeek:
 
     ckEQSetMidMode:
       begin
+
         if Assigned(FHighMidLowCtrl) then
           FHighMidLowCtrl.SetMidMode(TMfMidMode(Cmd.EqMidMode));
       end;
 
     ckEQSetMidQ:
       begin
+
         if Assigned(FHighMidLowCtrl) then
           FHighMidLowCtrl.SetMidQ(Cmd.EqMidQ);
       end;
 
     ckEQSetLowFreqHz:
       begin
+
         if Assigned(FHighMidLowCtrl) then
           FHighMidLowCtrl.SetLowFreqHz(Cmd.EqLowFreqHz);
       end;
 
     ckEQSetMidFreqHz:
       begin
+
         if Assigned(FHighMidLowCtrl) then
           FHighMidLowCtrl.SetMidFreqHz(Cmd.EqMidFreqHz);
       end;
 
     ckEQSetHighFreqHz:
       begin
+
         if Assigned(FHighMidLowCtrl) then
           FHighMidLowCtrl.SetHighFreqHz(Cmd.EqHighFreqHz);
       end;
@@ -1144,6 +1229,7 @@ ckSeek:
 
     ckEQSetHighShelfSlope:
       begin
+
         if Assigned(FHighMidLowCtrl) then
           FHighMidLowCtrl.SetHighShelfSlope(Cmd.EqHighShelfSlope);
       end;
@@ -1396,6 +1482,20 @@ end;
 // End EQ bass/ treble MFT implementation --------------------------------------
 
 
+// DSP
+procedure TWasApiEngine.SetDynamicsSettings(const S: TDynamicsSettings);
+begin
+
+  // DEBUG:
+  //OutputDebugString(PChar(Format('TWasApiEngine.SetDynamicsSettings: LimOversample=%d', [S.LimOversample])));
+
+  // Safe for modeless live updates:
+  // SetSettings now only publishes; audio thread applies at block boundary.
+  if Assigned(FDynamics) then
+    FDynamics.SetSettings(S);
+end;
+
+
 
 procedure TWasApiEngine.ResetAudioData(pFreeSourceStream: Boolean);
 begin
@@ -1486,12 +1586,6 @@ begin
   Inc(FOffset,
       bytesToCopy);
 
-  // DEBUG: print bufferFrameCount, not uninitialized 'remain'
-  //OutputDebugString(PChar(Format(
-  //  'After LoadData: flags=%x FOffset=%d bytesLen=%d frames=%u reqBytes=%u copyBytes=%u',
-  //  [Cardinal(flags), FOffset, pvBytesLength, bufferFrameCount, bytesRequested, bytesToCopy]
-  //)));
-
   Result := S_OK;
 end;
 
@@ -1518,6 +1612,8 @@ var
   nSampleRate,
   nBits: UINT32;
   wantSubType: TGUID;
+
+  recDynamicSettingS: TDynamicsSettings;
 
   function GetU32Attr(const mt: IMFMediaType;
                       const key: TGUID;
@@ -1776,6 +1872,20 @@ begin
       FEQTypeSet := False;
     end;
 
+  // Create DSP and set. =======================================================
+  FDynamics := TAudioDynamicsDSP.Create(pvRenderWfx.nSamplesPerSec,
+                                        pvRenderWfx.nChannels);
+
+  recDynamicSettingS := TDynamicsSettings.Defaults;
+  recDynamicSettingS.CompEnabled := False;
+  recDynamicSettingS.LimEnabled  := False;   // Important: Defaults has LimEnabled = True
+  recDynamicSettingS.LimTruePeak := False;   // Optional, but keeps intent clear
+  FDynamics.SetSettings(recDynamicSettingS);
+  // Delay SetFormat until we know SR/CH for sure (or set it here if known)
+  FDynamicsFmtSR := 0;
+  FDynamicsFmtCh := 0;
+  // ===========================================================================
+
   // ---------------------------------------------------------------------------
   // Read all samples into pvBytes (decoded PCM bytes in pvSourceWfx layout)
   // ---------------------------------------------------------------------------
@@ -1852,10 +1962,382 @@ begin
 end;
 
 
+// Stream switch handling ======================================================
+
+procedure TWasApiEngine.SetupDeviceNotifications;
+var
+  hr: HRESULT;
+
+begin
+
+  // Must be called on the engine thread (COM initialized).
+  if Assigned(FDeviceEnumerator) then
+    Exit;
+
+  hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
+                         nil,
+                         CLSCTX_ALL,
+                         IID_IMMDeviceEnumerator,
+                         FDeviceEnumerator);
+  if FAILED(hr) then
+    begin
+
+      FDeviceEnumerator := nil;
+      Exit;
+    end;
+
+  FNotifyClient := TWasApiNotificationClient.Create(Self as IWasApiDeviceNotifySink) as IMMNotificationClient;
+
+  if not Assigned(FNotifyClient) then
+    begin
+
+      FDeviceEnumerator := nil;
+      Exit;
+    end;
+
+  hr := FDeviceEnumerator.RegisterEndpointNotificationCallback(FNotifyClient);
+  if FAILED(hr) then
+    begin
+
+      // Don’t leave partially initialized state.
+      FNotifyClient := nil;
+      FDeviceEnumerator := nil;
+      Exit;
+    end;
+end;
+
+
+
+procedure TWasApiEngine.TeardownDeviceNotifications();
+//var
+//  hr: HRESULT;
+
+begin
+
+  // Must be called on the SAME thread that registered the callback
+  // (your engine thread that called CoInitializeEx).
+
+  if (FDeviceEnumerator <> nil) and (FNotifyClient <> nil) then
+    begin
+
+      {hr := }FDeviceEnumerator.UnregisterEndpointNotificationCallback(FNotifyClient);
+      // Best-effort: Ignore failures during shutdown (common if audio service is restarting).
+      // We may log hr if we build a logger.
+
+      //if FAILED(hr) then
+      //  Log('UnregisterEndpointNotificationCallback failed', hr);
+
+    end;
+
+  // Release in this order
+  FNotifyClient := nil;
+  FDeviceEnumerator := nil;
+end;
+
+
+procedure TWasApiEngine.RequestStreamSwitch(const NewDeviceId: string);
+begin
+
+  // Called from IMMNotificationClient callback threads or audio thread.
+  if (NewDeviceId <> '') then
+    begin
+
+      if Assigned(FDeviceIdCS) then
+        begin
+
+          FDeviceIdCS.Enter();
+
+          try
+
+            FPendingDeviceId := NewDeviceId;
+          finally
+
+            FDeviceIdCS.Leave();
+          end;
+        end
+      else
+        FPendingDeviceId := NewDeviceId;
+    end;
+
+  InterlockedExchange(FStreamSwitchRequested,
+                      1);
+
+  // Wake the render loop (and/or idle loop) so it can rebuild.
+  if (FCmdEvent <> 0) then
+    SetEvent(FCmdEvent);
+end;
+
+
+function TWasApiEngine.IsStreamSwitchRequested(): Boolean;
+begin
+
+  Result := (InterlockedCompareExchange(FStreamSwitchRequested,
+                                        0,
+                                        0) <> 0);
+end;
+
+
+procedure TWasApiEngine.ClearStreamSwitchRequested();
+begin
+
+  InterlockedExchange(FStreamSwitchRequested,
+                      0);
+  if Assigned(FDeviceIdCS) then
+    begin
+
+      FDeviceIdCS.Enter();
+
+      try
+
+        FPendingDeviceId := '';
+      finally
+
+        FDeviceIdCS.Leave;
+      end;
+    end
+  else
+    FPendingDeviceId := '';
+end;
+
+
+procedure TWasApiEngine.ReleaseAudioClientInterfaces();
+begin
+
+  pvAudioClock := nil;
+  pvAudioStreamVolume := nil;
+  pvRenderClient := nil;
+  pvAudioClient := nil;
+end;
+
+
+function TWasApiEngine.GetDeviceIdString(const ADevice: IMMDevice): string;
+var
+  pw: PWideChar;
+
+begin
+
+  Result := '';
+  pw := nil;
+
+  if (ADevice = nil) then
+    Exit;
+
+  if SUCCEEDED(ADevice.GetId(pw)) and (pw <> nil) then
+    begin
+
+      Result := pw;
+      CoTaskMemFree(pw);
+    end;
+end;
+
+
+function TWasApiEngine.GetCurrentPosition100nsApprox(): Int64;
+var
+  u64Position: UInt64;
+  u64QPC: UInt64;
+  u64Frequency: UInt64;
+  hr: HRESULT;
+
+begin
+
+  // Prefer audio clock if available.
+  Result := FBasePos100ns;
+
+  if Assigned(pvAudioClock) then
+    begin
+
+      hr := pvAudioClock.GetFrequency(u64Frequency);
+      if SUCCEEDED(hr) and (u64Frequency <> 0) then
+        begin
+
+          hr := pvAudioClock.GetPosition(@u64Position,
+                                         @u64QPC);
+          if SUCCEEDED(hr) then
+            begin
+
+              Result := FBasePos100ns + Int64((UInt64(u64Position) * UInt64(REFTIMES_PER_SEC)) div UInt64(u64Frequency));
+              Exit;
+            end;
+        end;
+    end;
+
+  // Fallback: compute from decoded byte offset (works for steady-state PCM/float).
+  if Assigned(pvSourceWfx) and (pvSourceWfx.nAvgBytesPerSec <> 0) then
+    Result := Int64((UInt64(FOffset) * UInt64(REFTIMES_PER_SEC)) div UInt64(pvSourceWfx.nAvgBytesPerSec));
+end;
+
+
+procedure TWasApiEngine.SetDeviceRole(Value: ERole);
+begin
+
+  if FRole = Value then
+    Exit;
+
+  FRole := Value;
+
+  // If we are already running, request a rebuild
+  if pvDeviceState = dsPlay then
+  begin
+    InterlockedExchange(FStreamSwitchRequested, 1);
+    RequestStreamSwitch(''); // or enqueue ckStreamSwitch
+  end;
+end;
+
+
+
+function TWasApiEngine.HandleStreamSwitch(): HRESULT;
+var
+  hr: HRESULT;
+  pDevice: IMMDevice;
+  wantId: string;
+  curPos: Int64;
+
+begin
+
+  // Capture current timeline position so UI doesn't jump backwards when the new clock starts at 0.
+  curPos := GetCurrentPosition100nsApprox();
+
+  // Stop/reset old client (ignore failures, it may already be invalidated).
+  try
+
+    if Assigned(pvAudioClient) then
+      begin
+
+        pvAudioClient.Stop();
+        pvAudioClient.Reset();
+      end;
+  except
+
+    // ignore
+  end;
+
+  ReleaseAudioClientInterfaces();
+
+  // Recreate the audio client on the new default endpoint (or requested id).
+  wantId := '';
+  if Assigned(FDeviceIdCS) then
+    begin
+
+      FDeviceIdCS.Enter();
+
+      try
+
+        wantId := FPendingDeviceId;
+        FPendingDeviceId := '';  // <-- clear after consume
+      finally
+
+        FDeviceIdCS.Leave();
+      end;
+    end
+  else
+    begin
+
+      wantId := FPendingDeviceId;
+      FPendingDeviceId := '';  // <-- clear after consume
+    end;
+
+
+
+  // Resolve endpoint.
+  pDevice := nil;
+
+  if (wantId <> '') and Assigned(FDeviceEnumerator) then
+    begin
+
+      hr := FDeviceEnumerator.GetDevice(PWideChar(wantId),
+                                        pDevice);
+      if FAILED(hr) then
+        pDevice := nil;
+    end;
+
+  if (pDevice = nil) then
+    begin
+
+      if not Assigned(FDeviceEnumerator) then
+        begin
+          hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
+                                 nil,
+                                 CLSCTX_ALL,
+                                 IID_IMMDeviceEnumerator,
+                                 FDeviceEnumerator);
+         if FAILED(hr) then
+           begin
+
+             Result := hr;
+             Exit;
+           end;
+        end;
+
+      hr := FDeviceEnumerator.GetDefaultAudioEndpoint(eRender,
+                                                      FRole,
+                                                      pDevice);
+      if FAILED(hr) then
+        begin
+
+          Result := hr;
+          Exit;
+        end;
+    end;
+
+  FActiveDeviceId := GetDeviceIdString(pDevice);
+
+  hr := pDevice.Activate(IID_IAudioClient,
+                         CLSCTX_ALL,
+                         nil,
+                         Pointer(pvAudioClient));
+  if FAILED(hr) then
+    begin
+
+      Result := hr;
+      Exit;
+    end;
+
+  // Refresh mix format for diagnostics (and DSP format if you use it elsewhere).
+  if Assigned(pvRenderWfx) then
+    begin
+
+      CoTaskMemFree(pvRenderWfx);
+      pvRenderWfx := nil;
+    end;
+
+  hr := pvAudioClient.GetMixFormat(pvRenderWfx);
+    if FAILED(hr) then
+      begin
+
+        Result := hr;
+        Exit;
+      end;
+
+  // Re-initialize WASAPI client using the current decoded format.
+  // NOTE: If the new endpoint does not accept pvSourceWfx, SetFormat will fail.
+  hr := SetFormat(pvSourceWfx);
+  if FAILED(hr) then
+    begin
+
+      Result := hr;
+      Exit;
+    end;
+
+  // Keep timeline continuity: Nnew audio clock starts at ~0.
+  FBasePos100ns := curPos;
+
+  ClearStreamSwitchRequested();
+
+  // Start playback on the new client.
+  hr := pvAudioClient.Start();
+  if SUCCEEDED(hr) then
+    ClearStreamSwitchRequested();
+
+  Result := hr;
+end;
+
+// =============================================================================
+
+
 function TWasApiEngine.InitializeAudioEngine(): HRESULT;
 var
   hr: HRESULT;
-  pEnumerator: IMMDeviceEnumerator;
+  //pEnumerator: IMMDeviceEnumerator;
   pDevice: IMMDevice;
   pasm: IAudioSessionManager2;
   psav: ISimpleAudioVolume;
@@ -1871,19 +2353,26 @@ begin
                                             False,
                                             nil);
 
-  hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
-                         nil,
-                         CLSCTX_ALL,
-                         IID_IMMDeviceEnumerator,
-                         pEnumerator);
+  // Enumerator is owned by the engine thread (see SetupDeviceNotifications).
+  if not Assigned(FDeviceEnumerator) then
+    begin
+      hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
+                             nil,
+                             CLSCTX_ALL,
+                             IID_IMMDeviceEnumerator,
+                             FDeviceEnumerator);
+      if FAILED(hr) then
+        Exit(hr);
+    end;
+
+
+  hr := FDeviceEnumerator.GetDefaultAudioEndpoint(eRender,
+                                                  FRole,
+                                                  pDevice);
   if FAILED(hr) then
     Exit(hr);
 
-  hr := pEnumerator.GetDefaultAudioEndpoint(eRender,
-                                            eMultimedia,
-                                            pDevice);
-  if FAILED(hr) then
-    Exit(hr);
+  FActiveDeviceId := GetDeviceIdString(pDevice);
 
   hr := pDevice.Activate(IID_IAudioClient,
                          CLSCTX_ALL,
@@ -2071,8 +2560,23 @@ begin
   if FAILED(hr) then
     begin
 
-      RaiseError('IAudioClient.Start failed', hr);
-      Exit(hr);
+      // When endpoints switch (e.g. Bluetooth headset -> speakers), the client may be invalidated.
+      if (hr = HResult(AUDCLNT_E_DEVICE_INVALIDATED)) then
+        begin
+
+          RequestStreamSwitch('');
+          hr := HandleStreamSwitch();
+          if SUCCEEDED(hr) then
+            hr := S_OK; // HandleStreamSwitch already started the new client.
+        end;
+
+      if FAILED(hr) then
+        begin
+
+          RaiseError('IAudioClient.Start failed',
+                     hr);
+          Exit(hr);
+        end;
     end;
 
   // Cache frequency once. Position math uses: seconds = pos / freq
@@ -2127,6 +2631,8 @@ begin
                 // Stop the client and reset its clock/buffer.
                 pvAudioClient.Stop();
                 pvAudioClient.Reset();
+                if Assigned(FDynamics) then
+                  FDynamics.Reset();
 
                 // Reset playback position.
                 FOffset := 0;
@@ -2146,14 +2652,76 @@ begin
                 SetState(dsPause);
                 Break;
               end;
+
+            // Stream switch requested (default endpoint changed / device invalidated).
+            if IsStreamSwitchRequested() then
+              begin
+
+                hr := HandleStreamSwitch();
+                if FAILED(hr) then
+                  begin
+
+                    SetState(dsError);
+                    RaiseError('Stream switch rebuild failed',
+                               hr);
+                    Exit(hr);
+                  end;
+
+                // Refresh cached clock frequency.
+                hr := pvAudioClock.GetFrequency(u64Frequency);
+                if FAILED(hr) then
+                  begin
+
+                    SetState(dsError);
+                    RaiseError('IAudioClock.GetFrequency failed after stream switch',
+                               hr);
+                    Exit(hr);
+                  end;
+              end;
+
           end;
 
         WAIT_OBJECT_0 + 2: // Audio ready.
           begin
 
+            // Stream switch requested?
+            if IsStreamSwitchRequested() then
+              begin
+
+                hr := HandleStreamSwitch();
+                if FAILED(hr) then
+                  begin
+                    SetState(dsError);
+                    RaiseError('Stream switch rebuild failed',
+                               hr);
+                    Exit(hr);
+                  end;
+
+                // Refresh cached clock frequency.
+                hr := pvAudioClock.GetFrequency(u64Frequency);
+                if FAILED(hr) then
+                  begin
+
+                    SetState(dsError);
+                    RaiseError('IAudioClock.GetFrequency failed after stream switch',
+                               hr);
+                    Exit(hr);
+                  end;
+                Continue;
+              end;
+
             hr := pvAudioClient.GetCurrentPadding(numFramesPadding);
             if FAILED(hr) then
-              Break;
+              begin
+
+                if (hr = HResult(AUDCLNT_E_DEVICE_INVALIDATED)) then
+                  begin
+
+                    RequestStreamSwitch('');
+                    Continue;
+                  end;
+                Break;
+              end;
 
             // Use cached total buffer frames (set in SetFormat via GetBufferSize)
             if (pvBufferFrameCount > numFramesPadding) then
@@ -2167,7 +2735,16 @@ begin
             hr := pvRenderClient.GetBuffer(numFramesAvailable,
                                            pBufferData);
             if FAILED(hr) then
-              Break;
+              begin
+
+                if (hr = HResult(AUDCLNT_E_DEVICE_INVALIDATED)) then
+                  begin
+
+                    RequestStreamSwitch('');
+                    Continue;
+                  end;
+                Break;
+              end;
 
             flags := 0;
 
@@ -2201,12 +2778,32 @@ begin
                       end;
 
                   end;
+
+                // --- Dynamics (always independent from EQ) ---
+                if Assigned(FDynamics) then
+                  begin
+
+                    FDynamics.ProcessInterleaved(pBufferData,
+                                                 Integer(numFramesAvailable),
+                                                 FSampleFormat);
+
+
+                  end;
               end;
 
             hr := pvRenderClient.ReleaseBuffer(numFramesAvailable,
                                                flags);
             if FAILED(hr) then
-              Break;
+              begin
+
+                if (hr = HResult(AUDCLNT_E_DEVICE_INVALIDATED)) then
+                  begin
+
+                    RequestStreamSwitch('');
+                    Continue;
+                  end;
+                Break;
+              end;
 
             // Progress
             if (u64Frequency <> 0) then
@@ -2241,6 +2838,8 @@ begin
   // Stop the client and reset its clock/buffer. -------------------------------
   pvAudioClient.Stop();
   pvAudioClient.Reset();
+  if Assigned(FDynamics) then
+    FDynamics.Reset();
 
   // Reset playback position.
   FOffset := 0;
@@ -2270,51 +2869,75 @@ function TWasApiEngine.ProcessEQBuffer(pData: PByte;
                                        const ByteCount: DWORD): HRESULT;
 var
   hr: HRESULT;
-  inSample, outSample: IMFSample;
-  inBuf, outBuf: IMFMediaBuffer;
+  inSample,
+  outSample: IMFSample;
+  inBuf,
+  outBuf: IMFMediaBuffer;
   outData: MFT_OUTPUT_DATA_BUFFER;
   status: DWORD;
-  pIn, pOut: PByte;
+  pIn,
+  pOut: PByte;
   cbOut: DWORD;
 
 begin
 
-  if (not FEQEnabled) or (FHighMidLowMFT = nil) or (ByteCount = 0) then
+  if (not FEQEnabled) or
+    (FHighMidLowMFT = nil) or
+    (ByteCount = 0) then
     Exit(S_OK);
 
   // --- Create input sample ---
   hr := MFCreateSample(inSample);
-  if FAILED(hr) then Exit(hr);
+  if FAILED(hr) then
+    Exit(hr);
 
-  hr := MFCreateMemoryBuffer(ByteCount, inBuf);
-  if FAILED(hr) then Exit(hr);
+  hr := MFCreateMemoryBuffer(ByteCount,
+                             inBuf);
+  if FAILED(hr) then
+    Exit(hr);
 
-  hr := inBuf.Lock(pIn, nil, nil);
-  if FAILED(hr) then Exit(hr);
+  hr := inBuf.Lock(pIn,
+                   nil,
+                   nil);
+  if FAILED(hr) then
+    Exit(hr);
+
   try
-    Move(pData^, pIn^, ByteCount);
+
+    Move(pData^,
+         pIn^,
+         ByteCount);
   finally
-    inBuf.Unlock;
+
+    inBuf.Unlock();
   end;
 
   hr := inBuf.SetCurrentLength(ByteCount);
-  if FAILED(hr) then Exit(hr);
+  if FAILED(hr) then
+    Exit(hr);
 
   hr := inSample.AddBuffer(inBuf);
-  if FAILED(hr) then Exit(hr);
+  if FAILED(hr) then
+    Exit(hr);
 
   // --- Create output sample (MUST be provided!) ---
   hr := MFCreateSample(outSample);
-  if FAILED(hr) then Exit(hr);
+  if FAILED(hr) then
+    Exit(hr);
 
-  hr := MFCreateMemoryBuffer(ByteCount, outBuf);
-  if FAILED(hr) then Exit(hr);
+  hr := MFCreateMemoryBuffer(ByteCount,
+                             outBuf);
+  if FAILED(hr) then
+    Exit(hr);
 
   hr := outSample.AddBuffer(outBuf);
-  if FAILED(hr) then Exit(hr);
+  if FAILED(hr) then
+    Exit(hr);
 
   // --- Feed MFT ---
-  hr := FHighMidLowMFT.ProcessInput(0, inSample, 0);
+  hr := FHighMidLowMFT.ProcessInput(0,
+                                    inSample,
+                                    0);
 
   // If MFT is full (has pending input), drain once and retry.
   if (hr = MF_E_NOTACCEPTING) then
@@ -2385,5 +3008,53 @@ begin
 
   Result := S_OK;
 end;
+
+//
+procedure TWasApiEngine.OnWasApiDefaultDeviceChanged(Flow: EDataFlow; Role: ERole; const DeviceId: UnicodeString);
+var
+  Cmd: TEngineCommand;
+
+begin
+
+  if (Flow <> eRender) then
+    Exit;
+
+  if (Role <> FRole) then
+    Exit; // use your DeviceRole backing field
+
+  // store device id and request a switch
+  FPendingSwitchDeviceId := DeviceId;
+  InterlockedExchange(FStreamSwitchRequested,
+                      1);
+
+  // wake engine thread through existing command path
+  Cmd.Kind := ckStreamSwitch;         // add this kind
+  EnqueueCommand(Cmd);
+  SetEvent(FCmdEvent);
+end;
+
+procedure TWasApiEngine.OnWasApiDeviceStateChanged(const DeviceId: UnicodeString; NewState: DWORD);
+begin
+  // optional: if active device went non-active -> rebuild
+  if SameText(DeviceId, FActiveDeviceId) and (NewState <> DEVICE_STATE_ACTIVE) then
+  begin
+    InterlockedExchange(FStreamSwitchRequested, 1);
+    SetEvent(FCmdEvent);
+  end;
+end;
+
+procedure TWasApiEngine.OnWasApiDeviceRemoved(const DeviceId: UnicodeString);
+var
+  Cmd: TEngineCommand;
+begin
+  if SameText(DeviceId, FActiveDeviceId) then
+  begin
+    InterlockedExchange(FStreamSwitchRequested, 1);
+    Cmd.Kind := ckStreamSwitch;
+    EnqueueCommand(Cmd);
+    SetEvent(FCmdEvent);
+  end;
+end;
+
 
 end.

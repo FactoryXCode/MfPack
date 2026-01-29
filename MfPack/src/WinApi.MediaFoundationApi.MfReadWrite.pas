@@ -362,10 +362,10 @@ type
     // https://docs.microsoft.com/en-us/windows/win32/medfound/supported-media-formats-in-media-foundation
     function GetNativeMediaType(const dwStreamIndex: DWORD;
                                 dwMediaTypeIndex: DWORD;
-                                out ppMediaType: IMFMediaType): HResult; stdcall;
+                                {out} ppMediaType: PIMFMediaType): HResult; stdcall;
 
     function GetCurrentMediaType(const dwStreamIndex: DWORD;
-                                 out ppMediaType: IMFMediaType): HResult; stdcall;
+                                 {out} ppMediaType: PIMFMediaType): HResult; stdcall;
 
     function SetCurrentMediaType(dwStreamIndex: DWORD;
                       {Reserved} pdwReserved: DWORD;

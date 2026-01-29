@@ -1,17 +1,18 @@
-// FactoryX
+ï»¿// FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright:  FactoryX. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
-// Module: MfPeakMeterEx.pas
+// Module: MfPeakMeterMmcs.pas
 // Kind: Pascal Unit Component
 // Release date: 04-08-2016
 // Language: ENU
 //
 // Version: 3.1.9
-// Description: An extended Peakmeter component based on the Mf Peakmeter Sample.
+// Description: An extended Peakmeter component based on the
+//              MfPeakmeterEx Sample with MMCS support.
 //
 // Company: FactoryX
 // Intiator(s): Tony (maXcomX), Peter (OzShips)
@@ -25,7 +26,7 @@
 //------------------------------------------------------------------------------
 //
 // Remarks: To install the visual components, choose Install in the Project Manager.
-//          Requires Windows 7 or later.
+//          Requires Windows 10 or later.
 //
 // Related objects: -
 // Related projects: MfPackX319
@@ -60,7 +61,7 @@
 // their product.
 //
 //==============================================================================
-unit MfPeakMeterEx;
+unit MfPeakMeterMmcs;
 
 interface
 
@@ -85,26 +86,84 @@ uses
   WinApi.MediaFoundationApi.MfUtils,
   {CoreAudioApi}
   WinApi.CoreAudioApi.MMDeviceApi,
-  WinApi.CoreAudioApi.EndPointVolume,
-  {Additional}
-  QueueTimer;
+  WinApi.CoreAudioApi.EndPointVolume;
+
 
 const
   // Timer period (in milliseconds)
   TIMER_PERIOD = 100;
+
+const
+  // Internal tick message (posted to the component window handle).
+  WM_MFPEAKMETEREX_TICK = WM_USER + $5A1;
+
+type
+
+  TLightMmcssTimer = class;
+
+  TLightMmcssTimerThread = class(TThread)
+  private
+
+    FOwner: TLightMmcssTimer;
+  protected
+
+    procedure Execute(); override;
+  public
+
+    constructor Create(AOwner: TLightMmcssTimer);
+  end;
+
+  // Lightweight periodic timer that posts WM_MFPEAKMETEREX_TICK to a target window.
+  // Runs on its own thread and registers that thread with MMCSS (Pro Audio by default).
+  TLightMmcssTimer = class(TComponent)
+  private
+
+    FEnabled: Boolean;
+    FDueTime: Cardinal;
+    FPeriod: Cardinal;
+    FTargetHwnd: HWND;
+    FThread: TLightMmcssTimerThread;
+    FStopEvent: THandle;
+    FMmcssTaskName: UnicodeString;
+    FMmcssPriority: Integer;
+
+    procedure SetEnabled(const Value: Boolean);
+    procedure SetDueTime(const Value: Cardinal);
+    procedure SetPeriod(const Value: Cardinal);
+    procedure Start;
+    procedure Stop;
+  public
+
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+
+    procedure Reset; // restart with current settings
+    property TargetHwnd: HWND read FTargetHwnd write FTargetHwnd;
+  published
+
+    property Enabled: Boolean read FEnabled write SetEnabled default False;
+    property DueTime: Cardinal read FDueTime write SetDueTime default 0;
+    property Period: Cardinal read FPeriod write SetPeriod default TIMER_PERIOD;
+    // MMCSS task name, e.g. 'Pro Audio', 'Audio', 'Playback'. Default: 'Pro Audio'.
+    property MmcssTaskName: UnicodeString read FMmcssTaskName write FMmcssTaskName;
+    // MMCSS priority: -2..+2 (maps to AVRT_PRIORITY_*). Default: 1 (High).
+    property MmcssPriority: Integer read FMmcssPriority write FMmcssPriority default 1;
+  end;
 
 
 type
 
   TMfPeakMeterExStyle = (dsVertical,
                          dsHorizontal);
+
   TMfPeakMeterExDirection = (ddRightDown,
                              ddLeftUp);
+
   TMfPeakMeterExChannel = (mcLeft,
                            mcRight);
 
 
-  TMfPeakMeterEx = class(TGraphicControl)
+  TMfPeakMeterMmcs = class(TGraphicControl)
   private
     { private fields }
 
@@ -143,7 +202,7 @@ type
     iPeakValue: Integer;
     afPeakValues: array of Float;
 
-    FTimer: TQTimer;
+    FTimer: TLightMmcssTimer;
     fSafeTimerInterval: Cardinal;      // Timer interval
     fGraphicsOnly: Boolean;
     fPeakMeterRunning: Boolean;
@@ -191,9 +250,9 @@ type
     { protected methods }
     procedure SetEnabled(value: Boolean); override;
     procedure WindProc(var Msg: TMessage); virtual;
-    procedure PaintBar;
+    procedure PaintBar();
     function CreateEngine(): HRESULT;
-    procedure Paint; override;
+    procedure Paint(); override;
     function CalculateX(X: Integer): Integer;
     function CalculateY(Y: Integer): Integer;
     procedure CalculatePeakValue;
@@ -248,7 +307,7 @@ type
     property PeakValue: Single read sPeakValue write SetPeakValue;
     property Channels: UINT read fChannelCount;
     property SampleChannel: TMfPeakMeterExChannel read fMeterChannel write SetPeakMeterChannel;
-    property IntTimer: TQTimer read FTimer write FTimer;
+    property IntTimer: TLightMmcssTimer read FTimer write FTimer;
     property Precision: Cardinal read fSafeTimerInterval write SetSafeTimerInterval default TIMER_PERIOD;
     property Enabled: Boolean read fEnabled write SetEnabled default False;
     property UseGraphicsOnly: Boolean read fGraphicsOnly write SetGraphicsOnly default False;
@@ -260,15 +319,241 @@ procedure Register;
 
 implementation
 
+type
+  AVRT_PRIORITY = Integer;
+
+// mmcss
+function AvSetMmThreadCharacteristicsW(TaskName: PWideChar;
+                                       var TaskIndex: DWORD):
+                                       THandle; stdcall; external 'avrt.dll';
+
+function AvRevertMmThreadCharacteristics(AvrtHandle: THandle): BOOL; stdcall; external 'avrt.dll';
+
+function AvSetMmThreadPriority(AvrtHandle: THandle;
+                               Priority: AVRT_PRIORITY): BOOL; stdcall; external 'avrt.dll';
+
+
+const
+  AVRT_PRIORITY_LOW      = -1;
+  AVRT_PRIORITY_NORMAL   = 0;
+  AVRT_PRIORITY_HIGH     = 1;
+  AVRT_PRIORITY_CRITICAL = 2;
+
+{ TLightMmcssTimerThread }
+
+constructor TLightMmcssTimerThread.Create(AOwner: TLightMmcssTimer);
+begin
+
+  inherited Create(False);
+
+  FreeOnTerminate := False;
+  FOwner := AOwner;
+end;
+
+
+procedure TLightMmcssTimerThread.Execute();
+var
+  TaskIndex: DWORD;
+  AvrtHandle: THandle;
+  WaitMs: Cardinal;
+  Prio: Integer;
+
+begin
+
+  // Register this thread with MMCSS (if available).
+  TaskIndex := 0;
+
+  if (FOwner.FMmcssTaskName = '') then
+    FOwner.FMmcssTaskName := 'Pro Audio';
+
+  AvrtHandle := AvSetMmThreadCharacteristicsW(PWideChar(FOwner.FMmcssTaskName),
+                                              TaskIndex);
+  if (AvrtHandle <> 0) then
+    begin
+
+      Prio := FOwner.FMmcssPriority;
+      if (Prio < -2) then
+        Prio := -2;
+      if (Prio > 2) then
+        Prio := 2;
+
+    // Map -2..+2 into AVRT_PRIORITY_*.
+    case Prio of
+      -2: AvSetMmThreadPriority(AvrtHandle,
+                                AVRT_PRIORITY_LOW);
+      -1: AvSetMmThreadPriority(AvrtHandle,
+                                AVRT_PRIORITY_LOW);
+       0: AvSetMmThreadPriority(AvrtHandle,
+                                AVRT_PRIORITY_NORMAL);
+       1: AvSetMmThreadPriority(AvrtHandle,
+                                AVRT_PRIORITY_HIGH);
+       2: AvSetMmThreadPriority(AvrtHandle,
+                                AVRT_PRIORITY_CRITICAL);
+    end;
+  end;
+
+  try
+
+    // Initial delay (DueTime)
+    WaitMs := FOwner.FDueTime;
+    if (WaitMs > 0) then
+      WaitForSingleObject(FOwner.FStopEvent,
+                          WaitMs);
+
+    while (not Terminated) and (WaitForSingleObject(FOwner.FStopEvent, 0) <> WAIT_OBJECT_0) do
+      begin
+
+        if (FOwner.FTargetHwnd <> 0) then
+          PostMessage(FOwner.FTargetHwnd,
+                      WM_MFPEAKMETEREX_TICK,
+                      0,
+                      0);
+
+      WaitMs := FOwner.FPeriod;
+      if (WaitMs < 1) then
+        WaitMs := 1;
+
+      // Wait for next tick, or stop request.
+      WaitForSingleObject(FOwner.FStopEvent,
+                          WaitMs);
+    end;
+  finally
+
+    if (AvrtHandle <> 0) then
+      AvRevertMmThreadCharacteristics(AvrtHandle);
+  end;
+end;
+
+{ TLightMmcssTimer }
+
+constructor TLightMmcssTimer.Create(AOwner: TComponent);
+begin
+
+  inherited Create(AOwner);
+
+  FEnabled := False;
+  FDueTime := 0;
+  FPeriod := TIMER_PERIOD;
+  FTargetHwnd := 0;
+  FThread := nil;
+  FStopEvent := CreateEvent(nil,
+                            True,
+                            False,
+                            nil); // manual-reset.
+  FMmcssTaskName := 'Pro Audio';
+  FMmcssPriority := 1;
+end;
+
+
+destructor TLightMmcssTimer.Destroy();
+begin
+
+  Stop();
+  if (FStopEvent <> 0) then
+    CloseHandle(FStopEvent);
+
+  inherited Destroy;
+end;
+
+
+procedure TLightMmcssTimer.Start;
+begin
+
+  if FEnabled and (FThread = nil) then
+    begin
+
+      if (csDesigning in ComponentState) then
+        Exit;
+      ResetEvent(FStopEvent);
+      FThread := TLightMmcssTimerThread.Create(Self);
+    end;
+end;
+
+
+procedure TLightMmcssTimer.Stop();
+begin
+
+  if (FThread <> nil) then
+    begin
+
+      SetEvent(FStopEvent);
+      FThread.Terminate();
+      // Give it a chance to exit quickly (it waits on FStopEvent).
+      WaitForSingleObject(FThread.Handle,
+                          2000);
+      FreeAndNil(FThread);
+    end;
+
+  FEnabled := False;
+end;
+
+
+procedure TLightMmcssTimer.Reset();
+begin
+
+  if FEnabled then
+    begin
+
+      if (csDesigning in ComponentState) then
+        Exit;
+
+      Stop();
+      FEnabled := True;
+      Start();
+    end;
+end;
+
+
+procedure TLightMmcssTimer.SetEnabled(const Value: Boolean);
+begin
+
+  if (Value <> FEnabled) then
+    begin
+
+      if (csDesigning in ComponentState) then
+        Exit;
+
+      FEnabled := Value;
+      if FEnabled then
+        Start()
+      else
+        Stop();
+    end;
+end;
+
+
+procedure TLightMmcssTimer.SetDueTime(const Value: Cardinal);
+begin
+
+  if (Value <> FDueTime) then
+    begin
+
+      FDueTime := Value;
+      Reset();
+    end;
+end;
+
+
+procedure TLightMmcssTimer.SetPeriod(const Value: Cardinal);
+begin
+
+  if (Value <> FPeriod) then
+    begin
+
+      FPeriod := Value;
+      Reset();
+    end;
+end;
+
 
 procedure Register;
 begin
 
-  RegisterComponents('MfPack Core Audio Samples', [TMfPeakMeterEx]);
+  RegisterComponents('MfPack Core Audio Samples', [TMfPeakMeterMmcs]);
 end;
 
 
-constructor TMfPeakMeterEx.Create(aOwner: Tcomponent);
+constructor TMfPeakMeterMmcs.Create(aOwner: Tcomponent);
 var
   hr: HResult;
 
@@ -286,12 +571,20 @@ begin
   fBevelstyle := bvLowered;
   fBevelwidth := 1;
   fShowSingleLed := False;
-  fColors[1, True] := clLime;
-  fColors[2, True] := clYellow;
-  fColors[3, True] := clRed;
-  fColors[1, False] := clGreen;
-  fColors[2, False] := clOlive;
-  fColors[3, False] := clMaroon;
+
+  fColors[1,
+          True] := clLime;
+  fColors[2,
+          True] := clYellow;
+  fColors[3,
+          True] := clRed;
+  fColors[1,
+          False] := clGreen;
+  fColors[2,
+          False] := clOlive;
+  fColors[3,
+          False] := clMaroon;
+
   fGreenLeds := 10;
   fYellowLeds := 6;
   fRedLeds := 4;
@@ -327,6 +620,7 @@ begin
    fBmp := TBitmap.Create;
 
 done:
+
   if ((csDesigning in ComponentState) = False) then
     if (FAILED(hr)) then
       begin
@@ -340,11 +634,12 @@ done:
 end;
 
 
-destructor TMfPeakMeterEx.Destroy;
+destructor TMfPeakMeterMmcs.Destroy();
 begin
 
   if Assigned(FTimer) then
     begin
+
       FTimer.Enabled := False;
       FTimer.Free;
     end;
@@ -353,17 +648,20 @@ begin
 
   if (fGraphicsOnly = False) then
     begin
+
       SafeRelease(pEnumerator);
       SafeRelease(pDevice);
       SafeRelease(pMeterInfo);
     end;
+
   // Destroy handle
   DeallocateHWnd(fHWnd);
-  inherited Destroy;
+
+  inherited Destroy();
 end;
 
 
-function TMfPeakMeterEx.CreateEngine(): HRESULT;
+function TMfPeakMeterMmcs.CreateEngine(): HRESULT;
 var
   hr: HResult;
 
@@ -407,11 +705,16 @@ begin
   SetLength(afPeakValues,
             fChannelCount);
 
-  // Create and activate a qtimer
-  FTimer := TQTimer.Create(Self);
+  // Create and activate a lightweight MMCSS-aware timer (posts to our hidden HWND).
+  FTimer := TLightMmcssTimer.Create(Self);
+  FTimer.TargetHwnd := fHWnd;
   FTimer.DueTime := 0;  // Immediate
   FTimer.Period := TIMER_PERIOD;
-  FTimer.OnTimerEvent := TimerTimer;
+  FTimer.MmcssTaskName := 'Pro Audio';
+  FTimer.MmcssPriority := 1; // High
+
+  if (csDesigning in ComponentState) = False then
+    FTimer.Enabled := True;
 
 done:
   Result := hr;
@@ -419,8 +722,9 @@ end;
 
 
 // Using a regular TTimer is less precise, but can do as well.
-procedure TMfPeakMeterEx.TimerTimer(sender: TObject);
+procedure TMfPeakMeterMmcs.TimerTimer(sender: TObject);
 begin
+
   if (fSampleAllChannels = True) then
     pMeterInfo.GetPeakValue(sPeakValue)
   else
@@ -445,8 +749,9 @@ begin
 end;
 
 
-procedure TMfPeakMeterEx.SetSafeTimerInterval(value: Cardinal);
+procedure TMfPeakMeterMmcs.SetSafeTimerInterval(value: Cardinal);
 begin
+
   // If running, user can't change this value
   if (fPeakMeterRunning = True) then
     Exit;
@@ -454,33 +759,37 @@ begin
   if (value < 10) or (value > 10000) then
     value := 10; // Reset to default.
   fSafeTimerInterval := value;
-  FTimer.Period := fSafeTimerInterval;
+  if Assigned(FTimer) then
+    FTimer.Period := fSafeTimerInterval;
 end;
 
 
-procedure TMfPeakMeterEx.SetGraphicsOnly(value: Boolean);
+procedure TMfPeakMeterMmcs.SetGraphicsOnly(value: Boolean);
 begin
+
   // If running, user can't change this value
   if (fGraphicsOnly <> value) and (fPeakMeterRunning = False) then
     fGraphicsOnly := value;
 end;
 
 
-procedure TMfPeakMeterEx.SetDeviceDataFlow(value: EDataFlow);
+procedure TMfPeakMeterMmcs.SetDeviceDataFlow(value: EDataFlow);
 begin
+
   if (fDataFlow <> value) then
     fDataFlow := value;
 end;
 
 
-procedure TMfPeakMeterEx.SetDeviceRole(value: ERole);
+procedure TMfPeakMeterMmcs.SetDeviceRole(value: ERole);
 begin
+
   if (fRole <> value) then
     fRole := value;
 end;
 
 
-procedure TMfPeakMeterEx.SetEnabled(value: Boolean);
+procedure TMfPeakMeterMmcs.SetEnabled(value: Boolean);
 begin
 
   if (fEnabled <> value) then
@@ -494,20 +803,23 @@ begin
 end;
 
 
-function TMfPeakMeterEx.CalculateX(X: Integer): Integer;
+function TMfPeakMeterMmcs.CalculateX(X: Integer): Integer;
 begin
+
   Result := (Width - X) - 1;
 end;
 
 
-function TMfPeakMeterEx.CalculateY(Y: Integer): Integer;
+function TMfPeakMeterMmcs.CalculateY(Y: Integer): Integer;
 begin
+
   Result := (Height - Y) - 1;
 end;
 
 
-procedure TMfPeakMeterEx.SetBevelWidth(value: Byte);
+procedure TMfPeakMeterMmcs.SetBevelWidth(value: Byte);
 begin
+
   if (value <> fbevelwidth) then
     begin
       if (value = 0) then
@@ -520,8 +832,9 @@ begin
 end;
 
 
-procedure TMfPeakMeterEx.SetBevelStyle(value: TPanelbevel);
+procedure TMfPeakMeterMmcs.SetBevelStyle(value: TPanelbevel);
 begin
+
   if (value <> fBevelStyle) then
     begin
       fBevelStyle := value;
@@ -530,8 +843,9 @@ begin
 end;
 
 
-procedure TMfPeakMeterEx.SetGreenColorOn(value: TColor);
+procedure TMfPeakMeterMmcs.SetGreenColorOn(value: TColor);
 begin
+
   if (value <> fColors[1,
                        True]) then
     begin
@@ -542,8 +856,9 @@ begin
 end;
 
 
-procedure TMfPeakMeterEx.SetGreenMax(value: Integer);
+procedure TMfPeakMeterMmcs.SetGreenMax(value: Integer);
 begin
+
   if (value <> fGreenMax) then
     begin
       fGreenMax := value;
@@ -552,8 +867,9 @@ begin
 end;
 
 
-procedure TMfPeakMeterEx.SetgreenLeds(value: Integer);
+procedure TMfPeakMeterMmcs.SetgreenLeds(value: Integer);
 begin
+
   if (value <> fGreenLeds) then
     begin
       fGreenLeds := value;
@@ -562,8 +878,9 @@ begin
 end;
 
 
-procedure TMfPeakMeterEx.SetGreenColorOff(value: TColor);
+procedure TMfPeakMeterMmcs.SetGreenColorOff(value: TColor);
 begin
+
   if (value <> fColors[1,
                        False]) then
     begin
@@ -574,8 +891,9 @@ begin
 end;
 
 
-procedure TMfPeakMeterEx.SetYellowColorOn(value: TColor);
+procedure TMfPeakMeterMmcs.SetYellowColorOn(value: TColor);
 begin
+
   if (value <> fColors[2, True]) then
     begin
       fColors[2,
@@ -585,8 +903,9 @@ begin
 end;
 
 
-procedure TMfPeakMeterEx.SetYellowMax(value: Integer);
+procedure TMfPeakMeterMmcs.SetYellowMax(value: Integer);
 begin
+
   if (value <> fYellowMax) then
     begin
       fYellowMax := value;
@@ -595,8 +914,9 @@ begin
 end;
 
 
-procedure TMfPeakMeterEx.SetYellowLeds(value: Integer);
+procedure TMfPeakMeterMmcs.SetYellowLeds(value: Integer);
 begin
+
   if (value <> fYellowLeds) then
     begin
       fYellowLeds := value;
@@ -605,8 +925,9 @@ begin
 end;
 
 
-procedure TMfPeakMeterEx.SetYellowColorOff(value: TColor);
+procedure TMfPeakMeterMmcs.SetYellowColorOff(value: TColor);
 begin
+
   if value <> fColors[2,
                       False] then
     begin
@@ -617,8 +938,9 @@ begin
 end;
 
 
-procedure TMfPeakMeterEx.SetRedColorOn(value: TColor);
+procedure TMfPeakMeterMmcs.SetRedColorOn(value: TColor);
 begin
+
   if (value <> fColors[3,
                        True]) then
     begin
@@ -629,8 +951,9 @@ begin
 end;
 
 
-procedure TMfPeakMeterEx.SetRedMax(value: Integer);
+procedure TMfPeakMeterMmcs.SetRedMax(value: Integer);
 begin
+
   if (value <> fRedMax) then
     begin
       fRedmax := value;
@@ -639,23 +962,29 @@ begin
 end;
 
 
-procedure TMfPeakMeterEx.SetRedLeds(value: Integer);
+procedure TMfPeakMeterMmcs.SetRedLeds(value: Integer);
 begin
+
 try
+
   if (value <> fRedLeds) then
     begin
+
       fRedLeds := value;
       Paint;
     end;
 except
+
   on Exception do Exit;
 end;
 end;
 
 
-procedure TMfPeakMeterEx.SetRedColorOff(value: TColor);
+procedure TMfPeakMeterMmcs.SetRedColorOff(value: TColor);
 begin
+
 try
+
   if (value <> fcolors[3,
                        False]) then
     begin
@@ -664,44 +993,56 @@ try
         Paint;
     end;
 except
+
   on Exception do Exit;
 end;
 end;
 
 
-procedure TMfPeakMeterEx.SetSingleLed(value: Boolean);
+procedure TMfPeakMeterMmcs.SetSingleLed(value: Boolean);
 begin
+
 try
+
   if (value <> fShowSingleLed) then
     begin
+
       fShowSingleLed := value;
       Paint;
     end;
 except
+
   on Exception do Exit;
 end;
 end;
 
 
-procedure TMfPeakMeterEx.SetSeparatorSpacing(value: Integer);
+procedure TMfPeakMeterMmcs.SetSeparatorSpacing(value: Integer);
 begin
+
 try
+
   if (value <> fSeparatorSpacing) then
     begin
+
       fSeparatorSpacing := value;
       Paint;
     end;
 except
+
   on Exception do Exit;
 end;
 end;
 
 
-procedure TMfPeakMeterEx.SetSeparatorColor(value: TColor);
+procedure TMfPeakMeterMmcs.SetSeparatorColor(value: TColor);
 begin
+
 try
+
   if (value <> fSeparatorColor) then
     begin
+
       fSeparatorColor := value;
       Paint;
     end;
@@ -711,59 +1052,73 @@ end;
 end;
 
 
-procedure TMfPeakMeterEx.SetStyle(value: TMfPeakMeterExStyle);
+procedure TMfPeakMeterMmcs.SetStyle(value: TMfPeakMeterExStyle);
 begin
+
 try
+
   if (value <> fstyle) then
     begin
+
       fStyle := value;
       Paint;
     end;
 except
+
   on Exception do Exit;
 end;
 end;
 
 
-procedure TMfPeakMeterEx.SetDirection(value: TMfPeakMeterExdirection);
+procedure TMfPeakMeterMmcs.SetDirection(value: TMfPeakMeterExdirection);
 begin
+
 try
+
   if (value <> fDirection) then
     begin
+
       fDirection := value;
       Paint;
     end;
 except
+
   on Exception do Exit;
 end;
 end;
 
 
-procedure TMfPeakMeterEx.SetPeakValue(value: Single);
+procedure TMfPeakMeterMmcs.SetPeakValue(value: Single);
 begin
+
 try
+
   if (value <> sPeakValue) then
     begin
+
       sPeakValue := value;
       CalculatePeakValue;
       Paint;
     end;
 except
+
   on Exception do Exit;
 end;
 end;
 
 
-procedure TMfPeakMeterEx.SetPeakMeterChannel(value: TMfPeakMeterExChannel);
+procedure TMfPeakMeterMmcs.SetPeakMeterChannel(value: TMfPeakMeterExChannel);
 begin
+
   if (fMeterChannel <> value) then
     fMeterChannel := value;
 end;
 
 
 // Calculates the peak value returned from a device (0.0 - 1.0) to an integer
-procedure TMfPeakMeterEx.CalculatePeakValue;
+procedure TMfPeakMeterMmcs.CalculatePeakValue();
 begin
+
   if (fEnabled = False) and (fPeakMeterRunning = true) then
     iPeakValue := 0
   else
@@ -771,7 +1126,7 @@ begin
 end;
 
 
-function TMfPeakMeterEx.GetLastLedPos(value: Integer): Integer;
+function TMfPeakMeterMmcs.GetLastLedPos(value: Integer): Integer;
 var
   num: Integer;
   ye: Integer;
@@ -779,7 +1134,7 @@ var
 
 begin
 
-  CalculatePeakValue;
+  CalculatePeakValue();
 
   ye := fYellowMax;
   if (YellowLeds = 0) then
@@ -840,7 +1195,7 @@ begin
 end;
 
 
-procedure TMfPeakMeterEx.WindProc(var Msg: TMessage);
+procedure TMfPeakMeterMmcs.WindProc(var Msg: TMessage);
 var
   Handled: Boolean;
 
@@ -850,6 +1205,7 @@ begin
 
   case Msg.Msg of
     WM_PAINT: Paint;
+    WM_MFPEAKMETEREX_TICK: TimerTimer(Self);
   else
     Handled := False;
   end;
@@ -864,7 +1220,7 @@ begin
 end;
 
 
-procedure TMfPeakMeterEx.PaintBar;
+procedure TMfPeakMeterMmcs.PaintBar();
 var
   bw: Byte;
   tcbottom: TColor;
@@ -883,56 +1239,58 @@ var
 begin
 
 try
+
   fBmp.Width := Width;
   fBmp.Height := Height;
 
   // Initiate the x and y coordinates
   for i := Low(ax) to High(ax) do
     begin
+
       ax[i] := 0;
       ay[i] := 0;
     end;
 
+  fBmp.Canvas.Pen.Color := fSeparatorColor;
+  fBmp.Canvas.Pen.Width := 0;
+  fBmp.Canvas.Pen.Style := psSolid;
+  fBmp.Canvas.Brush.Color := fSeparatorColor;
+  fBmp.Canvas.Brush.Style := bsSolid;
+  fBmp.Canvas.Rectangle(0,
+                        0,
+                        Width,
+                        Height);
 
-  with fBmp.Canvas do
-    begin
-      Pen.Color := fSeparatorColor;
-      Pen.Width := 0;
-      Pen.Style := psSolid;
-      Brush.Color := fSeparatorColor;
-      Brush.Style := bsSolid;
-      Rectangle(0,
-                0,
-                Width,
-                Height);
-     end;
-
-  //Calculate the number of leds
+  // Calculate the number of leds.
   ileds := (fGreenLeds + fRedLeds + fYellowLeds);
 
   if (ileds > 0) then
     begin
-      // Calculate the width
+
+      // Calculate the width.
       ibarwidth := (Width div ileds);
       ibarheight := Height;
 
       if (fStyle = dsVertical) then
         begin
+
           ibarwidth := Height div ileds;
           ibarheight := Width;
         end;
 
       if (ibarwidth > fSeparatorSpacing) then
         begin
-          // Calculate the last led
+
+          // Calculate the last led.
           inum := GetLastLedPos(ileds);
           if (inum = 0) then
             if (iPeakValue <> 0) then
               inum := 1;
 
-          // Set colors
+          // Set colors.
           with fBmp.Canvas do
             begin
+
               Pen.Width := 0;
               Pen.Style := psSolid;
               Brush.Style := bsSolid;
@@ -1031,32 +1389,40 @@ try
     begin
       if (fBevelStyle = bvRaised) then
         begin
+
           tcBottom := clGray;
           tcTop := clWhite;
         end;
 
       with fBmp.canvas do
         begin
-          // Bottom right
+
+          // Bottom right.
           Pen.Color := tcBottom;
           for lp := 0 to bw - 1 do
             begin
+
               MoveTo(CalculateX(Width),
                      CalculateY(lp));
+
               LineTo(CalculateX(lp),
                      CalculateY(lp));
+
               LineTo(CalculateX(lp),
                      CalculateY(Height));
             end;
 
-          // Top left
+          // Top left.
           Pen.Color := tcTop;
           for lp  := 0 to bw - 1 do
             begin
+
               MoveTo(Width,
                      lp);
+
               LineTo(lp,
                      lp);
+
               LineTo(lp,
                      Height - bw);
             end;
@@ -1067,14 +1433,16 @@ try
               0,
               fBmp);
 except
+
   on Exception do Exit;    // silent exception
 end;
 end;
 
 
-procedure TMfPeakMeterEx.Paint;
+procedure TMfPeakMeterMmcs.Paint();
 begin
-  PaintBar;
+
+  PaintBar();
   inherited
 end;
 
