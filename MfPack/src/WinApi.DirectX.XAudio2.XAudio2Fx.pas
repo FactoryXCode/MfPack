@@ -1133,7 +1133,9 @@ begin
   else
     begin
       RearDelay := ConstrainValue(RearDelay, 0, 5);
+      {$IFDEF _WIN32_WINNT_WIN10}
       SideDelay := ConstrainValue(SideDelay, 0, 0);
+      {$ENDIF}
     end;
 
   // Indexed parameters
