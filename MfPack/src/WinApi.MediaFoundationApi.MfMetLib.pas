@@ -2687,9 +2687,6 @@ begin
   {$IFDEF WIN32}
   if (stop > MAXUINT32) then
     stop := MAXUINT32;
-  {$ELSE}
-  if (stop > MAXUINT64) then
-    stop := MAXUINT64;
   {$ENDIF}
 
   update := nil;
