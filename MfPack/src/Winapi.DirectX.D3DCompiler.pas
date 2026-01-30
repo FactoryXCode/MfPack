@@ -77,7 +77,7 @@ uses
   Winapi.D3D11,
   Winapi.DirectX.D3D11Shader,
   {D3D12}
-  Winapi.D3D12,
+  Winapi.DirectX.D3D12,
   Winapi.DirectX.D3D12Shader,
   {DirectX}
   Winapi.DirectX.D3DCommon;

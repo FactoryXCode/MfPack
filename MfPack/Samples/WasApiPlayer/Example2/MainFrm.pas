@@ -684,8 +684,18 @@ var
   tstr: string;
   secPos: Integer;
 
+  // DEBUG:
+  //tid: Cardinal;
+
 begin
 
+  // DEBUG: ====================================================================
+  //tid := GetCurrentThreadId;
+  //if tid = MainThreadID then
+  //  OutputDebugString('OnAudioDataProcessed: MAIN THREAD')
+  //else
+  //  OutputDebugString(PChar(Format('OnAudioDataProcessed: TID=%d', [tid])));
+  // ===========================================================================
 
   iProgress := Position100ns;
   iSamples := RawPosition;
