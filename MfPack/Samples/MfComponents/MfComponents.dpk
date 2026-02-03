@@ -30,6 +30,8 @@ package MfComponents;
 
 requires
   rtl,
+  vcl,
+  DesignIDE,
   MfPackX319;
 
 contains
@@ -39,7 +41,21 @@ contains
   MfPeakMeterEx in 'MfPeakMeterEx.pas',
   MfPeakMeter in 'MfPeakMeter.pas',
   MfPeakMeterMmcs in 'MfPeakMeterMmcs.pas',
-  MfAudioVisualizer in 'MfAudioVisualizer.pas';
+  MfAudioVisualizer in 'MfAudioVisualizer.pas',
+  PcmLib in 'PcmLib.pas',
+  MfAudioEffectMFTBase in 'MfAudioEffectMFTBase.pas',
+  MfParametricEqMFT in 'MfParametricEqMFT.pas',
+  MfFlangerEchoMFT in 'MfFlangerEchoMFT.pas',
+  MfWasApiFxIntf in 'MfWasApiFxIntf.pas',
+  MfWasApiFxComponentBase in 'MfWasApiFxComponentBase.pas',
+  MfWasApiEffectsRack in 'MfWasApiEffectsRack.pas',
+  MfFxEditors in 'MfFxEditors.pas',
+  MfFlangerEchoComponent in 'MfFlangerEchoComponent.pas',
+  MfParametricEqComponent in 'MfParametricEqComponent.pas',
+  MfCompressorLimiterMFT in 'MfCompressorLimiterMFT.pas',
+  MfCompressorLimiterComponent in 'MfCompressorLimiterComponent.pas',
+  MfWasApiPlayerEngineComponent in 'MfWasApiPlayerEngineComponent.pas',
+  WasApiEngine in 'WasApiEngine.pas';
 
 end.
 

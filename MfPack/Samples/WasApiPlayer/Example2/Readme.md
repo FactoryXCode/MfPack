@@ -2,22 +2,12 @@
 
 Version: X 3.1.9
 
-
-
 Description:
 These samples demonstrates how to use the IAudioClient to render different audio formats like WAV, FLAC, MP3 etc.
 The samples uses the IMFSourceReader to decode the format suitable for playing in WASAPI's IAudioClient and renderer.
 
-
-
-The sample is fully threaded for smooth operations and uses threadsafe events. A MFT is used for bass and treble control,
-
-this MFT is a plug-inn type that don't needs to be registred for Windows.
-It shows you the basics of using the IAudioClient, iAudioRenderer, IAudioClock and IAudioStreamVolume interfaces and how to
-
-create a MFT that integrates in the sound stream using the Media Foundation IMFTransform interface.
-
-
+This sample plays formats like WAV (pcm or floatingpoint), MP3 and FLAC.
+It shows you the basics of using the IAudioClient, iAudioRenderer, IAudioClock and IAudioStreamVolume interfaces.
 The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
 In your projectsettings you must add ..MfPack\\Samples\\MfComponents in the project options searchpath.
 

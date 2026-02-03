@@ -65,6 +65,7 @@ unit MfPeakMeter;
 interface
 
 uses
+
   {WinApi}
   WinApi.Windows,
   WinApi.Messages,

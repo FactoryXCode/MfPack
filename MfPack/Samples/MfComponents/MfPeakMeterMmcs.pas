@@ -16,7 +16,8 @@
 //
 // Company: FactoryX
 // Intiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships)
+// Contributor(s): Tony Kalf (maXcomX), Carmen (Carmenh)
+
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG

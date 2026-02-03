@@ -3,19 +3,14 @@
 Version: X 3.1.9
 
 
-
 NOTES:
 
 * This release is updated for compiler version 17 up to 35.
 * SDK version: 10.0.26100.4654 (Win 11)
-* Requires Windows 7 or later.
+* Requires Windows 10 or later.
 * Minimum supported MfPack version: 3.1.9
 
-
-
 ```
-
-
 
 # MfPack Visual Components and classes
 
@@ -30,14 +25,21 @@ This package contains the following -installable- components:
 * TThreadedQTimer - A threaded queue timer (experimental)
 * MfAudioVisualizer - A visual component that uses WASAPI loopback, Peak/RMS, optional spectrum bars or VU.
 
+# WASAPI player / dsp / mft components:
 
+* MfWasApiPlayerEngineComponent - WasApi renderer component.
+* MfParametricEqComponent - Parametric equalizer component.
+* MfFlangerEchoComponent - Flanger / Echo component.
+* MfCompressorLimiterComponent - Compressor / Limiter component.
+* MfWasApiEffectsRack - Effects rack component that controls FX DSP's and MFT's.
+
+Note: On how to use these components, please read the WasApiPlayer sample 5 documentation.
 
 ```
 
 Project: Media Foundation - MFPack - Samples
 Project location: https://github.com/FactoryXCode/MfPack
 https://sourceforge.net/projects/MFPack
-
 
 
 ```

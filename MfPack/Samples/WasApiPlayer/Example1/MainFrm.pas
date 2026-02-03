@@ -92,7 +92,7 @@ uses
   {}
   Tools,
   WASAPIEngine,
-  MfPeakMeter;  // Don't forget to add the Mfpeakmeter location in your project settings.
+  MfPeakMeter, MfPeakMeterMmcs, MfAudioVisualizer;  // Don't forget to add the Mfpeakmeter location in your project settings.
 
 type
 
@@ -122,6 +122,7 @@ type
     lblLeftVolume: TLabel;
     lblRightVolume: TLabel;
     lblStatus: TLabel;
+    MfAudioVisualizer1: TMfAudioVisualizer;
     procedure Open1Click(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure butPlayClick(Sender: TObject);
@@ -358,6 +359,9 @@ var
   hr: HResult;
 
 begin
+
+  // Stop playing.
+  butStopClick(Self);
 
   // Select an audiofile.
   fAudioFileUrl := GetAudioFile();
