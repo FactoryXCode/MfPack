@@ -33,7 +33,7 @@
 //   so it works with the existing EQ/Flanger/Dynamics MFTs.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX).
+// Intiator(s): Tony (maXcomX), Carmen (carmenh).
 // Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
@@ -43,7 +43,7 @@
 // 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //          Please, read documentation carefully!
 //
 // Related objects: -
@@ -82,6 +82,7 @@ unit MfWasApiEffectsRack;
 interface
 
 uses
+
   {WinApi}
   WinApi.Windows,
   {System}
@@ -118,6 +119,7 @@ type
   public
 
     constructor Create(Collection: TCollection); override;
+
   published
 
     property Enabled: Boolean read FEnabled write SetEnabled default True;
@@ -135,6 +137,7 @@ type
   public
 
     constructor Create(AOwner: TPersistent);
+    destructor Destroy(); override;
 
     property Items[Index: Integer]: TMfWasApiFxSlot read GetItem write SetItem; default;
   end;
@@ -272,6 +275,13 @@ begin
 end;
 
 
+destructor TMfWasApiFxSlots.Destroy();
+begin
+
+  inherited;
+end;
+
+
 function TMfWasApiFxSlots.GetItem(Index: Integer): TMfWasApiFxSlot;
 begin
 
@@ -324,11 +334,11 @@ end;
 destructor TMfWasApiEffectsRack.Destroy();
 begin
 
-  FSlots.Free();
+  FreeAndNil(FSlots);
   FFloat32Type := nil;
   FLock.Free();
 
-  if FWorkFloat <> nil then
+  if (FWorkFloat <> nil) then
     FreeMem(FWorkFloat);
   FWorkFloat := nil;
   FWorkCapSamples := 0;

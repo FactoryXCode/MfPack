@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright:  FactoryX. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -82,6 +82,7 @@ type
     FMft: IMFTransform;
     FCtl: IMfCompressorLimiterControl;
     FIns: IMfCompressorLimiterInspect;
+    FMftObj: TMfCompressorLimiterMFT;
 
     FEnabled: Boolean;
     FSettings: TDynamicsSettings;
@@ -129,6 +130,8 @@ type
     function GetMftInstance(): IMFTransform; override;
 
   public
+
+    destructor Destroy; override;
 
     constructor Create(AOwner: TComponent); override;
 
@@ -224,19 +227,36 @@ end;
 procedure TMfCompressorLimiterEffect.EnsureMft();
 begin
 
-  if (FMft <> nil) then
+  if (FMftObj <> nil) then
     Exit;
 
   // Create MFT instance
-  FMft := TMfCompressorLimiterMFT.Create as IMFTransform;
+  FMftObj := TMfCompressorLimiterMFT.Create();
+  FMft := FMftObj as IMFTransform;
 
   // Grab control/inspect interfaces
-  FCtl := FMft as IMfCompressorLimiterControl;
-  FIns := FMft as IMfCompressorLimiterInspect;
+  FCtl := FMftObj as IMfCompressorLimiterControl;
+  FIns := FMftObj as IMfCompressorLimiterInspect;
 
   PushAll;
 end;
 
+
+
+
+destructor TMfCompressorLimiterEffect.Destroy;
+begin
+
+  // Release interface views first.
+  FIns := nil;
+  FCtl := nil;
+  FMft := nil;
+
+  // THEN free the actual object.
+  FreeAndNil(FMftObj);
+
+  inherited;
+end;
 
 procedure TMfCompressorLimiterEffect.EnsureCtl();
 begin

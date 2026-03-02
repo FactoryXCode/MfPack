@@ -14,7 +14,7 @@
 // Description: Common PCM/Float plumbing + true-peak guard hook.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX).
+// Intiator(s): Tony (maXcomX), Carmen (carmenh).
 // Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
@@ -24,7 +24,7 @@
 // 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
 // Related projects: MfPackX319
@@ -37,6 +37,7 @@
 //
 // =============================================================================
 // Source: FactoryX.Code.
+//         https://github.com/BillyDM/awesome-audio-dsp/blob/main/sections/DSP_COOKBOOKS.md
 // =============================================================================
 //
 // LICENSE
@@ -81,6 +82,7 @@ uses
   PcmLib;
 
 type
+
   TMfRampMode = (rmOff,
                  rmFast,
                  rmSmooth,
@@ -93,6 +95,41 @@ type
     b2: Double;
     a1,
     a2: Double;
+  end;
+
+  TMfChorusRateMode = (crmFreeHz,
+                       crmTempoSync);
+
+  TMfChorusNoteDiv = (cnd1_1,    // whole
+                      cnd1_2,    // half
+                      cnd1_4,    // quarter
+                      cnd1_8,    // eighth
+                      cnd1_16,   // sixteenth
+                      cnd1_8T,   // eighth triplet
+                      cnd1_16T); // sixteenth triplet
+
+  TChorusSettings = record
+    Enabled: Boolean;
+
+    // Mix model
+    Mix: Single;        // 0..1
+    Feedback: Single;   // 0..0.95
+
+    // Delay shape
+    BaseDelayMs: Single; // 1..60
+    DepthMs: Single;     // 0..25
+
+    // Rate
+    RateMode: TMfChorusRateMode;
+    RateHz: Single;      // when RateMode=crmFreeHz
+    TempoBpm: Single;    // when RateMode=crmTempoSync
+    NoteDiv: TMfChorusNoteDiv;
+
+    // Stereo image
+    WidthPct: Single;    // 0..100 (replaces degrees)
+
+    // Smoothing
+    SmoothMs: Single;    // 0..200
   end;
 
   // Base class: 1-in/1-out audio MFT, internal float processing.
@@ -296,6 +333,7 @@ begin
 
   FInType := nil;
   FOutType := nil;
+  FInputSample := nil;
 
   FCS.Free();
 

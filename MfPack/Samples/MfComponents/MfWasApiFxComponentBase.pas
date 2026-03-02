@@ -14,7 +14,7 @@
 // Description: Shared base for non-visual FX components that provide an IMFTransform.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX).
+// Intiator(s): Tony (maXcomX), Carmen (carmenh).
 // Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
@@ -24,7 +24,7 @@
 // 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //          Please, read documentation carefully!
 //
 // Related objects: -
@@ -38,6 +38,7 @@
 //
 // =============================================================================
 // Source: FactoryX.Code.
+//         https://github.com/BillyDM/awesome-audio-dsp/blob/main/sections/DSP_COOKBOOKS.md
 // =============================================================================
 //
 // LICENSE
@@ -87,15 +88,17 @@ type
 
     // Derived classes create their FMft + control interfaces here (lazy).
     procedure CheckForMft(); virtual; abstract;
-
     // Derived classes return their IMFTransform instance here (after EnsureMft).
-    function GetMftInstance: IMFTransform; virtual; abstract;
+    function GetMftInstance(): IMFTransform; virtual; abstract;
     // Helper: do nothing at design-time.
-    function IsDesigning(): Boolean; inline;
+    function IsDesigning(): Boolean; //inline;
 
   public
 
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(AOwner: TComponent); reintroduce; //override;
+    procedure AfterConstruction(); override;
+    destructor Destroy(); override;
+
   end;
 
 
@@ -107,26 +110,39 @@ begin
 
   inherited Create(AOwner);
 
-  // Do NOT create any MFT at design-time by default.
-  if not IsDesigning then
-    CheckForMft();
+  // Do NOT create any MFT by default, this creates memory leaks!
+  //  CheckForMft();
 end;
 
 
-function TMfWasApiFxComponentBase.IsDesigning: Boolean;
+procedure TMfWasApiFxComponentBase.AfterConstruction();
 begin
+  inherited;
 
-  Result := (csDesigning in ComponentState);
 end;
 
 
-function TMfWasApiFxComponentBase.GetMFT: IMFTransform;
+destructor TMfWasApiFxComponentBase.Destroy();
 begin
 
-  if not IsDesigning then
+  inherited;
+end;
+
+
+function TMfWasApiFxComponentBase.IsDesigning(): Boolean;
+begin
+
+  Result := (csDesigning in ComponentState) or (csLoading in ComponentState);
+end;
+
+
+function TMfWasApiFxComponentBase.GetMFT(): IMFTransform;
+begin
+
+  if not IsDesigning() then
     CheckForMft();
 
-  Result := GetMftInstance;
+  Result := GetMftInstance();
 end;
 
 
@@ -137,6 +153,7 @@ begin
             (BitsPerSample = 24) or
             (BitsPerSample = 32);
 end;
+
 
 function TMfWasApiFxComponentBase.SupportsFloat32(): Boolean;
 begin

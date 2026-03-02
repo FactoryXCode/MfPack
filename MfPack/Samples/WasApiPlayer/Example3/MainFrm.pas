@@ -644,8 +644,7 @@ begin
       end;
 
     dsReady,
-    dsStop,
-    dsPause:
+    dsStop:
       begin
 
         LoadEqFromIni();
@@ -661,6 +660,12 @@ begin
 
         hr := fWasApiEngine.Start();
       end;
+
+    dsPause:
+      begin
+
+        hr := fWasApiEngine.Start();
+      end
 
   else
     Exit;

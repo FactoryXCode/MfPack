@@ -1,4 +1,4 @@
-﻿// FactoryX
+// FactoryX
 //
 // Copyright: FactoryX. All rights reserved.
 //
@@ -14,7 +14,7 @@
 // Description: WasApiEngine component.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX).
+// Intiator(s): Tony (maXcomX), Carmen (carmenh).
 // Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
@@ -24,7 +24,7 @@
 // 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //          Please, read documentation carefully!
 //
 // Related objects: -
@@ -71,7 +71,21 @@ uses
   System.Classes,
   {Application}
   MfWasApiEffectsRack,
-  WasApiEngine;
+  WasApiEngine,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfObjects,
+  WinApi.MediaFoundationApi.MfTransform,
+  {CoreAudioApi}
+  WinApi.CoreAudioApi.AudioSessionTypes,
+  WinApi.CoreAudioApi.MMDeviceApi,
+  {WinMM}
+  WinApi.WinMM.MMeApi;
+
+const
+
+  HNS_PER_100MS = 1000000;
+  MIN_VOLUME = 0.0;
+  MAX_VOLUME = 100.0;
 
 type
 
@@ -88,7 +102,20 @@ type
     FOnProcessed: TWasApiProcessedEvent;
     FOnEnded: TWasApiEndedEvent;
 
+    // Threaded PCM callbacks (engine thread)
+    FOnOutputPcm: TOnOutputPcm;
+    FOnProcessPcm: TWasApiProcessPcmEvent;
+
+    FStopping: Integer; // 0/1 (atomic)
+
+    // Device selection / switching
+    FUseDefaultDevice: Boolean;
+    //FDeviceRole: ERole;          // default endpoint role when UseDefaultDevice = True
+    FDeviceId: string;           // IMMDevice ID when UseDefaultDevice = False
+
     // Internal forwarders (engine -> component)
+    procedure AttachEngineCallbacks();
+
     procedure EngineStateChanged(Sender: TObject;
                                  const NewState: TDeviceState);
 
@@ -103,6 +130,17 @@ type
                               const RawPosition: UInt64);
 
     procedure EngineEnded(Sender: TObject);
+
+    // Threaded PCM forwarding (engine thread)
+    procedure EngineOutputPcm(Sender: TObject;
+                              pData: PByte;
+                              const ByteCount: DWORD;
+                              Wfx: PWAVEFORMATEX);
+
+    procedure EngineProcessPcm(Sender: TObject;
+                               pData: PByte;
+                               const ByteCount: DWORD;
+                               pwfx: PWAVEFORMATEX);
 
     // Prevent callbacks into an owner/form that is already in the destroy path.
     function CanRaiseToOwner: Boolean;
@@ -130,17 +168,63 @@ type
                       fileDuration100ns: LONGLONG): HRESULT;
     function Start(): HRESULT;
     function Stop(): HRESULT;
+    function WaitForStop(TimeoutMs: DWORD = 100): HRESULT;
     function Pause(): HRESULT;
     function SeekTo(const Pos100ns: Int64): HRESULT;
     function SetVolumes(pVolLeft,
                         pVolRight: Single): HRESULT;
 
+    function Mute(pActive: Boolean): Boolean;
+
+    // Calculated gains for the post fader VU meters.
+    procedure SetMeterFaderGains(const GainL,
+                                 GainR: Single);
+    procedure GetMeterFaderGains(out GainL,
+                                 GainR: Single);
+
+    // Output device switching
+    function SwitchOutputDevice(const ADeviceId: string;
+                                const AUseDefaultDevice: Boolean = True;
+                                const ARole: ERole = eMultimedia;
+                                const AutoResume: Boolean = True): HRESULT;
+    procedure SetUseDefaultOutputDevice(const ARole: ERole = eMultimedia);
+    procedure SetOutputDeviceId(const ADeviceId: string);
+
+    // FX
+    procedure ClearEffects();
+    procedure AddEffect(const Mft: IMFTransform);
+    procedure SetEffects(const Effects: array of IMFTransform);
+
+    // Pitch / tempo
+    procedure SetPitchPercent(const Pct: Double);
+    procedure SetPitchSlider(const SliderPos: Integer);
+
+    // Pitch properties (forwarded)
+    function GetPitchRangePct: Double;
+    procedure SetPitchRangePct(const Value: Double);
+    function GetPitchDetentPct: Double;
+    procedure SetPitchDetentPct(const Value: Double);
+    function GetPitchAutoZeroPct: Double;
+    procedure SetPitchAutoZeroPct(const Value: Double);
+    function GetPitchRampMs: Integer;
+    procedure SetPitchRampMs(const Value: Integer);
+    function GetVarispeedEnabled: LongBool;
+    procedure SetVarispeedEnabled(const Value: LongBool);
+
+  published
+
     property Engine: TWasApiEngine read FEngine;
+
+    // Convenience aliases
+    property State: TDeviceState read GetDeviceState;
 
     property DeviceState: TDeviceState read GetDeviceState;
     property SoundChannels: Word read GetSoundChannels;
 
-  published
+    // Audio Device-------------------------------------------------------------
+    property UseDefaultDevice: Boolean read FUseDefaultDevice write FUseDefaultDevice default True;
+    property DeviceId: string read FDeviceId write FDeviceId;
+    // -------------------------------------------------------------------------
 
     // Rack (optional). If assigned, it will be called for each PCM block on the engine thread.
     property EffectsRack: TMfWasApiEffectsRack read FRack write SetRack;
@@ -150,6 +234,17 @@ type
     property OnReady: TWasApiReadyEvent read FOnReady write FOnReady;
     property OnProcessed: TWasApiProcessedEvent read FOnProcessed write FOnProcessed;
     property OnEnded: TWasApiEndedEvent read FOnEnded write FOnEnded;
+
+    // PCM callbacks (engine thread)
+    property OnOutputPcm: TOnOutputPcm read FOnOutputPcm write FOnOutputPcm;
+    property OnProcessPcm: TWasApiProcessPcmEvent read FOnProcessPcm write FOnProcessPcm;
+
+    // Pitch properties (forwarded)
+    property PitchRangePct: Double read GetPitchRangePct write SetPitchRangePct;
+    property PitchDetentPct: Double read GetPitchDetentPct write SetPitchDetentPct;
+    property PitchAutoZeroPct: Double read GetPitchAutoZeroPct write SetPitchAutoZeroPct;
+    property PitchRampMs: Integer read GetPitchRampMs write SetPitchRampMs;
+    property VarispeedEnabled: LongBool read GetVarispeedEnabled write SetVarispeedEnabled;
   end;
 
 procedure Register;
@@ -198,10 +293,12 @@ begin
       FEngine.OnEnded := nil;
       FEngine.OnProcessPcm := nil;
 
-      // Best effort stop before freeing (thread is joined in engine destructor).
+      // Best effort stop + join before freeing to avoid thread handle leaks.
       try
 
         FEngine.Stop();
+        // Wait a bit for the engine thread to stop.
+        FEngine.WaitForStop(5000);
       except
         // ignore during shutdown
       end;
@@ -212,7 +309,7 @@ begin
 end;
 
 
-function TMfWasApiPlayerEngine.CanRaiseToOwner: Boolean;
+function TMfWasApiPlayerEngine.CanRaiseToOwner(): Boolean;
 begin
 
   // Never raise events at design-time.
@@ -241,7 +338,8 @@ begin
 end;
 
 
-procedure TMfWasApiPlayerEngine.Notification(AComponent: TComponent; Operation: TOperation);
+procedure TMfWasApiPlayerEngine.Notification(AComponent: TComponent;
+                                             Operation: TOperation);
 begin
 
   inherited Notification(AComponent,
@@ -252,25 +350,38 @@ begin
 end;
 
 
-procedure TMfWasApiPlayerEngine.CheckForEngine();
+procedure TMfWasApiPlayerEngine.AttachEngineCallbacks;
 begin
 
-  if Assigned(FEngine) then
+  if not Assigned(FEngine) then
     Exit;
 
-  if (csDesigning in ComponentState) then
-    Exit;
-
-  FEngine := TWasApiEngine.Create();
-
-  // Forward engine events to the component's published events
+  // Always wire internal engine -> component handlers
   FEngine.OnStateChanged := EngineStateChanged;
   FEngine.OnError := EngineError;
   FEngine.OnReady := EngineReady;
   FEngine.OnProcessed := EngineProcessed;
   FEngine.OnEnded := EngineEnded;
+end;
 
-  // Wire rack if already set
+
+procedure TMfWasApiPlayerEngine.CheckForEngine();
+begin
+
+  if not Assigned(FEngine) then
+    FEngine := TWasApiEngine.Create;
+
+  AttachEngineCallbacks();  // Always ensure correct wiring.
+
+  if (csDesigning in ComponentState) then
+    Exit;
+
+  //FEngine := TWasApiEngine.Create();
+
+  // Forward engine events to the component's published events
+  AttachEngineCallbacks();
+
+  // Wire rack/user PCM hooks
   SyncRackHook();
 end;
 
@@ -278,16 +389,14 @@ end;
 procedure TMfWasApiPlayerEngine.SyncRackHook();
 begin
 
-  // Keep hook stable even if something overwrites it.
   if not Assigned(FEngine) then
     Exit;
 
-  if Assigned(FRack) then
-    FEngine.OnProcessPcm := FRack.ProcessPcm   // << No params!
-  else
-    FEngine.OnProcessPcm := nil;
+  // Always keep engine callbacks routed through the component so we can chain:
+  // Rack -> user event handler.
+  FEngine.OnOutputPcm := EngineOutputPcm;
+  FEngine.OnProcessPcm := EngineProcessPcm;
 end;
-
 
 procedure TMfWasApiPlayerEngine.SetRack(const Value: TMfWasApiEffectsRack);
 begin
@@ -303,7 +412,7 @@ begin
   if Assigned(FRack) then
     FRack.FreeNotification(Self);
 
-  // Wire into underlying engine (runtime only)
+  // Keep PCM hook chain active
   if Assigned(FEngine) then
     SyncRackHook();
 end;
@@ -395,6 +504,41 @@ begin
 end;
 
 
+
+
+procedure TMfWasApiPlayerEngine.EngineOutputPcm(Sender: TObject;
+                                               pData: PByte;
+                                               const ByteCount: DWORD;
+                                               Wfx: PWAVEFORMATEX);
+begin
+  // Note: Called on the engine thread.
+  if Assigned(FOnOutputPcm) then
+    FOnOutputPcm(Self,
+                 pData,
+                 ByteCount,
+                 Wfx);
+end;
+
+
+procedure TMfWasApiPlayerEngine.EngineProcessPcm(Sender: TObject;
+                                                pData: PByte;
+                                                const ByteCount: DWORD;
+                                                pwfx: PWAVEFORMATEX);
+begin
+  // Note: Called on the engine thread.
+  // First, process FX rack (if assigned), then call the user handler.
+  if Assigned(FRack) then
+    FRack.ProcessPcm(Sender,
+                     pData,
+                     ByteCount,
+                     pwfx);
+
+  if Assigned(FOnProcessPcm) then
+    FOnProcessPcm(Self,
+                  pData,
+                  ByteCount,
+                  pwfx);
+end;
 // ---- public API forwarders ----
 
 function TMfWasApiPlayerEngine.OpenFile(const audiofile: TFileName;
@@ -428,13 +572,40 @@ end;
 function TMfWasApiPlayerEngine.Stop(): HRESULT;
 begin
 
-  CheckForEngine();
-
+  // Do not auto-create the engine just to stop it.
   if not Assigned(FEngine) then
-    Exit(E_FAIL);
+    Exit(S_FALSE);
 
-  SyncRackHook();
+  // IMPORTANT:
+  // Do NOT detach engine callbacks here. The engine raises OnEnded/OnStateChanged
+  // from its worker thread using TThread.Queue, and the component must stay wired
+  // so the GUI receives the stop notification.
+  //
+  // Also do NOT clear OnProcessPcm here; that would permanently disconnect the FX rack
+  // unless the user reassigns it manually.
+
   Result := FEngine.Stop();
+end;
+
+
+function TMfWasApiPlayerEngine.WaitForStop(TimeoutMs: DWORD = 100): HRESULT;
+begin
+
+  // Do not auto-create the engine just to wait for it.
+  if not Assigned(FEngine) then
+    Exit(S_FALSE);
+
+  Result := FEngine.WaitForStop(TimeoutMs);
+
+  // After a stop/join, ensure wiring is restored so a subsequent Start
+  // continues to drive the FX rack and GUI events.
+  if (Result = S_OK) then
+    begin
+      InterlockedExchange(FStopping,
+                          0);
+      AttachEngineCallbacks();
+      SyncRackHook();
+    end;
 end;
 
 
@@ -477,5 +648,220 @@ begin
                                pVolRight);
 end;
 
+
+
+function TMfWasApiPlayerEngine.Mute(pActive: Boolean): Boolean;
+begin
+  CheckForEngine();
+
+  if not Assigned(FEngine) then
+    Exit(False);
+
+  SyncRackHook();
+  Result := FEngine.Mute(pActive);
+end;
+
+
+procedure TMfWasApiPlayerEngine.SetMeterFaderGains(const GainL, GainR: Single);
+begin
+  CheckForEngine();
+
+  if not Assigned(FEngine) then
+    Exit;
+
+  FEngine.SetMeterFaderGains(GainL,
+                             GainR);
+end;
+
+
+procedure TMfWasApiPlayerEngine.GetMeterFaderGains(out GainL, GainR: Single);
+begin
+  CheckForEngine();
+
+  if not Assigned(FEngine) then
+    begin
+      GainL := 1.0;
+      GainR := 1.0;
+      Exit;
+    end;
+
+  FEngine.GetMeterFaderGains(GainL,
+                             GainR);
+end;
+
+
+function TMfWasApiPlayerEngine.SwitchOutputDevice(const ADeviceId: string;
+                                                 const AUseDefaultDevice: Boolean;
+                                                 const ARole: ERole;
+                                                 const AutoResume: Boolean): HRESULT;
+begin
+  CheckForEngine();
+
+  if not Assigned(FEngine) then
+    Exit(E_FAIL);
+
+  Result := FEngine.SwitchOutputDevice(ADeviceId,
+                                      AUseDefaultDevice,
+                                      ARole,
+                                      AutoResume);
+end;
+
+
+procedure TMfWasApiPlayerEngine.SetUseDefaultOutputDevice(const ARole: ERole);
+begin
+  CheckForEngine();
+
+  if not Assigned(FEngine) then
+    Exit;
+
+  FEngine.SetUseDefaultOutputDevice(ARole);
+end;
+
+
+procedure TMfWasApiPlayerEngine.SetOutputDeviceId(const ADeviceId: string);
+begin
+  CheckForEngine();
+
+  if not Assigned(FEngine) then
+    Exit;
+
+  FEngine.SetOutputDeviceId(ADeviceId);
+end;
+
+
+procedure TMfWasApiPlayerEngine.ClearEffects();
+begin
+  CheckForEngine();
+
+  if not Assigned(FEngine) then
+    Exit;
+
+  FEngine.ClearEffects();
+end;
+
+
+procedure TMfWasApiPlayerEngine.AddEffect(const Mft: IMFTransform);
+begin
+  CheckForEngine();
+
+  if not Assigned(FEngine) then
+    Exit;
+
+  FEngine.AddEffect(Mft);
+end;
+
+
+procedure TMfWasApiPlayerEngine.SetEffects(const Effects: array of IMFTransform);
+begin
+  CheckForEngine();
+
+  if not Assigned(FEngine) then
+    Exit;
+
+  FEngine.SetEffects(Effects);
+end;
+
+
+procedure TMfWasApiPlayerEngine.SetPitchPercent(const Pct: Double);
+begin
+  CheckForEngine();
+
+  if not Assigned(FEngine) then
+    Exit;
+
+  FEngine.SetPitchPercent(Pct);
+end;
+
+
+procedure TMfWasApiPlayerEngine.SetPitchSlider(const SliderPos: Integer);
+begin
+  CheckForEngine();
+
+  if not Assigned(FEngine) then
+    Exit;
+
+  FEngine.SetPitchSlider(SliderPos);
+end;
+
+
+function TMfWasApiPlayerEngine.GetPitchRangePct: Double;
+begin
+  CheckForEngine();
+  if Assigned(FEngine) then
+    Result := FEngine.PitchRangePct
+  else
+    Result := 16.0;
+end;
+
+procedure TMfWasApiPlayerEngine.SetPitchRangePct(const Value: Double);
+begin
+  CheckForEngine();
+  if Assigned(FEngine) then
+    FEngine.PitchRangePct := Value;
+end;
+
+function TMfWasApiPlayerEngine.GetPitchDetentPct: Double;
+begin
+  CheckForEngine();
+  if Assigned(FEngine) then
+    Result := FEngine.PitchDetentPct
+  else
+    Result := 0.10;
+end;
+
+procedure TMfWasApiPlayerEngine.SetPitchDetentPct(const Value: Double);
+begin
+  CheckForEngine();
+  if Assigned(FEngine) then
+    FEngine.PitchDetentPct := Value;
+end;
+
+function TMfWasApiPlayerEngine.GetPitchAutoZeroPct: Double;
+begin
+  CheckForEngine();
+  if Assigned(FEngine) then
+    Result := FEngine.PitchAutoZeroPct
+  else
+    Result := 0.30;
+end;
+
+procedure TMfWasApiPlayerEngine.SetPitchAutoZeroPct(const Value: Double);
+begin
+  CheckForEngine();
+  if Assigned(FEngine) then
+    FEngine.PitchAutoZeroPct := Value;
+end;
+
+function TMfWasApiPlayerEngine.GetPitchRampMs: Integer;
+begin
+  CheckForEngine();
+  if Assigned(FEngine) then
+    Result := FEngine.PitchRampMs
+  else
+    Result := 50;
+end;
+
+procedure TMfWasApiPlayerEngine.SetPitchRampMs(const Value: Integer);
+begin
+  CheckForEngine();
+  if Assigned(FEngine) then
+    FEngine.PitchRampMs := Value;
+end;
+
+function TMfWasApiPlayerEngine.GetVarispeedEnabled: LongBool;
+begin
+  CheckForEngine();
+  if Assigned(FEngine) then
+    Result := FEngine.VarispeedEnabled
+  else
+    Result := False;
+end;
+
+procedure TMfWasApiPlayerEngine.SetVarispeedEnabled(const Value: LongBool);
+begin
+  CheckForEngine();
+  if Assigned(FEngine) then
+    FEngine.VarispeedEnabled := Value;
+end;
 
 end.

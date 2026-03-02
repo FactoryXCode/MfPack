@@ -35,13 +35,13 @@ requires
   MfPackX319;
 
 contains
-  MfAudioEndPoint in 'MfAudioEndPoint.pas',
   QueueTimer in 'QueueTimer.pas',
   ThreadedQueueTimer in 'ThreadedQueueTimer.pas',
   MfPeakMeterEx in 'MfPeakMeterEx.pas',
   MfPeakMeter in 'MfPeakMeter.pas',
   MfPeakMeterMmcs in 'MfPeakMeterMmcs.pas',
   MfAudioVisualizer in 'MfAudioVisualizer.pas',
+  MfAudioMixVisualizer in 'MfAudioMixVisualizer.pas',
   PcmLib in 'PcmLib.pas',
   MfAudioEffectMFTBase in 'MfAudioEffectMFTBase.pas',
   MfParametricEqMFT in 'MfParametricEqMFT.pas',
@@ -54,8 +54,13 @@ contains
   MfParametricEqComponent in 'MfParametricEqComponent.pas',
   MfCompressorLimiterMFT in 'MfCompressorLimiterMFT.pas',
   MfCompressorLimiterComponent in 'MfCompressorLimiterComponent.pas',
+  MfChorusComponent in 'MfChorusComponent.pas',
+  MfChorusMFT in 'MfChorusMFT.pas',
+  MfLowMidHighEqComponent in 'MfLowMidHighEqComponent.pas',
+  MfLowMidHighEqMFT in 'MfLowMidHighEqMFT.pas',
+  MfAudioEndPoint in 'MfAudioEndPoint.pas',
   MfWasApiPlayerEngineComponent in 'MfWasApiPlayerEngineComponent.pas',
-  WasApiEngine in 'WasApiEngine.pas';
+  WASAPIEngine in 'WASAPIEngine.pas';
 
 end.
 

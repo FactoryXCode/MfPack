@@ -700,8 +700,7 @@ begin
       end;
 
     dsReady,
-    dsStop,
-    dsPause:
+    dsStop:
       begin
 
         LoadEqFromIni();
@@ -714,6 +713,12 @@ begin
         SetVolumeChannels();
 
         fWasApiEngine.EnableEQ(chkEQ.Checked);
+
+        hr := fWasApiEngine.Start();
+      end;
+
+    dsPause:
+      begin
 
         hr := fWasApiEngine.Start();
       end;

@@ -1,4 +1,4 @@
-// FactoryX
+﻿// FactoryX
 //
 // Copyright:  FactoryX. All rights reserved.
 //
@@ -16,7 +16,7 @@
 // Notes:
 //  - Designed for real-time use in the WASAPI render thread.
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX).
+// Intiator(s): Tony (maXcomX), Carmen (carmenh).
 // Contributor(s): Tony Kalf (maXcomX)
 //
 //------------------------------------------------------------------------------
@@ -139,6 +139,9 @@ type
                          t: Single;
                          const ClampAbs: Single = 16.0): Single; inline;
 
+  // Decibel to linear.
+  function DbToLin(const dB: Single): Single; inline;
+
   // DEBUG:
   procedure DebugWfx(AMethod: string;
                      pwfx: PWAVEFORMATEX);
@@ -146,12 +149,18 @@ type
 
 implementation
 
+uses
+  System.Math;
 
 
-function GetWfxBitsAndFloat(const pwfx: PWAVEFORMATEX; out Bits: Integer; out IsFloat: Boolean): Boolean; inline;
+function GetWfxBitsAndFloat(const pwfx: PWAVEFORMATEX;
+                            out Bits: Integer;
+                            out IsFloat: Boolean): Boolean; inline;
 var
   pEx: PWAVEFORMATEXTENSIBLE;
+
 begin
+
   Bits := 0;
   IsFloat := False;
   Result := False;
@@ -195,6 +204,7 @@ begin
     Result := False;
   end;
 end;
+
 
 procedure Int16ToFloat(const InBytes: PByte;
                        OutF: PSingle;
@@ -516,6 +526,14 @@ begin
             (-v0 + v2) * td +
             (2*v0 - 5*v1 + 4*v2 - v3) * t2 +
             (-v0 + 3*v1 - 3*v2 + v3) * t3)) * 1.0;
+end;
+
+
+function DbToLin(const dB: Single): Single; inline;
+begin
+
+  Result := Power(10.0,
+                  dB / 20.0);
 end;
 
 

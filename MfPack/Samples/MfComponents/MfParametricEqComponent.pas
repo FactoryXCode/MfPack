@@ -16,7 +16,7 @@
 //              ceiling default -1.0 dBTP, and attack/release smoothing to avoid pumping.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX).
+// Intiator(s): Tony (maXcomX), Carmen (carmenh).
 // Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
@@ -26,7 +26,7 @@
 // 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: MfParametricEqMFT
 // Related projects: MfPackX319
@@ -39,6 +39,7 @@
 //
 // =============================================================================
 // Source: FactoryX.Code.
+//         https://github.com/BillyDM/awesome-audio-dsp/blob/main/sections/DSP_COOKBOOKS.md
 // =============================================================================
 //
 // LICENSE
@@ -67,6 +68,7 @@ uses
 
   {System}
   System.Classes,
+  System.SysUtils,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfTransform,
   {Application}
@@ -83,6 +85,7 @@ type
     FMft: IMFTransform;
     FCtl: IMfParametricEqControl;
     FIns: IMfParametricEqInspect;
+    FMftObj: TMfParametricEqMFT;
 
     FEnabled: Boolean;
     FGainDb: Single;
@@ -119,7 +122,9 @@ type
 
   public
 
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(AOwner: TComponent); //override;
+    procedure AfterConstruction(); override;
+    destructor Destroy(); override;
 
     // Optional inspection (runtime only)
     function GetCurrentCoeffs(out C: TBiquadCoeffs;
@@ -177,23 +182,49 @@ begin
   FTruePeakGuard := False;
   FTruePeakCeilingDbTP := -1.0;
   FTruePeakOversample := 4;
+  // Do NOT create any MFT by default, this creates memory leaks!
+  // Yuo have to do that, when the object is fully created.
+  // For that create the MFT in method AfterConstruction().
+  // CheckForMft();
+end;
 
-  if not (csDesigning in ComponentState) then
-    CheckForMft();
+
+procedure TMfParametricEqEffect.AfterConstruction();
+begin
+
+  inherited;
+
+  CheckForMft();
+end;
+
+
+destructor TMfParametricEqEffect.Destroy();
+begin
+
+  // Release interface views first.
+  FIns := nil;
+  FCtl := nil;
+  FMft := nil;
+
+  // THEN free the actual object
+  FreeAndNil(FMftObj);
+
+  inherited;
 end;
 
 
 procedure TMfParametricEqEffect.CheckForMft();
 begin
 
-  if (FMft <> nil) then
+  if (FMftObj <> nil) then
     Exit;
 
-  FMft := TMfParametricEqMFT.Create as IMFTransform;
-  FCtl := FMft as IMfParametricEqControl;
-  FIns := FMft as IMfParametricEqInspect;
+  FMftObj := TMfParametricEqMFT.Create;
+  FMft := FMftObj as IMFTransform;
+  FCtl := FMftObj as IMfParametricEqControl;
+  FIns := FMftObj as IMfParametricEqInspect;
 
-  PushAllToMft();
+  PushAllToMft(); // Set settings
 end;
 
 
@@ -207,7 +238,10 @@ end;
 procedure TMfParametricEqEffect.PushAllToMft();
 begin
 
-  if (FCtl = nil) then
+  if IsDesigning() then
+    Exit;
+
+  if (FMft <> nil) then
     Exit;
 
   FCtl.EnableEQ(FEnabled);
@@ -235,7 +269,7 @@ begin
 
   FEnabled := Value;
 
-  if (csDesigning in ComponentState) then
+  if IsDesigning() then
     Exit;
 
   CheckForMft();
@@ -248,7 +282,7 @@ begin
 
   FGainDb := Value;
 
-  if (csDesigning in ComponentState) then
+  if IsDesigning() then
     Exit;
 
   CheckForMft();
@@ -261,7 +295,7 @@ begin
 
   FCenterFreqHz := Value;
 
-  if (csDesigning in ComponentState) then
+  if IsDesigning() then
     Exit;
 
   CheckForMft();
@@ -277,7 +311,7 @@ begin
   if (Value <> 0) then
     FBandwidthOctaves := 0;
 
-  if (csDesigning in ComponentState) then
+  if IsDesigning() then
     Exit;
 
   CheckForMft();
@@ -290,7 +324,7 @@ begin
 
   FBandwidthOctaves := Value;
 
-  if (csDesigning in ComponentState) then
+  if IsDesigning() then
     Exit;
 
   CheckForMft();
@@ -303,7 +337,7 @@ begin
 
   FRampMode := Value;
 
-  if (csDesigning in ComponentState) then
+  if IsDesigning() then
     Exit;
 
   CheckForMft();
@@ -316,7 +350,7 @@ begin
 
   FRampTimeMs := Value;
 
-  if (csDesigning in ComponentState) then
+  if IsDesigning() then
     Exit;
 
   CheckForMft();
@@ -329,7 +363,7 @@ begin
 
   FTruePeakGuard := Value;
 
-  if (csDesigning in ComponentState) then
+  if IsDesigning() then
     Exit;
 
   CheckForMft();
@@ -342,7 +376,7 @@ begin
 
   FTruePeakCeilingDbTP := Value;
 
-  if (csDesigning in ComponentState) then
+  if IsDesigning() then
     Exit;
 
   CheckForMft();
@@ -355,7 +389,7 @@ begin
 
   FTruePeakOversample := Value;
 
-  if (csDesigning in ComponentState) then
+  if IsDesigning() then
     Exit;
 
   CheckForMft();
@@ -367,7 +401,7 @@ function TMfParametricEqEffect.GetCurrentCoeffs(out C: TBiquadCoeffs;
                                                 out SampleRate: Double): Boolean;
 begin
 
-  if (csDesigning in ComponentState) then
+  if IsDesigning() then
     Exit(False);
 
   CheckForMft();
@@ -380,7 +414,7 @@ function TMfParametricEqEffect.GetTargetCoeffs(out C: TBiquadCoeffs;
                                                out SampleRate: Double): Boolean;
 begin
 
-  if (csDesigning in ComponentState) then
+  if IsDesigning() then
     Exit(False);
 
   CheckForMft();

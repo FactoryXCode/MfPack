@@ -1,4 +1,4 @@
-// FactoryX
+﻿// FactoryX
 //
 // Copyright:  FactoryX. All rights reserved.
 //
@@ -14,7 +14,7 @@
 // Description: Flanger/Echo non-visual component.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX).
+// Intiator(s): Tony (maXcomX), Carmen (carmenh).
 // Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
@@ -24,7 +24,7 @@
 // 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
 // Related projects: MfPackX319
@@ -37,6 +37,7 @@
 //
 // =============================================================================
 // Source: FactoryX.Code.
+//         https://github.com/BillyDM/awesome-audio-dsp/blob/main/sections/DSP_COOKBOOKS.md
 // =============================================================================
 //
 // LICENSE
@@ -65,6 +66,7 @@ uses
 
   {System}
   System.Classes,
+  System.SysUtils,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfTransform,
   {Application}
@@ -81,6 +83,7 @@ type
     FMft: IMFTransform;
     FCtl: IMfFlangerEchoControl;
     FIns: IMfFlangerEchoInspect;
+    FMftObj: TMfFlangerEchoMFT;
 
     FEnabled: Boolean;
     FBaseDelayMs: Single;
@@ -103,7 +106,9 @@ type
 
   public
 
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(AOwner: TComponent); //override;
+    procedure AfterConstruction(); override;
+    destructor Destroy(); override;
 
   published
 
@@ -123,6 +128,7 @@ implementation
 
 procedure Register;
 begin
+
   RegisterComponents('MfPack Core Audio Samples',
                      [TMfFlangerEchoEffect]);
 end;
@@ -140,28 +146,57 @@ begin
   FFeedback := 0.2;
   FWet := 0.35;
 
-  if not (csDesigning in ComponentState) then
-    CheckForMft();
+  // Do NOT create any MFT by default, this creates memory leaks!
+  //  CheckForMft();
+end;
+
+
+procedure TMfFlangerEchoEffect.AfterConstruction();
+begin
+  inherited;
+
+  CheckForMft();
+end;
+
+
+destructor TMfFlangerEchoEffect.Destroy();
+begin
+
+  // Release interface views first.
+  FIns := nil;
+  FCtl := nil;
+  FMft := nil;
+
+  // THEN free the actual object.
+  FreeAndNil(FMftObj);
+
+  inherited;
 end;
 
 
 procedure TMfFlangerEchoEffect.CheckForMft();
 begin
 
-  if (FMft <> nil) then
+  if (FMftObj <> nil) then
     Exit;
 
-  FMft := TMfFlangerEchoMFT.Create as IMFTransform;
-  FCtl := FMft as IMfFlangerEchoControl;
-  FIns := FMft as IMfFlangerEchoInspect;
+  if (FMft = nil) then
+    begin
 
-  // Push current values to MFT
-  FCtl.EnableFX(FEnabled);
-  FCtl.SetBaseDelayMs(FBaseDelayMs);
-  FCtl.SetDepthMs(FDepthMs);
-  FCtl.SetRateHz(FRateHz);
-  FCtl.SetFeedback(FFeedback);
-  FCtl.SetWet(FWet);
+      FMftObj := TMfFlangerEchoMFT.Create();
+      FMft := FMftObj as IMFTransform;
+      FCtl := FMftObj as IMfFlangerEchoControl;
+      FIns := FMftObj as IMfFlangerEchoInspect;
+
+
+      // Push current values to MFT
+      FCtl.EnableFX(FEnabled);
+      FCtl.SetBaseDelayMs(FBaseDelayMs);
+      FCtl.SetDepthMs(FDepthMs);
+      FCtl.SetRateHz(FRateHz);
+      FCtl.SetFeedback(FFeedback);
+      FCtl.SetWet(FWet);
+    end;
 end;
 
 
@@ -177,7 +212,7 @@ begin
 
   FEnabled := Value;
 
-  if (csDesigning in ComponentState) then
+  if IsDesigning() then
     Exit;
 
   CheckForMft();
@@ -190,7 +225,7 @@ begin
 
   FBaseDelayMs := Value;
 
-  if (csDesigning in ComponentState) then
+  if IsDesigning() then
     Exit;
 
   CheckForMft();
@@ -203,7 +238,7 @@ begin
 
   FDepthMs := Value;
 
-  if (csDesigning in ComponentState) then
+  if IsDesigning() then
     Exit;
 
   CheckForMft();
@@ -216,7 +251,7 @@ begin
 
   FRateHz := Value;
 
-  if (csDesigning in ComponentState) then
+  if IsDesigning() then
     Exit;
 
   CheckForMft();
@@ -229,7 +264,7 @@ begin
 
   FFeedback := Value;
 
-  if (csDesigning in ComponentState) then
+  if IsDesigning() then
     Exit;
 
   CheckForMft();
@@ -242,7 +277,7 @@ begin
 
   FWet := Value;
 
-  if (csDesigning in ComponentState) then
+  if IsDesigning() then
     Exit;
 
   CheckForMft();

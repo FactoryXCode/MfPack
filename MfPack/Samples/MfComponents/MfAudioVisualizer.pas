@@ -1,4 +1,4 @@
-// FactoryX
+﻿// FactoryX
 //
 // Copyright:  FactoryX. All rights reserved.
 //
@@ -220,6 +220,9 @@ type
     procedure SetPeakCapFrac(Value: Single);
 
     procedure EnsureSpectrumStorage();
+    // Clears all published visual snapshots (levels + spectrum) to silence.
+    // Called when stopping/deactivating so the UI immediately drops to zero.
+    //procedure ClearVisualState();
     procedure StartCapture();
     procedure StopCapture();
     procedure RestartIfRunning();

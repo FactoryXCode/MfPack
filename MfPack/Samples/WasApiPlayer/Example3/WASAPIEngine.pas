@@ -2176,11 +2176,11 @@ begin
                            flags);
 
             if FAILED(hr) then
-            begin
-              pvRenderClient.ReleaseBuffer(numFramesAvailable,
-                                           AUDCLNT_BUFFERFLAGS_SILENT);
-              Break;
-            end;
+              begin
+                pvRenderClient.ReleaseBuffer(numFramesAvailable,
+                                             AUDCLNT_BUFFERFLAGS_SILENT);
+                Break;
+              end;
 
             // Only process when buffer has real audio
             if ((flags and AUDCLNT_BUFFERFLAGS_SILENT) = 0) then
@@ -2238,20 +2238,26 @@ begin
       end; // Case waitResult.
     end;
 
-  // Stop the client and reset its clock/buffer. -------------------------------
-  pvAudioClient.Stop();
-  pvAudioClient.Reset();
+  if (pvDeviceState = dsPause) then
+    pvAudioClient.Stop()
+  else
+    begin
 
-  // Reset playback position.
-  FOffset := 0;
-  FBasePos100ns := 0;
+      // Stop the client and reset its clock/buffer. ---------------------------
+      pvAudioClient.Stop();
+      pvAudioClient.Reset();
 
-  // Tell GUI immediately.
-  RaiseProcessed(0,
-                 0);
+      // Reset playback position.
+      FOffset := 0;
+      FBasePos100ns := 0;
 
-  SetState(dsStop);
-  // ---------------------------------------------------------------------------
+      // Tell GUI immediately.
+      RaiseProcessed(0,
+                     0);
+
+      SetState(dsStop);
+      // -----------------------------------------------------------------------
+    end;
 
   if (pvMmcssHandle <> 0) then
     begin

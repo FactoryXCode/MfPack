@@ -16,7 +16,7 @@
 //              ceiling default -1.0 dBTP, and attack/release smoothing to avoid pumping.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX).
+// Intiator(s): Tony (maXcomX), Carmen (carmenh).
 // Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
@@ -26,7 +26,7 @@
 // 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
 // Related projects: MfPackX319
@@ -39,6 +39,7 @@
 //
 // =============================================================================
 // Source: FactoryX.Code.
+//         https://github.com/BillyDM/awesome-audio-dsp/blob/main/sections/DSP_COOKBOOKS.md
 // =============================================================================
 //
 // LICENSE
@@ -123,7 +124,7 @@ type
   IMfCompressorLimiterInspect = interface(IInterface)
   ['{59F0BB8A-7A32-4F10-9E0F-0C0D7A7F8E2A}']
 
-    function GetCompressorGRdB(): Single; stdcall; // negative (gain reduction).
+    function GetCompressorGRdB(): Single; stdcall; // Negative (gain reduction).
 
     function GetLimiterGRdB(): Single; stdcall; // negative (gain reduction).
   end;
@@ -170,6 +171,7 @@ type
     Settings: TDynamicsSettings;
 
     constructor Create();
+
     procedure ResetState();
     procedure ConfigureFormat(const SampleRate,
                               Channels: Integer);
@@ -931,13 +933,13 @@ end;
 
 { TMfCompressorLimiterMFT }
 
-constructor TMfCompressorLimiterMFT.Create;
+constructor TMfCompressorLimiterMFT.Create();
 var
   S: TDynamicsSettings;
 
 begin
 
-  inherited Create;
+  inherited Create();
 
   InterlockedExchange(FEnabledInt,
                       0);
@@ -949,7 +951,7 @@ begin
   // records at runtime; SetSettings writes into the inactive buffer and swaps.
   FSettingsPtr := nil;
 
-  FDsp := TAudioDynamicsDSP.Create;
+  FDsp := TAudioDynamicsDSP.Create();
 
   // Defaults requested:
   // True-peak guard optional, but we expose it like EQ/Flanger.

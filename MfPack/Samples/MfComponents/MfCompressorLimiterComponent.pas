@@ -14,7 +14,7 @@
 // Description: Compressor/Limiter non-visual component.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX).
+// Intiator(s): Tony (maXcomX), Carmen (carmenh).
 // Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
@@ -24,7 +24,7 @@
 // 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
 // Related projects: MfPackX319
@@ -37,6 +37,7 @@
 //
 // =============================================================================
 // Source: FactoryX.Code.
+//         https://github.com/BillyDM/awesome-audio-dsp/blob/main/sections/DSP_COOKBOOKS.md
 // =============================================================================
 //
 // LICENSE
@@ -82,6 +83,7 @@ type
     FMft: IMFTransform;
     FCtl: IMfCompressorLimiterControl;
     FIns: IMfCompressorLimiterInspect;
+    FMftObj: TMfCompressorLimiterMFT;
 
     FEnabled: Boolean;
     FSettings: TDynamicsSettings;
@@ -131,7 +133,9 @@ type
 
   public
 
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(AOwner: TComponent); //override;
+    procedure AfterConstruction(); override;
+    destructor Destroy(); override;
 
     // Meters (poll from GUI timer / OnProcessed)
     function CompressorGRdB(): Single;
@@ -170,7 +174,6 @@ type
     property TruePeakOversample: Integer read FTruePeakOversample write SetTruePeakOversample;   // 2/4/8
   end;
 
-
 procedure Register;
 
 
@@ -179,6 +182,7 @@ implementation
 
 procedure Register;
 begin
+
   RegisterComponents('MfPack Core Audio Samples',
                      [TMfCompressorLimiterEffect]);
 end;
@@ -217,24 +221,42 @@ begin
   FTruePeakGuard := False;
   FTruePeakCeilingDbTP := -1.0;
   FTruePeakOversample := 4;
+end;
 
-  if not (csDesigning in ComponentState) then
-    CheckForMft();
+
+procedure TMfCompressorLimiterEffect.AfterConstruction();
+begin
+  inherited;
+
+  CheckForMft();
+end;
+
+
+destructor TMfCompressorLimiterEffect.Destroy();
+begin
+
+  // Release interface views first.
+  FIns := nil;
+  FCtl := nil;
+  FMft := nil;
+
+  // THEN free the actual object.
+  FreeAndNil(FMftObj);
+
+  inherited;
 end;
 
 
 procedure TMfCompressorLimiterEffect.CheckForMft();
 begin
 
-  if (FMft <> nil) then
+  if (FMftObj <> nil) then
     Exit;
 
-  // Create MFT instance
-  FMft := TMfCompressorLimiterMFT.Create as IMFTransform;
-
-  // Grab control/inspect interfaces
-  FCtl := FMft as IMfCompressorLimiterControl;
-  FIns := FMft as IMfCompressorLimiterInspect;
+  FMftObj := TMfCompressorLimiterMFT.Create();
+  FMft := FMftObj as IMFTransform;
+  FCtl := FMftObj as IMfCompressorLimiterControl;
+  FIns := FMftObj as IMfCompressorLimiterInspect;
 
   PushAll();
 end;
@@ -250,8 +272,9 @@ end;
 procedure TMfCompressorLimiterEffect.EnsureCtl();
 begin
 
-  if (csDesigning in ComponentState) then
+  if IsDesigning() then
     Exit;
+
   CheckForMft();
 end;
 
@@ -260,6 +283,9 @@ procedure TMfCompressorLimiterEffect.PushAll();
 begin
 
   if (FCtl = nil) then
+    Exit;
+
+  if (Owner <> nil) and (csLoading in Owner.ComponentState) then
     Exit;
 
   FCtl.EnableFX(FEnabled);
@@ -274,7 +300,7 @@ end;
 procedure TMfCompressorLimiterEffect.ApplySettingsToMft();
 begin
 
-  if (csDesigning in ComponentState) then
+  if IsDesigning() then
     Exit;
 
   EnsureCtl();
@@ -289,7 +315,7 @@ begin
 
   FEnabled := Value;
 
-  if (csDesigning in ComponentState) then
+  if IsDesigning() then
     Exit;
 
   EnsureCtl();
@@ -440,7 +466,10 @@ begin
 
   FTruePeakGuard := Value;
 
-  if (csDesigning in ComponentState) then
+  if IsDesigning() then
+    Exit;
+
+  if (FMft <> nil) then
     Exit;
 
   EnsureCtl();
@@ -494,7 +523,7 @@ end;
 function TMfCompressorLimiterEffect.CompressorGRdB(): Single;
 begin
 
-  if (csDesigning in ComponentState) or (FIns = nil) then
+  if IsDesigning() or (FIns = nil) then
     Exit(0.0);
 
   Result := FIns.GetCompressorGRdB();
@@ -504,7 +533,7 @@ end;
 function TMfCompressorLimiterEffect.LimiterGRdB(): Single;
 begin
 
-  if (csDesigning in ComponentState) or (FIns = nil) then
+  if IsDesigning() or (FIns = nil) then
     Exit(0.0);
 
   Result := FIns.GetLimiterGRdB();

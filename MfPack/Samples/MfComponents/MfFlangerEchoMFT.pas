@@ -395,7 +395,7 @@ begin
   tau := ms / 1000.0;
 
   // alpha in (0..1): closer to 1 = more smoothing
-  Result := Single(Exp(-1.0 / (tau * SampleRate)));
+  Result := (Exp(-1.0 / (tau * SampleRate))) * 1.0;
 end;
 
 

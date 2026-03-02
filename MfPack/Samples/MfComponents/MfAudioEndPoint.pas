@@ -1,34 +1,36 @@
-// FactoryX
+﻿// FactoryX
 //
-// Copyright: � FactoryX. All rights reserved.
+// Copyright: � FactoryX. All rights reserved.
 //
-// Project: Media Foundation - MFPack
+// Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
 //                   https://github.com/FactoryXCode/MfPack
 // Module: MfAudioEndPoint.pas
-// Kind: Pascal Unit Component
+// Kind: Pascal Unit
 // Release date: 13-08-2020
 // Language: ENU
 //
-// Version: 3.1.9
-//
+// Revision Version: 3.1.9
 // Description: Component to manage capture or render endpoints and properties.
 //              It also provides an audio endpoint callback.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX), Peter (OzShips), Ramyses De Macedo Rodrigues.
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships).
+// Intiator(s): Tony (maXcomX).
+// Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 // 12/06/2024 Tony                Removed EDataFlowEx.
 // 16/07/2025 Tony                updated some code and fixed some issues.
+// 05/02/2026 Carmen/Tony         Rewritten: thread-safe, events (no messages), IMMNotificationClient + RefreshDefaultDevice.
 //------------------------------------------------------------------------------
 //
-// Remarks: -
+// Remarks: - Requires Windows 10 or higher.
+//          - OnNotify event still uses PAUDIO_VOLUME_NOTIFICATION_DATA. In the new code the pointer is a COPY,
+//            valid only during the event call (main thread). Do NOT store it.
 //
 // Related objects: -
 // Related projects: MfPackX319
@@ -39,6 +41,8 @@
 //
 // Todo: -
 //
+// =============================================================================
+// Source: FactoryX.Code.
 // =============================================================================
 //
 // LICENSE
@@ -64,102 +68,113 @@ unit MfAudioEndPoint;
 interface
 
 uses
+
   {WinApi}
   WinApi.Windows,
-  WinApi.CommCtrl,
   WinApi.Messages,
   WinApi.WinApiTypes,
-  WinApi.Coml2Api,
   WinApi.ComBaseApi,
   {System}
   System.SysUtils,
   System.Classes,
+  System.SyncObjs,
+  System.Types,
   System.Win.ComObj,
   {ActiveX}
   WinApi.ActiveX.PropSys,
   WinApi.ActiveX.PropIdl,
   WinApi.ActiveX.ObjBase,
-  {MediaFoundationApi}
-  WinApi.MediaFoundationApi.MfUtils,
   {CoreAudioApi}
   WinApi.CoreAudioApi.FunctionDiscoveryKeys_devpkey,
   WinApi.CoreAudioApi.MMDeviceApi,
   WinApi.CoreAudioApi.MMDevApiUtils,
   WinApi.CoreAudioApi.Endpointvolume;
 
-  // Comment out if you don't want to see debug messages.
-  //{$DEFINE CONT_DEBUG}
-
-const
-  // Defines the maximum and minimum in- and output scalar values.
-  MAX_INPUT_SCALAR_VALUE  : Single = 1.0;
-  MIN_INPUT_SCALAR_VALUE  : Single = 0.0;
-  MAX_OUTPUT_SCALAR_VALUE : Single = 1.0;
-  MIN_OUTPUT_SCALAR_VALUE : Single = 0.0;
-
-  // Defines the maximum and minimum in- and output DB values.
-  MAX_INPUT_DB_VALUE  : Single = -6.0;  // arbitrary value!
-  MIN_INPUT_DB_VALUE  : Single = 0.0;
-  MAX_OUTPUT_DB_VALUE : Single = -6.0;  // arbitrary value!
-  MIN_OUTPUT_DB_VALUE : Single = 0.0;
-
-  // Message ID's
-  WM_MIXERNOTIFY            = WM_APP + 200;
-
-type
-  eState = (DEVICE_STATE_ACTIVE      = $00000001,
-            DEVICE_STATE_DISABLED    = $00000002,
-            DEVICE_STATE_NOTPRESENT  = $00000004,
-            DEVICE_STATE_UNPLUGGED   = $00000008,
-            DEVICE_STATEMASK_ALL     = $0000000F);
-
 type
 
   // Callback method for endpoint-volume-change notifications from IAudioEndpointVolumeCallback.
-  TOnNotify = procedure (Sender: TObject; pNotify: PAUDIO_VOLUME_NOTIFICATION_DATA) of object;
+  // NOTE: pNotify points to a COPY, valid only during this event call.
+  TOnNotify = procedure (Sender: TObject;
+                         pNotify: PAUDIO_VOLUME_NOTIFICATION_DATA) of object;
 
-  // Callback COM interface
+
+  TMfAudioEndPoint = class; // forward
+
+  // Volume callback COM interface
   TOnEndPointNotify = class(TInterfacedPersistent, IAudioEndpointVolumeCallback)
+  private
+
+    FOwner: TMfAudioEndPoint;
+  public
+
+    constructor Create(AOwner: TMfAudioEndPoint);
+
     function OnNotify(pNotify: PAUDIO_VOLUME_NOTIFICATION_DATA): HRESULT; stdcall;
+    procedure DetachOwner; inline;
   end;
+
+
+  // Device notification COM interface (default-device switching etc.)
+  TOnDeviceNotify = class(TInterfacedObject, IMMNotificationClient)
+  private
+
+    FOwner: TMfAudioEndPoint;
+
+  public
+
+    constructor Create(AOwner: TMfAudioEndPoint);
+    destructor Destroy(); override;
+
+    procedure DetachOwner; inline;
+    function OnDeviceStateChanged(pwstrDeviceId: LPCWSTR;
+                                  dwNewState: DWord): HResult; stdcall;
+    function OnDeviceAdded(pwstrDeviceId: LPCWSTR): HResult; stdcall;
+    function OnDeviceRemoved(pwstrDeviceId: LPCWSTR): HResult; stdcall;
+    function OnDefaultDeviceChanged(flow: EDataFlow;
+                                    role: ERole;
+                                    pwstrDefaultDeviceId: PWideChar): HResult; stdcall;
+    function OnPropertyValueChanged(pwstrDeviceId: LPCWSTR;
+                                    const key: PROPERTYKEY): HResult; stdcall;
+  end;
+
 
   TMfAudioEndPoint = class(TComponent)
   private
-    dwDeviceID: DWord;  // Device ID
-    uiChannels: UINT;   // Total number of channels
+
+    FLock: TCriticalSection;
+
+    dwDeviceID: DWord;  // Device ID (index into Devices[])
+    uiChannels: UINT;   // Total number of channels (last notify snapshot)
     dwEndPointsCount: DWord;
+
     wsDeviceName: string;
     wsDeviceInterfaceName: string;
     wsDeviceDesc: string;
 
-    fEndPointDevices: TEndPointDeviceArray;  // Array containing properties for each endpointdevice found on this system.
+    fEndPointDevices: TEndPointDeviceArray;  // Cached endpoints list (MfPack record)
 
     fSelectedIMMDevice: IMMDevice;
     fDeviceEnumerator: IMMDeviceEnumerator;
     fAudioEndpoint: IAudioEndpointVolumeEx;
+
     fOnEndPointNotify: TOnEndPointNotify;
+    fOnDeviceNotify: IMMNotificationClient;
+    FOnNotify: TOnNotify;
 
-    fDataFlow: EDataFlow; // The data-flow direction for the endpoint device.
+    FguidEventContext: TGuid;
 
-    fRole: ERole;       // The role of the endpoint device.
-                        // The IMMDeviceEnumerator.GetDefaultAudioEndpoint and
-                        // IMMNotificationClient.OnDefaultDeviceChanged methods use the
-                        // constants defined in the ERole enumeration.
-                        // eConsole         = Games, system notification sounds, and voice commands.
-                        // eMultimedia      = Music, movies, narration, and live music recording.
-                        // eCommunications  = Voice communications (talking to another person).
+    fDataFlow: EDataFlow;
+    fRole: ERole;
+    fState: eState;
 
-    fState: eState;     // The state or states of the endpoints that are to be included in the collection
-                        // Possible values or combinations are:
-                        //   DEVICE_STATE_ACTIVE, DEVICE_STATE_DISABLED, DEVICE_STATE_NOTPRESENT or DEVICE_STATE_UNPLUGGED
-                        //   To include all endpoints, regardless of state, set dwStateMask = DEVICE_STATEMASK_ALL
+    FFollowDefaultDevice: Boolean;
+    FShuttingDown: Integer; // 0=running, 1=shutting down (guards callbacks)
 
-    g_guidEventContext: TGuid; // Client's proprietary event-context GUID
-    FOnNotify: TOnNotify;      // Component's Eventhandler
+    // Keep object refs for DetachOwner; interface refs own lifetime (refcount)
+    fOnDeviceNotifyObj: TOnDeviceNotify;
+    fOnEndPointNotifyIntf: IAudioEndpointVolumeCallback;
 
     function GetGuidContextAsString(): string;
-
-    // The GetChannels method gets a count of the channels in the audio stream that enters or leaves the audio endpoint device.
     function GetChannels(): UINT;
 
     function GetMute(): BOOL;
@@ -173,29 +188,30 @@ type
 
     procedure SetDataFlow(aValue: EDataFlow);
     procedure SetDeviceState(aValue: string);
-
     procedure SetEndPointDevice(aValue: DWord);
 
-  protected
-    // Catches all messages for this object and posts them to the OnNotify eventhandler.
-    procedure WindProc(var Msg: TMessage);
+    procedure DoVolumeNotifyOnMainThread(pNotifyCopy: PAUDIO_VOLUME_NOTIFICATION_DATA);
+
+    procedure RebuildEndpointCache;
+    function FindDeviceIndexByIdStr(const DeviceId: WideString): Integer;
 
   public
-    fHwnd: THandle;    // Handle to this mixer.
 
     constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
+    destructor Destroy(); override;
 
-    // Gets the volume range
+    // Ensure callbacks are unregistered and owners detached before memory is freed.
+    procedure BeforeDestruction(); override;
+
+    // NEW: Sync this control to the current Windows default endpoint for (DeviceDataFlow, DeviceRole)
+    function GetDefaultDevice: HResult;
+
+    // Existing methods (do not rename)
     procedure GetVolumeRange(out pflVolumeMindB: Single;
                              out pflVolumeMaxdB: Single;
                              out pflVolumeIncrementdB: Single);
-    // The GetChannelVolumeLevel method gets the volume level, in decibels,
-    // of the specified channel in the audio stream that enters or leaves the audio endpoint device.
+
     function GetChannelScalarVolume(Index: UINT): Single;
-    // The SetChannelVolumeLevelScalar method sets the normalized,
-    // audio-tapered volume level of the specified channel in the audio stream that
-    // enters or leaves the audio endpoint device.
     procedure SetChannelScalarVolume(Index: UINT; chVolume: Single);
 
     function GetStateAsString(): string;
@@ -205,52 +221,47 @@ type
     function RegisterAudioEndpointVolumeCallback(pNotify: IAudioEndpointVolumeCallback): HResult;
     function UnregisterAudioEndpointVolumeCallback(pNotify: IAudioEndpointVolumeCallback): HResult;
 
-    // HELPERS /////////////////////////////////////////////////////////////////////
-
-    // Get the Endpoint device friendly name or description
-    // (in WCHAR string format) for the endpoint device.
-    function GetAudioDeviceDescriptions(DefaultDevice: IMMDevice; // call GetDefaultAudioEndPointDevice first to obtain the default device.
-                                        const DevicePkey: PROPERTYKEY; // Possible values are: PKEY_Device_FriendlyName, PKEY_Device_DeviceDesc or PKEY_DeviceInterface_FriendlyName.
+    function GetAudioDeviceDescriptions(DefaultDevice: IMMDevice;
+                                        const DevicePkey: PROPERTYKEY;
                                         out deviceDesc: WideString): HResult;
 
-    // Get EndpointDevices
     function GetAudioEndPoints(const flow: EDataFlow;
                                state: eState;
                                out endpointdevices: TEndPointDeviceArray): HResult;
 
-    // Get the default audio endpoint
     function GetDefaultAudioEndPointDevice(out audioEndPoint: IMMDevice): HResult;
 
     // Non visual properties
-    property Handle: THandle read fHwnd;
-    property IMMDevice: IMMDevice read fSelectedIMMDevice;
+    property IMMDeviceInterface: IMMDevice read fSelectedIMMDevice;
     property ChannelVolume[_Index: UINT]: Single read GetChannelScalarVolume write SetChannelScalarVolume;
-    property Devices: TEndPointDeviceArray read FEndPointDevices;
+    property Devices: TEndPointDeviceArray read fEndPointDevices;
     property EndPointsCount: DWord read dwEndPointsCount;
 
   published
-    { published methods }
+
     // Read-only properties
     property DeviceName: string read wsDeviceName;
     property DeviceInterfaceName: string read wsDeviceInterfaceName;
     property DeviceDescription: string read wsDeviceDesc;
-    property DeviceGuidContext: string read GetGuidContextAsString;  // Guidcontext of this control
+    property DeviceGuidContext: string read GetGuidContextAsString;
     property DeviceRole: ERole read fRole;
-    property State: eState read fState default DEVICE_STATE_ACTIVE;
+    property State: eState read fState default DEVICE_STATEMASK_ALL;
     property Channels: UINT read GetChannels;
 
     // read/write properties
     property DeviceID: DWord read dwDeviceID write SetEndPointDevice default 0;
     property DeviceDataFlow: EDataFlow read fDataFlow write SetDataFlow default eRender;
     property DeviceState: string read GetStateAsString write SetDeviceState;
+
     property MasterScalarVolume: Single read GetMasterScalarVolume write SetMasterScalarVolume;
     property MasterDbVolume: Single read GetMasterDbVolume write SetMasterDbVolume;
     property Mute: BOOL read GetMute write SetMute default BOOL(False);
+
+    // NEW (opt-in): automatically follow Windows default device changes (speakers ↔ headphones etc.)
+    property FollowDefaultDevice: Boolean read FFollowDefaultDevice write FFollowDefaultDevice default False;
+
     property OnNotify: TOnNotify read FOnNotify write FOnNotify;
   end;
-
-var
-  hhwnd: THandle;
 
 procedure Register;
 
@@ -261,596 +272,840 @@ implementation
 procedure Register;
 begin
 
-  RegisterComponents('MfPack Core Audio Samples', [TMfAudioEndPoint]);
+  RegisterComponents('MfPack Core Audio Samples',
+                     [TMfAudioEndPoint]);
 end;
 
 
-// Constructor
+function _CopyNotifyStruct(pNotify: PAUDIO_VOLUME_NOTIFICATION_DATA): PAUDIO_VOLUME_NOTIFICATION_DATA;
+var
+  cb: NativeUInt;
+
+begin
+
+  Result := nil;
+  if (pNotify = nil) then
+    Exit;
+
+  // AUDIO_VOLUME_NOTIFICATION_DATA ends with variable-length afChannelVolumes[...]
+  cb := SizeOf(AUDIO_VOLUME_NOTIFICATION_DATA);
+  if( pNotify^.nChannels > 1) then
+    cb := cb + NativeUInt(pNotify^.nChannels - 1) * SizeOf(Single);
+
+  GetMem(Result,
+         cb);
+  Move(pNotify^,
+       Result^,
+       cb);
+end;
+
+
+{ TOnEndPointNotify }
+
+constructor TOnEndPointNotify.Create(AOwner: TMfAudioEndPoint);
+begin
+
+  inherited Create();
+
+  FOwner := AOwner;
+end;
+
+procedure TOnEndPointNotify.DetachOwner;
+begin
+  FOwner := nil;
+end;
+
+
+
+function TOnEndPointNotify.OnNotify(pNotify: PAUDIO_VOLUME_NOTIFICATION_DATA): HRESULT;
+var
+  CopyPtr: PAUDIO_VOLUME_NOTIFICATION_DATA;
+
+begin
+
+  Result := S_OK;
+
+  if (FOwner = nil) or (pNotify = nil) then
+    Exit(S_OK);
+
+  // If owner is shutting down, do nothing.
+  if (InterlockedCompareExchange(FOwner.FShuttingDown, 0, 0) <> 0) then
+    Exit(S_OK);
+
+  CopyPtr := _CopyNotifyStruct(pNotify);
+  if (CopyPtr = nil) then
+    Exit(E_OUTOFMEMORY);
+
+  TThread.Queue(nil,
+                procedure
+                begin
+                  try
+
+                    if (FOwner <> nil) then
+                      FOwner.DoVolumeNotifyOnMainThread(CopyPtr);
+                  finally
+
+                    FreeMem(CopyPtr);
+                  end;
+                end);
+end;
+
+
+{ TOnDeviceNotify }
+
+constructor TOnDeviceNotify.Create(AOwner: TMfAudioEndPoint);
+begin
+
+  inherited Create();
+
+  FOwner := AOwner;
+end;
+
+
+destructor TOnDeviceNotify.Destroy();
+begin
+
+end;
+
+
+procedure TOnDeviceNotify.DetachOwner;
+begin
+
+  FOwner := nil;
+end;
+
+
+function TOnDeviceNotify.OnDeviceStateChanged(pwstrDeviceId: LPCWSTR; dwNewState: DWord): HResult;
+begin
+
+  
+  if (FOwner = nil) then
+    Exit(S_OK);
+
+  if (InterlockedCompareExchange(FOwner.FShuttingDown, 0, 0) <> 0) then
+    Exit(S_OK);
+
+  // Rebuild cache; if currently following default, refresh.
+  if (FOwner <> nil) then
+    TThread.Queue(nil,
+                  procedure
+                    begin
+                      if (FOwner = nil) then
+                        Exit;
+                      FOwner.RebuildEndpointCache();
+                      if FOwner.FFollowDefaultDevice then
+                        FOwner.GetDefaultDevice();
+                    end);
+  Result := S_OK;
+end;
+
+
+function TOnDeviceNotify.OnDeviceAdded(pwstrDeviceId: LPCWSTR): HResult;
+begin
+
+  
+  if (FOwner = nil) then
+    Exit(S_OK);
+
+  if (InterlockedCompareExchange(FOwner.FShuttingDown, 0, 0) <> 0) then
+    Exit(S_OK);
+if (FOwner <> nil) then
+    TThread.Queue(nil,
+                  procedure
+                    begin
+
+                      if (FOwner = nil) then
+                        Exit;
+                      FOwner.RebuildEndpointCache;
+                      if FOwner.FFollowDefaultDevice then
+                        FOwner.GetDefaultDevice();
+                    end);
+  Result := S_OK;
+end;
+
+
+function TOnDeviceNotify.OnDeviceRemoved(pwstrDeviceId: LPCWSTR): HResult;
+begin
+
+  
+  if (FOwner = nil) then
+    Exit(S_OK);
+
+  if (InterlockedCompareExchange(FOwner.FShuttingDown, 0, 0) <> 0) then
+    Exit(S_OK);
+  if (FOwner <> nil) then
+    TThread.Queue(nil,
+                  procedure
+                  begin
+
+                    if (FOwner = nil) then
+                      Exit;
+                    FOwner.RebuildEndpointCache;
+                    if FOwner.FFollowDefaultDevice then
+                      FOwner.GetDefaultDevice();
+                  end);
+  Result := S_OK;
+end;
+
+
+function TOnDeviceNotify.OnDefaultDeviceChanged(flow: EDataFlow;
+                                                role: ERole;
+                                                pwstrDefaultDeviceId: PWideChar): HResult;
+begin
+
+  
+  if (FOwner = nil) then
+    Exit(S_OK);
+
+  if (InterlockedCompareExchange(FOwner.FShuttingDown, 0, 0) <> 0) then
+    Exit(S_OK);
+  if (FOwner <> nil) and FOwner.FFollowDefaultDevice then
+    begin
+
+      // Only react when this component’s flow/role matches.
+      if (flow = FOwner.fDataFlow) and (role = FOwner.fRole) then
+        TThread.Queue(nil,
+                      procedure
+                      begin
+
+                        if (FOwner <> nil) then
+                          FOwner.GetDefaultDevice();
+                      end);
+     end;
+  Result := S_OK;
+end;
+
+
+function TOnDeviceNotify.OnPropertyValueChanged(pwstrDeviceId: LPCWSTR; const key: PROPERTYKEY): HResult;
+begin
+
+  
+  if (FOwner = nil) then
+    Exit(S_OK);
+
+  if (InterlockedCompareExchange(FOwner.FShuttingDown, 0, 0) <> 0) then
+    Exit(S_OK);
+  if (FOwner <> nil) then
+    TThread.Queue(nil,
+                  procedure
+                  begin
+
+                    if (FOwner = nil) then
+                      Exit;
+                    // keep simple: rebuild cache so names/desc update
+                    FOwner.RebuildEndpointCache() ;
+                  end);
+  Result := S_OK;
+end;
+
+
+{ TMfAudioEndPoint }
+
 constructor TMfAudioEndPoint.Create(AOwner: TComponent);
 var
   hr: HResult;
-
-label
-  done;
 
 begin
 
   inherited Create(AOwner);
 
-  // Get handle for this mixer
-  fHwnd := AllocateHWnd(WindProc);
-  hhwnd := fHwnd;
+  FLock := TCriticalSection.Create;
 
-  // Create the contextguid
-  hr := CoCreateGuid(g_guidEventContext);
-  if FAILED(hr) then
-    goto done;
-
-  // We want to know what the current default endpoint device is.
-  hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
-                         nil,
-                         INT(CLSCTX_INPROC_SERVER),
-                         IID_IMMDeviceEnumerator,
-                         FDeviceEnumerator);
-  if FAILED(hr) then
-    goto done;
-
-  // If you need the default capture device,
-  // change the value of the first parameter (fDataFlow) in the call to the from eRender to eCapture.
+  // Defaults
   fRole := eMultimedia;
   fDataFlow := eRender;
   fState := DEVICE_STATE_ACTIVE;
   dwDeviceID := 0;
+  uiChannels := 0;
+  dwEndPointsCount := 0;
+  FFollowDefaultDevice := False;
 
-  // Get all EndpointDevices and store them in an array
-  hr := GetEndpointDevices(fDataFlow,
-                           DWord(fState),
-                           FEndPointDevices,
-                           dwEndPointsCount);
-  if FAILED(hr) then
-    goto done;
+  OleCheck(CoCreateGuid(FguidEventContext));
 
-  if Assigned(FEndPointDevices) then
-    SetEndPointDevice(dwDeviceID);
+  // IMMDeviceEnumerator
+  hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
+                            nil,
+                            INT(CLSCTX_INPROC_SERVER),
+                            IID_IMMDeviceEnumerator,
+                            fDeviceEnumerator);
+  OleCheck(hr);
 
-done:
-  if ((csDesigning in ComponentState) = False) then
-    if FAILED(hr) then
-      begin
-        OleCheck(hr);
-        Abort;
-      end;
-end;
+  // Register device notifications.
+  fOnDeviceNotifyObj := TOnDeviceNotify.Create(Self);
+  fOnDeviceNotify := fOnDeviceNotifyObj as IMMNotificationClient;
+  OleCheck(fDeviceEnumerator.RegisterEndpointNotificationCallback(fOnDeviceNotify));
 
+  // Internal endpoint volume callback.
+  fOnEndPointNotify := TOnEndPointNotify.Create(Self);
 
-// Destructor
-destructor TMfAudioEndPoint.Destroy;
-begin
+  // Hold an interface reference for UnregisterControlChangeNotify; TInterfacedPersistent is not refcounted.
+  fOnEndPointNotifyIntf := fOnEndPointNotify as IAudioEndpointVolumeCallback;
 
-  // Unregister callback interface
-  if (FDeviceEnumerator <> Nil) then
-    OleCheck(FAudioEndpoint.UnregisterControlChangeNotify(FOnEndPointNotify));
+  // Build cache and bind selected device index.
+  RebuildEndpointCache();
 
-  // SafeRelease is declared in unit WinApi.MediaFoundationApi.MfUtils.pas
-  SafeRelease(FDeviceEnumerator);
-  SafeRelease(fSelectedIMMDevice);
-  SafeRelease(FAudioEndpoint);
-  fOnEndPointNotify := Nil;
-  // Free the Handle
-  DeallocateHWnd(fHwnd);
-  SetLength(fEndPointDevices, 0);
-
-  inherited Destroy;
-end;
-
-
-procedure TMfAudioEndPoint.WindProc(var Msg: TMessage);
-var
-  msg_lp: PAUDIO_VOLUME_NOTIFICATION_DATA;
-
-begin
-  inherited;
-
-  if (Msg.Msg = WM_MIXERNOTIFY) then // Check for mixer messages
+  if (dwEndPointsCount > 0) then
+    SetEndPointDevice(dwDeviceID)
+  else
     begin
-      if (Msg.WParam = S_OK) then
-        begin
-          msg_lp := PAUDIO_VOLUME_NOTIFICATION_DATA(Msg.LParam);
 
-{$IFDEF CONT_DEBUG}
-          // Show the output in messages window
-          OutputDebugString(pChar('==> OnEndPointNotify.OnNotify messages:'));
-          OutputDebugString(pChar(''));
-          OutputDebugString(pChar('guidEventContext: ' + GuidToString(msg_lp^.guidEventContext)));
-          OutputDebugString(pChar('Muted: ' + BoolToStr(msg_lp^.bMuted)));
-          OutputDebugString(pChar('MasterVolume: ' + FloatToStr(msg_lp^.fMasterVolume)));
-          OutputDebugString(pChar('Channels: ' + IntToStr(msg_lp^.nChannels)));
-          OutputDebugString(pChar('ChannelVolume Left: ' + IntToStr(Round(msg_lp^.afChannelVolumes[0] * 100))));
-          if (msg_lp^.nChannels >= 2) then
-            OutputDebugString(pChar('ChannelVolume Right: ' + IntToStr(Round(msg_lp^.afChannelVolumes[1] * 100))));
-          OutputDebugString(pChar(''));
-          OutputDebugString(pChar('<== OnEndPointNotify.OnNotify messages END'));
-{$ENDIF}
+      wsDeviceName := '?';
+      wsDeviceInterfaceName := 'No Active Endpoint devices found!';
+      wsDeviceDesc := '?';
+    end;
+end;
 
-          // Send received struct to TControl's OnNotify eventhandler.
-          if Assigned(FOnNotify) then
-            FOnNotify(Self,
-                      msg_lp);
 
-          // Set properties
-          uiChannels := msg_lp^.nChannels;
-          Mute := msg_lp^.bMuted;
-        end
+
+procedure TMfAudioEndPoint.BeforeDestruction();
+begin
+
+  // Stop any future callback work immediately.
+  InterlockedExchange(FShuttingDown,
+                      1);
+
+  // Make sure we do not try to auto-follow during teardown.
+  FFollowDefaultDevice := False;
+
+  // Unregister device notifications (never raise from teardown).
+  try
+    if Assigned(fDeviceEnumerator) and Assigned(fOnDeviceNotify) then
+      fDeviceEnumerator.UnregisterEndpointNotificationCallback(fOnDeviceNotify);
+  except
+  end;
+
+  // Unregister endpoint volume callback.
+  try
+    if Assigned(fAudioEndpoint) and Assigned(fOnEndPointNotifyIntf) then
+      fAudioEndpoint.UnregisterControlChangeNotify(fOnEndPointNotifyIntf);
+  except
+  end;
+
+  // Detach owners so any queued callbacks become no-ops.
+  if Assigned(fOnEndPointNotify) then
+    fOnEndPointNotify.DetachOwner;
+
+  if Assigned(fOnDeviceNotifyObj) then
+    fOnDeviceNotifyObj.DetachOwner;
+
+  // Release interface refs (refcounted lifetime).
+  fOnEndPointNotifyIntf := nil;
+  fOnDeviceNotify := nil;
+
+  inherited BeforeDestruction;
+end;
+
+
+destructor TMfAudioEndPoint.Destroy();
+begin
+
+  try
+    // Callback unregistration and owner detaching is handled in BeforeDestruction.
+
+    fAudioEndpoint := nil;
+    fSelectedIMMDevice := nil;
+    fDeviceEnumerator := nil;
+
+    fOnDeviceNotifyObj := nil;
+    FreeAndNil(fOnEndPointNotify);
+SetLength(fEndPointDevices,
+              0);
+  finally
+
+    FreeAndNil(FLock);
+    inherited Destroy;
+  end;
+end;
+
+
+procedure TMfAudioEndPoint.DoVolumeNotifyOnMainThread(pNotifyCopy: PAUDIO_VOLUME_NOTIFICATION_DATA);
+begin
+
+  if (pNotifyCopy = nil) then
+    Exit;
+
+  FLock.Enter();
+
+  try
+
+    uiChannels := pNotifyCopy^.nChannels;
+  finally
+
+    FLock.Leave();
+  end;
+
+  if Assigned(FOnNotify) then
+    FOnNotify(Self,
+              pNotifyCopy);
+end;
+
+
+procedure TMfAudioEndPoint.RebuildEndpointCache;
+begin
+
+  GetEndpointDevices(fDataFlow,
+                     DWord(fState),
+                     fEndPointDevices,
+                     dwEndPointsCount);
+end;
+
+
+function TMfAudioEndPoint.FindDeviceIndexByIdStr(const DeviceId: WideString): Integer;
+var
+  i: Integer;
+
+begin
+
+  Result := -1;
+  for i := 0 to Integer(dwEndPointsCount) - 1 do
+    if (fEndPointDevices[i].pwszID <> nil) and SameText(string(fEndPointDevices[i].pwszID),
+                                                               string(DeviceId)) then
+      Exit(i);
+end;
+
+
+function TMfAudioEndPoint.GetDefaultDevice: HResult;
+var
+  Dev: IMMDevice;
+  pId: PWideChar;
+  IdStr: WideString;
+  Idx: Integer;
+
+begin
+
+  Result := GetDefaultEndPointAudioDevice(Dev,
+                                          FRole,
+                                          FDataFlow);
+  if Failed(Result) or (Dev = nil) then
+    Exit;
+
+  pId := nil;
+  Result := Dev.GetId(pId);
+  if Failed(Result) then
+    Exit;
+
+  try
+
+    IdStr := WideString(pId);
+  finally
+
+    CoTaskMemFree(pId);
+  end;
+
+  // Ensure cache is current and find index
+  RebuildEndpointCache();
+  Idx := FindDeviceIndexByIdStr(IdStr);
+
+  if (Idx >= 0) then
+    begin
+
+      // Bind to the default device by index (keeps old semantics consistent)
+      SetEndPointDevice(DWord(Idx));
+      Result := S_OK;
     end
-      // Any other messages are passed to DefWindowProc, which tells Windows to handle the message.
-      // NOTE: The first parameter, fHwnd, is the handle of the window receiving this message.
-      //       It is obtained from the call to AllocateHWnd in the Constructor.
   else
-    msg.Result := DefWindowProc(fHwnd,
-                                Msg.Msg,
-                                Msg.WParam,
-                                Msg.LParam);
+    Result := E_NOTFOUND;
 end;
 
 
-procedure TMfAudioEndPoint.GetVolumeRange(out pflVolumeMindB: Single;
-                                          out pflVolumeMaxdB: Single;
-                                          out pflVolumeIncrementdB: Single);
+function TMfAudioEndPoint.GetGuidContextAsString: string;
+begin
+
+  Result := GuidToString(FguidEventContext);
+end;
+
+
+function TMfAudioEndPoint.GetChannels: UINT;
 var
-  hr: HResult;
+  cc: UINT;
 
 begin
 
-  hr := FAudioEndpoint.GetVolumeRange(pflVolumeMindB,
-                                      pflVolumeMaxdB,
-                                      pflVolumeIncrementdB);
-  if FAILED(hr) then
-    begin
-      OleCheck(hr);
-      pflVolumeMindB := 0;
-      pflVolumeMaxdB := 0;
-      pflVolumeIncrementdB := 0;
+  cc := 0;
+  if Assigned(fAudioEndpoint) then
+    fAudioEndpoint.GetChannelCount(cc);
+
+  if (cc = 0) then
+  begin
+
+    FLock.Enter();
+
+    try
+
+      cc := uiChannels;
+    finally
+
+      FLock.Leave();
     end;
+  end;
+
+  Result := cc;
 end;
 
 
-function TMfAudioEndPoint.GetGuidContextAsString(): string;
-begin
-
-  Result := GuidToString(g_guidEventContext);
-end;
-
-
-function TMfAudioEndPoint.GetChannels(): UINT;
+function TMfAudioEndPoint.GetMute: BOOL;
 var
-  hr: HResult;
-  channels: UINT;
+  b: INT; // MfPack BOOL workaround
 
 begin
 
-  hr := FAudioEndpoint.GetChannelCount(channels);
-  if SUCCEEDED(hr) then
-    Result := channels
-  else
-    begin
-      OleCheck(hr);
-      Result := 0;
-    end;
-end;
+  Result := BOOL(False);
 
+  if not Assigned(fAudioEndpoint) then
+    Exit;
 
-function TMfAudioEndPoint.GetMute(): BOOL;
-var
-  hr: HResult;
-  Res: BOOL;
-
-begin
-
-  hr := FAudioEndpoint.GetMute(INT(Res));
-  if FAILED(hr) then
-    OleCheck(hr);
-  Result := Res;
+  b := 0;
+  if Succeeded(fAudioEndpoint.GetMute(b)) then
+    Result := BOOL(b <> 0);
 end;
 
 
 procedure TMfAudioEndPoint.SetMute(aValue: BOOL);
-var
-  hr: HResult;
-
 begin
 
-  // This is a workaround on the BOOL issue.
-  // See comment at DCBOOL in WinApi.WinApiTypes.pas
-  hr := FAudioEndpoint.SetMute(INT(aValue),
-                               g_guidEventContext);
-  if FAILED(hr) then
-    OleCheck(hr);
+  if Assigned(fAudioEndpoint) then
+    // MfPack: SetMute expects INT {BOOL} (0/1)
+    fAudioEndpoint.SetMute(Abs(Integer(aValue)),
+                           FguidEventContext);
 end;
 
 
-function TMfAudioEndPoint.GetMasterScalarVolume(): Single;
+function TMfAudioEndPoint.GetMasterScalarVolume: Single;
 var
-  hr: HResult;
-  sVolLevel: Single;
+  v: Single;
 
 begin
 
-  hr := FAudioEndpoint.GetMasterVolumeLevelScalar(sVolLevel);
-  if FAILED(hr) then
-    begin
-      OleCheck(hr);
-      Result := 0.0;
-    end
-  else
-    Result := sVolLevel;
+  v := 0.0;
+  if Assigned(fAudioEndpoint) then
+    fAudioEndpoint.GetMasterVolumeLevelScalar(v);
+  Result := v;
 end;
 
 
 procedure TMfAudioEndPoint.SetMasterScalarVolume(aValue: Single);
-var
-  hr: HResult;
 begin
-  if (aValue < MIN_INPUT_SCALAR_VALUE) then
-    aValue := MIN_INPUT_SCALAR_VALUE;
-  if (aValue > MAX_INPUT_SCALAR_VALUE) then
-    aValue := MAX_INPUT_SCALAR_VALUE;
-  hr := FAudioEndpoint.SetMasterVolumeLevelScalar(aValue,
-                                                  @g_guidEventContext);
-  OleCheck(hr);
+
+  if Assigned(fAudioEndpoint) then
+    fAudioEndpoint.SetMasterVolumeLevelScalar(aValue,
+                                              @FguidEventContext);
+end;
+
+
+function TMfAudioEndPoint.GetMasterDbVolume: Single;
+var
+  v: Single;
+
+begin
+
+  v := 0.0;
+  if Assigned(fAudioEndpoint) then
+    fAudioEndpoint.GetMasterVolumeLevel(v);
+  Result := v;
+end;
+
+
+procedure TMfAudioEndPoint.SetMasterDbVolume(aValue: Single);
+begin
+
+  if Assigned(fAudioEndpoint) then
+    fAudioEndpoint.SetMasterVolumeLevel(aValue,
+                                        @FguidEventContext);
+end;
+
+procedure TMfAudioEndPoint.GetVolumeRange(out pflVolumeMindB,
+                                          pflVolumeMaxdB,
+                                          pflVolumeIncrementdB: Single);
+begin
+
+  pflVolumeMindB := 0;
+  pflVolumeMaxdB := 0;
+  pflVolumeIncrementdB := 0;
+  if Assigned(fAudioEndpoint) then
+    fAudioEndpoint.GetVolumeRange(pflVolumeMindB,
+                                  pflVolumeMaxdB,
+                                  pflVolumeIncrementdB);
 end;
 
 
 function TMfAudioEndPoint.GetChannelScalarVolume(Index: UINT): Single;
 var
-  hr: HResult;
-  fLevelDB: Single;
+  snLevel: Single;
 
 begin
 
-  hr := FAudioEndpoint.GetChannelVolumeLevel(Index,
-                                             fLevelDB);
-  if SUCCEEDED(hr) then
-    Result := fLevelDB
-  else
-    begin
-      OleCheck(hr);
-      Result := 0;
-    end;
+  snLevel := 0.0;
+  if Assigned(fAudioEndpoint) then
+    fAudioEndpoint.GetChannelVolumeLevelScalar(Index,
+                                               snLevel);
+  Result := snLevel;
 end;
 
 
-procedure TMfAudioEndPoint.SetChannelScalarVolume(Index: UINT;
-                                                  chVolume: Single);
-var
-  hr: HResult;
-
+procedure TMfAudioEndPoint.SetChannelScalarVolume(Index: UINT; chVolume: Single);
 begin
-
-  hr := FAudioEndpoint.SetChannelVolumeLevel(Index,
-                                             chVolume,
-                                             @g_GuidEventContext);
-  OleCheck(hr);
+  if Assigned(fAudioEndpoint) then
+    fAudioEndpoint.SetChannelVolumeLevelScalar(Index,
+                                               chVolume,
+                                               @FguidEventContext);
 end;
 
 
-function TMfAudioEndPoint.GetStateAsString(): string;
+function TMfAudioEndPoint.GetStateAsString: string;
 begin
 
-  case fState of
-    DEVICE_STATE_ACTIVE:     Result := DEV_STATE_ACTIVE;
-    DEVICE_STATE_DISABLED:   Result := DEV_STATE_DISABLED;
-    DEVICE_STATE_NOTPRESENT: Result := DEV_STATE_NOTPRESENT;
-    DEVICE_STATE_UNPLUGGED:  Result := DEV_STATE_UNPLUGGED;
-    DEVICE_STATEMASK_ALL:    Result := DEV_STATEMASK_ALL;
-  end;
-end;
-
-
-function TMfAudioEndPoint.GetMasterDbVolume(): Single;
-var
-  hr: HResult;
-  sVolLevel: Single;
-
-begin
-
-  hr := FAudioEndpoint.GetMasterVolumeLevel(sVolLevel);
-  if FAILED(hr) then
-    begin
-      OleCheck(hr);
-      Result := 0.0;
-    end
-  else
-    Result := sVolLevel;
-end;
-
-
-procedure TMfAudioEndPoint.SetMasterDbVolume(aValue: Single);
-var
-  hr: HResult;
-
-begin
-
-  if (aValue > MIN_INPUT_DB_VALUE) then
-    aValue := MIN_INPUT_DB_VALUE;
-  if (aValue < MAX_INPUT_DB_VALUE) then
-    aValue := MAX_INPUT_DB_VALUE;
-  hr := FAudioEndpoint.SetMasterVolumeLevel(aValue,
-                                            @g_GuidEventContext);
-  OleCheck(hr);
-end;
-
-
-procedure TMfAudioEndPoint.SetDataFlow(aValue: EDataFlow);
-begin
-
-  // Only these 2 members of the eDataFlow struct are alowed!
-  if aValue in [eRender, eCapture] then
-    begin
-      fDataFlow := aValue;
-      OleCheck(GetAudioEndPoints(aValue,
-                                 fState,
-                                 FEndPointDevices));
-      dwDeviceID := 0;
-    end;
+  Result := GetDeviceStateAsString(DWord(fState));
 end;
 
 
 procedure TMfAudioEndPoint.SetDeviceState(aValue: string);
+var
+  S1: string;
+  sl: TStringList;
+  i: Integer;
+  mask: DWord;
+
+  function TokenToMask(const Tok: string): DWord;
+  begin
+    if SameText(Tok,
+                DEV_STATE_ACTIVE) then
+      Exit(DEVICE_STATE_ACTIVE);
+
+    if SameText(Tok,
+                DEV_STATE_DISABLED) then
+      Exit(DEVICE_STATE_DISABLED);
+
+    if SameText(Tok,
+                DEV_STATE_NOTPRESENT) then
+      Exit(DEVICE_STATE_NOTPRESENT);
+
+    if SameText(Tok,
+                DEV_STATE_UNPLUGGED) then
+      Exit(DEVICE_STATE_UNPLUGGED);
+
+    if SameText(Tok,
+                DEV_STATEMASK_ALL) then
+      Exit(DEVICE_STATEMASK_ALL);
+
+    Result := 0;
+  end;
+
 begin
 
-  if (aValue = DEV_STATE_ACTIVE) then
-    fState := DEVICE_STATE_ACTIVE
-  else if (aValue = DEV_STATE_DISABLED) then
-    fState := DEVICE_STATE_DISABLED
-  else if (aValue = DEV_STATE_NOTPRESENT) then
-    fState := DEVICE_STATE_NOTPRESENT
-  else if (aValue = DEV_STATE_UNPLUGGED) then
-    fState := DEVICE_STATE_UNPLUGGED
-  else fstate := DEVICE_STATEMASK_ALL;
-  // Find device endpoints with given value
-  OleCheck( GetEndpointDevices(fDataFlow,
-                               DWord(fState),
-                               FEndPointDevices,
-                               dwEndPointsCount) );
+  S1 := Trim(aValue);
+
+  // Support single token (e.g. 'ACTIVE') and multi-token masks
+  // (e.g. 'ACTIVE,DISABLED' or 'ACTIVE|UNPLUGGED').
+  if (Pos(',', S1) > 0) or (Pos('|', S1) > 0) then
+    begin
+
+      sl := TStringList.Create;
+      try
+
+        // Normalize separators to comma
+        S1 := StringReplace(S1,
+                            '|',
+                            ',',
+                            [rfReplaceAll]);
+
+        sl.StrictDelimiter := True;
+        sl.Delimiter := ',';
+        sl.DelimitedText := S1;
+
+        mask := 0;
+        for i := 0 to sl.Count - 1 do
+          mask := mask or TokenToMask(Trim(sl[i]));
+
+        if (mask = 0) then
+          mask := DEVICE_STATE_ACTIVE;
+
+        fState := eState(mask);
+      finally
+
+        sl.Free;
+      end;
+    end
+  else
+    begin
+
+      // Single token (keeps old behaviour)
+      mask := TokenToMask(S1);
+      if (mask = 0) then
+        mask := DEVICE_STATE_ACTIVE;
+
+      fState := eState(mask);
+    end;
+
+  RebuildEndpointCache();
+  if (dwEndPointsCount > 0) then
+    SetEndPointDevice(dwDeviceID);
+end;
+
+procedure TMfAudioEndPoint.SetDataFlow(aValue: EDataFlow);
+begin
+
+  if (fDataFlow <> aValue) then
+    begin
+
+      fDataFlow := aValue;
+      RebuildEndpointCache();
+      if (dwEndPointsCount > 0) then
+        SetEndPointDevice(dwDeviceID);
+    end;
 end;
 
 
 procedure TMfAudioEndPoint.SetEndPointDevice(aValue: DWord);
 var
   hr: HResult;
+  imDevice: IMMDevice;
+  epVolume: IAudioEndpointVolumeEx;
 
 begin
 
-  if not Assigned(FEndPointDevices) then
+  if not Assigned(fDeviceEnumerator) then
     Exit;
 
-  if (dwDeviceID <> aValue) then
-    dwDeviceID := aValue;
+  dwDeviceID := aValue;
 
-  // Check boundaries
-  if (dwDeviceID > dwEndPointsCount -1) then
-    dwDeviceID := dwEndPointsCount -1;
+  if (dwEndPointsCount > 0) and (dwDeviceID > dwEndPointsCount - 1) then
+    dwDeviceID := dwEndPointsCount - 1;
 
-  if dwEndPointsCount > 0 then
-    begin
-      hr := FDeviceEnumerator.GetDevice(FEndPointDevices[dwDeviceID].pwszID,
-                                        fSelectedIMMDevice);
-      if Succeeded(hr) then
-        begin
-          wsDeviceName := WideCharToString(FEndPointDevices[dwDeviceID].DeviceName);
-          wsDeviceInterfaceName := WideCharToString(FEndPointDevices[dwDeviceID].DevInterfaceName);
-          wsDeviceDesc := WideCharToString(FEndPointDevices[dwDeviceID].DeviceDesc);
+  if (dwEndPointsCount = 0) then
+    Exit;
 
-          // We have to unregister the current endpoint, before getting a new one.
-          hr := UnregisterAudioEndpointVolumeCallback(fOnEndPointNotify);
-          if (hr = E_POINTER) then
-            hr := S_OK;  // The first time there will be no registered Audio Endpoint Volume Callback, so we ignore the error and set hr to S_OK.
+  hr := fDeviceEnumerator.GetDevice(fEndPointDevices[dwDeviceID].pwszID,
+                                    imDevice);
+  OleCheck(hr);
 
-          // Remember: After unregister the callback the refcount will be decreased!
-          //           See the documentation about Un/RegisterAudioEndpointVolumeCallback.
-          //           So, there is no need to release the interface, this will be done automaticly
+  // Unregister old callback
+  if Assigned(fAudioEndpoint) and Assigned(fOnEndPointNotify) then
+    fAudioEndpoint.UnregisterControlChangeNotify(fOnEndPointNotifyIntf);
 
-          if Succeeded(hr) then
-            begin
-              hr := fSelectedIMMDevice.Activate(IID_IAudioEndpointVolume,
-                                                INT(CLSCTX_INPROC_SERVER),
-                                                nil,
-                                                Pointer(FAudioEndpoint));
+  hr := imDevice.Activate(IID_IAudioEndpointVolume,
+                          CLSCTX_INPROC_SERVER,
+                          nil,
+                          Pointer(epVolume));
+  OleCheck(hr);
 
-              if Succeeded(hr) then
-                begin
-                  // Create and register the endpointnotifier
-                  FOnEndPointNotify := TOnEndPointNotify.Create;
-                  if not Assigned(FOnEndPointNotify) then
-                    begin
-                      hr := E_POINTER;
-                      OleCheck(hr);
-                      Exit;
-                    end;
-                  hr := RegisterAudioEndpointVolumeCallback(fOnEndPointNotify);
-                end;
-            end;
-        end;
+  // Update published strings (from cache)
+  wsDeviceName := WideCharToString(fEndPointDevices[dwDeviceID].DeviceName);
+  wsDeviceInterfaceName := WideCharToString(fEndPointDevices[dwDeviceID].DevInterfaceName);
+  wsDeviceDesc := WideCharToString(fEndPointDevices[dwDeviceID].DeviceDesc);
 
-      if Failed(hr) then
-        begin
-          OleCheck(hr);
-          dwDeviceID := 0;
-          Exit;
-        end;
-    end
-  else
-    begin
-      wsDeviceName := '?';
-      wsDeviceInterfaceName := 'No Active Endpoint devices found!';
-      wsDeviceDesc := '?';
-      dwEndPointsCount := 0;
-    end;
+  // Swap refs (thread-safe)
+  FLock.Enter();
+
+  try
+
+    fSelectedIMMDevice := imDevice;
+    fAudioEndpoint := epVolume;
+  finally
+
+    FLock.Leave();
+  end;
+
+  // Register callback again.
+  if Assigned(fAudioEndpoint) and Assigned(fOnEndPointNotify) then
+    OleCheck(fAudioEndpoint.RegisterControlChangeNotify(fOnEndPointNotifyIntf));
 end;
 
 
-function TMfAudioEndPoint.SupportsHardware(HardwareSupportMask: DWord = 0): Boolean;
+function TMfAudioEndPoint.SupportsHardware(HardwareSupportMask: DWord): Boolean;
 var
-  hr: HResult;
+  MaskOut: DWORD;
 
 begin
 
-  if not Assigned(FAudioEndpoint) then
-    begin
-      Result := False;
-      Exit;
-    end;
+  Result := False;
+  if not Assigned(fAudioEndpoint) then
+    Exit;
 
-  // Parameter HardwareSupportMask is a DWORD variable into which the method writes a hardware
-  // support mask that indicates the hardware capabilities of the audio endpoint device.
-  // The method can set the mask to 0 or to the bitwise-OR combination of one or more
-  // ENDPOINT_HARDWARE_SUPPORT_XXX constants:
-  //  | Constant                         | value	   | Description
-  //  |----------------------------------|-----------|--------------------------------------------------------------
-  //  | ENDPOINT_HARDWARE_SUPPORT_VOLUME | $00000001 | The audio endpoint device supports a hardware volume control.
-  //  | ENDPOINT_HARDWARE_SUPPORT_MUTE   | $00000002 | The audio endpoint device supports a hardware mute control.
-  //  | ENDPOINT_HARDWARE_SUPPORT_METER  | $00000004 | The audio endpoint device supports a hardware peak meter.
+  MaskOut := 0;
+  if Failed(fAudioEndpoint.QueryHardwareSupport(MaskOut)) then
+    Exit(False);
+
   if (HardwareSupportMask = 0) then
-    hr := FAudioEndpoint.QueryHardwareSupport(ENDPOINT_HARDWARE_SUPPORT_VOLUME or
-                                              ENDPOINT_HARDWARE_SUPPORT_MUTE or
-                                              ENDPOINT_HARDWARE_SUPPORT_METER)
+    Result := (MaskOut <> 0)
   else
-    hr := FAudioEndpoint.QueryHardwareSupport(HardwareSupportMask);
-  Result := Succeeded(hr);
+    Result := ((MaskOut and HardwareSupportMask) = HardwareSupportMask);
 end;
 
 
 function TMfAudioEndPoint.VolumeStepUp(const GuidEventContext: TGuid): HResult;
-var
-  hr: HResult;
-
 begin
 
-  if Assigned(FAudioEndpoint) then
-    hr := FAudioEndpoint.VolumeStepUp(@GuidEventContext)
-  else
-    hr := E_POINTER;
-  Result := hr;
+  if not Assigned(fAudioEndpoint) then
+    Exit(E_POINTER);
+  Result := fAudioEndpoint.VolumeStepUp(@GuidEventContext);
 end;
 
 
 function TMfAudioEndPoint.VolumeStepDown(const GuidEventContext: TGuid): HResult;
-var
-  hr: HResult;
-
 begin
 
-  if Assigned(FAudioEndpoint) then
-    hr := FAudioEndpoint.VolumeStepDown(@GuidEventContext)
-  else
-    hr := E_POINTER;
-  Result := hr;
+  if not Assigned(fAudioEndpoint) then
+    Exit(E_POINTER);
+  Result := fAudioEndpoint.VolumeStepDown(@GuidEventContext);
 end;
 
 
 function TMfAudioEndPoint.RegisterAudioEndpointVolumeCallback(pNotify: IAudioEndpointVolumeCallback): HResult;
-var
-  hr: HResult;
-
 begin
-
-  // The RegisterControlChangeNotify method registers a client's notification callback interface.
-  if Assigned(FAudioEndpoint) then
-    hr := FAudioEndpoint.RegisterControlChangeNotify(pNotify)
-  else
-    hr := E_POINTER;
-  Result := hr;
+  if (pNotify = nil) or not Assigned(fAudioEndpoint) then
+    Exit(E_POINTER);
+  Result := fAudioEndpoint.RegisterControlChangeNotify(pNotify);
 end;
+
 
 function TMfAudioEndPoint.UnregisterAudioEndpointVolumeCallback(pNotify: IAudioEndpointVolumeCallback): HResult;
-var
-  hr: HResult;
-
 begin
 
-  if Assigned(FAudioEndpoint) then
-    hr := FAudioEndpoint.UnregisterControlChangeNotify(pNotify)
-  else
-    hr := E_POINTER;
-  Result := hr;
+  if (pNotify = nil) or not Assigned(fAudioEndpoint) then
+    Exit(E_POINTER);
+  Result := fAudioEndpoint.UnregisterControlChangeNotify(pNotify);
 end;
 
 
-// HELPERS /////////////////////////////////////////////////////////////////////
-
-// Get deviceproperty descriptions
-function TMfAudioEndPoint.GetAudioDeviceDescriptions(DefaultDevice: IMMDevice;      // index starts with 0, which is always the default endpoint device.
-                                                     const DevicePkey: PROPERTYKEY; // Possible values are: PKEY_Device_FriendlyName, PKEY_Device_DeviceDesc or PKEY_DeviceInterface_FriendlyName.
+function TMfAudioEndPoint.GetAudioDeviceDescriptions(DefaultDevice: IMMDevice;
+                                                     const DevicePkey: PROPERTYKEY;
                                                      out deviceDesc: WideString): HResult;
 begin
 
-  // MMDevApiUtils.GetDeviceDescriptions
   Result := GetDeviceDescriptions(DefaultDevice,
                                   DevicePkey,
                                   deviceDesc);
 end;
 
 
-// Get GetEndpointDevices
 function TMfAudioEndPoint.GetAudioEndPoints(const flow: EDataFlow;
                                             state: eState;
                                             out endpointdevices: TEndPointDeviceArray): HResult;
+var
+  cnt: DWord;
+
 begin
 
-  // MMDevApiUtils.GetEndpointDevices
-  Result := GetEndpointDevices(Flow,
-                               DWord(State),
-                               FEndPointDevices,
-                               dwEndPointsCount);
+  cnt := 0;
+  Result := GetEndpointDevices(flow,
+                               state,
+                               endpointdevices,
+                               cnt);
+  if Succeeded(Result) then
+    begin
+
+      fEndPointDevices := endpointdevices;
+      dwEndPointsCount := cnt;
+    end;
 end;
 
 
-// Get a reference to the endpoint of the default communication device for
-// rendering an audio stream.
 function TMfAudioEndPoint.GetDefaultAudioEndPointDevice(out audioEndPoint: IMMDevice): HResult;
 begin
 
-  // MMDevApiUtils.GetDefaultEndPointAudioDevice
-  Result := GetDefaultEndPointAudioDevice(audioEndPoint);
-end;
-
-
-//
-// Callback interface implementation ///////////////////////////////////////////
-//
-function TOnEndPointNotify.OnNotify(pNotify: PAUDIO_VOLUME_NOTIFICATION_DATA): HRESULT;
-var
-  hr: HResult;
-
-begin
-
-  hr := S_OK;
-
-  //TMfAudioEndPoint
-  // About event-context GUID:
-  // Each of the methods in the preceding list accepts an input parameter named pguidEventContext,
-  // which is a pointer to an event-context GUID. Before sending notifications to clients,
-  // the method copies the event-context GUID pointed to by pguidEventContext into the
-  // guidEventContext member of the AUDIO_VOLUME_NOTIFICATION_DATA structure that it supplies to
-  // clients through their OnNotify methods.
-  // If pguidEventContext is Nil, the value of the guidEventContext member is set to GUID_NULL.
-  //
-  // In its implementation of the OnNotify method, a client can inspect the event-context GUID from
-  // that call to discover whether it or another client is the source of the volume-change event.
-
-  // send WM_MIXERNOTIFY message to TControl's WindProc.
-  // Note: As an alternative you might use the Messages.SendStructMessage wich is introduced in Delphi 2009 (compiler version 20.0).
-  //       See: https://docs.embarcadero.com/products/rad_studio/delphiAndcpp2009/HelpUpdate2/EN/html/delphivclwin32/Messages_SendStructMessage.html
-  if SendMessage(hHwnd,
-                 WM_MIXERNOTIFY,
-                 WPARAM(S_OK),
-                 LPARAM(pNotify)) > 0 then
-   begin
-     Dispose(pNotify);
-     hr := E_POINTER;
-   end;
-
-  Result := hr;
+  Result := GetDefaultEndPointAudioDevice(audioEndPoint,
+                                          fRole,
+                                          fDataFlow);
 end;
 
 end.

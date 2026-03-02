@@ -1,6 +1,6 @@
 ﻿// FactoryX
 //
-// Copyright: � FactoryX. All rights reserved.
+// Copyright: @ FactoryX. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -24,7 +24,7 @@
 // 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
 // Related projects: MfPackX319
@@ -89,6 +89,7 @@ uses
   WinApi.CoreAudioApi.AudioSessionTypes,
   WinApi.CoreAudioApi.AudioPolicy,
   WinApi.CoreAudioApi.MMDeviceApi,
+  WinApi.CoreAudioApi.EndPointVolume,
   {WinMM}
   WinApi.WinMM.MMeApi,
   WinApi.WinMM.MMReg,
@@ -99,7 +100,7 @@ uses
 const
 
   REFTIMES_PER_SEC = 10000000;
-
+  HNS_PER_100MS    = 1000000;
   MIN_VOLUME = 0.0;
   MAX_VOLUME = 100.0;
 
@@ -118,18 +119,25 @@ type
                   dsPlay,
                   dsPause,
                   dsStop);
+  // Pitch/tempo
+  TMfInterpQuality = (iqLinear,
+                      iqCatmullRom);
 
   // Event callbacks (always raised on the main/UI thread via TThread.Queue).
   TWasApiStateEvent = procedure(Sender: TObject;
                                 const NewState: TDeviceState) of object;
+
   TWasApiErrorEvent = procedure(Sender: TObject;
                                 const Msg: string;
                                 const Hr: HRESULT) of object;
+
   TWasApiReadyEvent = procedure(Sender: TObject) of object;
+
   // Position100ns: time position (100ns units), RawPosition: raw audio clock position.
   TWasApiProcessedEvent = procedure(Sender: TObject;
                                     const Position100ns: Int64;
                                     const RawPosition: UInt64) of object;
+
   // Audio post-decode processing callback (engine thread).
   // Called after decoded PCM is written to the WASAPI render buffer,
   // and before IAudioRenderClient.ReleaseBuffer.
@@ -141,12 +149,19 @@ type
 
   TWasApiEndedEvent = procedure(Sender: TObject) of object;
 
+  // Peakmeter data (push style).
+  TOnOutputPcm = procedure(Sender: TObject;
+                           pData: PByte;
+                           const ByteCount: DWORD;
+                           Wfx: PWAVEFORMATEX) of object;
+
   TEngineCmdKind = (ckLoadFile,
                     ckPlay,
                     ckPause,
                     ckStop,
                     ckSetVolume,
                     ckSeek,
+                    ckSwitchDevice,
                     ckShutdown,
 
                     // MFT bass / treble.
@@ -164,6 +179,12 @@ type
     VolR: Single;
     SeekPos100ns: Int64;  // <<< added (used to set FBasePos100ns and compute FOffset)
 
+    // Device switching
+    DeviceId: string;
+    UseDefaultDevice: Boolean;
+    DeviceRole: Integer; // Ord(ERole)
+    AutoResume: Boolean;
+
     // EQ MFT (bass & treble)
     EqEnabled: Boolean;
     EqBassDb: Integer;
@@ -179,6 +200,13 @@ type
     class function Seek(const APos100ns: Int64): TEngineCommand; static;
     class function SetVolume(aLeft,
                              aRight: Single): TEngineCommand; static;
+
+
+    // Device switch
+    class function SwitchDevice(const ADeviceId: string;
+                                const AUseDefault: Boolean;
+                                const ARole: Integer;
+                                const AAutoResume: Boolean): TEngineCommand; static;
 
     // EQ commands
     class function EQEnable(const AEnabled: Boolean): TEngineCommand; static;
@@ -206,6 +234,7 @@ type
     constructor Create(AEngine: TWasApiEngine);
   end;
 
+
   TWasApiEngine = class(TObject)
   private
 
@@ -214,23 +243,31 @@ type
     pvAudioStreamVolume: IAudioStreamVolume;
     pvRenderClient: IAudioRenderClient;
     pvAudioClock: IAudioClock;
+    pvSimpleVol: ISimpleAudioVolume; // optional: per-session master/mute
+
+    // Device selection / switching
+    FUseDefaultDevice: Boolean;
+    FDeviceRole: ERole;          // default endpoint role when UseDefaultDevice = True
+    FDeviceId: string;           // IMMDevice ID when UseDefaultDevice = False
+    FDeviceIndex: Integer;
 
     pvDeviceState: TDeviceState;
 
     // Decoded PCM bytes
     pvBytes: PByte;
-    pvBytesLength: Cardinal;
-    pvwaveformatlength: Cardinal;
+    pvBytesLength: UINT64;
+    pvwaveformatlength: UINT32;
 
     pvSourceWfx: PWAVEFORMATEX;
     pvRenderWfx: PWAVEFORMATEX;
     FClientBlockAlign: Word;
 
     // Playback
-    FOffset: UINT32;
+    FOffset: UINT64;
     FSampleType: TSampleType;
     FBytesPerSample: Integer;
     pvSoundChannels: WORD;
+
     // Seek
     FBasePos100ns: Int64;
     FDuration100ns: Int64;
@@ -243,6 +280,20 @@ type
 
     // Events.
     pvAudioSamplesReadyEvent: THandle;
+    FStoppedEvent: TEvent;  // manual reset
+    FRunning: Integer;      // 0/1
+
+    // Peakmeter coupling.
+    FOnOutputPcm: TOnOutputPcm;
+
+    // atomic storage (Single bits)
+    FMeterPeakBitsL: LongInt;
+    FMeterPeakBitsR: LongInt;
+    FMeterRmsBitsL: LongInt;
+    FMeterRmsBitsR: LongInt;
+    // Calculated gains
+    FMeterGainBitsL: LongInt;
+    FMeterGainBitsR: LongInt;
 
     // Threading / commands
     FThread: TWasApiEngineThread;
@@ -268,6 +319,34 @@ type
     FFx: TArray<IMFTransform>;
     FFxTypeSet: TArray<Boolean>;
 
+    // Varispeed / pitch (varispeed, pitch changes with tempo) -----------------
+    FVarispeedEnabled: LongBool;
+    FRateTarget: Double;   // target speed factor (e.g. 0.84..1.16).
+    FRateSmooth: Double;   // smoothed speed factor.
+    FRampMs: Integer;      // smoothing time, 0 = off.
+    FReadPos: Double;      // fractional read pos in *source frames*
+
+    // Quality
+    FInterpQuality: TMfInterpQuality;
+    // Pitch/tempo control.
+    FPitchRangePct: Double;     // e.g. 16.0 => -16..+16%
+    FPitchDetentPct: Double;    // default 0.10  (deadzone around 0%).
+    FPitchAutoZeroPct: Double;  // default 0.30  (snap-to-zero threshold).
+
+    function RampCoeff(const RampMs,
+                       SampleRate,
+                       Frames: Integer): Double; inline;
+
+    function LoadData_VarispeedFloat32(const Frames: Integer;
+                                       const OutPtr: PSingle;
+                                       out Flags: DWORD): HRESULT;
+    // -------------------------------------------------------------------------
+
+    // Peakmeter
+    procedure MeterPublishFloat32(const p: PSingle;
+                                  const Frames,
+                                  Channels: Integer);
+    // -------------------------------------------------------------------------
 
     procedure SetState(const NewState: TDeviceState);
     procedure RaiseError(const Msg: string; const Hr: HRESULT);
@@ -278,32 +357,36 @@ type
     procedure EnqueueCommand(const Cmd: TEngineCommand);
     function DequeueCommand(out Cmd: TEngineCommand): Boolean;
 
+    function GetDeviceIdByIndex(const AIndex: Integer;
+                                out ADeviceId: string): HRESULT;
     function InitializeAudioEngine(): HRESULT;
     function SetFormat(pwfx: PWAVEFORMATEX): HRESULT;
 
     procedure ResetAudioData(pFreeSourceStream: Boolean);
 
+    // Helper for LoadFileInternal.
+    function ConvertPvBytesToFloat32InPlace(): HRESULT;
     function LoadFileInternal(const audiofile: TFileName;
                               fileDuration: LONGLONG): HResult;
-    function LoadData(bufferFrameCount: UINT32;
-                      pData: PByte;
-                      var flags: DWORD): HRESULT;
+    function LoadData(const Frames: UINT32;
+                      const pBufferData: PByte;
+                      var Flags: DWORD): HRESULT;
 
     function PlayAudioStreamInternal(): HRESULT;
 
     procedure ProcessControlCommand(const Cmd: TEngineCommand);
 
-
-
     // FX helpers.
     function CreateAudioMediaTypeFromWfx(pwfx: PWAVEFORMATEX;
                                          out M: IMFMediaType): HRESULT;
+
     function EnsureFxTypesSetLocked(): HRESULT;
 
     // FX Core -----------------------------------------------------------------
     function ProcessMftBuffer(const AMft: IMFTransform;
                               pData: PByte;
                               const ByteCount: DWORD): HRESULT;
+
     function ProcessEffectsBuffer(pData: PByte;
                                   const ByteCount: DWORD): HRESULT;
     // -------------------------------------------------------------------------
@@ -318,18 +401,61 @@ type
                       fileDuration100ns: LONGLONG): HRESULT;
     function Start(): HResult;
     function Stop(): HResult;
+    function WaitForStop(TimeoutMs: DWORD = 2000): HRESULT;
     function Pause(): HResult;
     function SeekTo(const Pos100ns: Int64): HRESULT;
 
+
+    // Output device switching -------------------------------------------------
+    // If AUseDefaultDevice=True, engine will use the current default render endpoint for ARole.
+    // If False, it will use the IMMDevice with ADeviceId.
+    // Note: switching is performed on the engine thread. If currently playing, it will stop,
+    // reinitialize the audio client, and optionally resume.
+    function SwitchOutputDevice(const ADeviceId: string;
+                                const AUseDefaultDevice: Boolean = True;
+                                const ARole: ERole = eMultimedia;
+                                const AutoResume: Boolean = True): HRESULT;
+    procedure SetUseDefaultOutputDevice(const ARole: ERole = eMultimedia);
+    procedure SetOutputDeviceId(const ADeviceId: string);
+
+    function Mute(pActive: Boolean): Boolean;
+    function SetVolumesAsync(const VolLeft,
+                         VolRight: Single): HRESULT;
     function SetVolumes(pVolLeft: Single;
                         pVolRight: Single): HResult;
+    // Calculated gains for the post fader VU meters.
+    procedure SetMeterFaderGains(const GainL,
+                                 GainR: Single);
+    procedure GetMeterFaderGains(out GainL,
+                                 GainR: Single);
 
+    // FX ----------------------------------------------------------------------
     procedure ClearEffects();
     procedure AddEffect(const Mft: IMFTransform);
     procedure SetEffects(const Effects: array of IMFTransform);
 
+    // Pitching/tempo ----------------------------------------------------------
+    procedure SetPitchPercent(const Pct: Double);
+    procedure SetPitchSlider(const SliderPos: Integer);
+
+    property PitchRangePct: Double read FPitchRangePct write FPitchRangePct; // set default 16.0
+    property PitchDetentPct: Double read FPitchDetentPct write FPitchDetentPct;       // 0.10
+    property PitchAutoZeroPct: Double read FPitchAutoZeroPct write FPitchAutoZeroPct; // 0.30
+    property PitchRampMs: Integer read FRampMs write FRampMs;                // default 50
+    property VarispeedEnabled: LongBool read FVarispeedEnabled write FVarispeedEnabled;
+    // -------------------------------------------------------------------------
+
     property DeviceState: TDeviceState read pvDeviceState;
     property SoundChannels: Word read pvSoundChannels;
+
+    // Audio Device-------------------------------------------------------------
+    property UseDefaultDevice: Boolean read FUseDefaultDevice write FUseDefaultDevice default True;
+    property DeviceId: string read FDeviceId write FDeviceId;
+    property DeviceIndex: Integer read FDeviceIndex write FDeviceIndex default 0;      // must be valid when UseDefaultDevice=False
+    // -------------------------------------------------------------------------
+
+    property OnOutputPcm: TOnOutputPcm read FOnOutputPcm write FOnOutputPcm;
+
     property OnStateChanged: TWasApiStateEvent read FOnStateChanged write FOnStateChanged;
     property OnError: TWasApiErrorEvent read FOnError write FOnError;
     property OnReady: TWasApiReadyEvent read FOnReady write FOnReady;
@@ -401,7 +527,11 @@ end;
 
 class function TEngineCommand.Seek(const APos100ns: Int64): TEngineCommand;
 begin
-  FillChar(Result, SizeOf(Result), 0);
+
+  FillChar(Result,
+           SizeOf(Result),
+           0);
+
   Result.Kind := ckSeek;
   Result.SeekPos100ns := APos100ns;
 end;
@@ -420,42 +550,82 @@ begin
 end;
 
 
+class function TEngineCommand.SwitchDevice(const ADeviceId: string;
+                                           const AUseDefault: Boolean;
+                                           const ARole: Integer;
+                                           const AAutoResume: Boolean): TEngineCommand;
+begin
+  FillChar(Result,
+           SizeOf(Result),
+           0);
+
+  Result.Kind := ckSwitchDevice;
+  Result.DeviceId := ADeviceId;
+  Result.UseDefaultDevice := AUseDefault;
+  Result.DeviceRole := ARole;
+  Result.AutoResume := AAutoResume;
+end;
+
+
 // EQ methods
 class function TEngineCommand.EQEnable(const AEnabled: Boolean): TEngineCommand;
 begin
-  FillChar(Result, SizeOf(Result), 0);
+
+  FillChar(Result,
+           SizeOf(Result),
+           0);
+
   Result.Kind := ckEQEnable;
   Result.EqEnabled := AEnabled;
 end;
 
+
 class function TEngineCommand.EQSetBassDb(const ABassDb: Integer): TEngineCommand;
 begin
-  FillChar(Result, SizeOf(Result), 0);
+
+  FillChar(Result,
+           SizeOf(Result),
+           0);
+
   Result.Kind := ckEQSetBassDb;
   Result.EqBassDb := ABassDb;
 end;
 
+
 class function TEngineCommand.EQSetTrebleDb(const ATrebleDb: Integer): TEngineCommand;
 begin
-  FillChar(Result, SizeOf(Result), 0);
+
+  FillChar(Result,
+           SizeOf(Result),
+           0);
+
   Result.Kind := ckEQSetTrebleDb;
   Result.EqTrebleDb := ATrebleDb;
 end;
 
+
 class function TEngineCommand.EQSetRampMode(const ARampMode: Integer): TEngineCommand;
 begin
-  FillChar(Result, SizeOf(Result), 0);
+
+  FillChar(Result,
+           SizeOf(Result),
+           0);
+
   Result.Kind := ckEQSetRampMode;
   Result.EqRampMode := ARampMode;
 end;
 
+
 class function TEngineCommand.EQSetRampTimeMs(const AMs: Integer): TEngineCommand;
 begin
-  FillChar(Result, SizeOf(Result), 0);
+
+  FillChar(Result,
+           SizeOf(Result),
+           0);
+
   Result.Kind := ckEQSetRampTimeMs;
   Result.EqRampTimeMs := AMs;
 end;
-
 
 
 class function TEngineCommand.Shutdown(): TEngineCommand;
@@ -474,6 +644,7 @@ end;
 constructor TWasApiEngineThread.Create(AEngine: TWasApiEngine);
 begin
   inherited Create(False);
+
 
   FreeOnTerminate := False;
   FEngine := AEngine;
@@ -569,6 +740,12 @@ begin
   pvAudioStreamVolume := nil;
   pvRenderClient := nil;
   pvAudioClock := nil;
+  pvSimpleVol := nil;
+
+  // Default device selection
+  FUseDefaultDevice := True;
+  FDeviceRole := eMultimedia;
+  FDeviceId := '';
 
   pvBytes := nil;
   pvBytesLength := 0;
@@ -588,6 +765,25 @@ begin
   FBytesPerSample := 0;
   pvSoundChannels := 0;
 
+  // Pitching/tempo defaults ---------------------------------------------------
+  FVarispeedEnabled := True;
+  FPitchRangePct := 16.0;
+  FRampMs := 50;
+
+  FPitchDetentPct := 0.10;
+  FPitchAutoZeroPct := 0.30;
+
+  FRateTarget := 1.0;
+  FRateSmooth := 1.0;
+  FReadPos := 0.0;
+
+  FInterpQuality := iqCatmullRom; // Default to high quality.
+  // ---------------------------------------------------------------------------
+
+  // Post Fader VU value.
+  SetMeterFaderGains(1.0,
+                     1.0);
+
   FCmdCS := TCriticalSection.Create;
   FCmdQueue := TQueue<TEngineCommand>.Create;
 
@@ -601,6 +797,12 @@ begin
                                  True,
                                  False,
                                  nil);
+
+  FStoppedEvent := TEvent.Create(nil,
+                                 True {ManualReset},
+                                 True {InitiallySignaled},
+                                 '');
+  FRunning := 0;
 
   // Start worker thread immediately (engine owner)
   FThread := TWasApiEngineThread.Create(Self);
@@ -623,11 +825,17 @@ begin
   // Request thread shutdown
   EnqueueCommand(TEngineCommand.Shutdown);
   SetEvent(FCmdEvent);
+  CloseHandle(FCmdEvent);
+  FCmdEvent := 0;
+
   SetEvent(FTerminateEvent);
+  CloseHandle(FTerminateEvent);
+  FTerminateEvent := 0;
 
   if Assigned(FThread) then
     begin
 
+      FThread.Terminate;
       FThread.WaitFor;
       FreeAndNil(FThread);
     end;
@@ -647,11 +855,16 @@ begin
   if (FTerminateEvent <> 0) then
     CloseHandle(FTerminateEvent);
 
+  FreeAndNil(FStoppedEvent);
+
   FreeAndNil(FCmdQueue);
   FreeAndNil(FCmdCS);
 
   if Assigned(pvSourceWfx) then
-    CoTaskMemFree(pvSourceWfx);
+    begin
+      CoTaskMemFree(pvSourceWfx);
+      pvSourceWfx := nil;
+    end;
 
   if Assigned(pvRenderWfx) then
     begin
@@ -661,7 +874,179 @@ begin
 
   FFxCS.Free();
 
+  CLoseHandle(pvMmcssHandle);
+  pvMmcssHandle := 0;
+
+  SafeRelease(pvAudioClient);
+  SafeRelease(pvAudioStreamVolume);
+  SafeRelease(pvRenderClient);
+  SafeRelease(pvAudioClock);
+  SafeRelease(pvSimpleVol);
+
+  MfShutDown();
+
   inherited;
+end;
+
+
+// tempo/pitching
+function TWasApiEngine.RampCoeff(const RampMs,
+                                 SampleRate,
+                                 Frames: Integer): Double;
+var
+  dt,
+  tau: Double;
+
+begin
+
+  if (RampMs <= 0) then
+    Exit(1.0);
+
+  dt := Frames / SampleRate;
+  tau := RampMs / 1000.0;
+
+  // 1 - exp(-dt/tau)
+  Result := 1.0 - Exp(-dt / tau);
+end;
+
+
+function TWasApiEngine.LoadData_VarispeedFloat32(const Frames: Integer;
+                                                 const OutPtr: PSingle;
+                                                 out Flags: DWORD): HRESULT;
+
+  function ReadSample(const Base: PSingle; const Index: Integer): Single; inline;
+  begin
+    Result := PSingle(NativeUInt(Base) + NativeUInt(Index) * NativeUInt(SizeOf(Single)))^;
+  end;
+
+  procedure WriteSample(const Base: PSingle; const Index: Integer; const Value: Single); inline;
+  begin
+    PSingle(NativeUInt(Base) + NativeUInt(Index) * NativeUInt(SizeOf(Single)))^ := Value;
+  end;
+
+var
+  channels: Integer;
+  srcFramesTotal: Integer;
+  srcBase: PSingle;
+  outBase: PSingle;
+  maxSampleIndex: Integer;
+
+  i0, i, ch: Integer;
+  frac: Single;
+  rate, coeff: Double;
+  outIdx: Integer;
+
+  idxM1, idx0, idx1, idx2: Integer;
+  y0, y1, y2, y3: Single;
+
+  pSilence: PByte;
+  silenceBytes: Integer;
+begin
+  Result := S_OK;
+  Flags := 0;
+
+  if (pvBytes = nil) or (pvBytesLength <= 0) or (pvSourceWfx = nil) then
+  begin
+    FillChar(OutPtr^, Frames * 2 * SizeOf(Single), 0);
+    Flags := AUDCLNT_BUFFERFLAGS_SILENT;
+    Exit(S_OK);
+  end;
+
+  // Client format
+  channels := pvSourceWfx.nChannels;
+
+  // pvBytes float32 interleaved
+  srcFramesTotal := Integer(pvBytesLength) div Integer(channels * SizeOf(Single));
+
+  if (srcFramesTotal <= 1) then
+  begin
+    FillChar(OutPtr^, Frames * channels * SizeOf(Single), 0);
+    Flags := AUDCLNT_BUFFERFLAGS_SILENT;
+    Exit(S_OK);
+  end;
+
+  srcBase := PSingle(Pointer(pvBytes));
+  outBase := PSingle(Pointer(OutPtr));
+  maxSampleIndex := (srcFramesTotal * channels) - 1;
+
+  // Smooth rate per block
+  if (FRateTarget <= 0.0) then
+    FRateTarget := 1.0;
+
+  coeff := RampCoeff(FRampMs, pvSourceWfx.nSamplesPerSec, Frames);
+  if (coeff >= 1.0) then
+    FRateSmooth := FRateTarget
+  else
+    FRateSmooth := FRateSmooth + (FRateTarget - FRateSmooth) * coeff;
+
+  rate := FRateSmooth;
+  if (rate <= 0.0) then
+    rate := 1.0;
+
+  outIdx := 0;
+
+  for i := 0 to Frames - 1 do
+  begin
+    i0 := Trunc(FReadPos);
+
+    if (i0 >= srcFramesTotal - 1) then
+    begin
+      pSilence := PByte(NativeUInt(outBase) + NativeUInt(outIdx) * NativeUInt(SizeOf(Single)));
+      silenceBytes := (Frames - i) * channels * SizeOf(Single);
+      FillChar(pSilence^, silenceBytes, 0);
+
+      if (i = 0) then
+        Flags := AUDCLNT_BUFFERFLAGS_SILENT;
+
+      FOffset := pvBytesLength;
+      Exit(S_OK);
+    end;
+
+    frac := (FReadPos - i0) * 1.0;
+
+    for ch := 0 to channels - 1 do
+    begin
+      idx0 := (i0 * channels) + ch;
+      idx1 := ((i0 + 1) * channels) + ch;
+
+      if (idx1 > maxSampleIndex) then
+      begin
+        pSilence := PByte(NativeUInt(outBase) + NativeUInt(outIdx) * NativeUInt(SizeOf(Single)));
+        silenceBytes := (Frames - i) * channels * SizeOf(Single);
+        FillChar(pSilence^, silenceBytes, 0);
+
+        if (i = 0) then
+          Flags := AUDCLNT_BUFFERFLAGS_SILENT;
+
+        FOffset := pvBytesLength;
+        Exit(S_OK);
+      end;
+
+      if (FInterpQuality = iqCatmullRom) and (i0 >= 1) and (i0 + 2 < srcFramesTotal) then
+      begin
+        idxM1 := ((i0 - 1) * channels) + ch;
+        idx2  := ((i0 + 2) * channels) + ch;
+
+        y0 := ReadSample(srcBase, idxM1);
+        y1 := ReadSample(srcBase, idx0);
+        y2 := ReadSample(srcBase, idx1);
+        y3 := ReadSample(srcBase, idx2);
+
+        WriteSample(outBase, outIdx + ch, PcmLib.MfCatmullRomS(y0, y1, y2, y3, frac));
+      end
+      else
+      begin
+        y1 := ReadSample(srcBase, idx0);
+        y2 := ReadSample(srcBase, idx1);
+        WriteSample(outBase, outIdx + ch, y1 + (y2 - y1) * frac);
+      end;
+    end;
+
+    Inc(outIdx, channels);
+    FReadPos := FReadPos + rate;
+  end;
+
+  FOffset := Int64(Trunc(FReadPos)) * Int64(channels * SizeOf(Single));
 end;
 
 
@@ -675,7 +1060,8 @@ begin
                   begin
 
                     if Assigned(FOnStateChanged) then
-                      FOnStateChanged(Self, NewState);
+                      FOnStateChanged(Self,
+                                      NewState);
                   end);
 end;
 
@@ -690,12 +1076,14 @@ begin
                   begin
 
                     if Assigned(FOnError) then
-                      FOnError(Self, Msg, Hr);
+                      FOnError(Self,
+                               Msg,
+                               Hr);
                   end);
 end;
 
 
-procedure TWasApiEngine.RaiseReady;
+procedure TWasApiEngine.RaiseReady();
 begin
 
   if Assigned(FOnReady) then
@@ -724,7 +1112,7 @@ begin
 end;
 
 
-procedure TWasApiEngine.RaiseEnded;
+procedure TWasApiEngine.RaiseEnded();
 begin
 
   if Assigned(FOnEnded) then
@@ -778,7 +1166,7 @@ procedure TWasApiEngine.ProcessControlCommand(const Cmd: TEngineCommand);
 var
   hr: HRESULT;
   pos100ns,
-  newOffset: Int64;
+  newOffset: UINT64;
 
 begin
 
@@ -803,6 +1191,55 @@ begin
           end;
       end;
 
+    ckSwitchDevice:
+      begin
+        // Reinitialize WASAPI client on a different endpoint, keeping decoded PCM (pvBytes) intact.
+        // This is executed on the engine thread (safe to touch COM interfaces here).
+        // Stop/Reset current client if still alive.
+        if Assigned(pvAudioClient) then
+        begin
+          pvAudioClient.Stop();
+          pvAudioClient.Reset();
+        end;
+
+        // Release WASAPI interfaces so InitializeAudioEngine can activate the new device.
+        pvRenderClient := nil;
+        pvAudioStreamVolume := nil;
+        pvAudioClock := nil;
+        pvSimpleVol := nil;
+        pvAudioClient := nil;
+
+        // Persist selection (in case command overrides fields)
+        FUseDefaultDevice := Cmd.UseDefaultDevice;
+        FDeviceId := Cmd.DeviceId;
+        if (Cmd.DeviceRole >= Ord(Low(ERole))) and (Cmd.DeviceRole <= Ord(High(ERole))) then
+          FDeviceRole := ERole(Cmd.DeviceRole)
+        else
+          FDeviceRole := eMultimedia;
+
+        hr := InitializeAudioEngine();
+        if SUCCEEDED(hr) then
+          hr := SetFormat(pvSourceWfx);
+
+        if FAILED(hr) then
+        begin
+          SetState(dsError);
+          RaiseError('SwitchDevice failed', hr);
+        end
+        else
+        begin
+          // return to ready state (file still loaded)
+          SetState(dsReady);
+          RaiseReady();
+
+          if Cmd.AutoResume then
+          begin
+            // resume playback
+            EnqueueCommand(TEngineCommand.Play);
+          end;
+        end;
+      end;
+
     ckPause:
       begin
 
@@ -821,10 +1258,10 @@ begin
     ckSeek:
       begin
 
-        if (pvRenderWfx <> nil) and
+        if (pvSourceWfx <> nil) and
            (pvBytes <> nil) and
            (pvBytesLength > 0) and
-           (pvRenderWfx.nAvgBytesPerSec <> 0) then
+           (pvSourceWfx.nAvgBytesPerSec <> 0) then
          begin
 
            pos100ns := Cmd.SeekPos100ns;
@@ -836,29 +1273,36 @@ begin
              pos100ns := FDuration100ns;
 
            // 100ns -> bytes (render format rate)
-           newOffset := (UInt64(pos100ns) * UInt64(pvRenderWfx.nAvgBytesPerSec)) div UInt64(REFTIMES_PER_SEC);
+           // NOTE: Use decoded PCM byte rate (pvSourceWfx), not the mix format (pvRenderWfx).
+           // pvBytes is in pvSourceWfx layout.
+           // 100ns -> bytes (SOURCE PCM rate; pvBytes is in pvSourceWfx layout)
+           newOffset := (UInt64(pos100ns) * UInt64(pvSourceWfx.nAvgBytesPerSec)) div UInt64(REFTIMES_PER_SEC);
 
-           // align to block
-           if (pvRenderWfx.nBlockAlign <> 0) then
-             newOffset := (newOffset div Int64(pvRenderWfx.nBlockAlign)) * Int64(pvRenderWfx.nBlockAlign);
+           // Align to SOURCE block size (must match pvBytes layout)
+           if (pvSourceWfx.nBlockAlign <> 0) then
+             newOffset := (newOffset div UInt64(pvSourceWfx.nBlockAlign)) * UInt64(pvSourceWfx.nBlockAlign);
 
            if (newOffset > UInt64(pvBytesLength)) then
              newOffset := UInt64(pvBytesLength);
 
-           // THIS is what makes FBasePos100ns meaningful:
            FBasePos100ns := pos100ns;
-           FOffset := UInt32(newOffset);
+           FOffset := newOffset;
 
-           // restart clock position from zero at the new base
            if Assigned(pvAudioClient) then
              begin
 
                pvAudioClient.Stop();
                pvAudioClient.Reset();
-             end;
+              end;
 
-           if (pvDeviceState = dsPlay) and Assigned(pvAudioClient) then
-             pvAudioClient.Start;
+            // Reset FX state on seek (recommended)
+            // if Assigned(FDynamics) then
+            //   FDynamics.Reset;
+            // if Assigned(FEffectsRack) then
+            //   FEffectsRack.Reset; // if you have it
+
+            if (pvDeviceState = dsPlay) and Assigned(pvAudioClient) then
+              pvAudioClient.Start;
          end;
       end;
 
@@ -868,13 +1312,14 @@ begin
         if Assigned(pvAudioStreamVolume) then
           begin
 
-            // channel volumes applied in play thread too; safe here on engine thread
+            // Channel volumes applied in play thread too; safe here on engine thread.
             SetVolumes(Cmd.VolL,
                        Cmd.VolR);
           end;
       end;
   end;
 end;
+
 
 // FX Helpers ==================================================================
 
@@ -1114,6 +1559,7 @@ begin
   Result := S_OK;
 end;
 
+
 // Chain runner ////////////////////////////////////////////////////////////////
 function TWasApiEngine.ProcessEffectsBuffer(pData: PByte;
                                             const ByteCount: DWORD): HRESULT;
@@ -1198,8 +1644,22 @@ end;
 function TWasApiEngine.Stop(): HResult;
 begin
 
-  EnqueueCommand(TEngineCommand.Stop);
+    EnqueueCommand(TEngineCommand.Stop);
   Result := S_OK;
+end;
+
+
+function TWasApiEngine.WaitForStop(TimeoutMs: DWORD = 2000): HRESULT;
+begin
+  if InterlockedCompareExchange(FRunning, 0, 0) = 0 then
+    Exit(S_OK);
+
+  case FStoppedEvent.WaitFor(TimeoutMs) of
+    wrSignaled: Result := S_OK;
+    wrTimeout:  Result := HRESULT_FROM_WIN32(WAIT_TIMEOUT);
+  else
+    Result := E_FAIL;
+  end;
 end;
 
 
@@ -1225,23 +1685,286 @@ begin
 end;
 
 
+
+function TWasApiEngine.SwitchOutputDevice(const ADeviceId: string;
+                                          const AUseDefaultDevice: Boolean = True;
+                                          const ARole: ERole = eMultimedia;
+                                          const AutoResume: Boolean = True): HRESULT;
+var
+  resume: Boolean;
+begin
+  // Switching requires a configured stream format (after OpenFile/SetFormat).
+  if (pvSourceWfx = nil) or (pvAudioClient = nil) then
+    Exit(E_FAIL);
+
+  // Remember desired selection for the next InitializeAudioEngine()
+  FUseDefaultDevice := AUseDefaultDevice;
+  FDeviceRole := ARole;
+  FDeviceId := ADeviceId;
+
+  // If currently playing, stop first then re-init and optionally resume
+  resume := AutoResume and (pvDeviceState = dsPlay);
+
+  if (pvDeviceState = dsPlay) or (pvDeviceState = dsPause) then
+    EnqueueCommand(TEngineCommand.Stop);
+
+  EnqueueCommand(TEngineCommand.SwitchDevice(ADeviceId,
+                                            AUseDefaultDevice,
+                                            Ord(ARole),
+                                            resume));
+  Result := S_OK;
+end;
+
+
+procedure TWasApiEngine.SetUseDefaultOutputDevice(const ARole: ERole = eMultimedia);
+begin
+  FUseDefaultDevice := True;
+  FDeviceRole := ARole;
+  FDeviceId := '';
+end;
+
+
+procedure TWasApiEngine.SetOutputDeviceId(const ADeviceId: string);
+begin
+  FUseDefaultDevice := False;
+  FDeviceId := ADeviceId;
+end;
+
+
+
+function TWasApiEngine.Mute(pActive: Boolean): Boolean;
+var
+  hr: HResult;
+
+begin
+
+  hr := E_POINTER;
+
+  if Assigned(pvSimpleVol) then
+    hr := pvSimpleVol.SetMute(pActive,
+                              nil);
+
+  Result := Succeeded(hr);
+end;
+
+
+function TWasApiEngine.SetVolumesAsync(const VolLeft,
+                                       VolRight: Single): HRESULT;
+begin
+
+  // Thread-safe from GUI thread: Volume will be applied on the engine thread
+  // via ProcessControlCommand(ckSetVolume).
+  EnqueueCommand(TEngineCommand.SetVolume(VolLeft,
+                                          VolRight));
+  Result := S_OK;
+end;
+
+
 function TWasApiEngine.SetVolumes(pVolLeft,
                                   pVolRight: Single): HResult;
+var
+  hr: HResult;
+
 begin
+
+  hr := S_OK;
 
   // This is expected to run on the engine thread.
   if not Assigned(pvAudioStreamVolume) then
     Exit(E_POINTER);
 
   if (pvSoundChannels >= 1) then
-    pvAudioStreamVolume.SetChannelVolume(0,
-                                         pVolLeft);
+    hr := pvAudioStreamVolume.SetChannelVolume(0,
+                                               pVolLeft);
 
   if (pvSoundChannels >= 2) then
-    pvAudioStreamVolume.SetChannelVolume(1,
-                                         pVolRight);
+    hr := pvAudioStreamVolume.SetChannelVolume(1,
+                                               pVolRight);
 
-  Result := S_OK;
+  Result := hr;
+end;
+
+
+procedure TWasApiEngine.SetMeterFaderGains(const GainL,
+                                           GainR: Single);
+var
+  b: LongInt;
+
+begin
+
+  b := PLongInt(@GainL)^;
+  InterlockedExchange(FMeterGainBitsL,
+                      b);
+
+  b := PLongInt(@GainR)^;
+  InterlockedExchange(FMeterGainBitsR,
+                      b);
+end;
+
+
+procedure TWasApiEngine.GetMeterFaderGains(out GainL,
+                                           GainR: Single);
+var
+  b: LongInt;
+
+begin
+
+  b := InterlockedExchangeAdd(FMeterGainBitsL,
+                              0);
+  GainL := PSingle(@b)^;
+
+  b := InterlockedExchangeAdd(FMeterGainBitsR,
+                              0);
+  GainR := PSingle(@b)^;
+end;
+
+
+// Pitching/tempo
+
+procedure TWasApiEngine.SetPitchPercent(const Pct: Double);
+var
+  r: Double;
+
+begin
+
+  // Typical tempo range: -16..+16 (%). You may allow more if you want, but this should do.
+  r := 1.0 + (Pct / 100.0);
+
+  if (r < 0.5) then
+    r := 0.5;
+
+  if (r > 2.0) then
+    r := 2.0;
+  FRateTarget := r;
+end;
+
+
+procedure TWasApiEngine.SetPitchSlider(const SliderPos: Integer);
+var
+  pct: Double;
+  rate: Double;
+
+begin
+
+  // SliderPos -100..+100 -> pct -PitchRange..+PitchRange
+  pct := (SliderPos / 100.0) * FPitchRangePct;
+
+  // Hard detent: treat small region as exactly 0
+  if (Abs(pct) <= FPitchDetentPct) then
+    pct := 0.0
+  else
+    begin
+
+      // Auto-zero: if user is close to center, snap to exact 0
+      if (Abs(pct) <= FPitchAutoZeroPct) then
+        pct := 0.0;
+    end;
+
+  // Varispeed factor
+  rate := 1.0 + (pct / 100.0);
+
+  // Safety clamp
+  if (rate < 0.5) then
+    rate := 0.5;
+
+  if (rate > 2.0) then
+    rate := 2.0;
+
+  FRateTarget := rate;
+end;
+
+
+procedure TWasApiEngine.MeterPublishFloat32(const p: PSingle;
+                                            const Frames,
+                                            Channels: Integer);
+var
+  i: Integer;
+  l, r: Single;
+  absL, absR: Single;
+  peakL, peakR: Single;
+  sumL, sumR: Double;
+  bits: LongInt;
+
+begin
+
+  if (p = nil) or
+     (Frames <= 0) or
+     (Channels < 1) then
+    Exit;
+
+  peakL := 0;
+  peakR := 0;
+  sumL := 0;
+  sumR := 0;
+
+  if (Channels = 1) then
+    begin
+
+      for i := 0 to Frames - 1 do
+        begin
+
+          l := PSingle(NativeUInt(p) + NativeUInt(i) * 4)^;
+          absL := Abs(l);
+          if (absL > peakL) then
+            peakL := absL;
+          sumL := sumL + (l * l);
+        end;
+
+      peakR := peakL;
+      sumR := sumL;
+    end
+  else
+    begin
+
+      for i := 0 to Frames - 1 do
+        begin
+
+          l := PSingle(NativeUInt(p) + NativeUInt((i * Channels) + 0) * 4)^;
+          r := PSingle(NativeUInt(p) + NativeUInt((i * Channels) + 1) * 4)^;
+
+          absL := Abs(l);
+          if (absL > peakL) then
+            peakL := absL;
+
+          absR := Abs(r);
+          if (absR > peakR) then
+            peakR := absR;
+
+          sumL := sumL + (l * l);
+          sumR := sumR + (r * r);
+        end;
+    end;
+
+  // RMS
+  if (Frames > 0) then
+    begin
+
+      l := Sqrt(sumL / Frames);
+      r := Sqrt(sumR / Frames);
+    end
+  else
+    begin
+
+      l := 0;
+      r := 0;
+    end;
+
+  // store as bits atomically
+  bits := PLongInt(@peakL)^;
+  InterlockedExchange(FMeterPeakBitsL,
+                      bits);
+
+  bits := PLongInt(@peakR)^;
+  InterlockedExchange(FMeterPeakBitsR,
+                      bits);
+
+  bits := PLongInt(@l)^;
+  InterlockedExchange(FMeterRmsBitsL,
+                      bits);
+
+  bits := PLongInt(@r)^;
+  InterlockedExchange(FMeterRmsBitsR,
+                      bits);
 end;
 
 
@@ -1342,61 +2065,108 @@ begin
 end;
 
 
-function TWasApiEngine.LoadData(bufferFrameCount: UINT32;
-                                pData: PByte;
-                                var flags: DWORD): HRESULT;
+function TWasApiEngine.LoadData(const Frames: UINT32;
+                                const pBufferData: PByte;
+                                var Flags: DWORD): HRESULT;
+begin
+
+  if (pvSourceWfx = nil) then
+    Exit(E_POINTER);
+
+  // Client format must be IEEE float32 (this is what IAudioClient.Initialize uses)
+  if (pvSourceWfx.wFormatTag <> WAVE_FORMAT_IEEE_FLOAT) or
+     (pvSourceWfx.wBitsPerSample <> 32) then
+    Exit(MF_E_INVALIDMEDIATYPE);
+
+  if not Boolean(FVarispeedEnabled) then
+  begin
+    FRateTarget := 1.0;
+    if (FRampMs <= 0) then
+      FRateSmooth := 1.0;
+  end;
+
+  Result := LoadData_VarispeedFloat32(Integer(Frames),
+                                      PSingle(Pointer(pBufferData)), // XE7-safe
+                                      Flags);
+end;
+
+
+// Helper for LoadFileInternal.
+function TWasApiEngine.ConvertPvBytesToFloat32InPlace(): HRESULT;
 var
-  bytesToCopy: UINT32;
-  bytesRequested: UINT32;
-  remain: UINT32;
+  bits: Integer;
+  isFloat: Boolean;
+  frames: Integer;
+  ch: Integer;
+  samples: Integer;
+  floatBytes: Integer;
+  pNew: PByte;
 
 begin
 
-  flags := 0;
-
-  if (pData = nil) then
+  if (pvBytes = nil) or (pvBytesLength <= 0) or (pvSourceWfx = nil) then
     Exit(E_POINTER);
 
-  if (pvBytes = nil) or (pvBytesLength = 0) then
+  ch := pvSourceWfx.nChannels;
+  if (ch <= 0) or (pvSourceWfx.nBlockAlign <= 0) then
     Exit(E_FAIL);
 
-  if (FClientBlockAlign = 0) then
+  // How many frames are currently in pvBytes (in pvSourceWfx layout)
+  frames := pvBytesLength div pvSourceWfx.nBlockAlign;
+  if (frames <= 1) then
     Exit(E_FAIL);
 
-  bytesRequested := bufferFrameCount * UINT32(FClientBlockAlign);
-  bytesToCopy := bytesRequested;
+  samples := frames * ch;
 
-  if (FOffset >= pvBytesLength) then
+  if not GetWfxBitsAndFloat(pvSourceWfx, bits, isFloat) then
+    Exit(MF_E_INVALIDMEDIATYPE);
+
+  floatBytes := samples * SizeOf(Single);
+  GetMem(pNew, floatBytes);
+  FillChar(pNew^, floatBytes, 0);
+
+  try
+    if isFloat and (bits = 32) then
     begin
-      flags := AUDCLNT_BUFFERFLAGS_SILENT;
-      ZeroMemory(pData,
-                 bytesRequested);
-      Exit(S_OK);
+      // Already float32 interleaved
+      Move(pvBytes^, pNew^, floatBytes);
+    end
+    else
+    begin
+      case bits of
+        16: Int16ToFloat(pvBytes, PSingle(pNew), samples);
+        24: Int24ToFloat(pvBytes, PSingle(pNew), samples);
+        32: Int32ToFloat(pvBytes, PSingle(pNew), samples); // int32 PCM
+      else
+        Exit(MF_E_INVALIDMEDIATYPE);
+      end;
     end;
 
-  if (FOffset + bytesToCopy) > pvBytesLength then
-    begin
-      bytesToCopy := pvBytesLength - FOffset;
-      flags := AUDCLNT_BUFFERFLAGS_SILENT;
-    end;
+    // Replace old buffer
+    FreeMem(pvBytes);
+    pvBytes := pNew;
+    pNew := nil;
 
-  if (bytesToCopy > 0) then
-    Move((pvBytes + FOffset)^,
-         pData^,
-         bytesToCopy);
+    pvBytesLength := floatBytes;
 
-  // If partial, zero the rest of the buffer for safety.
-  if (bytesToCopy < bytesRequested) then
-    begin
-      remain := bytesRequested - bytesToCopy;
-      ZeroMemory(PByte(NativeUInt(pData) + NativeUInt(bytesToCopy)),
-                 remain);
-    end;
+    // Update pvSourceWfx to describe float32 interleaved
+    // (Keep SR/ch; blockalign/avgbytes change)
+    pvSourceWfx.wFormatTag := WAVE_FORMAT_IEEE_FLOAT;
+    pvSourceWfx.wBitsPerSample := 32;
+    pvSourceWfx.nBlockAlign := WORD(ch * SizeOf(Single));
+    pvSourceWfx.nAvgBytesPerSec := pvSourceWfx.nSamplesPerSec * pvSourceWfx.nBlockAlign;
+    pvSourceWfx.cbSize := 0;
 
-  Inc(FOffset,
-      bytesToCopy);
+    // Reset varispeed read cursor
+    FReadPos := 0.0;
+    if (FRateTarget <= 0.0) then FRateTarget := 1.0;
+    FRateSmooth := FRateTarget;
 
-  Result := S_OK;
+    Result := S_OK;
+  finally
+    if (pNew <> nil) then
+      FreeMem(pNew);
+  end;
 end;
 
 
@@ -1515,13 +2285,6 @@ begin
   if FAILED(hr) then
     Exit(hr);
 
-  // Configure and init WASAPI for decoded PCM format.
-  // NOTE: MUST match LoadData/byte layout -> pvSourceWfx.
-  hr := SetFormat(pvSourceWfx);
-  if FAILED(hr) then
-    Exit(hr);
-
-
   // ---------------------------------------------------------------------------
   // Read all samples into pvBytes (decoded PCM bytes in pvSourceWfx layout)
   // ---------------------------------------------------------------------------
@@ -1592,12 +2355,80 @@ begin
       end;
     end;
 
-  // Duration (100ns) based on decoded PCM byte rate.
-  FDuration100ns := 0;
-  if (pvSourceWfx <> nil) and (pvSourceWfx.nAvgBytesPerSec <> 0) then
-    FDuration100ns := Int64((UInt64(pvBytesLength) * UInt64(REFTIMES_PER_SEC)) div UInt64(pvSourceWfx.nAvgBytesPerSec));
+  if FAILED(hr) then
+    Exit(hr);
 
+  // Convert decoded pvBytes (any 16/24/32) -> float32 interleaved.
+  hr := ConvertPvBytesToFloat32InPlace();
+  if FAILED(hr) then
+    Exit(hr);
+
+  // NOW configure and init WASAPI for the final layout (float32).
+  hr := SetFormat(pvSourceWfx);
+  if FAILED(hr) then
+    Exit(hr);
+
+  // Duration calc is now correct for float32 too.
+  if (fileDuration > 0) then
+    FDuration100ns := fileDuration
+  else
+    begin
+
+      FDuration100ns := 0;
+      if (pvSourceWfx <> nil) and (pvSourceWfx.nAvgBytesPerSec <> 0) then
+        FDuration100ns := Int64((UInt64(pvBytesLength) * UInt64(REFTIMES_PER_SEC)) div UInt64(pvSourceWfx.nAvgBytesPerSec));
+    end;
   Result := hr;
+end;
+
+
+//
+function TWasApiEngine.GetDeviceIdByIndex(const AIndex: Integer;
+                                          out ADeviceId: string): HRESULT;
+var
+  pEnumerator: IMMDeviceEnumerator;
+  pCollection: IMMDeviceCollection;
+  pDevice: IMMDevice;
+  count: UINT;
+  pId: PWideChar;
+
+begin
+
+  ADeviceId := '';
+  pId := nil;
+
+  Result := CoCreateInstance(CLSID_MMDeviceEnumerator,
+                             nil,
+                             CLSCTX_INPROC_SERVER,
+                             IID_IMMDeviceEnumerator,
+                             pEnumerator);
+  if FAILED(Result) then
+    Exit;
+
+  // Render endpoints, active only (match typical “device list” UI expectations)
+  Result := pEnumerator.EnumAudioEndpoints(eRender,
+                                           DEVICE_STATE_ACTIVE,
+                                           pCollection);
+  if FAILED(Result) then
+    Exit;
+
+  Result := pCollection.GetCount(count);
+  if FAILED(Result) then
+    Exit;
+
+  if (AIndex < 0) or (UINT(AIndex) >= count) then
+    Exit(E_INVALIDARG);
+
+  Result := pCollection.Item(UINT(AIndex), pDevice);
+  if FAILED(Result) then
+    Exit;
+
+  Result := pDevice.GetId(pId);
+  if SUCCEEDED(Result) then
+    begin
+      ADeviceId := pId;
+      CoTaskMemFree(pId);
+    end;
 end;
 
 
@@ -1606,8 +2437,6 @@ var
   hr: HRESULT;
   pEnumerator: IMMDeviceEnumerator;
   pDevice: IMMDevice;
-  pasm: IAudioSessionManager2;
-  psav: ISimpleAudioVolume;
 
 begin
 
@@ -1628,9 +2457,29 @@ begin
   if FAILED(hr) then
     Exit(hr);
 
-  hr := pEnumerator.GetDefaultAudioEndpoint(eRender,
-                                            eMultimedia,
-                                            pDevice);
+  // Select endpoint
+  if FUseDefaultDevice then
+    begin
+      hr := pEnumerator.GetDefaultAudioEndpoint(eRender,
+                                                FDeviceRole,
+                                                pDevice);
+    end
+  else
+    begin
+
+      // Resolve DeviceIndex -> IMMDevice ID, then open that device
+      hr := GetDeviceIdByIndex(FDeviceIndex,
+                               FDeviceId);
+      if SUCCEEDED(hr) then
+        hr := pEnumerator.GetDevice(PWideChar(FDeviceId),
+                                    pDevice);
+  end;
+
+  // Fallback to default multimedia if explicit selection fails
+  if FAILED(hr) then
+    hr := pEnumerator.GetDefaultAudioEndpoint(eRender,
+                                              eMultimedia,
+                                              pDevice);
   if FAILED(hr) then
     Exit(hr);
 
@@ -1641,28 +2490,10 @@ begin
   if FAILED(hr) then
     Exit(hr);
 
-  // Force the audio session to unmuted + unity gain.
-  if Assigned(pvAudioClient) then
-    begin
+  // Do NOT call GetSimpleAudioVolume(@FSessionGuid, ...) here:
+  // the deck session does not exist until pvAudioClient.Initialize(..., @FSessionGuid) in SetFormat.
+  pvSimpleVol := nil;
 
-      hr := CreateAudioSessionManager2(@pasm);
-      if SUCCEEDED(hr) then
-        hr := pasm.GetSimpleAudioVolume(nil,
-                                        0,
-                                        psav);
-      if SUCCEEDED(hr) then
-        begin
-
-          hr := psav.SetMute(False,
-                             nil);
-
-          if SUCCEEDED(hr) then
-            hr := psav.SetMasterVolume(1.0,
-                                       nil);
-        end;
-    end;
-
-  // We init later in SetFormat because we need the final WAVEFORMATEX.
   Result := hr;
 end;
 
@@ -1724,6 +2555,20 @@ begin
                                  pvAudioClock);
   if FAILED(hr) then
     Exit(hr);
+
+  hr := pvAudioClient.GetService(IID_ISimpleAudioVolume,
+                                 pvSimpleVol);
+  if FAILED(hr) then
+    Exit(hr);
+
+  if Assigned(pvSimpleVol) then
+    begin
+
+      pvSimpleVol.SetMute(False,
+                          nil);
+      pvSimpleVol.SetMasterVolume(1.0,
+                                  nil);
+    end;
 
   pvSoundChannels := pwfx.nChannels;
 
@@ -1822,13 +2667,23 @@ begin
   // Otherwise start from the beginning.
   if (pvDeviceState <> dsPause) then
     begin
+
       FOffset := 0;
       FBasePos100ns := 0;
+
+      // Tempo/pitch
+      FReadPos := 0.0;
+      if (FRateTarget = 0.0) then
+        FRateTarget := 1.0;
+      FRateSmooth := FRateTarget;
     end;
 
   FRequestStop := False;
   FRequestPause := False;
 
+  InterlockedExchange(FRunning,
+                      1);
+  FStoppedEvent.ResetEvent;
   SetState(dsPlay);
 
   waitArray[0] := FTerminateEvent;          // Terminate engine thread.
@@ -1876,7 +2731,7 @@ begin
                 // Route *all* supported commands through the single implementation
                 ProcessControlCommand(Cmd);
 
-                // Keep the hard �shutdown now� shortcut if you want
+                // Keep the hard shutdown now shortcut if you want
                 if (Cmd.Kind = ckShutdown) then
                   begin
 
@@ -1904,6 +2759,7 @@ begin
                                0);
 
                 SetState(dsStop);
+                RaiseEnded();
                 Break;
               end;
 
@@ -1942,6 +2798,10 @@ begin
                                pBufferData,
                                flags);
 
+                // DEBUG : Check if we are only playing silence.
+                //if ((flags and AUDCLNT_BUFFERFLAGS_SILENT) <> 0) then
+                //  OutputDebugString('LoadData: SILENT');
+
                 // After GetBuffer succeeds, ReleaseBuffer MUST be called with the same frame count.
                 // If LoadData failed, release as SILENT for safety.
                 if FAILED(hr) then
@@ -1951,6 +2811,12 @@ begin
                                                  AUDCLNT_BUFFERFLAGS_SILENT);
                     Break;
                   end;
+
+                // Peakmeter pre/post.
+                if ((flags and AUDCLNT_BUFFERFLAGS_SILENT) = 0) then
+                  MeterPublishFloat32(PSingle(Pointer(pBufferData)),
+                                      Integer(numFramesAvailable),
+                                      pvSourceWfx.nChannels);
 
                 // -------------------------------------------------------------
                 // FX chain hook (generic IMFTransform list)
@@ -1975,10 +2841,6 @@ begin
                                         pvSourceWfx);
                          // DEBUG: Print the wav render format.
                          //DebugWfx('TWasApiEngine.PlayAudioStreamInternal', pvRenderWfx);
-
-
-
-
                         except
 
                           on E: Exception do
@@ -2008,6 +2870,46 @@ begin
                                                      AUDCLNT_BUFFERFLAGS_SILENT);
                         Break;
                       end;
+
+                    // Peakmeter pre/post = post.
+                    if ((flags and AUDCLNT_BUFFERFLAGS_SILENT) = 0) then
+                      MeterPublishFloat32(PSingle(Pointer(pBufferData)),
+                                          Integer(numFramesAvailable),
+                                          pvSourceWfx.nChannels);
+
+                    // -------------------------------------------------------------
+                    // Per-engine post-FX output hook (engine thread)
+                    // Buffer is in *render* format, so pass pvRenderWfx.
+                    // -------------------------------------------------------------
+                    if Assigned(FOnOutputPcm) then
+                      begin
+
+                        try
+
+                          if ((flags and AUDCLNT_BUFFERFLAGS_SILENT) <> 0) then
+                            FOnOutputPcm(Self,
+                                         nil,
+                                         0,
+                                         pvSourceWfx{pvRenderWfx})
+                          else
+                            FOnOutputPcm(Self,
+                                         pBufferData,
+                                         DWORD(numFramesAvailable) * DWORD(FClientBlockAlign),
+                                         pvSourceWfx{pvRenderWfx});
+
+                          // DEBUG: Print the wav render format.
+                          //DebugWfx('TWasApiEngine.PlayAudioStreamInternal: Render format', pvRenderWfx);
+                          //DebugWfx('TWasApiEngine.PlayAudioStreamInternal: Source format', pvSourceWfx);
+                          except
+                          on E: Exception do
+                            begin
+                              // Fail-safe: silence this buffer and report.
+                              flags := flags or AUDCLNT_BUFFERFLAGS_SILENT;
+                              RaiseError('OnOutputPcm exception: ' + E.Message,
+                                         E_FAIL);
+                            end;
+                        end;
+                      end;
                   end;
                   // -----------------------------------------------------------
 
@@ -2016,13 +2918,6 @@ begin
                 if FAILED(hr) then
                   Break;
 
-                // If we reach the end of the audio, we will detect silence.
-                if (flags and AUDCLNT_BUFFERFLAGS_SILENT = AUDCLNT_BUFFERFLAGS_SILENT) then
-                  begin
-
-                    pvDeviceState := dsStop;
-                    Break;
-                   end;
               end;
 
             // Progress
@@ -2040,6 +2935,9 @@ begin
             if (FOffset >= pvBytesLength) then
               begin
 
+                FBasePos100ns := 0;
+                RaiseProcessed(0,
+                               0);
                 SetState(dsStop);
                 RaiseEnded();
                 Break;
@@ -2065,6 +2963,13 @@ begin
       pvMmcssHandle := 0;
       pvMmcssTaskIndex := 0;
     end;
+
+  InterlockedExchange(FRunning,
+                      0);
+  RaiseProcessed(0,
+                 0);
+
+  FStoppedEvent.SetEvent;
 
   Result := hr;
 end;

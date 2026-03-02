@@ -2846,22 +2846,29 @@ begin
       end; // Case waitResult.
     end;
 
-  // Stop the client and reset its clock/buffer. -------------------------------
-  pvAudioClient.Stop();
-  pvAudioClient.Reset();
-  if Assigned(FDynamics) then
-    FDynamics.Reset();
+  if (pvDeviceState = dsPause) then
+    pvAudioClient.Stop()
+  else
+    begin
 
-  // Reset playback position.
-  FOffset := 0;
-  FBasePos100ns := 0;
+      // Stop the client and reset its clock/buffer. ---------------------------
+      pvAudioClient.Stop();
+      pvAudioClient.Reset();
 
-  // Tell GUI immediately.
-  RaiseProcessed(0,
-                 0);
+      if Assigned(FDynamics) then
+        FDynamics.Reset();
 
-  SetState(dsStop);
-  // ---------------------------------------------------------------------------
+      // Reset playback position.
+      FOffset := 0;
+      FBasePos100ns := 0;
+
+      // Tell GUI immediately.
+      RaiseProcessed(0,
+                     0);
+
+      SetState(dsStop);
+      // -----------------------------------------------------------------------
+    end;
 
   if (pvMmcssHandle <> 0) then
     begin
