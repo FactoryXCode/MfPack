@@ -862,6 +862,7 @@ begin
 
   if Assigned(pvSourceWfx) then
     begin
+
       CoTaskMemFree(pvSourceWfx);
       pvSourceWfx := nil;
     end;
@@ -882,8 +883,6 @@ begin
   SafeRelease(pvRenderClient);
   SafeRelease(pvAudioClock);
   SafeRelease(pvSimpleVol);
-
-  MfShutDown();
 
   inherited;
 end;
