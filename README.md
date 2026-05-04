@@ -389,14 +389,14 @@ This sample demonstrates a **real-time audio playback engine on Windows** using:
 
 **MfCaptureVideoFromGPU Sample 2**
 
-*This sample demonstrates how to Capture a selected monitor (screen) using DXGI Desktop Duplication,
+*This sample demonstrates how to capture a selected monitor (screen) connected with the graphics card GPU using DXGI Desktop Duplication,
 optionally captures system audio via WASAPI loopback, shows a live preview, 
 and writes the result to a file (typically MP4 with H.264 video and AAC or FLAC audio).*
 
 Audio-only recording can be done separately to WAV or FLAC using the
 dedicated recorder unit.
 
-*Note: You have to have good knowledge of Media Foundation and DirectX.*
+*Note: You need good knowledge of Media Foundation, DirectX and GPU processing.*
 
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfCaptureVideoFromScreen2s.png)
