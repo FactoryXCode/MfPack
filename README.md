@@ -413,7 +413,7 @@ All WASAPI code comes together in this sample.
 *Notes:* 
  You have to know the principles of WASAPI, MFT's and audio manipulation.
  This sample is very large and not suitable for beginners!
- Before using this sample make shure, you have all needed components installed (see instructions).
+ Before using this sample make sure, you have all needed components installed (see instructions).
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/RDJ_Interface_s.png)
 
