@@ -91,9 +91,11 @@ MFPack is the Delphi version of Microsoft Media Foundation, Core Audio etc. for 
   Tilo Güldner
   Tony Kalf
   TopPlay
+  Carmen (Carmenh)
 
 /* Project Members/ Initiators: */
 Peter Larson (OzShips)
 Tony Kalf (maXcomX)
+Carmen (Carmenh)
 
 <EOF>
