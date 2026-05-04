@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
@@ -499,11 +499,21 @@ var
   // Per-sample smoothing coef
   smS: Single;
 
+  // Enable/disable
+  en: Integer;
+
 begin
 
   if (Frames <= 0) or
      (Channels <= 0) or
      (pData = nil) then
+    Exit;
+
+  // Bypass the effect when disabled.
+  en := InterlockedCompareExchange(FEnabledInt,
+                                   0,
+                                   0);
+  if (en = 0) then
     Exit;
 
   FLastSampleRate := SampleRate;

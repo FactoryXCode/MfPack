@@ -19,7 +19,7 @@ This sample also demonstrates how to create and implement a:
 
 ## Features
 
-A set of components based on DSP and MFT's
+A set of components based on DSP and MFT's. Before using this sample, you have to install the MfComponents ()
 
 ---
 
@@ -28,10 +28,6 @@ A set of components based on DSP and MFT's
 ```
 GUI → Engine Thread → EQ MFT → DSP → WASAPI Renderer
 ```
-
-- The **engine thread** owns all real-time audio resources.  
-- The **GUI never touches audio objects directly**
-
 ---
 
 ## Notes
@@ -40,6 +36,7 @@ GUI → Engine Thread → EQ MFT → DSP → WASAPI Renderer
 - Built against **Windows SDK 10.0.22621.4654 (Windows 11)**
 - Requires **Windows 10 or later**
 - Minimum supported **MfPack version: 3.1.9**
+
 
 ---
 
@@ -55,7 +52,7 @@ GUI → Engine Thread → EQ MFT → DSP → WASAPI Renderer
 ## Release Information
 
 - **First release:** 13/08/2025  
-- **Final release:** 24/01/2026  
+- **Final release:** 05/05/2026  
 
 ---
 

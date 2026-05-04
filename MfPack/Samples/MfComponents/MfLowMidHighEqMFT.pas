@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -151,10 +151,14 @@ type
     FSampleRate: Integer;
     FChannels: Integer;
 
-    // Smoothed gains (linear) - currently unity, kept for future crossfade
-    FLowGainLin: Double;
-    FMidGainLin: Double;
-    FHighGainLin: Double;
+    // Smoothed gains (linear) - currently unity, kept for future crossfade.
+    // We keep them for future use.
+    // These gain members may be reused later for:
+    // 1) smooth EQ bypass transitions,
+    // 2) wet/dry style blending or staged gain interpolation.
+    //FLowGainLin: Double;
+    //FMidGainLin: Double;
+    //FHighGainLin: Double;
 
     // Biquad per band per channel
     // y[n] = b0*x + b1*x1 + b2*x2 - a1*y1 - a2*y2
@@ -262,7 +266,7 @@ end;
 
 { TMfLowMidHighEqMFT }
 
-constructor TMfLowMidHighEqMFT.Create;
+constructor TMfLowMidHighEqMFT.Create();
 begin
 
   inherited Create;
@@ -275,9 +279,9 @@ begin
   FSampleRate := 0;
   FChannels := 0;
 
-  FLowGainLin := 1.0;
-  FMidGainLin := 1.0;
-  FHighGainLin := 1.0;
+  //FLowGainLin := 1.0;
+  //FMidGainLin := 1.0;
+  //FHighGainLin := 1.0;
 end;
 
 
@@ -714,10 +718,7 @@ var
   x,
   y: Double;
   en: Integer;
-  rampMs: Integer;
-  dtMs: Double;
-  alpha: Double;
-  A: PSingleArray;
+  pS: PSingle;
 
   // Helper
   function ProcBiquad(var B: TBiquad;
@@ -733,11 +734,15 @@ var
 
 begin
 
-  if (pData = nil) or (Frames <= 0) then
+  if (pData = nil) or
+     (Frames <= 0) or
+     (Channels <= 0) or
+     (SampleRate <= 0) then
     Exit;
 
   // Ensure our cached SR/Ch are consistent.
-  if (SampleRate <> FSampleRate) or (Channels <> FChannels) then
+  if (SampleRate <> FSampleRate) or
+     (Channels <> FChannels) then
     begin
 
       FSampleRate := SampleRate;
@@ -752,27 +757,6 @@ begin
   if (en = 0) then
     Exit;
 
-  // Gain smoothing (kept for future gain-only crossfade)
-  rampMs := Max(0,
-                FSettings.RampMs);
-
-  if (rampMs = 0) then
-    alpha := 1.0
-  else
-    begin
-
-      dtMs := (Frames / Max(1.0,
-                            SampleRate)) * 1000.0;
-      alpha := 1.0 - Exp(-dtMs / rampMs);
-      alpha := EnsureRange(alpha, 0.0, 1.0);
-    end;
-
-  FLowGainLin := FLowGainLin + (1.0 - FLowGainLin) * alpha;
-  FMidGainLin := FMidGainLin + (1.0 - FMidGainLin) * alpha;
-  FHighGainLin := FHighGainLin + (1.0 - FHighGainLin) * alpha;
-
-  A := PSingleArray(pData);
-
   idx := 0;
 
   for i := 0 to Frames - 1 do
@@ -781,13 +765,17 @@ begin
       for ch := 0 to Channels - 1 do
         begin
 
-          x := A^[idx];
+          pS := PtrSingleOffset(pData,
+                                idx);
 
-          y := ProcBiquad(FLow[ch], x);
-          y := ProcBiquad(FMid[ch], y);
-          y := ProcBiquad(FHigh[ch], y);
+          x := pS^;
 
-          y := y * FLowGainLin * FMidGainLin * FHighGainLin;
+          y := ProcBiquad(FLow[ch],
+                          x);
+          y := ProcBiquad(FMid[ch],
+                          y);
+          y := ProcBiquad(FHigh[ch],
+                          y);
 
           if (y > 1.0) then
             y := 1.0
@@ -795,7 +783,7 @@ begin
             if (y < -1.0) then
               y := -1.0;
 
-          A^[idx] := (y) * 1.0;
+          pS^ := y;
           Inc(idx);
         end;
     end;

@@ -21,7 +21,8 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 28/03/2026 Tony                Fixed TLoopbackCapture.EventWait.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -65,6 +66,7 @@ interface
 uses
   WinApi.Windows,
   WinAPI.Messages,
+  WinApi.WinError,
   {System}
   System.Sysutils,
   System.Threading,
@@ -145,27 +147,24 @@ begin
 end;
 
 
-function EventWait(EventObj: TEvent;
-                   Period: Integer = 100): HResult;
+function TLoopbackCapture.EventWait(EventObj: TEvent;
+                                    Period: Integer = 100): HResult;
 var
-  hr: HResult;
   wrWaitResult: TWaitResult;
 
 begin
 
-  // Wait for capture to stop
   wrWaitResult := EventObj.WaitFor(Period);
 
   case wrWaitResult of
-    wrSignaled: hr := S_FALSE; // The signal of the event object was set.
-    wrTimeout: hr := ERROR_TIMEOUT; // The time specified by the TimeOut parameter elapsed without the signal being set.
-    wrAbandoned: hr := ERROR_TIMEOUT;
-    wrError: hr := EventObj.LastError;
-    wrIOCompletion: hr := S_OK;
-    else
-      hr := S_OK;
+    wrSignaled:    Result := S_OK;
+    wrTimeout:     Result := HRESULT_FROM_WIN32(ERROR_TIMEOUT);
+    wrAbandoned:   Result := HRESULT_FROM_WIN32(ERROR_TIMEOUT);
+    wrError:       Result := HRESULT_FROM_WIN32(EventObj.LastError);
+    wrIOCompletion:Result := S_OK;
+  else
+    Result := E_FAIL;
   end;
-  Result := hr;
 end;
 
 

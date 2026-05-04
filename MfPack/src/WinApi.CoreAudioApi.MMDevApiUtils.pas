@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -71,6 +71,7 @@ interface
 // {$DEFINE USE_EMBARCADERO_DEF}
 
 uses
+
   {WinApi}
   WinApi.Windows,
   WinApi.MMSystem,
@@ -120,6 +121,7 @@ uses
   {$I 'WinApiTypes.inc'}
 
 const
+
   STRSAFE_MAX_CCH = 2147483647;  // Maximum supported buffer size, in characters (same as INT_MAX)
 
   // State indicators
@@ -130,6 +132,7 @@ const
   DEV_STATEMASK_ALL    : string = 'All States'; // only use for queries
 
 type
+
   PEndPointDevice = ^EndPointDevice;
   {$NODEFINE PEndPointDevice}
   _EndPointDevice = record
@@ -149,7 +152,20 @@ type
 
   TEndPointDeviceArray = array of TEndPointDevice;
 
+  // "eState" (dwStateMask) as used by IMMDeviceEnumerator.EnumAudioEndpoints
+  // Possible values or combinations:
+  //   DEVICE_STATE_ACTIVE, DEVICE_STATE_DISABLED, DEVICE_STATE_NOTPRESENT, DEVICE_STATE_UNPLUGGED
+  //   or DEVICE_STATEMASK_ALL (DEVICE_STATEMASK_ALL should only be used in queries).
+  eState = DWORD;
+const
+   DEVICE_STATE_ACTIVE      = eState($00000001);
+   DEVICE_STATE_DISABLED    = eState($00000002);
+   DEVICE_STATE_NOTPRESENT  = eState($00000004);
+   DEVICE_STATE_UNPLUGGED   = eState($00000008);
+   DEVICE_STATEMASK_ALL     = eState($0000000F);
+
 type
+
  //-----------------------------------------------------------
  // Register the application to receive notifications when the
  // volume level changes on the default process-specific audio
@@ -191,7 +207,7 @@ type
   //   {out}    Number of endpoints returned.
   //-----------------------------------------------------------
   function GetEndpointDevices(const flow: EDataFlow;
-                              state: DWord;
+                              state: eState;
                               out endpointdevices: TEndPointDeviceArray;
                               out devicesCount: DWord): HRESULT;
 
@@ -205,12 +221,27 @@ type
                                          Role: eRole = eMultimedia;
                                          dataFlow: EDataFlow = eRender): HRESULT;
 
+  // Same as function GetDefaultEndPointAudioDevice, but with extra option to get the device by ID.
+  function GetEndPointAudioDevice(out audioEndPoint: IMMDevice;
+                                  const deviceID: string;
+                                  Role: eRole = eMultimedia;
+                                  dataFlow: EDataFlow = eRender): HRESULT;
+
   // Get the device descriptions of a device
   function GetDeviceDescriptions(DefaultDevice: IMMDevice; // the zero based index, where 0 is the default (active) endpoint.
                                  const DevicePkey: PROPERTYKEY; // Possible values are: PKEY_Device_FriendlyName, PKEY_Device_DeviceDesc or PKEY_DeviceInterface_FriendlyName.
                                  out deviceDesc: WideString): HRESULT;
 
   function GetDeviceStateAsString(state: DWord): string;
+
+
+  function MfGetEndpointFriendlyName(Device: IMMDevice): string;
+  function MfDeviceIdToFriendlyName(const DeviceID: string): string;
+
+  procedure MfEnumerateEndpoints(DataFlow: EDataFlow;
+                                 List: TStrings);
+
+
 
   // The DirectShow API does not provide a means for an application to select the
   // audio endpoint device that is assigned to a particular device role.
@@ -292,6 +323,7 @@ type
 
 
 implementation
+
 
 // Constructor
 constructor TAudioVolumeEvents.Create(flow: EDataFlow;
@@ -429,7 +461,7 @@ end;
 // endpointdevices: Dynamic array that holds EndPointDevice properties.
 // devicesCount: Number of specified devices found
 function GetEndpointDevices(const flow: EDataFlow;
-                            state: DWord;
+                            state: eState;
                             out endpointdevices: TEndPointDeviceArray;
                             out devicesCount: DWord): HRESULT;
 var
@@ -553,6 +585,7 @@ var
 
 begin
   hr := E_FAIL;
+
 try
 try
   hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
@@ -573,6 +606,59 @@ try
     end
   else
     hr := E_INVALIDARG;
+
+except
+  // Do Nothing. Caller is responsible for error handling.
+end;
+finally
+  Result := hr;
+end;
+end;
+
+
+// Same as function GetDefaultEndPointAudioDevice, but with extra option to get the device by ID.
+function GetEndPointAudioDevice(out audioEndPoint: IMMDevice;
+                                const deviceID: string;
+                                Role: eRole = eMultimedia;
+                                dataFlow: EDataFlow = eRender): HRESULT;
+var
+  hr: HRESULT;
+  pdeviceEnumerator: IMMDeviceEnumerator;
+
+begin
+  hr := E_FAIL;
+
+try
+try
+  hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
+                         nil,
+                         CLSCTX_ALL,
+                         IID_IMMDeviceEnumerator,
+                         pdeviceEnumerator);
+  if Failed(hr) then
+    Abort;
+
+  if deviceID = '' then
+    begin
+
+      if (dataFlow = eRender) or (dataFlow = eCapture) then  // Can only be eRender or eCapture
+        begin
+
+          hr := pdeviceEnumerator.GetDefaultAudioEndpoint(dataFlow,
+                                                          Role,
+                                                          audioEndPoint);
+          if Failed(hr) then
+            Abort;
+        end
+      else
+        hr := E_INVALIDARG;
+    end
+  else
+    begin
+
+      hr := pdeviceEnumerator.GetDevice((PWideChar(WideString(DeviceId))),
+                                        audioEndPoint);
+    end;
 
 except
   // Do Nothing. Caller is responsible for error handling.
@@ -628,6 +714,105 @@ begin
     DEVICE_STATEMASK_ALL:    Result := DEV_STATEMASK_ALL;
   end;
 end;
+
+
+function MfGetEndpointFriendlyName(Device: IMMDevice): string;
+var
+  Props: IPropertyStore;
+  Prop: PROPVARIANT;
+
+begin
+
+  Result := '';
+
+  if (Device = nil) then
+    Exit;
+
+  if Succeeded(Device.OpenPropertyStore(STGM_READ,
+                                        Props)) then
+    begin
+
+      if Succeeded(Props.GetValue(PKEY_Device_FriendlyName,
+                                  Prop)) then
+        begin
+
+          Result := Prop.pwszVal;
+          PropVariantClear(Prop);
+        end;
+    end;
+end;
+
+
+function MfDeviceIdToFriendlyName(const DeviceID: string): string;
+var
+  Dev: IMMDevice;
+
+begin
+
+  Result := '';
+
+  GetEndPointDeviceByID(PWideChar(DeviceID),
+                        Dev);
+
+  if (Dev <> nil) then
+    Result := MfGetEndpointFriendlyName(Dev);
+end;
+
+
+procedure MfEnumerateEndpoints(DataFlow: EDataFlow;
+                               List: TStrings);
+var
+  hr: HResult;
+  Enum: IMMDeviceEnumerator;
+  Col: IMMDeviceCollection;
+  Dev: IMMDevice;
+  Count: UINT;
+  i: Integer;
+  ID: PWideChar;
+  Name: string;
+
+begin
+
+  if (List = nil) then
+    Exit;
+
+  List.Clear;
+
+  hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
+                         nil,
+                         CLSCTX_INPROC_SERVER,
+                         IID_IMMDeviceEnumerator,
+                         Enum);
+
+  if FAILED(hr) then
+    Exit;
+
+  hr := Enum.EnumAudioEndpoints(DataFlow,
+                                DEVICE_STATE_ACTIVE,
+                                Col);
+  if FAILED(hr) then
+    Exit;
+
+  Col.GetCount(Count);
+
+  for i := 0 to Count - 1 do
+    begin
+
+      Dev := nil;
+
+      if Failed(Col.Item(i,
+                         Dev)) then
+        Continue;
+
+      Dev.GetId(ID);
+
+      Name := MfGetEndpointFriendlyName(Dev);
+
+      List.AddObject(Name,
+                     TObject(Pointer(ID)));
+    end;
+end;
+
 
 //-----------------------------------------------------------
 // Create a DirectShow audio rendering filter that

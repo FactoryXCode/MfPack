@@ -102,7 +102,7 @@ https://sourceforge.net/projects/MFPack
 
 First release date: 13-08-2025
 
-Final release date: 08-01-2026
+Final release date: 05/05/2026
 
 
 

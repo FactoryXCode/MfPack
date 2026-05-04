@@ -41,7 +41,7 @@ Project location: https://github.com/FactoryXCode/MfPack
 https://sourceforge.net/projects/MFPack
 
 First release date: 21-11-2019
-Final release date: 07-11-2025
+Final release date: 05/05/2026
 
 
 

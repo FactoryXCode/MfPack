@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Please take notice of ANSI or Unicode versions of the included function.
@@ -89,10 +89,10 @@ type
 
   _AVRT_PRIORITY = (
     AVRT_PRIORITY_VERYLOW = -2,
-    AVRT_PRIORITY_LOW,
-    AVRT_PRIORITY_NORMAL,
-    AVRT_PRIORITY_HIGH,
-    AVRT_PRIORITY_CRITICAL);
+    AVRT_PRIORITY_LOW = -1,
+    AVRT_PRIORITY_NORMAL = 0,
+    AVRT_PRIORITY_HIGH = 1,
+    AVRT_PRIORITY_CRITICAL = 2);
   {$EXTERNALSYM _AVRT_PRIORITY}
   AVRT_PRIORITY = _AVRT_PRIORITY;
   {$EXTERNALSYM AVRT_PRIORITY}

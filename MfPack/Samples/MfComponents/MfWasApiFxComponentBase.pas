@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -78,7 +78,7 @@ type
 
   TMfWasApiFxComponentBase = class(TComponent, IMfWasApiFxProvider)
 
-    function GetMFT: IMFTransform; stdcall;
+    function GetMFT(): IMFTransform; stdcall;
 
     // Optional capability flags (useful for validation/UI).
     function SupportsPcmBits(BitsPerSample: Integer): Boolean; stdcall; // 16/24/32

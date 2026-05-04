@@ -15,13 +15,13 @@
 //
 // Company: FactoryX
 // Intiator(s): Tony Kalf (maXcomX)
-// Contributor(s): Tony Kalf (maXcomX)
+// Contributor(s): Carmen(carmenh), Tony Kalf (maXcomX)
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -64,6 +64,7 @@ unit XAudio2_FXReverb;
 interface
 
 uses
+
   {WinApi}
   WinApi.Windows,
   {System}
@@ -82,7 +83,7 @@ const
   NATIVE_EFFECT_DEFAULT: XAUDIO2FX_REVERB_PARAMETERS = (
       WetDryMix: XAUDIO2FX_REVERB_DEFAULT_WET_DRY_MIX;
       ReflectionsDelay: XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_DELAY;
-      ReverbDelay:      XAUDIO2FX_REVERB_DEFAULT_REVERB_DELAY;
+      ReverbDelay: XAUDIO2FX_REVERB_DEFAULT_REVERB_DELAY;
       RearDelay: XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY;
       PositionLeft: XAUDIO2FX_REVERB_DEFAULT_POSITION;
       PositionRight: XAUDIO2FX_REVERB_DEFAULT_POSITION;
@@ -111,6 +112,7 @@ type
     i3dl2Param: XAUDIO2FX_REVERB_I3DL2_PARAMETERS;
     nativeParam: XAUDIO2FX_REVERB_PARAMETERS;
     sevenDotOneReverb: BOOL;
+
     procedure ConvertToNative(sdOneReverb: BOOL = TRUE);
   end;
 

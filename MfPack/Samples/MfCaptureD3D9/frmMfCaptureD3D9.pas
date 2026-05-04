@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -313,7 +313,7 @@ begin
           // Clear the combobox
           dlgSelectDevice.ComboBox1.Clear;
           // Fill the combobox with found capture devices
-          for i := 0 to Integer(param.count) - 1 do
+          for i := 0 to param.count - 1 do
             begin
 
               // Try to get the display-friendly-name.

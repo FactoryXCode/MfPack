@@ -9,7 +9,7 @@ This sample has 3 levels:
 * Example 1 creates a simple green bitmap (640x480) and store it to a file with a length of 20 seconds.
 * Example 2 demonstrates how to use the SinkWriter to create a video from one or more bitmap files.
 * Example 3 demonstrates how to use the SinkWriter to create a video from one or more imagefiles,
-  like jpg, bitmap, gif or png files. It also provides an option to add audio and define it's codec (AAC, FLAC and Dolby AC-3).
+like jpg, bitmap, gif or png files. It also provides an option to add audio and define it's codec (AAC, FLAC and Dolby AC-3).
 
 
 
@@ -27,7 +27,7 @@ Project location: https://github.com/FactoryXCode/MfPack
 https://sourceforge.net/projects/MFPack
 
 First release date: 25-11-2022
-Final release date: 25-07-2025
+Final release date: 05/05/2026
 
 Copyright © FactoryX. All rights reserved.
 

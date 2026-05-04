@@ -1,104 +1,134 @@
 object frmLoopBackCapture: TfrmLoopBackCapture
   Left = 0
   Top = 0
+  Margins.Left = 5
+  Margins.Top = 5
+  Margins.Right = 5
+  Margins.Bottom = 5
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'Loopback Capture Sample 1'
-  ClientHeight = 376
-  ClientWidth = 472
+  ClientHeight = 564
+  ClientWidth = 708
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -17
   Font.Name = 'Tahoma'
   Font.Style = []
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
-  TextHeight = 13
+  PixelsPerInch = 144
+  TextHeight = 21
   object Bevel1: TBevel
     Left = 0
-    Top = 351
-    Width = 472
+    Top = 526
+    Width = 708
     Height = 1
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Align = alBottom
     Shape = bsTopLine
-    ExplicitTop = 439
+    ExplicitTop = 527
   end
   object lblStatus: TLabel
     AlignWithMargins = True
-    Left = 3
-    Top = 355
-    Width = 466
-    Height = 18
+    Left = 5
+    Top = 532
+    Width = 698
+    Height = 27
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Align = alBottom
     AutoSize = False
     Caption = 'Start Capture'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
+    Font.Height = -17
     Font.Name = 'Tahoma'
     Font.Style = [fsBold]
     ParentFont = False
     Layout = tlCenter
-    ExplicitTop = 443
+    ExplicitTop = 533
+    ExplicitWidth = 699
   end
   object Panel3: TPanel
     Left = 0
-    Top = 149
-    Width = 472
-    Height = 82
+    Top = 224
+    Width = 708
+    Height = 123
     Hint = 
       'The capture buffersize depending on the audiodevice specs and so' +
       'urce latency '
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Align = alTop
     Alignment = taLeftJustify
     BevelOuter = bvLowered
     Caption = '  Capture Buffer'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
+    Font.Height = -17
     Font.Name = 'Tahoma'
     Font.Style = [fsBold]
     ParentFont = False
     TabOrder = 2
     VerticalAlignment = taAlignTop
     object lblBufferDuration: TLabel
-      Left = 65
-      Top = 51
-      Width = 195
-      Height = 13
+      Left = 98
+      Top = 77
+      Width = 301
+      Height = 21
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Caption = 'Capture buffer duration : 10 milliseconds'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
     end
     object lblCaptureBufferDuration: TLabel
-      Left = 114
-      Top = 25
-      Width = 216
-      Height = 13
+      Left = 171
+      Top = 38
+      Width = 334
+      Height = 21
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Caption = 'Auto capture buffer duration: 10 milliseconds'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clGrayText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = [fsItalic]
       ParentFont = False
     end
     object cbxAutoBufferSize: TCheckBox
-      Left = 8
-      Top = 24
-      Width = 100
-      Height = 16
+      Left = 12
+      Top = 36
+      Width = 150
+      Height = 24
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Caption = 'Auto buffer size.'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
@@ -106,10 +136,14 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       OnClick = cbxAutoBufferSizeClick
     end
     object sedBufferSize: TSpinEdit
-      Left = 7
-      Top = 48
-      Width = 52
-      Height = 22
+      Left = 11
+      Top = 72
+      Width = 78
+      Height = 32
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       MaxValue = 1000
       MinValue = 0
       TabOrder = 1
@@ -117,30 +151,42 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     end
   end
   object butStart: TButton
-    Left = 8
-    Top = 318
-    Width = 85
-    Height = 27
+    Left = 12
+    Top = 477
+    Width = 128
+    Height = 41
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Caption = 'Start capture'
     TabOrder = 4
     OnClick = butStartClick
   end
   object butStop: TButton
-    Left = 99
-    Top = 318
-    Width = 85
-    Height = 27
+    Left = 149
+    Top = 477
+    Width = 127
+    Height = 41
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Caption = 'Stop capture'
     Enabled = False
     TabOrder = 5
     OnClick = butStopClick
   end
   object butPlayData: TButton
-    Left = 190
-    Top = 318
-    Width = 80
-    Height = 27
+    Left = 285
+    Top = 477
+    Width = 120
+    Height = 41
     Hint = 'Play recorded data.'
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Caption = 'Play data'
     Enabled = False
     ParentShowHint = False
@@ -151,31 +197,39 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   object Panel1: TPanel
     Left = 0
     Top = 0
-    Width = 472
-    Height = 51
+    Width = 708
+    Height = 77
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Align = alTop
     Alignment = taLeftJustify
     BevelOuter = bvLowered
     Caption = '   AudioEndpoint'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
+    Font.Height = -17
     Font.Name = 'Tahoma'
     Font.Style = [fsBold]
     ParentFont = False
     TabOrder = 0
     VerticalAlignment = taAlignTop
     object rbRenderingDevice: TRadioButton
-      Left = 7
-      Top = 22
-      Width = 145
-      Height = 17
+      Left = 11
+      Top = 33
+      Width = 217
+      Height = 26
       Hint = 'Render'
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Caption = 'Audio rendering EndPoint.'
       Checked = True
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
@@ -185,15 +239,19 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       TabStop = True
     end
     object rbCaptureDevice: TRadioButton
-      Left = 168
-      Top = 22
-      Width = 145
-      Height = 17
+      Left = 252
+      Top = 33
+      Width = 218
+      Height = 26
       Hint = 'Capture'
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Caption = 'Audio capture EndPoint.'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
@@ -202,10 +260,14 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       TabOrder = 1
     end
     object butShowdlgDevices: TButton
-      Left = 367
-      Top = 20
-      Width = 97
-      Height = 25
+      Left = 551
+      Top = 27
+      Width = 145
+      Height = 38
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Caption = 'Select Device'
       ParentShowHint = False
       ShowHint = True
@@ -215,32 +277,40 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   end
   object Panel2: TPanel
     Left = 0
-    Top = 51
-    Width = 472
-    Height = 98
+    Top = 77
+    Width = 708
+    Height = 147
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Align = alTop
     Alignment = taLeftJustify
     BevelOuter = bvLowered
     Caption = '  Data-flow Direction'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
+    Font.Height = -17
     Font.Name = 'Tahoma'
     Font.Style = [fsBold]
     ParentFont = False
     TabOrder = 1
     VerticalAlignment = taAlignTop
     object rbConsole: TRadioButton
-      Left = 8
-      Top = 24
-      Width = 315
-      Height = 17
+      Left = 12
+      Top = 36
+      Width = 473
+      Height = 26
       Hint = 'Console'
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       ParentCustomHint = False
       Caption = 'Games, system notification sounds and voice commands.'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
@@ -250,16 +320,20 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       OnMouseUp = rbConsoleMouseUp
     end
     object rbMultimedia: TRadioButton
-      Left = 8
-      Top = 47
-      Width = 315
-      Height = 17
+      Left = 12
+      Top = 71
+      Width = 473
+      Height = 25
       Hint = 'Multimedia'
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Caption = 'Music, movies, narration and live music recording.'
       Checked = True
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
@@ -270,15 +344,19 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       OnMouseUp = rbConsoleMouseUp
     end
     object rbCommunications: TRadioButton
-      Left = 8
-      Top = 70
-      Width = 315
-      Height = 17
+      Left = 12
+      Top = 105
+      Width = 473
+      Height = 26
       Hint = 'Communications'
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Caption = 'Voice communications (talking to another person).'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
@@ -290,23 +368,31 @@ object frmLoopBackCapture: TfrmLoopBackCapture
   end
   object Panel4: TPanel
     Left = 0
-    Top = 231
-    Width = 472
-    Height = 81
+    Top = 347
+    Width = 708
+    Height = 121
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Align = alTop
     BevelOuter = bvLowered
     TabOrder = 3
     object Label1: TLabel
-      Left = 10
-      Top = 32
-      Width = 79
-      Height = 13
+      Left = 15
+      Top = 48
+      Width = 119
+      Height = 20
       Hint = 'Enter a file name without extension.'
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       AutoSize = False
       Caption = 'FileName'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentFont = False
@@ -314,16 +400,20 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       ShowHint = True
     end
     object lblFileExt: TLabel
-      Left = 405
-      Top = 51
-      Width = 44
-      Height = 21
+      Left = 608
+      Top = 77
+      Width = 66
+      Height = 31
       Hint = 'Enter a file name without extension.'
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       AutoSize = False
       Caption = '.wav'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -13
+      Font.Height = -20
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
@@ -332,10 +422,14 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       Transparent = False
     end
     object edFileName: TEdit
-      Left = 8
-      Top = 51
-      Width = 395
-      Height = 21
+      Left = 12
+      Top = 77
+      Width = 593
+      Height = 31
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Alignment = taRightJustify
       AutoSize = False
       BevelInner = bvNone
@@ -343,7 +437,7 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       BorderStyle = bsNone
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -13
+      Font.Height = -20
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
@@ -352,11 +446,15 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       OnKeyUp = edFileNameKeyUp
     end
     object cbxDontOverWrite: TCheckBox
-      Left = 9
-      Top = 11
-      Width = 189
-      Height = 15
+      Left = 14
+      Top = 17
+      Width = 283
+      Height = 22
       Hint = 'Do not overwrite files with the same name.'
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Caption = 'Don'#39't overwrite excisting files'
       Checked = True
       ParentShowHint = False
@@ -365,10 +463,14 @@ object frmLoopBackCapture: TfrmLoopBackCapture
       TabOrder = 0
     end
     object cbxStayOnTop: TCheckBox
-      Left = 186
-      Top = 11
-      Width = 106
-      Height = 15
+      Left = 279
+      Top = 17
+      Width = 159
+      Height = 22
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Caption = 'Stay On Top'
       ParentShowHint = False
       ShowHint = False
@@ -377,11 +479,15 @@ object frmLoopBackCapture: TfrmLoopBackCapture
     end
   end
   object butResetEngine: TButton
-    Left = 384
-    Top = 318
-    Width = 80
-    Height = 27
+    Left = 576
+    Top = 477
+    Width = 120
+    Height = 41
     Hint = 'Reset the engine when having issues.'
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Caption = 'Reset engine'
     ParentShowHint = False
     ShowHint = True

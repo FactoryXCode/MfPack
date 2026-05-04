@@ -3,7 +3,7 @@ object frmCapture: TfrmCapture
   Top = 0
   Caption = 'GPU Desktop Capture Sample 2'
   ClientHeight = 1179
-  ClientWidth = 1486
+  ClientWidth = 1554
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,12 +18,11 @@ object frmCapture: TfrmCapture
   object pnlTop: TPanel
     Left = 0
     Top = 0
-    Width = 1486
+    Width = 1554
     Height = 157
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitWidth = 1459
     object Bevel3: TBevel
       Left = 913
       Top = 12
@@ -299,20 +298,18 @@ object frmCapture: TfrmCapture
   object pnlPreview: TPanel
     Left = 0
     Top = 157
-    Width = 1486
+    Width = 1554
     Height = 731
     Align = alClient
     BevelOuter = bvNone
     Color = 6656
     ParentBackground = False
     TabOrder = 1
-    ExplicitWidth = 1459
-    ExplicitHeight = 725
   end
   object pnlBottom: TPanel
     Left = 0
     Top = 888
-    Width = 1486
+    Width = 1554
     Height = 291
     Align = alBottom
     BevelOuter = bvNone
@@ -321,7 +318,16 @@ object frmCapture: TfrmCapture
     ParentBackground = False
     ParentDoubleBuffered = False
     TabOrder = 2
-    ExplicitWidth = 1459
+    object Bevel4: TBevel
+      Left = 748
+      Top = 3
+      Width = 801
+      Height = 82
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
+    end
     object Bevel5: TBevel
       Left = 9
       Top = 3
@@ -332,18 +338,8 @@ object frmCapture: TfrmCapture
       Margins.Right = 5
       Margins.Bottom = 5
     end
-    object Bevel4: TBevel
-      Left = 748
-      Top = 3
-      Width = 732
-      Height = 82
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
-    end
     object lblAudioStateCaption: TLabel
-      Left = 1218
+      Left = 1190
       Top = 13
       Width = 55
       Height = 23
@@ -358,7 +354,7 @@ object frmCapture: TfrmCapture
       ParentFont = False
     end
     object lblAudioState: TLabel
-      Left = 1276
+      Left = 1251
       Top = 13
       Width = 70
       Height = 23
@@ -371,7 +367,7 @@ object frmCapture: TfrmCapture
       ParentFont = False
     end
     object lblFPS: TLabel
-      Left = 772
+      Left = 793
       Top = 51
       Width = 49
       Height = 23
@@ -397,7 +393,7 @@ object frmCapture: TfrmCapture
       ParentFont = False
     end
     object lblModeCaption: TLabel
-      Left = 962
+      Left = 949
       Top = 13
       Width = 55
       Height = 23
@@ -412,7 +408,7 @@ object frmCapture: TfrmCapture
       ParentFont = False
     end
     object lblMode: TLabel
-      Left = 1021
+      Left = 1008
       Top = 13
       Width = 116
       Height = 23
@@ -425,7 +421,7 @@ object frmCapture: TfrmCapture
       ParentFont = False
     end
     object lblRecTimeCaption: TLabel
-      Left = 962
+      Left = 949
       Top = 51
       Width = 55
       Height = 23
@@ -440,7 +436,7 @@ object frmCapture: TfrmCapture
       ParentFont = False
     end
     object lblRecTime: TLabel
-      Left = 1021
+      Left = 1008
       Top = 51
       Width = 70
       Height = 23
@@ -480,7 +476,7 @@ object frmCapture: TfrmCapture
     object mmoLog: TMemo
       Left = 0
       Top = 87
-      Width = 1486
+      Width = 1554
       Height = 204
       Align = alBottom
       Color = 6656
@@ -494,8 +490,6 @@ object frmCapture: TfrmCapture
       ParentFont = False
       ScrollBars = ssVertical
       TabOrder = 0
-      ExplicitTop = 192
-      ExplicitWidth = 1459
     end
     object butStart: TButton
       Left = 27
@@ -550,6 +544,7 @@ object frmCapture: TfrmCapture
       Margins.Right = 5
       Margins.Bottom = 5
       Caption = 'Enable Hotkeys'
+      Checked = True
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -17
@@ -558,6 +553,7 @@ object frmCapture: TfrmCapture
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
+      State = cbChecked
       TabOrder = 4
       OnClick = cbxHotKeysClick
     end

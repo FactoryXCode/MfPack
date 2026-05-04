@@ -15,14 +15,14 @@
 //              could interference with the threading model of this application.
 //
 // Company: FactoryX
-// Intiator(s): Tony Kalf (maXcomX)
-// Contributor(s): Tony Kalf (maXcomX)
+// Intiator(s): Tony Kalf (maXcomX), Carmen.
+// Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
@@ -78,6 +78,7 @@ uses
   System.Variants,
   System.Classes,
   System.Diagnostics,
+  System.IniFiles,
   {Vcl}
   Vcl.Graphics,
   Vcl.Controls,
@@ -93,19 +94,26 @@ uses
   WinApi.MediaFoundationApi.MfUtils,
   WinApi.MediaFoundationApi.MfMetLib,
   {Application}
-  WASAPIEngine,
+
   // MfPack components.
+  WASAPIEngine,
   MfPeakMeter,
-  // FX components.
+  // FX
   MfWasApiFxComponentBase,
+  MfAudioEffectMFTBase,
   MfFlangerEchoComponent,
   MfParametricEqComponent,
   MfCompressorLimiterComponent,
   MfWasApiEffectsRack,
-  MfWasApiPlayerEngineComponent;
+  MfWasApiPlayerEngineComponent,
+  MfChorusComponent,
+  //MfPitchTempoComponent,
+  //MfPitchTempoMFT,
+  // Other
+  MfAudioEndPoint,
+  MfAudioMixVisualizer;
 
 const
-
 
   // Global hotkey's.
 
@@ -178,6 +186,29 @@ type
     trbFlFeedback: TTrackBar;
 
     gbDynamics: TGroupBox;
+
+    gbChorus: TGroupBox;
+    cbChEnabled: TCheckBox;
+    rbChRateFree: TRadioButton;
+    rbChRateSync: TRadioButton;
+    lblChMix: TLabel;
+    lblChBaseDelay: TLabel;
+    lblChDepth: TLabel;
+    lblChFeedback: TLabel;
+    lblChRate: TLabel;
+    lblChTempo: TLabel;
+    lblChWidth: TLabel;
+    lblChSmooth: TLabel;
+    trbChMix: TTrackBar;
+    trbChBaseDelay: TTrackBar;
+    trbChDepth: TTrackBar;
+    trbChFeedback: TTrackBar;
+    trbChRate: TTrackBar;
+    edtChBpm: TEdit;
+    cmbChNoteDiv: TComboBox;
+    trbChWidth: TTrackBar;
+    trbChSmooth: TTrackBar;
+
     cbDynEnabled: TCheckBox;
     cbDynRms: TCheckBox;
     cbDynAutoMakeup: TCheckBox;
@@ -207,16 +238,29 @@ type
     cbDynTruePeak: TCheckBox;
     cmbDynTPOS: TComboBox;
     btnLoad: TButton;
-    Bevel1: TBevel;
 
-    // FX Components
-    MfWasApiPlayerEngine: TMfWasApiPlayerEngine;
-    FXCompressorLimiter: TMfCompressorLimiterEffect;
-    FXParametricEq: TMfParametricEqEffect;
-    FXFlangerEcho: TMfFlangerEchoEffect;
+    GroupBox2: TGroupBox;
+    trbMainVolumeL: TTrackBar;
+    trbMainVolumeR: TTrackBar;
+    CheckBox1: TCheckBox;
+    cbxMute: TCheckBox;
+    lblMainLeftVolume: TLabel;
+    lblMainRightVolume: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+
+    visAudioMix: TMfAudioMixVisualizer;
+    fxChorus: TMfChorusEffect;
+    fxCompressorLimiter: TMfCompressorLimiterEffect;
+    fxParametricEq: TMfParametricEqEffect;
+    fxFlangerEcho: TMfFlangerEchoEffect;
     waFxRack: TMfWasApiEffectsRack;
+    MfWasApiPlayerEngine: TMfWasApiPlayerEngine;
+    rbSpectrum: TRadioButton;
+    rbVu: TRadioButton;
+    aepMaster: TMfAudioEndPoint;
 
-    procedure Open1Click(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure butPlayPauseClick(Sender: TObject);
     procedure butStopClick(Sender: TObject);
@@ -243,6 +287,36 @@ type
     procedure trbEqBWChange(Sender: TObject);
 
     // Flanger UI events
+    // Chorus UI events
+    procedure cbChEnabledClick(Sender: TObject);
+    procedure rbChRateModeClick(Sender: TObject);
+    procedure trbChMixChange(Sender: TObject);
+    procedure trbChBaseDelayChange(Sender: TObject);
+    procedure trbChDepthChange(Sender: TObject);
+    procedure trbChFeedbackChange(Sender: TObject);
+    procedure trbChRateChange(Sender: TObject);
+    procedure edtChBpmChange(Sender: TObject);
+    procedure cmbChNoteDivChange(Sender: TObject);
+    procedure trbChWidthChange(Sender: TObject);
+    procedure trbChSmoothChange(Sender: TObject);
+
+    // Pitch/Tempo UI events
+    //procedure cbPtEnabledClick(Sender: TObject);
+    //procedure cbPtFormantsClick(Sender: TObject);
+   // procedure trbPtPitchChange(Sender: TObject);
+   // procedure trbPtTempoChange(Sender: TObject);
+   // procedure trbPtOverlapChange(Sender: TObject);
+   // procedure cmbPtWindowChange(Sender: TObject);
+   // procedure cmbPtModeChange(Sender: TObject);
+
+    //procedure ApplyPitchTempoFromUI();
+    //procedure UpdatePitchTempoLabels();
+
+    procedure ApplyChorusFromUI();
+    procedure UpdateChorusLabels();
+    procedure UpdateChorusRateUi();
+
+
     procedure cbFlEnabledClick(Sender: TObject);
     procedure trbFlWetChange(Sender: TObject);
     procedure trbFlDelayChange(Sender: TObject);
@@ -266,20 +340,36 @@ type
     procedure trbDynLimLookChange(Sender: TObject);
     procedure trbDynLimRelChange(Sender: TObject);
     procedure btnLoadClick(Sender: TObject);
+    procedure cbxMuteClick(Sender: TObject);
+    procedure trbMainVolumeLChange(Sender: TObject);
+    procedure trbMainVolumeRChange(Sender: TObject);
+    procedure MfWasApiPlayerEngineEnded(Sender: TObject);
+    procedure MfWasApiPlayerEngineError(Sender: TObject; const Msg: string;
+      const Hr: HRESULT);
+    procedure MfWasApiPlayerEngineProcessed(Sender: TObject;
+      const Position100ns: Int64; const RawPosition: UInt64);
+    procedure MfWasApiPlayerEngineReady(Sender: TObject);
+    procedure MfWasApiPlayerEngineStateChanged(Sender: TObject;
+      const NewState: TDeviceState);
+    procedure rbVuClick(Sender: TObject);
+    procedure rbSpectrumClick(Sender: TObject);
 
   private
     { Private declarations }
-
-    //FEffectsRack: TMfWasApiEffectsRack;
 
     FAudioFileUrl: TFileName;
     FFileName: string; // Filename without path.
     llAudioDuration: LONGLONG;
 
+    // If we don't want a WasApiPlayer component for testing TWasApiEngine.
+    //MfWasApiPlayerEngine: TWasApiEngine;
+
     function GetAudioFile(): string;
 
     /// <summary>Set Left and/or Right volume.</summary>
     procedure SetVolumeChannels();
+    /// <summary>Set Left and/or Right Main volume.</summary>
+    procedure SetMainVolumeChannels();
 
     /// <summary>Keep track of data been played.</summary>
     procedure OnAudioDataProcessed(Sender: TObject;
@@ -317,6 +407,12 @@ type
 
     // Hot keys
     procedure WMHotKey(var Msg: TWMHotKey); message WM_HOTKEY;
+
+    // INI persistence (FX rack)
+    function GetIniFileName(): string;
+    procedure LoadFxFromIni();
+    procedure SaveFxToIni();
+
   public
     { Public declarations }
 
@@ -362,24 +458,14 @@ begin
       lblDuration.Caption := Format('Duration: %s',
                                     [HnsTimeToStr(llAudioDuration, False)]);
 
-      // Set progressbar max
+      // Set progressbar max.
       pbProgress.Max := llAudioDuration div 1000000;
-      // Engine is provided by component (created in FormCreate)
+      // Engine is provided by component (created in FormCreate).
     end;
 
   if SUCCEEDED(hr) then
-    begin
-
-      // Wire engine events (Sample 4 principle: callbacks/events only) >> done in constructor
-      //fPlayerEngine.OnReady := OnAudioReady;
-     // fPlayerEngine.OnProcessed := OnAudioDataProcessed;
-     // fPlayerEngine.OnEnded := OnAudioEnded;
-     // fPlayerEngine.OnError := OnEngineError;
-     // fPlayerEngine.OnStateChanged := OnEngineState;
-
-      stxtStatus.Caption := Format('Selected file: %s.',
-                                   [fFileName]);
-    end;
+    stxtStatus.Caption := Format('Selected file: %s.',
+                                 [fFileName]);
 
   // Initialize the engine.
   if SUCCEEDED(hr) then
@@ -428,6 +514,7 @@ begin
 
         // Keep volume on previous volume.
         SetVolumeChannels();
+        SetMainVolumeChannels();
         hr := MfWasApiPlayerEngine.Start();
       end;
   else
@@ -457,7 +544,7 @@ begin
                                 [fFileName])
   else
     stxtStatus.Caption := Format('Stopped: %s failed with Error: %s',
-                                [fFileName, hr])
+                                [fFileName, hr]);
 end;
 
 
@@ -473,8 +560,26 @@ begin
 
   CanClose := False;
 
+  // 1) Stop callbacks into UI/FX immediately (engine thread safe)
+  MfWasApiPlayerEngine.OnProcessed := nil;
+  MfWasApiPlayerEngine.OnError := nil;
+  MfWasApiPlayerEngine.OnEnded := nil;
+  MfWasApiPlayerEngine.OnReady := nil;
+  MfWasApiPlayerEngine.OnStateChanged := nil;
+
+  // 2) Stop audio and WAIT until the render thread has exited
+  MfWasApiPlayerEngine.Stop();  // True = wait/join. If you don't have this, you must add it.
+  MfWasApiPlayerEngine.WaitForStop(1000);
+
+  // // The bare engine (not the component) for testing..
+  // FreeAndNil(MfWasApiPlayerEngine);
+
+  // 3) Now it's safe to free visual meters / FX rack / UI objects
   FreeAndNil(pmLeft);
   FreeAndNil(pmRight);
+
+  // 4) Save settings.
+  SaveFxToIni();
 
   CanClose := True;
 end;
@@ -581,6 +686,66 @@ begin
 end;
 
 
+procedure TfrmMain.SetMainVolumeChannels();
+begin
+
+  if not Assigned(MfWasApiPlayerEngine) or (aepMaster = nil) then
+    Exit;
+
+  // Stereo
+  // The first stereo channel (0) is always the LEFT one! SetVolumes
+  if (MfWasApiPlayerEngine.SoundChannels = 2) then
+    begin
+      // NOTE: The maximum of channels is 8!
+      aepMaster.ChannelVolume[0] := Abs(trbMainVolumeL.Position) * 0.01;
+      aepMaster.ChannelVolume[1] := Abs(trbMainVolumeR.Position) * 0.01;
+    end;
+end;
+
+
+procedure TfrmMain.trbMainVolumeLChange(Sender: TObject);
+var
+  vol: Single;
+
+begin
+
+  if (cbLockVolumeSliders.Checked = True) then
+    trbMainVolumeR.Position := trbMainVolumeL.Position;
+
+  SetMainVolumeChannels();
+
+  vol := (MapRange((trbMainVolumeL.Position),
+                    trbMainVolumeL.Max,
+                    trbMainVolumeL.Min,
+                    MIN_VOLUME,
+                    MAX_VOLUME) / (MAX_VOLUME / 100));
+
+  lblMainLeftVolume.Caption := Format('%d',
+                                  [Trunc(vol)]) + '%';
+end;
+
+
+procedure TfrmMain.trbMainVolumeRChange(Sender: TObject);
+var
+  vol: Single;
+
+begin
+
+  if (cbLockVolumeSliders.Checked = True) then
+    trbMainVolumeL.Position := trbMainVolumeR.Position;
+
+  SetMainVolumeChannels();
+
+  vol := (MapRange((trbMainVolumeR.Position),
+                    trbMainVolumeR.Max,
+                    trbMainVolumeR.Min,
+                    MIN_VOLUME,
+                    MAX_VOLUME) / (MAX_VOLUME / 100));
+
+  lblMainRightVolume.Caption := Format('%d',
+                                       [Trunc(vol)]) + '%';
+end;
+
 // FX UI helpers =============================================================
 
 function TfrmMain.EqFreqSliderToHz(const Slider: Integer): Single;
@@ -605,7 +770,8 @@ end;
 
 function TfrmMain.EqHzToFreqSlider(const Hz: Single): Integer;
 var
-  loHz, hiHz: Double;
+  loHz,
+  hiHz: Double;
   x: Double;
 
 begin
@@ -790,6 +956,362 @@ begin
 end;
 
 
+{procedure TfrmMain.UpdatePitchTempoLabels();
+var
+  pitch: Single;
+  tempo: Single;
+  overlap: Single;
+  win: Integer;
+  modeName: string;
+begin
+
+  pitch := trbPtPitch.Position / 10.0;
+  tempo := trbPtTempo.Position;
+  overlap := trbPtOverlap.Position / 100.0;
+  win := StrToIntDef(Trim(cmbPtWindow.Text),
+                     1024);
+
+  if (cmbPtMode.ItemIndex = 0) then
+    modeName := 'Clean'
+  else
+    modeName := 'DJ';
+
+  lblPtPitch.Caption := Format('Pitch: %.1f st',
+                               [pitch]);
+  lblPtTempo.Caption := Format('Tempo: %.0f %%',
+                               [tempo]);
+  lblPtOverlap.Caption := Format('Overlap: %.2f',
+                                 [overlap]);
+  lblPtWindow.Caption := Format('Window: %d',
+                                [win]);
+  lblPtMode.Caption := Format('Mode: %s',
+                              [modeName]);
+end;}
+
+
+{procedure TfrmMain.ApplyPitchTempoFromUI();
+var
+  pitch: Single;
+  tempo: Single;
+  overlap: Single;
+  win: Integer;
+  mode: TPitchTempoMode;
+  slot: TMfWasApiFxSlot;
+
+begin
+
+  if not Assigned(fxPitchTempo) then
+    Exit;
+
+  pitch := trbPtPitch.Position / 10.0;
+  tempo := trbPtTempo.Position;
+  overlap := trbPtOverlap.Position / 100.0;
+  win := StrToIntDef(Trim(cmbPtWindow.Text),
+                     fxPitchTempo.WindowSize);
+
+  mode := ptmClean;
+  if (cmbPtMode.ItemIndex >= 0) then
+    mode := TPitchTempoMode(EnsureRange(cmbPtMode.ItemIndex,
+                                        0,
+                                        Ord(High(TPitchTempoMode))));
+
+  // Slot.Enabled is the single source of truth for bypass.
+  if Assigned(waFxRack) then
+    begin
+
+      slot := waFxRack.FindFirstSlotByEffectClass(TMfPitchTempoEffect);
+      if (slot = nil) then
+        slot := waFxRack.FindSlotByEffectName('FXPitchTempo');
+
+      if (slot <> nil) then
+        slot.Enabled := cbPtEnabled.Checked;
+    end;
+
+  fxPitchTempo.Enabled := cbPtEnabled.Checked;
+
+  fxPitchTempo.PitchSemitones := pitch;
+  fxPitchTempo.TempoPercent := tempo;
+  fxPitchTempo.Overlap := overlap;
+  fxPitchTempo.WindowSize := win;
+  fxPitchTempo.PreserveFormants := cbPtFormants.Checked;
+  fxPitchTempo.Mode := mode;
+
+  UpdatePitchTempoLabels();
+end;}
+
+
+procedure TfrmMain.UpdateChorusRateUi();
+begin
+
+  if rbChRateFree.Checked then
+    begin
+
+      trbChRate.Enabled := True;
+      edtChBpm.Enabled := False;
+      cmbChNoteDiv.Enabled := False;
+    end
+  else
+    begin
+
+      trbChRate.Enabled := False;
+      edtChBpm.Enabled := True;
+      cmbChNoteDiv.Enabled := True;
+    end;
+end;
+
+
+procedure TfrmMain.UpdateChorusLabels();
+var
+  mix: Single;
+  baseMs: Integer;
+  depthMs: Single;
+  fb: Single;
+  rateHz: Single;
+  bpm: Single;
+  divText: string;
+  width: Integer;
+  smooth: Integer;
+
+begin
+
+  mix := trbChMix.Position / 100.0;
+  baseMs := trbChBaseDelay.Position;
+  depthMs := trbChDepth.Position / 10.0;
+  fb := trbChFeedback.Position / 100.0;
+  rateHz := trbChRate.Position / 100.0;
+  bpm := StrToFloatDef(edtChBpm.Text,
+                       120.0);
+  width := trbChWidth.Position;
+  smooth := trbChSmooth.Position;
+
+  lblChMix.Caption := Format('Mix: %.2f',
+                             [mix]);
+  lblChBaseDelay.Caption := Format('Base delay: %d ms',
+                                   [baseMs]);
+  lblChDepth.Caption := Format('Depth: %.1f ms',
+                               [depthMs]);
+  lblChFeedback.Caption := Format('Feedback: %.2f',
+                                  [fb]);
+  lblChRate.Caption := Format('Rate: %.2f Hz',
+                              [rateHz]);
+  lblChWidth.Caption := Format('Width: %d %%',
+                               [width]);
+  lblChSmooth.Caption := Format('Smoothing: %d ms',
+                                [smooth]);
+
+  if cmbChNoteDiv.ItemIndex >= 0 then
+    divText := cmbChNoteDiv.Items[cmbChNoteDiv.ItemIndex]
+  else
+    divText := '1/8';
+
+  lblChTempo.Caption := Format('Tempo: %.0f BPM / %s', [bpm, divText]);
+end;
+
+
+procedure TfrmMain.ApplyChorusFromUI();
+var
+  slot: TMfWasApiFxSlot;
+  s: TChorusSettings;
+
+begin
+
+  if not Assigned(fxChorus) then
+    Exit;
+
+  // Slot.Enabled is the single source of truth for bypass.
+  if Assigned(waFxRack) then
+    begin
+      slot := waFxRack.FindSlotByEffect(fxChorus);
+      if (slot = nil) then
+        slot := waFxRack.FindFirstSlotByEffectClass(TMfChorusEffect);
+        if (slot = nil) then
+          slot := waFxRack.FindSlotByEffectName('FXChorus');
+          if (slot <> nil) then
+           slot.Enabled := cbChEnabled.Checked;
+    end;
+
+  s := fxChorus.Settings;
+  s.Enabled := cbChEnabled.Checked;
+
+  s.Mix := trbChMix.Position / 100.0;
+  s.Feedback := trbChFeedback.Position / 100.0;
+  if (s.Feedback > 0.95) then
+    s.Feedback := 0.95;
+
+  s.BaseDelayMs := trbChBaseDelay.Position;
+  s.DepthMs := trbChDepth.Position / 10.0;
+
+  s.WidthPct := trbChWidth.Position;
+  s.SmoothMs := trbChSmooth.Position;
+
+  if rbChRateSync.Checked then
+    begin
+      s.RateMode := crmTempoSync;
+      s.TempoBpm := StrToFloatDef(edtChBpm.Text,
+                                  120.0);
+      s.NoteDiv := TMfChorusNoteDiv(EnsureRange(cmbChNoteDiv.ItemIndex,
+                                    0,
+                                    Ord(High(TMfChorusNoteDiv))));
+    end
+  else
+    begin
+
+      s.RateMode := crmFreeHz;
+      s.RateHz := trbChRate.Position / 100.0;
+    end;
+
+  fxChorus.Settings := s;
+
+  UpdateChorusRateUi();
+  UpdateChorusLabels();
+end;
+
+
+procedure TfrmMain.cbChEnabledClick(Sender: TObject);
+begin
+
+  ApplyChorusFromUI();
+end;
+
+
+
+{
+procedure TfrmMain.cbPtEnabledClick(Sender: TObject);
+begin
+
+  ApplyPitchTempoFromUI();
+end;
+
+
+procedure TfrmMain.cbPtFormantsClick(Sender: TObject);
+begin
+
+  ApplyPitchTempoFromUI();
+end;
+
+
+procedure TfrmMain.trbPtPitchChange(Sender: TObject);
+begin
+
+  ApplyPitchTempoFromUI();
+end;
+
+
+procedure TfrmMain.trbPtTempoChange(Sender: TObject);
+begin
+
+  ApplyPitchTempoFromUI();
+end;
+
+
+procedure TfrmMain.trbPtOverlapChange(Sender: TObject);
+begin
+
+  ApplyPitchTempoFromUI();
+end;
+
+
+procedure TfrmMain.cmbPtWindowChange(Sender: TObject);
+begin
+
+  ApplyPitchTempoFromUI();
+end;
+
+
+procedure TfrmMain.cmbPtModeChange(Sender: TObject);
+begin
+
+  ApplyPitchTempoFromUI();
+end;
+}
+
+procedure TfrmMain.rbChRateModeClick(Sender: TObject);
+begin
+
+  UpdateChorusRateUi();
+  ApplyChorusFromUI();
+end;
+
+
+procedure TfrmMain.rbSpectrumClick(Sender: TObject);
+begin
+
+  if rbSpectrum.Checked then
+    visAudioMix.View := vmSpectrum;
+end;
+
+
+procedure TfrmMain.rbVuClick(Sender: TObject);
+begin
+
+  if rbVu.Checked then
+    visAudioMix.View := vmMeters;
+end;
+
+
+procedure TfrmMain.trbChMixChange(Sender: TObject);
+begin
+
+  ApplyChorusFromUI();
+end;
+
+
+procedure TfrmMain.trbChBaseDelayChange(Sender: TObject);
+begin
+
+  ApplyChorusFromUI();
+end;
+
+
+procedure TfrmMain.trbChDepthChange(Sender: TObject);
+begin
+
+  ApplyChorusFromUI();
+end;
+
+
+procedure TfrmMain.trbChFeedbackChange(Sender: TObject);
+begin
+
+  ApplyChorusFromUI();
+end;
+
+
+procedure TfrmMain.trbChRateChange(Sender: TObject);
+begin
+
+  ApplyChorusFromUI();
+end;
+
+
+procedure TfrmMain.edtChBpmChange(Sender: TObject);
+begin
+
+  ApplyChorusFromUI();
+end;
+
+
+procedure TfrmMain.cmbChNoteDivChange(Sender: TObject);
+begin
+
+  ApplyChorusFromUI();
+end;
+
+
+procedure TfrmMain.trbChWidthChange(Sender: TObject);
+begin
+
+  ApplyChorusFromUI();
+end;
+
+
+procedure TfrmMain.trbChSmoothChange(Sender: TObject);
+begin
+
+  ApplyChorusFromUI();
+end;
+
+
 procedure TfrmMain.UpdateDynamicsLabels();
 var
   th: Single;
@@ -894,9 +1416,11 @@ begin
 
   os := 4;
 
-  if SameText(cmbDynTPOS.Text, '2x') then
+  if SameText(cmbDynTPOS.Text,
+             '2x') then
     os := 2
-  else if SameText(cmbDynTPOS.Text, '8x') then
+  else if SameText(cmbDynTPOS.Text,
+                   '8x') then
     os := 8;
 
   fxCompressorLimiter.TruePeakOversample := os;
@@ -981,6 +1505,13 @@ procedure TfrmMain.cbFlEnabledClick(Sender: TObject);
 begin
 
   ApplyFlangerFromUI();
+end;
+
+
+procedure TfrmMain.cbxMuteClick(Sender: TObject);
+begin
+
+  aepMaster.Mute := cbxMute.Checked;
 end;
 
 
@@ -1121,6 +1652,16 @@ end;
 procedure TfrmMain.FormCreate(Sender: TObject);
 begin
 
+  // Test with bare engine.
+  // MfWasApiPlayerEngine := TWasApiEngine.Create();
+
+  //MfWasApiPlayerEngine.OnReady := OnAudioReady;
+  //MfWasApiPlayerEngine.OnProcessed := OnAudioDataProcessed;
+  //MfWasApiPlayerEngine.OnEnded := OnAudioEnded;
+  //MfWasApiPlayerEngine.OnError := OnEngineError;
+  //MfWasApiPlayerEngine.OnStateChanged := OnEngineState;
+  // end test.
+
   // Initialize FX UI ranges
 
   // EQ
@@ -1160,6 +1701,75 @@ begin
   trbFlFeedback.Max := 98; // 0..0.98 (x100)
   trbFlFeedback.Frequency := 10;
 
+
+  // Chorus
+  trbChMix.Min := 0;
+  trbChMix.Max := 100;
+  trbChMix.Frequency := 10;
+
+  trbChFeedback.Min := 0;
+  trbChFeedback.Max := 95;
+  trbChFeedback.Frequency := 10;
+
+  trbChBaseDelay.Min := 1;
+  trbChBaseDelay.Max := 60;
+  trbChBaseDelay.Frequency := 5;
+
+  trbChDepth.Min := 0;
+  trbChDepth.Max := 250; // 0..25.0 ms (x10)
+  trbChDepth.Frequency := 25;
+
+  trbChRate.Min := 1;
+  trbChRate.Max := 2000; // 0.01..20.00 Hz (x100)
+  trbChRate.Frequency := 200;
+
+  trbChWidth.Min := 0;
+  trbChWidth.Max := 100;
+  trbChWidth.Frequency := 10;
+
+  trbChSmooth.Min := 0;
+  trbChSmooth.Max := 200;
+  trbChSmooth.Frequency := 20;
+
+  cmbChNoteDiv.Items.Clear;
+  cmbChNoteDiv.Items.Add('1/1');
+  cmbChNoteDiv.Items.Add('1/2');
+  cmbChNoteDiv.Items.Add('1/4');
+  cmbChNoteDiv.Items.Add('1/8');
+  cmbChNoteDiv.Items.Add('1/16');
+
+  // ------------------------------------------------------------------------
+  // Pitch/Tempo UI ranges (matches MfPitchTempoMFT constraints)
+  // ------------------------------------------------------------------------
+  {
+  trbPtPitch.Min := -240;    // -24.0 st
+  trbPtPitch.Max := 240;     // +24.0 st
+  trbPtPitch.Frequency := 20;
+
+  trbPtTempo.Min := 50;      // 50%
+  trbPtTempo.Max := 200;     // 200%
+  trbPtTempo.Frequency := 10;
+
+  trbPtOverlap.Min := 25;    // 0.25
+  trbPtOverlap.Max := 75;    // 0.75
+  trbPtOverlap.Frequency := 5;
+ } {
+  cmbPtWindow.Items.Clear;
+  cmbPtWindow.Items.Add('512');
+  cmbPtWindow.Items.Add('1024');
+  cmbPtWindow.Items.Add('2048');
+  cmbPtWindow.Items.Add('4096');
+  cmbPtWindow.ItemIndex := 1; // 1024 default
+
+  cmbPtMode.Items.Clear;
+  cmbPtMode.Items.Add('Clean');
+  cmbPtMode.Items.Add('DJ');
+  cmbPtMode.ItemIndex := 0;
+
+  cmbChNoteDiv.Items.Add('1/8T');
+  cmbChNoteDiv.Items.Add('1/16T');
+  cmbChNoteDiv.ItemIndex := 3; // 1/8
+  }
   // Dynamics
   trbDynThresh.Min := -600;
   trbDynThresh.Max := 0;
@@ -1258,6 +1868,83 @@ begin
       cbFlEnabled.Checked := fxFlangerEcho.Enabled;
     end;
 
+  if Assigned(fxChorus) then
+    begin
+
+      trbChMix.Position := EnsureRange(Round(fxChorus.Mix * 100.0),
+                                      trbChMix.Min,
+                                      trbChMix.Max);
+
+      trbChFeedback.Position := EnsureRange(Round(fxChorus.Feedback * 100.0),
+                                           trbChFeedback.Min,
+                                           trbChFeedback.Max);
+
+      trbChBaseDelay.Position := EnsureRange(Round(fxChorus.BaseDelayMs),
+                                             trbChBaseDelay.Min,
+                                             trbChBaseDelay.Max);
+
+      trbChDepth.Position := EnsureRange(Round(fxChorus.DepthMs * 10.0),
+                                         trbChDepth.Min,
+                                         trbChDepth.Max);
+
+      trbChRate.Position := EnsureRange(Round(fxChorus.RateHz * 100.0),
+                                        trbChRate.Min,
+                                        trbChRate.Max);
+
+      trbChWidth.Position := EnsureRange(Round(fxChorus.WidthPct),
+                                         trbChWidth.Min,
+                                         trbChWidth.Max);
+
+      trbChSmooth.Position := EnsureRange(Round(fxChorus.SmoothMs),
+                                          trbChSmooth.Min,
+                                          trbChSmooth.Max);
+
+      cbChEnabled.Checked := fxChorus.Enabled;
+
+      rbChRateFree.Checked := (fxChorus.RateMode = crmFreeHz);
+      rbChRateSync.Checked := (fxChorus.RateMode = crmTempoSync);
+
+      edtChBpm.Text := Format('%.0f', [fxChorus.TempoBpm]);
+      cmbChNoteDiv.ItemIndex := Ord(fxChorus.NoteDiv);
+
+      UpdateChorusRateUi();
+      UpdateChorusLabels();
+    end;
+
+  {if Assigned(fxPitchTempo) then
+    begin
+
+      trbPtPitch.Position := EnsureRange(Round(fxPitchTempo.PitchSemitones * 10.0),
+                                         trbPtPitch.Min,
+                                         trbPtPitch.Max);
+
+      trbPtTempo.Position := EnsureRange(Round(fxPitchTempo.TempoPercent),
+                                         trbPtTempo.Min,
+                                         trbPtTempo.Max);
+
+      trbPtOverlap.Position := EnsureRange(Round(fxPitchTempo.Overlap * 100.0),
+                                           trbPtOverlap.Min,
+                                           trbPtOverlap.Max);
+
+      cbPtEnabled.Checked := fxPitchTempo.Enabled;
+      cbPtFormants.Checked := fxPitchTempo.PreserveFormants;
+
+      cmbPtMode.ItemIndex := EnsureRange(Ord(fxPitchTempo.Mode),
+                                         0,
+                                         cmbPtMode.Items.Count - 1);
+
+      case fxPitchTempo.WindowSize of
+        512:  cmbPtWindow.ItemIndex := 0;
+        1024: cmbPtWindow.ItemIndex := 1;
+        2048: cmbPtWindow.ItemIndex := 2;
+        4096: cmbPtWindow.ItemIndex := 3;
+      else
+        cmbPtWindow.ItemIndex := 1;
+      end;
+    end;}
+
+
+
   if Assigned(fxCompressorLimiter) then
     begin
 
@@ -1341,9 +2028,21 @@ begin
       MfWasApiPlayerEngine.OnStateChanged := OnEngineState;
     end;
 
-  ApplyEqFromUI;
-  ApplyFlangerFromUI;
-  ApplyDynamicsFromUI;
+  ApplyEqFromUI();
+  ApplyFlangerFromUI();
+  ApplyDynamicsFromUI();
+  ApplyChorusFromUI();
+  //ApplyPitchTempoFromUI();
+
+  UpdateChorusRateUi();
+  UpdateEqLabels();
+  UpdateFlangerLabels();
+  UpdateDynamicsLabels();
+  UpdateChorusLabels();
+  //UpdatePitchTempoLabels();
+
+  // Override with persisted UI settings (if ini exists)
+  LoadFxFromIni();
 end;
 
 
@@ -1389,59 +2088,6 @@ begin
   lblRightVolume.Caption := Format('%d',
                                    [Trunc(vol)]) + '%';
 end;
-
-
-procedure TfrmMain.Open1Click(Sender: TObject);
-var
-  hr: HResult;
-
-begin
-
-  // Select an audiofile.
-  fAudioFileUrl := GetAudioFile();
-  if (fAudioFileUrl = 'No audiofile selected.') then
-    Exit;
-
-  fFileName := ExtractFileName(fAudioFileUrl);
-
-  // Get the length of the audiofile.
-  hr := GetFileDuration(StrToPWideChar(fAudioFileUrl),
-                        llAudioDuration);
-
-  if FAILED(hr) then
-    begin
-
-      ShowMessage('Could not retrieve the duration of the audio file.');
-      llAudioDuration := 0;
-    end;
-
-  if SUCCEEDED(hr) then
-    begin
-
-      lblDuration.Caption := Format('Duration: %s',
-                                    [HnsTimeToStr(llAudioDuration, False)]);
-
-      // Set progressbar max
-      pbProgress.Max := llAudioDuration div 1000000;
-      // Engine is provided by component (created in FormCreate)
-    end;
-
-  if SUCCEEDED(hr) then
-    begin
-
-      stxtStatus.Caption := Format('Selected file: %s.',
-                                   [fFileName]);
-    end;
-
-  // Initialize the engine.
-  if SUCCEEDED(hr) then
-    hr := MfWasApiPlayerEngine.OpenFile(fAudioFileUrl,
-                                        llAudioDuration);
-  if FAILED(hr) then
-    stxtStatus.Caption := Format('Selected file: %s open file failed with error: %d.',
-                                [fFileName, hr]);
-end;
-
 
 
 procedure TfrmMain.pbProgressMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -1520,7 +2166,6 @@ begin
                                  [hr]);
 end;
 
-
 // Event handlers ==============================================================
 
 procedure TfrmMain.OnAudioDataProcessed(Sender: TObject;
@@ -1586,15 +2231,20 @@ begin
   butPlayPause.Enabled := True;
   butPlayPause.Caption := 'Play';
   butStop.Enabled := False;
+
+  aepMaster.GetDefaultDevice();
   SetVolumeChannels();
+  SetMainVolumeChannels();
 end;
 
 
 procedure TfrmMain.OnAudioEnded(Sender: TObject);
 begin
 
+  visAudioMix.Reset();
+
   stxtStatus.Caption := Format('Stopped: %s',
-                              [fFileName]);
+                               [fFileName]);
 
   butPlayPause.Enabled := True;
   butPlayPause.Caption := 'Play';
@@ -1602,16 +2252,18 @@ begin
 end;
 
 
-procedure TfrmMain.OnEngineError(Sender: TObject; const Msg: string; const Hr: HRESULT);
+procedure TfrmMain.OnEngineError(Sender: TObject;
+                                 const Msg: string;
+                                 const Hr: HRESULT);
 begin
 
   stxtStatus.Caption := Format('%s (error 0x%.8x)',
-                              [Msg, Cardinal(Hr)]);
+                               [Msg, Cardinal(Hr)]);
 end;
 
 
 procedure TfrmMain.OnEngineState(Sender: TObject;
-                            const NewState: TDeviceState);
+                                 const NewState: TDeviceState);
 begin
 
   case NewState of
@@ -1654,22 +2306,534 @@ begin
 
         butPlayPause.Enabled := False;
         butPlayPause.Caption := 'Play';
-
         butStop.Enabled := False;
-
       end;
 
-
-
     dsError:
-
       begin
 
         butPlayPause.Enabled := False;
         butPlayPause.Caption := 'Play';
         butStop.Enabled := False;
-        stxtStatus.Caption := Format('Yoo! we have an error: %d', [GetLastError()]);
+        stxtStatus.Caption := Format('OOPS! We have an error: %d',
+                                     [GetLastError()]);
       end;
+  end;
+end;
+
+
+function TfrmMain.GetIniFileName(): string;
+begin
+
+  // Same folder as exe by default (classic Delphi behavior).
+  Result := ChangeFileExt(ParamStr(0),
+                          '.ini');
+end;
+
+
+procedure TfrmMain.LoadFxFromIni();
+var
+  Ini: TIniFile;
+  fn: string;
+
+begin
+
+  fn := GetIniFileName();
+  if not FileExists(fn) then
+    Exit;
+
+  Ini := TIniFile.Create(fn);
+
+  try
+
+    // EQ
+    cbEqEnabled.Checked := Ini.ReadBool('EQ',
+                                        'Enabled',
+                                        cbEqEnabled.Checked);
+
+    cbEqUseBW.Checked := Ini.ReadBool('EQ',
+                                      'UseBW',
+                                      cbEqUseBW.Checked);
+
+    cbEqTruePeak.Checked := Ini.ReadBool('EQ',
+                                         'TruePeak',
+                                         cbEqTruePeak.Checked);
+
+    trbEqGain.Position := EnsureRange(Ini.ReadInteger('EQ',
+                                                      'Gain_x10',
+                                                      trbEqGain.Position),
+                                                      trbEqGain.Min,
+                                                      trbEqGain.Max);
+
+    trbEqFreq.Position := EnsureRange(Ini.ReadInteger('EQ',
+                                                      'FreqSlider',
+                                                      trbEqFreq.Position),
+                                                      trbEqFreq.Min,
+                                                      trbEqFreq.Max);
+    trbEqQ.Position := EnsureRange(Ini.ReadInteger('EQ',
+                                                   'Q_x10',
+                                                   trbEqQ.Position),
+                                                   trbEqQ.Min,
+                                                   trbEqQ.Max);
+
+    trbEqBW.Position := EnsureRange(Ini.ReadInteger('EQ',
+                                                    'BW_x10',
+                                                    trbEqBW.Position),
+                                                    trbEqBW.Min,
+                                                    trbEqBW.Max);
+
+    // Dynamics
+    cbDynEnabled.Checked := Ini.ReadBool('Dynamics',
+                                         'Enabled',
+                                         cbDynEnabled.Checked);
+
+    cbDynRms.Checked := Ini.ReadBool('Dynamics',
+                                     'UseRms',
+                                     cbDynRms.Checked);
+
+    cbDynAutoMakeup.Checked := Ini.ReadBool('Dynamics',
+                                            'AutoMakeup',
+                                            cbDynAutoMakeup.Checked);
+
+    cbDynTruePeak.Checked := Ini.ReadBool('Dynamics',
+                                          'TruePeak',
+                                          cbDynTruePeak.Checked);
+
+    trbDynThresh.Position := EnsureRange(Ini.ReadInteger('Dynamics',
+                                                         'Thresh_x10',
+                                                         trbDynThresh.Position),
+                                                         trbDynThresh.Min,
+                                                         trbDynThresh.Max);
+
+    trbDynRatio.Position := EnsureRange(Ini.ReadInteger('Dynamics',
+                                                        'Ratio_x10',
+                                                        trbDynRatio.Position),
+                                                        trbDynRatio.Min,
+                                                        trbDynRatio.Max);
+
+    trbDynAttack.Position := EnsureRange(Ini.ReadInteger('Dynamics',
+                                                         'Attack_x10',
+                                                         trbDynAttack.Position),
+                                                         trbDynAttack.Min,
+                                                         trbDynAttack.Max);
+
+    trbDynRelease.Position := EnsureRange(Ini.ReadInteger('Dynamics',
+                                                          'Release_x10',
+                                                          trbDynRelease.Position),
+                                                          trbDynRelease.Min,
+                                                          trbDynRelease.Max);
+
+    trbDynKnee.Position := EnsureRange(Ini.ReadInteger('Dynamics',
+                                                       'Knee_x10',
+                                                       trbDynKnee.Position),
+                                                       trbDynKnee.Min,
+                                                       trbDynKnee.Max);
+
+    trbDynMakeup.Position := EnsureRange(Ini.ReadInteger('Dynamics',
+                                                         'Makeup_x10',
+                                                         trbDynMakeup.Position),
+                                                         trbDynMakeup.Min,
+                                                         trbDynMakeup.Max);
+
+    trbDynLimCeil.Position := EnsureRange(Ini.ReadInteger('Dynamics',
+                                                          'LimCeil_x10',
+                                                          trbDynLimCeil.Position),
+                                                          trbDynLimCeil.Min,
+                                                          trbDynLimCeil.Max);
+
+    trbDynLimLook.Position := EnsureRange(Ini.ReadInteger('Dynamics',
+                                                          'LimLook_ms',
+                                                          trbDynLimLook.Position),
+                                                          trbDynLimLook.Min,
+                                                          trbDynLimLook.Max);
+
+    trbDynLimRel.Position := EnsureRange(Ini.ReadInteger('Dynamics',
+                                                      'LimRel_x10',
+                                                      trbDynLimRel.Position),
+                                                      trbDynLimRel.Min,
+                                                      trbDynLimRel.Max);
+
+    cmbDynTPOS.ItemIndex := EnsureRange(Ini.ReadInteger('Dynamics',
+                                                        'TPOSIndex',
+                                                        cmbDynTPOS.ItemIndex),
+                                                        0,
+                                                        cmbDynTPOS.Items.Count - 1);
+
+    // Flanger
+    cbFlEnabled.Checked := Ini.ReadBool('Flanger',
+                                        'Enabled',
+                                        cbFlEnabled.Checked);
+
+    trbFlWet.Position := EnsureRange(Ini.ReadInteger('Flanger',
+                                                      'Wet',
+                                                      trbFlWet.Position),
+                                                      trbFlWet.Min,
+                                                      trbFlWet.Max);
+
+    trbFlDelay.Position := EnsureRange(Ini.ReadInteger('Flanger',
+                                                      'Delay',
+                                                      trbFlDelay.Position),
+                                                      trbFlDelay.Min,
+                                                      trbFlDelay.Max);
+
+    trbFlDepth.Position := EnsureRange(Ini.ReadInteger('Flanger',
+                                                      'Depth',
+                                                      trbFlDepth.Position),
+                                                      trbFlDepth.Min,
+                                                      trbFlDepth.Max);
+
+    trbFlRate.Position := EnsureRange(Ini.ReadInteger('Flanger',
+                                                      'Rate_x100',
+                                                      trbFlRate.Position),
+                                                      trbFlRate.Min,
+                                                      trbFlRate.Max);
+
+    trbFlFeedback.Position := EnsureRange(Ini.ReadInteger('Flanger',
+                                                          'Feedback_x100',
+                                                          trbFlFeedback.Position),
+                                                          trbFlFeedback.Min,
+                                                          trbFlFeedback.Max);
+
+    // Chorus
+    cbChEnabled.Checked := Ini.ReadBool('Chorus',
+                                        'Enabled',
+                                        cbChEnabled.Checked);
+
+    trbChMix.Position := EnsureRange(Ini.ReadInteger('Chorus',
+                                                     'Mix',
+                                                     trbChMix.Position),
+                                                     trbChMix.Min,
+                                                     trbChMix.Max);
+
+    trbChFeedback.Position := EnsureRange(Ini.ReadInteger('Chorus',
+                                                          'Feedback',
+                                                          trbChFeedback.Position),
+                                                          trbChFeedback.Min,
+                                                          trbChFeedback.Max);
+
+    trbChBaseDelay.Position := EnsureRange(Ini.ReadInteger('Chorus',
+                                                           'BaseDelayMs',
+                                                           trbChBaseDelay.Position),
+                                                           trbChBaseDelay.Min,
+                                                           trbChBaseDelay.Max);
+
+    trbChDepth.Position := EnsureRange(Ini.ReadInteger('Chorus',
+                                                       'Depth_x10',
+                                                       trbChDepth.Position),
+                                                       trbChDepth.Min,
+                                                       trbChDepth.Max);
+
+    rbChRateFree.Checked := Ini.ReadBool('Chorus',
+                                         'RateFree',
+                                         rbChRateFree.Checked);
+    rbChRateSync.Checked := not rbChRateFree.Checked;
+
+    trbChRate.Position := EnsureRange(Ini.ReadInteger('Chorus',
+                                                      'Rate_x100',
+                                                      trbChRate.Position),
+                                                      trbChRate.Min,
+                                                      trbChRate.Max);
+    edtChBpm.Text := Ini.ReadString('Chorus',
+                                    'TempoBpm',
+                                    edtChBpm.Text);
+
+    cmbChNoteDiv.ItemIndex := EnsureRange(Ini.ReadInteger('Chorus',
+                                                          'NoteDivIndex',
+                                                          cmbChNoteDiv.ItemIndex),
+                                                          0,
+                                                          cmbChNoteDiv.Items.Count - 1);
+
+    trbChWidth.Position := EnsureRange(Ini.ReadInteger('Chorus',
+                                                       'WidthPct',
+                                                       trbChWidth.Position),
+                                                       trbChWidth.Min,
+                                                       trbChWidth.Max);
+
+    trbChSmooth.Position := EnsureRange(Ini.ReadInteger('Chorus',
+                                                        'SmoothMs',
+                                                        trbChSmooth.Position),
+                                                        trbChSmooth.Min,
+                                                        trbChSmooth.Max);
+
+
+    // Pitch/Tempo
+    {fxPitchTempo.Enabled := Ini.ReadBool('PitchTempo',
+                                         'Enabled',
+                                         cbPtEnabled.Checked);
+    cbPtEnabled.Checked := fxPitchTempo.Enabled;
+
+    cbPtFormants.Checked := Ini.ReadBool('PitchTempo',
+                                         'PreserveFormants',
+                                         cbPtFormants.Checked);
+
+    trbPtPitch.Position := EnsureRange(Ini.ReadInteger('PitchTempo',
+                                                       'Pitch_x10',
+                                                       trbPtPitch.Position),
+                                                       trbPtPitch.Min,
+                                                       trbPtPitch.Max);
+
+    trbPtTempo.Position := EnsureRange(Ini.ReadInteger('PitchTempo',
+                                                       'TempoPct',
+                                                       trbPtTempo.Position),
+                                                       trbPtTempo.Min,
+                                                       trbPtTempo.Max);
+
+    trbPtOverlap.Position := EnsureRange(Ini.ReadInteger('PitchTempo',
+                                                         'Overlap_x100',
+                                                         trbPtOverlap.Position),
+                                                         trbPtOverlap.Min,
+                                                         trbPtOverlap.Max);
+
+    case Ini.ReadInteger('PitchTempo',
+                         'WindowSize',
+                         StrToIntDef(Trim(cmbPtWindow.Text), 1024)) of
+      512:  cmbPtWindow.ItemIndex := 0;
+      1024: cmbPtWindow.ItemIndex := 1;
+      2048: cmbPtWindow.ItemIndex := 2;
+      4096: cmbPtWindow.ItemIndex := 3;
+    else
+      cmbPtWindow.ItemIndex := 1;
+    end;
+
+    cmbPtMode.ItemIndex := EnsureRange(Ini.ReadInteger('PitchTempo',
+                                                       'ModeIndex',
+                                                       cmbPtMode.ItemIndex),
+                                                       0,
+                                                       cmbPtMode.Items.Count - 1);
+
+    }
+  finally
+    Ini.Free;
+  end;
+
+  // Refresh UI enable/labels
+  UpdateChorusRateUi();
+  UpdateEqLabels();
+  UpdateDynamicsLabels();
+  UpdateFlangerLabels();
+  UpdateChorusLabels();
+  //UpdatePitchTempoLabels();
+
+  // Apply loaded values to FX
+  ApplyEqFromUI();
+  ApplyDynamicsFromUI();
+  ApplyFlangerFromUI();
+  ApplyChorusFromUI();
+
+end;
+
+
+procedure TfrmMain.MfWasApiPlayerEngineEnded(Sender: TObject);
+begin
+
+  OnAudioEnded(Sender);
+end;
+
+
+procedure TfrmMain.MfWasApiPlayerEngineError(Sender: TObject;
+                                             const Msg: string;
+                                             const Hr: HRESULT);
+begin
+
+  OnEngineError(Sender,
+                Msg,
+                Hr);
+end;
+
+
+procedure TfrmMain.MfWasApiPlayerEngineProcessed(Sender: TObject;
+                                                 const Position100ns: Int64;
+                                                 const RawPosition: UInt64);
+begin
+
+  OnAudioDataProcessed(Sender,
+                       Position100ns,
+                       RawPosition);
+end;
+
+
+procedure TfrmMain.MfWasApiPlayerEngineReady(Sender: TObject);
+begin
+
+  OnAudioReady(Sender);
+end;
+
+
+procedure TfrmMain.MfWasApiPlayerEngineStateChanged(Sender: TObject;
+                                                    const NewState: TDeviceState);
+begin
+
+  OnEngineState(Sender,
+                NewState);
+end;
+
+
+procedure TfrmMain.SaveFxToIni();
+var
+  Ini: TIniFile;
+  fn: string;
+
+begin
+
+  fn := GetIniFileName();
+  Ini := TIniFile.Create(fn);
+
+  try
+
+    // EQ
+    Ini.WriteBool('EQ',
+                  'Enabled',
+                   cbEqEnabled.Checked);
+    Ini.WriteBool('EQ',
+                  'UseBW',
+                  cbEqUseBW.Checked);
+    Ini.WriteBool('EQ',
+                  'TruePeak',
+                  cbEqTruePeak.Checked);
+    Ini.WriteInteger('EQ',
+                     'Gain_x10',
+                     trbEqGain.Position);
+    Ini.WriteInteger('EQ',
+                     'FreqSlider',
+                     trbEqFreq.Position);
+    Ini.WriteInteger('EQ',
+                     'Q_x10',
+                     trbEqQ.Position);
+    Ini.WriteInteger('EQ',
+                     'BW_x10',
+                     trbEqBW.Position);
+
+    // Dynamics
+    Ini.WriteBool('Dynamics',
+                  'Enabled',
+                  cbDynEnabled.Checked);
+    Ini.WriteBool('Dynamics',
+                  'UseRms',
+                   cbDynRms.Checked);
+    Ini.WriteBool('Dynamics',
+                  'AutoMakeup',
+                  cbDynAutoMakeup.Checked);
+
+    Ini.WriteBool('Dynamics',
+                  'TruePeak',
+                  cbDynTruePeak.Checked);
+
+    Ini.WriteInteger('Dynamics',
+                     'Thresh_x10',
+                     trbDynThresh.Position);
+    Ini.WriteInteger('Dynamics',
+                     'Ratio_x10',
+                     trbDynRatio.Position);
+    Ini.WriteInteger('Dynamics',
+                     'Attack_x10',
+                     trbDynAttack.Position);
+    Ini.WriteInteger('Dynamics',
+                     'Release_x10',
+                     trbDynRelease.Position);
+    Ini.WriteInteger('Dynamics',
+                     'Knee_x10',
+                     trbDynKnee.Position);
+    Ini.WriteInteger('Dynamics',
+                     'Makeup_x10',
+                     trbDynMakeup.Position);
+    Ini.WriteInteger('Dynamics',
+                     'LimCeil_x10',
+                     trbDynLimCeil.Position);
+    Ini.WriteInteger('Dynamics',
+                     'LimLook_ms',
+                     trbDynLimLook.Position);
+    Ini.WriteInteger('Dynamics',
+                     'LimRel_x10',
+                     trbDynLimRel.Position);
+    Ini.WriteInteger('Dynamics',
+                     'TPOSIndex',
+                     cmbDynTPOS.ItemIndex);
+
+    // Flanger
+    Ini.WriteBool('Flanger',
+                  'Enabled',
+                  cbFlEnabled.Checked);
+    Ini.WriteInteger('Flanger',
+                     'Wet',
+                     trbFlWet.Position);
+    Ini.WriteInteger('Flanger',
+                     'Delay',
+                     trbFlDelay.Position);
+    Ini.WriteInteger('Flanger',
+                     'Depth',
+                     trbFlDepth.Position);
+    Ini.WriteInteger('Flanger',
+                     'Rate_x100',
+                     trbFlRate.Position);
+    Ini.WriteInteger('Flanger',
+                     'Feedback_x100',
+                     trbFlFeedback.Position);
+
+    // Chorus
+    Ini.WriteBool('Chorus',
+                  'Enabled',
+                  cbChEnabled.Checked);
+    Ini.WriteInteger('Chorus',
+                     'Mix',
+                     trbChMix.Position);
+    Ini.WriteInteger('Chorus',
+                     'Feedback',
+                     trbChFeedback.Position);
+    Ini.WriteInteger('Chorus',
+                     'BaseDelayMs',
+                     trbChBaseDelay.Position);
+    Ini.WriteInteger('Chorus',
+                     'Depth_x10',
+                     trbChDepth.Position);
+
+    Ini.WriteBool('Chorus',
+                  'RateFree',
+                  rbChRateFree.Checked);
+    Ini.WriteInteger('Chorus',
+                     'Rate_x100',
+                     trbChRate.Position);
+    Ini.WriteString('Chorus',
+                    'TempoBpm',
+                     Trim(edtChBpm.Text));
+    Ini.WriteInteger('Chorus',
+                     'NoteDivIndex',
+                     cmbChNoteDiv.ItemIndex);
+
+    Ini.WriteInteger('Chorus',
+                     'WidthPct',
+                     trbChWidth.Position);
+    Ini.WriteInteger('Chorus',
+                     'SmoothMs',
+                     trbChSmooth.Position);
+
+
+   { // Pitch/Tempo
+    Ini.WriteBool('PitchTempo',
+                  'Enabled',
+                  cbPtEnabled.Checked);
+    Ini.WriteBool('PitchTempo',
+                  'PreserveFormants',
+                  cbPtFormants.Checked);
+    Ini.WriteInteger('PitchTempo',
+                     'Pitch_x10',
+                     trbPtPitch.Position);
+    Ini.WriteInteger('PitchTempo',
+                     'TempoPct',
+                     trbPtTempo.Position);
+    Ini.WriteInteger('PitchTempo',
+                     'Overlap_x100',
+                     trbPtOverlap.Position);
+    Ini.WriteInteger('PitchTempo',
+                     'WindowSize',
+                     StrToIntDef(Trim(cmbPtWindow.Text), 1024));
+    Ini.WriteInteger('PitchTempo',
+                     'ModeIndex',
+                     cmbPtMode.ItemIndex);  }
+
+
+  finally
+
+    Ini.Free;
   end;
 end;
 
@@ -1693,6 +2857,5 @@ initialization
 finalization
 
   MFShutdown();
-
 
 end.

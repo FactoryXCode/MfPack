@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows Vista or later.
@@ -240,6 +240,9 @@ type
                           const pChannels: Integer;
                           const pBitsPerSample: Integer;
                           pShowMilliSeconds: Boolean = True): string; inline;
+
+  // Converts winApi BOOL to INT.
+  function NormalizeBOOL(const aBOOL: LongBool): Integer;
 
   // Operating system
   function GetOSArchitecture(): string;
@@ -1318,6 +1321,19 @@ begin
   Result := HnsTimeToStr(hns,
                          pShowMilliSeconds);
 end;
+
+
+function NormalizeBOOL(const aBOOL: LongBool): INT;
+begin
+  
+  // Delphi LongBool uses -1 for True; normalize for comparisons.
+  // See comments in WinApi.WinApiTypes about BOOL.
+  if aBOOL then
+    Result := 1
+  else
+    Result := 0;
+end;
+
 
 // OS
 

@@ -34,7 +34,7 @@ Project: Media Foundation - MFPack - Tools
 Project location: http://sourceforge.net/projects/MFPack
 
 First release date: 29/05/2024
-Final release date: 22/11/2025
+Final release date: 05/051/2026
 
 
 

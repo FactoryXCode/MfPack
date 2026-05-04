@@ -17,7 +17,7 @@
 // How to use it in a NEW (non-WASAPIEngine) player:
 // =================================================
 //
-// 1) Convert your engine s buffer to Float32 interleaved
+// 1) Convert your engine's buffer to Float32 interleaved
 //    PcmToFloat32Interleaved(InPcm, InBytes, InWfx,
 //                            FloatBuf, Frames, Channels, SampleRate);
 //
@@ -40,7 +40,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -351,19 +351,20 @@ procedure TMfWasApiEffectsRack.Notification(AComponent: TComponent;
                                             Operation: TOperation);
 var
   i: Integer;
-
 begin
-
   inherited;
 
-  if (Operation = opRemove) and (AComponent <> nil) then
-    begin
-      for i := 0 to FSlots.Count - 1 do
-        begin
-          if (FSlots[i].Effect = AComponent) then
-            FSlots[i].Effect := nil;
-        end;
-    end;
+  if (Operation <> opRemove) then
+    Exit;
+
+  if (FSlots = nil) then
+    Exit;
+
+  for i := 0 to FSlots.Count - 1 do
+  begin
+    if (FSlots[i] <> nil) and (FSlots[i].Effect = AComponent) then
+      FSlots[i].Effect := nil;
+  end;
 end;
 
 

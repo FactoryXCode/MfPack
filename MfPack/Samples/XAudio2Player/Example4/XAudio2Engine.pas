@@ -1,4 +1,65 @@
-﻿unit XAudio2Engine;
+﻿// FactoryX
+//
+// Copyright: © FactoryX. All rights reserved.
+//
+// Project: Media Foundation - MFPack - Samples
+// Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
+// Module: XAudio2Engine.pas
+// Kind: Pascal Unit
+// Release date: 28-03-2024
+// Language: ENU
+//
+// Revision Version: 3.1.9
+// Description: The commander in chief.
+//
+// Company: FactoryX
+// Intiator(s): Tony Kalf (maXcomX)
+// Contributor(s): Carmen(carmenh), Tony Kalf (maXcomX)
+//
+//------------------------------------------------------------------------------
+// CHANGE LOG
+// Date       Person              Reason
+// ---------- ------------------- ----------------------------------------------
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+//------------------------------------------------------------------------------
+//
+// Remarks: Requires Windows 10 or higher.
+//
+// Related objects: -
+// Related projects: MfPackX319
+// Known Issues: -
+//
+// Compiler version: 23 up to 35
+// SDK version: 10.0.26100.4654
+//
+// Todo: -
+//
+// =============================================================================
+// Source: factoryx.code
+//
+// Copyright © FacctoryX
+//==============================================================================
+//
+// LICENSE
+//
+// The contents of this file are subject to the Mozilla Public License
+// Version 2.0 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at
+// https://www.mozilla.org/en-US/MPL/2.0/
+//
+// Software distributed under the License is distributed on an "AS IS"
+// basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+// License for the specific language governing rights and limitations
+// under the License.
+//
+// Non commercial users may distribute this sourcecode provided that this
+// header is included in full at the top of the file.
+// Commercial users are not allowed to distribute this sourcecode as part of
+// their product.
+//
+//==============================================================================
+unit XAudio2Engine;
 
 interface
 
@@ -35,6 +96,7 @@ uses
   XAudio2_FXMasterLimiter;
 
 const
+
   MIN_PITCH = 0.4;
   MAX_PITCH = 2.0;
   MIN_VOLUME = 0.0;

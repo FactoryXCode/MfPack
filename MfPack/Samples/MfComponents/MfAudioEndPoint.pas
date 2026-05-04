@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 // 12/06/2024 Tony                Removed EDataFlowEx.
 // 16/07/2025 Tony                updated some code and fixed some issues.
 // 05/02/2026 Carmen/Tony         Rewritten: thread-safe, events (no messages), IMMNotificationClient + RefreshDefaultDevice.
@@ -143,13 +143,14 @@ type
 
     FLock: TCriticalSection;
 
-    dwDeviceID: DWord;  // Device ID (index into Devices[])
+    dwDeviceIndex: DWord;  // Device ID (index into Devices[])
     uiChannels: UINT;   // Total number of channels (last notify snapshot)
     dwEndPointsCount: DWord;
 
     wsDeviceName: string;
     wsDeviceInterfaceName: string;
     wsDeviceDesc: string;
+    FDeviceID: string;  // format {0.0.0.00000000}.{ef4f5772-aeac-426a-8d69-a6bcf7153472}
 
     fEndPointDevices: TEndPointDeviceArray;  // Cached endpoints list (MfPack record)
 
@@ -189,10 +190,10 @@ type
     procedure SetDataFlow(aValue: EDataFlow);
     procedure SetDeviceState(aValue: string);
     procedure SetEndPointDevice(aValue: DWord);
-
+    procedure SetDeviceID(aValue: string);
     procedure DoVolumeNotifyOnMainThread(pNotifyCopy: PAUDIO_VOLUME_NOTIFICATION_DATA);
 
-    procedure RebuildEndpointCache;
+    procedure RebuildEndpointCache();
     function FindDeviceIndexByIdStr(const DeviceId: WideString): Integer;
 
   public
@@ -204,7 +205,11 @@ type
     procedure BeforeDestruction(); override;
 
     // NEW: Sync this control to the current Windows default endpoint for (DeviceDataFlow, DeviceRole)
-    function GetDefaultDevice: HResult;
+    function GetDefaultDevice(): HResult;
+
+    // Bind to a device by IMMDevice endpoint ID string (as returned by IMMDevice.GetId).
+    // This avoids any dependency on friendly names / descriptions.
+    function BindToDeviceId(const ADeviceId: string): HResult;
 
     // Existing methods (do not rename)
     procedure GetVolumeRange(out pflVolumeMindB: Single;
@@ -244,12 +249,15 @@ type
     property DeviceInterfaceName: string read wsDeviceInterfaceName;
     property DeviceDescription: string read wsDeviceDesc;
     property DeviceGuidContext: string read GetGuidContextAsString;
+
     property DeviceRole: ERole read fRole;
-    property State: eState read fState default DEVICE_STATEMASK_ALL;
+    property State: eState read fState default DEVICE_STATE_ACTIVE;
     property Channels: UINT read GetChannels;
 
     // read/write properties
-    property DeviceID: DWord read dwDeviceID write SetEndPointDevice default 0;
+    property DeviceID: string read FDeviceID write SetDeviceID;
+
+    property DeviceIndex: DWord read dwDeviceIndex write SetEndPointDevice default 0;
     property DeviceDataFlow: EDataFlow read fDataFlow write SetDataFlow default eRender;
     property DeviceState: string read GetStateAsString write SetDeviceState;
 
@@ -257,7 +265,7 @@ type
     property MasterDbVolume: Single read GetMasterDbVolume write SetMasterDbVolume;
     property Mute: BOOL read GetMute write SetMute default BOOL(False);
 
-    // NEW (opt-in): automatically follow Windows default device changes (speakers ↔ headphones etc.)
+    // NEW (opt-in): automatically follow Windows default device changes (speakers <-> headphones etc.)
     property FollowDefaultDevice: Boolean read FFollowDefaultDevice write FFollowDefaultDevice default False;
 
     property OnNotify: TOnNotify read FOnNotify write FOnNotify;
@@ -280,23 +288,41 @@ end;
 function _CopyNotifyStruct(pNotify: PAUDIO_VOLUME_NOTIFICATION_DATA): PAUDIO_VOLUME_NOTIFICATION_DATA;
 var
   cb: NativeUInt;
+  Channels: Cardinal;
 
 begin
 
   Result := nil;
+
   if (pNotify = nil) then
     Exit;
 
-  // AUDIO_VOLUME_NOTIFICATION_DATA ends with variable-length afChannelVolumes[...]
-  cb := SizeOf(AUDIO_VOLUME_NOTIFICATION_DATA);
-  if( pNotify^.nChannels > 1) then
-    cb := cb + NativeUInt(pNotify^.nChannels - 1) * SizeOf(Single);
+  Channels := pNotify^.nChannels;
+  if (Channels = 0) or (Channels > 64) then
+    Exit;
+
+  cb := SizeOf(AUDIO_VOLUME_NOTIFICATION_DATA) + NativeUInt(Channels - 1) * SizeOf(Single);
 
   GetMem(Result,
          cb);
-  Move(pNotify^,
-       Result^,
-       cb);
+
+  if (Result = nil) then
+    Exit;
+
+  try
+
+    Move(pNotify^,
+         Result^,
+         cb);
+  except
+
+    if (Result <> nil) then
+      begin
+
+        FreeMem(Result);
+        Result := nil;
+      end;
+  end;
 end;
 
 
@@ -314,7 +340,6 @@ procedure TOnEndPointNotify.DetachOwner;
 begin
   FOwner := nil;
 end;
-
 
 
 function TOnEndPointNotify.OnNotify(pNotify: PAUDIO_VOLUME_NOTIFICATION_DATA): HRESULT;
@@ -515,7 +540,7 @@ begin
   fRole := eMultimedia;
   fDataFlow := eRender;
   fState := DEVICE_STATE_ACTIVE;
-  dwDeviceID := 0;
+  dwDeviceIndex := 0;
   uiChannels := 0;
   dwEndPointsCount := 0;
   FFollowDefaultDevice := False;
@@ -545,7 +570,7 @@ begin
   RebuildEndpointCache();
 
   if (dwEndPointsCount > 0) then
-    SetEndPointDevice(dwDeviceID)
+    SetEndPointDevice(dwDeviceIndex)
   else
     begin
 
@@ -554,7 +579,6 @@ begin
       wsDeviceDesc := '?';
     end;
 end;
-
 
 
 procedure TMfAudioEndPoint.BeforeDestruction();
@@ -608,7 +632,7 @@ begin
 
     fOnDeviceNotifyObj := nil;
     FreeAndNil(fOnEndPointNotify);
-SetLength(fEndPointDevices,
+    SetLength(fEndPointDevices,
               0);
   finally
 
@@ -661,6 +685,27 @@ begin
     if (fEndPointDevices[i].pwszID <> nil) and SameText(string(fEndPointDevices[i].pwszID),
                                                                string(DeviceId)) then
       Exit(i);
+end;
+
+
+function TMfAudioEndPoint.BindToDeviceId(const ADeviceId: string): HResult;
+var
+  idx: Integer;
+
+begin
+
+  Result := E_INVALIDARG;
+  if ADeviceId = '' then
+    Exit;
+
+  // Ensure cache is current.
+  RebuildEndpointCache();
+  idx := FindDeviceIndexByIdStr(WideString(ADeviceId));
+  if (idx < 0) then
+    Exit(E_NOTFOUND);
+
+  SetEndPointDevice(DWord(idx));
+  Result := S_OK;
 end;
 
 
@@ -770,7 +815,7 @@ begin
 end;
 
 
-function TMfAudioEndPoint.GetMasterScalarVolume: Single;
+function TMfAudioEndPoint.GetMasterScalarVolume(): Single;
 var
   v: Single;
 
@@ -792,7 +837,7 @@ begin
 end;
 
 
-function TMfAudioEndPoint.GetMasterDbVolume: Single;
+function TMfAudioEndPoint.GetMasterDbVolume(): Single;
 var
   v: Single;
 
@@ -812,6 +857,7 @@ begin
     fAudioEndpoint.SetMasterVolumeLevel(aValue,
                                         @FguidEventContext);
 end;
+
 
 procedure TMfAudioEndPoint.GetVolumeRange(out pflVolumeMindB,
                                           pflVolumeMaxdB,
@@ -861,85 +907,38 @@ end;
 procedure TMfAudioEndPoint.SetDeviceState(aValue: string);
 var
   S1: string;
-  sl: TStringList;
-  i: Integer;
-  mask: DWord;
-
-  function TokenToMask(const Tok: string): DWord;
-  begin
-    if SameText(Tok,
-                DEV_STATE_ACTIVE) then
-      Exit(DEVICE_STATE_ACTIVE);
-
-    if SameText(Tok,
-                DEV_STATE_DISABLED) then
-      Exit(DEVICE_STATE_DISABLED);
-
-    if SameText(Tok,
-                DEV_STATE_NOTPRESENT) then
-      Exit(DEVICE_STATE_NOTPRESENT);
-
-    if SameText(Tok,
-                DEV_STATE_UNPLUGGED) then
-      Exit(DEVICE_STATE_UNPLUGGED);
-
-    if SameText(Tok,
-                DEV_STATEMASK_ALL) then
-      Exit(DEVICE_STATEMASK_ALL);
-
-    Result := 0;
-  end;
 
 begin
 
   S1 := Trim(aValue);
 
-  // Support single token (e.g. 'ACTIVE') and multi-token masks
-  // (e.g. 'ACTIVE,DISABLED' or 'ACTIVE|UNPLUGGED').
-  if (Pos(',', S1) > 0) or (Pos('|', S1) > 0) then
-    begin
-
-      sl := TStringList.Create;
-      try
-
-        // Normalize separators to comma
-        S1 := StringReplace(S1,
-                            '|',
-                            ',',
-                            [rfReplaceAll]);
-
-        sl.StrictDelimiter := True;
-        sl.Delimiter := ',';
-        sl.DelimitedText := S1;
-
-        mask := 0;
-        for i := 0 to sl.Count - 1 do
-          mask := mask or TokenToMask(Trim(sl[i]));
-
-        if (mask = 0) then
-          mask := DEVICE_STATE_ACTIVE;
-
-        fState := eState(mask);
-      finally
-
-        sl.Free;
-      end;
-    end
+  if SameText(S1,
+              DEV_STATE_ACTIVE) then
+    fState := DEVICE_STATE_ACTIVE
   else
-    begin
-
-      // Single token (keeps old behaviour)
-      mask := TokenToMask(S1);
-      if (mask = 0) then
-        mask := DEVICE_STATE_ACTIVE;
-
-      fState := eState(mask);
-    end;
+    if SameText(S1,
+                DEV_STATE_DISABLED) then
+      fState := DEVICE_STATE_DISABLED
+  else
+    if SameText(S1,
+                DEV_STATE_NOTPRESENT) then
+      fState := DEVICE_STATE_NOTPRESENT
+  else
+    if SameText(S1,
+                DEV_STATE_UNPLUGGED) then
+      fState := DEVICE_STATE_UNPLUGGED
+  else
+    if SameText(S1,
+                DEV_STATEMASK_ALL) then
+    fState := DEVICE_STATEMASK_ALL
+  else
+    fState := DEVICE_STATE_ACTIVE;
 
   RebuildEndpointCache();
   if (dwEndPointsCount > 0) then
-    SetEndPointDevice(dwDeviceID);
+    SetEndPointDevice(dwDeviceIndex);
 end;
+
 
 procedure TMfAudioEndPoint.SetDataFlow(aValue: EDataFlow);
 begin
@@ -950,8 +949,37 @@ begin
       fDataFlow := aValue;
       RebuildEndpointCache();
       if (dwEndPointsCount > 0) then
-        SetEndPointDevice(dwDeviceID);
+        SetEndPointDevice(dwDeviceIndex);
     end;
+end;
+
+
+procedure TMfAudioEndPoint.SetDeviceID(aValue: string);
+var
+  hr: HResult;
+  s: string;
+
+begin
+
+  s := Trim(aValue);
+
+  // Store (always) so the property reflects the last requested value.
+  FDeviceID := s;
+
+  // Empty means: do not change selection here (DeviceIndex remains the selector).
+  if (s = '') then
+    Exit;
+
+  // If enumerator is not ready yet, we cannot bind right now.
+  if not Assigned(fDeviceEnumerator) then
+    Exit;
+
+  hr := BindToDeviceId(s);
+
+  // If binding fails, keep the previous active endpoint (do not raise).
+  // The caller can still check (e.g. by reading DeviceName / EndPointsCount) after Refresh.
+  if Failed(hr) then
+    Exit;
 end;
 
 
@@ -966,15 +994,15 @@ begin
   if not Assigned(fDeviceEnumerator) then
     Exit;
 
-  dwDeviceID := aValue;
+  dwDeviceIndex := aValue;
 
-  if (dwEndPointsCount > 0) and (dwDeviceID > dwEndPointsCount - 1) then
-    dwDeviceID := dwEndPointsCount - 1;
+  if (dwEndPointsCount > 0) and (dwDeviceIndex > dwEndPointsCount - 1) then
+    dwDeviceIndex := dwEndPointsCount - 1;
 
   if (dwEndPointsCount = 0) then
     Exit;
 
-  hr := fDeviceEnumerator.GetDevice(fEndPointDevices[dwDeviceID].pwszID,
+  hr := fDeviceEnumerator.GetDevice(fEndPointDevices[dwDeviceIndex].pwszID,
                                     imDevice);
   OleCheck(hr);
 
@@ -989,9 +1017,10 @@ begin
   OleCheck(hr);
 
   // Update published strings (from cache)
-  wsDeviceName := WideCharToString(fEndPointDevices[dwDeviceID].DeviceName);
-  wsDeviceInterfaceName := WideCharToString(fEndPointDevices[dwDeviceID].DevInterfaceName);
-  wsDeviceDesc := WideCharToString(fEndPointDevices[dwDeviceID].DeviceDesc);
+  wsDeviceName := WideCharToString(fEndPointDevices[dwDeviceIndex].DeviceName);
+  wsDeviceInterfaceName := WideCharToString(fEndPointDevices[dwDeviceIndex].DevInterfaceName);
+  wsDeviceDesc := WideCharToString(fEndPointDevices[dwDeviceIndex].DeviceDesc);
+  FDeviceID := WideCharToString(fEndPointDevices[dwDeviceIndex].pwszID);
 
   // Swap refs (thread-safe)
   FLock.Enter();

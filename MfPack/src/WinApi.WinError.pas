@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: When using MfPack, use this unit and not the outdated
@@ -431,6 +431,7 @@ const
   {$EXTERNALSYM ERROR_SEVERITY_WARNING}
   ERROR_SEVERITY_ERROR         = LongInt($C0000000);
   {$EXTERNALSYM ERROR_SEVERITY_ERROR}
+
 
 //
 // MessageId: ERROR_SUCCESS

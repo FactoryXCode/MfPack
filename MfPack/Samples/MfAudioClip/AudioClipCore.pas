@@ -31,7 +31,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
@@ -385,7 +385,7 @@ begin
   // Get the complete uncompressed format.
   if SUCCEEDED(hr) then
     hr := pReader.GetCurrentMediaType(DWORD(MF_SOURCE_READER_FIRST_AUDIO_STREAM),
-                                      pUncompressedAudioType);
+                                      @pUncompressedAudioType);
 
 
   // a suggestion to prevent memory leak issues from msdn

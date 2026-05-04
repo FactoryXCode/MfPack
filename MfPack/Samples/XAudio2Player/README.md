@@ -11,8 +11,8 @@ low latency etc.
 This sample has 3 levels.
 
 * Sample 1 Plays formats like wav, mp3 and flac. It shows you the basics of using XAudio2.
-  The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
-  In your projectsettings you must add ..MfPack\\Samples\\MfComponents in the project options searchpath.
+The sample uses the MfPeakMeter component. This requires that you install the MfComponents.
+In your projectsettings you must add ..MfPack\\Samples\\MfComponents in the project options searchpath.
 * Sample 2 implements the IXAudio2VoiceCallback and has a pitch control.
 * Sample 3 uses threadsafe events, instead of messages.
 * Sample 4 Shows how to implement effects and a progressbar.
@@ -33,7 +33,7 @@ Project location: https://github.com/FactoryXCode/MfPack
 https://sourceforge.net/projects/MFPack
 
 First release date: 30-03-2024
-Final release date: 25-07-2025
+Final release date: 05/05/2026
 
 Copyright © FactoryX. All rights reserved.
 

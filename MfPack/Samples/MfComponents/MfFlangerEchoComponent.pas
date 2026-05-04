@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -112,7 +112,7 @@ type
 
   published
 
-    property Enabled: Boolean read FEnabled write SetEnabled default True;
+    property Enabled: Boolean read FEnabled write SetEnabled default False;
     property BaseDelayMs: Single read FBaseDelayMs write SetBaseDelayMs;
     property DepthMs: Single read FDepthMs write SetDepthMs;
     property RateHz: Single read FRateHz write SetRateHz;
@@ -139,14 +139,14 @@ begin
 
   inherited Create(AOwner);
 
-  FEnabled := True;
+  FEnabled := False;
   FBaseDelayMs := 3.0;
   FDepthMs := 2.0;
   FRateHz := 0.25;
   FFeedback := 0.2;
   FWet := 0.35;
 
-  // Do NOT create any MFT by default, this creates memory leaks!
+  // Do NOT create any MFT by default, this will creates memory leaks!
   //  CheckForMft();
 end;
 

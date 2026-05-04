@@ -22,7 +22,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -84,6 +84,7 @@ type
   private
 
     FMft: IMFTransform;
+    FMftObj: TMfLowMidHighEqMFT;
     FSettings: TMfLowMidHighEqSettings;
 
     function GetEnabled: LongBool;
@@ -113,6 +114,7 @@ type
   public
 
     constructor Create(AOwner: TComponent); reintroduce;
+    destructor Destroy(); override;
     // Optional helper for callers (not part of TMfWasApiFxComponentBase).
     procedure ResetState();
 
@@ -183,7 +185,17 @@ begin
 end;
 
 
-function TMfLowMidHighEqEffect.GetEnabled: LongBool;
+destructor TMfLowMidHighEqEffect.Destroy();
+begin
+
+  FMft := nil;
+  FreeAndNil(FMftObj);
+
+  inherited;
+end;
+
+
+function TMfLowMidHighEqEffect.GetEnabled(): LongBool;
 begin
 
   Result := FSettings.Enabled;
@@ -316,10 +328,11 @@ begin
   if IsDesigning() then
     Exit;
 
-  if (FMft <> nil) then
+  if Assigned(FMftObj) then
     Exit;
 
-  FMft := TMfLowMidHighEqMFT.Create as IMFTransform;
+  FMftObj := TMfLowMidHighEqMFT.Create();
+  FMft := FMftObj as IMFTransform;
   ApplySettingsToMft();
 end;
 
@@ -347,7 +360,7 @@ begin
 end;
 
 
-procedure TMfLowMidHighEqEffect.ResetState;
+procedure TMfLowMidHighEqEffect.ResetState();
 var
   Eq: IMfLowMidHighEqMft;
 
@@ -363,3 +376,4 @@ begin
 end;
 
 end.
+

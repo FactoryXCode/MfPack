@@ -1,4 +1,4 @@
-// FactoryX
+﻿// FactoryX
 //
 // Copyright:  FactoryX. All rights reserved.
 //
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: To install the visual components, choose Install in the Project Manager.
@@ -100,15 +100,15 @@ type
                      vmSpectrum);
 
   TMfAudioInputSource = (isLoopback,
-                        isExternalFeed);
+                         isExternalFeed);
 
 
   TMfVolumeScaleMode = (vsmLinear,
-                       vsmPerceptual,
-                       vsmDbPerceptual);
+                        vsmPerceptual,
+                        vsmDbPerceptual);
 
   TMfClipIndicatorMode = (cimPerChannel,
-                         cimSingle);
+                          cimSingle);
 
 
   TMfLevels = record
@@ -142,7 +142,7 @@ type
     constructor Create(AOwner: TMfAudioMixVisualizer);
 
     function OnDeviceStateChanged(pwstrDeviceId: LPCWSTR;
-                                   dwNewState: DWord): HResult; stdcall;
+                                  dwNewState: DWord): HResult; stdcall;
 
     function OnDeviceAdded(pwstrDeviceId: LPCWSTR): HResult; stdcall;
 
@@ -162,7 +162,7 @@ type
     FOwner: TMfAudioMixVisualizer;
   protected
 
-    procedure Execute; override;
+    procedure Execute(); override;
   public
 
     constructor Create(AOwner: TMfAudioMixVisualizer);
@@ -181,7 +181,6 @@ type
 
     FDataFlow: EDataFlow;
     FRole: ERole;
-
 
     // Visual scaling based on endpoint master volume slider.
     FVolumeScaleMode: TMfVolumeScaleMode;
@@ -214,6 +213,7 @@ type
 
     // Optional dBFS scale overlay (left gutter).
     FShowDbScale: Boolean;
+    FDbTop: Single; // positive/ceiling (e.g. +6)
     FDbMin: Single; // negative (e.g. -60)
     FDbTickStep: Integer;
     FDbLabelStep: Integer;
@@ -271,8 +271,16 @@ type
     FHoldR: Single;
     FHoldTickL,
     FHoldTickR: DWORD;
+
+    // The endpoint deviceId the visualizer will be wired to.
+    FDeviceId: string;
+
     // Device change restart guard (default render device switches).
     FRestartQueued: Integer;
+
+    // Show header (meter info text)
+    FShowMeters: Boolean;
+    FInputTrimDb: Single;
 
     procedure QueueRestart();
     procedure DoQueuedRestart();
@@ -307,12 +315,15 @@ type
     procedure SetRmsColor(Value: TColor);
     procedure SetBorderColor(Value: TColor);
     procedure SetShowDbScale(Value: Boolean);
+    procedure SetShowMeters(Value: Boolean);
+    procedure SetDbTop(Value: Single);
     procedure SetDbMin(Value: Single);
     procedure SetDbTickStep(Value: Integer);
     procedure SetDbLabelStep(Value: Integer);
     procedure SetDbScaleWidth(Value: Integer);
     procedure SetPeakThreshold(Value: Single);
     procedure SetPeakCapFrac(Value: Single);
+    procedure SetInputTrimDb(Value: Single);
 
     procedure ClearVisualState();
     procedure EnsureSpectrumStorage();
@@ -325,9 +336,17 @@ type
 
 
     function GetVolumeVisualGain(): Single;
+    function DbToDisplayFrac(const ADb,
+                             ADbMin,
+                             ADbTop: Single): Single;
+    procedure BuildSpectrumBars(const MonoBlock: TArray<Single>;
+                                out Bars: TArray<Single>);
     procedure DrawMeters(ACanvas: TCanvas; const R: TRect);
     procedure DrawSpectrum(ACanvas: TCanvas; const R: TRect);
     procedure DrawDesignTimePlaceholder(ACanvas: TCanvas; const R: TRect);
+
+    // Set DeviceID
+    procedure SetDeviceId(const Value: string);
 
   protected
 
@@ -358,10 +377,10 @@ type
     property Align;
     property Anchors;
 
-    property BackColor: TColor read FBackColor write SetBackColor default clBlack;
+    property BackColor: TColor read FBackColor write SetBackColor default $00001A00;
 
     // Colors
-    property BarColor: TColor read FBarColor write SetBarColor default clAqua;
+    property BarColor: TColor read FBarColor write SetBarColor default $00F1BC8B;
     property PeakColor: TColor read FPeakColor write SetPeakColor default clRed;
     property RmsColor: TColor read FRmsColor write SetRmsColor default clYellow;
     property BorderColor: TColor read FBorderColor write SetBorderColor default clGray;
@@ -372,6 +391,8 @@ type
 
     // dBFS scale overlay
     property ShowDbScale: Boolean read FShowDbScale write SetShowDbScale default True;
+    property ShowMeterInfo: Boolean read FShowMeters write SetShowMeters default True;
+    property DbTop: Single read FDbTop write SetDbTop;
     property DbMin: Single read FDbMin write SetDbMin;
     property DbTickStep: Integer read FDbTickStep write SetDbTickStep default 6;
     property DbLabelStep: Integer read FDbLabelStep write SetDbLabelStep default 12;
@@ -384,7 +405,8 @@ type
 
     property DeviceDataFlow: EDataFlow read FDataFlow write SetDeviceDataFlow default eRender;
     property DeviceRole: ERole read FRole write SetDeviceRole default eMultimedia;
-
+    property DeviceId: string read FDeviceId write SetDeviceId;
+    property InputTrimDb: Single read FInputTrimDb write SetInputTrimDb;
 
     property VolumeScaleMode: TMfVolumeScaleMode read FVolumeScaleMode write SetVolumeScaleMode default vsmPerceptual;
     property EnableVolumeSmoothing: Boolean read FEnableVolumeSmoothing write FEnableVolumeSmoothing default True;
@@ -453,6 +475,23 @@ function BitsToSingle(const B: Integer): Single; inline;
 begin
 
   Result := PSingle(@B)^;
+end;
+
+
+function DbToGain(const ADb: Single): Single; inline;
+begin
+
+  Result := Power(10.0,
+                  ADb / 20.0);
+end;
+
+
+function ClampVizSample(const S: Single): Single; inline;
+begin
+
+  Result := EnsureRange(S,
+                        -4.0,
+                        4.0);
 end;
 
 
@@ -623,8 +662,11 @@ begin
 
   Result := S_OK;
 
-  // Restart only when we are visualizing the current default endpoint (flow/role match).
   if (FOwner = nil) then
+    Exit;
+
+  // Explicit device selected: do not follow Windows default changes.
+  if (FOwner.FDeviceId <> '') then
     Exit;
 
   if (flow <> FOwner.FDataFlow) then
@@ -841,9 +883,9 @@ var
       end;
   end;
 
-  procedure PublishLevels(const pL,
-                          pR,
-                          rL, rR: Single);
+  procedure PublishCaptureLevels(const pL,
+                                 pR,
+                                 rL, rR: Single);
   var
     peakDbL,
     peakDbR,
@@ -885,26 +927,71 @@ var
     if (pL >= FOwner.FClipThreshold) then
       InterlockedExchange(FOwner.FClipUntilL,
                           Integer(GetTickCount) + FOwner.FClipHoldMs);
+
     if (pR >= FOwner.FClipThreshold) then
       InterlockedExchange(FOwner.FClipUntilR,
                           Integer(GetTickCount) + FOwner.FClipHoldMs);
+
     if (pL >= FOwner.FClipThreshold) or (pR >= FOwner.FClipThreshold) then
       InterlockedExchange(FOwner.FClipUntilAny,
                           Integer(GetTickCount) + FOwner.FClipHoldMs);
   end;
 
-  procedure PublishSpectrum(const BarsLocal: TArray<Single>);
+  procedure PublishCaptureSpectrum(const BarsLocal: TArray<Single>);
+  const
+    // How to tune:
+    // More punch / faster bar rise:
+    //   Increase SPEC_ATTACK_ALPHA to 0.65..0.75
+    // Longer trailing decay:
+    //   Reduce SPEC_RELEASE_ALPHA to 0.10..0.14
+    // Quicker drop:
+    //   Increase SPEC_RELEASE_ALPHA to 0.22..0.30
+    // More aggressive snap-to-zero:
+    //   Raise SPEC_ZERO_SNAP to 0.005..0.01
+    //
+    SPEC_ATTACK_ALPHA  = 0.70;  // higher = faster rise
+    SPEC_RELEASE_ALPHA = 0.18;  // lower = slower fall
+    SPEC_ZERO_SNAP     = 0.009; // tiny residuals -> hard zero
+
   var
     ii,
     fi: Integer;
+    prev,
+    target,
+    outv: Single;
 
   begin
 
     fi := Min(Length(BarsLocal),
               Length(FOwner.FSpectrumBits));
+
     for ii := 0 to fi - 1 do
-      InterlockedExchange(FOwner.FSpectrumBits[ii],
-                          SingleToBits(BarsLocal[ii]));
+      begin
+
+        prev := BitsToSingle(
+                  InterlockedCompareExchange(FOwner.FSpectrumBits[ii],
+                                             0,
+                                             0));
+
+        prev := EnsureRange(prev,
+                            0.0,
+                            1.0);
+
+        target := EnsureRange(BarsLocal[ii],
+                              0.0,
+                              1.0);
+
+        if (target > prev) then
+          outv := prev + (target - prev) * SPEC_ATTACK_ALPHA
+        else
+          outv := prev + (target - prev) * SPEC_RELEASE_ALPHA;
+
+        if (outv < SPEC_ZERO_SNAP) then
+          outv := 0.0;
+
+        InterlockedExchange(FOwner.FSpectrumBits[ii],
+                            SingleToBits(outv));
+      end;
   end;
 
 begin
@@ -920,8 +1007,6 @@ begin
 
     lastDispatchTick := NowTick;
 
-
-    NotifyRegistered := False;
     hr := CoCreateInstance(CLSID_MMDeviceEnumerator,
                            nil,
                            CLSCTX_INPROC_SERVER,
@@ -936,9 +1021,13 @@ begin
     hr := Enumerator.RegisterEndpointNotificationCallback(NotifyClient);
     NotifyRegistered := Succeeded(hr);
 
-    hr := Enumerator.GetDefaultAudioEndpoint(FOwner.FDataFlow,
-                                             FOwner.FRole,
-                                             Device);
+    if (FOwner.FDeviceId <> '') then
+      hr := Enumerator.GetDevice(PWideChar(WideString(FOwner.FDeviceId)),
+                                 Device)
+    else
+      hr := Enumerator.GetDefaultAudioEndpoint(FOwner.FDataFlow,
+                                               FOwner.FRole,
+                                               Device);
     if FAILED(hr) then
       Exit;
 
@@ -1051,6 +1140,9 @@ begin
     WaitHandles[0] := FOwner.FStopEvent;
     WaitHandles[1] := EventHandle;
 
+    acc := 0;
+    cnt := 0;
+
     // Do the loop.
     while not Terminated do
       begin
@@ -1063,6 +1155,7 @@ begin
 
         WAIT_OBJECT_0 + 1:
           begin
+
             while True do
               begin
 
@@ -1082,13 +1175,15 @@ begin
                 if FAILED(hr) then
                   Break;
 
-                peakL := 0;
-                peakR := 0;
-                sumSqL := 0;
-                sumSqR := 0;
-                nSamp := Integer(NumFrames);
+                try
 
-                if ((Flags and AUDCLNT_BUFFERFLAGS_SILENT) <> 0) then
+                  peakL := 0;
+                  peakR := 0;
+                  sumSqL := 0;
+                  sumSqR := 0;
+                  nSamp := Integer(NumFrames);
+
+                  if ((Flags and AUDCLNT_BUFFERFLAGS_SILENT) <> 0) then
                   begin
 
                     if (FOwner.FMode = amLevelsAndSpectrum) and (Length(FOwner.FMonoRing) > 0) then
@@ -1116,7 +1211,7 @@ begin
                         for i := 0 to nSamp - 1 do
                           begin
 
-                            a := pf^; Inc(pf);
+                            a := ClampVizSample(pf^ * DbToGain(FOwner.FInputTrimDb)); Inc(pf);
                             sumSqL := sumSqL + (a * a);
 
                             if (Abs(a) > peakL) then
@@ -1125,7 +1220,7 @@ begin
                             if (channels > 1) then
                               begin
 
-                                b := pf^; Inc(pf);
+                                b := ClampVizSample(pf^ * DbToGain(FOwner.FInputTrimDb)); Inc(pf);
                                 sumSqR := sumSqR + (b * b);
                                 if (Abs(b) > peakR) then
                                   peakR := Abs(b);
@@ -1151,7 +1246,7 @@ begin
                         for i := 0 to nSamp - 1 do
                           begin
 
-                            a := ps^ / 32768.0; Inc(ps);
+                            a := ClampVizSample((ps^ / 32768.0) * DbToGain(FOwner.FInputTrimDb)); Inc(ps);
                             sumSqL := sumSqL + (a * a);
                             if (Abs(a) > peakL) then
                               peakL := Abs(a);
@@ -1159,7 +1254,7 @@ begin
                             if (channels > 1) then
                               begin
 
-                                b := ps^ / 32768.0;
+                                b := ClampVizSample((ps^ / 32768.0) * DbToGain(FOwner.FInputTrimDb));
                                 Inc(ps);
                                 sumSqR := sumSqR + (b * b);
 
@@ -1182,7 +1277,10 @@ begin
                         end;
                   end;
 
-                CaptureClient.ReleaseBuffer(NumFrames);
+                finally
+
+                  CaptureClient.ReleaseBuffer(NumFrames);
+                end;
 
                 rmsL := (Sqrt(sumSqL / Max(1,
                                            nSamp))) * 1.0;
@@ -1217,72 +1315,25 @@ begin
                 if ShouldDispatch() then
                   begin
 
-                    PublishLevels(smPeakL,
-                                  smPeakR,
-                                  smRmsL,
-                                  smRmsR);
+                    PublishCaptureLevels(smPeakL,
+                                         smPeakR,
+                                         smRmsL,
+                                         smRmsR);
 
                     if (FOwner.FMode = amLevelsAndSpectrum) and (Length(FOwner.FMonoRing) > 0) then
                       begin
 
-                        ReadRingLatest(monoBlock);
+                        try
 
-                        for i := 0 to fftN - 1 do
-                          begin
-
-                            re[i] := monoBlock[i];
-                            im[i] := 0;
-                          end;
-
-                        TSimpleFFT.HannWindow(re);
-                        TSimpleFFT.FFT(re,
-                                       im);
-
-                        maxMag := 1e-9;
-                        for k := 1 to (fftN div 2) - 1 do
-                          begin
-
-                            v := Sqrt(re[k]*re[k] + im[k]*im[k]);
-                            mags[k] := v;
-                            if (v > maxMag) then
-                              maxMag := v;
-                          end;
-
-                        for bar := 0 to barCount - 1 do
-                          begin
-
-                            t0 := bar / barCount;
-                            t1 := (bar + 1) / barCount;
-
-                            idxStart := 1 + Trunc((Power(fftN div 2, t0) - 1));
-                            idxEnd   := 1 + Trunc((Power(fftN div 2, t1) - 1));
-
-                            if (idxEnd <= idxStart) then
-                              idxEnd := idxStart + 1;
-                            if (idxEnd >= (fftN div 2)) then
-                              idxEnd := (fftN div 2) - 1;
-
-                            acc := 0;
-                            cnt := 0;
-
-                            for k := idxStart to idxEnd do
-                              begin
-
-                                acc := acc + mags[k];
-                                Inc(cnt);
-                              end;
-
-                            if (cnt > 0) then
-                              acc := acc / cnt;
-
-                            acc := acc / maxMag;
-                            acc := Sqrt(Max(0,
-                                            Min(1,
-                                                acc)));
-                            bars[bar] := acc;
-                          end;
-
-                        PublishSpectrum(bars);
+                          ReadRingLatest(monoBlock);
+                          FOwner.BuildSpectrumBars(monoBlock,
+                                                   bars);
+                          PublishCaptureSpectrum(bars);
+                        except
+                          on E: Exception do
+                            OutputDebugString(PChar('MfAudioMixVisualizer capture spectrum exception: ' +
+                                                    E.ClassName + ': ' + E.Message));
+                        end;
                       end;
                   end;
               end;
@@ -1290,6 +1341,7 @@ begin
         else  // case
           Break;
         end;
+
       end;
 
     if NotifyRegistered then
@@ -1313,13 +1365,12 @@ begin
 
   inherited Create(AOwner);
 
-  // IMPORTANT: never allocate timers/bitmaps or handles in the constructor,
+  // IMPORTANT: Never allocate timers/bitmaps or handles in the constructor,
   // because IDE palette may instantiate this at install time.
   FBackColor := clBlack;
 
   FAutoStart := False;
   FActive := False;
-
 
   FRestartQueued := 0;
   FInputSource := isLoopback;
@@ -1329,7 +1380,7 @@ begin
 
   FVolumeScaleMode := vsmPerceptual;
   FEnableVolumeSmoothing := True;
-  FVolumeSmoothingMs := 80;
+  FVolumeSmoothingMs := 60;
   FEndpointVol := nil;
   FVolScalarBits := SingleToBits(1.0);
   FMode := amLevelsAndSpectrum;
@@ -1370,7 +1421,9 @@ begin
 
   // dB scale overlay
   FShowDbScale := True;
-  FDbMin := -60.0;
+  FInputTrimDb := 12.0;
+  FDbTop := 6.0;
+  FDbMin := -45.0;
   FDbTickStep := 6;
   FDbLabelStep := 12;
   FDbScaleWidth := 44;
@@ -1378,8 +1431,10 @@ begin
   FillChar(FLevelsBits,
            SizeOf(FLevelsBits),
            0);
+
   SetLength(FSpectrumBits,
             0);
+
   SetLength(FMonoRing,
             0);
 
@@ -1406,7 +1461,6 @@ begin
   FStopEvent := 0;
   FBack := nil;
   FTimer := nil;
-
 end;
 
 
@@ -1433,6 +1487,7 @@ end;
 
 procedure TMfAudioMixVisualizer.Reset();
 begin
+
   FTimer.Enabled := False;
   Paint();
   ClearVisualState();  // Our existing internal reset logic.
@@ -1459,7 +1514,7 @@ begin
   FChannels := AChannels;
   FIsFloat := AIsFloat;
 
-  // reset smoothing coeffs to force recompute on next push
+  // Reset smoothing coeffs to force recompute on next push
   FExtAttackA := 0;
   FExtReleaseA := 0;
   FExtLastDispatchTick := GetTickCount();
@@ -1495,16 +1550,6 @@ var
   im: TArray<Single>;
   mags: TArray<Single>;
   bars: TArray<Single>;
-  k,
-  bar: Integer;
-  idxStart,
-  idxEnd: Integer;
-  maxMag,
-  v: Single;
-  t0,
-  t1: Double;
-  acc: Single;
-  cnt: Integer;
 
   // mono push
   tmpMono: TArray<Single>;
@@ -1616,10 +1661,10 @@ var
       end;
   end;
 
-  procedure PublishLevels(const pL,
-                          pR,
-                          rL,
-                          rR: Single);
+  procedure PublishExternalLevels(const pL,
+                                  pR,
+                                  rL,
+                                  rR: Single);
   var
     peakDbL,
     peakDbR,
@@ -1633,39 +1678,98 @@ var
     peakDbR := 20 * Log10(Max(EPS_AMP,
                               pR));
     rmsDbL  := 20 * Log10(Max(EPS_AMP,
-                          rL));
+                              rL));
     rmsDbR  := 20 * Log10(Max(EPS_AMP,
-                          rR));
+                              rR));
 
     InterlockedExchange(FLevelsBits[0],
-    SingleToBits(pL));
+                        SingleToBits(pL));
     InterlockedExchange(FLevelsBits[1],
-    SingleToBits(pR));
+                        SingleToBits(pR));
     InterlockedExchange(FLevelsBits[2],
-    SingleToBits(rL));
+                        SingleToBits(rL));
     InterlockedExchange(FLevelsBits[3],
-    SingleToBits(rR));
+                        SingleToBits(rR));
     InterlockedExchange(FLevelsBits[4],
-    SingleToBits(peakDbL));
+                        SingleToBits(peakDbL));
     InterlockedExchange(FLevelsBits[5],
-    SingleToBits(peakDbR));
+                        SingleToBits(peakDbR));
     InterlockedExchange(FLevelsBits[6],
-    SingleToBits(rmsDbL));
+                        SingleToBits(rmsDbL));
     InterlockedExchange(FLevelsBits[7],
-    SingleToBits(rmsDbR));
+                        SingleToBits(rmsDbR));
+
+    // Mark fresh data for idle-reset logic.
+    InterlockedExchange(FLastDataTick,
+                        Integer(GetTickCount));
+
+    // Clip latch (same behavior as loopback path).
+    if (pL >= FClipThreshold) then
+      InterlockedExchange(FClipUntilL,
+                          Integer(GetTickCount) + FClipHoldMs);
+
+    if (pR >= FClipThreshold) then
+      InterlockedExchange(FClipUntilR,
+                          Integer(GetTickCount) + FClipHoldMs);
+
+    if (pL >= FClipThreshold) or (pR >= FClipThreshold) then
+      InterlockedExchange(FClipUntilAny,
+                          Integer(GetTickCount) + FClipHoldMs);
   end;
 
-  procedure PublishSpectrum(const BarsLocal: TArray<Single>);
+  procedure PublishExternalSpectrum(const BarsLocal: TArray<Single>);
+  const
+    // How to tune:
+    // More punch / faster bar rise:
+    //   Increase SPEC_ATTACK_ALPHA to 0.65..0.75
+    // Longer trailing decay:
+    //   Reduce SPEC_RELEASE_ALPHA to 0.10..0.14
+    // More aggressive snap-to-zero:
+    //   Raise SPEC_ZERO_SNAP to 0.005..0.01
+    //
+    SPEC_ATTACK_ALPHA  = 0.70;  // higher = faster rise
+    SPEC_RELEASE_ALPHA = 0.18;  // lower = slower fall
+    SPEC_ZERO_SNAP     = 0.009; // tiny residuals -> hard zero
+
   var
     ii,
     fi: Integer;
+    prev,
+    target,
+    outv: Single;
 
   begin
 
-     fi := Min(Length(BarsLocal), Length(FSpectrumBits));
-     for ii := 0 to fi - 1 do
-       InterlockedExchange(FSpectrumBits[ii],
-                           SingleToBits(BarsLocal[ii]));
+    fi := Min(Length(BarsLocal),
+              Length(FSpectrumBits));
+
+    for ii := 0 to fi - 1 do
+      begin
+
+        prev := BitsToSingle(
+                  InterlockedCompareExchange(FSpectrumBits[ii],
+                                             0,
+                                             0));
+
+        prev := EnsureRange(prev,
+                            0.0,
+                            1.0);
+
+        target := EnsureRange(BarsLocal[ii],
+                              0.0,
+                              1.0);
+
+        if (target > prev) then
+          outv := prev + (target - prev) * SPEC_ATTACK_ALPHA
+        else
+          outv := prev + (target - prev) * SPEC_RELEASE_ALPHA;
+
+        if (outv < SPEC_ZERO_SNAP) then
+          outv := 0.0;
+
+        InterlockedExchange(FSpectrumBits[ii],
+                            SingleToBits(outv));
+      end;
   end;
 
 begin
@@ -1698,13 +1802,13 @@ begin
   for i := 0 to Frames - 1 do
     begin
 
-      a := pData^;
+      a := ClampVizSample(pData^ * DbToGain(FInputTrimDb));
       Inc(pData);
 
       if (FChannels > 1) then
         begin
 
-          b := pData^;
+          b := ClampVizSample(pData^ * DbToGain(FInputTrimDb));
           Inc(pData);
         end
       else
@@ -1765,10 +1869,10 @@ begin
   if ShouldDispatch() then
     begin
 
-      PublishLevels(FSmPeakL,
-                    FSmPeakR,
-                    FSmRmsL,
-                    FSmRmsR);
+      PublishExternalLevels(FSmPeakL,
+                            FSmPeakR,
+                            FSmRmsL,
+                            FSmRmsR);
 
       if needSpectrum then
         begin
@@ -1782,63 +1886,17 @@ begin
           SetLength(mags, fftN div 2);
           SetLength(bars, barCount);
 
-          ReadRingLatest(monoBlock);
+          try
 
-          for i := 0 to fftN - 1 do
-            begin
-
-              re[i] := monoBlock[i];
-              im[i] := 0;
-            end;
-
-          TSimpleFFT.HannWindow(re);
-          TSimpleFFT.FFT(re, im);
-
-          maxMag := 1e-9;
-          for k := 1 to (fftN div 2) - 1 do
-            begin
-
-              v := Sqrt(re[k] * re[k] + im[k] * im[k]);
-              mags[k] := v;
-              if (v > maxMag) then
-                maxMag := v;
-            end;
-
-          for bar := 0 to barCount - 1 do
-            begin
-
-              t0 := bar / barCount;
-              t1 := (bar + 1) / barCount;
-
-              idxStart := 1 + Trunc((Power(fftN div 2, t0) - 1));
-              idxEnd   := 1 + Trunc((Power(fftN div 2, t1) - 1));
-
-              if (idxEnd <= idxStart) then
-                idxEnd := idxStart + 1;
-
-              if (idxEnd >= (fftN div 2)) then
-                idxEnd := (fftN div 2) - 1;
-
-              acc := 0;
-              cnt := 0;
-
-              for k := idxStart to idxEnd do
-                begin
-
-                  acc := acc + mags[k];
-                  Inc(cnt);
-                end;
-
-              if (cnt > 0) then
-                acc := acc / cnt;
-
-              acc := acc / maxMag;
-              acc := Sqrt(Max(0, Min(1, acc)));
-
-              bars[bar] := acc;
-            end;
-
-          PublishSpectrum(bars);
+            ReadRingLatest(monoBlock);
+            BuildSpectrumBars(monoBlock,
+                              bars);
+            PublishExternalSpectrum(bars);
+          except
+            on E: Exception do
+              OutputDebugString(PChar('MfAudioMixVisualizer external spectrum exception: ' +
+                                      E.ClassName + ': ' + E.Message));
+          end;
         end;
     end;
 end;
@@ -1914,12 +1972,10 @@ var
       Result := False;
   end;
 
-  procedure PublishLevelsOnly(const pL,
-                              pR,
+  procedure PublishExternalLevelsOnly(const pL,
+                                      pR,
                               rL,
                               rR: Single);
-  const
-    EPS = 1e-12;
   var
     peakDbL,
     peakDbR,
@@ -1927,8 +1983,9 @@ var
     rmsDbR: Single;
 
   begin
+
     peakDbL := 20 * Log10(Max(EPS_AMP,
-                          pL));
+                              pL));
     peakDbR := 20 * Log10(Max(EPS_AMP,
                               pR));
     rmsDbL  := 20 * Log10(Max(EPS_AMP,
@@ -1952,6 +2009,23 @@ var
                         SingleToBits(rmsDbL));
     InterlockedExchange(FLevelsBits[7],
                         SingleToBits(rmsDbR));
+
+    // Mark fresh data for idle-reset logic.
+    InterlockedExchange(FLastDataTick,
+                        Integer(GetTickCount));
+
+    // Clip latch.
+    if (pL >= FClipThreshold) then
+      InterlockedExchange(FClipUntilL,
+                          Integer(GetTickCount) + FClipHoldMs);
+
+    if (pR >= FClipThreshold) then
+      InterlockedExchange(FClipUntilR,
+                          Integer(GetTickCount) + FClipHoldMs);
+
+    if (pL >= FClipThreshold) or (pR >= FClipThreshold) then
+      InterlockedExchange(FClipUntilAny,
+                          Integer(GetTickCount) + FClipHoldMs);
   end;
 
   procedure PushMonoToRing(const X: TArray<Single>);
@@ -2074,7 +2148,7 @@ begin
     PushMonoToRing(tmpMono);
 
   if ShouldDispatch() then
-    PublishLevelsOnly(FSmPeakL, FSmPeakR, FSmRmsL, FSmRmsR);
+    PublishExternalLevelsOnly(FSmPeakL, FSmPeakR, FSmRmsL, FSmRmsR);
 end;
 
 
@@ -2122,12 +2196,17 @@ end;
 
 
 procedure TMfAudioMixVisualizer.TimerTick(Sender: TObject);
+const
+  VIS_IDLE_RESET_MS = 200;
+
 var
   Muted: INT;
   MasterVol: Single;
   TargetVol: Single;
   CurVol: Single;
   Alpha: Single;
+  LastTick: DWORD;
+  NowTick: DWORD;
 
 begin
 
@@ -2146,20 +2225,21 @@ begin
         MasterVol := 1.0;
 
         if Succeeded(FEndpointVol.GetMute(Muted)) and
-          Succeeded(FEndpointVol.GetMasterVolumeLevelScalar(MasterVol)) then
-            begin
+           Succeeded(FEndpointVol.GetMasterVolumeLevelScalar(MasterVol)) then
+          begin
 
-              if (Muted <> 0) then
-                MasterVol := 0.0;
+            if (Muted <> 0) then
+              MasterVol := 0.0;
 
-              TargetVol := EnsureRange(MasterVol,
-                                       0.0,
-                                       1.0);
-            end;
+            TargetVol := EnsureRange(MasterVol,
+                                     0.0,
+                                     1.0);
+          end;
       except
+
         TargetVol := 1.0;
       end;
-  end;
+    end;
 
   // Optional smoothing so dragging the Windows slider doesn't cause hard jumps.
   if FEnableVolumeSmoothing and (FVolumeSmoothingMs > 0) then
@@ -2172,7 +2252,6 @@ begin
                             0.0,
                             1.0);
 
-      // Simple first-order smoothing. Alpha depends on timer interval and time constant.
       Alpha := EnsureRange(FTimer.Interval / Max(1,
                                                  FVolumeSmoothingMs),
                            0.0,
@@ -2186,6 +2265,15 @@ begin
   else
     InterlockedExchange(FVolScalarBits,
                         SingleToBits(TargetVol));
+
+  // Auto-reset visual state if no fresh audio data arrived recently.
+  LastTick := DWORD(InterlockedCompareExchange(FLastDataTick,
+                                               0,
+                                               0));
+  NowTick := GetTickCount;
+
+  if (LastTick <> 0) and (DWORD(NowTick - LastTick) > VIS_IDLE_RESET_MS) then
+    ClearVisualState();
 
   Invalidate();
 end;
@@ -2245,6 +2333,122 @@ begin
 end;
 
 
+
+
+function TMfAudioMixVisualizer.DbToDisplayFrac(const ADb,
+                                               ADbMin,
+                                               ADbTop: Single): Single;
+var
+  DbClamped: Single;
+
+begin
+
+  if (ADbTop <= ADbMin + 0.001) then
+    Exit(0.0);
+
+  DbClamped := EnsureRange(ADb,
+                           ADbMin,
+                           ADbTop);
+
+  Result := (DbClamped - ADbMin) / (ADbTop - ADbMin);
+end;
+
+
+procedure TMfAudioMixVisualizer.BuildSpectrumBars(const MonoBlock: TArray<Single>;
+                                                  out Bars: TArray<Single>);
+const
+  EPS_AMP = 1.0e-12;
+  HANN_COHERENT_GAIN = 0.5;
+
+var
+  fftN: Integer;
+  barCount: Integer;
+  re: TArray<Single>;
+  im: TArray<Single>;
+  magsDb: TArray<Single>;
+  i: Integer;
+  k: Integer;
+  bar: Integer;
+  t0: Double;
+  t1: Double;
+  idxStart: Integer;
+  idxEnd: Integer;
+  v: Double;
+  PeakDb: Single;
+
+begin
+
+  fftN := FFftSize;
+  barCount := FBarCount;
+
+  SetLength(Bars, barCount);
+  if (fftN <= 0) or
+     (barCount <= 0) or
+     (Length(MonoBlock) < fftN) then
+    Exit;
+
+  SetLength(re,
+            fftN);
+  SetLength(im,
+            fftN);
+  SetLength(magsDb,
+            fftN div 2);
+
+  for i := 0 to fftN - 1 do
+    begin
+
+      re[i] := MonoBlock[i];
+      im[i] := 0.0;
+    end;
+
+  TSimpleFFT.HannWindow(re);
+  TSimpleFFT.FFT(re,
+                 im);
+
+  magsDb[0] := FDbMin;
+
+  for k := 1 to (fftN div 2) - 1 do
+    begin
+
+      v := Sqrt((re[k] * re[k]) + (im[k] * im[k]));
+
+      v := (2.0 * v) / fftN;
+      v := v / HANN_COHERENT_GAIN;
+
+      if (v > EPS_AMP) then
+        magsDb[k] := 20.0 * Log10(v)
+      else
+        magsDb[k] := FDbMin;
+    end;
+
+  for bar := 0 to barCount - 1 do
+    begin
+
+      t0 := bar / barCount;
+      t1 := (bar + 1) / barCount;
+
+      idxStart := 1 + Trunc((Power(fftN div 2, t0) - 1));
+      idxEnd   := 1 + Trunc((Power(fftN div 2, t1) - 1));
+
+      if (idxEnd <= idxStart) then
+        idxEnd := idxStart + 1;
+
+      if (idxEnd >= (fftN div 2)) then
+        idxEnd := (fftN div 2) - 1;
+
+      PeakDb := FDbMin;
+
+      for k := idxStart to idxEnd do
+        if (magsDb[k] > PeakDb) then
+          PeakDb := magsDb[k];
+
+      Bars[bar] := DbToDisplayFrac(PeakDb,
+                                   FDbMin,
+                                   FDbTop);
+    end;
+end;
+
+
 procedure TMfAudioMixVisualizer.SetShowDbScale(Value: Boolean);
 begin
 
@@ -2252,6 +2456,40 @@ begin
     begin
 
       FShowDbScale := Value;
+      Invalidate();
+    end;
+end;
+
+
+procedure TMfAudioMixVisualizer.SetShowMeters(Value: Boolean);
+begin
+
+  if (FShowMeters <> Value) then
+    begin
+
+      FShowMeters := Value;
+      Invalidate();
+    end;
+  
+end;
+
+
+procedure TMfAudioMixVisualizer.SetDbTop(Value: Single);
+begin
+
+  Value := EnsureRange(Value,
+                       -12.0,
+                       24.0);
+
+  if (Value <= FDbMin + 0.1) then
+    Value := FDbMin + 0.1;
+
+  if not SameValue(FDbTop,
+                   Value,
+                   1E-6) then
+    begin
+
+      FDbTop := Value;
       Invalidate();
     end;
 end;
@@ -2369,6 +2607,18 @@ begin
 end;
 
 
+procedure TMfAudioMixVisualizer.SetDeviceId(const Value: string);
+begin
+
+  if SameText(FDeviceId,
+              Value) then
+    Exit;
+
+  FDeviceId := Trim(Value);
+  RestartIfRunning();
+end;
+
+
 procedure TMfAudioMixVisualizer.Paint();
 var
   R: TRect;
@@ -2430,6 +2680,21 @@ begin
 end;
 
 
+procedure TMfAudioMixVisualizer.SetInputTrimDb(Value: Single);
+begin
+
+  if SameValue(FInputTrimDb,
+               Value,
+               1.0e-4) then
+    Exit;
+
+  FInputTrimDb := EnsureRange(Value,
+                              -24.0,
+                              24.0);
+  Invalidate;
+end;
+
+
 procedure TMfAudioMixVisualizer.ClearVisualState();
 var
   i: Integer;
@@ -2458,6 +2723,16 @@ begin
   FSmRmsR := 0;
   FRingWrite := 0;
   FRingCount := 0;
+
+  InterlockedExchange(FLastDataTick,
+                      0);
+
+  InterlockedExchange(FClipUntilL,
+                      0);
+  InterlockedExchange(FClipUntilR,
+                      0);
+  InterlockedExchange(FClipUntilAny,
+                      0);
 end;
 
 
@@ -2543,11 +2818,13 @@ begin
   // This does NOT affect the audio data used for FFT; it only scales what we display.
   if (FEndpointVol = nil) then
     begin
+
       DevEnum := nil;
       Dev := nil;
 
       // Try to ensure COM on this thread; ignore mode mismatch.
-      hr := CoInitializeEx(nil, COINIT_APARTMENTTHREADED);
+      hr := CoInitializeEx(nil,
+                           COINIT_APARTMENTTHREADED);
       if (hr <> S_OK) and (hr <> S_FALSE) and (hr <> RPC_E_CHANGED_MODE) then
         ; // ignore
 
@@ -2556,11 +2833,18 @@ begin
                              CLSCTX_INPROC_SERVER,
                              IID_IMMDeviceEnumerator,
                              DevEnum);
+
       if Succeeded(hr) then
         begin
-          hr := DevEnum.GetDefaultAudioEndpoint(FDataFlow,
-                                                FRole,
-                                                Dev);
+
+          if (FDeviceId <> '') then
+            hr := DevEnum.GetDevice(PWideChar(WideString(FDeviceId)),
+                                    Dev)
+          else
+            hr := DevEnum.GetDefaultAudioEndpoint(FDataFlow,
+                                                  FRole,
+                                                  Dev);
+
           if Succeeded(hr) then
             begin
               Dev.Activate(IID_IAudioEndpointVolume,
@@ -2732,7 +3016,6 @@ begin
   FRole := Value;
   RestartIfRunning;
 end;
-
 
 
 procedure TMfAudioMixVisualizer.SetVolumeScaleMode(Value: TMfVolumeScaleMode);
@@ -2963,6 +3246,7 @@ begin
   g := GetVolumeVisualGain();
   if (g <> 1.0) then
     begin
+
       Result.PeakL := Result.PeakL * g;
       Result.PeakR := Result.PeakR * g;
       Result.RmsL  := Result.RmsL  * g;
@@ -3001,6 +3285,36 @@ procedure TMfAudioMixVisualizer.DrawMeters(ACanvas: TCanvas;
 const
   TOP_M = 8;
   BOT_M = 8;
+  EPS_AMP = 1.0e-12;
+
+var
+  PlotR,
+  ScaleR,
+  PlotArea: TRect;
+  DbMinLocal: Single;
+
+  function AmpToDb(const A: Single): Single; inline;
+  begin
+
+    Result := 20.0 * Log10(Max(A,
+                           EPS_AMP));
+  end;
+
+  function DbToFrac(const Db: Single): Double;
+  var
+    dbClamped: Double;
+
+  begin
+
+    dbClamped := EnsureRange(Db, DbMinLocal, 0.0);
+    Result := (dbClamped - DbMinLocal) / (0.0 - DbMinLocal); // 0..1
+  end;
+
+  function AmpToFrac(const A: Single): Double; inline;
+  begin
+
+    Result := DbToFrac(AmpToDb(A));
+  end;
 
   procedure DrawDbScale(const ScaleR,
                         PlotArea: TRect);
@@ -3011,9 +3325,9 @@ const
     tickLen: Integer;
     lbl: string;
     dbMinInt: Integer;
-    amp: Double;
 
   begin
+
     ACanvas.Brush.Style := bsClear;
     ACanvas.Font.Color := clSilver;
     ACanvas.Pen.Style := psSolid;
@@ -3022,18 +3336,19 @@ const
     axisX := PlotArea.Left - 4;
 
     // Axis line
-    ACanvas.MoveTo(axisX, PlotArea.Top);
-    ACanvas.LineTo(axisX, PlotArea.Bottom);
+    ACanvas.MoveTo(axisX,
+                   PlotArea.Top);
 
-    dbMinInt := Trunc(FDbMin);
+    ACanvas.LineTo(axisX,
+                   PlotArea.Bottom);
+
+    dbMinInt := Trunc(DbMinLocal);
+
     for db := 0 downto dbMinInt do
       if ((Abs(db) mod FDbTickStep) = 0) then
         begin
 
-          amp := Power(10.0,
-                       db / 20.0); // Linear amplitude fraction.
-
-          y := PlotArea.Bottom - Round(amp * RectHeight(PlotArea));
+          y := PlotArea.Bottom - Round(DbToFrac(db) * RectHeight(PlotArea));
 
           if ((Abs(db) mod FDbLabelStep) = 0) or (db = 0) then
             tickLen := 8
@@ -3047,17 +3362,12 @@ const
             begin
 
               lbl := IntToStr(db);
-              ACanvas.TextOut(ScaleR.Left + 2, y - (ACanvas.TextHeight('0') div 2), lbl);
+              ACanvas.TextOut(ScaleR.Left + 2,
+                              y - (ACanvas.TextHeight('0') div 2),
+                              lbl);
             end;
-      end;
+        end;
   end;
-
-
-var
-  PlotR,
-  ScaleR,
-  PlotArea: TRect;
-
 
   function BarRect(const idx,
                    total: Integer): TRect;
@@ -3070,14 +3380,14 @@ var
   begin
 
     w := RectWidth(PlotR);
-    gap := Max(4,
-               w div 80);
+    gap := Max(4, w div 80);
 
     bw := (w - gap * (total + 1)) div total;
-
     if (bw < 10) then
       bw := 10;
+
     x0 := PlotR.Left + gap + idx * (bw + gap);
+
     Result := Rect(x0,
                    PlotR.Top + TOP_M,
                    x0 + bw,
@@ -3106,6 +3416,7 @@ var
     ACanvas.Rectangle(BR);
 
     h := RectHeight(BR) - 2;
+
     yLevel := BR.Bottom - 1 - Round(h * EnsureRange(level,
                                                     0,
                                                     1));
@@ -3150,8 +3461,10 @@ var
                                                       0,
                                                       1));
         ACanvas.Pen.Color := FRmsColor;
+
         ACanvas.MoveTo(BR.Left + 1,
                        yRms);
+
         ACanvas.LineTo(BR.Right - 1,
                        yRms);
       end;
@@ -3159,14 +3472,17 @@ var
     if showHold then
       begin
 
-        yHold := BR.Bottom - 1 - Round(h * EnsureRange(hold,
-                                       0,
-                                       1));
+       yHold := BR.Bottom - 1 - Round(h * EnsureRange(hold,
+                                                      0,
+                                                      1));
         ACanvas.Pen.Color := clWhite;
-        ACanvas.MoveTo(BR.Left + 1, yHold);
-        ACanvas.LineTo(BR.Right - 1, yHold);
-      end;
 
+        ACanvas.MoveTo(BR.Left + 1,
+                       yHold);
+
+        ACanvas.LineTo(BR.Right - 1,
+                       yHold);
+      end;
   end;
 
   procedure DrawClipLedSquare(const LedR: TRect;
@@ -3188,21 +3504,19 @@ var
       begin
 
         ACanvas.Brush.Style := bsClear;
+
         if Active then
           ACanvas.Font.Color := clWhite
         else
           ACanvas.Font.Color := clSilver;
 
         ACanvas.TextOut(LedR.Right + 4,
-                        LedR.Top - 1,
-                        'CLIP');
+                        LedR.Top - 1, 'CLIP');
       end;
   end;
 
-
 var
   L: TMfLevels;
-  gain: Single;
   brL,
   brR: TRect;
   levL,
@@ -3213,85 +3527,142 @@ var
   holdR: Single;
 
 begin
+
+  DbMinLocal := FDbMin;
+
   PlotR := R;
+
   if FShowDbScale then
     PlotR.Left := PlotR.Left + FDbScaleWidth;
 
-  ScaleR := Rect(R.Left, R.Top, PlotR.Left, R.Bottom);
-  PlotArea := Rect(PlotR.Left, R.Top + TOP_M, PlotR.Right, R.Bottom - BOT_M);
+  ScaleR := Rect(R.Left,
+                 R.Top,
+                 PlotR.Left,
+                 R.Bottom);
+
+  PlotArea := Rect(PlotR.Left,
+                   R.Top + TOP_M,
+                   PlotR.Right,
+                   R.Bottom - BOT_M);
 
   if FShowDbScale then
-    DrawDbScale(ScaleR, PlotArea);
+    DrawDbScale(ScaleR,
+                PlotArea);
 
   L := Levels;
 
-  gain := GetVolumeVisualGain();
+  levL := AmpToFrac(EnsureRange(L.PeakL,
+                                0,
+                                1));
+  levR := AmpToFrac(EnsureRange(L.PeakR,
+                                0,
+                                1));
+  rmsL := AmpToFrac(EnsureRange(L.RmsL,
+                                0,
+                                1));
+  rmsR := AmpToFrac(EnsureRange(L.RmsR,
+                                0,
+                                1));
+  holdL := AmpToFrac(EnsureRange(FHoldL,
+                                 0,
+                                 1));
+  holdR := AmpToFrac(EnsureRange(FHoldR,
+                                 0,
+                                 1));
 
-  levL := EnsureRange(L.PeakL * gain, 0, 1);
-  levR := EnsureRange(L.PeakR * gain, 0, 1);
-  rmsL := EnsureRange(L.RmsL * gain, 0, 1);
-  rmsR := EnsureRange(L.RmsR * gain, 0, 1);
+  brL := BarRect(0,
+                 2);
 
-  holdL := EnsureRange(FHoldL * gain, 0, 1);
-  holdR := EnsureRange(FHoldR * gain, 0, 1);
+  brR := BarRect(1,
+                 2);
 
-  brL := BarRect(0, 2);
-  brR := BarRect(1, 2);
+  DrawBar(brL,
+          levL,
+          rmsL,
+          holdL,
+          FShowRms,
+          FShowPeakHold);
 
-  DrawBar(brL, levL, rmsL, holdL, FShowRms, FShowPeakHold);
-  DrawBar(brR, levR, rmsR, holdR, FShowRms, FShowPeakHold);
+  DrawBar(brR,
+          levR,
+          rmsR,
+          holdR,
+          FShowRms,
+          FShowPeakHold);
 
-if FShowClipIndicator then
-begin
-  // Latch deadlines are stored as tick counts (GetTickCount + hold).
-  if (FClipIndicatorMode = cimPerChannel) then
-  begin
-    DrawClipLedSquare(Rect(brL.Right - 14, brL.Top + 2, brL.Right - 2, brL.Top + 14),
-                      GetTickCount < Cardinal(InterlockedCompareExchange(FClipUntilL, 0, 0)),
-                      False);
+  if FShowClipIndicator then
+    begin
 
-    DrawClipLedSquare(Rect(brR.Right - 14, brR.Top + 2, brR.Right - 2, brR.Top + 14),
-                      GetTickCount < Cardinal(InterlockedCompareExchange(FClipUntilR, 0, 0)),
-                      False);
-  end
-  else
-  begin
-    // Single global CLIP LED (always shows label).
-    DrawClipLedSquare(Rect(PlotR.Right - 14, PlotR.Top + 2, PlotR.Right - 2, PlotR.Top + 14),
-                      GetTickCount < Cardinal(InterlockedCompareExchange(FClipUntilAny, 0, 0)),
-                      True);
-  end;
-end;
+      // Latch deadlines are stored as tick counts (GetTickCount + hold).
+      if (FClipIndicatorMode = cimPerChannel) then
+        begin
 
+          DrawClipLedSquare(Rect(brL.Right - 14,
+                                 brL.Top + 2,
+                                 brL.Right - 2,
+                                 brL.Top + 14),
+                                 GetTickCount < Cardinal(InterlockedCompareExchange(FClipUntilL,
+                                                                                    0,
+                                                                                    0)),
+                                                                                    False);
+
+          DrawClipLedSquare(Rect(brR.Right - 14,
+                                 brR.Top + 2,
+                                 brR.Right - 2,
+                                 brR.Top + 14),
+                                 GetTickCount < Cardinal(InterlockedCompareExchange(FClipUntilR,
+                                                                                    0,
+                                                                                    0)),
+                                                                                    False);
+        end
+      else
+        begin
+
+          // Single global CLIP LED (always shows label).
+          DrawClipLedSquare(Rect(PlotR.Right - 14,
+                                 PlotR.Top + 2,
+                                 PlotR.Right - 2,
+                                 PlotR.Top + 14),
+                                 GetTickCount < Cardinal(InterlockedCompareExchange(FClipUntilAny,
+                                                                                    0,
+                                                                                    0)),
+                                                                                    True);
+        end;
+    end;
 
   // Header
-  ACanvas.Brush.Style := bsClear;
-  ACanvas.Font.Color := clSilver;
-  ACanvas.TextOut(PlotR.Left + 8,
-                  R.Top + 8,
-                  Format('Meters  SR=%d  Ch=%d',
-                         [FSampleRate, FChannels]));
+  if FShowMeters then
+    begin
+
+      ACanvas.Brush.Style := bsClear;
+      ACanvas.Font.Color := clSilver;
+      ACanvas.TextOut(PlotR.Left + 8,
+                      R.Top + 8,
+                      Format('Meters  SR=%d  Ch=%d',
+                             [FSampleRate,
+                             FChannels]));
+    end;
+
 end;
 
 
 
 procedure TMfAudioMixVisualizer.DrawSpectrum(ACanvas: TCanvas;
-                                          const R: TRect);
+                                             const R: TRect);
 
 const
   TOP_M = 8;
   BOT_M = 8;
-  EPS_AMP = 1.0e-12;
 
-  function DbToFrac(const Db: Single): Double;
-  var
-    dbClamped: Double;
-  begin
-    dbClamped := EnsureRange(Db, FDbMin, 0.0);
-    Result := (dbClamped - FDbMin) / (0.0 - FDbMin); // 0..1
-  end;
+var
+  PlotR,
+  ScaleR,
+  PlotArea: TRect;
+  DbMinLocal: Single;
+  DbTopLocal: Single;
 
-  procedure DrawDbScale(const ScaleR, PlotArea: TRect);
+  procedure DrawDbScale(const ScaleR,
+                        PlotArea: TRect);
   var
     db: Integer;
     axisX: Integer;
@@ -3299,28 +3670,33 @@ const
     tickLen: Integer;
     lbl: string;
     dbMinInt: Integer;
+    dbTopInt: Integer;
+
   begin
+
     ACanvas.Brush.Style := bsClear;
     ACanvas.Font.Color := clSilver;
     ACanvas.Pen.Style := psSolid;
     ACanvas.Pen.Color := clGray;
 
     axisX := PlotArea.Left - 4;
+    ACanvas.MoveTo(axisX,
+                   PlotArea.Top);
+    ACanvas.LineTo(axisX,
+                   PlotArea.Bottom);
 
-    // Axis line
-    ACanvas.MoveTo(axisX, PlotArea.Top);
-    ACanvas.LineTo(axisX, PlotArea.Bottom);
+    dbMinInt := Floor(DbMinLocal);
+    dbTopInt := Ceil(DbTopLocal);
 
-    dbMinInt := Trunc(FDbMin);
-    for db := 0 downto dbMinInt do
-      if ((Abs(db) mod FDbTickStep) = 0) then
+    for db := dbTopInt downto dbMinInt do
+      if (((Abs(db) mod FDbTickStep) = 0) or (db = dbTopInt)) then
         begin
 
-          // Convert dB tick to linear amplitude fraction (0..1), so scale matches current bar mapping.
-          y := PlotArea.Bottom - Round(Power(10.0,
-                                       db / 20.0) * RectHeight(PlotArea));
+          y := PlotArea.Bottom - Round(DbToDisplayFrac(db,
+                                                       DbMinLocal,
+                                                       DbTopLocal) * RectHeight(PlotArea));
 
-          if ((Abs(db) mod FDbLabelStep) = 0) or (db = 0) then
+          if (((Abs(db) mod FDbLabelStep) = 0) or (db = 0) or (db = dbTopInt)) then
             tickLen := 8
           else
             tickLen := 5;
@@ -3330,10 +3706,14 @@ const
           ACanvas.LineTo(axisX,
                          y);
 
-          if ((Abs(db) mod FDbLabelStep) = 0) or (db = 0) then
+          if (((Abs(db) mod FDbLabelStep) = 0) or (db = 0) or (db = dbTopInt)) then
             begin
 
-              lbl := IntToStr(db);
+              if (db > 0) then
+                lbl := '+' + IntToStr(db)
+              else
+                lbl := IntToStr(db);
+
               ACanvas.TextOut(ScaleR.Left + 2,
                               y - (ACanvas.TextHeight('0') div 2),
                               lbl);
@@ -3354,16 +3734,18 @@ var
   BR: TRect;
   capR: TRect;
   capH: Integer;
-  PlotR,
-  ScaleR,
-  PlotArea: TRect;
+  PeakThresholdFrac: Single;
 
 begin
+
+  DbMinLocal := FDbMin;
+  DbTopLocal := FDbTop;
 
   S := Spectrum;
   n := Length(S);
 
   PlotR := R;
+
   if FShowDbScale then
     PlotR.Left := PlotR.Left + FDbScaleWidth;
 
@@ -3379,9 +3761,8 @@ begin
 
   if (n = 0) then
     begin
-
       ACanvas.Brush.Style := bsClear;
-      ACanvas.Font.Color := clGrayText;
+      ACanvas.Font.Color := clRed;
       ACanvas.TextOut(PlotR.Left + 8,
                       R.Top + 8,
                       'Spectrum: No data (Active = False?)');
@@ -3401,13 +3782,17 @@ begin
   h := RectHeight(PlotArea);
   x := PlotArea.Left + gap;
 
+  PeakThresholdFrac := DbToDisplayFrac(20.0 * Log10(Max(FPeakThreshold,
+                                                        1.0e-12)),
+                                       DbMinLocal,
+                                       DbTopLocal);
+
   ACanvas.Pen.Style := psClear;
   ACanvas.Brush.Style := bsSolid;
   ACanvas.Brush.Color := FBarColor;
 
   for i := 0 to n - 1 do
     begin
-
       level := EnsureRange(S[i],
                            0,
                            1);
@@ -3420,10 +3805,8 @@ begin
 
       ACanvas.Rectangle(BR);
 
-      // Peak cap.
-      if (level >= FPeakThreshold) then
+      if (level >= PeakThresholdFrac) then
         begin
-
           capH := Round(h * EnsureRange(FPeakCapFrac,
                                         0,
                                         1));
@@ -3431,10 +3814,10 @@ begin
             capH := 2;
 
           capR := BR;
-           capR.Bottom := Min(BR.Bottom,
-                              BR.Top + capH);
+          capR.Bottom := Min(BR.Bottom,
+                             BR.Top + capH);
 
-           ACanvas.Brush.Color := FPeakColor;
+          ACanvas.Brush.Color := FPeakColor;
           ACanvas.Rectangle(capR);
           ACanvas.Brush.Color := FBarColor;
         end;
@@ -3442,15 +3825,18 @@ begin
       x := x + bw + gap;
     end;
 
-  ACanvas.Pen.Style := psSolid;
-  ACanvas.Brush.Style := bsClear;
-  ACanvas.Font.Color := clSilver;
+  if FShowMeters then
+    begin
 
-  ACanvas.TextOut(PlotR.Left + 8,
-                  R.Top + 8,
-
-  Format('Spectrum  Sample Rate=%d  FFT=%d',
-         [FSampleRate, FFftSize]));
+      ACanvas.Pen.Style := psSolid;
+      ACanvas.Brush.Style := bsClear;
+      ACanvas.Font.Color := clSilver;
+      ACanvas.TextOut(PlotR.Left + 8,
+                      R.Top + 8,
+                      Format('Spectrum  Sample Rate=%d  FFT=%d',
+                             [FSampleRate,
+                              FFftSize]));
+    end;
 end;
 
 end.

@@ -1,16 +1,20 @@
 object frmMain: TfrmMain
   Left = 0
   Top = 0
+  Margins.Left = 5
+  Margins.Top = 5
+  Margins.Right = 5
+  Margins.Bottom = 5
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'XAudio2 Player  Sample 3'
-  ClientHeight = 415
-  ClientWidth = 390
+  ClientHeight = 623
+  ClientWidth = 585
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -17
   Font.Name = 'Tahoma'
   Font.Style = []
   KeyPreview = True
@@ -19,87 +23,112 @@ object frmMain: TfrmMain
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnKeyUp = FormKeyUp
-  TextHeight = 13
+  PixelsPerInch = 144
+  TextHeight = 21
   object lblDuration: TLabel
-    Left = 7
-    Top = 268
-    Width = 104
-    Height = 13
+    Left = 11
+    Top = 402
+    Width = 156
+    Height = 20
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     AutoSize = False
     Caption = 'Duration: 00:00:00'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
+    Font.Height = -17
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentFont = False
   end
   object lblProcessed: TLabel
-    Left = 9
-    Top = 306
-    Width = 114
-    Height = 14
+    Left = 14
+    Top = 459
+    Width = 171
+    Height = 21
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     AutoSize = False
     Caption = 'Samples: 0'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
+    Font.Height = -17
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentFont = False
   end
   object lblPlayed: TLabel
-    Left = 18
-    Top = 287
-    Width = 94
-    Height = 14
+    Left = 27
+    Top = 431
+    Width = 141
+    Height = 21
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     AutoSize = False
     Caption = 'Played: 00:00:00'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
+    Font.Height = -17
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentFont = False
   end
   object lblBarPositionInSamples: TLabel
-    Left = 165
-    Top = 286
-    Width = 142
-    Height = 13
+    Left = 248
+    Top = 429
+    Width = 213
+    Height = 20
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     AutoSize = False
     Caption = 'Sample Position: 0'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clGrayText
-    Font.Height = -11
+    Font.Height = -17
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentFont = False
   end
   object lblBarPositionInSTime: TLabel
-    Left = 167
-    Top = 306
-    Width = 143
-    Height = 14
+    Left = 251
+    Top = 459
+    Width = 214
+    Height = 21
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     AutoSize = False
     Caption = 'Timing Position: 00:00:00'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clGrayText
-    Font.Height = -11
+    Font.Height = -17
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentFont = False
   end
   object butPlayPause: TButton
-    Left = 7
-    Top = 350
-    Width = 71
-    Height = 24
+    Left = 11
+    Top = 525
+    Width = 106
+    Height = 36
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Caption = 'Play'
     Enabled = False
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
+    Font.Height = -17
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentFont = False
@@ -107,15 +136,19 @@ object frmMain: TfrmMain
     OnClick = butPlayPauseClick
   end
   object butStop: TButton
-    Left = 84
-    Top = 350
-    Width = 71
-    Height = 24
+    Left = 126
+    Top = 525
+    Width = 107
+    Height = 36
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Caption = 'Stop'
     Enabled = False
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
+    Font.Height = -17
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentFont = False
@@ -123,10 +156,14 @@ object frmMain: TfrmMain
     OnClick = butStopClick
   end
   object pbProgress: TProgressBar
-    Left = 8
-    Top = 327
-    Width = 374
-    Height = 17
+    Left = 12
+    Top = 491
+    Width = 561
+    Height = 25
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Enabled = False
     ParentShowHint = False
     Smooth = True
@@ -139,180 +176,245 @@ object frmMain: TfrmMain
   object pnlControls: TPanel
     Left = 0
     Top = 0
-    Width = 390
-    Height = 260
+    Width = 585
+    Height = 390
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Align = alTop
     Enabled = False
     TabOrder = 3
-    ExplicitWidth = 384
     object Bevel5: TBevel
-      Left = 194
-      Top = 30
-      Width = 179
-      Height = 99
+      Left = 291
+      Top = 45
+      Width = 269
+      Height = 149
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
     end
     object Bevel1: TBevel
-      Left = 194
-      Top = 133
-      Width = 179
-      Height = 93
+      Left = 291
+      Top = 200
+      Width = 269
+      Height = 139
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
     end
     object Bevel4: TBevel
-      Left = 133
-      Top = 30
-      Width = 58
-      Height = 224
+      Left = 200
+      Top = 45
+      Width = 87
+      Height = 336
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
     end
     object Bevel3: TBevel
-      Left = 8
-      Top = 30
-      Width = 58
-      Height = 224
+      Left = 12
+      Top = 45
+      Width = 87
+      Height = 336
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
     end
     object Bevel2: TBevel
-      Left = 70
-      Top = 30
-      Width = 59
-      Height = 224
+      Left = 105
+      Top = 45
+      Width = 89
+      Height = 336
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
     end
     object pmRight: TMfPeakMeter
-      Left = 79
-      Top = 57
-      Width = 8
-      Height = 165
+      Left = 119
+      Top = 86
+      Width = 12
+      Height = 247
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       BackGroundColor = clAppWorkSpace
       BarColor = clAqua
       Direction = pdVertical
       SampleChannel = mcRight
-      DeviceRole = eConsole
       Precision = 1
     end
     object pmLeft: TMfPeakMeter
-      Left = 50
-      Top = 57
-      Width = 8
-      Height = 165
+      Left = 75
+      Top = 86
+      Width = 12
+      Height = 247
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       BackGroundColor = clAppWorkSpace
       BarColor = clAqua
       Direction = pdVertical
       SampleChannel = mcLeft
-      DeviceRole = eConsole
       Precision = 10
     end
     object Label1: TLabel
-      Left = 29
-      Top = 235
-      Width = 19
-      Height = 13
+      Left = 44
+      Top = 353
+      Width = 28
+      Height = 21
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Caption = 'Left'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = cl3DDkShadow
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
     end
     object Label2: TLabel
-      Left = 87
-      Top = 235
-      Width = 25
-      Height = 13
+      Left = 131
+      Top = 353
+      Width = 39
+      Height = 21
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Caption = 'Right'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = cl3DDkShadow
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
     end
     object Label3: TLabel
-      Left = 146
-      Top = 235
-      Width = 23
-      Height = 13
+      Left = 219
+      Top = 353
+      Width = 36
+      Height = 21
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Caption = 'Pitch'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = cl3DDkShadow
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
     end
     object lblLeftVolume: TLabel
-      Left = 10
-      Top = 38
-      Width = 56
-      Height = 12
+      Left = 15
+      Top = 57
+      Width = 84
+      Height = 18
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Alignment = taCenter
       AutoSize = False
       Caption = '50%'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clGrayText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
     end
     object lblRightVolume: TLabel
-      Left = 71
-      Top = 38
-      Width = 60
-      Height = 12
+      Left = 107
+      Top = 57
+      Width = 90
+      Height = 18
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Alignment = taCenter
       AutoSize = False
       Caption = '50%'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clGrayText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
     end
     object lblPitch: TLabel
-      Left = 138
-      Top = 38
-      Width = 48
-      Height = 12
+      Left = 207
+      Top = 57
+      Width = 72
+      Height = 18
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Alignment = taCenter
       AutoSize = False
       Caption = '0'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clGrayText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
     end
     object Label4: TLabel
-      Left = 267
-      Top = 235
-      Width = 34
-      Height = 13
+      Left = 401
+      Top = 353
+      Width = 51
+      Height = 21
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Caption = 'Effects'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = cl3DDkShadow
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
     end
     object Bevel7: TBevel
-      Left = 8
-      Top = 9
-      Width = 123
-      Height = 23
+      Left = 12
+      Top = 14
+      Width = 185
+      Height = 34
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
     end
     object Label7: TLabel
-      Left = 225
-      Top = 169
-      Width = 61
-      Height = 13
+      Left = 332
+      Top = 254
+      Width = 97
+      Height = 21
       Hint = 'Tuning factor with no specific units (default = 6).'
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Alignment = taRightJustify
       Caption = 'Release time'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
@@ -320,16 +422,20 @@ object frmMain: TfrmMain
       ShowHint = True
     end
     object Label8: TLabel
-      Left = 239
-      Top = 197
-      Width = 47
-      Height = 13
+      Left = 356
+      Top = 296
+      Width = 73
+      Height = 21
       Hint = 'Loudness target (default = 1000).'
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Alignment = taRightJustify
       Caption = 'Threshold'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
@@ -337,37 +443,49 @@ object frmMain: TfrmMain
       ShowHint = True
     end
     object Label9: TLabel
-      Left = 204
-      Top = 38
-      Width = 121
-      Height = 13
+      Left = 306
+      Top = 57
+      Width = 184
+      Height = 21
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Caption = 'Reverb on Main Voice'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentFont = False
     end
     object Label5: TLabel
-      Left = 204
-      Top = 80
-      Width = 133
-      Height = 13
+      Left = 306
+      Top = 120
+      Width = 202
+      Height = 21
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Caption = 'Reverb on Source Voice'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentFont = False
     end
     object trbVolumeR: TTrackBar
-      Left = 87
-      Top = 54
-      Width = 35
-      Height = 175
+      Left = 131
+      Top = 81
+      Width = 52
+      Height = 263
       Hint = 'Press and release SHIFT + ESC to set zero position.'
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       DoubleBuffered = True
       Max = 0
       Min = -224
@@ -378,15 +496,20 @@ object frmMain: TfrmMain
       Position = -112
       ShowHint = True
       TabOrder = 0
+      ThumbLength = 30
       TickMarks = tmBoth
       OnChange = trbVolumeRChange
     end
     object trbVolumeL: TTrackBar
-      Left = 9
-      Top = 56
-      Width = 35
-      Height = 176
+      Left = 14
+      Top = 84
+      Width = 52
+      Height = 264
       Hint = 'Press and release SHIFT + ESC to set zero position.'
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       DoubleBuffered = True
       Max = 0
       Min = -224
@@ -397,19 +520,24 @@ object frmMain: TfrmMain
       Position = -112
       ShowHint = True
       TabOrder = 1
+      ThumbLength = 30
       TickMarks = tmBoth
       OnChange = trbVolumeLChange
     end
     object cbLockVolumeSliders: TCheckBox
-      Left = 13
-      Top = 13
-      Width = 111
-      Height = 15
+      Left = 20
+      Top = 20
+      Width = 166
+      Height = 22
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Caption = 'Lock Volume Sliders'
       Checked = True
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
@@ -417,27 +545,36 @@ object frmMain: TfrmMain
       TabOrder = 2
     end
     object trbPitch: TTrackBar
-      Left = 142
-      Top = 54
-      Width = 41
-      Height = 175
+      Left = 213
+      Top = 81
+      Width = 62
+      Height = 263
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       DoubleBuffered = True
       Max = 50
       Min = -50
       Orientation = trVertical
       ParentDoubleBuffered = False
       TabOrder = 3
+      ThumbLength = 30
       TickMarks = tmBoth
       OnChange = trbPitchChange
     end
     object ckbReverbMain: TComboBox
-      Left = 204
-      Top = 58
-      Width = 123
-      Height = 21
+      Left = 306
+      Top = 87
+      Width = 185
+      Height = 29
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ItemIndex = 0
@@ -449,13 +586,17 @@ object frmMain: TfrmMain
         'None')
     end
     object ckbReverbSource: TComboBox
-      Left = 204
-      Top = 99
-      Width = 123
-      Height = 21
+      Left = 306
+      Top = 149
+      Width = 185
+      Height = 29
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       ItemIndex = 0
@@ -467,14 +608,18 @@ object frmMain: TfrmMain
         'None')
     end
     object CheckBox1: TCheckBox
-      Left = 204
-      Top = 146
-      Width = 176
-      Height = 15
+      Left = 306
+      Top = 219
+      Width = 264
+      Height = 23
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Caption = 'Master limiter'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentFont = False
@@ -482,14 +627,18 @@ object frmMain: TfrmMain
       OnClick = CheckBox1Click
     end
     object spedLimiterReleaseTime: TSpinEdit
-      Left = 292
-      Top = 166
-      Width = 47
-      Height = 22
+      Left = 438
+      Top = 249
+      Width = 71
+      Height = 32
       Hint = 'Tuning factor with no specific units (default = 6).'
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       MaxValue = 20
@@ -501,14 +650,18 @@ object frmMain: TfrmMain
       Value = 6
     end
     object spedLimiterThreshold: TSpinEdit
-      Left = 292
-      Top = 194
-      Width = 47
-      Height = 22
+      Left = 438
+      Top = 291
+      Width = 71
+      Height = 32
       Hint = 'Loudness target (default = 1000).'
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
+      Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = []
       MaxValue = 1800
@@ -522,43 +675,47 @@ object frmMain: TfrmMain
   end
   object stxtStatus: TStaticText
     Left = 0
-    Top = 380
-    Width = 390
-    Height = 18
+    Top = 570
+    Width = 585
+    Height = 27
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Align = alBottom
     AutoSize = False
     BorderStyle = sbsSunken
     Caption = 'Status: Stopped'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clGrayText
-    Font.Height = -11
+    Font.Height = -17
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentFont = False
     TabOrder = 4
     Transparent = False
-    ExplicitTop = 363
-    ExplicitWidth = 384
   end
   object StatusBar: TStaticText
     Left = 0
-    Top = 398
-    Width = 390
-    Height = 17
+    Top = 597
+    Width = 585
+    Height = 26
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Align = alBottom
     AutoSize = False
     BorderStyle = sbsSunken
     Caption = 'Load File'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
+    Font.Height = -17
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentFont = False
     TabOrder = 5
     Transparent = False
-    ExplicitTop = 381
-    ExplicitWidth = 384
   end
   object mnuMain: TMainMenu
     Left = 577

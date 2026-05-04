@@ -23,7 +23,8 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 03/04/2026 Tony                Fixed cwAUDIO_VOLUME_NOTIFICATION_DATA
 //------------------------------------------------------------------------------
 //
 // Remarks: Pay close attention for supported platforms (ie Vista or Win 7/8/8.1/10).
@@ -113,7 +114,7 @@ type
     bMuted: BOOL;
     fMasterVolume: Single;
     nChannels: UINT;
-    afChannelVolumes: array [0..128] of Single;
+    afChannelVolumes: array [0..0] of Single;
   end;
   {$EXTERNALSYM cwAUDIO_VOLUME_NOTIFICATION_DATA}
   AUDIO_VOLUME_NOTIFICATION_DATA = cwAUDIO_VOLUME_NOTIFICATION_DATA;
@@ -210,10 +211,10 @@ type
     function GetChannelVolumeLevelScalar(nChannel: UINT;
                                          out fLevel: Single): HRESULT; stdcall;
 
-    function SetMute(const bMute: INT {BOOL};  // See BOOL comments in MfpTypes.pas (See for a workaround example MfpMixer)
+    function SetMute(const bMute: INT {BOOL};  // See BOOL comments in WinApiTypes.pas (See for a workaround Components/example MfAudioEndPoint)
                      const pguidEventContext: TGUID): HRESULT; stdcall;
 
-    function GetMute(out pbMute: INT {BOOL}): HRESULT; stdcall; // See BOOL comments in MfpTypes.pas (See for a workaround example MfpMixer)
+    function GetMute(out pbMute: INT {BOOL}): HRESULT; stdcall; // See BOOL comments in WinApi.WinApiTypes.pas (See for a workaround Components/example MfAudioEndPoint)
 
     function GetVolumeStepInfo(out pnStep: UINT;
                                out pnStepCount: UINT): HRESULT; stdcall;

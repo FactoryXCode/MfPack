@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -150,7 +150,7 @@ type
     property Settings: TDynamicsSettings read FSettings write SetSettings;
 
     // ---------------- Compressor ----------------
-    property CompEnabled: Boolean read FSettings.CompEnabled write SetCompEnabled default True;
+    property CompEnabled: Boolean read FSettings.CompEnabled write SetCompEnabled default False;
     property CompThresholdDb: Single read FSettings.CompThresholdDb write SetCompThresholdDb; // -60..0
     property CompRatio: Single read FSettings.CompRatio write SetCompRatio;                   // 1..50
     property CompAttackMs: Single read FSettings.CompAttackMs write SetCompAttackMs;          // 0.1..500
@@ -201,21 +201,21 @@ begin
            SizeOf(FSettings),
            0);
 
-  FSettings.CompEnabled := True;
+  FSettings.CompEnabled := False;
   FSettings.CompThresholdDb := -18;
   FSettings.CompRatio := 3.0;
   FSettings.CompAttackMs := 10;
   FSettings.CompReleaseMs := 120;
   FSettings.CompKneeDb := 6;
   FSettings.CompMakeupDb := 0;
-  FSettings.CompAutoMakeup := True;
+  FSettings.CompAutoMakeup := False;
 
-  FSettings.LimEnabled := True;
+  FSettings.LimEnabled := False;
   FSettings.LimCeilingDb := -1.0;
   FSettings.LimReleaseMs := 80;
   FSettings.LimLookaheadMs := 5;
 
-  FSettings.RmsDetector := True;
+  FSettings.RmsDetector := False;
 
   // True-peak defaults required by you
   FTruePeakGuard := False;

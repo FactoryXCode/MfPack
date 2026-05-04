@@ -1,4 +1,4 @@
-// FactoryX
+﻿// FactoryX
 //
 // Copyright:  FactoryX. All rights reserved.
 //
@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -162,7 +162,7 @@ type
 
   public
 
-    constructor Create;
+    constructor Create();
     destructor Destroy; override;
 
     // IMfParametricEqControl
@@ -192,14 +192,16 @@ implementation
 
 constructor TMfParametricEqMFT.Create;
 begin
+
   inherited Create;
+
   FLock := TCriticalSection.Create;
 
   FEQEnabled := True;
 
   // defaults
   FTGainDb := 0;
-  FTFreqHz := 1000;
+  FTFreqHz := 1500;
   FTQ := 1.0;
   FTBWOct := 1.0;
 
@@ -220,84 +222,128 @@ begin
   SetTruePeakOversample(4);
 end;
 
+
 destructor TMfParametricEqMFT.Destroy;
 begin
+
   FLock.Free;
+
   inherited;
 end;
+
 
 procedure TMfParametricEqMFT.EnsureStateForChannels(const Channels: Integer);
 var
   i: Integer;
-begin
-  if Channels <= 1 then
-  begin
-    if FStatesChannels <> 1 then
-    begin
-      SetLength(FStates, 1);
-      FStatesChannels := 1;
-      FStates[0].z1 := 0;
-      FStates[0].z2 := 0;
-    end;
-    Exit;
-  end;
 
-  if FStatesChannels <> Channels then
-  begin
-    SetLength(FStates, Channels);
-    FStatesChannels := Channels;
-    for i := 0 to Channels - 1 do
+begin
+
+  if (Channels <= 1) then
     begin
-      FStates[i].z1 := 0;
-      FStates[i].z2 := 0;
+
+      if (FStatesChannels <> 1) then
+        begin
+
+          SetLength(FStates,
+                    1);
+          FStatesChannels := 1;
+          FStates[0].z1 := 0;
+          FStates[0].z2 := 0;
+        end;
+      Exit;
     end;
-  end;
+
+  if (FStatesChannels <> Channels) then
+    begin
+
+      SetLength(FStates,
+                Channels);
+      FStatesChannels := Channels;
+      for i := 0 to Channels - 1 do
+        begin
+
+          FStates[i].z1 := 0;
+          FStates[i].z2 := 0;
+        end;
+    end;
 end;
+
 
 function TMfParametricEqMFT.ClampGainDb(const v: Single): Single;
 begin
-  Result := EnsureRange(v, -24.0, 24.0);
+
+  Result := EnsureRange(v,
+                        -24.0,
+                        24.0);
 end;
+
 
 function TMfParametricEqMFT.ClampQ(const v: Single): Single;
 begin
-  Result := EnsureRange(v, 0.2, 12.0);
+
+  Result := EnsureRange(v,
+                        0.2,
+                        12.0);
 end;
+
 
 function TMfParametricEqMFT.ClampFreqHz(const v: Single; const SampleRate: Integer): Single;
 var
   hi: Single;
+
 begin
+
   hi := SampleRate * 0.45;
-  Result := EnsureRange(v, 20.0, hi);
+  Result := EnsureRange(v,
+                        20.0,
+                        hi);
 end;
+
 
 function TMfParametricEqMFT.BWOctToQ(const BWOct, FreqHz: Single; const SampleRate: Integer): Single;
 var
   w0, sw: Double;
   x: Double;
+
 begin
+
   // Cookbook conversion:
   // Q = 1 / (2*sinh( ln(2)/2 * BW * w0/sin(w0) ))
-  if (BWOct <= 0.0001) or (SampleRate <= 0) then Exit(1.0);
+  if (BWOct <= 0.0001) or (SampleRate <= 0) then
+    Exit(1.0);
 
   w0 := 2.0 * PI * (FreqHz / SampleRate);
   sw := Sin(w0);
-  if Abs(sw) < 1e-9 then Exit(1.0);
+
+  if (Abs(sw) < 1e-9) then
+    Exit(1.0);
 
   x := (Ln(2.0) / 2.0) * BWOct * (w0 / sw);
   Result := (1.0 / (2.0 * Sinh(x))) * 1.0;
   Result := ClampQ(Result);
 end;
 
+
 procedure TMfParametricEqMFT.CalcPeakingCoeffs(const GainDb, FreqHz, Q: Double;
   const SampleRate: Integer; out C: TBiquadCoeffs);
 var
-  A, w0, cw, sw, alpha: Double;
-  b0, b1, b2, a0, a1, a2: Double;
+  A,
+  w0,
+  cw,
+  sw,
+  alpha: Double;
+  b0,
+  b1,
+  b2,
+  a0,
+  a1,
+  a2: Double;
+
 begin
+
   // RBJ peaking EQ (a0 normalized to 1)
-  A := Power(10.0, GainDb / 40.0);
+  A := Power(10.0,
+             GainDb / 40.0);
   w0 := 2.0 * PI * (FreqHz / SampleRate);
   cw := Cos(w0);
   sw := Sin(w0);
@@ -322,6 +368,7 @@ begin
   C.a1 := a1;
   C.a2 := a2;
 end;
+
 
 function TMfParametricEqMFT.RampCoefPerBlock(const Frames,
                                              SampleRate: Integer): Single;
@@ -348,6 +395,7 @@ begin
   aPerSample := Exp(-1.0 / (tau * SampleRate));
   Result := (Power(aPerSample, Frames)) * 1.0;  // per-block coefficient
 end;
+
 
 procedure TMfParametricEqMFT.UpdateCoeffsAndSmoothing(const Frames,
                                                       Channels,
@@ -385,27 +433,31 @@ begin
     // also keep the exposed BW octave around for inspection
     // (we will report the current BW as whatever you last set)
   finally
+
     FLock.Leave();
   end;
 
   a := RampCoefPerBlock(Frames, SampleRate);
 
-  if a <= 0 then
-  begin
-    curGain := tgtGain;
-    curFreq := tgtFreq;
-    curQ := tgtQ;
-  end
+  if (a <= 0) then
+    begin
+
+      curGain := tgtGain;
+      curFreq := tgtFreq;
+      curQ := tgtQ;
+    end
   else
-  begin
-    curGain := a * FCGainDb + (1 - a) * tgtGain;
-    curFreq := a * FCFreqHz + (1 - a) * tgtFreq;
-    curQ := a * FCQ + (1 - a) * tgtQ;
-  end;
+    begin
+
+      curGain := a * FCGainDb + (1 - a) * tgtGain;
+      curFreq := a * FCFreqHz + (1 - a) * tgtFreq;
+      curQ := a * FCQ + (1 - a) * tgtQ;
+    end;
 
   // clamp again after smoothing
   curGain := ClampGainDb(curGain);
-  curFreq := ClampFreqHz(curFreq, SampleRate);
+  curFreq := ClampFreqHz(curFreq,
+                         SampleRate);
   curQ := ClampQ(curQ);
 
   FCGainDb := curGain;
@@ -413,13 +465,24 @@ begin
   FCQ := curQ;
 
   // coeffs (current + target for inspection)
-  CalcPeakingCoeffs(curGain, curFreq, curQ, SampleRate, FCoeffCur);
-  CalcPeakingCoeffs(tgtGain, tgtFreq, tgtQ, SampleRate, FCoeffTgt);
+  CalcPeakingCoeffs(curGain,
+                    curFreq,
+                    curQ,
+                    SampleRate,
+                    FCoeffCur);
+
+  CalcPeakingCoeffs(tgtGain,
+                    tgtFreq,
+                    tgtQ,
+                    SampleRate,
+                    FCoeffTgt);
 
   EnsureStateForChannels(Channels);
 end;
 
-function TMfParametricEqMFT.ProcessSampleDF2T(var S: TBiquadState; const x: Single; const C: TBiquadCoeffs): Single;
+function TMfParametricEqMFT.ProcessSampleDF2T(var S: TBiquadState;
+                                              const x: Single;
+                                              const C: TBiquadCoeffs): Single;
 var
   y: Single;
 
@@ -465,6 +528,9 @@ begin
      (pData = nil) then
     Exit;
 
+  if not FEQEnabled then
+    Exit;
+
   UpdateCoeffsAndSmoothing(Frames,
                            Channels,
                            SampleRate);
@@ -480,7 +546,9 @@ begin
         begin
 
           x := p^ + DENORM;
-          x := ProcessSampleDF2T(FStates[0], x, FCoeffCur) - DENORM;
+          x := ProcessSampleDF2T(FStates[0],
+                                 x,
+                                 FCoeffCur) - DENORM;
           p^ := x;
           Inc(p);
         end;
@@ -586,6 +654,7 @@ begin
 
   FRampMode := Mode;
 end;
+
 
 procedure TMfParametricEqMFT.SetRampTimeMs(const Ms: Integer);
 begin

@@ -21,7 +21,8 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 28/03/2026 Tony                Fixed TCallbackAsync.Invoke
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -1240,8 +1241,9 @@ begin
 
   case _AsyncCmd of
     StartCapture:  begin
+
                      hr := _parent.OnStartCapture(pResult);
-                     if SUCCEEDED(hr) then
+                     if SUCCEEDED(hr) and Assigned(_parent.FOnCapturingStart) then
                        _parent.FOnCapturingStart(Self);
                    end;
     StopCapture:   hr := _parent.OnStopCapture(pResult);

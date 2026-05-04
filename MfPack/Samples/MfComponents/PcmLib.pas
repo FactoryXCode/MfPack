@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 (2H20) or later.
@@ -69,7 +69,9 @@ uses
   WinApi.Windows,
   WinApi.WinApiTypes,
   WinApi.ActiveX,
+
   System.SysUtils,
+
   WinApi.WinMM.MMReg,
   WinApi.WinMM.MMeApi;
 
@@ -87,6 +89,9 @@ type
   TByteArray = array[0..0] of Byte;
   PByteArray = ^TByteArray;
 
+
+  function PtrSingleOffset(p: PSingle;
+                           Index: Integer): PSingle; inline;
 
   procedure Int16ToFloat(const InBytes: PByte;
                          OutF: PSingle;
@@ -139,6 +144,28 @@ type
                          t: Single;
                          const ClampAbs: Single = 16.0): Single; inline;
 
+  // Parameters:
+  //  RampMs = desired smoothing time in milliseconds
+  //  SampleRate = e.g. 44100
+  //  Frames = block size being processed
+  //
+  // It returns a coefficient between 0..1.
+  // near 0 = very slow change
+  // near 1 = immediate change
+  //
+  // Example:
+  //  If:
+  //  RampMs = 50
+  //  SampleRate = 44100
+  //  Frames = 512
+  //  then:
+  //  ramp samples ≈ 2205
+  //  coeff ≈ 512 / 2205 ≈ 0.232
+  //  So each block moves about 23% toward the target.
+  function RampCoeff(const RampMs: Integer;
+                     const SampleRate: Cardinal;
+                     const Frames: Integer): Double; inline;
+
   // Decibel to linear.
   function DbToLin(const dB: Single): Single; inline;
 
@@ -151,6 +178,14 @@ implementation
 
 uses
   System.Math;
+
+
+function PtrSingleOffset(p: PSingle;
+                         Index: Integer): PSingle; inline;
+begin
+
+  Result := PSingle(NativeUInt(p) + NativeUInt(Index * SizeOf(Single)));
+end;
 
 
 function GetWfxBitsAndFloat(const pwfx: PWAVEFORMATEX;
@@ -526,6 +561,33 @@ begin
             (-v0 + v2) * td +
             (2*v0 - 5*v1 + 4*v2 - v3) * t2 +
             (-v0 + 3*v1 - 3*v2 + v3) * t3)) * 1.0;
+end;
+
+
+function RampCoeff(const RampMs: Integer;
+                   const SampleRate: Cardinal;
+                   const Frames: Integer): Double; inline;
+var
+  RampSamples: Double;
+
+begin
+
+  if (RampMs <= 0) or
+     (SampleRate = 0) or
+     (Frames <= 0) then
+    Exit(1.0);
+
+  RampSamples := (RampMs * 0.001) * SampleRate;
+  if (RampSamples <= 0.0) then
+    Exit(1.0);
+
+  Result := Frames / RampSamples;
+
+  if (Result < 0.0) then
+    Result := 0.0
+  else
+  if (Result > 1.0) then
+    Result := 1.0;
 end;
 
 

@@ -1,67 +1,100 @@
 object frmMain: TfrmMain
   Left = 0
   Top = 0
+  Margins.Left = 5
+  Margins.Top = 5
+  Margins.Right = 5
+  Margins.Bottom = 5
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'XAudio2 Player (Basic Sample)'
-  ClientHeight = 293
-  ClientWidth = 391
+  ClientHeight = 440
+  ClientWidth = 587
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -17
   Font.Name = 'Tahoma'
   Font.Style = []
   Menu = mnuMain
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
-  TextHeight = 13
+  PixelsPerInch = 144
+  TextHeight = 21
   object Bevel1: TBevel
     Left = 0
     Top = 0
-    Width = 391
-    Height = 234
+    Width = 587
+    Height = 351
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Align = alTop
   end
   object Bevel3: TBevel
-    Left = 46
-    Top = 19
-    Width = 78
-    Height = 208
+    Left = 69
+    Top = 29
+    Width = 117
+    Height = 312
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
   end
   object Bevel2: TBevel
-    Left = 127
-    Top = 19
-    Width = 78
-    Height = 208
+    Left = 191
+    Top = 29
+    Width = 117
+    Height = 312
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
   end
   object lblDuration: TLabel
-    Left = 229
-    Top = 23
-    Width = 92
-    Height = 13
+    Left = 344
+    Top = 35
+    Width = 141
+    Height = 21
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Caption = 'Duration: 00:00:00'
   end
   object lblProcessed: TLabel
-    Left = 229
-    Top = 77
-    Width = 52
-    Height = 13
+    Left = 344
+    Top = 116
+    Width = 82
+    Height = 21
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Caption = 'Samples: 0'
   end
   object lblPlayed: TLabel
-    Left = 238
-    Top = 50
-    Width = 83
-    Height = 13
+    Left = 357
+    Top = 75
+    Width = 125
+    Height = 21
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Caption = 'Played: 00:00:00'
   end
   object pmRight: TMfPeakMeter
-    Left = 136
-    Top = 27
-    Width = 17
-    Height = 172
+    Left = 204
+    Top = 41
+    Width = 26
+    Height = 258
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     BackGroundColor = clAppWorkSpace
     BarColor = clAqua
     Direction = pdVertical
@@ -70,10 +103,14 @@ object frmMain: TfrmMain
     Precision = 1
   end
   object pmLeft: TMfPeakMeter
-    Left = 103
-    Top = 27
-    Width = 18
-    Height = 172
+    Left = 155
+    Top = 41
+    Width = 27
+    Height = 258
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     BackGroundColor = clAppWorkSpace
     BarColor = clAqua
     Direction = pdVertical
@@ -82,46 +119,62 @@ object frmMain: TfrmMain
     Precision = 10
   end
   object Label1: TLabel
-    Left = 78
-    Top = 209
-    Width = 22
-    Height = 14
+    Left = 117
+    Top = 314
+    Width = 30
+    Height = 22
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Caption = 'Left'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = cl3DDkShadow
-    Font.Height = -12
+    Font.Height = -18
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentFont = False
   end
   object Label2: TLabel
-    Left = 150
-    Top = 209
-    Width = 28
-    Height = 14
+    Left = 225
+    Top = 314
+    Width = 41
+    Height = 22
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Caption = 'Right'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = cl3DDkShadow
-    Font.Height = -12
+    Font.Height = -18
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentFont = False
   end
   object butPlayPause: TButton
-    Left = 11
-    Top = 240
-    Width = 74
-    Height = 24
+    Left = 17
+    Top = 360
+    Width = 111
+    Height = 36
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Caption = 'Play'
     Enabled = False
     TabOrder = 0
     OnClick = butPlayPauseClick
   end
   object butStop: TButton
-    Left = 91
-    Top = 240
-    Width = 74
-    Height = 24
+    Left = 137
+    Top = 360
+    Width = 111
+    Height = 36
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Caption = 'Stop'
     Enabled = False
     TabOrder = 1
@@ -129,19 +182,26 @@ object frmMain: TfrmMain
   end
   object StatusBar: TStatusBar
     Left = 0
-    Top = 269
-    Width = 391
-    Height = 24
+    Top = 404
+    Width = 587
+    Height = 36
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Panels = <>
     SimplePanel = True
     SimpleText = 'Open an audio file'
-    ExplicitTop = 267
   end
   object trbVolumeR: TTrackBar
-    Left = 159
-    Top = 23
-    Width = 39
-    Height = 180
+    Left = 239
+    Top = 35
+    Width = 58
+    Height = 270
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     DoubleBuffered = True
     Max = 0
     Min = -224
@@ -149,14 +209,19 @@ object frmMain: TfrmMain
     ParentDoubleBuffered = False
     Frequency = 10
     TabOrder = 3
+    ThumbLength = 30
     TickMarks = tmBoth
     OnChange = trbVolumeRChange
   end
   object trbVolumeL: TTrackBar
-    Left = 53
-    Top = 23
-    Width = 39
-    Height = 180
+    Left = 80
+    Top = 35
+    Width = 58
+    Height = 270
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     DoubleBuffered = True
     Max = 0
     Min = -224
@@ -164,24 +229,33 @@ object frmMain: TfrmMain
     ParentDoubleBuffered = False
     Frequency = 10
     TabOrder = 4
+    ThumbLength = 30
     TickMarks = tmBoth
     OnChange = trbVolumeLChange
   end
   object cbLockVolumeSliders: TCheckBox
-    Left = 78
-    Top = 2
-    Width = 153
-    Height = 15
+    Left = 117
+    Top = 3
+    Width = 230
+    Height = 23
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Caption = 'Lock Volume Sliders'
     Checked = True
     State = cbChecked
     TabOrder = 5
   end
   object butReplay: TButton
-    Left = 171
-    Top = 240
-    Width = 74
-    Height = 24
+    Left = 257
+    Top = 360
+    Width = 111
+    Height = 36
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
     Caption = 'Replay'
     Enabled = False
     TabOrder = 6

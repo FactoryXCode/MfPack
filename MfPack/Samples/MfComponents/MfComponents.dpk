@@ -48,7 +48,6 @@ contains
   MfFlangerEchoMFT in 'MfFlangerEchoMFT.pas',
   MfWasApiFxIntf in 'MfWasApiFxIntf.pas',
   MfWasApiFxComponentBase in 'MfWasApiFxComponentBase.pas',
-  MfWasApiEffectsRack in 'MfWasApiEffectsRack.pas',
   MfFxEditors in 'MfFxEditors.pas',
   MfFlangerEchoComponent in 'MfFlangerEchoComponent.pas',
   MfParametricEqComponent in 'MfParametricEqComponent.pas',
@@ -60,7 +59,9 @@ contains
   MfLowMidHighEqMFT in 'MfLowMidHighEqMFT.pas',
   MfAudioEndPoint in 'MfAudioEndPoint.pas',
   MfWasApiPlayerEngineComponent in 'MfWasApiPlayerEngineComponent.pas',
-  WASAPIEngine in 'WASAPIEngine.pas';
+  WASAPIEngine in 'WASAPIEngine.pas',
+  MfWasApiEffectsRack in 'MfWasApiEffectsRack.pas',
+  RDJ.InternalMixer in 'RDJ.InternalMixer.pas';
 
 end.
 

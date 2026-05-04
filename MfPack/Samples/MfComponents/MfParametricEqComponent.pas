@@ -1,6 +1,6 @@
-// FactoryX
+ï»¿// FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: Â© FactoryX. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -12,7 +12,7 @@
 //
 // Revision Version: 3.1.9
 // Description: Compressor + limiter MFT with GR meters.
-//              Includes smoothed true-peak limiter using Catmull-Rom oversampling (2×/4×/8×),
+//              Includes smoothed true-peak limiter using Catmull-Rom oversampling (2Ã—/4Ã—/8Ã—),
 //              ceiling default -1.0 dBTP, and attack/release smoothing to avoid pumping.
 //
 // Company: FactoryX
@@ -23,7 +23,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -66,6 +66,7 @@ interface
 
 uses
 
+  WinApi.Windows,
   {System}
   System.Classes,
   System.SysUtils,
@@ -169,10 +170,15 @@ begin
 
   inherited Create(AOwner);
 
+
+  OutputDebugString(PChar(Format('TMfParametricEqEffect.Create Self=%p',
+                                 [Pointer(Self)])));
+
+
   // Defaults (match your MFT defaults)
   FEnabled := True;
   FGainDb := 0;
-  FCenterFreqHz := 1000;
+  FCenterFreqHz := 1500;
   FQ := 1.0;
   FBandwidthOctaves := 1.0;
 
@@ -228,7 +234,7 @@ begin
 end;
 
 
-function TMfParametricEqEffect.GetMftInstance: IMFTransform;
+function TMfParametricEqEffect.GetMftInstance(): IMFTransform;
 begin
 
   Result := FMft;
@@ -241,12 +247,12 @@ begin
   if IsDesigning() then
     Exit;
 
-  if (FMft <> nil) then
+  if (FMft = nil) then
     Exit;
 
   FCtl.EnableEQ(FEnabled);
 
-  // If BW>0 it drives Q internally; keep your rule.
+  // If BW > 0 it drives Q internally; keep your rule.
   FCtl.SetGainDb(FGainDb);
   FCtl.SetCenterFreqHz(FCenterFreqHz);
 

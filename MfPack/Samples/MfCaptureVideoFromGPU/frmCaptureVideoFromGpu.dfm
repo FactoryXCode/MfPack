@@ -33,10 +33,6 @@ object frmCapture: TfrmCapture
     DoubleBuffered = True
     ParentDoubleBuffered = False
     TabOrder = 0
-    ExplicitLeft = 12
-    ExplicitTop = 12
-    ExplicitWidth = 960
-    ExplicitHeight = 540
   end
   object mmoLog: TMemo
     Left = 0
@@ -59,10 +55,6 @@ object frmCapture: TfrmCapture
     ParentFont = False
     ScrollBars = ssVertical
     TabOrder = 1
-    ExplicitLeft = 12
-    ExplicitTop = 624
-    ExplicitWidth = 1320
-    ExplicitHeight = 264
   end
   object Panel1: TPanel
     Left = 0
@@ -75,10 +67,6 @@ object frmCapture: TfrmCapture
     Margins.Bottom = 5
     Align = alBottom
     TabOrder = 2
-    ExplicitLeft = 12
-    ExplicitTop = 585
-    ExplicitWidth = 1331
-    ExplicitHeight = 58
     object Label1: TLabel
       Left = 333
       Top = 15

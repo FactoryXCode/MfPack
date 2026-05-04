@@ -1,4 +1,4 @@
-// FactoryX
+﻿// FactoryX
 //
 // Copyright: FactoryX. All rights reserved.
 //
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -105,13 +105,24 @@ type
     // Threaded PCM callbacks (engine thread)
     FOnOutputPcm: TOnOutputPcm;
     FOnProcessPcm: TWasApiProcessPcmEvent;
+    FOnFillPcm: TWasApiFillPcmEvent;
 
     FStopping: Integer; // 0/1 (atomic)
 
     // Device selection / switching
     FUseDefaultDevice: Boolean;
-    //FDeviceRole: ERole;          // default endpoint role when UseDefaultDevice = True
-    FDeviceId: string;           // IMMDevice ID when UseDefaultDevice = False
+    FDeviceRole: ERole;            // default endpoint role when UseDefaultDevice = True
+    FDeviceId: string;             // IMMDevice ID when UseDefaultDevice = False
+    FDeviceName: string;           // Readable name
+    FDeviceIndex: Integer;
+
+    FCueEnabled: Boolean;
+    FCueUseDefaultDevice: Boolean;
+    FCueDeviceRole: ERole;
+    FCueDeviceId: string;
+    FCueMuted: Boolean;
+
+    FMixerSourceMode: Boolean;
 
     // Internal forwarders (engine -> component)
     procedure AttachEngineCallbacks();
@@ -142,6 +153,12 @@ type
                                const ByteCount: DWORD;
                                pwfx: PWAVEFORMATEX);
 
+    function EngineFillPcm(Sender: TObject;
+                           pData: PByte;
+                           const ByteCount: DWORD;
+                           pwfx: PWAVEFORMATEX;
+                           out Flags: DWORD): HRESULT;
+
     // Prevent callbacks into an owner/form that is already in the destroy path.
     function CanRaiseToOwner: Boolean;
 
@@ -152,6 +169,21 @@ type
 
     procedure SetRack(const Value: TMfWasApiEffectsRack);
 
+    procedure SetUseDefaultDevice(const Value: Boolean);
+    procedure SetDeviceRole(const Value: ERole);
+    procedure SetDeviceId(const Value: string);
+    procedure SetDeviceIndex(const Value: Integer);
+    procedure SetDeviceName(const Value: string);
+
+    procedure SetCueEnabled(const Value: Boolean);
+    procedure SetCueUseDefaultDevice(const Value: Boolean);
+    procedure SetCueDeviceRole(const Value: ERole);
+    procedure SetCueDeviceId(const Value: string);
+    procedure SetCueMuted(const Value: Boolean);
+    function GetCueMuted(): Boolean;
+
+    procedure SyncStoredPropertiesToEngine();
+
   protected
 
     procedure Loaded(); override;
@@ -161,7 +193,7 @@ type
   public
 
     constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
+    destructor Destroy(); override;
 
     // Commands (forwarded)
     function OpenFile(const audiofile: TFileName;
@@ -171,10 +203,13 @@ type
     function WaitForStop(TimeoutMs: DWORD = 100): HRESULT;
     function Pause(): HRESULT;
     function SeekTo(const Pos100ns: Int64): HRESULT;
+    function SetVolumesAsync(pVolLeft,
+                             pVolRight: Single): HRESULT;
     function SetVolumes(pVolLeft,
                         pVolRight: Single): HRESULT;
 
     function Mute(pActive: Boolean): Boolean;
+    function CueMute(pActive: Boolean): Boolean;
 
     // Calculated gains for the post fader VU meters.
     procedure SetMeterFaderGains(const GainL,
@@ -189,6 +224,10 @@ type
                                 const AutoResume: Boolean = True): HRESULT;
     procedure SetUseDefaultOutputDevice(const ARole: ERole = eMultimedia);
     procedure SetOutputDeviceId(const ADeviceId: string);
+    //
+    function ReadOutputPcmFloat32(const Frames: Integer;
+                                  const OutBuffer: PSingle;
+                                  out Flags: DWORD): HRESULT;
 
     // FX
     procedure ClearEffects();
@@ -214,6 +253,7 @@ type
   published
 
     property Engine: TWasApiEngine read FEngine;
+    property MixerSourceMode: Boolean read FMixerSourceMode write FMixerSourceMode default False;
 
     // Convenience aliases
     property State: TDeviceState read GetDeviceState;
@@ -222,9 +262,22 @@ type
     property SoundChannels: Word read GetSoundChannels;
 
     // Audio Device-------------------------------------------------------------
-    property UseDefaultDevice: Boolean read FUseDefaultDevice write FUseDefaultDevice default True;
-    property DeviceId: string read FDeviceId write FDeviceId;
+    property UseDefaultDevice: Boolean read FUseDefaultDevice write SetUseDefaultDevice default True;
+    property DeviceRole: ERole read FDeviceRole write SetDeviceRole default eMultimedia;
+    property DeviceName: string read FDeviceName write SetDeviceName;
+    property DeviceID: string read FDeviceId write SetDeviceId;
+    property DeviceIndex: Integer read FDeviceIndex write SetDeviceIndex default 0; // Must be valid when UseDefaultDevice = False
     // -------------------------------------------------------------------------
+
+    // Secondary (Cue/PFL) output ----------------------------------------------
+    // When CueEnabled=True, the engine will mirror audio to the Cue endpoint as well.
+    // Cue endpoint selection: when CueUseDefaultDevice=True, the default endpoint for CueDeviceRole is used.
+    // Otherwise CueDeviceId is used.
+    property CueEnabled: Boolean read FCueEnabled write SetCueEnabled default False;
+    property CueUseDefaultDevice: Boolean read FCueUseDefaultDevice write SetCueUseDefaultDevice default True;
+    property CueDeviceRole: ERole read FCueDeviceRole write SetCueDeviceRole default eMultimedia;
+    property CueDeviceId: string read FCueDeviceId write SetCueDeviceId;
+    property CueMuted: Boolean read GetCueMuted write SetCueMuted default False;
 
     // Rack (optional). If assigned, it will be called for each PCM block on the engine thread.
     property EffectsRack: TMfWasApiEffectsRack read FRack write SetRack;
@@ -238,6 +291,7 @@ type
     // PCM callbacks (engine thread)
     property OnOutputPcm: TOnOutputPcm read FOnOutputPcm write FOnOutputPcm;
     property OnProcessPcm: TWasApiProcessPcmEvent read FOnProcessPcm write FOnProcessPcm;
+    property OnFillPcm: TWasApiFillPcmEvent read FOnFillPcm write FOnFillPcm;
 
     // Pitch properties (forwarded)
     property PitchRangePct: Double read GetPitchRangePct write SetPitchRangePct;
@@ -248,6 +302,7 @@ type
   end;
 
 procedure Register;
+
 
 implementation
 
@@ -268,6 +323,18 @@ begin
 
   FEngine := nil;
   FRack := nil;
+
+  FUseDefaultDevice := True;
+  FDeviceRole := eMultimedia;
+  FDeviceId := '';
+  FDeviceName := '';
+  FDeviceIndex := 0;
+
+  FCueEnabled := False;
+  FCueUseDefaultDevice := True;
+  FCueDeviceRole := eMultimedia;
+  FCueDeviceId := '';
+  FCueMuted := False;
 end;
 
 
@@ -292,6 +359,7 @@ begin
       FEngine.OnProcessed := nil;
       FEngine.OnEnded := nil;
       FEngine.OnProcessPcm := nil;
+      FEngine.OnOutputPcm := nil;
 
       // Best effort stop + join before freeing to avoid thread handle leaks.
       try
@@ -356,7 +424,7 @@ begin
   if not Assigned(FEngine) then
     Exit;
 
-  // Always wire internal engine -> component handlers
+  // Always wire internal engine -> component handlers.
   FEngine.OnStateChanged := EngineStateChanged;
   FEngine.OnError := EngineError;
   FEngine.OnReady := EngineReady;
@@ -369,19 +437,20 @@ procedure TMfWasApiPlayerEngine.CheckForEngine();
 begin
 
   if not Assigned(FEngine) then
-    FEngine := TWasApiEngine.Create;
+    begin
+      FEngine := TWasApiEngine.Create;
+      SyncStoredPropertiesToEngine();
+    end;
 
   AttachEngineCallbacks();  // Always ensure correct wiring.
 
   if (csDesigning in ComponentState) then
     Exit;
 
-  //FEngine := TWasApiEngine.Create();
-
-  // Forward engine events to the component's published events
+  // Forward engine events to the component's published events.
   AttachEngineCallbacks();
 
-  // Wire rack/user PCM hooks
+  // Wire rack/user PCM hooks.
   SyncRackHook();
 end;
 
@@ -393,10 +462,187 @@ begin
     Exit;
 
   // Always keep engine callbacks routed through the component so we can chain:
-  // Rack -> user event handler.
+  // Fill -> Rack -> user event handler.
+  FEngine.OnFillPcm := EngineFillPcm;
   FEngine.OnOutputPcm := EngineOutputPcm;
   FEngine.OnProcessPcm := EngineProcessPcm;
 end;
+
+
+procedure TMfWasApiPlayerEngine.SyncStoredPropertiesToEngine();
+begin
+
+  if not Assigned(FEngine) then
+    Exit;
+
+  FEngine.MixerSourceMode := FMixerSourceMode;
+  FEngine.UseDefaultDevice := FUseDefaultDevice;
+  FEngine.DeviceRole := FDeviceRole;
+  FEngine.DeviceId := FDeviceId;
+  FEngine.DeviceIndex := FDeviceIndex;
+
+  FCueEnabled := FCueEnabled;
+  FEngine.CueEnabled := FCueEnabled;
+  FEngine.CueUseDefaultDevice := FCueUseDefaultDevice;
+  FEngine.CueDeviceRole := FCueDeviceRole;
+  FEngine.CueDeviceId := FCueDeviceId;
+  FEngine.CueMuted := FCueMuted;
+
+  // Keep readable name mirrored after engine create/rebinds where possible.
+  FDeviceName := FEngine.DeviceName;
+end;
+
+
+procedure TMfWasApiPlayerEngine.SetUseDefaultDevice(const Value: Boolean);
+begin
+
+  if (FUseDefaultDevice = Value) then
+    Exit;
+
+  FUseDefaultDevice := Value;
+
+  if Assigned(FEngine) then
+    FEngine.UseDefaultDevice := Value;
+end;
+
+
+procedure TMfWasApiPlayerEngine.SetDeviceRole(const Value: ERole);
+begin
+
+  if (FDeviceRole = Value) then
+    Exit;
+
+  FDeviceRole := Value;
+
+  if Assigned(FEngine) then
+    FEngine.DeviceRole := Value;
+end;
+
+
+procedure TMfWasApiPlayerEngine.SetDeviceId(const Value: string);
+begin
+
+  if SameText(FDeviceId,
+              Value) then
+    Exit;
+
+  FDeviceId := Value;
+
+  if (Value <> '') then
+    FUseDefaultDevice := False;
+
+  if Assigned(FEngine) then
+    begin
+
+      FEngine.UseDefaultDevice := FUseDefaultDevice;
+      FEngine.DeviceId := Value;
+    end;
+end;
+
+
+procedure TMfWasApiPlayerEngine.SetDeviceIndex(const Value: Integer);
+begin
+
+  if (FDeviceIndex = Value) then
+    Exit;
+
+  FDeviceIndex := Value;
+
+  if Assigned(FEngine) then
+    FEngine.DeviceIndex := Value;
+end;
+
+
+procedure TMfWasApiPlayerEngine.SetDeviceName(const Value: string);
+begin
+
+  // Readable label only. The engine owns the actual resolved device name.
+  FDeviceName := Value;
+end;
+
+
+procedure TMfWasApiPlayerEngine.SetCueEnabled(const Value: Boolean);
+begin
+
+  if (FCueEnabled = Value) then
+    Exit;
+
+  FCueEnabled := Value;
+
+  if Assigned(FEngine) then
+    FEngine.CueEnabled := Value;
+end;
+
+
+procedure TMfWasApiPlayerEngine.SetCueUseDefaultDevice(const Value: Boolean);
+begin
+
+  if (FCueUseDefaultDevice = Value) then
+    Exit;
+
+  FCueUseDefaultDevice := Value;
+
+  if Assigned(FEngine) then
+    FEngine.CueUseDefaultDevice := Value;
+end;
+
+
+procedure TMfWasApiPlayerEngine.SetCueDeviceRole(const Value: ERole);
+begin
+
+  if (FCueDeviceRole = Value) then
+    Exit;
+
+  FCueDeviceRole := Value;
+
+  if Assigned(FEngine) then
+    FEngine.CueDeviceRole := Value;
+end;
+
+
+procedure TMfWasApiPlayerEngine.SetCueDeviceId(const Value: string);
+begin
+
+  if SameText(FCueDeviceId,
+              Value) then
+    Exit;
+
+  FCueDeviceId := Value;
+
+  if (Value <> '') then
+    FCueUseDefaultDevice := False;
+
+  if Assigned(FEngine) then
+    begin
+
+      FEngine.CueUseDefaultDevice := FCueUseDefaultDevice;
+      FEngine.CueDeviceId := Value;
+    end;
+end;
+
+
+procedure TMfWasApiPlayerEngine.SetCueMuted(const Value: Boolean);
+begin
+
+  if (FCueMuted = Value) then
+    Exit;
+
+  FCueMuted := Value;
+
+  if Assigned(FEngine) then
+    FEngine.CueMuted := Value;
+end;
+
+
+function TMfWasApiPlayerEngine.GetCueMuted(): Boolean;
+begin
+
+  if Assigned(FEngine) then
+    Result := FEngine.CueMuted
+  else
+    Result := FCueMuted;
+end;
+
 
 procedure TMfWasApiPlayerEngine.SetRack(const Value: TMfWasApiEffectsRack);
 begin
@@ -525,6 +771,7 @@ procedure TMfWasApiPlayerEngine.EngineProcessPcm(Sender: TObject;
                                                 const ByteCount: DWORD;
                                                 pwfx: PWAVEFORMATEX);
 begin
+
   // Note: Called on the engine thread.
   // First, process FX rack (if assigned), then call the user handler.
   if Assigned(FRack) then
@@ -539,6 +786,27 @@ begin
                   ByteCount,
                   pwfx);
 end;
+
+
+function TMfWasApiPlayerEngine.EngineFillPcm(Sender: TObject;
+                                             pData: PByte;
+                                             const ByteCount: DWORD;
+                                             pwfx: PWAVEFORMATEX;
+                                             out Flags: DWORD): HRESULT;
+begin
+
+  Flags := 0;
+
+  if Assigned(FOnFillPcm) then
+    Result := FOnFillPcm(Self,
+                         pData,
+                         ByteCount,
+                         pwfx,
+                         Flags)
+  else
+    Result := E_NOTIMPL;
+end;
+
 // ---- public API forwarders ----
 
 function TMfWasApiPlayerEngine.OpenFile(const audiofile: TFileName;
@@ -565,7 +833,11 @@ begin
     Exit(E_FAIL);
 
   SyncRackHook();
-  Result := FEngine.Start();
+
+  if FMixerSourceMode then
+    Result := FEngine.StartSourceMode
+  else
+    Result := FEngine.Start();
 end;
 
 
@@ -635,7 +907,8 @@ begin
 end;
 
 
-function TMfWasApiPlayerEngine.SetVolumes(pVolLeft, pVolRight: Single): HRESULT;
+function TMfWasApiPlayerEngine.SetVolumes(pVolLeft,
+                                          pVolRight: Single): HRESULT;
 begin
 
   CheckForEngine();
@@ -648,6 +921,20 @@ begin
                                pVolRight);
 end;
 
+
+function TMfWasApiPlayerEngine.SetVolumesAsync(pVolLeft,
+                                               pVolRight: Single): HRESULT;
+begin
+
+  CheckForEngine();
+
+  if not Assigned(FEngine) then
+    Exit(E_FAIL);
+
+  SyncRackHook();
+  Result := FEngine.SetVolumesAsync(pVolLeft,
+                                    pVolRight);
+end;
 
 
 function TMfWasApiPlayerEngine.Mute(pActive: Boolean): Boolean;
@@ -662,7 +949,20 @@ begin
 end;
 
 
-procedure TMfWasApiPlayerEngine.SetMeterFaderGains(const GainL, GainR: Single);
+function TMfWasApiPlayerEngine.CueMute(pActive: Boolean): Boolean;
+begin
+  CheckForEngine();
+
+  if not Assigned(FEngine) then
+    Exit(False);
+
+  Result := FEngine.CueMute(pActive);
+  FCueMuted := pActive;
+end;
+
+
+procedure TMfWasApiPlayerEngine.SetMeterFaderGains(const GainL,
+                                                   GainR: Single);
 begin
   CheckForEngine();
 
@@ -674,7 +974,8 @@ begin
 end;
 
 
-procedure TMfWasApiPlayerEngine.GetMeterFaderGains(out GainL, GainR: Single);
+procedure TMfWasApiPlayerEngine.GetMeterFaderGains(out GainL,
+                                                   GainR: Single);
 begin
   CheckForEngine();
 
@@ -695,42 +996,77 @@ function TMfWasApiPlayerEngine.SwitchOutputDevice(const ADeviceId: string;
                                                  const ARole: ERole;
                                                  const AutoResume: Boolean): HRESULT;
 begin
+
   CheckForEngine();
 
   if not Assigned(FEngine) then
     Exit(E_FAIL);
 
   Result := FEngine.SwitchOutputDevice(ADeviceId,
-                                      AUseDefaultDevice,
-                                      ARole,
-                                      AutoResume);
+                                       AUseDefaultDevice,
+                                       ARole,
+                                       AutoResume);
+
+  if SUCCEEDED(Result) then
+    begin
+      FUseDefaultDevice := AUseDefaultDevice;
+      FDeviceRole := ARole;
+      FDeviceId := ADeviceId;
+      FDeviceName := FEngine.DeviceName;
+    end;
 end;
 
 
 procedure TMfWasApiPlayerEngine.SetUseDefaultOutputDevice(const ARole: ERole);
 begin
+
   CheckForEngine();
 
   if not Assigned(FEngine) then
     Exit;
 
+  FUseDefaultDevice := True;
+  FDeviceRole := ARole;
   FEngine.SetUseDefaultOutputDevice(ARole);
+  FDeviceName := FEngine.DeviceName;
 end;
 
 
 procedure TMfWasApiPlayerEngine.SetOutputDeviceId(const ADeviceId: string);
 begin
+
   CheckForEngine();
 
   if not Assigned(FEngine) then
     Exit;
 
+  FUseDefaultDevice := False;
+  FDeviceId := ADeviceId;
   FEngine.SetOutputDeviceId(ADeviceId);
+  FDeviceName := FEngine.DeviceName;
+end;
+
+
+function TMfWasApiPlayerEngine.ReadOutputPcmFloat32(const Frames: Integer;
+                                                    const OutBuffer: PSingle;
+                                                    out Flags: DWORD): HRESULT;
+begin
+
+  CheckForEngine();
+
+  if not Assigned(FEngine) then
+    Exit(E_FAIL);
+
+  SyncRackHook();
+  Result := FEngine.ReadOutputPcmFloat32(Frames,
+                                         OutBuffer,
+                                         Flags);
 end;
 
 
 procedure TMfWasApiPlayerEngine.ClearEffects();
 begin
+
   CheckForEngine();
 
   if not Assigned(FEngine) then
@@ -742,6 +1078,7 @@ end;
 
 procedure TMfWasApiPlayerEngine.AddEffect(const Mft: IMFTransform);
 begin
+
   CheckForEngine();
 
   if not Assigned(FEngine) then
@@ -753,6 +1090,7 @@ end;
 
 procedure TMfWasApiPlayerEngine.SetEffects(const Effects: array of IMFTransform);
 begin
+
   CheckForEngine();
 
   if not Assigned(FEngine) then
@@ -764,6 +1102,7 @@ end;
 
 procedure TMfWasApiPlayerEngine.SetPitchPercent(const Pct: Double);
 begin
+
   CheckForEngine();
 
   if not Assigned(FEngine) then
@@ -775,6 +1114,7 @@ end;
 
 procedure TMfWasApiPlayerEngine.SetPitchSlider(const SliderPos: Integer);
 begin
+
   CheckForEngine();
 
   if not Assigned(FEngine) then
@@ -786,55 +1126,75 @@ end;
 
 function TMfWasApiPlayerEngine.GetPitchRangePct: Double;
 begin
+
   CheckForEngine();
+
   if Assigned(FEngine) then
     Result := FEngine.PitchRangePct
   else
     Result := 16.0;
 end;
 
+
 procedure TMfWasApiPlayerEngine.SetPitchRangePct(const Value: Double);
 begin
+
   CheckForEngine();
+
   if Assigned(FEngine) then
     FEngine.PitchRangePct := Value;
 end;
 
+
 function TMfWasApiPlayerEngine.GetPitchDetentPct: Double;
 begin
+
   CheckForEngine();
+
   if Assigned(FEngine) then
     Result := FEngine.PitchDetentPct
   else
     Result := 0.10;
 end;
 
+
 procedure TMfWasApiPlayerEngine.SetPitchDetentPct(const Value: Double);
 begin
+
   CheckForEngine();
+
   if Assigned(FEngine) then
     FEngine.PitchDetentPct := Value;
 end;
 
+
 function TMfWasApiPlayerEngine.GetPitchAutoZeroPct: Double;
 begin
+
   CheckForEngine();
+
   if Assigned(FEngine) then
     Result := FEngine.PitchAutoZeroPct
   else
     Result := 0.30;
 end;
 
+
 procedure TMfWasApiPlayerEngine.SetPitchAutoZeroPct(const Value: Double);
 begin
+
   CheckForEngine();
+
   if Assigned(FEngine) then
     FEngine.PitchAutoZeroPct := Value;
 end;
 
+
 function TMfWasApiPlayerEngine.GetPitchRampMs: Integer;
 begin
+
   CheckForEngine();
+
   if Assigned(FEngine) then
     Result := FEngine.PitchRampMs
   else
@@ -843,23 +1203,31 @@ end;
 
 procedure TMfWasApiPlayerEngine.SetPitchRampMs(const Value: Integer);
 begin
+
   CheckForEngine();
+
   if Assigned(FEngine) then
     FEngine.PitchRampMs := Value;
 end;
 
+
 function TMfWasApiPlayerEngine.GetVarispeedEnabled: LongBool;
 begin
+
   CheckForEngine();
+
   if Assigned(FEngine) then
     Result := FEngine.VarispeedEnabled
   else
     Result := False;
 end;
 
+
 procedure TMfWasApiPlayerEngine.SetVarispeedEnabled(const Value: LongBool);
 begin
+
   CheckForEngine();
+
   if Assigned(FEngine) then
     FEngine.VarispeedEnabled := Value;
 end;

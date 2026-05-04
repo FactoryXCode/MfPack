@@ -1,7 +1,7 @@
 program XAudio2RenderingSample;
 
 uses
-  
+
   Vcl.Forms,
   MainFrm in 'MainFrm.pas' {frmMain},
   Tools in 'Tools.pas',

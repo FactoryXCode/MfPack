@@ -34,7 +34,7 @@ The application is using MMCSS and runs the rendering part in a separate thread.
 
 What has changed since the previous sample:
 
-The previous sample used the MMIO API to write WAV files. With the option to write FLAC files, 
+The previous sample used the MMIO API to write WAV files. With the option to write FLAC files,
 
 the MMIO API has been replaced by the IMfSinkWriter to write FLAC and WAV files.
 
@@ -42,7 +42,7 @@ the MMIO API has been replaced by the IMfSinkWriter to write FLAC and WAV files.
 
 NOTES:
 
-* When capturing from high latency sources, like Internet, use a low buffersize ~10 milliseconds or lower.
+* When capturing from high latency sources, like Internet, use a low buffersize \~10 milliseconds or lower.
 * If you are not sure which thread to be used, keep the defaults as it is in this sample.
 * This release is updated for compiler version 17 up to 34.
 * SDK version 10.0.22621.4654 (Win 11)
@@ -56,7 +56,7 @@ Project location: https://github.com/FactoryXCode/MfPack
 https://sourceforge.net/projects/MFPack
 
 First release date: 02-04-2023
-Final release date: 02-01-2026
+Final release date: 05/05/2026
 
 Copyright © FactoryX. All rights reserved.
 

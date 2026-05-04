@@ -1,15 +1,15 @@
 object frmMain: TfrmMain
   Left = 0
   Top = 0
-  Margins.Left = 8
-  Margins.Top = 8
-  Margins.Right = 8
-  Margins.Bottom = 8
+  Margins.Left = 12
+  Margins.Top = 12
+  Margins.Right = 12
+  Margins.Bottom = 12
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'WasApi Player Sample 5'
-  ClientHeight = 707
-  ClientWidth = 1650
+  ClientHeight = 1068
+  ClientWidth = 1461
   Color = clSilver
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -24,39 +24,69 @@ object frmMain: TfrmMain
   OnCreate = FormCreate
   PixelsPerInch = 144
   TextHeight = 25
+  object Label4: TLabel
+    Left = 150
+    Top = 399
+    Width = 39
+    Height = 21
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
+    Alignment = taCenter
+    Caption = 'Right'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = cl3DDkShadow
+    Font.Height = -17
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+  end
   object butPlayPause: TButton
-    Left = 116
-    Top = 630
-    Width = 100
-    Height = 36
+    Left = 107
+    Top = 1001
+    Width = 90
+    Height = 33
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
     Margins.Bottom = 5
     Caption = 'Play'
     Enabled = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -17
+    Font.Name = 'Segoe UI'
+    Font.Style = [fsBold]
+    ParentFont = False
     TabOrder = 0
     OnClick = butPlayPauseClick
   end
   object butStop: TButton
-    Left = 221
-    Top = 630
-    Width = 100
-    Height = 36
+    Left = 201
+    Top = 1001
+    Width = 90
+    Height = 33
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
     Margins.Bottom = 5
     Caption = 'Stop'
     Enabled = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -17
+    Font.Name = 'Segoe UI'
+    Font.Style = [fsBold]
+    ParentFont = False
     TabOrder = 1
     OnClick = butStopClick
   end
   object pnlControls: TPanel
     Left = 0
     Top = 0
-    Width = 1650
-    Height = 562
+    Width = 1461
+    Height = 933
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
@@ -66,10 +96,10 @@ object frmMain: TfrmMain
     ParentBackground = False
     TabOrder = 2
     object lblDuration: TLabel
-      Left = 17
-      Top = 504
+      Left = 21
+      Top = 903
       Width = 157
-      Height = 24
+      Height = 23
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -84,10 +114,10 @@ object frmMain: TfrmMain
       ParentFont = False
     end
     object lblProcessed: TLabel
-      Left = 188
-      Top = 530
-      Width = 291
-      Height = 25
+      Left = 345
+      Top = 903
+      Width = 261
+      Height = 23
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -102,10 +132,10 @@ object frmMain: TfrmMain
       ParentFont = False
     end
     object lblPlayed: TLabel
-      Left = 35
-      Top = 530
-      Width = 138
-      Height = 26
+      Left = 187
+      Top = 903
+      Width = 139
+      Height = 24
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -119,11 +149,30 @@ object frmMain: TfrmMain
       Font.Style = [fsBold]
       ParentFont = False
     end
+    object visAudioMix: TMfAudioMixVisualizer
+      Left = 432
+      Top = 444
+      Width = 719
+      Height = 408
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
+      PeakThreshold = 0.980000019073486300
+      PeakCapFrac = 0.119999997317791000
+      DbMin = -60.000000000000000000
+      DbTickStep = 2
+      DbLabelStep = 4
+      DbScaleWidth = 60
+      AutoStart = True
+      VolumeScaleMode = vsmDbPerceptual
+      BarCount = 64
+    end
     object gbEQ: TGroupBox
-      Left = 262
-      Top = 11
-      Width = 405
-      Height = 482
+      Left = 12
+      Top = 9
+      Width = 318
+      Height = 423
       Caption = ' Parametric EQ '
       Color = clGray
       Font.Charset = DEFAULT_CHARSET
@@ -136,45 +185,75 @@ object frmMain: TfrmMain
       ParentFont = False
       TabOrder = 0
       object lblEqGain: TLabel
-        Left = 17
-        Top = 108
-        Width = 98
+        Left = 15
+        Top = 98
+        Width = 91
         Height = 23
         Caption = 'Gain: 0.0 dB'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBtnText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
       end
       object lblEqFreq: TLabel
-        Left = 17
-        Top = 174
-        Width = 112
-        Height = 23
-        Caption = 'Freq: 1000 Hz'
-      end
-      object lblEqQ: TLabel
-        Left = 17
-        Top = 242
-        Width = 58
-        Height = 23
-        Caption = 'Q: 1.00'
-      end
-      object lblEqBW: TLabel
-        Left = 17
-        Top = 308
+        Left = 15
+        Top = 156
         Width = 103
         Height = 23
+        Caption = 'Freq: 1000 Hz'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBtnText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+      end
+      object lblEqQ: TLabel
+        Left = 15
+        Top = 218
+        Width = 53
+        Height = 23
+        Caption = 'Q: 1.00'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBtnText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+      end
+      object lblEqBW: TLabel
+        Left = 15
+        Top = 278
+        Width = 95
+        Height = 23
         Caption = 'BW: 1.00 oct'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBtnText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
       end
       object lblEqTP: TLabel
-        Left = 17
-        Top = 373
-        Width = 171
+        Left = 15
+        Top = 336
+        Width = 159
         Height = 23
         Caption = 'Ceiling: -1.0 dBTP, 4x'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBtnText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
       end
       object cbEqEnabled: TCheckBox
-        Left = 17
-        Top = 33
-        Width = 108
-        Height = 24
+        Left = 15
+        Top = 30
+        Width = 98
+        Height = 21
         Caption = 'Enabled'
         Checked = True
         State = cbChecked
@@ -182,78 +261,84 @@ object frmMain: TfrmMain
         OnClick = cbEqEnabledClick
       end
       object cbEqUseBW: TCheckBox
-        Left = 135
-        Top = 33
-        Width = 220
-        Height = 24
+        Left = 122
+        Top = 30
+        Width = 198
+        Height = 21
         Caption = 'Use Bandwidth (oct)'
         TabOrder = 1
         OnClick = cbEqUseBWClick
       end
       object cbEqTruePeak: TCheckBox
-        Left = 17
-        Top = 65
-        Width = 252
-        Height = 24
+        Left = 15
+        Top = 59
+        Width = 227
+        Height = 21
         Caption = 'True-peak guard (-1.0 dBTP)'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBtnText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
         TabOrder = 2
         OnClick = cbEqTruePeakClick
       end
       object trbEqGain: TTrackBar
-        Left = 17
-        Top = 134
-        Width = 369
-        Height = 31
+        Left = 8
+        Top = 120
+        Width = 306
+        Height = 29
         Max = 240
         Min = -240
         Frequency = 40
         TabOrder = 3
-        ThumbLength = 30
+        ThumbLength = 45
         OnChange = trbEqGainChange
       end
       object trbEqFreq: TTrackBar
-        Left = 17
-        Top = 200
-        Width = 369
-        Height = 31
+        Left = 8
+        Top = 180
+        Width = 306
+        Height = 29
         Max = 1000
         Frequency = 100
         TabOrder = 4
-        ThumbLength = 30
+        ThumbLength = 45
         OnChange = trbEqFreqChange
       end
       object trbEqQ: TTrackBar
-        Left = 17
-        Top = 267
-        Width = 369
-        Height = 32
+        Left = 8
+        Top = 240
+        Width = 306
+        Height = 29
         Max = 120
         Min = 2
         Frequency = 10
         Position = 10
         TabOrder = 5
-        ThumbLength = 30
+        ThumbLength = 45
         OnChange = trbEqQChange
       end
       object trbEqBW: TTrackBar
-        Left = 17
-        Top = 333
-        Width = 369
-        Height = 32
+        Left = 8
+        Top = 300
+        Width = 306
+        Height = 29
         Max = 40
         Min = 1
         Frequency = 5
         Position = 10
         TabOrder = 6
-        ThumbLength = 30
+        ThumbLength = 45
         OnChange = trbEqBWChange
       end
     end
     object gbFlanger: TGroupBox
-      Left = 678
-      Top = 11
-      Width = 378
-      Height = 482
+      Left = 336
+      Top = 9
+      Width = 318
+      Height = 423
       Caption = ' Flanger / Echo '
       Color = clGray
       Font.Charset = DEFAULT_CHARSET
@@ -266,117 +351,151 @@ object frmMain: TfrmMain
       ParentFont = False
       TabOrder = 1
       object lblFlWet: TLabel
-        Left = 17
-        Top = 78
-        Width = 78
+        Left = 15
+        Top = 99
+        Width = 70
         Height = 23
         Caption = 'Wet: 0.35'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
       end
       object lblFlDelay: TLabel
-        Left = 17
-        Top = 144
-        Width = 132
+        Left = 15
+        Top = 159
+        Width = 125
         Height = 23
         Caption = 'Base delay: 3 ms'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
       end
       object lblFlDepth: TLabel
-        Left = 17
-        Top = 210
-        Width = 98
+        Left = 15
+        Top = 218
+        Width = 92
         Height = 23
         Caption = 'Depth: 2 ms'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
       end
       object lblFlRate: TLabel
-        Left = 17
-        Top = 278
-        Width = 107
+        Left = 15
+        Top = 279
+        Width = 99
         Height = 23
         Caption = 'Rate: 0.25 Hz'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
       end
       object lblFlFeedback: TLabel
-        Left = 17
-        Top = 344
-        Width = 122
+        Left = 15
+        Top = 339
+        Width = 111
         Height = 23
         Caption = 'Feedback: 0.20'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
       end
       object cbFlEnabled: TCheckBox
-        Left = 17
-        Top = 33
-        Width = 108
-        Height = 24
+        Left = 15
+        Top = 30
+        Width = 98
+        Height = 21
         Caption = 'Enabled'
-        Checked = True
-        State = cbChecked
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentFont = False
         TabOrder = 0
         OnClick = cbFlEnabledClick
       end
       object trbFlWet: TTrackBar
-        Left = 17
-        Top = 102
-        Width = 342
-        Height = 32
+        Left = 8
+        Top = 120
+        Width = 306
+        Height = 30
         Max = 100
         Frequency = 10
         Position = 35
         TabOrder = 1
-        ThumbLength = 30
+        ThumbLength = 45
         OnChange = trbFlWetChange
       end
       object trbFlDelay: TTrackBar
-        Left = 17
-        Top = 170
-        Width = 342
-        Height = 31
+        Left = 8
+        Top = 182
+        Width = 306
+        Height = 28
         Max = 2000
         Frequency = 100
         Position = 3
         TabOrder = 2
-        ThumbLength = 30
+        ThumbLength = 45
         OnChange = trbFlDelayChange
       end
       object trbFlDepth: TTrackBar
-        Left = 17
-        Top = 236
-        Width = 342
-        Height = 31
+        Left = 8
+        Top = 242
+        Width = 306
+        Height = 27
         Max = 50
         Frequency = 5
         Position = 2
         TabOrder = 3
-        ThumbLength = 30
+        ThumbLength = 45
         OnChange = trbFlDepthChange
       end
       object trbFlRate: TTrackBar
-        Left = 17
-        Top = 303
-        Width = 342
-        Height = 32
+        Left = 8
+        Top = 302
+        Width = 306
+        Height = 28
         Max = 500
         Frequency = 50
         Position = 25
         TabOrder = 4
-        ThumbLength = 30
+        ThumbLength = 45
         OnChange = trbFlRateChange
       end
       object trbFlFeedback: TTrackBar
-        Left = 17
-        Top = 369
-        Width = 342
-        Height = 32
+        Left = 8
+        Top = 359
+        Width = 306
+        Height = 28
         Max = 98
         Frequency = 10
         Position = 20
         TabOrder = 5
-        ThumbLength = 30
+        ThumbLength = 45
         OnChange = trbFlFeedbackChange
       end
     end
     object gbDynamics: TGroupBox
-      Left = 1068
-      Top = 11
-      Width = 563
-      Height = 482
+      Left = 1160
+      Top = 9
+      Width = 291
+      Height = 884
       Caption = ' Dynamics (Compressor/Limiter)  '
       Color = clGray
       Font.Charset = DEFAULT_CHARSET
@@ -388,238 +507,584 @@ object frmMain: TfrmMain
       ParentColor = False
       ParentFont = False
       TabOrder = 2
-      object Bevel1: TBevel
-        Left = 294
-        Top = 192
-        Width = 256
-        Height = 278
-        Margins.Left = 5
-        Margins.Top = 5
-        Margins.Right = 5
-        Margins.Bottom = 5
-      end
       object lblDynTP: TLabel
-        Left = 17
-        Top = 66
-        Width = 281
+        Left = 15
+        Top = 60
+        Width = 261
         Height = 23
         Caption = 'True-peak guard ceiling: -1.0 dBTP'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
       end
       object lblDynThresh: TLabel
-        Left = 17
-        Top = 101
-        Width = 158
+        Left = 15
+        Top = 92
+        Width = 147
         Height = 23
         Caption = 'Threshold: -18.0 dB'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
       end
       object lblDynRatio: TLabel
-        Left = 17
-        Top = 161
-        Width = 92
+        Left = 15
+        Top = 146
+        Width = 83
         Height = 23
         Caption = 'Ratio: 3.0:1'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
       end
       object lblDynAttack: TLabel
-        Left = 17
-        Top = 219
-        Width = 127
+        Left = 15
+        Top = 197
+        Width = 115
         Height = 23
         Caption = 'Attack: 10.0 ms'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
       end
       object lblDynRelease: TLabel
-        Left = 17
-        Top = 279
-        Width = 127
-        Height = 23
-        Caption = 'Release: 120 ms'
-      end
-      object lblDynKnee: TLabel
-        Left = 17
-        Top = 339
-        Width = 101
-        Height = 23
-        Caption = 'Knee: 6.0 dB'
-      end
-      object lblDynMakeup: TLabel
-        Left = 17
-        Top = 398
-        Width = 127
-        Height = 23
-        Caption = 'Makeup: 0.0 dB'
-      end
-      object lblDynLimCeil: TLabel
-        Left = 321
-        Top = 219
-        Width = 185
-        Height = 23
-        Caption = 'Limiter ceiling: -1.0 dB'
-      end
-      object lblDynLimLook: TLabel
-        Left = 321
-        Top = 279
-        Width = 135
-        Height = 23
-        Caption = 'Lookahead: 5 ms'
-      end
-      object lblDynLimRel: TLabel
-        Left = 321
-        Top = 339
-        Width = 176
-        Height = 23
-        Caption = 'Limiter release: 80 ms'
-      end
-      object lblDynCompGR: TLabel
-        Left = 321
-        Top = 414
-        Width = 138
-        Height = 23
-        Caption = 'Comp GR: 0.0 dB'
-      end
-      object lblDynLimGR: TLabel
-        Left = 321
-        Top = 440
+        Left = 15
+        Top = 251
         Width = 120
         Height = 23
+        Caption = 'Release: 120 ms'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+      end
+      object lblDynKnee: TLabel
+        Left = 15
+        Top = 305
+        Width = 94
+        Height = 23
+        Caption = 'Knee: 6.0 dB'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+      end
+      object lblDynMakeup: TLabel
+        Left = 15
+        Top = 359
+        Width = 117
+        Height = 23
+        Caption = 'Makeup: 0.0 dB'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+      end
+      object lblDynLimCeil: TLabel
+        Left = 15
+        Top = 456
+        Width = 169
+        Height = 23
+        Caption = 'Limiter ceiling: -1.0 dB'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+      end
+      object lblDynLimLook: TLabel
+        Left = 15
+        Top = 512
+        Width = 128
+        Height = 23
+        Caption = 'Lookahead: 5 ms'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+      end
+      object lblDynLimRel: TLabel
+        Left = 15
+        Top = 566
+        Width = 164
+        Height = 23
+        Caption = 'Limiter release: 80 ms'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+      end
+      object lblDynCompGR: TLabel
+        Left = 15
+        Top = 633
+        Width = 129
+        Height = 23
+        Caption = 'Comp GR: 0.0 dB'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+      end
+      object lblDynLimGR: TLabel
+        Left = 15
+        Top = 657
+        Width = 110
+        Height = 23
         Caption = 'Lim GR: 0.0 dB'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
       end
       object cbDynEnabled: TCheckBox
-        Left = 17
-        Top = 36
-        Width = 114
-        Height = 23
+        Left = 15
+        Top = 33
+        Width = 104
+        Height = 20
         Caption = 'Enabled'
         TabOrder = 0
         OnClick = cbDynEnabledClick
       end
       object cbDynRms: TCheckBox
-        Left = 389
-        Top = 33
-        Width = 150
-        Height = 23
+        Left = 15
+        Top = 696
+        Width = 135
+        Height = 21
         Caption = 'RMS detector'
         Checked = True
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
         State = cbChecked
         TabOrder = 1
         OnClick = cbDynRmsClick
       end
       object cbDynAutoMakeup: TCheckBox
-        Left = 390
-        Top = 66
-        Width = 149
-        Height = 23
+        Left = 15
+        Top = 726
+        Width = 135
+        Height = 21
         Caption = 'Auto makeup'
         Checked = True
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
         State = cbChecked
         TabOrder = 2
         OnClick = cbDynAutoMakeupClick
       end
       object cbDynTruePeak: TCheckBox
-        Left = 390
-        Top = 102
-        Width = 122
-        Height = 23
+        Left = 15
+        Top = 759
+        Width = 110
+        Height = 21
         Caption = 'True-peak'
         Checked = True
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
         State = cbChecked
         TabOrder = 3
         OnClick = cbDynTruePeakClick
       end
       object cmbDynTPOS: TComboBox
-        Left = 390
-        Top = 129
-        Width = 99
+        Left = 15
+        Top = 783
+        Width = 90
         Height = 31
         Style = csDropDownList
         TabOrder = 4
         OnChange = cmbDynTPOSChange
       end
       object trbDynThresh: TTrackBar
-        Left = 17
-        Top = 126
-        Width = 216
-        Height = 32
+        Left = 15
+        Top = 114
+        Width = 270
+        Height = 29
         TabOrder = 5
-        ThumbLength = 30
+        ThumbLength = 45
         OnChange = trbDynThreshChange
       end
       object trbDynRatio: TTrackBar
-        Left = 17
-        Top = 186
-        Width = 216
-        Height = 32
+        Left = 15
+        Top = 168
+        Width = 270
+        Height = 29
         TabOrder = 6
-        ThumbLength = 30
+        ThumbLength = 45
         OnChange = trbDynRatioChange
       end
       object trbDynAttack: TTrackBar
-        Left = 17
-        Top = 245
-        Width = 216
-        Height = 31
+        Left = 15
+        Top = 221
+        Width = 270
+        Height = 28
         TabOrder = 7
-        ThumbLength = 30
+        ThumbLength = 45
         OnChange = trbDynAttackChange
       end
       object trbDynRelease: TTrackBar
-        Left = 17
-        Top = 305
-        Width = 216
-        Height = 31
+        Left = 15
+        Top = 275
+        Width = 270
+        Height = 28
         TabOrder = 8
-        ThumbLength = 30
+        ThumbLength = 45
         OnChange = trbDynReleaseChange
       end
       object trbDynKnee: TTrackBar
-        Left = 17
-        Top = 363
-        Width = 216
-        Height = 32
+        Left = 15
+        Top = 327
+        Width = 270
+        Height = 29
         TabOrder = 9
-        ThumbLength = 30
+        ThumbLength = 45
         OnChange = trbDynKneeChange
       end
       object trbDynMakeup: TTrackBar
-        Left = 17
-        Top = 423
-        Width = 216
-        Height = 32
+        Left = 15
+        Top = 381
+        Width = 270
+        Height = 29
         TabOrder = 10
-        ThumbLength = 30
+        ThumbLength = 45
         OnChange = trbDynMakeupChange
       end
       object trbDynLimCeil: TTrackBar
-        Left = 321
-        Top = 245
-        Width = 216
-        Height = 31
+        Left = 15
+        Top = 482
+        Width = 270
+        Height = 28
         TabOrder = 11
-        ThumbLength = 30
+        ThumbLength = 45
         OnChange = trbDynLimCeilChange
       end
       object trbDynLimLook: TTrackBar
-        Left = 321
-        Top = 305
-        Width = 216
-        Height = 31
+        Left = 15
+        Top = 536
+        Width = 270
+        Height = 28
         TabOrder = 12
-        ThumbLength = 30
+        ThumbLength = 45
         OnChange = trbDynLimLookChange
       end
       object trbDynLimRel: TTrackBar
-        Left = 321
-        Top = 363
-        Width = 216
-        Height = 32
+        Left = 15
+        Top = 588
+        Width = 270
+        Height = 29
         TabOrder = 13
-        ThumbLength = 30
+        ThumbLength = 45
         OnChange = trbDynLimRelChange
       end
     end
+    object gbChorus: TGroupBox
+      Left = 660
+      Top = 9
+      Width = 492
+      Height = 423
+      Caption = ' Chorus '
+      Color = clGray
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -17
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentBackground = False
+      ParentColor = False
+      ParentFont = False
+      TabOrder = 4
+      object lblChMix: TLabel
+        Left = 17
+        Top = 99
+        Width = 67
+        Height = 23
+        Caption = 'Mix: 0.35'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+      end
+      object lblChBaseDelay: TLabel
+        Left = 17
+        Top = 159
+        Width = 147
+        Height = 23
+        Caption = 'Base delay: 22.0 ms'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+      end
+      object lblChDepth: TLabel
+        Left = 17
+        Top = 218
+        Width = 105
+        Height = 23
+        Caption = 'Depth: 8.0 ms'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+      end
+      object lblChFeedback: TLabel
+        Left = 17
+        Top = 282
+        Width = 111
+        Height = 23
+        Caption = 'Feedback: 0.10'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+      end
+      object lblChRate: TLabel
+        Left = 258
+        Top = 99
+        Width = 99
+        Height = 23
+        Caption = 'Rate: 0.35 Hz'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+      end
+      object lblChTempo: TLabel
+        Left = 260
+        Top = 159
+        Width = 169
+        Height = 23
+        Caption = 'Tempo: 120 BPM / 1/8'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+      end
+      object lblChWidth: TLabel
+        Left = 266
+        Top = 218
+        Width = 92
+        Height = 23
+        Caption = 'Width: 70 %'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+      end
+      object lblChSmooth: TLabel
+        Left = 260
+        Top = 279
+        Width = 138
+        Height = 23
+        Caption = 'Smoothing: 20 ms'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+      end
+      object cbChEnabled: TCheckBox
+        Left = 17
+        Top = 32
+        Width = 108
+        Height = 22
+        Caption = 'Enabled'
+        TabOrder = 0
+        OnClick = cbChEnabledClick
+      end
+      object trbChMix: TTrackBar
+        Left = 11
+        Top = 120
+        Width = 229
+        Height = 30
+        Max = 100
+        Frequency = 10
+        Position = 35
+        TabOrder = 1
+        ThumbLength = 45
+        OnChange = trbChMixChange
+      end
+      object trbChBaseDelay: TTrackBar
+        Left = 11
+        Top = 182
+        Width = 229
+        Height = 28
+        Max = 60
+        Min = 1
+        Frequency = 5
+        Position = 22
+        TabOrder = 2
+        ThumbLength = 45
+        OnChange = trbChBaseDelayChange
+      end
+      object trbChDepth: TTrackBar
+        Left = 11
+        Top = 242
+        Width = 229
+        Height = 28
+        Max = 250
+        Frequency = 25
+        Position = 80
+        TabOrder = 3
+        ThumbLength = 45
+        OnChange = trbChDepthChange
+      end
+      object trbChFeedback: TTrackBar
+        Left = 9
+        Top = 305
+        Width = 231
+        Height = 30
+        Max = 95
+        Frequency = 10
+        Position = 10
+        TabOrder = 4
+        ThumbLength = 45
+        OnChange = trbChFeedbackChange
+      end
+      object rbChRateFree: TRadioButton
+        Left = 258
+        Top = 29
+        Width = 102
+        Height = 22
+        Caption = 'Rate (Hz)'
+        Checked = True
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+        TabOrder = 5
+        TabStop = True
+        OnClick = rbChRateModeClick
+      end
+      object rbChRateSync: TRadioButton
+        Left = 258
+        Top = 59
+        Width = 119
+        Height = 22
+        Caption = 'Tempo sync'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+        TabOrder = 6
+        OnClick = rbChRateModeClick
+      end
+      object trbChRate: TTrackBar
+        Left = 251
+        Top = 120
+        Width = 225
+        Height = 30
+        Max = 2000
+        Min = 1
+        Frequency = 200
+        Position = 35
+        TabOrder = 7
+        ThumbLength = 45
+        OnChange = trbChRateChange
+      end
+      object edtChBpm: TEdit
+        Left = 260
+        Top = 183
+        Width = 66
+        Height = 31
+        TabOrder = 8
+        Text = '120'
+        OnChange = edtChBpmChange
+      end
+      object cmbChNoteDiv: TComboBox
+        Left = 338
+        Top = 183
+        Width = 81
+        Height = 31
+        Style = csDropDownList
+        TabOrder = 9
+        OnChange = cmbChNoteDivChange
+      end
+      object trbChWidth: TTrackBar
+        Left = 251
+        Top = 240
+        Width = 225
+        Height = 29
+        Max = 100
+        Frequency = 10
+        Position = 70
+        TabOrder = 10
+        ThumbLength = 45
+        OnChange = trbChWidthChange
+      end
+      object trbChSmooth: TTrackBar
+        Left = 258
+        Top = 300
+        Width = 225
+        Height = 29
+        Max = 200
+        Frequency = 20
+        Position = 20
+        TabOrder = 11
+        ThumbLength = 45
+        OnChange = trbChSmoothChange
+      end
+    end
     object GroupBox1: TGroupBox
-      Left = 11
-      Top = 11
-      Width = 239
-      Height = 482
+      Left = 12
+      Top = 440
+      Width = 221
+      Height = 453
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -636,10 +1101,10 @@ object frmMain: TfrmMain
       ParentFont = False
       TabOrder = 3
       object pmLeft: TMfPeakMeter
-        Left = 90
-        Top = 107
-        Width = 24
-        Height = 316
+        Left = 85
+        Top = 96
+        Width = 21
+        Height = 285
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
@@ -652,10 +1117,10 @@ object frmMain: TfrmMain
         Precision = 10
       end
       object pmRight: TMfPeakMeter
-        Left = 119
-        Top = 107
-        Width = 22
-        Height = 316
+        Left = 111
+        Top = 96
+        Width = 21
+        Height = 285
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
@@ -668,8 +1133,8 @@ object frmMain: TfrmMain
         Precision = 1
       end
       object Label1: TLabel
-        Left = 33
-        Top = 443
+        Left = 30
+        Top = 398
         Width = 28
         Height = 21
         Margins.Left = 5
@@ -686,8 +1151,8 @@ object frmMain: TfrmMain
         ParentFont = False
       end
       object Label2: TLabel
-        Left = 164
-        Top = 443
+        Left = 147
+        Top = 398
         Width = 39
         Height = 21
         Margins.Left = 5
@@ -704,10 +1169,10 @@ object frmMain: TfrmMain
         ParentFont = False
       end
       object lblLeftVolume: TLabel
-        Left = 19
-        Top = 74
-        Width = 58
-        Height = 18
+        Left = 17
+        Top = 66
+        Width = 52
+        Height = 17
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
@@ -723,10 +1188,10 @@ object frmMain: TfrmMain
         ParentFont = False
       end
       object lblRightVolume: TLabel
-        Left = 158
-        Top = 74
-        Width = 45
-        Height = 18
+        Left = 154
+        Top = 66
+        Width = 40
+        Height = 17
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
@@ -743,23 +1208,29 @@ object frmMain: TfrmMain
       end
       object cbLockVolumeSliders: TCheckBox
         Left = 5
-        Top = 32
-        Width = 193
-        Height = 25
+        Top = 29
+        Width = 132
+        Height = 22
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
         Margins.Bottom = 5
-        Caption = 'Lock Volume Sliders'
+        Caption = 'Lock Sliders'
         Checked = True
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
         State = cbChecked
         TabOrder = 0
       end
       object trbVolumeL: TTrackBar
-        Left = 16
-        Top = 98
-        Width = 55
-        Height = 339
+        Left = 1
+        Top = 84
+        Width = 74
+        Height = 304
         Hint = 'Press and release SHIFT + ESC to set zero position.'
         Margins.Left = 5
         Margins.Top = 5
@@ -775,15 +1246,15 @@ object frmMain: TfrmMain
         Position = -30
         ShowHint = True
         TabOrder = 1
-        ThumbLength = 45
+        ThumbLength = 68
         TickMarks = tmBoth
         OnChange = trbVolumeLChange
       end
       object trbVolumeR: TTrackBar
-        Left = 152
-        Top = 98
-        Width = 55
-        Height = 339
+        Left = 130
+        Top = 89
+        Width = 74
+        Height = 304
         Hint = 'Press and release SHIFT + ESC to set zero position.'
         Margins.Left = 5
         Margins.Top = 5
@@ -799,17 +1270,221 @@ object frmMain: TfrmMain
         Position = -30
         ShowHint = True
         TabOrder = 2
-        ThumbLength = 45
+        ThumbLength = 68
         TickMarks = tmBoth
         OnChange = trbVolumeRChange
       end
     end
+    object GroupBox2: TGroupBox
+      Left = 242
+      Top = 440
+      Width = 176
+      Height = 453
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
+      Caption = 'Master Volume'
+      Color = clGray
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -17
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentBackground = False
+      ParentColor = False
+      ParentFont = False
+      TabOrder = 5
+      object lblMainLeftVolume: TLabel
+        Left = 19
+        Top = 66
+        Width = 52
+        Height = 17
+        Margins.Left = 5
+        Margins.Top = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
+        Alignment = taCenter
+        AutoSize = False
+        Caption = '0%'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clGrayText
+        Font.Height = -17
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
+      end
+      object lblMainRightVolume: TLabel
+        Left = 105
+        Top = 66
+        Width = 40
+        Height = 17
+        Margins.Left = 5
+        Margins.Top = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
+        Alignment = taCenter
+        AutoSize = False
+        Caption = '0%'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clGrayText
+        Font.Height = -17
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
+      end
+      object Label3: TLabel
+        Left = 17
+        Top = 398
+        Width = 28
+        Height = 21
+        Margins.Left = 5
+        Margins.Top = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
+        Alignment = taCenter
+        Caption = 'Left'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = cl3DDkShadow
+        Font.Height = -17
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
+      end
+      object Label5: TLabel
+        Left = 77
+        Top = 398
+        Width = 39
+        Height = 21
+        Margins.Left = 5
+        Margins.Top = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
+        Alignment = taCenter
+        Caption = 'Right'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = cl3DDkShadow
+        Font.Height = -17
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
+      end
+      object trbMainVolumeL: TTrackBar
+        Left = 2
+        Top = 89
+        Width = 86
+        Height = 304
+        Hint = 'Press and release SHIFT + ESC to set zero position.'
+        Margins.Left = 5
+        Margins.Top = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
+        DoubleBuffered = True
+        Max = 0
+        Min = -100
+        Orientation = trVertical
+        ParentDoubleBuffered = False
+        ParentShowHint = False
+        Frequency = 10
+        Position = -30
+        ShowHint = True
+        TabOrder = 0
+        ThumbLength = 68
+        TickMarks = tmBoth
+        OnChange = trbMainVolumeLChange
+      end
+      object trbMainVolumeR: TTrackBar
+        Left = 82
+        Top = 89
+        Width = 79
+        Height = 304
+        Hint = 'Press and release SHIFT + ESC to set zero position.'
+        Margins.Left = 5
+        Margins.Top = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
+        DoubleBuffered = True
+        Max = 0
+        Min = -100
+        Orientation = trVertical
+        ParentDoubleBuffered = False
+        ParentShowHint = False
+        Frequency = 10
+        Position = -30
+        ShowHint = True
+        TabOrder = 1
+        ThumbLength = 68
+        TickMarks = tmBoth
+        OnChange = trbMainVolumeRChange
+      end
+      object CheckBox1: TCheckBox
+        Left = 9
+        Top = 29
+        Width = 117
+        Height = 22
+        Margins.Left = 5
+        Margins.Top = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
+        Caption = 'Lock Sliders'
+        Checked = True
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -17
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+        State = cbChecked
+        TabOrder = 2
+      end
+      object cbxMute: TCheckBox
+        Left = 9
+        Top = 426
+        Width = 110
+        Height = 26
+        Margins.Left = 5
+        Margins.Top = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
+        Caption = 'Mute'
+        TabOrder = 3
+        OnClick = cbxMuteClick
+      end
+    end
+    object rbSpectrum: TRadioButton
+      Left = 956
+      Top = 861
+      Width = 106
+      Height = 32
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
+      Caption = 'Spectrum'
+      Checked = True
+      TabOrder = 6
+      TabStop = True
+      OnClick = rbSpectrumClick
+    end
+    object rbVu: TRadioButton
+      Left = 1074
+      Top = 861
+      Width = 75
+      Height = 32
+      Margins.Left = 5
+      Margins.Top = 5
+      Margins.Right = 5
+      Margins.Bottom = 5
+      Caption = 'VU'
+      TabOrder = 7
+      OnClick = rbVuClick
+    end
   end
   object pnlTrackbar: TPanel
     Left = 0
-    Top = 562
-    Width = 1650
-    Height = 55
+    Top = 933
+    Width = 1461
+    Height = 51
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
@@ -819,10 +1494,10 @@ object frmMain: TfrmMain
     ParentBackground = False
     TabOrder = 3
     object lblBarPositionInSTime: TLabel
-      Left = 14
-      Top = 27
-      Width = 129
-      Height = 24
+      Left = 12
+      Top = 24
+      Width = 117
+      Height = 23
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -831,10 +1506,10 @@ object frmMain: TfrmMain
       Caption = 'Time: 00:00:00'
     end
     object lblBarPositionInSamples: TLabel
-      Left = 164
-      Top = 27
-      Width = 204
-      Height = 24
+      Left = 147
+      Top = 24
+      Width = 185
+      Height = 23
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -845,8 +1520,8 @@ object frmMain: TfrmMain
     object pbProgress: TProgressBar
       Left = 1
       Top = 1
-      Width = 1648
-      Height = 22
+      Width = 1459
+      Height = 21
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -859,9 +1534,9 @@ object frmMain: TfrmMain
   end
   object stxtStatus: TStaticText
     Left = 0
-    Top = 680
-    Width = 1650
-    Height = 27
+    Top = 1044
+    Width = 1461
+    Height = 24
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
@@ -880,24 +1555,29 @@ object frmMain: TfrmMain
     ParentFont = False
     TabOrder = 4
     Transparent = False
-    ExplicitTop = 683
   end
   object btnLoad: TButton
     Left = 12
-    Top = 630
-    Width = 99
-    Height = 36
+    Top = 1001
+    Width = 90
+    Height = 33
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
     Margins.Bottom = 5
     Caption = 'Load ...'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -17
+    Font.Name = 'Segoe UI'
+    Font.Style = [fsBold]
+    ParentFont = False
     TabOrder = 5
     OnClick = btnLoadClick
   end
   object mnuMain: TMainMenu
-    Left = 386
-    Top = 498
+    Left = 527
+    Top = 1065
     object OpenAudioFile1: TMenuItem
       Caption = 'File'
       object Exit1: TMenuItem
@@ -912,59 +1592,78 @@ object frmMain: TfrmMain
       'WAV|*.wav|MPEG Audio Layer-3  (MP3)|*.mp3|Free Losless Audio Cod' +
       'er (FLAC)|*.flac|All files|*.*'
     Title = 'Open an Audio File'
-    Left = 477
-    Top = 498
+    Left = 435
+    Top = 1065
   end
-  object MfWasApiPlayerEngine: TMfWasApiPlayerEngine
-    Left = 437
-    Top = 332
+  object fxChorus: TMfChorusEffect
+    Enabled = False
+    NoteDiv = cnd1_1
+    Left = 410
+    Top = 25
   end
-  object FXCompressorLimiter: TMfCompressorLimiterEffect
-    CompThresholdDb = -18.000000000000000000
-    CompRatio = 3.000000000000000000
-    CompAttackMs = 10.000000000000000000
-    CompReleaseMs = 120.000000000000000000
-    CompKneeDb = 6.000000000000000000
-    LimCeilingDb = -1.000000000000000000
-    LimReleaseMs = 80.000000000000000000
-    LimLookaheadMs = 5.000000000000000000
-    TruePeakCeilingDbTP = -1.000000000000000000
+  object fxCompressorLimiter: TMfCompressorLimiterEffect
+    Enabled = False
+    CompEnabled = False
+    CompAutoMakeup = False
+    LimEnabled = False
+    RmsDetector = False
+    TruePeakGuard = True
     TruePeakOversample = 4
-    Left = 1215
-    Top = 496
+    Left = 607
+    Top = 28
   end
-  object FXParametricEq: TMfParametricEqEffect
-    GainDb = 3.000000000000000000
-    CenterFreqHz = 1000.000000000000000000
-    Q = 1.000000000000000000
-    BandwidthOctaves = 1.000000000000000000
-    RampMode = rmFast
-    TruePeakCeilingDbTP = -1.000000000000000000
-    TruePeakOversample = 4
-    Left = 616
-    Top = 331
+  object fxParametricEq: TMfParametricEqEffect
+    Enabled = False
+    RampMode = rmOff
+    RampTimeMs = 0
+    TruePeakOversample = 0
+    Left = 327
+    Top = 27
   end
-  object FXFlangerEcho: TMfFlangerEchoEffect
-    BaseDelayMs = 3.000000000000000000
-    DepthMs = 2.000000000000000000
-    RateHz = 0.250000000000000000
-    Feedback = 0.200000002980232200
-    Wet = 0.349999994039535500
-    Left = 705
-    Top = 331
+  object fxFlangerEcho: TMfFlangerEchoEffect
+    Enabled = False
+    Left = 158
+    Top = 23
   end
   object waFxRack: TMfWasApiEffectsRack
     Slots = <
       item
-        Effect = FXParametricEq
+        Effect = fxParametricEq
       end
       item
-        Effect = FXCompressorLimiter
+        Effect = fxChorus
       end
       item
-        Effect = FXFlangerEcho
+        Effect = fxCompressorLimiter
+      end
+      item
+        Effect = fxFlangerEcho
       end>
-    Left = 804
-    Top = 498
+    Left = 248
+    Top = 25
+  end
+  object MfWasApiPlayerEngine: TMfWasApiPlayerEngine
+    UseDefaultDevice = False
+    EffectsRack = waFxRack
+    OnStateChanged = MfWasApiPlayerEngineStateChanged
+    OnError = MfWasApiPlayerEngineError
+    OnReady = MfWasApiPlayerEngineReady
+    OnProcessed = MfWasApiPlayerEngineProcessed
+    OnEnded = MfWasApiPlayerEngineEnded
+    PitchRangePct = 16.000000000000000000
+    PitchDetentPct = 0.100000000000000000
+    PitchAutoZeroPct = 0.300000000000000000
+    PitchRampMs = 50
+    VarispeedEnabled = True
+    Left = 495
+    Top = 28
+  end
+  object aepMaster: TMfAudioEndPoint
+    DeviceState = 'Active'
+    MasterScalarVolume = 0.624515175819397000
+    MasterDbVolume = -7.139482975006104000
+    Mute = True
+    Left = 158
+    Top = 90
   end
 end

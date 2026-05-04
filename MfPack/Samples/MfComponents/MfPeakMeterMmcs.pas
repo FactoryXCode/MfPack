@@ -14,16 +14,20 @@
 // Description: An extended Peakmeter component based on the
 //              MfPeakmeterEx Sample with MMCS support.
 //
+//              How to assign to an audio endpoint:
+//              PeakMeter.Enabled := False;
+//              PeakMeter.EndpointDeviceID := '{0.0.0.00000000}.{ef4f5772-aeac-426a-8d69-a6bcf7153472}'; << DeviceID
+//              PeakMeter.Enabled := True;
+//
 // Company: FactoryX
 // Intiator(s): Tony (maXcomX), Peter (OzShips)
 // Contributor(s): Tony Kalf (maXcomX), Carmen (Carmenh)
-
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: To install the visual components, choose Install in the Project Manager.
@@ -33,7 +37,7 @@
 // Related projects: MfPackX319
 // Known Issues: -
 //
-// Compiler version: 23 up to 35               q
+// Compiler version: 23 up to 35
 // SDK version: 10.0.26100.4654
 //
 // Todo: -
@@ -98,13 +102,16 @@ uses
   WASAPIEngine;
 
 const
-  // Timer period (in milliseconds)
-  TIMER_PERIOD = 30;
 
-const
+  // Timer period (in milliseconds)
+  TIMER_PERIOD = 33;
+
   // Internal tick message (posted to the component window handle).
   WM_MFPEAKMETEREX_TICK = WM_USER + $5A1;
 
+  // Very low-level noise (denormals, silence tails) can keep 1 LED flickering,
+  // so we need a threshold.
+  SILENCE_GATE: Single = 1.0e-5; // ≈ -100 dB
 
 type
 
@@ -140,15 +147,15 @@ type
     procedure SetEnabled(const Value: Boolean);
     procedure SetDueTime(const Value: Cardinal);
     procedure SetPeriod(const Value: Cardinal);
-    procedure Start;
-    procedure Stop;
+    procedure Start();
+    procedure Stop();
 
   public
 
     constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
+    destructor Destroy(); override;
 
-    procedure Reset; // restart with current settings
+    procedure Reset(); // restart with current settings
     property TargetHwnd: HWND read FTargetHwnd write FTargetHwnd;
 
   published
@@ -180,12 +187,6 @@ type
   TMfPeakMeterInputSource = (isWasapiEndpoint,
                              isWasapiEngine);
 
-  // Engine-fed level mode.
-  // - elmPeak: use block peak (0..1)
-  // - elmRms:  use block RMS (VU-like, more movement)
-  TMfPeakMeterEngineLevelMode = (elmPeak,
-                                 elmRms);
-
   TMfPeakMeterMmcs = class(TGraphicControl)
   private
     { private fields }
@@ -213,6 +214,10 @@ type
 
     fDataFlow: EDataFlow;
     fRole: ERole;
+
+    // Optional: explicitly bind to a specific endpoint device (IMMDevice ID).
+    // If empty, the default endpoint is used based on DeviceDataFlow + DeviceRole.
+    FEndpointDeviceID: UnicodeString;
 
     fBmp: TBitmap;
 
@@ -246,14 +251,27 @@ type
     FExtRmsBitsL: LongInt;
     FExtRmsBitsR: LongInt;
 
-    // Which external metric to use for drawing
-    FEngineLevelMode: TMfPeakMeterEngineLevelMode;
     FExtChannels: Integer;
     FExtSmoothValue: Single;
-    
-    // VU integration (power average), engine-fed mode
-    FVuPowerL: Double;
-    FVuPowerR: Double;
+
+    // peak-hold.
+    FPeakHoldValue: Single;
+    FPeakHoldTime: Double;
+
+    // NOTE: Suggested values:
+    //   0.30 = snappier
+    //   0.50 = nice default
+    //   0.80 = slower, more “broadcast” feel.
+    FPeakHoldDuration: Single; // e.g. 0.5 sec
+
+    // Change these values if you want to improve these basic settings.
+    // Engine-source display tuning.
+    FEngineMeterFloorDb: Single;
+    FEngineMeterCeilDb: Single;
+    FEngineMeterGamma: Single;
+    FEnginePeakWeight: Single;
+    FEngineRmsWeight: Single;
+    FEngineReleaseSec: Single;
 
     { private methods }
 
@@ -294,6 +312,16 @@ type
     function EnsureEndpointInterfaces: HRESULT;
     procedure SetDeviceDataFlow(value: EDataFlow);
     procedure SetDeviceRole(value: ERole);
+    procedure SetEndpointDeviceID(const Value: UnicodeString);
+    // Setters for meter dynamics.
+    procedure SetEngineMeterFloorDb(const Value: Single);
+    procedure SetEngineMeterCeilDb(const Value: Single);
+    procedure SetEngineMeterGamma(const Value: Single);
+    procedure SetEnginePeakWeight(const Value: Single);
+    procedure SetEngineRmsWeight(const Value: Single);
+    procedure SetEngineReleaseSec(const Value: Single);
+    // Peak-hold
+    procedure SetPeakHoldDuration(const Value: Single);
 
   protected
     { protected methods }
@@ -308,6 +336,8 @@ type
     procedure CalculatePeakValue();
     function GetLastLedPos(value: Integer): Integer;
 
+    property IntTimer: TLightMmcssTimer read FTimer;
+
   public
     { public fields }
 
@@ -317,7 +347,7 @@ type
 
 
     // External (engine-fed) metering
-    procedure ResetExternalPeak();
+    procedure AudioEnded();
     procedure PushPcm(const pData: PByte;
                       const ByteCount: DWord;
                       const Wfx: PWAVEFORMATEX);
@@ -357,20 +387,35 @@ type
 
     property DeviceDataFlow: EDataFlow read fDataFlow write SetDeviceDataFlow default eRender;
     property DeviceRole: ERole read fRole write SetDeviceRole default eMultimedia;
+    // Bind to a specific audio endpoint by IMMDevice ID (e.g. '{0.0.0.00000000}.{...}').
+    // Leave empty to meter the default endpoint selected by DeviceDataFlow + DeviceRole.
+    property EndpointDeviceID: UnicodeString read FEndpointDeviceID write SetEndpointDeviceID;
 
     property Style: TMfPeakMeterExstyle read fStyle write SetStyle;
     property Direction: TMfPeakMeterExDirection read fDirection write SetDirection;
     property PeakValue: Single read sPeakValue write SetPeakValue;
     property Channels: UINT read fChannelCount;
     property SampleChannel: TMfPeakMeterExChannel read fMeterChannel write SetPeakMeterChannel;
-    property IntTimer: TLightMmcssTimer read FTimer write FTimer;
+
     property Precision: Cardinal read fSafeTimerInterval write SetSafeTimerInterval default TIMER_PERIOD;
     property Enabled: Boolean read fEnabled write SetEnabled default False;
     // Select the metering source.
     property InputSource: TMfPeakMeterInputSource read FInputSource write SetInputSource default isWasapiEndpoint;
-    // In engine-fed mode, choose which level metric drives the LEDs.
-    property EngineLevelMode: TMfPeakMeterEngineLevelMode read FEngineLevelMode write FEngineLevelMode default elmPeak;
     property WasApiEngine: TWasApiEngine read FWasApiEngine write FWasApiEngine;
+
+    // Tune meter dynamics.
+    // Engine-fed meter tuning (used when InputSource = isWasapiEngine)
+    property EngineMeterFloorDb: Single read FEngineMeterFloorDb write SetEngineMeterFloorDb;
+    property EngineMeterCeilDb: Single read FEngineMeterCeilDb write SetEngineMeterCeilDb;
+    // Blend of peak + RMS support.
+    // final = Max(peak * PeakWeight, rms * RmsWeight)
+    property EngineMeterGamma: Single read FEngineMeterGamma write SetEngineMeterGamma;
+    property EnginePeakWeight: Single read FEnginePeakWeight write SetEnginePeakWeight;
+    property EngineRmsWeight: Single read FEngineRmsWeight write SetEngineRmsWeight;
+    // Release time in seconds.
+    property EngineReleaseSec: Single read FEngineReleaseSec write SetEngineReleaseSec;
+    // Peak-hold
+    property PeakHoldDuration: Single read FPeakHoldDuration write SetPeakHoldDuration;
 end;
 
 
@@ -482,6 +527,7 @@ begin
                             True,
                             False,
                             nil); // manual-reset.
+
   FMmcssTaskName := 'Pro Audio';
   FMmcssPriority := 1;
 end;
@@ -596,16 +642,8 @@ end;
 
 
 constructor TMfPeakMeterMmcs.Create(aOwner: Tcomponent);
-var
-  hr: HResult;
-
-label
-  done;
-
 begin
   inherited Create(aOwner);
-
-  hr := S_OK;
 
   fEnabled := False;
   Width := 12;
@@ -661,16 +699,24 @@ begin
 
   // Default metering source = endpoint
   FInputSource := isWasapiEndpoint;
-  FEngineLevelMode := elmRms;
   FExtRmsBitsL := 0;
   FExtRmsBitsR := 0;
-
   
   FExtPeakBitsL := 0;
   FExtPeakBitsR := 0;
   FExtSmoothValue := 0.0;
-  FVuPowerL := 0.0;
-  FVuPowerR := 0.0;
+
+  FPeakHoldValue := 0.0;
+  FPeakHoldTime := 0.0;
+  FPeakHoldDuration := 0.5; // 0.5 sec
+
+  // Default meter dynamics
+  FEngineMeterFloorDb := -36.0;
+  FEngineMeterCeilDb := -1.0;
+  FEngineMeterGamma := 0.95;
+  FEnginePeakWeight := 1.00;
+  FEngineRmsWeight := 1.05;
+  FEngineReleaseSec := 0.12;
 
   // Create and configure a lightweight MMCSS-aware timer (posts to our hidden HWND).
   // The timer drives repaint/ballistics for BOTH sources; it is enabled only when Enabled=True.
@@ -689,19 +735,6 @@ begin
   fBmp := TBitmap.Create;
   // We paint our entire bounds; this reduces flicker for windowless controls.
   ControlStyle := ControlStyle + [csOpaque];
-
-done:
-
-  if ((csDesigning in ComponentState) = False) then
-    if (FAILED(hr)) then
-      begin
-        MessageBox(0,
-                   LPCWSTR('An error occured in ' + Self.ClassName + #13 +
-                           'Error: ' + IntToStr(hr) + #13 +
-                           Self.ClassName + ' will be disabled.') ,
-                   LPCWSTR('Error'),
-                   MB_OK or MB_ICONSTOP);
-      end;
 end;
 
 
@@ -748,10 +781,18 @@ begin
   if FAILED(hr) then
     goto done;
 
-  // Get peak meter for default audio device.
-  hr := pEnumerator.GetDefaultAudioEndpoint(fDataFlow,
-                                            fRole,
-                                            pDevice);
+  // Bind to a specific device if EndpointDeviceID is set; otherwise use the default endpoint.
+  if FEndpointDeviceID <> '' then
+    begin
+      hr := pEnumerator.GetDevice(PWideChar(FEndpointDeviceID),
+                                 pDevice);
+    end
+  else
+    begin
+      hr := pEnumerator.GetDefaultAudioEndpoint(fDataFlow,
+                                                fRole,
+                                                pDevice);
+    end;
   if FAILED(hr) then
     goto done;
 
@@ -824,7 +865,7 @@ begin
 
       // Engine-fed mode: release endpoint and reset external peaks.
       ReleaseEndpointInterfaces();
-      ResetExternalPeak;
+      AudioEnded();
       sPeakValue := 0.0;
       Paint;
     end
@@ -845,7 +886,7 @@ end;
 
 
 // Using a regular TTimer is less precise, but can do as well.
-procedure TMfPeakMeterMmcs.ResetExternalPeak;
+procedure TMfPeakMeterMmcs.AudioEnded();
 var
   z: Single;
   b: LongInt;
@@ -855,20 +896,24 @@ begin
   z := 0.0;
   b := PLongInt(@z)^;
 
-  InterlockedExchange(FExtPeakBitsL,
-                      b);
-  InterlockedExchange(FExtPeakBitsR,
-                      b);
-  InterlockedExchange(FExtRmsBitsL,
-                      b);
-  InterlockedExchange(FExtRmsBitsR,
-                      b);
+  InterlockedExchange(FExtPeakBitsL, b);
+  InterlockedExchange(FExtPeakBitsR, b);
+  InterlockedExchange(FExtRmsBitsL,  b);
+  InterlockedExchange(FExtRmsBitsR,  b);
+
   FExtChannels := 0;
   FExtSmoothValue := 0.0;
+  sPeakValue := 0.0;
+  FPeakHoldValue := 0.0;
+  FPeakHoldTime := 0.0;
+
+  if not (csDestroying in ComponentState) then
+    Invalidate;
 end;
 
 
-function MfReadWaveExtSubFormat(const Wfx: PWAVEFORMATEX; out SubFormat: TGUID): Boolean;
+function MfReadWaveExtSubFormat(const Wfx: PWAVEFORMATEX;
+                                out SubFormat: TGUID): Boolean;
 var
   p: PByte;
 
@@ -1009,6 +1054,8 @@ var
   pF32: PSingle;
   p24: PInt24;
 
+  SubFormat: TGUID;
+
 begin
 
   if (pData = nil) or
@@ -1034,6 +1081,15 @@ begin
   // WAVE_FORMAT_EXTENSIBLE can carry IEEE float or PCM in SubFormat; we treat it as PCM unless marked float.
   // If you already normalize this elsewhere, feel free to simplify.
   isIeeeFloat := (fmtTag = WAVE_FORMAT_IEEE_FLOAT);
+
+  if (fmtTag = WAVE_FORMAT_EXTENSIBLE) then
+    begin
+
+      if MfReadWaveExtSubFormat(Wfx,
+                                SubFormat) then
+        isIeeeFloat := IsEqualGUID(SubFormat,
+                                   KSDATAFORMAT_SUBTYPE_IEEE_FLOAT);
+    end;
 
   peakL := 0.0;
   peakR := 0.0;
@@ -1259,6 +1315,8 @@ begin
                       PLongInt(@rmsL)^);
   InterlockedExchange(FExtRmsBitsR,
                       PLongInt(@rmsR)^);
+
+  FExtChannels := channels;
 end;
 
 
@@ -1270,7 +1328,6 @@ var
   vR: Single;
   v: Single;
   dt: Double;
-  releaseSec: Double;
   coeff: Double;
   hr: HRESULT;
 
@@ -1279,6 +1336,7 @@ var
   // Display mapping helpers ----------------------------------------------------
   function Clamp01(const x: Single): Single; inline;
   begin
+
     if (x < 0) then
       Exit(0);
     if (x > 1) then
@@ -1289,64 +1347,89 @@ var
   function LinearToDbFS(const lin: Single): Single; inline;
   const
     EPS: Single = 1.0e-12;
+
   begin
-    Result := 20.0 * Log10(Max(lin, EPS));
+
+    Result := 20.0 * Log10(Max(lin,
+                           EPS));
   end;
 
   function DbToMeter01(const db: Single;
                        const FloorDb: Single;
                        const CeilDb: Single): Single; inline;
   begin
+
     Result := Clamp01((db - FloorDb) / (CeilDb - FloorDb));
   end;
 
-  function Curve(const x, gamma: Single): Single; inline;
+  function Curve(const x,
+                 gamma: Single): Single; inline;
   begin
-    Result := Power(Clamp01(x), gamma);
+
+    Result := Power(Clamp01(x),
+                    gamma);
   end;
-
-  // Change these values if you want to improve these basic settings.
-  const
-
-    METER_FLOOR_DB: Single = -60.0;
-    METER_CEIL_DB: Single = -6.0;
-    METER_GAMMA: Single =  0.65;
 
 var
   db: Single;
+  pL, pR: Single;
+  rL, rR: Single;
+  releaseSec: Single;
 
 begin
 
   // ===========================================================================
   // ENGINE SOURCE (per-deck metering).
-  // mmPreFader  = raw engine RMS (gain staging)
-  // mmPostFader = raw engine RMS * GUI fader/balance gains (matches audio)
+  // Peak-driven display with a little RMS support for body.
   // ===========================================================================
   if (FInputSource = isWasapiEngine) then
     begin
 
-      // Always use engine-fed RMS as the base
+      // Read PEAK values
+      bL :=  InterlockedCompareExchange(FExtPeakBitsL,
+                                        0,
+                                        0);
+
+      bR := InterlockedCompareExchange(FExtPeakBitsR,
+                                        0,
+                                        0);
+
+      pL := PSingle(@bL)^;
+      pR := PSingle(@bR)^;
+
+      // Read RMS values
       bL := InterlockedExchangeAdd(FExtRmsBitsL,
                                    0);
-
       bR := InterlockedExchangeAdd(FExtRmsBitsR,
                                    0);
+      rL := PSingle(@bL)^;
+      rR := PSingle(@bR)^;
 
-      vL := PSingle(@bL)^;
-      vR := PSingle(@bR)^;
+      // Safety clamp
+      if (pL < 0.0) then
+        pL := 0.0;
+      if (pR < 0.0) then
+        pR := 0.0;
+      if (rL < 0.0) then
+        rL := 0.0;
+      if (rR < 0.0) then
+        rR := 0.0;
 
-      // Default = unity (acts like pre-fader if engine not connected).
+      // Default = unity
       gL := 1.0;
       gR := 1.0;
 
-      // Apply GUI gains only for post-fader
+      // Apply GUI gains only for post-fader behaviour
       if Assigned(FWasApiEngine) then
         begin
 
           FWasApiEngine.GetMeterFaderGains(gL,
                                            gR);
-          vL := vL * gL;
-          vR := vR * gR;
+
+          pL := pL * gL;
+          pR := pR * gR;
+          rL := rL * gL;
+          rR := rR * gR;
         end;
 
       // Channel handling
@@ -1356,13 +1439,18 @@ begin
       if (FExtChannels <= 1) then
         begin
 
-          vR := vL;
+          pR := pL;
+          rR := rL;
           fMeterChannel := mcLeft;
         end;
 
+      // Blend: mostly peak, with a bit of RMS support
+      vL := Max(pL * FEnginePeakWeight, rL * FEngineRmsWeight);
+      vR := Max(pR * FEnginePeakWeight, rR * FEngineRmsWeight);
+
+      // Select channel(s)
       if (fSampleAllChannels = True) then
         begin
-
           if (vR > vL) then
             v := vR
           else
@@ -1376,34 +1464,58 @@ begin
             v := vL;
         end;
 
-      // Display mapping
+      // Final safety clamp
       if (v < 0.0) then
+        v := 0.0
+      else if (v > 1.0) then
+        v := 1.0;
+
+      // Silence gate: avoid tiny residual noise flicker
+      if (v < SILENCE_GATE) then
         v := 0.0;
 
+      // Convert to display space
       db := LinearToDbFS(v);
       v := DbToMeter01(db,
-                       METER_FLOOR_DB,
-                       METER_CEIL_DB);
+                       FEngineMeterFloorDb,
+                       FEngineMeterCeilDb);
 
-      if (METER_GAMMA <> 1.0) then
+      if (FEngineMeterGamma <> 1.0) then
         v := Curve(v,
-                   METER_GAMMA);
+                   FEngineMeterGamma);
 
       // Ballistics
       dt := fSafeTimerInterval / 1000.0;
       if (dt <= 0.0) then
         dt := 0.01;
 
-      releaseSec := 0.25;
+      releaseSec := FEngineReleaseSec;
+      if (releaseSec <= 0.001) then
+        releaseSec := 0.001;
+
       coeff := Exp(-dt / releaseSec);
 
       if (v >= FExtSmoothValue) then
         FExtSmoothValue := v
       else
         FExtSmoothValue := Max(v,
-                               (FExtSmoothValue * coeff) * 1.0);
+                               FExtSmoothValue * coeff);
 
       sPeakValue := FExtSmoothValue;
+
+      if (sPeakValue >= FPeakHoldValue) then
+        begin
+
+          FPeakHoldValue := sPeakValue;
+          FPeakHoldTime := 0.0;
+        end
+      else
+        begin
+
+          FPeakHoldTime := FPeakHoldTime + dt;
+          if (FPeakHoldTime >= FPeakHoldDuration) then
+            FPeakHoldValue := FPeakHoldValue * 0.95; // falloff
+        end;
 
       Invalidate;
       Exit;
@@ -1414,7 +1526,9 @@ begin
   // ===========================================================================
   if (pMeterInfo = nil) then
     begin
+
       hr := EnsureEndpointInterfaces();
+
       if FAILED(hr) or (pMeterInfo = nil) then
         begin
 
@@ -1428,7 +1542,9 @@ begin
     pMeterInfo.GetPeakValue(sPeakValue)
   else
     begin
-      pMeterInfo.GetChannelsPeakValues(fChannelCount, @afPeakValues[0]);
+
+      pMeterInfo.GetChannelsPeakValues(fChannelCount,
+                                       @afPeakValues[0]);
 
       if (fChannelCount = 1) then
         fMeterChannel := mcLeft;
@@ -1451,7 +1567,7 @@ begin
   if (value < 10) then
     value := 10;
   if (value > 10000) then
-    value := 1000;
+    value := 10000;
 
   fSafeTimerInterval := value;
   if Assigned(FTimer) then
@@ -1462,26 +1578,169 @@ end;
 procedure TMfPeakMeterMmcs.SetDeviceDataFlow(value: EDataFlow);
 begin
 
-  if (fDataFlow <> value) then
-    fDataFlow := value;
+  if (fDataFlow = value) then
+    Exit;
+
+  fDataFlow := value;
+
+  // If using default endpoint selection (EndpointDeviceID empty), rebind now.
+  if (FEndpointDeviceID = '') and (FEnabled) and (FInputSource = isWasapiEndpoint) then
+    begin
+
+      ReleaseEndpointInterfaces();
+      EnsureEndpointInterfaces();
+      Invalidate;
+    end;
 end;
 
 
 procedure TMfPeakMeterMmcs.SetDeviceRole(value: ERole);
 begin
 
-  if (fRole <> value) then
-    fRole := value;
+  if (fRole = value) then
+    Exit;
+
+  fRole := value;
+
+  // If using default endpoint selection (EndpointDeviceID empty), rebind now.
+  if (FEndpointDeviceID = '') and (FEnabled) and (FInputSource = isWasapiEndpoint) then
+    begin
+      ReleaseEndpointInterfaces();
+      EnsureEndpointInterfaces();
+      Invalidate;
+    end;
+end;
+
+
+procedure TMfPeakMeterMmcs.SetEndpointDeviceID(const Value: UnicodeString);
+begin
+
+  if (FEndpointDeviceID = Value) then
+    Exit;
+
+  FEndpointDeviceID := Value;
+
+  // If we're currently metering the endpoint, rebind immediately.
+  if (FEnabled) and (FInputSource = isWasapiEndpoint) then
+    begin
+      ReleaseEndpointInterfaces();
+      EnsureEndpointInterfaces();
+      Invalidate;
+    end;
+end;
+
+
+procedure TMfPeakMeterMmcs.SetEngineMeterFloorDb(const Value: Single);
+begin
+  if (FEngineMeterFloorDb <> Value) then
+    begin
+      FEngineMeterFloorDb := Value;
+      Invalidate;
+    end;
+end;
+
+procedure TMfPeakMeterMmcs.SetEngineMeterCeilDb(const Value: Single);
+begin
+  if (FEngineMeterCeilDb <> Value) then
+    begin
+      FEngineMeterCeilDb := Value;
+      Invalidate;
+    end;
+end;
+
+procedure TMfPeakMeterMmcs.SetEngineMeterGamma(const Value: Single);
+var
+  NewValue: Single;
+begin
+  NewValue := Value;
+  if (NewValue <= 0.0) then
+    NewValue := 0.01;
+
+  if (FEngineMeterGamma <> NewValue) then
+    begin
+      FEngineMeterGamma := NewValue;
+      Invalidate;
+    end;
+end;
+
+procedure TMfPeakMeterMmcs.SetEnginePeakWeight(const Value: Single);
+var
+  NewValue: Single;
+begin
+  NewValue := Value;
+  if (NewValue < 0.0) then
+    NewValue := 0.0;
+
+  if (FEnginePeakWeight <> NewValue) then
+    begin
+      FEnginePeakWeight := NewValue;
+      Invalidate;
+    end;
+end;
+
+procedure TMfPeakMeterMmcs.SetEngineRmsWeight(const Value: Single);
+var
+  NewValue: Single;
+begin
+  NewValue := Value;
+  if (NewValue < 0.0) then
+    NewValue := 0.0;
+
+  if (FEngineRmsWeight <> NewValue) then
+    begin
+      FEngineRmsWeight := NewValue;
+      Invalidate;
+    end;
+end;
+
+procedure TMfPeakMeterMmcs.SetEngineReleaseSec(const Value: Single);
+var
+  NewValue: Single;
+
+begin
+
+  NewValue := Value;
+  if (NewValue <= 0.0) then
+    NewValue := 0.001;
+
+  if (FEngineReleaseSec <> NewValue) then
+    begin
+
+      FEngineReleaseSec := NewValue;
+      Invalidate;
+    end;
+end;
+
+
+procedure TMfPeakMeterMmcs.SetPeakHoldDuration(const Value: Single);
+var
+  NewValue: Single;
+
+begin
+
+  NewValue := Value;
+
+  if (NewValue < 0.0) then
+    NewValue := 0.0;
+
+  if (FPeakHoldDuration <> NewValue) then
+    begin
+
+      FPeakHoldDuration := NewValue;
+      Invalidate;
+    end;
 end;
 
 
 procedure TMfPeakMeterMmcs.SetEnabled(value: Boolean);
 var
   hr: HRESULT;
+
 begin
 
   if (fEnabled = value) then
     begin
+
       inherited;
       Exit;
     end;
@@ -1496,10 +1755,10 @@ begin
         FTimer.Enabled := False;
 
       // Release endpoint interfaces so endpoint volume/mute can never influence visuals.
-      ReleaseEndpointInterfaces;
+      ReleaseEndpointInterfaces();
 
       // Reset external peaks and visuals.
-      ResetExternalPeak;
+      AudioEnded();
       sPeakValue := 0.0;
       Paint;
 
@@ -1515,7 +1774,7 @@ begin
   if (FInputSource = isWasapiEndpoint) then
     begin
 
-      hr := EnsureEndpointInterfaces;
+      hr := EnsureEndpointInterfaces();
       if FAILED(hr) then
         begin
           // Fail-safe: keep running but show silence.
@@ -1527,8 +1786,8 @@ begin
     begin
 
       // Engine-fed mode: ensure endpoint interfaces are not held.
-      ReleaseEndpointInterfaces;
-      ResetExternalPeak;
+      ReleaseEndpointInterfaces();
+      AudioEnded();
       sPeakValue := 0.0;
     end;
 
@@ -1557,10 +1816,12 @@ begin
 
   if (value <> fbevelwidth) then
     begin
+
       if (value = 0) then
         value := 1;
       if (value > (height div 3)) or (value > (width div 3)) then
         value := 1;
+
       fBevelWidth := value;
       Paint;
     end;
@@ -1572,6 +1833,7 @@ begin
 
   if (value <> fBevelStyle) then
     begin
+
       fBevelStyle := value;
       Paint;
     end;
@@ -1607,6 +1869,7 @@ begin
 
   if (value <> fGreenLeds) then
     begin
+
       fGreenLeds := value;
       Paint;
     end;
@@ -1619,6 +1882,7 @@ begin
   if (value <> fColors[1,
                        False]) then
     begin
+
       fColors[1,
               False] := value;
       Paint;
@@ -1631,6 +1895,7 @@ begin
 
   if (value <> fColors[2, True]) then
     begin
+
       fColors[2,
               True] := value;
       Paint;
@@ -1643,6 +1908,7 @@ begin
 
   if (value <> fYellowMax) then
     begin
+
       fYellowMax := value;
       Paint;
     end;
@@ -1654,6 +1920,7 @@ begin
 
   if (value <> fYellowLeds) then
     begin
+
       fYellowLeds := value;
       Paint;
     end;
@@ -1666,6 +1933,7 @@ begin
   if value <> fColors[2,
                       False] then
     begin
+
       fColors[2,
               False] := value;
       Paint;
@@ -1679,6 +1947,7 @@ begin
   if (value <> fColors[3,
                        True]) then
     begin
+
       fColors[3,
               True] := value;
       Paint;
@@ -1691,6 +1960,7 @@ begin
 
   if (value <> fRedMax) then
     begin
+
       fRedmax := value;
       Paint;
     end;
@@ -1853,7 +2123,7 @@ end;
 // Calculates the peak value returned from a device (0.0 - 1.0) to an integer
 procedure TMfPeakMeterMmcs.CalculatePeakValue();
 const
-  DB_FLOOR = -60.0;  // meter floor
+
   DB_GREENHI = -12.0;  // green->yellow boundary
   DB_YELLOWHI = -3.0;   // yellow->red boundary
   DB_TOP = 0.0;    // 0 dBFS
@@ -1936,7 +2206,7 @@ begin
 
   db := 20.0 * Log10(v);
   db := ClampD(db,
-               DB_FLOOR,
+               FEngineMeterFloorDb,
                DB_TOP);
 
   totalLeds := fGreenLeds + fYellowLeds + fRedLeds;
@@ -1953,7 +2223,7 @@ begin
 
       // Green zone: 0..GreenLeds
       idx := MapDbToCount(db,
-                          DB_FLOOR,
+                          FEngineMeterFloorDb,
                           DB_GREENHI,
                           fGreenLeds);
       iPeakValue := idx;
@@ -2264,4 +2534,3 @@ begin
 end;
 
 end.
-

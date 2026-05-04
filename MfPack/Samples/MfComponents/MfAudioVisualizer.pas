@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: To install the visual components, choose Install in the Project Manager.
@@ -128,6 +128,7 @@ type
 
   TMfAudioVisualizer = class(TGraphicControl)
   private
+
     // Published settings.
     FActive: Boolean;
     FAutoStart: Boolean;
@@ -190,6 +191,9 @@ type
     FHoldTickL,
     FHoldTickR: DWORD;
 
+    // The endpoint deviceId the visualizer will be wired to.
+    FDeviceId: string;
+
     procedure TimerTick(Sender: TObject);
 
     procedure SetActive(Value: Boolean);
@@ -234,6 +238,9 @@ type
     procedure DrawSpectrum(ACanvas: TCanvas; const R: TRect);
     procedure DrawDesignTimePlaceholder(ACanvas: TCanvas; const R: TRect);
 
+    // Set DeviceID
+    procedure SetDeviceId(const Value: string);
+
   protected
 
     procedure Loaded(); override;
@@ -272,6 +279,7 @@ type
 
     property DeviceDataFlow: EDataFlow read FDataFlow write SetDeviceDataFlow default eRender;
     property DeviceRole: ERole read FRole write SetDeviceRole default eMultimedia;
+    property DeviceId: string read FDeviceId write SetDeviceId;
 
     property Mode: TMfAnalyzerMode read FMode write SetMode default amLevelsAndSpectrum;
     property View: TMfVizMode read FView write SetView default vmSpectrum;
@@ -717,9 +725,13 @@ begin
     if FAILED(hr) then
       Exit;
 
-    hr := Enumerator.GetDefaultAudioEndpoint(FOwner.FDataFlow,
-                                             FOwner.FRole,
-                                             Device);
+    if (FOwner.FDeviceId <> '') then
+      hr := Enumerator.GetDevice(PWideChar(WideString(FOwner.FDeviceId)),
+                                 Device)
+    else
+      hr := Enumerator.GetDefaultAudioEndpoint(FOwner.FDataFlow,
+                                               FOwner.FRole,
+                                               Device);
     if FAILED(hr) then
       Exit;
 
@@ -1322,6 +1334,18 @@ begin
                   R.Top + 8, 'TMfAudioVisualizer');
   ACanvas.TextOut(R.Left + 8,
                   R.Top + 28, 'Design-time: no capture/timers');
+end;
+
+
+procedure TMfAudioVisualizer.SetDeviceId(const Value: string);
+begin
+
+  if SameText(FDeviceId,
+              Value) then
+    Exit;
+
+  FDeviceId := Trim(Value);
+  RestartIfRunning();
 end;
 
 

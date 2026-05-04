@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Delphi : The IUnknown entries of functions should be casted like this:
@@ -4649,18 +4649,17 @@ type
   PWAVEFORMATEXTENSIBLE = ^WAVEFORMATEXTENSIBLE;
   {$EXTERNALSYM PWAVEFORMATEXTENSIBLE}
   WAVEFORMATEXTENSIBLE = record
-    Format : WAVEFORMATEX;
-    Samples : record                      // union part
-      case integer of
-        0: (wValidBitsPerSample : WORD);  // bits of precision
-        1: (wSamplesPerBlock    : WORD);  // valid if wBitsPerSample == 0
-        2: (wReserved           : WORD);  // If neither applies, set to zero.
+    Format: WAVEFORMATEX;
+    Samples: record // Union part.
+      case Integer of
+        0: (wValidBitsPerSample: WORD); // Bits of precision.
+        1: (wSamplesPerBlock: WORD);  // Valid if wBitsPerSample = 0.
+        2: (wReserved: WORD);  // If neither applies, set to zero.
       end;
-    dwChannelMask : DWORD;                // which channels are present in stream
-    SubFormat :     TGUID;
+    dwChannelMask: DWORD; // Which channels are present in stream.
+    SubFormat: TGUID;
   end;
   {$EXTERNALSYM WAVEFORMATEXTENSIBLE}
-
 {$DEFINE __WAVEFORMATEXTENSIBLE__DEFINED}
 {$ENDIF} // !_WAVEFORMATEXTENSIBLE_
 

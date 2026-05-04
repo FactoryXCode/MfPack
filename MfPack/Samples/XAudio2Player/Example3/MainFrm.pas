@@ -15,13 +15,13 @@
 //
 // Company: FactoryX
 // Intiator(s): Tony Kalf (maXcomX)
-// Contributor(s): Tony Kalf (maXcomX)
+// Contributor(s): Carmen (carmenh), Tony Kalf (maXcomX)
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/04/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -234,12 +234,17 @@ begin
 
   if (butPlayPause.Tag = 0) then
     begin
+
       // Play.
       fXaudio2Engine.Play();
+
+      pmLeft.Enabled := True;
+      pmRight.Enabled := True;
 
       // Set choosen effects.
       if (ckbReverbMain.ItemIndex > 0) then
         ckbReverbMainCloseUp(Self);
+
       if (ckbReverbSource.ItemIndex > 0) then
         ckbReverbSourceCloseUp(Self);
 
@@ -261,6 +266,10 @@ begin
 
   if not Assigned(fXaudio2Engine) then
     Exit;
+
+  pmLeft.Enabled := False;
+  pmRight.Enabled := False;
+
   if SUCCEEDED(fXaudio2Engine.Stop()) then
     if FAILED(fXaudio2Engine.InitializeXAudio2(False)) then
       StatusBar.Caption := Format('Failed initializing file: %s.', [fAudioFileName]);
@@ -632,18 +641,25 @@ var
 
 begin
 
-  fSamplePos := Trunc((X / pbProgress.Width) * pbProgress.Max);
-  pbProgress.ShowHint := True;
-  pbProgress.Hint := Format('Position: %d', [fSamplePos]);
+  if not Assigned(fXaudio2Engine) then
+    exit;
 
-  lblBarPositionInSamples.Caption := Format('Sample Position: %d',
-                                            [fSamplePos]);
+  if fXaudio2Engine.PlayStatus in [rsPlaying, rsPauzed] then
+    begin
 
-  fTimePos := HnsTimeToStr((fSamplePos div (fXaudio2Engine.SamplesPerSec)) * 10000000,
-                           False);
+      fSamplePos := Trunc((X / pbProgress.Width) * pbProgress.Max);
+      pbProgress.ShowHint := True;
+      pbProgress.Hint := Format('Position: %d', [fSamplePos]);
 
-  lblBarPositionInSTime.Caption := Format('Timing Position: %s',
-                                          [fTimePos]);
+      lblBarPositionInSamples.Caption := Format('Sample Position: %d',
+                                                [fSamplePos]);
+
+      fTimePos := HnsTimeToStr((fSamplePos div (fXaudio2Engine.SamplesPerSec)) * 10000000,
+                               False);
+
+      lblBarPositionInSTime.Caption := Format('Timing Position: %s',
+                                              [fTimePos]);
+    end;
 end;
 
 
@@ -702,21 +718,19 @@ var
 
 begin
 
-  //TThread.Synchronize(nil,
-  //                   procedure
-  //                      begin
-                          Xaudio2EventData := fXaudio2Engine.AudioEventData;
-                          sPlayed := HnsTimeToStr(Xaudio2EventData.TimePlayed,
-                                                  False);
 
-                          lblProcessed.Caption := Format('Samples: %d',
-                                                         [Xaudio2EventData.Position + Xaudio2EventData.SamplesProcessed]);
+  Xaudio2EventData := fXaudio2Engine.AudioEventData;
+  sPlayed := HnsTimeToStr(Xaudio2EventData.TimePlayed,
+                          False);
 
-                          lblPlayed.Caption := Format('Played: %s',
-                                                      [sPlayed]);
+  lblProcessed.Caption := Format('Samples: %d',
+                                 [Xaudio2EventData.Position + Xaudio2EventData.SamplesProcessed]);
 
-                          pbProgress.Position := Xaudio2EventData.Position + Xaudio2EventData.SamplesProcessed;
-  //                      end);
+  lblPlayed.Caption := Format('Played: %s',
+                              [sPlayed]);
+
+  pbProgress.Position := Xaudio2EventData.Position + Xaudio2EventData.SamplesProcessed;
+
 
   Application.ProcessMessages;
 end;
@@ -744,12 +758,13 @@ begin
                                               False)]);
 
   StatusBar.Caption := Format('Loaded file: %s.',
-                                 [fAudioFileName]);
+                              [fAudioFileName]);
   // Set progressbar values.
   pbProgress.Max := (mftAudioDuration div 10000000) * fXaudio2Engine.SamplesPerSec;
   pbProgress.Min := 0;
   pbProgress.Position := 0;
 end;
+
 
 // Called after user hits Stop.
 procedure TfrmMain.HandleOnAudioStoppedEvent(Sender: TObject);
@@ -766,9 +781,13 @@ begin
   stxtStatus.Caption := GetStatus();
 end;
 
+
 // Called when playing starts.
 procedure TfrmMain.HandleOnAudioPlayingEvent(Sender: TObject);
 begin
+
+  if (fXaudio2Engine.PlayStatus <> rsPlaying)  then
+    Exit;
 
   butPlayPause.Enabled := True;
   butPlayPause.Caption := 'Pause';
@@ -776,6 +795,7 @@ begin
   StatusBar.Caption := Format('Loaded file: %s.', [fAudioFileName]);
   stxtStatus.Caption := GetStatus();
 end;
+
 
 // Called when paused.
 procedure TfrmMain.HandleOnAudioPauzedEvent(Sender: TObject);
@@ -786,6 +806,7 @@ begin
   StatusBar.Caption := Format('Loaded file: %s.', [fAudioFileName]);
   stxtStatus.Caption := GetStatus();
 end;
+
 
 // Called when the audiodata loop has been left.
 procedure TfrmMain.HandleOnAudioDataLoopLeftEvent(Sender: TObject);

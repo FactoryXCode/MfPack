@@ -11,7 +11,7 @@ audio that can be added to a mp4 file.
 
 
 * Thanks to Renate Schaaf for the initiative sample!
-  See: https://github.com/rmesch/Bitmaps2Video-for-Media-Foundation.
+See: https://github.com/rmesch/Bitmaps2Video-for-Media-Foundation.
 
 Supported file formats and codecs:
 
@@ -58,7 +58,7 @@ https://sourceforge.net/projects/MFPack
 
 
 First release date: 24-02-2024
-Final release date: 13-08-2025
+Final release date: 05/05/2026
 
 
 
