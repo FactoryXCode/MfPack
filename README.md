@@ -406,8 +406,8 @@ dedicated recorder unit.
 ***Complex samples***
 
 **MfRDJ Radio Mixer sample**
-*This sample demonstrates how to build an audio mixer,
-effects and how to implement IceCast/Caddy fot internet broadcasting.
+This sample demonstrates how to build an audio mixer,
+effects and how to implement IceCast/Caddy for internet broadcasting.
 The Mixer is fully adjustable for audio endpoint assignments, mixer decks and loopback decks.
 All WASAPI code comes together in this sample.
 *Notes:* 
