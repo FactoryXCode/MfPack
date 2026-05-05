@@ -406,14 +406,14 @@ dedicated recorder unit.
 ***Complex samples***
 
 **MfRDJ Radio Mixer sample**
-*This sample demonstrates how to build an audio mixer,
-effects and how to implement IceCast/Caddy fot internet broadcasting.
-The Mixer is fully adjustable for audio endpoint assigment, mixer decks and loopback decks.
+This sample demonstrates how to build an audio mixer,
+effects and how to implement IceCast/Caddy for internet broadcasting.
+The Mixer is fully adjustable for audio endpoint assignments, mixer decks and loopback decks.
 All WASAPI code comes together in this sample.
 *Notes:* 
  You have to know the principles of WASAPI, MFT's and audio manipulation.
  This sample is very large and not suitable for beginners!
- Before using this sample make shure, you have all needed components installed (see instructions).
+ Before using this sample make sure, you have all needed components installed (see instructions).
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/RDJ_Interface_s.png)
 
