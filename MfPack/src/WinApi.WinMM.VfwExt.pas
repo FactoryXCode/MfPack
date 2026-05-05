@@ -10,7 +10,7 @@
 // Release date: 17-05-2020
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: Constants and function prototypes needed to create IHV's extension DLL
 //              and constants used to programatically open a target capture device.
 //
@@ -28,7 +28,7 @@
 // Remarks:
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

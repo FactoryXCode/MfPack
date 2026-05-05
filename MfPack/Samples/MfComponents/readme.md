@@ -1,6 +1,6 @@
 # MfComponents
 
-Version: X 3.1.9
+Version: 3.2.0
 
 
 NOTES:
@@ -40,7 +40,7 @@ Note: On how to use these components, please read the WasApiPlayer sample 5 docu
 
 # Other files/ helpers for the components.
 * PcmLib.pas - A very convenient unit that is capable of recoding diverse WAV formats.
- 
+* WASAPIEngine.pas - Universal WASAPIEngine 
 ```
 
 Project: Media Foundation - MFPack - Samples
@@ -51,7 +51,7 @@ https://sourceforge.net/projects/MFPack
 ```
 
 First release date: 05-02-2016
-Final release date: 02-03-2026
+Final release date: 05-05-2026
 
 Copyright © FactoryX. All rights reserved.
 

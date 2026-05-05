@@ -9,7 +9,7 @@
 // Release date: 21/09/2024
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 //
 // Description: This is sample 2 of SimpleCapture that shows you how to implement
 //              IAMCameraControl and IAMVideoProcAmp to control camera and video.
@@ -30,7 +30,7 @@
 // Remarks: Requires Windows 8 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

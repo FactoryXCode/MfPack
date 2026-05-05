@@ -10,7 +10,7 @@
 // Release date: 24-01-2020
 // Language: ENU
 //
-// Revision Version: 3.1.1
+// Revision Version: 3.2.0
 // Description: Helpers for the Transcoding sample,
 //
 // Company: FactoryX
@@ -27,11 +27,11 @@
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX311
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 34
-// SDK version: 10.0.22000.0
+// SDK version: 10.0.26100.4654
 //
 // Todo: -
 //

@@ -10,7 +10,7 @@
 // Release date: 15-09-2020
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: Commonm Include file for Multimedia API's
 //              Version 4.00
 //              For more information, see: https://docs.microsoft.com/en-us/windows/win32/api/mmsyscom/
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

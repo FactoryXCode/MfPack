@@ -10,7 +10,7 @@
 // Release date: 13-08-2025
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 //
 // Description: The main form where all user (front end) contol takes place.
 //              It also reads and write the MFT parameters from/to the ini file.
@@ -31,7 +31,7 @@
 //          Recommended minimum Delphi version: XE7.
 //
 // Related objects: -
-// Related projects: MfPackX319/Samples/WasApiPlayer/Example4
+// Related projects: MfPackX320/Samples/WasApiPlayer/Example4
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.26100.4654

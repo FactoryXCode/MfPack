@@ -9,7 +9,7 @@
 // Release date: 29-05-2024
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 //
 // Description:
 //   Latency measuring tool for Windows.

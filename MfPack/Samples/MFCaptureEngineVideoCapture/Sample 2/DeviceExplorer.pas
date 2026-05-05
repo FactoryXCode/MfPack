@@ -10,7 +10,7 @@
 // Release date: 18-11-2022
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 //
 // Description:
 //   This unit contains the DeviceExplorer class to discover video devices like webcams etc.
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX319/Samples/MFCaptureEngineVideoCapture
+// Related projects: MfPackX320/Samples/MFCaptureEngineVideoCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.26100.4654

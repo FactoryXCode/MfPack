@@ -10,7 +10,7 @@
 // Release date: 31-08-2022
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 //
 // Description: Contains interface definitions for the D3D11.2 API.
 //              Microsoft DirectX D3D11 used by Media Foundation.
@@ -31,7 +31,7 @@
 // Remarks:  Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

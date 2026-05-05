@@ -9,7 +9,7 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description:   
 //  This version of XAudio2 is available only in Windows 8 or later.
 //  Use the XAudio2 headers and libraries from the DirectX SDK with
@@ -100,7 +100,7 @@
 //           
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

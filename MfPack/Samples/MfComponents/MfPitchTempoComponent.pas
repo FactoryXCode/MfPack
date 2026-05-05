@@ -10,7 +10,7 @@
 // Release date: 18-11-2022
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 //
 // Description: Pitch + Tempo (time-stretch + pitch-shift) MFT.
 // Notes: - Intended to be hosted by TMfWasApiEffectsRack (float32 processing path).
@@ -34,7 +34,7 @@
 //
 // This unit assumes MfPack provides TMfAudioEffectMFTBase (IMFTransform helper).
 // Related objects: -
-// Related projects: MfPackX319/Samples/MFCaptureEngineVideoCapture
+// Related projects: MfPackX320/Samples/MFCaptureEngineVideoCapture
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.26100.4654

@@ -10,7 +10,7 @@
 // Release date: 17-09-2020
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: ApiSet Contract for api-ms-win-mm-time-l1-1-0
 //              Part of Windows Multimedia
 //              See: https://docs.microsoft.com/en-us/windows/win32/api/_multimedia/
@@ -29,7 +29,7 @@
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

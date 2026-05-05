@@ -10,7 +10,7 @@
 // Release date: 24-02-2024
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: Audio formats dialog.
 //
 // Company: FactoryX
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 //
 // Compiler version: 23 up to 35
 // SDK version: 10.0.26100.4654

@@ -10,7 +10,7 @@
 // Release date: 05-10-2015
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: Video related definitions and interfaces for ActiveMovie. (DirectX Include unit).
 //
 // Organisation: FactoryX
@@ -28,7 +28,7 @@
 //          If you need DirectShow, exclude this file from your project.
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

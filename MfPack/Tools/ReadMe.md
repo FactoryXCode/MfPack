@@ -1,6 +1,6 @@
 # Latency measuring tool for Windows
 
-Version: X 3.1.9
+Version: 3.2.0
 
 Description:
 This unit is designed to measure minimum, maximum and average execution times of a routine in MICROSECONDS.
@@ -38,5 +38,5 @@ Final release date: 05/05/2026
 
 
 
-Copyright © FactoryX. All rights reserved.
+(c)  FactoryX. All rights reserved.
 

@@ -3,14 +3,11 @@
 This update adds two *professional* controls often found on mixers/engineer EQs:
 
 1. **Mid Mode**
-
 * **Peaking (bell)**: boost/cut around center frequency
 * **Notch (band-stop)**: removes a narrow band (feedback control)
 
   * Mid gain is ignored in notch mode (depth is inherent to a notch)
-
 2. **Shelf bandwidth / slope**
-
 * Low/High shelves now expose RBJ shelf parameter **S** (slope)
 * Lower S = gentler transition, higher S = steeper
 
@@ -32,6 +29,4 @@ Ranges (clamped inside the MFT):
 * High Hz: 2000..20000
 * Mid Q: 0.3..6.0
 * Shelf S: 0.1..4.0
-
-
 

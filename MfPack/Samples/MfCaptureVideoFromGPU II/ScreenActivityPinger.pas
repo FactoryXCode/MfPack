@@ -10,7 +10,7 @@
 // Release date: 13-08-2025
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: This unit creates a small window that blinks at a rate of ~30 in on
 //              the screen that's being captured. This is necessary in cases where
 //              two separate video outputs (like most laptops) are being used.
@@ -32,7 +32,7 @@
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

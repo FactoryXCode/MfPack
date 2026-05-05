@@ -10,7 +10,7 @@
 // Release date: 24-01-2026
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: 3-band EQ (Low / Mid / High) MFT.
 //
 // Company: FactoryX
@@ -33,7 +33,7 @@
 // This unit assumes MfPack provides TMfAudioEffectMFTBase (IMFTransform helper).
 //
 // Related objects: MfAudioEffectMFTBase
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

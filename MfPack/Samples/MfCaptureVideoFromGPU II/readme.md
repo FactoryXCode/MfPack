@@ -1,6 +1,6 @@
 # MfCaptureVideoFromGPU II
 
-Version: X 3.1.9
+Version: 3.2.0
 
 Description:
 Demonstrates how to capture from screen using your videocard GPU and sound

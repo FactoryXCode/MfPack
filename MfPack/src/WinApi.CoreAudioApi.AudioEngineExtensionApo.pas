@@ -10,7 +10,7 @@
 // Release date: 29-06-2022
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: This header is used by Audio Devices DDI Reference. For more information, see:
 //              Audio Devices DDI Reference (https://docs.microsoft.com/en-us/windows/win32/api/_audio/)
 //
@@ -35,7 +35,7 @@
 //          Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

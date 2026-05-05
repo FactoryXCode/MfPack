@@ -10,7 +10,7 @@
 // Release date: 04-01-2016
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: Holds compiler definitions for MfPack.
 //
 //
@@ -29,7 +29,7 @@
 //          the major Windows updates. So, we started with ISÁK.
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 // Compiler version: 23 up to 35
 // SDK version: 10.0.26100.4654
@@ -374,8 +374,9 @@ const
 // {$DEFINE MFPACK_VERSION_315_UP} // Carmel release, update 20.
 // {$DEFINE MFPACK_VERSION_316_UP} // Morrissey release, update 21.
 // {$DEFINE MFPACK_VERSION_317_UP} // RammStein release, Milestone update 22.
-// {$DEFINE MFPACK_VERSION_318_UP}    // Ozzy Osbourne release, Milestone update 23.
-{$DEFINE MFPACK_VERSION_319_UP}    // Sineead O'Connor release, Milestone update 24.
+// {$DEFINE MFPACK_VERSION_318_UP} // Ozzy Osbourne release, Milestone update 23.
+// {$DEFINE MFPACK_VERSION_319_UP} // Sineead O'Connor release, Milestone update 24.
+{$DEFINE MFPACK_VERSION_320_UP}    // Bauhaus release, Milestone update 25.
 
 // WARNINGS
 // enable/disable compiler warnings.
@@ -419,8 +420,8 @@ const
 
 const
 // a global version ID (for internal use only).
-MfpVersion   = '3.1.7'; // Release version.
-{$DEFINE MFP_VERSION_317}
+MfpVersion   = '3.2.0'; // Release version.
+{$DEFINE MFP_VERSION_320}
 
 
 // Definitions WinApiTypes

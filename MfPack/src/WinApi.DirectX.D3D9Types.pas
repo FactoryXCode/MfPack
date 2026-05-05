@@ -10,7 +10,7 @@
 // Release date: 14-01-2018
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: Direct3D include file.
 //
 // Organisation: FactoryX
@@ -28,7 +28,7 @@
 //          New apps should use the latest Direct3D API
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

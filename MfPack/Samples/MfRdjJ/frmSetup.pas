@@ -10,7 +10,7 @@
 // Release date: 24-01-2026
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: RDJ Setup form GUI, settings for audio, IceCast and Caddy.
 //
 // Company: FactoryX

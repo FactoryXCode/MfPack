@@ -10,7 +10,7 @@
 // Release date: 13-08-2025
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: The capture engine that takes care of writing to a
 //              preview object (TPanel) and output file (MP4).
 //
@@ -29,7 +29,7 @@
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

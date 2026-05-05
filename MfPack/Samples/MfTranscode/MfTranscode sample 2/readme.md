@@ -1,6 +1,6 @@
 # MfTranscode example 2
 
-Version: X 3.1.7
+Version: 3.2.0
 
 NOTES:
 
@@ -8,6 +8,7 @@ NOTES:
 * SDK version 10.0.22621.0 (Win 11)
 * Requires Windows 7 or later.
 * Minimum supported MfPack version: 3.1.6
+* 
 
 Description:
 Demonstrates using the transcode API to transcode a source file (audio or video) to

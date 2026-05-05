@@ -10,7 +10,7 @@
 // Release date: 24-01-2026
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: Master PA and PFL deck MDI child form.
 //              Includes recorder and IceCast UI.
 //

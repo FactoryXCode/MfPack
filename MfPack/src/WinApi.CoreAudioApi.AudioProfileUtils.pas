@@ -10,7 +10,7 @@
 // Release date: 22-02-2024
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: Audio tools like profiles, enum audio mft's etc.
 //              Supported audio are AAC, MP3, Dolby AC-3.
 //
@@ -30,7 +30,7 @@
 //
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

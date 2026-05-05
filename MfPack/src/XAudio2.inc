@@ -10,7 +10,7 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: Version control unit for XAudio2
 //              Requires Windows 8, XAudio2.8 or later
 //
@@ -27,7 +27,7 @@
 //          alongside XAudio2.8 to support older applications, and does not require redistribution.
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 // Compiler version: 23 up to 35
 // SDK version: 10.0.26100.4654

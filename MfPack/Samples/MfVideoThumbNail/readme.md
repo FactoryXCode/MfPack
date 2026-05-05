@@ -1,6 +1,6 @@
 # MfVideoThumbNail
 
-Version: 3.1.8
+Version: 3.2.0
 
 Description:
 

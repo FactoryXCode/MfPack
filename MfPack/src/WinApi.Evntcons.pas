@@ -10,7 +10,7 @@
 // Release date: 18-12-2016
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: This unit defines the event consumer API.
 //
 // Organisation: FactoryX

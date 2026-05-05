@@ -10,7 +10,7 @@
 // Release date: 24-01-2026
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: Parses filenames containing artist and title. This is more
 //              convenient than reading tags, because they are most of the
 //              time badly maintenanced or not implemented.

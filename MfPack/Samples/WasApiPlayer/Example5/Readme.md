@@ -1,5 +1,5 @@
 # WASAPI Player Sample 5
-Version: X 3.1.9
+Version: 3.2.0
 
 This is a non-visual components application sample using WASAPI.
 The sample shows you how to build a real-time audio playback engine for Windows using Delphi style components.  
@@ -37,7 +37,6 @@ GUI → Engine Thread → EQ MFT → DSP → WASAPI Renderer
 - Requires **Windows 10 or later**
 - Minimum supported **MfPack version: 3.1.9**
 
-
 ---
 
 ## Project Information
@@ -55,7 +54,5 @@ GUI → Engine Thread → EQ MFT → DSP → WASAPI Renderer
 - **Final release:** 05/05/2026  
 
 ---
-
-## Copyright
 
 © FactoryX. All rights reserved.

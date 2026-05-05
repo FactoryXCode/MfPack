@@ -1,6 +1,6 @@
 # MfPlayer X
 
-Version: X 3.1.9
+Version: 3.2.0
 
 Description:
 Requires Windows 7 or later.

@@ -10,7 +10,7 @@
 // Release date: 24-01-2026
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: Math operations/calculations for the 3 band EQ.
 //
 // Notes:
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 10 (2H20) or later.
 //
 // Related objects: -
-// Related projects: MfPackX319/Samples/WasApiPlayer/Example4
+// Related projects: MfPackX320/Samples/WasApiPlayer/Example4
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

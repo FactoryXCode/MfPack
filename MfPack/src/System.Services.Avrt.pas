@@ -10,7 +10,7 @@
 // Release date: 24-10-2020
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: This module contains the multimedia class scheduler APIs and any public data
 //              structures needed to call these APIs.
 //              This header is part of the System Services API.
@@ -32,7 +32,7 @@
 //          For more information, see https://docs.microsoft.com/en-us/windows/win32/intl/conventions-for-function-prototypes.
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 33

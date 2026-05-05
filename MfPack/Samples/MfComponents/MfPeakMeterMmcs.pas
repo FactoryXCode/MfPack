@@ -10,7 +10,7 @@
 // Release date: 04-08-2016
 // Language: ENU
 //
-// Version: 3.1.9
+// Version: 3.2.0
 // Description: An extended Peakmeter component based on the
 //              MfPeakmeterEx Sample with MMCS support.
 //
@@ -34,7 +34,7 @@
 //          Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

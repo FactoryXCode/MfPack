@@ -1,6 +1,6 @@
 MfRdjJ
 
-Version: X 3.1.9
+Version: 3.2.0
 
 Description:
 
@@ -66,5 +66,5 @@ First release date: 05-02-2026
 
 Final release date: 05/05/2026
 
-Copyright © FactoryX. All rights reserved.
+Copyright  FactoryX. All rights reserved.
 

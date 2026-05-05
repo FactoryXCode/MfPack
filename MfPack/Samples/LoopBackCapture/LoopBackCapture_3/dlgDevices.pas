@@ -9,7 +9,7 @@
 // Release date: 23-04-2023
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 //
 // Description:
 //   Dialog to choose an rendering or capture device.

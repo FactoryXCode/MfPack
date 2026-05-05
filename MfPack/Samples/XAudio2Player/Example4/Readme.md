@@ -1,8 +1,8 @@
-XAudio2Player Sample 4
+**XAudio2Player Sample 4**
 
 
 
-Version: 3.1.9
+Version: 3.2.0
 
 
 
@@ -106,5 +106,5 @@ Final release date: 05/05/2026
 
 
 
-Copyright © FactoryX. All rights reserved.
+(c)  FactoryX. All rights reserved.
 

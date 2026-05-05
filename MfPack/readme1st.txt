@@ -1,4 +1,4 @@
-MfPack X 3.1.9
+MfPack X 3.2.0
 
 NOTES: 
  - This release is updated for compiler version 17 up to 35.

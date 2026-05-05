@@ -10,7 +10,7 @@
 // Release date: 24-01-2026
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: Flanger/echo MFT.
 //              Supports wet/dry mix (equal-power), delay/flange modulation, feedback (capped at 0.98),
 //              max buffer size (2000 ms), Catmull-Rom interpolation for fractional delay.
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows 7 or higher.
 //
 // Related objects: MfAudioEffectMFTBase
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

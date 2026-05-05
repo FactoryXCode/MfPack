@@ -10,7 +10,7 @@
 // Release date: 15/01/2022
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description:  This header is part of the System Services API.
 //
 //
@@ -28,7 +28,7 @@
 // Remarks: Requires Windows 10 or later.
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

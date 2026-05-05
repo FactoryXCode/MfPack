@@ -10,7 +10,7 @@
 // Release date: 02-06-2016
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: Windows Driver Model/Connection and Streaming Architecture (WDM-CSA)
 // ions.
 //
@@ -28,7 +28,7 @@
 // Remarks: Requires Windows 8.1 or later.
 // 
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

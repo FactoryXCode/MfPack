@@ -10,7 +10,7 @@
 // Release date: 27-08-2022
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: D3D11On12 is a mapping layer, which maps graphics commands from D3D11 to D3D12.
 //              D3D11On12 is not an implementation of the D3D11 API,
 //              but is instead an implementation of the D3D11 usermode DDI (device driver interface).
@@ -30,7 +30,7 @@
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

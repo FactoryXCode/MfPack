@@ -10,7 +10,7 @@
 // Release date: 13-08-2022
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: This unit allows Windows Mixed Reality apps to use Direct3D 12
 //              See: https://learn.microsoft.com/en-us/windows/win32/api/_direct3d12/
 //
@@ -29,7 +29,7 @@
 //          OS: Windows 10 NTDDI_WIN10_RS2 and above.
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

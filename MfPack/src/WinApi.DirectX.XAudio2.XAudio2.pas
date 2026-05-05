@@ -9,7 +9,7 @@
 // Release date: 07-07-2018
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: Declarations for the XAudio2 game audio API.
 //              Windows 10 XAudio2.9 or later
 //
@@ -29,7 +29,7 @@
 //          that target Windows 7. See https://aka.ms/xaudio2redist.
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

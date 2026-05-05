@@ -10,7 +10,7 @@
 // Release date: 16-09-2020
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: This file defines the MPEG-2 section header bitfields. These are
 //              defined here instead of in mpegstructs.idl because of MIDL
 //              compiler conflicts with bitfield definitions.
@@ -29,7 +29,7 @@
 // Remarks: Requires Windows Vista or later.
 //
 // Related objects: -
-// Related projects: MfPackX319
+// Related projects: MfPackX320
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

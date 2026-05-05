@@ -10,7 +10,7 @@
 // Release date: 13-08-2025
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: GUI for MfCaptureVideoFromGPU version 2
 //
 //
@@ -28,7 +28,7 @@
 // Remarks: -
 //
 // Related objects: -
-// Related projects: MfPackX319/Samples/MfCaptureVideoFromGPU II
+// Related projects: MfPackX320/Samples/MfCaptureVideoFromGPU II
 // Known Issues: -
 //
 // Compiler version: 23 up to 35

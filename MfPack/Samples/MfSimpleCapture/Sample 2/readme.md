@@ -1,6 +1,6 @@
 # MFSimpleCapture Sample 2
 
-Version: X 3.1.9
+Version: 3.2.0
 
 
 
@@ -20,8 +20,12 @@ Project: Media Foundation - MFPack - Samples
 Project location: https://github.com/FactoryXCode/MfPack
 https://sourceforge.net/projects/MFPack
 
+
+
 First release date: 15/09/2024
-Final release date: 21/09/2024
+Final release date: 05/05/2026
+
+
 
 Copyright © FactoryX. All rights reserved.
 

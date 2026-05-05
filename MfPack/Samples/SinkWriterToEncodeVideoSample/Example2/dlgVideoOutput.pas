@@ -10,7 +10,7 @@
 // Release date: 25-11-2022
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: UI for example of how to use the SinkWriter.
 //
 // Organisation: FactoryX

@@ -10,7 +10,7 @@
 // Release date: 24-01-2026
 // Language: ENU
 //
-// Revision Version: 3.1.9
+// Revision Version: 3.2.0
 // Description: Lightwheigt file open dialog (See comments below this header).
 //
 // Company: FactoryX
