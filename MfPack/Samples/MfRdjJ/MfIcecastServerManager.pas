@@ -90,7 +90,7 @@ type
   TMfIcecastStateEvent = procedure(Sender: TObject;
                                    AState: TMfIcecastServerState) of object;
 
-  TMfIcecastServerManager = class{(TComponent)}
+  TMfIcecastServerManager = class
   private
 
     FExePath: string;
@@ -132,16 +132,18 @@ type
     procedure InternalStopProcess(AppIsHuttingDown: Boolean = False);
     function GetRunning(): Boolean;
     function FileExistsSafe(const AFileName: string): Boolean;
+    function IsUncPath(const APath: string): Boolean;
+    function IsProbeOnlyMode(): Boolean;
 
     function ProbeTcp(): Boolean;
     function ProbeHttp(): Boolean;
     function ProbeReady(): Boolean;
     function GetStatusText(): string;
-
+    //function StateToText(AState: TMfIcecastServerState): string;
 
   public
 
-    constructor Create(){(AOwner: TComponent)}; //override;
+    constructor Create();
     destructor Destroy(); override;
 
     function Start(): HRESULT;
@@ -170,26 +172,6 @@ type
 
 
 implementation
-
-
-function _StateToText(AState: TMfIcecastServerState): string;
-begin
-
-  case AState of
-    issStopped:
-      Result := 'Stopped';
-    issStarting:
-      Result := 'Starting';
-    issRunningNotReady:
-      Result := 'Running (not ready yet)';
-    issReady:
-      Result := 'Ready';
-    issStopping:
-      Result := 'Stopping';
-  else
-    Result := 'Unknown';
-  end;
-end;
 
 
 { TMfIcecastServerManager }
@@ -244,6 +226,27 @@ function TMfIcecastServerManager.FileExistsSafe(const AFileName: string): Boolea
 begin
 
   Result := (AFileName <> '') and FileExists(AFileName);
+end;
+
+
+function TMfIcecastServerManager.IsUncPath(const APath: string): Boolean;
+begin
+
+  Result := (Length(APath) >= 2) and
+            (APath[1] = '\') and
+            (APath[2] = '\');
+end;
+
+
+function TMfIcecastServerManager.IsProbeOnlyMode(): Boolean;
+begin
+
+  // Remote/server mode:
+  // Carmen must NOT try to start an EXE over a UNC share such as
+  // \PCHP001\Icecastin\icecast.exe. That is slow, unreliable and
+  // cannot manage the real service/process correctly on the server PC.
+  // In this mode the manager only probes Host:Port readiness.
+  Result := (Trim(FExePath) = '') or IsUncPath(Trim(FExePath));
 end;
 
 
@@ -302,6 +305,31 @@ begin
   end;
 end;
 
+{
+function TMfIcecastServerManager.StateToText(AState: TMfIcecastServerState): string;
+begin
+
+  case AState of
+    issStopped: begin
+
+                 if IsProbeOnlyMode() then
+                   Result := 'Remote monitor stopped'
+                 else
+                   Result := 'Stopped';
+                end;
+    issStarting:
+      Result := 'Starting';
+    issRunningNotReady:
+      Result := 'Running (not ready yet)';
+    issReady:
+      Result := 'Ready';
+    issStopping:
+      Result := 'Stopping';
+  else
+    Result := 'Unknown';
+  end;
+end;
+}
 
 function TMfIcecastServerManager.BuildCommandLine(): string;
 begin
@@ -470,6 +498,19 @@ begin
 
   SetState(issStarting);
 
+  // Remote/server mode: do not launch Icecast from a UNC path.
+  // Just start readiness monitoring against Host:Port.
+  if IsProbeOnlyMode() then
+    begin
+
+      EmitLog(Format('[Icecast] Remote/server mode. Monitoring %s:%d; process start disabled.',
+                     [FHost,
+                      FPort]));
+      SetState(issRunningNotReady);
+      FPollTimer.Enabled := True;
+      Exit(S_OK);
+    end;
+
   try
 
     Result := InternalStartProcess;
@@ -543,6 +584,16 @@ begin
   FPendingRestartTick := 0;
   FPollTimer.Enabled := False;
 
+  if IsProbeOnlyMode() and (FProcessInfo.hProcess = 0) then
+    begin
+
+      if not AppIsShuttingDown then
+        EmitLog('[Icecast] Remote/server monitor stopped. Remote process was not touched.');
+      FLastReady := False;
+      SetState(issStopped);
+      Exit;
+    end;
+
   if not Running then
     begin
 
@@ -571,6 +622,14 @@ end;
 procedure TMfIcecastServerManager.Restart();
 begin
 
+  if IsProbeOnlyMode() then
+    begin
+
+      EmitLog('[Icecast] Remote/server mode. Restart request ignored; restart Icecast on the server PC.');
+      Start();
+      Exit;
+    end;
+
   Stop();
   Start();
 end;
@@ -579,10 +638,48 @@ end;
 function TMfIcecastServerManager.GetRunning(): Boolean;
 var
   ExitCode: DWORD;
+  ReadyNow: Boolean;
 
 begin
 
   Result := False;
+
+  if IsProbeOnlyMode() then
+    begin
+
+      Result := FPollTimer.Enabled and
+                (FState in [issStarting,
+                            issRunningNotReady,
+                            issReady]);
+      Exit;
+    end;
+
+  if IsProbeOnlyMode() and (FProcessInfo.hProcess = 0) then
+    begin
+
+      ReadyNow := ProbeReady;
+
+      if ReadyNow then
+        begin
+
+          if not FLastReady then
+            EmitLog(Format('[Icecast] Remote server ready on %s:%d',
+                           [FHost,
+                            FPort]));
+          FLastReady := True;
+          SetState(issReady);
+        end
+      else
+        begin
+
+          if FLastReady then
+            EmitLog('[Icecast] Remote server no longer responding to readiness probe.');
+          FLastReady := False;
+          SetState(issRunningNotReady);
+        end;
+
+      Exit;
+    end;
 
   if (FProcessInfo.hProcess = 0) then
     Exit;
@@ -656,6 +753,7 @@ var
   Sock: TSocket;
   Addr: TSockAddrIn;
   HostAnsi: AnsiString;
+  HostEnt: PHostEnt;
   Tv: TimeVal;
   WriteSet: TFDSet;
   OptVal: u_long;
@@ -695,7 +793,20 @@ begin
       Addr.sin_addr.S_addr := inet_addr(PAnsiChar(HostAnsi));
 
       if (LongInt(Addr.sin_addr.S_addr) = LongInt(INADDR_NONE)) then
-        Exit;
+        begin
+
+          // Accept DNS names too, for example factoryxradio.asuscomm.com.
+          // This keeps the probe useful in public/server setups.
+          HostEnt := gethostbyname(PAnsiChar(HostAnsi));
+          if (HostEnt = nil) or
+             (HostEnt^.h_addr_list = nil) or
+             (HostEnt^.h_addr_list^ = nil) then
+            Exit;
+
+          Move(HostEnt^.h_addr_list^^,
+               Addr.sin_addr,
+               HostEnt^.h_length);
+        end;
 
       connect(Sock,
               Addr,

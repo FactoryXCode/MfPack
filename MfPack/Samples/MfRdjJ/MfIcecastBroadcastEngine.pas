@@ -1991,6 +1991,12 @@ var
 begin
   Result := -1;
 
+  if Trim(FSettings.Host) = '' then
+    Exit;
+
+  if FSettings.Port = 0 then
+    Exit;
+
   Mount := AMount;
   if (Mount <> '') and (Mount[1] <> '/') then
     Mount := '/' + Mount;
@@ -1998,59 +2004,69 @@ begin
   Http := THTTPClient.Create;
 
   try
-
-    Http.ConnectionTimeout := 1500;
-    Http.ResponseTimeout := 1500;
-
-    Response := Http.Get('http://127.0.0.1:8000/status-json.xsl');
-
-    if Response.StatusCode <> 200 then
-      Exit;
-
-    Root := TJSONObject.ParseJSONValue(Response.ContentAsString) as TJSONObject;
     try
 
-      if (Root = nil) then
+      Http.ConnectionTimeout := 1500;
+      Http.ResponseTimeout := 1500;
+
+      Response := Http.Get(Format('http://%s:%d/status-json.xsl',
+                                  [Trim(FSettings.Host),
+                                   FSettings.Port]));
+
+      if (Response.StatusCode <> 200) then
         Exit;
 
-      IceStats := Root.GetValue('icestats') as TJSONObject;
-      if IceStats = nil then
-        Exit;
+      Root := TJSONObject.ParseJSONValue(Response.ContentAsString) as TJSONObject;
+      try
 
-      SourceValue := IceStats.GetValue('source');
-      if (SourceValue = nil) then
-        Exit;
-
-      if SourceValue is TJSONObject then
-        begin
-
-          SourceObj := TJSONObject(SourceValue);
-          Result := ReadListeners(SourceObj);
+        if (Root = nil) then
           Exit;
-        end;
 
-      if SourceValue is TJSONArray then
-        begin
+        IceStats := Root.GetValue('icestats') as TJSONObject;
+        if (IceStats = nil) then
+          Exit;
 
-          SourceArr := TJSONArray(SourceValue);
+        SourceValue := IceStats.GetValue('source');
+        if (SourceValue = nil) then
+          Exit;
 
-          for I := 0 to SourceArr.Count - 1 do
-            if SourceArr.Items[I] is TJSONObject then
-              begin
+        if (SourceValue is TJSONObject) then
+          begin
 
-                SourceObj := TJSONObject(SourceArr.Items[I]);
+            SourceObj := TJSONObject(SourceValue);
+            Result := ReadListeners(SourceObj);
+            Exit;
+          end;
 
-                if SourceMatches(SourceObj) then
-                  begin
+        if (SourceValue is TJSONArray) then
+          begin
 
-                    Result := ReadListeners(SourceObj);
-                    Exit;
-                  end;
-              end;
-        end;
+            SourceArr := TJSONArray(SourceValue);
+
+            for I := 0 to SourceArr.Count - 1 do
+              if (SourceArr.Items[I] is TJSONObject) then
+                begin
+
+                  SourceObj := TJSONObject(SourceArr.Items[I]);
+
+                  if SourceMatches(SourceObj) then
+                    begin
+
+                      Result := ReadListeners(SourceObj);
+                      Exit;
+                    end;
+                end;
+          end;
     finally
 
       Root.Free;
+    end;
+
+    except
+
+      // Listener count is optional. Never let a failed status probe break
+      // now-playing updates or broadcast startup, especially in remote mode.
+      Result := -1;
     end;
   finally
 

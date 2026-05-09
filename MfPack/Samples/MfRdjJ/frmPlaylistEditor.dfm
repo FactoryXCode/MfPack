@@ -32,9 +32,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 2
-    ExplicitLeft = 2
-    ExplicitTop = 117
-    ExplicitHeight = 647
     object splLeft: TSplitter
       Left = 520
       Top = 0
@@ -52,7 +49,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       Height = 650
       Align = alLeft
       TabOrder = 0
-      ExplicitHeight = 647
       object grdLibrary: TStringGrid
         Left = 1
         Top = 1
@@ -85,7 +81,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         OnMouseDown = grdLibraryMouseDown
         OnSelectCell = grdLibrarySelectCell
         OnSetEditText = grdLibrarySetEditText
-        ExplicitHeight = 645
       end
     end
     object pnlActions: TPanel
@@ -98,7 +93,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       Color = 5850948
       ParentBackground = False
       TabOrder = 1
-      ExplicitHeight = 647
       object btnAddToPlaylist: TMPxpButton
         Left = 7
         Top = 214
@@ -512,7 +506,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       ParentFont = False
       TabOrder = 2
       OnMouseDown = grdPlaylistMouseDown
-      ExplicitHeight = 647
     end
   end
   object pnlTop: TPanel
@@ -525,8 +518,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
     Color = 5850948
     ParentBackground = False
     TabOrder = 0
-    ExplicitLeft = 2
-    ExplicitTop = 18
     object Bevel2: TBevel
       Left = 4
       Top = 1
@@ -678,7 +669,7 @@ object frmPlaylistEditor: TfrmPlaylistEditor
         Left = 6
         Top = 64
         Width = 123
-        Height = 23
+        Height = 16
         Caption = 'Playlist Duration: 0'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWhite
@@ -907,8 +898,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
     ParentBackground = False
     ParentFont = False
     TabOrder = 1
-    ExplicitLeft = 2
-    ExplicitTop = 764
     object lblStatus: TLabel
       Left = 8
       Top = 7
@@ -939,13 +928,10 @@ object frmPlaylistEditor: TfrmPlaylistEditor
     ParentFont = False
     TabOrder = 3
     OnMouseDown = pnlCaptionMouseDown
-    ExplicitLeft = 2
-    ExplicitTop = 2
-    ExplicitWidth = 283
     object lblCaption: TLabel
       Left = 8
       Top = 11
-      Width = 123
+      Width = 88
       Height = 16
       Hint = 'Channel number'
       Margins.Left = 2
@@ -1016,9 +1002,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       Style = bsModern
       Transparent = True
       OnClick = btnMinimizeClick
-      ExplicitLeft = 636
-      ExplicitTop = 0
-      ExplicitHeight = 41
     end
     object btnMaxNormal: TMPxpButton
       Left = 1064
@@ -1072,9 +1055,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       Style = bsModern
       Transparent = True
       OnClick = btnMaxNormalClick
-      ExplicitLeft = 703
-      ExplicitTop = 0
-      ExplicitHeight = 41
     end
     object btnExit: TMPxpButton
       Left = 1198
@@ -1128,9 +1108,6 @@ object frmPlaylistEditor: TfrmPlaylistEditor
       Style = bsModern
       Transparent = True
       OnClick = btnExitClick
-      ExplicitLeft = 770
-      ExplicitTop = 0
-      ExplicitHeight = 41
     end
   end
 end

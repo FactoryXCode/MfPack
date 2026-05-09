@@ -3,8 +3,8 @@ object MainMDIFrm: TMainMDIFrm
   Top = 0
   BorderIcons = []
   Caption = 'RDJ Charlie'
-  ClientHeight = 870
-  ClientWidth = 1293
+  ClientHeight = 836
+  ClientWidth = 1281
   Color = 5850948
   DefaultMonitor = dmPrimary
   Font.Charset = DEFAULT_CHARSET
@@ -48,7 +48,7 @@ object MainMDIFrm: TMainMDIFrm
   object pnlCaption: TPanel
     Left = 0
     Top = 0
-    Width = 1293
+    Width = 1281
     Height = 41
     Align = alTop
     BevelOuter = bvNone
@@ -59,11 +59,11 @@ object MainMDIFrm: TMainMDIFrm
     ShowCaption = False
     TabOrder = 0
     OnMouseDown = pnlCaptionMouseDown
-    ExplicitWidth = 836
+    ExplicitWidth = 1275
     object lblLocalTime: TLabel
       Left = 550
       Top = 0
-      Width = 477
+      Width = 465
       Height = 41
       Align = alClient
       Alignment = taCenter
@@ -155,7 +155,7 @@ object MainMDIFrm: TMainMDIFrm
       WordWrap = True
     end
     object btnExit: TMPxpButton
-      Left = 1227
+      Left = 1215
       Top = 0
       Width = 66
       Height = 41
@@ -206,7 +206,7 @@ object MainMDIFrm: TMainMDIFrm
       Style = bsModern
       Transparent = True
       OnClick = btnExitClick
-      ExplicitLeft = 770
+      ExplicitLeft = 1209
     end
     object btnSetup: TMPxpButton
       Left = 105
@@ -289,7 +289,7 @@ object MainMDIFrm: TMainMDIFrm
       OnClick = btnPlaylistClick
     end
     object btnMinimize: TMPxpButton
-      Left = 1093
+      Left = 1081
       Top = 0
       Width = 67
       Height = 41
@@ -340,10 +340,10 @@ object MainMDIFrm: TMainMDIFrm
       Style = bsModern
       Transparent = True
       OnClick = btnMinimizeClick
-      ExplicitLeft = 636
+      ExplicitLeft = 1075
     end
     object btnMaxNormal: TMPxpButton
-      Left = 1160
+      Left = 1148
       Top = 0
       Width = 67
       Height = 41
@@ -394,7 +394,7 @@ object MainMDIFrm: TMainMDIFrm
       Style = bsModern
       Transparent = True
       OnClick = btnMaxNormalClick
-      ExplicitLeft = 703
+      ExplicitLeft = 1142
     end
     object btnEffects: TMPxpButton
       Left = 327
@@ -437,7 +437,7 @@ object MainMDIFrm: TMainMDIFrm
       OnClick = btnEffectsClick
     end
     object btnFooterPnl: TMPxpButton
-      Left = 1027
+      Left = 1015
       Top = 0
       Width = 66
       Height = 41
@@ -569,7 +569,7 @@ object MainMDIFrm: TMainMDIFrm
       Style = bsModern
       Transparent = True
       OnClick = btnFooterPnlClick
-      ExplicitLeft = 570
+      ExplicitLeft = 1009
     end
     object chkMediaServer: TMPxpButton
       Left = 216
@@ -694,18 +694,18 @@ object MainMDIFrm: TMainMDIFrm
   end
   object pnlFooter: TPanel
     Left = 0
-    Top = 761
-    Width = 1293
+    Top = 727
+    Width = 1281
     Height = 109
     Align = alBottom
     Color = 4865081
     ParentBackground = False
     ShowCaption = False
     TabOrder = 1
-    ExplicitTop = 381
-    ExplicitWidth = 836
+    ExplicitTop = 710
+    ExplicitWidth = 1275
     object Panel1: TPanel
-      Left = 87
+      Left = 75
       Top = 1
       Width = 1205
       Height = 107
@@ -715,7 +715,7 @@ object MainMDIFrm: TMainMDIFrm
       ParentBackground = False
       ShowCaption = False
       TabOrder = 0
-      ExplicitLeft = -370
+      ExplicitLeft = 69
       object imgDjShowLogo: TImage
         Left = 428
         Top = 4

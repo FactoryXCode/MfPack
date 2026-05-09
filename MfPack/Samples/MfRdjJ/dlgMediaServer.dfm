@@ -10,13 +10,13 @@ object frmMediaServer: TfrmMediaServer
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Media Server'
-  ClientHeight = 534
-  ClientWidth = 651
+  ClientHeight = 356
+  ClientWidth = 434
   Color = 5850948
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -18
+  Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
@@ -26,17 +26,12 @@ object frmMediaServer: TfrmMediaServer
   OnDestroy = FormDestroy
   OnResize = FormResize
   OnShow = FormShow
-  PixelsPerInch = 144
-  TextHeight = 25
+  TextHeight = 15
   object pnlIceCast: TPanel
     Left = 0
     Top = 0
-    Width = 651
-    Height = 534
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
+    Width = 434
+    Height = 356
     Align = alClient
     Anchors = [akLeft, akTop, akRight]
     BevelOuter = bvNone
@@ -44,39 +39,37 @@ object frmMediaServer: TfrmMediaServer
     ParentBackground = False
     ShowCaption = False
     TabOrder = 0
-    ExplicitWidth = 622
-    ExplicitHeight = 553
+    ExplicitWidth = 428
+    ExplicitHeight = 339
     object Panel1: TPanel
       Left = 0
-      Top = 55
-      Width = 651
-      Height = 479
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Top = 37
+      Width = 434
+      Height = 319
       Align = alClient
       BevelOuter = bvNone
       Color = 5850948
       ParentBackground = False
       ShowCaption = False
       TabOrder = 1
-      ExplicitLeft = -12
-      ExplicitTop = 88
-      ExplicitWidth = 622
-      ExplicitHeight = 751
+      ExplicitWidth = 428
+      ExplicitHeight = 302
       object lblIcecastServerStatus: TLabel
         AlignWithMargins = True
-        Left = 3
-        Top = 446
-        Width = 645
-        Height = 30
+        Left = 2
+        Top = 297
+        Width = 430
+        Height = 20
+        Margins.Left = 2
+        Margins.Top = 2
+        Margins.Right = 2
+        Margins.Bottom = 2
         Align = alBottom
         AutoSize = False
         Caption = 'Broadcast Ofline'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = 13229826
-        Font.Height = -20
+        Font.Height = -13
         Font.Name = 'Tahoma'
         Font.Style = [fsBold]
         ParentFont = False
@@ -84,89 +77,64 @@ object frmMediaServer: TfrmMediaServer
         ShowHint = False
         Transparent = False
         WordWrap = True
-        ExplicitLeft = 18
-        ExplicitTop = 409
-        ExplicitWidth = 188
       end
       object memIcecastLog: TMemo
         Left = 0
-        Top = 130
-        Width = 651
-        Height = 313
-        Margins.Left = 5
-        Margins.Top = 5
-        Margins.Right = 5
-        Margins.Bottom = 5
+        Top = 87
+        Width = 434
+        Height = 208
         Align = alClient
         Color = 9216
         Font.Charset = DEFAULT_CHARSET
         Font.Color = 13229826
-        Font.Height = -17
+        Font.Height = -11
         Font.Name = 'Tahoma'
         Font.Style = []
         ParentFont = False
         ScrollBars = ssVertical
         TabOrder = 0
-        ExplicitLeft = 6
-        ExplicitTop = 117
-        ExplicitWidth = 355
-        ExplicitHeight = 292
+        ExplicitWidth = 428
+        ExplicitHeight = 191
       end
       object Panel2: TPanel
         Left = 0
         Top = 0
-        Width = 651
-        Height = 130
-        Margins.Left = 5
-        Margins.Top = 5
-        Margins.Right = 5
-        Margins.Bottom = 5
+        Width = 434
+        Height = 87
         Align = alTop
         BevelOuter = bvNone
         Color = 5850948
         ParentBackground = False
         ShowCaption = False
         TabOrder = 1
-        ExplicitWidth = 622
+        ExplicitWidth = 428
         object Bevel3: TBevel
-          Left = 18
-          Top = 21
-          Width = 323
-          Height = 92
-          Margins.Left = 5
-          Margins.Top = 5
-          Margins.Right = 5
-          Margins.Bottom = 5
+          Left = 12
+          Top = 14
+          Width = 215
+          Height = 61
         end
         object Label4: TLabel
-          Left = 30
-          Top = 11
-          Width = 91
-          Height = 24
-          Margins.Left = 5
-          Margins.Top = 5
-          Margins.Right = 5
-          Margins.Bottom = 5
+          Left = 20
+          Top = 7
+          Width = 60
+          Height = 16
           Alignment = taCenter
           Caption = '  Server  '
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWhite
-          Font.Height = -20
+          Font.Height = -13
           Font.Name = 'Tahoma'
           Font.Style = [fsBold]
           ParentFont = False
           Transparent = False
         end
         object chkBroadcast: TMPxpButton
-          Left = 371
-          Top = 47
-          Width = 150
-          Height = 60
+          Left = 247
+          Top = 31
+          Width = 100
+          Height = 40
           Hint = 'Start/Stop Broadcasing'
-          Margins.Left = 5
-          Margins.Top = 5
-          Margins.Right = 5
-          Margins.Bottom = 5
           Alignment = taCenter
           Caption = 'Broadcast'
           Color = 6899524
@@ -260,7 +228,7 @@ object frmMediaServer: TfrmMediaServer
           Enabled = False
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clAqua
-          Font.Height = -20
+          Font.Height = -13
           Font.Name = 'Segoe UI'
           Font.Style = [fsBold]
           GlyphTransparentColor = clBlack
@@ -282,15 +250,11 @@ object frmMediaServer: TfrmMediaServer
           OnClick = chkBroadcastClick
         end
         object chkStartStopServer: TMPxpButton
-          Left = 25
-          Top = 47
-          Width = 150
-          Height = 60
+          Left = 17
+          Top = 31
+          Width = 100
+          Height = 40
           Hint = 'Start/Stop server'
-          Margins.Left = 5
-          Margins.Top = 5
-          Margins.Right = 5
-          Margins.Bottom = 5
           Alignment = taCenter
           Caption = 'Start'
           Color = 6899524
@@ -383,7 +347,7 @@ object frmMediaServer: TfrmMediaServer
           ShowFocusRect = False
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clAqua
-          Font.Height = -20
+          Font.Height = -13
           Font.Name = 'Segoe UI'
           Font.Style = [fsBold]
           GlyphTransparentColor = clBlack
@@ -405,15 +369,11 @@ object frmMediaServer: TfrmMediaServer
           OnClick = chkStartStopServerClick
         end
         object chkAutoRestart: TMPxpButton
-          Left = 185
-          Top = 47
-          Width = 150
-          Height = 60
+          Left = 123
+          Top = 31
+          Width = 100
+          Height = 40
           Hint = 'Auto restart the server on disconnect'
-          Margins.Left = 5
-          Margins.Top = 5
-          Margins.Right = 5
-          Margins.Bottom = 5
           Alignment = taCenter
           Caption = 'Auto restart'
           Color = 6899524
@@ -506,7 +466,7 @@ object frmMediaServer: TfrmMediaServer
           ShowFocusRect = False
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clAqua
-          Font.Height = -20
+          Font.Height = -13
           Font.Name = 'Segoe UI'
           Font.Style = [fsBold]
           GlyphTransparentColor = clBlack
@@ -532,43 +492,38 @@ object frmMediaServer: TfrmMediaServer
     object pnlCaption: TPanel
       Left = 0
       Top = 0
-      Width = 651
-      Height = 55
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Width = 434
+      Height = 37
       Align = alTop
       Alignment = taLeftJustify
       Color = 4865081
       ParentBackground = False
       TabOrder = 0
       OnMouseDown = pnlCaptionMouseDown
-      ExplicitWidth = 622
+      ExplicitWidth = 428
       object shpOnAirCap: TShape
-        Left = 381
-        Top = 6
-        Width = 131
-        Height = 44
-        Margins.Left = 5
-        Margins.Top = 5
-        Margins.Right = 5
-        Margins.Bottom = 5
+        Left = 254
+        Top = 4
+        Width = 87
+        Height = 29
         Brush.Color = 5850948
         Pen.Color = 5668864
-        Pen.Width = 2
       end
       object lblCaption: TLabel
-        Left = 12
-        Top = 17
-        Width = 134
-        Height = 24
+        Left = 8
+        Top = 11
+        Width = 86
+        Height = 16
         Hint = 'Master deck'
+        Margins.Left = 2
+        Margins.Top = 2
+        Margins.Right = 2
+        Margins.Bottom = 2
         Alignment = taCenter
         Caption = 'Media Server'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWhite
-        Font.Height = -20
+        Font.Height = -13
         Font.Name = 'Tahoma'
         Font.Style = [fsBold]
         ParentFont = False
@@ -577,43 +532,38 @@ object frmMediaServer: TfrmMediaServer
         Layout = tlCenter
       end
       object shpOnAir: TShape
-        Left = 384
-        Top = 9
-        Width = 124
-        Height = 37
-        Margins.Left = 5
-        Margins.Top = 5
-        Margins.Right = 5
-        Margins.Bottom = 5
+        Left = 256
+        Top = 6
+        Width = 83
+        Height = 25
         Brush.Color = 5668864
         Pen.Color = 5668864
-        Pen.Width = 2
       end
       object lblOnAir: TLabel
-        Left = 390
-        Top = 13
-        Width = 112
-        Height = 29
-        Margins.Left = 5
-        Margins.Top = 5
-        Margins.Right = 5
-        Margins.Bottom = 5
+        Left = 260
+        Top = 9
+        Width = 75
+        Height = 19
         Alignment = taCenter
         AutoSize = False
         Caption = 'ON AIR'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clGreen
-        Font.Height = -22
+        Font.Height = -15
         Font.Name = 'Segoe UI'
         Font.Style = [fsBold]
         ParentFont = False
         Transparent = False
       end
       object btnMinimize: TMPxpButton
-        Left = 550
+        Left = 367
         Top = 1
-        Width = 100
-        Height = 53
+        Width = 66
+        Height = 35
+        Margins.Left = 2
+        Margins.Top = 2
+        Margins.Right = 2
+        Margins.Bottom = 2
         Align = alRight
         Alignment = taCenter
         AllowAllUp = True
@@ -625,7 +575,7 @@ object frmMediaServer: TfrmMediaServer
         Checked = False
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWhite
-        Font.Height = -20
+        Font.Height = -13
         Font.Name = 'Segoe UI'
         Font.Style = [fsBold]
         Glyph.Data = {
@@ -657,8 +607,7 @@ object frmMediaServer: TfrmMediaServer
         Style = bsModern
         Transparent = True
         OnClick = btnMinimizeClick
-        ExplicitLeft = 359
-        ExplicitTop = 2
+        ExplicitLeft = 361
       end
     end
   end

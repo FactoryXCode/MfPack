@@ -215,6 +215,12 @@ type
     Label19: TLabel;
     btnRecordingsDirName: TMPxpButton;
     btnDataBaseDirName: TMPxpButton;
+    Label20: TLabel;
+    edCoversDirName: TEdit;
+    btnCoversDirName: TMPxpButton;
+    Label21: TLabel;
+    edtCaddyCoversPath: TEdit;
+    btnCaddyCoversPath: TMPxpButton;
 
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -235,6 +241,8 @@ type
     procedure btnGetCaddyJsonPathClick(Sender: TObject);
     procedure btnRecordingsDirNameClick(Sender: TObject);
     procedure btnDataBaseDirNameClick(Sender: TObject);
+    procedure btnCoversDirNameClick(Sender: TObject);
+    procedure btnCaddyCoversPathClick(Sender: TObject);
 
   private
 
@@ -424,12 +432,22 @@ begin
     frm.edtIcecastRestartDelayMs.Text := IntToStr(ASetup.IcecastRestartDelayMs);
     frm.chkIcecastAutoRestart.Checked := ASetup.IcecastAutoRestart;
 
-    // Save audiorecordings dir & path
+    // Caddy
+    frm.edtCaddyPath.Text := ASetup.IcecastCaddyDir;
+    frm.edtCaddyConfigPath.Text := ASetup.IcecastCaddyConfigFile;
+    frm.edtCaddyJsonNowPlayingPath.Text := ASetup.IcecastNowPlayingJsonFile;
+    frm.edtCaddyCoversPath.Text := ASetup.IcecastCaddyCoversPath;
+    frm.edtCaddyCmdLine.Text := ASetup.IcecastCaddyCommand;
+
+    // Save audiorecordings path
     frm.edRecordingsDirName.Text := ASetup.AudioRecordingsDir;
     frm.edRecordingsDirName.Hint := ASetup.AudioRecordingsPath;
-    // Save Database dir & path
+    // Save Database path
     frm.edDataBaseDirName.Text := ASetup.DatabaseDir;
     frm.edDataBaseDirName.Hint := ASetup.DatabasePath;
+    // Save Local covers path
+    frm.edCoversDirName.Text := ASetup.LocalCoversDir;
+    frm.edCoversDirName.Hint := ASetup.LocalCoversPath;
 
     Result := (frm.ShowModal = mrOk);
 
@@ -485,6 +503,7 @@ begin
         ASetup.IcecastCaddyDir := frm.edtCaddyPath.Text;
         ASetup.IcecastCaddyConfigFile := frm.edtCaddyConfigPath.Text;
         ASetup.IcecastNowPlayingJsonFile := frm.edtCaddyJsonNowPlayingPath.Text;
+        ASetup.IcecastCaddyCoversPath := frm.edtCaddyCoversPath.Text;
         ASetup.IcecastCaddyCommand := frm.edtCaddyCmdLine.Text;
 
         // Keep current engine defaults for now.
@@ -509,6 +528,9 @@ begin
         // Database
         ASetup.DatabaseDir := frm.edDataBaseDirName.Text;
         ASetup.DatabasePath := frm.edDataBaseDirName.Hint;
+        // Covers
+        ASetup.LocalCoversDir := frm.edCoversDirName.Text;
+        ASetup.LocalCoversPath := frm.edCoversDirName.Hint;
       end;
   finally
 
@@ -718,11 +740,27 @@ begin
 end;
 
 
+procedure TfrmSetup.btnCaddyCoversPathClick(Sender: TObject);
+begin
+
+  edtCaddyCoversPath.Text := PickPath(True,
+                                      'Covers Directory'#0'*.jpg'#0#0);
+end;
+
+
 procedure TfrmSetup.btnRecordingsDirNameClick(Sender: TObject);
 begin
 
   edRecordingsDirName.Text :=  ExtractFileName(ExtractFileDir(PickPath(False,
                                                                        'Recordings Directory'#0'*.*'#0#0)));
+end;
+
+
+procedure TfrmSetup.btnCoversDirNameClick(Sender: TObject);
+begin
+
+  edCoversDirName.Text :=  ExtractFileName(ExtractFileDir(PickPath(False,
+                                                                     'Covers Directory'#0'*.*'#0#0)));
 end;
 
 
@@ -756,10 +794,10 @@ var
 
 begin
 
-  if BrowseAudioFile(Handle,
-                     AFilter,
-                     ADirOnly,
-                     filename) then
+  if BrowseFile(Handle,
+                AFilter,
+                ADirOnly,
+                filename) then
     Result := filename
   else
     Result := '';

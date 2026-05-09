@@ -102,14 +102,14 @@ object MasterDeckFrm: TMasterDeckFrm
         TabOrder = 0
         object Bevel1: TBevel
           Left = 4
-          Top = 136
+          Top = 12
           Width = 324
-          Height = 130
+          Height = 265
         end
         object lblRecTime: TLabel
           Left = 11
-          Top = 198
-          Width = 281
+          Top = 167
+          Width = 298
           Height = 19
           AutoSize = False
           Caption = 'Recorded: 00:00:00.00'
@@ -122,7 +122,7 @@ object MasterDeckFrm: TMasterDeckFrm
         end
         object Label3: TLabel
           Left = 11
-          Top = 156
+          Top = 114
           Width = 83
           Height = 17
           Hint = 'Enter a file name without extension.'
@@ -144,7 +144,7 @@ object MasterDeckFrm: TMasterDeckFrm
         end
         object lblRecordingDevice: TLabel
           Left = 11
-          Top = 228
+          Top = 223
           Width = 292
           Height = 18
           AutoSize = False
@@ -158,7 +158,7 @@ object MasterDeckFrm: TMasterDeckFrm
         end
         object lblRecorderStatus: TLabel
           Left = 11
-          Top = 245
+          Top = 248
           Width = 292
           Height = 18
           AutoSize = False
@@ -187,8 +187,8 @@ object MasterDeckFrm: TMasterDeckFrm
           Transparent = False
         end
         object lblFileExt: TLabel
-          Left = 274
-          Top = 156
+          Left = 276
+          Top = 114
           Width = 27
           Height = 16
           Hint = 'Enter a file name without extension.'
@@ -208,12 +208,13 @@ object MasterDeckFrm: TMasterDeckFrm
           Transparent = False
         end
         object btnRecord: TMPxpButton
-          Left = 11
-          Top = 28
-          Width = 109
-          Height = 51
+          Left = 243
+          Top = 40
+          Width = 66
+          Height = 41
+          Hint = 'Start recording.'
           Alignment = taCenter
-          Caption = 'Start Recording'
+          Caption = 'Start'
           Color = clMaroon
           ColorWhenDown = clRed
           ColorWhenUp = clMaroon
@@ -239,14 +240,16 @@ object MasterDeckFrm: TMasterDeckFrm
           LightColor = clRed
           ParentColor = False
           ParentFont = False
+          ParentShowHint = False
           ShadowColor = clAqua
+          ShowHint = True
           SlowDecease = True
           WordWrap = True
           OnClick = btnRecordClick
         end
         object chkPostFx: TMPxpButton
-          Left = 199
-          Top = 86
+          Left = 165
+          Top = 40
           Width = 66
           Height = 40
           Hint = 'Post-FX (Wet mix)'
@@ -364,9 +367,9 @@ object MasterDeckFrm: TMasterDeckFrm
           OnClick = chkPostFxClick
         end
         object chkPreFx: TMPxpButton
-          Left = 125
-          Top = 86
-          Width = 67
+          Left = 87
+          Top = 40
+          Width = 66
           Height = 40
           Hint = 'Pre-FX (Dry mix)'
           Alignment = taCenter
@@ -485,7 +488,7 @@ object MasterDeckFrm: TMasterDeckFrm
         end
         object edFileName: TEdit
           Left = 101
-          Top = 156
+          Top = 114
           Width = 170
           Height = 20
           Hint = 'Enter a capture filename (No path)'
@@ -510,9 +513,9 @@ object MasterDeckFrm: TMasterDeckFrm
           Text = 'WAS-capture'
         end
         object btnSelectAudiDevice: TMPxpButton
-          Left = 13
-          Top = 85
-          Width = 107
+          Left = 9
+          Top = 39
+          Width = 66
           Height = 40
           Hint = 'Choose an audio endpoint device'
           Margins.Left = 2

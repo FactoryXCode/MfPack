@@ -1,4 +1,4 @@
-﻿// FactoryX
+// FactoryX
 //
 // Copyright: FactoryX. All rights reserved.
 //
@@ -10,7 +10,7 @@
 // Release date: 24-01-2026
 // Language: ENU
 //
-// Revision Version: 3.2.0
+// Revision Version: 3.1.9
 // Description: Main MDI form.
 //
 // Company: FactoryX
@@ -21,7 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 01/13/2026 All                 Sineead O'Connor release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -121,13 +121,13 @@ uses
 
 const
 
-  WM_RDJ_ENDPOINTS_CHANGED = WM_APP + 300;
-  WM_RDJ_ENDPOINTS_CHANGED_COMMIT = WM_APP + 301;
-  WM_RDJ_CUE_ENDPOINT_LOST = WM_APP + 302;
+  WM_RDJ_ENDPOINTS_CHANGED = WM_APP + 410;
 
   // json file url
-  COVER_IMAGE_FILE_URL = 'cover.jpg?ts=';
+  COVER_IMAGE_FILE_URL = 'cover.jpg';
+  COVER_DEFAULT_IMAGE_FILE_URL = 'cover_default.jpg';
   COVER_IMAGE_FILE_NAME = 'cover.jpg';
+  COVER_DEFAULT_IMAGE_FILE_NAME = 'cover_default.jpg';
 
 
 type
@@ -227,9 +227,6 @@ type
     FEndpointEnumerator: IMMDeviceEnumerator;
     FEndpointNotifyClient: IMMNotificationClient;
     FEndpointRefreshPending: Boolean;
-    FAudioGraphRestarting: Boolean;
-    FPendingHardRestart: Boolean;
-    FCueLostDialogShowing: Boolean;
     FMasterEndpointAvailable: Boolean;
     FPFLEndpointAvailable: Boolean;
 
@@ -282,6 +279,13 @@ type
     function ValidateBroadcastSetup(const S: TRDJBroadcastSetup;
                                     out ErrMsg: string): Boolean;
 
+    function BuildCoverJsonUrl(const APreferCurrent: Boolean): string;
+    procedure WriteNowPlayingStatus(const ADjName,
+                                    AShowName,
+                                    AArtist,
+                                    ATitle,
+                                    ACoverUrl: string);
+
     procedure ConstructEngine();
 
     procedure EnsureCueWorkBuf(const AFrames: Integer);
@@ -299,14 +303,8 @@ type
     // Endpoints & deciceloss
     procedure SetupEndpointNotifications();
     procedure TeardownEndpointNotifications();
-    procedure QueueEndpointRefresh();
+    //procedure QueueEndpointRefresh();
     procedure WMEndpointsChanged(var Msg: TMessage); message WM_RDJ_ENDPOINTS_CHANGED;
-    procedure WMEndpointsChangedCommit(var Msg: TMessage); message WM_RDJ_ENDPOINTS_CHANGED_COMMIT;
-    procedure WMCueEndpointLost(var Msg: TMessage); message WM_RDJ_CUE_ENDPOINT_LOST;
-
-    function SaveSetupSafely(): Boolean;
-    function IsProbablyValidStoredEndpointId(const ADeviceId: string): Boolean;
-    procedure NotifyCueEndpointLostAsync();
 
     function IsEndpointUsable(const ADeviceId: string): Boolean;
     function ResolveMasterEndpointAvailable(): Boolean;
@@ -405,6 +403,10 @@ var
 implementation
 
 {$R *.dfm}
+
+uses
+  LWFileBrowserExDlg;
+
 
 
 const
@@ -519,39 +521,21 @@ begin
 end;
 
 
-procedure TMainMDIFrm.QueueEndpointRefresh();
-begin
+//procedure TMainMDIFrm.QueueEndpointRefresh();
+//begin
 
-  if FEndpointRefreshPending then
-    Exit;
+//  if FEndpointRefreshPending then
+//    Exit;
 
-  FEndpointRefreshPending := True;
-  PostMessage(Handle,
-              WM_RDJ_ENDPOINTS_CHANGED_COMMIT,
-              0,
-              0);
-end;
+//  FEndpointRefreshPending := True;
+//  PostMessage(Handle,
+//              WM_RDJ_ENDPOINTS_CHANGED,
+//              0,
+//              0);
+//end;
 
 
 procedure TMainMDIFrm.WMEndpointsChanged(var Msg: TMessage);
-begin
-
-  // Audio endpoint notifications can arrive in bursts, especially after
-  // Windows Update, driver restart, USB plug/unplug, or Endpoint Builder reset.
-  // Never rebuild the audio graph directly from the notification storm.
-  if not FEndpointRefreshPending then
-    begin
-
-      FEndpointRefreshPending := True;
-      PostMessage(Handle,
-                  WM_RDJ_ENDPOINTS_CHANGED_COMMIT,
-                  0,
-                  0);
-    end;
-end;
-
-
-procedure TMainMDIFrm.WMEndpointsChangedCommit(var Msg: TMessage);
 var
   OldMasterAvailable: Boolean;
   OldPFLAvailable: Boolean;
@@ -568,42 +552,6 @@ begin
   if (OldMasterAvailable <> FMasterEndpointAvailable) or
      (OldPFLAvailable <> FPFLEndpointAvailable) then
     HardRestartAudioGraph();
-end;
-
-
-procedure TMainMDIFrm.NotifyCueEndpointLostAsync();
-begin
-
-  if FCueUnavailableWarned then
-    Exit;
-
-  FCueUnavailableWarned := True;
-  PostMessage(Handle,
-              WM_RDJ_CUE_ENDPOINT_LOST,
-              0,
-              0);
-end;
-
-
-procedure TMainMDIFrm.WMCueEndpointLost(var Msg: TMessage);
-begin
-
-  if FCueLostDialogShowing then
-    Exit;
-
-  FCueLostDialogShowing := True;
-  try
-
-    MessageDlg('The stored cue/PFL audio endpoint is currently unavailable.' + sLineBreak +
-               'Cue will stay disabled for this run until the endpoint becomes available again.' + sLineBreak +
-               'Open Setup and select the headphone output again if Windows changed the device.',
-               mtWarning,
-               [mbOK],
-               0);
-  finally
-
-    FCueLostDialogShowing := False;
-  end;
 end;
 
 
@@ -702,22 +650,8 @@ begin
   KeyPreview := True;
 
   FSetupFileName := GetDefaultSetupFileName();
-
-  try
-
-    LoadSetupFromIni(FSetupFileName,
-                     FSetup);
-  except
-
-    // If Windows or a crash damaged the INI while RDJ was writing it,
-    // keep a copy for inspection and continue with a clean setup record.
-    if FileExists(FSetupFileName) then
-      MoveFileEx(PChar(FSetupFileName),
-                 PChar(FSetupFileName + '.bad.' + IntToStr(GetTickCount)),
-                 MOVEFILE_REPLACE_EXISTING or MOVEFILE_WRITE_THROUGH);
-
-    FSetup := Default(TRDJSetup);
-  end;
+  LoadSetupFromIni(FSetupFileName,
+                   FSetup);
 
   // IMPORTANT:
   //  Keep stored cue device + PFLEnabled untouched.
@@ -762,7 +696,6 @@ begin
   //lblLocalTime.Left := (ClientWidth div 2) - (lblLocalTime.Width div 2);
 
   if Assigned(FMasterDeck) and
-     Assigned(FfrmMasterFxRack) and
      (WindowState = wsMaximized) and
      (FfrmMasterFxRack.WindowState = wsMinimized) then
     FMasterDeck.Left := FfrmMasterFxRack.Left;
@@ -844,7 +777,11 @@ begin
           FreeAndNil(FCueOut);
 
           if FSetup.PFLEnabled and (Trim(FSetup.PFLDeviceId) <> '') then
-            NotifyCueEndpointLostAsync();
+            MessageDlg('The stored cue/PFL audio endpoint is currently unavailable or cannot be opened.' + sLineBreak +
+                       'Cue stays disabled for this run, but the stored cue device setting is preserved.',
+                       mtWarning,
+                       [mbOK],
+                       0);
         end;
     end;
 
@@ -869,11 +806,8 @@ begin
 
       hr := FCueOut.Start();
       if FAILED(hr) then
-        begin
-
-          FreeAndNil(FCueOut);
-          NotifyCueEndpointLostAsync();
-        end;
+        raise Exception.CreateFmt('FCueOut.Start failed: $%.8x',
+                                  [Cardinal(hr)]);
     end;
 
   // Icecast   TODO: Maybe better to do this manually?  T: Yes because Caddy needs to startup first (see frmMasterDeck).
@@ -884,8 +818,7 @@ begin
 
   FDjName := mmoDjName.Text;
   FShowName := mmoShow.Text;
-  FCoverFileName := IncludeTrailingPathDelimiter(Setup.IcecastCaddyDir) + 'cover_default.jpg';
-  imgDjShowLogo.Picture.LoadFromFile(FCoverFileName);
+  FCoverFileName := '';
 end;
 
 
@@ -908,10 +841,7 @@ begin
   if Assigned(FPlayListEditor) then
     FPlayListEditor.Free;
 
-  if Assigned(FRDJRadioStatusJson) then
-    FRDJRadioStatusJson.Free;
-
-  Sleep(200);
+  Sleep(2000);
   CanClose := True;
 end;
 
@@ -924,7 +854,8 @@ begin
   if TfrmSetup.Execute(FSetup) then
     begin
 
-      SaveSetupSafely();
+      SaveSetupToIni(FSetupFileName,
+                     FSetup);
 
       ApplySetupOnce();
 
@@ -962,6 +893,7 @@ begin
               SC_DRAGMOVE,
               0);
     end;
+
 end;
 
 
@@ -1190,9 +1122,10 @@ begin
 
       StopBroadcast();
       FreeAndNil(FBroadcastEngine);
-      // json
-      FreeAndNil(FRDJRadioStatusJson);
     end;
+
+  // json
+  FreeAndNil(FRDJRadioStatusJson);
 end;
 
 
@@ -1215,6 +1148,17 @@ begin
            0);
 
   S.Host := Trim(FSetup.Broadcast.Host);
+
+  // Server mode safety: when Icecast runs on another PC, users often leave
+  // Broadcast.Host at 127.0.0.1. That only points back to the Carmen PC and
+  // makes the public player connect/reconnect because Icecast receives no audio.
+  // If the Icecast server manager host is remote, use it as the audio target.
+  if (SameText(S.Host, '127.0.0.1') or SameText(S.Host, 'localhost')) and
+     (Trim(FSetup.IcecastHost) <> '') and
+     (not SameText(Trim(FSetup.IcecastHost), '127.0.0.1')) and
+     (not SameText(Trim(FSetup.IcecastHost), 'localhost')) then
+    S.Host := Trim(FSetup.IcecastHost);
+
   S.Port := FSetup.Broadcast.Port;
   S.Mount := Trim(FSetup.Broadcast.Mount);
   S.Username := FSetup.Broadcast.Username;
@@ -1336,6 +1280,76 @@ end;
 
 // Json ------------------------------------------------------------------------
 
+
+function TMainMDIFrm.BuildCoverJsonUrl(const APreferCurrent: Boolean): string;
+var
+  BaseUrl: string;
+  QPos: Integer;
+
+begin
+
+  BaseUrl := Trim(FCoverJpg);
+
+  if (BaseUrl = '') then
+    begin
+      if APreferCurrent and
+         FileExists(IncludeTrailingPathDelimiter(Setup.IcecastCaddyDir) + COVER_IMAGE_FILE_NAME) then
+        BaseUrl := COVER_IMAGE_FILE_NAME
+      else
+        BaseUrl := COVER_DEFAULT_IMAGE_FILE_NAME;
+    end;
+
+  // Keep the URL browser-safe. Never write local or UNC file paths to JSON.
+  BaseUrl := StringReplace(BaseUrl,
+                           '\',
+                           '/',
+                           [rfReplaceAll]);
+
+  if SameText(ExtractFileName(BaseUrl), COVER_IMAGE_FILE_NAME) or
+     (Pos(COVER_IMAGE_FILE_NAME + '?', LowerCase(BaseUrl)) > 0) then
+    BaseUrl := COVER_IMAGE_FILE_NAME
+  else
+    if SameText(ExtractFileName(BaseUrl), COVER_DEFAULT_IMAGE_FILE_NAME) or
+       (Pos(COVER_DEFAULT_IMAGE_FILE_NAME + '?', LowerCase(BaseUrl)) > 0) then
+      BaseUrl := COVER_DEFAULT_IMAGE_FILE_NAME
+    else
+      begin
+        QPos := Pos('?', BaseUrl);
+        if (QPos > 0) then
+          BaseUrl := Copy(BaseUrl,
+                          1,
+                          QPos - 1);
+      end;
+
+  Result := BaseUrl {+ '?ts=' + IntToStr(GetTickCount)};  // Do not add tickcount, that will be done in TRDJRadioStatusJson.WriteRadioStatusJson
+end;
+
+
+procedure TMainMDIFrm.WriteNowPlayingStatus(const ADjName,
+                                            AShowName,
+                                            AArtist,
+                                            ATitle,
+                                            ACoverUrl: string);
+var
+  JsonFile: string;
+
+begin
+
+  JsonFile := Trim(Setup.IcecastNowPlayingJsonFile);
+  if (JsonFile = '') then
+    Exit;
+
+  // Local mode: JsonFile is normally C:\Caddy\nowplaying.json.
+  // Server mode: JsonFile may be a UNC path such as \\Server\Caddy\nowplaying.json.
+  // The JSON coverUrl must always be a browser URL, never a disk/UNC path.
+  FRDJRadioStatusJson.WriteRadioStatusJson(JsonFile,
+                                           ADjName,
+                                           AShowName,
+                                           AArtist,
+                                           ATitle,
+                                           ACoverUrl);
+end;
+
 function TMainMDIFrm.CanGoOnAir(): Boolean;
 var
   Json: TJSONObject;
@@ -1376,6 +1390,7 @@ begin
 
   end;
 end;
+// Json end ====================================================================
 
 
 procedure TMainMDIFrm.chkMediaServerClick(Sender: TObject);
@@ -1383,8 +1398,6 @@ begin
 
   OpenMediaServerGUI();
 end;
-
-// Json end ====================================================================
 
 
 procedure TMainMDIFrm.EnsureCueWorkBuf(const AFrames: Integer);
@@ -1400,42 +1413,6 @@ begin
               NeedSamples);
 end;
 
-{
-// Here we change the default cover.jpg to the Dj's own cover.jpg
-procedure TMainMDIFrm.imgDjShowLogoDblClick(Sender: TObject);
-var
-  filename: TFileName;
-  RDJLogo: TFileName;
-
-begin
-
-  if BrowseAudioFile(Handle,
-                     'LogoFile File'#0'*.jpg'#0#0,
-                     False,
-                     filename) then
-    begin
-
-      FCoverFileName := ExtractFileName(filename);
-      imgDjShowLogo.Picture.LoadFromFile(FCoverFileName);
-
-      // We replace the Logo.jpg with the new one (after we renamed the original logo).
-      RDJLogo := IncludeTrailingPathDelimiter(Setup.IcecastCaddyDir) + 'cover.jpg';
-
-      if FileExists(RDJLogo) then
-        ChangeFileExt(RDJLogo, '.rdj')
-      else
-        RDJLogo := IncludeTrailingPathDelimiter(Setup.IcecastCaddyDir) + 'cover.rdj';
-
-      //FCoverFileName :=
-
-    end
-  else
-    begin
-
-      FCoverFileName := '';
-      imgDjShowLogo.Picture := nil;
-    end;
-end;}
 
 // Here we change the default cover.jpg to the Dj's own cover.jpg
 procedure TMainMDIFrm.imgDjShowLogoDblClick(Sender: TObject);
@@ -1443,59 +1420,54 @@ var
   FileName: TFileName;
   ActiveCover: TFileName;
   DefaultCover: TFileName;
+  CoverUrl: string;
+  CoverPath: string;
 
 begin
 
-  ActiveCover := IncludeTrailingPathDelimiter(Setup.IcecastCaddyDir) + 'cover.jpg';
-  DefaultCover := IncludeTrailingPathDelimiter(Setup.IcecastCaddyDir) + 'cover_default.jpg';
-
-  if BrowseAudioFile(Handle,
-                     'JPEG Image'#0'*.jpg;*.jpeg'#0#0,
-                     False,
-                     FileName) then
+  if DirectoryExists(Setup.IcecastCaddyCoversPath) then
     begin
+
+      ActiveCover := IncludeTrailingPathDelimiter(Setup.IcecastCaddyCoversPath) + COVER_IMAGE_FILE_NAME;
+      DefaultCover := IncludeTrailingPathDelimiter(Setup.IcecastCaddyCoversPath) + COVER_DEFAULT_IMAGE_FILE_NAME;
+      CoverPath := IncludeTrailingPathDelimiter(Setup.IcecastCaddyCoversPath);
+    end
+  else
+    Exit;
+
+  if not Assigned(DlgLWFileBrowserEx)  then
+    DlgLWFileBrowserEx := TLWFileBrowserExDlg.Create(Self);
+
+  DlgLWFileBrowserEx.FileFilter := fbxGraphics;
+  DlgLWFileBrowserEx.ShowModal;
+
+  if (DlgLWFileBrowserEx.ModalResult = mrOk) then
+    begin
+
+      FileName := CoverPath + DlgLWFileBrowserEx.FileName;
 
       if not FileExists(FileName) then
         Exit;
 
-      CopyFile(PChar(FileName),
-               PChar(ActiveCover),
-               False);
+      // Local mode: ActiveCover is C:\Caddy\cover.jpg.
+      // Server mode: ActiveCover may be \\Server\Caddy\cover.jpg.
+      // This is a user action, not an audio/render-thread operation.
+      if not CopyFile(PChar(FileName),
+                      PChar(ActiveCover),
+                      False) then
+        RaiseLastOSError;
 
       imgDjShowLogo.Picture.LoadFromFile(ActiveCover);
 
-      FCoverFileName := ActiveCover; // disk path, internal only
-      FCoverJpg := COVER_IMAGE_FILE_URL + IntToStr(GetTickCount); // web path for JSON
+      FCoverFileName := ActiveCover; // disk/UNC path, internal only
+      FCoverJpg := COVER_IMAGE_FILE_URL; // browser URL for JSON
+      CoverUrl := FCoverJpg;
 
-      FRDJRadioStatusJson.WriteRadioStatusJson(Setup.IcecastNowPlayingJsonFile,
-                                               Trim(mmoDjName.Text),
-                                               Trim(mmoShow.Text),
-                                               '',
-                                               '',
-                                               FCoverJpg);
-    end
-  else
-    begin
-
-      if FileExists(DefaultCover) then
-        begin
-
-          CopyFile(PChar(DefaultCover),
-                   PChar(ActiveCover),
-                   False);
-
-          imgDjShowLogo.Picture.LoadFromFile(ActiveCover);
-
-          FCoverFileName := ActiveCover;
-          FCoverJpg := COVER_IMAGE_FILE_URL + IntToStr(GetTickCount);
-
-          FRDJRadioStatusJson.WriteRadioStatusJson(Setup.IcecastNowPlayingJsonFile,
-                                                   Trim(mmoDjName.Text),
-                                                   Trim(mmoShow.Text),
-                                                   '',
-                                                   '',
-                                                   FCoverJpg);
-        end;
+      WriteNowPlayingStatus(Trim(mmoDjName.Text),
+                            Trim(mmoShow.Text),
+                            '',
+                            '',
+                            CoverUrl);
     end;
 end;
 
@@ -1643,110 +1615,27 @@ begin
 end;
 
 
-function TMainMDIFrm.SaveSetupSafely(): Boolean;
-var
-  TmpFileName: string;
-  BakFileName: string;
-
-begin
-
-  Result := False;
-
-  if (Trim(FSetupFileName) = '') then
-    Exit;
-
-  TmpFileName := FSetupFileName + '.tmp';
-  BakFileName := FSetupFileName + '.bak';
-
-  DeleteFile(PChar(TmpFileName));
-
-  try
-
-    // Write the new setup to a side file first.
-    // This prevents a forced Windows reboot from leaving the active INI half-written.
-    SaveSetupToIni(TmpFileName,
-                   FSetup);
-
-    if FileExists(FSetupFileName) then
-      CopyFile(PChar(FSetupFileName),
-               PChar(BakFileName),
-               False);
-
-    Result := MoveFileEx(PChar(TmpFileName),
-                         PChar(FSetupFileName),
-                         MOVEFILE_REPLACE_EXISTING or MOVEFILE_WRITE_THROUGH);
-
-    if not Result then
-      begin
-
-        DeleteFile(PChar(FSetupFileName));
-        Result := MoveFileEx(PChar(TmpFileName),
-                             PChar(FSetupFileName),
-                             MOVEFILE_REPLACE_EXISTING or MOVEFILE_WRITE_THROUGH);
-      end;
-
-    if not Result then
-      begin
-
-        // Last-resort fallback. It is less safe, but avoids losing setup changes.
-        SaveSetupToIni(FSetupFileName,
-                       FSetup);
-        Result := True;
-      end;
-  except
-
-    Result := False;
-  end;
-end;
-
-
-function TMainMDIFrm.IsProbablyValidStoredEndpointId(const ADeviceId: string): Boolean;
-var
-  S: string;
-
-begin
-
-  S := Trim(ADeviceId);
-
-  // Normal IMMDevice ids are long strings like:
-  // {0.0.0.00000000}.{xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}
-  // Corrupted INI values are often empty, very short, or missing braces.
-  Result := (Length(S) >= 16) and
-            (Pos('{', S) > 0) and
-            (Pos('}', S) > 0);
-end;
-
-
 function TMainMDIFrm.EndpointIdExists(const ADeviceId: string): Boolean;
 var
   DevEnum: IMMDeviceEnumerator;
   Dev: IMMDevice;
-  State: DWORD;
 
 begin
 
   Result := False;
 
-  if not IsProbablyValidStoredEndpointId(ADeviceId) then
+  if (Trim(ADeviceId) = '') then
     Exit;
 
   DevEnum := nil;
   Dev := nil;
-  State := 0;
 
   try
 
     DevEnum := CreateComObject(CLSID_MMDeviceEnumerator) as IMMDeviceEnumerator;
 
-    if FAILED(DevEnum.GetDevice(PWideChar(WideString(Trim(ADeviceId))),
-                                Dev)) or
-       (not Assigned(Dev)) then
-      Exit;
-
-    if FAILED(Dev.GetState(State)) then
-      Exit;
-
-    Result := (State = DEVICE_STATE_ACTIVE);
+    Result := SUCCEEDED(DevEnum.GetDevice(PWideChar(WideString(ADeviceId)),
+                                          Dev)) and Assigned(Dev);
   except
 
     Result := False;
@@ -1777,21 +1666,14 @@ begin
       Result := True;
     end;
 
-  // Cue/PFL is special:
-  // - Valid-looking but temporarily absent USB headphones are runtime state.
-  // - Corrupted/truncated INI strings must be removed, otherwise Windows audio
-  //   can loop internally with ERROR_NOT_FOUND after updates/reboots.
-  if (Trim(FSetup.PFLDeviceId) <> '') and
-     (not IsProbablyValidStoredEndpointId(FSetup.PFLDeviceId)) then
-    begin
-
-      FSetup.PFLDeviceId := '';
-      FSetup.PFLEnabled := False;
-      Result := True;
-    end;
+  // IMPORTANT:
+  //  Do NOT clear PFLDeviceId.
+  //  Do NOT force PFLEnabled := False.
+  //  Temporary cue-device absence is runtime state, not setup mutation.
 
   if Result then
-    SaveSetupSafely();
+    SaveSetupToIni(FSetupFileName,
+                   FSetup);
 end;
 
 
@@ -1802,7 +1684,8 @@ begin
   FSetup.MicDeviceId := '';
 
   // Keep cue settings intact.
-  SaveSetupSafely();
+  SaveSetupToIni(FSetupFileName,
+                 FSetup);
 end;
 
 
@@ -1836,8 +1719,16 @@ begin
   else
     begin
 
-      if FSetup.PFLEnabled and (PFLDeviceId <> '') then
-        NotifyCueEndpointLostAsync();
+      if FSetup.PFLEnabled and (PFLDeviceId <> '') and (not FCueUnavailableWarned) then
+        begin
+
+          FCueUnavailableWarned := True;
+          MessageDlg('The stored cue/PFL audio endpoint is currently unavailable.' + sLineBreak +
+                     'Cue will stay disabled for this run until the endpoint becomes available again.',
+                     mtWarning,
+                     [mbOK],
+                     0);
+        end;
     end;
 end;
 
@@ -1917,12 +1808,11 @@ begin
   if not Assigned (FRDJRadioStatusJson) then
     Exit;
 
-  FRDJRadioStatusJson.WriteRadioStatusJson(FSetup.IcecastNowPlayingJsonFile,
-                                           Trim(mmoDjName.Text),
-                                           Trim(mmoShow.Text),
-                                           '',
-                                           '',
-                                           FCoverFileName);
+  WriteNowPlayingStatus(Trim(mmoDjName.Text),
+                        Trim(mmoShow.Text),
+                        '',
+                        '',
+                        BuildCoverJsonUrl(True));
 end;
 
 
@@ -1998,16 +1888,6 @@ var
 
 begin
 
-  if FAudioGraphRestarting then
-    begin
-
-      FPendingHardRestart := True;
-      Exit;
-    end;
-
-  FAudioGraphRestarting := True;
-  FPendingHardRestart := False;
-
   RestartBroadcast := True; //FSetup.Broadcast.Enabled;
 
   if RestartBroadcast then
@@ -2067,13 +1947,11 @@ begin
 
     if Assigned(FCueOut) then
       begin
+
         hr := FCueOut.Start();
         if FAILED(hr) then
-          begin
-
-            FreeAndNil(FCueOut);
-            NotifyCueEndpointLostAsync();
-          end;
+          raise Exception.CreateFmt('FCueOut.Start failed: $%.8x',
+                                    [Cardinal(hr)]);
       end;
 
     if Assigned(FMasterDeck) then
@@ -2082,15 +1960,12 @@ begin
     if RestartBroadcast then
       StartBroadcast();
 
-  finally
+  except
 
-    FAudioGraphRestarting := False;
-
-    if FPendingHardRestart then
+    on E: Exception do
       begin
 
-        FPendingHardRestart := False;
-        QueueEndpointRefresh();
+        raise;
       end;
   end;
 end;
@@ -2308,6 +2183,7 @@ begin
 
   for i := 0 to Count - 1 do
     begin
+
       FChannelDecks[i] := TfrmChannelDeck.Create(Self);
       FChannelDecks[i].ChannelIndex := i;
       FChannelDecks[i].lblCaption.Caption := Format('Channel %d',
@@ -2383,7 +2259,9 @@ var
   DirName: string;
   BaseNoExt: string;
   Ext: string;
+
 begin
+
   DirName := ExtractFilePath(ABaseFileName);
   BaseNoExt := ChangeFileExt(ExtractFileName(ABaseFileName), '');
   Ext := ExtractFileExt(ABaseFileName);
@@ -2517,6 +2395,7 @@ begin
 
   if not Assigned(FCueOut) then
     begin
+
       Flags := AUDCLNT_BUFFERFLAGS_SILENT;
       Exit(S_OK);
     end;
@@ -2670,7 +2549,8 @@ procedure TMainMDIFrm.SetAudioRecorderRecordPreFx(const AValue: Boolean);
 begin
 
   FSetup.AudioRecorderRecordPreFx := AValue;
-  SaveSetupSafely();
+  SaveSetupToIni(FSetupFileName,
+                 FSetup);
 end;
 
 
@@ -2678,7 +2558,8 @@ procedure TMainMDIFrm.SetAudioRecorderRecordPostFx(const AValue: Boolean);
 begin
 
   FSetup.AudioRecorderRecordPostFx := AValue;
-  SaveSetupSafely();
+  SaveSetupToIni(FSetupFileName,
+                 FSetup);
 end;
 
 
@@ -2712,15 +2593,10 @@ begin
     else
       FSetup.AudioRecorderTapPoint := AValue;
 
-  SaveSetupSafely();
+  SaveSetupToIni(FSetupFileName,
+                 FSetup);
 end;
 
-
-// JSON ========================================================================
-
-
-
-// JSON end ====================================================================
 
 
 // initialization and finalization =============================================

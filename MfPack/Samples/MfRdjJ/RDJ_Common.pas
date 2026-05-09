@@ -135,10 +135,10 @@ type
   procedure RefreshDarkWindowFrame(const AWnd: HWND);
 
   // Lightweight OpenFile dialog.
-  function BrowseAudioFile(const AOwner: HWND;
-                           const AFilter: PWideChar;
-                           AReturnDirOnly: Boolean;
-                           out APath: TFileName): Boolean;
+  function BrowseFile(const AOwner: HWND;
+                      const AFilter: PWideChar;
+                      const AReturnDirOnly: Boolean;
+                      out APath: TFileName): Boolean;
 
   procedure FreeComboObjects(ACombo: TComboBox);
 
@@ -411,51 +411,47 @@ begin
 end;
 
 
-function BrowseAudioFile(const AOwner: HWND;
-                         const AFilter: PWideChar;
-                         AReturnDirOnly: Boolean;
-                         out APath: TFileName): Boolean;
+function BrowseFile(const AOwner: HWND;
+                    const AFilter: PWideChar;
+                    const AReturnDirOnly: Boolean;
+                    out APath: TFileName): Boolean;
 var
-  Ofn: OPENFILENAME;
-  FileBuf: array[0..MAX_PATH - 1] of Char;
+  Ofn: OPENFILENAMEW;
+  FileBuf: array[0..MAX_PATH - 1] of WideChar;
 
 const
-  AUDIO_FILTER: PChar = 'Audio Files'#0'*.mp3;*.wav;*.flac;*.ogg;*.m4a;*.aac;*.wma;*.opus'#0 +
-                        'All Files'#0'*.*'#0#0;
-begin
+  ALL_FILTER: PWideChar = 'All Files'#0'*.*'#0#0;
 
+begin
   APath := '';
 
-  ZeroMemory(@Ofn,
-             SizeOf(Ofn));
-
-  ZeroMemory(@FileBuf,
-             SizeOf(FileBuf));
+  ZeroMemory(@Ofn, SizeOf(Ofn));
+  ZeroMemory(@FileBuf, SizeOf(FileBuf));
 
   Ofn.lStructSize := SizeOf(Ofn);
   Ofn.hwndOwner := AOwner;
 
-  if (AFilter = '') then
-    Ofn.lpstrFilter := AUDIO_FILTER
+  if (AFilter = nil) or (AFilter^ = #0) then
+    Ofn.lpstrFilter := ALL_FILTER
   else
     Ofn.lpstrFilter := AFilter;
 
   Ofn.lpstrFile := @FileBuf[0];
-  Ofn.nMaxFile := MAX_PATH;
-  Ofn.lpstrTitle := 'Open audio file';
+  Ofn.nMaxFile := Length(FileBuf);
+  Ofn.lpstrTitle := 'Open file';
   Ofn.Flags := OFN_FILEMUSTEXIST or
                OFN_PATHMUSTEXIST or
                OFN_HIDEREADONLY;
 
-  Result := GetOpenFileName(Ofn);
+  Result := GetOpenFileNameW(Ofn);
 
   if Result then
     begin
 
-      if AReturnDirOnly then // Dir only
-        ExtractFileDir(string(FileBuf))
-      else  // Full path + filename
-        APath := FileBuf;
+      if AReturnDirOnly then
+        APath := ExtractFileDir(string(Ofn.lpstrFile))
+      else
+        APath := string(Ofn.lpstrFile);
     end;
 end;
 

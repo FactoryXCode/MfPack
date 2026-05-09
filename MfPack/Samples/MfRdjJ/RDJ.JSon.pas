@@ -208,7 +208,7 @@ begin
 
     if (ACoverUrl <> '') then
       SetJsonString('coverUrl',
-                    ACoverUrl + '?ts=' + IntToStr(GetTickCount));
+                    ExtractFileName(ACoverUrl) + '?ts=' + IntToStr(GetTickCount));
 
     SetJsonInteger('displayListeners',
                    AListeners);

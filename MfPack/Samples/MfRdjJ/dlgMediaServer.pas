@@ -1,6 +1,6 @@
 // FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright:  FactoryX. All rights reserved.
 //
 // Project: MfPack - CoreAudio - WASAPI
 // Project location: https://sourceforge.net/projects/MFPack
@@ -130,6 +130,7 @@ type
     FCaddyProcessHandle: THandle;
     FCaddyProcessId: DWORD;
     FCaddyStartedByRdj: Boolean;
+    FUpdatingServerUi: Boolean;
 
     procedure IcecastLog(Sender: TObject;
                          const AText: string);
@@ -145,6 +146,12 @@ type
     function IsCaddyRunning(): Boolean;
     function TcpPortOpen(const AHost: string;
                          const APort: Word): Boolean;
+
+    function IsUncPath(const APath: string): Boolean;
+    function IsRemoteServerMode(): Boolean;
+    function IsIcecastReachable(): Boolean;
+    function IsCaddyShareReady(): Boolean;
+    function ConfirmRemoteServerReady(): Boolean;
 
   public
     { Public declarations }
@@ -189,13 +196,35 @@ begin
   if FUpdatingBroadcastUi then
     Exit;
 
-  if Assigned(MainMDIFrm) then
+  if not Assigned(MainMDIFrm) then
     begin
-      MainMDIFrm.SetBroadcastEnabled(chkBroadcast.Checked);
-      if chkBroadcast.Checked then
-        chkBroadcast.Tag := 1
-      else
-        chkBroadcast.Tag := 0
+      SetBroadcastUiState(False,
+                          False);
+      Exit;
+    end;
+
+  if chkBroadcast.Checked then
+    begin
+      if IsRemoteServerMode() and
+         (not chkStartStopServer.Checked) then
+        begin
+          IcecastLog(Self,
+                     'Broadcast disabled: remote server is not confirmed.');
+          SetBroadcastUiState(False,
+                              False);
+          Exit;
+        end;
+
+      SetBroadcastUiState(False,
+                          False);
+
+      MainMDIFrm.SetBroadcastEnabled(True);
+    end
+  else
+    begin
+      MainMDIFrm.SetBroadcastEnabled(False);
+      SetBroadcastUiState(False,
+                          False);
     end;
 end;
 
@@ -203,33 +232,44 @@ end;
 procedure TfrmMediaServer.chkStartStopServerClick(Sender: TObject);
 begin
 
+  if FUpdatingServerUi then
+    Exit;
+
   StartStopPublicRadioServices();
 end;
 
 
 procedure TfrmMediaServer.FormCloseQuery(Sender: TObject;
   var CanClose: Boolean);
+
 begin
 
   CanClose := False;
-
-  StartStopPublicRadioServices();
-  FreeAndNil(FIcecastMgr);
-  CanClose := True;
+  Hide;
 end;
 
 
 procedure TfrmMediaServer.FormCreate(Sender: TObject);
 begin
 
-  SetBroadcastUiState(MainMDIFrm.Setup.Broadcast.Enabled,
-                      False);
-
-  UpdateIcecastUi();
+  FUpdatingBroadcastUi := False;
+  FUpdatingServerUi := False;
 
   FCaddyProcessHandle := 0;
   FCaddyProcessId := 0;
   FCaddyStartedByRdj := False;
+
+  chkStartStopServer.Checked := False;
+  chkStartStopServer.Down := False;
+
+  chkBroadcast.Checked := False;
+  chkBroadcast.Down := False;
+  chkBroadcast.Enabled := False;
+
+  chkAutoRestart.Checked := True;
+  chkAutoRestart.Down := True;
+
+  UpdateOnAirLamp(False);
 end;
 
 
@@ -269,9 +309,6 @@ var
 
 begin
 
-  MainMdifrm.chkMediaServer.Down := False;
-
-  // No form caption & borders.
   SetWindowLong(Handle,
                 GWL_STYLE,
                 GetWindowLong(Handle, GWL_STYLE) and not WS_CAPTION or WS_BORDER);
@@ -279,33 +316,57 @@ begin
   Width := Width - 10;
   Height := Height - 30;
 
+  if not Assigned(MainMDIFrm) then
+    Exit;
+
   setup := MainMDIFrm.Setup;
 
-  // IceCast server
-  FIcecastMgr := TMfIcecastServerManager.Create({Self});
-  FIcecastMgr.OnLog := IcecastLog;
-  FIcecastMgr.OnStateChanged := IcecastStateChanged;
+  if not Assigned(FIcecastMgr) then
+    begin
+      FIcecastMgr := TMfIcecastServerManager.Create({Self});
+      FIcecastMgr.OnLog := IcecastLog;
+      FIcecastMgr.OnStateChanged := IcecastStateChanged;
+    end;
 
   FIcecastMgr.ExePath := setup.IcecastExePath;
-
   FIcecastMgr.ConfigPath := setup.IcecastConfigPath;
-
   FIcecastMgr.WorkingDir := setup.IcecastWorkingDir;
   FIcecastMgr.Host := setup.IcecastHost;
   FIcecastMgr.Port := setup.IcecastPort;
   FIcecastMgr.HttpPath := setup.IcecastHttpPath;
-  FIcecastMgr.AutoRestart := setup.IcecastAutoRestart;
-  FIcecastMgr.RestartDelayMs := setup.IcecastRestartDelayMs;
 
-  UpdateIcecastUi();
+  if (setup.IcecastAutoRestart = False) then
+    setup.IcecastAutoRestart := True;
+
+  FIcecastMgr.AutoRestart := setup.IcecastAutoRestart;
+  chkAutoRestart.Checked := FIcecastMgr.AutoRestart;
+
+  FIcecastMgr.RestartDelayMs := setup.IcecastRestartDelayMs;
 
   FCaddyProcessHandle := 0;
   FCaddyProcessId := 0;
   FCaddyStartedByRdj := False;
+
+  if IsRemoteServerMode() then
+    begin
+
+      lblIcecastServerStatus.Caption := 'Server: Remote mode - not confirmed';
+      chkStartStopServer.Enabled := True;
+      chkStartStopServer.Checked := False;
+      chkStartStopServer.Down := False;
+
+      chkBroadcast.Enabled := False;
+      chkBroadcast.Checked := False;
+      chkBroadcast.Down := False;
+
+      UpdateOnAirLamp(False);
+      Exit;
+    end;
+
+  UpdateIcecastUi();
 end;
 
 
-// Icecast server
 procedure TfrmMediaServer.IcecastLog(Sender: TObject;
                                      const AText: string);
 begin
@@ -341,6 +402,33 @@ end;
 procedure TfrmMediaServer.UpdateIcecastUi();
 begin
 
+  if IsRemoteServerMode() then
+    begin
+
+      if chkStartStopServer.Checked then
+        begin
+
+          lblIcecastServerStatus.Caption := 'Server: Remote server ready';
+          chkBroadcast.Enabled := True;
+        end
+      else
+        begin
+
+          lblIcecastServerStatus.Caption := 'Server: Remote server not confirmed';
+          chkBroadcast.Enabled := False;
+          chkBroadcast.Checked := False;
+          chkBroadcast.Down := False;
+          UpdateOnAirLamp(False);
+        end;
+
+      chkStartStopServer.Enabled := True;
+
+      if Assigned(MainMDIFrm) then
+        MainMDIFrm.chkMediaServer.Down := chkStartStopServer.Checked;
+
+      Exit;
+    end;
+
   if not Assigned(FIcecastMgr) then
     Exit;
 
@@ -348,58 +436,62 @@ begin
     issStopped:
       begin
 
-        lblIcecastServerStatus.Caption := 'Server: Stopped';
-        //chkStartStopServer.Caption := 'Start Icecast';
-        chkStartStopServer.Enabled := True;
+        chkStartStopServer.Checked := False;
+        chkStartStopServer.Down := False;
         chkBroadcast.Enabled := False;
         chkBroadcast.Checked := False;
-        MainMdifrm.chkMediaServer.Down := False;
+        chkBroadcast.Down := False;
+
+        MainMDIFrm.SetBroadcastEnabled(False);
+        MainMDIFrm.chkMediaServer.Down := False;
+
+        UpdateOnAirLamp(False);
       end;
 
     issStarting:
       begin
 
         lblIcecastServerStatus.Caption := 'Server: Starting';
-        //chkStartStopServer.Caption := 'Starting...';
         chkStartStopServer.Enabled := False;
+        chkBroadcast.Enabled := False;
         chkBroadcast.Checked := False;
+        chkBroadcast.Down := False;
         MainMdifrm.chkMediaServer.Down := False;
       end;
 
     issRunningNotReady:
       begin
-        lblIcecastServerStatus.Caption := 'Server: Running (not ready yet)';
-        //chkStartStopServer.Caption := 'Stop Icecast';
-        chkStartStopServer.Enabled := True;
+
+        chkStartStopServer.Checked := True;
+        chkStartStopServer.Down := True;
         chkBroadcast.Enabled := False;
         chkBroadcast.Checked := False;
-        MainMdifrm.chkMediaServer.Down := False;
+        chkBroadcast.Down := False;
+        UpdateOnAirLamp(False);
       end;
 
     issReady:
       begin
 
-        lblIcecastServerStatus.Caption := 'Server: Ready and running';
-        //chkStartStopServer.Caption := 'Stop Icecast';
-        chkStartStopServer.Enabled := True;
+        chkStartStopServer.Checked := True;
+        chkStartStopServer.Down := True;
         chkBroadcast.Enabled := True;
-        MainMdifrm.chkMediaServer.Down := True;
+        MainMDIFrm.chkMediaServer.Down := True;
       end;
 
     issStopping:
       begin
 
         lblIcecastServerStatus.Caption := 'Server: Stopping';
-        //chkStartStopServer.Caption := 'Stopping...';
         chkStartStopServer.Enabled := False;
         chkBroadcast.Enabled := False;
         chkBroadcast.Checked := False;
+        chkBroadcast.Down := False;
         MainMdifrm.chkMediaServer.Down := False;
       end;
   end;
 
   chkAutoRestart.Checked := FIcecastMgr.AutoRestart;
-
 end;
 
 
@@ -437,7 +529,14 @@ begin
 
   try
 
+    if IsRemoteServerMode() then
+      chkBroadcast.Enabled := chkStartStopServer.Checked
+    else
+      chkBroadcast.Enabled := chkBroadcast.Enabled or AChecked or AOnAir;
+
     chkBroadcast.Checked := AChecked;
+    chkBroadcast.Down := AChecked;
+
     UpdateOnAirLamp(AOnAir);
   finally
 
@@ -446,51 +545,57 @@ begin
 end;
 
 
-// IceCast/caddy/json
 procedure TfrmMediaServer.StartStopPublicRadioServices();
 var
   hr: HResult;
 
 begin
 
+  if IsRemoteServerMode() then
+    begin
+
+      ConfirmRemoteServerReady();
+      Exit;
+    end;
+
   if not Assigned(FIcecastMgr) then
     Exit;
 
   case FIcecastMgr.State of
+    issStopped: begin
 
-    issStopped:
-      begin
+                  hr := StartCaddy();
+                  if Failed(hr) then
+                    raise Exception.Create('Could not start Caddy.');
 
-        hr := StartCaddy();
-        if Failed(hr) then
-          raise Exception.Create('Could not start Caddy.');
+                  FIcecastMgr.AutoRestart := chkAutoRestart.Checked;
 
-        FIcecastMgr.AutoRestart := chkAutoRestart.Checked;
+                  hr := FIcecastMgr.Start();
+                  if Failed(hr) then
+                    raise Exception.Create('Could not start Icecast.');
 
-        hr := FIcecastMgr.Start();
-        if Failed(hr) then
-          raise Exception.Create('Could not start Icecast.');
-
-        chkStartStopServer.Caption := 'Stop';
-      end;
+                  chkStartStopServer.Caption := 'Stop';
+                end;
 
     issRunningNotReady,
-    issReady:
-      begin
+    issReady: begin
 
-        FIcecastMgr.Stop();
-        StopCaddy();
+                MainMDIFrm.SetBroadcastEnabled(False);
+                SetBroadcastUiState(False,
+                                    False);
 
-        chkStartStopServer.Caption := 'Start';
-      end;
+                FIcecastMgr.Stop();
+                StopCaddy();
+
+                chkStartStopServer.Caption := 'Start';
+              end;
 
     issStarting,
-    issStopping:
-      Exit;
+    issStopping: UpdateIcecastUi();
   end;
 end;
 
-// Start Caddy as a service.
+
 function TfrmMediaServer.StartCaddy(): HRESULT;
 var
   hr: HResult;
@@ -678,6 +783,141 @@ begin
               WM_SYSCOMMAND,
               SC_MOVE + HTCAPTION,
               0);
+end;
+
+
+function TfrmMediaServer.IsUncPath(const APath: string): Boolean;
+var
+  S: string;
+
+begin
+  S := Trim(APath);
+  Result := (Length(S) >= 2) and
+            (S[1] = '\') and
+            (S[2] = '\');
+end;
+
+
+function TfrmMediaServer.IsRemoteServerMode(): Boolean;
+var
+  Setup: TRDJSetup;
+  Host: string;
+
+begin
+  Result := False;
+
+  if not Assigned(MainMDIFrm) then
+    Exit;
+
+  Setup := MainMDIFrm.Setup;
+  Host := Trim(Setup.IcecastHost);
+
+  Result := IsUncPath(Setup.IcecastExePath) or
+            IsUncPath(Setup.IcecastConfigPath) or
+            IsUncPath(Setup.IcecastWorkingDir) or
+            IsUncPath(Setup.IcecastCaddyDir) or
+            IsUncPath(Setup.IcecastCaddyConfigFile) or
+            IsUncPath(Setup.IcecastNowPlayingJsonFile) or
+            ((Host <> '') and
+             (not SameText(Host, '127.0.0.1')) and
+             (not SameText(Host, 'localhost')));
+end;
+
+
+function TfrmMediaServer.IsIcecastReachable(): Boolean;
+var
+  Host: string;
+  Port: Word;
+
+begin
+  Result := False;
+
+  if not Assigned(MainMDIFrm) then
+    Exit;
+
+  Host := Trim(MainMDIFrm.Setup.IcecastHost);
+  Port := MainMDIFrm.Setup.IcecastPort;
+
+  if Host = '' then
+    Host := Trim(MainMDIFrm.Setup.Broadcast.Host);
+
+  if Port = 0 then
+    Port := MainMDIFrm.Setup.Broadcast.Port;
+
+  if (Host = '') or
+     (Port = 0) then
+    Exit;
+
+  Result := TcpPortOpen(Host,
+                        Port);
+end;
+
+
+function TfrmMediaServer.IsCaddyShareReady(): Boolean;
+var
+  Dir: string;
+  JsonFile: string;
+
+begin
+  Result := True;
+
+  if not Assigned(MainMDIFrm) then
+    Exit(False);
+
+  Dir := Trim(MainMDIFrm.Setup.IcecastCaddyDir);
+  JsonFile := Trim(MainMDIFrm.Setup.IcecastNowPlayingJsonFile);
+
+  if Dir <> '' then
+    Result := DirectoryExists(Dir);
+
+  if Result and
+     (JsonFile <> '') then
+    Result := DirectoryExists(ExtractFilePath(JsonFile));
+end;
+
+
+function TfrmMediaServer.ConfirmRemoteServerReady(): Boolean;
+var
+  IcecastOk: Boolean;
+  CaddyShareOk: Boolean;
+
+begin
+  IcecastOk := IsIcecastReachable();
+  CaddyShareOk := IsCaddyShareReady();
+
+  if IcecastOk then
+    IcecastLog(Self,
+               'Remote server mode: Icecast is reachable.')
+  else
+    IcecastLog(Self,
+               'Remote server mode: Icecast is NOT reachable.');
+
+  if CaddyShareOk then
+    IcecastLog(Self,
+               'Remote server mode: Caddy web folder is reachable.')
+  else
+    IcecastLog(Self,
+               'Remote server mode: Caddy web folder is NOT reachable.');
+
+  Result := IcecastOk and CaddyShareOk;
+
+  chkStartStopServer.Enabled := True;
+  chkStartStopServer.Checked := Result;
+  chkStartStopServer.Down := Result;
+  chkBroadcast.Enabled := Result;
+  chkBroadcast.Checked := False;
+  chkBroadcast.Down := False;
+
+  if Result then
+    lblIcecastServerStatus.Caption := 'Server: Remote server ready'
+  else
+    begin
+      lblIcecastServerStatus.Caption := 'Server: Remote server not ready';
+      UpdateOnAirLamp(False);
+    end;
+
+  if Assigned(MainMDIFrm) then
+    MainMDIFrm.chkMediaServer.Down := Result;
 end;
 
 

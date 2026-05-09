@@ -36,8 +36,6 @@ uses
   Vcl.Themes,
   Vcl.Styles,
   frmMainMDI in 'frmMainMDI.pas' {MainMDIFrm},
-  MfAudioFileBrowserDlg in 'MfAudioFileBrowserDlg.pas',
-  dlgAudioFileBrowser in 'dlgAudioFileBrowser.pas' {AudioFileBrowserDlg},
   MfIcecastBroadcastEngine in 'MfIcecastBroadcastEngine.pas',
   MfMicrophoneFx in 'MfMicrophoneFx.pas',
   MfMicrophoneDeckEngine in 'MfMicrophoneDeckEngine.pas',
@@ -47,7 +45,8 @@ uses
   RDJ.JSon in 'RDJ.JSon.pas',
   RDJ.FilenameParser in 'RDJ.FilenameParser.pas',
   dlgMediaServer in 'dlgMediaServer.pas' {frmMediaServer},
-  dlgAudioDevices in 'dlgAudioDevices.pas' {AudioDevicesDlg};
+  dlgAudioDevices in 'dlgAudioDevices.pas' {AudioDevicesDlg},
+  LWFileBrowserExDlg in 'LWFileBrowserExDlg.pas' {LWFileBrowserExDlg};
 
 {$R *.res}
 
@@ -57,7 +56,7 @@ begin
   Application.Title := 'RDJ Charlie';
   Application.CreateForm(TMainMDIFrm, MainMDIFrm);
   // Autocreate these forms for less UI load during rendering in loopback.
-  Application.CreateForm(TAudioFileBrowserDlg, AudioFileBrowserDlg);
+  Application.CreateForm(TLWFileBrowserExDlg, DlgLWFileBrowserEx);
   Application.CreateForm(TfrmMediaServer, fMediaServer);
   Application.Run;
 end.

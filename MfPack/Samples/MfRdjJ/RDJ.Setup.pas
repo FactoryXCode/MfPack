@@ -181,6 +181,7 @@ type
     IcecastCaddyDir: string;
     IcecastCaddyConfigFile: string;
     IcecastNowPlayingJsonFile: string;
+    IcecastCaddyCoversPath: string;
     IcecastCaddyCommand: string;
     IcecastCaddyLogFile: string;
 
@@ -196,6 +197,8 @@ type
     AudioRecordingsPath: string;  // hint
     DatabaseDir: string;  // text
     DatabasePath: string; // hint
+    LocalCoversDir: string; // text
+    LocalCoversPath: string; // hint
   end;
 
   TRecordTapPoint = (rtpPreFx,
@@ -355,6 +358,7 @@ begin
   ASetupRec.IcecastCaddyDir := 'C:\Caddy';
   ASetupRec.IcecastCaddyConfigFile := 'C:\Caddy\caddy.cff';
   ASetupRec.IcecastNowPlayingJsonFile := 'C:\Caddy\nowplaying.json';
+  ASetupRec.IcecastCaddyCoversPath := 'C:\Caddy';
   ASetupRec.IcecastCaddyCommand := 'C:\caddy.exe run --config "C:\Caddy\Caddy.cff" --adapter caddyfile'; // We need to avoid false uri, better to place Caddy under dir RDJ?
   ASetupRec.IcecastCaddyLogFile := 'Caddy.log';
 
@@ -392,6 +396,14 @@ begin
   if not DirectoryExists(ASetupRec.DatabasePath) then
     if not CreateDir(ASetupRec.DatabasePath) then
       ASetupRec.DatabasePath := ExpandFileName(ExtractFileDir(Application.ExeName));
+
+  ASetupRec.LocalCoversDir := 'Covers';
+  ASetupRec.LocalCoversPath := Format('%s\%s\', [ExtractFileDir(Application.ExeName),
+                                                 ASetupRec.LocalCoversDir]);
+
+  if not DirectoryExists(ASetupRec.LocalCoversPath) then
+    if not CreateDir(ASetupRec.LocalCoversPath) then
+      ASetupRec.LocalCoversPath := ExpandFileName(ExtractFileDir(Application.ExeName));
 end;
 
 
@@ -657,6 +669,15 @@ begin
                                                  'Data',
                                                  ASetupRec.DatabasePath);
 
+    // Covers
+    ASetupRec.LocalCoversDir := iniFile.ReadString('Dir',
+                                                   'Covers',
+                                                   ASetupRec.LocalCoversDir);
+
+    ASetupRec.LocalCoversPath := iniFile.ReadString('Paths',
+                                                    'Covers',
+                                                    ASetupRec.LocalCoversPath);
+
     // Icecast
     //ASetupRec.Broadcast.Enabled := iniFile.ReadBool('SetupBroadcast',
     //                                                'Enabled',
@@ -776,9 +797,13 @@ begin
                                                               'NowPlayingJsonFile',
                                                               ASetupRec.IcecastNowPlayingJsonFile);
 
+    ASetupRec.IcecastCaddyCoversPath := iniFile.ReadString('Icecast',
+                                                           'Covers',
+                                                           ASetupRec.IcecastCaddyCoversPath);
+
     ASetupRec.IcecastCaddyCommand := iniFile.ReadString('Icecast',
                                                         'CaddyCommand',
-                                                        ASetupRec.IcecastCaddyCommand);
+                                                        ASetupRec.IcecastCaddyCoversPath);
 
     ASetupRec.IcecastCaddyLogFile := iniFile.ReadString('Icecast',
                                                         'CaddyLogFile',
@@ -919,6 +944,15 @@ begin
                         'Data',
                         ASetupRec.DatabasePath);
 
+    // Covers dir + path
+    iniFile.WriteString('Dir',
+                        'Covers',
+                        ASetupRec.LocalCoversDir);
+
+    iniFile.WriteString('Paths',
+                        'Covers',
+                        ASetupRec.LocalCoversPath);
+
     // Icecast
     //iniFile.WriteBool('SetupBroadcast',
     //                  'Enabled',
@@ -1037,6 +1071,10 @@ begin
     iniFile.WriteString('Icecast',
                         'NowPlayingJsonFile',
                         ASetupRec.IcecastNowPlayingJsonFile);
+
+    iniFile.WriteString('Icecast',
+                        'Covers',
+                        ASetupRec.IcecastCaddyCoversPath);
 
     iniFile.WriteString('Icecast',
                         'CaddyCommand',

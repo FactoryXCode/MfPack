@@ -110,7 +110,7 @@ uses
   RDJ.TrackLibrary,
   RDJ.PlaylistManager,
   RDJ.FilenameParser,
-  dlgAudioFileBrowser, // Select single file.
+  LWFileBrowserExDlg, // Select single file.
   MfBeatLed,
   MfLevelProgressBar;
 
@@ -1508,10 +1508,10 @@ begin
 
   StopPlaylistMode();
 
-  AudioFileBrowserDlg.ShowModal;
+  DlgLWFileBrowserEx.ShowModal;
 
-  if (AudioFileBrowserDlg.ModalResult = mrOk) then
-    SelectedFile := AudioFileBrowserDlg.FileURI
+  if (DlgLWFileBrowserEx.ModalResult = mrOk) then
+    SelectedFile := DlgLWFileBrowserEx.FileURI
   else
     Exit;
 
@@ -1881,7 +1881,7 @@ begin
   Result := FFileNameParser.BuildIceCastSongText(Artist,
                                                  Title);
 
-  if Result = '' then
+  if (Result = '') then
     Result := ChangeFileExt(ExtractFileName(AFileName),
                             '');
 end;

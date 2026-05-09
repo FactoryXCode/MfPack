@@ -97,7 +97,7 @@ uses
   RDJ.PlaylistManager,
   RDJ.LibraryScanner,
   RDJ.LibraryScanThread,
-  dlgAudioFileBrowser,
+  LWFileBrowserExDlg,
   MPxpButton,
   frmTagEditor;
 
@@ -919,13 +919,14 @@ end;
 procedure TfrmPlaylistEditor.btnOpenFileClick(Sender: TObject);
 begin
 
-  AudioFileBrowserDlg.ShowModal;
+  DlgLWFileBrowserEx.FileFilter := fbxAudio;
+  DlgLWFileBrowserEx.ShowModal;
 
-  if (AudioFileBrowserDlg.ModalResult = mrOk) then
+  if (DlgLWFileBrowserEx.ModalResult = mrOk) then
     begin
 
-      edFileName.Text := AudioFileBrowserDlg.FileName;
-      edFileName.Hint := AudioFileBrowserDlg.FileURI;
+      edFileName.Text := DlgLWFileBrowserEx.FileName;
+      edFileName.Hint := DlgLWFileBrowserEx.FileURI;
     end
   else
     begin

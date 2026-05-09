@@ -364,10 +364,10 @@ type
     dwType: DWORD;
     dwDisplayType: DWORD;
     dwUsage: DWORD;
-    lpLocalName: PWideChar;
-    lpRemoteName: PWideChar;
-    lpComment: PWideChar;
-    lpProvider: PWideChar;
+    lpLocalName: LPWSTR;
+    lpRemoteName: LPWSTR;
+    lpComment: LPWSTR;
+    lpProvider: LPWSTR;
   end;
   {$EXTERNALSYM _NETRESOURCEW}
   NETRESOURCEW = _NETRESOURCEW;
@@ -430,8 +430,8 @@ type
   _DISCDLGSTRUCTW = record
     cbStructure: DWORD;
     hwndOwner: HWND;
-    lpLocalName: PWideChar;
-    lpRemoteName: PWideChar;
+    lpLocalName: LPWSTR;
+    lpRemoteName: LPWSTR;
     dwFlags: DWORD;
   end;
   {$EXTERNALSYM _DISCDLGSTRUCTW}
@@ -455,7 +455,7 @@ type
   LPUNIVERSAL_NAME_INFOW = ^UNIVERSAL_NAME_INFOW;
   {$EXTERNALSYM LPUNIVERSAL_NAME_INFOW}
   _UNIVERSAL_NAME_INFOW = record
-    lpUniversalName: PWideChar;
+    lpUniversalName: LPWSTR;
   end;
   {$EXTERNALSYM _UNIVERSAL_NAME_INFOW}
   UNIVERSAL_NAME_INFOW = _UNIVERSAL_NAME_INFOW;
@@ -480,9 +480,9 @@ type
   LPREMOTE_NAME_INFOW = ^REMOTE_NAME_INFOW;
   {$EXTERNALSYM LPREMOTE_NAME_INFOW}
   _REMOTE_NAME_INFOW = record
-    lpUniversalName: PWideChar;
-    lpConnectionName: PWideChar;
-    lpRemainingPath: PWideChar;
+    lpUniversalName: LPWSTR;
+    lpConnectionName: LPWSTR;
+    lpRemainingPath: LPWSTR;
   end;
   {$EXTERNALSYM _REMOTE_NAME_INFOW}
   REMOTE_NAME_INFOW = _REMOTE_NAME_INFOW;
@@ -531,9 +531,9 @@ function WNetAddConnectionA(lpRemoteName: PAnsiChar;
                             lpLocalName: PAnsiChar): DWORD; stdcall;
 {$EXTERNALSYM WNetAddConnectionA}
 
-function WNetAddConnectionW(lpRemoteName: PWideChar;
-                            lpPassword: PWideChar;
-                            lpLocalName: PWideChar): DWORD; stdcall;
+function WNetAddConnectionW(lpRemoteName: LPWSTR;
+                            lpPassword: LPWSTR;
+                            lpLocalName: LPWSTR): DWORD; stdcall;
 {$EXTERNALSYM WNetAddConnectionW}
 
 function WNetAddConnection2A(lpNetResource: LPNETRESOURCEA;
@@ -543,8 +543,8 @@ function WNetAddConnection2A(lpNetResource: LPNETRESOURCEA;
 {$EXTERNALSYM WNetAddConnection2A}
 
 function WNetAddConnection2W(lpNetResource: LPNETRESOURCEW;
-                             lpPassword: PWideChar;
-                             lpUserName: PWideChar;
+                             lpPassword: LPWSTR;
+                             lpUserName: LPWSTR;
                              dwFlags: DWORD): DWORD; stdcall;
 {$EXTERNALSYM WNetAddConnection2W}
 
@@ -557,8 +557,8 @@ function WNetAddConnection3A(hwndOwner: HWND;
 
 function WNetAddConnection3W(hwndOwner: HWND;
                              lpNetResource: LPNETRESOURCEW;
-                             lpPassword: PWideChar;
-                             lpUserName: PWideChar;
+                             lpPassword: LPWSTR;
+                             lpUserName: LPWSTR;
                              dwFlags: DWORD): DWORD; stdcall;
 {$EXTERNALSYM WNetAddConnection3W}
 
@@ -585,7 +585,7 @@ function WNetCancelConnectionA(lpName: PAnsiChar;
                                fForce: BOOL): DWORD; stdcall;
 {$EXTERNALSYM WNetCancelConnectionA}
 
-function WNetCancelConnectionW(lpName: PWideChar;
+function WNetCancelConnectionW(lpName: LPWSTR;
                                fForce: BOOL): DWORD; stdcall;
 {$EXTERNALSYM WNetCancelConnectionW}
 
@@ -594,7 +594,7 @@ function WNetCancelConnection2A(lpName: PAnsiChar;
                                 fForce: BOOL): DWORD; stdcall;
 {$EXTERNALSYM WNetCancelConnection2A}
 
-function WNetCancelConnection2W(lpName: PWideChar;
+function WNetCancelConnection2W(lpName: LPWSTR;
                                 dwFlags: DWORD;
                                 fForce: BOOL): DWORD; stdcall;
 {$EXTERNALSYM WNetCancelConnection2W}
@@ -604,18 +604,18 @@ function WNetGetConnectionA(lpLocalName: PAnsiChar;
                             var lpnLength: DWORD): DWORD; stdcall;
 {$EXTERNALSYM WNetGetConnectionA}
 
-function WNetGetConnectionW(lpLocalName: PWideChar;
-                            lpRemoteName: PWideChar;
+function WNetGetConnectionW(lpLocalName: LPWSTR;
+                            lpRemoteName: LPWSTR;
                             var lpnLength: DWORD): DWORD; stdcall;
 {$EXTERNALSYM WNetGetConnectionW}
 
 function WNetRestoreSingleConnectionW(hwndParent: HWND;
-                                      lpDevice: PWideChar;
+                                      lpDevice: LPWSTR;
                                       fUseUI: BOOL): DWORD; stdcall;
 {$EXTERNALSYM WNetRestoreSingleConnectionW}
 
 function WNetRestoreConnectionW(hWnd: HWND;
-                                lpDevice: PWideChar): DWORD; stdcall;
+                                lpDevice: LPWSTR): DWORD; stdcall;
 {$EXTERNALSYM WNetRestoreConnectionW}
 
 function WNetUseConnectionA(hwndOwner: HWND;
@@ -630,10 +630,10 @@ function WNetUseConnectionA(hwndOwner: HWND;
 
 function WNetUseConnectionW(hwndOwner: HWND;
                             lpNetResource: LPNETRESOURCEW;
-                            lpPassword: PWideChar;
-                            lpUserId: PWideChar;
+                            lpPassword: LPWSTR;
+                            lpUserId: LPWSTR;
                             dwFlags: DWORD;
-                            lpAccessName: PWideChar;
+                            lpAccessName: LPWSTR;
                             var lpBufferSize: DWORD;
                             lpResult: LPDWORD): DWORD; stdcall;
 {$EXTERNALSYM WNetUseConnectionW}
@@ -657,7 +657,7 @@ function WNetUseConnection4W(hwndOwner: HWND;
                              dwFlags: DWORD;
                              lpUseOptions: PByte;
                              cbUseOptions: DWORD;
-                             lpAccessName: PWideChar;
+                             lpAccessName: LPWSTR;
                              var lpBufferSize: DWORD;
                              lpResult: LPDWORD): DWORD; stdcall;
 {$EXTERNALSYM WNetUseConnection4W}
@@ -732,7 +732,7 @@ function WNetGetResourceInformationA(lpNetResource: LPNETRESOURCEA;
 function WNetGetResourceInformationW(lpNetResource: LPNETRESOURCEW;
                                      lpBuffer: Pointer;
                                      var lpcbBuffer: DWORD;
-                                     var lplpSystem: PWideChar): DWORD; stdcall;
+                                     var lplpSystem: LPWSTR): DWORD; stdcall;
 {$EXTERNALSYM WNetGetResourceInformationW}
 
 { Universal Naming }
@@ -742,7 +742,7 @@ function WNetGetUniversalNameA(lpLocalPath: PAnsiChar;
                                var lpBufferSize: DWORD): DWORD; stdcall;
 {$EXTERNALSYM WNetGetUniversalNameA}
 
-function WNetGetUniversalNameW(lpLocalPath: PWideChar;
+function WNetGetUniversalNameW(lpLocalPath: LPWSTR;
                                dwInfoLevel: DWORD;
                                lpBuffer: Pointer;
                                var lpBufferSize: DWORD): DWORD; stdcall;
@@ -754,8 +754,8 @@ function WNetGetUserA(lpName: PAnsiChar;
                       var lpnLength: DWORD): DWORD; stdcall;
 {$EXTERNALSYM WNetGetUserA}
 
-function WNetGetUserW(lpName: PWideChar;
-                      lpUserName: PWideChar;
+function WNetGetUserW(lpName: LPWSTR;
+                      lpUserName: LPWSTR;
                       var lpnLength: DWORD): DWORD; stdcall;
 {$EXTERNALSYM WNetGetUserW}
 
@@ -766,7 +766,7 @@ function WNetGetProviderNameA(dwNetType: DWORD;
 {$EXTERNALSYM WNetGetProviderNameA}
 
 function WNetGetProviderNameW(dwNetType: DWORD;
-                              lpProviderName: PWideChar;
+                              lpProviderName: LPWSTR;
                               var lpBufferSize: DWORD): DWORD; stdcall;
 {$EXTERNALSYM WNetGetProviderNameW}
 
@@ -774,7 +774,7 @@ function WNetGetNetworkInformationA(lpProvider: PAnsiChar;
                                     lpNetInfoStruct: LPNETINFOSTRUCT): DWORD; stdcall;
 {$EXTERNALSYM WNetGetNetworkInformationA}
 
-function WNetGetNetworkInformationW(lpProvider: PWideChar;
+function WNetGetNetworkInformationW(lpProvider: LPWSTR;
                                     lpNetInfoStruct: LPNETINFOSTRUCT): DWORD; stdcall;
 {$EXTERNALSYM WNetGetNetworkInformationW}
 
@@ -787,9 +787,9 @@ function WNetGetLastErrorA(lpError: LPDWORD;
 {$EXTERNALSYM WNetGetLastErrorA}
 
 function WNetGetLastErrorW(lpError: LPDWORD;
-                           lpErrorBuf: PWideChar;
+                           lpErrorBuf: LPWSTR;
                            nErrorBufSize: DWORD;
-                           lpNameBuf: PWideChar;
+                           lpNameBuf: LPWSTR;
                            nNameBufSize: DWORD): DWORD; stdcall;
 {$EXTERNALSYM WNetGetLastErrorW}
 
@@ -804,38 +804,38 @@ function MultinetGetConnectionPerformanceW(lpNetResource: LPNETRESOURCEW;
 
 
 { Unicode aliases }
-function WNetAddConnection(lpRemoteName: PWideChar;
-                           lpPassword: PWideChar;
-                           lpLocalName: PWideChar): DWORD; inline;
+function WNetAddConnection(lpRemoteName: LPWSTR;
+                           lpPassword: LPWSTR;
+                           lpLocalName: LPWSTR): DWORD; inline;
 
 function WNetAddConnection2(lpNetResource: LPNETRESOURCEW;
-                            lpPassword: PWideChar;
-                            lpUserName: PWideChar;
+                            lpPassword: LPWSTR;
+                            lpUserName: LPWSTR;
                             dwFlags: DWORD): DWORD; inline;
 
 function WNetAddConnection3(hwndOwner: HWND;
                             lpNetResource: LPNETRESOURCEW;
-                            lpPassword: PWideChar;
-                            lpUserName: PWideChar;
+                            lpPassword: LPWSTR;
+                            lpUserName: LPWSTR;
                             dwFlags: DWORD): DWORD; inline;
 
-function WNetCancelConnection(lpName: PWideChar;
+function WNetCancelConnection(lpName: LPWSTR;
                               fForce: BOOL): DWORD; inline;
 
-function WNetCancelConnection2(lpName: PWideChar;
+function WNetCancelConnection2(lpName: LPWSTR;
                                dwFlags: DWORD;
                                fForce: BOOL): DWORD; inline;
 
-function WNetGetConnection(lpLocalName: PWideChar;
-                           lpRemoteName: PWideChar;
+function WNetGetConnection(lpLocalName: LPWSTR;
+                           lpRemoteName: LPWSTR;
                            var lpnLength: DWORD): DWORD; inline;
 
 function WNetUseConnection(hwndOwner: HWND;
                            lpNetResource: LPNETRESOURCEW;
-                           lpPassword: PWideChar;
-                           lpUserId: PWideChar;
+                           lpPassword: LPWSTR;
+                           lpUserId: LPWSTR;
                            dwFlags: DWORD;
-                           lpAccessName: PWideChar;
+                           lpAccessName: LPWSTR;
                            var lpBufferSize: DWORD;
                            lpResult: LPDWORD): DWORD; inline;
 
@@ -861,28 +861,28 @@ function WNetGetResourceParent(lpNetResource: LPNETRESOURCEW;
 function WNetGetResourceInformation(lpNetResource: LPNETRESOURCEW;
                                     lpBuffer: Pointer;
                                     var lpcbBuffer: DWORD;
-                                    var lplpSystem: PWideChar): DWORD; inline;
+                                    var lplpSystem: LPWSTR): DWORD; inline;
 
-function WNetGetUniversalName(lpLocalPath: PWideChar;
+function WNetGetUniversalName(lpLocalPath: LPWSTR;
                               dwInfoLevel: DWORD;
                               lpBuffer: Pointer;
                               var lpBufferSize: DWORD): DWORD; inline;
 
-function WNetGetUser(lpName: PWideChar;
-                     lpUserName: PWideChar;
+function WNetGetUser(lpName: LPWSTR;
+                     lpUserName: LPWSTR;
                      var lpnLength: DWORD): DWORD; inline;
 
 function WNetGetProviderName(dwNetType: DWORD;
-                             lpProviderName: PWideChar;
+                             lpProviderName: LPWSTR;
                              var lpBufferSize: DWORD): DWORD; inline;
 
-function WNetGetNetworkInformation(lpProvider: PWideChar;
+function WNetGetNetworkInformation(lpProvider: LPWSTR;
                                    lpNetInfoStruct: LPNETINFOSTRUCT): DWORD; inline;
 
 function WNetGetLastError(lpError: LPDWORD;
-                          lpErrorBuf: PWideChar;
+                          lpErrorBuf: LPWSTR;
                           nErrorBufSize: DWORD;
-                          lpNameBuf: PWideChar;
+                          lpNameBuf: LPWSTR;
                           nNameBufSize: DWORD): DWORD; inline;
 
 function MultinetGetConnectionPerformance(lpNetResource: LPNETRESOURCEW;
@@ -898,9 +898,9 @@ implementation
   // Implement additional prototypes here.
 
 
-function WNetAddConnection(lpRemoteName: PWideChar;
-                           lpPassword: PWideChar;
-                           lpLocalName: PWideChar): DWORD;
+function WNetAddConnection(lpRemoteName: LPWSTR;
+                           lpPassword: LPWSTR;
+                           lpLocalName: LPWSTR): DWORD;
 begin
 
   Result := WNetAddConnectionW(lpRemoteName,
@@ -910,8 +910,8 @@ end;
 
 
 function WNetAddConnection2(lpNetResource: LPNETRESOURCEW;
-                            lpPassword: PWideChar;
-                            lpUserName: PWideChar;
+                            lpPassword: LPWSTR;
+                            lpUserName: LPWSTR;
                             dwFlags: DWORD): DWORD;
 begin
 
@@ -924,8 +924,8 @@ end;
 
 function WNetAddConnection3(hwndOwner: HWND;
                             lpNetResource: LPNETRESOURCEW;
-                            lpPassword: PWideChar;
-                            lpUserName: PWideChar;
+                            lpPassword: LPWSTR;
+                            lpUserName: LPWSTR;
                             dwFlags: DWORD): DWORD;
 begin
 
@@ -937,7 +937,7 @@ begin
 end;
 
 
-function WNetCancelConnection(lpName: PWideChar;
+function WNetCancelConnection(lpName: LPWSTR;
                               fForce: BOOL): DWORD;
 begin
 
@@ -946,7 +946,7 @@ begin
 end;
 
 
-function WNetCancelConnection2(lpName: PWideChar;
+function WNetCancelConnection2(lpName: LPWSTR;
                                dwFlags: DWORD;
                                fForce: BOOL): DWORD;
 begin
@@ -957,8 +957,8 @@ begin
 end;
 
 
-function WNetGetConnection(lpLocalName: PWideChar;
-                           lpRemoteName: PWideChar;
+function WNetGetConnection(lpLocalName: LPWSTR;
+                           lpRemoteName: LPWSTR;
                            var lpnLength: DWORD): DWORD;
 begin
 
@@ -970,10 +970,10 @@ end;
 
 function WNetUseConnection(hwndOwner: HWND;
                            lpNetResource: LPNETRESOURCEW;
-                           lpPassword: PWideChar;
-                           lpUserId: PWideChar;
+                           lpPassword: LPWSTR;
+                           lpUserId: LPWSTR;
                            dwFlags: DWORD;
-                           lpAccessName: PWideChar;
+                           lpAccessName: LPWSTR;
                            var lpBufferSize: DWORD;
                            lpResult: LPDWORD): DWORD;
 begin
@@ -1044,7 +1044,7 @@ end;
 function WNetGetResourceInformation(lpNetResource: LPNETRESOURCEW;
                                     lpBuffer: Pointer;
                                     var lpcbBuffer: DWORD;
-                                    var lplpSystem: PWideChar): DWORD;
+                                    var lplpSystem: LPWSTR): DWORD;
 begin
 
   Result := WNetGetResourceInformationW(lpNetResource,
@@ -1054,7 +1054,7 @@ begin
 end;
 
 
-function WNetGetUniversalName(lpLocalPath: PWideChar;
+function WNetGetUniversalName(lpLocalPath: LPWSTR;
                               dwInfoLevel: DWORD;
                               lpBuffer: Pointer;
                               var lpBufferSize: DWORD): DWORD;
@@ -1067,8 +1067,8 @@ begin
 end;
 
 
-function WNetGetUser(lpName: PWideChar;
-                     lpUserName: PWideChar;
+function WNetGetUser(lpName: LPWSTR;
+                     lpUserName: LPWSTR;
                      var lpnLength: DWORD): DWORD;
 begin
 
@@ -1079,7 +1079,7 @@ end;
 
 
 function WNetGetProviderName(dwNetType: DWORD;
-                             lpProviderName: PWideChar;
+                             lpProviderName: LPWSTR;
                              var lpBufferSize: DWORD): DWORD;
 begin
 
@@ -1089,7 +1089,7 @@ begin
 end;
 
 
-function WNetGetNetworkInformation(lpProvider: PWideChar;
+function WNetGetNetworkInformation(lpProvider: LPWSTR;
                                    lpNetInfoStruct: LPNETINFOSTRUCT): DWORD;
 begin
 
@@ -1099,9 +1099,9 @@ end;
 
 
 function WNetGetLastError(lpError: LPDWORD;
-                          lpErrorBuf: PWideChar;
+                          lpErrorBuf: LPWSTR;
                           nErrorBufSize: DWORD;
-                          lpNameBuf: PWideChar;
+                          lpNameBuf: LPWSTR;
                           nNameBufSize: DWORD): DWORD;
 begin
 
