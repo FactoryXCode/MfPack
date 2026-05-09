@@ -142,14 +142,17 @@ const
   RDJ_MASTER_INPUT_STATE = 'Active';
   RDJ_MASTER_INPUT_IFACE = 'Internal mixer';
 
+
 procedure TAudioDevicesDlg.btnCancelClick(Sender: TObject);
 begin
+
   prDataFlow := eDataFlow(-1);
   prEndPointDevice := nil;
   prDeviceName := nil;
   prDeviceInterfaceName := nil;
   ModalResult := mrCancel;
 end;
+
 
 procedure TAudioDevicesDlg.btnOkClick(Sender: TObject);
 begin

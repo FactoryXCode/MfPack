@@ -536,7 +536,7 @@ begin
   if FRecordingInternal then
     begin
 
-      btnRecord.Caption := 'Stop Recording';
+      btnRecord.Caption := 'Stop';
       btnRecord.Enabled := True;
       btnSelectAudiDevice.Enabled := False;
       edFileName.Enabled := False;
@@ -546,7 +546,7 @@ begin
     if Assigned(prAudioRecorder) and (prAudioRecorder.DeviceState = Capturing) then
       begin
 
-        btnRecord.Caption := 'Stop Recording';
+        btnRecord.Caption := 'Stop';
         btnRecord.Enabled := True;
         btnSelectAudiDevice.Enabled := False;
         edFileName.Enabled := False;
@@ -555,7 +555,7 @@ begin
     else
       begin
 
-        btnRecord.Caption := 'Start Recording';
+        btnRecord.Caption := 'Start';
         btnSelectAudiDevice.Enabled := True;
         edFileName.Enabled := True;
       end;
@@ -707,7 +707,7 @@ begin
                                             [E_FAIL]);
       end;
 
-  btnRecord.Caption := 'Start Recording';
+  btnRecord.Caption := 'Start';
   btnSelectAudiDevice.Enabled := True;
   edFileName.Enabled := True;
 end;
@@ -908,7 +908,7 @@ begin
 
   FRecordingInternal := False;
   Tag := 0;
-  btnRecord.Caption := 'Start Recording';
+  btnRecord.Caption := 'Start';
   btnSelectAudiDevice.Enabled := True;
   edFileName.Enabled := True;
   chkPreFx.Enabled := True;
@@ -967,7 +967,7 @@ begin
       FTimerRunning := bSuccess;
       tmrTime.Enabled := bSuccess;
       UpdateTimeLabel();
-      btnRecord.Caption := 'Start Recording';
+      btnRecord.Caption := 'Start';
       lblRecorderStatus.Caption := 'Failed recording audio!';
       Tag := 0;
       Exit;
@@ -994,7 +994,7 @@ begin
       UpdateTimeLabel();
     end;
 
-  btnRecord.Caption := 'Start Recording';
+  btnRecord.Caption := 'Start';
   lblRecorderStatus.Caption := 'Capturing stopped.';
   btnSelectAudiDevice.Enabled := True;
   edFileName.Enabled := True;

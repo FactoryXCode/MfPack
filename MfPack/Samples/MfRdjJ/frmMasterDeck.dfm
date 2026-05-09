@@ -1354,7 +1354,7 @@ object MasterDeckFrm: TMasterDeckFrm
   object epPFL: TMfAudioEndPoint
     DeviceID = '{0.0.0.00000000}.{d7e13618-ca94-4b30-a916-0934986710a9}'
     DeviceState = 'Active'
-    MasterDbVolume = -96.000000000000000000
+    MasterScalarVolume = 1.000000000000000000
     Left = 188
     Top = 272
   end

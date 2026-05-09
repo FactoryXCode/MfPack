@@ -1,85 +1,63 @@
 object AudioDevicesDlg: TAudioDevicesDlg
   Left = 0
   Top = 0
-  Margins.Left = 5
-  Margins.Top = 5
-  Margins.Right = 5
-  Margins.Bottom = 5
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsDialog
   Caption = 'Audio Endpoint Devices'
-  ClientHeight = 511
-  ClientWidth = 1407
+  ClientHeight = 341
+  ClientWidth = 938
   Color = 5850948
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWhite
-  Font.Height = -17
+  Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
   KeyPreview = True
   Position = poMainFormCenter
   OnShow = FormShow
-  PixelsPerInch = 144
-  TextHeight = 21
+  TextHeight = 13
   object pnlCtrls: TPanel
     Left = 0
     Top = 0
-    Width = 1407
-    Height = 425
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
+    Width = 938
+    Height = 283
     Align = alClient
     BevelOuter = bvNone
     Color = 5850948
     ParentBackground = False
     TabOrder = 0
+    ExplicitWidth = 932
+    ExplicitHeight = 266
     object Bevel1: TBevel
       Left = 0
       Top = 0
-      Width = 1407
-      Height = 38
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Width = 938
+      Height = 25
       Align = alTop
       Shape = bsTopLine
-      ExplicitTop = 3
-      ExplicitWidth = 714
     end
     object Label1: TLabel
-      Left = 12
-      Top = 9
-      Width = 66
-      Height = 21
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 8
+      Top = 6
+      Width = 44
+      Height = 13
       Caption = 'Devices'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clAqua
-      Font.Height = -17
+      Font.Height = -11
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentFont = False
     end
     object sgDevices: TStringGrid
       Left = 0
-      Top = 38
-      Width = 1407
-      Height = 387
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Top = 25
+      Width = 938
+      Height = 258
       Align = alClient
       BorderStyle = bsNone
       ColCount = 6
-      DefaultColWidth = 96
-      DefaultRowHeight = 27
+      DefaultRowHeight = 18
       DrawingStyle = gdsClassic
       FixedColor = 5850948
       FixedCols = 0
@@ -89,28 +67,32 @@ object AudioDevicesDlg: TAudioDevicesDlg
       Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goColSizing, goRowSelect]
       ParentColor = True
       TabOrder = 0
+      ExplicitWidth = 932
+      ExplicitHeight = 241
     end
   end
   object pnlButtons: TPanel
     Left = 0
-    Top = 425
-    Width = 1407
-    Height = 86
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
+    Top = 283
+    Width = 938
+    Height = 58
     Align = alBottom
     Color = 5850948
     ParentBackground = False
     ShowCaption = False
     TabOrder = 1
+    ExplicitTop = 266
+    ExplicitWidth = 932
     object btnRefresh: TMPxpButton
-      Left = 12
-      Top = 13
-      Width = 160
-      Height = 60
+      Left = 8
+      Top = 9
+      Width = 107
+      Height = 40
       Hint = 'Choose an audio endpoint device'
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
       Alignment = taCenter
       AllowAllUp = True
       Caption = '&Refresh'
@@ -121,7 +103,7 @@ object AudioDevicesDlg: TAudioDevicesDlg
       ShowFocusRect = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
-      Font.Height = -20
+      Font.Height = -13
       Font.Name = 'Segoe UI'
       Font.Style = [fsBold]
       GlyphTransparentColor = clFuchsia
@@ -142,11 +124,15 @@ object AudioDevicesDlg: TAudioDevicesDlg
       Style = bsModern
     end
     object btnOk: TMPxpButton
-      Left = 1063
-      Top = 13
-      Width = 160
-      Height = 60
+      Left = 709
+      Top = 9
+      Width = 106
+      Height = 40
       Hint = 'Choose an audio endpoint device'
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
       Alignment = taCenter
       AllowAllUp = True
       Caption = '&Ok'
@@ -157,7 +143,7 @@ object AudioDevicesDlg: TAudioDevicesDlg
       ShowFocusRect = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
-      Font.Height = -20
+      Font.Height = -13
       Font.Name = 'Segoe UI'
       Font.Style = [fsBold]
       GlyphTransparentColor = clFuchsia
@@ -179,11 +165,15 @@ object AudioDevicesDlg: TAudioDevicesDlg
       OnClick = btnOkClick
     end
     object btnCancel: TMPxpButton
-      Left = 1237
-      Top = 13
-      Width = 160
-      Height = 60
+      Left = 825
+      Top = 9
+      Width = 106
+      Height = 40
       Hint = 'Choose an audio endpoint device'
+      Margins.Left = 2
+      Margins.Top = 2
+      Margins.Right = 2
+      Margins.Bottom = 2
       Alignment = taCenter
       AllowAllUp = True
       Caption = '&Cancel'
@@ -194,7 +184,7 @@ object AudioDevicesDlg: TAudioDevicesDlg
       ShowFocusRect = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWhite
-      Font.Height = -20
+      Font.Height = -13
       Font.Name = 'Segoe UI'
       Font.Style = [fsBold]
       GlyphTransparentColor = clFuchsia
@@ -213,6 +203,7 @@ object AudioDevicesDlg: TAudioDevicesDlg
       ShadowColor = clSkyBlue
       ShowHint = True
       Style = bsModern
+      OnClick = btnCancelClick
     end
   end
 end
