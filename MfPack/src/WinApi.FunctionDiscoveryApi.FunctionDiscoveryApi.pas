@@ -81,6 +81,15 @@ uses
 
 {$MINENUMSIZE 4}
 
+const
+
+  CLSID_FunctionDiscovery: TGUID =  '{C72BE2EC-8E90-452c-B29A-AB8FF1C071FC}';
+
+  ///(D1: $C72BE2EC;
+  //                                  D2: $8E90;
+  //                                  D3: $452C;
+  //                                  D4: ($B2, $9A, $AB, $4F, $99, $BA, $CA, $3E));
+
 type
 
   // Forward declarations
