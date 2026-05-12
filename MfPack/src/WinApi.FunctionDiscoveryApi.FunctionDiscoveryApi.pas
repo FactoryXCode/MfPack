@@ -64,6 +64,7 @@
 unit WinApi.FunctionDiscoveryApi.FunctionDiscoveryApi;
 
  {$HPPEMIT '#include "functiondiscoveryapi.h"'}
+ {$HPPEMIT '#include "functiondiscoveryconstraints.h"'}
 
 interface
 
@@ -75,20 +76,20 @@ uses
   WinApi.ServProv,
   {ActiveX}
   WinApi.ActiveX.PropSys,
-  WinApi.ActiveX.PropIdl;
+  WinApi.ActiveX.PropIdl,
+  {FunctionDiscoveryApi}
+  WinApi.FunctionDiscoveryApi.FunctionDiscoveryConstraints;
 
-
-
-{$MINENUMSIZE 4}
+  {$MINENUMSIZE 4}
 
 const
 
-  CLSID_FunctionDiscovery: TGUID =  '{C72BE2EC-8E90-452c-B29A-AB8FF1C071FC}';
+  // CLSID_FunctionDiscovery: TGUID = '{C72BE2EC-8E90-452c-B29A-AB8FF1C071FC}'
 
-  ///(D1: $C72BE2EC;
-  //                                  D2: $8E90;
-  //                                  D3: $452C;
-  //                                  D4: ($B2, $9A, $AB, $4F, $99, $BA, $CA, $3E));
+  CLSID_FunctionDiscovery: TGUID = (D1: $C72BE2EC;
+                                    D2: $8E90;
+                                    D3: $452C;
+                                    D4: ($B2, $9A, $AB, $8F, $F1, $C0, $71, $FC));
 
 type
 
@@ -138,30 +139,6 @@ type
   PQueryCategoryType = ^tagQueryCategoryType;
   {$EXTERNALSYM PQueryCategoryType}
 
-
-  // PROPERTY Constraint defines
-  // ===========================
-  //
-  // From FunctionDiscoveryConstraints.h, required by
-  // IFunctionInstanceCollectionQuery.AddPropertyConstraint.
-  //
-  tagPropertyConstraint = (
-    QC_EQUALS = 0,
-    QC_NOTEQUAL = 1,
-    QC_LESSTHAN = 2,
-    QC_LESSTHANOREQUAL = 3,
-    QC_GREATERTHAN = 4,
-    QC_GREATERTHANOREQUAL = 5,
-    QC_STARTSWITH = 6,   // Strings only
-    QC_EXISTS = 7,
-    QC_DOESNOTEXIST = 8,
-    QC_CONTAINS = 9      // Strings and VT_VECTOR only
-  );
-  {$EXTERNALSYM tagPropertyConstraint}
-  PropertyConstraint = tagPropertyConstraint;
-  {$EXTERNALSYM PropertyConstraint}
-  PPropertyConstraint = ^tagPropertyConstraint;
-  {$EXTERNALSYM PPropertyConstraint}
 
 
   // This interface should be implemented by clients performing async queries...
