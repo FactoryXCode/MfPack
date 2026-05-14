@@ -50,6 +50,7 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
     ParentBackground = False
     ParentDoubleBuffered = False
     TabOrder = 0
+    ExplicitWidth = 934
     object lblLocation: TLabel
       Left = 10
       Top = 7
@@ -64,9 +65,9 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
       ParentFont = False
     end
     object cbxLocations: TComboBox
-      Left = 10
+      Left = 4
       Top = 28
-      Width = 260
+      Width = 266
       Height = 25
       Style = csOwnerDrawFixed
       Color = 5850948
@@ -82,9 +83,9 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
       OnSelect = cbxLocationsSelect
     end
     object edtPath: TEdit
-      Left = 390
+      Left = 290
       Top = 28
-      Width = 237
+      Width = 337
       Height = 25
       Hint = 'Find a local map or network station. (like: \\MyServer)'
       Color = 5850948
@@ -99,9 +100,9 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
     end
     object btnGo: TMPxpButton
       Left = 636
-      Top = 23
+      Top = 20
       Width = 68
-      Height = 40
+      Height = 43
       Alignment = taCenter
       Caption = 'Find'
       Color = 6303744
@@ -144,42 +145,6 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
       ParentFont = False
       TabOrder = 3
     end
-    object btnScanNetwork: TMPxpButton
-      Left = 276
-      Top = 23
-      Width = 91
-      Height = 40
-      Hint = 'Scan network again.'
-      Alignment = taCenter
-      Caption = 'Scan Network'
-      Color = 6303744
-      ColorWhenDown = 11363625
-      ColorWhenUp = 6303744
-      Checked = False
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
-      Font.Height = -13
-      Font.Name = 'Segoe UI'
-      Font.Style = [fsBold]
-      GlyphTransparentColor = clFuchsia
-      GlyphTransparent = True
-      HotTrackColor = clAqua
-      HotTrackFont.Charset = DEFAULT_CHARSET
-      HotTrackFont.Color = clWindowText
-      HotTrackFont.Height = -13
-      HotTrackFont.Name = 'Segoe UI'
-      HotTrackFont.Style = [fsBold]
-      Layout = blGlyphRight
-      LightColor = 12348265
-      ParentColor = False
-      ParentFont = False
-      ParentShowHint = False
-      ShadowColor = clSkyBlue
-      ShowHint = True
-      Style = bsModern
-      WordWrap = True
-      OnClick = btnScanNetworkClick
-    end
   end
   object pnlBottom: TPanel
     Left = 0
@@ -193,8 +158,8 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
     ParentBackground = False
     ParentDoubleBuffered = False
     TabOrder = 1
-    ExplicitTop = 544
-    ExplicitWidth = 934
+    ExplicitLeft = -2
+    ExplicitTop = 563
     object lblSelectedFile: TLabel
       Left = 14
       Top = 15
@@ -297,8 +262,7 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
     Color = 5850948
     ParentBackground = False
     TabOrder = 2
-    ExplicitTop = 86
-    ExplicitHeight = 458
+    ExplicitHeight = 433
     object lbFolders: TListBox
       Left = 0
       Top = 0
@@ -317,8 +281,7 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
       TabOrder = 0
       OnDblClick = lbFoldersDblClick
       OnDrawItem = lbFoldersDrawItem
-      ExplicitTop = 17
-      ExplicitHeight = 458
+      ExplicitHeight = 433
     end
   end
   object flbFiles: TFileListBox
@@ -340,9 +303,8 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
     TabOrder = 3
     OnChange = flbFilesChange
     OnDblClick = flbFilesDblClick
-    ExplicitLeft = 288
-    ExplicitTop = 103
-    ExplicitHeight = 475
+    ExplicitWidth = 422
+    ExplicitHeight = 433
   end
   object pnlPreview: TPanel
     Left = 710
@@ -355,13 +317,12 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
     ParentBackground = False
     TabOrder = 4
     ExplicitLeft = 704
-    ExplicitTop = 86
-    ExplicitHeight = 458
+    ExplicitHeight = 433
     object lblPreview: TLabel
       Left = 0
       Top = 0
       Width = 230
-      Height = 33
+      Height = 17
       Align = alTop
       Alignment = taCenter
       Caption = 'Preview'
@@ -372,18 +333,18 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
       Font.Style = [fsBold]
       ParentFont = False
       Layout = tlCenter
+      ExplicitWidth = 48
     end
     object imgPreview: TImage
       Left = 0
-      Top = 33
+      Top = 17
       Width = 230
-      Height = 417
+      Height = 433
       Align = alClient
       Center = True
       Proportional = True
       Stretch = True
-      ExplicitTop = 38
-      ExplicitHeight = 412
+      ExplicitLeft = -2
     end
   end
 end

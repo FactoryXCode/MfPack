@@ -66,6 +66,11 @@ Enable Sstreamswitch detection".
 **Open tab "Broadcast"**
 If you don't want to use IceCast streaming, you can skip this (close the setup dialog) 
 
+**Note:**
+  These steps needs to be done when you use your local computer for IceCast/Caddy.
+  When IceCast/Caddy are running on a server or network station, 
+  read the instructions in MfRDJ Installation & Setup Guide.md/pdf.
+
 **IceCast Settings**
 Host: 127.0.0.1                Port: 8000
 Mount: /live
@@ -92,5 +97,7 @@ Caddy json Path: C:\Caddy\nowplaying.json
 Caddy Command: caddy.exe run --config "C:\Caddy\Caddy.cff" --adapter caddyfile (leave this untouched, unless you know what you are doing).
 
 Close Setup (**OK**)
+
+For router settings read  MfRDJ Installation & Setup Guide.md/pdf.
 
 <eof>       

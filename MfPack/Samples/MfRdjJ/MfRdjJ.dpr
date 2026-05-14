@@ -46,7 +46,8 @@ uses
   RDJ.FilenameParser in 'RDJ.FilenameParser.pas',
   dlgMediaServer in 'dlgMediaServer.pas' {frmMediaServer},
   dlgAudioDevices in 'dlgAudioDevices.pas' {AudioDevicesDlg},
-  LWFileBrowserExDlg in 'LWFileBrowserExDlg.pas' {LWFileBrowserExDlg};
+  LWFileBrowserExDlg in 'LWFileBrowserExDlg.pas' {LWFileBrowserExDlg},
+  RDJ_NetWorkStationsScanner in 'RDJ_NetWorkStationsScanner.pas';
 
 {$R *.res}
 

@@ -29,6 +29,7 @@ uses
   Winapi.MediaFoundationApi.MfMetLib,
   Winapi.MediaFoundationApi.MfUtils,
   {Application}
+  RDJ_NetWorkStationsScanner,
   MPxpButton;
 
 const
@@ -50,15 +51,15 @@ const
                       'JPG Files (*.jpg;*.jpeg)|*.jpg;*.jpeg|' +
                       'All Files (*.*)|*.*';
 
-  LW_NERR_SUCCESS = 0;
+  LW_NERR_SUCCESS         = 0;
   LW_MAX_PREFERRED_LENGTH = DWORD(-1);
-  LW_ERROR_MORE_DATA = 234;
+  LW_ERROR_MORE_DATA      = 234;
 
-  LW_SV_TYPE_WORKSTATION = $00000001;
-  LW_SV_TYPE_SERVER = $00000002;
+  LW_SV_TYPE_WORKSTATION  = $00000001;
+  LW_SV_TYPE_SERVER       = $00000002;
 
-  LW_STYPE_DISKTREE = $00000000;
-  LW_STYPE_MASK = $000000FF;
+  LW_STYPE_DISKTREE       = $00000000;
+  LW_STYPE_MASK           = $000000FF;
 
 type
 
@@ -123,7 +124,6 @@ type
     lblPreview: TLabel;
     imgPreview: TImage;
     SplitterPreview: TSplitter;
-    btnScanNetwork: TMPxpButton;
 
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -146,6 +146,7 @@ type
     procedure flbFilesChange(Sender: TObject);
     procedure flbFilesDblClick(Sender: TObject);
     procedure btnScanNetworkClick(Sender: TObject);
+    procedure btnNetStationsSearchClick(Sender: TObject);
 
   private
 
@@ -157,6 +158,11 @@ type
     FSmallSysImages: HIMAGELIST;
     FUpdatingUi: Boolean;
     FNetworkScanRunning: Boolean;
+    FNetworkFinder: TNetworkDiscoveryThread;
+
+    // Leave code here for network scan example .
+    // procedure NetworkDiscoveryFinished(Sender: TObject);
+    procedure StartNetworkStationDiscovery();
 
     procedure InitSystemImageList();
     procedure FillLocationCombo();
@@ -164,10 +170,10 @@ type
                                                const ADepth: Integer;
                                                const AItems: TStrings);
 
-    procedure CollectNetworkComputersToStrings(const AItems: TStrings);
     procedure FillNetworkServerFolderList(const AServerName: string);
     function IsNetworkServerPath(const ARemoteName: string): Boolean;
     function IsSelectableNetworkShare(const ARemoteName: string): Boolean;
+    procedure NetworkStationFound(const AStation: string);
 
     procedure AddLocationItem(const APath: string);
     procedure AddCurrentLocationIfNeeded(const APath: string);
@@ -217,9 +223,11 @@ function BrowseLWFileEx(const AOwner: TComponent;
 var
   DlgLWFileBrowserEx: TLWFileBrowserExDlg;
 
+
 implementation
 
 {$R *.dfm}
+
 
 function BrowseLWFileEx(const AOwner: TComponent;
                         const AFilter: TLWFileBrowserExFilter;
@@ -244,6 +252,7 @@ begin
     Dlg.SetInitialDirectory(AInitialDirectory);
 
     Result := Dlg.ShowModal() = mrOk;
+
     if Result then
       begin
 
@@ -272,6 +281,7 @@ begin
   InitSystemImageList();
   FillLocationCombo();
   SetSelectedFilter(fbxAudio);
+  StartNetworkStationDiscovery();
 
   if not TrySetBrowserDirectory(ExtractFilePath(ParamStr(0)),
                                 False) then
@@ -285,12 +295,22 @@ end;
 procedure TLWFileBrowserExDlg.FormDestroy(Sender: TObject);
 begin
 
+  if Assigned(FNetworkFinder) then
+    begin
+
+      FNetworkFinder.OnStationFound := nil;
+      FNetworkFinder.OnFinished := nil;
+      FNetworkFinder.Terminate();
+      FNetworkFinder := nil;
+    end;
+
   // NOTE: FSmallSysImages is the shared system image list. Do not destroy it.
 end;
 
 
 procedure TLWFileBrowserExDlg.btnCancelClick(Sender: TObject);
 begin
+
   ModalResult := mrCancel;
 end;
 
@@ -308,10 +328,12 @@ var
   PathText: string;
 
 begin
+
   PathText := NormalizeDirectory(edtPath.Text);
 
   if IsNetworkServerPath(PathText) then
     begin
+
       FillNetworkServerFolderList(PathText);
       Exit;
     end;
@@ -320,11 +342,13 @@ begin
                          True);
 end;
 
+
 procedure TLWFileBrowserExDlg.cbxLocationsSelect(Sender: TObject);
 var
   LocationPath: string;
 
 begin
+
   if FUpdatingUi then
     Exit;
 
@@ -332,6 +356,7 @@ begin
 
   if IsNetworkServerPath(LocationPath) then
     begin
+
       FillNetworkServerFolderList(LocationPath);
       Exit;
     end;
@@ -340,6 +365,7 @@ begin
                          True);
 end;
 
+
 procedure TLWFileBrowserExDlg.edtPathKeyDown(Sender: TObject;
                                             var Key: Word;
                                             Shift: TShiftState);
@@ -347,14 +373,17 @@ var
   PathText: string;
 
 begin
-  if Key = VK_RETURN then
+
+  if (Key = VK_RETURN) then
     begin
+
       Key := 0;
 
       PathText := NormalizeDirectory(edtPath.Text);
 
       if IsNetworkServerPath(PathText) then
         begin
+
           FillNetworkServerFolderList(PathText);
           Exit;
         end;
@@ -364,14 +393,17 @@ begin
     end;
 end;
 
+
 procedure TLWFileBrowserExDlg.flbFilesChange(Sender: TObject);
 begin
+
   FSelectedFile := '';
   FSelectedFilePath := '';
   FFileDuration := '';
 
-  if flbFiles.ItemIndex >= 0 then
+  if (flbFiles.ItemIndex >= 0) then
     begin
+
       FSelectedFile := flbFiles.Items[flbFiles.ItemIndex];
       FSelectedFilePath := IncludeTrailingPathDelimiter(FCurrentDirectory) + FSelectedFile;
 
@@ -382,6 +414,7 @@ begin
     end
   else
     begin
+
       lblSelectedFile.Caption := 'Selected file:';
       lblSelectedFile.Hint := '';
       lblDuration.Caption := 'Duration: 00:00:00';
@@ -390,6 +423,7 @@ begin
   UpdatePreview();
   UpdateOkState();
 end;
+
 
 procedure TLWFileBrowserExDlg.flbFilesDblClick(Sender: TObject);
 begin
@@ -408,8 +442,9 @@ begin
 
   ItemText := lbFolders.Items[lbFolders.ItemIndex];
 
-  if ItemText = '..' then
+  if (ItemText = '..') then
     begin
+
       NewDir := ExtractFileDir(ExcludeTrailingPathDelimiter(FCurrentDirectory));
       if (NewDir <> '') and (NewDir <> FCurrentDirectory) then
         TrySetBrowserDirectory(NewDir,
@@ -417,17 +452,38 @@ begin
     end
   else
     begin
+
       NewDir := IncludeTrailingPathDelimiter(FCurrentDirectory) + ItemText;
       TrySetBrowserDirectory(NewDir,
                              True);
     end;
 end;
 
+
+// Scan network for network stations (>= Win 10)
+procedure TLWFileBrowserExDlg.StartNetworkStationDiscovery();
+begin
+
+  if FNetworkScanRunning then
+    Exit;
+
+  if Assigned(FNetworkFinder) then
+    Exit;
+
+  FNetworkScanRunning := True;
+  FNetworkFinder := TNetworkDiscoveryThread.Create();
+  FNetworkFinder.FreeOnTerminate := True;
+  FNetworkFinder.OnStationFound := NetworkStationFound;
+  FNetworkFinder.Start();
+end;
+
+
 procedure TLWFileBrowserExDlg.InitSystemImageList();
 var
   SFI: TSHFileInfo;
 
 begin
+
   ZeroMemory(@SFI,
              SizeOf(SFI));
 
@@ -440,6 +496,7 @@ begin
                                    SHGFI_USEFILEATTRIBUTES);
 end;
 
+
 procedure TLWFileBrowserExDlg.FillLocationCombo();
 var
   DriveBits: DWORD;
@@ -449,7 +506,9 @@ var
   DisplayText: string;
 
 begin
+
   cbxLocations.Items.BeginUpdate();
+
   try
     cbxLocations.Items.Clear();
 
@@ -481,12 +540,12 @@ begin
         cbxLocations.Items.Add(DisplayText);
       end;
 
-    { Network discovery is intentionally not started here.
-      Use btnScanNetworkClick() for the slow network scan. }
   finally
+
     cbxLocations.Items.EndUpdate();
   end;
 end;
+
 
 function TLWFileBrowserExDlg.IsNetworkServerPath(const ARemoteName: string): Boolean;
 var
@@ -495,6 +554,7 @@ var
   I: Integer;
 
 begin
+
   Result := False;
   S := ExcludeTrailingPathDelimiter(Trim(ARemoteName));
 
@@ -505,7 +565,8 @@ begin
 
   for I := 1 to Length(S) do
     begin
-      if S[I] = '\' then
+
+      if (S[I] = '\') then
         Inc(SlashCount);
     end;
 
@@ -541,133 +602,19 @@ begin
 end;
 
 
+procedure TLWFileBrowserExDlg.NetworkStationFound(const AStation: string);
+begin
+
+  AddLocationItem(AStation);
+end;
+
+
 procedure TLWFileBrowserExDlg.btnScanNetworkClick(Sender: TObject);
 begin
-  if FNetworkScanRunning then
-    Exit;
 
-  FNetworkScanRunning := True;
-
-  if Assigned(btnScanNetwork) then
-    btnScanNetwork.Enabled := False;
-
-  TThread.CreateAnonymousThread(
-    procedure
-    var
-      FoundItems: TStringList;
-
-    begin
-      FoundItems := TStringList.Create();
-      try
-        FoundItems.Sorted := True;
-        FoundItems.Duplicates := dupIgnore;
-
-        try
-
-          CollectNetworkComputersToStrings(FoundItems);
-          CollectNetworkResourcesToStrings(nil,
-                                          0,
-                                          FoundItems);
-        except
-          { Network discovery may fail on some providers. Keep the dialog alive. }
-        end;
-
-        TThread.Queue(nil,
-          procedure
-          var
-            I: Integer;
-
-          begin
-            try
-              cbxLocations.Items.BeginUpdate();
-              try
-                for I := 0 to FoundItems.Count - 1 do
-                  AddLocationItem(FoundItems[I]);
-              finally
-                cbxLocations.Items.EndUpdate();
-              end;
-            finally
-              FoundItems.Free();
-              FNetworkScanRunning := False;
-
-              if Assigned(btnScanNetwork) then
-                btnScanNetwork.Enabled := True;
-            end;
-          end);
-      except
-        FoundItems.Free();
-
-        TThread.Queue(nil,
-          procedure
-          begin
-            FNetworkScanRunning := False;
-
-            if Assigned(btnScanNetwork) then
-              btnScanNetwork.Enabled := True;
-          end);
-      end;
-    end).Start();
+  StartNetworkStationDiscovery();
 end;
 
-procedure TLWFileBrowserExDlg.CollectNetworkComputersToStrings(const AItems: TStrings);
-var
-  Buffer: Pointer;
-  EntriesRead: DWORD;
-  TotalEntries: DWORD;
-  ResumeHandle: DWORD;
-  Status: DWORD;
-  ServerInfo: PLWServerInfo100;
-  I: DWORD;
-  ServerName: string;
-
-begin
-  if AItems = nil then
-    Exit;
-
-  ResumeHandle := 0;
-
-  repeat
-    Buffer := nil;
-    EntriesRead := 0;
-    TotalEntries := 0;
-
-    Status := NetServerEnum(nil,
-                            100,
-                            Buffer,
-                            LW_MAX_PREFERRED_LENGTH,
-                            EntriesRead,
-                            TotalEntries,
-                            LW_SV_TYPE_WORKSTATION or LW_SV_TYPE_SERVER,
-                            nil,
-                            ResumeHandle);
-
-    if (Status <> LW_NERR_SUCCESS) and
-       (Status <> LW_ERROR_MORE_DATA) then
-      Exit;
-
-    try
-      ServerInfo := PLWServerInfo100(Buffer);
-
-      for I := 0 to EntriesRead - 1 do
-        begin
-          if ServerInfo^.sv100_name <> nil then
-            begin
-              ServerName := '\\' + string(ServerInfo^.sv100_name);
-
-              if IsNetworkServerPath(ServerName) and
-                 (AItems.IndexOf(ServerName) < 0) then
-                AItems.Add(ServerName);
-            end;
-
-          Inc(ServerInfo);
-        end;
-    finally
-      if Buffer <> nil then
-        NetApiBufferFree(Buffer);
-    end;
-
-  until Status <> LW_ERROR_MORE_DATA;
-end;
 
 procedure TLWFileBrowserExDlg.CollectNetworkResourcesToStrings(const AResource: PNetResource;
                                                                const ADepth: Integer;
@@ -675,6 +622,7 @@ procedure TLWFileBrowserExDlg.CollectNetworkResourcesToStrings(const AResource: 
 const
   CBufferSize = 64 * 1024;
   CMaxDepth = 5;
+
 var
   EnumHandle: THandle;
   EnumResult: DWORD;
@@ -687,10 +635,11 @@ var
   IsContainer: Boolean;
 
 begin
-  if AItems = nil then
+
+  if (AItems = nil) then
     Exit;
 
-  if ADepth > CMaxDepth then
+  if (ADepth > CMaxDepth) then
     Exit;
 
   EnumHandle := 0;
@@ -701,14 +650,16 @@ begin
                              AResource,
                              EnumHandle);
 
-  if EnumResult <> NO_ERROR then
+  if (EnumResult <> NO_ERROR) then
     Exit;
 
   try
+
     GetMem(Buffer,
            CBufferSize);
     try
       repeat
+
         Count := DWORD(-1);
         BufferSize := CBufferSize;
 
@@ -720,15 +671,17 @@ begin
                                        Buffer,
                                        BufferSize);
 
-        if EnumResult = NO_ERROR then
+        if (EnumResult = NO_ERROR) then
           begin
+
             NetRes := PNetResource(Buffer);
 
             for I := 0 to Count - 1 do
               begin
+
                 RemoteName := '';
 
-                if NetRes^.lpRemoteName <> nil then
+                if (NetRes^.lpRemoteName <> nil) then
                   RemoteName := Trim(NetRes^.lpRemoteName);
 
                 if (IsNetworkServerPath(RemoteName) or
@@ -749,12 +702,16 @@ begin
 
       until EnumResult = ERROR_NO_MORE_ITEMS;
     finally
+
       FreeMem(Buffer);
     end;
+
   finally
+
     WNetCloseEnum(EnumHandle);
   end;
 end;
+
 
 procedure TLWFileBrowserExDlg.FillNetworkServerFolderList(const AServerName: string);
 var
@@ -770,13 +727,16 @@ var
   SharePath: string;
 
 begin
+
   ServerPath := ExcludeTrailingPathDelimiter(Trim(AServerName));
 
   if not IsNetworkServerPath(ServerPath) then
     Exit;
 
   FUpdatingUi := True;
+
   try
+
     FCurrentDirectory := ServerPath;
     edtPath.Text := ServerPath;
     flbFiles.Clear();
@@ -784,13 +744,16 @@ begin
 
     lbFolders.Items.BeginUpdate();
     cbxLocations.Items.BeginUpdate();
+
     try
+
       lbFolders.Items.Clear();
       AddLocationItem(ServerPath);
 
       ResumeHandle := 0;
 
       repeat
+
         Buffer := nil;
         EntriesRead := 0;
         TotalEntries := 0;
@@ -812,15 +775,18 @@ begin
 
           for I := 0 to EntriesRead - 1 do
             begin
-              if ShareInfo^.shi1_netname <> nil then
+
+              if (ShareInfo^.shi1_netname <> nil) then
                 begin
-                  if (ShareInfo^.shi1_type and LW_STYPE_MASK) = LW_STYPE_DISKTREE then
+                  if ((ShareInfo^.shi1_type and LW_STYPE_MASK) = LW_STYPE_DISKTREE) then
                     begin
+
                       ShareName := string(ShareInfo^.shi1_netname);
 
                       if (ShareName <> '') and
                          (ShareName[Length(ShareName)] <> '$') then
                         begin
+
                           SharePath := ServerPath + '\' + ShareName;
 
                           if lbFolders.Items.IndexOf(ShareName) < 0 then
@@ -834,39 +800,48 @@ begin
               Inc(ShareInfo);
             end;
         finally
-          if Buffer <> nil then
+
+          if (Buffer <> nil) then
             NetApiBufferFree(Buffer);
         end;
 
-      until Status <> LW_ERROR_MORE_DATA;
+      until (Status <> LW_ERROR_MORE_DATA);
     finally
+
       cbxLocations.Items.EndUpdate();
       lbFolders.Items.EndUpdate();
     end;
+
   finally
+
     FUpdatingUi := False;
   end;
 end;
 
+
 procedure TLWFileBrowserExDlg.AddLocationItem(const APath: string);
 begin
-  if Trim(APath) = '' then
+
+  if (Trim(APath) = '') then
     Exit;
 
-  if cbxLocations.Items.IndexOf(APath) < 0 then
+  if (cbxLocations.Items.IndexOf(APath) < 0) then
     cbxLocations.Items.Add(APath);
 end;
+
 
 procedure TLWFileBrowserExDlg.AddCurrentLocationIfNeeded(const APath: string);
 var
   PathText: string;
 
 begin
+
   PathText := NormalizeDirectory(APath);
 
   if IsUncPath(PathText) then
     AddLocationItem(PathText);
 end;
+
 
 procedure TLWFileBrowserExDlg.FillFolderList();
 var
@@ -875,11 +850,14 @@ var
   ParentDir: string;
 
 begin
+
   lbFolders.Items.BeginUpdate();
+
   try
     lbFolders.Items.Clear();
 
     ParentDir := ExtractFileDir(ExcludeTrailingPathDelimiter(FCurrentDirectory));
+
     if (ParentDir <> '') and
        (ParentDir <> ExcludeTrailingPathDelimiter(FCurrentDirectory)) then
       lbFolders.Items.Add('..');
@@ -890,22 +868,28 @@ begin
                  faDirectory,
                  SR) = 0 then
       try
+
         repeat
           if ((SR.Attr and faDirectory) <> 0) and
              (SR.Name <> '.') and
              (SR.Name <> '..') then
             lbFolders.Items.Add(SR.Name);
-        until FindNext(SR) <> 0;
+        until (FindNext(SR) <> 0);
       finally
+
         FindClose(SR);
       end;
+
   finally
+
     lbFolders.Items.EndUpdate();
   end;
 end;
 
+
 procedure TLWFileBrowserExDlg.ClearSelection();
 begin
+
   FSelectedFile := '';
   FSelectedFilePath := '';
   FFileDuration := '';
@@ -913,7 +897,7 @@ begin
   lblSelectedFile.Caption := 'Selected file:';
   lblSelectedFile.Hint := '';
 
-  if FSelectedFilter = fbxAudio then
+  if (FSelectedFilter = fbxAudio) then
     lblDuration.Caption := 'Duration: 00:00:00'
   else
     lblDuration.Caption := 'Image preview';
@@ -924,19 +908,23 @@ begin
   UpdateOkState();
 end;
 
+
 procedure TLWFileBrowserExDlg.UpdateOkState();
 begin
+
   btnOk.Enabled := FileExists(FSelectedFilePath);
 end;
 
+
 procedure TLWFileBrowserExDlg.UpdatePreview();
 begin
+
   if not Assigned(imgPreview) then
     Exit;
 
   imgPreview.Picture.Assign(nil);
 
-  if FSelectedFilePath = '' then
+  if (FSelectedFilePath = '') then
     Exit;
 
   if not FileExists(FSelectedFilePath) then
@@ -946,27 +934,33 @@ begin
     Exit;
 
   try
+
     imgPreview.Picture.LoadFromFile(FSelectedFilePath);
   except
+
     imgPreview.Picture.Assign(nil);
   end;
 end;
+
 
 procedure TLWFileBrowserExDlg.UpdateDuration();
 var
   Duration: Int64;
 
 begin
+
   FFileDuration := '';
 
-  if FSelectedFilter <> fbxAudio then
+  if (FSelectedFilter <> fbxAudio) then
     begin
+
       lblDuration.Caption := 'Image preview';
       Exit;
     end;
 
   if not IsAudioFile(FSelectedFilePath) then
     begin
+
       lblDuration.Caption := 'Duration: 00:00:00';
       Exit;
     end;
@@ -974,6 +968,7 @@ begin
   Duration := 0;
 
   try
+
     GetFileDuration(PWideChar(WideString(FSelectedFilePath)),
                     Duration);
 
@@ -983,48 +978,55 @@ begin
     lblDuration.Caption := Format('Duration: %s',
                                   [FFileDuration]);
   except
+
     FFileDuration := '';
     lblDuration.Caption := 'Duration: 00:00:00';
   end;
 end;
 
+
 procedure TLWFileBrowserExDlg.SetSelectedFilter(AValue: TLWFileBrowserExFilter);
 begin
+
   FSelectedFilter := AValue;
 
   case FSelectedFilter of
-    fbxAudio:
-      begin
-        Caption := 'Select an audio file';
-        cbxFileFilter.Filter := CLWAudioFilter;
-        pnlPreview.Visible := False;
-        SplitterPreview.Visible := False;
-        lblDuration.Caption := 'Duration: 00:00:00';
-      end;
+    fbxAudio: begin
 
-    fbxGraphics:
-      begin
-        Caption := 'Select an image file';
-        cbxFileFilter.Filter := CLWGraphicsFilter;
-        pnlPreview.Visible := True;
-        SplitterPreview.Visible := True;
-        lblDuration.Caption := 'Image preview';
-      end;
+                Caption := 'Select an audio file';
+                cbxFileFilter.Filter := CLWAudioFilter;
+                pnlPreview.Visible := False;
+                SplitterPreview.Visible := False;
+                lblDuration.Caption := 'Duration: 00:00:00';
+              end;
+
+    fbxGraphics: begin
+
+                   Caption := 'Select an image file';
+                   cbxFileFilter.Filter := CLWGraphicsFilter;
+                   pnlPreview.Visible := True;
+                   SplitterPreview.Visible := True;
+                   lblDuration.Caption := 'Image preview';
+                 end;
   end;
 
   ClearSelection();
 end;
 
+
 function TLWFileBrowserExDlg.GetSelectedFilter(): TLWFileBrowserExFilter;
 begin
+
   Result := FSelectedFilter;
 end;
+
 
 function TLWFileBrowserExDlg.IsGraphicFile(const AFileName: string): Boolean;
 var
   Ext: string;
 
 begin
+
   Ext := LowerCase(ExtractFileExt(AFileName));
 
   Result := (Ext = '.jpg') or
@@ -1033,11 +1035,13 @@ begin
             (Ext = '.bmp');
 end;
 
+
 function TLWFileBrowserExDlg.IsAudioFile(const AFileName: string): Boolean;
 var
   Ext: string;
 
 begin
+
   Ext := LowerCase(ExtractFileExt(AFileName));
 
   Result := (Ext = '.mp3') or
@@ -1050,18 +1054,22 @@ begin
             (Ext = '.opus');
 end;
 
+
 function TLWFileBrowserExDlg.IsUncPath(const APath: string): Boolean;
 begin
+
   Result := Copy(Trim(APath),
                  1,
                  2) = '\\';
 end;
 
+
 function TLWFileBrowserExDlg.NormalizeDirectory(const ADirectory: string): string;
 begin
+
   Result := Trim(ADirectory);
 
-  if Result = '' then
+  if (Result = '') then
     Exit;
 
   if (Length(Result) = 2) and
@@ -1074,26 +1082,30 @@ begin
     Result := Copy(Result, 1, 2) + '\';
 end;
 
+
 function TLWFileBrowserExDlg.TrySetBrowserDirectory(const ADirectory: string;
                                                     const AShowError: Boolean): Boolean;
 var
   Dir: string;
 
 begin
+
   Result := False;
   Dir := NormalizeDirectory(ADirectory);
 
-  if Dir = '' then
+  if (Dir = '') then
     Exit;
 
   if IsNetworkServerPath(Dir) then
     begin
+
       FillNetworkServerFolderList(Dir);
       Exit(True);
     end;
 
   if not System.SysUtils.DirectoryExists(Dir) then
     begin
+
       if AShowError then
         MessageDlg('Directory not found:'#13#10 + Dir,
                    mtWarning,
@@ -1103,7 +1115,9 @@ begin
     end;
 
   FUpdatingUi := True;
+
   try
+
     FCurrentDirectory := IncludeTrailingPathDelimiter(Dir);
     edtPath.Text := FCurrentDirectory;
 
@@ -1113,31 +1127,35 @@ begin
     FillFolderList();
     ClearSelection();
   finally
+
     FUpdatingUi := False;
   end;
 
   Result := True;
 end;
 
+
 function TLWFileBrowserExDlg.GetDisplayPathFromLocationItem(const AText: string): string;
 var
   P: Integer;
 
 begin
+
   Result := Trim(AText);
 
-  if Result = '' then
+  if (Result = '') then
     Exit;
 
   if IsUncPath(Result) then
     Exit;
 
   P := Pos('  ', Result);
-  if P > 0 then
+  if (P > 0) then
     Result := Copy(Result,
                    1,
                    P - 1);
 end;
+
 
 function TLWFileBrowserExDlg.GetShellIconIndex(const APath: string;
                                                const AAttributes: DWORD;
@@ -1147,6 +1165,7 @@ var
   Flags: UINT;
 
 begin
+
   Result := 0;
 
   ZeroMemory(@SFI,
@@ -1157,13 +1176,14 @@ begin
   if AUseAttributes then
     Flags := Flags or SHGFI_USEFILEATTRIBUTES;
 
-  if SHGetFileInfo(PChar(APath),
+  if (SHGetFileInfo(PChar(APath),
                    AAttributes,
                    SFI,
                    SizeOf(SFI),
-                   Flags) <> 0 then
+                   Flags) <> 0) then
     Result := SFI.iIcon;
 end;
+
 
 procedure TLWFileBrowserExDlg.DrawShellItem(ACanvas: TCanvas;
                                             const ARect: TRect;
@@ -1176,11 +1196,12 @@ var
   Flags: UINT;
 
 begin
+
   ACanvas.FillRect(ARect);
 
   IconY := ARect.Top + (((ARect.Bottom - ARect.Top) - GetSystemMetrics(SM_CYSMICON)) div 2);
 
-  if FSmallSysImages <> 0 then
+  if (FSmallSysImages <> 0) then
     ImageList_Draw(FSmallSysImages,
                    AIconIndex,
                    ACanvas.Handle,
@@ -1201,6 +1222,7 @@ begin
            Flags);
 end;
 
+
 procedure TLWFileBrowserExDlg.cbxLocationsDrawItem(Control: TWinControl;
                                                    Index: Integer;
                                                    Rect: TRect;
@@ -1211,7 +1233,8 @@ var
   IconIndex: Integer;
 
 begin
-  if Index < 0 then
+
+  if (Index < 0) then
     Exit;
 
   TextValue := cbxLocations.Items[Index];
@@ -1233,6 +1256,7 @@ begin
                 odSelected in State);
 end;
 
+
 procedure TLWFileBrowserExDlg.lbFoldersDrawItem(Control: TWinControl;
                                                 Index: Integer;
                                                 Rect: TRect;
@@ -1243,12 +1267,13 @@ var
   IconIndex: Integer;
 
 begin
-  if Index < 0 then
+
+  if (Index < 0) then
     Exit;
 
   TextValue := lbFolders.Items[Index];
 
-  if TextValue = '..' then
+  if (TextValue = '..') then
     PathValue := ExtractFileDir(ExcludeTrailingPathDelimiter(FCurrentDirectory))
   else
     PathValue := IncludeTrailingPathDelimiter(FCurrentDirectory) + TextValue;
@@ -1264,9 +1289,18 @@ begin
                 odSelected in State);
 end;
 
+
+procedure TLWFileBrowserExDlg.btnNetStationsSearchClick(Sender: TObject);
+begin
+
+  StartNetworkStationDiscovery();
+end;
+
+
 procedure TLWFileBrowserExDlg.SetInitialDirectory(const ADirectory: string);
 begin
-  if Trim(ADirectory) <> '' then
+
+  if (Trim(ADirectory) <> '') then
     TrySetBrowserDirectory(ADirectory,
                            False);
 end;

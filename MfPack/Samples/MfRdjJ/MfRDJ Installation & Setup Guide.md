@@ -158,9 +158,9 @@ Enable:
 
 ---
 
-# 🖥 Server PC vs 📱 User Device
+# Server PC vs User Device
 
-## 🖥 Server PC
+## Server PC
 
 Runs:
 
@@ -210,7 +210,7 @@ Note: No firewall setup needed
 
 ---
 
-# ▶ Running MfRDJ
+# Running MfRDJ
 
 First run:
 

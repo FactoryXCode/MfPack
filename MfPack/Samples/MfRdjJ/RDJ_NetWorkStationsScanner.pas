@@ -1,0 +1,680 @@
+unit RDJ_NetWorkStationsScanner;
+
+interface
+
+uses
+
+  {WinApi}
+  WinApi.Windows,
+  WinApi.ComBaseApi,
+  WinApi.WinApiTypes,
+  WinApi.ShellAPI,
+  {System}
+  System.SysUtils,
+  System.Win.ComObj,
+  System.Classes,
+  {ActiveX}
+  WinApi.ActiveX.ObjBase,
+  WinApi.ActiveX.ObjIdl;
+
+type
+
+  TDiscoveryEvent = procedure(const AStation: string) of object;
+
+  TRDJNetworkStationsScanner = class(TObject)
+  private
+    class procedure AddUnique(AItems: TStrings;
+                              const AValue: string); static;
+
+    class function NormalizeStationName(const AStation: string): string; static;
+
+  public
+    class procedure DiscoverNetworkStations(AItems: TStrings); static;
+
+    class function StationExists(const AStation: string): Boolean; static;
+
+    class procedure DiscoverStationShares(const AStation: string;
+                                          AItems: TStrings); static;
+  end;
+
+  TNetworkDiscoveryThread = class(TThread)
+  private
+    FResultList: TStringList;
+    FOnStationFound: TDiscoveryEvent;
+    FOnFinished: TNotifyEvent;
+
+    procedure AddStationName(const AStationName: string);
+    procedure AddStationToTarget(const AStationName: string);
+    procedure FindStations;
+    procedure FindStationsShellNetworkFolder;
+    procedure DoFinished;
+
+  protected
+    procedure Execute; override;
+
+  public
+
+    constructor Create();
+    destructor Destroy; override;
+
+    property OnStationFound: TDiscoveryEvent read FOnStationFound write FOnStationFound;
+    property OnFinished: TNotifyEvent read FOnFinished write FOnFinished;
+  end;
+
+
+implementation
+
+
+const
+
+  KF_FLAG_DEFAULT        = DWORD($00000000);
+  SIGDN_NORMALDISPLAY   = DWORD($00000000);
+  SIGDN_DESKTOPABSOLUTEPARSING = DWORD($80028000);
+
+  NERR_Success          = 0;
+  MAX_PREFERRED_LENGTH  = DWORD($FFFFFFFF);
+  STYPE_DISKTREE        = DWORD($00000000);
+  STYPE_SPECIAL         = DWORD($80000000);
+
+  FOLDERID_NetworkFolder: TGUID = '{D20BEEC4-5CA8-4905-AE3B-BF251EA09B53}';
+  IID_IShellItem: TGUID         = '{43826D1E-E718-42EE-BC55-A1E261C37BFE}';
+  IID_IEnumShellItems: TGUID    = '{70629033-E363-4A28-A567-0DB78006E6D7}';
+  BHID_EnumItems: TGUID         = '{94F60519-2850-4924-AA5A-D15E84868039}';
+
+type
+
+  SIGDN = DWORD;
+  NET_API_STATUS = DWORD;
+  LMSTR = PWideChar;
+
+  IShellItem = interface(IUnknown)
+    ['{43826D1E-E718-42EE-BC55-A1E261C37BFE}']
+    function BindToHandler(pbc: IBindCtx;
+                           const bhid: TGUID;
+                           const riid: TGUID;
+                           out ppv): HRESULT; stdcall;
+
+    function GetParent(out ppsi: IShellItem): HRESULT; stdcall;
+
+    function GetDisplayName(sigdnName: SIGDN;
+                            out ppszName: LPWSTR): HRESULT; stdcall;
+
+    function GetAttributes(sfgaoMask: DWORD;
+                           out psfgaoAttribs: DWORD): HRESULT; stdcall;
+
+    function Compare(const psi: IShellItem;
+                     hint: DWORD;
+                     out piOrder: Integer): HRESULT; stdcall;
+  end;
+
+  IEnumShellItems = interface(IUnknown)
+    ['{70629033-E363-4A28-A567-0DB78006E6D7}']
+    function Next(celt: ULONG;
+                  out rgelt: IShellItem;
+                  pceltFetched: PULONG): HRESULT; stdcall;
+
+    function Skip(celt: ULONG): HRESULT; stdcall;
+
+    function Reset(): HRESULT; stdcall;
+
+    function Clone(out ppenum: IEnumShellItems): HRESULT; stdcall;
+  end;
+
+  PSHARE_INFO_1 = ^SHARE_INFO_1;
+  SHARE_INFO_1 = record
+    shi1_netname: LMSTR;
+    shi1_type: DWORD;
+    shi1_remark: LMSTR;
+  end;
+
+
+function SHGetKnownFolderItem(const rfid: TGUID;
+                              dwFlags: DWORD;
+                              hToken: THandle;
+                              const riid: TGUID;
+                              out ppv): HRESULT; stdcall; external 'Shell32.dll';
+
+function NetShareEnum(servername: LMSTR;
+                      level: DWORD;
+                      var bufptr: Pointer;
+                      prefmaxlen: DWORD;
+                      var entriesread: DWORD;
+                      var totalentries: DWORD;
+                      var resume_handle: DWORD): NET_API_STATUS; stdcall; external 'Netapi32.dll';
+
+function NetApiBufferFree(Buffer: Pointer): NET_API_STATUS; stdcall; external 'Netapi32.dll';
+
+
+function IsIgnoredNetworkStationName(const AStationName: string): Boolean;
+var
+  StationName: string;
+
+begin
+
+  StationName := Trim(AStationName);
+
+  Result := (StationName = '') or
+            SameText(StationName,
+                     '\Microsoft Terminal Services') or
+            SameText(StationName,
+                     '\Microsoft Windows Network') or
+            SameText(StationName,
+                     '\Plan 9 Network Provider') or
+            SameText(StationName,
+                     '\Web Client Network') or
+            SameText(StationName,
+                     '\Network') or
+            SameText(StationName,
+                     '\Provider') or
+            StationName.StartsWith('Provider\',
+                                   True) or
+            StationName.StartsWith('Layered\',
+                                   True) or
+            StationName.StartsWith('::{',
+                                   True) or
+            StationName.StartsWith('\\Provider\',
+                                   True) or
+            StationName.StartsWith('\\Layered\',
+                                   True);
+end;
+
+
+function ExtractComputerNameFromShellName(const AShellName: string): string;
+var
+  S: string;
+  P: Integer;
+
+begin
+
+  Result := '';
+
+  S := Trim(AShellName);
+
+  if (S = '') then
+    Exit;
+
+  S := StringReplace(S,
+                     '/',
+                     '\',
+                     [rfReplaceAll]);
+
+  if IsIgnoredNetworkStationName(S) then
+    Exit;
+
+  P := Pos('\\',
+           S);
+
+  if (P > 0) then
+    S := Copy(S,
+              P,
+              MaxInt);
+
+  while S.StartsWith('\') do
+    Delete(S,
+           1,
+           1);
+
+  P := Pos('\',
+           S);
+
+  if (P > 0) then
+    S := Copy(S,
+              1,
+              P - 1);
+
+  Result := Trim(S);
+end;
+
+
+function IsValidComputerNameCandidate(const AComputerName: string): Boolean;
+var
+  ComputerName: string;
+  I: Integer;
+  C: Char;
+
+begin
+
+  Result := False;
+
+  ComputerName := Trim(AComputerName);
+
+  if (ComputerName = '') then
+    Exit;
+
+  if (Length(ComputerName) > 255) then
+    Exit;
+
+  if ComputerName.StartsWith('-') or
+     ComputerName.EndsWith('-') or
+     ComputerName.StartsWith('.') or
+     ComputerName.EndsWith('.') then
+    Exit;
+
+  for I := 1 to Length(ComputerName) do
+    begin
+
+      C := ComputerName[I];
+
+      if not CharInSet(C,
+                       ['A'..'Z',
+                        'a'..'z',
+                        '0'..'9',
+                        '-',
+                        '_',
+                        '.']) then
+        Exit;
+    end;
+
+  Result := True;
+end;
+
+
+function NormalizeNetworkStationName(const AStationName: string): string;
+var
+  ComputerName: string;
+
+begin
+
+  Result := '';
+
+  ComputerName := ExtractComputerNameFromShellName(AStationName);
+
+  if not IsValidComputerNameCandidate(ComputerName) then
+    Exit;
+
+  Result := '\\' + ComputerName;
+
+  if IsIgnoredNetworkStationName(Result) then
+    Result := '';
+end;
+
+
+function EnumerateDiskShares(const AStationName: string;
+                             AItems: TStrings;
+                             const AStopAfterFirst: Boolean): Boolean;
+var
+  StationName: string;
+  Buffer: Pointer;
+  EntriesRead: DWORD;
+  TotalEntries: DWORD;
+  ResumeHandle: DWORD;
+  Status: NET_API_STATUS;
+  I: DWORD;
+  ShareInfo: PSHARE_INFO_1;
+  ShareName: string;
+  ShareType: DWORD;
+
+begin
+
+  Result := False;
+
+  StationName := NormalizeNetworkStationName(AStationName);
+
+  if (StationName = '') then
+    Exit;
+
+  ResumeHandle := 0;
+
+  repeat
+
+    Buffer := nil;
+    EntriesRead := 0;
+    TotalEntries := 0;
+
+    Status := NetShareEnum(PWideChar(StationName),
+                           1,
+                           Buffer,
+                           MAX_PREFERRED_LENGTH,
+                           EntriesRead,
+                           TotalEntries,
+                           ResumeHandle);
+
+    if (Status <> NERR_Success) and
+       (Status <> ERROR_MORE_DATA) then
+      Exit;
+
+    try
+
+      if Assigned(Buffer) and
+         (EntriesRead > 0) then
+        begin
+
+          I := 0;
+
+          while (I < EntriesRead) do
+            begin
+
+              ShareInfo := PSHARE_INFO_1(NativeUInt(Buffer) + (NativeUInt(I) * SizeOf(SHARE_INFO_1)));
+
+              ShareType := ShareInfo^.shi1_type and not STYPE_SPECIAL;
+
+              if (ShareType = STYPE_DISKTREE) and
+                 (ShareInfo^.shi1_netname <> nil) then
+                begin
+
+                  ShareName := ShareInfo^.shi1_netname;
+                  ShareName := Trim(ShareName);
+
+                  if (ShareName <> '') and
+                     not ShareName.EndsWith('$') then
+                    begin
+
+                      Result := True;
+
+                      if Assigned(AItems) then
+                        TRDJNetworkStationsScanner.AddUnique(AItems,
+                                                             StationName + '\' + ShareName);
+
+                      if AStopAfterFirst then
+                        Exit;
+                    end;
+                end;
+
+              Inc(I);
+            end;
+        end;
+
+    finally
+
+      if Assigned(Buffer) then
+        NetApiBufferFree(Buffer);
+    end;
+
+  until (Status <> ERROR_MORE_DATA);
+end;
+
+
+function StationHasDiskShares(const AStationName: string): Boolean;
+begin
+
+  Result := EnumerateDiskShares(AStationName,
+                                nil,
+                                True);
+end;
+
+
+class procedure TRDJNetworkStationsScanner.AddUnique(AItems: TStrings;
+                                                     const AValue: string);
+begin
+
+  if (AItems = nil) then
+    Exit;
+
+  if (AValue = '') then
+    Exit;
+
+  if (AItems.IndexOf(AValue) < 0) then
+    AItems.Add(AValue);
+end;
+
+
+class function TRDJNetworkStationsScanner.NormalizeStationName(const AStation: string): string;
+begin
+
+  Result := NormalizeNetworkStationName(AStation);
+end;
+
+
+class procedure TRDJNetworkStationsScanner.DiscoverNetworkStations(AItems: TStrings);
+var
+  Finder: TNetworkDiscoveryThread;
+
+begin
+
+  if (AItems = nil) then
+    Exit;
+
+  AItems.Clear();
+
+  Finder := TNetworkDiscoveryThread.Create();
+  Finder.FreeOnTerminate := False;
+
+  try
+
+    Finder.Start();
+    Finder.WaitFor();
+
+    AItems.Assign(Finder.FResultList);
+  finally
+
+    Finder.Free();
+  end;
+end;
+
+
+class function TRDJNetworkStationsScanner.StationExists(const AStation: string): Boolean;
+var
+  StationName: string;
+
+begin
+
+  StationName := NormalizeStationName(AStation);
+
+  Result := (StationName <> '') and
+            StationHasDiskShares(StationName);
+end;
+
+
+class procedure TRDJNetworkStationsScanner.DiscoverStationShares(const AStation: string;
+                                                                 AItems: TStrings);
+begin
+
+  if (AItems = nil) then
+    Exit;
+
+  AItems.Clear();
+
+  EnumerateDiskShares(AStation,
+                      AItems,
+                      False);
+end;
+
+
+constructor TNetworkDiscoveryThread.Create();
+begin
+
+  inherited Create(True);
+
+  FreeOnTerminate := True;
+
+  FResultList := TStringList.Create();
+  FResultList.Sorted := True;
+  FResultList.Duplicates := dupIgnore;
+  FResultList.CaseSensitive := False;
+end;
+
+
+destructor TNetworkDiscoveryThread.Destroy();
+begin
+
+  FResultList.Free();
+
+  inherited Destroy();
+end;
+
+
+procedure TNetworkDiscoveryThread.Execute();
+var
+  CoInitHr: HRESULT;
+
+begin
+
+  NameThreadForDebugging('NetworkDiscovery');
+
+  CoInitHr := CoInitializeEx(nil,
+                             COINIT_APARTMENTTHREADED);
+
+  try
+
+    try
+
+      if Succeeded(CoInitHr) or
+         (CoInitHr = RPC_E_CHANGED_MODE) then
+        FindStations();
+    finally
+
+      if Succeeded(CoInitHr) then
+        CoUninitialize();
+    end;
+
+  finally
+
+    if Assigned(FOnFinished) then
+      Synchronize(DoFinished);
+  end;
+end;
+
+
+procedure TNetworkDiscoveryThread.FindStations();
+var
+  I: Integer;
+
+begin
+
+  FResultList.Clear();
+
+  FindStationsShellNetworkFolder();
+
+  if Assigned(FOnStationFound) then
+    begin
+
+      for I := 0 to FResultList.Count - 1 do
+        begin
+
+          if Terminated then
+            Exit;
+
+          Synchronize(procedure
+                      begin
+
+                        AddStationToTarget(FResultList[I]);
+                      end);
+        end;
+    end;
+end;
+
+
+procedure TNetworkDiscoveryThread.AddStationToTarget(const AStationName: string);
+begin
+
+  if (AStationName = '') then
+    Exit;
+
+  if Assigned(FOnStationFound) then
+    FOnStationFound(AStationName);
+end;
+
+
+procedure TNetworkDiscoveryThread.AddStationName(const AStationName: string);
+var
+  StationName: string;
+
+begin
+
+  StationName := NormalizeNetworkStationName(AStationName);
+
+  if (StationName = '') then
+    Exit;
+
+  if not StationHasDiskShares(StationName) then
+    Exit;
+
+  if FResultList.IndexOf(StationName) < 0 then
+    FResultList.Add(StationName);
+end;
+
+
+procedure TNetworkDiscoveryThread.DoFinished();
+begin
+
+  if Assigned(FOnFinished) then
+    FOnFinished(Self);
+end;
+
+
+procedure TNetworkDiscoveryThread.FindStationsShellNetworkFolder();
+var
+  NetworkFolder: IShellItem;
+  EnumItems: IEnumShellItems;
+  Item: IShellItem;
+  NamePtr: LPWSTR;
+  DisplayName: string;
+  Fetched: ULONG;
+  hr: HRESULT;
+
+begin
+
+  NetworkFolder := nil;
+  EnumItems := nil;
+
+  hr := SHGetKnownFolderItem(FOLDERID_NetworkFolder,
+                             KF_FLAG_DEFAULT,
+                             0,
+                             IID_IShellItem,
+                             NetworkFolder);
+
+  if Failed(hr) or
+     (NetworkFolder = nil) then
+    Exit;
+
+  hr := NetworkFolder.BindToHandler(nil,
+                                    BHID_EnumItems,
+                                    IID_IEnumShellItems,
+                                    EnumItems);
+
+  if Failed(hr) or
+     (EnumItems = nil) then
+    Exit;
+
+  while not Terminated do
+    begin
+
+      Item := nil;
+      Fetched := 0;
+
+      hr := EnumItems.Next(1,
+                           Item,
+                           @Fetched);
+
+      if (hr <> S_OK) or
+         (Fetched = 0) or
+         (Item = nil) then
+        Break;
+
+      NamePtr := nil;
+
+      if Succeeded(Item.GetDisplayName(SIGDN_NORMALDISPLAY,
+                                        NamePtr)) then
+        try
+
+          if (NamePtr <> nil) then
+            begin
+
+              DisplayName := NamePtr;
+              AddStationName(DisplayName);
+            end;
+        finally
+
+          CoTaskMemFree(NamePtr);
+        end;
+
+      NamePtr := nil;
+
+      if Succeeded(Item.GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING,
+                                        NamePtr)) then
+        try
+
+          if (NamePtr <> nil) then
+            begin
+
+              DisplayName := NamePtr;
+              AddStationName(DisplayName);
+            end;
+        finally
+
+          CoTaskMemFree(NamePtr);
+        end;
+    end;
+end;
+
+end.
