@@ -158,8 +158,8 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
     ParentBackground = False
     ParentDoubleBuffered = False
     TabOrder = 1
-    ExplicitLeft = -2
-    ExplicitTop = 563
+    ExplicitTop = 544
+    ExplicitWidth = 934
     object lblSelectedFile: TLabel
       Left = 14
       Top = 15

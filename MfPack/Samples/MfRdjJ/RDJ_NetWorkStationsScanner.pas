@@ -9,13 +9,19 @@ uses
   WinApi.ComBaseApi,
   WinApi.WinApiTypes,
   WinApi.ShellAPI,
+  Winapi.ShlObj,
   {System}
   System.SysUtils,
   System.Win.ComObj,
   System.Classes,
+  {NetManApi}
+  WinApi.NetManApi.LMShare,
+  WinApi.NetManApi.LMCons,
+  WinApi.NetManApi.LMApiBuf,
   {ActiveX}
   WinApi.ActiveX.ObjBase,
-  WinApi.ActiveX.ObjIdl;
+  WinApi.ActiveX.ObjIdl,
+  WinApi.ActiveX.ObjIdlbase;
 
 type
 
@@ -39,6 +45,7 @@ type
 
   TNetworkDiscoveryThread = class(TThread)
   private
+
     FResultList: TStringList;
     FOnStationFound: TDiscoveryEvent;
     FOnFinished: TNotifyEvent;
@@ -67,82 +74,8 @@ implementation
 
 const
 
-  KF_FLAG_DEFAULT        = DWORD($00000000);
-  SIGDN_NORMALDISPLAY   = DWORD($00000000);
-  SIGDN_DESKTOPABSOLUTEPARSING = DWORD($80028000);
-
   NERR_Success          = 0;
-  MAX_PREFERRED_LENGTH  = DWORD($FFFFFFFF);
-  STYPE_DISKTREE        = DWORD($00000000);
-  STYPE_SPECIAL         = DWORD($80000000);
-
   FOLDERID_NetworkFolder: TGUID = '{D20BEEC4-5CA8-4905-AE3B-BF251EA09B53}';
-  IID_IShellItem: TGUID         = '{43826D1E-E718-42EE-BC55-A1E261C37BFE}';
-  IID_IEnumShellItems: TGUID    = '{70629033-E363-4A28-A567-0DB78006E6D7}';
-  BHID_EnumItems: TGUID         = '{94F60519-2850-4924-AA5A-D15E84868039}';
-
-type
-
-  SIGDN = DWORD;
-  NET_API_STATUS = DWORD;
-  LMSTR = PWideChar;
-
-  IShellItem = interface(IUnknown)
-    ['{43826D1E-E718-42EE-BC55-A1E261C37BFE}']
-    function BindToHandler(pbc: IBindCtx;
-                           const bhid: TGUID;
-                           const riid: TGUID;
-                           out ppv): HRESULT; stdcall;
-
-    function GetParent(out ppsi: IShellItem): HRESULT; stdcall;
-
-    function GetDisplayName(sigdnName: SIGDN;
-                            out ppszName: LPWSTR): HRESULT; stdcall;
-
-    function GetAttributes(sfgaoMask: DWORD;
-                           out psfgaoAttribs: DWORD): HRESULT; stdcall;
-
-    function Compare(const psi: IShellItem;
-                     hint: DWORD;
-                     out piOrder: Integer): HRESULT; stdcall;
-  end;
-
-  IEnumShellItems = interface(IUnknown)
-    ['{70629033-E363-4A28-A567-0DB78006E6D7}']
-    function Next(celt: ULONG;
-                  out rgelt: IShellItem;
-                  pceltFetched: PULONG): HRESULT; stdcall;
-
-    function Skip(celt: ULONG): HRESULT; stdcall;
-
-    function Reset(): HRESULT; stdcall;
-
-    function Clone(out ppenum: IEnumShellItems): HRESULT; stdcall;
-  end;
-
-  PSHARE_INFO_1 = ^SHARE_INFO_1;
-  SHARE_INFO_1 = record
-    shi1_netname: LMSTR;
-    shi1_type: DWORD;
-    shi1_remark: LMSTR;
-  end;
-
-
-function SHGetKnownFolderItem(const rfid: TGUID;
-                              dwFlags: DWORD;
-                              hToken: THandle;
-                              const riid: TGUID;
-                              out ppv): HRESULT; stdcall; external 'Shell32.dll';
-
-function NetShareEnum(servername: LMSTR;
-                      level: DWORD;
-                      var bufptr: Pointer;
-                      prefmaxlen: DWORD;
-                      var entriesread: DWORD;
-                      var totalentries: DWORD;
-                      var resume_handle: DWORD): NET_API_STATUS; stdcall; external 'Netapi32.dll';
-
-function NetApiBufferFree(Buffer: Pointer): NET_API_STATUS; stdcall; external 'Netapi32.dll';
 
 
 function IsIgnoredNetworkStationName(const AStationName: string): Boolean;
@@ -294,7 +227,7 @@ function EnumerateDiskShares(const AStationName: string;
                              const AStopAfterFirst: Boolean): Boolean;
 var
   StationName: string;
-  Buffer: Pointer;
+  Buffer: PBYTE;
   EntriesRead: DWORD;
   TotalEntries: DWORD;
   ResumeHandle: DWORD;
@@ -325,9 +258,9 @@ begin
                            1,
                            Buffer,
                            MAX_PREFERRED_LENGTH,
-                           EntriesRead,
-                           TotalEntries,
-                           ResumeHandle);
+                           @EntriesRead,
+                           @TotalEntries,
+                           @ResumeHandle);
 
     if (Status <> NERR_Success) and
        (Status <> ERROR_MORE_DATA) then
@@ -611,7 +544,7 @@ begin
                              KF_FLAG_DEFAULT,
                              0,
                              IID_IShellItem,
-                             NetworkFolder);
+                             Pointer(NetworkFolder));
 
   if Failed(hr) or
      (NetworkFolder = nil) then

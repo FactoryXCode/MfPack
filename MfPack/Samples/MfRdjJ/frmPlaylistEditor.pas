@@ -69,6 +69,7 @@ uses
   WinApi.Messages,
   Winapi.ShellAPI,
   WinApi.WinError,
+  Winapi.MMSystem,
   {System}
   System.SysUtils,
   System.Variants,
@@ -262,6 +263,10 @@ type
 
     function EditSelectedLibraryTrackTags(): Boolean;
     function GetLoadedFileNameFromEdit(out AFileName: string): Boolean;
+    function FindLibraryTrackByFullPath(const AFileName: string;
+                                        out ATrack: TRDJTrack): Boolean;
+    function ReadAudioDurationMs(const AFileName: string): Int64;
+    function AddLoadedFileToCurrentPlaylist(): Boolean;
     function LoadLoadedFileOnChannel(const AChannelIndex: Integer;
                                      const AStartPlayback: Boolean): HRESULT;
 
@@ -281,7 +286,8 @@ implementation
 uses
   frmMainMDI,
   frmChannelDeck,
-  MfAudioFileBrowserDlg;
+  MfAudioFileBrowserDlg,
+  RDJ.FilenameParser;
 
 
 procedure TfrmPlaylistEditor.FormCreate(Sender: TObject);
@@ -1726,6 +1732,16 @@ begin
 
   FLoadFilePopUp.Items.Clear;
 
+  MI := TMenuItem.Create(FLoadFilePopUp);
+  MI.Caption := 'Add file to current playlist';
+  MI.Tag := 10;
+  MI.OnClick := LoadedFilePopupClick;
+  FLoadFilePopUp.Items.Add(MI);
+
+  Sep := TMenuItem.Create(FLoadFilePopUp);
+  Sep.Caption := '-';
+  FLoadFilePopUp.Items.Add(Sep);
+
   if not Assigned(MainMDIFrm) then
     Exit;
 
@@ -1799,6 +1815,13 @@ begin
 
   TagValue := TMenuItem(Sender).Tag;
 
+  if (TagValue = 10) then
+    begin
+
+      AddLoadedFileToCurrentPlaylist();
+      Exit;
+    end;
+
   if (TagValue >= 2000) then
     begin
 
@@ -1822,12 +1845,244 @@ begin
 
   AFileName := Trim(edFileName.Hint);
 
+  if (AFileName = '') or not FileExists(AFileName) then
+    AFileName := Trim(edFileName.Text);
+
   Result := (AFileName <> '') and FileExists(AFileName);
 
   if not Result then
     SetStatus('No valid file selected.');
 end;
 
+
+function TfrmPlaylistEditor.FindLibraryTrackByFullPath(const AFileName: string;
+                                                       out ATrack: TRDJTrack): Boolean;
+var
+  Artist: string;
+  Title: string;
+
+  function TrySearch(const AText: string): Boolean;
+  var
+    L: TList<TRDJTrack>;
+    I: Integer;
+  begin
+
+    Result := False;
+
+    if Trim(AText) = '' then
+      Exit;
+
+    L := FLibrary.SearchTrackSummaries(AText);
+    try
+
+      for I := 0 to L.Count - 1 do
+        begin
+
+          if SameText(ExpandFileName(L[I].FullPath),
+                      ExpandFileName(AFileName)) then
+            begin
+
+              ATrack := L[I];
+              Exit(True);
+            end;
+        end;
+    finally
+
+      L.Free;
+    end;
+  end;
+
+begin
+
+  ATrack := Default(TRDJTrack);
+
+  Result := TrySearch(AFileName);
+  if Result then
+    Exit;
+
+  Result := TrySearch(ExtractFileName(AFileName));
+  if Result then
+    Exit;
+
+  TFileNameParser.ResolveArtistTitle(AFileName,
+                                     '',
+                                     '',
+                                     Artist,
+                                     Title);
+
+  Result := TrySearch(Artist + ' ' + Title);
+end;
+
+
+
+function TfrmPlaylistEditor.ReadAudioDurationMs(const AFileName: string): Int64;
+var
+  AliasName: string;
+  Cmd: string;
+  Buffer: array[0..63] of Char;
+  Err: MCIERROR;
+
+begin
+
+  Result := 0;
+
+  if (Trim(AFileName) = '') or not FileExists(AFileName) then
+    Exit;
+
+  AliasName := 'RDJDuration' + IntToHex(GetTickCount(), 8);
+
+  Cmd := Format('open "%s" alias %s',
+                [AFileName,
+                 AliasName]);
+
+  Err := mciSendString(PChar(Cmd),
+                       nil,
+                       0,
+                       0);
+  if (Err <> 0) then
+    Exit;
+
+  try
+
+    mciSendString(PChar('set ' + AliasName + ' time format milliseconds'),
+                  nil,
+                  0,
+                  0);
+
+    FillChar(Buffer,
+             SizeOf(Buffer),
+             0);
+
+    Cmd := 'status ' + AliasName + ' length';
+
+    Err := mciSendString(PChar(Cmd),
+                         Buffer,
+                         Length(Buffer),
+                         0);
+    if (Err = 0) then
+      Result := StrToInt64Def(Trim(string(Buffer)),
+                              0);
+  finally
+
+    mciSendString(PChar('close ' + AliasName),
+                  nil,
+                  0,
+                  0);
+  end;
+end;
+
+
+function TfrmPlaylistEditor.AddLoadedFileToCurrentPlaylist(): Boolean;
+var
+  FileName: string;
+  Track: TRDJTrack;
+  Artist: string;
+  Title: string;
+  OldCount: Integer;
+  NewIndex: Integer;
+
+begin
+
+  Result := False;
+
+  if (FCurrentPlaylist = nil) then
+    begin
+
+      SetStatus('No playlist selected.');
+      Exit;
+    end;
+
+  if not GetLoadedFileNameFromEdit(FileName) then
+    Exit;
+
+  if not FindLibraryTrackByFullPath(FileName,
+                                    Track) then
+    begin
+
+      TFileNameParser.ResolveArtistTitle(FileName,
+                                         '',
+                                         '',
+                                         Artist,
+                                         Title);
+
+      Track := Default(TRDJTrack);
+      Track.FullPath := FileName;
+      Track.Artist := Trim(Artist);
+      Track.Title := Trim(Title);
+      Track.Album := '';
+      Track.Genre := '';
+      Track.DurationMs := ReadAudioDurationMs(FileName);
+
+      if (Track.Artist = '') then
+        Track.Artist := 'Unknown Artist';
+
+      if (Track.Title = '') then
+        Track.Title := ChangeFileExt(ExtractFileName(FileName),
+                                     '');
+
+      RDJUpdateTrackQuality(Track);
+      FLibrary.AddOrUpdateTrack(Track);
+
+      // AddOrUpdateTrack may not update the TrackID in the local record, so
+      // read the track back from the library before adding it to the playlist.
+      FindLibraryTrackByFullPath(FileName,
+                                 Track);
+    end;
+
+  if (Track.TrackID = 0) then
+    begin
+
+      SetStatus('Could not add selected file to the library.');
+      Exit;
+    end;
+
+  // Existing library entries can still have DurationMs = 0. Fill it once, then
+  // update the library before the playlist entry is created.
+  if (Track.DurationMs <= 0) then
+    begin
+
+      Track.DurationMs := ReadAudioDurationMs(FileName);
+      if (Track.DurationMs > 0) then
+        FLibrary.AddOrUpdateTrack(Track);
+    end;
+
+  OldCount := FCurrentPlaylist.Count;
+
+  FPlaylistMgr.AddTrackToPlaylist(FCurrentPlaylist,
+                                  Track.TrackID);
+
+  // Important: do NOT reload the playlist here. AddTrackToPlaylist updates the
+  // in-memory playlist; reloading can drop an unsaved appended item and makes it
+  // look as if nothing was added.
+  if (FCurrentPlaylist.Count <= OldCount) then
+    begin
+
+      SetStatus('Could not append selected file to the playlist.');
+      Exit;
+    end;
+
+  NewIndex := FCurrentPlaylist.Count - 1;
+
+  RefreshPlaylistGrid();
+  UpdatePlaylistDurationStatus();
+
+  // The grid is refreshed from the playlist entry. Correct only the new appended
+  // visible row, never the currently selected row.
+  if (grdPlaylist.RowCount > NewIndex + 1) then
+    begin
+
+      grdPlaylist.Cells[1, NewIndex + 1] := Track.Artist;
+      grdPlaylist.Cells[2, NewIndex + 1] := Track.Title;
+      grdPlaylist.Cells[3, NewIndex + 1] := FormatDurationMs(Track.DurationMs);
+    end;
+
+  SetStatus(Format('Added "%s - %s" to playlist "%s".',
+                   [Track.Artist,
+                    Track.Title,
+                    FCurrentPlaylist.Info.Name]));
+
+  Result := True;
+end;
 
 function TfrmPlaylistEditor.LoadLoadedFileOnChannel(const AChannelIndex: Integer;
   const AStartPlayback: Boolean): HRESULT;
