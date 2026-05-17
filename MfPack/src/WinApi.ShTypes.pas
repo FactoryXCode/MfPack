@@ -389,7 +389,7 @@ type
 
 
 // >= Vista
-  PComdlgFilterspec = ^COMDLG_FILTERSPEC;
+  PCOMDLG_FILTERSPEC = ^_COMDLG_FILTERSPEC;
   _COMDLG_FILTERSPEC = record
     pszName: PWideChar;
     { [string] }

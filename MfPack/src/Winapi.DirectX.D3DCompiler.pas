@@ -62,7 +62,7 @@
 // their product.
 //
 //==============================================================================
-unit Winapi.DirectX.D3DCompiler;
+unit WinApi.DirectX.D3DCompiler;
 
 interface
 

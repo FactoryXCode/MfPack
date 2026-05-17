@@ -113,6 +113,20 @@ const
   OLEVERBATTRIB_ONCONTAINERMENU = 2;
   {$EXTERNALSYM OLEVERBATTRIB_ONCONTAINERMENU}
 
+  MK_ALT = DWORD($0020);
+  {$EXTERNALSYM MK_ALT}
+
+  DROPEFFECT_NONE = DWORD(0);
+  {$EXTERNALSYM DROPEFFECT_NONE}
+  DROPEFFECT_COPY = DWORD(1);
+  {$EXTERNALSYM DROPEFFECT_COPY}
+  DROPEFFECT_MOVE = DWORD(2);
+  {$EXTERNALSYM DROPEFFECT_MOVE}
+  DROPEFFECT_LINK = DWORD(4);
+  {$EXTERNALSYM DROPEFFECT_LINK}
+  DROPEFFECT_SCROLL = DWORD($80000000);
+  {$EXTERNALSYM DROPEFFECT_SCROLL}
+
 type
 
   // Forward Interface Declarations
@@ -700,6 +714,11 @@ type
   OLEMENUGROUPWIDTHS = tagOleMenuGroupWidths;
   {$EXTERNALSYM OLEMENUGROUPWIDTHS}
 
+  PHOLEMENU = ^HOLEMENU;
+  {$EXTERNALSYM HOLEMENU}
+  HOLEMENU = HGLOBAL;
+
+
 
   // Interface IOleInPlaceFrame
   // ==========================
@@ -708,10 +727,12 @@ type
   {$EXTERNALSYM IOleInPlaceFrame}
   IOleInPlaceFrame = interface(IOleInPlaceUIWindow)
   ['{00000116-0000-0000-C000-000000000046}']
+    
     function InsertMenus(hmenuShared: HMenu;
                          var menuWidths: OLEMENUGROUPWIDTHS): HResult; stdcall;
 
-    function SetMenu(hmenuShared: HMenu; holemenu: HMenu;
+    function SetMenu(hmenuShared: HMenu; 
+                     holemenu: HMenu;
                      hwndActiveObject: HWnd): HResult; stdcall;
 
     function RemoveMenus(hmenuShared: HMenu): HResult; stdcall;
