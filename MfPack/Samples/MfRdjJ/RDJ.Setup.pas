@@ -199,6 +199,19 @@ type
     DatabasePath: string; // hint
     LocalCoversDir: string; // text
     LocalCoversPath: string; // hint
+
+    // CarmenH
+    CarmenProEnabled: Boolean;
+    CarmenProObsExePath: string;
+    CarmenProObsWorkingDir: string;
+    CarmenProObsProfileName: string;
+    CarmenProObsSceneCollection: string;
+    CarmenProMetadataJsonFile: string;
+    CarmenProCameraName: string;
+    CarmenProCameraSymbolicLink: string;
+    CarmenProAutoStartObs: Boolean;
+    CarmenProAutoWriteMetadata: Boolean;
+
   end;
 
   TRecordTapPoint = (rtpPreFx,
@@ -404,6 +417,18 @@ begin
   if not DirectoryExists(ASetupRec.LocalCoversPath) then
     if not CreateDir(ASetupRec.LocalCoversPath) then
       ASetupRec.LocalCoversPath := ExpandFileName(ExtractFileDir(Application.ExeName));
+
+  // CarmenPro
+  ASetupRec.CarmenProEnabled := False;
+  ASetupRec.CarmenProObsExePath := '';
+  ASetupRec.CarmenProObsWorkingDir := '';
+  ASetupRec.CarmenProObsProfileName := 'CarmenPro';
+  ASetupRec.CarmenProObsSceneCollection := 'CarmenPro';
+  ASetupRec.CarmenProMetadataJsonFile := IncludeTrailingPathDelimiter(ASetupRec.IcecastCaddyDir) + 'carmenpro.json';
+  ASetupRec.CarmenProCameraName := '';
+  ASetupRec.CarmenProCameraSymbolicLink := '';
+  ASetupRec.CarmenProAutoStartObs := False;
+  ASetupRec.CarmenProAutoWriteMetadata := True;
 end;
 
 

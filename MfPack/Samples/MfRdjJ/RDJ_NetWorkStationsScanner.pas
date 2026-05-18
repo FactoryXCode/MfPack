@@ -8,8 +8,11 @@ uses
   WinApi.Windows,
   WinApi.ComBaseApi,
   WinApi.WinApiTypes,
-  WinApi.ShellAPI,
-  Winapi.ShlObj,
+  //WinApi.ShellAPI,
+  WinApi.WinShellApi.ShlObj,
+  WinApi.WinShellApi.ShlObjIdl_Core,
+  WinApi.WinShellApi.ShlObj_Core,
+  WinApi.WinShellApi.ShlGuid,
   {System}
   System.SysUtils,
   System.Win.ComObj,
@@ -566,7 +569,7 @@ begin
       Fetched := 0;
 
       hr := EnumItems.Next(1,
-                           Item,
+                           @Item,
                            @Fetched);
 
       if (hr <> S_OK) or
