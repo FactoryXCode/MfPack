@@ -187,7 +187,7 @@ contains
   WinApi.MpegType in '..\src\WinApi.MpegType.pas',
   WinApi.Relogger in '..\src\WinApi.Relogger.pas',
   WinApi.ServProv in '..\src\WinApi.ServProv.pas',
-  WinApi.ShTypes in '..\src\WinApi.ShTypes.pas',
+  WinApi.WinShellApi.ShTypes in '..\src\WinApi.WinShellApi.ShTypes.pas',
   WinApi.StrmIf in '..\src\WinApi.StrmIf.pas',
   WinApi.StructuredQueryCondition_2020 in '..\src\WinApi.StructuredQueryCondition_2020.pas',
   WinApi.Unknwn in '..\src\WinApi.Unknwn.pas',
@@ -223,6 +223,24 @@ contains
   WinApi.MediaFoundationApi.MfTrace in '..\src\WinApi.MediaFoundationApi.MfTrace.pas',
   WinApi.ShErrors in '..\src\WinApi.ShErrors.pas',
   Winapi.DirectX.D3DCompiler in '..\src\Winapi.DirectX.D3DCompiler.pas',
-  WinApi.DirectX.D3D11SdkLayers in '..\src\WinApi.DirectX.D3D11SdkLayers.pas';
+  WinApi.DirectX.D3D11SdkLayers in '..\src\WinApi.DirectX.D3D11SdkLayers.pas',
+  WinApi.WinNetWk in '..\src\WinApi.WinNetWk.pas',
+  WinApi.FunctionDiscoveryApi.FunctionDiscoveryApi in '..\src\WinApi.FunctionDiscoveryApi.FunctionDiscoveryApi.pas',
+  WinApi.FunctionDiscoveryApi.FunctionDiscoveryCategories in '..\src\WinApi.FunctionDiscoveryApi.FunctionDiscoveryCategories.pas',
+  WinApi.FunctionDiscoveryApi.FunctionDiscoveryConstraints in '..\src\WinApi.FunctionDiscoveryApi.FunctionDiscoveryConstraints.pas',
+  WinApi.FunctionDiscoveryApi.FunctionDiscoveryError in '..\src\WinApi.FunctionDiscoveryApi.FunctionDiscoveryError.pas',
+  WinApi.FunctionDiscoveryApi.FunctionDiscoveryKeys in '..\src\WinApi.FunctionDiscoveryApi.FunctionDiscoveryKeys.pas',
+  WinApi.FunctionDiscoveryApi.FunctionDiscoveryKeys_devpkey in '..\src\WinApi.FunctionDiscoveryApi.FunctionDiscoveryKeys_devpkey.pas',
+  WinApi.NetManApi.LMShare in '..\src\WinApi.NetManApi.LMShare.pas',
+  WinApi.NetManApi.LMCons in '..\src\WinApi.NetManApi.LMCons.pas',
+  WinApi.NetManApi.LMApiBuf in '..\src\WinApi.NetManApi.LMApiBuf.pas',
+  WinApi.WinShellApi.ShlObjIdl_Core in '..\src\WinApi.WinShellApi.ShlObjIdl_Core.pas',
+  WinApi.WinShellApi.ShlObjIdl in '..\src\WinApi.WinShellApi.ShlObjIdl.pas',
+  WinApi.ComCat in '..\src\WinApi.ComCat.pas',
+  WinApi.WinShellApi.ObjectArray in '..\src\WinApi.WinShellApi.ObjectArray.pas',
+  WinApi.WinShellApi.ShlObj in '..\src\WinApi.WinShellApi.ShlObj.pas',
+  WinApi.WinShellApi.ShlObj_Core in '..\src\WinApi.WinShellApi.ShlObj_Core.pas',
+  WinApi.WinShellApi.ShlGuid in '..\src\WinApi.WinShellApi.ShlGuid.pas';
 
 end.
+
