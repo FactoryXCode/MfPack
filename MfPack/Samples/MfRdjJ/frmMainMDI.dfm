@@ -77,6 +77,7 @@ object MainMDIFrm: TMainMDIFrm
       ParentFont = False
       Transparent = True
       Layout = tlCenter
+      OnMouseDown = pnlCaptionMouseDown
       ExplicitWidth = 26
     end
     object imgLogo: TImage
@@ -126,6 +127,7 @@ object MainMDIFrm: TMainMDIFrm
         DFFAD155EF19B8D267FFD9}
       Stretch = True
       Transparent = True
+      OnMouseDown = pnlCaptionMouseDown
     end
     object lblAppTitle: TLabel
       Left = 0
@@ -153,6 +155,7 @@ object MainMDIFrm: TMainMDIFrm
       ParentShowHint = False
       ShowHint = False
       WordWrap = True
+      OnMouseDown = pnlCaptionMouseDown
     end
     object btnExit: TMPxpButton
       Left = 1215
@@ -702,6 +705,7 @@ object MainMDIFrm: TMainMDIFrm
     ParentBackground = False
     ShowCaption = False
     TabOrder = 1
+    OnMouseDown = pnlCaptionMouseDown
     ExplicitTop = 710
     ExplicitWidth = 1275
     object Panel1: TPanel
