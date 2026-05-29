@@ -2218,15 +2218,13 @@ type
   // To declare parameters that must be dynamic arrays, you need to specify a type identifier.
   // Source: Delphi Help
   //
-  // Advisable is to use static arrays with a max of WORD,
-  // which should be a sufficient amount of elements to be returned.
   {$NODEFINE PIMFActivateArray}
   PIMFActivateArray = ^TIMFActivateArray;
   // dynamic
   // TIMFActivateArray = array of IMFActivate;
   // or static (preferred)
   {$NODEFINE TIMFActivateArray}
-  TIMFActivateArray = array[0..65535] of IMFActivate;
+  TIMFActivateArray = array[0..MaxInt div SizeOf(Pointer) - 1] of IMFActivate;
 
 
   // Used by function MfPack.MfIdl.MFCreateStreamDescriptor
@@ -2236,8 +2234,7 @@ type
   // TIMFMediaTypeArray = array of IMFMediaType;
   // or static (preferred)
   {$NODEFINE TIMFMediaTypeArray}
-  TIMFMediaTypeArray = array[0..65535] of IMFMediaType;
-
+  TIMFMediaTypeArray = array[0..MaxInt div SizeOf(Pointer) - 1] of IMFMediaType;
 
   // End of Additional Prototypes
 

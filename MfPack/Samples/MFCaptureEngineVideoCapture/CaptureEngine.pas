@@ -107,7 +107,7 @@ uses
 const
 
   WM_APP_CAPTURE_EVENT = WM_APP + 1001;
-  WM_RECIEVED_SAMPLE_FROM_CALLBACK = WM_APP + 1002;
+  WM_RECEIVED_SAMPLE_FROM_CALLBACK = WM_APP + 1002;
   WM_APP_CAPTURE_EVENT_HANDLED = WM_APP + 1003;
 
   IDD_CHOOSE_DEVICE                   = 101;
@@ -396,7 +396,7 @@ begin
 
   if (pSample <> nil) then
     SendMessage(m_hwnd,
-                WM_RECIEVED_SAMPLE_FROM_CALLBACK,
+                WM_RECEIVED_SAMPLE_FROM_CALLBACK,
                 WPARAM(Pointer(pSample)),
                 LPARAM(0))
   else

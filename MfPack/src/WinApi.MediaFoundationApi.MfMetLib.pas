@@ -625,7 +625,7 @@ type
   function EnumMft(const mftCategory: TGuid;
                    mftInput: PMFT_REGISTER_TYPE_INFO;   // This parameter can be nil. If nil, all input types are matched.
                    mftOutput: PMFT_REGISTER_TYPE_INFO;  // This parameter can be nil. If nil, all output types are matched.
-                   out ppActivate: PIMFActivate;
+                   out ppActivate: PIMFActivateArray;
                    out count: UINT32): HResult;
 
   // Find the in- and outputs of a MFTclsid (for example CLSID_CMSH264EncoderMFT)
@@ -872,6 +872,10 @@ type
                            out g_pwszSymbolicLink: PWideChar;
                            out g_cchSymbolicLink: UINT32;
                            devMediaType: TGUID): HResult;
+
+  // Get activation interface by passing a symboliclink from a capture device.
+  function CaptureDeviceGetActivate(ASymbolicLink: PWideChar;
+                                    out AActivate: IMFActivate): HRESULT;
 
   // Get the readable name of the device.
   function GetDeviceName(pActivate: IMFActivate;
@@ -2820,7 +2824,7 @@ end;
 function EnumMft(const mftCategory: TGuid;
                  mftInput: PMFT_REGISTER_TYPE_INFO;
                  mftOutput: PMFT_REGISTER_TYPE_INFO;
-                 out ppActivate: PIMFActivate;
+                 out ppActivate: PIMFActivateArray;
                  out count: UINT32): HResult;
 const
   unFlags = MFT_ENUM_FLAG_SYNCMFT or
@@ -2830,6 +2834,7 @@ var
   hr: HResult;
 
 begin
+
   hr := MFTEnumEx(mftCategory,
                   unFlags,
                   mftInput,     // Input type
@@ -2946,8 +2951,8 @@ function GetCodec(mftRegisterTypeInput: PMFT_REGISTER_TYPE_INFO;
 var
   hr: HResult;
   count: UINT32;
-  ppActivate: PIMFActivate;
-  pOriginalActivate: PIMFActivate;  // Save the original pointer for cleanup.
+  ppActivate: PIMFActivateArray;
+  pOriginalActivate: PIMFActivateArray;  // Save the original pointer for cleanup.
   attr: IMFAttributes;
   i: Integer;
 
@@ -2957,11 +2962,11 @@ begin
 
   // Enumerate MFTs.
   hr := MFTEnumEx(mftCategory,
-                    flags,                   // default = MFT_ENUM_FLAG_ALL
-                    mftRegisterTypeInput,     // Input type
-                    mftRegisterTypeOutput,    // Output type
-                    ppActivate,               // Array of IMFActivate pointers
-                    count);                   // Number of pointers returned
+                  flags,                   // default = MFT_ENUM_FLAG_ALL
+                  mftRegisterTypeInput,     // Input type
+                  mftRegisterTypeOutput,    // Output type
+                  ppActivate,               // Array of IMFActivate pointers
+                  count);                   // Number of pointers returned
 
   if (SUCCEEDED(hr) and (count = 0)) then
     Exit(MF_E_TOPO_CODEC_NOT_FOUND);
@@ -2976,13 +2981,17 @@ begin
         begin
             if (i = selIndex) then
               begin
-                hr := ppActivate^.ActivateObject(IID_IMFTransform, Pointer(mftCodec));
+
+                hr := ppActivate[i].ActivateObject(IID_IMFTransform,
+                                                   Pointer(mftCodec));
 
                 if SUCCEEDED(hr) then
                   begin
+
                     hr := mftCodec.GetAttributes(attr);
                     if SUCCEEDED(hr) then
                       begin
+
                         // Process the attributes as needed, e.g., attr.GetString()...
 
                       end;
@@ -5389,6 +5398,115 @@ begin
     end
   else
     Result := E_FAIL;
+end;
+
+
+//
+function CaptureDeviceGetActivate(ASymbolicLink: PWideChar;
+                                  out AActivate: IMFActivate): HRESULT;
+var
+  hr: HRESULT;
+  pConfig: IMFAttributes;
+  ppDevices: PIMFActivate;
+  ppWalk: PIMFActivate;
+  pDevice: IMFActivate;
+  count: UINT32;
+  i: Integer;
+  DeviceLink: PWideChar;
+  cchDeviceLink: UINT32;
+  WantedLink: string;
+  CurrentLink: string;
+
+begin
+
+  AActivate := nil;
+  pConfig := nil;
+  ppDevices := nil;
+  pDevice := nil;
+  count := 0;
+
+  // RDJ Pro does not use the sample's pSelectedDevice/DeviceExplorer object.
+  // The selected camera is stored by symbolic link in setup.
+  WantedLink := ASymbolicLink;
+
+  if (WantedLink = '') then
+    Exit(MF_E_NOT_FOUND);
+
+  // Create an attribute store to hold the search criteria.
+  hr := MFCreateAttributes(pConfig,
+                           1);
+
+  // Request video capture devices.
+  if SUCCEEDED(hr) then
+    hr := pConfig.SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
+                          MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
+
+  // Enumerate the devices again, because in the mean while a device could be
+  // disconnected.
+  if SUCCEEDED(hr) then
+    hr := MFEnumDeviceSources(pConfig,
+                              ppDevices,
+                              count);
+
+  if FAILED(hr) or (count = 0) then
+    begin
+
+      Result := MF_E_NOT_FOUND;
+      Exit;
+    end;
+
+  ppWalk := ppDevices;
+
+  try
+
+    for i := 0 to count - 1 do
+      begin
+
+        pDevice := ppWalk^;
+
+        DeviceLink := nil;
+        cchDeviceLink := 0;
+
+        // Compare by symbolic link, not by DeviceExplorer index.
+        hr := GetSymbolicLink(pDevice,
+                              DeviceLink,
+                              cchDeviceLink,
+                              MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK);
+
+        if SUCCEEDED(hr) then
+          begin
+
+            CurrentLink := string(DeviceLink);
+
+            if Assigned(DeviceLink) then
+              CoTaskMemFree(DeviceLink);
+
+            if SameText(CurrentLink,
+                        WantedLink) then
+              begin
+
+                AActivate := pDevice;
+                Result := S_OK;
+                Exit;
+              end;
+          end
+        else
+          begin
+
+            if Assigned(DeviceLink) then
+              CoTaskMemFree(DeviceLink);
+          end;
+
+        Inc(ppWalk);
+      end;
+
+    Result := MF_E_NOT_FOUND;
+
+  finally
+
+    if Assigned(ppDevices) then
+      CoTaskMemFree(ppDevices);
+  end;
 end;
 
 

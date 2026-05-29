@@ -2466,11 +2466,11 @@ const
 
 
   // Starting in Windows 7, applications should use the MFTEnumEx function instead!
-  function MFTEnum(const guidCategory: TGUID;   // GUID that specifies the category of MFTs to enumerate.
+  function MFTEnum(guidCategory: TGUID;   // GUID that specifies the category of MFTs to enumerate.
                    Flags: UINT32;               // Reserved. Must be zero.
-                   pInputType: PMFT_REGISTER_TYPE_INFO;  // Pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an input media type to match.
+                   const pInputType: PMFT_REGISTER_TYPE_INFO;  // Pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an input media type to match.
                                                          // This parameter can be nil. If nil, all input types are matched.
-                   pOutputType: PMFT_REGISTER_TYPE_INFO; // Pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an output media type to match.
+                   const pOutputType: PMFT_REGISTER_TYPE_INFO; // Pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an output media type to match.
                                                          // This parameter can be nil. If nil, all output types are matched.
                    pAttributes: PIMFAttributes;    // Reserved. Set to nil.
              {out} ppclsidMFT: PCLSID;             // Receives an array of CLSIDs. To create an MFT from this list, call CoCreateInstance with one of the CLSIDs.
@@ -2506,10 +2506,10 @@ const
   MFT_ENUM_ADAPTER_LUID :	TGUID = '{1d39518c-e220-4da8-a07f-ba172552d6b1}';
   {$EXTERNALSYM MFT_ENUM_ADAPTER_LUID}
 
-  function MFTEnum2(const guidCategory: TGUID; // A GUID that specifies the category of MFTs to enumerate. For a list of MFT categories, see MFT_CATEGORY.
+  function MFTEnum2(guidCategory: TGUID; // A GUID that specifies the category of MFTs to enumerate. For a list of MFT categories, see MFT_CATEGORY.
                     Flags: UINT32;  // The bitwise OR of zero or more flags from the _MFT_ENUM_FLAG enumeration.
-                    pInputType: MFT_REGISTER_TYPE_INFO;  // A pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an input media type to match. This parameter can be Nil. If Nil, all input types are matched.
-                    pOutputType: MFT_REGISTER_TYPE_INFO; // A pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an output media type to match. This parameter can be Nil. If Nil, all input types are matched.
+                    const pInputType: MFT_REGISTER_TYPE_INFO;  // A pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an input media type to match. This parameter can be Nil. If Nil, all input types are matched.
+                    const pOutputType: MFT_REGISTER_TYPE_INFO; // A pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an output media type to match. This parameter can be Nil. If Nil, all input types are matched.
                     pAttributes: IMFAttributes; // A pointer to an IMFAttributes interface that enables access to the standard attribute store.
                     out pppMFTActivate: PIMFActivate;  // Receives a pointer to an array of IMFActivate interface pointers.
                                                        // Each pointer represents an activation object for an MFT that matches the search criteria.
@@ -2524,20 +2524,20 @@ const
 
   // >= Win 7
 
-  function MFTEnumEx(const guidCategory: TGUID;  // A GUID that specifies the category of MFTs to enumerate. For a list of MFT categories, see MFT_CATEGORY.
-                     Flags: UINT32;  // The bitwise OR of zero or more flags from the _MFT_ENUM_FLAG enumeration.
-                     pInputType: PMFT_REGISTER_TYPE_INFO; // A pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an input media type to match.
-                                                          // This parameter can be nil. If nil, all input types are matched.
-                     pOutputType: PMFT_REGISTER_TYPE_INFO;  // A pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an output media type to match.
-                                                            // This parameter can be nil. If nil, all output types are matched.
-                     {out} pppMFTActivate: PIMFActivate;  // Receives an array of IMFActivate interface pointers.
-                                                          // Each pointer represents an activation object for an MFT that matches the search criteria.
-                                                          // The function allocates the memory for the array. The caller must release the pointers and call the
-                                                          // CoTaskMemFree function to free the memory used by the array.
+  function MFTEnumEx(guidCategory: TGUID; // A GUID that specifies the category of MFTs to enumerate. For a list of MFT categories, see MFT_CATEGORY.
+                     Flags: UINT32; // The bitwise OR of zero or more flags from the _MFT_ENUM_FLAG enumeration.
+                     const pInputType: PMFT_REGISTER_TYPE_INFO; // A pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an input media type to match.
+                                                                // This parameter can be nil. If nil, all input types are matched.
+                     const pOutputType: PMFT_REGISTER_TYPE_INFO; // A pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an output media type to match.
+                                                                 // This parameter can be nil. If nil, all output types are matched.
+                     out pppMFTActivate: PIMFActivateArray; // Receives an array of IMFActivate interface pointers.
+                                                            // Each pointer represents an activation object for an MFT that matches the search criteria.
+                                                            // The function allocates the memory for the array. The caller must release the pointers and call the
+                                                            // CoTaskMemFree function to free the memory used by the array.
 
 
 
-                     out pnumMFTActivate: UINT32): HResult; stdcall;  // Receives the number of elements in the pppMFTActivate array. If no MFTs match the search criteria, this parameter receives the value zero.
+                     out pnumMFTActivate: UINT32): HResult; stdcall; // Receives the number of elements in the pppMFTActivate array. If no MFTs match the search criteria, this parameter receives the value zero.
   {$EXTERNALSYM MFTEnumEx}
 
   // result pppMFTActivate must be freed with CoTaskMemFree. Each IMFActivate pointer inside this
