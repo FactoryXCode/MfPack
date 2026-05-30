@@ -2466,19 +2466,19 @@ const
 
 
   // Starting in Windows 7, applications should use the MFTEnumEx function instead!
-  function MFTEnum(guidCategory: TGUID;   // GUID that specifies the category of MFTs to enumerate.
-                   Flags: UINT32;               // Reserved. Must be zero.
+  function MFTEnum(guidCategory: TGUID; // GUID that specifies the category of MFTs to enumerate.
+                   Flags: UINT32; // Reserved. Must be zero.
                    const pInputType: PMFT_REGISTER_TYPE_INFO;  // Pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an input media type to match.
-                                                         // This parameter can be nil. If nil, all input types are matched.
+                                                               // This parameter can be nil. If nil, all input types are matched.
                    const pOutputType: PMFT_REGISTER_TYPE_INFO; // Pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an output media type to match.
-                                                         // This parameter can be nil. If nil, all output types are matched.
-                   pAttributes: PIMFAttributes;    // Reserved. Set to nil.
-                   out ppclsidMFT: PCLSID;         // Receives an array of CLSIDs. To create an MFT from this list, call CoCreateInstance with one of the CLSIDs.
-                                                   // To get information about a particular MFT from its CLSID, call MFTGetInfo.
-                                                   // The caller must free the memory for the array by calling CoTaskMemFree.
-                                                   // NOTE:  When using pointer array calculations, POINTERMATH should be turned ON.
-                                                   //        See WinApiTypes.inc
-                   out pcMFTs: UINT32): HResult; stdcall;  // Receives the number of elements in the ppclsidMFT array. The value can be zero.
+                                                                // This parameter can be nil. If nil, all output types are matched.
+                   pAttributes: PIMFAttributes; // Reserved. Set to nil.
+                   out ppclsidMFT: PCLSIDArray; // Receives an array of CLSIDs. To create an MFT from this list, call CoCreateInstance with one of the CLSIDs.
+                                                // To get information about a particular MFT from its CLSID, call MFTGetInfo.
+                                                // The caller must free the memory for the array by calling CoTaskMemFree.
+                                                // NOTE:  When using pointer array calculations, POINTERMATH should be turned ON.
+                                                //        See WinApiTypes.inc
+                   out pcMFTs: UINT32): HResult; stdcall; // Receives the number of elements in the ppclsidMFT array. The value can be zero.
   {$EXTERNALSYM MFTEnum}
 
   //#if (WINVER >= _WIN32_WINNT_WIN7)
