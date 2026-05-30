@@ -218,8 +218,6 @@ type
   PCLSID = ^CLSID;
   {$EXTERNALSYM PCLSID}
   CLSID = IID;
-  {$EXTERNALSYM CLSID}
-  TClsidArray = array of CLSID;
 {$ENDIF}
 
 
@@ -3106,6 +3104,8 @@ type
 type
   ByteData = TArray<Byte>;
   PByteData = ^ByteData;
+
+
 
 // REFERENCE_TIME time units per second and per millisecond
 const REFTIMES_PER_SEC = 10000000;   // One sec = 100,000 hns

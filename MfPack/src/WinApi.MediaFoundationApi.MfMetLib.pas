@@ -718,7 +718,7 @@ type
   // List audio or video encoders on this system.
   function ListEncoders(const subtype: TGUID;
                         bAudio: Boolean;
-                        var aGuidArray: TClsidArray): Hresult;
+                        var aGuidArray: PCLSIDArray): Hresult;
 
   // Create an encoder found with function ListEncoders.
   function CreateEncoderFromClsid(mftCategory: CLSID;
@@ -3155,13 +3155,14 @@ var
   guidMajorType: TGUID;
   guidSubtype: TGUID;
   guidDecoderCategory: TGUID;
-  ppDecoderCLSIDs: array of CLSID;
+  ppDecoderCLSIDs: PCLSIDArray;
   cDecoderCLSIDs: UINT32;    // Size of the array.
   pHandler: IMFMediaTypeHandler;
   pMediaType: IMFMediaType;
   mftinfo: MFT_REGISTER_TYPE_INFO;
 
 begin
+
   bIsCompressed := False;
   guidMajorType := GUID_NULL;
   guidSubtype := GUID_NULL;
@@ -3231,7 +3232,7 @@ begin
                             @mftinfo,            // Input type to match. (Encoded type.)
                             nil,                 // Output type to match. (Don't care.)
                             nil,                 // Attributes to match. (None.)
-                            @ppDecoderCLSIDs[0], // Receives an array of CLSIDs.
+                            ppDecoderCLSIDs,     // Receives an array of CLSIDs.
                             cDecoderCLSIDs);     // Receives the size of the array.
             end;
 
@@ -8667,19 +8668,18 @@ end;
 // List audio or video encoders on the current system.
 function ListEncoders(const subtype: TGUID;
                       bAudio: Boolean;
-                      var aGuidArray: TClsidArray): Hresult;
+                      var aGuidArray: PCLSIDArray): Hresult;
 var
   hr: HResult;
   i: Integer;
   iCount: UINT32;
-  ppCLSIDs: PCLSID;
+  ppCLSIDs: PCLSIDArray;
   mftInfo: MFT_REGISTER_TYPE_INFO;
   mftCategory: TGuid;
 
 begin
 
   iCount := 0;
-  ppCLSIDs := nil;
 
   if bAudio then
     begin
@@ -8705,12 +8705,12 @@ begin
   else
     begin
       // Copy the MFT GUIDs to the array.
-      SetLength(aGuidArray,
-                iCount);
+      //SetLength(aGuidArray,
+      //          iCount);
 
       // Manually handle pointer arithmetic.
       for i := 0 to iCount - 1 do
-        aGuidArray[i] := ppCLSIDs^;
+        aGuidArray[i] := ppCLSIDs[i];
 
       // Move to the next pointer.
       Inc(ppCLSIDs);

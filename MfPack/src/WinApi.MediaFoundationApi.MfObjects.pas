@@ -2244,7 +2244,7 @@ type
   // TPCLSIDArray = array of IMFMediaType;
   // or static (preferred)
   {$NODEFINE TPCLSIDArray}
-  TPCLSIDArray = array[0..MaxInt div SizeOf(Pointer) - 1] of PCLSID;
+  TPCLSIDArray = array[0..MaxInt div SizeOf(CLSID) - 1] of CLSID;
 
   // End of Additional Prototypes
 
