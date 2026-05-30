@@ -75,6 +75,7 @@ interface
 // {$DEFINE USE_EMBARCADERO_DEF}
 
 uses
+
   {WinApi}
   Winapi.Windows,
   WinApi.WinApiTypes,
@@ -2235,6 +2236,15 @@ type
   // or static (preferred)
   {$NODEFINE TIMFMediaTypeArray}
   TIMFMediaTypeArray = array[0..MaxInt div SizeOf(Pointer) - 1] of IMFMediaType;
+
+  // Used by function MfPack.MfApi.Enum
+  {$NODEFINE PCLSIDArray}
+  PCLSIDArray = ^TPCLSIDArray;
+  // dynamic
+  // TPCLSIDArray = array of IMFMediaType;
+  // or static (preferred)
+  {$NODEFINE TPCLSIDArray}
+  TPCLSIDArray = array[0..MaxInt div SizeOf(Pointer) - 1] of PCLSID;
 
   // End of Additional Prototypes
 

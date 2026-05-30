@@ -2473,7 +2473,7 @@ const
                    const pOutputType: PMFT_REGISTER_TYPE_INFO; // Pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an output media type to match.
                                                          // This parameter can be nil. If nil, all output types are matched.
                    pAttributes: PIMFAttributes;    // Reserved. Set to nil.
-             {out} ppclsidMFT: PCLSID;             // Receives an array of CLSIDs. To create an MFT from this list, call CoCreateInstance with one of the CLSIDs.
+                   out ppclsidMFT: PCLSID;         // Receives an array of CLSIDs. To create an MFT from this list, call CoCreateInstance with one of the CLSIDs.
                                                    // To get information about a particular MFT from its CLSID, call MFTGetInfo.
                                                    // The caller must free the memory for the array by calling CoTaskMemFree.
                                                    // NOTE:  When using pointer array calculations, POINTERMATH should be turned ON.
@@ -2511,10 +2511,10 @@ const
                     const pInputType: MFT_REGISTER_TYPE_INFO;  // A pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an input media type to match. This parameter can be Nil. If Nil, all input types are matched.
                     const pOutputType: MFT_REGISTER_TYPE_INFO; // A pointer to an MFT_REGISTER_TYPE_INFO structure that specifies an output media type to match. This parameter can be Nil. If Nil, all input types are matched.
                     pAttributes: IMFAttributes; // A pointer to an IMFAttributes interface that enables access to the standard attribute store.
-                    out pppMFTActivate: PIMFActivate;  // Receives a pointer to an array of IMFActivate interface pointers.
-                                                       // Each pointer represents an activation object for an MFT that matches the search criteria.
-                                                       // The function allocates the memory for the array.
-                                                       // The caller must release the pointers and call the CoTaskMemFree function to free the memory for the array.
+                    out pppMFTActivate: PIMFActivateArray;  // Receives a pointer to an array of IMFActivate interface pointers.
+                                                            // Each pointer represents an activation object for an MFT that matches the search criteria.
+                                                            // The function allocates the memory for the array.
+                                                            // The caller must release the pointers and call the CoTaskMemFree function to free the memory for the array.
 
                     out pnumMFTActivate: UINT32): HResult; stdcall; // Receives the number of elements in the pppMFTActivate array. If no MFTs match the search criteria, this parameter receives the value zero.
   {$EXTERNALSYM MFTEnum2}
@@ -2549,7 +2549,7 @@ const
   // pppMFTActivate must be released like this when using as global array:
   //
   // Shut down and release the interface pointers.   (Don't use  for i := Low() to High() do !!)
-  // {$POINTERMATH ON}
+  // {$POINTERMATH ON}   << when using pointermath!
   // for i := 0 to count -1 do   // count is a returned UINT32 from MFEnumDeviceSources
   //   begin
   //     CoTaskMemFree(pppMFTActivate[i]);
