@@ -15,13 +15,18 @@
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), (Ciaran), (topPlay)
+// Contributor(s): Tony Kalf (maXcomX), 
+//                  Peter Larson (ozships),
+//                  (Ciaran),
+//                   (topPlay),
+//                   Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 03/06/2026 Carmen              Correct ICodecAPI VARIANT pointer signatures.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or later.
@@ -126,7 +131,7 @@ type
   ICodecAPI = interface(IUnknown)
   ['{901db4c7-31ce-41a2-85dc-8fa0bf41b8da}']
     ///  <summary> Query whether a given parameter is supported.</summary>
-    function IsSupported (const Api: TGUID): HResult; stdcall;
+    function IsSupported(Api: PGUID): HResult; stdcall;
 
     /// <summary> Query whether a given parameter can be changed given the codec selection
     ///   and other parameter selections.
@@ -137,14 +142,14 @@ type
     /// <see href="https://learn.microsoft.com/en-us/windows/desktop/DirectShow/codec-api-properties">
     /// [See Codec API Properties]
     /// </see>
-    function IsModifiable(const Api: TGUID): HResult; stdcall;
+    function IsModifiable(Api: PGUID): HResult; stdcall;
 
     /// <summary>
     ///   Returns the valid range of values that the parameter supports should
     ///   the parameter support a stepped range as opposed to a list of specific
     ///   values. The support is [ValueMin .. ValueMax] by SteppingDelta.
     ///
-    ///   Ranged variant types must fall into one of the below types.  Each
+    ///   Ranged variant types must fall into one of the below types. Each
     ///   parameter will, by definition, return a specific type.
     ///
     ///   If the range has no stepping delta (any delta will do), the Stepping
@@ -158,7 +163,7 @@ type
     ///   The caller must free the VARIANT by calling VariantClear.
     /// </param>
     /// <param name="ValueMax">
-    ///   Pointer to a VARIANT that sets the maximum value of the property.
+    ///   Pointer to a VARIANT that receives the maximum value of the property.
     /// </param>
     /// <param name="SteppingDelta">
     ///   Pointer to a VARIANT that receives the stepping delta,
@@ -167,7 +172,7 @@ type
     ///
     ///   If the VARIANT type is VT_EMPTY, any increment is valid.
     /// </param>
-    function GetParameterRange(const Api: TGUID;
+    function GetParameterRange(Api: PGUID;
                                out ValueMin: VARIANT;
                                out ValueMax: VARIANT;
                                out SteppingDelta: VARIANT): HResult; stdcall;
@@ -177,35 +182,35 @@ type
     ///   COM allocated array. The total number of values will be placed in
     ///   the ValuesCount parameter and the Values array will contain the
     ///   individual values. This array must be freed by the caller through
-    ///   CoTaskMemFree().
+    ///   CoTaskMemFree(). Each VARIANT must be cleared with VariantClear().
     /// </summary>
-    function GetParameterValues (const Api: TGUID;
-                                 {out} Values: PVARIANT;
-                                 out ValuesCount: ULONG): HResult; stdcall;
+    function GetParameterValues(Api: PGUID;
+                                out Values: PVARIANT;
+                                out ValuesCount: ULONG): HResult; stdcall;
 
     /// <summary>
     ///   Get the default value for a parameter, if one exists. Otherwise,
     ///   an error will be returned.
     /// </summary>
-    function GetDefaultValue(const Api: TGUID;
-                             out Value: PVARIANT): HResult; stdcall;
+    function GetDefaultValue(Api: PGUID;
+                             out Value: VARIANT): HResult; stdcall;
 
     /// <summary>
     ///   Get the current value of a parameter.
     /// </summary>
-    function GetValue (const Api: TGUID;
-                       out Value: VARIANT): HResult; stdcall;
+    function GetValue(Api: PGUID;
+                      out Value: VARIANT): HResult; stdcall;
 
     /// <summary>
     ///   Set the current value of a parameter.
     /// </summary>
-    function SetValue(const Api: TGUID;
-                      Value: VARIANT): HResult; stdcall;
+    function SetValue(Api: PGUID;
+                      Value: PVARIANT): HResult; stdcall;
 
     // new methods beyond IEncoderAPI
 
     /// <summary>
-    ///   Enable events to be reported for the given event GUID.  For DShow
+    ///   Enable events to be reported for the given event GUID. For DShow
     ///   events, the event is returned as
     ///        (EC_CODECAPI_EVENT, lParam=userData, lParam2=CodecAPIEventData* Data)
     ///   where
@@ -231,13 +236,13 @@ type
     ///   The current array is limited, so a driver may send multiple messages if the array size is
     ///   exceeded.
     /// </summary>
-    function RegisterForEvent(const Api: TGUID;
+    function RegisterForEvent(Api: PGUID;
                               userData: LONG_PTR): HResult; stdcall;
 
     /// <summary>
     ///   Disable event reporting for the given event GUID.
     /// </summary>
-    function UnregisterForEvent(const Api: TGUID): HResult; stdcall;
+    function UnregisterForEvent(Api: PGUID): HResult; stdcall;
 
     /// <summary>
     ///   SetAllDefaults
@@ -253,7 +258,7 @@ type
     ///   that changed as a result of the SetValue() call (for UI updates etc)
     ///   The client must free the buffer.
     /// </summary>
-    function SetValueWithNotify(const Api: TGUID;
+    function SetValueWithNotify(Api: PGUID;
                                 Value: PVARIANT;
                                 out ChangedParam: PGUID;
                                 out ChangedParamCount: ULONG): HResult; stdcall;
@@ -261,8 +266,9 @@ type
     /// <summary>
     ///   SetAllDefaultsWithNotify
     /// </summary>
-    function SetAllDefaultsWithNotify({out} ChangedParam: PGUID;
+    function SetAllDefaultsWithNotify(out ChangedParam: PGUID;
                                       out ChangedParamCount: ULONG): HResult; stdcall;
+
     /// <summary>
     ///   Load the current settings from a stream.
     /// </summary>
@@ -271,14 +277,14 @@ type
     /// <summary>
     ///   Save the current settings to a stream.
     /// </summary>
-    function SetAllSettings(__MIDL__ICodecAPI0001: IStream ): HResult; stdcall;
+    function SetAllSettings(__MIDL__ICodecAPI0001: IStream): HResult; stdcall;
 
     /// <summary>
     ///   The SetAllSettingsWithNotify method reads codec properties from a stream,
     ///   sets them on the codec, and returns a list of the properties that changed.
     /// </summary>
     function SetAllSettingsWithNotify(__MIDL__ICodecAPI0002: IStream;
-                                      out ChangedParam: TGUID;
+                                      out ChangedParam: PGUID;
                                       out ChangedParamCount: ULONG): HResult; stdcall;
   end;
 

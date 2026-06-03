@@ -628,10 +628,10 @@ function PropVariantChangeType(var ppropvarDest: PROPVARIANT;
 {$EXTERNALSYM PropVariantChangeType}
 
 function PropVariantToVariant(const pPropVar: PROPVARIANT;
-                              out pVar: OLEVARIANT): HResult; stdcall;
+                              out pVar: VARIANT): HResult; stdcall;
 {$EXTERNALSYM PropVariantToVariant}
 
-function VariantToPropVariant(const pVar: OLEVARIANT;
+function VariantToPropVariant(const pVar: VARIANT;
                               out pPropVar: PROPVARIANT): HResult; stdcall;
 {$EXTERNALSYM VariantToPropVariant}
 
@@ -665,141 +665,141 @@ function IsVarTypeInteger(vt: VARTYPE): BOOL; stdcall;
 {$EXTERNALSYM IsVarTypeInteger}
 
 
-// Initialize a OLEVARIANT
+// Initialize a VARIANT
 
 function InitVariantFromResource(hinst: HINSTANCE;
                                  id: UINT;
-                                 out pvar: OLEVARIANT): HResult; stdcall;
+                                 out pvar: VARIANT): HResult; stdcall;
 {$EXTERNALSYM InitVariantFromResource}
 
 function InitVariantFromBuffer(pv: Pointer;
                                cb: UINT;
-                               out pvar: OLEVARIANT): HResult; stdcall;
+                               out pvar: VARIANT): HResult; stdcall;
 {$EXTERNALSYM InitVariantFromBuffer}
 
 function InitVariantFromGUIDAsString(guid: REFGUID;
-                                     out pvar: OLEVARIANT): HResult; stdcall;
+                                     out pvar: VARIANT): HResult; stdcall;
 {$EXTERNALSYM InitVariantFromGUIDAsString}
 
 function InitVariantFromFileTime(pft: FILETIME;
-                                 out pvar: OLEVARIANT): HResult; stdcall;
+                                 out pvar: VARIANT): HResult; stdcall;
 {$EXTERNALSYM InitVariantFromFileTime}
 
 function InitVariantFromFileTimeArray(prgft: FILETIME;
                                       cElems: ULONG;
-                                      out pvar: OLEVARIANT): HResult; stdcall;
+                                      out pvar: VARIANT): HResult; stdcall;
 {$EXTERNALSYM InitVariantFromFileTimeArray}
 
 function InitVariantFromStrRet(pstrret: STRRET;
                                pidl: PCUITEMID_CHILD;
-                               out pvar: OLEVARIANT): HResult; stdcall;
+                               out pvar: VARIANT): HResult; stdcall;
 {$EXTERNALSYM InitVariantFromStrRet}
 
 function InitVariantFromVariantArrayElem(varIn: REFVARIANT;
                                          iElem: ULONG;
-                                         out pvar: OLEVARIANT): HResult; stdcall;
+                                         out pvar: VARIANT): HResult; stdcall;
 {$EXTERNALSYM InitVariantFromVariantArrayElem}
 
 function InitVariantFromBooleanArray(prgf: BOOL;
                                      cElems: ULONG;
-                                     out pvar: OLEVARIANT): HResult; stdcall;
+                                     out pvar: VARIANT): HResult; stdcall;
 {$EXTERNALSYM InitVariantFromBooleanArray}
 
 function InitVariantFromInt16Array(prgn: SHORT;
                                    cElems: ULONG;
-                                   out pvar: OLEVARIANT): HResult; stdcall;
+                                   out pvar: VARIANT): HResult; stdcall;
 {$EXTERNALSYM InitVariantFromInt16Array}
 
 function InitVariantFromUInt16Array(prgn: USHORT;
                                     cElems: ULONG;
-                                    out pvar: OLEVARIANT): HResult; stdcall;
+                                    out pvar: VARIANT): HResult; stdcall;
 {$EXTERNALSYM InitVariantFromUInt16Array}
 
 function InitVariantFromInt32Array(prgn: LONG;
                                    cElems: ULONG;
-                                   out pvar: OLEVARIANT): HResult; stdcall;
+                                   out pvar: VARIANT): HResult; stdcall;
 {$EXTERNALSYM InitVariantFromInt32Array}
 
 function InitVariantFromUInt32Array(prgn: ULONG;
                                     cElems: ULONG;
-                                    out pvar: OLEVARIANT): HResult; stdcall;
+                                    out pvar: VARIANT): HResult; stdcall;
 {$EXTERNALSYM InitVariantFromUInt32Array}
 
 function InitVariantFromInt64Array(prgn: LONGLONG;
                                    cElems: ULONG;
-                                   out pvar: OLEVARIANT): HResult; stdcall;
+                                   out pvar: VARIANT): HResult; stdcall;
 {$EXTERNALSYM InitVariantFromInt64Array}
 
 function InitVariantFromUInt64Array(prgn: ULONGLONG;
                                     cElems: ULONG;
-                                    out pvar: OLEVARIANT): HResult; stdcall;
+                                    out pvar: VARIANT): HResult; stdcall;
 {$EXTERNALSYM InitVariantFromUInt64Array}
 
 function InitVariantFromDoubleArray(prgn: DOUBLE;
                                     cElems: ULONG;
-                                    out pvar: OLEVARIANT): HResult; stdcall;
+                                    out pvar: VARIANT): HResult; stdcall;
 {$EXTERNALSYM InitVariantFromDoubleArray}
 
 function InitVariantFromStringArray(prgsz: PCWSTR;
                                     cElems: ULONG;
-                                    out pvar: OLEVARIANT): HResult; stdcall;
+                                    out pvar: VARIANT): HResult; stdcall;
 {$EXTERNALSYM InitVariantFromStringArray}
 
 
 function InitVariantFromBoolean(fVal: BOOL;
-                                out pvar: OleVariant): HResult; inline;
+                                out pvar: VARIANT): HResult; inline;
 {$EXTERNALSYM InitVariantFromBoolean}
 
 function InitVariantFromInt16(iVal: SHORT;
-                              out pvar: OLEVARIANT): HResult; inline;
+                              out pvar: VARIANT): HResult; inline;
 {$EXTERNALSYM InitVariantFromInt16}
 
 function InitVariantFromUInt16(uiVal: USHORT;
-                               out pvar: OLEVARIANT): HResult; inline;
+                               out pvar: VARIANT): HResult; inline;
 {$EXTERNALSYM InitVariantFromUInt16}
 
 function InitVariantFromInt32(lVal: LONG;
-                              out pvar: OLEVARIANT): HResult; inline;
+                              out pvar: VARIANT): HResult; inline;
 {$EXTERNALSYM InitVariantFromInt32}
 
 function InitVariantFromUInt32(ulVal: ULONG;
-                               out pvar: OLEVARIANT): HResult; inline;
+                               out pvar: VARIANT): HResult; inline;
 {$EXTERNALSYM InitVariantFromUInt32}
 
 function InitVariantFromInt64(llVal: LONGLONG;
-                              out pvar: OLEVARIANT): HResult; inline;
+                              out pvar: VARIANT): HResult; inline;
 {$EXTERNALSYM InitVariantFromInt64}
 
 function InitVariantFromUInt64(ullVal: ULONGLONG;
-                               out pvar: OLEVARIANT): HResult; inline;
+                               out pvar: VARIANT): HResult; inline;
 {$EXTERNALSYM InitVariantFromUInt64}
 
 function InitVariantFromDouble(dblVal: DOUBLE;
-                               out pvar: OLEVARIANT): HResult; inline;
+                               out pvar: VARIANT): HResult; inline;
 {$EXTERNALSYM InitVariantFromDouble}
 
 function InitVariantFromString(psz: LPCWSTR;
-                               out pvar: OleVariant): HResult; inline;
+                               out pvar: VARIANT): HResult; inline;
 {$EXTERNALSYM InitVariantFromString}
 
 function InitVariantFromDispatch(pdisp: IDispatch;
-                                 out pvar: OleVariant): HResult; inline;
+                                 out pvar: VARIANT): HResult; inline;
 {$EXTERNALSYM InitVariantFromDispatch}
 
 function InitVariantFromDosDateTime(wDate: WORD;
                                     wTime: WORD;
-                                    var pvar: OleVariant): HResult; inline;
+                                    var pvar: VARIANT): HResult; inline;
 {$EXTERNALSYM InitVariantFromDosDateTime}
 
 function InitVariantFromGUIDAsBuffer(const _guid: TGUID;
-                                     var pvar: OleVariant): HResult; inline;
+                                     var pvar: VARIANT): HResult; inline;
 {$EXTERNALSYM InitVariantFromGUIDAsBuffer}
 
 function InitVariantFromUnknown(unknown: IUnknown;
-                                var _variant: OleVariant): HResult; inline;
+                                var _variant: VARIANT): HResult; inline;
 {$EXTERNALSYM InitVariantFromUnknown}
 
-// Extract data from a OLEVARIANT
+// Extract data from a VARIANT
 function VariantToBooleanWithDefault(const varIn: REFVARIANT;
                                      fDefault: BOOL): Boolean; stdcall;
 {$EXTERNALSYM VariantToBooleanWithDefault}
@@ -909,7 +909,7 @@ function VariantGetElementCount(const varIn: REFVARIANT): ULONG; stdcall;
 {$EXTERNALSYM VariantGetElementCount}
 
 
-// Extract data from a OLEVARIANT into a vector
+// Extract data from a VARIANT into a vector
 function VariantToBooleanArray(_var: REFVARIANT;
                                out prgf: BOOL;
                                crgn: ULONG;
@@ -965,7 +965,7 @@ function VariantToStringArray(_var: REFVARIANT;
 {$EXTERNALSYM VariantToStringArray}
 
 
-// Extract data from a OLEVARIANT into a newly allocated vector (free with CoTaskMemFree)
+// Extract data from a VARIANT into a newly allocated vector (free with CoTaskMemFree)
 function VariantToBooleanArrayAlloc(_var: REFVARIANT;
                                     out pprgf: PBOOL;
                                     out pcElem: ULONG): HResult; stdcall;
@@ -1007,7 +1007,7 @@ function VariantToDoubleArrayAlloc(_var: REFVARIANT;
 {$EXTERNALSYM VariantToDoubleArrayAlloc}
 
 
-// Get a single element of a OLEVARIANT.
+// Get a single element of a VARIANT.
 // If it is type VT_ARRAY, returns a the requested element.
 // Otherwise iElem must equal 0 and the function returns the value.
 function VariantGetBooleanElem(_var: REFVARIANT;
@@ -1057,12 +1057,12 @@ function VariantGetStringElem(_var: REFVARIANT;
 
 function VariantGetElem(varIn: REFVARIANT;
                         iElem: ULONG;
-                        out pvar: OLEVARIANT): HResult; stdcall;
+                        out pvar: VARIANT): HResult; stdcall;
 {$EXTERNALSYM VariantGetElem}
 
 
 // Helpers
-procedure ClearVariantArray(var pvars: OLEVARIANT;
+procedure ClearVariantArray(var pvars: VARIANT;
                             cvars: UINT); stdcall;
 {$EXTERNALSYM ClearVariantArray}
 
@@ -1125,28 +1125,28 @@ function SHStrDupW(const psz: LPCWSTR;
 function SysAllocString(psz: LPCWSTR): PWideChar; stdcall;
 {$EXTERNALSYM SysAllocString}
 
-procedure VariantInit(var varg: OleVariant); stdcall;
+procedure VariantInit(var varg: VARIANT); stdcall;
 {$EXTERNALSYM VariantInit}
 
-function VariantClear(var varg: OleVariant): HResult; stdcall;
+function VariantClear(var varg: VARIANT): HResult; stdcall;
 {$EXTERNALSYM VariantClear}
 
-function VariantCopy(var vargDest: OleVariant;
-                     const vargSrc: OleVariant): HResult; stdcall;
+function VariantCopy(var vargDest: VARIANT;
+                     const vargSrc: VARIANT): HResult; stdcall;
 {$EXTERNALSYM VariantCopy}
 
-function VariantCopyInd(var varDest: OleVariant;
-                        const vargSrc: OleVariant): HResult; stdcall;
+function VariantCopyInd(var varDest: VARIANT;
+                        const vargSrc: VARIANT): HResult; stdcall;
 {$EXTERNALSYM VariantCopyInd}
 
-function VariantChangeType(var vargDest: OleVariant;
-                           const vargSrc: OleVariant;
+function VariantChangeType(var vargDest: VARIANT;
+                           const vargSrc: VARIANT;
                            wFlags: Word;
                            vt: VARTYPE): HResult; stdcall;
 {$EXTERNALSYM VariantChangeType}
 
-function VariantChangeTypeEx(var vargDest: OleVariant;
-                             const vargSrc: OleVariant;
+function VariantChangeTypeEx(var vargDest: VARIANT;
+                             const vargSrc: VARIANT;
                              const lcid: LCID;
                              wFlags: Word;
                              vvt: VARTYPE): HResult; stdcall;
@@ -1301,7 +1301,7 @@ function IsVariantString; external PropVarUtilLib name 'IsVariantString' {$IF CO
 function IsVarTypeNumber; external PropVarUtilLib name 'IsVarTypeNumber' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function IsVarTypeInteger; external PropVarUtilLib name 'IsVarTypeInteger' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
-// Extract data from a OLEVARIANT
+// Extract data from a VARIANT
 function VariantToBooleanWithDefault; external PropVarUtilLib name 'VariantToBooleanWithDefault' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function VariantToInt16WithDefault; external PropVarUtilLib name 'VariantToInt16WithDefault' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 function VariantToUInt16WithDefault; external PropVarUtilLib name 'VariantToUInt16WithDefault' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
@@ -1460,7 +1460,7 @@ end;
 
 
 function InitVariantFromBoolean(fVal: BOOL;
-                                out pvar: OLEVARIANT): HResult; inline;
+                                out pvar: VARIANT): HResult; inline;
 begin
     VARIANTARG(pvar).vt:= VT_BOOL;
     if fVal = True then
@@ -1471,7 +1471,7 @@ begin
 end;
 
 function InitVariantFromInt16(iVal: SHORT;
-                              out pvar: OLEVARIANT): HResult; inline;
+                              out pvar: VARIANT): HResult; inline;
 begin
     VARIANTARG(pvar).vt:= VT_I2;
     VARIANTARG(pvar).iVal:= iVal;
@@ -1479,7 +1479,7 @@ begin
 end;
 
 function InitVariantFromUInt16(uiVal: USHORT;
-                               out pvar: OLEVARIANT): HResult; inline;
+                               out pvar: VARIANT): HResult; inline;
 begin
     VARIANTARG(pvar).vt:= VT_UI2;
     VARIANTARG(pvar).uiVal:= uiVal;
@@ -1487,7 +1487,7 @@ begin
 end;
 
 function InitVariantFromInt32(lVal: LONG;
-                              out pvar: OLEVARIANT): HResult; inline;
+                              out pvar: VARIANT): HResult; inline;
 begin
     VARIANTARG(pvar).vt:= VT_I4;
     VARIANTARG(pvar).lVal:= lVal;
@@ -1495,7 +1495,7 @@ begin
 end;
 
 function InitVariantFromUInt32(ulVal: ULONG;
-                               out pvar: OLEVARIANT): HResult; inline;
+                               out pvar: VARIANT): HResult; inline;
 begin
     VARIANTARG(pvar).vt:= VT_UI4;
     VARIANTARG(pvar).ulVal:= ulVal;
@@ -1503,7 +1503,7 @@ begin
 end;
 
 function InitVariantFromInt64(llVal: LONGLONG;
-                              out pvar: OLEVARIANT): HResult; inline;
+                              out pvar: VARIANT): HResult; inline;
 begin
     VARIANTARG(pvar).vt:= VT_I8;
     VARIANTARG(pvar).llVal:= llVal;
@@ -1511,7 +1511,7 @@ begin
 end;
 
 function InitVariantFromUInt64(ullVal: ULONGLONG;
-                               out pvar: OLEVARIANT): HResult; inline;
+                               out pvar: VARIANT): HResult; inline;
 begin
     VARIANTARG(pvar).vt:= VT_UI8;
     VARIANTARG(pvar).ullVal:= ullVal;
@@ -1519,7 +1519,7 @@ begin
 end;
 
 function InitVariantFromDouble(dblVal: DOUBLE;
-                               out pvar: OLEVARIANT): HResult; inline;
+                               out pvar: VARIANT): HResult; inline;
 begin
     VARIANTARG(pvar).vt:= VT_R8;
     VARIANTARG(pvar).dblVal:= dblVal;
@@ -1527,7 +1527,7 @@ begin
 end;
 
 function InitVariantFromString(psz: LPCWSTR;
-                               out pvar: OLEVARIANT): HResult; inline;
+                               out pvar: VARIANT): HResult; inline;
 var
   hr: HResult;
 
@@ -1551,20 +1551,24 @@ end;
 
 
 function InitVariantFromDispatch(pdisp: IDispatch;
-                                 out pvar: OLEVARIANT): HResult; inline;
+                                 out pvar: VARIANT): HResult; inline;
 begin
-  VARIANTARG(pvar).vt:= VT_DISPATCH;
-  IDispatch(VARIANTARG(pvar).pdispVal):= pdisp;
-  if (pvar.pdispVal = True) then
-    Result:= S_OK
+
+  VariantInit(pvar);
+
+  VARIANTARG(pvar).vt := VT_DISPATCH;
+  IDispatch(VARIANTARG(pvar).pdispVal) := pdisp;
+
+  if Assigned(VARIANTARG(pvar).pdispVal) then
+    Result := S_OK
   else
-    Result:= E_FAIL;
+    Result := E_FAIL;
 end;
 
 // Creates a VT_DATE variant
 function InitVariantFromDosDateTime(wDate: WORD;
                                     wTime: WORD;
-                                    var pvar: OLEVARIANT): HResult; inline;
+                                    var pvar: VARIANT): HResult; inline;
 begin
   VARIANTARG(pvar).vt:= VT_DATE;
   if DosDateTimeToVariantTime(wDate, wTime, VARIANTARG(pvar).date) <> 0 then
@@ -1576,7 +1580,7 @@ end;
 // Changes the value of a Component Object Model (COM) interface pointer and
 // releases the previous interface.
 function InitVariantFromUnknown(unknown: IUnknown;
-                                var _variant: OLEVARIANT): HResult; inline;
+                                var _variant: VARIANT): HResult; inline;
 begin
   VariantInit(_variant);
 	VARIANTARG(_variant).vt:= VT_UNKNOWN;
@@ -1615,7 +1619,7 @@ begin
 end;
 
 function InitVariantFromGUIDAsBuffer(const _guid: TGUID;
-                                     var pvar: OleVariant): HResult; inline;
+                                     var pvar: VARIANT): HResult; inline;
 begin
   Result:= InitVariantFromBuffer(@_guid, sizeof(_guid), pvar);
 end;
