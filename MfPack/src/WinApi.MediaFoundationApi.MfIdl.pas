@@ -6760,7 +6760,7 @@ const
   function MFCreateTopologyNode;           external MfIdlLib1 name 'MFCreateTopologyNode' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFGetTopoNodeCurrentType;       external MfIdlLib1 name 'MFGetTopoNodeCurrentType' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
-  function MFGetSystemTime;                external MfIdlLib2 name 'MFGetSystemTime' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFGetSystemTime;                external MfIdlLib1 name 'MFGetSystemTime' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
   function MFCreateTopology;               external MfIdlLib1 name 'MFCreateTopology' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFCreateTopoLoader;             external MfIdlLib1 name 'MFCreateTopoLoader' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
@@ -6772,7 +6772,7 @@ const
   function MFGetService;                   external MfIdlLib1 name 'MFGetService' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFCreatePresentationClock;      external MfIdlLib1 name 'MFCreatePresentationClock' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
-  function MFCreateSystemTimeSource;       external MfIdlLib2 name 'MFCreateSystemTimeSource' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateSystemTimeSource;       external MfIdlLib1 name 'MFCreateSystemTimeSource' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
   function CreatePropertyStore;            external MfIdlLib1 name 'CreatePropertyStore' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFGetSupportedSchemes;          external MfIdlLib1 name 'MFGetSupportedSchemes' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
@@ -6780,24 +6780,24 @@ const
   function MFCreateSequencerSource;        external MfIdlLib1 name 'MFCreateSequencerSource' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFCreateSequencerSegmentOffset; external MfIdlLib1 name 'MFCreateSequencerSegmentOffset' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
-  function MFCreatePresentationDescriptor;      external MfIdlLib2 name 'MFCreatePresentationDescriptor' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreatePresentationDescriptor;      external MfIdlLib1 name 'MFCreatePresentationDescriptor' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
   function MFRequireProtectedEnvironment;       external MfIdlLib1 name 'MFRequireProtectedEnvironment' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
-  function MFSerializePresentationDescriptor;   external MfIdlLib2 name 'MFSerializePresentationDescriptor' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function MFDeserializePresentationDescriptor; external MfIdlLib2 name 'MFDeserializePresentationDescriptor' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function MFCreateStreamDescriptor;            external MfIdlLib2 name 'MFCreateStreamDescriptor' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function MFCreateStreamDescriptor2;           external MfIdlLib2 name 'MFCreateStreamDescriptor' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFSerializePresentationDescriptor;   external MfIdlLib1 name 'MFSerializePresentationDescriptor' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFDeserializePresentationDescriptor; external MfIdlLib1 name 'MFDeserializePresentationDescriptor' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateStreamDescriptor;            external MfIdlLib1 name 'MFCreateStreamDescriptor' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateStreamDescriptor2;           external MfIdlLib1 name 'MFCreateStreamDescriptor' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
   function MFCreateSimpleTypeHandler;           external MfIdlLib1 name 'MFCreateSimpleTypeHandler' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
-  function MFCreateMPEG4MediaSink;        external MfIdlLib5 name 'MFCreateMPEG4MediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function MFCreate3GPMediaSink;          external MfIdlLib5 name 'MFCreate3GPMediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function MFCreateMP3MediaSink;          external MfIdlLib5 name 'MFCreateMP3MediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function MFCreateAC3MediaSink;          external MfIdlLib5 name 'MFCreateAC3MediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function MFCreateADTSMediaSink;         external MfIdlLib5 name 'MFCreateADTSMediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function MFCreateMuxSink;               external MfIdlLib5 name 'MFCreateMuxSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
-  function MFCreateFMPEG4MediaSink;       external MfIdlLib5 name 'MFCreateFMPEG4MediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateMPEG4MediaSink;        external MfIdlLib1 name 'MFCreateMPEG4MediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateFMPEG4MediaSink;       external MfIdlLib1 name 'MFCreateFMPEG4MediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreate3GPMediaSink;          external MfIdlLib1 name 'MFCreate3GPMediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateMP3MediaSink;          external MfIdlLib1 name 'MFCreateMP3MediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateAC3MediaSink;          external MfIdlLib1 name 'MFCreateAC3MediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateADTSMediaSink;         external MfIdlLib1 name 'MFCreateADTSMediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+  function MFCreateMuxSink;               external MfIdlLib1 name 'MFCreateMuxSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFCreateAVIMediaSink;          external MfIdlLib5 name 'MFCreateAVIMediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
   function MFCreateWAVEMediaSink;         external MfIdlLib5 name 'MFCreateWAVEMediaSink' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 

@@ -155,8 +155,8 @@ type
     AudioBufferMs: Integer;
 
     // Audio recorder
-    AudioRecorderCaptureBufferSize: LONGLONG;
-    AudioRecorderSystemLatency: LONGLONG;
+    AudioRecorderCaptureBufferSize: Integer;
+    AudioRecorderSystemLatency: Integer;
     AudioRecorderAutoBufferSize: LongBool;
     AudioRecorderDisableMMCSS: Boolean;
     AudioRecorderDontOverWriteAudioFiles: Boolean;
@@ -633,17 +633,17 @@ begin
 
 
     // Audio recorder
-    ASetupRec.AudioRecorderCaptureBufferSize := iniFile.ReadInt64('SetupAudioRecorder',
-                                                                  'CaptureBufferSize',
-                                                                  ASetupRec.AudioRecorderCaptureBufferSize);
+    ASetupRec.AudioRecorderCaptureBufferSize := iniFile.ReadInteger('SetupAudioRecorder',
+                                                                    'CaptureBufferSize',
+                                                                    ASetupRec.AudioRecorderCaptureBufferSize);
 
     ASetupRec.AudioRecorderAutoBufferSize := iniFile.ReadBool('SetupAudioRecorder',
                                                               'AutoBufferSize',
                                                               ASetupRec.AudioRecorderAutoBufferSize);
 
-    ASetupRec.AudioRecorderSystemLatency := iniFile.ReadInt64('SetupAudioRecorder',
-                                                              'SystemLatency',
-                                                              ASetupRec.AudioRecorderSystemLatency);
+    ASetupRec.AudioRecorderSystemLatency := iniFile.ReadInteger('SetupAudioRecorder',
+                                                                'SystemLatency',
+                                                                ASetupRec.AudioRecorderSystemLatency);
 
     ASetupRec.AudioRecorderDisableMMCSS := iniFile.ReadBool('SetupAudioRecorder',
                                                             'DisableMMCSS',
@@ -889,17 +889,17 @@ begin
                          ASetupRec.MicDeviceCbItemIndex);
 
     // Audio recorder
-    iniFile.WriteInt64('SetupAudioRecorder',
-                       'CaptureBufferSize',
-                       ASetupRec.AudioRecorderCaptureBufferSize);
+    iniFile.WriteInteger('SetupAudioRecorder',
+                         'CaptureBufferSize',
+                         ASetupRec.AudioRecorderCaptureBufferSize);
 
     iniFile.WriteBool('SetupAudioRecorder',
                       'AutoBufferSize',
                       ASetupRec.AudioRecorderAutoBufferSize);
 
-    iniFile.WriteInt64('SetupAudioRecorder',
-                       'SystemLatency',
-                       ASetupRec.AudioRecorderSystemLatency);
+    iniFile.WriteInteger('SetupAudioRecorder',
+                         'SystemLatency',
+                         ASetupRec.AudioRecorderSystemLatency);
 
     iniFile.WriteBool('SetupAudioRecorder',
                       'DisableMMCSS',

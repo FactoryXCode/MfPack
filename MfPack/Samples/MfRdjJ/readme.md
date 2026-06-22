@@ -42,7 +42,7 @@ The aim of this sample project is: Combine all kinds of MfPack (coreAudio WASAPI
 
 Now, the example has become pretty large for a sample but usefull for audio knights..
 
-We tested it, and it works without issues on Delphi 12.
+We tested it, and it works without issues on Delphi XE7 up to 12.2.
 
 
 
@@ -64,7 +64,7 @@ https://sourceforge.net/projects/MFPack
 
 First release date: 05-02-2026
 
-Final release date: 05/05/2026
+Final release date: 22/06/2026
 
 Copyright  FactoryX. All rights reserved.
 

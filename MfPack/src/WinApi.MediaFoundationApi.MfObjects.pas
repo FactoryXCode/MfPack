@@ -553,6 +553,7 @@ const
     MF_ATTRIBUTE_SERIALIZE_UNKNOWN_BYREF = MF_ATTRIBUTE_SERIALIZE_OPTIONS($1);
 
 type
+
   PBITMAPINFOHEADER = ^BITMAPINFOHEADER;
   cwBITMAPINFOHEADER = record
     biSize: DWORD;
@@ -1714,7 +1715,7 @@ type
 
     function Read(pb: PByte;
                   cb: ULONG;
-                  out pcbRead: PByte): HResult; stdcall;
+                  out pcbRead: ULONG): HResult; stdcall;
 
     function BeginRead(pb: PByte;
                        cb: ULONG;

@@ -79,8 +79,7 @@ uses
   System.Generics.Collections,
   System.NetEncoding,
   System.JSON,
-  System.Net.HttpClient,
-  System.Net.URLClient,
+  Winapi.WinInet,
   {ActiveX}
   Winapi.ActiveX.ObjBase,
   {MediaFoundationApi}
@@ -1939,8 +1938,8 @@ end;
 
 function TMfIcecastBroadcastEngine.GetIcecastListenerCount(const AMount: string): Integer;
 var
-  Http: THTTPClient;
-  Response: IHTTPResponse;
+  Internet: HINTERNET;
+  Request: HINTERNET;
   Root: TJSONObject;
   IceStats: TJSONObject;
   SourceValue: TJSONValue;
@@ -1949,6 +1948,12 @@ var
   I: Integer;
   ListenUrl: string;
   Mount: string;
+  StatusUrl: string;
+  ResponseText: UTF8String;
+  Buffer: array[0..4095] of Byte;
+  BytesRead: DWORD;
+  OldLength: Integer;
+  TimeoutMs: DWORD;
 
   function ReadListeners(const Obj: TJSONObject): Integer;
   var
@@ -1990,6 +1995,9 @@ var
 
 begin
   Result := -1;
+  Internet := nil;
+  Request := nil;
+  Root := nil;
 
   if Trim(FSettings.Host) = '' then
     Exit;
@@ -2001,23 +2009,60 @@ begin
   if (Mount <> '') and (Mount[1] <> '/') then
     Mount := '/' + Mount;
 
-  Http := THTTPClient.Create;
-
   try
     try
-
-      Http.ConnectionTimeout := 1500;
-      Http.ResponseTimeout := 1500;
-
-      Response := Http.Get(Format('http://%s:%d/status-json.xsl',
-                                  [Trim(FSettings.Host),
-                                   FSettings.Port]));
-
-      if (Response.StatusCode <> 200) then
+      Internet := InternetOpen('RDJ/1.0',
+                               INTERNET_OPEN_TYPE_PRECONFIG,
+                               nil,
+                               nil,
+                               0);
+      if Internet = nil then
         Exit;
 
-      Root := TJSONObject.ParseJSONValue(Response.ContentAsString) as TJSONObject;
-      try
+      TimeoutMs := 1500;
+      InternetSetOption(Internet,
+                        INTERNET_OPTION_CONNECT_TIMEOUT,
+                        @TimeoutMs,
+                        SizeOf(TimeoutMs));
+      InternetSetOption(Internet,
+                        INTERNET_OPTION_RECEIVE_TIMEOUT,
+                        @TimeoutMs,
+                        SizeOf(TimeoutMs));
+
+      StatusUrl := Format('http://%s:%d/status-json.xsl',
+                          [Trim(FSettings.Host),
+                           FSettings.Port]);
+      Request := InternetOpenUrl(Internet,
+                                 PChar(StatusUrl),
+                                 nil,
+                                 0,
+                                 INTERNET_FLAG_RELOAD or
+                                 INTERNET_FLAG_NO_CACHE_WRITE,
+                                 0);
+      if Request = nil then
+        Exit;
+
+      ResponseText := '';
+      repeat
+        BytesRead := 0;
+        if not InternetReadFile(Request,
+                                @Buffer[0],
+                                SizeOf(Buffer),
+                                BytesRead) then
+          Exit;
+
+        if BytesRead > 0 then
+          begin
+            OldLength := Length(ResponseText);
+            SetLength(ResponseText,
+                      OldLength + Integer(BytesRead));
+            Move(Buffer[0],
+                 ResponseText[OldLength + 1],
+                 BytesRead);
+          end;
+      until BytesRead = 0;
+
+      Root := TJSONObject.ParseJSONValue(UTF8ToString(ResponseText)) as TJSONObject;
 
         if (Root = nil) then
           Exit;
@@ -2057,11 +2102,6 @@ begin
                     end;
                 end;
           end;
-    finally
-
-      Root.Free;
-    end;
-
     except
 
       // Listener count is optional. Never let a failed status probe break
@@ -2069,8 +2109,11 @@ begin
       Result := -1;
     end;
   finally
-
-    Http.Free;
+    Root.Free;
+    if Request <> nil then
+      InternetCloseHandle(Request);
+    if Internet <> nil then
+      InternetCloseHandle(Internet);
   end;
 end;
 

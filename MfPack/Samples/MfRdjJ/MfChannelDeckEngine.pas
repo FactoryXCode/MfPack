@@ -1932,6 +1932,8 @@ var
   CurrentBpm: Double;
   BeatPhase: Double;
   BeatIndex: Int64;
+  TickProc: TThreadProcedure;
+  BeatProc: TThreadProcedure;
 
 begin
 
@@ -2053,7 +2055,7 @@ begin
             V0 := PSingle(NativeUInt(BasePtr) + NativeUInt(SampleIndex0 * SizeOf(Single)))^;
             V1 := PSingle(NativeUInt(BasePtr) + NativeUInt(SampleIndex1 * SizeOf(Single)))^;
 
-            OutputPtr^ := V0 + Single((V1 - V0) * Frac);
+            OutputPtr^ := V0 + _Single((V1 - V0) * Frac);
             Inc(OutputPtr);
           end;
 
@@ -2099,8 +2101,8 @@ begin
           Exit(E_ABORT);
 
         if Assigned(FOnDeckTick) then
-          TThread.Queue(nil,
-                        procedure
+          begin
+            TickProc := procedure
                         begin
 
                           if Assigned(FOnDeckTick) then
@@ -2108,7 +2110,10 @@ begin
                                         Position100ns,
                                         CurrentBpm,
                                         BeatPhase);
-                        end);
+                        end;
+            TThread.Queue(nil,
+                          TickProc);
+          end;
       end;
 
     if (BeatIndex > FLastBeatIndex) then
@@ -2117,8 +2122,8 @@ begin
         FLastBeatIndex := BeatIndex;
 
         if Assigned(FOnBeat) then
-          TThread.Queue(nil,
-                        procedure
+          begin
+            BeatProc := procedure
                         begin
 
                           if FShuttingDown or FDestroying then
@@ -2129,7 +2134,10 @@ begin
                                     Position100ns,
                                     BeatIndex,
                                     CurrentBpm);
-                        end);
+                        end;
+            TThread.Queue(nil,
+                          BeatProc);
+          end;
       end;
 
     NowTick := GetTickCount64;

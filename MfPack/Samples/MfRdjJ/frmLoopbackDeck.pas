@@ -129,8 +129,6 @@ type
     lblGain: TLabel;
     Bevel7: TBevel;
     Label1: TLabel;
-    Shape2: TShape;
-    Shape1: TShape;
     pnlCaption: TPanel;
     lblCaption: TLabel;
     shpLive: TShape;

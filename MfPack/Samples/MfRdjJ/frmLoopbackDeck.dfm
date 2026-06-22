@@ -15,11 +15,13 @@ object frmLoopbackDeck: TfrmLoopbackDeck
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsMDIChild
+  OldCreateOrder = True
   Visible = True
   StyleElements = [seFont, seClient]
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
+  PixelsPerInch = 96
   TextHeight = 15
   object pnlTop: TPanel
     Left = 0
@@ -205,7 +207,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       ParentFont = False
     end
     object lblP: TLabel
-      Left = 144
+      Left = 149
       Top = 487
       Width = 28
       Height = 13
@@ -260,7 +262,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
     end
     object Bevel6: TBevel
       Left = 189
-      Top = 12
+      Top = 10
       Width = 66
       Height = 493
       ParentCustomHint = False
@@ -268,7 +270,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       ShowHint = False
     end
     object Label3: TLabel
-      Left = 207
+      Left = 211
       Top = 465
       Width = 21
       Height = 13
@@ -287,7 +289,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Layout = tlCenter
     end
     object Label4: TLabel
-      Left = 207
+      Left = 211
       Top = 308
       Width = 22
       Height = 13
@@ -306,7 +308,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Layout = tlCenter
     end
     object Label5: TLabel
-      Left = 213
+      Left = 218
       Top = 155
       Width = 8
       Height = 13
@@ -325,8 +327,8 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Layout = tlCenter
     end
     object lblInputGainValue: TLabel
-      Left = 15
-      Top = 324
+      Left = 18
+      Top = 325
       Width = 32
       Height = 15
       Alignment = taCenter
@@ -364,7 +366,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Layout = tlCenter
     end
     object Label1: TLabel
-      Left = 205
+      Left = 210
       Top = 487
       Width = 21
       Height = 13
@@ -382,28 +384,10 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       ParentFont = False
       Layout = tlCenter
     end
-    object Shape2: TShape
-      Left = 76
-      Top = 77
-      Width = 53
-      Height = 96
-      Brush.Color = clOrange
-      Brush.Style = bsHorizontal
-      Pen.Style = psClear
-    end
-    object Shape1: TShape
-      Left = 76
-      Top = 39
-      Width = 53
-      Height = 40
-      Brush.Color = clRed
-      Brush.Style = bsHorizontal
-      Pen.Style = psClear
-    end
     object tbVolume: TMfTrackBar
-      Left = 76
+      Left = 82
       Top = 36
-      Width = 53
+      Width = 39
       Height = 442
       Margins.Left = 0
       Margins.Top = 0
@@ -475,9 +459,9 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       OnDblClick = tbBalanceDblClick
     end
     object tbPitch: TMfTrackBar
-      Left = 137
+      Left = 143
       Top = 36
-      Width = 51
+      Width = 39
       Height = 442
       Margins.Left = 0
       Margins.Top = 0
@@ -513,9 +497,9 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       OnDblClick = tbPitchDblClick
     end
     object tbEqQ: TMfTrackBar
-      Left = 199
-      Top = 21
-      Width = 51
+      Left = 204
+      Top = 23
+      Width = 39
       Height = 134
       Margins.Left = 0
       Margins.Top = 0
@@ -551,9 +535,9 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       OnDblClick = tbEqQDblClick
     end
     object tbEqCenterFreqHz: TMfTrackBar
-      Left = 197
+      Left = 203
       Top = 175
-      Width = 52
+      Width = 39
       Height = 134
       Margins.Left = 0
       Margins.Top = 0
@@ -590,9 +574,9 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       OnDblClick = tbEqCenterFreqHzDblClick
     end
     object tbEqGainDb: TMfTrackBar
-      Left = 197
+      Left = 203
       Top = 333
-      Width = 52
+      Width = 39
       Height = 134
       Margins.Left = 0
       Margins.Top = 0
@@ -628,9 +612,9 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       OnDblClick = tbEqGainDbDblClick
     end
     object tbInputGain: TMfTrackBar
-      Left = 11
+      Left = 14
       Top = 343
-      Width = 45
+      Width = 39
       Height = 135
       Margins.Left = 0
       Margins.Top = 0

@@ -68,6 +68,7 @@ uses
   WinApi.Windows,
   {System}
   System.SysUtils,
+  System.Classes,
   System.JSON,
   System.IOUtils;
 
@@ -114,6 +115,9 @@ var
   JsonFileName: string;
   TmpFileName: string;
   Setup: TRDJSetup;
+  JsonText: string;
+  Utf8Bytes: TBytes;
+  JsonStream: TFileStream;
 
   procedure SetJsonInteger(const AName: string;
                            const AValue: Integer);
@@ -225,9 +229,17 @@ begin
                                    Now));
 
 
-    TFile.WriteAllText(TmpFileName,
-                       Json.Format(2),
-                       TEncoding.UTF8);
+    JsonText := Json.ToJSON();
+    Utf8Bytes := TEncoding.UTF8.GetBytes(JsonText);
+    JsonStream := TFileStream.Create(TmpFileName,
+                                     fmCreate);
+    try
+      if Length(Utf8Bytes) > 0 then
+        JsonStream.WriteBuffer(Utf8Bytes[0],
+                               Length(Utf8Bytes));
+    finally
+      JsonStream.Free();
+    end;
 
     if TFile.Exists(JsonFileName) then
       TFile.Delete(JsonFileName);

@@ -38,12 +38,14 @@ object MainMDIFrm: TMainMDIFrm
     0000000000000000000000000000000000000000000000000000000000000000
     0000000000000000000000000000000000000000000000000000000000000000
     000000000000000000000000000000000000000000000000000080000001}
+  OldCreateOrder = True
   WindowState = wsMaximized
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnResize = FormResize
   OnShow = FormShow
+  PixelsPerInch = 96
   TextHeight = 15
   object pnlCaption: TPanel
     Left = 0
@@ -59,7 +61,6 @@ object MainMDIFrm: TMainMDIFrm
     ShowCaption = False
     TabOrder = 0
     OnMouseDown = pnlCaptionMouseDown
-    ExplicitWidth = 1275
     object lblLocalTime: TLabel
       Left = 550
       Top = 0
@@ -209,7 +210,6 @@ object MainMDIFrm: TMainMDIFrm
       Style = bsModern
       Transparent = True
       OnClick = btnExitClick
-      ExplicitLeft = 1209
     end
     object btnSetup: TMPxpButton
       Left = 105
@@ -343,7 +343,6 @@ object MainMDIFrm: TMainMDIFrm
       Style = bsModern
       Transparent = True
       OnClick = btnMinimizeClick
-      ExplicitLeft = 1075
     end
     object btnMaxNormal: TMPxpButton
       Left = 1148
@@ -397,7 +396,6 @@ object MainMDIFrm: TMainMDIFrm
       Style = bsModern
       Transparent = True
       OnClick = btnMaxNormalClick
-      ExplicitLeft = 1142
     end
     object btnEffects: TMPxpButton
       Left = 327
@@ -572,7 +570,6 @@ object MainMDIFrm: TMainMDIFrm
       Style = bsModern
       Transparent = True
       OnClick = btnFooterPnlClick
-      ExplicitLeft = 1009
     end
     object chkMediaServer: TMPxpButton
       Left = 216
@@ -706,8 +703,6 @@ object MainMDIFrm: TMainMDIFrm
     ShowCaption = False
     TabOrder = 1
     OnMouseDown = pnlCaptionMouseDown
-    ExplicitTop = 710
-    ExplicitWidth = 1275
     object Panel1: TPanel
       Left = 75
       Top = 1
@@ -719,7 +714,6 @@ object MainMDIFrm: TMainMDIFrm
       ParentBackground = False
       ShowCaption = False
       TabOrder = 0
-      ExplicitLeft = 69
       object imgDjShowLogo: TImage
         Left = 428
         Top = 4

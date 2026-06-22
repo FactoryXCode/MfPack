@@ -1,0 +1,12 @@
+
+caddy.exe run --config "C:\Caddy\caddy.file" --adapter caddyfile
+
+Service Name:     RDJPro
+Protocol:         TCP
+External Port:    443
+Internal Port:    8080
+Internal IP:      192.168.x.x   (your PC)
+Source IP:        (empty)
+
+Kill caddy: 
+Close DOSBox.

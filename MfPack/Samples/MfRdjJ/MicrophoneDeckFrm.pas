@@ -108,7 +108,6 @@ type
     Bevel4: TBevel;
     Bevel1: TBevel;
     Bevel2: TBevel;
-    Shape1: TShape;
     pmLeft: TMfPeakMeterMmcs;
     pmRight: TMfPeakMeterMmcs;
     lblVolumePerc: TLabel;
@@ -119,7 +118,6 @@ type
     Label4: TLabel;
     Label5: TLabel;
     lblGain: TLabel;
-    Shape2: TShape;
     lblPeq: TLabel;
     lblInputGainValue: TLabel;
     tbVolume: TMfTrackBar;

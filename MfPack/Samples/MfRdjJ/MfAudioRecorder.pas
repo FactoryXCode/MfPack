@@ -1974,7 +1974,7 @@ begin
                                            bytesWrittenMF);
 
                                        Inc(time100ns,
-                                           Round((Double(NumFramesToRead) * REFTIMES_PER_SEC) /
+                                           Round((_Double(NumFramesToRead) * REFTIMES_PER_SEC) /
                                                  pvMixFormat.Format.nSamplesPerSec));
                                        DoBpmTracking(time100ns);
                                      end;

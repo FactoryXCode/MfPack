@@ -1,0 +1,1 @@
+Copy the entire Caddy folder to the C drive of your server or local pc and make it accessible.

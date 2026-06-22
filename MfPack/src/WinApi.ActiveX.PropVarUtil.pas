@@ -128,7 +128,7 @@ function InitPropVariantFromCLSID(const clsid: REFCLSID;
 {$EXTERNALSYM InitPropVariantFromCLSID}
 
 function InitPropVariantFromGUIDAsString(const guid: REFGUID;
-                                        out ppropvar: PROPVARIANT): HResult; stdcall;
+                                         out ppropvar: PROPVARIANT): HResult; stdcall;
 {$EXTERNALSYM InitPropVariantFromGUIDAsString}
 
 function InitPropVariantFromFileTime(pftIn: FILETIME;
@@ -237,7 +237,7 @@ function InitPropVariantFromDouble(dblVal: DOUBLE;
 function InitPropVariantFromString(psz: LPCWSTR;
                                    out ppropvar: PROPVARIANT): HResult; inline;
 
-//Creates a VT_VECTOR | VT_UI1 propvariant.
+// Creates a VT_VECTOR | VT_UI1 propvariant.
 function InitPropVariantFromGUIDAsBuffer(const guid: REFGUID;
                                          out ppropvar: PROPVARIANT): HResult; inline;
 

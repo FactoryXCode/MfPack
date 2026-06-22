@@ -13,9 +13,11 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
   Font.Name = 'Segoe UI'
   Font.Style = [fsBold]
   FormStyle = fsStayOnTop
+  OldCreateOrder = True
   Position = poScreenCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  PixelsPerInch = 96
   TextHeight = 17
   object Splitter1: TSplitter
     Left = 270
@@ -281,7 +283,6 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
       TabOrder = 0
       OnDblClick = lbFoldersDblClick
       OnDrawItem = lbFoldersDrawItem
-      ExplicitHeight = 433
     end
   end
   object flbFiles: TFileListBox
@@ -321,7 +322,7 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
     object lblPreview: TLabel
       Left = 0
       Top = 0
-      Width = 230
+      Width = 48
       Height = 17
       Align = alTop
       Alignment = taCenter
@@ -333,7 +334,6 @@ object LWFileBrowserExDlg: TLWFileBrowserExDlg
       Font.Style = [fsBold]
       ParentFont = False
       Layout = tlCenter
-      ExplicitWidth = 48
     end
     object imgPreview: TImage
       Left = 0

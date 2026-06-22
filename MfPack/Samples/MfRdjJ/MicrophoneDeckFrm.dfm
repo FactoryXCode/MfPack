@@ -15,12 +15,14 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsMDIChild
+  OldCreateOrder = True
   Visible = True
   StyleElements = [seFont, seClient]
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
+  PixelsPerInch = 96
   TextHeight = 15
   object pnlTop: TPanel
     Left = 0
@@ -60,15 +62,6 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       Top = 12
       Width = 53
       Height = 493
-    end
-    object Shape1: TShape
-      Left = 69
-      Top = 39
-      Width = 40
-      Height = 40
-      Brush.Color = clRed
-      Brush.Style = bsHorizontal
-      Pen.Style = psClear
     end
     object pmLeft: TMfPeakMeterMmcs
       Left = 13
@@ -293,15 +286,6 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       ParentShowHint = False
       ShowHint = True
       Layout = tlCenter
-    end
-    object Shape2: TShape
-      Left = 69
-      Top = 77
-      Width = 40
-      Height = 96
-      Brush.Color = clOrange
-      Brush.Style = bsHorizontal
-      Pen.Style = psClear
     end
     object lblPeq: TLabel
       Left = 141

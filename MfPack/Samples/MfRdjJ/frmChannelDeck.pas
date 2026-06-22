@@ -166,8 +166,6 @@ type
     bldBeat: TMfBeatLed;
     tbInputGain: TMfTrackBar;
     lblGain: TLabel;
-    Shape1: TShape;
-    Shape2: TShape;
     lblPeq: TLabel;
     lblInputGainValue: TLabel;
     pnlCaption: TPanel;

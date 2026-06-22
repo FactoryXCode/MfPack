@@ -142,12 +142,6 @@ type
     epPFL: TMfAudioEndPoint;
     epMaster: TMfAudioEndPoint;
     tmrTime: TTimer;
-    Shape2: TShape;
-    Shape1: TShape;
-    Shape3: TShape;
-    Shape4: TShape;
-    Shape5: TShape;
-    Shape6: TShape;
     pnlCaption: TPanel;
     lblCaption: TLabel;
     pnlRecIcecast: TPanel;

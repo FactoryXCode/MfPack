@@ -22,13 +22,14 @@ object MasterDeckFrm: TMasterDeckFrm
   Font.Style = []
   FormStyle = fsMDIChild
   KeyPreview = True
+  OldCreateOrder = True
   Position = poDesigned
-  RoundedCorners = rcOff
   Visible = True
   StyleElements = [seFont, seClient]
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
+  PixelsPerInch = 96
   TextHeight = 13
   object pnlBottom: TPanel
     Left = 0
@@ -859,60 +860,6 @@ object MasterDeckFrm: TMasterDeckFrm
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
-    end
-    object Shape2: TShape
-      Left = 23
-      Top = 119
-      Width = 40
-      Height = 96
-      Brush.Color = clOrange
-      Brush.Style = bsHorizontal
-      Pen.Style = psClear
-    end
-    object Shape1: TShape
-      Left = 23
-      Top = 81
-      Width = 40
-      Height = 40
-      Brush.Color = clRed
-      Brush.Style = bsHorizontal
-      Pen.Style = psClear
-    end
-    object Shape3: TShape
-      Left = 145
-      Top = 81
-      Width = 40
-      Height = 40
-      Brush.Color = clRed
-      Brush.Style = bsHorizontal
-      Pen.Style = psClear
-    end
-    object Shape4: TShape
-      Left = 145
-      Top = 119
-      Width = 40
-      Height = 96
-      Brush.Color = clOrange
-      Brush.Style = bsHorizontal
-      Pen.Style = psClear
-    end
-    object Shape5: TShape
-      Left = 272
-      Top = 81
-      Width = 40
-      Height = 40
-      Brush.Color = clRed
-      Brush.Style = bsHorizontal
-      Pen.Style = psClear
-    end
-    object Shape6: TShape
-      Left = 272
-      Top = 119
-      Width = 40
-      Height = 96
-      Brush.Color = clOrange
-      Brush.Style = bsHorizontal
-      Pen.Style = psClear
     end
     object tbBalance: TMfTrackBar
       Left = 8

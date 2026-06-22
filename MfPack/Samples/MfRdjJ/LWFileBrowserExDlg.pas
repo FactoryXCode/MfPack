@@ -20,7 +20,9 @@ uses
   Vcl.Controls,
   Vcl.Forms,
   Vcl.Dialogs,
+  {$WARN UNIT_PLATFORM OFF}
   Vcl.FileCtrl,
+  {$WARN UNIT_PLATFORM ON}
   Vcl.StdCtrls,
   Vcl.ExtCtrls,
   Vcl.Imaging.jpeg,

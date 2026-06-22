@@ -87,6 +87,7 @@ uses
   Vcl.StdCtrls,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.MfUtils,
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioClient,
   WinApi.CoreAudioApi.MMDeviceApi,
@@ -597,6 +598,11 @@ end;
 procedure TMainMDIFrm.FormCreate(Sender: TObject);
 begin
 
+  // Keep audio, video and network broadcasting active while RDJ is running.
+  // The display may still switch off according to the Windows power settings.
+  if SetThreadExecutionState(ES_CONTINUOUS or ES_SYSTEM_REQUIRED) = 0 then
+    OutputDebugString(PChar('RDJ could not prevent Windows system sleep.'));
+
   // Do not create any childforms here!
 end;
 
@@ -606,6 +612,8 @@ var
   i: Integer;
 
 begin
+
+  SetThreadExecutionState(ES_CONTINUOUS);
 
   tmrClock.Enabled:= False;
 

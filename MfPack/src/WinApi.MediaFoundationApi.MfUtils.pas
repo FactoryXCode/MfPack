@@ -98,9 +98,9 @@ uses
   // Used by function CreateEventEx dwFlags.
   {$IF COMPILERVERSION < 34.0}
   const
-  CREATE_EVENT_MANUAL_RESET = DWord($0001);  // The initial state of the event object is signaled; otherwise, it is nonsignaled.
+  CREATE_EVENT_MANUAL_RESET = DWORD($0001);  // The initial state of the event object is signaled; otherwise, it is nonsignaled.
 
-  CREATE_EVENT_INITIAL_SET  = DWord($0002);  // The event must be manually reset using the ResetEvent function.
+  CREATE_EVENT_INITIAL_SET  = DWORD($0002);  // The event must be manually reset using the ResetEvent function.
                                              // Any number of waiting threads, or threads that subsequently begin
                                              // wait operations for the specified event object,
                                              // can be released while the object's state is signaled.
@@ -108,6 +108,16 @@ uses
                                              // the event after releasing a single waiting thread.
   {$ENDIF}
 
+  // Windows SetThreadExecutionState constants.
+  // Enables an application to inform the system that it is in use,
+  // thereby preventing the system from entering sleep or turning off
+  // the display while the application is running.
+  const
+  ES_CONTINUOUS        = DWORD($80000000); // Informs the system that the state being set should remain in effect until the next call that uses ES_CONTINUOUS and one of the other state flags is cleared.
+  ES_SYSTEM_REQUIRED   = DWORD($00000001); // Forces the system to be in the working state by resetting the system idle timer.
+  ES_DISPLAY_REQUIRED  = DWORD($00000002); // Forces the display to be on by resetting the display idle timer.
+  // ES_USER_PRESENT      = DWORD($00000004); // This value is not supported.
+  ES_AWAYMODE_REQUIRED = DWORD($00000040); // Enables away mode. This value must be specified with ES_CONTINUOUS.
 
 
 type
@@ -241,11 +251,31 @@ type
                           const pBitsPerSample: Integer;
                           pShowMilliSeconds: Boolean = True): string; inline;
 
+  // API function GetTickCount64.
+  function GetTickCount64(): UInt64; stdcall;
+
   // Converts winApi BOOL to INT.
   function NormalizeBOOL(const aBOOL: LongBool): Integer;
 
+  // Inline methods to avoid hard Double typecasting.
+  function _Double(const AValue: Single): Double; overload; inline;
+  function _Double(const AValue: Integer): Double; overload; inline;
+  function _Double(const AValue: Cardinal): Double; overload; inline;
+  function _Double(const AValue: Int64): Double; overload; inline;
+  function _Double(const AValue: UInt64): Double; overload; inline;
+  // Inline methods to avoid hard Single typecasting errors.
+  function _Single(const AValue: Double): Single; overload; inline;
+  function _Single(const AValue: Integer): Single; overload; inline;
+  function _Single(const AValue: Cardinal): Single; overload; inline;
+  function _Single(const AValue: Int64): Single; overload; inline;
+  function _Single(const AValue: UInt64): Single; overload; inline;
+
+
   // Operating system
+
   function GetOSArchitecture(): string;
+  //
+  function SetThreadExecutionState(const AFlags: DWORD): DWORD; stdcall;
 
 
   // Colors and pixelformats
@@ -539,6 +569,10 @@ type
       {[in]}           dwShareMode: DWORD;
       {[in]}           dwCreationDisposition: DWORD;
       {[in, optional]} pCreateExParams: LPCREATEFILE2_EXTENDED_PARAMETERS): THandle; stdcall;
+
+  // Replaces TFile::Size
+  function GetFileSize64(const AFileName: string;
+                         out ASize: Int64): Boolean;
 
 
   // Strings
@@ -1332,6 +1366,60 @@ begin
     Result := 1
   else
     Result := 0;
+end;
+
+
+// Inline methods to avoid hard Double typecasting errors.
+function _Double(const AValue: Single): Double; overload; inline;
+begin
+  Result := AValue;
+end;
+
+function _Double(const AValue: Integer): Double; overload; inline;
+begin
+  Result := AValue;
+end;
+
+function _Double(const AValue: Cardinal): Double; overload; inline;
+begin
+  Result := AValue;
+end;
+
+function _Double(const AValue: Int64): Double; overload; inline;
+begin
+  Result := AValue;
+end;
+
+function _Double(const AValue: UInt64): Double; overload; inline;
+begin
+  Result := AValue;
+end;
+
+
+// Inline methods to avoid hard Single typecasting errors.
+function _Single(const AValue: Double): Single; overload; inline;
+begin
+  Result := AValue;
+end;
+
+function _Single(const AValue: Integer): Single; overload; inline;
+begin
+  Result := AValue;
+end;
+
+function _Single(const AValue: Cardinal): Single; overload; inline;
+begin
+  Result := AValue;
+end;
+
+function _Single(const AValue: Int64): Single; overload; inline;
+begin
+  Result := AValue;
+end;
+
+function _Single(const AValue: UInt64): Single; overload; inline;
+begin
+  Result := AValue;
 end;
 
 
@@ -2173,6 +2261,38 @@ begin
   Result := (OutMin + (ival - InMin) * (OutMax - OutMin) / (InMax - InMin));
 end;
 
+
+//  GetFileSize64 replaces  TFile::Size.
+function GetFileSize64(const AFileName: string; out ASize: Int64): Boolean;
+var
+  Data: TWin32FileAttributeData;
+
+begin
+
+  Result := False;
+  ASize := 0;
+
+  if (Trim(AFileName) = '') then
+    Exit;
+
+  FillChar(Data,
+           SizeOf(Data),
+           0);
+
+  if not GetFileAttributesEx(PChar(AFileName),
+                             GetFileExInfoStandard,
+                             @Data) then
+    Exit;
+
+  if ((Data.dwFileAttributes and FILE_ATTRIBUTE_DIRECTORY) <> 0) then
+    Exit;
+
+  ASize := (Int64(Data.nFileSizeHigh) shl 32) or Int64(Data.nFileSizeLow);
+
+  Result := True;
+end;
+
+
 // Strings
 function StringCbCat(pszDest: PChar;
                      cbDest: SIZE_T;
@@ -2192,6 +2312,8 @@ begin
 end;
 
 {$WARN SYMBOL_PLATFORM OFF}
+function SetThreadExecutionState; external Kernel32Lib name 'SetThreadExecutionState' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+
 function CreateFile2; external Kernel32Lib name 'CreateFile2' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
 function StringCbCatA; external Kernel32Lib name 'StringCbCatA' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
@@ -2200,6 +2322,12 @@ function StringCbCatW; external Kernel32Lib name 'StringCbCatW' {$IF COMPILERVER
 {$IF COMPILERVERSION < 29.0}
 function StrCmpLogicalW; external Shlwapi32Lib name 'StrCmpLogicalW' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 {$ENDIF}
+
+{$IF COMPILERVERSION < 33.0}
+// API function GetTickCount64.
+function GetTickCount64; external kernel32 name 'GetTickCount64' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+{$ENDIF}
+
 {$WARN SYMBOL_PLATFORM ON}
 
 
