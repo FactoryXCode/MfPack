@@ -15,7 +15,12 @@
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Ciaran, (TopPlay)
+// Contributor(s): Tony Kalf (maXcomX),
+//                 Peter Larson (ozships),
+//                 Ciaran,
+//                 (TopPlay),
+//                 Carmen (carmenh)
+//                 Sándor Wortmann (wsandor)
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
@@ -851,10 +856,10 @@ type
     //
     // For protected content, call the IMFMediaEngineProtectedContent.TransferVideoFrame method
     // instead of this method.
-    function TransferVideoFrame(var pDstSurf: IUnknown; // Delphi note: Pass the parameter as IUnknown(DXGI or WICbitmap interface)
+    function TransferVideoFrame(pDstSurf: IUnknown; // Delphi note: Pass the parameter as IUnknown(DXGI or WICbitmap interface)
                          {opt}  pSrc: PMFVideoNormalizedRect;  // A pointer to an MFVideoNormalizedRect structure that specifies the source rectangle.
                          {opt}  pDst: PRECT;                  // A pointer to a TRect structure that specifies the destination rectangle.
-                                pBorderClr: MFARGB): HResult; stdcall;   // A pointer to an MFARGB structure that specifies the border color.
+                                pBorderClr: PMFARGB): HResult; stdcall;   // A pointer to an MFARGB structure that specifies the border color.
 
     // If a new frame is ready, receives the presentation time of the frame.
     //

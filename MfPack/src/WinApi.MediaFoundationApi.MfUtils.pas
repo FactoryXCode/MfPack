@@ -1,6 +1,6 @@
-﻿// FactoryX
+// FactoryX
 //
-// Copyright: © FactoryX. All rights reserved.
+// Copyright: � FactoryX. All rights reserved.
 //
 // Project: MfPack - Shared
 // Project location: https://sourceforge.net/projects/MFPack
@@ -118,6 +118,10 @@ uses
   ES_DISPLAY_REQUIRED  = DWORD($00000002); // Forces the display to be on by resetting the display idle timer.
   // ES_USER_PRESENT      = DWORD($00000004); // This value is not supported.
   ES_AWAYMODE_REQUIRED = DWORD($00000040); // Enables away mode. This value must be specified with ES_CONTINUOUS.
+
+  // Power policy GUIDs.
+  GUID_SYSTEM_BUTTON_SUBGROUP: TGUID = '{4F971E89-EEBD-4455-A8DE-9E59040E7347}';
+  GUID_LIDCLOSE_ACTION: TGUID = '{5CA83367-6E45-459F-A27B-476B1D01C936}';
 
 
 type
@@ -274,8 +278,40 @@ type
   // Operating system
 
   function GetOSArchitecture(): string;
+
   //
   function SetThreadExecutionState(const AFlags: DWORD): DWORD; stdcall;
+
+  // Windows power scheme.
+  function PowerGetActiveScheme(UserRootPowerKey: HKEY;
+                                out ActivePolicyGuid: PGUID): DWORD; stdcall;
+
+  function PowerReadACValueIndex(RootPowerKey: HKEY;
+                                 const SchemeGuid: PGUID;
+                                 const SubGroupOfPowerSettingsGuid: PGUID;
+                                 const PowerSettingGuid: PGUID;
+                                 out AcValueIndex: DWORD): DWORD; stdcall;
+
+  function PowerReadDCValueIndex(RootPowerKey: HKEY;
+                                 const SchemeGuid: PGUID;
+                                 const SubGroupOfPowerSettingsGuid: PGUID;
+                                 const PowerSettingGuid: PGUID;
+                                 out DcValueIndex: DWORD): DWORD; stdcall;
+
+  function PowerWriteACValueIndex(RootPowerKey: HKEY;
+                                  const SchemeGuid: PGUID;
+                                  const SubGroupOfPowerSettingsGuid: PGUID;
+                                  const PowerSettingGuid: PGUID;
+                                  AcValueIndex: DWORD): DWORD; stdcall;
+
+  function PowerWriteDCValueIndex(RootPowerKey: HKEY;
+                                  const SchemeGuid: PGUID;
+                                  const SubGroupOfPowerSettingsGuid: PGUID;
+                                  const PowerSettingGuid: PGUID;
+                                  DcValueIndex: DWORD): DWORD; stdcall;
+
+  function PowerSetActiveScheme(UserRootPowerKey: HKEY;
+                                const SchemeGuid: PGUID): DWORD; stdcall;
 
 
   // Colors and pixelformats
@@ -646,6 +682,7 @@ const
   Kernel32Lib = 'kernel32.dll';
   Ole32Lib = 'Ole32.dll';
   Shlwapi32Lib = 'Shlwapi.dll';
+  PowrProfLib = 'PowrProf.dll';
 
 
   VER_EQUAL             = 1;
@@ -2313,6 +2350,14 @@ end;
 
 {$WARN SYMBOL_PLATFORM OFF}
 function SetThreadExecutionState; external Kernel32Lib name 'SetThreadExecutionState' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+
+// System power scheme.
+function PowerGetActiveScheme; external PowrProfLib name 'PowerGetActiveScheme' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function PowerReadACValueIndex; external PowrProfLib name 'PowerReadACValueIndex' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function PowerReadDCValueIndex; external PowrProfLib name 'PowerReadDCValueIndex' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function PowerWriteACValueIndex; external PowrProfLib name 'PowerWriteACValueIndex' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function PowerWriteDCValueIndex; external PowrProfLib name 'PowerWriteDCValueIndex' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
+function PowerSetActiveScheme; external PowrProfLib name 'PowerSetActiveScheme' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
 function CreateFile2; external Kernel32Lib name 'CreateFile2' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
