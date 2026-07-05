@@ -18,7 +18,10 @@
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), (kxMAXX)
+// Contributor(s): Tony Kalf (maXcomX),
+//                 Peter Larson (ozships),
+//                 (kxMAXX)
+//                 (HendriXML)
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
