@@ -146,6 +146,8 @@ var
     Json.AddPair(AName,
                  AValue);
   end;
+
+
   function BuildBrowserCoverUrl(const AValue: string): string;
   var
     CleanValue: string;
@@ -165,7 +167,8 @@ var
 
     QPos := Pos('?',
                 CleanValue);
-    if QPos > 0 then
+
+    if (QPos > 0) then
       CleanValue := Copy(CleanValue,
                          1,
                          QPos - 1);
@@ -183,6 +186,39 @@ var
     Result := CleanValue + '?ts=' + IntToStr(GetTickCount);
   end;
 
+
+  procedure PublishJsonFile(const ASourceFileName: string;
+                            const ADestFileName: string);
+  const
+    RDJ_JSON_PUBLISH_RETRY_COUNT = 10;
+    RDJ_JSON_PUBLISH_RETRY_DELAY_MS = 25;
+  var
+    Attempt: Integer;
+    LastError: DWORD;
+
+  begin
+
+    for Attempt := 0 to RDJ_JSON_PUBLISH_RETRY_COUNT do
+      begin
+        if MoveFileEx(PChar(ASourceFileName),
+                      PChar(ADestFileName),
+                      MOVEFILE_REPLACE_EXISTING or MOVEFILE_WRITE_THROUGH) then
+          Exit;
+
+        LastError := GetLastError();
+
+        if (LastError <> ERROR_ALREADY_EXISTS) and
+           (LastError <> ERROR_ACCESS_DENIED) and
+           (LastError <> ERROR_SHARING_VIOLATION) and
+           (LastError <> ERROR_LOCK_VIOLATION) then
+          Break;
+
+        Sleep(RDJ_JSON_PUBLISH_RETRY_DELAY_MS);
+      end;
+
+    RaiseLastOSError(LastError);
+  end;
+
 begin
 
   if (Trim(AFileName) = '') then
@@ -192,7 +228,7 @@ begin
      (AShowName = '') and
      (AArtist = '') and
      (ATitle = '') and
-     (AListeners = 0) then
+     (AListeners < 0) then
     Exit;
 
   if not Assigned(MainMDIFrm) then
@@ -244,11 +280,15 @@ begin
                   ATitle);
 
     CoverUrl := BuildBrowserCoverUrl(ACoverUrl);
+
     if (CoverUrl <> '') then
       SetJsonString('coverUrl',
                     CoverUrl);
 
     SetJsonInteger('displayListeners',
+                   AListeners);
+
+    SetJsonInteger('listeners',
                    AListeners);
 
     SetJsonInteger('onAir',
@@ -268,11 +308,8 @@ begin
                        Json.ToString,
                        TEncoding.UTF8);
 
-    if TFile.Exists(JsonFileName) then
-      TFile.Delete(JsonFileName);
-
-    TFile.Move(TmpFileName,
-               JsonFileName);
+    PublishJsonFile(TmpFileName,
+                    JsonFileName);
 
   finally
 

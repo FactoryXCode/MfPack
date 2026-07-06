@@ -126,6 +126,8 @@ type
     PFLEnabled: Boolean;
     PFLDeviceId: string;
 
+    SystemOverrideSleepMode: Boolean;
+
     // AudioClient bufferlength (default = 60 ms).
     AudioBufferMs: Integer;
 
@@ -298,6 +300,8 @@ begin
   ASetupRec.PFLEnabled := False;
   ASetupRec.PFLDeviceId := '';
   ASetupRec.MicDeviceId := '';
+
+  ASetupRec.SystemOverrideSleepMode := True;
 
   // Caddy/json.
   // Default settings.
@@ -571,6 +575,11 @@ begin
                         ASetupRec.ChannelFxRacks[i]);
       end;
 
+    // Override system sleep mode setting.
+    ASetupRec.SystemOverrideSleepMode := iniFile.ReadBool('Setup',
+                                                          'SystemOverrideSleepMode',
+                                                          ASetupRec.SystemOverrideSleepMode);
+
     // Audio recorder
     ASetupRec.AudioRecorderCaptureBufferMs := iniFile.ReadInteger('SetupAudioRecorder',
                                                                 'CaptureBufferMs',
@@ -759,6 +768,11 @@ begin
     iniFile.WriteInteger('Setup',
                          'MicDeviceCbItemIndex',
                          ASetupRec.MicDeviceCbItemIndex);
+
+    // Override system sleep mode setting.
+    iniFile.WriteBool('Setup',
+                      'SystemOverrideSleepMode',
+                      ASetupRec.SystemOverrideSleepMode);
 
     // Audio recorder
     iniFile.WriteInteger('SetupAudioRecorder',

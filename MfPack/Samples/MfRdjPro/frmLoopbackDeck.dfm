@@ -33,7 +33,6 @@ object frmLoopbackDeck: TfrmLoopbackDeck
     Color = 5850948
     ParentBackground = False
     TabOrder = 0
-    ExplicitWidth = 249
     object Bevel7: TBevel
       Left = 0
       Top = 511
@@ -72,7 +71,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Layout = tlCenter
     end
     object lblVolumePerc: TLabel
-      Left = 89
+      Left = 92
       Top = 15
       Width = 16
       Height = 15
@@ -194,7 +193,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       PeakHoldDuration = 0.500000000000000000
     end
     object lblPitch: TLabel
-      Left = 149
+      Left = 154
       Top = 15
       Width = 16
       Height = 15
@@ -208,7 +207,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       ParentFont = False
     end
     object lblP: TLabel
-      Left = 144
+      Left = 149
       Top = 487
       Width = 28
       Height = 13
@@ -272,7 +271,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       ShowHint = False
     end
     object Label3: TLabel
-      Left = 207
+      Left = 213
       Top = 465
       Width = 21
       Height = 13
@@ -291,7 +290,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Layout = tlCenter
     end
     object Label4: TLabel
-      Left = 207
+      Left = 213
       Top = 308
       Width = 22
       Height = 13
@@ -310,7 +309,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Layout = tlCenter
     end
     object Label5: TLabel
-      Left = 213
+      Left = 219
       Top = 155
       Width = 8
       Height = 13
@@ -329,7 +328,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Layout = tlCenter
     end
     object lblInputGainValue: TLabel
-      Left = 15
+      Left = 19
       Top = 324
       Width = 32
       Height = 15
@@ -368,7 +367,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Layout = tlCenter
     end
     object Label1: TLabel
-      Left = 205
+      Left = 212
       Top = 487
       Width = 21
       Height = 13
@@ -387,9 +386,9 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Layout = tlCenter
     end
     object tbVolume: TMfTrackBar
-      Left = 76
-      Top = 36
-      Width = 53
+      Left = 80
+      Top = 38
+      Width = 39
       Height = 442
       Margins.Left = 0
       Margins.Top = 0
@@ -461,9 +460,9 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       OnDblClick = tbBalanceDblClick
     end
     object tbPitch: TMfTrackBar
-      Left = 137
-      Top = 36
-      Width = 51
+      Left = 143
+      Top = 38
+      Width = 39
       Height = 442
       Margins.Left = 0
       Margins.Top = 0
@@ -499,9 +498,9 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       OnDblClick = tbPitchDblClick
     end
     object tbEqQ: TMfTrackBar
-      Left = 199
-      Top = 21
-      Width = 51
+      Left = 205
+      Top = 23
+      Width = 39
       Height = 134
       Margins.Left = 0
       Margins.Top = 0
@@ -537,9 +536,9 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       OnDblClick = tbEqQDblClick
     end
     object tbEqCenterFreqHz: TMfTrackBar
-      Left = 197
-      Top = 175
-      Width = 52
+      Left = 205
+      Top = 177
+      Width = 39
       Height = 134
       Margins.Left = 0
       Margins.Top = 0
@@ -576,9 +575,9 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       OnDblClick = tbEqCenterFreqHzDblClick
     end
     object tbEqGainDb: TMfTrackBar
-      Left = 197
-      Top = 333
-      Width = 52
+      Left = 204
+      Top = 337
+      Width = 39
       Height = 134
       Margins.Left = 0
       Margins.Top = 0
@@ -614,9 +613,9 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       OnDblClick = tbEqGainDbDblClick
     end
     object tbInputGain: TMfTrackBar
-      Left = 11
-      Top = 343
-      Width = 45
+      Left = 14
+      Top = 345
+      Width = 39
       Height = 135
       Margins.Left = 0
       Margins.Top = 0
@@ -661,7 +660,6 @@ object frmLoopbackDeck: TfrmLoopbackDeck
     Color = 4865081
     ParentBackground = False
     TabOrder = 1
-    ExplicitWidth = 249
     object shpLiveCap: TShape
       Left = 160
       Top = 4
@@ -727,7 +725,6 @@ object frmLoopbackDeck: TfrmLoopbackDeck
     ParentBackground = False
     ShowCaption = False
     TabOrder = 2
-    ExplicitWidth = 249
     object lblStatus: TLabel
       Left = 0
       Top = 38
@@ -797,7 +794,6 @@ object frmLoopbackDeck: TfrmLoopbackDeck
     Color = 4865081
     ParentBackground = False
     TabOrder = 3
-    ExplicitWidth = 249
     object Bevel1: TBevel
       Left = 4
       Top = 151

@@ -152,6 +152,7 @@ type
     FPatchedFragmentQueue: TQueue<TBytes>;
     FTrackDecodeTimes: TDictionary<DWORD, UInt64>;
     FBoxIndex: UInt64;
+    FShuttingDown: Boolean;
 
     procedure ResetBoxObserver();
     procedure ObserveBytes(const pb: PByte; const cb: ULONG);
@@ -200,6 +201,7 @@ type
                                 out AParserBufferSize: Integer;
                                 out APendingMoofBytes: Integer;
                                 out ATotalBytesWritten: UInt64): Boolean;
+    procedure BeginShutdown();
     procedure ClearLiveFragmentQueues();
 
     property TotalBytesWritten: UInt64 read FTotalBytesWritten;
@@ -337,6 +339,9 @@ const
   RDJ_FMP4_ASSUMED_VIDEO_STREAM_INDEX = 0;
   RDJ_FMP4_ASSUMED_AUDIO_STREAM_INDEX = 1;
   RDJ_FMP4_CAPTURE_LOG_STEP_BYTES = 16 * 1024 * 1024;
+  RDJ_FMP4_SINK_FRAGMENT_DURATION_MS = 1000;
+  RDJ_FMP4_SINK_MIN_FRAGMENT_DURATION_100NS =
+    RDJ_FMP4_SINK_FRAGMENT_DURATION_MS * 10000;
 
   // Milestone 24 memory guard:
   // The browser only consumes patched MSE fragments. Keeping a second raw
@@ -386,11 +391,11 @@ const
   RDJ_FMP4_RECOVERY_SLOW_AUDIO_MS = 500;
   RDJ_FMP4_RECOVERY_SLOW_AUDIO_STREAK = 3;
 
-  // Milestone 7:
-  // False = browser/MSE mode. The MF fMP4 sink still writes to an IMFByteStream,
-  // but that stream is an in-memory/null publishing stream. No public growing
-  // live.mp4 file is created.
-  // True = old diagnostic mode. Writes the full growing fMP4 file too.
+  // False = browser/MSE mode. The MF fMP4 sink writes to a private local
+  // scratch file, while this unit extracts the live MSE fragments from the byte
+  // stream. A pure null/seekable stream lets some MF builds retain too much
+  // stream state over long runs.
+  // True = old diagnostic mode. Writes the full growing public fMP4 file too.
   RDJ_FMP4_WRITE_PUBLIC_MP4_FILE = False;
 
 
@@ -466,6 +471,7 @@ begin
   FFragmentQueue := TQueue<TBytes>.Create();
   FPatchedFragmentQueue := TQueue<TBytes>.Create();
   FTrackDecodeTimes := TDictionary<DWORD, UInt64>.Create();
+  FShuttingDown := False;
   ResetBoxObserver();
 end;
 
@@ -1120,11 +1126,12 @@ begin
           end;
       end;
 
-    OutputDebugString(PChar(Format('TRdjProFmp4CaptureByteStream.MSEPatch: raw=%d patched=%d moof=%d traf=%d',
-                                   [Length(AFragment),
-                                    Length(APatchedFragment),
-                                    NewMoofSize,
-                                    PatchedTrafList.Count])));
+    if (FBoxIndex <= 20) or ((FBoxIndex mod 200) = 0) then
+      OutputDebugString(PChar(Format('TRdjProFmp4CaptureByteStream.MSEPatch: raw=%d patched=%d moof=%d traf=%d',
+                                     [Length(AFragment),
+                                      Length(APatchedFragment),
+                                      NewMoofSize,
+                                      PatchedTrafList.Count])));
 
     Result := Length(APatchedFragment) > 0;
   finally
@@ -1282,6 +1289,9 @@ begin
 
   FCritSec.Enter();
   try
+
+    if FShuttingDown then
+      Exit;
 
     OldSize := FParserBufferSize;
     FParserBufferSize := FParserBufferSize + Integer(cb);
@@ -1798,8 +1808,8 @@ var
 begin
 
   // MFCreateFMPEG4MediaSink usually writes through the async byte-stream
-  // path. Observe the buffer here. In null-output mode we deliberately do not
-  // forward to a real file: the MSE fragments are the product.
+  // path. Observe the buffer here before optionally forwarding it to the real
+  // MFCreateFile stream; the extracted MSE fragments are the browser product.
   if (pb <> nil) and
      (cb > 0) then
     begin
@@ -1971,8 +1981,44 @@ begin
 end;
 
 
+procedure TRdjProFmp4CaptureByteStream.BeginShutdown();
+begin
+
+  FCritSec.Enter();
+  try
+    if FShuttingDown then
+      Exit;
+
+    FShuttingDown := True;
+  finally
+    FCritSec.Leave();
+  end;
+
+  ClearLiveFragmentQueues();
+
+  FCritSec.Enter();
+  try
+    // Media Foundation can keep the final byte-stream COM reference alive while
+    // a worker is timing out in WriteSample. Release the live MSE storage here
+    // so the queue/dictionary backing arrays are not reported as leaks.
+    FParserBuffer := nil;
+    FParserBufferSize := 0;
+    FInitSegment := nil;
+    FPendingMoof := nil;
+    FreeAndNil(FAsyncWriteSizes);
+    FreeAndNil(FFragmentQueue);
+    FreeAndNil(FPatchedFragmentQueue);
+    FreeAndNil(FTrackDecodeTimes);
+  finally
+    FCritSec.Leave();
+  end;
+end;
+
+
 function TRdjProFmp4CaptureByteStream.Close(): HRESULT;
 begin
+
+  BeginShutdown();
 
   if FNullOutput then
     Exit(S_OK);
@@ -1992,16 +2038,22 @@ begin
 
   FCritSec.Enter();
   try
-    while FFragmentQueue.Count > 0 do
+    if Assigned(FFragmentQueue) then
       begin
-        Fragment := FFragmentQueue.Dequeue();
-        Fragment := nil;
+        while FFragmentQueue.Count > 0 do
+          begin
+            Fragment := FFragmentQueue.Dequeue();
+            Fragment := nil;
+          end;
       end;
 
-    while FPatchedFragmentQueue.Count > 0 do
+    if Assigned(FPatchedFragmentQueue) then
       begin
-        Fragment := FPatchedFragmentQueue.Dequeue();
-        Fragment := nil;
+        while FPatchedFragmentQueue.Count > 0 do
+          begin
+            Fragment := FPatchedFragmentQueue.Dequeue();
+            Fragment := nil;
+          end;
       end;
 
     // A flush can abandon a moof without its matching mdat. Do not allow a
@@ -2042,7 +2094,7 @@ var
 begin
   NowTick := GetTickCount();
 
-  if (NowTick - FDbgLastLogTick) < 1000 then
+  if (NowTick - FDbgLastLogTick) < 10000 then
     Exit;
 
   FDbgLastLogTick := NowTick;
@@ -2619,17 +2671,30 @@ begin
     begin
       // Live MSE mode:
       //
-      // Do NOT create a growing private/temp MP4 file.  The old server proved
-      // that even a hidden temp file eventually becomes the bottleneck: after
-      // several hundred MB the file-backed MF byte stream can block around
-      // one second per WriteSample, while the browser keeps waiting for a
-      // manifest that no longer advances.
-      //
-      // The capture byte stream is now a null-output observer: it accepts all
-      // bytes from the fragmented MP4 media sink, parses ftyp/moov/moof/mdat,
-      // exposes MSE fragments, but does not ask the old disk to maintain a
-      // useless growing live.mp4.
-      CaptureStream := TRdjProFmp4CaptureByteStream.Create(nil);
+      // Keep the public live.mp4 URL out of the browser path, but still give
+      // Media Foundation a real MFCreateFile byte stream.  RDJ_LOG_41 showed
+      // the null seekable stream publishing fragments correctly while private
+      // bytes kept growing with TotalBytes, which points to MF retaining output
+      // state internally.  A private scratch sink lets MF flush normally; the
+      // .m4s fragments remain the actual browser output.
+      FPrivateSinkFileName :=
+        ChangeFileExt(FFileName,
+                      Format('.sink_%x_%x.tmp',
+                             [GetCurrentProcessId(),
+                              GetTickCount()]));
+
+      Result := MFCreateFile(MF_ACCESSMODE_WRITE,
+                             MF_OPENMODE_DELETE_IF_EXIST,
+                             MF_FILEFLAGS_NONE,
+                             PWideChar(FPrivateSinkFileName),
+                             FileStream);
+      if FAILED(Result) then
+        begin
+          FPrivateSinkFileName := '';
+          Exit;
+        end;
+
+      CaptureStream := TRdjProFmp4CaptureByteStream.Create(FileStream);
     end;
 
   FCaptureByteStream := CaptureStream;
@@ -2642,6 +2707,7 @@ var
   VideoTargetType: IMFMediaType;
   AudioTargetType: IMFMediaType;
   AudioInputType: IMFMediaType;
+  MediaSinkAttributes: IMFAttributes;
   SinkWriterAttributes: IMFAttributes;
 
 begin
@@ -2649,6 +2715,7 @@ begin
   VideoTargetType := nil;
   AudioTargetType := nil;
   AudioInputType := nil;
+  MediaSinkAttributes := nil;
   SinkWriterAttributes := nil;
 
   if not Assigned(FVideoMediaType) then
@@ -2678,6 +2745,29 @@ begin
                                     @FMediaSink);
   if FAILED(Result) then
     Exit;
+
+  Result := FMediaSink.QueryInterface(IID_IMFAttributes,
+                                      MediaSinkAttributes);
+  if SUCCEEDED(Result) then
+    begin
+      // Without explicit fMP4 sink fragmentation, MF can buffer encoded media
+      // internally and emit moov/moof/mdat only when Finalize is called. For
+      // live MSE output that looks like a frozen public stream while memory
+      // climbs until the restart/stop path flushes everything at once.
+      //
+      // Do not set MF_MPEG4SINK_MAX_CODED_SEQUENCES_PER_FRAGMENT to 1 here.
+      // RDJ_LOG_42 showed that splits the stream into many tiny coded-sequence
+      // fragments, which makes browser playback advance in short bursts.
+      Result := MediaSinkAttributes.SetUINT32(MF_MPEG4SINK_MIN_FRAGMENT_DURATION,
+                                              RDJ_FMP4_SINK_MIN_FRAGMENT_DURATION_100NS);
+      if FAILED(Result) then
+        Exit;
+    end
+  else
+    begin
+      OutputDebugString(PChar(
+        'TRdjProFmp4Recorder.CreateFragmentedSinkWriter: fMP4 sink has no IMFAttributes; live fragments may be delayed until Finalize'));
+    end;
 
   Result := MFCreateAttributes(SinkWriterAttributes,
                                2);
@@ -2919,6 +3009,7 @@ function TRdjProFmp4Recorder.StopRecording(): HRESULT;
 var
   Worker: TThread;
   WaitRes: DWORD;
+  CaptureByteStream: TRdjProFmp4CaptureByteStream;
 
 begin
 
@@ -2926,7 +3017,11 @@ begin
 
   FCritSec.Enter();
   try
-    if (not Active) and (not Assigned(FWorker)) then
+    if (not Active) and (not Assigned(FWorker)) and
+       (not Assigned(FSinkWriter)) and
+       (not Assigned(FMediaSink)) and
+       (not Assigned(FByteStream)) and
+       (not Assigned(FCaptureByteStream)) then
       begin
 
         SetState(mrsStopped,
@@ -2948,10 +3043,14 @@ begin
     if Assigned(FQueueEvent) then
       FQueueEvent.SetEvent();
 
+    CaptureByteStream := FCaptureByteStream;
     Worker := FWorker;
   finally
     FCritSec.Leave();
   end;
+
+  if Assigned(CaptureByteStream) then
+    CaptureByteStream.BeginShutdown();
 
   if Assigned(Worker) then
     begin
@@ -2976,6 +3075,20 @@ begin
           // because the worker did not return in time.
           OutputDebugString(PChar(
             'TRdjProFmp4Recorder.StopRecording timeout: worker still owns recorder resources'));
+
+          FCritSec.Enter();
+          try
+            if Assigned(FMediaSink) then
+              FMediaSink.Shutdown();
+
+            FSinkWriter := nil;
+            FMediaSink := nil;
+            FByteStream := nil;
+            FCaptureByteStream := nil;
+          finally
+            FCritSec.Leave();
+          end;
+
           SetState(mrsError,
                    HRESULT_FROM_WIN32(WAIT_TIMEOUT));
           Exit(HRESULT_FROM_WIN32(WAIT_TIMEOUT));
@@ -2989,7 +3102,18 @@ begin
         SetState(mrsFinalizing,
                  S_OK);
 
+        CaptureByteStream := FCaptureByteStream;
+
+        if Assigned(CaptureByteStream) then
+          CaptureByteStream.BeginShutdown();
+
         Result := FSinkWriter.Finalize();
+
+        if Assigned(CaptureByteStream) then
+          CaptureByteStream.Close();
+
+        if Assigned(FMediaSink) then
+          FMediaSink.Shutdown();
 
         FSinkWriter := nil;
         FMediaSink := nil;

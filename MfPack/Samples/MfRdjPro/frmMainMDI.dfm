@@ -2,7 +2,7 @@ object MainMDIFrm: TMainMDIFrm
   Left = 0
   Top = 0
   BorderIcons = []
-  Caption = 'RDJ Charlie'
+  Caption = 'RDJ Pro'
   ClientHeight = 836
   ClientWidth = 1281
   Color = 5850948
@@ -61,7 +61,6 @@ object MainMDIFrm: TMainMDIFrm
     ShowCaption = False
     TabOrder = 0
     OnMouseDown = pnlCaptionMouseDown
-    ExplicitWidth = 1275
     object lblLocalTime: TLabel
       Left = 550
       Top = 0
@@ -132,7 +131,7 @@ object MainMDIFrm: TMainMDIFrm
       OnMouseDown = pnlCaptionMouseDown
     end
     object lblAppTitle: TLabel
-      Left = 0
+      Left = -2
       Top = 0
       Width = 105
       Height = 17
@@ -144,7 +143,7 @@ object MainMDIFrm: TMainMDIFrm
       Alignment = taCenter
       AutoSize = False
       BiDiMode = bdLeftToRight
-      Caption = 'RDJ Charlie'
+      Caption = 'RDJ Pro'
       Color = clBlack
       Font.Charset = DEFAULT_CHARSET
       Font.Color = 9891585
@@ -211,7 +210,6 @@ object MainMDIFrm: TMainMDIFrm
       Style = bsModern
       Transparent = True
       OnClick = btnExitClick
-      ExplicitLeft = 1209
     end
     object btnSetup: TMPxpButton
       Left = 105
@@ -345,7 +343,6 @@ object MainMDIFrm: TMainMDIFrm
       Style = bsModern
       Transparent = True
       OnClick = btnMinimizeClick
-      ExplicitLeft = 1075
     end
     object btnMaxNormal: TMPxpButton
       Left = 1148
@@ -399,7 +396,6 @@ object MainMDIFrm: TMainMDIFrm
       Style = bsModern
       Transparent = True
       OnClick = btnMaxNormalClick
-      ExplicitLeft = 1142
     end
     object btnEffects: TMPxpButton
       Left = 327
@@ -574,7 +570,6 @@ object MainMDIFrm: TMainMDIFrm
       Style = bsModern
       Transparent = True
       OnClick = btnFooterPnlClick
-      ExplicitLeft = 1009
     end
     object chkMediaServer: TMPxpButton
       Left = 216
@@ -708,8 +703,6 @@ object MainMDIFrm: TMainMDIFrm
     ShowCaption = False
     TabOrder = 1
     OnMouseDown = pnlCaptionMouseDown
-    ExplicitTop = 710
-    ExplicitWidth = 1275
     object Panel1: TPanel
       Left = 75
       Top = 1
@@ -721,9 +714,8 @@ object MainMDIFrm: TMainMDIFrm
       ParentBackground = False
       ShowCaption = False
       TabOrder = 0
-      ExplicitLeft = 69
       object imgDjShowLogo: TImage
-        Left = 428
+        Left = 430
         Top = 4
         Width = 175
         Height = 99

@@ -219,6 +219,7 @@ type
     lblMp4SegmentSize: TLabel;
     Label8: TLabel;
     Bevel8: TBevel;
+    chkOverrideSleepMode: TMPxpButton;
 
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -449,6 +450,7 @@ begin
     frm.chkDontOverWrite.Checked := ASetup.AudioRecorderDontOverWriteAudioFiles;
     frm.chkUsePCMFormat.Checked := ASetup.AudioRecorderUsePCMFormat;
     frm.chkDisableMMCSS.Checked := ASetup.AudioRecorderDisableMMCSS;
+    frm.chkOverrideSleepMode.Checked := ASetup.SystemOverrideSleepMode;
     frm.chkEnableStreamSwitchDetection.Checked := ASetup.AudioRecorderEnableStreamSwitchDetection;
     frm.cbxOutputFormat.ItemIndex := ASetup.AudioRecorderAudioFormat;
 
@@ -502,6 +504,8 @@ begin
           ASetup.PFLDeviceId := frm.GetSelectedDeviceId(frm.cbCueOut)
         else
           ASetup.PFLDeviceId := '';
+
+        ASetup.SystemOverrideSleepMode := frm.chkOverrideSleepMode.Checked;
 
         ASetup.AudioRecorderCaptureBufferMs := frm.tbRecCapBufferSize.Position;
         ASetup.AudioRecorderAutoBufferSize := LongBool(frm.tbRecCapBufferSize.Tag);

@@ -1,10 +1,10 @@
-# MfRDJ Installation & Setup Guide
+# MfRDJ Pro Installation & Setup Guide
 
 ---
 
 # Overview
 
-MfRDJ supports two setup modes:
+MfRDJ Pro supports two setup modes:
 
 ## Local Setup (Single PC)
 
@@ -188,7 +188,7 @@ Note: No firewall setup needed
 
 ---
 
-#  Running MfRdjPro
+#  Running MfRdj Pro
 
 First run:
 

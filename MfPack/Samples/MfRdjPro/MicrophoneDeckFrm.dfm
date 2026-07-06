@@ -374,7 +374,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
     end
     object tbBalance: TMfTrackBar
       Left = 4
-      Top = 520
+      Top = 522
       Width = 296
       Height = 40
       Margins.Left = 0
@@ -3075,6 +3075,6 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
     Interval = 40
     OnTimer = tmrUiTimer
     Left = 202
-    Top = 8
+    Top = 50
   end
 end

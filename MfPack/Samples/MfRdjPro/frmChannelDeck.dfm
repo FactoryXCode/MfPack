@@ -258,6 +258,7 @@ object frmChannelDeck: TfrmChannelDeck
       Top = 12
       Width = 57
       Height = 15
+      Alignment = taCenter
       Caption = '00:00:00.00'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clAqua
@@ -267,7 +268,7 @@ object frmChannelDeck: TfrmChannelDeck
       ParentFont = False
     end
     object Label3: TLabel
-      Left = 192
+      Left = 189
       Top = 460
       Width = 23
       Height = 14
@@ -286,7 +287,7 @@ object frmChannelDeck: TfrmChannelDeck
       Layout = tlCenter
     end
     object Label4: TLabel
-      Left = 193
+      Left = 188
       Top = 305
       Width = 24
       Height = 14
@@ -305,8 +306,8 @@ object frmChannelDeck: TfrmChannelDeck
       Layout = tlCenter
     end
     object Label5: TLabel
-      Left = 199
-      Top = 151
+      Left = 196
+      Top = 152
       Width = 9
       Height = 14
       Margins.Left = 2
@@ -459,8 +460,8 @@ object frmChannelDeck: TfrmChannelDeck
       OnDblClick = tbVolumeDblClick
     end
     object tbPitch: TMfTrackBar
-      Left = 128
-      Top = 37
+      Left = 126
+      Top = 40
       Width = 39
       Height = 442
       Margins.Left = 0
@@ -497,7 +498,7 @@ object frmChannelDeck: TfrmChannelDeck
       OnDblClick = tbPitchDblClick
     end
     object tbBalance: TMfTrackBar
-      Left = 4
+      Left = 0
       Top = 520
       Width = 296
       Height = 40
@@ -533,7 +534,7 @@ object frmChannelDeck: TfrmChannelDeck
       OnDblClick = tbBalanceDblClick
     end
     object tbEqQ: TMfTrackBar
-      Left = 183
+      Left = 182
       Top = 17
       Width = 39
       Height = 133
@@ -571,7 +572,7 @@ object frmChannelDeck: TfrmChannelDeck
       OnDblClick = tbEqQDblClick
     end
     object tbEqCenterFreqHz: TMfTrackBar
-      Left = 183
+      Left = 182
       Top = 171
       Width = 39
       Height = 133
@@ -610,7 +611,7 @@ object frmChannelDeck: TfrmChannelDeck
       OnDblClick = tbEqCenterFreqHzDblClick
     end
     object tbEqGainDb: TMfTrackBar
-      Left = 183
+      Left = 182
       Top = 325
       Width = 39
       Height = 133
@@ -687,8 +688,8 @@ object frmChannelDeck: TfrmChannelDeck
       OnDblClick = tbInputGainDblClick
     end
     object pbProgress: TMfLevelProgressBar
-      Left = 244
-      Top = 32
+      Left = 242
+      Top = 33
       Width = 39
       Height = 473
       Color = clGray
@@ -827,17 +828,17 @@ object frmChannelDeck: TfrmChannelDeck
     ParentBackground = False
     ParentDoubleBuffered = False
     TabOrder = 1
-    object Bevel5: TBevel
-      Left = 0
-      Top = 193
-      Width = 297
-      Height = 54
-    end
     object Bevel6: TBevel
       Left = 222
-      Top = 137
-      Width = 75
-      Height = 57
+      Top = 133
+      Width = 76
+      Height = 60
+    end
+    object Bevel5: TBevel
+      Left = -2
+      Top = 192
+      Width = 297
+      Height = 54
     end
     object btnPFL: TMPxpButton
       Left = 7

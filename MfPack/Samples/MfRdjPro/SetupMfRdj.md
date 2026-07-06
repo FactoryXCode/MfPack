@@ -1,4 +1,4 @@
-## **MfRdj Install/Setup instructions**
+## **MfRdj Pro Install/Setup instructions**
 
 
 **Caddy**
@@ -22,7 +22,7 @@ HTTPS/SSL Certificate: Free Certificate from Let's Encrypt (enable)
 Now register and Apply to your router settings.
 
 
-## MfRdj Project setup
+## MfRdj Pro Project setup
 Before opening the project, first install the MfPack components (MfPack\Samples\Components) and the RDJ components (MfPack\Samples\MfRdjJ\Controls).
 After installing the components, open the  project and add the following Search Paths: 
   ..\MfPack\src
@@ -34,10 +34,10 @@ Set
   Unit Output Directory: .\$(Platform)\$(Config)
   
   
-Build the RDJ project.
+Build the RDJ Pro project.
 No hints, Warnings or error should occure.
 
-## MfRDJ Applicationsetup
+## MfRDJ Pro Applicationsetup
 
 **Run MfRDJ**
 At first time MfRDJ will create the setup ini file and opens the Setup dialog.

@@ -117,8 +117,8 @@ const
   // byte stream still emits small internal moof/mdat chunks, but the public
   // Caddy/MSE files concatenate several of those chunks into one appendable
   // fMP4 segment.
-  RDJ_MSE_SOURCE_FRAGMENT_ESTIMATE_MS = 300;
-  RDJ_MSE_GROUP_SOURCE_FRAGMENTS_DEFAULT = 7;  // ~2.1s at 300ms/source fragment
+  RDJ_MSE_SOURCE_FRAGMENT_ESTIMATE_MS = 1000;
+  RDJ_MSE_GROUP_SOURCE_FRAGMENTS_DEFAULT = 4;  // ~4s at 1s/source fragment
 
   RDJ_MSE_MANIFEST_POLL_MS = 750;
   // Publish the first new session as soon as one complete public fragment is
@@ -129,12 +129,13 @@ const
   RDJ_MSE_GROUP_FORCE_FLUSH_MIN_MS = 2500;
   RDJ_MSE_GROUP_FORCE_FLUSH_FACTOR = 3;
 
-  // Keep a bounded public live window.  At the normal ~3 second public segment
-  // duration this is about 6-7 minutes and roughly 136 .m4s files.
-  RDJ_MSE_PUBLIC_WINDOW_TARGET_MS = 408000;
-  RDJ_MSE_KEEP_PATCHED_FRAGMENTS_DEFAULT = 136;
-  RDJ_MSE_KEEP_PATCHED_FRAGMENTS_MIN = 45;
-  RDJ_MSE_KEEP_PATCHED_FRAGMENTS_MAX = 136;
+  // Keep a short bounded public live window. The browser metadata is current,
+  // so a large backlog makes restarted clients hear older audio while showing
+  // the new artist/title.
+  RDJ_MSE_PUBLIC_WINDOW_TARGET_MS = 45000;
+  RDJ_MSE_KEEP_PATCHED_FRAGMENTS_DEFAULT = 24;
+  RDJ_MSE_KEEP_PATCHED_FRAGMENTS_MIN = 12;
+  RDJ_MSE_KEEP_PATCHED_FRAGMENTS_MAX = 48;
 
   // If the H.264/fMP4 writer starts taking about a second per video sample and
   // raw video frames are backing up, the process memory grows fast. Roll the
@@ -216,6 +217,7 @@ type
     procedure CleanupMirroredFragmentsAfterManifest(const ALiveJsonFileName: string;
                                                     const ASafeFirst: Integer;
                                                     const ASafeLast: Integer);
+    procedure AdvanceMirroredPatchedSeq(const ASeq: Integer);
 
   protected
 
@@ -459,6 +461,7 @@ type
     procedure RecordTapPreFx(const pData: PSingle;
                              const Frames: Integer;
                              const pwfx: PWAVEFORMATEX);
+    procedure RecoverBroadcastAfterAudioGraphRestart(const AReason: string);
   end;
 
 var
@@ -1429,6 +1432,55 @@ begin
 end;
 
 
+procedure TRdjProMseMirrorThread.AdvanceMirroredPatchedSeq(const ASeq: Integer);
+var
+  Gap: Integer;
+
+begin
+
+  if ASeq <= 0 then
+    Exit;
+
+  FLock.Acquire();
+  try
+    if ASeq <= FLastMirroredPatchedSeq then
+      Exit;
+
+    if ASeq = (FLastMirroredPatchedSeq + 1) then
+      begin
+        FLastMirroredPatchedSeq := ASeq;
+        Exit;
+      end;
+
+    Gap := ASeq - FLastMirroredPatchedSeq - 1;
+
+    // If the missing fragment is already far outside the public live window,
+    // waiting for it will freeze the Caddy manifest forever. Resync to the
+    // newest successfully mirrored fragment and let live.json publish a fresh
+    // rolling window.
+    if Gap >= RDJ_MSE_KEEP_PATCHED_FRAGMENTS_MAX then
+      begin
+        OutputDebugString(PChar(Format('TRdjProMseMirrorThread: resync stale mirror gap oldSafeLast=%d got=%d gap=%d',
+                                       [FLastMirroredPatchedSeq,
+                                        ASeq,
+                                        Gap])));
+        FLastMirroredPatchedSeq := ASeq;
+        Exit;
+      end;
+
+    // Short gaps can still be filled by queued jobs. Log sparsely; this path can
+    // otherwise overflow the Delphi debugger after long broadcasts.
+    if (ASeq <= 5) or ((ASeq mod 25) = 0) then
+      OutputDebugString(PChar(Format('TRdjProMseMirrorThread: mirror sequence gap, keeping safeLast=%d got=%d gap=%d',
+                                     [FLastMirroredPatchedSeq,
+                                      ASeq,
+                                      Gap])));
+  finally
+    FLock.Release();
+  end;
+end;
+
+
 procedure TRdjProMseMirrorThread.Execute();
 var
   Job: TRdjProMseMirrorJob;
@@ -1475,20 +1527,7 @@ begin
                 // Only advance FLastMirroredPatchedSeq after the file was
                 // actually written on the public side.
                 if WriteOk and (Seq > 0) then
-                  begin
-                    FLock.Acquire();
-                    try
-                      if Seq = (FLastMirroredPatchedSeq + 1) then
-                        FLastMirroredPatchedSeq := Seq
-                      else
-                      if Seq > (FLastMirroredPatchedSeq + 1) then
-                        OutputDebugString(PChar(Format('TRdjProMseMirrorThread: mirror sequence gap, keeping safeLast=%d got=%d',
-                                                       [FLastMirroredPatchedSeq,
-                                                        Seq])));
-                    finally
-                      FLock.Release();
-                    end;
-                  end;
+                  AdvanceMirroredPatchedSeq(Seq);
               end;
 
             mjkCopyFile:
@@ -1515,20 +1554,7 @@ begin
                   end;
 
                 if WriteOk and (Seq > 0) then
-                  begin
-                    FLock.Acquire();
-                    try
-                      if Seq = (FLastMirroredPatchedSeq + 1) then
-                        FLastMirroredPatchedSeq := Seq
-                      else
-                      if Seq > (FLastMirroredPatchedSeq + 1) then
-                        OutputDebugString(PChar(Format('TRdjProMseMirrorThread: mirror sequence gap, keeping safeLast=%d got=%d',
-                                                       [FLastMirroredPatchedSeq,
-                                                        Seq])));
-                    finally
-                      FLock.Release();
-                    end;
-                  end;
+                  AdvanceMirroredPatchedSeq(Seq);
               end;
 
             mjkDeleteFile:
@@ -1717,6 +1743,12 @@ begin
             end;
         end;
 
+      if FRdjProPreviewing and not FRdjProStaticImage then
+        begin
+          RefreshRdjProCameraPreview();
+          ScheduleRdjProCameraPreviewRefresh();
+        end;
+
       if ModeChanged and FRdjProBroadcasting then
         OutputDebugString(PChar('RDJ Pro live source switched to camera without recorder restart.'));
     end
@@ -1798,7 +1830,10 @@ begin
       chkRdjProCamera.Checked := False;
       chkRdjProCamera.Down := False;
       chkRdjProCamera.Enabled := not FRecordingRdjPro;
-      ShowRdjProStaticPreview();
+
+      if ModeChanged and FRdjProBroadcasting then
+        PrepareBroadcastMseVideoSourceSwitch();
+
       QueueRdjProStaticVideoSample();
 
       if not FRdjProBroadcasting then
@@ -1808,6 +1843,7 @@ begin
         end;
 
       StopRdjProCamera();
+      ShowRdjProStaticPreview();
     end
   else if FRdjProBroadcasting then
     begin
@@ -1816,6 +1852,8 @@ begin
       chkRdjProCamera.Checked := True;
       chkRdjProCamera.Down := True;
       chkRdjProCamera.Enabled := False;
+      RefreshRdjProCameraPreview();
+      ScheduleRdjProCameraPreviewRefresh();
     end
   else if chkRdjProCamera.Checked then
     begin
@@ -2319,6 +2357,8 @@ end;
 
 
 procedure TfrmMediaServer.ScheduleRdjProCameraPreviewRefresh();
+const
+  RDJ_CAMERA_PREVIEW_REFRESH_DELAYS: array[0..3] of Integer = (100, 250, 500, 1000);
 var
   RefreshThread: TThread;
 
@@ -2331,20 +2371,34 @@ begin
 
   RefreshThread := TThread.CreateAnonymousThread(
     procedure
+    var
+      I: Integer;
+      RefreshProc: TThreadProcedure;
+      ClearProc: TThreadProcedure;
+
     begin
 
-      Sleep(250);
+      for I := Low(RDJ_CAMERA_PREVIEW_REFRESH_DELAYS) to High(RDJ_CAMERA_PREVIEW_REFRESH_DELAYS) do
+        begin
+          Sleep(RDJ_CAMERA_PREVIEW_REFRESH_DELAYS[I]);
 
+          RefreshProc := procedure
+                         begin
+
+                           if FRdjProPreviewing and
+                              (not FRdjProStaticImage) then
+                             RefreshRdjProCameraPreview();
+                         end;
+          TThread.Queue(nil,
+                        RefreshProc);
+        end;
+
+      ClearProc := procedure
+                   begin
+                     FPreviewFramePending := False;
+                   end;
       TThread.Queue(nil,
-                    procedure
-                    begin
-
-                      FPreviewFramePending := False;
-
-                      if FRdjProPreviewing and
-                         (not FRdjProStaticImage) then
-                        RefreshRdjProCameraPreview();
-                    end);
+                    ClearProc);
     end);
   RefreshThread.Start();
 end;
@@ -2382,6 +2436,11 @@ begin
   hr := FStaticVideoMediaType.SetUINT64(MF_MT_FRAME_SIZE,
                                         RdjMakeUINT64(RDJ_STATIC_VIDEO_WIDTH,
                                                      RDJ_STATIC_VIDEO_HEIGHT));
+  if FAILED(hr) then
+    Exit;
+
+  hr := FStaticVideoMediaType.SetUINT32(MF_MT_DEFAULT_STRIDE,
+                                        RDJ_STATIC_VIDEO_WIDTH * 4);
   if FAILED(hr) then
     Exit;
 
@@ -2460,7 +2519,9 @@ begin
       try
         for Row := 0 to TargetHeight - 1 do
           begin
-            Src := FStaticVideoBitmap.ScanLine[TargetHeight - 1 - Row];
+            // Keep the bitmap's display row order and make that explicit with
+            // MF_MT_DEFAULT_STRIDE on the media type.
+            Src := FStaticVideoBitmap.ScanLine[Row];
             Dst := Data;
             Inc(Dst,
                 Row * Stride);
@@ -2810,6 +2871,9 @@ procedure TfrmMediaServer.RecordTapPreFx(const pData: PSingle;
                                          const pwfx: PWAVEFORMATEX);
 var
   hr: HRESULT;
+  PendingStartProc: TThreadProcedure;
+  StopLocalProc: TThreadProcedure;
+  StopBroadcastProc: TThreadProcedure;
 
 begin
 
@@ -2824,18 +2888,21 @@ begin
 
       if (FPendingLocalRecording or FPendingBroadcastRecording) and
          (TInterlocked.CompareExchange(FPendingMp4StartQueued, 1, 0) = 0) then
-        TThread.Queue(nil,
-                      procedure
-                      begin
+        begin
+          PendingStartProc := procedure
+                              begin
 
-                      try
+                                try
 
-                        TryCompletePendingMp4Starts();
-                      finally
+                                  TryCompletePendingMp4Starts();
+                                finally
 
-                        TInterlocked.Exchange(FPendingMp4StartQueued, 0);
-                      end;
-                      end);
+                                  TInterlocked.Exchange(FPendingMp4StartQueued, 0);
+                                end;
+                              end;
+          TThread.Queue(nil,
+                        PendingStartProc);
+        end;
     end;
 
   if (not FRdjProRecording) and
@@ -2865,12 +2932,13 @@ begin
 
             OutputDebugString(PChar('RDJ Pro local MP4 PushPcmFloat32 exception: ' + E.ClassName + ': ' + E.Message));
             FRdjProRecording := False;
-            TThread.Queue(nil,
-                          procedure
-                          begin
+            StopLocalProc := procedure
+                             begin
 
-                            StopRdjProRecording();
-                          end);
+                               StopRdjProRecording();
+                             end;
+            TThread.Queue(nil,
+                          StopLocalProc);
           end;
       end;
     end;
@@ -2895,12 +2963,13 @@ begin
             OutputDebugString(PChar('RDJ Pro broadcast MP4 PushPcmFloat32 exception: ' + E.ClassName + ': ' + E.Message));
             FRdjProBroadcasting := False;
 
-            TThread.Queue(nil,
-                          procedure
-                          begin
+            StopBroadcastProc := procedure
+                                 begin
 
-                            StopRdjProBroadcast();
-                          end);
+                                   StopRdjProBroadcast();
+                                 end;
+            TThread.Queue(nil,
+                          StopBroadcastProc);
           end;
       end;
     end;
@@ -4369,6 +4438,7 @@ begin
     procedure
     var
       StopHr: HRESULT;
+      RestartUiProc: TThreadProcedure;
 
     begin
 
@@ -4377,172 +4447,191 @@ begin
       if Assigned(OldRecorder) then
         begin
           StopHr := OldRecorder.StopRecording();
-          if SUCCEEDED(StopHr) then
-            OldRecorder.Free()
-          else
-            OutputDebugString(PChar(Format('TfrmMediaServer.MSE recorder restart: old recorder not freed because StopRecording failed hr=0x%.8x',
-                                           [Cardinal(StopHr)])));
+          if FAILED(StopHr) then
+            OutputDebugString(PChar(Format('TfrmMediaServer.MSE recorder restart: StopRecording failed hr=0x%.8x; freeing recorder via destructor fallback',
+                                            [Cardinal(StopHr)])));
+
+          OldRecorder.Free();
         end;
 
+      RestartUiProc := procedure
+                       var
+                         Hr: HRESULT;
+                         FileName: string;
+                         NewRecorder: TRdjProFMp4Recorder;
+                         RestartVideoType: IMFMediaType;
+                         RestartOk: Boolean;
+
+                       begin
+
+                         RestartOk := False;
+                         NewRecorder := nil;
+                         RestartVideoType := nil;
+
+                         OutputDebugString(PChar(Format('TfrmMediaServer.MSE recorder restart stop completed: count=%d stopHr=0x%.8x reason=%s',
+                                                        [RestartNo,
+                                                         Cardinal(StopHr),
+                                                         Reason])));
+
+                         try
+
+                           if FAILED(StopHr) then
+                             Exit;
+
+                           if not chkBroadcast.Down then
+                             Exit;
+
+                           CleanupBroadcastMseArtifactsOnStop();
+                           ResetBroadcastMseDebugDump();
+
+                           if FRdjProStaticImage then
+                             begin
+
+                               if not EnsureRdjProStaticVideoMediaType() then
+                                 Exit;
+
+                               RestartVideoType := FStaticVideoMediaType;
+                             end
+                           else
+                             begin
+
+                               if not Assigned(FRdjProCaptureManager) then
+                                 Exit;
+
+                               if not EnsureRdjProVideoSampleReader() then
+                                 Exit;
+
+                               if not Assigned(FRdjProCaptureManager.VideoSourceReaderMediaType) then
+                                 Exit;
+
+                               RestartVideoType := FRdjProCaptureManager.VideoSourceReaderMediaType;
+                             end;
+
+                           NewRecorder := TRdjProFMp4Recorder.Create();
+
+                           Hr := NewRecorder.SetVideoPreviewMediaType(RestartVideoType);
+                           if FAILED(Hr) then
+                             begin
+                               OutputDebugString(PChar(Format(
+                                 'TfrmMediaServer.MSE recorder restart SetVideoPreviewMediaType failed: hr=0x%.8x',
+                                 [Cardinal(Hr)])));
+                               Exit;
+                             end;
+
+                           if not FRecordVideoOnly then
+                             begin
+                               if not FLastRdjProAudioWfxValid then
+                                 begin
+                                   OutputDebugString(PChar(
+                                     'TfrmMediaServer.MSE recorder restart failed: audio format not available'));
+                                   Exit;
+                                 end;
+
+                               Hr := NewRecorder.SetAudioWaveFormat(@FLastRdjProAudioWfx);
+                               if FAILED(Hr) then
+                                 begin
+                                   OutputDebugString(PChar(Format(
+                                     'TfrmMediaServer.MSE recorder restart SetAudioWaveFormat failed: hr=0x%.8x',
+                                     [Cardinal(Hr)])));
+                                   Exit;
+                                 end;
+                             end;
+
+                           FileName := ResolveCaddyLiveMp4Path();
+
+                           Hr := NewRecorder.StartRecording(FileName,
+                                                            FRecordVideoOnly);
+                           if FAILED(Hr) then
+                             begin
+                               OutputDebugString(PChar(Format(
+                                 'TfrmMediaServer.MSE recorder restart StartRecording failed: hr=0x%.8x',
+                                 [Cardinal(Hr)])));
+                               Exit;
+                             end;
+
+                           FRdjProBroadcastMp4Recorder := NewRecorder;
+                           NewRecorder := nil;
+                           FActiveBroadcastVideoMediaType := RestartVideoType;
+
+                           ResetBroadcastMseDebugDump();
+
+                           FRdjProBroadcasting := True;
+                           if FRdjProStaticImage and not FRdjProRecording then
+                             begin
+                               FStaticVideoFrameIndex := 0;
+                               FStaticVideoStartTick := 0;
+                               FStaticVideoLastTick := 0;
+                             end;
+                           tmrTime.Enabled := True;
+                           chkBroadcast.Checked := True;
+                           chkBroadcast.Down := True;
+                           chkRdjProCamera.Enabled := FRdjProStaticImage and
+                                                      (not FRecordingRdjPro);
+                           chkRecordVideoOnly.Enabled := False;
+                           chkRdjProStaticImage.Enabled := not FRecordingRdjPro;
+                           UpdateOnAirLamp(True);
+                           if not FRdjProStaticImage then
+                             begin
+                               RefreshRdjProCameraPreview();
+                               ScheduleRdjProCameraPreviewRefresh();
+                             end;
+
+                           RestartOk := True;
+
+                           OutputDebugString(PChar(Format(
+                             'TfrmMediaServer.MSE recorder restart completed: count=%d sessionId=%s reason=%s',
+                             [RestartNo,
+                              FBroadcastMseSessionId,
+                              Reason])));
+                         finally
+                           if Assigned(NewRecorder) then
+                             begin
+                               NewRecorder.StopRecording();
+                               NewRecorder.Free();
+                             end;
+
+                           if not RestartOk then
+                             begin
+                               FRdjProBroadcasting := False;
+                               chkBroadcast.Checked := False;
+                               chkBroadcast.Down := False;
+                               chkRdjProCamera.Enabled := not FRecordingRdjPro;
+                               chkRecordVideoOnly.Enabled := not FRecordingRdjPro;
+                               chkRdjProStaticImage.Enabled := not FRecordingRdjPro;
+                               UpdateOnAirLamp(False);
+                               OutputDebugString(PChar(Format(
+                                 'TfrmMediaServer.MSE recorder restart failed: count=%d reason=%s',
+                                 [RestartNo,
+                                  Reason])));
+                             end;
+
+                           TInterlocked.Exchange(FBroadcastMseRecorderRestartQueued, 0);
+                         end;
+                       end;
       TThread.Queue(nil,
-                    procedure
-                    var
-                      Hr: HRESULT;
-                      FileName: string;
-                      NewRecorder: TRdjProFMp4Recorder;
-                      RestartVideoType: IMFMediaType;
-                      RestartOk: Boolean;
-
-                    begin
-
-                      RestartOk := False;
-                      NewRecorder := nil;
-                      RestartVideoType := nil;
-
-                      OutputDebugString(PChar(Format('TfrmMediaServer.MSE recorder restart stop completed: count=%d stopHr=0x%.8x reason=%s',
-                                                     [RestartNo,
-                                                      Cardinal(StopHr),
-                                                      Reason])));
-
-                      try
-
-                        if FAILED(StopHr) then
-                          Exit;
-
-                        if not chkBroadcast.Down then
-                          Exit;
-
-                        CleanupBroadcastMseArtifactsOnStop();
-                        ResetBroadcastMseDebugDump();
-
-                        if FRdjProStaticImage then
-                          begin
-
-                            if not EnsureRdjProStaticVideoMediaType() then
-                              Exit;
-
-                            RestartVideoType := FStaticVideoMediaType;
-                          end
-                        else
-                          begin
-
-                            if not Assigned(FRdjProCaptureManager) then
-                              Exit;
-
-                            if not EnsureRdjProVideoSampleReader() then
-                              Exit;
-
-                            if not Assigned(FRdjProCaptureManager.VideoSourceReaderMediaType) then
-                              Exit;
-
-                            RestartVideoType := FRdjProCaptureManager.VideoSourceReaderMediaType;
-                          end;
-
-                        NewRecorder := TRdjProFMp4Recorder.Create();
-
-                        Hr := NewRecorder.SetVideoPreviewMediaType(RestartVideoType);
-                        if FAILED(Hr) then
-                          begin
-                            OutputDebugString(PChar(Format(
-                              'TfrmMediaServer.MSE recorder restart SetVideoPreviewMediaType failed: hr=0x%.8x',
-                              [Cardinal(Hr)])));
-                            Exit;
-                          end;
-
-                        if not FRecordVideoOnly then
-                          begin
-                            if not FLastRdjProAudioWfxValid then
-                              begin
-                                OutputDebugString(PChar(
-                                  'TfrmMediaServer.MSE recorder restart failed: audio format not available'));
-                                Exit;
-                              end;
-
-                            Hr := NewRecorder.SetAudioWaveFormat(@FLastRdjProAudioWfx);
-                            if FAILED(Hr) then
-                              begin
-                                OutputDebugString(PChar(Format(
-                                  'TfrmMediaServer.MSE recorder restart SetAudioWaveFormat failed: hr=0x%.8x',
-                                  [Cardinal(Hr)])));
-                                Exit;
-                              end;
-                          end;
-
-                        FileName := ResolveCaddyLiveMp4Path();
-
-                        Hr := NewRecorder.StartRecording(FileName,
-                                                         FRecordVideoOnly);
-                        if FAILED(Hr) then
-                          begin
-                            OutputDebugString(PChar(Format(
-                              'TfrmMediaServer.MSE recorder restart StartRecording failed: hr=0x%.8x',
-                              [Cardinal(Hr)])));
-                            Exit;
-                          end;
-
-                        FRdjProBroadcastMp4Recorder := NewRecorder;
-                        NewRecorder := nil;
-                        FActiveBroadcastVideoMediaType := RestartVideoType;
-
-                        ResetBroadcastMseDebugDump();
-
-                        FRdjProBroadcasting := True;
-                        if FRdjProStaticImage and not FRdjProRecording then
-                          begin
-                            FStaticVideoFrameIndex := 0;
-                            FStaticVideoStartTick := 0;
-                            FStaticVideoLastTick := 0;
-                          end;
-                        tmrTime.Enabled := True;
-                        chkBroadcast.Checked := True;
-                        chkBroadcast.Down := True;
-                        chkRdjProCamera.Enabled := FRdjProStaticImage and
-                                                   (not FRecordingRdjPro);
-                        chkRecordVideoOnly.Enabled := False;
-                        chkRdjProStaticImage.Enabled := not FRecordingRdjPro;
-                        UpdateOnAirLamp(True);
-                        if not FRdjProStaticImage then
-                          begin
-                            RefreshRdjProCameraPreview();
-                            ScheduleRdjProCameraPreviewRefresh();
-                          end;
-
-                        RestartOk := True;
-
-                        OutputDebugString(PChar(Format(
-                          'TfrmMediaServer.MSE recorder restart completed: count=%d sessionId=%s reason=%s',
-                          [RestartNo,
-                           FBroadcastMseSessionId,
-                           Reason])));
-                      finally
-                        if Assigned(NewRecorder) then
-                          begin
-                            NewRecorder.StopRecording();
-                            NewRecorder.Free();
-                          end;
-
-                        if not RestartOk then
-                          begin
-                            FRdjProBroadcasting := False;
-                            chkBroadcast.Checked := False;
-                            chkBroadcast.Down := False;
-                            chkRdjProCamera.Enabled := not FRecordingRdjPro;
-                            chkRecordVideoOnly.Enabled := not FRecordingRdjPro;
-                            chkRdjProStaticImage.Enabled := not FRecordingRdjPro;
-                            UpdateOnAirLamp(False);
-                            OutputDebugString(PChar(Format(
-                              'TfrmMediaServer.MSE recorder restart failed: count=%d reason=%s',
-                              [RestartNo,
-                               Reason])));
-                          end;
-
-                        TInterlocked.Exchange(FBroadcastMseRecorderRestartQueued, 0);
-                      end;
-                    end);
+                    RestartUiProc);
     end);
 
   RestartThread.FreeOnTerminate := True;
   RestartThread.Start();
+end;
+
+
+procedure TfrmMediaServer.RecoverBroadcastAfterAudioGraphRestart(const AReason: string);
+var
+  Reason: string;
+
+begin
+
+  if (not FRdjProBroadcasting) and
+     (not chkBroadcast.Down) then
+    Exit;
+
+  Reason := Trim(AReason);
+  if Reason = '' then
+    Reason := 'audio graph recovery';
+
+  QueueBroadcastMseRecorderRestart('audio graph recovered: ' + Reason);
 end;
 
 
@@ -4553,6 +4642,7 @@ var
   PublicAgeMs: UInt64;
   SinceLastFlushMs: UInt64;
   PublicStaleMs: UInt64;
+  FlushProc: TThreadProcedure;
 
 begin
 
@@ -4645,39 +4735,40 @@ begin
      FBroadcastMseFragmentSeq,
      FBroadcastMsePublicSeq])));
 
+  FlushProc := procedure
+               var
+                 hr: HRESULT;
+
+               begin
+                 try
+                   if FRdjProBroadcasting and Assigned(FRdjProCaptureManager) then
+                     begin
+                       hr := FRdjProCaptureManager.FlushVideoSourceReaderHard(1500);
+                       OutputDebugString(PChar(Format(
+                         'TfrmMediaServer.MSE video SourceReader hard flush completed hr=0x%.8x',
+                         [Cardinal(hr)])));
+
+                       if SUCCEEDED(hr) then
+                         FLastBroadcastVideoSampleTick := GetTickCount64()
+                       else if VideoAgeMs >= 15000 then
+                         begin
+                           // With no video, the SinkWriter keeps unmatched audio
+                           // internally even though our own queues remain empty.
+                           // Roll over the recorder before that hidden buffer can
+                           // exhaust the 32-bit process address space.
+                           QueueBroadcastMseRecorderRestart(Format(
+                             'camera SourceReader recovery failed: hr=0x%.8x videoAgeMs=%d publicAgeMs=%d',
+                             [Cardinal(hr),
+                              VideoAgeMs,
+                              PublicAgeMs]));
+                         end;
+                     end;
+                 finally
+                   TInterlocked.Exchange(FBroadcastVideoFlushQueued, 0);
+                 end;
+               end;
   TThread.Queue(nil,
-                procedure
-                var
-                  hr: HRESULT;
-
-                begin
-                  try
-                    if FRdjProBroadcasting and Assigned(FRdjProCaptureManager) then
-                      begin
-                        hr := FRdjProCaptureManager.FlushVideoSourceReaderHard(1500);
-                        OutputDebugString(PChar(Format(
-                          'TfrmMediaServer.MSE video SourceReader hard flush completed hr=0x%.8x',
-                          [Cardinal(hr)])));
-
-                        if SUCCEEDED(hr) then
-                          FLastBroadcastVideoSampleTick := GetTickCount64()
-                        else if VideoAgeMs >= 15000 then
-                          begin
-                            // With no video, the SinkWriter keeps unmatched audio
-                            // internally even though our own queues remain empty.
-                            // Roll over the recorder before that hidden buffer can
-                            // exhaust the 32-bit process address space.
-                            QueueBroadcastMseRecorderRestart(Format(
-                              'camera SourceReader recovery failed: hr=0x%.8x videoAgeMs=%d publicAgeMs=%d',
-                              [Cardinal(hr),
-                               VideoAgeMs,
-                               PublicAgeMs]));
-                          end;
-                      end;
-                  finally
-                    TInterlocked.Exchange(FBroadcastVideoFlushQueued, 0);
-                  end;
-                end);
+                FlushProc);
 end;
 
 
@@ -4933,13 +5024,13 @@ begin
     procedure
     var
       hr: HRESULT;
+      StopUiProc: TThreadProcedure;
 
     begin
 
       hr := Recorder.StopRecording();
 
-      TThread.Queue(nil,
-                    procedure
+      StopUiProc := procedure
                     begin
 
                       if FAILED(hr) then
@@ -4950,7 +5041,9 @@ begin
                       CleanupBroadcastMseArtifactsOnStop();
                       ResetBroadcastMseDebugDump();
                       StopRdjProVideoSampleReaderIfIdle();
-                    end);
+                    end;
+      TThread.Queue(nil,
+                    StopUiProc);
     end);
 
   StopThread.FreeOnTerminate := True;
@@ -4985,31 +5078,33 @@ begin
   Recorder := FRdjProMp4Recorder;
 
   StopThread := TThread.CreateAnonymousThread(procedure
-                                              var
-                                                hr: HRESULT;
+                                               var
+                                                 hr: HRESULT;
+                                                 StopUiProc: TThreadProcedure;
 
-                                              begin
+                                               begin
 
-                                                hr := Recorder.StopRecording();
+                                                 hr := Recorder.StopRecording();
 
-                                                TThread.Queue(nil,
-                                                              procedure
-                                                              begin
+                                                 StopUiProc := procedure
+                                                               begin
 
-                                                                if FAILED(hr) then
-                                                                  begin
+                                                                 if FAILED(hr) then
+                                                                   begin
 
-                                                                    lblRecorderStatus.Caption := 'Recorder stop failed: ' + IntToStr(hr);
+                                                                     lblRecorderStatus.Caption := 'Recorder stop failed: ' + IntToStr(hr);
                                                                     OutputDebugString(PChar('RDJ Pro MP4 StopRecording failed: ' + IntToStr(hr)));
                                                                   end
                                                                 else
                                                                   begin
 
-                                                                    lblRecorderStatus.Caption := 'Recorder is ready.';
-                                                                    StopRdjProVideoSampleReaderIfIdle();
-                                                                  end;
-                                                              end);
-                                              end);
+                                                                     lblRecorderStatus.Caption := 'Recorder is ready.';
+                                                                     StopRdjProVideoSampleReaderIfIdle();
+                                                                   end;
+                                                               end;
+                                                 TThread.Queue(nil,
+                                                               StopUiProc);
+                                               end);
 
   StopThread.FreeOnTerminate := True;
   StopThread.Start();
