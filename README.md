@@ -410,6 +410,7 @@ This sample demonstrates how to build an audio mixer,
 effects and how to implement IceCast/Caddy for internet broadcasting.
 The Mixer is fully adjustable for audio endpoint assignments, mixer decks and loopback decks.
 All WASAPI code comes together in this sample.
+
 *Notes:* 
  You have to know the principles of WASAPI, MFT's and audio manipulation.
  This sample is very large and not suitable for beginners!
@@ -419,11 +420,26 @@ All WASAPI code comes together in this sample.
 
 
 **MfRDJ Pro Radio Mixer sample**
-MfRDJPro is the extended version of MfRDJ. Where MfRDJ mainly demonstrates DJ-style audio playback and mixing with MfPack, MfRDJPro adds a complete live broadcast layer around the mixer.
-MfRDJPro still provides the familiar RDJ functions: channel decks, loopback decks, microphone input, effects, PFL/cue monitoring, playlist editing, tag editing, and local recording. The Pro version expands this into an audio/video streaming application. It can combine the live program audio with camera video or a static video source, encode the result with Microsoft Media Foundation, and publish it as a browser-playable stream.
-The main technical difference is the broadcast pipeline. MfRDJPro uses Media Foundation Sink Writer and the MPEG-4 media sink to create fragmented MP4. RDJPro observes the generated MP4 byte stream, extracts and patches fMP4 fragments, writes a rolling live.json manifest, and serves the result through Caddy. Modern browsers can then play the stream using Media Source Extensions without needing Icecast for the video path.
-MfRDJPro also writes now-playing metadata, artwork links, on-air state, and listener counts to JSON files for the web interface. It includes safeguards for long-running broadcasts, such as bounded queues, fragment cleanup, Caddy mirroring, sleep prevention options, and clean shutdown handling.
-In short, MfRDJ is primarily the DJ/mixer sample, while MfRDJPro turns that mixer into a full live radio/video broadcast system using MfPack, WASAPI, Media Foundation, Caddy, JSON, and browser MSE playback,
+MfRDJPro is the extended version of MfRDJ.
+
+Where MfRDJ mainly demonstrates DJ-style audio playback and mixing with MfPack,
+MfRDJPro adds a complete live broadcast layer around the mixer.
+MfRDJPro still provides the familiar RDJ functions: channel decks, loopback decks, microphone input, 
+effects, PFL/cue monitoring, playlist editing, tag editing, and local recording. 
+The Pro version expands this into an audio/video streaming application. 
+It can combine the live program audio with camera video or a static video source, 
+encode the result with Microsoft Media Foundation, and publish it as a browser-playable stream.
+The main technical difference is the broadcast pipeline. 
+MfRDJPro uses Media Foundation Sink Writer and the MPEG-4 media sink to create fragmented MP4. 
+MfRDJPro observes the generated MP4 byte stream, extracts and patches fMP4 fragments, writes a rolling live.json manifest, 
+and serves the result through Caddy. 
+Modern browsers can then play the stream using Media Source Extensions without needing Icecast for the video path.
+MfRDJPro also writes now-playing metadata, artwork links, on-air state, and listener counts to JSON files for the web interface. 
+It includes safeguards for long-running broadcasts, such as bounded queues, fragment cleanup, Caddy mirroring, 
+sleep prevention options, and clean shutdown handling.
+In short, MfRDJ is primarily the DJ/mixer sample, while MfRDJPro turns that mixer into a full live radio/video broadcast system using MfPack, 
+WASAPI, Media Foundation, Caddy, JSON, and browser MSE playback,
+
 *Notes:* 
  You have to know the principles of WASAPI, MFT's and audio manipulation.
  This sample is very large and not suitable for beginners!
