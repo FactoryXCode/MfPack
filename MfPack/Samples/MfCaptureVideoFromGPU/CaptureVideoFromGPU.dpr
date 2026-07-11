@@ -1,11 +1,6 @@
 program CaptureVideoFromGPU;
 
 uses
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
   Vcl.Forms,
   frmCaptureVideoFromGpu in 'frmCaptureVideoFromGpu.pas' {FrmCapture},
   CaptureStreamEngine in 'CaptureStreamEngine.pas',

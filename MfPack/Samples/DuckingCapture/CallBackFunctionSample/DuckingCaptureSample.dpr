@@ -1,9 +1,11 @@
 program DuckingCaptureSample;
 
 uses
+  
   {$IFDEF FASTMM}
   FastMM4,
   {$ENDIF}
+
   Vcl.Forms,
   IddDialogChat in 'IddDialogChat.pas' {Form1},
   ChatTransport in 'ChatTransport.pas',

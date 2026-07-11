@@ -1,9 +1,11 @@
 program DuckingMediaPlayer;
 
 uses
+  
   {$IFDEF FASTMM}
   FastMM4,
   {$ENDIF}
+
   Vcl.Forms,
   frmDuckingMediaPlayer in 'frmDuckingMediaPlayer.pas' {Form1},
   MediaPlayer in 'MediaPlayer.pas';
