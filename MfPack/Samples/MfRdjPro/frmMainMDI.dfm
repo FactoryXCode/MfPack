@@ -719,7 +719,7 @@ object MainMDIFrm: TMainMDIFrm
         Top = 4
         Width = 175
         Height = 99
-        Hint = 'DoubleClick to select an image'
+        Hint = 'DoubleClick to select an image.'
         ParentShowHint = False
         ShowHint = True
         Stretch = True
@@ -894,7 +894,7 @@ object MainMDIFrm: TMainMDIFrm
       end
       object btnSetDjNameAndShowTitle: TMPxpButton
         Left = 9
-        Top = 4
+        Top = 5
         Width = 71
         Height = 99
         Margins.Left = 2

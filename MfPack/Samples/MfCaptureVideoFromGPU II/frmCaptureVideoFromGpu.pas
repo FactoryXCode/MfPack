@@ -73,6 +73,7 @@ uses
   {System}
   System.SysUtils,
   System.Classes,
+  System.IOUtils,
   System.StrUtils,
   {Vcl}
   Vcl.Controls,
@@ -111,11 +112,9 @@ type
     pnlBottom: TPanel;
     lblMonitor: TLabel;
     lblOutput: TLabel;
-    lblFPS: TLabel;
     cbxMonitor: TComboBox;
     edtOutput: TEdit;
     btnBrowse: TButton;
-    mmoLog: TMemo;
     lblAudio: TLabel;
     cbxAudioDevice: TComboBox;
     Bevel1: TBevel;
@@ -127,29 +126,32 @@ type
     rbRecVideoAndAudio: TRadioButton;
     rbRecVideo: TRadioButton;
     rbRecAudio: TRadioButton;
-    butStart: TButton;
-    butStop: TButton;
-    lblStatus: TLabel;
     Bevel3: TBevel;
     lblAudioBitrate: TLabel;
     cbxAudioBitrate: TComboBox;
     lblAudioCodec: TLabel;
     cbxAudioCodec: TComboBox;
     cbxAudioFormat: TComboBox;
+    tmrGUI: TTimer;
+    pnlControls: TPanel;
     Bevel4: TBevel;
-    cbxKeepOnTop: TCheckBox;
-    cbxHotKeys: TCheckBox;
-    Label1: TLabel;
+    Bevel5: TBevel;
+    lblAudioStateCaption: TLabel;
+    lblAudioState: TLabel;
+    lblFPS: TLabel;
+    lblStatus: TLabel;
     lblModeCaption: TLabel;
     lblMode: TLabel;
     lblRecTimeCaption: TLabel;
     lblRecTime: TLabel;
-    lblAudioStateCaption: TLabel;
-    lblAudioState: TLabel;
-    tmrGUI: TTimer;
-    Bevel5: TBevel;
+    Label1: TLabel;
     Bevel6: TBevel;
+    butStart: TButton;
+    butStop: TButton;
+    cbxKeepOnTop: TCheckBox;
+    cbxHotKeys: TCheckBox;
     butPlayOutput: TButton;
+    cbxEnableLogging: TCheckBox;
 
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -169,6 +171,7 @@ type
     procedure tmrGUITimer(Sender: TObject);
     procedure AnyUiChanged(Sender: TObject);
     procedure cbxAudioCodecCloseUp(Sender: TObject);
+    procedure cbxEnableLoggingClick(Sender: TObject);
 
   private
 
@@ -186,6 +189,8 @@ type
     FRecordingStartTick: UInt64;
     FAudioOnly: TLoopbackAudioOnlyRecorder;
     FActivityPinger: TScreenActivityPinger;
+    FLogFileName: string;
+    FLoggingActive: Boolean;
     // Resolution and frame rate.
     FCaptureWidth,
     FCaptureHeigth: UINT;
@@ -203,6 +208,10 @@ type
     function FormatElapsed(const ElapsedMs: UInt64): string;
 
     function SelectedAacAvgBytesPerSec: Cardinal;
+
+    procedure StartNewLogFile(const OutputFileName: string);
+    procedure StopLogFile();
+    procedure WriteLog(const Msg: string);
 
     procedure CaptureProgress(Sender: TObject;
                               FrameIndex: Int64;
@@ -235,15 +244,75 @@ implementation
 
 {$R *.dfm}
 
+procedure TfrmCapture.StartNewLogFile(const OutputFileName: string);
+var
+  LogDir: string;
+begin
+
+  StopLogFile();
+
+  if not cbxEnableLogging.Checked then
+    Exit;
+
+  LogDir := ExtractFilePath(ExpandFileName(OutputFileName));
+  if (LogDir = '') then
+    LogDir := ExtractFilePath(ParamStr(0));
+
+  LogDir := IncludeTrailingPathDelimiter(LogDir);
+  ForceDirectories(LogDir);
+
+  FLogFileName := LogDir + 'Log_' + FormatDateTime('yyyymmdd_hhnnss', Now) + '.txt';
+
+  try
+    TFile.WriteAllText(FLogFileName, '', TEncoding.UTF8);
+    FLoggingActive := True;
+    WriteLog('Log file: ' + FLogFileName);
+  except
+    FLogFileName := '';
+    FLoggingActive := False;
+  end;
+end;
+
+
+procedure TfrmCapture.StopLogFile();
+begin
+
+  if FLoggingActive then
+    begin
+      WriteLog('Log closed.');
+      FLoggingActive := False;
+    end;
+end;
+
+
+procedure TfrmCapture.WriteLog(const Msg: string);
+var
+  Line: string;
+begin
+
+  if (not FLoggingActive) or (FLogFileName = '') then
+    Exit;
+
+  Line := FormatDateTime('yyyy-mm-dd hh:nn:ss.zzz', Now) + '  ' + Msg + sLineBreak;
+
+  try
+    TFile.AppendAllText(FLogFileName, Line, TEncoding.UTF8);
+  except
+    FLoggingActive := False;
+  end;
+end;
+
+
 procedure TfrmCapture.FormCreate(Sender: TObject);
 begin
 
-  mmoLog.Clear;
   lblStatus.Caption := 'Idle';
   lblStatus.Font.Color := clGray;
 
   FIsRecording := False;
   FRecordingStartTick := 0;
+  FLogFileName := '';
+  FLoggingActive := False;
   FFpsAvg := 0.0;
   FFpsAvgCount := 0;
 
@@ -291,6 +360,7 @@ end;
 procedure TfrmCapture.FormDestroy(Sender: TObject);
 begin
 
+  StopLogFile();
   DisableGlobalHotkeys();
 
   if Assigned(FActivityPinger) then
@@ -364,6 +434,7 @@ begin
 
   // The file to write to
   sFileName := edtOutput.Text;
+  StartNewLogFile(sFileName);
 
   // Get height, width and sample rate if changed inbetween.
   GetRenderSettings();
@@ -398,7 +469,7 @@ begin
       if not Assigned(FAudioOnly) then
         FAudioOnly := TLoopbackAudioOnlyRecorder.Create(Self);
 
-      mmoLog.Lines.Add('Starting AUDIO-ONLY recording: ' + sFileName);
+      WriteLog('Starting AUDIO-ONLY recording: ' + sFileName);
 
       // Start recorder ////////////////////////////////////////////////////////
 
@@ -421,11 +492,11 @@ begin
       ApplyUiGuardrails();
       UpdateUiIndicators();
 
-      mmoLog.Lines.Add('--- Audio-Only Capture Started ---');
-      mmoLog.Lines.Add('Output file: ' + sFileName);
+      WriteLog('--- Audio-Only Capture Started ---');
+      WriteLog('Output file: ' + sFileName);
 
-      // debug check full path.
-      mmoLog.Lines.Add('Audio-only file (absolute): ' + ExpandFileName(FAudioOnly.OutputFileName));
+      // Check full path.
+      WriteLog('Audio-only file (absolute): ' + ExpandFileName(FAudioOnly.OutputFileName));
 
       Exit; // IMPORTANT: Don't start video pipeline and ActivityPinger.
     end;
@@ -444,7 +515,7 @@ begin
     if (FAudioCodec = acNone) then
       FEngine.DisableAudio;
 
-  mmoLog.Lines.Add('Starting capture: ' + sFileName);
+  WriteLog('Starting capture: ' + sFileName);
 
   // Start recording ///////////////////////////////////////////////////////////
 
@@ -483,8 +554,8 @@ begin
 
   UpdateUiIndicators();
 
-  mmoLog.Lines.Add('--- Capture Started ---');
-  mmoLog.Lines.Add('Output file: ' + sFileName);
+  WriteLog('--- Capture Started ---');
+  WriteLog('Output file: ' + sFileName);
 end;
 
 
@@ -506,7 +577,8 @@ begin
   lblStatus.Caption := 'Idle';
   lblStatus.Font.Color := clGray;
 
-  mmoLog.Lines.Add('--- Capture Stopped ---');
+  WriteLog('--- Capture Stopped ---');
+  StopLogFile();
 
   FIsRecording := False;
   FFpsAvg := 0.0;
@@ -730,6 +802,25 @@ begin
                  0,
                  0,
                  SWP_NoMove or SWP_NoSize);
+end;
+
+
+procedure TfrmCapture.cbxEnableLoggingClick(Sender: TObject);
+begin
+
+  if not FIsRecording then
+    Exit;
+
+  if cbxEnableLogging.Checked then
+    begin
+      if not FLoggingActive then
+        StartNewLogFile(edtOutput.Text);
+    end
+  else
+    begin
+      WriteLog('Logging disabled by user.');
+      FLoggingActive := False;
+    end;
 end;
 
 
@@ -1203,7 +1294,7 @@ begin
                                           [InstFps, FPS_AVG_WINDOW, FFpsAvg]);
 
                     if ((FrameIndex mod 30) = 0) then
-                      mmoLog.Lines.Add(Format('Frame %d Elapsed time: %.3f ms',
+                      WriteLog(Format('Frame %d Elapsed time: %.3f ms',
                                        [FrameIndex, Msec * 1000]));
                   end);
 end;
@@ -1245,7 +1336,7 @@ begin
   TThread.Queue(nil,
                 procedure
                   begin
-                    mmoLog.Lines.Add('ERROR: ' + Msg);
+                    WriteLog('ERROR: ' + Msg);
                     lblStatus.Caption := 'Error';
                     lblStatus.Font.Color := clRed;
                    end);
