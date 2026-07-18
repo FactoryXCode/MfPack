@@ -418,7 +418,7 @@
         <div class="stream-actions">
           <button class="play-round" id="btnStart" type="button" aria-label="Start live stream">▶</button>
           <button class="btn" id="btnStop" type="button">Stop</button>
-          <a class="btn" href="/stream/rdj_stream.html?debug=1" target="_blank" rel="noopener">Debug</a>
+          <a class="btn" href="/stream/rdj_stream.html?base=https%3A%2F%2Ffactoryxradio.asuscomm.com%2Fstream%2F&amp;debug=1" target="_blank" rel="noopener">Debug</a>
           <div class="stream-status" id="streamStatusText">Ready</div>
         </div>
       </section>

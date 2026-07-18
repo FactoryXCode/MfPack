@@ -8,5 +8,6 @@ Source IP:        (empty)
 dir C:\Caddy\index.html
 type C:\Caddy\index.html
 
-caddy.exe run --config "C:\Caddy\Caddy.cff" --adapter caddyfile
+Note: Assuming Caddy is present on C:\Caddy
+caddy.exe caddy.exe run --config "C:\Caddy\caddy.file" --adapter caddyfile
 

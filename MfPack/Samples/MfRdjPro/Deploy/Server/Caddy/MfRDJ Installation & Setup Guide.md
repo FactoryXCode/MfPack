@@ -1,4 +1,4 @@
-# MfRDJ Installation & Setup Guide
+ MfRDJ Installation & Setup Guide
 
 ---
 
@@ -10,8 +10,7 @@ MfRDJ supports two setup modes:
 
 All components run on one machine:
 
-* MfRDJ
-* Icecast
+* MfRDJ Pro
 * Caddy
 
 **Use this for:**
@@ -24,7 +23,7 @@ All components run on one machine:
 
 ## Server Setup (Network / Internet)
 
-Icecast + Caddy run on a **server PC**, accessible by:
+ICaddy run on a **server PC**, accessible by:
 
 * Local network (LAN)
 * Internet (public users)
@@ -73,31 +72,12 @@ factoryxradio.asuscomm.com
 ```
 
 ---
-
-# Icecast Setup
-
-1. Extract:
-
-```text
-..\MfPack\Samples\MfRdjJ\Binaries\icecast_win64_2.5.0.zip
-```
-
-2. Install Icecast
-
-3. Replace config:
-
-```text
-..\MfPack\Samples\MfRdjJ\Binaries\IceCast_defXML\icecast.xml
-```
-
----
-
 # Caddy Setup (Web + PWA)
 
 1. Extract:
 
 ```text
-..\MfPack\Samples\MfRdjJ\Binaries\Caddy_PWA.zip
+..\MfPack\Samples\MfRdjPro\Binaries\Caddy_PWA.zip
 ```
 
 2. Copy to:
@@ -114,7 +94,6 @@ C:\Caddy
 
 ### Applications:
 
-* `icecast.exe`
 * `caddy.exe`
 
 ### Ports:
@@ -164,8 +143,7 @@ Enable:
 
 Runs:
 
-* MfRDJ
-* Icecast
+* MfRDJ Pro
 * Caddy
 
 Must have:
@@ -277,22 +255,7 @@ Password: your_password
 ```
 
 ---
-
-# Icecast Server Manager
-
-Example:
-
-```text
-Host: 127.0.0.1
-Port: 8000
-EXE: C:\Icecast\bin\icecast.exe
-Config: C:\Icecast\icecast.xml
-Working Dir: C:\Icecast
-```
-
----
-
-# Caddy Setup
+# Caddy Setup (sample)
 
 ```text
 C:\Caddy
@@ -368,7 +331,6 @@ https://yourdomain.com
 
 ## Server PC
 
-* [ ] Icecast running
 * [ ] Caddy running
 * [ ] Firewall open
 * [ ] Ports forwarded
