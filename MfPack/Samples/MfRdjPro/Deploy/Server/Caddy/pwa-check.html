@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -13,7 +13,7 @@
 </head>
 <body>
   <h1>FactoryX PWA Check</h1>
-  <p>Open this on your phone: <b>https://factoryxradio.asuscomm.com/pwa-check.html</b></p>
+  <p>Open this on your phone: <b id="pageUrl"></b></p>
   <button id="btnRun">Run check</button>
   <button id="btnInstall">Test install prompt</button>
   <pre id="out">Waiting...</pre>
@@ -131,6 +131,9 @@ if ("serviceWorker" in navigator) {
 } else {
   runCheck();
 }
+</script>
+<script>
+  document.getElementById('pageUrl').textContent = window.location.href;
 </script>
 </body>
 </html>
