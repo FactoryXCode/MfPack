@@ -1,8 +1,8 @@
-Service Name:     factoryxradio
+Service Name:     factoryxradio or what ever your broadcastname is.
 Protocol:         TCP
 External Port:    443
 Internal Port:    8080
-Internal IP:      192.168.x.x   (your PC)
+Internal IP:      192.168.x.x   (your PC/Server)
 Source IP:        (empty)
 
 dir C:\Caddy\index.html
