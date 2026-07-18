@@ -84,7 +84,8 @@ type
                                          const ACoverUrl: string = '';
                                          const AListeners: Integer = -1;
                                          const AOnAir: Integer = -1;
-                                         const AOnAirLock: string = ''); static;
+                                         const AOnAirLock: string = '';
+                                         const AClearEmptyTrackInfo: Boolean = False); static;
 
     class function LoadNowPlayingJson(const AFileName: string): TJSONObject;
 
@@ -106,7 +107,8 @@ class procedure TRDJRadioStatusJson.WriteRadioStatusJson(const AFileName: string
                                                          const ACoverUrl: string = '';
                                                          const AListeners: Integer = -1;
                                                          const AOnAir: Integer = -1;
-                                                         const AOnAirLock: string = '');
+                                                         const AOnAirLock: string = '';
+                                                         const AClearEmptyTrackInfo: Boolean = False);
 var
   Json: TJSONObject;
   JsonValue: TJSONValue;
@@ -136,10 +138,12 @@ var
 
 
   procedure SetJsonString(const AName: string;
-                          const AValue: string);
+                          const AValue: string;
+                          const AAllowEmpty: Boolean = False);
   begin
 
-    if (AValue = '') then
+    if (AValue = '') and
+       (not AAllowEmpty) then
       Exit;
 
     Json.RemovePair(AName).Free;
@@ -224,7 +228,8 @@ begin
   if (Trim(AFileName) = '') then
     Exit;
 
-  if (ADjName = '') and
+  if (not AClearEmptyTrackInfo) and
+     (ADjName = '') and
      (AShowName = '') and
      (AArtist = '') and
      (ATitle = '') and
@@ -274,10 +279,12 @@ begin
                   AShowName);
 
     SetJsonString('artist',
-                  AArtist);
+                  AArtist,
+                  AClearEmptyTrackInfo);
 
     SetJsonString('title',
-                  ATitle);
+                  ATitle,
+                  AClearEmptyTrackInfo);
 
     CoverUrl := BuildBrowserCoverUrl(ACoverUrl);
 

@@ -300,7 +300,8 @@ type
                                     AArtist,
                                     ATitle,
                                     ACoverUrl: string;
-                                    const AListeners: Integer = -1);
+                                    const AListeners: Integer = -1;
+                                    const AClearEmptyTrackInfo: Boolean = False);
 
     procedure ConstructEngine();
 
@@ -399,6 +400,8 @@ type
     // Json
     procedure UpdateNowPlaying(const AArtist,
                                ATitle: string);
+    procedure ClearNowPlaying();
+    function HasActiveLoopbackDeck(): Boolean;
     function CanGoOnAir(): Boolean;
         property Caption;
 
@@ -1894,7 +1897,8 @@ procedure TMainMDIFrm.WriteNowPlayingStatus(const ADjName,
                                             AArtist,
                                             ATitle,
                                             ACoverUrl: string;
-                                            const AListeners: Integer = -1);
+                                            const AListeners: Integer = -1;
+                                            const AClearEmptyTrackInfo: Boolean = False);
 var
   JsonFile: string;
   ListenerCount: Integer;
@@ -1918,7 +1922,31 @@ begin
                                            AArtist,
                                            ATitle,
                                            ACoverUrl,
-                                           ListenerCount);
+                                           ListenerCount,
+                                           -1,
+                                           '',
+                                           AClearEmptyTrackInfo);
+end;
+
+
+procedure TMainMDIFrm.ClearNowPlaying();
+begin
+
+  if not Assigned(FRDJRadioStatusJson) then
+    Exit;
+
+  FDjName := Trim(mmoDjName.Text);
+  FShowName := Trim(mmoShow.Text);
+  FNowPlayingArtist := '';
+  FNowPlayingTitle := '';
+
+  WriteNowPlayingStatus(FDjName,
+                        FShowName,
+                        '',
+                        '',
+                        BuildCoverJsonUrl(True),
+                        FCaddyListenerCount,
+                        True);
 end;
 
 
@@ -2776,6 +2804,21 @@ begin
 
       FChannelDecks[i].Show;
     end;
+end;
+
+
+function TMainMDIFrm.HasActiveLoopbackDeck(): Boolean;
+var
+  I: Integer;
+
+begin
+
+  Result := False;
+
+  for I := 0 to High(FLoopbackDecks) do
+    if Assigned(FLoopbackDecks[I]) and
+       FLoopbackDecks[I].IsCapturing() then
+      Exit(True);
 end;
 
 

@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 
 <html lang="en">
 
@@ -529,6 +529,17 @@
   let firstPlayBufferLogged = false;
   let sessionSwitching = false;
   let firstPlayMinBufferSec = 0;
+  let userPausedPlayback = false;
+  let internalPauseUntil = 0;
+
+  function pauseVideoInternally() {
+    internalPauseUntil = Date.now() + 1000;
+    video.pause();
+  }
+
+  function isInternalPauseEvent() {
+    return Date.now() <= internalPauseUntil;
+  }
 
 
   const START_BEHIND_FRAGMENTS = 4;
@@ -598,6 +609,23 @@
     return preferredAudioEnabled;
   }
 
+  function currentAudioEnabled() {
+    try {
+      return !video.muted && video.volume > 0;
+    } catch (_) {
+      return preferredAudioEnabled;
+    }
+  }
+
+  function notifyAudioState() {
+    try {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'RDJ_STREAM_AUDIO_STATE', enabled: currentAudioEnabled() }, window.location.origin);
+      }
+    } catch (_) {
+    }
+  }
+
   function savePreferredAudioEnabled(value) {
     preferredAudioEnabled = !!value;
 
@@ -620,6 +648,45 @@
         video.volume = 1.0;
       }
     } catch (_) {
+    }
+  }
+
+  function setStreamAudioEnabled(enabled, userGesture) {
+    savePreferredAudioEnabled(enabled);
+
+    try {
+      if (enabled) {
+        video.muted = false;
+        video.defaultMuted = false;
+
+        if (video.volume === 0) {
+          video.volume = 1.0;
+        }
+      } else {
+        video.muted = true;
+        video.defaultMuted = true;
+      }
+    } catch (_) {
+    }
+
+    notifyAudioState();
+
+    if (!enabled) {
+      return;
+    }
+
+    if (!running) {
+      start(!!userGesture);
+    } else {
+      try {
+        const p = video.play();
+        if (p && typeof p.catch === 'function') {
+          p.catch(function (e) {
+            log('video.play() after audio enable failed: ' + e.message);
+          });
+        }
+      } catch (_) {
+      }
     }
   }
 
@@ -685,7 +752,7 @@
 
     try {
 
-      video.pause();
+      pauseVideoInternally();
 
       video.playbackRate = 1.0;
 
@@ -1394,6 +1461,12 @@
 
   function tuneLivePlayback() {
 
+    if (userPausedPlayback) {
+
+      return;
+
+    }
+
     if (video.buffered.length <= 0) {
 
       return;
@@ -1536,7 +1609,7 @@
 
           try {
 
-            video.pause();
+            pauseVideoInternally();
 
           } catch (_) {
 
@@ -1584,7 +1657,7 @@
 
         try {
 
-          video.pause();
+          pauseVideoInternally();
 
           liveEdgePauseStartedAt = Date.now();
 
@@ -1879,7 +1952,7 @@
 
     try {
 
-      video.pause();
+      pauseVideoInternally();
 
       video.currentTime = 0;
 
@@ -1900,7 +1973,7 @@
     }
 
     try {
-      video.pause();
+      pauseVideoInternally();
       video.removeAttribute('src');
       video.load();
     } catch (_) {
@@ -2157,15 +2230,30 @@
 
   async function start(userGesture) {
 
-    if (userGesture) {
-      savePreferredAudioEnabled(true);
-      applyPreferredAudio();
-    }
-
     if (running) {
+      if (userPausedPlayback) {
+        userPausedPlayback = false;
+
+        try {
+          const p = video.play();
+          if (p && typeof p.catch === 'function') {
+            p.catch(function (e) {
+              log('video.play() after resume failed: ' + e.message);
+            });
+          }
+        } catch (_) {
+        }
+      }
 
       return;
 
+    }
+
+    userPausedPlayback = false;
+
+    if (userGesture) {
+      savePreferredAudioEnabled(true);
+      applyPreferredAudio();
     }
 
 
@@ -2234,6 +2322,7 @@
 
   function stop() {
 
+    userPausedPlayback = false;
     stopped = true;
     running = false;
     btnStart.disabled = false;
@@ -2251,34 +2340,30 @@
   btnStop.addEventListener('click', stop);
 
   window.rdjStreamEnableAudio = function () {
-    savePreferredAudioEnabled(true);
-    applyPreferredAudio();
+    setStreamAudioEnabled(true, true);
+  };
 
-    if (!running) {
-      start(true);
-    } else {
-      try {
-        const p = video.play();
-        if (p && typeof p.catch === 'function') {
-          p.catch(function (e) {
-            log('video.play() after audio enable failed: ' + e.message);
-          });
-        }
-      } catch (_) {
-      }
-    }
+  window.rdjStreamDisableAudio = function () {
+    setStreamAudioEnabled(false, false);
+  };
+
+  window.rdjStreamSetAudioEnabled = function (enabled) {
+    setStreamAudioEnabled(!!enabled, true);
   };
 
   window.addEventListener('message', function (event) {
-    if (event.origin !== window.location.origin) {
+    if (event.origin !== window.location.origin || !event.data) {
       return;
     }
 
-    if (event.data && event.data.type === 'RDJ_STREAM_ENABLE_AUDIO') {
+    if (event.data.type === 'RDJ_STREAM_SET_AUDIO_ENABLED') {
+      window.rdjStreamSetAudioEnabled(!!event.data.enabled);
+    } else if (event.data.type === 'RDJ_STREAM_ENABLE_AUDIO') {
       window.rdjStreamEnableAudio();
+    } else if (event.data.type === 'RDJ_STREAM_DISABLE_AUDIO') {
+      window.rdjStreamDisableAudio();
     }
   });
-
 
 
   btnClear.addEventListener('click', function () {
@@ -2307,8 +2392,33 @@
 
   });
 
+  video.addEventListener('pause', function () {
+    if (!running || isInternalPauseEvent()) {
+      return;
+    }
+
+    userPausedPlayback = true;
+    liveEdgePauseStartedAt = 0;
+    btnStart.disabled = false;
+    setStreamStatus('Paused');
+    log('Playback paused from browser/media controls.');
+  });
+
+  video.addEventListener('play', function () {
+    if (userPausedPlayback) {
+      log('Playback resumed from browser/media controls.');
+    }
+
+    userPausedPlayback = false;
+
+    if (running) {
+      setStreamStatus('Streaming');
+    }
+  });
+
   video.addEventListener('volumechange', function () {
     savePreferredAudioEnabled(!video.muted && video.volume > 0);
+    notifyAudioState();
   });
 
 
@@ -2324,6 +2434,7 @@
   }
 
   applyPreferredAudio();
+  notifyAudioState();
 
   setCover('/cover_default.jpg');
   loadNowPlaying();

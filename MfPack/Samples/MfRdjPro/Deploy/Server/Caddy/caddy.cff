@@ -2,6 +2,11 @@ factoryxradio.asuscomm.com {
 
     root * C:\Caddy
 
+    log {
+        output file C:\Caddy\Caddy.log
+        format json
+    }
+
     handle /admin* {
         respond "Forbidden" 403
     }

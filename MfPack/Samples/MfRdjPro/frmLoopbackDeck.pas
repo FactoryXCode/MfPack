@@ -1,4 +1,4 @@
-﻿// FactoryX
+// FactoryX
 //
 // Copyright: FactoryX. All rights reserved.
 //
@@ -211,6 +211,7 @@ type
     FTimerRunning: Boolean;
     FVolPosLast: Integer;
     FApplyingXFade: Boolean;
+    FClosing: Boolean;
 
     function GetEqEffect(): TMfParametricEqEffect;
     procedure BindAudioRack();
@@ -265,6 +266,7 @@ type
     procedure ApplyExternalCrossFadeDelta(const ADelta: Integer);
     procedure StartCapture();
     procedure StopCapture();
+    function IsCapturing(): Boolean;
   end;
 
 var
@@ -300,6 +302,7 @@ begin
   FTempoPercent := 0.0;
   FVolPosLast := tbVolume.Position;
   FApplyingXFade := False;
+  FClosing := False;
 
   edtProcessName.ReadOnly := True;
 
@@ -324,8 +327,13 @@ end;
 procedure TfrmLoopbackDeck.FormDestroy(Sender: TObject);
 begin
 
-  StopCapture();
+  FClosing := True;
+  Timer1.Enabled := False;
+  FTimerRunning := False;
+
   DetachDeckEngineEvents();
+  StopCapture();
+  TThread.RemoveQueuedEvents(nil);
 
   UnregisterFromMixer();
   FreeAndNil(FEngine);
@@ -641,12 +649,16 @@ procedure TfrmLoopbackDeck.WasApiStateEvent(Sender: TObject;
                                             const AState: TWasApiDeviceState);
 begin
 
+  if FClosing then
+    Exit;
+
   if not Assigned(FEngine) then
     Exit;
 
   case AState of
     dsReady: begin
 
+               // Nothing for the moment.
              end;
     dsPlay:  begin
 
@@ -675,6 +687,12 @@ procedure TfrmLoopbackDeck.DeckTick(Sender: TObject;
                                     const BeatPhase: Double);
 begin
 
+  if FClosing or (csDestroying in ComponentState) then
+    Exit;
+
+  if not Assigned(bldBeat) then
+    Exit;
+
   bldBeat.UpdatePulse(Position100ns);
 
   if (CurrentBpm > 0.0) then
@@ -691,6 +709,12 @@ procedure TfrmLoopbackDeck.DeckBeat(Sender: TObject;
                                     const CurrentBpm: Double);
 begin
 
+  if FClosing or (csDestroying in ComponentState) then
+    Exit;
+
+  if not Assigned(bldBeat) then
+    Exit;
+
   bldBeat.TriggerPulse(Position100ns);
 
   if (CurrentBpm > 0.0) then
@@ -700,6 +724,13 @@ begin
     UpdateBpmGuiFromEngine();
 end;
 // BPM end ---------------------------------------------------------------------
+
+function TfrmLoopbackDeck.IsCapturing(): Boolean;
+begin
+
+  Result := Assigned(FEngine) and FEngine.Active;
+end;
+
 
 procedure TfrmLoopbackDeck.StartCapture();
 var
@@ -738,7 +769,10 @@ begin
 
       lblStatus.Caption := 'Start: Failed';
       lblStatus.Hint := lblStatus.Caption;
-    end;
+    end
+  else
+    if Assigned(MainMDIFrm) then
+      MainMDIFrm.ClearNowPlaying();
 end;
 
 
@@ -760,8 +794,11 @@ begin
       lblStatus.Hint := lblStatus.Caption;
     end;
 
-  UpdateMixerChannelState();
-  UpdateUiState();
+  if not FClosing then
+    begin
+      UpdateMixerChannelState();
+      UpdateUiState();
+    end;
 end;
 
 

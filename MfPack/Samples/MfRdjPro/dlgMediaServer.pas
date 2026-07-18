@@ -4928,6 +4928,8 @@ begin
           chkRecordVideoOnly.Enabled := False;
           chkRdjProStaticImage.Enabled := not FRecordingRdjPro;
           UpdateOnAirLamp(True);
+          if Assigned(MainMDIFrm) and MainMDIFrm.HasActiveLoopbackDeck() then
+            MainMDIFrm.ClearNowPlaying();
           Result := True;
           Exit;
         end;
@@ -4978,6 +4980,8 @@ begin
   chkRecordVideoOnly.Enabled := False;
   chkRdjProStaticImage.Enabled := not FRecordingRdjPro;
   UpdateOnAirLamp(True);
+  if Assigned(MainMDIFrm) and MainMDIFrm.HasActiveLoopbackDeck() then
+    MainMDIFrm.ClearNowPlaying();
   memLog.Lines.Append('Broadcasting started.');
   Result := True;
 end;

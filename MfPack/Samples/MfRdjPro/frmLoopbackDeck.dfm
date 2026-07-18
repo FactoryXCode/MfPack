@@ -576,7 +576,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
     end
     object tbEqGainDb: TMfTrackBar
       Left = 204
-      Top = 337
+      Top = 332
       Width = 39
       Height = 134
       Margins.Left = 0
