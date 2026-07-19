@@ -984,7 +984,6 @@ begin
   if ALive then
     begin
 
-      shpLive.Brush.Color := ON_COLOR;
       shpLive.Pen.Color := ON_COLOR;
       shpLiveCap.Pen.Color := ON_COLOR;
       lblLive.Font.Color := ON_COLOR;
@@ -992,7 +991,6 @@ begin
   else
     begin
 
-      shpLive.Brush.Color := OFF_COLOR;
       shpLive.Pen.Color := OFF_COLOR;
       shpLiveCap.Pen.Color := OFF_COLOR;
       lblLive.Font.Color := OFF_COLOR;

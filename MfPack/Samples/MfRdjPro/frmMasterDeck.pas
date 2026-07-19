@@ -164,7 +164,7 @@ type
     lblAudioRecorder: TLabel;
     Bevel1: TBevel;
     lblFileExt: TLabel;
-    OnRecordingCap: TShape;
+    shpRecordingCap: TShape;
     shpRecording: TShape;
     lblRecording: TLabel;
     pnlFXButtons: TPanel;

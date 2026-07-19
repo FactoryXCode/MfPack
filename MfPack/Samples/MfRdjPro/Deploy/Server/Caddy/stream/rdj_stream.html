@@ -598,6 +598,7 @@
   const AUTO_RESTART_AUDIO_KEY = 'rdj_mse_audio_enabled';
 
   let preferredAudioEnabled = false;
+  let suppressAudioPreferenceSave = false;
 
   function loadPreferredAudioEnabled() {
     try {
@@ -627,6 +628,10 @@
   }
 
   function savePreferredAudioEnabled(value) {
+    if (suppressAudioPreferenceSave) {
+      return;
+    }
+
     preferredAudioEnabled = !!value;
 
     try {
@@ -648,6 +653,26 @@
         video.volume = 1.0;
       }
     } catch (_) {
+    }
+  }
+
+  function resetMediaElementPreservingAudio() {
+    const restoreAudio = preferredAudioEnabled || currentAudioEnabled();
+
+    suppressAudioPreferenceSave = true;
+
+    try {
+      pauseVideoInternally();
+      video.playbackRate = 1.0;
+      video.removeAttribute('src');
+      video.load();
+    } finally {
+      suppressAudioPreferenceSave = false;
+    }
+
+    if (restoreAudio) {
+      savePreferredAudioEnabled(true);
+      applyPreferredAudio();
     }
   }
 
@@ -752,13 +777,7 @@
 
     try {
 
-      pauseVideoInternally();
-
-      video.playbackRate = 1.0;
-
-      video.removeAttribute('src');
-
-      video.load();
+      resetMediaElementPreservingAudio();
 
     } catch (_) {
 
@@ -1973,9 +1992,7 @@
     }
 
     try {
-      pauseVideoInternally();
-      video.removeAttribute('src');
-      video.load();
+      resetMediaElementPreservingAudio();
     } catch (_) {
     }
 

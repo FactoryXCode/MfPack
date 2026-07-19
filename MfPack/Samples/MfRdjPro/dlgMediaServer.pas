@@ -151,10 +151,24 @@ const
   RDJ_MSE_MIRROR_CLEANUP_SAFETY_FRAGMENTS = 2;
   RDJ_MSE_MIRROR_ORPHAN_SCAN_INTERVAL_MS = 60000;
 
+  RDJ_BROADCAST_HANDOVER_LOCK_DIR = 'rdjpro_broadcast.lock';
+  RDJ_BROADCAST_HANDOVER_STATUS_FILE = 'broadcast_status.json';
+  RDJ_BROADCAST_HANDOVER_OWNER_FILE = 'owner.json';
+  RDJ_BROADCAST_HANDOVER_HEARTBEAT_MS = 5000;
+  RDJ_BROADCAST_HANDOVER_POLL_MS = 5000;
+  RDJ_BROADCAST_HANDOVER_STALE_MS = 120000;
+  RDJ_MS_PER_DAY = 86400000;
+
   RDJ_STATIC_VIDEO_WIDTH = 1280;
   RDJ_STATIC_VIDEO_HEIGHT = 720;
   RDJ_STATIC_VIDEO_FPS = 5;
   RDJ_STATIC_VIDEO_FRAME_DURATION_100NS = 10000000 div RDJ_STATIC_VIDEO_FPS;
+
+  // RDJ Pro locked/unlocked colors.
+  LOCKED_COLOR = clRed;
+  UNLOCKED_COLOR = clLime;
+  CAP_UNLOCKED = 'UNLOCKED';
+  CAP_LOCKED = 'LOCKED';
 
 type
 
@@ -162,6 +176,7 @@ type
 
   TRdjProMseMirrorJob = class
   public
+
     Kind: TRdjProMseMirrorJobKind;
     FileName: string;       // destination file
     SourceFileName: string; // source file for mjkCopyFile
@@ -250,26 +265,32 @@ type
     lblRecording: TLabel;
     pnlRdjProControl: TPanel;
     pnlRdjProControls: TPanel;
+    pnlRdjProPreviewHost: TPanel;
+    imgRdjProStaticPreview: TImage;
+    pnlBottom: TPanel;
+    lblRecorderStatus: TLabel;
+    lblIcecastServerStatus: TLabel;
+    pnlServerCtrl: TPanel;
+    pnlAudioEndPoints: TPanel;
+    chkServerCtrl: TMPxpButton;
+    chkRecorderCtrl: TMPxpButton;
+    Bevel3: TBevel;
+    Bevel2: TBevel;
+    chkBroadcast: TMPxpButton;
+    chkRdjProCamera: TMPxpButton;
+    chkRdjProStaticImage: TMPxpButton;
+    memLog: TMemo;
+    pnlRecorderCtrl: TPanel;
     Bevel1: TBevel;
     Label3: TLabel;
     lblFileExt: TLabel;
     lblRecTime: TLabel;
-    Label1: TLabel;
-    Bevel3: TBevel;
-    Label4: TLabel;
-    Bevel2: TBevel;
     edRdjProRecFileName: TEdit;
     btnRdjProRecord: TMPxpButton;
     chkRecordVideoOnly: TMPxpButton;
-    chkBroadcast: TMPxpButton;
-    chkRdjProCamera: TMPxpButton;
-    chkRdjProStaticImage: TMPxpButton;
-    pnlRdjProPreviewHost: TPanel;
-    imgRdjProStaticPreview: TImage;
-    memLog: TMemo;
-    pnlBottom: TPanel;
-    lblRecorderStatus: TLabel;
-    lblIcecastServerStatus: TLabel;
+    shpBcLocked: TShape;
+    shpBcLockedCap: TShape;
+    lblLockBC: TLabel;
 
     procedure FormShow(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -284,6 +305,8 @@ type
     procedure chkRdjProStaticImageClick(Sender: TObject);
     procedure pnlCaptionMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure chkServerCtrlClick(Sender: TObject);
+    procedure chkRecorderCtrlClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -353,6 +376,12 @@ type
     FBroadcastMseRecorderRestartQueued: Integer;
     FBroadcastMseRecorderRestartCount: Integer;
     FActiveBroadcastVideoMediaType: IMFMediaType;
+
+    FBroadcastHandoverLockAcquired: Boolean;
+    FBroadcastHandoverOwnerId: string;
+    FLastBroadcastHandoverHeartbeatTick: DWORD;
+    FLastBroadcastHandoverPollTick: DWORD;
+    FLastBroadcastHandoverNotice: string;
 
     FLastRdjProAudioWfx: WAVEFORMATEX;
     FLastRdjProAudioWfxValid: Boolean;
@@ -438,6 +467,27 @@ type
                                  const ADestFileName: string);
     procedure MirrorUtf8TextToServerAtomic(const AFileName: string;
                                            const AText: string);
+    procedure SetBroadcastHandoverLockIndicator(const ACaption: string;
+                                                const AColor: TColor);
+    function BroadcastHandoverBaseDir(): string;
+    function BroadcastHandoverLockDir(): string;
+    function BroadcastHandoverStatusFileName(): string;
+    function BroadcastHandoverComputerName(): string;
+    function BroadcastHandoverOwnerDisplay(): string;
+    function BroadcastHandoverJsonEscape(const AValue: string): string;
+    function ExtractBroadcastHandoverJsonString(const AJson: string;
+                                                const AName: string): string;
+    function ReadBroadcastHandoverTextFile(const AFileName: string): string;
+    function IsBroadcastHandoverLockStale(const ALockDir: string): Boolean;
+    procedure DeleteBroadcastHandoverLockDir(const ALockDir: string);
+    function BuildBroadcastHandoverStatusJson(const AState: string;
+                                              const AMessage: string): string;
+    procedure PublishBroadcastHandoverStatus(const AState: string;
+                                             const AMessage: string);
+    function AcquireBroadcastHandoverLock(out AMessage: string): Boolean;
+    procedure ReleaseBroadcastHandoverLock(const APublishHandoverReady: Boolean);
+    procedure UpdateBroadcastHandoverHeartbeat(const AForce: Boolean = False);
+    procedure PollBroadcastHandoverStatus();
     procedure MirrorDeleteServerFile(const AFileName: string);
     function EnsureBroadcastMseMirrorThread(): TRdjProMseMirrorThread;
     procedure StopBroadcastMseMirrorThread();
@@ -498,6 +548,7 @@ function RDJGetProcessMemoryInfo(Process: THandle;
 
 function RDJBytesToMb(const ABytes: UInt64): UInt64;
 begin
+
   Result := (ABytes + (1024 * 1024 div 2)) div (1024 * 1024);
 end;
 
@@ -1641,7 +1692,7 @@ begin
       prStopwatch.Stop;
       FTimerRunning := False;
       if not FRdjProBroadcasting then
-        tmrTime.Enabled := False;
+        tmrTime.Enabled := True;
       UpdateTimeLabel();
     end;
 
@@ -1678,6 +1729,24 @@ begin
 end;
 
 
+procedure TfrmMediaServer.chkRecorderCtrlClick(Sender: TObject);
+begin
+
+  pnlRecorderCtrl.BringToFront;
+  chkServerCtrl.Checked := True;
+  chkRecorderCtrl.Checked := False;
+end;
+
+
+procedure TfrmMediaServer.chkServerCtrlClick(Sender: TObject);
+begin
+
+  pnlServerCtrl.BringToFront;
+  chkServerCtrl.Checked := True;
+  chkRecorderCtrl.Checked := False;
+end;
+
+
 procedure TfrmMediaServer.chkRdjProCameraClick(Sender: TObject);
 var
   ModeChanged: Boolean;
@@ -1692,23 +1761,13 @@ begin
   if chkRdjProCamera.Checked then
     begin
 
-      if FRdjProStaticImage and FRdjProBroadcasting then
+      if FRdjProStaticImage then
         begin
-          if FAILED(StartRdjProCamera(pnlRdjProPreviewHost.Handle)) then
-            begin
-              chkRdjProCamera.Checked := False;
-              chkRdjProCamera.Down := False;
-              ShowRdjProStaticPreview();
-              Exit;
-            end;
+          if FRdjProBroadcasting and Assigned(FRdjProCaptureManager) then
+            FRdjProCaptureManager.StopVideoSourceReader(150);
 
-          if not EnsureRdjProVideoSampleReader(FActiveBroadcastVideoMediaType) then
-            begin
-              chkRdjProCamera.Checked := False;
-              chkRdjProCamera.Down := False;
-              ShowRdjProStaticPreview();
-              Exit;
-            end;
+          StopRdjProCamera();
+          FRdjProCaptureInitialized := False;
         end;
 
       if FRdjProStaticImage then
@@ -1739,6 +1798,21 @@ begin
                   chkRdjProStaticImage.Down := True;
                   ShowRdjProStaticPreview();
                 end;
+              Exit;
+            end;
+        end;
+
+      if ModeChanged and FRdjProBroadcasting then
+        begin
+          if not EnsureRdjProVideoSampleReader(FActiveBroadcastVideoMediaType) then
+            begin
+              StopRdjProCamera();
+              FRdjProStaticImage := True;
+              chkRdjProStaticImage.Checked := True;
+              chkRdjProStaticImage.Down := True;
+              chkRdjProCamera.Checked := False;
+              chkRdjProCamera.Down := False;
+              ShowRdjProStaticPreview();
               Exit;
             end;
         end;
@@ -1775,28 +1849,13 @@ begin
   WantStaticImage := chkRdjProStaticImage.Checked;
 
   if (not WantStaticImage) and
-     FRdjProStaticImage and
-     FRdjProBroadcasting then
+     FRdjProStaticImage then
     begin
-      if FAILED(StartRdjProCamera(pnlRdjProPreviewHost.Handle)) then
-        begin
-          chkRdjProStaticImage.Checked := True;
-          chkRdjProStaticImage.Down := True;
-          chkRdjProCamera.Checked := False;
-          chkRdjProCamera.Down := False;
-          ShowRdjProStaticPreview();
-          Exit;
-        end;
+      if FRdjProBroadcasting and Assigned(FRdjProCaptureManager) then
+        FRdjProCaptureManager.StopVideoSourceReader(150);
 
-      if not EnsureRdjProVideoSampleReader(FActiveBroadcastVideoMediaType) then
-        begin
-          chkRdjProStaticImage.Checked := True;
-          chkRdjProStaticImage.Down := True;
-          chkRdjProCamera.Checked := False;
-          chkRdjProCamera.Down := False;
-          ShowRdjProStaticPreview();
-          Exit;
-        end;
+      StopRdjProCamera();
+      FRdjProCaptureInitialized := False;
     end;
 
   if WantStaticImage then
@@ -1847,6 +1906,29 @@ begin
     end
   else if FRdjProBroadcasting then
     begin
+      if FAILED(StartRdjProCamera(pnlRdjProPreviewHost.Handle)) then
+        begin
+          FRdjProStaticImage := True;
+          chkRdjProStaticImage.Checked := True;
+          chkRdjProStaticImage.Down := True;
+          chkRdjProCamera.Checked := False;
+          chkRdjProCamera.Down := False;
+          ShowRdjProStaticPreview();
+          Exit;
+        end;
+
+      if not EnsureRdjProVideoSampleReader(FActiveBroadcastVideoMediaType) then
+        begin
+          StopRdjProCamera();
+          FRdjProStaticImage := True;
+          chkRdjProStaticImage.Checked := True;
+          chkRdjProStaticImage.Down := True;
+          chkRdjProCamera.Checked := False;
+          chkRdjProCamera.Down := False;
+          ShowRdjProStaticPreview();
+          Exit;
+        end;
+
       PrepareBroadcastMseVideoSourceSwitch();
       HideRdjProStaticPreview();
       chkRdjProCamera.Checked := True;
@@ -1872,7 +1954,12 @@ begin
     end;
 
   if ModeChanged and FRdjProBroadcasting then
-    OutputDebugString(PChar('RDJ Pro live source switched to static image without recorder restart.'));
+    begin
+      if FRdjProStaticImage then
+        OutputDebugString(PChar('RDJ Pro live source switched to static image without recorder restart.'))
+      else
+        OutputDebugString(PChar('RDJ Pro live source switched to camera without recorder restart.'));
+    end;
 end;
 
 
@@ -1942,6 +2029,13 @@ begin
   FBroadcastMseManifestPublishSeq := 0;
   FBroadcastMseSessionId := FormatDateTime('yyyymmddhhnnsszzz', Now);
   FBroadcastMseMemLastLogTick := 0;
+  FBroadcastHandoverLockAcquired := False;
+  FBroadcastHandoverOwnerId := '';
+  SetBroadcastHandoverLockIndicator(CAP_UNLOCKED,
+                                    UNLOCKED_COLOR);
+  FLastBroadcastHandoverHeartbeatTick := 0;
+  FLastBroadcastHandoverPollTick := 0;
+  FLastBroadcastHandoverNotice := '';
   FBroadcastMseRecorderRestartQueued := 0;
   FBroadcastMseRecorderRestartCount := 0;
   FActiveBroadcastVideoMediaType := nil;
@@ -1987,6 +2081,8 @@ begin
       FreeAndNil(FRdjProBroadcastMp4Recorder);
     end;
 
+  ReleaseBroadcastHandoverLock(True);
+
   LaunchBroadcastMseCleanupBatch(CleanupDumpDir,
                                  CleanupMirrorDir);
 
@@ -2027,6 +2123,7 @@ begin
 
   UpdateOnAirLamp(False);
   UpdateRecordingUi();
+  tmrTime.Enabled := True;
 end;
 
 
@@ -2036,16 +2133,16 @@ begin
    if AOnAir then
      begin
 
-       shpOnAir.Brush.Color := clRed;
        shpOnAirCap.Pen.Color := clRed;
+       shpOnAir.Pen.Color := clRed;
        lblOnAir.Font.Color := clRed;
        lblOnAir.Caption := 'ON AIR';
      end
    else
      begin
 
-       shpOnAir.Brush.Color := $00568000;
        shpOnAirCap.Pen.Color := $00568000;
+       shpOnAir.Pen.Color := $00568000;
        lblOnAir.Font.Color := $00568000;
        lblOnAir.Caption := 'OFF AIR';
      end;
@@ -2058,18 +2155,16 @@ begin
    if ARecording then
      begin
 
-       shpRecording.Brush.Color := clRed;
        lblRecording.Font.Color := clRed;
        OnRecordingCap.Pen.Color := clRed;
-       lblRecording.Caption := 'RECORDING';
+       lblRecording.Caption := 'REC ON';
      end
    else
      begin
 
-       shpRecording.Brush.Color := $00568000;
        OnRecordingCap.Pen.Color := $00568000;
        lblRecording.Font.Color := $00568000;
-       lblRecording.Caption := 'STOPPED';
+       lblRecording.Caption := 'REC OFF';
      end;
 end;
 
@@ -2086,7 +2181,11 @@ begin
       DumpBroadcastMseSegments();
       CheckBroadcastMseVideoSourceFlush();
       LogBroadcastMseMemoryHeartbeat('timer');
+      UpdateBroadcastHandoverHeartbeat();
     end;
+
+  if not FRdjProBroadcasting then
+    PollBroadcastHandoverStatus();
 
   if FRdjProRecording and not FRdjProBroadcasting then
     QueueRdjProStaticVideoSample();
@@ -2336,12 +2435,14 @@ begin
 
   if Assigned(imgRdjProStaticPreview) then
     begin
+
       imgRdjProStaticPreview.Visible := False;
       imgRdjProStaticPreview.Picture.Graphic := nil;
     end;
 
   if Assigned(pnlRdjProPreviewHost) then
     begin
+
       pnlRdjProPreviewHost.Invalidate();
       pnlRdjProPreviewHost.Update();
     end;
@@ -2349,6 +2450,7 @@ begin
   if Assigned(FRdjProCaptureManager) and
      Assigned(pnlRdjProPreviewHost) then
     begin
+
       FRdjProCaptureManager.PreviewHandle := pnlRdjProPreviewHost.Handle;
       FRdjProCaptureManager.ResizeVideo(nil);
       FRdjProCaptureManager.UpdateVideo();
@@ -3059,6 +3161,7 @@ begin
                 chkBroadcast.Checked := False;
                 chkBroadcast.Down := False;
                 UpdateOnAirLamp(False);
+                ReleaseBroadcastHandoverLock(False);
               end;
           end;
       end;
@@ -3298,7 +3401,7 @@ begin
     Exit;
 
   // Caddy server/public mirror. Example:
-  //   \\PCHP001\Caddy\stream
+  //   \\SERVER001\Caddy\stream
   // MainMDIFrm.Setup.CaddyVideoPath should point to the server's Video folder.
   BaseDir := Trim(MainMDIFrm.Setup.CaddyVideoPath);
 
@@ -3321,6 +3424,7 @@ begin
   except
     on E: Exception do
       begin
+
         OutputDebugString(PChar('TfrmMediaServer.MSE mirror disabled: ' + E.Message));
         Result := '';
       end;
@@ -3351,11 +3455,13 @@ begin
                faAnyFile,
                SearchRec) = 0 then
     try
+
       repeat
         if (SearchRec.Name <> '.') and
            (SearchRec.Name <> '..') and
            ((SearchRec.Attr and faDirectory) = 0) then
           begin
+
             FileName := Dir + SearchRec.Name;
             try
               DeleteFile(FileName);
@@ -3368,6 +3474,7 @@ begin
           end;
       until FindNext(SearchRec) <> 0;
     finally
+
       FindClose(SearchRec);
     end;
 end;
@@ -3419,6 +3526,7 @@ begin
 
   Batch := TStringList.Create();
   try
+
     Batch.Add('@echo off');
     Batch.Add('setlocal');
     Batch.Add('timeout /t 2 /nobreak >nul 2>nul');
@@ -3434,6 +3542,7 @@ begin
     Batch.Add('del /f /q "%~1\frag_*.m4s" >nul 2>nul');
     Batch.Add('del /f /q "%~1\patched_frag_*.m4s" >nul 2>nul');
     Batch.Add('exit /b');
+
     try
       Batch.SaveToFile(BatFileName);
     except
@@ -3448,7 +3557,7 @@ begin
   end;
 
   ComSpec := GetEnvironmentVariable('ComSpec');
-  if ComSpec = '' then
+  if (ComSpec = '') then
     ComSpec := IncludeTrailingPathDelimiter(GetEnvironmentVariable('SystemRoot')) +
                'System32\cmd.exe';
 
@@ -3518,7 +3627,7 @@ begin
   // no background mirror job should recreate a file that we are cleaning up.
   StopBroadcastMseMirrorThread();
 
-  if DumpDir <> '' then
+  if (DumpDir <> '') then
     begin
       DeleteBroadcastMseFilesByMask(DumpDir,
                                     'live.json');
@@ -3606,11 +3715,11 @@ begin
 
   Result := FBroadcastMsePublicTargetMs;
 
-  if Result < RDJ_MSE_PUBLIC_FRAGMENT_TARGET_MIN_MS then
+  if (Result < RDJ_MSE_PUBLIC_FRAGMENT_TARGET_MIN_MS) then
     Result := RDJ_MSE_PUBLIC_FRAGMENT_TARGET_MIN_MS
   else
-  if Result > RDJ_MSE_PUBLIC_FRAGMENT_TARGET_MAX_MS then
-    Result := RDJ_MSE_PUBLIC_FRAGMENT_TARGET_MAX_MS;
+    if (Result > RDJ_MSE_PUBLIC_FRAGMENT_TARGET_MAX_MS) then
+      Result := RDJ_MSE_PUBLIC_FRAGMENT_TARGET_MAX_MS;
 end;
 
 
@@ -3619,7 +3728,7 @@ begin
 
   Result := FBroadcastMseGroupSourceFragments;
 
-  if Result < 1 then
+  if (Result < 1) then
     Result := 1;
 end;
 
@@ -3629,11 +3738,11 @@ begin
 
   Result := FBroadcastMseKeepPatchedFragments;
 
-  if Result < RDJ_MSE_KEEP_PATCHED_FRAGMENTS_MIN then
+  if (Result < RDJ_MSE_KEEP_PATCHED_FRAGMENTS_MIN) then
     Result := RDJ_MSE_KEEP_PATCHED_FRAGMENTS_MIN
   else
-  if Result > RDJ_MSE_KEEP_PATCHED_FRAGMENTS_MAX then
-    Result := RDJ_MSE_KEEP_PATCHED_FRAGMENTS_MAX;
+    if (Result > RDJ_MSE_KEEP_PATCHED_FRAGMENTS_MAX) then
+      Result := RDJ_MSE_KEEP_PATCHED_FRAGMENTS_MAX;
 end;
 
 
@@ -3642,7 +3751,7 @@ begin
 
   Result := BroadcastMsePublicTargetMs() * RDJ_MSE_GROUP_FORCE_FLUSH_FACTOR;
 
-  if Result < RDJ_MSE_GROUP_FORCE_FLUSH_MIN_MS then
+  if (Result < RDJ_MSE_GROUP_FORCE_FLUSH_MIN_MS) then
     Result := RDJ_MSE_GROUP_FORCE_FLUSH_MIN_MS;
 end;
 
@@ -3791,6 +3900,544 @@ begin
                          Bytes);
 end;
 
+
+procedure TfrmMediaServer.SetBroadcastHandoverLockIndicator(const ACaption: string;
+                                                            const AColor: TColor);
+begin
+
+  lblLockBC.Font.Color := AColor;
+  lblLockBC.Caption := ACaption;
+  shpBcLockedCap.Pen.Color := AColor;
+  shpBcLocked.Pen.Color := AColor;
+end;
+
+
+function TfrmMediaServer.BroadcastHandoverBaseDir(): string;
+begin
+
+  Result := '';
+
+  if Assigned(MainMDIFrm) then
+    begin
+
+      Result := Trim(MainMDIFrm.Setup.CaddyDir);
+
+      if (Result = '') then
+        Result := ExtractFilePath(Trim(MainMDIFrm.Setup.CaddyNowPlayingJsonFile));
+
+      if (Result = '') then
+        Result := ExtractFilePath(Trim(MainMDIFrm.Setup.CaddyVideoPath));
+    end;
+
+  Result := Trim(Result);
+
+  if (Result <> '') then
+    Result := IncludeTrailingPathDelimiter(Result);
+end;
+
+
+function TfrmMediaServer.BroadcastHandoverLockDir(): string;
+begin
+
+  Result := BroadcastHandoverBaseDir();
+
+  if (Result <> '') then
+    Result := IncludeTrailingPathDelimiter(Result + RDJ_BROADCAST_HANDOVER_LOCK_DIR);
+end;
+
+
+function TfrmMediaServer.BroadcastHandoverStatusFileName(): string;
+begin
+
+  Result := BroadcastHandoverBaseDir();
+
+  if (Result <> '') then
+    Result := Result + RDJ_BROADCAST_HANDOVER_STATUS_FILE;
+end;
+
+
+function TfrmMediaServer.BroadcastHandoverComputerName(): string;
+var
+  Buffer: array[0..MAX_COMPUTERNAME_LENGTH] of Char;
+  BufferLen: DWORD;
+
+begin
+
+  Result := '';
+  BufferLen := Length(Buffer);
+
+  if GetComputerName(Buffer,
+                     BufferLen) then
+    SetString(Result,
+              Buffer,
+              BufferLen);
+end;
+
+
+function TfrmMediaServer.BroadcastHandoverOwnerDisplay(): string;
+var
+  ComputerName: string;
+  UserName: string;
+
+begin
+
+  Result := '';
+
+  if Assigned(MainMDIFrm) then
+    Result := Trim(MainMDIFrm.DjName);
+
+  if Result = '' then
+    begin
+      UserName := Trim(GetEnvironmentVariable('USERNAME'));
+      if UserName <> '' then
+        Result := UserName;
+    end;
+
+  ComputerName := BroadcastHandoverComputerName();
+  if ComputerName <> '' then
+    begin
+      if Result = '' then
+        Result := ComputerName
+      else
+        Result := Result + ' @ ' + ComputerName;
+    end;
+
+  if Result = '' then
+    Result := 'Unknown broadcaster';
+end;
+
+
+function TfrmMediaServer.BroadcastHandoverJsonEscape(const AValue: string): string;
+var
+  I: Integer;
+  C: Char;
+
+begin
+
+  Result := '';
+
+  for I := 1 to Length(AValue) do
+    begin
+      C := AValue[I];
+      case C of
+        '"': Result := Result + '\"';
+        '\': Result := Result + '\\';
+        #8: Result := Result + '\b';
+        #9: Result := Result + '\t';
+        #10: Result := Result + '\n';
+        #12: Result := Result + '\f';
+        #13: Result := Result + '\r';
+      else
+        if Ord(C) < 32 then
+          Result := Result + Format('\u%.4x', [Ord(C)])
+        else
+          Result := Result + C;
+      end;
+    end;
+end;
+
+
+function TfrmMediaServer.ExtractBroadcastHandoverJsonString(const AJson: string;
+                                                            const AName: string): string;
+var
+  P: Integer;
+  Pattern: string;
+  Escaped: Boolean;
+  C: Char;
+
+begin
+
+  Result := '';
+  Pattern := '"' + AName + '"';
+  P := Pos(Pattern,
+           AJson);
+
+  if P <= 0 then
+    Exit;
+
+  Inc(P,
+      Length(Pattern));
+
+  while (P <= Length(AJson)) and (AJson[P] <> ':') do
+    Inc(P);
+
+  if P > Length(AJson) then
+    Exit;
+
+  Inc(P);
+
+  while (P <= Length(AJson)) and (AJson[P] <= ' ') do
+    Inc(P);
+
+  if (P > Length(AJson)) or (AJson[P] <> '"') then
+    Exit;
+
+  Inc(P);
+  Escaped := False;
+
+  while P <= Length(AJson) do
+    begin
+      C := AJson[P];
+
+      if Escaped then
+        begin
+          if C = 'n' then
+            Result := Result + ' '
+          else if C = 'r' then
+            Result := Result + ' '
+          else if C = 't' then
+            Result := Result + ' '
+          else
+            Result := Result + C;
+
+          Escaped := False;
+        end
+      else if C = '\' then
+        Escaped := True
+      else if C = '"' then
+        Exit
+      else
+        Result := Result + C;
+
+      Inc(P);
+    end;
+end;
+
+
+function TfrmMediaServer.ReadBroadcastHandoverTextFile(const AFileName: string): string;
+var
+  Lines: TStringList;
+
+begin
+
+  Result := '';
+
+  if (AFileName = '') or
+     (not FileExists(AFileName)) then
+    Exit;
+
+  Lines := TStringList.Create();
+  try
+    Lines.LoadFromFile(AFileName,
+                       TEncoding.UTF8);
+    Result := Lines.Text;
+  finally
+    Lines.Free();
+  end;
+end;
+
+
+function TfrmMediaServer.IsBroadcastHandoverLockStale(const ALockDir: string): Boolean;
+var
+  OwnerFileName: string;
+  OwnerTime: TDateTime;
+
+begin
+
+  Result := False;
+  OwnerFileName := IncludeTrailingPathDelimiter(ALockDir) + RDJ_BROADCAST_HANDOVER_OWNER_FILE;
+
+  if not FileExists(OwnerFileName) then
+    Exit;
+
+  if not FileAge(OwnerFileName,
+                 OwnerTime) then
+    Exit;
+
+  Result := ((Now - OwnerTime) * RDJ_MS_PER_DAY) > RDJ_BROADCAST_HANDOVER_STALE_MS;
+end;
+
+
+procedure TfrmMediaServer.DeleteBroadcastHandoverLockDir(const ALockDir: string);
+var
+  SearchRec: TSearchRec;
+  LockDir: string;
+
+begin
+
+  LockDir := IncludeTrailingPathDelimiter(ALockDir);
+
+  DeleteFile(LockDir + RDJ_BROADCAST_HANDOVER_OWNER_FILE);
+
+  if FindFirst(LockDir + RDJ_BROADCAST_HANDOVER_OWNER_FILE + '.tmp_*',
+               faAnyFile,
+               SearchRec) = 0 then
+    try
+      repeat
+        if (SearchRec.Attr and faDirectory) = 0 then
+          DeleteFile(LockDir + SearchRec.Name);
+      until FindNext(SearchRec) <> 0;
+    finally
+      FindClose(SearchRec);
+    end;
+
+  RemoveDir(ALockDir);
+end;
+
+
+function TfrmMediaServer.BuildBroadcastHandoverStatusJson(const AState: string;
+                                                          const AMessage: string): string;
+var
+  DjName: string;
+  ShowName: string;
+  ComputerName: string;
+  OwnerDisplay: string;
+  ActiveText: string;
+
+begin
+
+  DjName := '';
+  ShowName := '';
+
+  if Assigned(MainMDIFrm) then
+    begin
+      DjName := Trim(MainMDIFrm.DjName);
+      ShowName := Trim(MainMDIFrm.ShowName);
+    end;
+
+  ComputerName := BroadcastHandoverComputerName();
+  OwnerDisplay := BroadcastHandoverOwnerDisplay();
+
+  if SameText(AState,
+              'on_air') then
+    ActiveText := 'true'
+  else
+    ActiveText := 'false';
+
+  Result :=
+    '{' + sLineBreak +
+    '  "version": 1,' + sLineBreak +
+    Format('  "active": %s,', [ActiveText]) + sLineBreak +
+    Format('  "state": "%s",', [BroadcastHandoverJsonEscape(AState)]) + sLineBreak +
+    Format('  "ownerId": "%s",', [BroadcastHandoverJsonEscape(FBroadcastHandoverOwnerId)]) + sLineBreak +
+    Format('  "owner": "%s",', [BroadcastHandoverJsonEscape(OwnerDisplay)]) + sLineBreak +
+    Format('  "djName": "%s",', [BroadcastHandoverJsonEscape(DjName)]) + sLineBreak +
+    Format('  "showName": "%s",', [BroadcastHandoverJsonEscape(ShowName)]) + sLineBreak +
+    Format('  "computerName": "%s",', [BroadcastHandoverJsonEscape(ComputerName)]) + sLineBreak +
+    Format('  "processId": %d,', [GetCurrentProcessId()]) + sLineBreak +
+    Format('  "updated": "%s",', [FormatDateTime('yyyy-mm-dd hh:nn:ss', Now)]) + sLineBreak +
+    Format('  "heartbeatTick": %d,', [GetTickCount()]) + sLineBreak +
+    Format('  "message": "%s"', [BroadcastHandoverJsonEscape(AMessage)]) + sLineBreak +
+    '}';
+end;
+
+
+procedure TfrmMediaServer.PublishBroadcastHandoverStatus(const AState: string;
+                                                         const AMessage: string);
+var
+  StatusFileName: string;
+  Json: string;
+
+begin
+
+  StatusFileName := BroadcastHandoverStatusFileName();
+  if StatusFileName = '' then
+    Exit;
+
+  Json := BuildBroadcastHandoverStatusJson(AState,
+                                           AMessage);
+
+  WriteUtf8TextToFileAtomic(StatusFileName,
+                            Json);
+end;
+
+
+function TfrmMediaServer.AcquireBroadcastHandoverLock(out AMessage: string): Boolean;
+var
+  BaseDir: string;
+  LockDir: string;
+  OwnerFileName: string;
+  OwnerJson: string;
+  OwnerName: string;
+  OwnerUpdated: string;
+
+begin
+
+  Result := False;
+  AMessage := '';
+
+  if FBroadcastHandoverLockAcquired then
+    begin
+
+      UpdateBroadcastHandoverHeartbeat(True);
+      Result := True;
+      Exit;
+    end;
+
+  BaseDir := BroadcastHandoverBaseDir();
+  LockDir := BroadcastHandoverLockDir();
+
+  if (BaseDir = '') or (LockDir = '') then
+    begin
+
+      AMessage := 'Caddy directory is not configured, so RDJ Pro cannot protect the shared broadcast stream.';
+      Exit;
+    end;
+
+  ForceDirectories(BaseDir);
+
+  if DirectoryExists(LockDir) and
+     IsBroadcastHandoverLockStale(LockDir) then
+    begin
+
+      memLog.Lines.Append('Removing stale broadcast handover lock.');
+      DeleteBroadcastHandoverLockDir(LockDir);
+    end;
+
+  if not CreateDir(LockDir) then
+    begin
+
+      SetBroadcastHandoverLockIndicator(CAP_LOCKED,
+                                        LOCKED_COLOR);
+      OwnerFileName := IncludeTrailingPathDelimiter(LockDir) + RDJ_BROADCAST_HANDOVER_OWNER_FILE;
+      OwnerJson := ReadBroadcastHandoverTextFile(OwnerFileName);
+      OwnerName := ExtractBroadcastHandoverJsonString(OwnerJson,
+                                                      'owner');
+      OwnerUpdated := ExtractBroadcastHandoverJsonString(OwnerJson,
+                                                         'updated');
+
+      if (OwnerName = '') then
+        OwnerName := 'another RDJ Pro computer';
+
+      SetBroadcastHandoverLockIndicator(CAP_LOCKED,
+                                        LOCKED_COLOR);
+      AMessage := 'Broadcast is already active by ' + OwnerName;
+      if (OwnerUpdated <> '') then
+        AMessage := AMessage + ' since ' + OwnerUpdated;
+      AMessage := AMessage + '. Wait for the handover message before taking over.';
+      Exit;
+    end;
+
+  FBroadcastHandoverLockAcquired := True;
+  FBroadcastHandoverOwnerId := Format('%s-%d-%d',
+                                      [BroadcastHandoverComputerName(),
+                                       GetCurrentProcessId(),
+                                       GetTickCount()]);
+  FLastBroadcastHandoverHeartbeatTick := 0;
+
+  UpdateBroadcastHandoverHeartbeat(True);
+  AMessage := 'Broadcast lock acquired by ' + BroadcastHandoverOwnerDisplay() + '.';
+  Result := True;
+end;
+
+
+procedure TfrmMediaServer.ReleaseBroadcastHandoverLock(const APublishHandoverReady: Boolean);
+var
+  LockDir: string;
+  MessageText: string;
+
+begin
+
+  if not FBroadcastHandoverLockAcquired then
+    Exit;
+
+  SetBroadcastHandoverLockIndicator(CAP_UNLOCKED,
+                                    UNLOCKED_COLOR);
+
+  LockDir := BroadcastHandoverLockDir();
+
+  if APublishHandoverReady then
+    begin
+      MessageText := BroadcastHandoverOwnerDisplay() + ' has finished. The next DJ can take over now.';
+      PublishBroadcastHandoverStatus('handover_ready',
+                                     MessageText);
+    end;
+
+  if LockDir <> '' then
+    DeleteBroadcastHandoverLockDir(LockDir);
+
+  FBroadcastHandoverLockAcquired := False;
+  FBroadcastHandoverOwnerId := '';
+  FLastBroadcastHandoverHeartbeatTick := 0;
+end;
+
+
+procedure TfrmMediaServer.UpdateBroadcastHandoverHeartbeat(const AForce: Boolean = False);
+var
+  Tick: DWORD;
+  LockDir: string;
+  OwnerFileName: string;
+  Json: string;
+
+begin
+
+  if not FBroadcastHandoverLockAcquired then
+    Exit;
+
+  Tick := GetTickCount();
+
+  if (not AForce) and
+     (FLastBroadcastHandoverHeartbeatTick <> 0) and
+     ((Tick - FLastBroadcastHandoverHeartbeatTick) < RDJ_BROADCAST_HANDOVER_HEARTBEAT_MS) then
+    Exit;
+
+  LockDir := BroadcastHandoverLockDir();
+  if LockDir = '' then
+    Exit;
+
+  OwnerFileName := IncludeTrailingPathDelimiter(LockDir) + RDJ_BROADCAST_HANDOVER_OWNER_FILE;
+  Json := BuildBroadcastHandoverStatusJson('on_air',
+                                           BroadcastHandoverOwnerDisplay() + ' is on air.');
+
+  WriteUtf8TextToFileAtomic(OwnerFileName,
+                            Json);
+  PublishBroadcastHandoverStatus('on_air',
+                                 BroadcastHandoverOwnerDisplay() + ' is on air.');
+
+  FLastBroadcastHandoverHeartbeatTick := Tick;
+end;
+
+
+procedure TfrmMediaServer.PollBroadcastHandoverStatus();
+var
+  Tick: DWORD;
+  StatusFileName: string;
+  Json: string;
+  State: string;
+  MessageText: string;
+  NoticeKey: string;
+
+begin
+
+  Tick := GetTickCount();
+
+  if (FLastBroadcastHandoverPollTick <> 0) and
+     ((Tick - FLastBroadcastHandoverPollTick) < RDJ_BROADCAST_HANDOVER_POLL_MS) then
+    Exit;
+
+  SetBroadcastHandoverLockIndicator(CAP_UNLOCKED,
+                                    UNLOCKED_COLOR);
+
+  FLastBroadcastHandoverPollTick := Tick;
+  StatusFileName := BroadcastHandoverStatusFileName();
+
+  if (StatusFileName = '') or
+     (not FileExists(StatusFileName)) then
+    Exit;
+
+  Json := ReadBroadcastHandoverTextFile(StatusFileName);
+  State := ExtractBroadcastHandoverJsonString(Json,
+                                              'state');
+
+  if not SameText(State,
+                  'handover_ready') then
+    Exit;
+
+  MessageText := ExtractBroadcastHandoverJsonString(Json,
+                                                    'message');
+  if (MessageText = '') then
+    MessageText := 'The previous DJ has finished. The next DJ can take over now.';
+
+  NoticeKey := State + '|' + MessageText;
+  if SameText(NoticeKey,
+              FLastBroadcastHandoverNotice) then
+    Exit;
+
+  FLastBroadcastHandoverNotice := NoticeKey;
+  memLog.Lines.Append('Handover ready: ' + MessageText);
+  //
+
+end;
 
 
 
@@ -4871,6 +5518,7 @@ var
   FileName: string;
   hr: HRESULT;
   VideoType: IMFMediaType;
+  HandoverMessage: string;
 
 begin
 
@@ -4880,8 +5528,19 @@ begin
   if not Assigned(FRdjProBroadcastMp4Recorder) then
     Exit;
 
+  if not AcquireBroadcastHandoverLock(HandoverMessage) then
+    begin
+
+      memLog.Lines.Append(HandoverMessage);
+      ShowMessage(HandoverMessage);
+      Exit;
+    end;
+
+  try
+
   if FRdjProStaticImage then
     begin
+
       if not EnsureRdjProStaticVideoMediaType() then
         Exit;
 
@@ -4889,6 +5548,7 @@ begin
     end
   else
     begin
+
       if not EnsureRdjProVideoSampleReader() then
         Exit;
 
@@ -4984,6 +5644,12 @@ begin
     MainMDIFrm.ClearNowPlaying();
   memLog.Lines.Append('Broadcasting started.');
   Result := True;
+finally
+  if (not Result) and
+     (not FRdjProBroadcasting) and
+     (not FPendingBroadcastRecording) then
+    ReleaseBroadcastHandoverLock(False);
+end;
 end;
 
 
@@ -4995,14 +5661,17 @@ var
 begin
 
   if not Assigned(FRdjProBroadcastMp4Recorder) then
-    Exit;
+    begin
+      ReleaseBroadcastHandoverLock(True);
+      Exit;
+    end;
 
   // Stop accepting new broadcast audio/video immediately.  The recorder stop
   // itself can still take a moment, so keep that work off the VCL thread.
   FRdjProBroadcasting := False;
 
   if not FTimerRunning then
-    tmrTime.Enabled := False;
+    tmrTime.Enabled := True;
 
   FPendingBroadcastRecording := False;
   FPendingBroadcastFileName := '';
@@ -5019,6 +5688,7 @@ begin
       CleanupBroadcastMseArtifactsOnStop();
       ResetBroadcastMseDebugDump();
       StopRdjProVideoSampleReaderIfIdle();
+      ReleaseBroadcastHandoverLock(True);
       Exit;
     end;
 
@@ -5045,6 +5715,7 @@ begin
                       CleanupBroadcastMseArtifactsOnStop();
                       ResetBroadcastMseDebugDump();
                       StopRdjProVideoSampleReaderIfIdle();
+                      ReleaseBroadcastHandoverLock(True);
                     end;
       TThread.Queue(nil,
                     StopUiProc);

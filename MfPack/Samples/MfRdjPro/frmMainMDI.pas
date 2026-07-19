@@ -1905,12 +1905,15 @@ var
 
 begin
 
+  if FAppClosing then
+    Exit;
+
   JsonFile := Trim(Setup.CaddyNowPlayingJsonFile);
   if (JsonFile = '') then
     Exit;
 
   ListenerCount := AListeners;
-  if ListenerCount < 0 then
+  if (ListenerCount < 0) then
     ListenerCount := FCaddyListenerCount;
 
   // Local mode: JsonFile is normally C:\Caddy\nowplaying.json.

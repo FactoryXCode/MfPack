@@ -660,13 +660,15 @@ object frmLoopbackDeck: TfrmLoopbackDeck
     Color = 4865081
     ParentBackground = False
     TabOrder = 1
+    ExplicitTop = -3
     object shpLiveCap: TShape
       Left = 160
       Top = 4
       Width = 87
       Height = 29
-      Brush.Color = 5850948
+      Brush.Style = bsClear
       Pen.Color = 5668864
+      Pen.Width = 3
     end
     object lblCaption: TLabel
       Left = 8
@@ -690,18 +692,18 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Layout = tlCenter
     end
     object shpLive: TShape
-      Left = 162
-      Top = 6
-      Width = 83
-      Height = 25
-      Brush.Color = 5668864
+      Left = 164
+      Top = 8
+      Width = 79
+      Height = 21
+      Brush.Style = bsClear
       Pen.Color = 5668864
     end
     object lblLive: TLabel
-      Left = 166
-      Top = 9
-      Width = 75
-      Height = 19
+      Left = 164
+      Top = 8
+      Width = 79
+      Height = 20
       Alignment = taCenter
       AutoSize = False
       Caption = 'LIVE'
@@ -711,7 +713,8 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Font.Name = 'Segoe UI'
       Font.Style = [fsBold]
       ParentFont = False
-      Transparent = False
+      Transparent = True
+      Layout = tlCenter
     end
   end
   object pnlBottom: TPanel
