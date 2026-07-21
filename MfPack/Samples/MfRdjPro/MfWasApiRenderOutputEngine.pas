@@ -1,4 +1,4 @@
-﻿// FactoryX
+// FactoryX
 //
 // Copyright: FactoryX. All rights reserved.
 //
@@ -84,6 +84,7 @@ uses
   Winapi.CoreAudioApi.AudioClient,
   Winapi.CoreAudioApi.AudioSessionTypes,
   Winapi.CoreAudioApi.AudioPolicy,
+  WinApi.CoreAudioApi.MMDevApiUtils,
   {WinMM}
   WinApi.WinMM.MMeApi,
   WinApi.WinMM.MMReg,
@@ -507,6 +508,10 @@ begin
                                    AUDIO_BUFFER_MAX_MS);
 
   hnsRequestedDuration := Int64(RequestedBufferMs) * 10000; // 60 ms buffer = default.
+
+  ConfigureRawAudioStream(pvAudioClient,
+                                AudioCategory_Media,
+                                'RDJ WASAPI render output');
 
   hr := pvAudioClient.Initialize(AUDCLNT_SHAREMODE_SHARED,
                                  AUDCLNT_STREAMFLAGS_EVENTCALLBACK or

@@ -150,6 +150,8 @@ type
     chkCrossFade: TMPxpButton;
     btnPFL: TMPxpButton;
     edtPID: TEdit;
+    lblBalMaster: TLabel;
+    Label2: TLabel;
 
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -352,8 +354,7 @@ begin
   SetWindowLong(Handle,
                 GWL_STYLE,
                 GetWindowLong(Handle, GWL_STYLE) and not WS_CAPTION or WS_BORDER);
- // Height := 1538;
- // Width := 415;
+  Width := 261;
 end;
 
 

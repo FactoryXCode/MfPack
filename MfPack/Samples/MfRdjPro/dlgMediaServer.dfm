@@ -97,27 +97,27 @@ object frmMediaServer: TfrmMediaServer
       ParentFont = False
       Transparent = True
     end
-    object OnRecordingCap: TShape
-      Left = 398
-      Top = 4
-      Width = 112
-      Height = 29
+    object shpRecordingCap: TShape
+      Left = 369
+      Top = 5
+      Width = 95
+      Height = 28
       Brush.Color = 5850948
       Pen.Color = 5668864
       Pen.Width = 3
     end
     object shpRecording: TShape
-      Left = 402
-      Top = 8
-      Width = 104
-      Height = 21
+      Left = 373
+      Top = 9
+      Width = 87
+      Height = 20
       Brush.Style = bsClear
       Pen.Color = 5668864
     end
     object lblRecording: TLabel
-      Left = 402
-      Top = 7
-      Width = 105
+      Left = 373
+      Top = 8
+      Width = 87
       Height = 20
       Alignment = taCenter
       AutoSize = False
@@ -133,7 +133,7 @@ object frmMediaServer: TfrmMediaServer
       Transparent = True
     end
     object shpBcLocked: TShape
-      Left = 264
+      Left = 268
       Top = 5
       Width = 95
       Height = 28
@@ -142,7 +142,7 @@ object frmMediaServer: TfrmMediaServer
       Pen.Width = 3
     end
     object shpBcLockedCap: TShape
-      Left = 268
+      Left = 272
       Top = 9
       Width = 87
       Height = 20
@@ -151,7 +151,7 @@ object frmMediaServer: TfrmMediaServer
       Pen.Color = clLime
     end
     object lblLockBC: TLabel
-      Left = 269
+      Left = 273
       Top = 8
       Width = 86
       Height = 20
@@ -237,7 +237,7 @@ object frmMediaServer: TfrmMediaServer
       Left = 0
       Top = 0
       Width = 791
-      Height = 129
+      Height = 117
       Align = alTop
       BevelOuter = bvNone
       Color = 9598320
@@ -248,9 +248,9 @@ object frmMediaServer: TfrmMediaServer
       TabOrder = 0
       object pnlRecorderCtrl: TPanel
         Left = 0
-        Top = 49
+        Top = 41
         Width = 791
-        Height = 80
+        Height = 76
         Align = alClient
         BevelOuter = bvNone
         Caption = 'pnlRecorderCtrl'
@@ -258,6 +258,8 @@ object frmMediaServer: TfrmMediaServer
         ParentBackground = False
         ShowCaption = False
         TabOrder = 2
+        ExplicitTop = 49
+        ExplicitHeight = 80
         object Bevel1: TBevel
           Left = 10
           Top = 12
@@ -509,9 +511,9 @@ object frmMediaServer: TfrmMediaServer
       end
       object pnlServerCtrl: TPanel
         Left = 0
-        Top = 49
+        Top = 41
         Width = 791
-        Height = 80
+        Height = 76
         Align = alClient
         BevelOuter = bvNone
         Caption = 'pnlServerCtrl'
@@ -519,6 +521,7 @@ object frmMediaServer: TfrmMediaServer
         ParentBackground = False
         ShowCaption = False
         TabOrder = 0
+        ExplicitHeight = 80
         object Bevel3: TBevel
           Left = 10
           Top = 10
@@ -891,9 +894,9 @@ object frmMediaServer: TfrmMediaServer
         end
         object memLog: TMemo
           Left = 375
-          Top = 12
+          Top = 10
           Width = 409
-          Height = 62
+          Height = 59
           Color = 9216
           Font.Charset = DEFAULT_CHARSET
           Font.Color = 13229826
@@ -909,7 +912,7 @@ object frmMediaServer: TfrmMediaServer
         Left = 0
         Top = 0
         Width = 791
-        Height = 49
+        Height = 41
         Margins.Left = 0
         Margins.Top = 0
         Margins.Right = 0
@@ -920,13 +923,11 @@ object frmMediaServer: TfrmMediaServer
         ParentBackground = False
         ShowCaption = False
         TabOrder = 1
-        ExplicitLeft = -1
-        ExplicitTop = 1
         object chkServerCtrl: TMPxpButton
           Left = 4
-          Top = 3
+          Top = 4
           Width = 107
-          Height = 46
+          Height = 38
           Alignment = taCenter
           Caption = 'Server'
           Color = 6899524
@@ -1040,10 +1041,10 @@ object frmMediaServer: TfrmMediaServer
           OnClick = chkServerCtrlClick
         end
         object chkRecorderCtrl: TMPxpButton
-          Left = 117
+          Left = 112
           Top = 4
           Width = 107
-          Height = 46
+          Height = 38
           Alignment = taCenter
           Caption = 'Recorder'
           Color = 6899524
@@ -1159,20 +1160,22 @@ object frmMediaServer: TfrmMediaServer
     end
     object pnlRdjProPreviewHost: TPanel
       Left = 0
-      Top = 129
+      Top = 117
       Width = 791
-      Height = 581
+      Height = 593
       Align = alClient
       BevelOuter = bvNone
       Color = 9216
       ParentBackground = False
       ShowCaption = False
       TabOrder = 1
+      ExplicitTop = 129
+      ExplicitHeight = 581
       object imgRdjProStaticPreview: TImage
         Left = 0
         Top = 0
         Width = 791
-        Height = 581
+        Height = 593
         Align = alClient
         Center = True
         Proportional = True

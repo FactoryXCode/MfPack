@@ -80,9 +80,10 @@ uses
   Vcl.Grids,
   Vcl.ExtCtrls,
   {CoreAudioApi}
-  RDJ_Common,
   WinApi.CoreAudioApi.MMDeviceApi,
   WinApi.CoreAudioApi.MMDevApiUtils,
+  {Application}
+  RDJ_Common,
   MPxpButton;
 
 type

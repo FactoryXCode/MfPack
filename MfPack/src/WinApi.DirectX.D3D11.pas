@@ -17,7 +17,7 @@
 //
 // Organisation: FactoryX
 // Initiator(s): Tony (maXcomX), Peter (OzShips)
-// Contributor(s): Tony Kalf (maXcomX), (kxMAXX)
+// Contributor(s): Tony Kalf (maXcomX), (kxMAXX), Sandor Wortmann.
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
@@ -5137,15 +5137,15 @@ type
 
     function CreateVideoProcessorInputView(pResource: ID3D11Resource;
                                            pEnum: ID3D11VideoProcessorEnumerator;
-                                           const pDesc: D3D11_VIDEO_PROCESSOR_INPUT_VIEW_DESC;
+                                           pDesc: PD3D11_VIDEO_PROCESSOR_INPUT_VIEW_DESC;
                                      {out} ppVPIView: PID3D11VideoProcessorInputView): HRESULT; stdcall;
 
     function CreateVideoProcessorOutputView(pResource: ID3D11Resource;
                                             pEnum: ID3D11VideoProcessorEnumerator;
-                                            const pDesc: D3D11_VIDEO_PROCESSOR_OUTPUT_VIEW_DESC;
+                                            pDesc: PD3D11_VIDEO_PROCESSOR_OUTPUT_VIEW_DESC;
                                       {out} ppVPOView: PID3D11VideoProcessorOutputView): HRESULT; stdcall;
 
-    function CreateVideoProcessorEnumerator(const pDesc: D3D11_VIDEO_PROCESSOR_CONTENT_DESC;
+    function CreateVideoProcessorEnumerator(pDesc: PD3D11_VIDEO_PROCESSOR_CONTENT_DESC;
                                             out ppEnum: ID3D11VideoProcessorEnumerator): HRESULT; stdcall;
 
     function GetVideoDecoderProfileCount(): UINT; stdcall;

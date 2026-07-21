@@ -2587,7 +2587,7 @@ object frmSetup: TfrmSetup
     Left = 0
     Top = 0
     Width = 689
-    Height = 49
+    Height = 41
     Margins.Left = 0
     Margins.Top = 0
     Margins.Right = 0
@@ -2598,11 +2598,12 @@ object frmSetup: TfrmSetup
     ParentBackground = False
     ShowCaption = False
     TabOrder = 2
+    ExplicitTop = 2
     object chkGeneralSettings: TMPxpButton
       Left = 4
       Top = 4
       Width = 107
-      Height = 46
+      Height = 38
       Alignment = taCenter
       Caption = 'General'
       Color = 6899524
@@ -2716,10 +2717,10 @@ object frmSetup: TfrmSetup
       OnClick = chkGeneralSettingsClick
     end
     object chkBroadcastSettings: TMPxpButton
-      Left = 117
+      Left = 112
       Top = 4
       Width = 107
-      Height = 46
+      Height = 38
       Alignment = taCenter
       Caption = 'Broadcast'
       Color = 6899524

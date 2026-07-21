@@ -260,7 +260,7 @@ type
     lblOnAir: TLabel;
     btnMinimize: TMPxpButton;
     tmrTime: TTimer;
-    OnRecordingCap: TShape;
+    shpRecordingCap: TShape;
     shpRecording: TShape;
     lblRecording: TLabel;
     pnlRdjProControl: TPanel;
@@ -316,6 +316,7 @@ type
     FRecordingRdjPro: Boolean;
     FRecordVideoOnly: Boolean;
     FRdjProStaticImage: Boolean;
+    FUpdatingRdjProVideoSourceButtons: Boolean;
 
     // Camera / recorder -------------------------------------------------------
     FRdjProPreviewing: Boolean;
@@ -411,6 +412,10 @@ type
     // Camera / recorder
     function StartRdjProCamera(PreviewObject: HWnd): HRESULT;
     procedure StopRdjProCamera();
+    procedure ResetRdjProCaptureManager();
+    procedure SetRdjProVideoSourceButtons(const AStaticImage,
+                                          ACamera: Boolean);
+    procedure SetRdjProStaticImageMode(const AStaticImage: Boolean);
     function PickRdjProStaticImageFileName(): string;
     function ResolveRdjProStaticImageFileName(): string;
     function EnsureRdjProStaticVideoFrame(const AWidth: Integer = RDJ_STATIC_VIDEO_WIDTH;
@@ -1753,104 +1758,17 @@ var
 
 begin
 
+  if FUpdatingRdjProVideoSourceButtons then
+    Exit;
+
   if not Assigned(MainMDIFrm) then
     Exit;
 
-  ModeChanged := False;
+  ModeChanged := FRdjProStaticImage;
 
-  if chkRdjProCamera.Checked then
+  if FRdjProStaticImage then
     begin
 
-      if FRdjProStaticImage then
-        begin
-          if FRdjProBroadcasting and Assigned(FRdjProCaptureManager) then
-            FRdjProCaptureManager.StopVideoSourceReader(150);
-
-          StopRdjProCamera();
-          FRdjProCaptureInitialized := False;
-        end;
-
-      if FRdjProStaticImage then
-        begin
-          FRdjProStaticImage := False;
-          ModeChanged := True;
-          chkRdjProStaticImage.Checked := False;
-          chkRdjProStaticImage.Down := False;
-          FStaticVideoFrameIndex := 0;
-          FStaticVideoStartTick := 0;
-          FStaticVideoLastTick := 0;
-          HideRdjProStaticPreview();
-
-          if FRdjProBroadcasting then
-            PrepareBroadcastMseVideoSourceSwitch();
-        end;
-
-      if not FRdjProPreviewing then
-        begin
-          if FAILED(StartRdjProCamera(pnlRdjProPreviewHost.Handle)) then
-            begin
-              chkRdjProCamera.Checked := False;
-              chkRdjProCamera.Down := False;
-              if ModeChanged then
-                begin
-                  FRdjProStaticImage := True;
-                  chkRdjProStaticImage.Checked := True;
-                  chkRdjProStaticImage.Down := True;
-                  ShowRdjProStaticPreview();
-                end;
-              Exit;
-            end;
-        end;
-
-      if ModeChanged and FRdjProBroadcasting then
-        begin
-          if not EnsureRdjProVideoSampleReader(FActiveBroadcastVideoMediaType) then
-            begin
-              StopRdjProCamera();
-              FRdjProStaticImage := True;
-              chkRdjProStaticImage.Checked := True;
-              chkRdjProStaticImage.Down := True;
-              chkRdjProCamera.Checked := False;
-              chkRdjProCamera.Down := False;
-              ShowRdjProStaticPreview();
-              Exit;
-            end;
-        end;
-
-      if FRdjProPreviewing and not FRdjProStaticImage then
-        begin
-          RefreshRdjProCameraPreview();
-          ScheduleRdjProCameraPreviewRefresh();
-        end;
-
-      if ModeChanged and FRdjProBroadcasting then
-        OutputDebugString(PChar('RDJ Pro live source switched to camera without recorder restart.'));
-    end
-  else
-    StopRdjProCamera();
-end;
-
-
-procedure TfrmMediaServer.chkRdjProStaticImageClick(Sender: TObject);
-var
-  ModeChanged: Boolean;
-  StaticImageFileName: string;
-  WantStaticImage: Boolean;
-
-begin
-
-  if FRdjProRecording then
-    begin
-      chkRdjProStaticImage.Checked := FRdjProStaticImage;
-      chkRdjProStaticImage.Down := FRdjProStaticImage;
-      Exit;
-    end;
-
-  WantStaticImage := chkRdjProStaticImage.Checked;
-
-  if (not WantStaticImage) and
-     FRdjProStaticImage then
-    begin
       if FRdjProBroadcasting and Assigned(FRdjProCaptureManager) then
         FRdjProCaptureManager.StopVideoSourceReader(150);
 
@@ -1858,108 +1776,112 @@ begin
       FRdjProCaptureInitialized := False;
     end;
 
-  if WantStaticImage then
-    begin
-      StaticImageFileName := PickRdjProStaticImageFileName();
-      if StaticImageFileName = '' then
-        begin
-          chkRdjProStaticImage.Checked := FRdjProStaticImage;
-          chkRdjProStaticImage.Down := FRdjProStaticImage;
-          Exit;
-        end;
-
-      FStaticImageFileName := StaticImageFileName;
-      FStaticVideoBuffer := nil;
-      FStaticVideoBufferWidth := 0;
-      FStaticVideoBufferHeight := 0;
-    end;
-
-  ModeChanged := FRdjProStaticImage <> WantStaticImage;
-  FRdjProStaticImage := WantStaticImage;
-  chkRdjProStaticImage.Down := FRdjProStaticImage;
+  SetRdjProStaticImageMode(False);
   FStaticVideoFrameIndex := 0;
   FStaticVideoStartTick := 0;
   FStaticVideoLastTick := 0;
+  HideRdjProStaticPreview();
 
-  if FRdjProStaticImage then
-    begin
-      FreeAndNil(FStaticVideoBitmap);
-      EnsureRdjProStaticVideoFrame();
+  if ModeChanged and FRdjProBroadcasting then
+    PrepareBroadcastMseVideoSourceSwitch();
 
-      chkRdjProCamera.Checked := False;
-      chkRdjProCamera.Down := False;
-      chkRdjProCamera.Enabled := not FRecordingRdjPro;
-
-      if ModeChanged and FRdjProBroadcasting then
-        PrepareBroadcastMseVideoSourceSwitch();
-
-      QueueRdjProStaticVideoSample();
-
-      if not FRdjProBroadcasting then
-        begin
-          if Assigned(FRdjProCaptureManager) then
-            FRdjProCaptureManager.StopVideoSourceReader(50);
-        end;
-
-      StopRdjProCamera();
-      ShowRdjProStaticPreview();
-    end
-  else if FRdjProBroadcasting then
+  if not FRdjProPreviewing then
     begin
       if FAILED(StartRdjProCamera(pnlRdjProPreviewHost.Handle)) then
         begin
-          FRdjProStaticImage := True;
-          chkRdjProStaticImage.Checked := True;
-          chkRdjProStaticImage.Down := True;
-          chkRdjProCamera.Checked := False;
-          chkRdjProCamera.Down := False;
-          ShowRdjProStaticPreview();
+          if ModeChanged then
+            begin
+              SetRdjProStaticImageMode(True);
+              ShowRdjProStaticPreview();
+            end
+          else
+            SetRdjProVideoSourceButtons(False,
+                                        False);
+
           Exit;
         end;
-
-      if not EnsureRdjProVideoSampleReader(FActiveBroadcastVideoMediaType) then
-        begin
-          StopRdjProCamera();
-          FRdjProStaticImage := True;
-          chkRdjProStaticImage.Checked := True;
-          chkRdjProStaticImage.Down := True;
-          chkRdjProCamera.Checked := False;
-          chkRdjProCamera.Down := False;
-          ShowRdjProStaticPreview();
-          Exit;
-        end;
-
-      PrepareBroadcastMseVideoSourceSwitch();
-      HideRdjProStaticPreview();
-      chkRdjProCamera.Checked := True;
-      chkRdjProCamera.Down := True;
-      chkRdjProCamera.Enabled := False;
-      RefreshRdjProCameraPreview();
-      ScheduleRdjProCameraPreviewRefresh();
-    end
-  else if chkRdjProCamera.Checked then
-    begin
-      HideRdjProStaticPreview();
-      chkRdjProCamera.Enabled := True;
-      if FAILED(StartRdjProCamera(pnlRdjProPreviewHost.Handle)) then
-        begin
-          chkRdjProCamera.Checked := False;
-          chkRdjProCamera.Down := False;
-        end;
-    end
-  else
-    begin
-      HideRdjProStaticPreview();
-      chkRdjProCamera.Enabled := not FRdjProBroadcasting;
     end;
 
   if ModeChanged and FRdjProBroadcasting then
     begin
-      if FRdjProStaticImage then
-        OutputDebugString(PChar('RDJ Pro live source switched to static image without recorder restart.'))
-      else
-        OutputDebugString(PChar('RDJ Pro live source switched to camera without recorder restart.'));
+      if not EnsureRdjProVideoSampleReader(FActiveBroadcastVideoMediaType) then
+        begin
+          StopRdjProCamera();
+          SetRdjProStaticImageMode(True);
+          ShowRdjProStaticPreview();
+          Exit;
+        end;
     end;
+
+  if FRdjProPreviewing and not FRdjProStaticImage then
+    begin
+      RefreshRdjProCameraPreview();
+      ScheduleRdjProCameraPreviewRefresh();
+    end;
+
+  if ModeChanged and FRdjProBroadcasting then
+    OutputDebugString(PChar('RDJ Pro live source switched to camera without recorder restart.'));
+end;
+
+
+procedure TfrmMediaServer.chkRdjProStaticImageClick(Sender: TObject);
+var
+  ModeChanged: Boolean;
+  StaticImageFileName: string;
+
+begin
+
+  if FUpdatingRdjProVideoSourceButtons then
+    Exit;
+
+  if FRdjProRecording then
+    begin
+      SetRdjProVideoSourceButtons(FRdjProStaticImage,
+                                  not FRdjProStaticImage);
+      Exit;
+    end;
+
+  StaticImageFileName := PickRdjProStaticImageFileName();
+  if StaticImageFileName = '' then
+    begin
+      SetRdjProVideoSourceButtons(FRdjProStaticImage,
+                                  not FRdjProStaticImage);
+      Exit;
+    end;
+
+  FStaticImageFileName := StaticImageFileName;
+  FStaticVideoBuffer := nil;
+  FStaticVideoBufferWidth := 0;
+  FStaticVideoBufferHeight := 0;
+
+  ModeChanged := not FRdjProStaticImage;
+  SetRdjProStaticImageMode(True);
+  FStaticVideoFrameIndex := 0;
+  FStaticVideoStartTick := 0;
+  FStaticVideoLastTick := 0;
+
+  FreeAndNil(FStaticVideoBitmap);
+  EnsureRdjProStaticVideoFrame();
+
+  chkRdjProCamera.Enabled := not FRecordingRdjPro;
+
+  if ModeChanged and FRdjProBroadcasting then
+    PrepareBroadcastMseVideoSourceSwitch();
+
+  QueueRdjProStaticVideoSample();
+
+  if not FRdjProBroadcasting then
+    begin
+      if Assigned(FRdjProCaptureManager) then
+        FRdjProCaptureManager.StopVideoSourceReader(50);
+    end;
+
+  StopRdjProCamera();
+  ResetRdjProCaptureManager();
+  ShowRdjProStaticPreview();
+
+  if ModeChanged and FRdjProBroadcasting then
+    OutputDebugString(PChar('RDJ Pro live source switched to static image without recorder restart.'));
 end;
 
 
@@ -1983,9 +1905,10 @@ begin
   btnRdjProRecord.Tag := 0;
   btnRdjProRecord.Enabled := True;
   FRecordVideoOnly := False;
+  FUpdatingRdjProVideoSourceButtons := False;
   FRdjProStaticImage := False;
-  chkRdjProStaticImage.Checked := False;
-  chkRdjProStaticImage.Down := False;
+  SetRdjProVideoSourceButtons(False,
+                              False);
 
   UpdateOnAirLamp(False);
   UpdateRecorderLamp(False);
@@ -2155,14 +2078,16 @@ begin
    if ARecording then
      begin
 
+       shpRecordingCap.Pen.Color := clRed;
+       shpRecording.Pen.Color := clRed;
        lblRecording.Font.Color := clRed;
-       OnRecordingCap.Pen.Color := clRed;
        lblRecording.Caption := 'REC ON';
      end
    else
      begin
 
-       OnRecordingCap.Pen.Color := $00568000;
+       shpRecordingCap.Pen.Color := $00568000;
+       shpRecording.Pen.Color := $00568000;
        lblRecording.Font.Color := $00568000;
        lblRecording.Caption := 'REC OFF';
      end;
@@ -2254,6 +2179,31 @@ function RdjMakeUINT64(const HighPart: DWORD;
 begin
 
   Result := (UINT64(HighPart) shl 32) or UINT64(LowPart);
+end;
+
+
+procedure TfrmMediaServer.SetRdjProVideoSourceButtons(const AStaticImage,
+                                                      ACamera: Boolean);
+begin
+
+  FUpdatingRdjProVideoSourceButtons := True;
+  try
+
+    chkRdjProStaticImage.Checked := AStaticImage;
+    chkRdjProCamera.Checked := ACamera;
+  finally
+
+    FUpdatingRdjProVideoSourceButtons := False;
+  end;
+end;
+
+
+procedure TfrmMediaServer.SetRdjProStaticImageMode(const AStaticImage: Boolean);
+begin
+
+  FRdjProStaticImage := AStaticImage;
+  SetRdjProVideoSourceButtons(AStaticImage,
+                              not AStaticImage);
 end;
 
 
@@ -2854,18 +2804,18 @@ begin
     end;
 
   Result := FRdjProCaptureManager.StartCamera(nil);
-  // ignore, not an error
-  if (Result <> E_VIDEOPROCESSOR_NOT_IMPLEMENTED) then
-    if FAILED(Result) then
-      begin
+  if (Result = E_VIDEOPROCESSOR_NOT_IMPLEMENTED) then
+    Result := S_OK
+  else if FAILED(Result) then
+    begin
 
-        InfoMsg(optShowMsg,
-                'StartRdjProCamera: StartCamera failed.',
-                Result);
+      InfoMsg(optShowMsg,
+              'StartRdjProCamera: StartCamera failed.',
+              Result);
 
-        memLog.Lines.Append('Start camera failed.');
-        Exit;
-      end;
+      memLog.Lines.Append('Start camera failed.');
+      Exit;
+    end;
 
   FRdjProPreviewing := True;
   if not FRdjProStaticImage then
@@ -2881,10 +2831,25 @@ procedure TfrmMediaServer.StopRdjProCamera();
 begin
 
   if Assigned(FRdjProCaptureManager) then
+    FRdjProCaptureManager.StopCamera();
+
+  FRdjProPreviewing := False;
+  FRdjProCaptureInitialized := False;
+end;
+
+
+procedure TfrmMediaServer.ResetRdjProCaptureManager();
+begin
+
+  if Assigned(FRdjProCaptureManager) then
     begin
-      FRdjProCaptureManager.StopCamera();
-      FRdjProPreviewing := False;
+      FRdjProCaptureManager.ShutDownEngine();
+      FreeAndNil(FRdjProCaptureManager);
     end;
+
+  FRdjProCaptureManager := TRdjProCaptureManager.Create(Handle);
+  FRdjProPreviewing := False;
+  FRdjProCaptureInitialized := False;
 end;
 
 
@@ -3695,17 +3660,9 @@ end;
 procedure TfrmMediaServer.PrepareBroadcastMseVideoSourceSwitch();
 begin
 
-  // Do not let already-grouped static fragments delay the first camera image.
-  // The next complete encoder fragment is published as a one-off short public
-  // segment; normal configured grouping resumes after that fragment.
-  SetLength(FBroadcastMseGroupBytes,
-            0);
-
-  if Assigned(FBroadcastMseGroupStream) then
-    FBroadcastMseGroupStream.Clear();
-
-  FBroadcastMseGroupPartCount := 0;
-  FBroadcastMseGroupFirstTick := 0;
+  // Preserve already-grouped fMP4 fragments: they contain audio too.  Dropping
+  // the partial group during a camera/static switch creates an audible gap in
+  // the browser.  Force the next fragment to publish the current group early.
   FBroadcastMseForceNextPublicGroup := True;
 end;
 

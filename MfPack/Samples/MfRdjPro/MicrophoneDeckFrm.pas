@@ -205,6 +205,7 @@ type
     chkNoiseGate: TMPxpButton;
     chkCrossFade: TMPxpButton;
     Label14: TLabel;
+    lblBalMaster: TLabel;
 
 
     procedure FormCreate(Sender: TObject);

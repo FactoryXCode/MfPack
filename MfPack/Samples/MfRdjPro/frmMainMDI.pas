@@ -191,6 +191,12 @@ type
     btnSetDjNameAndShowTitle: TMPxpButton;
     imgDjShowLogo: TImage;
     chkMediaServer: TMPxpButton;
+    Label1: TLabel;
+    Label2: TLabel;
+    mmoEventTitle: TMemo;
+    Label3: TLabel;
+    mmoActivityTitle: TMemo;
+    Label4: TLabel;
 
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -273,6 +279,7 @@ type
     FShowName: string;
     FNowPlayingArtist: string;
     FNowPlayingTitle: string;
+    FNowPlayingFromChannelDeck: Boolean;
     FCaddyListenerCount: Integer;
     FLastCaddyListenerRefreshTick: UInt64;
     FCoverFileName: string;
@@ -291,6 +298,8 @@ type
     // RdjPro ------------------------------------------------------------------
 
     function BuildCoverJsonUrl(const APreferCurrent: Boolean): string;
+    function NormalizeNowPlayingMemoText(AMemo: TMemo): string;
+    procedure ApplyLoopbackNowPlayingFallback(var AArtist, ATitle: string);
     procedure PublishSelectedCover();
     function ResolveCaddyLogFileName(): string;
     function ReadCaddyActiveListenerCount(): Integer;
@@ -1048,6 +1057,7 @@ begin
   FLastCaddyListenerRefreshTick := 0;
   FNowPlayingArtist := '';
   FNowPlayingTitle := '';
+  FNowPlayingFromChannelDeck := False;
   FPowerPolicyScheme := nil;
   FLidPolicyOverrideActive := False;
   FLidPolicyWarningShown := False;
@@ -1713,11 +1723,11 @@ begin
   FCaddyListenerCount := NewCount;
 
   if AForceJsonUpdate and (NewCount <> OldCount) then
-    WriteNowPlayingStatus('',
-                          '',
-                          '',
-                          '',
-                          '',
+    WriteNowPlayingStatus(FDjName,
+                          FShowName,
+                          FNowPlayingArtist,
+                          FNowPlayingTitle,
+                          BuildCoverJsonUrl(True),
                           FCaddyListenerCount);
 end;
 
@@ -1932,7 +1942,43 @@ begin
 end;
 
 
+function TMainMDIFrm.NormalizeNowPlayingMemoText(AMemo: TMemo): string;
+begin
+
+  Result := '';
+  if not Assigned(AMemo) then
+    Exit;
+
+  Result := Trim(AMemo.Text);
+  if SameText(Result,
+              'none') then
+    Result := '';
+end;
+
+
+procedure TMainMDIFrm.ApplyLoopbackNowPlayingFallback(var AArtist, ATitle: string);
+begin
+
+  AArtist := Trim(AArtist);
+  ATitle := Trim(ATitle);
+
+  if (AArtist <> '') or
+     (ATitle <> '') then
+    Exit;
+
+  if not HasActiveLoopbackDeck() then
+    Exit;
+
+  AArtist := NormalizeNowPlayingMemoText(mmoEventTitle);
+  ATitle := NormalizeNowPlayingMemoText(mmoActivityTitle);
+end;
+
+
 procedure TMainMDIFrm.ClearNowPlaying();
+var
+  Artist: string;
+  Title: string;
+
 begin
 
   if not Assigned(FRDJRadioStatusJson) then
@@ -1940,34 +1986,52 @@ begin
 
   FDjName := Trim(mmoDjName.Text);
   FShowName := Trim(mmoShow.Text);
-  FNowPlayingArtist := '';
-  FNowPlayingTitle := '';
+  Artist := '';
+  Title := '';
+  ApplyLoopbackNowPlayingFallback(Artist,
+                                  Title);
+
+  FNowPlayingArtist := Artist;
+  FNowPlayingTitle := Title;
+  FNowPlayingFromChannelDeck := False;
 
   WriteNowPlayingStatus(FDjName,
                         FShowName,
-                        '',
-                        '',
+                        FNowPlayingArtist,
+                        FNowPlayingTitle,
                         BuildCoverJsonUrl(True),
                         FCaddyListenerCount,
-                        True);
+                        (FNowPlayingArtist = '') and
+                        (FNowPlayingTitle = ''));
 end;
 
 
 procedure TMainMDIFrm.UpdateNowPlaying(const AArtist,
                                        ATitle: string);
+var
+  Artist: string;
+  Title: string;
+
 begin
 
   if not Assigned(FRDJRadioStatusJson) then
     Exit;
 
-  if (Trim(AArtist) = '') and
-     (Trim(ATitle) = '') then
+  Artist := Trim(AArtist);
+  Title := Trim(ATitle);
+  ApplyLoopbackNowPlayingFallback(Artist,
+                                  Title);
+
+  if (Artist = '') and
+     (Title = '') then
     Exit;
 
   FDjName := Trim(mmoDjName.Text);
   FShowName := Trim(mmoShow.Text);
-  FNowPlayingArtist := Trim(AArtist);
-  FNowPlayingTitle := Trim(ATitle);
+  FNowPlayingArtist := Artist;
+  FNowPlayingTitle := Title;
+  FNowPlayingFromChannelDeck := (Trim(AArtist) <> '') or
+                                (Trim(ATitle) <> '');
 
   WriteNowPlayingStatus(FDjName,
                         FShowName,
@@ -1975,7 +2039,6 @@ begin
                         FNowPlayingTitle,
                         BuildCoverJsonUrl(True));
 end;
-
 
 function TMainMDIFrm.CanGoOnAir(): Boolean;
 var
@@ -2410,11 +2473,24 @@ begin
   FDjName := Trim(mmoDjName.Text);
   FShowName := Trim(mmoShow.Text);
 
+  if HasActiveLoopbackDeck() and
+     not FNowPlayingFromChannelDeck then
+    begin
+      FNowPlayingArtist := '';
+      FNowPlayingTitle := '';
+    end;
+
+  ApplyLoopbackNowPlayingFallback(FNowPlayingArtist,
+                                  FNowPlayingTitle);
+
   WriteNowPlayingStatus(FDjName,
                         FShowName,
-                        '',
-                        '',
-                        BuildCoverJsonUrl(True));
+                        FNowPlayingArtist,
+                        FNowPlayingTitle,
+                        BuildCoverJsonUrl(True),
+                        FCaddyListenerCount,
+                        (FNowPlayingArtist = '') and
+                        (FNowPlayingTitle = ''));
 end;
 
 

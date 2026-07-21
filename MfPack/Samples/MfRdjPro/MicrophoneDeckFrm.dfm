@@ -28,7 +28,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
     Left = 0
     Top = 37
     Width = 306
-    Height = 576
+    Height = 580
     Margins.Left = 0
     Margins.Top = 0
     Margins.Right = 0
@@ -42,12 +42,27 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
     TabOrder = 0
     object Bevel4: TBevel
       Left = 0
-      Top = 509
+      Top = 511
       Width = 306
-      Height = 67
+      Height = 69
       Align = alBottom
       ExplicitTop = 510
-      ExplicitWidth = 305
+    end
+    object lblBalMaster: TLabel
+      Left = 125
+      Top = 562
+      Width = 55
+      Height = 14
+      Alignment = taCenter
+      AutoSize = False
+      Caption = 'Balance'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentFont = False
+      Transparent = True
     end
     object Bevel1: TBevel
       Left = 127
@@ -374,7 +389,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
     end
     object tbBalance: TMfTrackBar
       Left = 4
-      Top = 522
+      Top = 520
       Width = 296
       Height = 40
       Margins.Left = 0
@@ -679,22 +694,24 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
   end
   object pnlMid: TPanel
     Left = 0
-    Top = 613
+    Top = 617
     Width = 306
-    Height = 374
+    Height = 370
     Align = alClient
     BevelOuter = bvNone
     Color = 4865081
     ParentBackground = False
     TabOrder = 1
+    ExplicitTop = 613
+    ExplicitHeight = 374
     DesignSize = (
       306
-      374)
+      370)
     object Label14: TLabel
       Left = 17
       Top = 96
       Width = 75
-      Height = 22
+      Height = 18
       Margins.Left = 2
       Margins.Top = 2
       Margins.Right = 2
@@ -713,6 +730,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       ShowHint = False
       Transparent = False
       Layout = tlCenter
+      ExplicitHeight = 22
     end
     object chkMute: TMPxpButton
       Left = 232
@@ -946,7 +964,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
     end
     object pnlCompEcho: TPanel
       Left = 0
-      Top = 143
+      Top = 139
       Width = 306
       Height = 231
       Align = alBottom
@@ -955,6 +973,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       ParentBackground = False
       ShowCaption = False
       TabOrder = 2
+      ExplicitTop = 143
       object pnlNoiseGate: TPanel
         Left = 0
         Top = 0
@@ -2298,7 +2317,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
     end
     object pnlFXButtons: TPanel
       Left = 0
-      Top = 99
+      Top = 95
       Width = 306
       Height = 44
       Align = alBottom
@@ -2309,6 +2328,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       ParentDoubleBuffered = False
       ShowCaption = False
       TabOrder = 5
+      ExplicitTop = 99
       object chkCompressorSettings: TMPxpButton
         Left = 0
         Top = 5
@@ -2787,6 +2807,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
     Color = 4865081
     ParentBackground = False
     TabOrder = 2
+    ExplicitTop = 2
     object lblCaption: TLabel
       Left = 8
       Top = 11
@@ -2810,22 +2831,23 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
     object shpSignalCap: TShape
       Left = 211
       Top = 4
-      Width = 88
+      Width = 87
       Height = 29
       Brush.Color = 5850948
       Pen.Color = 5668864
+      Pen.Width = 3
     end
     object shpSignal: TShape
-      Left = 214
-      Top = 7
-      Width = 83
-      Height = 24
-      Brush.Color = 5668864
+      Left = 215
+      Top = 8
+      Width = 79
+      Height = 21
+      Brush.Style = bsClear
       Pen.Color = 5668864
     end
     object lblSignal: TLabel
-      Left = 217
-      Top = 9
+      Left = 218
+      Top = 8
       Width = 75
       Height = 19
       Alignment = taCenter
@@ -2837,7 +2859,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       Font.Name = 'Segoe UI'
       Font.Style = [fsBold]
       ParentFont = False
-      Transparent = False
+      Transparent = True
     end
   end
   object chkEchoEnabled: TMPxpButton

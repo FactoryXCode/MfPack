@@ -176,6 +176,7 @@ type
     pbProgress: TMfLevelProgressBar;
     Bevel5: TBevel;
     Bevel6: TBevel;
+    lblBalMaster: TLabel;
 
     procedure FormCreate(Sender: TObject);
     procedure AfterConstruction(); override;
