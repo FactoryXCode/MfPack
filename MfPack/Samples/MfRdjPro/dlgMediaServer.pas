@@ -517,6 +517,7 @@ type
                              const Frames: Integer;
                              const pwfx: PWAVEFORMATEX);
     procedure RecoverBroadcastAfterAudioGraphRestart(const AReason: string);
+    function IsBroadcasting(): Boolean;
   end;
 
 var
@@ -1644,12 +1645,23 @@ begin
 end;
 
 
-
 procedure TfrmMediaServer.btnMinimizeClick(Sender: TObject);
 begin
 
   WindowState := wsMinimized;
+  if Assigned(MainMDIFrm) then
+    MainMDIFrm.SetMediaServerButtonChecked(False);
 end;
+
+
+function TfrmMediaServer.IsBroadcasting(): Boolean;
+begin
+
+  Result := FRdjProBroadcasting or
+            FPendingBroadcastRecording or
+            chkBroadcast.Checked;
+end;
+
 
 // FRecordingRdjPro
 procedure TfrmMediaServer.btnRdjProRecordClick(Sender: TObject);
@@ -1856,16 +1868,23 @@ begin
 
   ModeChanged := not FRdjProStaticImage;
   SetRdjProStaticImageMode(True);
-  FStaticVideoFrameIndex := 0;
-  FStaticVideoStartTick := 0;
-  FStaticVideoLastTick := 0;
+
+  // Keep live MP4 timestamps monotonic when only replacing the static image.
+  // Resetting the clock while the fMP4 SinkWriter is active can make the next
+  // video samples jump back to zero and stall public .m4s publication.
+  if ModeChanged or not (FRdjProRecording or FRdjProBroadcasting) then
+    begin
+      FStaticVideoFrameIndex := 0;
+      FStaticVideoStartTick := 0;
+      FStaticVideoLastTick := 0;
+    end;
 
   FreeAndNil(FStaticVideoBitmap);
   EnsureRdjProStaticVideoFrame();
 
   chkRdjProCamera.Enabled := not FRecordingRdjPro;
 
-  if ModeChanged and FRdjProBroadcasting then
+  if FRdjProBroadcasting then
     PrepareBroadcastMseVideoSourceSwitch();
 
   QueueRdjProStaticVideoSample();
@@ -1892,6 +1911,8 @@ begin
 
   CanClose := False;
   Hide;
+  if Assigned(MainMDIFrm) then
+    MainMDIFrm.RefreshMainButtonStates();
 end;
 
 
@@ -2041,12 +2062,15 @@ begin
   lblIcecastServerStatus.Caption := 'Server: handled by RDJ Pro service.';
 
   chkBroadcast.Enabled := True;
-  chkBroadcast.Checked := False;
-  chkBroadcast.Down := False;
+  chkBroadcast.Checked := FRdjProBroadcasting or FPendingBroadcastRecording;
+  chkBroadcast.Down := chkBroadcast.Checked;
 
-  UpdateOnAirLamp(False);
+  UpdateOnAirLamp(chkBroadcast.Checked);
   UpdateRecordingUi();
   tmrTime.Enabled := True;
+
+  if Assigned(MainMDIFrm) then
+    MainMDIFrm.RefreshMainButtonStates();
 end;
 
 
@@ -2728,6 +2752,8 @@ begin
 
     if Queued then
       begin
+        FLastRdjProVideoSampleTime100ns := SampleTime100ns;
+        FLastRdjProVideoSampleTick := NowTick;
         FStaticVideoFrameIndex := TargetFrameIndex + 1;
         FStaticVideoLastTick := NowTick;
       end;
@@ -5545,8 +5571,12 @@ begin
           chkRecordVideoOnly.Enabled := False;
           chkRdjProStaticImage.Enabled := not FRecordingRdjPro;
           UpdateOnAirLamp(True);
-          if Assigned(MainMDIFrm) and MainMDIFrm.HasActiveLoopbackDeck() then
-            MainMDIFrm.ClearNowPlaying();
+          if Assigned(MainMDIFrm) then
+            begin
+              if MainMDIFrm.HasActiveLoopbackDeck() then
+                MainMDIFrm.ClearNowPlaying();
+              MainMDIFrm.RefreshMainButtonStates();
+            end;
           Result := True;
           Exit;
         end;
@@ -5597,8 +5627,12 @@ begin
   chkRecordVideoOnly.Enabled := False;
   chkRdjProStaticImage.Enabled := not FRecordingRdjPro;
   UpdateOnAirLamp(True);
-  if Assigned(MainMDIFrm) and MainMDIFrm.HasActiveLoopbackDeck() then
-    MainMDIFrm.ClearNowPlaying();
+  if Assigned(MainMDIFrm) then
+    begin
+      if MainMDIFrm.HasActiveLoopbackDeck() then
+        MainMDIFrm.ClearNowPlaying();
+      MainMDIFrm.RefreshMainButtonStates();
+    end;
   memLog.Lines.Append('Broadcasting started.');
   Result := True;
 finally
@@ -5620,6 +5654,8 @@ begin
   if not Assigned(FRdjProBroadcastMp4Recorder) then
     begin
       ReleaseBroadcastHandoverLock(True);
+      if Assigned(MainMDIFrm) then
+        MainMDIFrm.RefreshMainButtonStates();
       Exit;
     end;
 
@@ -5639,6 +5675,8 @@ begin
   chkRecordVideoOnly.Enabled := not FRecordingRdjPro;
   chkRdjProStaticImage.Enabled := not FRecordingRdjPro;
   UpdateOnAirLamp(False);
+  if Assigned(MainMDIFrm) then
+    MainMDIFrm.RefreshMainButtonStates();
 
   if not FRdjProBroadcastMp4Recorder.Active then
     begin

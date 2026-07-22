@@ -1414,7 +1414,6 @@ begin
   if ALive then
     begin
 
-      shpSignal.Brush.Color := ON_COLOR;
       shpSignal.Pen.Color := ON_COLOR;
       shpSignalCap.Pen.Color := ON_COLOR;
       lblSignal.Font.Color := ON_BRIGHT_COLOR;
@@ -1423,7 +1422,6 @@ begin
   else
     begin
 
-      shpSignal.Brush.Color := OFF_COLOR;
       shpSignal.Pen.Color := OFF_COLOR;
       shpSignalCap.Pen.Color := OFF_COLOR;
       lblSignal.Font.Color := OFF_COLOR;

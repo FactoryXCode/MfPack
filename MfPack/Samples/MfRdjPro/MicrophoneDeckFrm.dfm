@@ -702,8 +702,6 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
     Color = 4865081
     ParentBackground = False
     TabOrder = 1
-    ExplicitTop = 613
-    ExplicitHeight = 374
     DesignSize = (
       306
       370)
@@ -973,7 +971,6 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       ParentBackground = False
       ShowCaption = False
       TabOrder = 2
-      ExplicitTop = 143
       object pnlNoiseGate: TPanel
         Left = 0
         Top = 0
@@ -2328,7 +2325,6 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       ParentDoubleBuffered = False
       ShowCaption = False
       TabOrder = 5
-      ExplicitTop = 99
       object chkCompressorSettings: TMPxpButton
         Left = 0
         Top = 5
@@ -2807,7 +2803,6 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
     Color = 4865081
     ParentBackground = False
     TabOrder = 2
-    ExplicitTop = 2
     object lblCaption: TLabel
       Left = 8
       Top = 11
@@ -2829,7 +2824,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       Layout = tlCenter
     end
     object shpSignalCap: TShape
-      Left = 211
+      Left = 213
       Top = 4
       Width = 87
       Height = 29
@@ -2838,7 +2833,7 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       Pen.Width = 3
     end
     object shpSignal: TShape
-      Left = 215
+      Left = 217
       Top = 8
       Width = 79
       Height = 21
@@ -2846,8 +2841,8 @@ object frmMicrophoneDeck: TfrmMicrophoneDeck
       Pen.Color = 5668864
     end
     object lblSignal: TLabel
-      Left = 218
-      Top = 8
+      Left = 220
+      Top = 7
       Width = 75
       Height = 19
       Alignment = taCenter

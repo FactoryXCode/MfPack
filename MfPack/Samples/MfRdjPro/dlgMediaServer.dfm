@@ -39,7 +39,6 @@ object frmMediaServer: TfrmMediaServer
     ParentBackground = False
     TabOrder = 0
     OnMouseDown = pnlCaptionMouseDown
-    ExplicitTop = 2
     object shpOnAirCap: TShape
       Left = 167
       Top = 5
@@ -258,8 +257,6 @@ object frmMediaServer: TfrmMediaServer
         ParentBackground = False
         ShowCaption = False
         TabOrder = 2
-        ExplicitTop = 49
-        ExplicitHeight = 80
         object Bevel1: TBevel
           Left = 10
           Top = 12
@@ -521,7 +518,6 @@ object frmMediaServer: TfrmMediaServer
         ParentBackground = False
         ShowCaption = False
         TabOrder = 0
-        ExplicitHeight = 80
         object Bevel3: TBevel
           Left = 10
           Top = 10
@@ -1169,8 +1165,6 @@ object frmMediaServer: TfrmMediaServer
       ParentBackground = False
       ShowCaption = False
       TabOrder = 1
-      ExplicitTop = 129
-      ExplicitHeight = 581
       object imgRdjProStaticPreview: TImage
         Left = 0
         Top = 0

@@ -2,7 +2,7 @@ object frmSetup: TfrmSetup
   Left = 0
   Top = 0
   BorderStyle = bsDialog
-  Caption = 'RDJ Setup'
+  Caption = 'RDJ Pro Setup'
   ClientHeight = 1099
   ClientWidth = 689
   Color = 5850948
@@ -2598,7 +2598,6 @@ object frmSetup: TfrmSetup
     ParentBackground = False
     ShowCaption = False
     TabOrder = 2
-    ExplicitTop = 2
     object chkGeneralSettings: TMPxpButton
       Left = 4
       Top = 4

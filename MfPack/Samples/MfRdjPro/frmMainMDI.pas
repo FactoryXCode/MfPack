@@ -351,6 +351,7 @@ type
 
     procedure OpenSetupGUI();
     procedure OpenMediaServerGUI();
+    function IsMediaServerBroadcasting(): Boolean;
 
     procedure ApplySetupOnce();
     procedure RecreateAudioOutputs();
@@ -412,6 +413,8 @@ type
     procedure ClearNowPlaying();
     function HasActiveLoopbackDeck(): Boolean;
     function CanGoOnAir(): Boolean;
+    procedure RefreshMainButtonStates();
+    procedure SetMediaServerButtonChecked(const AChecked: Boolean);
         property Caption;
 
     property Setup: TRDJSetup
@@ -1317,6 +1320,41 @@ end;
 
 
 // Media Server
+function TMainMDIFrm.IsMediaServerBroadcasting(): Boolean;
+begin
+
+  Result := Assigned(FMediaServer) and
+            FMediaServer.IsBroadcasting();
+end;
+
+
+procedure TMainMDIFrm.SetMediaServerButtonChecked(const AChecked: Boolean);
+begin
+
+  chkMediaServer.Checked := AChecked;
+  if not AChecked then
+    btnSetup.Checked := False;
+end;
+
+
+procedure TMainMDIFrm.RefreshMainButtonStates();
+var
+  MediaServerShown: Boolean;
+  Broadcasting: Boolean;
+begin
+
+  Broadcasting := IsMediaServerBroadcasting();
+  btnSetup.Enabled := not Broadcasting;
+  if Broadcasting then
+    btnSetup.Checked := False;
+
+  MediaServerShown := Assigned(FMediaServer) and
+                      FMediaServer.Visible and
+                      (FMediaServer.WindowState <> wsMinimized);
+  SetMediaServerButtonChecked(MediaServerShown);
+end;
+
+
 procedure TMainMDIFrm.OpenMediaServerGUI();
 begin
 
@@ -1325,6 +1363,8 @@ begin
 
   FMediaServer.Show;
   FMediaServer.WindowState := wsNormal;
+  FMediaServer.BringToFront();
+  RefreshMainButtonStates();
 end;
 
 
@@ -2086,7 +2126,15 @@ end;
 procedure TMainMDIFrm.chkMediaServerClick(Sender: TObject);
 begin
 
-  OpenMediaServerGUI();
+  if chkMediaServer.Checked then
+    OpenMediaServerGUI()
+  else
+    begin
+      if Assigned(FMediaServer) then
+        FMediaServer.WindowState := wsMinimized;
+
+      RefreshMainButtonStates();
+    end;
 end;
 
 
@@ -2497,7 +2545,12 @@ end;
 procedure TMainMDIFrm.btnSetupClick(Sender: TObject);
 begin
 
+  RefreshMainButtonStates();
+  if not btnSetup.Enabled then
+    Exit;
+
   OpenSetupGUI();
+  btnSetup.Checked := False;
 end;
 
 

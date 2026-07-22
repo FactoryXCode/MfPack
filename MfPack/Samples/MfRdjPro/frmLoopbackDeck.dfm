@@ -33,8 +33,6 @@ object frmLoopbackDeck: TfrmLoopbackDeck
     Color = 5850948
     ParentBackground = False
     TabOrder = 0
-    ExplicitTop = 38
-    ExplicitWidth = 261
     object Bevel7: TBevel
       Left = 0
       Top = 512
@@ -678,9 +676,8 @@ object frmLoopbackDeck: TfrmLoopbackDeck
     Color = 4865081
     ParentBackground = False
     TabOrder = 1
-    ExplicitTop = 2
     object shpLiveCap: TShape
-      Left = 166
+      Left = 162
       Top = 5
       Width = 87
       Height = 29
@@ -710,7 +707,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Layout = tlCenter
     end
     object shpLive: TShape
-      Left = 170
+      Left = 166
       Top = 9
       Width = 79
       Height = 21
@@ -718,7 +715,7 @@ object frmLoopbackDeck: TfrmLoopbackDeck
       Pen.Color = 5668864
     end
     object lblLive: TLabel
-      Left = 171
+      Left = 167
       Top = 9
       Width = 79
       Height = 20
@@ -746,7 +743,6 @@ object frmLoopbackDeck: TfrmLoopbackDeck
     ParentBackground = False
     ShowCaption = False
     TabOrder = 2
-    ExplicitWidth = 261
     object lblStatus: TLabel
       Left = 0
       Top = 38
@@ -816,7 +812,6 @@ object frmLoopbackDeck: TfrmLoopbackDeck
     Color = 4865081
     ParentBackground = False
     TabOrder = 3
-    ExplicitTop = 616
     object Bevel1: TBevel
       Left = 0
       Top = 222

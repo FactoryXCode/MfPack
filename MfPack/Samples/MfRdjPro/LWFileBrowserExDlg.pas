@@ -199,7 +199,6 @@ type
     procedure edtPathKeyDown(Sender: TObject;
                              var Key: Word;
                              Shift: TShiftState);
-    procedure lbFoldersDblClick(Sender: TObject);
     procedure lbFoldersDrawItem(Control: TWinControl;
                                 Index: Integer;
                                 Rect: TRect;
@@ -208,6 +207,7 @@ type
     procedure flbFilesDblClick(Sender: TObject);
     procedure btnScanNetworkClick(Sender: TObject);
     procedure btnNetStationsSearchClick(Sender: TObject);
+    procedure lbFoldersDblClick(Sender: TObject);
 
   private
 
@@ -489,36 +489,9 @@ end;
 
 procedure TLWFileBrowserExDlg.flbFilesDblClick(Sender: TObject);
 begin
+
   if btnOk.Enabled then
     btnOkClick(Sender);
-end;
-
-procedure TLWFileBrowserExDlg.lbFoldersDblClick(Sender: TObject);
-var
-  ItemText: string;
-  NewDir: string;
-
-begin
-  if lbFolders.ItemIndex < 0 then
-    Exit;
-
-  ItemText := lbFolders.Items[lbFolders.ItemIndex];
-
-  if (ItemText = '..') then
-    begin
-
-      NewDir := ExtractFileDir(ExcludeTrailingPathDelimiter(FCurrentDirectory));
-      if (NewDir <> '') and (NewDir <> FCurrentDirectory) then
-        TrySetBrowserDirectory(NewDir,
-                               False);
-    end
-  else
-    begin
-
-      NewDir := IncludeTrailingPathDelimiter(FCurrentDirectory) + ItemText;
-      TrySetBrowserDirectory(NewDir,
-                             True);
-    end;
 end;
 
 
@@ -1316,6 +1289,36 @@ begin
                 TextValue,
                 IconIndex,
                 odSelected in State);
+end;
+
+
+procedure TLWFileBrowserExDlg.lbFoldersDblClick(Sender: TObject);
+var
+  ItemText: string;
+  NewDir: string;
+
+begin
+
+  if (lbFolders.ItemIndex < 0) then
+    Exit;
+
+  ItemText := lbFolders.Items[lbFolders.ItemIndex];
+
+  if (ItemText = '..') then
+    begin
+
+      NewDir := ExtractFileDir(ExcludeTrailingPathDelimiter(FCurrentDirectory));
+      if (NewDir <> '') and (NewDir <> FCurrentDirectory) then
+        TrySetBrowserDirectory(NewDir,
+                               False);
+    end
+  else
+    begin
+
+      NewDir := IncludeTrailingPathDelimiter(FCurrentDirectory) + ItemText;
+      TrySetBrowserDirectory(NewDir,
+                             True);
+    end;
 end;
 
 
