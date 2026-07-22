@@ -927,7 +927,7 @@ object frmMediaServer: TfrmMediaServer
           Alignment = taCenter
           Caption = 'Server'
           Color = 6899524
-          ColorWhenDown = 10045252
+          ColorWhenDown = 6899524
           ColorWhenUp = 6899524
           Down = True
           Behavior = bbCheckBox
@@ -1044,7 +1044,7 @@ object frmMediaServer: TfrmMediaServer
           Alignment = taCenter
           Caption = 'Recorder'
           Color = 6899524
-          ColorWhenDown = 10045252
+          ColorWhenDown = 6899524
           ColorWhenUp = 6899524
           Behavior = bbCheckBox
           Checked = False

@@ -1750,8 +1750,8 @@ procedure TfrmMediaServer.chkRecorderCtrlClick(Sender: TObject);
 begin
 
   pnlRecorderCtrl.BringToFront;
-  chkServerCtrl.Checked := True;
-  chkRecorderCtrl.Checked := False;
+  chkServerCtrl.Checked := False;
+  chkRecorderCtrl.Checked := True;
 end;
 
 
