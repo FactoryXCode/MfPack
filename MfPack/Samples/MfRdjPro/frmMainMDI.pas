@@ -301,6 +301,8 @@ type
     function NormalizeNowPlayingMemoText(AMemo: TMemo): string;
     procedure ApplyLoopbackNowPlayingFallback(var AArtist, ATitle: string);
     procedure PublishSelectedCover();
+    procedure LoadBroadcastIdentityFromIni();
+    procedure SaveBroadcastIdentityToIni();
     function ResolveCaddyLogFileName(): string;
     function ReadCaddyActiveListenerCount(): Integer;
     procedure RefreshCaddyListenerCount(const AForceJsonUpdate: Boolean);
@@ -444,6 +446,7 @@ implementation
 {$R *.dfm}
 
 uses
+  System.IniFiles,
   LWFileBrowserExDlg,
   RDJ.PlaylistDb;
 
@@ -454,6 +457,10 @@ const
   RDJ_CADDY_LISTENER_REFRESH_MS = 15000;
   RDJ_CADDY_ACTIVE_LISTENER_SECONDS = 180;
   RDJ_CADDY_LOG_TAIL_BYTES = 262144;
+  RDJ_BROADCAST_IDENTITY_SECTION = 'BroadcastIdentity';
+  RDJ_BROADCAST_IDENTITY_DJ_NAME = 'DjName';
+  RDJ_BROADCAST_IDENTITY_SHOW_NAME = 'ShowName';
+  RDJ_BROADCAST_IDENTITY_COVER_FILE = 'CoverFileName';
 
 // TAudioEndpointNotificationClient --------------------------------------------
 
@@ -1293,9 +1300,16 @@ begin
 
   FRDJRadioStatusJson := TRDJRadioStatusJson.Create;
 
-  FDjName := mmoDjName.Text;
-  FShowName := mmoShow.Text;
   FCoverFileName := '';
+  LoadBroadcastIdentityFromIni();
+  PublishSelectedCover();
+  WriteNowPlayingStatus(FDjName,
+                        FShowName,
+                        FNowPlayingArtist,
+                        FNowPlayingTitle,
+                        BuildCoverJsonUrl(True),
+                        FCaddyListenerCount,
+                        True);
 end;
 
 
@@ -1772,6 +1786,162 @@ begin
 end;
 
 
+
+function EncodeBroadcastIdentityText(const AValue: string): string;
+begin
+
+  Result := StringReplace(AValue,
+                          '\',
+                          '\\',
+                          [rfReplaceAll]);
+  Result := StringReplace(Result,
+                          #13#10,
+                          '\n',
+                          [rfReplaceAll]);
+  Result := StringReplace(Result,
+                          #13,
+                          '\n',
+                          [rfReplaceAll]);
+  Result := StringReplace(Result,
+                          #10,
+                          '\n',
+                          [rfReplaceAll]);
+end;
+
+
+function DecodeBroadcastIdentityText(const AValue: string): string;
+var
+  i: Integer;
+
+begin
+
+  Result := '';
+  i := 1;
+  while i <= Length(AValue) do
+    begin
+
+      if (AValue[i] = '\') and
+         (i < Length(AValue)) then
+        begin
+
+          Inc(i);
+          case AValue[i] of
+            'n':
+              Result := Result + sLineBreak;
+            '\':
+              Result := Result + '\';
+          else
+            Result := Result + '\' + AValue[i];
+          end;
+        end
+      else
+        Result := Result + AValue[i];
+
+      Inc(i);
+    end;
+end;
+
+
+procedure TMainMDIFrm.LoadBroadcastIdentityFromIni();
+var
+  IniFile: TIniFile;
+  Value: string;
+
+begin
+
+  FDjName := Trim(mmoDjName.Text);
+  FShowName := Trim(mmoShow.Text);
+
+  if (Trim(FSetupFileName) = '') or
+     (not FileExists(FSetupFileName)) then
+    Exit;
+
+  IniFile := TIniFile.Create(FSetupFileName);
+  try
+
+    if IniFile.ValueExists(RDJ_BROADCAST_IDENTITY_SECTION,
+                           RDJ_BROADCAST_IDENTITY_DJ_NAME) then
+      begin
+
+        Value := IniFile.ReadString(RDJ_BROADCAST_IDENTITY_SECTION,
+                                    RDJ_BROADCAST_IDENTITY_DJ_NAME,
+                                    '');
+        FDjName := DecodeBroadcastIdentityText(Value);
+        mmoDjName.Text := FDjName;
+      end;
+
+    if IniFile.ValueExists(RDJ_BROADCAST_IDENTITY_SECTION,
+                           RDJ_BROADCAST_IDENTITY_SHOW_NAME) then
+      begin
+
+        Value := IniFile.ReadString(RDJ_BROADCAST_IDENTITY_SECTION,
+                                    RDJ_BROADCAST_IDENTITY_SHOW_NAME,
+                                    '');
+        FShowName := DecodeBroadcastIdentityText(Value);
+        mmoShow.Text := FShowName;
+      end;
+
+    FCoverFileName := Trim(IniFile.ReadString(RDJ_BROADCAST_IDENTITY_SECTION,
+                                              RDJ_BROADCAST_IDENTITY_COVER_FILE,
+                                              FCoverFileName));
+    if (FCoverFileName <> '') then
+      begin
+
+        if FileExists(FCoverFileName) then
+          begin
+
+            try
+              imgDjShowLogo.Picture.LoadFromFile(FCoverFileName);
+            except
+
+              on E: Exception do
+                begin
+
+                  OutputDebugString(PChar('RDJ Pro could not load stored show logo: ' +
+                                          E.ClassName + ': ' + E.Message));
+                  FCoverFileName := '';
+                end;
+            end;
+          end
+        else
+          FCoverFileName := '';
+      end;
+  finally
+
+    IniFile.Free;
+  end;
+end;
+
+
+procedure TMainMDIFrm.SaveBroadcastIdentityToIni();
+var
+  IniFile: TIniFile;
+
+begin
+
+  if Trim(FSetupFileName) = '' then
+    Exit;
+
+  FDjName := Trim(mmoDjName.Text);
+  FShowName := Trim(mmoShow.Text);
+
+  IniFile := TIniFile.Create(FSetupFileName);
+  try
+
+    IniFile.WriteString(RDJ_BROADCAST_IDENTITY_SECTION,
+                        RDJ_BROADCAST_IDENTITY_DJ_NAME,
+                        EncodeBroadcastIdentityText(FDjName));
+    IniFile.WriteString(RDJ_BROADCAST_IDENTITY_SECTION,
+                        RDJ_BROADCAST_IDENTITY_SHOW_NAME,
+                        EncodeBroadcastIdentityText(FShowName));
+    IniFile.WriteString(RDJ_BROADCAST_IDENTITY_SECTION,
+                        RDJ_BROADCAST_IDENTITY_COVER_FILE,
+                        Trim(FCoverFileName));
+  finally
+
+    IniFile.Free;
+  end;
+end;
 function TMainMDIFrm.BuildCoverJsonUrl(const APreferCurrent: Boolean): string;
 var
   BaseUrl: string;
@@ -2175,6 +2345,7 @@ begin
 
       imgDjShowLogo.Picture.LoadFromFile(FileName);
       FCoverFileName := FileName;
+      SaveBroadcastIdentityToIni();
     end;
 end;
 
@@ -2524,6 +2695,7 @@ begin
   if HasActiveLoopbackDeck() and
      not FNowPlayingFromChannelDeck then
     begin
+
       FNowPlayingArtist := '';
       FNowPlayingTitle := '';
     end;
@@ -2539,6 +2711,8 @@ begin
                         FCaddyListenerCount,
                         (FNowPlayingArtist = '') and
                         (FNowPlayingTitle = ''));
+
+  SaveBroadcastIdentityToIni();
 end;
 
 

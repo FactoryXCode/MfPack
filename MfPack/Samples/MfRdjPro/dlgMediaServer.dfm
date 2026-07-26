@@ -39,6 +39,8 @@ object frmMediaServer: TfrmMediaServer
     ParentBackground = False
     TabOrder = 0
     OnMouseDown = pnlCaptionMouseDown
+    ExplicitLeft = -2
+    ExplicitTop = 2
     object shpOnAirCap: TShape
       Left = 167
       Top = 5
@@ -47,10 +49,11 @@ object frmMediaServer: TfrmMediaServer
       Brush.Color = 5850948
       Pen.Color = 5668864
       Pen.Width = 3
+      OnMouseDown = pnlCaptionMouseDown
     end
     object lblCaption: TLabel
-      Left = 5
-      Top = 10
+      Left = 4
+      Top = 11
       Width = 137
       Height = 16
       Hint = 'Master deck'
@@ -79,6 +82,7 @@ object frmMediaServer: TfrmMediaServer
       Cursor = crDrag
       Brush.Style = bsClear
       Pen.Color = 5668864
+      OnMouseDown = pnlCaptionMouseDown
     end
     object lblOnAir: TLabel
       Left = 174
@@ -95,6 +99,7 @@ object frmMediaServer: TfrmMediaServer
       Font.Style = [fsBold]
       ParentFont = False
       Transparent = True
+      OnMouseDown = pnlCaptionMouseDown
     end
     object shpRecordingCap: TShape
       Left = 369
@@ -104,6 +109,7 @@ object frmMediaServer: TfrmMediaServer
       Brush.Color = 5850948
       Pen.Color = 5668864
       Pen.Width = 3
+      OnMouseDown = pnlCaptionMouseDown
     end
     object shpRecording: TShape
       Left = 373
@@ -112,6 +118,7 @@ object frmMediaServer: TfrmMediaServer
       Height = 20
       Brush.Style = bsClear
       Pen.Color = 5668864
+      OnMouseDown = pnlCaptionMouseDown
     end
     object lblRecording: TLabel
       Left = 373
@@ -130,6 +137,7 @@ object frmMediaServer: TfrmMediaServer
       ParentColor = False
       ParentFont = False
       Transparent = True
+      OnMouseDown = pnlCaptionMouseDown
     end
     object shpBcLocked: TShape
       Left = 268
@@ -139,6 +147,7 @@ object frmMediaServer: TfrmMediaServer
       Brush.Style = bsClear
       Pen.Color = clLime
       Pen.Width = 3
+      OnMouseDown = pnlCaptionMouseDown
     end
     object shpBcLockedCap: TShape
       Left = 272
@@ -148,6 +157,7 @@ object frmMediaServer: TfrmMediaServer
       Cursor = crDrag
       Brush.Style = bsClear
       Pen.Color = clLime
+      OnMouseDown = pnlCaptionMouseDown
     end
     object lblLockBC: TLabel
       Left = 273
@@ -166,6 +176,26 @@ object frmMediaServer: TfrmMediaServer
       ParentColor = False
       ParentFont = False
       Transparent = True
+      OnMouseDown = pnlCaptionMouseDown
+    end
+    object lblBroadcastHealth: TLabel
+      Left = 470
+      Top = 8
+      Width = 245
+      Height = 20
+      Alignment = taCenter
+      AutoSize = False
+      Caption = 'HEALTH: IDLE'
+      Color = 4865081
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = 5668864
+      Font.Height = -15
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+      Transparent = True
+      OnMouseDown = pnlCaptionMouseDown
     end
     object btnMinimize: TMPxpButton
       Left = 724

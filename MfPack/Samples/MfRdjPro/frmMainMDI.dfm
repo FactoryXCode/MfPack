@@ -61,7 +61,6 @@ object MainMDIFrm: TMainMDIFrm
     ShowCaption = False
     TabOrder = 0
     OnMouseDown = pnlCaptionMouseDown
-    ExplicitWidth = 1281
     object lblLocalTime: TLabel
       Left = 550
       Top = 0
@@ -211,7 +210,6 @@ object MainMDIFrm: TMainMDIFrm
       Style = bsModern
       Transparent = True
       OnClick = btnExitClick
-      ExplicitLeft = 1215
     end
     object btnSetup: TMPxpButton
       Left = 105
@@ -345,7 +343,6 @@ object MainMDIFrm: TMainMDIFrm
       Style = bsModern
       Transparent = True
       OnClick = btnMinimizeClick
-      ExplicitLeft = 1081
     end
     object btnMaxNormal: TMPxpButton
       Left = 1745
@@ -399,7 +396,6 @@ object MainMDIFrm: TMainMDIFrm
       Style = bsModern
       Transparent = True
       OnClick = btnMaxNormalClick
-      ExplicitLeft = 1148
     end
     object btnEffects: TMPxpButton
       Left = 327
@@ -574,7 +570,6 @@ object MainMDIFrm: TMainMDIFrm
       Style = bsModern
       Transparent = True
       OnClick = btnFooterPnlClick
-      ExplicitLeft = 1015
     end
     object chkMediaServer: TMPxpButton
       Left = 216
@@ -708,7 +703,6 @@ object MainMDIFrm: TMainMDIFrm
     ShowCaption = False
     TabOrder = 1
     OnMouseDown = pnlCaptionMouseDown
-    ExplicitWidth = 1281
     object Panel1: TPanel
       Left = 150
       Top = 1
@@ -720,7 +714,6 @@ object MainMDIFrm: TMainMDIFrm
       ParentBackground = False
       ShowCaption = False
       TabOrder = 0
-      ExplicitLeft = 151
       object imgDjShowLogo: TImage
         Left = 954
         Top = 4
@@ -924,7 +917,6 @@ object MainMDIFrm: TMainMDIFrm
         ScrollBars = ssVertical
         ShowHint = True
         TabOrder = 0
-        ExplicitLeft = 682
       end
       object btnClearMemo: TMPxpButton
         Left = 1132

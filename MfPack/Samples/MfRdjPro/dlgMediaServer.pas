@@ -169,6 +169,15 @@ const
   UNLOCKED_COLOR = clLime;
   CAP_UNLOCKED = 'UNLOCKED';
   CAP_LOCKED = 'LOCKED';
+  HEALTH_IDLE_COLOR = $00568000;
+  HEALTH_OK_COLOR = clLime;
+  HEALTH_WARNING_COLOR = clYellow;
+  HEALTH_ERROR_COLOR = clRed;
+  RDJ_BROADCAST_HEALTH_AUDIO_STALE_MS = 5000;
+  RDJ_BROADCAST_HEALTH_VIDEO_STALE_MS = 5000;
+  RDJ_BROADCAST_HEALTH_PUBLIC_STALE_MS = 12000;
+  RDJ_BROADCAST_HEALTH_STARTUP_GRACE_MS = 15000;
+  RDJ_BROADCAST_HEALTH_LOG_REPEAT_MS = 30000;
 
 type
 
@@ -291,6 +300,7 @@ type
     shpBcLocked: TShape;
     shpBcLockedCap: TShape;
     lblLockBC: TLabel;
+    lblBroadcastHealth: TLabel;
 
     procedure FormShow(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -370,6 +380,7 @@ type
     FBroadcastMseSessionId: string;
     FLastBroadcastVideoSampleTick: UInt64;
     FLastBroadcastPublicSegmentTick: UInt64;
+    FLastBroadcastAudioSampleTick: UInt64;
     FLastBroadcastVideoFlushTick: UInt64;
     FBroadcastVideoFlushQueued: Integer;
     FBroadcastMseLastStallTraceTick: UInt64;
@@ -383,6 +394,9 @@ type
     FLastBroadcastHandoverHeartbeatTick: DWORD;
     FLastBroadcastHandoverPollTick: DWORD;
     FLastBroadcastHandoverNotice: string;
+    FLastBroadcastHealthCaption: string;
+    FLastBroadcastHealthMessage: string;
+    FLastBroadcastHealthLogTick: UInt64;
 
     FLastRdjProAudioWfx: WAVEFORMATEX;
     FLastRdjProAudioWfxValid: Boolean;
@@ -408,6 +422,11 @@ type
     procedure UpdateRecorderLamp(const ARecording: Boolean);
     procedure UpdateTimeLabel();
     procedure UpdateRecordingUi();
+    procedure SetBroadcastHealth(const ACaption: string;
+                                 const AColor: TColor;
+                                 const AMessage: string;
+                                 const AForceLog: Boolean = False);
+    procedure UpdateBroadcastHealth();
 
     // Camera / recorder
     function StartRdjProCamera(PreviewObject: HWnd): HRESULT;
@@ -1933,6 +1952,9 @@ begin
 
   UpdateOnAirLamp(False);
   UpdateRecorderLamp(False);
+  SetBroadcastHealth('HEALTH: IDLE',
+                     HEALTH_IDLE_COLOR,
+                     'Broadcast health idle.');
 
   // Form-owned Sample-2 capture engine instance.
   FRdjProCaptureManager := TRdjProCaptureManager.Create(Handle);
@@ -1980,9 +2002,13 @@ begin
   FLastBroadcastHandoverHeartbeatTick := 0;
   FLastBroadcastHandoverPollTick := 0;
   FLastBroadcastHandoverNotice := '';
+  FLastBroadcastHealthCaption := '';
+  FLastBroadcastHealthMessage := '';
+  FLastBroadcastHealthLogTick := 0;
   FBroadcastMseRecorderRestartQueued := 0;
   FBroadcastMseRecorderRestartCount := 0;
   FActiveBroadcastVideoMediaType := nil;
+  FLastBroadcastAudioSampleTick := 0;
   FLastRdjProVideoSampleTime100ns := 0;
   FLastRdjProVideoSampleTick := 0;
   FStaticVideoBitmap := nil;
@@ -2117,6 +2143,156 @@ begin
      end;
 end;
 
+procedure TfrmMediaServer.SetBroadcastHealth(const ACaption: string;
+                                            const AColor: TColor;
+                                            const AMessage: string;
+                                            const AForceLog: Boolean);
+var
+  NowTick: UInt64;
+  ShouldLog: Boolean;
+begin
+
+  if Assigned(lblBroadcastHealth) then
+    begin
+      lblBroadcastHealth.Caption := ACaption;
+      lblBroadcastHealth.Font.Color := AColor;
+    end;
+
+  NowTick := GetTickCount64();
+  ShouldLog := AForceLog or
+               (FLastBroadcastHealthCaption <> ACaption) or
+               (FLastBroadcastHealthMessage <> AMessage);
+
+  if (not ShouldLog) and
+     (ACaption <> 'HEALTH: IDLE') and
+     (AMessage <> '') and
+     ((FLastBroadcastHealthLogTick = 0) or
+      ((NowTick - FLastBroadcastHealthLogTick) >= RDJ_BROADCAST_HEALTH_LOG_REPEAT_MS)) then
+    ShouldLog := True;
+
+  if ShouldLog and Assigned(memLog) and (AMessage <> '') then
+    begin
+      memLog.Lines.Append(FormatDateTime('hh:nn:ss  ', Now) + AMessage);
+      while memLog.Lines.Count > 250 do
+        memLog.Lines.Delete(0);
+      FLastBroadcastHealthLogTick := NowTick;
+    end;
+
+  FLastBroadcastHealthCaption := ACaption;
+  FLastBroadcastHealthMessage := AMessage;
+end;
+
+
+procedure TfrmMediaServer.UpdateBroadcastHealth();
+var
+  NowTick: UInt64;
+  AudioAgeMs: UInt64;
+  VideoAgeMs: UInt64;
+  PublicAgeMs: UInt64;
+  NeedAudio: Boolean;
+  RecorderActive: Boolean;
+begin
+
+  if (not FRdjProBroadcasting) and
+     (not FPendingBroadcastRecording) then
+    begin
+      SetBroadcastHealth('HEALTH: IDLE',
+                         HEALTH_IDLE_COLOR,
+                         'Broadcast health idle.');
+      Exit;
+    end;
+
+  NowTick := GetTickCount64();
+
+  if FPendingBroadcastRecording then
+    begin
+      SetBroadcastHealth('HEALTH: STARTING',
+                         HEALTH_WARNING_COLOR,
+                         'Broadcast waiting for the first valid audio format.');
+      Exit;
+    end;
+
+  if not FBroadcastHandoverLockAcquired then
+    begin
+      SetBroadcastHealth('HEALTH: ERROR',
+                         HEALTH_ERROR_COLOR,
+                         'Broadcast health error: broadcast handover lock is not acquired.');
+      Exit;
+    end;
+
+  RecorderActive := Assigned(FRdjProBroadcastMp4Recorder) and
+                    FRdjProBroadcastMp4Recorder.Active;
+  if not RecorderActive then
+    begin
+      SetBroadcastHealth('HEALTH: ERROR',
+                         HEALTH_ERROR_COLOR,
+                         'Broadcast health error: broadcast recorder is not active.');
+      Exit;
+    end;
+
+  NeedAudio := not FRecordVideoOnly;
+  if NeedAudio then
+    begin
+      if FLastBroadcastAudioSampleTick = 0 then
+        begin
+          SetBroadcastHealth('HEALTH: STARTING',
+                             HEALTH_WARNING_COLOR,
+                             'Broadcast waiting for audio samples.');
+          Exit;
+        end;
+
+      AudioAgeMs := NowTick - FLastBroadcastAudioSampleTick;
+      if AudioAgeMs >= RDJ_BROADCAST_HEALTH_AUDIO_STALE_MS then
+        begin
+          SetBroadcastHealth('HEALTH: ERROR',
+                             HEALTH_ERROR_COLOR,
+                             'Broadcast health error: audio samples stopped.');
+          Exit;
+        end;
+    end;
+
+  if FLastBroadcastVideoSampleTick = 0 then
+    begin
+      SetBroadcastHealth('HEALTH: STARTING',
+                         HEALTH_WARNING_COLOR,
+                         'Broadcast waiting for video samples.');
+      Exit;
+    end;
+
+  VideoAgeMs := NowTick - FLastBroadcastVideoSampleTick;
+  if VideoAgeMs >= RDJ_BROADCAST_HEALTH_VIDEO_STALE_MS then
+    begin
+      SetBroadcastHealth('HEALTH: ERROR',
+                         HEALTH_ERROR_COLOR,
+                         'Broadcast health error: video samples stopped.');
+      Exit;
+    end;
+
+  if FLastBroadcastPublicSegmentTick = 0 then
+    FLastBroadcastPublicSegmentTick := NowTick;
+
+  PublicAgeMs := NowTick - FLastBroadcastPublicSegmentTick;
+  if (FBroadcastMsePublicSeq <= 0) and
+     (PublicAgeMs < RDJ_BROADCAST_HEALTH_STARTUP_GRACE_MS) then
+    begin
+      SetBroadcastHealth('HEALTH: STARTING',
+                         HEALTH_WARNING_COLOR,
+                         'Broadcast waiting for the first browser stream fragment.');
+      Exit;
+    end;
+
+  if PublicAgeMs >= RDJ_BROADCAST_HEALTH_PUBLIC_STALE_MS then
+    begin
+      SetBroadcastHealth('HEALTH: WARNING',
+                         HEALTH_WARNING_COLOR,
+                         'Broadcast health warning: browser stream fragments are not advancing.');
+      Exit;
+    end;
+
+  SetBroadcastHealth('HEALTH: OK',
+                     HEALTH_OK_COLOR,
+                     'Broadcast healthy: audio, video, recorder and browser stream active.');
+end;
 
 procedure TfrmMediaServer.tmrTimeTimer(Sender: TObject);
 begin
@@ -2138,6 +2314,8 @@ begin
 
   if FRdjProRecording and not FRdjProBroadcasting then
     QueueRdjProStaticVideoSample();
+
+  UpdateBroadcastHealth();
 end;
 
 // All Icecast end =============================================================
@@ -3043,6 +3221,7 @@ begin
 
       try
 
+        FLastBroadcastAudioSampleTick := GetTickCount64();
         hr := FRdjProBroadcastMp4Recorder.PushPcmFloat32(pData,
                                                          Frames,
                                                          pwfx);
@@ -5563,6 +5742,9 @@ begin
           ArmPendingBroadcastRecording(FileName,
                                        FRecordVideoOnly);
           FActiveBroadcastVideoMediaType := VideoType;
+          FLastBroadcastAudioSampleTick := 0;
+          FLastBroadcastVideoSampleTick := GetTickCount64();
+          FLastBroadcastPublicSegmentTick := GetTickCount64();
           FRdjProBroadcasting := True;
           chkBroadcast.Checked := True;
           chkBroadcast.Down := True;
@@ -5571,6 +5753,7 @@ begin
           chkRecordVideoOnly.Enabled := False;
           chkRdjProStaticImage.Enabled := not FRecordingRdjPro;
           UpdateOnAirLamp(True);
+          UpdateBroadcastHealth();
           if Assigned(MainMDIFrm) then
             begin
               if MainMDIFrm.HasActiveLoopbackDeck() then
@@ -5609,6 +5792,9 @@ begin
 
   FRdjProBroadcasting := True;
   FActiveBroadcastVideoMediaType := VideoType;
+  FLastBroadcastAudioSampleTick := 0;
+  FLastBroadcastVideoSampleTick := GetTickCount64();
+  FLastBroadcastPublicSegmentTick := GetTickCount64();
   if FRdjProStaticImage and not FRdjProRecording then
     begin
 
@@ -5634,6 +5820,7 @@ begin
       MainMDIFrm.RefreshMainButtonStates();
     end;
   memLog.Lines.Append('Broadcasting started.');
+  UpdateBroadcastHealth();
   Result := True;
 finally
   if (not Result) and
@@ -5675,6 +5862,7 @@ begin
   chkRecordVideoOnly.Enabled := not FRecordingRdjPro;
   chkRdjProStaticImage.Enabled := not FRecordingRdjPro;
   UpdateOnAirLamp(False);
+  UpdateBroadcastHealth();
   if Assigned(MainMDIFrm) then
     MainMDIFrm.RefreshMainButtonStates();
 
