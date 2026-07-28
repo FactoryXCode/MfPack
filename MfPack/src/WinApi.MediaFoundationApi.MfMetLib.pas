@@ -24,7 +24,8 @@
 //                 Ramyses De Macedo Rodrigues,
 //                 (TopPlay),
 //                 (Banalskander), 
-//                 (kxMAXX)
+//                 (kxMAXX),
+//                 Carmen (carmenh)
 //
 // -----------------------------------------------------------------------------
 // CHANGE LOG
@@ -32,6 +33,7 @@
 // ---------- ------------------- ----------------------------------------------
 // 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 // 07/11/2025 Tony                Added function SetSafeStream
+// 28/07/2026 Carmen              Added function GetStreamCodecDescription.
 // -----------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or later.
@@ -833,6 +835,9 @@ type
                             out aFormatTag: LPWSTR;
                             out aFOURCC: DWord;
                             out aFmtDesc: LPWSTR): HResult;
+
+  // Call this function to get a stream description, using GetGUIDNameConst.
+  function GetStreamCodecDescription(const AStreamDescriptor: IMFStreamDescriptor): string;
 
   // Checks if a given input subtype is supported by Media Foundation MFT.
   function IsMfSupportedFormat(const pSubType: TGuid): Boolean; inline; deprecated 'Use function IsMftSupportedInputFormat';
@@ -3146,115 +3151,155 @@ begin
 end;
 
 
+// Finds a decoder for a stream.
 //
-function FindDecoderForStream(pSD: IMFStreamDescriptor; // Stream descriptor for the stream.
-                              out opCLSID: CLSID): HResult;  // Receives the CLSID of the decoder.
+// If the stream is not compressed, opCLSID receives GUID_NULL.
+// If no decoder is installed, the function returns
+// MF_E_TOPO_CODEC_NOT_FOUND.
+function FindDecoderForStream(pSD: IMFStreamDescriptor;
+                              out opCLSID: CLSID): HResult;
 var
   hr: HResult;
   bIsCompressed: BOOL;
+
   guidMajorType: TGUID;
   guidSubtype: TGUID;
   guidDecoderCategory: TGUID;
-  ppDecoderCLSIDs: PCLSIDArray;
-  cDecoderCLSIDs: UINT32;    // Size of the array.
+
   pHandler: IMFMediaTypeHandler;
   pMediaType: IMFMediaType;
-  mftinfo: MFT_REGISTER_TYPE_INFO;
+
+  mftInfo: MFT_REGISTER_TYPE_INFO;
+  EnumFlags: UINT32;
+
+  ppMFTActivate: PIMFActivateArray;
+  cMFTActivate: UINT32;
+  I: UINT32;
 
 begin
 
+  opCLSID := GUID_NULL;
+
   bIsCompressed := False;
+
   guidMajorType := GUID_NULL;
   guidSubtype := GUID_NULL;
   guidDecoderCategory := GUID_NULL;
-  cDecoderCLSIDs := 0;
 
+  pHandler := nil;
+  pMediaType := nil;
+  ppMFTActivate := nil;
+  cMFTActivate := 0;
 
-  // Find the media type for the stream.
+  if not Assigned(pSD) then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
+
+  // Find the current media type for the stream.
   hr := pSD.GetMediaTypeHandler(pHandler);
 
-  if (SUCCEEDED(hr)) then
-    begin
-      hr := pHandler.GetCurrentMediaType(pMediaType);
-    end;
+  if SUCCEEDED(hr) then
+    hr := pHandler.GetCurrentMediaType(pMediaType);
 
   // Get the major type and subtype.
-  if (SUCCEEDED(hr)) then
+  if SUCCEEDED(hr) then
+    hr := pMediaType.GetMajorType(guidMajorType);
+
+  if SUCCEEDED(hr) then
+    hr := pMediaType.GetGUID(MF_MT_SUBTYPE,
+                             guidSubtype);
+
+  // Determine whether the stream is compressed.
+  if SUCCEEDED(hr) then
+    hr := pMediaType.IsCompressedFormat(bIsCompressed);
+
+  if FAILED(hr) then
     begin
-      hr := pMediaType.GetMajorType(guidMajorType);
+      Result := hr;
+      Exit;
     end;
 
-  if (SUCCEEDED(hr)) then
+  // An uncompressed stream does not require a decoder.
+  if not bIsCompressed then
     begin
-      hr := pMediaType.GetGUID(MF_MT_SUBTYPE,
-                               guidSubtype);
+      Result := S_OK;
+      Exit;
     end;
 
-  // Check whether the stream is compressed.
-  if (SUCCEEDED(hr)) then
+  // Select the video or audio decoder category.
+  hr := GetDecoderCategory(guidMajorType,
+                           guidDecoderCategory);
+
+  if FAILED(hr) then
     begin
-      hr := pMediaType.IsCompressedFormat(bIsCompressed);
+      Result := hr;
+      Exit;
     end;
 
-//{$if WINVER < _WIN32_WINNT_WIN7}
+  mftInfo.guidMajorType := guidMajorType;
+  mftInfo.guidSubtype := guidSubtype;
 
-  // Starting in Windows 7, you can connect an uncompressed video source
-  // directly to the EVR. In earlier versions of Media Foundation, this
-  // is not supported.
+  // Search synchronous, asynchronous, hardware, and locally
+  // registered playback decoders.
+  //
+  // Transcode-only MFTs are deliberately excluded.
+  EnumFlags := MFT_ENUM_FLAG_SYNCMFT or
+               MFT_ENUM_FLAG_ASYNCMFT or
+               MFT_ENUM_FLAG_HARDWARE or
+               MFT_ENUM_FLAG_LOCALMFT or
+               MFT_ENUM_FLAG_SORTANDFILTER;
 
-  //if (SUCCEEDED(hr)) then
-  //  begin
-  //    if ((bIsCompressed = True) And (guidMajorType = MFMediaType_Video)) then
-  //      begin
-  //        hr := MF_E_INVALIDMEDIATYPE;
-  //      end;
-  //  end;
+  try
+    hr := MFTEnumEx(guidDecoderCategory,
+                    EnumFlags,
+                    @mftInfo,
+                    nil,
+                    ppMFTActivate,
+                    cMFTActivate);
 
-//{$endif}
+    if FAILED(hr) then
+      begin
+        Result := hr;
+        Exit;
+      end;
 
-  // If the stream is compressed, find a decoder.
-  if (SUCCEEDED(hr)) then
-    begin
-      if (bIsCompressed) then
-        begin
-          // Select the decoder category from the major type (audio/video).
-          hr := GetDecoderCategory(guidMajorType,
-                                   guidDecoderCategory);
+    // MFTEnumEx can succeed while returning no matching MFTs.
+    if (cMFTActivate = 0) or not Assigned(ppMFTActivate) then
+      begin
+        Result := MF_E_TOPO_CODEC_NOT_FOUND;
+        Exit;
+      end;
 
-          // Look for a decoder.
-          if (SUCCEEDED(hr)) then
-            begin
-              mftinfo.guidMajorType := guidMajorType;
-              mftinfo.guidSubtype := guidSubtype;
+    if not Assigned(ppMFTActivate^[0]) then
+      begin
+        Result := MF_E_TOPO_CODEC_NOT_FOUND;
+        Exit;
+      end;
 
-              hr := MFTEnum(guidDecoderCategory,
-                            0,                   // Reserved
-                            @mftinfo,            // Input type to match. (Encoded type.)
-                            nil,                 // Output type to match. (Don't care.)
-                            nil,                 // Attributes to match. (None.)
-                            ppDecoderCLSIDs,     // Receives an array of CLSIDs.
-                            cDecoderCLSIDs);     // Receives the size of the array.
-            end;
+    // Preserve the original function contract by returning the
+    // CLSID of the first matching decoder.
+    hr := ppMFTActivate^[0].GetGUID(MFT_TRANSFORM_CLSID_Attribute,
+                                    opCLSID);
 
-          // MFTEnum can return zero matches.
-          if (SUCCEEDED(hr) and (cDecoderCLSIDs = 0)) then
-            begin
-              hr := MF_E_TOPO_CODEC_NOT_FOUND;
-            end;
+    Result := hr;
 
-          // Return the first CLSID in the list to the caller.
-          if (SUCCEEDED(hr) and (cDecoderCLSIDs > 0)) then
-            begin
-              opCLSID := ppDecoderCLSIDs[0];
-            end;
-        end
-      else
-        begin
-          // Uncompressed. A decoder is not required.
-          opCLSID := GUID_NULL;
-        end;
-    end;
-  Result := hr;
+  finally
+    // Release every activation interface returned by MFTEnumEx.
+    if Assigned(ppMFTActivate) then
+      begin
+        if (cMFTActivate > 0) then
+          begin
+            for I := 0 to cMFTActivate - 1 do
+            SafeRelease(ppMFTActivate^[I]);
+          end;
+
+        // MFTEnumEx allocated the array with CoTaskMemAlloc.
+        CoTaskMemFree(ppMFTActivate);
+        ppMFTActivate := nil;
+      end;
+  end;
 end;
 
 
@@ -3277,13 +3322,13 @@ function EnumCaptureDeviceSources(const pAttributeSourceType: TGuid;
     i := Length(pDeviceProperties) - 1;
     // Find the last item in the array with the same name
     while (pIndex = -1) and (i > -1) do
-    begin
-      Result := SameText(WideCharToString(pName),
-                         WideCharToString(pDeviceProperties[i].lpFriendlyName));
-      if Result then
-        pIndex := i;
-      Dec(i);
-    end;
+      begin
+        Result := SameText(WideCharToString(pName),
+                           WideCharToString(pDeviceProperties[i].lpFriendlyName));
+        if Result then
+          pIndex := i;
+        Dec(i);
+      end;
     Result := (pIndex >= 0);
   end;
   {$ENDREGION}
@@ -5197,6 +5242,86 @@ done:
   aFormatTag := sFormatTag;
   aFOURCC := dwFOURCC;
   aFmtDesc := sFmtDesc;
+end;
+
+// Call this function to get a stream description, using GetGUIDNameConst.
+function GetStreamCodecDescription(const AStreamDescriptor: IMFStreamDescriptor): string;
+var
+  hr: HRESULT;
+  MediaTypeHandler: IMFMediaTypeHandler;
+  MediaType: IMFMediaType;
+  MajorType: TGUID;
+  SubType: TGUID;
+  GuidName: LPWSTR;
+  FormatTag: LPWSTR;
+  FormatDescription: LPWSTR;
+  FourCC: DWORD;
+  MediaKind: string;
+
+begin
+
+  Result := 'Unknown media format';
+
+  MediaTypeHandler := nil;
+  MediaType := nil;
+  MajorType := GUID_NULL;
+  SubType := GUID_NULL;
+
+  GuidName := nil;
+  FormatTag := nil;
+  FormatDescription := nil;
+  FourCC := 0;
+
+  if not Assigned(AStreamDescriptor) then
+    Exit;
+
+  hr := AStreamDescriptor.GetMediaTypeHandler(MediaTypeHandler);
+
+  if SUCCEEDED(hr) then
+    hr := MediaTypeHandler.GetCurrentMediaType(MediaType);
+
+  if SUCCEEDED(hr) then
+    hr := MediaType.GetMajorType(MajorType);
+
+  if SUCCEEDED(hr) then
+    hr := MediaType.GetGUID(MF_MT_SUBTYPE,
+                            SubType);
+
+  if FAILED(hr) then
+    Exit;
+
+  if IsEqualGUID(MajorType,
+                 MFMediaType_Video) then
+    MediaKind := 'video'
+  else
+    if IsEqualGUID(MajorType,
+                   MFMediaType_Audio) then
+      MediaKind := 'audio'
+    else
+      MediaKind := 'media';
+
+  hr := GetGUIDNameConst(MajorType,
+                         SubType,
+                         GuidName,
+                         FormatTag,
+                         FourCC,
+                         FormatDescription);
+
+  if (hr = S_OK) then
+    begin
+      if Assigned(FormatDescription) and (FormatDescription^ <> #0) then
+        Result := string(FormatDescription)
+      else
+        if Assigned(FormatTag) and (FormatTag^ <> #0) then
+          Result := string(FormatTag) + ' ' + MediaKind
+        else
+          if Assigned(GuidName) and (GuidName^ <> #0) then
+            Result := string(GuidName)
+        else
+          Result := GUIDToString(SubType);
+    end
+  else
+    Result := GUIDToString(SubType) + ' ' + MediaKind;
 end;
 
 

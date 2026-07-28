@@ -321,6 +321,15 @@ type
   function GetDeviceDataFlow(pDevice: IMMDevice;
                              out pDataFlow: eDataFlow): HResult;
 
+  //===========================================================
+  // WASAPI streams request RAW mode bypass for Windows 10/11 Audio enhangements.
+  // Audio enhancements is not recommended when using custom MFT's because it
+  // consumes processor (CPU) time and audio latency.
+  // It can also introduce "hiss" and "cracks" in the audio stream.
+  //===========================================================
+  procedure ConfigureRawAudioStream(const AAudioClient: IAudioClient;
+                                    const ACategory: AUDIO_STREAM_CATEGORY;
+                                    const AContext: string);
 
 implementation
 
@@ -1173,6 +1182,42 @@ begin
     hr := endPoint.GetDataFlow(pDataFlow);
 
   Result := hr;
+end;
+
+
+procedure ConfigureRawAudioStream(const AAudioClient: IAudioClient;
+                                  const ACategory: AUDIO_STREAM_CATEGORY;
+                                  const AContext: string);
+var
+  Hr: HRESULT;
+  AudioClient2: IAudioClient2;
+  Props: AudioClientProperties;
+
+begin
+
+
+  if not Assigned(AAudioClient) then
+    Exit;
+
+  if not Supports(AAudioClient,
+                  IAudioClient2,
+                  AudioClient2) then
+    Exit;
+
+  FillChar(Props,
+           SizeOf(Props),
+           0);
+
+  Props.cbSize := SizeOf(Props);
+  Props.bIsOffload := False;
+  Props.eCategory := ACategory;
+  Props.Options := AUDCLNT_STREAMOPTIONS_RAW;
+
+  Hr := AudioClient2.SetClientProperties(Props);
+  if FAILED(Hr) then
+    OutputDebugString(PChar(Format('%s: AUDCLNT_STREAMOPTIONS_RAW not accepted, hr=0x%.8x',
+                                  [AContext,
+                                   Cardinal(Hr)])));
 end;
 
 
