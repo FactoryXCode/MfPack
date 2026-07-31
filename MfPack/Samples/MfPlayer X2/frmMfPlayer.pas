@@ -878,6 +878,7 @@ begin
   prbProgress.Position := 0;
   mnuSetPosition.Enabled := False;
   pnlControls.Enabled := False;
+  SetPlaybackButtonsEnabled(False);
   mnuTakeScreenshot.Enabled := False;
   mnuExportSubtitled.Enabled := False;
   mnuSubtitling.Enabled := False;
@@ -997,6 +998,10 @@ begin
               MfPlayerX.SubtitlesEnabled := MfPlayerX.TimedTextFileLoaded;
 
               RealignInterface();
+
+              // FormCreate disables the individual playback buttons before
+              // a player exists. Recalculate them now that OpenURL succeeded.
+              UpdateCastControls();
             end //SUCCEEDED
           else
             MessageBox(0,
