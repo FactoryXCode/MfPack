@@ -104,6 +104,7 @@ type
     FPendingTranscodeRequest: TMfCastTranscodeRequest;
     FHasPendingTranscode: Boolean;
     FCurrentPublishedPath: string;
+    FCurrentSubtitlePublishedPath: string;
 
     procedure CleanupCastAttempt();
     function FailCastAttempt(const AHResult: HRESULT;
@@ -116,11 +117,11 @@ type
                           const AMessage: string;
                           const ADetail: string = '');
     function PrepareDirectFile(const ASourceName: string;
-                               const ASubtitleSourceName: string;
+                               const ASubtitle: TMfCastSubtitleAsset;
                                const ASubtitleMode: TMfCastSubtitleMode;
                                out ALoadRequest: TMfCastLoadRequest): HRESULT;
     function PrepareTranscodedStream(const ASourceName: string;
-                                     const ASubtitleSourceName: string;
+                                     const ASubtitle: TMfCastSubtitleAsset;
                                      const ASubtitleMode: TMfCastSubtitleMode;
                                      out ALoadRequest: TMfCastLoadRequest): HRESULT;
 
@@ -151,7 +152,7 @@ type
     function GetDevices(out ADevices: TMfCastDeviceArray): HRESULT;
     function CastFile(const ADevice: TMfCastDevice;
                       const ASourceName: string;
-                      const ASubtitleSourceName: string;
+                      const ASubtitle: TMfCastSubtitleAsset;
                       const AMediaMode: TMfCastMediaMode;
                       const ASubtitleMode: TMfCastSubtitleMode): HRESULT;
     function Play: HRESULT;
@@ -335,6 +336,10 @@ begin
     FComponents.SegmentPublisher.AbortPresentation(E_ABORT);
 
   if Assigned(FComponents.HttpServer) and
+     (FCurrentSubtitlePublishedPath <> '') then
+    FComponents.HttpServer.Unpublish(FCurrentSubtitlePublishedPath);
+
+  if Assigned(FComponents.HttpServer) and
      (FCurrentPublishedPath <> '') then
     FComponents.HttpServer.Unpublish(FCurrentPublishedPath);
 
@@ -345,6 +350,7 @@ begin
     FComponents.HttpServer.Stop();
 
   FCurrentPublishedPath := '';
+  FCurrentSubtitlePublishedPath := '';
   FPendingLoadRequest.Reset();
   FPendingTranscodeRequest.Reset();
   FHasPendingTranscode := False;
@@ -522,7 +528,8 @@ end;
 
 
 function TMfCastController.CastFile(const ADevice: TMfCastDevice;
-                                    const ASourceName, ASubtitleSourceName: string;
+                                    const ASourceName: string;
+                                    const ASubtitle: TMfCastSubtitleAsset;
                                     const AMediaMode: TMfCastMediaMode;
                                     const ASubtitleMode: TMfCastSubtitleMode): HRESULT;
 var
@@ -586,6 +593,18 @@ begin
       Exit;
     end;
 
+  FCurrentMedia.HasTimedText := ASubtitle.Enabled and
+                                (Length(ASubtitle.Data) > 0);
+
+  if (ASubtitleMode in [csmExternalTextTrack, csmBurnIntoVideo]) and
+     (not FCurrentMedia.HasTimedText) then
+    begin
+      Result := FailCastAttempt(E_INVALIDARG,
+                                'Prepare subtitles',
+                                'The requested subtitle mode has no active subtitle data.');
+      Exit;
+    end;
+
   Result := FComponents.MediaPlanner.ChooseMode(ADevice,
                                                 FCurrentMedia,
                                                 AMediaMode,
@@ -642,13 +661,13 @@ begin
     cmmDirectFile,
     cmmDirectWithTextTrack:
       Result := PrepareDirectFile(ASourceName,
-                                  ASubtitleSourceName,
+                                  ASubtitle,
                                   SelectedSubtitleMode,
                                   FPendingLoadRequest);
 
     cmmTranscodeBurnedSubtitles:
       Result := PrepareTranscodedStream(ASourceName,
-                                        ASubtitleSourceName,
+                                        ASubtitle,
                                         SelectedSubtitleMode,
                                         FPendingLoadRequest);
   else
@@ -978,7 +997,7 @@ end;
 
 
 function TMfCastController.PrepareDirectFile(const ASourceName: string;
-                                             const ASubtitleSourceName: string;
+                                             const ASubtitle: TMfCastSubtitleAsset;
                                              const ASubtitleMode: TMfCastSubtitleMode;
                                              out ALoadRequest: TMfCastLoadRequest): HRESULT;
 var
@@ -986,6 +1005,12 @@ var
   ResourceName: string;
   PublishedPath: string;
   Url: string;
+  SubtitleContent: IMfCastHttpContent;
+  SubtitlePath: string;
+  SubtitleUrl: string;
+  SubtitleContentType: string;
+  SubtitleName: string;
+  SubtitleLanguage: string;
 begin
 
   ALoadRequest.Reset();
@@ -1003,6 +1028,11 @@ begin
   Content := TMfCastFileContent.Create(ASourceName,
                                        FCurrentMedia.ContentType);
 
+  if FCurrentSubtitlePublishedPath <> '' then
+    begin
+      FComponents.HttpServer.Unpublish(FCurrentSubtitlePublishedPath);
+      FCurrentSubtitlePublishedPath := '';
+    end;
   if FCurrentPublishedPath <> '' then
     FComponents.HttpServer.Unpublish(FCurrentPublishedPath);
 
@@ -1027,12 +1057,56 @@ begin
   ALoadRequest.StreamType := cstBuffered;
   ALoadRequest.Title := FCurrentMedia.Title;
   ALoadRequest.AutoPlay := True;
+
+  if ASubtitleMode = csmExternalTextTrack then
+    begin
+      if (not ASubtitle.Enabled) or (Length(ASubtitle.Data) = 0) then
+        begin
+          Result := E_INVALIDARG;
+          Exit;
+        end;
+      SubtitleContentType := Trim(ASubtitle.ContentType);
+      if SubtitleContentType = '' then
+        SubtitleContentType := 'text/vtt; charset=utf-8';
+      SubtitleContent := TMfCastMemoryContent.Create(
+                           ASubtitle.Data, SubtitleContentType);
+      Result := FComponents.HttpServer.Publish(
+                  'subtitles.vtt', SubtitleContent, SubtitlePath);
+      if FAILED(Result) then
+        Exit;
+      Result := FComponents.HttpServer.BuildUrl(SubtitlePath, SubtitleUrl);
+      if FAILED(Result) then
+        begin
+          FComponents.HttpServer.Unpublish(SubtitlePath);
+          Exit;
+        end;
+      FCurrentSubtitlePublishedPath := SubtitlePath;
+      SubtitleName := Trim(ASubtitle.Name);
+      if SubtitleName = '' then
+        SubtitleName := 'Subtitles';
+      SubtitleLanguage := StringReplace(Trim(ASubtitle.Language),
+                                        '_', '-', [rfReplaceAll]);
+      if SubtitleLanguage = '' then
+        SubtitleLanguage := 'und';
+      SetLength(ALoadRequest.Tracks, 1);
+      ALoadRequest.Tracks[0].Reset();
+      ALoadRequest.Tracks[0].TrackId := 1;
+      ALoadRequest.Tracks[0].TrackType := 'TEXT';
+      ALoadRequest.Tracks[0].ContentId := SubtitleUrl;
+      ALoadRequest.Tracks[0].ContentType := 'text/vtt';
+      ALoadRequest.Tracks[0].Name := SubtitleName;
+      ALoadRequest.Tracks[0].Language := SubtitleLanguage;
+      ALoadRequest.Tracks[0].SubType := 'SUBTITLES';
+      SetLength(ALoadRequest.ActiveTrackIds, 1);
+      ALoadRequest.ActiveTrackIds[0] := 1;
+      OutputDebugString(PChar('MfCast subtitle URL: ' + SubtitleUrl));
+    end;
   Result := S_OK;
 end;
 
 
 function TMfCastController.PrepareTranscodedStream(const ASourceName: string;
-                                                   const ASubtitleSourceName: string;
+                                                   const ASubtitle: TMfCastSubtitleAsset;
                                                    const ASubtitleMode: TMfCastSubtitleMode;
                                                    out ALoadRequest: TMfCastLoadRequest): HRESULT;
 var
@@ -1054,7 +1128,12 @@ begin
   Request.SourceName := ASourceName;
   Request.Title := FCurrentMedia.Title;
   Request.SubtitleMode := ASubtitleMode;
-  Request.SubtitleSourceName := ASubtitleSourceName;
+  if (ASubtitleMode = csmBurnIntoVideo) and ASubtitle.Enabled then
+    begin
+      Request.SubtitleSourceName := ASourceName;
+      Request.SubtitleLanguage := ASubtitle.Language;
+      Request.SubtitleAspectRatio := ASubtitle.AspectRatio;
+    end;
   Request.Encoding := FSettings.Encoding;
   Request.Encoding.OutputMode := comFragmentedMp4;
 

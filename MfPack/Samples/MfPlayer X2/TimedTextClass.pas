@@ -224,6 +224,9 @@ type
     function GetClosestStartTime(search: MFTIME): MFTIME;
     function TryGetTrackAtTime(MediaTimeMs: MFTIME;
                                out Track: TSubTitleTrack): Boolean;
+    // Serialize the already parsed and normalized subtitle cues to
+    // canonical UTF-8 WebVTT for remote playback targets.
+    function ExportWebVtt(out AData: TBytes): HRESULT;
     // Open, check and decide what filetype to process
     function OpenTimedTextFile(const sUrl: WideString): HResult;
 
@@ -249,6 +252,36 @@ implementation
 
 const
   Kernel32Lib = 'kernel32.dll';    // Also declared in WinApi.Windows
+
+
+function MfTimedTextFormatWebVttTime(const ATime100ns: MFTIME): string;
+var
+  TotalMilliseconds: Int64;
+  Hours: Int64;
+  Minutes: Int64;
+  Seconds: Int64;
+  Milliseconds: Int64;
+begin
+  TotalMilliseconds := ATime100ns div 10000;
+  if TotalMilliseconds < 0 then
+    TotalMilliseconds := 0;
+  Hours := TotalMilliseconds div 3600000;
+  TotalMilliseconds := TotalMilliseconds mod 3600000;
+  Minutes := TotalMilliseconds div 60000;
+  TotalMilliseconds := TotalMilliseconds mod 60000;
+  Seconds := TotalMilliseconds div 1000;
+  Milliseconds := TotalMilliseconds mod 1000;
+  Result := Format('%.2d:%.2d:%.2d.%.3d',
+                   [Hours, Minutes, Seconds, Milliseconds]);
+end;
+
+
+function MfTimedTextEscapeWebVttText(const AValue: string): string;
+begin
+  Result := StringReplace(AValue, '&', '&amp;', [rfReplaceAll]);
+  Result := StringReplace(Result, '<', '&lt;', [rfReplaceAll]);
+  Result := StringReplace(Result, '>', '&gt;', [rfReplaceAll]);
+end;
 
 
 constructor TMfTimedText.Create(hwSender: HWnd;
@@ -432,6 +465,8 @@ var
         sp_Url := pc_LanguageTags.TimedTxtPropsArray[Index].sFile;
 
         tp_FileType := pc_LanguageTags.TimedTxtPropsArray[Index].sTTxtType;
+
+        sp_PreferredLanguage := pc_LanguageTags.TimedTxtPropsArray[Index].sLanguageTag;
 
         sp_FriendlyLangName := pc_LanguageTags.TimedTxtPropsArray[Index].sFriendlyLanguageName;
       end;
@@ -1092,6 +1127,59 @@ begin
           Exit;
         end;
     end;
+end;
+
+
+function TMfTimedText.ExportWebVtt(out AData: TBytes): HRESULT;
+var
+  Lines: TStringList;
+  I: Integer;
+  J: Integer;
+  CueCount: Integer;
+  HasText: Boolean;
+begin
+  SetLength(AData, 0);
+  Lines := TStringList.Create();
+  try
+    Lines.LineBreak := #13#10;
+    Lines.Add('WEBVTT');
+    Lines.Add('');
+    CueCount := 0;
+    for I := Low(ap_SubTitleTracks) to High(ap_SubTitleTracks) do
+      begin
+        if ap_SubTitleTracks[I].Stop <= ap_SubTitleTracks[I].Start then
+          Continue;
+        HasText := False;
+        for J := Low(ap_SubTitleTracks[I].TrackText) to
+                 High(ap_SubTitleTracks[I].TrackText) do
+          if Trim(ap_SubTitleTracks[I].TrackText[J].TextLine) <> '' then
+            begin
+              HasText := True;
+              Break;
+            end;
+        if not HasText then
+          Continue;
+        Lines.Add(MfTimedTextFormatWebVttTime(ap_SubTitleTracks[I].Start) +
+                  ' --> ' +
+                  MfTimedTextFormatWebVttTime(ap_SubTitleTracks[I].Stop));
+        for J := Low(ap_SubTitleTracks[I].TrackText) to
+                 High(ap_SubTitleTracks[I].TrackText) do
+          if Trim(ap_SubTitleTracks[I].TrackText[J].TextLine) <> '' then
+            Lines.Add(MfTimedTextEscapeWebVttText(
+                        ap_SubTitleTracks[I].TrackText[J].TextLine));
+        Lines.Add('');
+        Inc(CueCount);
+      end;
+    if CueCount = 0 then
+      begin
+        Result := S_FALSE;
+        Exit;
+      end;
+    AData := TEncoding.UTF8.GetBytes(Lines.Text);
+    Result := S_OK;
+  finally
+    Lines.Free();
+  end;
 end;
 
 

@@ -236,7 +236,7 @@ type
     function GetDevices(out ADevices: TMfCastDeviceArray): HRESULT;
     function CastFile(const ADevice: TMfCastDevice;
                       const ASourceName: string;
-                      const ASubtitleSourceName: string;
+                      const ASubtitle: TMfCastSubtitleAsset;
                       const AMediaMode: TMfCastMediaMode;
                       const ASubtitleMode: TMfCastSubtitleMode): HRESULT;
     function Play(): HRESULT;

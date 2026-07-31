@@ -214,17 +214,24 @@ begin
     try
       OutputDebugString(PChar('MfCast Transcode: worker started'));
       Compositor := TMfSubtitleCompositor.Create();
-      if FOwner.FRequest.SubtitleAspectRatio > 0.0 then
-        Compositor.SubtitleAspectRatio := FOwner.FRequest.SubtitleAspectRatio;
-
-      SubtitleSourceName := FOwner.FRequest.SubtitleSourceName;
-      if SubtitleSourceName = '' then
-        SubtitleSourceName := FOwner.FRequest.SourceName;
-
-      FOwner.FWorkerResult := Compositor.OpenTimedTextFile(SubtitleSourceName,
-                                                           FOwner.FRequest.SubtitleLanguage);
-      if FAILED(FOwner.FWorkerResult) then
-        Exit;
+      FOwner.FWorkerResult := S_OK;
+      if FOwner.FRequest.SubtitleMode = csmBurnIntoVideo then
+        begin
+          if FOwner.FRequest.SubtitleAspectRatio > 0.0 then
+            Compositor.SubtitleAspectRatio := FOwner.FRequest.SubtitleAspectRatio;
+          SubtitleSourceName := FOwner.FRequest.SubtitleSourceName;
+          if SubtitleSourceName = '' then
+            SubtitleSourceName := FOwner.FRequest.SourceName;
+          FOwner.FWorkerResult := Compositor.OpenTimedTextFile(
+                                   SubtitleSourceName,
+                                   FOwner.FRequest.SubtitleLanguage);
+          if FOwner.FWorkerResult <> S_OK then
+            begin
+              if FOwner.FWorkerResult = S_FALSE then
+                FOwner.FWorkerResult := HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
+              Exit;
+            end;
+        end;
 
       FPump := TMfSubtitleFramePump.Create(Compositor);
       FPump.OnProgress := PumpProgress;

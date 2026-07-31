@@ -267,6 +267,25 @@ type
                          const ATimeoutMs: Cardinal): HRESULT;
   end;
 
+  TMfCastMemoryContent = class(TInterfacedObject, IMfCastHttpContent)
+  private
+    FData: TBytes;
+    FContentType: string;
+  public
+    constructor Create(const AData: TBytes;
+                       const AContentType: string);
+    function GetContentType(): string;
+    function GetLength(out ALength: UInt64): HRESULT;
+    function CanSeek(): Boolean;
+    function IsComplete(): Boolean;
+    function ReadAt(const AOffset: UInt64;
+                    ABuffer: Pointer;
+                    const ABufferSize: Cardinal;
+                    out ABytesRead: Cardinal): HRESULT;
+    function WaitForData(const AOffset: UInt64;
+                         const ATimeoutMs: Cardinal): HRESULT;
+  end;
+
   TMfCastSegmentPublisher = class(TInterfacedObject, IMfCastSegmentPublisher)
   private
     FServer: IMfCastHttpServer;
@@ -308,6 +327,16 @@ type
   public
     constructor Create(AOwner: TMfCastHttpServer);
   end;
+
+
+function MfCastCorsResponseHeaders(): AnsiString;
+begin
+  Result := AnsiString(
+    'Access-Control-Allow-Origin: *' + #13#10 +
+    'Access-Control-Allow-Methods: GET, HEAD, OPTIONS' + #13#10 +
+    'Access-Control-Allow-Headers: Content-Type, Accept-Encoding, Range' + #13#10 +
+    'Access-Control-Expose-Headers: Accept-Ranges, Content-Length, Content-Range' + #13#10);
+end;
 
 
 constructor TMfCastByteStreamAsyncState.Create(
@@ -1505,6 +1534,17 @@ begin
   TargetPath := MfCastHttpDecodePath(TargetPath);
 
   IsHead := MethodName = 'HEAD';
+  if MethodName = 'OPTIONS' then
+    begin
+      Header := AnsiString('HTTP/1.1 204 No Content' + #13#10);
+      if FSettings.EnableCors then
+        Header := Header + MfCastCorsResponseHeaders();
+      Header := Header + AnsiString(
+        'Content-Length: 0' + #13#10 +
+        'Connection: close' + #13#10 + #13#10);
+      MfCastSendText(AClient, Header);
+      Exit;
+    end;
   if (MethodName <> 'GET') and (not IsHead) then
     begin
       MfCastSendSimpleResponse(AClient, 405, 'Method not allowed');
@@ -1548,7 +1588,7 @@ begin
         'Transfer-Encoding: chunked' + #13#10 +
         'Cache-Control: no-store' + #13#10);
       if FSettings.EnableCors then
-        Header := Header + AnsiString('Access-Control-Allow-Origin: *' + #13#10);
+        Header := Header + MfCastCorsResponseHeaders();
       Header := Header + AnsiString('Connection: close' + #13#10 + #13#10);
       MfCastSendText(AClient, Header);
       OutputDebugString(PChar('MfCast HTTP live chunked start: ' + TargetPath));
@@ -1612,7 +1652,7 @@ begin
     Header := Header + AnsiString('Content-Range: bytes ' + IntToStr(StartOffset) +
       '-' + IntToStr(EndOffset) + '/' + IntToStr(TotalLength) + #13#10);
   if FSettings.EnableCors then
-    Header := Header + AnsiString('Access-Control-Allow-Origin: *' + #13#10);
+    Header := Header + MfCastCorsResponseHeaders();
   Header := Header + AnsiString('Connection: close' + #13#10 + #13#10);
   MfCastSendText(AClient, Header);
   if IsHead then
@@ -1752,6 +1792,72 @@ function TMfCastFileContent.WaitForData(const AOffset: UInt64;
 begin
   Result := S_OK;
 end;
+
+constructor TMfCastMemoryContent.Create(const AData: TBytes;
+                                        const AContentType: string);
+begin
+  inherited Create();
+  FData := Copy(AData, 0, Length(AData));
+  FContentType := AContentType;
+end;
+
+function TMfCastMemoryContent.GetContentType(): string;
+begin
+  Result := FContentType;
+end;
+
+function TMfCastMemoryContent.GetLength(out ALength: UInt64): HRESULT;
+begin
+  ALength := UInt64(Length(FData));
+  Result := S_OK;
+end;
+
+function TMfCastMemoryContent.CanSeek(): Boolean;
+begin
+  Result := True;
+end;
+
+function TMfCastMemoryContent.IsComplete(): Boolean;
+begin
+  Result := True;
+end;
+
+function TMfCastMemoryContent.ReadAt(const AOffset: UInt64;
+  ABuffer: Pointer; const ABufferSize: Cardinal;
+  out ABytesRead: Cardinal): HRESULT;
+var
+  Remaining: UInt64;
+  BytesToRead: Cardinal;
+begin
+  ABytesRead := 0;
+  if (ABuffer = nil) and (ABufferSize > 0) then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
+  if AOffset >= UInt64(Length(FData)) then
+    begin
+      Result := S_OK;
+      Exit;
+    end;
+  Remaining := UInt64(Length(FData)) - AOffset;
+  BytesToRead := ABufferSize;
+  if UInt64(BytesToRead) > Remaining then
+    BytesToRead := Cardinal(Remaining);
+  if BytesToRead > 0 then
+    begin
+      Move(FData[Integer(AOffset)], ABuffer^, BytesToRead);
+      ABytesRead := BytesToRead;
+    end;
+  Result := S_OK;
+end;
+
+function TMfCastMemoryContent.WaitForData(const AOffset: UInt64;
+  const ATimeoutMs: Cardinal): HRESULT;
+begin
+  Result := S_OK;
+end;
+
 
 constructor TMfCastSegmentPublisher.Create(const AServer: IMfCastHttpServer);
 begin

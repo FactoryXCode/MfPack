@@ -653,6 +653,9 @@ function TMfCastChannel.LoadMedia(const ARequest: TMfCastLoadRequest): HRESULT;
 var
   Payload: string;
   RequestId: Cardinal;
+  I: Integer;
+  Track: TMfCastTrackInfo;
+  TrackType: string;
 
 begin
 
@@ -678,7 +681,44 @@ begin
     Payload := Payload + ',"metadata":{"metadataType":0,"title":"' +
                MfCastJsonEscape(ARequest.Title) + '"}';
 
-  Payload := Payload + '},"autoplay":';
+  if Length(ARequest.Tracks) > 0 then
+    begin
+      Payload := Payload + ',"tracks":[';
+      for I := Low(ARequest.Tracks) to High(ARequest.Tracks) do
+        begin
+          if I > Low(ARequest.Tracks) then
+            Payload := Payload + ',';
+          Track := ARequest.Tracks[I];
+          TrackType := Trim(Track.TrackType);
+          if TrackType = '' then
+            TrackType := 'TEXT';
+          Payload := Payload + '{"trackId":' + IntToStr(Track.TrackId) +
+                     ',"type":"' + MfCastJsonEscape(TrackType) + '"' +
+                     ',"trackContentId":"' + MfCastJsonEscape(Track.ContentId) + '"' +
+                     ',"trackContentType":"' + MfCastJsonEscape(Track.ContentType) + '"';
+          if Trim(Track.Name) <> '' then
+            Payload := Payload + ',"name":"' + MfCastJsonEscape(Track.Name) + '"';
+          if Trim(Track.Language) <> '' then
+            Payload := Payload + ',"language":"' + MfCastJsonEscape(Track.Language) + '"';
+          if Trim(Track.SubType) <> '' then
+            Payload := Payload + ',"subtype":"' + MfCastJsonEscape(Track.SubType) + '"';
+          Payload := Payload + '}';
+        end;
+      Payload := Payload + ']';
+    end;
+  Payload := Payload + '}';
+  if Length(ARequest.ActiveTrackIds) > 0 then
+    begin
+      Payload := Payload + ',"activeTrackIds":[';
+      for I := Low(ARequest.ActiveTrackIds) to High(ARequest.ActiveTrackIds) do
+        begin
+          if I > Low(ARequest.ActiveTrackIds) then
+            Payload := Payload + ',';
+          Payload := Payload + IntToStr(ARequest.ActiveTrackIds[I]);
+        end;
+      Payload := Payload + ']';
+    end;
+  Payload := Payload + ',"autoplay":';
 
   if ARequest.AutoPlay then
     Payload := Payload + 'true'
@@ -691,6 +731,8 @@ begin
                                                            '.',
                                                            []);
   Payload := Payload + '}';
+
+  OutputDebugString(PChar('MfCast LOAD JSON: ' + Payload));
 
   FReceivedMediaStatus := False;
   FPendingLoadContentId := ARequest.ContentId;

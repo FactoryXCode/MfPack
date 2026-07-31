@@ -438,6 +438,10 @@ type
     function Pause(): HRESULT;
     function Stop(): HRESULT;
     function ReloadTimedText(): HRESULT;
+    function ExportActiveSubtitlesAsWebVtt(
+      out AData: TBytes;
+      out ALanguageTag: string;
+      out AFriendlyLanguageName: string): HRESULT;
 
     // Shut down the session and MF
     // Use this funtion to kill the MfPlayer.
@@ -3974,6 +3978,29 @@ function TMfPlayerX.GetTimedTextFileLoaded(): Boolean;
 begin
 
   Result := Assigned(FSubtitleCompositor) and FSubtitleCompositor.TimedTextFileLoaded;
+end;
+
+
+function TMfPlayerX.ExportActiveSubtitlesAsWebVtt(
+  out AData: TBytes;
+  out ALanguageTag: string;
+  out AFriendlyLanguageName: string): HRESULT;
+begin
+  SetLength(AData, 0);
+  ALanguageTag := '';
+  AFriendlyLanguageName := '';
+  if not FSubtitlesEnabled then
+    begin
+      Result := S_FALSE;
+      Exit;
+    end;
+  if not Assigned(FSubtitleCompositor) then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
+  Result := FSubtitleCompositor.ExportActiveWebVtt(
+              AData, ALanguageTag, AFriendlyLanguageName);
 end;
 
 

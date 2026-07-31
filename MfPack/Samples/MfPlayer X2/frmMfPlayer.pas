@@ -1135,7 +1135,7 @@ procedure Tfrm_MfPlayer.mnuCastToClick(Sender: TObject);
 var
   hr: HRESULT;
   Device: TMfCastDevice;
-  SubtitleSourceName: string;
+  Subtitle: TMfCastSubtitleAsset;
 
 begin
 
@@ -1164,10 +1164,34 @@ begin
                     Device.FriendlyName);
   UpdateCastControls();
 
-  SubtitleSourceName := '';
+  Subtitle.Reset();
+  if Assigned(MfPlayerX) and MfPlayerX.SubtitlesEnabled then
+    begin
+      hr := MfPlayerX.ExportActiveSubtitlesAsWebVtt(
+              Subtitle.Data, Subtitle.Language, Subtitle.Name);
+      if FAILED(hr) then
+        begin
+          SetCastStatusText(
+            'ChromeCast: Could not prepare the active subtitles.');
+          UpdateCastControls();
+          Exit;
+        end;
+      if hr = S_OK then
+        begin
+          Subtitle.Enabled := Length(Subtitle.Data) > 0;
+          Subtitle.ContentType := 'text/vtt; charset=utf-8';
+          Subtitle.AspectRatio := MfPlayerX.SubtitleAspectRatio;
+          Subtitle.Language := StringReplace(Trim(Subtitle.Language),
+                                             '_', '-', [rfReplaceAll]);
+          if Subtitle.Language = '' then
+            Subtitle.Language := 'und';
+          if Trim(Subtitle.Name) = '' then
+            Subtitle.Name := 'Subtitles';
+        end;
+    end;
   hr := FMfCastController.CastFile(Device,
                                    sMediaFileName,
-                                   SubtitleSourceName,
+                                   Subtitle,
                                    cmmAutomatic,
                                    csmAutomatic);
 

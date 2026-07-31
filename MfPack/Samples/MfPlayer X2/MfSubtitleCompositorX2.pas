@@ -103,6 +103,9 @@ type
 
     function OpenTimedTextFile(const MediaFileName: WideString;
                                const PreferredLanguage: string): HRESULT;
+    function ExportActiveWebVtt(out AData: TBytes;
+                                out ALanguageTag: string;
+                                out AFriendlyLanguageName: string): HRESULT;
     procedure Close();
 
     function TryGetSubtitleAtTime(MediaTimeMs: Int64;
@@ -193,6 +196,25 @@ begin
                           (hr <> HRESULT(ERROR_INVALID_PARAMETER));
 
   Result := hr;
+end;
+
+
+function TMfSubtitleCompositor.ExportActiveWebVtt(
+  out AData: TBytes;
+  out ALanguageTag: string;
+  out AFriendlyLanguageName: string): HRESULT;
+begin
+  SetLength(AData, 0);
+  ALanguageTag := '';
+  AFriendlyLanguageName := '';
+  if (not FTimedTextFileLoaded) or (not Assigned(FTimedText)) then
+    begin
+      Result := S_FALSE;
+      Exit;
+    end;
+  ALanguageTag := FTimedText.PreferredLanguage;
+  AFriendlyLanguageName := FTimedText.FriendlyLanguage;
+  Result := FTimedText.ExportWebVtt(AData);
 end;
 
 

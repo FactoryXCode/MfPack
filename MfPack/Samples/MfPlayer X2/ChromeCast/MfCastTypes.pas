@@ -139,8 +139,19 @@ type
 
   TMfCastDeviceArray = array of TMfCastDevice;
 
+  TMfCastSubtitleAsset = record
+    Enabled: Boolean;
+    ContentType: string;
+    Language: string;
+    Name: string;
+    AspectRatio: Single;
+    Data: TBytes;
+    procedure Reset();
+  end;
+
   TMfCastTrackInfo = record
     TrackId: Int64;
+    TrackType: string;
     ContentId: string;
     ContentType: string;
     Name: string;
@@ -385,10 +396,22 @@ begin
 end;
 
 
+procedure TMfCastSubtitleAsset.Reset();
+begin
+  Enabled := False;
+  ContentType := '';
+  Language := '';
+  Name := '';
+  AspectRatio := 0.0;
+  SetLength(Data, 0);
+end;
+
+
 procedure TMfCastTrackInfo.Reset();
 begin
 
   TrackId := 0;
+  TrackType := '';
   ContentId := '';
   ContentType := '';
   Name := '';
