@@ -70,6 +70,7 @@ uses
   WinApi.Windows,
   WinApi.ActiveX,
   WinApi.WinApiTypes,
+  WinApi.WinError,
   {System}
   System.SysUtils,
   System.Classes,
