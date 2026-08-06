@@ -48,7 +48,6 @@ MfPlayer X2 keeps those foundations and adds a frame-based subtitle architecture
 * Metadata and unsupported data streams are excluded from the playback topology.
 * Media properties and language-tag support.
 * Presentation-clock and `IMFTimer` integration.
-* Deterministic Media Session shutdown.
 
 ## Timed text and subtitles
 
@@ -123,14 +122,14 @@ are not claimed as supported by this snapshot.
 * An H.264 encoder and AAC encoder for export or transcoded casting.
 * A Chromecast, Chromecast-enabled television, or Google/Android TV device for Cast tests.
 * The PC and Cast receiver must be reachable on the same local network.
-* Windows Firewall must permit the temporary local HTTP listener.
+* Windows Firewall must permit the temporary local HTTP listener (Windows will ask for permits when starting the app).
 
 ---
 
 # Building the sample
 
 1. Install or configure MfPack.
-2. Make sure the MfPack source (src) directory is present in the Delphi search path.
+2. Make sure the MfPack source (src) directory and ChromeCast source (ChromeCast) directory are present in the project search path.
 3. Open `TMFPlayerX2.dproj`.
 4. Select the Win32 target.
 5. Build and run the project.
