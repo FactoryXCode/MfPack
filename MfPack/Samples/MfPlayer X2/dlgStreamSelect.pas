@@ -129,7 +129,6 @@ begin
  // Get all video streams and their properties
  for i:= 0 to High(MfPlayerX.StreamContents) do
    begin
-
      lItem:= lvStreams.Items.Add;
      lItem.Caption:= IntToStr(MfPlayerX.StreamContents[i].dwStreamIndex);
      lItem.Checked:= MfPlayerX.StreamContents[i].bSelected;
@@ -137,7 +136,6 @@ begin
 
      if (MfPlayerX.StreamContents[i].idStreamMediaType = mtVideo) then
        begin
-
          lItem.SubItems.Add('Video');
          if (MfPlayerX.StreamContents[i].bSelected = True) then
            iCurVideoStream:= MfPlayerX.StreamContents[i].dwStreamIndex;
@@ -145,7 +143,6 @@ begin
 
      if (MfPlayerX.StreamContents[i].idStreamMediaType = mtAudio) then
        begin
-
          lItem.SubItems.Add('Audio');
          if (MfPlayerX.StreamContents[i].bSelected = True) then
            iCurAudioStream:= MfPlayerX.StreamContents[i].dwStreamIndex;
@@ -171,7 +168,6 @@ begin
 
       if (Item.SubItems[1] = 'Audio') then
         begin
-
           lvStreams.Items[iCurAudioStream].Checked:= False;
           iCurAudioStream:= StrToInt(Item.Caption);
           MfPlayerX.SetActiveStreamType(mtAudio,
@@ -181,7 +177,6 @@ begin
 
       if (Item.SubItems[1] = 'Video') then
         begin
-
           lvStreams.Items[iCurVideoStream].Checked:= False;
           iCurVideoStream:= StrToInt(Item.Caption);
           MfPlayerX.SetActiveStreamType(mtVideo,
@@ -189,7 +184,6 @@ begin
         end;
     end;
 end;
-
 
 end.
 

@@ -37,9 +37,8 @@
 // Todo: -
 //
 // =============================================================================
-// Source: Parts of CPlayer Examples
+// Source: -
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
 //==============================================================================
 //
 // LICENSE
@@ -75,6 +74,7 @@ uses
   System.StrUtils,
   {Cast}
   MfCastTypes,
+  MfPCXConstants,
   MfCastInterfaces;
 
 type
@@ -132,43 +132,59 @@ type
     function GetState(): TMfCastState;
   end;
 
+
 implementation
 
-procedure MfCastAppendByte(var AData: TBytes; const AValue: Byte);
+
+procedure MfCastAppendByte(var AData: TBytes;
+                           const AValue: Byte);
 var
   Index: Integer;
+
 begin
 
   Index := Length(AData);
-  SetLength(AData, Index + 1);
+
+  SetLength(AData,
+            Index + 1);
   AData[Index] := AValue;
 end;
 
 
-procedure MfCastAppendBytes(var AData: TBytes; const ABytes: TBytes);
+procedure MfCastAppendBytes(var AData: TBytes;
+                            const ABytes: TBytes);
 var
   OldLength: Integer;
+
 begin
 
-  if Length(ABytes) = 0 then
+  if (Length(ABytes) = 0) then
     Exit;
 
   OldLength := Length(AData);
-  SetLength(AData, OldLength + Length(ABytes));
-  Move(ABytes[0], AData[OldLength], Length(ABytes));
+  SetLength(AData,
+            OldLength + Length(ABytes));
+
+  Move(ABytes[0],
+       AData[OldLength],
+       Length(ABytes));
 end;
 
 
-procedure MfCastAppendVarUInt(var AData: TBytes; AValue: Cardinal);
+procedure MfCastAppendVarUInt(var AData: TBytes;
+                              AValue: Cardinal);
 begin
 
   repeat
-    if AValue >= $80 then
-      MfCastAppendByte(AData, Byte((AValue and $7F) or $80))
+    if (AValue >= $80) then
+      MfCastAppendByte(AData,
+                       Byte((AValue and $7F) or $80))
     else
-      MfCastAppendByte(AData, Byte(AValue));
+      MfCastAppendByte(AData,
+                       Byte(AValue));
+
     AValue := AValue shr 7;
-  until AValue = 0;
+  until (AValue = 0);
 end;
 
 
@@ -177,12 +193,17 @@ procedure MfCastAppendProtoString(var AData: TBytes;
                                   const AValue: string);
 var
   Bytes: TBytes;
+
 begin
 
   Bytes := TEncoding.UTF8.GetBytes(AValue);
-  MfCastAppendVarUInt(AData, (AFieldNumber shl 3) or 2);
-  MfCastAppendVarUInt(AData, Length(Bytes));
-  MfCastAppendBytes(AData, Bytes);
+  MfCastAppendVarUInt(AData,
+                      (AFieldNumber shl 3) or 2);
+
+  MfCastAppendVarUInt(AData,
+                      Length(Bytes));
+  MfCastAppendBytes(AData,
+                    Bytes);
 end;
 
 
@@ -191,8 +212,10 @@ procedure MfCastAppendProtoVarUInt(var AData: TBytes;
                                    const AValue: Cardinal);
 begin
 
-  MfCastAppendVarUInt(AData, (AFieldNumber shl 3) or 0);
-  MfCastAppendVarUInt(AData, AValue);
+  MfCastAppendVarUInt(AData,
+                     (AFieldNumber shl 3) or 0);
+  MfCastAppendVarUInt(AData,
+                      AValue);
 end;
 
 
@@ -211,6 +234,7 @@ end;
 function MfCastJsonEscape(const AValue: string): string;
 var
   I: Integer;
+
 begin
 
   Result := '';
@@ -223,10 +247,11 @@ begin
       #9: Result := Result + '\t';
       #10: Result := Result + '\n';
       #12: Result := Result + '\f';
-      #13: Result := Result + '\r';
+      LFEED: Result := Result + '\r';
     else
-      if Ord(AValue[I]) < 32 then
-        Result := Result + '\u' + IntToHex(Ord(AValue[I]), 4)
+      if (Ord(AValue[I]) < 32) then
+        Result := Result + '\u' + IntToHex(Ord(AValue[I]),
+                                           4)
       else
         Result := Result + AValue[I];
     end;
@@ -239,26 +264,53 @@ function MfCastBuildMessage(const ASourceId: string;
                             const AJsonPayload: string): TBytes;
 begin
 
-  SetLength(Result, 0);
-  MfCastAppendProtoVarUInt(Result, 1, 0);
-  MfCastAppendProtoString(Result, 2, ASourceId);
-  MfCastAppendProtoString(Result, 3, ADestinationId);
-  MfCastAppendProtoString(Result, 4, ANamespace);
-  MfCastAppendProtoVarUInt(Result, 5, 0);
-  MfCastAppendProtoString(Result, 6, AJsonPayload);
+  SetLength(Result,
+            0);
+
+  MfCastAppendProtoVarUInt(Result,
+                           1,
+                           0);
+
+  MfCastAppendProtoString(Result,
+                          2,
+                          ASourceId);
+
+  MfCastAppendProtoString(Result,
+                          3,
+                          ADestinationId);
+
+  MfCastAppendProtoString(Result,
+                          4,
+                          ANamespace);
+
+  MfCastAppendProtoVarUInt(Result,
+                           5,
+                           0);
+
+  MfCastAppendProtoString(Result,
+                          6,
+                          AJsonPayload);
 end;
 
 
 function MfCastFrameMessage(const AMessage: TBytes): TBytes;
 var
   LengthValue: Cardinal;
+
 begin
 
-  SetLength(Result, Length(AMessage) + 4);
+  SetLength(Result,
+            Length(AMessage) + 4);
   LengthValue := htonl(Cardinal(Length(AMessage)));
-  Move(LengthValue, Result[0], 4);
-  if Length(AMessage) > 0 then
-    Move(AMessage[0], Result[4], Length(AMessage));
+
+  Move(LengthValue,
+       Result[0],
+       4);
+
+  if (Length(AMessage) > 0) then
+    Move(AMessage[0],
+         Result[4],
+         Length(AMessage));
 end;
 
 
@@ -268,23 +320,29 @@ function MfCastReadVarUInt(const AData: TBytes;
 var
   Shift: Integer;
   B: Byte;
+
 begin
 
   Result := False;
   AValue := 0;
   Shift := 0;
-  while AIndex < Length(AData) do
+
+  while (AIndex < Length(AData)) do
     begin
+
       B := AData[AIndex];
       Inc(AIndex);
       AValue := AValue or (Cardinal(B and $7F) shl Shift);
+
       if (B and $80) = 0 then
         begin
           Result := True;
           Exit;
         end;
-      Inc(Shift, 7);
-      if Shift > 28 then
+
+      Inc(Shift,
+          7);
+      if (Shift > 28) then
         Exit;
     end;
 end;
@@ -295,19 +353,25 @@ function MfCastReadProtoString(const AData: TBytes;
                                out AValue: string): Boolean;
 var
   ValueLength: Cardinal;
+
 begin
 
   Result := False;
   AValue := '';
-  if not MfCastReadVarUInt(AData, AIndex, ValueLength) then
+
+  if not MfCastReadVarUInt(AData,
+                           AIndex,
+                           ValueLength) then
     Exit;
-  if ValueLength > Cardinal(Length(AData) - AIndex) then
+
+  if (ValueLength > Cardinal(Length(AData) - AIndex)) then
     Exit;
 
   AValue := TEncoding.UTF8.GetString(AData,
                                      AIndex,
                                      Integer(ValueLength));
-  Inc(AIndex, Integer(ValueLength));
+  Inc(AIndex,
+      Integer(ValueLength));
   Result := True;
 end;
 
@@ -318,24 +382,33 @@ var
   Pattern: string;
   I: Integer;
   Escaped: Boolean;
+
 begin
 
   Result := '';
   Pattern := '"' + AName + '"';
-  I := Pos(Pattern, AJson);
-  if I = 0 then
+  I := Pos(Pattern,
+           AJson);
+  if (I = 0) then
     Exit;
 
-  I := PosEx(':', AJson, I + Length(Pattern));
-  if I = 0 then
+  I := PosEx(':',
+             AJson,
+             I + Length(Pattern));
+
+  if (I = 0) then
     Exit;
-  I := PosEx('"', AJson, I + 1);
-  if I = 0 then
+
+  I := PosEx('"',
+             AJson,
+             I + 1);
+  if (I = 0) then
     Exit;
   Inc(I);
 
   Escaped := False;
-  while I <= Length(AJson) do
+
+  while (I <= Length(AJson)) do
     begin
       if Escaped then
         begin
@@ -347,17 +420,18 @@ begin
             't': Result := Result + #9;
             'n': Result := Result + #10;
             'f': Result := Result + #12;
-            'r': Result := Result + #13;
+            'r': Result := Result + LFEED;
           else
             Result := Result + AJson[I];
           end;
+
           Escaped := False;
         end
       else
-        if AJson[I] = '\' then
+        if (AJson[I] = '\') then
           Escaped := True
         else
-          if AJson[I] = '"' then
+          if (AJson[I] = '"') then
             Exit
           else
             Result := Result + AJson[I];
@@ -380,7 +454,9 @@ begin
 
   Result := '';
   Pattern := '"' + AName + '"';
-  I := Pos(Pattern, AJson);
+
+  I := Pos(Pattern,
+           AJson);
   if (I = 0) then
     Exit;
 
@@ -392,7 +468,8 @@ begin
     Exit;
 
   Inc(I);
-  while (I <= Length(AJson)) and CharInSet(AJson[I], [' ', #9, #10, #13]) do
+
+  while (I <= Length(AJson)) and CharInSet(AJson[I], [' ', #9, #10, LFEED]) do
     Inc(I);
 
   if (I > Length(AJson)) or (AJson[I] <> '{') then
@@ -405,7 +482,6 @@ begin
 
   while (I <= Length(AJson)) do
     begin
-
       if InString then
         begin
 
@@ -422,18 +498,16 @@ begin
         case AJson[I] of
           '"': InString := True;
           '{': Inc(Depth);
-          '}':
-            begin
-
-              Dec(Depth);
-              if (Depth = 0) then
-                begin
-                  Result := Copy(AJson,
-                                 Start,
-                                 I - Start + 1);
-                  Exit;
-                end;
-            end;
+          '}': begin
+                 Dec(Depth);
+                 if (Depth = 0) then
+                   begin
+                     Result := Copy(AJson,
+                                    Start,
+                                    I - Start + 1);
+                     Exit;
+                   end;
+               end;
         end;
       Inc(I);
     end;
@@ -465,7 +539,7 @@ begin
     Exit;
 
   Inc(I);
-  while (I <= Length(AJson)) and CharInSet(AJson[I], [' ', #9, #10, #13]) do
+  while (I <= Length(AJson)) and CharInSet(AJson[I], [' ', #9, #10, LFEED]) do
     Inc(I);
 
   Start := I;
@@ -476,9 +550,96 @@ begin
   TextValue := Copy(AJson,
                     Start,
                     I - Start);
+
   if (TextValue <> '') then
     TryStrToInt64(TextValue,
                   Result);
+end;
+
+
+function MfCastExtractJsonTime100ns(const AJson: string;
+                                     const AName: string;
+                                     const ADefault: Int64): Int64;
+var
+  Pattern: string;
+  I: Integer;
+  Digit: Integer;
+  FractionScale: Int64;
+  WholeSeconds: Int64;
+  Fraction100ns: Int64;
+  Negative: Boolean;
+  HasDigits: Boolean;
+
+begin
+
+  Result := ADefault;
+  Pattern := '"' + AName + '"';
+  I := Pos(Pattern,
+           AJson);
+  if (I = 0) then
+    Exit;
+
+  I := PosEx(':',
+             AJson,
+             I + Length(Pattern));
+  if (I = 0) then
+    Exit;
+
+  Inc(I);
+  while (I <= Length(AJson)) and CharInSet(AJson[I], [' ', #9, #10, LFEED]) do
+    Inc(I);
+
+  Negative := False;
+  if (I <= Length(AJson)) and (AJson[I] = '-') then
+    begin
+      Negative := True;
+      Inc(I);
+    end;
+
+  WholeSeconds := 0;
+  HasDigits := False;
+
+  while (I <= Length(AJson)) and CharInSet(AJson[I], ['0'..'9']) do
+    begin
+      HasDigits := True;
+      Digit := Ord(AJson[I]) - Ord('0');
+      if (WholeSeconds > (High(Int64) - Digit) div 10) then
+        Exit;
+
+      WholeSeconds := WholeSeconds * 10 + Digit;
+      Inc(I);
+    end;
+
+  if not HasDigits then
+    Exit;
+
+  Fraction100ns := 0;
+  FractionScale := 1000000;
+
+  if (I <= Length(AJson)) and (AJson[I] = '.') then
+    begin
+      Inc(I);
+
+      while (I <= Length(AJson)) and CharInSet(AJson[I], ['0'..'9']) do
+        begin
+          if (FractionScale > 0) then
+            begin
+              Digit := Ord(AJson[I]) - Ord('0');
+              Inc(Fraction100ns,
+                  Digit * FractionScale);
+              FractionScale := FractionScale div 10;
+            end;
+
+          Inc(I);
+        end;
+    end;
+
+  if (WholeSeconds > (High(Int64) - Fraction100ns) div 10000000) then
+    Exit;
+
+  Result := WholeSeconds * 10000000 + Fraction100ns;
+  if Negative then
+    Result := -Result;
 end;
 
 
@@ -500,7 +661,6 @@ begin
 
   if (FState <> csIdle) then
   begin
-
     Result := E_UNEXPECTED;
     Exit;
   end;
@@ -539,7 +699,6 @@ begin
 
   if not Assigned(FTransport) then
     begin
-
       Result := E_POINTER;
       Exit;
     end;
@@ -548,9 +707,9 @@ begin
 
   if (Host = '') then
     Host := Trim(ADevice.HostName);
+
   if (Host = '') then
     begin
-
       Result := E_INVALIDARG;
       Exit;
     end;
@@ -564,7 +723,6 @@ begin
                                Port);
   if FAILED(Result) then
     begin
-
       SetState(csError);
       Exit;
     end;
@@ -578,7 +736,6 @@ begin
   Result := SendConnect(FTransportId);
   if FAILED(Result) then
     begin
-
       Disconnect();
       SetState(csError);
       Exit;
@@ -628,7 +785,6 @@ begin
                      Payload);
   if FAILED(Result) then
     begin
-
       SetState(csError);
       Exit;
     end;
@@ -636,7 +792,6 @@ begin
   Result := RequestReceiverStatus();
   if FAILED(Result) then
     begin
-
       SetState(csError);
       Exit;
     end;
@@ -659,15 +814,15 @@ var
 
 begin
 
-  if Trim(ARequest.ContentId) = '' then
+  if (Trim(ARequest.ContentId) = '') then
     begin
-
       Result := E_INVALIDARG;
       Exit;
     end;
 
   if (FTransportId = '') then
     FTransportId := FSettings.ReceiverId;
+
   if (FTransportId = '') then
     FTransportId := 'receiver-0';
 
@@ -684,40 +839,55 @@ begin
   if Length(ARequest.Tracks) > 0 then
     begin
       Payload := Payload + ',"tracks":[';
+
       for I := Low(ARequest.Tracks) to High(ARequest.Tracks) do
         begin
-          if I > Low(ARequest.Tracks) then
+
+          if (I > Low(ARequest.Tracks)) then
             Payload := Payload + ',';
+
           Track := ARequest.Tracks[I];
           TrackType := Trim(Track.TrackType);
-          if TrackType = '' then
+
+          if (TrackType = '') then
             TrackType := 'TEXT';
+
           Payload := Payload + '{"trackId":' + IntToStr(Track.TrackId) +
                      ',"type":"' + MfCastJsonEscape(TrackType) + '"' +
                      ',"trackContentId":"' + MfCastJsonEscape(Track.ContentId) + '"' +
                      ',"trackContentType":"' + MfCastJsonEscape(Track.ContentType) + '"';
-          if Trim(Track.Name) <> '' then
+
+          if (Trim(Track.Name) <> '') then
             Payload := Payload + ',"name":"' + MfCastJsonEscape(Track.Name) + '"';
-          if Trim(Track.Language) <> '' then
+
+          if (Trim(Track.Language) <> '') then
             Payload := Payload + ',"language":"' + MfCastJsonEscape(Track.Language) + '"';
-          if Trim(Track.SubType) <> '' then
+
+          if (Trim(Track.SubType) <> '') then
             Payload := Payload + ',"subtype":"' + MfCastJsonEscape(Track.SubType) + '"';
           Payload := Payload + '}';
         end;
+
       Payload := Payload + ']';
     end;
+
   Payload := Payload + '}';
-  if Length(ARequest.ActiveTrackIds) > 0 then
+
+  if (Length(ARequest.ActiveTrackIds) > 0) then
     begin
       Payload := Payload + ',"activeTrackIds":[';
+
       for I := Low(ARequest.ActiveTrackIds) to High(ARequest.ActiveTrackIds) do
         begin
-          if I > Low(ARequest.ActiveTrackIds) then
+          if (I > Low(ARequest.ActiveTrackIds)) then
             Payload := Payload + ',';
+
           Payload := Payload + IntToStr(ARequest.ActiveTrackIds[I]);
         end;
+
       Payload := Payload + ']';
     end;
+
   Payload := Payload + ',"autoplay":';
 
   if ARequest.AutoPlay then
@@ -734,6 +904,9 @@ begin
 
   OutputDebugString(PChar('MfCast LOAD JSON: ' + Payload));
 
+  // LOAD creates a new media session. Do not attach an ID learned from the
+  // receiver's previous media item to the status request that follows.
+  FMediaSessionId := 0;
   FReceivedMediaStatus := False;
   FPendingLoadContentId := ARequest.ContentId;
   Result := SendJson(FTransportId,
@@ -742,7 +915,6 @@ begin
 
   if SUCCEEDED(Result) then
     begin
-
       SetState(csBuffering);
       WaitForMediaStatus(10000);
       Result := S_OK;
@@ -761,7 +933,6 @@ begin
 
   if (FTransportId = '') then
     begin
-
       Result := E_UNEXPECTED;
       Exit;
     end;
@@ -793,7 +964,6 @@ begin
 
   if (FTransportId = '') then
     begin
-
       Result := E_UNEXPECTED;
       Exit;
     end;
@@ -825,7 +995,6 @@ begin
 
   if (FTransportId = '') then
     begin
-
       Result := S_OK;
       Exit;
     end;
@@ -856,9 +1025,8 @@ var
 
 begin
 
-  if FTransportId = '' then
+  if (FTransportId = '') then
     begin
-
       Result := E_UNEXPECTED;
       Exit;
     end;
@@ -866,8 +1034,7 @@ begin
   RequestId := NextRequestId();
   SecondsText := StringReplace(FloatToStr(APosition100ns / 10000000.0),
                                ',', '.', []);
-  Payload := '{"type":"SEEK","requestId":' + IntToStr(RequestId) +
-             ',"currentTime":' + SecondsText;
+  Payload := '{"type":"SEEK","requestId":' + IntToStr(RequestId) + ',"currentTime":' + SecondsText;
 
   if (FMediaSessionId <> 0) then
     Payload := Payload + ',"mediaSessionId":' + IntToStr(FMediaSessionId);
@@ -892,15 +1059,17 @@ begin
 
   if (AVolume < 0.0) or (AVolume > 1.0) then
     begin
-
       Result := E_INVALIDARG;
       Exit;
     end;
 
   RequestId := NextRequestId();
-  LevelText := StringReplace(FloatToStr(AVolume), ',', '.', []);
-  Payload := '{"type":"SET_VOLUME","requestId":' + IntToStr(RequestId) +
-             ',"volume":{"level":' + LevelText + '}}';
+  LevelText := StringReplace(FloatToStr(AVolume),
+                             ',',
+                             '.',
+                             []);
+
+  Payload := '{"type":"SET_VOLUME","requestId":' + IntToStr(RequestId) + ',"volume":{"level":' + LevelText + '}}';
 
   Result := SendJson(FSettings.ReceiverId,
                      FSettings.NamespaceReceiver,
@@ -920,10 +1089,12 @@ begin
   RequestId := NextRequestId();
   Payload := '{"type":"SET_VOLUME","requestId":' + IntToStr(RequestId) +
              ',"volume":{"muted":';
+
   if AMuted then
     Payload := Payload + 'true'
   else
     Payload := Payload + 'false';
+
   Payload := Payload + '}}';
 
   Result := SendJson(FSettings.ReceiverId,
@@ -957,14 +1128,13 @@ begin
 
   if (FTransportId = '') then
     begin
-
       Result := E_UNEXPECTED;
       Exit;
     end;
 
   Payload := '{"type":"GET_STATUS","requestId":' +
              IntToStr(NextRequestId());
-  if FMediaSessionId <> 0 then
+  if (FMediaSessionId <> 0) then
     Payload := Payload + ',"mediaSessionId":' + IntToStr(FMediaSessionId);
   Payload := Payload + '}';
 
@@ -998,24 +1168,28 @@ var
   SourceId: string;
   Message: TBytes;
   Frame: TBytes;
+
 begin
 
   if not Assigned(FTransport) then
     begin
+
       Result := E_POINTER;
       Exit;
     end;
 
   SourceId := FSettings.SenderId;
-  if SourceId = '' then
+  if (SourceId = '') then
     SourceId := 'sender-0';
 
   Message := MfCastBuildMessage(SourceId,
                                 ADestinationId,
                                 ANamespace,
                                 AJsonPayload);
+
   Frame := MfCastFrameMessage(Message);
-  if Length(Frame) = 0 then
+
+  if (Length(Frame) = 0) then
     Result := E_FAIL
   else
     Result := FTransport.SendBuffer(@Frame[0], Length(Frame));
@@ -1042,6 +1216,7 @@ var
   Payload: string;
   IgnoredString: string;
   IgnoredVarUInt: Cardinal;
+
 begin
 
   Result := S_OK;
@@ -1053,7 +1228,9 @@ begin
 
   while Index < Length(AData) do
     begin
-      if not MfCastReadVarUInt(AData, Index, FieldKey) then
+      if not MfCastReadVarUInt(AData,
+                               Index,
+                               FieldKey) then
         begin
           Result := E_FAIL;
           Exit;
@@ -1062,61 +1239,76 @@ begin
       FieldNumber := FieldKey shr 3;
       WireType := FieldKey and $07;
       case WireType of
-        0:
-          if not MfCastReadVarUInt(AData, Index, IgnoredVarUInt) then
-            begin
-              Result := E_FAIL;
-              Exit;
-            end;
+        0: if not MfCastReadVarUInt(AData,
+                                    Index,
+                                    IgnoredVarUInt) then
+             begin
+               Result := E_FAIL;
+               Exit;
+             end;
 
-        1:
-          begin
-            Inc(Index, 8);
-            if Index > Length(AData) then
-              begin
-                Result := E_FAIL;
-                Exit;
-              end;
-          end;
+        1: begin
+             Inc(Index,
+                 8);
 
-        2:
-          if FieldNumber in [2, 3, 4, 6] then
-            begin
-              if not MfCastReadProtoString(AData, Index, IgnoredString) then
-                begin
-                  Result := E_FAIL;
-                  Exit;
-                end;
-              if FieldNumber = 4 then
+             if (Index > Length(AData)) then
+               begin
+
+                 Result := E_FAIL;
+                 Exit;
+               end;
+           end;
+
+        2: if FieldNumber in [2, 3, 4, 6] then
+             begin
+               if not MfCastReadProtoString(AData,
+                                            Index,
+                                            IgnoredString) then
+                 begin
+
+                   Result := E_FAIL;
+                   Exit;
+                 end;
+
+              if (FieldNumber = 4) then
                 Namespace := IgnoredString
               else
-                if FieldNumber = 6 then
+                if (FieldNumber = 6) then
                   Payload := IgnoredString;
-            end
-          else
-            begin
-              if not MfCastReadVarUInt(AData, Index, ValueLength) then
-                begin
-                  Result := E_FAIL;
-                  Exit;
-                end;
-              Inc(Index, Integer(ValueLength));
-              if Index > Length(AData) then
-                begin
-                  Result := E_FAIL;
-                  Exit;
-                end;
-            end;
+             end
+           else
+             begin
 
-        5:
-          begin
-            Inc(Index, 4);
-            if Index > Length(AData) then
-              begin
-                Result := E_FAIL;
-                Exit;
-              end;
-          end;
+               if not MfCastReadVarUInt(AData,
+                                        Index,
+                                        ValueLength) then
+                 begin
+
+                   Result := E_FAIL;
+                   Exit;
+                 end;
+
+               Inc(Index,
+                   Integer(ValueLength));
+
+               if (Index > Length(AData)) then
+                 begin
+
+                   Result := E_FAIL;
+                   Exit;
+                 end;
+           end;
+
+        5: begin
+             Inc(Index,
+                 4);
+             if (Index > Length(AData)) then
+               begin
+
+                 Result := E_FAIL;
+                 Exit;
+               end;
+           end;
       else
         Result := E_FAIL;
         Exit;
@@ -1126,11 +1318,19 @@ begin
   FLastNamespace := Namespace;
   FLastPayload := Payload;
 
-  if SameText(Namespace, FSettings.NamespaceReceiver) then
-    Result := ProcessReceiverMessage(Payload)
+  if SameText(Namespace, FSettings.NamespaceHeartbeat) then
+    begin
+      if Pos('PING', UpperCase(Payload)) > 0 then
+        Result := SendJson(FSettings.ReceiverId,
+                           FSettings.NamespaceHeartbeat,
+                           '{"type":"PONG"}');
+    end
   else
-    if SameText(Namespace, FSettings.NamespaceMedia) then
-      Result := ProcessMediaMessage(Payload);
+    if SameText(Namespace, FSettings.NamespaceReceiver) then
+      Result := ProcessReceiverMessage(Payload)
+    else
+      if SameText(Namespace, FSettings.NamespaceMedia) then
+        Result := ProcessMediaMessage(Payload);
 end;
 
 
@@ -1138,17 +1338,20 @@ function TMfCastChannel.ProcessReceiverMessage(const AJsonPayload: string): HRES
 var
   NewSessionId: string;
   NewTransportId: string;
+
 begin
 
   Result := S_OK;
   if Pos('RECEIVER_STATUS', AJsonPayload) > 0 then
     begin
-      NewTransportId := MfCastExtractJsonString(AJsonPayload, 'transportId');
-      if NewTransportId = '' then
+      NewTransportId := MfCastExtractJsonString(AJsonPayload,
+                                                'transportId');
+      if (NewTransportId = '') then
         Exit;
 
       NewSessionId := MfCastExtractJsonString(AJsonPayload, 'sessionId');
-      if NewSessionId = '' then
+
+      if (NewSessionId = '') then
         NewSessionId := FSettings.ReceiverApplicationId;
 
       if (FSessionId <> '') and SameText(FTransportId, NewTransportId) then
@@ -1156,6 +1359,7 @@ begin
 
       FSessionId := NewSessionId;
       FTransportId := NewTransportId;
+
       Result := SendConnect(FTransportId);
       if FAILED(Result) then
         Exit;
@@ -1165,7 +1369,8 @@ begin
                                    FTransportId);
     end
   else
-    if Pos('CLOSE', AJsonPayload) > 0 then
+    if (Pos('CLOSE',
+           AJsonPayload) > 0) then
       begin
         FSessionId := '';
         FTransportId := FSettings.ReceiverId;
@@ -1182,6 +1387,7 @@ var
   Error: TMfCastErrorInfo;
   ExtendedStatus: string;
   ExtendedPlayerState: string;
+
 begin
 
   Result := S_OK;
@@ -1192,9 +1398,11 @@ begin
       Error.Reset();
       Error.HResult := E_FAIL;
       Error.Stage := 'Media status';
-      Error.MessageText := MfCastExtractJsonString(AJsonPayload, 'type');
+      Error.MessageText := MfCastExtractJsonString(AJsonPayload,
+                                                   'type');
       Error.Detail := AJsonPayload;
       SetState(csError);
+
       if Assigned(FCallbacks.OnError) then
         FCallbacks.OnError(Error);
       Exit;
@@ -1204,8 +1412,13 @@ begin
     Exit;
 
   OutputDebugString(PChar('MfCast MEDIA_STATUS: ' + AJsonPayload));
-  if Pos('"status":[]', StringReplace(AJsonPayload, ' ', '', [rfReplaceAll])) > 0 then
+  if (Pos('"status":[]',
+          StringReplace(AJsonPayload,
+                        ' ',
+                        '',
+                        [rfReplaceAll])) > 0) then
     Exit;
+
   if (FPendingLoadContentId <> '') and
      (Pos(FPendingLoadContentId, AJsonPayload) = 0) then
     begin
@@ -1213,22 +1426,29 @@ begin
                               FPendingLoadContentId));
       Exit;
     end;
-  if FPendingLoadContentId <> '' then
+
+  if (FPendingLoadContentId <> '') then
     FPendingLoadContentId := '';
 
   FReceivedMediaStatus := True;
   Status.Reset();
+
   Status.MediaSessionId := MfCastExtractJsonInt64(AJsonPayload,
                                                  'mediaSessionId',
                                                  0);
+
   Status.PlayerState := MfCastExtractJsonString(AJsonPayload,
                                                 'playerState');
+
   Status.IdleReason := MfCastExtractJsonString(AJsonPayload,
                                                'idleReason');
+
   ExtendedStatus := MfCastExtractJsonObject(AJsonPayload,
                                             'extendedStatus');
+
   ExtendedPlayerState := MfCastExtractJsonString(ExtendedStatus,
                                                  'playerState');
+
   if SameText(Status.PlayerState, 'IDLE') and
      ((SameText(ExtendedPlayerState, 'LOADING')) or
       (SameText(ExtendedPlayerState, 'BUFFERING'))) then
@@ -1242,12 +1462,12 @@ begin
                               ExtendedPlayerState + ' mapped=' +
                               Status.PlayerState));
     end;
-  Status.CurrentTime100ns := MfCastExtractJsonInt64(AJsonPayload,
-                                                   'currentTime',
-                                                   0) * 10000000;
-  Status.Duration100ns := MfCastExtractJsonInt64(AJsonPayload,
-                                                'duration',
-                                                0) * 10000000;
+  Status.CurrentTime100ns := MfCastExtractJsonTime100ns(AJsonPayload,
+                                                       'currentTime',
+                                                       0);
+  Status.Duration100ns := MfCastExtractJsonTime100ns(AJsonPayload,
+                                                    'duration',
+                                                    0);
 
   if Status.MediaSessionId <> 0 then
     FMediaSessionId := Status.MediaSessionId;
@@ -1276,6 +1496,7 @@ var
   TotalRead: Cardinal;
   BytesRead: Cardinal;
   Ptr: PAnsiChar;
+
 begin
 
   if (ABuffer = nil) and (ASize > 0) then
@@ -1353,17 +1574,19 @@ var
   LastStatusTick: DWORD;
   TimeoutMs: Cardinal;
   Message: TBytes;
+
 begin
 
   TimeoutMs := ATimeoutMs;
-  if TimeoutMs = 0 then
+  if (TimeoutMs = 0) then
     TimeoutMs := 10000;
 
   StartTick := GetTickCount();
   LastStatusTick := StartTick;
+
   repeat
     Result := ReadFrame(Message);
-    if Result = S_FALSE then
+    if (Result = S_FALSE) then
       begin
         if (GetTickCount() - LastStatusTick) >= 3000 then
           begin
@@ -1398,6 +1621,7 @@ var
   LastStatusTick: DWORD;
   TimeoutMs: Cardinal;
   Message: TBytes;
+
 begin
 
   TimeoutMs := ATimeoutMs;
@@ -1406,6 +1630,7 @@ begin
 
   StartTick := GetTickCount();
   LastStatusTick := StartTick;
+
   repeat
     Result := ReadFrame(Message);
     if Result = S_FALSE then
@@ -1431,8 +1656,7 @@ begin
       end;
 
     if FReceivedMediaStatus and
-       ((FMediaSessionId <> 0) or
-        (FState in [csPlaying, csPaused, csStopped])) then
+       (FState in [csPlaying, csPaused, csStopped]) then
       begin
         Result := S_OK;
         Exit;

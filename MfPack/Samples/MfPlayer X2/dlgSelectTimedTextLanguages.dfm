@@ -4,7 +4,7 @@ object DlgTimedTextLanguages: TDlgTimedTextLanguages
   BorderStyle = bsDialog
   Caption = 'Select preferred subtitle language'
   ClientHeight = 192
-  ClientWidth = 307
+  ClientWidth = 430
   Color = clBtnFace
   ParentFont = True
   OldCreateOrder = True
@@ -30,28 +30,30 @@ object DlgTimedTextLanguages: TDlgTimedTextLanguages
     Cancel = True
     Caption = 'Cancel'
     TabOrder = 1
+    OnClick = butCancelClick
   end
   object lvTTxtLang: TListView
     Left = 0
     Top = 0
-    Width = 307
+    Width = 430
     Height = 157
     Align = alTop
     Checkboxes = True
     Columns = <
       item
-        Caption = 'Current'
-        MinWidth = 50
+        Caption = 'Language tag'
+        MinWidth = 70
+        Width = 85
       end
       item
-        Caption = 'Language tag'
-        MinWidth = 50
-        Width = 120
+        Caption = 'Language'
+        MinWidth = 80
+        Width = 150
       end
       item
         AutoSize = True
-        Caption = 'Language'
-        MinWidth = 50
+        Caption = 'Source'
+        MinWidth = 100
       end>
     ColumnClick = False
     GridLines = True

@@ -16,7 +16,7 @@
 //
 // Company: FactoryX
 // Intiator(s): Tony (maXcomX), Peter (OzShips), Ramyses De Macedo Rodrigues.
-// Contributor(s): Tony Kalf (maXcomX), Peter Larson (ozships), Ramyses De Macedo Rodrigues.
+// Contributor(s): Tony Kalf (maXcomX).
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
@@ -25,7 +25,7 @@
 // 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
-// Remarks: Requires Windows 7 or higher.
+// Remarks: Requires Windows 10 or higher.
 //
 // Related objects: -
 // Related projects: MfPackX320
@@ -39,7 +39,6 @@
 // =============================================================================
 // Source: -
 //
-// Copyright FactoryX. All rights reserved.
 //==============================================================================
 //
 // LICENSE
@@ -65,6 +64,7 @@ unit MfPCXConstants;
 interface
 
 uses
+
   {WinApi}
   Winapi.Messages;
 
@@ -79,6 +79,7 @@ const
   WM_TIMEDTEXTNOTIFY_UPDATE    = WM_APP + 105;
   WM_TIMEDTEXTNOTIFY_INIT      = WM_APP + 106;
   WM_TIMEDTEXTNOTIFY_PROCESSED = WM_APP + 107;
+  WM_SUBTITLELOADNOTIFY        = WM_APP + 108;
 
   WM_PLAYER_EVENT              = WM_APP + 110;
 

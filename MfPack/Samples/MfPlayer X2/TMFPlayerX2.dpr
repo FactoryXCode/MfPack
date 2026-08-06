@@ -1,17 +1,23 @@
 program TMFPlayerX2;
 
 uses
-
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
   Vcl.Forms,
   frmMfPlayer in 'frmMfPlayer.pas' {frm_MfPlayer},
   dlgStreamSelect in 'dlgStreamSelect.pas' {dlgSelectStreams},
   TimedTextClass in 'TimedTextClass.pas',
+  MfMatroskaSubtitleReader in 'MfMatroskaSubtitleReader.pas',
+  MfEmbeddedSubtitleReader in 'MfEmbeddedSubtitleReader.pas',
   LangTags in 'LangTags.pas',
   MfPlayerClassX in 'MfPlayerClassX.pas',
-  MfMediaTimelineX2 in 'MfMediaTimelineX2.pas',
-  MfSubtitleCompositorX2 in 'MfSubtitleCompositorX2.pas',
-  MfSubtitleFramePumpX2 in 'MfSubtitleFramePumpX2.pas',
-  MfSubtitleTransformX2 in 'MfSubtitleTransformX2.pas',
+  MfMediaTimeline in 'MfMediaTimeline.pas',
+  MfSubtitleCompositor in 'MfSubtitleCompositor.pas',
+  MfSubtitleFramePump in 'MfSubtitleFramePump.pas',
+  MfSubtitleTransform in 'MfSubtitleTransform.pas',
   MFTimerCallBackClass in 'MFTimerCallBackClass.pas',
   MfPCXConstants in 'MfPCXConstants.pas',
   dlgSelectTimedTextLanguages in 'dlgSelectTimedTextLanguages.pas' {DlgTimedTextLanguages},

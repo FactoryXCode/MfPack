@@ -36,9 +36,8 @@
 // Todo: -
 //
 // =============================================================================
-// Source: Parts of CPlayer Examples
+// Source: -
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
 //==============================================================================
 //
 // LICENSE
@@ -115,6 +114,7 @@ type
     function IsRunning(): Boolean;
   end;
 
+
 implementation
 
 const
@@ -137,63 +137,82 @@ type
 function MfCastWinSockHResult(): HRESULT;
 var
   ErrorCode: Integer;
+
 begin
 
   ErrorCode := WSAGetLastError();
-  if ErrorCode = 0 then
+  if (ErrorCode = 0) then
     Result := E_FAIL
   else
     Result := HRESULT($80070000 or DWORD(ErrorCode));
 end;
 
 
-procedure MfCastAppendByte(var AData: TBytes; AValue: Byte);
+procedure MfCastAppendByte(var AData: TBytes;
+                           AValue: Byte);
 var
   Index: Integer;
+
 begin
 
   Index := Length(AData);
-  SetLength(AData, Index + 1);
+  SetLength(AData,
+            Index + 1);
   AData[Index] := AValue;
 end;
 
 
-procedure MfCastAppendUInt16(var AData: TBytes; AValue: Word);
+procedure MfCastAppendUInt16(var AData: TBytes;
+                             AValue: Word);
 begin
 
-  MfCastAppendByte(AData, Byte((AValue shr 8) and $FF));
-  MfCastAppendByte(AData, Byte(AValue and $FF));
+  MfCastAppendByte(AData,
+                   Byte((AValue shr 8) and $FF));
+
+  MfCastAppendByte(AData,
+                   Byte(AValue and $FF));
 end;
 
 
-procedure MfCastAppendDnsName(var AData: TBytes; const AName: string);
+procedure MfCastAppendDnsName(var AData: TBytes;
+                              const AName: string);
 var
   LabelStart: Integer;
   DotPos: Integer;
   LabelText: AnsiString;
   Remaining: string;
   I: Integer;
+
 begin
 
   Remaining := AName;
-  while Remaining <> '' do
+
+  while (Remaining <> '') do
     begin
-      DotPos := Pos('.', Remaining);
-      if DotPos = 0 then
+
+      DotPos := Pos('.',
+                    Remaining);
+      if (DotPos = 0) then
         begin
           LabelText := AnsiString(Remaining);
           Remaining := '';
         end
       else
         begin
-          LabelText := AnsiString(Copy(Remaining, 1, DotPos - 1));
-          Delete(Remaining, 1, DotPos);
+          LabelText := AnsiString(Copy(Remaining,
+                                       1,
+                                       DotPos - 1));
+          Delete(Remaining,
+                 1,
+                 DotPos);
         end;
 
       LabelStart := Length(AData);
       MfCastAppendByte(AData, Byte(Length(LabelText)));
+
       for I := 1 to Length(LabelText) do
-        MfCastAppendByte(AData, Byte(LabelText[I]));
+        MfCastAppendByte(AData,
+                         Byte(LabelText[I]));
 
       if Length(AData) = LabelStart + 1 then
         Break;
@@ -223,7 +242,7 @@ function MfCastReadUInt16(const AData: TBytes; var AOffset: Integer;
                           out AValue: Word): Boolean;
 begin
 
-  Result := AOffset + 1 < Length(AData);
+  Result := (AOffset + 1 < Length(AData));
   if not Result then
     Exit;
 
@@ -244,7 +263,8 @@ begin
             (Cardinal(AData[AOffset + 1]) shl 16) or
             (Cardinal(AData[AOffset + 2]) shl 8) or
              Cardinal(AData[AOffset + 3]);
-  Inc(AOffset, 4);
+  Inc(AOffset,
+      4);
 end;
 
 
@@ -258,6 +278,7 @@ var
   PointerOffset: Integer;
   Jumped: Boolean;
   JumpCount: Integer;
+
 begin
 
   Result := False;
@@ -268,17 +289,18 @@ begin
 
   while True do
     begin
-      if Position >= Length(AData) then
+      if (Position >= Length(AData)) then
         Exit;
 
       LabelLength := AData[Position];
       if (LabelLength and $C0) = $C0 then
         begin
-          if Position + 1 >= Length(AData) then
+
+          if (Position + 1 >= Length(AData)) then
             Exit;
 
           PointerOffset := ((LabelLength and $3F) shl 8) or AData[Position + 1];
-          if PointerOffset >= Length(AData) then
+          if (PointerOffset >= Length(AData)) then
             Exit;
 
           if not Jumped then
@@ -287,16 +309,18 @@ begin
           Position := PointerOffset;
           Jumped := True;
           Inc(JumpCount);
-          if JumpCount > 32 then
+
+          if (JumpCount > 32) then
             Exit;
+
           Continue;
         end;
 
-      if (LabelLength and $C0) <> 0 then
+      if ((LabelLength and $C0) <> 0) then
         Exit;
 
       Inc(Position);
-      if LabelLength = 0 then
+      if (LabelLength = 0) then
         begin
           if not Jumped then
             AOffset := Position;
@@ -304,17 +328,21 @@ begin
           Exit;
         end;
 
-      if Position + LabelLength > Length(AData) then
+      if (Position + LabelLength > Length(AData)) then
         Exit;
 
-      SetLength(LabelText, LabelLength);
+      SetLength(LabelText,
+                LabelLength);
+
       for I := 0 to LabelLength - 1 do
         LabelText[I + 1] := AnsiChar(AData[Position + I]);
 
-      if AName <> '' then
+      if (AName <> '') then
         AName := AName + '.';
+
       AName := AName + string(LabelText);
-      Inc(Position, LabelLength);
+      Inc(Position,
+          LabelLength);
     end;
 end;
 
@@ -324,6 +352,7 @@ procedure MfCastAppendTxtEntry(var AEntries: TMfCastTxtEntryArray;
                                const AValue: string);
 var
   Index: Integer;
+
 begin
 
   Index := Length(AEntries);
@@ -337,23 +366,31 @@ procedure MfCastMergeDevice(var ATarget: TMfCastDevice;
                             const ASource: TMfCastDevice);
 begin
 
-  if ASource.Id <> '' then
+  if (ASource.Id <> '') then
     ATarget.Id := ASource.Id;
-  if ASource.ServiceInstance <> '' then
+
+  if (ASource.ServiceInstance <> '') then
     ATarget.ServiceInstance := ASource.ServiceInstance;
-  if ASource.FriendlyName <> '' then
+
+  if (ASource.FriendlyName <> '') then
     ATarget.FriendlyName := ASource.FriendlyName;
-  if ASource.ModelName <> '' then
+
+  if (ASource.ModelName <> '') then
     ATarget.ModelName := ASource.ModelName;
-  if ASource.HostName <> '' then
+
+  if (ASource.HostName <> '') then
     ATarget.HostName := ASource.HostName;
-  if ASource.Address <> '' then
+
+  if (ASource.Address <> '') then
     ATarget.Address := ASource.Address;
-  if ASource.Port <> 0 then
+
+  if (ASource.Port <> 0) then
     ATarget.Port := ASource.Port;
-  if ASource.RawCapabilities <> 0 then
+
+ if (ASource.RawCapabilities <> 0) then
     ATarget.RawCapabilities := ASource.RawCapabilities;
-  if Length(ASource.TxtEntries) > 0 then
+
+  if (Length(ASource.TxtEntries) > 0) then
     ATarget.TxtEntries := Copy(ASource.TxtEntries);
   ATarget.LastSeenUtc := Now();
 end;
@@ -363,11 +400,18 @@ function MfCastSameDevice(const ALeft: TMfCastDevice;
                           const ARight: TMfCastDevice): Boolean;
 begin
 
-  Result := ((ALeft.Id <> '') and (ARight.Id <> '') and SameText(ALeft.Id, ARight.Id)) or
-            ((ALeft.ServiceInstance <> '') and (ARight.ServiceInstance <> '') and
-             SameText(ALeft.ServiceInstance, ARight.ServiceInstance)) or
-            ((ALeft.HostName <> '') and (ARight.HostName <> '') and
-             SameText(ALeft.HostName, ARight.HostName));
+  Result := ((ALeft.Id <> '') and
+            (ARight.Id <> '') and
+             SameText(ALeft.Id,
+                      ARight.Id)) or
+            ((ALeft.ServiceInstance <> '') and
+            (ARight.ServiceInstance <> '') and
+             SameText(ALeft.ServiceInstance,
+                      ARight.ServiceInstance)) or
+            ((ALeft.HostName <> '') and
+            (ARight.HostName <> '') and
+             SameText(ALeft.HostName,
+                      ARight.HostName));
 end;
 
 
@@ -375,12 +419,17 @@ function MfCastIsServiceInstance(const AName: string;
                                  const AServiceName: string): Boolean;
 var
   Suffix: string;
+
 begin
 
   Suffix := '.' + AServiceName;
-  Result := SameText(AName, AServiceName) or
+  Result := SameText(AName,
+                     AServiceName) or
             ((Length(AName) > Length(Suffix)) and
-             SameText(Copy(AName, Length(AName) - Length(Suffix) + 1, MaxInt), Suffix));
+             SameText(Copy(AName,
+                           Length(AName) - Length(Suffix) + 1,
+                           MaxInt),
+                      Suffix));
 end;
 
 constructor TMfCastMdnsDiscovery.Create();
@@ -404,7 +453,9 @@ begin
   CloseSocket();
   if FWSAStarted then
     WSACleanup();
+
   FLock.Free();
+
   inherited Destroy();
 end;
 
@@ -415,7 +466,6 @@ begin
 
   if FRunning then
     begin
-
       Result := E_UNEXPECTED;
       Exit;
     end;
@@ -445,7 +495,6 @@ begin
 
   if FRunning then
     begin
-
       Result := S_OK;
       Exit;
     end;
@@ -457,7 +506,6 @@ begin
   Result := Refresh();
   if FAILED(Result) then
     begin
-
       FRunning := False;
       if Assigned(FCallbacks.OnStopped) then
         FCallbacks.OnStopped();
@@ -472,12 +520,12 @@ begin
   Result := S_OK;
 end;
 
+
 function TMfCastMdnsDiscovery.Refresh(): HRESULT;
 begin
 
   if not FRunning then
     begin
-
       Result := E_UNEXPECTED;
       Exit;
     end;
@@ -503,10 +551,13 @@ begin
   FLock.Acquire;
 
   try
-    SetLength(ADevices,
+
+   SetLength(ADevices,
               Length(FDevices));
+
     for I := 0 to Length(FDevices) - 1 do
       ADevices[I] := FDevices[I];
+
   finally
     FLock.Release;
   end;
@@ -530,9 +581,10 @@ var
   NonBlocking: u_long;
   Membership: TMfCastIpMreq;
   BindAddress: AnsiString;
+
 begin
 
-  if FSocket <> INVALID_SOCKET then
+  if (FSocket <> INVALID_SOCKET) then
     begin
       Result := S_OK;
       Exit;
@@ -540,28 +592,41 @@ begin
 
   if not FWSAStarted then
     begin
-      if WSAStartup($0202, WsaData) <> 0 then
+      if (WSAStartup($0202,
+                    WsaData) <> 0) then
         begin
           Result := MfCastWinSockHResult();
           Exit;
         end;
+
       FWSAStarted := True;
     end;
 
-  FSocket := socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-  if FSocket = INVALID_SOCKET then
+  FSocket := socket(AF_INET,
+                    SOCK_DGRAM,
+                    IPPROTO_UDP);
+
+  if (FSocket = INVALID_SOCKET) then
     begin
       Result := MfCastWinSockHResult();
       Exit;
     end;
 
   ReuseAddr := 1;
-  setsockopt(FSocket, SOL_SOCKET, SO_REUSEADDR, PAnsiChar(@ReuseAddr), SizeOf(ReuseAddr));
+  setsockopt(FSocket,
+             SOL_SOCKET,
+             SO_REUSEADDR,
+             PAnsiChar(@ReuseAddr),
+             SizeOf(ReuseAddr));
 
-  FillChar(BindAddr, SizeOf(BindAddr), 0);
+  FillChar(BindAddr,
+           SizeOf(BindAddr),
+           0);
+
   BindAddr.sin_family := AF_INET;
   BindAddr.sin_port := htons(MFCAST_MDNS_PORT);
-  if FSettings.LocalInterfaceAddress <> '' then
+
+  if (FSettings.LocalInterfaceAddress <> '') then
     begin
       BindAddress := AnsiString(FSettings.LocalInterfaceAddress);
       BindAddr.sin_addr.S_addr := inet_addr(PAnsiChar(BindAddress));
@@ -569,19 +634,26 @@ begin
   else
     BindAddr.sin_addr.S_addr := INADDR_ANY;
 
-  if bind(FSocket, TSockAddr(BindAddr), SizeOf(BindAddr)) = SOCKET_ERROR then
+  if (bind(FSocket,
+           TSockAddr(BindAddr),
+           SizeOf(BindAddr)) = SOCKET_ERROR) then
     begin
       Result := MfCastWinSockHResult();
       CloseSocket();
       Exit;
     end;
 
-  FillChar(Membership, SizeOf(Membership), 0);
+  FillChar(Membership,
+           SizeOf(Membership),
+           0);
+
   Membership.imr_multiaddr.S_addr := inet_addr(PAnsiChar(AnsiString(MFCAST_MDNS_IPV4_ADDRESS)));
-  if FSettings.LocalInterfaceAddress <> '' then
+
+  if (FSettings.LocalInterfaceAddress <> '') then
     Membership.imr_interface.S_addr := inet_addr(PAnsiChar(AnsiString(FSettings.LocalInterfaceAddress)))
   else
     Membership.imr_interface.S_addr := INADDR_ANY;
+
   setsockopt(FSocket,
              IPPROTO_IP,
              IP_ADD_MEMBERSHIP,
@@ -593,7 +665,6 @@ begin
                  FIONBIO,
                  NonBlocking) = SOCKET_ERROR then
     begin
-
       Result := MfCastWinSockHResult();
       CloseSocket();
       Exit;
@@ -608,7 +679,6 @@ begin
 
   if (FSocket <> INVALID_SOCKET) then
     begin
-
       WinApi.WinSock.closesocket(FSocket);
       FSocket := INVALID_SOCKET;
     end;
@@ -625,7 +695,6 @@ begin
 
   if not FSettings.IncludeIPv4 then
     begin
-
       Result := S_OK;
       Exit;
     end;
@@ -683,6 +752,7 @@ begin
     WindowMs := 1500;
 
   StartTick := GetTickCount();
+
   repeat
 
     FromLen := SizeOf(FromAddr);
@@ -699,11 +769,9 @@ begin
 
     if (BytesRead = SOCKET_ERROR) then
       begin
-
         LastError := WSAGetLastError();
         if (LastError = WSAEWOULDBLOCK) then
           begin
-
             Sleep(25);
             Continue;
           end;
@@ -712,14 +780,21 @@ begin
         Exit;
       end;
 
-    if BytesRead > 0 then
+    if (BytesRead > 0) then
       begin
-        SetLength(Packet, BytesRead);
-        Move(Buffer[0], Packet[0], BytesRead);
-        if SUCCEEDED(ParseResponse(Packet, Device)) then
+        SetLength(Packet,
+                  BytesRead);
+
+        Move(Buffer[0],
+             Packet[0],
+             BytesRead);
+
+        if SUCCEEDED(ParseResponse(Packet,
+                                   Device)) then
           UpsertDevice(Device);
+
       end;
-  until (GetTickCount() - StartTick) >= WindowMs;
+  until ((GetTickCount() - StartTick) >= WindowMs);
 
   Result := S_OK;
 end;
@@ -751,102 +826,167 @@ var
   EqPos: Integer;
   EntryOffset: Integer;
   ServiceName: string;
+
 begin
 
   ADevice.Reset;
   Result := E_FAIL;
 
-  if Length(AData) < 12 then
+  if (Length(AData) < 12) then
     Exit;
 
   ServiceName := FProtocol.DiscoveryServiceName;
-  if ServiceName = '' then
+  if (ServiceName = '') then
     ServiceName := '_googlecast._tcp.local';
 
   Offset := 4;
-  if not MfCastReadUInt16(AData, Offset, QuestionCount) then
+
+  if not MfCastReadUInt16(AData,
+                          Offset,
+                          QuestionCount) then
     Exit;
-  if not MfCastReadUInt16(AData, Offset, AnswerCount) then
+
+  if not MfCastReadUInt16(AData,
+                          Offset,
+                          AnswerCount) then
     Exit;
-  if not MfCastReadUInt16(AData, Offset, AuthorityCount) then
+
+  if not MfCastReadUInt16(AData,
+                          Offset,
+                          AuthorityCount) then
     Exit;
-  if not MfCastReadUInt16(AData, Offset, AdditionalCount) then
+
+  if not MfCastReadUInt16(AData,
+                          Offset,
+                          AdditionalCount) then
     Exit;
 
   for I := 0 to QuestionCount - 1 do
     begin
-      if not MfCastReadDnsName(AData, Offset, RecordName) then
+      if not MfCastReadDnsName(AData,
+                               Offset,
+                               RecordName) then
         Exit;
-      Inc(Offset, 4);
-      if Offset > Length(AData) then
+
+      Inc(Offset,
+          4);
+
+      if (Offset > Length(AData)) then
         Exit;
     end;
 
   RecordCount := AnswerCount + AuthorityCount + AdditionalCount;
+
   for I := 0 to RecordCount - 1 do
     begin
-      if not MfCastReadDnsName(AData, Offset, RecordName) then
+      if not MfCastReadDnsName(AData,
+                               Offset,
+                               RecordName) then
         Exit;
-      if not MfCastReadUInt16(AData, Offset, RecordType) then
+
+      if not MfCastReadUInt16(AData,
+                              Offset,
+                              RecordType) then
         Exit;
-      if not MfCastReadUInt16(AData, Offset, RecordClass) then
+
+      if not MfCastReadUInt16(AData,
+                              Offset,
+                              RecordClass) then
         Exit;
-      if not MfCastReadUInt32(AData, Offset, RecordTtl) then
+
+      if not MfCastReadUInt32(AData,
+                              Offset,
+                              RecordTtl) then
         Exit;
-      if not MfCastReadUInt16(AData, Offset, RecordLength) then
+
+      if not MfCastReadUInt16(AData,
+                              Offset,
+                              RecordLength) then
         Exit;
 
       RecordEnd := Offset + RecordLength;
-      if RecordEnd > Length(AData) then
+
+      if (RecordEnd > Length(AData)) then
         Exit;
 
       DataOffset := Offset;
+
       case RecordType of
         MFCAST_DNS_TYPE_PTR:
           begin
-            if SameText(RecordName, ServiceName) and
-               MfCastReadDnsName(AData, DataOffset, ServiceInstance) and
-               MfCastIsServiceInstance(ServiceInstance, ServiceName) then
+            if SameText(RecordName,
+                        ServiceName) and
+               MfCastReadDnsName(AData,
+                                 DataOffset,
+                                 ServiceInstance) and
+               MfCastIsServiceInstance(ServiceInstance,
+                                       ServiceName) then
               ADevice.ServiceInstance := ServiceInstance;
           end;
 
         MFCAST_DNS_TYPE_SRV:
           begin
-            if ((ADevice.ServiceInstance <> '') and SameText(RecordName, ADevice.ServiceInstance)) or
-               ((ADevice.ServiceInstance = '') and MfCastIsServiceInstance(RecordName, ServiceName)) then
+
+            if ((ADevice.ServiceInstance <> '') and SameText(RecordName,
+                                                             ADevice.ServiceInstance)) or
+               ((ADevice.ServiceInstance = '') and MfCastIsServiceInstance(RecordName,
+                                                                           ServiceName)) then
               begin
                 ADevice.ServiceInstance := RecordName;
-                Inc(DataOffset, 4);
-                if MfCastReadUInt16(AData, DataOffset, ADevice.Port) and
-                   MfCastReadDnsName(AData, DataOffset, HostName) then
+                Inc(DataOffset,
+                    4);
+
+                if MfCastReadUInt16(AData,
+                                    DataOffset,
+                                    ADevice.Port) and
+                   MfCastReadDnsName(AData,
+                                     DataOffset,
+                                     HostName) then
                   ADevice.HostName := HostName;
               end;
           end;
 
         MFCAST_DNS_TYPE_TXT:
           begin
-            if ((ADevice.ServiceInstance <> '') and SameText(RecordName, ADevice.ServiceInstance)) or
-               ((ADevice.ServiceInstance = '') and MfCastIsServiceInstance(RecordName, ServiceName)) then
+            if ((ADevice.ServiceInstance <> '') and SameText(RecordName,
+                                                             ADevice.ServiceInstance)) or
+               ((ADevice.ServiceInstance = '') and MfCastIsServiceInstance(RecordName,
+                                                                           ServiceName)) then
               begin
                 ADevice.ServiceInstance := RecordName;
                 EntryOffset := Offset;
-                while EntryOffset < RecordEnd do
+
+                while (EntryOffset < RecordEnd) do
                   begin
                     TxtLength := AData[EntryOffset];
                     Inc(EntryOffset);
-                    if EntryOffset + TxtLength > RecordEnd then
+
+                    if (EntryOffset + TxtLength > RecordEnd) then
                       Break;
 
-                    SetLength(TxtText, TxtLength);
-                    if TxtLength > 0 then
-                      Move(AData[EntryOffset], TxtText[1], TxtLength);
-                    Inc(EntryOffset, TxtLength);
+                    SetLength(TxtText,
+                              TxtLength);
+
+                    if (TxtLength > 0) then
+                      Move(AData[EntryOffset],
+                           TxtText[1],
+                           TxtLength);
+
+                    Inc(EntryOffset,
+                        TxtLength);
 
                     EqPos := Pos('=', string(TxtText));
-                    if EqPos > 0 then
+
+                    if (EqPos > 0) then
                       begin
-                        TxtName := Copy(string(TxtText), 1, EqPos - 1);
-                        TxtValue := Copy(string(TxtText), EqPos + 1, MaxInt);
+
+                        TxtName := Copy(string(TxtText),
+                                        1,
+                                        EqPos - 1);
+
+                        TxtValue := Copy(string(TxtText),
+                                         EqPos + 1,
+                                         MaxInt);
                       end
                     else
                       begin
@@ -855,24 +995,35 @@ begin
                       end;
 
                     MfCastAppendTxtEntry(ADevice.TxtEntries, TxtName, TxtValue);
-                    if SameText(TxtName, 'fn') then
+
+                    if SameText(TxtName,
+                                'fn') then
                       ADevice.FriendlyName := TxtValue
-                    else if SameText(TxtName, 'id') then
-                      ADevice.Id := TxtValue
-                    else if SameText(TxtName, 'md') then
-                      ADevice.ModelName := TxtValue
-                    else if SameText(TxtName, 'ca') then
-                      ADevice.RawCapabilities := Cardinal(StrToIntDef(TxtValue, 0));
+                    else
+                      if SameText(TxtName,
+                                  'id') then
+                        ADevice.Id := TxtValue
+                      else
+                        if SameText(TxtName,
+                                    'md') then
+                          ADevice.ModelName := TxtValue
+                        else
+                          if SameText(TxtName,
+                                      'ca') then
+                            ADevice.RawCapabilities := Cardinal(StrToIntDef(TxtValue,
+                                                                            0));
                   end;
               end;
           end;
 
         MFCAST_DNS_TYPE_A:
           begin
-            if (ADevice.HostName <> '') and SameText(RecordName, ADevice.HostName) then
+            if (ADevice.HostName <> '') and SameText(RecordName,
+                                                     ADevice.HostName) then
               begin
                 ADevice.HostName := RecordName;
-                if RecordLength = 4 then
+
+                if (RecordLength = 4) then
                   ADevice.Address := Format('%d.%d.%d.%d',
                                             [AData[Offset], AData[Offset + 1],
                                              AData[Offset + 2], AData[Offset + 3]]);
@@ -883,16 +1034,19 @@ begin
       Offset := RecordEnd;
     end;
 
-  if ADevice.Port = 0 then
+  if (ADevice.Port = 0) then
     ADevice.Port := FProtocol.ControlPort;
-  if ADevice.Id = '' then
+
+  if (ADevice.Id = '') then
     ADevice.Id := ADevice.ServiceInstance;
-  if ADevice.FriendlyName = '' then
+
+  if (ADevice.FriendlyName = '') then
     ADevice.FriendlyName := ADevice.ServiceInstance;
+
   ADevice.LastSeenUtc := Now();
 
-  if (ADevice.ServiceInstance <> '') and
-     MfCastIsServiceInstance(ADevice.ServiceInstance, ServiceName) then
+  if (ADevice.ServiceInstance <> '') and MfCastIsServiceInstance(ADevice.ServiceInstance,
+                                                                 ServiceName) then
     Result := S_OK;
 end;
 
@@ -903,6 +1057,7 @@ var
   Index: Integer;
   Added: Boolean;
   CallbackDevice: TMfCastDevice;
+
 begin
 
   Result := S_OK;
@@ -910,23 +1065,28 @@ begin
   Added := False;
 
   FLock.Acquire;
+
   try
+
     for I := 0 to Length(FDevices) - 1 do
-      if MfCastSameDevice(FDevices[I], ADevice) then
+      if MfCastSameDevice(FDevices[I],
+                          ADevice) then
         begin
           Index := I;
           Break;
         end;
 
-    if Index < 0 then
+    if (Index < 0) then
       begin
         Index := Length(FDevices);
-        SetLength(FDevices, Index + 1);
+        SetLength(FDevices,
+                  Index + 1);
         FDevices[Index].Reset();
         Added := True;
       end;
 
-    MfCastMergeDevice(FDevices[Index], ADevice);
+    MfCastMergeDevice(FDevices[Index],
+                      ADevice);
     CallbackDevice := FDevices[Index];
   finally
     FLock.Release;
@@ -934,11 +1094,13 @@ begin
 
   if Added then
     begin
+
       if Assigned(FCallbacks.OnDeviceAdded) then
         FCallbacks.OnDeviceAdded(CallbackDevice);
     end
-  else if Assigned(FCallbacks.OnDeviceUpdated) then
-    FCallbacks.OnDeviceUpdated(CallbackDevice);
+  else
+    if Assigned(FCallbacks.OnDeviceUpdated) then
+      FCallbacks.OnDeviceUpdated(CallbackDevice);
 end;
 
 
@@ -948,26 +1110,33 @@ var
   J: Integer;
   RemovedId: string;
   AgeMs: Double;
+
 begin
 
-  if FSettings.DeviceExpiryMs = 0 then
+  if (FSettings.DeviceExpiryMs = 0) then
     Exit;
 
   I := 0;
-  while I < Length(FDevices) do
+
+  while (I < Length(FDevices)) do
     begin
       AgeMs := (Now() - FDevices[I].LastSeenUtc) * MFCAST_MSECS_PER_DAY;
-      if AgeMs > FSettings.DeviceExpiryMs then
+
+      if (AgeMs > FSettings.DeviceExpiryMs) then
         begin
           RemovedId := FDevices[I].Id;
-          if RemovedId = '' then
+          if (RemovedId = '') then
             RemovedId := FDevices[I].ServiceInstance;
 
           FLock.Acquire;
+
           try
+
             for J := I to Length(FDevices) - 2 do
               FDevices[J] := FDevices[J + 1];
-            SetLength(FDevices, Length(FDevices) - 1);
+
+            SetLength(FDevices,
+                      Length(FDevices) - 1);
           finally
             FLock.Release;
           end;

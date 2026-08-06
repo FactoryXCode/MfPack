@@ -67,7 +67,7 @@ uses
   Winapi.Windows,
   Winapi.Messages,
   WinApi.ComBaseApi,
-  Winapi.ShlObj,
+  WinApi.WinShellApi.ShlObj,
   Winapi.KnownFolders,
   WinApi.WinApiTypes,
   Winapi.CommCtrl,
@@ -180,7 +180,7 @@ type
 
     // Messages
     procedure OnSize(var message: TWMSize); message WM_SIZE;
-    procedure OnRecievedSample(var AMessage: TMessage); message WM_RECIEVED_SAMPLE_FROM_CALLBACK;
+    procedure OnRecievedSample(var AMessage: TMessage); message WM_RECEIVED_SAMPLE_FROM_CALLBACK;
     procedure OnCaptureEvent(var AMessage: TMessage); message WM_APP_CAPTURE_EVENT;
     procedure OnCaptureEventHandled(var AMessage: TMessage); message WM_APP_CAPTURE_EVENT_HANDLED;
     procedure OnDeviceChange(var AMessage: TMessage); message WM_DEVICECHANGE;

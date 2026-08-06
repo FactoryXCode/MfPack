@@ -37,7 +37,6 @@
 // =============================================================================
 // Source: -
 //
-//
 //==============================================================================
 //
 // LICENSE
@@ -329,8 +328,12 @@ procedure TLanguageTags.Clear();
 
 begin
 
-  lp_MatchList.Clear;
-  lp_MatchList.Free;
+  if Assigned(lp_MatchList) then
+    begin
+
+      lp_MatchList.Clear;
+      FreeAndNil(lp_MatchList);
+    end;
   SetLength(TimedTxtPropsArray, 0);
   Finalize(TimedTxtPropsArray);
   TimedTxtPropsArray := nil;
@@ -470,7 +473,6 @@ try
 
   for I := Length(ar) - 1 downto 0 do
     begin
-
       sSidecarName := ChangeFileExt(ar[I], '');
       if not (SameText(sSidecarName, sMediafile) or
               StartsText(sMediafile + '[', sSidecarName)) then
@@ -491,7 +493,6 @@ try
 
       if IsMatch('[a-z][a-z]_[A-Z][A-Z]', ar[I]) then
         begin
-
           sMatch := GetMatch('\[\K[a-z][a-z]',
                              ar[I],
                              [roSingleLine, roNotEmpty]);
@@ -502,13 +503,12 @@ try
         end
       else
         begin
-
           Result[I].sLanguageTag := GetUserDefaultLanguageTag(1, False);
           if (DefaultIndex < 0) then
             DefaultIndex := I;
         end;
 
-      Result[I].sFriendlyLanguageName := pc_LanguageTags.GetLangOrCountryFromTag(Result[I].sLanguageTag);
+      Result[I].sFriendlyLanguageName := GetLangOrCountryFromTag(Result[I].sLanguageTag);
     end;
 
   if (ActiveIndex < 0) then
@@ -543,6 +543,7 @@ begin
   Dir := TStringList.Create;
 
 try
+
 {$WARN SYMBOL_PLATFORM OFF}
   if FindFirst(Path + '*' + ext, faArchive, searchrec) = 0 then
 {$WARN SYMBOL_PLATFORM ON}
@@ -646,7 +647,6 @@ begin
                                     @LanguagesBuf[0],
                                     @LanguagesBufSize) then
     begin
-
       iTags := 0;
       wcp := @LanguagesBuf[0];
 
@@ -828,7 +828,9 @@ begin
 
   if (BufferLen <> 0) then
     begin
-      SetLength(Buffer, BufferLen);
+      SetLength(Buffer,
+                BufferLen);
+
       Result := GetGeoInfoEx(Arg1,
                              GeoType,
                              LPTSTR(Buffer),
@@ -852,7 +854,6 @@ begin
 
   if Result and (S = EnumGeoData.GeoCode) then
     begin
-
       // stop the enumeration since we've found the country by its ISO code
       Result := False;
       // return the success flag and try to return the friendly name of the country to the
@@ -946,7 +947,6 @@ begin
   lp_MatchList.Append(match.Value);
   if (match.Groups.Count > 1) then
     begin
-
       //group 0 is the entire match, so the first real group is 1
       for i := 1 to match.Groups.Count -1 do
         begin
@@ -982,7 +982,6 @@ try
   Match := RegEx.Match(txt);
   if match.Success then
     begin
-
       AddMatchToList(Match);
       Result := lp_MatchList.Count;
     end
@@ -1042,5 +1041,16 @@ function LCIDToLocaleName; external kernel32Lib name 'LCIDToLocaleName' {$IF COM
 function LocaleNameToLCID; external kernel32Lib name 'LocaleNameToLCID' {$IF COMPILERVERSION > 20.0} delayed {$ENDIF};
 
 {$WARN SYMBOL_PLATFORM ON}
+
+initialization
+
+  // Dialogs use this UI-level helper. Timed-text readers own separate
+  // TLanguageTags instances so local playback and Cast workers cannot
+  // overwrite or free each other's language-tag state.
+  pc_LanguageTags := TLanguageTags.Create();
+
+finalization
+
+  FreeAndNil(pc_LanguageTags);
 
 end.

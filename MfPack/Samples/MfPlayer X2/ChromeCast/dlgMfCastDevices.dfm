@@ -110,7 +110,6 @@ object CastDevicesDlg: TCastDevicesDlg
     ViewStyle = vsReport
     OnDblClick = lvCastDevicesDblClick
     OnSelectItem = lvCastDevicesSelectItem
-    ExplicitHeight = 151
   end
   object lblConnectionStatus: TEdit
     Left = 0

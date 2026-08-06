@@ -37,9 +37,8 @@
 // Todo: -
 //
 // =============================================================================
-// Source: Parts of CPlayer Examples
+// Source: -
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
 //==============================================================================
 //
 // LICENSE
@@ -78,8 +77,8 @@ uses
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfObjects,
   {Project}
-  MfSubtitleCompositorX2,
-  MfSubtitleFramePumpX2,
+  MfSubtitleCompositor,
+  MfSubtitleFramePump,
   {Cast}
   MfCastTypes,
   MfCastInterfaces;
@@ -120,6 +119,7 @@ type
     function GetState(): TMfCastState;
   end;
 
+
 implementation
 
 
@@ -128,14 +128,18 @@ type
   private
     FOwner: TMfCastTranscodePipeline;
     FPump: TMfSubtitleFramePump;
+    function WriteSubtitleTempFile(out AFileName: WideString): HRESULT;
     procedure PumpProgress(Sender: TObject;
                            FramesWritten: Int64;
                            SampleTime: MFTIME;
                            var Cancel: Boolean);
   protected
     procedure Execute(); override;
+
   public
+
     constructor Create(AOwner: TMfCastTranscodePipeline);
+
     procedure CancelTranscode();
     procedure PauseTranscode();
     procedure ResumeTranscode();
@@ -144,7 +148,9 @@ type
 
 constructor TMfCastTranscodeWorker.Create(AOwner: TMfCastTranscodePipeline);
 begin
+
   inherited Create(True);
+
   FreeOnTerminate := False;
   Priority := tpLower;
   FOwner := AOwner;
@@ -154,6 +160,7 @@ end;
 
 procedure TMfCastTranscodeWorker.CancelTranscode();
 begin
+
   Terminate();
   if Assigned(FPump) then
     FPump.Cancel();
@@ -162,6 +169,7 @@ end;
 
 procedure TMfCastTranscodeWorker.PauseTranscode();
 begin
+
   if Assigned(FPump) then
     FPump.Pause();
 end;
@@ -169,8 +177,83 @@ end;
 
 procedure TMfCastTranscodeWorker.ResumeTranscode();
 begin
+
   if Assigned(FPump) then
     FPump.Resume();
+end;
+
+
+function TMfCastTranscodeWorker.WriteSubtitleTempFile(out AFileName: WideString): HRESULT;
+var
+  TempPath: array[0..MAX_PATH] of WideChar;
+  TempFileName: array[0..MAX_PATH] of WideChar;
+  TempPathLength: DWORD;
+  FileStream: TFileStream;
+  Preamble: TBytes;
+
+begin
+
+  AFileName := '';
+  FileStream := nil;
+  TempPathLength := GetTempPathW(MAX_PATH,
+                                 TempPath);
+  if (TempPathLength = 0) then
+    begin
+      Result := HRESULT_FROM_WIN32(GetLastError());
+      Exit;
+    end;
+
+  if (TempPathLength >= MAX_PATH) then
+    begin
+      Result := HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER);
+      Exit;
+    end;
+
+  if GetTempFileNameW(TempPath,
+                      'MFX',
+                      0,
+                      TempFileName) = 0 then
+    begin
+      Result := HRESULT_FROM_WIN32(GetLastError());
+      Exit;
+    end;
+
+  DeleteFileW(TempFileName);
+  AFileName := ChangeFileExt(TempFileName,
+                             '.vtt');
+
+  try
+    try
+      FileStream := TFileStream.Create(string(AFileName),
+                                       fmCreate or fmShareDenyWrite);
+      Preamble := TEncoding.UTF8.GetPreamble();
+      if (Length(Preamble) > 0) then
+        FileStream.WriteBuffer(Preamble[0],
+                               Length(Preamble));
+
+      if Length(FOwner.FRequest.SubtitleData) > 0 then
+        FileStream.WriteBuffer(FOwner.FRequest.SubtitleData[0],
+                               Length(FOwner.FRequest.SubtitleData));
+
+      Result := S_OK;
+    except
+      on E: Exception do
+        begin
+          OutputDebugString(PChar('MfCast subtitle temp file exception: ' +
+                                  E.Message));
+          Result := E_FAIL;
+        end;
+    end;
+  finally
+    FileStream.Free();
+  end;
+
+  if FAILED(Result) then
+    begin
+      if (AFileName <> '') then
+        DeleteFileW(PWideChar(AFileName));
+      AFileName := '';
+    end;
 end;
 
 
@@ -179,6 +262,7 @@ procedure TMfCastTranscodeWorker.PumpProgress(Sender: TObject;
                                               SampleTime: MFTIME;
                                               var Cancel: Boolean);
 begin
+
   Cancel := Terminated;
 end;
 
@@ -189,13 +273,17 @@ var
   ComInitialized: Boolean;
   Compositor: TMfSubtitleCompositor;
   SubtitleSourceName: WideString;
+  SubtitleTempFileName: WideString;
   Bitrate: UINT32;
+
 begin
+
   if not Assigned(FOwner) then
     Exit;
 
   ComInitialized := False;
   Compositor := nil;
+  SubtitleTempFileName := '';
   FPump := nil;
   FOwner.FWorkerResult := E_FAIL;
 
@@ -204,7 +292,7 @@ begin
   if SUCCEEDED(HrCom) then
     ComInitialized := True
   else
-    if HrCom <> RPC_E_CHANGED_MODE then
+    if (HrCom <> RPC_E_CHANGED_MODE) then
       begin
         FOwner.FWorkerResult := HrCom;
         FOwner.SetState(csError);
@@ -218,14 +306,27 @@ begin
       FOwner.FWorkerResult := S_OK;
       if FOwner.FRequest.SubtitleMode = csmBurnIntoVideo then
         begin
-          if FOwner.FRequest.SubtitleAspectRatio > 0.0 then
+          if (FOwner.FRequest.SubtitleAspectRatio > 0.0) then
             Compositor.SubtitleAspectRatio := FOwner.FRequest.SubtitleAspectRatio;
-          SubtitleSourceName := FOwner.FRequest.SubtitleSourceName;
-          if SubtitleSourceName = '' then
-            SubtitleSourceName := FOwner.FRequest.SourceName;
-          FOwner.FWorkerResult := Compositor.OpenTimedTextFile(
-                                   SubtitleSourceName,
-                                   FOwner.FRequest.SubtitleLanguage);
+          if (Length(FOwner.FRequest.SubtitleData) > 0) then
+            begin
+              FOwner.FWorkerResult := WriteSubtitleTempFile(SubtitleTempFileName);
+              if FOwner.FWorkerResult = S_OK then
+                FOwner.FWorkerResult := Compositor.OpenTimedTextFile(
+                                         SubtitleTempFileName,
+                                         FOwner.FRequest.SubtitleLanguage,
+                                         nil,
+                                         False);
+            end
+          else
+            begin
+              SubtitleSourceName := FOwner.FRequest.SubtitleSourceName;
+              if SubtitleSourceName = '' then
+                SubtitleSourceName := FOwner.FRequest.SourceName;
+              FOwner.FWorkerResult := Compositor.OpenTimedTextFile(
+                                       SubtitleSourceName,
+                                       FOwner.FRequest.SubtitleLanguage);
+            end;
           if FOwner.FWorkerResult <> S_OK then
             begin
               if FOwner.FWorkerResult = S_FALSE then
@@ -235,6 +336,7 @@ begin
         end;
 
       FPump := TMfSubtitleFramePump.Create(Compositor);
+      FPump.UseSoftwareVideoDecoder := True;
       FPump.OnProgress := PumpProgress;
 
       Bitrate := FOwner.FRequest.Encoding.VideoBitrate;
@@ -245,7 +347,8 @@ begin
                                                         'mfcast.mp4',
                                                         Bitrate,
                                                         FOwner.FByteStream,
-                                                        FOwner.FRequest.Encoding.OutputMode = comFragmentedMp4);
+                                                        FOwner.FRequest.Encoding.OutputMode = comFragmentedMp4,
+                                                        FOwner.FRequest.StartTime100ns);
     except
       on E: Exception do
         begin
@@ -256,6 +359,10 @@ begin
   finally
     FreeAndNil(FPump);
     FreeAndNil(Compositor);
+
+    if SubtitleTempFileName <> '' then
+      DeleteFileW(PWideChar(SubtitleTempFileName));
+
     if Assigned(FOwner.FPublisher) then
       begin
         if SUCCEEDED(FOwner.FWorkerResult) then
@@ -263,10 +370,12 @@ begin
         else
           FOwner.FPublisher.AbortPresentation(FOwner.FWorkerResult);
       end;
+
     if SUCCEEDED(FOwner.FWorkerResult) then
       FOwner.SetState(csStopped)
     else
       FOwner.SetState(csError);
+
     if ComInitialized then
       CoUninitialize();
     OutputDebugString(PChar(Format('MfCast Transcode: worker done hr=%.8x',
@@ -301,10 +410,10 @@ function TMfCastTranscodePipeline.Configure(const ASettings: TMfCastEncodingSett
 begin
 
   if not (FState in [csIdle, csStopped]) then
-  begin
-    Result := E_UNEXPECTED;
-    Exit;
-  end;
+    begin
+      Result := E_UNEXPECTED;
+      Exit;
+    end;
 
   FSettings := ASettings;
   Result := S_OK;
@@ -325,21 +434,18 @@ begin
 
   if not Assigned(APublisher) then
     begin
-
       Result := E_POINTER;
       Exit;
     end;
 
   if not (FState in [csIdle, csStopped]) then
     begin
-
       Result := E_UNEXPECTED;
       Exit;
     end;
 
   if Assigned(FWorker) then
     begin
-
       Result := StopWorkers();
       if FAILED(Result) then
         Exit;
@@ -359,7 +465,6 @@ begin
   Result := PrepareMediaFoundationPipeline;
   if FAILED(Result) then
     begin
-
       SetState(csError);
       Exit;
     end;
@@ -367,7 +472,6 @@ begin
   Result := StartWorkers;
   if FAILED(Result) then
     begin
-
       SetState(csError);
       Exit;
     end;
@@ -407,7 +511,6 @@ begin
      not Assigned(FWorker) and
      not Assigned(FByteStream) then
     begin
-
       FPublisher := nil;
       FPreviewSink := nil;
       FRequest.Reset();
@@ -453,6 +556,7 @@ end;
 
 function TMfCastTranscodePipeline.StartWorkers(): HRESULT;
 begin
+
   if not Assigned(FPublisher) then
     begin
       Result := E_POINTER;
@@ -471,6 +575,7 @@ end;
 
 function TMfCastTranscodePipeline.StopWorkers(): HRESULT;
 begin
+
   if Assigned(FWorker) then
     begin
       TMfCastTranscodeWorker(FWorker).CancelTranscode();

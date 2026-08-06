@@ -37,9 +37,8 @@
 // Todo: -
 //
 // =============================================================================
-// Source: Parts of CPlayer Examples
+// Source: -
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
 //==============================================================================
 //
 // LICENSE
@@ -79,6 +78,7 @@ uses
   WinApi.MediaFoundationApi.MfApi,
   WinApi.MediaFoundationApi.MfObjects,
   {MfCastTypes}
+  MfPCXConstants,
   MfCastTypes,
   MfCastInterfaces;
 
@@ -89,14 +89,19 @@ type
     function GetBytesTransferred(): ULONG;
   end;
 
+
   TMfCastByteStreamAsyncState = class(TInterfacedObject,
                                       IMfCastByteStreamAsyncState)
   private
     FBytesTransferred: ULONG;
+
   public
+
     constructor Create(const ABytesTransferred: ULONG);
-    function GetBytesTransferred(): ULONG;
+
+   function GetBytesTransferred(): ULONG;
   end;
+
 
   IMfCastLiveBuffer = interface
     ['{5CA9780A-F3D6-4923-86A1-485F746DD40A}']
@@ -111,10 +116,12 @@ type
                          const ATimeoutMs: Cardinal): HRESULT;
     function GetLength(): UInt64;
     function SetLengthValue(const ALength: UInt64): HRESULT;
+    function Flush(): HRESULT;
     function IsComplete(): Boolean;
     procedure Complete();
     procedure Close();
   end;
+
 
   TMfCastLiveBuffer = class(TInterfacedObject, IMfCastLiveBuffer)
   private
@@ -126,84 +133,118 @@ type
     FLastPruneDebugOffset: UInt64;
     FComplete: Boolean;
     FClosed: Boolean;
+
     procedure EnsureCapacity(const ARequired: UInt64);
     procedure DiscardBeforeLocked(const AOffset: UInt64);
+
   public
+
     constructor Create();
     destructor Destroy(); override;
+
     function WriteAt(const AOffset: UInt64;
                      ABuffer: Pointer;
                      const ASize: Cardinal): HRESULT;
+
     function ReadAt(const AOffset: UInt64;
                     ABuffer: Pointer;
                     const ABufferSize: Cardinal;
                     out ABytesRead: Cardinal): HRESULT;
+
     function WaitForData(const AOffset: UInt64;
                          const ATimeoutMs: Cardinal): HRESULT;
+
     function GetLength(): UInt64;
     function SetLengthValue(const ALength: UInt64): HRESULT;
+    function Flush(): HRESULT;
     function IsComplete(): Boolean;
     procedure Complete();
     procedure Close();
   end;
+
 
   TMfCastLiveByteStream = class(TInterfacedObject, IMFByteStream)
   private
     FBuffer: IMfCastLiveBuffer;
     FPosition: UInt64;
     FClosed: Boolean;
+
   public
+
     constructor Create(const ABuffer: IMfCastLiveBuffer);
+
     function GetCapabilities(out pdwCapabilities: DWord): HResult; stdcall;
+
     function GetLength(out pqwLength: QWORD): HResult; stdcall;
+
     function SetLength(qwLength: QWORD): HResult; stdcall;
+
     function GetCurrentPosition(out pqwPosition: QWORD): HResult; stdcall;
+
     function SetCurrentPosition(const qwPosition: QWORD): HResult; stdcall;
+
     function IsEndOfStream(out pfEndOfStream: BOOL): HResult; stdcall;
+
     function Read(pb: PByte;
                   cb: ULONG;
                   out pcbRead: ULONG): HResult; stdcall;
+
     function BeginRead(pb: PByte;
                        cb: ULONG;
                        pCallback: IMFAsyncCallback;
                        punkState: IUnknown): HResult; stdcall;
+
     function EndRead(pResult: IMFAsyncResult;
                      out pcbRead: ULONG): HResult; stdcall;
+
     function Write(pb: PByte;
                    cb: ULONG;
                    out pcbWritten: ULONG): HResult; stdcall;
+
     function BeginWrite(pb: PByte;
                         cb: ULONG;
                         pCallback: IMFAsyncCallback;
                         punkState: IUnknown): HResult; stdcall;
+
     function EndWrite(pResult: IMFAsyncResult;
                       out pcbWritten: ULONG): HResult; stdcall;
+
     function Seek(SeekOrigin: MFBYTESTREAM_SEEK_ORIGIN;
                   llSeekOffset: LONGLONG;
                   dwSeekFlags: DWord;
                   out pqwCurrentPosition: QWORD): HResult; stdcall;
+
     function Flush(): HResult; stdcall;
     function Close(): HResult; stdcall;
   end;
 
-  TMfCastLiveStreamContent = class(TInterfacedObject, IMfCastHttpContent)
+
+  TMfCastLiveStreamContent = class(TInterfacedObject,
+                                   IMfCastHttpContent,
+                                   IMfCastLiveHttpContent)
   private
     FBuffer: IMfCastLiveBuffer;
     FContentType: string;
+
   public
+
     constructor Create(const ABuffer: IMfCastLiveBuffer;
                        const AContentType: string);
+
     function GetContentType(): string;
     function GetLength(out ALength: UInt64): HRESULT;
     function CanSeek(): Boolean;
     function IsComplete(): Boolean;
+
     function ReadAt(const AOffset: UInt64;
                     ABuffer: Pointer;
                     const ABufferSize: Cardinal;
                     out ABytesRead: Cardinal): HRESULT;
+
     function WaitForData(const AOffset: UInt64;
                          const ATimeoutMs: Cardinal): HRESULT;
   end;
+
 
   TMfCastHttpServer = class(TInterfacedObject, IMfCastHttpServer)
   private
@@ -235,15 +276,19 @@ type
     procedure SetLogger(const ALogger: IMfCastLogger);
     function Start(): HRESULT;
     function Stop(): HRESULT;
+
     function Publish(const AResourceName: string;
                      const AContent: IMfCastHttpContent;
                      out APublishedPath: string): HRESULT;
+
     function Unpublish(const APublishedPath: string): HRESULT;
     function BuildUrl(const APublishedPath: string;
                       out AUrl: string): HRESULT;
+
     function IsRunning(): Boolean;
     function GetListenPort(): Word;
   end;
+
 
   TMfCastFileContent = class(TInterfacedObject, IMfCastHttpContent)
   private
@@ -259,21 +304,25 @@ type
     function GetLength(out ALength: UInt64): HRESULT;
     function CanSeek(): Boolean;
     function IsComplete(): Boolean;
+
     function ReadAt(const AOffset: UInt64;
                     ABuffer: Pointer;
                     const ABufferSize: Cardinal;
                     out ABytesRead: Cardinal): HRESULT;
-    function WaitForData(const AOffset: UInt64;
-                         const ATimeoutMs: Cardinal): HRESULT;
+
   end;
+
 
   TMfCastMemoryContent = class(TInterfacedObject, IMfCastHttpContent)
   private
     FData: TBytes;
     FContentType: string;
+
   public
+
     constructor Create(const AData: TBytes;
                        const AContentType: string);
+
     function GetContentType(): string;
     function GetLength(out ALength: UInt64): HRESULT;
     function CanSeek(): Boolean;
@@ -282,8 +331,7 @@ type
                     ABuffer: Pointer;
                     const ABufferSize: Cardinal;
                     out ABytesRead: Cardinal): HRESULT;
-    function WaitForData(const AOffset: UInt64;
-                         const ATimeoutMs: Cardinal): HRESULT;
+
   end;
 
   TMfCastSegmentPublisher = class(TInterfacedObject, IMfCastSegmentPublisher)
@@ -291,7 +339,6 @@ type
     FServer: IMfCastHttpServer;
     FLogger: IMfCastLogger;
     FEntryPath: string;
-    FOutputMode: TMfCastOutputMode;
     FBuffer: IMfCastLiveBuffer;
     FContent: IMfCastHttpContent;
     FByteStream: IMFByteStream;
@@ -303,59 +350,61 @@ type
 
     procedure SetLogger(const ALogger: IMfCastLogger);
     function BeginPresentation(const AContentType: string;
-                               const AOutputMode: TMfCastOutputMode;
                                out AEntryPath: string): HRESULT;
     function GetByteStream(out AByteStream: IMFByteStream): HRESULT;
-    function PublishInitializationSegment(const AData: TBytes): HRESULT;
-    function PublishMediaFragment(const ASequence: Int64;
-                                  const AStartTime100ns: Int64;
-                                  const ADuration100ns: Int64;
-                                  const AData: TBytes): HRESULT;
-    function UpdateManifest: HRESULT;
     function CompletePresentation: HRESULT;
     function AbortPresentation(const AReason: HRESULT): HRESULT;
   end;
 
+
 implementation
+
 
 type
   TMfCastHttpServerThread = class(TThread)
   private
     FOwner: TMfCastHttpServer;
+
   protected
-    procedure Execute; override;
+    procedure Execute(); override;
+
   public
+
     constructor Create(AOwner: TMfCastHttpServer);
   end;
 
 
 function MfCastCorsResponseHeaders(): AnsiString;
 begin
-  Result := AnsiString(
-    'Access-Control-Allow-Origin: *' + #13#10 +
-    'Access-Control-Allow-Methods: GET, HEAD, OPTIONS' + #13#10 +
-    'Access-Control-Allow-Headers: Content-Type, Accept-Encoding, Range' + #13#10 +
-    'Access-Control-Expose-Headers: Accept-Ranges, Content-Length, Content-Range' + #13#10);
+
+  Result := AnsiString('Access-Control-Allow-Origin: *' + ULBR +
+                       'Access-Control-Allow-Methods: GET, HEAD, OPTIONS' + ULBR +
+                       'Access-Control-Allow-Headers: Content-Type, Accept-Encoding, Range' + ULBR +
+                       'Access-Control-Expose-Headers: Accept-Ranges, Content-Length, Content-Range' + ULBR);
 end;
 
 
-constructor TMfCastByteStreamAsyncState.Create(
-  const ABytesTransferred: ULONG);
+constructor TMfCastByteStreamAsyncState.Create(const ABytesTransferred: ULONG);
 begin
+
   inherited Create;
+
   FBytesTransferred := ABytesTransferred;
 end;
 
 
 function TMfCastByteStreamAsyncState.GetBytesTransferred(): ULONG;
 begin
+
   Result := FBytesTransferred;
 end;
 
 
 constructor TMfCastLiveBuffer.Create();
 begin
-  inherited Create;
+
+  inherited Create();
+
   FLock := TCriticalSection.Create;
   FBaseOffset := 0;
   FLength := 0;
@@ -368,7 +417,9 @@ end;
 
 destructor TMfCastLiveBuffer.Destroy();
 begin
+
   FLock.Free;
+
   inherited Destroy;
 end;
 
@@ -377,76 +428,96 @@ procedure TMfCastLiveBuffer.EnsureCapacity(const ARequired: UInt64);
 var
   RequiredFromBase: UInt64;
   NewCapacity: NativeInt;
+
 begin
-  if ARequired <= FBaseOffset then
+
+  if (ARequired <= FBaseOffset) then
     Exit;
 
   RequiredFromBase := ARequired - FBaseOffset;
-  if RequiredFromBase <= UInt64(Length(FData)) then
+
+  if (RequiredFromBase <= UInt64(Length(FData))) then
     Exit;
 
-  if RequiredFromBase > UInt64(MaxInt) then
+  if (RequiredFromBase > UInt64(MaxInt)) then
     raise EOutOfMemory.Create('MfCast live buffer address range is too large');
 
   NewCapacity := Length(FData);
-  if NewCapacity < 65536 then
+  if (NewCapacity < 65536) then
     NewCapacity := 65536;
+
   while UInt64(NewCapacity) < RequiredFromBase do
     begin
-      if NewCapacity > (MaxInt div 2) then
+      if (NewCapacity > (MaxInt div 2)) then
         NewCapacity := MaxInt
       else
         NewCapacity := NewCapacity * 2;
+
       if (NewCapacity = MaxInt) and (UInt64(NewCapacity) < RequiredFromBase) then
         raise EOutOfMemory.Create('MfCast live buffer address range is too large');
     end;
-  SetLength(FData, NewCapacity);
+
+  SetLength(FData,
+            NewCapacity);
 end;
 
 
 procedure TMfCastLiveBuffer.DiscardBeforeLocked(const AOffset: UInt64);
 const
   PruneGranularity = UInt64(8 * 1024 * 1024);
+
 var
   NewBaseOffset: UInt64;
   DropBytes: UInt64;
   KeepBytes: UInt64;
+
 begin
+
   if FComplete then
     Exit;
+
   if AOffset <= FBaseOffset then
     Exit;
+
   if (AOffset - FBaseOffset) < PruneGranularity then
     Exit;
 
   NewBaseOffset := AOffset;
+
   if NewBaseOffset > FLength then
     NewBaseOffset := FLength;
 
   DropBytes := NewBaseOffset - FBaseOffset;
   KeepBytes := FLength - NewBaseOffset;
-  if KeepBytes > 0 then
+
+  if (KeepBytes > 0) then
     Move(FData[NativeInt(DropBytes)],
          FData[0],
          NativeInt(KeepBytes));
-  SetLength(FData, NativeInt(KeepBytes));
+
+  SetLength(FData,
+            NativeInt(KeepBytes));
   FBaseOffset := NewBaseOffset;
 
   if (FBaseOffset = 0) or
      (FBaseOffset >= FLastPruneDebugOffset + PruneGranularity) then
     begin
+
       FLastPruneDebugOffset := FBaseOffset;
       OutputDebugString(PChar(Format('MfCast live buffer pruned base=%d kept=%d',
                                      [FBaseOffset, KeepBytes])));
     end;
 end;
 
+
 function TMfCastLiveBuffer.WriteAt(const AOffset: UInt64;
                                    ABuffer: Pointer;
                                    const ASize: Cardinal): HRESULT;
 var
   Required: UInt64;
+
 begin
+
   if (ABuffer = nil) and (ASize > 0) then
     begin
       Result := E_POINTER;
@@ -455,6 +526,7 @@ begin
 
   FLock.Acquire;
   try
+
     if FClosed then
       begin
         Result := E_ABORT;
@@ -470,15 +542,17 @@ begin
       end;
 
     Required := AOffset + ASize;
-    if Required < AOffset then
+    if (Required < AOffset) then
       begin
         Result := E_INVALIDARG;
         Exit;
       end;
 
     try
+
       EnsureCapacity(Required);
-      if ASize > 0 then
+
+      if (ASize > 0) then
         Move(ABuffer^,
              FData[NativeInt(AOffset - FBaseOffset)],
              ASize);
@@ -491,16 +565,21 @@ begin
           Exit;
         end;
     end;
-    if Required > FLength then
+
+    if (Required > FLength) then
       FLength := Required;
+
     if (FLength > 0) and
        ((FLastWriteDebugLength = 0) or
         (FLength >= FLastWriteDebugLength + 262144)) then
       begin
         FLastWriteDebugLength := FLength;
-        OutputDebugString(PChar(Format('MfCast live buffer bytes=%d', [FLength])));
+        OutputDebugString(PChar(Format('MfCast live buffer bytes=%d',
+                                       [FLength])));
       end;
+
     Result := S_OK;
+
   finally
     FLock.Release;
   end;
@@ -513,7 +592,9 @@ function TMfCastLiveBuffer.ReadAt(const AOffset: UInt64;
                                   out ABytesRead: Cardinal): HRESULT;
 var
   Available: UInt64;
+
 begin
+
   ABytesRead := 0;
   if (ABuffer = nil) and (ABufferSize > 0) then
     begin
@@ -522,8 +603,9 @@ begin
     end;
 
   FLock.Acquire;
+
   try
-    if AOffset < FBaseOffset then
+    if (AOffset < FBaseOffset) then
       begin
         OutputDebugString(PChar(Format('MfCast live buffer read before base offset=%d base=%d',
                                        [AOffset, FBaseOffset])));
@@ -531,16 +613,16 @@ begin
         Exit;
       end;
 
-    if AOffset >= FLength then
+    if (AOffset >= FLength) then
       begin
         Result := S_OK;
         Exit;
       end;
 
     Available := FLength - AOffset;
-    if Available > ABufferSize then
+    if (Available > ABufferSize) then
       Available := ABufferSize;
-    if Available > 0 then
+    if (Available > 0) then
       begin
         Move(FData[NativeInt(AOffset - FBaseOffset)],
              ABuffer^,
@@ -595,7 +677,9 @@ end;
 
 function TMfCastLiveBuffer.GetLength(): UInt64;
 begin
+
   FLock.Acquire;
+
   try
     Result := FLength;
   finally
@@ -606,22 +690,44 @@ end;
 
 function TMfCastLiveBuffer.SetLengthValue(const ALength: UInt64): HRESULT;
 begin
+
   FLock.Acquire;
+
   try
     if FClosed then
       begin
         Result := E_ABORT;
         Exit;
       end;
-    if ALength < FBaseOffset then
+
+    if (ALength < FBaseOffset) then
       begin
         SetLength(FData, 0);
         FBaseOffset := ALength;
       end
     else
       EnsureCapacity(ALength);
+
     FLength := ALength;
     Result := S_OK;
+
+  finally
+    FLock.Release;
+  end;
+end;
+
+
+function TMfCastLiveBuffer.Flush(): HRESULT;
+begin
+
+  // WriteAt is synchronous. Taking the same lock is the commit barrier for
+  // every byte written before IMFByteStream.Flush was called.
+  FLock.Acquire;
+  try
+    if FClosed then
+      Result := E_ABORT
+    else
+      Result := S_OK;
   finally
     FLock.Release;
   end;
@@ -630,7 +736,9 @@ end;
 
 function TMfCastLiveBuffer.IsComplete(): Boolean;
 begin
+
   FLock.Acquire;
+
   try
     Result := FComplete;
   finally
@@ -641,7 +749,9 @@ end;
 
 procedure TMfCastLiveBuffer.Complete();
 begin
+
   FLock.Acquire;
+
   try
     FComplete := True;
   finally
@@ -652,7 +762,9 @@ end;
 
 procedure TMfCastLiveBuffer.Close();
 begin
+
   FLock.Acquire;
+
   try
     FClosed := True;
     FComplete := True;
@@ -664,7 +776,9 @@ end;
 
 constructor TMfCastLiveByteStream.Create(const ABuffer: IMfCastLiveBuffer);
 begin
-  inherited Create;
+
+ inherited Create();
+
   FBuffer := ABuffer;
   FPosition := 0;
   FClosed := False;
@@ -673,6 +787,7 @@ end;
 
 function TMfCastLiveByteStream.GetCapabilities(out pdwCapabilities: DWord): HResult;
 begin
+
   pdwCapabilities := MFBYTESTREAM_IS_READABLE or
                      MFBYTESTREAM_IS_WRITABLE or
                      MFBYTESTREAM_IS_SEEKABLE or
@@ -683,16 +798,19 @@ end;
 
 function TMfCastLiveByteStream.GetLength(out pqwLength: QWORD): HResult;
 begin
+
   if Assigned(FBuffer) then
     pqwLength := FBuffer.GetLength()
   else
     pqwLength := 0;
+
   Result := S_OK;
 end;
 
 
 function TMfCastLiveByteStream.SetLength(qwLength: QWORD): HResult;
 begin
+
   if not Assigned(FBuffer) then
     begin
       Result := E_POINTER;
@@ -704,6 +822,7 @@ end;
 
 function TMfCastLiveByteStream.GetCurrentPosition(out pqwPosition: QWORD): HResult;
 begin
+
   pqwPosition := FPosition;
   Result := S_OK;
 end;
@@ -711,6 +830,7 @@ end;
 
 function TMfCastLiveByteStream.SetCurrentPosition(const qwPosition: QWORD): HResult;
 begin
+
   FPosition := qwPosition;
   Result := S_OK;
 end;
@@ -718,6 +838,7 @@ end;
 
 function TMfCastLiveByteStream.IsEndOfStream(out pfEndOfStream: BOOL): HResult;
 begin
+
   pfEndOfStream := BOOL(FClosed or
                         (Assigned(FBuffer) and FBuffer.IsComplete() and
                          (FPosition >= FBuffer.GetLength())));
@@ -729,7 +850,9 @@ function TMfCastLiveByteStream.Read(pb: PByte;
                                     cb: ULONG;
                                     out pcbRead: ULONG): HResult;
 begin
+
   pcbRead := 0;
+
   if not Assigned(FBuffer) then
     begin
       Result := E_POINTER;
@@ -769,14 +892,12 @@ begin
   pcbWritten := 0;
   if not Assigned(FBuffer) then
     begin
-
       Result := E_POINTER;
       Exit;
     end;
 
   if FClosed then
     begin
-
       Result := E_ABORT;
       Exit;
     end;
@@ -786,7 +907,6 @@ begin
                             cb);
   if SUCCEEDED(Result) then
     begin
-
       pcbWritten := cb;
       Inc(FPosition, cb);
     end;
@@ -801,7 +921,9 @@ var
   BytesWritten: ULONG;
   TransferState: IUnknown;
   AsyncResult: IMFAsyncResult;
+
 begin
+
   BytesWritten := 0;
   Result := Write(pb,
                   cb,
@@ -815,6 +937,7 @@ begin
                                   AsyncResult);
   if SUCCEEDED(Result) then
     Result := AsyncResult.SetStatus(S_OK);
+
   if SUCCEEDED(Result) then
     Result := MFInvokeCallback(AsyncResult);
 end;
@@ -825,8 +948,11 @@ function TMfCastLiveByteStream.EndWrite(pResult: IMFAsyncResult;
 var
   ResultObject: IUnknown;
   TransferState: IMfCastByteStreamAsyncState;
+
 begin
+
   pcbWritten := 0;
+
   if not Assigned(pResult) then
     begin
       Result := E_POINTER;
@@ -855,13 +981,15 @@ function TMfCastLiveByteStream.Seek(SeekOrigin: MFBYTESTREAM_SEEK_ORIGIN;
                                     out pqwCurrentPosition: QWORD): HResult;
 var
   NewPosition: Int64;
+
 begin
-  if SeekOrigin = msoCurrent then
+
+  if (SeekOrigin = msoCurrent) then
     NewPosition := Int64(FPosition) + llSeekOffset
   else
     NewPosition := llSeekOffset;
 
-  if NewPosition < 0 then
+  if (NewPosition < 0) then
     begin
       Result := E_INVALIDARG;
       Exit;
@@ -875,7 +1003,20 @@ end;
 
 function TMfCastLiveByteStream.Flush(): HResult;
 begin
-  Result := S_OK;
+
+  if FClosed then
+    begin
+      Result := E_ABORT;
+      Exit;
+    end;
+
+  if not Assigned(FBuffer) then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
+
+  Result := FBuffer.Flush();
 end;
 
 
@@ -891,7 +1032,9 @@ end;
 constructor TMfCastLiveStreamContent.Create(const ABuffer: IMfCastLiveBuffer;
                                             const AContentType: string);
 begin
-  inherited Create;
+
+  inherited Create();
+
   FBuffer := ABuffer;
   FContentType := AContentType;
 end;
@@ -899,28 +1042,33 @@ end;
 
 function TMfCastLiveStreamContent.GetContentType(): string;
 begin
+
   Result := FContentType;
 end;
 
 
 function TMfCastLiveStreamContent.GetLength(out ALength: UInt64): HRESULT;
 begin
+
   if Assigned(FBuffer) then
     ALength := FBuffer.GetLength()
   else
     ALength := 0;
+
   Result := S_OK;
 end;
 
 
 function TMfCastLiveStreamContent.CanSeek(): Boolean;
 begin
+
   Result := False;
 end;
 
 
 function TMfCastLiveStreamContent.IsComplete(): Boolean;
 begin
+
   Result := Assigned(FBuffer) and FBuffer.IsComplete();
 end;
 
@@ -930,6 +1078,7 @@ function TMfCastLiveStreamContent.ReadAt(const AOffset: UInt64;
                                          const ABufferSize: Cardinal;
                                          out ABytesRead: Cardinal): HRESULT;
 begin
+
   if Assigned(FBuffer) then
     Result := FBuffer.ReadAt(AOffset,
                              ABuffer,
@@ -946,6 +1095,7 @@ end;
 function TMfCastLiveStreamContent.WaitForData(const AOffset: UInt64;
                                               const ATimeoutMs: Cardinal): HRESULT;
 begin
+
   if Assigned(FBuffer) then
     Result := FBuffer.WaitForData(AOffset,
                                   ATimeoutMs)
@@ -957,10 +1107,12 @@ end;
 function MfCastWinSockHResult(): HRESULT;
 var
   ErrorCode: Integer;
+
 begin
 
   ErrorCode := WSAGetLastError();
-  if ErrorCode = 0 then
+
+  if (ErrorCode = 0) then
     Result := E_FAIL
   else
     Result := HRESULT($80070000 or DWORD(ErrorCode));
@@ -972,25 +1124,28 @@ var
   I: Integer;
   Hex: string;
   Value: Integer;
+
 begin
 
   Result := '';
   I := 1;
+
   while I <= Length(APath) do
     begin
       if (APath[I] = '%') and (I + 2 <= Length(APath)) then
         begin
           Hex := Copy(APath, I + 1, 2);
           Value := StrToIntDef('$' + Hex, -1);
-          if Value >= 0 then
+          if (Value >= 0) then
             begin
               Result := Result + Char(Value);
-              Inc(I, 3);
+              Inc(I,
+                  3);
               Continue;
             end;
         end;
 
-      if APath[I] = '+' then
+      if (APath[I] = '+') then
         Result := Result + ' '
       else
         Result := Result + APath[I];
@@ -1005,13 +1160,18 @@ var
   HostEntry: PHostEnt;
   I: Integer;
   Addr: PInAddr;
+
 begin
 
   Result := False;
   AAddress := '';
 
-  FillChar(HostName, SizeOf(HostName), 0);
-  if gethostname(@HostName[0], SizeOf(HostName)) <> 0 then
+  FillChar(HostName,
+           SizeOf(HostName),
+           0);
+
+  if gethostname(@HostName[0],
+                 SizeOf(HostName)) <> 0 then
     Exit;
 
   HostEntry := gethostbyname(@HostName[0]);
@@ -1060,27 +1220,37 @@ var
   Sent: Integer;
   TotalSent: Integer;
   Ptr: PAnsiChar;
+
 begin
 
   Result := False;
   TotalSent := 0;
   Ptr := PAnsiChar(ABuffer);
-  while TotalSent < ASize do
+
+  while (TotalSent < ASize) do
     begin
-      Sent := send(ASocket, Ptr[TotalSent], ASize - TotalSent, 0);
-      if Sent <= 0 then
+      Sent := send(ASocket,
+                   Ptr[TotalSent],
+                   ASize - TotalSent,
+                   0);
+      if (Sent <= 0) then
         Exit;
-      Inc(TotalSent, Sent);
+
+      Inc(TotalSent,
+          Sent);
     end;
   Result := True;
 end;
 
 
-procedure MfCastSendText(const ASocket: TSocket; const AText: AnsiString);
+procedure MfCastSendText(const ASocket: TSocket;
+                         const AText: AnsiString);
 begin
 
-  if AText <> '' then
-    MfCastSendAll(ASocket, @AText[1], Length(AText));
+  if (AText <> '') then
+    MfCastSendAll(ASocket,
+                  @AText[1],
+                  Length(AText));
 end;
 
 
@@ -1090,35 +1260,54 @@ procedure MfCastSendSimpleResponse(const ASocket: TSocket;
 var
   Body: AnsiString;
   Header: AnsiString;
+
 begin
 
-  Body := AnsiString(AMessage + #13#10);
+  Body := AnsiString(AMessage + ULBR);
   Header := AnsiString('HTTP/1.1 ' + IntToStr(AStatusCode) + ' ' +
-                       MfCastHttpStatusText(AStatusCode) + #13#10 +
-                       'Content-Type: text/plain; charset=utf-8' + #13#10 +
-                       'Content-Length: ' + IntToStr(Length(Body)) + #13#10 +
-                       'Connection: close' + #13#10 + #13#10);
-  MfCastSendText(ASocket, Header);
-  MfCastSendText(ASocket, Body);
+                       MfCastHttpStatusText(AStatusCode) + ULBR +
+                       'Content-Type: text/plain; charset=utf-8' + ULBR +
+                       'Content-Length: ' + IntToStr(Length(Body)) + ULBR +
+                       'Connection: close' + ULBR + ULBR);
+
+  MfCastSendText(ASocket,
+                 Header);
+
+  MfCastSendText(ASocket,
+                 Body);
 end;
 
 
-function MfCastHeaderValue(const ARequest: string; const AHeaderName: string): string;
+function MfCastHeaderValue(const ARequest: string;
+                           const AHeaderName: string): string;
 var
   Lines: TStringList;
   I: Integer;
   Prefix: string;
+
 begin
 
   Result := '';
   Lines := TStringList.Create;
+
   try
-    Lines.Text := StringReplace(ARequest, #13#10, #10, [rfReplaceAll]);
+
+    Lines.Text := StringReplace(ARequest,
+                                ULBR,
+                                LFEED,
+                                [rfReplaceAll]);
+
     Prefix := LowerCase(AHeaderName) + ':';
+
     for I := 0 to Lines.Count - 1 do
-      if SameText(Copy(Trim(Lines[I]), 1, Length(Prefix)), Prefix) then
+      if SameText(Copy(Trim(Lines[I]),
+                       1,
+                       Length(Prefix)),
+                       Prefix) then
         begin
-          Result := Trim(Copy(Trim(Lines[I]), Length(Prefix) + 1, MaxInt));
+          Result := Trim(Copy(Trim(Lines[I]),
+                              Length(Prefix) + 1,
+                              MaxInt));
           Exit;
         end;
   finally
@@ -1138,34 +1327,57 @@ var
   EndText: string;
   StartValue: Int64;
   EndValue: Int64;
+
 begin
 
   Result := False;
   AStart := 0;
-  if ATotalLength = 0 then
+
+  if (ATotalLength = 0) then
     AEnd := 0
   else
     AEnd := ATotalLength - 1;
 
   RangeText := Trim(ARangeHeader);
-  if not SameText(Copy(RangeText, 1, 6), 'bytes=') then
-    Exit;
-  Delete(RangeText, 1, 6);
-  DashPos := Pos('-', RangeText);
-  if DashPos <= 0 then
+
+  if not SameText(Copy(RangeText,
+                       1,
+                       6),
+                  'bytes=') then
     Exit;
 
-  StartText := Trim(Copy(RangeText, 1, DashPos - 1));
-  EndText := Trim(Copy(RangeText, DashPos + 1, MaxInt));
-  StartValue := StrToInt64Def(StartText, -1);
-  if StartValue < 0 then
+  Delete(RangeText,
+         1,
+         6);
+
+  DashPos := Pos('-',
+                 RangeText);
+
+  if (DashPos <= 0) then
+    Exit;
+
+  StartText := Trim(Copy(RangeText,
+                         1,
+                         DashPos - 1));
+
+  EndText := Trim(Copy(RangeText,
+                       DashPos + 1,
+                       MaxInt));
+
+  StartValue := StrToInt64Def(StartText,
+                              -1);
+
+  if (StartValue < 0) then
     Exit;
   AStart := UInt64(StartValue);
 
-  if EndText <> '' then
+  if (EndText <> '') then
     begin
-      EndValue := StrToInt64Def(EndText, -1);
-      if EndValue < 0 then
+
+      EndValue := StrToInt64Def(EndText,
+                                -1);
+
+      if (EndValue < 0) then
         Exit;
       AEnd := UInt64(EndValue);
     end;
@@ -1178,6 +1390,7 @@ constructor TMfCastHttpServerThread.Create(AOwner: TMfCastHttpServer);
 begin
 
   inherited Create(False);
+
   FreeOnTerminate := False;
   FOwner := AOwner;
 end;
@@ -1197,7 +1410,7 @@ begin
   inherited Create;
 
   FResources := TDictionary<string, IMfCastHttpContent>.Create;
-  FLock := TCriticalSection.Create;
+  FLock := TCriticalSection.Create();
   FRunning := False;
   FListenPort := 0;
   FListenSocket := INVALID_SOCKET;
@@ -1212,6 +1425,7 @@ begin
   Stop();
   FResources.Free();
   FLock.Free();
+
   inherited Destroy();
 end;
 
@@ -1221,7 +1435,6 @@ begin
 
   if FRunning then
     begin
-
       Result := E_UNEXPECTED;
       Exit;
     end;
@@ -1247,6 +1460,7 @@ var
   SockNameLen: Integer;
   ReuseAddr: Integer;
   BindAddress: AnsiString;
+
 begin
 
   if FRunning then
@@ -1263,29 +1477,40 @@ begin
 
   if not FWSAStarted then
     begin
-      if WSAStartup($0202, WsaData) <> 0 then
+      if WSAStartup($0202,
+                    WsaData) <> 0 then
         begin
           Result := MfCastWinSockHResult();
           Exit;
         end;
+
       FWSAStarted := True;
     end;
 
   FListenSocket := socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-  if FListenSocket = INVALID_SOCKET then
+
+  if (FListenSocket = INVALID_SOCKET) then
     begin
       Result := MfCastWinSockHResult();
       Exit;
     end;
 
   ReuseAddr := 1;
-  setsockopt(FListenSocket, SOL_SOCKET, SO_REUSEADDR,
-             PAnsiChar(@ReuseAddr), SizeOf(ReuseAddr));
 
-  FillChar(BindAddr, SizeOf(BindAddr), 0);
+  setsockopt(FListenSocket,
+             SOL_SOCKET,
+             SO_REUSEADDR,
+             PAnsiChar(@ReuseAddr),
+             SizeOf(ReuseAddr));
+
+  FillChar(BindAddr,
+           SizeOf(BindAddr),
+           0);
+
   BindAddr.sin_family := AF_INET;
   BindAddr.sin_port := htons(FSettings.ListenPort);
-  if Trim(FSettings.BindAddress) <> '' then
+
+  if (Trim(FSettings.BindAddress) <> '') then
     begin
       BindAddress := AnsiString(Trim(FSettings.BindAddress));
       BindAddr.sin_addr.S_addr := inet_addr(PAnsiChar(BindAddress));
@@ -1293,25 +1518,35 @@ begin
   else
     BindAddr.sin_addr.S_addr := INADDR_ANY;
 
-  if bind(FListenSocket, TSockAddr(BindAddr), SizeOf(BindAddr)) = SOCKET_ERROR then
+  if (bind(FListenSocket,
+           TSockAddr(BindAddr),
+           SizeOf(BindAddr)) = SOCKET_ERROR) then
     begin
       Result := MfCastWinSockHResult();
       WinApi.WinSock.closesocket(FListenSocket);
       FListenSocket := INVALID_SOCKET;
+
       Exit;
     end;
 
-  if listen(FListenSocket, SOMAXCONN) = SOCKET_ERROR then
+  if (listen(FListenSocket,
+            SOMAXCONN) = SOCKET_ERROR) then
     begin
       Result := MfCastWinSockHResult();
       WinApi.WinSock.closesocket(FListenSocket);
       FListenSocket := INVALID_SOCKET;
+
       Exit;
     end;
 
   SockNameLen := SizeOf(SockName);
-  FillChar(SockName, SizeOf(SockName), 0);
-  if getsockname(FListenSocket, SockName, SockNameLen) = SOCKET_ERROR then
+  FillChar(SockName,
+           SizeOf(SockName),
+           0);
+
+  if (getsockname(FListenSocket,
+                  SockName,
+                  SockNameLen) = SOCKET_ERROR) then
     begin
       Result := MfCastWinSockHResult();
       WinApi.WinSock.closesocket(FListenSocket);
@@ -1322,6 +1557,7 @@ begin
   FListenPort := ntohs(TSockAddrIn(SockName).sin_port);
   FRunning := True;
   FServerThread := TMfCastHttpServerThread.Create(Self);
+
   Result := S_OK;
 end;
 
@@ -1331,9 +1567,10 @@ begin
 
   FRunning := False;
 
-  if FListenSocket <> INVALID_SOCKET then
+  if (FListenSocket <> INVALID_SOCKET) then
     begin
-      shutdown(FListenSocket, SD_BOTH);
+      shutdown(FListenSocket,
+               SD_BOTH);
       WinApi.WinSock.closesocket(FListenSocket);
       FListenSocket := INVALID_SOCKET;
     end;
@@ -1359,7 +1596,6 @@ begin
 
   if not Assigned(AContent) then
     begin
-
       Result := E_POINTER;
       Exit;
     end;
@@ -1367,6 +1603,7 @@ begin
   APublishedPath := CreateResourcePath(AResourceName);
 
   FLock.Acquire;
+
   try
     FResources.AddOrSetValue(APublishedPath, AContent);
   finally
@@ -1386,7 +1623,6 @@ begin
 
     if FResources.ContainsKey(APublishedPath) then
       begin
-
         FResources.Remove(APublishedPath);
         Result := S_OK;
       end
@@ -1399,11 +1635,13 @@ end;
 
 
 function TMfCastHttpServer.BuildUrl(const APublishedPath: string;
-  out AUrl: string): HRESULT;
+                                    out AUrl: string): HRESULT;
 var
   Address: string;
   Scheme: string;
+
 begin
+
   AUrl := '';
 
   Result := ResolveAdvertisedAddress(Address);
@@ -1421,25 +1659,35 @@ begin
   Result := S_OK;
 end;
 
+
 function TMfCastHttpServer.IsRunning: Boolean;
 begin
+
   Result := FRunning;
 end;
 
+
 function TMfCastHttpServer.GetListenPort: Word;
 begin
+
   Result := FListenPort;
 end;
+
 
 procedure TMfCastHttpServer.AcceptLoop();
 var
   Client: TSocket;
+
 begin
 
   while FRunning do
     begin
-      Client := accept(FListenSocket, nil, nil);
-      if Client = INVALID_SOCKET then
+
+      Client := accept(FListenSocket,
+                       nil,
+                       nil);
+
+      if (Client = INVALID_SOCKET) then
         begin
           if FRunning then
             Sleep(10);
@@ -1449,7 +1697,8 @@ begin
       try
         HandleClient(Client);
       finally
-        shutdown(Client, SD_BOTH);
+        shutdown(Client,
+                 SD_BOTH);
         WinApi.WinSock.closesocket(Client);
       end;
     end;
@@ -1457,12 +1706,14 @@ end;
 
 
 function TMfCastHttpServer.TryGetResource(const APath: string;
-  out AContent: IMfCastHttpContent): Boolean;
+                                          out AContent: IMfCastHttpContent): Boolean;
 begin
 
   FLock.Acquire;
+
   try
-    Result := FResources.TryGetValue(APath, AContent);
+    Result := FResources.TryGetValue(APath,
+                                     AContent);
   finally
     FLock.Release;
   end;
@@ -1471,6 +1722,7 @@ end;
 
 procedure TMfCastHttpServer.HandleClient(const AClient: TSocket);
 var
+  Hr: HRESULT;
   Buffer: array[0..4095] of Byte;
   BytesRead: Integer;
   Request: AnsiString;
@@ -1482,6 +1734,7 @@ var
   SpacePos: Integer;
   QueryPos: Integer;
   Content: IMfCastHttpContent;
+  LiveContent: IMfCastLiveHttpContent;
   TotalLength: UInt64;
   StartOffset: UInt64;
   EndOffset: UInt64;
@@ -1492,115 +1745,184 @@ var
   IsHead: Boolean;
   IsPartial: Boolean;
   RangeHeader: string;
-  Hr: HRESULT;
+
 begin
 
   Request := '';
+
   repeat
-    BytesRead := recv(AClient, Buffer, SizeOf(Buffer), 0);
-    if BytesRead <= 0 then
+    BytesRead := recv(AClient,
+                      Buffer,
+                      SizeOf(Buffer),
+                      0);
+
+    if (BytesRead <= 0) then
       Exit;
-    SetString(RequestChunk, PAnsiChar(@Buffer[0]), BytesRead);
+
+    SetString(RequestChunk,
+              PAnsiChar(@Buffer[0]),
+              BytesRead);
+
     Request := Request + RequestChunk;
-  until (Pos(#13#10#13#10, string(Request)) > 0) or (Length(Request) > 16384);
+
+  until (Pos(ULBR + ULBR,
+             string(Request)) > 0) or (Length(Request) > 16384);
 
   RequestText := string(Request);
-  SpacePos := Pos(#13#10, RequestText);
-  if SpacePos <= 0 then
+  SpacePos := Pos(ULBR,
+                  RequestText);
+
+  if (SpacePos <= 0) then
     FirstLine := RequestText
   else
-    FirstLine := Copy(RequestText, 1, SpacePos - 1);
+    FirstLine := Copy(RequestText,
+                      1,
+                      SpacePos - 1);
 
   OutputDebugString(PChar('MfCast HTTP request: ' + FirstLine));
 
-  SpacePos := Pos(' ', FirstLine);
-  if SpacePos <= 0 then
+  SpacePos := Pos(' ',
+                  FirstLine);
+
+  if (SpacePos <= 0) then
     begin
-      MfCastSendSimpleResponse(AClient, 400, 'Bad request');
+      MfCastSendSimpleResponse(AClient,
+                               400,
+                               'Bad request');
       Exit;
     end;
 
-  MethodName := UpperCase(Copy(FirstLine, 1, SpacePos - 1));
-  Delete(FirstLine, 1, SpacePos);
-  SpacePos := Pos(' ', FirstLine);
-  if SpacePos <= 0 then
+  MethodName := UpperCase(Copy(FirstLine,
+                               1,
+                               SpacePos - 1));
+
+  Delete(FirstLine,
+         1,
+         SpacePos);
+
+  SpacePos := Pos(' ',
+                  FirstLine);
+
+  if (SpacePos <= 0) then
     TargetPath := FirstLine
   else
-    TargetPath := Copy(FirstLine, 1, SpacePos - 1);
+    TargetPath := Copy(FirstLine,
+                       1,
+                       SpacePos - 1);
 
-  QueryPos := Pos('?', TargetPath);
-  if QueryPos > 0 then
-    TargetPath := Copy(TargetPath, 1, QueryPos - 1);
+  QueryPos := Pos('?',
+                  TargetPath);
+
+  if (QueryPos > 0) then
+    TargetPath := Copy(TargetPath,
+                       1,
+                       QueryPos - 1);
+
   TargetPath := MfCastHttpDecodePath(TargetPath);
 
   IsHead := MethodName = 'HEAD';
-  if MethodName = 'OPTIONS' then
+
+  if (MethodName = 'OPTIONS') then
     begin
-      Header := AnsiString('HTTP/1.1 204 No Content' + #13#10);
+      Header := AnsiString('HTTP/1.1 204 No Content' + ULBR);
+
       if FSettings.EnableCors then
         Header := Header + MfCastCorsResponseHeaders();
-      Header := Header + AnsiString(
-        'Content-Length: 0' + #13#10 +
-        'Connection: close' + #13#10 + #13#10);
-      MfCastSendText(AClient, Header);
-      Exit;
-    end;
-  if (MethodName <> 'GET') and (not IsHead) then
-    begin
-      MfCastSendSimpleResponse(AClient, 405, 'Method not allowed');
+
+      Header := Header + AnsiString('Content-Length: 0' + ULBR + 'Connection: close' + ULBR + ULBR);
+      MfCastSendText(AClient,
+                     Header);
       Exit;
     end;
 
-  if not TryGetResource(TargetPath, Content) then
+  if (MethodName <> 'GET') and (not IsHead) then
     begin
-      MfCastSendSimpleResponse(AClient, 404, 'Not found');
+      MfCastSendSimpleResponse(AClient,
+                               405,
+                               'Method not allowed');
+      Exit;
+    end;
+
+  if not TryGetResource(TargetPath,
+                        Content) then
+    begin
+      MfCastSendSimpleResponse(AClient,
+                               404,
+                               'Not found');
       Exit;
     end;
 
   if FAILED(Content.GetLength(TotalLength)) then
     begin
-      MfCastSendSimpleResponse(AClient, 500, 'Could not read content length');
+      MfCastSendSimpleResponse(AClient,
+                               500,
+                               'Could not read content length');
       Exit;
     end;
 
   StartOffset := 0;
-  if TotalLength = 0 then
+
+  if (TotalLength = 0) then
     EndOffset := 0
   else
     EndOffset := TotalLength - 1;
 
-  RangeHeader := MfCastHeaderValue(RequestText, 'Range');
+  RangeHeader := MfCastHeaderValue(RequestText,
+                                   'Range');
   IsPartial := False;
+
   if (RangeHeader <> '') and Content.IsComplete() then
     begin
-      if not MfCastParseRange(RangeHeader, TotalLength, StartOffset, EndOffset) then
+      if not MfCastParseRange(RangeHeader,
+                              TotalLength,
+                              StartOffset,
+                              EndOffset) then
         begin
-          MfCastSendSimpleResponse(AClient, 416, 'Invalid range');
+
+          MfCastSendSimpleResponse(AClient,
+                                   416,
+                                   'Invalid range');
           Exit;
         end;
+
       IsPartial := True;
     end;
 
   if (not Content.IsComplete()) and (not IsHead) then
     begin
-      Header := AnsiString('HTTP/1.1 200 OK' + #13#10 +
-        'Content-Type: ' + Content.GetContentType() + #13#10 +
-        'Transfer-Encoding: chunked' + #13#10 +
-        'Cache-Control: no-store' + #13#10);
+      if not Supports(Content,
+                      IMfCastLiveHttpContent,
+                      LiveContent) then
+        begin
+          MfCastSendSimpleResponse(AClient,
+                                   500,
+                                   'Incomplete resource is not live content');
+          Exit;
+        end;
+
+      Header := AnsiString('HTTP/1.1 200 OK' + ULBR +
+                'Content-Type: ' + Content.GetContentType() + ULBR +
+                'Transfer-Encoding: chunked' + ULBR +
+                'Cache-Control: no-store' + ULBR);
+
       if FSettings.EnableCors then
         Header := Header + MfCastCorsResponseHeaders();
-      Header := Header + AnsiString('Connection: close' + #13#10 + #13#10);
-      MfCastSendText(AClient, Header);
+
+      Header := Header + AnsiString('Connection: close' + ULBR + ULBR);
+
+      MfCastSendText(AClient,
+                     Header);
       OutputDebugString(PChar('MfCast HTTP live chunked start: ' + TargetPath));
 
       ChunkOffset := 0;
+
       while True do
         begin
-          Hr := Content.WaitForData(ChunkOffset,
-                                        FSettings.IdleTimeoutMs);
-          if FAILED(Hr) or
-             ((Hr = S_FALSE) and (not Content.IsComplete())) then
+          Hr := LiveContent.WaitForData(ChunkOffset,
+                                           FSettings.IdleTimeoutMs);
+          if FAILED(Hr) or ((Hr = S_FALSE) and (not Content.IsComplete())) then
             begin
+
               OutputDebugString(PChar(Format('MfCast HTTP live wait ended hr=%.8x offset=%d',
                                              [DWORD(Hr), ChunkOffset])));
               Exit;
@@ -1613,7 +1935,7 @@ begin
                                    ChunkRead)) then
             Exit;
 
-          if ChunkRead = 0 then
+          if (ChunkRead = 0) then
             begin
               if Content.IsComplete() then
                 Break;
@@ -1624,79 +1946,111 @@ begin
             OutputDebugString(PChar(Format('MfCast HTTP live chunk offset=%d size=%d',
                                            [ChunkOffset, ChunkRead])));
           MfCastSendText(AClient,
-                         AnsiString(IntToHex(ChunkRead, 1) + #13#10));
-          if not MfCastSendAll(AClient, @Buffer[0], ChunkRead) then
+                         AnsiString(IntToHex(ChunkRead, 1) + ULBR));
+
+          if not MfCastSendAll(AClient,
+                               @Buffer[0],
+                               ChunkRead) then
             begin
               OutputDebugString(PChar(Format('MfCast HTTP live send failed offset=%d error=%d',
                                              [ChunkOffset, WSAGetLastError()])));
               Exit;
             end;
-          MfCastSendText(AClient, AnsiString(#13#10));
 
-          Inc(ChunkOffset, ChunkRead);
+          MfCastSendText(AClient,
+                         AnsiString(ULBR));
+
+          Inc(ChunkOffset,
+              ChunkRead);
         end;
 
-      MfCastSendText(AClient, AnsiString('0' + #13#10 + #13#10));
+      MfCastSendText(AClient,
+                     AnsiString('0' + ULBR + ULBR));
       Exit;
     end;
 
   if IsPartial then
-    Header := AnsiString('HTTP/1.1 206 Partial Content' + #13#10)
+    Header := AnsiString('HTTP/1.1 206 Partial Content' + ULBR)
   else
-    Header := AnsiString('HTTP/1.1 200 OK' + #13#10);
+    Header := AnsiString('HTTP/1.1 200 OK' + ULBR);
 
-  Header := Header + AnsiString('Content-Type: ' + Content.GetContentType() + #13#10 +
-    'Accept-Ranges: bytes' + #13#10 +
-    'Content-Length: ' + IntToStr(EndOffset - StartOffset + 1) + #13#10);
+  Header := Header + AnsiString('Content-Type: ' + Content.GetContentType() + ULBR +
+            'Accept-Ranges: bytes' + ULBR +
+            'Content-Length: ' + IntToStr(EndOffset - StartOffset + 1) + ULBR);
+
   if IsPartial then
     Header := Header + AnsiString('Content-Range: bytes ' + IntToStr(StartOffset) +
-      '-' + IntToStr(EndOffset) + '/' + IntToStr(TotalLength) + #13#10);
+              '-' + IntToStr(EndOffset) + '/' + IntToStr(TotalLength) + ULBR);
+
   if FSettings.EnableCors then
     Header := Header + MfCastCorsResponseHeaders();
-  Header := Header + AnsiString('Connection: close' + #13#10 + #13#10);
-  MfCastSendText(AClient, Header);
+
+  Header := Header + AnsiString('Connection: close' + ULBR + ULBR);
+
+  MfCastSendText(AClient,
+                 Header);
   if IsHead then
     Exit;
 
   ChunkOffset := StartOffset;
-  while ChunkOffset <= EndOffset do
+  while (ChunkOffset <= EndOffset) do
     begin
       ChunkSize := SizeOf(Buffer);
-      if UInt64(ChunkSize) > (EndOffset - ChunkOffset + 1) then
+
+      if (UInt64(ChunkSize) > (EndOffset - ChunkOffset + 1)) then
         ChunkSize := Cardinal(EndOffset - ChunkOffset + 1);
-      if FAILED(Content.ReadAt(ChunkOffset, @Buffer[0], ChunkSize, ChunkRead)) then
+
+      if FAILED(Content.ReadAt(ChunkOffset,
+                               @Buffer[0],
+                               ChunkSize,
+                               ChunkRead)) then
         Exit;
-      if ChunkRead = 0 then
+
+      if (ChunkRead = 0) then
         Exit;
-      if not MfCastSendAll(AClient, @Buffer[0], ChunkRead) then
+
+      if not MfCastSendAll(AClient,
+                           @Buffer[0],
+                           ChunkRead) then
         Exit;
-      Inc(ChunkOffset, ChunkRead);
+
+      Inc(ChunkOffset,
+          ChunkRead);
     end;
 end;
 
 
 function TMfCastHttpServer.NormalizeBasePath(const APath: string): string;
 begin
+
   Result := Trim(APath);
-  if Result = '' then
+
+  if (Result = '') then
     Result := '/';
-  if Result[1] <> '/' then
+
+  if (Result[1] <> '/') then
     Result := '/' + Result;
+
   while (Length(Result) > 1) and (Result[Length(Result)] = '/') do
-    Delete(Result, Length(Result), 1);
+    Delete(Result,
+           Length(Result),
+           1);
 end;
 
-function TMfCastHttpServer.CreateResourcePath(
-  const AResourceName: string): string;
+
+function TMfCastHttpServer.CreateResourcePath(const AResourceName: string): string;
 begin
+
   Result := FSettings.BasePath + '/' + AResourceName;
 end;
 
-function TMfCastHttpServer.ResolveAdvertisedAddress(
-  out AAddress: string): HRESULT;
+
+function TMfCastHttpServer.ResolveAdvertisedAddress(out AAddress: string): HRESULT;
 begin
+
   AAddress := Trim(FSettings.AdvertisedAddress);
-  if AAddress = '' then
+
+  if (AAddress = '') then
     AAddress := Trim(FSettings.BindAddress);
   if ((AAddress = '') or (AAddress = '0.0.0.0')) and
      (not MfCastResolveLocalIPv4(AAddress)) then
@@ -1706,31 +2060,41 @@ begin
 end;
 
 
-constructor TMfCastFileContent.Create(const AFileName,
-  AContentType: string);
+constructor TMfCastFileContent.Create(const AFileName: string;
+                                      const AContentType: string);
 begin
+
   inherited Create;
+
   FFileName := AFileName;
   FContentType := AContentType;
 end;
 
-function TMfCastFileContent.GetContentType: string;
+
+function TMfCastFileContent.GetContentType(): string;
 begin
+
   Result := FContentType;
 end;
+
 
 function TMfCastFileContent.GetLength(out ALength: UInt64): HRESULT;
 var
   Stream: TFileStream;
+
 begin
+
   ALength := 0;
+
   if not FileExists(FFileName) then
     begin
       Result := HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
       Exit;
     end;
 
-  Stream := TFileStream.Create(FFileName, fmOpenRead or fmShareDenyNone);
+  Stream := TFileStream.Create(FFileName,
+                               fmOpenRead or fmShareDenyNone);
+
   try
     ALength := Stream.Size;
   finally
@@ -1740,22 +2104,30 @@ begin
   Result := S_OK;
 end;
 
-function TMfCastFileContent.CanSeek: Boolean;
+
+function TMfCastFileContent.CanSeek(): Boolean;
 begin
+
   Result := True;
 end;
 
-function TMfCastFileContent.IsComplete: Boolean;
+
+function TMfCastFileContent.IsComplete(): Boolean;
 begin
+
   Result := True;
 end;
+
 
 function TMfCastFileContent.ReadAt(const AOffset: UInt64;
-  ABuffer: Pointer; const ABufferSize: Cardinal;
-  out ABytesRead: Cardinal): HRESULT;
+                                   ABuffer: Pointer;
+                                   const ABufferSize: Cardinal;
+                                   out ABytesRead: Cardinal): HRESULT;
 var
   Stream: TFileStream;
+
 begin
+
   ABytesRead := 0;
 
   if (ABuffer = nil) and (ABufferSize > 0) then
@@ -1771,15 +2143,17 @@ begin
     end;
 
   Stream := TFileStream.Create(FFileName, fmOpenRead or fmShareDenyNone);
+
   try
-    if AOffset >= UInt64(Stream.Size) then
+    if (AOffset >= UInt64(Stream.Size)) then
       begin
         Result := S_OK;
         Exit;
       end;
 
     Stream.Position := AOffset;
-    ABytesRead := Stream.Read(ABuffer^, ABufferSize);
+    ABytesRead := Stream.Read(ABuffer^,
+                              ABufferSize);
   finally
     Stream.Free;
   end;
@@ -1787,83 +2161,96 @@ begin
   Result := S_OK;
 end;
 
-function TMfCastFileContent.WaitForData(const AOffset: UInt64;
-  const ATimeoutMs: Cardinal): HRESULT;
-begin
-  Result := S_OK;
-end;
 
 constructor TMfCastMemoryContent.Create(const AData: TBytes;
                                         const AContentType: string);
 begin
+
   inherited Create();
-  FData := Copy(AData, 0, Length(AData));
+
+  FData := Copy(AData,
+                0,
+                Length(AData));
   FContentType := AContentType;
 end;
 
+
 function TMfCastMemoryContent.GetContentType(): string;
 begin
+
   Result := FContentType;
 end;
 
+
 function TMfCastMemoryContent.GetLength(out ALength: UInt64): HRESULT;
 begin
+
   ALength := UInt64(Length(FData));
   Result := S_OK;
 end;
 
+
 function TMfCastMemoryContent.CanSeek(): Boolean;
 begin
+
   Result := True;
 end;
+
 
 function TMfCastMemoryContent.IsComplete(): Boolean;
 begin
+
   Result := True;
 end;
 
+
 function TMfCastMemoryContent.ReadAt(const AOffset: UInt64;
-  ABuffer: Pointer; const ABufferSize: Cardinal;
-  out ABytesRead: Cardinal): HRESULT;
+                                     ABuffer: Pointer;
+                                     const ABufferSize: Cardinal;
+                                     out ABytesRead: Cardinal): HRESULT;
 var
   Remaining: UInt64;
   BytesToRead: Cardinal;
+
 begin
+
   ABytesRead := 0;
+
   if (ABuffer = nil) and (ABufferSize > 0) then
     begin
       Result := E_POINTER;
       Exit;
     end;
-  if AOffset >= UInt64(Length(FData)) then
+
+  if (AOffset >= UInt64(Length(FData))) then
     begin
       Result := S_OK;
       Exit;
     end;
+
   Remaining := UInt64(Length(FData)) - AOffset;
   BytesToRead := ABufferSize;
-  if UInt64(BytesToRead) > Remaining then
+
+  if (UInt64(BytesToRead) > Remaining) then
     BytesToRead := Cardinal(Remaining);
-  if BytesToRead > 0 then
+
+  if (BytesToRead > 0) then
     begin
-      Move(FData[Integer(AOffset)], ABuffer^, BytesToRead);
+      Move(FData[Integer(AOffset)],
+                 ABuffer^,
+                 BytesToRead);
       ABytesRead := BytesToRead;
     end;
-  Result := S_OK;
-end;
-
-function TMfCastMemoryContent.WaitForData(const AOffset: UInt64;
-  const ATimeoutMs: Cardinal): HRESULT;
-begin
   Result := S_OK;
 end;
 
 
 constructor TMfCastSegmentPublisher.Create(const AServer: IMfCastHttpServer);
 begin
-  inherited Create;
+
+  inherited Create();
+
   FServer := AServer;
-  FOutputMode := comHlsFmp4;
 end;
 
 
@@ -1887,12 +2274,13 @@ end;
 
 procedure TMfCastSegmentPublisher.SetLogger(const ALogger: IMfCastLogger);
 begin
+
   FLogger := ALogger;
 end;
 
-function TMfCastSegmentPublisher.BeginPresentation(
-  const AContentType: string; const AOutputMode: TMfCastOutputMode;
-  out AEntryPath: string): HRESULT;
+
+function TMfCastSegmentPublisher.BeginPresentation(const AContentType: string;
+                                                   out AEntryPath: string): HRESULT;
 begin
 
   AEntryPath := '';
@@ -1910,12 +2298,10 @@ begin
 
   if not Assigned(FServer) then
     begin
-
       Result := E_POINTER;
       Exit;
     end;
 
-  FOutputMode := AOutputMode;
   FBuffer := TMfCastLiveBuffer.Create();
 
   FContent := TMfCastLiveStreamContent.Create(FBuffer,
@@ -1926,7 +2312,6 @@ begin
                             FEntryPath);
   if FAILED(Result) then
     begin
-
       FContent := nil;
       FBuffer := nil;
       FEntryPath := '';
@@ -1941,10 +2326,11 @@ begin
 end;
 
 
-function TMfCastSegmentPublisher.GetByteStream(
-  out AByteStream: IMFByteStream): HRESULT;
+function TMfCastSegmentPublisher.GetByteStream(out AByteStream: IMFByteStream): HRESULT;
 begin
+
   AByteStream := FByteStream;
+
   if Assigned(AByteStream) then
     Result := S_OK
   else
@@ -1952,33 +2338,16 @@ begin
 end;
 
 
-function TMfCastSegmentPublisher.PublishInitializationSegment(
-  const AData: TBytes): HRESULT;
+function TMfCastSegmentPublisher.CompletePresentation(): HRESULT;
 begin
-  Result := S_OK;
-end;
 
-function TMfCastSegmentPublisher.PublishMediaFragment(
-  const ASequence, AStartTime100ns, ADuration100ns: Int64;
-  const AData: TBytes): HRESULT;
-begin
-  Result := S_OK;
-end;
-
-function TMfCastSegmentPublisher.UpdateManifest: HRESULT;
-begin
-  Result := S_OK;
-end;
-
-function TMfCastSegmentPublisher.CompletePresentation: HRESULT;
-begin
   if Assigned(FBuffer) then
     FBuffer.Complete();
   Result := S_OK;
 end;
 
-function TMfCastSegmentPublisher.AbortPresentation(
-  const AReason: HRESULT): HRESULT;
+
+function TMfCastSegmentPublisher.AbortPresentation(const AReason: HRESULT): HRESULT;
 begin
 
   if Assigned(FBuffer) then

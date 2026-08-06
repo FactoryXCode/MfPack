@@ -3,32 +3,29 @@ object MainWindow: TMainWindow
   Top = 0
   BorderWidth = 1
   Caption = 'Capture Engine Application Sample'
-  ClientHeight = 981
-  ClientWidth = 1637
-  Color = clDarkslategray
+  ClientHeight = 607
+  ClientWidth = 1013
+  Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -17
+  Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
   Menu = MainMenu
+  OldCreateOrder = True
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
-  PixelsPerInch = 144
   DesignSize = (
-    1637
-    981)
-  TextHeight = 21
+    1013
+    607)
+  PixelsPerInch = 96
+  TextHeight = 13
   object pnlSnapShot: TPanel
-    Left = 1170
+    Left = 724
     Top = 0
-    Width = 465
-    Height = 351
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
+    Width = 288
+    Height = 217
     Anchors = [akTop, akRight]
     BevelOuter = bvNone
     Color = clBackground
@@ -38,39 +35,27 @@ object MainWindow: TMainWindow
     object pbCapture: TPaintBox
       Left = 0
       Top = 0
-      Width = 465
-      Height = 309
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Width = 288
+      Height = 191
       Align = alClient
       Color = clBackground
       ParentColor = False
     end
     object pnlControls: TPanel
       Left = 0
-      Top = 309
-      Width = 465
-      Height = 42
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Top = 191
+      Width = 288
+      Height = 26
       Align = alBottom
       ParentBackground = False
       ShowCaption = False
       TabOrder = 0
       object butSaveToFile: TButton
-        Left = 137
-        Top = 2
-        Width = 109
-        Height = 37
+        Left = 85
+        Top = 1
+        Width = 67
+        Height = 23
         Hint = 'Save photo to file'
-        Margins.Left = 5
-        Margins.Top = 5
-        Margins.Right = 5
-        Margins.Bottom = 5
         Caption = '&Save To File'
         Enabled = False
         ParentShowHint = False
@@ -79,15 +64,11 @@ object MainWindow: TMainWindow
         OnClick = butSaveToFileClick
       end
       object butTakePhoto: TButton
-        Left = 18
-        Top = 2
-        Width = 110
-        Height = 37
+        Left = 11
+        Top = 1
+        Width = 68
+        Height = 23
         Hint = 'Save photo to file'
-        Margins.Left = 5
-        Margins.Top = 5
-        Margins.Right = 5
-        Margins.Bottom = 5
         Caption = '&Take Photo'
         Enabled = False
         ParentShowHint = False
@@ -96,28 +77,20 @@ object MainWindow: TMainWindow
         OnClick = butTakePhotoClick
       end
       object chkNoPreview: TCheckBox
-        Left = 263
-        Top = 9
-        Width = 145
-        Height = 23
-        Margins.Left = 5
-        Margins.Top = 5
-        Margins.Right = 5
-        Margins.Bottom = 5
+        Left = 163
+        Top = 6
+        Width = 90
+        Height = 14
         Caption = 'Auto Save'
         TabOrder = 2
       end
     end
   end
   object pnlInfo: TPanel
-    Left = -3
-    Top = 942
-    Width = 1649
-    Height = 42
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
+    Left = -2
+    Top = 583
+    Width = 1021
+    Height = 26
     Align = alCustom
     Anchors = [akLeft, akRight]
     AutoSize = True

@@ -234,7 +234,7 @@ begin
   SourceName := Trim(ASourceName);
   AMediaInfo.SourceName := SourceName;
 
-  if SourceName = '' then
+  if (SourceName = '') then
     begin
       Result := E_INVALIDARG;
       Exit;
@@ -291,7 +291,7 @@ end;
 constructor TMfCastMediaPlanner.Create(const ACapabilityResolver: IMfCastCapabilityResolver);
 begin
 
-  inherited Create;
+  inherited Create();
 
   FCapabilityResolver := ACapabilityResolver;
 end;
@@ -323,14 +323,12 @@ begin
 
   if (ARequestedMediaMode <> cmmAutomatic) then
     begin
-
       Result := S_OK;
       Exit;
     end;
 
   if not Assigned(FCapabilityResolver) then
     begin
-
       Result := E_POINTER;
       Exit;
     end;
@@ -355,18 +353,15 @@ begin
 
   if ContentAllowed and VideoAllowed and AudioAllowed then
     begin
-
       if AMediaInfo.HasTimedText and
          (ARequestedSubtitleMode <> csmNone) and
          (ARequestedSubtitleMode <> csmBurnIntoVideo) then
         begin
-
           ASelectedMediaMode := cmmDirectWithTextTrack;
           ASelectedSubtitleMode := csmExternalTextTrack;
         end
       else
         begin
-
           ASelectedMediaMode := cmmDirectFile;
           if (ARequestedSubtitleMode = csmAutomatic) then
             ASelectedSubtitleMode := csmNone;
@@ -395,7 +390,6 @@ begin
 
   if (Length(AProfile.AllowedContentTypes) = 0) then
     begin
-
       Result := AProfile.AllowUnknownFormats;
       Exit;
     end;
@@ -404,11 +398,9 @@ begin
 
   for I := 0 to Length(AProfile.AllowedContentTypes) - 1 do
     begin
-
       if SameText(AContentType,
                   AProfile.AllowedContentTypes[I]) then
         begin
-
           Result := True;
           Exit;
         end;
@@ -427,11 +419,9 @@ begin
 
   for I := 0 to Length(AAllowed) - 1 do
     begin
-
        if IsEqualGUID(ASubtype,
                       AAllowed[I]) then
          begin
-
            Result := True;
            Exit;
          end;

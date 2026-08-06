@@ -990,6 +990,7 @@ var
   hr: HResult;
 
 begin
+
   pt_CritSec.Enter;
   //while hr = S_False do
   //  begin
@@ -1008,7 +1009,7 @@ begin
       hr := pr_MediaEngine.TransferVideoFrame(IUnknown(wicbmp),
                                               @SourceRect,
                                               @DestRecr,
-                                              vMFARGB);
+                                              @vMFARGB);
     end;
 
   if SUCCEEDED(hr) then

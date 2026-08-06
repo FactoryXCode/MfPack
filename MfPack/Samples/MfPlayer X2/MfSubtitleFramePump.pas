@@ -1,0 +1,1555 @@
+// FactoryX
+//
+// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
+//
+// Project: Media Foundation - MFPack - Samples
+// Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
+// Module: MfSubtitleFramePump.pas
+// Kind: Pascal Unit
+// Release date: 29-07-2026
+// Language: ENU
+//
+// Revision Version: 3.2.0
+// Description: MfPlayer X2 frame pump. Reads decoded RGB32 video frames, burns subtitles into
+//              the frames, and writes the result to a new video stream.
+//
+// Company: FactoryX
+// Intiator(s): Tony (maXcomX), Peter (OzShips), Carmen (carmenh).
+// Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
+//
+//------------------------------------------------------------------------------
+// CHANGE LOG
+// Date       Person              Reason
+// ---------- ------------------- ----------------------------------------------
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+//------------------------------------------------------------------------------
+//
+// Remarks: Requires Windows 10 or higher.
+//
+// Related objects: -
+// Related projects: MfPackX320
+// Known Issues: -
+//
+// Compiler version: 23 up to 35
+// SDK version: 10.0.26100.4654
+//
+// Todo: -
+//
+// =============================================================================
+// Source: -
+//
+//==============================================================================
+//
+// LICENSE
+//
+// The contents of this file are subject to the Mozilla Public License
+// Version 2.0 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at
+// https://www.mozilla.org/en-US/MPL/2.0/
+//
+// Software distributed under the License is distributed on an "AS IS"
+// basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+// License for the specific language governing rights and limitations
+// under the License.
+//
+// Non commercial users may distribute this sourcecode provided that this
+// header is included in full at the top of the file.
+// Commercial users are not allowed to distribute this sourcecode as part of
+// their product.
+//
+//==============================================================================
+unit MfSubtitleFramePump;
+
+interface
+
+uses
+
+  {WinApi}
+  WinApi.Windows,
+  WinApi.WinApiTypes,
+  WinApi.ComBaseApi,
+  {}
+  WinApi.ActiveX.ObjBase,
+  WinApi.ActiveX.PropIdl,
+  {System}
+  System.SysUtils,
+  System.Classes,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.MfError,
+  WinApi.MediaFoundationApi.MfIdl,
+  WinApi.MediaFoundationApi.MfObjects,
+  WinApi.MediaFoundationApi.MfReadWrite,
+  WinApi.MediaFoundationApi.MfUtils,
+  {Project}
+  MfSubtitleCompositor;
+
+type
+  TMfSubtitleFramePumpProgress = procedure(Sender: TObject;
+                                           FramesWritten: Int64;
+                                           SampleTime: MFTIME;
+                                           var Cancel: Boolean) of object;
+
+  TMfSubtitleAudioState = record
+    PendingSample: IMFSample;
+    PendingTime: LONGLONG;
+    OutputTime: LONGLONG;
+    BytesPerSecond: UINT32;
+    Pending: Boolean;
+    Done: Boolean;
+  end;
+
+  TMfSubtitleFramePump = class(TObject)
+  private
+    FCompositor: TMfSubtitleCompositor;
+    FOnProgress: TMfSubtitleFramePumpProgress;
+    FFramesWritten: Int64;
+    FCancelRequested: Boolean;
+    FPauseRequested: Boolean;
+    FUseSoftwareVideoDecoder: Boolean;
+    FReader: IMFSourceReader;
+    FWriter: IMFSinkWriter;
+    FStreamIndex: DWORD;
+
+    function CreateReader(const InputFileName: WideString;
+                          out Reader: IMFSourceReader): HRESULT;
+    function ConfigureReader(Reader: IMFSourceReader;
+                             out MediaType: IMFMediaType;
+                             out Width: UINT32;
+                             out Height: UINT32;
+                             out FrameRateNum: UINT32;
+                             out FrameRateDen: UINT32): HRESULT;
+    function CreateWriter(const OutputFileName: WideString;
+                          Width: UINT32;
+                          Height: UINT32;
+                          FrameRateNum: UINT32;
+                          FrameRateDen: UINT32;
+                          Bitrate: UINT32;
+                          out Writer: IMFSinkWriter;
+                          out StreamIndex: DWORD;
+                          const OutputByteStream: IMFByteStream = nil;
+                          UseFragmentedMp4: Boolean = False): HRESULT;
+    function ConfigureAudioReader(const InputFileName: WideString;
+                                  out AudioReader: IMFSourceReader;
+                                  out AudioMediaType: IMFMediaType;
+                                  out HasAudio: Boolean): HRESULT;
+    function AddAudioStream(Writer: IMFSinkWriter;
+                            AudioInputType: IMFMediaType;
+                            out AudioStreamIndex: DWORD): HRESULT;
+    function GetAudioSampleDuration(Sample: IMFSample;
+                                    const AudioState: TMfSubtitleAudioState;
+                                    out SampleDuration: LONGLONG): HRESULT;
+    function WriteAudioSamples(AudioReader: IMFSourceReader;
+                               Writer: IMFSinkWriter;
+                               AudioStreamIndex: DWORD;
+                               var AudioState: TMfSubtitleAudioState;
+                               StopTime: LONGLONG): HRESULT;
+    function CompositeSample(Sample: IMFSample;
+                             Width: UINT32;
+                             Height: UINT32;
+                             SampleTime: MFTIME): HRESULT;
+    function FlipRgb32InPlace(VideoBuffer: PByte;
+                              BufferSize: DWORD;
+                              Width: UINT32;
+                              Height: UINT32;
+                              Stride: Integer): HRESULT;
+    function CancelRequested(SampleTime: MFTIME): Boolean;
+    function WaitIfPaused(var AExportStartTick: DWORD;
+                          SampleTime: MFTIME): Boolean;
+    function SetReaderPosition(const Reader: IMFSourceReader;
+                               const Position100ns: MFTIME): HRESULT;
+  public
+
+    constructor Create(Compositor: TMfSubtitleCompositor);
+
+    procedure Cancel();
+    procedure Pause();
+    procedure Resume();
+
+    function BurnSubtitlesToFile(const InputFileName: WideString;
+                                 const OutputFileName: WideString;
+                                 Bitrate: UINT32 = 8000000;
+                                 const OutputByteStream: IMFByteStream = nil;
+                                 UseFragmentedMp4: Boolean = False;
+                                 StartTime100ns: MFTIME = 0): HRESULT;
+
+    property FramesWritten: Int64 read FFramesWritten;
+    property UseSoftwareVideoDecoder: Boolean read FUseSoftwareVideoDecoder write FUseSoftwareVideoDecoder;
+    property OnProgress: TMfSubtitleFramePumpProgress read FOnProgress write FOnProgress;
+  end;
+
+
+implementation
+
+type
+  TMfSubtitleFramePumpCancelThread = class(TThread)
+  private
+    FReader: IMFSourceReader;
+    FWriter: IMFSinkWriter;
+    FStreamIndex: DWORD;
+  protected
+    procedure Execute(); override;
+
+  public
+
+    constructor Create(const Reader: IMFSourceReader;
+                       const Writer: IMFSinkWriter;
+                       StreamIndex: DWORD);
+  end;
+
+constructor TMfSubtitleFramePumpCancelThread.Create(const Reader: IMFSourceReader;
+                                                    const Writer: IMFSinkWriter;
+                                                    StreamIndex: DWORD);
+begin
+
+  inherited Create(True);
+
+  FreeOnTerminate := True;
+  Priority := tpHigher;
+  FReader := Reader;
+  FWriter := Writer;
+  FStreamIndex := StreamIndex;
+end;
+
+
+procedure TMfSubtitleFramePumpCancelThread.Execute();
+var
+  hr: HRESULT;
+  hrCom: HRESULT;
+  comInitialized: Boolean;
+
+begin
+
+  comInitialized := False;
+  OutputDebugString(PChar('Export: cancel helper started'));
+
+  hrCom := CoInitializeEx(nil,
+                          COINIT_MULTITHREADED);
+  if SUCCEEDED(hrCom) then
+    comInitialized := True;
+
+  try
+
+    if Assigned(FReader) then
+      begin
+        OutputDebugString(PChar('Export: cancel helper before reader Flush'));
+
+        hr := FReader.Flush(MF_SOURCE_READER_FIRST_VIDEO_STREAM);
+
+        OutputDebugString(PChar(Format('Export: cancel helper after reader Flush hr=%.8x',
+                                       [DWORD(hr)])));
+      end;
+
+    // Do not flush the sink writer during a graceful stop. We want samples that
+    // were already accepted by WriteSample to remain available for Finalize().
+  finally
+
+    FWriter := nil;
+    FReader := nil;
+    if comInitialized then
+      CoUninitialize();
+    OutputDebugString(PChar('Export: cancel helper done'));
+  end;
+end;
+
+
+constructor TMfSubtitleFramePump.Create(Compositor: TMfSubtitleCompositor);
+begin
+
+  inherited Create();
+
+  FCompositor := Compositor;
+  FFramesWritten := 0;
+  FCancelRequested := False;
+  FPauseRequested := False;
+  FUseSoftwareVideoDecoder := False;
+  FReader := nil;
+  FWriter := nil;
+  FStreamIndex := 0;
+end;
+
+
+function TMfSubtitleFramePump.CreateReader(const InputFileName: WideString;
+                                           out Reader: IMFSourceReader): HRESULT;
+var
+  attribs: IMFAttributes;
+
+begin
+
+  Reader := nil;
+  attribs := nil;
+
+  Result := MFCreateAttributes(attribs,
+                               2);
+  if FAILED(Result) then
+    Exit;
+
+  if FUseSoftwareVideoDecoder then
+    begin
+      Result := attribs.SetUINT32(MF_SOURCE_READER_DISABLE_DXVA,
+                                  UINT32(True));
+      if FAILED(Result) then
+        Exit;
+    end;
+
+  Result := attribs.SetUINT32(MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING,
+                              UINT32(True));
+  if FAILED(Result) then
+    Exit;
+
+  Result := MFCreateSourceReaderFromURL(PWideChar(InputFileName),
+                                        attribs,
+                                        Reader);
+end;
+
+
+function TMfSubtitleFramePump.ConfigureReader(Reader: IMFSourceReader;
+                                              out MediaType: IMFMediaType;
+                                              out Width: UINT32;
+                                              out Height: UINT32;
+                                              out FrameRateNum: UINT32;
+                                              out FrameRateDen: UINT32): HRESULT;
+var
+  partialType: IMFMediaType;
+
+begin
+
+  MediaType := nil;
+  Width := 0;
+  Height := 0;
+  FrameRateNum := 25;
+  FrameRateDen := 1;
+  partialType := nil;
+
+  if not Assigned(Reader) then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
+
+  Result := Reader.SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS,
+                                      False);
+  if FAILED(Result) then
+    Exit;
+
+  Result := Reader.SetStreamSelection(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                      True);
+  if FAILED(Result) then
+    Exit;
+
+  Result := MFCreateMediaType(partialType);
+  if FAILED(Result) then
+    Exit;
+
+  Result := partialType.SetGUID(MF_MT_MAJOR_TYPE,
+                                MFMediaType_Video);
+  if FAILED(Result) then
+    Exit;
+
+  Result := partialType.SetGUID(MF_MT_SUBTYPE,
+                                MFVideoFormat_RGB32);
+  if FAILED(Result) then
+    Exit;
+
+  Result := Reader.SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                       0,
+                                       partialType);
+  if FAILED(Result) then
+    Exit;
+
+  Result := Reader.GetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                       @MediaType);
+  if FAILED(Result) then
+    Exit;
+
+  Result := MFGetAttributeSize(MediaType,
+                               MF_MT_FRAME_SIZE,
+                               Width,
+                               Height);
+  if FAILED(Result) then
+    Exit;
+
+  Result := MFGetAttributeRatio(MediaType,
+                                MF_MT_FRAME_RATE,
+                                FrameRateNum,
+                                FrameRateDen);
+  if FAILED(Result) then
+    begin
+      FrameRateNum := 25;
+      FrameRateDen := 1;
+      Result := S_OK;
+    end;
+end;
+
+
+function TMfSubtitleFramePump.CreateWriter(const OutputFileName: WideString;
+                                           Width: UINT32;
+                                           Height: UINT32;
+                                           FrameRateNum: UINT32;
+                                           FrameRateDen: UINT32;
+                                           Bitrate: UINT32;
+                                           out Writer: IMFSinkWriter;
+                                           out StreamIndex: DWORD;
+                                           const OutputByteStream: IMFByteStream;
+                                           UseFragmentedMp4: Boolean): HRESULT;
+var
+  attribs: IMFAttributes;
+  outputType: IMFMediaType;
+  inputType: IMFMediaType;
+
+begin
+
+  Writer := nil;
+  StreamIndex := 0;
+  attribs := nil;
+  outputType := nil;
+  inputType := nil;
+
+  Result := MFCreateAttributes(attribs,
+                               2);
+  if FAILED(Result) then
+    Exit;
+
+  Result := attribs.SetUINT32(MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS,
+                              UINT32(False));
+  if FAILED(Result) then
+    Exit;
+
+  Result := attribs.SetUINT32(MF_SINK_WRITER_DISABLE_THROTTLING,
+                              UINT32(True));
+  if FAILED(Result) then
+    Exit;
+
+  if UseFragmentedMp4 then
+    begin
+      Result := attribs.SetGUID(MF_TRANSCODE_CONTAINERTYPE,
+                                MFTranscodeContainerType_FMPEG4);
+      if FAILED(Result) then
+        Exit;
+    end;
+
+  Result := MFCreateSinkWriterFromURL(PWideChar(OutputFileName),
+                                      OutputByteStream,
+                                      attribs,
+                                      Writer);
+  if FAILED(Result) then
+    Exit;
+
+  Result := MFCreateMediaType(outputType);
+  if FAILED(Result) then
+    Exit;
+
+  Result := outputType.SetGUID(MF_MT_MAJOR_TYPE,
+                               MFMediaType_Video);
+  if FAILED(Result) then
+    Exit;
+
+  Result := outputType.SetGUID(MF_MT_SUBTYPE,
+                               MFVideoFormat_H264);
+  if FAILED(Result) then
+    Exit;
+
+  Result := outputType.SetUINT32(MF_MT_AVG_BITRATE,
+                                 Bitrate);
+  if FAILED(Result) then
+    Exit;
+
+  Result := outputType.SetUINT32(MF_MT_INTERLACE_MODE,
+                                 MFVideoInterlace_Progressive);
+  if FAILED(Result) then
+    Exit;
+
+  Result := MFSetAttributeSize(outputType,
+                               MF_MT_FRAME_SIZE,
+                               Width,
+                               Height);
+  if FAILED(Result) then
+    Exit;
+
+  Result := MFSetAttributeRatio(outputType,
+                                MF_MT_FRAME_RATE,
+                                FrameRateNum,
+                                FrameRateDen);
+  if FAILED(Result) then
+    Exit;
+
+  Result := MFSetAttributeRatio(outputType,
+                                MF_MT_PIXEL_ASPECT_RATIO,
+                                1,
+                                1);
+  if FAILED(Result) then
+    Exit;
+
+
+  Result := Writer.AddStream(outputType,
+                             StreamIndex);
+  if FAILED(Result) then
+    Exit;
+
+  Result := MFCreateMediaType(inputType);
+  if FAILED(Result) then
+    Exit;
+
+  Result := inputType.SetGUID(MF_MT_MAJOR_TYPE,
+                              MFMediaType_Video);
+  if FAILED(Result) then
+    Exit;
+
+  Result := inputType.SetGUID(MF_MT_SUBTYPE,
+                              MFVideoFormat_RGB32);
+  if FAILED(Result) then
+    Exit;
+
+  Result := inputType.SetUINT32(MF_MT_INTERLACE_MODE,
+                                MFVideoInterlace_Progressive);
+  if FAILED(Result) then
+    Exit;
+
+  Result := MFSetAttributeSize(inputType,
+                               MF_MT_FRAME_SIZE,
+                               Width,
+                               Height);
+  if FAILED(Result) then
+    Exit;
+
+  Result := MFSetAttributeRatio(inputType,
+                                MF_MT_FRAME_RATE,
+                                FrameRateNum,
+                                FrameRateDen);
+  if FAILED(Result) then
+    Exit;
+
+  Result := MFSetAttributeRatio(inputType,
+                                MF_MT_PIXEL_ASPECT_RATIO,
+                                1,
+                                1);
+  if FAILED(Result) then
+    Exit;
+
+  Result := Writer.SetInputMediaType(StreamIndex,
+                                     inputType,
+                                     nil);
+end;
+
+
+function TMfSubtitleFramePump.ConfigureAudioReader(const InputFileName: WideString;
+                                                   out AudioReader: IMFSourceReader;
+                                                   out AudioMediaType: IMFMediaType;
+                                                   out HasAudio: Boolean): HRESULT;
+var
+  partialType: IMFMediaType;
+
+begin
+
+  AudioReader := nil;
+  AudioMediaType := nil;
+  HasAudio := False;
+  partialType := nil;
+
+  Result := MFCreateSourceReaderFromURL(PWideChar(InputFileName),
+                                        nil,
+                                        AudioReader);
+  if FAILED(Result) then
+    Exit;
+
+  Result := AudioReader.SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS,
+                                           False);
+  if FAILED(Result) then
+    Exit;
+
+  Result := AudioReader.SetStreamSelection(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
+                                           True);
+  if FAILED(Result) then
+    begin
+      Result := S_OK;
+      AudioReader := nil;
+      Exit;
+    end;
+
+  Result := MFCreateMediaType(partialType);
+  if FAILED(Result) then
+    Exit;
+
+  Result := partialType.SetGUID(MF_MT_MAJOR_TYPE,
+                                MFMediaType_Audio);
+  if FAILED(Result) then
+    Exit;
+
+  Result := partialType.SetGUID(MF_MT_SUBTYPE,
+                                MFAudioFormat_PCM);
+  if FAILED(Result) then
+    Exit;
+
+  Result := partialType.SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE,
+                                  16);
+  if FAILED(Result) then
+    Exit;
+
+  Result := partialType.SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
+                                  48000);
+  if FAILED(Result) then
+    Exit;
+
+  Result := partialType.SetUINT32(MF_MT_AUDIO_NUM_CHANNELS,
+                                  2);
+  if FAILED(Result) then
+    Exit;
+
+  Result := partialType.SetUINT32(MF_MT_AUDIO_BLOCK_ALIGNMENT,
+                                  4);
+  if FAILED(Result) then
+    Exit;
+
+  Result := partialType.SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
+                                  192000);
+  if FAILED(Result) then
+    Exit;
+
+  Result := AudioReader.SetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
+                                            0,
+                                            partialType);
+  if FAILED(Result) then
+    begin
+      Result := S_OK;
+      AudioReader := nil;
+      Exit;
+    end;
+
+  Result := AudioReader.GetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
+                                            @AudioMediaType);
+  if SUCCEEDED(Result) then
+    HasAudio := True;
+end;
+
+
+function TMfSubtitleFramePump.AddAudioStream(Writer: IMFSinkWriter;
+                                             AudioInputType: IMFMediaType;
+                                             out AudioStreamIndex: DWORD): HRESULT;
+var
+  audioOutputType: IMFMediaType;
+  channels: UINT32;
+  samplesPerSec: UINT32;
+  bitsPerSample: UINT32;
+  avgBytesPerSec: UINT32;
+
+begin
+
+  AudioStreamIndex := 0;
+  audioOutputType := nil;
+  channels := 2;
+  samplesPerSec := 48000;
+  bitsPerSample := 16;
+
+  if (not Assigned(Writer)) or (not Assigned(AudioInputType)) then
+    begin
+
+      Result := E_POINTER;
+      Exit;
+    end;
+
+  if FAILED(AudioInputType.GetUINT32(MF_MT_AUDIO_NUM_CHANNELS,
+                                     channels)) or (channels = 0) then
+    channels := 2;
+  if FAILED(AudioInputType.GetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
+                                     samplesPerSec)) or (samplesPerSec = 0) then
+    samplesPerSec := 48000;
+  if FAILED(AudioInputType.GetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE,
+                                     bitsPerSample)) or (bitsPerSample = 0) then
+    bitsPerSample := 16;
+
+  if (channels <= 1) then
+    avgBytesPerSec := 12000
+  else
+    if (channels <= 2) then
+      avgBytesPerSec := 24000
+    else
+      avgBytesPerSec := 48000;
+
+  OutputDebugString(PChar(Format('Export: audio input channels=%d rate=%d bits=%d aacBytesPerSec=%d',
+                                 [channels, samplesPerSec, bitsPerSample, avgBytesPerSec])));
+
+  Result := MFCreateMediaType(audioOutputType);
+  if FAILED(Result) then
+    Exit;
+
+  Result := audioOutputType.SetGUID(MF_MT_MAJOR_TYPE,
+                                    MFMediaType_Audio);
+  if FAILED(Result) then
+    Exit;
+
+  Result := audioOutputType.SetGUID(MF_MT_SUBTYPE,
+                                    MFAudioFormat_AAC);
+  if FAILED(Result) then
+    Exit;
+
+  Result := audioOutputType.SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE,
+                                      bitsPerSample);
+  if FAILED(Result) then
+    Exit;
+
+  Result := audioOutputType.SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
+                                      samplesPerSec);
+  if FAILED(Result) then
+    Exit;
+
+  Result := audioOutputType.SetUINT32(MF_MT_AUDIO_NUM_CHANNELS,
+                                      channels);
+  if FAILED(Result) then
+    Exit;
+
+
+  Result := audioOutputType.SetUINT32(MF_MT_AAC_AUDIO_PROFILE_LEVEL_INDICATION,
+                                      $29);
+  if FAILED(Result) then
+    Exit;
+
+  Result := audioOutputType.SetUINT32(MF_MT_AAC_PAYLOAD_TYPE,
+                                      0);
+  if FAILED(Result) then
+    Exit;
+
+  Result := audioOutputType.SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
+                                      avgBytesPerSec);
+  if FAILED(Result) then
+    Exit;
+
+  Result := audioOutputType.SetUINT32(MF_MT_ALL_SAMPLES_INDEPENDENT,
+                                      UINT32(True));
+  if FAILED(Result) then
+    Exit;
+
+  Result := Writer.AddStream(audioOutputType,
+                             AudioStreamIndex);
+  if FAILED(Result) then
+    begin
+      OutputDebugString(PChar(Format('Export: audio AddStream failed hr=%.8x',
+                                     [DWORD(Result)])));
+      Exit;
+    end;
+
+  Result := Writer.SetInputMediaType(AudioStreamIndex,
+                                     AudioInputType,
+                                     nil);
+  if FAILED(Result) then
+    OutputDebugString(PChar(Format('Export: audio SetInputMediaType failed hr=%.8x', [DWORD(Result)])));
+end;
+
+
+function TMfSubtitleFramePump.GetAudioSampleDuration(Sample: IMFSample;
+                                                    const AudioState: TMfSubtitleAudioState;
+                                                    out SampleDuration: LONGLONG): HRESULT;
+var
+  totalLength: DWORD;
+
+begin
+
+  SampleDuration := 0;
+  Result := S_OK;
+
+  if not Assigned(Sample) then
+    begin
+
+      Result := E_POINTER;
+      Exit;
+    end;
+
+  totalLength := 0;
+  if SUCCEEDED(Sample.GetTotalLength(@totalLength)) and
+     (totalLength > 0) and (AudioState.BytesPerSecond > 0) then
+    SampleDuration := (Int64(totalLength) * 10000000) div Int64(AudioState.BytesPerSecond);
+
+  if (SampleDuration <= 0) then
+    begin
+      Sample.GetSampleDuration(@SampleDuration);
+      if (SampleDuration <= 0) then
+        SampleDuration := 100000;
+    end;
+end;
+
+
+procedure TMfSubtitleFramePump.Cancel();
+begin
+
+  if FCancelRequested then
+    Exit;
+
+  OutputDebugString(PChar('Export: cancel requested'));
+  FCancelRequested := True;
+  FPauseRequested := False;
+
+  if Assigned(FReader) or Assigned(FWriter) then
+    TMfSubtitleFramePumpCancelThread.Create(FReader,
+                                            FWriter,
+                                            FStreamIndex).Start();
+end;
+
+
+procedure TMfSubtitleFramePump.Pause();
+begin
+
+  if FCancelRequested or FPauseRequested then
+    Exit;
+
+  OutputDebugString(PChar('Export: pause requested'));
+  FPauseRequested := True;
+end;
+
+
+procedure TMfSubtitleFramePump.Resume();
+begin
+
+  if not FPauseRequested then
+    Exit;
+
+  OutputDebugString(PChar('Export: resume requested'));
+  FPauseRequested := False;
+end;
+
+
+function TMfSubtitleFramePump.WaitIfPaused(var AExportStartTick: DWORD;
+                                           SampleTime: MFTIME): Boolean;
+var
+  pauseStartTick: DWORD;
+  pauseElapsedMs: DWORD;
+begin
+
+  Result := FCancelRequested;
+  if Result or (not FPauseRequested) then
+    Exit;
+
+  pauseStartTick := GetTickCount();
+  OutputDebugString(PChar(Format('Export: paused at frames=%d time=%d',
+                                 [FFramesWritten, SampleTime])));
+  while FPauseRequested and (not FCancelRequested) do
+    Sleep(25);
+
+  pauseElapsedMs := DWORD(GetTickCount() - pauseStartTick);
+  AExportStartTick := DWORD(AExportStartTick + pauseElapsedMs);
+  OutputDebugString(PChar(Format('Export: resumed after %d ms',
+                                 [pauseElapsedMs])));
+  Result := FCancelRequested;
+end;
+
+function TMfSubtitleFramePump.CancelRequested(SampleTime: MFTIME): Boolean;
+var
+  cancel: Boolean;
+
+begin
+
+  Result := FCancelRequested;
+
+  if Assigned(FOnProgress) then
+    begin
+
+      cancel := False;
+      FOnProgress(Self,
+                  FFramesWritten,
+                  SampleTime,
+                  cancel);
+      Result := Result or cancel;
+    end;
+end;
+
+
+function TMfSubtitleFramePump.WriteAudioSamples(AudioReader: IMFSourceReader;
+                                                Writer: IMFSinkWriter;
+                                                AudioStreamIndex: DWORD;
+                                                var AudioState: TMfSubtitleAudioState;
+                                                StopTime: LONGLONG): HRESULT;
+var
+  sample: IMFSample;
+  actualStreamIndex: DWORD;
+  flags: DWORD;
+  sampleTime: LONGLONG;
+  sampleDuration: LONGLONG;
+
+begin
+
+  Result := S_OK;
+
+  if (not Assigned(AudioReader)) or (not Assigned(Writer)) or AudioState.Done then
+    Exit;
+
+  if AudioState.Pending then
+    begin
+
+      if (StopTime > 0) and (AudioState.PendingTime > StopTime) then
+        Exit;
+
+      sample := AudioState.PendingSample;
+      AudioState.PendingSample := nil;
+      AudioState.Pending := False;
+
+      if Assigned(sample) then
+        begin
+          Result := GetAudioSampleDuration(sample,
+                                           AudioState,
+                                           sampleDuration);
+          if FAILED(Result) then
+            Exit;
+          Result := sample.SetSampleTime(AudioState.PendingTime);
+
+          if SUCCEEDED(Result) then
+            Result := sample.SetSampleDuration(sampleDuration);
+
+          if SUCCEEDED(Result) then
+            Result := Writer.WriteSample(AudioStreamIndex,
+                                         sample);
+          if FAILED(Result) then
+            Exit;
+          AudioState.OutputTime := AudioState.PendingTime + sampleDuration;
+        end;
+    end;
+
+  while True do
+    begin
+
+      sample := nil;
+      actualStreamIndex := 0;
+      flags := 0;
+      sampleTime := 0;
+
+      Result := AudioReader.ReadSample(MF_SOURCE_READER_FIRST_AUDIO_STREAM,
+                                       0,
+                                       @actualStreamIndex,
+                                       @flags,
+                                       @sampleTime,
+                                       @sample);
+      if FAILED(Result) then
+        Break;
+
+      if ((flags and MF_SOURCE_READERF_ENDOFSTREAM) <> 0) then
+        begin
+
+          AudioState.Done := True;
+          Break;
+        end;
+
+      if ((flags and MF_SOURCE_READERF_ERROR) <> 0) or
+         ((flags and MF_SOURCE_READERF_NATIVEMEDIATYPECHANGED) <> 0) or
+         ((flags and MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED) <> 0) then
+        begin
+
+          Result := E_FAIL;
+          Break;
+        end;
+
+      if not Assigned(sample) then
+        Continue;
+
+      if (StopTime > 0) and (AudioState.OutputTime > StopTime) then
+        begin
+          AudioState.PendingSample := sample;
+          AudioState.PendingTime := AudioState.OutputTime;
+          AudioState.Pending := True;
+          Break;
+        end;
+
+      Result := GetAudioSampleDuration(sample,
+                                       AudioState,
+                                       sampleDuration);
+      if FAILED(Result) then
+        Break;
+
+      Result := sample.SetSampleTime(AudioState.OutputTime);
+      if SUCCEEDED(Result) then
+        Result := sample.SetSampleDuration(sampleDuration);
+
+      if SUCCEEDED(Result) then
+        Result := Writer.WriteSample(AudioStreamIndex,
+                                     sample);
+      if FAILED(Result) then
+        Break;
+
+      Inc(AudioState.OutputTime,
+          sampleDuration);
+    end;
+end;
+
+
+function TMfSubtitleFramePump.FlipRgb32InPlace(VideoBuffer: PByte;
+                                              BufferSize: DWORD;
+                                              Width: UINT32;
+                                              Height: UINT32;
+                                              Stride: Integer): HRESULT;
+var
+  rowBytes: Integer;
+  row: Integer;
+  halfRows: Integer;
+  requiredBytes: UInt64;
+  topRow: PByte;
+  bottomRow: PByte;
+  tempRow: Pointer;
+
+begin
+
+  Result := S_OK;
+
+  if (VideoBuffer = nil) or
+     (Width = 0) or
+     (Height = 0) or
+     (Stride <= 0) then
+    begin
+
+      Result := E_INVALIDARG;
+      Exit;
+    end;
+
+  rowBytes := Integer(Width) * 4;
+  if (Stride < rowBytes) then
+    begin
+
+      Result := E_INVALIDARG;
+      Exit;
+    end;
+
+  requiredBytes := UInt64(Stride) * UInt64(Height);
+  if (requiredBytes > UInt64(BufferSize)) then
+    begin
+
+      Result := E_INVALIDARG;
+      Exit;
+    end;
+
+  halfRows := Integer(Height div 2);
+  if (halfRows <= 0) then
+    Exit;
+
+  GetMem(tempRow,
+         rowBytes);
+  if (tempRow = nil) then
+    begin
+
+      Result := E_OUTOFMEMORY;
+      Exit;
+    end;
+
+  try
+    for row := 0 to halfRows - 1 do
+      begin
+
+        topRow := PByte(NativeInt(VideoBuffer) + (NativeInt(row) * NativeInt(Stride)));
+        bottomRow := PByte(NativeInt(VideoBuffer) + (NativeInt(Integer(Height) - 1 - row) * NativeInt(Stride)));
+
+        CopyMemory(tempRow,
+                   topRow,
+                   rowBytes);
+
+        CopyMemory(topRow,
+                   bottomRow,
+                   rowBytes);
+
+        CopyMemory(bottomRow,
+                   tempRow,
+                   rowBytes);
+      end;
+  finally
+    FreeMem(tempRow);
+  end;
+end;
+
+
+function TMfSubtitleFramePump.CompositeSample(Sample: IMFSample;
+                                              Width: UINT32;
+                                              Height: UINT32;
+                                              SampleTime: MFTIME): HRESULT;
+var
+  buffer: IMFMediaBuffer;
+  data: PByte;
+  maxLength: DWORD;
+  currentLength: DWORD;
+  stride: Integer;
+
+begin
+
+  Result := S_OK;
+
+  if (not Assigned(Sample)) or (not Assigned(FCompositor)) then
+    Exit;
+
+  buffer := nil;
+  data := nil;
+  maxLength := 0;
+  currentLength := 0;
+  stride := Integer(Width) * 4;
+
+  Result := Sample.ConvertToContiguousBuffer(@buffer);
+  if FAILED(Result) then
+    Exit;
+
+  Result := buffer.Lock(data,
+                        @maxLength,
+                        @currentLength);
+  if FAILED(Result) then
+    Exit;
+
+  try
+    Result := FCompositor.CompositeRgb32(data,
+                                         currentLength,
+                                         Integer(Width),
+                                         Integer(Height),
+                                         stride,
+                                         SampleTime div 10000);
+    if SUCCEEDED(Result) then
+      Result := FlipRgb32InPlace(data,
+                                 currentLength,
+                                 Width,
+                                 Height,
+                                 stride);
+  finally
+    buffer.Unlock();
+  end;
+end;
+
+
+function TMfSubtitleFramePump.SetReaderPosition(const Reader: IMFSourceReader;
+                                                const Position100ns: MFTIME): HRESULT;
+var
+  Position: PROPVARIANT;
+
+begin
+
+  if not Assigned(Reader) then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
+
+  if (Position100ns <= 0) then
+    begin
+      Result := S_OK;
+      Exit;
+    end;
+
+  PropVariantInit(Position);
+
+  try
+    Position.vt := VT_I8;
+    Position.hVal.QuadPart := Position100ns;
+    Result := Reader.SetCurrentPosition(GUID_NULL,
+                                        Position);
+  finally
+    PropVariantClear(Position);
+  end;
+end;
+
+
+function TMfSubtitleFramePump.BurnSubtitlesToFile(const InputFileName: WideString;
+                                                  const OutputFileName: WideString;
+                                                  Bitrate: UINT32;
+                                                  const OutputByteStream: IMFByteStream;
+                                                  UseFragmentedMp4: Boolean;
+                                                  StartTime100ns: MFTIME): HRESULT;
+var
+  reader: IMFSourceReader;
+  writer: IMFSinkWriter;
+  mediaType: IMFMediaType;
+  audioType: IMFMediaType;
+  sample: IMFSample;
+  audioReader: IMFSourceReader;
+  streamIndex: DWORD;
+  audioStreamIndex: DWORD;
+  actualStreamIndex: DWORD;
+  flags: DWORD;
+  width: UINT32;
+  height: UINT32;
+  frameRateNum: UINT32;
+  frameRateDen: UINT32;
+  sampleTime: LONGLONG;
+  sampleDuration: LONGLONG;
+  frameDuration: LONGLONG;
+  outputTime: LONGLONG;
+  lastOutputTime: LONGLONG;
+  emptyReads: Integer;
+  hasAudio: Boolean;
+  audioHr: HRESULT;
+  audioState: TMfSubtitleAudioState;
+  lastReadDebugFrame: Int64;
+  lastWriteDebugFrame: Int64;
+  writeRetryCount: Integer;
+  exportStartTick: DWORD;
+  paceTargetMs: Int64;
+  paceElapsedMs: Int64;
+  paceSleepMs: Int64;
+  subtitleTime: MFTIME;
+  useSourceSubtitleTime: Boolean;
+
+begin
+
+  FFramesWritten := 0;
+  FCancelRequested := False;
+  FPauseRequested := False;
+  FReader := nil;
+  FWriter := nil;
+  FStreamIndex := 0;
+  reader := nil;
+  writer := nil;
+  mediaType := nil;
+  audioType := nil;
+  sample := nil;
+  audioReader := nil;
+  streamIndex := 0;
+  audioStreamIndex := 0;
+  actualStreamIndex := 0;
+  flags := 0;
+  sampleTime := 0;
+  frameDuration := 400000;
+  outputTime := 0;
+  lastOutputTime := -1;
+  emptyReads := 0;
+  hasAudio := False;
+  audioState.PendingSample := nil;
+  audioState.PendingTime := 0;
+  audioState.OutputTime := 0;
+  audioState.BytesPerSecond := 0;
+  audioState.Pending := False;
+  audioState.Done := False;
+  lastReadDebugFrame := -1;
+  lastWriteDebugFrame := -1;
+
+  if (InputFileName = '') or
+     ((OutputFileName = '') and (not Assigned(OutputByteStream))) then
+    begin
+      Result := E_INVALIDARG;
+      Exit;
+    end;
+
+  OutputDebugString(PChar('Export: creating source reader'));
+  Result := CreateReader(InputFileName,
+                         reader);
+  if FAILED(Result) then
+    Exit;
+  FReader := reader;
+
+  OutputDebugString(PChar('Export: configuring source reader'));
+  Result := ConfigureReader(reader,
+                            mediaType,
+                            width,
+                            height,
+                            frameRateNum,
+                            frameRateDen);
+  if FAILED(Result) then
+    Exit;
+
+  if (frameRateNum > 0) then
+    frameDuration := (Int64(frameRateDen) * 10000000) div Int64(frameRateNum);
+
+  if (frameDuration <= 0) then
+    frameDuration := 400000;
+
+  if (StartTime100ns < 0) then
+    StartTime100ns := 0;
+
+  // AVI timestamps are commonly unreliable, so retain the stable CFR clock
+  // used by the existing export path. Other containers provide the original
+  // timestamp of the decoded picture, which is the correct subtitle lookup
+  // time even though the cast MP4 itself is rebased to zero.
+  useSourceSubtitleTime := not SameText(ExtractFileExt(InputFileName), '.avi');
+
+  Result := SetReaderPosition(reader,
+                              StartTime100ns);
+  if FAILED(Result) then
+    Exit;
+
+  OutputDebugString(PChar('Export: creating sink writer'));
+  Result := CreateWriter(OutputFileName,
+                         width,
+                         height,
+                         frameRateNum,
+                         frameRateDen,
+                         Bitrate,
+                         writer,
+                         streamIndex,
+                         OutputByteStream,
+                         UseFragmentedMp4);
+  if FAILED(Result) then
+    Exit;
+
+  FWriter := writer;
+  FStreamIndex := streamIndex;
+
+  audioHr := ConfigureAudioReader(InputFileName,
+                                  audioReader,
+                                  audioType,
+                                  hasAudio);
+  if FAILED(audioHr) then
+    begin
+      OutputDebugString(PChar(Format('Export: audio reader disabled hr=%.8x', [DWORD(audioHr)])));
+      hasAudio := False;
+      audioReader := nil;
+      audioType := nil;
+    end;
+
+  if hasAudio then
+    begin
+      audioHr := SetReaderPosition(audioReader,
+                                   StartTime100ns);
+      if FAILED(audioHr) then
+        begin
+          OutputDebugString(PChar(Format('Export: audio seek disabled hr=%.8x', [DWORD(audioHr)])));
+          hasAudio := False;
+          audioReader := nil;
+          audioType := nil;
+        end;
+    end;
+
+  if hasAudio then
+    begin
+
+      audioHr := AddAudioStream(writer,
+                                audioType,
+                                audioStreamIndex);
+      if FAILED(audioHr) then
+        begin
+          OutputDebugString(PChar(Format('Export: audio stream disabled hr=%.8x', [DWORD(audioHr)])));
+          hasAudio := False;
+          audioReader := nil;
+          audioType := nil;
+        end
+      else
+        begin
+          if FAILED(audioType.GetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
+                                        audioState.BytesPerSecond)) or
+             (audioState.BytesPerSecond = 0) then
+            audioState.BytesPerSecond := 48000 * 2 * 16 div 8;
+
+          OutputDebugString(PChar(Format('Export: audio stream enabled index=%d bytesPerSec=%d', [audioStreamIndex, audioState.BytesPerSecond])));
+        end;
+    end;
+
+  Result := writer.BeginWriting();
+  if FAILED(Result) then
+    Exit;
+
+  exportStartTick := GetTickCount();
+
+  while True do
+    begin
+
+      sample := nil;
+      flags := 0;
+      actualStreamIndex := 0;
+      sampleTime := 0;
+
+      if CancelRequested(outputTime) then
+        begin
+          if (FFramesWritten > 0) then
+            Result := S_OK
+          else
+            Result := E_ABORT;
+          Break;
+        end;
+
+      if WaitIfPaused(exportStartTick,
+                      outputTime) then
+        begin
+          if (FFramesWritten > 0) then
+            Result := S_OK
+          else
+            Result := E_ABORT;
+          Break;
+        end;
+
+      if (FFramesWritten <> lastReadDebugFrame) and ((FFramesWritten mod 250) = 0) then
+        begin
+          lastReadDebugFrame := FFramesWritten;
+          OutputDebugString(PChar(Format('Export: before ReadSample frames=%d time=%d', [FFramesWritten, outputTime])));
+        end;
+
+      Result := reader.ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                  0,
+                                  @actualStreamIndex,
+                                  @flags,
+                                  @sampleTime,
+                                  @sample);
+      if FAILED(Result) then
+        Break;
+
+      if CancelRequested(outputTime) then
+        begin
+          if (FFramesWritten > 0) then
+            Result := S_OK
+          else
+            Result := E_ABORT;
+          Break;
+        end;
+
+      if ((flags and MF_SOURCE_READERF_ENDOFSTREAM) <> 0) then
+        Break;
+
+      if ((flags and MF_SOURCE_READERF_ERROR) <> 0) or
+         ((flags and MF_SOURCE_READERF_NATIVEMEDIATYPECHANGED) <> 0) or
+         ((flags and MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED) <> 0) then
+        begin
+
+          Result := E_FAIL;
+          Break;
+        end;
+
+      if ((flags and MF_SOURCE_READERF_STREAMTICK) <> 0) or
+         (not Assigned(sample)) then
+        begin
+          Inc(emptyReads);
+          if (emptyReads > 1000) then
+            begin
+              Result := E_FAIL;
+              Break;
+            end;
+          Sleep(1);
+          Continue;
+        end;
+
+      emptyReads := 0;
+
+      // AVI files often have sparse, repeated, or otherwise unreliable frame
+      // timestamps. Generate a stable CFR export timeline from the configured
+      // frame rate so audio/video muxing and subtitle timing stay coherent.
+      outputTime := FFramesWritten * frameDuration;
+      lastOutputTime := outputTime;
+
+      while not CancelRequested(outputTime) do
+        begin
+          if WaitIfPaused(exportStartTick,
+                          outputTime) then
+            Break;
+
+          paceTargetMs := outputTime div 10000;
+          paceElapsedMs := Int64(DWORD(GetTickCount() - exportStartTick));
+          if (paceElapsedMs + 5 >= paceTargetMs) then
+            Break;
+
+          paceSleepMs := paceTargetMs - paceElapsedMs;
+          if paceSleepMs > 25 then
+            paceSleepMs := 25;
+          Sleep(DWORD(paceSleepMs));
+        end;
+
+      if CancelRequested(outputTime) then
+        begin
+          if (FFramesWritten > 0) then
+            Result := S_OK
+          else
+            Result := E_ABORT;
+          Break;
+        end;
+
+      Result := sample.SetSampleTime(outputTime);
+      if FAILED(Result) then
+        Break;
+
+      if useSourceSubtitleTime and (sampleTime >= 0) then
+        subtitleTime := sampleTime
+      else
+        subtitleTime := StartTime100ns + outputTime;
+
+      if FFramesWritten = 0 then
+        OutputDebugString(PChar(Format(
+          'Export: first frame source=%d output=%d subtitle=%d requested=%d',
+          [sampleTime, outputTime, subtitleTime, StartTime100ns])));
+
+      Result := CompositeSample(sample,
+                                width,
+                                height,
+                                subtitleTime);
+      if FAILED(Result) then
+        Break;
+
+      sampleDuration := frameDuration;
+      Result := sample.SetSampleDuration(sampleDuration);
+      if FAILED(Result) then
+        Break;
+
+      if (FFramesWritten <> lastWriteDebugFrame) and ((FFramesWritten mod 250) = 0) then
+        begin
+          lastWriteDebugFrame := FFramesWritten;
+          OutputDebugString(PChar(Format('Export: before WriteSample frames=%d time=%d',
+                                          [FFramesWritten, outputTime])));
+        end;
+
+      writeRetryCount := 0;
+      repeat
+        Result := writer.WriteSample(streamIndex,
+                                     sample);
+        if Result <> E_OUTOFMEMORY then
+          Break;
+
+        Inc(writeRetryCount);
+        if (writeRetryCount = 1) or ((writeRetryCount mod 20) = 0) then
+          OutputDebugString(PChar(Format('Export: video WriteSample waiting for encoder frames=%d retries=%d',
+                                         [FFramesWritten, writeRetryCount])));
+        Sleep(25);
+      until (writeRetryCount >= 200) or CancelRequested(outputTime);
+
+      if FAILED(Result) then
+        Break;
+
+      if hasAudio and Assigned(audioReader) then
+        begin
+          audioHr := WriteAudioSamples(audioReader,
+                                       writer,
+                                       audioStreamIndex,
+                                       audioState,
+                                       outputTime + sampleDuration);
+          if FAILED(audioHr) then
+            begin
+              Result := audioHr;
+              Break;
+            end;
+        end;
+
+      Inc(FFramesWritten);
+      if CancelRequested(outputTime) then
+        begin
+
+          if (FFramesWritten > 0) then
+            Result := S_OK
+          else
+            Result := E_ABORT;
+          Break;
+        end;
+    end;
+
+  if Assigned(writer) and
+     SUCCEEDED(Result) and
+     hasAudio and
+     Assigned(audioReader) and
+     (FFramesWritten > 0) then
+    begin
+      OutputDebugString(PChar(Format('Export: before audio copy stop=%d',
+                                     [lastOutputTime + frameDuration])));
+      audioHr := WriteAudioSamples(audioReader,
+                                   writer,
+                                   audioStreamIndex,
+                                   audioState,
+                                   lastOutputTime + frameDuration);
+      OutputDebugString(PChar(Format('Export: after audio copy hr=%.8x',
+                                     [DWORD(audioHr)])));
+    end;
+
+  if Assigned(writer) and SUCCEEDED(Result) and (FFramesWritten > 0) then
+    begin
+      OutputDebugString(PChar(Format('Export: before Finalize cancel=%d',
+                                     [Integer(FCancelRequested)])));
+      Result := writer.Finalize();
+      OutputDebugString(PChar(Format('Export: after Finalize hr=%.8x',
+                                     [DWORD(Result)])));
+    end
+  else
+    OutputDebugString(PChar(Format('Export: skipping Finalize hr=%.8x cancel=%d frames=%d',
+                                   [DWORD(Result), Integer(FCancelRequested), FFramesWritten])));
+
+  sample := nil;
+  audioState.PendingSample := nil;
+  audioType := nil;
+  mediaType := nil;
+  audioReader := nil;
+  writer := nil;
+  reader := nil;
+  FWriter := nil;
+  FReader := nil;
+  OutputDebugString(PChar(Format('Export: done hr=%.8x frames=%d videoSec=%.3f audioSec=%.3f audioBps=%d',
+                                 [DWORD(Result), FFramesWritten, (lastOutputTime + frameDuration) / 10000000.0, audioState.OutputTime / 10000000.0, audioState.BytesPerSecond])));
+end;
+
+end.

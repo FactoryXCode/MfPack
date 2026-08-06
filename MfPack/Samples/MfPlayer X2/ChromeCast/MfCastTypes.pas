@@ -362,6 +362,7 @@ type
     SubtitleSourceName: string;
     SubtitleLanguage: string;
     SubtitleAspectRatio: Single;
+    SubtitleData: TBytes;
     Encoding: TMfCastEncodingSettings;
     procedure Reset();
   end;
@@ -398,6 +399,7 @@ end;
 
 procedure TMfCastSubtitleAsset.Reset();
 begin
+
   Enabled := False;
   ContentType := '';
   Language := '';
@@ -422,6 +424,7 @@ end;
 
 procedure TMfCastMediaInfo.Reset();
 begin
+
   SourceName := '';
   Title := '';
   ContentType := '';
@@ -692,6 +695,7 @@ begin
   SubtitleSourceName := '';
   SubtitleLanguage := '';
   SubtitleAspectRatio := 0.0;
+  SetLength(SubtitleData, 0);
   Encoding.Reset();
 end;
 

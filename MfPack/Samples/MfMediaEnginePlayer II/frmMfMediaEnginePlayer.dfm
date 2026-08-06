@@ -8,7 +8,7 @@ object FeMediaEnginePlayer: TFeMediaEnginePlayer
   Caption = 'MePlayer II'
   ClientHeight = 350
   ClientWidth = 674
-  Color = clDarkslategray
+  Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -151,11 +151,13 @@ object FeMediaEnginePlayer: TFeMediaEnginePlayer
     000000000000000000000000000000000000000000000000000000000000}
   KeyPreview = True
   Menu = MainMenu1
+  OldCreateOrder = True
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnKeyUp = FormKeyUp
   OnResize = FormResize
+  PixelsPerInch = 96
   TextHeight = 13
   object pnlControls: TPanel
     Left = 0
@@ -298,7 +300,7 @@ object FeMediaEnginePlayer: TFeMediaEnginePlayer
       ExplicitWidth = 662
     end
     object butFullScreen: TButton
-      Left = 535
+      Left = 531
       Top = 16
       Width = 25
       Height = 24
@@ -366,7 +368,6 @@ object FeMediaEnginePlayer: TFeMediaEnginePlayer
     AutoSize = True
     BevelOuter = bvNone
     Caption = 'MePlayer II'
-    Color = clDarkslategray
     Ctl3D = False
     UseDockManager = False
     DoubleBuffered = True

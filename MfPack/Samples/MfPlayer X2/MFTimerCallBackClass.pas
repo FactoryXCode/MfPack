@@ -21,6 +21,7 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
+// 01/08/2026 All                 Fixed timer interval initialization and async UI notification.
 // 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
 //------------------------------------------------------------------------------
 //
@@ -83,6 +84,11 @@ uses
   {Project}
   MfPCXConstants;
 
+const
+  // MFTIME uses 100-nanosecond units. A 100 ms UI update cadence keeps the
+  // progress display responsive without flooding the Media Foundation queue.
+  MF_PLAYER_UI_TIMER_INTERVAL_HNS = 100 * 10000;
+
 type
 
   TMFCallBack = class(TInterfacedPersistent, IMFAsyncCallback)
@@ -132,13 +138,14 @@ type
       destructor Destroy(); override;
 
       property ClockProperties: MFCLOCK_PROPERTIES read GetClockProperties;
-      property TimerResolution: LongWord read m_TimerResolution write SetTimerResolution default 1;
+      property TimerResolution: LongWord read m_TimerResolution write SetTimerResolution default MF_PLAYER_UI_TIMER_INTERVAL_HNS;
       property ClockTime: MFTIME read m_hnsClockTime;
 
   end;
 
 var
   MFPresentationClock: IMFPresentationClock;
+
 
 implementation
 
@@ -153,6 +160,11 @@ begin
     raise Exception.Create('Callback initialization failed: MFPresentationClock is not created.');
 
   m_hwndOwner := OwnerHandle;
+  m_TimerResolution := MF_PLAYER_UI_TIMER_INTERVAL_HNS;
+  m_hnsClockTime := 0;
+  m_TimerFlags := DWord(MFTIMER_RELATIVE);
+  m_CancellationObject := nil;
+
   // Create timer object, if it fails, raise exception
   if FAILED(MFPresentationClock.QueryInterface(IID_IMFTimer,
                                                MfTimer)) then
@@ -189,13 +201,13 @@ end;
 // Implementation of this method is optional.
 function TMFCallBack.GetParameters(out pdwFlags: DWord;
                                    out pdwQueue: DWord): HResult;
-var
-  hr: HResult;
-
 begin
 
-  hr:= S_OK;
-  Result := hr;
+  // Request the Media Foundation defaults. Returning S_OK without assigning
+  // both out parameters leaves the work-queue selection undefined.
+  pdwFlags := 0;
+  pdwQueue := 0;
+  Result := E_NOTIMPL;
 end;
 
 
@@ -233,8 +245,9 @@ try
 
       // Gets the clocktime in 100-nano second units.
       hr := MFPresentationClock.GetTime(m_hnsClockTime);
-      // Send a message to the owner to update the ontimer depending objects.
-      SendMessage(m_hwndOwner,
+      // Invoke runs on a Media Foundation work-queue thread. Post the private
+      // message so that this callback never blocks on the VCL/UI thread.
+      PostMessage(m_hwndOwner,
                   WM_TIMERNOTIFY,
                   WPARAM(GetPresentationClockState()),
                   LPARAM(hr));
@@ -272,6 +285,12 @@ begin
 
   hr := S_OK;
   m_TimerFlags := dwFlags;
+
+  // Always retain the cancellation key for the first timer as well as for
+  // recurring ticks. Older callers passed nil here, which made the first
+  // scheduled callback impossible to cancel during rapid close/reopen.
+  if not Assigned(CancellationObject) then
+    CancellationObject := @m_CancellationObject;
 
   if (GetPresentationClockState() = MFCLOCK_STATE_RUNNING) then
     try
@@ -314,6 +333,9 @@ end;
 
 procedure TMFCallBack.SetTimerResolution(aValue: LongWord);
 begin
+
+  if (aValue = 0) then
+    aValue := MF_PLAYER_UI_TIMER_INTERVAL_HNS;
 
   m_TimerResolution := aValue;
 end;

@@ -6,7 +6,7 @@ object frm_MfPlayer: Tfrm_MfPlayer
   Margins.Right = 0
   Margins.Bottom = 0
   Caption = 'MfPlayer X2'
-  ClientHeight = 440
+  ClientHeight = 450
   ClientWidth = 725
   Color = clBtnFace
   TransparentColorValue = clNone
@@ -32,14 +32,13 @@ object frm_MfPlayer: Tfrm_MfPlayer
     Left = 0
     Top = 0
     Width = 725
-    Height = 374
+    Height = 372
     Margins.Left = 0
     Margins.Top = 0
     Margins.Right = 0
     Margins.Bottom = 0
     ParentCustomHint = False
     Align = alClient
-    Anchors = [akLeft, akTop, akRight]
     AutoSize = True
     BevelOuter = bvNone
     Color = clNone
@@ -61,12 +60,14 @@ object frm_MfPlayer: Tfrm_MfPlayer
     TabOrder = 0
     TabStop = True
     OnResize = pnlVideoResize
+    ExplicitTop = 3
+    ExplicitHeight = 248
   end
   object pnlControls: TPanel
     Left = 0
-    Top = 374
+    Top = 372
     Width = 725
-    Height = 47
+    Height = 59
     Margins.Left = 0
     Margins.Top = 0
     Margins.Right = 0
@@ -97,12 +98,28 @@ object frm_MfPlayer: Tfrm_MfPlayer
     TabOrder = 1
     TabStop = True
     VerticalAlignment = taAlignBottom
+    ExplicitLeft = 16
+    ExplicitTop = 362
     DesignSize = (
       721
-      43)
+      55)
+    object lblBarPositionInSTime: TLabel
+      Left = 346
+      Top = 30
+      Width = 191
+      Height = 16
+      AutoSize = False
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Arial'
+      Font.Style = []
+      Font.Quality = fqClearType
+      ParentFont = False
+    end
     object butStop: TButton
       Left = 17
-      Top = 16
+      Top = 26
       Width = 55
       Height = 24
       Hint = 'Stop'
@@ -120,8 +137,8 @@ object frm_MfPlayer: Tfrm_MfPlayer
       OnClick = butStopClick
     end
     object butPause: TButton
-      Left = 71
-      Top = 16
+      Left = 74
+      Top = 26
       Width = 55
       Height = 24
       Hint = 'Pause'
@@ -142,7 +159,7 @@ object frm_MfPlayer: Tfrm_MfPlayer
     end
     object butPlay: TButton
       Left = 132
-      Top = 16
+      Top = 27
       Width = 55
       Height = 24
       Hint = 'Play'
@@ -161,7 +178,7 @@ object frm_MfPlayer: Tfrm_MfPlayer
     end
     object trbVolumeL: TTrackBar
       Left = 193
-      Top = 8
+      Top = 18
       Width = 82
       Height = 19
       Hint = 'Volume Left'
@@ -181,7 +198,7 @@ object frm_MfPlayer: Tfrm_MfPlayer
       Left = 1
       Top = 1
       Width = 719
-      Height = 12
+      Height = 18
       Margins.Left = 0
       Margins.Top = 0
       Margins.Right = 0
@@ -197,11 +214,14 @@ object frm_MfPlayer: Tfrm_MfPlayer
       Step = 1
       ShowHint = False
       TabOrder = 4
+      OnMouseEnter = prbProgressMouseEnter
+      OnMouseLeave = prbProgressMouseLeave
+      OnMouseMove = prbProgressMouseMove
       OnMouseUp = prbProgressMouseUp
     end
     object butFullScreen: TButton
-      Left = 412
-      Top = 16
+      Left = 303
+      Top = 26
       Width = 25
       Height = 24
       Hint = 'Full Screen, hit Esc to switch.'
@@ -221,7 +241,7 @@ object frm_MfPlayer: Tfrm_MfPlayer
     end
     object trbVolumeR: TTrackBar
       Left = 193
-      Top = 27
+      Top = 37
       Width = 82
       Height = 19
       Hint = 'Volume Right'
@@ -237,7 +257,7 @@ object frm_MfPlayer: Tfrm_MfPlayer
     end
     object cbLockVolumeSliders: TCheckBox
       Left = 278
-      Top = 22
+      Top = 32
       Width = 13
       Height = 13
       Checked = True
@@ -249,12 +269,13 @@ object frm_MfPlayer: Tfrm_MfPlayer
   end
   object stbCastStatus: TStatusBar
     Left = 0
-    Top = 421
+    Top = 431
     Width = 725
     Height = 19
     Panels = <>
     SimplePanel = True
     Visible = False
+    ExplicitTop = 421
   end
   object dlgOpenUrl: TOpenDialog
     Title = 'Open mediafile'
@@ -278,11 +299,6 @@ object frm_MfPlayer: Tfrm_MfPlayer
         Caption = '&Open'
         OnClick = mnuOpenClick
       end
-      object mnuExportSubtitled: TMenuItem
-        Caption = 'Export subtitled MP4...'
-        Enabled = False
-        OnClick = mnuExportSubtitledClick
-      end
       object muSeparator1: TMenuItem
         Caption = '-'
       end
@@ -302,6 +318,14 @@ object frm_MfPlayer: Tfrm_MfPlayer
         Caption = 'Take Screenshot (F8)'
         Enabled = False
         OnClick = mnuTakeScreenshotClick
+      end
+      object N6: TMenuItem
+        Caption = '-'
+      end
+      object mnuExportSubtitled: TMenuItem
+        Caption = 'Export to subtitled MP4'
+        Enabled = False
+        OnClick = mnuExportSubtitledClick
       end
       object N4: TMenuItem
         Caption = '-'
@@ -386,17 +410,14 @@ object frm_MfPlayer: Tfrm_MfPlayer
         Enabled = False
         OnClick = mnuPauseCastingClick
       end
+      object mnuStopCasting: TMenuItem
+        Caption = 'Stop casting'
+        OnClick = mnuStopCastingClick
+      end
       object mnuResumeCasting: TMenuItem
         Caption = 'Resume casting'
         Enabled = False
         OnClick = mnuResumeCastingClick
-      end
-      object N5: TMenuItem
-        Caption = '-'
-      end
-      object mnuStopCasting: TMenuItem
-        Caption = 'Stop casting'
-        OnClick = mnuStopCastingClick
       end
     end
   end

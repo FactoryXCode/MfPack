@@ -55,6 +55,9 @@ MfPlayer X2 keeps those foundations and adds a frame-based subtitle architecture
 * SubRip (`.srt`) support.
 * MicroDVD (`.sub`) support.
 * WebVTT (`.vtt`) support.
+* Embedded textual subtitle streams exposed by Media Foundation.
+* Matroska SRT/UTF-8 and SSA/ASS subtitle import.
+* Sidecar-first, embedded-subtitle fallback selection by preferred language.
 * Language-tag parsing and subtitle-language selection.
 * Timestamp-based subtitle lookup.
 * `TMfMediaTimeline` fallback when samples do not provide usable timestamps.
@@ -62,6 +65,7 @@ MfPlayer X2 keeps those foundations and adds a frame-based subtitle architecture
 * Custom in-place subtitle video MFT for local playback.
 * Subtitle bitmap caching and reset handling.
 * Subtitle burn-in without modifying the original source file.
+* The same embedded cue model feeds local playback, export, and Chromecast.
 
 ## Export
 
@@ -96,6 +100,18 @@ MfPlayer X2 keeps those foundations and adds a frame-based subtitle architecture
 * Reference-counted live-stream buffers to prevent stale writer access.
 
 ---
+
+## Embedded subtitle boundaries
+
+The current embedded reader handles textual subtitle streams that the active
+Media Foundation source exposes as `MFMediaType_Subtitle`. Matroska SRT/UTF-8
+and SSA/ASS tracks are imported into `TMfTimedText`. PGS and VobSub tracks are
+detected but not decoded because they contain subtitle images rather than text.
+
+The native Microsoft MP4 source exposes audio and video streams but ignores
+non-audio/video tracks. Embedded MP4 `tx3g`, `wvtt`, and `stpp`, plus AVI text
+variants hidden by the native source, therefore require container adapters and
+are not claimed as supported by this snapshot.
 
 # Requirements
 

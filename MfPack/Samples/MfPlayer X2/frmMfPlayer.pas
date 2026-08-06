@@ -1,6 +1,6 @@
-﻿// FactoryX
+// FactoryX
 //
-// Copyright © FactoryX, Netherlands/Australia. All rights reserved.
+// Copyright � FactoryX, Netherlands/Australia. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -151,8 +151,10 @@ type
     mnuCastTo: TMenuItem;
     mnuPauseCasting: TMenuItem;
     mnuResumeCasting: TMenuItem;
-    N5: TMenuItem;
     stbCastStatus: TStatusBar;
+    N6: TMenuItem;
+    lblBarPositionInSTime: TLabel;
+
     procedure mnuOpenClick(Sender: TObject);
     procedure mnuExitClick(Sender: TObject);
     procedure mnuSetPositionClick(Sender: TObject);
@@ -184,6 +186,10 @@ type
     procedure mnuStopCastingClick(Sender: TObject);
     procedure mnuPauseCastingClick(Sender: TObject);
     procedure mnuResumeCastingClick(Sender: TObject);
+    procedure prbProgressMouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
+    procedure prbProgressMouseLeave(Sender: TObject);
+    procedure prbProgressMouseEnter(Sender: TObject);
 
   private
     { Private declarations }
@@ -194,7 +200,16 @@ type
     FExportThread: TThread;
     FExportClosePending: Boolean;
     FExportStopPending: Boolean;
+    FSubtitleLoadThread: TThread;
+    FSubtitleLoadSerial: Integer;
+    FSubtitleLoadPending: Boolean;
+    FPendingSubtitleLoadEmbedded: Boolean;
+    FPendingSubtitleLoadStreamIndex: DWORD;
+    FPendingSubtitleLoadLanguageTag: string;
     FMfCastController: IMfCastController;
+    FCastStartPosition100ns: Int64;
+    FCastSyncPending: Boolean;
+    FCastLocalWasRunning: Boolean;
 
     { Private methods }
     // Size and move handlers.
@@ -204,17 +219,27 @@ type
     procedure ForceResize();
     // Progress handling.
     procedure WMProgressEvent(var Msg: TMessage); message WM_PROGRESSNOTIFY;
+    procedure WMSubtitleLoadEvent(var Msg: TMessage); message WM_SUBTITLELOADNOTIFY;
 
     procedure ExportThreadTerminated(Sender: TObject);
     procedure StartSubtitledExport(const OutputFileName: WideString);
+    procedure StopSubtitleLoad();
+    function StartEmbeddedSubtitleLoad(const StreamIndex: DWORD): HRESULT;
+    function StartSidecarSubtitleLoad(const LanguageTag: string): HRESULT;
+    procedure StartPendingSubtitleLoad();
+    procedure StartPreferredEmbeddedSubtitleLoad();
     procedure StopPlaybackNow();
     procedure SetVolumeChannels(volchans: TFloatArray);
     function MfCastIsActive(): Boolean;
     procedure SetPlaybackButtonsEnabled(const AEnabled: Boolean);
+    procedure RestoreLocalVideoForCasting();
     procedure StartLocalPlaybackForCasting();
+    procedure CancelPendingCastSynchronization(const ResumeLocalPlayback: Boolean);
+    procedure SynchronizeLocalPlaybackToCast(const CastPosition100ns: MFTIME);
     procedure SetCastStatusText(const AText: string);
     procedure ClearCastStatusText();
     procedure UpdateCastControls();
+    procedure CompletePlayback();
     procedure PauseCasting();
     procedure ResumeCasting();
     procedure MfCastStateChanged(const AOldState: TMfCastState;
@@ -231,6 +256,9 @@ type
     //procedure SetToParentRect();
     procedure RealignInterface();
     function GetFmPlayer(): HRESULT;
+    function SelectEmbeddedSubtitleTrackAsync(const StreamIndex: DWORD): HRESULT;
+    function SelectSidecarSubtitleLanguageAsync(const LanguageTag: string): HRESULT;
+    function SubtitleLoadPending(): Boolean;
     procedure QuitMfPlayerSession();
   end;
 
@@ -245,8 +273,8 @@ uses
   {Vcl}
   Vcl.ClipBrd,
   {Application}
-  MfSubtitleCompositorX2,
-  MfSubtitleFramePumpX2,
+  MfSubtitleCompositor,
+  MfSubtitleFramePump,
   dlgStreamSelect,
   dlgSelectTimedTextLanguages,
   {ChromeCast}
@@ -259,6 +287,8 @@ uses
   MfCastTransport;
 
 {$R *.dfm}
+
+
 function MfCastStartFailureText(const ADeviceName: string;
                                 const AHResult: HRESULT): string;
 begin
@@ -285,6 +315,44 @@ end;
 
 
 type
+
+  TMfSubtitleLoadKind = (slkEmbedded,
+                         slkSidecar);
+
+  TMfSubtitleLoadThread = class(TThread)
+  private
+    FCompositor: TMfSubtitleCompositor;
+    FKind: TMfSubtitleLoadKind;
+    FStreamIndex: DWORD;
+    FLanguageTag: string;
+    FMediaFileName: WideString;
+    FNotifyHandle: HWND;
+    FSerial: Integer;
+    FCancelEvent: THandle;
+    FResult: HRESULT;
+
+  protected
+    procedure Execute(); override;
+
+  public
+
+    constructor Create(const Compositor: TMfSubtitleCompositor;
+                       const Kind: TMfSubtitleLoadKind;
+                       const StreamIndex: DWORD;
+                       const LanguageTag: string;
+                       const MediaFileName: WideString;
+                       const NotifyHandle: HWND;
+                       const Serial: Integer);
+    destructor Destroy(); override;
+
+    procedure CancelLoad();
+
+    property Kind: TMfSubtitleLoadKind read FKind;
+    property MediaFileName: WideString read FMediaFileName;
+    property ResultCode: HRESULT read FResult;
+    property Serial: Integer read FSerial;
+  end;
+
 
   TMfSubtitleExportThread = class(TThread)
   private
@@ -316,6 +384,110 @@ type
     property FramesWritten: Int64 read FFramesWritten;
     property ResultCode: HRESULT read FResult;
   end;
+
+constructor TMfSubtitleLoadThread.Create(const Compositor: TMfSubtitleCompositor;
+                                         const Kind: TMfSubtitleLoadKind;
+                                         const StreamIndex: DWORD;
+                                         const LanguageTag: string;
+                                         const MediaFileName: WideString;
+                                         const NotifyHandle: HWND;
+                                         const Serial: Integer);
+begin
+
+  inherited Create(True);
+
+  FreeOnTerminate := False;
+  Priority := tpLower;
+  FCompositor := Compositor;
+  FKind := Kind;
+  FStreamIndex := StreamIndex;
+  FLanguageTag := LanguageTag;
+  FMediaFileName := MediaFileName;
+  FNotifyHandle := NotifyHandle;
+  FSerial := Serial;
+  FResult := E_FAIL;
+  FCancelEvent := CreateEvent(nil,
+                              True,
+                              False,
+                              nil);
+end;
+
+
+destructor TMfSubtitleLoadThread.Destroy();
+begin
+
+  if (FCancelEvent <> 0) then
+    begin
+      CloseHandle(FCancelEvent);
+      FCancelEvent := 0;
+    end;
+
+  inherited Destroy();
+end;
+
+
+procedure TMfSubtitleLoadThread.CancelLoad();
+begin
+
+  Terminate();
+
+  if (FCancelEvent <> 0) then
+    SetEvent(FCancelEvent);
+end;
+
+
+procedure TMfSubtitleLoadThread.Execute();
+var
+  HrCom: HRESULT;
+  ComInitialized: Boolean;
+
+begin
+
+  ComInitialized := False;
+  HrCom := CoInitializeEx(nil,
+                          COINIT_MULTITHREADED);
+
+  if SUCCEEDED(HrCom) then
+    ComInitialized := True
+  else
+    if (HrCom <> RPC_E_CHANGED_MODE) then
+      begin
+        FResult := HrCom;
+        PostMessage(FNotifyHandle,
+                    WM_SUBTITLELOADNOTIFY,
+                    WPARAM(FSerial),
+                    0);
+        Exit;
+      end;
+
+  try
+    if Terminated or
+       ((FCancelEvent <> 0) and
+        (WaitForSingleObject(FCancelEvent,
+                             0) = WAIT_OBJECT_0)) then
+      FResult := E_ABORT
+    else
+      if not Assigned(FCompositor) then
+        FResult := E_POINTER
+      else
+        case FKind of
+          slkEmbedded: FResult := FCompositor.SelectEmbeddedSubtitleTrack(FStreamIndex,
+                                                                          FCancelEvent);
+          slkSidecar:  FResult := FCompositor.SelectSidecarSubtitleLanguage(FLanguageTag);
+        else
+          FResult := E_INVALIDARG;
+        end;
+  finally
+    if ComInitialized then
+      CoUninitialize();
+  end;
+
+  PostMessage(FNotifyHandle,
+              WM_SUBTITLELOADNOTIFY,
+              WPARAM(FSerial),
+              0);
+end;
+
 
 constructor TMfSubtitleExportThread.Create(const InputFileName: WideString;
                                            const OutputFileName: WideString;
@@ -451,7 +623,6 @@ begin
 
   if Assigned(FExportThread) then
     begin
-
       ShowMessage('A subtitled export is already running.');
       Exit;
     end;
@@ -461,7 +632,6 @@ begin
 
   if not MfPlayerX.TimedTextFileLoaded then
     begin
-
       ShowMessage('No TimedText file is loaded.');
       Exit;
     end;
@@ -510,13 +680,11 @@ begin
 
   if (not closePending) and (not stopPending) then
     begin
-
       if (hr = E_ABORT) then
         ShowMessage('Subtitled video export stopped before frames were written.')
       else
         if FAILED(hr) then
           begin
-
             msg := Format('Could not export subtitled video. HRESULT: %.8x',
                           [DWORD(hr)]);
             if (exportThread.ErrorMessage <> '') then
@@ -563,15 +731,15 @@ end;
 
 function Tfrm_MfPlayer.MfCastIsActive(): Boolean;
 begin
-  Result := Assigned(FMfCastController) and
-            (FMfCastController.GetState() in [csConnecting,
-                                             csConnected,
-                                             csLaunchingReceiver,
-                                             csPreparingMedia,
-                                             csBuffering,
-                                             csPlaying,
-                                             csPaused,
-                                             csStopping]);
+
+  Result := Assigned(FMfCastController) and (FMfCastController.GetState() in [csConnecting,
+                                                                              csConnected,
+                                                                              csLaunchingReceiver,
+                                                                              csPreparingMedia,
+                                                                              csBuffering,
+                                                                              csPlaying,
+                                                                              csPaused,
+                                                                              csStopping]);
 end;
 
 
@@ -584,8 +752,22 @@ begin
 end;
 
 
+procedure Tfrm_MfPlayer.RestoreLocalVideoForCasting();
+begin
+
+  if not Assigned(MfPlayerX) then
+    Exit;
+
+  MfPlayerX.SetVideoSurface := pnlVideo.Handle;
+  MfPlayerX.ResizeVideo(nil);
+  MfPlayerX.Repaint();
+  pnlVideo.Invalidate();
+end;
+
+
 procedure Tfrm_MfPlayer.StartLocalPlaybackForCasting();
 begin
+
   if not Assigned(MfPlayerX) then
     Exit;
 
@@ -597,6 +779,92 @@ begin
       MfPlayerX.SendPlayerRequest(reqStart);
       mnuTakeScreenshot.Enabled := True;
     end;
+
+  RestoreLocalVideoForCasting();
+end;
+
+
+procedure Tfrm_MfPlayer.CancelPendingCastSynchronization(const ResumeLocalPlayback: Boolean);
+begin
+
+  if not FCastSyncPending then
+    Exit;
+
+  FCastSyncPending := False;
+
+  if ResumeLocalPlayback and FCastLocalWasRunning then
+    StartLocalPlaybackForCasting();
+
+  FCastLocalWasRunning := False;
+end;
+
+
+procedure Tfrm_MfPlayer.SynchronizeLocalPlaybackToCast(const CastPosition100ns: MFTIME);
+const
+  CAST_SYNC_TOLERANCE_100NS = 5000000; // 500 ms
+
+var
+
+  PositionHr: HRESULT;
+  SeekHr: HRESULT;
+  SyncPosition100ns: MFTIME;
+  LocalPosition100ns: MFTIME;
+  PositionDifference100ns: MFTIME;
+
+begin
+
+  if not FCastSyncPending then
+    Exit;
+
+  FCastSyncPending := False;
+
+  if not FCastLocalWasRunning or
+     not Assigned(MfPlayerX) then
+    begin
+      FCastLocalWasRunning := False;
+      Exit;
+    end;
+
+  SyncPosition100ns := CastPosition100ns;
+  if (SyncPosition100ns <= 0) then
+    SyncPosition100ns := FCastStartPosition100ns;
+  if (SyncPosition100ns < 0) then
+    SyncPosition100ns := 0;
+
+  LocalPosition100ns := 0;
+  PositionHr := MfPlayerX.GetPosition(LocalPosition100ns);
+
+  if SUCCEEDED(PositionHr) then
+    begin
+      if LocalPosition100ns >= SyncPosition100ns then
+        PositionDifference100ns := LocalPosition100ns - SyncPosition100ns
+      else
+        PositionDifference100ns := SyncPosition100ns - LocalPosition100ns;
+
+      if PositionDifference100ns <= CAST_SYNC_TOLERANCE_100NS then
+        begin
+          RestoreLocalVideoForCasting();
+          mnuTakeScreenshot.Enabled := True;
+          FCastLocalWasRunning := False;
+          Exit;
+        end;
+    end;
+
+  // SendPlayerRequest(reqSeek) changes the player state to Seeking before it
+  // knows whether IMFMediaSession.Start accepted the new position. Use the
+  // HRESULT-returning method so a rejected seek cannot leave the EVR black.
+  SeekHr := MfPlayerX.SetPosition(SyncPosition100ns);
+  if FAILED(SeekHr) then
+    begin
+      OutputDebugString(PChar(Format('ChromeCast local synchronization seek failed, hr=%.8x',
+                                     [DWORD(SeekHr)])));
+      StartLocalPlaybackForCasting();
+    end
+  else
+    RestoreLocalVideoForCasting();
+
+  mnuTakeScreenshot.Enabled := True;
+  FCastLocalWasRunning := False;
 end;
 
 
@@ -607,7 +875,7 @@ begin
     begin
 
       stbCastStatus.SimpleText := AText;
-      stbCastStatus.Visible := Trim(AText) <> '';
+      stbCastStatus.Visible := (Trim(AText) <> '');
     end;
 
   if (Trim(AText) <> '') then
@@ -620,7 +888,6 @@ begin
 
   if Assigned(stbCastStatus) then
     begin
-
       stbCastStatus.SimpleText := '';
       stbCastStatus.Visible := False;
     end;
@@ -653,7 +920,6 @@ begin
 
   if CastActive then
     begin
-
       mnuStopCasting.Enabled := True;
       mnuPauseCasting.Enabled := CastState in [csBuffering,
                                                csPlaying];
@@ -671,13 +937,31 @@ begin
 
   if Assigned(FExportThread) then
     begin
-
       butPlay.Enabled := False;
       butPause.Enabled := False;
       butStop.Enabled := True;
     end
   else
     SetPlaybackButtonsEnabled(Assigned(MfPlayerX));
+end;
+
+
+procedure Tfrm_MfPlayer.CompletePlayback();
+begin
+
+  CancelPendingCastSynchronization(False);
+
+  if MfCastIsActive() then
+    FMfCastController.Disconnect();
+
+  if Assigned(MfPlayerX) and
+     (not (MfPlayerX.State in [Closed, Stopped, Stopping])) then
+    MfPlayerX.SendPlayerRequest(reqStop);
+
+  ClearCastStatusText();
+  UpdateCastControls();
+  ResetInterface();
+  Caption := 'Playback completed.';
 end;
 
 
@@ -694,10 +978,10 @@ begin
   hr := FMfCastController.Pause();
   if SUCCEEDED(hr) then
     begin
-
       if Assigned(MfPlayerX) and
          (MfPlayerX.State in [OpenPending, Started, TopologyReady]) then
         MfPlayerX.SendPlayerRequest(reqPause);
+
       SetCastStatusText('ChromeCast: Paused');
       UpdateCastControls();
     end
@@ -720,7 +1004,6 @@ begin
   hr := FMfCastController.Play();
   if SUCCEEDED(hr) then
     begin
-
       StartLocalPlaybackForCasting();
       SetCastStatusText('ChromeCast: Buffering');
       UpdateCastControls();
@@ -745,10 +1028,7 @@ begin
 
   if Assigned(MfPlayerX) then
     if MfPlayerX.State in [OpenPending, Started, TopologyReady] then
-      begin
-
-        MfPlayerX.SendPlayerRequest(reqPause);
-      end;
+      MfPlayerX.SendPlayerRequest(reqPause);
 end;
 
 
@@ -760,7 +1040,6 @@ begin
 
   if MfCastIsActive() then
     begin
-
       ResumeCasting();
       Exit;
     end;
@@ -770,22 +1049,20 @@ begin
     begin
 
       if MfPlayerX.State in [Paused] then
-        begin
-
-          MfPlayerX.SendPlayerRequest(reqStart);
-        end;
+        MfPlayerX.SendPlayerRequest(reqStart);
 
       // Start a new session
       if MfPlayerX.State in [OpenPending, Stopped, TopologyReady] then
         begin
-
           // Set initial volume
-          MfPlayerX.GetVolume();
+          //MfPlayerX.GetVolume();
 
-          if (Length(MfPlayerX.m_VolumeChannels) >= 1) then
-            trbVolumeR.Position:= Trunc(MfPlayerX.m_VolumeChannels[0] * 30); // left  30%
-          if (Length(MfPlayerX.m_VolumeChannels) > 1) then
-            trbVolumeL.Position := Trunc(MfPlayerX.m_VolumeChannels[1] * 30); // right 30%
+          //if (Length(MfPlayerX.m_VolumeChannels) >= 1) then
+          //  trbVolumeR.Position := Trunc(MfPlayerX.m_VolumeChannels[0] * 30); // left  30%
+          //if (Length(MfPlayerX.m_VolumeChannels) > 1) then
+          //  trbVolumeL.Position := Trunc(MfPlayerX.m_VolumeChannels[1] * 30); // right 30%
+          // or use the current position of the sliders
+          SetVolumeChannels(MfPlayerX.m_VolumeChannels);
 
           // Set progressbar max
           prbProgress.Max := prbProgress.Width;
@@ -812,7 +1089,6 @@ begin
 
       if MfPlayerX.State in [Started, Starting, Pausing, Paused, Stopping, Seeking, SeekingReady] then
         begin
-
           OutputDebugString(PChar('MfPlayer X2: stopping playback'));
           MfPlayerX.SendPlayerRequest(reqStop);
         end;
@@ -831,7 +1107,6 @@ begin
 
   if Assigned(FExportThread) then
     begin
-
       FExportStopPending := True;
       FExportClosePending := False;
       OutputDebugString(PChar('MfPlayer X2: stop requested while export is active'));
@@ -851,7 +1126,6 @@ begin
 
   if (bFullScreen = True) then
     begin
-
       BorderStyle := bsNone;
       pnlControls.Visible := False;
       mnuFile.Visible := False;
@@ -861,7 +1135,6 @@ begin
     end
   else
     begin
-
       pb_IsFullScreen := False;
       pnlControls.Visible := True;
       mnuFile.Visible := True;
@@ -882,13 +1155,13 @@ begin
   mnuTakeScreenshot.Enabled := False;
   mnuExportSubtitled.Enabled := False;
   mnuSubtitling.Enabled := False;
+  mnuLanguage.Enabled := False;
   mnuSelectStreams.Enabled := False;
   mnuMediaInfo.Enabled := False;
 
   // Stop MFPeakmeters
   //MfPeakMeter1.Enabled := False;
   //MfPeakMeter2.Enabled := False;
-
 end;
 
 
@@ -906,23 +1179,21 @@ begin
 
       if (MfPlayerX.StreamContents[i].idStreamMediaType = mtVideo) then
         begin
-
-          lst := 'Video Info' + #13 + #13;
-          lst := lst + 'Pixel aspect ratio: ' + FloatToStrF(MfPlayerX.StreamContents[i].video_PixelAspectRatioNumerator / MfPlayerX.StreamContents[i].video_PixelAspectRatioDenominator, ffGeneral, 4, 2) + #13;
-          lst := lst + 'Framerate per second (fps): ' + FloatToStrF(MfPlayerX.StreamContents[i].video_FrameRateNumerator / MfPlayerX.StreamContents[i].video_FrameRateDenominator, ffGeneral, 4, 2) + #13;
-          lst := lst + 'Framesize (w x h): ' + IntToStr(MfPlayerX.StreamContents[i].video_FrameSizeWidth) + ' x ' + IntToStr(MfPlayerX.StreamContents[i].video_FrameSizeHeigth) + #13 + #13;
+          lst := 'Video Info' + LFEED + LFEED;
+          lst := lst + 'Pixel aspect ratio: ' + FloatToStrF(MfPlayerX.StreamContents[i].video_PixelAspectRatioNumerator / MfPlayerX.StreamContents[i].video_PixelAspectRatioDenominator, ffGeneral, 4, 2) + LFEED;
+          lst := lst + 'Framerate per second (fps): ' + FloatToStrF(MfPlayerX.StreamContents[i].video_FrameRateNumerator / MfPlayerX.StreamContents[i].video_FrameRateDenominator, ffGeneral, 4, 2) + LFEED;
+          lst := lst + 'Framesize (w x h): ' + IntToStr(MfPlayerX.StreamContents[i].video_FrameSizeWidth) + ' x ' + IntToStr(MfPlayerX.StreamContents[i].video_FrameSizeHeigth) + LFEED + LFEED;
         end
       else
         if (MfPlayerX.StreamContents[i].idStreamMediaType = mtAudio) then
           begin
-
-            lst := lst + 'Audio Info' + #13 + #13;
-            lst := lst + 'Format        : ' + MfPlayerX.StreamContents[i].audio_wsAudioDescr + #13;
-            lst := lst + 'Channels      : ' + IntToStr(MfPlayerX.StreamContents[i].audio_iAudioChannels) + #13;
-            lst := lst + 'FormatTag     : ' + IntToStr(MfPlayerX.StreamContents[i].audio_dwFormatTag) + #13;
-            lst := lst + 'SamplesPerSec : ' + IntToStr(MfPlayerX.StreamContents[i].audio_iSamplesPerSec) + #13;
-            lst := lst + 'BitsPerSample : ' + IntToStr(MfPlayerX.StreamContents[i].audio_iBitsPerSample) + #13 + #13;
-            lst := lst + 'Compressed    : ' + BoolToStr(MfPlayerX.StreamContents[i].bCompressed) + #13;
+            lst := lst + 'Audio Info' + LFEED + LFEED;
+            lst := lst + 'Format        : ' + MfPlayerX.StreamContents[i].audio_wsAudioDescr + LFEED;
+            lst := lst + 'Channels      : ' + IntToStr(MfPlayerX.StreamContents[i].audio_iAudioChannels) + LFEED;
+            lst := lst + 'FormatTag     : ' + IntToStr(MfPlayerX.StreamContents[i].audio_dwFormatTag) + LFEED;
+            lst := lst + 'SamplesPerSec : ' + IntToStr(MfPlayerX.StreamContents[i].audio_iSamplesPerSec) + LFEED;
+            lst := lst + 'BitsPerSample : ' + IntToStr(MfPlayerX.StreamContents[i].audio_iBitsPerSample) + LFEED + LFEED;
+            lst := lst + 'Compressed    : ' + BoolToStr(MfPlayerX.StreamContents[i].bCompressed) + LFEED;
           end;
     end;
   ShowMessage(lst);
@@ -946,12 +1217,275 @@ begin
 end;
 
 
+function Tfrm_MfPlayer.SubtitleLoadPending(): Boolean;
+begin
+
+  Result := Assigned(FSubtitleLoadThread) or FSubtitleLoadPending;
+end;
+
+
+procedure Tfrm_MfPlayer.StopSubtitleLoad();
+var
+  LoadThread: TMfSubtitleLoadThread;
+
+begin
+
+  FSubtitleLoadPending := False;
+  FPendingSubtitleLoadLanguageTag := '';
+
+  if not Assigned(FSubtitleLoadThread) then
+    Exit;
+
+  LoadThread := TMfSubtitleLoadThread(FSubtitleLoadThread);
+  FSubtitleLoadThread := nil;
+  LoadThread.CancelLoad();
+
+  LoadThread.WaitFor();
+  LoadThread.Free();
+
+  if Assigned(dlgTimedTextLanguages) then
+    dlgTimedTextLanguages.SubtitleLoadCompleted(E_ABORT);
+end;
+
+
+function Tfrm_MfPlayer.StartEmbeddedSubtitleLoad(
+  const StreamIndex: DWORD): HRESULT;
+var
+  LoadThread: TMfSubtitleLoadThread;
+
+begin
+
+  Result := E_POINTER;
+
+  if not Assigned(MfPlayerX) or
+     not Assigned(MfPlayerX.SubtitleCompositor) then
+    Exit;
+
+  Inc(FSubtitleLoadSerial);
+  LoadThread := nil;
+
+  try
+    LoadThread := TMfSubtitleLoadThread.Create(MfPlayerX.SubtitleCompositor,
+                                               slkEmbedded,
+                                               StreamIndex,
+                                               '',
+                                               MfPlayerX.MediaFileName,
+                                               Handle,
+                                               FSubtitleLoadSerial);
+    FSubtitleLoadThread := LoadThread;
+
+    if Assigned(dlgTimedTextLanguages) then
+      dlgTimedTextLanguages.SubtitleLoadStarted();
+    UpdateCastControls();
+
+    LoadThread.Start();
+    Result := S_OK;
+  except
+    FSubtitleLoadThread := nil;
+    LoadThread.Free();
+    Result := E_OUTOFMEMORY;
+  end;
+end;
+
+
+function Tfrm_MfPlayer.StartSidecarSubtitleLoad(
+  const LanguageTag: string): HRESULT;
+var
+  LoadThread: TMfSubtitleLoadThread;
+
+begin
+
+  Result := E_POINTER;
+
+  if not Assigned(MfPlayerX) or
+     not Assigned(MfPlayerX.SubtitleCompositor) then
+    Exit;
+
+  Inc(FSubtitleLoadSerial);
+  LoadThread := nil;
+
+  try
+    LoadThread := TMfSubtitleLoadThread.Create(MfPlayerX.SubtitleCompositor,
+                                               slkSidecar,
+                                               0,
+                                               LanguageTag,
+                                               MfPlayerX.MediaFileName,
+                                               Handle,
+                                               FSubtitleLoadSerial);
+    FSubtitleLoadThread := LoadThread;
+
+    if Assigned(dlgTimedTextLanguages) then
+      dlgTimedTextLanguages.SubtitleLoadStarted();
+    UpdateCastControls();
+
+    LoadThread.Start();
+    Result := S_OK;
+  except
+    FSubtitleLoadThread := nil;
+    LoadThread.Free();
+    Result := E_OUTOFMEMORY;
+  end;
+end;
+
+
+procedure Tfrm_MfPlayer.StartPendingSubtitleLoad();
+var
+  PendingEmbedded: Boolean;
+  PendingStreamIndex: DWORD;
+  PendingLanguageTag: string;
+  Hr: HRESULT;
+
+begin
+
+  if not FSubtitleLoadPending then
+    Exit;
+
+  PendingEmbedded := FPendingSubtitleLoadEmbedded;
+  PendingStreamIndex := FPendingSubtitleLoadStreamIndex;
+  PendingLanguageTag := FPendingSubtitleLoadLanguageTag;
+  FSubtitleLoadPending := False;
+  FPendingSubtitleLoadLanguageTag := '';
+
+  if PendingEmbedded then
+    Hr := StartEmbeddedSubtitleLoad(PendingStreamIndex)
+  else
+    Hr := StartSidecarSubtitleLoad(PendingLanguageTag);
+
+  if (Hr <> S_OK) and Assigned(dlgTimedTextLanguages) then
+    dlgTimedTextLanguages.SubtitleLoadCompleted(Hr);
+end;
+
+
+function Tfrm_MfPlayer.SelectEmbeddedSubtitleTrackAsync(
+  const StreamIndex: DWORD): HRESULT;
+begin
+
+  Result := E_POINTER;
+
+  if not Assigned(MfPlayerX) or
+     not Assigned(MfPlayerX.SubtitleCompositor) then
+    Exit;
+
+  if Assigned(FSubtitleLoadThread) then
+    begin
+
+      // Do not wait for the old file scan on the VCL thread. Keep only the
+      // newest requested selection and start it when cancellation completes.
+      FSubtitleLoadPending := True;
+      FPendingSubtitleLoadEmbedded := True;
+      FPendingSubtitleLoadStreamIndex := StreamIndex;
+      FPendingSubtitleLoadLanguageTag := '';
+      TMfSubtitleLoadThread(FSubtitleLoadThread).CancelLoad();
+
+      if Assigned(dlgTimedTextLanguages) then
+        dlgTimedTextLanguages.SubtitleLoadStarted();
+
+      Result := S_OK;
+      Exit;
+    end;
+
+  Result := StartEmbeddedSubtitleLoad(StreamIndex);
+end;
+
+
+function Tfrm_MfPlayer.SelectSidecarSubtitleLanguageAsync(const LanguageTag: string): HRESULT;
+begin
+
+  Result := E_POINTER;
+
+  if not Assigned(MfPlayerX) or
+     not Assigned(MfPlayerX.SubtitleCompositor) then
+    Exit;
+
+  if Assigned(FSubtitleLoadThread) then
+    begin
+      FSubtitleLoadPending := True;
+      FPendingSubtitleLoadEmbedded := False;
+      FPendingSubtitleLoadStreamIndex := 0;
+      FPendingSubtitleLoadLanguageTag := LanguageTag;
+      TMfSubtitleLoadThread(FSubtitleLoadThread).CancelLoad();
+
+      if Assigned(dlgTimedTextLanguages) then
+        dlgTimedTextLanguages.SubtitleLoadStarted();
+
+      Result := S_OK;
+      Exit;
+    end;
+
+  Result := StartSidecarSubtitleLoad(LanguageTag);
+end;
+
+
+procedure Tfrm_MfPlayer.StartPreferredEmbeddedSubtitleLoad();
+var
+  StreamIndex: DWORD;
+
+begin
+
+  if not Assigned(MfPlayerX) or
+     MfPlayerX.TimedTextFileLoaded or
+     (not MfPlayerX.SubtitleSourcesAvailable) then
+    Exit;
+
+  StreamIndex := 0;
+
+  if (MfPlayerX.GetPreferredEmbeddedSubtitleStreamIndex(StreamIndex) = S_OK) then
+    SelectEmbeddedSubtitleTrackAsync(StreamIndex);
+end;
+
+
+procedure Tfrm_MfPlayer.WMSubtitleLoadEvent(var Msg: TMessage);
+var
+  LoadThread: TMfSubtitleLoadThread;
+  LoadResult: HRESULT;
+  LoadedMediaFileName: WideString;
+
+begin
+
+  if not Assigned(FSubtitleLoadThread) then
+    Exit;
+
+  LoadThread := TMfSubtitleLoadThread(FSubtitleLoadThread);
+
+  if (Integer(Msg.WParam) <> LoadThread.Serial) then
+    Exit;
+
+  FSubtitleLoadThread := nil;
+  LoadThread.WaitFor();
+  LoadResult := LoadThread.ResultCode;
+  LoadedMediaFileName := LoadThread.MediaFileName;
+  LoadThread.Free();
+
+  if FSubtitleLoadPending then
+    begin
+      StartPendingSubtitleLoad();
+      Exit;
+    end;
+
+  if (LoadResult = S_OK) and
+     Assigned(MfPlayerX) and
+     SameText(MfPlayerX.MediaFileName,
+              LoadedMediaFileName) then
+    begin
+      MfPlayerX.CommitSubtitleSelection();
+      mnuEnableSubtitling.Checked := MfPlayerX.TimedTextFileLoaded;
+      MfPlayerX.SubtitlesEnabled := MfPlayerX.TimedTextFileLoaded;
+      mnuExportSubtitled.Enabled := MfPlayerX.TimedTextFileLoaded;
+    end;
+
+  if Assigned(dlgTimedTextLanguages) then
+    dlgTimedTextLanguages.SubtitleLoadCompleted(LoadResult);
+  UpdateCastControls();
+end;
+
+
 procedure Tfrm_MfPlayer.QuitMfPlayerSession();
 var
   hr: HRESULT;
 
 begin
 
+  StopSubtitleLoad();
   ResetInterface();
 
   if not Assigned(MfPlayerX) then
@@ -971,20 +1505,24 @@ end;
 
 
 procedure Tfrm_MfPlayer.mnuOpenClick(Sender: TObject);
+var
+  hr: HRESULT;
+
 begin
 
   // End a previous session
   QuitMfPlayerSession();
 
-  if SUCCEEDED(GetFmPlayer()) then
+  hr := GetFmPlayer();
+  if SUCCEEDED(hr) then
     begin
 
       if dlgOpenUrl.Execute then
         begin
+          hr := MfPlayerX.OpenURL(PWideChar(dlgOpenUrl.Filename));
 
-          if SUCCEEDED(MfPlayerX.OpenURL(PWideChar(dlgOpenUrl.Filename))) then
+          if SUCCEEDED(hr) then
             begin
-
               mnuSetPosition.Enabled := True;
               pnlControls.Enabled := True;
               mnuTakeScreenshot.Enabled := True;
@@ -992,8 +1530,11 @@ begin
               mnuMediaInfo.Enabled := True;
               sMediaFileName := dlgOpenUrl.Filename;
 
-              // enable subtitling when X2 loaded a timed-text sidecar
-              mnuSubtitling.Enabled := MfPlayerX.TimedTextFileLoaded;
+              // Keep subtitle selection reachable for every opened media
+              // file. The dialog rescans embedded tracks and sidecars on show;
+              // a failed initial import must never disable its recovery path.
+              mnuSubtitling.Enabled := True;
+              mnuLanguage.Enabled := True;
               mnuEnableSubtitling.Checked := MfPlayerX.TimedTextFileLoaded;
               MfPlayerX.SubtitlesEnabled := MfPlayerX.TimedTextFileLoaded;
 
@@ -1002,10 +1543,15 @@ begin
               // FormCreate disables the individual playback buttons before
               // a player exists. Recalculate them now that OpenURL succeeded.
               UpdateCastControls();
+
+              // Sidecar subtitles are already available. Embedded subtitle
+              // cue data can require a complete MKV pass, so load the preferred
+              // track on a worker after playback opening has completed.
+              StartPreferredEmbeddedSubtitleLoad();
             end //SUCCEEDED
           else
             MessageBox(0,
-                       lpcwstr('MfPlayer could not open ' + #13 +
+                       lpcwstr('MfPlayer could not open ' + LFEED +
                        lpcwstr(dlgOpenUrl.Filename)),
                        lpcwstr('Initial Failure!'),
                        MB_ICONERROR);
@@ -1063,13 +1609,12 @@ begin
   if bAppIsClosing then
     Exit;
 
-  if (prbProgress <> Nil) then
+  if (prbProgress <> nil) then
     prbProgress.Max:= prbProgress.Width;
 
   // Set video size
   if Assigned(MfPlayerX) then
     begin
-
       crD.left := 0;
       crD.top := 0;
       crD.right := pnlVideo.ClientWidth;
@@ -1088,6 +1633,51 @@ begin
 end;
 
 
+procedure Tfrm_MfPlayer.prbProgressMouseEnter(Sender: TObject);
+begin
+
+  lblBarPositionInSTime.Visible := True;
+end;
+
+
+procedure Tfrm_MfPlayer.prbProgressMouseLeave(Sender: TObject);
+begin
+
+  lblBarPositionInSTime.Visible := False;
+end;
+
+
+procedure Tfrm_MfPlayer.prbProgressMouseMove(Sender: TObject;
+                                             Shift: TShiftState;
+                                             X, Y: Integer);
+var
+  secPos: Float;
+  hnsPos: Int64;
+
+begin
+
+  if (not Assigned(MfPlayerX)) or (prbProgress.Width <= 0) then
+    Exit;
+
+  // Show only when TopologyReady/playing/paused.
+  if MfPlayerX.State in [TopologyReady, Started, Paused] then
+    begin
+
+      if (X <= 0) then
+       secPos := 0.0
+      else
+       if (X >= prbProgress.Width) then
+         secPos := MfPlayerX.Duration
+       else
+         secPos := ((X / prbProgress.Width) * MfPlayerX.Duration);
+
+       hnsPos := Trunc(secPos);
+       lblBarPositionInSTime.Caption := Format('Position: %s',
+                                               [HnsTimeToStr(hnsPos,
+                                                             False)]);
+    end;
+end;
+
 // Seek
 procedure Tfrm_MfPlayer.prbProgressMouseUp(Sender: TObject;
                                            Button: TMouseButton;
@@ -1095,17 +1685,46 @@ procedure Tfrm_MfPlayer.prbProgressMouseUp(Sender: TObject;
                                            X, Y: Integer);
 var
   fPos: Float;
+  hr: HRESULT;
+  SeekPosition100ns: Int64;
 
 begin
+
+  if (not Assigned(MfPlayerX)) or (prbProgress.Width <= 0) then
+    Exit;
 
   if (X <= 0) then
     fPos := 0.0
   else
-    fPos := ((X / prbProgress.Width) * MfPlayerX.Duration);
+    if (X >= prbProgress.Width) then
+      fPos := MfPlayerX.Duration
+    else
+      fPos := ((X / prbProgress.Width) * MfPlayerX.Duration);
 
-  MfPlayerX.SetNewPosition := Trunc(fPos); // set new StartPosition
+  SeekPosition100ns := Trunc(fPos);
+
+  if MfCastIsActive() and Assigned(FMfCastController) then
+    begin
+
+      hr := FMfCastController.Seek(SeekPosition100ns);
+      if FAILED(hr) then
+        SetCastStatusText('Could not seek ChromeCast. HRESULT $' +
+                          IntToHex(DWORD(hr), 8));
+
+      if SUCCEEDED(hr) then
+        SetCastStatusText('ChromeCast: Seeking');
+    end;
+
+  MfPlayerX.SetNewPosition := SeekPosition100ns; // original media timeline
   MfPlayerX.SendPlayerRequest(reqSeek);
-  prbProgress.Position := X;
+
+  if (X < prbProgress.Min) then
+    prbProgress.Position := prbProgress.Min
+  else
+    if (X > prbProgress.Max) then
+      prbProgress.Position := prbProgress.Max
+    else
+      prbProgress.Position := X;
 end;
 
 
@@ -1139,6 +1758,8 @@ end;
 procedure Tfrm_MfPlayer.mnuCastToClick(Sender: TObject);
 var
   hr: HRESULT;
+  PositionHr: HRESULT;
+  CastStartPosition100ns: MFTIME;
   Device: TMfCastDevice;
   Subtitle: TMfCastSubtitleAsset;
 
@@ -1146,7 +1767,6 @@ begin
 
   if not Assigned(FMfCastController) then
     begin
-
       Caption := 'ChromeCast support is not initialized.';
       Exit;
     end;
@@ -1156,8 +1776,14 @@ begin
 
   if Trim(sMediaFileName) = '' then
     begin
-
       Caption := 'Open a media file before casting.';
+      Exit;
+    end;
+
+  if SubtitleLoadPending() then
+    begin
+      SetCastStatusText('ChromeCast: The selected subtitle track is still loading.');
+      UpdateCastControls();
       Exit;
     end;
 
@@ -1165,23 +1791,24 @@ begin
                                 Device) then
     Exit;
 
-  SetCastStatusText('ChromeCast: Connecting to ' +
-                    Device.FriendlyName);
+  SetCastStatusText('ChromeCast: Connecting to ' + Device.FriendlyName);
   UpdateCastControls();
 
   Subtitle.Reset();
+
   if Assigned(MfPlayerX) and MfPlayerX.SubtitlesEnabled then
     begin
-      hr := MfPlayerX.ExportActiveSubtitlesAsWebVtt(
-              Subtitle.Data, Subtitle.Language, Subtitle.Name);
+      hr := MfPlayerX.ExportActiveSubtitlesAsWebVtt(Subtitle.Data,
+                                                    Subtitle.Language,
+                                                    Subtitle.Name);
       if FAILED(hr) then
         begin
-          SetCastStatusText(
-            'ChromeCast: Could not prepare the active subtitles.');
+          SetCastStatusText('ChromeCast: Could not prepare the active subtitles.');
           UpdateCastControls();
           Exit;
         end;
-      if hr = S_OK then
+
+      if (hr = S_OK) then
         begin
           Subtitle.Enabled := Length(Subtitle.Data) > 0;
           Subtitle.ContentType := 'text/vtt; charset=utf-8';
@@ -1194,26 +1821,49 @@ begin
             Subtitle.Name := 'Subtitles';
         end;
     end;
+
+  CastStartPosition100ns := 0;
+  FCastLocalWasRunning := False;
+
+  if Assigned(MfPlayerX) then
+    begin
+      FCastLocalWasRunning := MfPlayerX.State in [Starting, Started];
+      PositionHr := MfPlayerX.GetPosition(CastStartPosition100ns);
+
+      if FAILED(PositionHr) then
+        CastStartPosition100ns := MfPlayerX.Position * ONE_HNS_MSEC;
+      if (CastStartPosition100ns < 0) then
+        CastStartPosition100ns := 0;
+    end;
+
+  FCastStartPosition100ns := CastStartPosition100ns;
+  FCastSyncPending := True;
+
   hr := FMfCastController.CastFile(Device,
                                    sMediaFileName,
                                    Subtitle,
                                    cmmAutomatic,
-                                   csmAutomatic);
+                                   csmAutomatic,
+                                   CastStartPosition100ns);
 
   if (hr = S_OK) and
      (FMfCastController.GetState() <> csError) then
     begin
 
+      // Keep local playback running while the receiver buffers. LoadMedia waits
+      // for the first PLAYING status and the callback then seeks the local
+      // session to the receiver position. If the receiver takes too long, the
+      // local video remains visible instead of being left paused indefinitely.
       StartLocalPlaybackForCasting();
       UpdateCastControls();
     end
   else
     begin
-
-      if FMfCastController.GetState() <> csError then
+      if (FMfCastController.GetState() <> csError) then
         SetCastStatusText(MfCastStartFailureText(Device.FriendlyName,
                                                  hr));
 
+      CancelPendingCastSynchronization(False);
       UpdateCastControls();
     end;
 end;
@@ -1227,15 +1877,15 @@ begin
 
   case ANewState of
     csIdle,
-    csStopped:
-      ClearCastStatusText();
+    csStopped: begin
+                 CancelPendingCastSynchronization(True);
+                 ClearCastStatusText();
+               end;
 
-    csError:
-      ; // MfCastError supplies the detailed error text.
+    csError:   CancelPendingCastSynchronization(True); // MfCastError supplies the detailed error text.
 
   else
-    SetCastStatusText('ChromeCast: ' +
-                      MfCastStateToString(ANewState));
+    SetCastStatusText('ChromeCast: ' + MfCastStateToString(ANewState));
   end;
 end;
 
@@ -1249,6 +1899,19 @@ begin
   StatusText := Trim(AStatus.PlayerState);
   if (StatusText = '') then
     Exit;
+
+  if SameText(StatusText,
+              'PLAYING') then
+    SynchronizeLocalPlaybackToCast(AStatus.CurrentTime100ns);
+
+  if SameText(StatusText,
+              'IDLE') and
+     SameText(Trim(AStatus.IdleReason),
+              'FINISHED') then
+    begin
+      CompletePlayback();
+      Exit;
+    end;
 
   if SameText(StatusText,
               'LOADING') then
@@ -1269,14 +1932,20 @@ end;
 procedure Tfrm_MfPlayer.MfCastError(const AError: TMfCastErrorInfo);
 var
   ErrorText: string;
+
 begin
 
+  CancelPendingCastSynchronization(True);
   ErrorText := 'ChromeCast error';
+
   if (Trim(AError.Stage) <> '') then
     ErrorText := ErrorText + ' at ' + AError.Stage;
+
   if (Trim(AError.MessageText) <> '') then
     ErrorText := ErrorText + ': ' + AError.MessageText;
+
   ErrorText := ErrorText + '. HRESULT $' + IntToHex(DWORD(AError.HResult), 8);
+
   if (Trim(AError.Detail) <> '') then
     ErrorText := ErrorText + ' ' + AError.Detail;
 
@@ -1318,6 +1987,7 @@ begin
   mnuCinema.Checked := True;
   mnuSixteenByNine.Checked := False;
   mnuFourByThree.Checked := False;
+
   if Assigned(MfPlayerX) then
     MfPlayerX.SubtitleAspectRatio := ps_AspectRatio;
   ForceResize();
@@ -1331,6 +2001,7 @@ begin
   mnuCinema.Checked := False;
   mnuSixteenByNine.Checked := True;
   mnuFourByThree.Checked := False;
+
   if Assigned(MfPlayerX) then
     MfPlayerX.SubtitleAspectRatio := ps_AspectRatio;
   ForceResize();
@@ -1344,6 +2015,7 @@ begin
   mnuCinema.Checked := False;
   mnuSixteenByNine.Checked := False;
   mnuFourByThree.Checked := True;
+
   if Assigned(MfPlayerX) then
     MfPlayerX.SubtitleAspectRatio := ps_AspectRatio;
   ForceResize();
@@ -1358,6 +2030,11 @@ var
 
 begin
 
+  if (not Assigned(MfPlayerX)) or
+     (MfPlayerX.SoundChannels = 0) or
+     (Length(MfPlayerX.m_VolumeChannels) < Integer(MfPlayerX.SoundChannels)) then
+    Exit;
+
   iSliderL := (trbVolumeL.Position * 0.01);
   iSliderR := (trbVolumeR.Position * 0.01);
 
@@ -1371,7 +2048,6 @@ begin
   // The first stereo channel (0) is always the LEFT one!
   if (MfPlayerX.SoundChannels = 2) then
     begin
-
       MfPlayerX.m_VolumeChannels[0] := iSliderL;
       MfPlayerX.m_VolumeChannels[1] := iSliderR;
     end;
@@ -1421,12 +2097,12 @@ begin
 
   if (MfPlayerX.SoundChannels > 0) then
     begin
-
       if (cbLockVolumeSliders.Checked = True) then
         trbVolumeL.Position := trbVolumeR.Position;
       SetVolumeChannels(MfPlayerX.m_VolumeChannels);
     end;
 end;
+
 
 // Left volume channel
 procedure Tfrm_MfPlayer.trbVolumeLChange(Sender: TObject);
@@ -1437,23 +2113,21 @@ begin
 
   if (MfPlayerX.SoundChannels > 0) then
     begin
-
       if (cbLockVolumeSliders.Checked = True) then
         trbVolumeR.Position := trbVolumeL.Position;
-      SetVolumeChannels(MfPlayerX.m_VolumeChannels);
+      if (MfPlayerX.SoundChannels > 0) then
+        SetVolumeChannels(MfPlayerX.m_VolumeChannels);
     end;
 end;
 //------------------------------------------------------------------------------
 
-procedure Tfrm_MfPlayer.FormCloseQuery(
-  Sender: TObject;
-  var CanClose: Boolean);
+procedure Tfrm_MfPlayer.FormCloseQuery(Sender: TObject;
+                                       var CanClose: Boolean);
 
 begin
 
   if Assigned(FExportThread) then
     begin
-
       FExportClosePending := True;
       FExportStopPending := False;
 
@@ -1474,7 +2148,6 @@ begin
 
   if Assigned(FMfCastController) then
     begin
-
       FMfCastController.Disconnect();
       FMfCastController := nil;
     end;
@@ -1502,6 +2175,15 @@ begin
   FExportThread := nil;
   FExportClosePending := False;
   FExportStopPending := False;
+  FSubtitleLoadThread := nil;
+  FSubtitleLoadSerial := 0;
+  FSubtitleLoadPending := False;
+  FPendingSubtitleLoadEmbedded := False;
+  FPendingSubtitleLoadStreamIndex := 0;
+  FPendingSubtitleLoadLanguageTag := '';
+  FCastStartPosition100ns := 0;
+  FCastSyncPending := False;
+  FCastLocalWasRunning := False;
   ps_AspectRatio := AR_16_9;
   mnuStopCasting.Enabled := False;
 
@@ -1528,9 +2210,9 @@ begin
   FMfCastController := TMfCastController.Create(Components);
   Settings := TMfCastSettings.CreateDefault();
   hr := FMfCastController.Configure(Settings);
+
   if SUCCEEDED(hr) then
     begin
-
       CastCallbacks.Reset();
       CastCallbacks.OnStateChanged := MfCastStateChanged;
       CastCallbacks.OnMediaStatus := MfCastMediaStatus;
@@ -1540,7 +2222,6 @@ begin
 
   if FAILED(hr) then
     begin
-
       FMfCastController := nil;
       Caption := 'ChromeCast setup failed. HRESULT $' + IntToHex(DWORD(hr), 8);
     end;
@@ -1556,10 +2237,10 @@ var
   bm: TBitmap;
 
 begin
+
   case Key of
     VK_SPACE:   if Assigned(MfPlayerX) then
                   begin
-
                     case MfPlayerX.State of
                       Started: butPauseClick(Self);
                       OpenPending: butPlayClick(Self);
@@ -1569,12 +2250,10 @@ begin
 
     VK_END:     if Assigned(MfPlayerX) then
                   begin
-
                     butStopClick(Self);
                   end;
 
     VK_F11:     begin  //Shut down
-
                   if Assigned(MfPlayerX) then
                     MfPlayerX.ShutDown();
                 end;
@@ -1583,7 +2262,6 @@ begin
 
     //take a snapshot and copy the bitmap to the clipboard
     VK_F8:      begin
-
                   bm:= TBitmap.Create;
                   MfPlayerX.TakeSnapShot(bm);
                   Clipboard.Assign(bm);
@@ -1594,18 +2272,18 @@ begin
     // since there is a trackbar, this one will have the focus.
     // We did not implement a balance method.
     VK_LEFT:    begin
-
                   if (Length(MfPlayerX.m_VolumeChannels) >= 1) then
                     MfPlayerX.m_VolumeChannels[0]:= MfPlayerX.m_VolumeChannels[0] - 0.01;
+
                   if (Length(MfPlayerX.m_VolumeChannels) > 1) then
                     MfPlayerX.m_VolumeChannels[1]:= MfPlayerX.m_VolumeChannels[1] - 0.01;
                   MfPlayerX.SetVolume(MfPlayerX.m_VolumeChannels);
                 end;
 
     VK_RIGHT:   begin
-
                   if (Length(MfPlayerX.m_VolumeChannels) >= 1) then
                     MfPlayerX.m_VolumeChannels[0]:= MfPlayerX.m_VolumeChannels[0] + 0.01;
+
                   if (Length(MfPlayerX.m_VolumeChannels) > 1) then
                     MfPlayerX.m_VolumeChannels[1]:= MfPlayerX.m_VolumeChannels[1] + 0.01;
                   MfPlayerX.SetVolume(MfPlayerX.m_VolumeChannels);
@@ -1625,7 +2303,6 @@ begin
 
   if not Assigned(MfPlayerX) then
     begin
-
       MfPlayerX := nil;
       // We want the video to be played on the VideoPanel, so, we use that handle.
       MfPlayerX := TMfPlayerX.Create(pnlVideo.Handle,       // The clipping window / control
@@ -1646,10 +2323,6 @@ begin
 
   if Assigned(MfPlayerX) then
     begin
-
-      // no TimedText files found; nothing to do here.
-      if not MfPlayerX.TimedTextFileLoaded then
-        Exit;
       // Show language dialog
       // No dialog initiated on startup, this should not happen.
       if not Assigned(dlgTimedTextLanguages) then
@@ -1709,16 +2382,49 @@ end;
 
 
 procedure Tfrm_MfPlayer.WMProgressEvent(var Msg: TMessage);
+var
+  DurationMs: Int64;
+  PositionMs: Int64;
+  ProgressValue: Int64;
+
 begin //Position
 
-  if bAppIsClosing then
+  if bAppIsClosing or (not Assigned(MfPlayerX)) then
     Exit;
 
-  // WParam 1 is a subtitle text event
+  // The presentation clock no longer ticks after MESessionEnded, so the
+  // player posts this explicit notification after the final sample drains.
+  if (Msg.WParam = 2) then
+    begin
+      CompletePlayback();
+      Exit;
+    end;
+
+  // WParam 1 is the Media Foundation presentation-clock update.
   if (Msg.WParam = 1) then
     begin
       if (MfPlayerX.State = Started) then
-        prbProgress.Position := Trunc((prbProgress.Width / (MfPlayerX.Duration / ONE_HNS_MSEC)) * (MfPlayerX.Position));
+        begin
+          DurationMs := MfPlayerX.Duration div ONE_HNS_MSEC;
+          PositionMs := MfPlayerX.Position;
+
+          // MF_PD_DURATION is optional and some MKV sources initially report
+          // zero. Never divide by zero; keep playback and later timer updates
+          // alive even when a duration is unavailable.
+          if DurationMs > 0 then
+            begin
+              ProgressValue := (PositionMs * prbProgress.Max) div DurationMs;
+              if (ProgressValue < prbProgress.Min) then
+                ProgressValue := prbProgress.Min
+              else
+                if (ProgressValue > prbProgress.Max) then
+                  ProgressValue := prbProgress.Max;
+
+              prbProgress.Position := Integer(ProgressValue);
+            end
+          else
+            prbProgress.Position := 0;
+        end;
 
       if (MfPlayerX.State In [Closed, Stopped]) then
         ResetInterface();
@@ -1743,7 +2449,6 @@ begin
   // No dialog initiated on startup, this should not happen.
   if not Assigned(dlgSelectStreams) then
     begin
-
       ShowMessage('No stream selection dialog available.');
       Exit;
     end;

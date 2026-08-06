@@ -135,7 +135,7 @@ type
   end;
 
   IMfCastHttpContent = interface
-    ['{2CAEBD91-85A4-4025-8CFD-AC85DC1CF8D5}']
+    ['{26AF57D3-6935-47DA-A022-F0C3B7AC707E}']
     function GetContentType(): string;
     function GetLength(out ALength: UInt64): HRESULT;
     function CanSeek(): Boolean;
@@ -144,6 +144,13 @@ type
                     ABuffer: Pointer;
                     const ABufferSize: Cardinal;
                     out ABytesRead: Cardinal): HRESULT;
+  end;
+
+  // Optional capability implemented only by content that can grow while it is
+  // being served. Static file and memory resources deliberately do not expose
+  // this interface.
+  IMfCastLiveHttpContent = interface
+    ['{1EF8CFA8-1778-4F7D-B0D8-89BEB2A1E6B9}']
     function WaitForData(const AOffset: UInt64;
                          const ATimeoutMs: Cardinal): HRESULT;
   end;
@@ -165,17 +172,10 @@ type
   end;
 
   IMfCastSegmentPublisher = interface
-    ['{A468BC13-1C0E-4746-AC09-1632BD0860E7}']
+    ['{696081C4-E77F-4F7D-A756-F84A16F45B56}']
     function BeginPresentation(const AContentType: string;
-                               const AOutputMode: TMfCastOutputMode;
                                out AEntryPath: string): HRESULT;
     function GetByteStream(out AByteStream: IMFByteStream): HRESULT;
-    function PublishInitializationSegment(const AData: TBytes): HRESULT;
-    function PublishMediaFragment(const ASequence: Int64;
-                                  const AStartTime100ns: Int64;
-                                  const ADuration100ns: Int64;
-                                  const AData: TBytes): HRESULT;
-    function UpdateManifest(): HRESULT;
     function CompletePresentation(): HRESULT;
     function AbortPresentation(const AReason: HRESULT): HRESULT;
   end;
@@ -238,7 +238,8 @@ type
                       const ASourceName: string;
                       const ASubtitle: TMfCastSubtitleAsset;
                       const AMediaMode: TMfCastMediaMode;
-                      const ASubtitleMode: TMfCastSubtitleMode): HRESULT;
+                      const ASubtitleMode: TMfCastSubtitleMode;
+                      const AStartTime100ns: Int64 = 0): HRESULT;
     function Play(): HRESULT;
     function Pause(): HRESULT;
     function Stop(): HRESULT;

@@ -103,10 +103,11 @@ uses
   WinApi.MediaFoundationApi.MfMetLib,
   {Project}
   TimedTextClass,
-  MfMediaTimelineX2,
-  MfSubtitleCompositorX2,
-  MfSubtitleFramePumpX2,
-  MfSubtitleTransformX2,
+  MfMediaTimeline,
+  MfSubtitleCompositor,
+  MfEmbeddedSubtitleReader,
+  MfSubtitleFramePump,
+  MfSubtitleTransform,
   MFTimerCallBackClass,
   MfPCXConstants,
   LangTags;
@@ -163,8 +164,8 @@ type
     fInitialRate: FLOAT;          // Initial or Actual playback rate
     fCurrentRate: FLOAT;          // The current rate
     StartPosition: MFTIME;        // Start from this position
-    CurrentPosition: MFTIME;      // Current position
-    uiDuration: UINT64;           // Duration
+    CurrentPosition: MFTIME;      // Current position in milliseconds
+    uiDuration: MFTIME;           // Duration
     uiFileSize: UINT64;           // Filesize
     Volume: FLOAT;                // Volume
     SourceStreams: DWORD;         // Number of sourcestreams
@@ -323,6 +324,7 @@ type
     procedure SetSubtitleLanguage(aValue: string);
     procedure SetSubtitleAspectRatio(aValue: Single);
     function GetTimedTextFileLoaded(): Boolean;
+    function GetSubtitleSourcesAvailable(): Boolean;
     procedure SetSubtitlesEnabled(aValue: Boolean);
 
     // Status indicators
@@ -438,6 +440,14 @@ type
     function Pause(): HRESULT;
     function Stop(): HRESULT;
     function ReloadTimedText(): HRESULT;
+    function RefreshEmbeddedSubtitleTracks(): HRESULT;
+    function GetEmbeddedSubtitleTracks(out Tracks: TMfEmbeddedSubtitleTrackInfoArray): HRESULT;
+    function GetPreferredEmbeddedSubtitleStreamIndex(out StreamIndex: DWORD): HRESULT;
+    function SelectEmbeddedSubtitleTrack(StreamIndex: DWORD): HRESULT;
+    function SelectSidecarSubtitleLanguage(const LanguageTag: string): HRESULT;
+    procedure CommitSubtitleSelection();
+    function GetActiveEmbeddedSubtitleStreamIndex(): Integer;
+    function GetActiveSubtitleIsEmbedded(): Boolean;
     function ExportActiveSubtitlesAsWebVtt(
       out AData: TBytes;
       out ALanguageTag: string;
@@ -509,7 +519,7 @@ type
     property CanSetRateReverse: Boolean read m_bCanSetRateReverse;
     // This property is intended to display a custom on screen text.
     property CustomMessage: string read sCustomMessage write SetCustomMessage;
-    property Duration: UINT64 read mfpControl.uiDuration;
+    property Duration: MFTIME read mfpControl.uiDuration;
     // Deprecated: Not available after SDKversion RedStone4.
     //property FullScreen: BOOL read IsFullScreen write SetFullScreen;
     property MaxPlayBackRate: FLOAT read mfpControl.fMaxRateSupported;
@@ -532,6 +542,7 @@ type
     property SubtitleCompositor: TMfSubtitleCompositor read FSubtitleCompositor;
     property SubtitlesEnabled: Boolean read FSubtitlesEnabled write SetSubtitlesEnabled;
     property TimedTextFileLoaded: Boolean read GetTimedTextFileLoaded;
+    property SubtitleSourcesAvailable: Boolean read GetSubtitleSourcesAvailable;
     property VideoRectangle: TRect read GetVideoRectangle;
     property Volumes: TFloatArray read m_VolumeChannels write SetVolume;
   end;
@@ -599,7 +610,9 @@ var
   targetLeft: Integer;
   targetTop: Integer;
   clientRatio: Single;
+
 begin
+
   Result := ClientRect;
   clientWidth := ClientRect.Right - ClientRect.Left;
   clientHeight := ClientRect.Bottom - ClientRect.Top;
@@ -842,14 +855,12 @@ begin
 
   if m_bAppIsClosing then
     begin
-
       Result := MF_E_SHUTDOWN;
       Exit;
     end;
 
   if not Assigned(m_pSession) then
     begin
-
       Result := E_POINTER;
       Exit;
     end;
@@ -858,7 +869,6 @@ begin
 
   if not Assigned(MFPresentationClock) then
     begin
-
       Result := m_pSession.GetClock(pClock);
       if FAILED(Result) then
         Exit;
@@ -880,20 +890,17 @@ begin
   // Closing might have started while GetClock or QueryInterface was running.
   if m_bAppIsClosing then
     begin
-
       Result := MF_E_SHUTDOWN;
       Exit;
     end;
 
   if not Assigned(m_pClockStateSink) then
     begin
-
       m_pClockStateSink := TClockStateSink.Create();
 
       Result := MFPresentationClock.AddClockStateSink(m_pClockStateSink);
       if FAILED(Result) then
         begin
-
           FreeAndNil(m_pClockStateSink);
           Exit;
         end;
@@ -901,19 +908,16 @@ begin
 
   if m_bAppIsClosing then
     begin
-
       Result := MF_E_SHUTDOWN;
       Exit;
     end;
 
   if not Assigned(MFCallBack) then
     begin
-
       MFCallBack := TMFCallBack.Create(m_hwndThis);
 
       if not Assigned(MFCallBack) then
         begin
-
           Result := E_OUTOFMEMORY;
           Exit;
         end;
@@ -966,7 +970,6 @@ begin
   // selected stream without source/output nodes in the topology.
   for streamIndex := 0 to Integer(SourceStreams) - 1 do
     begin
-
       pSD := nil;
       pHandler := nil;
       majorType := GUID_NULL;
@@ -989,7 +992,6 @@ begin
       if IsEqualGUID(majorType,
                      MFMediaType_Video) then
         begin
-
           if (firstVideoStream < 0) then
             firstVideoStream := streamIndex;
           if fSelected then
@@ -999,7 +1001,6 @@ begin
         if IsEqualGUID(majorType,
                        MFMediaType_Audio) then
           begin
-
             if (firstAudioStream < 0) then
               firstAudioStream := streamIndex;
             if fSelected then
@@ -1008,7 +1009,6 @@ begin
         else
           if fSelected then
             begin
-
               // MfPlayer X2 renders sidecar subtitles itself. Other selected source
               // streams have no renderer branch and must therefore be deselected.
               Result := pPD.DeselectStream(DWORD(streamIndex));
@@ -1022,7 +1022,6 @@ begin
   // descriptor and decides whether to create topology nodes.
   if (not selectedVideoFound) and (firstVideoStream >= 0) then
     begin
-
       Result := pPD.SelectStream(DWORD(firstVideoStream));
       if FAILED(Result) then
         Exit;
@@ -1030,7 +1029,6 @@ begin
 
   if (not selectedAudioFound) and (firstAudioStream >= 0) then
     begin
-
       Result := pPD.SelectStream(DWORD(firstAudioStream));
       if FAILED(Result) then
         Exit;
@@ -1038,7 +1036,6 @@ begin
 
   if (firstVideoStream < 0) and (firstAudioStream < 0) then
     begin
-
       Result := MF_E_UNSUPPORTED_BYTESTREAM_TYPE;
       Exit;
     end;
@@ -1047,7 +1044,6 @@ begin
   // presentation descriptor.
   for streamIndex := 0 to Integer(SourceStreams) - 1 do
     begin
-
       Result := AddBranchToPlaybackTopologyX2(tmpTopology,
                                               pSource,
                                               pPD,
@@ -1100,7 +1096,6 @@ begin
 
   if not fSelected then
     begin
-
       Result := S_OK;
       Exit;
     end;
@@ -1119,7 +1114,6 @@ begin
   if IsEqualGUID(majorType,
                  MFMediaType_Video) then
     begin
-
       isVideo := True;
       Result := CreateVideoMediaSinkActivate(pSD,
                                              hVideoWnd,
@@ -1132,7 +1126,6 @@ begin
                                              pSinkActivate)
     else
       begin
-
         // MfPlayer X2 renders only audio and video source streams. Unsupported
         // selected streams must be deselected, otherwise the source can start a
         // stream for which the topology has no sink branch.
@@ -1160,12 +1153,14 @@ begin
   if FAILED(Result) then
     Exit;
 
-  if isVideo and
-     Assigned(FSubtitleCompositor) and
-     FSubtitleCompositor.TimedTextFileLoaded then
+  if isVideo and Assigned(FSubtitleCompositor) then
     begin
-
-      transformObject := TMfSubtitleVideoTransform.Create(FSubtitleCompositor);
+      // Keep the local subtitle transform in every video topology. Subtitle
+      // sources can be rescanned and selected after OpenURL; omitting the MFT
+      // here would make that later selection impossible to render.
+      OutputDebugString(PChar('MfPlayer X2: inserting local subtitle video transform'));
+      transformObject := TMfSubtitleVideoTransform.Create(FSubtitleCompositor,
+                                                          FMediaTimeline);
       transformInterface := transformObject as IMFTransform;
       transformControl := transformObject as IMfSubtitleVideoTransformControl;
       transformControl.SetEnabled(FSubtitlesEnabled);
@@ -1219,13 +1214,11 @@ begin
 
   with mfpControl do
     begin
-
       State := Closed;           // No session.
       Request := reqNone;        // No request
 
       with SeekState do
         begin
-
           fRequestedRate := 0.0;
           bCanThinPb := False;  // Thinned playback, if supported
           bCanScrub := False;
@@ -1238,6 +1231,7 @@ begin
       fInitialRate := 0.0;        // Actual playback rate
       fCurrentRate := fInitialRate;
       StartPosition := 0;
+      CurrentPosition := 0;
       uiDuration := 0;
       Volume := 1.0;             // Set to the max
       m_dcaps := 0;
@@ -1251,6 +1245,8 @@ begin
   // We don't because the session wil do that automaticly.
 
   ResetController();
+  nChannels := 0;
+  SetLength(m_VolumeChannels, 0);
 
   // reset
   m_bPending := False;
@@ -1273,9 +1269,8 @@ try
 
   // Don't free dynamic array's when the program is terminating.
   // They are managed types and therefor, they are freed automatically.
-  if Not m_bAppIsClosing then
+  if not m_bAppIsClosing then
     begin
-
       Finalize(m_VolumeChannels);
       Finalize(m_aStreamCont);
     end;
@@ -1301,19 +1296,18 @@ try
 
   if Assigned(m_pClockStateSink) then
     begin
-
       try
       // This call will also destroy the ClockStateSink.
       if Assigned(MFPresentationClock) then
         {void} MFPresentationClock.RemoveClockStateSink(m_pClockStateSink);
       finally
-
         MFPresentationClock := nil;
         FreeAndnil(m_pClockStateSink);
       end;
     end;
 
-  SetLength(m_aStreamCont, 0);
+  SetLength(m_aStreamCont,
+            0);
   Finalize(m_aStreamCont);
 
 except
@@ -1355,7 +1349,6 @@ begin
 
   if Assigned(m_pSession) then
     begin
-
       if (FhCloseEvent <> 0) then
         ResetEvent(THandle(FhCloseEvent));
 
@@ -1373,7 +1366,6 @@ begin
       else
         if (FhCloseEvent <> 0) then
           begin
-
             // MESessionClosed is guaranteed to be the final session event.
             dwWaitResult := WaitForSingleObject(THandle(FhCloseEvent),
                                                 5000);
@@ -1395,7 +1387,6 @@ begin
   // waiting for MESessionClosed reported an error.
   if Assigned(m_pSource) then
     begin
-
       hrStep := m_pSource.Shutdown();
 
       if (hrStep <> MF_E_SHUTDOWN) and
@@ -1406,7 +1397,6 @@ begin
 
   if Assigned(m_pSession) then
     begin
-
       hrStep := m_pSession.Shutdown();
 
       if (hrStep <> MF_E_SHUTDOWN) and
@@ -1435,6 +1425,11 @@ end;
 
 
 procedure TMfPlayerX.WndProc(var Msg: TMessage);
+var
+  ClockPositionHns: MFTIME;
+  ClockPositionMs: Int64;
+  TimelinePositionMs: Int64;
+
 begin
 
   // prevent processing messages when app is shutting down.
@@ -1446,15 +1441,39 @@ begin
 
       if (Msg.LParam = S_OK) then
         begin
-          // Send a message to the owner form to update the progressbar
+          // Update the cached position before notifying the form. Use a
+          // separate HNS variable: CurrentPosition is stored in milliseconds.
+          // The fallback timeline also keeps the UI moving when an MKV
+          // presentation clock temporarily reports a frozen zero value.
+          ClockPositionHns := 0;
+          ClockPositionMs := -1;
+          TimelinePositionMs := -1;
+
+          if SUCCEEDED(GetPosition(ClockPositionHns)) then
+            ClockPositionMs := HnsTimeToMsec(ClockPositionHns);
+
+          if Assigned(FMediaTimeline) then
+            TimelinePositionMs := FMediaTimeline.GetPositionMs();
+
+          if (ClockPositionMs >= 0) and (TimelinePositionMs >= 0) then
+            begin
+              if ClockPositionMs >= TimelinePositionMs then
+                mfpControl.CurrentPosition := ClockPositionMs
+              else
+                mfpControl.CurrentPosition := TimelinePositionMs;
+            end
+          else
+            if ClockPositionMs >= 0 then
+              mfpControl.CurrentPosition := ClockPositionMs
+            else
+              if TimelinePositionMs >= 0 then
+                mfpControl.CurrentPosition := TimelinePositionMs;
+
           SendMessage(m_hwndMainForm,
                       WM_PROGRESSNOTIFY,
                       WPARAM(1),
                       0);
 
-          // Get position
-          GetPosition(mfpControl.CurrentPosition);
-          mfpControl.CurrentPosition := HnsTimeToMsec(mfpControl.CurrentPosition);
           // X2 burns subtitles into video samples in the playback topology.
           UpdateCaption();
         end
@@ -1472,7 +1491,6 @@ begin
     end
   else
     begin
-
       // This is a private AllocateHWnd message target used only by the MF timer
       // callback. Avoid DefWindowProc here; stale private-window messages during
       // media-session transitions can otherwise re-enter user32 from the player
@@ -1497,7 +1515,6 @@ begin
   // Check if the current MF version match user's
   if FAILED(MFStartup(MF_VERSION, 0)) then
     begin
-
       MessageBox(0,
                  LPCWSTR('Your computer does not support this Media Foundation API version' +
                        IntToStr(MF_VERSION) + '.'),
@@ -1529,7 +1546,6 @@ begin
 
   if FAILED(hr) then
     begin
-
       MessageBox(0,
                  LPCWSTR('An error occured while initializing MESessionClosed'),
                  LPCWSTR('Error!'),
@@ -1564,7 +1580,8 @@ begin
   DeAllocateHWnd(m_hwndThis);
   // Shutdown the Media Foundation platform
   MFShutdown();
-  inherited Destroy;
+
+  inherited Destroy();
 end;
 
 
@@ -1612,10 +1629,8 @@ begin
 
   if (FhCloseEvent <> 0) then
     begin
-
       if not CloseHandle(THandle(FhCloseEvent)) then
         begin
-
           CloseError := GetLastError();
 
           if SUCCEEDED(hr) then
@@ -1647,7 +1662,6 @@ begin
   // while selecting the correct session type.
   if Assigned(m_pSession) then
     begin
-
       hr := CloseSession();
       if FAILED(hr) then
         goto Done;
@@ -1657,7 +1671,6 @@ begin
 
   if not Assigned(pPD) then
     begin
-
       hr := E_POINTER;
       goto Done;
     end;
@@ -1687,13 +1700,11 @@ begin
   else
     if (hrProtected = S_FALSE) then
       begin
-
         hr := MFCreateMediaSession(nil,
                                    m_pSession);
       end
     else
       begin
-
         // Preserve an actual failure from MFRequireProtectedEnvironment.
         hr := hrProtected;
       end;
@@ -1746,7 +1757,6 @@ begin
 
   if Assigned(m_pVideoDisplay) then
     begin
-
       hr := m_pVideoDisplay.GetCurrentImage(Bmi,
                                             buffer,
                                             bufSize,
@@ -1761,7 +1771,6 @@ try
 
   if (bmi.biSizeImage > 0) and (data <> nil) then
     begin
-
       if (bmi.biBitCount = 32) and
          FSubtitlesEnabled and
          Assigned(FSubtitleCompositor) and
@@ -1771,13 +1780,11 @@ try
           rowBytes := Abs(bmi.biWidth) * 4;
           if (bmi.biHeight < 0) then
             begin
-
               compBuffer := buffer;
               compStride := rowBytes;
             end
           else
             begin
-
               compBuffer := Pointer(NativeInt(buffer) + (NativeInt(Abs(bmi.biHeight) - 1) * NativeInt(rowBytes)));
               compStride := -rowBytes;
             end;
@@ -1796,7 +1803,6 @@ try
       Bit.SetSize(abs(bmi.biWidth), abs(bmi.biHeight));
       for i := abs(bmi.biHeight) - 1 downto 0 do // (int y = h - 1; y >= 0; --y)
         begin
-
           CopyMemory(Bit.ScanLine[i],
                      data,
                      bmi.biWidth * bmi.biBitCount div 8);
@@ -1828,13 +1834,11 @@ try
 
   if Assigned(m_pSource) then
     begin
-
       dur := 0;
       hr := m_pSource.CreatePresentationDescriptor(pPD);
 
       if (SUCCEEDED(hr)) then
         begin
-
           hr := pPD.GetUINT64(MF_PD_DURATION,
                               UINT64(mdur));
           dur := mdur;
@@ -1893,6 +1897,7 @@ var
   pVol: IMFAudioStreamVolume;
   uiChan: UINT32;
   hr: HRESULT;
+  VolumeChannels: TFloatArray;
 
 begin
 
@@ -1901,14 +1906,8 @@ begin
   uiChan := 0;
 
 try
-  SetLength(m_VolumeChannels,
-            0);
-
-  nChannels := 0;
-
   if not Assigned(m_pSession) then
     begin
-
       hr := E_POINTER;
       Exit(hr);
     end;
@@ -1917,8 +1916,8 @@ try
   // valid media layout, so leave the channel array empty when the service is
   // unavailable. The caller can continue starting the Media Session.
   hr := (m_pSession as IMFGetService).GetService(MR_STREAM_VOLUME_SERVICE,
-                                                  IID_IMFAudioStreamVolume,
-                                                  Pointer(pVol));
+                                                 IID_IMFAudioStreamVolume,
+                                                 Pointer(pVol));
   if FAILED(hr) then
     begin
 
@@ -1935,21 +1934,23 @@ try
   // channels. This can occur while a topology is still settling.
   if uiChan = 0 then
     begin
-
       hr := S_OK;
       Exit(hr);
     end;
 
   // Volume levels are in the range 0.0 to 1.0.
   // If balanced volume is needed; use an array of channels.
-  SetLength(m_VolumeChannels,
+  SetLength(VolumeChannels,
             uiChan);
 
   // The GetAllVolumes method retrieves the volume levels for all channels.
   hr := pVol.GetAllVolumes(uiChan,
-                           @m_VolumeChannels[0]);
+                           @VolumeChannels[0]);
   if SUCCEEDED(hr) then
-    nChannels := uiChan;
+    begin
+      m_VolumeChannels := VolumeChannels;
+      nChannels := uiChan;
+    end;
 
 finally
   Result := hr;
@@ -1970,7 +1971,6 @@ begin
 
   if (FhCloseEvent <> 0) then
     begin
-
       Result := MF_E_ALREADY_INITIALIZED;
       Exit;
     end;
@@ -2002,7 +2002,6 @@ begin
 
   if not Assigned(m_pSession) then
     begin
-
       Result := E_POINTER;
       Exit;
     end;
@@ -2024,7 +2023,6 @@ begin
     SetEvent(THandle(FhCloseEvent))
   else
     begin
-
       // For all other events, ask the media session for the
       // next event in the queue.
       hr := m_pSession.BeginGetEvent(IMFAsyncCallback(Self),
@@ -2051,7 +2049,6 @@ begin
   // Check if the async operation succeeded.
   if (SUCCEEDED(hr) and FAILED(hrStatus)) then
     begin
-
       OutputDebugString(PChar(Format('MfPlayer X2: media event %d failed, HRESULT=0x%.8x',
                                      [Ord(meType), DWORD(hrStatus)])));
       hr := hrStatus;
@@ -2230,7 +2227,6 @@ begin
 
   if m_bAppIsClosing then
     begin
-
       Result := MF_E_SHUTDOWN;
       Exit;
     end;
@@ -2240,7 +2236,6 @@ begin
   if SUCCEEDED(hr) then
     if (status = MF_TOPOSTATUS_READY) then
       begin
-
         // Call OnTopologyReady
         hr := OnSessionTopologyReady(pEvent);  // Send msg we are ready
       end;
@@ -2260,7 +2255,6 @@ begin
 
   if m_bAppIsClosing then
     begin
-
       Result := MF_E_SHUTDOWN;
       Exit;
     end;
@@ -2291,10 +2285,7 @@ begin
 
   // Adjust aspect ratio
   if Assigned(m_pVideoDisplay) then
-    begin
-      ResizeVideo(nil);
-    end;
-
+    ResizeVideo(nil);
 
 // Since the topology is ready, you might start playback, do rate calculations etc.
 //
@@ -2317,7 +2308,6 @@ begin
   hrRate := InitiateRateControl();
   if FAILED(hrRate) then
     begin
-
       mfpControl.SeekState.bCanScrub := False;
       mfpControl.SeekState.bCanThinPb := False;
     end;
@@ -2390,8 +2380,10 @@ begin
 
   m_bPending := False;
   mfpControl.Request := reqNone;
+
   if Assigned(FMediaTimeline) then
     FMediaTimeline.Pause();
+
   State := Paused;
   UpdateCaption();
   Result := S_OK;
@@ -2448,7 +2440,6 @@ var
 
 begin
 
-
   queuedRequest := mfpControl.Request;
   m_bPending := False;
   mfpControl.Request := reqNone;
@@ -2487,12 +2478,15 @@ begin
 
   if Assigned(MFCallBack) and (State = Started) then
     begin
-
+      // Set the recurring interval before arming the immediate first tick.
+      // The previous order allowed Invoke to run with an uninitialized zero
+      // interval and flood the callback queue.
+      MFCallBack.TimerResolution := MF_PLAYER_UI_TIMER_INTERVAL_HNS;
       hr := MFCallBack.SetTimer(0,
                                 DWord(MFTIMER_RELATIVE),
-                                nil); // Fire up immediately on default params
+                                nil); // Fire the first UI update immediately
       if SUCCEEDED(hr) then
-        MFCallBack.TimerResolution := 1
+        OutputDebugString(PChar('MfPlayer X2: 100 ms presentation timer started'))
       else
         OutputDebugString(PChar(Format('MfPlayer X2: timer unavailable, hr=%.8x',
                                        [DWORD(hr)])));
@@ -2512,8 +2506,10 @@ begin
   OutputDebugString(PChar('MfPlayer X2: explicit Stop completed'));
   m_bPending := False;
   mfpControl.Request := reqNone;
+
   if Assigned(FMediaTimeline) then
     FMediaTimeline.Stop();
+
   ClearSubtitleBitmap();
   State := Stopped;
   UpdateCaption();
@@ -2530,8 +2526,10 @@ begin
   OutputDebugString(PChar('MfPlayer X2: session ended after pipeline drain'));
   m_bPending := False;
   mfpControl.Request := reqNone;
+
   if Assigned(FMediaTimeline) then
     FMediaTimeline.Stop();
+
   ClearSubtitleBitmap();
   State := Stopped;
   UpdateCaption();
@@ -2599,7 +2597,6 @@ begin
     try
       if not Assigned(sURL) then
         begin
-
           hr := E_POINTER;
           ErrorCaption := 'MfPlayer X2: no media file was specified.';
           goto done;
@@ -2607,7 +2604,6 @@ begin
 
       if (sURL^ = #0) then
         begin
-
           hr := E_INVALIDARG;
           ErrorCaption := 'MfPlayer X2: no media file was specified.';
           goto done;
@@ -2621,7 +2617,6 @@ begin
 
       if FAILED(hr) then
         begin
-
           ErrorCaption := Format('Could not open %s (%s)',
                                  [ExtractFileName(FFilename), IntToHex(DWORD(hr), 8)]);
           goto done;
@@ -2637,7 +2632,6 @@ begin
 
       if FAILED(hr) then
         begin
-
           ErrorCaption := Format('Could not examine the streams in %s (%s)',
                                  [ExtractFileName(FFilename), IntToHex(DWORD(hr), 8)]);
           goto done;
@@ -2649,7 +2643,6 @@ begin
       hr := CreateSession(m_pSourcePD);
       if FAILED(hr) then
         begin
-
           ErrorCaption := Format('Could not create the Media Foundation session. (%s)',
                                  [IntToHex(DWORD(hr), 8)]);
           goto done;
@@ -2662,7 +2655,6 @@ begin
 
       if FAILED(hrTimedText) then
         begin
-
           FSubtitlesEnabled := False;
 
           if Assigned(FSubtitleCompositor) then
@@ -2684,7 +2676,6 @@ begin
                                      mfpControl.SourceStreams);
       if FAILED(hr) then
         begin
-
           ErrorCaption := Format('Could not create the playback topology. (%s)',
                                  [IntToHex(DWORD(hr), 8)]);
           goto done;
@@ -2696,7 +2687,6 @@ begin
 
       if FAILED(hr) then
         begin
-
           ErrorCaption := Format('Could not enumerate the media streams. (%s)',
                                  [IntToHex(DWORD(hr), 8)]);
           goto done;
@@ -2704,7 +2694,6 @@ begin
 
       if (StreamCount = 0) then
         begin
-
           hr := MF_E_UNSUPPORTED_BYTESTREAM_TYPE;
           ErrorCaption := 'The file contains no playable media streams.';
           goto done;
@@ -2722,7 +2711,6 @@ begin
       //     decoder is installed.
       for StreamIndex := 0 to StreamCount - 1 do
         begin
-
           StreamDescriptor := nil;
           StreamSelected := False;
           DecoderCLSID := GUID_NULL;
@@ -2732,7 +2720,6 @@ begin
                                                        StreamDescriptor);
           if FAILED(hr) then
             begin
-
               ErrorCaption := Format('Could not examine media stream %s (%s)',
                                      [IntToStr(StreamIndex), IntToHex(DWORD(hr), 8)]);
               goto done;
@@ -2755,16 +2742,10 @@ begin
             CodecDescription := 'Unknown compressed media format';
 
           if (hr = MF_E_TOPO_CODEC_NOT_FOUND) then
-            begin
-
-              ErrorCaption := 'Missing Media Foundation decoder: ' + CodecDescription;
-            end
+            ErrorCaption := 'Missing Media Foundation decoder: ' + CodecDescription
           else
-            begin
-
-              ErrorCaption := Format('Could not validate the decoder for %s (%s)',
-                                     [CodecDescription, IntToHex(DWORD(hr), 8)]);
-            end;
+            ErrorCaption := Format('Could not validate the decoder for %s (%s)',
+                                   [CodecDescription, IntToHex(DWORD(hr), 8)]);
 
           goto done;
         end;
@@ -2808,8 +2789,6 @@ begin
                                    m_pTopology);
       if FAILED(hr) then
         begin
-
-
           ErrorCaption := Format('Could not submit the playback topology. (%s)',
                                  [IntToHex(DWORD(hr), 8)]);
           goto done;
@@ -2823,10 +2802,41 @@ begin
                                       m_pSource,
                                       m_aStreamCont);
       if FAILED(hrOptional) then
+        ErrorCaption := Format('Could not retrieve stream information. (%s)',
+                               [IntToHex(DWORD(hrOptional), 8)])
+      else
         begin
+          // Stream metadata is available as soon as the source is opened,
+          // before the audio-renderer volume service is necessarily ready.
+          nChannels := 0;
+          SetLength(m_VolumeChannels, 0);
+          for StreamIndex := Low(m_aStreamCont) to High(m_aStreamCont) do
+            if (m_aStreamCont[StreamIndex].idStreamMediaType = mtAudio) and
+               (m_aStreamCont[StreamIndex].bSelected <> BOOL(0)) and
+               (m_aStreamCont[StreamIndex].audio_iAudioChannels > 0) then
+              begin
+                nChannels := m_aStreamCont[StreamIndex].audio_iAudioChannels;
+                SetLength(m_VolumeChannels, nChannels);
+                for StreamCount := 0 to nChannels - 1 do
+                  m_VolumeChannels[StreamCount] := mfpControl.Volume;
+                Break;
+              end;
 
-          ErrorCaption := Format('Could not retrieve stream information. (%s)',
-                                 [IntToHex(DWORD(hrOptional), 8)]);
+        if Assigned(FMediaTimeline) then
+          begin
+            // Configure the frame-rate fallback for decoded samples that do
+            // not carry a usable timestamp. Some MKV decoder paths need this.
+            for StreamIndex := Low(m_aStreamCont) to High(m_aStreamCont) do
+              if (m_aStreamCont[StreamIndex].idStreamMediaType = mtVideo) and
+                 (m_aStreamCont[StreamIndex].video_FrameRateNumerator > 0) and
+                 (m_aStreamCont[StreamIndex].video_FrameRateDenominator > 0) then
+                begin
+                  FMediaTimeline.SetFrameRate(
+                    m_aStreamCont[StreamIndex].video_FrameRateNumerator,
+                    m_aStreamCont[StreamIndex].video_FrameRateDenominator);
+                  Break;
+                end;
+          end;
         end;
 
       // The topology is now being resolved asynchronously.
@@ -2839,7 +2849,6 @@ done:
 
       if FAILED(hr) then
         begin
-
           // Clear releases the partially created topology, source and session.
           // It also clears FFileName, so compose ErrorCaption before this call.
           Clear();
@@ -2915,21 +2924,18 @@ begin
 
   if (m_pSession = nil) or (m_pSource = nil) then
     begin
-
       Result := E_UNEXPECTED;
       Exit;
     end;
 
   if m_bPending then
     begin
-
       mfpControl.Request := reqPause;
       State := Pausing;
       hr := S_OK;
     end
   else
     begin
-
       hr := m_pSession.Pause();
       mfpControl.Request := reqPause;
       State := Pausing;
@@ -2967,13 +2973,11 @@ try
 
   if m_bPending then
     begin
-
       mfpControl.Request := reqStart;
       State := Starting;
     end
   else
     begin
-
       PropVariantInit(varStart);
 
       tPos := 0;
@@ -2996,11 +3000,9 @@ try
       if (csClockState = MFCLOCK_STATE_PAUSED) and
          Assigned(MFPresentationClock) then
         begin
-
           hrClock := MFPresentationClock.GetTime(tPos);
           if SUCCEEDED(hrClock) then
             begin
-
               varStart.vt := VT_I8;
               varStart.hVal.QuadPart := tPos;
             end
@@ -3020,7 +3022,6 @@ try
 
   if (SUCCEEDED(hr)) then
     begin
-
       // Get initial volume
       GetVolume();
       mfpControl.Request := reqStart;
@@ -3031,7 +3032,6 @@ try
       // check if there is video present
       if (HasVideo() = True) then
         begin
-
           hrVideo := (m_pSession as IMFGetService).GetService(MR_VIDEO_MIXER_SERVICE,
                                                               IID_IMFVideoProcessor,
                                                               Pointer(FVideoProcessor));
@@ -3059,21 +3059,18 @@ begin
 
   if (FFileName = '') or (OutputFileName = '') then
     begin
-
       Result := E_INVALIDARG;
       Exit;
     end;
 
   if not Assigned(FSubtitleCompositor) then
     begin
-
       Result := E_POINTER;
       Exit;
     end;
 
   if not FSubtitleCompositor.TimedTextFileLoaded then
     begin
-
       Result := ReloadTimedText();
       if FAILED(Result) then
         Exit;
@@ -3097,15 +3094,9 @@ function TMfPlayerX.Repaint(): HRESULT;
 begin
 
   if Assigned(m_pVideoDisplay) then
-    begin
-
-      Result := m_pVideoDisplay.RepaintVideo();
-    end
+    Result := m_pVideoDisplay.RepaintVideo()
   else
-    begin
-
-      Result := S_OK;
-    end;
+    Result := S_OK;
 end;
 
 
@@ -3122,7 +3113,6 @@ begin
 
   if Assigned(m_pVideoDisplay) then
     begin
-
       // Stop repaint
       SetRedraw();
       // Set the destination rectangle.
@@ -3135,9 +3125,7 @@ begin
                             rcpdest);
         end
       else
-        begin
-          rcpDest := pdRect;
-        end;
+        rcpDest := pdRect;
 
       hr := m_pVideoDisplay.SetVideoPosition(nil,
                                              rcpdest);
@@ -3152,6 +3140,7 @@ begin
       // Start repaint again
       SetRedraw();
     end;
+
   rcpdest := nil;
   Result := hr;
 end;
@@ -3163,7 +3152,6 @@ begin
   //Stop flickering of controls and subtitle when resizing.
   if (stRedrawStatus = rdStarted) then
     begin
-
       SendMessage(m_hwndMainForm,
                   WM_SETREDRAW,
                   WPARAM(False),
@@ -3172,7 +3160,6 @@ begin
     end
   else
     begin
-
       SendMessage(m_hwndMainForm,
                   WM_SETREDRAW,
                   WPARAM(True), 0);
@@ -3239,16 +3226,12 @@ begin
 
   if (m_bPending) then
     begin
-
       // Currently seeking or changing rates, so cache this request.
       mfpControl.Request := reqSeek;
       mfpControl.StartPosition := hnsPosition;
     end
   else
-    begin
-
-      hr:= SetPositionInternal(hnsPosition);
-    end;
+    hr:= SetPositionInternal(hnsPosition);
 
   Result:= hr;
 end;
@@ -3267,7 +3250,6 @@ begin
 
   if (m_pSession = nil) then
     begin
-
       Result := MF_E_INVALIDREQUEST;
       Exit;
     end;
@@ -3289,13 +3271,14 @@ try
 
   if (SUCCEEDED(hr)) then
     begin
-
-      // Store the pending state
+      // Store the pending state. CurrentPosition uses milliseconds, while
+      // StartPosition remains in Media Foundation 100-ns units.
       mfpControl.StartPosition := tPos;
+      mfpControl.CurrentPosition := tPos div ONE_HNS_MSEC;
       mfpControl.Request := reqSeek;
 
       if Assigned(FMediaTimeline) then
-        FMediaTimeline.Seek(tPos div 10000);
+        FMediaTimeline.Seek(tPos div ONE_HNS_MSEC);
 
       State := Seeking;
       m_bPending := True;
@@ -3397,7 +3380,6 @@ begin
   if ((fRate > 0) And (mfpControl.fCurrentRate <= 0) Or
       (fRate < 0) And (mfpControl.fCurrentRate >= 0)) then
     begin
-
       // Transition to stopped.
       if (State = Started) {cmdNow = CmdStart} then
         begin
@@ -3427,23 +3409,24 @@ begin
           mfpControl.Request := reqSeek;            //m_request.command = CmdSeek;
           mfpControl.StartPosition := hnsClockTime; // m_request.hnsStart = hnsClockTime;
         end
-      else if (State = Paused)  {cmdNow = CmdPause} then
-        begin
-          // The current state is paused.
+      else
+        if (State = Paused)  {cmdNow = CmdPause} then
+          begin
+            // The current state is paused.
 
-          // For this rate change, the session must be stopped. However, the
-          // session cannot transition back from stopped to paused.
-          // Therefore, this rate transition is not supported while paused.
+            // For this rate change, the session must be stopped. However, the
+            // session cannot transition back from stopped to paused.
+            // Therefore, this rate transition is not supported while paused.
 
-          hr := MF_E_UNSUPPORTED_STATE_TRANSITION;
+            hr := MF_E_UNSUPPORTED_STATE_TRANSITION;
             goto done;
-        end;
-  end
-    else if (fRate = 0) And (mfpControl.fCurrentRate <> 0) then
+          end;
+    end
+  else
+    if (fRate = 0) And (mfpControl.fCurrentRate <> 0) then
       begin
         if (mfpControl.Request <> reqPause) {cmdNow != CmdPause} then
           begin
-
             // Transition to paused.
             // This transisition requires the paused state.
             // Pause and set the rate.
@@ -3509,21 +3492,6 @@ begin
 end;
 
 
-// Full screen methods
-//procedure TMfPlayerX.SetFullScreen(val: BOOL);
-//begin
-//  if Assigned(m_pVideoDisplay) then
-//    m_pVideoDisplay.SetFullscreen(val);
-//end;
-
-
-//function TMfPlayerX.IsFullScreen(): BOOL;
-//begin
-//  if Assigned(m_pVideoDisplay) then
-//    {void} m_pVideoDisplay.GetFullscreen(Result);
-//end;
-
-
 function TMfPlayerX.GetPosition(out hnsPosition: MFTIME): HRESULT;
 var
   hr: HRESULT;
@@ -3534,7 +3502,6 @@ begin
 
   if (MFPresentationClock = nil) then
     begin
-
       Result := MF_E_NO_CLOCK;
       Exit;
     end;
@@ -3588,12 +3555,10 @@ begin
   // - By calling MFGetService
   //   The MFGetService function is a helper function that wraps the IMFGetService.GetService method.
   if (SUCCEEDED(hr)) then
-    begin
-      hr:= MFGetService(m_pSession,
-                        MF_RATE_CONTROL_SERVICE,
-                        IID_IMFRateSupport,
-                        Pointer(m_pRateSupport));
-    end;
+    hr:= MFGetService(m_pSession,
+                      MF_RATE_CONTROL_SERVICE,
+                      IID_IMFRateSupport,
+                      Pointer(m_pRateSupport));
 
   // Get the RateControl interface
   //==============================
@@ -3612,16 +3577,13 @@ begin
   // - By calling IMFGetService.GetService on the Media Session.
 
   if (SUCCEEDED(hr)) then
-    begin
-      // Check if rate 0 (scrubbing) is supported.
-      hr:= m_pRateSupport.IsRateSupported(False,
-                                          0,
-                                          @fltmprate);
-    end;
+    // Check if rate 0 (scrubbing) is supported.
+    hr:= m_pRateSupport.IsRateSupported(False,
+                                        0,
+                                        @fltmprate);
 
   if (SUCCEEDED(hr)) then
     begin
-
       mfpControl.SeekState.bCanScrub:= True;
       hr:= m_pRateSupport.GetSlowestRate(MFRATE_FORWARD,
                                          mfpControl.SeekState.bCanScrub,
@@ -3644,7 +3606,6 @@ begin
     end
   else     // if m_pRate is nil, bCanScrub must be FALSE.
     begin
-
       mfpControl.SeekState.bCanScrub:= False;
       mfpControl.SeekState.bCanThinPb:= False;
     end;
@@ -3689,7 +3650,6 @@ try
 
   if (FAILED(hr)) then
     begin
-
       bThin := True;
       hr := m_pRateSupport.IsRateSupported(True,
                                            frval,
@@ -3697,11 +3657,8 @@ try
     end;
 
   if (FAILED(hr)) then
-    begin
-
-      // Unsupported rate.
-      Exit;
-    end;
+    // Unsupported rate.
+    Exit;
 
   // No pending operation? Should be implemented here.
 
@@ -3746,6 +3703,7 @@ begin
                               iStreamIndex)
   else
     hr:= E_POINTER;
+
   Result:= hr;
 end;
 
@@ -3771,7 +3729,6 @@ begin
       // The returned value of iD should always be >= 0.
       if SUCCEEDED(hr) then
         begin
-
           // Deselect the current active stream
           hr:= m_pSourcePD.DeselectStream(iD);
           // Select the new one
@@ -3780,7 +3737,6 @@ begin
 
           if SUCCEEDED(hr) then
             begin
-
               m_aStreamCont[iD].bSelected := BOOL(0);  // False
               // Select given stream to activate
               m_aStreamCont[iStreamIndex].bSelected := BOOL(1); // True
@@ -3805,7 +3761,6 @@ begin
 
               if (State = Started) or (State = Paused) then
                 begin
-
                   SetVolume(m_VolumeChannels);
                   SetNewPosition := Position;
                   SendPlayerRequest(reqSeek);
@@ -3813,10 +3768,7 @@ begin
             end;
         end
       else
-        begin
-
-          hr := E_FAIL;  // Could not find an active stream.
-        end;
+        hr := E_FAIL;  // Could not find an active stream.
     end;
   Result := hr;
 end;
@@ -3842,7 +3794,6 @@ begin
   // Set boundaries to prevent overflow or clipping
   for i := 0 to Length(aVolumes) -1 do
     begin
-
       if (aVolumes[i] > 1.0) then
         aVolumes[i] := 1.0;
       if (aVolumes[i] < 0.0) then
@@ -3860,7 +3811,6 @@ begin
   // Set the volumes
   if SUCCEEDED(hr) then
     begin
-
       hr := pVol.SetAllVolumes(nChan,
                                @aVolumes[0]);
       if (FAILED(hr)) then
@@ -3878,7 +3828,6 @@ begin
 
   if Assigned(m_pSession) then
     begin
-
       hr := m_pSession.Stop();
 
       if SUCCEEDED(hr) then
@@ -3899,6 +3848,11 @@ end;
 // Called after an operation completes.
 // This method executes any cached requests.
 procedure TMfPlayerX.UpdateCaption();
+var
+  DurationMs: Int64;
+  RemainingMs: Int64;
+  CaptionText: string;
+
 begin
 
   case Self.GetState() of
@@ -3911,16 +3865,34 @@ begin
 
     Closing:     SetWindowText(m_hwndEvent,
                                'Closing session...');
-    Started:       begin
-                      SetWindowText(m_hwndEvent,
-                                    'Playing: ' +
-                                    ExtractFileName(FFileName) +
-                                    '   Duration: ' +
-                                    MSecToStr(((mfpControl.uiDuration div 1000) - (mfpControl.CurrentPosition)), false) +
-                                    ' / ' + MSecToStr(mfpControl.CurrentPosition, True));
-                   end;
+    Started:     begin
+                   // uiDuration is stored in Media Foundation 100-ns units,
+                   // while CurrentPosition is cached in milliseconds.
+                   DurationMs := Int64(mfpControl.uiDuration div ONE_HNS_MSEC);
+
+                   CaptionText := 'Playing: ' +
+                                  ExtractFileName(FFileName) +
+                                  '   Position: ' +
+                                  MSecToStr(mfpControl.CurrentPosition, True);
+
+                   if (DurationMs > 0) then
+                     begin
+                       RemainingMs := DurationMs - mfpControl.CurrentPosition;
+                       if (RemainingMs < 0) then
+                         RemainingMs := 0;
+
+                       CaptionText := CaptionText +
+                                      ' / ' + MSecToStr(DurationMs, True) +
+                                      '   Remaining: ' +
+                                      MSecToStr(RemainingMs, True);
+                     end;
+
+                   SetWindowText(m_hwndEvent,
+                                 PChar(CaptionText));
+                 end;
     Paused:       SetWindowText(m_hwndEvent,
-                                'Paused.');
+                                'Paused at ' +
+                                MSecToStr(mfpControl.CurrentPosition, True));
 
     Stopped:      SetWindowText(m_hwndEvent,
                                 'Stopped.');
@@ -3929,7 +3901,8 @@ begin
                                 'Session closed.');
 
     Seeking:      SetWindowText(m_hwndEvent,
-                                'Starting at position ' + MSecToStr(mfpControl.StartPosition div 1000, false));
+                                'Starting at position ' +
+                                MSecToStr(mfpControl.StartPosition div ONE_HNS_MSEC, false));
    end;
 end;
 
@@ -3946,7 +3919,6 @@ begin
 
   if (FSubtitleLanguage <> aValue) then
     begin
-
       FSubtitleLanguage := aValue;
       ClearSubtitleBitmap();
 
@@ -3965,7 +3937,6 @@ begin
 
   if (Abs(FSubtitleAspectRatio - aValue) > 0.0001) then
     begin
-
       FSubtitleAspectRatio := aValue;
       if Assigned(FSubtitleCompositor) then
         FSubtitleCompositor.SubtitleAspectRatio := FSubtitleAspectRatio;
@@ -3981,26 +3952,156 @@ begin
 end;
 
 
-function TMfPlayerX.ExportActiveSubtitlesAsWebVtt(
-  out AData: TBytes;
-  out ALanguageTag: string;
-  out AFriendlyLanguageName: string): HRESULT;
+function TMfPlayerX.GetSubtitleSourcesAvailable(): Boolean;
 begin
-  SetLength(AData, 0);
-  ALanguageTag := '';
-  AFriendlyLanguageName := '';
-  if not FSubtitlesEnabled then
-    begin
-      Result := S_FALSE;
-      Exit;
-    end;
+
+  Result := Assigned(FSubtitleCompositor) and
+            FSubtitleCompositor.HasSubtitleSources();
+end;
+
+
+function TMfPlayerX.RefreshEmbeddedSubtitleTracks(): HRESULT;
+begin
+
   if not Assigned(FSubtitleCompositor) then
     begin
       Result := E_POINTER;
       Exit;
     end;
-  Result := FSubtitleCompositor.ExportActiveWebVtt(
-              AData, ALanguageTag, AFriendlyLanguageName);
+
+  Result := FSubtitleCompositor.RefreshEmbeddedSubtitleTracks(m_pSourcePD);
+end;
+
+
+function TMfPlayerX.GetEmbeddedSubtitleTracks(out Tracks: TMfEmbeddedSubtitleTrackInfoArray): HRESULT;
+begin
+
+  SetLength(Tracks,
+            0);
+  if not Assigned(FSubtitleCompositor) then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
+
+  Result := FSubtitleCompositor.GetEmbeddedSubtitleTracks(Tracks);
+end;
+
+
+function TMfPlayerX.GetPreferredEmbeddedSubtitleStreamIndex(out StreamIndex: DWORD): HRESULT;
+begin
+
+  StreamIndex := 0;
+
+  if not Assigned(FSubtitleCompositor) then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
+
+  Result := FSubtitleCompositor.GetPreferredEmbeddedSubtitleStreamIndex(StreamIndex);
+end;
+
+
+function TMfPlayerX.SelectEmbeddedSubtitleTrack(StreamIndex: DWORD): HRESULT;
+begin
+
+  if not Assigned(FSubtitleCompositor) then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
+
+  Result := FSubtitleCompositor.SelectEmbeddedSubtitleTrack(StreamIndex);
+  if (Result = S_OK) then
+    begin
+      FSubtitleLanguage := FSubtitleCompositor.PreferredLanguage;
+      FSubtitlesEnabled := True;
+      ClearSubtitleBitmap();
+      if Assigned(FSubtitlePlaybackControl) then
+        FSubtitlePlaybackControl.SetEnabled(True);
+    end;
+end;
+
+
+function TMfPlayerX.SelectSidecarSubtitleLanguage(const LanguageTag: string): HRESULT;
+begin
+
+  if not Assigned(FSubtitleCompositor) then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
+
+  Result := FSubtitleCompositor.SelectSidecarSubtitleLanguage(LanguageTag);
+  if (Result = S_OK) then
+    begin
+      FSubtitleLanguage := FSubtitleCompositor.PreferredLanguage;
+      FSubtitlesEnabled := True;
+      ClearSubtitleBitmap();
+      if Assigned(FSubtitlePlaybackControl) then
+        FSubtitlePlaybackControl.SetEnabled(True);
+    end;
+end;
+
+
+procedure TMfPlayerX.CommitSubtitleSelection();
+begin
+
+  if not Assigned(FSubtitleCompositor) then
+    Exit;
+
+  FSubtitleLanguage := FSubtitleCompositor.PreferredLanguage;
+  FSubtitlesEnabled := FSubtitleCompositor.TimedTextFileLoaded;
+  ClearSubtitleBitmap();
+
+  if Assigned(FSubtitlePlaybackControl) then
+    FSubtitlePlaybackControl.SetEnabled(FSubtitlesEnabled);
+end;
+
+
+function TMfPlayerX.GetActiveEmbeddedSubtitleStreamIndex(): Integer;
+begin
+
+  if Assigned(FSubtitleCompositor) then
+    Result := FSubtitleCompositor.ActiveEmbeddedStreamIndex
+  else
+    Result := -1;
+end;
+
+
+function TMfPlayerX.GetActiveSubtitleIsEmbedded(): Boolean;
+begin
+
+  Result := Assigned(FSubtitleCompositor) and FSubtitleCompositor.ActiveSubtitleIsEmbedded;
+end;
+
+
+function TMfPlayerX.ExportActiveSubtitlesAsWebVtt(out AData: TBytes;
+                                                  out ALanguageTag: string;
+                                                  out AFriendlyLanguageName: string): HRESULT;
+begin
+
+  SetLength(AData,
+            0);
+  ALanguageTag := '';
+  AFriendlyLanguageName := '';
+
+  if not FSubtitlesEnabled then
+    begin
+      Result := S_FALSE;
+      Exit;
+    end;
+
+  if not Assigned(FSubtitleCompositor) then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
+
+  Result := FSubtitleCompositor.ExportActiveWebVtt(AData,
+                                                   ALanguageTag,
+                                                   AFriendlyLanguageName);
 end;
 
 
@@ -4008,6 +4109,7 @@ procedure TMfPlayerX.SetSubtitlesEnabled(aValue: Boolean);
 begin
 
   FSubtitlesEnabled := aValue and TimedTextFileLoaded;
+
   if Assigned(FSubtitlePlaybackControl) then
     FSubtitlePlaybackControl.SetEnabled(FSubtitlesEnabled);
 
@@ -4029,14 +4131,12 @@ begin
 
   if not Assigned(FSubtitleCompositor) then
     begin
-
       Result := E_POINTER;
       Exit;
     end;
 
   if (FFileName = '') then
     begin
-
       FSubtitleCompositor.Close();
       Result := E_INVALIDARG;
       Exit;
@@ -4044,9 +4144,19 @@ begin
 
   FSubtitleCompositor.SubtitleAspectRatio := FSubtitleAspectRatio;
   hr := FSubtitleCompositor.OpenTimedTextFile(FFileName,
-                                              SubtitleLanguage);
+                                              SubtitleLanguage,
+                                              m_pSourcePD,
+                                              False);
   FSubtitlesEnabled := (hr = S_OK) and
                        FSubtitleCompositor.TimedTextFileLoaded;
+
+  OutputDebugString(PChar(Format(
+    'MfPlayer X2 subtitle load hr=%s loaded=%s sources=%s enabled=%s',
+    [IntToHex(DWORD(hr), 8),
+     BoolToStr(FSubtitleCompositor.TimedTextFileLoaded),
+     BoolToStr(FSubtitleCompositor.HasSubtitleSources()),
+     BoolToStr(FSubtitlesEnabled)])));
+
   if Assigned(FSubtitlePlaybackControl) then
     FSubtitlePlaybackControl.SetEnabled(FSubtitlesEnabled);
 
@@ -4066,19 +4176,16 @@ begin
 
   if (m_bPending) and (mfpControl.Request = req) then
     begin
-
       m_bPending:= False;
       // The current pending command has completed.
 
       // First look for rate changes.
       if (mfpControl.fCurrentRate <> mfpControl.SeekState.fRequestedRate) then
         begin
-
           hr:= CommitRateChange(mfpControl.SeekState.fRequestedRate,
                                 mfpControl.SeekState.bCanThinPb);
           if (FAILED(hr)) then
             begin
-
               Result:= hr;
               Exit;
             end;
@@ -4123,6 +4230,7 @@ constructor TClockStateSink.Create();
 begin
 
   inherited Create();
+
   p_MFTime := 0;
   p_flRate := 1.0;
 end;
