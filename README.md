@@ -105,7 +105,7 @@ SDK version: 10.0.26100.4654 (Windows 11)
 
 *Player samples, based on the CPlayer sample.*
 
-*There are 3 samples in 3 project degrees.*
+*There are 4 samples in 4 project degrees.*
 
 - *MfPlayer I : The basic player sample.*
 - *MfPlayer II : The extended version I sample.*
