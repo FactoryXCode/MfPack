@@ -15,7 +15,7 @@
 //              playback commands, and status messages.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX), Peter (OzShips), Carmen (carmenh).
+// Intiator(s): Tony (maXcomX), Carmen (carmenh).
 // Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
@@ -93,6 +93,7 @@ type
     FLastNamespace: string;
     FLastPayload: string;
     FReceivedMediaStatus: Boolean;
+    FStopInProgress: Boolean;
     FPendingLoadContentId: string;
 
     function NextRequestId(): Cardinal;
@@ -652,6 +653,7 @@ begin
   FState := csIdle;
   FRequestId := 0;
   FMediaSessionId := 0;
+  FStopInProgress := False;
   FCallbacks.Reset;
 end;
 
@@ -770,6 +772,7 @@ begin
 
   if (FTransportId = '') then
     FTransportId := FSettings.ReceiverId;
+
   if (FTransportId = '') then
     FTransportId := 'receiver-0';
 
@@ -836,7 +839,7 @@ begin
     Payload := Payload + ',"metadata":{"metadataType":0,"title":"' +
                MfCastJsonEscape(ARequest.Title) + '"}';
 
-  if Length(ARequest.Tracks) > 0 then
+  if (Length(ARequest.Tracks) > 0) then
     begin
       Payload := Payload + ',"tracks":[';
 
@@ -870,6 +873,16 @@ begin
 
       Payload := Payload + ']';
     end;
+
+  if Length(ARequest.Tracks) > 0 then
+    Payload := Payload +
+               ',"textTrackStyle":{' +
+               '"foregroundColor":"#FFFFFFFF",' +
+               '"backgroundColor":"#00000000",' +
+               '"edgeType":"OUTLINE",' +
+               '"edgeColor":"#000000FF",' +
+               '"windowType":"NONE",' +
+               '"windowColor":"#00000000"}';
 
   Payload := Payload + '}';
 
@@ -990,6 +1003,8 @@ function TMfCastChannel.Stop(): HRESULT;
 var
   Payload: string;
   RequestId: Cardinal;
+  MediaStopResult: HRESULT;
+  ReceiverStopResult: HRESULT;
 
 begin
 
@@ -1002,18 +1017,45 @@ begin
   RequestId := NextRequestId();
   Payload := '{"type":"STOP","requestId":' + IntToStr(RequestId);
 
-  if FMediaSessionId <> 0 then
+  if (FMediaSessionId <> 0) then
     Payload := Payload + ',"mediaSessionId":' + IntToStr(FMediaSessionId);
   Payload := Payload + '}';
 
-  Result := SendJson(FTransportId,
-                     FSettings.NamespaceMedia,
-                     Payload);
+  MediaStopResult := SendJson(FTransportId,
+                              FSettings.NamespaceMedia,
+                              Payload);
 
-  if SUCCEEDED(Result) then
-    SetState(csStopped)
+  ReceiverStopResult := S_FALSE;
+  if (FSessionId <> '') then
+    begin
+      RequestId := NextRequestId();
+      Payload := '{"type":"STOP","requestId":' + IntToStr(RequestId) +
+                 ',"sessionId":"' + MfCastJsonEscape(FSessionId) + '"}';
+      ReceiverStopResult := SendJson(FSettings.ReceiverId,
+                                     FSettings.NamespaceReceiver,
+                                     Payload);
+    end;
+
+  OutputDebugString(PChar(Format(
+    'MfCast STOP media=%.8x receiver=%.8x mediaSession=%d session=%s transport=%s',
+    [DWORD(MediaStopResult), DWORD(ReceiverStopResult), FMediaSessionId,
+     FSessionId, FTransportId])));
+
+  // Keep TLS alive briefly so the receiver can process both encrypted STOP
+  // messages before controller cleanup closes the control connection.
+  if SUCCEEDED(MediaStopResult) or SUCCEEDED(ReceiverStopResult) then
+    Sleep(1500);
+
+  if SUCCEEDED(MediaStopResult) or SUCCEEDED(ReceiverStopResult) then
+    begin
+      SetState(csStopped);
+      Result := S_OK;
+    end
   else
-    SetState(csError);
+    begin
+      SetState(csError);
+      Result := MediaStopResult;
+    end;
 end;
 
 
@@ -1087,8 +1129,7 @@ var
 begin
 
   RequestId := NextRequestId();
-  Payload := '{"type":"SET_VOLUME","requestId":' + IntToStr(RequestId) +
-             ',"volume":{"muted":';
+  Payload := '{"type":"SET_VOLUME","requestId":' + IntToStr(RequestId) + ',"volume":{"muted":';
 
   if AMuted then
     Payload := Payload + 'true'
@@ -1111,8 +1152,7 @@ var
 
 begin
 
-  Payload := '{"type":"GET_STATUS","requestId":' +
-             IntToStr(NextRequestId()) + '}';
+  Payload := '{"type":"GET_STATUS","requestId":' + IntToStr(NextRequestId()) + '}';
 
   Result := SendJson(FSettings.ReceiverId,
                      FSettings.NamespaceReceiver,
@@ -1132,10 +1172,11 @@ begin
       Exit;
     end;
 
-  Payload := '{"type":"GET_STATUS","requestId":' +
-             IntToStr(NextRequestId());
+  Payload := '{"type":"GET_STATUS","requestId":' + IntToStr(NextRequestId());
+
   if (FMediaSessionId <> 0) then
     Payload := Payload + ',"mediaSessionId":' + IntToStr(FMediaSessionId);
+
   Payload := Payload + '}';
 
   Result := SendJson(FTransportId,
@@ -1173,7 +1214,6 @@ begin
 
   if not Assigned(FTransport) then
     begin
-
       Result := E_POINTER;
       Exit;
     end;
@@ -1226,7 +1266,7 @@ begin
   FLastNamespace := '';
   FLastPayload := '';
 
-  while Index < Length(AData) do
+  while (Index < Length(AData)) do
     begin
       if not MfCastReadVarUInt(AData,
                                Index,
@@ -1253,7 +1293,6 @@ begin
 
              if (Index > Length(AData)) then
                begin
-
                  Result := E_FAIL;
                  Exit;
                end;
@@ -1283,7 +1322,6 @@ begin
                                         Index,
                                         ValueLength) then
                  begin
-
                    Result := E_FAIL;
                    Exit;
                  end;
@@ -1293,7 +1331,6 @@ begin
 
                if (Index > Length(AData)) then
                  begin
-
                    Result := E_FAIL;
                    Exit;
                  end;
@@ -1304,7 +1341,6 @@ begin
                  4);
              if (Index > Length(AData)) then
                begin
-
                  Result := E_FAIL;
                  Exit;
                end;
@@ -1320,7 +1356,8 @@ begin
 
   if SameText(Namespace, FSettings.NamespaceHeartbeat) then
     begin
-      if Pos('PING', UpperCase(Payload)) > 0 then
+      if (Pos('PING',
+             UpperCase(Payload)) > 0) then
         Result := SendJson(FSettings.ReceiverId,
                            FSettings.NamespaceHeartbeat,
                            '{"type":"PONG"}');
@@ -1342,7 +1379,8 @@ var
 begin
 
   Result := S_OK;
-  if Pos('RECEIVER_STATUS', AJsonPayload) > 0 then
+  if (Pos('RECEIVER_STATUS',
+         AJsonPayload) > 0) then
     begin
       NewTransportId := MfCastExtractJsonString(AJsonPayload,
                                                 'transportId');
@@ -1391,9 +1429,12 @@ var
 begin
 
   Result := S_OK;
-  if (Pos('LOAD_FAILED', AJsonPayload) > 0) or
-     (Pos('LOAD_CANCELLED', AJsonPayload) > 0) or
-     (Pos('INVALID_REQUEST', AJsonPayload) > 0) then
+  if (Pos('LOAD_FAILED',
+          AJsonPayload) > 0) or
+     (Pos('LOAD_CANCELLED',
+          AJsonPayload) > 0) or
+     (Pos('INVALID_REQUEST',
+          AJsonPayload) > 0) then
     begin
       Error.Reset();
       Error.HResult := E_FAIL;
@@ -1449,15 +1490,21 @@ begin
   ExtendedPlayerState := MfCastExtractJsonString(ExtendedStatus,
                                                  'playerState');
 
-  if SameText(Status.PlayerState, 'IDLE') and
-     ((SameText(ExtendedPlayerState, 'LOADING')) or
-      (SameText(ExtendedPlayerState, 'BUFFERING'))) then
+  if SameText(Status.PlayerState,
+              'IDLE') and
+     ((SameText(ExtendedPlayerState,
+                'LOADING')) or
+      (SameText(ExtendedPlayerState,
+                'BUFFERING'))) then
     begin
-      if SameText(ExtendedPlayerState, 'LOADING') then
+      if SameText(ExtendedPlayerState,
+                  'LOADING') then
         Status.PlayerState := 'BUFFERING'
       else
         Status.PlayerState := ExtendedPlayerState;
+
       Status.IdleReason := '';
+
       OutputDebugString(PChar('MfCast MEDIA_STATUS extended playerState=' +
                               ExtendedPlayerState + ' mapped=' +
                               Status.PlayerState));
@@ -1484,7 +1531,8 @@ begin
         if SameText(Status.PlayerState, 'IDLE') then
           SetState(csStopped);
 
-  if Assigned(FCallbacks.OnMediaStatus) and
+  if (not FStopInProgress) and
+     Assigned(FCallbacks.OnMediaStatus) and
      ((Status.MediaSessionId <> 0) or (Status.PlayerState <> '')) then
     FCallbacks.OnMediaStatus(Status);
 end;
@@ -1507,6 +1555,7 @@ begin
 
   TotalRead := 0;
   Ptr := PAnsiChar(ABuffer);
+
   while TotalRead < ASize do
     begin
       Result := FTransport.ReceiveBuffer(@Ptr[TotalRead],
@@ -1519,15 +1568,18 @@ begin
             Result := S_FALSE;
           Exit;
         end;
-      if BytesRead = 0 then
+
+      if (BytesRead = 0) then
         begin
-          if TotalRead = 0 then
+          if (TotalRead = 0) then
             Result := S_FALSE
           else
             Result := E_FAIL;
           Exit;
         end;
-      Inc(TotalRead, BytesRead);
+
+      Inc(TotalRead,
+          BytesRead);
     end;
 
   Result := S_OK;
@@ -1541,26 +1593,32 @@ var
 
 begin
 
-  SetLength(AMessage, 0);
-  Result := ReadExact(@Header[0], SizeOf(Header));
-  if Result <> S_OK then
+  SetLength(AMessage,
+            0);
+  Result := ReadExact(@Header[0],
+                      SizeOf(Header));
+  if (Result <> S_OK) then
     Exit;
 
   MessageLength := (Cardinal(Header[0]) shl 24) or
                    (Cardinal(Header[1]) shl 16) or
                    (Cardinal(Header[2]) shl 8) or
                    Cardinal(Header[3]);
-  if MessageLength > Cardinal(16 * 1024 * 1024) then
+
+  if (MessageLength > Cardinal(16 * 1024 * 1024)) then
     begin
       Result := E_FAIL;
       Exit;
     end;
 
-  SetLength(AMessage, Integer(MessageLength));
-  if MessageLength > 0 then
+  SetLength(AMessage,
+            Integer(MessageLength));
+
+
+  if (MessageLength > 0) then
     begin
       Result := ReadExact(@AMessage[0], MessageLength);
-      if Result = S_FALSE then
+      if (Result = S_FALSE) then
         Result := E_FAIL;
     end
   else
@@ -1573,7 +1631,7 @@ var
   StartTick: DWORD;
   LastStatusTick: DWORD;
   TimeoutMs: Cardinal;
-  Message: TBytes;
+  msgMessage: TBytes;
 
 begin
 
@@ -1585,7 +1643,7 @@ begin
   LastStatusTick := StartTick;
 
   repeat
-    Result := ReadFrame(Message);
+    Result := ReadFrame(msgMessage);
     if (Result = S_FALSE) then
       begin
         if (GetTickCount() - LastStatusTick) >= 3000 then
@@ -1598,7 +1656,7 @@ begin
     if FAILED(Result) then
       Exit;
 
-    Result := ProcessIncomingMessage(Message);
+    Result := ProcessIncomingMessage(msgMessage);
     if FAILED(Result) then
       Exit;
 
@@ -1620,20 +1678,20 @@ var
   StartTick: DWORD;
   LastStatusTick: DWORD;
   TimeoutMs: Cardinal;
-  Message: TBytes;
+  msgMessage: TBytes;
 
 begin
 
   TimeoutMs := ATimeoutMs;
-  if TimeoutMs = 0 then
+  if (TimeoutMs = 0) then
     TimeoutMs := 10000;
 
   StartTick := GetTickCount();
   LastStatusTick := StartTick;
 
   repeat
-    Result := ReadFrame(Message);
-    if Result = S_FALSE then
+    Result := ReadFrame(msgMessage);
+    if (Result = S_FALSE) then
       begin
         if (GetTickCount() - LastStatusTick) >= 3000 then
           begin
@@ -1645,11 +1703,11 @@ begin
     if FAILED(Result) then
       Exit;
 
-    Result := ProcessIncomingMessage(Message);
+    Result := ProcessIncomingMessage(msgMessage);
     if FAILED(Result) then
       Exit;
 
-    if FState = csError then
+    if (FState = csError) then
       begin
         Result := E_FAIL;
         Exit;

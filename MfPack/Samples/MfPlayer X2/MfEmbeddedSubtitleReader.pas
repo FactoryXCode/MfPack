@@ -1,6 +1,6 @@
-// FactoryX
+﻿// FactoryX
 //
-// Copyright � FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -16,23 +16,25 @@
 //              existing TMfTimedText model used by local playback and Cast.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX), Peter (OzShips), Carmen (carmenh).
+// Intiator(s): Tony (maXcomX).
 // Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 02/08/2026 All                 Added direct Matroska text-track fallback.
-// 01/08/2026 All                 Added exact embedded-track selection and end-of-stream safety.
-// 01/08/2026 All                 Robust stream classification and explicit Source Reader type selection.
-// 31/07/2026 All                 Embedded SRT/UTF-8 and SSA/ASS subtitle import.
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 02/08/2026 Carmen              Added direct Matroska text-track fallback.
+// 01/08/2026 Carmen              Added exact embedded-track selection and end-of-stream safety.
+// 01/08/2026 Carmen              Robust stream classification and explicit Source Reader type selection.
+// 31/07/2026 Carmen              Embedded SRT/UTF-8 and SSA/ASS subtitle import.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
 //
 // Related objects: TMfTimedText, TMfSubtitleCompositor
 // Related projects: MfPackX320
+//
 // Known Issues: Bitmap subtitle streams (PGS/VobSub) are detected but are not
 //               decoded. The native Microsoft MP4 source ignores non-audio/
 //               video tracks, so MP4 timed-text requires a container adapter.
@@ -102,28 +104,32 @@ type
   strict private
     class function CreateReader(const MediaFileName: WideString;
                                 out Reader: IMFSourceReader): HRESULT; static;
+
     class function EnumerateReaderTracks(const Reader: IMFSourceReader;
                                          out Tracks: TMfEmbeddedSubtitleTrackInfoArray): HRESULT; static;
+
     class function GetStreamAttributeString(const Reader: IMFSourceReader;
                                             const StreamIndex: DWORD;
                                             const AttributeKey: TGUID): string; static;
+
     class function GetDescriptorAttributeString(const Descriptor: IMFStreamDescriptor;
                                                 const AttributeKey: TGUID): string; static;
+
     class function IsSubtitleMajorType(const MajorType: TGUID): Boolean; static;
     class function ClassifySubtype(const Subtype: TGUID): TMfEmbeddedSubtitleFormat; static;
     class function FormatName(const SubtitleFormat: TMfEmbeddedSubtitleFormat): string; static;
     class function TrackScore(const Track: TMfEmbeddedSubtitleTrackInfo;
                               const PreferredLanguage: string): Integer; static;
-    //class function SelectBestTrack(const Tracks: TMfEmbeddedSubtitleTrackInfoArray;
-    //                               const PreferredLanguage: string): Integer; static;
     class function ReadSampleBytes(const Sample: IMFSample;
                                    out Data: TBytes): HRESULT; static;
+
     class function DecodeTextBytes(const Data: TBytes): string; static;
     class function NormalizeSrtText(const Value: string): string; static;
     class function NormalizeSsaAssText(const Value: string): string; static;
     class function StripAssOverrideTags(const Value: string): string; static;
     class function TextAfterCommaCount(const Value: string;
                                        const CommaCount: Integer): string; static;
+
     class procedure NormalizeCueTimes(var Cues: TMfTimedTextCueArray); static;
 
     class function ResolveReaderNativeType(const Reader: IMFSourceReader;
@@ -147,25 +153,33 @@ type
 
     class function EnumeratePresentationTracks(const PresentationDescriptor: IMFPresentationDescriptor;
                                                out Tracks: TMfEmbeddedSubtitleTrackInfoArray): HRESULT; static;
+
     class function EnumerateTracks(const MediaFileName: WideString;
                                    out Tracks: TMfEmbeddedSubtitleTrackInfoArray): HRESULT; static;
 
     class function FindBestTextTrackFromList(const PreferredLanguage: string;
                                              const Tracks: TMfEmbeddedSubtitleTrackInfoArray;
                                              out SelectedTrack: TMfEmbeddedSubtitleTrackInfo): HRESULT; static;
+
     class function ImportTextTrack(const MediaFileName: WideString;
                                    const Track: TMfEmbeddedSubtitleTrackInfo;
                                    const TimedText: TMfTimedText;
                                    const CancelEvent: THandle = 0): HRESULT; static;
+
+    class function LoadMatroskaTextTrackWindow(const MediaFileName: WideString;
+                                               const Track: TMfEmbeddedSubtitleTrackInfo;
+                                               const StartMs: Int64;
+                                               const EndMs: Int64;
+                                               out Cues: TMfTimedTextCueArray;
+                                               out EndOfTrack: Boolean;
+                                               const CancelEvent: THandle = 0): HRESULT; static;
+
     class function ImportBestTextTrackFromList(const MediaFileName: WideString;
                                                const PreferredLanguage: string;
                                                const Tracks: TMfEmbeddedSubtitleTrackInfoArray;
                                                const TimedText: TMfTimedText;
                                                out SelectedTrack: TMfEmbeddedSubtitleTrackInfo): HRESULT; static;
-    class function ImportBestTextTrack(const MediaFileName: WideString;
-                                       const PreferredLanguage: string;
-                                       const TimedText: TMfTimedText;
-                                       out SelectedTrack: TMfEmbeddedSubtitleTrackInfo): HRESULT; static;
+
   end;
 
 
@@ -405,34 +419,6 @@ begin
                         2);
   end;
 end;
-
-{
-class function TMfEmbeddedSubtitleReader.SelectBestTrack(const Tracks: TMfEmbeddedSubtitleTrackInfoArray;
-                                                         const PreferredLanguage: string): Integer;
-var
-  I: Integer;
-  Score: Integer;
-  BestScore: Integer;
-
-begin
-
-  Result := -1;
-  BestScore := Low(Integer);
-
-  for I := Low(Tracks) to High(Tracks) do
-    begin
-
-      Score := TrackScore(Tracks[I],
-                          PreferredLanguage);
-      if (Score > BestScore) then
-        begin
-
-          BestScore := Score;
-          Result := I;
-        end;
-    end;
-end;
-}
 
 class function TMfEmbeddedSubtitleReader.ReadSampleBytes(const Sample: IMFSample;
                                                          out Data: TBytes): HRESULT;
@@ -1595,6 +1581,72 @@ begin
 end;
 
 
+class function TMfEmbeddedSubtitleReader.LoadMatroskaTextTrackWindow(
+  const MediaFileName: WideString;
+  const Track: TMfEmbeddedSubtitleTrackInfo;
+  const StartMs: Int64;
+  const EndMs: Int64;
+  out Cues: TMfTimedTextCueArray;
+  out EndOfTrack: Boolean;
+  const CancelEvent: THandle): HRESULT;
+var
+  MatroskaTrack: TMfMatroskaSubtitleTrack;
+  MatroskaCues: TMfMatroskaSubtitleCueArray;
+  I: Integer;
+  CueText: string;
+
+begin
+
+  SetLength(Cues, 0);
+  SetLength(MatroskaCues, 0);
+  MatroskaTrack.Reset();
+  EndOfTrack := False;
+
+  if (Track.Source <> essMatroska) or
+     (StartMs < 0) or
+     (EndMs <= StartMs) then
+    begin
+      Result := E_INVALIDARG;
+      Exit;
+    end;
+
+  Result := TMfMatroskaSubtitleReader.ReadTrackWindow(
+              MediaFileName,
+              UInt64(Track.StreamIndex),
+              StartMs,
+              EndMs,
+              MatroskaTrack,
+              MatroskaCues,
+              EndOfTrack,
+              CancelEvent);
+
+  if FAILED(Result) then
+    Exit;
+
+  SetLength(Cues, Length(MatroskaCues));
+
+  for I := Low(MatroskaCues) to High(MatroskaCues) do
+    begin
+      CueText := MatroskaCues[I].Text;
+
+      case Track.Format of
+        esfSsaAss: CueText := NormalizeSsaAssText(CueText);
+      else
+        CueText := NormalizeSrtText(CueText);
+      end;
+
+      Cues[I].StartMs := MatroskaCues[I].StartMs;
+      Cues[I].StopMs := MatroskaCues[I].StopMs;
+      Cues[I].Text := CueText;
+    end;
+
+  OutputDebugString(PChar(Format(
+    'Direct MKV subtitle window track=%d start=%d end=%d cues=%d eof=%s hr=%s',
+    [Track.StreamIndex, StartMs, EndMs, Length(Cues),
+     BoolToStr(EndOfTrack), IntToHex(DWORD(Result), 8)])));
+end;
+
+
 class function TMfEmbeddedSubtitleReader.EnumerateTracks(const MediaFileName: WideString;
                                                          out Tracks: TMfEmbeddedSubtitleTrackInfoArray): HRESULT;
 var
@@ -1823,32 +1875,6 @@ begin
     end;
 
   Result := S_FALSE;
-end;
-
-
-class function TMfEmbeddedSubtitleReader.ImportBestTextTrack(const MediaFileName: WideString;
-                                                             const PreferredLanguage: string;
-                                                             const TimedText: TMfTimedText;
-                                                             out SelectedTrack: TMfEmbeddedSubtitleTrackInfo): HRESULT;
-var
-  Tracks: TMfEmbeddedSubtitleTrackInfoArray;
-
-begin
-
-  SelectedTrack.Reset();
-  SetLength(Tracks,
-            0);
-
-  Result := EnumerateTracks(MediaFileName,
-                            Tracks);
-  if (Result <> S_OK) then
-    Exit;
-
-  Result := ImportBestTextTrackFromList(MediaFileName,
-                                        PreferredLanguage,
-                                        Tracks,
-                                        TimedText,
-                                        SelectedTrack);
 end;
 
 end.

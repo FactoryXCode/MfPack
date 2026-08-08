@@ -1,6 +1,6 @@
-// FactoryX
+﻿// FactoryX
 //
-// Copyright � FactoryX, Netherlands/Australia. All rights reserved.
+// Copyright © FactoryX, Netherlands/Australia. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -210,6 +210,9 @@ type
     FCastStartPosition100ns: Int64;
     FCastSyncPending: Boolean;
     FCastLocalWasRunning: Boolean;
+    FCastConnectivityTimer: TTimer;
+    FCastBufferingStartedTick: Cardinal;
+    FCastConnectivityWarningShown: Boolean;
 
     { Private methods }
     // Size and move handlers.
@@ -246,6 +249,8 @@ type
                                  const ANewState: TMfCastState);
     procedure MfCastMediaStatus(const AStatus: TMfCastMediaStatus);
     procedure MfCastError(const AError: TMfCastErrorInfo);
+    procedure CastConnectivityTimer(Sender: TObject);
+    procedure ResetCastConnectivityWatchdog();
 
   public
     { Public declarations }
@@ -364,6 +369,9 @@ type
     FErrorMessage: string;
     FFramesWritten: Int64;
     FPump: TMfSubtitleFramePump;
+    FNotifyHandle: HWND;
+    FDuration100ns: MFTIME;
+    FLastProgress: Integer;
     procedure PumpProgress(Sender: TObject;
                            FramesWritten: Int64;
                            SampleTime: MFTIME;
@@ -376,7 +384,9 @@ type
     constructor Create(const InputFileName: WideString;
                        const OutputFileName: WideString;
                        const PreferredLanguage: string;
-                       SubtitleAspectRatio: Single);
+                       SubtitleAspectRatio: Single;
+                       NotifyHandle: HWND;
+                       Duration100ns: MFTIME);
 
     procedure CancelExport();
 
@@ -490,9 +500,11 @@ end;
 
 
 constructor TMfSubtitleExportThread.Create(const InputFileName: WideString;
-                                           const OutputFileName: WideString;
-                                           const PreferredLanguage: string;
-                                           SubtitleAspectRatio: Single);
+                                            const OutputFileName: WideString;
+                                            const PreferredLanguage: string;
+                                            SubtitleAspectRatio: Single;
+                                            NotifyHandle: HWND;
+                                            Duration100ns: MFTIME);
 begin
 
   inherited Create(True);
@@ -503,6 +515,9 @@ begin
   FOutputFileName := OutputFileName;
   FPreferredLanguage := PreferredLanguage;
   FSubtitleAspectRatio := SubtitleAspectRatio;
+  FNotifyHandle := NotifyHandle;
+  FDuration100ns := Duration100ns;
+  FLastProgress := -1;
   FResult := E_FAIL;
   FFramesWritten := 0;
   FPump := nil;
@@ -522,10 +537,31 @@ end;
 procedure TMfSubtitleExportThread.PumpProgress(Sender: TObject;
                                               FramesWritten: Int64;
                                               SampleTime: MFTIME;
-                                              var Cancel: Boolean);
+var Cancel: Boolean);
+var
+  progress: Integer;
+
 begin
 
   Cancel := Terminated;
+  if Cancel or (FNotifyHandle = 0) or (FDuration100ns <= 0) then
+    Exit;
+
+  progress := Integer((SampleTime * 100) div FDuration100ns);
+  if progress < 0 then
+    progress := 0
+  else
+    if progress > 100 then
+      progress := 100;
+
+  if progress <> FLastProgress then
+    begin
+      FLastProgress := progress;
+      PostMessage(FNotifyHandle,
+                  WM_PROGRESSNOTIFY,
+                  WPARAM(3),
+                  LPARAM(progress));
+    end;
 end;
 
 
@@ -559,6 +595,8 @@ begin
 
       compositor := TMfSubtitleCompositor.Create();
       compositor.SubtitleAspectRatio := FSubtitleAspectRatio;
+      if SameText(ExtractFileExt(FInputFileName), '.mp4') then
+        compositor.SubtitleFontScale := 1.5;
       FResult := compositor.OpenTimedTextFile(FInputFileName,
                                               FPreferredLanguage);
       if FAILED(FResult) then
@@ -602,13 +640,16 @@ begin
   FExportClosePending := False;
   FExportStopPending := False;
   FExportThread := TMfSubtitleExportThread.Create(sMediaFileName,
-                                                 OutputFileName,
-                                                 MfPlayerX.SubtitleLanguage,
-                                                 MfPlayerX.SubtitleAspectRatio);
+                                                  OutputFileName,
+                                                  MfPlayerX.SubtitleLanguage,
+                                                  MfPlayerX.SubtitleAspectRatio,
+                                                  Handle,
+                                                  MfPlayerX.Duration);
 
   FExportThread.OnTerminate := ExportThreadTerminated;
   mnuExportSubtitled.Enabled := False;
   mnuExportSubtitled.Caption := 'Exporting subtitled MP4...';
+  prbProgress.Position := prbProgress.Min;
   butPlay.Enabled := False;
   butPause.Enabled := False;
   FExportThread.Start();
@@ -1369,8 +1410,8 @@ begin
   if Assigned(FSubtitleLoadThread) then
     begin
 
-      // Do not wait for the old file scan on the VCL thread. Keep only the
-      // newest requested selection and start it when cancellation completes.
+      // Do not wait for the previous selection on the VCL thread. Keep only
+      // the newest request and start it when cancellation completes.
       FSubtitleLoadPending := True;
       FPendingSubtitleLoadEmbedded := True;
       FPendingSubtitleLoadStreamIndex := StreamIndex;
@@ -1762,6 +1803,8 @@ var
   CastStartPosition100ns: MFTIME;
   Device: TMfCastDevice;
   Subtitle: TMfCastSubtitleAsset;
+  CastMediaMode: TMfCastMediaMode;
+  CastSubtitleMode: TMfCastSubtitleMode;
 
 begin
 
@@ -1799,8 +1842,8 @@ begin
   if Assigned(MfPlayerX) and MfPlayerX.SubtitlesEnabled then
     begin
       hr := MfPlayerX.ExportActiveSubtitlesAsWebVtt(Subtitle.Data,
-                                                    Subtitle.Language,
-                                                    Subtitle.Name);
+                                                     Subtitle.Language,
+                                                     Subtitle.Name);
       if FAILED(hr) then
         begin
           SetCastStatusText('ChromeCast: Could not prepare the active subtitles.');
@@ -1839,11 +1882,19 @@ begin
   FCastStartPosition100ns := CastStartPosition100ns;
   FCastSyncPending := True;
 
+  CastMediaMode := cmmAutomatic;
+  CastSubtitleMode := csmAutomatic;
+  if Subtitle.Enabled and SameText(ExtractFileExt(sMediaFileName), '.mp4') then
+    begin
+      CastMediaMode := cmmTranscodeBurnedSubtitles;
+      CastSubtitleMode := csmBurnIntoVideo;
+    end;
+
   hr := FMfCastController.CastFile(Device,
                                    sMediaFileName,
                                    Subtitle,
-                                   cmmAutomatic,
-                                   csmAutomatic,
+                                   CastMediaMode,
+                                   CastSubtitleMode,
                                    CastStartPosition100ns);
 
   if (hr = S_OK) and
@@ -1878,15 +1929,87 @@ begin
   case ANewState of
     csIdle,
     csStopped: begin
+                 ResetCastConnectivityWatchdog();
                  CancelPendingCastSynchronization(True);
                  ClearCastStatusText();
                end;
 
-    csError:   CancelPendingCastSynchronization(True); // MfCastError supplies the detailed error text.
+    csError:   begin
+                 ResetCastConnectivityWatchdog();
+                 CancelPendingCastSynchronization(True); // MfCastError supplies the detailed error text.
+               end;
+
+    csBuffering:
+      begin
+        if Assigned(FCastConnectivityTimer) and
+           not FCastConnectivityTimer.Enabled then
+          begin
+            FCastBufferingStartedTick := GetTickCount();
+            FCastConnectivityWarningShown := False;
+            FCastConnectivityTimer.Enabled := True;
+          end;
+
+        SetCastStatusText('ChromeCast: ' + MfCastStateToString(ANewState));
+      end;
 
   else
-    SetCastStatusText('ChromeCast: ' + MfCastStateToString(ANewState));
+    begin
+      ResetCastConnectivityWatchdog();
+      SetCastStatusText('ChromeCast: ' + MfCastStateToString(ANewState));
+    end;
   end;
+end;
+
+
+procedure Tfrm_MfPlayer.ResetCastConnectivityWatchdog();
+begin
+
+  if Assigned(FCastConnectivityTimer) then
+    FCastConnectivityTimer.Enabled := False;
+
+  FCastBufferingStartedTick := 0;
+  FCastConnectivityWarningShown := False;
+end;
+
+
+procedure Tfrm_MfPlayer.CastConnectivityTimer(Sender: TObject);
+const
+  CAST_CONNECTIVITY_WARNING_DELAY_MS = 15000;
+var
+  WarningText: string;
+
+begin
+
+  if not Assigned(FMfCastController) or
+     (FMfCastController.GetState() <> csBuffering) then
+    begin
+      ResetCastConnectivityWatchdog();
+      Exit;
+    end;
+
+  if FCastConnectivityWarningShown or
+     ((GetTickCount() - FCastBufferingStartedTick) <
+       CAST_CONNECTIVITY_WARNING_DELAY_MS) then
+    Exit;
+
+  if FMfCastController.GetHttpRequestCount() <> 0 then
+    begin
+      FCastConnectivityTimer.Enabled := False;
+      Exit;
+    end;
+
+  FCastConnectivityWarningShown := True;
+  FCastConnectivityTimer.Enabled := False;
+  WarningText := 'Chromecast cannot reach MfPlayer''s local media server.' +
+                 sLineBreak + sLineBreak +
+                 'Windows Firewall may be blocking inbound access. Allow ' +
+                 'TMFPlayerX2.exe through the firewall, or set a trusted ' +
+                 'network profile to Private, and then try casting again.';
+  SetCastStatusText('ChromeCast: Local media server is not reachable.');
+  MessageDlg(WarningText,
+             mtWarning,
+             [mbOK],
+             0);
 end;
 
 
@@ -1955,14 +2078,28 @@ end;
 
 
 procedure Tfrm_MfPlayer.mnuStopCastingClick(Sender: TObject);
+var
+  hr: HRESULT;
+
 begin
 
-  if Assigned(FMfCastController) then
-    FMfCastController.Disconnect();
+  hr := S_OK;
 
-  ClearCastStatusText();
-  UpdateCastControls();
-  Caption := 'Casting stopped.';
+  if Assigned(FMfCastController) then
+    hr := FMfCastController.Disconnect();
+
+  if SUCCEEDED(hr) then
+    begin
+      if Assigned(MfPlayerX) then
+        MfPlayerX.SendPlayerRequest(reqStop);
+
+      ResetInterface();
+      SetCastStatusText('ChromeCast: Stopped');
+      UpdateCastControls();
+      Caption := 'Casting stopped.';
+    end
+  else
+    Caption := 'Casting could not be stopped.';
 end;
 
 
@@ -2184,6 +2321,12 @@ begin
   FCastStartPosition100ns := 0;
   FCastSyncPending := False;
   FCastLocalWasRunning := False;
+  FCastBufferingStartedTick := 0;
+  FCastConnectivityWarningShown := False;
+  FCastConnectivityTimer := TTimer.Create(Self);
+  FCastConnectivityTimer.Enabled := False;
+  FCastConnectivityTimer.Interval := 1000;
+  FCastConnectivityTimer.OnTimer := CastConnectivityTimer;
   ps_AspectRatio := AR_16_9;
   mnuStopCasting.Enabled := False;
 
@@ -2391,6 +2534,23 @@ begin //Position
 
   if bAppIsClosing or (not Assigned(MfPlayerX)) then
     Exit;
+
+  // WParam 3 is a worker-thread subtitled-export percentage update.
+  if (Msg.WParam = 3) and Assigned(FExportThread) then
+    begin
+      ProgressValue := Msg.LParam;
+      if ProgressValue < 0 then
+        ProgressValue := 0
+      else
+        if ProgressValue > 100 then
+          ProgressValue := 100;
+
+      prbProgress.Position := Integer(
+        (ProgressValue * prbProgress.Max) div 100);
+      mnuExportSubtitled.Caption := Format('Exporting subtitled MP4... %d%%',
+                                           [ProgressValue]);
+      Exit;
+    end;
 
   // The presentation clock no longer ticks after MESessionEnded, so the
   // player posts this explicit notification after the final sample drains.

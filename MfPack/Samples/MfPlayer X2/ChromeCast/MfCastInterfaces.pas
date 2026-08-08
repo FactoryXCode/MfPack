@@ -1,6 +1,6 @@
-// FactoryX
+﻿// FactoryX
 //
-// Copyright � FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -17,7 +17,7 @@
 //              transcoding, and the controller.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX), Peter (OzShips), Carmen (carmenh).
+// Intiator(s): Tony (maXcomX), Carmen (carmenh).
 // Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
@@ -73,9 +73,10 @@ uses
   {System}
   System.Classes,
   System.SysUtils,
+  {MediaFoundationApi}
+  WinApi.MediaFoundationApi.MfObjects,
   {Cast}
-  MfCastTypes,
-  WinApi.MediaFoundationApi.MfObjects;
+  MfCastTypes;
 
 type
 
@@ -169,6 +170,7 @@ type
                       out AUrl: string): HRESULT;
     function IsRunning(): Boolean;
     function GetListenPort(): Word;
+    function GetRequestCount(): Cardinal;
   end;
 
   IMfCastSegmentPublisher = interface
@@ -248,6 +250,7 @@ type
     function SetMuted(const AMuted: Boolean): HRESULT;
     function Disconnect(): HRESULT;
     function GetState(): TMfCastState;
+    function GetHttpRequestCount(): Cardinal;
   end;
 
 implementation

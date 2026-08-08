@@ -1,6 +1,6 @@
-﻿// FactoryX
+// FactoryX
 //
-// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright � FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -15,15 +15,15 @@
 //              subtitles into those samples in-place, and passes them on to the EVR.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX), Peter (OzShips), Carmen (carmenh).
+// Intiator(s): Tony (maXcomX)
 // Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/08/2026 All                 Use sample/frame/clock timeline for local subtitles.
 // 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 01/08/2026 Tony                Use sample/frame/clock timeline for local subtitles.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -285,7 +285,6 @@ begin
   DestType := nil;
   if not Assigned(SourceType) then
     begin
-
       Result := E_POINTER;
       Exit;
     end;
@@ -336,8 +335,11 @@ var
 
 begin
 
+  OutputDebugString(PChar('MfPlayer X2 subtitle transform ParseVideoType begin'));
+
   if not IsTypeSupported(MediaType) then
     begin
+      OutputDebugString(PChar('MfPlayer X2 subtitle transform rejects non-RGB32 type'));
       Result := MF_E_INVALIDMEDIATYPE;
       Exit;
     end;
@@ -347,7 +349,28 @@ begin
                                width,
                                height);
   if FAILED(Result) then
-    Exit;
+    begin
+
+      // The EVR can propose an output type without repeating frame size. The
+      // transform has already learned it from the decoder-facing input type,
+      // so inherit those dimensions instead of leaking MF_E_ATTRIBUTENOTFOUND
+      // into the Media Session.
+      if (FWidth > 0) and (FHeight > 0) then
+        begin
+          width := FWidth;
+          height := FHeight;
+          OutputDebugString(PChar(Format(
+            'MfPlayer X2 subtitle transform inherits missing frame size %dx%d',
+            [width, height])));
+        end
+      else
+        begin
+          OutputDebugString(PChar(Format(
+            'MfPlayer X2 subtitle transform frame size unavailable, hr=%.8x',
+            [DWORD(Result)])));
+          Exit;
+        end;
+    end;
 
   if (width = 0) or (height = 0) then
     begin
@@ -372,6 +395,9 @@ begin
   FWidth := width;
   FHeight := height;
   FStride := stride;
+  OutputDebugString(PChar(Format(
+    'MfPlayer X2 subtitle transform parsed type %dx%d stride=%d',
+    [FWidth, FHeight, FStride])));
   Result := S_OK;
 end;
 
@@ -628,7 +654,13 @@ begin
     Result := CloneMediaType(FInputType,
                              pType)
   else
-    Result := CreateRgb32Type(pType);
+    begin
+
+      // The output format depends on the negotiated input dimensions. A bare
+      // RGB32 type has no MF_MT_FRAME_SIZE; some H.264/MP4 topologies query it
+      // immediately and abort with MF_E_ATTRIBUTENOTFOUND.
+      Result := MF_E_TRANSFORM_TYPE_NOT_SET;
+    end;
 end;
 
 
@@ -636,6 +668,10 @@ function TMfSubtitleVideoTransform.SetInputType(const dwInputStreamID: DWORD;
                                                 pType: IMFMediaType;
                                                 dwFlags: DWORD): HRESULT;
 begin
+
+  OutputDebugString(PChar(Format(
+    'MfPlayer X2 subtitle transform SetInputType flags=%.8x assigned=%s',
+    [dwFlags, BoolToStr(Assigned(pType), True)])));
 
   if (dwInputStreamID <> 0) then
     Exit(MF_E_INVALIDSTREAMNUMBER);
@@ -662,13 +698,21 @@ begin
 
   FInputType := pType;
   ClearInput();
+  OutputDebugString(PChar('MfPlayer X2 subtitle transform input type committed'));
 end;
 
 
 function TMfSubtitleVideoTransform.SetOutputType(dwOutputStreamID: DWORD;
                                                  pType: IMFMediaType;
                                                  dwFlags: DWORD): HRESULT;
+var
+  NormalizedType: IMFMediaType;
+
 begin
+  OutputDebugString(PChar(Format(
+    'MfPlayer X2 subtitle transform SetOutputType flags=%.8x assigned=%s',
+    [dwFlags, BoolToStr(Assigned(pType), True)])));
+
   if (dwOutputStreamID <> 0) then
     Exit(MF_E_INVALIDSTREAMNUMBER);
 
@@ -687,11 +731,29 @@ begin
   if ((dwFlags and MFT_SET_TYPE_TEST_ONLY) <> 0) then
     Exit(S_OK);
 
-  Result := ParseVideoType(pType);
+  NormalizedType := pType;
+  if Assigned(FInputType) then
+    begin
+
+      // EVR may propose a deliberately sparse output type. Preserve decoder
+      // attributes needed by downstream components (frame rate, pixel aspect
+      // ratio, interlace mode, apertures), then overlay EVR's requested values.
+      Result := CloneMediaType(FInputType,
+                               NormalizedType);
+      if FAILED(Result) then
+        Exit;
+
+      Result := pType.CopyAllItems(NormalizedType);
+      if FAILED(Result) then
+        Exit;
+    end;
+
+  Result := ParseVideoType(NormalizedType);
   if FAILED(Result) then
     Exit;
 
-  FOutputType := pType;
+  FOutputType := NormalizedType;
+  OutputDebugString(PChar('MfPlayer X2 subtitle transform output type committed'));
 end;
 
 
@@ -785,8 +847,7 @@ begin
   case eMessage of
     MFT_MESSAGE_COMMAND_FLUSH,
     MFT_MESSAGE_NOTIFY_BEGIN_STREAMING,
-    MFT_MESSAGE_NOTIFY_START_OF_STREAM:
-      begin
+    MFT_MESSAGE_NOTIFY_START_OF_STREAM: begin
         ClearInput();
         FFrameIndex := 0;
         FLoggedTimelineFallback := False;
@@ -807,6 +868,9 @@ function TMfSubtitleVideoTransform.ProcessInput(const dwInputStreamID: DWORD;
                                                 const pSample: IMFSample;
                                                 dwFlags: DWORD): HRESULT;
 begin
+
+  if FFrameIndex = 0 then
+    OutputDebugString(PChar('Subtitle transform received first input sample'));
 
   if (dwInputStreamID <> 0) then
     Exit(MF_E_INVALIDSTREAMNUMBER);

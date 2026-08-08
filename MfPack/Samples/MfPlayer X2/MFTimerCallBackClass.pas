@@ -14,15 +14,15 @@
 // Description: A Timercallback class for the IMFTimer interface.
 //
 // Company: FactoryX
-// Intiator(s): Ramyses De Macedo Rodrigues, Tony (maXcomX), Peter (OzShips).
-// Contributor(s): Ramyses De Macedo Rodrigues, Tony Kalf (maXcomX), Peter Larson (ozships).
+// Intiator(s): Tony (maXcomX)
+// Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 01/08/2026 All                 Fixed timer interval initialization and async UI notification.
 // 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 01/08/2026 Tony                Fixed timer interval initialization and async UI notification.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.
@@ -37,9 +37,8 @@
 // Todo: -
 //
 // =============================================================================
-// Source: Parts of CPlayer Examples
+// Source: -
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
 //==============================================================================
 //
 // LICENSE

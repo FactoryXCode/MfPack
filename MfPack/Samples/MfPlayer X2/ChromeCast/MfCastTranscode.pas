@@ -1,6 +1,6 @@
-// FactoryX
+﻿// FactoryX
 //
-// Copyright � FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -15,7 +15,7 @@
 //              pipeline and local preview.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX), Peter (OzShips).
+// Intiator(s): Tony (maXcomX), Carmen (carmenh).
 // Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
@@ -304,10 +304,13 @@ begin
       OutputDebugString(PChar('MfCast Transcode: worker started'));
       Compositor := TMfSubtitleCompositor.Create();
       FOwner.FWorkerResult := S_OK;
-      if FOwner.FRequest.SubtitleMode = csmBurnIntoVideo then
+
+      if (FOwner.FRequest.SubtitleMode = csmBurnIntoVideo) then
         begin
           if (FOwner.FRequest.SubtitleAspectRatio > 0.0) then
             Compositor.SubtitleAspectRatio := FOwner.FRequest.SubtitleAspectRatio;
+          if SameText(ExtractFileExt(FOwner.FRequest.SourceName), '.mp4') then
+            Compositor.SubtitleFontScale := 1.5;
           if (Length(FOwner.FRequest.SubtitleData) > 0) then
             begin
               FOwner.FWorkerResult := WriteSubtitleTempFile(SubtitleTempFileName);
@@ -337,6 +340,7 @@ begin
 
       FPump := TMfSubtitleFramePump.Create(Compositor);
       FPump.UseSoftwareVideoDecoder := True;
+      FPump.RealTimePacing := True;
       FPump.OnProgress := PumpProgress;
 
       Bitrate := FOwner.FRequest.Encoding.VideoBitrate;
@@ -360,7 +364,7 @@ begin
     FreeAndNil(FPump);
     FreeAndNil(Compositor);
 
-    if SubtitleTempFileName <> '' then
+    if (SubtitleTempFileName <> '') then
       DeleteFileW(PWideChar(SubtitleTempFileName));
 
     if Assigned(FOwner.FPublisher) then
@@ -579,6 +583,12 @@ begin
   if Assigned(FWorker) then
     begin
       TMfCastTranscodeWorker(FWorker).CancelTranscode();
+
+      // A worker can be waiting inside the publishing byte stream. Abort the
+      // presentation before waiting so that operation returns immediately.
+      if Assigned(FPublisher) then
+        FPublisher.AbortPresentation(E_ABORT);
+
       FWorker.WaitFor();
       FreeAndNil(FWorker);
     end;

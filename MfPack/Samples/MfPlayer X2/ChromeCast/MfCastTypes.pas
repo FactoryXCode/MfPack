@@ -15,7 +15,7 @@
 //              load requests, status records, codec profiles, and all configurable settings.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX), Peter (OzShips).
+// Intiator(s): Tony (maXcomX), Carmen (carmenh).
 // Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------

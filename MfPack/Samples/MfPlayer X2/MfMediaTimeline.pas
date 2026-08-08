@@ -16,7 +16,7 @@
 //              timestamps.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX), Peter (OzShips).
+// Intiator(s): Tony (maXcomX).
 // Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
@@ -153,6 +153,7 @@ procedure TMfMediaTimeline.Reset();
 begin
 
   FLock.Acquire();
+
   try
     FBasePositionMs := 0;
     FFrameRateNumerator := 0;
@@ -171,7 +172,7 @@ end;
 procedure TMfMediaTimeline.Start(StartPositionMs: Int64);
 begin
 
-  if StartPositionMs < 0 then
+  if (StartPositionMs < 0) then
     StartPositionMs := 0;
 
   FLock.Acquire();
@@ -224,6 +225,7 @@ procedure TMfMediaTimeline.Stop();
 begin
 
   FLock.Acquire();
+
   try
     if FRunning and not FPaused then
       FBasePositionMs := GetClockPositionMsUnlocked();
@@ -240,14 +242,16 @@ end;
 procedure TMfMediaTimeline.Seek(NewPositionMs: Int64);
 begin
 
-  if NewPositionMs < 0 then
+  if (NewPositionMs < 0) then
     NewPositionMs := 0;
 
   FLock.Acquire();
   try
     FBasePositionMs := NewPositionMs;
+
     if FRunning and not FPaused then
       FStopwatch := TStopwatch.StartNew();
+
     ResetResolvedTimeUnlocked();
   finally
     FLock.Release();
@@ -281,6 +285,7 @@ procedure TMfMediaTimeline.SetFrameRate(Numerator: UINT32;
 begin
 
   FLock.Acquire();
+
   try
     FFrameRateNumerator := Numerator;
     FFrameRateDenominator := Denominator;
@@ -313,6 +318,7 @@ function TMfMediaTimeline.GetPositionMs(): Int64;
 begin
 
   FLock.Acquire();
+
   try
     Result := GetClockPositionMsUnlocked();
   finally

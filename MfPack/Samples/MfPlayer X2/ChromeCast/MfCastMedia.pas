@@ -15,7 +15,7 @@
 //              route selection between direct playback, external subtitles, and transcoding.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX), Peter (OzShips).
+// Intiator(s): Tony (maXcomX), Carmen (carmenh).
 // Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
@@ -126,6 +126,7 @@ type
                         out ASelectedMediaMode: TMfCastMediaMode;
                         out ASelectedSubtitleMode: TMfCastSubtitleMode): HRESULT;
   end;
+
 
 implementation
 

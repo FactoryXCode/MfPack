@@ -1,6 +1,6 @@
-// FactoryX
+﻿// FactoryX
 //
-// Copyright: � FactoryX. All rights reserved.
+// Copyright: Â© FactoryX. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -302,11 +302,11 @@ type
 
     procedure UpdateCaption();
     procedure ClearSubtitleBitmap();
-    //function EnsureVideoMixerBitmap(): HRESULT;
-    //function GetSubtitleTargetRect(const ClientRect: TRect): TRect;
-    //function RenderSubtitleBitmap(const SubtitleText: string): HRESULT;
+    function EnsureVideoMixerBitmap(): HRESULT;
+    function GetSubtitleTargetRect(const ClientRect: TRect): TRect;
+    function RenderSubtitleBitmap(const SubtitleText: string): HRESULT;
     procedure ResetSubtitleBitmapCache();
-    //procedure UpdateSubtitleBitmap(MediaTimeMs: Int64);
+    procedure UpdateSubtitleBitmap(MediaTimeMs: Int64);
     function EnsurePresentationClock(): HRESULT;
     function CreatePlaybackTopologyX2(pSource: IMFMediaSource;
                                       pPD: IMFPresentationDescriptor;
@@ -448,10 +448,10 @@ type
     procedure CommitSubtitleSelection();
     function GetActiveEmbeddedSubtitleStreamIndex(): Integer;
     function GetActiveSubtitleIsEmbedded(): Boolean;
-    function ExportActiveSubtitlesAsWebVtt(
-      out AData: TBytes;
-      out ALanguageTag: string;
-      out AFriendlyLanguageName: string): HRESULT;
+
+    function ExportActiveSubtitlesAsWebVtt(out AData: TBytes;
+                                           out ALanguageTag: string;
+                                           out AFriendlyLanguageName: string): HRESULT;
 
     // Shut down the session and MF
     // Use this funtion to kill the MfPlayer.
@@ -485,9 +485,6 @@ type
     // Volume
     procedure SetVolume(Value: TFloatArray);
     function GetVolume(): HRESULT;
-
-    // Get the duration if the mediafile
-    function GetInitialDuration(out dur: MFTIME): HRESULT;
 
     // Sets the current playback position (calls SetPositionInternal).
     function SetPosition(hnsPosition: MFTIME): HRESULT;
@@ -574,7 +571,6 @@ begin
   ResetSubtitleBitmapCache();
 end;
 
-{
 function TMfPlayerX.EnsureVideoMixerBitmap(): HRESULT;
 begin
   if Assigned(FVideoMixerBitmap) then
@@ -598,9 +594,7 @@ begin
     Result := E_NOINTERFACE;
   end;
 end;
-}
 
-{
 function TMfPlayerX.GetSubtitleTargetRect(const ClientRect: TRect): TRect;
 var
   clientWidth: Integer;
@@ -641,8 +635,7 @@ begin
                  targetLeft + targetWidth,
                  targetTop + targetHeight);
 end;
-}
-{
+
 function TMfPlayerX.RenderSubtitleBitmap(const SubtitleText: string): HRESULT;
 const
   TRANSPARENT_COLOR = TColor($010101);
@@ -804,9 +797,7 @@ begin
       FSubtitleBitmapVisible := True;
     end;
 end;
-}
 
-{
 procedure TMfPlayerX.UpdateSubtitleBitmap(MediaTimeMs: Int64);
 var
   subtitleText: string;
@@ -845,7 +836,6 @@ begin
   //void
   RenderSubtitleBitmap(subtitleText);
 end;
-}
 
 function TMfPlayerX.EnsurePresentationClock(): HRESULT;
 var
@@ -1153,7 +1143,8 @@ begin
   if FAILED(Result) then
     Exit;
 
-  if isVideo and Assigned(FSubtitleCompositor) then
+  if isVideo and Assigned(FSubtitleCompositor) and
+     (not SameText(ExtractFileExt(FFileName), '.mp4')) then
     begin
       // Keep the local subtitle transform in every video topology. Subtitle
       // sources can be rescanned and selected after OpenURL; omitting the MFT
@@ -1203,9 +1194,16 @@ begin
       FSubtitlePlaybackControl := transformControl;
     end
   else
-    Result := pSourceNode.ConnectOutput(0,
-                                        pOutputNode,
-                                        0);
+    begin
+
+      if isVideo and SameText(ExtractFileExt(FFileName), '.mp4') then
+        OutputDebugString(PChar(
+          'MfPlayer X2: preserving native MP4 video path; subtitles use EVR overlay'));
+
+      Result := pSourceNode.ConnectOutput(0,
+                                          pOutputNode,
+                                          0);
+    end;
 end;
 
 
@@ -1455,7 +1453,13 @@ begin
           if Assigned(FMediaTimeline) then
             TimelinePositionMs := FMediaTimeline.GetPositionMs();
 
-          if (ClockPositionMs >= 0) and (TimelinePositionMs >= 0) then
+          // Native MP4 playback has a reliable presentation clock.  Do not
+          // let the wall-clock fallback run the UI and subtitle position ahead
+          // of the actual decoded media position.
+          if SameText(ExtractFileExt(FFileName), '.mp4') and
+             (ClockPositionMs >= 0) then
+            mfpControl.CurrentPosition := ClockPositionMs
+          else if (ClockPositionMs >= 0) and (TimelinePositionMs >= 0) then
             begin
               if ClockPositionMs >= TimelinePositionMs then
                 mfpControl.CurrentPosition := ClockPositionMs
@@ -1468,6 +1472,9 @@ begin
             else
               if TimelinePositionMs >= 0 then
                 mfpControl.CurrentPosition := TimelinePositionMs;
+
+          if not Assigned(FSubtitlePlaybackControl) then
+            UpdateSubtitleBitmap(mfpControl.CurrentPosition);
 
           SendMessage(m_hwndMainForm,
                       WM_PROGRESSNOTIFY,
@@ -1812,41 +1819,6 @@ try
 
       hr := S_OK;
     end;
-
-finally
-  Result := hr;
-end;
-end;
-
-
-// Gets the duration of the current presentation.
-function TMfPlayerX.GetInitialDuration(out dur: MFTIME): HRESULT;
-var
-  pPD: IMFPresentationDescriptor;
-  hr: HRESULT;
-  mdur: MFTIME;
-
-begin
-
-  hr:= S_OK;
-
-try
-
-  if Assigned(m_pSource) then
-    begin
-      dur := 0;
-      hr := m_pSource.CreatePresentationDescriptor(pPD);
-
-      if (SUCCEEDED(hr)) then
-        begin
-          hr := pPD.GetUINT64(MF_PD_DURATION,
-                              UINT64(mdur));
-          dur := mdur;
-          mfpControl.uiDuration := dur;
-        end;
-    end
-  else
-    hr := E_POINTER;
 
 finally
   Result := hr;
@@ -2533,6 +2505,15 @@ begin
   ClearSubtitleBitmap();
   State := Stopped;
   UpdateCaption();
+
+  // Complete the form-level playback lifecycle on the UI thread. This also
+  // disconnects an active Chromecast session and stops its transcode worker.
+  if m_hwndMainForm <> 0 then
+    PostMessage(m_hwndMainForm,
+                WM_PROGRESSNOTIFY,
+                WPARAM(2),
+                0);
+
   Result := S_OK;
 end;
 
@@ -4103,7 +4084,6 @@ begin
                                                    ALanguageTag,
                                                    AFriendlyLanguageName);
 end;
-
 
 procedure TMfPlayerX.SetSubtitlesEnabled(aValue: Boolean);
 begin

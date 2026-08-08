@@ -291,7 +291,7 @@ object frm_MfPlayer: Tfrm_MfPlayer
     Top = 18
   end
   object MainMenu1: TMainMenu
-    Left = 38
+    Left = 40
     Top = 18
     object mnuFile: TMenuItem
       Caption = '&File'

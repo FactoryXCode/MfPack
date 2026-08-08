@@ -15,8 +15,8 @@
 // Description: Holds global constants for timedtext.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX), Peter (OzShips), Ramyses De Macedo Rodrigues.
-// Contributor(s): Tony Kalf (maXcomX).
+// Intiator(s): Tony (maXcomX).
+// Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
 // CHANGE LOG

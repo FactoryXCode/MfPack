@@ -1,6 +1,6 @@
-// FactoryX
+﻿// FactoryX
 //
-// Copyright � FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright Â© FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -24,9 +24,9 @@
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
 // 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
-// 02/08/2026 All                 Cache subtitle overlays to remove per-frame GDI allocation.
-// 01/08/2026 All                 Added selectable MKV tracks and thread-safe timed-text swaps.
-// 31/07/2026 All                 Added sidecar-first embedded subtitle fallback.
+// 02/08/2026 Carmen              Cache subtitle overlays to remove per-frame GDI allocation.
+// 01/08/2026 Carmen              Added selectable MKV tracks and thread-safe timed-text swaps.
+// 31/07/2026 Carmen              Added sidecar-first embedded subtitle fallback.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 10 or higher.
@@ -99,7 +99,14 @@ type
     FMediaFileName: WideString;
     FPreferredLanguage: string;
     FTimedTextFileLoaded: Boolean;
+    FEmbeddedWindowed: Boolean;
+    FEmbeddedWindowLoading: Boolean;
+    FEmbeddedWindowStartMs: Int64;
+    FEmbeddedWindowEndMs: Int64;
+    FEmbeddedWindowEndOfTrack: Boolean;
+    FEmbeddedWindowGeneration: Integer;
     FSubtitleAspectRatio: Single;
+    FSubtitleFontScale: Single;
     FOverlayText: string;
     FOverlayFrameWidth: Integer;
     FOverlayFrameHeight: Integer;
@@ -113,6 +120,9 @@ type
 
     procedure ReleaseTimedText();
     procedure ResetOverlayCache();
+    procedure ResetEmbeddedWindowState();
+    function EnsureEmbeddedWindow(MediaTimeMs: Int64): HRESULT;
+    function EnsureFullEmbeddedTrack(): HRESULT;
     function BuildSubtitleOverlay(const SubtitleText: string;
                                   Width: Integer;
                                   Height: Integer): HRESULT;
@@ -125,6 +135,7 @@ type
     function BuildPlainText(const Track: TSubTitleTrack): string;
     function GetSubtitleTargetRect(const ClientRect: TRect): TRect;
     procedure SetSubtitleAspectRatio(aValue: Single);
+    procedure SetSubtitleFontScale(aValue: Single);
 
   public
 
@@ -145,10 +156,9 @@ type
     function ExportActiveWebVtt(out AData: TBytes;
                                 out ALanguageTag: string;
                                 out AFriendlyLanguageName: string): HRESULT;
+
     procedure Close();
 
-    function TryGetSubtitleAtTime(MediaTimeMs: Int64;
-                                  out Track: TSubTitleTrack): Boolean;
     function TryGetSubtitleTextAtTime(MediaTimeMs: Int64;
                                       out SubtitleText: string;
                                       out Track: TSubTitleTrack): Boolean;
@@ -163,6 +173,7 @@ type
     property MediaFileName: WideString read FMediaFileName;
     property PreferredLanguage: string read FPreferredLanguage;
     property SubtitleAspectRatio: Single read FSubtitleAspectRatio write SetSubtitleAspectRatio;
+    property SubtitleFontScale: Single read FSubtitleFontScale write SetSubtitleFontScale;
     property TimedTextFileLoaded: Boolean read FTimedTextFileLoaded;
     property ActiveSubtitleIsEmbedded: Boolean read FActiveSubtitleIsEmbedded;
     property ActiveEmbeddedStreamIndex: Integer read FActiveEmbeddedStreamIndex;
@@ -170,6 +181,10 @@ type
 
 
 implementation
+
+const
+  MF_SUBTITLE_WINDOW_LOOK_BEHIND_MS = Int64(30000);
+  MF_SUBTITLE_WINDOW_AHEAD_MS = Int64(5 * 60 * 1000);
 
 
 constructor TMfSubtitleCompositor.Create();
@@ -183,7 +198,10 @@ begin
   FActiveEmbeddedStreamIndex := -1;
   FActiveSubtitleIsEmbedded := False;
   FTimedTextFileLoaded := False;
+  FEmbeddedWindowGeneration := 0;
+  ResetEmbeddedWindowState();
   FSubtitleAspectRatio := 16.0 / 9.0;
+  FSubtitleFontScale := 1.0;
   ResetOverlayCache();
 end;
 
@@ -289,6 +307,13 @@ begin
   else
     if (fontSize > 21) then
       fontSize := 21;
+
+  fontSize := Round(fontSize * FSubtitleFontScale);
+  if fontSize < 10 then
+    fontSize := 10
+  else
+    if fontSize > 48 then
+      fontSize := 48;
 
   marginX := videoWidth div 10;
   marginBottom := videoHeight div 20;
@@ -645,6 +670,7 @@ begin
     FActiveEmbeddedStreamIndex := -1;
     FActiveSubtitleIsEmbedded := False;
     FTimedTextFileLoaded := False;
+    ResetEmbeddedWindowState();
     FMediaFileName := '';
   finally
     FLock.Release();
@@ -671,9 +697,9 @@ begin
 
   // Keep the complete MKV track list for the language-selection dialog. This
   // operation reads metadata only. The player passes LoadEmbeddedTrack=False
-  // and loads embedded cue data asynchronously after submitting its topology,
-  // so opening a large MKV no longer walks every cluster on the VCL thread.
-  // Export callers retain the synchronous path by using the default True.
+  // and activates the selected embedded track asynchronously after submitting
+  // its topology. Direct MKV cues are then read in rolling playback windows.
+  // Export callers retain the complete synchronous path by using default True.
   hrTracks := RefreshEmbeddedSubtitleTracks(PresentationDescriptor);
 
   if FAILED(hrTracks) then
@@ -713,6 +739,7 @@ begin
         ReleaseTimedText();
         FTimedText := NewTimedText;
         NewTimedText := nil;
+        ResetEmbeddedWindowState();
         FPreferredLanguage := FTimedText.PreferredLanguage;
         FTimedTextFileLoaded := True;
         FActiveSubtitleIsEmbedded := EmbeddedTrack.Supported;
@@ -930,10 +957,14 @@ begin
       Exit;
     end;
 
-  Result := TMfEmbeddedSubtitleReader.ImportTextTrack(FMediaFileName,
-                                                      Track,
-                                                      NewTimedText,
-                                                      CancelEvent);
+  if (Track.Source = essMatroska) then
+    Result := S_OK
+  else
+    Result := TMfEmbeddedSubtitleReader.ImportTextTrack(FMediaFileName,
+                                                        Track,
+                                                        NewTimedText,
+                                                        CancelEvent);
+
   if (Result <> S_OK) then
     begin
       NewTimedText.Free();
@@ -945,6 +976,8 @@ begin
   try
     OldTimedText := FTimedText;
     FTimedText := NewTimedText;
+    ResetEmbeddedWindowState();
+    FEmbeddedWindowed := Track.Source = essMatroska;
     FPreferredLanguage := FTimedText.PreferredLanguage;
     FTimedTextFileLoaded := True;
     FActiveSubtitleIsEmbedded := True;
@@ -985,6 +1018,7 @@ begin
   try
     OldTimedText := FTimedText;
     FTimedText := NewTimedText;
+    ResetEmbeddedWindowState();
     FPreferredLanguage := FTimedText.PreferredLanguage;
     FTimedTextFileLoaded := True;
     FActiveSubtitleIsEmbedded := False;
@@ -997,6 +1031,191 @@ begin
 end;
 
 
+function TMfSubtitleCompositor.EnsureEmbeddedWindow(MediaTimeMs: Int64): HRESULT;
+var
+  Track: TMfEmbeddedSubtitleTrackInfo;
+  Cues: TMfTimedTextCueArray;
+  WindowStartMs: Int64;
+  WindowEndMs: Int64;
+  EndOfTrack: Boolean;
+  Generation: Integer;
+  MediaFileName: WideString;
+  FriendlyName: string;
+  ImportResult: HRESULT;
+
+begin
+
+  Result := S_OK;
+  if (MediaTimeMs < 0) then
+    MediaTimeMs := 0;
+
+  Track.Reset();
+  SetLength(Cues, 0);
+
+  FLock.Acquire();
+  try
+    if (not FEmbeddedWindowed) or
+       (not FActiveSubtitleIsEmbedded) or
+       (not FTimedTextFileLoaded) or
+       (not Assigned(FTimedText)) then
+      Exit;
+
+    if (FEmbeddedWindowStartMs >= 0) and
+       (MediaTimeMs >= FEmbeddedWindowStartMs) and
+       ((MediaTimeMs < FEmbeddedWindowEndMs) or FEmbeddedWindowEndOfTrack) then
+      Exit;
+
+    if FEmbeddedWindowLoading then
+      begin
+        Result := S_FALSE;
+        Exit;
+      end;
+
+    if not FindEmbeddedTrack(DWORD(FActiveEmbeddedStreamIndex), Track) then
+      begin
+        Result := MF_E_INVALIDSTREAMNUMBER;
+        Exit;
+      end;
+
+    FEmbeddedWindowLoading := True;
+    Generation := FEmbeddedWindowGeneration;
+    MediaFileName := FMediaFileName;
+  finally
+    FLock.Release();
+  end;
+
+  WindowStartMs := MediaTimeMs - MF_SUBTITLE_WINDOW_LOOK_BEHIND_MS;
+  if (WindowStartMs < 0) then
+    WindowStartMs := 0;
+  WindowEndMs := MediaTimeMs + MF_SUBTITLE_WINDOW_AHEAD_MS;
+
+  Result := TMfEmbeddedSubtitleReader.LoadMatroskaTextTrackWindow(
+              MediaFileName,
+              Track,
+              WindowStartMs,
+              WindowEndMs,
+              Cues,
+              EndOfTrack);
+
+  FriendlyName := Track.Name;
+  if (FriendlyName = '') then
+    FriendlyName := Track.Language;
+  if (FriendlyName = '') then
+    FriendlyName := 'Embedded subtitles';
+
+  FLock.Acquire();
+  try
+    if Generation <> FEmbeddedWindowGeneration then
+      begin
+        Result := E_ABORT;
+        Exit;
+      end;
+
+    FEmbeddedWindowLoading := False;
+
+    if FAILED(Result) then
+      Exit;
+
+    ImportResult := FTimedText.ImportCues(Cues,
+                                          MediaFileName,
+                                          Track.Language,
+                                          FriendlyName);
+    if FAILED(ImportResult) then
+      begin
+        Result := ImportResult;
+        Exit;
+      end;
+
+    FEmbeddedWindowStartMs := WindowStartMs;
+    FEmbeddedWindowEndMs := WindowEndMs;
+    FEmbeddedWindowEndOfTrack := EndOfTrack;
+    Result := S_OK;
+  finally
+    FLock.Release();
+  end;
+end;
+
+
+function TMfSubtitleCompositor.EnsureFullEmbeddedTrack(): HRESULT;
+var
+  Track: TMfEmbeddedSubtitleTrackInfo;
+  NewTimedText: TMfTimedText;
+  OldTimedText: TMfTimedText;
+  MediaFileName: WideString;
+  Generation: Integer;
+  Committed: Boolean;
+
+begin
+
+  Track.Reset();
+  OldTimedText := nil;
+  Committed := False;
+
+  FLock.Acquire();
+  try
+    if not FEmbeddedWindowed then
+      begin
+        Result := S_OK;
+        Exit;
+      end;
+
+    if not FindEmbeddedTrack(DWORD(FActiveEmbeddedStreamIndex), Track) then
+      begin
+        Result := MF_E_INVALIDSTREAMNUMBER;
+        Exit;
+      end;
+
+    MediaFileName := FMediaFileName;
+    Inc(FEmbeddedWindowGeneration);
+    Generation := FEmbeddedWindowGeneration;
+    FEmbeddedWindowLoading := False;
+  finally
+    FLock.Release();
+  end;
+
+  NewTimedText := TMfTimedText.Create(0,
+                                      MediaFileName,
+                                      Track.Language);
+  if not Assigned(NewTimedText) then
+    begin
+      Result := E_OUTOFMEMORY;
+      Exit;
+    end;
+
+  Result := TMfEmbeddedSubtitleReader.ImportTextTrack(MediaFileName,
+                                                      Track,
+                                                      NewTimedText);
+  if (Result <> S_OK) then
+    begin
+      NewTimedText.Free();
+      Exit;
+    end;
+
+  FLock.Acquire();
+  try
+    if (Generation = FEmbeddedWindowGeneration) and
+       FEmbeddedWindowed and
+       (FActiveEmbeddedStreamIndex = Integer(Track.StreamIndex)) then
+      begin
+        OldTimedText := FTimedText;
+        FTimedText := NewTimedText;
+        NewTimedText := nil;
+        ResetEmbeddedWindowState();
+        FPreferredLanguage := FTimedText.PreferredLanguage;
+        Committed := True;
+      end;
+  finally
+    FLock.Release();
+  end;
+
+  OldTimedText.Free();
+  NewTimedText.Free();
+
+  if not Committed then
+    Result := E_ABORT;
+end;
+
+
 function TMfSubtitleCompositor.ExportActiveWebVtt(out AData: TBytes;
                                                   out ALanguageTag: string;
                                                   out AFriendlyLanguageName: string): HRESULT;
@@ -1006,6 +1225,10 @@ begin
             0);
   ALanguageTag := '';
   AFriendlyLanguageName := '';
+
+  Result := EnsureFullEmbeddedTrack();
+  if FAILED(Result) then
+    Exit;
 
   FLock.Acquire();
   try
@@ -1023,6 +1246,17 @@ begin
   end;
 end;
 
+
+procedure TMfSubtitleCompositor.ResetEmbeddedWindowState();
+begin
+
+  Inc(FEmbeddedWindowGeneration);
+  FEmbeddedWindowed := False;
+  FEmbeddedWindowLoading := False;
+  FEmbeddedWindowStartMs := -1;
+  FEmbeddedWindowEndMs := -1;
+  FEmbeddedWindowEndOfTrack := False;
+end;
 
 function TMfSubtitleCompositor.BuildPlainText(const Track: TSubTitleTrack): string;
 var
@@ -1049,6 +1283,20 @@ begin
     aValue := 16.0 / 9.0;
 
   FSubtitleAspectRatio := aValue;
+end;
+
+
+procedure TMfSubtitleCompositor.SetSubtitleFontScale(aValue: Single);
+begin
+
+  if aValue <= 0.0 then
+    aValue := 1.0;
+
+  if Abs(FSubtitleFontScale - aValue) > 0.0001 then
+    begin
+      FSubtitleFontScale := aValue;
+      ResetOverlayCache();
+    end;
 end;
 
 
@@ -1094,29 +1342,6 @@ begin
                  targetTop + targetHeight);
 end;
 
-
-function TMfSubtitleCompositor.TryGetSubtitleAtTime(MediaTimeMs: Int64;
-                                                   out Track: TSubTitleTrack): Boolean;
-begin
-
-  Track.Start := 0;
-  Track.Stop := 0;
-  Track.Duration := 0;
-  SetLength(Track.TrackText, 0);
-
-  FLock.Acquire();
-
-  try
-    Result := FTimedTextFileLoaded and
-              Assigned(FTimedText) and
-              FTimedText.TryGetTrackAtTime(MediaTimeMs,
-                                           Track);
-  finally
-    FLock.Release();
-  end;
-end;
-
-
 function TMfSubtitleCompositor.TryGetSubtitleTextAtTime(MediaTimeMs: Int64;
                                                        out SubtitleText: string;
                                                        out Track: TSubTitleTrack): Boolean;
@@ -1127,6 +1352,8 @@ begin
   Track.Stop := 0;
   Track.Duration := 0;
   SetLength(Track.TrackText, 0);
+
+  EnsureEmbeddedWindow(MediaTimeMs);
 
   // Keep the cue lookup and plain-text extraction under one lock. TrackText
   // owns formatted-text objects that belong to FTimedText, so a live language

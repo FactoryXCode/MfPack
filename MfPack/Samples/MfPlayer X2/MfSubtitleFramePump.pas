@@ -1,6 +1,6 @@
-// FactoryX
+﻿// FactoryX
 //
-// Copyright � FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -15,7 +15,7 @@
 //              the frames, and writes the result to a new video stream.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX), Peter (OzShips), Carmen (carmenh).
+// Intiator(s): Tony (maXcomX).
 // Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
@@ -81,7 +81,9 @@ uses
   WinApi.MediaFoundationApi.MfIdl,
   WinApi.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MfReadWrite,
+  WinApi.MediaFoundationApi.MfTransform,
   WinApi.MediaFoundationApi.MfUtils,
+  WinApi.MediaFoundationApi.WmCodecDsp,
   {Project}
   MfSubtitleCompositor;
 
@@ -108,6 +110,8 @@ type
     FCancelRequested: Boolean;
     FPauseRequested: Boolean;
     FUseSoftwareVideoDecoder: Boolean;
+    FRealTimePacing: Boolean;
+    FLoggedConverterGeometry: Boolean;
     FReader: IMFSourceReader;
     FWriter: IMFSinkWriter;
     FStreamIndex: DWORD;
@@ -115,11 +119,22 @@ type
     function CreateReader(const InputFileName: WideString;
                           out Reader: IMFSourceReader): HRESULT;
     function ConfigureReader(Reader: IMFSourceReader;
+                             UseNativeNv12: Boolean;
                              out MediaType: IMFMediaType;
                              out Width: UINT32;
                              out Height: UINT32;
                              out FrameRateNum: UINT32;
                              out FrameRateDen: UINT32): HRESULT;
+
+    function CreateNv12Converter(InputType: IMFMediaType;
+                                 out Converter: IMFTransform): HRESULT;
+
+    function ConvertNv12Sample(Converter: IMFTransform;
+                               InputSample: IMFSample;
+                               Width: UINT32;
+                               Height: UINT32;
+                               out OutputSample: IMFSample): HRESULT;
+
     function CreateWriter(const OutputFileName: WideString;
                           Width: UINT32;
                           Height: UINT32;
@@ -130,37 +145,44 @@ type
                           out StreamIndex: DWORD;
                           const OutputByteStream: IMFByteStream = nil;
                           UseFragmentedMp4: Boolean = False): HRESULT;
+
     function ConfigureAudioReader(const InputFileName: WideString;
                                   out AudioReader: IMFSourceReader;
                                   out AudioMediaType: IMFMediaType;
                                   out HasAudio: Boolean): HRESULT;
+
     function AddAudioStream(Writer: IMFSinkWriter;
                             AudioInputType: IMFMediaType;
                             out AudioStreamIndex: DWORD): HRESULT;
+
     function GetAudioSampleDuration(Sample: IMFSample;
                                     const AudioState: TMfSubtitleAudioState;
                                     out SampleDuration: LONGLONG): HRESULT;
+
     function WriteAudioSamples(AudioReader: IMFSourceReader;
                                Writer: IMFSinkWriter;
                                AudioStreamIndex: DWORD;
                                var AudioState: TMfSubtitleAudioState;
                                StopTime: LONGLONG): HRESULT;
+
     function CompositeSample(Sample: IMFSample;
                              Width: UINT32;
                              Height: UINT32;
                              SampleTime: MFTIME): HRESULT;
+
     function FlipRgb32InPlace(VideoBuffer: PByte;
                               BufferSize: DWORD;
                               Width: UINT32;
                               Height: UINT32;
                               Stride: Integer): HRESULT;
+
     function CancelRequested(SampleTime: MFTIME): Boolean;
     function WaitIfPaused(var AExportStartTick: DWORD;
                           SampleTime: MFTIME): Boolean;
+
     function SetReaderPosition(const Reader: IMFSourceReader;
                                const Position100ns: MFTIME): HRESULT;
   public
-
     constructor Create(Compositor: TMfSubtitleCompositor);
 
     procedure Cancel();
@@ -176,6 +198,7 @@ type
 
     property FramesWritten: Int64 read FFramesWritten;
     property UseSoftwareVideoDecoder: Boolean read FUseSoftwareVideoDecoder write FUseSoftwareVideoDecoder;
+    property RealTimePacing: Boolean read FRealTimePacing write FRealTimePacing;
     property OnProgress: TMfSubtitleFramePumpProgress read FOnProgress write FOnProgress;
   end;
 
@@ -188,6 +211,7 @@ type
     FReader: IMFSourceReader;
     FWriter: IMFSinkWriter;
     FStreamIndex: DWORD;
+
   protected
     procedure Execute(); override;
 
@@ -233,6 +257,7 @@ begin
 
     if Assigned(FReader) then
       begin
+
         OutputDebugString(PChar('Export: cancel helper before reader Flush'));
 
         hr := FReader.Flush(MF_SOURCE_READER_FIRST_VIDEO_STREAM);
@@ -264,6 +289,8 @@ begin
   FCancelRequested := False;
   FPauseRequested := False;
   FUseSoftwareVideoDecoder := False;
+  FRealTimePacing := False;
+  FLoggedConverterGeometry := False;
   FReader := nil;
   FWriter := nil;
   FStreamIndex := 0;
@@ -274,14 +301,16 @@ function TMfSubtitleFramePump.CreateReader(const InputFileName: WideString;
                                            out Reader: IMFSourceReader): HRESULT;
 var
   attribs: IMFAttributes;
+  useNativeMp4Video: Boolean;
 
 begin
 
   Reader := nil;
   attribs := nil;
+  useNativeMp4Video := SameText(ExtractFileExt(InputFileName), '.mp4');
 
   Result := MFCreateAttributes(attribs,
-                               2);
+                               3);
   if FAILED(Result) then
     Exit;
 
@@ -293,10 +322,16 @@ begin
         Exit;
     end;
 
-  Result := attribs.SetUINT32(MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING,
-                              UINT32(True));
-  if FAILED(Result) then
-    Exit;
+  if not useNativeMp4Video then
+    begin
+      Result := attribs.SetUINT32(MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING,
+                                  UINT32(True));
+      if FAILED(Result) then
+        Exit;
+    end;
+
+  OutputDebugString(PChar(Format('Export: source reader native MP4 video=%s',
+                                 [BoolToStr(useNativeMp4Video)])));
 
   Result := MFCreateSourceReaderFromURL(PWideChar(InputFileName),
                                         attribs,
@@ -305,6 +340,7 @@ end;
 
 
 function TMfSubtitleFramePump.ConfigureReader(Reader: IMFSourceReader;
+                                              UseNativeNv12: Boolean;
                                               out MediaType: IMFMediaType;
                                               out Width: UINT32;
                                               out Height: UINT32;
@@ -347,8 +383,12 @@ begin
   if FAILED(Result) then
     Exit;
 
-  Result := partialType.SetGUID(MF_MT_SUBTYPE,
-                                MFVideoFormat_RGB32);
+  if UseNativeNv12 then
+    Result := partialType.SetGUID(MF_MT_SUBTYPE,
+                                  MFVideoFormat_NV12)
+  else
+    Result := partialType.SetGUID(MF_MT_SUBTYPE,
+                                  MFVideoFormat_RGB32);
   if FAILED(Result) then
     Exit;
 
@@ -380,6 +420,215 @@ begin
       FrameRateDen := 1;
       Result := S_OK;
     end;
+end;
+
+
+function TMfSubtitleFramePump.CreateNv12Converter(InputType: IMFMediaType;
+                                                  out Converter: IMFTransform): HRESULT;
+var
+  outputType: IMFMediaType;
+
+begin
+
+  Converter := nil;
+  outputType := nil;
+
+  Result := CoCreateInstance(CLSID_CColorConvertDMO,
+                             nil,
+                             CLSCTX_INPROC_SERVER,
+                             IID_IMFTransform,
+                             Converter);
+  if FAILED(Result) then
+    Exit;
+
+  Result := Converter.SetInputType(0,
+                                   InputType,
+                                   0);
+  if FAILED(Result) then
+    Exit;
+
+  Result := MFCreateMediaType(outputType);
+  if FAILED(Result) then
+    Exit;
+
+  Result := InputType.CopyAllItems(outputType);
+  if FAILED(Result) then
+    Exit;
+
+  Result := outputType.SetGUID(MF_MT_SUBTYPE,
+                               MFVideoFormat_RGB32);
+  if FAILED(Result) then
+    Exit;
+
+  Result := Converter.SetOutputType(0,
+                                    outputType,
+                                    0);
+  if FAILED(Result) then
+    Exit;
+
+  Result := Converter.ProcessMessage(MFT_MESSAGE_NOTIFY_BEGIN_STREAMING,
+                                     0);
+  if SUCCEEDED(Result) then
+    Result := Converter.ProcessMessage(MFT_MESSAGE_NOTIFY_START_OF_STREAM,
+                                       0);
+end;
+
+
+function TMfSubtitleFramePump.ConvertNv12Sample(Converter: IMFTransform;
+                                                InputSample: IMFSample;
+                                                Width: UINT32;
+                                                Height: UINT32;
+                                                out OutputSample: IMFSample): HRESULT;
+var
+  streamInfo: MFT_OUTPUT_STREAM_INFO;
+  outputBuffer: IMFMediaBuffer;
+  outputData: MFT_OUTPUT_DATA_BUFFER;
+  processStatus: DWORD;
+  bufferSize: UINT32;
+  currentLength: DWORD;
+  maxLength: DWORD;
+  tightSample: IMFSample;
+  tightBuffer: IMFMediaBuffer;
+  sourceData: PByte;
+  targetData: PByte;
+  sourceMaxLength: DWORD;
+  targetMaxLength: DWORD;
+  targetLength: DWORD;
+  sourceStride: UINT32;
+  codedHeight: UINT32;
+  row: UINT32;
+
+begin
+
+  OutputSample := nil;
+  outputBuffer := nil;
+  ZeroMemory(@streamInfo, SizeOf(streamInfo));
+  ZeroMemory(@outputData, SizeOf(outputData));
+  processStatus := 0;
+  currentLength := 0;
+  maxLength := 0;
+  tightSample := nil;
+  tightBuffer := nil;
+  sourceData := nil;
+  targetData := nil;
+
+  if (not Assigned(Converter)) or (not Assigned(InputSample)) then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
+
+  Result := Converter.ProcessInput(0,
+                                   InputSample,
+                                   0);
+  if FAILED(Result) then
+    Exit;
+
+  Result := Converter.GetOutputStreamInfo(0,
+                                          streamInfo);
+  if FAILED(Result) then
+    Exit;
+
+  bufferSize := Width * Height * 4;
+  if streamInfo.cbSize > bufferSize then
+    bufferSize := streamInfo.cbSize;
+
+  Result := MFCreateSample(OutputSample);
+  if FAILED(Result) then
+    Exit;
+
+  Result := MFCreateMemoryBuffer(bufferSize,
+                                 outputBuffer);
+  if FAILED(Result) then
+    Exit;
+
+  Result := OutputSample.AddBuffer(outputBuffer);
+  if FAILED(Result) then
+    Exit;
+
+  outputData.dwStreamID := 0;
+  outputData.pSample := OutputSample;
+  Result := Converter.ProcessOutput(0,
+                                    1,
+                                    @outputData,
+                                    processStatus);
+  if FAILED(Result) then
+    begin
+      OutputSample := nil;
+      Exit;
+    end;
+
+  Result := outputBuffer.GetCurrentLength(currentLength);
+  if FAILED(Result) then
+    Exit;
+  outputBuffer.GetMaxLength(maxLength);
+
+  if not FLoggedConverterGeometry then
+    begin
+      FLoggedConverterGeometry := True;
+      OutputDebugString(PChar(Format(
+        'Export: converter output width=%d height=%d cbSize=%d current=%d max=%d',
+        [Width, Height, streamInfo.cbSize, currentLength, maxLength])));
+    end;
+
+  targetLength := Width * Height * 4;
+  if currentLength = targetLength then
+    Exit;
+
+  codedHeight := (Height + 15) and not UINT32(15);
+  if (codedHeight = 0) or ((currentLength mod codedHeight) <> 0) then
+    begin
+      Result := E_UNEXPECTED;
+      Exit;
+    end;
+
+  sourceStride := currentLength div codedHeight;
+  if sourceStride < (Width * 4) then
+    begin
+      Result := E_UNEXPECTED;
+      Exit;
+    end;
+
+  Result := MFCreateSample(tightSample);
+  if FAILED(Result) then
+    Exit;
+  Result := MFCreateMemoryBuffer(targetLength,
+                                 tightBuffer);
+  if FAILED(Result) then
+    Exit;
+
+  Result := tightSample.AddBuffer(tightBuffer);
+  if FAILED(Result) then
+    Exit;
+
+  sourceMaxLength := 0;
+  targetMaxLength := 0;
+  Result := outputBuffer.Lock(sourceData,
+                              @sourceMaxLength,
+                              @currentLength);
+  if FAILED(Result) then
+    Exit;
+  try
+    Result := tightBuffer.Lock(targetData,
+                               @targetMaxLength,
+                               nil);
+    if FAILED(Result) then
+      Exit;
+    try
+      for row := 0 to Height - 1 do
+        CopyMemory(PByte(NativeInt(targetData) + NativeInt(row * Width * 4)),
+                   PByte(NativeInt(sourceData) + NativeInt(row * sourceStride)),
+                   Width * 4);
+      Result := tightBuffer.SetCurrentLength(targetLength);
+    finally
+      tightBuffer.Unlock();
+    end;
+  finally
+    outputBuffer.Unlock();
+  end;
+
+  if SUCCEEDED(Result) then
+    OutputSample := tightSample;
 end;
 
 
@@ -643,7 +892,6 @@ begin
 
   if (not Assigned(Writer)) or (not Assigned(AudioInputType)) then
     begin
-
       Result := E_POINTER;
       Exit;
     end;
@@ -723,6 +971,7 @@ begin
                              AudioStreamIndex);
   if FAILED(Result) then
     begin
+
       OutputDebugString(PChar(Format('Export: audio AddStream failed hr=%.8x',
                                      [DWORD(Result)])));
       Exit;
@@ -749,7 +998,6 @@ begin
 
   if not Assigned(Sample) then
     begin
-
       Result := E_POINTER;
       Exit;
     end;
@@ -841,7 +1089,6 @@ begin
 
   if Assigned(FOnProgress) then
     begin
-
       cancel := False;
       FOnProgress(Self,
                   FFramesWritten,
@@ -873,7 +1120,6 @@ begin
 
   if AudioState.Pending then
     begin
-
       if (StopTime > 0) and (AudioState.PendingTime > StopTime) then
         Exit;
 
@@ -921,7 +1167,6 @@ begin
 
       if ((flags and MF_SOURCE_READERF_ENDOFSTREAM) <> 0) then
         begin
-
           AudioState.Done := True;
           Break;
         end;
@@ -1018,9 +1263,9 @@ begin
 
   GetMem(tempRow,
          rowBytes);
+
   if (tempRow = nil) then
     begin
-
       Result := E_OUTOFMEMORY;
       Exit;
     end;
@@ -1028,7 +1273,6 @@ begin
   try
     for row := 0 to halfRows - 1 do
       begin
-
         topRow := PByte(NativeInt(VideoBuffer) + (NativeInt(row) * NativeInt(Stride)));
         bottomRow := PByte(NativeInt(VideoBuffer) + (NativeInt(Integer(Height) - 1 - row) * NativeInt(Stride)));
 
@@ -1103,8 +1347,9 @@ begin
 end;
 
 
-function TMfSubtitleFramePump.SetReaderPosition(const Reader: IMFSourceReader;
-                                                const Position100ns: MFTIME): HRESULT;
+function TMfSubtitleFramePump.SetReaderPosition(
+  const Reader: IMFSourceReader;
+  const Position100ns: MFTIME): HRESULT;
 var
   Position: PROPVARIANT;
 
@@ -1145,8 +1390,10 @@ var
   reader: IMFSourceReader;
   writer: IMFSinkWriter;
   mediaType: IMFMediaType;
+  converter: IMFTransform;
   audioType: IMFMediaType;
   sample: IMFSample;
+  rgbSample: IMFSample;
   audioReader: IMFSourceReader;
   streamIndex: DWORD;
   audioStreamIndex: DWORD;
@@ -1174,6 +1421,7 @@ var
   paceSleepMs: Int64;
   subtitleTime: MFTIME;
   useSourceSubtitleTime: Boolean;
+  useNativeNv12: Boolean;
 
 begin
 
@@ -1186,8 +1434,10 @@ begin
   reader := nil;
   writer := nil;
   mediaType := nil;
+  converter := nil;
   audioType := nil;
   sample := nil;
+  rgbSample := nil;
   audioReader := nil;
   streamIndex := 0;
   audioStreamIndex := 0;
@@ -1223,7 +1473,9 @@ begin
   FReader := reader;
 
   OutputDebugString(PChar('Export: configuring source reader'));
+  useNativeNv12 := SameText(ExtractFileExt(InputFileName), '.mp4');
   Result := ConfigureReader(reader,
+                            useNativeNv12,
                             mediaType,
                             width,
                             height,
@@ -1231,6 +1483,15 @@ begin
                             frameRateDen);
   if FAILED(Result) then
     Exit;
+
+  if useNativeNv12 then
+    begin
+      OutputDebugString('Export: creating explicit NV12 to RGB32 converter');
+      Result := CreateNv12Converter(mediaType,
+                                    converter);
+      if FAILED(Result) then
+        Exit;
+    end;
 
   if (frameRateNum > 0) then
     frameDuration := (Int64(frameRateDen) * 10000000) div Int64(frameRateNum);
@@ -1247,10 +1508,16 @@ begin
   // time even though the cast MP4 itself is rebased to zero.
   useSourceSubtitleTime := not SameText(ExtractFileExt(InputFileName), '.avi');
 
-  Result := SetReaderPosition(reader,
-                              StartTime100ns);
-  if FAILED(Result) then
-    Exit;
+  // Do not flush a newly configured H.264 decoder merely to seek to zero.
+  // Some MP4 Source Reader decoder chains accept that seek but then fail the
+  // first ReadSample call. A non-zero cast restart still requires a real seek.
+  if StartTime100ns > 0 then
+    begin
+      Result := SetReaderPosition(reader,
+                                  StartTime100ns);
+      if FAILED(Result) then
+        Exit;
+    end;
 
   OutputDebugString(PChar('Export: creating sink writer'));
   Result := CreateWriter(OutputFileName,
@@ -1261,8 +1528,8 @@ begin
                          Bitrate,
                          writer,
                          streamIndex,
-                         OutputByteStream,
-                         UseFragmentedMp4);
+                          OutputByteStream,
+                          UseFragmentedMp4);
   if FAILED(Result) then
     Exit;
 
@@ -1296,12 +1563,12 @@ begin
 
   if hasAudio then
     begin
-
       audioHr := AddAudioStream(writer,
                                 audioType,
                                 audioStreamIndex);
       if FAILED(audioHr) then
         begin
+
           OutputDebugString(PChar(Format('Export: audio stream disabled hr=%.8x', [DWORD(audioHr)])));
           hasAudio := False;
           audioReader := nil;
@@ -1326,7 +1593,6 @@ begin
 
   while True do
     begin
-
       sample := nil;
       flags := 0;
       actualStreamIndex := 0;
@@ -1363,6 +1629,10 @@ begin
                                   @flags,
                                   @sampleTime,
                                   @sample);
+      if FFramesWritten = 0 then
+        OutputDebugString(PChar(Format(
+          'Export: first ReadSample hr=%.8x flags=%.8x sample=%d time=%d',
+          [DWORD(Result), flags, Ord(Assigned(sample)), sampleTime])));
       if FAILED(Result) then
         Break;
 
@@ -1379,12 +1649,31 @@ begin
         Break;
 
       if ((flags and MF_SOURCE_READERF_ERROR) <> 0) or
-         ((flags and MF_SOURCE_READERF_NATIVEMEDIATYPECHANGED) <> 0) or
-         ((flags and MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED) <> 0) then
+         ((flags and MF_SOURCE_READERF_NATIVEMEDIATYPECHANGED) <> 0) then
         begin
-
           Result := E_FAIL;
           Break;
+        end;
+
+      if ((flags and MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED) <> 0) then
+        begin
+          mediaType := nil;
+          Result := reader.GetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                               @mediaType);
+          if FAILED(Result) then
+            Break;
+
+          if useNativeNv12 then
+            begin
+              converter := nil;
+              Result := CreateNv12Converter(mediaType,
+                                            converter);
+              OutputDebugString(PChar(Format(
+                'Export: refreshed NV12 converter hr=%.8x',
+                [DWORD(Result)])));
+              if FAILED(Result) then
+                Break;
+            end;
         end;
 
       if ((flags and MF_SOURCE_READERF_STREAMTICK) <> 0) or
@@ -1402,28 +1691,46 @@ begin
 
       emptyReads := 0;
 
+      if useNativeNv12 then
+        begin
+          rgbSample := nil;
+          Result := ConvertNv12Sample(converter,
+                                      sample,
+                                      width,
+                                      height,
+                                      rgbSample);
+          if FFramesWritten = 0 then
+            OutputDebugString(PChar(Format(
+              'Export: first NV12 conversion hr=%.8x sample=%d',
+              [DWORD(Result), Ord(Assigned(rgbSample))])));
+          if FAILED(Result) then
+            Break;
+          sample := rgbSample;
+        end;
+
       // AVI files often have sparse, repeated, or otherwise unreliable frame
       // timestamps. Generate a stable CFR export timeline from the configured
       // frame rate so audio/video muxing and subtitle timing stay coherent.
       outputTime := FFramesWritten * frameDuration;
       lastOutputTime := outputTime;
 
-      while not CancelRequested(outputTime) do
-        begin
-          if WaitIfPaused(exportStartTick,
-                          outputTime) then
-            Break;
+      if WaitIfPaused(exportStartTick,
+                      outputTime) then
+        Break;
 
-          paceTargetMs := outputTime div 10000;
-          paceElapsedMs := Int64(DWORD(GetTickCount() - exportStartTick));
-          if (paceElapsedMs + 5 >= paceTargetMs) then
-            Break;
+      if FRealTimePacing then
+        while not CancelRequested(outputTime) do
+          begin
+            paceTargetMs := outputTime div 10000;
+            paceElapsedMs := Int64(DWORD(GetTickCount() - exportStartTick));
+            if (paceElapsedMs + 5 >= paceTargetMs) then
+              Break;
 
-          paceSleepMs := paceTargetMs - paceElapsedMs;
-          if paceSleepMs > 25 then
-            paceSleepMs := 25;
-          Sleep(DWORD(paceSleepMs));
-        end;
+            paceSleepMs := paceTargetMs - paceElapsedMs;
+            if paceSleepMs > 25 then
+              paceSleepMs := 25;
+            Sleep(DWORD(paceSleepMs));
+          end;
 
       if CancelRequested(outputTime) then
         begin
@@ -1468,6 +1775,7 @@ begin
         end;
 
       writeRetryCount := 0;
+
       repeat
         Result := writer.WriteSample(streamIndex,
                                      sample);
@@ -1501,7 +1809,6 @@ begin
       Inc(FFramesWritten);
       if CancelRequested(outputTime) then
         begin
-
           if (FFramesWritten > 0) then
             Result := S_OK
           else
@@ -1529,6 +1836,7 @@ begin
 
   if Assigned(writer) and SUCCEEDED(Result) and (FFramesWritten > 0) then
     begin
+
       OutputDebugString(PChar(Format('Export: before Finalize cancel=%d',
                                      [Integer(FCancelRequested)])));
       Result := writer.Finalize();

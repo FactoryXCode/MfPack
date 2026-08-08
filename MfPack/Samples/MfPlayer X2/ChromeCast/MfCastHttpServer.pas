@@ -1,4 +1,4 @@
-// FactoryX
+﻿// FactoryX
 //
 // Copyright ? FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
@@ -15,7 +15,7 @@
 //              and later fragmented output.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX), Peter (OzShips).
+// Intiator(s): Tony (maXcomX), Carmen (carmenh).
 // Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
@@ -254,8 +254,10 @@ type
     FRunning: Boolean;
     FListenPort: Word;
     FListenSocket: TSocket;
+    FClientSocket: TSocket;
     FServerThread: TThread;
     FWSAStarted: Boolean;
+    FRequestCount: Integer;
     FResources: TDictionary<string, IMfCastHttpContent>;
     FLock: TCriticalSection;
 
@@ -287,6 +289,7 @@ type
 
     function IsRunning(): Boolean;
     function GetListenPort(): Word;
+    function GetRequestCount(): Cardinal;
   end;
 
 
@@ -476,7 +479,7 @@ begin
   if FComplete then
     Exit;
 
-  if AOffset <= FBaseOffset then
+  if (AOffset <= FBaseOffset) then
     Exit;
 
   if (AOffset - FBaseOffset) < PruneGranularity then
@@ -484,7 +487,7 @@ begin
 
   NewBaseOffset := AOffset;
 
-  if NewBaseOffset > FLength then
+  if (NewBaseOffset > FLength) then
     NewBaseOffset := FLength;
 
   DropBytes := NewBaseOffset - FBaseOffset;
@@ -723,6 +726,7 @@ begin
   // WriteAt is synchronous. Taking the same lock is the commit barrier for
   // every byte written before IMFByteStream.Flush was called.
   FLock.Acquire;
+
   try
     if FClosed then
       Result := E_ABORT
@@ -1414,8 +1418,10 @@ begin
   FRunning := False;
   FListenPort := 0;
   FListenSocket := INVALID_SOCKET;
+  FClientSocket := INVALID_SOCKET;
   FServerThread := nil;
   FWSAStarted := False;
+  FRequestCount := 0;
 end;
 
 
@@ -1555,6 +1561,8 @@ begin
     end;
 
   FListenPort := ntohs(TSockAddrIn(SockName).sin_port);
+  InterlockedExchange(FRequestCount,
+                      0);
   FRunning := True;
   FServerThread := TMfCastHttpServerThread.Create(Self);
 
@@ -1563,6 +1571,9 @@ end;
 
 
 function TMfCastHttpServer.Stop(): HRESULT;
+var
+  ClientSocket: TSocket;
+
 begin
 
   FRunning := False;
@@ -1573,6 +1584,26 @@ begin
                SD_BOTH);
       WinApi.WinSock.closesocket(FListenSocket);
       FListenSocket := INVALID_SOCKET;
+    end;
+
+  // HandleClient runs on the server thread. Closing its established socket
+  // releases recv/send immediately so the thread can leave before WaitFor.
+  ClientSocket := INVALID_SOCKET;
+  FLock.Acquire;
+  try
+    if FClientSocket <> INVALID_SOCKET then
+      begin
+        ClientSocket := FClientSocket;
+        FClientSocket := INVALID_SOCKET;
+      end;
+  finally
+    FLock.Release;
+  end;
+
+  if ClientSocket <> INVALID_SOCKET then
+    begin
+      shutdown(ClientSocket, SD_BOTH);
+      WinApi.WinSock.closesocket(ClientSocket);
     end;
 
   if Assigned(FServerThread) then
@@ -1674,9 +1705,19 @@ begin
 end;
 
 
+function TMfCastHttpServer.GetRequestCount(): Cardinal;
+begin
+
+  Result := Cardinal(InterlockedCompareExchange(FRequestCount,
+                                                 0,
+                                                 0));
+end;
+
+
 procedure TMfCastHttpServer.AcceptLoop();
 var
   Client: TSocket;
+  CloseClient: Boolean;
 
 begin
 
@@ -1694,12 +1735,38 @@ begin
           Continue;
         end;
 
+      CloseClient := False;
+      FLock.Acquire;
+      try
+        if FRunning then
+          FClientSocket := Client
+        else
+          CloseClient := True;
+      finally
+        FLock.Release;
+      end;
+
+      if CloseClient then
+        begin
+          shutdown(Client, SD_BOTH);
+          WinApi.WinSock.closesocket(Client);
+          Break;
+        end;
+
       try
         HandleClient(Client);
       finally
-        shutdown(Client,
-                 SD_BOTH);
-        WinApi.WinSock.closesocket(Client);
+        FLock.Acquire;
+        try
+          if FClientSocket = Client then
+            begin
+              FClientSocket := INVALID_SOCKET;
+              shutdown(Client, SD_BOTH);
+              WinApi.WinSock.closesocket(Client);
+            end;
+        finally
+          FLock.Release;
+        end;
       end;
     end;
 end;
@@ -1780,6 +1847,7 @@ begin
                       SpacePos - 1);
 
   OutputDebugString(PChar('MfCast HTTP request: ' + FirstLine));
+  InterlockedIncrement(FRequestCount);
 
   SpacePos := Pos(' ',
                   FirstLine);
@@ -1976,7 +2044,9 @@ begin
 
   Header := Header + AnsiString('Content-Type: ' + Content.GetContentType() + ULBR +
             'Accept-Ranges: bytes' + ULBR +
-            'Content-Length: ' + IntToStr(EndOffset - StartOffset + 1) + ULBR);
+            'Content-Length: ' + IntToStr(EndOffset - StartOffset + 1) + ULBR +
+            'Cache-Control: no-store, no-cache, must-revalidate' + ULBR +
+            'Pragma: no-cache' + ULBR);
 
   if IsPartial then
     Header := Header + AnsiString('Content-Range: bytes ' + IntToStr(StartOffset) +

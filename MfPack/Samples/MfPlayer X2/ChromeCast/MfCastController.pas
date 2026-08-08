@@ -1,6 +1,6 @@
-// FactoryX
+﻿// FactoryX
 //
-// Copyright � FactoryX, Netherlands/Australia/Germany. All rights reserved.
+// Copyright Â© FactoryX, Netherlands/Australia/Germany. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -15,7 +15,7 @@
 //              HTTP publishing, connection, receiver launch, load, playback, and shutdown.
 //
 // Company: FactoryX
-// Intiator(s): Tony (maXcomX), Peter (OzShips), Carmen (carmenh).
+// Intiator(s): Tony (maXcomX), Carmen (carmenh).
 // Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
 //
 //------------------------------------------------------------------------------
@@ -156,12 +156,14 @@ type
     function StopDiscovery: HRESULT;
     function RefreshDiscovery: HRESULT;
     function GetDevices(out ADevices: TMfCastDeviceArray): HRESULT;
+
     function CastFile(const ADevice: TMfCastDevice;
                       const ASourceName: string;
                       const ASubtitle: TMfCastSubtitleAsset;
                       const AMediaMode: TMfCastMediaMode;
                       const ASubtitleMode: TMfCastSubtitleMode;
                       const AStartTime100ns: Int64 = 0): HRESULT;
+
     function Play: HRESULT;
     function Pause: HRESULT;
     function Stop: HRESULT;
@@ -170,6 +172,7 @@ type
     function SetMuted(const AMuted: Boolean): HRESULT;
     function Disconnect: HRESULT;
     function GetState: TMfCastState;
+    function GetHttpRequestCount(): Cardinal;
   end;
 
 
@@ -209,7 +212,6 @@ begin
   AAddress.S_addr := inet_addr(PAnsiChar(HostAnsi));
   if AAddress.S_addr <> u_long(INADDR_NONE) then
     begin
-
       Result := True;
       Exit;
     end;
@@ -217,7 +219,6 @@ begin
   HostEntry := gethostbyname(PAnsiChar(HostAnsi));
   if Assigned(HostEntry) and Assigned(HostEntry^.h_addr_list[0]) then
     begin
-
       AAddress := PInAddr(HostEntry^.h_addr_list[0])^;
       Result := True;
     end;
@@ -318,7 +319,7 @@ var
 
 begin
 
-  inherited Create;
+  inherited Create();
 
   FComponents := AComponents;
   FState := csIdle;
@@ -356,15 +357,27 @@ end;
 
 
 procedure TMfCastController.CleanupCastAttempt();
+var
+  StopResult: HRESULT;
+
 begin
 
-  // Stop the writer before its publisher, byte stream, or HTTP resources
-  // are released.
-  if Assigned(FComponents.TranscodePipeline) then
-    FComponents.TranscodePipeline.Stop();
+  // Stop the receiver while both the control channel and media URL are still
+  // valid. Keep TLS connected until the HTTP client has also been closed.
+  if Assigned(FComponents.Channel) then
+    begin
+      StopResult := FComponents.Channel.Stop();
+      OutputDebugString(PChar(Format('MfCast receiver STOP hr=%.8x',
+                                    [DWORD(StopResult)])));
+    end;
 
+  // Abort the publisher first so a transcoder blocked in a byte-stream write
+  // is released before Stop waits for its worker thread.
   if Assigned(FComponents.SegmentPublisher) then
     FComponents.SegmentPublisher.AbortPresentation(E_ABORT);
+
+  if Assigned(FComponents.TranscodePipeline) then
+    FComponents.TranscodePipeline.Stop();
 
   if Assigned(FComponents.HttpServer) and
      (FCurrentSubtitlePublishedPath <> '') then
@@ -374,11 +387,11 @@ begin
      (FCurrentPublishedPath <> '') then
     FComponents.HttpServer.Unpublish(FCurrentPublishedPath);
 
-  if Assigned(FComponents.Channel) then
-    FComponents.Channel.Disconnect();
-
   if Assigned(FComponents.HttpServer) then
     FComponents.HttpServer.Stop();
+
+  if Assigned(FComponents.Channel) then
+    FComponents.Channel.Disconnect();
 
   FCurrentPublishedPath := '';
   FCurrentSubtitlePublishedPath := '';
@@ -567,7 +580,6 @@ begin
       if not Assigned(FComponents.TranscodePipeline) or
          not Assigned(FComponents.SegmentPublisher) then
         begin
-
           Result := FailCastAttempt(E_POINTER,
                                     'Start transcoder',
                                     'The Chromecast transcoding pipeline is not available.');
@@ -579,7 +591,6 @@ begin
                                                 FComponents.PreviewSink);
       if (hr <> S_OK) then
         begin
-
           Result := FailCastAttempt(hr,
                                     'Start transcoder',
                                     'The Chromecast transcoding pipeline could not be started.');
@@ -757,7 +768,7 @@ begin
     Result := E_UNEXPECTED;
   end;
 
-  if Result = S_OK then
+  if (Result = S_OK) then
     begin
 
       if SelectedMediaMode in [cmmDirectFile, cmmDirectWithTextTrack] then
@@ -799,7 +810,7 @@ begin
   SetState(csLaunchingReceiver);
 
   Result := FComponents.Channel.LaunchReceiver();
-  if Result = E_UNEXPECTED then
+  if (Result = E_UNEXPECTED) then
     begin
       // Some receivers close the first control connection while the Default
       // Media Receiver is being created. Reconnect once instead of requiring
@@ -923,8 +934,7 @@ begin
 
       // Force the receiver to treat the republished path as a new media item.
       // The HTTP server intentionally strips the query string for lookup.
-      Url := Url + '?seek=' + IntToStr(APosition100ns) +
-             '&request=' + IntToStr(GetTickCount());
+      Url := Url + '?seek=' + IntToStr(APosition100ns) + '&request=' + IntToStr(GetTickCount());
 
       RestartRequest := FActiveTranscodeRequest;
       RestartRequest.StartTime100ns := APosition100ns;
@@ -1058,6 +1068,16 @@ function TMfCastController.GetState(): TMfCastState;
 begin
 
   Result := FState;
+end;
+
+
+function TMfCastController.GetHttpRequestCount(): Cardinal;
+begin
+
+  Result := 0;
+
+  if Assigned(FComponents.HttpServer) then
+    Result := FComponents.HttpServer.GetRequestCount();
 end;
 
 
@@ -1242,6 +1262,8 @@ var
   SubtitleContentType: string;
   SubtitleName: string;
   SubtitleLanguage: string;
+  SubtitleResourceName: string;
+  SubtitleTrackId: Int64;
 
 begin
 
@@ -1305,10 +1327,15 @@ begin
       if (SubtitleContentType = '') then
         SubtitleContentType := 'text/vtt; charset=utf-8';
 
+      if Pos('ttml', LowerCase(SubtitleContentType)) > 0 then
+        SubtitleResourceName := 'subtitles.ttml'
+      else
+        SubtitleResourceName := 'subtitles.vtt';
+
       SubtitleContent := TMfCastMemoryContent.Create(ASubtitle.Data,
                                                      SubtitleContentType);
 
-      Result := FComponents.HttpServer.Publish('subtitles.vtt',
+      Result := FComponents.HttpServer.Publish(SubtitleResourceName,
                                                SubtitleContent,
                                                SubtitlePath);
       if FAILED(Result) then
@@ -1322,6 +1349,11 @@ begin
           FComponents.HttpServer.Unpublish(SubtitlePath);
           Exit;
         end;
+
+      // Cast receivers may cache an out-of-band text track by URL across
+      // sessions. Use a fresh URL for every publication while the HTTP server
+      // continues to resolve the resource path without its query string.
+      SubtitleUrl := SubtitleUrl + '?v=' + IntToStr(Int64(GetTickCount()));
 
       FCurrentSubtitlePublishedPath := SubtitlePath;
       SubtitleName := Trim(ASubtitle.Name);
@@ -1337,18 +1369,25 @@ begin
       if (SubtitleLanguage = '') then
         SubtitleLanguage := 'und';
 
+      // Some Android Cast receivers retain a text track object across media
+      // sessions when its ID is reused. Give each LOAD a fresh track identity.
+      SubtitleTrackId := Int64(GetTickCount());
+      if SubtitleTrackId = 0 then
+        SubtitleTrackId := 1;
+
       SetLength(ALoadRequest.Tracks, 1);
       ALoadRequest.Tracks[0].Reset();
-      ALoadRequest.Tracks[0].TrackId := 1;
+      ALoadRequest.Tracks[0].TrackId := SubtitleTrackId;
       ALoadRequest.Tracks[0].TrackType := 'TEXT';
       ALoadRequest.Tracks[0].ContentId := SubtitleUrl;
-      ALoadRequest.Tracks[0].ContentType := 'text/vtt';
+      ALoadRequest.Tracks[0].ContentType := SubtitleContentType;
       ALoadRequest.Tracks[0].Name := SubtitleName;
       ALoadRequest.Tracks[0].Language := SubtitleLanguage;
       ALoadRequest.Tracks[0].SubType := 'SUBTITLES';
       SetLength(ALoadRequest.ActiveTrackIds, 1);
-      ALoadRequest.ActiveTrackIds[0] := 1;
-      OutputDebugString(PChar('MfCast subtitle URL: ' + SubtitleUrl));
+      ALoadRequest.ActiveTrackIds[0] := SubtitleTrackId;
+      OutputDebugString(PChar(Format('MfCast subtitle trackId=%d URL: %s',
+                                    [SubtitleTrackId, SubtitleUrl])));
     end;
 
   Result := S_OK;

@@ -1,6 +1,6 @@
-// FactoryX
+﻿// FactoryX
 //
-// Copyright: � FactoryX. All rights reserved.
+// Copyright: © FactoryX. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -167,6 +167,7 @@ const
   MATROSKA_TRACK_TYPE_SUBTITLE = UInt64(17);
   MATROSKA_DEFAULT_TS_SCALE_NS = UInt64(1000000);
   MATROSKA_DEFAULT_CUE_MS      = Int64(2000);
+  MATROSKA_WINDOW_CLUSTER_OVERLAP_MS = Int64(30000);
   MATROSKA_MAX_TEXT_FRAME_SIZE = UInt64(16 * 1024 * 1024);
   MATROSKA_MAX_STRING_SIZE     = UInt64(1024 * 1024);
 
@@ -234,35 +235,9 @@ type
                              out IsSubtitle: Boolean): Boolean;
     function ParseMetadata(): Boolean;
 
-    // Slow...
-    //function FindTrack(const TrackNumber: UInt64;
-    //                   out Track: TMfMatroskaSubtitleTrack): Boolean;
-
     function FindClusterTimestamp(const StartPos: Int64;
                                   const EndPos: Int64;
                                   out Timestamp: UInt64): Boolean;
-
-    // Slow...
-    //function ParseCluster(const StartPos: Int64;
-    //                      const EndPos: Int64;
-    //                      const ClusterTimestamp: UInt64;
-    //                      const Track: TMfMatroskaSubtitleTrack;
-    //                      var Cues: TMfMatroskaSubtitleCueArray): Boolean;
-    //
-    //function ParseBlockGroup(const StartPos: Int64;
-    //                         const EndPos: Int64;
-    //                         const ClusterTimestamp: UInt64;
-    //                         const Track: TMfMatroskaSubtitleTrack;
-    //                         var Cues: TMfMatroskaSubtitleCueArray): Boolean;
-    //
-    //function ParseBlock(const StartPos: Int64;
-    //                    const Size: UInt64;
-    //                    const ClusterTimestamp: UInt64;
-    //                    const BlockDurationTicks: UInt64;
-    //                    const HasBlockDuration: Boolean;
-    //                    const Track: TMfMatroskaSubtitleTrack;
-    //                    var Cues: TMfMatroskaSubtitleCueArray): Boolean;
-
 
     function FindTrackDataIndex(const TrackNumber: UInt64;
                                 const TrackData: TMfMatroskaSubtitleTrackDataArray): Integer;
@@ -309,10 +284,9 @@ type
     destructor Destroy(); override;
 
     function Enumerate(out Tracks: TMfMatroskaSubtitleTrackArray): HRESULT;
-    function ReadSubtitleTrack(const TrackNumber: UInt64;
-                               out Track: TMfMatroskaSubtitleTrack;
-                               out Cues: TMfMatroskaSubtitleCueArray): HRESULT;
+
     function ReadAllSubtitleTracks(out TrackData: TMfMatroskaSubtitleTrackDataArray): HRESULT;
+
     function ReadSubtitleTrackWindow(const TrackNumber: UInt64;
                                      const StartMs: Int64;
                                      const EndMs: Int64;
@@ -1125,28 +1099,6 @@ begin
   Result := True;
 end;
 
-{
-function TMfMatroskaParser.FindTrack(const TrackNumber: UInt64;
-                                     out Track: TMfMatroskaSubtitleTrack): Boolean;
-var
-  I: Integer;
-
-begin
-
-  Track.Reset();
-  Result := False;
-
-  for I := Low(FTracks) to High(FTracks) do
-    if FTracks[I].TrackNumber = TrackNumber then
-      begin
-
-        Track := FTracks[I];
-        Result := True;
-        Exit;
-      end;
-end;
-}
-
 function TMfMatroskaParser.FindClusterTimestamp(const StartPos: Int64;
                                                 const EndPos: Int64;
                                                 out Timestamp: UInt64): Boolean;
@@ -1426,118 +1378,6 @@ begin
   Result := FStream.Position = DataEnd;
 end;
 
-{
-function TMfMatroskaParser.ParseBlock(const StartPos: Int64;
-                                      const Size: UInt64;
-                                      const ClusterTimestamp: UInt64;
-                                      const BlockDurationTicks: UInt64;
-                                      const HasBlockDuration: Boolean;
-                                      const Track: TMfMatroskaSubtitleTrack;
-                                      var Cues: TMfMatroskaSubtitleCueArray): Boolean;
-var
-  DataEnd: Int64;
-  BlockTrackNumber: UInt64;
-  TrackNumberLength: Integer;
-  UnknownValue: Boolean;
-  TimecodeHigh: Byte;
-  TimecodeLow: Byte;
-  RelativeTimecode: Int64;
-  RawTimecode: Word;
-  Flags: Byte;
-  LacingMode: Integer;
-  FrameStorage: array[0..255] of TBytes;
-  FrameCount: Integer;
-  I: Integer;
-  StartMs: Int64;
-  StopMs: Int64;
-  PerFrameDurationMs: Int64;
-  DefaultDurationMs: Int64;
-  Text: string;
-
-begin
-
-  Result := False;
-
-  if (Size > UInt64(MaxInt)) then
-    Exit;
-
-  DataEnd := StartPos + Int64(Size);
-
-  if (DataEnd < StartPos) or (DataEnd > FFileSize) then
-    Exit;
-
-  if not SeekAbsolute(StartPos) then
-    Exit;
-
-  if not ReadVInt(BlockTrackNumber,
-                  TrackNumberLength,
-                  True,
-                  UnknownValue) or UnknownValue then
-    Exit;
-
-  if not ReadByte(TimecodeHigh) or
-     not ReadByte(TimecodeLow) or
-     not ReadByte(Flags) then
-    Exit;
-
-  RawTimecode := (Word(TimecodeHigh) shl 8) or Word(TimecodeLow);
-  if (RawTimecode >= $8000) then
-    RelativeTimecode := Int64(RawTimecode) - $10000
-  else
-    RelativeTimecode := RawTimecode;
-
-  if (BlockTrackNumber <> Track.TrackNumber) then
-    begin
-
-      Result := SkipTo(DataEnd);
-      Exit;
-    end;
-
-  LacingMode := (Flags and $06) shr 1;
-  if not ReadLacedFrames(DataEnd,
-                         LacingMode,
-                         FrameStorage,
-                         FrameCount) then
-    Exit;
-
-  StartMs := TicksToMs(Int64(ClusterTimestamp) + RelativeTimecode,
-                       Track.TrackTimestampScale);
-
-  DefaultDurationMs := 0;
-  if (Track.DefaultDurationNs > 0) then
-    DefaultDurationMs := Int64(Track.DefaultDurationNs div 1000000);
-
-  PerFrameDurationMs := 0;
-  if HasBlockDuration and (FrameCount > 0) then
-    PerFrameDurationMs := DurationTicksToMs(BlockDurationTicks,
-                                            Track.TrackTimestampScale) div FrameCount
-  else
-    if (DefaultDurationMs > 0) then
-      PerFrameDurationMs := DefaultDurationMs;
-
-  for I := 0 to FrameCount - 1 do
-    begin
-
-      Text := DecodeText(FrameStorage[I]);
-      StopMs := 0;
-
-      if (PerFrameDurationMs > 0) then
-        StopMs := StartMs + PerFrameDurationMs;
-
-      AppendCue(Cues,
-                StartMs,
-                StopMs,
-                Text);
-
-      if (PerFrameDurationMs > 0) then
-        Inc(StartMs,
-            PerFrameDurationMs);
-    end;
-
-  Result := True;
-end;
-}
-
 function TMfMatroskaParser.FindTrackDataIndex(const TrackNumber: UInt64;
                                               const TrackData: TMfMatroskaSubtitleTrackDataArray): Integer;
 var
@@ -1814,147 +1654,6 @@ begin
         end;
     end;
 end;
-
-{
-function TMfMatroskaParser.ParseBlockGroup(const StartPos: Int64;
-                                           const EndPos: Int64;
-                                           const ClusterTimestamp: UInt64;
-                                           const Track: TMfMatroskaSubtitleTrack;
-                                           var Cues: TMfMatroskaSubtitleCueArray): Boolean;
-var
-  Header: TEbmlElementHeader;
-  BlockStart: Int64;
-  BlockSize: UInt64;
-  BlockDurationTicks: UInt64;
-  HasBlock: Boolean;
-  HasBlockDuration: Boolean;
-
-begin
-
-  BlockStart := 0;
-  BlockSize := 0;
-  BlockDurationTicks := 0;
-  HasBlock := False;
-  HasBlockDuration := False;
-
-  Result := SeekAbsolute(StartPos);
-  if not Result then
-    Exit;
-
-  while (FStream.Position < EndPos) do
-    begin
-
-      if not ReadElementHeader(EndPos,
-                               Header) then
-        begin
-
-          Result := False;
-          Exit;
-        end;
-
-      if (Header.ElementId = EBML_ID_BLOCK) then
-        begin
-
-          BlockStart := Header.DataStart;
-          BlockSize := Header.DataSize;
-          HasBlock := True;
-        end
-      else
-        if (Header.ElementId = EBML_ID_BLOCK_DURATION) then
-          begin
-
-            if ReadUnsigned(Header.DataSize,
-                            BlockDurationTicks) then
-              HasBlockDuration := True;
-          end;
-
-      if not SkipTo(Header.DataEnd) then
-        begin
-
-          Result := False;
-          Exit;
-        end;
-    end;
-
-  if HasBlock then
-    Result := ParseBlock(BlockStart,
-                         BlockSize,
-                         ClusterTimestamp,
-                         BlockDurationTicks,
-                         HasBlockDuration,
-                         Track,
-                         Cues)
-  else
-    Result := True;
-end;
-}
-{
-function TMfMatroskaParser.ParseCluster(const StartPos: Int64;
-                                        const EndPos: Int64;
-                                        const ClusterTimestamp: UInt64;
-                                        const Track: TMfMatroskaSubtitleTrack;
-                                        var Cues: TMfMatroskaSubtitleCueArray): Boolean;
-var
-  Header: TEbmlElementHeader;
-
-begin
-
-  Result := SeekAbsolute(StartPos);
-  if not Result then
-    Exit;
-
-  while (FStream.Position < EndPos) do
-    begin
-
-      if not ReadElementHeader(EndPos,
-                               Header) then
-        begin
-
-          Result := False;
-          Exit;
-        end;
-
-      if (Header.ElementId = EBML_ID_SIMPLE_BLOCK) then
-        begin
-
-          if not ParseBlock(Header.DataStart,
-                            Header.DataSize,
-                            ClusterTimestamp,
-                            0,
-                            False,
-                            Track,
-                            Cues) then
-            begin
-
-              Result := False;
-              Exit;
-            end;
-        end
-      else
-        if (Header.ElementId = EBML_ID_BLOCK_GROUP) then
-          begin
-
-            if not ParseBlockGroup(Header.DataStart,
-                                   Header.DataEnd,
-                                   ClusterTimestamp,
-                                   Track,
-                                   Cues) then
-              begin
-
-                Result := False;
-                Exit;
-              end;
-          end;
-
-      if not SkipTo(Header.DataEnd) then
-        begin
-
-          Result := False;
-          Exit;
-        end;
-    end;
-end;
-}
 
 procedure TMfMatroskaParser.QuickSortCues(var Cues: TMfMatroskaSubtitleCueArray;
                                           L: Integer;
@@ -2259,15 +1958,19 @@ begin
           if (ClusterTimeMs >= EndMs) then
             Break;
 
-          if not ParseClusterAll(Header.DataStart, Header.DataEnd,
-                                 ClusterTimestamp, TrackData) then
-            begin
-              if Cancelled() then
-                Result := E_ABORT
-              else
-                Result := E_FAIL;
-              Exit;
-            end;
+          // Cluster payloads before the requested window can be skipped with
+          // a seek. Retain one overlap interval because block timestamps are
+          // relative to the cluster and a long cue may cross the boundary.
+          if (ClusterTimeMs + MATROSKA_WINDOW_CLUSTER_OVERLAP_MS >= StartMs) then
+            if not ParseClusterAll(Header.DataStart, Header.DataEnd,
+                                   ClusterTimestamp, TrackData) then
+              begin
+                if Cancelled() then
+                  Result := E_ABORT
+                else
+                  Result := E_FAIL;
+                Exit;
+              end;
         end;
 
       if not SkipTo(Header.DataEnd) then
@@ -2298,50 +2001,6 @@ begin
     Result := S_OK
   else
     Result := S_FALSE;
-end;
-
-
-function TMfMatroskaParser.ReadSubtitleTrack(const TrackNumber: UInt64;
-                                             out Track: TMfMatroskaSubtitleTrack;
-                                             out Cues: TMfMatroskaSubtitleCueArray): HRESULT;
-var
-  TrackData: TMfMatroskaSubtitleTrackDataArray;
-  I: Integer;
-
-begin
-
-  Track.Reset();
-  SetLength(Cues,
-            0);
-  SetLength(TrackData,
-            0);
-
-  Result := ReadAllSubtitleTracks(TrackData);
-  if FAILED(Result) then
-    Exit;
-
-  for I := Low(TrackData) to High(TrackData) do
-    if (TrackData[I].Track.TrackNumber = TrackNumber) then
-      begin
-        Track := TrackData[I].Track;
-
-        if not Track.Supported then
-          begin
-            Result := HRESULT(MF_E_INVALIDMEDIATYPE);
-            Exit;
-          end;
-
-        CopyMatroskaCues(TrackData[I].Cues,
-                         Cues);
-
-        if (Length(Cues) = 0) then
-          Result := S_FALSE
-        else
-          Result := S_OK;
-        Exit;
-      end;
-
-  Result := HRESULT(MF_E_INVALIDSTREAMNUMBER);
 end;
 
 class function TMfMatroskaSubtitleReader.EnumerateTracks(const FileName: WideString;
