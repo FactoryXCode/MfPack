@@ -255,8 +255,10 @@ type
                           const pBitsPerSample: Integer;
                           pShowMilliSeconds: Boolean = True): string; inline;
 
+  {$IF COMPILERVERSION < 33.0}
   // API function GetTickCount64.
   function GetTickCount64(): UInt64; stdcall;
+  {$ENDIF}
 
   // Converts winApi BOOL to INT.
   function NormalizeBOOL(const aBOOL: LongBool): Integer;
