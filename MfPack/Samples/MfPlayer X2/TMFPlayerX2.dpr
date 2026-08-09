@@ -1,11 +1,6 @@
 program TMFPlayerX2;
 
 uses
-  madExcept,
-  madLinkDisAsm,
-  madListHardware,
-  madListProcesses,
-  madListModules,
   Vcl.Forms,
   frmMfPlayer in 'frmMfPlayer.pas' {frm_MfPlayer},
   dlgStreamSelect in 'dlgStreamSelect.pas' {dlgSelectStreams},
@@ -35,7 +30,7 @@ uses
 
 begin
 
-   // Check for memoryleaks (debug mode (F9) only!)
+ // Check for memoryleaks (debug mode (F9) only!)
 {$IFNDEF madExcept}
   {$IFDEF DEBUG}
     {$WARN SYMBOL_PLATFORM OFF}
