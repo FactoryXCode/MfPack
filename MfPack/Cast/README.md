@@ -1,4 +1,4 @@
-# MfPack Chromecast subsystem
+# MfPack Cast V2
 
 `MfCast.pas` is the application-facing facade. The other units contain device
 discovery, Cast v2 TLS/channel handling, controller logic, media planning, and
