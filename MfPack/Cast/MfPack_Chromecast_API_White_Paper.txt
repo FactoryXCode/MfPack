@@ -1,0 +1,1303 @@
+MfPack Chromecast API
+Independent Delphi Chromecast Framework
+Design Notes
+
+Version: 1.0
+Date: 9 August 2026
+
+
+1. What This Is
+===============
+
+MfCast is an independent Chromecast subsystem for Delphi. It handles device
+discovery, receiver control, local media serving, media preparation, subtitles,
+track selection, and optional transcoding behind a small public API.
+
+It can be used by:
+
+- MfPack media-player samples
+- Audio players
+- Radio applications
+- Slideshow or image applications
+- Dedicated Chromecast control applications
+- Third-party Delphi applications that use MfPack
+- Applications that do not otherwise use MfPack player classes
+
+The central design principle is simple:
+
+    Applications use MfCast.
+    MfCast does not depend on an application or form.
+
+The public API hides Cast protocol details, networking, local HTTP serving,
+subtitle conversion, media preparation, and optional transcoding.
+
+
+2. Why Split It Up
+=================
+
+MfPack is intended not only as a multimedia framework but also as a collection of examples from which Delphi developers can learn. Chromecast support itself combines several distinct responsibilities:
+
+- Media-track selection
+- Subtitle management
+- Chromecast discovery and connection
+- Chromecast session control
+- Chromecast media preparation
+- Local HTTP media serving
+- Subtitle conversion and serving
+- MKV-specific decisions
+- Transcoding/remuxing decisions
+- Chromecast state synchronization
+
+Keeping these responsibilities behind one explicit subsystem makes them easier
+to understand, reuse, test manually, and maintain. A developer learning Cast can
+follow the public facade and focused sample without first
+studying unrelated application logic.
+
+
+3. What We Want
+===============
+
+The main goals are simple.
+
+3.1 Standalone
+--------------
+
+Chromecast core units do not reference application forms or depend on a
+particular player's internal state.
+
+3.2 Reusable
+------------
+
+The same Chromecast classes work in other VCL applications with little or no
+modification.
+
+3.3 Easy to Learn From
+----------------------
+
+The public API and sample stay small and understandable.
+
+The sample shows:
+
+- How to discover Chromecast devices
+- How to connect
+- How to load media
+- How to play, pause, stop and seek
+- How to set volume
+- How to work with subtitles
+- How local files are made accessible to Chromecast
+
+without having to understand a complete media-player application.
+
+3.4 Works with Delphi XE7
+-------------------------
+
+The public API and core implementation remain compatible with Delphi XE7, the
+oldest Delphi version supported by MfPack.
+
+Newer Delphi language features are used only behind compatibility helpers.
+
+3.5 Does Not Freeze the UI
+--------------------------
+
+Chromecast networking and media-serving operations must not block the VCL main thread.
+
+The GUI remains responsive during:
+
+- Discovery
+- Connection
+- Receiver startup
+- Media loading
+- Status traffic
+- Subtitle preparation
+- HTTP serving
+- Remuxing or transcoding
+
+3.6 Clear Layers
+----------------
+
+Protocol, media serving, subtitles, and transcoding live in separate layers.
+
+This makes maintenance easier and allows applications to use only the parts they need.
+
+3.7 Media Foundation Is Optional in the Core
+---------------------------------------------
+
+Basic Chromecast control does not require Media Foundation.
+
+For example, casting an existing HTTP MP4 URL does not initialize or depend on a
+Media Foundation playback engine.
+
+Media Foundation becomes necessary only for operations such as media inspection, extraction, remuxing or transcoding.
+
+
+4. Two Different Kinds of Transport
+===================================
+
+Chromecast control transport and media transport are different mechanisms and
+remain separate in the implementation.
+
+4.1 Cast Control Transport
+--------------------------
+
+The control connection handles operations such as:
+
+- Device discovery
+- Connect
+- Disconnect
+- Receiver launch
+- Heartbeat
+- LOAD
+- PLAY
+- PAUSE
+- STOP
+- SEEK
+- Volume
+- Mute
+- Media status
+- Track selection
+- Receiver/session status
+
+This is Chromecast protocol traffic.
+
+4.2 Media Transport
+-------------------
+
+The Chromecast normally retrieves media independently through HTTP or HTTPS.
+
+For local media, the Delphi application makes the media available to the
+Chromecast over the network.
+
+Media transport may include:
+
+- Local HTTP server
+- HTTP range requests
+- MIME/content types
+- File serving
+- Stream serving
+- Subtitle serving
+- Artwork serving
+- Remuxed streams
+- Transcoded streams
+
+Separating these two meanings of "transport" is fundamental to keeping the implementation clean.
+
+
+5. Units
+========
+
+The units are organized like this:
+
+    ChromeCast\
+        MfCast.pas
+        MfCastTypes.pas
+        MfCastDiscovery.pas
+        MfCastChannel.pas
+        MfCastProtocol.pas
+        MfCastController.pas
+        MfCastMedia.pas
+        MfCastHttpServer.pas
+        MfCastSubtitles.pas
+        MfCastTranscode.pas
+        MfCastWindowsSupport.pas
+
+The important part is that every unit has one clear job.
+
+
+6. What Each Unit Does
+======================
+
+6.1 MfCast.pas
+--------------
+
+Public facade of the subsystem.
+
+Applications normally use this unit instead of the lower-level protocol classes.
+
+This unit handles:
+
+- Create and destroy the Chromecast subsystem
+- Start/stop discovery
+- Connect/disconnect
+- Load media
+- Playback control
+- Volume control
+- Subtitle/audio-track selection
+- Expose state
+- Expose events
+- Coordinate internal modules
+
+6.2 MfCastTypes.pas
+-------------------
+
+Shared types and constants.
+
+Examples:
+
+- Device information
+- Media description
+- Media state
+- Connection state
+- Track information
+- Subtitle information
+- Platform-neutral subtitle-choice records
+- Stable track and sidecar-path identifiers
+- Error information
+- Capability flags
+- Stream type
+- Receiver type
+
+This unit has minimal dependencies.
+
+6.3 MfCastDiscovery.pas
+-----------------------
+
+Device discovery.
+
+Responsibilities may include:
+
+- mDNS discovery
+- Chromecast service detection
+- Device-added notifications
+- Device-removed notifications
+- Device metadata
+- IP address and port resolution
+
+6.4 MfCastChannel.pas
+---------------------
+
+Low-level Chromecast connection.
+
+This unit handles:
+
+- TCP connection
+- TLS
+- Chromecast message framing
+- Send/receive loop
+- Heartbeats
+- Connection lifetime
+- Thread-safe message transport
+
+This unit contains no application playback logic.
+
+6.5 MfCastProtocol.pas
+----------------------
+
+Protocol message definitions and helpers.
+
+This unit handles:
+
+- Chromecast namespaces
+- Message creation
+- JSON protocol messages
+- Request IDs
+- Session IDs
+- Transport IDs
+- Message parsing
+- Error responses
+- Media status parsing
+
+Keeping protocol construction outside the controller prevents the controller from becoming a collection of JSON string operations.
+
+6.6 MfCastController.pas
+------------------------
+
+Higher-level receiver/session controller.
+
+This unit handles:
+
+- Launch receiver
+- Join receiver
+- Maintain receiver session
+- LOAD
+- PLAY
+- PAUSE
+- STOP
+- SEEK
+- Volume/mute
+- Track selection
+- Request media status
+- Maintain current remote media state
+
+6.7 MfCastMedia.pas
+-------------------
+
+Media preparation and decision layer.
+
+This unit handles:
+
+- Describe media
+- Determine whether media is remote or local
+- Determine MIME type
+- Determine direct-play suitability
+- Select direct serving, remuxing or transcoding
+- Build media URLs for the Chromecast
+- Coordinate tracks and metadata
+
+The application describes what it wants to play. MfCast decides how the
+Chromecast receives it.
+
+6.8 MfCastHttpServer.pas
+------------------------
+
+Local media HTTP server.
+
+This unit handles:
+
+- Serve local media
+- Serve generated media
+- Serve subtitles
+- Serve artwork
+- HTTP range requests
+- Content-Length
+- Content-Range
+- MIME types
+- Multiple simultaneous requests where required
+- Clean shutdown
+- URL generation based on the local network address
+
+This server works independently of any player UI.
+
+6.9 MfCastSubtitles.pas
+-----------------------
+
+Subtitle subsystem.
+
+This unit handles:
+
+- External subtitle files
+- Embedded text subtitle tracks
+- Subtitle metadata
+- WebVTT generation
+- Temporary/generated subtitle resources
+- Subtitle URLs
+- Subtitle selection
+- Disable subtitles
+- Optional style information where supported
+
+6.10 MfCastTranscode.pas
+------------------------
+
+Optional media-conversion layer.
+
+This unit handles:
+
+- Remuxing when codecs are usable but the container is not
+- Transcoding unsupported codecs
+- Burn-in of unsupported bitmap/complex subtitles where necessary
+- Track selection before output
+- Lifecycle and cleanup of conversion processes/objects
+
+Ordinary Chromecast control does not require transcoding.
+
+6.11 MfCastWindowsSupport.pas
+------------------------------
+
+Optional Windows UI integration layer.
+
+This unit handles:
+
+- Define the `WM_MFCAST_*` messages used by window-based clients
+- Run blocking Cast/load and runtime subtitle-switch commands on worker threads
+- Post command completion back to a target window
+- Carry allocated log text safely through the Windows message queue
+
+This unit is not required by the core API. Console applications, services,
+FireMonkey applications, and clients with their own task framework can marshal
+callbacks and commands differently. Platform-neutral choice and track records
+remain in `MfCastTypes.pas`.
+
+
+7. Which Way Dependencies Point
+===============================
+
+Dependencies flow in this direction:
+
+                 +--------------------+
+                 |       MfCast       |
+                 |   Public Facade    |
+                 +---------+----------+
+                           |
+             +-------------+-------------+
+             |             |             |
+             v             v             v
+        Controller       Media       Subtitles
+             |             |
+             v             v
+         Protocol      HTTP Server
+             |
+             v
+        CastChannel
+             |
+             v
+        TCP / TLS
+
+Applications may call MfCast. MfCast must never call or reference an application
+form.
+
+
+8. Public API
+=============
+
+The public API is intentionally small.
+
+Typical creation:
+
+    FCast := TMfCast.Create;
+
+    FCast.OnDeviceFound := CastDeviceFound;
+    FCast.OnStateChanged := CastStateChanged;
+    FCast.OnMediaStatus := CastMediaStatus;
+    FCast.OnError := CastError;
+
+Discovery:
+
+    FCast.Discover;
+
+Connection:
+
+    FCast.Connect(Device);
+
+Playback:
+
+    FCast.Load(Media);
+    FCast.Play;
+    FCast.Pause;
+    FCast.Stop;
+
+Seeking:
+
+    FCast.Seek(360.0);
+
+Volume:
+
+    FCast.Volume := 0.75;
+    FCast.Muted := False;
+
+Subtitles:
+
+    FCast.SelectSubtitle(SubtitleTrackId);
+
+or:
+
+    FCast.DisableSubtitles;
+
+API users do not need to know about:
+
+- Chromecast namespaces
+- Raw JSON messages
+- TLS implementation details
+- Receiver transport IDs
+- Internal request IDs
+- HTTP server sockets
+- Temporary subtitle filenames
+- WebVTT generation
+- Transcoder setup
+
+
+9. Describing Media
+===================
+
+Media is passed to the API as a description, not through application-specific
+player objects.
+
+For example:
+
+    TMfCastMedia = record
+      Source: string;
+      ContentType: string;
+      Title: string;
+      Duration: Double;
+      StreamType: TMfCastStreamType;
+      Tracks: TArray<TMfCastTrack>;
+    end;
+
+Example:
+
+    Media.Source :=
+      'C:\Movies\MyMovie.mkv';
+
+    Media.Title :=
+      'My Movie';
+
+    FCast.Load(Media);
+
+The Chromecast subsystem then decides what to do.
+
+Possible path:
+
+    Local file?
+        |
+        +-- Directly compatible?
+        |      |
+        |      +-- Serve directly
+        |
+        +-- Container incompatible?
+               |
+               +-- Remux when possible
+               |
+               +-- Transcode when required
+
+These decisions belong in the Chromecast media layer, not in an application form.
+
+
+10. MKV Files
+=============
+
+MKV is an important real-world Chromecast input format.
+
+Application code does not need format checks such as:
+
+    if IsMKV then
+      ...
+
+The media layer inspects the source and chooses the appropriate route.
+
+Possible strategies include:
+
+- Serve compatible elementary/container media directly
+- Remux MKV streams to a Cast-compatible container without re-encoding
+- Select a requested audio stream during remux
+- Extract text subtitles and serve them separately
+- Transcode only when the codecs themselves are unsupported
+- Burn subtitles into video only when normal text-track delivery is not possible
+
+This isolates MKV complexity from the user interface.
+
+
+11. Subtitles
+=============
+
+Subtitle handling is one of the strongest reasons for moving Chromecast support into a dedicated subsystem.
+
+The caller sees a simple list of subtitle tracks.
+
+A track can look like this:
+
+    TMfCastTrack = record
+      Id: Int64;
+      TrackType: TMfCastTrackType;
+      TrackSource: TMfCastTrackSource;
+      StreamIndex: Cardinal;
+      Name: string;
+      Language: string;
+      Source: string;
+      ContentType: string;
+    end;
+
+A stable ID encodes track kind, source, and source-stream index. Applications
+treat it as opaque; the Cast subsystem decodes it when an exact source
+stream must be selected. A caller can then do:
+
+    FCast.SelectSubtitle(Track.Id);
+
+The Chromecast subsystem handles the source and conversion.
+
+11.1 External Text Subtitles
+----------------------------
+
+Example:
+
+    movie.mp4
+    movie.en.srt
+
+Pipeline:
+
+    SRT
+     |
+     v
+    MfCastSubtitles
+     |
+     v
+    WebVTT
+     |
+     v
+    MfCastHttpServer
+     |
+     v
+    http://local-address:port/subtitle/1.vtt
+     |
+     v
+    Chromecast
+
+11.2 Embedded MKV Text Subtitles
+--------------------------------
+
+Example:
+
+    MKV
+     |
+     +-- Subtitle 1: English
+     +-- Subtitle 2: Dutch
+     +-- Subtitle 3: German
+               |
+               v
+       Subtitle extraction
+               |
+               v
+             WebVTT
+               |
+               v
+         HTTP subtitle URL
+               |
+               v
+           Chromecast
+
+An application only needs to populate its subtitle control from the track list
+and call `SelectSubtitle`.
+
+11.3 Complex Subtitle Types
+---------------------------
+
+The subsystem distinguishes text subtitles from subtitles that require rendering.
+
+Text path:
+
+    SRT
+    WebVTT
+    text-based ASS/SSA where conversion is practical
+        |
+        v
+      WebVTT
+
+Complex/bitmap path:
+
+    PGS
+    VobSub
+    complex ASS rendering
+        |
+        v
+      Burn-in
+        |
+        v
+     Transcode
+
+The application does not need separate logic for these cases. Bitmap rendering is
+explicitly deferred until real MfPack user demand justifies the additional
+decoder and renderer surface.
+
+
+12. Audio Tracks
+================
+
+Multiple audio tracks require careful abstraction.
+
+The public API can expose:
+
+    FCast.SelectAudioTrack(TrackId);
+
+Internally, the implementation may use different strategies depending on receiver capability and media format.
+
+Possible approaches:
+
+- Receiver-native track selection where supported
+- Remux with a different selected audio stream
+- Recreate/reload the media session when necessary
+- Transcode the requested audio track when required
+
+The application-facing API stays the same when the internal route changes.
+
+
+13. Events and State
+====================
+
+The API reports state changes through Delphi events and callbacks.
+
+Possible events:
+
+    OnDeviceAdded
+    OnDeviceRemoved
+
+    OnConnecting
+    OnConnected
+    OnDisconnected
+
+    OnReceiverStarted
+
+    OnMediaLoading
+    OnMediaPlaying
+    OnMediaPaused
+    OnMediaBuffering
+    OnMediaStopped
+
+    OnPositionChanged
+
+    OnSubtitleChanged
+    OnAudioTrackChanged
+
+    OnVolumeChanged
+
+    OnError
+
+Alternatively, some related events can be consolidated into state-change events if that produces a cleaner API.
+
+The important requirement is that state information is delivered to the application rather than forcing the application to poll the network synchronously.
+
+
+14. Threads
+===========
+
+Chromecast network operations never run on the VCL main thread.
+
+Background work includes:
+
+- mDNS discovery
+- DNS/address resolution
+- TCP/TLS connect
+- Cast receive loop
+- Heartbeat processing
+- HTTP serving
+- File reads
+- Subtitle conversion
+- Media inspection
+- Remuxing
+- Transcoding
+
+Events that modify VCL controls must be marshalled safely back to the main thread.
+
+`MfCastWindowsSupport.pas` provides an optional `PostMessage`-based bridge and
+reusable workers for window-based clients. It keeps message IDs and thread
+classes out of forms while leaving non-windowed consumers free to use their own
+dispatch mechanism.
+
+Callbacks, events, and worker threads are used instead of timer-driven networking.
+
+
+15. Where Media Foundation Fits
+===============================
+
+The core Chromecast API does not need Media Foundation merely to control a
+Chromecast.
+
+For example, this works without creating a playback engine:
+
+    Cast.Load(
+      'https://example.com/movie.mp4',
+      'video/mp4'
+    );
+
+Media Foundation can be used by optional layers for:
+
+- Reading media metadata
+- Enumerating streams
+- Extracting subtitle data
+- Remuxing
+- Transcoding
+- Video conversion
+- Audio conversion
+
+This keeps MfCast useful outside a Media Foundation playback application.
+
+
+16. The Receiver
+================
+
+The implementation uses the standard receiver approach supported by the current
+Cast subsystem.
+
+The unit boundaries leave room for a future custom MfPack Cast receiver.
+
+A future custom receiver could provide additional control over:
+
+- Audio track selection
+- Video track selection
+- Subtitle presentation
+- Application-specific metadata
+- Custom player behavior
+- Additional status information
+
+Such a receiver can be added later without rewriting applications.
+
+
+17. Errors
+==========
+
+Chromecast errors use a structured record.
+
+Suggested error information:
+
+- Error code
+- Error category
+- Human-readable message
+- Protocol request ID if applicable
+- Network error where applicable
+- HTTP/media error where applicable
+- Conversion/transcoding error where applicable
+
+Possible categories:
+
+    ceDiscovery
+    ceConnection
+    ceTLS
+    ceProtocol
+    ceReceiver
+    ceMedia
+    ceHttp
+    ceSubtitle
+    ceRemux
+    ceTranscode
+
+This is preferable to showing message boxes from inside the library.
+
+The library reports errors; the application decides how to present them.
+
+
+18. Logging
+===========
+
+A reusable diagnostic callback carries log messages.
+
+Example:
+
+    OnLog(Sender, Level, Text);
+
+Suggested levels:
+
+    mlDebug
+    mlInfo
+    mlWarning
+    mlError
+
+An application may display these in a debug window, log them to a file, or ignore
+them.
+
+Low-level protocol logging is optional.
+
+
+19. Cleanup
+===========
+
+The API provides deterministic cleanup.
+
+Disconnecting or destroying `TMfCast` cleanly stops:
+
+- Discovery
+- Cast connection
+- Heartbeat worker
+- Receive worker
+- HTTP server
+- Subtitle resources
+- Temporary media resources
+- Remux/transcode workers
+
+Temporary files and generated WebVTT files are removed when no longer needed,
+unless a debug option explicitly preserves them.
+
+
+20. The Sample
+==============
+
+`MfSimpleCastPlayer` is the focused reference sample. It demonstrates discovery,
+direct and transcoded playback, transport controls, seek, volume/mute, subtitle
+enumeration and runtime subtitle switching without becoming an application
+framework.
+
+The form concentrates on UI behavior. Its Windows-message constants and command
+workers come from `MfCastWindowsSupport.pas`; shared subtitle-choice types come
+from `MfCastTypes.pas`.
+
+A sample is a learning aid, not an out-of-the-box product or a catalogue of one
+sample per API call. It exposes enough structure for a developer to follow
+the data flow, then leave room for application-specific choices and creativity.
+Audio-track enumeration and selection belong to the reusable API;
+another focused sample may be added only when it teaches a substantially
+different design, not merely to duplicate controls.
+
+
+21. Keeping Application Code Clean
+==================================
+
+Application code calls the public facade directly. For example:
+
+    Cast.Play;
+    Cast.Pause;
+    Cast.Seek(PositionSeconds);
+    Cast.SelectSubtitle(TrackId);
+
+An application may manage:
+
+- Menu items
+- Buttons
+- Status labels
+- Its own local-playback state
+- User choices
+
+It does not manage:
+
+- Chromecast sockets
+- JSON protocol
+- TLS
+- HTTP range requests
+- WebVTT generation
+- MKV extraction
+- Cast session IDs
+- Receiver message namespaces
+- Transcoder internals
+
+
+22. Building It in Steps
+========================
+
+Build and evolve the subsystem in small, verifiable steps.
+
+Phase 1
+-------
+
+Define the public TMfCast API and shared types.
+
+Keep public behavior stable while the internal layers are separated.
+
+Phase 2
+-------
+
+Move receiver/session logic behind TMfCast and MfCastController.
+
+Route receiver/session behavior through the new interface.
+
+Phase 3
+-------
+
+Separate low-level protocol/channel handling.
+
+Move:
+
+- Message framing
+- TLS transport
+- Namespace handling
+- Request IDs
+- Heartbeats
+- Incoming-message parsing
+
+into dedicated protocol and channel units.
+
+Phase 4
+-------
+
+Move local HTTP/media serving into MfCastHttpServer.
+
+Verify:
+
+- Local video
+- Seeking/range requests
+- Restart
+- Stop
+- Multiple Cast requests
+
+Phase 5
+-------
+
+Move subtitle handling into MfCastSubtitles.
+
+Verify:
+
+- External subtitles
+- Embedded subtitles
+- Language switching
+- Subtitle disable
+- Timing
+- WebVTT generation
+
+Phase 6
+-------
+
+Move media decisions and transcoding into MfCastMedia and MfCastTranscode.
+
+Verify:
+
+- Direct-play media
+- Audio-track choice
+- Unsupported formats
+- Subtitle burn-in fallback
+
+Phase 7
+-------
+
+Keep application integration limited to high-level API calls and UI event handlers.
+
+Phase 8
+-------
+
+Maintain the focused `MfSimpleCastPlayer` educational sample as the public API evolves.
+
+Phase 9
+-------
+
+Document the public API and its threading/lifetime rules.
+
+
+23. Things to Check
+===================
+
+Exercise each implementation step in the focused sample before
+continuing. This is a practical manual validation list, not a requirement for an
+automated test suite or additional sample projects.
+
+Behavior to verify includes:
+
+- Device discovery remains reliable
+- Connect/disconnect remains reliable
+- Receiver launches correctly
+- Media loads
+- Play/pause works
+- Seeking works
+- Position updates remain synchronized
+- Volume/mute works
+- Local files are reachable by Chromecast
+- HTTP range requests work
+- Embedded subtitle tracks are listed correctly
+- External subtitles work
+- Subtitle language switching works
+- Subtitle timing remains correct
+- Audio selection remains correct
+- Application remains responsive
+- Shutdown does not leave threads or sockets running
+- Repeated connect/disconnect cycles do not leak resources
+
+
+24. API Rules
+=============
+
+A good API makes common operations simple and uncommon operations possible.
+
+Most users need only:
+
+    Discover
+    Connect
+    Load
+    Play
+    Pause
+    Seek
+    Stop
+    Volume
+    SelectSubtitle
+    Disconnect
+
+Advanced users may optionally access:
+
+- Media inspection
+- Track lists
+- Receiver capabilities
+- HTTP server configuration
+- Transcoding configuration
+- Logging
+- Low-level diagnostics
+
+Normal use does not require low-level protocol objects.
+
+
+25. Compatibility
+=================
+
+Treat the public API as a stable MfPack interface.
+
+Internal implementations can then evolve without breaking applications.
+
+For example, this application code:
+
+    FCast.SelectSubtitle(2);
+
+does not change if the implementation later changes from:
+
+- WebVTT file generation
+
+to:
+
+- streamed WebVTT generation
+
+or from:
+
+- default receiver behavior
+
+to:
+
+- an MfPack custom receiver.
+
+Stable abstractions are especially important because Chromecast behavior involves several independent technologies underneath one apparently simple operation.
+
+
+26. Public Facade Shape
+=======================
+
+The public facade looks roughly like this:
+
+    TMfCast = class
+    public
+      constructor Create;
+      destructor Destroy; override;
+
+      procedure Discover;
+      procedure StopDiscovery;
+
+      procedure Connect(const ADevice: TMfCastDevice);
+      procedure Disconnect;
+
+      procedure Load(const AMedia: TMfCastMedia);
+
+      procedure Play;
+      procedure Pause;
+      procedure Stop;
+      procedure Seek(const APositionSeconds: Double);
+
+      procedure SelectSubtitle(const ATrackId: Int64);
+      procedure DisableSubtitles;
+
+      procedure SelectAudioTrack(const ATrackId: Int64);
+
+      property Volume: Double read ... write ...;
+      property Muted: Boolean read ... write ...;
+
+      property State: TMfCastState read ...;
+      property MediaState: TMfCastMediaState read ...;
+
+      property OnDeviceAdded: ...;
+      property OnDeviceRemoved: ...;
+      property OnStateChanged: ...;
+      property OnMediaStatus: ...;
+      property OnError: ...;
+      property OnLog: ...;
+    end;
+
+The exact declarations may evolve with the implementation, but this illustrates
+the intended level of abstraction.
+
+
+27. Why This Layout Works
+=========================
+
+This layout gives MfPack several benefits.
+
+For users:
+
+- Easier to understand
+- Easier to reuse
+- Smaller code
+- Clearer responsibilities
+- Less application-specific code
+- Easier debugging
+
+For application developers:
+
+- Smaller form or controller units
+- Cleaner playback logic
+- Less coupling
+- Fewer opportunities for Cast changes to affect unrelated playback behavior
+- Easier maintenance of subtitle functionality
+
+For future development:
+
+- Other players can reuse Cast support
+- New receiver functionality can be added centrally
+- New subtitle formats can be added centrally
+- Media compatibility logic can improve without changing applications
+- Chromecast bug fixes benefit all MfPack samples immediately
+
+
+28. Things to Watch
+===================
+
+28.1 Native Cast Sender
+-----------------------
+
+There is no official native Delphi/Windows Google Cast Sender SDK.
+
+MfPack implements the Cast protocol directly; it does not wrap an official
+Delphi DLL.
+
+Keep this clear in the documentation.
+
+28.2 The Protocol Can Change
+----------------------------
+
+Google may change protocol behavior or receiver requirements.
+
+Keep protocol code isolated from the public API.
+
+28.3 Files and Codecs Differ
+----------------------------
+
+Whether a media file can play directly depends on:
+
+- Container
+- Video codec
+- Audio codec
+- Profiles/levels
+- Subtitle format
+- Receiver capabilities
+
+The media layer must avoid assuming that all files with the same extension are equivalent.
+
+28.4 Networks Differ
+--------------------
+
+Local casting depends on network reachability.
+
+Possible problems include:
+
+- Windows Firewall
+- Multiple network adapters
+- VPNs
+- Guest Wi-Fi isolation
+- IPv4/IPv6 selection
+- Chromecast and PC on different subnets
+
+Handle network/address selection centrally and provide useful diagnostics.
+
+28.5 Transcoding Uses Resources
+-------------------------------
+
+Transcoding can consume substantial CPU/GPU resources.
+
+Prefer:
+
+    Direct play
+        before
+    Remux
+        before
+    Transcode
+
+whenever technically possible.
+
+
+29. One Useful Rule
+===================
+
+During development, ask one question about every piece of code:
+
+    "Would this code make sense in more than one Delphi application?"
+
+If yes, it probably belongs in the Chromecast subsystem.
+
+If no, it probably belongs in the application or in an adapter between the
+application and MfCast.
+
+
+30. Where This Leads
+====================
+
+The Chromecast implementation is a reusable MfPack subsystem with a compact
+application-facing facade.
+
+The result looks like this:
+
+    Delphi application
+        |
+        +--> MfCast public API
+                |
+                +--> Discovery
+                +--> Connection / Cast protocol
+                +--> Receiver control
+                +--> Media preparation
+                +--> Local HTTP transport
+                +--> Subtitle handling
+                +--> Optional remux/transcode
+
+This structure improves the educational value of MfPack and provides an
+independent Chromecast API that can be reused by MfPack samples and third-party
+Delphi applications.
+
+The goal is not merely to make Chromecast work.
+
+The goal is to make Chromecast support understandable, reusable and maintainable.
+
+
+End of Design Notes
+===================
