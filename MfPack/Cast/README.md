@@ -36,7 +36,9 @@ uses receiver `SET_VOLUME` when device volume is adjustable, or media-session
 `VOLUME` when the receiver reports `controlType: fixed`. These routes control
 only MfCast playback and cannot override a Chromecast/Google TV system mute set
 by its physical remote. Buffered receiver audio may make a PCM change audible a
-few seconds after the command.
+few seconds after the command. Note: Chromecast/ Google Cast V2 does not support 
+volume or mute. So, this way we can alter volume (stream volume and mute) that works
+for Chromecast/ Google Cast V2.
 
 `GetMediaTracks` returns stable opaque `Int64` track IDs together with the source
 stream index, kind, source, language, name, and selection state. For an active
@@ -55,10 +57,10 @@ and receiver/media command policy.
 
 Known architectural follow-ups:
 
-- remove Media Foundation declarations from the direct-control type/interface
+- Remove Media Foundation declarations from the direct-control type/interface
   layer (the current direct path does not initialize a playback engine, but the
   units still compile against MfPack Media Foundation declarations);
-- add separate `Connect` and `Load` operations after preserving existing
+- Add separate `Connect` and `Load` operations after preserving existing
   receiver behavior;
-- separate remuxing from full transcoding so compatible MKV codecs can avoid
+- Separate remuxing from full transcoding so compatible MKV codecs can avoid
   video re-encoding;
