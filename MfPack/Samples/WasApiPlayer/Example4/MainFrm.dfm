@@ -11,8 +11,8 @@ object frmMain: TfrmMain
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'WASAPI Player Sample 4 - EQ MFT and DSP'
-  ClientHeight = 306
-  ClientWidth = 608
+  ClientHeight = 312
+  ClientWidth = 638
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -40,7 +40,7 @@ object frmMain: TfrmMain
     Left = 7
     Top = 266
     Width = 65
-    Height = 18
+    Height = 25
     Caption = 'Load...'
     TabOrder = 0
     OnClick = btnLoadClick
@@ -49,7 +49,7 @@ object frmMain: TfrmMain
     Left = 77
     Top = 266
     Width = 65
-    Height = 18
+    Height = 25
     Hint = 'CTRL + ALT + RIGHT'
     Caption = 'Play'
     ParentShowHint = False
@@ -61,7 +61,7 @@ object frmMain: TfrmMain
     Left = 148
     Top = 266
     Width = 66
-    Height = 18
+    Height = 25
     Hint = 'CTRL + ALT + SPACE'
     Caption = 'Stop'
     ParentShowHint = False
@@ -71,44 +71,46 @@ object frmMain: TfrmMain
   end
   object stxtStatus: TStaticText
     Left = 0
-    Top = 287
-    Width = 608
+    Top = 293
+    Width = 638
     Height = 19
     Align = alBottom
     BorderStyle = sbsSingle
     Caption = 'Open an audio file'
     TabOrder = 3
+    ExplicitTop = 287
+    ExplicitWidth = 608
   end
   object Panel2: TPanel
     Left = 0
     Top = 228
-    Width = 608
-    Height = 29
+    Width = 638
+    Height = 35
     Align = alTop
     Color = clMoneyGreen
     ParentBackground = False
     TabOrder = 4
-    object lblBarPositionInSTime: TLabel
-      Left = 10
-      Top = 14
+    object lblBarPositionInsTime: TLabel
+      Left = 11
+      Top = 17
       Width = 75
       Height = 15
       Alignment = taRightJustify
       Caption = 'Time: 00:00:00'
     end
     object lblBarPosition: TLabel
-      Left = 103
-      Top = 14
+      Left = 109
+      Top = 17
       Width = 124
-      Height = 13
+      Height = 16
       AutoSize = False
       Caption = 'Position: 0'
     end
     object pbProgress: TProgressBar
       Left = 1
       Top = 1
-      Width = 606
-      Height = 11
+      Width = 636
+      Height = 16
       Align = alTop
       TabOrder = 0
       OnMouseMove = pbProgressMouseMove
@@ -118,7 +120,7 @@ object frmMain: TfrmMain
   object pnlControls: TPanel
     Left = 0
     Top = 0
-    Width = 608
+    Width = 638
     Height = 228
     Align = alTop
     DoubleBuffered = False
@@ -126,43 +128,45 @@ object frmMain: TfrmMain
     ParentDoubleBuffered = False
     ShowCaption = False
     TabOrder = 5
+    ExplicitLeft = 1
+    ExplicitTop = 2
     object Bevel1: TBevel
-      Left = 118
+      Left = 132
       Top = 21
-      Width = 186
+      Width = 200
       Height = 170
     end
     object lblLow: TLabel
-      Left = 138
-      Top = 175
+      Left = 150
+      Top = 172
       Width = 22
       Height = 15
       Caption = 'Low'
     end
     object lblMid: TLabel
-      Left = 170
-      Top = 175
+      Left = 182
+      Top = 172
       Width = 21
       Height = 15
       Caption = 'Mid'
     end
     object lblHigh: TLabel
-      Left = 202
-      Top = 175
+      Left = 214
+      Top = 172
       Width = 26
       Height = 15
       Caption = 'High'
     end
     object lblRamp: TLabel
-      Left = 232
+      Left = 244
       Top = 91
       Width = 65
       Height = 15
       Caption = 'Ramp mode'
     end
     object lblRampMs: TLabel
-      Left = 232
-      Top = 128
+      Left = 243
+      Top = 131
       Width = 85
       Height = 15
       Caption = 'Ramp time (ms)'
@@ -170,13 +174,13 @@ object frmMain: TfrmMain
     object Bevel3: TBevel
       Left = 7
       Top = 21
-      Width = 50
+      Width = 60
       Height = 170
     end
     object pmLeft: TMfPeakMeter
-      Left = 41
+      Left = 47
       Top = 44
-      Width = 14
+      Width = 11
       Height = 123
       BackGroundColor = clAppWorkSpace
       BarColor = clAqua
@@ -185,13 +189,13 @@ object frmMain: TfrmMain
       Precision = 10
     end
     object Bevel2: TBevel
-      Left = 59
+      Left = 69
       Top = 21
-      Width = 51
+      Width = 60
       Height = 170
     end
     object pmRight: TMfPeakMeter
-      Left = 68
+      Left = 78
       Top = 44
       Width = 11
       Height = 123
@@ -203,7 +207,7 @@ object frmMain: TfrmMain
     end
     object Label1: TLabel
       Left = 26
-      Top = 176
+      Top = 173
       Width = 19
       Height = 13
       Alignment = taCenter
@@ -216,8 +220,8 @@ object frmMain: TfrmMain
       ParentFont = False
     end
     object Label2: TLabel
-      Left = 71
-      Top = 176
+      Left = 81
+      Top = 173
       Width = 25
       Height = 13
       Alignment = taCenter
@@ -233,7 +237,7 @@ object frmMain: TfrmMain
       Left = 9
       Top = 26
       Width = 46
-      Height = 10
+      Height = 16
       Alignment = taCenter
       AutoSize = False
       Caption = '0%'
@@ -245,10 +249,10 @@ object frmMain: TfrmMain
       ParentFont = False
     end
     object lblRightVolume: TLabel
-      Left = 61
+      Left = 73
       Top = 26
       Width = 45
-      Height = 10
+      Height = 16
       Alignment = taCenter
       AutoSize = False
       Caption = '0%'
@@ -260,30 +264,32 @@ object frmMain: TfrmMain
       ParentFont = False
     end
     object lblDuration: TLabel
-      Left = 7
-      Top = 199
+      Left = 5
+      Top = 194
       Width = 94
-      Height = 15
+      Height = 16
       Caption = 'Duration: 00:00:00'
     end
     object lblPlayed: TLabel
       Left = 16
-      Top = 211
+      Top = 210
       Width = 83
-      Height = 15
+      Height = 16
       Caption = 'Played: 00:00:00'
     end
     object chkEQ: TCheckBox
-      Left = 133
-      Top = 4
-      Width = 68
+      Left = 144
+      Top = 3
+      Width = 79
       Height = 12
       Caption = 'Enable EQ'
+      Checked = True
+      State = cbChecked
       TabOrder = 0
       OnClick = chkEQClick
     end
     object tbLow: TTrackBar
-      Left = 130
+      Left = 140
       Top = 101
       Width = 22
       Height = 68
@@ -294,12 +300,12 @@ object frmMain: TfrmMain
       Frequency = 6
       ShowHint = False
       TabOrder = 1
-      ThumbLength = 68
+      ThumbLength = 30
       TickMarks = tmBoth
       OnChange = tbLowChange
     end
     object tbMid: TTrackBar
-      Left = 163
+      Left = 175
       Top = 101
       Width = 22
       Height = 68
@@ -310,12 +316,12 @@ object frmMain: TfrmMain
       Frequency = 6
       ShowHint = False
       TabOrder = 2
-      ThumbLength = 68
+      ThumbLength = 30
       TickMarks = tmBoth
       OnChange = tbMidChange
     end
     object tbHigh: TTrackBar
-      Left = 194
+      Left = 206
       Top = 101
       Width = 23
       Height = 68
@@ -326,12 +332,12 @@ object frmMain: TfrmMain
       Frequency = 6
       ShowHint = False
       TabOrder = 3
-      ThumbLength = 68
+      ThumbLength = 30
       TickMarks = tmBoth
       OnChange = tbHighChange
     end
     object cbxRamp: TComboBox
-      Left = 232
+      Left = 244
       Top = 106
       Width = 61
       Height = 23
@@ -340,8 +346,8 @@ object frmMain: TfrmMain
       OnChange = cbxRampChange
     end
     object edtRampMs: TEdit
-      Left = 232
-      Top = 142
+      Left = 244
+      Top = 148
       Width = 40
       Height = 23
       TabOrder = 5
@@ -349,9 +355,9 @@ object frmMain: TfrmMain
       OnChange = edtRampMsChange
     end
     object cbLockVolumeSliders: TCheckBox
-      Left = 16
-      Top = 4
-      Width = 109
+      Left = 7
+      Top = 3
+      Width = 125
       Height = 12
       Caption = 'Lock Volume Sliders'
       Checked = True
@@ -360,7 +366,7 @@ object frmMain: TfrmMain
     end
     object trbVolumeL: TTrackBar
       Left = 11
-      Top = 41
+      Top = 44
       Width = 28
       Height = 131
       Hint = 
@@ -376,14 +382,14 @@ object frmMain: TfrmMain
       Position = -30
       ShowHint = True
       TabOrder = 7
-      ThumbLength = 68
+      ThumbLength = 30
       TickMarks = tmBoth
       OnChange = trbVolumeLChange
     end
     object trbVolumeR: TTrackBar
-      Left = 81
-      Top = 42
-      Width = 25
+      Left = 91
+      Top = 44
+      Width = 24
       Height = 131
       Hint = 
         'Press and release SHIFT + ESC to set zero position.'#13#10'Press CTRL ' +
@@ -398,12 +404,12 @@ object frmMain: TfrmMain
       Position = -30
       ShowHint = True
       TabOrder = 8
-      ThumbLength = 68
+      ThumbLength = 30
       TickMarks = tmBoth
       OnChange = trbVolumeRChange
     end
     object pnlEq: TPanel
-      Left = 306
+      Left = 334
       Top = 21
       Width = 298
       Height = 170
@@ -413,9 +419,9 @@ object frmMain: TfrmMain
       ParentDoubleBuffered = False
       TabOrder = 9
       object avGraph: TMfAudioVisualizer
-        Left = 7
-        Top = 7
-        Width = 286
+        Left = 4
+        Top = 5
+        Width = 290
         Height = 160
         PeakThreshold = 0.980000019073486300
         PeakCapFrac = 0.100000001490116100
@@ -423,7 +429,7 @@ object frmMain: TfrmMain
       end
     end
     object stxtHighIndex: TStaticText
-      Left = 196
+      Left = 208
       Top = 91
       Width = 19
       Height = 13
@@ -435,7 +441,7 @@ object frmMain: TfrmMain
       TabOrder = 10
     end
     object stxtMidIndex: TStaticText
-      Left = 162
+      Left = 174
       Top = 91
       Width = 21
       Height = 13
@@ -447,7 +453,7 @@ object frmMain: TfrmMain
       TabOrder = 11
     end
     object stxtLowIndex: TStaticText
-      Left = 133
+      Left = 145
       Top = 91
       Width = 20
       Height = 13
@@ -459,10 +465,10 @@ object frmMain: TfrmMain
       TabOrder = 12
     end
     object stxtProcessed: TStaticText
-      Left = 103
-      Top = 211
+      Left = 112
+      Top = 209
       Width = 127
-      Height = 12
+      Height = 16
       AutoSize = False
       Caption = 'Samples: 0'
       DoubleBuffered = True
@@ -470,17 +476,17 @@ object frmMain: TfrmMain
       TabOrder = 13
     end
     object Panel1: TPanel
-      Left = 128
+      Left = 139
       Top = 26
-      Width = 167
+      Width = 186
       Height = 63
       Color = 6656
       ParentBackground = False
       TabOrder = 14
       object imgSpectrumAnalizer: TImage
-        Left = 7
-        Top = 4
-        Width = 154
+        Left = 4
+        Top = 5
+        Width = 178
         Height = 54
         ParentCustomHint = False
         ParentShowHint = False
@@ -488,11 +494,13 @@ object frmMain: TfrmMain
       end
     end
     object chkGraph: TCheckBox
-      Left = 310
-      Top = 4
+      Left = 338
+      Top = 3
       Width = 88
       Height = 12
       Caption = 'Enable Graph'
+      Checked = True
+      State = cbChecked
       TabOrder = 15
       OnClick = chkGraphClick
     end

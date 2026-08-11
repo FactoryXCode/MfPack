@@ -119,7 +119,7 @@ type
     lblFile: TLabel;
     stxtStatus: TStaticText;
     Panel2: TPanel;
-    lblBarPositionInSTime: TLabel;
+    lblBarPositionInsTime: TLabel;
     lblBarPosition: TLabel;
     pbProgress: TProgressBar;
     pnlControls: TPanel;
@@ -1251,7 +1251,7 @@ begin
 
       hnsPos := Int64(secPos) * MS100_PER_SEC;
 
-      lblBarPositionInSTime.Caption := Format('Position: %s',
+      lblBarPositionInSTime.Caption := Format('Time: %s',
                                               [HnsTimeToStr(hnsPos,
                                                             False)]);
     end;

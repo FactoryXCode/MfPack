@@ -167,6 +167,7 @@ type
     procedure btnDefaultsClick(Sender: TObject);
     procedure btnOKClick(Sender: TObject);
     procedure edPeakMeterFreqExit(Sender: TObject);
+    procedure btnCancelClick(Sender: TObject);
 
   private
 
@@ -498,6 +499,13 @@ begin
 end;
 
 
+procedure TfrmEqSettings.btnCancelClick(Sender: TObject);
+begin
+
+  Hide();
+end;
+
+
 procedure TfrmEqSettings.btnDefaultsClick(Sender: TObject);
 begin
 
@@ -516,16 +524,16 @@ begin
                      FDynSettings);
 
   if (FIniFileName <> '') and (FIniSection <> '') then
-  begin
+    begin
 
-    SaveToIni(FIniFileName,
-              FIniSection,
-              FTuning);
+      SaveToIni(FIniFileName,
+                FIniSection,
+                FTuning);
 
-    SaveDynamicsToIni(FIniFileName,
-                      FIniSection,
-                      FDynSettings);
-  end;
+      SaveDynamicsToIni(FIniFileName,
+                        FIniSection,
+                        FDynSettings);
+    end;
 end;
 
 

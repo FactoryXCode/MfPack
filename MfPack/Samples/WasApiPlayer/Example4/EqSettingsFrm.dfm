@@ -34,10 +34,6 @@ object frmEqSettings: TfrmEqSettings
       Margins.Right = 2
       Margins.Bottom = 2
       Caption = 'EQ'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object grpLow: TGroupBox
         Left = 3
         Top = 3
@@ -73,7 +69,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 88
           Top = 15
           Width = 50
-          Height = 31
+          Height = 20
           TabOrder = 0
           Text = '100'
         end
@@ -81,7 +77,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 138
           Top = 15
           Width = 14
-          Height = 18
+          Height = 20
           Associate = edtLowFreqHz
           Min = 20
           Max = 400
@@ -92,7 +88,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 88
           Top = 36
           Width = 50
-          Height = 31
+          Height = 20
           TabOrder = 2
           Text = '100'
         end
@@ -100,7 +96,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 138
           Top = 36
           Width = 14
-          Height = 17
+          Height = 20
           Associate = edtLowSlope
           Min = 10
           Max = 400
@@ -141,15 +137,15 @@ object frmEqSettings: TfrmEqSettings
           Left = 88
           Top = 15
           Width = 50
-          Height = 31
+          Height = 20
           TabOrder = 0
-          Text = '10000'
+          Text = '10.000'
         end
         object udHighFreqHz: TUpDown
           Left = 138
           Top = 15
           Width = 14
-          Height = 18
+          Height = 20
           Associate = edtHighFreqHz
           Min = 2000
           Max = 20000
@@ -160,7 +156,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 88
           Top = 36
           Width = 50
-          Height = 31
+          Height = 20
           TabOrder = 2
           Text = '100'
         end
@@ -168,7 +164,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 138
           Top = 36
           Width = 14
-          Height = 17
+          Height = 20
           Associate = edtHighSlope
           Min = 10
           Max = 400
@@ -211,15 +207,15 @@ object frmEqSettings: TfrmEqSettings
           Left = 76
           Top = 17
           Width = 51
-          Height = 31
+          Height = 20
           TabOrder = 0
-          Text = '1000'
+          Text = '1.000'
         end
         object udMidFreqHz: TUpDown
           Left = 127
           Top = 17
           Width = 14
-          Height = 17
+          Height = 20
           Associate = edtMidFreqHz
           Min = 200
           Max = 6000
@@ -230,7 +226,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 76
           Top = 37
           Width = 51
-          Height = 31
+          Height = 20
           TabOrder = 2
           Text = '100'
         end
@@ -238,7 +234,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 127
           Top = 37
           Width = 14
-          Height = 18
+          Height = 20
           Associate = edtMidQ
           Min = 30
           Max = 600
@@ -286,7 +282,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 84
           Top = 20
           Width = 31
-          Height = 31
+          Height = 20
           Hint = 'Peakmeter frequency in milliseconds.'
           NumbersOnly = True
           ParentShowHint = False
@@ -304,10 +300,6 @@ object frmEqSettings: TfrmEqSettings
       Margins.Bottom = 2
       Caption = 'Dynamics'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object grpComp: TGroupBox
         Left = 9
         Top = 3
@@ -402,7 +394,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 97
           Top = 37
           Width = 39
-          Height = 31
+          Height = 20
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -414,7 +406,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 136
           Top = 37
           Width = 14
-          Height = 18
+          Height = 20
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -429,7 +421,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 97
           Top = 58
           Width = 39
-          Height = 31
+          Height = 20
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -441,7 +433,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 136
           Top = 58
           Width = 14
-          Height = 17
+          Height = 20
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -456,7 +448,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 97
           Top = 78
           Width = 39
-          Height = 31
+          Height = 20
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -468,7 +460,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 136
           Top = 78
           Width = 14
-          Height = 18
+          Height = 20
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -483,7 +475,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 97
           Top = 98
           Width = 39
-          Height = 31
+          Height = 20
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -495,7 +487,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 136
           Top = 98
           Width = 14
-          Height = 18
+          Height = 20
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -510,7 +502,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 97
           Top = 119
           Width = 39
-          Height = 31
+          Height = 20
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -522,7 +514,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 136
           Top = 119
           Width = 14
-          Height = 17
+          Height = 20
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -680,7 +672,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 105
           Top = 37
           Width = 40
-          Height = 31
+          Height = 20
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -692,7 +684,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 145
           Top = 37
           Width = 13
-          Height = 18
+          Height = 20
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -707,7 +699,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 105
           Top = 58
           Width = 40
-          Height = 31
+          Height = 20
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -719,7 +711,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 145
           Top = 58
           Width = 13
-          Height = 17
+          Height = 20
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -734,7 +726,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 105
           Top = 78
           Width = 40
-          Height = 31
+          Height = 20
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -746,7 +738,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 145
           Top = 78
           Width = 13
-          Height = 18
+          Height = 20
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -760,7 +752,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 105
           Top = 98
           Width = 40
-          Height = 31
+          Height = 20
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -772,7 +764,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 145
           Top = 98
           Width = 13
-          Height = 18
+          Height = 20
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -800,7 +792,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 162
           Top = 119
           Width = 25
-          Height = 31
+          Height = 20
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -812,7 +804,7 @@ object frmEqSettings: TfrmEqSettings
           Left = 187
           Top = 119
           Width = 14
-          Height = 17
+          Height = 20
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -828,23 +820,25 @@ object frmEqSettings: TfrmEqSettings
   end
   object btnOK: TButton
     Left = 190
-    Top = 194
+    Top = 193
     Width = 64
     Height = 22
     Caption = 'OK'
     Default = True
+    ModalResult = 1
     TabOrder = 2
     OnClick = btnOKClick
   end
   object btnCancel: TButton
-    Left = 262
-    Top = 194
+    Left = 263
+    Top = 193
     Width = 64
     Height = 22
     Cancel = True
     Caption = 'Cancel'
     ModalResult = 2
     TabOrder = 3
+    OnClick = btnCancelClick
   end
   object btnApply: TButton
     Left = 333

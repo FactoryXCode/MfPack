@@ -11,57 +11,46 @@ object frmMain: TfrmMain
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'WASAPI Player Sample 3 - High/Mid/Low EQ MFT'
-  ClientHeight = 567
-  ClientWidth = 593
+  ClientHeight = 340
+  ClientWidth = 418
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -18
+  Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
   KeyPreview = True
   Menu = MainMenu1
+  OldCreateOrder = True
   Position = poScreenCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyUp = FormKeyUp
-  PixelsPerInch = 144
-  TextHeight = 25
+  PixelsPerInch = 96
+  TextHeight = 15
   object lblFile: TLabel
-    Left = 54
-    Top = 669
-    Width = 119
-    Height = 25
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
+    Left = 32
+    Top = 401
+    Width = 80
+    Height = 15
     Caption = '(no file loaded)'
   end
   object btnLoad: TButton
-    Left = 12
-    Top = 491
-    Width = 122
-    Height = 34
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
+    Left = 7
+    Top = 292
+    Width = 73
+    Height = 24
     Caption = 'Load...'
     TabOrder = 0
     OnClick = btnLoadClick
   end
   object butPlayPause: TButton
-    Left = 143
-    Top = 491
-    Width = 121
-    Height = 34
+    Left = 86
+    Top = 292
+    Width = 72
+    Height = 24
     Hint = 'CTRL + ALT + RIGHT'
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
     Caption = 'Play'
     ParentShowHint = False
     ShowHint = True
@@ -69,15 +58,11 @@ object frmMain: TfrmMain
     OnClick = butPlayPauseClick
   end
   object butStop: TButton
-    Left = 273
-    Top = 491
-    Width = 122
-    Height = 34
+    Left = 164
+    Top = 292
+    Width = 73
+    Height = 24
     Hint = 'CTRL + ALT + SPACE'
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
     Caption = 'Stop'
     ParentShowHint = False
     ShowHint = True
@@ -86,169 +71,117 @@ object frmMain: TfrmMain
   end
   object stxtStatus: TStaticText
     Left = 0
-    Top = 538
-    Width = 593
-    Height = 29
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
+    Top = 321
+    Width = 418
+    Height = 19
     Align = alBottom
     BorderStyle = sbsSingle
     Caption = 'Open an audio file'
     TabOrder = 3
+    ExplicitWidth = 356
   end
   object Panel2: TPanel
     Left = 0
-    Top = 422
-    Width = 593
-    Height = 55
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
+    Top = 253
+    Width = 418
+    Height = 33
     Align = alTop
     Color = clAppWorkSpace
     ParentBackground = False
     TabOrder = 4
+    ExplicitWidth = 356
     object lblBarPositionInSTime: TLabel
-      Left = 14
-      Top = 27
-      Width = 129
-      Height = 24
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 8
+      Top = 16
+      Width = 84
+      Height = 15
       AutoSize = False
       Caption = 'Time: 00:00:00'
     end
     object lblBarPosition: TLabel
-      Left = 164
-      Top = 27
-      Width = 223
-      Height = 24
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 98
+      Top = 16
+      Width = 134
+      Height = 15
       AutoSize = False
       Caption = 'Position: 0'
     end
     object pbProgress: TProgressBar
       Left = 1
       Top = 1
-      Width = 591
-      Height = 22
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Width = 416
+      Height = 13
       Align = alTop
       TabOrder = 0
       OnMouseMove = pbProgressMouseMove
       OnMouseUp = pbProgressMouseUp
+      ExplicitLeft = 2
     end
   end
   object pnlControls: TPanel
     Left = 0
     Top = 0
-    Width = 593
-    Height = 422
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
+    Width = 418
+    Height = 253
     Align = alTop
     DoubleBuffered = False
     FullRepaint = False
     ParentDoubleBuffered = False
     ShowCaption = False
     TabOrder = 5
+    ExplicitTop = 2
     object Bevel1: TBevel
-      Left = 218
-      Top = 39
-      Width = 345
-      Height = 315
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 171
+      Top = 23
+      Width = 230
+      Height = 189
     end
     object lblLow: TLabel
-      Left = 246
-      Top = 323
-      Width = 32
-      Height = 25
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 186
+      Top = 193
+      Width = 22
+      Height = 15
       Caption = 'Low'
     end
     object lblMid: TLabel
-      Left = 305
-      Top = 323
-      Width = 31
-      Height = 25
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 221
+      Top = 193
+      Width = 21
+      Height = 15
       Caption = 'Mid'
     end
     object lblHigh: TLabel
-      Left = 362
-      Top = 323
-      Width = 38
-      Height = 25
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 255
+      Top = 193
+      Width = 26
+      Height = 15
       Caption = 'High'
     end
     object lblRamp: TLabel
-      Left = 429
-      Top = 168
-      Width = 99
-      Height = 25
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 295
+      Top = 100
+      Width = 65
+      Height = 15
       Caption = 'Ramp mode'
     end
     object lblRampMs: TLabel
-      Left = 429
-      Top = 237
-      Width = 126
-      Height = 25
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 295
+      Top = 141
+      Width = 85
+      Height = 15
       Caption = 'Ramp time (ms)'
     end
     object Bevel3: TBevel
-      Left = 12
-      Top = 38
-      Width = 93
-      Height = 315
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 7
+      Top = 23
+      Width = 56
+      Height = 189
     end
     object pmLeft: TMfPeakMeter
-      Left = 71
-      Top = 81
-      Width = 25
-      Height = 228
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 45
+      Top = 49
+      Width = 14
+      Height = 136
       BackGroundColor = clAppWorkSpace
       BarColor = clAqua
       Direction = pdVertical
@@ -257,24 +190,16 @@ object frmMain: TfrmMain
       Precision = 10
     end
     object Bevel2: TBevel
-      Left = 110
-      Top = 38
-      Width = 93
-      Height = 315
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 66
+      Top = 23
+      Width = 56
+      Height = 189
     end
     object pmRight: TMfPeakMeter
-      Left = 125
-      Top = 81
-      Width = 22
-      Height = 228
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 72
+      Top = 49
+      Width = 14
+      Height = 136
       BackGroundColor = clAppWorkSpace
       BarColor = clAqua
       Direction = pdVertical
@@ -283,112 +208,84 @@ object frmMain: TfrmMain
       Precision = 1
     end
     object Label1: TLabel
-      Left = 48
-      Top = 326
-      Width = 28
-      Height = 21
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 29
+      Top = 196
+      Width = 19
+      Height = 13
       Alignment = taCenter
       Caption = 'Left'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = cl3DDkShadow
-      Font.Height = -17
+      Font.Height = -11
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
     end
     object Label2: TLabel
-      Left = 132
-      Top = 326
-      Width = 39
-      Height = 21
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 79
+      Top = 196
+      Width = 25
+      Height = 13
       Alignment = taCenter
       Caption = 'Right'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = cl3DDkShadow
-      Font.Height = -17
+      Font.Height = -11
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
     end
     object lblLeftVolume: TLabel
-      Left = 17
-      Top = 48
-      Width = 84
-      Height = 18
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 11
+      Top = 27
+      Width = 51
+      Height = 11
       Alignment = taCenter
       AutoSize = False
       Caption = '0%'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clGrayText
-      Font.Height = -17
+      Font.Height = -11
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
     end
     object lblRightVolume: TLabel
-      Left = 113
-      Top = 48
-      Width = 84
-      Height = 18
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 68
+      Top = 27
+      Width = 50
+      Height = 11
       Alignment = taCenter
       AutoSize = False
       Caption = '0%'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clGrayText
-      Font.Height = -17
+      Font.Height = -11
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
     end
     object lblDuration: TLabel
-      Left = 11
-      Top = 368
-      Width = 141
-      Height = 25
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 5
+      Top = 220
+      Width = 100
+      Height = 15
       AutoSize = False
       Caption = 'Duration: 00:00:00'
     end
     object lblPlayed: TLabel
-      Left = 26
-      Top = 390
-      Width = 121
-      Height = 24
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 16
+      Top = 234
+      Width = 91
+      Height = 14
       AutoSize = False
       Caption = 'Played: 00:00:00'
     end
     object chkEQ: TCheckBox
-      Left = 236
-      Top = 48
-      Width = 216
-      Height = 23
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 182
+      Top = 27
+      Width = 129
+      Height = 14
       Caption = 'Enable EQ'
       Checked = True
       State = cbChecked
@@ -396,14 +293,10 @@ object frmMain: TfrmMain
       OnClick = chkEQClick
     end
     object tbLow: TTrackBar
-      Left = 240
-      Top = 186
-      Width = 42
-      Height = 128
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 182
+      Top = 111
+      Width = 25
+      Height = 76
       DoubleBuffered = True
       Orientation = trVertical
       ParentDoubleBuffered = False
@@ -411,19 +304,15 @@ object frmMain: TfrmMain
       Frequency = 6
       ShowHint = False
       TabOrder = 1
-      ThumbLength = 45
+      ThumbLength = 30
       TickMarks = tmBoth
       OnChange = tbLowChange
     end
     object tbMid: TTrackBar
-      Left = 297
-      Top = 186
-      Width = 44
-      Height = 128
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 216
+      Top = 111
+      Width = 27
+      Height = 76
       DoubleBuffered = True
       Orientation = trVertical
       ParentDoubleBuffered = False
@@ -431,19 +320,15 @@ object frmMain: TfrmMain
       Frequency = 6
       ShowHint = False
       TabOrder = 2
-      ThumbLength = 45
+      ThumbLength = 30
       TickMarks = tmBoth
       OnChange = tbMidChange
     end
     object tbHigh: TTrackBar
-      Left = 359
-      Top = 186
-      Width = 43
-      Height = 128
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 253
+      Top = 111
+      Width = 26
+      Height = 76
       DoubleBuffered = True
       Orientation = trVertical
       ParentDoubleBuffered = False
@@ -451,62 +336,46 @@ object frmMain: TfrmMain
       Frequency = 6
       ShowHint = False
       TabOrder = 3
-      ThumbLength = 45
+      ThumbLength = 30
       TickMarks = tmBoth
       OnChange = tbHighChange
     end
     object cbxRamp: TComboBox
-      Left = 429
-      Top = 195
-      Width = 114
-      Height = 33
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 295
+      Top = 116
+      Width = 69
+      Height = 23
       Style = csDropDownList
       TabOrder = 4
       OnChange = cbxRampChange
     end
     object edtRampMs: TEdit
-      Left = 429
-      Top = 264
-      Width = 74
-      Height = 33
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 295
+      Top = 157
+      Width = 45
+      Height = 23
       TabOrder = 5
       Text = '30'
       OnChange = edtRampMsChange
     end
     object cbLockVolumeSliders: TCheckBox
-      Left = 30
-      Top = 6
-      Width = 201
-      Height = 24
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 10
+      Top = 5
+      Width = 121
+      Height = 14
       Caption = 'Lock Volume Sliders'
       Checked = True
       State = cbChecked
       TabOrder = 6
     end
     object trbVolumeL: TTrackBar
-      Left = 20
-      Top = 75
-      Width = 52
-      Height = 243
+      Left = 12
+      Top = 44
+      Width = 27
+      Height = 146
       Hint = 
         'Press and release SHIFT + ESC to set zero position.'#13#10'Press CTRL ' +
         '+ ALT + DOWN for volume down.'
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
       DoubleBuffered = True
       Max = 0
       Min = -100
@@ -517,22 +386,18 @@ object frmMain: TfrmMain
       Position = -30
       ShowHint = True
       TabOrder = 7
-      ThumbLength = 45
+      ThumbLength = 30
       TickMarks = tmBoth
       OnChange = trbVolumeLChange
     end
     object trbVolumeR: TTrackBar
-      Left = 150
-      Top = 75
-      Width = 47
-      Height = 243
+      Left = 89
+      Top = 44
+      Width = 28
+      Height = 146
       Hint = 
         'Press and release SHIFT + ESC to set zero position.'#13#10'Press CTRL ' +
         '+ ALT + UP for volume up.'
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
       DoubleBuffered = True
       Max = 0
       Min = -100
@@ -543,45 +408,33 @@ object frmMain: TfrmMain
       Position = -30
       ShowHint = True
       TabOrder = 8
-      ThumbLength = 45
+      ThumbLength = 30
       TickMarks = tmBoth
       OnChange = trbVolumeRChange
     end
     object pnlEq: TPanel
-      Left = 236
-      Top = 75
-      Width = 307
-      Height = 89
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 180
+      Top = 44
+      Width = 211
+      Height = 53
       Color = 6656
       ParentBackground = False
       TabOrder = 9
       object imgSpectrumAnalizer: TImage
-        Left = 11
-        Top = 8
-        Width = 285
-        Height = 73
-        Margins.Left = 5
-        Margins.Top = 5
-        Margins.Right = 5
-        Margins.Bottom = 5
+        Left = 4
+        Top = 4
+        Width = 203
+        Height = 44
         ParentCustomHint = False
         ParentShowHint = False
         ShowHint = False
       end
     end
     object stxtHighIndex: TStaticText
-      Left = 362
-      Top = 168
-      Width = 37
-      Height = 23
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 255
+      Top = 100
+      Width = 22
+      Height = 14
       Alignment = taCenter
       AutoSize = False
       Caption = '0 dB'
@@ -590,14 +443,10 @@ object frmMain: TfrmMain
       TabOrder = 10
     end
     object stxtMidIndex: TStaticText
-      Left = 300
-      Top = 168
-      Width = 38
-      Height = 23
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 218
+      Top = 100
+      Width = 23
+      Height = 14
       Alignment = taCenter
       AutoSize = False
       Caption = '0 dB'
@@ -606,14 +455,10 @@ object frmMain: TfrmMain
       TabOrder = 11
     end
     object stxtLowIndex: TStaticText
-      Left = 246
-      Top = 168
-      Width = 38
-      Height = 23
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 186
+      Top = 100
+      Width = 22
+      Height = 14
       Alignment = taCenter
       AutoSize = False
       Caption = '0 dB'
@@ -622,14 +467,10 @@ object frmMain: TfrmMain
       TabOrder = 12
     end
     object stxtProcessed: TStaticText
-      Left = 170
-      Top = 390
-      Width = 237
-      Height = 23
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 113
+      Top = 233
+      Width = 142
+      Height = 14
       AutoSize = False
       Caption = 'Samples: 0'
       DoubleBuffered = True

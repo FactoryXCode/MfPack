@@ -9,7 +9,7 @@ object frmMain: TfrmMain
   BorderStyle = bsSingle
   Caption = 'WasApi Player Sample 2'
   ClientHeight = 377
-  ClientWidth = 284
+  ClientWidth = 302
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -26,18 +26,18 @@ object frmMain: TfrmMain
   TextHeight = 15
   object butPlayPause: TButton
     Left = 8
-    Top = 331
+    Top = 329
     Width = 66
-    Height = 21
+    Height = 26
     Caption = 'Play'
     TabOrder = 0
     OnClick = butPlayPauseClick
   end
   object butStop: TButton
     Left = 77
-    Top = 331
+    Top = 329
     Width = 67
-    Height = 21
+    Height = 26
     Caption = 'Stop'
     TabOrder = 1
     OnClick = butStopClick
@@ -45,14 +45,15 @@ object frmMain: TfrmMain
   object Panel1: TPanel
     Left = 0
     Top = 0
-    Width = 284
+    Width = 302
     Height = 286
     Align = alTop
     TabOrder = 2
+    ExplicitLeft = -1
     object Bevel1: TBevel
       Left = 144
       Top = 25
-      Width = 136
+      Width = 151
       Height = 210
     end
     object Bevel3: TBevel
@@ -64,7 +65,7 @@ object frmMain: TfrmMain
     object pmLeft: TMfPeakMeter
       Left = 52
       Top = 54
-      Width = 16
+      Width = 15
       Height = 152
       BackGroundColor = clAppWorkSpace
       BarColor = clAqua
@@ -80,16 +81,16 @@ object frmMain: TfrmMain
       Height = 210
     end
     object lblDuration: TLabel
-      Left = 11
-      Top = 245
-      Width = 93
+      Left = 9
+      Top = 247
+      Width = 104
       Height = 17
       AutoSize = False
       Caption = 'Duration: 00:00:00'
     end
     object lblProcessed: TLabel
       Left = 125
-      Top = 261
+      Top = 265
       Width = 138
       Height = 16
       AutoSize = False
@@ -97,14 +98,14 @@ object frmMain: TfrmMain
     end
     object lblPlayed: TLabel
       Left = 20
-      Top = 261
-      Width = 81
+      Top = 265
+      Width = 93
       Height = 16
       AutoSize = False
       Caption = 'Played: 00:00:00'
     end
     object pmRight: TMfPeakMeter
-      Left = 87
+      Left = 85
       Top = 54
       Width = 15
       Height = 152
@@ -119,7 +120,7 @@ object frmMain: TfrmMain
       Left = 36
       Top = 217
       Width = 19
-      Height = 13
+      Height = 16
       Alignment = taCenter
       Caption = 'Left'
       Font.Charset = DEFAULT_CHARSET
@@ -133,7 +134,7 @@ object frmMain: TfrmMain
       Left = 92
       Top = 217
       Width = 25
-      Height = 13
+      Height = 16
       Alignment = taCenter
       Caption = 'Right'
       Font.Charset = DEFAULT_CHARSET
@@ -145,9 +146,9 @@ object frmMain: TfrmMain
     end
     object lblLeftVolume: TLabel
       Left = 15
-      Top = 32
+      Top = 29
       Width = 56
-      Height = 12
+      Height = 16
       Alignment = taCenter
       AutoSize = False
       Caption = '0%'
@@ -160,9 +161,9 @@ object frmMain: TfrmMain
     end
     object lblRightVolume: TLabel
       Left = 79
-      Top = 32
+      Top = 29
       Width = 57
-      Height = 12
+      Height = 16
       Alignment = taCenter
       AutoSize = False
       Caption = '0%'
@@ -175,9 +176,9 @@ object frmMain: TfrmMain
     end
     object lblBass: TLabel
       Left = 151
-      Top = 218
+      Top = 217
       Width = 22
-      Height = 13
+      Height = 16
       Alignment = taCenter
       Caption = 'Bass'
       Font.Charset = DEFAULT_CHARSET
@@ -189,9 +190,9 @@ object frmMain: TfrmMain
     end
     object Label3: TLabel
       Left = 189
-      Top = 218
+      Top = 217
       Width = 30
-      Height = 13
+      Height = 16
       Alignment = taCenter
       Caption = 'Treble'
       Font.Charset = DEFAULT_CHARSET
@@ -203,9 +204,9 @@ object frmMain: TfrmMain
     end
     object Label4: TLabel
       Left = 151
-      Top = 32
+      Top = 29
       Width = 70
-      Height = 13
+      Height = 16
       Caption = 'Attack/release'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = cl3DDkShadow
@@ -216,7 +217,7 @@ object frmMain: TfrmMain
     end
     object Label5: TLabel
       Left = 151
-      Top = 69
+      Top = 71
       Width = 36
       Height = 13
       Alignment = taRightJustify
@@ -229,7 +230,7 @@ object frmMain: TfrmMain
       ParentFont = False
     end
     object cbLockVolumeSliders: TCheckBox
-      Left = 24
+      Left = 20
       Top = 4
       Width = 134
       Height = 16
@@ -239,9 +240,9 @@ object frmMain: TfrmMain
       TabOrder = 0
     end
     object trbVolumeL: TTrackBar
-      Left = 17
+      Left = 15
       Top = 50
-      Width = 35
+      Width = 31
       Height = 162
       Hint = 'Press and release SHIFT + ESC to set zero position.'
       DoubleBuffered = True
@@ -259,9 +260,9 @@ object frmMain: TfrmMain
       OnChange = trbVolumeLChange
     end
     object trbVolumeR: TTrackBar
-      Left = 104
+      Left = 103
       Top = 50
-      Width = 32
+      Width = 30
       Height = 162
       Hint = 'Press and release SHIFT + ESC to set zero position.'
       DoubleBuffered = True
@@ -300,7 +301,7 @@ object frmMain: TfrmMain
     object tbTreble: TTrackBar
       Left = 189
       Top = 126
-      Width = 24
+      Width = 32
       Height = 86
       Hint = 'Press and release SHIFT + ESC to set zero position.'
       DoubleBuffered = True
@@ -333,16 +334,16 @@ object frmMain: TfrmMain
     object chkResetEQOnNewFile: TCheckBox
       Left = 151
       Top = 92
-      Width = 120
+      Width = 134
       Height = 15
       Caption = 'Reset EQ on new file'
       TabOrder = 6
     end
     object edtRampMs: TEdit
       Left = 193
-      Top = 66
+      Top = 68
       Width = 48
-      Height = 33
+      Height = 23
       Enabled = False
       NumbersOnly = True
       TabOrder = 7
@@ -350,7 +351,7 @@ object frmMain: TfrmMain
     end
     object cbEnableEq: TCheckBox
       Left = 151
-      Top = 110
+      Top = 113
       Width = 106
       Height = 17
       Hint = 'Enables or by-passes the MFT'
@@ -365,12 +366,13 @@ object frmMain: TfrmMain
   object Panel2: TPanel
     Left = 0
     Top = 286
-    Width = 284
+    Width = 302
     Height = 37
     Align = alTop
     Color = clAppWorkSpace
     ParentBackground = False
     TabOrder = 3
+    ExplicitWidth = 284
     object lblBarPositionInSTime: TLabel
       Left = 9
       Top = 18
@@ -380,28 +382,29 @@ object frmMain: TfrmMain
       Caption = 'Time: 00:00:00'
     end
     object lblBarPositionInSamples: TLabel
-      Left = 109
+      Left = 111
       Top = 18
       Width = 104
       Height = 16
       AutoSize = False
-      Caption = 'Samples: 0'
+      Caption = 'Position: 0'
     end
     object pbProgress: TProgressBar
       Left = 1
       Top = 1
-      Width = 283
+      Width = 300
       Height = 15
       Align = alTop
       TabOrder = 0
       OnMouseMove = pbProgressMouseMove
       OnMouseUp = pbProgressMouseUp
+      ExplicitWidth = 282
     end
   end
   object stxtStatus: TStaticText
     Left = 0
     Top = 359
-    Width = 284
+    Width = 302
     Height = 18
     Align = alBottom
     AutoSize = False
@@ -417,6 +420,7 @@ object frmMain: TfrmMain
     ParentFont = False
     TabOrder = 4
     Transparent = False
+    ExplicitWidth = 284
   end
   object mnuMain: TMainMenu
     Left = 320

@@ -786,15 +786,16 @@ begin
 
   // Stereo
   // The first stereo channel (0) is always the LEFT one! SetVolumes
+  //Note: The number of soundchannels is known, when an audiofile is loaded.
   if (fWasApiEngine.SoundChannels = 2) then
     begin
       hr := fWasApiEngine.SetVolumes(Abs(trbVolumeL.Position) * 0.01,
                                      Abs(trbVolumeR.Position) * 0.01);
-    end;
 
-  if FAILED(hr) then
-    stxtStatus.Caption := Format('Adjusting volumes failed with error: %d.',
-                                [hr]);
+      if FAILED(hr) then
+        stxtStatus.Caption := Format('Adjusting volumes failed with error: %d.',
+                                     [hr]);
+    end;
 end;
 
 

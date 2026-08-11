@@ -1,6 +1,6 @@
-﻿// FactoryX
+// FactoryX
 //
-// Copyright: ® FactoryX. All rights reserved.
+// Copyright:  FactoryX. All rights reserved.
 //
 // Project: Media Foundation - MFPack - Samples
 // Project location: https://sourceforge.net/projects/MFPack
@@ -11,7 +11,8 @@
 // Language: ENU
 //
 // Revision Version: 3.2.0
-// Description: Main window.
+// Description: Main window that only is the frontend, no calculations or whatever, that
+//              could interference with the threading model of this application.
 //
 // Company: FactoryX
 // Intiator(s): Tony Kalf (maXcomX)
@@ -65,9 +66,9 @@ unit MainFrm;
 interface
 
 uses
+
   {Winapi}
-  Winapi.Windows,
-  Winapi.Messages,
+  WinApi.Windows,
   WinApi.WinApiTypes,
   {ActiveX}
   Winapi.ActiveX,
@@ -87,24 +88,24 @@ uses
   Vcl.ExtCtrls,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.MfTransform,
   WinApi.MediaFoundationApi.MfUtils,
   WinApi.MediaFoundationApi.MfMetLib,
-  {}
-  Tools,
+  {Application}
   WASAPIEngine,
-  MfPeakMeter, MfPeakMeterMmcs, MfAudioVisualizer;  // Don't forget to add the Mfpeakmeter location in your project settings.
+  // MFT
+  MfAudioBassTrebleTypes,
+  // MfPack component
+  MfPeakMeter;  // Don't forget to add the Mfpeakmeter location in your project settings.
 
 type
 
   TfrmMain = class(TForm)
-    butPlay: TButton;
+    butPlayPause: TButton;
     butStop: TButton;
-    mnuMain: TMainMenu;
-    OpenAudioFile1: TMenuItem;
-    N1: TMenuItem;
-    Open1: TMenuItem;
-    Exit1: TMenuItem;
-    dlgOpen: TOpenDialog;
+    Panel1: TPanel;
+    Bevel3: TBevel;
+    Bevel2: TBevel;
     lblDuration: TLabel;
     lblProcessed: TLabel;
     lblPlayed: TLabel;
@@ -112,26 +113,50 @@ type
     pmLeft: TMfPeakMeter;
     Label1: TLabel;
     Label2: TLabel;
-    Bevel1: TBevel;
-    trbVolumeR: TTrackBar;
-    trbVolumeL: TTrackBar;
-    cbLockVolumeSliders: TCheckBox;
-    Bevel2: TBevel;
-    Bevel3: TBevel;
-    butPause: TButton;
     lblLeftVolume: TLabel;
     lblRightVolume: TLabel;
-    lblStatus: TLabel;
-    MfAudioVisualizer1: TMfAudioVisualizer;
+    cbLockVolumeSliders: TCheckBox;
+    trbVolumeL: TTrackBar;
+    trbVolumeR: TTrackBar;
+    mnuMain: TMainMenu;
+    OpenAudioFile1: TMenuItem;
+    Open1: TMenuItem;
+    N1: TMenuItem;
+    Exit1: TMenuItem;
+    dlgOpen: TOpenDialog;
+    Panel2: TPanel;
+    pbProgress: TProgressBar;
+    lblBarPositionInSTime: TLabel;
+    lblBarPositionInSamples: TLabel;
+    tbBass: TTrackBar;
+    tbTreble: TTrackBar;
+    lblBass: TLabel;
+    Label3: TLabel;
+    cbxSetRamp: TComboBox;
+    Label4: TLabel;
+    Label5: TLabel;
+    chkResetEQOnNewFile: TCheckBox;
+    Bevel1: TBevel;
+    stxtStatus: TStaticText;
+    edtRampMs: TEdit;
+    cbEnableEq: TCheckBox;
+
     procedure Open1Click(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-    procedure butPlayClick(Sender: TObject);
+    procedure butPlayPauseClick(Sender: TObject);
     procedure butStopClick(Sender: TObject);
     procedure Exit1Click(Sender: TObject);
     procedure trbVolumeLChange(Sender: TObject);
     procedure trbVolumeRChange(Sender: TObject);
     procedure butPauseClick(Sender: TObject);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure pbProgressMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure pbProgressMouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
+    procedure tbBassChange(Sender: TObject);
+    procedure tbTrebleChange(Sender: TObject);
+    procedure cbxSetRampChange(Sender: TObject);
 
   private
     { Private declarations }
@@ -144,14 +169,32 @@ type
 
     /// <summary>Set Left and/or Right volume.</summary>
     procedure SetVolumeChannels();
-    /// <summary>Keep track of data been played.</summary>
-    procedure OnAudioDataProcessedEvent(var AMessage: TMessage); message WM_DATA_PROCESSED_NOTIFY;
-    /// <summary>Signals the audio is ready to play.</summary>
-    procedure OnAudioReadyEvent(var AMessage: TMessage); message WM_DATA_READY_NOTIFY;
-    /// <summary>Signals the audio reached end.</summary>
-    procedure OnAudioEndedEvent(var AMessage: TMessage); message WM_DATA_ENDED_NOTIFY;
 
-  public
+    procedure ResetEQ();
+
+    /// <summary>Calculate the linear values of the bass and treble sliders to dB.</summary>
+    function SliderToDb(Slider: Integer;
+                        MaxDb: Single = 24.0): Single;
+
+
+    /// <summary>Keep track of data been played.</summary>
+    procedure OnAudioDataProcessed(Sender: TObject;
+                                   const Position100ns: Int64;
+                                   const RawPosition: UInt64);
+
+    /// <summary>Signals the audio is ready to play.</summary>
+    procedure OnAudioReady(Sender: TObject);
+
+    /// <summary>Signals the audio reached end.</summary>
+    procedure OnAudioEnded(Sender: TObject);
+    /// <summary>Signals an engine error.</summary>
+    procedure OnEngineError(Sender: TObject;
+                            const Msg: string;
+                            const Hr: HRESULT);
+    /// <summary>Signals the rendering engine state.</summary>
+    procedure OnEngineState(Sender: TObject;
+                            const NewState: TDeviceState);
+public
     { Public declarations }
 
   end;
@@ -166,45 +209,115 @@ implementation
 {$R *.dfm}
 
 
+uses
+  System.Math;
+
+
 procedure TfrmMain.butPauseClick(Sender: TObject);
 begin
 
-  if not Assigned(fWasApiEngine) then
-    Exit;
-  if SUCCEEDED(fWasApiEngine.Pause) then
-    lblStatus.Caption := Format('Paused file: %s.',
-                                [fFileName]);
+  // Play/Pause is handled by the Play button.
+  butPlayPauseClick(Sender);
 end;
 
 
-procedure TfrmMain.butPlayClick(Sender: TObject);
+procedure TfrmMain.butPlayPauseClick(Sender: TObject);
+var
+  hr: HResult;
+
 begin
 
   if not Assigned(fWasApiEngine) then
     Exit;
 
-  // Activate the peakmeters.
-  pmLeft.Enabled := True;
-  pmRight.Enabled := True;
+  case fWasApiEngine.DeviceState of
 
-  // Keep volume on previous volume.
-  SetVolumeChannels();
+    dsPlay:
+      begin
+        hr := fWasApiEngine.Pause();
+      end;
 
-  if SUCCEEDED(fWasApiEngine.Start()) then
-    lblStatus.Caption := Format('Playing file: %s.',
-                                [fFileName]);
+    dsReady,
+    dsStop,
+    dsPause:
+      begin
+
+        // Activate the peakmeters.
+        pmLeft.Enabled := True;
+        pmRight.Enabled := True;
+
+        // Keep volume on previous volume.
+        SetVolumeChannels();
+
+        hr := fWasApiEngine.Start();
+      end;
+
+  else
+    Exit;
+  end;
+
+  if FAILED(hr) then
+    stxtStatus.Caption := Format('Play/Pause failed for file: %s with Error: %d',
+                                [fFileName, hr]);
 end;
 
 
 procedure TfrmMain.butStopClick(Sender: TObject);
+var
+  hr: HResult;
+
 begin
 
   if not Assigned(fWasApiEngine) then
     Exit;
-  if SUCCEEDED(fWasApiEngine.Stop()) then
-    lblStatus.Caption := Format('Stopped playing file: %s.',
-                                [fFileName]);
+
+  hr := fWasApiEngine.Stop();
+  if SUCCEEDED(hr) then
+    stxtStatus.Caption := Format('Stopped: %s.',
+                                [fFileName])
+  else
+    stxtStatus.Caption := Format('Stopped: %s failed with Error: %s',
+                                [fFileName, hr])
+
 end;
+
+
+procedure TfrmMain.cbxSetRampChange(Sender: TObject);
+var
+  ms: Integer;
+
+begin
+
+  if not Assigned(fWasApiEngine) then
+    Exit;
+
+  case cbxSetRamp.ItemIndex of
+    0: fWasApiEngine.SetRampMode(rmOff);
+    1: fWasApiEngine.SetRampMode(rmFast);
+    2: fWasApiEngine.SetRampMode(rmSmooth);
+    3: begin
+
+         fWasApiEngine.SetRampMode(rmCustom);
+
+         // show edit
+         edtRampMs.Enabled := True;
+
+         ms := StrToIntDef(Trim(edtRampMs.Text),
+                           30);
+         if (ms < 0) then
+           ms := 0;
+         if (ms > 2000) then
+           ms := 2000; // sensible clamp
+
+         fWasApiEngine.SetRampTimeMs(ms);
+       end;
+  end;
+
+  // Disable edit when not manual.
+  if (cbxSetRamp.ItemIndex <> 3) then
+    edtRampMs.Enabled := False;
+end;
+
 
 
 procedure TfrmMain.Exit1Click(Sender: TObject);
@@ -239,6 +352,7 @@ begin
   // Set volume slider positions to 0.
   if (Shift = [ssShift]) and (Key = VK_ESCAPE) then
     begin
+
       trbVolumeL.Position := 0;
       trbVolumeR.Position := 0;
       Key := 0;
@@ -248,7 +362,7 @@ begin
   case Key of
     VK_SPACE:   if Assigned(fWasApiEngine) then
                   begin
-                    butPlayClick(nil);
+                    butPlayPauseClick(nil);
                   end;
 
     VK_END:     if Assigned(fWasApiEngine) then
@@ -306,8 +420,68 @@ begin
     end;
 
   if FAILED(hr) then
-    lblStatus.Caption := 'Adjusting volumes failed.';
+    stxtStatus.Caption := Format('Adjusting volumes failed with error: %d.',
+                                [hr]);
 end;
+
+
+procedure TfrmMain.tbBassChange(Sender: TObject);
+begin
+
+  // TrackBar.Position is integer -24..+24
+  if Assigned(fWasApiEngine) then
+    // fWasApiEngine.SetBassDb(tbBass.Position); Note: dB's are not linear but logarithmic values.
+    fWasApiEngine.SetBassDb(Round(SliderToDb(tbBass.Position)));
+
+  // Optional UI label
+  // lblBass.Caption := Format('%d dB', [tbBass.Position]);
+end;
+
+
+procedure TfrmMain.tbTrebleChange(Sender: TObject);
+begin
+
+  // TrackBar.Position is integer -24..+24
+  if Assigned(fWasApiEngine) then
+    // fWasApiEngine.SetTrebleDb(tbTreble.Position); Note: dB's are not linear but logarithmic values.
+    fWasApiEngine.SetTrebleDb(Round(SliderToDb(tbTreble.Position)));
+
+  // Optional UI label
+  // lblTreble.Caption := Format('%d dB', [tbTreble.Position]);
+end;
+
+
+procedure TfrmMain.ResetEQ();
+begin
+
+  tbBass.Position := 0;
+  tbTreble.Position := 0;
+  cbxSetRamp.ItemIndex := 2; // Smooth default, if you want.
+  edtRampMs.Text := '30';    // Only if Manual is choosen.
+
+  if Assigned(FWasApiEngine) then
+    begin
+      FWasApiEngine.SetBassDb(0);
+      FWasApiEngine.SetTrebleDb(0);
+      fWasApiEngine.SetRampMode(rmSmooth);
+    end;
+end;
+
+
+function TfrmMain.SliderToDb(Slider: Integer;
+                             MaxDb: Single = 24.0): Single;
+const
+  Gamma = 2.2; // perceptual curve.
+
+var
+  x: Single;
+
+begin
+
+  x := Slider / MaxDb;          // normalize to -1..+1
+  Result := Sign(x) * MaxDb * Power(Abs(x), Gamma);
+end;
+
 
 
 procedure TfrmMain.trbVolumeLChange(Sender: TObject);
@@ -360,9 +534,6 @@ var
 
 begin
 
-  // Stop playing.
-  butStopClick(Self);
-
   // Select an audiofile.
   fAudioFileUrl := GetAudioFile();
   if (fAudioFileUrl = 'No audiofile selected.') then
@@ -375,43 +546,172 @@ begin
                         llAudioDuration);
   if FAILED(hr) then
     begin
+
       ShowMessage('Could not retrieve the duration of the audio file.');
       llAudioDuration := 0;
     end;
 
-  lblDuration.Caption := Format('Duration: %s',
-                                [HnsTimeToStr(llAudioDuration, False)]);
-
-  // Create the engine
   if SUCCEEDED(hr) then
-    fWasApiEngine := TWasApiEngine.Create();
+    begin
 
-  if not Assigned(fWasApiEngine) then
-    Exit;
+      lblDuration.Caption := Format('Duration: %s',
+                                    [HnsTimeToStr(llAudioDuration, False)]);
 
-  lblStatus.Caption := Format('Selected file: %s.',
-                              [fFileName]);
+      // Set progressbar max
+      pbProgress.Max := llAudioDuration div 1000000;
+
+      // Create the engine
+      fWasApiEngine := TWasApiEngine.Create();
+
+      if not Assigned(fWasApiEngine) then
+        begin
+
+          hr := E_POINTER;
+          stxtStatus.Caption := Format('Creating WasApiEngine failed: Error: %d.',
+                                       [hr]);
+        end;
+    end;
+
+  if SUCCEEDED(hr) then
+    begin
+
+      // Wire engine events (Sample 4 principle: callbacks/events only)
+      fWasApiEngine.OnReady := OnAudioReady;
+      fWasApiEngine.OnProcessed := OnAudioDataProcessed;
+      fWasApiEngine.OnEnded := OnAudioEnded;
+      fWasApiEngine.OnError := OnEngineError;
+      fWasApiEngine.OnStateChanged := OnEngineState;
+
+      stxtStatus.Caption := Format('Selected file: %s.',
+                                   [fFileName]);
+    end;
 
   // Initialize the engine.
-  hr := fWasApiEngine.LoadFile(Handle,
-                               fAudioFileUrl,
-                               llAudioDuration);
   if SUCCEEDED(hr) then
-    SetVolumeChannels();
+    hr := fWasApiEngine.OpenFile(fAudioFileUrl,
+                                 llAudioDuration);
+  if FAILED(hr) then
+    stxtStatus.Caption := Format('Selected file: %s open file failed with error: %d.',
+                                [fFileName, hr]);
+end;
+
+
+procedure TfrmMain.pbProgressMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+var
+  secPos: Integer;
+  hnsPos: Int64;
+
+begin
+
+  if (pbProgress.Max <= 0) or (llAudioDuration <= 0) then
+    Exit;
+
+  // Show only when playing/pause
+  if fWasApiEngine.DeviceState in [dsPlay, dsPause] then
+    begin
+
+      secPos := Trunc((X / pbProgress.Width) * pbProgress.Max);
+
+      if (secPos < 0) then
+        secPos := 0
+      else
+        if (secPos > pbProgress.Max) then
+          secPos := pbProgress.Max;
+
+      pbProgress.ShowHint := True;
+      pbProgress.Hint := Format('Position: %d s', [secPos]);
+
+      lblBarPositionInSamples.Caption := Format('Position: %d s', [secPos]);
+
+      hnsPos := Int64(secPos) * 10000000;
+      lblBarPositionInSTime.Caption := Format('Time: %s', [HnsTimeToStr(hnsPos, False)]);
+    end;
+end;
+
+
+procedure TfrmMain.pbProgressMouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+
+var
+  hr: HResult;
+  secPos: Int64;
+  posHns: Int64;
+
+begin
+
+  if (fWasApiEngine = nil) then
+    Exit;
+
+  if (pbProgress.Width <= 0) then
+    Exit;
+
+  if (pbProgress.Max <= 0) then
+    Exit;
+
+  if (X <= 0) then
+    secPos := 0
+  else
+    if (X >= pbProgress.Width) then
+      secPos := pbProgress.Max
+  else
+    secPos := Trunc((X / pbProgress.Width) * pbProgress.Max); // seconds
+
+  // Seconds -> 100ns
+  posHns := secPos * 10000000;
+
+  // clamp to duration (optional safety)
+  if (llAudioDuration > 0) and (posHns > llAudioDuration) then
+    posHns := llAudioDuration;
+
+  hr := fWasApiEngine.SeekTo(posHns);
+
+  if SUCCEEDED(hr) then
+    pbProgress.Position := Integer(secPos)
+  else
+    stxtStatus.Caption := Format('SeekTo failed. (hr=%d)',
+                                 [hr]);
 end;
 
 
 // Event handlers ==============================================================
 
-procedure TfrmMain.OnAudioDataProcessedEvent(var AMessage: TMessage);
+procedure TfrmMain.OnAudioDataProcessed(Sender: TObject;
+                                        const Position100ns: Int64;
+                                        const RawPosition: UInt64);
 var
   iProgress: LONGLONG;
   iSamples: LONGLONG;
   tstr: string;
+  secPos: Integer;
+
+  // DEBUG:
+  //tid: Cardinal;
 
 begin
-  iProgress := AMessage.WParam;
-  iSamples := AMessage.LParam;
+
+  // DEBUG: ====================================================================
+  //tid := GetCurrentThreadId;
+  //if tid = MainThreadID then
+  //  OutputDebugString('OnAudioDataProcessed: MAIN THREAD')
+  //else
+  //  OutputDebugString(PChar(Format('OnAudioDataProcessed: TID=%d', [tid])));
+  // ===========================================================================
+
+  iProgress := Position100ns;
+  iSamples := RawPosition;
+
+  if (pbProgress.Max <= 0) then
+    Exit;
+
+  secPos := Integer(Position100ns div 10000000);
+
+  if (secPos < 0) then
+    secPos := 0;
+
+  if (secPos > pbProgress.Max) then
+    secPos := pbProgress.Max;
+
+  pbProgress.Position := secPos;
 
   tstr := HnsTimeToStr(iProgress,
                        False);
@@ -420,37 +720,135 @@ begin
                                  [iSamples]);
   lblPlayed.Caption := Format('Played: %s',
                               [tstr]);
-  Application.ProcessMessages;
 end;
 
 
-procedure TfrmMain.OnAudioReadyEvent(var AMessage: TMessage);
+procedure TfrmMain.OnAudioReady(Sender: TObject);
+var
+  durSec: Int64;
+
 begin
 
-  if (AMessage.WParam = 1) then
+  if (fWasApiEngine = nil) then
+    Exit;
+
+  if (llAudioDuration > 0) then
+    durSec := llAudioDuration div 10000000
+  else
+    durSec := 0;
+
+  if (durSec > High(Integer)) then
+    pbProgress.Max := High(Integer)
+  else
+    pbProgress.Max := Integer(durSec);
+
+  pbProgress.Position := 0;
+  pbProgress.Enabled := (pbProgress.Max > 0);
+  butPlayPause.Enabled := True;
+  butPlayPause.Caption := 'Play';
+  butStop.Enabled := False;
+  SetVolumeChannels();
+
+  // EQ Bass/treble ============================================================
+
+  if cbEnableEq.Checked then
     begin
 
-      lblStatus.Caption := Format('Ready to play: %s',
-                                  [fFileName]);
-      butPlay.Enabled := True;
-      butPause.Enabled := True;
-      butStop.Enabled := True;
+      if chkResetEQOnNewFile.Checked then
+        begin
+          ResetEQ();
+        end
+      else
+        begin
+
+          // re-apply current UI values to engine (important after plugging a new MFT or new file)
+          fWasApiEngine.SetBassDb(tbBass.Position);
+          fWasApiEngine.SetTrebleDb(tbTreble.Position);
+          cbxSetRampChange(nil);
+        end;
     end;
+  // ===========================================================================
 end;
 
 
-procedure TfrmMain.OnAudioEndedEvent(var AMessage: TMessage);
+procedure TfrmMain.OnAudioEnded(Sender: TObject);
 begin
 
-  if (AMessage.WParam = 1) then
-    begin
+  stxtStatus.Caption := Format('Stopped: %s',
+                              [fFileName]);
 
-      lblStatus.Caption := Format('Stopped playing: %s',
-                                  [fFileName]);
-      butPlay.Enabled := True;
-      butPause.Enabled := True;
-      butStop.Enabled := True;
-    end;
+  butPlayPause.Enabled := True;
+  butPlayPause.Caption := 'Play';
+  butStop.Enabled := False;
+end;
+
+
+procedure TfrmMain.OnEngineError(Sender: TObject; const Msg: string; const Hr: HRESULT);
+begin
+
+  stxtStatus.Caption := Format('%s (error 0x%.8x)',
+                              [Msg, Cardinal(Hr)]);
+end;
+
+
+procedure TfrmMain.OnEngineState(Sender: TObject;
+                            const NewState: TDeviceState);
+begin
+
+  case NewState of
+
+    dsReady,
+    dsStop:
+      begin
+
+        butPlayPause.Enabled := True;
+        butPlayPause.Caption := 'Play';
+        butStop.Enabled := False;
+
+        pbProgress.Position := 0;
+        lblPlayed.Caption := 'Played: 00:00:00';
+        lblProcessed.Caption := 'Samples: 0';
+      end;
+
+    dsPlay:
+      begin
+
+        butPlayPause.Enabled := True;
+        butPlayPause.Caption := 'Pause';
+        butStop.Enabled := True;
+        stxtStatus.Caption := Format('Playing: %s',
+                                     [fFileName]);
+      end;
+
+    dsPause:
+      begin
+
+        butPlayPause.Enabled := True;
+        butPlayPause.Caption := 'Play';
+        butStop.Enabled := True;
+        stxtStatus.Caption := Format('Pauzed: %s',
+                                     [fFileName]);
+      end;
+
+    dsUninitialized,
+    dsInitialized:
+      begin
+
+        butPlayPause.Enabled := False;
+        butPlayPause.Caption := 'Play';
+        butStop.Enabled := False;
+      end;
+
+    dsError:
+      begin
+
+        butPlayPause.Enabled := False;
+        butPlayPause.Caption := 'Play';
+        butStop.Enabled := False;
+        stxtStatus.Caption := Format('Yoo! we have an error: %d', [GetLastError()]);
+      end;
+
+  end;
 end;
 
 
@@ -460,7 +858,7 @@ end;
 initialization
 
   if FAILED(MFStartup(MF_VERSION,
-                      MFSTARTUP_LITE)) then
+                      MFSTARTUP_FULL)) then
       begin
         MessageBox(0,
                    lpcwstr('Your computer does not support this Media Foundation API version ' +

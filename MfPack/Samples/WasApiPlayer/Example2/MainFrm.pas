@@ -624,7 +624,7 @@ begin
       lblBarPositionInSamples.Caption := Format('Position: %d s', [secPos]);
 
       hnsPos := Int64(secPos) * 10000000;
-      lblBarPositionInSTime.Caption := Format('Position: %s', [HnsTimeToStr(hnsPos, False)]);
+      lblBarPositionInSTime.Caption := Format('Time: %s', [HnsTimeToStr(hnsPos, False)]);
     end;
 end;
 
