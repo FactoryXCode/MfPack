@@ -53,12 +53,38 @@ alter volume (stream volume and mute) that works for Chromecast/ Google Cast V2.
 source, language, name, and selection state.
 For an active transcode, **SelectAudioTrack** restarts at the current source position using the chosen Media Foundation audio stream.
 
-**TMfCastSubtitleAsset.SourceName** identifies a selected sidecar subtitle file.
-For embedded text, **TrackId**, **StreamIndex**, and **HasStreamIndex** provide exact selection even when language metadata is absent or duplicated.
-**SelectSubtitle** and **DisableSubtitles** switch the active transcoded presentation at its current source position.
+Automatic media planning treats remuxing as a separate route from transcoding.
+For a Matroska source containing frame-aligned H.264 video and optional AAC
+audio, **cmmRemuxFile** copies the compressed samples into a fragmented MP4
+presentation without decoding or re-encoding them. This preserves source video
+quality and substantially reduces CPU use. Incompatible MKV codecs and active
+burned subtitles continue to use **cmmTranscodeBurnedSubtitles**. Remuxed streams
+retain the generated-stream restart behavior for seeking, while volume remains
+receiver-controlled because there is no decoded PCM gain stage.
 
-Cast V2 protobuf envelope encoding/decoding is isolated in ***MfCastProtocol.pas***; **MfCastChannel** owns
-transport, heartbeats, request state, and receiver/media command policy.
+**TMfCastSubtitleAsset.SourceName** identifies a selected sidecar subtitle file.
+For embedded text, **TrackId**, **StreamIndex**, and **HasStreamIndex** provide exact
+selection even when language metadata is absent or duplicated. **SelectSubtitle**
+and **DisableSubtitles** switch the active transcoded presentation at its current
+source position.
+
+Cast V2 protobuf envelope encoding/decoding is isolated in
+**MfCastProtocol.pas**; **MfCastChannel** owns transport, heartbeats, request state,
+and receiver/media command policy.
+
+The direct-control contract is Media Foundation-neutral: **MfCastTypes.pas** and
+**MfCastInterfaces.pas** do not import MfPack Media Foundation declaration units.
+The optional byte-stream, sample, remux, and transcode contracts are isolated in
+**MfCastMediaInterfaces.pas**; only the media implementations and their composition
+layer compile against those declarations.
+
+## Compile validation
+
+**MfCastCompile.dpk** is a non-installed runtime package that lists every Cast
+unit, including all units under "Cast/Media". Build it to perform a complete
+static compile check after changes that may not be reached by the simple sample.
+It requires the matching installed "MfPackXxxx" package but is not intended to
+be installed or referenced by applications. 
 
 Project: MFPack - Cast
 Project location:
