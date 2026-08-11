@@ -75,7 +75,8 @@ uses
   System.Classes,
   {Cast}
   MfCastTypes,
-  MfCastInterfaces;
+  MfCastInterfaces,
+  MfCastMediaInterfaces;
 
 type
 
@@ -86,9 +87,10 @@ type
     MediaInspector: IMfCastMediaInspector;
     MediaPlanner: IMfCastMediaPlanner;
     SegmentPublisher: IMfCastSegmentPublisher;
+    RemuxPipeline: IMfCastRemuxPipeline;
     TranscodePipeline: IMfCastTranscodePipeline;
     PreviewSink: IMfCastPreviewSink;
-    procedure Reset;
+    procedure Reset();
   end;
 
   TMfCastController = class(TInterfacedObject, IMfCastController)
@@ -103,13 +105,19 @@ type
     FPendingLoadRequest: TMfCastLoadRequest;
     FPendingTranscodeRequest: TMfCastTranscodeRequest;
     FHasPendingTranscode: Boolean;
+    FPendingRemuxRequest: TMfCastRemuxRequest;
+    FHasPendingRemux: Boolean;
     FActiveLoadRequest: TMfCastLoadRequest;
     FActiveTranscodeRequest: TMfCastTranscodeRequest;
+    FActiveRemuxRequest: TMfCastRemuxRequest;
     FUsingTranscodedStream: Boolean;
+    FUsingRemuxedStream: Boolean;
     FCurrentPublishedPath: string;
     FCurrentSubtitlePublishedPath: string;
     FPlaybackTimeOffset100ns: Int64;
     FLastMediaPosition100ns: Int64;
+    FCurrentMediaSessionId: Int64;
+    FReplacedMediaSessionId: Int64;
     FMediaLoadStartTick: Cardinal;
     FMediaPlaybackStarted: Boolean;
     FSeekInProgress: Boolean;
@@ -119,7 +127,16 @@ type
                   const AMessage: string);
 
     procedure CleanupCastAttempt();
+    procedure CleanupMediaForLoad();
     function RecreateControlChannel(): HRESULT;
+    function ConnectReceiver(const ADevice: TMfCastDevice): HRESULT;
+    function ExecuteCastFile(const ADevice: TMfCastDevice;
+                             const ASourceName: string;
+                             const ASubtitle: TMfCastSubtitleAsset;
+                             const AMediaMode: TMfCastMediaMode;
+                             const ASubtitleMode: TMfCastSubtitleMode;
+                             const AStartTime100ns: Int64;
+                             const AConnectReceiver: Boolean): HRESULT;
 
     function FailCastAttempt(const AHResult: HRESULT;
                              const AStage: string;
@@ -143,7 +160,9 @@ type
     function PrepareTranscodedStream(const ASourceName: string;
                                      const ASubtitle: TMfCastSubtitleAsset;
                                      const ASubtitleMode: TMfCastSubtitleMode;
-                                     out ALoadRequest: TMfCastLoadRequest): HRESULT;
+                                      out ALoadRequest: TMfCastLoadRequest): HRESULT;
+    function PrepareRemuxedStream(const ASourceName: string;
+                                  out ALoadRequest: TMfCastLoadRequest): HRESULT;
 
     procedure DiscoveryStarted();
     procedure DiscoveryStopped();
@@ -173,6 +192,12 @@ type
     function GetMediaTracks(const ASourceName: string;
                             out ATracks: TMfCastTrackInfoArray): HRESULT;
 
+    function Connect(const ADevice: TMfCastDevice): HRESULT;
+    function LoadFile(const ASourceName: string;
+                      const ASubtitle: TMfCastSubtitleAsset;
+                      const AMediaMode: TMfCastMediaMode;
+                      const ASubtitleMode: TMfCastSubtitleMode;
+                      const AStartTime100ns: Int64 = 0): HRESULT;
     function CastFile(const ADevice: TMfCastDevice;
                       const ASourceName: string;
                       const ASubtitle: TMfCastSubtitleAsset;
@@ -199,6 +224,8 @@ type
 implementation
 
 uses
+  WinApi.MediaFoundationApi.MfApi,
+  WinApi.MediaFoundationApi.MfError,
   MfCastHttpServer,
   MfCastChannel,
   MfCastTransport;
@@ -345,7 +372,7 @@ begin
 end;
 
 
-procedure TMfCastComponents.Reset;
+procedure TMfCastComponents.Reset();
 begin
 
   Discovery := nil;
@@ -354,6 +381,7 @@ begin
   MediaInspector := nil;
   MediaPlanner := nil;
   SegmentPublisher := nil;
+  RemuxPipeline := nil;
   TranscodePipeline := nil;
   PreviewSink := nil;
 end;
@@ -376,11 +404,17 @@ begin
   FPendingLoadRequest.Reset;
   FPendingTranscodeRequest.Reset;
   FHasPendingTranscode := False;
+  FPendingRemuxRequest.Reset;
+  FHasPendingRemux := False;
   FActiveLoadRequest.Reset;
   FActiveTranscodeRequest.Reset;
+  FActiveRemuxRequest.Reset;
   FUsingTranscodedStream := False;
+  FUsingRemuxedStream := False;
   FPlaybackTimeOffset100ns := 0;
   FLastMediaPosition100ns := 0;
+  FCurrentMediaSessionId := 0;
+  FReplacedMediaSessionId := 0;
   FMediaLoadStartTick := 0;
   FMediaPlaybackStarted := False;
   FSeekInProgress := False;
@@ -428,6 +462,9 @@ begin
   if Assigned(FComponents.SegmentPublisher) then
     FComponents.SegmentPublisher.AbortPresentation(E_ABORT);
 
+  if Assigned(FComponents.RemuxPipeline) then
+    FComponents.RemuxPipeline.Stop();
+
   if Assigned(FComponents.TranscodePipeline) then
     FComponents.TranscodePipeline.Stop();
 
@@ -450,11 +487,17 @@ begin
   FPendingLoadRequest.Reset();
   FPendingTranscodeRequest.Reset();
   FHasPendingTranscode := False;
+  FPendingRemuxRequest.Reset();
+  FHasPendingRemux := False;
   FActiveLoadRequest.Reset();
   FActiveTranscodeRequest.Reset();
+  FActiveRemuxRequest.Reset();
   FUsingTranscodedStream := False;
+  FUsingRemuxedStream := False;
   FPlaybackTimeOffset100ns := 0;
   FLastMediaPosition100ns := 0;
+  FCurrentMediaSessionId := 0;
+  FReplacedMediaSessionId := 0;
   FMediaLoadStartTick := 0;
   FMediaPlaybackStarted := False;
   FSeekInProgress := False;
@@ -489,6 +532,54 @@ begin
               ADetail);
 
   Result := ErrorHr;
+end;
+
+
+procedure TMfCastController.CleanupMediaForLoad();
+begin
+
+  // A new receiver LOAD replaces the current media session. Tear down only
+  // the media resources here; the Cast control channel and launched receiver
+  // remain available for the replacement request.
+  if Assigned(FComponents.SegmentPublisher) then
+    FComponents.SegmentPublisher.AbortPresentation(E_ABORT);
+
+  if Assigned(FComponents.RemuxPipeline) then
+    FComponents.RemuxPipeline.Stop();
+
+  if Assigned(FComponents.TranscodePipeline) then
+    FComponents.TranscodePipeline.Stop();
+
+  if Assigned(FComponents.HttpServer) and
+     (FCurrentSubtitlePublishedPath <> '') then
+    FComponents.HttpServer.Unpublish(FCurrentSubtitlePublishedPath);
+
+  if Assigned(FComponents.HttpServer) and
+     (FCurrentPublishedPath <> '') then
+    FComponents.HttpServer.Unpublish(FCurrentPublishedPath);
+
+  if Assigned(FComponents.HttpServer) then
+    FComponents.HttpServer.Stop();
+
+  FCurrentPublishedPath := '';
+  FCurrentSubtitlePublishedPath := '';
+  FPendingLoadRequest.Reset();
+  FPendingTranscodeRequest.Reset();
+  FHasPendingTranscode := False;
+  FPendingRemuxRequest.Reset();
+  FHasPendingRemux := False;
+  FActiveLoadRequest.Reset();
+  FActiveTranscodeRequest.Reset();
+  FActiveRemuxRequest.Reset();
+  FUsingTranscodedStream := False;
+  FUsingRemuxedStream := False;
+  FPlaybackTimeOffset100ns := 0;
+  FLastMediaPosition100ns := 0;
+  FCurrentMediaSessionId := 0;
+  FMediaLoadStartTick := 0;
+  FMediaPlaybackStarted := False;
+  FSeekInProgress := False;
+  FCurrentMedia.Reset();
 end;
 
 
@@ -581,6 +672,9 @@ begin
   if Assigned(FComponents.MediaPlanner) then
     FComponents.MediaPlanner.SetLogger(ALogger);
 
+  if Assigned(FComponents.RemuxPipeline) then
+    FComponents.RemuxPipeline.SetLogger(ALogger);
+
   if Assigned(FComponents.TranscodePipeline) then
     FComponents.TranscodePipeline.SetLogger(ALogger);
 end;
@@ -648,6 +742,33 @@ var
   hr: HRESULT;
 
 begin
+
+  if FHasPendingRemux then
+    begin
+      if not Assigned(FComponents.RemuxPipeline) or
+         not Assigned(FComponents.SegmentPublisher) then
+        begin
+          Result := FailCastAttempt(E_POINTER,
+                                    'Start remuxer',
+                                    'The Chromecast remux pipeline is not available.');
+          Exit;
+        end;
+
+      hr := FComponents.RemuxPipeline.Start(FPendingRemuxRequest,
+                                             FComponents.SegmentPublisher);
+      if (hr <> S_OK) then
+        begin
+          Result := FailCastAttempt(hr,
+                                    'Start remuxer',
+                                    'The Chromecast remux pipeline could not be started.');
+          Exit;
+        end;
+
+      FActiveRemuxRequest := FPendingRemuxRequest;
+      FUsingRemuxedStream := True;
+      FHasPendingRemux := False;
+      FPendingRemuxRequest.Reset();
+    end;
 
   if FHasPendingTranscode then
     begin
@@ -718,230 +839,11 @@ begin
 end;
 
 
-function TMfCastController.CastFile(const ADevice: TMfCastDevice;
-                                    const ASourceName: string;
-                                    const ASubtitle: TMfCastSubtitleAsset;
-                                    const AMediaMode: TMfCastMediaMode;
-                                    const ASubtitleMode: TMfCastSubtitleMode;
-                                    const AStartTime100ns: Int64): HRESULT;
-var
-  SelectedMediaMode: TMfCastMediaMode;
-  SelectedSubtitleMode: TMfCastSubtitleMode;
-  HttpSettings: TMfCastHttpSettings;
-  DeviceHost: string;
-  DevicePort: Word;
-  AdvertisedAddress: string;
-  StartTime100ns: Int64;
-
+function TMfCastController.ConnectReceiver(
+  const ADevice: TMfCastDevice): HRESULT;
 begin
 
-  Log(cllInfo,
-      Format('Cast requested: device="%s" address=%s:%d source="%s"',
-             [ADevice.FriendlyName,
-              ADevice.Address,
-              ADevice.Port,
-              ASourceName]));
-
-  StartTime100ns := AStartTime100ns;
-  if (StartTime100ns < 0) then
-    StartTime100ns := 0;
-
-  if (Trim(ASourceName) = '') then
-    begin
-      Result := E_INVALIDARG;
-      Exit;
-    end;
-
-  if FState in [csConnecting,
-                csConnected,
-                csLaunchingReceiver,
-                csPreparingMedia,
-                csBuffering,
-                csPlaying,
-                csPaused,
-                csStopping] then
-    begin
-      Result := HRESULT_FROM_WIN32(ERROR_BUSY);
-      Exit;
-    end;
-
-  if not Assigned(FComponents.MediaInspector) or
-     not Assigned(FComponents.MediaPlanner) or
-     not Assigned(FComponents.Channel) or
-     not Assigned(FComponents.HttpServer) then
-    begin
-      Result := E_POINTER;
-      Exit;
-    end;
-
-  if FState in [csError, csStopped] then
-    CleanupCastAttempt();
-
   FCurrentDevice := ADevice;
-  FPendingLoadRequest.Reset;
-  FPendingTranscodeRequest.Reset;
-  FHasPendingTranscode := False;
-  FActiveLoadRequest.Reset;
-  FActiveTranscodeRequest.Reset;
-  FUsingTranscodedStream := False;
-  FPlaybackTimeOffset100ns := 0;
-  FMediaLoadStartTick := 0;
-  FMediaPlaybackStarted := False;
-  FSeekInProgress := False;
-  FReplacementLoadPending := False;
-  SetState(csPreparingMedia);
-
-  Result := FComponents.MediaInspector.Inspect(ASourceName,
-                                               FCurrentMedia);
-  if (Result <> S_OK) then
-    begin
-      Result := FailCastAttempt(Result,
-                                'Inspect media',
-                                'The media source could not be inspected.');
-      Exit;
-    end;
-
-  Log(cllDebug,
-      Format('Media inspected: contentType=%s container=%s video=%s audio=%s seekable=%s',
-             [FCurrentMedia.ContentType,
-              FCurrentMedia.ContainerName,
-              BoolToStr(FCurrentMedia.HasVideo, True),
-              BoolToStr(FCurrentMedia.HasAudio, True),
-              BoolToStr(FCurrentMedia.IsSeekable, True)]));
-
-  FCurrentMedia.HasTimedText := ASubtitle.Enabled and
-                                (ASubtitle.Embedded or
-                                 (Trim(ASubtitle.SourceName) <> '') or
-                                 (Length(ASubtitle.Data) > 0));
-
-  if (ASubtitleMode in [csmExternalTextTrack, csmBurnIntoVideo]) and
-     (not FCurrentMedia.HasTimedText) then
-    begin
-      Result := FailCastAttempt(E_INVALIDARG,
-                                'Prepare subtitles',
-                                'The requested subtitle mode has no active subtitle data.');
-      Exit;
-    end;
-
-  Result := FComponents.MediaPlanner.ChooseMode(ADevice,
-                                                FCurrentMedia,
-                                                AMediaMode,
-                                                ASubtitleMode,
-                                                SelectedMediaMode,
-                                                SelectedSubtitleMode);
-  if (Result <> S_OK) then
-    begin
-      Result := FailCastAttempt(Result,
-                                'Choose media mode',
-                                'A suitable Chromecast media route could not be selected.');
-      Exit;
-    end;
-
-  Log(cllInfo,
-      Format('Media route selected: media=%s subtitles=%s',
-             [MfCastMediaModeToString(SelectedMediaMode),
-              MfCastSubtitleModeToString(SelectedSubtitleMode)]));
-
-  if (SelectedMediaMode = cmmTranscodeBurnedSubtitles) and
-     ((not Assigned(FComponents.TranscodePipeline)) or
-      (not Assigned(FComponents.SegmentPublisher))) then
-    begin
-      Result := FailCastAttempt(E_NOTIMPL,
-                                'Choose media route',
-                                'This media requires remuxing or transcoding, but no conversion pipeline is configured.',
-                                'Content type: ' + FCurrentMedia.ContentType +
-                                '; container: ' + FCurrentMedia.ContainerName);
-      Exit;
-    end;
-
-  if not MfCastIsHttpSource(ASourceName) then
-    begin
-      if FComponents.HttpServer.IsRunning then
-        FComponents.HttpServer.Stop();
-
-      HttpSettings := FSettings.Http;
-      DeviceHost := Trim(ADevice.Address);
-
-      if (DeviceHost = '') then
-        DeviceHost := Trim(ADevice.HostName);
-
-      DevicePort := ADevice.Port;
-      if (DevicePort = 0) then
-        DevicePort := FSettings.Protocol.ControlPort;
-
-      if (Trim(HttpSettings.AdvertisedAddress) = '') and
-         MfCastResolveLocalIPv4ForPeer(DeviceHost,
-                                       DevicePort,
-                                       AdvertisedAddress) then
-        HttpSettings.AdvertisedAddress := AdvertisedAddress;
-
-      Result := FComponents.HttpServer.Configure(HttpSettings);
-      if (Result <> S_OK) then
-        begin
-          Result := FailCastAttempt(Result,
-                                    'Configure HTTP server',
-                                    'The local Chromecast HTTP server could not be configured.');
-          Exit;
-        end;
-
-      Result := FComponents.HttpServer.Start();
-      if (Result <> S_OK) then
-        begin
-          Result := FailCastAttempt(Result,
-                                    'Start HTTP server',
-                                    'The local Chromecast HTTP server could not be started.');
-          Exit;
-        end;
-
-      Log(cllDebug,
-          Format('Local HTTP server started: advertisedAddress=%s port=%d',
-                 [HttpSettings.AdvertisedAddress,
-                  FComponents.HttpServer.GetListenPort()]));
-    end;
-
-  case SelectedMediaMode of
-    cmmDirectFile,
-    cmmDirectWithTextTrack:      Result := PrepareDirectFile(ASourceName,
-                                                             ASubtitle,
-                                                             SelectedSubtitleMode,
-                                                             FPendingLoadRequest);
-
-    cmmTranscodeBurnedSubtitles: Result := PrepareTranscodedStream(ASourceName,
-                                                                   ASubtitle,
-                                                                   SelectedSubtitleMode,
-                                                                   FPendingLoadRequest);
-  else
-    Result := E_UNEXPECTED;
-  end;
-
-  if (Result = S_OK) then
-    begin
-
-      if SelectedMediaMode in [cmmDirectFile, cmmDirectWithTextTrack] then
-        begin
-          FUsingTranscodedStream := False;
-          FPendingLoadRequest.StartTime100ns := StartTime100ns;
-          FPlaybackTimeOffset100ns := 0;
-        end
-      else
-        begin
-          // The transcoder seeks into the source and rebases its output to
-          // zero. Add the source offset back to receiver status callbacks so
-          // the player UI always sees the original media timeline.
-          FPendingTranscodeRequest.StartTime100ns := StartTime100ns;
-          FPendingLoadRequest.StartTime100ns := 0;
-          FPlaybackTimeOffset100ns := StartTime100ns;
-        end;
-    end;
-
-  if (Result <> S_OK) then
-    begin
-      Result := FailCastAttempt(Result,
-                                'Prepare media',
-                                'The media could not be prepared for Chromecast.');
-      Exit;
-    end;
-
   SetState(csConnecting);
 
   Log(cllInfo,
@@ -1008,6 +910,406 @@ begin
       Exit;
     end;
 
+  SetState(csConnected);
+  Result := S_OK;
+end;
+
+
+function TMfCastController.Connect(const ADevice: TMfCastDevice): HRESULT;
+begin
+
+  if FState in [csConnecting,
+                csConnected,
+                csLaunchingReceiver,
+                csPreparingMedia,
+                csBuffering,
+                csPlaying,
+                csPaused,
+                csStopping] then
+    begin
+      Result := HRESULT_FROM_WIN32(ERROR_BUSY);
+      Exit;
+    end;
+
+  if not Assigned(FComponents.Channel) then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
+
+  if FState in [csError, csStopped] then
+    CleanupCastAttempt();
+
+  FPendingLoadRequest.Reset();
+  FPendingTranscodeRequest.Reset();
+  FHasPendingTranscode := False;
+  FPendingRemuxRequest.Reset();
+  FHasPendingRemux := False;
+  FActiveLoadRequest.Reset();
+  FActiveTranscodeRequest.Reset();
+  FActiveRemuxRequest.Reset();
+  FUsingTranscodedStream := False;
+  FUsingRemuxedStream := False;
+  FPlaybackTimeOffset100ns := 0;
+  FLastMediaPosition100ns := 0;
+  FCurrentMediaSessionId := 0;
+  FReplacedMediaSessionId := 0;
+  FMediaLoadStartTick := 0;
+  FMediaPlaybackStarted := False;
+  FSeekInProgress := False;
+  FReplacementLoadPending := False;
+  FCurrentMedia.Reset();
+
+  Result := ConnectReceiver(ADevice);
+end;
+
+
+function TMfCastController.LoadFile(const ASourceName: string;
+                                    const ASubtitle: TMfCastSubtitleAsset;
+                                    const AMediaMode: TMfCastMediaMode;
+                                    const ASubtitleMode: TMfCastSubtitleMode;
+                                    const AStartTime100ns: Int64): HRESULT;
+begin
+
+  if not (FState in [csConnected,
+                     csBuffering,
+                     csPlaying,
+                     csPaused]) then
+    begin
+      Result := E_UNEXPECTED;
+      Exit;
+    end;
+
+  if (FState <> csConnected) then
+    begin
+      FReplacementLoadPending := True;
+      FReplacedMediaSessionId := FCurrentMediaSessionId;
+      CleanupMediaForLoad();
+      SetState(csConnected);
+    end;
+
+  Result := ExecuteCastFile(FCurrentDevice,
+                            ASourceName,
+                            ASubtitle,
+                            AMediaMode,
+                            ASubtitleMode,
+                            AStartTime100ns,
+                            False);
+end;
+
+
+function TMfCastController.CastFile(const ADevice: TMfCastDevice;
+                                    const ASourceName: string;
+                                    const ASubtitle: TMfCastSubtitleAsset;
+                                    const AMediaMode: TMfCastMediaMode;
+                                    const ASubtitleMode: TMfCastSubtitleMode;
+                                    const AStartTime100ns: Int64): HRESULT;
+begin
+
+  Result := ExecuteCastFile(ADevice,
+                            ASourceName,
+                            ASubtitle,
+                            AMediaMode,
+                            ASubtitleMode,
+                            AStartTime100ns,
+                            True);
+end;
+
+
+function TMfCastController.ExecuteCastFile(const ADevice: TMfCastDevice;
+                                           const ASourceName: string;
+                                           const ASubtitle: TMfCastSubtitleAsset;
+                                           const AMediaMode: TMfCastMediaMode;
+                                           const ASubtitleMode: TMfCastSubtitleMode;
+                                           const AStartTime100ns: Int64;
+                                           const AConnectReceiver: Boolean): HRESULT;
+var
+  SelectedMediaMode: TMfCastMediaMode;
+  SelectedSubtitleMode: TMfCastSubtitleMode;
+  HttpSettings: TMfCastHttpSettings;
+  DeviceHost: string;
+  DevicePort: Word;
+  AdvertisedAddress: string;
+  StartTime100ns: Int64;
+
+begin
+
+  if AConnectReceiver then
+    Log(cllInfo,
+        Format('Cast requested: device="%s" address=%s:%d source="%s"',
+               [ADevice.FriendlyName,
+                ADevice.Address,
+                ADevice.Port,
+                ASourceName]))
+  else
+    Log(cllInfo,
+        Format('Load requested: source="%s"',
+               [ASourceName]));
+
+  StartTime100ns := AStartTime100ns;
+  if (StartTime100ns < 0) then
+    StartTime100ns := 0;
+
+  if (Trim(ASourceName) = '') then
+    begin
+      Result := E_INVALIDARG;
+      Exit;
+    end;
+
+  if AConnectReceiver and
+     (FState in [csConnecting,
+                 csConnected,
+                 csLaunchingReceiver,
+                 csPreparingMedia,
+                 csBuffering,
+                 csPlaying,
+                 csPaused,
+                 csStopping]) then
+    begin
+      Result := HRESULT_FROM_WIN32(ERROR_BUSY);
+      Exit;
+    end;
+
+  if not Assigned(FComponents.MediaInspector) or
+     not Assigned(FComponents.MediaPlanner) or
+     not Assigned(FComponents.Channel) or
+     not Assigned(FComponents.HttpServer) then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
+
+  if AConnectReceiver and (FState in [csError, csStopped]) then
+    CleanupCastAttempt();
+
+  FCurrentDevice := ADevice;
+  FPendingLoadRequest.Reset;
+  FPendingTranscodeRequest.Reset;
+  FHasPendingTranscode := False;
+  FPendingRemuxRequest.Reset;
+  FHasPendingRemux := False;
+  FActiveLoadRequest.Reset;
+  FActiveTranscodeRequest.Reset;
+  FActiveRemuxRequest.Reset;
+  FUsingTranscodedStream := False;
+  FUsingRemuxedStream := False;
+  FPlaybackTimeOffset100ns := 0;
+  FCurrentMediaSessionId := 0;
+  if AConnectReceiver then
+    FReplacedMediaSessionId := 0;
+  FMediaLoadStartTick := 0;
+  FMediaPlaybackStarted := False;
+  FSeekInProgress := False;
+  if AConnectReceiver then
+    FReplacementLoadPending := False;
+  SetState(csPreparingMedia);
+
+  Result := FComponents.MediaInspector.Inspect(ASourceName,
+                                               FCurrentMedia);
+  if (Result <> S_OK) then
+    begin
+      Result := FailCastAttempt(Result,
+                                'Inspect media',
+                                'The media source could not be inspected.');
+      Exit;
+    end;
+
+  Log(cllDebug,
+      Format('Media inspected: contentType=%s container=%s video=%s audio=%s seekable=%s',
+             [FCurrentMedia.ContentType,
+              FCurrentMedia.ContainerName,
+              BoolToStr(FCurrentMedia.HasVideo, True),
+              BoolToStr(FCurrentMedia.HasAudio, True),
+              BoolToStr(FCurrentMedia.IsSeekable, True)]));
+
+  FCurrentMedia.HasTimedText := ASubtitle.Enabled and
+                                (ASubtitle.Embedded or
+                                 (Trim(ASubtitle.SourceName) <> '') or
+                                 (Length(ASubtitle.Data) > 0));
+
+  if (ASubtitleMode in [csmExternalTextTrack, csmBurnIntoVideo]) and
+     (not FCurrentMedia.HasTimedText) then
+    begin
+      Result := FailCastAttempt(E_INVALIDARG,
+                                'Prepare subtitles',
+                                'The requested subtitle mode has no active subtitle data.');
+      Exit;
+    end;
+
+  Result := FComponents.MediaPlanner.ChooseMode(ADevice,
+                                                FCurrentMedia,
+                                                AMediaMode,
+                                                ASubtitleMode,
+                                                SelectedMediaMode,
+                                                SelectedSubtitleMode);
+  if (Result <> S_OK) then
+    begin
+      Result := FailCastAttempt(Result,
+                                'Choose media mode',
+                                'A suitable Chromecast media route could not be selected.');
+      Exit;
+    end;
+
+  Log(cllInfo,
+      Format('Media route selected: media=%s subtitles=%s',
+             [MfCastMediaModeToString(SelectedMediaMode),
+              MfCastSubtitleModeToString(SelectedSubtitleMode)]));
+
+  if (SelectedMediaMode = cmmTranscodeBurnedSubtitles) and
+     ((not Assigned(FComponents.TranscodePipeline)) or
+      (not Assigned(FComponents.SegmentPublisher))) then
+    begin
+      Result := FailCastAttempt(E_NOTIMPL,
+                                'Choose media route',
+                                'This media requires remuxing or transcoding, but no conversion pipeline is configured.',
+                                'Content type: ' + FCurrentMedia.ContentType +
+                                '; container: ' + FCurrentMedia.ContainerName);
+      Exit;
+    end;
+
+  if (SelectedMediaMode = cmmRemuxFile) and
+     ((not Assigned(FComponents.RemuxPipeline)) or
+      (not Assigned(FComponents.SegmentPublisher))) then
+    begin
+      Result := FailCastAttempt(E_NOTIMPL,
+                                'Choose media route',
+                                'This media can be remuxed without re-encoding, but no remux pipeline is configured.',
+                                'Content type: ' + FCurrentMedia.ContentType +
+                                '; container: ' + FCurrentMedia.ContainerName);
+      Exit;
+    end;
+
+  if (SelectedMediaMode = cmmRemuxFile) and
+     ((not SameText(FCurrentMedia.ContainerName, 'Matroska')) or
+      (not FCurrentMedia.HasVideo) or
+      (not IsEqualGUID(FCurrentMedia.VideoSubtype, MFVideoFormat_H264)) or
+      (FCurrentMedia.HasAudio and
+       (not IsEqualGUID(FCurrentMedia.AudioSubtype, MFAudioFormat_AAC)))) then
+    begin
+      Result := FailCastAttempt(MF_E_INVALIDMEDIATYPE,
+                                'Choose remux route',
+                                'The Matroska streams are not compatible with MP4 pass-through.');
+      Exit;
+    end;
+
+  if (SelectedMediaMode = cmmRemuxFile) and
+     FCurrentMedia.HasTimedText and
+     (SelectedSubtitleMode <> csmNone) then
+    begin
+      Result := FailCastAttempt(E_NOTIMPL,
+                                'Choose remux route',
+                                'Active subtitles require the full transcoding route.');
+      Exit;
+    end;
+
+  if not MfCastIsHttpSource(ASourceName) then
+    begin
+      if FComponents.HttpServer.IsRunning then
+        FComponents.HttpServer.Stop();
+
+      HttpSettings := FSettings.Http;
+      DeviceHost := Trim(ADevice.Address);
+
+      if (DeviceHost = '') then
+        DeviceHost := Trim(ADevice.HostName);
+
+      DevicePort := ADevice.Port;
+      if (DevicePort = 0) then
+        DevicePort := FSettings.Protocol.ControlPort;
+
+      if (Trim(HttpSettings.AdvertisedAddress) = '') and
+         MfCastResolveLocalIPv4ForPeer(DeviceHost,
+                                       DevicePort,
+                                       AdvertisedAddress) then
+        HttpSettings.AdvertisedAddress := AdvertisedAddress;
+
+      Result := FComponents.HttpServer.Configure(HttpSettings);
+      if (Result <> S_OK) then
+        begin
+          Result := FailCastAttempt(Result,
+                                    'Configure HTTP server',
+                                    'The local Chromecast HTTP server could not be configured.');
+          Exit;
+        end;
+
+      Result := FComponents.HttpServer.Start();
+      if (Result <> S_OK) then
+        begin
+          Result := FailCastAttempt(Result,
+                                    'Start HTTP server',
+                                    'The local Chromecast HTTP server could not be started.');
+          Exit;
+        end;
+
+      Log(cllDebug,
+          Format('Local HTTP server started: advertisedAddress=%s port=%d',
+                 [HttpSettings.AdvertisedAddress,
+                  FComponents.HttpServer.GetListenPort()]));
+    end;
+
+  case SelectedMediaMode of
+    cmmDirectFile,
+    cmmDirectWithTextTrack:      Result := PrepareDirectFile(ASourceName,
+                                                             ASubtitle,
+                                                             SelectedSubtitleMode,
+                                                             FPendingLoadRequest);
+
+    cmmTranscodeBurnedSubtitles: Result := PrepareTranscodedStream(ASourceName,
+                                                                   ASubtitle,
+                                                                   SelectedSubtitleMode,
+                                                                   FPendingLoadRequest);
+    cmmRemuxFile:                Result := PrepareRemuxedStream(ASourceName,
+                                                               FPendingLoadRequest);
+  else
+    Result := E_UNEXPECTED;
+  end;
+
+  if (Result = S_OK) then
+    begin
+
+      if SelectedMediaMode in [cmmDirectFile, cmmDirectWithTextTrack] then
+        begin
+          FUsingTranscodedStream := False;
+          FUsingRemuxedStream := False;
+          FPendingLoadRequest.StartTime100ns := StartTime100ns;
+          FPlaybackTimeOffset100ns := 0;
+        end
+      else
+        if (SelectedMediaMode = cmmRemuxFile) then
+          begin
+            FUsingTranscodedStream := False;
+            FUsingRemuxedStream := True;
+            FPendingRemuxRequest.StartTime100ns := StartTime100ns;
+            FPendingLoadRequest.StartTime100ns := 0;
+            FPlaybackTimeOffset100ns := StartTime100ns;
+          end
+        else
+          begin
+            // The transcoder seeks into the source and rebases its output to
+            // zero. Add the source offset back to receiver status callbacks so
+            // the player UI always sees the original media timeline.
+            FPendingTranscodeRequest.StartTime100ns := StartTime100ns;
+            FUsingRemuxedStream := False;
+            FPendingLoadRequest.StartTime100ns := 0;
+            FPlaybackTimeOffset100ns := StartTime100ns;
+          end;
+    end;
+
+  if (Result <> S_OK) then
+    begin
+      Result := FailCastAttempt(Result,
+                                'Prepare media',
+                                'The media could not be prepared for Chromecast.');
+      Exit;
+    end;
+
+  if AConnectReceiver then
+    begin
+      Result := ConnectReceiver(ADevice);
+      if (Result <> S_OK) then
+        Exit;
+    end;
+
   Result := StartPendingMedia();
   if (Result = S_OK) then
     Log(cllInfo,
@@ -1033,6 +1335,7 @@ end;
 function TMfCastController.Play(): HRESULT;
 const
   MEDIA_STATUS_RECOVERY_TIMEOUT_MS = 5000;
+
 var
   RecoveryResult: HRESULT;
 
@@ -1092,7 +1395,16 @@ begin
         Result := RecoveryResult;
     end;
 
-  if SUCCEEDED(Result) and Assigned(FComponents.TranscodePipeline) then
+  if SUCCEEDED(Result) and FUsingRemuxedStream and
+     Assigned(FComponents.RemuxPipeline) then
+    begin
+      RecoveryResult := FComponents.RemuxPipeline.Resume();
+      if FAILED(RecoveryResult) then
+        Result := RecoveryResult;
+    end;
+
+  if SUCCEEDED(Result) and FUsingTranscodedStream and
+     Assigned(FComponents.TranscodePipeline) then
     begin
       RecoveryResult := FComponents.TranscodePipeline.Resume();
       Log(cllDebug,
@@ -1113,7 +1425,12 @@ begin
   else
     Result := E_POINTER;
 
-  if SUCCEEDED(Result) and Assigned(FComponents.TranscodePipeline) then
+  if SUCCEEDED(Result) and FUsingRemuxedStream and
+     Assigned(FComponents.RemuxPipeline) then
+    FComponents.RemuxPipeline.Pause();
+
+  if SUCCEEDED(Result) and FUsingTranscodedStream and
+     Assigned(FComponents.TranscodePipeline) then
     FComponents.TranscodePipeline.Pause();
 end;
 
@@ -1143,6 +1460,9 @@ begin
   if Assigned(FComponents.SegmentPublisher) then
     FComponents.SegmentPublisher.AbortPresentation(E_ABORT);
 
+  if Assigned(FComponents.RemuxPipeline) then
+    FComponents.RemuxPipeline.Stop();
+
   if Assigned(FComponents.TranscodePipeline) then
     FComponents.TranscodePipeline.Stop();
 
@@ -1165,10 +1485,16 @@ begin
   FPendingLoadRequest.Reset();
   FPendingTranscodeRequest.Reset();
   FHasPendingTranscode := False;
+  FPendingRemuxRequest.Reset();
+  FHasPendingRemux := False;
   FActiveLoadRequest.Reset();
   FActiveTranscodeRequest.Reset();
+  FActiveRemuxRequest.Reset();
   FUsingTranscodedStream := False;
+  FUsingRemuxedStream := False;
   FPlaybackTimeOffset100ns := 0;
+  FCurrentMediaSessionId := 0;
+  FReplacedMediaSessionId := 0;
   FMediaLoadStartTick := 0;
   FMediaPlaybackStarted := False;
   FSeekInProgress := False;
@@ -1202,6 +1528,7 @@ var
   EntryPath: string;
   Url: string;
   RestartRequest: TMfCastTranscodeRequest;
+  RemuxRestartRequest: TMfCastRemuxRequest;
   ReloadRequest: TMfCastLoadRequest;
   ReceiverPosition100ns: Int64;
   SeekPosition100ns: Int64;
@@ -1209,14 +1536,14 @@ var
 begin
 
   SeekPosition100ns := APosition100ns;
-  if SeekPosition100ns < 0 then
+  if (SeekPosition100ns < 0) then
     SeekPosition100ns := 0;
 
   Log(cllInfo,
       Format('Seek requested: position=%.3f seconds.',
              [SeekPosition100ns / 10000000.0]));
 
-  if FUsingTranscodedStream then
+  if FUsingTranscodedStream or FUsingRemuxedStream then
     begin
 
       if FSeekInProgress then
@@ -1225,7 +1552,10 @@ begin
           Exit;
         end;
 
-      if (not Assigned(FComponents.TranscodePipeline)) or
+      if (FUsingTranscodedStream and
+          (not Assigned(FComponents.TranscodePipeline))) or
+         (FUsingRemuxedStream and
+          (not Assigned(FComponents.RemuxPipeline))) or
          (not Assigned(FComponents.SegmentPublisher)) or
          (not Assigned(FComponents.HttpServer)) or
          (not Assigned(FComponents.Channel)) then
@@ -1240,12 +1570,17 @@ begin
         FMediaLoadStartTick := 0;
         FMediaPlaybackStarted := False;
         SetState(csPreparingMedia);
-        Result := FComponents.TranscodePipeline.Stop();
+
+        if FUsingRemuxedStream then
+          Result := FComponents.RemuxPipeline.Stop()
+        else
+          Result := FComponents.TranscodePipeline.Stop();
+
         if FAILED(Result) then
           begin
             Result := FailCastAttempt(Result,
-                                      'Seek transcoder',
-                                      'The current Chromecast transcode could not be stopped.');
+                                      'Seek generated stream',
+                                      'The current Chromecast conversion could not be stopped.');
             Exit;
           end;
 
@@ -1272,27 +1607,40 @@ begin
 
         // Force the receiver to treat the republished path as a new media item.
         // The HTTP server intentionally strips the query string for lookup.
-        Url := Url + '?seek=' + IntToStr(SeekPosition100ns) +
-               '&request=' + IntToStr(GetTickCount());
+        Url := Url + '?seek=' + IntToStr(SeekPosition100ns) + '&request=' + IntToStr(GetTickCount());
 
-        RestartRequest := FActiveTranscodeRequest;
-        RestartRequest.StartTime100ns := SeekPosition100ns;
         ReloadRequest := FActiveLoadRequest;
         ReloadRequest.ContentId := Url;
         ReloadRequest.StartTime100ns := 0;
 
-        Result := FComponents.TranscodePipeline.Start(RestartRequest,
-                                                      FComponents.SegmentPublisher,
-                                                      FComponents.PreviewSink);
+        if FUsingRemuxedStream then
+          begin
+            RemuxRestartRequest := FActiveRemuxRequest;
+            RemuxRestartRequest.StartTime100ns := SeekPosition100ns;
+            Result := FComponents.RemuxPipeline.Start(RemuxRestartRequest,
+                                                      FComponents.SegmentPublisher);
+          end
+        else
+          begin
+            RestartRequest := FActiveTranscodeRequest;
+            RestartRequest.StartTime100ns := SeekPosition100ns;
+            Result := FComponents.TranscodePipeline.Start(RestartRequest,
+                                                          FComponents.SegmentPublisher,
+                                                          FComponents.PreviewSink);
+          end;
         if FAILED(Result) then
           begin
             Result := FailCastAttempt(Result,
-                                      'Seek transcoder',
-                                      'The Chromecast transcoder could not restart at the selected position.');
+                                      'Seek generated stream',
+                                      'The Chromecast conversion could not restart at the selected position.');
             Exit;
           end;
 
-        FActiveTranscodeRequest := RestartRequest;
+        if FUsingRemuxedStream then
+          FActiveRemuxRequest := RemuxRestartRequest
+        else
+          FActiveTranscodeRequest := RestartRequest;
+
         FActiveLoadRequest := ReloadRequest;
         FPlaybackTimeOffset100ns := SeekPosition100ns;
         SetState(csBuffering);
@@ -1304,8 +1652,10 @@ begin
           begin
 
             OutputDebugString(PChar(Format('MfCast seek: direct LOAD failed hr=%.8x; recreating control channel',
-                                          [DWORD(Result)])));
+                                           [DWORD(Result)])));
+
             Result := RecreateControlChannel();
+
             if (Result = S_OK) then
               Result := FComponents.Channel.Connect(FCurrentDevice);
 
@@ -1340,7 +1690,7 @@ begin
       Exit;
     end;
 
-  // Transcoded output is rebased to zero at its source start position. Keep
+  // Generated output is rebased to zero at its source start position. Keep
   // callers on the original file timeline and translate only for the receiver.
   ReceiverPosition100ns := SeekPosition100ns - FPlaybackTimeOffset100ns;
   if (ReceiverPosition100ns < 0) then
@@ -1384,8 +1734,7 @@ begin
 end;
 
 
-function TMfCastController.SelectSubtitle(
-  const ASubtitle: TMfCastSubtitleAsset): HRESULT;
+function TMfCastController.SelectSubtitle(const ASubtitle: TMfCastSubtitleAsset): HRESULT;
 begin
 
   if not ASubtitle.Enabled then
@@ -1405,11 +1754,13 @@ begin
              [ASubtitle.TrackId,
               ASubtitle.StreamIndex,
               ASubtitle.Language]));
+
   FActiveTranscodeRequest.SubtitleMode := csmBurnIntoVideo;
   if ASubtitle.Embedded or (Trim(ASubtitle.SourceName) = '') then
     FActiveTranscodeRequest.SubtitleSourceName := FActiveTranscodeRequest.SourceName
   else
     FActiveTranscodeRequest.SubtitleSourceName := ASubtitle.SourceName;
+
   FActiveTranscodeRequest.SubtitleLanguage := ASubtitle.Language;
   FActiveTranscodeRequest.SubtitleTrackId := ASubtitle.TrackId;
   FActiveTranscodeRequest.SubtitleStreamIndex := ASubtitle.StreamIndex;
@@ -1422,8 +1773,7 @@ begin
 end;
 
 
-function TMfCastController.SelectSubtitleTrack(
-  const ATrackId: Int64): HRESULT;
+function TMfCastController.SelectSubtitleTrack(const ATrackId: Int64): HRESULT;
 var
   Kind: TMfCastTrackKind;
   Source: TMfCastTrackSource;
@@ -1432,7 +1782,10 @@ var
 
 begin
 
-  if not MfCastDecodeTrackId(ATrackId, Kind, Source, StreamIndex) or
+  if not MfCastDecodeTrackId(ATrackId,
+                             Kind,
+                             Source,
+                             StreamIndex) or
      (Kind <> ctkSubtitle) or
      (not (Source in [ctsMediaFoundation, ctsMatroska])) then
     begin
@@ -1612,6 +1965,7 @@ begin
     FCallbacks.OnDeviceUpdated(ADevice);
 end;
 
+
 procedure TMfCastController.DeviceRemoved(const ADeviceId: string);
 begin
 
@@ -1675,9 +2029,19 @@ begin
   if FSeekInProgress and (FMediaLoadStartTick = 0) then
     Exit;
 
+  if FReplacementLoadPending and
+     (FReplacedMediaSessionId <> 0) and
+     (AStatus.MediaSessionId = FReplacedMediaSessionId) then
+    begin
+      Log(cllDebug,
+          Format('Ignoring status from replaced media session %d.',
+                 [AStatus.MediaSessionId]));
+      Exit;
+    end;
+
   if SameText(AStatus.PlayerState, 'IDLE') and
       ((not SameText(AStatus.IdleReason, 'ERROR')) or FReplacementLoadPending) and
-     FUsingTranscodedStream and
+     (FUsingTranscodedStream or FUsingRemuxedStream) and
      (not FMediaPlaybackStarted) and
      (FMediaLoadStartTick <> 0) then
     begin
@@ -1695,6 +2059,8 @@ begin
     end;
 
   CallbackStatus := AStatus;
+  if AStatus.MediaSessionId <> 0 then
+    FCurrentMediaSessionId := AStatus.MediaSessionId;
   if (FPlaybackTimeOffset100ns > 0) and
      (CallbackStatus.CurrentTime100ns >= 0) then
     Inc(CallbackStatus.CurrentTime100ns,
@@ -2052,6 +2418,56 @@ begin
   // worker writing into a presentation replaced by a later attempt.
   FPendingTranscodeRequest := Request;
   FHasPendingTranscode := True;
+
+  ALoadRequest.ContentId := Url;
+  ALoadRequest.ContentType := 'video/mp4';
+  ALoadRequest.StreamType := cstBuffered;
+  ALoadRequest.Title := FCurrentMedia.Title;
+  ALoadRequest.AutoPlay := True;
+
+  Result := S_OK;
+end;
+
+
+function TMfCastController.PrepareRemuxedStream(
+  const ASourceName: string;
+  out ALoadRequest: TMfCastLoadRequest): HRESULT;
+var
+  Request: TMfCastRemuxRequest;
+  EntryPath: string;
+  Url: string;
+
+begin
+
+  ALoadRequest.Reset();
+
+  if (not Assigned(FComponents.RemuxPipeline)) or
+     (not Assigned(FComponents.SegmentPublisher)) or
+     (not Assigned(FComponents.HttpServer)) then
+    begin
+      Result := E_POINTER;
+      Exit;
+    end;
+
+  Request.Reset();
+  Request.SourceName := ASourceName;
+  Request.Title := FCurrentMedia.Title;
+
+  Result := FComponents.SegmentPublisher.BeginPresentation('video/mp4',
+                                                            EntryPath);
+  if FAILED(Result) then
+    Exit;
+
+  Result := FComponents.HttpServer.BuildUrl(EntryPath, Url);
+  if FAILED(Result) then
+    begin
+      FComponents.SegmentPublisher.AbortPresentation(Result);
+      Exit;
+    end;
+
+  OutputDebugString(PChar('MfCast REMUX URL: ' + Url));
+  FPendingRemuxRequest := Request;
+  FHasPendingRemux := True;
 
   ALoadRequest.ContentId := Url;
   ALoadRequest.ContentType := 'video/mp4';

@@ -81,6 +81,7 @@ uses
   WinApi.MediaFoundationApi.MfIdl,
   WinApi.MediaFoundationApi.MfObjects,
   WinApi.MediaFoundationApi.MfReadWrite,
+  WinApi.MediaFoundationApi.MfMetLib,
   {Cast}
   MfCastTypes,
   MfCastInterfaces,
@@ -152,7 +153,8 @@ var
 begin
 
   Index := Length(ATracks);
-  SetLength(ATracks, Index + 1);
+  SetLength(ATracks,
+            Index + 1);
   ATracks[Index] := ATrack;
 end;
 
@@ -168,8 +170,11 @@ begin
   Result := '';
   PropVariantInit(Value);
   try
-    if FAILED(AReader.GetPresentationAttribute(AStreamIndex, AKey, Value)) then
+    if FAILED(AReader.GetPresentationAttribute(AStreamIndex,
+                                               AKey,
+                                               Value)) then
       Exit;
+
     case Value.vt of
       VT_LPWSTR: if Assigned(Value.pwszVal) then
                    Result := Value.pwszVal;
@@ -187,8 +192,14 @@ end;
 function MfCastIsHttpSource(const ASourceName: string): Boolean;
 begin
 
-  Result := SameText(Copy(ASourceName, 1, 7), 'http://') or
-            SameText(Copy(ASourceName, 1, 8), 'https://');
+  Result := SameText(Copy(ASourceName,
+                          1,
+                          7),
+                          'http://') or
+            SameText(Copy(ASourceName,
+                          1,
+                          8),
+                          'https://');
 end;
 
 
@@ -200,13 +211,19 @@ begin
 
   Result := ASourceName;
 
-  DelimiterPos := Pos('?', Result);
-  if DelimiterPos > 0 then
-    Delete(Result, DelimiterPos, MaxInt);
+  DelimiterPos := Pos('?',
+                      Result);
+  if (DelimiterPos > 0) then
+    Delete(Result,
+           DelimiterPos,
+           MaxInt);
 
-  DelimiterPos := Pos('#', Result);
-  if DelimiterPos > 0 then
-    Delete(Result, DelimiterPos, MaxInt);
+  DelimiterPos := Pos('#',
+                      Result);
+  if (DelimiterPos > 0) then
+    Delete(Result,
+           DelimiterPos,
+           MaxInt);
 end;
 
 
@@ -359,6 +376,15 @@ function TMfCastMediaInspector.Inspect(const ASourceName: string;
 var
   SourceName: string;
   Ext: string;
+  Reader: IMFSourceReader;
+  MediaType: IMFMediaType;
+  MajorType: TGUID;
+  Subtype: TGUID;
+  StreamCount: DWORD;
+  StreamIndex: DWORD;
+  Value: UINT32;
+  ActualVideo: Boolean;
+  ActualAudio: Boolean;
 
 begin
 
@@ -391,6 +417,87 @@ begin
 
   if (not AMediaInfo.HasVideo) and (not AMediaInfo.HasAudio) then
     AMediaInfo.HasVideo := True;
+
+  // Keep extension-based inspection as the tolerant baseline, but enrich it
+  // with native compressed stream types when Media Foundation can open the
+  // source. The planner needs this information to distinguish remuxing from
+  // decoding and re-encoding.
+  Reader := nil;
+  if SUCCEEDED(MFCreateSourceReaderFromURL(PWideChar(WideString(SourceName)),
+                                           nil,
+                                           Reader)) then
+    begin
+      ActualVideo := False;
+      ActualAudio := False;
+      StreamCount := CountSourceReaderStreams(Reader);
+
+      if (StreamCount > 0) then
+      for StreamIndex := 0 to StreamCount - 1 do
+        begin
+          MediaType := nil;
+          if FAILED(Reader.GetNativeMediaType(StreamIndex,
+                                              0,
+                                              @MediaType)) or
+             (not Assigned(MediaType)) or
+             FAILED(MediaType.GetGUID(MF_MT_MAJOR_TYPE,
+                                      MajorType)) or
+             FAILED(MediaType.GetGUID(MF_MT_SUBTYPE,
+                                      Subtype)) then
+            Continue;
+
+          if IsEqualGUID(MajorType,
+                         MFMediaType_Video) and (not ActualVideo) then
+            begin
+              ActualVideo := True;
+              AMediaInfo.VideoSubtype := Subtype;
+
+              MFGetAttributeSize(MediaType,
+                                 MF_MT_FRAME_SIZE,
+                                 AMediaInfo.VideoWidth,
+                                 AMediaInfo.VideoHeight);
+
+              MFGetAttributeRatio(MediaType,
+                                  MF_MT_FRAME_RATE,
+                                  AMediaInfo.FrameRateNumerator,
+                                  AMediaInfo.FrameRateDenominator);
+
+              Value := 0;
+              if SUCCEEDED(MediaType.GetUINT32(MF_MT_AVG_BITRATE,
+                                               Value)) then
+                AMediaInfo.VideoBitrate := Value;
+            end
+          else
+            if IsEqualGUID(MajorType,
+                           MFMediaType_Audio) and (not ActualAudio) then
+            begin
+              ActualAudio := True;
+              AMediaInfo.AudioSubtype := Subtype;
+              Value := 0;
+
+              if SUCCEEDED(MediaType.GetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,
+                                               Value)) then
+                AMediaInfo.AudioSampleRate := Value;
+
+              Value := 0;
+
+              if SUCCEEDED(MediaType.GetUINT32(MF_MT_AUDIO_NUM_CHANNELS,
+                                               Value)) then
+                AMediaInfo.AudioChannels := Value;
+
+              Value := 0;
+
+              if SUCCEEDED(MediaType.GetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND,
+                                               Value)) then
+                AMediaInfo.AudioBitrate := Value * 8;
+            end;
+        end;
+
+      if ActualVideo or ActualAudio then
+        begin
+          AMediaInfo.HasVideo := ActualVideo;
+          AMediaInfo.HasAudio := ActualAudio;
+        end;
+    end;
 
   Result := S_OK;
 end;
@@ -540,7 +647,9 @@ begin
       Inc(StreamIndex);
     end;
 
-  SetLength(EmbeddedTracks, 0);
+  SetLength(EmbeddedTracks,
+            0);
+
   Hr := TMfEmbeddedSubtitleReader.EnumerateTracks(ASourceName,
                                                   EmbeddedTracks);
   if SUCCEEDED(Hr) then
@@ -581,6 +690,7 @@ var
   ContentAllowed: Boolean;
   VideoAllowed: Boolean;
   AudioAllowed: Boolean;
+  RemuxCompatible: Boolean;
 
 begin
 
@@ -617,6 +727,17 @@ begin
                   (Profile.AllowUnknownFormats and
                    (Length(Profile.AllowedAudioSubtypes) = 0));
 
+  RemuxCompatible := SameText(AMediaInfo.ContainerName,
+                              'Matroska') and
+                     AMediaInfo.HasVideo and
+                     IsEqualGUID(AMediaInfo.VideoSubtype,
+                                 MFVideoFormat_H264) and
+                     ((not AMediaInfo.HasAudio) or
+                      IsEqualGUID(AMediaInfo.AudioSubtype,
+                                  MFAudioFormat_AAC)) and
+                     ((not AMediaInfo.HasTimedText) or
+                      (ARequestedSubtitleMode = csmNone));
+
   if ContentAllowed and VideoAllowed and AudioAllowed then
     begin
       if AMediaInfo.HasTimedText and
@@ -634,14 +755,21 @@ begin
         end;
     end
   else
-    begin
+    if RemuxCompatible then
+      begin
+        ASelectedMediaMode := cmmRemuxFile;
+        if (ARequestedSubtitleMode = csmAutomatic) then
+          ASelectedSubtitleMode := csmNone;
+      end
+    else
+      begin
 
-      ASelectedMediaMode := cmmTranscodeBurnedSubtitles;
-      if AMediaInfo.HasTimedText and (ARequestedSubtitleMode <> csmNone) then
-        ASelectedSubtitleMode := csmBurnIntoVideo
-      else
-        ASelectedSubtitleMode := csmNone;
-    end;
+        ASelectedMediaMode := cmmTranscodeBurnedSubtitles;
+        if AMediaInfo.HasTimedText and (ARequestedSubtitleMode <> csmNone) then
+          ASelectedSubtitleMode := csmBurnIntoVideo
+        else
+          ASelectedSubtitleMode := csmNone;
+      end;
 
   Result := S_OK;
 end;

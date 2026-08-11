@@ -1,4 +1,64 @@
-﻿unit MfCast;
+﻿// FactoryX
+//
+// Copyright © FactoryX, Netherlands/Australia/Germany. All rights reserved.
+//
+// Project: Media Foundation - MFPack - Samples
+// Project location: https://sourceforge.net/projects/MFPack
+//                   https://github.com/FactoryXCode/MfPack
+// Module: MfCast.pas
+// Kind: Pascal Unit
+// Release date: 10-08-2026
+// Language: ENU
+//
+// Revision Version: 3.2.0
+// Description: Public facade for Cast discovery, connection, media loading,
+//              and playback control.
+//
+// Company: FactoryX
+// Intiator(s): Tony (maXcomX), Carmen (carmenh).
+// Contributor(s): Tony Kalf (maXcomX), Carmen (carmenh).
+//
+//------------------------------------------------------------------------------
+// CHANGE LOG
+// Date       Person              Reason
+// ---------- ------------------- ----------------------------------------------
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+//------------------------------------------------------------------------------
+//
+// Remarks: Requires Windows 7 or higher.
+//
+// Related objects: -
+// Related projects: MfPackX320
+// Known Issues: -
+//
+// Compiler version: 23 up to 35
+// SDK version: 10.0.26100.4654
+//
+// Todo: -
+//
+// =============================================================================
+// Source: Google Cast V2 wire protocol
+//==============================================================================
+//
+// LICENSE
+//
+// The contents of this file are subject to the Mozilla Public License
+// Version 2.0 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at
+// https://mozilla.org/MPL/2.0/
+//
+// Software distributed under the License is distributed on an "AS IS"
+// basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+// License for the specific language governing rights and limitations
+// under the License.
+//
+// Non commercial users may distribute this sourcecode provided that this
+// header is included in full at the top of the file.
+// Commercial users are not allowed to distribute this sourcecode as part of
+// their product.
+//
+//==============================================================================
+unit MfCast;
 
 interface
 
@@ -49,8 +109,9 @@ type
                           const ASource: string;
                           const AMessage: string);
   public
+
     constructor Create(const AEnableTranscoding: Boolean = False);
-    destructor Destroy; override;
+    destructor Destroy(); override;
 
     function Discover: HRESULT;
     function StopDiscovery: HRESULT;
@@ -58,6 +119,15 @@ type
     function GetDevices(out ADevices: TMfCastDeviceArray): HRESULT;
     function GetMediaTracks(const ASource: string;
                             out ATracks: TMfCastTrackInfoArray): HRESULT;
+
+    function Connect(const ADevice: TMfCastDevice): HRESULT;
+
+    function Load(const ASource: string): HRESULT; overload;
+    function Load(const ASource: string;
+                  const ASubtitle: TMfCastSubtitleAsset;
+                  const AMediaMode: TMfCastMediaMode = cmmAutomatic;
+                  const ASubtitleMode: TMfCastSubtitleMode = csmAutomatic;
+                  const AStartSeconds: Double = 0.0): HRESULT; overload;
 
     function Cast(const ADevice: TMfCastDevice;
                   const ASource: string): HRESULT; overload;
@@ -71,6 +141,7 @@ type
     function Play(): HRESULT;
     function Pause(): HRESULT;
     function Stop(): HRESULT;
+
     function Seek(const APositionSeconds: Double): HRESULT;
     function SelectAudioTrack(const ATrackId: Int64): HRESULT;
     function SelectSubtitle(const ATrackId: Int64): HRESULT; overload;
@@ -94,12 +165,16 @@ type
 implementation
 
 uses
+
+  {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
+  {Cast/Media}
   MfCastTransport,
   MfCastChannel,
   MfCastDiscovery,
   MfCastHttpServer,
   MfCastMedia,
+  MfCastRemux,
   MfCastTranscode,
   MfCastController;
 
@@ -193,6 +268,7 @@ begin
   if AEnableTranscoding then
     begin
       Components.SegmentPublisher := TMfCastSegmentPublisher.Create(Components.HttpServer);
+      Components.RemuxPipeline := TMfCastRemuxPipeline.Create();
       Components.TranscodePipeline := TMfCastTranscodePipeline.Create();
     end;
 
@@ -290,6 +366,46 @@ begin
 
   Subtitle.Reset;
   Result := Cast(ADevice, ASource, Subtitle, cmmAutomatic, csmNone, 0.0);
+end;
+
+
+function TMfCast.Connect(const ADevice: TMfCastDevice): HRESULT;
+begin
+
+  Result := FController.Connect(ADevice);
+end;
+
+
+function TMfCast.Load(const ASource: string): HRESULT;
+var
+  Subtitle: TMfCastSubtitleAsset;
+
+begin
+
+  Subtitle.Reset;
+  Result := Load(ASource, Subtitle, cmmAutomatic, csmNone, 0.0);
+end;
+
+
+function TMfCast.Load(const ASource: string;
+                      const ASubtitle: TMfCastSubtitleAsset;
+                      const AMediaMode: TMfCastMediaMode;
+                      const ASubtitleMode: TMfCastSubtitleMode;
+                      const AStartSeconds: Double): HRESULT;
+var
+  StartTime: Int64;
+
+begin
+
+  StartTime := Round(AStartSeconds * 10000000.0);
+  if (StartTime < 0) then
+    StartTime := 0;
+
+  Result := FController.LoadFile(ASource,
+                                 ASubtitle,
+                                 AMediaMode,
+                                 ASubtitleMode,
+                                 StartTime);
 end;
 
 

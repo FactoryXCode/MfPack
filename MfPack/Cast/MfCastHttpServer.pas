@@ -79,7 +79,8 @@ uses
   WinApi.MediaFoundationApi.MfObjects,
   {MfCastTypes}
   MfCastTypes,
-  MfCastInterfaces;
+  MfCastInterfaces,
+  MfCastMediaInterfaces;
 
 type
 

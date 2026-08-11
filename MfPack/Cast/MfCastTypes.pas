@@ -72,9 +72,7 @@ uses
   {WinApi}
   System.SysUtils,
   {WinApi}
-  System.Classes,
-  {MediaFoundation}
-  WinApi.MediaFoundationApi.MfApi;
+  System.Classes;
 
 type
 
@@ -100,7 +98,8 @@ type
   TMfCastMediaMode = (cmmAutomatic,
                       cmmDirectFile,
                       cmmDirectWithTextTrack,
-                      cmmTranscodeBurnedSubtitles);
+                      cmmTranscodeBurnedSubtitles,
+                      cmmRemuxFile);
 
   TMfCastSubtitleMode = (csmAutomatic,
                          csmNone,
@@ -409,6 +408,17 @@ type
     procedure Reset();
   end;
 
+  TMfCastRemuxRequest = record
+    SourceName: string;
+    Title: string;
+    StartTime100ns: Int64;
+    VideoStreamIndex: DWORD;
+    HasVideoStreamIndex: Boolean;
+    AudioStreamIndex: DWORD;
+    HasAudioStreamIndex: Boolean;
+    procedure Reset();
+  end;
+
   function MfCastStateToString(const AState: TMfCastState): string;
   function MfCastLogLevelToString(const ALevel: TMfCastLogLevel): string;
   function MfCastMediaModeToString(const AMode: TMfCastMediaMode): string;
@@ -424,6 +434,14 @@ type
   function MfCastStablePathIndex(const AFileName: string): DWORD;
 
 implementation
+
+const
+  // Standard subtype GUIDs kept local so the public settings types do not
+  // require the Media Foundation declaration units.
+  MFCAST_DEFAULT_VIDEO_SUBTYPE_H264: TGUID =
+    '{34363248-0000-0010-8000-00AA00389B71}';
+  MFCAST_DEFAULT_AUDIO_SUBTYPE_AAC: TGUID =
+    '{00001610-0000-0010-8000-00AA00389B71}';
 
 
 procedure TMfCastTxtEntry.Reset();
@@ -725,8 +743,8 @@ begin
   Result.Http.IdleTimeoutMs := 30000;
 
   Result.Encoding.OutputMode := comHlsFmp4;
-  Result.Encoding.VideoSubtype := MFVideoFormat_H264;
-  Result.Encoding.AudioSubtype := MFAudioFormat_AAC;
+  Result.Encoding.VideoSubtype := MFCAST_DEFAULT_VIDEO_SUBTYPE_H264;
+  Result.Encoding.AudioSubtype := MFCAST_DEFAULT_AUDIO_SUBTYPE_AAC;
   Result.Encoding.VideoBitrate := 4000000;
   Result.Encoding.AudioBitrate := 128000;
   Result.Encoding.AudioSampleRate := 48000;
@@ -766,6 +784,19 @@ begin
   AudioStreamIndex := 0;
   HasAudioStreamIndex := False;
   Encoding.Reset();
+end;
+
+
+procedure TMfCastRemuxRequest.Reset();
+begin
+
+  SourceName := '';
+  Title := '';
+  StartTime100ns := 0;
+  VideoStreamIndex := 0;
+  HasVideoStreamIndex := False;
+  AudioStreamIndex := 0;
+  HasAudioStreamIndex := False;
 end;
 
 
@@ -884,6 +915,7 @@ begin
     cmmDirectFile:               Result := 'DirectFile';
     cmmDirectWithTextTrack:      Result := 'DirectWithTextTrack';
     cmmTranscodeBurnedSubtitles: Result := 'TranscodeBurnedSubtitles';
+    cmmRemuxFile:                Result := 'RemuxFile';
   else
     Result := 'Unknown';
   end;

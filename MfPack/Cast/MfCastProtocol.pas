@@ -23,7 +23,8 @@
 // CHANGE LOG
 // Date       Person              Reason
 // ---------- ------------------- ----------------------------------------------
-// 10/08/2026 All                 Initial protocol separation.
+// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
+// 10/08/2026 Carmen              Initial protocol separation.
 //------------------------------------------------------------------------------
 //
 // Remarks: Requires Windows 7 or higher.

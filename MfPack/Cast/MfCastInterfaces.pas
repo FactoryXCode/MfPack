@@ -11,10 +11,9 @@
 // Language: ENU
 //
 // Revision Version: 3.2.0
-// Description: Interfaces for discovery, TLS transport, Cast channel,
-//              HTTP serving, segmented publishing, media inspection,
-//              capability resolution, planning, preview,
-//              transcoding and the controller.
+// Description: Media Foundation-neutral interfaces for discovery, TLS
+//              transport, Cast channel, HTTP serving, media inspection,
+//              capability resolution, planning and the controller.
 //
 // Company: FactoryX
 // Intiator(s): Tony (maXcomX), Carmen (carmenh).
@@ -73,8 +72,6 @@ uses
   {System}
   System.Classes,
   System.SysUtils,
-  {MediaFoundationApi}
-  WinApi.MediaFoundationApi.MfObjects,
   {Cast}
   MfCastTypes;
 
@@ -174,15 +171,6 @@ type
     function GetRequestCount(): Cardinal;
   end;
 
-  IMfCastSegmentPublisher = interface
-    ['{696081C4-E77F-4F7D-A756-F84A16F45B56}']
-    function BeginPresentation(const AContentType: string;
-                               out AEntryPath: string): HRESULT;
-    function GetByteStream(out AByteStream: IMFByteStream): HRESULT;
-    function CompletePresentation(): HRESULT;
-    function AbortPresentation(const AReason: HRESULT): HRESULT;
-  end;
-
   IMfCastMediaInspector = interface
     ['{5D6397F8-9604-430A-B8D0-7D61DBDC46EA}']
     procedure SetLogger(const ALogger: IMfCastLogger);
@@ -210,32 +198,8 @@ type
                         out ASelectedSubtitleMode: TMfCastSubtitleMode): HRESULT;
   end;
 
-  IMfCastPreviewSink = interface
-    ['{6AD88FE3-0C53-4748-B0AC-DBCAA8A29AC5}']
-    function PresentSample(const ASample: IMFSample;
-                           const ASampleTime100ns: Int64;
-                           const ASampleDuration100ns: Int64): HRESULT;
-    function Flush(): HRESULT;
-  end;
-
-  IMfCastTranscodePipeline = interface
-    ['{BB145D8E-BF87-4E9B-B325-E400E88BA5D5}']
-    function Configure(const ASettings: TMfCastEncodingSettings): HRESULT;
-    procedure SetLogger(const ALogger: IMfCastLogger);
-    function Start(const ARequest: TMfCastTranscodeRequest;
-                   const APublisher: IMfCastSegmentPublisher;
-                   const APreviewSink: IMfCastPreviewSink): HRESULT;
-    function Pause(): HRESULT;
-    function Resume(): HRESULT;
-    function SetVolume(const AVolume: Single): HRESULT;
-    function SetMuted(const AMuted: Boolean): HRESULT;
-    function Stop(): HRESULT;
-    function Seek(const APosition100ns: Int64): HRESULT;
-    function GetState(): TMfCastState;
-  end;
-
   IMfCastController = interface
-    ['{8A78F007-FDC5-4EB8-97AF-234AB5E0FB46}']
+    ['{595F9777-2220-4D88-A167-FEA2DFD6C46F}']
     function Configure(const ASettings: TMfCastSettings): HRESULT;
     procedure SetCallbacks(const ACallbacks: TMfCastControllerCallbacks);
     function GetCallbacks(): TMfCastControllerCallbacks;
@@ -246,6 +210,12 @@ type
     function GetDevices(out ADevices: TMfCastDeviceArray): HRESULT;
     function GetMediaTracks(const ASourceName: string;
                             out ATracks: TMfCastTrackInfoArray): HRESULT;
+    function Connect(const ADevice: TMfCastDevice): HRESULT;
+    function LoadFile(const ASourceName: string;
+                      const ASubtitle: TMfCastSubtitleAsset;
+                      const AMediaMode: TMfCastMediaMode;
+                      const ASubtitleMode: TMfCastSubtitleMode;
+                      const AStartTime100ns: Int64 = 0): HRESULT;
     function CastFile(const ADevice: TMfCastDevice;
                       const ASourceName: string;
                       const ASubtitle: TMfCastSubtitleAsset;

@@ -81,7 +81,8 @@ uses
   MfSubtitleFramePump,
   {Cast}
   MfCastTypes,
-  MfCastInterfaces;
+  MfCastInterfaces,
+  MfCastMediaInterfaces;
 
 type
   TMfCastTranscodePipeline = class(TInterfacedObject,
@@ -113,13 +114,16 @@ type
 
     function Configure(const ASettings: TMfCastEncodingSettings): HRESULT;
     procedure SetLogger(const ALogger: IMfCastLogger);
+
     function Start(const ARequest: TMfCastTranscodeRequest;
                    const APublisher: IMfCastSegmentPublisher;
                    const APreviewSink: IMfCastPreviewSink): HRESULT;
     function Pause(): HRESULT;
     function Resume(): HRESULT;
+
     function SetVolume(const AVolume: Single): HRESULT;
     function SetMuted(const AMuted: Boolean): HRESULT;
+
     function Stop(): HRESULT;
     function Seek(const APosition100ns: Int64): HRESULT;
     function GetState(): TMfCastState;

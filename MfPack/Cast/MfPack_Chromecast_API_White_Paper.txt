@@ -2,8 +2,8 @@ MfPack Chromecast API
 Independent Delphi Chromecast Framework
 Design Notes
 
-Version: 1.0
-Date: 9 August 2026
+Version: 1.1
+Date: 11 August 2026
 
 
 1. What This Is
@@ -11,7 +11,7 @@ Date: 9 August 2026
 
 MfCast is an independent Chromecast subsystem for Delphi. It handles device
 discovery, receiver control, local media serving, media preparation, subtitles,
-track selection, and optional transcoding behind a small public API.
+track selection, and optional remuxing/transcoding behind a small public API.
 
 It can be used by:
 
@@ -29,7 +29,7 @@ The central design principle is simple:
     MfCast does not depend on an application or form.
 
 The public API hides Cast protocol details, networking, local HTTP serving,
-subtitle conversion, media preparation, and optional transcoding.
+subtitle conversion, media preparation, and optional remuxing/transcoding.
 
 
 2. Why Split It Up
@@ -122,12 +122,16 @@ This makes maintenance easier and allows applications to use only the parts they
 3.7 Media Foundation Is Optional in the Core
 ---------------------------------------------
 
-Basic Chromecast control does not require Media Foundation.
+Basic Chromecast control does not require Media Foundation declarations in its
+public type and interface layer.
 
 For example, casting an existing HTTP MP4 URL does not initialize or depend on a
 Media Foundation playback engine.
 
-Media Foundation becomes necessary only for operations such as media inspection, extraction, remuxing or transcoding.
+`MfCastTypes.pas` and `MfCastInterfaces.pas` therefore remain independent of the
+MfPack Media Foundation declaration units. Media Foundation becomes necessary
+only for operations such as media inspection, extraction, remuxing or
+transcoding; those contracts live in `MfCastMediaInterfaces.pas`.
 
 
 4. Two Different Kinds of Transport
@@ -187,18 +191,29 @@ Separating these two meanings of "transport" is fundamental to keeping the imple
 
 The units are organized like this:
 
-    ChromeCast\
+    Cast\
         MfCast.pas
         MfCastTypes.pas
+        MfCastInterfaces.pas
+        MfCastMediaInterfaces.pas
         MfCastDiscovery.pas
+        MfCastTransport.pas
         MfCastChannel.pas
         MfCastProtocol.pas
         MfCastController.pas
         MfCastMedia.pas
         MfCastHttpServer.pas
-        MfCastSubtitles.pas
+        MfCastRemux.pas
         MfCastTranscode.pas
         MfCastWindowsSupport.pas
+        Media\
+            LangTags.pas
+            MfEmbeddedSubtitleReader.pas
+            MfMatroskaSubtitleReader.pas
+            MfPCXConstants.pas
+            MfSubtitleCompositor.pas
+            MfSubtitleFramePump.pas
+            TimedTextClass.pas
 
 The important part is that every unit has one clear job.
 
@@ -248,7 +263,19 @@ Examples:
 
 This unit has minimal dependencies.
 
-6.3 MfCastDiscovery.pas
+6.3 MfCastInterfaces.pas
+------------------------
+
+Media Foundation-neutral contracts for discovery, transport, Cast channels,
+HTTP serving, media inspection and planning, and controller operations.
+
+6.4 MfCastMediaInterfaces.pas
+-----------------------------
+
+Optional Media Foundation-specific contracts. IMFByteStream- and IMFSample-based
+publishing, preview, remux, and transcode interfaces are isolated here.
+
+6.5 MfCastDiscovery.pas
 -----------------------
 
 Device discovery.
@@ -262,7 +289,12 @@ Responsibilities may include:
 - Device metadata
 - IP address and port resolution
 
-6.4 MfCastChannel.pas
+6.6 MfCastTransport.pas
+-----------------------
+
+SChannel TLS transport and socket I/O used by the Cast channel.
+
+6.7 MfCastChannel.pas
 ---------------------
 
 Low-level Chromecast connection.
@@ -270,7 +302,6 @@ Low-level Chromecast connection.
 This unit handles:
 
 - TCP connection
-- TLS
 - Chromecast message framing
 - Send/receive loop
 - Heartbeats
@@ -279,7 +310,7 @@ This unit handles:
 
 This unit contains no application playback logic.
 
-6.5 MfCastProtocol.pas
+6.8 MfCastProtocol.pas
 ----------------------
 
 Protocol message definitions and helpers.
@@ -298,7 +329,7 @@ This unit handles:
 
 Keeping protocol construction outside the controller prevents the controller from becoming a collection of JSON string operations.
 
-6.6 MfCastController.pas
+6.9 MfCastController.pas
 ------------------------
 
 Higher-level receiver/session controller.
@@ -318,8 +349,8 @@ This unit handles:
 - Request media status
 - Maintain current remote media state
 
-6.7 MfCastMedia.pas
--------------------
+6.10 MfCastMedia.pas
+--------------------
 
 Media preparation and decision layer.
 
@@ -336,8 +367,8 @@ This unit handles:
 The application describes what it wants to play. MfCast decides how the
 Chromecast receives it.
 
-6.8 MfCastHttpServer.pas
-------------------------
+6.11 MfCastHttpServer.pas
+-------------------------
 
 Local media HTTP server.
 
@@ -357,31 +388,20 @@ This unit handles:
 
 This server works independently of any player UI.
 
-6.9 MfCastSubtitles.pas
------------------------
+6.12 MfCastRemux.pas
+--------------------
 
-Subtitle subsystem.
+Optional compressed-sample remux pipeline. It copies compatible H.264 and AAC
+samples into the generated fragmented MP4 presentation without decoding or
+re-encoding them.
 
-This unit handles:
+6.13 MfCastTranscode.pas
+-------------------------
 
-- External subtitle files
-- Embedded text subtitle tracks
-- Subtitle metadata
-- WebVTT generation
-- Temporary/generated subtitle resources
-- Subtitle URLs
-- Subtitle selection
-- Disable subtitles
-- Optional style information where supported
-
-6.10 MfCastTranscode.pas
-------------------------
-
-Optional media-conversion layer.
+Optional full media-conversion layer.
 
 This unit handles:
 
-- Remuxing when codecs are usable but the container is not
 - Transcoding unsupported codecs
 - Burn-in of unsupported bitmap/complex subtitles where necessary
 - Track selection before output
@@ -389,7 +409,14 @@ This unit handles:
 
 Ordinary Chromecast control does not require transcoding.
 
-6.11 MfCastWindowsSupport.pas
+6.14 Cast/Media units
+---------------------
+
+Subtitle parsing, embedded Matroska text-track reading, timed-text storage,
+subtitle composition, and frame pumping used by media inspection and burned
+subtitle transcoding.
+
+6.15 MfCastWindowsSupport.pas
 ------------------------------
 
 Optional Windows UI integration layer.
@@ -417,19 +444,21 @@ Dependencies flow in this direction:
                  |   Public Facade    |
                  +---------+----------+
                            |
-             +-------------+-------------+
-             |             |             |
-             v             v             v
-        Controller       Media       Subtitles
-             |             |
-             v             v
-         Protocol      HTTP Server
-             |
-             v
-        CastChannel
-             |
-             v
-        TCP / TLS
+                     Controller
+                      /       \
+                     v         v
+             Cast protocol   Media planning
+                  |          /      |       \
+                  v         v       v        v
+              Channel    Direct   Remux   Transcode
+                  |                 |        |
+                  v                 +---+----+
+              TLS transport             |
+                                   Media interfaces
+
+`MfCastTypes` and `MfCastInterfaces` form the declaration-neutral contract
+boundary. `MfCastMediaInterfaces` is used only where Media Foundation byte
+streams or samples are required.
 
 Applications may call MfCast. MfCast must never call or reference an application
 form.
@@ -442,44 +471,60 @@ The public API is intentionally small.
 
 Typical creation:
 
-    FCast := TMfCast.Create;
+    FCast := TMfCast.Create(True);  // Enable optional remux/transcode support.
 
-    FCast.OnDeviceFound := CastDeviceFound;
+    FCast.OnDeviceAdded := CastDeviceAdded;
+    FCast.OnDeviceUpdated := CastDeviceUpdated;
+    FCast.OnDeviceRemoved := CastDeviceRemoved;
     FCast.OnStateChanged := CastStateChanged;
     FCast.OnMediaStatus := CastMediaStatus;
     FCast.OnError := CastError;
 
 Discovery:
 
-    FCast.Discover;
+    Hr := FCast.Discover;
 
 Connection:
 
-    FCast.Connect(Device);
+    Hr := FCast.Connect(Device);
 
 Playback:
 
-    FCast.Load(Media);
-    FCast.Play;
-    FCast.Pause;
-    FCast.Stop;
+    Hr := FCast.Load('C:\Movies\MyMovie.mkv');
+    Hr := FCast.Play;
+    Hr := FCast.Pause;
+    Hr := FCast.Stop;
+
+`Connect` preserves the receiver session. More than one source can therefore be
+loaded without rediscovering or reconnecting:
+
+    Hr := FCast.Connect(Device);
+    Hr := FCast.Load(Source1);
+    Hr := FCast.Load(Source2);
+
+For the common one-shot operation, `Cast(Device, Source)` performs the same
+connect-and-load sequence as a convenience function.
 
 Seeking:
 
-    FCast.Seek(360.0);
+    Hr := FCast.Seek(360.0);
 
 Volume:
 
-    FCast.Volume := 0.75;
-    FCast.Muted := False;
+    Hr := FCast.SetVolume(0.75);
+    Hr := FCast.SetMuted(False);
 
 Subtitles:
 
-    FCast.SelectSubtitle(SubtitleTrackId);
+    Hr := FCast.SelectSubtitle(SubtitleTrackId);
 
 or:
 
-    FCast.DisableSubtitles;
+    Hr := FCast.DisableSubtitles;
+
+All public commands return `HRESULT`. Callers can handle a synchronous failure
+immediately; asynchronous receiver and media failures are also reported through
+`OnError` and state callbacks.
 
 API users do not need to know about:
 
@@ -491,35 +536,20 @@ API users do not need to know about:
 - HTTP server sockets
 - Temporary subtitle filenames
 - WebVTT generation
-- Transcoder setup
+- Remux/transcode pipeline setup
 
 
 9. Describing Media
 ===================
 
-Media is passed to the API as a description, not through application-specific
-player objects.
+Media is passed as a source string rather than through application-specific
+player objects. The source may be a local file or an HTTP(S) URL:
 
-For example:
+    Hr := FCast.Load('C:\Movies\MyMovie.mkv');
 
-    TMfCastMedia = record
-      Source: string;
-      ContentType: string;
-      Title: string;
-      Duration: Double;
-      StreamType: TMfCastStreamType;
-      Tracks: TArray<TMfCastTrack>;
-    end;
-
-Example:
-
-    Media.Source :=
-      'C:\Movies\MyMovie.mkv';
-
-    Media.Title :=
-      'My Movie';
-
-    FCast.Load(Media);
+The overload accepts a `TMfCastSubtitleAsset`, requested media and subtitle
+modes, and an optional start position. `GetMediaTracks` returns stable track IDs
+that can subsequently be passed to `SelectAudioTrack` or `SelectSubtitle`.
 
 The Chromecast subsystem then decides what to do.
 
@@ -552,14 +582,18 @@ Application code does not need format checks such as:
 
 The media layer inspects the source and chooses the appropriate route.
 
-Possible strategies include:
+The implemented automatic strategy is:
 
 - Serve compatible elementary/container media directly
-- Remux MKV streams to a Cast-compatible container without re-encoding
-- Select a requested audio stream during remux
+- Remux frame-aligned H.264 video with optional AAC audio from MKV into a
+  fragmented MP4 presentation without re-encoding
 - Extract text subtitles and serve them separately
-- Transcode only when the codecs themselves are unsupported
+- Transcode incompatible codecs, or when burned subtitles are requested
 - Burn subtitles into video only when normal text-track delivery is not possible
+
+Remuxing has its own `TMfCastRemuxPipeline`; it is not a mode inside the full
+transcoder. Because compressed samples are preserved, the remux path retains
+source video quality and avoids the CPU cost of video encoding.
 
 This isolates MKV complexity from the user interface.
 
@@ -588,7 +622,7 @@ A stable ID encodes track kind, source, and source-stream index. Applications
 treat it as opaque; the Cast subsystem decodes it when an exact source
 stream must be selected. A caller can then do:
 
-    FCast.SelectSubtitle(Track.Id);
+    Hr := FCast.SelectSubtitle(Track.TrackId);
 
 The Chromecast subsystem handles the source and conversion.
 
@@ -605,7 +639,7 @@ Pipeline:
     SRT
      |
      v
-    MfCastSubtitles
+    Subtitle preparation
      |
      v
     WebVTT
@@ -679,22 +713,14 @@ decoder and renderer surface.
 12. Audio Tracks
 ================
 
-Multiple audio tracks require careful abstraction.
+Multiple audio tracks require careful abstraction. The public API exposes:
 
-The public API can expose:
+    Hr := FCast.SelectAudioTrack(TrackId);
 
-    FCast.SelectAudioTrack(TrackId);
-
-Internally, the implementation may use different strategies depending on receiver capability and media format.
-
-Possible approaches:
-
-- Receiver-native track selection where supported
-- Remux with a different selected audio stream
-- Recreate/reload the media session when necessary
-- Transcode the requested audio track when required
-
-The application-facing API stays the same when the internal route changes.
+The current implementation supports switching Media Foundation audio streams for
+an active transcode. It records the requested source-stream index and restarts
+the generated presentation at the current file position. Direct and remuxed
+playback currently return `ERROR_NOT_SUPPORTED` for runtime audio switching.
 
 
 13. Events and State
@@ -702,35 +728,19 @@ The application-facing API stays the same when the internal route changes.
 
 The API reports state changes through Delphi events and callbacks.
 
-Possible events:
+The public facade exposes:
 
     OnDeviceAdded
+    OnDeviceUpdated
     OnDeviceRemoved
-
-    OnConnecting
-    OnConnected
-    OnDisconnected
-
-    OnReceiverStarted
-
-    OnMediaLoading
-    OnMediaPlaying
-    OnMediaPaused
-    OnMediaBuffering
-    OnMediaStopped
-
-    OnPositionChanged
-
-    OnSubtitleChanged
-    OnAudioTrackChanged
-
-    OnVolumeChanged
-
+    OnStateChanged
+    OnMediaStatus
     OnError
+    OnLog
 
-Alternatively, some related events can be consolidated into state-change events if that produces a cleaner API.
-
-The important requirement is that state information is delivered to the application rather than forcing the application to poll the network synchronously.
+Connection, receiver, loading, and playback transitions are consolidated in
+`OnStateChanged`. Position, duration, volume, mute, and remote player state are
+delivered through `OnMediaStatus` rather than many narrowly scoped events.
 
 
 14. Threads
@@ -768,14 +778,11 @@ Callbacks, events, and worker threads are used instead of timer-driven networkin
 The core Chromecast API does not need Media Foundation merely to control a
 Chromecast.
 
-For example, this works without creating a playback engine:
+For example, this direct-control call does not create a playback engine:
 
-    Cast.Load(
-      'https://example.com/movie.mp4',
-      'video/mp4'
-    );
+    Hr := Cast.Load('https://example.com/movie.mp4');
 
-Media Foundation can be used by optional layers for:
+Media Foundation is used by the media layers for:
 
 - Reading media metadata
 - Enumerating streams
@@ -785,7 +792,18 @@ Media Foundation can be used by optional layers for:
 - Video conversion
 - Audio conversion
 
-This keeps MfCast useful outside a Media Foundation playback application.
+The current `TMfCast` facade calls `MFStartup` because media inspection and track
+enumeration are part of its standard composition. This initializes the Media
+Foundation platform but does not create a playback engine. Remux and transcode
+pipeline objects are created only when `AEnableTranscoding` is True.
+
+The public `MfCastTypes` and `MfCastInterfaces` units do not import MfPack Media
+Foundation declaration units. Contracts that explicitly use `IMFByteStream` or
+`IMFSample` are isolated in `MfCastMediaInterfaces`, which is consumed by the
+HTTP publisher, remux pipeline, transcode pipeline, and composition layer.
+
+This keeps direct-control contracts usable without pulling Media Foundation
+declarations into their type/interface boundary.
 
 
 16. The Receiver
@@ -811,30 +829,15 @@ Such a receiver can be added later without rewriting applications.
 17. Errors
 ==========
 
-Chromecast errors use a structured record.
+Chromecast errors use `TMfCastErrorInfo`, containing:
 
-Suggested error information:
+- `HResult`
+- `Stage`
+- `MessageText`
+- `Detail`
 
-- Error code
-- Error category
-- Human-readable message
-- Protocol request ID if applicable
-- Network error where applicable
-- HTTP/media error where applicable
-- Conversion/transcoding error where applicable
-
-Possible categories:
-
-    ceDiscovery
-    ceConnection
-    ceTLS
-    ceProtocol
-    ceReceiver
-    ceMedia
-    ceHttp
-    ceSubtitle
-    ceRemux
-    ceTranscode
+In addition, every public command returns `HRESULT`, so immediate errors do not
+depend on an event being delivered.
 
 This is preferable to showing message boxes from inside the library.
 
@@ -887,9 +890,9 @@ unless a debug option explicitly preserves them.
 ==============
 
 `MfSimpleCastPlayer` is the focused reference sample. It demonstrates discovery,
-direct and transcoded playback, transport controls, seek, volume/mute, subtitle
-enumeration and runtime subtitle switching without becoming an application
-framework.
+direct, remuxed, and transcoded playback, transport controls, seek, volume/mute,
+subtitle enumeration and runtime subtitle switching without becoming an
+application framework.
 
 The form concentrates on UI behavior. Its Windows-message constants and command
 workers come from `MfCastWindowsSupport.pas`; shared subtitle-choice types come
@@ -908,10 +911,10 @@ different design, not merely to duplicate controls.
 
 Application code calls the public facade directly. For example:
 
-    Cast.Play;
-    Cast.Pause;
-    Cast.Seek(PositionSeconds);
-    Cast.SelectSubtitle(TrackId);
+    Hr := Cast.Play;
+    Hr := Cast.Pause;
+    Hr := Cast.Seek(PositionSeconds);
+    Hr := Cast.SelectSubtitle(TrackId);
 
 An application may manage:
 
@@ -934,94 +937,20 @@ It does not manage:
 - Transcoder internals
 
 
-22. Building It in Steps
-========================
+22. Building and Validating It
+==============================
 
-Build and evolve the subsystem in small, verifiable steps.
+The subsystem is kept verifiable at two levels:
 
-Phase 1
--------
+- `MfSimpleCastPlayer` exercises the compact public facade and remains focused
+  on starter-friendly application code.
+- `MfCastCompile.dpk` is a non-installed, compile-validation runtime package
+  whose `contains` list covers every Cast unit, including `Cast/Media`.
 
-Define the public TMfCast API and shared types.
-
-Keep public behavior stable while the internal layers are separated.
-
-Phase 2
--------
-
-Move receiver/session logic behind TMfCast and MfCastController.
-
-Route receiver/session behavior through the new interface.
-
-Phase 3
--------
-
-Separate low-level protocol/channel handling.
-
-Move:
-
-- Message framing
-- TLS transport
-- Namespace handling
-- Request IDs
-- Heartbeats
-- Incoming-message parsing
-
-into dedicated protocol and channel units.
-
-Phase 4
--------
-
-Move local HTTP/media serving into MfCastHttpServer.
-
-Verify:
-
-- Local video
-- Seeking/range requests
-- Restart
-- Stop
-- Multiple Cast requests
-
-Phase 5
--------
-
-Move subtitle handling into MfCastSubtitles.
-
-Verify:
-
-- External subtitles
-- Embedded subtitles
-- Language switching
-- Subtitle disable
-- Timing
-- WebVTT generation
-
-Phase 6
--------
-
-Move media decisions and transcoding into MfCastMedia and MfCastTranscode.
-
-Verify:
-
-- Direct-play media
-- Audio-track choice
-- Unsupported formats
-- Subtitle burn-in fallback
-
-Phase 7
--------
-
-Keep application integration limited to high-level API calls and UI event handlers.
-
-Phase 8
--------
-
-Maintain the focused `MfSimpleCastPlayer` educational sample as the public API evolves.
-
-Phase 9
--------
-
-Document the public API and its threading/lifetime rules.
+The package requires the matching installed `MfPackX320` package. It is built to
+find static unit, interface, and dependency errors; applications are not meant
+to install or depend on its BPL. Generated validation artifacts are directed to
+`Cast/build/<Platform>/<Config>`.
 
 
 23. Things to Check
@@ -1043,6 +972,8 @@ Behavior to verify includes:
 - Volume/mute works
 - Local files are reachable by Chromecast
 - HTTP range requests work
+- Compatible H.264/AAC MKV media uses the remux route without video encoding
+- Incompatible MKV codecs use the transcode route
 - Embedded subtitle tracks are listed correctly
 - External subtitles work
 - Subtitle language switching works
@@ -1067,7 +998,8 @@ Most users need only:
     Pause
     Seek
     Stop
-    Volume
+    SetVolume
+    SetMuted
     SelectSubtitle
     Disconnect
 
@@ -1077,6 +1009,7 @@ Advanced users may optionally access:
 - Track lists
 - Receiver capabilities
 - HTTP server configuration
+- Remux configuration and diagnostics
 - Transcoding configuration
 - Logging
 - Low-level diagnostics
@@ -1093,7 +1026,7 @@ Internal implementations can then evolve without breaking applications.
 
 For example, this application code:
 
-    FCast.SelectSubtitle(2);
+    Hr := FCast.SelectSubtitle(Track.TrackId);
 
 does not change if the implementation later changes from:
 
@@ -1117,47 +1050,53 @@ Stable abstractions are especially important because Chromecast behavior involve
 26. Public Facade Shape
 =======================
 
-The public facade looks roughly like this:
+The public facade is shaped like this (overloads abbreviated):
 
     TMfCast = class
     public
-      constructor Create;
+      constructor Create(const AEnableTranscoding: Boolean = False);
       destructor Destroy; override;
 
-      procedure Discover;
-      procedure StopDiscovery;
+      function Discover: HRESULT;
+      function StopDiscovery: HRESULT;
+      function RefreshDiscovery: HRESULT;
+      function GetDevices(out ADevices: TMfCastDeviceArray): HRESULT;
+      function GetMediaTracks(const ASource: string;
+        out ATracks: TMfCastTrackInfoArray): HRESULT;
 
-      procedure Connect(const ADevice: TMfCastDevice);
-      procedure Disconnect;
+      function Connect(const ADevice: TMfCastDevice): HRESULT;
+      function Load(const ASource: string): HRESULT; overload;
+      function Cast(const ADevice: TMfCastDevice;
+        const ASource: string): HRESULT; overload;
 
-      procedure Load(const AMedia: TMfCastMedia);
+      function Play: HRESULT;
+      function Pause: HRESULT;
+      function Stop: HRESULT;
+      function Seek(const APositionSeconds: Double): HRESULT;
 
-      procedure Play;
-      procedure Pause;
-      procedure Stop;
-      procedure Seek(const APositionSeconds: Double);
+      function SelectSubtitle(const ATrackId: Int64): HRESULT; overload;
+      function SelectSubtitle(
+        const ASubtitle: TMfCastSubtitleAsset): HRESULT; overload;
+      function DisableSubtitles: HRESULT;
+      function SelectAudioTrack(const ATrackId: Int64): HRESULT;
 
-      procedure SelectSubtitle(const ATrackId: Int64);
-      procedure DisableSubtitles;
+      function SetVolume(const AVolume: Single): HRESULT;
+      function SetMuted(const AMuted: Boolean): HRESULT;
+      function Disconnect: HRESULT;
+      function State: TMfCastState;
 
-      procedure SelectAudioTrack(const ATrackId: Int64);
-
-      property Volume: Double read ... write ...;
-      property Muted: Boolean read ... write ...;
-
-      property State: TMfCastState read ...;
-      property MediaState: TMfCastMediaState read ...;
-
-      property OnDeviceAdded: ...;
-      property OnDeviceRemoved: ...;
-      property OnStateChanged: ...;
-      property OnMediaStatus: ...;
-      property OnError: ...;
-      property OnLog: ...;
+      property OnDeviceAdded: TMfCastDeviceEvent ...;
+      property OnDeviceUpdated: TMfCastDeviceEvent ...;
+      property OnDeviceRemoved: TMfCastDeviceRemovedEvent ...;
+      property OnStateChanged: TMfCastStateChangedEvent ...;
+      property OnMediaStatus: TMfCastMediaStatusEvent ...;
+      property OnError: TMfCastErrorEvent ...;
+      property OnLog: TMfCastLogEvent ...;
     end;
 
-The exact declarations may evolve with the implementation, but this illustrates
-the intended level of abstraction.
+The full `Load` and `Cast` overloads additionally accept subtitle assets, media
+and subtitle modes, and a starting position. The facade remains deliberately
+smaller than its internal controller and pipeline contracts.
 
 
 27. Why This Layout Works

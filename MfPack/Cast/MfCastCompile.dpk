@@ -1,0 +1,55 @@
+package MfCastCompile;
+
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DESCRIPTION 'MfCast compile-validation package; do not install'}
+{$RUNONLY}
+
+requires
+  rtl,
+  vcl,
+  MfPackX320;
+
+contains
+  MfCast in 'MfCast.pas',
+  MfCastChannel in 'MfCastChannel.pas',
+  MfCastController in 'MfCastController.pas',
+  MfCastDiscovery in 'MfCastDiscovery.pas',
+  MfCastHttpServer in 'MfCastHttpServer.pas',
+  MfCastInterfaces in 'MfCastInterfaces.pas',
+  MfCastMedia in 'MfCastMedia.pas',
+  MfCastMediaInterfaces in 'MfCastMediaInterfaces.pas',
+  MfCastProtocol in 'MfCastProtocol.pas',
+  MfCastRemux in 'MfCastRemux.pas',
+  MfCastTranscode in 'MfCastTranscode.pas',
+  MfCastTransport in 'MfCastTransport.pas',
+  MfCastTypes in 'MfCastTypes.pas',
+  MfCastWindowsSupport in 'MfCastWindowsSupport.pas',
+  LangTags in 'Media\LangTags.pas',
+  MfEmbeddedSubtitleReader in 'Media\MfEmbeddedSubtitleReader.pas',
+  MfMatroskaSubtitleReader in 'Media\MfMatroskaSubtitleReader.pas',
+  MfPCXConstants in 'Media\MfPCXConstants.pas',
+  MfSubtitleCompositor in 'Media\MfSubtitleCompositor.pas',
+  MfSubtitleFramePump in 'Media\MfSubtitleFramePump.pas',
+  TimedTextClass in 'Media\TimedTextClass.pas';
+
+end.
