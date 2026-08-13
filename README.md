@@ -143,6 +143,28 @@ SDK version: 10.0.26100.4654 (Windows 11)
 
 ---
 
+**MfSimpleCastPlayer Sample**
+
+**THis sample demonstrates:**
+
+- Asynchronous Chromecast discovery;
+- Device selection;
+- Casting a compatible local file through the built-in range-capable HTTP server;
+- Casting a directly reachable HTTP/HTTPS media URL;
+- Play, pause, stop, seek, volume, mute, and disconnect;
+- Sidecar (Subtitle files) and embedded text-subtitle enumeration, with sidecars preferred when
+  the same language exists in both sources;
+- Exact embedded-track selection and subtitle switching while casting;
+
+The sample enables the optional Media Foundation conversion stack. Compatible
+MP4/H.264/AAC, WebM, MP3, M4A, and AAC sources use direct play. Containers such
+as MKV are converted to fragmented MP4 and published by the local HTTP server.
+Please read the white paper document  MfPack/Cast/MfPack_Chromecast_API_White_Paper.txt for full details using the MfPack Cast API.
+
+![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfSimpleCastPlayer.png)
+
+---
+
 **MFFrameCapture sample**
 
 *Demonstrates how to capture an image (synchronous or A-synchronous) using the IMFSourceReader.*
