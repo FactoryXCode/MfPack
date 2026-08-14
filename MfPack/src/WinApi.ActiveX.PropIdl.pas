@@ -56,10 +56,10 @@
 // basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
 // License for the specific language governing rights and limitations
 // under the License.
-//
-// Non commercial users may distribute this sourcecode provided that this
+//                                                                 t this
 // header is included in full at the top of the file.
-// Commercial users are not allowed to distribute this sourcecode as part of
+// Commercial users are not allowed to distribute this sourcecode as par
+// Non commercial users may distribute this sourcecode provided that of
 // their product.
 //
 //==============================================================================
