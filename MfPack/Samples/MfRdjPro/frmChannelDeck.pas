@@ -102,6 +102,8 @@ uses
   RDJ.InternalMixer,
   MfWasApiEffectsRack,
   MfParametricEqComponent,
+  // Icecast
+  MfIcecastBroadcastEngine,
   // Playlist
   RDJ.PlaylistTypes,
   RDJ.PlaylistDb,
@@ -176,7 +178,6 @@ type
     pbProgress: TMfLevelProgressBar;
     Bevel5: TBevel;
     Bevel6: TBevel;
-    lblBalMaster: TLabel;
 
     procedure FormCreate(Sender: TObject);
     procedure AfterConstruction(); override;
@@ -362,9 +363,7 @@ implementation
 uses
   System.Math,
   frmMainMDI,
-  frmMasterDeck,
-  frmLoopbackDeck,
-  MicrophoneDeckFrm;
+  frmMasterDeck;
 
 
 procedure TfrmChannelDeck.btnEqEnableClick(Sender: TObject);
@@ -1120,30 +1119,8 @@ begin
       Break;
     end;
 
-  if Other = nil then
-    begin
-      for i := 0 to Screen.FormCount - 1 do
-        begin
-          if Screen.Forms[i] is TfrmLoopbackDeck then
-            begin
-              if TfrmLoopbackDeck(Screen.Forms[i]).chkCrossFade.Checked then
-                begin
-                  TfrmLoopbackDeck(Screen.Forms[i]).ApplyExternalCrossFadeDelta(Delta);
-                  Exit;
-                end;
-            end
-          else if Screen.Forms[i] is TfrmMicrophoneDeck then
-            begin
-              if TfrmMicrophoneDeck(Screen.Forms[i]).chkCrossFade.Checked then
-                begin
-                  TfrmMicrophoneDeck(Screen.Forms[i]).ApplyExternalCrossFadeDelta(Delta);
-                  Exit;
-                end;
-            end;
-        end;
-
-      Exit;
-    end;
+  if (Other = nil) then
+    Exit;
 
   FApplyingXFade := True;
   try
@@ -1953,11 +1930,12 @@ begin
               FLastSentNowPlaying) then
     Exit;
 
-  if Assigned(MainMDIFrm) then
+  if Assigned(MainMDIFrm) and
+     Assigned(MainMDIFrm.IcecastEngine) then
     begin
 
-      MainMDIFrm.UpdateNowPlaying(Artist,
-                                  Title);
+      MainMDIFrm.IcecastEngine.UpdateNowPlaying(Artist,
+                                                Title);
       FLastSentNowPlaying := SongText;
     end;
 end;

@@ -1,62 +1,3 @@
-// FactoryX
-//
-// Copyright: © FactoryX. All rights reserved.
-//
-// Project: MfPack - MediaFoundation
-// Project location: https://sourceforge.net/projects/MFPack
-//                   https://github.com/FactoryXCode/MfPack
-// Module: LWFileBrowserExDlg.pas
-// Kind: Pascal Unit
-// Release date: 18-11-2022
-// Language: ENU
-//
-// Revision Version: 3.2.0
-//
-// Description: A very lightweight filebrowser dialog with network support.
-//
-// Organisation: FactoryX
-// Initiator(s): Ciaran
-// Contributor(s): Ciaran, Tony (maXcomX)
-//
-//------------------------------------------------------------------------------
-// CHANGE LOG
-// Date       Person              Reason
-// ---------- ------------------- ----------------------------------------------
-// 05/05/2026 All                 Bauhaus release  SDK 10.0.26100.4654 (Windows 11)
-//------------------------------------------------------------------------------
-//
-// Remarks: Requires Windows 10 (2H20) or later.
-//
-// Related objects: -
-// Related projects: MfPackX320/Samples/MFCaptureEngineVideoCapture
-//
-// Compiler version: 23 up to 35
-// SDK version: 10.0.26100.4654
-//
-// Todo: -
-//
-//==============================================================================
-// Source: -
-//==============================================================================
-//
-// LICENSE
-//
-// The contents of this file are subject to the Mozilla Public License
-// Version 2.0 (the "License"); you may not use this file except in
-// compliance with the License. You may obtain a copy of the License at
-// https://www.mozilla.org/en-US/MPL/2.0/
-//
-// Software distributed under the License is distributed on an "AS IS"
-// basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-// License for the specific language governing rights and limitations
-// under the License.
-//
-// Non commercial users may distribute this sourcecode provided that this
-// header is included in full at the top of the file.
-// Commercial users are not allowed to distribute this sourcecode as part of
-// their product.
-//
-//==============================================================================
 unit LWFileBrowserExDlg;
 
 interface
@@ -199,6 +140,7 @@ type
     procedure edtPathKeyDown(Sender: TObject;
                              var Key: Word;
                              Shift: TShiftState);
+    procedure lbFoldersDblClick(Sender: TObject);
     procedure lbFoldersDrawItem(Control: TWinControl;
                                 Index: Integer;
                                 Rect: TRect;
@@ -207,7 +149,6 @@ type
     procedure flbFilesDblClick(Sender: TObject);
     procedure btnScanNetworkClick(Sender: TObject);
     procedure btnNetStationsSearchClick(Sender: TObject);
-    procedure lbFoldersDblClick(Sender: TObject);
 
   private
 
@@ -221,8 +162,9 @@ type
     FNetworkScanRunning: Boolean;
     FNetworkFinder: TNetworkDiscoveryThread;
 
-    // Leave code here for network scan example .
-    // procedure NetworkDiscoveryFinished(Sender: TObject);
+    procedure NetworkDiscoveryFinished(Sender: TObject);
+    procedure StopNetworkStationDiscovery();
+    function NetworkDiscoveryIsRunning(): Boolean;
     procedure StartNetworkStationDiscovery();
 
     procedure InitSystemImageList();
@@ -356,15 +298,7 @@ end;
 procedure TLWFileBrowserExDlg.FormDestroy(Sender: TObject);
 begin
 
-  if Assigned(FNetworkFinder) then
-    begin
-
-      //FNetworkFinder.OnStationFound := nil;
-      //FNetworkFinder.OnFinished := nil;
-      //FNetworkFinder.Terminate();
-      //FNetworkFinder.WaitFor();
-      //FreeAndNil(FNetworkFinder);
-    end;
+  StopNetworkStationDiscovery();
 
   // NOTE: FSmallSysImages is the shared system image list. Do not destroy it.
 end;
@@ -489,26 +423,82 @@ end;
 
 procedure TLWFileBrowserExDlg.flbFilesDblClick(Sender: TObject);
 begin
-
   if btnOk.Enabled then
     btnOkClick(Sender);
 end;
 
+procedure TLWFileBrowserExDlg.lbFoldersDblClick(Sender: TObject);
+var
+  ItemText: string;
+  NewDir: string;
+
+begin
+  if lbFolders.ItemIndex < 0 then
+    Exit;
+
+  ItemText := lbFolders.Items[lbFolders.ItemIndex];
+
+  if (ItemText = '..') then
+    begin
+
+      NewDir := ExtractFileDir(ExcludeTrailingPathDelimiter(FCurrentDirectory));
+      if (NewDir <> '') and (NewDir <> FCurrentDirectory) then
+        TrySetBrowserDirectory(NewDir,
+                               False);
+    end
+  else
+    begin
+
+      NewDir := IncludeTrailingPathDelimiter(FCurrentDirectory) + ItemText;
+      TrySetBrowserDirectory(NewDir,
+                             True);
+    end;
+end;
+
 
 // Scan network for network stations (>= Win 10)
+function TLWFileBrowserExDlg.NetworkDiscoveryIsRunning(): Boolean;
+begin
+
+  Result := Assigned(FNetworkFinder) and not FNetworkFinder.Finished;
+end;
+
+
+procedure TLWFileBrowserExDlg.NetworkDiscoveryFinished(Sender: TObject);
+begin
+
+  FNetworkScanRunning := False;
+end;
+
+
+procedure TLWFileBrowserExDlg.StopNetworkStationDiscovery();
+begin
+
+  if not Assigned(FNetworkFinder) then
+    Exit;
+
+  FNetworkFinder.OnStationFound := nil;
+  FNetworkFinder.OnFinished := nil;
+  FNetworkFinder.Terminate();
+  FNetworkFinder.WaitFor();
+  FreeAndNil(FNetworkFinder);
+  FNetworkScanRunning := False;
+end;
+
+
 procedure TLWFileBrowserExDlg.StartNetworkStationDiscovery();
 begin
 
-  if FNetworkScanRunning then
+  if NetworkDiscoveryIsRunning() then
     Exit;
 
-  if Assigned(FNetworkFinder) then
-    Exit;
+  // Reap a completed discovery before starting another one.
+  StopNetworkStationDiscovery();
 
   FNetworkScanRunning := True;
   FNetworkFinder := TNetworkDiscoveryThread.Create();
-  FNetworkFinder.FreeOnTerminate := True;
   FNetworkFinder.OnStationFound := NetworkStationFound;
+  FNetworkFinder.OnFinished := NetworkDiscoveryFinished;
   FNetworkFinder.Start();
 end;
 
@@ -1289,36 +1279,6 @@ begin
                 TextValue,
                 IconIndex,
                 odSelected in State);
-end;
-
-
-procedure TLWFileBrowserExDlg.lbFoldersDblClick(Sender: TObject);
-var
-  ItemText: string;
-  NewDir: string;
-
-begin
-
-  if (lbFolders.ItemIndex < 0) then
-    Exit;
-
-  ItemText := lbFolders.Items[lbFolders.ItemIndex];
-
-  if (ItemText = '..') then
-    begin
-
-      NewDir := ExtractFileDir(ExcludeTrailingPathDelimiter(FCurrentDirectory));
-      if (NewDir <> '') and (NewDir <> FCurrentDirectory) then
-        TrySetBrowserDirectory(NewDir,
-                               False);
-    end
-  else
-    begin
-
-      NewDir := IncludeTrailingPathDelimiter(FCurrentDirectory) + ItemText;
-      TrySetBrowserDirectory(NewDir,
-                             True);
-    end;
 end;
 
 

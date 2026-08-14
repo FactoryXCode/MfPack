@@ -1,4 +1,4 @@
-﻿// FactoryX
+// FactoryX
 //
 // Copyright: FactoryX. All rights reserved.
 //
@@ -265,6 +265,7 @@ type
     procedure ApplyExternalCrossFadeDelta(const ADelta: Integer);
     procedure StartCapture();
     procedure StopCapture();
+    function IsCapturing(): Boolean;
   end;
 
 var
@@ -277,7 +278,8 @@ implementation
 
 uses
   frmMainMDI,
-  frmChannelDeck;
+  frmChannelDeck,
+  MfIcecastBroadcastEngine;
 
 
 procedure TfrmLoopbackDeck.FormCreate(Sender: TObject);
@@ -700,6 +702,12 @@ begin
 end;
 // BPM end ---------------------------------------------------------------------
 
+function TfrmLoopbackDeck.IsCapturing(): Boolean;
+begin
+
+  Result := Assigned(FEngine) and FEngine.Active;
+end;
+
 procedure TfrmLoopbackDeck.StartCapture();
 var
   hr: HRESULT;
@@ -737,7 +745,14 @@ begin
 
       lblStatus.Caption := 'Start: Failed';
       lblStatus.Hint := lblStatus.Caption;
-    end;
+    end
+  else
+    if Assigned(MainMDIFrm) and
+       Assigned(MainMDIFrm.IcecastEngine) and
+       (MainMDIFrm.IcecastEngine.State in [bsConnecting,
+                                           bsLive,
+                                           bsReconnecting]) then
+      MainMDIFrm.IcecastEngine.ClearNowPlaying();
 end;
 
 

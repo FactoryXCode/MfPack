@@ -162,8 +162,9 @@ type
     FNetworkScanRunning: Boolean;
     FNetworkFinder: TNetworkDiscoveryThread;
 
-    // Leave code here for network scan example .
-    // procedure NetworkDiscoveryFinished(Sender: TObject);
+    procedure NetworkDiscoveryFinished(Sender: TObject);
+    procedure StopNetworkStationDiscovery();
+    function NetworkDiscoveryIsRunning(): Boolean;
     procedure StartNetworkStationDiscovery();
 
     procedure InitSystemImageList();
@@ -297,14 +298,7 @@ end;
 procedure TLWFileBrowserExDlg.FormDestroy(Sender: TObject);
 begin
 
-  if Assigned(FNetworkFinder) then
-    begin
-
-      FNetworkFinder.OnStationFound := nil;
-      FNetworkFinder.OnFinished := nil;
-      FNetworkFinder.Terminate();
-      FNetworkFinder := nil;
-    end;
+  StopNetworkStationDiscovery();
 
   // NOTE: FSmallSysImages is the shared system image list. Do not destroy it.
 end;
@@ -463,19 +457,48 @@ end;
 
 
 // Scan network for network stations (>= Win 10)
+function TLWFileBrowserExDlg.NetworkDiscoveryIsRunning(): Boolean;
+begin
+
+  Result := Assigned(FNetworkFinder) and not FNetworkFinder.Finished;
+end;
+
+
+procedure TLWFileBrowserExDlg.NetworkDiscoveryFinished(Sender: TObject);
+begin
+
+  FNetworkScanRunning := False;
+end;
+
+
+procedure TLWFileBrowserExDlg.StopNetworkStationDiscovery();
+begin
+
+  if not Assigned(FNetworkFinder) then
+    Exit;
+
+  FNetworkFinder.OnStationFound := nil;
+  FNetworkFinder.OnFinished := nil;
+  FNetworkFinder.Terminate();
+  FNetworkFinder.WaitFor();
+  FreeAndNil(FNetworkFinder);
+  FNetworkScanRunning := False;
+end;
+
+
 procedure TLWFileBrowserExDlg.StartNetworkStationDiscovery();
 begin
 
-  if FNetworkScanRunning then
+  if NetworkDiscoveryIsRunning() then
     Exit;
 
-  if Assigned(FNetworkFinder) then
-    Exit;
+  // Reap a completed discovery before starting another one.
+  StopNetworkStationDiscovery();
 
   FNetworkScanRunning := True;
   FNetworkFinder := TNetworkDiscoveryThread.Create();
-  FNetworkFinder.FreeOnTerminate := True;
   FNetworkFinder.OnStationFound := NetworkStationFound;
+  FNetworkFinder.OnFinished := NetworkDiscoveryFinished;
   FNetworkFinder.Start();
 end;
 

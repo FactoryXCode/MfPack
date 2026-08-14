@@ -2,7 +2,7 @@ object MainMDIFrm: TMainMDIFrm
   Left = 0
   Top = 0
   BorderIcons = []
-  Caption = 'RDJ Charlie'
+  Caption = 'RDJ'
   ClientHeight = 836
   ClientWidth = 1281
   Color = 5850948
@@ -131,7 +131,7 @@ object MainMDIFrm: TMainMDIFrm
       OnMouseDown = pnlCaptionMouseDown
     end
     object lblAppTitle: TLabel
-      Left = 0
+      Left = -2
       Top = 0
       Width = 105
       Height = 17
@@ -143,7 +143,7 @@ object MainMDIFrm: TMainMDIFrm
       Alignment = taCenter
       AutoSize = False
       BiDiMode = bdLeftToRight
-      Caption = 'RDJ Charlie'
+      Caption = 'RDJ'
       Color = clBlack
       Font.Charset = DEFAULT_CHARSET
       Font.Color = 9891585
@@ -936,7 +936,7 @@ object MainMDIFrm: TMainMDIFrm
   end
   object tmrClock: TTimer
     OnTimer = tmrClockTimer
-    Left = 1130
-    Top = 78
+    Left = 934
+    Top = 8
   end
 end

@@ -1,9 +1,12 @@
 program MfRdjJ;
 
 uses
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
   Vcl.Forms,
-  Vcl.Themes,
-  Vcl.Styles,
   frmMasterDeck in 'frmMasterDeck.pas' {MasterDeckFrm},
   frmPlaylistEditor in 'frmPlaylistEditor.pas' {frmPlaylistEditor},
   frmSetup in 'frmSetup.pas' {frmSetup},
@@ -30,29 +33,28 @@ uses
   MfAudioRecorder in 'MfAudioRecorder.pas',
   MfAudioFileWriter in 'MfAudioFileWriter.pas',
   RDJ_Common in 'RDJ_Common.pas',
+  Vcl.Themes,
+  Vcl.Styles,
   frmMainMDI in 'frmMainMDI.pas' {MainMDIFrm},
+  MfIcecastBroadcastEngine in 'MfIcecastBroadcastEngine.pas',
   MfMicrophoneFx in 'MfMicrophoneFx.pas',
   MfMicrophoneDeckEngine in 'MfMicrophoneDeckEngine.pas',
   MicrophoneDeckFrm in 'MicrophoneDeckFrm.pas' {MicrophoneDeckFrm},
+  MfIcecastServerManager in 'MfIcecastServerManager.pas',
+  MfBroadcastEncoderAac in 'MfBroadcastEncoderAac.pas',
   RDJ.JSon in 'RDJ.JSon.pas',
   RDJ.FilenameParser in 'RDJ.FilenameParser.pas',
   dlgMediaServer in 'dlgMediaServer.pas' {frmMediaServer},
   dlgAudioDevices in 'dlgAudioDevices.pas' {AudioDevicesDlg},
   LWFileBrowserExDlg in 'LWFileBrowserExDlg.pas' {LWFileBrowserExDlg},
-  RDJ_NetWorkStationsScanner in 'RDJ_NetWorkStationsScanner.pas',
-  RDJ.RdjPro.Compositor in 'RDJ.RdjPro.Compositor.pas',
-  RDJ.RdjPro.AudioQueue in 'RDJ.RdjPro.AudioQueue.pas',
-  RDJ.RdjPro.CaptureEngine in 'RDJ.RdjPro.CaptureEngine.pas',
-  RDJ.RdjPro.SampleConverter in 'RDJ.RdjPro.SampleConverter.pas',
-  RDJ.RdjPro.Mp4Recorder in 'RDJ.RdjPro.Mp4Recorder.pas',
-  RDJ.RdjPro.BroadcastFmp4Recorder in 'RDJ.RdjPro.BroadcastFmp4Recorder.pas';
+  RDJ_NetWorkStationsScanner in 'RDJ_NetWorkStationsScanner.pas';
 
 {$R *.res}
 
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
-  Application.Title := 'RDJ Pro';
+  Application.Title := 'RDJ Charlie';
   Application.CreateForm(TMainMDIFrm, MainMDIFrm);
   // Autocreate these forms for less UI load during rendering in loopback.
   Application.CreateForm(TLWFileBrowserExDlg, DlgLWFileBrowserEx);

@@ -550,7 +550,7 @@ object frmCaddyAdmin: TfrmCaddyAdmin
   object lblRdjProSetupIni: TLabel
     Left = 38
     Top = 145
-    Width = 65
+    Width = 56
     Height = 15
     Caption = 'RDJPro ini:'
     Font.Charset = DEFAULT_CHARSET
@@ -591,41 +591,64 @@ object frmCaddyAdmin: TfrmCaddyAdmin
   end
   object FServerEdit: TEdit
     Left = 108
-    Top = 28
+    Top = 27
     Width = 360
     Height = 23
+    Hint = 
+      'Leave **Server** empty when Caddy runs on the same PC as CaddyAd' +
+      'min. An empty server value makes the app use the local Windows S' +
+      'ervice Control Manager.'
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 0
   end
   object FServiceEdit: TEdit
-    Left = 108
+    Left = 109
     Top = 56
     Width = 360
     Height = 23
+    Hint = 'Type a name for the service.'
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 1
+    TextHint = 'RDJProCaddy'
   end
   object FCaddyRootEdit: TEdit
     Left = 108
     Top = 84
     Width = 360
     Height = 23
+    Hint = 
+      'Enter the Caddy share/folder. For example "C:\Caddy" or "\\MySer' +
+      'ver\Caddy"'
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 2
+    TextHint = 'C:\Caddy'
   end
   object FServerCaddyRootEdit: TEdit
     Left = 108
     Top = 113
     Width = 360
     Height = 23
+    Hint = 'Enter the server local path.'
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 3
+    TextHint = 'C:\Caddy'
   end
   object FRdjProSetupIniEdit: TEdit
     Left = 108
     Top = 142
     Width = 360
     Height = 23
-    Hint = 'RDJ Pro setup INI file to update when saving Caddy.cff.'
+    Hint = 
+      'RDJ Pro setup INI file to update when saving Caddy.cff. (local: ' +
+      'C:\Caddy\caddy.cff, remote: \\MyServer\Caddy\caddy.cff'
     ParentShowHint = False
     ShowHint = True
     TabOrder = 4
+    TextHint = 'C:\Caddy\caddy.cff'
   end
   object btnChangePassword: TButton
     Left = 491

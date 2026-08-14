@@ -411,7 +411,9 @@ begin
 
   inherited Create(True);
 
-  FreeOnTerminate := True;
+  // Discovery callers own the thread and must join it before releasing any
+  // callback targets.  Self-destruction would leave their references stale.
+  FreeOnTerminate := False;
 
   FResultList := TStringList.Create();
   FResultList.Sorted := True;

@@ -13,10 +13,8 @@ object AudioDevicesDlg: TAudioDevicesDlg
   Font.Name = 'Tahoma'
   Font.Style = []
   KeyPreview = True
-  OldCreateOrder = True
   Position = poMainFormCenter
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object pnlCtrls: TPanel
     Left = 0

@@ -64,48 +64,78 @@ object frmCaddyConfigEditor: TfrmCaddyConfigEditor
     Height = 183
   end
   object edtConfigFile: TEdit
-    Left = 109
+    Left = 110
     Top = 14
     Width = 422
     Height = 23
+    Hint = 'Caddy config filename. You can'#39't change this value.'
     ReadOnly = True
     TabOrder = 0
     Text = 'caddy.cff'
   end
   object edtSiteAddress: TEdit
-    Left = 109
+    Left = 110
     Top = 54
     Width = 422
     Height = 23
+    Hint = 
+      'Site address, the first Caddy site label, such as `factoryxradio' +
+      '.asuscomm.com`.'
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 1
+    TextHint = 'factoryxradio.asuscomm.com, http://192.168.1.227'
   end
   object edtCaddyRoot: TEdit
     Left = 109
     Top = 86
     Width = 422
     Height = 23
+    Hint = 'Caddy root path, written to every `root * ...` line.'
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 2
+    TextHint = 'C:\Caddy'
   end
   object edtLogFile: TEdit
-    Left = 109
+    Left = 110
     Top = 118
     Width = 422
     Height = 23
+    Hint = 
+      'Log file path, written to the `output file` line. The editor man' +
+      'ages  the file-writer braces automatically; they are Caddy synta' +
+      'x and are not part of the path shown in the editor.'
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 3
+    TextHint = 'C:\Caddy\cast-access.log'
   end
   object edtProxyHost: TEdit
-    Left = 109
+    Left = 110
     Top = 150
     Width = 185
     Height = 23
+    Hint = 
+      'RDJPRO host/IP and port, written to every `reverse_proxy ...` li' +
+      'ne.'
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 4
+    TextHint = '127.0.0.1'
   end
   object edtProxyPort: TEdit
     Left = 349
     Top = 150
     Width = 80
     Height = 23
+    Hint = 
+      'RDJPRO host/IP and port, written to every `reverse_proxy ...` li' +
+      'ne.'
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 5
+    TextHint = '8000'
   end
   object btnSave: TButton
     Left = 375

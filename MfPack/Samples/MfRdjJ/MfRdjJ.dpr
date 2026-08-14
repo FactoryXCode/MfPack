@@ -1,6 +1,11 @@
 program MfRdjJ;
 
 uses
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
   Vcl.Forms,
   frmMasterDeck in 'frmMasterDeck.pas' {MasterDeckFrm},
   frmPlaylistEditor in 'frmPlaylistEditor.pas' {frmPlaylistEditor},
@@ -42,8 +47,7 @@ uses
   dlgMediaServer in 'dlgMediaServer.pas' {frmMediaServer},
   dlgAudioDevices in 'dlgAudioDevices.pas' {AudioDevicesDlg},
   LWFileBrowserExDlg in 'LWFileBrowserExDlg.pas' {LWFileBrowserExDlg},
-  RDJ_NetWorkStationsScanner in 'RDJ_NetWorkStationsScanner.pas',
-  RDJ.CarmenPro in 'RDJ.CarmenPro.pas';
+  RDJ_NetWorkStationsScanner in 'RDJ_NetWorkStationsScanner.pas';
 
 {$R *.res}
 

@@ -324,6 +324,7 @@ type
     procedure CreateMicrophoneForm();
     procedure CreateChannelForms(Count: Integer);
     procedure CreateLoopbackDecks(Count: Integer);
+    function HasActiveLoopbackDeck(): Boolean;
     procedure DestroyDeckForms();
     procedure TileDecks();
     procedure ApplyDarkFrameToAllChildren();
@@ -839,17 +840,16 @@ begin
   tmrClock.Enabled := False;
   lblLocalTime.Caption := 'Closing RDJ, Please wait...';
   lblLocalTime.Repaint;
-  Sleep(2000);
-
   DestroyBroadcastEngine();
 
-  if Assigned(FMediaServer) then
-    FMediaServer.Free;
+  // This form is auto-created by the project and owns the asynchronous
+  // network-discovery worker.  Destroy it while normal message processing and
+  // application services are still available, rather than in DoneApplication.
+  FreeAndNil(DlgLWFileBrowserEx);
 
-  if Assigned(FPlayListEditor) then
-    FPlayListEditor.Free;
+  FreeAndNil(FMediaServer);
+  FreeAndNil(FPlayListEditor);
 
-  Sleep(2000);
   CanClose := True;
 end;
 
@@ -1137,6 +1137,20 @@ begin
 end;
 
 
+function TMainMDIFrm.HasActiveLoopbackDeck(): Boolean;
+var
+  I: Integer;
+
+begin
+
+  Result := False;
+
+  for I := 0 to High(FLoopbackDecks) do
+    if Assigned(FLoopbackDecks[I]) and
+       FLoopbackDecks[I].IsCapturing() then
+      Exit(True);
+end;
+
 procedure TMainMDIFrm.StartBroadcast();
 var
   S: TRDJBroadcastSetup;
@@ -1202,6 +1216,9 @@ begin
   HR := FBroadcastEngine.Start();
   if Failed(HR) then
     OleCheck(HR);
+
+  if HasActiveLoopbackDeck() then
+    FBroadcastEngine.ClearNowPlaying();
 end;
 
 

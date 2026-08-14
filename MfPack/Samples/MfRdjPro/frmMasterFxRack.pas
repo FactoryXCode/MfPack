@@ -216,7 +216,6 @@ type
     procedure tbLowGainDbDblClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure btnMinimizeClick(Sender: TObject);
-    procedure FormResize(Sender: TObject);
 
   private
 
@@ -589,14 +588,6 @@ procedure TfrmMasterFxRack.btnFlangerEchoClick(Sender: TObject);
 begin
   //
   pnlFlangerEcho.BringToFront;
-end;
-
-
-procedure TfrmMasterFxRack.FormResize(Sender: TObject);
-begin
-
-  if Assigned(MainMDIFrm) then
-    MainMDIFrm.AlignMasterDeckWithFxRack();
 end;
 
 

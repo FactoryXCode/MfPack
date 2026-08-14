@@ -104,7 +104,7 @@ uses
   MfTrackBar,
   MPxpButton,
   MfAudioMixVisualizer,
-  RdjAudioMixVisualizer;
+  MfIcecastServerManager;
 
 const
   MIN_VOLUME = 0.0;
@@ -142,12 +142,6 @@ type
     epPFL: TMfAudioEndPoint;
     epMaster: TMfAudioEndPoint;
     tmrTime: TTimer;
-    Shape2: TShape;
-    Shape1: TShape;
-    Shape3: TShape;
-    Shape4: TShape;
-    Shape5: TShape;
-    Shape6: TShape;
     pnlCaption: TPanel;
     lblCaption: TLabel;
     pnlRecIcecast: TPanel;
@@ -164,11 +158,11 @@ type
     lblAudioRecorder: TLabel;
     Bevel1: TBevel;
     lblFileExt: TLabel;
-    shpRecordingCap: TShape;
+    OnRecordingCap: TShape;
     shpRecording: TShape;
     lblRecording: TLabel;
     pnlFXButtons: TPanel;
-    avMixGraph: TRdjAudioMixVisualizer;
+    avMixGraph: TMfAudioMixVisualizer;
 
     procedure FormShow(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -1055,7 +1049,7 @@ begin
   if pSetupRec.AudioRecorderAutoBufferSize then
     prBufferDuration := 0
   else
-    prBufferDuration := (REFTIMES_PER_MILLISEC) * pSetupRec.AudioRecorderCaptureBufferMs;
+    prBufferDuration := (REFTIMES_PER_MILLISEC) * pSetupRec.AudioRecorderCaptureBufferSize;
 
   prTargetLatency := pSetupRec.AudioRecorderSystemLatency;
 

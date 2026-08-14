@@ -50,9 +50,11 @@ type
     procedure UpdateRdjProSetupIni();
     function FindFirstValue(const APrefix: string): string;
     function LeadingSpaces(const S: string): string;
+
     function SplitProxyTarget(const ATarget: string;
                               out AHost: string;
                               out APort: string): Boolean;
+
     function BuildProxyTarget: string;
     function BuildCaddyCommand(): string;
     function BuildRdjProLogFileValue(): string;
@@ -73,12 +75,14 @@ implementation
 
 constructor TfrmCaddyConfigEditor.Create(AOwner: TComponent);
 begin
+
   inherited Create(AOwner);
-  FConfigLines := TStringList.Create;
+  FConfigLines := TStringList.Create();
+
 end;
 
 
-destructor TfrmCaddyConfigEditor.Destroy;
+destructor TfrmCaddyConfigEditor.Destroy();
 begin
 
   FConfigLines.Free;
@@ -121,7 +125,6 @@ begin
   Result := '';
   for I := 0 to FConfigLines.Count - 1 do
     begin
-
       S := Trim(FConfigLines[I]);
       if SameText(Copy(S, 1, Length(APrefix)),
                   APrefix) then
@@ -143,10 +146,9 @@ begin
 
   P := LastDelimiter(':',
                      ATarget);
-  Result := P > 0;
+  Result := (P > 0);
   if Result then
     begin
-
       AHost := Trim(Copy(ATarget,
                     1,
                     P - 1));
@@ -186,6 +188,7 @@ var
   LogFileName: string;
   LogDir: string;
   ServerRoot: string;
+
 begin
 
   LogFileName := Trim(edtLogFile.Text);
@@ -224,7 +227,6 @@ begin
       S := Trim(FConfigLines[I]);
       if (S <> '') and (S[Length(S)] = '{') then
         begin
-
           edtSiteAddress.Text := Trim(Copy(S,
                                            1,
                                            Length(S) - 1));
@@ -233,7 +235,13 @@ begin
     end;
 
   edtCaddyRoot.Text := FindFirstValue('root * ');
-  edtLogFile.Text := FindFirstValue('output file ');
+
+  Value := FindFirstValue('output file ');
+  if (Value <> '') and (Value[Length(Value)] = '{') then
+    Value := Trim(Copy(Value,
+                       1,
+                       Length(Value) - 1));
+  edtLogFile.Text := Value;
 
   Value := FindFirstValue('reverse_proxy ');
   if Pos(' ',
@@ -257,13 +265,54 @@ end;
 procedure TfrmCaddyConfigEditor.ApplyConfig;
 var
   I: Integer;
+  J: Integer;
   Line: string;
   S: string;
   Prefix: string;
   Suffix: string;
   P: Integer;
+  HasFileBlockEnd: Boolean;
 
 begin
+
+  { Normalize the file writer block. The braces are Caddy syntax, not part of
+    the log filename exposed by the editor. }
+  for I := 0 to FConfigLines.Count - 1 do
+    begin
+
+      S := Trim(FConfigLines[I]);
+      if SameText(Copy(S,
+                       1,
+                       12),
+                       'output file ') then
+        begin
+
+          HasFileBlockEnd := False;
+          J := I + 1;
+
+          while (J < FConfigLines.Count) do
+            begin
+              S := Trim(FConfigLines[J]);
+              if SameText(Copy(S,
+                               1,
+                               7),
+                               'format ') then
+                Break;
+              if S = '}' then
+                begin
+
+                  HasFileBlockEnd := True;
+                  Break;
+                end;
+              Inc(J);
+            end;
+
+          if not HasFileBlockEnd then
+            FConfigLines.Insert(J,
+                                LeadingSpaces(FConfigLines[I]) + '}');
+          Break;
+        end;
+    end;
 
   for I := 0 to FConfigLines.Count - 1 do
     begin
@@ -278,7 +327,6 @@ begin
                    1,
                    Length(S) - 1)) = 0) then
         begin
-
           FConfigLines[I] := LeadingSpaces(Line) + Trim(edtSiteAddress.Text) + ' {';
           Continue;
         end;
@@ -298,8 +346,8 @@ begin
                        12),
                        'output file ') then
         begin
-
-          FConfigLines[I] := LeadingSpaces(Line) + 'output file ' + Trim(edtLogFile.Text);
+          FConfigLines[I] := LeadingSpaces(Line) + 'output file ' +
+                             Trim(edtLogFile.Text) + ' {';
           Continue;
         end;
 
@@ -308,9 +356,9 @@ begin
                        14),
                        'reverse_proxy ') then
         begin
-
           Prefix := LeadingSpaces(Line) + 'reverse_proxy ';
           Suffix := '';
+
           P := Pos(' ',
                    Trim(Copy(S,
                              15,
@@ -336,7 +384,7 @@ var
 begin
 
   SetupIniFileName := Trim(FSetupIniFileName);
-  if SetupIniFileName = '' then
+  if (SetupIniFileName = '') then
     Exit;
 
   if not FileExists(SetupIniFileName) then

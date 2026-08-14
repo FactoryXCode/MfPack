@@ -68,6 +68,7 @@ uses
   WinApi.Windows,
   {System}
   System.SysUtils,
+  System.Classes,
   System.JSON,
   System.IOUtils;
 
@@ -116,7 +117,9 @@ var
   JsonFileName: string;
   TmpFileName: string;
   Setup: TRDJSetup;
-  CoverUrl: string;
+  JsonText: string;
+  Utf8Bytes: TBytes;
+  JsonStream: TFileStream;
 
   procedure SetJsonInteger(const AName: string;
                            const AValue: Integer);
@@ -151,78 +154,6 @@ var
                  AValue);
   end;
 
-
-  function BuildBrowserCoverUrl(const AValue: string): string;
-  var
-    CleanValue: string;
-    QPos: Integer;
-
-  begin
-
-    Result := '';
-    CleanValue := Trim(AValue);
-    if CleanValue = '' then
-      Exit;
-
-    CleanValue := StringReplace(CleanValue,
-                                '\',
-                                '/',
-                                [rfReplaceAll]);
-
-    QPos := Pos('?',
-                CleanValue);
-
-    if (QPos > 0) then
-      CleanValue := Copy(CleanValue,
-                         1,
-                         QPos - 1);
-
-    // Do not publish disk/UNC paths to the browser.
-    if ((Length(CleanValue) >= 2) and (CleanValue[2] = ':')) or
-       (Copy(CleanValue,
-             1,
-             2) = '//') then
-      CleanValue := ExtractFileName(CleanValue);
-
-    if CleanValue = '' then
-      Exit;
-
-    Result := CleanValue + '?ts=' + IntToStr(GetTickCount);
-  end;
-
-
-  procedure PublishJsonFile(const ASourceFileName: string;
-                            const ADestFileName: string);
-  const
-    RDJ_JSON_PUBLISH_RETRY_COUNT = 10;
-    RDJ_JSON_PUBLISH_RETRY_DELAY_MS = 25;
-  var
-    Attempt: Integer;
-    LastError: DWORD;
-
-  begin
-
-    for Attempt := 0 to RDJ_JSON_PUBLISH_RETRY_COUNT do
-      begin
-        if MoveFileEx(PChar(ASourceFileName),
-                      PChar(ADestFileName),
-                      MOVEFILE_REPLACE_EXISTING or MOVEFILE_WRITE_THROUGH) then
-          Exit;
-
-        LastError := GetLastError();
-
-        if (LastError <> ERROR_ALREADY_EXISTS) and
-           (LastError <> ERROR_ACCESS_DENIED) and
-           (LastError <> ERROR_SHARING_VIOLATION) and
-           (LastError <> ERROR_LOCK_VIOLATION) then
-          Break;
-
-        Sleep(RDJ_JSON_PUBLISH_RETRY_DELAY_MS);
-      end;
-
-    RaiseLastOSError(LastError);
-  end;
-
 begin
 
   if (Trim(AFileName) = '') then
@@ -233,7 +164,7 @@ begin
      (AShowName = '') and
      (AArtist = '') and
      (ATitle = '') and
-     (AListeners < 0) then
+     (AListeners = 0) then
     Exit;
 
   if not Assigned(MainMDIFrm) then
@@ -286,16 +217,11 @@ begin
                   ATitle,
                   AClearEmptyTrackInfo);
 
-    CoverUrl := BuildBrowserCoverUrl(ACoverUrl);
-
-    if (CoverUrl <> '') then
+    if (ACoverUrl <> '') then
       SetJsonString('coverUrl',
-                    CoverUrl);
+                    ExtractFileName(ACoverUrl) + '?ts=' + IntToStr(GetTickCount));
 
     SetJsonInteger('displayListeners',
-                   AListeners);
-
-    SetJsonInteger('listeners',
                    AListeners);
 
     SetJsonInteger('onAir',
@@ -310,13 +236,23 @@ begin
                                    Now));
 
 
-    TFile.WriteAllText(TmpFileName,
-                       //Json.Format(2),
-                       Json.ToString,
-                       TEncoding.UTF8);
+    JsonText := Json.ToJSON();
+    Utf8Bytes := TEncoding.UTF8.GetBytes(JsonText);
+    JsonStream := TFileStream.Create(TmpFileName,
+                                     fmCreate);
+    try
+      if Length(Utf8Bytes) > 0 then
+        JsonStream.WriteBuffer(Utf8Bytes[0],
+                               Length(Utf8Bytes));
+    finally
+      JsonStream.Free();
+    end;
 
-    PublishJsonFile(TmpFileName,
-                    JsonFileName);
+    if TFile.Exists(JsonFileName) then
+      TFile.Delete(JsonFileName);
+
+    TFile.Move(TmpFileName,
+               JsonFileName);
 
   finally
 

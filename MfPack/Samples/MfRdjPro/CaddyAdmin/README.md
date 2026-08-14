@@ -42,7 +42,9 @@ The editor intentionally exposes only values that normally change when Caddy is 
 
 - Site address, the first Caddy site label such as `factoryxradio.asuscomm.com`.
 - Caddy root path, written to every `root * ...` line.
-- Log file path, written to the `output file ...` line.
+- Log file path, written to the `output file ... {` line. The editor manages
+  the file-writer braces automatically; they are Caddy syntax and are not part
+  of the path shown in the editor.
 - RDJPRO host/IP and port, written to every `reverse_proxy ...` line.
 
 All other Caddy directives are preserved.

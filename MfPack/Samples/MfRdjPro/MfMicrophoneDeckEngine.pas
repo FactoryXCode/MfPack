@@ -77,7 +77,6 @@ uses
   Winapi.CoreAudioApi.AudioClient,
   Winapi.CoreAudioApi.MMDeviceApi,
   WinApi.CoreAudioApi.AudioSessionTypes,
-  WinApi.CoreAudioApi.MMDevApiUtils,
   {WinMM}
   WinApi.WinMM.MMeApi,
   WinApi.WinMM.MMReg,
@@ -1364,10 +1363,6 @@ begin
                          Pointer(AAudioClient));
   if Failed(Hr) then
     Exit(Hr);
-
-  ConfigureRawAudioStream(AAudioClient,
-                          AudioCategory_Other,
-                          'RDJ microphone capture');
 
   FreeWaveFormat;
   Hr := AAudioClient.GetMixFormat(FWaveFormat);

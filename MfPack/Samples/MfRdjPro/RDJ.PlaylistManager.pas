@@ -1,4 +1,13 @@
-﻿// FactoryX
+﻿{
+Responsibilities:
+
+create playlists
+
+load/save playlists
+
+manage playlist list
+}
+// FactoryX
 //
 // Copyright: FactoryX. All rights reserved.
 //

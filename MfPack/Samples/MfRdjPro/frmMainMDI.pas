@@ -68,18 +68,14 @@ uses
   WinApi.Windows,
   WinApi.WinApiTypes,
   WinApi.Messages,
-  WinApi.WinError,
   {System}
   System.SysUtils,
   System.Classes,
-  System.DateUtils,
-  System.IOUtils,
   System.Math,
   System.Types,
   System.UITypes,
   System.Win.ComObj,
   System.JSON,
-  System.SyncObjs,
   {Vcl}
   Vcl.Graphics,
   Vcl.Imaging.jpeg,
@@ -91,8 +87,6 @@ uses
   Vcl.StdCtrls,
   {MediaFoundationApi}
   WinApi.MediaFoundationApi.MfApi,
-  WinApi.MediaFoundationApi.MfObjects,
-  WinApi.MediaFoundationApi.MfMetLib,
   WinApi.MediaFoundationApi.MfUtils,
   {CoreAudioApi}
   WinApi.CoreAudioApi.AudioClient,
@@ -103,12 +97,9 @@ uses
   WinApi.WinMM.MMeApi,
   WinApi.WinMM.MMReg,
   {Application}
-  MPxpButton,
   RDJ_Common,
+  frmSetup,
   RDJ.Setup,
-  RDJ.InternalMixer,
-  RDJ.JSon,
-  RDJ.RdjPro.AudioQueue,
   MfWasApiFxComponentBase,
   MfParametricEqComponent,
   MfCompressorLimiterComponent,
@@ -117,23 +108,21 @@ uses
   frmChannelDeck,
   frmMasterDeck,
   frmPlaylistEditor,
-  frmSetup,
+  RDJ.InternalMixer,
+  MfWasApiEffectsRack,
+  MfWasApiRenderOutputEngine,
   frmMasterFxRack,
   frmLoopBackDeck,
   MicrophoneDeckFrm,
-  MfWasApiEffectsRack,
-  MfWasApiRenderOutputEngine,
   MfAudioRecorder,
-  dlgMediaServer;
+  MfIcecastBroadcastEngine,
+  MPxpButton,
+  dlgMediaServer,
+  RDJ.JSon;
 
 const
 
   WM_RDJ_ENDPOINTS_CHANGED = WM_APP + 410;
-  RDJ_PBT_APMSUSPEND = $0004;
-  RDJ_PBT_APMRESUMECRITICAL = $0006;
-  RDJ_PBT_APMRESUMESUSPEND = $0007;
-  RDJ_PBT_APMRESUMEAUTOMATIC = $0012;
-  RDJ_POWER_ACTION_DO_NOTHING = 0;
 
   // json file url
   COVER_IMAGE_FILE_URL = 'cover.jpg';
@@ -143,9 +132,6 @@ const
 
 
 type
-
-  // DEBUG: See OnCloseQuery section. Best recommondation is using MadExcept to make things easier to find thread bugs.
-  // TCustomFormAccess = class(TCustomForm);
 
   TAudioEndpointNotificationClient = class(TInterfacedObject, IMMNotificationClient)
   private
@@ -191,18 +177,12 @@ type
     btnSetDjNameAndShowTitle: TMPxpButton;
     imgDjShowLogo: TImage;
     chkMediaServer: TMPxpButton;
-    Label1: TLabel;
-    Label2: TLabel;
-    mmoEventTitle: TMemo;
-    Label3: TLabel;
-    mmoActivityTitle: TMemo;
-    Label4: TLabel;
 
     procedure FormCreate(Sender: TObject);
-    procedure FormShow(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormResize(Sender: TObject);
+    procedure FormShow(Sender: TObject);
     procedure tmrClockTimer(Sender: TObject);
     procedure btnExitClick(Sender: TObject);
     procedure btnMaxNormalClick(Sender: TObject);
@@ -220,7 +200,6 @@ type
 
   private
 
-    FAppClosing: Boolean;
     FSetupApplied: Boolean;
     FSetupFileName: string;
     FMasterDeck: TMasterDeckFrm;
@@ -244,14 +223,6 @@ type
     FCueQueueValidFrames: Integer;
     FCueUnavailableWarned: Boolean;
     FUiInitialized: Boolean;
-    FAudioGraphRecoveryQueued: Integer;
-    FAudioGraphRecoveryDueTick: UInt64;
-    FAudioGraphRecoveryReason: string;
-    FPowerPolicyScheme: PGUID;
-    FLidPolicyOverrideActive: Boolean;
-    FLidPolicyWarningShown: Boolean;
-    FOriginalLidActionAc: DWORD;
-    FOriginalLidActionDc: DWORD;
 
     // Deviceloss
     FEndpointEnumerator: IMMDeviceEnumerator;
@@ -273,17 +244,16 @@ type
     FfrmMasterFxRack: TfrmMasterFxRack;
     FMasterFxObjects: array of TMfWasApiFxComponentBase;
 
+    // Icecast -----------------------------------------------------------------
+    FBroadcastEngine: TMfIcecastBroadcastEngine;
+
     // json
     FRDJRadioStatusJson: TRDJRadioStatusJson;
     FDjName: string;
     FShowName: string;
-    FNowPlayingArtist: string;
-    FNowPlayingTitle: string;
-    FNowPlayingFromChannelDeck: Boolean;
-    FCaddyListenerCount: Integer;
-    FLastCaddyListenerRefreshTick: UInt64;
     FCoverFileName: string;
     FCoverJpg: string;
+
 
     // FX ----------------------------------------------------------------------
     procedure ClearMasterFxObjects();
@@ -295,24 +265,27 @@ type
                               const Frames: Integer;
                               const ASampleRate: Integer);
 
-    // RdjPro ------------------------------------------------------------------
+    // Icecast -----------------------------------------------------------------
+    procedure BroadcastTapPostFx(const pData: PSingle;
+                                 const Frames: Integer;
+                                 const pwfx: PWAVEFORMATEX);
+    procedure BroadcastTapPreFx(const pData: PSingle;
+                                const Frames: Integer;
+                                const pwfx: PWAVEFORMATEX);
+
+    procedure CreateBroadcastEngine();
+    procedure DestroyBroadcastEngine();
+    procedure StartBroadcast();
+    procedure StopBroadcast();
+    function ValidateBroadcastSetup(const S: TRDJBroadcastSetup;
+                                    out ErrMsg: string): Boolean;
 
     function BuildCoverJsonUrl(const APreferCurrent: Boolean): string;
-    function NormalizeNowPlayingMemoText(AMemo: TMemo): string;
-    procedure ApplyLoopbackNowPlayingFallback(var AArtist, ATitle: string);
-    procedure PublishSelectedCover();
-    procedure LoadBroadcastIdentityFromIni();
-    procedure SaveBroadcastIdentityToIni();
-    function ResolveCaddyLogFileName(): string;
-    function ReadCaddyActiveListenerCount(): Integer;
-    procedure RefreshCaddyListenerCount(const AForceJsonUpdate: Boolean);
     procedure WriteNowPlayingStatus(const ADjName,
                                     AShowName,
                                     AArtist,
                                     ATitle,
-                                    ACoverUrl: string;
-                                    const AListeners: Integer = -1;
-                                    const AClearEmptyTrackInfo: Boolean = False);
+                                    ACoverUrl: string);
 
     procedure ConstructEngine();
 
@@ -333,27 +306,14 @@ type
     procedure TeardownEndpointNotifications();
     //procedure QueueEndpointRefresh();
     procedure WMEndpointsChanged(var Msg: TMessage); message WM_RDJ_ENDPOINTS_CHANGED;
-    procedure WMPowerBroadcast(var Msg: TMessage); message WM_POWERBROADCAST;
 
     function IsEndpointUsable(const ADeviceId: string): Boolean;
     function ResolveMasterEndpointAvailable(): Boolean;
     function ResolvePFLEndpointAvailable(): Boolean;
     procedure RefreshEndpointAvailability();
-    procedure ApplyRdjExecutionState();
-    procedure ApplyLidClosePolicyOverride();
-    procedure RestoreLidClosePolicyOverride();
-    procedure WarnLidCloseOverrideFailedOnce(const AReason: string);
-    procedure AttachAudioOutputHandlers(const AOutput: TMfWasApiRenderOutputEngine);
-    procedure AudioRenderError(Sender: TObject;
-                               const Hr: HRESULT;
-                               const Msg: string);
-    procedure QueueAudioGraphRecovery(const AReason: string;
-                                      const ADelayMs: Cardinal = 1500);
-    procedure ServiceAudioGraphRecovery();
 
     procedure OpenSetupGUI();
     procedure OpenMediaServerGUI();
-    function IsMediaServerBroadcasting(): Boolean;
 
     procedure ApplySetupOnce();
     procedure RecreateAudioOutputs();
@@ -364,6 +324,7 @@ type
     procedure CreateMicrophoneForm();
     procedure CreateChannelForms(Count: Integer);
     procedure CreateLoopbackDecks(Count: Integer);
+    function HasActiveLoopbackDeck(): Boolean;
     procedure DestroyDeckForms();
     procedure TileDecks();
     procedure ApplyDarkFrameToAllChildren();
@@ -388,8 +349,12 @@ type
                            const ByteCount: DWORD;
                            pwfx: PWAVEFORMATEX;
                            out Flags: DWORD): HRESULT;
+    // IceCast
+    procedure BroadcastStateChanged(Sender: TObject;
+                                    NewState: TMfBroadcastState;
+                                    const Msg: string);
 
-   public
+  public
 
     FChannelDecks: array of TfrmChannelDeck;
 
@@ -402,21 +367,15 @@ type
     procedure SetAudioRecorderRecordPreFx(const AValue: Boolean);
     procedure SetAudioRecorderRecordPostFx(const AValue: Boolean);
 
-
     function GetChannelDeck(const AIndex: Integer): TfrmChannelDeck;
     function GetChannelDeckCount(): Integer;
-    // audio recorder (main deck)
-    procedure SetAudioRecorderTapPoint(const AValue: Integer);
-    procedure AlignMasterDeckWithFxRack();
 
+    procedure SetAudioRecorderTapPoint(const AValue: Integer);
+    // Icecast
+    procedure SetBroadcastEnabled(const AValue: Boolean);
+    procedure RemoveBroadcastEngine();
     // Json
-    procedure UpdateNowPlaying(const AArtist,
-                               ATitle: string);
-    procedure ClearNowPlaying();
-    function HasActiveLoopbackDeck(): Boolean;
     function CanGoOnAir(): Boolean;
-    procedure RefreshMainButtonStates();
-    procedure SetMediaServerButtonChecked(const AChecked: Boolean);
         property Caption;
 
     property Setup: TRDJSetup
@@ -427,6 +386,8 @@ type
       read GetRecorderTapPoint;
     property Master: TMasterDeckFrm
       read FMasterDeck;
+    property IceCastEngine: TMfIcecastBroadcastEngine
+      read FBroadCastEngine;
     property jsonUpdate: TRDJRadioStatusJson
       read FRDJRadioStatusJson;
     property DjName: string
@@ -446,21 +407,14 @@ implementation
 {$R *.dfm}
 
 uses
-  System.IniFiles,
-  LWFileBrowserExDlg,
-  RDJ.PlaylistDb;
+  LWFileBrowserExDlg;
+
+
 
 const
   // Baseline target "minimum today" resolution.
   BASE_MIN_W = 1920;
   BASE_MIN_H = 1080;
-  RDJ_CADDY_LISTENER_REFRESH_MS = 15000;
-  RDJ_CADDY_ACTIVE_LISTENER_SECONDS = 180;
-  RDJ_CADDY_LOG_TAIL_BYTES = 262144;
-  RDJ_BROADCAST_IDENTITY_SECTION = 'BroadcastIdentity';
-  RDJ_BROADCAST_IDENTITY_DJ_NAME = 'DjName';
-  RDJ_BROADCAST_IDENTITY_SHOW_NAME = 'ShowName';
-  RDJ_BROADCAST_IDENTITY_COVER_FILE = 'CoverFileName';
 
 // TAudioEndpointNotificationClient --------------------------------------------
 
@@ -603,47 +557,6 @@ begin
 end;
 
 
-procedure TMainMDIFrm.WMPowerBroadcast(var Msg: TMessage);
-var
-  EventCode: Cardinal;
-  EventName: string;
-
-begin
-
-  EventCode := Cardinal(Msg.WParam);
-
-  case EventCode of
-    RDJ_PBT_APMSUSPEND:
-      EventName := 'PBT_APMSUSPEND';
-    RDJ_PBT_APMRESUMECRITICAL:
-      EventName := 'PBT_APMRESUMECRITICAL';
-    RDJ_PBT_APMRESUMESUSPEND:
-      EventName := 'PBT_APMRESUMESUSPEND';
-    RDJ_PBT_APMRESUMEAUTOMATIC:
-      EventName := 'PBT_APMRESUMEAUTOMATIC';
-  else
-    EventName := 'PBT_' + IntToStr(EventCode);
-  end;
-
-  OutputDebugString(PChar(Format('RDJ Pro power event: %s (%d)',
-                                 [EventName,
-                                  EventCode])));
-
-  case EventCode of
-    RDJ_PBT_APMRESUMECRITICAL,
-    RDJ_PBT_APMRESUMESUSPEND,
-    RDJ_PBT_APMRESUMEAUTOMATIC:
-      begin
-        ApplyRdjExecutionState();
-        QueueAudioGraphRecovery(EventName,
-                                2500);
-      end;
-  end;
-
-  Msg.Result := 1;
-end;
-
-
 function TMainMDIFrm.IsEndpointUsable(const ADeviceId: string): Boolean;
 begin
 
@@ -683,402 +596,15 @@ end;
 
 // Main lifecycle ==============================================================
 
-// DEBUG: let's see what is causing an error on adress 00005000
-{procedure DumpFormDestroyHandlers;
-var
-  I: Integer;
-  M: TMethod;
-  F: TCustomForm;
-
-begin
-
-  for I := 0 to Screen.FormCount - 1 do
-    begin
-
-      F := Screen.Forms[I];
-
-      M := TMethod(TCustomFormAccess(F).OnDestroy);
-
-      OutputDebugString(PChar(Format(
-        'FORM %s.%s OnDestroy Code=%p Data=%p',
-        [F.ClassName,
-         F.Name,
-         M.Code,
-         M.Data])));
-    end;
-end;
-}
-
-procedure TMainMDIFrm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-begin
-
-  CanClose := False;
-
-  FAppClosing := True;
-
-  tmrClock.Enabled:= False;
-  RestoreLidClosePolicyOverride();
-
-  lblLocalTime.Caption := 'Closing RDJ Pro, please wait...';
-  lblLocalTime.Repaint;
-  Sleep(1000);
-
-  if Assigned(FMediaServer) then
-    FMediaServer.Free;
-
-  if Assigned(FPlayListEditor) then
-    FreeAndNil(FPlayListEditor);
-
-  RDJShutdownPlaylistDbFireDAC();
-
-  Sleep(1000);
-
-  CanClose := True
-end;
-
-
-procedure TMainMDIFrm.ApplyRdjExecutionState();
-var
-  NewState: DWORD;
-  PrevState: DWORD;
-
-begin
-
-  NewState := ES_CONTINUOUS or
-              ES_SYSTEM_REQUIRED or
-              ES_AWAYMODE_REQUIRED;
-
-  PrevState := SetThreadExecutionState(NewState);
-  if (PrevState <> 0) then
-    begin
-      OutputDebugString(PChar(Format(
-        'RDJ Pro power request active: state=$%.8x previous=$%.8x',
-        [Cardinal(NewState),
-         Cardinal(PrevState)])));
-      Exit;
-    end;
-
-  NewState := ES_CONTINUOUS or
-              ES_SYSTEM_REQUIRED;
-
-  PrevState := SetThreadExecutionState(NewState);
-  if (PrevState = 0) then
-    OutputDebugString(PChar('RDJ Pro could not prevent Windows system sleep.'))
-  else
-    OutputDebugString(PChar(Format(
-      'RDJ Pro power request active without away mode: state=$%.8x previous=$%.8x',
-      [Cardinal(NewState),
-       Cardinal(PrevState)])));
-end;
-
-
-procedure TMainMDIFrm.ApplyLidClosePolicyOverride();
-var
-  Hr: DWORD;
-  Scheme: PGUID;
-  AcValue: DWORD;
-  DcValue: DWORD;
-
-begin
-
-  if not FSetup.SystemOverrideSleepMode then
-    Exit;
-
-  if FLidPolicyOverrideActive then
-    Exit;
-
-  Scheme := nil;
-  Hr := PowerGetActiveScheme(0,
-                             Scheme);
-  if (Hr <> ERROR_SUCCESS) or
-     (Scheme = nil) then
-    begin
-      OutputDebugString(PChar(Format('RDJ Pro lid close override failed: PowerGetActiveScheme error=%d',
-                                     [Hr])));
-      WarnLidCloseOverrideFailedOnce(Format('PowerGetActiveScheme failed: %d',
-                                            [Hr]));
-      Exit;
-    end;
-
-  Hr := PowerReadACValueIndex(0,
-                              Scheme,
-                              @GUID_SYSTEM_BUTTON_SUBGROUP,
-                              @GUID_LIDCLOSE_ACTION,
-                              AcValue);
-  if Hr <> ERROR_SUCCESS then
-    begin
-      LocalFree(HLOCAL(Scheme));
-      OutputDebugString(PChar(Format('RDJ Pro lid close override failed: PowerReadACValueIndex error=%d',
-                                     [Hr])));
-      WarnLidCloseOverrideFailedOnce(Format('PowerReadACValueIndex failed: %d',
-                                            [Hr]));
-      Exit;
-    end;
-
-  Hr := PowerReadDCValueIndex(0,
-                              Scheme,
-                              @GUID_SYSTEM_BUTTON_SUBGROUP,
-                              @GUID_LIDCLOSE_ACTION,
-                              DcValue);
-  if Hr <> ERROR_SUCCESS then
-    begin
-      LocalFree(HLOCAL(Scheme));
-      OutputDebugString(PChar(Format('RDJ Pro lid close override failed: PowerReadDCValueIndex error=%d',
-                                     [Hr])));
-      WarnLidCloseOverrideFailedOnce(Format('PowerReadDCValueIndex failed: %d',
-                                            [Hr]));
-      Exit;
-    end;
-
-  Hr := PowerWriteACValueIndex(0,
-                               Scheme,
-                               @GUID_SYSTEM_BUTTON_SUBGROUP,
-                               @GUID_LIDCLOSE_ACTION,
-                               RDJ_POWER_ACTION_DO_NOTHING);
-  if Hr <> ERROR_SUCCESS then
-    begin
-      LocalFree(HLOCAL(Scheme));
-      OutputDebugString(PChar(Format('RDJ Pro lid close override failed: PowerWriteACValueIndex error=%d',
-                                     [Hr])));
-      WarnLidCloseOverrideFailedOnce(Format('PowerWriteACValueIndex failed: %d',
-                                            [Hr]));
-      Exit;
-    end;
-
-  Hr := PowerWriteDCValueIndex(0,
-                               Scheme,
-                               @GUID_SYSTEM_BUTTON_SUBGROUP,
-                               @GUID_LIDCLOSE_ACTION,
-                               RDJ_POWER_ACTION_DO_NOTHING);
-  if Hr <> ERROR_SUCCESS then
-    begin
-      LocalFree(HLOCAL(Scheme));
-      OutputDebugString(PChar(Format('RDJ Pro lid close override failed: PowerWriteDCValueIndex error=%d',
-                                     [Hr])));
-      WarnLidCloseOverrideFailedOnce(Format('PowerWriteDCValueIndex failed: %d',
-                                            [Hr]));
-      Exit;
-    end;
-
-  Hr := PowerSetActiveScheme(0,
-                             Scheme);
-  if Hr <> ERROR_SUCCESS then
-    begin
-      LocalFree(HLOCAL(Scheme));
-      OutputDebugString(PChar(Format('RDJ Pro lid close override failed: PowerSetActiveScheme error=%d',
-                                     [Hr])));
-      WarnLidCloseOverrideFailedOnce(Format('PowerSetActiveScheme failed: %d',
-                                            [Hr]));
-      Exit;
-    end;
-
-  FPowerPolicyScheme := Scheme;
-  FOriginalLidActionAc := AcValue;
-  FOriginalLidActionDc := DcValue;
-  FLidPolicyOverrideActive := True;
-
-  OutputDebugString(PChar(Format(
-    'RDJ Pro lid close override active: originalAC=%d originalDC=%d newAction=%d',
-    [AcValue,
-     DcValue,
-     RDJ_POWER_ACTION_DO_NOTHING])));
-end;
-
-
-procedure TMainMDIFrm.WarnLidCloseOverrideFailedOnce(const AReason: string);
-begin
-
-  if FLidPolicyWarningShown then
-    Exit;
-
-  FLidPolicyWarningShown := True;
-
-  MessageDlg('RDJ Pro could not override the Windows lid-close power setting.' + sLineBreak +
-             'If the laptop lid is closed, Windows may still sleep, hibernate, or shut down.' + sLineBreak +
-             sLineBreak +
-             AReason,
-             mtWarning,
-             [mbOK],
-             0);
-end;
-
-
-procedure TMainMDIFrm.RestoreLidClosePolicyOverride();
-var
-  HrAc: DWORD;
-  HrDc: DWORD;
-  HrApply: DWORD;
-
-begin
-
-  if not FLidPolicyOverrideActive then
-    Exit;
-
-  if (FPowerPolicyScheme = nil) then
-    begin
-
-      FLidPolicyOverrideActive := False;
-      Exit;
-    end;
-
-  HrAc := PowerWriteACValueIndex(0,
-                                 FPowerPolicyScheme,
-                                 @GUID_SYSTEM_BUTTON_SUBGROUP,
-                                 @GUID_LIDCLOSE_ACTION,
-                                 FOriginalLidActionAc);
-
-  HrDc := PowerWriteDCValueIndex(0,
-                                 FPowerPolicyScheme,
-                                 @GUID_SYSTEM_BUTTON_SUBGROUP,
-                                 @GUID_LIDCLOSE_ACTION,
-                                 FOriginalLidActionDc);
-
-  HrApply := PowerSetActiveScheme(0,
-                                  FPowerPolicyScheme);
-
-  OutputDebugString(PChar(Format(
-    'RDJ Pro lid close override restore: ac=%d dc=%d apply=%d originalAC=%d originalDC=%d',
-    [HrAc,
-     HrDc,
-     HrApply,
-     FOriginalLidActionAc,
-     FOriginalLidActionDc])));
-
-  LocalFree(HLOCAL(FPowerPolicyScheme));
-  FPowerPolicyScheme := nil;
-  FLidPolicyOverrideActive := False;
-end;
-
-
-procedure TMainMDIFrm.AttachAudioOutputHandlers(const AOutput: TMfWasApiRenderOutputEngine);
-begin
-
-  if Assigned(AOutput) then
-    AOutput.OnError := AudioRenderError;
-end;
-
-
-procedure TMainMDIFrm.AudioRenderError(Sender: TObject;
-                                      const Hr: HRESULT;
-                                      const Msg: string);
-begin
-
-  OutputDebugString(PChar(Format(
-    'RDJ Pro audio render error: hr=0x%.8x msg=%s',
-    [Cardinal(Hr),
-     Msg])));
-
-  QueueAudioGraphRecovery(Format('render error hr=0x%.8x %s',
-                                 [Cardinal(Hr),
-                                  Msg]),
-                          1500);
-end;
-
-
-procedure TMainMDIFrm.QueueAudioGraphRecovery(const AReason: string;
-                                             const ADelayMs: Cardinal);
-var
-  Reason: string;
-  QueueProc: TThreadProcedure;
-
-begin
-
-  if FAppClosing then
-    Exit;
-
-  Reason := Trim(AReason);
-  if (Reason = '') then
-    Reason := 'audio graph recovery requested';
-
-  if TInterlocked.CompareExchange(FAudioGraphRecoveryQueued,
-                                  1,
-                                  0) <> 0 then
-    Exit;
-
-  QueueProc := procedure
-               begin
-
-                 FAudioGraphRecoveryReason := Reason;
-                 FAudioGraphRecoveryDueTick := GetTickCount64() + UInt64(ADelayMs);
-                 OutputDebugString(PChar(Format('RDJ Pro audio graph recovery queued: delayMs=%d reason=%s',
-                                                [ADelayMs,
-                                                 Reason])));
-               end;
-  TThread.Queue(nil,
-                QueueProc);
-end;
-
-
-procedure TMainMDIFrm.ServiceAudioGraphRecovery();
-var
-  NowTick: UInt64;
-  Reason: string;
-
-begin
-
-  if (FAudioGraphRecoveryQueued = 0) then
-    Exit;
-
-  if FAppClosing or
-     (not FUiInitialized) then
-    Exit;
-
-  NowTick := GetTickCount64();
-  if (FAudioGraphRecoveryDueTick = 0) or
-     (NowTick < FAudioGraphRecoveryDueTick) then
-    Exit;
-
-  Reason := FAudioGraphRecoveryReason;
-
-  try
-
-    OutputDebugString(PChar('RDJ Pro audio graph recovery starting: ' + Reason));
-    HardRestartAudioGraph();
-
-    if Assigned(FMediaServer) then
-      FMediaServer.RecoverBroadcastAfterAudioGraphRestart(Reason);
-
-    OutputDebugString(PChar('RDJ Pro audio graph recovery completed: ' + Reason));
-
-    FAudioGraphRecoveryReason := '';
-    FAudioGraphRecoveryDueTick := 0;
-    TInterlocked.Exchange(FAudioGraphRecoveryQueued,
-                          0);
-  except
-
-    on E: Exception do
-      begin
-
-        FAudioGraphRecoveryDueTick := NowTick + 5000;
-        OutputDebugString(PChar('RDJ Pro audio graph recovery failed, retrying: ' +
-                                E.ClassName + ': ' + E.Message));
-      end;
-  end;
-end;
-
-
 procedure TMainMDIFrm.FormCreate(Sender: TObject);
 begin
 
-  FAudioGraphRecoveryQueued := 0;
-  FAudioGraphRecoveryDueTick := 0;
-  FAudioGraphRecoveryReason := '';
-  FCaddyListenerCount := -1;
-  FLastCaddyListenerRefreshTick := 0;
-  FNowPlayingArtist := '';
-  FNowPlayingTitle := '';
-  FNowPlayingFromChannelDeck := False;
-  FPowerPolicyScheme := nil;
-  FLidPolicyOverrideActive := False;
-  FLidPolicyWarningShown := False;
-  FOriginalLidActionAc := 0;
-  FOriginalLidActionDc := 0;
-
-  // Keep audio, video and network broadcasting active while RDJ Pro is running.
+  // Keep audio, video and network broadcasting active while RDJ is running.
   // The display may still switch off according to the Windows power settings.
-  ApplyRdjExecutionState();
+  if SetThreadExecutionState(ES_CONTINUOUS or ES_SYSTEM_REQUIRED) = 0 then
+    OutputDebugString(PChar('RDJ could not prevent Windows system sleep.'));
 
-  // Do not create childforms here!
+  // Do not create any childforms here!
 end;
 
 
@@ -1089,10 +615,10 @@ var
 begin
 
   SetThreadExecutionState(ES_CONTINUOUS);
-  RestoreLidClosePolicyOverride();
-  RDJShutdownPlaylistDbFireDAC();
 
-  TeardownEndpointNotifications();
+  tmrClock.Enabled:= False;
+
+  // Icecast will be destroyed in OnCloseQuery.
 
   FreeAndNil(FfrmMasterFxRack);
 
@@ -1117,9 +643,9 @@ begin
   FreeAndNil(FMasterCompLim);
   FreeAndNil(FMasterFXRack);
 
-  FreeAndNil(FRDJRadioStatusJson);
-
   DeleteCriticalSection(FCueBufferLock);
+
+  TeardownEndpointNotifications();
 end;
 
 
@@ -1135,7 +661,6 @@ begin
   FSetupFileName := GetDefaultSetupFileName();
   LoadSetupFromIni(FSetupFileName,
                    FSetup);
-  ApplyLidClosePolicyOverride();
 
   // IMPORTANT:
   //  Keep stored cue device + PFLEnabled untouched.
@@ -1163,7 +688,6 @@ begin
 
   FMasterOut := TMfWasApiRenderOutputEngine.Create();
   FMasterOut.OnFillPcm := MasterOutFillPcm;
-  AttachAudioOutputHandlers(FMasterOut);
 
   FCueOut := nil;
   InitializeCriticalSection(FCueBufferLock);
@@ -1177,14 +701,13 @@ end;
 procedure TMainMDIFrm.FormResize(Sender: TObject);
 begin
 
-  if FAppClosing then
-    Exit;
-
   TileDecks();
   //lblLocalTime.Left := (ClientWidth div 2) - (lblLocalTime.Width div 2);
 
-  if (WindowState = wsMaximized) then
-    AlignMasterDeckWithFxRack();
+  if Assigned(FMasterDeck) and
+     (WindowState = wsMaximized) and
+     (FfrmMasterFxRack.WindowState = wsMinimized) then
+    FMasterDeck.Left := FfrmMasterFxRack.Left;
 
   Invalidate;
 end;
@@ -1212,8 +735,6 @@ begin
 
   Width := BASE_MIN_W;
   Height := BASE_MIN_H;
-
-  FAppClosing := False;
 
   ConstructEngine();
   FUiInitialized := True;
@@ -1298,20 +819,39 @@ begin
                                   [Cardinal(hr)]);
     end;
 
+  // Icecast   TODO: Maybe better to do this manually?  T: Yes because Caddy needs to startup first (see frmMasterDeck).
+  //if FSetup.Broadcast.Enabled then
+  //  StartBroadcast();
+
   FRDJRadioStatusJson := TRDJRadioStatusJson.Create;
 
+  FDjName := mmoDjName.Text;
+  FShowName := mmoShow.Text;
   FCoverFileName := '';
-  LoadBroadcastIdentityFromIni();
-  PublishSelectedCover();
-  WriteNowPlayingStatus(FDjName,
-                        FShowName,
-                        FNowPlayingArtist,
-                        FNowPlayingTitle,
-                        BuildCoverJsonUrl(True),
-                        FCaddyListenerCount,
-                        True);
 end;
 
+
+procedure TMainMDIFrm.FormCloseQuery(Sender: TObject;
+                                     var CanClose: Boolean);
+begin
+
+  CanClose := False;
+
+  tmrClock.Enabled := False;
+  lblLocalTime.Caption := 'Closing RDJ, Please wait...';
+  lblLocalTime.Repaint;
+  DestroyBroadcastEngine();
+
+  // This form is auto-created by the project and owns the asynchronous
+  // network-discovery worker.  Destroy it while normal message processing and
+  // application services are still available, rather than in DoneApplication.
+  FreeAndNil(DlgLWFileBrowserEx);
+
+  FreeAndNil(FMediaServer);
+  FreeAndNil(FPlayListEditor);
+
+  CanClose := True;
+end;
 
 
 // Setup / deck creation ======================================================
@@ -1333,42 +873,7 @@ begin
 end;
 
 
-// Media Server
-function TMainMDIFrm.IsMediaServerBroadcasting(): Boolean;
-begin
-
-  Result := Assigned(FMediaServer) and
-            FMediaServer.IsBroadcasting();
-end;
-
-
-procedure TMainMDIFrm.SetMediaServerButtonChecked(const AChecked: Boolean);
-begin
-
-  chkMediaServer.Checked := AChecked;
-  if not AChecked then
-    btnSetup.Checked := False;
-end;
-
-
-procedure TMainMDIFrm.RefreshMainButtonStates();
-var
-  MediaServerShown: Boolean;
-  Broadcasting: Boolean;
-begin
-
-  Broadcasting := IsMediaServerBroadcasting();
-  btnSetup.Enabled := not Broadcasting;
-  if Broadcasting then
-    btnSetup.Checked := False;
-
-  MediaServerShown := Assigned(FMediaServer) and
-                      FMediaServer.Visible and
-                      (FMediaServer.WindowState <> wsMinimized);
-  SetMediaServerButtonChecked(MediaServerShown);
-end;
-
-
+// IceCast/Caddy
 procedure TMainMDIFrm.OpenMediaServerGUI();
 begin
 
@@ -1377,8 +882,6 @@ begin
 
   FMediaServer.Show;
   FMediaServer.WindowState := wsNormal;
-  FMediaServer.BringToFront();
-  RefreshMainButtonStates();
 end;
 
 
@@ -1537,462 +1040,276 @@ begin
 end;
 
 
+procedure TMainMDIFrm.BroadcastTapPostFx(const pData: PSingle;
+                                         const Frames: Integer;
+                                         const pwfx: PWAVEFORMATEX);
+var
+  hr: HRESULT;
+
+begin
+
+  if not Assigned(FBroadcastEngine) then
+    Exit;
+
+  if not (FBroadcastEngine.State in [bsConnecting,
+                                     bsLive,
+                                     bsReconnecting]) then
+    Exit;
+
+  if (pData = nil) or
+     (pwfx = nil) or
+     (Frames <= 0) then
+    Exit;
+
+  if (FSetup.Broadcast.TapPoint <> btpPostMasterFx) then
+    Exit;
+
+  hr := FBroadcastEngine.PushPcmFloat32(pData,
+                                        Frames,
+                                        pwfx);
+  if FAILED(hr) then
+    InfoMsg(optShowMsg,
+            'PushPcmFloat32 failed',
+            hr,
+            0);
+end;
+
+
+procedure TMainMDIFrm.BroadcastTapPreFx(const pData: PSingle;
+                                        const Frames: Integer;
+                                        const pwfx: PWAVEFORMATEX);
+var
+  HR: HRESULT;
+
+begin
+
+  if not Assigned(FBroadcastEngine) then
+    Exit;
+
+  if not (FBroadcastEngine.State in [bsConnecting,
+                                     bsLive,
+                                     bsReconnecting]) then
+    Exit;
+
+  if (pData = nil) or
+     (pwfx = nil) or
+     (Frames <= 0) then
+    Exit;
+
+  if (FSetup.Broadcast.TapPoint <> btpPreMasterFx) then
+    Exit;
+
+  HR := FBroadcastEngine.PushPcmFloat32(pData,
+                                        Frames,
+                                        pwfx);
+  if FAILED(hr) then
+    InfoMsg(optShowMsg,
+            'PushPcmFloat32 failed',
+            hr,
+            0);
+end;
+
+
+// Icecast ---------------------------------------------------------------------
+procedure TMainMDIFrm.CreateBroadcastEngine();
+begin
+
+  if Assigned(FBroadcastEngine) then
+    Exit;
+
+  FBroadcastEngine := TMfIcecastBroadcastEngine.Create(Self);
+  FBroadcastEngine.OnStateChanged := BroadcastStateChanged;
+end;
+
+
+procedure TMainMDIFrm.DestroyBroadcastEngine();
+begin
+
+  if Assigned(FBroadcastEngine) then
+    begin
+
+      StopBroadcast();
+      FreeAndNil(FBroadcastEngine);
+    end;
+
+  // json
+  FreeAndNil(FRDJRadioStatusJson);
+end;
+
+
+function TMainMDIFrm.HasActiveLoopbackDeck(): Boolean;
+var
+  I: Integer;
+
+begin
+
+  Result := False;
+
+  for I := 0 to High(FLoopbackDecks) do
+    if Assigned(FLoopbackDecks[I]) and
+       FLoopbackDecks[I].IsCapturing() then
+      Exit(True);
+end;
+
+procedure TMainMDIFrm.StartBroadcast();
+var
+  S: TRDJBroadcastSetup;
+  HR: HRESULT;
+  ErrMsg: string;
+
+begin
+
+  if not ValidateBroadcastSetup(FSetup.Broadcast,
+                                ErrMsg) then
+    raise Exception.Create(ErrMsg);
+
+  CreateBroadcastEngine();
+
+  FillChar(S,
+           SizeOf(S),
+           0);
+
+  S.Host := Trim(FSetup.Broadcast.Host);
+
+  // Server mode safety: when Icecast runs on another PC, users often leave
+  // Broadcast.Host at 127.0.0.1. That only points back to the Carmen PC and
+  // makes the public player connect/reconnect because Icecast receives no audio.
+  // If the Icecast server manager host is remote, use it as the audio target.
+  if (SameText(S.Host, '127.0.0.1') or SameText(S.Host, 'localhost')) and
+     (Trim(FSetup.IcecastHost) <> '') and
+     (not SameText(Trim(FSetup.IcecastHost), '127.0.0.1')) and
+     (not SameText(Trim(FSetup.IcecastHost), 'localhost')) then
+    S.Host := Trim(FSetup.IcecastHost);
+
+  S.Port := FSetup.Broadcast.Port;
+  S.Mount := Trim(FSetup.Broadcast.Mount);
+  S.Username := FSetup.Broadcast.Username;
+  S.Password := FSetup.Broadcast.Password;
+
+  S.StreamName := FSetup.Broadcast.StreamName;
+  S.Description := FSetup.Broadcast.Description;
+  S.Genre := FSetup.Broadcast.Genre;
+  S.Url := FSetup.Broadcast.Url;
+  S.PublicStream := FSetup.Broadcast.PublicStream;
+
+  case FSetup.Broadcast.Codec of
+    bcMp3: S.Codec := bcMp3;
+  else
+    S.Codec := bcAac;
+  end;
+
+  S.BitrateKbps := FSetup.Broadcast.BitrateKbps;
+  S.SampleRate := FSetup.Broadcast.SampleRate;
+  S.Channels := FSetup.Broadcast.Channels;
+
+  case FSetup.Broadcast.TapPoint of
+    btpPreMasterFx: S.TapPoint := btpPreMasterFx;
+  else
+    S.TapPoint := btpPostMasterFx;
+  end;
+
+  S.AutoReconnect := FSetup.Broadcast.AutoReconnect;
+  S.BroadcastGainDb := FSetup.Broadcast.BroadcastGainDb;
+
+  FBroadcastEngine.Settings := S;
+
+  HR := FBroadcastEngine.Start();
+  if Failed(HR) then
+    OleCheck(HR);
+
+  if HasActiveLoopbackDeck() then
+    FBroadcastEngine.ClearNowPlaying();
+end;
+
+
+procedure TMainMDIFrm.StopBroadcast();
+begin
+
+  if Assigned(FBroadcastEngine) then
+    FBroadcastEngine.Stop;
+end;
+
+
+procedure TMainMDIFrm.SetBroadcastEnabled(const AValue: Boolean);
+begin
+
+  FSetup.Broadcast.Enabled := AValue;
+
+  if AValue then
+    begin
+
+      if Assigned(FBroadcastEngine) and
+         (FBroadcastEngine.State in [bsConnecting,
+                                     bsLive,
+                                     bsReconnecting]) then
+        Exit;
+    end
+  else
+    begin
+      if Assigned(FBroadcastEngine) and
+         (FBroadcastEngine.State = bsStopped) then
+        Exit;
+    end;
+
+  // Don't save to ini!
+  //SaveSetupToIni(FSetupFileName,
+  //               FSetup);
+
+  // NOTE: T: Only start broadcast in UI masterdeck.
+  if AValue then
+    StartBroadcast()
+  else
+    StopBroadcast();
+end;
+
+
+procedure TMainMDIFrm.RemoveBroadcastEngine();
+begin
+
+  DestroyBroadcastEngine();
+end;
+
+
+function TMainMDIFrm.ValidateBroadcastSetup(const S: TRDJBroadcastSetup;
+                                            out ErrMsg: string): Boolean;
+begin
+
+  Result := False;
+  ErrMsg := '';
+
+  if (Trim(S.Host) = '') then
+    ErrMsg := 'Broadcast host is empty.'
+  else
+    if (S.Port <= 0) then
+      ErrMsg := 'Broadcast port is invalid.'
+    else
+      if (Trim(S.Mount) = '') then
+        ErrMsg := 'Broadcast mount is empty.'
+      else
+        if (S.Mount[1] <> '/') then
+          ErrMsg := 'Broadcast mount must start with "/".'
+        else
+          if (Trim(S.Username) = '') then
+            ErrMsg := 'Broadcast username is empty.'
+          else
+            if (Trim(S.Password) = '') then
+              ErrMsg := 'Broadcast password is empty.'
+            else
+              if (S.Channels <> 2) then
+                ErrMsg := 'Only stereo broadcast is supported.'
+              else
+                Result := True;
+end;
+
+// Icecast end -----------------------------------------------------------------
 
 // Json ------------------------------------------------------------------------
 
 
-function TMainMDIFrm.ResolveCaddyLogFileName(): string;
-var
-  BaseDir: string;
-
-begin
-
-  Result := Trim(FSetup.CaddyLogFile);
-  if (Result = '') then
-    Exit;
-
-  if ((Length(Result) >= 2) and (Result[2] = ':')) or
-     (Copy(Result,
-           1,
-           2) = '\\') then
-    Exit;
-
-  BaseDir := Trim(FSetup.CaddyDir);
-  if (BaseDir = '') then
-    BaseDir := ExtractFilePath(Trim(FSetup.CaddyConfigFile));
-
-  if (BaseDir = '') then
-    Result := ''
-  else
-    Result := IncludeTrailingPathDelimiter(BaseDir) + Result;
-end;
-
-
-function TMainMDIFrm.ReadCaddyActiveListenerCount(): Integer;
-var
-  LogFileName: string;
-  Stream: TFileStream;
-  Bytes: TBytes;
-  ReadSize: Integer;
-  Text: string;
-  Lines: TStringList;
-  Clients: TStringList;
-  I: Integer;
-  Line: string;
-  JsonValue: TJSONValue;
-  Json: TJSONObject;
-  RequestJson: TJSONObject;
-  Value: TJSONValue;
-  Uri: string;
-  ClientIp: string;
-  TsText: string;
-  LogTs: Double;
-  NowUtc: TDateTime;
-  NowUnix: Double;
-
-  function JsonText(const AJson: TJSONObject;
-                    const AName: string): string;
-  var
-    V: TJSONValue;
-
-  begin
-
-    Result := '';
-    if not Assigned(AJson) then
-      Exit;
-
-    V := AJson.GetValue(AName);
-    if Assigned(V) then
-      Result := V.Value;
-  end;
-
-  function RelevantUri(const AUri: string): Boolean;
-  var
-    S: string;
-
-  begin
-
-    S := LowerCase(Trim(AUri));
-    Result := (Copy(S,
-                    1,
-                    8) = '/stream/') or
-              (Copy(S,
-                    1,
-                    7) = '/video/') or
-              (Copy(S,
-                    1,
-                    5) = '/live') or
-              (Copy(S,
-                    1,
-                    11) = '/video.mjpg');
-  end;
-
-  function CleanClientIp(const AValue: string): string;
-  var
-    P: Integer;
-    S: string;
-
-  begin
-
-    S := Trim(AValue);
-    if (S = '') then
-      Exit('');
-
-    if (Length(S) > 0) and (S[1] = '[') then
-      begin
-        P := Pos(']',
-                 S);
-        if P > 0 then
-          Exit(Copy(S,
-                    2,
-                    P - 2));
-      end;
-
-    P := Pos(':',
-             S);
-    if P > 0 then
-      S := Copy(S,
-                1,
-                P - 1);
-
-    Result := S;
-  end;
-
-begin
-
-  Result := -1;
-
-  LogFileName := ResolveCaddyLogFileName();
-  if (LogFileName = '') or not FileExists(LogFileName) then
-    Exit;
-
-  Stream := TFileStream.Create(LogFileName,
-                               fmOpenRead or fmShareDenyNone);
-  try
-    ReadSize := Stream.Size;
-    if ReadSize > RDJ_CADDY_LOG_TAIL_BYTES then
-      ReadSize := RDJ_CADDY_LOG_TAIL_BYTES;
-
-    if ReadSize <= 0 then
-      Exit;
-
-    Stream.Position := Stream.Size - ReadSize;
-    SetLength(Bytes,
-              ReadSize);
-    Stream.ReadBuffer(Bytes[0],
-                      ReadSize);
-  finally
-    Stream.Free;
-  end;
-
-  Text := TEncoding.UTF8.GetString(Bytes);
-
-  Lines := TStringList.Create;
-  Clients := TStringList.Create;
-  try
-    Lines.Text := Text;
-    Clients.Sorted := True;
-    Clients.Duplicates := dupIgnore;
-
-    NowUtc := TTimeZone.Local.ToUniversalTime(Now);
-    NowUnix := (NowUtc - EncodeDate(1970,
-                                    1,
-                                    1)) * SecsPerDay;
-
-    for I := 0 to Lines.Count - 1 do
-      begin
-        Line := Trim(Lines[I]);
-        if (Line = '') or (Line[1] <> '{') then
-          Continue;
-
-        JsonValue := TJSONObject.ParseJSONValue(Line);
-        try
-          if not (JsonValue is TJSONObject) then
-            Continue;
-
-          Json := TJSONObject(JsonValue);
-          RequestJson := nil;
-
-          Value := Json.GetValue('request');
-          if Value is TJSONObject then
-            RequestJson := TJSONObject(Value);
-
-          Uri := JsonText(RequestJson,
-                          'uri');
-          if Uri = '' then
-            Uri := JsonText(Json,
-                            'uri');
-
-          if not RelevantUri(Uri) then
-            Continue;
-
-          TsText := JsonText(Json,
-                             'ts');
-          LogTs := StrToFloatDef(StringReplace(TsText,
-                                               '.',
-                                               FormatSettings.DecimalSeparator,
-                                               []),
-                                 0);
-
-          if (LogTs > 0) and
-             ((NowUnix - LogTs) > RDJ_CADDY_ACTIVE_LISTENER_SECONDS) then
-            Continue;
-
-          ClientIp := CleanClientIp(JsonText(RequestJson,
-                                            'client_ip'));
-          if ClientIp = '' then
-            ClientIp := CleanClientIp(JsonText(RequestJson,
-                                              'remote_ip'));
-          if ClientIp = '' then
-            ClientIp := CleanClientIp(JsonText(Json,
-                                              'remote_ip'));
-
-          if ClientIp <> '' then
-            Clients.Add(ClientIp);
-        finally
-          JsonValue.Free;
-        end;
-      end;
-
-    Result := Clients.Count;
-  finally
-    Clients.Free;
-    Lines.Free;
-  end;
-end;
-
-
-procedure TMainMDIFrm.RefreshCaddyListenerCount(const AForceJsonUpdate: Boolean);
-var
-  NewCount: Integer;
-  OldCount: Integer;
-
-begin
-
-  OldCount := FCaddyListenerCount;
-  NewCount := ReadCaddyActiveListenerCount();
-  if NewCount < 0 then
-    Exit;
-
-  FCaddyListenerCount := NewCount;
-
-  if AForceJsonUpdate and (NewCount <> OldCount) then
-    WriteNowPlayingStatus(FDjName,
-                          FShowName,
-                          FNowPlayingArtist,
-                          FNowPlayingTitle,
-                          BuildCoverJsonUrl(True),
-                          FCaddyListenerCount);
-end;
-
-
-
-function EncodeBroadcastIdentityText(const AValue: string): string;
-begin
-
-  Result := StringReplace(AValue,
-                          '\',
-                          '\\',
-                          [rfReplaceAll]);
-  Result := StringReplace(Result,
-                          #13#10,
-                          '\n',
-                          [rfReplaceAll]);
-  Result := StringReplace(Result,
-                          #13,
-                          '\n',
-                          [rfReplaceAll]);
-  Result := StringReplace(Result,
-                          #10,
-                          '\n',
-                          [rfReplaceAll]);
-end;
-
-
-function DecodeBroadcastIdentityText(const AValue: string): string;
-var
-  i: Integer;
-
-begin
-
-  Result := '';
-  i := 1;
-  while i <= Length(AValue) do
-    begin
-
-      if (AValue[i] = '\') and
-         (i < Length(AValue)) then
-        begin
-
-          Inc(i);
-          case AValue[i] of
-            'n':
-              Result := Result + sLineBreak;
-            '\':
-              Result := Result + '\';
-          else
-            Result := Result + '\' + AValue[i];
-          end;
-        end
-      else
-        Result := Result + AValue[i];
-
-      Inc(i);
-    end;
-end;
-
-
-procedure TMainMDIFrm.LoadBroadcastIdentityFromIni();
-var
-  IniFile: TIniFile;
-  Value: string;
-
-begin
-
-  FDjName := Trim(mmoDjName.Text);
-  FShowName := Trim(mmoShow.Text);
-
-  if (Trim(FSetupFileName) = '') or
-     (not FileExists(FSetupFileName)) then
-    Exit;
-
-  IniFile := TIniFile.Create(FSetupFileName);
-  try
-
-    if IniFile.ValueExists(RDJ_BROADCAST_IDENTITY_SECTION,
-                           RDJ_BROADCAST_IDENTITY_DJ_NAME) then
-      begin
-
-        Value := IniFile.ReadString(RDJ_BROADCAST_IDENTITY_SECTION,
-                                    RDJ_BROADCAST_IDENTITY_DJ_NAME,
-                                    '');
-        FDjName := DecodeBroadcastIdentityText(Value);
-        mmoDjName.Text := FDjName;
-      end;
-
-    if IniFile.ValueExists(RDJ_BROADCAST_IDENTITY_SECTION,
-                           RDJ_BROADCAST_IDENTITY_SHOW_NAME) then
-      begin
-
-        Value := IniFile.ReadString(RDJ_BROADCAST_IDENTITY_SECTION,
-                                    RDJ_BROADCAST_IDENTITY_SHOW_NAME,
-                                    '');
-        FShowName := DecodeBroadcastIdentityText(Value);
-        mmoShow.Text := FShowName;
-      end;
-
-    FCoverFileName := Trim(IniFile.ReadString(RDJ_BROADCAST_IDENTITY_SECTION,
-                                              RDJ_BROADCAST_IDENTITY_COVER_FILE,
-                                              FCoverFileName));
-    if (FCoverFileName <> '') then
-      begin
-
-        if FileExists(FCoverFileName) then
-          begin
-
-            try
-              imgDjShowLogo.Picture.LoadFromFile(FCoverFileName);
-            except
-
-              on E: Exception do
-                begin
-
-                  OutputDebugString(PChar('RDJ Pro could not load stored show logo: ' +
-                                          E.ClassName + ': ' + E.Message));
-                  FCoverFileName := '';
-                end;
-            end;
-          end
-        else
-          FCoverFileName := '';
-      end;
-  finally
-
-    IniFile.Free;
-  end;
-end;
-
-
-procedure TMainMDIFrm.SaveBroadcastIdentityToIni();
-var
-  IniFile: TIniFile;
-
-begin
-
-  if Trim(FSetupFileName) = '' then
-    Exit;
-
-  FDjName := Trim(mmoDjName.Text);
-  FShowName := Trim(mmoShow.Text);
-
-  IniFile := TIniFile.Create(FSetupFileName);
-  try
-
-    IniFile.WriteString(RDJ_BROADCAST_IDENTITY_SECTION,
-                        RDJ_BROADCAST_IDENTITY_DJ_NAME,
-                        EncodeBroadcastIdentityText(FDjName));
-    IniFile.WriteString(RDJ_BROADCAST_IDENTITY_SECTION,
-                        RDJ_BROADCAST_IDENTITY_SHOW_NAME,
-                        EncodeBroadcastIdentityText(FShowName));
-    IniFile.WriteString(RDJ_BROADCAST_IDENTITY_SECTION,
-                        RDJ_BROADCAST_IDENTITY_COVER_FILE,
-                        Trim(FCoverFileName));
-  finally
-
-    IniFile.Free;
-  end;
-end;
 function TMainMDIFrm.BuildCoverJsonUrl(const APreferCurrent: Boolean): string;
 var
   BaseUrl: string;
-  CaddyPath: string;
-  ArtworkPath: string;
-  ArtworkRelPath: string;
-  FilePart: string;
   QPos: Integer;
-
-  function NormalizeUrlDirectory(const APath: string): string;
-  begin
-
-    Result := StringReplace(Trim(APath),
-                            '\',
-                            '/',
-                            [rfReplaceAll]);
-
-    while (Result <> '') and
-          (Result[Length(Result)] = '/') do
-      Delete(Result,
-             Length(Result),
-             1);
-
-    if (Result <> '') then
-      Result := Result + '/';
-  end;
-
-  function LastUrlDirectoryName(const APath: string): string;
-  var
-    PathValue: string;
-    DelimiterPos: Integer;
-
-  begin
-
-    PathValue := NormalizeUrlDirectory(APath);
-    if PathValue = '' then
-      Exit('');
-
-    Delete(PathValue,
-           Length(PathValue),
-           1);
-
-    DelimiterPos := LastDelimiter('/',
-                                  PathValue);
-    if DelimiterPos > 0 then
-      Result := Copy(PathValue,
-                     DelimiterPos + 1,
-                     MaxInt)
-    else
-      Result := PathValue;
-  end;
 
 begin
 
@@ -2001,7 +1318,7 @@ begin
   if (BaseUrl = '') then
     begin
       if APreferCurrent and
-         FileExists(IncludeTrailingPathDelimiter(Setup.CaddyArtworkPath) + COVER_IMAGE_FILE_NAME) then
+         FileExists(IncludeTrailingPathDelimiter(Setup.IcecastCaddyDir) + COVER_IMAGE_FILE_NAME) then
         BaseUrl := COVER_IMAGE_FILE_NAME
       else
         BaseUrl := COVER_DEFAULT_IMAGE_FILE_NAME;
@@ -2010,44 +1327,16 @@ begin
   // Keep the URL browser-safe. Never write local or UNC file paths to JSON.
   BaseUrl := StringReplace(BaseUrl,
                            '\',
-                            '/',
-                            [rfReplaceAll]);
+                           '/',
+                           [rfReplaceAll]);
 
-  CaddyPath := NormalizeUrlDirectory(Setup.CaddyDir);
-  ArtworkPath := NormalizeUrlDirectory(Setup.CaddyArtworkPath);
-
-  ArtworkRelPath := '';
-  if (CaddyPath <> '') and
-     (ArtworkPath <> '') and
-     SameText(Copy(ArtworkPath,
-                   1,
-                   Length(CaddyPath)),
-              CaddyPath) then
-    ArtworkRelPath := Copy(ArtworkPath,
-                           Length(CaddyPath) + 1,
-                           MaxInt)
-  else if ArtworkPath <> '' then
-    ArtworkRelPath := LastUrlDirectoryName(ArtworkPath);
-
-  ArtworkRelPath := StringReplace(ArtworkRelPath,
-                                  '\',
-                                  '/',
-                                  [rfReplaceAll]);
-  ArtworkRelPath := Trim(ArtworkRelPath);
-
-  if (ArtworkRelPath <> '') and
-     (ArtworkRelPath[Length(ArtworkRelPath)] <> '/') then
-    ArtworkRelPath := ArtworkRelPath + '/';
-
-  FilePart := ExtractFileName(BaseUrl);
-
-  if SameText(FilePart, COVER_IMAGE_FILE_NAME) or
+  if SameText(ExtractFileName(BaseUrl), COVER_IMAGE_FILE_NAME) or
      (Pos(COVER_IMAGE_FILE_NAME + '?', LowerCase(BaseUrl)) > 0) then
-    BaseUrl := ArtworkRelPath + COVER_IMAGE_FILE_NAME
+    BaseUrl := COVER_IMAGE_FILE_NAME
   else
-    if SameText(FilePart, COVER_DEFAULT_IMAGE_FILE_NAME) or
+    if SameText(ExtractFileName(BaseUrl), COVER_DEFAULT_IMAGE_FILE_NAME) or
        (Pos(COVER_DEFAULT_IMAGE_FILE_NAME + '?', LowerCase(BaseUrl)) > 0) then
-      BaseUrl := ArtworkRelPath + COVER_DEFAULT_IMAGE_FILE_NAME
+      BaseUrl := COVER_DEFAULT_IMAGE_FILE_NAME
     else
       begin
         QPos := Pos('?', BaseUrl);
@@ -2061,80 +1350,19 @@ begin
 end;
 
 
-procedure TMainMDIFrm.PublishSelectedCover();
-var
-  SourceCover: TFileName;
-  ActiveCover: TFileName;
-  PublicCover: TFileName;
-
-  procedure CopyCoverFile(const ASource,
-                                ADestination: TFileName);
-  begin
-
-    if SameText(ExpandFileName(ASource),
-                ExpandFileName(ADestination)) then
-      Exit;
-
-    if not CopyFile(PChar(ASource),
-                    PChar(ADestination),
-                    False) then
-      RaiseLastOSError;
-  end;
-
-begin
-
-  SourceCover := Trim(FCoverFileName);
-  if (SourceCover = '') or
-     not FileExists(SourceCover) then
-    Exit;
-
-  if not DirectoryExists(Setup.CaddyArtworkPath) then
-    Exit;
-
-  ActiveCover := IncludeTrailingPathDelimiter(Setup.CaddyArtworkPath) + COVER_IMAGE_FILE_NAME;
-  CopyCoverFile(SourceCover,
-                ActiveCover);
-
-  // Keep the root cover in sync for older deployed browser pages that still
-  // normalize every cover.jpg URL to /cover.jpg.
-  if DirectoryExists(Setup.CaddyDir) then
-    begin
-
-      PublicCover := IncludeTrailingPathDelimiter(Setup.CaddyDir) + COVER_IMAGE_FILE_NAME;
-      if not SameText(ExpandFileName(ActiveCover),
-                      ExpandFileName(PublicCover)) then
-        CopyCoverFile(SourceCover,
-                      PublicCover);
-    end;
-
-  FCoverFileName := ActiveCover;
-  FCoverJpg := COVER_IMAGE_FILE_URL;
-end;
-
-
 procedure TMainMDIFrm.WriteNowPlayingStatus(const ADjName,
                                             AShowName,
                                             AArtist,
                                             ATitle,
-                                            ACoverUrl: string;
-                                            const AListeners: Integer = -1;
-                                            const AClearEmptyTrackInfo: Boolean = False);
+                                            ACoverUrl: string);
 var
   JsonFile: string;
-  ListenerCount: Integer;
 
 begin
 
-  if FAppClosing then
-    Exit;
-
-  JsonFile := Trim(Setup.CaddyNowPlayingJsonFile);
+  JsonFile := Trim(Setup.IcecastNowPlayingJsonFile);
   if (JsonFile = '') then
     Exit;
-
-  ListenerCount := AListeners;
-  if (ListenerCount < 0) then
-    ListenerCount := FCaddyListenerCount;
 
   // Local mode: JsonFile is normally C:\Caddy\nowplaying.json.
   // Server mode: JsonFile may be a UNC path such as \\Server\Caddy\nowplaying.json.
@@ -2144,110 +1372,7 @@ begin
                                            AShowName,
                                            AArtist,
                                            ATitle,
-                                           ACoverUrl,
-                                           ListenerCount,
-                                           -1,
-                                           '',
-                                           AClearEmptyTrackInfo);
-end;
-
-
-function TMainMDIFrm.NormalizeNowPlayingMemoText(AMemo: TMemo): string;
-begin
-
-  Result := '';
-  if not Assigned(AMemo) then
-    Exit;
-
-  Result := Trim(AMemo.Text);
-  if SameText(Result,
-              'none') then
-    Result := '';
-end;
-
-
-procedure TMainMDIFrm.ApplyLoopbackNowPlayingFallback(var AArtist, ATitle: string);
-begin
-
-  AArtist := Trim(AArtist);
-  ATitle := Trim(ATitle);
-
-  if (AArtist <> '') or
-     (ATitle <> '') then
-    Exit;
-
-  if not HasActiveLoopbackDeck() then
-    Exit;
-
-  AArtist := NormalizeNowPlayingMemoText(mmoEventTitle);
-  ATitle := NormalizeNowPlayingMemoText(mmoActivityTitle);
-end;
-
-
-procedure TMainMDIFrm.ClearNowPlaying();
-var
-  Artist: string;
-  Title: string;
-
-begin
-
-  if not Assigned(FRDJRadioStatusJson) then
-    Exit;
-
-  FDjName := Trim(mmoDjName.Text);
-  FShowName := Trim(mmoShow.Text);
-  Artist := '';
-  Title := '';
-  ApplyLoopbackNowPlayingFallback(Artist,
-                                  Title);
-
-  FNowPlayingArtist := Artist;
-  FNowPlayingTitle := Title;
-  FNowPlayingFromChannelDeck := False;
-
-  WriteNowPlayingStatus(FDjName,
-                        FShowName,
-                        FNowPlayingArtist,
-                        FNowPlayingTitle,
-                        BuildCoverJsonUrl(True),
-                        FCaddyListenerCount,
-                        (FNowPlayingArtist = '') and
-                        (FNowPlayingTitle = ''));
-end;
-
-
-procedure TMainMDIFrm.UpdateNowPlaying(const AArtist,
-                                       ATitle: string);
-var
-  Artist: string;
-  Title: string;
-
-begin
-
-  if not Assigned(FRDJRadioStatusJson) then
-    Exit;
-
-  Artist := Trim(AArtist);
-  Title := Trim(ATitle);
-  ApplyLoopbackNowPlayingFallback(Artist,
-                                  Title);
-
-  if (Artist = '') and
-     (Title = '') then
-    Exit;
-
-  FDjName := Trim(mmoDjName.Text);
-  FShowName := Trim(mmoShow.Text);
-  FNowPlayingArtist := Artist;
-  FNowPlayingTitle := Title;
-  FNowPlayingFromChannelDeck := (Trim(AArtist) <> '') or
-                                (Trim(ATitle) <> '');
-
-  WriteNowPlayingStatus(FDjName,
-                        FShowName,
-                        FNowPlayingArtist,
-                        FNowPlayingTitle,
-                        BuildCoverJsonUrl(True));
+                                           ACoverUrl);
 end;
 
 function TMainMDIFrm.CanGoOnAir(): Boolean;
@@ -2260,7 +1385,7 @@ begin
   Result := True;
 
   try
-  Json := FRDJRadioStatusJson.LoadNowPlayingJson(FSetup.CaddyNowPlayingJsonFile);
+  Json := FRDJRadioStatusJson.LoadNowPlayingJson(FSetup.IcecastNowPlayingJsonFile);
 
   try
 
@@ -2296,15 +1421,7 @@ end;
 procedure TMainMDIFrm.chkMediaServerClick(Sender: TObject);
 begin
 
-  if chkMediaServer.Checked then
-    OpenMediaServerGUI()
-  else
-    begin
-      if Assigned(FMediaServer) then
-        FMediaServer.WindowState := wsMinimized;
-
-      RefreshMainButtonStates();
-    end;
+  OpenMediaServerGUI();
 end;
 
 
@@ -2326,8 +1443,22 @@ end;
 procedure TMainMDIFrm.imgDjShowLogoDblClick(Sender: TObject);
 var
   FileName: TFileName;
+  ActiveCover: TFileName;
+  DefaultCover: TFileName;
+  CoverUrl: string;
+  CoverPath: string;
 
 begin
+
+  if DirectoryExists(Setup.IcecastCaddyCoversPath) then
+    begin
+
+      ActiveCover := IncludeTrailingPathDelimiter(Setup.IcecastCaddyCoversPath) + COVER_IMAGE_FILE_NAME;
+      DefaultCover := IncludeTrailingPathDelimiter(Setup.IcecastCaddyCoversPath) + COVER_DEFAULT_IMAGE_FILE_NAME;
+      CoverPath := IncludeTrailingPathDelimiter(Setup.IcecastCaddyCoversPath);
+    end
+  else
+    Exit;
 
   if not Assigned(DlgLWFileBrowserEx)  then
     DlgLWFileBrowserEx := TLWFileBrowserExDlg.Create(Self);
@@ -2338,14 +1469,30 @@ begin
   if (DlgLWFileBrowserEx.ModalResult = mrOk) then
     begin
 
-      FileName := DlgLWFileBrowserEx.FileURI;
+      FileName := CoverPath + DlgLWFileBrowserEx.FileName;
 
       if not FileExists(FileName) then
         Exit;
 
-      imgDjShowLogo.Picture.LoadFromFile(FileName);
-      FCoverFileName := FileName;
-      SaveBroadcastIdentityToIni();
+      // Local mode: ActiveCover is C:\Caddy\cover.jpg.
+      // Server mode: ActiveCover may be \\Server\Caddy\cover.jpg.
+      // This is a user action, not an audio/render-thread operation.
+      if not CopyFile(PChar(FileName),
+                      PChar(ActiveCover),
+                      False) then
+        RaiseLastOSError;
+
+      imgDjShowLogo.Picture.LoadFromFile(ActiveCover);
+
+      FCoverFileName := ActiveCover; // disk/UNC path, internal only
+      FCoverJpg := COVER_IMAGE_FILE_URL; // browser URL for JSON
+      CoverUrl := FCoverJpg;
+
+      WriteNowPlayingStatus(Trim(mmoDjName.Text),
+                            Trim(mmoShow.Text),
+                            '',
+                            '',
+                            CoverUrl);
     end;
 end;
 
@@ -2591,7 +1738,6 @@ begin
 
       FCueOut := TMfWasApiRenderOutputEngine.Create();
       FCueOut.OnFillPcm := CueOutFillPcm;
-      AttachAudioOutputHandlers(FCueOut);
       FCueOut.SetOutputDeviceId(PFLDeviceId);
       FCueUnavailableWarned := False;
     end
@@ -2687,75 +1833,39 @@ begin
   if not Assigned (FRDJRadioStatusJson) then
     Exit;
 
-  PublishSelectedCover();
-
-  FDjName := Trim(mmoDjName.Text);
-  FShowName := Trim(mmoShow.Text);
-
-  if HasActiveLoopbackDeck() and
-     not FNowPlayingFromChannelDeck then
-    begin
-
-      FNowPlayingArtist := '';
-      FNowPlayingTitle := '';
-    end;
-
-  ApplyLoopbackNowPlayingFallback(FNowPlayingArtist,
-                                  FNowPlayingTitle);
-
-  WriteNowPlayingStatus(FDjName,
-                        FShowName,
-                        FNowPlayingArtist,
-                        FNowPlayingTitle,
-                        BuildCoverJsonUrl(True),
-                        FCaddyListenerCount,
-                        (FNowPlayingArtist = '') and
-                        (FNowPlayingTitle = ''));
-
-  SaveBroadcastIdentityToIni();
+  WriteNowPlayingStatus(Trim(mmoDjName.Text),
+                        Trim(mmoShow.Text),
+                        '',
+                        '',
+                        BuildCoverJsonUrl(True));
 end;
 
 
 procedure TMainMDIFrm.btnSetupClick(Sender: TObject);
 begin
 
-  RefreshMainButtonStates();
-  if not btnSetup.Enabled then
-    Exit;
-
   OpenSetupGUI();
-  btnSetup.Checked := False;
 end;
 
 
 procedure TMainMDIFrm.btnEffectsClick(Sender: TObject);
 begin
 
-  if not Assigned(FfrmMasterFxRack) or
-     not Assigned(FMasterDeck) then
+  if not Assigned(FfrmMasterFxRack) then
     Exit;
 
   if (FfrmMasterFxRack.WindowState = wsMinimized) then
-    FfrmMasterFxRack.WindowState := wsNormal
+    begin
+
+      FMasterDeck.Left := FfrmMasterFxRack.Left + FfrmMasterFxRack.Width;
+      FfrmMasterFxRack.WindowState := wsNormal;
+    end
   else
-    FfrmMasterFxRack.WindowState := wsMinimized;
+    begin
 
-  AlignMasterDeckWithFxRack();
-end;
-
-
-procedure TMainMDIFrm.AlignMasterDeckWithFxRack();
-begin
-
-  if FAppClosing or
-     not Assigned(FfrmMasterFxRack) or
-     not Assigned(FMasterDeck) then
-    Exit;
-
-  if (FfrmMasterFxRack.WindowState = wsMinimized) then
-    FMasterDeck.Left := FfrmMasterFxRack.Left
-  else
-    FMasterDeck.Left := FfrmMasterFxRack.Left + FfrmMasterFxRack.Width;
+      FMasterDeck.Left := FfrmMasterFxRack.Left;
+      FfrmMasterFxRack.WindowState := wsMinimized;
+    end;
 end;
 
 
@@ -2781,7 +1891,6 @@ begin
 
   FMasterOut := TMfWasApiRenderOutputEngine.Create();
   FMasterOut.OnFillPcm := MasterOutFillPcm;
-  AttachAudioOutputHandlers(FMasterOut);
 end;
 
 
@@ -2800,7 +1909,14 @@ var
   hr: HRESULT;
   wfx: TWAVEFORMATEX;
   Frames: Integer;
+  RestartBroadcast: Boolean;
+
 begin
+
+  RestartBroadcast := True; //FSetup.Broadcast.Enabled;
+
+  if RestartBroadcast then
+    StopBroadcast();
 
   try
 
@@ -2866,6 +1982,8 @@ begin
     if Assigned(FMasterDeck) then
       FMasterDeck.ApplyCurrentSetup();
 
+    if RestartBroadcast then
+      StartBroadcast();
 
   except
 
@@ -3046,21 +2164,9 @@ end;
 
 
 procedure TMainMDIFrm.tmrClockTimer(Sender: TObject);
-var
-  NowTick: UInt64;
-
 begin
 
   lblLocalTime.Caption := TimeToStr(Time);
-  ServiceAudioGraphRecovery();
-
-  NowTick := GetTickCount64();
-  if (FLastCaddyListenerRefreshTick = 0) or
-     (NowTick - FLastCaddyListenerRefreshTick >= RDJ_CADDY_LISTENER_REFRESH_MS) then
-    begin
-      FLastCaddyListenerRefreshTick := NowTick;
-      RefreshCaddyListenerCount(True);
-    end;
 end;
 
 
@@ -3110,21 +2216,6 @@ begin
 
       FChannelDecks[i].Show;
     end;
-end;
-
-
-function TMainMDIFrm.HasActiveLoopbackDeck(): Boolean;
-var
-  I: Integer;
-
-begin
-
-  Result := False;
-
-  for I := 0 to High(FLoopbackDecks) do
-    if Assigned(FLoopbackDecks[I]) and
-       FLoopbackDecks[I].IsCapturing() then
-      Exit(True);
 end;
 
 
@@ -3265,16 +2356,20 @@ begin
     FInternalMixRecorderPreFx.PushFloat32(OutBuffer,
                                           Frames);
 
-  // PRE-FX tap for RDJ Pro MP4/video recording.
-  if Assigned(FMediaServer) then
-    FMediaServer.RecordTapPreFx(OutBuffer,
-                                Frames,
-                                pwfx);
+  // PRE-FX tap for Icecast broadcast.
+  BroadcastTapPreFx(OutBuffer,
+                    Frames,
+                    pwfx);
 
   // Apply master FX.
   ProcessMasterFx(OutBuffer,
                   Frames,
                   pwfx.nSamplesPerSec);
+
+  // POST-FX tap for Icecast broadcast.
+  BroadcastTapPostFx(OutBuffer,
+                     Frames,
+                     pwfx);
 
   // POST-FX tap for recorder.
   if IsRecordingPostFx() then
@@ -3339,6 +2434,54 @@ begin
 end;
 
 
+// Media Server/IceCast
+procedure TMainMDIFrm.BroadcastStateChanged(Sender: TObject;
+                                            NewState: TMfBroadcastState;
+                                            const Msg: string);
+begin
+
+  if Assigned(FMediaServer) then
+    begin
+      case NewState of
+
+        bsStopped: begin
+
+                      FMediaServer.SetBroadcastUiState(False,
+                                                       False);
+                      MainMdifrm.chkMediaServer.Down := False;
+                   end;
+
+        bsConnecting: begin
+
+                        FMediaServer.SetBroadcastUiState(True,
+                                                         False);
+                        MainMdifrm.chkMediaServer.Down := False;
+                      end;
+
+        bsLive: begin
+
+                  FMediaServer.SetBroadcastUiState(True,
+                                                   True);
+                  MainMdifrm.chkMediaServer.Down := True;
+                end;
+
+        bsReconnecting: begin
+
+                          FMediaServer.SetBroadcastUiState(True,
+                                                           False);
+                          MainMdifrm.chkMediaServer.Down := False;
+                        end;
+
+        bsError: begin
+
+                   FMediaServer.SetBroadcastUiState(False,
+                                                    False);
+                   MainMdifrm.chkMediaServer.Down := False;
+                 end;
+      end;
+    end;
+end;
+// Media Server/IceCast end
 
 function TMainMDIFrm.StartInternalMixerRecording(const ABaseFileName: TFileName;
                                                  const ARecordPreFx: Boolean;
@@ -3499,6 +2642,5 @@ initialization
 finalization
 
   MFShutdown();
-
 
 end.

@@ -187,6 +187,7 @@ uses
   dlgPassWord,
   frmCaddyConfigEditor;
 
+
 function BytesToHex(const ABytes: TBytes): string;
 const
   HEX: array[0..15] of Char = '0123456789ABCDEF';
@@ -222,7 +223,9 @@ begin
   SetLength(Result,
             Length(S) div 2);
   for I := 0 to High(Result) do
-    Result[I] := StrToInt('$' + Copy(S, (I * 2) + 1, 2));
+    Result[I] := StrToInt('$' + Copy(S,
+                                     (I * 2) + 1,
+                                     2));
 end;
 
 
@@ -241,7 +244,12 @@ begin
   Diff := 0;
   for I := 0 to High(A) do
     Diff := Diff or (A[I] xor B[I]);
-  Result := Diff = 0;
+  Result := (Diff = 0);
+
+  // When you forgot the Admin password, you have close CaddyAdmin and open RegEdit with,
+  // admin rights and search for:
+  // HKEY_CURRENT_USER\Software\RDJPro\CaddyAdmin\Security
+  // Then remove the values "Salt" and "Hash", close RegEdit and start CaddyAdmin again.
 end;
 
 
@@ -379,6 +387,7 @@ constructor TfrmCaddyAdmin.Create(AOwner: TComponent);
 begin
 
   inherited Create(AOwner);
+
   LoadSettings();
 end;
 
@@ -392,7 +401,6 @@ begin
 
   if not FAuthenticated then
     begin
-
       Application.ShowMainForm := False;
       PostMessage(Handle,
                   WM_CLOSE,
@@ -419,11 +427,13 @@ begin
   end;
 end;
 
+
 function TfrmCaddyAdmin.DefaultRdjProSetupIniFileName(): string;
 var
   AppDir: string;
   ParentDir: string;
   Candidate: string;
+
 begin
 
   AppDir := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName));
@@ -564,16 +574,16 @@ begin
   if Result then
     Exit;
 
-  if MessageDlg('No admin password has been configured yet. Create one now?',
-                mtConfirmation,
-                [mbYes, mbNo], 0) <> mrYes then
+  if (MessageDlg('No admin password has been configured yet. Create one now?',
+                 mtConfirmation,
+                 [mbYes, mbNo],
+                 0) <> mrYes) then
     Exit(False);
 
   Result := PromptNewPassword(Password);
 
   if Result then
     begin
-
       StorePassword(Password);
       AddLog('Admin password configured.');
     end;
@@ -646,9 +656,9 @@ begin
 
   Result := False;
   APassword := '';
-
+  // Default password = Admin_1
   if not PromptPassword('Create Admin Password',
-                        'New password:',
+                        'New password (Use at least 6 characters):',
                         First) then
     Exit;
 
@@ -754,7 +764,6 @@ begin
 
   if (Trim(FServiceEdit.Text) = '') then
   begin
-
     AddLog('Service name is empty.');
     Exit;
   end;
@@ -770,7 +779,6 @@ begin
 
   if (AManager = 0) then
   begin
-
     AddLog('OpenSCManager failed: ' + SysErrorMessage(GetLastError));
     Exit;
   end;
@@ -780,7 +788,6 @@ begin
                           ADesiredAccess);
   if (AService = 0) then
     begin
-
       if (GetLastError = ERROR_SERVICE_DOES_NOT_EXIST) then
         AddLog('OpenService failed: service is not installed. Use Install first.')
     else
@@ -914,6 +921,7 @@ function TfrmCaddyAdmin.ClientCaddyRoot(): string;
 var
   ServerName: string;
   ServerRoot: string;
+
 begin
 
   Result := Trim(FCaddyRootEdit.Text);
@@ -929,11 +937,17 @@ begin
   if (ServerName = '') then
     Exit(ServerRoot);
 
-  if Copy(ServerName, 1, 2) = '\\' then
-    Delete(ServerName, 1, 2);
+  if Copy(ServerName,
+          1,
+          2) = '\\' then
+    Delete(ServerName,
+           1,
+           2);
 
   if (Length(ServerRoot) >= 2) and (ServerRoot[2] = ':') then
-    Result := '\\' + ServerName + '\' + ServerRoot[1] + '$' + Copy(ServerRoot, 3, MaxInt)
+    Result := '\\' + ServerName + '\' + ServerRoot[1] + '$' + Copy(ServerRoot,
+                                                                   3,
+                                                                   MaxInt)
   else
     Result := '';
 end;
@@ -950,7 +964,9 @@ begin
   if not ForceDirectories(ADestRoot) then
     raise Exception.CreateFmt('Could not create Caddy folder:'#13#10'%s', [ADestRoot]);
 
-  if FindFirst(IncludeTrailingPathDelimiter(ASourceRoot) + '*', faAnyFile, SearchRec) = 0 then
+  if (FindFirst(IncludeTrailingPathDelimiter(ASourceRoot) + '*',
+                faAnyFile,
+                SearchRec) = 0) then
     try
       repeat
         if (SearchRec.Name = '.') or (SearchRec.Name = '..') then
@@ -964,7 +980,9 @@ begin
         else
           if not FileExists(DestPath) then
             begin
-              if not CopyFile(PChar(SourcePath), PChar(DestPath), True) then
+              if not CopyFile(PChar(SourcePath),
+                              PChar(DestPath),
+                              True) then
                 raise Exception.CreateFmt('Could not copy:'#13#10'%s'#13#10'to:'#13#10'%s'#13#10#13#10'%s',
                                           [SourcePath, DestPath, SysErrorMessage(GetLastError)]);
             end;
@@ -981,6 +999,7 @@ var
   DestRoot: string;
   DestCaddyExe: string;
   DestConfig: string;
+
 begin
 
   DestRoot := ClientCaddyRoot();
@@ -1012,6 +1031,8 @@ begin
 
   AddLog('Caddy deployment ready: ' + DestRoot);
 end;
+
+
 procedure TfrmCaddyAdmin.InstallCaddyService();
 var
   Manager: SC_HANDLE;
@@ -1339,9 +1360,10 @@ end;
 procedure TfrmCaddyAdmin.BtnStopClick(Sender: TObject);
 begin
 
-  if MessageDlg('Stop the remote Caddy service?',
+  if (MessageDlg('Stop the Caddy service?',
                 mtConfirmation,
-                [mbYes, mbNo], 0) <> mrYes then
+                [mbYes, mbNo],
+                0) <> mrYes) then
     Exit;
 
   BeginOperation('Stopping Caddy service');
@@ -1356,10 +1378,10 @@ end;
 procedure TfrmCaddyAdmin.BtnRestartClick(Sender: TObject);
 begin
 
-  if MessageDlg('Restart the remote Caddy service?',
-                mtConfirmation,
-                [mbYes, mbNo],
-                0) <> mrYes then
+  if (MessageDlg('Restart the Caddy service?',
+                 mtConfirmation,
+                 [mbYes, mbNo],
+                 0) <> mrYes) then
     Exit;
 
   BeginOperation('Restarting Caddy service');
@@ -1398,9 +1420,11 @@ begin
       Exit;
     end;
 
-  if MessageDlg('Install the Caddy service on the remote server?'#13#10#13#10 + BinaryPath,
-                mtConfirmation,
-                [mbYes, mbNo], 0) <> mrYes then
+  if (MessageDlg('Install the Caddy service on the server?'#13#10#13#10 + BinaryPath,
+                 mtConfirmation,
+                 [mbYes,
+                 mbNo],
+                 0) <> mrYes) then
     Exit;
 
   SaveSettings();
@@ -1419,7 +1443,7 @@ end;
 procedure TfrmCaddyAdmin.BtnUninstallClick(Sender: TObject);
 begin
 
-  if MessageDlg('Uninstall the remote Caddy service?',
+  if MessageDlg('Uninstall the Caddy service?',
                 mtWarning,
                 [mbYes, mbNo], 0) <> mrYes then
     Exit;
@@ -1503,7 +1527,7 @@ begin
                    Trim(FRdjProSetupIniEdit.Text)) then
       begin
         AddLog('Caddy configuration saved: ' + ConfigFileName);
-        if Trim(FRdjProSetupIniEdit.Text) <> '' then
+        if (Trim(FRdjProSetupIniEdit.Text) <> '') then
           AddLog('RDJ Pro setup INI updated: ' + Trim(FRdjProSetupIniEdit.Text));
       end;
   except
@@ -1536,7 +1560,10 @@ begin
   if not VerifyPassword(OldPassword) then
     begin
 
-      MessageDlg('Invalid current password.', mtError, [mbOK], 0);
+      MessageDlg('Invalid current password.',
+                 mtError,
+                 [mbOK],
+                 0);
       Exit;
     end;
 

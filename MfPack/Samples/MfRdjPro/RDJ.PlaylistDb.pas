@@ -84,7 +84,6 @@ uses
   FireDAC.DatS,
   FireDAC.Phys.Intf,
   FireDAC.Phys,
-  FireDAC.Phys.SQLiteCli,
   FireDAC.Phys.SQLite,
   FireDAC.Phys.SQLiteDef,
   FireDAC.UI.Intf,
@@ -157,7 +156,6 @@ type
   // Helpers
   function RDJDateTimeToDbStr(const AValue: TDateTime): string;
   function RDJDbStrToDateTime(const S: string): TDateTime;
-  procedure RDJShutdownPlaylistDbFireDAC();
 
 
 implementation
@@ -766,26 +764,6 @@ begin
     Exit(0);
 
   Result := StrToDateTime(S);
-end;
-
-
-procedure RDJShutdownPlaylistDbFireDAC();
-begin
-
-  try
-    if FDManager.Active then
-      FDManager.Close;
-
-{$IF CompilerVersion = 28.0}
-    // Delphi XE7 FireDAC assigns its SQLite shutdown callback to
-    // sqlite3_initialize by mistake, so close the SQLite runtime explicitly.
-    sqlite3_shutdown();
-{$IFEND}
-  except
-    on E: Exception do
-      OutputDebugString(PChar('RDJ playlist FireDAC shutdown failed: ' +
-                              E.Message));
-  end;
 end;
 
 end.

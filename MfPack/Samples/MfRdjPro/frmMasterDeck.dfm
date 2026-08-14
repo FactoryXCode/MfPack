@@ -10,7 +10,7 @@ object MasterDeckFrm: TMasterDeckFrm
   BorderStyle = bsSingle
   Caption = 'Master'
   ClientHeight = 988
-  ClientWidth = 332
+  ClientWidth = 316
   Color = clNone
   Constraints.MaxHeight = 1538
   Constraints.MaxWidth = 338
@@ -34,7 +34,7 @@ object MasterDeckFrm: TMasterDeckFrm
   object pnlBottom: TPanel
     Left = 0
     Top = 483
-    Width = 332
+    Width = 316
     Height = 505
     Align = alClient
     BevelOuter = bvNone
@@ -45,10 +45,10 @@ object MasterDeckFrm: TMasterDeckFrm
     ParentCtl3D = False
     ParentDoubleBuffered = False
     TabOrder = 0
-    object avMixGraph: TRdjAudioMixVisualizer
+    object avMixGraph: TMfAudioMixVisualizer
       Left = 0
       Top = 0
-      Width = 332
+      Width = 316
       Height = 211
       Margins.Left = 0
       Margins.Top = 0
@@ -80,7 +80,7 @@ object MasterDeckFrm: TMasterDeckFrm
     object pnlRecIcecast: TPanel
       Left = 0
       Top = 204
-      Width = 332
+      Width = 316
       Height = 301
       Align = alBottom
       AutoSize = True
@@ -92,7 +92,7 @@ object MasterDeckFrm: TMasterDeckFrm
       object pnlRecorder: TPanel
         Left = 0
         Top = 21
-        Width = 332
+        Width = 316
         Height = 280
         Align = alClient
         AutoSize = True
@@ -188,7 +188,7 @@ object MasterDeckFrm: TMasterDeckFrm
           Transparent = False
         end
         object lblFileExt: TLabel
-          Left = 273
+          Left = 276
           Top = 114
           Width = 27
           Height = 16
@@ -558,7 +558,7 @@ object MasterDeckFrm: TMasterDeckFrm
       object pnlFXButtons: TPanel
         Left = 0
         Top = 0
-        Width = 332
+        Width = 316
         Height = 21
         Align = alTop
         BevelOuter = bvNone
@@ -574,7 +574,7 @@ object MasterDeckFrm: TMasterDeckFrm
   object pnlTop: TPanel
     Left = 0
     Top = 37
-    Width = 332
+    Width = 316
     Height = 446
     Align = alTop
     BevelOuter = bvNone
@@ -585,7 +585,7 @@ object MasterDeckFrm: TMasterDeckFrm
     TabOrder = 1
     object bvlPfl: TBevel
       Left = 211
-      Top = 11
+      Top = 12
       Width = 116
       Height = 430
     end
@@ -638,7 +638,7 @@ object MasterDeckFrm: TMasterDeckFrm
       AutoSize = False
       Caption = 'Balance'
       Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWhite
+      Font.Color = clAqua
       Font.Height = -11
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
@@ -860,57 +860,6 @@ object MasterDeckFrm: TMasterDeckFrm
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
-    end
-    object Shape2: TShape
-      Left = 23
-      Top = 119
-      Width = 40
-      Height = 96
-      Brush.Style = bsHorizontal
-      Pen.Style = psClear
-    end
-    object Shape1: TShape
-      Left = 23
-      Top = 81
-      Width = 40
-      Height = 40
-      Brush.Color = clRed
-      Brush.Style = bsHorizontal
-      Pen.Style = psClear
-    end
-    object Shape3: TShape
-      Left = 145
-      Top = 81
-      Width = 40
-      Height = 40
-      Brush.Color = clRed
-      Brush.Style = bsHorizontal
-      Pen.Style = psClear
-    end
-    object Shape4: TShape
-      Left = 145
-      Top = 119
-      Width = 40
-      Height = 96
-      Brush.Style = bsHorizontal
-      Pen.Style = psClear
-    end
-    object Shape5: TShape
-      Left = 272
-      Top = 81
-      Width = 40
-      Height = 40
-      Brush.Color = clRed
-      Brush.Style = bsHorizontal
-      Pen.Style = psClear
-    end
-    object Shape6: TShape
-      Left = 272
-      Top = 119
-      Width = 40
-      Height = 96
-      Brush.Style = bsHorizontal
-      Pen.Style = psClear
     end
     object tbBalance: TMfTrackBar
       Left = 8
@@ -1287,14 +1236,13 @@ object MasterDeckFrm: TMasterDeckFrm
   object pnlCaption: TPanel
     Left = 0
     Top = 0
-    Width = 332
+    Width = 316
     Height = 37
     Align = alTop
     Alignment = taLeftJustify
     Color = 4865081
     ParentBackground = False
     TabOrder = 2
-    ExplicitTop = 2
     object lblCaption: TLabel
       Left = 8
       Top = 11
@@ -1317,53 +1265,52 @@ object MasterDeckFrm: TMasterDeckFrm
       ShowHint = True
       Layout = tlCenter
     end
-    object shpRecordingCap: TShape
-      Left = 238
+    object OnRecordingCap: TShape
+      Left = 198
       Top = 4
-      Width = 87
+      Width = 112
       Height = 29
-      Brush.Style = bsClear
+      Brush.Color = 5850948
       Pen.Color = 5668864
-      Pen.Width = 3
     end
     object shpRecording: TShape
-      Left = 242
-      Top = 8
-      Width = 79
-      Height = 21
-      Brush.Style = bsClear
+      Left = 201
+      Top = 6
+      Width = 106
+      Height = 25
+      Brush.Color = 5668864
       Pen.Color = 5668864
     end
     object lblRecording: TLabel
-      Left = 242
-      Top = 8
-      Width = 83
-      Height = 20
+      Left = 204
+      Top = 9
+      Width = 101
+      Height = 19
       Alignment = taCenter
       AutoSize = False
-      Caption = 'REC OFF'
+      Caption = 'RECORDING'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clGreen
       Font.Height = -15
       Font.Name = 'Segoe UI'
       Font.Style = [fsBold]
       ParentFont = False
-      Transparent = True
+      Transparent = False
     end
   end
   object epPFL: TMfAudioEndPoint
     DeviceID = '{0.0.0.00000000}.{d7e13618-ca94-4b30-a916-0934986710a9}'
     DeviceState = 'Active'
     MasterScalarVolume = 1.000000000000000000
-    Left = 244
-    Top = 270
+    Left = 188
+    Top = 272
   end
   object epMaster: TMfAudioEndPoint
     DeviceID = '{0.0.0.00000000}.{ef4f5772-aeac-426a-8d69-a6bcf7153472}'
     DeviceIndex = 1
     DeviceState = 'Active'
-    MasterScalarVolume = 0.300000011920929000
-    MasterDbVolume = -17.823547363281250000
+    MasterScalarVolume = 0.379999995231628400
+    MasterDbVolume = -14.372318267822270000
     Left = 98
     Top = 270
   end
