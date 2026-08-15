@@ -445,11 +445,11 @@ dedicated recorder unit.
 This sample demonstrates how to build an audio mixer,
 effects and how to implement IceCast/Caddy for internet broadcasting.
 The Mixer is fully adjustable for audio endpoint assignments, mixer decks and loopback decks.
-All WASAPI code comes together in this sample.
+All WASAPI sample code comes together in this sample.
 
-*Notes:* 
+*Note:* 
  You have to know the principles of WASAPI, MFT's and audio manipulation.
- This sample is very large and not suitable for beginners!
+ This sample is large and not suitable for beginners!
  Before using this sample make sure, you have all needed components installed (see instructions).
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/RDJ_Interface_s.png)
@@ -477,7 +477,7 @@ MfRDJ Pro supports casting to Cromecast devices on your local network using the 
 In short, MfRDJ is primarily the DJ/mixer sample, while MfRDJ Pro turns that mixer into a full live radio/video broadcast system using MfPack, 
 WASAPI, Media Foundation, Caddy, JSON, MfPack Cast V2, and browser MSE playback,
 
-*Notes:* 
+*Note:* 
  You have to know the principles of WASAPI, MFT's, MfPack Cast V2, and audio manipulation.
  This sample is large and not suitable for beginners!
  Before using this sample make sure, you have all needed components installed (see instructions).
