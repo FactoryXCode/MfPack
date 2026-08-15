@@ -14,7 +14,8 @@
 - Microsoft DirectX API's (D2D1, D3D9, D3D11, D3D12, DirectComposition, DXGI, DirectWrite and DXVA) Note that D3D11 and above are part of Media Foundation.
 - Windows Imaging Component (WIC) API.
 - MPEG2 API.
-- The COMPLETE Windows Media (WinMM) API.
+- The complete Windows Media (WinMM) API.
+- MfPack Cast V2 API.
 - Media Foundation samples.
 
 # <u>Latest release:</u> 
@@ -23,7 +24,13 @@
 
 Version 3.2.0  
 Delphi XE2 (recommended Delphi XE7) up to and including Delphi 12  
-SDK version: 10.0.26100.4654 (Windows 11)
+SDK version: 10.0.26100.4654 (Windows 11).
+
+
+Note:
+Some Windows 11 versions do not support Dolby AC-3 and H.265 (hvec) codecs because of financial/license reasons.
+Those you can buy from Microsoft Store.
+
 
 # Samples
 
@@ -60,7 +67,7 @@ SDK version: 10.0.26100.4654 (Windows 11)
 - Video
    * Audio Video Interleave (avi)
    * MPEG-4 Video with AAC Audio (mp4)
-   * MPEG-4 Video with Dolby AC-3 Audio (mp4)
+   * MPEG-4 Video with Dolby AC-3 Audio (mp4) 
    * Windows Media Video (wmv)
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfTranscode%20Sample%202.png)
@@ -116,7 +123,7 @@ SDK version: 10.0.26100.4654 (Windows 11)
   *now composed into the decoded video for local playback, MP4 export and Chromecast/Android TV/Google TV streaming.*
   *The Player also demonstrates how Media Foundation playback, timed text,*
   *MFT processing, Source Reader/Sink Writer transcoding, IMFByteStream,*
-  *mDNS, TLS, Google Cast V2 messages, and a local HTTP server can work together*
+  *mDNS, TLS, MfPack Cast V2 messages, and a local HTTP server can work together*
   *inside a Delphi application, without using 3th party components.*
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/MfMediaPlayer_X.jfif)
@@ -145,7 +152,7 @@ SDK version: 10.0.26100.4654 (Windows 11)
 
 **MfSimpleCastPlayer Sample**
 
-**THis sample demonstrates:**
+**This sample demonstrates:**
 
 - Asynchronous Chromecast discovery;
 - Device selection;
@@ -452,26 +459,27 @@ All WASAPI code comes together in this sample.
 MfRDJPro is the extended version of MfRDJ.
 
 Where MfRDJ mainly demonstrates DJ-style audio playback and mixing with MfPack,
-MfRDJPro adds a complete live broadcast layer around the mixer.
-MfRDJPro still provides the familiar RDJ functions: channel decks, loopback decks, microphone input, 
+MfRDJ Pro adds a complete live broadcast layer around the mixer.
+MfRDJ Pro still provides the familiar RDJ functions: channel decks, loopback decks, microphone input, 
 effects, PFL/cue monitoring, playlist editing, tag editing, and local recording. 
 The Pro version expands this into an audio/video streaming application. 
 It can combine the live program audio with camera video or a static video source, 
 encode the result with Microsoft Media Foundation, and publish it as a browser-playable stream.
 The main technical difference is the broadcast pipeline. 
-MfRDJPro uses Media Foundation Sink Writer and the MPEG-4 media sink to create fragmented MP4. 
-MfRDJPro observes the generated MP4 byte stream, extracts and patches fMP4 fragments, writes a rolling live.json manifest, 
+MfRDJ Pro uses Media Foundation Sink Writer and the MPEG-4 media sink to create fragmented MP4. 
+MfRDJ Pro observes the generated MP4 byte stream, extracts and patches fMP4 fragments, writes a rolling live.json manifest, 
 and serves the result through Caddy. 
 Modern browsers can then play the stream using Media Source Extensions without needing Icecast for the video path.
-MfRDJPro also writes now-playing metadata, artwork links, on-air state, and listener counts to JSON files for the web interface. 
+MfRDJ Pro also writes now-playing metadata, artwork links, on-air state, and listener counts to JSON files for the web interface. 
 It includes safeguards for long-running broadcasts, such as bounded queues, fragment cleanup, Caddy mirroring, 
 sleep prevention options, and clean shutdown handling.
-In short, MfRDJ is primarily the DJ/mixer sample, while MfRDJPro turns that mixer into a full live radio/video broadcast system using MfPack, 
-WASAPI, Media Foundation, Caddy, JSON, and browser MSE playback,
+MfRDJ Pro supports casting to Cromecast devices on your local network using the integrated MfPack Cast V2 protocols.
+In short, MfRDJ is primarily the DJ/mixer sample, while MfRDJ Pro turns that mixer into a full live radio/video broadcast system using MfPack, 
+WASAPI, Media Foundation, Caddy, JSON, MfPack Cast V2, and browser MSE playback,
 
 *Notes:* 
- You have to know the principles of WASAPI, MFT's and audio manipulation.
- This sample is very large and not suitable for beginners!
+ You have to know the principles of WASAPI, MFT's, MfPack Cast V2, and audio manipulation.
+ This sample is large and not suitable for beginners!
  Before using this sample make sure, you have all needed components installed (see instructions).
 
 ![](https://github.com/FactoryXCode/MfPack/blob/Master/MfPack/Pic/RDJPro_Interface_s.png)
