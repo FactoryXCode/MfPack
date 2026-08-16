@@ -49,6 +49,56 @@ The editor intentionally exposes only values that normally change when Caddy is 
 
 All other Caddy directives are preserved.
 
+### RDJPRO host/IP and port
+
+These fields define the upstream RDJ Pro HTTP server to which Caddy forwards
+requests such as `/live` and `/status`. Enter the address as seen from the
+machine running the Caddy service. They do not specify the Caddy server, the
+CaddyAdmin workstation, the public site address, or Caddy's HTTPS port.
+
+**RDJPRO host/IP**:
+
+- Use `127.0.0.1` when RDJ Pro and the Caddy service run on the same computer.
+- Use the LAN hostname or a stable LAN IP address of the RDJ Pro computer when
+  RDJ Pro and Caddy run on different computers, for example `RDJPRO01` or
+  `192.168.1.50`.
+- Do not enter `http://`, `https://`, a path such as `/live`, or a port in this
+  field.
+
+**RDJPRO port**:
+
+- Enter the port on which RDJ Pro's HTTP/stream server listens. The normal
+  value is `8000`.
+- This is not Caddy's public HTTP/HTTPS port (`80` or `443`) and not Caddy's
+  administration API port (`2019`).
+
+Typical configurations:
+
+| Scenario | Caddy service | RDJ Pro | RDJPRO host/IP | RDJPRO port |
+| --- | --- | --- | --- | --- |
+| Local, all on one PC | Local PC | Same local PC | `127.0.0.1` | `8000` |
+| Remote administration, same server | `PCHP001` | `PCHP001` | `127.0.0.1` | `8000` |
+| Separate LAN computers | `PCHP001` | `RDJPRO01` | `RDJPRO01` or its LAN IP | `8000` |
+
+The second example remains `127.0.0.1` even when CaddyAdmin itself is running
+on another workstation and remotely manages `PCHP001`: from Caddy's point of
+view, RDJ Pro is still on the same computer.
+
+For a separate RDJ Pro computer, its HTTP server must listen on a LAN-accessible
+interface and Windows Firewall must allow the selected port. Test the upstream
+from the Caddy computer before starting Caddy, for example:
+
+```text
+http://RDJPRO01:8000/status
+```
+
+With host `RDJPRO01` and port `8000`, the editor writes this target to every
+applicable route:
+
+```caddyfile
+reverse_proxy RDJPRO01:8000
+```
+
 If **RDJPro ini** is filled in on the main CaddyAdmin form, saving `caddy.cff` also updates the `[Caddy]` section in that RDJ Pro setup INI. The editor updates only the Caddy file/path fields:
 
 - `CaddyDir`
