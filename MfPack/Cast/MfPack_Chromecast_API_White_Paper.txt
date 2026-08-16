@@ -891,10 +891,10 @@ unless a debug option explicitly preserves them.
 20. The Sample
 ==============
 
-`MfSimpleCastPlayer` is the focused reference sample. It demonstrates discovery,
-direct, remuxed, and transcoded playback, transport controls, seek, volume/mute,
-subtitle enumeration and runtime subtitle switching without becoming an
-application framework.
+`MfSimpleCastPlayer` is the focused reference sample.
+It demonstrates discovery, direct, remuxed, and transcoded playback,
+transport controls, seek, volume/mute, subtitle enumeration and
+runtime subtitle switching without becoming an application framework.
 
 The form concentrates on UI behavior. Its Windows-message constants and command
 workers come from `MfCastWindowsSupport.pas`; shared subtitle-choice types come
